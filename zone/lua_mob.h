@@ -301,9 +301,10 @@ public:
 	bool SetAA(int rank_id, int new_value, int charges);
 	bool DivineAura();
 	void SetOOCRegen(int64 new_ooc_regen);
-	const char* GetEntityVariable(const char *name);
-	void SetEntityVariable(const char *name, const char *value);
-	bool EntityVariableExists(const char *name);
+	std::string GetEntityVariable(std::string variable_name);
+	luabind::object GetEntityVariables(lua_State* L);
+	void SetEntityVariable(std::string variable_name, std::string variable_value);
+	bool EntityVariableExists(std::string variable_name);
 	void Signal(int signal_id);
 	bool CombatRange(Lua_Mob other);
 	void DoSpecialAttackDamage(Lua_Mob other, int skill, int max_damage);

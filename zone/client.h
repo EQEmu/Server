@@ -661,12 +661,12 @@ public:
 	void MovePC(uint32 zoneID, float x, float y, float z, float heading, uint8 ignorerestrictions = 0, ZoneMode zm = ZoneSolicited);
 	void MovePC(float x, float y, float z, float heading, uint8 ignorerestrictions = 0, ZoneMode zm = ZoneSolicited);
 	void MovePC(uint32 zoneID, uint32 instanceID, float x, float y, float z, float heading, uint8 ignorerestrictions = 0, ZoneMode zm = ZoneSolicited);
-	void MoveZone(const char *zone_short_name);
-	void MoveZoneGroup(const char *zone_short_name);
-	void MoveZoneRaid(const char *zone_short_name);
-	void MoveZoneInstance(uint16 instance_id);
-	void MoveZoneInstanceGroup(uint16 instance_id);
-	void MoveZoneInstanceRaid(uint16 instance_id);
+	void MoveZone(const char *zone_short_name, const glm::vec4& location = glm::vec4(0.f));
+	void MoveZoneGroup(const char *zone_short_name, const glm::vec4& location = glm::vec4(0.f));
+	void MoveZoneRaid(const char *zone_short_name, const glm::vec4& location = glm::vec4(0.f));
+	void MoveZoneInstance(uint16 instance_id, const glm::vec4& location = glm::vec4(0.f));
+	void MoveZoneInstanceGroup(uint16 instance_id, const glm::vec4& location = glm::vec4(0.f));
+	void MoveZoneInstanceRaid(uint16 instance_id, const glm::vec4& location = glm::vec4(0.f));
 	void SendToGuildHall();
 	void SendToInstance(std::string instance_type, std::string zone_short_name, uint32 instance_version, float x, float y, float z, float heading, std::string instance_identifier, uint32 duration);
 	void AssignToInstance(uint16 instance_id);
@@ -707,7 +707,7 @@ public:
 	inline int GetAccountCreation() const { return account_creation; }
 	inline int16 Admin() const { return admin; }
 	inline uint32 CharacterID() const { return character_id; }
-	void UpdateAdmin(bool iFromDB = true);
+	void UpdateAdmin(bool from_database = true);
 	void UpdateWho(uint8 remove = 0);
 	bool GMHideMe(Client* client = 0);
 
@@ -910,6 +910,33 @@ public:
 
 	bool SendGMCommand(std::string message, bool ignore_status = false);
 
+	void RegisterBug(BugReport_Struct* r);
+
+	std::vector<Mob*> GetApplySpellList(
+		ApplySpellType apply_type,
+		bool allow_pets,
+		bool is_raid_group_only,
+		bool allow_bots
+	);
+
+	void ApplySpell(
+		int spell_id,
+		int duration = 0,
+		ApplySpellType apply_type = ApplySpellType::Solo,
+		bool allow_pets = false,
+		bool is_raid_group_only = true,
+		bool allow_bots = false
+	);
+
+	void SetSpellDuration(
+		int spell_id,
+		int duration = 0,
+		ApplySpellType apply_type = ApplySpellType::Solo,
+		bool allow_pets = false,
+		bool is_raid_group_only = true,
+		bool allow_bots = false
+	);
+
 	//old AA methods that we still use
 	void ResetAA();
 	void RefundAA();
@@ -1002,12 +1029,14 @@ public:
 	void DoClassAttacks(Mob *ca_target, uint16 skill = -1, bool IsRiposte=false);
 
 	void ClearZoneFlag(uint32 zone_id);
+	inline std::set<uint32> GetZoneFlags() { return zone_flags; } ;
 	bool HasZoneFlag(uint32 zone_id) const;
 	void LoadZoneFlags();
 	void SendZoneFlagInfo(Client *to) const;
 	void SetZoneFlag(uint32 zone_id);
 
 	void ClearPEQZoneFlag(uint32 zone_id);
+	inline std::set<uint32> GetPEQZoneFlags() { return peqzone_flags; };
 	bool HasPEQZoneFlag(uint32 zone_id) const;
 	void LoadPEQZoneFlags();
 	void SendPEQZoneFlagInfo(Client *to) const;
@@ -1554,7 +1583,7 @@ public:
 	void LoadAccountFlags();
 	void SetAccountFlag(std::string flag, std::string val);
 	std::string GetAccountFlag(std::string flag);
-	void SetGMStatus(int newStatus);
+	void SetGMStatus(int16 new_status);
 	float GetDamageMultiplier(EQ::skills::SkillType how_long_has_this_been_missing);
 	void Consume(const EQ::ItemData *item, uint8 type, int16 slot, bool auto_consume);
 	void PlayMP3(const char* fname);

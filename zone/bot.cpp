@@ -4577,11 +4577,11 @@ void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client*
 	using namespace EQ;
 
 	struct ClientTrade {
-		const ItemInstance* trade_item_instance;
+		ItemInstance* trade_item_instance;
 		int16 from_client_slot;
 		int16 to_bot_slot;
 
-		ClientTrade(const ItemInstance* item, int16 from) : trade_item_instance(item), from_client_slot(from), to_bot_slot(invslot::SLOT_INVALID) { }
+		ClientTrade(ItemInstance* item, int16 from) : trade_item_instance(item), from_client_slot(from), to_bot_slot(invslot::SLOT_INVALID) { }
 	};
 
 	struct ClientReturn {
@@ -4645,11 +4645,19 @@ void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client*
 	}
 
 	std::list<ClientTrade> client_trade;
+	std::list<ClientTrade> event_trade;
 	std::list<ClientReturn> client_return;
 
+	bool trade_event_exists = false;
+	if (parse->BotHasQuestSub(EVENT_TRADE)) {
+		// There is a EVENT_TRADE, we will let the Event handle returning of items.
+		trade_event_exists = true;
+	}
+
 	// pre-checks for incoming illegal transfers
+	EQ::InventoryProfile& user_inv = client->GetInv();
 	for (int16 trade_index = begin_slot_id; trade_index <= end_slot_id; ++trade_index) {
-		auto trade_instance = client->GetInv()[trade_index];
+		auto trade_instance = user_inv.GetItem(trade_index);
 		if (!trade_instance) {
 			continue;
 		}
@@ -4681,37 +4689,65 @@ void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client*
 		}
 
 		if (trade_instance->IsStackable() && trade_instance->GetCharges() < trade_instance->GetItem()->StackSize) { // temp until partial stacks are implemented
-			client->Message(
-				Chat::Yellow,
-				fmt::format(
-					"{} is only a partially stacked item, the trade has been cancelled!",
-					item_link
-				).c_str()
-			);
-			client->ResetTrade();
-			return;
+			if (trade_event_exists) {
+				event_trade.push_back(ClientTrade(trade_instance, trade_index));
+				continue;
+			}
+			else {
+				client->Message(
+					Chat::Yellow,
+					fmt::format(
+						"{} is only a partially stacked item, the trade has been cancelled!",
+						item_link
+					).c_str()
+				);
+				client->ResetTrade();
+				return;
+			}
 		}
 
 		if (CheckLoreConflict(trade_instance->GetItem())) {
-			client->Message(
-				Chat::Yellow,
-				fmt::format(
-					"This bot already has {}, the trade has been cancelled!",
-					item_link
-				).c_str()
-			);
-			client->ResetTrade();
-			return;
+			if (trade_event_exists) {
+				event_trade.push_back(ClientTrade(trade_instance, trade_index));
+				continue;
+			}
+			else {
+				client->Message(
+					Chat::Yellow,
+					fmt::format(
+						"This bot already has {}, the trade has been cancelled!",
+						item_link
+					).c_str()
+				);
+				client->ResetTrade();
+				return;
+			}
 		}
 
 		if (!trade_instance->IsType(item::ItemClassCommon)) {
-			client_return.push_back(ClientReturn(trade_instance, trade_index));
-			continue;
+			if (trade_event_exists) {
+				event_trade.push_back(ClientTrade(trade_instance, trade_index));
+				continue;
+			}
+			else {
+				client->ResetTrade();
+				return;
+			}
 		}
-
-		if (!trade_instance->IsEquipable(GetBaseRace(), GetClass()) || (GetLevel() < trade_instance->GetItem()->ReqLevel)) { // deity checks will be handled within IsEquipable()
-			client_return.push_back(ClientReturn(trade_instance, trade_index));
-			continue;
+		
+		if (
+			!trade_instance->IsClassEquipable(GetClass()) ||
+			GetLevel() < trade_instance->GetItem()->ReqLevel ||
+			(!trade_instance->IsRaceEquipable(GetRace()) && !RuleB(Bot, AllowBotEquipAnyRaceGear))
+		) {
+			if (trade_event_exists) {
+				event_trade.push_back(ClientTrade(trade_instance, trade_index));
+				continue;
+			}
+			else {
+				client->ResetTrade();
+				return;
+			}
 		}
 
 		client_trade.push_back(ClientTrade(trade_instance, trade_index));
@@ -4719,7 +4755,9 @@ void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client*
 
 	// check for incoming lore hacks
 	for (auto& trade_iterator : client_trade) {
-		if (!trade_iterator.trade_item_instance->GetItem()->LoreFlag) {
+		auto trade_instance = trade_iterator.trade_item_instance;
+		auto trade_index = trade_iterator.from_client_slot;
+		if (!trade_instance->GetItem()->LoreFlag) {
 			continue;
 		}
 
@@ -4732,14 +4770,14 @@ void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client*
 				continue;
 			}
 
-			if (trade_iterator.trade_item_instance->GetItem()->LoreGroup == -1 && check_iterator.trade_item_instance->GetItem()->ID == trade_iterator.trade_item_instance->GetItem()->ID) {
+			if (trade_instance->GetItem()->LoreGroup == -1 && check_iterator.trade_item_instance->GetItem()->ID == trade_instance->GetItem()->ID) {
 				LogError("Bot::PerformTradeWithClient trade hack detected by {} with {}.", client->GetCleanName(), GetCleanName());
 				client->Message(Chat::White, "Trade hack detected, the trade has been cancelled.");
 				client->ResetTrade();
 				return;
 			}
 
-			if ((trade_iterator.trade_item_instance->GetItem()->LoreGroup > 0) && (check_iterator.trade_item_instance->GetItem()->LoreGroup == trade_iterator.trade_item_instance->GetItem()->LoreGroup)) {
+			if ((trade_instance->GetItem()->LoreGroup > 0) && (check_iterator.trade_item_instance->GetItem()->LoreGroup == trade_instance->GetItem()->LoreGroup)) {
 				LogError("Bot::PerformTradeWithClient trade hack detected by {} with {}.", client->GetCleanName(), GetCleanName());
 				client->Message(Chat::White, "Trade hack detected, the trade has been cancelled.");
 				client->ResetTrade();
@@ -4839,12 +4877,19 @@ void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client*
 		}
 	}
 
-	// move unassignable items from trade list to return list
+	// move unassignable items from trade list to event list
 	for (std::list<ClientTrade>::iterator trade_iterator = client_trade.begin(); trade_iterator != client_trade.end();) {
 		if (trade_iterator->to_bot_slot == invslot::SLOT_INVALID) {
-			client_return.push_back(ClientReturn(trade_iterator->trade_item_instance, trade_iterator->from_client_slot));
-			trade_iterator = client_trade.erase(trade_iterator);
-			continue;
+			if (trade_event_exists) {
+				event_trade.push_back(ClientTrade(trade_iterator->trade_item_instance, trade_iterator->from_client_slot));
+				trade_iterator = client_trade.erase(trade_iterator);
+				continue;
+			}
+			else {
+				client_return.push_back(ClientReturn(trade_iterator->trade_item_instance, trade_iterator->from_client_slot));
+				trade_iterator = client_trade.erase(trade_iterator);
+				continue;
+			}
 		}
 		++trade_iterator;
 	}
@@ -5040,6 +5085,24 @@ void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client*
 
 	if (accepted_count) {
 		CalcBotStats(client->GetBotOption(Client::booStatsUpdate));
+	}
+
+	if (event_trade.size()) {
+		// Get Traded Items
+		EQ::ItemInstance* insts[8] = { 0 };
+		EQ::InventoryProfile& user_inv = client->GetInv();
+		for (int i = EQ::invslot::TRADE_BEGIN; i <= EQ::invslot::TRADE_END; ++i) {
+			insts[i - EQ::invslot::TRADE_BEGIN] = user_inv.GetItem(i);
+			client->DeleteItemInInventory(i);
+		}
+
+		// copy to be filtered by task updates, null trade slots preserved for quest event arg
+		std::vector<EQ::ItemInstance*> items(insts, insts + std::size(insts));
+
+		// Check if EVENT_TRADE accepts any items
+		std::vector<std::any> item_list(items.begin(), items.end());
+		parse->EventBot(EVENT_TRADE, this, client, "", 0, &item_list);
+		CalcBotStats(false);
 	}
 }
 

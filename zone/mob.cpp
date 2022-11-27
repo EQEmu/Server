@@ -4461,29 +4461,43 @@ void Mob::SetDelta(const glm::vec4& delta) {
 	m_Delta = delta;
 }
 
-void Mob::SetEntityVariable(const char *id, const char *m_var)
+std::string Mob::GetEntityVariable(std::string variable_name)
 {
-	std::string n_m_var = m_var;
-	m_EntityVariables[id] = n_m_var;
-}
-
-const char *Mob::GetEntityVariable(const char *id)
-{
-	auto iter = m_EntityVariables.find(id);
-	if (iter != m_EntityVariables.end()) {
-		return iter->second.c_str();
+	const auto& v = m_EntityVariables.find(variable_name);
+	if (v != m_EntityVariables.end()) {
+		return v->second;
 	}
-	return nullptr;
+
+	return std::string();
 }
 
-bool Mob::EntityVariableExists(const char *id)
+std::vector<std::string> Mob::GetEntityVariables()
 {
-	auto iter = m_EntityVariables.find(id);
-	if(iter != m_EntityVariables.end())
-	{
+	std::vector<std::string> l;
+	if (m_EntityVariables.empty()) {
+		return l;
+	}
+
+	for (const auto& v : m_EntityVariables) {
+		l.push_back(v.first);
+	}
+
+	return l;
+}
+
+bool Mob::EntityVariableExists(std::string variable_name)
+{
+	const auto& v = m_EntityVariables.find(variable_name);
+	if (v != m_EntityVariables.end()) {
 		return true;
 	}
+
 	return false;
+}
+
+void Mob::SetEntityVariable(std::string variable_name, std::string variable_value)
+{
+	m_EntityVariables[variable_name] = variable_value;
 }
 
 void Mob::SetFlyMode(GravityBehavior flymode)

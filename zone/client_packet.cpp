@@ -2695,7 +2695,8 @@ void Client::Handle_OP_AltCurrencySell(const EQApplicationPacket *app)
 				continue;
 
 			if (item->ID == inst->GetItem()->ID) {
-				cost = ml.alt_currency_cost;
+				// 06/11/2016 This formula matches RoF2 client side calculation.
+				cost = (ml.alt_currency_cost + 1) * item->LDoNSellBackRate / 100;
 				found = true;
 				break;
 			}
@@ -2799,7 +2800,8 @@ void Client::Handle_OP_AltCurrencySellSelection(const EQApplicationPacket *app)
 					continue;
 
 				if (item->ID == inst->GetItem()->ID) {
-					cost = ml.alt_currency_cost;
+					// 06/11/2016 This formula matches RoF2 client side calculation.
+					cost = (ml.alt_currency_cost + 1) * item->LDoNSellBackRate / 100;
 					found = true;
 					break;
 				}
@@ -3936,23 +3938,17 @@ void Client::Handle_OP_BuffRemoveRequest(const EQApplicationPacket *app)
 void Client::Handle_OP_Bug(const EQApplicationPacket *app)
 {
 	if (!RuleB(Bugs, ReportingSystemActive)) {
-		Message(0, "Bug reporting is disabled on this server.");
+		Message(Chat::White, "Bug reporting is disabled on this server.");
 		return;
 	}
 
 	if (app->size != sizeof(BugReport_Struct)) {
-		printf("Wrong size of BugReport_Struct got %d expected %zu!\n", app->size, sizeof(BugReport_Struct));
-	}
-	else {
-		BugReport_Struct* bug_report = (BugReport_Struct*)app->pBuffer;
-
-		if (RuleB(Bugs, UseOldReportingMethod))
-			database.RegisterBug(bug_report);
-		else
-			database.RegisterBug(this, bug_report);
+		LogError("Wrong size of BugReport_Struct got {} expected {}!", app->size, sizeof(BugReport_Struct));
+		return;
 	}
 
-	return;
+	auto *r = (BugReport_Struct *) app->pBuffer;
+	RegisterBug(r);
 }
 
 void Client::Handle_OP_Camp(const EQApplicationPacket *app)
@@ -11175,8 +11171,8 @@ void Client::Handle_OP_PopupResponse(const EQApplicationPacket *app)
 			break;
 
 		case POPUPID_DIAWIND_ONE:
-			if (EntityVariableExists(DIAWIND_RESPONSE_ONE_KEY.c_str())) {
-				response = GetEntityVariable(DIAWIND_RESPONSE_ONE_KEY.c_str());
+			if (EntityVariableExists(DIAWIND_RESPONSE_ONE_KEY)) {
+				response = GetEntityVariable(DIAWIND_RESPONSE_ONE_KEY);
 				if (!response.empty()) {
 					ChannelMessageReceived(8, 0, 100, response.c_str(), nullptr, true);
 				}
@@ -11184,8 +11180,8 @@ void Client::Handle_OP_PopupResponse(const EQApplicationPacket *app)
 			break;
 
 		case POPUPID_DIAWIND_TWO:
-			if (EntityVariableExists(DIAWIND_RESPONSE_TWO_KEY.c_str())) {
-				response = GetEntityVariable(DIAWIND_RESPONSE_TWO_KEY.c_str());
+			if (EntityVariableExists(DIAWIND_RESPONSE_TWO_KEY)) {
+				response = GetEntityVariable(DIAWIND_RESPONSE_TWO_KEY);
 				if (!response.empty()) {
 					ChannelMessageReceived(8, 0, 100, response.c_str(), nullptr, true);
 				}

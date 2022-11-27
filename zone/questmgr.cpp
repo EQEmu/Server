@@ -204,17 +204,18 @@ void QuestManager::write(const char *file, const char *str) {
 	fclose (pFile);
 }
 
-Mob* QuestManager::spawn2(int npc_type, int grid, int unused, const glm::vec4& position) {
-	const NPCType* tmp = 0;
-	if (tmp = content_db.LoadNPCTypesData(npc_type))
-	{
-		auto npc = new NPC(tmp, nullptr, position, GravityBehavior::Water);
+Mob* QuestManager::spawn2(int npc_id, int grid, int unused, const glm::vec4& position) {
+	const NPCType* t = 0;
+	if (t = content_db.LoadNPCTypesData(npc_id)) {
+		auto npc = new NPC(t, nullptr, position, GravityBehavior::Water);
 		npc->AddLootTable();
-		if (npc->DropsGlobalLoot())
+		if (npc->DropsGlobalLoot()) {
 			npc->CheckGlobalLootTables();
-		entity_list.AddNPC(npc,true,true);
-		if(grid > 0)
-		{
+		}
+
+		entity_list.AddNPC(npc, true, true);
+
+		if (grid) {
 			npc->AssignWaypoints(grid);
 		}
 
@@ -1820,23 +1821,46 @@ void QuestManager::respawn(int npcTypeID, int grid) {
 	}
 }
 
-void QuestManager::set_proximity(float minx, float maxx, float miny, float maxy, float minz, float maxz, bool bSay)
+void QuestManager::set_proximity_range(float x_range, float y_range, float z_range, bool enable_say)
 {
 	QuestManagerCurrentQuestVars();
 	if (!owner || !owner->IsNPC()) {
 		return;
 	}
 
-	entity_list.AddProximity(owner->CastToNPC());
+	auto n = owner->CastToNPC();
 
-	owner->CastToNPC()->proximity->min_x         = minx;
-	owner->CastToNPC()->proximity->max_x         = maxx;
-	owner->CastToNPC()->proximity->min_y         = miny;
-	owner->CastToNPC()->proximity->max_y         = maxy;
-	owner->CastToNPC()->proximity->min_z         = minz;
-	owner->CastToNPC()->proximity->max_z         = maxz;
-	owner->CastToNPC()->proximity->say           = bSay;
-	owner->CastToNPC()->proximity->proximity_set = true;
+	entity_list.AddProximity(n);
+
+	n->proximity->min_x         = n->GetX() - x_range;
+	n->proximity->max_x         = n->GetX() + x_range;
+	n->proximity->min_y         = n->GetY() - y_range;
+	n->proximity->max_y         = n->GetY() + y_range;
+	n->proximity->min_z         = n->GetZ() - z_range;
+	n->proximity->max_z         = n->GetZ() + z_range;
+	n->proximity->say           = enable_say;
+	n->proximity->proximity_set = true;
+}
+
+void QuestManager::set_proximity(float min_x, float max_x, float min_y, float max_y, float min_z, float max_z, bool enable_say)
+{
+	QuestManagerCurrentQuestVars();
+	if (!owner || !owner->IsNPC()) {
+		return;
+	}
+
+	auto n = owner->CastToNPC();
+
+	entity_list.AddProximity(n);
+
+	n->proximity->min_x         = min_x;
+	n->proximity->max_x         = max_x;
+	n->proximity->min_y         = min_y;
+	n->proximity->max_y         = max_y;
+	n->proximity->min_z         = min_z;
+	n->proximity->max_z         = max_z;
+	n->proximity->say           = enable_say;
+	n->proximity->proximity_set = true;
 }
 
 void QuestManager::clear_proximity() {
@@ -3006,6 +3030,20 @@ uint16 QuestManager::GetInstanceID(const char *zone, int16 version)
 	return 0;
 }
 
+std::vector<uint16> QuestManager::GetInstanceIDs(std::string zone_name, uint32 character_id)
+{
+	if (!character_id) {
+		QuestManagerCurrentQuestVars();
+		if (initiator) {
+			return database.GetInstanceIDs(ZoneID(zone_name), initiator->CharacterID());
+		}
+
+		return { };
+	}
+
+	return database.GetInstanceIDs(ZoneID(zone_name), character_id);
+}
+
 uint16 QuestManager::GetInstanceIDByCharID(const char *zone, int16 version, uint32 char_id) {
 	return database.GetInstanceID(ZoneID(zone), char_id, version);
 }
@@ -3068,7 +3106,7 @@ void QuestManager::RemoveFromInstanceByCharID(uint16 instance_id, uint32 char_id
 }
 
 bool QuestManager::CheckInstanceByCharID(uint16 instance_id, uint32 char_id) {
-	return database.CharacterInInstanceGroup(instance_id, char_id);
+	return database.CheckInstanceByCharID(instance_id, char_id);
 }
 
 void QuestManager::RemoveAllFromInstance(uint16 instance_id)
@@ -3076,14 +3114,14 @@ void QuestManager::RemoveAllFromInstance(uint16 instance_id)
 	QuestManagerCurrentQuestVars();
 	if (initiator)
 	{
-		std::list<uint32> charid_list;
+		std::list<uint32> character_ids;
 
 		if (database.RemoveClientsFromInstance(instance_id))
 			initiator->Message(Chat::Say, "Removed all players from instance.");
 		else
 		{
-			database.GetCharactersInInstance(instance_id, charid_list);
-			initiator->Message(Chat::Say, "Failed to remove %i player(s) from instance.", charid_list.size()); // once the expedition system is in, this message it not relevant
+			database.GetCharactersInInstance(instance_id, character_ids);
+			initiator->Message(Chat::Say, "Failed to remove %i player(s) from instance.", character_ids.size()); // once the expedition system is in, this message it not relevant
 		}
 	}
 }
@@ -3536,10 +3574,6 @@ EQ::ItemInstance *QuestManager::CreateItem(uint32 item_id, int16 charges, uint32
 		return database.CreateItem(item_id, charges, augment_one, augment_two, augment_three, augment_four, augment_five, augment_six, attuned);
 	}
 	return nullptr;
-}
-
-std::string QuestManager::secondstotime(int duration) {
-	return Strings::SecondsToTime(duration);
 }
 
 std::string QuestManager::gethexcolorcode(std::string color_name) {

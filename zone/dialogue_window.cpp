@@ -14,8 +14,8 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 	Mob *target = c->GetTarget() ? c->GetTarget() : c;
 
 	// zero this out
-	c->SetEntityVariable(DIAWIND_RESPONSE_ONE_KEY.c_str(), "");
-	c->SetEntityVariable(DIAWIND_RESPONSE_TWO_KEY.c_str(), "");
+	c->SetEntityVariable(DIAWIND_RESPONSE_ONE_KEY, "");
+	c->SetEntityVariable(DIAWIND_RESPONSE_TWO_KEY, "");
 
 	// simple find and replace for the markdown
 	Strings::FindReplace(output, "~", "</c>");
@@ -335,14 +335,8 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 
 	// Placed here to allow silent message or other message to override default for custom values.
 	if (!button_one_name.empty() && !button_two_name.empty()) {
-		c->SetEntityVariable(
-			DIAWIND_RESPONSE_ONE_KEY.c_str(),
-			button_one_name.c_str()
-		);
-		c->SetEntityVariable(
-			DIAWIND_RESPONSE_TWO_KEY.c_str(),
-			button_two_name.c_str()
-		);
+		c->SetEntityVariable(DIAWIND_RESPONSE_ONE_KEY, button_one_name);
+		c->SetEntityVariable(DIAWIND_RESPONSE_TWO_KEY, button_two_name);
 	}
 
 	// handle silent prompts from the [> silent syntax
@@ -351,7 +345,7 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 		silent_message = Strings::GetBetween(output, "[", ">");
 
 		// temporary and used during the response
-		c->SetEntityVariable(DIAWIND_RESPONSE_ONE_KEY.c_str(), silent_message.c_str());
+		c->SetEntityVariable(DIAWIND_RESPONSE_ONE_KEY, silent_message);
 
 		// pop the silent message off
 		Strings::FindReplace(output, fmt::format("[{}>", silent_message), "");
@@ -361,7 +355,7 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 		silent_message = responses[0];
 
 		// temporary and used during the response
-		c->SetEntityVariable(DIAWIND_RESPONSE_ONE_KEY.c_str(), silent_message.c_str());
+		c->SetEntityVariable(DIAWIND_RESPONSE_ONE_KEY, silent_message);
 
 		// pop the silent message off
 		Strings::FindReplace(output, fmt::format("[{}]", silent_message), "");

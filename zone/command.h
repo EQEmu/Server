@@ -31,6 +31,7 @@ uint8 GetCommandStatus(Client *c, std::string command_name);
 void ListModifyNPCStatMap(Client *c);
 std::map<std::string, std::string> GetModifyNPCStatMap();
 std::string GetModifyNPCStatDescription(std::string stat);
+void SendNPCEditSubCommands(Client *c);
 
 // Commands
 void command_acceptrules(Client *c, const Seperator *sep);
@@ -45,6 +46,7 @@ void command_attack(Client *c, const Seperator *sep);
 void command_augmentitem(Client *c, const Seperator *sep);
 void command_ban(Client *c, const Seperator *sep);
 void command_bind(Client *c, const Seperator *sep);
+void command_bugs(Client *c, const Seperator *sep);
 void command_camerashake(Client *c, const Seperator *sep);
 void command_castspell(Client *c, const Seperator *sep);
 void command_chat(Client *c, const Seperator *sep);
@@ -135,7 +137,6 @@ void command_invsnapshot(Client *c, const Seperator *sep);
 void command_invul(Client *c, const Seperator *sep);
 void command_ipban(Client *c, const Seperator *sep);
 void command_iplookup(Client *c, const Seperator *sep);
-void command_iteminfo(Client *c, const Seperator *sep);
 void command_itemsearch(Client *c, const Seperator *sep);
 void command_kick(Client *c, const Seperator *sep);
 void command_killallnpcs(Client *c, const Seperator *sep);

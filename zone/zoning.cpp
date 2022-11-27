@@ -36,8 +36,10 @@ extern QueryServ* QServ;
 extern WorldServer worldserver;
 extern Zone* zone;
 
-#include "../common/repositories/zone_repository.h"
 #include "../common/content/world_content_service.h"
+
+#include "../common/repositories/character_peqzone_flags_repository.h"
+#include "../common/repositories/zone_repository.h"
 
 
 void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
@@ -512,68 +514,69 @@ void Client::MovePC(uint32 zoneID, uint32 instanceID, float x, float y, float z,
 	ProcessMovePC(zoneID, instanceID, x, y, z, heading, ignorerestrictions, zm);
 }
 
-void Client::MoveZone(const char *zone_short_name) {
-	ProcessMovePC(ZoneID(zone_short_name), 0, 0.0f, 0.0f, 0.0f, 0.0f, 3, ZoneToSafeCoords);
+void Client::MoveZone(const char *zone_short_name, const glm::vec4 &location) {
+	ProcessMovePC(ZoneID(zone_short_name), 0, location.x, location.y, location.z, location.w, 3, ZoneToSafeCoords);
 }
 
-void Client::MoveZoneGroup(const char *zone_short_name) {
+void Client::MoveZoneGroup(const char *zone_short_name, const glm::vec4 &location) {
 	if (!GetGroup()) {
-		MoveZone(zone_short_name);
+		MoveZone(zone_short_name, location);
 	} else {
 		auto client_group = GetGroup();
 		for (int member_index = 0; member_index < MAX_GROUP_MEMBERS; member_index++) {
 			if (client_group->members[member_index] && client_group->members[member_index]->IsClient()) {
 				auto group_member = client_group->members[member_index]->CastToClient();
-				group_member->MoveZone(zone_short_name);
+				group_member->MoveZone(zone_short_name, location);
 			}
 		}
 	}
 }
 
-void Client::MoveZoneRaid(const char *zone_short_name) {
+void Client::MoveZoneRaid(const char *zone_short_name, const glm::vec4 &location) {
 	if (!GetRaid()) {
-		MoveZone(zone_short_name);
+		MoveZone(zone_short_name, location);
 	} else {
 		auto client_raid = GetRaid();
 		for (int member_index = 0; member_index < MAX_RAID_MEMBERS; member_index++) {
 			if (client_raid->members[member_index].member && client_raid->members[member_index].member->IsClient()) {
 				auto raid_member = client_raid->members[member_index].member->CastToClient();
-				raid_member->MoveZone(zone_short_name);
+				raid_member->MoveZone(zone_short_name, location);
 			}
 		}
 	}
 }
 
-void Client::MoveZoneInstance(uint16 instance_id) {
-	if (!database.CharacterInInstanceGroup(instance_id, CharacterID())) {
+void Client::MoveZoneInstance(uint16 instance_id, const glm::vec4 &location) {
+	if (!database.CheckInstanceByCharID(instance_id, CharacterID())) {
 		database.AddClientToInstance(instance_id, CharacterID());
 	}
-	ProcessMovePC(database.ZoneIDFromInstanceID(instance_id), instance_id, 0.0f, 0.0f, 0.0f, 0.0f, 3, ZoneToSafeCoords);
+
+	ProcessMovePC(database.GetInstanceZoneID(instance_id), instance_id, location.x, location.y, location.z, location.w, 3, ZoneToSafeCoords);
 }
 
-void Client::MoveZoneInstanceGroup(uint16 instance_id) {
+void Client::MoveZoneInstanceGroup(uint16 instance_id, const glm::vec4 &location) {
 	if (!GetGroup()) {
-		MoveZoneInstance(instance_id);
+		MoveZoneInstance(instance_id, location);
 	} else {
 		auto client_group = GetGroup();
 		for (int member_index = 0; member_index < MAX_GROUP_MEMBERS; member_index++) {
 			if (client_group->members[member_index] && client_group->members[member_index]->IsClient()) {
 				auto group_member = client_group->members[member_index]->CastToClient();
-				group_member->MoveZoneInstance(instance_id);
+				group_member->MoveZoneInstance(instance_id, location);
 			}
 		}
 	}
 }
 
-void Client::MoveZoneInstanceRaid(uint16 instance_id) {
+void Client::MoveZoneInstanceRaid(uint16 instance_id, const glm::vec4 &location) {
 	if (!GetRaid()) {
-		MoveZoneInstance(instance_id);
+		MoveZoneInstance(instance_id, location);
 	} else {
 		auto client_raid = GetRaid();
 		for (int member_index = 0; member_index < MAX_RAID_MEMBERS; member_index++) {
 			if (client_raid->members[member_index].member && client_raid->members[member_index].member->IsClient()) {
 				auto raid_member = client_raid->members[member_index].member->CastToClient();
-				raid_member->MoveZoneInstance(instance_id);
+				raid_member->MoveZoneInstance(instance_id, location);
 			}
 		}
 	}
@@ -998,13 +1001,13 @@ bool Client::HasZoneFlag(uint32 zone_id) const {
 }
 
 void Client::LoadZoneFlags() {
-	std::string query = fmt::format(
+	const auto query = fmt::format(
 		"SELECT zoneID from zone_flags WHERE charID = {}",
 		CharacterID()
 	);
 	auto results = database.QueryDatabase(query);
 
-	if (!results.Success()) {
+	if (!results.Success() || !results.RowCount()) {
 		LogError("MySQL Error while trying to load zone flags for [{}]: [{}]", GetName(), results.ErrorMessage().c_str());
 		return;
 	}
@@ -1044,23 +1047,23 @@ void Client::SendZoneFlagInfo(Client *to) const {
 		const char* zone_short_name = ZoneName(zone_id, true);
 		if (strncmp(zone_short_name, "UNKNOWN", strlen(zone_short_name)) != 0) {
 			std::string zone_long_name = ZoneLongName(zone_id);
-			char flag_name[128];
+			std::string flag_name = "ERROR";
 
 			auto z = GetZone(zone_id);
-			if (!z) {
-				strcpy(flag_name, "ERROR");
+			if (z) {
+				flag_name = z->flag_needed;
 			}
 
 			to->Message(
 				Chat::White,
 				fmt::format(
-					"Flag {} | Zone ID: {} Zone Name: {} ({}){}",
+					"Flag {} | Zone: {} ({}) ID: {}",
 					flag_number,
-					zone_id,
 					zone_long_name,
 					zone_short_name,
+					zone_id,
 					(
-						flag_name[0] != '\0' ?
+						!flag_name.empty() ?
 						fmt::format(
 							" Flag Required: {}",
 							flag_name
@@ -1091,7 +1094,7 @@ void Client::SetZoneFlag(uint32 zone_id) {
 
 	zone_flags.insert(zone_id);
 
-	std::string query = fmt::format(
+	const auto query = fmt::format(
 		"INSERT INTO zone_flags (charID, zoneID) VALUES ({}, {})",
 		CharacterID(),
 		zone_id
@@ -1110,15 +1113,8 @@ void Client::ClearPEQZoneFlag(uint32 zone_id) {
 
 	peqzone_flags.erase(zone_id);
 
-	auto query = fmt::format(
-		"DELETE FROM character_peqzone_flags WHERE id = {} AND zone_id = {}",
-		CharacterID(),
-		zone_id
-	);
-	auto results = database.QueryDatabase(query);
-
-	if (!results.Success()) {
-		LogError("MySQL Error while trying to clear zone flag for [{}]: [{}]", GetName(), results.ErrorMessage().c_str());
+	if (!CharacterPeqzoneFlagsRepository::DeleteFlag(content_db, CharacterID(), zone_id)) {
+		LogError("MySQL Error while trying to clear PEQZone flag for [{}]", GetName());
 	}
 }
 
@@ -1127,21 +1123,22 @@ bool Client::HasPEQZoneFlag(uint32 zone_id) const {
 }
 
 void Client::LoadPEQZoneFlags() {
-	std::string query = fmt::format(
-		"SELECT zone_id from character_peqzone_flags WHERE id = {}",
-		CharacterID()
+	const auto l = CharacterPeqzoneFlagsRepository::GetWhere(
+		content_db,
+		fmt::format(
+			"id = {}",
+			CharacterID()
+		)
 	);
-	auto results = database.QueryDatabase(query);
-
-	if (!results.Success()) {
-		LogError("MySQL Error while trying to load zone flags for [{}]: [{}]", GetName(), results.ErrorMessage().c_str());
+	if (l.empty() || !l[0].id){
+		LogError("MySQL Error while trying to load PEQZone flags for [{}].", GetName());
 		return;
 	}
 
 	peqzone_flags.clear();
 
-	for (auto row : results) {
-		peqzone_flags.insert(std::stoul(row[0]));
+	for (const auto& f : l) {
+		peqzone_flags.insert(f.zone_id);
 	}
 }
 
@@ -1176,11 +1173,11 @@ void Client::SendPEQZoneFlagInfo(Client *to) const {
 			to->Message(
 				Chat::White,
 				fmt::format(
-					"Flag {} | Zone ID: {} Zone Name: {} ({})",
+					"Flag {} | Zone: {} ({}) ID: {}",
 					flag_number,
-					zone_id,
 					zone_long_name,
-					zone_short_name
+					zone_short_name,
+					zone_id
 				).c_str()
 			);
 			flag_count++;
@@ -1205,15 +1202,13 @@ void Client::SetPEQZoneFlag(uint32 zone_id) {
 
 	peqzone_flags.insert(zone_id);
 
-	auto query = fmt::format(
-		"INSERT INTO character_peqzone_flags (id, zone_id) VALUES ({}, {})",
-		CharacterID(),
-		zone_id
-	);
-	auto results = database.QueryDatabase(query);
+	auto f = CharacterPeqzoneFlagsRepository::NewEntity();
 
-	if (!results.Success()) {
-		LogError("MySQL Error while trying to set zone flag for [{}]: [{}]", GetName(), results.ErrorMessage().c_str());
+	f.id = CharacterID();
+	f.zone_id = zone_id;
+
+	if (!CharacterPeqzoneFlagsRepository::InsertOne(content_db, f).id) {
+		LogError("MySQL Error while trying to set zone flag for [{}]", GetName());
 	}
 }
 

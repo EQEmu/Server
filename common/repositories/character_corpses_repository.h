@@ -44,7 +44,30 @@ public:
      */
 
 	// Custom extended repository methods here
+	static int BuryInstance(Database& db, uint16 instance_id) {
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"UPDATE {} SET is_buried = 1, instance_id = 0 WHERE instance_id = {}",
+				TableName(),
+				instance_id
+			)
+		);
 
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int BuryInstances(Database& db, const std::string& joined_instance_ids)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"UPDATE {} SET is_buried = 1, instance_id = 0 WHERE instance_id IN ({})",
+				TableName(),
+				joined_instance_ids
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_CHARACTER_CORPSES_REPOSITORY_H

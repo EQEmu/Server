@@ -109,6 +109,7 @@ public:
 	static std::vector<std::string> Split(const std::string& s, const std::string& delimiter);
 	static std::vector<std::string> Wrap(std::vector<std::string> &src, std::string character);
 	static void FindReplace(std::string &string_subject, const std::string &search_string, const std::string &replace_string);
+	static uint32 TimeToSeconds(std::string time_string);
 
 	template<typename T>
 	static std::string

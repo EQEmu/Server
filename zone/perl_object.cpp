@@ -166,22 +166,6 @@ void Perl_Object_Depop(Object* self) // @categories Objects
 	self->Depop();
 }
 
-const char* Perl_Object_GetEntityVariable(Object* self, const char* key) // @categories Objects
-{
-	// supports possible nullptr return
-	return self->GetEntityVariable(key);
-}
-
-bool Perl_Object_EntityVariableExists(Object* self, const char* key) // @categories Objects
-{
-	return self->EntityVariableExists(key);
-}
-
-void Perl_Object_SetEntityVariable(Object* self, const char* key, const char* var) // @categories Objects
-{
-	self->SetEntityVariable(key, var);
-}
-
 uint32_t Perl_Object_GetSolidType(Object* self) // @categories Objects
 {
 	return self->GetSolidType();
@@ -222,6 +206,33 @@ float Perl_Object_GetTiltY(Object* self) // @categories Objects
 	return self->GetTiltY();
 }
 
+bool Perl_Object_EntityVariableExists(Object* self, std::string variable_name) // @categories Objects
+{
+	return self->EntityVariableExists(variable_name);
+}
+
+std::string Perl_Object_GetEntityVariable(Object* self, std::string variable_name) // @categories Objects
+{
+	return self->GetEntityVariable(variable_name);
+}
+
+perl::array Perl_Object_GetEntityVariables(Object* self) // @categories Script Utility
+{
+	perl::array a;
+
+	const auto& l = self->GetEntityVariables();
+	for (const auto& v : l) {
+		a.push_back(v);
+	}
+
+	return a;
+}
+
+void Perl_Object_SetEntityVariable(Object* self, std::string variable_name, std::string variable_value) // @categories Objects
+{
+	self->SetEntityVariable(variable_name, variable_value);
+}
+
 void perl_register_object()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -237,6 +248,7 @@ void perl_register_object()
 	package.add("EntityVariableExists", &Perl_Object_EntityVariableExists);
 	package.add("GetDBID", &Perl_Object_GetDBID);
 	package.add("GetEntityVariable", &Perl_Object_GetEntityVariable);
+	package.add("GetEntityVariables", &Perl_Object_GetEntityVariables);
 	package.add("GetHeading", &Perl_Object_GetHeading);
 	package.add("GetID", &Perl_Object_GetID);
 	package.add("GetIcon", &Perl_Object_GetIcon);

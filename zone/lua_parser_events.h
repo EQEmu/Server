@@ -276,6 +276,16 @@ void handle_bot_timer(
 	std::vector<std::any> *extra_pointers
 );
 
+void handle_bot_trade(
+	QuestInterface *parse,
+	lua_State* L,
+	Bot* bot,
+	Mob* init,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+);
+
 void handle_bot_use_skill(
 	QuestInterface *parse,
 	lua_State* L,

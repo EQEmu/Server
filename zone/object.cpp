@@ -1057,34 +1057,49 @@ void Object::SetHeading(float heading)
 	safe_delete(app2);
 }
 
-void Object::SetEntityVariable(const char *id, const char *m_var)
+void Object::SetEntityVariable(std::string variable_name, std::string variable_value)
 {
-	std::string n_m_var = m_var;
-	o_EntityVariables[id] = n_m_var;
+	o_EntityVariables[variable_name] = variable_value;
 }
 
-const char* Object::GetEntityVariable(const char *id)
+std::string Object::GetEntityVariable(std::string variable_name)
 {
-	if(!id)
-		return nullptr;
-
-	auto iter = o_EntityVariables.find(id);
-	if(iter != o_EntityVariables.end())
-	{
-		return iter->second.c_str();
+	if (variable_name.empty()) {
+		return std::string();
 	}
-	return nullptr;
+
+	const auto& v = o_EntityVariables.find(variable_name);
+	if (v != o_EntityVariables.end()) {
+		return v->second;
+	}
+
+	return std::string();
 }
 
-bool Object::EntityVariableExists(const char * id)
+std::vector<std::string> Object::GetEntityVariables()
 {
-	if(!id)
-		return false;
+	std::vector<std::string> l;
+	if (o_EntityVariables.empty()) {
+		return l;
+	}
 
-	auto iter = o_EntityVariables.find(id);
-	if(iter != o_EntityVariables.end())
-	{
+	for (const auto& v : o_EntityVariables) {
+		l.push_back(v.first);
+	}
+
+	return l;
+}
+
+bool Object::EntityVariableExists(std::string variable_name)
+{
+	if (variable_name.empty()) {
+		return false;
+	}
+
+	const auto& v = o_EntityVariables.find(variable_name);
+	if (v != o_EntityVariables.end()) {
 		return true;
 	}
+
 	return false;
 }

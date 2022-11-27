@@ -100,6 +100,7 @@ int command_init(void)
 		command_add("augmentitem", "Force augments an item. Must have the augment item window open.", AccountStatus::GMImpossible, command_augmentitem) ||
 		command_add("ban", "[Character Name] [Reason] - Ban by character name", AccountStatus::GMLeadAdmin, command_ban) ||
 		command_add("bind", "Sets your targets bind spot to their current location", AccountStatus::GMMgmt, command_bind) ||
+		command_add("bugs", "[Close|Delete|Review|Search|View] - Handles player bug reports", AccountStatus::QuestTroupe, command_bugs) ||
 
 #ifdef BOTS
 		command_add("bot", "Type \"#bot help\" or \"^help\" to the see the list of available commands for bots.", AccountStatus::Player, command_bot) ||
@@ -107,7 +108,7 @@ int command_init(void)
 
 		command_add("camerashake", "[Duration (Milliseconds)] [Intensity (1-10)] - Shakes the camera on everyone's screen globally.", AccountStatus::QuestTroupe, command_camerashake) ||
 		command_add("castspell", "[Spell ID] [Instant (0 = False, 1 = True, Default is 1 if Unused)] - Cast a spell", AccountStatus::Guide, command_castspell) ||
-		command_add("chat", "[channel num] [message] - Send a channel message to all zones", AccountStatus::GMMgmt, command_chat) ||
+		command_add("chat", "[Channel ID] [Message] - Send a channel message to all zones", AccountStatus::GMMgmt, command_chat) ||
 		command_add("checklos", "Check for line of sight to your target", AccountStatus::Guide, command_checklos) ||
 		command_add("copycharacter", "[source_char_name] [dest_char_name] [dest_account_name] - Copies character to destination account", AccountStatus::GMImpossible, command_copycharacter) ||
 		command_add("corpse", "Manipulate corpses, use with no arguments for help", AccountStatus::Guide, command_corpse) ||
@@ -118,7 +119,7 @@ int command_init(void)
 		command_add("databuckets", "View|Delete [key] [limit]- View data buckets, limit 50 default or Delete databucket by key", AccountStatus::QuestTroupe, command_databuckets) ||
 		command_add("date", "[Year] [Month] [Day] [Hour] [Minute] - Set EQ time (Hour and Minute are optional)", AccountStatus::EQSupport, command_date) ||
 		command_add("dbspawn2", "[Spawngroup ID] [Respawn] [Variance] [Condition ID] [Condition Minimum] - Spawn an NPC from a predefined row in the spawn2 table, Respawn and Variance are in Seconds (condition is optional)", AccountStatus::GMAdmin, command_dbspawn2) ||
-		command_add("delacct", "[accountname] - Delete an account", AccountStatus::GMLeadAdmin, command_delacct) ||
+		command_add("delacct", "[Account ID|Account Name] - Delete an account by ID or Name", AccountStatus::GMLeadAdmin, command_delacct) ||
 		command_add("delpetition", "[petition number] - Delete a petition", AccountStatus::ApprenticeGuide, command_delpetition) ||
 		command_add("depop", "[Start Spawn Timer] - Depop your NPC target and optionally start their spawn timer (false by default)", AccountStatus::Guide, command_depop) ||
 		command_add("depopzone", "[Start Spawn Timers] - Depop the zone and optionally start spawn timers (false by default)", AccountStatus::GMAdmin, command_depopzone) ||
@@ -183,7 +184,7 @@ int command_init(void)
 		command_add("hatelist", "Display hate list for NPC.", AccountStatus::QuestTroupe, command_hatelist) ||
 		command_add("heal", "Completely heal your target", AccountStatus::Steward, command_heal) ||
 		command_add("help", "[Search Criteria] - List available commands and their description, specify partial command as argument to search", AccountStatus::Player, command_help) ||
-		command_add("heromodel", "[hero model] [slot] - Full set of Hero's Forge Armor appearance. If slot is set, sends exact model just to slot.", AccountStatus::GMMgmt, command_heromodel) ||
+		command_add("heromodel", "[Hero Model] [Slot] - Set your or your target's appearance to a full set of Hero's Forge Armor, if slot is set, sends exact model just to slot.", AccountStatus::GMMgmt, command_heromodel) ||
 		command_add("hideme", "[on/off] - Hide yourself from spawn lists.", AccountStatus::QuestTroupe, command_hideme) ||
 		command_add("hotfix", "[hotfix_name] - Reloads shared memory into a hotfix, equiv to load_shared_memory followed by apply_shared_memory", AccountStatus::GMImpossible, command_hotfix) ||
 		command_add("hp", "Refresh your HP bar from the server.", AccountStatus::Player, command_hp) ||
@@ -195,7 +196,6 @@ int command_init(void)
 		command_add("invul", "[On|Off]] - Turn player target's or your invulnerable flag on or off", AccountStatus::QuestTroupe, command_invul) ||
 		command_add("ipban", "[IP] - Ban IP", AccountStatus::GMMgmt, command_ipban) ||
 		command_add("iplookup", "[charname] - Look up IP address of charname", AccountStatus::GMMgmt, command_iplookup) ||
-		command_add("iteminfo", "Get information about the item on your cursor", AccountStatus::Steward, command_iteminfo) ||
 		command_add("itemsearch", "[Search Criteria] - Search for an item", AccountStatus::Steward, command_itemsearch) ||
 		command_add("kick", "[Character Name] - Disconnect a player by name", AccountStatus::GMLeadAdmin, command_kick) ||
 		command_add("kill", "Kill your target", AccountStatus::GMAdmin, command_kill) ||
@@ -943,6 +943,7 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/augmentitem.cpp"
 #include "gm_commands/ban.cpp"
 #include "gm_commands/bind.cpp"
+#include "gm_commands/bugs.cpp"
 #include "gm_commands/camerashake.cpp"
 #include "gm_commands/castspell.cpp"
 #include "gm_commands/chat.cpp"
@@ -1031,7 +1032,6 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/invul.cpp"
 #include "gm_commands/ipban.cpp"
 #include "gm_commands/iplookup.cpp"
-#include "gm_commands/iteminfo.cpp"
 #include "gm_commands/itemsearch.cpp"
 #include "gm_commands/kick.cpp"
 #include "gm_commands/kill.cpp"

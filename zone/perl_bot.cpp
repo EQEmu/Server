@@ -126,6 +126,11 @@ void Perl_Bot_ReloadBotSpellSettings(Bot* self)
 	self->LoadBotSpellSettings();
 }
 
+bool Perl_Bot_HasBotSpellEntry(Bot* self, uint16 spellid)
+{
+	return self->HasBotSpellEntry(spellid);
+}
+
 void perl_register_bot()
 {
 	perl::interpreter state(PERL_GET_THX);
@@ -147,6 +152,7 @@ void perl_register_bot()
 	package.add("GetExpansionBitmask", &Perl_Bot_GetExpansionBitmask);
 	package.add("GetOwner", &Perl_Bot_GetOwner);
 	package.add("HasBotItem", &Perl_Bot_HasBotItem);
+	package.add("HasBotSpellEntry", &Perl_Bot_HasBotSpellEntry);
 	package.add("OwnerMessage", &Perl_Bot_OwnerMessage);
 	package.add("ReloadBotDataBuckets", &Perl_Bot_ReloadBotDataBuckets);
 	package.add("ReloadBotOwnerDataBuckets", &Perl_Bot_ReloadBotOwnerDataBuckets);

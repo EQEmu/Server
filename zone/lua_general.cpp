@@ -542,8 +542,8 @@ void lua_set_proximity(float min_x, float max_x, float min_y, float max_y, float
 	quest_manager.set_proximity(min_x, max_x, min_y, max_y, min_z, max_z);
 }
 
-void lua_set_proximity(float min_x, float max_x, float min_y, float max_y, float min_z, float max_z, bool say) {
-	quest_manager.set_proximity(min_x, max_x, min_y, max_y, min_z, max_z, say);
+void lua_set_proximity(float min_x, float max_x, float min_y, float max_y, float min_z, float max_z, bool enable_say) {
+	quest_manager.set_proximity(min_x, max_x, min_y, max_y, min_z, max_z, enable_say);
 }
 
 void lua_clear_proximity() {
@@ -1002,16 +1002,46 @@ int lua_get_instance_id(const char *zone, uint32 version) {
 	return quest_manager.GetInstanceID(zone, version);
 }
 
-int lua_get_instance_id_by_char_id(const char *zone, uint32 version, uint32 char_id) {
-	return quest_manager.GetInstanceIDByCharID(zone, version, char_id);
+uint8 lua_get_instance_version_by_id(uint16 instance_id) {
+	return database.GetInstanceVersion(instance_id);
+}
+
+uint32 lua_get_instance_zone_id_by_id(uint16 instance_id) {
+	return database.GetInstanceZoneID(instance_id);
+}
+
+luabind::adl::object lua_get_instance_ids(lua_State* L, std::string zone_name) {
+	luabind::adl::object ret = luabind::newtable(L);
+
+	auto instance_ids = quest_manager.GetInstanceIDs(zone_name);
+	for (int i = 0; i < instance_ids.size(); i++) {
+		ret[i] = instance_ids[i];
+	}
+
+	return ret;
+}
+
+luabind::adl::object lua_get_instance_ids_by_char_id(lua_State* L, std::string zone_name, uint32 character_id) {
+	luabind::adl::object ret = luabind::newtable(L);
+
+	auto instance_ids = quest_manager.GetInstanceIDs(zone_name, character_id);
+	for (int i = 0; i < instance_ids.size(); i++) {
+		ret[i] = instance_ids[i];
+	}
+
+	return ret;
+}
+
+int lua_get_instance_id_by_char_id(const char *zone, uint32 version, uint32 character_id) {
+	return quest_manager.GetInstanceIDByCharID(zone, version, character_id);
 }
 
 void lua_assign_to_instance(uint32 instance_id) {
 	quest_manager.AssignToInstance(instance_id);
 }
 
-void lua_assign_to_instance_by_char_id(uint32 instance_id, uint32 char_id) {
-	quest_manager.AssignToInstanceByCharID(instance_id, char_id);
+void lua_assign_to_instance_by_char_id(uint32 instance_id, uint32 character_id) {
+	quest_manager.AssignToInstanceByCharID(instance_id, character_id);
 }
 
 void lua_assign_group_to_instance(uint32 instance_id) {
@@ -1026,12 +1056,12 @@ void lua_remove_from_instance(uint32 instance_id) {
 	quest_manager.RemoveFromInstance(instance_id);
 }
 
-void lua_remove_from_instance_by_char_id(uint32 instance_id, uint32 char_id) {
-	quest_manager.RemoveFromInstanceByCharID(instance_id, char_id);
+void lua_remove_from_instance_by_char_id(uint32 instance_id, uint32 character_id) {
+	quest_manager.RemoveFromInstanceByCharID(instance_id, character_id);
 }
 
-bool lua_check_instance_by_char_id(uint32 instance_id, uint32 char_id) {
-	return quest_manager.CheckInstanceByCharID(instance_id, char_id);
+bool lua_check_instance_by_char_id(uint32 instance_id, uint32 character_id) {
+	return quest_manager.CheckInstanceByCharID(instance_id, character_id);
 }
 
 void lua_remove_all_from_instance(uint32 instance_id) {
@@ -1215,11 +1245,11 @@ int lua_get_zone_instance_version() {
 luabind::adl::object lua_get_characters_in_instance(lua_State *L, uint16 instance_id) {
 	luabind::adl::object ret = luabind::newtable(L);
 
-	std::list<uint32> charid_list;
+	std::list<uint32> character_ids;
 	uint16 i = 1;
-	database.GetCharactersInInstance(instance_id,charid_list);
-	auto iter = charid_list.begin();
-	while(iter != charid_list.end()) {
+	database.GetCharactersInInstance(instance_id, character_ids);
+	auto iter = character_ids.begin();
+	while(iter != character_ids.end()) {
 		ret[i] = *iter;
 		++i;
 		++iter;
@@ -1893,7 +1923,11 @@ void lua_remove_all_expedition_lockouts_by_char_id(uint32 char_id, std::string e
 }
 
 std::string lua_seconds_to_time(int duration) {
-	return quest_manager.secondstotime(duration);
+	return Strings::SecondsToTime(duration);
+}
+
+uint32 lua_time_to_seconds(std::string time_string) {
+	return Strings::TimeToSeconds(time_string);
 }
 
 std::string lua_get_hex_color_code(std::string color_name) {
@@ -3561,6 +3595,39 @@ void lua_zone_marquee(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_
 	entity_list.Marquee(type, priority, fade_in, fade_out, duration, message);
 }
 
+bool lua_is_hotzone()
+{
+	if (!zone) {
+		return false;
+	}
+
+	return zone->IsHotzone();
+}
+
+void lua_set_hotzone(bool is_hotzone)
+{
+	if (!zone) {
+		return;
+	}
+
+	zone->SetIsHotzone(is_hotzone);
+}
+
+void lua_set_proximity_range(float x_range, float y_range)
+{
+	quest_manager.set_proximity_range(x_range, y_range);
+}
+
+void lua_set_proximity_range(float x_range, float y_range, float z_range)
+{
+	quest_manager.set_proximity_range(x_range, y_range, z_range);
+}
+
+void lua_set_proximity_range(float x_range, float y_range, float z_range, bool enable_say)
+{
+	quest_manager.set_proximity_range(x_range, y_range, z_range, enable_say);
+}
+
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
 	cur = table[#name]; \
 	if(luabind::type(cur) != LUA_TNIL) { \
@@ -3829,6 +3896,9 @@ luabind::scope lua_register_general() {
 		luabind::def("set_proximity", (void(*)(float,float,float,float))&lua_set_proximity),
 		luabind::def("set_proximity", (void(*)(float,float,float,float,float,float))&lua_set_proximity),
 		luabind::def("set_proximity", (void(*)(float,float,float,float,float,float,bool))&lua_set_proximity),
+		luabind::def("set_proximity_range", (void(*)(float,float))&lua_set_proximity_range),
+		luabind::def("set_proximity_range", (void(*)(float,float,float))&lua_set_proximity_range),
+		luabind::def("set_proximity_range", (void(*)(float,float,float,bool))&lua_set_proximity_range),
 		luabind::def("clear_proximity", &lua_clear_proximity),
 		luabind::def("enable_proximity_say", &lua_enable_proximity_say),
 		luabind::def("disable_proximity_say", &lua_disable_proximity_say),
@@ -3921,8 +3991,12 @@ luabind::scope lua_register_general() {
 		luabind::def("update_instance_timer", &lua_update_instance_timer),
 		luabind::def("get_instance_id", &lua_get_instance_id),
 		luabind::def("get_instance_id_by_char_id", &lua_get_instance_id_by_char_id),
+		luabind::def("get_instance_ids", &lua_get_instance_ids),
+		luabind::def("get_instance_ids_by_char_id", &lua_get_instance_id_by_char_id),
 		luabind::def("get_instance_timer", &lua_get_instance_timer),
 		luabind::def("get_instance_timer_by_id", &lua_get_instance_timer_by_id),
+		luabind::def("get_instance_version_by_id", &lua_get_instance_version_by_id),
+		luabind::def("get_instance_zone_id_by_id", &lua_get_instance_zone_id_by_id),
 		luabind::def("get_characters_in_instance", &lua_get_characters_in_instance),
 		luabind::def("assign_to_instance", &lua_assign_to_instance),
 		luabind::def("assign_to_instance_by_char_id", &lua_assign_to_instance_by_char_id),
@@ -3991,6 +4065,7 @@ luabind::scope lua_register_general() {
 		luabind::def("debug", (void(*)(std::string, int))&lua_debug),
 		luabind::def("log_combat", (void(*)(std::string))&lua_log_combat),
 		luabind::def("seconds_to_time", &lua_seconds_to_time),
+		luabind::def("time_to_seconds", &lua_time_to_seconds),
 		luabind::def("get_hex_color_code", &lua_get_hex_color_code),
 		luabind::def("get_aa_exp_modifier_by_char_id", (double(*)(uint32,uint32))&lua_get_aa_exp_modifier_by_char_id),
 		luabind::def("get_aa_exp_modifier_by_char_id", (double(*)(uint32,uint32,int16))&lua_get_aa_exp_modifier_by_char_id),
@@ -4052,6 +4127,8 @@ luabind::scope lua_register_general() {
 		luabind::def("zone_marquee", (void(*)(uint32,std::string))&lua_zone_marquee),
 		luabind::def("zone_marquee", (void(*)(uint32,std::string,uint32))&lua_zone_marquee),
 		luabind::def("zone_marquee", (void(*)(uint32,uint32,uint32,uint32,uint32,std::string))&lua_zone_marquee),
+		luabind::def("is_hotzone", (bool(*)(void))&lua_is_hotzone),
+		luabind::def("set_hotzone", (void(*)(bool))&lua_set_hotzone),
 
 		/*
 			Cross Zone

@@ -117,11 +117,23 @@ public:
 	void MovePC(int zone, float x, float y, float z, float heading);
 	void MovePCInstance(int zone, int instance, float x, float y, float z, float heading);
 	void MoveZone(const char *zone_short_name);
+	void MoveZone(const char *zone_short_name, float x, float y, float z);
+	void MoveZone(const char *zone_short_name, float x, float y, float z, float heading);
 	void MoveZoneGroup(const char *zone_short_name);
+	void MoveZoneGroup(const char *zone_short_name, float x, float y, float z);
+	void MoveZoneGroup(const char *zone_short_name, float x, float y, float z, float heading);
 	void MoveZoneRaid(const char *zone_short_name);
+	void MoveZoneRaid(const char *zone_short_name, float x, float y, float z);
+	void MoveZoneRaid(const char *zone_short_name, float x, float y, float z, float heading);
 	void MoveZoneInstance(uint16 instance_id);
+	void MoveZoneInstance(uint16 instance_id, float x, float y, float z);
+	void MoveZoneInstance(uint16 instance_id, float x, float y, float z, float heading);
 	void MoveZoneInstanceGroup(uint16 instance_id);
+	void MoveZoneInstanceGroup(uint16 instance_id, float x, float y, float z);
+	void MoveZoneInstanceGroup(uint16 instance_id, float x, float y, float z, float heading);
 	void MoveZoneInstanceRaid(uint16 instance_id);
+	void MoveZoneInstanceRaid(uint16 instance_id, float x, float y, float z);
+	void MoveZoneInstanceRaid(uint16 instance_id, float x, float y, float z, float heading);
 	bool TeleportToPlayerByCharID(uint32 character_id);
 	bool TeleportToPlayerByName(std::string player_name);
 	bool TeleportGroupToPlayerByCharID(uint32 character_id);
@@ -434,6 +446,55 @@ public:
 	bool HasItemEquippedByID(uint32 item_id);
 	int GetHealAmount();
 	int GetSpellDamage();
+	void UpdateAdmin();
+	void UpdateAdmin(bool from_database);
+	luabind::object GetPEQZoneFlags(lua_State* L);
+	luabind::object GetZoneFlags(lua_State* L);
+
+	void ApplySpell(int spell_id);
+	void ApplySpell(int spell_id, int duration);
+	void ApplySpell(int spell_id, int duration, bool allow_pets);
+#ifdef BOTS
+	void ApplySpell(int spell_id, int duration, bool allow_pets, bool allow_bots);
+#endif
+
+	void ApplySpellGroup(int spell_id);
+	void ApplySpellGroup(int spell_id, int duration);
+	void ApplySpellGroup(int spell_id, int duration, bool allow_pets);
+#ifdef BOTS
+	void ApplySpellGroup(int spell_id, int duration, bool allow_pets, bool allow_bots);
+#endif
+
+	void ApplySpellRaid(int spell_id);
+	void ApplySpellRaid(int spell_id, int duration);
+	void ApplySpellRaid(int spell_id, int duration, bool allow_pets);
+	void ApplySpellRaid(int spell_id, int duration, bool allow_pets, bool is_raid_group_only);
+#ifdef BOTS
+	void ApplySpellRaid(int spell_id, int duration, bool allow_pets, bool is_raid_group_only, bool allow_bots);
+#endif
+
+	void SetSpellDuration(int spell_id);
+	void SetSpellDuration(int spell_id, int duration);
+	void SetSpellDuration(int spell_id, int duration, bool allow_pets);
+#ifdef BOTS
+	void SetSpellDuration(int spell_id, int duration, bool allow_pets, bool allow_bots);
+#endif
+
+	void SetSpellDurationGroup(int spell_id);
+	void SetSpellDurationGroup(int spell_id, int duration);
+	void SetSpellDurationGroup(int spell_id, int duration, bool allow_pets);
+#ifdef BOTS
+	void SetSpellDurationGroup(int spell_id, int duration, bool allow_pets, bool allow_bots);
+#endif
+
+	void SetSpellDurationRaid(int spell_id);
+	void SetSpellDurationRaid(int spell_id, int duration);
+	void SetSpellDurationRaid(int spell_id, int duration, bool allow_pets);
+	void SetSpellDurationRaid(int spell_id, int duration, bool allow_pets, bool is_raid_group_only);
+#ifdef BOTS
+	void SetSpellDurationRaid(int spell_id, int duration, bool allow_pets, bool is_raid_group_only, bool allow_bots);
+#endif
+
 
 	int GetEnvironmentDamageModifier();
 	void SetEnvironmentDamageModifier(int value);

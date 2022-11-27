@@ -149,9 +149,9 @@ void NpcScaleManager::ScaleNPC(NPC *npc)
 		std::string scale_log;
 
 		for (const auto &stat : scaling_stats) {
-			std::string variable = StringFormat("modify_stat_%s", stat.c_str());
-			if (npc->EntityVariableExists(variable.c_str())) {
-				scale_log += stat + ": " + npc->GetEntityVariable(variable.c_str()) + " ";
+			auto v = fmt::format("modify_stat_{}", stat);
+			if (npc->EntityVariableExists(v)) {
+				scale_log += fmt::format("{}: {} ", stat, npc->GetEntityVariable(v));
 			}
 		}
 
@@ -169,9 +169,9 @@ void NpcScaleManager::ScaleNPC(NPC *npc)
 void NpcScaleManager::ResetNPCScaling(NPC *npc)
 {
 	for (const auto &scaling_stat : scaling_stats) {
-		std::string stat_name   = fmt::format("modify_stat_{}", scaling_stat);
-		std::string reset_value = "0";
-		if (npc->EntityVariableExists(stat_name.c_str())) {
+		auto stat_name   = fmt::format("modify_stat_{}", scaling_stat);
+		auto reset_value = std::to_string(0);
+		if (npc->EntityVariableExists(stat_name)) {
 			npc->ModifyNPCStat(scaling_stat.c_str(), reset_value.c_str());
 		}
 	}
