@@ -4019,7 +4019,7 @@ bool Bot::Spawn(Client* botCharacterOwner) {
 		const auto& m = GetBotItemSlots();
 		uint8 material_from_slot = 0xFF;
 		for (int slot_id = EQ::invslot::EQUIPMENT_BEGIN; slot_id <= EQ::invslot::EQUIPMENT_END; ++slot_id) {
-			if (m.find(slot_id) != l.end()) {
+			if (m.find(slot_id) != m.end()) {
 				material_from_slot = EQ::InventoryProfile::CalcMaterialFromSlot(slot_id);
 				if (material_from_slot != 0xFF) {
 					SendWearChange(material_from_slot);
