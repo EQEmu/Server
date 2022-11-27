@@ -162,7 +162,7 @@ int command_init(void)
 		command_add("fov", "Check wether you're behind or in your target's field of view", AccountStatus::QuestTroupe, command_fov) ||
 		command_add("freeze", "Freeze your target", AccountStatus::QuestTroupe, command_freeze) ||
 		command_add("gassign", "[Grid ID] - Assign targetted NPC to predefined wandering grid id", AccountStatus::GMAdmin, command_gassign) ||
-		command_add("gearup", "Developer tool to quickly equip a character", AccountStatus::GMMgmt, command_gearup) ||
+		command_add("gearup", "Developer tool to quickly equip yourself or your target", AccountStatus::GMMgmt, command_gearup) ||
 		command_add("gender", "[0/1/2] - Change your or your target's gender to male/female/neuter", AccountStatus::Guide, command_gender) ||
 		command_add("getplayerburiedcorpsecount", "Get your or your target's total number of buried player corpses.", AccountStatus::GMAdmin, command_getplayerburiedcorpsecount) ||
 		command_add("getvariable", "[Variable Name] - Get the value of a variable from the database", AccountStatus::GMMgmt, command_getvariable) ||
