@@ -7725,25 +7725,31 @@ bool Bot::CastSpell(
 }
 
 bool Bot::SpellOnTarget(uint16 spell_id, Mob* spelltar) {
-	bool Result = false;
 	if (!IsValidSpell(spell_id)) {
 		return false;
 	}
-	
+
 	if (spelltar) {
-		if(((IsDetrimentalSpell(spell_id) && spelltar->IsBot()) || (IsDetrimentalSpell(spell_id) && spelltar->IsClient())) && !IsResurrectionEffects(spell_id)) {
+		if (
+			IsDetrimentalSpell(spell_id) &&
+			(spelltar->IsBot() || spelltar->IsClient()) &&
+			!IsResurrectionEffects(spell_id)
+		) {
 			return false;
 		}
-		
+
 		if (spelltar->IsPet()) {
-			for (int  i= 0; i < EFFECT_COUNT; ++i) {
-				if (spells[spell_id].effect_id[i] == SE_Illusion)
+			for (int i = 0; i < EFFECT_COUNT; ++i) {
+				if (spells[spell_id].effect_id[i] == SE_Illusion) {
 					return false;
+				}
 			}
 		}
-		Result = Mob::SpellOnTarget(spell_id, spelltar);
+
+		return Mob::SpellOnTarget(spell_id, spelltar);
 	}
-	return Result;
+
+	return false;
 }
 
 bool Bot::IsImmuneToSpell(uint16 spell_id, Mob *caster) {
