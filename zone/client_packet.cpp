@@ -2211,7 +2211,7 @@ void Client::Handle_OP_AdventureMerchantSell(const EQApplicationPacket *app)
 	}
 
 	// 06/11/2016 This formula matches RoF2 client side calculation.
-	int32 price = (item->LDoNPrice + 1) * item->LDoNSellBackRate / 100;
+	int32 price = EQ::Clamp(item->LDoNPrice, (item->LDoNPrice + 1) * item->LDoNSellBackRate / 100, item->LDoNPrice);
 
 	if (price == 0)
 	{
@@ -2696,7 +2696,10 @@ void Client::Handle_OP_AltCurrencySell(const EQApplicationPacket *app)
 
 			if (item->ID == inst->GetItem()->ID) {
 				// 06/11/2016 This formula matches RoF2 client side calculation.
-				cost = (ml.alt_currency_cost + 1) * item->LDoNSellBackRate / 100;
+				
+				cost = EQ::Clamp(static_cast<size_t>(ml.alt_currency_cost),
+						static_cast<size_t>((ml.alt_currency_cost + 1) * item->LDoNSellBackRate / 100), 
+						static_cast<size_t>(ml.alt_currency_cost));
 				found = true;
 				break;
 			}
@@ -2801,7 +2804,9 @@ void Client::Handle_OP_AltCurrencySellSelection(const EQApplicationPacket *app)
 
 				if (item->ID == inst->GetItem()->ID) {
 					// 06/11/2016 This formula matches RoF2 client side calculation.
-					cost = (ml.alt_currency_cost + 1) * item->LDoNSellBackRate / 100;
+					cost = EQ::Clamp(static_cast<size_t>(ml.alt_currency_cost),
+							static_cast<size_t>((ml.alt_currency_cost + 1) * item->LDoNSellBackRate / 100), 
+							static_cast<size_t>(ml.alt_currency_cost));
 					found = true;
 					break;
 				}
