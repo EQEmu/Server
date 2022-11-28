@@ -7731,6 +7731,10 @@ bool Bot::SpellOnTarget(uint16 spell_id, Mob* spelltar) {
 	}
 	
 	if (spelltar) {
+		if(((IsDetrimentalSpell(spell_id) && spelltar->IsBot()) || (IsDetrimentalSpell(spell_id) && spelltar->IsClient())) && !IsResurrectionEffects(spell_id)) {
+			return false;
+		}
+		
 		if (spelltar->IsPet()) {
 			for (int  i= 0; i < EFFECT_COUNT; ++i) {
 				if (spells[spell_id].effect_id[i] == SE_Illusion)
