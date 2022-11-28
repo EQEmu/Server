@@ -24,6 +24,8 @@
 #include "../common/strings.h"
 #include "../common/eqemu_logsys.h"
 
+#include "../common/repositories/bot_inventories_repository.h"
+
 #include "zonedb.h"
 #include "../common/zone_store.h"
 #include "bot.h"
@@ -1356,6 +1358,30 @@ bool BotDatabase::LoadItemBySlot(const uint32 bot_id, const uint32 slot_id, uint
 
 	auto row = results.begin();
 	item_id = atoi(row[0]);
+
+	return true;
+}
+
+bool BotDatabase::LoadItemSlots(const uint32 bot_id, std::map<uint16, uint32>& m)
+{
+	if (!bot_id) {
+		return false;
+	}
+
+	const auto& l = BotInventoriesRepository::GetWhere(
+		database,
+		fmt::format(
+			"bot_id = {}",
+			bot_id
+		)
+	);
+	if (l.empty()) {
+		return false;
+	}
+
+	for (const auto& e : l) {
+		m.insert(std::pair<uint16, uint32>(e.slot_id, e.item_id));
+	}
 
 	return true;
 }
@@ -3276,7 +3302,6 @@ const char* BotDatabase::fail::QueryInventoryCount() { return "Failed to query i
 const char* BotDatabase::fail::LoadItems() { return "Failed to load items"; }
 const char* BotDatabase::fail::SaveItems() { return "Failed to save items"; }
 const char* BotDatabase::fail::DeleteItems() { return "Failed to delete items"; }
-const char* BotDatabase::fail::LoadItemBySlot() { return "Failed to load item by slot"; }
 const char* BotDatabase::fail::SaveItemBySlot() { return "Failed to save item by slot"; }
 const char* BotDatabase::fail::DeleteItemBySlot() { return "Failed to delete item by slot"; }
 const char* BotDatabase::fail::LoadEquipmentColor() { return "Failed to load equipment color"; }
