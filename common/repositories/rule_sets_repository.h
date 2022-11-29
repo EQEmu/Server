@@ -44,7 +44,53 @@ public:
      */
 
 	// Custom extended repository methods here
+	static int GetRuleSetID(Database& db, std::string rule_set_name)
+	{
+		const auto query = fmt::format(
+			"SELECT ruleset_id FROM {} WHERE `name` = '{}'",
+			TableName(),
+			Strings::Escape(rule_set_name)
+		);
+		auto results = db.QueryDatabase(query);
+		if (!results.Success() || !results.RowCount()) {
+			return -1;
+		}
 
+		auto row = results.begin();
+		return std::stoi(row[0]);
+	}
+
+	static int CreateNewRuleSet(Database& db, std::string rule_set_name)
+	{
+		const auto query = fmt::format(
+			"INSERT INTO {} (`name`) VALUES ('{}')",
+			TableName(),
+			rule_set_name
+		);
+		auto results = db.QueryDatabase(query);
+		if (!results.Success() || !results.RowsAffected()) {
+			return -1;
+		}
+
+		return static_cast<int>(results.LastInsertedID());
+	}
+
+	static std::string GetRuleSetName(Database& db, int rule_set_id)
+	{
+		const auto query = fmt::format(
+			"SELECT `name` FROM {} WHERE ruleset_id = {}",
+			TableName(),
+			rule_set_id
+		);
+		auto results = db.QueryDatabase(query);
+		if (!results.Success() || !results.RowsAffected()) {
+			return std::string();
+		}
+
+		auto row = results.begin();
+
+		return std::string(row[0]);
+	}
 };
 
 #endif //EQEMU_RULE_SETS_REPOSITORY_H

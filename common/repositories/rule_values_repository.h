@@ -44,6 +44,87 @@ public:
      */
 
 	// Custom extended repository methods here
+	static std::vector<std::string> GetRuleNames(Database &db, int rule_set_id)
+	{
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT rule_name FROM {} WHERE ruleset_id = {}",
+				TableName(),
+				rule_set_id
+			)
+		);
+		if (!results.Success() || !results.RowCount()) {
+			return v;
+		}
+
+		for (auto row : results) {
+			v.push_back(row[0]);
+		}
+
+		return v;
+	}
+
+	static std::vector<std::string> GetGroupedRules(Database &db)
+	{
+		std::vector <std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT rule_name FROM {} GROUP BY rule_name",
+				TableName()
+			)
+		);
+		if (!results.Success() || !results.RowCount()) {
+			return v;
+		}
+
+		for (auto row : results) {
+			v.push_back(row[0]);
+		}
+
+		return v;
+	}
+
+	static bool DeleteOrphanedRules(Database& db, std::vector<std::string>& v)
+	{
+		const auto query = fmt::format(
+			"DELETE FROM {} WHERE rule_name IN ({})",
+			TableName(),
+			Strings::ImplodePair(",", std::pair<char, char>('\'', '\''), v)
+		);
+
+		return db.QueryDatabase(query).Success();
+	}
+
+	static bool InjectRules(Database& db, std::vector<std::tuple<int, std::string, std::string, std::string>>& v)
+	{
+		const auto query = fmt::format(
+			"REPLACE INTO {} (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES {}",
+			TableName(),
+			Strings::ImplodePair(
+				",",
+				std::pair<char, char>('(', ')'),
+				join_tuple(",", std::pair<char, char>('\'', '\''), v)
+			)
+		);
+
+		return db.QueryDatabase(query).Success();
+	}
+
+	static bool UpdateRuleNote(Database& db, int rule_set_id, std::string rule_name, std::string notes)
+	{
+		const auto query = fmt::format(
+			"UPDATE {} SET notes = '{}' WHERE ruleset_id = {} AND rule_name = '{}'",
+			TableName(),
+			notes,
+			rule_set_id,
+			rule_name
+		);
+
+		return db.QueryDatabase(query).Success();
+	}
 
 };
 
