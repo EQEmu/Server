@@ -54,7 +54,7 @@ void command_rules(Client *c, const Seperator *sep)
 		);
 	} else if (is_list_sets) {
 		std::map<int, std::string> m;
-		if (!RuleManager::Instance()->ListRulesets(database, m)) {
+		if (!RuleManager::Instance()->ListRulesets(&database, m)) {
 			c->Message(Chat::White, "Failed to list Rule Sets!");
 			return;
 		}
@@ -89,7 +89,7 @@ void command_rules(Client *c, const Seperator *sep)
 			).c_str()
 		);
 	} else if (is_reload) {
-		RuleManager::Instance()->LoadRules(database, RuleManager::Instance()->GetActiveRuleset(), true);
+		RuleManager::Instance()->LoadRules(&database, RuleManager::Instance()->GetActiveRuleset(), true);
 		c->Message(
 			Chat::White,
 			fmt::format(
@@ -117,7 +117,7 @@ void command_rules(Client *c, const Seperator *sep)
 			return;
 		}
 
-		RuleManager::Instance()->LoadRules(database, sep->arg[2], true);
+		RuleManager::Instance()->LoadRules(&database, sep->arg[2], true);
 
 		c->Message(
 			Chat::White,
@@ -138,7 +138,7 @@ void command_rules(Client *c, const Seperator *sep)
 			return;
 		}
 
-		RuleManager::Instance()->LoadRules(database, sep->arg[2], true);
+		RuleManager::Instance()->LoadRules(&database, sep->arg[2], true);
 		c->Message(
 			Chat::White,
 			fmt::format(
@@ -149,10 +149,10 @@ void command_rules(Client *c, const Seperator *sep)
 		);
 	} else if (is_store) {
 		if (arguments == 1) {
-			RuleManager::Instance()->SaveRules(database);
+			RuleManager::Instance()->SaveRules(&database);
 			c->Message(Chat::White, "Rules saved.");
 		} else if (arguments == 2) {
-			RuleManager::Instance()->SaveRules(database, sep->arg[2]);
+			RuleManager::Instance()->SaveRules(&database, sep->arg[2]);
 			const auto prersid = RuleManager::Instance()->GetActiveRulesetID();
 			const auto rsid    = RuleSetsRepository::GetRuleSetID(database, sep->arg[2]);
 			if (rsid < 0) {
@@ -244,7 +244,7 @@ void command_rules(Client *c, const Seperator *sep)
 		}
 	} else if (is_set_db) {
 		if (arguments == 3) {
-			if (!RuleManager::Instance()->SetRule(sep->arg[2], sep->arg[3], database, true, true)) {
+			if (!RuleManager::Instance()->SetRule(sep->arg[2], sep->arg[3], &database, true, true)) {
 				c->Message(
 					Chat::White,
 					fmt::format(
