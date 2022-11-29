@@ -389,7 +389,7 @@ void command_rules(Client *c, const Seperator *sep)
 					c->Message(
 						Chat::White,
 						fmt::format(
-							"Rule {} | {}",
+							"Rule {} | Name: {} Value: {}",
 							rule_number,
 							e,
 							rule_value
