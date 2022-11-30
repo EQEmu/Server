@@ -2214,8 +2214,8 @@ void Client::Handle_OP_AdventureMerchantSell(const EQApplicationPacket *app)
 	uint32 price = EQ::Clamp(
 		price,
 		EQ::ClampUpper(
-		(item->LDoNPrice + 1) * item->LDoNSellBackRate / 100,
-		item->LDoNPrice
+			(item->LDoNPrice + 1) * item->LDoNSellBackRate / 100,
+			item->LDoNPrice
 		),
 		item->LDoNPrice
 	);
