@@ -16,6 +16,7 @@
 #include "lua_hate_list.h"
 #include "lua_client.h"
 #include "lua_stat_bonuses.h"
+#include "questmgr.h"
 #include "dialogue_window.h"
 
 struct SpecialAbilities { };
@@ -842,6 +843,16 @@ void Lua_Mob::QuestSay(Lua_Client client, const char *message, luabind::adl::obj
 		journal_opts.journal_mode = Journal::Mode::None;
 
 	self->QuestJournalledSay(client, message, journal_opts);
+}
+
+void Lua_Mob::SetTimer(const char *timer, int time_ms) {
+	Lua_Safe_Call_Void();
+	quest_manager.settimerMS(timer, time_ms, self);
+}
+
+void Lua_Mob::StopTimer(const char *timer) {
+	Lua_Safe_Call_Void();
+	quest_manager.stoptimer(timer, self);
 }
 
 void Lua_Mob::Shout(const char *message) {
@@ -3216,6 +3227,7 @@ luabind::scope lua_register_mob() {
 	.def("SetSpecialAbilityParam", (void(Lua_Mob::*)(int,int,int))&Lua_Mob::SetSpecialAbilityParam)
 	.def("SetTarget", &Lua_Mob::SetTarget)
 	.def("SetTargetable", (void(Lua_Mob::*)(bool))&Lua_Mob::SetTargetable)
+	.def("SetTimer", (void(Lua_Mob::*)(const char*, int))&Lua_Mob::SetTimer)
 	.def("SetTexture", (void(Lua_Mob::*)(int))&Lua_Mob::SetTexture)
 	.def("Shout", (void(Lua_Mob::*)(const char*))& Lua_Mob::Shout)
 	.def("Shout", (void(Lua_Mob::*)(const char*, int))& Lua_Mob::Shout)
@@ -3229,6 +3241,7 @@ luabind::scope lua_register_mob() {
 	.def("SpellFinished", (bool(Lua_Mob::*)(int,Lua_Mob,int,int,uint32,int,bool))&Lua_Mob::SpellFinished)
 	.def("Spin", (void(Lua_Mob::*)(void))&Lua_Mob::Spin)
 	.def("StopNavigation", (void(Lua_Mob::*)(void))&Lua_Mob::StopNavigation)
+	.def("StopTimer", (void(Lua_Mob::*)(const char*))&Lua_Mob::StopTimer)
 	.def("Stun", (void(Lua_Mob::*)(int))&Lua_Mob::Stun)
 	.def("TarGlobal", (void(Lua_Mob::*)(const char*,const char*,const char*,int,int,int))&Lua_Mob::TarGlobal)
 	.def("TempName", (void(Lua_Mob::*)(const char*))&Lua_Mob::TempName)
