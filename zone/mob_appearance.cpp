@@ -249,7 +249,7 @@ int32 Mob::GetEquipmentMaterial(uint8 material_slot) const
 				}
 			}
 
-			if (equipment_material == 0 && strlen(item->IDFile) > 2) {
+			if (equipment_material == 0 && strlen(item->IDFile) > 2 && Strings::IsNumber(&item->IDFile[2])) {
 				equipment_material = std::stoi(&item->IDFile[2]);
 			}
 		}
