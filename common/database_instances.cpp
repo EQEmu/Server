@@ -49,11 +49,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include <sys/time.h>
 #endif
 
-/**
- * @param instance_id
- * @param char_id
- * @return
- */
 bool Database::AddClientToInstance(uint16 instance_id, uint32 character_id)
 {
 	auto e = InstanceListPlayerRepository::NewEntity();
@@ -61,7 +56,7 @@ bool Database::AddClientToInstance(uint16 instance_id, uint32 character_id)
 	e.id = instance_id;
 	e.charid = character_id;
 
-	return InstanceListPlayerRepository::InsertOne(*this, e).id ? true : false;
+	return InstanceListPlayerRepository::ReplaceOne(*this, e);
 }
 
 bool Database::CheckInstanceByCharID(uint16 instance_id, uint32 character_id)
@@ -78,14 +73,15 @@ bool Database::CheckInstanceByCharID(uint16 instance_id, uint32 character_id)
 			character_id
 		)
 	);
-	if (l.empty() || !l[0].id) {
+	if (l.empty()) {
 		return false;
 	}
 
 	return true;
 }
 
-bool Database::CheckInstanceExists(uint16 instance_id) {
+bool Database::CheckInstanceExists(uint16 instance_id)
+{
 	if (!instance_id) {
 		return false;
 	}
@@ -129,7 +125,7 @@ bool Database::CreateInstance(uint16 instance_id, uint32 zone_id, uint32 version
 	e.start_time = std::time(nullptr);
 	e.duration = duration;
 
-	return InstanceListRepository::InsertOne(*this, e).id ? true : false;
+	return InstanceListRepository::InsertOne(*this, e).id;
 }
 
 bool Database::GetUnusedInstanceID(uint16 &instance_id)
@@ -137,8 +133,8 @@ bool Database::GetUnusedInstanceID(uint16 &instance_id)
 	uint32 max_reserved_instance_id = RuleI(Instances, ReservedInstances);
 	uint32 max                      = 32000;
 
-	std::string query = StringFormat(
-		"SELECT IFNULL(MAX(id),%u)+1 FROM instance_list WHERE id > %u",
+	auto query = fmt::format(
+		"SELECT IFNULL(MAX(id), {}) + 1 FROM instance_list WHERE id > {}",
 		max_reserved_instance_id,
 		max_reserved_instance_id
 	);
@@ -182,7 +178,7 @@ bool Database::GetUnusedInstanceID(uint16 &instance_id)
 		return true;
 	}
 
-	query   = StringFormat("SELECT id FROM instance_list where id > %u ORDER BY id", max_reserved_instance_id);
+	query   = fmt::format("SELECT id FROM instance_list where id > {} ORDER BY id", max_reserved_instance_id);
 	results = QueryDatabase(query);
 
 	if (!results.Success()) {
@@ -196,8 +192,9 @@ bool Database::GetUnusedInstanceID(uint16 &instance_id)
 	}
 
 	max_reserved_instance_id++;
-	for (auto row = results.begin(); row != results.end(); ++row) {
-		if (max_reserved_instance_id < atoi(row[0])) {
+
+	for (auto row : results) {
+		if (max_reserved_instance_id < std::stoul(row[0])) {
 			instance_id = max_reserved_instance_id;
 			return true;
 		}
@@ -226,7 +223,7 @@ bool Database::IsGlobalInstance(uint16 instance_id)
 		return false;
 	}
 
-	return i.is_global ? true : false;
+	return i.is_global;
 }
 
 bool Database::RemoveClientFromInstance(uint16 instance_id, uint32 char_id)
@@ -238,15 +235,12 @@ bool Database::RemoveClientFromInstance(uint16 instance_id, uint32 char_id)
 			instance_id,
 			char_id
 		)
-	) ?
-	true :
-	false;
+	);
 }
-
 
 bool Database::RemoveClientsFromInstance(uint16 instance_id)
 {
-	return InstanceListPlayerRepository::DeleteOne(*this, instance_id) ? true : false;
+	return InstanceListPlayerRepository::DeleteOne(*this, instance_id);
 }
 
 bool Database::VerifyInstanceAlive(uint16 instance_id, uint32 character_id)
@@ -274,7 +268,7 @@ bool Database::VerifyZoneInstance(uint32 zone_id, uint16 instance_id)
 			zone_id
 		)
 	);
-	if (l.empty() || !l[0].id) {
+	if (l.empty()) {
 		return false;
 	}
 
@@ -399,7 +393,7 @@ void Database::AssignGroupToInstance(uint32 group_id, uint32 instance_id)
 			group_id
 		)
 	);
-	if (l.empty() || !l[0].groupid) {
+	if (l.empty()) {
 		return;
 	}
 
@@ -422,7 +416,7 @@ void Database::AssignRaidToInstance(uint32 raid_id, uint32 instance_id)
 			raid_id
 		)
 	);
-	if (l.empty() || !l[0].groupid) {
+	if (l.empty()) {
 		return;
 	}
 
@@ -490,7 +484,7 @@ void Database::FlagInstanceByRaidLeader(uint32 zone_id, int16 version, uint32 ch
 void Database::GetCharactersInInstance(uint16 instance_id, std::list<uint32> &character_ids)
 {
 	auto l = InstanceListPlayerRepository::GetWhere(*this, fmt::format("id = {}", instance_id));
-	if (l.empty() || !l[0].id) {
+	if (l.empty()) {
 		return;
 	}
 
@@ -510,7 +504,7 @@ void Database::PurgeExpiredInstances()
 		*this,
 		"(start_time + duration) <= (UNIX_TIMESTAMP() - 86400) AND never_expires = 0"
 	);
-	if (l.empty() || !l[0].id) {
+	if (l.empty()) {
 		return;
 	}
 

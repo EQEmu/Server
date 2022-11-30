@@ -73,6 +73,27 @@ public:
 
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
+
+	static bool ReplaceOne(Database& db, InstanceListPlayer e)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.id));
+		v.push_back(std::to_string(e.charid));
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"REPLACE INTO {} VALUES ({})",
+				TableName(),
+				Strings::Implode(",", v)
+			)
+		);
+		if (results.Success()) {
+			return true;
+		}
+
+		return false;
+	}
 };
 
 #endif //EQEMU_INSTANCE_LIST_PLAYER_REPOSITORY_H
