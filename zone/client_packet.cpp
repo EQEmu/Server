@@ -2211,7 +2211,7 @@ void Client::Handle_OP_AdventureMerchantSell(const EQApplicationPacket *app)
 	}
 
 	// 06/11/2016 This formula matches RoF2 client side calculation.
-	int32 price = EQ::Clamp(item->LDoNPrice, (item->LDoNPrice + 1) * item->LDoNSellBackRate / 100, item->LDoNPrice);
+	int32 price = EQ::Clamp(static_cast<uint32>(price), EQ::ClampUpper((item->LDoNPrice + 1) * item->LDoNSellBackRate / 100, item->LDoNPrice), item->LDoNPrice);
 
 	if (price == 0)
 	{
