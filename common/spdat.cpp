@@ -374,13 +374,16 @@ bool IsAEDurationSpell(uint16 spell_id)
 		There are plenty of spells with aoe_duration set at single digit numbers, but these
 		do not act as duration effects.
 	*/
-	if (IsValidSpell(spell_id) && 
+	if (
+		IsValidSpell(spell_id) &&
 		spells[spell_id].aoe_duration >= 2500 &&
-		(	spells[spell_id].target_type == ST_AETarget || 
+		(
+			spells[spell_id].target_type == ST_AETarget ||
 			spells[spell_id].target_type == ST_UndeadAE ||
 			spells[spell_id].target_type == ST_AECaster ||
-			spells[spell_id].target_type == ST_Ring)
-		) {
+			spells[spell_id].target_type == ST_Ring
+		)
+	) {
 		return true;
 	}
 
@@ -1482,6 +1485,7 @@ bool IsInstrumentModAppliedToSpellEffect(int32 spell_id, int effect)
 		case SE_WaterBreathing:
 		case SE_ModelSize:
 		case SE_ChangeHeight:
+		case SE_MakeDrunk:
 			return false;
 		default:
 			return true;
@@ -1494,15 +1498,17 @@ bool IsPulsingBardSong(int32 spell_id)
 	if (!IsValidSpell(spell_id)) {
 		return false;
 	}
-	
-	if (spells[spell_id].buff_duration == 0xFFFF ||
+
+	if (
+		spells[spell_id].buff_duration == 0xFFFF ||
 		spells[spell_id].recast_time> 0 ||
-		spells[spell_id].mana > 0 || 
-		IsEffectInSpell(spell_id, SE_TemporaryPets) || 
-		IsEffectInSpell(spell_id, SE_Familiar)) {
+		spells[spell_id].mana > 0 ||
+		IsEffectInSpell(spell_id, SE_TemporaryPets) ||
+		IsEffectInSpell(spell_id, SE_Familiar)
+	) {
 		return false;
 	}
-	
+
 	return true;
 }
 
