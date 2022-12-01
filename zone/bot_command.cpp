@@ -10239,7 +10239,6 @@ void bot_command_spell_list(Client* c, const Seperator *sep)
 	}
 
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::White, "You must target a Caster or Hybrid bot to use this command.");
 		c->Message(
 			Chat::White,
 			fmt::format(
@@ -10253,11 +10252,6 @@ void bot_command_spell_list(Client* c, const Seperator *sep)
 	auto my_bot = ActionableBots::AsTarget_ByBot(c);
 	if (!my_bot) {
 		c->Message(Chat::White, "You must target a bot that you own to use this command.");
-		return;
-	}
-
-	if (!my_bot->IsBotCaster() && !my_bot->IsBotHybrid()) {
-		c->Message(Chat::White, "You must target a Caster or Hybrid bot to use this command.");
 		return;
 	}
 
@@ -10271,7 +10265,6 @@ void bot_command_spell_settings_add(Client *c, const Seperator *sep)
 	}
 
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::White, "You must target a Caster or Hybrid bot to use this command.");
 		c->Message(
 			Chat::White,
 			fmt::format(
@@ -10285,11 +10278,6 @@ void bot_command_spell_settings_add(Client *c, const Seperator *sep)
 	auto my_bot = ActionableBots::AsTarget_ByBot(c);
 	if (!my_bot) {
 		c->Message(Chat::White, "You must target a bot that you own to use this command.");
-		return;
-	}
-
-	if (!my_bot->IsBotCaster() && !my_bot->IsBotHybrid()) {
-		c->Message(Chat::White, "You must target a Caster or Hybrid bot to use this command.");
 		return;
 	}
 
@@ -10402,7 +10390,6 @@ void bot_command_spell_settings_delete(Client *c, const Seperator *sep)
 	}
 
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::White, "You must target a Caster or Hybrid bot to use this command.");
 		c->Message(
 			Chat::White,
 			fmt::format(
@@ -10416,11 +10403,6 @@ void bot_command_spell_settings_delete(Client *c, const Seperator *sep)
 	auto my_bot = ActionableBots::AsTarget_ByBot(c);
 	if (!my_bot) {
 		c->Message(Chat::White, "You must target a bot that you own to use this command.");
-		return;
-	}
-
-	if (!my_bot->IsBotCaster() && !my_bot->IsBotHybrid()) {
-		c->Message(Chat::White, "You must target a Caster or Hybrid bot to use this command.");
 		return;
 	}
 
@@ -10490,7 +10472,6 @@ void bot_command_spell_settings_list(Client *c, const Seperator *sep)
 	}
 
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::White, "You must target a Caster or Hybrid bot to use this command.");
 		c->Message(
 			Chat::White,
 			fmt::format(
@@ -10507,11 +10488,6 @@ void bot_command_spell_settings_list(Client *c, const Seperator *sep)
 		return;
 	}
 
-	if (!my_bot->IsBotCaster() && !my_bot->IsBotHybrid()) {
-		c->Message(Chat::White, "You must target a Caster or Hybrid bot to use this command.");
-		return;
-	}
-
 	my_bot->ListBotSpellSettings();
 }
 
@@ -10522,7 +10498,6 @@ void bot_command_spell_settings_toggle(Client *c, const Seperator *sep)
 	}
 
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::White, "You must target a Caster or Hybrid bot to use this command.");
 		c->Message(
 			Chat::White,
 			fmt::format(
@@ -10536,11 +10511,6 @@ void bot_command_spell_settings_toggle(Client *c, const Seperator *sep)
 	auto my_bot = ActionableBots::AsTarget_ByBot(c);
 	if (!my_bot) {
 		c->Message(Chat::White, "You must target a bot that you own to use this command.");
-		return;
-	}
-
-	if (!my_bot->IsBotCaster() && !my_bot->IsBotHybrid()) {
-		c->Message(Chat::White, "You must target a Caster or Hybrid bot to use this command.");
 		return;
 	}
 
@@ -10632,7 +10602,6 @@ void bot_command_spell_settings_update(Client *c, const Seperator *sep)
 	}
 
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::White, "You must target a Caster or Hybrid bot to use this command.");
 		c->Message(
 			Chat::White,
 			fmt::format(
@@ -10646,11 +10615,6 @@ void bot_command_spell_settings_update(Client *c, const Seperator *sep)
 	auto my_bot = ActionableBots::AsTarget_ByBot(c);
 	if (!my_bot) {
 		c->Message(Chat::White, "You must target a bot that you own to use this command.");
-		return;
-	}
-
-	if (!my_bot->IsBotCaster() && !my_bot->IsBotHybrid()) {
-		c->Message(Chat::White, "You must target a Caster or Hybrid bot to use this command.");
 		return;
 	}
 
