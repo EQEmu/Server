@@ -894,7 +894,7 @@ typedef enum {
 #define SE_SpellDamageShield			157	// implemented, @DS, causes non-melee damage on caster of a spell, base: Amt DS (negative), limit: none, max: unknown (same as base but +)
 #define SE_Reflect						158 // implemented, @SpellMisc, reflect casted detrimental spell back at caster, base: chance pct, limit: resist modifier (positive value reduces resists), max: pct of base dmg mod (50=50pct of base)
 #define SE_AllStats						159	// implemented
-//#define SE_MakeDrunk					160 // *not implemented - Effect works entirely client side (Should check against tolerance)
+#define SE_MakeDrunk					160 // *not implemented - Effect works entirely client side (Should check against tolerance)
 #define SE_MitigateSpellDamage			161	// implemented, @Runes, mitigate incoming spell damage by percentage until rune fades, base: percent mitigation, limit: max dmg absorbed per hit, max: rune amt, Note: If placed on item or AA, will provide stackable percent mitigation.
 #define SE_MitigateMeleeDamage			162	// implemented - rune with max value
 #define SE_NegateAttacks				163	// implemented
@@ -927,7 +927,7 @@ typedef enum {
 #define SE_EndurancePool				190	// implemented
 #define SE_Amnesia						191	// implemented - Silence vs Melee Effect
 #define SE_Hate							192	// implemented - Instant and hate over time.
-#define SE_SkillAttack					193	// implemented,  
+#define SE_SkillAttack					193	// implemented,
 #define SE_FadingMemories				194	// implemented, @Aggro, Remove from hate lists and make invisible. Can set max level of NPCs that can be affected. base: success chance, limit: max level (ROF2), max: max level (modern client), Note: Support for max level requires Rule (Spells, UseFadingMemoriesMaxLevel) to be true. If used from limit field, then it set as the level, ie. max level of 75 would use limit value of 75. If set from max field, max level 75 would use max value of 1075, if you want to set it so it checks a level range above the spell target then for it to only work on mobs 5 levels or below you set max value to 5.
 #define SE_StunResist					195	// implemented
 #define SE_StrikeThrough				196	// implemented
