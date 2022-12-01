@@ -46,7 +46,7 @@ public:
 	bool BehindMob(Lua_Mob other, float x, float y);
 	void SetLevel(int level);
 	void SetLevel(int level, bool command);
-	void SendWearChange(int material_slot);
+	void SendWearChange(uint8 material_slot);
 	bool IsMoving();
 	bool IsFeared();
 	bool IsBlind();
@@ -377,9 +377,9 @@ public:
 	void TarGlobal(const char *varname, const char *value, const char *duration, int npc_id, int char_id, int zone_id);
 	void DelGlobal(const char *varname);
 	void SetSlotTint(int material_slot, int red_tint, int green_tint, int blue_tint);
-	void WearChange(int material_slot, int texture);
-	void WearChange(int material_slot, int texture, uint32 color);
-	void WearChange(int material_slot, int texture, uint32 color, uint32 heros_forge_model);
+	void WearChange(uint8 material_slot, uint16 texture);
+	void WearChange(uint8 material_slot, uint16 texture, uint32 color);
+	void WearChange(uint8 material_slot, uint16 texture, uint32 color, uint32 heros_forge_model);
 	void DoKnockback(Lua_Mob caster, uint32 push_back, uint32 push_up);
 	void AddNimbusEffect(int effect_id);
 	void RemoveNimbusEffect(int effect_id);

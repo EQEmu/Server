@@ -65,7 +65,7 @@ void Lua_Mob::SetLevel(int level, bool command) {
 	self->SetLevel(level, command);
 }
 
-void Lua_Mob::SendWearChange(int material_slot) {
+void Lua_Mob::SendWearChange(uint8 material_slot) {
 	Lua_Safe_Call_Void();
 	self->SendWearChange(material_slot);
 }
@@ -1866,17 +1866,17 @@ void Lua_Mob::SetSlotTint(int material_slot, int red_tint, int green_tint, int b
 	self->SetSlotTint(material_slot, red_tint, green_tint, blue_tint);
 }
 
-void Lua_Mob::WearChange(int material_slot, int texture) {
+void Lua_Mob::WearChange(uint8 material_slot, uint16 texture) {
 	Lua_Safe_Call_Void();
 	self->WearChange(material_slot, texture);
 }
 
-void Lua_Mob::WearChange(int material_slot, int texture, uint32 color) {
+void Lua_Mob::WearChange(uint8 material_slot, uint16 texture, uint32 color) {
 	Lua_Safe_Call_Void();
 	self->WearChange(material_slot, texture, color);
 }
 
-void Lua_Mob::WearChange(int material_slot, int texture, uint32 color, uint32 heros_forge_model) {
+void Lua_Mob::WearChange(uint8 material_slot, uint16 texture, uint32 color, uint32 heros_forge_model) {
 	Lua_Safe_Call_Void();
 	self->WearChange(material_slot, texture, color, heros_forge_model);
 }
@@ -3178,6 +3178,7 @@ luabind::scope lua_register_mob() {
 	.def("SetSeeInvisibleUndeadLevel", (void(Lua_Mob::*)(uint8))&Lua_Mob::SetSeeInvisibleUndeadLevel)
 	.def("SendAppearanceEffect", (void(Lua_Mob::*)(uint32,uint32,uint32,uint32,uint32))&Lua_Mob::SendAppearanceEffect)
 	.def("SendAppearanceEffect", (void(Lua_Mob::*)(uint32,uint32,uint32,uint32,uint32,Lua_Client))&Lua_Mob::SendAppearanceEffect)
+	.def("SendWearChange", (void(Lua_Mob::*)(uint8))&Lua_Mob::SendWearChange)
 	.def("SendBeginCast", &Lua_Mob::SendBeginCast)
 	.def("SendIllusionPacket", (void(Lua_Mob::*)(luabind::adl::object))&Lua_Mob::SendIllusionPacket)
 	.def("SendSpellEffect", (void(Lua_Mob::*)(uint32,uint32,uint32,bool,uint32))&Lua_Mob::SendSpellEffect)
@@ -3249,9 +3250,9 @@ luabind::scope lua_register_mob() {
 	.def("TryMoveAlong", (void(Lua_Mob::*)(float,float,bool))&Lua_Mob::TryMoveAlong)
 	.def("UnStun", (void(Lua_Mob::*)(void))&Lua_Mob::UnStun)
 	.def("WalkTo", (void(Lua_Mob::*)(double, double, double))&Lua_Mob::WalkTo)
-	.def("WearChange", (void(Lua_Mob::*)(int,int))&Lua_Mob::WearChange)
-	.def("WearChange", (void(Lua_Mob::*)(int,int,uint32))&Lua_Mob::WearChange)
-	.def("WearChange", (void(Lua_Mob::*)(int,int,uint32,uint32))&Lua_Mob::WearChange)
+	.def("WearChange", (void(Lua_Mob::*)(uint8,uint16))&Lua_Mob::WearChange)
+	.def("WearChange", (void(Lua_Mob::*)(uint8,uint16,uint32))&Lua_Mob::WearChange)
+	.def("WearChange", (void(Lua_Mob::*)(uint8,uint16,uint32,uint32))&Lua_Mob::WearChange)
 	.def("WipeHateList", (void(Lua_Mob::*)(void))&Lua_Mob::WipeHateList);
 }
 
