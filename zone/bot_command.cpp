@@ -10342,7 +10342,7 @@ void bot_command_spell_settings_add(Client *c, const Seperator *sep)
 	bs.min_hp = min_hp;
 	bs.max_hp = max_hp;
 
-	if (!my_bot->UpdateBotSpellSetting(spell_id, &bs)) {
+	if (!my_bot->AddBotSpellSetting(spell_id, &bs)) {
 		c->Message(
 			Chat::White,
 			fmt::format(
