@@ -101,7 +101,7 @@ public:
 	void OpenDoorsNear(Lua_Mob opener);
 	std::string MakeNameUnique(const char *name);
 	std::string RemoveNumbers(const char *name);
-	void SignalMobsByNPCID(uint32 npc_id, int signal);
+	void SignalMobsByNPCID(uint32 npc_id, int signal_id);
 	uint32 DeleteNPCCorpses();
 	uint32 DeletePlayerCorpses();
 	void HalveAggro(Lua_Mob who);
@@ -128,7 +128,7 @@ public:
 	Lua_Object_List GetObjectList();
 	Lua_Doors_List GetDoorsList();
 	Lua_Spawn_List GetSpawnList();
-	void SignalAllClients(int signal);
+	void SignalAllClients(int signal_id);
 	void ChannelMessage(Lua_Mob from, int channel_num, int language, const char *message);
 #ifdef BOTS
 	Lua_Bot GetBotByID(uint32 bot_id);

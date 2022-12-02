@@ -2732,6 +2732,11 @@ perl::array Perl_Client_GetZoneFlags(Client* self)
 	return a;
 }
 
+void Perl_Client_Signal(Client* self, int signal_id)
+{
+	self->Signal(signal_id);
+}
+
 #ifdef BOTS
 
 int Perl_Client_GetBotRequiredLevel(Client* self)
@@ -3270,6 +3275,7 @@ void perl_register_client()
 	package.add("SetTitleSuffix", (void(*)(Client*, std::string))&Perl_Client_SetTitleSuffix);
 	package.add("SetTitleSuffix", (void(*)(Client*, std::string, bool))&Perl_Client_SetTitleSuffix);
 	package.add("SetZoneFlag", &Perl_Client_SetZoneFlag);
+	package.add("Signal", &Perl_Client_Signal);
 	package.add("SilentMessage", &Perl_Client_SilentMessage);
 	package.add("Sit", &Perl_Client_Sit);
 	package.add("SlotConvert2", &Perl_Client_SlotConvert2);
