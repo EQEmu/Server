@@ -592,7 +592,7 @@ void bot_command_spell_settings_delete(Client* c, const Seperator *sep);
 void bot_command_spell_settings_list(Client* c, const Seperator *sep);
 void bot_command_spell_settings_toggle(Client* c, const Seperator *sep);
 void bot_command_spell_settings_update(Client* c, const Seperator *sep);
-void bot_spell_info_diaglogue_window(Client* c, const Seperator *sep);
+void bot_spell_info_dialogue_window(Client* c, const Seperator *sep);
 void bot_command_enforce_spell_list(Client* c, const Seperator* sep);
 void bot_command_summon_corpse(Client *c, const Seperator *sep);
 void bot_command_suspend(Client *c, const Seperator *sep);
