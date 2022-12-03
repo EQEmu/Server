@@ -510,7 +510,7 @@ bool BotDatabase::LoadBot(const uint32 bot_id, Bot*& loaded_bot)
 		auto eb = std::stoi(row[28]);
 		loaded_bot->SetExpansionBitmask(eb, false);
 
-		loaded_bot->SetBotEnforceSpellSetting((std::stoi(row[29]) > 0 ? true : false), false);
+		loaded_bot->SetBotEnforceSpellSetting((std::stoi(row[29]) > 0 ? true : false));
 	}
 
 	return true;

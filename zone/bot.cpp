@@ -10603,7 +10603,7 @@ void Bot::SetExpansionBitmask(int expansion_bitmask, bool save)
 
 void Bot::SetBotEnforceSpellSetting(bool enforce_spell_settings, bool save)
 {
-	_enforcespellsettings = enforce_spell_settings;
+	m_enforce_spell_settings = enforce_spell_settings;
 
 	if (save) {
 		if (!database.botdb.SaveEnforceSpellSetting(GetBotID(), enforce_spell_settings)) {
@@ -10639,8 +10639,6 @@ bool Bot::AddBotSpellSetting(uint16 spell_id, BotSpellSetting* bs)
 	s.bot_id = GetBotID();
 
 	s.priority = bs->priority;
-	s.min_level = bs->min_level;
-	s.max_level = bs->max_level;
 	s.min_hp = bs->min_hp;
 	s.max_hp = bs->max_hp;
 	s.is_enabled = bs->is_enabled;
@@ -10691,7 +10689,7 @@ BotSpellSetting* Bot::GetBotSpellSetting(uint16 spell_id)
 	return nullptr;
 }
 
-void Bot::ListBotSpells(uint8 minlevel)
+void Bot::ListBotSpells(uint8 min_level)
 {
 	auto bot_owner = GetBotOwner();
 	if (!bot_owner) {
@@ -10714,18 +10712,18 @@ void Bot::ListBotSpells(uint8 minlevel)
 
 	for (const auto& s : AIBot_spells) {
 		auto b = bot_spell_settings.find(s.spellid);
-		if(b == bot_spell_settings.end() && s.minlevel >= minlevel) {
+		if (b == bot_spell_settings.end() && s.minlevel >= minlevel) {
 			bot_owner->Message(
 				Chat::White,
 				fmt::format(
-					"Spell {} | Spell: {} Add Spell: {}",
+					"Spell {} | Spell: {} | Add Spell: {}",
 					spell_number,
 					Saylink::Silent(
 						fmt::format("^botspellidinfo {}", s.spellid),
 						spells[s.spellid].name
 					),
 					Saylink::Silent(
-						fmt::format("^spellsettingsadd {} {} {} {}", s.spellid, s.priority, s.min_hp, s.max_hp), "Yes")
+						fmt::format("^spellsettingsadd {} {} {} {}", s.spellid, s.priority, s.min_hp, s.max_hp), "Add")
 				).c_str()
 			);
 
@@ -10770,7 +10768,7 @@ void Bot::ListBotSpellSettings()
 		bot_owner->Message(
 			Chat::White,
 			fmt::format(
-				"Setting: {} Spell: {} State: {} Remove: {}",
+				"Setting: {} | Spell: {} | State: {} | {}",
 				setting_number,
 				Saylink::Silent(fmt::format("^botspellidinfo {}", bs.first), spells[bs.first].name),
 				Saylink::Silent(
@@ -10778,7 +10776,7 @@ void Bot::ListBotSpellSettings()
 					bs.first, bs.second.is_enabled ? "False" : "True"),
 					bs.second.is_enabled ? "Enabled" : "Disabled"
 				),
-				Saylink::Silent(fmt::format("^spellsettingsdelete {}", bs.first), "Yes")
+				Saylink::Silent(fmt::format("^spellsettingsdelete {}", bs.first), "Remove")
 			).c_str()
 		);
 
@@ -10813,7 +10811,6 @@ void Bot::LoadBotSpellSettings()
 		b.min_hp = e.min_hp;
 		b.max_hp = e.max_hp;
 		b.is_enabled = e.is_enabled;
-
 		bot_spell_settings[e.spell_id] = b;
 	}
 }
@@ -10844,30 +10841,6 @@ bool Bot::UpdateBotSpellSetting(uint16 spell_id, BotSpellSetting* bs)
 
 	LoadBotSpellSettings();
 	return true;
-}
-
-std::string Bot::GetLevelString(uint8 min_level, uint8 max_level)
-{
-	std::string level_string = "Any";
-	if (min_level && max_level) {
-		level_string = fmt::format(
-			"{} to {}",
-			min_level,
-			max_level
-		);
-	} else if (min_level && !max_level) {
-		level_string = fmt::format(
-			"{}+",
-			min_level
-		);
-	} else if (!min_level && max_level) {
-		level_string = fmt::format(
-			"1 to {}",
-			max_level
-		);
-	}
-
-	return level_string;
 }
 
 std::string Bot::GetHPString(int8 min_hp, int8 max_hp)

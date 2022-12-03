@@ -6693,7 +6693,7 @@ void bot_subcommand_bot_spawn(Client *c, const Seperator *sep)
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"Failed to load spells for '{}' (ID {})",
+				"Failed to load spells for '{}' (ID {}).",
 				bot_name,
 				bot_id
 			).c_str()
@@ -10259,7 +10259,7 @@ void bot_command_spell_list(Client* c, const Seperator *sep)
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"Usage: {} Optional Min Level 0 - 255",
+				"Usage: {} [Min Level] (Level is optional)",
 				sep->arg[0]
 			).c_str()
 		);
@@ -10272,13 +10272,13 @@ void bot_command_spell_list(Client* c, const Seperator *sep)
 		return;
 	}
 
-	uint8 minlevel = 0;
+	uint8 min_level = 0;
 
 	if (sep->IsNumber(1)) {
-		minlevel = atoi(sep->arg[1]);
+		min_level = static_cast<uint8>(std::stoul(sep->arg[1]));
 	}
 
-	my_bot->ListBotSpells(minlevel);
+	my_bot->ListBotSpells(min_level);
 }
 
 void bot_command_spell_settings_add(Client *c, const Seperator *sep)
@@ -10789,7 +10789,7 @@ void bot_command_enforce_spell_list(Client* c, const Seperator *sep)
 	c->Message(
 		Chat::White,
 		fmt::format(
-			"{}'s Spell Settings List entries are now {}",
+			"{}'s Spell Settings List entries are now {}.",
 			my_bot->GetCleanName(),
 			toggle ? "enforced" : "optional"
 		).c_str()
