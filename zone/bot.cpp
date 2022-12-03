@@ -10719,7 +10719,7 @@ void Bot::ListBotSpells(uint8 min_level)
 					"Spell {} | Spell: {} | Add Spell: {}",
 					spell_number,
 					Saylink::Silent(
-						fmt::format("^botspellidinfo {}", s.spellid),
+						fmt::format("^spellinfo {}", s.spellid),
 						spells[s.spellid].name
 					),
 					Saylink::Silent(
@@ -10768,9 +10768,9 @@ void Bot::ListBotSpellSettings()
 		bot_owner->Message(
 			Chat::White,
 			fmt::format(
-				"Setting: {} | Spell: {} | State: {} | {}",
+				"Setting {} | Spell: {} | State: {} | {}",
 				setting_number,
-				Saylink::Silent(fmt::format("^botspellidinfo {}", bs.first), spells[bs.first].name),
+				Saylink::Silent(fmt::format("^spellinfo {}", bs.first), spells[bs.first].name),
 				Saylink::Silent(
 					fmt::format("^spellsettingstoggle {} {}",
 					bs.first, bs.second.is_enabled ? "False" : "True"),

@@ -1363,6 +1363,7 @@ int bot_command_init(void)
 		bot_command_add("cure", "Orders a bot to remove any ailments", AccountStatus::Player, bot_command_cure) ||
 		bot_command_add("defensive", "Orders a bot to use a defensive discipline", AccountStatus::Player, bot_command_defensive) ||
 		bot_command_add("depart", "Orders a bot to open a magical doorway to a specified destination", AccountStatus::Player, bot_command_depart) ||
+		bot_command_add("enforcespelllist", "Toggles your Bot to cast only spells in their spell settings list.", AccountStatus::Player, bot_command_enforce_spell_list) ||
 		bot_command_add("escape", "Orders a bot to send a target group to a safe location within the zone", AccountStatus::Player, bot_command_escape) ||
 		bot_command_add("findaliases", "Find available aliases for a bot command", AccountStatus::Player, bot_command_find_aliases) ||
 		bot_command_add("follow", "Orders bots to follow a designated target (option 'chain' auto-links eligible spawned bots)", AccountStatus::Player, bot_command_follow) ||
@@ -1417,14 +1418,13 @@ int bot_command_init(void)
 		bot_command_add("rune", "Orders a bot to cast a rune of protection", AccountStatus::Player, bot_command_rune) ||
 		bot_command_add("sendhome", "Orders a bot to open a magical doorway home", AccountStatus::Player, bot_command_send_home) ||
 		bot_command_add("size", "Orders a bot to change a player's size", AccountStatus::Player, bot_command_size) ||
-		bot_command_add("enforcespelllist", "Toggles your Bot to cast only spells in their spell settings list.", AccountStatus::Player, bot_command_enforce_spell_list) ||
+		bot_command_add("spellinfo", "Opens a dialogue window with spell info", AccountStatus::Player, bot_spell_info_diaglogue_window) ||
 		bot_command_add("spelllist", "Lists all Spells learned by the Bot.", AccountStatus::Player, bot_command_spell_list) ||
 		bot_command_add("spellsettingsadd", "Add a bot spell setting entry", AccountStatus::Player, bot_command_spell_settings_add) ||
 		bot_command_add("spellsettingsdelete", "Delete a bot spell setting entry", AccountStatus::Player, bot_command_spell_settings_delete) ||
 		bot_command_add("spellsettingslist", "Lists a bot's spell setting entries", AccountStatus::Player, bot_command_spell_settings_list) ||
 		bot_command_add("spellsettingstoggle", "Toggle a bot spells use", AccountStatus::Player, bot_command_spell_settings_toggle) ||
 		bot_command_add("spellsettingsupdate", "Update a bot spell setting entry", AccountStatus::Player, bot_command_spell_settings_update) ||
-		bot_command_add("botspellidinfo", "Opens a diaglogue window with spell info", AccountStatus::Player, bot_spell_info_diaglogue_window) ||
 		bot_command_add("summoncorpse", "Orders a bot to summon a corpse to its feet", AccountStatus::Player, bot_command_summon_corpse) ||
 		bot_command_add("suspend", "Suspends a bot's AI processing until released", AccountStatus::Player, bot_command_suspend) ||
 		bot_command_add("taunt", "Toggles taunt use by a bot", AccountStatus::Player, bot_command_taunt) ||
@@ -10715,7 +10715,22 @@ void bot_command_spell_settings_update(Client *c, const Seperator *sep)
 
 void bot_spell_info_diaglogue_window(Client* c, const Seperator *sep)
 {
-	if (helper_command_alias_fail(c, "bot_spell_info_diaglogue_window", sep->arg[0], "botspellidinfo")) {
+	if (helper_command_alias_fail(c, "bot_spell_info_diaglogue_window", sep->arg[0], "spellinfo")) {
+		return;
+	}
+
+	auto arguments = sep->argnum;
+	if (
+		arguments < 1 ||
+		!sep->IsNumber(1)
+	) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Usage: {} [Spell ID]",
+				sep->arg[0]
+			).c_str()
+		);
 		return;
 	}
 
@@ -10726,7 +10741,14 @@ void bot_spell_info_diaglogue_window(Client* c, const Seperator *sep)
 	}
 
 	auto spell_id = static_cast<uint16>(std::stoul(sep->arg[1]));
-	
+	auto min_level = spells[spell_id].classes;
+	auto class_level = min_level[my_bot->GetBotClass() - 1];
+
+	if (class_level > my_bot->GetLevel()) {
+		c->Message(Chat::White, "This is not a usable spell by your bot.");
+		return;
+	}
+
 	auto results = database.QueryDatabase(
 		fmt::format(
 			"SELECT value FROM db_str WHERE id = {} and type = 6 LIMIT 1",
@@ -10745,6 +10767,11 @@ void bot_spell_info_diaglogue_window(Client* c, const Seperator *sep)
 	auto m = DialogueWindow::TableRow(
 		DialogueWindow::TableCell("Spell Effect: ") +
 		DialogueWindow::TableCell(spell_desc)
+	);
+
+	 m += DialogueWindow::TableRow(
+		DialogueWindow::TableCell("Spell Level: ") +
+		DialogueWindow::TableCell(fmt::format("{}", class_level))
 	);
 
 	c->SendPopupToClient(

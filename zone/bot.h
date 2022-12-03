@@ -479,6 +479,7 @@ public:
 	bool IsBotSpellFighter() { return IsSpellFighterClass(GetClass()); }
 	bool IsBotFighter() { return IsFighterClass(GetClass()); }
 	bool IsBotNonSpellFighter() { return IsNonSpellFighterClass(GetClass()); }
+	uint8 GetBotClass() { return GetClass(); }
 	bool CanHeal();
 	int GetRawACNoShield(int &shield_ac);
 
