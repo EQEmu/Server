@@ -1418,7 +1418,7 @@ int bot_command_init(void)
 		bot_command_add("rune", "Orders a bot to cast a rune of protection", AccountStatus::Player, bot_command_rune) ||
 		bot_command_add("sendhome", "Orders a bot to open a magical doorway home", AccountStatus::Player, bot_command_send_home) ||
 		bot_command_add("size", "Orders a bot to change a player's size", AccountStatus::Player, bot_command_size) ||
-		bot_command_add("spellinfo", "Opens a dialogue window with spell info", AccountStatus::Player, bot_spell_info_diaglogue_window) ||
+		bot_command_add("spellinfo", "Opens a dialogue window with spell info", AccountStatus::Player, bot_spell_info_dialogue_window) ||
 		bot_command_add("spelllist", "Lists all Spells learned by the Bot.", AccountStatus::Player, bot_command_spell_list) ||
 		bot_command_add("spellsettingsadd", "Add a bot spell setting entry", AccountStatus::Player, bot_command_spell_settings_add) ||
 		bot_command_add("spellsettingsdelete", "Delete a bot spell setting entry", AccountStatus::Player, bot_command_spell_settings_delete) ||
@@ -10713,9 +10713,9 @@ void bot_command_spell_settings_update(Client *c, const Seperator *sep)
 	);
 }
 
-void bot_spell_info_diaglogue_window(Client* c, const Seperator *sep)
+void bot_spell_info_dialogue_window(Client* c, const Seperator *sep)
 {
-	if (helper_command_alias_fail(c, "bot_spell_info_diaglogue_window", sep->arg[0], "spellinfo")) {
+	if (helper_command_alias_fail(c, "bot_spell_info_dialogue_window", sep->arg[0], "spellinfo")) {
 		return;
 	}
 
