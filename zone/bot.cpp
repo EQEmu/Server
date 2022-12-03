@@ -10696,7 +10696,7 @@ void Bot::ListBotSpells(uint8 min_level)
 		return;
 	}
 
-	if (AIBot_spells.empty()) {
+	if (AIBot_spells.empty() && AIBot_spells_enforced.empty()) {
 		bot_owner->Message(
 			Chat::White,
 			fmt::format(
@@ -10710,7 +10710,7 @@ void Bot::ListBotSpells(uint8 min_level)
 	auto spell_count = 0;
 	auto spell_number = 1;
 
-	for (const auto& s : AIBot_spells) {
+	for (const auto& s : (AIBot_spells.size() > AIBot_spells_enforced.size()) ? AIBot_spells : AIBot_spells_enforced) {
 		auto b = bot_spell_settings.find(s.spellid);
 		if (b == bot_spell_settings.end() && s.minlevel >= min_level) {
 			bot_owner->Message(
