@@ -406,11 +406,6 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 		bot_owner->Message(Chat::White, "&s for '%s'", BotDatabase::fail::LoadBuffs(), GetCleanName());
 	}
 
-	GetBotOwnerDataBuckets();
-	GetBotDataBuckets();
-	LoadBotSpellSettings();
-	AI_AddBotSpells(GetBotSpellID());
-
 	CalcBotStats(false);
 	hp_regen = CalcHPRegen();
 	mana_regen = CalcManaRegen();
@@ -10606,6 +10601,27 @@ void Bot::SetExpansionBitmask(int expansion_bitmask, bool save)
 	LoadAAs();
 }
 
+void Bot::SetBotEnforceSpellSetting(bool enforce_spell_settings, bool save)
+{
+	_enforcespellsettings = enforce_spell_settings;
+
+	if (save) {
+		if (!database.botdb.SaveEnforceSpellSetting(GetBotID(), enforce_spell_settings)) {
+			if (GetBotOwner() && GetBotOwner()->IsClient()) {
+				GetBotOwner()->CastToClient()->Message(
+					Chat::White,
+					fmt::format(
+						"Failed to save enforce spell settings for {}.",
+						GetCleanName()
+					).c_str()
+				);
+			}
+		}
+	}
+	LoadBotSpellSettings();
+	AI_AddBotSpells(GetBotSpellID());
+}
+
 bool Bot::AddBotSpellSetting(uint16 spell_id, BotSpellSetting* bs)
 {
 	if (!IsValidSpell(spell_id) || !bs) {
@@ -10675,7 +10691,7 @@ BotSpellSetting* Bot::GetBotSpellSetting(uint16 spell_id)
 	return nullptr;
 }
 
-void Bot::ListBotSpells()
+void Bot::ListBotSpells(uint8 minlevel)
 {
 	auto bot_owner = GetBotOwner();
 	if (!bot_owner) {
@@ -10697,28 +10713,25 @@ void Bot::ListBotSpells()
 	auto spell_number = 1;
 
 	for (const auto& s : AIBot_spells) {
-		bot_owner->Message(
-			Chat::White,
-			fmt::format(
-				"Spell {} | Spell: {} ({})",
-				spell_number,
-				spells[s.spellid].name,
-				s.spellid
-			).c_str()
-		);
+		auto b = bot_spell_settings.find(s.spellid);
+		if(b == bot_spell_settings.end() && s.minlevel >= minlevel) {
+			bot_owner->Message(
+				Chat::White,
+				fmt::format(
+					"Spell {} | Spell: {} Add Spell: {}",
+					spell_number,
+					Saylink::Silent(
+						fmt::format("^botspellidinfo {}", s.spellid),
+						spells[s.spellid].name
+					),
+					Saylink::Silent(
+						fmt::format("^spellsettingsadd {} {} {} {}", s.spellid, s.priority, s.min_hp, s.max_hp), "Yes")
+				).c_str()
+			);
 
-		bot_owner->Message(
-			Chat::White,
-			fmt::format(
-				"Spell {} | Priority: {} Health: {}",
-				spell_number,
-				s.priority,
-				GetHPString(s.min_hp, s.max_hp)
-			).c_str()
-		);
-
-		spell_count++;
-		spell_number++;
+			spell_count++;
+			spell_number++;
+		}
 	}
 
 	bot_owner->Message(
@@ -10757,22 +10770,15 @@ void Bot::ListBotSpellSettings()
 		bot_owner->Message(
 			Chat::White,
 			fmt::format(
-				"Setting {} | Spell: {} ({}) Enabled: {}",
+				"Setting: {} Spell: {} State: {} Remove: {}",
 				setting_number,
-				spells[bs.first].name,
-				bs.first,
-				bs.second.is_enabled ? "Yes" : "No"
-			).c_str()
-		);
-
-		bot_owner->Message(
-			Chat::White,
-			fmt::format(
-				"Setting {} | Priority: {} Levels: {} Health: {}",
-				setting_number,
-				bs.second.priority,
-				GetLevelString(bs.second.min_level, bs.second.max_level),
-				GetHPString(bs.second.min_hp, bs.second.max_hp)
+				Saylink::Silent(fmt::format("^botspellidinfo {}", bs.first), spells[bs.first].name),
+				Saylink::Silent(
+					fmt::format("^spellsettingstoggle {} {}",
+					bs.first, bs.second.is_enabled ? "False" : "True"),
+					bs.second.is_enabled ? "Enabled" : "Disabled"
+				),
+				Saylink::Silent(fmt::format("^spellsettingsdelete {}", bs.first), "Yes")
 			).c_str()
 		);
 
@@ -10804,8 +10810,6 @@ void Bot::LoadBotSpellSettings()
 		BotSpellSetting b;
 
 		b.priority = e.priority;
-		b.min_level = e.min_level;
-		b.max_level = e.max_level;
 		b.min_hp = e.min_hp;
 		b.max_hp = e.max_hp;
 		b.is_enabled = e.is_enabled;
@@ -10825,8 +10829,6 @@ bool Bot::UpdateBotSpellSetting(uint16 spell_id, BotSpellSetting* bs)
 	s.spell_id = spell_id;
 	s.bot_id = GetBotID();
 	s.priority = bs->priority;
-	s.min_level = bs->min_level;
-	s.max_level = bs->max_level;
 	s.min_hp = bs->min_hp;
 	s.max_hp = bs->max_hp;
 	s.is_enabled = bs->is_enabled;

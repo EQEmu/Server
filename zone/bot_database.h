@@ -99,6 +99,7 @@ public:
 	bool SaveEquipmentColor(const uint32 bot_id, const int16 slot_id, const uint32 rgb);
 
 	bool SaveExpansionBitmask(const uint32 bot_id, const int expansion_bitmask);
+	bool SaveEnforceSpellSetting(const uint32 bot_id, const bool enforce_spell_setting);
 
 
 	/* Bot pet functions   */

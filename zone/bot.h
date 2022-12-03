@@ -315,6 +315,8 @@ public:
 		int16 iManaCost,
 		int32 iRecastDelay,
 		int16 iResistAdjust,
+		uint8 minlevel,
+		uint8 maxlevel,
 		int8 min_hp,
 		int8 max_hp,
 		std::string bucket_name,
@@ -456,6 +458,7 @@ public:
 	BotRoleType GetBotRole() { return _botRole; }
 	EQ::constants::StanceType GetBotStance() { return _botStance; }
 	uint8 GetChanceToCastBySpellType(uint32 spellType);
+	bool GetBotEnforceSpellSetting() { return _enforcespellsettings; }
 
 	bool IsGroupHealer() { return m_CastingRoles.GroupHealer; }
 	bool IsGroupSlower() { return m_CastingRoles.GroupSlower; }
@@ -597,7 +600,7 @@ public:
 	int GetExpansionBitmask();
 	void SetExpansionBitmask(int expansion_bitmask, bool save = true);
 
-	void ListBotSpells();
+	void ListBotSpells(uint8 minlevel);
 
 	std::string GetLevelString(uint8 min_level, uint8 max_level);
 	std::string GetHPString(int8 min_hp, int8 max_hp);
@@ -608,6 +611,7 @@ public:
 	void ListBotSpellSettings();
 	void LoadBotSpellSettings();
 	bool UpdateBotSpellSetting(uint16 spell_id, BotSpellSetting* bs);
+	void SetBotEnforceSpellSetting(bool enforcespellsettings, bool save);
 
 	static void SpawnBotGroupByName(Client* c, std::string botgroup_name, uint32 leader_id);
 
@@ -789,6 +793,7 @@ private:
 	bool _pauseAI;
 	uint8 _stopMeleeLevel;
 	int m_expansion_bitmask;
+	bool _enforcespellsettings;
 
 	// Private "base stats" Members
 	int32 _baseMR;
