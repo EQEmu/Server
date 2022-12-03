@@ -67,6 +67,8 @@ struct BotSpells_Struct {
 	int32		recast_delay;
 	int16		priority;
 	int16		resist_adjust;
+	uint8		minlevel;
+	uint8		maxlevel;
 	int16		min_hp;			// >0 won't cast if HP is below
 	int16		max_hp;			// >0 won't cast if HP is above
 	std::string	bucket_name;

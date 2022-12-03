@@ -54,11 +54,9 @@ public:
 		auto columns = Columns();
 
 		v.push_back(columns[3] + " = " + std::to_string(e.priority));
-		v.push_back(columns[4] + " = " + std::to_string(e.min_level));
-		v.push_back(columns[5] + " = " + std::to_string(e.max_level));
-		v.push_back(columns[6] + " = " + std::to_string(e.min_hp));
-		v.push_back(columns[7] + " = " + std::to_string(e.max_hp));
-		v.push_back(columns[8] + " = " + std::to_string(e.is_enabled));
+		v.push_back(columns[4] + " = " + std::to_string(e.min_hp));
+		v.push_back(columns[5] + " = " + std::to_string(e.max_hp));
+		v.push_back(columns[6] + " = " + std::to_string(e.is_enabled));
 
 		auto results = db.QueryDatabase(
 			fmt::format(

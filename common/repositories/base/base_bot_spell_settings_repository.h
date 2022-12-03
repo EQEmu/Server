@@ -23,8 +23,6 @@ public:
 		int32_t  bot_id;
 		int16_t  spell_id;
 		int16_t  priority;
-		uint16_t min_level;
-		uint16_t max_level;
 		int16_t  min_hp;
 		int16_t  max_hp;
 		uint8_t  is_enabled;
@@ -42,8 +40,6 @@ public:
 			"bot_id",
 			"spell_id",
 			"priority",
-			"min_level",
-			"max_level",
 			"min_hp",
 			"max_hp",
 			"is_enabled",
@@ -57,8 +53,6 @@ public:
 			"bot_id",
 			"spell_id",
 			"priority",
-			"min_level",
-			"max_level",
 			"min_hp",
 			"max_hp",
 			"is_enabled",
@@ -106,8 +100,6 @@ public:
 		e.bot_id     = 0;
 		e.spell_id   = 0;
 		e.priority   = 0;
-		e.min_level  = 0;
-		e.max_level  = 255;
 		e.min_hp     = 0;
 		e.max_hp     = 0;
 		e.is_enabled = 1;
@@ -150,11 +142,9 @@ public:
 			e.bot_id     = static_cast<int32_t>(atoi(row[1]));
 			e.spell_id   = static_cast<int16_t>(atoi(row[2]));
 			e.priority   = static_cast<int16_t>(atoi(row[3]));
-			e.min_level  = static_cast<uint16_t>(strtoul(row[4], nullptr, 10));
-			e.max_level  = static_cast<uint16_t>(strtoul(row[5], nullptr, 10));
-			e.min_hp     = static_cast<int16_t>(atoi(row[6]));
-			e.max_hp     = static_cast<int16_t>(atoi(row[7]));
-			e.is_enabled = static_cast<uint8_t>(strtoul(row[8], nullptr, 10));
+			e.min_hp     = static_cast<int16_t>(atoi(row[4]));
+			e.max_hp     = static_cast<int16_t>(atoi(row[5]));
+			e.is_enabled = static_cast<uint8_t>(strtoul(row[6], nullptr, 10));
 
 			return e;
 		}
@@ -188,15 +178,12 @@ public:
 
 		auto columns = Columns();
 
-		v.push_back(columns[0] + " = " + std::to_string(e.id));
 		v.push_back(columns[1] + " = " + std::to_string(e.bot_id));
 		v.push_back(columns[2] + " = " + std::to_string(e.spell_id));
 		v.push_back(columns[3] + " = " + std::to_string(e.priority));
-		v.push_back(columns[4] + " = " + std::to_string(e.min_level));
-		v.push_back(columns[5] + " = " + std::to_string(e.max_level));
-		v.push_back(columns[6] + " = " + std::to_string(e.min_hp));
-		v.push_back(columns[7] + " = " + std::to_string(e.max_hp));
-		v.push_back(columns[8] + " = " + std::to_string(e.is_enabled));
+		v.push_back(columns[4] + " = " + std::to_string(e.min_hp));
+		v.push_back(columns[5] + " = " + std::to_string(e.max_hp));
+		v.push_back(columns[6] + " = " + std::to_string(e.is_enabled));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -222,8 +209,6 @@ public:
 		v.push_back(std::to_string(e.bot_id));
 		v.push_back(std::to_string(e.spell_id));
 		v.push_back(std::to_string(e.priority));
-		v.push_back(std::to_string(e.min_level));
-		v.push_back(std::to_string(e.max_level));
 		v.push_back(std::to_string(e.min_hp));
 		v.push_back(std::to_string(e.max_hp));
 		v.push_back(std::to_string(e.is_enabled));
@@ -260,8 +245,6 @@ public:
 			v.push_back(std::to_string(e.bot_id));
 			v.push_back(std::to_string(e.spell_id));
 			v.push_back(std::to_string(e.priority));
-			v.push_back(std::to_string(e.min_level));
-			v.push_back(std::to_string(e.max_level));
 			v.push_back(std::to_string(e.min_hp));
 			v.push_back(std::to_string(e.max_hp));
 			v.push_back(std::to_string(e.is_enabled));
@@ -302,11 +285,9 @@ public:
 			e.bot_id     = static_cast<int32_t>(atoi(row[1]));
 			e.spell_id   = static_cast<int16_t>(atoi(row[2]));
 			e.priority   = static_cast<int16_t>(atoi(row[3]));
-			e.min_level  = static_cast<uint16_t>(strtoul(row[4], nullptr, 10));
-			e.max_level  = static_cast<uint16_t>(strtoul(row[5], nullptr, 10));
-			e.min_hp     = static_cast<int16_t>(atoi(row[6]));
-			e.max_hp     = static_cast<int16_t>(atoi(row[7]));
-			e.is_enabled = static_cast<uint8_t>(strtoul(row[8], nullptr, 10));
+			e.min_hp     = static_cast<int16_t>(atoi(row[4]));
+			e.max_hp     = static_cast<int16_t>(atoi(row[5]));
+			e.is_enabled = static_cast<uint8_t>(strtoul(row[6], nullptr, 10));
 
 			all_entries.push_back(e);
 		}
@@ -335,11 +316,9 @@ public:
 			e.bot_id     = static_cast<int32_t>(atoi(row[1]));
 			e.spell_id   = static_cast<int16_t>(atoi(row[2]));
 			e.priority   = static_cast<int16_t>(atoi(row[3]));
-			e.min_level  = static_cast<uint16_t>(strtoul(row[4], nullptr, 10));
-			e.max_level  = static_cast<uint16_t>(strtoul(row[5], nullptr, 10));
-			e.min_hp     = static_cast<int16_t>(atoi(row[6]));
-			e.max_hp     = static_cast<int16_t>(atoi(row[7]));
-			e.is_enabled = static_cast<uint8_t>(strtoul(row[8], nullptr, 10));
+			e.min_hp     = static_cast<int16_t>(atoi(row[4]));
+			e.max_hp     = static_cast<int16_t>(atoi(row[5]));
+			e.is_enabled = static_cast<uint8_t>(strtoul(row[6], nullptr, 10));
 
 			all_entries.push_back(e);
 		}

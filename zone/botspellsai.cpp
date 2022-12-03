@@ -3003,14 +3003,6 @@ bool Bot::AI_AddBotSpells(uint32 bot_spell_id) {
 						continue;
 					}
 
-					if (bs->min_level > 0 && GetLevel() < bs->min_level) {
-						continue;
-					}
-
-					if (bs->max_level > 0 && GetLevel() > bs->max_level) {
-						continue;
-					}
-
 					AddSpellToBotList(
 						bs->priority,
 						e.spellid,
@@ -3018,6 +3010,8 @@ bool Bot::AI_AddBotSpells(uint32 bot_spell_id) {
 						e.manacost,
 						e.recast_delay,
 						e.resist_adjust,
+						e.minlevel,
+						e.maxlevel,
 						bs->min_hp,
 						bs->max_hp,
 						e.bucket_name,
@@ -3027,19 +3021,23 @@ bool Bot::AI_AddBotSpells(uint32 bot_spell_id) {
 					continue;
 				}
 
-				AddSpellToBotList(
-					e.priority,
-					e.spellid,
-					e.type,
-					e.manacost,
-					e.recast_delay,
-					e.resist_adjust,
-					e.min_hp,
-					e.max_hp,
-					e.bucket_name,
-					e.bucket_value,
-					e.bucket_comparison
-				);
+				if (!GetBotEnforceSpellSetting()) {
+					AddSpellToBotList(
+						e.priority,
+						e.spellid,
+						e.type,
+						e.manacost,
+						e.recast_delay,
+						e.resist_adjust,
+						e.minlevel,
+						e.maxlevel,
+						e.min_hp,
+						e.max_hp,
+						e.bucket_name,
+						e.bucket_value,
+						e.bucket_comparison
+					);
+				}
 			}
 		}
 	}
@@ -3102,14 +3100,6 @@ bool Bot::AI_AddBotSpells(uint32 bot_spell_id) {
 					continue;
 				}
 
-				if (bs->min_level > 0 && GetLevel() < bs->min_level) {
-					continue;
-				}
-
-				if (bs->max_level > 0 && GetLevel() > bs->max_level) {
-					continue;
-				}
-
 				AddSpellToBotList(
 					bs->priority,
 					e.spellid,
@@ -3117,6 +3107,8 @@ bool Bot::AI_AddBotSpells(uint32 bot_spell_id) {
 					e.manacost,
 					e.recast_delay,
 					e.resist_adjust,
+					e.minlevel,
+					e.maxlevel,
 					bs->min_hp,
 					bs->max_hp,
 					e.bucket_name,
@@ -3126,19 +3118,23 @@ bool Bot::AI_AddBotSpells(uint32 bot_spell_id) {
 				continue;
 			}
 
-			AddSpellToBotList(
-				e.priority,
-				e.spellid,
-				e.type,
-				e.manacost,
-				e.recast_delay,
-				e.resist_adjust,
-				e.min_hp,
-				e.max_hp,
-				e.bucket_name,
-				e.bucket_value,
-				e.bucket_comparison
-			);
+			if (!GetBotEnforceSpellSetting()) {
+				AddSpellToBotList(
+					e.priority,
+					e.spellid,
+					e.type,
+					e.manacost,
+					e.recast_delay,
+					e.resist_adjust,
+					e.minlevel,
+					e.maxlevel,
+					e.min_hp,
+					e.max_hp,
+					e.bucket_name,
+					e.bucket_value,
+					e.bucket_comparison
+				);
+			}
 		}
 	}
 
@@ -3295,6 +3291,8 @@ void Bot::AddSpellToBotList(
 	int16 iManaCost,
 	int32 iRecastDelay,
 	int16 iResistAdjust,
+	uint8 min_level,
+	uint8 max_level,
 	int8 min_hp,
 	int8 max_hp,
 	std::string bucket_name,
@@ -3315,6 +3313,8 @@ void Bot::AddSpellToBotList(
 	t.recast_delay = iRecastDelay;
 	t.time_cancast = 0;
 	t.resist_adjust = iResistAdjust;
+	t.minlevel = min_level;
+	t.maxlevel = maxlevel;
 	t.min_hp = min_hp;
 	t.max_hp = max_hp;
 	t.bucket_name = bucket_name;
