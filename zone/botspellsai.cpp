@@ -3313,7 +3313,7 @@ void Bot::AddSpellToBotList(
 	t.recast_delay = iRecastDelay;
 	t.time_cancast = 0;
 	t.resist_adjust = iResistAdjust;
-	t.minlevel = minlevel;
+	t.minlevel = min_level;
 	t.maxlevel = maxlevel;
 	t.min_hp = min_hp;
 	t.max_hp = max_hp;

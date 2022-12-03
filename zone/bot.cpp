@@ -10712,7 +10712,7 @@ void Bot::ListBotSpells(uint8 min_level)
 
 	for (const auto& s : AIBot_spells) {
 		auto b = bot_spell_settings.find(s.spellid);
-		if (b == bot_spell_settings.end() && s.minlevel >= minlevel) {
+		if (b == bot_spell_settings.end() && s.minlevel >= min_level) {
 			bot_owner->Message(
 				Chat::White,
 				fmt::format(
