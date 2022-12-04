@@ -3504,7 +3504,7 @@ void Bot::AI_Process()
 
 				if (GetTarget() && !IsRooted()) {
 
-					LogAI("Pursuing [{}] while engaged", GetTarget()->GetCleanName());
+					LogAIDetail("Pursuing [{}] while engaged", GetTarget()->GetCleanName());
 					Goal = GetTarget()->GetPosition();
 					if (DistanceSquared(m_Position, Goal) <= leash_distance) {
 						RunTo(Goal.x, Goal.y, Goal.z);
@@ -3890,7 +3890,7 @@ void Bot::PetAIProcess() {
 				else if (botPet->GetTarget() && botPet->GetAIMovementTimer()->Check()) {
 					botPet->SetRunAnimSpeed(0);
 					if(!botPet->IsRooted()) {
-						LogAI("Pursuing [{}] while engaged", botPet->GetTarget()->GetCleanName());
+						LogAIDetail("Pursuing [{}] while engaged", botPet->GetTarget()->GetCleanName());
 						botPet->RunTo(botPet->GetTarget()->GetX(), botPet->GetTarget()->GetY(), botPet->GetTarget()->GetZ());
 						return;
 					} else {

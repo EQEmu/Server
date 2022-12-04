@@ -252,7 +252,7 @@ void NPC::MoveTo(const glm::vec4 &position, bool saveguardspot)
 void NPC::UpdateWaypoint(int wp_index)
 {
 	if (wp_index >= static_cast<int>(Waypoints.size())) {
-		LogAI("Update to waypoint [{}] failed. Not found", wp_index);
+		LogAIDetail("Update to waypoint [{}] failed. Not found", wp_index);
 		return;
 	}
 	std::vector<wplist>::iterator cur;
@@ -567,7 +567,7 @@ void NPC::SaveGuardSpot(bool ClearGuardSpot) {
 		if (m_GuardPoint.w == 0) {
 			m_GuardPoint.w = 0.0001; //hack to make IsGuarding simpler
 		}
-		LogAI("Setting guard position to {0}", to_string(static_cast<glm::vec3>(m_GuardPoint)));
+		LogAIDetail("Setting guard position to {0}", to_string(static_cast<glm::vec3>(m_GuardPoint)));
 	}
 }
 
@@ -577,7 +577,7 @@ void NPC::SaveGuardSpot(const glm::vec4 &pos)
 
 	if (m_GuardPoint.w == 0)
 		m_GuardPoint.w = 0.0001;		//hack to make IsGuarding simpler
-	LogAI("Setting guard position to {0}", to_string(static_cast<glm::vec3>(m_GuardPoint)));
+	LogAIDetail("Setting guard position to {0}", to_string(static_cast<glm::vec3>(m_GuardPoint)));
 }
 
 void NPC::NextGuardPosition() {

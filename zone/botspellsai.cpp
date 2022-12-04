@@ -1165,7 +1165,7 @@ bool Bot::AIDoSpellCast(uint8 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgain
 				|| dist2 <= GetActSpellRange(AIBot_spells[i].spellid, spells[AIBot_spells[i].spellid].range)*GetActSpellRange(AIBot_spells[i].spellid, spells[AIBot_spells[i].spellid].range)) && (mana_cost <= GetMana() || GetMana() == GetMaxMana()))
 	{
 		casting_spell_AIindex = i;
-		LogAIModerate("Bot::AIDoSpellCast: spellid = [{}], tar = [{}], mana = [{}], Name: [{}]", AIBot_spells[i].spellid, tar->GetName(), mana_cost, spells[AIBot_spells[i].spellid].name);
+		LogAI("Bot::AIDoSpellCast: spellid = [{}], tar = [{}], mana = [{}], Name: [{}]", AIBot_spells[i].spellid, tar->GetName(), mana_cost, spells[AIBot_spells[i].spellid].name);
 		result = Mob::CastSpell(AIBot_spells[i].spellid, tar->GetID(), EQ::spells::CastingSlot::Gem2, spells[AIBot_spells[i].spellid].cast_time, AIBot_spells[i].manacost == -2 ? 0 : mana_cost, oDontDoAgainBefore, -1, -1, 0, &(AIBot_spells[i].resist_adjust));
 
 		if (IsCasting() && IsSitting())
@@ -1232,9 +1232,7 @@ bool Bot::AI_IdleCastCheck() {
 	bool result = false;
 
 	if (AIautocastspell_timer->Check(false)) {
-#if BotAI_DEBUG_Spells >= 25
 		LogAIDetail("Bot Non-Engaged autocast check triggered: [{}]", GetCleanName());
-#endif
 		AIautocastspell_timer->Disable();	//prevent the timer from going off AGAIN while we are casting.
 
 		bool pre_combat = false;
@@ -2910,7 +2908,7 @@ bool Bot::AI_AddBotSpells(uint32 bot_spell_id) {
 			)
 		);
 
-		LogAIModerate("[{}]", debug_msg);
+		LogAI("[{}]", debug_msg);
 		for (const auto &iter : spell_list->entries) {
 			LogAIDetail("([{}]) [{}]", iter.spellid, spells[iter.spellid].name);
 		}
@@ -2918,10 +2916,10 @@ bool Bot::AI_AddBotSpells(uint32 bot_spell_id) {
 	else 
 	{
 		debug_msg.append(" (not found)");
-		LogAIModerate("[{}]", debug_msg);
+		LogAI("[{}]", debug_msg);
 	}
 
-	LogAIModerate("fin (spell list)");
+	LogAI("fin (spell list)");
 
 	uint16 attack_proc_spell = -1;
 	int8 proc_chance = 3;
