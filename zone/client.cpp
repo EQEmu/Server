@@ -2698,6 +2698,38 @@ uint16 Client::GetMaxSkillAfterSpecializationRules(EQ::skills::SkillType skillid
 	return Result;
 }
 
+uint8 Client::GetPVPTeam() {
+	if (RuleI(World, PVPSettings) == 2) {
+		int myrace = GetRace();
+		// humans
+		if (myrace == 1 || myrace == 2 || myrace == 3 || myrace == 522) {
+			return 1;
+		// elves
+		} else if (myrace == 4 || myrace == 5 || myrace == 7 || myrace == 130) {
+			return 2;
+		// short
+		} else if (myrace == 8 || myrace == 11 || myrace == 12 || myrace == 330) {
+			return 3;
+		// evil
+		} else if (myrace == 6 || myrace == 9 || myrace == 10 || myrace == 128) {
+			return 4;
+		}
+	} else if (RuleI(World, PVPSettings) == 4) {
+		int mydeity = GetDeity();
+		//good deity
+		if (mydeity == 204 || mydeity == 208 || mydeity == 212 || mydeity == 210 || mydeity == 215) {
+			return 1;
+		//evil deity
+		} else if (mydeity == 201 || mydeity == 203 || mydeity == 206 || mydeity == 211) {
+			return 2;
+		} else {
+		//others
+			return 3;
+		}
+	}
+	return 0;
+}
+
 void Client::SetPVP(bool toggle, bool message) {
 	m_pp.pvp = toggle ? 1 : 0;
 
@@ -9046,10 +9078,6 @@ void Client::CheckRegionTypeChanges()
 
 	// region type changed
 	last_region_type = new_region;
-
-	// PVP is the only state we need to keep track of, so we can just return now for PVP servers
-	if (RuleI(World, PVPSettings) > 0)
-		return;
 
 	if (last_region_type == RegionTypePVP)
 		temp_pvp = true;

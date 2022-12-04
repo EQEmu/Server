@@ -719,6 +719,17 @@ bool Mob::IsAttackAllowed(Mob *target, bool isSpellAttack)
 					c2->GetDuelTarget() == c1->GetID()
 				)
 					return true;
+				else if // if server is pvp teams race or deity opposite teams can fight
+				(
+					RuleI(World, PVPSettings) >= 2 && RuleI(World, PVPSettings) <= 4 &&
+					c1->GetPVPTeam() != c2->GetPVPTeam() 
+				)
+					return true;
+				else if // if server is discord pvp they can fight
+				(
+					RuleI(World, PVPSettings) >= 6
+				)
+					return true;
 				else
 					return false;
 			}

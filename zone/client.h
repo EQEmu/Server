@@ -405,6 +405,7 @@ public:
 	void SetGM(bool toggle);
 	void SetPVP(bool toggle, bool message = true);
 
+	uint8 GetPVPTeam();
 	inline bool GetPVP(bool inc_temp = true) const { return m_pp.pvp != 0 || (inc_temp && temp_pvp); }
 	inline bool GetGM() const { return m_pp.gm != 0; }
 
@@ -419,6 +420,7 @@ public:
 	inline uint16 GetBaseRace() const { return m_pp.race; }
 	inline uint16 GetBaseClass() const { return m_pp.class_; }
 	inline uint8 GetBaseGender() const { return m_pp.gender; }
+	inline uint8 GetBaseDeity() const { return m_pp.deity; }
 	inline uint8 GetBaseFace() const { return m_pp.face; }
 	inline uint8 GetBaseHairColor() const { return m_pp.haircolor; }
 	inline uint8 GetBaseBeardColor() const { return m_pp.beardcolor; }
