@@ -195,7 +195,7 @@ bool RuleManager::_FindRule(std::string rule_name, RuleType &type_into, uint16 &
 
 	for (int i = 0; i < CountRules(); i++) {
 		const auto& r = s_RuleInfo[i];
-		if (Strings::Contains(rule_name, r.name)) {
+		if (Strings::Equal(rule_name, r.name)) {
 			type_into = r.type;
 			index_into = r.rule_index;
 			return true;
@@ -342,8 +342,8 @@ void RuleManager::_SaveRule(Database *db, RuleType type, uint16 index) {
 	const auto rule_name = _GetRuleName(type, index);
 
 	if (
-		(type == BoolRule && Strings::Contains(rule_name, "World:UseClientBasedExpansionSettings")) ||
-		(type == IntRule && Strings::Contains(rule_name, "World:ExpansionSettings"))
+		(type == BoolRule && Strings::EqualFold(rule_name, "World:UseClientBasedExpansionSettings")) ||
+		(type == IntRule && Strings::EqualFold(rule_name, "World:ExpansionSettings"))
 	) {
 		return;
 	}
@@ -355,7 +355,7 @@ void RuleManager::_SaveRule(Database *db, RuleType type, uint16 index) {
 			rule_value = fmt::format("{}", m_RuleIntValues[index]);
 			break;
 		case RealRule:
-			rule_value = fmt::format("{:.2f}", m_RuleRealValues[index]);
+			rule_value = fmt::format("{:.13f}", m_RuleRealValues[index]);
 			break;
 		case BoolRule:
 			rule_value = fmt::format("{}", m_RuleBoolValues[index] ? "true" : "false");
@@ -413,7 +413,7 @@ bool RuleManager::UpdateInjectedRules(Database *db, std::string rule_set_name, b
 
 	// build rule data entries
 	for (const auto& r : s_RuleInfo) {
-		if (Strings::Contains(r.name, "Invalid Rule")) {
+		if (Strings::EqualFold(r.name, "Invalid Rule")) {
 			continue;
 		}
 
@@ -423,7 +423,7 @@ bool RuleManager::UpdateInjectedRules(Database *db, std::string rule_set_name, b
 				rule_data[r.name].second = &r.notes;
 				break;
 			case RealRule:
-				rule_data[r.name].first = fmt::format("{:.2f}", m_RuleRealValues[r.rule_index]);
+				rule_data[r.name].first = fmt::format("{:.13f}", m_RuleRealValues[r.rule_index]);
 				rule_data[r.name].second = &r.notes;
 				break;
 			case BoolRule:
@@ -487,7 +487,7 @@ bool RuleManager::UpdateOrphanedRules(Database *db, bool quiet_update)
 
 	// build rule data entries
 	for (const auto &r : s_RuleInfo) {
-		if (Strings::Contains(r.name, "Invalid Rule")) {
+		if (Strings::EqualFold(r.name, "Invalid Rule")) {
 			continue;
 		}
 
@@ -531,7 +531,7 @@ bool RuleManager::RestoreRuleNotes(Database *db)
 
 		auto rule = [](std::string rule_name) {
 			for (auto rule_iter : s_RuleInfo) {
-				if (Strings::Contains(rule_iter.name, rule_name)) {
+				if (Strings::EqualFold(rule_iter.name, rule_name)) {
 					return rule_iter;
 				}
 			}
