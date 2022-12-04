@@ -106,10 +106,10 @@ void command_scale(Client *c, const Seperator *sep)
 				continue;
 			}
 
-			std::string status = " (Searching)";
+			std::string status = "(Searching)";
 
 			if (is_apply) {
-				status = " (Applying)";
+				status = "(Applying)";
 
 				if (is_dynamic) {
 					npc_scale_manager->ApplyGlobalBaseScalingToNPCDynamically(n);
@@ -121,22 +121,15 @@ void command_scale(Client *c, const Seperator *sep)
 			c->Message(
 				Chat::White,
 				fmt::format(
-					"Entity {} | Name: {} | NPC ID: {}",
+					"Entity {} | Name: {} | NPC ID: {} | Position: {:.2f}, {:.2f}, {:.2f}, {:.2f} {}",
 					found_number,
 					c->GetTargetDescription(n),
-					n->GetNPCTypeID()
-				).c_str()
-			);
-
-			c->Message(
-				Chat::White,
-				fmt::format(
-					"Entity {} | Position: {:.2f}, {:.2f}, {:.2f}, {:.2f}",
-					found_number,
+					n->GetNPCTypeID(),
 					n->GetX(),
 					n->GetY(),
 					n->GetZ(),
-					n->GetHeading()
+					n->GetHeading(),
+					status
 				).c_str()
 			);
 
