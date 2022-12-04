@@ -13,7 +13,7 @@ void command_suspend(Client *c, const Seperator *sep)
 		return;
 	}
 
-	const std::string character_name = Strings::UcFirst(Strings::ToLower(sep->arg[1]));
+	const std::string character_name = Strings::ToLower(sep->arg[1]);
 	auto days = std::stoul(sep->arg[2]);
 
 	const std::string reason = sep->arg[3] ? sep->argplus[3] : "";
@@ -21,7 +21,7 @@ void command_suspend(Client *c, const Seperator *sep)
 	auto l = AccountRepository::GetWhere(
 		content_db,
 		fmt::format(
-			"charname = '{}'",
+			"LOWER(charname) = '{}'",
 			Strings::Escape(character_name)
 		)
 	);
@@ -30,8 +30,8 @@ void command_suspend(Client *c, const Seperator *sep)
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"Character {} does not exist.",
-				character_name
+				"Character '{}' does not exist.",
+				sep->arg[1]
 			).c_str()
 		);
 		return;
