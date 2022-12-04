@@ -4461,8 +4461,37 @@ void Mob::SetDelta(const glm::vec4& delta) {
 	m_Delta = delta;
 }
 
+bool Mob::ClearEntityVariables()
+{
+	if (m_EntityVariables.empty()) {
+		return false;
+	}
+
+	m_EntityVariables.clear();
+	return true;
+}
+
+bool Mob::DeleteEntityVariable(std::string variable_name)
+{
+	if (m_EntityVariables.empty() || variable_name.empty()) {
+		return false;
+	}
+
+	auto v = m_EntityVariables.find(variable_name);
+	if (v == m_EntityVariables.end()) {
+		return false;
+	}
+
+	m_EntityVariables.erase(v);
+	return true;
+}
+
 std::string Mob::GetEntityVariable(std::string variable_name)
 {
+	if (m_EntityVariables.empty() || variable_name.empty()) {
+		return std::string();
+	}
+
 	const auto& v = m_EntityVariables.find(variable_name);
 	if (v != m_EntityVariables.end()) {
 		return v->second;
@@ -4487,6 +4516,10 @@ std::vector<std::string> Mob::GetEntityVariables()
 
 bool Mob::EntityVariableExists(std::string variable_name)
 {
+	if (m_EntityVariables.empty() || variable_name.empty()) {
+		return false;
+	}
+
 	const auto& v = m_EntityVariables.find(variable_name);
 	if (v != m_EntityVariables.end()) {
 		return true;
@@ -4497,6 +4530,10 @@ bool Mob::EntityVariableExists(std::string variable_name)
 
 void Mob::SetEntityVariable(std::string variable_name, std::string variable_value)
 {
+	if (variable_name.empty()) {
+		return;
+	}
+
 	m_EntityVariables[variable_name] = variable_value;
 }
 

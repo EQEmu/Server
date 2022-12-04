@@ -99,6 +99,7 @@ public:
 	bool SaveEquipmentColor(const uint32 bot_id, const int16 slot_id, const uint32 rgb);
 
 	bool SaveExpansionBitmask(const uint32 bot_id, const int expansion_bitmask);
+	bool SaveEnforceSpellSetting(const uint32 bot_id, const bool enforce_spell_setting);
 
 
 	/* Bot pet functions   */
@@ -142,6 +143,8 @@ public:
 	bool CreateCloneBotInventory(const uint32 owner_id, const uint32 bot_id, const uint32 clone_id);
 
 	bool SaveStopMeleeLevel(const uint32 owner_id, const uint32 bot_id, const uint8 sml_value);
+
+	bool SaveBotArcherSetting(const uint32 bot_id, const bool bot_archer_setting);
 
 	bool LoadOwnerOptions(Client *owner);
 	bool SaveOwnerOption(const uint32 owner_id, size_t type, const bool flag);

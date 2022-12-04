@@ -206,6 +206,16 @@ float Perl_Object_GetTiltY(Object* self) // @categories Objects
 	return self->GetTiltY();
 }
 
+bool Perl_Object_ClearEntityVariables(Object* self) // @categories Script Utility
+{
+	return self->ClearEntityVariables();
+}
+
+bool Perl_Object_DeleteEntityVariable(Object* self, std::string variable_name) // @categories Script Utility
+{
+	return self->DeleteEntityVariable(variable_name);
+}
+
 bool Perl_Object_EntityVariableExists(Object* self, std::string variable_name) // @categories Objects
 {
 	return self->EntityVariableExists(variable_name);
@@ -239,10 +249,12 @@ void perl_register_object()
 
 	auto package = perl.new_class<Object>("Object");
 	package.add_base_class("Entity");
+	package.add("ClearEntityVariables", &Perl_Object_ClearEntityVariables);
 	package.add("ClearUser", &Perl_Object_ClearUser);
 	package.add("Close", &Perl_Object_Close);
 	package.add("Delete", (void(*)(Object*))&Perl_Object_Delete);
 	package.add("Delete", (void(*)(Object*, bool))&Perl_Object_Delete);
+	package.add("DeleteEntityVariable", &Perl_Object_DeleteEntityVariable);
 	package.add("DeleteItem", &Perl_Object_DeleteItem);
 	package.add("Depop", &Perl_Object_Depop);
 	package.add("EntityVariableExists", &Perl_Object_EntityVariableExists);
