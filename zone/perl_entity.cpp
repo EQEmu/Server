@@ -533,9 +533,9 @@ perl::array Perl_EntityList_GetDoorsList(EntityList* self) // @categories Script
 	return result;
 }
 
-void Perl_EntityList_SignalAllClients(EntityList* self, uint32_t data) // @categories Script Utility
+void Perl_EntityList_SignalAllClients(EntityList* self, int signal_id) // @categories Script Utility
 {
-	entity_list.SignalAllClients(data);
+	entity_list.SignalAllClients(signal_id);
 }
 
 Mob* Perl_EntityList_GetRandomMob(EntityList* self) // @categories Account and Character, Script Utility

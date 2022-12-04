@@ -281,9 +281,9 @@ std::string Lua_EntityList::RemoveNumbers(const char *name) {
 	return self->RemoveNumbers(t_name);
 }
 
-void Lua_EntityList::SignalMobsByNPCID(uint32 npc_id, int signal) {
+void Lua_EntityList::SignalMobsByNPCID(uint32 npc_id, int signal_id) {
 	Lua_Safe_Call_Void();
-	self->SignalMobsByNPCID(npc_id, signal);
+	self->SignalMobsByNPCID(npc_id, signal_id);
 }
 
 uint32 Lua_EntityList::DeleteNPCCorpses() {
@@ -558,9 +558,9 @@ Lua_Spawn_List Lua_EntityList::GetSpawnList() {
 	return ret;
 }
 
-void Lua_EntityList::SignalAllClients(int signal) {
+void Lua_EntityList::SignalAllClients(int signal_id) {
 	Lua_Safe_Call_Void();
-	self->SignalAllClients(signal);
+	self->SignalAllClients(signal_id);
 }
 
 void Lua_EntityList::ChannelMessage(Lua_Mob from, int channel_num, int language, const char *message) {

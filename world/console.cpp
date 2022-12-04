@@ -901,7 +901,7 @@ void ConsoleSignalCharByName(
 	int update_identifier = 0;
 	CZS->update_type = update_type;
 	CZS->update_identifier = update_identifier;
-	CZS->signal = atoi(args[1].c_str());
+	CZS->signal_id = atoi(args[1].c_str());
 	strn0cpy(CZS->client_name, (char *) args[0].c_str(), 64);
 	zoneserver_list.SendPacket(pack);
 	safe_delete(pack);
