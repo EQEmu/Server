@@ -380,47 +380,41 @@ bool BotDatabase::LoadBot(const uint32 bot_id, Bot*& loaded_bot)
 		return false;
 	}
 
-	const auto& l = BotDataRepository::GetWhere(
-		database,
-		fmt::format(
-			"bot_id = {}",
-			bot_id
-		)
-	);
-	if (l.empty()) {
+	const auto& l = BotDataRepository::FindOne(database, bot_id);
+	if (!l.bot_id) {
 		return false;
 	}
 
 	auto d = Bot::CreateDefaultNPCTypeStructForBot(
-		l[0].name,
-		l[0].last_name,
-		l[0].level,
-		l[0].race,
-		l[0].class_,
-		l[0].gender
+		l.name,
+		l.last_name,
+		l.level,
+		l.race,
+		l.class_,
+		l.gender
 	);
 
 	auto t = Bot::FillNPCTypeStruct(
-		l[0].spells_id,
-		l[0].name,
-		l[0].last_name,
-		l[0].level,
-		l[0].race,
-		l[0].class_,
-		l[0].gender,
-		l[0].size,
-		l[0].face,
-		l[0].hair_style,
-		l[0].hair_color,
-		l[0].eye_color_1,
-		l[0].eye_color_2,
-		l[0].beard,
-		l[0].beard_color,
-		l[0].drakkin_heritage,
-		l[0].drakkin_tattoo,
-		l[0].drakkin_details,
-		l[0].hp,
-		l[0].mana,
+		l.spells_id,
+		l.name,
+		l.last_name,
+		l.level,
+		l.race,
+		l.class_,
+		l.gender,
+		l.size,
+		l.face,
+		l.hair_style,
+		l.hair_color,
+		l.eye_color_1,
+		l.eye_color_2,
+		l.beard,
+		l.beard_color,
+		l.drakkin_heritage,
+		l.drakkin_tattoo,
+		l.drakkin_details,
+		l.hp,
+		l.mana,
 		d->MR,
 		d->CR,
 		d->DR,
@@ -442,30 +436,30 @@ bool BotDatabase::LoadBot(const uint32 bot_id, Bot*& loaded_bot)
 
 	loaded_bot = new Bot(
 		bot_id,
-		l[0].owner_id,
-		l[0].spells_id,
-		l[0].time_spawned,
-		l[0].zone_id,
+		l.owner_id,
+		l.spells_id,
+		l.time_spawned,
+		l.zone_id,
 		t
 	);
 
 	if (loaded_bot) {
-		loaded_bot->SetSurname(l[0].last_name);
-		loaded_bot->SetTitle(l[0].title);
-		loaded_bot->SetSuffix(l[0].suffix);
+		loaded_bot->SetSurname(l.last_name);
+		loaded_bot->SetTitle(l.title);
+		loaded_bot->SetSuffix(l.suffix);
 
-		loaded_bot->SetShowHelm((l[0].show_helm ? true : false));
+		loaded_bot->SetShowHelm((l.show_helm ? true : false));
 
-		auto bfd = EQ::Clamp(l[0].follow_distance, static_cast<uint32>(1), BOT_FOLLOW_DISTANCE_DEFAULT_MAX);
+		auto bfd = EQ::Clamp(l.follow_distance, static_cast<uint32>(1), BOT_FOLLOW_DISTANCE_DEFAULT_MAX);
 		loaded_bot->SetFollowDistance(bfd);
 
-		loaded_bot->SetStopMeleeLevel(l[0].stop_melee_level);
+		loaded_bot->SetStopMeleeLevel(l.stop_melee_level);
 
-		loaded_bot->SetExpansionBitmask(l[0].expansion_bitmask, false);
+		loaded_bot->SetExpansionBitmask(l.expansion_bitmask, false);
 
-		loaded_bot->SetBotEnforceSpellSetting((l[0].enforce_spell_settings ? true : false));
+		loaded_bot->SetBotEnforceSpellSetting((l.enforce_spell_settings ? true : false));
 
-		loaded_bot->SetBotArcherySetting((l[0].archery_setting ? true : false));
+		loaded_bot->SetBotArcherySetting((l.archery_setting ? true : false));
 	}
 
 	return true;
@@ -523,6 +517,9 @@ bool BotDatabase::SaveNewBot(Bot* bot_inst, uint32& bot_id)
 	e.show_helm              = bot_inst->GetShowHelm() ? 1 : 0;
 	e.follow_distance        = bot_inst->GetFollowDistance();
 	e.stop_melee_level       = bot_inst->GetStopMeleeLevel();
+	e.expansion_bitmask      = bot_inst->GetExpansionBitmask();
+	e.enforce_spell_settings = bot_inst->GetBotEnforceSpellSetting();
+	e.archery_setting        = bot_inst->IsBotArcher() ? 1 : 0;
 
 	auto b = BotDataRepository::InsertOne(database, e);
 	if (!b.bot_id) {
@@ -540,66 +537,60 @@ bool BotDatabase::SaveBot(Bot* bot_inst)
 		return false;
 	}
 
-	auto l = BotDataRepository::GetWhere(
-		database,
-		fmt::format(
-			"bot_id = {}",
-			bot_inst->GetBotID()
-		)
-	);
-	if (l.empty()) {
+	auto l = BotDataRepository::FindOne(database, bot_inst->GetBotID());
+	if (!l.bot_id) {
 		return false;
 	}
 
-	l[0].owner_id               = bot_inst->GetBotOwnerCharacterID();
-	l[0].spells_id              = bot_inst->GetBotSpellID();
-	l[0].name                   = bot_inst->GetCleanName();
-	l[0].last_name              = bot_inst->GetLastName();
-	l[0].title                  = bot_inst->GetTitle();
-	l[0].suffix                 = bot_inst->GetSuffix();
-	l[0].zone_id                = bot_inst->GetLastZoneID();
-	l[0].gender                 = bot_inst->GetGender();
-	l[0].race                   = bot_inst->GetBaseRace();
-	l[0].class_                 = bot_inst->GetClass();
-	l[0].level                  = bot_inst->GetLevel();
-	l[0].last_spawn             = std::time(nullptr);
-	l[0].time_spawned           = bot_inst->GetTotalPlayTime();
-	l[0].size                   = bot_inst->GetSize();
-	l[0].face                   = bot_inst->GetLuclinFace();
-	l[0].hair_color             = bot_inst->GetHairColor();
-	l[0].hair_style             = bot_inst->GetHairStyle();
-	l[0].beard                  = bot_inst->GetBeard();
-	l[0].beard_color            = bot_inst->GetBeardColor();
-	l[0].eye_color_1            = bot_inst->GetEyeColor1();
-	l[0].eye_color_2            = bot_inst->GetEyeColor2();
-	l[0].drakkin_heritage       = bot_inst->GetDrakkinHeritage();
-	l[0].drakkin_tattoo         = bot_inst->GetDrakkinTattoo();
-	l[0].drakkin_details        = bot_inst->GetDrakkinDetails();
-	l[0].ac                     = bot_inst->GetBaseAC();
-	l[0].atk                    = bot_inst->GetBaseATK();
-	l[0].hp                     = bot_inst->GetHP();
-	l[0].mana                   = bot_inst->GetMana();
-	l[0].str                    = bot_inst->GetBaseSTR();
-	l[0].sta                    = bot_inst->GetBaseSTA();
-	l[0].cha                    = bot_inst->GetBaseCHA();
-	l[0].dex                    = bot_inst->GetBaseDEX();
-	l[0].int_                   = bot_inst->GetBaseINT();
-	l[0].agi                    = bot_inst->GetBaseAGI();
-	l[0].wis                    = bot_inst->GetBaseWIS();
-	l[0].fire                   = bot_inst->GetBaseFR();
-	l[0].cold                   = bot_inst->GetBaseCR();
-	l[0].magic                  = bot_inst->GetBaseMR();
-	l[0].poison                 = bot_inst->GetBasePR();
-	l[0].disease                = bot_inst->GetBaseDR();
-	l[0].corruption             = bot_inst->GetBaseCorrup();
-	l[0].show_helm              = bot_inst->GetShowHelm() ? 1 : 0;
-	l[0].follow_distance        = bot_inst->GetFollowDistance();
-	l[0].stop_melee_level       = bot_inst->GetStopMeleeLevel();
-	l[0].expansion_bitmask      = bot_inst->GetExpansionBitmask();
-	l[0].enforce_spell_settings = bot_inst->GetBotEnforceSpellSetting();
-	l[0].archery_setting        = bot_inst->IsBotArcher() ? 1 : 0;
+	l.owner_id               = bot_inst->GetBotOwnerCharacterID();
+	l.spells_id              = bot_inst->GetBotSpellID();
+	l.name                   = bot_inst->GetCleanName();
+	l.last_name              = bot_inst->GetLastName();
+	l.title                  = bot_inst->GetTitle();
+	l.suffix                 = bot_inst->GetSuffix();
+	l.zone_id                = bot_inst->GetLastZoneID();
+	l.gender                 = bot_inst->GetGender();
+	l.race                   = bot_inst->GetBaseRace();
+	l.class_                 = bot_inst->GetClass();
+	l.level                  = bot_inst->GetLevel();
+	l.last_spawn             = std::time(nullptr);
+	l.time_spawned           = bot_inst->GetTotalPlayTime();
+	l.size                   = bot_inst->GetSize();
+	l.face                   = bot_inst->GetLuclinFace();
+	l.hair_color             = bot_inst->GetHairColor();
+	l.hair_style             = bot_inst->GetHairStyle();
+	l.beard                  = bot_inst->GetBeard();
+	l.beard_color            = bot_inst->GetBeardColor();
+	l.eye_color_1            = bot_inst->GetEyeColor1();
+	l.eye_color_2            = bot_inst->GetEyeColor2();
+	l.drakkin_heritage       = bot_inst->GetDrakkinHeritage();
+	l.drakkin_tattoo         = bot_inst->GetDrakkinTattoo();
+	l.drakkin_details        = bot_inst->GetDrakkinDetails();
+	l.ac                     = bot_inst->GetBaseAC();
+	l.atk                    = bot_inst->GetBaseATK();
+	l.hp                     = bot_inst->GetHP();
+	l.mana                   = bot_inst->GetMana();
+	l.str                    = bot_inst->GetBaseSTR();
+	l.sta                    = bot_inst->GetBaseSTA();
+	l.cha                    = bot_inst->GetBaseCHA();
+	l.dex                    = bot_inst->GetBaseDEX();
+	l.int_                   = bot_inst->GetBaseINT();
+	l.agi                    = bot_inst->GetBaseAGI();
+	l.wis                    = bot_inst->GetBaseWIS();
+	l.fire                   = bot_inst->GetBaseFR();
+	l.cold                   = bot_inst->GetBaseCR();
+	l.magic                  = bot_inst->GetBaseMR();
+	l.poison                 = bot_inst->GetBasePR();
+	l.disease                = bot_inst->GetBaseDR();
+	l.corruption             = bot_inst->GetBaseCorrup();
+	l.show_helm              = bot_inst->GetShowHelm() ? 1 : 0;
+	l.follow_distance        = bot_inst->GetFollowDistance();
+	l.stop_melee_level       = bot_inst->GetStopMeleeLevel();
+	l.expansion_bitmask      = bot_inst->GetExpansionBitmask();
+	l.enforce_spell_settings = bot_inst->GetBotEnforceSpellSetting();
+	l.archery_setting        = bot_inst->IsBotArcher() ? 1 : 0;
 
-	const auto updated = BotDataRepository::UpdateOne(database, l[0]);
+	const auto updated = BotDataRepository::UpdateOne(database, l);
 	if (!updated) {
 		return false;
 	}
