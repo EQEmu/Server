@@ -323,6 +323,23 @@ public:
 		std::string bucket_value,
 		uint8 bucket_comparison
 	);
+	
+	void AddSpellToBotEnforceList(
+		int16 iPriority,
+		uint16 iSpellID,
+		uint32 iType,
+		int16 iManaCost,
+		int32 iRecastDelay,
+		int16 iResistAdjust,
+		uint8 min_level,
+		uint8 max_level,
+		int8 min_hp,
+		int8 max_hp,
+		std::string bucket_name,
+		std::string bucket_value,
+		uint8 bucket_comparison
+	);
+
 	void AI_Bot_Event_SpellCastFinished(bool iCastSucceeded, uint16 slot);
 	// AI Methods
 	virtual bool AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes);
@@ -725,6 +742,9 @@ protected:
 	//void SetRaidNuker(bool flag = true) { m_CastingRoles.RaidNuker = flag; }
 	//void SetRaidDoter(bool flag = true) { m_CastingRoles.RaidDoter = flag; }
 	std::deque<int> bot_signal_q;
+
+	std::vector<BotSpells_Struct> AIBot_spells;
+	std::vector<BotSpells_Struct> AIBot_spells_enforced;
 
 private:
 	// Class Members

@@ -1363,7 +1363,7 @@ int bot_command_init(void)
 		bot_command_add("cure", "Orders a bot to remove any ailments", AccountStatus::Player, bot_command_cure) ||
 		bot_command_add("defensive", "Orders a bot to use a defensive discipline", AccountStatus::Player, bot_command_defensive) ||
 		bot_command_add("depart", "Orders a bot to open a magical doorway to a specified destination", AccountStatus::Player, bot_command_depart) ||
-		bot_command_add("enforcespelllist", "Toggles your Bot to cast only spells in their spell settings list.", AccountStatus::Player, bot_command_enforce_spell_list) ||
+		bot_command_add("enforcespellsettings", "Toggles your Bot to cast only spells in their spell settings list.", AccountStatus::Player, bot_command_enforce_spell_list) ||
 		bot_command_add("escape", "Orders a bot to send a target group to a safe location within the zone", AccountStatus::Player, bot_command_escape) ||
 		bot_command_add("findaliases", "Find available aliases for a bot command", AccountStatus::Player, bot_command_find_aliases) ||
 		bot_command_add("follow", "Orders bots to follow a designated target (option 'chain' auto-links eligible spawned bots)", AccountStatus::Player, bot_command_follow) ||
@@ -1419,11 +1419,11 @@ int bot_command_init(void)
 		bot_command_add("sendhome", "Orders a bot to open a magical doorway home", AccountStatus::Player, bot_command_send_home) ||
 		bot_command_add("size", "Orders a bot to change a player's size", AccountStatus::Player, bot_command_size) ||
 		bot_command_add("spellinfo", "Opens a dialogue window with spell info", AccountStatus::Player, bot_spell_info_dialogue_window) ||
-		bot_command_add("spelllist", "Lists all Spells learned by the Bot.", AccountStatus::Player, bot_command_spell_list) ||
+		bot_command_add("spells", "Lists all Spells learned by the Bot.", AccountStatus::Player, bot_command_spell_list) ||
+		bot_command_add("spellsettings", "Lists a bot's spell setting entries", AccountStatus::Player, bot_command_spell_settings_list) ||
 		bot_command_add("spellsettingsadd", "Add a bot spell setting entry", AccountStatus::Player, bot_command_spell_settings_add) ||
 		bot_command_add("spellsettingsdelete", "Delete a bot spell setting entry", AccountStatus::Player, bot_command_spell_settings_delete) ||
-		bot_command_add("spellsettingslist", "Lists a bot's spell setting entries", AccountStatus::Player, bot_command_spell_settings_list) ||
-		bot_command_add("spellsettingstoggle", "Toggle a bot spells use", AccountStatus::Player, bot_command_spell_settings_toggle) ||
+		bot_command_add("spellsettingstoggle", "Toggle a bot spell use", AccountStatus::Player, bot_command_spell_settings_toggle) ||
 		bot_command_add("spellsettingsupdate", "Update a bot spell setting entry", AccountStatus::Player, bot_command_spell_settings_update) ||
 		bot_command_add("summoncorpse", "Orders a bot to summon a corpse to its feet", AccountStatus::Player, bot_command_summon_corpse) ||
 		bot_command_add("suspend", "Suspends a bot's AI processing until released", AccountStatus::Player, bot_command_suspend) ||
@@ -10251,7 +10251,7 @@ bool helper_spell_list_fail(Client *bot_owner, bcst_list* spell_list, BCEnum::Sp
 
 void bot_command_spell_list(Client* c, const Seperator *sep)
 {
-	if (helper_command_alias_fail(c, "bot_command_spell_list", sep->arg[0], "spelllist")) {
+	if (helper_command_alias_fail(c, "bot_command_spell_list", sep->arg[0], "spells")) {
 		return;
 	}
 
@@ -10483,7 +10483,7 @@ void bot_command_spell_settings_delete(Client *c, const Seperator *sep)
 
 void bot_command_spell_settings_list(Client *c, const Seperator *sep)
 {
-	if (helper_command_alias_fail(c, "bot_command_spell_settings_list", sep->arg[0], "spellsettingslist")) {
+	if (helper_command_alias_fail(c, "bot_command_spell_settings_list", sep->arg[0], "spellsettings")) {
 		return;
 	}
 
@@ -10784,7 +10784,7 @@ void bot_spell_info_dialogue_window(Client* c, const Seperator *sep)
 
 void bot_command_enforce_spell_list(Client* c, const Seperator *sep)
 {
-	if (helper_command_alias_fail(c, "bot_command_enforce_spell_list", sep->arg[0], "enforcespelllist")) {
+	if (helper_command_alias_fail(c, "bot_command_enforce_spell_list", sep->arg[0], "enforcespellsettings")) {
 		return;
 	}
 

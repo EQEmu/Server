@@ -2884,6 +2884,7 @@ bool Bot::AI_AddBotSpells(uint32 bot_spell_id) {
 	// ok, this function should load the list, and the parent list then shove them into the struct and sort
 	npc_spells_id = bot_spell_id;
 	AIBot_spells.clear();
+	AIBot_spells_enforced.clear();
 	if (!bot_spell_id) {
 		AIautocastspell_timer->Disable();
 		return false;
@@ -3037,6 +3038,22 @@ bool Bot::AI_AddBotSpells(uint32 bot_spell_id) {
 						e.bucket_value,
 						e.bucket_comparison
 					);
+				} else {
+					AddSpellToBotEnforceList(
+						e.priority,
+						e.spellid,
+						e.type,
+						e.manacost,
+						e.recast_delay,
+						e.resist_adjust,
+						e.minlevel,
+						e.maxlevel,
+						e.min_hp,
+						e.max_hp,
+						e.bucket_name,
+						e.bucket_value,
+						e.bucket_comparison
+					);
 				}
 			}
 		}
@@ -3120,6 +3137,22 @@ bool Bot::AI_AddBotSpells(uint32 bot_spell_id) {
 
 			if (!GetBotEnforceSpellSetting()) {
 				AddSpellToBotList(
+					e.priority,
+					e.spellid,
+					e.type,
+					e.manacost,
+					e.recast_delay,
+					e.resist_adjust,
+					e.minlevel,
+					e.maxlevel,
+					e.min_hp,
+					e.max_hp,
+					e.bucket_name,
+					e.bucket_value,
+					e.bucket_comparison
+				);
+			} else {
+				AddSpellToBotEnforceList(
 					e.priority,
 					e.spellid,
 					e.type,
@@ -3327,6 +3360,47 @@ void Bot::AddSpellToBotList(
 	if (AIBot_spells.empty()) {
 		AIautocastspell_timer->Start(RandomTimer(0, 300), false);
 	}
+}
+
+// adds spells to the list ^spells that are returned if ^enforce is enabled
+void Bot::AddSpellToBotEnforceList(
+	int16 iPriority,
+	uint16 iSpellID,
+	uint32 iType,
+	int16 iManaCost,
+	int32 iRecastDelay,
+	int16 iResistAdjust,
+	uint8 min_level,
+	uint8 max_level,
+	int8 min_hp,
+	int8 max_hp,
+	std::string bucket_name,
+	std::string bucket_value,
+	uint8 bucket_comparison
+) {
+	if (!IsValidSpell(iSpellID)) {
+		return;
+	}
+
+	HasAISpell = true;
+	BotSpells_Struct t;
+
+	t.priority = iPriority;
+	t.spellid = iSpellID;
+	t.type = iType;
+	t.manacost = iManaCost;
+	t.recast_delay = iRecastDelay;
+	t.time_cancast = 0;
+	t.resist_adjust = iResistAdjust;
+	t.minlevel = min_level;
+	t.maxlevel = maxlevel;
+	t.min_hp = min_hp;
+	t.max_hp = max_hp;
+	t.bucket_name = bucket_name;
+	t.bucket_value = bucket_value;
+	t.bucket_comparison = bucket_comparison;
+
+	AIBot_spells_enforced.push_back(t);
 }
 
 //this gets called from InterruptSpell() for failure or SpellFinished() for success
