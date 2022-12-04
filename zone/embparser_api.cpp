@@ -3173,40 +3173,40 @@ void Perl__crosszonesetentityvariablebynpctypeid(int npc_id, const char* variabl
 	quest_manager.CrossZoneSetEntityVariable(CZUpdateType_NPC, npc_id, variable_name, variable_value);
 }
 
-void Perl__crosszonesignalclientbycharid(int character_id, int signal)
+void Perl__crosszonesignalclientbycharid(int character_id, int signal_id)
 {
-	quest_manager.CrossZoneSignal(CZUpdateType_Character, character_id, signal);
+	quest_manager.CrossZoneSignal(CZUpdateType_Character, character_id, signal_id);
 }
 
-void Perl__crosszonesignalclientbygroupid(int group_id, int signal)
+void Perl__crosszonesignalclientbygroupid(int group_id, int signal_id)
 {
-	quest_manager.CrossZoneSignal(CZUpdateType_Group, group_id, signal);
+	quest_manager.CrossZoneSignal(CZUpdateType_Group, group_id, signal_id);
 }
 
-void Perl__crosszonesignalclientbyraidid(int raid_id, int signal)
+void Perl__crosszonesignalclientbyraidid(int raid_id, int signal_id)
 {
-	quest_manager.CrossZoneSignal(CZUpdateType_Raid, raid_id, signal);
+	quest_manager.CrossZoneSignal(CZUpdateType_Raid, raid_id, signal_id);
 }
 
-void Perl__crosszonesignalclientbyguildid(int guild_id, int signal)
+void Perl__crosszonesignalclientbyguildid(int guild_id, int signal_id)
 {
-	quest_manager.CrossZoneSignal(CZUpdateType_Guild, guild_id, signal);
+	quest_manager.CrossZoneSignal(CZUpdateType_Guild, guild_id, signal_id);
 }
 
-void Perl__crosszonesignalclientbyexpeditionid(uint32 expedition_id, int signal)
+void Perl__crosszonesignalclientbyexpeditionid(uint32 expedition_id, int signal_id)
 {
-	quest_manager.CrossZoneSignal(CZUpdateType_Expedition, expedition_id, signal);
+	quest_manager.CrossZoneSignal(CZUpdateType_Expedition, expedition_id, signal_id);
 }
 
-void Perl__crosszonesignalclientbyname(const char* client_name, int signal)
+void Perl__crosszonesignalclientbyname(const char* client_name, int signal_id)
 {
 	int update_identifier = 0;
-	quest_manager.CrossZoneSignal(CZUpdateType_Expedition, update_identifier, signal, client_name);
+	quest_manager.CrossZoneSignal(CZUpdateType_Expedition, update_identifier, signal_id, client_name);
 }
 
-void Perl__crosszonesignalnpcbynpctypeid(uint32 npc_id, int signal)
+void Perl__crosszonesignalnpcbynpctypeid(uint32 npc_id, int signal_id)
 {
-	quest_manager.CrossZoneSignal(CZUpdateType_NPC, npc_id, signal);
+	quest_manager.CrossZoneSignal(CZUpdateType_NPC, npc_id, signal_id);
 }
 
 void Perl__crosszoneupdateactivitybycharid(int character_id, uint32 task_id, int activity_id)
@@ -3638,24 +3638,24 @@ void Perl__worldwidesetentityvariablenpc(const char* variable_name, const char* 
 	quest_manager.WorldWideSetEntityVariable(WWSetEntityVariableUpdateType_NPC, variable_name, variable_value);
 }
 
-void Perl__worldwidesignalnpc(int signal)
+void Perl__worldwidesignalnpc(int signal_id)
 {
-	quest_manager.WorldWideSignal(WWSignalUpdateType_NPC, signal);
+	quest_manager.WorldWideSignal(WWSignalUpdateType_NPC, signal_id);
 }
 
-void Perl__worldwidesignalclient(int signal)
+void Perl__worldwidesignalclient(int signal_id)
 {
-	quest_manager.WorldWideSignal(WWSignalUpdateType_Character, signal);
+	quest_manager.WorldWideSignal(WWSignalUpdateType_Character, signal_id);
 }
 
-void Perl__worldwidesignalclient(int signal, uint8 min_status)
+void Perl__worldwidesignalclient(int signal_id, uint8 min_status)
 {
-	quest_manager.WorldWideSignal(WWSignalUpdateType_Character, signal, min_status);
+	quest_manager.WorldWideSignal(WWSignalUpdateType_Character, signal_id, min_status);
 }
 
-void Perl__worldwidesignalclient(int signal, uint8 min_status, uint8 max_status)
+void Perl__worldwidesignalclient(int signal_id, uint8 min_status, uint8 max_status)
 {
-	quest_manager.WorldWideSignal(WWSignalUpdateType_Character, signal, min_status, max_status);
+	quest_manager.WorldWideSignal(WWSignalUpdateType_Character, signal_id, min_status, max_status);
 }
 
 void Perl__worldwideupdateactivity(uint32 task_id, int activity_id)

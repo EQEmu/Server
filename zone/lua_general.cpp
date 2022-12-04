@@ -2868,40 +2868,40 @@ void lua_cross_zone_set_entity_variable_by_client_name(const char* character_nam
 	quest_manager.CrossZoneSetEntityVariable(update_type, update_identifier, variable_name, variable_value, character_name);
 }
 
-void lua_cross_zone_signal_client_by_char_id(uint32 character_id, int signal) {
+void lua_cross_zone_signal_client_by_char_id(uint32 character_id, int signal_id) {
 	uint8 update_type = CZUpdateType_Character;
-	quest_manager.CrossZoneSignal(update_type, character_id, signal);
+	quest_manager.CrossZoneSignal(update_type, character_id, signal_id);
 }
 
-void lua_cross_zone_signal_client_by_group_id(uint32 group_id, int signal) {
+void lua_cross_zone_signal_client_by_group_id(uint32 group_id, int signal_id) {
 	uint8 update_type = CZUpdateType_Group;
-	quest_manager.CrossZoneSignal(update_type, group_id, signal);
+	quest_manager.CrossZoneSignal(update_type, group_id, signal_id);
 }
 
-void lua_cross_zone_signal_client_by_raid_id(uint32 raid_id, int signal) {
+void lua_cross_zone_signal_client_by_raid_id(uint32 raid_id, int signal_id) {
 	uint8 update_type = CZUpdateType_Raid;
-	quest_manager.CrossZoneSignal(update_type, raid_id, signal);
+	quest_manager.CrossZoneSignal(update_type, raid_id, signal_id);
 }
 
-void lua_cross_zone_signal_client_by_guild_id(uint32 guild_id, int signal) {
+void lua_cross_zone_signal_client_by_guild_id(uint32 guild_id, int signal_id) {
 	uint8 update_type = CZUpdateType_Guild;
-	quest_manager.CrossZoneSignal(update_type, guild_id, signal);
+	quest_manager.CrossZoneSignal(update_type, guild_id, signal_id);
 }
 
-void lua_cross_zone_signal_client_by_expedition_id(uint32 expedition_id, int signal) {
+void lua_cross_zone_signal_client_by_expedition_id(uint32 expedition_id, int signal_id) {
 	uint8 update_type = CZUpdateType_Expedition;
-	quest_manager.CrossZoneSignal(update_type, expedition_id, signal);
+	quest_manager.CrossZoneSignal(update_type, expedition_id, signal_id);
 }
 
-void lua_cross_zone_signal_client_by_name(const char* client_name, int signal) {
+void lua_cross_zone_signal_client_by_name(const char* client_name, int signal_id) {
 	uint8 update_type = CZUpdateType_ClientName;
 	int update_identifier = 0;
-	quest_manager.CrossZoneSignal(update_type, update_identifier, signal, client_name);
+	quest_manager.CrossZoneSignal(update_type, update_identifier, signal_id, client_name);
 }
 
-void lua_cross_zone_signal_npc_by_npctype_id(uint32 npctype_id, int signal) {
+void lua_cross_zone_signal_npc_by_npctype_id(uint32 npctype_id, int signal_id) {
 	uint8 update_type = CZUpdateType_NPC;
-	quest_manager.CrossZoneSignal(update_type, npctype_id, signal);
+	quest_manager.CrossZoneSignal(update_type, npctype_id, signal_id);
 }
 
 void lua_cross_zone_update_activity_by_char_id(int character_id, uint32 task_id, int activity_id) {
@@ -3329,24 +3329,24 @@ void lua_world_wide_set_entity_variable_npc(const char* variable_name, const cha
 	quest_manager.WorldWideSetEntityVariable(update_type, variable_name, variable_value);
 }
 
-void lua_world_wide_signal_client(uint32 signal) {
+void lua_world_wide_signal_client(int signal_id) {
 	uint8 update_type = WWSignalUpdateType_Character;
-	quest_manager.WorldWideSignal(update_type, signal);
+	quest_manager.WorldWideSignal(update_type, signal_id);
 }
 
-void lua_world_wide_signal_client(uint32 signal, uint8 min_status) {
+void lua_world_wide_signal_client(int signal_id, uint8 min_status) {
 	uint8 update_type = WWSignalUpdateType_Character;
-	quest_manager.WorldWideSignal(update_type, signal, min_status);
+	quest_manager.WorldWideSignal(update_type, signal_id, min_status);
 }
 
-void lua_world_wide_signal_client(uint32 signal, uint8 min_status, uint8 max_status) {
+void lua_world_wide_signal_client(int signal_id, uint8 min_status, uint8 max_status) {
 	uint8 update_type = WWSignalUpdateType_Character;
-	quest_manager.WorldWideSignal(update_type, signal, min_status, max_status);
+	quest_manager.WorldWideSignal(update_type, signal_id, min_status, max_status);
 }
 
-void lua_world_wide_signal_npc(uint32 signal) {
+void lua_world_wide_signal_npc(int signal_id) {
 	uint8 update_type = WWSignalUpdateType_NPC;
-	quest_manager.WorldWideSignal(update_type, signal);
+	quest_manager.WorldWideSignal(update_type, signal_id);
 }
 
 void lua_world_wide_update_activity(uint32 task_id, int activity_id) {
@@ -4329,9 +4329,9 @@ luabind::scope lua_register_general() {
 		luabind::def("world_wide_set_entity_variable_client", (void(*)(const char*,const char*,uint8))&lua_world_wide_set_entity_variable_client),
 		luabind::def("world_wide_set_entity_variable_client", (void(*)(const char*,const char*,uint8,uint8))&lua_world_wide_set_entity_variable_client),
 		luabind::def("world_wide_set_entity_variable_npc", &lua_world_wide_set_entity_variable_npc),
-		luabind::def("world_wide_signal_client", (void(*)(uint32))&lua_world_wide_signal_client),
-		luabind::def("world_wide_signal_client", (void(*)(uint32,uint8))&lua_world_wide_signal_client),
-		luabind::def("world_wide_signal_client", (void(*)(uint32,uint8,uint8))&lua_world_wide_signal_client),
+		luabind::def("world_wide_signal_client", (void(*)(int))&lua_world_wide_signal_client),
+		luabind::def("world_wide_signal_client", (void(*)(int,uint8))&lua_world_wide_signal_client),
+		luabind::def("world_wide_signal_client", (void(*)(int,uint8,uint8))&lua_world_wide_signal_client),
 		luabind::def("world_wide_signal_npc", &lua_world_wide_signal_npc),
 		luabind::def("world_wide_update_activity", (void(*)(uint32,int))&lua_world_wide_update_activity),
 		luabind::def("world_wide_update_activity", (void(*)(uint32,int,int))&lua_world_wide_update_activity),

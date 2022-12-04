@@ -2614,12 +2614,12 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		CZSignal_Struct* CZS = (CZSignal_Struct*) pack->pBuffer;
 		uint8 update_type = CZS->update_type;
 		int update_identifier = CZS->update_identifier;
-		int signal = CZS->signal;
+		int signal_id = CZS->signal_id;
 		const char* client_name = CZS->client_name;
 		if (update_type == CZUpdateType_Character) {
 			auto client = entity_list.GetClientByCharID(update_identifier);
 			if (client) {
-				client->Signal(signal);
+				client->Signal(signal_id);
 			}
 		} else if (update_type == CZUpdateType_Group) {
 			auto client_group = entity_list.GetGroupByID(update_identifier);
@@ -2627,7 +2627,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 				for (int member_index = 0; member_index < MAX_GROUP_MEMBERS; member_index++) {
 					if (client_group->members[member_index] && client_group->members[member_index]->IsClient()) {
 						auto group_member = client_group->members[member_index]->CastToClient();
-						group_member->Signal(signal);
+						group_member->Signal(signal_id);
 					}
 				}
 			}
@@ -2637,31 +2637,31 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 				for (int member_index = 0; member_index < MAX_RAID_MEMBERS; member_index++) {
 					if (client_raid->members[member_index].member && client_raid->members[member_index].member->IsClient()) {
 						auto raid_member = client_raid->members[member_index].member->CastToClient();
-						raid_member->Signal(signal);
+						raid_member->Signal(signal_id);
 					}
 				}
 			}
 		} else if (update_type == CZUpdateType_Guild) {
 			for (auto &client: entity_list.GetClientList()) {
 				if (client.second->GuildID() > 0 && client.second->GuildID() == update_identifier) {
-					client.second->Signal(signal);
+					client.second->Signal(signal_id);
 				}
 			}
 		} else if (update_type == CZUpdateType_Expedition) {
 			for (auto &client: entity_list.GetClientList()) {
 				if (client.second->GetExpedition() && client.second->GetExpedition()->GetID() == update_identifier) {
-					client.second->Signal(signal);
+					client.second->Signal(signal_id);
 				}
 			}
 		} else if (update_type == CZUpdateType_ClientName) {
 			auto client = entity_list.GetClientByName(client_name);
 			if (client) {
-				client->Signal(signal);
+				client->Signal(signal_id);
 			}
 		} else if (update_type == CZUpdateType_NPC) {
 			auto npc = entity_list.GetNPCByNPCTypeID(update_identifier);
 			if (npc) {
-				npc->SignalNPC(signal);
+				npc->SignalNPC(signal_id);
 			}
 		}
 		break;
@@ -3083,18 +3083,18 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	{
 		WWSignal_Struct* WWS = (WWSignal_Struct*) pack->pBuffer;
 		uint8 update_type = WWS->update_type;
-		uint32 signal = WWS->signal;
+		int signal_id = WWS->signal_id;
 		uint8 min_status = WWS->min_status;
 		uint8 max_status = WWS->max_status;
 		if (update_type == WWSignalUpdateType_Character) {
 			for (auto &client : entity_list.GetClientList()) {
 				if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == AccountStatus::Player)) {
-					client.second->Signal(signal);
+					client.second->Signal(signal_id);
 				}
 			}
 		} else if (update_type == WWSignalUpdateType_NPC) {
 			for (auto &npc : entity_list.GetNPCList()) {
-				npc.second->SignalNPC(signal);
+				npc.second->SignalNPC(signal_id);
 			}
 		}
 		break;
