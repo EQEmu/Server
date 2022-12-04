@@ -72,7 +72,6 @@ Bot::Bot(NPCType *npcTypeData, Client* botOwner) : NPC(npcTypeData, nullptr, glm
 	SetBotID(0);
 	SetBotSpellID(0);
 	SetSpawnStatus(false);
-	SetBotArcher(false);
 	SetBotCharmer(false);
 	SetPetChooser(false);
 	SetRangerAutoWeaponSelect(false);
@@ -167,7 +166,6 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 	SetBotID(botID);
 	SetBotSpellID(botSpellsID);
 	SetSpawnStatus(false);
-	SetBotArcher(false);
 	SetBotCharmer(false);
 	SetPetChooser(false);
 	SetRangerAutoWeaponSelect(false);
@@ -2137,7 +2135,7 @@ bool Bot::Process()
 	}
 
 	if (mob_close_scan_timer.Check()) {
-		LogAIScanClose(
+		LogAIScanCloseDetail(
 			"is_moving [{}] bot [{}] timer [{}]",
 			moving ? "true" : "false",
 			GetCleanName(),
@@ -3164,12 +3162,12 @@ void Bot::AI_Process()
 
 			if (atArcheryRange && !IsBotArcher()) {
 
-				SetBotArcher(true);
+				SetBotArcherySetting(true);
 				changeWeapons = true;
 			}
 			else if (!atArcheryRange && IsBotArcher()) {
 
-				SetBotArcher(false);
+				SetBotArcherySetting(false);
 				changeWeapons = true;
 			}
 
@@ -4005,6 +4003,21 @@ bool Bot::Spawn(Client* botCharacterOwner) {
 
 		m_targetable = true;
 		entity_list.AddBot(this, true, true);
+
+		GetBotOwnerDataBuckets();
+		GetBotDataBuckets();
+		LoadBotSpellSettings();
+		if (!AI_AddBotSpells(GetBotSpellID())) {
+			GetBotOwner()->CastToClient()->Message(
+				Chat::White,
+				fmt::format(
+					"Failed to load spells for '{}' (ID {}).",
+					GetCleanName(),
+					GetBotID()
+				).c_str()
+			);
+		}
+
 		// Load pet
 		LoadPet();
 		SentPositionPacket(0.0f, 0.0f, 0.0f, 0.0f, 0);
@@ -9840,7 +9853,7 @@ void EntityList::ScanCloseClientMobs(std::unordered_map<uint16, Mob*>& close_mob
 		}
 	}
 
-	LogAIScanClose("Close Client Mob List Size [{}] for mob [{}]", close_mobs.size(), scanning_mob->GetCleanName());
+	LogAIScanCloseModerate("Close Client Mob List Size [{}] for mob [{}]", close_mobs.size(), scanning_mob->GetCleanName());
 }
 
 uint8 Bot::GetNumberNeedingHealedInGroup(uint8 hpr, bool includePets) {
@@ -10871,6 +10884,24 @@ std::string Bot::GetHPString(int8 min_hp, int8 max_hp)
 	}
 
 	return hp_string;
+}
+
+void Bot::SetBotArcherySetting(bool bot_archer_setting, bool save) 
+{ 
+	m_bot_archery_setting = bot_archer_setting;
+	if (save) {
+		if (!database.botdb.SaveBotArcherSetting(GetBotID(), bot_archer_setting)) {
+			if (GetBotOwner() && GetBotOwner()->IsClient()) {
+				GetBotOwner()->CastToClient()->Message(
+					Chat::White,
+					fmt::format(
+						"Failed to save archery settings for {}.",
+						GetCleanName()
+					).c_str()
+				);
+			}
+		}
+	}
 }
 
 uint8 Bot::spell_casting_chances[SPELL_TYPE_COUNT][PLAYER_CLASS_COUNT][EQ::constants::STANCE_TYPE_COUNT][cntHSND] = { 0 };

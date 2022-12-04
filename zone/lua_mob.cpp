@@ -2699,6 +2699,16 @@ luabind::object Lua_Mob::GetEntityVariables(lua_State* L) {
 	return t;
 }
 
+bool Lua_Mob::ClearEntityVariables() {
+	Lua_Safe_Call_Bool();
+	return self->ClearEntityVariables();
+}
+
+bool Lua_Mob::DeleteEntityVariable(std::string variable_name) {
+	Lua_Safe_Call_Bool();
+	return self->DeleteEntityVariable(variable_name);
+}
+
 void Lua_Mob::SetEntityVariable(std::string variable_name, std::string variable_value) {
 	Lua_Safe_Call_Void();
 	self->SetEntityVariable(variable_name, variable_value);
@@ -2883,6 +2893,7 @@ luabind::scope lua_register_mob() {
 	.def("CheckLoSToLoc", (bool(Lua_Mob::*)(double,double,double))&Lua_Mob::CheckLoSToLoc)
 	.def("CheckLoSToLoc", (bool(Lua_Mob::*)(double,double,double,double))&Lua_Mob::CheckLoSToLoc)
 	.def("CheckNumHitsRemaining", &Lua_Mob::CheckNumHitsRemaining)
+	.def("ClearEntityVariables", (bool(Lua_Mob::*)(void))&Lua_Mob::ClearEntityVariables)
 	.def("ClearSpecialAbilities", (void(Lua_Mob::*)(void))&Lua_Mob::ClearSpecialAbilities)
 	.def("CloneAppearance", (void(Lua_Mob::*)(Lua_Mob))&Lua_Mob::CloneAppearance)
 	.def("CloneAppearance", (void(Lua_Mob::*)(Lua_Mob,bool))&Lua_Mob::CloneAppearance)
@@ -2929,6 +2940,7 @@ luabind::scope lua_register_mob() {
 	.def("DamageHateListPercentage", (void(Lua_Mob::*)(int64,uint32))&Lua_Mob::DamageHateListPercentage)
 	.def("DelGlobal", (void(Lua_Mob::*)(const char*))&Lua_Mob::DelGlobal)
 	.def("DeleteBucket", (void(Lua_Mob::*)(std::string))&Lua_Mob::DeleteBucket)
+	.def("DeleteEntityVariable", (bool(Lua_Mob::*)(std::string))&Lua_Mob::DeleteEntityVariable)
 	.def("Depop", (void(Lua_Mob::*)(bool))&Lua_Mob::Depop)
 	.def("Depop", (void(Lua_Mob::*)(void))&Lua_Mob::Depop)
 	.def("DivineAura", (bool(Lua_Mob::*)(void))&Lua_Mob::DivineAura)

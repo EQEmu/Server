@@ -144,6 +144,8 @@ public:
 
 	bool SaveStopMeleeLevel(const uint32 owner_id, const uint32 bot_id, const uint8 sml_value);
 
+	bool SaveBotArcherSetting(const uint32 bot_id, const bool bot_archer_setting);
+
 	bool LoadOwnerOptions(Client *owner);
 	bool SaveOwnerOption(const uint32 owner_id, size_t type, const bool flag);
 	bool SaveOwnerOption(const uint32 owner_id, const std::pair<size_t, size_t> type, const std::pair<bool, bool> flag);

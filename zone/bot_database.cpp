@@ -410,7 +410,8 @@ bool BotDatabase::LoadBot(const uint32 bot_id, Bot*& loaded_bot)
 		" `follow_distance`," // 26
 		" `stop_melee_level`," // 27
 		" `expansion_bitmask`," // 28
-		" `enforce_spell_settings`" // 29
+		" `enforce_spell_settings`," // 29
+		" `archery_setting`" // 30
 		" FROM `bot_data`"
 		" WHERE `bot_id` = {}"
 		" LIMIT 1",
@@ -511,6 +512,8 @@ bool BotDatabase::LoadBot(const uint32 bot_id, Bot*& loaded_bot)
 		loaded_bot->SetExpansionBitmask(eb, false);
 
 		loaded_bot->SetBotEnforceSpellSetting((std::stoi(row[29]) > 0 ? true : false));
+
+		loaded_bot->SetBotArcherySetting((std::stoi(row[30]) > 0 ? true : false));
 	}
 
 	return true;
@@ -3292,6 +3295,27 @@ bool BotDatabase::SaveEnforceSpellSetting(const uint32 bot_id, const bool enforc
 		"SET `enforce_spell_settings` = {} "
 		"WHERE `bot_id` = {}",
 		(enforce_spell_setting ? 1 : 0),
+		bot_id
+	);
+	auto results = database.QueryDatabase(query);
+	if (!results.Success()) {
+		return false;
+	}
+
+	return true;
+}
+
+bool BotDatabase::SaveBotArcherSetting(const uint32 bot_id, const bool bot_archer_setting)
+{
+	if (!bot_id) {
+		return false;
+	}
+
+	query = fmt::format(
+		"UPDATE `bot_data`"
+		"SET `archery_setting` = {} "
+		"WHERE `bot_id` = {}",
+		(bot_archer_setting ? 1 : 0),
 		bot_id
 	);
 	auto results = database.QueryDatabase(query);

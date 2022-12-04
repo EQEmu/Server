@@ -183,6 +183,16 @@ luabind::object Lua_Object::GetEntityVariables(lua_State* L) {
 	return t;
 }
 
+bool Lua_Object::ClearEntityVariables() {
+	Lua_Safe_Call_Bool();
+	return self->ClearEntityVariables();
+}
+
+bool Lua_Object::DeleteEntityVariable(std::string variable_name) {
+	Lua_Safe_Call_Bool();
+	return self->DeleteEntityVariable(variable_name);
+}
+
 void Lua_Object::SetEntityVariable(std::string variable_name, std::string variable_value) {
 	Lua_Safe_Call_Void();
 	self->SetEntityVariable(variable_name, variable_value);
@@ -198,10 +208,12 @@ luabind::scope lua_register_object() {
 	.def(luabind::constructor<>())
 	.property("null", &Lua_Object::Null)
 	.property("valid", &Lua_Object::Valid)
+	.def("ClearEntityVariables", (bool(Lua_Object::*)(void))&Lua_Object::ClearEntityVariables)
 	.def("ClearUser", (void(Lua_Object::*)(void))&Lua_Object::ClearUser)
 	.def("Close", (void(Lua_Object::*)(void))&Lua_Object::Close)
 	.def("Delete", (void(Lua_Object::*)(bool))&Lua_Object::Delete)
 	.def("Delete", (void(Lua_Object::*)(void))&Lua_Object::Delete)
+	.def("DeleteEntityVariable", (bool(Lua_Object::*)(std::string))&Lua_Object::DeleteEntityVariable)
 	.def("DeleteItem", (void(Lua_Object::*)(int))&Lua_Object::DeleteItem)
 	.def("Depop", (void(Lua_Object::*)(void))&Lua_Object::Depop)
 	.def("EntityVariableExists", (bool(Lua_Object::*)(std::string))&Lua_Object::EntityVariableExists)

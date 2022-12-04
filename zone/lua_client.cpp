@@ -2865,6 +2865,12 @@ void Lua_Client::SendPayload(int payload_id, std::string payload_value) {
 	self->SendPayload(payload_id, payload_value);
 }
 
+std::string Lua_Client::GetGuildPublicNote()
+{
+	Lua_Safe_Call_String();
+	return self->GetGuildPublicNote();
+}
+
 #ifdef BOTS
 
 int Lua_Client::GetBotRequiredLevel()
@@ -3122,6 +3128,7 @@ luabind::scope lua_register_client() {
 	.def("GetGMStatus", (int16(Lua_Client::*)(void))&Lua_Client::GetGMStatus)
 	.def("GetGroup", (Lua_Group(Lua_Client::*)(void))&Lua_Client::GetGroup)
 	.def("GetGroupPoints", (uint32(Lua_Client::*)(void))&Lua_Client::GetGroupPoints)
+	.def("GetGuildPublicNote", (std::string(Lua_Client::*)(void))&Lua_Client::GetGuildPublicNote)
 	.def("GetHorseId", (int(Lua_Client::*)(void))&Lua_Client::GetHorseId)
 	.def("GetHealAmount", (int(Lua_Client::*)(void))&Lua_Client::GetHealAmount)
 	.def("GetHunger", (int(Lua_Client::*)(void))&Lua_Client::GetHunger)

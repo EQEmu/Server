@@ -68,6 +68,7 @@ public:
 		uint8_t     stop_melee_level;
 		int32_t     expansion_bitmask;
 		uint8_t     enforce_spell_settings;
+		uint8_t     archery_setting;
 	};
 
 	static std::string PrimaryKey()
@@ -127,6 +128,7 @@ public:
 			"stop_melee_level",
 			"expansion_bitmask",
 			"enforce_spell_settings",
+			"archery_setting",
 		};
 	}
 
@@ -182,6 +184,7 @@ public:
 			"stop_melee_level",
 			"expansion_bitmask",
 			"enforce_spell_settings",
+			"archery_setting",
 		};
 	}
 
@@ -271,6 +274,7 @@ public:
 		e.stop_melee_level       = 255;
 		e.expansion_bitmask      = -1;
 		e.enforce_spell_settings = 0;
+		e.archery_setting        = 0;
 
 		return e;
 	}
@@ -355,6 +359,7 @@ public:
 			e.stop_melee_level       = static_cast<uint8_t>(strtoul(row[46], nullptr, 10));
 			e.expansion_bitmask      = static_cast<int32_t>(atoi(row[47]));
 			e.enforce_spell_settings = static_cast<uint8_t>(strtoul(row[48], nullptr, 10));
+			e.archery_setting        = static_cast<uint8_t>(strtoul(row[49], nullptr, 10));
 
 			return e;
 		}
@@ -436,6 +441,7 @@ public:
 		v.push_back(columns[46] + " = " + std::to_string(e.stop_melee_level));
 		v.push_back(columns[47] + " = " + std::to_string(e.expansion_bitmask));
 		v.push_back(columns[48] + " = " + std::to_string(e.enforce_spell_settings));
+		v.push_back(columns[49] + " = " + std::to_string(e.archery_setting));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -506,6 +512,7 @@ public:
 		v.push_back(std::to_string(e.stop_melee_level));
 		v.push_back(std::to_string(e.expansion_bitmask));
 		v.push_back(std::to_string(e.enforce_spell_settings));
+		v.push_back(std::to_string(e.archery_setting));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -584,6 +591,7 @@ public:
 			v.push_back(std::to_string(e.stop_melee_level));
 			v.push_back(std::to_string(e.expansion_bitmask));
 			v.push_back(std::to_string(e.enforce_spell_settings));
+			v.push_back(std::to_string(e.archery_setting));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
@@ -666,6 +674,7 @@ public:
 			e.stop_melee_level       = static_cast<uint8_t>(strtoul(row[46], nullptr, 10));
 			e.expansion_bitmask      = static_cast<int32_t>(atoi(row[47]));
 			e.enforce_spell_settings = static_cast<uint8_t>(strtoul(row[48], nullptr, 10));
+			e.archery_setting        = static_cast<uint8_t>(strtoul(row[49], nullptr, 10));
 
 			all_entries.push_back(e);
 		}
@@ -739,6 +748,7 @@ public:
 			e.stop_melee_level       = static_cast<uint8_t>(strtoul(row[46], nullptr, 10));
 			e.expansion_bitmask      = static_cast<int32_t>(atoi(row[47]));
 			e.enforce_spell_settings = static_cast<uint8_t>(strtoul(row[48], nullptr, 10));
+			e.archery_setting        = static_cast<uint8_t>(strtoul(row[49], nullptr, 10));
 
 			all_entries.push_back(e);
 		}

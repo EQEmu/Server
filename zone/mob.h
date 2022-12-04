@@ -1130,6 +1130,8 @@ public:
 	virtual void AI_ShutDown();
 	virtual void AI_Process();
 
+	bool ClearEntityVariables();
+	bool DeleteEntityVariable(std::string variable_name);
 	std::string GetEntityVariable(std::string variable_name);
 	std::vector<std::string> GetEntityVariables();
 	void SetEntityVariable(std::string variable_name, std::string variable_value);

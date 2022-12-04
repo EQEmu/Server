@@ -1668,6 +1668,8 @@ public:
 
 	std::map<std::string,std::string> GetMerchantDataBuckets();
 
+	std::string GetGuildPublicNote();
+
 protected:
 	friend class Mob;
 	void CalcItemBonuses(StatBonuses* newbon);
