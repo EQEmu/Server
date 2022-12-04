@@ -1069,11 +1069,7 @@ bool Object::ClearEntityVariables()
 
 bool Object::DeleteEntityVariable(std::string variable_name)
 {
-	if (o_EntityVariables.empty()) {
-		return false;
-	}
-
-	if (variable_name.empty()) {
+	if (o_EntityVariables.empty() || variable_name.empty()) {
 		return false;
 	}
 
@@ -1088,11 +1084,7 @@ bool Object::DeleteEntityVariable(std::string variable_name)
 
 std::string Object::GetEntityVariable(std::string variable_name)
 {
-	if (o_EntityVariables.empty()) {
-		return std::string();
-	}
-
-	if (variable_name.empty()) {
+	if (o_EntityVariables.empty() || variable_name.empty()) {
 		return std::string();
 	}
 
@@ -1120,11 +1112,7 @@ std::vector<std::string> Object::GetEntityVariables()
 
 bool Object::EntityVariableExists(std::string variable_name)
 {
-	if (o_EntityVariables.empty()) {
-		return false;
-	}
-
-	if (variable_name.empty()) {
+	if (o_EntityVariables.empty() || variable_name.empty()) {
 		return false;
 	}
 
@@ -1138,5 +1126,9 @@ bool Object::EntityVariableExists(std::string variable_name)
 
 void Object::SetEntityVariable(std::string variable_name, std::string variable_value)
 {
+	if (variable_name.empty()) {
+		return;
+	}
+
 	o_EntityVariables[variable_name] = variable_value;
 }

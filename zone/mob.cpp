@@ -4473,11 +4473,7 @@ bool Mob::ClearEntityVariables()
 
 bool Mob::DeleteEntityVariable(std::string variable_name)
 {
-	if (m_EntityVariables.empty()) {
-		return false;
-	}
-
-	if (variable_name.empty()) {
+	if (m_EntityVariables.empty() || variable_name.empty()) {
 		return false;
 	}
 
@@ -4492,11 +4488,7 @@ bool Mob::DeleteEntityVariable(std::string variable_name)
 
 std::string Mob::GetEntityVariable(std::string variable_name)
 {
-	if (m_EntityVariables.empty()) {
-		return std::string();
-	}
-
-	if (variable_name.empty()) {
+	if (m_EntityVariables.empty() || variable_name.empty()) {
 		return std::string();
 	}
 
@@ -4524,11 +4516,7 @@ std::vector<std::string> Mob::GetEntityVariables()
 
 bool Mob::EntityVariableExists(std::string variable_name)
 {
-	if (m_EntityVariables.empty()) {
-		return false;
-	}
-
-	if (variable_name.empty()) {
+	if (m_EntityVariables.empty() || variable_name.empty()) {
 		return false;
 	}
 
@@ -4542,6 +4530,10 @@ bool Mob::EntityVariableExists(std::string variable_name)
 
 void Mob::SetEntityVariable(std::string variable_name, std::string variable_value)
 {
+	if (variable_name.empty()) {
+		return;
+	}
+
 	m_EntityVariables[variable_name] = variable_value;
 }
 
