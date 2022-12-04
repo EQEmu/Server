@@ -1057,13 +1057,41 @@ void Object::SetHeading(float heading)
 	safe_delete(app2);
 }
 
-void Object::SetEntityVariable(std::string variable_name, std::string variable_value)
+bool Object::ClearEntityVariables()
 {
-	o_EntityVariables[variable_name] = variable_value;
+	if (o_EntityVariables.empty()) {
+		return false;
+	}
+
+	o_EntityVariables.clear();
+	return true;
+}
+
+bool Object::DeleteEntityVariable(std::string variable_name)
+{
+	if (o_EntityVariables.empty()) {
+		return false;
+	}
+
+	if (variable_name.empty()) {
+		return false;
+	}
+
+	auto v = o_EntityVariables.find(variable_name);
+	if (v == o_EntityVariables.end()) {
+		return false;
+	}
+
+	o_EntityVariables.erase(v);
+	return true;
 }
 
 std::string Object::GetEntityVariable(std::string variable_name)
 {
+	if (o_EntityVariables.empty()) {
+		return std::string();
+	}
+
 	if (variable_name.empty()) {
 		return std::string();
 	}
@@ -1092,6 +1120,10 @@ std::vector<std::string> Object::GetEntityVariables()
 
 bool Object::EntityVariableExists(std::string variable_name)
 {
+	if (o_EntityVariables.empty()) {
+		return false;
+	}
+
 	if (variable_name.empty()) {
 		return false;
 	}
@@ -1102,4 +1134,9 @@ bool Object::EntityVariableExists(std::string variable_name)
 	}
 
 	return false;
+}
+
+void Object::SetEntityVariable(std::string variable_name, std::string variable_value)
+{
+	o_EntityVariables[variable_name] = variable_value;
 }
