@@ -33,6 +33,7 @@
 9032|2022_11_07_bot_expansion_bitmask.sql|SHOW COLUMNS FROM `bot_data` LIKE 'expansion_bitmask'|empty|
 9033|2022_11_19_bot_spell_settings.sql|SHOW TABLES LIKE 'bot_spell_settings'|empty|
 9034|2022_12_02_bot_spell_settings.sql|SHOW COLUMNS FROM `bot_data` LIKE 'enforce_spell_settings'|empty|
+9035|2022_12_04_bot_archery.sql|SHOW COLUMNS FROM `bot_data` LIKE 'archer_setting'|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not
