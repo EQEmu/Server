@@ -205,14 +205,14 @@ void NPC::MoveTo(const glm::vec4 &position, bool saveguardspot)
 	if (IsNPC() && GetGrid() != 0) {    // he is on a grid
 		if (GetGrid() < 0) {    // currently stopped by a quest command
 			SetGrid(0 - GetGrid());    // get him moving again
-			LogAI("MoveTo during quest wandering. Canceling quest wandering and going back to grid [{}] when MoveTo is done", GetGrid());
+			LogAIDetail("MoveTo during quest wandering. Canceling quest wandering and going back to grid [{}] when MoveTo is done", GetGrid());
 		}
 		AI_walking_timer->Disable();    // disable timer in case he is paused at a wp
 		if (cur_wp >= 0) {    // we've not already done a MoveTo()
 			save_wp = cur_wp;    // save the current waypoint
 			cur_wp  = EQ::WaypointStatus::QuestControlGrid;
 		}
-		LogAI("MoveTo [{}], pausing regular grid wandering. Grid [{}], save_wp [{}]",
+		LogAIDetail("MoveTo [{}], pausing regular grid wandering. Grid [{}], save_wp [{}]",
 			to_string(static_cast<glm::vec3>(position)).c_str(),
 			-GetGrid(),
 			save_wp);
@@ -221,7 +221,7 @@ void NPC::MoveTo(const glm::vec4 &position, bool saveguardspot)
 		roamer  = true;
 		save_wp = 0;
 		cur_wp  = EQ::WaypointStatus::QuestControlNoGrid;
-		LogAI("MoveTo [{}] without a grid", to_string(static_cast<glm::vec3>(position)).c_str());
+		LogAIDetail("MoveTo [{}] without a grid", to_string(static_cast<glm::vec3>(position)).c_str());
 	}
 
 	glm::vec3 dest(position);
@@ -239,7 +239,7 @@ void NPC::MoveTo(const glm::vec4 &position, bool saveguardspot)
 		if (m_GuardPoint.w == -1)
 			m_GuardPoint.w = CalculateHeadingToTarget(position.x, position.y);
 
-		LogAI("Setting guard position to [{}]", to_string(static_cast<glm::vec3>(m_GuardPoint)).c_str());
+		LogAIModerate("Setting guard position to [{}]", to_string(static_cast<glm::vec3>(m_GuardPoint)).c_str());
 	}
 
 	cur_wp_pause        = 0;
@@ -261,7 +261,7 @@ void NPC::UpdateWaypoint(int wp_index)
 
 	m_CurrentWayPoint = glm::vec4(cur->x, cur->y, cur->z, cur->heading);
 	cur_wp_pause = cur->pause;
-	LogAI("Next waypoint [{}]: ({}, {}, {}, {})", wp_index, m_CurrentWayPoint.x, m_CurrentWayPoint.y, m_CurrentWayPoint.z, m_CurrentWayPoint.w);
+	LogAIModerate("Next waypoint [{}]: ({}, {}, {}, {})", wp_index, m_CurrentWayPoint.x, m_CurrentWayPoint.y, m_CurrentWayPoint.z, m_CurrentWayPoint.w);
 
 }
 
@@ -559,7 +559,7 @@ void NPC::SetWaypointPause()
 
 void NPC::SaveGuardSpot(bool ClearGuardSpot) {
 	if (ClearGuardSpot) {
-		LogAI("Clearing guard order.");
+		LogAIModerate("Clearing guard order.");
 		m_GuardPoint = glm::vec4();
 	} else {
 		m_GuardPoint = m_Position;
@@ -712,7 +712,7 @@ void Mob::SendTo(float new_x, float new_y, float new_z) {
 	m_Position.x = new_x;
 	m_Position.y = new_y;
 	m_Position.z = new_z;
-	LogAI("Sent To ({}, {}, {})", new_x, new_y, new_z);
+	LogAIDetail("Sent To ({}, {}, {})", new_x, new_y, new_z);
 
 	if (flymode == GravityBehavior::Flying)
 		return;
@@ -728,7 +728,7 @@ void Mob::SendTo(float new_x, float new_y, float new_z) {
 
 			float newz = zone->zonemap->FindBestZ(dest, nullptr);
 
-			LogAI("BestZ returned {} at {}, {}, {}", newz, m_Position.x, m_Position.y, m_Position.z);
+			LogAIModerate("BestZ returned {} at {}, {}, {}", newz, m_Position.x, m_Position.y, m_Position.z);
 
 			if ((newz > -2000) && std::abs(newz - dest.z) < RuleR(Map, FixPathingZMaxDeltaSendTo)) // Sanity check.
 				m_Position.z = newz + 1;
