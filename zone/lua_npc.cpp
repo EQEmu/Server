@@ -681,6 +681,16 @@ void Lua_NPC::ReloadSpells()
 	self->ReloadSpells();
 }
 
+void Lua_NPC::SendPayload(int payload_id) {
+	Lua_Safe_Call_Void();
+	self->SendPayload(payload_id);
+}
+
+void Lua_NPC::SendPayload(int payload_id, std::string payload_value) {
+	Lua_Safe_Call_Void();
+	self->SendPayload(payload_id, payload_value);
+}
+
 luabind::scope lua_register_npc() {
 	return luabind::class_<Lua_NPC, Lua_Mob>("NPC")
 	.def(luabind::constructor<>())
@@ -787,6 +797,8 @@ luabind::scope lua_register_npc() {
 	.def("SaveGuardSpot", (void(Lua_NPC::*)(bool))&Lua_NPC::SaveGuardSpot)
 	.def("SaveGuardSpot", (void(Lua_NPC::*)(float,float,float,float))&Lua_NPC::SaveGuardSpot)
 	.def("ScaleNPC", (void(Lua_NPC::*)(uint8))&Lua_NPC::ScaleNPC)
+	.def("SendPayload", (void(Lua_NPC::*)(int))&Lua_NPC::SendPayload)
+	.def("SendPayload", (void(Lua_NPC::*)(int,std::string))&Lua_NPC::SendPayload)
 	.def("SetCopper", (void(Lua_NPC::*)(uint32))&Lua_NPC::SetCopper)
 	.def("SetFollowCanRun", (void(Lua_NPC::*)(bool))&Lua_NPC::SetFollowCanRun)
 	.def("SetFollowDistance", (void(Lua_NPC::*)(int))&Lua_NPC::SetFollowDistance)

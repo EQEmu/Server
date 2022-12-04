@@ -186,6 +186,24 @@ void handle_npc_signal(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init,
 	lua_setfield(L, -2, "signal");
 }
 
+void handle_npc_payload(
+	QuestInterface *parse,
+	lua_State* L,
+	NPC* npc,
+	Mob *init,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+) {
+	Seperator sep(data.c_str());
+
+	lua_pushinteger(L, std::stoi(sep.arg[0]));
+	lua_setfield(L, -2, "payload_id");
+
+	lua_pushstring(L, sep.argplus[1]);
+	lua_setfield(L, -2, "payload_value");
+}
+
 void handle_npc_timer(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, std::string data, uint32 extra_data,
 						  std::vector<std::any> *extra_pointers) {
 	lua_pushstring(L, data.c_str());
@@ -400,6 +418,17 @@ void handle_player_signal(QuestInterface *parse, lua_State* L, Client* client, s
 						  std::vector<std::any> *extra_pointers) {
 	lua_pushinteger(L, std::stoi(data));
 	lua_setfield(L, -2, "signal");
+}
+
+void handle_player_payload(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
+						  std::vector<std::any> *extra_pointers) {
+	Seperator sep(data.c_str());
+
+	lua_pushinteger(L, std::stoi(sep.arg[0]));
+	lua_setfield(L, -2, "payload_id");
+
+	lua_pushstring(L, sep.argplus[1]);
+	lua_setfield(L, -2, "payload_value");
 }
 
 void handle_player_popup_response(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
@@ -1120,6 +1149,24 @@ void handle_bot_signal(
 ) {
 	lua_pushinteger(L, std::stoi(data));
 	lua_setfield(L, -2, "signal");
+}
+
+void handle_bot_payload(
+	QuestInterface *parse,
+	lua_State* L,
+	Bot* bot,
+	Mob *init,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+) {
+	Seperator sep(data.c_str());
+
+	lua_pushinteger(L, std::stoi(sep.arg[0]));
+	lua_setfield(L, -2, "payload_id");
+
+	lua_pushstring(L, sep.argplus[1]);
+	lua_setfield(L, -2, "payload_value");
 }
 
 void handle_bot_slay(

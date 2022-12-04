@@ -81,9 +81,9 @@ uint32 Perl_Bot_GetBotItemIDBySlot(Bot* self, uint16 slot_id)
 	return self->GetBotItemBySlot(slot_id);
 }
 
-void Perl_Bot_SignalBot(Bot* self, int signal_id)
+void Perl_Bot_Signal(Bot* self, int signal_id)
 {
-	self->SignalBot(signal_id);
+	self->Signal(signal_id);
 }
 
 void Perl_Bot_OwnerMessage(Bot* self, std::string message)
@@ -131,6 +131,16 @@ bool Perl_Bot_HasBotSpellEntry(Bot* self, uint16 spellid)
 	return self->HasBotSpellEntry(spellid);
 }
 
+void Perl_Bot_SendPayload(Bot* self, int payload_id) // @categories Script Utility
+{
+	self->SendPayload(payload_id);
+}
+
+void Perl_Bot_SendPayload(Bot* self, int payload_id, std::string payload_value) // @categories Script Utility
+{
+	self->SendPayload(payload_id, payload_value);
+}
+
 void perl_register_bot()
 {
 	perl::interpreter state(PERL_GET_THX);
@@ -159,9 +169,11 @@ void perl_register_bot()
 	package.add("ReloadBotSpells", &Perl_Bot_ReloadBotSpells);
 	package.add("ReloadBotSpellSettings", &Perl_Bot_ReloadBotSpellSettings);
 	package.add("RemoveBotItem", &Perl_Bot_RemoveBotItem);
+	package.add("SendPayload", (void(*)(Bot*, int))&Perl_Bot_SendPayload);
+	package.add("SendPayload", (void(*)(Bot*, int, std::string))&Perl_Bot_SendPayload);
 	package.add("SetExpansionBitmask", (void(*)(Bot*, int))&Perl_Bot_SetExpansionBitmask);
 	package.add("SetExpansionBitmask", (void(*)(Bot*, int, bool))&Perl_Bot_SetExpansionBitmask);
-	package.add("SignalBot", &Perl_Bot_SignalBot);
+	package.add("Signal", &Perl_Bot_Signal);
 }
 
 #endif //EMBPERL_XS_CLASSES

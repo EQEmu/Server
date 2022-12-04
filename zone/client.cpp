@@ -5496,6 +5496,12 @@ void Client::Signal(int signal_id)
 	parse->EventPlayer(EVENT_SIGNAL, this, export_string, 0);
 }
 
+void Client::SendPayload(int payload_id, std::string payload_value)
+{
+	const auto export_string = fmt::format("{} {}", payload_id, payload_value);
+	parse->EventPlayer(EVENT_PAYLOAD, this, export_string, 0);
+}
+
 void Client::SendRewards()
 {
 	std::vector<ClientReward> rewards;

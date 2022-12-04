@@ -670,6 +670,16 @@ void Perl_NPC_ReloadSpells(NPC* self)
 	self->ReloadSpells();
 }
 
+void Perl_NPC_SendPayload(NPC* self, int payload_id) // @categories Script Utility
+{
+	self->SendPayload(payload_id);
+}
+
+void Perl_NPC_SendPayload(NPC* self, int payload_id, std::string payload_value) // @categories Script Utility
+{
+	self->SendPayload(payload_id, payload_value);
+}
+
 void perl_register_npc()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -786,6 +796,8 @@ void perl_register_npc()
 	package.add("SaveGuardSpot", (void(*)(NPC*, bool))&Perl_NPC_SaveGuardSpot);
 	package.add("SaveGuardSpot", (void(*)(NPC*, float, float, float, float))&Perl_NPC_SaveGuardSpot);
 	package.add("ScaleNPC", &Perl_NPC_ScaleNPC);
+	package.add("SendPayload", (void(*)(NPC*, int))&Perl_NPC_SendPayload);
+	package.add("SendPayload", (void(*)(NPC*, int, std::string))&Perl_NPC_SendPayload);
 	package.add("SetCopper", &Perl_NPC_SetCopper);
 	package.add("SetGold", &Perl_NPC_SetGold);
 	package.add("SetGrid", &Perl_NPC_SetGrid);

@@ -2732,6 +2732,16 @@ perl::array Perl_Client_GetZoneFlags(Client* self)
 	return a;
 }
 
+void Perl_Client_SendPayload(Client* self, int payload_id) // @categories Script Utility
+{
+	self->SendPayload(payload_id);
+}
+
+void Perl_Client_SendPayload(Client* self, int payload_id, std::string payload_value) // @categories Script Utility
+{
+	self->SendPayload(payload_id, payload_value);
+}
+
 #ifdef BOTS
 
 int Perl_Client_GetBotRequiredLevel(Client* self)
@@ -3168,6 +3178,8 @@ void perl_register_client()
 	package.add("SendMarqueeMessage", (void(*)(Client*, uint32, std::string, uint32))&Perl_Client_SendMarqueeMessage);
 	package.add("SendMarqueeMessage", (void(*)(Client*, uint32, uint32, uint32, uint32, uint32, std::string))&Perl_Client_SendMarqueeMessage);
 	package.add("SendOPTranslocateConfirm", &Perl_Client_SendOPTranslocateConfirm);
+	package.add("SendPayload", (void(*)(Client*, int))&Perl_Client_SendPayload);
+	package.add("SendPayload", (void(*)(Client*, int, std::string))&Perl_Client_SendPayload);
 	package.add("SendPEQZoneFlagInfo", &Perl_Client_SendPEQZoneFlagInfo);
 	package.add("SendSound", &Perl_Client_SendSound);
 	package.add("SendSpellAnim", &Perl_Client_SendSpellAnim);

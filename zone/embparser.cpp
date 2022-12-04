@@ -162,7 +162,8 @@ const char *QuestEventSubroutines[_LargestEventID] = {
 	"EVENT_INSPECT",
 	"EVENT_TASK_BEFORE_UPDATE",
 	"EVENT_AA_BUY",
-	"EVENT_AA_GAIN"
+	"EVENT_AA_GAIN",
+	"EVENT_PAYLOAD"
   #ifdef BOTS
 	,
 	"EVENT_SPELL_EFFECT_BOT",
@@ -1600,6 +1601,13 @@ void PerlembParser::ExportEventVariables(
 
 		case EVENT_SIGNAL: {
 			ExportVar(package_name.c_str(), "signal", data);
+			break;
+		}
+
+		case EVENT_PAYLOAD: {
+			Seperator sep(data);
+			ExportVar(package_name.c_str(), "payload_id", sep.arg[0]);
+			ExportVar(package_name.c_str(), "payload_value", sep.arg[1]);
 			break;
 		}
 

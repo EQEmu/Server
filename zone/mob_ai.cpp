@@ -2477,36 +2477,10 @@ void NPC::CheckSignal() {
 	if (!signal_q.empty()) {
 		int signal_id = signal_q.front();
 		signal_q.pop_front();
-		std::string export_string = fmt::format("{}", signal_id);
+		const auto export_string = fmt::format("{}", signal_id);
 		parse->EventNPC(EVENT_SIGNAL, this, nullptr, export_string, 0);
 	}
 }
-
-
-
-/*
-alter table npc_types drop column usedspells;
-alter table npc_types add column npc_spells_id int(11) unsigned not null default 0 after merchant_id;
-Create Table npc_spells (
-	id int(11) unsigned not null auto_increment primary key,
-	name tinytext,
-	parent_list int(11) unsigned not null default 0,
-	attack_proc smallint(5) not null default -1,
-	proc_chance tinyint(3) not null default 3
-	);
-create table npc_spells_entries (
-	id int(11) unsigned not null auto_increment primary key,
-	npc_spells_id int(11) not null,
-	spellid smallint(5) not null default 0,
-	type smallint(5) unsigned not null default 0,
-	minlevel tinyint(3) unsigned not null default 0,
-	maxlevel tinyint(3) unsigned not null default 255,
-	manacost smallint(5) not null default '-1',
-	recast_delay int(11) not null default '-1',
-	priority smallint(5) not null default 0,
-	index npc_spells_id (npc_spells_id)
-	);
-*/
 
 bool IsSpellInList(DBnpcspells_Struct* spell_list, uint16 iSpellID);
 bool IsSpellEffectInList(DBnpcspellseffects_Struct* spelleffect_list, uint16 iSpellEffectID, int32 base_value, int32 limit, int32 max_value);

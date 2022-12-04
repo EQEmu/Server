@@ -1366,7 +1366,7 @@ void Lua_Mob::Signal(int signal_id) {
 		self->CastToNPC()->SignalNPC(signal_id);
 #ifdef BOTS
 	} else if (self->IsBot()) {
-		self->CastToBot()->SignalBot(signal_id);
+		self->CastToBot()->Signal(signal_id);
 #endif
 	}
 }
@@ -2709,6 +2709,34 @@ bool Lua_Mob::EntityVariableExists(std::string variable_name) {
 	return self->EntityVariableExists(variable_name);
 }
 
+void Lua_Mob::SendPayload(int payload_id) {
+	Lua_Safe_Call_Void();
+
+	if (self->IsClient()) {
+		self->CastToClient()->SendPayload(payload_id);
+	} else if (self->IsNPC()) {
+		self->CastToNPC()->SendPayload(payload_id);
+#ifdef BOTS
+	} else if (self->IsBot()) {
+		self->CastToBot()->SendPayload(payload_id);
+#endif
+	}
+}
+
+void Lua_Mob::SendPayload(int payload_id, std::string payload_value) {
+	Lua_Safe_Call_Void();
+
+	if (self->IsClient()) {
+		self->CastToClient()->SendPayload(payload_id, payload_value);
+	} else if (self->IsNPC()) {
+		self->CastToNPC()->SendPayload(payload_id, payload_value);
+#ifdef BOTS
+	} else if (self->IsBot()) {
+		self->CastToBot()->SendPayload(payload_id, payload_value);
+#endif
+	}
+}
+
 #ifdef BOTS
 void Lua_Mob::DamageAreaBots(int64 damage) {
 	Lua_Safe_Call_Void();
@@ -3181,6 +3209,8 @@ luabind::scope lua_register_mob() {
 	.def("SendWearChange", (void(Lua_Mob::*)(uint8))&Lua_Mob::SendWearChange)
 	.def("SendBeginCast", &Lua_Mob::SendBeginCast)
 	.def("SendIllusionPacket", (void(Lua_Mob::*)(luabind::adl::object))&Lua_Mob::SendIllusionPacket)
+	.def("SendPayload", (void(Lua_Mob::*)(int))&Lua_Mob::SendPayload)
+	.def("SendPayload", (void(Lua_Mob::*)(int,std::string))&Lua_Mob::SendPayload)
 	.def("SendSpellEffect", (void(Lua_Mob::*)(uint32,uint32,uint32,bool,uint32))&Lua_Mob::SendSpellEffect)
 	.def("SendSpellEffect", (void(Lua_Mob::*)(uint32,uint32,uint32,bool,uint32,bool))&Lua_Mob::SendSpellEffect)
 	.def("SendSpellEffect", (void(Lua_Mob::*)(uint32,uint32,uint32,bool,uint32,bool,Lua_Client))&Lua_Mob::SendSpellEffect)
