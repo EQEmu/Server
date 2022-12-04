@@ -6942,8 +6942,9 @@ void bot_subcommand_bot_tattoo(Client *c, const Seperator *sep)
 
 void bot_subcommand_bot_toggle_archer(Client *c, const Seperator *sep)
 {
-	if (helper_command_alias_fail(c, "bot_subcommand_bot_toggle_archer", sep->arg[0], "bottogglearcher"))
+	if (helper_command_alias_fail(c, "bot_subcommand_bot_toggle_archer", sep->arg[0], "bottogglearcher")) {
 		return;
+	}
 	if (helper_is_help_or_usage(sep->arg[1])) {
 		c->Message(Chat::White, "usage: %s ([option: on | off]) ([actionable: target | byname] ([actionable_name]))", sep->arg[0]);
 		return;
@@ -6966,21 +6967,26 @@ void bot_subcommand_bot_toggle_archer(Client *c, const Seperator *sep)
 	}
 
 	std::list<Bot*> sbl;
-	if (ActionableBots::PopulateSBL(c, sep->arg[ab_arg], sbl, ab_mask, sep->arg[(ab_arg + 1)]) == ActionableBots::ABT_None)
+	if (ActionableBots::PopulateSBL(c, sep->arg[ab_arg], sbl, ab_mask, sep->arg[(ab_arg + 1)]) == ActionableBots::ABT_None) {
 		return;
+	}
 
 	for (auto bot_iter : sbl) {
-		if (!bot_iter)
+		if (!bot_iter) {
 			continue;
+		}
 
-		if (toggle_archer)
-			bot_iter->SetBotArcher(!bot_iter->IsBotArcher());
-		else
-			bot_iter->SetBotArcher(archer_state);
+		if (toggle_archer) {
+			bot_iter->SetBotArcherySetting(!bot_iter->IsBotArcher(), true);
+		}
+		else {
+			bot_iter->SetBotArcherySetting(archer_state, true);
+		}
 		bot_iter->ChangeBotArcherWeapons(bot_iter->IsBotArcher());
 
-		if (bot_iter->GetClass() == RANGER && bot_iter->GetLevel() >= 61)
+		if (bot_iter->GetClass() == RANGER && bot_iter->GetLevel() >= 61) {
 			bot_iter->SetRangerAutoWeaponSelect(bot_iter->IsBotArcher());
+		}
 	}
 }
 
@@ -9368,11 +9374,9 @@ void bot_subcommand_inventory_remove(Client *c, const Seperator *sep)
 		c->PushItemOnCursor(*inst, true);
 		if (
 			slot_id == EQ::invslot::slotRange ||
-			slot_id == EQ::invslot::slotAmmo ||
-			slot_id == EQ::invslot::slotPrimary ||
-			slot_id == EQ::invslot::slotSecondary
+			slot_id == EQ::invslot::slotAmmo
 		) {
-			my_bot->SetBotArcher(false);
+			my_bot->SetBotArcherySetting(false, true);
 		}
 
 		my_bot->RemoveBotItemBySlot(slot_id, &error_message);
