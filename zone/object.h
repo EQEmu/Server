@@ -171,6 +171,8 @@ public:
 	void SetDisplayName(const char *in_name);
 	const char *GetDisplayName() const { return m_display_name; }
 
+	bool ClearEntityVariables();
+	bool DeleteEntityVariable(std::string variable_name);
 	std::string GetEntityVariable(std::string variable_name);
 	std::vector<std::string> GetEntityVariables();
 	void SetEntityVariable(std::string variable_name, std::string variable_value);

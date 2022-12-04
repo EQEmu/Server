@@ -301,6 +301,8 @@ public:
 	bool SetAA(int rank_id, int new_value, int charges);
 	bool DivineAura();
 	void SetOOCRegen(int64 new_ooc_regen);
+	bool ClearEntityVariables();
+	bool DeleteEntityVariable(std::string variable_name);
 	std::string GetEntityVariable(std::string variable_name);
 	luabind::object GetEntityVariables(lua_State* L);
 	void SetEntityVariable(std::string variable_name, std::string variable_value);
