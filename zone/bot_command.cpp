@@ -6686,20 +6686,6 @@ void bot_subcommand_bot_spawn(Client *c, const Seperator *sep)
 		return;
 	}
 
-	my_bot->GetBotOwnerDataBuckets();
-	my_bot->GetBotDataBuckets();
-	my_bot->LoadBotSpellSettings();
-	if (!my_bot->AI_AddBotSpells(my_bot->GetBotSpellID())) {
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"Failed to load spells for '{}' (ID {}).",
-				bot_name,
-				bot_id
-			).c_str()
-		);
-	}
-
 	static std::string bot_spawn_message[17] = {
 		"I am ready to fight!", // DEFAULT
 		"A solid weapon is my ally!", // WARRIOR
