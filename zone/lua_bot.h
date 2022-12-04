@@ -50,8 +50,10 @@ public:
 	void RemoveBotItem(uint32 item_id);
 	void SetExpansionBitmask(int expansion_bitmask);
 	void SetExpansionBitmask(int expansion_bitmask, bool save);
-	void SignalBot(int signal_id);
+	void Signal(int signal_id);
 	bool HasBotSpellEntry(uint16 spellid);
+	void SendPayload(int payload_id);
+	void SendPayload(int payload_id, std::string payload_value);
 };
 
 #endif

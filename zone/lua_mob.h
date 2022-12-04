@@ -308,6 +308,8 @@ public:
 	void SetEntityVariable(std::string variable_name, std::string variable_value);
 	bool EntityVariableExists(std::string variable_name);
 	void Signal(int signal_id);
+	void SendPayload(int payload_id);
+	void SendPayload(int payload_id, std::string payload_value);
 	bool CombatRange(Lua_Mob other);
 	void DoSpecialAttackDamage(Lua_Mob other, int skill, int max_damage);
 	void DoSpecialAttackDamage(Lua_Mob other, int skill, int max_damage, int min_damage);

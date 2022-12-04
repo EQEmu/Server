@@ -2855,6 +2855,16 @@ luabind::object Lua_Client::GetZoneFlags(lua_State* L) {
 	return t;
 }
 
+void Lua_Client::SendPayload(int payload_id) {
+	Lua_Safe_Call_Void();
+	self->SendPayload(payload_id);
+}
+
+void Lua_Client::SendPayload(int payload_id, std::string payload_value) {
+	Lua_Safe_Call_Void();
+	self->SendPayload(payload_id, payload_value);
+}
+
 std::string Lua_Client::GetGuildPublicNote()
 {
 	Lua_Safe_Call_String();
@@ -3316,6 +3326,8 @@ luabind::scope lua_register_client() {
 	.def("SendSound", (void(Lua_Client::*)(void))&Lua_Client::SendSound)
 	.def("SendToGuildHall", (void(Lua_Client::*)(void))&Lua_Client::SendToGuildHall)
 	.def("SendToInstance", (void(Lua_Client::*)(std::string,std::string,uint32,float,float,float,float,std::string,uint32))&Lua_Client::SendToInstance)
+	.def("SendPayload", (void(Lua_Client::*)(int))&Lua_Client::SendPayload)
+	.def("SendPayload", (void(Lua_Client::*)(int,std::string))&Lua_Client::SendPayload)
 	.def("SendWebLink", (void(Lua_Client::*)(const char *))&Lua_Client::SendWebLink)
 	.def("SendZoneFlagInfo", (void(Lua_Client::*)(Lua_Client))&Lua_Client::SendZoneFlagInfo)
 	.def("SetAAEXPModifier", (void(Lua_Client::*)(uint32,double))&Lua_Client::SetAAEXPModifier)

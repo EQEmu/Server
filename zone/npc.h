@@ -262,6 +262,7 @@ public:
 	void	PetOnSpawn(NewSpawn_Struct* ns);
 
 	void	SignalNPC(int _signal_id);
+	void	SendPayload(int payload_id, std::string payload_value = std::string());
 
 	inline int32 GetNPCFactionID() const
 	{ return npc_faction_id; }
@@ -321,8 +322,9 @@ public:
 
 	bool MeetsLootDropLevelRequirements(LootDropEntries_Struct loot_drop, bool verbose=false);
 
+	void CheckSignal();
+
 	virtual void DoClassAttacks(Mob *target);
-	void	CheckSignal();
 	inline bool IsNotTargetableWithHotkey() const { return no_target_hotkey; }
 	int64 GetNPCHPRegen() const { return hp_regen + itembonuses.HPRegen + spellbonuses.HPRegen; }
 	inline const char* GetAmmoIDfile() const { return ammo_idfile; }

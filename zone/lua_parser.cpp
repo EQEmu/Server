@@ -149,7 +149,8 @@ const char *LuaEvents[_LargestEventID] = {
 	"event_inspect",
 	"event_task_before_update",
 	"event_aa_buy",
-	"event_aa_gain"
+	"event_aa_gain",
+	"event_payload"
 };
 
 extern Zone *zone;
@@ -206,6 +207,7 @@ LuaParser::LuaParser() {
 	NPCArgumentDispatch[EVENT_LEAVE_AREA] = handle_npc_area;
 	NPCArgumentDispatch[EVENT_LOOT_ZONE] = handle_npc_loot_zone;
 	NPCArgumentDispatch[EVENT_SPAWN_ZONE] = handle_npc_spawn_zone;
+	NPCArgumentDispatch[EVENT_PAYLOAD] = handle_npc_payload;
 
 	PlayerArgumentDispatch[EVENT_SAY] = handle_player_say;
 	PlayerArgumentDispatch[EVENT_ENVIRONMENTAL_DAMAGE] = handle_player_environmental_damage;
@@ -259,6 +261,7 @@ LuaParser::LuaParser() {
 	PlayerArgumentDispatch[EVENT_INSPECT] = handle_player_inspect;
 	PlayerArgumentDispatch[EVENT_AA_BUY] = handle_player_aa_buy;
 	PlayerArgumentDispatch[EVENT_AA_GAIN] = handle_player_aa_gain;
+	PlayerArgumentDispatch[EVENT_PAYLOAD] = handle_player_payload;
 
 	ItemArgumentDispatch[EVENT_ITEM_CLICK] = handle_item_click;
 	ItemArgumentDispatch[EVENT_ITEM_CLICK_CAST] = handle_item_click;
@@ -296,6 +299,7 @@ LuaParser::LuaParser() {
 	BotArgumentDispatch[EVENT_TIMER] = handle_bot_timer;
 	BotArgumentDispatch[EVENT_TRADE] = handle_bot_trade;
 	BotArgumentDispatch[EVENT_USE_SKILL] = handle_bot_use_skill;
+	BotArgumentDispatch[EVENT_PAYLOAD] = handle_bot_payload;
 #endif
 
 	L = nullptr;

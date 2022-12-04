@@ -450,6 +450,8 @@ public:
 	void UpdateAdmin(bool from_database);
 	luabind::object GetPEQZoneFlags(lua_State* L);
 	luabind::object GetZoneFlags(lua_State* L);
+	void SendPayload(int payload_id);
+	void SendPayload(int payload_id, std::string payload_value);
 	std::string GetGuildPublicNote();
 
 	void ApplySpell(int spell_id);

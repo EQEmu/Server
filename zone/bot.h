@@ -323,7 +323,7 @@ public:
 		std::string bucket_value,
 		uint8 bucket_comparison
 	);
-	
+
 	void AddSpellToBotEnforceList(
 		int16 iPriority,
 		uint16 iSpellID,
@@ -719,7 +719,8 @@ public:
 	int32 GetBaseDR() { return _baseDR; }
 	int32 GetBaseCorrup() { return _baseCorrup; }
 
-	void SignalBot(int signal_id);
+	void Signal(int signal_id);
+	void SendPayload(int payload_id, std::string payload_value = std::string());
 	void OwnerMessage(std::string message);
 
 protected:

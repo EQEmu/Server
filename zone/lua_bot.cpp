@@ -84,9 +84,9 @@ uint32 Lua_Bot::GetBotItemIDBySlot(uint16 slot_id) {
 	return self->GetBotItemBySlot(slot_id);
 }
 
-void Lua_Bot::SignalBot(int signal_id) {
+void Lua_Bot::Signal(int signal_id) {
 	Lua_Safe_Call_Void();
-	self->SignalBot(signal_id);
+	self->Signal(signal_id);
 }
 
 void Lua_Bot::OwnerMessage(std::string message) {
@@ -134,6 +134,16 @@ bool Lua_Bot::HasBotSpellEntry(uint16 spellid) {
 	return self->HasBotSpellEntry(spellid);
 }
 
+void Lua_Bot::SendPayload(int payload_id) {
+	Lua_Safe_Call_Void();
+	self->SendPayload(payload_id);
+}
+
+void Lua_Bot::SendPayload(int payload_id, std::string payload_value) {
+	Lua_Safe_Call_Void();
+	self->SendPayload(payload_id, payload_value);
+}
+
 luabind::scope lua_register_bot() {
 	return luabind::class_<Lua_Bot, Lua_Mob>("Bot")
 	.def(luabind::constructor<>())
@@ -161,7 +171,9 @@ luabind::scope lua_register_bot() {
 	.def("RemoveBotItem", (void(Lua_Bot::*)(uint32))&Lua_Bot::RemoveBotItem)
 	.def("SetExpansionBitmask", (void(Lua_Bot::*)(int))&Lua_Bot::SetExpansionBitmask)
 	.def("SetExpansionBitmask", (void(Lua_Bot::*)(int,bool))&Lua_Bot::SetExpansionBitmask)
-	.def("SignalBot", (void(Lua_Bot::*)(int))&Lua_Bot::SignalBot);
+	.def("SendPayload", (void(Lua_Bot::*)(int))&Lua_Bot::SendPayload)
+	.def("SendPayload", (void(Lua_Bot::*)(int,std::string))&Lua_Bot::SendPayload)
+	.def("Signal", (void(Lua_Bot::*)(int))&Lua_Bot::Signal);
 }
 
 #endif
