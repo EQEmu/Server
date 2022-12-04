@@ -1165,7 +1165,7 @@ bool Bot::AIDoSpellCast(uint8 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgain
 				|| dist2 <= GetActSpellRange(AIBot_spells[i].spellid, spells[AIBot_spells[i].spellid].range)*GetActSpellRange(AIBot_spells[i].spellid, spells[AIBot_spells[i].spellid].range)) && (mana_cost <= GetMana() || GetMana() == GetMaxMana()))
 	{
 		casting_spell_AIindex = i;
-		LogAIDetail("Bot::AIDoSpellCast: spellid = [{}], tar = [{}], mana = [{}], Name: [{}]", AIBot_spells[i].spellid, tar->GetName(), mana_cost, spells[AIBot_spells[i].spellid].name);
+		LogAIModerate("Bot::AIDoSpellCast: spellid = [{}], tar = [{}], mana = [{}], Name: [{}]", AIBot_spells[i].spellid, tar->GetName(), mana_cost, spells[AIBot_spells[i].spellid].name);
 		result = Mob::CastSpell(AIBot_spells[i].spellid, tar->GetID(), EQ::spells::CastingSlot::Gem2, spells[AIBot_spells[i].spellid].cast_time, AIBot_spells[i].manacost == -2 ? 0 : mana_cost, oDontDoAgainBefore, -1, -1, 0, &(AIBot_spells[i].resist_adjust));
 
 		if (IsCasting() && IsSitting())
@@ -1205,7 +1205,7 @@ bool Bot::AI_PursueCastCheck() {
 
 		AIautocastspell_timer->Disable();	//prevent the timer from going off AGAIN while we are casting.
 
-		LogAI("Bot Engaged (pursuing) autocast check triggered. Trying to cast offensive spells");
+		LogAIDetail("Bot Engaged (pursuing) autocast check triggered. Trying to cast offensive spells");
 
 		if (!AICastSpell(GetTarget(), 100, SpellType_Snare)) {
 			if (!AICastSpell(GetTarget(), 100, SpellType_Lifetap)) {
@@ -1233,7 +1233,7 @@ bool Bot::AI_IdleCastCheck() {
 
 	if (AIautocastspell_timer->Check(false)) {
 #if BotAI_DEBUG_Spells >= 25
-		LogAI("Bot Non-Engaged autocast check triggered: [{}]", GetCleanName());
+		LogAIDetail("Bot Non-Engaged autocast check triggered: [{}]", GetCleanName());
 #endif
 		AIautocastspell_timer->Disable();	//prevent the timer from going off AGAIN while we are casting.
 
@@ -1389,7 +1389,7 @@ bool Bot::AI_EngagedCastCheck() {
 		EQ::constants::StanceType botStance = GetBotStance();
 		bool mayGetAggro = HasOrMayGetAggro();
 
-		LogAI("Engaged autocast check triggered (BOTS). Trying to cast healing spells then maybe offensive spells");
+		LogAIDetail("Engaged autocast check triggered (BOTS). Trying to cast healing spells then maybe offensive spells");
 
 		if (botClass == CLERIC) {
 			if (!AICastSpell(GetTarget(), GetChanceToCastBySpellType(SpellType_Escape), SpellType_Escape)) {
@@ -1714,13 +1714,10 @@ bool Bot::AIHealRotation(Mob* tar, bool useFastHeals) {
 		}
 	}
 
-#if BotAI_DEBUG_Spells >= 10
-	LogAI("Bot::AIHealRotation: heal spellid = [{}], fastheals = [{}], casterlevel = [{}]",
+	LogAIModerate("Bot::AIHealRotation: heal spellid = [{}], fastheals = [{}], casterlevel = [{}]",
 		botSpell.SpellId, ((useFastHeals) ? ('T') : ('F')), GetLevel());
-#endif
-#if BotAI_DEBUG_Spells >= 25
-	LogAI("Bot::AIHealRotation: target = [{}], current_time = [{}], donthealmebefore = [{}]", tar->GetCleanName(), Timer::GetCurrentTime(), tar->DontHealMeBefore());
-#endif
+
+	LogAIDetail("Bot::AIHealRotation: target = [{}], current_time = [{}], donthealmebefore = [{}]", tar->GetCleanName(), Timer::GetCurrentTime(), tar->DontHealMeBefore());
 
 	// If there is still no spell id, then there isn't going to be one so we are done
 	if (botSpell.SpellId == 0)
@@ -2899,7 +2896,7 @@ bool Bot::AI_AddBotSpells(uint32 bot_spell_id) {
 	auto* parentlist = content_db.GetBotSpells(spell_list->parent_list);
 
 	auto debug_msg = fmt::format(
-		"Loading NPCSpells onto {}: dbspellsid={}, level={}",
+		"Loading Bot spells onto {}: dbspellsid={}, level={}",
 		GetName(),
 		bot_spell_id,
 		GetLevel()
@@ -2908,42 +2905,20 @@ bool Bot::AI_AddBotSpells(uint32 bot_spell_id) {
 	if (spell_list) {
 		debug_msg.append(
 			fmt::format(
-				" (found, {}), parentlist={}",
-				spell_list->entries.size(),
-				spell_list->parent_list
+				" (found, {})",
+				spell_list->entries.size()
 			)
 		);
 
-		if (spell_list->parent_list) {
-			if (parentlist) {
-				debug_msg.append(
-					fmt::format(
-						" (found, {})",
-						parentlist->entries.size()
-					)
-				);
-			} else {
-				debug_msg.append(" (not found)");
-			}
-		}
-	} else {
-		debug_msg.append(" (not found)");
-	}
-
-	LogAIDetail("[{}]", debug_msg);
-
-	if (parentlist) {
-		for (const auto &iter : parentlist->entries) {
-			LogAI("([{}]) [{}]", iter.spellid, spells[iter.spellid].name);
-		}
-	}
-
-	LogAIModerate("fin (parent list)");
-
-	if (spell_list) {
+		LogAIModerate("[{}]", debug_msg);
 		for (const auto &iter : spell_list->entries) {
 			LogAIDetail("([{}]) [{}]", iter.spellid, spells[iter.spellid].name);
 		}
+	} 
+	else 
+	{
+		debug_msg.append(" (not found)");
+		LogAIModerate("[{}]", debug_msg);
 	}
 
 	LogAIModerate("fin (spell list)");

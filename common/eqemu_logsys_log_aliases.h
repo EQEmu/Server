@@ -39,7 +39,7 @@
 } while (0)
 
 #define LogAIModerate(message, ...) do {\
-    if (LogSys.IsLogEnabled(Logs::General, Logs::AI))\
+    if (LogSys.IsLogEnabled(Logs::Moderate, Logs::AI))\
         OutF(LogSys, Logs::Moderate, Logs::AI, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
@@ -584,6 +584,11 @@
         OutF(LogSys, Logs::General, Logs::AIScanClose, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
+#define LogAIScanCloseModerate(message, ...) do {\
+    if (LogSys.IsLogEnabled(Logs::Moderate, Logs::AIScanClose))\
+        OutF(LogSys, Logs::Moderate, Logs::AIScanClose, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
 #define LogAIScanCloseDetail(message, ...) do {\
     if (LogSys.IsLogEnabled(Logs::Detail, Logs::AIScanClose))\
         OutF(LogSys, Logs::Detail, Logs::AIScanClose, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
@@ -894,6 +899,9 @@
 #define LogAI(message, ...) do {\
 } while (0)
 
+#define LogAIModerate(message, ...) do {\
+} while (0)
+
 #define LogAIDetail(message, ...) do {\
 } while (0)
 
@@ -1144,6 +1152,9 @@
 } while (0)
 
 #define LogAIScanClose(message, ...) do {\
+} while (0)
+
+#define LogAIScanCloseModerate(message, ...) do {\
 } while (0)
 
 #define LogAIScanCloseDetail(message, ...) do {\
