@@ -2871,6 +2871,12 @@ std::string Lua_Client::GetGuildPublicNote()
 	return self->GetGuildPublicNote();
 }
 
+void Lua_Client::MaxSkills()
+{
+	Lua_Safe_Call_Void();
+	self->MaxSkills();
+}
+
 #ifdef BOTS
 
 int Lua_Client::GetBotRequiredLevel()
@@ -3233,6 +3239,7 @@ luabind::scope lua_register_client() {
 	.def("Marquee", (void(Lua_Client::*)(uint32, std::string, uint32))&Lua_Client::SendMarqueeMessage)
 	.def("Marquee", (void(Lua_Client::*)(uint32, uint32, uint32, uint32, uint32, std::string))&Lua_Client::SendMarqueeMessage)
 	.def("MaxSkill", (int(Lua_Client::*)(int))&Lua_Client::MaxSkill)
+	.def("MaxSkills", (void(Lua_Client::*)(void))&Lua_Client::MaxSkills)
 	.def("MemSpell", (void(Lua_Client::*)(int,int))&Lua_Client::MemSpell)
 	.def("MemSpell", (void(Lua_Client::*)(int,int,bool))&Lua_Client::MemSpell)
 	.def("MemmedCount", (int(Lua_Client::*)(void))&Lua_Client::MemmedCount)

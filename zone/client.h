@@ -783,6 +783,7 @@ public:
 	uint16 MaxSkill(EQ::skills::SkillType skillid, uint16 class_, uint16 level) const;
 	inline uint16 MaxSkill(EQ::skills::SkillType skillid) const { return MaxSkill(skillid, GetClass(), GetLevel()); }
 	uint8 SkillTrainLevel(EQ::skills::SkillType skillid, uint16 class_);
+	void MaxSkills();
 
 	void SendTradeskillSearchResults(const std::string &query, unsigned long objtype, unsigned long someid);
 	void SendTradeskillDetails(uint32 recipe_id);

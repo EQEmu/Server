@@ -453,6 +453,7 @@ public:
 	void SendPayload(int payload_id);
 	void SendPayload(int payload_id, std::string payload_value);
 	std::string GetGuildPublicNote();
+	void MaxSkills();
 
 	void ApplySpell(int spell_id);
 	void ApplySpell(int spell_id, int duration);

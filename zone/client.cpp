@@ -11997,3 +11997,17 @@ std::string Client::GetGuildPublicNote()
 
 	return gci.public_note;
 }
+
+void Client::MaxSkills()
+{
+	for (const auto &skills_iter : EQ::skills::GetSkillTypeMap()) {
+		auto skill_id            = skills_iter.first;
+		auto current_skill_value = (
+			EQ::skills::IsSpecializedSkill(skill_id) ?
+			50 :
+			content_db.GetSkillCap(GetClass(), skill_id, GetLevel())
+		);
+
+		SetSkill(skill_id, current_skill_value);
+	}
+}
