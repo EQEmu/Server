@@ -317,7 +317,7 @@ int command_init(void)
 		command_add("summonburiedplayercorpse", "Summons the target's oldest buried corpse, if any exist.", AccountStatus::GMAdmin, command_summonburiedplayercorpse) ||
 		command_add("summonitem", "[itemid] [charges] - Summon an item onto your cursor. Charges are optional.", AccountStatus::GMMgmt, command_summonitem) ||
 		command_add("suspend", "[name] [days] [reason] - Suspend by character name and for specificed number of days", AccountStatus::GMLeadAdmin, command_suspend) ||
-		command_add("suspendmulti", "[Character Name One|Character Name Two|etc] [Days] [reason] - Suspend multiple characters by name for specified number of days", AccountStatus::GMLeadAdmin, command_suspendmulti) ||
+		command_add("suspendmulti", "[Character Name One|Character Name Two|etc] [Days] [Reason] - Suspend multiple characters by name for specified number of days", AccountStatus::GMLeadAdmin, command_suspendmulti) ||
 		command_add("task", "(subcommand) - Task system commands", AccountStatus::GMLeadAdmin, command_task) ||
 		command_add("tempname", "[newname] - Temporarily renames your target. Leave name blank to restore the original name.", AccountStatus::GMAdmin, command_tempname) ||
 		command_add("petname", "[newname] - Temporarily renames your pet. Leave name blank to restore the original name.", AccountStatus::GMAdmin, command_petname) ||
