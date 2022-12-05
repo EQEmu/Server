@@ -916,9 +916,9 @@ void Client::SetLevel(uint8 set_level, bool command)
 	CalcBonuses();
 
 	if (!RuleB(Character, HealOnLevel)) {
-		int mhp = CalcMaxHP();
-		if (GetHP() > mhp) {
-			SetHP(mhp);
+		const auto max_hp = CalcMaxHP();
+		if (GetHP() > max_hp) {
+			SetHP(max_hp);
 		}
 	} else {
 		SetHP(CalcMaxHP()); // Why not, lets give them a free heal
