@@ -12000,14 +12000,13 @@ std::string Client::GetGuildPublicNote()
 
 void Client::MaxSkills()
 {
-	for (const auto &skills_iter : EQ::skills::GetSkillTypeMap()) {
-		auto skill_id            = skills_iter.first;
+	for (const auto &s : EQ::skills::GetSkillTypeMap()) {
 		auto current_skill_value = (
-			EQ::skills::IsSpecializedSkill(skill_id) ?
+			EQ::skills::IsSpecializedSkill(s.first) ?
 			50 :
-			content_db.GetSkillCap(GetClass(), skill_id, GetLevel())
+			content_db.GetSkillCap(GetClass(), s.first, GetLevel())
 		);
 
-		SetSkill(skill_id, current_skill_value);
+		SetSkill(s.first, current_skill_value);
 	}
 }
