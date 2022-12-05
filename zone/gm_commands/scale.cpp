@@ -3,134 +3,182 @@
 
 void command_scale(Client *c, const Seperator *sep)
 {
-	if (sep->argnum == 0) {
-		c->Message(Chat::Yellow, "# Usage # ");
-		c->Message(Chat::Yellow, "#scale [static/dynamic] (With targeted NPC)");
-		c->Message(Chat::Yellow, "#scale [npc_name_search] [static/dynamic] (To make zone-wide changes)");
-		c->Message(Chat::Yellow, "#scale all [static/dynamic]");
+	auto arguments = sep->argnum;
+	if (!arguments) {
+		c->Message(Chat::White, "Usage: #scale [Scale Type] - Must target an NPC");
+		c->Message(Chat::White, "Usage: #scale [Search Criteria] [Scale Type] - Zone-wide Changes");
+		c->Message(Chat::White, "Usage: #scale all [Scale Type] - Scale every NPC in the zone");
+		c->Message(Chat::White, "Note: Scale Type can be \"dynamic\" or \"static\".");
 		return;
 	}
 
-	/**
-	 * Targeted changes
-	 */
-	if (c->GetTarget() && c->GetTarget()->IsNPC() && sep->argnum < 2) {
-		NPC *npc = c->GetTarget()->CastToNPC();
+	if (c->GetTarget() && c->GetTarget()->IsNPC() && arguments < 2) {
+		auto n = c->GetTarget()->CastToNPC();
 
 		bool apply_status = false;
-		if (strcasecmp(sep->arg[1], "dynamic") == 0) {
-			c->Message(Chat::Yellow, "Applying global base scaling to npc dynamically (All stats set to zeroes)...");
-			apply_status = npc_scale_manager->ApplyGlobalBaseScalingToNPCDynamically(npc);
-		}
-		else if (strcasecmp(sep->arg[1], "static") == 0) {
-			c->Message(Chat::Yellow, "Applying global base scaling to npc statically (Copying base stats onto NPC)...");
-			apply_status = npc_scale_manager->ApplyGlobalBaseScalingToNPCStatically(npc);
-		}
-		else {
+
+		bool is_dynamic = !strcasecmp(sep->arg[1], "dynamic");
+		bool is_static  = !strcasecmp(sep->arg[1], "static");
+
+		if (is_dynamic || is_static) {
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"Applying global base scaling to {} {}ally, all stats set to zeroes.",
+					c->GetTargetDescription(n),
+					sep->arg[1]
+				).c_str()
+			);
+
+			if (is_dynamic) {
+				apply_status = npc_scale_manager->ApplyGlobalBaseScalingToNPCDynamically(n);
+			} else {
+				apply_status = npc_scale_manager->ApplyGlobalBaseScalingToNPCStatically(n);
+			}
+		} else {
+			c->Message(Chat::White, "Usage: #scale [Scale Type] - Must target an NPC");
+			c->Message(Chat::White, "Usage: #scale [Search Criteria] [Scale Type] - Zone-wide Changes");
+			c->Message(Chat::White, "Usage: #scale all [Scale Type] - Scale every NPC in the zone");
+			c->Message(Chat::White, "Note: Scale Type can be \"dynamic\" or \"static\".");
 			return;
 		}
 
 		if (apply_status) {
-			c->Message(Chat::Yellow, "Applied to NPC '%s' successfully!", npc->GetName());
-		}
-		else {
 			c->Message(
-				Chat::Yellow, "Failed to load scaling data from the database "
-							  "for this npc / type, see 'NPCScaling' log for more info"
+				Chat::White,
+				fmt::format(
+					"Applied global base scaling to {} {}ally successfully.",
+					c->GetTargetDescription(n),
+					sep->arg[1]
+				).c_str()
+			);
+		} else {
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"Failed to load scaling data from the database for {}, see 'NPCScaling' log for more info.",
+					c->GetTargetDescription(n)
+				).c_str()
 			);
 		}
-	}
-	else if (c->GetTarget() && sep->argnum < 2) {
-		c->Message(Chat::Yellow, "Target must be an npc!");
+	} else if (c->GetTarget() && arguments < 2) {
+		c->Message(Chat::White, "You must target an NPC to use targeted scaling!");
 	}
 
-	/**
-	 * Zonewide
-	 */
-	if (sep->argnum > 1) {
-
+	if (arguments > 1) {
 		std::string scale_type;
-		if (strcasecmp(sep->arg[2], "dynamic") == 0) {
-			scale_type = "dynamic";
-		}
-		else if (strcasecmp(sep->arg[2], "static") == 0) {
-			scale_type = "static";
-		}
 
-		if (scale_type.length() <= 0) {
-			c->Message(
-				Chat::Yellow,
-				"You must first set if you intend on using static versus dynamic for these changes"
-			);
-			c->Message(Chat::Yellow, "#scale [npc_name_search] [static/dynamic]");
-			c->Message(Chat::Yellow, "#scale all [static/dynamic]");
+		bool is_all     = !strcasecmp(sep->arg[1], "all");
+		bool is_dynamic = !strcasecmp(sep->arg[2], "dynamic");
+		bool is_static  = !strcasecmp(sep->arg[2], "static");
+
+		bool is_apply = arguments == 3 && !strcasecmp(sep->arg[3], "apply");
+
+		if (is_dynamic) {
+			scale_type = "dynamic";
+		} else if (is_static) {
+			scale_type = "static";
+		} else {
+			c->Message(Chat::White, "Usage: #scale [Scale Type] - Must target an NPC");
+			c->Message(Chat::White, "Usage: #scale [Search Criteria] [Scale Type] - Zone-wide Changes");
+			c->Message(Chat::White, "Usage: #scale all [Scale Type] - Scale every NPC in the zone");
+			c->Message(Chat::White, "Note: Scale Type can be \"dynamic\" or \"static\".");
 			return;
 		}
 
-		std::string search_string = sep->arg[1];
+		const std::string search_string = sep->arg[1];
 
-		auto &entity_list_search = entity_list.GetNPCList();
+		const auto& l = entity_list.GetNPCList();
 
-		int       found_count = 0;
-		for (auto &itr : entity_list_search) {
-			NPC *entity = itr.second;
+		auto found_count  = 0;
+		auto found_number = 1;
 
-			std::string entity_name = entity->GetName();
+		for (const auto &e : l) {
+			auto n = e.second;
 
-			/**
-			 * Filter by name
-			 */
-			if (search_string.length() > 0 && entity_name.find(search_string) == std::string::npos &&
-				strcasecmp(sep->arg[1], "all") != 0) {
+			std::string entity_name = n->GetName();
+
+			if (
+				!search_string.empty() &&
+				!Strings::Contains(entity_name, search_string) &&
+				!is_all
+			) {
 				continue;
 			}
 
 			std::string status = "(Searching)";
 
-			if (strcasecmp(sep->arg[3], "apply") == 0) {
+			if (is_apply) {
 				status = "(Applying)";
 
-				if (strcasecmp(sep->arg[2], "dynamic") == 0) {
-					npc_scale_manager->ApplyGlobalBaseScalingToNPCDynamically(entity);
-				}
-				if (strcasecmp(sep->arg[2], "static") == 0) {
-					npc_scale_manager->ApplyGlobalBaseScalingToNPCStatically(entity);
+				if (is_dynamic) {
+					npc_scale_manager->ApplyGlobalBaseScalingToNPCDynamically(n);
+				} else if (is_static) {
+					npc_scale_manager->ApplyGlobalBaseScalingToNPCStatically(n);
 				}
 			}
 
 			c->Message(
-				15,
-				"| ID %5d | %s | x %.0f | y %0.f | z %.0f | DBID %u %s",
-				entity->GetID(),
-				entity->GetName(),
-				entity->GetX(),
-				entity->GetY(),
-				entity->GetZ(),
-				entity->GetNPCTypeID(),
-				status.c_str()
+				Chat::White,
+				fmt::format(
+					"Entity {} | Name: {} | NPC ID: {} | Position: {:.2f}, {:.2f}, {:.2f}, {:.2f} {}",
+					found_number,
+					c->GetTargetDescription(n),
+					n->GetNPCTypeID(),
+					n->GetX(),
+					n->GetY(),
+					n->GetZ(),
+					n->GetHeading(),
+					status
+				).c_str()
 			);
 
 			found_count++;
+			found_number++;
 		}
 
-		if (strcasecmp(sep->arg[3], "apply") == 0) {
-			c->Message(Chat::Yellow, "%s scaling applied against (%i) NPC's", sep->arg[2], found_count);
-		}
-		else {
-
-			std::string saylink = StringFormat(
-				"#scale %s %s apply",
-				sep->arg[1],
-				sep->arg[2]
+		if (is_apply) {
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"{} scaling applied against {} NPC{}.",
+					Strings::UcFirst(sep->arg[2]),
+					found_count,
+					found_count != 1 ? "s" : ""
+				).c_str()
+			);
+		} else {
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"Found {} NPC{}{}.",
+					found_count,
+					found_count != 1 ? "s" : "",
+					(
+						is_all ?
+						"" :
+						fmt::format(
+							" matching '{}'",
+							search_string
+						)
+					)
+				).c_str()
 			);
 
-			c->Message(Chat::Yellow, "Found (%i) NPC's that match this search...", found_count);
 			c->Message(
-				Chat::Yellow, "To apply these changes, click <%s> or type %s",
-				Saylink::Silent(saylink, "Apply").c_str(),
-				saylink.c_str()
+				Chat::White,
+				fmt::format(
+					"Would you like to {} these changes?",
+					Saylink::Silent(
+						fmt::format(
+							"#scale {} {} apply",
+							sep->arg[1],
+							sep->arg[2]
+						),
+						"apply"
+					)
+				).c_str()
 			);
 		}
 	}
 }
-
