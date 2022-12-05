@@ -301,8 +301,8 @@ public:
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} WHERE {} = {} LIMIT 1",
-				PrimaryKey(),
 				BaseSelect(),
+				PrimaryKey(),
 				bot_data_id
 			)
 		);
