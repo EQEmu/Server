@@ -265,6 +265,7 @@ void command_summon(Client *c, const Seperator *sep);
 void command_summonburiedplayercorpse(Client *c, const Seperator *sep);
 void command_summonitem(Client *c, const Seperator *sep);
 void command_suspend(Client *c, const Seperator *sep);
+void command_suspendmulti(Client *c, const Seperator *sep);
 void command_task(Client *c, const Seperator *sep);
 void command_tempname(Client *c, const Seperator *sep);
 void command_petname(Client *c, const Seperator *sep);
