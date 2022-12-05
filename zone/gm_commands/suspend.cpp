@@ -13,35 +13,35 @@ void command_suspend(Client *c, const Seperator *sep)
 		return;
 	}
 
-	const std::string character_name = sep->arg[1];
+	const std::string character_name = Strings::ToLower(sep->arg[1]);
 	auto days = std::stoul(sep->arg[2]);
 
 	const std::string reason = sep->arg[3] ? sep->argplus[3] : "";
 
-	auto a = AccountRepository::GetWhere(
+	auto l = AccountRepository::GetWhere(
 		content_db,
 		fmt::format(
-			"charname = '{}'",
+			"LOWER(charname) = '{}'",
 			Strings::Escape(character_name)
 		)
 	);
 
-	if (a.empty() || !a[0].id) {
+	if (l.empty()) {
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"Character {} does not exist.",
-				character_name
+				"Character '{}' does not exist.",
+				sep->arg[1]
 			).c_str()
 		);
 		return;
 	}
 
-	a[0].status = -1;
-	a[0].suspendeduntil = std::time(nullptr) + (days * 86400);
-	a[0].suspend_reason = reason;
+	l[0].status = -1;
+	l[0].suspendeduntil = std::time(nullptr) + (days * 86400);
+	l[0].suspend_reason = reason;
 
-	if (!AccountRepository::UpdateOne(content_db, a[0])) {
+	if (!AccountRepository::UpdateOne(content_db, l[0])) {
 		c->Message(
 			Chat::White,
 			fmt::format(
@@ -56,8 +56,8 @@ void command_suspend(Client *c, const Seperator *sep)
 		Chat::White,
 		fmt::format(
 			"Account {} ({}) with the character {} {}.",
-			a[0].name,
-			a[0].id,
+			l[0].name,
+			l[0].id,
 			character_name,
 			(
 				days ?
