@@ -12007,6 +12007,8 @@ void Client::MaxSkills()
 			content_db.GetSkillCap(GetClass(), s.first, GetLevel())
 		);
 
-		SetSkill(s.first, current_skill_value);
+		if (GetSkill(s.first) < current_skill_value) {
+			SetSkill(s.first, current_skill_value);
+		}
 	}
 }
