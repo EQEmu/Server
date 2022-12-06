@@ -2113,9 +2113,9 @@ void Lua_Client::Fling(float target_x, float target_y, float target_z, bool igno
 	self->Fling(0, target_x, target_y, target_z, ignore_los, false, true);
 }
 
-void Lua_Client::Fling(float target_x, float target_y, float target_z, bool ignore_los, bool clipping) {
+void Lua_Client::Fling(float target_x, float target_y, float target_z, bool ignore_los, bool clip_through_walls) {
 	Lua_Safe_Call_Void();
-	self->Fling(0, target_x, target_y, target_z, ignore_los, clipping, true);
+	self->Fling(0, target_x, target_y, target_z, ignore_los, clip_through_walls, true);
 }
 
 void Lua_Client::Fling(float value, float target_x, float target_y, float target_z) {
@@ -2128,9 +2128,9 @@ void Lua_Client::Fling(float value, float target_x, float target_y, float target
 	self->Fling(value, target_x, target_y, target_z, ignore_los);
 }
 
-void Lua_Client::Fling(float value, float target_x, float target_y, float target_z, bool ignore_los, bool clipping) {
+void Lua_Client::Fling(float value, float target_x, float target_y, float target_z, bool ignore_los, bool clip_through_walls) {
 	Lua_Safe_Call_Void();
-	self->Fling(value, target_x, target_y, target_z, ignore_los, clipping);
+	self->Fling(value, target_x, target_y, target_z, ignore_los, clip_through_walls);
 }
 
 double Lua_Client::GetAAEXPModifier(uint32 zone_id) {

@@ -1941,9 +1941,9 @@ void Perl_Client_Fling(Client* self, float target_x, float target_y, float targe
 	self->Fling(0, target_x, target_y, target_z, ignore_los, false, true);
 }
 
-void Perl_Client_Fling(Client* self, float target_x, float target_y, float target_z, bool ignore_los, bool clipping)
+void Perl_Client_Fling(Client* self, float target_x, float target_y, float target_z, bool ignore_los, bool clip_through_walls)
 {
-	self->Fling(0, target_x, target_y, target_z, ignore_los, clipping, true);
+	self->Fling(0, target_x, target_y, target_z, ignore_los, clip_through_walls, true);
 }
 
 void Perl_Client_Fling(Client* self, float value, float target_x, float target_y, float target_z)
@@ -1956,9 +1956,9 @@ void Perl_Client_Fling(Client* self, float value, float target_x, float target_y
 	self->Fling(value, target_x, target_y, target_z, ignore_los);
 }
 
-void Perl_Client_Fling(Client* self, float value, float target_x, float target_y, float target_z, bool ignore_los, bool clipping)
+void Perl_Client_Fling(Client* self, float value, float target_x, float target_y, float target_z, bool ignore_los, bool clip_through_walls)
 {
-	self->Fling(value, target_x, target_y, target_z, ignore_los, clipping);
+	self->Fling(value, target_x, target_y, target_z, ignore_los, clip_through_walls);
 }
 
 bool Perl_Client_HasDisciplineLearned(Client* self, uint16 spell_id)

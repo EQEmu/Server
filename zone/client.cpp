@@ -10488,7 +10488,7 @@ void Client::MovePCDynamicZone(const std::string& zone_name, int zone_version, b
 	MovePCDynamicZone(zone_id, zone_version, msg_if_invalid);
 }
 
-void Client::Fling(float value, float target_x, float target_y, float target_z, bool ignore_los, bool clipping, bool calculate_speed) {
+void Client::Fling(float value, float target_x, float target_y, float target_z, bool ignore_los, bool clip_through_walls, bool calculate_speed) {
 	BuffFadeByEffect(SE_Levitate);
 	if (CheckLosFN(target_x, target_y, target_z, 6.0f) || ignore_los) {
 		auto p = new EQApplicationPacket(OP_Fling, sizeof(fling_struct));
@@ -10514,7 +10514,7 @@ void Client::Fling(float value, float target_x, float target_y, float target_z, 
 			f->speed_z = speed;
 		}
 
-		f->collision = clipping ? 0 : -1;
+		f->collision = clip_through_walls ? 0 : -1;
 		f->travel_time = -1;
 		f->unk3 = 1;
 		f->disable_fall_damage = 1;
