@@ -10494,12 +10494,6 @@ void Client::Fling(float value, float target_x, float target_y, float target_z, 
 		auto p = new EQApplicationPacket(OP_Fling, sizeof(fling_struct));
 		auto* f = (fling_struct*) p->pBuffer;
 
-		if (clipping) {
-			f->collision = 0;
-		} else {
-			f->collision = -1;
-		}
-
 		if (!calculate_speed) {
 			f->speed_z = value;
 		} else {
@@ -10520,6 +10514,7 @@ void Client::Fling(float value, float target_x, float target_y, float target_z, 
 			f->speed_z = speed;
 		}
 
+		f->collision = clipping ? 0 : -1;
 		f->travel_time = -1;
 		f->unk3 = 1;
 		f->disable_fall_damage = 1;
