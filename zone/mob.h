@@ -654,6 +654,8 @@ public:
 	inline const bool AlwaysAggro() const { return always_aggro; }
 	inline int32 GetHeroicStrikethrough() const  { return heroic_strikethrough; }
 
+	void CopyHateList(Mob* to);
+
 	//Group
 	virtual bool HasRaid() = 0;
 	virtual bool HasGroup() = 0;

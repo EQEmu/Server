@@ -519,6 +519,7 @@ public:
 	void DamageHateListNPCs(int64 damage, uint32 distance);
 	void DamageHateListNPCsPercentage(int64 damage);
 	void DamageHateListNPCsPercentage(int64 damage, uint32 distance);
+	void CopyHateList(Lua_Mob to);
 };
 
 #endif
