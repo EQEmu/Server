@@ -10488,25 +10488,41 @@ void Client::MovePCDynamicZone(const std::string& zone_name, int zone_version, b
 	MovePCDynamicZone(zone_id, zone_version, msg_if_invalid);
 }
 
-void Client::Fling(float value, float target_x, float target_y, float target_z, bool ignore_los, bool clipping) {
+void Client::Fling(float value, float target_x, float target_y, float target_z, bool ignore_los, bool clip_through_walls, bool calculate_speed) {
 	BuffFadeByEffect(SE_Levitate);
 	if (CheckLosFN(target_x, target_y, target_z, 6.0f) || ignore_los) {
-		auto outapp_fling = new EQApplicationPacket(OP_Fling, sizeof(fling_struct));
-		fling_struct* flingTo = (fling_struct*)outapp_fling->pBuffer;
-		if(clipping)
-			flingTo->collision = 0;
-		else
-			flingTo->collision = -1;
+		auto p = new EQApplicationPacket(OP_Fling, sizeof(fling_struct));
+		auto* f = (fling_struct*) p->pBuffer;
 
-		flingTo->travel_time = -1;
-		flingTo->unk3 = 1;
-		flingTo->disable_fall_damage = 1;
-		flingTo->speed_z = value;
-		flingTo->new_y = target_y;
-		flingTo->new_x = target_x;
-		flingTo->new_z = target_z;
-		outapp_fling->priority = 6;
-		FastQueuePacket(&outapp_fling);
+		if (!calculate_speed) {
+			f->speed_z = value;
+		} else {
+			auto speed = 1.0f;
+			const auto distance = CalculateDistance(target_x, target_y, target_z);
+
+			auto z_diff = target_z - GetZ();
+			if (z_diff != 0.0f) {
+				speed += std::abs(z_diff) / 12.0f;
+			}
+
+			speed += distance / 200.0f;
+
+			speed++;
+
+			speed = std::abs(speed);
+
+			f->speed_z = speed;
+		}
+
+		f->collision = clip_through_walls ? 0 : -1;
+		f->travel_time = -1;
+		f->unk3 = 1;
+		f->disable_fall_damage = 1;
+		f->new_y = target_y;
+		f->new_x = target_x;
+		f->new_z = target_z;
+		p->priority = 6;
+		FastQueuePacket(&p);
 	}
 }
 

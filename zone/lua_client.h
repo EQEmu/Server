@@ -557,9 +557,12 @@ public:
 	void            MovePCDynamicZone(std::string zone_name, int zone_version);
 	void            MovePCDynamicZone(std::string zone_name, int zone_version, bool msg_if_invalid);
 	void            CreateTaskDynamicZone(int task_id, luabind::object dz_table);
+	void            Fling(float target_x, float target_y, float target_z);
+	void            Fling(float target_x, float target_y, float target_z, bool ignore_los);
+	void            Fling(float target_x, float target_y, float target_z, bool ignore_los, bool clip_through_walls);
 	void            Fling(float value, float target_x, float target_y, float target_z);
 	void            Fling(float value, float target_x, float target_y, float target_z, bool ignore_los);
-	void            Fling(float value, float target_x, float target_y, float target_z, bool ignore_los, bool clipping);
+	void            Fling(float value, float target_x, float target_y, float target_z, bool ignore_los, bool clip_through_walls);
 };
 
 #endif
