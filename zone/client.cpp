@@ -10501,7 +10501,7 @@ void Client::Fling(float value, float target_x, float target_y, float target_z, 
 			const auto distance = CalculateDistance(target_x, target_y, target_z);
 
 			auto z_diff = target_z - GetZ();
-			if (z_diff > 0.0f) {
+			if (z_diff != 0.0f) {
 				speed += std::abs(z_diff) / 12.0f;
 			}
 
