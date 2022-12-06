@@ -87,6 +87,7 @@ namespace EQ
 #define CLIENT_LD_TIMEOUT 30000 // length of time client stays in zone after LDing
 #define TARGETING_RANGE 200 // range for /assist and /target
 #define XTARGET_HARDCAP 20
+#define MAX_SPECIALIZED_SKILL 50
 
 extern Zone* zone;
 extern TaskManager *task_manager;

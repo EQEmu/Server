@@ -12003,7 +12003,7 @@ void Client::MaxSkills()
 	for (const auto &s : EQ::skills::GetSkillTypeMap()) {
 		auto current_skill_value = (
 			EQ::skills::IsSpecializedSkill(s.first) ?
-			50 :
+			MAX_SPECIALIZED_SKILL :
 			content_db.GetSkillCap(GetClass(), s.first, GetLevel())
 		);
 
