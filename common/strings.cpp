@@ -685,32 +685,37 @@ uint32 Strings::TimeToSeconds(std::string time_string)
 		return 0;
 	}
 
-	uint32 duration = 0;
+	time_string = Strings::ToLower(time_string);
 
-	std::transform(time_string.begin(), time_string.end(), time_string.begin(), ::tolower);
+	if (time_string == "f") {
+		return 0;
+	}
 
 	std::string time_unit = time_string;
-	time_unit.erase(remove_if(time_unit.begin(), time_unit.end(), [](char c) { return !isdigit(c); }), time_unit.end());
+
+	time_unit.erase(
+		remove_if(
+			time_unit.begin(),
+			time_unit.end(),
+			[](char c) {
+				return !isdigit(c);
+			}
+		),
+		time_unit.end()
+	);
 
 	auto unit = std::stoul(time_unit);
+	uint32 duration = 0;
 
-	if (time_string.find('s') != std::string::npos) {
+	if (Strings::Contains(time_string, "s")) {
 		duration = unit;
-	}
-
-	if (time_string.find('m') != std::string::npos) {
+	} else if (Strings::Contains(time_string, "m")) {
 		duration = unit * 60;
-	}
-
-	if (time_string.find('h') != std::string::npos) {
+	} else if (Strings::Contains(time_string, "h")) {
 		duration = unit * 3600;
-	}
-
-	if (time_string.find('d') != std::string::npos) {
+	} else if (Strings::Contains(time_string, "d")) {
 		duration = unit * 86400;
-	}
-
-	if (time_string.find('y') != std::string::npos) {
+	} else if (Strings::Contains(time_string, "y")) {
 		duration = unit * 31556926;
 	}
 
