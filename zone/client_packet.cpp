@@ -1606,28 +1606,32 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	outapp->priority = 6;
 	FastQueuePacket(&outapp);
 
-	if (m_pp.RestTimer)
+	if (m_pp.RestTimer) {
 		rest_timer.Start(m_pp.RestTimer * 1000);
+	}
 
-	/* Load Pet */
-	database.LoadPetInfo(this);
-	if (m_petinfo.SpellID > 1 && !GetPet() && m_petinfo.SpellID <= SPDAT_RECORDS) {
-		MakePoweredPet(m_petinfo.SpellID, spells[m_petinfo.SpellID].teleport_zone, m_petinfo.petpower, m_petinfo.Name, m_petinfo.size);
-		if (GetPet() && GetPet()->IsNPC()) {
-			NPC *pet = GetPet()->CastToNPC();
-			pet->SetPetState(m_petinfo.Buffs, m_petinfo.Items);
-			pet->CalcBonuses();
-			pet->SetHP(m_petinfo.HP);
-			pet->SetMana(m_petinfo.Mana);
+	if (RuleB(NPC, PetZoneWithOwner)) {
+		/* Load Pet */
+		database.LoadPetInfo(this);
+		if (m_petinfo.SpellID > 1 && !GetPet() && m_petinfo.SpellID <= SPDAT_RECORDS) {
+			MakePoweredPet(m_petinfo.SpellID, spells[m_petinfo.SpellID].teleport_zone, m_petinfo.petpower,
+						   m_petinfo.Name, m_petinfo.size);
+			if (GetPet() && GetPet()->IsNPC()) {
+				NPC *pet = GetPet()->CastToNPC();
+				pet->SetPetState(m_petinfo.Buffs, m_petinfo.Items);
+				pet->CalcBonuses();
+				pet->SetHP(m_petinfo.HP);
+				pet->SetMana(m_petinfo.Mana);
 
-			// Taunt persists when zoning on newer clients, overwrite default.
-			if (m_ClientVersionBit & EQ::versions::maskUFAndLater) {
-				if (!firstlogon) {
-					pet->SetTaunting(m_petinfo.taunting);
+				// Taunt persists when zoning on newer clients, overwrite default.
+				if (m_ClientVersionBit & EQ::versions::maskUFAndLater) {
+					if (!firstlogon) {
+						pet->SetTaunting(m_petinfo.taunting);
+					}
 				}
 			}
+			m_petinfo.SpellID = 0;
 		}
-		m_petinfo.SpellID = 0;
 	}
 	/* Moved here so it's after where we load the pet data. */
 	if (!aabonuses.ZoneSuspendMinion && !spellbonuses.ZoneSuspendMinion && !itembonuses.ZoneSuspendMinion) {
