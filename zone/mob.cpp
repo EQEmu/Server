@@ -7053,7 +7053,7 @@ void Mob::CloneAppearance(Mob* other, bool clone_name)
 }
 
 void Mob::CopyHateList(Mob* to) {
-	if (hate_list.IsHateListEmpty() || !to) {
+	if (hate_list.IsHateListEmpty() || !to || to->IsClient()) {
 		return;
 	}
 
