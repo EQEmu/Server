@@ -7051,3 +7051,15 @@ void Mob::CloneAppearance(Mob* other, bool clone_name)
 		TempName(other->GetCleanName());
 	}
 }
+
+void Mob::CopyHateList(Mob* to) {
+	if (hate_list.IsHateListEmpty() || !to) {
+		return;
+	}
+
+	for (const auto& h : hate_list.GetHateList()) {
+		if (h->entity_on_hatelist) {
+			to->AddToHateList(h->entity_on_hatelist, h->stored_hate_amount, h->hatelist_damage);
+		}
+	}
+}

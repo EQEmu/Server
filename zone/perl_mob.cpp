@@ -2678,6 +2678,11 @@ void Perl_Mob_SetEntityVariable(Mob* self, std::string variable_name, std::strin
 	self->SetEntityVariable(variable_name, variable_value);
 }
 
+void Perl_Mob_CopyHateList(Mob* self, Mob* to)
+{
+	self->CopyHateList(to);
+}
+
 #ifdef BOTS
 void Perl_Mob_DamageAreaBots(Mob* self, int64 damage) // @categories Hate and Aggro
 {
@@ -2827,6 +2832,7 @@ void perl_register_mob()
 	package.add("CloneAppearance", (void(*)(Mob*, Mob*))&Perl_Mob_CloneAppearance);
 	package.add("CloneAppearance", (void(*)(Mob*, Mob*, bool))&Perl_Mob_CloneAppearance);
 	package.add("CombatRange", &Perl_Mob_CombatRange);
+	package.add("CopyHateList", &Perl_Mob_CopyHateList);
 	package.add("Damage", (void(*)(Mob*, Mob*, int64, uint16_t, int))&Perl_Mob_Damage);
 	package.add("Damage", (void(*)(Mob*, Mob*, int64, uint16_t, int, bool))&Perl_Mob_Damage);
 	package.add("Damage", (void(*)(Mob*, Mob*, int64, uint16_t, int, bool, int8_t))&Perl_Mob_Damage);
