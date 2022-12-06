@@ -1931,6 +1931,21 @@ void Perl_Client_MovePCDynamicZone(Client* self, perl::scalar zone, int zone_ver
 	self->MovePCDynamicZone(zone_id, zone_version, msg_if_invalid);
 }
 
+void Perl_Client_Fling(Client* self, float target_x, float target_y, float target_z)
+{
+	self->Fling(0, target_x, target_y, target_z, false, false, true);
+}
+
+void Perl_Client_Fling(Client* self, float target_x, float target_y, float target_z, bool ignore_los)
+{
+	self->Fling(0, target_x, target_y, target_z, ignore_los, false, true);
+}
+
+void Perl_Client_Fling(Client* self, float target_x, float target_y, float target_z, bool ignore_los, bool clipping)
+{
+	self->Fling(0, target_x, target_y, target_z, ignore_los, clipping, true);
+}
+
 void Perl_Client_Fling(Client* self, float value, float target_x, float target_y, float target_z)
 {
 	self->Fling(value, target_x, target_y, target_z);
@@ -2914,6 +2929,9 @@ void perl_register_client()
 	package.add("FindEmptyMemSlot", &Perl_Client_FindEmptyMemSlot);
 	package.add("FindMemmedSpellBySlot", &Perl_Client_FindMemmedSpellBySlot);
 	package.add("FindMemmedSpellBySpellID", &Perl_Client_FindMemmedSpellBySpellID);
+	package.add("Fling", (void(*)(Client*, float, float, float))&Perl_Client_Fling);
+	package.add("Fling", (void(*)(Client*, float, float, float, bool))&Perl_Client_Fling);
+	package.add("Fling", (void(*)(Client*, float, float, float, bool, bool))&Perl_Client_Fling);
 	package.add("Fling", (void(*)(Client*, float, float, float, float))&Perl_Client_Fling);
 	package.add("Fling", (void(*)(Client*, float, float, float, float, bool))&Perl_Client_Fling);
 	package.add("Fling", (void(*)(Client*, float, float, float, float, bool, bool))&Perl_Client_Fling);

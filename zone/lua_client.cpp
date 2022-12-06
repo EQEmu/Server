@@ -2103,6 +2103,21 @@ void Lua_Client::CreateTaskDynamicZone(int task_id, luabind::object dz_table) {
 	self->CreateTaskDynamicZone(task_id, dz);
 }
 
+void Lua_Client::Fling(float target_x, float target_y, float target_z) {
+	Lua_Safe_Call_Void();
+	self->Fling(0, target_x, target_y, target_z, false, false, true);
+}
+
+void Lua_Client::Fling(float target_x, float target_y, float target_z, bool ignore_los) {
+	Lua_Safe_Call_Void();
+	self->Fling(0, target_x, target_y, target_z, ignore_los, false, true);
+}
+
+void Lua_Client::Fling(float target_x, float target_y, float target_z, bool ignore_los, bool clipping) {
+	Lua_Safe_Call_Void();
+	self->Fling(0, target_x, target_y, target_z, ignore_los, clipping, true);
+}
+
 void Lua_Client::Fling(float value, float target_x, float target_y, float target_z) {
 	Lua_Safe_Call_Void();
 	self->Fling(value, target_x, target_y, target_z);
@@ -3049,6 +3064,9 @@ luabind::scope lua_register_client() {
 	.def("FindMemmedSpellBySlot", (uint16(Lua_Client::*)(int))&Lua_Client::FindMemmedSpellBySlot)
 	.def("FindMemmedSpellBySpellID", (int(Lua_Client::*)(uint16))&Lua_Client::FindMemmedSpellBySpellID)
 	.def("FindSpellBookSlotBySpellID", (int(Lua_Client::*)(int))&Lua_Client::FindSpellBookSlotBySpellID)
+	.def("Fling", (void(Lua_Client::*)(float,float,float))&Lua_Client::Fling)
+	.def("Fling", (void(Lua_Client::*)(float,float,float,bool))&Lua_Client::Fling)
+	.def("Fling", (void(Lua_Client::*)(float,float,float,bool,bool))&Lua_Client::Fling)
 	.def("Fling", (void(Lua_Client::*)(float,float,float,float))&Lua_Client::Fling)
 	.def("Fling", (void(Lua_Client::*)(float,float,float,float,bool))&Lua_Client::Fling)
 	.def("Fling", (void(Lua_Client::*)(float,float,float,float,bool,bool))&Lua_Client::Fling)
