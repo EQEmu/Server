@@ -1269,13 +1269,11 @@ bool Merc::Process()
 	if(tic_timer.Check())
 	{
 		//6 seconds, or whatever the rule is set to has passed, send this position to everyone to avoid ghosting
-		if(!IsMoving() && !IsEngaged())
+		if (!IsEngaged())
 		{
 			SentPositionPacket(0.0f, 0.0f, 0.0f, 0.0f, 0);
-			if(IsSitting()) {
-				if(!rest_timer.Enabled()) {
-					rest_timer.Start(RuleI(Character, RestRegenTimeToActivate) * 1000);
-				}
+			if (!rest_timer.Enabled()) {
+				rest_timer.Start(RuleI(Character, RestRegenTimeToActivate) * 1000);
 			}
 		}
 
@@ -4305,32 +4303,26 @@ void Merc::MercMeditate(bool isSitting) {
 	{
 		return;
 	}
-	if(isSitting) {
+	if (isSitting) {
 		// If the merc is a caster and has less than 99% mana while its not engaged, he needs to sit to meditate
-		if(GetManaRatio() < 99.0f)
+		if (GetManaRatio() < 99.0f)
 		{
-			if(!IsSitting())
+			if(!IsSitting()) {
 				Sit();
+			}
 		}
 		else
 		{
-			if(IsSitting())
+			if (IsSitting()) {
 				Stand();
+			}
 		}
 	}
 	else
 	{
-		if(IsSitting())
+		if (IsSitting()) {
 			Stand();
-	}
-
-	if(IsSitting()) {
-		if(!rest_timer.Enabled()) {
-			rest_timer.Start(RuleI(Character, RestRegenTimeToActivate) * 1000);
 		}
-	}
-	else {
-		rest_timer.Disable();
 	}
 }
 
