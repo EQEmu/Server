@@ -110,13 +110,13 @@ public:
 	static const std::string &GetRuleNotes(RealType t) { return s_RuleInfo[t + _IntRuleCount].notes; }
 	static const std::string &GetRuleNotes(BoolType t) { return s_RuleInfo[t + _IntRuleCount + _RealRuleCount].notes; }
 	static uint32 CountRules() { return _RulesCount; }
-	static CategoryType FindCategory(std::string category_name);
-	bool ListRules(std::string category_name, std::vector <std::string> &l);
+	static CategoryType FindCategory(const std::string &category_name);
+	bool ListRules(const std::string &category_name, std::vector <std::string> &l);
 	bool ListCategories(std::vector <std::string> &l);
-	bool GetRule(std::string rule_name, std::string &rule_value);
+	bool GetRule(const std::string &rule_name, std::string &rule_value);
 	bool SetRule(
-		std::string rule_name,
-		std::string rule_value,
+		const std::string &rule_name,
+		const std::string &rule_value,
 		Database *db = nullptr,
 		bool db_save = false,
 		bool reload = false
@@ -127,9 +127,9 @@ public:
 	static bool ListRulesets(Database *db, std::map<int, std::string> &l);
 
 	void ResetRules(bool reload = false);
-	bool LoadRules(Database *db, std::string rule_set_name = std::string(), bool reload = false);
-	void SaveRules(Database *db, std::string rule_set_name = std::string());
-	bool UpdateInjectedRules(Database *db, std::string rule_set_name, bool quiet_update = false);
+	bool LoadRules(Database *db, const std::string &rule_set_name, bool reload = false);
+	void SaveRules(Database *db, const std::string &rule_set_name);
+	bool UpdateInjectedRules(Database *db, const std::string &rule_set_name, bool quiet_update = false);
 	bool UpdateOrphanedRules(Database *db, bool quiet_update = false);
 	bool RestoreRuleNotes(Database *db);
 
@@ -151,13 +151,13 @@ private:
 		BoolRule
 	} RuleType;
 
-	static bool _FindRule(std::string rule_name, RuleType &type_into, uint16 &index_into);
+	static bool _FindRule(const std::string &rule_name, RuleType &type_into, uint16 &index_into);
 	static std::string _GetRuleName(RuleType type, uint16 index);
 	static const std::string &_GetRuleNotes(RuleType type, uint16 index);
-	static int _FindOrCreateRuleset(Database *db, std::string rule_set_name);
+	static int _FindOrCreateRuleset(Database *db, const std::string &rule_set_name);
 	void _SaveRule(Database *db, RuleType type, uint16 index);
 
-	static std::string s_categoryNames[];
+	static const char* s_categoryNames[];
 	typedef struct {
 		std::string       name;
 		CategoryType      category;

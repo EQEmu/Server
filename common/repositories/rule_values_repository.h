@@ -118,7 +118,7 @@ public:
 		const auto query = fmt::format(
 			"UPDATE {} SET notes = '{}' WHERE ruleset_id = {} AND rule_name = '{}'",
 			TableName(),
-			notes,
+			Strings::Escape(notes),
 			rule_set_id,
 			rule_name
 		);

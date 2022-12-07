@@ -149,7 +149,7 @@ void command_rules(Client *c, const Seperator *sep)
 		);
 	} else if (is_store) {
 		if (arguments == 1) {
-			RuleManager::Instance()->SaveRules(&database);
+			RuleManager::Instance()->SaveRules(&database, "");
 			c->Message(Chat::White, "Rules saved.");
 		} else if (arguments == 2) {
 			RuleManager::Instance()->SaveRules(&database, sep->arg[2]);

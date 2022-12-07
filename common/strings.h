@@ -111,8 +111,7 @@ public:
 	static void FindReplace(std::string &string_subject, const std::string &search_string, const std::string &replace_string);
 	static uint32 TimeToSeconds(std::string time_string);
 	static bool ToBool(std::string bool_string);
-	static inline bool Equal(std::string string_one, std::string string_two) { return string_one.compare(string_two) == 0; }
-	static inline bool EqualFold(std::string string_one, std::string string_two) { return Strings::ToLower(string_one).compare(Strings::ToLower(string_two)) == 0; }
+	static inline bool EqualFold(const std::string &string_one, const std::string &string_two) { return strcasecmp(string_one.c_str(), string_two.c_str()) == 0; }
 
 	template<typename T>
 	static std::string

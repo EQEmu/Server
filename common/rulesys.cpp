@@ -27,7 +27,7 @@
 #include "../common/repositories/rule_sets_repository.h"
 #include "../common/repositories/rule_values_repository.h"
 
-std::string RuleManager::s_categoryNames[_CatCount + 1] = {
+const char *RuleManager::s_categoryNames[_CatCount + 1] = {
 	#define RULE_CATEGORY(category_name) \
 		#category_name ,
 	#include "ruletypes.h"
@@ -55,7 +55,7 @@ RuleManager::RuleManager()
 	ResetRules(false);
 }
 
-RuleManager::CategoryType RuleManager::FindCategory(std::string category_name)
+RuleManager::CategoryType RuleManager::FindCategory(const std::string &category_name)
 {
 	for (int i = 0; i < _CatCount; i++) {
 		if (Strings::Contains(category_name, s_categoryNames[i])) {
@@ -66,7 +66,7 @@ RuleManager::CategoryType RuleManager::FindCategory(std::string category_name)
 	return InvalidCategory;
 }
 
-bool RuleManager::ListRules(std::string category_name, std::vector<std::string> &l)
+bool RuleManager::ListRules(const std::string &category_name, std::vector<std::string> &l)
 {
 	CategoryType category_type = InvalidCategory;
 	if (!category_name.empty()) {
@@ -96,7 +96,7 @@ bool RuleManager::ListCategories(std::vector <std::string> &l)
 	return true;
 }
 
-bool RuleManager::GetRule(std::string rule_name, std::string &rule_value)
+bool RuleManager::GetRule(const std::string &rule_name, std::string &rule_value)
 {
 	RuleType type;
 	uint16 index;
@@ -112,14 +112,14 @@ bool RuleManager::GetRule(std::string rule_name, std::string &rule_value)
 			rule_value = fmt::format("{}", m_RuleRealValues[index]);
 			break;
 		case BoolRule:
-			rule_value = fmt::format("{}", m_RuleBoolValues[index] ? "true" : "false");
+			rule_value = m_RuleBoolValues[index] ? "true" : "false";
 			break;
 	}
 
 	return true;
 }
 
-bool RuleManager::SetRule(std::string rule_name, std::string rule_value, Database *db, bool db_save, bool reload)
+bool RuleManager::SetRule(const std::string &rule_name, const std::string &rule_value, Database *db, bool db_save, bool reload)
 {
 	if (rule_name.empty() || rule_value.empty()) {
 		return false;
@@ -132,8 +132,8 @@ bool RuleManager::SetRule(std::string rule_name, std::string rule_value, Databas
 	}
 
 	if (reload) {
-		bool is_client = Strings::Contains(rule_name, "World:UseClientBasedExpansionSettings");
-		bool is_world = Strings::Contains(rule_name, "World:ExpansionSettings");
+		bool is_client = Strings::EqualFold(rule_name, "World:UseClientBasedExpansionSettings");
+		bool is_world = Strings::EqualFold(rule_name, "World:ExpansionSettings");
 		if (is_client || is_world) {
 			return false;
 		}
@@ -141,7 +141,7 @@ bool RuleManager::SetRule(std::string rule_name, std::string rule_value, Databas
 
 	switch (type) {
 		case IntRule:
-			m_RuleIntValues[index] = std::stoi(rule_value);
+			m_RuleIntValues[index] = atoi(rule_value.c_str());
 			LogRules("Set rule [{}] to value [{}]", rule_name, m_RuleIntValues[index]);
 			break;
 		case RealRule:
@@ -188,14 +188,14 @@ void RuleManager::ResetRules(bool reload) {
 	}
 }
 
-bool RuleManager::_FindRule(std::string rule_name, RuleType &type_into, uint16 &index_into) {
+bool RuleManager::_FindRule(const std::string &rule_name, RuleType &type_into, uint16 &index_into) {
 	if (rule_name.empty()) {
 		return false;
 	}
 
 	for (int i = 0; i < CountRules(); i++) {
 		const auto& r = s_RuleInfo[i];
-		if (Strings::Equal(rule_name, r.name)) {
+		if (rule_name == r.name) {
 			type_into = r.type;
 			index_into = r.rule_index;
 			return true;
@@ -238,7 +238,7 @@ const std::string &RuleManager::_GetRuleNotes(RuleType type, uint16 index) {
 	return s_RuleInfo[_IntRuleCount + _RealRuleCount + _BoolRuleCount].notes;
 }
 
-bool RuleManager::LoadRules(Database *db, std::string rule_set_name, bool reload) {
+bool RuleManager::LoadRules(Database *db, const std::string &rule_set_name, bool reload) {
 	const auto rule_set_id = RuleSetsRepository::GetRuleSetID(*db, rule_set_name);
 	if (rule_set_id < 0) {
 		LogRulesDetail("Failed to find Rule Set {} for load operation. Canceling.", rule_set_name);
@@ -251,7 +251,7 @@ bool RuleManager::LoadRules(Database *db, std::string rule_set_name, bool reload
 	/* Load default ruleset values first if we're loading something other than default */
 
 	const std::string default_ruleset_name = "default";
-	bool is_default = Strings::Contains(rule_set_name, default_ruleset_name);
+	bool is_default = rule_set_name == default_ruleset_name;
 
 	if (!is_default) {
 		const auto default_rule_set_id = RuleSetsRepository::GetRuleSetID(*db, default_ruleset_name);
@@ -307,7 +307,7 @@ bool RuleManager::LoadRules(Database *db, std::string rule_set_name, bool reload
 	return true;
 }
 
-void RuleManager::SaveRules(Database *db, std::string rule_set_name) {
+void RuleManager::SaveRules(Database *db, const std::string &rule_set_name) {
 	if (!rule_set_name.empty()) {
 		if (m_activeName != rule_set_name) {
 			m_activeRuleset = _FindOrCreateRuleset(db, rule_set_name);
@@ -358,7 +358,7 @@ void RuleManager::_SaveRule(Database *db, RuleType type, uint16 index) {
 			rule_value = fmt::format("{:.13f}", m_RuleRealValues[index]);
 			break;
 		case BoolRule:
-			rule_value = fmt::format("{}", m_RuleBoolValues[index] ? "true" : "false");
+			rule_value = m_RuleBoolValues[index] ? "true" : "false";
 			break;
 	}
 
@@ -392,7 +392,7 @@ void RuleManager::_SaveRule(Database *db, RuleType type, uint16 index) {
 	RuleValuesRepository::InsertOne(*db, e);
 }
 
-bool RuleManager::UpdateInjectedRules(Database *db, std::string rule_set_name, bool quiet_update)
+bool RuleManager::UpdateInjectedRules(Database *db, const std::string &rule_set_name, bool quiet_update)
 {
 	std::map<std::string, std::pair<std::string, const std::string *>>  rule_data;
 	std::vector<std::tuple<int, std::string, std::string, std::string>> injected_rule_entries;
@@ -443,7 +443,7 @@ bool RuleManager::UpdateInjectedRules(Database *db, std::string rule_set_name, b
 					rule_set_id,
 					d.first,
 					d.second.first,
-					*d.second.second
+					Strings::Escape(*d.second.second)
 				)
 			);
 
@@ -561,7 +561,7 @@ bool RuleManager::RestoreRuleNotes(Database *db)
 	return true;
 }
 
-int RuleManager::_FindOrCreateRuleset(Database *db, std::string rule_set_name)
+int RuleManager::_FindOrCreateRuleset(Database *db, const std::string &rule_set_name)
 {
 	const auto rule_set_id = RuleSetsRepository::GetRuleSetID(*db, rule_set_name);
 	if (rule_set_id >= 0) {
