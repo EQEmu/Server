@@ -145,7 +145,7 @@ bool RuleManager::SetRule(const std::string &rule_name, const std::string &rule_
 			LogRules("Set rule [{}] to value [{}]", rule_name, m_RuleIntValues[index]);
 			break;
 		case RealRule:
-			m_RuleRealValues[index] = atof(rule_value);
+			m_RuleRealValues[index] = atof(rule_value.c_str());
 			LogRules("Set rule [{}] to value [{:.2f}]", rule_name, m_RuleRealValues[index]);
 			break;
 		case BoolRule:
