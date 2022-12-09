@@ -3628,6 +3628,26 @@ void lua_set_proximity_range(float x_range, float y_range, float z_range, bool e
 	quest_manager.set_proximity_range(x_range, y_range, z_range, enable_say);
 }
 
+void lua_do_anim(int animation_id)
+{
+	quest_manager.doanim(animation_id);
+}
+
+void lua_do_anim(int animation_id, int animation_speed)
+{
+	quest_manager.doanim(animation_id, animation_speed);
+}
+
+void lua_do_anim(int animation_id, int animation_speed, bool ackreq)
+{
+	quest_manager.doanim(animation_id, animation_speed, ackreq);
+}
+
+void lua_do_anim(int animation_id, int animation_speed, bool ackreq, int filter)
+{
+	quest_manager.doanim(animation_id, animation_speed, ackreq, static_cast<eqFilterType>(filter));
+}
+
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
 	cur = table[#name]; \
 	if(luabind::type(cur) != LUA_TNIL) { \
@@ -4129,7 +4149,10 @@ luabind::scope lua_register_general() {
 		luabind::def("zone_marquee", (void(*)(uint32,uint32,uint32,uint32,uint32,std::string))&lua_zone_marquee),
 		luabind::def("is_hotzone", (bool(*)(void))&lua_is_hotzone),
 		luabind::def("set_hotzone", (void(*)(bool))&lua_set_hotzone),
-
+		luabind::def("do_anim", (void(*)(int))&lua_do_anim),
+		luabind::def("do_anim", (void(*)(int,int))&lua_do_anim),
+		luabind::def("do_anim", (void(*)(int,int,bool))&lua_do_anim),
+		luabind::def("do_anim", (void(*)(int,int,bool,int))&lua_do_anim),
 		/*
 			Cross Zone
 		*/

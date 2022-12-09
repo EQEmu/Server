@@ -640,6 +640,21 @@ void Perl__doanim(int animation_id)
 	quest_manager.doanim(animation_id);
 }
 
+void Perl__doanim(int animation_id, int animation_speed)
+{
+	quest_manager.doanim(animation_id, animation_speed);
+}
+
+void Perl__doanim(int animation_id, int animation_speed, bool ackreq)
+{
+	quest_manager.doanim(animation_id, animation_speed, ackreq);
+}
+
+void Perl__doanim(int animation_id, int animation_speed, bool ackreq, int filter)
+{
+	quest_manager.doanim(animation_id, animation_speed, ackreq, static_cast<eqFilterType>(filter));
+}
+
 void Perl__addskill(int skill_id, int value)
 {
 	quest_manager.addskill(skill_id, value);
@@ -4263,7 +4278,10 @@ void perl_register_quest()
 	package.add("disablerecipe", &Perl__disablerecipe);
 	package.add("disabletask", &Perl__disabletask);
 	package.add("discordsend", &Perl__discordsend);
-	package.add("doanim", &Perl__doanim);
+	package.add("doanim", (void(*)(int))&Perl__doanim);
+	package.add("doanim", (void(*)(int, int))&Perl__doanim);
+	package.add("doanim", (void(*)(int, int, bool))&Perl__doanim);
+	package.add("doanim", (void(*)(int, int, bool, int))&Perl__doanim);
 	package.add("echo", &Perl__echo);
 	package.add("emote", &Perl__emote);
 	package.add("enable_proximity_say", &Perl__enable_proximity_say);
