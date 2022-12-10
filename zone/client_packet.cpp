@@ -3896,14 +3896,14 @@ void Client::Handle_OP_Buff(const EQApplicationPacket *app)
 	*/
 	if (app->size != sizeof(SpellBuffPacket_Struct))
 	{
-		LogError("Size mismatch in OP_Buff. expected [{}] got [{}]", sizeof(SpellBuffPacket_Struct), app->size);
+		LogError("[Client::Handle_OP_Buff] Size mismatch in OP_Buff. expected [{}] got [{}]", sizeof(SpellBuffPacket_Struct), app->size);
 		DumpPacket(app);
 		return;
 	}
 
 	SpellBuffPacket_Struct* sbf = (SpellBuffPacket_Struct*)app->pBuffer;
 	uint32 spid = sbf->buff.spellid;
-	LogSpells("Client requested that buff with spell id [{}] be canceled", spid);
+	LogSpells("[Client::Handle_OP_Buff] Client requested that buff with spell id [{}] be canceled", spid);
 
 	//something about IsDetrimentalSpell() crashes this portion of code..
 	//tbh we shouldn't use it anyway since this is a simple red vs blue buff check and
@@ -4067,7 +4067,7 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 
 	m_TargetRing = glm::vec3(castspell->x_pos, castspell->y_pos, castspell->z_pos);
 
-	LogSpells("OP CastSpell: slot [{}] spell [{}] target [{}] inv [{}]", castspell->slot, castspell->spell_id, castspell->target_id, (unsigned long)castspell->inventoryslot);
+	LogSpells("[Client::Handle_OP_CastSpell] OP CastSpell: slot [{}] spell [{}] target [{}] inv [{}]", castspell->slot, castspell->spell_id, castspell->target_id, (unsigned long)castspell->inventoryslot);
 	CastingSlot slot = static_cast<CastingSlot>(castspell->slot);
 
 	/* Memorized Spell */
@@ -4167,7 +4167,7 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 	/* Discipline -- older clients use the same slot as items, but we translate to it's own */
 	else if (slot == CastingSlot::Discipline) {
 		if (!UseDiscipline(castspell->spell_id, castspell->target_id)) {
-			LogSpells("Unknown ability being used by [{}], spell being cast is: [{}]\n", GetName(), castspell->spell_id);
+			LogSpells("[Client::Handle_OP_CastSpell] Unknown ability being used by [{}] spell being cast is: [{}]\n", GetName(), castspell->spell_id);
 			InterruptSpell(castspell->spell_id);
 			return;
 		}
@@ -8801,7 +8801,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 	using EQ::spells::CastingSlot;
 	if (app->size != sizeof(ItemVerifyRequest_Struct))
 	{
-		LogError("OP size error: OP_ItemVerifyRequest expected:[{}] got:[{}]", sizeof(ItemVerifyRequest_Struct), app->size);
+		LogError("[Client::Handle_OP_ItemVerifyRequest] OP size error: OP_ItemVerifyRequest expected:[{}] got:[{}]", sizeof(ItemVerifyRequest_Struct), app->size);
 		return;
 	}
 
@@ -8830,7 +8830,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 	}
 
 	if (slot_id < 0) {
-		LogDebug("Unknown slot being used by [{}], slot being used is: [{}]", GetName(), request->slot);
+		LogDebug("[Client::Handle_OP_ItemVerifyRequest] Unknown slot being used by [{}] slot being used is [{}]", GetName(), request->slot);
 		return;
 	}
 
@@ -8891,7 +8891,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 	if (spell_id > 0 && (spells[spell_id].target_type == ST_Pet || spells[spell_id].target_type == ST_SummonedPet))
 		target_id = GetPetID();
 
-	LogDebug("OP ItemVerifyRequest: spell=[{}], target=[{}], inv=[{}]", spell_id, target_id, slot_id);
+	LogDebug("[Client::Handle_OP_ItemVerifyRequest] OP ItemVerifyRequest: spell=[{}] target=[{}] inv=[{}]", spell_id, target_id, slot_id);
 
 	if (m_inv.SupportsClickCasting(slot_id) || ((item->ItemType == EQ::item::ItemTypePotion || item->PotionBelt) && m_inv.SupportsPotionBeltCasting(slot_id))) // sanity check
 	{
@@ -8929,7 +8929,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 
 		if ((spell_id <= 0) && (item->ItemType != EQ::item::ItemTypeFood && item->ItemType != EQ::item::ItemTypeDrink && item->ItemType != EQ::item::ItemTypeAlcohol && item->ItemType != EQ::item::ItemTypeSpell))
 		{
-			LogDebug("Item with no effect right clicked by [{}]", GetName());
+			LogDebug("[Client::Handle_OP_ItemVerifyRequest] Item with no effect right clicked by [{}]", GetName());
 		}
 		else if (inst->IsClassCommon())
 		{
@@ -8983,7 +8983,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 							SendItemRecastTimer(item->RecastType); //Problem: When you loot corpse, recast display is not present. This causes it to display again. Could not get to display when sending from looting.
 							MessageString(Chat::Red, SPELL_RECAST);
 							SendSpellBarEnable(item->Click.Effect);
-							LogSpells("Casting of [{}] canceled: item spell reuse timer not expired", spell_id);
+							LogSpells("[Client::Handle_OP_ItemVerifyRequest] Casting of [{}] canceled: item spell reuse timer not expired", spell_id);
 							return;
 						}
 					}
@@ -9025,7 +9025,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 					if (augitem->RecastDelay > 0)
 					{
 						if (!GetPTimers().Expired(&database, (pTimerItemStart + augitem->RecastType), false)) {
-							LogSpells("Casting of [{}] canceled: item spell reuse timer from augment not expired", spell_id);
+							LogSpells("[Client::Handle_OP_ItemVerifyRequest] Casting of [{}] canceled: item spell reuse timer from augment not expired", spell_id);
 							MessageString(Chat::Red, SPELL_RECAST);
 							SendSpellBarEnable(augitem->Click.Effect);
 							return;
@@ -9063,12 +9063,12 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 				{
 					if (item->ItemType != EQ::item::ItemTypeFood && item->ItemType != EQ::item::ItemTypeDrink && item->ItemType != EQ::item::ItemTypeAlcohol)
 					{
-						LogDebug("Error: unknown item->Click.Type ([{}])", item->Click.Type);
+						LogDebug("[Client::Handle_OP_ItemVerifyRequest] Error: unknown item->Click.Type ([{}])", item->Click.Type);
 					}
 				}
 				else
 				{
-					LogDebug("Error: unknown item->Click.Type ([{}])", item->Click.Type);
+					LogDebug("[Client::Handle_OP_ItemVerifyRequest] Error: unknown item->Click.Type ([{}])", item->Click.Type);
 				}
 			}
 		}
@@ -12636,7 +12636,7 @@ void Client::Handle_OP_RezzAnswer(const EQApplicationPacket *app)
 
 	const Resurrect_Struct* ra = (const Resurrect_Struct*)app->pBuffer;
 
-	LogSpells("Received OP_RezzAnswer from client. Pendingrezzexp is [{}], action is [{}]",
+	LogSpells("[Client::Handle_OP_RezzAnswer] Received OP_RezzAnswer from client. Pendingrezzexp is [{}] action is [{}]",
 		PendingRezzXP, ra->action ? "ACCEPT" : "DECLINE");
 
 

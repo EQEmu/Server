@@ -131,10 +131,8 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes, bool bInnates
 				&& (AIspells[i].time_cancast + (zone->random.Int(0, 4) * 500)) <= Timer::GetCurrentTime() //break up the spelling casting over a period of time.
 				) {
 
-#if MobAI_DEBUG_Spells >= 21
-				LogAI("Mob::AICastSpell: Casting: spellid=[{}], tar=[{}], dist2[[{}]]<=[{}], mana_cost[[{}]]<=[{}], cancast[[{}]]<=[{}], type=[{}]",
+				LogAI("[Mob::AICastSpell] Casting: spellid [{}] tar [{}] dist2[[{}]]<=[{}] mana_cost[[{}]]<=[{}] cancast[[{}]]<=[{}] type [{}]",
 					AIspells[i].spellid, tar->GetName(), dist2, (spells[AIspells[i].spellid].range * spells[AIspells[i].spellid].range), mana_cost, GetMana(), AIspells[i].time_cancast, Timer::GetCurrentTime(), AIspells[i].type);
-#endif
 
 				switch (AIspells[i].type) {
 					case SpellType_Heal: {
@@ -364,21 +362,17 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes, bool bInnates
 					}
 				}
 			}
-#if MobAI_DEBUG_Spells >= 21
 			else {
-				LogAI("Mob::AICastSpell: NotCasting: spellid=[{}], tar=[{}], dist2[[{}]]<=[{}], mana_cost[[{}]]<=[{}], cancast[[{}]]<=[{}], type=[{}]",
+				LogAI("[Mob::AICastSpell] NotCasting: spellid [{}] tar [{}] dist2[[{}]]<=[{}] mana_cost[[{}]]<=[{}] cancast[[{}]]<=[{}] type [{}]",
 					AIspells[i].spellid, tar->GetName(), dist2, (spells[AIspells[i].spellid].range * spells[AIspells[i].spellid].range), mana_cost, GetMana(), AIspells[i].time_cancast, Timer::GetCurrentTime(), AIspells[i].type);
 			}
-#endif
 		}
 	}
 	return false;
 }
 
 bool NPC::AIDoSpellCast(uint8 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgainBefore) {
-#if MobAI_DEBUG_Spells >= 1
-	LogAI("Mob::AIDoSpellCast: spellid = [{}], tar = [{}], mana = [{}], Name: [{}]", AIspells[i].spellid, tar->GetName(), mana_cost, spells[AIspells[i].spellid].name);
-#endif
+	LogAI("[Mob::AIDoSpellCast] spellid [{}] tar [{}] mana [{}] Name [{}]", AIspells[i].spellid, tar->GetName(), mana_cost, spells[AIspells[i].spellid].name);
 	casting_spell_AIindex = i;
 
 	return CastSpell(AIspells[i].spellid, tar->GetID(), EQ::spells::CastingSlot::Gem2, AIspells[i].manacost == -2 ? 0 : -1, mana_cost, oDontDoAgainBefore, -1, -1, 0, &(AIspells[i].resist_adjust));
@@ -1359,7 +1353,7 @@ void Mob::AI_Process() {
 						(GetOwnerID() || IsBot() || IsTempPet() ||
 						CastToNPC()->GetCombatEvent())) {
 					if (!IsRooted()) {
-						LogAI("Pursuing [{}] while engaged", target->GetName());
+						LogAIDetail("Pursuing [{}] while engaged", target->GetName());
 						RunTo(target->GetX(), target->GetY(), target->GetZ());
 
 					}
@@ -1722,7 +1716,7 @@ void NPC::AI_DoMovement() {
 			else if (!(AI_walking_timer->Enabled())) {    // currently moving
 				bool doMove = true;
 				if(IsPositionEqual(glm::vec2(m_CurrentWayPoint.x, m_CurrentWayPoint.y), glm::vec2(GetX(), GetY()))) {
-					LogAI("We have reached waypoint [{}] ({},{},{}) on grid [{}]",
+					LogAIDetail("We have reached waypoint [{}] ({},{},{}) on grid [{}]",
 						cur_wp,
 						GetX(),
 						GetY(),
@@ -1810,7 +1804,7 @@ void NPC::AI_DoMovement() {
 		if (at_gp) {
 
 			if (moved) {
-				LogAI("Reached guard point ({},{},{})", m_GuardPoint.x, m_GuardPoint.y, m_GuardPoint.z);
+				LogAIDetail("Reached guard point ({},{},{})", m_GuardPoint.x, m_GuardPoint.y, m_GuardPoint.z);
 
 				ClearFeignMemory();
 				moved = false;
@@ -2017,7 +2011,7 @@ bool NPC::AI_EngagedCastCheck() {
 	if (AIautocastspell_timer->Check(false)) {
 		AIautocastspell_timer->Disable();	//prevent the timer from going off AGAIN while we are casting.
 
-		LogAI("Engaged autocast check triggered. Trying to cast healing spells then maybe offensive spells");
+		LogAIDetail("Engaged autocast check triggered. Trying to cast healing spells then maybe offensive spells");
 
 		// first try innate (spam) spells
 		if(!AICastSpell(GetTarget(), 0, SpellType_Nuke | SpellType_Lifetap | SpellType_DOT | SpellType_Dispel | SpellType_Mez | SpellType_Slow | SpellType_Debuff | SpellType_Charm | SpellType_Root, true)) {
@@ -2046,7 +2040,7 @@ bool NPC::AI_PursueCastCheck() {
 	if (AIautocastspell_timer->Check(false)) {
 		AIautocastspell_timer->Disable();	//prevent the timer from going off AGAIN while we are casting.
 
-		LogAI("Engaged (pursuing) autocast check triggered. Trying to cast offensive spells");
+		LogAIDetail("Engaged (pursuing) autocast check triggered. Trying to cast offensive spells");
 		// checking innate (spam) spells first
 		if(!AICastSpell(GetTarget(), AISpellVar.pursue_detrimental_chance, SpellType_Root | SpellType_Nuke | SpellType_Lifetap | SpellType_Snare | SpellType_DOT | SpellType_Dispel | SpellType_Mez | SpellType_Slow | SpellType_Debuff, true)) {
 			if(!AICastSpell(GetTarget(), AISpellVar.pursue_detrimental_chance, SpellType_Root | SpellType_Nuke | SpellType_Lifetap | SpellType_Snare | SpellType_DOT | SpellType_Dispel | SpellType_Mez | SpellType_Slow | SpellType_Debuff)) {
@@ -2068,7 +2062,7 @@ bool NPC::AI_IdleCastCheck() {
 				//last duration it was set to... try to put up a more reasonable timer...
 				AIautocastspell_timer->Start(RandomTimer(AISpellVar.idle_no_sp_recast_min, AISpellVar.idle_no_sp_recast_max), false);
 
-				LogSpells("Triggering AI_IdleCastCheck :: Mob [{}] - Min : [{}] Max : [{}]", GetCleanName(), AISpellVar.idle_no_sp_recast_min, AISpellVar.idle_no_sp_recast_max);
+				LogSpells("[NPC::AI_IdleCastCheck] Mob [{}] Min [{}] Max [{}]", GetCleanName(), AISpellVar.idle_no_sp_recast_min, AISpellVar.idle_no_sp_recast_max);
 
 			}	//else, spell casting finishing will reset the timer.
 		}	//else, spell casting finishing will reset the timer.
@@ -2499,7 +2493,6 @@ bool NPC::AI_AddNPCSpells(uint32 iDBSpellsID) {
 		return false;
 	}
 	DBnpcspells_Struct* parentlist = content_db.GetNPCSpells(spell_list->parent_list);
-#if MobAI_DEBUG_Spells >= 10
 	std::string debug_msg = StringFormat("Loading NPCSpells onto %s: dbspellsid=%u, level=%u", GetName(), iDBSpellsID, GetLevel());
 	if (spell_list) {
 		debug_msg.append(StringFormat(" (found, %u), parentlist=%u", spell_list->entries.size(), spell_list->parent_list));
@@ -2515,22 +2508,19 @@ bool NPC::AI_AddNPCSpells(uint32 iDBSpellsID) {
 	}
 	LogAI("[{}]", debug_msg.c_str());
 
-#ifdef MobAI_DEBUG_Spells >= 25
 	if (parentlist) {
 		for (const auto &iter : parentlist->entries) {
-			LogAI("([{}]) [{}]", iter.spellid, spells[iter.spellid].name);
+			LogAIDetail("([{}]) [{}]", iter.spellid, spells[iter.spellid].name);
 		}
 	}
 	LogAI("fin (parent list)");
 	if (spell_list) {
 		for (const auto &iter : spell_list->entries) {
-			LogAI("([{}]) [{}]", iter.spellid, spells[iter.spellid].name);
+			LogAIDetail("([{}]) [{}]", iter.spellid, spells[iter.spellid].name);
 		}
 	}
 	LogAI("fin (spell list)");
-#endif
 
-#endif
 	uint16 attack_proc_spell = -1;
 	int8 proc_chance = 3;
 	uint16 range_proc_spell = -1;
@@ -2674,7 +2664,6 @@ bool NPC::AI_AddNPCSpellsEffects(uint32 iDBSpellsEffectsID) {
 	DBnpcspellseffects_Struct* parentlist = content_db.GetNPCSpellsEffects(spell_effects_list->parent_list);
 
 	uint32 i;
-#if MobAI_DEBUG_Spells >= 10
 	std::string debug_msg = StringFormat("Loading NPCSpellsEffects onto %s: dbspellseffectid=%u", GetName(), iDBSpellsEffectsID);
 	if (spell_effects_list) {
 		debug_msg.append(StringFormat(" (found, %u), parentlist=%u", spell_effects_list->numentries, spell_effects_list->parent_list));
@@ -2689,7 +2678,6 @@ bool NPC::AI_AddNPCSpellsEffects(uint32 iDBSpellsEffectsID) {
 		debug_msg.append(" (not found)");
 	}
 	LogAI("[{}]", debug_msg.c_str());
-#endif
 
 	if (parentlist) {
 		for (i=0; i<parentlist->numentries; i++) {

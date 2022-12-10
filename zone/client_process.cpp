@@ -1006,7 +1006,7 @@ void Client::OPRezzAnswer(uint32 Action, uint32 SpellID, uint16 ZoneID, uint16 I
 {
 	if(PendingRezzXP < 0) {
 		// pendingrezexp is set to -1 if we are not expecting an OP_RezzAnswer
-		LogSpells("Unexpected OP_RezzAnswer. Ignoring it");
+		LogSpells("[Client::OPRezzAnswer] Unexpected OP_RezzAnswer. Ignoring it");
 		Message(Chat::Red, "You have already been resurrected.\n");
 		return;
 	}
@@ -1016,7 +1016,7 @@ void Client::OPRezzAnswer(uint32 Action, uint32 SpellID, uint16 ZoneID, uint16 I
 		// Mark the corpse as rezzed in the database, just in case the corpse has buried, or the zone the
 		// corpse is in has shutdown since the rez spell was cast.
 		database.MarkCorpseAsRezzed(PendingRezzDBID);
-		LogSpells("Player [{}] got a [{}] Rezz, spellid [{}] in zone[{}], instance id [{}]",
+		LogSpells("[Client::OPRezzAnswer] Player [{}] got a [{}] Rezz spellid [{}] in zone[{}] instance id [{}]",
 				name, (uint16)spells[SpellID].base_value[0],
 				SpellID, ZoneID, InstanceID);
 
@@ -1085,7 +1085,7 @@ void Client::OPMemorizeSpell(const EQApplicationPacket* app)
 {
 	if(app->size != sizeof(MemorizeSpell_Struct))
 	{
-		LogError("Wrong size on OP_MemorizeSpell. Got: [{}], Expected: [{}]", app->size, sizeof(MemorizeSpell_Struct));
+		LogError("[Client::OPMemorizeSpell] Wrong size on OP_MemorizeSpell. Got: [{}] Expected: [{}]", app->size, sizeof(MemorizeSpell_Struct));
 		DumpPacket(app);
 		return;
 	}
@@ -2052,7 +2052,7 @@ void Client::HandleRespawnFromHover(uint32 Option)
 		{
 			if (PendingRezzXP < 0 || PendingRezzSpellID == 0)
 			{
-				LogSpells("Unexpected Rezz from hover request");
+				LogSpells("[Client::HandleRespawnFromHover] Unexpected Rezz from hover request");
 				safe_delete(default_to_bind);
 				return;
 			}
@@ -2087,10 +2087,10 @@ void Client::HandleRespawnFromHover(uint32 Option)
 
 			if (corpse && corpse->IsCorpse())
 			{
-				LogSpells("Hover Rez in zone [{}] for corpse [{}]",
+				LogSpells("[Client::HandleRespawnFromHover] Hover Rez in zone [{}] for corpse [{}]",
 						zone->GetShortName(), PendingRezzCorpseName.c_str());
 
-				LogSpells("Found corpse. Marking corpse as rezzed");
+				LogSpells("[Client::HandleRespawnFromHover] Found corpse. Marking corpse as rezzed");
 
 				corpse->IsRezzed(true);
 				corpse->CompleteResurrection();

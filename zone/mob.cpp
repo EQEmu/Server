@@ -2551,7 +2551,7 @@ void Mob::SendIllusionPacket(
 	}
 
 	LogSpells(
-		"Illusion: Race [{}] Gender [{}] Texture [{}] HelmTexture [{}] HairColor [{}] BeardColor [{}] EyeColor1 [{}] EyeColor2 [{}] HairStyle [{}] Face [{}] DrakkinHeritage [{}] DrakkinTattoo [{}] DrakkinDetails [{}] Size [{}]",
+		"[Mob::SendIllusionPacket] Illusion: Race [{}] Gender [{}] Texture [{}] HelmTexture [{}] HairColor [{}] BeardColor [{}] EyeColor1 [{}] EyeColor2 [{}] HairStyle [{}] Face [{}] DrakkinHeritage [{}] DrakkinTattoo [{}] DrakkinDetails [{}] Size [{}]",
 		race,
 		gender,
 		new_texture,
@@ -4163,7 +4163,7 @@ void Mob::ExecWeaponProc(const EQ::ItemInstance *inst, uint16 spell_id, Mob *on,
 	if(!IsValidSpell(spell_id)) { // Check for a valid spell otherwise it will crash through the function
 		if(IsClient()){
 			Message(0, "Invalid spell proc %u", spell_id);
-			LogSpells("Player [{}], Weapon Procced invalid spell [{}]", GetName(), spell_id);
+			LogSpells("[Mob::ExecWeaponProc] Player [{}] Weapon Procced invalid spell [{}]", GetName(), spell_id);
 		}
 		return;
 	}
