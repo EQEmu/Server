@@ -24,7 +24,7 @@ void command_suspendmulti(Client *c, const Seperator *sep)
 	const std::string reason = sep->arg[3] ? sep->argplus[3] : "";
 
 	auto l = AccountRepository::GetWhere(
-		content_db,
+		database,
 		fmt::format(
 			"LOWER(charname) IN ({})",
 			Strings::Implode(", ", v)
