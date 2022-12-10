@@ -41,7 +41,7 @@ void command_suspendmulti(Client *c, const Seperator *sep)
 		a.suspendeduntil = std::time(nullptr) + (days * 86400);
 		a.suspend_reason = reason;
 
-		if (!AccountRepository::UpdateOne(content_db, a)) {
+		if (!AccountRepository::UpdateOne(database, a)) {
 			c->Message(
 				Chat::White,
 				fmt::format(
