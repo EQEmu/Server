@@ -1234,9 +1234,9 @@ void QuestManager::movegrp(int zoneid, float x, float y, float z) {
 	}
 }
 
-void QuestManager::doanim(int anim_id) {
+void QuestManager::doanim(int animation_id, int animation_speed, bool ackreq, eqFilterType filter) {
 	QuestManagerCurrentQuestVars();
-	owner->DoAnim(anim_id);
+	owner->DoAnim(animation_id, animation_speed, ackreq, filter);
 }
 
 void QuestManager::addskill(int skill_id, int value) {
