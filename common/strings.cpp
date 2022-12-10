@@ -192,7 +192,7 @@ std::string Strings::Escape(const std::string &s)
 bool Strings::IsNumber(const std::string &s)
 {
 	try {
-		auto r = stod(s);
+		auto r = stoi(s);
 		return true;
 	}
 	catch (std::exception &) {
