@@ -721,3 +721,20 @@ uint32 Strings::TimeToSeconds(std::string time_string)
 
 	return duration;
 }
+
+bool Strings::ToBool(std::string bool_string)
+{
+	if (
+		Strings::Contains(bool_string, "true") ||
+		Strings::Contains(bool_string, "y") ||
+		Strings::Contains(bool_string, "yes") ||
+		Strings::Contains(bool_string, "on") ||
+		Strings::Contains(bool_string, "enable") ||
+		Strings::Contains(bool_string, "enabled") ||
+		(Strings::IsNumber(bool_string) && std::stoi(bool_string))
+	) {
+		return true;
+	}
+
+	return false;
+}

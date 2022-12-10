@@ -1,232 +1,451 @@
 #include "../client.h"
+#include "../command.h"
+
+#include "../../common/repositories/rule_sets_repository.h"
+#include "../../common/repositories/rule_values_repository.h"
 
 void command_rules(Client *c, const Seperator *sep)
 {
-	//super-command for managing rules settings
-	if (sep->arg[1][0] == '\0' || !strcasecmp(sep->arg[1], "help")) {
-		c->Message(Chat::White, "Syntax: #rules [subcommand].");
-		c->Message(Chat::White, "-- Rule Set Manipulation --");
-		c->Message(Chat::White, "...listsets - List avaliable rule sets");
-		c->Message(Chat::White, "...current - gives the name of the ruleset currently running in this zone");
-		c->Message(Chat::White, "...reload - Reload the selected ruleset in this zone");
-		c->Message(Chat::White, "...switch (ruleset name) - Change the selected ruleset and load it");
-		c->Message(
-			Chat::White,
-			"...load (ruleset name) - Load a ruleset in just this zone without changing the selected set"
-		);
-//too lazy to write this right now:
-//		c->Message(Chat::White, "...wload (ruleset name) - Load a ruleset in all zones without changing the selected set");
-		c->Message(Chat::White, "...store [ruleset name] - Store the running ruleset as the specified name");
-		c->Message(Chat::White, "---------------------");
-		c->Message(Chat::White, "-- Running Rule Manipulation --");
-		c->Message(Chat::White, "...reset - Reset all rules to their default values");
-		c->Message(Chat::White, "...get [rule] - Get the specified rule's local value");
-		c->Message(Chat::White, "...set (rule) (value) - Set the specified rule to the specified value locally only");
-		c->Message(
-			Chat::White,
-			"...setdb (rule) (value) - Set the specified rule to the specified value locally and in the DB"
-		);
-		c->Message(
-			Chat::White,
-			"...list [catname] - List all rules in the specified category (or all categiries if omitted)"
-		);
-		c->Message(Chat::White, "...values [catname] - List the value of all rules in the specified category");
+	auto arguments = sep->argnum;
+	bool is_help = !strcasecmp(sep->arg[1], "help");
+	if (!arguments || is_help) {
+		SendRuleSubCommands(c);
 		return;
 	}
 
-	if (!strcasecmp(sep->arg[1], "current")) {
-		c->Message(
-			Chat::White, "Currently running ruleset '%s' (%d)", RuleManager::Instance()->GetActiveRuleset(),
-			RuleManager::Instance()->GetActiveRulesetID());
+	bool is_current = !strcasecmp(sep->arg[1], "current");
+	bool is_get = !strcasecmp(sep->arg[1], "get");
+	bool is_list = !strcasecmp(sep->arg[1], "list");
+	bool is_list_sets = !strcasecmp(sep->arg[1], "listsets");
+	bool is_load = !strcasecmp(sep->arg[1], "load");
+	bool is_reload = !strcasecmp(sep->arg[1], "reload");
+	bool is_reset = !strcasecmp(sep->arg[1], "reset");
+	bool is_set = !strcasecmp(sep->arg[1], "set");
+	bool is_set_db = !strcasecmp(sep->arg[1], "setdb");
+	bool is_store = !strcasecmp(sep->arg[1], "store");
+	bool is_switch = !strcasecmp(sep->arg[1], "switch");
+	bool is_values = !strcasecmp(sep->arg[1], "values");
+	if (
+		!is_current &&
+		!is_get &&
+		!is_list &&
+		!is_list_sets &&
+		!is_load &&
+		!is_reload &&
+		!is_reset &&
+		!is_set &&
+		!is_set_db &&
+		!is_store &&
+		!is_switch &&
+		!is_values
+	) {
+		SendRuleSubCommands(c);
+		return;
 	}
-	else if (!strcasecmp(sep->arg[1], "listsets")) {
-		std::map<int, std::string> sets;
-		if (!RuleManager::Instance()->ListRulesets(&database, sets)) {
-			c->Message(Chat::Red, "Failed to list rule sets!");
+
+	if (is_current) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Currently running Rule Set {} ({}).",
+				RuleManager::Instance()->GetActiveRuleset(),
+				RuleManager::Instance()->GetActiveRulesetID()
+			).c_str()
+		);
+	} else if (is_list_sets) {
+		std::map<int, std::string> m;
+		if (!RuleManager::Instance()->ListRulesets(&database, m)) {
+			c->Message(Chat::White, "Failed to list Rule Sets!");
 			return;
 		}
 
-		c->Message(Chat::White, "Avaliable rule sets:");
-		std::map<int, std::string>::iterator cur, end;
-		cur = sets.begin();
-		end = sets.end();
-		for (; cur != end; ++cur) {
-			c->Message(Chat::White, "(%d) %s", cur->first, cur->second.c_str());
+		if (m.empty()) {
+			c->Message(Chat::White, "There are no available Rule Sets!");
+			return;
 		}
-	}
-	else if (!strcasecmp(sep->arg[1], "reload")) {
+
+		c->Message(Chat::White, "Available Rule Sets:");
+
+		auto rule_set_count = 0;
+		auto rule_set_number = 1;
+
+		for (const auto& e : m) {
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"Rule Set {} | {} ({})",
+					e.second,
+					e.first
+				).c_str()
+			);
+		}
+
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"There are {} available Rule Set{}.",
+				rule_set_count,
+				rule_set_count != 1 ? "s" : ""
+			).c_str()
+		);
+	} else if (is_reload) {
 		RuleManager::Instance()->LoadRules(&database, RuleManager::Instance()->GetActiveRuleset(), true);
 		c->Message(
-			Chat::White, "The active ruleset (%s (%d)) has been reloaded", RuleManager::Instance()->GetActiveRuleset(),
-			RuleManager::Instance()->GetActiveRulesetID());
-	}
-	else if (!strcasecmp(sep->arg[1], "switch")) {
+			Chat::White,
+			fmt::format(
+				"Active Rule Set {} ({}) has been reloaded.",
+				RuleManager::Instance()->GetActiveRuleset(),
+				RuleManager::Instance()->GetActiveRulesetID()
+			).c_str()
+		);
+	} else if (is_switch) {
 		//make sure this is a valid rule set..
-		int rsid = RuleManager::Instance()->GetRulesetID(&database, sep->arg[2]);
+		const auto rsid = RuleSetsRepository::GetRuleSetID(database, sep->arg[2]);
 		if (rsid < 0) {
-			c->Message(Chat::Red, "Unknown rule set '%s'", sep->arg[2]);
-			return;
-		}
-		if (!database.SetVariable("RuleSet", sep->arg[2])) {
-			c->Message(Chat::Red, "Failed to update variables table to change selected rule set");
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"Rule Set '{}' does not exist or is invalid.",
+					sep->arg[2]
+				).c_str()
+			);
 			return;
 		}
 
-		//TODO: we likely want to reload this ruleset everywhere...
+		if (!database.SetVariable("RuleSet", sep->arg[2])) {
+			c->Message(Chat::White, "Failed to update variables table to change selected Rule Set.");
+			return;
+		}
+
 		RuleManager::Instance()->LoadRules(&database, sep->arg[2], true);
 
 		c->Message(
 			Chat::White,
-			"The selected ruleset has been changed to (%s (%d)) and reloaded locally",
+			"The selected ruleset has been changed to {} ({}) and reloaded locally.",
 			sep->arg[2],
 			rsid
 		);
-	}
-	else if (!strcasecmp(sep->arg[1], "load")) {
-		//make sure this is a valid rule set..
-		int rsid = RuleManager::Instance()->GetRulesetID(&database, sep->arg[2]);
+	} else if (is_load) {
+		const auto rsid = RuleSetsRepository::GetRuleSetID(database, sep->arg[2]);
 		if (rsid < 0) {
-			c->Message(Chat::Red, "Unknown rule set '%s'", sep->arg[2]);
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"Rule Set '{}' does not exist or is invalid.",
+					sep->arg[2]
+				).c_str()
+			);
 			return;
 		}
+
 		RuleManager::Instance()->LoadRules(&database, sep->arg[2], true);
-		c->Message(Chat::White, "Loaded ruleset '%s' (%d) locally", sep->arg[2], rsid);
-	}
-	else if (!strcasecmp(sep->arg[1], "store")) {
-		if (sep->argnum == 1) {
-			//store current rule set.
-			RuleManager::Instance()->SaveRules(&database);
-			c->Message(Chat::White, "Rules saved");
-		}
-		else if (sep->argnum == 2) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Loaded Rule Set {} ({}) locally.",
+				sep->arg[2],
+				rsid
+			).c_str()
+		);
+	} else if (is_store) {
+		if (arguments == 1) {
+			RuleManager::Instance()->SaveRules(&database, "");
+			c->Message(Chat::White, "Rules saved.");
+		} else if (arguments == 2) {
 			RuleManager::Instance()->SaveRules(&database, sep->arg[2]);
-			int prersid = RuleManager::Instance()->GetActiveRulesetID();
-			int rsid    = RuleManager::Instance()->GetRulesetID(&database, sep->arg[2]);
+			const auto prersid = RuleManager::Instance()->GetActiveRulesetID();
+			const auto rsid    = RuleSetsRepository::GetRuleSetID(database, sep->arg[2]);
 			if (rsid < 0) {
-				c->Message(Chat::Red, "Unable to query ruleset ID after store, it most likely failed.");
-			}
-			else {
-				c->Message(Chat::White, "Stored rules as ruleset '%s' (%d)", sep->arg[2], rsid);
+				c->Message(Chat::White, "Unable to query Rule Set ID after store.");
+			} else {
+				c->Message(
+					Chat::White,
+					fmt::format(
+						"Stored rules as Rule Set {} ({}).",
+						sep->arg[2],
+						rsid
+					).c_str()
+				);
+
 				if (prersid != rsid) {
-					c->Message(Chat::White, "Rule set %s (%d) is now active in this zone", sep->arg[2], rsid);
+					c->Message(
+						Chat::White,
+						fmt::format(
+							"Rule Set {} ({}) is now active locally.",
+							sep->arg[2],
+							rsid
+						).c_str()
+					);
 				}
 			}
-		}
-		else {
-			c->Message(Chat::Red, "Invalid argument count, see help.");
+		} else {
+			SendRuleSubCommands(c);
 			return;
 		}
-	}
-	else if (!strcasecmp(sep->arg[1], "reset")) {
+	} else if (is_reset) {
 		RuleManager::Instance()->ResetRules(true);
-		c->Message(Chat::White, "The running ruleset has been set to defaults");
-
-	}
-	else if (!strcasecmp(sep->arg[1], "get")) {
-		if (sep->argnum != 2) {
-			c->Message(Chat::Red, "Invalid argument count, see help.");
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Rule Set {} ({}) has been set to defaults.",
+				RuleManager::Instance()->GetActiveRuleset(),
+				RuleManager::Instance()->GetActiveRulesetID()
+			).c_str()
+		);
+	} else if (is_get) {
+		if (arguments == 2) {
+			std::string value;
+			if (!RuleManager::Instance()->GetRule(sep->arg[2], value)) {
+				c->Message(
+					Chat::White,
+					fmt::format(
+						"Unable to find rule '{}'.",
+						sep->arg[2]
+					).c_str()
+				);
+			} else {
+				c->Message(
+					Chat::White,
+					fmt::format(
+						"{} has a value of {}.",
+						sep->arg[2],
+						value
+					).c_str()
+				);
+			}
+		} else {
+			SendRuleSubCommands(c);
 			return;
 		}
-		std::string value;
-		if (!RuleManager::Instance()->GetRule(sep->arg[2], value)) {
-			c->Message(Chat::Red, "Unable to find rule %s", sep->arg[2]);
-		}
-		else {
-			c->Message(Chat::White, "%s - %s", sep->arg[2], value.c_str());
-		}
-
-	}
-	else if (!strcasecmp(sep->arg[1], "set")) {
-		if (sep->argnum != 3) {
-			c->Message(Chat::Red, "Invalid argument count, see help.");
+	} else if (is_set) {
+		if (arguments == 3) {
+			if (!RuleManager::Instance()->SetRule(sep->arg[2], sep->arg[3], nullptr, false, true)) {
+				c->Message(
+					Chat::White,
+					fmt::format(
+						"Failed to modify Rule {} to a value of {}.",
+						sep->arg[2],
+						sep->arg[3]
+					).c_str()
+				);
+			} else {
+				c->Message(
+					Chat::White,
+					fmt::format(
+						"Rule {} modified locally to a value of {}.",
+						sep->arg[2],
+						sep->arg[3]
+					).c_str()
+				);
+			}
+		} else {
+			SendRuleSubCommands(c);
 			return;
 		}
-		if (!RuleManager::Instance()->SetRule(sep->arg[2], sep->arg[3], nullptr, false, true)) {
-			c->Message(Chat::Red, "Failed to modify rule");
-		}
-		else {
-			c->Message(Chat::White, "Rule modified locally.");
-		}
-	}
-	else if (!strcasecmp(sep->arg[1], "setdb")) {
-		if (sep->argnum != 3) {
-			c->Message(Chat::Red, "Invalid argument count, see help.");
+	} else if (is_set_db) {
+		if (arguments == 3) {
+			if (!RuleManager::Instance()->SetRule(sep->arg[2], sep->arg[3], &database, true, true)) {
+				c->Message(
+					Chat::White,
+					fmt::format(
+						"Failed to modify Rule {} to a value of {}.",
+						sep->arg[2],
+						sep->arg[3]
+					).c_str()
+				);
+			} else {
+				c->Message(
+					Chat::White,
+					fmt::format(
+						"Rule {} modified locally and in database to a value of {}.",
+						sep->arg[2],
+						sep->arg[3]
+					).c_str()
+				);
+			}
+		} else {
+			SendRuleSubCommands(c);
 			return;
 		}
-		if (!RuleManager::Instance()->SetRule(sep->arg[2], sep->arg[3], &database, true, true)) {
-			c->Message(Chat::Red, "Failed to modify rule");
-		}
-		else {
-			c->Message(Chat::White, "Rule modified locally and in the database.");
-		}
-	}
-	else if (!strcasecmp(sep->arg[1], "list")) {
-		if (sep->argnum == 1) {
-			std::vector<const char *> rule_list;
-			if (!RuleManager::Instance()->ListCategories(rule_list)) {
-				c->Message(Chat::Red, "Failed to list categories!");
+	} else if (is_list) {
+		if (arguments == 1) {
+			std::vector<std::string> l;
+			if (!RuleManager::Instance()->ListCategories(l)) {
+				c->Message(Chat::White, "Failed to list Rule Categories!");
 				return;
 			}
+
+			if (l.empty()) {
+				c->Message(Chat::White, "There are no Rule Categories to list!");
+				return;
+			}
+
 			c->Message(Chat::White, "Rule Categories:");
-			std::vector<const char *>::iterator cur, end;
-			cur = rule_list.begin();
-			end = rule_list.end();
-			for (; cur != end; ++cur) {
-				c->Message(Chat::White, " %s", *cur);
+
+			auto rule_category_count = 0;
+			auto rule_category_number = 1;
+
+			for (const auto& e : l) {
+				c->Message(
+					Chat::White,
+					fmt::format(
+						"Rule Category {} | {}",
+						rule_category_number,
+						e
+					).c_str()
+				);
+
+				rule_category_count++;
+				rule_category_number++;
 			}
-		}
-		else if (sep->argnum == 2) {
-			const char *catfilt = nullptr;
+
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"There {} {} available Rule Categor{}.",
+					rule_category_count != 1 ? "are" : "is",
+					rule_category_count,
+					rule_category_count != 1 ? "ies" : "y"
+				).c_str()
+			);
+		} else if (arguments == 2) {
+			std::string category_name;
 			if (std::string("all") != sep->arg[2]) {
-				catfilt = sep->arg[2];
+				category_name = sep->arg[2];
 			}
-			std::vector<const char *> rule_list;
-			if (!RuleManager::Instance()->ListRules(catfilt, rule_list)) {
-				c->Message(Chat::Red, "Failed to list rules!");
+
+			std::vector<std::string> l;
+			if (!RuleManager::Instance()->ListRules(category_name, l)) {
+				c->Message(Chat::White, "Failed to list rules!");
 				return;
 			}
-			c->Message(Chat::White, "Rules in category %s:", sep->arg[2]);
-			std::vector<const char *>::iterator cur, end;
-			cur = rule_list.begin();
-			end = rule_list.end();
-			for (; cur != end; ++cur) {
-				c->Message(Chat::White, " %s", *cur);
+
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"Rules in {} Category:",
+					category_name
+				).c_str()
+			);
+
+			auto rule_count = 0;
+			auto rule_number = 1;
+
+			for (const auto& e : l) {
+				c->Message(
+					Chat::White,
+					fmt::format(
+						"Rule {} | {}",
+						rule_number,
+						e
+					).c_str()
+				);
+
+				rule_count++;
+				rule_number++;
 			}
-		}
-		else {
-			c->Message(Chat::Red, "Invalid argument count, see help.");
-		}
-	}
-	else if (!strcasecmp(sep->arg[1], "values")) {
-		if (sep->argnum != 2) {
-			c->Message(Chat::Red, "Invalid argument count, see help.");
+
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"There {} {} available Rule{} in the {} Category.",
+					rule_count != 1 ? "are" : "is",
+					rule_count,
+					rule_count != 1 ? "s" : "",
+					category_name
+				).c_str()
+			);
+		} else {
+			SendRuleSubCommands(c);
 			return;
 		}
-		else {
-			const char *catfilt = nullptr;
+	} else if (is_values) {
+		if (arguments == 2) {
+			std::string category_name;
 			if (std::string("all") != sep->arg[2]) {
-				catfilt = sep->arg[2];
+				category_name = sep->arg[2];
 			}
-			std::vector<const char *> rule_list;
-			if (!RuleManager::Instance()->ListRules(catfilt, rule_list)) {
-				c->Message(Chat::Red, "Failed to list rules!");
+
+			std::vector<std::string> l;
+			if (!RuleManager::Instance()->ListRules(category_name, l)) {
+				c->Message(Chat::White, "Failed to list rules!");
 				return;
 			}
-			c->Message(Chat::White, "Rules & values in category %s:", sep->arg[2]);
-			std::vector<const char *>::iterator cur, end;
-			cur = rule_list.begin();
-			end = rule_list.end();
-			for (std::string tmp_value; cur != end; ++cur) {
-				if (RuleManager::Instance()->GetRule(*cur, tmp_value)) {
-					c->Message(Chat::White, " %s - %s", *cur, tmp_value.c_str());
+
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"Rule Values in {} Category:",
+					category_name
+				).c_str()
+			);
+
+			auto rule_count = 0;
+			auto rule_number = 1;
+			std::string rule_value;
+
+			for (const auto& e : l) {
+				if (RuleManager::Instance()->GetRule(e, rule_value)) {
+					c->Message(
+						Chat::White,
+						fmt::format(
+							"Rule {} | Name: {} Value: {}",
+							rule_number,
+							e,
+							rule_value
+						).c_str()
+					);
+
+					rule_count++;
+					rule_number++;
 				}
 			}
-		}
 
-	}
-	else {
-		c->Message(Chat::Yellow, "Invalid action specified. use '#rules help' for help");
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"There {} {} available Rule{} in the {} Category.",
+					rule_count != 1 ? "are" : "is",
+					rule_count,
+					rule_count != 1 ? "s" : "",
+					category_name
+				).c_str()
+			);
+		} else {
+			SendRuleSubCommands(c);
+			return;
+		}
 	}
 }
 
-
+void SendRuleSubCommands(Client *c)
+{
+	c->Message(Chat::White, "Usage: #rule listsets - List available rule sets");
+	c->Message(Chat::White, "Usage: #rule current - gives the name of the ruleset currently running in this zone");
+	c->Message(Chat::White, "Usage: #rule reload - Reload the selected ruleset in this zone");
+	c->Message(Chat::White, "Usage: #rule switch [Ruleset Name] - Change the selected ruleset and load it");
+	c->Message(
+		Chat::White,
+		"Usage: #rule load [Ruleset Name] - Load a ruleset in just this zone without changing the selected set"
+	);
+	c->Message(Chat::White, "Usage: #rule store [Ruleset Name] - Store the running ruleset as the specified name");
+	c->Message(Chat::White, "Usage: #rule reset - Reset all rules to their default values");
+	c->Message(Chat::White, "Usage: #rule get [Rule] - Get the specified rule's local value");
+	c->Message(
+		Chat::White,
+		"Usage: #rule set [Rule) [Value] - Set the specified rule to the specified value locally only"
+	);
+	c->Message(
+		Chat::White,
+		"Usage: #rule setdb [Rule] [Value] - Set the specified rule to the specified value locally and in the DB"
+	);
+	c->Message(
+		Chat::White,
+		"Usage: #rule list [Category Name] - List all rules in the specified category (or all categiries if omitted)"
+	);
+	c->Message(
+		Chat::White,
+		"Usage: #rule values [Category Name] - List the value of all rules in the specified category"
+	);
+	return;
+}

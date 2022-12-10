@@ -32,6 +32,7 @@ void ListModifyNPCStatMap(Client *c);
 std::map<std::string, std::string> GetModifyNPCStatMap();
 std::string GetModifyNPCStatDescription(std::string stat);
 void SendNPCEditSubCommands(Client *c);
+void SendRuleSubCommands(Client *c);
 
 // Commands
 void command_acceptrules(Client *c, const Seperator *sep);

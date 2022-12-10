@@ -59,6 +59,7 @@
 #include "zone_reload.h"
 #include "../common/repositories/criteria/content_filter_criteria.h"
 #include "../common/repositories/content_flags_repository.h"
+#include "../common/repositories/rule_sets_repository.h"
 #include "../common/repositories/zone_points_repository.h"
 #include "../common/serverinfo.h"
 
@@ -1113,7 +1114,7 @@ bool Zone::Init(bool is_static) {
 	} // if that fails, try the file name, then load defaults
 
 	if (RuleManager::Instance()->GetActiveRulesetID() != default_ruleset) {
-		std::string r_name = RuleManager::Instance()->GetRulesetName(&database, default_ruleset);
+		std::string r_name = RuleSetsRepository::GetRuleSetName(database, default_ruleset);
 		if (r_name.size() > 0) {
 			RuleManager::Instance()->LoadRules(&database, r_name.c_str(), false);
 		}
