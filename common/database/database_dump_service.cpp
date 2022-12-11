@@ -27,6 +27,7 @@
 #include "../eqemu_config.h"
 #include "../database_schema.h"
 #include "../file.h"
+#include "../process/process.h"
 
 #include <ctime>
 
@@ -39,38 +40,6 @@
 #endif
 
 #define DATABASE_DUMP_PATH "backups/"
-
-/**
- * @param cmd
- * @param return_result
- * @return
- */
-std::string DatabaseDumpService::execute(const std::string &cmd, bool return_result = true)
-{
-	const char *file_name = "db-exec-result.txt";
-
-	if (return_result) {
-#ifdef _WINDOWS
-		std::system((cmd + " > " + file_name + " 2>&1").c_str());
-#else
-		std::system((cmd + " > " + file_name).c_str());
-#endif
-	}
-	else {
-		std::system((cmd).c_str());
-	}
-
-	std::string result;
-
-	if (return_result) {
-		std::ifstream file(file_name);
-		result = {std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>()};
-		std::remove(file_name);
-
-	}
-
-	return result;
-}
 
 /**
  * @return bool
@@ -88,7 +57,7 @@ bool DatabaseDumpService::IsMySQLInstalled()
  */
 bool DatabaseDumpService::IsTarAvailable()
 {
-	std::string version_output = execute("tar --version");
+	std::string version_output = Process::execute("tar --version");
 
 	return version_output.find("GNU tar") != std::string::npos;
 }
@@ -99,7 +68,7 @@ bool DatabaseDumpService::IsTarAvailable()
  */
 bool DatabaseDumpService::Is7ZipAvailable()
 {
-	std::string version_output = execute("7z --help");
+	std::string version_output = Process::execute("7z --help");
 
 	return version_output.find("7-Zip") != std::string::npos;
 }
@@ -117,7 +86,7 @@ bool DatabaseDumpService::HasCompressionBinary()
  */
 std::string DatabaseDumpService::GetMySQLVersion()
 {
-	std::string version_output = execute("mysql --version");
+	std::string version_output = Process::execute("mysql --version");
 
 	return Strings::Trim(version_output);
 }
@@ -399,8 +368,8 @@ void DatabaseDumpService::Dump()
 		}
 	}
 	else {
-		std::string execution_result = execute(execute_command, IsDumpOutputToConsole());
-		if (!execution_result.empty()) {
+		std::string execution_result = Process::execute(execute_command);
+		if (!execution_result.empty() && IsDumpOutputToConsole()) {
 			std::cout << execution_result;
 		}
 	}
@@ -416,7 +385,7 @@ void DatabaseDumpService::Dump()
 			LogInfo("Compression requested... Compressing dump [{}.sql]", GetDumpFileNameWithPath());
 
 			if (IsTarAvailable()) {
-				execute(
+				Process::execute(
 					fmt::format(
 						"tar -zcvf {}.tar.gz -C {} {}.sql",
 						GetDumpFileNameWithPath(),
@@ -427,7 +396,7 @@ void DatabaseDumpService::Dump()
 				LogInfo("Compressed dump created at [{}.tar.gz]", GetDumpFileNameWithPath());
 			}
 			else if (Is7ZipAvailable()) {
-				execute(
+				Process::execute(
 					fmt::format(
 						"7z a -t7z {}.zip {}.sql",
 						GetDumpFileNameWithPath(),
