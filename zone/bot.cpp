@@ -5108,20 +5108,38 @@ void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client*
 
 	if (event_trade.size()) {
 		// Get Traded Items
-		EQ::ItemInstance* insts[8] = { 0 };
-		EQ::InventoryProfile& user_inv = client->GetInv();
-		for (int i = EQ::invslot::TRADE_BEGIN; i <= EQ::invslot::TRADE_END; ++i) {
-			insts[i - EQ::invslot::TRADE_BEGIN] = user_inv.GetItem(i);
-			client->DeleteItemInInventory(i);
+
+		// Accept Items from Cursor to support bot command ^inventorygive
+		if (begin_slot_id == invslot::slotCursor && end_slot_id == invslot::slotCursor) {
+			EQ::ItemInstance* insts[1] = { 0 };
+			EQ::InventoryProfile& user_inv = client->GetInv();
+			insts[0] = user_inv.GetItem(invslot::slotCursor);
+			client->DeleteItemInInventory(invslot::slotCursor);
+
+			// copy to be filtered by task updates, null trade slots preserved for quest event arg
+			std::vector<EQ::ItemInstance*> items(insts, insts + std::size(insts));
+
+			// Check if EVENT_TRADE accepts any items
+			std::vector<std::any> item_list(items.begin(), items.end());
+			parse->EventBot(EVENT_TRADE, this, client, "", 0, &item_list);
+			CalcBotStats(false);
+
+		} else {
+			EQ::ItemInstance* insts[8] = { 0 };
+			EQ::InventoryProfile& user_inv = client->GetInv();
+			for (int i = EQ::invslot::TRADE_BEGIN; i <= EQ::invslot::TRADE_END; ++i) {
+				insts[i - EQ::invslot::TRADE_BEGIN] = user_inv.GetItem(i);
+				client->DeleteItemInInventory(i);
+			}
+			
+			// copy to be filtered by task updates, null trade slots preserved for quest event arg
+			std::vector<EQ::ItemInstance*> items(insts, insts + std::size(insts));
+
+			// Check if EVENT_TRADE accepts any items
+			std::vector<std::any> item_list(items.begin(), items.end());
+			parse->EventBot(EVENT_TRADE, this, client, "", 0, &item_list);
+			CalcBotStats(false);
 		}
-
-		// copy to be filtered by task updates, null trade slots preserved for quest event arg
-		std::vector<EQ::ItemInstance*> items(insts, insts + std::size(insts));
-
-		// Check if EVENT_TRADE accepts any items
-		std::vector<std::any> item_list(items.begin(), items.end());
-		parse->EventBot(EVENT_TRADE, this, client, "", 0, &item_list);
-		CalcBotStats(false);
 	}
 }
 
