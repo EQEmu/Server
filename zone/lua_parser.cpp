@@ -151,7 +151,8 @@ const char *LuaEvents[_LargestEventID] = {
 	"event_aa_buy",
 	"event_aa_gain",
 	"event_payload",
-	"event_level_down"
+	"event_level_down",
+	"event_gm_command"
 };
 
 extern Zone *zone;
@@ -265,6 +266,7 @@ LuaParser::LuaParser() {
 	PlayerArgumentDispatch[EVENT_PAYLOAD] = handle_player_payload;
 	PlayerArgumentDispatch[EVENT_LEVEL_UP] = handle_player_level_up;
 	PlayerArgumentDispatch[EVENT_LEVEL_DOWN] = handle_player_level_down;
+	PlayerArgumentDispatch[EVENT_GM_COMMAND] = handle_player_gm_command;
 
 	ItemArgumentDispatch[EVENT_ITEM_CLICK] = handle_item_click;
 	ItemArgumentDispatch[EVENT_ITEM_CLICK_CAST] = handle_item_click;

@@ -165,6 +165,7 @@ const char *QuestEventSubroutines[_LargestEventID] = {
 	"EVENT_AA_GAIN",
 	"EVENT_PAYLOAD",
 	"EVENT_LEVEL_DOWN",
+	"EVENT_GM_COMMAND",
 #ifdef BOTS
 	"EVENT_SPELL_EFFECT_BOT",
 	"EVENT_SPELL_EFFECT_BUFF_TIC_BOT",
@@ -1995,6 +1996,11 @@ void PerlembParser::ExportEventVariables(
 
 		case EVENT_LEVEL_DOWN: {
 			ExportVar(package_name.c_str(), "levels_lost", data);
+			break;
+		}
+
+		case EVENT_GM_COMMAND: {
+			ExportVar(package_name.c_str(), "message", data);
 			break;
 		}
 

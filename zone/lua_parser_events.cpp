@@ -1116,6 +1116,18 @@ void handle_player_level_down(
 	lua_setfield(L, -2, "levels_lost");
 }
 
+void handle_player_gm_command(
+	QuestInterface *parse,
+	lua_State* L,
+	Client* client,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+) {
+	lua_pushstring(L, data.c_str());
+	lua_setfield(L, -2, "message");
+}
+
 // Item
 void handle_item_click(
 	QuestInterface *parse,
