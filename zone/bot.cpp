@@ -26,6 +26,7 @@
 #include "../common/strings.h"
 #include "../common/say_link.h"
 #include "../common/repositories/bot_spell_settings_repository.h"
+#include "../common/data_verification.h"
 
 extern volatile bool is_zone_loaded;
 
@@ -10894,6 +10895,337 @@ void Bot::SetBotArcherySetting(bool bot_archer_setting, bool save)
 			}
 		}
 	}
+}
+
+std::vector<Mob*> Bot::GetApplySpellList(
+	ApplySpellType apply_type,
+	bool allow_pets,
+	bool is_raid_group_only
+) {
+	std::vector<Mob*> l;
+
+	if (apply_type == ApplySpellType::Raid && IsRaidGrouped()) {
+		auto* r = GetRaid();
+		auto group_id = r->GetGroup(this->GetCleanName());
+		if (r && EQ::ValueWithin(group_id, 0, (MAX_RAID_GROUPS - 1))) {
+			for (auto i = 0; i < MAX_RAID_MEMBERS; i++) {
+				auto* m = r->members[i].member;
+				if (m && m->IsClient() && (!is_raid_group_only || r->GetGroup(m) == group_id)) {
+					l.push_back(m);
+
+					if (allow_pets && m->HasPet()) {
+						l.push_back(m->GetPet());
+					}
+
+					const auto& sbl = entity_list.GetBotListByCharacterID(m->CharacterID());
+					for (const auto& b : sbl) {
+						l.push_back(b);
+					}
+				}
+			}
+		}
+	} else if (apply_type == ApplySpellType::Group && IsGrouped()) {
+		auto* g = GetGroup();
+		if (g) {
+			for (auto i = 0; i < MAX_GROUP_MEMBERS; i++) {
+				auto* m = g->members[i];
+				if (m && m->IsClient()) {
+					l.push_back(m->CastToClient());
+
+					if (allow_pets && m->HasPet()) {
+						l.push_back(m->GetPet());
+					}
+					const auto& sbl = entity_list.GetBotListByCharacterID(m->CastToClient()->CharacterID());
+					for (const auto& b : sbl) {
+						l.push_back(b);
+					}
+				}
+			}
+		}
+	} else {
+		l.push_back(this);
+
+		if (allow_pets && HasPet()) {
+			l.push_back(GetPet());
+		}
+		const auto& sbl = entity_list.GetBotListByCharacterID(CharacterID());
+		for (const auto& b : sbl) {
+			l.push_back(b);
+		}
+	}
+
+	return l;
+}
+
+void Bot::ApplySpell(
+	int spell_id,
+	int duration,
+	ApplySpellType apply_type,
+	bool allow_pets,
+	bool is_raid_group_only
+) {
+	const auto& l = GetApplySpellList(apply_type, allow_pets, is_raid_group_only);
+
+	for (const auto& m : l) {
+		m->ApplySpellBuff(spell_id, duration);
+	}
+}
+
+void Bot::SetSpellDuration(
+	int spell_id,
+	int duration,
+	ApplySpellType apply_type,
+	bool allow_pets,
+	bool is_raid_group_only
+) {
+	const auto& l = GetApplySpellList(apply_type, allow_pets, is_raid_group_only);
+
+	for (const auto& m : l) {
+		m->SetBuffDuration(spell_id, duration);
+	}
+}
+
+void Bot::Escape()
+{
+	entity_list.RemoveFromTargets(this, true);
+	SetInvisible(Invisibility::Invisible);
+	MessageString(Chat::Skills, ESCAPE);
+}
+
+void Bot::Fling(float value, float target_x, float target_y, float target_z, bool ignore_los, bool clip_through_walls, bool calculate_speed) {
+	BuffFadeByEffect(SE_Levitate);
+	if (CheckLosFN(target_x, target_y, target_z, 6.0f) || ignore_los) {
+		auto p = new EQApplicationPacket(OP_Fling, sizeof(fling_struct));
+		auto* f = (fling_struct*) p->pBuffer;
+
+		if (!calculate_speed) {
+			f->speed_z = value;
+		} else {
+			auto speed = 1.0f;
+			const auto distance = CalculateDistance(target_x, target_y, target_z);
+
+			auto z_diff = target_z - GetZ();
+			if (z_diff != 0.0f) {
+				speed += std::abs(z_diff) / 12.0f;
+			}
+
+			speed += distance / 200.0f;
+
+			speed++;
+
+			speed = std::abs(speed);
+
+			f->speed_z = speed;
+		}
+
+		f->collision = clip_through_walls ? 0 : -1;
+		f->travel_time = -1;
+		f->unk3 = 1;
+		f->disable_fall_damage = 1;
+		f->new_y = target_y;
+		f->new_x = target_x;
+		f->new_z = target_z;
+		p->priority = 6;
+		GetBotOwner()->CastToClient()->FastQueuePacket(&p);
+	}
+}
+
+// This should return the combined AC of all the items the Bot is wearing.
+int32 Bot::GetRawItemAC()
+{
+	int32 Total = 0;
+	// this skips MainAmmo..add an '=' conditional if that slot is required (original behavior)
+	for (int16 slot_id = EQ::invslot::BONUS_BEGIN; slot_id <= EQ::invslot::BONUS_STAT_END; slot_id++) {
+		const EQ::ItemInstance* inst = m_inv[slot_id];
+		if (inst && inst->IsClassCommon()) {
+			Total += inst->GetItem()->AC;
+		}
+	}
+	return Total;
+}
+
+void Bot::IncStats(uint8 type,int16 increase_val){
+	if(type>STAT_DISEASE){
+		printf("Error in Client::IncStats, received invalid type of: %i\n",type);
+		return;
+	}
+	auto outapp = new EQApplicationPacket(OP_IncreaseStats, sizeof(IncreaseStat_Struct));
+	IncreaseStat_Struct* iss=(IncreaseStat_Struct*)outapp->pBuffer;
+	switch(type){
+		case STAT_STR:
+			if(increase_val>0)
+				iss->str=increase_val;
+			if((STR+increase_val*2)<0)
+				STR=0;
+			else if((STR+increase_val*2)>255)
+				STR=255;
+			else
+				STR+=increase_val*2;
+			break;
+		case STAT_STA:
+			if(increase_val>0)
+				iss->sta=increase_val;
+			if((STA+increase_val*2)<0)
+				STA=0;
+			else if((STA+increase_val*2)>255)
+				STA=255;
+			else
+				STA+=increase_val*2;
+			break;
+		case STAT_AGI:
+			if(increase_val>0)
+				iss->agi=increase_val;
+			if((AGI+increase_val*2)<0)
+				AGI=0;
+			else if((AGI+increase_val*2)>255)
+				AGI=255;
+			else
+				AGI+=increase_val*2;
+			break;
+		case STAT_DEX:
+			if(increase_val>0)
+				iss->dex=increase_val;
+			if((DEX+increase_val*2)<0)
+				DEX=0;
+			else if((DEX+increase_val*2)>255)
+				DEX=255;
+			else
+				DEX+=increase_val*2;
+			break;
+		case STAT_INT:
+			if(increase_val>0)
+				iss->int_=increase_val;
+			if((INT+increase_val*2)<0)
+				INT=0;
+			else if((INT+increase_val*2)>255)
+				INT=255;
+			else
+				INT+=increase_val*2;
+			break;
+		case STAT_WIS:
+			if(increase_val>0)
+				iss->wis=increase_val;
+			if((WIS+increase_val*2)<0)
+				WIS=0;
+			else if((WIS+increase_val*2)>255)
+				WIS=255;
+			else
+				WIS+=increase_val*2;
+			break;
+		case STAT_CHA:
+			if(increase_val>0)
+				iss->cha=increase_val;
+			if((CHA+increase_val*2)<0)
+				CHA=0;
+			else if((CHA+increase_val*2)>255)
+				CHA=255;
+			else
+				CHA+=increase_val*2;
+			break;
+	}
+	GetBotOwner()->CastToClient()->QueuePacket(outapp);
+	safe_delete(outapp);
+}
+
+void Bot::SendSpellAnim(uint16 targetid, uint16 spell_id)
+{
+	if (!targetid || !IsValidSpell(spell_id))
+		return;
+
+	EQApplicationPacket app(OP_Action, sizeof(Action_Struct));
+	Action_Struct* a = (Action_Struct*)app.pBuffer;
+	a->target = targetid;
+	a->source = GetID();
+	a->type = 231;
+	a->spell = spell_id;
+	a->hit_heading = GetHeading();
+
+	app.priority = 1;
+	entity_list.QueueCloseClients(this, &app, false, RuleI(Range, SpellParticles));
+}
+
+void Bot::SetStats(uint8 type,int16 set_val) 
+{
+	if(type>STAT_DISEASE){
+		printf("[Bot::SetStats] received invalid type of: %i\n",type);
+		return;
+	}
+	auto outapp = new EQApplicationPacket(OP_IncreaseStats, sizeof(IncreaseStat_Struct));
+	IncreaseStat_Struct* iss=(IncreaseStat_Struct*)outapp->pBuffer;
+	switch(type){
+		case STAT_STR:
+			if(set_val>0)
+				iss->str=set_val;
+			if(set_val<0)
+				STR=0;
+			else if(set_val>255)
+				STR=255;
+			else
+				STR=set_val;
+			break;
+		case STAT_STA:
+			if(set_val>0)
+				iss->sta=set_val;
+			if(set_val<0)
+				STA=0;
+			else if(set_val>255)
+				STA=255;
+			else
+				STA=set_val;
+			break;
+		case STAT_AGI:
+			if(set_val>0)
+				iss->agi=set_val;
+			if(set_val<0)
+				AGI=0;
+			else if(set_val>255)
+				AGI=255;
+			else
+				AGI=set_val;
+			break;
+		case STAT_DEX:
+			if(set_val>0)
+				iss->dex=set_val;
+			if(set_val<0)
+				DEX=0;
+			else if(set_val>255)
+				DEX=255;
+			else
+				DEX=set_val;
+			break;
+		case STAT_INT:
+			if(set_val>0)
+				iss->int_=set_val;
+			if(set_val<0)
+				INT=0;
+			else if(set_val>255)
+				INT=255;
+			else
+				INT=set_val;
+			break;
+		case STAT_WIS:
+			if(set_val>0)
+				iss->wis=set_val;
+			if(set_val<0)
+				WIS=0;
+			else if(set_val>255)
+				WIS=255;
+			else
+				WIS=set_val;
+			break;
+		case STAT_CHA:
+			if(set_val>0)
+				iss->cha=set_val;
+			if(set_val<0)
+				CHA=0;
+			else if(set_val>255)
+				CHA=255;
+			else
+				CHA=set_val;
+		break;
+	}
+	GetBotOwner()->CastToClient()->QueuePacket(outapp);
+	safe_delete(outapp);
 }
 
 uint8 Bot::spell_casting_chances[SPELL_TYPE_COUNT][PLAYER_CLASS_COUNT][EQ::constants::STANCE_TYPE_COUNT][cntHSND] = { 0 };
