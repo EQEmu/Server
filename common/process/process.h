@@ -1,7 +1,7 @@
 #ifndef EQEMU_PROCESS_H
 #define EQEMU_PROCESS_H
 
-#include "strings.h"
+#include "../strings.h"
 
 #include <cstdio>
 
