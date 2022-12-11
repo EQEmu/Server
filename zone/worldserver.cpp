@@ -669,7 +669,13 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	}
 	case ServerOP_KickPlayer: {
 		ServerKickPlayer_Struct* skp = (ServerKickPlayer_Struct*)pack->pBuffer;
-		Client* client = entity_list.GetClientByName(skp->name);
+		Client* client;
+		if (strlen(skp->name)) {
+			client = entity_list.GetClientByName(skp->name);
+		} else if (skp->account_id) {
+			client = entity_list.GetClientByAccID(skp->account_id);
+		}
+
 		if (client) {
 			if (skp->adminrank >= client->Admin()) {
 				client->WorldKick();
