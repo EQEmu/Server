@@ -835,55 +835,78 @@ void Client::SetLevel(uint8 set_level, bool command)
 	}
 
 	auto outapp = new EQApplicationPacket(OP_LevelUpdate, sizeof(LevelUpdate_Struct));
-	LevelUpdate_Struct* lu = (LevelUpdate_Struct*)outapp->pBuffer;
+	auto* lu = (LevelUpdate_Struct *) outapp->pBuffer;
 	lu->level = set_level;
-	if(m_pp.level2 != 0)
+
+	if (m_pp.level2 != 0) {
 		lu->level_old = m_pp.level2;
-	else
+	} else {
 		lu->level_old = level;
+	}
 
 	level = set_level;
 
-	if(IsRaidGrouped()) {
+	if (IsRaidGrouped()) {
 		Raid *r = GetRaid();
-		if(r){
+		if (r) {
 			r->UpdateLevel(GetName(), set_level);
 		}
 	}
-	if(set_level > m_pp.level2) {
-		if(m_pp.level2 == 0)
+
+	if (set_level > m_pp.level2) {
+		if (m_pp.level2 == 0) {
 			m_pp.points += 5;
-		else
+		} else {
 			m_pp.points += (5 * (set_level - m_pp.level2));
+		}
 
 		m_pp.level2 = set_level;
 	}
-	if(set_level > m_pp.level) {
-		parse->EventPlayer(EVENT_LEVEL_UP, this, "", 0);
-		/* QS: PlayerLogLevels */
-		if (RuleB(QueryServ, PlayerLogLevels)){
-			std::string event_desc = StringFormat("Leveled UP :: to Level:%i from Level:%i in zoneid:%i instid:%i", set_level, m_pp.level, GetZoneID(), GetInstanceID());
+
+	if (set_level > m_pp.level) {
+		const auto export_string = fmt::format("{}", (set_level - m_pp.level));
+		parse->EventPlayer(EVENT_LEVEL_UP, this, export_string, 0);
+
+		if (RuleB(QueryServ, PlayerLogLevels)) {
+			const auto event_desc = fmt::format(
+				"Leveled UP :: to Level:{} from Level:{} in zoneid:{} instid:{}",
+				set_level,
+				m_pp.level,
+				GetZoneID(),
+				GetInstanceID()
+			);
 			QServ->PlayerLogEvent(Player_Log_Levels, CharacterID(), event_desc);
 		}
-	}
-	else if (set_level < m_pp.level){
-		/* QS: PlayerLogLevels */
-		if (RuleB(QueryServ, PlayerLogLevels)){
-			std::string event_desc = StringFormat("Leveled DOWN :: to Level:%i from Level:%i in zoneid:%i instid:%i", set_level, m_pp.level, GetZoneID(), GetInstanceID());
+	} else if (set_level < m_pp.level) {
+		const auto export_string = fmt::format("{}", (m_pp.level - set_level));
+		parse->EventPlayer(EVENT_LEVEL_DOWN, this, export_string, 0);
+
+		if (RuleB(QueryServ, PlayerLogLevels)) {
+			const auto event_desc = fmt::format(
+				"Leveled DOWN :: to Level:{} from Level:{} in zoneid:{} instid:{}",
+				set_level,
+				m_pp.level,
+				GetZoneID(),
+				GetInstanceID()
+			);
 			QServ->PlayerLogEvent(Player_Log_Levels, CharacterID(), event_desc);
 		}
 	}
 
 	m_pp.level = set_level;
-	if (command){
+
+	if (command) {
 		m_pp.exp = GetEXPForLevel(set_level);
-		Message(Chat::Yellow, "Welcome to level %i!", set_level);
+		Message(Chat::Yellow, fmt::format("Welcome to level {}!", set_level).c_str());
 		lu->exp = 0;
+	} else {
+		const auto temporary_xp = (
+			static_cast<float>(m_pp.exp - GetEXPForLevel(GetLevel())) /
+			static_cast<float>(GetEXPForLevel(GetLevel() + 1) - GetEXPForLevel(GetLevel()))
+		);
+		lu->exp = static_cast<uint32>(330.0f * temporary_xp);
 	}
-	else {
-		float tmpxp = (float) ( (float) m_pp.exp - GetEXPForLevel( GetLevel() )) / ( (float) GetEXPForLevel(GetLevel()+1) - GetEXPForLevel(GetLevel()));
-		lu->exp = (uint32)(330.0f * tmpxp);
-	}
+
 	QueuePacket(outapp);
 	safe_delete(outapp);
 	SendAppearancePacket(AT_WhoLevel, set_level); // who level change
@@ -892,16 +915,18 @@ void Client::SetLevel(uint8 set_level, bool command)
 
 	CalcBonuses();
 
-	if(!RuleB(Character, HealOnLevel)) {
-		int mhp = CalcMaxHP();
-		if(GetHP() > mhp)
-			SetHP(mhp);
-	}
-	else {
+	if (!RuleB(Character, HealOnLevel)) {
+		const auto max_hp = CalcMaxHP();
+		if (GetHP() > max_hp) {
+			SetHP(max_hp);
+		}
+	} else {
 		SetHP(CalcMaxHP()); // Why not, lets give them a free heal
 	}
 
-	if (RuleI(World, PVPMinLevel) > 0 && level >= RuleI(World, PVPMinLevel) && m_pp.pvp == 0) SetPVP(true);
+	if (RuleI(World, PVPMinLevel) > 0 && level >= RuleI(World, PVPMinLevel) && m_pp.pvp == 0) {
+		SetPVP(true);
+	}
 
 	DoTributeUpdate();
 	SendHPUpdate();
