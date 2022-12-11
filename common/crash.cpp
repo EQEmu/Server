@@ -2,7 +2,7 @@
 #include "eqemu_logsys.h"
 #include "crash.h"
 #include "strings.h"
-#include "process.h"
+#include "process/process.h"
 
 #include <cstdio>
 

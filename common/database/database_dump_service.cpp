@@ -27,7 +27,7 @@
 #include "../eqemu_config.h"
 #include "../database_schema.h"
 #include "../file.h"
-#include "../process.h"
+#include "../process/process.h"
 
 #include <ctime>
 

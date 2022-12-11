@@ -1,15 +1,13 @@
 #ifndef EQEMU_PROCESS_H
 #define EQEMU_PROCESS_H
 
-#include "global_define.h"
-#include "eqemu_logsys.h"
-#include "crash.h"
 #include "strings.h"
 
 #include <cstdio>
 
-#if WINDOWS
+#if _WIN32
 #define popen _popen
+#define pclose _pclose
 #endif
 
 class Process {

@@ -64,7 +64,7 @@ SET(common_sources
     path_manager.cpp
     perl_eqdb.cpp
     perl_eqdb_res.cpp
-    process.cpp
+    process/process.cpp
     proc_launcher.cpp
     profanity_manager.cpp
     ptimer.cpp
@@ -569,7 +569,7 @@ SET(common_headers
     packet_functions.h
     path_manager.cpp
     platform.h
-    process.h
+    process/process.h
     proc_launcher.h
     profanity_manager.h
     profiler.h
