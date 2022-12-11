@@ -1,6 +1,14 @@
 #include "global_define.h"
 #include "eqemu_logsys.h"
 #include "crash.h"
+#include "strings.h"
+
+#include <cstdio>
+
+#if WINDOWS
+#define popen _popen
+#endif
+
 
 inline std::string random_string(size_t length)
 {
@@ -16,30 +24,20 @@ inline std::string random_string(size_t length)
 	return str;
 }
 
-std::string execute(const std::string &cmd, bool return_result = true)
+std::string execute(const std::string &cmd)
 {
-	std::string random     = "/tmp/" + random_string(25);
-	const char  *file_name = random.c_str();
-
-	if (return_result) {
-#ifdef _WINDOWS
-		std::system((cmd + " > " + file_name + " 2>&1").c_str());
-#else
-		std::system((cmd + " > " + file_name + " 2>&1").c_str());
-#endif
-	}
-	else {
-		std::system((cmd).c_str());
-	}
-
+	std::shared_ptr<FILE> pipe(popen(cmd.c_str(), "r"), pclose);
+	if (!pipe) { return "ERROR"; }
+	char        buffer[128];
 	std::string result;
-
-	if (return_result) {
-		std::ifstream file(file_name);
-		result = {std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>()};
-		std::remove(file_name);
-
+	while (!feof(pipe.get())) {
+		if (fgets(buffer, 128, pipe.get()) != nullptr) {
+			result += buffer;
+		}
 	}
+
+	std::cout << "Returning result" << std::endl;
+	std::cout << result << std::endl;
 
 	return result;
 }
@@ -167,7 +165,7 @@ void set_exception_handler() {
 
 void print_trace()
 {
-	bool does_gdb_exist = execute("gdb -v").find("GNU") != std::string::npos;
+	bool does_gdb_exist = Strings::Contains(execute("gdb -v"), "GNU");
 	if (!does_gdb_exist) {
 		LogCrash(
 			"[Error] GDB is not installed, if you want crash dumps on Linux to work properly you will need GDB installed"
@@ -180,8 +178,8 @@ void print_trace()
 
 	// check for passwordless sudo if not root
 	if (uid != 0) {
-		bool has_passwordless_sudo = execute("sudo -n true").find("a password is required") == std::string::npos;
-		if (!has_passwordless_sudo) {
+		bool sudo_password_required = Strings::Contains(execute("sudo -n true"), "a password is required");
+		if (sudo_password_required) {
 			LogCrash(
 				"[Error] Current user does not have passwordless sudo installed. It is required to automatically process crash dumps with GDB as non-root."
 			);

@@ -313,6 +313,8 @@ int main(int argc, char** argv) {
 
 	zone_store.LoadZones(content_db);
 
+	std::cout << 1 / 0;
+
 	LogInfo("Loading items");
 	if (!database.LoadItems(hotfix_name)) {
 		LogError("Loading items failed!");
