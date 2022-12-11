@@ -813,28 +813,36 @@ int lua_get_level(int type) {
 	return quest_manager.getlevel(type);
 }
 
-void lua_create_ground_object(uint32 item_id, float x, float y, float z, float h) {
-	quest_manager.CreateGroundObject(item_id, glm::vec4(x, y, z, h));
+uint16 lua_create_ground_object(uint32 item_id, float x, float y, float z, float h) {
+	return quest_manager.CreateGroundObject(item_id, glm::vec4(x, y, z, h));
 }
 
-void lua_create_ground_object(uint32 item_id, float x, float y, float z, float h, uint32 decay_time) {
-	quest_manager.CreateGroundObject(item_id, glm::vec4(x, y, z, h), decay_time);
+uint16 lua_create_ground_object(uint32 item_id, float x, float y, float z, float h, uint32 decay_time) {
+	return quest_manager.CreateGroundObject(item_id, glm::vec4(x, y, z, h), decay_time);
 }
 
-void lua_create_ground_object_from_model(const char *model, float x, float y, float z, float h) {
-	quest_manager.CreateGroundObjectFromModel(model, glm::vec4(x, y, z, h));
+uint16 lua_create_ground_object_from_model(const char *model, float x, float y, float z, float h) {
+	return quest_manager.CreateGroundObjectFromModel(model, glm::vec4(x, y, z, h));
 }
 
-void lua_create_ground_object_from_model(const char *model, float x, float y, float z, float h, int type) {
-	quest_manager.CreateGroundObjectFromModel(model, glm::vec4(x, y, z, h), type);
+uint16 lua_create_ground_object_from_model(const char *model, float x, float y, float z, float h, uint8 type) {
+	return quest_manager.CreateGroundObjectFromModel(model, glm::vec4(x, y, z, h), type);
 }
 
-void lua_create_ground_object_from_model(const char *model, float x, float y, float z, float h, int type, uint32 decay_time) {
-	quest_manager.CreateGroundObjectFromModel(model, glm::vec4(x, y, z, h), type, decay_time);
+uint16 lua_create_ground_object_from_model(const char *model, float x, float y, float z, float h, uint8 type, uint32 decay_time) {
+	return quest_manager.CreateGroundObjectFromModel(model, glm::vec4(x, y, z, h), type, decay_time);
 }
 
-void lua_create_door(const char *model, float x, float y, float z, float h, int open_type, int size) {
-	quest_manager.CreateDoor(model, x, y, z, h, open_type, size);
+uint16 lua_create_door(const char *model, float x, float y, float z, float h) {
+	return quest_manager.CreateDoor(model, x, y, z, h, 58, 100);
+}
+
+uint16 lua_create_door(const char *model, float x, float y, float z, float h, uint8 open_type) {
+	return quest_manager.CreateDoor(model, x, y, z, h, open_type, 100);
+}
+
+uint16 lua_create_door(const char *model, float x, float y, float z, float h, uint8 open_type, uint16 size) {
+	return quest_manager.CreateDoor(model, x, y, z, h, open_type, size);
 }
 
 void lua_modify_npc_stat(std::string stat, std::string value) {
@@ -3967,12 +3975,14 @@ luabind::scope lua_register_general() {
 		luabind::def("message", &lua_message),
 		luabind::def("whisper", &lua_whisper),
 		luabind::def("get_level", &lua_get_level),
-		luabind::def("create_ground_object", (void(*)(uint32,float,float,float,float))&lua_create_ground_object),
-		luabind::def("create_ground_object", (void(*)(uint32,float,float,float,float,uint32))&lua_create_ground_object),
-		luabind::def("create_ground_object_from_model", (void(*)(const char*,float,float,float,float))&lua_create_ground_object_from_model),
-		luabind::def("create_ground_object_from_model", (void(*)(const char*,float,float,float,float,int))&lua_create_ground_object_from_model),
-		luabind::def("create_ground_object_from_model", (void(*)(const char*,float,float,float,float,int,uint32))&lua_create_ground_object_from_model),
-		luabind::def("create_door", &lua_create_door),
+		luabind::def("create_ground_object", (uint16(*)(uint32,float,float,float,float))&lua_create_ground_object),
+		luabind::def("create_ground_object", (uint16(*)(uint32,float,float,float,float,uint32))&lua_create_ground_object),
+		luabind::def("create_ground_object_from_model", (uint16(*)(const char*,float,float,float,float))&lua_create_ground_object_from_model),
+		luabind::def("create_ground_object_from_model", (uint16(*)(const char*,float,float,float,float,uint8))&lua_create_ground_object_from_model),
+		luabind::def("create_ground_object_from_model", (uint16(*)(const char*,float,float,float,float,uint8,uint32))&lua_create_ground_object_from_model),
+		luabind::def("create_door", (uint16(*)(const char*,float,float,float,float))&lua_create_door),
+		luabind::def("create_door", (uint16(*)(const char*,float,float,float,float,uint8))&lua_create_door),
+		luabind::def("create_door", (uint16(*)(const char*,float,float,float,float,uint8,uint16))&lua_create_door),
 		luabind::def("modify_npc_stat", &lua_modify_npc_stat),
 		luabind::def("collect_items", &lua_collect_items),
 		luabind::def("count_item", &lua_count_item),
