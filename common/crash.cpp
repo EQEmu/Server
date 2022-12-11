@@ -2,6 +2,7 @@
 #include "eqemu_logsys.h"
 #include "crash.h"
 #include "strings.h"
+#include "process.h"
 
 #include <cstdio>
 
@@ -9,38 +10,6 @@
 #define popen _popen
 #endif
 
-
-inline std::string random_string(size_t length)
-{
-	auto        randchar = []() -> char {
-		const char   charset[] = "0123456789"
-								 "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-								 "abcdefghijklmnopqrstuvwxyz";
-		const size_t max_index = (sizeof(charset) - 1);
-		return charset[static_cast<size_t>(std::rand()) % max_index];
-	};
-	std::string str(length, 0);
-	std::generate_n(str.begin(), length, randchar);
-	return str;
-}
-
-std::string execute(const std::string &cmd)
-{
-	std::shared_ptr<FILE> pipe(popen(cmd.c_str(), "r"), pclose);
-	if (!pipe) { return "ERROR"; }
-	char        buffer[128];
-	std::string result;
-	while (!feof(pipe.get())) {
-		if (fgets(buffer, 128, pipe.get()) != nullptr) {
-			result += buffer;
-		}
-	}
-
-	std::cout << "Returning result" << std::endl;
-	std::cout << result << std::endl;
-
-	return result;
-}
 
 #if defined(_WINDOWS) && defined(CRASH_LOGGING)
 #include "StackWalker.h"
@@ -165,7 +134,7 @@ void set_exception_handler() {
 
 void print_trace()
 {
-	bool does_gdb_exist = Strings::Contains(execute("gdb -v"), "GNU");
+	bool does_gdb_exist = Strings::Contains(Process::execute("gdb -v"), "GNU");
 	if (!does_gdb_exist) {
 		LogCrash(
 			"[Error] GDB is not installed, if you want crash dumps on Linux to work properly you will need GDB installed"
@@ -174,11 +143,11 @@ void print_trace()
 	}
 
 	auto        uid              = geteuid();
-	std::string temp_output_file = "/tmp/dump-output";
+	std::string temp_output_file = fmt::format("/tmp/dump-output-{}", Strings::Random(10));
 
 	// check for passwordless sudo if not root
 	if (uid != 0) {
-		bool sudo_password_required = Strings::Contains(execute("sudo -n true"), "a password is required");
+		bool sudo_password_required = Strings::Contains(Process::execute("sudo -n true"), "a password is required");
 		if (sudo_password_required) {
 			LogCrash(
 				"[Error] Current user does not have passwordless sudo installed. It is required to automatically process crash dumps with GDB as non-root."
@@ -208,7 +177,7 @@ void print_trace()
 		abort(); /* If gdb failed to start */
 	}
 	else {
-		waitpid(child_pid, NULL, 0);
+		waitpid(child_pid, nullptr, 0);
 	}
 
 	std::ifstream    input(temp_output_file);
