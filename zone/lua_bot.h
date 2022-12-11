@@ -9,7 +9,6 @@ class Bot;
 class Lua_Bot;
 class Lua_Mob;
 class Lua_Group;
-class Lua_Raid;
 
 namespace luabind {
 	struct scope;
@@ -65,11 +64,6 @@ public:
 	void ApplySpellGroup(int spell_id, int duration);
 	void ApplySpellGroup(int spell_id, int duration, bool allow_pets);
 
-	void ApplySpellRaid(int spell_id);
-	void ApplySpellRaid(int spell_id, int duration);
-	void ApplySpellRaid(int spell_id, int duration, bool allow_pets);
-	void ApplySpellRaid(int spell_id, int duration, bool allow_pets, bool is_raid_group_only);
-
 	void SetSpellDuration(int spell_id);
 	void SetSpellDuration(int spell_id, int duration);
 	void SetSpellDuration(int spell_id, int duration, bool allow_pets);
@@ -103,15 +97,11 @@ public:
 	int GetBaseINT();
 	int GetBaseAGI();
 	int GetBaseWIS();
-	bool InZone();
-	virtual Lua_Group GetGroup();
-	virtual Lua_Raid GetRaid();
+
+	Lua_Group GetGroup();
 	int GetRawItemAC();
 
-	void SetStats(int type, int value);
-	void IncStats(int type, int value);
 	bool IsGrouped();
-	bool IsRaidGrouped();
 	bool IsStanding();
 	bool IsSitting();
 	void Sit();

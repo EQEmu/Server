@@ -10989,7 +10989,6 @@ void Bot::Escape()
 {
 	entity_list.RemoveFromTargets(this, true);
 	SetInvisible(Invisibility::Invisible);
-	MessageString(Chat::Skills, ESCAPE);
 }
 
 void Bot::Fling(float value, float target_x, float target_y, float target_z, bool ignore_los, bool clip_through_walls, bool calculate_speed) {
@@ -11044,89 +11043,6 @@ int32 Bot::GetRawItemAC()
 	return Total;
 }
 
-void Bot::IncStats(uint8 type,int16 increase_val){
-	if(type>STAT_DISEASE){
-		printf("Error in Client::IncStats, received invalid type of: %i\n",type);
-		return;
-	}
-	auto outapp = new EQApplicationPacket(OP_IncreaseStats, sizeof(IncreaseStat_Struct));
-	IncreaseStat_Struct* iss=(IncreaseStat_Struct*)outapp->pBuffer;
-	switch(type){
-		case STAT_STR:
-			if(increase_val>0)
-				iss->str=increase_val;
-			if((STR+increase_val*2)<0)
-				STR=0;
-			else if((STR+increase_val*2)>255)
-				STR=255;
-			else
-				STR+=increase_val*2;
-			break;
-		case STAT_STA:
-			if(increase_val>0)
-				iss->sta=increase_val;
-			if((STA+increase_val*2)<0)
-				STA=0;
-			else if((STA+increase_val*2)>255)
-				STA=255;
-			else
-				STA+=increase_val*2;
-			break;
-		case STAT_AGI:
-			if(increase_val>0)
-				iss->agi=increase_val;
-			if((AGI+increase_val*2)<0)
-				AGI=0;
-			else if((AGI+increase_val*2)>255)
-				AGI=255;
-			else
-				AGI+=increase_val*2;
-			break;
-		case STAT_DEX:
-			if(increase_val>0)
-				iss->dex=increase_val;
-			if((DEX+increase_val*2)<0)
-				DEX=0;
-			else if((DEX+increase_val*2)>255)
-				DEX=255;
-			else
-				DEX+=increase_val*2;
-			break;
-		case STAT_INT:
-			if(increase_val>0)
-				iss->int_=increase_val;
-			if((INT+increase_val*2)<0)
-				INT=0;
-			else if((INT+increase_val*2)>255)
-				INT=255;
-			else
-				INT+=increase_val*2;
-			break;
-		case STAT_WIS:
-			if(increase_val>0)
-				iss->wis=increase_val;
-			if((WIS+increase_val*2)<0)
-				WIS=0;
-			else if((WIS+increase_val*2)>255)
-				WIS=255;
-			else
-				WIS+=increase_val*2;
-			break;
-		case STAT_CHA:
-			if(increase_val>0)
-				iss->cha=increase_val;
-			if((CHA+increase_val*2)<0)
-				CHA=0;
-			else if((CHA+increase_val*2)>255)
-				CHA=255;
-			else
-				CHA+=increase_val*2;
-			break;
-	}
-	GetBotOwner()->CastToClient()->QueuePacket(outapp);
-	safe_delete(outapp);
-}
-
 void Bot::SendSpellAnim(uint16 targetid, uint16 spell_id)
 {
 	if (!targetid || !IsValidSpell(spell_id))
@@ -11142,90 +11058,6 @@ void Bot::SendSpellAnim(uint16 targetid, uint16 spell_id)
 
 	app.priority = 1;
 	entity_list.QueueCloseClients(this, &app, false, RuleI(Range, SpellParticles));
-}
-
-void Bot::SetStats(uint8 type,int16 set_val) 
-{
-	if(type>STAT_DISEASE){
-		printf("[Bot::SetStats] received invalid type of: %i\n",type);
-		return;
-	}
-	auto outapp = new EQApplicationPacket(OP_IncreaseStats, sizeof(IncreaseStat_Struct));
-	IncreaseStat_Struct* iss=(IncreaseStat_Struct*)outapp->pBuffer;
-	switch(type){
-		case STAT_STR:
-			if(set_val>0)
-				iss->str=set_val;
-			if(set_val<0)
-				STR=0;
-			else if(set_val>255)
-				STR=255;
-			else
-				STR=set_val;
-			break;
-		case STAT_STA:
-			if(set_val>0)
-				iss->sta=set_val;
-			if(set_val<0)
-				STA=0;
-			else if(set_val>255)
-				STA=255;
-			else
-				STA=set_val;
-			break;
-		case STAT_AGI:
-			if(set_val>0)
-				iss->agi=set_val;
-			if(set_val<0)
-				AGI=0;
-			else if(set_val>255)
-				AGI=255;
-			else
-				AGI=set_val;
-			break;
-		case STAT_DEX:
-			if(set_val>0)
-				iss->dex=set_val;
-			if(set_val<0)
-				DEX=0;
-			else if(set_val>255)
-				DEX=255;
-			else
-				DEX=set_val;
-			break;
-		case STAT_INT:
-			if(set_val>0)
-				iss->int_=set_val;
-			if(set_val<0)
-				INT=0;
-			else if(set_val>255)
-				INT=255;
-			else
-				INT=set_val;
-			break;
-		case STAT_WIS:
-			if(set_val>0)
-				iss->wis=set_val;
-			if(set_val<0)
-				WIS=0;
-			else if(set_val>255)
-				WIS=255;
-			else
-				WIS=set_val;
-			break;
-		case STAT_CHA:
-			if(set_val>0)
-				iss->cha=set_val;
-			if(set_val<0)
-				CHA=0;
-			else if(set_val>255)
-				CHA=255;
-			else
-				CHA=set_val;
-		break;
-	}
-	GetBotOwner()->CastToClient()->QueuePacket(outapp);
-	safe_delete(outapp);
 }
 
 uint8 Bot::spell_casting_chances[SPELL_TYPE_COUNT][PLAYER_CLASS_COUNT][EQ::constants::STANCE_TYPE_COUNT][cntHSND] = { 0 };

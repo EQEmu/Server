@@ -390,7 +390,6 @@ public:
 	bool CheckLoreConflict(const EQ::ItemData* item);
 	virtual void UpdateEquipmentLight() { m_Light.Type[EQ::lightsource::LightEquipment] = m_inv.FindBrightestLightType(); m_Light.Level[EQ::lightsource::LightEquipment] = EQ::lightsource::TypeToLevel(m_Light.Type[EQ::lightsource::LightEquipment]); }
 	inline EQ::InventoryProfile& GetBotInv() { return m_inv; }
-	inline const EQ::InventoryProfile& GetBotInv() const { return m_inv; }
 
 	// Static Class Methods
 	//static void DestroyBotRaidObjects(Client* client);	// Can be removed after bot raids are dumped
@@ -590,9 +589,7 @@ public:
 	int32 GetItemIDAt(int16 slot_id);
 	int32 GetAugmentIDAt(int16 slot_id, uint8 augslot);
 	int32 GetRawItemAC();
-	void IncStats(uint8 type,int16 increase_val);
 	void SendSpellAnim(uint16 targetid, uint16 spell_id);
-	void SetStats(uint8 type,int16 set_val); 
 	void SetSpellDuration(int spell_id, int duration = 0, ApplySpellType apply_type = ApplySpellType::Solo, bool allow_pets = false, bool is_raid_group_only = true);
 
 	// "SET" Class Methods
