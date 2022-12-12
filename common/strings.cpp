@@ -200,6 +200,16 @@ bool Strings::IsNumber(const std::string &s)
 	}
 }
 
+bool Strings::IsFloat(const std::string &s)
+{
+	try {
+		auto r = stof(s);
+		return true;
+	}
+	catch (std::exception &) {
+		return false;
+	}
+}
 
 std::string Strings::Join(const std::vector<std::string> &ar, const std::string &delim)
 {
