@@ -26,6 +26,7 @@
 #include "../common/strings.h"
 #include "../common/say_link.h"
 #include "../common/repositories/bot_spell_settings_repository.h"
+#include "../common/data_verification.h"
 
 extern volatile bool is_zone_loaded;
 
@@ -10913,6 +10914,169 @@ void Bot::SetBotArcherySetting(bool bot_archer_setting, bool save)
 			}
 		}
 	}
+}
+
+std::vector<Mob*> Bot::GetApplySpellList(
+	ApplySpellType apply_type,
+	bool allow_pets,
+	bool is_raid_group_only
+) {
+	std::vector<Mob*> l;
+
+	if (apply_type == ApplySpellType::Raid && IsRaidGrouped()) {
+		auto* r = GetRaid();
+		auto group_id = r->GetGroup(this->GetCleanName());
+		if (r && EQ::ValueWithin(group_id, 0, (MAX_RAID_GROUPS - 1))) {
+			for (auto i = 0; i < MAX_RAID_MEMBERS; i++) {
+				auto* m = r->members[i].member;
+				if (m && m->IsClient() && (!is_raid_group_only || r->GetGroup(m) == group_id)) {
+					l.push_back(m);
+
+					if (allow_pets && m->HasPet()) {
+						l.push_back(m->GetPet());
+					}
+
+					const auto& sbl = entity_list.GetBotListByCharacterID(m->CharacterID());
+					for (const auto& b : sbl) {
+						l.push_back(b);
+					}
+				}
+			}
+		}
+	} else if (apply_type == ApplySpellType::Group && IsGrouped()) {
+		auto* g = GetGroup();
+		if (g) {
+			for (auto i = 0; i < MAX_GROUP_MEMBERS; i++) {
+				auto* m = g->members[i];
+				if (m && m->IsClient()) {
+					l.push_back(m->CastToClient());
+
+					if (allow_pets && m->HasPet()) {
+						l.push_back(m->GetPet());
+					}
+					const auto& sbl = entity_list.GetBotListByCharacterID(m->CastToClient()->CharacterID());
+					for (const auto& b : sbl) {
+						l.push_back(b);
+					}
+				}
+			}
+		}
+	} else {
+		l.push_back(this);
+
+		if (allow_pets && HasPet()) {
+			l.push_back(GetPet());
+		}
+		const auto& sbl = entity_list.GetBotListByCharacterID(CharacterID());
+		for (const auto& b : sbl) {
+			l.push_back(b);
+		}
+	}
+
+	return l;
+}
+
+void Bot::ApplySpell(
+	int spell_id,
+	int duration,
+	ApplySpellType apply_type,
+	bool allow_pets,
+	bool is_raid_group_only
+) {
+	const auto& l = GetApplySpellList(apply_type, allow_pets, is_raid_group_only);
+
+	for (const auto& m : l) {
+		m->ApplySpellBuff(spell_id, duration);
+	}
+}
+
+void Bot::SetSpellDuration(
+	int spell_id,
+	int duration,
+	ApplySpellType apply_type,
+	bool allow_pets,
+	bool is_raid_group_only
+) {
+	const auto& l = GetApplySpellList(apply_type, allow_pets, is_raid_group_only);
+
+	for (const auto& m : l) {
+		m->SetBuffDuration(spell_id, duration);
+	}
+}
+
+void Bot::Escape()
+{
+	entity_list.RemoveFromTargets(this, true);
+	SetInvisible(Invisibility::Invisible);
+}
+
+void Bot::Fling(float value, float target_x, float target_y, float target_z, bool ignore_los, bool clip_through_walls, bool calculate_speed) {
+	BuffFadeByEffect(SE_Levitate);
+	if (CheckLosFN(target_x, target_y, target_z, 6.0f) || ignore_los) {
+		auto p = new EQApplicationPacket(OP_Fling, sizeof(fling_struct));
+		auto* f = (fling_struct*) p->pBuffer;
+
+		if (!calculate_speed) {
+			f->speed_z = value;
+		} else {
+			auto speed = 1.0f;
+			const auto distance = CalculateDistance(target_x, target_y, target_z);
+
+			auto z_diff = target_z - GetZ();
+			if (z_diff != 0.0f) {
+				speed += std::abs(z_diff) / 12.0f;
+			}
+
+			speed += distance / 200.0f;
+
+			speed++;
+
+			speed = std::abs(speed);
+
+			f->speed_z = speed;
+		}
+
+		f->collision = clip_through_walls ? 0 : -1;
+		f->travel_time = -1;
+		f->unk3 = 1;
+		f->disable_fall_damage = 1;
+		f->new_y = target_y;
+		f->new_x = target_x;
+		f->new_z = target_z;
+		p->priority = 6;
+		GetBotOwner()->CastToClient()->FastQueuePacket(&p);
+	}
+}
+
+// This should return the combined AC of all the items the Bot is wearing.
+int32 Bot::GetRawItemAC()
+{
+	int32 Total = 0;
+	// this skips MainAmmo..add an '=' conditional if that slot is required (original behavior)
+	for (int16 slot_id = EQ::invslot::BONUS_BEGIN; slot_id <= EQ::invslot::BONUS_STAT_END; slot_id++) {
+		const EQ::ItemInstance* inst = m_inv[slot_id];
+		if (inst && inst->IsClassCommon()) {
+			Total += inst->GetItem()->AC;
+		}
+	}
+	return Total;
+}
+
+void Bot::SendSpellAnim(uint16 targetid, uint16 spell_id)
+{
+	if (!targetid || !IsValidSpell(spell_id))
+		return;
+
+	EQApplicationPacket app(OP_Action, sizeof(Action_Struct));
+	Action_Struct* a = (Action_Struct*)app.pBuffer;
+	a->target = targetid;
+	a->source = GetID();
+	a->type = 231;
+	a->spell = spell_id;
+	a->hit_heading = GetHeading();
+
+	app.priority = 1;
+	entity_list.QueueCloseClients(this, &app, false, RuleI(Range, SpellParticles));
 }
 
 uint8 Bot::spell_casting_chances[SPELL_TYPE_COUNT][PLAYER_CLASS_COUNT][EQ::constants::STANCE_TYPE_COUNT][cntHSND] = { 0 };

@@ -389,7 +389,7 @@ public:
 	void EquipBot(std::string* error_message);
 	bool CheckLoreConflict(const EQ::ItemData* item);
 	virtual void UpdateEquipmentLight() { m_Light.Type[EQ::lightsource::LightEquipment] = m_inv.FindBrightestLightType(); m_Light.Level[EQ::lightsource::LightEquipment] = EQ::lightsource::TypeToLevel(m_Light.Type[EQ::lightsource::LightEquipment]); }
-	const EQ::InventoryProfile& GetBotInv() const { return m_inv; }
+	inline EQ::InventoryProfile& GetBotInv() { return m_inv; }
 
 	// Static Class Methods
 	//static void DestroyBotRaidObjects(Client* client);	// Can be removed after bot raids are dumped
@@ -581,6 +581,16 @@ public:
 
 	// "Quest API" Methods
 	bool HasBotSpellEntry(uint16 spellid);
+	void ApplySpell(int spell_id, int duration = 0, ApplySpellType apply_type = ApplySpellType::Solo, bool allow_pets = false, bool is_raid_group_only = true);
+	void BreakInvis();
+	void Escape();
+	void Fling(float value, float target_x, float target_y, float target_z, bool ignore_los = false, bool clip_through_walls = false, bool calculate_speed = false);
+	std::vector<Mob*> GetApplySpellList(ApplySpellType apply_type, bool allow_pets, bool is_raid_group_only);
+	int32 GetItemIDAt(int16 slot_id);
+	int32 GetAugmentIDAt(int16 slot_id, uint8 augslot);
+	int32 GetRawItemAC();
+	void SendSpellAnim(uint16 targetid, uint16 spell_id);
+	void SetSpellDuration(int spell_id, int duration = 0, ApplySpellType apply_type = ApplySpellType::Solo, bool allow_pets = false, bool is_raid_group_only = true);
 
 	// "SET" Class Methods
 	void SetBotSpellID(uint32 newSpellID);
