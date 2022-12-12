@@ -21,6 +21,7 @@ Eglin
 #include "../common/path_manager.h"
 #include "../common/process/process.h"
 #include "../common/file.h"
+#include "../common/timer.h"
 
 #ifndef GvCV_set
 #define GvCV_set(gv,cv)   (GvCV(gv) = (cv))
@@ -279,9 +280,11 @@ int Embperl::dosub(const char * subname, const std::vector<std::string> * args, 
 		const std::string &filename = args->back();
 		std::string sub = subname;
 		if (sub == "main::eval_file" && !filename.empty() && File::Exists(filename)) {
+			BenchTimer benchmark;
 			std::string syntax_error = Process::execute(
 				fmt::format("perl -c {} 2>&1", filename)
 			);
+			LogInfo("Perl eval [{}] took [{}]", filename, benchmark.elapsed());
 			syntax_error = Strings::Trim(syntax_error);
 			if (!Strings::Contains(syntax_error, "syntax OK")) {
 				syntax_error += SvPVX(ERRSV);
