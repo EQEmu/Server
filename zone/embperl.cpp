@@ -283,7 +283,6 @@ int Embperl::dosub(const char * subname, const std::vector<std::string> * args, 
 				fmt::format("perl -c {} 2>&1", filename)
 			);
 			syntax_error = Strings::Trim(syntax_error);
-
 			if (!Strings::Contains(syntax_error, "syntax OK")) {
 				syntax_error += SvPVX(ERRSV);
 				throw syntax_error;
