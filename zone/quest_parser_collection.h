@@ -97,7 +97,7 @@ public:
 		std::vector<std::any> *extra_pointers = nullptr
 	);
 #endif
-	
+
 	void GetErrors(std::list<std::string> &quest_errors);
 
 	/*
@@ -119,7 +119,7 @@ public:
 
 	PerlEventExportSettings perl_event_export_settings[_LargestEventID];
 
-	void LoadPerlEventExportSettings(PerlEventExportSettings* perl_event_export_settings);
+	void LoadPerlEventExportSettings(PerlEventExportSettings* s);
 
 private:
 	bool HasQuestSubLocal(uint32 npcid, QuestEventID evt);
@@ -173,7 +173,7 @@ private:
 	QuestInterface *GetQIByBotQuest(std::string &filename);
 	QuestInterface *GetQIByGlobalBotQuest(std::string &filename);
 #endif
-	
+
 	int DispatchEventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
 		std::vector<std::any> *extra_pointers);
 	int DispatchEventPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data,
