@@ -549,7 +549,7 @@ bool BotDatabase::SaveBot(Bot* bot_inst)
 	l.title                  = bot_inst->GetTitle();
 	l.suffix                 = bot_inst->GetSuffix();
 	l.zone_id                = bot_inst->GetLastZoneID();
-	l.gender                 = bot_inst->GetGender();
+	l.gender                 = bot_inst->GetBaseGender();
 	l.race                   = bot_inst->GetBaseRace();
 	l.class_                 = bot_inst->GetClass();
 	l.level                  = bot_inst->GetLevel();
