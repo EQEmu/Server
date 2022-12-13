@@ -38,34 +38,11 @@ void WorldserverCLI::TestCommand(int argc, char **argv, argh::parser &cmd, std::
 
 		e.serialize(ar);
 
-//		std::cout << e.serialize(ar) << std::endl;
 	}
 
 	std::string output = ss.str();
-	output = Strings::Replace(output, "	", "");
-	output = Strings::Replace(output, " ", "");
 	output = Strings::Replace(output, "\n", "");
 
 	std::cout << output << std::endl;
-
-/*
-
-	{
-		cereal::JSONInputArchive ar(ss);
-		A                        a;
-		ar(a);
-
-		std::ostringstream        oss;
-		cereal::JSONOutputArchive ar2(oss);
-		ar2(a);
-
-		std::string output = oss.str();
-		output = Strings::Replace(output, "	", "");
-		output = Strings::Replace(output, " ", "");
-		output = Strings::Replace(output, "\n", "");
-
-		LogInfo("{}", output);
-	}
-*/
 
 }

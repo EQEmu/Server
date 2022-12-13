@@ -73,28 +73,9 @@ std::unique_ptr<ServerPacket> PlayerEventLogs::RecordGMCommandEvent(
 )
 {
 	auto n = PlayerEventLogsRepository::NewEntity();
-	n.account_id    = p.account_id;
-	n.character_id  = p.character_id;
-	n.zone_id       = p.zone_id;
-	n.instance_id   = p.instance_id;
-	n.x             = p.x;
-	n.y             = p.y;
-	n.z             = p.z;
-	n.heading       = p.heading;
+	FillPlayerEvent(p, n);
 	n.event_type_id = PlayerEvent::GM_COMMAND;
-
-	std::stringstream ss;
-	{
-		cereal::JSONOutputArchive ar(ss);
-		e.serialize(ar);
-	}
-
-	std::string output = ss.str();
-	output = Strings::Replace(output, "	", "");
-	output = Strings::Replace(output, "    ", "");
-	output = Strings::Replace(output, "\n", "");
-
-	n.event_data = output;
+	n.event_data = GetEventPayload(e);
 	n.created_at = std::time(nullptr);
 
 	// return packet
@@ -129,8 +110,39 @@ void PlayerEventLogs::ProcessBatchQueue()
 	m_record_batch_queue = {};
 }
 
-void PlayerEventLogs::AddToQueue(const PlayerEventLogsRepository::PlayerEventLogs& log)
+void PlayerEventLogs::AddToQueue(const PlayerEventLogsRepository::PlayerEventLogs &log)
 {
 	m_record_batch_queue.emplace_back(log);
+}
+
+void PlayerEventLogs::FillPlayerEvent(
+	const PlayerEvent::PlayerEvent &p,
+	PlayerEventLogsRepository::PlayerEventLogs &n
+)
+{
+	n.account_id   = p.account_id;
+	n.character_id = p.character_id;
+	n.zone_id      = p.zone_id;
+	n.instance_id  = p.instance_id;
+	n.x            = p.x;
+	n.y            = p.y;
+	n.z            = p.z;
+	n.heading      = p.heading;
+}
+
+std::string PlayerEventLogs::GetEventPayload(PlayerEvent::GMCommandEvent &e)
+{
+	std::stringstream ss;
+	{
+		cereal::JSONOutputArchive ar(ss);
+		e.serialize(ar);
+	}
+
+	std::string o = ss.str();
+	o = Strings::Replace(o, "	", "");
+	o = Strings::Replace(o, "    ", "");
+	o = Strings::Replace(o, "\n", "");
+
+	return o;
 }
 
