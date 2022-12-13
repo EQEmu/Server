@@ -1065,9 +1065,6 @@ int QuestParserCollection::DispatchEventSpell(
 
 void QuestParserCollection::LoadPerlEventExportSettings(PerlEventExportSettings *s)
 {
-	LogInfo("Loading Perl Event Export Settings...");
-
-	/* Write Defaults First (All Enabled) */
 	for (int i = 0; i < _LargestEventID; i++) {
 		s[i].qglobals        = 1;
 		s[i].mob             = 1;
@@ -1076,13 +1073,16 @@ void QuestParserCollection::LoadPerlEventExportSettings(PerlEventExportSettings 
 		s[i].event_variables = 1;
 	}
 
-	for (auto &e: PerlEventExportSettingsRepository::All(database)) {
+	auto settings = PerlEventExportSettingsRepository::All(database);
+	for (auto &e: settings) {
 		s[e.event_id].qglobals        = e.export_qglobals;
 		s[e.event_id].mob             = e.export_mob;
 		s[e.event_id].zone            = e.export_zone;
 		s[e.event_id].item            = e.export_item;
 		s[e.event_id].event_variables = e.export_event;
 	}
+
+	LogInfo("Loaded [{}] Perl Event Export Settings", settings.size());
 }
 
 #ifdef BOTS
