@@ -19,6 +19,9 @@ Eglin
 #include "embxs.h"
 #include "../common/features.h"
 #include "../common/path_manager.h"
+#include "../common/process/process.h"
+#include "../common/file.h"
+#include "../common/timer.h"
 
 #ifndef GvCV_set
 #define GvCV_set(gv,cv)   (GvCV(gv) = (cv))
@@ -211,6 +214,7 @@ void Embperl::init_eval_file(void)
 			"} else {"
 			// we 'my' $filename,$mtime,$package,$sub to prevent them from changing our state up here.
 			"	eval(\"package $package; my(\\$filename,\\$mtime,\\$package,\\$sub); \\$isloaded = 1; require './$filename'; \");"
+			"	die $@ if ($@ && $@ !~ /did not return a true value/); "
 			//  " print $@ if $@;"
 /*				"local *FH;open FH, $filename or die \"open '$filename' $!\";"
 				"local($/) = undef;my $sub = <FH>;close FH;"
@@ -229,21 +233,21 @@ int Embperl::eval_file(const char * packagename, const char * filename)
 	std::vector<std::string> args;
 	args.push_back(packagename);
 	args.push_back(filename);
+
 	return dosub("main::eval_file", &args);
 }
 
 int Embperl::dosub(const char * subname, const std::vector<std::string> * args, int mode)
 {
 	dSP;
-	int ret_value = 0;
-	int count;
+	int         ret_value = 0;
+	int         count;
 	std::string error;
 
 	ENTER;
 	SAVETMPS;
 	PUSHMARK(SP);
-	if(args && !args->empty())
-	{
+	if (args && !args->empty()) {
 		for (auto i = args->begin(); i != args->end(); ++i) {
 			XPUSHs(sv_2mortal(newSVpv(i->c_str(), i->length())));
 		}
@@ -253,16 +257,14 @@ int Embperl::dosub(const char * subname, const std::vector<std::string> * args, 
 	count = call_pv(subname, mode);
 	SPAGAIN;
 
-	if(SvTRUE(ERRSV))
-	{
+	if (SvTRUE(ERRSV)) {
 		error = SvPV_nolen(ERRSV);
 		POPs;
 	}
-	else
-	{
-		if(count == 1) {
+	else {
+		if (count == 1) {
 			SV *ret = POPs;
-			if(SvTYPE(ret) == SVt_IV) {
+			if (SvTYPE(ret) == SVt_IV) {
 				IV v = SvIV(ret);
 				ret_value = v;
 			}
@@ -273,8 +275,7 @@ int Embperl::dosub(const char * subname, const std::vector<std::string> * args, 
 	FREETMPS;
 	LEAVE;
 
-	if(error.length() > 0)
-	{
+	if (error.length() > 0) {
 		std::string errmsg = "Perl runtime error: ";
 		errmsg += SvPVX(ERRSV);
 		throw errmsg;

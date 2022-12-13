@@ -71,7 +71,7 @@ public:
 		return 0;
 	}
 #endif
-	
+
 	virtual bool HasQuestSub(uint32 npcid, QuestEventID evt) { return false; }
 	virtual bool HasGlobalQuestSub(QuestEventID evt) { return false; }
 	virtual bool PlayerHasQuestSub(QuestEventID evt) { return false; }
@@ -120,14 +120,14 @@ public:
 		return 0;
 	}
 #endif
-	
+
 	virtual void AddVar(std::string name, std::string val) { }
 	virtual std::string GetVar(std::string name) { return std::string(); }
 	virtual void Init() { }
 	virtual void ReloadQuests() { }
 	virtual uint32 GetIdentifier() = 0;
 	virtual void RemoveEncounter(const std::string &name) { }
-	
+
 	//TODO: Set maximum quest errors instead of hard coding it
 	virtual void GetErrors(std::list<std::string> &quest_errors) {
 		quest_errors.insert(quest_errors.end(), errors_.begin(), errors_.end());
@@ -135,13 +135,14 @@ public:
 
 	virtual void AddError(std::string error) {
 		LogQuests("{}", error);
+		LogQuestErrors("{}", Strings::Trim(error));
 
 		errors_.push_back(error);
 		if(errors_.size() > 30) {
 			errors_.pop_front();
 		}
 	}
-	
+
 protected:
 	std::list<std::string> errors_;
 };

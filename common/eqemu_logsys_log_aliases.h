@@ -861,6 +861,16 @@
         OutF(LogSys, Logs::Detail, Logs::Bugs, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
+#define LogQuestErrors(message, ...) do {\
+    if (LogSys.IsLogEnabled(Logs::General, Logs::QuestErrors))\
+        OutF(LogSys, Logs::General, Logs::QuestErrors, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogQuestErrorsDetail(message, ...) do {\
+    if (LogSys.IsLogEnabled(Logs::Detail, Logs::QuestErrors))\
+        OutF(LogSys, Logs::Detail, Logs::QuestErrors, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
 #define Log(debug_level, log_category, message, ...) do {\
     if (LogSys.IsLogEnabled(debug_level, log_category))\
         LogSys.Out(debug_level, log_category, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
