@@ -96,6 +96,7 @@ union semun {
 #include "shared_task_manager.h"
 #include "world_boot.h"
 #include "../common/path_manager.h"
+#include "../common/events/player_event_logs.h"
 
 
 ZoneStore           zone_store;
@@ -118,6 +119,7 @@ EQEmuLogSys         LogSys;
 WorldContentService content_service;
 WebInterfaceList    web_interface;
 PathManager         path;
+PlayerEventLogs     player_event_logs;
 
 void CatchSignal(int sig_num);
 
@@ -371,6 +373,9 @@ int main(int argc, char **argv)
 		}
 	);
 
+	Timer batch_player_event_log_insert_timer(5000);
+	player_event_logs.SetDatabase(&database)->Init();
+
 	auto loop_fn = [&](EQ::Timer* t) {
 		Timer::SetCurrentTime();
 
@@ -423,6 +428,10 @@ int main(int argc, char **argv)
 			database.PurgeAllDeletedDataBuckets();
 			ExpeditionDatabase::PurgeExpiredCharacterLockouts();
 			CharacterTaskTimersRepository::DeleteWhere(database, "expire_time <= NOW()");
+		}
+
+		if (batch_player_event_log_insert_timer.Check()) {
+			player_event_logs.ProcessBatchQueue();
 		}
 
 		if (EQTimeTimer.Check()) {

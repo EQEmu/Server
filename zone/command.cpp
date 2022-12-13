@@ -595,7 +595,12 @@ int command_realdispatch(Client *c, std::string message, bool ignore_status)
 	parse->EventPlayer(EVENT_GM_COMMAND, c, message, 0);
 
 	if (player_event_logs.IsEventEnabled(PlayerEvent::GM_COMMAND)) {
-		player_event_logs.RecordGMCommandEvent(c->GetPlayerEvent(), PlayerEvent::GMCommandEvent{message});
+		worldserver.SendPacket(
+			player_event_logs.RecordGMCommandEvent(
+				c->GetPlayerEvent(),
+				PlayerEvent::GMCommandEvent{message}
+			).get()
+		);
 	}
 
 	cur->function(c, &sep);	// Dispatch C++ Command

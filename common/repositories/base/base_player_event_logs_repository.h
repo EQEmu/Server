@@ -31,6 +31,26 @@ public:
 		int32_t     event_type_id;
 		std::string event_data;
 		time_t      created_at;
+
+		// cereal
+		template<class Archive>
+		void serialize(Archive &ar)
+		{
+			ar(
+				CEREAL_NVP(id),
+				CEREAL_NVP(account_id),
+				CEREAL_NVP(character_id),
+				CEREAL_NVP(zone_id),
+				CEREAL_NVP(instance_id),
+				CEREAL_NVP(x),
+				CEREAL_NVP(y),
+				CEREAL_NVP(z),
+				CEREAL_NVP(heading),
+				CEREAL_NVP(event_type_id),
+				CEREAL_NVP(event_data),
+				CEREAL_NVP(created_at)
+			);
+		}
 	};
 
 	static std::string PrimaryKey()

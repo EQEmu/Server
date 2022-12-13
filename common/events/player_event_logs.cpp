@@ -1,6 +1,9 @@
 #include <cereal/archives/json.hpp>
 #include "player_event_logs.h"
 #include "../repositories/player_event_logs_repository.h"
+#include "../net/packet.h"
+#include "../servertalk.h"
+#include "../timer.h"
 
 void PlayerEventLogs::Init()
 {
@@ -64,7 +67,10 @@ bool PlayerEventLogs::IsEventEnabled(PlayerEvent::Event event)
 	return m_settings[event].event_enabled ? m_settings[event].event_enabled : false;
 }
 
-void PlayerEventLogs::RecordGMCommandEvent(const PlayerEvent::PlayerEvent &p, PlayerEvent::GMCommandEvent e)
+std::unique_ptr<ServerPacket> PlayerEventLogs::RecordGMCommandEvent(
+	const PlayerEvent::PlayerEvent &p,
+	PlayerEvent::GMCommandEvent e
+)
 {
 	auto n = PlayerEventLogsRepository::NewEntity();
 	n.account_id    = p.account_id;
@@ -88,11 +94,43 @@ void PlayerEventLogs::RecordGMCommandEvent(const PlayerEvent::PlayerEvent &p, Pl
 	output = Strings::Replace(output, "    ", "");
 	output = Strings::Replace(output, "\n", "");
 
-	std::cout << output << std::endl;
-
 	n.event_data = output;
 	n.created_at = std::time(nullptr);
 
-	PlayerEventLogsRepository::InsertOne(*m_database, n);
+	// return packet
+	EQ::Net::DynamicPacket dyn_pack;
+	dyn_pack.PutSerialize(0, n);
+	auto pack_size = sizeof(ServerSendPlayerEvent_Struct) + dyn_pack.Length();
+	auto pack      = std::make_unique<ServerPacket>(ServerOP_PlayerEvent, static_cast<uint32_t>(pack_size));
+	auto buf       = reinterpret_cast<ServerSendPlayerEvent_Struct *>(pack->pBuffer);
+	buf->cereal_size = static_cast<uint32_t>(dyn_pack.Length());
+	memcpy(buf->cereal_data, dyn_pack.Data(), dyn_pack.Length());
+
+	return pack;
+}
+
+void PlayerEventLogs::ProcessBatchQueue()
+{
+	if (m_record_batch_queue.empty()) {
+		return;
+	}
+
+	BenchTimer benchmark;
+
+	// flush many
+	PlayerEventLogsRepository::InsertMany(*m_database, m_record_batch_queue);
+	LogInfo(
+		"Processing batch player event log queue of [{}] took [{}]",
+		m_record_batch_queue.size(),
+		benchmark.elapsed()
+	);
+
+	// empty
+	m_record_batch_queue = {};
+}
+
+void PlayerEventLogs::AddToQueue(const PlayerEventLogsRepository::PlayerEventLogs& log)
+{
+	m_record_batch_queue.emplace_back(log);
 }
 

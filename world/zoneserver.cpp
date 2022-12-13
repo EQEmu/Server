@@ -43,6 +43,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/shared_tasks.h"
 #include "shared_task_manager.h"
 #include "../common/content/world_content_service.h"
+#include "../common/repositories/player_event_logs_repository.h"
+#include "../common/events/player_event_logs.h"
 
 extern ClientList client_list;
 extern GroupLFPList LFPGroupList;
@@ -367,6 +369,16 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			}
 
 			zoneserver_list.SendPacket(pack);
+			break;
+		}
+		case ServerOP_PlayerEvent: {
+			auto n = PlayerEventLogsRepository::PlayerEventLogs{};
+			auto s = (ServerSendPlayerEvent_Struct*) pack->pBuffer;
+			EQ::Util::MemoryStreamReader ss(s->cereal_data, s->cereal_size);
+			cereal::BinaryInputArchive archive(ss);
+			archive(n);
+			player_event_logs.AddToQueue(n);
+
 			break;
 		}
 		case ServerOP_DetailsChange: {

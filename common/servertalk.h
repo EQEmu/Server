@@ -281,6 +281,9 @@
 #define ServerOP_QSSendQuery 0x5006
 #define ServerOP_QSPlayerDropItem 0x5007
 
+// player events
+#define ServerOP_PlayerEvent 0x5100
+
 enum {
 	CZUpdateType_Character,
 	CZUpdateType_Group,
@@ -1804,6 +1807,11 @@ struct ServerDzCreateSerialized_Struct {
 	uint16_t origin_instance_id;
 	uint32_t cereal_size;
 	char     cereal_data[0];
+};
+
+struct ServerSendPlayerEvent_Struct {
+	uint32_t cereal_size;
+	char cereal_data[0];
 };
 
 struct ServerFlagUpdate_Struct {
