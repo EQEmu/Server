@@ -36,6 +36,7 @@
 #include "fastmath.h"
 #include "mob_movement_manager.h"
 #include "npc_scale_manager.h"
+#include "../common/events/player_event_logs.h"
 
 extern QueryServ* QServ;
 extern WorldServer worldserver;
@@ -592,6 +593,10 @@ int command_realdispatch(Client *c, std::string message, bool ignore_status)
 	}
 
 	parse->EventPlayer(EVENT_GM_COMMAND, c, message, 0);
+
+	if (player_event_logs.IsEventEnabled(PlayerEvent::GM_COMMAND)) {
+		player_event_logs.RecordGMCommandEvent(c->GetPlayerEvent(), PlayerEvent::GMCommandEvent{message});
+	}
 
 	cur->function(c, &sep);	// Dispatch C++ Command
 

@@ -33,6 +33,7 @@ SET(common_sources
     eq_stream_proxy.cpp
     eqtime.cpp
     event_sub.cpp
+    events/player_event_logs.cpp
     expedition_lockout_timer.cpp
     extprofile.cpp
     discord_manager.cpp
@@ -264,6 +265,8 @@ SET(repositories
     repositories/base/base_pets_equipmentset_repository.h
     repositories/base/base_pets_equipmentset_entries_repository.h
     repositories/base/base_player_titlesets_repository.h
+    repositories/base/base_player_event_log_settings_repository.h
+    repositories/base/base_player_event_logs_repository.h
     repositories/base/base_quest_globals_repository.h
     repositories/base/base_raid_details_repository.h
     repositories/base/base_raid_members_repository.h
@@ -442,6 +445,8 @@ SET(repositories
     repositories/pets_equipmentset_repository.h
     repositories/pets_equipmentset_entries_repository.h
     repositories/player_titlesets_repository.h
+    repositories/player_event_log_settings_repository.h
+    repositories/player_event_logs_repository.h
     repositories/quest_globals_repository.h
     repositories/raid_details_repository.h
     repositories/raid_members_repository.h
@@ -530,6 +535,8 @@ SET(common_headers
     eq_stream_locator.h
     eq_stream_proxy.h
     eqtime.h
+    events/player_event_logs.h
+    events/player_events.h
     errmsg.h
     event_sub.h
     expedition_lockout_timer.h
