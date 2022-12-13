@@ -75,19 +75,9 @@ std::unique_ptr<ServerPacket> PlayerEventLogs::RecordGMCommandEvent(
 	auto n = PlayerEventLogsRepository::NewEntity();
 	FillPlayerEvent(p, n);
 	n.event_type_id = PlayerEvent::GM_COMMAND;
-	n.event_data = GetEventPayload(e);
-	n.created_at = std::time(nullptr);
-
-	// return packet
-	EQ::Net::DynamicPacket dyn_pack;
-	dyn_pack.PutSerialize(0, n);
-	auto pack_size = sizeof(ServerSendPlayerEvent_Struct) + dyn_pack.Length();
-	auto pack      = std::make_unique<ServerPacket>(ServerOP_PlayerEvent, static_cast<uint32_t>(pack_size));
-	auto buf       = reinterpret_cast<ServerSendPlayerEvent_Struct *>(pack->pBuffer);
-	buf->cereal_size = static_cast<uint32_t>(dyn_pack.Length());
-	memcpy(buf->cereal_data, dyn_pack.Data(), dyn_pack.Length());
-
-	return pack;
+	n.event_data    = GetEventPayload(e);
+	n.created_at    = std::time(nullptr);
+	return BuildPlayerEventPacket(n);
 }
 
 void PlayerEventLogs::ProcessBatchQueue()
@@ -144,5 +134,19 @@ std::string PlayerEventLogs::GetEventPayload(PlayerEvent::GMCommandEvent &e)
 	o = Strings::Replace(o, "\n", "");
 
 	return o;
+}
+
+std::unique_ptr<ServerPacket>
+PlayerEventLogs::BuildPlayerEventPacket(BasePlayerEventLogsRepository::PlayerEventLogs e)
+{
+	EQ::Net::DynamicPacket dyn_pack;
+	dyn_pack.PutSerialize(0, e);
+	auto pack_size = sizeof(ServerSendPlayerEvent_Struct) + dyn_pack.Length();
+	auto pack      = std::make_unique<ServerPacket>(ServerOP_PlayerEvent, static_cast<uint32_t>(pack_size));
+	auto buf       = reinterpret_cast<ServerSendPlayerEvent_Struct *>(pack->pBuffer);
+	buf->cereal_size = static_cast<uint32_t>(dyn_pack.Length());
+	memcpy(buf->cereal_data, dyn_pack.Data(), dyn_pack.Length());
+
+	return pack;
 }
 

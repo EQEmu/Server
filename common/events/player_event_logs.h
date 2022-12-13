@@ -25,6 +25,7 @@ private:
 	std::vector<PlayerEventLogsRepository::PlayerEventLogs>  m_record_batch_queue{};
 	static void FillPlayerEvent(const PlayerEvent::PlayerEvent &p, PlayerEventLogsRepository::PlayerEventLogs &n);
 	static std::string GetEventPayload(PlayerEvent::GMCommandEvent &e);
+	std::unique_ptr<ServerPacket> BuildPlayerEventPacket(BasePlayerEventLogsRepository::PlayerEventLogs e);
 };
 
 extern PlayerEventLogs player_event_logs;
