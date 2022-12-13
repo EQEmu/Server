@@ -80,6 +80,7 @@ std::map<std::string, std::string> GetModifyNPCStatMap()
 		{ "loottable_id", "Loottable ID" },
 		{ "mana_regen", "Mana Regen" },
 		{ "max_hit", "Maximum Damage" },
+		{ "max_hp", "Maximum Hit Points" },
 		{ "min_hit", "Minimum Damage" },
 		{ "mr", "Magic Resist" },
 		{ "npc_spells_id", "NPC Spells ID" },
