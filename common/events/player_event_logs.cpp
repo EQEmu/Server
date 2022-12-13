@@ -67,19 +67,6 @@ bool PlayerEventLogs::IsEventEnabled(PlayerEvent::Event event)
 	return m_settings[event].event_enabled ? m_settings[event].event_enabled : false;
 }
 
-std::unique_ptr<ServerPacket> PlayerEventLogs::RecordGMCommandEvent(
-	const PlayerEvent::PlayerEvent &p,
-	PlayerEvent::GMCommandEvent e
-)
-{
-	auto n = PlayerEventLogsRepository::NewEntity();
-	FillPlayerEvent(p, n);
-	n.event_type_id = PlayerEvent::GM_COMMAND;
-	n.event_data    = GetEventPayload(e);
-	n.created_at    = std::time(nullptr);
-	return BuildPlayerEventPacket(n);
-}
-
 void PlayerEventLogs::ProcessBatchQueue()
 {
 	if (m_record_batch_queue.empty()) {
@@ -150,3 +137,19 @@ PlayerEventLogs::BuildPlayerEventPacket(BasePlayerEventLogsRepository::PlayerEve
 	return pack;
 }
 
+/**
+ * Events
+ */
+
+std::unique_ptr<ServerPacket> PlayerEventLogs::RecordGMCommandEvent(
+	const PlayerEvent::PlayerEvent &p,
+	PlayerEvent::GMCommandEvent e
+)
+{
+	auto n = PlayerEventLogsRepository::NewEntity();
+	FillPlayerEvent(p, n);
+	n.event_type_id = PlayerEvent::GM_COMMAND;
+	n.event_data    = GetEventPayload(e);
+	n.created_at    = std::time(nullptr);
+	return BuildPlayerEventPacket(n);
+}
