@@ -38,6 +38,7 @@ extern Zone* zone;
 
 #include "../common/repositories/character_peqzone_flags_repository.h"
 #include "../common/repositories/zone_repository.h"
+#include "../common/events/player_event_logs.h"
 
 
 void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
@@ -214,6 +215,23 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 	if (parse->EventPlayer(EVENT_ZONE, this, export_string, 0) != 0) {
 		SendZoneCancel(zc);
 		return;
+	}
+
+	if (player_event_logs.IsEventEnabled(PlayerEvent::ZONING)) {
+		auto e = PlayerEvent::ZoningEvent{};
+		e.from_instance_id      = zone->GetInstanceID();
+		e.from_instance_version = zone->GetInstanceVersion();
+		e.from_zone_id          = zone->GetZoneID();
+		e.to_instance_id        = target_instance_id;
+		e.to_instance_version   = target_instance_version;
+		e.to_zone_id            = target_zone_id;
+
+		worldserver.SendPacket(
+			player_event_logs.RecordZoningEvent(
+				GetPlayerEvent(),
+				e
+			).get()
+		);
 	}
 
 	//handle circumvention of zone restrictions

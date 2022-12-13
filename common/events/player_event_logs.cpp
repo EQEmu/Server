@@ -107,22 +107,6 @@ void PlayerEventLogs::FillPlayerEvent(
 	n.heading      = p.heading;
 }
 
-std::string PlayerEventLogs::GetEventPayload(PlayerEvent::GMCommandEvent &e)
-{
-	std::stringstream ss;
-	{
-		cereal::JSONOutputArchive ar(ss);
-		e.serialize(ar);
-	}
-
-	std::string o = ss.str();
-	o = Strings::Replace(o, "	", "");
-	o = Strings::Replace(o, "    ", "");
-	o = Strings::Replace(o, "\n", "");
-
-	return o;
-}
-
 std::unique_ptr<ServerPacket>
 PlayerEventLogs::BuildPlayerEventPacket(BasePlayerEventLogsRepository::PlayerEventLogs e)
 {
@@ -149,7 +133,32 @@ std::unique_ptr<ServerPacket> PlayerEventLogs::RecordGMCommandEvent(
 	auto n = PlayerEventLogsRepository::NewEntity();
 	FillPlayerEvent(p, n);
 	n.event_type_id = PlayerEvent::GM_COMMAND;
-	n.event_data    = GetEventPayload(e);
+
+	std::stringstream ss;
+	{
+		cereal::JSONOutputArchive ar(ss);
+		e.serialize(ar);
+	}
+
+	n.event_data    = Strings::MinifyJson(ss.str());
+	n.created_at    = std::time(nullptr);
+	return BuildPlayerEventPacket(n);
+}
+
+std::unique_ptr<ServerPacket> PlayerEventLogs::RecordZoningEvent(
+	const PlayerEvent::PlayerEvent& p,
+	PlayerEvent::ZoningEvent e)
+{
+	auto n = PlayerEventLogsRepository::NewEntity();
+	FillPlayerEvent(p, n);
+	n.event_type_id = PlayerEvent::ZONING;
+	std::stringstream ss;
+	{
+		cereal::JSONOutputArchive ar(ss);
+		e.serialize(ar);
+	}
+
+	n.event_data    = Strings::MinifyJson(ss.str());
 	n.created_at    = std::time(nullptr);
 	return BuildPlayerEventPacket(n);
 }

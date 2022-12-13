@@ -9,6 +9,7 @@ namespace PlayerEvent {
 
 	enum Event {
 		GM_COMMAND = 1,
+		ZONING,
 		MAX // dont remove
 	};
 
@@ -16,6 +17,7 @@ namespace PlayerEvent {
 	static const char *EventName[PlayerEvent::MAX] = {
 		"None",
 		"GM Command",
+		"Zoning",
 	};
 
 	/**
@@ -101,6 +103,30 @@ namespace PlayerEvent {
 		{
 			ar(
 				CEREAL_NVP(message)
+			);
+		}
+	};
+
+	class ZoningEvent {
+	public:
+		int32 from_zone_id;
+		int32 from_instance_id;
+		int32 from_instance_version;
+		int32 to_zone_id;
+		int32 to_instance_id;
+		int32 to_instance_version;
+
+		// cereal
+		template<class Archive>
+		void serialize(Archive &ar)
+		{
+			ar(
+				CEREAL_NVP(from_zone_id),
+				CEREAL_NVP(from_instance_id),
+				CEREAL_NVP(from_instance_version),
+				CEREAL_NVP(to_zone_id),
+				CEREAL_NVP(to_instance_id),
+				CEREAL_NVP(to_instance_version)
 			);
 		}
 	};

@@ -18,13 +18,13 @@ public:
 	// batch queue
 	void ProcessBatchQueue();
 	void AddToQueue(const PlayerEventLogsRepository::PlayerEventLogs &logs);
+	std::unique_ptr<ServerPacket> RecordZoningEvent(const PlayerEvent::PlayerEvent& p, PlayerEvent::ZoningEvent e);
 private:
 	Database                                                 *m_database; // reference to database
 	PlayerEventLogSettingsRepository::PlayerEventLogSettings m_settings[PlayerEvent::Event::MAX]{};
 	// batch queue is used to record events in batch
 	std::vector<PlayerEventLogsRepository::PlayerEventLogs>  m_record_batch_queue{};
 	static void FillPlayerEvent(const PlayerEvent::PlayerEvent &p, PlayerEventLogsRepository::PlayerEventLogs &n);
-	static std::string GetEventPayload(PlayerEvent::GMCommandEvent &e);
 	std::unique_ptr<ServerPacket> BuildPlayerEventPacket(BasePlayerEventLogsRepository::PlayerEventLogs e);
 };
 
