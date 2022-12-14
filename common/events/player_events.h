@@ -43,6 +43,12 @@ namespace PlayerEvent {
 		COMBINE_SUCCESS, // unimplemented
 		DROPPED_ITEM, // unimplemented
 		SPLIT_MONEY, // unimplemented
+		DZ_JOIN, // unimplemented
+		DZ_LEAVE, // unimplemented
+		TRADER_PURCHASE, // unimplemented
+		TRADER_SELL, // unimplemented
+		BANDOLIER_CREATE, // unimplemented
+		BANDOLIER_SWAP, // unimplemented
 		MAX // dont remove
 	};
 
@@ -84,6 +90,12 @@ namespace PlayerEvent {
 		"Combine Success",
 		"Dropped Item",
 		"Split Money",
+		"DZ Join",
+		"DZ Leave",
+		"Trader Purchase",
+		"Trader Sell",
+		"Bandolier Create",
+		"Bandolier Swap",
 	};
 
 	// Generic struct used by all events
