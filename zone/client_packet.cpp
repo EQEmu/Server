@@ -2794,7 +2794,25 @@ void Client::Handle_OP_AltCurrencySell(const EQApplicationPacket *app)
 		parse->EventPlayer(EVENT_ALT_CURRENCY_MERCHANT_SELL, this, export_string, 0);
 
 		FastQueuePacket(&outapp);
-		AddAlternateCurrencyValue(alt_cur_id, cost);
+		uint64 new_balance = AddAlternateCurrencyValue(alt_cur_id, cost);
+
+		if (player_event_logs.IsEventEnabled(PlayerEvent::MERCHANT_SELL)) {
+			auto e = PlayerEvent::MerchantSellEvent{
+				.npc_id = tar->GetNPCTypeID(),
+				.merchant_name = tar->GetCleanName(),
+				.merchant_type = tar->CastToNPC()->MerchantType,
+				.item_id = item->ID,
+				.item_name = item->Name,
+				.charges = static_cast<int16>(sell->charges),
+				.cost = cost,
+				.alternate_currency_id = 0,
+				.player_money_balance = GetCarriedMoney(),
+				.player_currency_balance = new_balance,
+			};
+
+			RecordPlayerEventLog(PlayerEvent::MERCHANT_SELL, e);
+		}
+
 		Save(1);
 	}
 }
@@ -13605,6 +13623,22 @@ void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
 	);
 	parse->EventPlayer(EVENT_MERCHANT_SELL, this, export_string, 0);
 
+	if (player_event_logs.IsEventEnabled(PlayerEvent::MERCHANT_SELL)) {
+		auto e = PlayerEvent::MerchantSellEvent{
+			.npc_id = vendor->GetNPCTypeID(),
+			.merchant_name = vendor->GetCleanName(),
+			.merchant_type = vendor->CastToNPC()->MerchantType,
+			.item_id = item->ID,
+			.item_name = item->Name,
+			.charges = static_cast<int16>(mp->quantity),
+			.cost = price,
+			.alternate_currency_id = 0,
+			.player_money_balance = GetCarriedMoney(),
+			.player_currency_balance = 0,
+		};
+
+		RecordPlayerEventLog(PlayerEvent::MERCHANT_SELL, e);
+	}
 
 	// Now remove the item from the player, this happens regardless of outcome
 	DeleteItemInInventory(
