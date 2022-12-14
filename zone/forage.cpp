@@ -381,6 +381,15 @@ void Client::GoFish()
 					std::vector<std::any> args;
 					args.push_back(inst);
 					parse->EventPlayer(EVENT_FISH_SUCCESS, this, "", inst->GetID(), &args);
+
+					if (player_event_logs.IsEventEnabled(PlayerEvent::FISH_SUCCESS)) {
+						auto e = PlayerEvent::FishSuccessEvent{
+							.item_id = inst->GetItem()->ID,
+							.item_name = inst->GetItem()->Name,
+						};
+
+						RecordPlayerEventLog(PlayerEvent::FISH_SUCCESS, e);
+					}
 				}
 			}
 		}
@@ -400,6 +409,7 @@ void Client::GoFish()
 		}
 
 		parse->EventPlayer(EVENT_FISH_FAILURE, this, "", 0);
+		RecordPlayerEventLog(PlayerEvent::FISH_FAILURE, PlayerEvent::EmptyEvent{});
 	}
 
 	//chance to break fishing pole...

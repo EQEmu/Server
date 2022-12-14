@@ -14,9 +14,9 @@ namespace PlayerEvent {
 		AA_PURCHASE,
 		FORAGE_SUCCESS,
 		FORAGE_FAILURE,
-		FISH_SUCCESS, // unimplemented
-		FISH_FAILURE, // unimplemented
-		ITEM_DESTROY, // unimplemented
+		FISH_SUCCESS,
+		FISH_FAILURE,
+		ITEM_DESTROY,
 		WENT_ONLINE, // unimplemented
 		WENT_OFFLINE, // unimplemented
 		LEVEL_GAIN, // unimplemented
@@ -241,6 +241,38 @@ namespace PlayerEvent {
 			ar(
 				CEREAL_NVP(item_id),
 				CEREAL_NVP(item_name)
+			);
+		}
+	};
+
+	struct FishSuccessEvent {
+		uint32      item_id;
+		std::string item_name;
+
+		// cereal
+		template<class Archive>
+		void serialize(Archive &ar)
+		{
+			ar(
+				CEREAL_NVP(item_id),
+				CEREAL_NVP(item_name)
+			);
+		}
+	};
+
+	struct DestroyItemEvent {
+		uint32      item_id;
+		std::string item_name;
+		std::string reason;
+
+		// cereal
+		template<class Archive>
+		void serialize(Archive &ar)
+		{
+			ar(
+				CEREAL_NVP(item_id),
+				CEREAL_NVP(item_name),
+				CEREAL_NVP(reason)
 			);
 		}
 	};

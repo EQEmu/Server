@@ -26,6 +26,7 @@
 #include "../common/zone_store.h"
 
 #include "bot.h"
+#include "../common/events/player_event_logs.h"
 
 extern WorldServer worldserver;
 
@@ -1822,6 +1823,17 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 				MessageString(Chat::Loot, 290);
 				parse->EventItem(EVENT_DESTROY_ITEM, this, test_inst, nullptr, "", 0);
 				DeleteItemInInventory(EQ::invslot::slotCursor, 0, true);
+
+				if (player_event_logs.IsEventEnabled(PlayerEvent::ITEM_DESTROY)) {
+					auto e = PlayerEvent::DestroyItemEvent{
+						.item_id = test_inst->GetItem()->ID,
+						.item_name = test_inst->GetItem()->Name,
+						.reason = "Duplicate lore item",
+					};
+
+					RecordPlayerEventLog(PlayerEvent::ITEM_DESTROY, e);
+				}
+
 			}
 		}
 		return true;
@@ -1835,6 +1847,15 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 			EQ::ItemInstance *inst = m_inv.GetItem(EQ::invslot::slotCursor);
 			if(inst) {
 				parse->EventItem(EVENT_DESTROY_ITEM, this, inst, nullptr, "", 0);
+				if (player_event_logs.IsEventEnabled(PlayerEvent::ITEM_DESTROY)) {
+					auto e = PlayerEvent::DestroyItemEvent{
+						.item_id = inst->GetItem()->ID,
+						.item_name = inst->GetItem()->Name,
+						.reason = "Client destroy cursor",
+					};
+
+					RecordPlayerEventLog(PlayerEvent::ITEM_DESTROY, e);
+				}
 			}
 
 			DeleteItemInInventory(move_in->from_slot);
