@@ -70,6 +70,9 @@ Bot::Bot(NPCType *npcTypeData, Client* botOwner) : NPC(npcTypeData, nullptr, glm
 	RestRegenHP = 0;
 	RestRegenMana = 0;
 	RestRegenEndurance = 0;
+	m_enforce_spell_settings = 0;
+	m_bot_archery_setting = 0;
+	m_expansion_bitmask = -1;
 	SetBotID(0);
 	SetBotSpellID(0);
 	SetSpawnStatus(false);
