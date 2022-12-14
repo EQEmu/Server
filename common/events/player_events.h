@@ -41,6 +41,8 @@ namespace PlayerEvent {
 		DEATH, // unimplemented
 		COMBINE_FAILURE, // unimplemented
 		COMBINE_SUCCESS, // unimplemented
+		DROPPED_ITEM, // unimplemented
+		SPLIT_MONEY, // unimplemented
 		MAX // dont remove
 	};
 
@@ -80,6 +82,8 @@ namespace PlayerEvent {
 		"Death",
 		"Combine Failure",
 		"Combine Success",
+		"Dropped Item",
+		"Split Money",
 	};
 
 	// Generic struct used by all events
