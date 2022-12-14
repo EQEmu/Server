@@ -871,8 +871,10 @@ void Client::SetLevel(uint8 set_level, bool command)
 	}
 
 	if (set_level > m_pp.level) {
-		const auto export_string = fmt::format("{}", (set_level - m_pp.level));
+		int levels_gained = (set_level - m_pp.level);
+		const auto export_string = fmt::format("{}", levels_gained);
 		parse->EventPlayer(EVENT_LEVEL_UP, this, export_string, 0);
+		RecordPlayerEventLog(PlayerEvent::LEVEL_GAIN, PlayerEvent::LevelGainedEvent{levels_gained});
 
 		if (RuleB(QueryServ, PlayerLogLevels)) {
 			const auto event_desc = fmt::format(
@@ -885,8 +887,10 @@ void Client::SetLevel(uint8 set_level, bool command)
 			QServ->PlayerLogEvent(Player_Log_Levels, CharacterID(), event_desc);
 		}
 	} else if (set_level < m_pp.level) {
-		const auto export_string = fmt::format("{}", (m_pp.level - set_level));
+		int levels_lost = (m_pp.level - set_level);
+		const auto export_string = fmt::format("{}", levels_lost);
 		parse->EventPlayer(EVENT_LEVEL_DOWN, this, export_string, 0);
+		RecordPlayerEventLog(PlayerEvent::LEVEL_LOSS, PlayerEvent::LevelLostEvent{levels_lost});
 
 		if (RuleB(QueryServ, PlayerLogLevels)) {
 			const auto event_desc = fmt::format(

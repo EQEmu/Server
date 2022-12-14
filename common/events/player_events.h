@@ -19,8 +19,8 @@ namespace PlayerEvent {
 		ITEM_DESTROY,
 		WENT_ONLINE,
 		WENT_OFFLINE,
-		LEVEL_GAIN, // unimplemented
-		LEVEL_LOSS, // unimplemented
+		LEVEL_GAIN,
+		LEVEL_LOSS,
 		LOOT_ITEM, // unimplemented
 		MERCHANT_PURCHASE, // unimplemented
 		MERCHANT_SELL, // unimplemented
@@ -276,6 +276,28 @@ namespace PlayerEvent {
 				CEREAL_NVP(reason),
 				CEREAL_NVP(charges)
 			);
+		}
+	};
+
+	struct LevelGainedEvent {
+		int levels_gained;
+
+		// cereal
+		template<class Archive>
+		void serialize(Archive &ar)
+		{
+			ar(CEREAL_NVP(levels_gained));
+		}
+	};
+
+	struct LevelLostEvent {
+		int levels_lost;
+
+		// cereal
+		template<class Archive>
+		void serialize(Archive &ar)
+		{
+			ar(CEREAL_NVP(levels_lost));
 		}
 	};
 }
