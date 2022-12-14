@@ -30,7 +30,7 @@ namespace PlayerEvent {
 		RAID_LEAVE, // unimplemented
 		GROUNDSPAWN_PICKUP, // unimplemented
 		NPC_HANDIN, // unimplemented
-		SKILL_UP, // unimplemented
+		SKILL_UP,
 		TASK_ACCEPT, // unimplemented
 		TASK_UPDATE, // unimplemented
 		TASK_COMPLETE, // unimplemented
@@ -378,6 +378,25 @@ namespace PlayerEvent {
 				CEREAL_NVP(alternate_currency_id),
 				CEREAL_NVP(player_money_balance),
 				CEREAL_NVP(player_currency_balance)
+			);
+		}
+	};
+
+	struct SkillUpEvent {
+		uint32      skill_id;
+		int         value;
+		int16       max_skill;
+		std::string against_who;
+
+		// cereal
+		template<class Archive>
+		void serialize(Archive &ar)
+		{
+			ar(
+				CEREAL_NVP(skill_id),
+				CEREAL_NVP(value),
+				CEREAL_NVP(max_skill),
+				CEREAL_NVP(against_who)
 			);
 		}
 	};
