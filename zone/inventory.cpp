@@ -1828,6 +1828,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 					auto e = PlayerEvent::DestroyItemEvent{
 						.item_id = test_inst->GetItem()->ID,
 						.item_name = test_inst->GetItem()->Name,
+						.charges = test_inst->GetCharges(),
 						.reason = "Duplicate lore item",
 					};
 
@@ -1851,6 +1852,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 					auto e = PlayerEvent::DestroyItemEvent{
 						.item_id = inst->GetItem()->ID,
 						.item_name = inst->GetItem()->Name,
+						.charges = inst->GetCharges(),
 						.reason = "Client destroy cursor",
 					};
 

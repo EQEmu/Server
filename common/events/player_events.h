@@ -263,6 +263,7 @@ namespace PlayerEvent {
 	struct DestroyItemEvent {
 		uint32      item_id;
 		std::string item_name;
+		int16       charges;
 		std::string reason;
 
 		// cereal
@@ -272,7 +273,8 @@ namespace PlayerEvent {
 			ar(
 				CEREAL_NVP(item_id),
 				CEREAL_NVP(item_name),
-				CEREAL_NVP(reason)
+				CEREAL_NVP(reason),
+				CEREAL_NVP(charges)
 			);
 		}
 	};
