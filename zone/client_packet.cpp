@@ -2602,10 +2602,28 @@ void Client::Handle_OP_AltCurrencyPurchase(const EQApplicationPacket *app)
 		);
 		parse->EventPlayer(EVENT_ALT_CURRENCY_MERCHANT_BUY, this, export_string, 0);
 
-		AddAlternateCurrencyValue(alt_cur_id, -((int32)cost));
-		int16 charges = 1;
-		if (item->MaxCharges != 0)
+		uint64 current_balance = AddAlternateCurrencyValue(alt_cur_id, -((int32) cost));
+		int16  charges         = 1;
+		if (item->MaxCharges != 0) {
 			charges = item->MaxCharges;
+		}
+
+		if (player_event_logs.IsEventEnabled(PlayerEvent::MERCHANT_PURCHASE)) {
+			auto e = PlayerEvent::MerchantPurchaseEvent{
+				.npc_id = tar->GetNPCTypeID(),
+				.merchant_name = tar->GetCleanName(),
+				.merchant_type = tar->MerchantType,
+				.item_id = item->ID,
+				.item_name = item->Name,
+				.charges = item->MaxCharges,
+				.cost = cost,
+				.alternate_currency_id = alt_cur_id,
+				.player_money_balance = GetCarriedMoney(),
+				.player_currency_balance = current_balance,
+			};
+
+			RecordPlayerEventLog(PlayerEvent::MERCHANT_PURCHASE, e);
+		}
 
 		EQ::ItemInstance *inst = database.CreateItem(item, charges);
 		if (!AutoPutLootInInventory(*inst, true, true))
@@ -13384,6 +13402,23 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 		mpo->price
 	);
 	parse->EventPlayer(EVENT_MERCHANT_BUY, this, export_string, 0);
+
+	if (player_event_logs.IsEventEnabled(PlayerEvent::MERCHANT_PURCHASE)) {
+		auto e = PlayerEvent::MerchantPurchaseEvent{
+			.npc_id = tmp->GetNPCTypeID(),
+			.merchant_name = tmp->GetCleanName(),
+			.merchant_type = tmp->CastToNPC()->MerchantType,
+			.item_id = item->ID,
+			.item_name = item->Name,
+			.charges = static_cast<int16>(mpo->quantity),
+			.cost = mpo->price,
+			.alternate_currency_id = 0,
+			.player_money_balance = GetCarriedMoney(),
+			.player_currency_balance = 0,
+		};
+
+		RecordPlayerEventLog(PlayerEvent::MERCHANT_PURCHASE, e);
+	}
 
 	if ((RuleB(Character, EnableDiscoveredItems)))
 	{

@@ -6871,7 +6871,7 @@ void Client::SetAlternateCurrencyValue(uint32 currency_id, uint32 new_amount)
 	SendAlternateCurrencyValue(currency_id);
 }
 
-void Client::AddAlternateCurrencyValue(uint32 currency_id, int32 amount, int8 method)
+int Client::AddAlternateCurrencyValue(uint32 currency_id, int32 amount, int8 method)
 {
 
 	/* Added via Quest, rest of the logging methods may be done inline due to information available in that area of the code */
@@ -6884,12 +6884,12 @@ void Client::AddAlternateCurrencyValue(uint32 currency_id, int32 amount, int8 me
 	}
 
 	if(amount == 0) {
-		return;
+		return 0;
 	}
 
 	if(!alternate_currency_loaded) {
 		alternate_currency_queued_operations.push(std::make_pair(currency_id, amount));
-		return;
+		return 0;
 	}
 
 	int new_value = 0;
@@ -6908,6 +6908,8 @@ void Client::AddAlternateCurrencyValue(uint32 currency_id, int32 amount, int8 me
 		database.UpdateAltCurrencyValue(CharacterID(), currency_id, new_value);
 	}
 	SendAlternateCurrencyValue(currency_id);
+
+	return new_value;
 }
 
 void Client::SendAlternateCurrencyValues()

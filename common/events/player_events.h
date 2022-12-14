@@ -22,7 +22,7 @@ namespace PlayerEvent {
 		LEVEL_GAIN,
 		LEVEL_LOSS,
 		LOOT_ITEM,
-		MERCHANT_PURCHASE, // unimplemented
+		MERCHANT_PURCHASE,
 		MERCHANT_SELL, // unimplemented
 		GROUP_JOIN, // unimplemented
 		GROUP_LEAVE, // unimplemented
@@ -316,6 +316,37 @@ namespace PlayerEvent {
 				CEREAL_NVP(item_name),
 				CEREAL_NVP(charges),
 				CEREAL_NVP(corpse_name)
+			);
+		}
+	};
+
+	struct MerchantPurchaseEvent {
+		uint32      npc_id;
+		std::string merchant_name;
+		uint32      merchant_type;
+		uint32      item_id;
+		std::string item_name;
+		int16       charges;
+		uint32      cost;
+		uint32      alternate_currency_id;
+		uint64      player_money_balance;
+		uint64      player_currency_balance;
+
+		// cereal
+		template<class Archive>
+		void serialize(Archive &ar)
+		{
+			ar(
+				CEREAL_NVP(npc_id),
+				CEREAL_NVP(merchant_name),
+				CEREAL_NVP(merchant_type),
+				CEREAL_NVP(item_id),
+				CEREAL_NVP(item_name),
+				CEREAL_NVP(charges),
+				CEREAL_NVP(cost),
+				CEREAL_NVP(alternate_currency_id),
+				CEREAL_NVP(player_money_balance),
+				CEREAL_NVP(player_currency_balance)
 			);
 		}
 	};
