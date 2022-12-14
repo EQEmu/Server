@@ -17,8 +17,8 @@ namespace PlayerEvent {
 		FISH_SUCCESS,
 		FISH_FAILURE,
 		ITEM_DESTROY,
-		WENT_ONLINE, // unimplemented
-		WENT_OFFLINE, // unimplemented
+		WENT_ONLINE,
+		WENT_OFFLINE,
 		LEVEL_GAIN, // unimplemented
 		LEVEL_LOSS, // unimplemented
 		LOOT_ITEM, // unimplemented

@@ -55,6 +55,7 @@
 #include "zone.h"
 #include "zonedb.h"
 #include "../common/zone_store.h"
+#include "../common/events/player_event_logs.h"
 
 extern QueryServ* QServ;
 extern Zone* zone;
@@ -184,6 +185,7 @@ bool Client::Process() {
 			SetDynamicZoneMemberStatus(DynamicZoneMemberStatus::Offline);
 
 			parse->EventPlayer(EVENT_DISCONNECT, this, "", 0);
+			RecordPlayerEventLog(PlayerEvent::WENT_OFFLINE, PlayerEvent::EmptyEvent{});
 
 			return false; //delete client
 		}
@@ -693,6 +695,7 @@ void Client::OnDisconnect(bool hard_disconnect) {
 			MyRaid->MemberZoned(this);
 
 		parse->EventPlayer(EVENT_DISCONNECT, this, "", 0);
+		RecordPlayerEventLog(PlayerEvent::WENT_OFFLINE, PlayerEvent::EmptyEvent{});
 
 		/* QS: PlayerLogConnectDisconnect */
 		if (RuleB(QueryServ, PlayerLogConnectDisconnect)){
