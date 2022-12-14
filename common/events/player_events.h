@@ -21,7 +21,7 @@ namespace PlayerEvent {
 		WENT_OFFLINE,
 		LEVEL_GAIN,
 		LEVEL_LOSS,
-		LOOT_ITEM, // unimplemented
+		LOOT_ITEM,
 		MERCHANT_PURCHASE, // unimplemented
 		MERCHANT_SELL, // unimplemented
 		GROUP_JOIN, // unimplemented
@@ -300,6 +300,25 @@ namespace PlayerEvent {
 			ar(CEREAL_NVP(levels_lost));
 		}
 	};
+
+	struct LootItemEvent {
+		uint32      item_id;
+		std::string item_name;
+		int16       charges;
+		std::string corpse_name;
+
+		// cereal
+		template<class Archive>
+		void serialize(Archive &ar)
+		{
+			ar(
+				CEREAL_NVP(item_id),
+				CEREAL_NVP(item_name),
+				CEREAL_NVP(charges),
+				CEREAL_NVP(corpse_name)
+			);
+		}
+	};
 }
 
 #endif //EQEMU_PLAYER_EVENTS_H
@@ -310,6 +329,18 @@ namespace PlayerEvent {
             player_event_logs.RecordEvent(\
                 event_type,\
                 GetPlayerEvent(),\
+                event_data\
+            ).get()\
+        );\
+    }\
+} while (0)
+
+#define RecordPlayerEventLogWithClient(c, event_type, event_data) do {\
+    if (player_event_logs.IsEventEnabled(event_type)) {\
+        worldserver.SendPacket(\
+            player_event_logs.RecordEvent(\
+                event_type,\
+                c->GetPlayerEvent(),\
                 event_data\
             ).get()\
         );\
