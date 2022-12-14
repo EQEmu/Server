@@ -31,7 +31,7 @@ namespace PlayerEvent {
 		GROUNDSPAWN_PICKUP, // unimplemented
 		NPC_HANDIN, // unimplemented
 		SKILL_UP,
-		TASK_ACCEPT, // unimplemented
+		TASK_ACCEPT,
 		TASK_UPDATE, // unimplemented
 		TASK_COMPLETE, // unimplemented
 		TRADE, // unimplemented
@@ -413,6 +413,65 @@ namespace PlayerEvent {
 				CEREAL_NVP(value),
 				CEREAL_NVP(max_skill),
 				CEREAL_NVP(against_who)
+			);
+		}
+	};
+
+	struct TaskAcceptEvent {
+		uint32      npc_id;
+		std::string npc_name;
+		uint32      task_id;
+		std::string task_name;
+
+		// cereal
+		template<class Archive>
+		void serialize(Archive &ar)
+		{
+			ar(
+				CEREAL_NVP(npc_id),
+				CEREAL_NVP(npc_name),
+				CEREAL_NVP(task_id),
+				CEREAL_NVP(task_name)
+			);
+		}
+	};
+
+	struct TaskUpdateEvent {
+		uint32      task_id;
+		std::string task_name;
+		uint32      activity_id;
+		uint32      done_count;
+
+
+		// cereal
+		template<class Archive>
+		void serialize(Archive &ar)
+		{
+			ar(
+				CEREAL_NVP(task_id),
+				CEREAL_NVP(task_name),
+				CEREAL_NVP(activity_id),
+				CEREAL_NVP(done_count)
+			);
+		}
+	};
+
+	struct TaskCompleteEvent {
+		uint32      task_id;
+		std::string task_name;
+		uint32      activity_id;
+		uint32      done_count;
+
+
+		// cereal
+		template<class Archive>
+		void serialize(Archive &ar)
+		{
+			ar(
+				CEREAL_NVP(task_id),
+				CEREAL_NVP(task_name),
+				CEREAL_NVP(activity_id),
+				CEREAL_NVP(done_count)
 			);
 		}
 	};
