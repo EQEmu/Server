@@ -596,7 +596,8 @@ int command_realdispatch(Client *c, std::string message, bool ignore_status)
 
 	if (player_event_logs.IsEventEnabled(PlayerEvent::GM_COMMAND)) {
 		worldserver.SendPacket(
-			player_event_logs.RecordGMCommandEvent(
+			player_event_logs.RecordEvent(
+				PlayerEvent::GM_COMMAND,
 				c->GetPlayerEvent(),
 				PlayerEvent::GMCommandEvent{message}
 			).get()

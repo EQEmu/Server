@@ -62,7 +62,7 @@ bool PlayerEventLogs::ValidateDatabaseConnection()
 	return true;
 }
 
-bool PlayerEventLogs::IsEventEnabled(PlayerEvent::Event event)
+bool PlayerEventLogs::IsEventEnabled(PlayerEvent::EventType event)
 {
 	return m_settings[event].event_enabled ? m_settings[event].event_enabled : false;
 }
@@ -119,46 +119,4 @@ PlayerEventLogs::BuildPlayerEventPacket(BasePlayerEventLogsRepository::PlayerEve
 	memcpy(buf->cereal_data, dyn_pack.Data(), dyn_pack.Length());
 
 	return pack;
-}
-
-/**
- * Events
- */
-
-std::unique_ptr<ServerPacket> PlayerEventLogs::RecordGMCommandEvent(
-	const PlayerEvent::PlayerEvent &p,
-	PlayerEvent::GMCommandEvent e
-)
-{
-	auto n = PlayerEventLogsRepository::NewEntity();
-	FillPlayerEvent(p, n);
-	n.event_type_id = PlayerEvent::GM_COMMAND;
-
-	std::stringstream ss;
-	{
-		cereal::JSONOutputArchive ar(ss);
-		e.serialize(ar);
-	}
-
-	n.event_data    = Strings::MinifyJson(ss.str());
-	n.created_at    = std::time(nullptr);
-	return BuildPlayerEventPacket(n);
-}
-
-std::unique_ptr<ServerPacket> PlayerEventLogs::RecordZoningEvent(
-	const PlayerEvent::PlayerEvent& p,
-	PlayerEvent::ZoningEvent e)
-{
-	auto n = PlayerEventLogsRepository::NewEntity();
-	FillPlayerEvent(p, n);
-	n.event_type_id = PlayerEvent::ZONING;
-	std::stringstream ss;
-	{
-		cereal::JSONOutputArchive ar(ss);
-		e.serialize(ar);
-	}
-
-	n.event_data    = Strings::MinifyJson(ss.str());
-	n.created_at    = std::time(nullptr);
-	return BuildPlayerEventPacket(n);
 }

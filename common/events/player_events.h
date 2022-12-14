@@ -7,7 +7,7 @@
 
 namespace PlayerEvent {
 
-	enum Event {
+	enum EventType {
 		GM_COMMAND = 1,
 		ZONING,
 		MAX // dont remove
@@ -23,8 +23,7 @@ namespace PlayerEvent {
 	/**
 	 * Generic struct used by all events
 	 */
-	class PlayerEvent {
-	public:
+	struct PlayerEvent {
 		int64       account_id;
 		int64       character_id;
 		std::string character_name;
@@ -37,8 +36,7 @@ namespace PlayerEvent {
 	};
 
 	// used in Trade event
-	class TradeItem {
-	public:
+	struct TradeItem {
 		int64       item_id;
 		std::string item_name;
 		int32       slot;
@@ -79,8 +77,7 @@ namespace PlayerEvent {
 	/**
 	 * Events
 	 */
-	class TradeEvent {
-	public:
+	struct TradeEvent {
 		std::vector<TradeEntry> entries;
 
 		// cereal
@@ -93,8 +90,7 @@ namespace PlayerEvent {
 		}
 	};
 
-	class GMCommandEvent {
-	public:
+	struct GMCommandEvent {
 		std::string message;
 
 		// cereal
@@ -107,8 +103,7 @@ namespace PlayerEvent {
 		}
 	};
 
-	class ZoningEvent {
-	public:
+	struct ZoningEvent {
 		int32 from_zone_id;
 		int32 from_instance_id;
 		int32 from_instance_version;

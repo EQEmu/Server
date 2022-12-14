@@ -783,12 +783,3 @@ std::string Strings::RemoveNumbers(std::string s)
 
 	return s.substr(0, current);
 }
-
-std::string Strings::MinifyJson(std::string s)
-{
-	s = Strings::Replace(s, "	", "");
-	s = Strings::Replace(s, "    ", "");
-	s = Strings::Replace(s, "\n", "");
-
-	return s;
-}

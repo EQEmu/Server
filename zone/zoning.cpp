@@ -227,7 +227,8 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 		e.to_zone_id            = target_zone_id;
 
 		worldserver.SendPacket(
-			player_event_logs.RecordZoningEvent(
+			player_event_logs.RecordEvent(
+				PlayerEvent::ZONING,
 				GetPlayerEvent(),
 				e
 			).get()
