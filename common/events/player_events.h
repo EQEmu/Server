@@ -10,6 +10,33 @@ namespace PlayerEvent {
 	enum EventType {
 		GM_COMMAND = 1,
 		ZONING,
+		AA_GAIN, // unimplemented
+		AA_PURCHASE, // unimplemented
+		FORAGE_SUCCESS, // unimplemented
+		FORAGE_FAILURE, // unimplemented
+		FISH_SUCCESS, // unimplemented
+		FISH_FAILURE, // unimplemented
+		ITEM_DESTROY, // unimplemented
+		WENT_ONLINE, // unimplemented
+		WENT_OFFLINE, // unimplemented
+		LEVEL_GAIN, // unimplemented
+		LEVEL_LOSS, // unimplemented
+		LOOT_ITEM, // unimplemented
+		MERCHANT_PURCHASE, // unimplemented
+		MERCHANT_SELL, // unimplemented
+		GROUP_JOIN, // unimplemented
+		GROUP_LEAVE, // unimplemented
+		RAID_JOIN, // unimplemented
+		RAID_LEAVE, // unimplemented
+		GROUNDSPAWN_PICKUP, // unimplemented
+		NPC_HANDIN, // unimplemented
+		SKILL_UP, // unimplemented
+		TASK_ACCEPT, // unimplemented
+		TASK_UPDATE, // unimplemented
+		TASK_COMPLETE, // unimplemented
+		TRADE, // unimplemented
+		GIVE_ITEM, // unimplemented
+		SAY, // unimplemented
 		MAX // dont remove
 	};
 
@@ -18,6 +45,33 @@ namespace PlayerEvent {
 		"None",
 		"GM Command",
 		"Zoning",
+		"AA Gain",
+		"AA Purchase",
+		"Forage Success",
+		"Forage Failure",
+		"Fish Success",
+		"Fish Failure",
+		"Item Destroy",
+		"Went Online",
+		"Went Offline",
+		"Level Gain",
+		"Level Loss",
+		"Loot Item",
+		"Merchant Purchase",
+		"Merchant Sell",
+		"Group Join",
+		"Group Leave",
+		"Raid Join",
+		"Raid Leave",
+		"Groundspawn Pickup",
+		"NPC Handin",
+		"Skill Up",
+		"Task Accept",
+		"Task Update",
+		"Task Complete",
+		"Trade",
+		"Given Item",
+		"Say",
 	};
 
 	/**
