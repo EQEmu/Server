@@ -1,10 +1,8 @@
 #include <cereal/archives/json.hpp>
 #include "player_event_logs.h"
-#include "../repositories/player_event_logs_repository.h"
-#include "../net/packet.h"
-#include "../servertalk.h"
 #include "../timer.h"
 
+// general initialization routine
 void PlayerEventLogs::Init()
 {
 	ValidateDatabaseConnection();
@@ -45,6 +43,7 @@ void PlayerEventLogs::Init()
 	}
 }
 
+// set the database object, during initialization
 PlayerEventLogs *PlayerEventLogs::SetDatabase(Database *db)
 {
 	m_database = db;
@@ -52,6 +51,7 @@ PlayerEventLogs *PlayerEventLogs::SetDatabase(Database *db)
 	return this;
 }
 
+// validates whether the connection is valid or not, used in initialization
 bool PlayerEventLogs::ValidateDatabaseConnection()
 {
 	if (!m_database) {
@@ -62,11 +62,18 @@ bool PlayerEventLogs::ValidateDatabaseConnection()
 	return true;
 }
 
+// determines if the passed in event is enabled or not
+// this is used to gate logic or events from firing off
+// this is used prior to building the events, we don't want to
+// build the events, send them through the stack in a function call
+// only to discard them immediately afterwards, very wasteful on resources
+// the quest api currently does this
 bool PlayerEventLogs::IsEventEnabled(PlayerEvent::EventType event)
 {
 	return m_settings[event].event_enabled ? m_settings[event].event_enabled : false;
 }
 
+// this processes any current player events on the queue
 void PlayerEventLogs::ProcessBatchQueue()
 {
 	if (m_record_batch_queue.empty()) {
@@ -87,11 +94,13 @@ void PlayerEventLogs::ProcessBatchQueue()
 	m_record_batch_queue = {};
 }
 
+// adds a player event to the queue
 void PlayerEventLogs::AddToQueue(const PlayerEventLogsRepository::PlayerEventLogs &log)
 {
 	m_record_batch_queue.emplace_back(log);
 }
 
+// fills common event data in the SendEvent function
 void PlayerEventLogs::FillPlayerEvent(
 	const PlayerEvent::PlayerEvent &p,
 	PlayerEventLogsRepository::PlayerEventLogs &n
@@ -107,8 +116,10 @@ void PlayerEventLogs::FillPlayerEvent(
 	n.heading      = p.heading;
 }
 
+// builds the dynamic packet used to ship the player event over the wire
+// supports serializing the struct so it can be rebuilt on the other end
 std::unique_ptr<ServerPacket>
-PlayerEventLogs::BuildPlayerEventPacket(BasePlayerEventLogsRepository::PlayerEventLogs e)
+PlayerEventLogs::BuildPlayerEventPacket(const BasePlayerEventLogsRepository::PlayerEventLogs &e)
 {
 	EQ::Net::DynamicPacket dyn_pack;
 	dyn_pack.PutSerialize(0, e);

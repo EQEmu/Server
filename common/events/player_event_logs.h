@@ -48,7 +48,7 @@ private:
 	// batch queue is used to record events in batch
 	std::vector<PlayerEventLogsRepository::PlayerEventLogs>  m_record_batch_queue{};
 	static void FillPlayerEvent(const PlayerEvent::PlayerEvent &p, PlayerEventLogsRepository::PlayerEventLogs &n);
-	std::unique_ptr<ServerPacket> BuildPlayerEventPacket(BasePlayerEventLogsRepository::PlayerEventLogs e);
+	std::unique_ptr<ServerPacket> BuildPlayerEventPacket(const BasePlayerEventLogsRepository::PlayerEventLogs& e);
 };
 
 extern PlayerEventLogs player_event_logs;
