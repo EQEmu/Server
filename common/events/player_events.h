@@ -37,6 +37,10 @@ namespace PlayerEvent {
 		TRADE, // unimplemented
 		GIVE_ITEM, // unimplemented
 		SAY, // unimplemented
+		REZ_ACCEPTED, // unimplemented
+		DEATH, // unimplemented
+		COMBINE_FAILURE, // unimplemented
+		COMBINE_SUCCESS, // unimplemented
 		MAX // dont remove
 	};
 
@@ -72,11 +76,13 @@ namespace PlayerEvent {
 		"Trade",
 		"Given Item",
 		"Say",
+		"Rez Accepted",
+		"Death",
+		"Combine Failure",
+		"Combine Success",
 	};
 
-	/**
-	 * Generic struct used by all events
-	 */
+	// Generic struct used by all events
 	struct PlayerEvent {
 		int64       account_id;
 		int64       character_id;
