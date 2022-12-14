@@ -2785,8 +2785,6 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 	}
 #endif
 
-	LogInfo("[Attack] Should have attempted to do OOS check");
-
 	WipeHateList();
 	p_depop = true;
 
