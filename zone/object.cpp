@@ -25,9 +25,11 @@
 #include "object.h"
 
 #include "quest_parser_collection.h"
+#include "worldserver.h"
 #include "zonedb.h"
 #include "../common/zone_store.h"
 #include "../common/repositories/criteria/content_filter_criteria.h"
+#include "../common/events/player_event_logs.h"
 
 #include <iostream>
 
@@ -37,6 +39,7 @@ const char DEFAULT_OBJECT_NAME_SUFFIX[] = "_ACTORDEF";
 
 extern Zone* zone;
 extern EntityList entity_list;
+extern WorldServer worldserver;
 
 // Loading object from database
 Object::Object(uint32 id, uint32 type, uint32 icon, const Object_Struct& object, const EQ::ItemInstance* inst)
@@ -515,6 +518,14 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 					m_inst->SetRecastTimestamp(
 						database.GetItemRecastTimestamp(sender->CharacterID(), item->ID));
 				}
+			}
+
+			if (player_event_logs.IsEventEnabled(PlayerEvent::GROUNDSPAWN_PICKUP)) {
+				auto e = PlayerEvent::GroundSpawnPickupEvent{
+					.item_id = item->ID,
+					.item_name = item->Name,
+				};
+				RecordPlayerEventLogWithClient(sender, PlayerEvent::GROUNDSPAWN_PICKUP, e);
 			}
 
 			std::string export_string = fmt::format("{}", item->ID);

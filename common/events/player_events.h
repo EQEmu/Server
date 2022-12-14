@@ -28,12 +28,12 @@ namespace PlayerEvent {
 		GROUP_LEAVE, // unimplemented
 		RAID_JOIN, // unimplemented
 		RAID_LEAVE, // unimplemented
-		GROUNDSPAWN_PICKUP, // unimplemented
+		GROUNDSPAWN_PICKUP,
 		NPC_HANDIN, // unimplemented
 		SKILL_UP,
 		TASK_ACCEPT,
-		TASK_UPDATE, // unimplemented
-		TASK_COMPLETE, // unimplemented
+		TASK_UPDATE,
+		TASK_COMPLETE,
 		TRADE, // unimplemented
 		GIVE_ITEM, // unimplemented
 		SAY, // unimplemented
@@ -452,6 +452,22 @@ namespace PlayerEvent {
 				CEREAL_NVP(task_name),
 				CEREAL_NVP(activity_id),
 				CEREAL_NVP(done_count)
+			);
+		}
+	};
+
+	struct GroundSpawnPickupEvent {
+		uint32      item_id;
+		std::string item_name;
+
+
+		// cereal
+		template<class Archive>
+		void serialize(Archive &ar)
+		{
+			ar(
+				CEREAL_NVP(item_id),
+				CEREAL_NVP(item_name)
 			);
 		}
 	};
