@@ -34,6 +34,8 @@
 #include "../common/data_verification.h"
 
 #include "bot.h"
+#include "../common/events/player_event_logs.h"
+
 
 extern QueryServ* QServ;
 
@@ -727,6 +729,8 @@ void Client::SetEXP(uint64 set_exp, uint64 set_aaxp, bool isrezzexp) {
 		);
 
 		parse->EventPlayer(EVENT_AA_GAIN, this, export_string, 0);
+
+		RecordPlayerEventLog(PlayerEvent::AA_GAIN, PlayerEvent::AAGainedEvent{gained});
 
 		/* QS: PlayerLogAARate */
 		if (RuleB(QueryServ, PlayerLogAARate)){

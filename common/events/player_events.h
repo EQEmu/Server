@@ -10,10 +10,10 @@ namespace PlayerEvent {
 	enum EventType {
 		GM_COMMAND = 1,
 		ZONING,
-		AA_GAIN, // unimplemented
-		AA_PURCHASE, // unimplemented
-		FORAGE_SUCCESS, // unimplemented
-		FORAGE_FAILURE, // unimplemented
+		AA_GAIN,
+		AA_PURCHASE,
+		FORAGE_SUCCESS,
+		FORAGE_FAILURE,
 		FISH_SUCCESS, // unimplemented
 		FISH_FAILURE, // unimplemented
 		ITEM_DESTROY, // unimplemented
@@ -93,6 +93,20 @@ namespace PlayerEvent {
 		float       y;
 		float       z;
 		float       heading;
+	};
+
+	// used in events with no extra data
+	struct EmptyEvent {
+		std::string noop; // noop, gets discard upstream
+
+		// cereal
+		template<class Archive>
+		void serialize(Archive &ar)
+		{
+			ar(
+				CEREAL_NVP(noop)
+			);
+		}
 	};
 
 	// used in Trade event
@@ -185,6 +199,63 @@ namespace PlayerEvent {
 			);
 		}
 	};
+
+	struct AAGainedEvent {
+		uint32 aa_gained;
+
+		// cereal
+		template<class Archive>
+		void serialize(Archive &ar)
+		{
+			ar(CEREAL_NVP(aa_gained));
+		}
+	};
+
+	struct AAPurchasedEvent {
+		int32 aa_id;
+		int32 aa_cost;
+		int32 aa_previous_id;
+		int32 aa_next_id;
+
+		// cereal
+		template<class Archive>
+		void serialize(Archive &ar)
+		{
+			ar(
+				CEREAL_NVP(aa_id),
+				CEREAL_NVP(aa_cost),
+				CEREAL_NVP(aa_previous_id),
+				CEREAL_NVP(aa_next_id)
+			);
+		}
+	};
+
+	struct ForageSuccessEvent {
+		uint32      item_id;
+		std::string item_name;
+
+		// cereal
+		template<class Archive>
+		void serialize(Archive &ar)
+		{
+			ar(
+				CEREAL_NVP(item_id),
+				CEREAL_NVP(item_name)
+			);
+		}
+	};
 }
 
 #endif //EQEMU_PLAYER_EVENTS_H
+
+#define RecordPlayerEventLog(event_type, event_data) do {\
+    if (player_event_logs.IsEventEnabled(event_type)) {\
+        worldserver.SendPacket(\
+            player_event_logs.RecordEvent(\
+                event_type,\
+                GetPlayerEvent(),\
+                event_data\
+            ).get()\
+        );\
+    }\
+} while (0)

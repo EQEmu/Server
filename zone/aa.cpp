@@ -23,6 +23,7 @@ Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 #include "../common/races.h"
 #include "../common/spdat.h"
 #include "../common/strings.h"
+#include "../common/events/player_event_logs.h"
 #include "aa.h"
 #include "client.h"
 #include "corpse.h"
@@ -1179,6 +1180,17 @@ void Client::FinishAlternateAdvancementPurchase(AA::Rank *rank, bool ignore_cost
 
 	SendAlternateAdvancementPoints();
 	SendAlternateAdvancementStats();
+
+	if (player_event_logs.IsEventEnabled(PlayerEvent::AA_PURCHASE)) {
+		auto e = PlayerEvent::AAPurchasedEvent{
+			.aa_id = rank->id,
+			.aa_cost = cost,
+			.aa_previous_id = rank->prev_id,
+			.aa_next_id = rank->next_id
+		};
+
+		RecordPlayerEventLog(PlayerEvent::AA_PURCHASE, e);
+	}
 
 	if (rank->prev) {
 		MessageString(

@@ -32,6 +32,10 @@
 #include "zonedb.h"
 #include "../common/zone_store.h"
 #include "../common/repositories/criteria/content_filter_criteria.h"
+#include "../common/events/player_event_logs.h"
+#include "worldserver.h"
+
+extern WorldServer worldserver;
 
 #include <iostream>
 
@@ -497,6 +501,14 @@ void Client::ForageItem(bool guarantee) {
 				std::vector<std::any> args;
 				args.push_back(inst);
 				parse->EventPlayer(EVENT_FORAGE_SUCCESS, this, "", inst->GetID(), &args);
+
+				if (player_event_logs.IsEventEnabled(PlayerEvent::FORAGE_SUCCESS)) {
+					auto e = PlayerEvent::ForageSuccessEvent{
+						.item_id = inst->GetItem()->ID,
+						.item_name = inst->GetItem()->Name
+					};
+					RecordPlayerEventLog(PlayerEvent::FORAGE_SUCCESS, e);
+				}
 			}
 		}
 
@@ -508,6 +520,7 @@ void Client::ForageItem(bool guarantee) {
 	} else {
 		MessageString(Chat::Skills, FORAGE_FAILED);
 		parse->EventPlayer(EVENT_FORAGE_FAILURE, this, "", 0);
+		RecordPlayerEventLog(PlayerEvent::FORAGE_FAILURE, PlayerEvent::EmptyEvent{});
 	}
 
 	CheckIncreaseSkill(EQ::skills::SkillForage, nullptr, 5);

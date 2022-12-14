@@ -11,7 +11,7 @@ void PlayerEventLogs::Init()
 	for (int i = PlayerEvent::GM_COMMAND; i != PlayerEvent::MAX; i++) {
 		m_settings[i].id                 = i;
 		m_settings[i].event_name         = PlayerEvent::EventName[i];
-		m_settings[i].event_enabled      = 0;
+		m_settings[i].event_enabled      = 1;
 		m_settings[i].retention_days     = 0;
 		m_settings[i].discord_webhook_id = 0;
 	}
@@ -36,8 +36,9 @@ void PlayerEventLogs::Init()
 			);
 
 			auto c = PlayerEventLogSettingsRepository::NewEntity();
-			c.id         = i;
-			c.event_name = PlayerEvent::EventName[i];
+			c.id            = i;
+			c.event_name    = PlayerEvent::EventName[i];
+			c.event_enabled = m_settings[i].event_enabled;
 			PlayerEventLogSettingsRepository::InsertOne(*m_database, c);
 		}
 	}
