@@ -1093,7 +1093,7 @@ void Client::OPMemorizeSpell(const EQApplicationPacket* app)
 		return;
 	}
 
-	const auto* m = (MemorizeSpell_Struct *) app->pBuffer;
+	const auto* m = (MemorizeSpell_Struct*) app->pBuffer;
 
 	if (!IsValidSpell(m->spell_id)) {
 		Message(
