@@ -1007,8 +1007,12 @@ void Client::LoadZoneFlags() {
 	);
 	auto results = database.QueryDatabase(query);
 
-	if (!results.Success() || !results.RowCount()) {
+	if (!results.Success()) {
 		LogError("MySQL Error while trying to load zone flags for [{}]: [{}]", GetName(), results.ErrorMessage().c_str());
+		return;
+	}
+
+	if (!results.RowCount()) {
 		return;
 	}
 
@@ -1130,8 +1134,7 @@ void Client::LoadPEQZoneFlags() {
 			CharacterID()
 		)
 	);
-	if (l.empty() || !l[0].id){
-		LogError("MySQL Error while trying to load PEQZone flags for [{}].", GetName());
+	if (l.empty()) {
 		return;
 	}
 
