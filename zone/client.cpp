@@ -897,6 +897,13 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 		}
 	}
 
+	if (player_event_logs.IsEventEnabled(PlayerEvent::SAY)) {
+		auto e = PlayerEvent::SayEvent{
+			.message = message
+		};
+		RecordPlayerEventLog(PlayerEvent::SAY, e);
+	}
+
 	/* Logs Player Chat */
 	if (RuleB(QueryServ, PlayerLogChat)) {
 		auto pack = new ServerPacket(ServerOP_Speech, sizeof(Server_Speech_Struct) + strlen(message) + 1);

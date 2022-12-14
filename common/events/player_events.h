@@ -36,7 +36,7 @@ namespace PlayerEvent {
 		TASK_COMPLETE,
 		TRADE, // unimplemented
 		GIVE_ITEM, // unimplemented
-		SAY, // unimplemented
+		SAY,
 		REZ_ACCEPTED, // unimplemented
 		DEATH, // unimplemented
 		COMBINE_FAILURE, // unimplemented
@@ -442,6 +442,24 @@ namespace PlayerEvent {
 		uint32      activity_id;
 		uint32      done_count;
 
+		// cereal
+		template<class Archive>
+		void serialize(Archive &ar)
+		{
+			ar(
+				CEREAL_NVP(task_id),
+				CEREAL_NVP(task_name),
+				CEREAL_NVP(activity_id),
+				CEREAL_NVP(done_count)
+			);
+		}
+	};
+
+	struct TaskCompleteEvent {
+		uint32      task_id;
+		std::string task_name;
+		uint32      activity_id;
+		uint32      done_count;
 
 		// cereal
 		template<class Archive>
@@ -460,7 +478,6 @@ namespace PlayerEvent {
 		uint32      item_id;
 		std::string item_name;
 
-
 		// cereal
 		template<class Archive>
 		void serialize(Archive &ar)
@@ -472,22 +489,15 @@ namespace PlayerEvent {
 		}
 	};
 
-	struct TaskCompleteEvent {
-		uint32      task_id;
-		std::string task_name;
-		uint32      activity_id;
-		uint32      done_count;
-
+	struct SayEvent {
+		std::string message;
 
 		// cereal
 		template<class Archive>
 		void serialize(Archive &ar)
 		{
 			ar(
-				CEREAL_NVP(task_id),
-				CEREAL_NVP(task_name),
-				CEREAL_NVP(activity_id),
-				CEREAL_NVP(done_count)
+				CEREAL_NVP(message)
 			);
 		}
 	};
