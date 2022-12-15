@@ -111,10 +111,6 @@ if ($requested_table_to_generate ne "all") {
     @tables = ($requested_table_to_generate);
 }
 
-my @cereal_enabled_tables = (
-    "player_event_logs"
-);
-
 my $generated_base_repository_files = "";
 my $generated_repository_files      = "";
 
@@ -158,11 +154,6 @@ foreach my $table_to_generate (@tables) {
     if ($table_to_generate ~~ @table_ignore_list) {
         print "Table [$table_to_generate] is on ignore list... skipping...\n";
         $table_found_in_schema = 0;
-    }
-
-    my $cereal_enabled = 0;
-    if ($table_to_generate ~~ @cereal_enabled_tables) {
-        $cereal_enabled = 1;
     }
 
     if ($table_found_in_schema == 0 && ($requested_table_to_generate eq "" || $requested_table_to_generate eq "all")) {
@@ -219,7 +210,6 @@ foreach my $table_to_generate (@tables) {
     my $column_names_quoted        = "";
     my $select_column_names_quoted = "";
     my $table_struct_columns       = "";
-    my $cereal_columns             = "";
     my $update_one_entries         = "";
     my $all_entries                = "";
     my $index                      = 0;
@@ -268,10 +258,6 @@ foreach my $table_to_generate (@tables) {
 
         # struct
         $table_struct_columns .= sprintf("\t\t\%-${longest_data_type_length}s %s;\n", $struct_data_type, $column_name_formatted);
-
-        if ($cereal_enabled == 1) {
-            $cereal_columns .= sprintf("\t\t\t\tCEREAL_NVP(%s),\n", $column_name_formatted);
-        }
 
         # new entity
         $default_entries .= sprintf("\t\te.%-${longest_column_length}s = %s;\n", $column_name_formatted, $default_value);
@@ -414,22 +400,6 @@ foreach my $table_to_generate (@tables) {
         $database_connection = "content_db";
     }
 
-    my $additional_includes = "";
-    if ($cereal_enabled) {
-        chomp($cereal_columns);
-        # remove the last comma "," from string
-        $cereal_columns = substr($cereal_columns, 0, -1);
-
-        $table_struct_columns .= "
-		// cereal
-		template<class Archive>
-		void serialize(Archive &ar)
-		{
-			ar(\n" . $cereal_columns . "\n\t\t\t);\n\t\t}";
-
-        $additional_includes .= "#include <cereal/cereal.hpp>";
-    }
-
     chomp($column_names_quoted);
     chomp($select_column_names_quoted);
     chomp($table_struct_columns);
@@ -465,7 +435,6 @@ foreach my $table_to_generate (@tables) {
     $new_base_repository =~ s/\{\{INSERT_MANY_ENTRIES}}/$insert_many_entries/g;
     $new_base_repository =~ s/\{\{ALL_ENTRIES}}/$all_entries/g;
     $new_base_repository =~ s/\{\{GENERATED_DATE}}/$generated_date/g;
-    $new_base_repository =~ s/\{\{ADDITIONAL_INCLUDES}}/$additional_includes/g;
 
     # Extended repository
     my $new_repository = $repository_template;
