@@ -49,6 +49,7 @@ namespace PlayerEvent {
 		TRADER_SELL,
 		BANDOLIER_CREATE, // unimplemented
 		BANDOLIER_SWAP, // unimplemented
+		DISCOVER_ITEM,
 		MAX // dont remove
 	};
 
@@ -96,6 +97,7 @@ namespace PlayerEvent {
 		"Trader Sell",
 		"Bandolier Create",
 		"Bandolier Swap",
+		"Discover Item"
 	};
 
 	// Generic struct used by all events
@@ -648,6 +650,21 @@ namespace PlayerEvent {
 				CEREAL_NVP(charges),
 				CEREAL_NVP(total_cost),
 				CEREAL_NVP(player_money_balance)
+			);
+		}
+	};
+
+	struct DiscoverItemEvent {
+		uint32      item_id;
+		std::string item_name;
+
+		// cereal
+		template<class Archive>
+		void serialize(Archive &ar)
+		{
+			ar(
+				CEREAL_NVP(item_id),
+				CEREAL_NVP(item_name)
 			);
 		}
 	};
