@@ -26,6 +26,7 @@
 #include "zone.h"
 #include "questmgr.h"
 #include "../common/path_manager.h"
+#include "../common/repositories/perl_event_export_settings_repository.h"
 
 #include <stdio.h>
 
@@ -1062,43 +1063,26 @@ int QuestParserCollection::DispatchEventSpell(
 	return ret;
 }
 
-void QuestParserCollection::LoadPerlEventExportSettings(PerlEventExportSettings* perl_event_export_settings) {
-
-	LogInfo("Loading Perl Event Export Settings...");
-
-	/* Write Defaults First (All Enabled) */
-	for (int i = 0; i < _LargestEventID; i++){
-		perl_event_export_settings[i].qglobals = 1;
-		perl_event_export_settings[i].mob = 1;
-		perl_event_export_settings[i].zone = 1;
-		perl_event_export_settings[i].item = 1;
-		perl_event_export_settings[i].event_variables = 1;
+void QuestParserCollection::LoadPerlEventExportSettings(PerlEventExportSettings *s)
+{
+	for (int i = 0; i < _LargestEventID; i++) {
+		s[i].qglobals        = 1;
+		s[i].mob             = 1;
+		s[i].zone            = 1;
+		s[i].item            = 1;
+		s[i].event_variables = 1;
 	}
 
-	std::string query =
-		"SELECT "
-		"event_id, "
-		"event_description, "
-		"export_qglobals, "
-		"export_mob, "
-		"export_zone, "
-		"export_item, "
-		"export_event "
-		"FROM "
-		"perl_event_export_settings "
-		"ORDER BY event_id";
-
-	int event_id = 0;
-	auto results = database.QueryDatabase(query);
-	for (auto row = results.begin(); row != results.end(); ++row) {
-		event_id = atoi(row[0]);
-		perl_event_export_settings[event_id].qglobals = atoi(row[2]);
-		perl_event_export_settings[event_id].mob = atoi(row[3]);
-		perl_event_export_settings[event_id].zone = atoi(row[4]);
-		perl_event_export_settings[event_id].item = atoi(row[5]);
-		perl_event_export_settings[event_id].event_variables = atoi(row[6]);
+	auto settings = PerlEventExportSettingsRepository::All(database);
+	for (auto &e: settings) {
+		s[e.event_id].qglobals        = e.export_qglobals;
+		s[e.event_id].mob             = e.export_mob;
+		s[e.event_id].zone            = e.export_zone;
+		s[e.event_id].item            = e.export_item;
+		s[e.event_id].event_variables = e.export_event;
 	}
 
+	LogInfo("Loaded [{}] Perl Event Export Settings", settings.size());
 }
 
 #ifdef BOTS
