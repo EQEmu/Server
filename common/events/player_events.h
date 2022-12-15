@@ -42,7 +42,7 @@ namespace PlayerEvent {
 		COMBINE_FAILURE,
 		COMBINE_SUCCESS,
 		DROPPED_ITEM,
-		SPLIT_MONEY, // unimplemented
+		SPLIT_MONEY,
 		DZ_JOIN, // unimplemented
 		DZ_LEAVE, // unimplemented
 		TRADER_PURCHASE, // unimplemented
@@ -571,6 +571,27 @@ namespace PlayerEvent {
 				CEREAL_NVP(spell_name),
 				CEREAL_NVP(skill_id),
 				CEREAL_NVP(skill_name)
+			);
+		}
+	};
+
+	struct SplitMoneyEvent {
+		uint32 copper;
+		uint32 silver;
+		uint32 gold;
+		uint32 platinum;
+		uint64 player_money_balance;
+
+		// cereal
+		template<class Archive>
+		void serialize(Archive &ar)
+		{
+			ar(
+				CEREAL_NVP(copper),
+				CEREAL_NVP(silver),
+				CEREAL_NVP(gold),
+				CEREAL_NVP(platinum),
+				CEREAL_NVP(player_money_balance)
 			);
 		}
 	};

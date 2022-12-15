@@ -17,6 +17,7 @@
 */
 
 #include "../common/strings.h"
+#include "../common/events/player_event_logs.h"
 
 #include "client.h"
 #include "entity.h"
@@ -813,6 +814,19 @@ void Raid::SplitMoney(uint32 gid, uint32 copper, uint32 silver, uint32 gold, uin
 				platinum_split,
 				true
 			);
+
+			if (player_event_logs.IsEventEnabled(PlayerEvent::SPLIT_MONEY)) {
+				auto e = PlayerEvent::SplitMoneyEvent{
+					.copper = copper_split,
+					.silver = silver_split,
+					.gold = gold_split,
+					.platinum = platinum_split,
+					.player_money_balance = members[i].member->GetCarriedMoney(),
+				};
+
+				RecordPlayerEventLogWithClient(members[i].member, PlayerEvent::SPLIT_MONEY, e);
+			}
+
 
 			members[i].member->MessageString(
 				Chat::MoneySplit,
