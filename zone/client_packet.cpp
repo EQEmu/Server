@@ -12753,7 +12753,6 @@ void Client::Handle_OP_RezzAnswer(const EQApplicationPacket *app)
 		r->action ? "ACCEPT" : "DECLINE"
 	);
 
-
 	OPRezzAnswer(r->action, r->spellid, r->zone_id, r->instance_id, r->x, r->y, r->z);
 
 	if (r->action == ResurrectionActions::Accept) {
