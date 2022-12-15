@@ -38,7 +38,7 @@ namespace PlayerEvent {
 		GIVE_ITEM, // unimplemented
 		SAY,
 		REZ_ACCEPTED,
-		DEATH, // unimplemented
+		DEATH,
 		COMBINE_FAILURE,
 		COMBINE_SUCCESS,
 		DROPPED_ITEM,
@@ -546,6 +546,31 @@ namespace PlayerEvent {
 				CEREAL_NVP(item_id),
 				CEREAL_NVP(item_name),
 				CEREAL_NVP(slot_id)
+			);
+		}
+	};
+
+	struct DeathEvent {
+		uint32      killer_id;
+		std::string killer_name;
+		int64       damage;
+		uint32      spell_id;
+		std::string spell_name;
+		int         skill_id;
+		std::string skill_name;
+
+		// cereal
+		template<class Archive>
+		void serialize(Archive &ar)
+		{
+			ar(
+				CEREAL_NVP(killer_id),
+				CEREAL_NVP(killer_name),
+				CEREAL_NVP(damage),
+				CEREAL_NVP(spell_id),
+				CEREAL_NVP(spell_name),
+				CEREAL_NVP(skill_id),
+				CEREAL_NVP(skill_name)
 			);
 		}
 	};
