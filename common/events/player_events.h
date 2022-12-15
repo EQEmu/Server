@@ -501,6 +501,20 @@ namespace PlayerEvent {
 			);
 		}
 	};
+
+	struct ResurrectAcceptEvent {
+		std::string resurrecter_name;
+		uint32      spell_id;
+
+		// cereal
+		template<class Archive>
+		void serialize(Archive &ar)
+		{
+			ar(
+				CEREAL_NVP(resurrecter_name)
+			);
+		}
+	};
 }
 
 #endif //EQEMU_PLAYER_EVENTS_H

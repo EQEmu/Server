@@ -12745,16 +12745,26 @@ void Client::Handle_OP_RezzAnswer(const EQApplicationPacket *app)
 {
 	VERIFY_PACKET_LENGTH(OP_RezzAnswer, app, Resurrect_Struct);
 
-	const Resurrect_Struct* ra = (const Resurrect_Struct*)app->pBuffer;
+	const auto* r = (const Resurrect_Struct*) app->pBuffer;
 
-	LogSpells("[Client::Handle_OP_RezzAnswer] Received OP_RezzAnswer from client. Pendingrezzexp is [{}] action is [{}]",
-		PendingRezzXP, ra->action ? "ACCEPT" : "DECLINE");
+	LogSpells(
+		"[Client::Handle_OP_RezzAnswer] Received OP_RezzAnswer from client. Pendingrezzexp is [{}] action is [{}]",
+		PendingRezzXP,
+		r->action ? "ACCEPT" : "DECLINE"
+	);
 
 
-	OPRezzAnswer(ra->action, ra->spellid, ra->zone_id, ra->instance_id, ra->x, ra->y, ra->z);
+	OPRezzAnswer(r->action, r->spellid, r->zone_id, r->instance_id, r->x, r->y, r->z);
 
-	if (ra->action == 1)
-	{
+	if (r->action == ResurrectionActions::Accept) {
+		if (player_event_logs.IsEventEnabled(PlayerEvent::REZ_ACCEPTED)) {
+			auto e = PlayerEvent::ResurrectAcceptEvent{
+				.resurrecter_name = r->rezzer_name,
+				.spell_id = r->spellid,
+			};
+			RecordPlayerEventLog(PlayerEvent::REZ_ACCEPTED, e);
+		}
+
 		EQApplicationPacket* outapp = app->Copy();
 		// Send the OP_RezzComplete to the world server. This finds it's way to the zone that
 		// the rezzed corpse is in to mark the corpse as rezzed.
@@ -12762,7 +12772,6 @@ void Client::Handle_OP_RezzAnswer(const EQApplicationPacket *app)
 		worldserver.RezzPlayer(outapp, 0, 0, OP_RezzComplete);
 		safe_delete(outapp);
 	}
-	return;
 }
 
 void Client::Handle_OP_Sacrifice(const EQApplicationPacket *app)
