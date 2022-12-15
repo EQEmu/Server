@@ -10,39 +10,4 @@ void WorldserverCLI::TestCommand(int argc, char **argv, argh::parser &cmd, std::
 		return;
 	}
 
-	std::stringstream ss;
-	{
-		cereal::JSONOutputArchive ar(ss);
-
-		auto e = PlayerEvent::TradeEvent{};
-
-		// player a
-		auto t = PlayerEvent::TradeEntry{};
-		t.character_id   = 1;
-		t.character_name = "PlayerA";
-		t.coin           = 100;
-		t.items.push_back(PlayerEvent::TradeItem{1001, "Cloth Cap", 1});
-		t.items.push_back(PlayerEvent::TradeItem{1002, "Cloth Veil", 2});
-		t.items.push_back(PlayerEvent::TradeItem{1003, "Cloth Choker", 3});
-		e.entries.push_back(t);
-
-		// player b
-		t = PlayerEvent::TradeEntry{};
-		t.character_id   = 2;
-		t.character_name = "PlayerB";
-		t.coin           = 101;
-		t.items.push_back(PlayerEvent::TradeItem{1001, "Cloth Cap", 1});
-		t.items.push_back(PlayerEvent::TradeItem{1002, "Cloth Veil", 2});
-		t.items.push_back(PlayerEvent::TradeItem{1003, "Cloth Choker", 3});
-		e.entries.push_back(t);
-
-		e.serialize(ar);
-
-	}
-
-	std::string output = ss.str();
-	output = Strings::Replace(output, "\n", "");
-
-	std::cout << output << std::endl;
-
 }

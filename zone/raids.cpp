@@ -827,7 +827,6 @@ void Raid::SplitMoney(uint32 gid, uint32 copper, uint32 silver, uint32 gold, uin
 				RecordPlayerEventLogWithClient(members[i].member, PlayerEvent::SPLIT_MONEY, e);
 			}
 
-
 			members[i].member->MessageString(
 				Chat::MoneySplit,
 				YOU_RECEIVE_AS_SPLIT,

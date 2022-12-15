@@ -868,6 +868,8 @@ private:
 
 	uint32 with_id;
 	Mob* owner;
+public:
+	Mob *GetOwner() const;
 };
 
 struct ExtraAttackOptions {

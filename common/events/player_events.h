@@ -34,7 +34,7 @@ namespace PlayerEvent {
 		TASK_ACCEPT,
 		TASK_UPDATE,
 		TASK_COMPLETE,
-		TRADE, // unimplemented
+		TRADE,
 		GIVE_ITEM, // unimplemented
 		SAY,
 		REZ_ACCEPTED,
@@ -146,22 +146,32 @@ namespace PlayerEvent {
 	};
 
 	// used in Trade event
-	class TradeEntry {
+	class TradeItemEntry {
 	public:
-		int64                  character_id;
-		std::string            character_name;
-		int32                  coin;
-		std::vector<TradeItem> items;
+		uint16 slot;
+		uint32 item_id;
+		uint16 charges;
+		uint32 aug_1_item_id;
+		uint32 aug_2_item_id;
+		uint32 aug_3_item_id;
+		uint32 aug_4_item_id;
+		uint32 aug_5_item_id;
+		bool   in_bag;
 
 		// cereal
 		template<class Archive>
 		void serialize(Archive &ar)
 		{
 			ar(
-				CEREAL_NVP(character_id),
-				CEREAL_NVP(character_name),
-				CEREAL_NVP(coin),
-				CEREAL_NVP(items)
+				CEREAL_NVP(slot),
+				CEREAL_NVP(item_id),
+				CEREAL_NVP(charges),
+				CEREAL_NVP(aug_1_item_id),
+				CEREAL_NVP(aug_2_item_id),
+				CEREAL_NVP(aug_3_item_id),
+				CEREAL_NVP(aug_4_item_id),
+				CEREAL_NVP(aug_5_item_id),
+				CEREAL_NVP(in_bag)
 			);
 		}
 	};
@@ -169,15 +179,44 @@ namespace PlayerEvent {
 	/**
 	 * Events
 	 */
-	struct TradeEvent {
-		std::vector<TradeEntry> entries;
+	struct Money {
+		int32 platinum;
+		int32 gold;
+		int32 silver;
+		int32 copper;
 
 		// cereal
 		template<class Archive>
 		void serialize(Archive &ar)
 		{
 			ar(
-				CEREAL_NVP(entries)
+				CEREAL_NVP(platinum),
+				CEREAL_NVP(gold),
+				CEREAL_NVP(silver),
+				CEREAL_NVP(copper)
+			);
+		}
+	};
+
+	struct TradeEvent {
+		uint32                      character_1_id;
+		uint32                      character_2_id;
+		Money                       character_1_money;
+		Money                       character_2_money;
+		std::vector<TradeItemEntry> character_1_items_give;
+		std::vector<TradeItemEntry> character_2_items_give;
+
+		// cereal
+		template<class Archive>
+		void serialize(Archive &ar)
+		{
+			ar(
+				CEREAL_NVP(character_1_id),
+				CEREAL_NVP(character_2_id),
+				CEREAL_NVP(character_1_money),
+				CEREAL_NVP(character_2_money),
+				CEREAL_NVP(character_1_items_give),
+				CEREAL_NVP(character_2_items_give)
 			);
 		}
 	};

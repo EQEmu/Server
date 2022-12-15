@@ -29,6 +29,7 @@ public:
 		float       z;
 		float       heading;
 		int32_t     event_type_id;
+		std::string event_type_name;
 		std::string event_data;
 		time_t      created_at;
 
@@ -47,6 +48,7 @@ public:
 				CEREAL_NVP(z),
 				CEREAL_NVP(heading),
 				CEREAL_NVP(event_type_id),
+				CEREAL_NVP(event_type_name),
 				CEREAL_NVP(event_data),
 				CEREAL_NVP(created_at)
 			);
@@ -71,6 +73,7 @@ public:
 			"z",
 			"heading",
 			"event_type_id",
+			"event_type_name",
 			"event_data",
 			"created_at",
 		};
@@ -89,6 +92,7 @@ public:
 			"z",
 			"heading",
 			"event_type_id",
+			"event_type_name",
 			"event_data",
 			"UNIX_TIMESTAMP(created_at)",
 		};
@@ -131,18 +135,19 @@ public:
 	{
 		PlayerEventLogs e{};
 
-		e.id            = 0;
-		e.account_id    = 0;
-		e.character_id  = 0;
-		e.zone_id       = 0;
-		e.instance_id   = 0;
-		e.x             = 0;
-		e.y             = 0;
-		e.z             = 0;
-		e.heading       = 0;
-		e.event_type_id = 0;
-		e.event_data    = "";
-		e.created_at    = 0;
+		e.id              = 0;
+		e.account_id      = 0;
+		e.character_id    = 0;
+		e.zone_id         = 0;
+		e.instance_id     = 0;
+		e.x               = 0;
+		e.y               = 0;
+		e.z               = 0;
+		e.heading         = 0;
+		e.event_type_id   = 0;
+		e.event_type_name = "";
+		e.event_data      = "";
+		e.created_at      = 0;
 
 		return e;
 	}
@@ -179,18 +184,19 @@ public:
 		if (results.RowCount() == 1) {
 			PlayerEventLogs e{};
 
-			e.id            = strtoll(row[0], nullptr, 10);
-			e.account_id    = strtoll(row[1], nullptr, 10);
-			e.character_id  = strtoll(row[2], nullptr, 10);
-			e.zone_id       = static_cast<int32_t>(atoi(row[3]));
-			e.instance_id   = static_cast<int32_t>(atoi(row[4]));
-			e.x             = strtof(row[5], nullptr);
-			e.y             = strtof(row[6], nullptr);
-			e.z             = strtof(row[7], nullptr);
-			e.heading       = strtof(row[8], nullptr);
-			e.event_type_id = static_cast<int32_t>(atoi(row[9]));
-			e.event_data    = row[10] ? row[10] : "";
-			e.created_at    = strtoll(row[11] ? row[11] : "-1", nullptr, 10);
+			e.id              = strtoll(row[0], nullptr, 10);
+			e.account_id      = strtoll(row[1], nullptr, 10);
+			e.character_id    = strtoll(row[2], nullptr, 10);
+			e.zone_id         = static_cast<int32_t>(atoi(row[3]));
+			e.instance_id     = static_cast<int32_t>(atoi(row[4]));
+			e.x               = strtof(row[5], nullptr);
+			e.y               = strtof(row[6], nullptr);
+			e.z               = strtof(row[7], nullptr);
+			e.heading         = strtof(row[8], nullptr);
+			e.event_type_id   = static_cast<int32_t>(atoi(row[9]));
+			e.event_type_name = row[10] ? row[10] : "";
+			e.event_data      = row[11] ? row[11] : "";
+			e.created_at      = strtoll(row[12] ? row[12] : "-1", nullptr, 10);
 
 			return e;
 		}
@@ -233,8 +239,9 @@ public:
 		v.push_back(columns[7] + " = " + std::to_string(e.z));
 		v.push_back(columns[8] + " = " + std::to_string(e.heading));
 		v.push_back(columns[9] + " = " + std::to_string(e.event_type_id));
-		v.push_back(columns[10] + " = '" + Strings::Escape(e.event_data) + "'");
-		v.push_back(columns[11] + " = FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
+		v.push_back(columns[10] + " = '" + Strings::Escape(e.event_type_name) + "'");
+		v.push_back(columns[11] + " = '" + Strings::Escape(e.event_data) + "'");
+		v.push_back(columns[12] + " = FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -266,6 +273,7 @@ public:
 		v.push_back(std::to_string(e.z));
 		v.push_back(std::to_string(e.heading));
 		v.push_back(std::to_string(e.event_type_id));
+		v.push_back("'" + Strings::Escape(e.event_type_name) + "'");
 		v.push_back("'" + Strings::Escape(e.event_data) + "'");
 		v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
 
@@ -307,6 +315,7 @@ public:
 			v.push_back(std::to_string(e.z));
 			v.push_back(std::to_string(e.heading));
 			v.push_back(std::to_string(e.event_type_id));
+			v.push_back("'" + Strings::Escape(e.event_type_name) + "'");
 			v.push_back("'" + Strings::Escape(e.event_data) + "'");
 			v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
 
@@ -342,18 +351,19 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			PlayerEventLogs e{};
 
-			e.id            = strtoll(row[0], nullptr, 10);
-			e.account_id    = strtoll(row[1], nullptr, 10);
-			e.character_id  = strtoll(row[2], nullptr, 10);
-			e.zone_id       = static_cast<int32_t>(atoi(row[3]));
-			e.instance_id   = static_cast<int32_t>(atoi(row[4]));
-			e.x             = strtof(row[5], nullptr);
-			e.y             = strtof(row[6], nullptr);
-			e.z             = strtof(row[7], nullptr);
-			e.heading       = strtof(row[8], nullptr);
-			e.event_type_id = static_cast<int32_t>(atoi(row[9]));
-			e.event_data    = row[10] ? row[10] : "";
-			e.created_at    = strtoll(row[11] ? row[11] : "-1", nullptr, 10);
+			e.id              = strtoll(row[0], nullptr, 10);
+			e.account_id      = strtoll(row[1], nullptr, 10);
+			e.character_id    = strtoll(row[2], nullptr, 10);
+			e.zone_id         = static_cast<int32_t>(atoi(row[3]));
+			e.instance_id     = static_cast<int32_t>(atoi(row[4]));
+			e.x               = strtof(row[5], nullptr);
+			e.y               = strtof(row[6], nullptr);
+			e.z               = strtof(row[7], nullptr);
+			e.heading         = strtof(row[8], nullptr);
+			e.event_type_id   = static_cast<int32_t>(atoi(row[9]));
+			e.event_type_name = row[10] ? row[10] : "";
+			e.event_data      = row[11] ? row[11] : "";
+			e.created_at      = strtoll(row[12] ? row[12] : "-1", nullptr, 10);
 
 			all_entries.push_back(e);
 		}
@@ -378,18 +388,19 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			PlayerEventLogs e{};
 
-			e.id            = strtoll(row[0], nullptr, 10);
-			e.account_id    = strtoll(row[1], nullptr, 10);
-			e.character_id  = strtoll(row[2], nullptr, 10);
-			e.zone_id       = static_cast<int32_t>(atoi(row[3]));
-			e.instance_id   = static_cast<int32_t>(atoi(row[4]));
-			e.x             = strtof(row[5], nullptr);
-			e.y             = strtof(row[6], nullptr);
-			e.z             = strtof(row[7], nullptr);
-			e.heading       = strtof(row[8], nullptr);
-			e.event_type_id = static_cast<int32_t>(atoi(row[9]));
-			e.event_data    = row[10] ? row[10] : "";
-			e.created_at    = strtoll(row[11] ? row[11] : "-1", nullptr, 10);
+			e.id              = strtoll(row[0], nullptr, 10);
+			e.account_id      = strtoll(row[1], nullptr, 10);
+			e.character_id    = strtoll(row[2], nullptr, 10);
+			e.zone_id         = static_cast<int32_t>(atoi(row[3]));
+			e.instance_id     = static_cast<int32_t>(atoi(row[4]));
+			e.x               = strtof(row[5], nullptr);
+			e.y               = strtof(row[6], nullptr);
+			e.z               = strtof(row[7], nullptr);
+			e.heading         = strtof(row[8], nullptr);
+			e.event_type_id   = static_cast<int32_t>(atoi(row[9]));
+			e.event_type_name = row[10] ? row[10] : "";
+			e.event_data      = row[11] ? row[11] : "";
+			e.created_at      = strtoll(row[12] ? row[12] : "-1", nullptr, 10);
 
 			all_entries.push_back(e);
 		}

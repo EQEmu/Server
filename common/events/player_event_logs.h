@@ -37,6 +37,7 @@ public:
 			e.serialize(ar);
 		}
 
+		n.event_type_name = PlayerEvent::EventName[t];
 		n.event_data = Strings::Contains(ss.str(), "noop") ? "{}" : ss.str();
 		n.created_at = std::time(nullptr);
 		return BuildPlayerEventPacket(n);

@@ -2615,7 +2615,7 @@ void Client::Handle_OP_AltCurrencyPurchase(const EQApplicationPacket *app)
 				.merchant_type = tar->MerchantType,
 				.item_id = item->ID,
 				.item_name = item->Name,
-				.charges = item->MaxCharges,
+				.charges = charges,
 				.cost = cost,
 				.alternate_currency_id = alt_cur_id,
 				.player_money_balance = GetCarriedMoney(),
@@ -12760,6 +12760,7 @@ void Client::Handle_OP_RezzAnswer(const EQApplicationPacket *app)
 		if (player_event_logs.IsEventEnabled(PlayerEvent::REZ_ACCEPTED)) {
 			auto e = PlayerEvent::ResurrectAcceptEvent{
 				.resurrecter_name = r->rezzer_name,
+//				.spell_name = spells[r->spellid].name,
 				.spell_id = r->spellid,
 			};
 			RecordPlayerEventLog(PlayerEvent::REZ_ACCEPTED, e);
@@ -13362,6 +13363,23 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 	safe_delete(inst);
 	safe_delete(outapp);
 
+	if (player_event_logs.IsEventEnabled(PlayerEvent::MERCHANT_PURCHASE)) {
+		auto e = PlayerEvent::MerchantPurchaseEvent{
+			.npc_id = tmp->GetNPCTypeID(),
+			.merchant_name = tmp->GetCleanName(),
+			.merchant_type = tmp->CastToNPC()->MerchantType,
+			.item_id = item->ID,
+			.item_name = item->Name,
+			.charges = static_cast<int16>(mpo->quantity),
+			.cost = mpo->price,
+			.alternate_currency_id = 0,
+			.player_money_balance = GetCarriedMoney(),
+			.player_currency_balance = 0,
+		};
+
+		RecordPlayerEventLog(PlayerEvent::MERCHANT_PURCHASE, e);
+	}
+
 	// start QS code
 	// stacking purchases not supported at this time - entire process will need some work to catch them properly
 	if (RuleB(QueryServ, PlayerLogMerchantTransactions)) {
@@ -13443,15 +13461,12 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 			.player_money_balance = GetCarriedMoney(),
 			.player_currency_balance = 0,
 		};
-
 		RecordPlayerEventLog(PlayerEvent::MERCHANT_PURCHASE, e);
 	}
-
 	if ((RuleB(Character, EnableDiscoveredItems)))
 	{
 		if (!GetGM() && !IsDiscovered(item_id)) {
 			DiscoverItem(item_id);
-
 			if (player_event_logs.IsEventEnabled(PlayerEvent::DISCOVER_ITEM)) {
 				auto e = PlayerEvent::DiscoverItemEvent{
 					.item_id = item_id,
@@ -13559,7 +13574,7 @@ void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
 				charges,
 				true
 			)
-		) > 0) {
+			) > 0) {
 			EQ::ItemInstance *inst2 = inst->Clone();
 
 			while (true) {
@@ -14517,10 +14532,10 @@ void Client::Handle_OP_TradeAcceptClick(const EQApplicationPacket *app)
 
 				// start QS code
 				if (RuleB(QueryServ, PlayerLogTrades)) {
-					QSPlayerLogTrade_Struct event_entry;
+					PlayerLogTrade_Struct event_entry;
 					std::list<void*> event_details;
 
-					memset(&event_entry, 0, sizeof(QSPlayerLogTrade_Struct));
+					memset(&event_entry, 0, sizeof(PlayerLogTrade_Struct));
 
 					// Perform actual trade
 					FinishTrade(other, true, &event_entry, &event_details);
@@ -14530,18 +14545,18 @@ void Client::Handle_OP_TradeAcceptClick(const EQApplicationPacket *app)
 
 					auto qs_pack = new ServerPacket(
 						ServerOP_QSPlayerLogTrades,
-						sizeof(QSPlayerLogTrade_Struct) +
-						(sizeof(QSTradeItems_Struct) * event_entry._detail_count));
-					QSPlayerLogTrade_Struct* qs_buf = (QSPlayerLogTrade_Struct*)qs_pack->pBuffer;
+						sizeof(PlayerLogTrade_Struct) +
+						(sizeof(PlayerLogTradeItemsEntry_Struct) * event_entry._detail_count));
+					PlayerLogTrade_Struct* qs_buf = (PlayerLogTrade_Struct*)qs_pack->pBuffer;
 
-					memcpy(qs_buf, &event_entry, sizeof(QSPlayerLogTrade_Struct));
+					memcpy(qs_buf, &event_entry, sizeof(PlayerLogTrade_Struct));
 
 					int offset = 0;
 
 					for (auto iter = event_details.begin(); iter != event_details.end();
 					++iter, ++offset) {
-						QSTradeItems_Struct* detail = reinterpret_cast<QSTradeItems_Struct*>(*iter);
-						qs_buf->items[offset] = *detail;
+						PlayerLogTradeItemsEntry_Struct* detail = reinterpret_cast<PlayerLogTradeItemsEntry_Struct*>(*iter);
+						qs_buf->item_entries[offset] = *detail;
 						safe_delete(detail);
 					}
 

@@ -1311,10 +1311,10 @@ struct Server_Speech_Struct {
 	char	message[0];
 };
 
-struct QSTradeItems_Struct {
-	uint32 from_id;
+struct PlayerLogTradeItemsEntry_Struct {
+	uint32 from_character_id;
 	uint16 from_slot;
-	uint32 to_id;
+	uint32 to_character_id;
 	uint16 to_slot;
 	uint32 item_id;
 	uint16 charges;
@@ -1325,15 +1325,15 @@ struct QSTradeItems_Struct {
 	uint32 aug_5;
 };
 
-struct QSPlayerLogTrade_Struct {
-	uint32 char1_id;
-	MoneyUpdate_Struct	char1_money;
-	uint16 char1_count;
-	uint32 char2_id;
-	MoneyUpdate_Struct	char2_money;
-	uint16 char2_count;
-	uint16 _detail_count;
-	QSTradeItems_Struct items[0];
+struct PlayerLogTrade_Struct {
+	uint32                          character_1_id;
+	MoneyUpdate_Struct              character_1_money;
+	uint16                          character_1_item_count;
+	uint32                          character_2_id;
+	MoneyUpdate_Struct              character_2_money;
+	uint16                          character_2_item_count;
+	uint16                          _detail_count;
+	PlayerLogTradeItemsEntry_Struct item_entries[0];
 };
 
 struct QSDropItems_Struct {
