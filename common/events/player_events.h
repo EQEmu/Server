@@ -41,7 +41,7 @@ namespace PlayerEvent {
 		DEATH, // unimplemented
 		COMBINE_FAILURE,
 		COMBINE_SUCCESS,
-		DROPPED_ITEM, // unimplemented
+		DROPPED_ITEM,
 		SPLIT_MONEY, // unimplemented
 		DZ_JOIN, // unimplemented
 		DZ_LEAVE, // unimplemented
@@ -529,6 +529,23 @@ namespace PlayerEvent {
 				CEREAL_NVP(recipe_id),
 				CEREAL_NVP(recipe_name),
 				CEREAL_NVP(made_count)
+			);
+		}
+	};
+
+	struct DroppedItemEvent {
+		uint32      item_id;
+		std::string item_name;
+		int16       slot_id;
+
+		// cereal
+		template<class Archive>
+		void serialize(Archive &ar)
+		{
+			ar(
+				CEREAL_NVP(item_id),
+				CEREAL_NVP(item_name),
+				CEREAL_NVP(slot_id)
 			);
 		}
 	};
