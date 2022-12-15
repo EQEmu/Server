@@ -214,7 +214,6 @@ void Embperl::init_eval_file(void)
 			"} else {"
 			// we 'my' $filename,$mtime,$package,$sub to prevent them from changing our state up here.
 			"	eval(\"package $package; my(\\$filename,\\$mtime,\\$package,\\$sub); \\$isloaded = 1; require './$filename'; \");"
-			"	die $@ if ($@ && $@ !~ /did not return a true value/); "
 			//  " print $@ if $@;"
 /*				"local *FH;open FH, $filename or die \"open '$filename' $!\";"
 				"local($/) = undef;my $sub = <FH>;close FH;"
@@ -274,6 +273,25 @@ int Embperl::dosub(const char * subname, const std::vector<std::string> * args, 
 
 	FREETMPS;
 	LEAVE;
+
+	// not sure why we pass this as blind args, strange
+	// check for syntax errors
+	if (args && !args->empty()) {
+		const std::string &filename = args->back();
+		std::string sub = subname;
+		if (sub == "main::eval_file" && !filename.empty() && File::Exists(filename)) {
+			BenchTimer benchmark;
+			std::string syntax_error = Process::execute(
+				fmt::format("perl -c {} 2>&1", filename)
+			);
+			LogQuests("Perl eval [{}] took [{}]", filename, benchmark.elapsed());
+			syntax_error = Strings::Trim(syntax_error);
+			if (!Strings::Contains(syntax_error, "syntax OK")) {
+				syntax_error += SvPVX(ERRSV);
+				throw syntax_error;
+			}
+		}
+	}
 
 	if (error.length() > 0) {
 		std::string errmsg = "Perl runtime error: ";
