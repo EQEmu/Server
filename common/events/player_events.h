@@ -37,10 +37,10 @@ namespace PlayerEvent {
 		TRADE, // unimplemented
 		GIVE_ITEM, // unimplemented
 		SAY,
-		REZ_ACCEPTED, // unimplemented
+		REZ_ACCEPTED,
 		DEATH, // unimplemented
-		COMBINE_FAILURE, // unimplemented
-		COMBINE_SUCCESS, // unimplemented
+		COMBINE_FAILURE,
+		COMBINE_SUCCESS,
 		DROPPED_ITEM, // unimplemented
 		SPLIT_MONEY, // unimplemented
 		DZ_JOIN, // unimplemented
@@ -512,6 +512,23 @@ namespace PlayerEvent {
 		{
 			ar(
 				CEREAL_NVP(resurrecter_name)
+			);
+		}
+	};
+
+	struct CombineEvent {
+		uint32      recipe_id;
+		std::string recipe_name;
+		uint32      made_count;
+
+		// cereal
+		template<class Archive>
+		void serialize(Archive &ar)
+		{
+			ar(
+				CEREAL_NVP(recipe_id),
+				CEREAL_NVP(recipe_name),
+				CEREAL_NVP(made_count)
 			);
 		}
 	};

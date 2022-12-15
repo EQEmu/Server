@@ -17,6 +17,7 @@
 */
 
 #include "../common/global_define.h"
+#include "../common/events/player_event_logs.h"
 
 #include <stdlib.h>
 #include <list>
@@ -33,12 +34,14 @@
 #include "string_ids.h"
 #include "titles.h"
 #include "zonedb.h"
+#include "worldserver.h"
 #include "../common/repositories/char_recipe_list_repository.h"
 #include "../common/zone_store.h"
 #include "../common/repositories/tradeskill_recipe_repository.h"
 #include "../common/repositories/tradeskill_recipe_entries_repository.h"
 
 extern QueryServ* QServ;
+extern WorldServer worldserver;
 
 static const EQ::skills::SkillType TradeskillUnknown = EQ::skills::Skill1HBlunt; /* an arbitrary non-tradeskill */
 
@@ -488,8 +491,26 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 	}
 
 	if (success) {
+		if (player_event_logs.IsEventEnabled(PlayerEvent::COMBINE_SUCCESS)) {
+			auto e = PlayerEvent::CombineEvent{
+				.recipe_id = spec.recipe_id,
+				.recipe_name = spec.name,
+				.made_count = spec.madecount
+			};
+			RecordPlayerEventLogWithClient(user, PlayerEvent::COMBINE_SUCCESS, e);
+		}
+
 		parse->EventPlayer(EVENT_COMBINE_SUCCESS, user, spec.name, spec.recipe_id);
 	} else {
+		if (player_event_logs.IsEventEnabled(PlayerEvent::COMBINE_FAILURE)) {
+			auto e = PlayerEvent::CombineEvent{
+				.recipe_id = spec.recipe_id,
+				.recipe_name = spec.name,
+				.made_count = spec.madecount
+			};
+			RecordPlayerEventLogWithClient(user, PlayerEvent::COMBINE_FAILURE, e);
+		}
+
 		parse->EventPlayer(EVENT_COMBINE_FAILURE, user, spec.name, spec.recipe_id);
 	}
 }
