@@ -12014,3 +12014,138 @@ PlayerEvent::PlayerEvent Client::GetPlayerEvent()
 
 	return e;
 }
+
+void Client::PlayerTradeEventLog(Trade *t, Trade *t2)
+{
+	Client *trader       = t->GetOwner()->CastToClient();
+	Client *trader2      = t2->GetOwner()->CastToClient();
+	uint8  t_item_count  = 0;
+	uint8  t2_item_count = 0;
+
+	auto money_t  = PlayerEvent::Money{
+		.platinum = t->pp,
+		.gold = t->gp,
+		.silver = t->sp,
+		.copper = t->cp,
+	};
+	auto money_t2 = PlayerEvent::Money{
+		.platinum = t2->pp,
+		.gold = t2->gp,
+		.silver = t2->sp,
+		.copper = t2->cp,
+	};
+
+	// trader 1 item count
+	for (uint16 i = EQ::invslot::TRADE_BEGIN; i <= EQ::invslot::TRADE_END; i++) {
+		if (trader->GetInv().GetItem(i)) {
+			t_item_count++;
+		}
+	}
+
+	// trader 2 item count
+	for (uint16 i = EQ::invslot::TRADE_BEGIN; i <= EQ::invslot::TRADE_END; i++) {
+		if (trader2->GetInv().GetItem(i)) {
+			t2_item_count++;
+		}
+	}
+
+	std::vector<PlayerEvent::TradeItemEntry> t_entries = {};
+	t_entries.reserve(t_item_count);
+	if (t_item_count > 0) {
+		for (uint16 i = EQ::invslot::TRADE_BEGIN; i <= EQ::invslot::TRADE_END; i++) {
+			const EQ::ItemInstance *inst = trader->GetInv().GetItem(i);
+			if (inst) {
+				t_entries.emplace_back(
+					PlayerEvent::TradeItemEntry{
+						.slot = i,
+						.item_id = inst->GetItem()->ID,
+						.charges = static_cast<uint16>(inst->GetCharges()),
+						.aug_1_item_id = inst->GetAugmentItemID(1),
+						.aug_2_item_id = inst->GetAugmentItemID(2),
+						.aug_3_item_id = inst->GetAugmentItemID(3),
+						.aug_4_item_id = inst->GetAugmentItemID(4),
+						.aug_5_item_id = inst->GetAugmentItemID(5),
+						.in_bag = false,
+					}
+				);
+
+				if (inst->IsClassBag()) {
+					for (uint8 j = EQ::invbag::SLOT_BEGIN; j <= EQ::invbag::SLOT_END; j++) {
+						inst = trader->GetInv().GetItem(i, j);
+						if (inst) {
+							t_entries.emplace_back(
+								PlayerEvent::TradeItemEntry{
+									.slot = j,
+									.item_id = inst->GetItem()->ID,
+									.charges = static_cast<uint16>(inst->GetCharges()),
+									.aug_1_item_id = inst->GetAugmentItemID(1),
+									.aug_2_item_id = inst->GetAugmentItemID(2),
+									.aug_3_item_id = inst->GetAugmentItemID(3),
+									.aug_4_item_id = inst->GetAugmentItemID(4),
+									.aug_5_item_id = inst->GetAugmentItemID(5),
+									.in_bag = true,
+								}
+							);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	std::vector<PlayerEvent::TradeItemEntry> t2_entries = {};
+	t_entries.reserve(t2_item_count);
+	if (t2_item_count > 0) {
+		for (uint16 i = EQ::invslot::TRADE_BEGIN; i <= EQ::invslot::TRADE_END; i++) {
+			const EQ::ItemInstance *inst = trader->GetInv().GetItem(i);
+			if (inst) {
+				t2_entries.emplace_back(
+					PlayerEvent::TradeItemEntry{
+						.slot = i,
+						.item_id = inst->GetItem()->ID,
+						.charges = static_cast<uint16>(inst->GetCharges()),
+						.aug_1_item_id = inst->GetAugmentItemID(1),
+						.aug_2_item_id = inst->GetAugmentItemID(2),
+						.aug_3_item_id = inst->GetAugmentItemID(3),
+						.aug_4_item_id = inst->GetAugmentItemID(4),
+						.aug_5_item_id = inst->GetAugmentItemID(5),
+						.in_bag = false,
+					}
+				);
+
+				if (inst->IsClassBag()) {
+					for (uint8 j = EQ::invbag::SLOT_BEGIN; j <= EQ::invbag::SLOT_END; j++) {
+						inst = trader->GetInv().GetItem(i, j);
+						if (inst) {
+							t2_entries.emplace_back(
+								PlayerEvent::TradeItemEntry{
+									.slot = j,
+									.item_id = inst->GetItem()->ID,
+									.charges = static_cast<uint16>(inst->GetCharges()),
+									.aug_1_item_id = inst->GetAugmentItemID(1),
+									.aug_2_item_id = inst->GetAugmentItemID(2),
+									.aug_3_item_id = inst->GetAugmentItemID(3),
+									.aug_4_item_id = inst->GetAugmentItemID(4),
+									.aug_5_item_id = inst->GetAugmentItemID(5),
+									.in_bag = true,
+								}
+							);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	auto e = PlayerEvent::TradeEvent{
+		.character_1_id = trader->CharacterID(),
+		.character_2_id = trader2->CharacterID(),
+		.character_1_money = money_t,
+		.character_2_money = money_t2,
+		.character_1_items_give = t_entries,
+		.character_2_items_give = t2_entries
+	};
+
+	RecordPlayerEventLogWithClient(trader, PlayerEvent::TRADE, e);
+	RecordPlayerEventLogWithClient(trader2, PlayerEvent::TRADE, e);
+}
