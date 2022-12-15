@@ -226,13 +226,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 		e.to_instance_version   = target_instance_version;
 		e.to_zone_id            = target_zone_id;
 
-		worldserver.SendPacket(
-			player_event_logs.RecordEvent(
-				PlayerEvent::ZONING,
-				GetPlayerEvent(),
-				e
-			).get()
-		);
+		RecordPlayerEventLog(PlayerEvent::ZONING, e);
 	}
 
 	//handle circumvention of zone restrictions
