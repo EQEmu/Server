@@ -2,8 +2,13 @@
 
 void command_feature(Client *c, const Seperator *sep)
 {
+	// nested command aliasing
+	std::string command         = sep->arg[0] ? sep->arg[0] : "";
+	bool        is_size_alias   = sep->arg[0] && Strings::Contains(command, "#size");
+	bool        is_nested_alias = (is_size_alias);
+
 	int arguments = sep->argnum;
-	if (arguments < 2 || !sep->IsNumber(2)) {
+	if ((arguments < 2 || !sep->IsNumber(2)) && !is_nested_alias) {
 		auto feature_save_link = Saylink::Silent("#npcedit featuresave");
 
 		c->Message(Chat::White, "Usage: #feature beard [Beard] - Change your or your target's Beard");
@@ -43,7 +48,7 @@ void command_feature(Client *c, const Seperator *sep)
 	bool is_helm = !strcasecmp(sep->arg[1], "helm");
 	bool is_heritage = !strcasecmp(sep->arg[1], "heritage");
 	bool is_race = !strcasecmp(sep->arg[1], "race");
-	bool is_size = !strcasecmp(sep->arg[1], "size");
+	bool is_size = !strcasecmp(sep->arg[1], "size") || is_size_alias;
 	bool is_tattoo = !strcasecmp(sep->arg[1], "tattoo");
 	bool is_texture = !strcasecmp(sep->arg[1], "texture");
 
@@ -165,7 +170,16 @@ void command_feature(Client *c, const Seperator *sep)
 		feature_changed = "Race";
 		value_changed = race;
 	} else if (is_size) {
-		size = std::stof(sep->arg[2]);
+		// handle aliased input
+		if (is_size_alias) {
+			c->Message(Chat::White, "Usage: #feature size [Size] - Change your or your target's Size temporarily (Valid values are 0 to 255, decimal increments are allowed.)");
+			if (sep->arg[1] && Strings::IsFloat(sep->arg[1])) {
+				size = std::stof(sep->arg[1]);
+			}
+		}
+		else {
+			size = std::stof(sep->arg[2]);
+		}
 
 		if (size < 0 || size > 255) {
 			c->Message(Chat::White, "Usage: #feature size [Size] - Change your or your target's Size temporarily (Valid values are 0 to 255, decimal increments are allowed.)");
