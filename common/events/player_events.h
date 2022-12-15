@@ -200,11 +200,11 @@ namespace PlayerEvent {
 
 	struct TradeEvent {
 		uint32                      character_1_id;
-		uint32                      character_2_id;
-		Money                       character_1_money;
-		Money                       character_2_money;
-		std::vector<TradeItemEntry> character_1_items_give;
-		std::vector<TradeItemEntry> character_2_items_give;
+		uint32 character_2_id;
+		Money                       character_1_give_money;
+		Money                       character_2_give_money;
+		std::vector<TradeItemEntry> character_1_give_items;
+		std::vector<TradeItemEntry> character_2_give_items;
 
 		// cereal
 		template<class Archive>
@@ -213,10 +213,10 @@ namespace PlayerEvent {
 			ar(
 				CEREAL_NVP(character_1_id),
 				CEREAL_NVP(character_2_id),
-				CEREAL_NVP(character_1_money),
-				CEREAL_NVP(character_2_money),
-				CEREAL_NVP(character_1_items_give),
-				CEREAL_NVP(character_2_items_give)
+				CEREAL_NVP(character_1_give_money),
+				CEREAL_NVP(character_2_give_money),
+				CEREAL_NVP(character_1_give_items),
+				CEREAL_NVP(character_2_give_items)
 			);
 		}
 	};

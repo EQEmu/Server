@@ -12140,10 +12140,10 @@ void Client::PlayerTradeEventLog(Trade *t, Trade *t2)
 	auto e = PlayerEvent::TradeEvent{
 		.character_1_id = trader->CharacterID(),
 		.character_2_id = trader2->CharacterID(),
-		.character_1_money = money_t,
-		.character_2_money = money_t2,
-		.character_1_items_give = t_entries,
-		.character_2_items_give = t2_entries
+		.character_1_give_money = money_t,
+		.character_2_give_money = money_t2,
+		.character_1_give_items = t_entries,
+		.character_2_give_items = t2_entries
 	};
 
 	RecordPlayerEventLogWithClient(trader, PlayerEvent::TRADE, e);
