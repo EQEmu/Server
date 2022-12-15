@@ -832,11 +832,14 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 // Drop item from inventory to ground (generally only dropped from SLOT_CURSOR)
 void Client::DropItem(int16 slot_id, bool recurse)
 {
-	LogInventory("[{}] (char_id: [{}]) Attempting to drop item from slot [{}] on the ground",
-				 GetCleanName(), CharacterID(), slot_id);
+	LogInventory(
+		"[{}] (char_id: [{}]) Attempting to drop item from slot [{}] on the ground",
+		GetCleanName(),
+		CharacterID(),
+		slot_id
+	);
 
-	if(GetInv().CheckNoDrop(slot_id, recurse) && !CanTradeFVNoDropItem())
-	{
+	if (GetInv().CheckNoDrop(slot_id, recurse) && !CanTradeFVNoDropItem()) {
 		auto invalid_drop = m_inv.GetItem(slot_id);
 		if (!invalid_drop) {
 			LogInventory("Error in InventoryProfile::CheckNoDrop() - returned 'true' for empty slot");
@@ -866,7 +869,7 @@ void Client::DropItem(int16 slot_id, bool recurse)
 	}
 
 	// Take control of item in client inventory
-	EQ::ItemInstance *inst = m_inv.PopItem(slot_id);
+	auto* inst = m_inv.PopItem(slot_id);
 	if (inst) {
 		if (LogSys.log_settings[Logs::Inventory].is_category_enabled) {
 			LogInventory("DropItem() Processing - full item parse:");
@@ -882,16 +885,24 @@ void Client::DropItem(int16 slot_id, bool recurse)
 			}
 
 			for (auto iter1 : *inst->GetContents()) { // depth 1
-				LogInventory("-depth: 1, Item: [{}] (id: [{}]), IsDroppable: [{}]",
-							 (iter1.second->GetItem() ? iter1.second->GetItem()->Name : "null data"), iter1.second->GetID(), (iter1.second->IsDroppable(false) ? "true" : "false"));
+				LogInventory(
+					"-depth: 1, Item: [{}] (id: [{}]), IsDroppable: [{}]",
+					(iter1.second->GetItem() ? iter1.second->GetItem()->Name : "null data"),
+					iter1.second->GetID(),
+					(iter1.second->IsDroppable(false) ? "true" : "false")
+				);
 
 				if (!iter1.second->IsDroppable(false)) {
 					LogError("Non-droppable item being processed for drop by [{}]", GetCleanName());
 				}
 
 				for (auto iter2 : *iter1.second->GetContents()) { // depth 2
-					LogInventory("--depth: 2, Item: [{}] (id: [{}]), IsDroppable: [{}]",
-								 (iter2.second->GetItem() ? iter2.second->GetItem()->Name : "null data"), iter2.second->GetID(), (iter2.second->IsDroppable(false) ? "true" : "false"));
+					LogInventory(
+						"--depth: 2, Item: [{}] (id: [{}]), IsDroppable: [{}]",
+						(iter2.second->GetItem() ? iter2.second->GetItem()->Name : "null data"),
+						iter2.second->GetID(),
+						(iter2.second->IsDroppable(false) ? "true" : "false")
+					);
 
 					if (!iter2.second->IsDroppable(false)) {
 						LogError("Non-droppable item being processed for drop by [{}]", GetCleanName());
@@ -910,7 +921,7 @@ void Client::DropItem(int16 slot_id, bool recurse)
 		}
 
 		int i = parse->EventItem(EVENT_DROP_ITEM, this, inst, nullptr, "", slot_id);
-		if(i != 0) {
+		if (i != 0) {
 			LogInventory("Item drop handled by [EVENT_DROP_ITEM]");
 			safe_delete(inst);
 		}
