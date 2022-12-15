@@ -45,8 +45,8 @@ namespace PlayerEvent {
 		SPLIT_MONEY,
 		DZ_JOIN, // unimplemented
 		DZ_LEAVE, // unimplemented
-		TRADER_PURCHASE, // unimplemented
-		TRADER_SELL, // unimplemented
+		TRADER_PURCHASE,
+		TRADER_SELL,
 		BANDOLIER_CREATE, // unimplemented
 		BANDOLIER_SWAP, // unimplemented
 		MAX // dont remove
@@ -591,6 +591,62 @@ namespace PlayerEvent {
 				CEREAL_NVP(silver),
 				CEREAL_NVP(gold),
 				CEREAL_NVP(platinum),
+				CEREAL_NVP(player_money_balance)
+			);
+		}
+	};
+
+	struct TraderPurchaseEvent {
+		uint32      item_id;
+		std::string item_name;
+		uint32      trader_id;
+		std::string trader_name;
+		uint32      price;
+		uint32      charges;
+		uint32      total_cost;
+		uint64      player_money_balance;
+
+
+		// cereal
+		template<class Archive>
+		void serialize(Archive &ar)
+		{
+			ar(
+				CEREAL_NVP(item_id),
+				CEREAL_NVP(item_name),
+				CEREAL_NVP(trader_id),
+				CEREAL_NVP(trader_name),
+				CEREAL_NVP(price),
+				CEREAL_NVP(charges),
+				CEREAL_NVP(total_cost),
+				CEREAL_NVP(player_money_balance)
+			);
+		}
+	};
+
+	struct TraderSellEvent {
+		uint32      item_id;
+		std::string item_name;
+		uint32      buyer_id;
+		std::string buyer_name;
+		uint32      price;
+		uint32      charges;
+		uint32      total_cost;
+		uint64      player_money_balance;
+
+
+		// cereal
+		template<class Archive>
+		void serialize(Archive &ar)
+		{
+			ar(
+				CEREAL_NVP(item_id),
+				CEREAL_NVP(item_name),
+				CEREAL_NVP(buyer_id),
+				CEREAL_NVP(buyer_name),
+				CEREAL_NVP(price),
+				CEREAL_NVP(charges),
+				CEREAL_NVP(total_cost),
 				CEREAL_NVP(player_money_balance)
 			);
 		}

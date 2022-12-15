@@ -21,6 +21,7 @@
 #include "../common/rulesys.h"
 #include "../common/strings.h"
 #include "../common/misc_functions.h"
+#include "../common/events/player_event_logs.h"
 
 #include "client.h"
 #include "entity.h"
@@ -1714,6 +1715,37 @@ void Client::BuyTraderItem(TraderBuy_Struct* tbs, Client* Trader, const EQApplic
 	uint32 copper = TotalCost;
 
 	Trader->AddMoneyToPP(copper, silver, gold, platinum, true);
+
+
+	if (player_event_logs.IsEventEnabled(PlayerEvent::TRADER_PURCHASE)) {
+		auto e = PlayerEvent::TraderPurchaseEvent{
+			.item_id = BuyItem->GetID(),
+			.item_name = BuyItem->GetItem()->Name,
+			.trader_id = Trader->CharacterID(),
+			.trader_name = Trader->GetCleanName(),
+			.price = tbs->Price,
+			.charges = outtbs->Quantity,
+			.total_cost = (tbs->Price * outtbs->Quantity),
+			.player_money_balance = GetCarriedMoney(),
+		};
+
+		RecordPlayerEventLog(PlayerEvent::TRADER_PURCHASE, e);
+	}
+
+	if (player_event_logs.IsEventEnabled(PlayerEvent::TRADER_SELL)) {
+		auto e = PlayerEvent::TraderSellEvent{
+			.item_id = BuyItem->GetID(),
+			.item_name = BuyItem->GetItem()->Name,
+			.buyer_id = CharacterID(),
+			.buyer_name = GetCleanName(),
+			.price = tbs->Price,
+			.charges = outtbs->Quantity,
+			.total_cost = (tbs->Price * outtbs->Quantity),
+			.player_money_balance = Trader->GetCarriedMoney(),
+		};
+
+		RecordPlayerEventLogWithClient(Trader, PlayerEvent::TRADER_SELL, e);
+	}
 
 	LogTrading("Trader Received: [{}] Platinum, [{}] Gold, [{}] Silver, [{}] Copper", platinum, gold, silver, copper);
 

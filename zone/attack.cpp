@@ -2067,12 +2067,12 @@ bool Client::Death(Mob* killerMob, int64 damage, uint16 spell, EQ::skills::Skill
 
 	if (player_event_logs.IsEventEnabled(PlayerEvent::DEATH)) {
 		auto e = PlayerEvent::DeathEvent{
-			.killer_id = killerMob ? killerMob->GetID() : 0,
+			.killer_id = killerMob ? static_cast<uint32>(killerMob->GetID()) : static_cast<uint32>(0),
 			.killer_name = killerMob ? killerMob->GetCleanName() : "No Killer",
 			.damage = damage,
 			.spell_id = spell,
 			.spell_name = IsValidSpell(spell) ? spells[spell].name : "No Spell",
-			.skill_id = attack_skill,
+			.skill_id = static_cast<int>(attack_skill),
 			.skill_name = !EQ::skills::GetSkillName(attack_skill).empty() ? EQ::skills::GetSkillName(attack_skill) : "No Skill",
 		};
 
