@@ -364,7 +364,6 @@ public:
 
 	// Mob Spell Virtual Override Methods
 	virtual void SpellProcess();
-	virtual int64 GetActSpellDamage(uint16 spell_id, int64 value, Mob* target = nullptr);
 	virtual int64 GetActSpellHealing(uint16 spell_id, int64 value, Mob* target = nullptr);
 	virtual int32 GetActSpellCasttime(uint16 spell_id, int32 casttime);
 	virtual int32 GetActSpellCost(uint16 spell_id, int32 cost);
@@ -737,7 +736,7 @@ protected:
 	virtual void PetAIProcess();
 	virtual void BotMeditate(bool isSitting);
 	virtual bool CheckBotDoubleAttack(bool Triple = false);
-	virtual int32 GetBotFocusEffect(focusType bottype, uint16 spell_id, bool from_buff_tic = false);
+	int64 GetFocusEffect(focusType type, uint16 spell_id, Mob *caster = nullptr, bool from_buff_tic = false);
 	virtual int32 CalcBotFocusEffect(focusType bottype, uint16 focus_id, uint16 spell_id, bool best_focus=false);
 	virtual int32 CalcBotAAFocus(focusType type, uint32 aa_ID, uint32 points, uint16 spell_id);
 	virtual void PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client* client);

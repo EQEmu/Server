@@ -5789,48 +5789,62 @@ int32 Bot::CalcBotAAFocus(focusType type, uint32 aa_ID, uint32 points, uint16 sp
 	return (value * lvlModifier / 100);
 }
 
-int32 Bot::GetBotFocusEffect(focusType bottype, uint16 spell_id, bool from_buff_tic) {
-	if (IsBardSong(spell_id) && bottype != focusFcBaseEffects)
+int64 Bot::GetFocusEffect(focusType type, uint16 spell_id, Mob *caster, bool from_buff_tic)
+{
+	if (IsBardSong(spell_id) && type != focusFcBaseEffects && type != focusSpellDuration && type != focusReduceRecastTime) {
 		return 0;
+	}
 
-	int32 realTotal = 0;
-	int32 realTotal2 = 0;
-	int32 realTotal3 = 0;
+	int64 realTotal = 0;
+	int64 realTotal2 = 0;
+	int64 realTotal3 = 0;
+
 	bool rand_effectiveness = false;
+
 	//Improved Healing, Damage & Mana Reduction are handled differently in that some are random percentages
 	//In these cases we need to find the most powerful effect, so that each piece of gear wont get its own chance
-	if(RuleB(Spells, LiveLikeFocusEffects) && (bottype == focusManaCost || bottype == focusImprovedHeal || bottype == focusImprovedDamage || bottype == focusImprovedDamage2 || bottype == focusResistRate))
+	if (RuleB(Spells, LiveLikeFocusEffects) && CanFocusUseRandomEffectivenessByType(type)) {
 		rand_effectiveness = true;
+	}
 
-	//Check if item focus effect exists for the client.
-	if (itembonuses.FocusEffects[bottype]) {
+	//Check if item focus effect exists for the Bot.
+	if (itembonuses.FocusEffects[type]){
+
 		const EQ::ItemData* TempItem = nullptr;
 		const EQ::ItemData* UsedItem = nullptr;
-		const EQ::ItemInstance* TempInst = nullptr;
 		uint16 UsedFocusID = 0;
 		int32 Total = 0;
 		int32 focus_max = 0;
 		int32 focus_max_real = 0;
+
 		//item focus
-		// are focus effects the same as bonus? (slotAmmo-excluded)
-		for (int x = EQ::invslot::EQUIPMENT_BEGIN; x <= EQ::invslot::EQUIPMENT_END; x++) {
+		for (int x = EQ::invslot::EQUIPMENT_BEGIN; x <= EQ::invslot::EQUIPMENT_END; x++)
+		{
 			TempItem = nullptr;
-			EQ::ItemInstance* ins = GetBotItem(x);
+			EQ::ItemInstance* ins = GetBotInv().GetItem(x);
 			if (!ins)
 				continue;
-
 			TempItem = ins->GetItem();
 			if (TempItem && TempItem->Focus.Effect > 0 && TempItem->Focus.Effect != SPELL_UNKNOWN) {
-				if(rand_effectiveness) {
-					focus_max = CalcBotFocusEffect(bottype, TempItem->Focus.Effect, spell_id, true);
-					if ((focus_max > 0 && focus_max_real >= 0 && focus_max > focus_max_real) || (focus_max < 0 && focus_max < focus_max_real)) {
+				if (rand_effectiveness) {
+					focus_max = CalcFocusEffect(type, TempItem->Focus.Effect, spell_id, true);
+					if (focus_max > 0 && focus_max_real >= 0 && focus_max > focus_max_real) {
+						focus_max_real = focus_max;
+						UsedItem = TempItem;
+						UsedFocusID = TempItem->Focus.Effect;
+					} else if (focus_max < 0 && focus_max < focus_max_real) {
 						focus_max_real = focus_max;
 						UsedItem = TempItem;
 						UsedFocusID = TempItem->Focus.Effect;
 					}
-				} else {
-					Total = CalcBotFocusEffect(bottype, TempItem->Focus.Effect, spell_id);
-					if ((Total > 0 && realTotal >= 0 && Total > realTotal) || (Total < 0 && Total < realTotal)) {
+				}
+				else {
+					Total = CalcFocusEffect(type, TempItem->Focus.Effect, spell_id);
+					if (Total > 0 && realTotal >= 0 && Total > realTotal) {
+						realTotal = Total;
+						UsedItem = TempItem;
+						UsedFocusID = TempItem->Focus.Effect;
+					} else if (Total < 0 && Total < realTotal) {
 						realTotal = Total;
 						UsedItem = TempItem;
 						UsedFocusID = TempItem->Focus.Effect;
@@ -5838,22 +5852,33 @@ int32 Bot::GetBotFocusEffect(focusType bottype, uint16 spell_id, bool from_buff_
 				}
 			}
 
-			for (int y = EQ::invaug::SOCKET_BEGIN; y <= EQ::invaug::SOCKET_END; ++y) {
+			for (int y = EQ::invaug::SOCKET_BEGIN; y <= EQ::invaug::SOCKET_END; ++y)
+			{
 				EQ::ItemInstance *aug = nullptr;
 				aug = ins->GetAugment(y);
-				if(aug) {
+				if (aug)
+				{
 					const EQ::ItemData* TempItemAug = aug->GetItem();
 					if (TempItemAug && TempItemAug->Focus.Effect > 0 && TempItemAug->Focus.Effect != SPELL_UNKNOWN) {
-						if(rand_effectiveness) {
-							focus_max = CalcBotFocusEffect(bottype, TempItemAug->Focus.Effect, spell_id, true);
-							if ((focus_max > 0 && focus_max_real >= 0 && focus_max > focus_max_real) || (focus_max < 0 && focus_max < focus_max_real)) {
+						if (rand_effectiveness) {
+							focus_max = CalcFocusEffect(type, TempItemAug->Focus.Effect, spell_id, true);
+							if (focus_max > 0 && focus_max_real >= 0 && focus_max > focus_max_real) {
+								focus_max_real = focus_max;
+								UsedItem = TempItem;
+								UsedFocusID = TempItemAug->Focus.Effect;
+							} else if (focus_max < 0 && focus_max < focus_max_real) {
 								focus_max_real = focus_max;
 								UsedItem = TempItem;
 								UsedFocusID = TempItemAug->Focus.Effect;
 							}
-						} else {
-							Total = CalcBotFocusEffect(bottype, TempItemAug->Focus.Effect, spell_id);
-							if ((Total > 0 && realTotal >= 0 && Total > realTotal) || (Total < 0 && Total < realTotal)) {
+						}
+						else {
+							Total = CalcFocusEffect(type, TempItemAug->Focus.Effect, spell_id);
+							if (Total > 0 && realTotal >= 0 && Total > realTotal) {
+								realTotal = Total;
+								UsedItem = TempItem;
+								UsedFocusID = TempItemAug->Focus.Effect;
+							} else if (Total < 0 && Total < realTotal) {
 								realTotal = Total;
 								UsedItem = TempItem;
 								UsedFocusID = TempItemAug->Focus.Effect;
@@ -5864,36 +5889,48 @@ int32 Bot::GetBotFocusEffect(focusType bottype, uint16 spell_id, bool from_buff_
 			}
 		}
 
-		if(UsedItem && rand_effectiveness && focus_max_real != 0)
-			realTotal = CalcBotFocusEffect(bottype, UsedFocusID, spell_id);
+		if (UsedItem && rand_effectiveness && focus_max_real != 0) {
+			realTotal = CalcFocusEffect(type, UsedFocusID, spell_id);
+		}
 	}
 
-	//Check if spell focus effect exists for the client.
-	if (spellbonuses.FocusEffects[bottype]) {
+	//Check if spell focus effect exists for the Bot.
+	if (spellbonuses.FocusEffects[type]) {
+
 		//Spell Focus
 		int32 Total2 = 0;
 		int32 focus_max2 = 0;
 		int32 focus_max_real2 = 0;
+
 		int buff_tracker = -1;
 		int buff_slot = 0;
-		uint32 focusspellid = 0;
-		uint32 focusspell_tracker = 0;
-		uint32 buff_max = GetMaxTotalSlots();
+		int32 focusspellid = 0;
+		int32 focusspell_tracker = 0;
+		int buff_max = GetMaxTotalSlots();
 		for (buff_slot = 0; buff_slot < buff_max; buff_slot++) {
 			focusspellid = buffs[buff_slot].spellid;
 			if (focusspellid == 0 || focusspellid >= SPDAT_RECORDS)
 				continue;
 
-			if(rand_effectiveness) {
-				focus_max2 = CalcBotFocusEffect(bottype, focusspellid, spell_id, true);
-				if ((focus_max2 > 0 && focus_max_real2 >= 0 && focus_max2 > focus_max_real2) || (focus_max2 < 0 && focus_max2 < focus_max_real2)) {
+			if (rand_effectiveness) {
+				focus_max2 = CalcFocusEffect(type, focusspellid, spell_id, true, buffs[buff_slot].casterid, caster);
+				if (focus_max2 > 0 && focus_max_real2 >= 0 && focus_max2 > focus_max_real2) {
+					focus_max_real2 = focus_max2;
+					buff_tracker = buff_slot;
+					focusspell_tracker = focusspellid;
+				} else if (focus_max2 < 0 && focus_max2 < focus_max_real2) {
 					focus_max_real2 = focus_max2;
 					buff_tracker = buff_slot;
 					focusspell_tracker = focusspellid;
 				}
-			} else {
-				Total2 = CalcBotFocusEffect(bottype, focusspellid, spell_id);
-				if ((Total2 > 0 && realTotal2 >= 0 && Total2 > realTotal2) || (Total2 < 0 && Total2 < realTotal2)) {
+			}
+			else {
+				Total2 = CalcFocusEffect(type, focusspellid, spell_id, false, buffs[buff_slot].casterid, caster);
+				if (Total2 > 0 && realTotal2 >= 0 && Total2 > realTotal2) {
+					realTotal2 = Total2;
+					buff_tracker = buff_slot;
+					focusspell_tracker = focusspellid;
+				} else if (Total2 < 0 && Total2 < realTotal2) {
 					realTotal2 = Total2;
 					buff_tracker = buff_slot;
 					focusspell_tracker = focusspellid;
@@ -5901,16 +5938,21 @@ int32 Bot::GetBotFocusEffect(focusType bottype, uint16 spell_id, bool from_buff_
 			}
 		}
 
-		if(focusspell_tracker && rand_effectiveness && focus_max_real2 != 0)
-			realTotal2 = CalcBotFocusEffect(bottype, focusspell_tracker, spell_id);
+		uint16 original_caster_id = 0;
+		if (buff_tracker >= 0 && buffs[buff_tracker].casterid > 0) {
+			original_caster_id = buffs[buff_tracker].casterid;
+		}
 
+		if (focusspell_tracker && rand_effectiveness && focus_max_real2 != 0) {
+			realTotal2 = CalcFocusEffect(type, focusspell_tracker, spell_id, false, original_caster_id, caster);
+		}
 		if (!from_buff_tic && buff_tracker >= 0 && buffs[buff_tracker].hit_number > 0) {
 			CheckNumHitsRemaining(NumHit::MatchingSpells, buff_tracker);
 		}
 	}
 
 	// AA Focus
-	if (aabonuses.FocusEffects[bottype]) {
+	if (aabonuses.FocusEffects[type]) {
 		int32 Total3 = 0;
 		uint32 slots = 0;
 		uint32 aa_AA = 0;
@@ -5930,7 +5972,7 @@ int32 Bot::GetBotFocusEffect(focusType bottype, uint16 spell_id, bool from_buff_
 			if (aa_AA < 1 || aa_value < 1)
 				continue;
 
-			Total3 = CalcBotAAFocus(bottype, aa_AA, aa_value, spell_id);
+			Total3 = CalcBotAAFocus(type, aa_AA, aa_value, spell_id);
 			if (Total3 > 0 && realTotal3 >= 0 && Total3 > realTotal3) {
 				realTotal3 = Total3;
 			}
@@ -5940,13 +5982,23 @@ int32 Bot::GetBotFocusEffect(focusType bottype, uint16 spell_id, bool from_buff_
 		}
 	}
 
-	if(bottype == focusReagentCost && IsSummonPetSpell(spell_id) && GetAA(aaElementalPact))
+	//Summon Spells that require reagents are typically imbue type spells, enchant metal, sacrifice and shouldn't be affected
+	//by reagent conservation for obvious reasons.
+
+	if (type == focusReagentCost && IsSummonPetSpell(spell_id) && GetAA(aaElementalPact)) {
 		return 100;
-
-	if(bottype == focusReagentCost && (IsEffectInSpell(spell_id, SE_SummonItem) || IsSacrificeSpell(spell_id)))
+	}
+	if (type == focusReagentCost && (IsEffectInSpell(spell_id, SE_SummonItem) || IsSacrificeSpell(spell_id))) {
 		return 0;
+	}
 
-	return (realTotal + realTotal2);
+	//Non-Live like feature to allow for an additive focus bonus to be applied from foci that are placed in worn slot. (No limit checks)
+	int32 worneffect_bonus = 0;
+	if (RuleB(Spells, UseAdditiveFocusFromWornSlot)) {
+		worneffect_bonus = itembonuses.FocusEffectsWorn[type];
+	}
+
+	return realTotal + realTotal2 + realTotal3 + worneffect_bonus;
 }
 
 int32 Bot::CalcBotFocusEffect(focusType bottype, uint16 focus_id, uint16 spell_id, bool best_focus) {
@@ -6933,14 +6985,14 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 
 int32 Bot::CheckAggroAmount(uint16 spellid) {
 	int32 AggroAmount = Mob::CheckAggroAmount(spellid, nullptr);
-	int32 focusAggro = GetBotFocusEffect(focusSpellHateMod, spellid);
+	int64 focusAggro = GetFocusEffect(focusSpellHateMod, spellid);
 	AggroAmount = (AggroAmount * (100 + focusAggro) / 100);
 	return AggroAmount;
 }
 
 int32 Bot::CheckHealAggroAmount(uint16 spellid, Mob *target, uint32 heal_possible) {
 	int32 AggroAmount = Mob::CheckHealAggroAmount(spellid, target, heal_possible);
-	int32 focusAggro = GetBotFocusEffect(focusSpellHateMod, spellid);
+	int64 focusAggro = GetFocusEffect(focusSpellHateMod, spellid);
 	AggroAmount = (AggroAmount * (100 + focusAggro) / 100);
 	return AggroAmount;
 }
@@ -7209,116 +7261,11 @@ void Bot::SetAttackTimer() {
 	}
 }
 
-int64 Bot::GetActSpellDamage(uint16 spell_id, int64 value, Mob* target) {
-	if (spells[spell_id].target_type == ST_Self)
-		return value;
-
-	bool Critical = false;
-	int32 base_value = value;
-	int chance = 0;
-
-	// Need to scale HT damage differently after level 40! It no longer scales by the constant value in the spell file. It scales differently, instead of 10 more damage per level, it does 30 more damage per level. So we multiply the level minus 40 times 20 if they are over level 40.
-	if ((spell_id == SPELL_HARM_TOUCH || spell_id == SPELL_HARM_TOUCH2 || spell_id == SPELL_IMP_HARM_TOUCH ) && GetLevel() > 40)
-		value -= (GetLevel() - 40) * 20;
-
-	//This adds the extra damage from the AA Unholy Touch, 450 per level to the AA Improved Harm TOuch.
-	if (spell_id == SPELL_IMP_HARM_TOUCH) //Improved Harm Touch
-		value -= GetAA(aaUnholyTouch) * 450; //Unholy Touch
-
-	chance = RuleI(Spells, BaseCritChance); //Wizard base critical chance is 2% (Does not scale with level)
-	chance += itembonuses.CriticalSpellChance + spellbonuses.CriticalSpellChance + aabonuses.CriticalSpellChance;
-	chance += itembonuses.FrenziedDevastation + spellbonuses.FrenziedDevastation + aabonuses.FrenziedDevastation;
-
-	//Crtical Hit Calculation pathway
-	if (chance > 0 || (GetClass() == WIZARD && GetLevel() >= RuleI(Spells, WizCritLevel))) {
-
-		int32 ratio = RuleI(Spells, BaseCritRatio); //Critical modifier is applied from spell effects only. Keep at 100 for live like criticals.
-
-		//Improved Harm Touch is a guaranteed crit if you have at least one level of SCF.
-		if (spell_id == SPELL_IMP_HARM_TOUCH && (GetAA(aaSpellCastingFury) > 0) && (GetAA(aaUnholyTouch) > 0))
-			chance = 100;
-
-		if (spells[spell_id].override_crit_chance > 0 && chance > spells[spell_id].override_crit_chance)
-			chance = spells[spell_id].override_crit_chance;
-
-		if (zone->random.Roll(chance)) {
-			Critical = true;
-			ratio += itembonuses.SpellCritDmgIncrease + spellbonuses.SpellCritDmgIncrease + aabonuses.SpellCritDmgIncrease;
-			ratio += itembonuses.SpellCritDmgIncNoStack + spellbonuses.SpellCritDmgIncNoStack + aabonuses.SpellCritDmgIncNoStack;
-		}
-
-		else if (GetClass() == WIZARD || (IsMerc() && GetClass() == CASTERDPS)) {
-			if ((GetLevel() >= RuleI(Spells, WizCritLevel)) && zone->random.Roll(RuleI(Spells, WizCritChance))) {
-				//Wizard innate critical chance is calculated seperately from spell effect and is not a set ratio. (20-70 is parse confirmed)
-				ratio += zone->random.Int(20,70);
-				Critical = true;
-			}
-		}
-
-		if (GetClass() == WIZARD)
-			ratio += RuleI(Spells, WizCritRatio); //Default is zero
-
-		if (Critical) {
-
-			value = base_value*ratio/100;
-
-			value += base_value*GetBotFocusEffect(focusImprovedDamage, spell_id)/100;
-			value += base_value*GetBotFocusEffect(focusImprovedDamage2, spell_id)/100;
-
-			value += int(base_value*GetBotFocusEffect(focusFcDamagePctCrit, spell_id)/100)*ratio/100;
-			value += int(base_value*GetBotFocusEffect(focusFcAmplifyMod, spell_id) / 100)*ratio / 100;
-
-			if (target) {
-				value += int(base_value*target->GetVulnerability(this, spell_id, 0)/100)*ratio/100;
-				value -= target->GetFcDamageAmtIncoming(this, spell_id);
-			}
-
-			value -= GetBotFocusEffect(focusFcDamageAmtCrit, spell_id)*ratio/100;
-
-			value -= GetBotFocusEffect(focusFcDamageAmt, spell_id);
-			value -= GetBotFocusEffect(focusFcDamageAmt2, spell_id);
-			value -= GetBotFocusEffect(focusFcAmplifyAmt, spell_id);
-
-			if ((RuleB(Spells, IgnoreSpellDmgLvlRestriction) || spells[spell_id].classes[(GetClass() % 17) - 1] >= GetLevel() - 5) && !spells[spell_id].no_heal_damage_item_mod && itembonuses.SpellDmg)
-				value -= GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, base_value) * ratio / 100;
-
-			entity_list.MessageCloseString(
-				this, true, 100, Chat::SpellCrit,
-				OTHER_CRIT_BLAST, GetName(), itoa(-value));
-
-			return value;
-		}
-	}
-	//Non Crtical Hit Calculation pathway
-	value = base_value;
-
-	value += base_value*GetBotFocusEffect(focusImprovedDamage, spell_id)/100;
-	value += base_value*GetBotFocusEffect(focusImprovedDamage2, spell_id)/100;
-
-	value += base_value*GetBotFocusEffect(focusFcDamagePctCrit, spell_id)/100;
-	value += base_value*GetBotFocusEffect(focusFcAmplifyMod, spell_id)/100;
-
-	if (target) {
-		value += base_value*target->GetVulnerability(this, spell_id, 0)/100;
-		value -= target->GetFcDamageAmtIncoming(this, spell_id);
-	}
-
-	value -= GetBotFocusEffect(focusFcDamageAmtCrit, spell_id);
-	value -= GetBotFocusEffect(focusFcDamageAmt, spell_id);
-	value -= GetBotFocusEffect(focusFcDamageAmt2, spell_id);
-	value -= GetBotFocusEffect(focusFcAmplifyAmt, spell_id);
-
-	if ((RuleB(Spells, IgnoreSpellDmgLvlRestriction) || spells[spell_id].classes[(GetClass() % 17) - 1] >= GetLevel() - 5) && !spells[spell_id].no_heal_damage_item_mod && itembonuses.SpellDmg)
-		value -= GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, base_value);
-
-	return value;
-}
-
 int64 Bot::GetActSpellHealing(uint16 spell_id, int64 value, Mob* target) {
 	if (target == nullptr)
 		target = this;
 
-	int32 base_value = value;
+	int64 base_value = value;
 	int16 critical_chance = 0;
 	int8  critical_modifier = 1;
 
@@ -7351,8 +7298,8 @@ int64 Bot::GetActSpellHealing(uint16 spell_id, int64 value, Mob* target) {
 	if (GetClass() == CLERIC) {
 		value += int(base_value*RuleI(Spells, ClericInnateHealFocus) / 100);  //confirmed on live parsing clerics get an innate 5 pct heal focus
 	}
-	value += int(base_value*GetBotFocusEffect(focusImprovedHeal, spell_id) / 100);
-	value += int(base_value*GetBotFocusEffect(focusFcAmplifyMod, spell_id) / 100);
+	value += int(base_value*GetFocusEffect(focusImprovedHeal, spell_id) / 100);
+	value += int(base_value*GetFocusEffect(focusFcAmplifyMod, spell_id) / 100);
 
 	// Instant Heals
 	if (spells[spell_id].buff_duration < 1) {
@@ -7364,7 +7311,7 @@ int64 Bot::GetActSpellHealing(uint16 spell_id, int64 value, Mob* target) {
 		}
 		*/
 
-		value += GetBotFocusEffect(focusFcHealAmtCrit, spell_id); //SPA 396 Add before critical
+		value += GetFocusEffect(focusFcHealAmtCrit, spell_id); //SPA 396 Add before critical
 
 		//Using IgnoreSpellDmgLvlRestriction to also allow healing to scale
 		if ((RuleB(Spells, IgnoreSpellDmgLvlRestriction) || spells[spell_id].classes[(GetClass() % 17) - 1] >= GetLevel() - 5) && !spells[spell_id].no_heal_damage_item_mod && itembonuses.HealAmt) {
@@ -7380,14 +7327,9 @@ int64 Bot::GetActSpellHealing(uint16 spell_id, int64 value, Mob* target) {
 		*/
 
 		value *= critical_modifier;
-		value += GetBotFocusEffect(focusFcHealAmt, spell_id); //SPA 392 Add after critical
-		value += GetBotFocusEffect(focusFcAmplifyAmt, spell_id); //SPA 508 ? Add after critical
+		value += GetFocusEffect(focusFcHealAmt, spell_id); //SPA 392 Add after critical
+		value += GetFocusEffect(focusFcAmplifyAmt, spell_id); //SPA 508 ? Add after critical
 
-		/*
-		if (target) {
-			value += target->GetBotFocusEffect(focusFcHealAmtIncoming, spell_id, this); //SPA 394 Add after critical
-		}
-		*/
 
 		if (critical_modifier > 1) {
 			entity_list.MessageCloseString(
@@ -7422,7 +7364,7 @@ int64 Bot::GetActSpellHealing(uint16 spell_id, int64 value, Mob* target) {
 }
 
 int32 Bot::GetActSpellCasttime(uint16 spell_id, int32 casttime) {
-	int32 cast_reducer = GetBotFocusEffect(focusSpellHaste, spell_id);
+	int64 cast_reducer = GetFocusEffect(focusSpellHaste, spell_id);
 	auto min_cap = casttime / 2;
 	uint8 botlevel = GetLevel();
 	uint8 botclass = GetClass();
@@ -7558,7 +7500,7 @@ int32 Bot::GetActSpellCost(uint16 spell_id, int32 cost) {
 		}
 	}
 
-	int32 focus_redux = GetBotFocusEffect(focusManaCost, spell_id);
+	int64 focus_redux = GetFocusEffect(focusManaCost, spell_id);
 
 	if(focus_redux > 0)
 		PercentManaReduction += zone->random.Real(1, (double)focus_redux);
@@ -7585,14 +7527,15 @@ int32 Bot::GetActSpellCost(uint16 spell_id, int32 cost) {
 
 float Bot::GetActSpellRange(uint16 spell_id, float range) {
 	float extrange = 100;
-	extrange += GetBotFocusEffect(focusRange, spell_id);
+	extrange += GetFocusEffect(focusRange, spell_id);
 	return ((range * extrange) / 100);
 }
 
 int32 Bot::GetActSpellDuration(uint16 spell_id, int32 duration) {
 	int increase = 100;
-	increase += GetBotFocusEffect(focusSpellDuration, spell_id);
-	int tic_inc = 0;	tic_inc = GetBotFocusEffect(focusSpellDurByTic, spell_id);
+	increase += GetFocusEffect(focusSpellDuration, spell_id);
+	int64 tic_inc = 0;	
+	tic_inc = GetFocusEffect(focusSpellDurByTic, spell_id);
 
 	if(IsBeneficialSpell(spell_id)) {
 		switch (GetAA(aaSpellCastingReinforcement)) {
