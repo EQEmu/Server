@@ -38,7 +38,7 @@ void PlayerEventDiscordFormatter::BuildBaseFields(
 {
 	std::string guild_info;
 	if (!p.player_event.guild_name.empty()) {
-		guild_info = fmt::format(":shield: Guild [{}] ({})", p.player_event.guild_name, p.player_event.guild_id);
+		guild_info = fmt::format("\n:shield: Guild [{}] ({})", p.player_event.guild_name, p.player_event.guild_id);
 	}
 
 	BuildDiscordField(
