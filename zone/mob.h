@@ -1402,6 +1402,7 @@ public:
 	int GetAlternateAdvancementCooldownReduction(AA::Rank *rank_in);
 	void ExpendAlternateAdvancementCharge(uint32 aa_id);
 	void CalcAABonuses(StatBonuses* newbon);
+	int64 CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id);
 	void ApplyAABonuses(const AA::Rank &rank, StatBonuses* newbon);
 	bool CheckAATimer(int timer);
 
@@ -1592,7 +1593,8 @@ protected:
 	virtual
 #endif
 	int GetBaseSkillDamage(EQ::skills::SkillType skill, Mob *target = nullptr);
-	virtual int64 GetFocusEffect(focusType type, uint16 spell_id, Mob *caster = nullptr, bool from_buff_tic = false) { return 0; }
+	int64 GetFocusEffect(focusType type, uint16 spell_id, Mob *caster = nullptr, bool from_buff_tic = false);
+	virtual EQ::InventoryProfile& GetInv() { return EQ::InventoryProfile::InventoryProfile(); }
 	void CalculateNewFearpoint();
 	float FindGroundZ(float new_x, float new_y, float z_offset=0.0);
 	float FindDestGroundZ(glm::vec3 dest, float z_offset=0.0);

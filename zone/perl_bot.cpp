@@ -103,7 +103,7 @@ void Perl_Bot_RemoveBotItem(Bot* self, uint32 item_id)
 
 EQ::ItemInstance* Perl_Bot_GetAugmentAt(Bot* self, uint32 slot, uint32 aug_slot)
 {
-	EQ::ItemInstance* inst = self->GetBotInv().GetItem(slot);
+	EQ::ItemInstance* inst = self->GetInv().GetItem(slot);
 	if (inst)
 	{
 		return inst->GetAugment(aug_slot);
@@ -113,22 +113,22 @@ EQ::ItemInstance* Perl_Bot_GetAugmentAt(Bot* self, uint32 slot, uint32 aug_slot)
 
 int Perl_Bot_CountAugmentEquippedByID(Bot* self, uint32 item_id)
 {
-	return self->GetBotInv().CountAugmentEquippedByID(item_id);
+	return self->GetInv().CountAugmentEquippedByID(item_id);
 }
 
 bool Perl_Bot_HasAugmentEquippedByID(Bot* self, uint32 item_id)
 {
-	return self->GetBotInv().HasAugmentEquippedByID(item_id);
+	return self->GetInv().HasAugmentEquippedByID(item_id);
 }
 
 int Perl_Bot_CountItemEquippedByID(Bot* self, uint32 item_id)
 {
-	return self->GetBotInv().CountItemEquippedByID(item_id);
+	return self->GetInv().CountItemEquippedByID(item_id);
 }
 
 bool Perl_Bot_HasItemEquippedByID(Bot* self, uint32 item_id)
 {
-	return self->GetBotInv().HasItemEquippedByID(item_id);
+	return self->GetInv().HasItemEquippedByID(item_id);
 }
 
 int Perl_Bot_GetRawItemAC(Bot* self) // @categories Inventory and Items
@@ -288,7 +288,7 @@ int Perl_Bot_GetInstrumentMod(Bot* self, uint16 spell_id) // @categories Spells 
 
 EQ::ItemInstance* Perl_Bot_GetItemAt(Bot* self, uint32 slot) // @categories Inventory and Items
 {
-	return self->GetBotInv().GetItem(slot);
+	return self->GetInv().GetItem(slot);
 }
 
 bool Perl_Bot_IsGrouped(Bot* self) // @categories Account and Character, Group

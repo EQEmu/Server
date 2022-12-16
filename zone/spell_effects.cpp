@@ -4564,7 +4564,7 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 		CalcBonuses();
 }
 
-int64 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
+int64 Mob::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 {
 	const SPDat_Spell_Struct &spell = spells[spell_id];
 
@@ -6348,7 +6348,7 @@ uint16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 	return 0;
 }
 
-int64 Client::GetFocusEffect(focusType type, uint16 spell_id, Mob *caster, bool from_buff_tic)
+int64 Mob::GetFocusEffect(focusType type, uint16 spell_id, Mob *caster, bool from_buff_tic)
 {
 	if (IsBardSong(spell_id) && type != focusFcBaseEffects && type != focusSpellDuration && type != focusReduceRecastTime) {
 		return 0;
@@ -6448,38 +6448,40 @@ int64 Client::GetFocusEffect(focusType type, uint16 spell_id, Mob *caster, bool 
 			}
 		}
 
-		//Tribute Focus
-		for (int x = EQ::invslot::TRIBUTE_BEGIN; x <= EQ::invslot::TRIBUTE_END; ++x)
-		{
-			TempItem = nullptr;
-			EQ::ItemInstance* ins = GetInv().GetItem(x);
-			if (!ins)
-				continue;
-			TempItem = ins->GetItem();
-			if (TempItem && TempItem->Focus.Effect > 0 && TempItem->Focus.Effect != SPELL_UNKNOWN) {
-				if(rand_effectiveness) {
-					focus_max = CalcFocusEffect(type, TempItem->Focus.Effect, spell_id, true);
-					if (focus_max > 0 && focus_max_real >= 0 && focus_max > focus_max_real) {
-						focus_max_real = focus_max;
-						UsedItem = TempItem;
-						UsedFocusID = TempItem->Focus.Effect;
-					} else if (focus_max < 0 && focus_max < focus_max_real) {
-						focus_max_real = focus_max;
-						UsedItem = TempItem;
-						UsedFocusID = TempItem->Focus.Effect;
+		if (IsClient()) {
+			//Tribute Focus
+			for (int x = EQ::invslot::TRIBUTE_BEGIN; x <= EQ::invslot::TRIBUTE_END; ++x)
+			{
+				TempItem = nullptr;
+				EQ::ItemInstance* ins = GetInv().GetItem(x);
+				if (!ins)
+					continue;
+				TempItem = ins->GetItem();
+				if (TempItem && TempItem->Focus.Effect > 0 && TempItem->Focus.Effect != SPELL_UNKNOWN) {
+					if(rand_effectiveness) {
+						focus_max = CalcFocusEffect(type, TempItem->Focus.Effect, spell_id, true);
+						if (focus_max > 0 && focus_max_real >= 0 && focus_max > focus_max_real) {
+							focus_max_real = focus_max;
+							UsedItem = TempItem;
+							UsedFocusID = TempItem->Focus.Effect;
+						} else if (focus_max < 0 && focus_max < focus_max_real) {
+							focus_max_real = focus_max;
+							UsedItem = TempItem;
+							UsedFocusID = TempItem->Focus.Effect;
+						}
 					}
-				}
-				else {
-					Total = CalcFocusEffect(type, TempItem->Focus.Effect, spell_id);
-					if (Total > 0 && realTotal >= 0 && Total > realTotal) {
-						realTotal = Total;
-						UsedItem = TempItem;
-						UsedFocusID = TempItem->Focus.Effect;
-					}
-					else if (Total < 0 && Total < realTotal) {
-						realTotal = Total;
-						UsedItem = TempItem;
-						UsedFocusID = TempItem->Focus.Effect;
+					else {
+						Total = CalcFocusEffect(type, TempItem->Focus.Effect, spell_id);
+						if (Total > 0 && realTotal >= 0 && Total > realTotal) {
+							realTotal = Total;
+							UsedItem = TempItem;
+							UsedFocusID = TempItem->Focus.Effect;
+						}
+						else if (Total < 0 && Total < realTotal) {
+							realTotal = Total;
+							UsedItem = TempItem;
+							UsedFocusID = TempItem->Focus.Effect;
+						}
 					}
 				}
 			}
