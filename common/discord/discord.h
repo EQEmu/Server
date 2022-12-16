@@ -13,7 +13,6 @@ public:
 	static std::string FormatDiscordMessage(uint16 category_id, const std::string& message);
 	static void SendPlayerEventMessage(const PlayerEventLogsRepository::PlayerEventLogs& e, const std::string &webhook_url);
 	static bool ValidateWebhookUrl(const std::string &webhook_url);
-	static std::string GetFormattedMessageFromPlayerEvent(const PlayerEventLogsRepository::PlayerEventLogs &e);
 };
 
 

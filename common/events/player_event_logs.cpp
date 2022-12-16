@@ -1,6 +1,7 @@
 #include <cereal/archives/json.hpp>
 #include "player_event_logs.h"
 #include "../timer.h"
+#include "player_event_discord_formatter.h"
 
 // general initialization routine
 void PlayerEventLogs::Init()
@@ -178,19 +179,22 @@ std::string PlayerEventLogs::GetDiscordWebhookUrlFromEventType(int32_t event_typ
 	return "";
 }
 
-void PlayerEventLogs::GetStructFromEvent(const PlayerEventLogsRepository::PlayerEventLogs &e)
+std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEventLogsRepository::PlayerEventLogs &e)
 {
+	std::string payload;
+
 	switch (e.event_type_id) {
 		case PlayerEvent::SAY:
 			PlayerEvent::SayEvent n;
-			std::stringstream ss;
+			std::stringstream     ss;
 			{
 				ss << e.event_data;
 				cereal::JSONInputArchive ar(ss);
 				n.serialize(ar);
-				LogInfo("Message is [{}]", n.message);
 			}
-
+			payload = PlayerEventDiscordFormatter::FormatEventSay(e, n);
 			break;
 	}
+
+	return payload;
 }

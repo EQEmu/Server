@@ -34,6 +34,7 @@ SET(common_sources
     eqtime.cpp
     event_sub.cpp
     events/player_event_logs.cpp
+    events/player_event_discord_formatter.cpp
     expedition_lockout_timer.cpp
     extprofile.cpp
     discord/discord_manager.cpp
@@ -536,6 +537,7 @@ SET(common_headers
     eq_stream_proxy.h
     eqtime.h
     events/player_event_logs.h
+    events/player_event_discord_formatter.h
     events/player_events.h
     errmsg.h
     event_sub.h

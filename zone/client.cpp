@@ -1126,7 +1126,8 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 	case ChatChannel_Say: { /* Say */
 		if (player_event_logs.IsEventEnabled(PlayerEvent::SAY)) {
 			auto e = PlayerEvent::SayEvent{
-				.message = message
+				.message = message,
+				.target = GetTarget() ? GetTarget()->GetCleanName() : ""
 			};
 			RecordPlayerEventLog(PlayerEvent::SAY, e);
 		}

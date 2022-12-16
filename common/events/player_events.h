@@ -200,7 +200,7 @@ namespace PlayerEvent {
 
 	struct TradeEvent {
 		uint32                      character_1_id;
-		uint32 character_2_id;
+		uint32                      character_2_id;
 		Money                       character_1_give_money;
 		Money                       character_2_give_money;
 		std::vector<TradeItemEntry> character_1_give_items;
@@ -532,13 +532,15 @@ namespace PlayerEvent {
 
 	struct SayEvent {
 		std::string message;
+		std::string target;
 
 		// cereal
 		template<class Archive>
 		void serialize(Archive &ar)
 		{
 			ar(
-				CEREAL_NVP(message)
+				CEREAL_NVP(message),
+				CEREAL_NVP(target)
 			);
 		}
 	};

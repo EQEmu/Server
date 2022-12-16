@@ -47,7 +47,7 @@ public:
 	bool IsEventDiscordEnabled(int32_t event_type_id);
 	std::string GetDiscordWebhookUrlFromEventType(int32_t event_type_id);
 
-	void GetStructFromEvent(const PlayerEventLogsRepository::PlayerEventLogs &e);
+	static std::string GetDiscordPayloadFromEvent(const PlayerEventLogsRepository::PlayerEventLogs &e);
 private:
 	Database                                                 *m_database; // reference to database
 	PlayerEventLogSettingsRepository::PlayerEventLogSettings m_settings[PlayerEvent::EventType::MAX]{};

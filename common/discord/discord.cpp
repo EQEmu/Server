@@ -76,8 +76,10 @@ void Discord::SendWebhookMessage(const std::string &message, const std::string &
 	}
 }
 
-void
-Discord::SendPlayerEventMessage(const PlayerEventLogsRepository::PlayerEventLogs &e, const std::string &webhook_url)
+void Discord::SendPlayerEventMessage(
+	const PlayerEventLogsRepository::PlayerEventLogs &e,
+	const std::string &webhook_url
+)
 {
 	if (!ValidateWebhookUrl(webhook_url)) {
 		return;
@@ -98,21 +100,16 @@ Discord::SendPlayerEventMessage(const PlayerEventLogsRepository::PlayerEventLogs
 		{"Content-Type", "application/json"}
 	};
 
-	std::string message = "This is coming from player events";
-
-	std::string msg = GetFormattedMessageFromPlayerEvent(e);
-
-	// payload
-	Json::Value p;
-	p["content"] = message;
-	std::stringstream payload;
-	payload << p;
+	std::string payload = PlayerEventLogs::GetDiscordPayloadFromEvent(e);
+	if (payload.empty()) {
+		return;
+	}
 
 	bool retry       = true;
 	int  retries     = 0;
 	int  retry_timer = 1000;
 	while (retry) {
-		if (auto res = cli.Post(endpoint, payload.str(), "application/json")) {
+		if (auto res = cli.Post(endpoint, payload, "application/json")) {
 			if (res->status != 200 && res->status != 204) {
 				LogError("Code [{}] Error [{}]", res->status, res->body);
 			}
@@ -138,7 +135,7 @@ Discord::SendPlayerEventMessage(const PlayerEventLogsRepository::PlayerEventLogs
 				retry = false;
 			}
 			if (retries > MAX_RETRIES) {
-				LogDiscord("Retries exceeded for message [{}]", message);
+				LogDiscord("Retries exceeded for player event message");
 				retry = false;
 			}
 
@@ -171,16 +168,4 @@ bool Discord::ValidateWebhookUrl(const std::string &webhook_url)
 	}
 
 	return true;
-}
-
-std::string Discord::GetFormattedMessageFromPlayerEvent(const PlayerEventLogsRepository::PlayerEventLogs &e)
-{
-	auto n = PlayerEventLogsRepository::PlayerEventLogs{};
-
-	player_event_logs.GetStructFromEvent(e);
-
-
-
-
-	return std::string();
 }
