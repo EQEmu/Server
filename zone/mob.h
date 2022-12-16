@@ -1594,7 +1594,7 @@ protected:
 #endif
 	int GetBaseSkillDamage(EQ::skills::SkillType skill, Mob *target = nullptr);
 	int64 GetFocusEffect(focusType type, uint16 spell_id, Mob *caster = nullptr, bool from_buff_tic = false);
-	virtual EQ::InventoryProfile& GetInv() { return EQ::InventoryProfile::InventoryProfile(); }
+	virtual const EQ::InventoryProfile& GetInv() { return EQ::InventoryProfile(); }
 	void CalculateNewFearpoint();
 	float FindGroundZ(float new_x, float new_y, float z_offset=0.0);
 	float FindDestGroundZ(glm::vec3 dest, float z_offset=0.0);
