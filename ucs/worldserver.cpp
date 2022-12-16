@@ -27,6 +27,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "ucsconfig.h"
 #include "database.h"
 #include "../common/discord/discord_manager.h"
+#include "../common/events/player_event_logs.h"
 
 #include <iostream>
 #include <string.h>
@@ -76,6 +77,19 @@ void WorldServer::ProcessMessage(uint16 opcode, EQ::Net::Packet &p)
 	}
 	case ServerOP_ReloadLogs: {
 		LogSys.LoadLogDatabaseSettings();
+		break;
+	}
+	case ServerOP_PlayerEvent: {
+		auto n = PlayerEventLogsRepository::PlayerEventLogs{};
+		auto s = (ServerSendPlayerEvent_Struct*) pack->pBuffer;
+		EQ::Util::MemoryStreamReader ss(s->cereal_data, s->cereal_size);
+		cereal::BinaryInputArchive archive(ss);
+		archive(n);
+
+		discord_manager.QueuePlayerEventMessage(n);
+
+		LogInfo("Received event [{}]", n.event_type_id);
+
 		break;
 	}
 	case ServerOP_DiscordWebhookMessage: {

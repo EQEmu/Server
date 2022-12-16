@@ -2,6 +2,7 @@
 #include "../../common/discord/discord.h"
 #include "../../common/eqemu_logsys.h"
 #include "../../common/strings.h"
+#include "../events/player_event_logs.h"
 
 void DiscordManager::QueueWebhookMessage(uint32 webhook_id, const std::string &message)
 {
@@ -66,4 +67,12 @@ void DiscordManager::ProcessMessageQueue()
 	}
 	webhook_message_queue.clear();
 	webhook_queue_lock.unlock();
+}
+
+void DiscordManager::QueuePlayerEventMessage(const PlayerEventLogsRepository::PlayerEventLogs& e)
+{
+	auto w = player_event_logs.GetDiscordWebhookUrlFromEventType(e.event_type_id);
+	if (!w.empty()) {
+		Discord::SendPlayerEventMessage(e, w);
+	}
 }

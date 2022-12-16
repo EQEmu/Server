@@ -43,10 +43,11 @@ public:
 		return BuildPlayerEventPacket(n);
 	}
 
-	const PlayerEventLogSettingsRepository::PlayerEventLogSettings *GetSettings() const;
+	[[nodiscard]] const PlayerEventLogSettingsRepository::PlayerEventLogSettings *GetSettings() const;
 	bool IsEventDiscordEnabled(int32_t event_type_id);
-	int32_t GetDiscordWebhookIdFromEventType(int32_t event_type_id);
+	std::string GetDiscordWebhookUrlFromEventType(int32_t event_type_id);
 
+	void GetStructFromEvent(const PlayerEventLogsRepository::PlayerEventLogs &e);
 private:
 	Database                                                 *m_database; // reference to database
 	PlayerEventLogSettingsRepository::PlayerEventLogSettings m_settings[PlayerEvent::EventType::MAX]{};

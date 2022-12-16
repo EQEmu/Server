@@ -158,22 +158,39 @@ bool PlayerEventLogs::IsEventDiscordEnabled(int32_t event_type_id)
 	return false;
 }
 
-int32_t PlayerEventLogs::GetDiscordWebhookIdFromEventType(int32_t event_type_id)
+std::string PlayerEventLogs::GetDiscordWebhookUrlFromEventType(int32_t event_type_id)
 {
 	// out of bounds check
 	if (event_type_id > PlayerEvent::EventType::MAX) {
-		return 0;
+		return "";
 	}
 
 	// make sure webhook id is set
 	if (m_settings[event_type_id].discord_webhook_id == 0) {
-		return 0;
+		return "";
 	}
 
 	// ensure there is a matching webhook to begin with
 	if (!LogSys.GetDiscordWebhooks()[m_settings[event_type_id].discord_webhook_id].webhook_url.empty()) {
-		return m_settings[event_type_id].discord_webhook_id;
+		return LogSys.GetDiscordWebhooks()[m_settings[event_type_id].discord_webhook_id].webhook_url;
 	}
 
-	return 0;
+	return "";
+}
+
+void PlayerEventLogs::GetStructFromEvent(const PlayerEventLogsRepository::PlayerEventLogs &e)
+{
+	switch (e.event_type_id) {
+		case PlayerEvent::SAY:
+			PlayerEvent::SayEvent n;
+			std::stringstream ss;
+			{
+				ss << e.event_data;
+				cereal::JSONInputArchive ar(ss);
+				n.serialize(ar);
+				LogInfo("Message is [{}]", n.message);
+			}
+
+			break;
+	}
 }
