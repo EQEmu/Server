@@ -15,17 +15,20 @@ std::string PlayerEventDiscordFormatter::GetCurrentTimestamp()
 	return timestamp;
 }
 
-DiscordField PlayerEventDiscordFormatter::BuildDiscordField(
+void PlayerEventDiscordFormatter::BuildDiscordField(
+	std::vector<DiscordField> *f,
 	const std::string &name,
 	const std::string &value,
 	bool is_inline
 )
 {
-	return DiscordField{
-		.name = name,
-		.value = value,
-		._inline = is_inline,
-	};
+	f->emplace_back(
+		DiscordField{
+			.name = name,
+			.value = value,
+			._inline = is_inline,
+		}
+	);
 }
 
 void PlayerEventDiscordFormatter::BuildBaseFields(
@@ -38,15 +41,13 @@ void PlayerEventDiscordFormatter::BuildBaseFields(
 		guild_info = fmt::format(":shield: Guild [{}] ({})", p.player_event.guild_name, p.player_event.guild_id);
 	}
 
-	f->emplace_back(
-		BuildDiscordField(
-			"Character",
-			fmt::format(
-				":scales: {} ({}) {}",
-				p.player_event.character_name,
-				p.player_event.character_id,
-				guild_info
-			)
+	BuildDiscordField(
+		f, "Character",
+		fmt::format(
+			":scales: {} ({}) {}",
+			p.player_event.character_name,
+			p.player_event.character_id,
+			guild_info
 		)
 	);
 
@@ -55,16 +56,13 @@ void PlayerEventDiscordFormatter::BuildBaseFields(
 		instance_info = fmt::format("Instance ID [{}]", p.player_event.instance_id);
 	}
 
-	f->emplace_back(
-		BuildDiscordField(
-			"Zone",
-			fmt::format(
-				":map: [{}] ({}) ({}) {}",
-				p.player_event.zone_long_name,
-				p.player_event.zone_short_name,
-				p.player_event.zone_id,
-				instance_info
-			)
+	BuildDiscordField(
+		f, "Zone", fmt::format(
+			":map: [{}] ({}) ({}) {}",
+			p.player_event.zone_long_name,
+			p.player_event.zone_short_name,
+			p.player_event.zone_id,
+			instance_info
 		)
 	);
 }
@@ -94,9 +92,9 @@ std::string PlayerEventDiscordFormatter::FormatEventSay(
 {
 	std::vector<DiscordField> f = {};
 	BuildBaseFields(&f, c);
-	f.emplace_back(BuildDiscordField("Message", e.message));
+	BuildDiscordField(&f, "Message", e.message);
 	if (!e.target.empty()) {
-		f.emplace_back(BuildDiscordField("Target", e.target));
+		BuildDiscordField(&f, "Target", e.target);
 	}
 
 	std::vector<DiscordEmbed> embeds = {};
@@ -121,7 +119,35 @@ std::string PlayerEventDiscordFormatter::FormatWithNodata(const PlayerEvent::Pla
 	BuildBaseFields(&f, c);
 	std::vector<DiscordEmbed> embeds = {};
 	BuildBaseEmbed(&embeds, f, c);
-	DiscordEmbedRoot root = DiscordEmbedRoot{
+	DiscordEmbedRoot  root = DiscordEmbedRoot{
+		.embeds = embeds
+	};
+	std::stringstream ss;
+	{
+		cereal::JSONOutputArchive ar(ss);
+		root.serialize(ar);
+	}
+
+	return ss.str();
+}
+std::string PlayerEventDiscordFormatter::FormatMerchantPurchaseEvent(
+	const PlayerEvent::PlayerEventContainer &c,
+	const PlayerEvent::MerchantPurchaseEvent &e
+)
+{
+	std::vector<DiscordField> f = {};
+	BuildBaseFields(&f, c);
+	BuildDiscordField(&f, "Merchant", fmt::format("{} ({}) NPC ID ({})", e.merchant_name, e.merchant_type, e.npc_id));
+	BuildDiscordField(&f, "Item", fmt::format("{} ({}) x({})", e.item_name, e.item_id, e.charges));
+	BuildDiscordField(&f, "Cost", fmt::format(":moneybag: {}", Strings::Money((e.cost / 1000), (e.cost / 100) % 10, (e.cost / 10) % 10, e.cost % 10)));
+	BuildDiscordField(
+		&f,
+		"Player Balance",
+		fmt::format(":moneybag: [{}] \n:gem: Currency [{}]", Strings::Commify(std::to_string(e.player_money_balance)), e.player_currency_balance)
+	);
+	std::vector<DiscordEmbed> embeds = {};
+	BuildBaseEmbed(&embeds, f, c);
+	DiscordEmbedRoot  root = DiscordEmbedRoot{
 		.embeds = embeds
 	};
 	std::stringstream ss;

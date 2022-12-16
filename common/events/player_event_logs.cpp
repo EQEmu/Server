@@ -200,6 +200,18 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 			payload = PlayerEventDiscordFormatter::FormatWithNodata(e);
 			break;
 		}
+		case PlayerEvent::MERCHANT_PURCHASE: {
+			PlayerEvent::MerchantPurchaseEvent n;
+			std::stringstream     ss;
+			{
+				ss << e.player_event_log.event_data;
+				cereal::JSONInputArchive ar(ss);
+				n.serialize(ar);
+			}
+
+			payload = PlayerEventDiscordFormatter::FormatMerchantPurchaseEvent(e, n);
+			break;
+		}
 	}
 
 	return payload;

@@ -59,14 +59,24 @@ class PlayerEventDiscordFormatter {
 public:
 	static std::string GetCurrentTimestamp();
 	static std::string FormatEventSay(const PlayerEvent::PlayerEventContainer &c, const PlayerEvent::SayEvent &e);
-	static DiscordField BuildDiscordField(const std::string& name, const std::string &value, bool is_inline = true);
-	static void BuildBaseFields(std::vector<DiscordField> *f, const PlayerEvent::PlayerEventContainer& p);
+	static void BuildDiscordField(
+		std::vector<DiscordField> *f,
+		const std::string &name,
+		const std::string &value,
+		bool is_inline = true
+	);
+	static void BuildBaseFields(std::vector<DiscordField> *f, const PlayerEvent::PlayerEventContainer &p);
 	static void BuildBaseEmbed(
 		std::vector<DiscordEmbed> *e,
 		const std::vector<DiscordField> &f,
-		const PlayerEvent::PlayerEventContainer c
+		PlayerEvent::PlayerEventContainer c
 	);
 	static std::string FormatWithNodata(const PlayerEvent::PlayerEventContainer &c);
+	static std::string
+	FormatMerchantPurchaseEvent(
+		const PlayerEvent::PlayerEventContainer &c,
+		const PlayerEvent::MerchantPurchaseEvent &e
+	);
 };
 
 
