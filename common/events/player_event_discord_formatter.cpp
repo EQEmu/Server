@@ -130,9 +130,39 @@ std::string PlayerEventDiscordFormatter::FormatWithNodata(const PlayerEvent::Pla
 
 	return ss.str();
 }
+
 std::string PlayerEventDiscordFormatter::FormatMerchantPurchaseEvent(
 	const PlayerEvent::PlayerEventContainer &c,
 	const PlayerEvent::MerchantPurchaseEvent &e
+)
+{
+	std::vector<DiscordField> f = {};
+	BuildBaseFields(&f, c);
+	BuildDiscordField(&f, "Merchant", fmt::format("{} ({}) NPC ID ({})", e.merchant_name, e.merchant_type, e.npc_id));
+	BuildDiscordField(&f, "Item", fmt::format("{} ({}) x({})", e.item_name, e.item_id, e.charges));
+	BuildDiscordField(&f, "Cost", fmt::format(":moneybag: {}", Strings::Money((e.cost / 1000), (e.cost / 100) % 10, (e.cost / 10) % 10, e.cost % 10)));
+	BuildDiscordField(
+		&f,
+		"Player Balance",
+		fmt::format(":moneybag: [{}] \n:gem: Currency [{}]", Strings::Commify(std::to_string(e.player_money_balance)), e.player_currency_balance)
+	);
+	std::vector<DiscordEmbed> embeds = {};
+	BuildBaseEmbed(&embeds, f, c);
+	DiscordEmbedRoot  root = DiscordEmbedRoot{
+		.embeds = embeds
+	};
+	std::stringstream ss;
+	{
+		cereal::JSONOutputArchive ar(ss);
+		root.serialize(ar);
+	}
+
+	return ss.str();
+}
+
+std::string PlayerEventDiscordFormatter::FormatMerchantSellEvent(
+	const PlayerEvent::PlayerEventContainer &c,
+	const PlayerEvent::MerchantSellEvent &e
 )
 {
 	std::vector<DiscordField> f = {};

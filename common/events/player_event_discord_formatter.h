@@ -72,10 +72,13 @@ public:
 		PlayerEvent::PlayerEventContainer c
 	);
 	static std::string FormatWithNodata(const PlayerEvent::PlayerEventContainer &c);
-	static std::string
-	FormatMerchantPurchaseEvent(
+	static std::string FormatMerchantPurchaseEvent(
 		const PlayerEvent::PlayerEventContainer &c,
 		const PlayerEvent::MerchantPurchaseEvent &e
+	);
+	static std::string FormatMerchantSellEvent(
+		const PlayerEvent::PlayerEventContainer &c,
+		const PlayerEvent::MerchantSellEvent &e
 	);
 };
 
