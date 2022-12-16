@@ -207,22 +207,22 @@ void Lua_Bot::SetSpellDurationGroup(int spell_id, int duration, bool allow_pets)
 
 int Lua_Bot::CountAugmentEquippedByID(uint32 item_id) {
 	Lua_Safe_Call_Int();
-	return self->GetBotInv().CountAugmentEquippedByID(item_id);
+	return self->GetInv().CountAugmentEquippedByID(item_id);
 }
 
 bool Lua_Bot::HasAugmentEquippedByID(uint32 item_id) {
 	Lua_Safe_Call_Bool();
-	return self->GetBotInv().HasAugmentEquippedByID(item_id);
+	return self->GetInv().HasAugmentEquippedByID(item_id);
 }
 
 int Lua_Bot::CountItemEquippedByID(uint32 item_id) {
 	Lua_Safe_Call_Int();
-	return self->GetBotInv().CountItemEquippedByID(item_id);
+	return self->GetInv().CountItemEquippedByID(item_id);
 }
 
 bool Lua_Bot::HasItemEquippedByID(uint32 item_id) {
 	Lua_Safe_Call_Bool();
-	return self->GetBotInv().HasItemEquippedByID(item_id);
+	return self->GetInv().HasItemEquippedByID(item_id);
 }
 
 void Lua_Bot::Escape() {

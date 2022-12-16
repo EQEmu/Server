@@ -4213,22 +4213,26 @@ int EQ::InventoryProfile::GetItemStatValue(uint32 item_id, const char* identifie
 // Returns a slot's item ID (returns INVALID_ID if not found)
 int32 Bot::GetItemIDAt(int16 slot_id) {
 	if (slot_id <= EQ::invslot::POSSESSIONS_END && slot_id >= EQ::invslot::POSSESSIONS_BEGIN) {
-		if ((((uint64)1 << slot_id) & GetBotInv().GetLookup()->PossessionsBitmask) == 0)
+		if ((((uint64)1 << slot_id) & GetInv().GetLookup()->PossessionsBitmask) == 0) {
 			return INVALID_ID;
+		}
 	}
 	else if (slot_id <= EQ::invbag::GENERAL_BAGS_END && slot_id >= EQ::invbag::GENERAL_BAGS_BEGIN) {
 		auto temp_slot = EQ::invslot::GENERAL_BEGIN + ((slot_id - EQ::invbag::GENERAL_BAGS_BEGIN) / EQ::invbag::SLOT_COUNT);
-		if ((((uint64)1 << temp_slot) & GetBotInv().GetLookup()->PossessionsBitmask) == 0)
+		if ((((uint64)1 << temp_slot) & GetInv().GetLookup()->PossessionsBitmask) == 0) {
 			return INVALID_ID;
+		}
 	}
 	else if (slot_id <= EQ::invslot::BANK_END && slot_id >= EQ::invslot::BANK_BEGIN) {
-		if ((slot_id - EQ::invslot::BANK_BEGIN) >= GetBotInv().GetLookup()->InventoryTypeSize.Bank)
+		if ((slot_id - EQ::invslot::BANK_BEGIN) >= GetInv().GetLookup()->InventoryTypeSize.Bank) {
 			return INVALID_ID;
+		}
 	}
 	else if (slot_id <= EQ::invbag::BANK_BAGS_END && slot_id >= EQ::invbag::BANK_BAGS_BEGIN) {
 		auto temp_slot = (slot_id - EQ::invbag::BANK_BAGS_BEGIN) / EQ::invbag::SLOT_COUNT;
-		if (temp_slot >= GetBotInv().GetLookup()->InventoryTypeSize.Bank)
+		if (temp_slot >= GetInv().GetLookup()->InventoryTypeSize.Bank) {
 			return INVALID_ID;
+		}
 	}
 
 	const EQ::ItemInstance* inst = m_inv[slot_id];
@@ -4243,22 +4247,26 @@ int32 Bot::GetItemIDAt(int16 slot_id) {
 // Pass in the slot ID of the item and which augslot you want to check (0-5)
 int32 Bot::GetAugmentIDAt(int16 slot_id, uint8 augslot) {
 	if (slot_id <= EQ::invslot::POSSESSIONS_END && slot_id >= EQ::invslot::POSSESSIONS_BEGIN) {
-		if ((((uint64)1 << slot_id) & GetBotInv().GetLookup()->PossessionsBitmask) == 0)
+		if ((((uint64)1 << slot_id) & GetInv().GetLookup()->PossessionsBitmask) == 0) {
 			return INVALID_ID;
+		}
 	}
 	else if (slot_id <= EQ::invbag::GENERAL_BAGS_END && slot_id >= EQ::invbag::GENERAL_BAGS_BEGIN) {
 		auto temp_slot = EQ::invslot::GENERAL_BEGIN + ((slot_id - EQ::invbag::GENERAL_BAGS_BEGIN) / EQ::invbag::SLOT_COUNT);
-		if ((((uint64)1 << temp_slot) & GetBotInv().GetLookup()->PossessionsBitmask) == 0)
+		if ((((uint64)1 << temp_slot) & GetInv().GetLookup()->PossessionsBitmask) == 0) {
 			return INVALID_ID;
+		}
 	}
 	else if (slot_id <= EQ::invslot::BANK_END && slot_id >= EQ::invslot::BANK_BEGIN) {
-		if ((slot_id - EQ::invslot::BANK_BEGIN) >= GetBotInv().GetLookup()->InventoryTypeSize.Bank)
+		if ((slot_id - EQ::invslot::BANK_BEGIN) >= GetInv().GetLookup()->InventoryTypeSize.Bank) {
 			return INVALID_ID;
+		}
 	}
 	else if (slot_id <= EQ::invbag::BANK_BAGS_END && slot_id >= EQ::invbag::BANK_BAGS_BEGIN) {
 		auto temp_slot = (slot_id - EQ::invbag::BANK_BAGS_BEGIN) / EQ::invbag::SLOT_COUNT;
-		if (temp_slot >= GetBotInv().GetLookup()->InventoryTypeSize.Bank)
+		if (temp_slot >= GetInv().GetLookup()->InventoryTypeSize.Bank) {
 			return INVALID_ID;
+		}
 	}
 
 	const EQ::ItemInstance* inst = m_inv[slot_id];

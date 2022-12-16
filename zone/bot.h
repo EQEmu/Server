@@ -364,7 +364,6 @@ public:
 
 	// Mob Spell Virtual Override Methods
 	virtual void SpellProcess();
-	virtual int64 GetActSpellDamage(uint16 spell_id, int64 value, Mob* target = nullptr);
 	virtual int64 GetActSpellHealing(uint16 spell_id, int64 value, Mob* target = nullptr);
 	virtual int32 GetActSpellCasttime(uint16 spell_id, int32 casttime);
 	virtual int32 GetActSpellCost(uint16 spell_id, int32 cost);
@@ -389,7 +388,7 @@ public:
 	void EquipBot(std::string* error_message);
 	bool CheckLoreConflict(const EQ::ItemData* item);
 	virtual void UpdateEquipmentLight() { m_Light.Type[EQ::lightsource::LightEquipment] = m_inv.FindBrightestLightType(); m_Light.Level[EQ::lightsource::LightEquipment] = EQ::lightsource::TypeToLevel(m_Light.Type[EQ::lightsource::LightEquipment]); }
-	inline EQ::InventoryProfile& GetBotInv() { return m_inv; }
+	inline EQ::InventoryProfile& GetInv() { return m_inv; }
 
 	// Static Class Methods
 	//static void DestroyBotRaidObjects(Client* client);	// Can be removed after bot raids are dumped
@@ -737,9 +736,6 @@ protected:
 	virtual void PetAIProcess();
 	virtual void BotMeditate(bool isSitting);
 	virtual bool CheckBotDoubleAttack(bool Triple = false);
-	virtual int32 GetBotFocusEffect(focusType bottype, uint16 spell_id, bool from_buff_tic = false);
-	virtual int32 CalcBotFocusEffect(focusType bottype, uint16 focus_id, uint16 spell_id, bool best_focus=false);
-	virtual int32 CalcBotAAFocus(focusType type, uint32 aa_ID, uint32 points, uint16 spell_id);
 	virtual void PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client* client);
 	virtual bool AIDoSpellCast(uint8 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgainBefore = 0);
 
