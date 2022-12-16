@@ -38,16 +38,21 @@ public:
 		}
 
 		n.event_type_name = PlayerEvent::EventName[t];
-		n.event_data = Strings::Contains(ss.str(), "noop") ? "{}" : ss.str();
-		n.created_at = std::time(nullptr);
+		n.event_data      = Strings::Contains(ss.str(), "noop") ? "{}" : ss.str();
+		n.created_at      = std::time(nullptr);
 		return BuildPlayerEventPacket(n);
 	}
+
+	const PlayerEventLogSettingsRepository::PlayerEventLogSettings *GetSettings() const;
+	bool IsEventDiscordEnabled(int32_t event_type_id);
+	int32_t GetDiscordWebhookIdFromEventType(int32_t event_type_id);
 
 private:
 	Database                                                 *m_database; // reference to database
 	PlayerEventLogSettingsRepository::PlayerEventLogSettings m_settings[PlayerEvent::EventType::MAX]{};
+
 	// batch queue is used to record events in batch
-	std::vector<PlayerEventLogsRepository::PlayerEventLogs>  m_record_batch_queue{};
+	std::vector<PlayerEventLogsRepository::PlayerEventLogs> m_record_batch_queue{};
 	static void FillPlayerEvent(const PlayerEvent::PlayerEvent &p, PlayerEventLogsRepository::PlayerEventLogs &n);
 	static std::unique_ptr<ServerPacket>
 	BuildPlayerEventPacket(const BasePlayerEventLogsRepository::PlayerEventLogs &e);

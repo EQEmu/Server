@@ -132,3 +132,48 @@ PlayerEventLogs::BuildPlayerEventPacket(const BasePlayerEventLogsRepository::Pla
 
 	return pack;
 }
+
+const PlayerEventLogSettingsRepository::PlayerEventLogSettings *PlayerEventLogs::GetSettings() const
+{
+	return m_settings;
+}
+
+bool PlayerEventLogs::IsEventDiscordEnabled(int32_t event_type_id)
+{
+	// out of bounds check
+	if (event_type_id > PlayerEvent::EventType::MAX) {
+		return false;
+	}
+
+	// make sure webhook id is set
+	if (m_settings[event_type_id].discord_webhook_id == 0) {
+		return false;
+	}
+
+	// ensure there is a matching webhook to begin with
+	if (!LogSys.GetDiscordWebhooks()[m_settings[event_type_id].discord_webhook_id].webhook_url.empty()) {
+		return true;
+	}
+
+	return false;
+}
+
+int32_t PlayerEventLogs::GetDiscordWebhookIdFromEventType(int32_t event_type_id)
+{
+	// out of bounds check
+	if (event_type_id > PlayerEvent::EventType::MAX) {
+		return 0;
+	}
+
+	// make sure webhook id is set
+	if (m_settings[event_type_id].discord_webhook_id == 0) {
+		return 0;
+	}
+
+	// ensure there is a matching webhook to begin with
+	if (!LogSys.GetDiscordWebhooks()[m_settings[event_type_id].discord_webhook_id].webhook_url.empty()) {
+		return m_settings[event_type_id].discord_webhook_id;
+	}
+
+	return 0;
+}
