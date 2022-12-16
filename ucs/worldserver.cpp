@@ -80,7 +80,7 @@ void WorldServer::ProcessMessage(uint16 opcode, EQ::Net::Packet &p)
 		break;
 	}
 	case ServerOP_PlayerEvent: {
-		auto n = PlayerEventLogsRepository::PlayerEventLogs{};
+		auto n = PlayerEvent::PlayerEventContainer{};
 		auto s = (ServerSendPlayerEvent_Struct*) pack->pBuffer;
 		EQ::Util::MemoryStreamReader ss(s->cereal_data, s->cereal_size);
 		cereal::BinaryInputArchive archive(ss);
@@ -88,7 +88,7 @@ void WorldServer::ProcessMessage(uint16 opcode, EQ::Net::Packet &p)
 
 		discord_manager.QueuePlayerEventMessage(n);
 
-		LogInfo("Received event [{}]", n.event_type_id);
+		LogInfo("Received event [{}]", n.player_event_log.event_type_id);
 
 		break;
 	}

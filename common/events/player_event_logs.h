@@ -40,14 +40,20 @@ public:
 		n.event_type_name = PlayerEvent::EventName[t];
 		n.event_data      = Strings::Contains(ss.str(), "noop") ? "{}" : ss.str();
 		n.created_at      = std::time(nullptr);
-		return BuildPlayerEventPacket(n);
+
+		auto c = PlayerEvent::PlayerEventContainer{
+			.player_event = p,
+			.player_event_log = n
+		};
+
+		return BuildPlayerEventPacket(c);
 	}
 
 	[[nodiscard]] const PlayerEventLogSettingsRepository::PlayerEventLogSettings *GetSettings() const;
 	bool IsEventDiscordEnabled(int32_t event_type_id);
 	std::string GetDiscordWebhookUrlFromEventType(int32_t event_type_id);
 
-	static std::string GetDiscordPayloadFromEvent(const PlayerEventLogsRepository::PlayerEventLogs &e);
+	static std::string GetDiscordPayloadFromEvent(const PlayerEvent::PlayerEventContainer &e);
 private:
 	Database                                                 *m_database; // reference to database
 	PlayerEventLogSettingsRepository::PlayerEventLogSettings m_settings[PlayerEvent::EventType::MAX]{};
@@ -56,7 +62,7 @@ private:
 	std::vector<PlayerEventLogsRepository::PlayerEventLogs> m_record_batch_queue{};
 	static void FillPlayerEvent(const PlayerEvent::PlayerEvent &p, PlayerEventLogsRepository::PlayerEventLogs &n);
 	static std::unique_ptr<ServerPacket>
-	BuildPlayerEventPacket(const BasePlayerEventLogsRepository::PlayerEventLogs &e);
+	BuildPlayerEventPacket(const PlayerEvent::PlayerEventContainer &e);
 };
 
 extern PlayerEventLogs player_event_logs;

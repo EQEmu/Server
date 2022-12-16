@@ -77,7 +77,7 @@ void Discord::SendWebhookMessage(const std::string &message, const std::string &
 }
 
 void Discord::SendPlayerEventMessage(
-	const PlayerEventLogsRepository::PlayerEventLogs &e,
+	const PlayerEvent::PlayerEventContainer &e,
 	const std::string &webhook_url
 )
 {

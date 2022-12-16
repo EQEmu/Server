@@ -12003,15 +12003,20 @@ void Client::UseAugmentContainer(int container_slot)
 PlayerEvent::PlayerEvent Client::GetPlayerEvent()
 {
 	auto e = PlayerEvent::PlayerEvent{};
-	e.account_id     = AccountID();
-	e.character_id   = CharacterID();
-	e.character_name = GetCleanName();
-	e.x              = GetX();
-	e.y              = GetY();
-	e.z              = GetZ();
-	e.heading        = GetHeading();
-	e.zone_id        = GetZoneID();
-	e.instance_id    = GetInstanceID();
+	e.account_id      = AccountID();
+	e.character_id    = CharacterID();
+	e.character_name  = GetCleanName();
+	e.x               = GetX();
+	e.y               = GetY();
+	e.z               = GetZ();
+	e.heading         = GetHeading();
+	e.zone_id         = GetZoneID();
+	e.zone_short_name = zone ? zone->GetShortName() : "";
+	e.zone_long_name  = zone ? zone->GetLongName() : "";
+	e.instance_id     = GetInstanceID();
+	e.guild_id        = GuildID();
+	e.guild_name      = guild_mgr.GetGuildName(GuildID());
+	e.account_name    = AccountName();
 
 	return e;
 }

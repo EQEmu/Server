@@ -4,6 +4,7 @@
 #include <string>
 #include <cereal/cereal.hpp>
 #include "../types.h"
+#include "../repositories/player_event_logs_repository.h"
 
 namespace PlayerEvent {
 
@@ -103,14 +104,58 @@ namespace PlayerEvent {
 	// Generic struct used by all events
 	struct PlayerEvent {
 		int64       account_id;
+		std::string account_name;
 		int64       character_id;
 		std::string character_name;
+		int64       guild_id;
+		std::string guild_name;
 		int         zone_id;
+		std::string zone_short_name;
+		std::string zone_long_name;
 		int         instance_id;
 		float       x;
 		float       y;
 		float       z;
 		float       heading;
+
+		// cereal
+		template<class Archive>
+		void serialize(Archive &ar)
+		{
+			ar(
+				CEREAL_NVP(account_id),
+				CEREAL_NVP(account_name),
+				CEREAL_NVP(character_id),
+				CEREAL_NVP(character_name),
+				CEREAL_NVP(guild_id),
+				CEREAL_NVP(guild_name),
+				CEREAL_NVP(zone_id),
+				CEREAL_NVP(zone_short_name),
+				CEREAL_NVP(zone_long_name),
+				CEREAL_NVP(instance_id),
+				CEREAL_NVP(x),
+				CEREAL_NVP(y),
+				CEREAL_NVP(z),
+				CEREAL_NVP(heading)
+			);
+		}
+	};
+
+	// contains metadata in use for things like log/discord formatters
+	// along with the actual event to be persisted
+	struct PlayerEventContainer {
+		PlayerEvent                                player_event;
+		PlayerEventLogsRepository::PlayerEventLogs player_event_log;
+
+		// cereal
+		template<class Archive>
+		void serialize(Archive &ar)
+		{
+			ar(
+				CEREAL_NVP(player_event),
+				CEREAL_NVP(player_event_log)
+			);
+		}
 	};
 
 	// used in events with no extra data

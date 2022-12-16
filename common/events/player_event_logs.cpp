@@ -121,7 +121,7 @@ void PlayerEventLogs::FillPlayerEvent(
 // builds the dynamic packet used to ship the player event over the wire
 // supports serializing the struct so it can be rebuilt on the other end
 std::unique_ptr<ServerPacket>
-PlayerEventLogs::BuildPlayerEventPacket(const BasePlayerEventLogsRepository::PlayerEventLogs &e)
+PlayerEventLogs::BuildPlayerEventPacket(const PlayerEvent::PlayerEventContainer &e)
 {
 	EQ::Net::DynamicPacket dyn_pack;
 	dyn_pack.PutSerialize(0, e);
@@ -179,16 +179,16 @@ std::string PlayerEventLogs::GetDiscordWebhookUrlFromEventType(int32_t event_typ
 	return "";
 }
 
-std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEventLogsRepository::PlayerEventLogs &e)
+std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::PlayerEventContainer &e)
 {
 	std::string payload;
 
-	switch (e.event_type_id) {
+	switch (e.player_event_log.event_type_id) {
 		case PlayerEvent::SAY:
 			PlayerEvent::SayEvent n;
 			std::stringstream     ss;
 			{
-				ss << e.event_data;
+				ss << e.player_event_log.event_data;
 				cereal::JSONInputArchive ar(ss);
 				n.serialize(ar);
 			}

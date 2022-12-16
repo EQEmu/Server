@@ -372,7 +372,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			break;
 		}
 		case ServerOP_PlayerEvent: {
-			auto                         n = PlayerEventLogsRepository::PlayerEventLogs{};
+			auto                         n = PlayerEvent::PlayerEventContainer{};
 			auto                         s = (ServerSendPlayerEvent_Struct *) pack->pBuffer;
 			EQ::Util::MemoryStreamReader ss(s->cereal_data, s->cereal_size);
 			cereal::BinaryInputArchive   archive(ss);
@@ -382,14 +382,14 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			// if set, process events in queryserver
 			// if you want to offload event recording to a dedicated QS instance
 			if (!RuleB(Logging, PlayerEventsQSProcess)) {
-				player_event_logs.AddToQueue(n);
+				player_event_logs.AddToQueue(n.player_event_log);
 			}
 			else {
 				QSLink.SendPacket(pack);
 			}
 
 			// if discord enabled for event, ship to UCS to process
-			if (player_event_logs.IsEventDiscordEnabled(n.event_type_id)) {
+			if (player_event_logs.IsEventDiscordEnabled(n.player_event_log.event_type_id)) {
 				UCSLink.SendPacket(pack);
 			}
 
