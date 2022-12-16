@@ -37,7 +37,7 @@
 
 #include "../common/net/tcp_server.h"
 #include "../common/net/servertalk_client_connection.h"
-#include "../common/discord_manager.h"
+#include "../common/discord/discord_manager.h"
 #include "../common/path_manager.h"
 #include "../common/zone_store.h"
 

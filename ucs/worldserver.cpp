@@ -26,7 +26,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "clientlist.h"
 #include "ucsconfig.h"
 #include "database.h"
-#include "../common/discord_manager.h"
+#include "../common/discord/discord_manager.h"
 
 #include <iostream>
 #include <string.h>

@@ -1,7 +1,7 @@
 #include "discord_manager.h"
-#include "../common/discord/discord.h"
-#include "../common/eqemu_logsys.h"
-#include "../common/strings.h"
+#include "../../common/discord/discord.h"
+#include "../../common/eqemu_logsys.h"
+#include "../../common/strings.h"
 
 void DiscordManager::QueueWebhookMessage(uint32 webhook_id, const std::string &message)
 {
