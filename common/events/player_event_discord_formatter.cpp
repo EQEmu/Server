@@ -1,5 +1,6 @@
 #include "player_event_discord_formatter.h"
 #include "../repositories/player_event_logs_repository.h"
+#include "../repositories/character_data_repository.h"
 #include <vector>
 #include <fmt/format.h>
 #include <cereal/archives/json.hpp>
@@ -10,27 +11,19 @@ std::string PlayerEventDiscordFormatter::FormatEventSay(
 	const PlayerEvent::SayEvent &e
 )
 {
-	std::vector<DiscordField> fields = {};
-	fields.emplace_back(
-		DiscordField{
-			.name = "Event",
-			.value = PlayerEvent::EventName[p.event_type_id],
-			._inline = false,
-		}
-	);
-	fields.emplace_back(
-		DiscordField{
-			.name = "Character",
-			.value = PlayerEvent::EventName[p.event_type_id],
-			._inline = false,
-		}
-	);
+	std::vector<DiscordField> f = {};
+//	f.emplace_back(BuildDiscordField("Event", PlayerEvent::EventName[p.event_type_id]));
+	f.emplace_back(BuildDiscordField("Character", fmt::format("{}", p.character_id)));
+	f.emplace_back(BuildDiscordField("Message", e.message));
+	if (!e.target.empty()) {
+		f.emplace_back(BuildDiscordField("Target", e.target));
+	}
 
 	std::vector<DiscordEmbed> embeds = {};
 	embeds.emplace_back(
 		DiscordEmbed{
-			.fields = fields,
-			.description = "",
+			.fields = f,
+			.description = fmt::format("[Player Event] {}", PlayerEvent::EventName[p.event_type_id]),
 			.timestamp = GetCurrentTimestamp()
 		}
 	);
@@ -56,4 +49,17 @@ std::string PlayerEventDiscordFormatter::GetCurrentTimestamp()
 	strftime(buf, sizeof buf, "%FT%TZ", gmtime(&now));
 	std::string timestamp = buf;
 	return timestamp;
+}
+
+DiscordField PlayerEventDiscordFormatter::BuildDiscordField(
+	const std::string &name,
+	const std::string &value,
+	bool is_inline
+)
+{
+	return DiscordField{
+		.name = name,
+		.value = value,
+		._inline = is_inline,
+	};
 }

@@ -5,6 +5,8 @@
 #include "../strings.h"
 #include "base/base_character_data_repository.h"
 
+
+
 class CharacterDataRepository: public BaseCharacterDataRepository {
 public:
 
@@ -44,7 +46,6 @@ public:
      */
 
 	// Custom extended repository methods here
-
 };
 
 #endif //EQEMU_CHARACTER_DATA_REPOSITORY_H
