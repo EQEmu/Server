@@ -88,24 +88,42 @@ void PlayerEventDiscordFormatter::BuildBaseEmbed(
 }
 
 std::string PlayerEventDiscordFormatter::FormatEventSay(
-	const PlayerEvent::PlayerEventContainer &p,
+	const PlayerEvent::PlayerEventContainer &c,
 	const PlayerEvent::SayEvent &e
 )
 {
 	std::vector<DiscordField> f = {};
-	BuildBaseFields(&f, p);
+	BuildBaseFields(&f, c);
 	f.emplace_back(BuildDiscordField("Message", e.message));
 	if (!e.target.empty()) {
 		f.emplace_back(BuildDiscordField("Target", e.target));
 	}
 
 	std::vector<DiscordEmbed> embeds = {};
-	BuildBaseEmbed(&embeds, f, p);
+	BuildBaseEmbed(&embeds, f, c);
 
 	DiscordEmbedRoot root = DiscordEmbedRoot{
 		.embeds = embeds
 	};
 
+	std::stringstream ss;
+	{
+		cereal::JSONOutputArchive ar(ss);
+		root.serialize(ar);
+	}
+
+	return ss.str();
+}
+
+std::string PlayerEventDiscordFormatter::FormatWithNodata(const PlayerEvent::PlayerEventContainer &c)
+{
+	std::vector<DiscordField> f = {};
+	BuildBaseFields(&f, c);
+	std::vector<DiscordEmbed> embeds = {};
+	BuildBaseEmbed(&embeds, f, c);
+	DiscordEmbedRoot root = DiscordEmbedRoot{
+		.embeds = embeds
+	};
 	std::stringstream ss;
 	{
 		cereal::JSONOutputArchive ar(ss);

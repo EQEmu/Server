@@ -184,7 +184,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 	std::string payload;
 
 	switch (e.player_event_log.event_type_id) {
-		case PlayerEvent::SAY:
+		case PlayerEvent::SAY: {
 			PlayerEvent::SayEvent n;
 			std::stringstream     ss;
 			{
@@ -194,6 +194,12 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 			}
 			payload = PlayerEventDiscordFormatter::FormatEventSay(e, n);
 			break;
+		}
+		case PlayerEvent::WENT_ONLINE:
+		case PlayerEvent::WENT_OFFLINE: {
+			payload = PlayerEventDiscordFormatter::FormatWithNodata(e);
+			break;
+		}
 	}
 
 	return payload;
