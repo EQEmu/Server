@@ -1,6 +1,8 @@
 #include <cereal/archives/json.hpp>
 #include "player_event_logs.h"
 #include "player_event_discord_formatter.h"
+#include "../platform.h"
+#include "../rulesys.h"
 
 const uint32 PROCESS_EVENTS_TIMER_INTERVAL               = 5 * 1000; // 5 seconds
 const uint32 PROCESS_RETENTION_TRUNCATION_TIMER_INTERVAL = 60 * 60 * 1000; // 1 hour
@@ -47,6 +49,14 @@ void PlayerEventLogs::Init()
 			c.event_enabled = m_settings[i].event_enabled;
 			PlayerEventLogSettingsRepository::InsertOne(*m_database, c);
 		}
+	}
+
+	// on initial boot process truncation
+	if (!RuleB(Logging, PlayerEventsQSProcess) && GetExecutablePlatform() == EQEmuExePlatform::ExePlatformWorld) {
+		ProcessRetentionTruncation();
+	}
+	else if (RuleB(Logging, PlayerEventsQSProcess) && GetExecutablePlatform() == EQEmuExePlatform::ExePlatformQueryServ) {
+		ProcessRetentionTruncation();
 	}
 }
 
