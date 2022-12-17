@@ -296,7 +296,7 @@ void PlayerEventLogs::ReloadSettings()
 	}
 }
 
-const int32_t RETENTION_DAYS_DEFAULT = 7;
+const int32_t RETENTION_DAYS_DEFAULT = 30;
 
 void PlayerEventLogs::SetSettingsDefaults()
 {
