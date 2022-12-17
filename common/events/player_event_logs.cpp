@@ -46,9 +46,10 @@ void PlayerEventLogs::Init()
 			);
 
 			auto c = PlayerEventLogSettingsRepository::NewEntity();
-			c.id            = i;
-			c.event_name    = PlayerEvent::EventName[i];
-			c.event_enabled = m_settings[i].event_enabled;
+			c.id             = i;
+			c.event_name     = PlayerEvent::EventName[i];
+			c.event_enabled  = m_settings[i].event_enabled;
+			c.retention_days = m_settings[i].retention_days;
 			PlayerEventLogSettingsRepository::InsertOne(*m_database, c);
 		}
 	}
@@ -300,10 +301,6 @@ const int32_t RETENTION_DAYS_DEFAULT = 30;
 
 void PlayerEventLogs::SetSettingsDefaults()
 {
-	for (int i = PlayerEvent::GM_COMMAND; i != PlayerEvent::MAX; i++) {
-		m_settings[i].retention_days = RETENTION_DAYS_DEFAULT;
-	}
-
 	m_settings[PlayerEvent::GM_COMMAND].event_enabled         = 1;
 	m_settings[PlayerEvent::ZONING].event_enabled             = 1;
 	m_settings[PlayerEvent::AA_GAIN].event_enabled            = 1;
@@ -346,4 +343,8 @@ void PlayerEventLogs::SetSettingsDefaults()
 	m_settings[PlayerEvent::BANDOLIER_CREATE].event_enabled   = 0;
 	m_settings[PlayerEvent::BANDOLIER_SWAP].event_enabled     = 0;
 	m_settings[PlayerEvent::DISCOVER_ITEM].event_enabled      = 1;
+
+	for (int i = PlayerEvent::GM_COMMAND; i != PlayerEvent::MAX; i++) {
+		m_settings[i].retention_days = RETENTION_DAYS_DEFAULT;
+	}
 }
