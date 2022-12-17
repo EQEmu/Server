@@ -373,7 +373,6 @@ int main(int argc, char **argv)
 		}
 	);
 
-	Timer batch_player_event_log_insert_timer(5000);
 	player_event_logs.SetDatabase(&database)->Init();
 
 	auto loop_fn = [&](EQ::Timer* t) {
@@ -430,8 +429,8 @@ int main(int argc, char **argv)
 			CharacterTaskTimersRepository::DeleteWhere(database, "expire_time <= NOW()");
 		}
 
-		if (batch_player_event_log_insert_timer.Check()) {
-			player_event_logs.ProcessBatchQueue();
+		if (!RuleB(Logging, PlayerEventsQSProcess)) {
+			player_event_logs.Process();
 		}
 
 		if (EQTimeTimer.Check()) {

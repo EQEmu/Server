@@ -5,6 +5,7 @@
 #include "player_events.h"
 #include "../servertalk.h"
 #include "../repositories/player_event_logs_repository.h"
+#include "../timer.h"
 #include <cereal/archives/json.hpp>
 
 class PlayerEventLogs {
@@ -14,8 +15,9 @@ public:
 	bool ValidateDatabaseConnection();
 	bool IsEventEnabled(PlayerEvent::EventType event);
 
+	void Process();
+
 	// batch queue
-	void ProcessBatchQueue();
 	void AddToQueue(const PlayerEventLogsRepository::PlayerEventLogs &logs);
 
 	// main event record generic function
@@ -63,6 +65,14 @@ private:
 	static void FillPlayerEvent(const PlayerEvent::PlayerEvent &p, PlayerEventLogsRepository::PlayerEventLogs &n);
 	static std::unique_ptr<ServerPacket>
 	BuildPlayerEventPacket(const PlayerEvent::PlayerEventContainer &e);
+
+	// timers
+	Timer m_process_batch_events_timer; // events processing timer
+	Timer m_process_retention_truncation_timer; // timer for truncating events based on retention settings
+
+	// processing
+	void ProcessBatchQueue();
+	void ProcessRetentionTruncation();
 };
 
 extern PlayerEventLogs player_event_logs;

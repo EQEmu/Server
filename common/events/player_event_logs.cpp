@@ -1,11 +1,16 @@
 #include <cereal/archives/json.hpp>
 #include "player_event_logs.h"
-#include "../timer.h"
 #include "player_event_discord_formatter.h"
+
+const uint32 PROCESS_EVENTS_TIMER_INTERVAL               = 5 * 1000; // 5 seconds
+const uint32 PROCESS_RETENTION_TRUNCATION_TIMER_INTERVAL = 60 * 60 * 1000; // 1 hour
 
 // general initialization routine
 void PlayerEventLogs::Init()
 {
+	m_process_batch_events_timer.SetTimer(PROCESS_EVENTS_TIMER_INTERVAL);
+	m_process_retention_truncation_timer.SetTimer(PROCESS_RETENTION_TRUNCATION_TIMER_INTERVAL);
+
 	ValidateDatabaseConnection();
 
 	// initialize settings array
@@ -201,7 +206,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 		}
 		case PlayerEvent::MERCHANT_PURCHASE: {
 			PlayerEvent::MerchantPurchaseEvent n;
-			std::stringstream     ss;
+			std::stringstream                  ss;
 			{
 				ss << e.player_event_log.event_data;
 				cereal::JSONInputArchive ar(ss);
@@ -213,7 +218,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 		}
 		case PlayerEvent::MERCHANT_SELL: {
 			PlayerEvent::MerchantSellEvent n;
-			std::stringstream     ss;
+			std::stringstream              ss;
 			{
 				ss << e.player_event_log.event_data;
 				cereal::JSONInputArchive ar(ss);
@@ -226,4 +231,44 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 	}
 
 	return payload;
+}
+
+// general process function, used in world or UCS depending on rule Logging:PlayerEventsQSProcess
+void PlayerEventLogs::Process()
+{
+	if (m_process_batch_events_timer.Check()) {
+		ProcessBatchQueue();
+	}
+
+	if (m_process_retention_truncation_timer.Check()) {
+		ProcessRetentionTruncation();
+	}
+}
+
+void PlayerEventLogs::ProcessRetentionTruncation()
+{
+	LogInfo("[ProcessRetentionTruncation] Running truncation");
+
+	for (int i = PlayerEvent::GM_COMMAND; i != PlayerEvent::MAX; i++) {
+		if (m_settings[i].retention_days > 0) {
+			int deleted_count = PlayerEventLogsRepository::DeleteWhere(
+				*m_database,
+				fmt::format(
+					"event_type_id = {} AND created_at < (NOW() - INTERVAL {} DAY)",
+					i,
+					m_settings[i].retention_days
+				)
+			);
+
+			if (deleted_count > 0) {
+				LogInfo(
+					"[ProcessRetentionTruncation] Truncated [{}] events of type [{}] ({}) older than [{}] days",
+					deleted_count,
+					PlayerEvent::EventName[i],
+					i,
+					m_settings[i].retention_days
+				);
+			}
+		}
+	}
 }
