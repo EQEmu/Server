@@ -201,6 +201,49 @@ std::string PlayerEventLogs::GetDiscordWebhookUrlFromEventType(int32_t event_typ
 	return "";
 }
 
+// GM_COMMAND           | [x] Implemented Formatter
+// ZONING               | [] Implemented Formatter
+// AA_GAIN              | [] Implemented Formatter
+// AA_PURCHASE          | [] Implemented Formatter
+// FORAGE_SUCCESS       | [] Implemented Formatter
+// FORAGE_FAILURE       | [] Implemented Formatter
+// FISH_SUCCESS         | [] Implemented Formatter
+// FISH_FAILURE         | [] Implemented Formatter
+// ITEM_DESTROY         | [] Implemented Formatter
+// WENT_ONLINE          | [x] Implemented Formatter
+// WENT_OFFLINE         | [x] Implemented Formatter
+// LEVEL_GAIN           | [] Implemented Formatter
+// LEVEL_LOSS           | [] Implemented Formatter
+// LOOT_ITEM            | [] Implemented Formatter
+// MERCHANT_PURCHASE    | [x] Implemented Formatter
+// MERCHANT_SELL        | [x] Implemented Formatter
+// GROUP_JOIN           | [] Implemented Formatter
+// GROUP_LEAVE          | [] Implemented Formatter
+// RAID_JOIN            | [] Implemented Formatter
+// RAID_LEAVE           | [] Implemented Formatter
+// GROUNDSPAWN_PICKUP   | [] Implemented Formatter
+// NPC_HANDIN           | [] Implemented Formatter
+// SKILL_UP             | [] Implemented Formatter
+// TASK_ACCEPT          | [] Implemented Formatter
+// TASK_UPDATE          | [] Implemented Formatter
+// TASK_COMPLETE        | [] Implemented Formatter
+// TRADE                | [] Implemented Formatter
+// GIVE_ITEM            | [] Implemented Formatter
+// SAY                  | [] Implemented Formatter
+// REZ_ACCEPTED         | [] Implemented Formatter
+// DEATH                | [] Implemented Formatter
+// COMBINE_FAILURE      | [] Implemented Formatter
+// COMBINE_SUCCESS      | [] Implemented Formatter
+// DROPPED_ITEM         | [] Implemented Formatter
+// SPLIT_MONEY          | [] Implemented Formatter
+// DZ_JOIN              | [] Implemented Formatter
+// DZ_LEAVE             | [] Implemented Formatter
+// TRADER_PURCHASE      | [] Implemented Formatter
+// TRADER_SELL          | [] Implemented Formatter
+// BANDOLIER_CREATE     | [] Implemented Formatter
+// BANDOLIER_SWAP       | [] Implemented Formatter
+// DISCOVER_ITEM        | [] Implemented Formatter
+
 std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::PlayerEventContainer &e)
 {
 	std::string payload;
