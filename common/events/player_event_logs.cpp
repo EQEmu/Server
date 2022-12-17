@@ -286,3 +286,10 @@ void PlayerEventLogs::ProcessRetentionTruncation()
 		}
 	}
 }
+
+void PlayerEventLogs::ReloadSettings()
+{
+	for (auto &e: PlayerEventLogSettingsRepository::All(*m_database)) {
+		m_settings[e.id] = e;
+	}
+}

@@ -1382,6 +1382,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			zoneserver_list.SendPacket(pack);
 			UCSLink.SendPacket(pack);
 			LogSys.LoadLogDatabaseSettings();
+			player_event_logs.ReloadSettings();
 			break;
 		}
 		case ServerOP_ReloadTasks: {

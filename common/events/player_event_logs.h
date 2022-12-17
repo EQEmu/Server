@@ -12,6 +12,7 @@
 class PlayerEventLogs {
 public:
 	void Init();
+	void ReloadSettings();
 	PlayerEventLogs *SetDatabase(Database *db);
 	bool ValidateDatabaseConnection();
 	bool IsEventEnabled(PlayerEvent::EventType event);

@@ -77,6 +77,7 @@ void WorldServer::ProcessMessage(uint16 opcode, EQ::Net::Packet &p)
 	}
 	case ServerOP_ReloadLogs: {
 		LogSys.LoadLogDatabaseSettings();
+		player_event_logs.ReloadSettings();
 		break;
 	}
 	case ServerOP_PlayerEvent: {
