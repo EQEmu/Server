@@ -98,13 +98,17 @@ void PlayerEventLogs::ProcessBatchQueue()
 	);
 
 	// empty
+	m_batch_queue_lock.lock();
 	m_record_batch_queue = {};
+	m_batch_queue_lock.unlock();
 }
 
 // adds a player event to the queue
 void PlayerEventLogs::AddToQueue(const PlayerEventLogsRepository::PlayerEventLogs &log)
 {
+	m_batch_queue_lock.lock();
 	m_record_batch_queue.emplace_back(log);
+	m_batch_queue_lock.unlock();
 }
 
 // fills common event data in the SendEvent function
@@ -247,7 +251,7 @@ void PlayerEventLogs::Process()
 
 void PlayerEventLogs::ProcessRetentionTruncation()
 {
-	LogInfo("[ProcessRetentionTruncation] Running truncation");
+	LogInfo("[PlayerEventLogs::ProcessRetentionTruncation] Running truncation");
 
 	for (int i = PlayerEvent::GM_COMMAND; i != PlayerEvent::MAX; i++) {
 		if (m_settings[i].retention_days > 0) {
@@ -262,7 +266,7 @@ void PlayerEventLogs::ProcessRetentionTruncation()
 
 			if (deleted_count > 0) {
 				LogInfo(
-					"[ProcessRetentionTruncation] Truncated [{}] events of type [{}] ({}) older than [{}] days",
+					"[PlayerEventLogs::ProcessRetentionTruncation] Truncated [{}] events of type [{}] ({}) older than [{}] days",
 					deleted_count,
 					PlayerEvent::EventName[i],
 					i,

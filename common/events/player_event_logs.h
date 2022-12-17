@@ -7,6 +7,7 @@
 #include "../repositories/player_event_logs_repository.h"
 #include "../timer.h"
 #include <cereal/archives/json.hpp>
+#include <mutex>
 
 class PlayerEventLogs {
 public:
@@ -71,6 +72,7 @@ private:
 	Timer m_process_retention_truncation_timer; // timer for truncating events based on retention settings
 
 	// processing
+	std::mutex m_batch_queue_lock{};
 	void ProcessBatchQueue();
 	void ProcessRetentionTruncation();
 };

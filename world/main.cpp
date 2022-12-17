@@ -58,6 +58,7 @@
 
 #include "../common/unix.h"
 #include <sys/sem.h>
+#include <thread>
 
 #if not defined (FREEBSD) && not defined (DARWIN)
 union semun {
@@ -128,6 +129,13 @@ inline void UpdateWindowTitle(std::string new_title)
 #ifdef _WINDOWS
 	SetConsoleTitle(new_title.c_str());
 #endif
+}
+
+void PlayerEventQueueListener() {
+	while (RunLoops) {
+		player_event_logs.Process();
+		Sleep(1000);
+	}
 }
 
 /**
@@ -375,6 +383,11 @@ int main(int argc, char **argv)
 
 	player_event_logs.SetDatabase(&database)->Init();
 
+	if (!RuleB(Logging, PlayerEventsQSProcess)) {
+		LogInfo("[PlayerEventQueueListener] Booting queue processor");
+		std::thread(PlayerEventQueueListener).detach();
+	}
+
 	auto loop_fn = [&](EQ::Timer* t) {
 		Timer::SetCurrentTime();
 
@@ -427,10 +440,6 @@ int main(int argc, char **argv)
 			database.PurgeAllDeletedDataBuckets();
 			ExpeditionDatabase::PurgeExpiredCharacterLockouts();
 			CharacterTaskTimersRepository::DeleteWhere(database, "expire_time <= NOW()");
-		}
-
-		if (!RuleB(Logging, PlayerEventsQSProcess)) {
-			player_event_logs.Process();
 		}
 
 		if (EQTimeTimer.Check()) {

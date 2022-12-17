@@ -93,7 +93,7 @@ void CatchSignal(int sig_num) {
 	}
 }
 
-void DiscordQueueListener() {
+void PlayerEventQueueListener() {
 	while (caught_loop == 0) {
 		discord_manager.ProcessMessageQueue();
 		Sleep(100);
@@ -177,7 +177,7 @@ int main() {
 	std::signal(SIGKILL, CatchSignal);
 	std::signal(SIGSEGV, CatchSignal);
 
-	std::thread(DiscordQueueListener).detach();
+	std::thread(PlayerEventQueueListener).detach();
 
 	worldserver = new WorldServer;
 
