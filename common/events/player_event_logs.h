@@ -76,6 +76,7 @@ private:
 	std::mutex m_batch_queue_lock{};
 	void ProcessBatchQueue();
 	void ProcessRetentionTruncation();
+	void SetSettingsDefaults();
 };
 
 extern PlayerEventLogs player_event_logs;

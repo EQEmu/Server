@@ -24,6 +24,8 @@ void PlayerEventLogs::Init()
 		m_settings[i].discord_webhook_id = 0;
 	}
 
+	SetSettingsDefaults();
+
 	// initialize settings from database
 	auto             s = PlayerEventLogSettingsRepository::All(*m_database);
 	std::vector<int> db_settings{};
@@ -51,11 +53,14 @@ void PlayerEventLogs::Init()
 		}
 	}
 
+	bool processing_in_world = !RuleB(Logging, PlayerEventsQSProcess) && IsWorld();
+	bool processing_in_qs    = RuleB(Logging, PlayerEventsQSProcess) && IsQueryServ();
+
 	// on initial boot process truncation
-	if (!RuleB(Logging, PlayerEventsQSProcess) && GetExecutablePlatform() == EQEmuExePlatform::ExePlatformWorld) {
+	if (processing_in_world) {
 		ProcessRetentionTruncation();
 	}
-	else if (RuleB(Logging, PlayerEventsQSProcess) && GetExecutablePlatform() == EQEmuExePlatform::ExePlatformQueryServ) {
+	else if (processing_in_qs) {
 		ProcessRetentionTruncation();
 	}
 }
@@ -292,4 +297,56 @@ void PlayerEventLogs::ReloadSettings()
 	for (auto &e: PlayerEventLogSettingsRepository::All(*m_database)) {
 		m_settings[e.id] = e;
 	}
+}
+
+const int32_t RETENTION_DAYS_DEFAULT = 7;
+
+void PlayerEventLogs::SetSettingsDefaults()
+{
+	for (int i = PlayerEvent::GM_COMMAND; i != PlayerEvent::MAX; i++) {
+		m_settings[i].retention_days = RETENTION_DAYS_DEFAULT;
+	}
+
+	m_settings[PlayerEvent::GM_COMMAND].event_enabled         = 1;
+	m_settings[PlayerEvent::ZONING].event_enabled             = 1;
+	m_settings[PlayerEvent::AA_GAIN].event_enabled            = 1;
+	m_settings[PlayerEvent::AA_PURCHASE].event_enabled        = 1;
+	m_settings[PlayerEvent::FORAGE_SUCCESS].event_enabled     = 0;
+	m_settings[PlayerEvent::FORAGE_FAILURE].event_enabled     = 0;
+	m_settings[PlayerEvent::FISH_SUCCESS].event_enabled       = 0;
+	m_settings[PlayerEvent::FISH_FAILURE].event_enabled       = 0;
+	m_settings[PlayerEvent::ITEM_DESTROY].event_enabled       = 1;
+	m_settings[PlayerEvent::WENT_ONLINE].event_enabled        = 0;
+	m_settings[PlayerEvent::WENT_OFFLINE].event_enabled       = 0;
+	m_settings[PlayerEvent::LEVEL_GAIN].event_enabled         = 1;
+	m_settings[PlayerEvent::LEVEL_LOSS].event_enabled         = 1;
+	m_settings[PlayerEvent::LOOT_ITEM].event_enabled          = 1;
+	m_settings[PlayerEvent::MERCHANT_PURCHASE].event_enabled  = 1;
+	m_settings[PlayerEvent::MERCHANT_SELL].event_enabled      = 1;
+	m_settings[PlayerEvent::GROUP_JOIN].event_enabled         = 0;
+	m_settings[PlayerEvent::GROUP_LEAVE].event_enabled        = 0;
+	m_settings[PlayerEvent::RAID_JOIN].event_enabled          = 0;
+	m_settings[PlayerEvent::RAID_LEAVE].event_enabled         = 0;
+	m_settings[PlayerEvent::GROUNDSPAWN_PICKUP].event_enabled = 1;
+	m_settings[PlayerEvent::NPC_HANDIN].event_enabled         = 1;
+	m_settings[PlayerEvent::SKILL_UP].event_enabled           = 0;
+	m_settings[PlayerEvent::TASK_ACCEPT].event_enabled        = 1;
+	m_settings[PlayerEvent::TASK_UPDATE].event_enabled        = 1;
+	m_settings[PlayerEvent::TASK_COMPLETE].event_enabled      = 1;
+	m_settings[PlayerEvent::TRADE].event_enabled              = 1;
+	m_settings[PlayerEvent::GIVE_ITEM].event_enabled          = 1;
+	m_settings[PlayerEvent::SAY].event_enabled                = 0;
+	m_settings[PlayerEvent::REZ_ACCEPTED].event_enabled       = 1;
+	m_settings[PlayerEvent::DEATH].event_enabled              = 1;
+	m_settings[PlayerEvent::COMBINE_FAILURE].event_enabled    = 1;
+	m_settings[PlayerEvent::COMBINE_SUCCESS].event_enabled    = 1;
+	m_settings[PlayerEvent::DROPPED_ITEM].event_enabled       = 1;
+	m_settings[PlayerEvent::SPLIT_MONEY].event_enabled        = 1;
+	m_settings[PlayerEvent::DZ_JOIN].event_enabled            = 1;
+	m_settings[PlayerEvent::DZ_LEAVE].event_enabled           = 1;
+	m_settings[PlayerEvent::TRADER_PURCHASE].event_enabled    = 1;
+	m_settings[PlayerEvent::TRADER_SELL].event_enabled        = 1;
+	m_settings[PlayerEvent::BANDOLIER_CREATE].event_enabled   = 0;
+	m_settings[PlayerEvent::BANDOLIER_SWAP].event_enabled     = 0;
+	m_settings[PlayerEvent::DISCOVER_ITEM].event_enabled      = 1;
 }

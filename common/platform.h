@@ -44,5 +44,7 @@ void RegisterExecutablePlatform(EQEmuExePlatform p);
 const EQEmuExePlatform& GetExecutablePlatform();
 int GetExecutablePlatformInt();
 std::string GetPlatformName();
+bool IsWorld();
+bool IsQueryServ();
 
 #endif
