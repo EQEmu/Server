@@ -57,10 +57,7 @@ void PlayerEventLogs::Init()
 	bool processing_in_qs    = RuleB(Logging, PlayerEventsQSProcess) && IsQueryServ();
 
 	// on initial boot process truncation
-	if (processing_in_world) {
-		ProcessRetentionTruncation();
-	}
-	else if (processing_in_qs) {
+	if (processing_in_world || processing_in_qs) {
 		ProcessRetentionTruncation();
 	}
 }
