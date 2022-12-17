@@ -50,56 +50,7 @@
 #include "../common/strings.h"
 #include "../common/servertalk.h"
 
-Database::Database()
-{
-	DBInitVars();
-}
-
-/*
-Establish a connection to a mysql database with the supplied parameters
-*/
-
-Database::Database(const char *host, const char *user, const char *passwd, const char *database, uint32 port)
-{
-	DBInitVars();
-	Connect(host, user, passwd, database, port);
-}
-
-bool Database::Connect(const char *host, const char *user, const char *passwd, const char *database, uint32 port)
-{
-	uint32 errnum = 0;
-	char   errbuf[MYSQL_ERRMSG_SIZE];
-	if (!Open(host, user, passwd, database, port, &errnum, errbuf)) {
-		LogError("Failed to connect to database: Error: {}", errbuf);
-		HandleMysqlError(errnum);
-
-		return false;
-	}
-	else {
-		LogInfo("Using database [{}] at [{}]:[{}]", database, host, port);
-		return true;
-	}
-}
-
-void Database::DBInitVars()
-{
-
-}
-
-
-void Database::HandleMysqlError(uint32 errnum)
-{
-}
-
-/*
-
-Close the connection to the database
-*/
-Database::~Database()
-{
-}
-
-void Database::AddSpeech(
+void QSDatabase::AddSpeech(
 	const char *from,
 	const char *to,
 	const char *message,
@@ -134,7 +85,7 @@ void Database::AddSpeech(
 
 }
 
-void Database::LogPlayerDropItem(QSPlayerDropItem_Struct *QS)
+void QSDatabase::LogPlayerDropItem(QSPlayerDropItem_Struct *QS)
 {
 
 	std::string query = StringFormat(
@@ -173,7 +124,7 @@ void Database::LogPlayerDropItem(QSPlayerDropItem_Struct *QS)
 	}
 }
 
-void Database::LogPlayerTrade(PlayerLogTrade_Struct *QS, uint32 detailCount)
+void QSDatabase::LogPlayerTrade(PlayerLogTrade_Struct *QS, uint32 detailCount)
 {
 
 	std::string query   = StringFormat(
@@ -220,7 +171,7 @@ void Database::LogPlayerTrade(PlayerLogTrade_Struct *QS, uint32 detailCount)
 
 }
 
-void Database::LogPlayerHandin(QSPlayerLogHandin_Struct *QS, uint32 detailCount)
+void QSDatabase::LogPlayerHandin(QSPlayerLogHandin_Struct *QS, uint32 detailCount)
 {
 
 	std::string query   = StringFormat(
@@ -269,7 +220,7 @@ void Database::LogPlayerHandin(QSPlayerLogHandin_Struct *QS, uint32 detailCount)
 
 }
 
-void Database::LogPlayerNPCKill(QSPlayerLogNPCKill_Struct *QS, uint32 members)
+void QSDatabase::LogPlayerNPCKill(QSPlayerLogNPCKill_Struct *QS, uint32 members)
 {
 
 	std::string query   = StringFormat(
@@ -306,7 +257,7 @@ void Database::LogPlayerNPCKill(QSPlayerLogNPCKill_Struct *QS, uint32 members)
 
 }
 
-void Database::LogPlayerDelete(QSPlayerLogDelete_Struct *QS, uint32 items)
+void QSDatabase::LogPlayerDelete(QSPlayerLogDelete_Struct *QS, uint32 items)
 {
 
 	std::string query   = StringFormat(
@@ -345,7 +296,7 @@ void Database::LogPlayerDelete(QSPlayerLogDelete_Struct *QS, uint32 items)
 
 }
 
-void Database::LogPlayerMove(QSPlayerLogMove_Struct *QS, uint32 items)
+void QSDatabase::LogPlayerMove(QSPlayerLogMove_Struct *QS, uint32 items)
 {
 	/* These are item moves */
 
@@ -385,7 +336,7 @@ void Database::LogPlayerMove(QSPlayerLogMove_Struct *QS, uint32 items)
 	}
 }
 
-void Database::LogMerchantTransaction(QSMerchantLogTransaction_Struct *QS, uint32 items)
+void QSDatabase::LogMerchantTransaction(QSMerchantLogTransaction_Struct *QS, uint32 items)
 {
 	/* Merchant transactions are from the perspective of the merchant, not the player */
 	std::string query   = StringFormat(
@@ -433,7 +384,7 @@ void Database::LogMerchantTransaction(QSMerchantLogTransaction_Struct *QS, uint3
 }
 
 // this function does not delete the ServerPacket, so it must be handled at call site
-void Database::GeneralQueryReceive(ServerPacket *pack)
+void QSDatabase::GeneralQueryReceive(ServerPacket *pack)
 {
 	/*
 		These are general queries passed from anywhere in zone instead of packing structures and breaking them down again and again
