@@ -56,7 +56,6 @@ void DiscordManager::ProcessMessageQueue()
 				message = "";
 			}
 		}
-
 		// final flush
 		if (!message.empty()) {
 			Discord::SendWebhookMessage(

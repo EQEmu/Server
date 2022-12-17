@@ -142,7 +142,7 @@ const PlayerEventLogSettingsRepository::PlayerEventLogSettings *PlayerEventLogs:
 bool PlayerEventLogs::IsEventDiscordEnabled(int32_t event_type_id)
 {
 	// out of bounds check
-	if (event_type_id > PlayerEvent::EventType::MAX) {
+	if (event_type_id >= PlayerEvent::EventType::MAX) {
 		return false;
 	}
 
@@ -162,7 +162,7 @@ bool PlayerEventLogs::IsEventDiscordEnabled(int32_t event_type_id)
 std::string PlayerEventLogs::GetDiscordWebhookUrlFromEventType(int32_t event_type_id)
 {
 	// out of bounds check
-	if (event_type_id > PlayerEvent::EventType::MAX) {
+	if (event_type_id >= PlayerEvent::EventType::MAX) {
 		return "";
 	}
 
@@ -182,7 +182,6 @@ std::string PlayerEventLogs::GetDiscordWebhookUrlFromEventType(int32_t event_typ
 std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::PlayerEventContainer &e)
 {
 	std::string payload;
-
 	switch (e.player_event_log.event_type_id) {
 		case PlayerEvent::SAY: {
 			PlayerEvent::SayEvent n;

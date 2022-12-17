@@ -22,6 +22,10 @@ void PlayerEventDiscordFormatter::BuildDiscordField(
 	bool is_inline
 )
 {
+	if (value.empty()) {
+		return;
+	}
+
 	f->emplace_back(
 		DiscordField{
 			.name = name,
@@ -93,9 +97,7 @@ std::string PlayerEventDiscordFormatter::FormatEventSay(
 	std::vector<DiscordField> f = {};
 	BuildBaseFields(&f, c);
 	BuildDiscordField(&f, "Message", e.message);
-	if (!e.target.empty()) {
-		BuildDiscordField(&f, "Target", e.target);
-	}
+	BuildDiscordField(&f, "Target", e.target);
 
 	std::vector<DiscordEmbed> embeds = {};
 	BuildBaseEmbed(&embeds, f, c);
