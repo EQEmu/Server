@@ -23,6 +23,7 @@
 #include "../common/spdat.h"
 #include "../common/strings.h"
 #include "../common/say_link.h"
+#include "../common/events/player_event_logs.h"
 
 #include "entity.h"
 #include "event_codes.h"
@@ -3986,3 +3987,67 @@ int8 QuestManager::DoesAugmentFit(EQ::ItemInstance* inst, uint32 augment_id, uin
 
 	return inst->AvailableAugmentSlot(aug_inst->AugType);
 }
+
+void QuestManager::SendPlayerHandinEvent()
+{
+	QuestManagerCurrentQuestVars();
+	if (!owner || !owner->IsNPC() || !initiator) {
+		return;
+	}
+
+	if (
+		!initiator->EntityVariableExists("HANDIN_ITEMS") ||
+		!initiator->EntityVariableExists("RETURN_ITEMS")
+		) {
+		return;
+	}
+
+	const auto                            handin_data = Strings::Split(
+		initiator->GetEntityVariable("HANDIN_ITEMS"),
+		","
+	);
+	std::vector<PlayerEvent::HandinEntry> handin_items;
+
+	for (const auto &h: handin_data) {
+		const auto item_data = Strings::Split(h, "-");
+
+		handin_items.emplace_back(
+			PlayerEvent::HandinEntry{
+				.item_id = static_cast<uint32>(std::stoul(item_data[0])),
+				.charges = static_cast<uint16>(std::stoul(item_data[1])),
+				.attuned = std::stoi(item_data[2]) ? true : false
+			}
+		);
+	}
+
+	const auto                            return_data = Strings::Split(
+		initiator->GetEntityVariable("RETURN_ITEMS"),
+		","
+	);
+	std::vector<PlayerEvent::HandinEntry> return_items;
+
+	for (const auto &r: return_data) {
+		const auto item_data = Strings::Split(r, "-");
+
+		return_items.emplace_back(
+			PlayerEvent::HandinEntry{
+				.item_id = static_cast<uint32>(std::stoul(item_data[0])),
+				.charges = static_cast<uint16>(std::stoul(item_data[1])),
+				.attuned = std::stoi(item_data[2]) ? true : false
+			}
+		);
+	}
+
+	initiator->DeleteEntityVariable("HANDIN_ITEMS");
+	initiator->DeleteEntityVariable("RETURN_ITEMS");
+
+	auto e = PlayerEvent::HandinEvent{
+		.npc_id = owner->CastToNPC()->GetNPCTypeID(),
+		.npc_name = owner->GetCleanName(),
+		.handin_items = handin_items,
+		.return_items = return_items
+	};
+
+	RecordPlayerEventLogWithClient(initiator, PlayerEvent::NPC_HANDIN, e);
+}
+

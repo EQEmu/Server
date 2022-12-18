@@ -754,6 +754,43 @@ namespace PlayerEvent {
 			);
 		}
 	};
+
+	class HandinEntry {
+	public:
+		uint32 item_id;
+		uint16 charges;
+		bool   attuned;
+
+		// cereal
+		template<class Archive>
+		void serialize(Archive &ar)
+		{
+			ar(
+				CEREAL_NVP(item_id),
+				CEREAL_NVP(charges),
+				CEREAL_NVP(attuned)
+			);
+		}
+	};
+
+	struct HandinEvent {
+		uint32                    npc_id;
+		std::string               npc_name;
+		std::vector<HandinEntry>  handin_items;
+		std::vector<HandinEntry>  return_items;
+
+		// cereal
+		template<class Archive>
+		void serialize(Archive &ar)
+		{
+			ar(
+				CEREAL_NVP(npc_id),
+				CEREAL_NVP(npc_name),
+				CEREAL_NVP(handin_items),
+				CEREAL_NVP(return_items)
+			);
+		}
+	};
 }
 
 #endif //EQEMU_PLAYER_EVENTS_H
