@@ -4050,4 +4050,3 @@ void QuestManager::SendPlayerHandinEvent()
 
 	RecordPlayerEventLogWithClient(initiator, PlayerEvent::NPC_HANDIN, e);
 }
-
