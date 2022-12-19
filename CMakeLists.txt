@@ -376,6 +376,7 @@ ENDIF()
 
 IF(WIN32)
 	SET(SERVER_LIBS ${SERVER_LIBS} "ws2_32" "psapi" "iphlpapi" "userenv")
+	SET(CMAKE_CXX_FLAGS "$(CMAKE_CXX_FLAGS) /W1")
 ENDIF()
 
 IF(UNIX)
