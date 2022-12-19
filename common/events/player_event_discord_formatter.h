@@ -10,7 +10,7 @@
 struct DiscordField {
 	std::string name;
 	std::string value;
-	bool        _inline;
+	bool        is_inline;
 
 	// cereal
 	template<class Archive>
@@ -19,7 +19,7 @@ struct DiscordField {
 		ar(
 			CEREAL_NVP(name),
 			CEREAL_NVP(value),
-			cereal::make_nvp("inline", _inline)
+			cereal::make_nvp("inline", is_inline)
 		);
 	}
 };

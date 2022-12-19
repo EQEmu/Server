@@ -30,7 +30,7 @@ void PlayerEventDiscordFormatter::BuildDiscordField(
 		DiscordField{
 			.name = name,
 			.value = value,
-			._inline = is_inline,
+			.is_inline = is_inline,
 		}
 	);
 }
