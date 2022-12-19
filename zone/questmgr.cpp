@@ -2421,17 +2421,6 @@ bool QuestManager::createBot(const char *name, const char *lastname, uint8 level
 						new_bot->GetBotID()
 					).c_str()
 				);
-
-				const auto export_string = fmt::format(
-					"{} {} {} {} {}",
-					name,
-					new_bot->GetBotID(),
-					race,
-					botclass,
-					gender
-				);
-
-				parse->EventPlayer(EVENT_BOT_CREATE, initiator, export_string, 0);
 				return true;
 			}
 		}
@@ -2908,38 +2897,19 @@ uint32 QuestManager::MerchantCountItem(uint32 NPCid, uint32 itemid) {
 }
 
 // Item Link for use in Variables - "my $example_link = quest::varlink(item_id);"
-std::string QuestManager::varlink(
-	uint32 item_id,
-	int16 charges,
-	uint32 aug1,
-	uint32 aug2,
-	uint32 aug3,
-	uint32 aug4,
-	uint32 aug5,
-	uint32 aug6,
-	bool attuned
-) {
+const char* QuestManager::varlink(char* perltext, int item_id) {
 	QuestManagerCurrentQuestVars();
-	const auto *item = database.CreateItem(
-		item_id,
-		charges,
-		aug1,
-		aug2,
-		aug3,
-		aug4,
-		aug5,
-		aug6,
-		attuned
-	);
-	if (!item) {
+	const EQ::ItemData* item = database.GetItem(item_id);
+	if (!item)
 		return "INVALID ITEM ID IN VARLINK";
-	}
 
 	EQ::SayLinkEngine linker;
-	linker.SetLinkType(EQ::saylink::SayLinkItemInst);
-	linker.SetItemInst(item);
+	linker.SetLinkType(EQ::saylink::SayLinkItemData);
+	linker.SetItemData(item);
 
-	return linker.GenerateLink();
+	strcpy(perltext, linker.GenerateLink().c_str());
+
+	return perltext;
 }
 
 std::string QuestManager::getitemname(uint32 item_id) {
@@ -3635,9 +3605,9 @@ std::string QuestManager::getinventoryslotname(int16 slot_id) {
 	return EQ::invslot::GetInvPossessionsSlotName(slot_id);
 }
 
-const int QuestManager::getitemstat(uint32 item_id, std::string stat_identifier) {
+int QuestManager::getitemstat(uint32 item_id, std::string stat_identifier) {
 	QuestManagerCurrentQuestVars();
-	return EQ::InventoryProfile::GetItemStatValue(item_id, stat_identifier);
+	return EQ::InventoryProfile::GetItemStatValue(item_id, stat_identifier.c_str());
 }
 
 int QuestManager::getspellstat(uint32 spell_id, std::string stat_identifier, uint8 slot) {
@@ -3996,20 +3966,37 @@ void QuestManager::SendPlayerHandinEvent()
 	}
 
 	if (
-		!initiator->EntityVariableExists("HANDIN_ITEMS") ||
+		!initiator->EntityVariableExists("HANDIN_ITEMS") &&
 		!initiator->EntityVariableExists("RETURN_ITEMS")
-		) {
+	) {
 		return;
 	}
 
-	const auto                            handin_data = Strings::Split(
-		initiator->GetEntityVariable("HANDIN_ITEMS"),
-		","
-	);
-	std::vector<PlayerEvent::HandinEntry> handin_items;
+	auto handin_variable = initiator->GetEntityVariable("HANDIN_ITEMS");
+	auto return_variable = initiator->GetEntityVariable("RETURN_ITEMS");
 
-	for (const auto &h: handin_data) {
-		const auto item_data = Strings::Split(h, "-");
+	std::vector<PlayerEvent::HandinEntry> handin_items;
+	std::vector<PlayerEvent::HandinEntry> return_items;
+
+	if (Strings::Contains(handin_variable, ",")) {
+		const auto handin_data = Strings::Split(handin_variable, ",");
+
+		for (const auto& h : handin_data) {
+			const auto item_data = Strings::Split(h, "-");
+
+			const auto item_id = static_cast<uint32>(std::stoul(item_data[0]));
+			if (item_id != 0) {
+				handin_items.emplace_back(
+					PlayerEvent::HandinEntry{
+						.item_id = item_id,
+						.charges = static_cast<uint16>(std::stoul(item_data[1])),
+						.attuned = std::stoi(item_data[2]) ? true : false
+					}
+				);
+			}
+		}
+	} else if (Strings::Contains(handin_variable, "-")) {
+		const auto item_data = Strings::Split(handin_variable, "-");
 
 		handin_items.emplace_back(
 			PlayerEvent::HandinEntry{
@@ -4020,14 +4007,22 @@ void QuestManager::SendPlayerHandinEvent()
 		);
 	}
 
-	const auto                            return_data = Strings::Split(
-		initiator->GetEntityVariable("RETURN_ITEMS"),
-		","
-	);
-	std::vector<PlayerEvent::HandinEntry> return_items;
+	if (Strings::Contains(return_variable, ",")) {
+		const auto return_data = Strings::Split(return_variable, ",");
 
-	for (const auto &r: return_data) {
-		const auto item_data = Strings::Split(r, "-");
+		for (const auto& r : return_data) {
+			const auto item_data = Strings::Split(r, "-");
+
+			return_items.emplace_back(
+				PlayerEvent::HandinEntry{
+					.item_id = static_cast<uint32>(std::stoul(item_data[0])),
+					.charges = static_cast<uint16>(std::stoul(item_data[1])),
+					.attuned = std::stoi(item_data[2]) ? true : false
+				}
+			);
+		}
+	} else if (Strings::Contains(return_variable, "-")) {
+		const auto item_data = Strings::Split(return_variable, "-");
 
 		return_items.emplace_back(
 			PlayerEvent::HandinEntry{
@@ -4041,12 +4036,14 @@ void QuestManager::SendPlayerHandinEvent()
 	initiator->DeleteEntityVariable("HANDIN_ITEMS");
 	initiator->DeleteEntityVariable("RETURN_ITEMS");
 
-	auto e = PlayerEvent::HandinEvent{
-		.npc_id = owner->CastToNPC()->GetNPCTypeID(),
-		.npc_name = owner->GetCleanName(),
-		.handin_items = handin_items,
-		.return_items = return_items
-	};
+	if (player_event_logs.IsEventEnabled(PlayerEvent::NPC_HANDIN)) {
+		auto e = PlayerEvent::HandinEvent{
+			.npc_id = owner->CastToNPC()->GetNPCTypeID(),
+			.npc_name = owner->GetCleanName(),
+			.handin_items = handin_items,
+			.return_items = return_items
+		};
 
-	RecordPlayerEventLogWithClient(initiator, PlayerEvent::NPC_HANDIN, e);
+		RecordPlayerEventLogWithClient(initiator, PlayerEvent::NPC_HANDIN, e);
+	}
 }

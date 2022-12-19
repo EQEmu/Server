@@ -30,7 +30,7 @@ namespace PlayerEvent {
 		RAID_JOIN, // unimplemented
 		RAID_LEAVE, // unimplemented
 		GROUNDSPAWN_PICKUP,
-		NPC_HANDIN, // unimplemented
+		NPC_HANDIN,
 		SKILL_UP,
 		TASK_ACCEPT,
 		TASK_UPDATE,
