@@ -773,10 +773,31 @@ namespace PlayerEvent {
 		}
 	};
 
+	class HandinMoney {
+	public:
+		uint32 copper;
+		uint32 silver;
+		uint32 gold;
+		uint32 platinum;
+
+		// cereal
+		template<class Archive>
+		void serialize(Archive &ar)
+		{
+			ar(
+				CEREAL_NVP(copper),
+				CEREAL_NVP(silver),
+				CEREAL_NVP(gold),
+				CEREAL_NVP(platinum)
+			);
+		}
+	};
+
 	struct HandinEvent {
 		uint32                    npc_id;
 		std::string               npc_name;
 		std::vector<HandinEntry>  handin_items;
+		HandinMoney               handin_money;
 		std::vector<HandinEntry>  return_items;
 
 		// cereal
@@ -787,6 +808,7 @@ namespace PlayerEvent {
 				CEREAL_NVP(npc_id),
 				CEREAL_NVP(npc_name),
 				CEREAL_NVP(handin_items),
+				CEREAL_NVP(handin_money),
 				CEREAL_NVP(return_items)
 			);
 		}
