@@ -813,28 +813,36 @@ int lua_get_level(int type) {
 	return quest_manager.getlevel(type);
 }
 
-void lua_create_ground_object(uint32 item_id, float x, float y, float z, float h) {
-	quest_manager.CreateGroundObject(item_id, glm::vec4(x, y, z, h));
+uint16 lua_create_ground_object(uint32 item_id, float x, float y, float z, float h) {
+	return quest_manager.CreateGroundObject(item_id, glm::vec4(x, y, z, h));
 }
 
-void lua_create_ground_object(uint32 item_id, float x, float y, float z, float h, uint32 decay_time) {
-	quest_manager.CreateGroundObject(item_id, glm::vec4(x, y, z, h), decay_time);
+uint16 lua_create_ground_object(uint32 item_id, float x, float y, float z, float h, uint32 decay_time) {
+	return quest_manager.CreateGroundObject(item_id, glm::vec4(x, y, z, h), decay_time);
 }
 
-void lua_create_ground_object_from_model(const char *model, float x, float y, float z, float h) {
-	quest_manager.CreateGroundObjectFromModel(model, glm::vec4(x, y, z, h));
+uint16 lua_create_ground_object_from_model(const char *model, float x, float y, float z, float h) {
+	return quest_manager.CreateGroundObjectFromModel(model, glm::vec4(x, y, z, h));
 }
 
-void lua_create_ground_object_from_model(const char *model, float x, float y, float z, float h, int type) {
-	quest_manager.CreateGroundObjectFromModel(model, glm::vec4(x, y, z, h), type);
+uint16 lua_create_ground_object_from_model(const char *model, float x, float y, float z, float h, uint8 type) {
+	return quest_manager.CreateGroundObjectFromModel(model, glm::vec4(x, y, z, h), type);
 }
 
-void lua_create_ground_object_from_model(const char *model, float x, float y, float z, float h, int type, uint32 decay_time) {
-	quest_manager.CreateGroundObjectFromModel(model, glm::vec4(x, y, z, h), type, decay_time);
+uint16 lua_create_ground_object_from_model(const char *model, float x, float y, float z, float h, uint8 type, uint32 decay_time) {
+	return quest_manager.CreateGroundObjectFromModel(model, glm::vec4(x, y, z, h), type, decay_time);
 }
 
-void lua_create_door(const char *model, float x, float y, float z, float h, int open_type, int size) {
-	quest_manager.CreateDoor(model, x, y, z, h, open_type, size);
+uint16 lua_create_door(const char *model, float x, float y, float z, float h) {
+	return quest_manager.CreateDoor(model, x, y, z, h, 58, 100);
+}
+
+uint16 lua_create_door(const char *model, float x, float y, float z, float h, uint8 open_type) {
+	return quest_manager.CreateDoor(model, x, y, z, h, open_type, 100);
+}
+
+uint16 lua_create_door(const char *model, float x, float y, float z, float h, uint8 open_type, uint16 size) {
+	return quest_manager.CreateDoor(model, x, y, z, h, open_type, size);
 }
 
 void lua_modify_npc_stat(std::string stat, std::string value) {
@@ -3628,6 +3636,26 @@ void lua_set_proximity_range(float x_range, float y_range, float z_range, bool e
 	quest_manager.set_proximity_range(x_range, y_range, z_range, enable_say);
 }
 
+void lua_do_anim(int animation_id)
+{
+	quest_manager.doanim(animation_id);
+}
+
+void lua_do_anim(int animation_id, int animation_speed)
+{
+	quest_manager.doanim(animation_id, animation_speed);
+}
+
+void lua_do_anim(int animation_id, int animation_speed, bool ackreq)
+{
+	quest_manager.doanim(animation_id, animation_speed, ackreq);
+}
+
+void lua_do_anim(int animation_id, int animation_speed, bool ackreq, int filter)
+{
+	quest_manager.doanim(animation_id, animation_speed, ackreq, static_cast<eqFilterType>(filter));
+}
+
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
 	cur = table[#name]; \
 	if(luabind::type(cur) != LUA_TNIL) { \
@@ -3947,12 +3975,14 @@ luabind::scope lua_register_general() {
 		luabind::def("message", &lua_message),
 		luabind::def("whisper", &lua_whisper),
 		luabind::def("get_level", &lua_get_level),
-		luabind::def("create_ground_object", (void(*)(uint32,float,float,float,float))&lua_create_ground_object),
-		luabind::def("create_ground_object", (void(*)(uint32,float,float,float,float,uint32))&lua_create_ground_object),
-		luabind::def("create_ground_object_from_model", (void(*)(const char*,float,float,float,float))&lua_create_ground_object_from_model),
-		luabind::def("create_ground_object_from_model", (void(*)(const char*,float,float,float,float,int))&lua_create_ground_object_from_model),
-		luabind::def("create_ground_object_from_model", (void(*)(const char*,float,float,float,float,int,uint32))&lua_create_ground_object_from_model),
-		luabind::def("create_door", &lua_create_door),
+		luabind::def("create_ground_object", (uint16(*)(uint32,float,float,float,float))&lua_create_ground_object),
+		luabind::def("create_ground_object", (uint16(*)(uint32,float,float,float,float,uint32))&lua_create_ground_object),
+		luabind::def("create_ground_object_from_model", (uint16(*)(const char*,float,float,float,float))&lua_create_ground_object_from_model),
+		luabind::def("create_ground_object_from_model", (uint16(*)(const char*,float,float,float,float,uint8))&lua_create_ground_object_from_model),
+		luabind::def("create_ground_object_from_model", (uint16(*)(const char*,float,float,float,float,uint8,uint32))&lua_create_ground_object_from_model),
+		luabind::def("create_door", (uint16(*)(const char*,float,float,float,float))&lua_create_door),
+		luabind::def("create_door", (uint16(*)(const char*,float,float,float,float,uint8))&lua_create_door),
+		luabind::def("create_door", (uint16(*)(const char*,float,float,float,float,uint8,uint16))&lua_create_door),
 		luabind::def("modify_npc_stat", &lua_modify_npc_stat),
 		luabind::def("collect_items", &lua_collect_items),
 		luabind::def("count_item", &lua_count_item),
@@ -4129,7 +4159,10 @@ luabind::scope lua_register_general() {
 		luabind::def("zone_marquee", (void(*)(uint32,uint32,uint32,uint32,uint32,std::string))&lua_zone_marquee),
 		luabind::def("is_hotzone", (bool(*)(void))&lua_is_hotzone),
 		luabind::def("set_hotzone", (void(*)(bool))&lua_set_hotzone),
-
+		luabind::def("do_anim", (void(*)(int))&lua_do_anim),
+		luabind::def("do_anim", (void(*)(int,int))&lua_do_anim),
+		luabind::def("do_anim", (void(*)(int,int,bool))&lua_do_anim),
+		luabind::def("do_anim", (void(*)(int,int,bool,int))&lua_do_anim),
 		/*
 			Cross Zone
 		*/
@@ -4530,7 +4563,9 @@ luabind::scope lua_register_events() {
 			luabind::value("task_before_update", static_cast<int>(EVENT_TASK_BEFORE_UPDATE)),
 			luabind::value("aa_buy", static_cast<int>(EVENT_AA_BUY)),
 			luabind::value("aa_gain", static_cast<int>(EVENT_AA_GAIN)),
-			luabind::value("payload", static_cast<int>(EVENT_PAYLOAD))
+			luabind::value("payload", static_cast<int>(EVENT_PAYLOAD)),
+			luabind::value("level_down", static_cast<int>(EVENT_LEVEL_DOWN)),
+			luabind::value("gm_command", static_cast<int>(EVENT_GM_COMMAND))
 		];
 }
 

@@ -1269,13 +1269,11 @@ bool Merc::Process()
 	if(tic_timer.Check())
 	{
 		//6 seconds, or whatever the rule is set to has passed, send this position to everyone to avoid ghosting
-		if(!IsMoving() && !IsEngaged())
+		if (!IsEngaged())
 		{
 			SentPositionPacket(0.0f, 0.0f, 0.0f, 0.0f, 0);
-			if(IsSitting()) {
-				if(!rest_timer.Enabled()) {
-					rest_timer.Start(RuleI(Character, RestRegenTimeToActivate) * 1000);
-				}
+			if (!rest_timer.Enabled()) {
+				rest_timer.Start(RuleI(Character, RestRegenTimeToActivate) * 1000);
 			}
 		}
 
@@ -1688,7 +1686,7 @@ void Merc::AI_Process() {
 			if (AI_movement_timer->Check())
 			{
 				if(!IsRooted()) {
-					LogAI("Pursuing [{}] while engaged", GetTarget()->GetCleanName());
+					LogAIDetail("Pursuing [{}] while engaged", GetTarget()->GetCleanName());
 					RunTo(GetTarget()->GetX(), GetTarget()->GetY(), GetTarget()->GetZ());
 					return;
 				}
@@ -1807,7 +1805,7 @@ bool Merc::AI_EngagedCastCheck() {
 	{
 		AIautocastspell_timer->Disable();       //prevent the timer from going off AGAIN while we are casting.
 
-		LogAI("Merc Engaged autocast check triggered");
+		LogAIDetail("Merc Engaged autocast check triggered");
 
 		int8 mercClass = GetClass();
 
@@ -1862,7 +1860,7 @@ bool Merc::AI_IdleCastCheck() {
 
 	if (AIautocastspell_timer->Check(false)) {
 #if MercAI_DEBUG_Spells >= 25
-		LogAI("Merc Non-Engaged autocast check triggered: [{}]", GetCleanName());
+		LogAIDetail("Merc Non-Engaged autocast check triggered: [{}]", GetCleanName());
 #endif
 		AIautocastspell_timer->Disable();       //prevent the timer from going off AGAIN while we are casting.
 
@@ -4305,32 +4303,26 @@ void Merc::MercMeditate(bool isSitting) {
 	{
 		return;
 	}
-	if(isSitting) {
+	if (isSitting) {
 		// If the merc is a caster and has less than 99% mana while its not engaged, he needs to sit to meditate
-		if(GetManaRatio() < 99.0f)
+		if (GetManaRatio() < 99.0f)
 		{
-			if(!IsSitting())
+			if(!IsSitting()) {
 				Sit();
+			}
 		}
 		else
 		{
-			if(IsSitting())
+			if (IsSitting()) {
 				Stand();
+			}
 		}
 	}
 	else
 	{
-		if(IsSitting())
+		if (IsSitting()) {
 			Stand();
-	}
-
-	if(IsSitting()) {
-		if(!rest_timer.Enabled()) {
-			rest_timer.Start(RuleI(Character, RestRegenTimeToActivate) * 1000);
 		}
-	}
-	else {
-		rest_timer.Disable();
 	}
 }
 

@@ -73,7 +73,6 @@ private:
 	std::string dump_path;
 	std::string dump_file_name;
 
-	std::string execute(const std::string &cmd, bool return_result);
 	bool IsMySQLInstalled();
 	std::string GetMySQLVersion();
 	std::string GetBaseMySQLDumpCommand();

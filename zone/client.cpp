@@ -11845,7 +11845,7 @@ bool Client::SendGMCommand(std::string message, bool ignore_status) {
 void Client::RegisterBug(BugReport_Struct* r) {
 	if (!r) {
 		return;
-	};
+	}
 
 	auto b = BugReportsRepository::NewEntity();
 

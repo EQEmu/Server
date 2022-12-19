@@ -285,8 +285,6 @@ public:
 		content_db.GetFactionIdsForNPC(npc_faction_id, &faction_list, &primary_faction);
 	}
 
-	int64 GetFocusEffect(focusType type, uint16 spell_id, Mob* caster = nullptr);
-
     glm::vec4 m_SpawnPoint;
 
 	uint32	GetMaxDMG() const {return max_dmg;}
@@ -585,7 +583,7 @@ protected:
 	virtual bool AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes, bool bInnates = false);
 	virtual bool AIDoSpellCast(uint8 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgainBefore = 0);
 	AISpellsVar_Struct AISpellVar;
-	int64 GetFocusEffect(focusType type, uint16 spell_id, Mob* caster, bool from_buff_tic = false);
+	int64 GetFocusEffect(focusType type, uint16 spell_id, Mob *caster = nullptr, bool from_buff_tic = false);
 	uint16 innate_proc_spell_id;
 
 	uint32	npc_spells_effects_id;

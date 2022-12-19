@@ -1,48 +1,15 @@
 #include "global_define.h"
 #include "eqemu_logsys.h"
 #include "crash.h"
+#include "strings.h"
+#include "process/process.h"
 
-inline std::string random_string(size_t length)
-{
-	auto        randchar = []() -> char {
-		const char   charset[] = "0123456789"
-								 "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-								 "abcdefghijklmnopqrstuvwxyz";
-		const size_t max_index = (sizeof(charset) - 1);
-		return charset[static_cast<size_t>(std::rand()) % max_index];
-	};
-	std::string str(length, 0);
-	std::generate_n(str.begin(), length, randchar);
-	return str;
-}
+#include <cstdio>
 
-std::string execute(const std::string &cmd, bool return_result = true)
-{
-	std::string random     = "/tmp/" + random_string(25);
-	const char  *file_name = random.c_str();
-
-	if (return_result) {
-#ifdef _WINDOWS
-		std::system((cmd + " > " + file_name + " 2>&1").c_str());
-#else
-		std::system((cmd + " > " + file_name + " 2>&1").c_str());
+#if WINDOWS
+#define popen _popen
 #endif
-	}
-	else {
-		std::system((cmd).c_str());
-	}
 
-	std::string result;
-
-	if (return_result) {
-		std::ifstream file(file_name);
-		result = {std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>()};
-		std::remove(file_name);
-
-	}
-
-	return result;
-}
 
 #if defined(_WINDOWS) && defined(CRASH_LOGGING)
 #include "StackWalker.h"
@@ -167,7 +134,7 @@ void set_exception_handler() {
 
 void print_trace()
 {
-	bool does_gdb_exist = execute("gdb -v").find("GNU") != std::string::npos;
+	bool does_gdb_exist = Strings::Contains(Process::execute("gdb -v"), "GNU");
 	if (!does_gdb_exist) {
 		LogCrash(
 			"[Error] GDB is not installed, if you want crash dumps on Linux to work properly you will need GDB installed"
@@ -176,12 +143,12 @@ void print_trace()
 	}
 
 	auto        uid              = geteuid();
-	std::string temp_output_file = "/tmp/dump-output";
+	std::string temp_output_file = fmt::format("/tmp/dump-output-{}", Strings::Random(10));
 
 	// check for passwordless sudo if not root
 	if (uid != 0) {
-		bool has_passwordless_sudo = execute("sudo -n true").find("a password is required") == std::string::npos;
-		if (!has_passwordless_sudo) {
+		bool sudo_password_required = Strings::Contains(Process::execute("sudo -n true"), "a password is required");
+		if (sudo_password_required) {
 			LogCrash(
 				"[Error] Current user does not have passwordless sudo installed. It is required to automatically process crash dumps with GDB as non-root."
 			);
@@ -210,7 +177,7 @@ void print_trace()
 		abort(); /* If gdb failed to start */
 	}
 	else {
-		waitpid(child_pid, NULL, 0);
+		waitpid(child_pid, nullptr, 0);
 	}
 
 	std::ifstream    input(temp_output_file);

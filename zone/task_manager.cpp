@@ -232,7 +232,9 @@ bool TaskManager::LoadTasks(int single_task)
 		);
 
 		for (auto &&e : zones) {
-			ad->zone_ids.push_back(std::stoi(e));
+			if (Strings::IsNumber(e)) {
+				ad->zone_ids.push_back(std::stoi(e));
+			}
 		}
 
 		ad->optional = a.optional;

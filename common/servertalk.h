@@ -605,7 +605,7 @@ struct ServerKickPlayer_Struct {
 	char adminname[64];
 	int16 adminrank;
 	char name[64];
-	uint32 AccountID;
+	uint32 account_id;
 };
 
 struct ServerLSInfo_Struct {

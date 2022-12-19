@@ -825,7 +825,7 @@ void Group::CastGroupSpell(Mob* caster, uint16 spell_id) {
 					caster->SpellOnTarget(spell_id, members[z]->GetPet());
 #endif
 			} else
-				LogSpells("Group spell: [{}] is out of range [{}] at distance [{}] from [{}]", members[z]->GetName(), range, distance, caster->GetName());
+				LogSpells("[Group::CastGroupSpell] Group spell: [{}] is out of range [{}] at distance [{}] from [{}]", members[z]->GetName(), range, distance, caster->GetName());
 		}
 	}
 

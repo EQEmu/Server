@@ -140,6 +140,8 @@ EQEmuLogSys *EQEmuLogSys::LoadLogSettingsDefaults()
 	log_settings[Logs::ChecksumVerification].log_to_gmsay   = static_cast<uint8>(Logs::General);
 	log_settings[Logs::CombatRecord].log_to_gmsay           = static_cast<uint8>(Logs::General);
 	log_settings[Logs::Discord].log_to_console              = static_cast<uint8>(Logs::General);
+	log_settings[Logs::QuestErrors].log_to_gmsay            = static_cast<uint8>(Logs::General);
+	log_settings[Logs::QuestErrors].log_to_console          = static_cast<uint8>(Logs::General);
 
 	/**
 	 * RFC 5424
@@ -254,6 +256,7 @@ uint16 EQEmuLogSys::GetWindowsConsoleColorFromCategory(uint16 log_category)
 			return Console::Color::Yellow;
 		case Logs::MySQLError:
 		case Logs::Error:
+		case Logs::QuestErrors:
 			return Console::Color::LightRed;
 		case Logs::MySQLQuery:
 		case Logs::Debug:
@@ -281,6 +284,7 @@ std::string EQEmuLogSys::GetLinuxConsoleColorFromCategory(uint16 log_category)
 		case Logs::Normal:
 			return LC_YELLOW;
 		case Logs::MySQLError:
+		case Logs::QuestErrors:
 		case Logs::Warning:
 		case Logs::Critical:
 		case Logs::Error:
@@ -311,6 +315,7 @@ uint16 EQEmuLogSys::GetGMSayColorFromCategory(uint16 log_category)
 		case Logs::Normal:
 			return Chat::Yellow;
 		case Logs::MySQLError:
+		case Logs::QuestErrors:
 		case Logs::Error:
 			return Chat::Red;
 		case Logs::MySQLQuery:
@@ -625,7 +630,11 @@ EQEmuLogSys *EQEmuLogSys::LoadLogDatabaseSettings()
 		bool is_missing_in_database = std::find(db_categories.begin(), db_categories.end(), i) == db_categories.end();
 		bool is_deprecated_category = Strings::Contains(fmt::format("{}", Logs::LogCategoryName[i]), "Deprecated");
 		if (!is_missing_in_database && is_deprecated_category) {
-			LogInfo("Logging category [{}] ({}) is now deprecated, deleting from database", Logs::LogCategoryName[i], i);
+			LogInfo(
+				"Logging category [{}] ({}) is now deprecated, deleting from database",
+				Logs::LogCategoryName[i],
+				i
+			);
 			LogsysCategoriesRepository::DeleteOne(*m_database, i);
 		}
 
@@ -754,7 +763,7 @@ const std::string &EQEmuLogSys::GetLogPath() const
 	return m_log_path;
 }
 
-EQEmuLogSys * EQEmuLogSys::SetLogPath(const std::string &log_path)
+EQEmuLogSys *EQEmuLogSys::SetLogPath(const std::string &log_path)
 {
 	EQEmuLogSys::m_log_path = log_path;
 

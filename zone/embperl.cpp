@@ -19,6 +19,9 @@ Eglin
 #include "embxs.h"
 #include "../common/features.h"
 #include "../common/path_manager.h"
+#include "../common/process/process.h"
+#include "../common/file.h"
+#include "../common/timer.h"
 
 #ifndef GvCV_set
 #define GvCV_set(gv,cv)   (GvCV(gv) = (cv))
@@ -229,21 +232,21 @@ int Embperl::eval_file(const char * packagename, const char * filename)
 	std::vector<std::string> args;
 	args.push_back(packagename);
 	args.push_back(filename);
+
 	return dosub("main::eval_file", &args);
 }
 
 int Embperl::dosub(const char * subname, const std::vector<std::string> * args, int mode)
 {
 	dSP;
-	int ret_value = 0;
-	int count;
+	int         ret_value = 0;
+	int         count;
 	std::string error;
 
 	ENTER;
 	SAVETMPS;
 	PUSHMARK(SP);
-	if(args && !args->empty())
-	{
+	if (args && !args->empty()) {
 		for (auto i = args->begin(); i != args->end(); ++i) {
 			XPUSHs(sv_2mortal(newSVpv(i->c_str(), i->length())));
 		}
@@ -253,16 +256,14 @@ int Embperl::dosub(const char * subname, const std::vector<std::string> * args, 
 	count = call_pv(subname, mode);
 	SPAGAIN;
 
-	if(SvTRUE(ERRSV))
-	{
+	if (SvTRUE(ERRSV)) {
 		error = SvPV_nolen(ERRSV);
 		POPs;
 	}
-	else
-	{
-		if(count == 1) {
+	else {
+		if (count == 1) {
 			SV *ret = POPs;
-			if(SvTYPE(ret) == SVt_IV) {
+			if (SvTYPE(ret) == SVt_IV) {
 				IV v = SvIV(ret);
 				ret_value = v;
 			}
@@ -273,8 +274,26 @@ int Embperl::dosub(const char * subname, const std::vector<std::string> * args, 
 	FREETMPS;
 	LEAVE;
 
-	if(error.length() > 0)
-	{
+	// not sure why we pass this as blind args, strange
+	// check for syntax errors
+	if (args && !args->empty()) {
+		const std::string &filename = args->back();
+		std::string sub = subname;
+		if (sub == "main::eval_file" && !filename.empty() && File::Exists(filename)) {
+			BenchTimer benchmark;
+			std::string syntax_error = Process::execute(
+				fmt::format("perl -c {} 2>&1", filename)
+			);
+			LogQuests("Perl eval [{}] took [{}]", filename, benchmark.elapsed());
+			syntax_error = Strings::Trim(syntax_error);
+			if (!Strings::Contains(syntax_error, "syntax OK")) {
+				syntax_error += SvPVX(ERRSV);
+				throw syntax_error;
+			}
+		}
+	}
+
+	if (error.length() > 0) {
 		std::string errmsg = "Perl runtime error: ";
 		errmsg += SvPVX(ERRSV);
 		throw errmsg;

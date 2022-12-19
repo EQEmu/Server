@@ -3727,7 +3727,7 @@ void bot_command_item_use(Client* c, const Seperator* sep)
 				continue;
 			}
 
-			auto equipped_item = bot_iter->GetBotInv()[slot_iter];
+			auto equipped_item = bot_iter->GetInv()[slot_iter];
 
 			if (equipped_item && !empty_only) {
 				linker.SetItemInst(equipped_item);

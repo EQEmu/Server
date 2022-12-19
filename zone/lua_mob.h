@@ -70,10 +70,10 @@ public:
 	uint32 GetLevelCon(int other);
 	uint32 GetLevelCon(int my, int other);
 	void SetHP(int64 hp);
-	void DoAnim(int anim_num);
-	void DoAnim(int anim_num, int type);
-	void DoAnim(int anim_num, int type, bool ackreq);
-	void DoAnim(int anim_num, int type, bool ackreq, int filter);
+	void DoAnim(int animation_id);
+	void DoAnim(int animation_id, int animation_speed);
+	void DoAnim(int animation_id, int animation_speed, bool ackreq);
+	void DoAnim(int animation_id, int animation_speed, bool ackreq, int filter);
 	void ChangeSize(double in_size);
 	void ChangeSize(double in_size, bool no_restriction);
 	bool RandomizeFeatures();

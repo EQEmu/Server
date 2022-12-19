@@ -581,7 +581,7 @@ int64 Client::CalcMaxMana()
 				break;
 			}
 		default: {
-				LogSpells("Invalid Class [{}] in CalcMaxMana", GetCasterClass());
+				LogSpells("[Client::CalcMaxMana] Invalid Class [{}] in CalcMaxMana", GetCasterClass());
 				max_mana = 0;
 				break;
 			}
@@ -599,7 +599,7 @@ int64 Client::CalcMaxMana()
 			current_mana = curMana_cap;
 		}
 	}
-	LogSpells("Client::CalcMaxMana() called for [{}] - returning [{}]", GetName(), max_mana);
+	LogSpells("[Client::CalcMaxMana] for [{}] returning [{}]", GetName(), max_mana);
 	return max_mana;
 }
 
@@ -1663,7 +1663,7 @@ uint32 Mob::GetInstrumentMod(uint16 spell_id)
 		}
 	}
 
-	LogSpells("[{}]::GetInstrumentMod() spell=[{}] mod=[{}] modcap=[{}]\n", GetName(), spell_id, effectmod, effectmodcap);
+	LogSpells("[Mob::GetInstrumentMod] Name [{}] spell [{}] mod [{}] modcap [{}]\n", GetName(), spell_id, effectmod, effectmodcap);
 
 	return effectmod;
 }

@@ -163,11 +163,12 @@ const char *QuestEventSubroutines[_LargestEventID] = {
 	"EVENT_TASK_BEFORE_UPDATE",
 	"EVENT_AA_BUY",
 	"EVENT_AA_GAIN",
-	"EVENT_PAYLOAD"
-  #ifdef BOTS
-	,
+	"EVENT_PAYLOAD",
+	"EVENT_LEVEL_DOWN",
+	"EVENT_GM_COMMAND",
+#ifdef BOTS
 	"EVENT_SPELL_EFFECT_BOT",
-	"EVENT_SPELL_EFFECT_BUFF_TIC_BOT"
+	"EVENT_SPELL_EFFECT_BUFF_TIC_BOT",
 #endif
 };
 
@@ -1703,6 +1704,7 @@ void PerlembParser::ExportEventVariables(
 			ExportVar(package_name.c_str(), "popupid", data);
 			break;
 		}
+
 		case EVENT_ENVIRONMENTAL_DAMAGE: {
 			Seperator sep(data);
 			ExportVar(package_name.c_str(), "env_damage", sep.arg[0]);
@@ -1845,6 +1847,7 @@ void PerlembParser::ExportEventVariables(
 			}
 			break;
 		}
+
 		case EVENT_DROP_ITEM: {
 			ExportVar(package_name.c_str(), "quantity", item_inst->IsStackable() ? item_inst->GetCharges() : 1);
 			ExportVar(package_name.c_str(), "itemname", item_inst->GetItem()->Name);
@@ -1853,17 +1856,20 @@ void PerlembParser::ExportEventVariables(
 			ExportVar(package_name.c_str(), "slotid", extradata);
 			break;
 		}
+
 		case EVENT_SPAWN_ZONE: {
 			ExportVar(package_name.c_str(), "spawned_entity_id", mob->GetID());
 			ExportVar(package_name.c_str(), "spawned_npc_id", mob->GetNPCTypeID());
 			break;
 		}
+
 		case EVENT_USE_SKILL: {
 			Seperator sep(data);
 			ExportVar(package_name.c_str(), "skill_id", sep.arg[0]);
 			ExportVar(package_name.c_str(), "skill_level", sep.arg[1]);
 			break;
 		}
+
 		case EVENT_COMBINE_VALIDATE: {
 			Seperator sep(data);
 			ExportVar(package_name.c_str(), "recipe_id", extradata);
@@ -1882,6 +1888,7 @@ void PerlembParser::ExportEventVariables(
 			ExportVar(package_name.c_str(), "tradeskill_id", tradeskill_id.c_str());
 			break;
 		}
+
 		case EVENT_BOT_COMMAND: {
 			Seperator sep(data);
 			ExportVar(package_name.c_str(), "bot_command", (sep.arg[0] + 1));
@@ -1891,6 +1898,7 @@ void PerlembParser::ExportEventVariables(
 			ExportVar(package_name.c_str(), "langid", extradata);
 			break;
 		}
+
 		case EVENT_WARP: {
 			Seperator sep(data);
 			ExportVar(package_name.c_str(), "from_x", sep.arg[0]);
@@ -1978,6 +1986,21 @@ void PerlembParser::ExportEventVariables(
 
 		case EVENT_INSPECT: {
 			ExportVar(package_name.c_str(), "target_id", extradata);
+			break;
+		}
+
+		case EVENT_LEVEL_UP: {
+			ExportVar(package_name.c_str(), "levels_gained", data);
+			break;
+		}
+
+		case EVENT_LEVEL_DOWN: {
+			ExportVar(package_name.c_str(), "levels_lost", data);
+			break;
+		}
+
+		case EVENT_GM_COMMAND: {
+			ExportVar(package_name.c_str(), "message", data);
 			break;
 		}
 

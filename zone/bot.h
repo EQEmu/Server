@@ -364,7 +364,6 @@ public:
 
 	// Mob Spell Virtual Override Methods
 	virtual void SpellProcess();
-	virtual int64 GetActSpellDamage(uint16 spell_id, int64 value, Mob* target = nullptr);
 	virtual int64 GetActSpellHealing(uint16 spell_id, int64 value, Mob* target = nullptr);
 	virtual int32 GetActSpellCasttime(uint16 spell_id, int32 casttime);
 	virtual int32 GetActSpellCost(uint16 spell_id, int32 cost);
@@ -389,7 +388,7 @@ public:
 	void EquipBot(std::string* error_message);
 	bool CheckLoreConflict(const EQ::ItemData* item);
 	virtual void UpdateEquipmentLight() { m_Light.Type[EQ::lightsource::LightEquipment] = m_inv.FindBrightestLightType(); m_Light.Level[EQ::lightsource::LightEquipment] = EQ::lightsource::TypeToLevel(m_Light.Type[EQ::lightsource::LightEquipment]); }
-	const EQ::InventoryProfile& GetBotInv() const { return m_inv; }
+	inline EQ::InventoryProfile& GetInv() { return m_inv; }
 
 	// Static Class Methods
 	//static void DestroyBotRaidObjects(Client* client);	// Can be removed after bot raids are dumped
@@ -581,6 +580,16 @@ public:
 
 	// "Quest API" Methods
 	bool HasBotSpellEntry(uint16 spellid);
+	void ApplySpell(int spell_id, int duration = 0, ApplySpellType apply_type = ApplySpellType::Solo, bool allow_pets = false, bool is_raid_group_only = true);
+	void BreakInvis();
+	void Escape();
+	void Fling(float value, float target_x, float target_y, float target_z, bool ignore_los = false, bool clip_through_walls = false, bool calculate_speed = false);
+	std::vector<Mob*> GetApplySpellList(ApplySpellType apply_type, bool allow_pets, bool is_raid_group_only);
+	int32 GetItemIDAt(int16 slot_id);
+	int32 GetAugmentIDAt(int16 slot_id, uint8 augslot);
+	int32 GetRawItemAC();
+	void SendSpellAnim(uint16 targetid, uint16 spell_id);
+	void SetSpellDuration(int spell_id, int duration = 0, ApplySpellType apply_type = ApplySpellType::Solo, bool allow_pets = false, bool is_raid_group_only = true);
 
 	// "SET" Class Methods
 	void SetBotSpellID(uint32 newSpellID);
@@ -727,9 +736,6 @@ protected:
 	virtual void PetAIProcess();
 	virtual void BotMeditate(bool isSitting);
 	virtual bool CheckBotDoubleAttack(bool Triple = false);
-	virtual int32 GetBotFocusEffect(focusType bottype, uint16 spell_id, bool from_buff_tic = false);
-	virtual int32 CalcBotFocusEffect(focusType bottype, uint16 focus_id, uint16 spell_id, bool best_focus=false);
-	virtual int32 CalcBotAAFocus(focusType type, uint32 aa_ID, uint32 points, uint16 spell_id);
 	virtual void PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client* client);
 	virtual bool AIDoSpellCast(uint8 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgainBefore = 0);
 
