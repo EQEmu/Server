@@ -980,24 +980,28 @@ bool Mob::IsBeneficialAllowed(Mob *target)
 
 bool Mob::CombatRange(Mob* other, float fixed_size_mod, bool aeRampage)
 {
-	if(!other)
+	if (!other) {
 		return(false);
+	}
 
 	float size_mod = GetSize();
 	float other_size_mod = other->GetSize();
 
-	if(GetRace() == 49 || GetRace() == 158 || GetRace() == 196) //For races with a fixed size
+	if (GetRace() == RT_DRAGON || GetRace() == RT_WURM || GetRace() == RACE_GHOST_DRAGON_196) { //For races with a fixed size
 		size_mod = 60.0f;
-	else if (size_mod < 6.0)
+	}
+	else if (size_mod < 6.0) {
 		size_mod = 8.0f;
+	}
 
-	if(other->GetRace() == 49 || other->GetRace() == 158 || other->GetRace() == 196) //For races with a fixed size
+	if (other->GetRace() == RT_DRAGON || other->GetRace() == RT_WURM || other->GetRace() == RACE_GHOST_DRAGON_196) { //For races with a fixed size
 		other_size_mod = 60.0f;
-	else if (other_size_mod < 6.0)
+	}
+	else if (other_size_mod < 6.0) {
 		other_size_mod = 8.0f;
+	}
 
-	if (other_size_mod > size_mod)
-	{
+	if (other_size_mod > size_mod) {
 		size_mod = other_size_mod;
 	}
 
@@ -1011,11 +1015,11 @@ bool Mob::CombatRange(Mob* other, float fixed_size_mod, bool aeRampage)
 		size_mod *= size_mod * 4;
 	}
 
-	if (other->GetRace() == 184)		// Lord Vyemm and other velious dragons
+	if (other->GetRace() == RT_DRAGON_4)		// Lord Vyemm and other velious dragons
 	{
 		size_mod *= 1.75;
 	}
-	if (other->GetRace() == 122)		// Dracoliche in Fear.  Skeletal Dragon
+	if (other->GetRace() == RACE_DRAGON_SKELETON_122)		// Dracoliche in Fear.  Skeletal Dragon
 	{
 		size_mod *= 2.25;
 	}
@@ -1029,44 +1033,48 @@ bool Mob::CombatRange(Mob* other, float fixed_size_mod, bool aeRampage)
 	// improved playability and "you are too far away" while chasing
 	// a fleeing mob.  The Blind check is to make sure that this does not
 	// apply to disoriented fleeing mobs who need proximity to turn and fight.
-	if  (other->currently_fleeing && !other->IsBlind())
-	{
+	if  (other->currently_fleeing && !other->IsBlind()) {
 		size_mod *= 3;
 	}
 
 	// prevention of ridiculously sized hit boxes
-	if (size_mod > 10000)
+	if (size_mod > 10000) {
 		size_mod = size_mod / 7;
+	}
 
 	float _DistNoRoot = DistanceSquaredNoZ(m_Position, other->GetPosition());
 	float _zDist = m_Position.z - other->GetZ();
 	_zDist *= _zDist;
 
-	if (GetSpecialAbility(NPC_CHASE_DISTANCE)){
+	if (GetSpecialAbility(NPC_CHASE_DISTANCE)) {
 
 		bool DoLoSCheck = true;
 		float max_dist = static_cast<float>(GetSpecialAbilityParam(NPC_CHASE_DISTANCE, 0));
 		float min_distance = static_cast<float>(GetSpecialAbilityParam(NPC_CHASE_DISTANCE, 1));
 
-		if (GetSpecialAbilityParam(NPC_CHASE_DISTANCE, 2))
+		if (GetSpecialAbilityParam(NPC_CHASE_DISTANCE, 2)) {
 			DoLoSCheck = false; //Ignore line of sight check
+		}
 
-		if (max_dist == 1)
+		if (max_dist == 1) {
 			max_dist = 250.0f; //Default it to 250 if you forget to put a value
+		}
 
 		max_dist = max_dist * max_dist;
 
-		if (!min_distance)
+		if (!min_distance) {
 			min_distance = size_mod; //Default to melee range
-		else
+		} else {
 			min_distance = min_distance * min_distance;
+		}
 
-		if ((DoLoSCheck && CheckLastLosState()) && (_DistNoRoot >= min_distance && _DistNoRoot <= max_dist))
+		if ((DoLoSCheck && CheckLastLosState()) && (_DistNoRoot >= min_distance && _DistNoRoot <= max_dist)) {
 			SetPseudoRoot(true);
-		else
+		} else {
 			SetPseudoRoot(false);
+		}
 	}
-	if(aeRampage) {
+	if (aeRampage) {
 		float multiplyer = GetSize() * RuleR(Combat, AERampageSafeZone);
 		float ramp_range = (size_mod * multiplyer);
 		if (_DistNoRoot <= ramp_range) {
