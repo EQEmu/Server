@@ -35,7 +35,9 @@
 
 #include "bot.h"
 #include "../common/events/player_event_logs.h"
+#include "worldserver.h"
 
+extern WorldServer worldserver;
 
 extern QueryServ* QServ;
 

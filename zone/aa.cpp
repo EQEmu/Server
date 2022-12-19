@@ -36,9 +36,11 @@ Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 #include "titles.h"
 #include "zonedb.h"
 #include "../common/zone_store.h"
+#include "worldserver.h"
 
 #include "bot.h"
 
+extern WorldServer worldserver;
 extern QueryServ* QServ;
 
 void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, uint32 duration_override, bool followme, bool sticktarg, uint16 *eye_id) {
