@@ -62,7 +62,7 @@ public:
 
 		std::vector<CharacterExpedition> entries;
 
-		auto joined_character_names = fmt::format("'{}'", fmt::join(character_names, "','"));
+		auto joined_character_names = fmt::format("'{}'", Strings::Join(character_names, "','"));
 
 		auto results = db.QueryDatabase(fmt::format(SQL(
 			SELECT

@@ -225,6 +225,20 @@ std::string Strings::Join(const std::vector<std::string> &ar, const std::string 
 	return ret;
 }
 
+std::string Strings::Join(const std::vector<uint32_t> &ar, const std::string &delim)
+{
+	std::string ret;
+	for (size_t i = 0; i < ar.size(); ++i) {
+		if (i != 0) {
+			ret += delim;
+		}
+
+		ret += std::to_string(ar[i]);
+	}
+
+	return ret;
+}
+
 void
 Strings::FindReplace(std::string &string_subject, const std::string &search_string, const std::string &replace_string)
 {
