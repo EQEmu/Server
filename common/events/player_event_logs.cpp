@@ -202,11 +202,11 @@ std::string PlayerEventLogs::GetDiscordWebhookUrlFromEventType(int32_t event_typ
 }
 
 // GM_COMMAND           | [x] Implemented Formatter
-// ZONING               | [] Implemented Formatter
-// AA_GAIN              | [] Implemented Formatter
-// AA_PURCHASE          | [] Implemented Formatter
-// FORAGE_SUCCESS       | [] Implemented Formatter
-// FORAGE_FAILURE       | [] Implemented Formatter
+// ZONING               | [x] Implemented Formatter
+// AA_GAIN              | [x] Implemented Formatter
+// AA_PURCHASE          | [x] Implemented Formatter
+// FORAGE_SUCCESS       | [x] Implemented Formatter
+// FORAGE_FAILURE       | [x] Implemented Formatter
 // FISH_SUCCESS         | [] Implemented Formatter
 // FISH_FAILURE         | [] Implemented Formatter
 // ITEM_DESTROY         | [] Implemented Formatter
@@ -248,6 +248,54 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 {
 	std::string payload;
 	switch (e.player_event_log.event_type_id) {
+		case PlayerEvent::AA_GAIN: {
+			PlayerEvent::AAGainedEvent n;
+			std::stringstream     ss;
+			{
+				ss << e.player_event_log.event_data;
+				cereal::JSONInputArchive ar(ss);
+				n.serialize(ar);
+			}
+			payload = PlayerEventDiscordFormatter::FormatAAGainedEvent(e, n);
+			break;
+		}
+		case PlayerEvent::AA_PURCHASE: {
+			PlayerEvent::AAPurchasedEvent n;
+			std::stringstream     ss;
+			{
+				ss << e.player_event_log.event_data;
+				cereal::JSONInputArchive ar(ss);
+				n.serialize(ar);
+			}
+			payload = PlayerEventDiscordFormatter::FormatAAPurchasedEvent(e, n);
+			break;
+		}
+		case PlayerEvent::FORAGE_FAILURE: {
+			payload = PlayerEventDiscordFormatter::FormatWithNodata(e);
+			break;
+		}
+		case PlayerEvent::FORAGE_SUCCESS: {
+			PlayerEvent::ForageSuccessEvent n;
+			std::stringstream     ss;
+			{
+				ss << e.player_event_log.event_data;
+				cereal::JSONInputArchive ar(ss);
+				n.serialize(ar);
+			}
+			payload = PlayerEventDiscordFormatter::FormatForageSuccessEvent(e, n);
+			break;
+		}
+		case PlayerEvent::ITEM_DESTROY: {
+			PlayerEvent::DestroyItemEvent n;
+			std::stringstream     ss;
+			{
+				ss << e.player_event_log.event_data;
+				cereal::JSONInputArchive ar(ss);
+				n.serialize(ar);
+			}
+			payload = PlayerEventDiscordFormatter::FormatDestroyItemEvent(e, n);
+			break;
+		}
 		case PlayerEvent::SAY: {
 			PlayerEvent::SayEvent n;
 			std::stringstream     ss;
@@ -286,6 +334,18 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 			}
 
 			payload = PlayerEventDiscordFormatter::FormatMerchantSellEvent(e, n);
+			break;
+		}
+		case PlayerEvent::ZONING: {
+			PlayerEvent::ZoningEvent n;
+			std::stringstream        ss;
+			{
+				ss << e.player_event_log.event_data;
+				cereal::JSONInputArchive ar(ss);
+				n.serialize(ar);
+			}
+
+			payload = PlayerEventDiscordFormatter::FormatZoningEvent(e, n);
 			break;
 		}
 	}

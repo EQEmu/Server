@@ -190,3 +190,160 @@ std::string PlayerEventDiscordFormatter::FormatMerchantSellEvent(
 
 	return ss.str();
 }
+
+std::string PlayerEventDiscordFormatter::FormatZoningEvent(
+	const PlayerEvent::PlayerEventContainer &c,
+	const PlayerEvent::ZoningEvent &e
+)
+{
+	std::string instance_id_info;
+	std::string instance_version_info;
+
+	if (e.to_instance_id > 0 || e.from_instance_id > 0) {
+		instance_id_info = fmt::format("Instance ID ({}) -> ({})", e.from_instance_id, e.to_instance_id);
+	}
+
+	if (e.from_instance_version > 0 || e.to_instance_version > 0) {
+		instance_version_info = fmt::format("Instance Version ({}) -> ({})", e.from_instance_version, e.to_instance_version);
+	}
+
+	std::vector<DiscordField> f = {};
+	BuildBaseFields(&f, c);
+	BuildDiscordField(
+		&f, 
+		"Zoning Information", 
+		fmt::format("Zone ID ({}) -> ({}) \n{} \n{}",
+		e.from_zone_id, e.to_zone_id, instance_id_info, instance_version_info)
+	);
+
+	std::vector<DiscordEmbed> embeds = {};
+	BuildBaseEmbed(&embeds, f, c);
+	DiscordEmbedRoot  root = DiscordEmbedRoot{
+		.embeds = embeds
+	};
+	std::stringstream ss;
+	{
+		cereal::JSONOutputArchive ar(ss);
+		root.serialize(ar);
+	}
+
+	return ss.str();
+}
+
+std::string PlayerEventDiscordFormatter::FormatAAGainedEvent(
+	const PlayerEvent::PlayerEventContainer &c,
+	const PlayerEvent::AAGainedEvent &e
+)
+{
+	std::vector<DiscordField> f = {};
+	BuildBaseFields(&f, c);
+	BuildDiscordField(
+		&f, 
+		"Points Gained", 
+		fmt::format("AA Gained ({})",
+		e.aa_gained)
+	);
+
+	std::vector<DiscordEmbed> embeds = {};
+	BuildBaseEmbed(&embeds, f, c);
+	DiscordEmbedRoot  root = DiscordEmbedRoot{
+		.embeds = embeds
+	};
+	std::stringstream ss;
+	{
+		cereal::JSONOutputArchive ar(ss);
+		root.serialize(ar);
+	}
+
+	return ss.str();
+}
+
+std::string PlayerEventDiscordFormatter::FormatAAPurchasedEvent(
+	const PlayerEvent::PlayerEventContainer &c,
+	const PlayerEvent::AAPurchasedEvent &e
+)
+{
+	std::string aa_info;
+	if (e.aa_previous_id != -1 || e.aa_next_id != -1) {
+		aa_info = fmt::format("AA Previous ID ({}) \nAA Next ID ({})", e.aa_previous_id, e.aa_next_id);
+	}
+
+	std::vector<DiscordField> f = {};
+	BuildBaseFields(&f, c);
+	BuildDiscordField(
+		&f, 
+		"AA Purchased", 
+		fmt::format("AA ID ({}) \nAA Cost ({}) \n{}",
+		e.aa_id, e.aa_cost, aa_info)
+	);
+
+	std::vector<DiscordEmbed> embeds = {};
+	BuildBaseEmbed(&embeds, f, c);
+	DiscordEmbedRoot  root = DiscordEmbedRoot{
+		.embeds = embeds
+	};
+	std::stringstream ss;
+	{
+		cereal::JSONOutputArchive ar(ss);
+		root.serialize(ar);
+	}
+
+	return ss.str();
+}
+
+std::string PlayerEventDiscordFormatter::FormatForageSuccessEvent(
+	const PlayerEvent::PlayerEventContainer &c,
+	const PlayerEvent::ForageSuccessEvent &e
+)
+{
+	std::vector<DiscordField> f = {};
+	BuildBaseFields(&f, c);
+	BuildDiscordField(
+		&f, 
+		"Foraged Item", 
+		fmt::format("Item ID ({}) \nItem Name ({})",
+		e.item_id, e.item_name)
+	);
+
+	std::vector<DiscordEmbed> embeds = {};
+	BuildBaseEmbed(&embeds, f, c);
+	DiscordEmbedRoot  root = DiscordEmbedRoot{
+		.embeds = embeds
+	};
+	std::stringstream ss;
+	{
+		cereal::JSONOutputArchive ar(ss);
+		root.serialize(ar);
+	}
+
+	return ss.str();
+}
+
+std::string PlayerEventDiscordFormatter::FormatDestroyItemEvent(
+	const PlayerEvent::PlayerEventContainer &c,
+	const PlayerEvent::DestroyItemEvent &e
+)
+{
+	std::vector<DiscordField> f = {};
+	BuildBaseFields(&f, c);
+	BuildDiscordField(
+		&f, 
+		"Destroyed Item", 
+		fmt::format("{} ({}) \nCharges ({}) \nReason ({})",
+		e.item_name, e.item_id, e.charges, e.reason)
+	);
+
+	std::vector<DiscordEmbed> embeds = {};
+	BuildBaseEmbed(&embeds, f, c);
+	DiscordEmbedRoot  root = DiscordEmbedRoot{
+		.embeds = embeds
+	};
+	std::stringstream ss;
+	{
+		cereal::JSONOutputArchive ar(ss);
+		root.serialize(ar);
+	}
+
+	return ss.str();
+}
+

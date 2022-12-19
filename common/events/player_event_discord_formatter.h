@@ -72,6 +72,23 @@ public:
 		PlayerEvent::PlayerEventContainer c
 	);
 	static std::string FormatWithNodata(const PlayerEvent::PlayerEventContainer &c);
+
+	static std::string FormatAAGainedEvent(
+	const PlayerEvent::PlayerEventContainer &c,
+	const PlayerEvent::AAGainedEvent &e
+	);
+	static std::string FormatAAPurchasedEvent(
+	const PlayerEvent::PlayerEventContainer &c,
+	const PlayerEvent::AAPurchasedEvent &e
+	);
+	static std::string FormatForageSuccessEvent(
+	const PlayerEvent::PlayerEventContainer &c,
+	const PlayerEvent::ForageSuccessEvent &e
+	);
+	static std::string FormatDestroyItemEvent(
+	const PlayerEvent::PlayerEventContainer &c,
+	const PlayerEvent::DestroyItemEvent &e
+	);
 	static std::string FormatMerchantPurchaseEvent(
 		const PlayerEvent::PlayerEventContainer &c,
 		const PlayerEvent::MerchantPurchaseEvent &e
@@ -80,6 +97,14 @@ public:
 		const PlayerEvent::PlayerEventContainer &c,
 		const PlayerEvent::MerchantSellEvent &e
 	);
+	static std::string FormatZoningEvent(
+	const PlayerEvent::PlayerEventContainer &c,
+	const PlayerEvent::ZoningEvent &e
+	);
+
+
+
+
 };
 
 
