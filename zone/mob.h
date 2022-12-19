@@ -1594,7 +1594,7 @@ protected:
 #endif
 	int GetBaseSkillDamage(EQ::skills::SkillType skill, Mob *target = nullptr);
 	int64 GetFocusEffect(focusType type, uint16 spell_id, Mob *caster = nullptr, bool from_buff_tic = false);
-	virtual const EQ::InventoryProfile& GetInv() { return EQ::InventoryProfile(); }
+	virtual EQ::InventoryProfile& GetInv() { return m_inv; }
 	void CalculateNewFearpoint();
 	float FindGroundZ(float new_x, float new_y, float z_offset=0.0);
 	float FindDestGroundZ(glm::vec3 dest, float z_offset=0.0);
@@ -1863,7 +1863,7 @@ protected:
 
 private:
 	Mob* target;
-
+	EQ::InventoryProfile m_inv;
 
 #ifdef BOTS
 	std::shared_ptr<HealRotation> m_target_of_heal_rotation;
