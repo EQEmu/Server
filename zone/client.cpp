@@ -645,16 +645,24 @@ bool Client::Save(uint8 iCommitNow) {
 
 	m_pp.guildrank = guildrank;
 
-	/* Mana and HP */
-	if (GetHP() <= 0) {
-		m_pp.cur_hp = GetMaxHP();
-	}
-	else {
-		m_pp.cur_hp = GetHP();
-	}
+	if (dead && GetHP() <= 0) {
+		m_pp.cur_hp    = GetMaxHP();
+		if (RuleB(Character, ManaOnDeath)) {
+			m_pp.mana      = GetMaxMana();
+		} else {
+			m_pp.mana      = current_mana;
+		}
 
-	m_pp.mana = current_mana;
-	m_pp.endurance = current_endurance;
+		if (RuleB(Character, EndurOnDeath)) {
+			m_pp.endurance = GetMaxEndurance();
+		} else {
+			m_pp.endurance = current_endurance;
+		}
+	} else { 	// Otherwise, no changes.
+		m_pp.cur_hp    = GetHP();
+		m_pp.mana      = current_mana;
+		m_pp.endurance = current_endurance;
+	}
 
 	/* Save Character Currency */
 	database.SaveCharacterCurrency(CharacterID(), &m_pp);
