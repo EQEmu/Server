@@ -44,9 +44,10 @@
 #include <tuple>
 #include <type_traits>
 
+#include <fmt/format.h>
+
 #ifndef _WIN32
 // this doesn't appear to affect linux-based systems..need feedback for _WIN64
-#include <fmt/format.h>
 
 #endif
 
