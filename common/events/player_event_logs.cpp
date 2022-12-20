@@ -209,31 +209,31 @@ std::string PlayerEventLogs::GetDiscordWebhookUrlFromEventType(int32_t event_typ
 // FORAGE_FAILURE       | [x] Implemented Formatter
 // FISH_SUCCESS         | [] Implemented Formatter
 // FISH_FAILURE         | [] Implemented Formatter
-// ITEM_DESTROY         | [] Implemented Formatter
+// ITEM_DESTROY         | [x] Implemented Formatter
 // WENT_ONLINE          | [x] Implemented Formatter
 // WENT_OFFLINE         | [x] Implemented Formatter
-// LEVEL_GAIN           | [] Implemented Formatter
-// LEVEL_LOSS           | [] Implemented Formatter
-// LOOT_ITEM            | [] Implemented Formatter
+// LEVEL_GAIN           | [x] Implemented Formatter
+// LEVEL_LOSS           | [x] Implemented Formatter
+// LOOT_ITEM            | [x] Implemented Formatter
 // MERCHANT_PURCHASE    | [x] Implemented Formatter
 // MERCHANT_SELL        | [x] Implemented Formatter
 // GROUP_JOIN           | [] Implemented Formatter
 // GROUP_LEAVE          | [] Implemented Formatter
 // RAID_JOIN            | [] Implemented Formatter
 // RAID_LEAVE           | [] Implemented Formatter
-// GROUNDSPAWN_PICKUP   | [] Implemented Formatter
+// GROUNDSPAWN_PICKUP   | [x] Implemented Formatter
 // NPC_HANDIN           | [] Implemented Formatter
-// SKILL_UP             | [] Implemented Formatter
-// TASK_ACCEPT          | [] Implemented Formatter
-// TASK_UPDATE          | [] Implemented Formatter
-// TASK_COMPLETE        | [] Implemented Formatter
+// SKILL_UP             | [x] Implemented Formatter
+// TASK_ACCEPT          | [x] Implemented Formatter
+// TASK_UPDATE          | [x] Implemented Formatter
+// TASK_COMPLETE        | [x] Implemented Formatter
 // TRADE                | [] Implemented Formatter
 // GIVE_ITEM            | [] Implemented Formatter
 // SAY                  | [] Implemented Formatter
-// REZ_ACCEPTED         | [] Implemented Formatter
+// REZ_ACCEPTED         | [x] Implemented Formatter
 // DEATH                | [] Implemented Formatter
-// COMBINE_FAILURE      | [] Implemented Formatter
-// COMBINE_SUCCESS      | [] Implemented Formatter
+// COMBINE_FAILURE      | [x] Implemented Formatter
+// COMBINE_SUCCESS      | [x] Implemented Formatter
 // DROPPED_ITEM         | [] Implemented Formatter
 // SPLIT_MONEY          | [] Implemented Formatter
 // DZ_JOIN              | [] Implemented Formatter
@@ -270,6 +270,18 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 			payload = PlayerEventDiscordFormatter::FormatAAPurchasedEvent(e, n);
 			break;
 		}
+		case PlayerEvent::COMBINE_FAILURE:
+		case PlayerEvent::COMBINE_SUCCESS: {
+			PlayerEvent::CombineEvent n;
+			std::stringstream     ss;
+			{
+				ss << e.player_event_log.event_data;
+				cereal::JSONInputArchive ar(ss);
+				n.serialize(ar);
+			}
+			payload = PlayerEventDiscordFormatter::FormatCombineEvent(e, n);
+			break;
+		}
 		case PlayerEvent::FORAGE_FAILURE: {
 			payload = PlayerEventDiscordFormatter::FormatWithNodata(e);
 			break;
@@ -296,6 +308,50 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 			payload = PlayerEventDiscordFormatter::FormatDestroyItemEvent(e, n);
 			break;
 		}
+		case PlayerEvent::LEVEL_GAIN: {
+			PlayerEvent::LevelGainedEvent n;
+			std::stringstream     ss;
+			{
+				ss << e.player_event_log.event_data;
+				cereal::JSONInputArchive ar(ss);
+				n.serialize(ar);
+			}
+			payload = PlayerEventDiscordFormatter::FormatLevelGainedEvent(e, n);
+			break;
+		}
+		case PlayerEvent::LEVEL_LOSS: {
+			PlayerEvent::LevelLostEvent n;
+			std::stringstream     ss;
+			{
+				ss << e.player_event_log.event_data;
+				cereal::JSONInputArchive ar(ss);
+				n.serialize(ar);
+			}
+			payload = PlayerEventDiscordFormatter::FormatLevelLostEvent(e, n);
+			break;
+		}
+		case PlayerEvent::LOOT_ITEM: {
+			PlayerEvent::LootItemEvent n;
+			std::stringstream     ss;
+			{
+				ss << e.player_event_log.event_data;
+				cereal::JSONInputArchive ar(ss);
+				n.serialize(ar);
+			}
+			payload = PlayerEventDiscordFormatter::FormatLootItemEvent(e, n);
+			break;
+		}
+		case PlayerEvent::GROUNDSPAWN_PICKUP: {
+			PlayerEvent::GroundSpawnPickupEvent n;
+			std::stringstream     ss;
+			{
+				ss << e.player_event_log.event_data;
+				cereal::JSONInputArchive ar(ss);
+				n.serialize(ar);
+			}
+			payload = PlayerEventDiscordFormatter::FormatGroundSpawnPickupEvent(e, n);
+			break;
+		}
 		case PlayerEvent::SAY: {
 			PlayerEvent::SayEvent n;
 			std::stringstream     ss;
@@ -305,6 +361,61 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 				n.serialize(ar);
 			}
 			payload = PlayerEventDiscordFormatter::FormatEventSay(e, n);
+			break;
+		}
+		case PlayerEvent::SKILL_UP: {
+			PlayerEvent::SkillUpEvent n;
+			std::stringstream     ss;
+			{
+				ss << e.player_event_log.event_data;
+				cereal::JSONInputArchive ar(ss);
+				n.serialize(ar);
+			}
+			payload = PlayerEventDiscordFormatter::FormatSkillUpEvent(e, n);
+			break;
+		}
+		case PlayerEvent::TASK_ACCEPT: {
+			PlayerEvent::TaskAcceptEvent n;
+			std::stringstream     ss;
+			{
+				ss << e.player_event_log.event_data;
+				cereal::JSONInputArchive ar(ss);
+				n.serialize(ar);
+			}
+			payload = PlayerEventDiscordFormatter::FormatTaskAcceptEvent(e, n);
+			break;
+		}
+		case PlayerEvent::TASK_COMPLETE: {
+			PlayerEvent::TaskCompleteEvent n;
+			std::stringstream     ss;
+			{
+				ss << e.player_event_log.event_data;
+				cereal::JSONInputArchive ar(ss);
+				n.serialize(ar);
+			}
+			payload = PlayerEventDiscordFormatter::FormatTaskCompleteEvent(e, n);
+			break;
+		}
+		case PlayerEvent::TASK_UPDATE: {
+			PlayerEvent::TaskUpdateEvent n;
+			std::stringstream     ss;
+			{
+				ss << e.player_event_log.event_data;
+				cereal::JSONInputArchive ar(ss);
+				n.serialize(ar);
+			}
+			payload = PlayerEventDiscordFormatter::FormatTaskUpdateEvent(e, n);
+			break;
+		}
+		case PlayerEvent::REZ_ACCEPTED: {
+			PlayerEvent::ResurrectAcceptEvent n;
+			std::stringstream     ss;
+			{
+				ss << e.player_event_log.event_data;
+				cereal::JSONInputArchive ar(ss);
+				n.serialize(ar);
+			}
+			payload = PlayerEventDiscordFormatter::FormatResurrectAcceptEvent(e, n);
 			break;
 		}
 		case PlayerEvent::WENT_ONLINE:

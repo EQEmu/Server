@@ -347,3 +347,289 @@ std::string PlayerEventDiscordFormatter::FormatDestroyItemEvent(
 	return ss.str();
 }
 
+std::string PlayerEventDiscordFormatter::FormatLevelGainedEvent(
+	const PlayerEvent::PlayerEventContainer &c,
+	const PlayerEvent::LevelGainedEvent &e
+)
+{
+	std::vector<DiscordField> f = {};
+	BuildBaseFields(&f, c);
+	BuildDiscordField(
+		&f, 
+		"Levels Gained", 
+		fmt::format("(+{})",
+		e.levels_gained)
+	);
+
+	std::vector<DiscordEmbed> embeds = {};
+	BuildBaseEmbed(&embeds, f, c);
+	DiscordEmbedRoot  root = DiscordEmbedRoot{
+		.embeds = embeds
+	};
+	std::stringstream ss;
+	{
+		cereal::JSONOutputArchive ar(ss);
+		root.serialize(ar);
+	}
+
+	return ss.str();
+}
+
+std::string PlayerEventDiscordFormatter::FormatLevelLostEvent(
+	const PlayerEvent::PlayerEventContainer &c,
+	const PlayerEvent::LevelLostEvent &e
+)
+{
+	std::vector<DiscordField> f = {};
+	BuildBaseFields(&f, c);
+	BuildDiscordField(
+		&f, 
+		"Levels Lost", 
+		fmt::format("(-{})",
+		e.levels_lost)
+	);
+
+	std::vector<DiscordEmbed> embeds = {};
+	BuildBaseEmbed(&embeds, f, c);
+	DiscordEmbedRoot  root = DiscordEmbedRoot{
+		.embeds = embeds
+	};
+	std::stringstream ss;
+	{
+		cereal::JSONOutputArchive ar(ss);
+		root.serialize(ar);
+	}
+
+	return ss.str();
+}
+
+std::string PlayerEventDiscordFormatter::FormatLootItemEvent(
+	const PlayerEvent::PlayerEventContainer &c,
+	const PlayerEvent::LootItemEvent &e
+)
+{
+	std::vector<DiscordField> f = {};
+	BuildBaseFields(&f, c);
+	BuildDiscordField(
+		&f, 
+		"Looted Item", 
+		fmt::format("{} ({}) \nCharges: {} \nCorpse: {}",
+		e.item_name, e.item_id, e.charges, e.corpse_name)
+	);
+
+	std::vector<DiscordEmbed> embeds = {};
+	BuildBaseEmbed(&embeds, f, c);
+	DiscordEmbedRoot  root = DiscordEmbedRoot{
+		.embeds = embeds
+	};
+	std::stringstream ss;
+	{
+		cereal::JSONOutputArchive ar(ss);
+		root.serialize(ar);
+	}
+
+	return ss.str();
+}
+
+
+std::string PlayerEventDiscordFormatter::FormatGroundSpawnPickupEvent(
+	const PlayerEvent::PlayerEventContainer &c,
+	const PlayerEvent::GroundSpawnPickupEvent &e
+)
+{
+	std::vector<DiscordField> f = {};
+	BuildBaseFields(&f, c);
+	BuildDiscordField(
+		&f, 
+		"Picked Up Item", 
+		fmt::format("{} ({})",
+		e.item_name, e.item_id)
+	);
+
+	std::vector<DiscordEmbed> embeds = {};
+	BuildBaseEmbed(&embeds, f, c);
+	DiscordEmbedRoot  root = DiscordEmbedRoot{
+		.embeds = embeds
+	};
+	std::stringstream ss;
+	{
+		cereal::JSONOutputArchive ar(ss);
+		root.serialize(ar);
+	}
+
+	return ss.str();
+}
+
+std::string PlayerEventDiscordFormatter::FormatSkillUpEvent(
+	const PlayerEvent::PlayerEventContainer &c,
+	const PlayerEvent::SkillUpEvent &e
+)
+{
+	
+	std::string target_info;
+	if (e.against_who.length()) {
+		if (e.against_who == c.player_event.character_name) {
+		target_info = fmt::format("Target: Self");
+		} else {
+		target_info = fmt::format("Target: {}", e.against_who);
+		}
+	} 
+
+	std::vector<DiscordField> f = {};
+	BuildBaseFields(&f, c);
+	BuildDiscordField(
+		&f, 
+		"Skill Information", 
+		fmt::format("Skill: {} \nLevel: ({}/{}) \n{}",
+		e.skill_id, e.value, e.max_skill, target_info )
+	);
+
+	std::vector<DiscordEmbed> embeds = {};
+	BuildBaseEmbed(&embeds, f, c);
+	DiscordEmbedRoot  root = DiscordEmbedRoot{
+		.embeds = embeds
+	};
+	std::stringstream ss;
+	{
+		cereal::JSONOutputArchive ar(ss);
+		root.serialize(ar);
+	}
+
+	return ss.str();
+}
+
+std::string PlayerEventDiscordFormatter::FormatTaskAcceptEvent(
+	const PlayerEvent::PlayerEventContainer &c,
+	const PlayerEvent::TaskAcceptEvent &e
+)
+{
+
+	std::vector<DiscordField> f = {};
+	BuildBaseFields(&f, c);
+	BuildDiscordField(
+		&f, 
+		"Task Information", 
+		fmt::format("{} ({}) \n {} ({})",
+		e.task_name, e.task_id, e.npc_name, e.npc_id)
+	);
+	std::vector<DiscordEmbed> embeds = {};
+	BuildBaseEmbed(&embeds, f, c);
+	DiscordEmbedRoot  root = DiscordEmbedRoot{
+		.embeds = embeds
+	};
+	std::stringstream ss;
+	{
+		cereal::JSONOutputArchive ar(ss);
+		root.serialize(ar);
+	}
+
+	return ss.str();
+}
+
+std::string PlayerEventDiscordFormatter::FormatTaskCompleteEvent(
+	const PlayerEvent::PlayerEventContainer &c,
+	const PlayerEvent::TaskCompleteEvent &e
+)
+{
+	std::vector<DiscordField> f = {};
+	BuildBaseFields(&f, c);
+	BuildDiscordField(
+		&f, 
+		"Task Information", 
+		fmt::format("{} ({}) \nActivity ID ({}) \nDone ({})",
+		e.task_name, e.task_id, e.activity_id, e.done_count)
+	);
+	std::vector<DiscordEmbed> embeds = {};
+	BuildBaseEmbed(&embeds, f, c);
+	DiscordEmbedRoot  root = DiscordEmbedRoot{
+		.embeds = embeds
+	};
+	std::stringstream ss;
+	{
+		cereal::JSONOutputArchive ar(ss);
+		root.serialize(ar);
+	}
+
+	return ss.str();
+}
+
+std::string PlayerEventDiscordFormatter::FormatTaskUpdateEvent(
+	const PlayerEvent::PlayerEventContainer &c,
+	const PlayerEvent::TaskUpdateEvent &e
+)
+{
+	std::vector<DiscordField> f = {};
+	BuildBaseFields(&f, c);
+	BuildDiscordField(
+		&f, 
+		"Task Information", 
+		fmt::format("{} ({}) \nActivity ID ({}) \nDone ({})",
+		e.task_name, e.task_id, e.activity_id, e.done_count)
+	);
+	std::vector<DiscordEmbed> embeds = {};
+	BuildBaseEmbed(&embeds, f, c);
+	DiscordEmbedRoot  root = DiscordEmbedRoot{
+		.embeds = embeds
+	};
+	std::stringstream ss;
+	{
+		cereal::JSONOutputArchive ar(ss);
+		root.serialize(ar);
+	}
+
+	return ss.str();
+}
+
+std::string PlayerEventDiscordFormatter::FormatResurrectAcceptEvent(
+	const PlayerEvent::PlayerEventContainer &c,
+	const PlayerEvent::ResurrectAcceptEvent &e
+)
+{
+	std::vector<DiscordField> f = {};
+	BuildBaseFields(&f, c);
+	BuildDiscordField(
+		&f, 
+		"Resurrect Information", 
+		fmt::format("From: {} \nSpell ID ({})",
+		e.resurrecter_name, e.spell_id)
+	);
+	std::vector<DiscordEmbed> embeds = {};
+	BuildBaseEmbed(&embeds, f, c);
+	DiscordEmbedRoot  root = DiscordEmbedRoot{
+		.embeds = embeds
+	};
+	std::stringstream ss;
+	{
+		cereal::JSONOutputArchive ar(ss);
+		root.serialize(ar);
+	}
+
+	return ss.str();
+}
+
+std::string PlayerEventDiscordFormatter::FormatCombineEvent(
+	const PlayerEvent::PlayerEventContainer &c,
+	const PlayerEvent::CombineEvent &e
+)
+{
+	std::vector<DiscordField> f = {};
+	BuildBaseFields(&f, c);
+	BuildDiscordField(
+		&f, 
+		"Combine Information", 
+		fmt::format("{} ({}) \n Made ({})",
+		e.recipe_name, e.recipe_id, e.made_count)
+	);
+	std::vector<DiscordEmbed> embeds = {};
+	BuildBaseEmbed(&embeds, f, c);
+	DiscordEmbedRoot  root = DiscordEmbedRoot{
+		.embeds = embeds
+	};
+	std::stringstream ss;
+	{
+		cereal::JSONOutputArchive ar(ss);
+		root.serialize(ar);
+	}
+
+	return ss.str();
+}
