@@ -81,6 +81,14 @@ public:
 		const PlayerEvent::PlayerEventContainer &c,
 		const PlayerEvent::AAPurchasedEvent &e
 	);
+	static std::string FormatDeathEvent(
+		const PlayerEvent::PlayerEventContainer &c,
+		const PlayerEvent::DeathEvent &e
+	);
+	static std::string FormatFishSuccessEvent(
+		const PlayerEvent::PlayerEventContainer &c,
+		const PlayerEvent::FishSuccessEvent &e
+	);
 	static std::string FormatForageSuccessEvent(
 		const PlayerEvent::PlayerEventContainer &c,
 		const PlayerEvent::ForageSuccessEvent &e
@@ -128,6 +136,10 @@ public:
 	static std::string FormatTaskUpdateEvent(
 		const PlayerEvent::PlayerEventContainer &c,
 		const PlayerEvent::TaskUpdateEvent &e
+	);
+	static std::string FormatTradeItem(
+		const PlayerEvent::PlayerEventContainer &c,
+		const PlayerEvent::TradeItem &e
 	);
 	static std::string FormatResurrectAcceptEvent(
 		const PlayerEvent::PlayerEventContainer &c,

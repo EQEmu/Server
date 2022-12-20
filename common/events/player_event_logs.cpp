@@ -207,8 +207,8 @@ std::string PlayerEventLogs::GetDiscordWebhookUrlFromEventType(int32_t event_typ
 // AA_PURCHASE          | [x] Implemented Formatter
 // FORAGE_SUCCESS       | [x] Implemented Formatter
 // FORAGE_FAILURE       | [x] Implemented Formatter
-// FISH_SUCCESS         | [] Implemented Formatter
-// FISH_FAILURE         | [] Implemented Formatter
+// FISH_SUCCESS         | [x] Implemented Formatter
+// FISH_FAILURE         | [x] Implemented Formatter
 // ITEM_DESTROY         | [x] Implemented Formatter
 // WENT_ONLINE          | [x] Implemented Formatter
 // WENT_OFFLINE         | [x] Implemented Formatter
@@ -229,9 +229,9 @@ std::string PlayerEventLogs::GetDiscordWebhookUrlFromEventType(int32_t event_typ
 // TASK_COMPLETE        | [x] Implemented Formatter
 // TRADE                | [] Implemented Formatter
 // GIVE_ITEM            | [] Implemented Formatter
-// SAY                  | [] Implemented Formatter
+// SAY                  | [x] Implemented Formatter
 // REZ_ACCEPTED         | [x] Implemented Formatter
-// DEATH                | [] Implemented Formatter
+// DEATH                | [x] Implemented Formatter
 // COMBINE_FAILURE      | [x] Implemented Formatter
 // COMBINE_SUCCESS      | [x] Implemented Formatter
 // DROPPED_ITEM         | [] Implemented Formatter
@@ -280,6 +280,32 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 				n.serialize(ar);
 			}
 			payload = PlayerEventDiscordFormatter::FormatCombineEvent(e, n);
+			break;
+		}
+		case PlayerEvent::DEATH: {
+			PlayerEvent::DeathEvent n;
+			std::stringstream     ss;
+			{
+				ss << e.player_event_log.event_data;
+				cereal::JSONInputArchive ar(ss);
+				n.serialize(ar);
+			}
+			payload = PlayerEventDiscordFormatter::FormatDeathEvent(e, n);
+			break;
+		}
+		case PlayerEvent::FISH_FAILURE: {
+			payload = PlayerEventDiscordFormatter::FormatWithNodata(e);
+			break;
+		}
+		case PlayerEvent::FISH_SUCCESS: {
+			PlayerEvent::FishSuccessEvent n;
+			std::stringstream     ss;
+			{
+				ss << e.player_event_log.event_data;
+				cereal::JSONInputArchive ar(ss);
+				n.serialize(ar);
+			}
+			payload = PlayerEventDiscordFormatter::FormatFishSuccessEvent(e, n);
 			break;
 		}
 		case PlayerEvent::FORAGE_FAILURE: {
@@ -405,6 +431,17 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 				n.serialize(ar);
 			}
 			payload = PlayerEventDiscordFormatter::FormatTaskUpdateEvent(e, n);
+			break;
+		}
+		case PlayerEvent::TRADE: {
+			PlayerEvent::TradeItem n;
+			std::stringstream     ss;
+			{
+				ss << e.player_event_log.event_data;
+				cereal::JSONInputArchive ar(ss);
+				n.serialize(ar);
+			}
+			payload = PlayerEventDiscordFormatter::FormatTradeItem(e, n);
 			break;
 		}
 		case PlayerEvent::REZ_ACCEPTED: {

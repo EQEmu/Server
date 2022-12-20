@@ -2558,7 +2558,7 @@ bool Client::CheckIncreaseSkill(EQ::skills::SkillType skillid, Mob *against_who,
 					.skill_id = static_cast<uint32>(skillid),
 					.value = (skillval + 1),
 					.max_skill = static_cast<int16>(maxskill),
-					.against_who = against_who->GetCleanName(),
+					.against_who = (against_who) ? against_who->GetCleanName() : GetCleanName(),
 				};
 				RecordPlayerEventLog(PlayerEvent::SKILL_UP, e);
 			}

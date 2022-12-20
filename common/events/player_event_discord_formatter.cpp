@@ -505,7 +505,6 @@ std::string PlayerEventDiscordFormatter::FormatSkillUpEvent(
 	const PlayerEvent::SkillUpEvent &e
 )
 {
-
 	std::string target_info;
 	if (e.against_who.length()) {
 		if (e.against_who == c.player_event.character_name) {
@@ -671,6 +670,108 @@ std::string PlayerEventDiscordFormatter::FormatCombineEvent(
 		fmt::format(
 			"{} ({}) \n Made ({})",
 			e.recipe_name, e.recipe_id, e.made_count
+		)
+	);
+	std::vector<DiscordEmbed> embeds = {};
+	BuildBaseEmbed(&embeds, f, c);
+	DiscordEmbedRoot  root = DiscordEmbedRoot{
+		.embeds = embeds
+	};
+	std::stringstream ss;
+	{
+		cereal::JSONOutputArchive ar(ss);
+		root.serialize(ar);
+	}
+
+	return ss.str();
+}
+
+std::string PlayerEventDiscordFormatter::FormatFishSuccessEvent(
+	const PlayerEvent::PlayerEventContainer &c,
+	const PlayerEvent::FishSuccessEvent &e
+)
+{
+	std::vector<DiscordField> f = {};
+	BuildBaseFields(&f, c);
+	BuildDiscordField(
+		&f,
+		"Fishing Information",
+		fmt::format(
+			"{} ({})",
+			e.item_name, e.item_id
+		)
+	);
+	std::vector<DiscordEmbed> embeds = {};
+	BuildBaseEmbed(&embeds, f, c);
+	DiscordEmbedRoot  root = DiscordEmbedRoot{
+		.embeds = embeds
+	};
+	std::stringstream ss;
+	{
+		cereal::JSONOutputArchive ar(ss);
+		root.serialize(ar);
+	}
+
+	return ss.str();
+}
+
+std::string PlayerEventDiscordFormatter::FormatDeathEvent(
+	const PlayerEvent::PlayerEventContainer &c,
+	const PlayerEvent::DeathEvent &e
+)
+{
+	std::string killer_info;
+	if (e.killer_id) {
+		killer_info = fmt::format("Killer: {} ({})", e.killer_name, e.killer_id);
+	}
+
+	std::string spell_info;
+	if (e.spell_id) {
+		spell_info = fmt::format("Spell: {} ({})", e.spell_name, e.spell_id);
+	}
+	
+	std::string skill_info;
+	if (e.skill_id) {
+		skill_info = fmt::format("Skill: {} ({})", e.skill_name, e.skill_id);
+	}
+
+	std::vector<DiscordField> f = {};
+	BuildBaseFields(&f, c);
+	BuildDiscordField(
+		&f,
+		"Death Information",
+		fmt::format(
+			"{} ({}) \nDamage: {} \n {} \n {}",
+			killer_info, e.damage, spell_info, skill_info
+		)
+	);
+	std::vector<DiscordEmbed> embeds = {};
+	BuildBaseEmbed(&embeds, f, c);
+	DiscordEmbedRoot  root = DiscordEmbedRoot{
+		.embeds = embeds
+	};
+	std::stringstream ss;
+	{
+		cereal::JSONOutputArchive ar(ss);
+		root.serialize(ar);
+	}
+
+	return ss.str();
+}
+
+std::string PlayerEventDiscordFormatter::FormatTradeItem(
+	const PlayerEvent::PlayerEventContainer &c,
+	const PlayerEvent::TradeItem &e
+)
+{
+	std::vector<DiscordField> f = {};
+	BuildBaseFields(&f, c);
+	BuildDiscordField(
+		&f,
+		"Trade Information",
+		fmt::format(
+			"{} ({}) \nSlot ({})",
+			e.item_name, e.item_id, e.slot
 		)
 	);
 	std::vector<DiscordEmbed> embeds = {};
