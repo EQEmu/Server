@@ -75,7 +75,7 @@ public:
 		Database& db, const std::vector<uint32_t>& character_ids,
 		const std::string& expedition_name, const std::string& ordered_event_name)
 	{
-		auto joined_character_ids = fmt::join(character_ids, ",");
+		auto joined_character_ids = Strings::Join(character_ids, ",");
 
 		auto results = db.QueryDatabase(fmt::format(SQL(
 			SELECT

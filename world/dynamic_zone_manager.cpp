@@ -28,9 +28,9 @@ void DynamicZoneManager::PurgeExpiredDynamicZones()
 		LogDynamicZones("Purging [{}] dynamic zone(s)", dz_ids.size());
 
 		DynamicZoneMembersRepository::DeleteWhere(database,
-			fmt::format("dynamic_zone_id IN ({})", fmt::join(dz_ids, ",")));
+			fmt::format("dynamic_zone_id IN ({})", Strings::Join(dz_ids, ",")));
 		DynamicZonesRepository::DeleteWhere(database,
-			fmt::format("id IN ({})", fmt::join(dz_ids, ",")));
+			fmt::format("id IN ({})", Strings::Join(dz_ids, ",")));
 	}
 }
 
@@ -145,7 +145,7 @@ void DynamicZoneManager::Process()
 		// need to look up expedition ids until lockouts are moved to dynamic zones
 		std::vector<uint32_t> expedition_ids;
 		auto expeditions = ExpeditionsRepository::GetWhere(database,
-			fmt::format("dynamic_zone_id IN ({})", fmt::join(dynamic_zone_ids, ",")));
+			fmt::format("dynamic_zone_id IN ({})", Strings::Join(dynamic_zone_ids, ",")));
 
 		if (!expeditions.empty())
 		{
@@ -154,14 +154,14 @@ void DynamicZoneManager::Process()
 				expedition_ids.emplace_back(expedition.id);
 			}
 			ExpeditionLockoutsRepository::DeleteWhere(database,
-				fmt::format("expedition_id IN ({})", fmt::join(expedition_ids, ",")));
+				fmt::format("expedition_id IN ({})", Strings::Join(expedition_ids, ",")));
 		}
 
 		ExpeditionsRepository::DeleteWhere(database,
-			fmt::format("dynamic_zone_id IN ({})", fmt::join(dynamic_zone_ids, ",")));
+			fmt::format("dynamic_zone_id IN ({})", Strings::Join(dynamic_zone_ids, ",")));
 		DynamicZoneMembersRepository::RemoveAllMembers(database, dynamic_zone_ids);
 		DynamicZonesRepository::DeleteWhere(database,
-			fmt::format("id IN ({})", fmt::join(dynamic_zone_ids, ",")));
+			fmt::format("id IN ({})", Strings::Join(dynamic_zone_ids, ",")));
 	}
 }
 

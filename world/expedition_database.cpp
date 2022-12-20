@@ -60,7 +60,7 @@ void ExpeditionDatabase::PurgeExpiredExpeditions()
 
 		if (!expedition_ids.empty())
 		{
-			auto joined_expedition_ids = fmt::join(expedition_ids, ",");
+			auto joined_expedition_ids = Strings::Join(expedition_ids, ",");
 			ExpeditionsRepository::DeleteWhere(database, fmt::format("id IN ({})", joined_expedition_ids));
 			ExpeditionLockoutsRepository::DeleteWhere(database, fmt::format("expedition_id IN ({})", joined_expedition_ids));
 			DynamicZoneMembersRepository::RemoveAllMembers(database, dynamic_zone_ids);

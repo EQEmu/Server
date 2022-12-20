@@ -312,7 +312,7 @@ void SharedTaskManager::LoadSharedTaskState()
 
 		shared_task_character_data = CharacterDataRepository::GetWhere(
 			*m_database,
-			fmt::format("id IN ({})", fmt::join(character_ids, ","))
+			fmt::format("id IN ({})", Strings::Join(character_ids, ","))
 		);
 	}
 
@@ -1294,7 +1294,7 @@ std::vector<CharacterTaskTimersRepository::CharacterTaskTimers> SharedTaskManage
 				OR (timer_group > 0 AND timer_type = {} AND timer_group = {}))
 			AND expire_time > NOW() ORDER BY timer_type ASC LIMIT 1
 		),
-		fmt::join(character_ids, ","),
+		Strings::Join(character_ids, ","),
 		task.id,
 		static_cast<int>(TaskTimerType::Replay),
 		task.replay_timer_group,
@@ -1632,7 +1632,7 @@ void SharedTaskManager::AddReplayTimers(SharedTask *s)
 				s->GetTaskData().id,
 				s->GetTaskData().replay_timer_group,
 				static_cast<int>(TaskTimerType::Replay),
-				fmt::join(s->member_id_history, ",")
+				Strings::Join(s->member_id_history, ",")
 			));
 
 			CharacterTaskTimersRepository::InsertMany(*m_database, task_timers);
