@@ -211,16 +211,6 @@ bool Strings::IsFloat(const std::string &s)
 	}
 }
 
-std::string Strings::Join(const std::vector<std::string> &ar, const std::string &delim)
-{
-	return fmt::format("{}", fmt::join(ar, delim));
-}
-
-std::string Strings::Join(const std::vector<uint32_t> &ar, const std::string &delim)
-{
-	return fmt::format("{}", fmt::join(ar, delim));
-}
-
 void
 Strings::FindReplace(std::string &string_subject, const std::string &search_string, const std::string &replace_string)
 {
