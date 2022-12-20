@@ -76,6 +76,7 @@
 
 #include "classes.h"
 #include "spdat.h"
+#include "../common/rulesys.h"
 
 #ifndef WIN32
 #include <stdlib.h>
@@ -747,8 +748,9 @@ bool IsCombatSkill(uint16 spell_id)
 bool IsResurrectionEffects(uint16 spell_id)
 {
 	// spell id 756 is Resurrection Effects spell
-	if(IsValidSpell(spell_id) && (spell_id == 756 || spell_id == 757))
+	if (IsValidSpell(spell_id) && (spell_id == RuleI(Character, ResurrectionSicknessSpellID) || spell_id == RuleI(Character, OldResurrectionSicknessSpellID))) {
 		return true;
+	}
 
 	return false;
 }

@@ -5,7 +5,7 @@ void command_showzonepoints(Client *c, const Seperator *sep)
 	auto      &mob_list = entity_list.GetMobList();
 	for (auto itr : mob_list) {
 		Mob *mob = itr.second;
-		if (mob->IsNPC() && mob->GetRace() == 2254) {
+		if (mob->IsNPC() && mob->GetRace() == RACE_NODE_2254) {
 			mob->Depop();
 		}
 	}

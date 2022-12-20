@@ -263,15 +263,17 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 		//reapply some buffs
 		uint32 buff_count = GetMaxTotalSlots();
 		for (uint32 j1 = 0; j1 < buff_count; j1++) {
-			if (!IsValidSpell(buffs[j1].spellid))
+			if (!IsValidSpell(buffs[j1].spellid)) {
 				continue;
+			}
 
 			const SPDat_Spell_Struct& spell = spells[buffs[j1].spellid];
 
 			int NimbusEffect = GetNimbusEffect(buffs[j1].spellid);
 			if (NimbusEffect) {
-				if (!IsNimbusEffectActive(NimbusEffect))
+				if (!IsNimbusEffectActive(NimbusEffect)) {
 					SendSpellEffect(NimbusEffect, 500, 0, 1, 3000, true);
+				}
 			}
 
 			for (int x1 = 0; x1 < EFFECT_COUNT; x1++) {
@@ -287,8 +289,9 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 					}
 					else if (spell.base_value[x1] == -2) // WTF IS THIS
 					{
-						if (GetRace() == 128 || GetRace() == 130 || GetRace() <= 12)
+						if (GetRace() == IKSAR || GetRace() == VAHSHIR || GetRace() <= GNOME) {
 							SendIllusionPacket(GetRace(), GetGender(), spell.limit_value[x1], spell.max_value[x1]);
+						}
 					}
 					else if (spell.max_value[x1] > 0)
 					{
@@ -401,8 +404,6 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 				}
 			}
 		}
-
-
 	}
 	else {
 		bot_owner->Message(Chat::White, "&s for '%s'", BotDatabase::fail::LoadBuffs(), GetCleanName());
@@ -1205,21 +1206,25 @@ void Bot::GenerateBaseStats()
 void Bot::GenerateAppearance() {
 	// Randomize facial appearance
 	int iFace = 0;
-	if(GetRace() == 2) // Barbarian w/Tatoo
+	if (GetRace() == BARBARIAN) // Barbarian w/Tatoo
+	{
 		iFace = zone->random.Int(0, 79);
+	}	
 	else
+	{
 		iFace = zone->random.Int(0, 7);
+	}
 
 	int iHair = 0;
 	int iBeard = 0;
 	int iBeardColor = 1;
-	if(GetRace() == 522) {
+	if (GetRace() == DRAKKIN) {
 		iHair = zone->random.Int(0, 8);
 		iBeard = zone->random.Int(0, 11);
 		iBeardColor = zone->random.Int(0, 3);
-	} else if(GetGender()) {
+	} else if (GetGender()) {
 		iHair = zone->random.Int(0, 2);
-		if(GetRace() == 8) { // Dwarven Females can have a beard
+		if (GetRace() == DWARF) { // Dwarven Females can have a beard
 			if(zone->random.Int(1, 100) < 50)
 				iFace += 10;
 		}
@@ -1230,24 +1235,26 @@ void Bot::GenerateAppearance() {
 	}
 
 	int iHairColor = 0;
-	if(GetRace() == 522)
+	if (GetRace() == DRAKKIN) {
 		iHairColor = zone->random.Int(0, 3);
-	else
+	} else {
 		iHairColor = zone->random.Int(0, 19);
+	}
 
 	uint8 iEyeColor1 = (uint8)zone->random.Int(0, 9);
 	uint8 iEyeColor2 = 0;
-	if(GetRace() == 522)
+	if (GetRace() == DRAKKIN) {
 		iEyeColor1 = iEyeColor2 = (uint8)zone->random.Int(0, 11);
-	else if(zone->random.Int(1, 100) > 96)
+	} else if(zone->random.Int(1, 100) > 96) {
 		iEyeColor2 = zone->random.Int(0, 9);
-	else
+	} else {
 		iEyeColor2 = iEyeColor1;
+	}
 
 	int iHeritage = 0;
 	int iTattoo = 0;
 	int iDetails = 0;
-	if(GetRace() == 522) {
+	if (GetRace() == DRAKKIN) {
 		iHeritage = zone->random.Int(0, 6);
 		iTattoo = zone->random.Int(0, 7);
 		iDetails = zone->random.Int(0, 7);

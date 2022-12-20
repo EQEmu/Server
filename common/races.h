@@ -1612,6 +1612,7 @@ namespace PlayerAppearance
 #define RACE_LUCLIN_731 731
 #define RACE_PEGASUS_732 732
 #define RACE_INTERACTIVE_OBJECT_2250 2250
+#define RACE_NODE_2254 2254
 
 #endif
 
