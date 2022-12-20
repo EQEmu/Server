@@ -94,16 +94,16 @@ public:
 		const PlayerEvent::LevelGainedEvent &e
 	);
 	static std::string FormatLevelLostEvent(
-	const PlayerEvent::PlayerEventContainer &c,
-	const PlayerEvent::LevelLostEvent &e
+		const PlayerEvent::PlayerEventContainer &c,
+		const PlayerEvent::LevelLostEvent &e
 	);
 	static std::string FormatLootItemEvent(
-	const PlayerEvent::PlayerEventContainer &c,
-	const PlayerEvent::LootItemEvent &e
+		const PlayerEvent::PlayerEventContainer &c,
+		const PlayerEvent::LootItemEvent &e
 	);
 	static std::string FormatGroundSpawnPickupEvent(
-	const PlayerEvent::PlayerEventContainer &c,
-	const PlayerEvent::GroundSpawnPickupEvent &e
+		const PlayerEvent::PlayerEventContainer &c,
+		const PlayerEvent::GroundSpawnPickupEvent &e
 	);
 	static std::string FormatMerchantPurchaseEvent(
 		const PlayerEvent::PlayerEventContainer &c,
@@ -114,28 +114,28 @@ public:
 		const PlayerEvent::MerchantSellEvent &e
 	);
 	static std::string FormatSkillUpEvent(
-	const PlayerEvent::PlayerEventContainer &c,
-	const PlayerEvent::SkillUpEvent &e
+		const PlayerEvent::PlayerEventContainer &c,
+		const PlayerEvent::SkillUpEvent &e
 	);
 	static std::string FormatTaskAcceptEvent(
-	const PlayerEvent::PlayerEventContainer &c,
-	const PlayerEvent::TaskAcceptEvent &e
+		const PlayerEvent::PlayerEventContainer &c,
+		const PlayerEvent::TaskAcceptEvent &e
 	);
 	static std::string FormatTaskCompleteEvent(
-	const PlayerEvent::PlayerEventContainer &c,
-	const PlayerEvent::TaskCompleteEvent &e
+		const PlayerEvent::PlayerEventContainer &c,
+		const PlayerEvent::TaskCompleteEvent &e
 	);
 	static std::string FormatTaskUpdateEvent(
-	const PlayerEvent::PlayerEventContainer &c,
-	const PlayerEvent::TaskUpdateEvent &e
+		const PlayerEvent::PlayerEventContainer &c,
+		const PlayerEvent::TaskUpdateEvent &e
 	);
 	static std::string FormatResurrectAcceptEvent(
-	const PlayerEvent::PlayerEventContainer &c,
-	const PlayerEvent::ResurrectAcceptEvent &e
+		const PlayerEvent::PlayerEventContainer &c,
+		const PlayerEvent::ResurrectAcceptEvent &e
 	);
 	static std::string FormatCombineEvent(
-	const PlayerEvent::PlayerEventContainer &c,
-	const PlayerEvent::CombineEvent &e
+		const PlayerEvent::PlayerEventContainer &c,
+		const PlayerEvent::CombineEvent &e
 	);
 	static std::string FormatZoningEvent(
 		const PlayerEvent::PlayerEventContainer &c,
