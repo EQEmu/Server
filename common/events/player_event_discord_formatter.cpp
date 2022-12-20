@@ -142,11 +142,20 @@ std::string PlayerEventDiscordFormatter::FormatMerchantPurchaseEvent(
 	BuildBaseFields(&f, c);
 	BuildDiscordField(&f, "Merchant", fmt::format("{} ({}) NPC ID ({})", e.merchant_name, e.merchant_type, e.npc_id));
 	BuildDiscordField(&f, "Item", fmt::format("{} ({}) x({})", e.item_name, e.item_id, e.charges));
-	BuildDiscordField(&f, "Cost", fmt::format(":moneybag: {}", Strings::Money((e.cost / 1000), (e.cost / 100) % 10, (e.cost / 10) % 10, e.cost % 10)));
+	BuildDiscordField(
+		&f,
+		"Cost",
+		fmt::format(
+			":moneybag: {}",
+			Strings::Money((e.cost / 1000), (e.cost / 100) % 10, (e.cost / 10) % 10, e.cost % 10)));
 	BuildDiscordField(
 		&f,
 		"Player Balance",
-		fmt::format(":moneybag: [{}] \n:gem: Currency [{}]", Strings::Commify(std::to_string(e.player_money_balance)), e.player_currency_balance)
+		fmt::format(
+			":moneybag: [{}] \n:gem: Currency [{}]",
+			Strings::Commify(std::to_string(e.player_money_balance)),
+			e.player_currency_balance
+		)
 	);
 	std::vector<DiscordEmbed> embeds = {};
 	BuildBaseEmbed(&embeds, f, c);
@@ -171,11 +180,20 @@ std::string PlayerEventDiscordFormatter::FormatMerchantSellEvent(
 	BuildBaseFields(&f, c);
 	BuildDiscordField(&f, "Merchant", fmt::format("{} ({}) NPC ID ({})", e.merchant_name, e.merchant_type, e.npc_id));
 	BuildDiscordField(&f, "Item", fmt::format("{} ({}) x({})", e.item_name, e.item_id, e.charges));
-	BuildDiscordField(&f, "Cost", fmt::format(":moneybag: {}", Strings::Money((e.cost / 1000), (e.cost / 100) % 10, (e.cost / 10) % 10, e.cost % 10)));
+	BuildDiscordField(
+		&f,
+		"Cost",
+		fmt::format(
+			":moneybag: {}",
+			Strings::Money((e.cost / 1000), (e.cost / 100) % 10, (e.cost / 10) % 10, e.cost % 10)));
 	BuildDiscordField(
 		&f,
 		"Player Balance",
-		fmt::format(":moneybag: [{}] \n:gem: Currency [{}]", Strings::Commify(std::to_string(e.player_money_balance)), e.player_currency_balance)
+		fmt::format(
+			":moneybag: [{}] \n:gem: Currency [{}]",
+			Strings::Commify(std::to_string(e.player_money_balance)),
+			e.player_currency_balance
+		)
 	);
 	std::vector<DiscordEmbed> embeds = {};
 	BuildBaseEmbed(&embeds, f, c);
@@ -204,16 +222,22 @@ std::string PlayerEventDiscordFormatter::FormatZoningEvent(
 	}
 
 	if (e.from_instance_version > 0 || e.to_instance_version > 0) {
-		instance_version_info = fmt::format("Instance Version ({}) -> ({})", e.from_instance_version, e.to_instance_version);
+		instance_version_info = fmt::format(
+			"Instance Version ({}) -> ({})",
+			e.from_instance_version,
+			e.to_instance_version
+		);
 	}
 
 	std::vector<DiscordField> f = {};
 	BuildBaseFields(&f, c);
 	BuildDiscordField(
-		&f, 
-		"Zoning Information", 
-		fmt::format("Zone ID ({}) -> ({}) \n{} \n{}",
-		e.from_zone_id, e.to_zone_id, instance_id_info, instance_version_info)
+		&f,
+		"Zoning Information",
+		fmt::format(
+			"Zone ID ({}) -> ({}) \n{} \n{}",
+			e.from_zone_id, e.to_zone_id, instance_id_info, instance_version_info
+		)
 	);
 
 	std::vector<DiscordEmbed> embeds = {};
@@ -238,10 +262,12 @@ std::string PlayerEventDiscordFormatter::FormatAAGainedEvent(
 	std::vector<DiscordField> f = {};
 	BuildBaseFields(&f, c);
 	BuildDiscordField(
-		&f, 
-		"Points Gained", 
-		fmt::format("AA Gained ({})",
-		e.aa_gained)
+		&f,
+		"Points Gained",
+		fmt::format(
+			"AA Gained ({})",
+			e.aa_gained
+		)
 	);
 
 	std::vector<DiscordEmbed> embeds = {};
@@ -271,10 +297,12 @@ std::string PlayerEventDiscordFormatter::FormatAAPurchasedEvent(
 	std::vector<DiscordField> f = {};
 	BuildBaseFields(&f, c);
 	BuildDiscordField(
-		&f, 
-		"AA Purchased", 
-		fmt::format("AA ID ({}) \nAA Cost ({}) \n{}",
-		e.aa_id, e.aa_cost, aa_info)
+		&f,
+		"AA Purchased",
+		fmt::format(
+			"AA ID ({}) \nAA Cost ({}) \n{}",
+			e.aa_id, e.aa_cost, aa_info
+		)
 	);
 
 	std::vector<DiscordEmbed> embeds = {};
@@ -299,10 +327,12 @@ std::string PlayerEventDiscordFormatter::FormatForageSuccessEvent(
 	std::vector<DiscordField> f = {};
 	BuildBaseFields(&f, c);
 	BuildDiscordField(
-		&f, 
-		"Foraged Item", 
-		fmt::format("Item ID ({}) \nItem Name ({})",
-		e.item_id, e.item_name)
+		&f,
+		"Foraged Item",
+		fmt::format(
+			"Item ID ({}) \nItem Name ({})",
+			e.item_id, e.item_name
+		)
 	);
 
 	std::vector<DiscordEmbed> embeds = {};
@@ -327,10 +357,12 @@ std::string PlayerEventDiscordFormatter::FormatDestroyItemEvent(
 	std::vector<DiscordField> f = {};
 	BuildBaseFields(&f, c);
 	BuildDiscordField(
-		&f, 
-		"Destroyed Item", 
-		fmt::format("{} ({}) \nCharges ({}) \nReason ({})",
-		e.item_name, e.item_id, e.charges, e.reason)
+		&f,
+		"Destroyed Item",
+		fmt::format(
+			"{} ({}) \nCharges ({}) \nReason ({})",
+			e.item_name, e.item_id, e.charges, e.reason
+		)
 	);
 
 	std::vector<DiscordEmbed> embeds = {};
@@ -355,10 +387,12 @@ std::string PlayerEventDiscordFormatter::FormatLevelGainedEvent(
 	std::vector<DiscordField> f = {};
 	BuildBaseFields(&f, c);
 	BuildDiscordField(
-		&f, 
-		"Levels Gained", 
-		fmt::format("(+{})",
-		e.levels_gained)
+		&f,
+		"Levels Gained",
+		fmt::format(
+			"(+{})",
+			e.levels_gained
+		)
 	);
 
 	std::vector<DiscordEmbed> embeds = {};
@@ -383,10 +417,12 @@ std::string PlayerEventDiscordFormatter::FormatLevelLostEvent(
 	std::vector<DiscordField> f = {};
 	BuildBaseFields(&f, c);
 	BuildDiscordField(
-		&f, 
-		"Levels Lost", 
-		fmt::format("(-{})",
-		e.levels_lost)
+		&f,
+		"Levels Lost",
+		fmt::format(
+			"(-{})",
+			e.levels_lost
+		)
 	);
 
 	std::vector<DiscordEmbed> embeds = {};
@@ -411,10 +447,12 @@ std::string PlayerEventDiscordFormatter::FormatLootItemEvent(
 	std::vector<DiscordField> f = {};
 	BuildBaseFields(&f, c);
 	BuildDiscordField(
-		&f, 
-		"Looted Item", 
-		fmt::format("{} ({}) \nCharges: {} \nCorpse: {}",
-		e.item_name, e.item_id, e.charges, e.corpse_name)
+		&f,
+		"Looted Item",
+		fmt::format(
+			"{} ({}) \nCharges: {} \nCorpse: {}",
+			e.item_name, e.item_id, e.charges, e.corpse_name
+		)
 	);
 
 	std::vector<DiscordEmbed> embeds = {};
@@ -440,10 +478,12 @@ std::string PlayerEventDiscordFormatter::FormatGroundSpawnPickupEvent(
 	std::vector<DiscordField> f = {};
 	BuildBaseFields(&f, c);
 	BuildDiscordField(
-		&f, 
-		"Picked Up Item", 
-		fmt::format("{} ({})",
-		e.item_name, e.item_id)
+		&f,
+		"Picked Up Item",
+		fmt::format(
+			"{} ({})",
+			e.item_name, e.item_id
+		)
 	);
 
 	std::vector<DiscordEmbed> embeds = {};
@@ -465,23 +505,26 @@ std::string PlayerEventDiscordFormatter::FormatSkillUpEvent(
 	const PlayerEvent::SkillUpEvent &e
 )
 {
-	
+
 	std::string target_info;
 	if (e.against_who.length()) {
 		if (e.against_who == c.player_event.character_name) {
-		target_info = fmt::format("Target: Self");
-		} else {
-		target_info = fmt::format("Target: {}", e.against_who);
+			target_info = fmt::format("Target: Self");
 		}
-	} 
+		else {
+			target_info = fmt::format("Target: {}", e.against_who);
+		}
+	}
 
 	std::vector<DiscordField> f = {};
 	BuildBaseFields(&f, c);
 	BuildDiscordField(
-		&f, 
-		"Skill Information", 
-		fmt::format("Skill: {} \nLevel: ({}/{}) \n{}",
-		e.skill_id, e.value, e.max_skill, target_info )
+		&f,
+		"Skill Information",
+		fmt::format(
+			"Skill: {} \nLevel: ({}/{}) \n{}",
+			e.skill_id, e.value, e.max_skill, target_info
+		)
 	);
 
 	std::vector<DiscordEmbed> embeds = {};
@@ -507,10 +550,12 @@ std::string PlayerEventDiscordFormatter::FormatTaskAcceptEvent(
 	std::vector<DiscordField> f = {};
 	BuildBaseFields(&f, c);
 	BuildDiscordField(
-		&f, 
-		"Task Information", 
-		fmt::format("{} ({}) \n {} ({})",
-		e.task_name, e.task_id, e.npc_name, e.npc_id)
+		&f,
+		"Task Information",
+		fmt::format(
+			"{} ({}) \n {} ({})",
+			e.task_name, e.task_id, e.npc_name, e.npc_id
+		)
 	);
 	std::vector<DiscordEmbed> embeds = {};
 	BuildBaseEmbed(&embeds, f, c);
@@ -534,10 +579,12 @@ std::string PlayerEventDiscordFormatter::FormatTaskCompleteEvent(
 	std::vector<DiscordField> f = {};
 	BuildBaseFields(&f, c);
 	BuildDiscordField(
-		&f, 
-		"Task Information", 
-		fmt::format("{} ({}) \nActivity ID ({}) \nDone ({})",
-		e.task_name, e.task_id, e.activity_id, e.done_count)
+		&f,
+		"Task Information",
+		fmt::format(
+			"{} ({}) \nActivity ID ({}) \nDone ({})",
+			e.task_name, e.task_id, e.activity_id, e.done_count
+		)
 	);
 	std::vector<DiscordEmbed> embeds = {};
 	BuildBaseEmbed(&embeds, f, c);
@@ -561,10 +608,12 @@ std::string PlayerEventDiscordFormatter::FormatTaskUpdateEvent(
 	std::vector<DiscordField> f = {};
 	BuildBaseFields(&f, c);
 	BuildDiscordField(
-		&f, 
-		"Task Information", 
-		fmt::format("{} ({}) \nActivity ID ({}) \nDone ({})",
-		e.task_name, e.task_id, e.activity_id, e.done_count)
+		&f,
+		"Task Information",
+		fmt::format(
+			"{} ({}) \nActivity ID ({}) \nDone ({})",
+			e.task_name, e.task_id, e.activity_id, e.done_count
+		)
 	);
 	std::vector<DiscordEmbed> embeds = {};
 	BuildBaseEmbed(&embeds, f, c);
@@ -588,10 +637,12 @@ std::string PlayerEventDiscordFormatter::FormatResurrectAcceptEvent(
 	std::vector<DiscordField> f = {};
 	BuildBaseFields(&f, c);
 	BuildDiscordField(
-		&f, 
-		"Resurrect Information", 
-		fmt::format("From: {} \nSpell ID ({})",
-		e.resurrecter_name, e.spell_id)
+		&f,
+		"Resurrect Information",
+		fmt::format(
+			"From: {} \nSpell ID ({})",
+			e.resurrecter_name, e.spell_id
+		)
 	);
 	std::vector<DiscordEmbed> embeds = {};
 	BuildBaseEmbed(&embeds, f, c);
@@ -615,10 +666,12 @@ std::string PlayerEventDiscordFormatter::FormatCombineEvent(
 	std::vector<DiscordField> f = {};
 	BuildBaseFields(&f, c);
 	BuildDiscordField(
-		&f, 
-		"Combine Information", 
-		fmt::format("{} ({}) \n Made ({})",
-		e.recipe_name, e.recipe_id, e.made_count)
+		&f,
+		"Combine Information",
+		fmt::format(
+			"{} ({}) \n Made ({})",
+			e.recipe_name, e.recipe_id, e.made_count
+		)
 	);
 	std::vector<DiscordEmbed> embeds = {};
 	BuildBaseEmbed(&embeds, f, c);
