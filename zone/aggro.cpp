@@ -987,14 +987,14 @@ bool Mob::CombatRange(Mob* other, float fixed_size_mod, bool aeRampage)
 	float size_mod = GetSize();
 	float other_size_mod = other->GetSize();
 
-	if (GetRace() == RT_DRAGON || GetRace() == RT_WURM || GetRace() == RACE_GHOST_DRAGON_196) { //For races with a fixed size
+	if (GetRace() == RACE_LAVA_DRAGON_49 || GetRace() == RACE_WURM_158 || GetRace() == RACE_GHOST_DRAGON_196) { //For races with a fixed size
 		size_mod = 60.0f;
 	}
 	else if (size_mod < 6.0) {
 		size_mod = 8.0f;
 	}
 
-	if (other->GetRace() == RT_DRAGON || other->GetRace() == RT_WURM || other->GetRace() == RACE_GHOST_DRAGON_196) { //For races with a fixed size
+	if (other->GetRace() == RACE_LAVA_DRAGON_49 || other->GetRace() == RACE_WURM_158 || other->GetRace() == RACE_GHOST_DRAGON_196) { //For races with a fixed size
 		other_size_mod = 60.0f;
 	}
 	else if (other_size_mod < 6.0) {
@@ -1015,7 +1015,7 @@ bool Mob::CombatRange(Mob* other, float fixed_size_mod, bool aeRampage)
 		size_mod *= size_mod * 4;
 	}
 
-	if (other->GetRace() == RT_DRAGON_4)		// Lord Vyemm and other velious dragons
+	if (other->GetRace() == RACE_VELIOUS_DRAGON_184)		// Lord Vyemm and other velious dragons
 	{
 		size_mod *= 1.75;
 	}
