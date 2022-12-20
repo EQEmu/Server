@@ -2467,7 +2467,7 @@ namespace SoD
 			}
 
 			float SpawnSize = emu->size;
-			if (!((emu->NPC == RACE_DOUG_0) || (emu->race <= RACE_GNOME_12) || (emu->race == RACE_IKSAR_128) || 
+			if (!((emu->NPC == 0) || (emu->race <= RACE_GNOME_12) || (emu->race == RACE_IKSAR_128) || 
 					(emu->race == RACE_VAH_SHIR_130) || (emu->race == RACE_FROGLOK_330) || (emu->race == RACE_DRAKKIN_522))
 				)
 			{
@@ -2666,7 +2666,7 @@ namespace SoD
 
 			Buffer += sizeof(structs::Spawn_Struct_Position);
 
-			if ((emu->NPC == RACE_DOUG_0) || (emu->race <= RACE_GNOME_12) || (emu->race == RACE_IKSAR_128) || 
+			if ((emu->NPC == 0) || (emu->race <= RACE_GNOME_12) || (emu->race == RACE_IKSAR_128) || 
 					(emu->race == RACE_VAH_SHIR_130) || (emu->race == RACE_FROGLOK_330) || (emu->race == RACE_DRAKKIN_522)
 				)
 			{
@@ -2693,7 +2693,7 @@ namespace SoD
 			}
 
 
-			if ((emu->NPC == RACE_DOUG_0) || (emu->race <= RACE_GNOME_12) || (emu->race == RACE_IKSAR_128) || 
+			if ((emu->NPC == 0) || (emu->race <= RACE_GNOME_12) || (emu->race == RACE_IKSAR_128) || 
 					(emu->race == RACE_VAH_SHIR_130) || (emu->race == RACE_FROGLOK_330) || (emu->race == RACE_DRAKKIN_522)
 				)
 			{

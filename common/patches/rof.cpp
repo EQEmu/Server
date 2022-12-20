@@ -3831,7 +3831,7 @@ namespace RoF
 			}
 
 			float SpawnSize = emu->size;
-			if (!((emu->NPC == RACE_DOUG_0) || (emu->race <= RACE_GNOME_12) || (emu->race == RACE_IKSAR_128) || 
+			if (!((emu->NPC == 0) || (emu->race <= RACE_GNOME_12) || (emu->race == RACE_IKSAR_128) || 
 					(emu->race == RACE_VAH_SHIR_130) || (emu->race == RACE_FROGLOK_330) || (emu->race == RACE_DRAKKIN_522))
 				)
 			{
@@ -3965,7 +3965,7 @@ namespace RoF
 			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0xffffffff); // unknown18
 			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0xffffffff); // unknown19
 
-			if ((emu->NPC == RACE_DOUG_0) || (emu->race <= RACE_GNOME_12) || (emu->race == RACE_IKSAR_128) || 
+			if ((emu->NPC == 0) || (emu->race <= RACE_GNOME_12) || (emu->race == RACE_IKSAR_128) || 
 					(emu->race == RACE_VAH_SHIR_130) || (emu->race == RACE_FROGLOK_330) || (emu->race == RACE_DRAKKIN_522)
 				)
 			{
