@@ -194,8 +194,8 @@ RULE_INT(Character, BeastlordTrackingDistanceMultiplier, 0, "If you want beastlo
 RULE_INT(Character, BerserkerTrackingDistanceMultiplier, 0, "If you want berserkers to be able to track, increase this above 0.  0 disables tracking packets.")
 RULE_BOOL(Character, OnInviteReceiveAlreadyinGroupMessage, true, "If you want clients to receive a message when trying to invite a player into a group that is currently in another group.")
 RULE_BOOL(Character, PetZoneWithOwner, true, "Should Pets Zone with Owner")
-RULE_BOOL(Character, ManaOnDeath, true, "On death set mana to full")
-RULE_BOOL(Character, EndurOnDeath, true, "On death set endurance to full")
+RULE_BOOL(Character, FullManaOnDeath, true, "On death set mana to full")
+RULE_BOOL(Character, FullEndurOnDeath, true, "On death set endurance to full")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Mercs)
