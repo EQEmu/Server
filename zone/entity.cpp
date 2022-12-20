@@ -5833,7 +5833,7 @@ void EntityList::DespawnGridNodes(int32 grid_id) {
 		Mob *mob = m.second;
 		if (
 			mob->IsNPC() &&
-			mob->GetRace() == RACE_NODE &&
+			mob->GetRace() == RACE_NODE_2254 &&
 			mob->EntityVariableExists("grid_id") &&
 			std::stoi(mob->GetEntityVariable("grid_id")) == grid_id) 
 		{
