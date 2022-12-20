@@ -4057,37 +4057,6 @@ void Mob::SetNextIncHPEvent( int inchpevent )
 	nextinchpevent = inchpevent;
 }
 
-int16 Mob::GetResist(uint8 type) const
-{
-	if (IsNPC())
-	{
-		if (type == 1)
-			return MR + spellbonuses.MR + itembonuses.MR;
-		else if (type == 2)
-			return FR + spellbonuses.FR + itembonuses.FR;
-		else if (type == 3)
-			return CR + spellbonuses.CR + itembonuses.CR;
-		else if (type == 4)
-			return PR + spellbonuses.PR + itembonuses.PR;
-		else if (type == 5)
-			return DR + spellbonuses.DR + itembonuses.DR;
-	}
-	else if (IsClient())
-	{
-		if (type == 1)
-			return CastToClient()->GetMR();
-		else if (type == 2)
-			return CastToClient()->GetFR();
-		else if (type == 3)
-			return CastToClient()->GetCR();
-		else if (type == 4)
-			return CastToClient()->GetPR();
-		else if (type == 5)
-			return CastToClient()->GetDR();
-	}
-	return 25;
-}
-
 uint32 Mob::GetLevelHP(uint8 tlevel)
 {
 	int multiplier = 0;

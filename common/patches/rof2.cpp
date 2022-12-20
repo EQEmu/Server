@@ -33,6 +33,8 @@
 #include "rof2_structs.h"
 #include "../rulesys.h"
 #include "../path_manager.h"
+#include "../classes.h"
+#include "../races.h"
 
 #include <iostream>
 #include <sstream>
@@ -3944,7 +3946,7 @@ namespace RoF2
 			if (strlen(emu->suffix))
 				PacketSize += strlen(emu->suffix) + 1;
 
-			if (emu->DestructibleObject || emu->class_ == 62)
+			if (emu->DestructibleObject || emu->class_ == LDON_TREASURE)
 			{
 				if (emu->DestructibleObject)
 					PacketSize = PacketSize - 4;	// No bodytype
@@ -3965,7 +3967,9 @@ namespace RoF2
 			}
 
 			float SpawnSize = emu->size;
-			if (!((emu->NPC == 0) || (emu->race <= 12) || (emu->race == 128) || (emu->race == 130) || (emu->race == 330) || (emu->race == 522)))
+			if (!((emu->NPC == RACE_DOUG_0) || (emu->race <= RACE_GNOME_12) || (emu->race == RACE_IKSAR_128) || 
+					(emu->race == RACE_VAH_SHIR_130) || (emu->race == RACE_FROGLOK_330) || (emu->race == RACE_DRAKKIN_522))
+				)
 			{
 				PacketSize += 60;
 
@@ -4032,17 +4036,19 @@ namespace RoF2
 			// actually part of bitfields
 			uint8 OtherData = 0;
 
-			if (emu->class_ == 62) //LDoN Chest
+			if (emu->class_ == LDON_TREASURE) //LDoN Chest
+			{
 				OtherData = OtherData | 0x04;
-
-			if (strlen(emu->title))
+			}
+			if (strlen(emu->title)) {
 				OtherData = OtherData | 16;
-
-			if (strlen(emu->suffix))
+			}
+			if (strlen(emu->suffix)) {
 				OtherData = OtherData | 32;
-
-			if (emu->DestructibleObject)
+			}
+			if (emu->DestructibleObject) {
 				OtherData = OtherData | 0xe1;	// Live has 0xe1 for OtherData
+			}
 
 			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, OtherData);
 			// float EmitterScalingRadius
@@ -4058,7 +4064,7 @@ namespace RoF2
 			// int DefaultEmitterID
 			VARSTRUCT_ENCODE_TYPE(float, Buffer, 0);	// unknown4
 
-			if (emu->DestructibleObject || emu->class_ == 62)
+			if (emu->DestructibleObject || emu->class_ == LDON_TREASURE)
 			{
 				VARSTRUCT_ENCODE_STRING(Buffer, emu->DestructibleModel);
 				VARSTRUCT_ENCODE_STRING(Buffer, emu->DestructibleName2);
@@ -4166,7 +4172,9 @@ namespace RoF2
 			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0xffffffff); // These do something with OP_WeaponEquip1
 			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0xffffffff); // ^
 
-			if ((emu->NPC == 0) || (emu->race <= 12) || (emu->race == 128) || (emu->race == 130) || (emu->race == 330) || (emu->race == 522))
+			if ((emu->NPC == RACE_DOUG_0) || (emu->race <= RACE_GNOME_12) || (emu->race == RACE_IKSAR_128) || 
+					(emu->race == RACE_VAH_SHIR_130) || (emu->race == RACE_FROGLOK_330) || (emu->race == RACE_DRAKKIN_522)
+				)
 			{
 				for (k = EQ::textures::textureBegin; k < EQ::textures::materialCount; ++k)
 				{

@@ -33,6 +33,7 @@
 #include "sod_structs.h"
 #include "../rulesys.h"
 #include "../path_manager.h"
+#include "../races.h"
 
 #include <iostream>
 #include <sstream>
@@ -2466,7 +2467,9 @@ namespace SoD
 			}
 
 			float SpawnSize = emu->size;
-			if (!((emu->NPC == 0) || (emu->race <= 12) || (emu->race == 128) || (emu->race == 130) || (emu->race == 330) || (emu->race == 522)))
+			if (!((emu->NPC == RACE_DOUG_0) || (emu->race <= RACE_GNOME_12) || (emu->race == RACE_IKSAR_128) || 
+					(emu->race == RACE_VAH_SHIR_130) || (emu->race == RACE_FROGLOK_330) || (emu->race == RACE_DRAKKIN_522))
+				)
 			{
 				PacketSize -= (sizeof(structs::Texture_Struct) * EQ::textures::materialCount);
 
@@ -2663,7 +2666,9 @@ namespace SoD
 
 			Buffer += sizeof(structs::Spawn_Struct_Position);
 
-			if ((emu->NPC == 0) || (emu->race <= 12) || (emu->race == 128) || (emu->race == 130) || (emu->race == 330) || (emu->race == 522))
+			if ((emu->NPC == RACE_DOUG_0) || (emu->race <= RACE_GNOME_12) || (emu->race == RACE_IKSAR_128) || 
+					(emu->race == RACE_VAH_SHIR_130) || (emu->race == RACE_FROGLOK_330) || (emu->race == RACE_DRAKKIN_522)
+				)
 			{
 				for (k = EQ::textures::textureBegin; k < EQ::textures::materialCount; ++k)
 				{
@@ -2688,7 +2693,9 @@ namespace SoD
 			}
 
 
-			if ((emu->NPC == 0) || (emu->race <= 12) || (emu->race == 128) || (emu->race == 130) || (emu->race == 330) || (emu->race == 522))
+			if ((emu->NPC == RACE_DOUG_0) || (emu->race <= RACE_GNOME_12) || (emu->race == RACE_IKSAR_128) || 
+					(emu->race == RACE_VAH_SHIR_130) || (emu->race == RACE_FROGLOK_330) || (emu->race == RACE_DRAKKIN_522)
+				)
 			{
 				structs::Texture_Struct *Equipment = (structs::Texture_Struct *)Buffer;
 
