@@ -335,7 +335,7 @@ void ClientList::SendCLEList(const int16& admin, const char* to, WorldTCPConnect
 			if (cle->LSID())
 				fmt::format_to(std::back_inserter(out), "{}  LSID: {}  LSName: {}  WorldAdmin: {}", newline, cle->LSID(), cle->LSName(), cle->WorldAdmin());
 			if (cle->CharID())
-				fmt:format_to(std::back_inserter(out), "{}  CharID: {}  CharName: {}  Zone: {} ({})", newline, cle->CharID(), cle->name(), ZoneName(cle->zone()), cle->zone());
+				fmt::format_to(std::back_inserter(out), "{}  CharID: {}  CharName: {}  Zone: {} ({})", newline, cle->CharID(), cle->name(), ZoneName(cle->zone()), cle->zone());
 			if (out.size() >= 3072) {
 				connection->SendEmoteMessageRaw(
 					to,
