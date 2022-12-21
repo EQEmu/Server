@@ -284,11 +284,11 @@ luabind::scope lua_register_expedition() {
 luabind::scope lua_register_expedition_lock_messages() {
 	return luabind::class_<ExpeditionLockMessage>("ExpeditionLockMessage")
 	.enum_("constants")
-	[
+	[(
 		luabind::value("None", static_cast<int>(ExpeditionLockMessage::None)),
 		luabind::value("Close", static_cast<int>(ExpeditionLockMessage::Close)),
 		luabind::value("Begin", static_cast<int>(ExpeditionLockMessage::Begin))
-	];
+	)];
 }
 
 #endif // LUA_EQEMU
