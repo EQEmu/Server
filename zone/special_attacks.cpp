@@ -115,9 +115,9 @@ int Mob::GetBaseSkillDamage(EQ::skills::SkillType skill, Mob *target)
 				if (!inst->GetItemBackstabDamage())
 					base += inst->GetItemWeaponDamage(true);
 				if (target) {
-					if (inst->GetItemElementalFlag(true) && inst->GetItemElementalDamage(true))
+					if (inst->GetItemElementalFlag(true) && inst->GetItemElementalDamage(true) && !RuleB(Combat, BackstabIgnoresElemental))
 						base += target->ResistElementalWeaponDmg(inst);
-					if (inst->GetItemBaneDamageBody(true) || inst->GetItemBaneDamageRace(true))
+					if ((inst->GetItemBaneDamageBody(true) || inst->GetItemBaneDamageRace(true)) && !RuleB(Combat, BackstabIgnoresBane))
 						base += target->CheckBaneDamage(inst);
 				}
 			}
