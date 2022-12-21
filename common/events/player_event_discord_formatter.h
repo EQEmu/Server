@@ -137,10 +137,6 @@ public:
 		const PlayerEvent::PlayerEventContainer &c,
 		const PlayerEvent::TaskUpdateEvent &e
 	);
-	static std::string FormatTradeItem(
-		const PlayerEvent::PlayerEventContainer &c,
-		const PlayerEvent::TradeItem &e
-	);
 	static std::string FormatResurrectAcceptEvent(
 		const PlayerEvent::PlayerEventContainer &c,
 		const PlayerEvent::ResurrectAcceptEvent &e

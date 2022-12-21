@@ -388,10 +388,10 @@ std::string PlayerEventDiscordFormatter::FormatLevelGainedEvent(
 	BuildBaseFields(&f, c);
 	BuildDiscordField(
 		&f,
-		"Levels Gained",
+		"Level Information",
 		fmt::format(
-			"(+{})",
-			e.levels_gained
+			"From ({}) > ({}) \nLevels Gained ({})",
+			e.from_level, e.to_level, e.levels_gained 
 		)
 	);
 
@@ -418,10 +418,10 @@ std::string PlayerEventDiscordFormatter::FormatLevelLostEvent(
 	BuildBaseFields(&f, c);
 	BuildDiscordField(
 		&f,
-		"Levels Lost",
+		"Level Information",
 		fmt::format(
-			"(-{})",
-			e.levels_lost
+			"From ({}) > ({}) \nLevels Lost ({})",
+			e.from_level, e.to_level, e.levels_lost
 		)
 	);
 
@@ -743,35 +743,6 @@ std::string PlayerEventDiscordFormatter::FormatDeathEvent(
 		fmt::format(
 			"{} ({}) \nDamage: {} \n {} \n {}",
 			killer_info, e.damage, spell_info, skill_info
-		)
-	);
-	std::vector<DiscordEmbed> embeds = {};
-	BuildBaseEmbed(&embeds, f, c);
-	DiscordEmbedRoot  root = DiscordEmbedRoot{
-		.embeds = embeds
-	};
-	std::stringstream ss;
-	{
-		cereal::JSONOutputArchive ar(ss);
-		root.serialize(ar);
-	}
-
-	return ss.str();
-}
-
-std::string PlayerEventDiscordFormatter::FormatTradeItem(
-	const PlayerEvent::PlayerEventContainer &c,
-	const PlayerEvent::TradeItem &e
-)
-{
-	std::vector<DiscordField> f = {};
-	BuildBaseFields(&f, c);
-	BuildDiscordField(
-		&f,
-		"Trade Information",
-		fmt::format(
-			"{} ({}) \nSlot ({})",
-			e.item_name, e.item_id, e.slot
 		)
 	);
 	std::vector<DiscordEmbed> embeds = {};

@@ -876,7 +876,16 @@ void Client::SetLevel(uint8 set_level, bool command)
 		int levels_gained = (set_level - m_pp.level);
 		const auto export_string = fmt::format("{}", levels_gained);
 		parse->EventPlayer(EVENT_LEVEL_UP, this, export_string, 0);
-		RecordPlayerEventLog(PlayerEvent::LEVEL_GAIN, PlayerEvent::LevelGainedEvent{levels_gained});
+		if (player_event_logs.IsEventEnabled(PlayerEvent::LEVEL_GAIN)) {
+			auto e = PlayerEvent::LevelGainedEvent{
+				.from_level = m_pp.level,
+				.to_level = set_level,
+				.levels_gained = levels_gained
+			};
+
+			RecordPlayerEventLog(PlayerEvent::LEVEL_GAIN, e);
+		}
+								
 
 		if (RuleB(QueryServ, PlayerLogLevels)) {
 			const auto event_desc = fmt::format(
@@ -892,7 +901,15 @@ void Client::SetLevel(uint8 set_level, bool command)
 		int levels_lost = (m_pp.level - set_level);
 		const auto export_string = fmt::format("{}", levels_lost);
 		parse->EventPlayer(EVENT_LEVEL_DOWN, this, export_string, 0);
-		RecordPlayerEventLog(PlayerEvent::LEVEL_LOSS, PlayerEvent::LevelLostEvent{levels_lost});
+		if (player_event_logs.IsEventEnabled(PlayerEvent::LEVEL_LOSS)) {
+			auto e = PlayerEvent::LevelLostEvent{
+				.from_level = m_pp.level,
+				.to_level = set_level,
+				.levels_lost = levels_lost
+			};
+
+			RecordPlayerEventLog(PlayerEvent::LEVEL_LOSS, e);
+		}
 
 		if (RuleB(QueryServ, PlayerLogLevels)) {
 			const auto event_desc = fmt::format(

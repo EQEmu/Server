@@ -382,24 +382,36 @@ namespace PlayerEvent {
 	};
 
 	struct LevelGainedEvent {
+		uint32 from_level;
+		uint8 to_level;
 		int levels_gained;
 
 		// cereal
 		template<class Archive>
 		void serialize(Archive &ar)
 		{
-			ar(CEREAL_NVP(levels_gained));
+			ar(
+				CEREAL_NVP(from_level),
+				CEREAL_NVP(to_level),
+				CEREAL_NVP(levels_gained)
+			);
 		}
 	};
 
 	struct LevelLostEvent {
+		uint32 from_level;
+		uint8 to_level;
 		int levels_lost;
 
 		// cereal
 		template<class Archive>
 		void serialize(Archive &ar)
 		{
-			ar(CEREAL_NVP(levels_lost));
+			ar(
+				CEREAL_NVP(from_level),
+				CEREAL_NVP(to_level),
+				CEREAL_NVP(levels_lost)
+			);
 		}
 	};
 
@@ -599,7 +611,8 @@ namespace PlayerEvent {
 		void serialize(Archive &ar)
 		{
 			ar(
-				CEREAL_NVP(resurrecter_name)
+				CEREAL_NVP(resurrecter_name),
+				CEREAL_NVP(spell_id)
 			);
 		}
 	};
