@@ -3661,7 +3661,7 @@ void Client::Handle_OP_BazaarSearch(const EQApplicationPacket *app)
 		return;
 	}
 	else {
-		LogTrading("Malformed BazaarSearch_Struct packe, Action [{}]t received, ignoring");
+		LogTrading("Malformed BazaarSearch_Struct packet received, ignoring");
 		LogError("Malformed BazaarSearch_Struct packet received, ignoring\n");
 	}
 

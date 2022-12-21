@@ -3506,13 +3506,13 @@ luabind::scope lua_register_client() {
 luabind::scope lua_register_inventory_where() {
 	return luabind::class_<InventoryWhere>("InventoryWhere")
 		.enum_("constants")
-		[
+		[(
 			luabind::value("Personal", static_cast<int>(invWherePersonal)),
 			luabind::value("Bank", static_cast<int>(invWhereBank)),
 			luabind::value("SharedBank", static_cast<int>(invWhereSharedBank)),
 			luabind::value("Trading", static_cast<int>(invWhereTrading)),
 			luabind::value("Cursor", static_cast<int>(invWhereCursor))
-		];
+		)];
 }
 
 

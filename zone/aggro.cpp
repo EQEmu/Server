@@ -43,7 +43,7 @@ void EntityList::DescribeAggro(Client *to_who, NPC *from_who, float d, bool verb
 	to_who->Message(
 		Chat::White,
 		fmt::format(
-			"Describing aggro for {} ({}).",
+			"Describing aggro for {}.",
 			to_who->GetTargetDescription(from_who)
 		).c_str()
 	);

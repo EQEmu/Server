@@ -42,7 +42,7 @@ void CheatManager::CheatDetected(CheatTypes type, glm::vec3 position1, glm::vec3
 					message.c_str(),
 					zone->GetShortName()
 				);
-				LogCheat(message);
+				LogCheat(fmt::runtime(message));
 				std::string export_string = fmt::format(
 					"{} {} {}",
 					position1.x,
@@ -71,7 +71,7 @@ void CheatManager::CheatDetected(CheatTypes type, glm::vec3 position1, glm::vec3
 					message.c_str(),
 					zone->GetShortName()
 				);
-				LogCheat(message);
+				LogCheat(fmt::runtime(message));
 				std::string export_string = fmt::format(
 					"{} {} {}",
 					position1.x,
@@ -97,7 +97,7 @@ void CheatManager::CheatDetected(CheatTypes type, glm::vec3 position1, glm::vec3
 					message.c_str(),
 					zone->GetShortName()
 				);
-				LogCheat(message);
+				LogCheat(fmt::runtime(message));
 			}
 			break;
 		case MQWarpKnockBack:
@@ -115,7 +115,7 @@ void CheatManager::CheatDetected(CheatTypes type, glm::vec3 position1, glm::vec3
 					message.c_str(),
 					zone->GetShortName()
 				);
-				LogCheat(message);
+				LogCheat(fmt::runtime(message));
 			}
 			break;
 
@@ -135,7 +135,7 @@ void CheatManager::CheatDetected(CheatTypes type, glm::vec3 position1, glm::vec3
 						message.c_str(),
 						zone->GetShortName()
 					);
-					LogCheat(message);
+					LogCheat(fmt::runtime(message));
 				}
 			}
 			break;
@@ -155,7 +155,7 @@ void CheatManager::CheatDetected(CheatTypes type, glm::vec3 position1, glm::vec3
 					message.c_str(),
 					zone->GetShortName()
 				);
-				LogCheat(message);
+				LogCheat(fmt::runtime(message));
 			}
 			break;
 		case MQZoneUnknownDest:
@@ -173,7 +173,7 @@ void CheatManager::CheatDetected(CheatTypes type, glm::vec3 position1, glm::vec3
 					message.c_str(),
 					zone->GetShortName()
 				);
-				LogCheat(message);
+				LogCheat(fmt::runtime(message));
 			}
 			break;
 		case MQGate:
@@ -191,7 +191,7 @@ void CheatManager::CheatDetected(CheatTypes type, glm::vec3 position1, glm::vec3
 					message.c_str(),
 					zone->GetShortName()
 				);
-				LogCheat(message);
+				LogCheat(fmt::runtime(message));
 			}
 			break;
 		case MQGhost:
@@ -228,7 +228,7 @@ void CheatManager::CheatDetected(CheatTypes type, glm::vec3 position1, glm::vec3
 					message.c_str(),
 					zone->GetShortName()
 				);
-				LogCheat(message);
+				LogCheat(fmt::runtime(message));
 			}
 			break;
 		default:
@@ -244,7 +244,7 @@ void CheatManager::CheatDetected(CheatTypes type, glm::vec3 position1, glm::vec3
 				message.c_str(),
 				zone->GetShortName()
 			);
-			LogCheat(message);
+			LogCheat(fmt::runtime(message));
 			break;
 	}
 }

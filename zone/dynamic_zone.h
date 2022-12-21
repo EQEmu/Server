@@ -32,8 +32,6 @@ class Database;
 class EQApplicationPacket;
 class ServerPacket;
 
-extern const char* const CREATE_NOT_ALL_ADDED;
-
 class DynamicZone : public DynamicZoneBase
 {
 public:

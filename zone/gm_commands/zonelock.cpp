@@ -65,7 +65,7 @@ void command_zonelock(Client *c, const Seperator *sep)
 			c->Message(
 				Chat::White,
 				fmt::format(
-					"Usage: #zonelock {} [Zone ID] or #zonelock {} [Zone Short Name]",
+					"Usage: #zonelock {0} [Zone ID] or #zonelock {0} [Zone Short Name]",
 					is_lock ? "lock" : "unlock"
 				).c_str()
 			);
