@@ -604,6 +604,7 @@ namespace PlayerEvent {
 
 	struct ResurrectAcceptEvent {
 		std::string resurrecter_name;
+		std::string spell_name;
 		uint32      spell_id;
 
 		// cereal
@@ -612,6 +613,7 @@ namespace PlayerEvent {
 		{
 			ar(
 				CEREAL_NVP(resurrecter_name),
+				CEREAL_NVP(spell_name),
 				CEREAL_NVP(spell_id)
 			);
 		}

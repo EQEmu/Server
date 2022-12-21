@@ -12760,7 +12760,7 @@ void Client::Handle_OP_RezzAnswer(const EQApplicationPacket *app)
 		if (player_event_logs.IsEventEnabled(PlayerEvent::REZ_ACCEPTED)) {
 			auto e = PlayerEvent::ResurrectAcceptEvent{
 				.resurrecter_name = r->rezzer_name,
-//				.spell_name = spells[r->spellid].name,
+				.spell_name = spells[r->spellid].name,
 				.spell_id = r->spellid,
 			};
 			RecordPlayerEventLog(PlayerEvent::REZ_ACCEPTED, e);

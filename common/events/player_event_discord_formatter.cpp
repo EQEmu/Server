@@ -639,8 +639,8 @@ std::string PlayerEventDiscordFormatter::FormatResurrectAcceptEvent(
 		&f,
 		"Resurrect Information",
 		fmt::format(
-			"From: {} \nSpell ID ({})",
-			e.resurrecter_name, e.spell_id
+			"From: {} \nSpell: {} ({})",
+			e.resurrecter_name, e.spell_name, e.spell_id
 		)
 	);
 	std::vector<DiscordEmbed> embeds = {};
@@ -726,7 +726,7 @@ std::string PlayerEventDiscordFormatter::FormatDeathEvent(
 	}
 
 	std::string spell_info;
-	if (e.spell_id) {
+	if (e.spell_id < MAX_SPELL_DB_ID_VAL) {
 		spell_info = fmt::format("Spell: {} ({})", e.spell_name, e.spell_id);
 	}
 	
@@ -741,7 +741,7 @@ std::string PlayerEventDiscordFormatter::FormatDeathEvent(
 		&f,
 		"Death Information",
 		fmt::format(
-			"{} ({}) \nDamage: {} \n {} \n {}",
+			"{} \nDamage: {} \n {} \n {}",
 			killer_info, e.damage, spell_info, skill_info
 		)
 	);
