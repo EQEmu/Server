@@ -49,6 +49,8 @@
 #ifndef _WIN32
 // this doesn't appear to affect linux-based systems..need feedback for _WIN64
 
+#endif
+
 #ifdef _WINDOWS
 #include <ctype.h>
 #include <functional>
