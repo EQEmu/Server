@@ -2953,7 +2953,7 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 				LogSpells("Spells the same but newer is higher or equal level, overwriting");
 				return 1;
 			}
-		} else if (spellid1 == 2751) {
+		} else if (spellid1 == SPELL_MANA_BURN) {
 			LogSpells("Blocking spell because manaburn does not stack with itself");
 			return -1;
 		}

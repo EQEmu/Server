@@ -1010,7 +1010,6 @@ public:
 	bool CheckTradeLoreConflict(Client* other);
 	bool CheckTradeNonDroppable();
 	void LinkDead();
-	void Insight(uint32 t_id);
 	bool CheckDoubleAttack();
 	bool CheckTripleAttack();
 	bool CheckDoubleRangedAttack();

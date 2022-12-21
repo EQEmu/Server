@@ -33,6 +33,7 @@
 #include "rof_structs.h"
 #include "../rulesys.h"
 #include "../path_manager.h"
+#include "../races.h"
 
 #include <iostream>
 #include <sstream>
@@ -3830,7 +3831,9 @@ namespace RoF
 			}
 
 			float SpawnSize = emu->size;
-			if (!((emu->NPC == 0) || (emu->race <= 12) || (emu->race == 128) || (emu->race == 130) || (emu->race == 330) || (emu->race == 522)))
+			if (!((emu->NPC == 0) || (emu->race <= RACE_GNOME_12) || (emu->race == RACE_IKSAR_128) || 
+					(emu->race == RACE_VAH_SHIR_130) || (emu->race == RACE_FROGLOK_330) || (emu->race == RACE_DRAKKIN_522))
+				)
 			{
 				PacketSize += 60;
 
@@ -3962,7 +3965,9 @@ namespace RoF
 			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0xffffffff); // unknown18
 			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0xffffffff); // unknown19
 
-			if ((emu->NPC == 0) || (emu->race <= 12) || (emu->race == 128) || (emu->race == 130) || (emu->race == 330) || (emu->race == 522))
+			if ((emu->NPC == 0) || (emu->race <= RACE_GNOME_12) || (emu->race == RACE_IKSAR_128) || 
+					(emu->race == RACE_VAH_SHIR_130) || (emu->race == RACE_FROGLOK_330) || (emu->race == RACE_DRAKKIN_522)
+				)
 			{
 				for (k = EQ::textures::textureBegin; k < EQ::textures::materialCount; ++k)
 				{

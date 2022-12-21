@@ -2955,13 +2955,13 @@ uint32 NPC::GetSpawnPointID() const
 
 void NPC::NPCSlotTexture(uint8 slot, uint16 texture)
 {
-	if (slot == 7) {
+	if (slot == EQ::invslot::slotNeck) {
 		d_melee_texture1 = texture;
 	}
-	else if (slot == 8) {
+	else if (slot == EQ::invslot::slotBack) {
 		d_melee_texture2 = texture;
 	}
-	else if (slot < 6) {
+	else if (slot < EQ::invslot::slotShoulders) {
 		// Reserved for texturing individual armor slots
 	}
 }
