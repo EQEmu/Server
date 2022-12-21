@@ -989,7 +989,7 @@ bool Client::HandleDeleteCharacterPacket(const EQApplicationPacket *app) {
 
 	uint32 char_acct_id = database.GetAccountIDByChar((char*)app->pBuffer);
 	if(char_acct_id == GetAccountID()) {
-		LogInfo("Delete character: [{}]", app->pBuffer);
+		LogInfo("Delete character: [{}]", (const char*)app->pBuffer);
 		database.DeleteCharacter((char *)app->pBuffer);
 		SendCharInfo();
 	}

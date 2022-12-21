@@ -30,6 +30,11 @@
 
 constexpr char SystemName[] = "expedition";
 
+// message string 8312 added in September 08 2020 Test patch (used by both dz and shared tasks)
+constexpr const char* CREATE_NOT_ALL_ADDED = "Not all players in your {} were added to the {}. The {} can take a maximum of {} players, and your {} has {}.";
+// message string 9265 (not in emu clients)
+constexpr const char* EXPEDITION_OTHER_BELONGS = "{} attempted to create an expedition but {} already belongs to one.";
+
 ExpeditionRequest::ExpeditionRequest(const DynamicZone& dz, bool disable_messages) :
 	m_expedition_name(dz.GetName()),
 	m_min_players(dz.GetMinPlayers()),

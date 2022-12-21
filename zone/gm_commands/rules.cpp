@@ -73,7 +73,7 @@ void command_rules(Client *c, const Seperator *sep)
 			c->Message(
 				Chat::White,
 				fmt::format(
-					"Rule Set {} | {} ({})",
+					"Rule Set {} ({})",
 					e.second,
 					e.first
 				).c_str()

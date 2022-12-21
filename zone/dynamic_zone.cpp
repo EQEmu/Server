@@ -27,9 +27,6 @@
 
 extern WorldServer worldserver;
 
-// message string 8312 added in September 08 2020 Test patch (used by both dz and shared tasks)
-const char* const CREATE_NOT_ALL_ADDED       = "Not all players in your {} were added to the {}. The {} can take a maximum of {} players, and your {} has {}.";
-
 DynamicZone::DynamicZone(
 	uint32_t zone_id, uint32_t version, uint32_t duration, DynamicZoneType type)
 {

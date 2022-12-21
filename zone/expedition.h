@@ -37,7 +37,6 @@ class ExpeditionRequest;
 class ServerPacket;
 
 extern const char* const DZ_YOU_NOT_ASSIGNED;
-extern const char* const EXPEDITION_OTHER_BELONGS;
 
 enum class ExpeditionLockMessage : uint8_t
 {
@@ -50,7 +49,7 @@ class Expedition
 {
 public:
 	Expedition() = delete;
-	Expedition(DynamicZone* dz) : m_dynamic_zone(dz) { assert(m_dynamic_zone != nullptr); }
+	Expedition(DynamicZone* dz);
 	Expedition(DynamicZone* dz, uint32_t id, uint32_t dz_id);
 
 	static Expedition* TryCreate(Client* requester, DynamicZone& dynamiczone, bool disable_messages);

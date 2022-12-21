@@ -2022,7 +2022,7 @@ void ClientTaskState::AcceptNewTask(
 			else if (timer_type == TaskTimerType::Request)
 			{
 				auto eqstr = TaskStr::Get(TaskStr::ASSIGN_REQUEST_TIMER);
-				client->Message(Chat::Red, fmt::format(eqstr, days, hours, mins).c_str());
+				client->Message(Chat::Red, fmt::format(fmt::runtime(eqstr), days, hours, mins).c_str());
 			}
 
 			return;
@@ -2284,7 +2284,7 @@ void ClientTaskState::ListTaskTimers(Client* client)
 			else
 			{
 				auto eqstr = TaskStr::Get(TaskStr::REQUEST_TIMER_REMAINING);
-				client->Message(Chat::Yellow, fmt::format(eqstr, task->title, days, hours, mins).c_str());
+				client->Message(Chat::Yellow, fmt::format(fmt::runtime(eqstr), task->title, days, hours, mins).c_str());
 			}
 		}
 	}

@@ -1,4 +1,4 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 3.2)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.12)
 
 SET(shared_memory_sources
 	base_data.cpp

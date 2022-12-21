@@ -35,8 +35,6 @@ extern Zone* zone;
 
 // message string 8271 (not in emu clients)
 const char* const DZ_YOU_NOT_ASSIGNED        = "You could not use this command because you are not currently assigned to a dynamic zone.";
-// message string 9265 (not in emu clients)
-const char* const EXPEDITION_OTHER_BELONGS   = "{} attempted to create an expedition but {} already belongs to one.";
 // lockout warnings were added to live in March 11 2020 patch
 const char* const DZADD_INVITE_WARNING       = "Warning! You will be given replay timers for the following events if you enter %s:";
 const char* const DZADD_INVITE_WARNING_TIMER = "%s - %sD:%sH:%sM";
@@ -46,6 +44,12 @@ constexpr char LOCK_BEGIN[]                  = "The trial has begun. You cannot 
 
 const int32_t Expedition::REPLAY_TIMER_ID = -1;
 const int32_t Expedition::EVENT_TIMER_ID  = 1;
+
+Expedition::Expedition(DynamicZone* dz) :
+	m_dynamic_zone(dz)
+{
+	assert(m_dynamic_zone != nullptr);
+}
 
 Expedition::Expedition(DynamicZone* dz, uint32_t id, uint32_t dz_id) :
 	m_dynamic_zone(dz),
