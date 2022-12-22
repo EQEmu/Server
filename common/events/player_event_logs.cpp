@@ -234,7 +234,7 @@ std::string PlayerEventLogs::GetDiscordWebhookUrlFromEventType(int32_t event_typ
 // DEATH                | [x] Implemented Formatter
 // COMBINE_FAILURE      | [x] Implemented Formatter
 // COMBINE_SUCCESS      | [x] Implemented Formatter
-// DROPPED_ITEM         | [] Implemented Formatter
+// DROPPED_ITEM         | [x] Implemented Formatter
 // SPLIT_MONEY          | [] Implemented Formatter
 // DZ_JOIN              | [] Implemented Formatter
 // DZ_LEAVE             | [] Implemented Formatter
@@ -242,7 +242,7 @@ std::string PlayerEventLogs::GetDiscordWebhookUrlFromEventType(int32_t event_typ
 // TRADER_SELL          | [] Implemented Formatter
 // BANDOLIER_CREATE     | [] Implemented Formatter
 // BANDOLIER_SWAP       | [] Implemented Formatter
-// DISCOVER_ITEM        | [] Implemented Formatter
+// DISCOVER_ITEM        | [X] Implemented Formatter
 
 std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::PlayerEventContainer &e)
 {
@@ -302,6 +302,17 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 				n.serialize(ar);
 			}
 			payload = PlayerEventDiscordFormatter::FormatDiscoverItemEvent(e, n);
+			break;
+		}
+		case PlayerEvent::DROPPED_ITEM: {
+			PlayerEvent::DroppedItemEvent n;
+			std::stringstream             ss;
+			{
+				ss << e.player_event_log.event_data;
+				cereal::JSONInputArchive ar(ss);
+				n.serialize(ar);
+			}
+			payload = PlayerEventDiscordFormatter::FormatDroppedItemEvent(e, n);
 			break;
 		}
 		case PlayerEvent::FISH_FAILURE: {

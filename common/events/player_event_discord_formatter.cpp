@@ -897,3 +897,37 @@ std::string PlayerEventDiscordFormatter::FormatDiscoverItemEvent(
 
 	return ss.str();
 }
+
+
+std::string PlayerEventDiscordFormatter::FormatDroppedItemEvent(
+	const PlayerEvent::PlayerEventContainer &c,
+	const PlayerEvent::DroppedItemEvent &e
+)
+{
+	std::vector<DiscordField> f = {};
+	BuildBaseFields(&f, c);
+	BuildDiscordField(
+		&f,
+		"Dropped Item",
+		fmt::format(
+			"{} ({})\nSlot: {} ({})",
+			e.item_name,
+			e.item_id,
+			e.slot_id,
+			EQ::invslot::GetInvPossessionsSlotName(e.slot_id)
+		)
+	);
+
+	std::vector<DiscordEmbed> embeds = {};
+	BuildBaseEmbed(&embeds, f, c);
+	DiscordEmbedRoot  root = DiscordEmbedRoot{
+		.embeds = embeds
+	};
+	std::stringstream ss;
+	{
+		cereal::JSONOutputArchive ar(ss);
+		root.serialize(ar);
+	}
+
+	return ss.str();
+}

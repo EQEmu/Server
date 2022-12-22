@@ -101,6 +101,10 @@ public:
 		const PlayerEvent::PlayerEventContainer &c,
 		const PlayerEvent::DiscoverItemEvent &e
 	);
+	static std::string FormatDroppedItemEvent(
+		const PlayerEvent::PlayerEventContainer &c,
+		const PlayerEvent::DroppedItemEvent &e
+	);
 	static std::string FormatLevelGainedEvent(
 		const PlayerEvent::PlayerEventContainer &c,
 		const PlayerEvent::LevelGainedEvent &e
