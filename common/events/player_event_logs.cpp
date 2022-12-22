@@ -222,7 +222,7 @@ std::string PlayerEventLogs::GetDiscordWebhookUrlFromEventType(int32_t event_typ
 // RAID_JOIN            | [] Implemented Formatter
 // RAID_LEAVE           | [] Implemented Formatter
 // GROUNDSPAWN_PICKUP   | [x] Implemented Formatter
-// NPC_HANDIN           | [] Implemented Formatter
+// NPC_HANDIN           | [x] Implemented Formatter
 // SKILL_UP             | [x] Implemented Formatter
 // TASK_ACCEPT          | [x] Implemented Formatter
 // TASK_UPDATE          | [x] Implemented Formatter
