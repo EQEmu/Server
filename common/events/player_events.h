@@ -280,21 +280,29 @@ namespace PlayerEvent {
 	};
 
 	struct ZoningEvent {
-		int32 from_zone_id;
-		int32 from_instance_id;
-		int32 from_instance_version;
-		int32 to_zone_id;
-		int32 to_instance_id;
-		int32 to_instance_version;
+		std::string from_zone_long_name;
+		std::string from_zone_short_name;
+		int32       from_zone_id;
+		int32       from_instance_id;
+		int32       from_instance_version;
+		std::string to_zone_long_name;
+		std::string to_zone_short_name;
+		int32       to_zone_id;
+		int32       to_instance_id;
+		int32       to_instance_version;
 
 		// cereal
 		template<class Archive>
 		void serialize(Archive &ar)
 		{
 			ar(
+				CEREAL_NVP(from_zone_long_name),
+				CEREAL_NVP(from_zone_short_name),
 				CEREAL_NVP(from_zone_id),
 				CEREAL_NVP(from_instance_id),
 				CEREAL_NVP(from_instance_version),
+				CEREAL_NVP(to_zone_long_name),
+				CEREAL_NVP(to_zone_short_name),
 				CEREAL_NVP(to_zone_id),
 				CEREAL_NVP(to_instance_id),
 				CEREAL_NVP(to_instance_version)
@@ -419,6 +427,7 @@ namespace PlayerEvent {
 		uint32      item_id;
 		std::string item_name;
 		int16       charges;
+		uint32      npc_id;
 		std::string corpse_name;
 
 		// cereal
@@ -429,6 +438,7 @@ namespace PlayerEvent {
 				CEREAL_NVP(item_id),
 				CEREAL_NVP(item_name),
 				CEREAL_NVP(charges),
+				CEREAL_NVP(npc_id),
 				CEREAL_NVP(corpse_name)
 			);
 		}

@@ -218,12 +218,12 @@ std::string PlayerEventDiscordFormatter::FormatZoningEvent(
 	std::string instance_version_info;
 
 	if (e.to_instance_id > 0 || e.from_instance_id > 0) {
-		instance_id_info = fmt::format("Instance ID ({}) -> ({})", e.from_instance_id, e.to_instance_id);
+		instance_id_info = fmt::format("Instance ID: ({}) :arrow_right: ({})", e.from_instance_id, e.to_instance_id);
 	}
 
 	if (e.from_instance_version > 0 || e.to_instance_version > 0) {
 		instance_version_info = fmt::format(
-			"Instance Version ({}) -> ({})",
+			"Instance Version: ({}) :arrow_right: ({})",
 			e.from_instance_version,
 			e.to_instance_version
 		);
@@ -235,8 +235,15 @@ std::string PlayerEventDiscordFormatter::FormatZoningEvent(
 		&f,
 		"Zoning Information",
 		fmt::format(
-			"Zone ID ({}) -> ({}) \n{} \n{}",
-			e.from_zone_id, e.to_zone_id, instance_id_info, instance_version_info
+			"Zone: {} ({}) ({}) :arrow_right: {} ({}) ({})\n{}\n{}",
+			e.from_zone_long_name,
+			e.from_zone_short_name,
+			e.from_zone_id,
+			e.to_zone_long_name,
+			e.to_zone_short_name,
+			e.to_zone_id,
+			instance_id_info,
+			instance_version_info
 		)
 	);
 
@@ -450,8 +457,12 @@ std::string PlayerEventDiscordFormatter::FormatLootItemEvent(
 		&f,
 		"Looted Item",
 		fmt::format(
-			"{} ({}) \nCharges: {} \nCorpse: {}",
-			e.item_name, e.item_id, e.charges, e.corpse_name
+			"{} ({})\nCharges: {}\nNPC: {} ({})",
+			e.item_name,
+			e.item_id,
+			e.charges,
+			e.corpse_name,
+			e.npc_id
 		)
 	);
 
