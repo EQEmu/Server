@@ -378,6 +378,17 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 			payload = PlayerEventDiscordFormatter::FormatGroundSpawnPickupEvent(e, n);
 			break;
 		}
+		case PlayerEvent::NPC_HANDIN: {
+			PlayerEvent::HandinEvent n;
+			std::stringstream        ss;
+			{
+				ss << e.player_event_log.event_data;
+				cereal::JSONInputArchive ar(ss);
+				n.serialize(ar);
+			}
+			payload = PlayerEventDiscordFormatter::FormatNPCHandinEvent(e, n);
+			break;
+		}
 		case PlayerEvent::SAY: {
 			PlayerEvent::SayEvent n;
 			std::stringstream     ss;

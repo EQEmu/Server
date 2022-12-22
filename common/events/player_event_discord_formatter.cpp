@@ -391,7 +391,7 @@ std::string PlayerEventDiscordFormatter::FormatLevelGainedEvent(
 		"Level Information",
 		fmt::format(
 			"From ({}) > ({}) \nLevels Gained ({})",
-			e.from_level, e.to_level, e.levels_gained 
+			e.from_level, e.to_level, e.levels_gained
 		)
 	);
 
@@ -729,7 +729,7 @@ std::string PlayerEventDiscordFormatter::FormatDeathEvent(
 	if (e.spell_id < MAX_SPELL_DB_ID_VAL) {
 		spell_info = fmt::format("Spell: {} ({})", e.spell_name, e.spell_id);
 	}
-	
+
 	std::string skill_info;
 	if (e.skill_id) {
 		skill_info = fmt::format("Skill: {} ({})", e.skill_name, e.skill_id);
@@ -745,6 +745,115 @@ std::string PlayerEventDiscordFormatter::FormatDeathEvent(
 			killer_info, e.damage, spell_info, skill_info
 		)
 	);
+	std::vector<DiscordEmbed> embeds = {};
+	BuildBaseEmbed(&embeds, f, c);
+	DiscordEmbedRoot  root = DiscordEmbedRoot{
+		.embeds = embeds
+	};
+	std::stringstream ss;
+	{
+		cereal::JSONOutputArchive ar(ss);
+		root.serialize(ar);
+	}
+
+	return ss.str();
+}
+
+std::string PlayerEventDiscordFormatter::FormatNPCHandinEvent(
+	const PlayerEvent::PlayerEventContainer &c,
+	const PlayerEvent::HandinEvent &e
+)
+{
+	std::string handin_info;
+	if (!e.handin_items.empty()) {
+		for (const auto& h : e.handin_items) {
+			handin_info += fmt::format(
+				"{} ({}){}{}\n",
+				h.item_name,
+				h.item_id,
+				h.charges > 1 ? fmt::format(" Charges: {}", h.charges) : "",
+				h.attuned ? " (Attuned)" : ""
+			);
+		}
+	}
+
+	std::string return_info;
+	if (!e.return_items.empty()) {
+		for (const auto& r : e.return_items) {
+			return_info += fmt::format(
+				"{} ({}){}{}\n",
+				r.item_name,
+				r.item_id,
+				r.charges > 1 ? fmt::format(" Charges: {}", r.charges) : "",
+				r.attuned ? " (Attuned)" : ""
+			);
+		}
+	}
+
+	std::string money_info;
+	if (e.handin_money.platinum) {
+		money_info += fmt::format(
+			"{} Platinum\n",
+			Strings::Commify(std::to_string(e.handin_money.platinum))
+		);
+	}
+
+	if (e.handin_money.gold) {
+		money_info += fmt::format(
+			"{} Gold\n",
+			Strings::Commify(std::to_string(e.handin_money.gold))
+		);
+	}
+
+	if (e.handin_money.silver) {
+		money_info += fmt::format(
+			"{} Silver\n",
+			Strings::Commify(std::to_string(e.handin_money.silver))
+		);
+	}
+
+	if (e.handin_money.copper) {
+		money_info += fmt::format(
+			"{} Copper",
+			Strings::Commify(std::to_string(e.handin_money.copper))
+		);
+	}
+
+	std::vector<DiscordField> f = {};
+	BuildBaseFields(&f, c);
+
+	if (!handin_info.empty()) {
+		BuildDiscordField(
+			&f,
+			"Handin Items",
+			fmt::format(
+				"{}",
+				handin_info
+			)
+		);
+	}
+
+	if (!money_info.empty()) {
+		BuildDiscordField(
+			&f,
+			"Handin Money",
+			fmt::format(
+				"{}",
+				money_info
+			)
+		);
+	}
+
+	if (!return_info.empty()) {
+		BuildDiscordField(
+			&f,
+			"Return Items",
+			fmt::format(
+				"{}",
+				return_info
+			)
+		);
+	}
 	std::vector<DiscordEmbed> embeds = {};
 	BuildBaseEmbed(&embeds, f, c);
 	DiscordEmbedRoot  root = DiscordEmbedRoot{

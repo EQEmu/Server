@@ -121,6 +121,10 @@ public:
 		const PlayerEvent::PlayerEventContainer &c,
 		const PlayerEvent::MerchantSellEvent &e
 	);
+	static std::string FormatNPCHandinEvent(
+		const PlayerEvent::PlayerEventContainer &c,
+		const PlayerEvent::HandinEvent &e
+	);
 	static std::string FormatSkillUpEvent(
 		const PlayerEvent::PlayerEventContainer &c,
 		const PlayerEvent::SkillUpEvent &e

@@ -3988,27 +3988,48 @@ void QuestManager::SendPlayerHandinEvent()
 		for (const auto& h : handin_data) {
 			const auto item_data = Strings::Split(h, "-");
 
-			const auto item_id = static_cast<uint32>(std::stoul(item_data[0]));
-			if (item_id != 0) {
-				handin_items.emplace_back(
-					PlayerEvent::HandinEntry{
-						.item_id = item_id,
-						.charges = static_cast<uint16>(std::stoul(item_data[1])),
-						.attuned = std::stoi(item_data[2]) ? true : false
-					}
-				);
+			if (
+				item_data.size() == 3 &&
+				Strings::IsNumber(item_data[0]) &&
+				Strings::IsNumber(item_data[1]) &&
+				Strings::IsNumber(item_data[2])
+			) {
+				const auto item_id = static_cast<uint32>(std::stoul(item_data[0]));
+				if (item_id != 0) {
+					const auto* item = database.GetItem(item_id);
+
+					handin_items.emplace_back(
+						PlayerEvent::HandinEntry{
+							.item_id = item_id,
+							.item_name = item->Name,
+							.charges = static_cast<uint16>(std::stoul(item_data[1])),
+							.attuned = std::stoi(item_data[2]) ? true : false
+						}
+					);
+				}
 			}
 		}
 	} else if (Strings::Contains(handin_variable, "-")) {
 		const auto item_data = Strings::Split(handin_variable, "-");
 
-		handin_items.emplace_back(
-			PlayerEvent::HandinEntry{
-				.item_id = static_cast<uint32>(std::stoul(item_data[0])),
-				.charges = static_cast<uint16>(std::stoul(item_data[1])),
-				.attuned = std::stoi(item_data[2]) ? true : false
-			}
-		);
+		if (
+			item_data.size() == 3 &&
+			Strings::IsNumber(item_data[0]) &&
+			Strings::IsNumber(item_data[1]) &&
+			Strings::IsNumber(item_data[2])
+		) {
+			const auto item_id = static_cast<uint32>(std::stoul(item_data[0]));
+			const auto* item = database.GetItem(item_id);
+
+			handin_items.emplace_back(
+				PlayerEvent::HandinEntry{
+					.item_id = item_id,
+					.item_name = item->Name,
+					.charges = static_cast<uint16>(std::stoul(item_data[1])),
+					.attuned = std::stoi(item_data[2]) ? true : false
+				}
+			);
+		}
 	}
 
 	// Handin Money
@@ -4025,24 +4046,46 @@ void QuestManager::SendPlayerHandinEvent()
 		for (const auto& r : return_data) {
 			const auto item_data = Strings::Split(r, "-");
 
+			if (
+				item_data.size() == 3 &&
+				Strings::IsNumber(item_data[0]) &&
+				Strings::IsNumber(item_data[1]) &&
+				Strings::IsNumber(item_data[2])
+			) {
+				const auto item_id = static_cast<uint32>(std::stoul(item_data[0]));
+				const auto* item = database.GetItem(item_id);
+
+				return_items.emplace_back(
+					PlayerEvent::HandinEntry{
+						.item_id = item_id,
+						.item_name = item->Name,
+						.charges = static_cast<uint16>(std::stoul(item_data[1])),
+						.attuned = std::stoi(item_data[2]) ? true : false
+					}
+				);
+			}
+		}
+	} else if (Strings::Contains(return_variable, "-")) {
+		const auto item_data = Strings::Split(return_variable, "-");
+
+		if (
+			item_data.size() == 3 &&
+			Strings::IsNumber(item_data[0]) &&
+			Strings::IsNumber(item_data[1]) &&
+			Strings::IsNumber(item_data[2])
+		) {
+			const auto item_id = static_cast<uint32>(std::stoul(item_data[0]));
+			const auto* item = database.GetItem(item_id);
+
 			return_items.emplace_back(
 				PlayerEvent::HandinEntry{
-					.item_id = static_cast<uint32>(std::stoul(item_data[0])),
+					.item_id = item_id,
+					.item_name = item->Name,
 					.charges = static_cast<uint16>(std::stoul(item_data[1])),
 					.attuned = std::stoi(item_data[2]) ? true : false
 				}
 			);
 		}
-	} else if (Strings::Contains(return_variable, "-")) {
-		const auto item_data = Strings::Split(return_variable, "-");
-
-		return_items.emplace_back(
-			PlayerEvent::HandinEntry{
-				.item_id = static_cast<uint32>(std::stoul(item_data[0])),
-				.charges = static_cast<uint16>(std::stoul(item_data[1])),
-				.attuned = std::stoi(item_data[2]) ? true : false
-			}
-		);
 	}
 
 	initiator->DeleteEntityVariable("HANDIN_ITEMS");
