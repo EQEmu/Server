@@ -196,7 +196,7 @@ RULE_BOOL(Character, OnInviteReceiveAlreadyinGroupMessage, true, "If you want cl
 RULE_BOOL(Character, PetZoneWithOwner, true, "Should Pets Zone with Owner")
 RULE_BOOL(Character, FullManaOnDeath, true, "On death set mana to full")
 RULE_BOOL(Character, FullEndurOnDeath, true, "On death set endurance to full")
-RULE_INT(Character, KillExperiencePercentCap, 100, "If you want there to be a percent cap (0-100) of a player's current level. 100 disables the cap; 0 blocks all xp.")
+RULE_INT(Character, KillExperiencePercentCap, 100, "If you want there to be a percent cap (0-100) of a player's current level. 100 disables the cap; 0 blocks all (non-aa) xp.")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Mercs)
