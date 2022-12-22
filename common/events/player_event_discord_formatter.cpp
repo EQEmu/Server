@@ -1108,3 +1108,245 @@ std::string PlayerEventDiscordFormatter::FormatTraderSellEvent(
 
 	return ss.str();
 }
+
+std::string PlayerEventDiscordFormatter::FormatTradeEvent(
+	const PlayerEvent::PlayerEventContainer &c,
+	const PlayerEvent::TradeEvent &e
+)
+{
+	std::string character_1_item_info;
+	if (!e.character_1_give_items.empty()) {
+		for (const auto& i : e.character_1_give_items) {
+			std::string augment_info;
+			if (i.aug_1_item_id > 0) {
+				augment_info += fmt::format(
+					"Augment 1: {} ({})",
+					i.aug_1_item_name,
+					i.aug_1_item_id
+				);
+			}
+
+			if (i.aug_2_item_id > 0) {
+				augment_info += fmt::format(
+					"Augment 2: {} ({})",
+					i.aug_2_item_name,
+					i.aug_2_item_id
+				);
+			}
+
+			if (i.aug_3_item_id > 0) {
+				augment_info += fmt::format(
+					"Augment 3: {} ({})",
+					i.aug_3_item_name,
+					i.aug_3_item_id
+				);
+			}
+
+			if (i.aug_4_item_id > 0) {
+				augment_info += fmt::format(
+					"Augment 4: {} ({})\n",
+					i.aug_4_item_name,
+					i.aug_4_item_id
+				);
+			}
+
+			if (i.aug_5_item_id > 0) {
+				augment_info += fmt::format(
+					"Augment 5: {} ({})\n",
+					i.aug_5_item_name,
+					i.aug_5_item_id
+				);
+			}
+
+			if (i.aug_6_item_id > 0) {
+				augment_info += fmt::format(
+					"Augment 6: {} ({})",
+					i.aug_6_item_name,
+					i.aug_6_item_id
+				);
+			}
+
+			character_1_item_info += fmt::format(
+				"{} ({}){}\nSlot: {} ({}){}\n{}",
+				i.item_name,
+				i.item_id,
+				i.charges > 1 ? fmt::format(" Charges: {}", i.charges) : "",
+				EQ::invslot::GetInvPossessionsSlotName(i.slot),
+				i.slot,
+				i.in_bag ? " (Bagged Item)" : "",
+				augment_info
+			);
+		}
+	}
+
+	std::string character_2_item_info;
+	if (!e.character_2_give_items.empty()) {
+		for (const auto& i : e.character_2_give_items) {
+			std::string augment_info;
+			if (i.aug_1_item_id > 0) {
+				augment_info += fmt::format(
+					"Augment 1: {} ({})",
+					i.aug_1_item_name,
+					i.aug_1_item_id
+				);
+			}
+
+			if (i.aug_2_item_id > 0) {
+				augment_info += fmt::format(
+					"Augment 2: {} ({})",
+					i.aug_2_item_name,
+					i.aug_2_item_id
+				);
+			}
+
+			if (i.aug_3_item_id > 0) {
+				augment_info += fmt::format(
+					"Augment 3: {} ({})",
+					i.aug_3_item_name,
+					i.aug_3_item_id
+				);
+			}
+
+			if (i.aug_4_item_id > 0) {
+				augment_info += fmt::format(
+					"Augment 4: {} ({})\n",
+					i.aug_4_item_name,
+					i.aug_4_item_id
+				);
+			}
+
+			if (i.aug_5_item_id > 0) {
+				augment_info += fmt::format(
+					"Augment 5: {} ({})\n",
+					i.aug_5_item_name,
+					i.aug_5_item_id
+				);
+			}
+
+			if (i.aug_6_item_id > 0) {
+				augment_info += fmt::format(
+					"Augment 6: {} ({})",
+					i.aug_6_item_name,
+					i.aug_6_item_id
+				);
+			}
+
+			character_2_item_info += fmt::format(
+				"{} ({}){}\nSlot: {} ({}){}\n{}\n",
+				i.item_name,
+				i.item_id,
+				i.charges > 1 ? fmt::format(" Charges: {}", i.charges) : "",
+				EQ::invslot::GetInvPossessionsSlotName(i.slot),
+				i.slot,
+				i.in_bag ? " (Bagged Item)" : "",
+				augment_info
+			);
+		}
+	}
+
+	std::string character_1_money_info;
+	if (e.character_1_give_money.platinum) {
+		character_1_money_info += fmt::format(
+			":moneybag: {} Platinum\n",
+			Strings::Commify(std::to_string(e.character_1_give_money.platinum))
+		);
+	}
+
+	if (e.character_1_give_money.gold) {
+		character_1_money_info += fmt::format(
+			":moneybag: {} Gold\n",
+			Strings::Commify(std::to_string(e.character_1_give_money.gold))
+		);
+	}
+
+	if (e.character_1_give_money.silver) {
+		character_1_money_info += fmt::format(
+			":moneybag: {} Silver\n",
+			Strings::Commify(std::to_string(e.character_1_give_money.silver))
+		);
+	}
+
+	if (e.character_1_give_money.copper) {
+		character_1_money_info += fmt::format(
+			":moneybag: {} Copper",
+			Strings::Commify(std::to_string(e.character_1_give_money.copper))
+		);
+	}
+
+	std::string character_2_money_info;
+	if (e.character_2_give_money.platinum) {
+		character_2_money_info += fmt::format(
+			":moneybag: {} Platinum\n",
+			Strings::Commify(std::to_string(e.character_2_give_money.platinum))
+		);
+	}
+
+	if (e.character_2_give_money.gold) {
+		character_2_money_info += fmt::format(
+			":moneybag: {} Gold\n",
+			Strings::Commify(std::to_string(e.character_2_give_money.gold))
+		);
+	}
+
+	if (e.character_2_give_money.silver) {
+		character_2_money_info += fmt::format(
+			":moneybag: {} Silver\n",
+			Strings::Commify(std::to_string(e.character_2_give_money.silver))
+		);
+	}
+
+	if (e.character_2_give_money.copper) {
+		character_2_money_info += fmt::format(
+			":moneybag: {} Copper",
+			Strings::Commify(std::to_string(e.character_2_give_money.copper))
+		);
+	}
+
+	std::vector<DiscordField> f = {};
+	BuildBaseFields(&f, c);
+
+	if (!character_1_item_info.empty()) {
+		BuildDiscordField(
+			&f,
+			"Character 1 Items",
+			character_1_item_info
+		);
+	}
+
+	if (!character_1_money_info.empty()) {
+		BuildDiscordField(
+			&f,
+			"Character 1 Money",
+			character_1_money_info
+		);
+	}
+
+	if (!character_2_item_info.empty()) {
+		BuildDiscordField(
+			&f,
+			"Character 2 Items",
+			character_2_item_info
+		);
+	}
+
+	if (!character_2_money_info.empty()) {
+		BuildDiscordField(
+			&f,
+			"Character 2 Money",
+			character_2_money_info
+		);
+	}
+
+	std::vector<DiscordEmbed> embeds = {};
+	BuildBaseEmbed(&embeds, f, c);
+	DiscordEmbedRoot  root = DiscordEmbedRoot{
+		.embeds = embeds
+	};
+	std::stringstream ss;
+	{
+		cereal::JSONOutputArchive ar(ss);
+		root.serialize(ar);
+	}
+
+	return ss.str();
+}

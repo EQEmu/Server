@@ -477,6 +477,17 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 			payload = PlayerEventDiscordFormatter::FormatTaskUpdateEvent(e, n);
 			break;
 		}
+		case PlayerEvent::TRADE: {
+			PlayerEvent::TradeEvent n;
+			std::stringstream     ss;
+			{
+				ss << e.player_event_log.event_data;
+				cereal::JSONInputArchive ar(ss);
+				n.serialize(ar);
+			}
+			payload = PlayerEventDiscordFormatter::FormatTradeEvent(e, n);
+			break;
+		}
 		case PlayerEvent::TRADER_PURCHASE: {
 			PlayerEvent::TraderPurchaseEvent n;
 			std::stringstream     ss;

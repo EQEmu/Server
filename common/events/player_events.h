@@ -193,15 +193,23 @@ namespace PlayerEvent {
 	// used in Trade event
 	class TradeItemEntry {
 	public:
-		uint16 slot;
-		uint32 item_id;
-		uint16 charges;
-		uint32 aug_1_item_id;
-		uint32 aug_2_item_id;
-		uint32 aug_3_item_id;
-		uint32 aug_4_item_id;
-		uint32 aug_5_item_id;
-		bool   in_bag;
+		uint16      slot;
+		uint32      item_id;
+		std::string item_name;
+		uint16      charges;
+		uint32      aug_1_item_id;
+		std::string aug_1_item_name;
+		uint32      aug_2_item_id;
+		std::string aug_2_item_name;
+		uint32      aug_3_item_id;
+		std::string aug_3_item_name;
+		uint32      aug_4_item_id;
+		std::string aug_4_item_name;
+		uint32      aug_5_item_id;
+		std::string aug_5_item_name;
+		uint32      aug_6_item_id;
+		std::string aug_6_item_name;
+		bool        in_bag;
 
 		// cereal
 		template<class Archive>
@@ -245,7 +253,9 @@ namespace PlayerEvent {
 
 	struct TradeEvent {
 		uint32                      character_1_id;
+		std::string                 character_1_name;
 		uint32                      character_2_id;
+		std::string                 character_2_name;
 		Money                       character_1_give_money;
 		Money                       character_2_give_money;
 		std::vector<TradeItemEntry> character_1_give_items;
@@ -257,7 +267,9 @@ namespace PlayerEvent {
 		{
 			ar(
 				CEREAL_NVP(character_1_id),
+				CEREAL_NVP(character_1_name),
 				CEREAL_NVP(character_2_id),
+				CEREAL_NVP(character_2_name),
 				CEREAL_NVP(character_1_give_money),
 				CEREAL_NVP(character_2_give_money),
 				CEREAL_NVP(character_1_give_items),

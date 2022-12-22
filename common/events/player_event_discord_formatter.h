@@ -149,6 +149,10 @@ public:
 		const PlayerEvent::PlayerEventContainer &c,
 		const PlayerEvent::TaskUpdateEvent &e
 	);
+	static std::string FormatTradeEvent(
+		const PlayerEvent::PlayerEventContainer &c,
+		const PlayerEvent::TradeEvent &e
+	);
 	static std::string FormatTraderPurchaseEvent(
 		const PlayerEvent::PlayerEventContainer &c,
 		const PlayerEvent::TraderPurchaseEvent &e
