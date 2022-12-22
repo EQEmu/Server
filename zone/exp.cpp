@@ -199,16 +199,6 @@ uint32 Client::CalcEXP(uint8 conlevel) {
 		in_add_exp *= RuleR(Character, FinalExpMultiplier);
 	}
 
-	unsigned short KillPercentXPCap = RuleI(Character, KillExperiencePercentCap);
-	if (KillPercentXPCap < 100) { // If the cap is >= 100, do nothing
-		uint32 exp_gained = in_add_exp;
-		float ExperienceForLevel = (float)(GetEXPForLevel(GetLevel() + 1) - GetEXPForLevel(GetLevel()) * (float)100); // Amt of xp needed to complete current level
-		float exp_percent = (float)((float)exp_gained / ExperienceForLevel); // Percent of current level earned
-		if (exp_percent > KillPercentXPCap) { // Detirmine if the earned XP percent is higher than the percent cap
-			in_add_exp = floor(ExperienceForLevel * (KillPercentXPCap / 100.0)); // Set the added xp to the set cap.
-		}
-	}
-
 	return in_add_exp;
 }
 
@@ -440,11 +430,29 @@ void Client::CalculateExp(uint32 in_add_exp, uint32 &add_exp, uint32 &add_aaxp, 
 
 	if (!resexp)
 	{
+		
 		//figure out how much of this goes to AAs
 		add_aaxp = add_exp * m_epp.perAA / 100;
 
 		//take that amount away from regular exp
 		add_exp -= add_aaxp;
+
+		//Enforce Percent XP Cap per kill, if rule is enabled
+		unsigned short KillPercentXPCap = RuleI(Character, KillExperiencePercentCap);
+		// Enforce bounds
+		if (KillPercentXPCap > 100) {
+			KillPercentXPCap = 100;
+		}
+		else if (KillPercentXPCap < 0) {
+			KillPercentXPCap = 0;
+		}
+		if (KillPercentXPCap < 100) { // If the cap is >= 100, do nothing
+			unsigned long int ExperienceForLevel = (unsigned long int)(GetEXPForLevel(GetLevel() + 1) - GetEXPForLevel(GetLevel())); // Amt of xp needed to complete current level
+			unsigned short exp_percent = ceil((float)((float)add_exp / ExperienceForLevel) * 100); // Percent of current level earned
+			if (exp_percent > KillPercentXPCap) { // Determine if the earned XP percent is higher than the percent cap
+				add_exp = floor(ExperienceForLevel * (KillPercentXPCap / 100.0)); // Set the added xp to the set cap.
+			}
+		}
 
 		float totalmod = 1.0;
 		float zemmod = 1.0;
