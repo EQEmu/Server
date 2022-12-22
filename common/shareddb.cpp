@@ -518,16 +518,16 @@ bool SharedDatabase::GetSharedBank(uint32 id, EQ::InventoryProfile *inv, bool is
 
 	for (auto& row = results.begin(); row != results.end(); ++row) {
 		int16 slot_id = static_cast<int16>(atoi(row[0]));
-		uint32 item_id = static_cast<uint32>(atoi(row[1]));
+		uint32 item_id = atoul(row[1]);
 		const int16 charges = static_cast<int16>(atoi(row[2]));
 
 		uint32 aug[EQ::invaug::SOCKET_COUNT];
-		aug[0] = static_cast<uint32>(atoi(row[3]));
-		aug[1] = static_cast<uint32>(atoi(row[4]));
-		aug[2] = static_cast<uint32>(atoi(row[5]));
-		aug[3] = static_cast<uint32>(atoi(row[6]));
-		aug[4] = static_cast<uint32>(atoi(row[7]));
-		aug[5] = static_cast<uint32>(atoi(row[8]));
+		aug[0] = atoul(row[3]);
+		aug[1] = atoul(row[4]);
+		aug[2] = atoul(row[5]);
+		aug[3] = atoul(row[6]);
+		aug[4] = atoul(row[7]);
+		aug[5] = atoul(row[8]);
 
 		const EQ::ItemData *item = GetItem(item_id);
 
@@ -795,12 +795,12 @@ bool SharedDatabase::GetInventory(uint32 account_id, char *name, EQ::InventoryPr
 		const uint32 color = atoul(row[3]);
 
 		uint32 aug[EQ::invaug::SOCKET_COUNT];
-		aug[0] = static_cast<uint32>(atoi(row[4]));
-		aug[1] = static_cast<uint32>(atoi(row[5]));
-		aug[2] = static_cast<uint32>(atoi(row[6]));
-		aug[3] = static_cast<uint32>(atoi(row[7]));
-		aug[4] = static_cast<uint32>(atoi(row[8]));
-		aug[5] = static_cast<uint32>(atoi(row[9]));
+		aug[0] = atoul(row[4]);
+		aug[1] = atoul(row[5]);
+		aug[2] = atoul(row[6]);
+		aug[3] = atoul(row[7]);
+		aug[4] = atoul(row[8]);
+		aug[5] = atoul(row[9]);
 
 		const bool instnodrop = (row[10] && static_cast<uint16>(atoi(row[10]))) ? true : false;
 		const uint32 ornament_icon = std::stoul(row[12]);

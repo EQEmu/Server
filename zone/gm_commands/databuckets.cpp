@@ -46,9 +46,9 @@ void command_databuckets(Client *c, const Seperator *sep)
 						"<td>Value</td>"
 						"</tr>";
 		for (auto   row          = results.begin(); row != results.end(); ++row) {
-			auto        id      = static_cast<uint32>(atoi(row[0]));
-			std::string key     = row[1];
-			std::string value   = row[2];
+			auto id      = atoul(row[0]);
+			std::string key = row[1];
+			std::string value = row[2];
 			std::string expires = row[3];
 			window_text.append(
 				StringFormat(
