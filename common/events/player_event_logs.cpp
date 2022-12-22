@@ -238,8 +238,8 @@ std::string PlayerEventLogs::GetDiscordWebhookUrlFromEventType(int32_t event_typ
 // SPLIT_MONEY          | [x] Implemented Formatter
 // DZ_JOIN              | [] Implemented Formatter
 // DZ_LEAVE             | [] Implemented Formatter
-// TRADER_PURCHASE      | [] Implemented Formatter
-// TRADER_SELL          | [] Implemented Formatter
+// TRADER_PURCHASE      | [x] Implemented Formatter
+// TRADER_SELL          | [x] Implemented Formatter
 // BANDOLIER_CREATE     | [] Implemented Formatter
 // BANDOLIER_SWAP       | [] Implemented Formatter
 // DISCOVER_ITEM        | [X] Implemented Formatter
@@ -475,6 +475,28 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 				n.serialize(ar);
 			}
 			payload = PlayerEventDiscordFormatter::FormatTaskUpdateEvent(e, n);
+			break;
+		}
+		case PlayerEvent::TRADER_PURCHASE: {
+			PlayerEvent::TraderPurchaseEvent n;
+			std::stringstream     ss;
+			{
+				ss << e.player_event_log.event_data;
+				cereal::JSONInputArchive ar(ss);
+				n.serialize(ar);
+			}
+			payload = PlayerEventDiscordFormatter::FormatTraderPurchaseEvent(e, n);
+			break;
+		}
+		case PlayerEvent::TRADER_SELL: {
+			PlayerEvent::TraderSellEvent n;
+			std::stringstream     ss;
+			{
+				ss << e.player_event_log.event_data;
+				cereal::JSONInputArchive ar(ss);
+				n.serialize(ar);
+			}
+			payload = PlayerEventDiscordFormatter::FormatTraderSellEvent(e, n);
 			break;
 		}
 		case PlayerEvent::REZ_ACCEPTED: {

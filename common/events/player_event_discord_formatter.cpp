@@ -991,3 +991,109 @@ std::string PlayerEventDiscordFormatter::FormatSplitMoneyEvent(
 
 	return ss.str();
 }
+
+std::string PlayerEventDiscordFormatter::FormatTraderPurchaseEvent(
+	const PlayerEvent::PlayerEventContainer &c,
+	const PlayerEvent::TraderPurchaseEvent &e
+)
+{
+	std::string purchase_info;
+
+	purchase_info += fmt::format(
+		"Item: {} ({})\n",
+		e.item_name,
+		e.item_id
+	);
+
+	purchase_info += fmt::format(
+		"Trader: {} ({})\n",
+		e.trader_name,
+		e.trader_id
+	);
+
+	purchase_info += fmt::format(
+		"Price: {} Amount: {} Total: {}\n",
+		Strings::Commify(std::to_string(e.price)),
+		e.charges,
+		Strings::Commify(std::to_string(e.total_cost))
+	);
+
+	purchase_info += fmt::format(
+		":moneybag: [{}]\n",
+		Strings::Commify(std::to_string(e.player_money_balance))
+	);
+
+	std::vector<DiscordField> f = {};
+	BuildBaseFields(&f, c);
+	BuildDiscordField(
+		&f,
+		"Purchase Information",
+		purchase_info
+	);
+
+	std::vector<DiscordEmbed> embeds = {};
+	BuildBaseEmbed(&embeds, f, c);
+	DiscordEmbedRoot  root = DiscordEmbedRoot{
+		.embeds = embeds
+	};
+	std::stringstream ss;
+	{
+		cereal::JSONOutputArchive ar(ss);
+		root.serialize(ar);
+	}
+
+	return ss.str();
+}
+
+std::string PlayerEventDiscordFormatter::FormatTraderSellEvent(
+	const PlayerEvent::PlayerEventContainer &c,
+	const PlayerEvent::TraderSellEvent &e
+)
+{
+	std::string sell_info;
+
+	sell_info += fmt::format(
+		"Item: {} ({})\n",
+		e.item_name,
+		e.item_id
+	);
+
+	sell_info += fmt::format(
+		"Buyer: {} ({})\n",
+		e.buyer_name,
+		e.buyer_id
+	);
+
+	sell_info += fmt::format(
+		"Price: {} Amount: {} Total: {}\n",
+		Strings::Commify(std::to_string(e.price)),
+		e.charges,
+		Strings::Commify(std::to_string(e.total_cost))
+	);
+
+	sell_info += fmt::format(
+		":moneybag: [{}]\n",
+		Strings::Commify(std::to_string(e.player_money_balance))
+	);
+
+	std::vector<DiscordField> f = {};
+	BuildBaseFields(&f, c);
+	BuildDiscordField(
+		&f,
+		"Sale Information",
+		sell_info
+	);
+
+	std::vector<DiscordEmbed> embeds = {};
+	BuildBaseEmbed(&embeds, f, c);
+	DiscordEmbedRoot  root = DiscordEmbedRoot{
+		.embeds = embeds
+	};
+	std::stringstream ss;
+	{
+		cereal::JSONOutputArchive ar(ss);
+		root.serialize(ar);
+	}
+
+	return ss.str();
+}
