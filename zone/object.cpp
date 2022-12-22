@@ -553,12 +553,13 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 			sender->SendItemPacket(EQ::invslot::slotCursor, m_inst, ItemPacketTrade);
 
 			// Could be an undiscovered ground_spawn
-			if (m_ground_spawn && (RuleB(Character, EnableDiscoveredItems)))
-			{
-				if (!sender->GetGM() && !sender->IsDiscovered(item->ID))
-				{
-					sender->DiscoverItem(item->ID);
-				}
+			if (
+				m_ground_spawn &&
+				RuleB(Character, EnableDiscoveredItems) &&
+				!sender->GetGM() &&
+				!sender->IsDiscovered(item->ID)
+			) {
+				sender->DiscoverItem(item->ID);
 			}
 
 			if(cursordelete)	// delete the item if it's a duplicate lore. We have to do this because the client expects the item packet

@@ -1483,18 +1483,14 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 		// safe to ACK now
 		client->QueuePacket(app);
 
-		if (!IsPlayerCorpse() && RuleB(Character, EnableDiscoveredItems)) {
-			if (client && !client->GetGM() && !client->IsDiscovered(inst->GetItem()->ID)) {
-				client->DiscoverItem(inst->GetItem()->ID);
-
-				if (player_event_logs.IsEventEnabled(PlayerEvent::DISCOVER_ITEM)) {
-					auto e = PlayerEvent::DiscoverItemEvent{
-						.item_id = inst->GetItem()->ID,
-						.item_name = inst->GetItem()->Name
-					};
-					RecordPlayerEventLogWithClient(client, PlayerEvent::DISCOVER_ITEM, e);
-				}
-			}
+		if (
+			!IsPlayerCorpse() &&
+			RuleB(Character, EnableDiscoveredItems) &&
+			client &&
+			!client->GetGM() &&
+			!client->IsDiscovered(inst->GetItem()->ID)
+		) {
+			client->DiscoverItem(inst->GetItem()->ID);
 		}
 
 		if (zone->adv_data) {

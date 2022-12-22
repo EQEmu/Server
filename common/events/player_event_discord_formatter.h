@@ -97,6 +97,10 @@ public:
 		const PlayerEvent::PlayerEventContainer &c,
 		const PlayerEvent::DestroyItemEvent &e
 	);
+	static std::string FormatDiscoverItemEvent(
+		const PlayerEvent::PlayerEventContainer &c,
+		const PlayerEvent::DiscoverItemEvent &e
+	);
 	static std::string FormatLevelGainedEvent(
 		const PlayerEvent::PlayerEventContainer &c,
 		const PlayerEvent::LevelGainedEvent &e

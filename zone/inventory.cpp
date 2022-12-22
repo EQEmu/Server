@@ -805,25 +805,12 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 	safe_delete(inst);
 
 	// discover item and any augments
-	if((RuleB(Character, EnableDiscoveredItems)) && !GetGM()) {
-		if(!IsDiscovered(item_id)) {
-			DiscoverItem(item_id);
-
-			if (player_event_logs.IsEventEnabled(PlayerEvent::DISCOVER_ITEM)) {
-				auto e = PlayerEvent::DiscoverItemEvent{
-					.item_id = item_id,
-					.item_name = item->Name
-				};
-				RecordPlayerEventLog(PlayerEvent::DISCOVER_ITEM, e);
-			}
-		}
-		/*
-		// Augments should have been discovered prior to being placed on an item.
-		for (int iter = AUG_BEGIN; iter < EQ::constants::ITEM_COMMON_SIZE; ++iter) {
-			if(augments[iter] && !IsDiscovered(augments[iter]))
-				DiscoverItem(augments[iter]);
-		}
-		*/
+	if (
+		RuleB(Character, EnableDiscoveredItems) &&
+		!GetGM() &&
+		!IsDiscovered(item_id)
+	) {
+		DiscoverItem(item_id);
 	}
 
 	return true;

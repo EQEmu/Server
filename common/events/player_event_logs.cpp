@@ -293,6 +293,17 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 			payload = PlayerEventDiscordFormatter::FormatDeathEvent(e, n);
 			break;
 		}
+		case PlayerEvent::DISCOVER_ITEM: {
+			PlayerEvent::DiscoverItemEvent n;
+			std::stringstream              ss;
+			{
+				ss << e.player_event_log.event_data;
+				cereal::JSONInputArchive ar(ss);
+				n.serialize(ar);
+			}
+			payload = PlayerEventDiscordFormatter::FormatDiscoverItemEvent(e, n);
+			break;
+		}
 		case PlayerEvent::FISH_FAILURE: {
 			payload = PlayerEventDiscordFormatter::FormatWithNodata(e);
 			break;

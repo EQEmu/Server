@@ -793,28 +793,28 @@ std::string PlayerEventDiscordFormatter::FormatNPCHandinEvent(
 	std::string money_info;
 	if (e.handin_money.platinum) {
 		money_info += fmt::format(
-			"{} Platinum\n",
+			":moneybag: {} Platinum\n",
 			Strings::Commify(std::to_string(e.handin_money.platinum))
 		);
 	}
 
 	if (e.handin_money.gold) {
 		money_info += fmt::format(
-			"{} Gold\n",
+			":moneybag: {} Gold\n",
 			Strings::Commify(std::to_string(e.handin_money.gold))
 		);
 	}
 
 	if (e.handin_money.silver) {
 		money_info += fmt::format(
-			"{} Silver\n",
+			":moneybag: {} Silver\n",
 			Strings::Commify(std::to_string(e.handin_money.silver))
 		);
 	}
 
 	if (e.handin_money.copper) {
 		money_info += fmt::format(
-			"{} Copper",
+			":moneybag: {} Copper",
 			Strings::Commify(std::to_string(e.handin_money.copper))
 		);
 	}
@@ -854,6 +854,36 @@ std::string PlayerEventDiscordFormatter::FormatNPCHandinEvent(
 			)
 		);
 	}
+	std::vector<DiscordEmbed> embeds = {};
+	BuildBaseEmbed(&embeds, f, c);
+	DiscordEmbedRoot  root = DiscordEmbedRoot{
+		.embeds = embeds
+	};
+	std::stringstream ss;
+	{
+		cereal::JSONOutputArchive ar(ss);
+		root.serialize(ar);
+	}
+
+	return ss.str();
+}
+
+std::string PlayerEventDiscordFormatter::FormatDiscoverItemEvent(
+	const PlayerEvent::PlayerEventContainer &c,
+	const PlayerEvent::DiscoverItemEvent &e
+)
+{
+	std::vector<DiscordField> f = {};
+	BuildBaseFields(&f, c);
+	BuildDiscordField(
+		&f,
+		"Discovered Item",
+		fmt::format(
+			"{} ({})",
+			e.item_name, e.item_id
+		)
+	);
+
 	std::vector<DiscordEmbed> embeds = {};
 	BuildBaseEmbed(&embeds, f, c);
 	DiscordEmbedRoot  root = DiscordEmbedRoot{

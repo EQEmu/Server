@@ -66,6 +66,7 @@ extern volatile bool RunLoops;
 #include "../common/repositories/character_spells_repository.h"
 #include "../common/repositories/character_disciplines_repository.h"
 #include "../common/repositories/character_data_repository.h"
+#include "../common/repositories/discovered_items_repository.h"
 #include "../common/events/player_events.h"
 #include "../common/events/player_event_logs.h"
 
@@ -4065,36 +4066,42 @@ void Client::KeyRingList()
 	}
 }
 
-bool Client::IsDiscovered(uint32 itemid) {
-
-	std::string query = StringFormat("SELECT count(*) FROM discovered_items WHERE item_id = '%lu'", itemid);
-	auto results = database.QueryDatabase(query);
-	if (!results.Success()) {
+bool Client::IsDiscovered(uint32 item_id) {
+	const auto& l = DiscoveredItemsRepository::GetWhere(
+		database,
+		fmt::format(
+			"item_id = {}",
+			item_id
+		)
+	);
+	if (l.empty()) {
 		return false;
 	}
-
-	auto row = results.begin();
-	if (!atoi(row[0]))
-		return false;
 
 	return true;
 }
 
-void Client::DiscoverItem(uint32 itemid) {
+void Client::DiscoverItem(uint32 item_id) {
+	auto e = DiscoveredItemsRepository::NewEntity();
 
-	std::string query = StringFormat("INSERT INTO discovered_items "
-									"SET item_id = %lu, char_name = '%s', "
-									"discovered_date = UNIX_TIMESTAMP(), account_status = %i",
-									itemid, GetName(), Admin());
-	auto results = database.QueryDatabase(query);
+	e.account_status = Admin();
+	e.char_name = GetCleanName();
+	e.discovered_date = std::time(nullptr);
+	e.item_id = item_id;
 
-	auto* inst = database.CreateItem(itemid);
+	auto d = DiscoveredItemsRepository::InsertOne(database, e);
 
-	std::vector<std::any> args;
+	parse->EventPlayer(EVENT_DISCOVER_ITEM, this, "", item_id);
 
-	args.emplace_back(inst);
+	if (player_event_logs.IsEventEnabled(PlayerEvent::DISCOVER_ITEM)) {
+		const auto* item = database.GetItem(item_id);
 
-	parse->EventPlayer(EVENT_DISCOVER_ITEM, this, "", itemid, &args);
+		auto e = PlayerEvent::DiscoverItemEvent{
+			.item_id = item_id,
+			.item_name = item->Name,
+		};
+		RecordPlayerEventLog(PlayerEvent::DISCOVER_ITEM, e);
+	}
 }
 
 void Client::UpdateLFP() {
@@ -12002,7 +12009,7 @@ void Client::UseAugmentContainer(int container_slot)
 
 PlayerEvent::PlayerEvent Client::GetPlayerEvent()
 {
-	auto e = PlayerEvent::PlayerEvent{};
+	auto e = PlayerEvent::PlayerEvenbool IsDiscovered(uint32 item_id);t{};
 	e.account_id      = AccountID();
 	e.character_id    = CharacterID();
 	e.character_name  = GetCleanName();
