@@ -1,5 +1,5 @@
 #include "../client.h"
-#include "../common/data_verification.h"
+#include "../../common/data_verification.h"
 
 void command_flymode(Client *c, const Seperator *sep)
 {
