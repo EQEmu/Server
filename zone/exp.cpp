@@ -438,15 +438,8 @@ void Client::CalculateExp(uint32 in_add_exp, uint32 &add_exp, uint32 &add_aaxp, 
 		add_exp -= add_aaxp;
 
 		//Enforce Percent XP Cap per kill, if rule is enabled
-		unsigned short KillPercentXPCap = RuleI(Character, KillExperiencePercentCap);
-		// Enforce bounds
-		if (KillPercentXPCap > 100) {
-			KillPercentXPCap = 100;
-		}
-		else if (KillPercentXPCap < 0) {
-			KillPercentXPCap = 0;
-		}
-		if (KillPercentXPCap < 100) { // If the cap is >= 100, do nothing
+		int KillPercentXPCap = RuleI(Character, KillExperiencePercentCap);
+		if (KillPercentXPCap >= 0) { // If the cap is == -1, do nothing
 			unsigned long int ExperienceForLevel = (unsigned long int)(GetEXPForLevel(GetLevel() + 1) - GetEXPForLevel(GetLevel())); // Amt of xp needed to complete current level
 			unsigned short exp_percent = ceil((float)((float)add_exp / ExperienceForLevel) * 100); // Percent of current level earned
 			if (exp_percent > KillPercentXPCap) { // Determine if the earned XP percent is higher than the percent cap
