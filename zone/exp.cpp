@@ -200,12 +200,12 @@ uint32 Client::CalcEXP(uint8 conlevel) {
 	}
 
 	unsigned short KillPercentXPCap = RuleI(Character, KillExperiencePercentCap);
-	if (KillPercentXPCap < 100) { // If the cap is 100, do nothing
+	if (KillPercentXPCap < 100) { // If the cap is >= 100, do nothing
 		uint32 exp_gained = in_add_exp;
-		float ExperienceForLevel = (float)(GetEXPForLevel(GetLevel() + 1) - GetEXPForLevel(GetLevel()) * (float)100);
+		float ExperienceForLevel = (float)(GetEXPForLevel(GetLevel() + 1) - GetEXPForLevel(GetLevel()) * (float)100); // Amt of xp needed to complete current level
 		float exp_percent = (float)((float)exp_gained / ExperienceForLevel); // Percent of current level earned
 		if (exp_percent > KillPercentXPCap) { // Detirmine if the earned XP percent is higher than the percent cap
-			in_add_exp = floor(m_pp.exp * KillPercentXPCap / 100.0);
+			in_add_exp = floor(ExperienceForLevel * (KillPercentXPCap / 100.0));
 		}
 	}
 
