@@ -898,7 +898,6 @@ std::string PlayerEventDiscordFormatter::FormatDiscoverItemEvent(
 	return ss.str();
 }
 
-
 std::string PlayerEventDiscordFormatter::FormatDroppedItemEvent(
 	const PlayerEvent::PlayerEventContainer &c,
 	const PlayerEvent::DroppedItemEvent &e
@@ -913,9 +912,70 @@ std::string PlayerEventDiscordFormatter::FormatDroppedItemEvent(
 			"{} ({})\nSlot: {} ({})",
 			e.item_name,
 			e.item_id,
-			e.slot_id,
-			EQ::invslot::GetInvPossessionsSlotName(e.slot_id)
+			EQ::invslot::GetInvPossessionsSlotName(e.slot_id),
+			e.slot_id
 		)
+	);
+
+	std::vector<DiscordEmbed> embeds = {};
+	BuildBaseEmbed(&embeds, f, c);
+	DiscordEmbedRoot  root = DiscordEmbedRoot{
+		.embeds = embeds
+	};
+	std::stringstream ss;
+	{
+		cereal::JSONOutputArchive ar(ss);
+		root.serialize(ar);
+	}
+
+	return ss.str();
+}
+
+std::string PlayerEventDiscordFormatter::FormatSplitMoneyEvent(
+	const PlayerEvent::PlayerEventContainer &c,
+	const PlayerEvent::SplitMoneyEvent &e
+)
+{
+	std::string money_info;
+	if (e.platinum) {
+		money_info += fmt::format(
+			":moneybag: {} Platinum\n",
+			Strings::Commify(std::to_string(e.platinum))
+		);
+	}
+
+	if (e.gold) {
+		money_info += fmt::format(
+			":moneybag: {} Gold\n",
+			Strings::Commify(std::to_string(e.gold))
+		);
+	}
+
+	if (e.silver) {
+		money_info += fmt::format(
+			":moneybag: {} Silver\n",
+			Strings::Commify(std::to_string(e.silver))
+		);
+	}
+
+	if (e.copper) {
+		money_info += fmt::format(
+			":moneybag: {} Copper\n",
+			Strings::Commify(std::to_string(e.copper))
+		);
+	}
+
+	money_info += fmt::format(
+		":moneybag: [{}]",
+		Strings::Commify(std::to_string(e.player_money_balance))
+	);
+
+	std::vector<DiscordField> f = {};
+	BuildBaseFields(&f, c);
+	BuildDiscordField(
+		&f,
+		"Split Money",
+		money_info
 	);
 
 	std::vector<DiscordEmbed> embeds = {};

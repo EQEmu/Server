@@ -235,7 +235,7 @@ std::string PlayerEventLogs::GetDiscordWebhookUrlFromEventType(int32_t event_typ
 // COMBINE_FAILURE      | [x] Implemented Formatter
 // COMBINE_SUCCESS      | [x] Implemented Formatter
 // DROPPED_ITEM         | [x] Implemented Formatter
-// SPLIT_MONEY          | [] Implemented Formatter
+// SPLIT_MONEY          | [x] Implemented Formatter
 // DZ_JOIN              | [] Implemented Formatter
 // DZ_LEAVE             | [] Implemented Formatter
 // TRADER_PURCHASE      | [] Implemented Formatter
@@ -431,6 +431,17 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 				n.serialize(ar);
 			}
 			payload = PlayerEventDiscordFormatter::FormatSkillUpEvent(e, n);
+			break;
+		}
+		case PlayerEvent::SPLIT_MONEY: {
+			PlayerEvent::SplitMoneyEvent n;
+			std::stringstream            ss;
+			{
+				ss << e.player_event_log.event_data;
+				cereal::JSONInputArchive ar(ss);
+				n.serialize(ar);
+			}
+			payload = PlayerEventDiscordFormatter::FormatSplitMoneyEvent(e, n);
 			break;
 		}
 		case PlayerEvent::TASK_ACCEPT: {

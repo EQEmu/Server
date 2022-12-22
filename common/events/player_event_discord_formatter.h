@@ -153,6 +153,10 @@ public:
 		const PlayerEvent::PlayerEventContainer &c,
 		const PlayerEvent::ResurrectAcceptEvent &e
 	);
+	static std::string FormatSplitMoneyEvent(
+		const PlayerEvent::PlayerEventContainer &c,
+		const PlayerEvent::SplitMoneyEvent &e
+	);
 	static std::string FormatCombineEvent(
 		const PlayerEvent::PlayerEventContainer &c,
 		const PlayerEvent::CombineEvent &e
