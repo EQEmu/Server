@@ -1966,14 +1966,16 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	}
 	case ServerOP_ReloadLevelEXPMods:
 	{
-		zone->SendReloadMessage("Level Based Experience Modifiers");
-		zone->LoadLevelEXPMods();
+		if (zone && zone->IsLoaded()) {
+			zone->SendReloadMessage("Level Based Experience Modifiers");
+			zone->LoadLevelEXPMods();
+		}
 		break;
 	}
 	case ServerOP_ReloadLogs:
 	{
-		zone->SendReloadMessage("Log Settings");
-		LogSys.LoadLogDatabaseSettings();
+			zone->SendReloadMessage("Log Settings");
+			LogSys.LoadLogDatabaseSettings();
 		break;
 	}
 	case ServerOP_ReloadMerchants: {
