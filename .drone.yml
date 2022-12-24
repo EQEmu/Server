@@ -44,9 +44,19 @@ platform:
   arch: amd64
 
 steps:
-  - name: build
+  - name: init
     commands:
-      - utils/scripts/build/windows-build.ps1
+      - git submodule init
+      - git submodule update
+  - name: build-win-x64
+    commands:
+      - utils/scripts/build/windows-build-no-bots.ps1
+  - name: build-win-x64-bots
+    commands:
+      - utils/scripts/build/windows-build-bots.ps1
+  - name: package-artifacts
+    commands:
+      - utils/scripts/build/package-artifacts.ps1
 
 trigger:
   branch:
