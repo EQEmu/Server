@@ -25,3 +25,24 @@ steps:
     volumes:
       - name: cache
         path: /home/eqemu/.ccache/
+
+---
+
+kind: pipeline
+type: exec
+name: default
+
+platform:
+  os: windows
+  arch: amd64
+
+steps:
+  - name: greeting
+    commands:
+      - echo hello world
+
+trigger:
+  branch:
+    - akkadius/build-test
+  event:
+    - push
