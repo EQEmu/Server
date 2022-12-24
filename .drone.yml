@@ -36,8 +36,66 @@ trigger:
 ---
 
 kind: pipeline
+type: docker
+name: Build Linux Binaries
+
+platform:
+  os: windows
+  arch: amd64
+
+steps:
+  - name: Init
+    image: akkadius/eqemu-server:v11
+    commands:
+      - sudo chown eqemu:eqemu /drone/src/ * -R
+      - sudo chown eqemu:eqemu /home/eqemu/.ccache/ * -R
+      - git submodule init && git submodule update && mkdir -p build && cd build && cmake -DEQEMU_BUILD_TESTS=ON -DEQEMU_BUILD_LOGIN=ON -DEQEMU_ENABLE_BOTS=ON -DEQEMU_BUILD_LUA=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_FLAGS_RELWITHDEBINFO:STRING="-O0 -g -DNDEBUG" -G 'Unix Makefiles' ..
+      - curl https://raw.githubusercontent.com/Akkadius/eqemu-install-v2/master/eqemu_config.json --output eqemu_config.json
+      - ./bin/tests
+    volumes:
+      - name: cache
+        path: /home/eqemu/.ccache/
+  - name: Linux x64
+    image: akkadius/eqemu-server:v11
+    commands:
+      - cd build && cmake -DEQEMU_BUILD_TESTS=ON -DEQEMU_BUILD_LOGIN=ON -DEQEMU_ENABLE_BOTS=OFF -DEQEMU_BUILD_LUA=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_FLAGS_RELWITHDEBINFO:STRING="-O0 -g -DNDEBUG" -G 'Unix Makefiles' .. && make -j$((`nproc`-4))
+      - curl https://raw.githubusercontent.com/Akkadius/eqemu-install-v2/master/eqemu_config.json --output eqemu_config.json
+      - ./bin/tests
+    volumes:
+      - name: cache
+        path: /home/eqemu/.ccache/
+  - name: Linux x64 Bots
+    image: akkadius/eqemu-server:v11
+    commands:
+      - git submodule init && git submodule update && mkdir -p build && cd build && cmake -DEQEMU_BUILD_TESTS=ON -DEQEMU_BUILD_LOGIN=ON -DEQEMU_ENABLE_BOTS=ON -DEQEMU_BUILD_LUA=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_FLAGS_RELWITHDEBINFO:STRING="-O0 -g -DNDEBUG" -G 'Unix Makefiles' .. && make -j$((`nproc`-4))
+      - ./bin/tests
+    volumes:
+      - name: cache
+        path: /home/eqemu/.ccache/
+  - name: Package Artifacts
+    image: akkadius/eqemu-server:v11
+    commands:
+      - sudo chown eqemu:eqemu /drone/src/ * -R
+      - sudo chown eqemu:eqemu /home/eqemu/.ccache/ * -R
+      - git submodule init && git submodule update && mkdir -p build && cd build && cmake -DEQEMU_BUILD_TESTS=ON -DEQEMU_BUILD_LOGIN=ON -DEQEMU_ENABLE_BOTS=ON -DEQEMU_BUILD_LUA=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_FLAGS_RELWITHDEBINFO:STRING="-O0 -g -DNDEBUG" -G 'Unix Makefiles' .. && make -j$((`nproc`-4))
+      - curl https://raw.githubusercontent.com/Akkadius/eqemu-install-v2/master/eqemu_config.json --output eqemu_config.json
+      - ./bin/tests
+    volumes:
+      - name: cache
+        path: /home/eqemu/.ccache/
+
+
+trigger:
+  branch:
+    - akkadius/build-test
+  event:
+    - push
+
+---
+
+kind: pipeline
 type: exec
-name: default
+name: Build Windows Binaries
 
 platform:
   os: windows
