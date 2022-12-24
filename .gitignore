@@ -63,3 +63,6 @@ compile_flags.txt
 
 # vscode generated settings
 .vscode/
+
+
+!utils/scripts/build/
