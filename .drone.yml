@@ -26,6 +26,13 @@ steps:
       - name: cache
         path: /home/eqemu/.ccache/
 
+# remove this when merge
+trigger:
+  branch:
+    - noop
+  event:
+    - push
+
 ---
 
 kind: pipeline
@@ -37,9 +44,9 @@ platform:
   arch: amd64
 
 steps:
-  - name: greeting
+  - name: build
     commands:
-      - echo hello world
+      - utils/scripts/build/windows-build.ps1
 
 trigger:
   branch:
