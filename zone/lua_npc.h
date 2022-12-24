@@ -159,6 +159,8 @@ public:
 	float GetNPCStat(std::string stat);
 	void SendPayload(int payload_id);
 	void SendPayload(int payload_id, std::string payload_value);
+	bool GetKeepsSoldItems();
+	void SetKeepsSoldItems(bool keeps_sold_items);
 };
 
 #endif

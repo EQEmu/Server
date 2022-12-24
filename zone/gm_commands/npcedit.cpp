@@ -1491,6 +1491,22 @@ void command_npcedit(Client *c, const Seperator *sep)
 			);
 			return;
 		}
+	} else if (!strcasecmp(sep->arg[1], "keeps_sold_items")) {
+		if (sep->IsNumber(2)) {
+			auto keeps_sold_items = static_cast<uint8_t>(std::stoul(sep->arg[2]));
+			n.keeps_sold_items = keeps_sold_items;
+			d = fmt::format(
+				"{} will {} Keep Sold Items.",
+				npc_id_string,
+				keeps_sold_items ? "now" : "no longer"
+			);
+		} else {
+			c->Message(
+				Chat::White,
+				"Usage: #npcedit keeps_sold_items [Flag] - Sets an NPC's Keeps Sold Items Flag [0 = False, 1 = True]"
+			);
+			return;
+		}
 	} else if (!strcasecmp(sep->arg[1], "setanimation")) {
 		if (sep->IsNumber(2)) {
 			auto animation_id   = std::stoul(sep->arg[2]);
@@ -1759,6 +1775,10 @@ void SendNPCEditSubCommands(Client *c)
 	c->Message(
 		Chat::White,
 		"Usage: #npcedit exp_mod [Modifier] - Sets an NPC's Experience Modifier [50 = 50%, 100 = 100%, 200 = 200%]"
+	);
+	c->Message(
+		Chat::White,
+		"Usage: #npcedit keeps_sold_items [Flag] - Sets an NPC's Keeps Sold Items Flag [0 = False, 1 = True]"
 	);
 	c->Message(
 		Chat::White,
