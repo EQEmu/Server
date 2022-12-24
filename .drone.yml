@@ -39,9 +39,14 @@ kind: pipeline
 type: docker
 name: Build Linux Binaries
 
-platform:
-  os: windows
-  arch: amd64
+# Limits how many of these builds can run on the drone runner at a time, this isn't about cores
+concurrency:
+  limit: 1
+
+volumes:
+  - name: cache
+    host:
+      path: /var/lib/cache
 
 steps:
   - name: Init
