@@ -12,4 +12,3 @@ Set-Location -Path "$cwd\build_x64"
 cmake -Wno-dev -G "Visual Studio 17 2022" -A x64 -DEQEMU_BUILD_TESTS=ON -DEQEMU_BUILD_LOGIN=ON -DEQEMU_BUILD_ZLIB=ON -DEQEMU_ENABLE_BOTS=OFF "$cwd"
 cmake --build . --config RelWithDebInfo --clean-first
 Set-Location -Path "$cwd"
-7z a build_x64.zip $cwd\build_x64\bin\RelWithDebInfo\*.exe $cwd\build_x64\bin\RelWithDebInfo\*.dll $cwd\build_x64\bin\RelWithDebInfo\*.pdb $cwd\build_x64\libs\zlibng\RelWithDebInfo\*.dll $cwd\build_x64\libs\zlibng\RelWithDebInfo\*.pdb
