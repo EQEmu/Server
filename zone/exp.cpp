@@ -436,16 +436,6 @@ void Client::CalculateExp(uint32 in_add_exp, uint32 &add_exp, uint32 &add_aaxp, 
 		//take that amount away from regular exp
 		add_exp -= add_aaxp;
 
-		//Enforce Percent XP Cap per kill, if rule is enabled
-		int kill_percent_xp_cap = RuleI(Character, ExperiencePercentCapPerKill);
-		if (kill_percent_xp_cap >= 0) {
-			auto experience_for_level = (GetEXPForLevel(GetLevel() + 1) - GetEXPForLevel(GetLevel()));
-			auto exp_percent = static_cast<uint32>(std::ceil(static_cast<float>(add_exp / experience_for_level) * 100.0f));
-			if (exp_percent > kill_percent_xp_cap) {
-				add_exp = static_cast<uint32>(std::floor(experience_for_level * (kill_percent_xp_cap / 100.0)));
-			}
-		}
-
 		float totalmod = 1.0;
 		float zemmod = 1.0;
 
@@ -506,6 +496,16 @@ void Client::CalculateExp(uint32 in_add_exp, uint32 &add_exp, uint32 &add_aaxp, 
 	}
 
 	add_exp = GetEXP() + add_exp;
+	
+	//Enforce Percent XP Cap per kill, if rule is enabled
+	int kill_percent_xp_cap = RuleI(Character, ExperiencePercentCapPerKill);
+	if (kill_percent_xp_cap >= 0) {
+		auto experience_for_level = (GetEXPForLevel(GetLevel() + 1) - GetEXPForLevel(GetLevel()));
+		auto exp_percent = static_cast<uint32>(std::ceil(static_cast<float>(add_exp / experience_for_level) * 100.0f));
+		if (exp_percent > kill_percent_xp_cap) {
+			add_exp = static_cast<uint32>(std::floor(experience_for_level * (kill_percent_xp_cap / 100.0)));
+		}
+	}
 }
 
 void Client::AddEXP(uint32 in_add_exp, uint8 conlevel, bool resexp) {
