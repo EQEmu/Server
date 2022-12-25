@@ -131,8 +131,6 @@ steps:
     commands:
       - utils/scripts/build/package-artifacts.ps1
       - dir *.zip
-      - rclone copy eqemu-server-windows-x64.zip remote:
-      - rclone copy eqemu-server-windows-bots-x64.zip remote:
   - name: Upload Artifacts
     environment:
       RCLONE_CONFIG_REMOTE_TYPE: ftp
