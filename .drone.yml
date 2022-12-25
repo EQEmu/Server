@@ -164,7 +164,7 @@ name: Publish Artifacts to Github
 
 steps:
   - name: Upload Artifacts
-    image: akkadius/eqemu-build-releaser:v2
+    image: akkadius/eqemu-build-releaser:v3
     environment:
       RCLONE_CONFIG_REMOTE_TYPE: ftp
       RCLONE_FTP_HOST: drone.akkadius.com
@@ -176,7 +176,7 @@ steps:
     commands:
       - rclone config create remote ftp env_auth true > /dev/null
       - |
-        rclone copy remote: --include "eqemu-server*.zip" . 
+        rclone copy remote: --include "eqemu-server*.zip" .
       - gh-release --assets=eqemu-server-linux-x64.zip,eqemu-server-linux-bots-x64.zip,eqemu-server-windows-x64.zip,eqemu-server-windows-bots-x64.zip -y
 
 #depends_on:
