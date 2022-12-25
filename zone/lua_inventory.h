@@ -68,6 +68,7 @@ public:
 	bool CanItemFitInContainer(Lua_Item item, Lua_Item container);
 	bool SupportsContainers(int slot_id);
 	int GetSlotByItemInst(Lua_ItemInst inst);
+	luabind::object GetAugmentIDsBySlotID(lua_State* L, int16 slot_id);
 };
 
 #endif

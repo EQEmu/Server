@@ -1718,3 +1718,17 @@ int16 EQ::InventoryProfile::_HasItemByLoreGroup(ItemInstQueue& iqueue, uint32 lo
 
 	return EQ::invslot::SLOT_INVALID;
 }
+
+std::vector<uint32> EQ::InventoryProfile::GetAugmentIDsBySlotID(int16 slot_id)
+{
+	std::vector<uint32> augments;
+	const auto* item = GetItem(slot_id);
+
+	if (item) {
+		for (uint8 i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; i++) {
+			augments.push_back(item->GetAugment(i) ? item->GetAugmentItemID(i) : 0);
+		}
+	}
+
+	return augments;
+}

@@ -166,6 +166,18 @@ int Perl_Inventory_CountItemEquippedByID(EQ::InventoryProfile* self, uint32_t it
 	return self->CountItemEquippedByID(item_id);
 }
 
+perl::array Perl_Inventory_GetAugmentIDsBySlotID(EQ::InventoryProfile* self, int16 slot_id)
+{
+	perl::array result;
+	auto augments = self->GetAugmentIDsBySlotID(slot_id);
+
+	for (int i = 0; i < augments.size(); ++i) {
+		result.push_back(augments[i]);
+	}
+
+	return result;
+}
+
 void perl_register_inventory()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -180,6 +192,7 @@ void perl_register_inventory()
 	package.add("FindFreeSlot", (int(*)(EQ::InventoryProfile*, bool, bool))&Perl_Inventory_FindFreeSlot);
 	package.add("FindFreeSlot", (int(*)(EQ::InventoryProfile*, bool, bool, uint8_t))&Perl_Inventory_FindFreeSlot);
 	package.add("FindFreeSlot", (int(*)(EQ::InventoryProfile*, bool, bool, uint8_t, bool))&Perl_Inventory_FindFreeSlot);
+	package.add("GetAugmentIDsBySlotID", &Perl_Inventory_GetAugmentIDsBySlotID);
 	package.add("GetBagIndex", &Perl_Inventory_GetBagIndex);
 	package.add("GetItem", &Perl_Inventory_GetItem);
 	package.add("GetMaterialFromSlot", &Perl_Inventory_GetMaterialFromSlot);

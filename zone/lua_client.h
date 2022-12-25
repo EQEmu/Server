@@ -454,6 +454,7 @@ public:
 	void SendPayload(int payload_id, std::string payload_value);
 	std::string GetGuildPublicNote();
 	void MaxSkills();
+	luabind::object GetAugmentIDsBySlotID(lua_State* L, int16 slot_id);
 
 	void ApplySpell(int spell_id);
 	void ApplySpell(int spell_id, int duration);

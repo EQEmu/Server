@@ -650,7 +650,7 @@ luabind::object Lua_Client::GetLearnableDisciplines(lua_State* L) {
 	if (d_) {
 		auto self = reinterpret_cast<NativeType*>(d_);
 		auto learnable_disciplines = self->GetLearnableDisciplines();
-		int index = 0;
+		int index = 1;
 		for (auto spell_id : learnable_disciplines) {
 			lua_table[index] = spell_id;
 			index++;
@@ -664,7 +664,7 @@ luabind::object Lua_Client::GetLearnableDisciplines(lua_State* L, uint8 min_leve
 	if (d_) {
 		auto self = reinterpret_cast<NativeType*>(d_);
 		auto learnable_disciplines = self->GetLearnableDisciplines(min_level);
-		int index = 0;
+		int index = 1;
 		for (auto spell_id : learnable_disciplines) {
 			lua_table[index] = spell_id;
 			index++;
@@ -678,7 +678,7 @@ luabind::object Lua_Client::GetLearnableDisciplines(lua_State* L, uint8 min_leve
 	if (d_) {
 		auto self = reinterpret_cast<NativeType*>(d_);
 		auto learnable_disciplines = self->GetLearnableDisciplines(min_level, max_level);
-		int index = 0;
+		int index = 1;
 		for (auto spell_id : learnable_disciplines) {
 			lua_table[index] = spell_id;
 			index++;
@@ -692,7 +692,7 @@ luabind::object Lua_Client::GetLearnedDisciplines(lua_State* L) {
 	if (d_) {
 		auto self = reinterpret_cast<NativeType*>(d_);
 		auto learned_disciplines = self->GetLearnedDisciplines();
-		int index = 0;
+		int index = 1;
 		for (auto spell_id : learned_disciplines) {
 			lua_table[index] = spell_id;
 			index++;
@@ -706,7 +706,7 @@ luabind::object Lua_Client::GetMemmedSpells(lua_State* L) {
 	if (d_) {
 		auto self = reinterpret_cast<NativeType*>(d_);
 		auto memmed_spells = self->GetMemmedSpells();
-		int index = 0;
+		int index = 1;
 		for (auto spell_id : memmed_spells) {
 			lua_table[index] = spell_id;
 			index++;
@@ -720,7 +720,7 @@ luabind::object Lua_Client::GetScribeableSpells(lua_State* L) {
 	if (d_) {
 		auto self = reinterpret_cast<NativeType*>(d_);
 		auto scribeable_spells = self->GetScribeableSpells();
-		int index = 0;
+		int index = 1;
 		for (auto spell_id : scribeable_spells) {
 			lua_table[index] = spell_id;
 			index++;
@@ -734,7 +734,7 @@ luabind::object Lua_Client::GetScribeableSpells(lua_State* L, uint8 min_level) {
 	if (d_) {
 		auto self = reinterpret_cast<NativeType*>(d_);
 		auto scribeable_spells = self->GetScribeableSpells(min_level);
-		int index = 0;
+		int index = 1;
 		for (auto spell_id : scribeable_spells) {
 			lua_table[index] = spell_id;
 			index++;
@@ -748,7 +748,7 @@ luabind::object Lua_Client::GetScribeableSpells(lua_State* L, uint8 min_level, u
 	if (d_) {
 		auto self = reinterpret_cast<NativeType*>(d_);
 		auto scribeable_spells = self->GetScribeableSpells(min_level, max_level);
-		int index = 0;
+		int index = 1;
 		for (auto spell_id : scribeable_spells) {
 			lua_table[index] = spell_id;
 			index++;
@@ -762,7 +762,7 @@ luabind::object Lua_Client::GetScribedSpells(lua_State* L) {
 	if (d_) {
 		auto self = reinterpret_cast<NativeType*>(d_);
 		auto scribed_spells = self->GetScribedSpells();
-		int index = 0;
+		int index = 1;
 		for (auto spell_id : scribed_spells) {
 			lua_table[index] = spell_id;
 			index++;
@@ -2892,6 +2892,20 @@ void Lua_Client::MaxSkills()
 	self->MaxSkills();
 }
 
+luabind::object Lua_Client::GetAugmentIDsBySlotID(lua_State* L, int16 slot_id) {
+	auto lua_table = luabind::newtable(L);
+	if (d_) {
+		auto self = reinterpret_cast<NativeType*>(d_);
+		auto augments = self->GetInv().GetAugmentIDsBySlotID(slot_id);
+		int index = 1;
+		for (auto item_id : augments) {
+			lua_table[index] = item_id;
+			index++;
+		}
+	}
+	return lua_table;
+}
+
 #ifdef BOTS
 
 int Lua_Client::GetBotRequiredLevel()
@@ -3092,6 +3106,7 @@ luabind::scope lua_register_client() {
 	.def("GetAlternateCurrencyValue", (int(Lua_Client::*)(uint32))&Lua_Client::GetAlternateCurrencyValue)
 	.def("GetAnon", (int(Lua_Client::*)(void))&Lua_Client::GetAnon)
 	.def("GetAugmentIDAt", (int(Lua_Client::*)(int,int))&Lua_Client::GetAugmentIDAt)
+	.def("GetAugmentIDsBySlotID", (luabind::object(Lua_Client::*)(lua_State* L,int16))&Lua_Client::GetAugmentIDsBySlotID)
 	.def("GetBaseAGI", (int(Lua_Client::*)(void))&Lua_Client::GetBaseAGI)
 	.def("GetBaseCHA", (int(Lua_Client::*)(void))&Lua_Client::GetBaseCHA)
 	.def("GetBaseDEX", (int(Lua_Client::*)(void))&Lua_Client::GetBaseDEX)
