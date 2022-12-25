@@ -87,7 +87,7 @@ steps:
       - name: cache
         path: /home/eqemu/.ccache/
   - name: Upload Artifacts
-    image: akkadius/eqemu-build-releaser:latest
+    image: akkadius/eqemu-build-releaser:v2
     environment:
       RCLONE_CONFIG_REMOTE_TYPE: ftp
       RCLONE_FTP_HOST: drone.akkadius.com
@@ -95,10 +95,13 @@ steps:
       RCLONE_FTP_PASS:
         from_secret: RCLONE_FTP_PASS
     commands:
+      - rclone config create remote ftp env_auth true > /dev/null
       - |
         rclone copy eqemu-server-linux-x64.zip remote:
       - |
         rclone copy eqemu-server-linux-bots-x64.zip remote:
+      - |
+        rclone ls remote:
 
 trigger:
   branch:
@@ -139,13 +142,41 @@ steps:
       RCLONE_FTP_PASS:
         from_secret: RCLONE_FTP_PASS
     commands:
+      - rclone config create remote ftp env_auth true > /dev/null
       - |
         rclone copy eqemu-server-windows-x64.zip remote:
       - |
         rclone copy eqemu-server-windows-bots-x64.zip remote:
+      - |
+        rclone ls remote:
 
 trigger:
   branch:
     - akkadius/build-test
   event:
     - push
+
+---
+
+kind: pipeline
+type: docker
+name: Publish Artifacts to Github
+
+steps:
+  - name: Upload Artifacts
+    image: akkadius/eqemu-build-releaser:v2
+    environment:
+      RCLONE_CONFIG_REMOTE_TYPE: ftp
+      RCLONE_FTP_HOST: drone.akkadius.com
+      RCLONE_FTP_USER: artifacts
+      RCLONE_FTP_PASS:
+        from_secret: RCLONE_FTP_PASS
+    commands:
+      - rclone config create remote ftp env_auth true > /dev/null
+      - |
+        rclone copy remote:* .
+      - gh-release --assets=eqemu-server-linux-x64.zip,eqemu-server-linux-bots-x64.zip,eqemu-server-windows-x64.zip,eqemu-server-windows-bots-x64.zip -y
+
+depends_on:
+  - Build Windows Binaries
+  - Build Linux Binaries
