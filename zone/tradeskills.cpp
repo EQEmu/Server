@@ -947,37 +947,37 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 	// Remember: skillup_modifier is (float). Lower is better
 	switch(spec->tradeskill) {
 	case EQ::skills::SkillFletching:
-		skillup_modifier = RuleI(Character, TradeskillUpFletching);
+		skillup_modifier = RuleR(Character, TradeskillUpFletching);
 		break;
 	case EQ::skills::SkillAlchemy:
-		skillup_modifier = RuleI(Character, TradeskillUpAlchemy);
+		skillup_modifier = RuleR(Character, TradeskillUpAlchemy);
 		break;
 	case EQ::skills::SkillJewelryMaking:
-		skillup_modifier = RuleI(Character, TradeskillUpJewelcrafting);
+		skillup_modifier = RuleR(Character, TradeskillUpJewelcrafting);
 		break;
 	case EQ::skills::SkillPottery:
-		skillup_modifier = RuleI(Character, TradeskillUpPottery);
+		skillup_modifier = RuleR(Character, TradeskillUpPottery);
 		break;
 	case EQ::skills::SkillBaking:
-		skillup_modifier = RuleI(Character, TradeskillUpBaking);
+		skillup_modifier = RuleR(Character, TradeskillUpBaking);
 		break;
 	case EQ::skills::SkillBrewing:
-		skillup_modifier = RuleI(Character, TradeskillUpBrewing);
+		skillup_modifier = RuleR(Character, TradeskillUpBrewing);
 		break;
 	case EQ::skills::SkillBlacksmithing:
-		skillup_modifier = RuleI(Character, TradeskillUpBlacksmithing);
+		skillup_modifier = RuleR(Character, TradeskillUpBlacksmithing);
 		break;
 	case EQ::skills::SkillResearch:
-		skillup_modifier = RuleI(Character, TradeskillUpResearch);
+		skillup_modifier = RuleR(Character, TradeskillUpResearch);
 		break;
 	case EQ::skills::SkillMakePoison:
-		skillup_modifier = RuleI(Character, TradeskillUpMakePoison);
+		skillup_modifier = RuleR(Character, TradeskillUpMakePoison);
 		break;
 	case EQ::skills::SkillTinkering:
-		skillup_modifier = RuleI(Character, TradeskillUpTinkering);
+		skillup_modifier = RuleR(Character, TradeskillUpTinkering);
 		break;
 	case EQ::skills::SkillTailoring:
-		skillup_modifier = RuleI(Character, TradeskillUpTailoring);
+		skillup_modifier = RuleR(Character, TradeskillUpTailoring);
 		break;
 	default:
 		skillup_modifier = 2;
