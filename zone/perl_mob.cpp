@@ -2693,6 +2693,16 @@ void Perl_Mob_CopyHateList(Mob* self, Mob* to)
 	self->CopyHateList(to);
 }
 
+bool Perl_Mob_IsAttackAllowed(Mob* self, Mob* target)
+{
+	return self->IsAttackAllowed(target);
+}
+
+bool Perl_Mob_IsAttackAllowed(Mob* self, Mob* target, bool is_spell_attack)
+{
+	return self->IsAttackAllowed(target, is_spell_attack);
+}
+
 #ifdef BOTS
 void Perl_Mob_DamageAreaBots(Mob* self, int64 damage) // @categories Hate and Aggro
 {
@@ -3100,6 +3110,8 @@ void perl_register_mob()
 	package.add("InterruptSpell", (void(*)(Mob*, uint16))&Perl_Mob_InterruptSpell);
 	package.add("IsAIControlled", &Perl_Mob_IsAIControlled);
 	package.add("IsAmnesiad", &Perl_Mob_IsAmnesiad);
+	package.add("IsAttackAllowed", (bool(*)(Mob*, Mob*))&Perl_Mob_IsAttackAllowed);
+	package.add("IsAttackAllowed", (bool(*)(Mob*, Mob*, bool))&Perl_Mob_IsAttackAllowed);
 	package.add("IsBeacon", &Perl_Mob_IsBeacon);
 	package.add("IsBeneficialAllowed", &Perl_Mob_IsBeneficialAllowed);
 	package.add("IsBlind", &Perl_Mob_IsBlind);

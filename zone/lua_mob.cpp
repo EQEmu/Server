@@ -2253,11 +2253,6 @@ int16 Lua_Mob::GetMeleeMinDamageMod_SE(uint16 skill)
 	return self->GetMeleeMinDamageMod_SE(skill);
 }
 
-bool Lua_Mob::IsAttackAllowed(Lua_Mob target, bool isSpellAttack) {
-	Lua_Safe_Call_Bool();
-	return self->IsAttackAllowed(target, isSpellAttack);
-}
-
 bool Lua_Mob::IsCasting() {
 	Lua_Safe_Call_Bool();
 	return self->IsCasting();
@@ -2752,6 +2747,16 @@ void Lua_Mob::CopyHateList(Lua_Mob to) {
 	self->CopyHateList(to);
 }
 
+bool Lua_Mob::IsAttackAllowed(Lua_Mob target) {
+	Lua_Safe_Call_Bool();
+	return self->IsAttackAllowed(target);
+}
+
+bool Lua_Mob::IsAttackAllowed(Lua_Mob target, bool is_spell_attack) {
+	Lua_Safe_Call_Bool();
+	return self->IsAttackAllowed(target, is_spell_attack);
+}
+
 #ifdef BOTS
 void Lua_Mob::DamageAreaBots(int64 damage) {
 	Lua_Safe_Call_Void();
@@ -3157,7 +3162,8 @@ luabind::scope lua_register_mob() {
 	.def("InterruptSpell", (void(Lua_Mob::*)(void))&Lua_Mob::InterruptSpell)
 	.def("IsAIControlled", (bool(Lua_Mob::*)(void))&Lua_Mob::IsAIControlled)
 	.def("IsAmnesiad", (bool(Lua_Mob::*)(void))&Lua_Mob::IsAmnesiad)
-	.def("IsAttackAllowed", &Lua_Mob::IsAttackAllowed)
+	.def("IsAttackAllowed", (bool(Lua_Mob::*)(Lua_Mob))&Lua_Mob::IsAttackAllowed)
+	.def("IsAttackAllowed", (bool(Lua_Mob::*)(Lua_Mob,bool))&Lua_Mob::IsAttackAllowed)
 	.def("IsBeneficialAllowed", (bool(Lua_Mob::*)(Lua_Mob))&Lua_Mob::IsBeneficialAllowed)
 	.def("IsBerserk", &Lua_Mob::IsBerserk)
 	.def("IsBlind", (bool(Lua_Mob::*)(void))&Lua_Mob::IsBlind)
