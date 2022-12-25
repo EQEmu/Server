@@ -691,6 +691,16 @@ void Lua_NPC::SendPayload(int payload_id, std::string payload_value) {
 	self->SendPayload(payload_id, payload_value);
 }
 
+bool Lua_NPC::GetKeepsSoldItems() {
+	Lua_Safe_Call_Bool();
+	return self->GetKeepsSoldItems();
+}
+
+void Lua_NPC::SetKeepsSoldItems(bool keeps_sold_items) {
+	Lua_Safe_Call_Void();
+	self->SetKeepsSoldItems(keeps_sold_items);
+}
+
 luabind::scope lua_register_npc() {
 	return luabind::class_<Lua_NPC, Lua_Mob>("NPC")
 	.def(luabind::constructor<>())
@@ -736,6 +746,7 @@ luabind::scope lua_register_npc() {
 	.def("GetGuardPointZ", (float(Lua_NPC::*)(void))&Lua_NPC::GetGuardPointZ)
 	.def("GetHealScale", (float(Lua_NPC::*)(void))&Lua_NPC::GetHealScale)
 	.def("GetItemIDBySlot", (uint32(Lua_NPC::*)(uint16))&Lua_NPC::GetItemIDBySlot)
+	.def("GetKeepsSoldItems", (bool(Lua_NPC::*)(void))&Lua_NPC::GetKeepsSoldItems)
 	.def("GetLootList", (Lua_NPC_Loot_List(Lua_NPC::*)(lua_State* L))&Lua_NPC::GetLootList)
 	.def("GetLoottableID", (int(Lua_NPC::*)(void))&Lua_NPC::GetLoottableID)
 	.def("GetMaxDMG", (uint32(Lua_NPC::*)(void))&Lua_NPC::GetMaxDMG)
@@ -805,6 +816,7 @@ luabind::scope lua_register_npc() {
 	.def("SetFollowID", (void(Lua_NPC::*)(int))&Lua_NPC::SetFollowID)
 	.def("SetGold", (void(Lua_NPC::*)(uint32))&Lua_NPC::SetGold)
 	.def("SetGrid", (void(Lua_NPC::*)(int))&Lua_NPC::SetGrid)
+	.def("SetKeepsSoldItems", (void(Lua_NPC::*)(bool))&Lua_NPC::SetKeepsSoldItems)
 	.def("SetNPCFactionID", (void(Lua_NPC::*)(int))&Lua_NPC::SetNPCFactionID)
 	.def("SetPetSpellID", (void(Lua_NPC::*)(int))&Lua_NPC::SetPetSpellID)
 	.def("SetPlatinum", (void(Lua_NPC::*)(uint32))&Lua_NPC::SetPlatinum)

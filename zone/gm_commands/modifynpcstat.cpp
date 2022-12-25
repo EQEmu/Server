@@ -8,7 +8,7 @@ void command_modifynpcstat(Client *c, const Seperator *sep)
 		ListModifyNPCStatMap(c);
 		return;
 	}
-	
+
 	if (!c->GetTarget() || !c->GetTarget()->IsNPC()) {
 		c->Message(Chat::White, "You must target an NPC to use this command.");
 		return;
@@ -76,6 +76,7 @@ std::map<std::string, std::string> GetModifyNPCStatMap()
 		{ "hp_regen_per_second", "HP Regen Per Second" },
 		{ "int", "Intelligence" },
 		{ "_int", "Intelligence" },
+		{ "keeps_sold_items", "Keeps Sold Items" },
 		{ "level", "Level" },
 		{ "loottable_id", "Loottable ID" },
 		{ "mana_regen", "Mana Regen" },

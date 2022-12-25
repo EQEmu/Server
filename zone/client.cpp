@@ -82,63 +82,64 @@ char entirecommand[255];
 
 void UpdateWindowTitle(char* iNewTitle);
 
-Client::Client(EQStreamInterface* ieqs)
-: Mob("No name",	// name
-	"",	// lastname
-	0,	// cur_hp
-	0,	// max_hp
-	0,	// gender
-	0,	// race
-	0,	// class
-	BT_Humanoid,	// bodytype
-	0,	// deity
-	0,	// level
-	0,	// npctypeid
-	0,	// size
-	0.7,	// runspeed
-	glm::vec4(),
-	0,	// light - verified for client innate_light value
-	0xFF,	// texture
-	0xFF,	// helmtexture
-	0,	// ac
-	0,	// atk
-	0,	// str
-	0,	// sta
-	0,	// dex
-	0,	// agi
-	0,	// int
-	0,	// wis
-	0,	// cha
-	0,	// Luclin Hair Colour
-	0,	// Luclin Beard Color
-	0,	// Luclin Eye1
-	0,	// Luclin Eye2
-	0,	// Luclin Hair Style
-	0,	// Luclin Face
-	0,	// Luclin Beard
-	0,	// Drakkin Heritage
-	0,	// Drakkin Tattoo
-	0,	// Drakkin Details
-	EQ::TintProfile(),	// Armor Tint
-	0xff,	// AA Title
-	0,	// see_invis
-	0,	// see_invis_undead
-	0,
-	0,
-	0,
-	0,
-	0,	// qglobal
-	0,	// maxlevel
-	0,	// scalerate
-	0,
-	0,
-	0,
-	0,
-	0,
-	0,
-	0,
-	false
-	),
+Client::Client(EQStreamInterface *ieqs) : Mob(
+	"No name", // in_name
+	"", // in_lastname
+	0, // in_cur_hp
+	0, // in_max_hp
+	0, // in_gender
+	0, // in_race
+	0, // in_class
+	BT_Humanoid, // in_bodytype
+	0, // in_deity
+	0, // in_level
+	0, // in_npctype_id
+	0.0f, // in_size
+	0.7f, // in_runspeed
+	glm::vec4(), // position
+	0, // in_light
+	0xFF, // in_texture
+	0xFF, // in_helmtexture
+	0, // in_ac
+	0, // in_atk
+	0, // in_str
+	0, // in_sta
+	0, // in_dex
+	0, // in_agi
+	0, // in_int
+	0, // in_wis
+	0, // in_cha
+	0, // in_haircolor
+	0, // in_beardcolor
+	0, // in_eyecolor1
+	0, // in_eyecolor2
+	0, // in_hairstyle
+	0, // in_luclinface
+	0, // in_beard
+	0, // in_drakkin_heritage
+	0, // in_drakkin_tattoo
+	0, // in_drakkin_details
+	EQ::TintProfile(), // in_armor_tint
+	0xff, // in_aa_title
+	0, // in_see_invis
+	0, // in_see_invis_undead
+	0, // in_see_hide
+	0, // in_see_improved_hide
+	0, // in_hp_regen
+	0, // in_mana_regen
+	0, // in_qglobal
+	0, // in_maxlevel
+	0, // in_scalerate
+	0, // in_armtexture
+	0, // in_bracertexture
+	0, // in_handtexture
+	0, // in_legtexture
+	0, // in_feettexture
+	0, // in_usemodel
+	false, // in_always_aggros_foes
+	0, // in_heroic_strikethrough
+	false // in_keeps_sold_items
+),
   hpupdate_timer(2000),
   camp_timer(29000),
   process_timer(100),

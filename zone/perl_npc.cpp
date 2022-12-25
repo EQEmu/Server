@@ -680,6 +680,16 @@ void Perl_NPC_SendPayload(NPC* self, int payload_id, std::string payload_value) 
 	self->SendPayload(payload_id, payload_value);
 }
 
+bool Perl_NPC_GetKeepsSoldItems(NPC* self)
+{
+	return self->GetKeepsSoldItems();
+}
+
+void Perl_NPC_SetKeepsSoldItems(NPC* self, bool keeps_sold_items)
+{
+	self->SetKeepsSoldItems(keeps_sold_items);
+}
+
 void perl_register_npc()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -731,6 +741,7 @@ void perl_register_npc()
 	package.add("GetGuardPointZ", &Perl_NPC_GetGuardPointZ);
 	package.add("GetHealScale", &Perl_NPC_GetHealScale);
 	package.add("GetItemIDBySlot", &Perl_NPC_GetItemIDBySlot);
+	package.add("GetKeepsSoldItems", &Perl_NPC_GetKeepsSoldItems);
 	package.add("GetLootList", &Perl_NPC_GetLootList);
 	package.add("GetLoottableID", &Perl_NPC_GetLoottableID);
 	package.add("GetMaxDMG", &Perl_NPC_GetMaxDMG);
@@ -799,6 +810,7 @@ void perl_register_npc()
 	package.add("SendPayload", (void(*)(NPC*, int))&Perl_NPC_SendPayload);
 	package.add("SendPayload", (void(*)(NPC*, int, std::string))&Perl_NPC_SendPayload);
 	package.add("SetCopper", &Perl_NPC_SetCopper);
+	package.add("SetKeepsSoldItems", &Perl_NPC_SetKeepsSoldItems);
 	package.add("SetGold", &Perl_NPC_SetGold);
 	package.add("SetGrid", &Perl_NPC_SetGrid);
 	package.add("SetNPCFactionID", &Perl_NPC_SetNPCFactionID);

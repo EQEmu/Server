@@ -466,6 +466,7 @@
 9210|2022_10_11_fix_misty_pok_stone.sql|select * from doors where id = 2040 and `name` = 'POKRVPORT500' and client_version_mask = 4294967232|empty|
 9211|2022_10_14_fix_neriak_pok_stone.sql|select * from doors where id = 2057 and `name` = 'POKNRKPORT500' and client_version_mask = 4294967232|empty|
 9212|2022_10_14_fix_misty_pok_stone.sql|select * from doors where id = 2040 and `name` = 'POKRVPORT500' and dest_zone = 'misty'|empty|
+9213|2022_12_24_npc_keeps_sold_items.sql|SHOW COLUMNS FROM `npc_types` LIKE 'keeps_sold_items'|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not

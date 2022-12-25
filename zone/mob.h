@@ -165,6 +165,7 @@ public:
 		uint16 in_usemodel,
 		bool in_always_aggros_foes,
 		int32 in_heroic_strikethrough,
+		bool keeps_sold_items,
 		int64 in_hp_regen_per_second = 0
 	);
 	virtual ~Mob();
@@ -653,6 +654,8 @@ public:
 	bool IsControllableBoat() const;
 	inline const bool AlwaysAggro() const { return always_aggro; }
 	inline int32 GetHeroicStrikethrough() const  { return heroic_strikethrough; }
+	inline const bool GetKeepsSoldItems() const { return keeps_sold_items; }
+	inline void SetKeepsSoldItems(bool in_keeps_sold_items)  { keeps_sold_items = in_keeps_sold_items; }
 
 	void CopyHateList(Mob* to);
 
@@ -1531,6 +1534,7 @@ protected:
 	bool no_target_hotkey;
 	bool rare_spawn;
 	int32 heroic_strikethrough;
+	bool keeps_sold_items;
 
 	uint32 m_PlayerState;
 	uint32 GetPlayerState() { return m_PlayerState; }

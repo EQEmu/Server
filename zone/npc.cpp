@@ -121,7 +121,8 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 	npc_type_data->use_model,
 	npc_type_data->always_aggro,
 	npc_type_data->hp_regen_per_second,
-	npc_type_data->heroic_strikethrough
+	npc_type_data->heroic_strikethrough,
+	npc_type_data->keeps_sold_items
 ),
 	  attacked_timer(CombatEventTimer_expire),
 	  swarm_timer(100),
@@ -210,12 +211,13 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 		LevelScale();
 	}
 
-	base_damage      = round((max_dmg - min_dmg) / 1.9);
-	min_damage       = min_dmg - round(base_damage / 10.0);
-	accuracy_rating  = npc_type_data->accuracy_rating;
-	avoidance_rating = npc_type_data->avoidance_rating;
-	ATK              = npc_type_data->ATK;
+	base_damage          = round((max_dmg - min_dmg) / 1.9);
+	min_damage           = min_dmg - round(base_damage / 10.0);
+	accuracy_rating      = npc_type_data->accuracy_rating;
+	avoidance_rating     = npc_type_data->avoidance_rating;
+	ATK                  = npc_type_data->ATK;
 	heroic_strikethrough = npc_type_data->heroic_strikethrough;
+	keeps_sold_items     = npc_type_data->keeps_sold_items;
 
 	// used for when switch back to charm
 	default_ac               = npc_type_data->AC;
@@ -2672,6 +2674,10 @@ void NPC::ModifyNPCStat(std::string stat, std::string value)
 		heroic_strikethrough = atoi(value.c_str());
 		return;
 	}
+	else if (stat_lower == "keeps_sold_items") {
+		SetKeepsSoldItems(Strings::ToBool(value));
+		return;
+	}
 }
 
 float NPC::GetNPCStat(std::string stat)
@@ -2812,6 +2818,9 @@ float NPC::GetNPCStat(std::string stat)
 	}
 	else if (stat_lower == "heroic_strikethrough") {
 		return heroic_strikethrough;
+	}
+	else if (stat_lower == "keeps_sold_items") {
+		return keeps_sold_items;
 	}
 	//default values
 	else if (stat_lower == "default_ac") {

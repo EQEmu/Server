@@ -13403,32 +13403,50 @@ void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
 
 	int charges = mp->quantity;
 
-	int freeslot = 0;
-	if ((freeslot = zone->SaveTempItem(vendor->CastToNPC()->MerchantType, vendor->GetNPCTypeID(), itemid, charges, true)) > 0) {
-		EQ::ItemInstance* inst2 = inst->Clone();
+	if (vendor->GetKeepsSoldItems()) {
+		int freeslot = 0;
+		if (
+			(freeslot = zone->SaveTempItem(
+				vendor->CastToNPC()->MerchantType,
+				vendor->GetNPCTypeID(),
+				itemid,
+				charges,
+				true
+			)
+		) > 0) {
+			EQ::ItemInstance *inst2 = inst->Clone();
 
-		while (true) {
-			if (inst2 == nullptr)
+			while (true) {
+				if (!inst2) {
+					break;
+				}
+
+				uint32 price = (
+					item->Price *
+					RuleR(Merchant, SellCostMod) *
+					item->SellRate
+				);
+
+				if (RuleB(Merchant, UsePriceMod)) {
+					price *= Client::CalcPriceMod(vendor, false);
+				}
+
+				inst2->SetPrice(price);
+				inst2->SetMerchantSlot(freeslot);
+
+				uint32 merchant_quantity = zone->GetTempMerchantQuantity(vendor->GetNPCTypeID(), freeslot);
+
+				if (inst2->IsStackable()) {
+					inst2->SetCharges(merchant_quantity);
+				}
+
+				inst2->SetMerchantCount(merchant_quantity);
+
+				SendItemPacket(freeslot - 1, inst2, ItemPacketMerchant);
+				safe_delete(inst2);
+
 				break;
-
-			if (RuleB(Merchant, UsePriceMod)) {
-				inst2->SetPrice(item->Price*(RuleR(Merchant, SellCostMod))*item->SellRate*Client::CalcPriceMod(vendor, false));
 			}
-			else
-				inst2->SetPrice(item->Price*(RuleR(Merchant, SellCostMod))*item->SellRate);
-			inst2->SetMerchantSlot(freeslot);
-
-			uint32 MerchantQuantity = zone->GetTempMerchantQuantity(vendor->GetNPCTypeID(), freeslot);
-
-			if (inst2->IsStackable()) {
-				inst2->SetCharges(MerchantQuantity);
-			}
-			inst2->SetMerchantCount(MerchantQuantity);
-
-			SendItemPacket(freeslot - 1, inst2, ItemPacketMerchant);
-			safe_delete(inst2);
-
-			break;
 		}
 	}
 

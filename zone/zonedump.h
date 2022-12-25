@@ -34,124 +34,125 @@ spawn2 mediumblob, npcs mediumblob, npc_loot mediumblob, gmspawntype mediumblob,
 
 struct NPCType
 {
-	char	name[64];
-	char	lastname[64];
-	int64	current_hp;
-	int64	max_hp;
-	float	size;
-	float	runspeed;
-	uint8	gender;
-	uint16	race;
-	uint8	class_;
-	uint8	bodytype;	// added for targettype support
-	uint32	deity;		//not loaded from DB
-	uint8	level;
-	uint32	npc_id;
-	uint8	texture;
-	uint8	helmtexture;
-	uint32	herosforgemodel;
-	uint32	loottable_id;
-	uint32	npc_spells_id;
-	uint32	npc_spells_effects_id;
-	int32	npc_faction_id;
-	int32	faction_amount;	// faction association magnitude, will use primary faction
-	uint32	merchanttype;
-	uint32	alt_currency_type;
-	uint32	adventure_template;
-	uint32	trap_template;
-	uint8	light;
-	uint32	AC;
-	uint64	Mana;	//not loaded from DB
-	uint32	ATK;	//not loaded from DB
-	uint32	STR;
-	uint32	STA;
-	uint32	DEX;
-	uint32	AGI;
-	uint32	INT;
-	uint32	WIS;
-	uint32	CHA;
-	int32	MR;
-	int32	FR;
-	int32	CR;
-	int32	PR;
-	int32	DR;
-	int32	Corrup;
-	int32   PhR;
-	uint8	haircolor;
-	uint8	beardcolor;
-	uint8	eyecolor1;			// the eyecolors always seem to be the same, maybe left and right eye?
-	uint8	eyecolor2;
-	uint8	hairstyle;
-	uint8	luclinface;			//
-	uint8	beard;				//
-	uint32	drakkin_heritage;
-	uint32	drakkin_tattoo;
-	uint32	drakkin_details;
-	EQ::TintProfile	armor_tint;
-	uint32	min_dmg;
-	uint32	max_dmg;
-	uint32	charm_ac;
-	uint32	charm_min_dmg;
-	uint32	charm_max_dmg;
-	int		charm_attack_delay;
-	int		charm_accuracy_rating;
-	int		charm_avoidance_rating;
-	int		charm_atk;
-	int16	attack_count;
-	char	special_abilities[512];
-	uint16	d_melee_texture1;
-	uint16	d_melee_texture2;
-	char	ammo_idfile[30];
-	uint8	prim_melee_type;
-	uint8	sec_melee_type;
-	uint8	ranged_type;
-	int64	hp_regen;
-	int64	hp_regen_per_second;
-	int64	mana_regen;
-	int32	aggroradius; // added for AI improvement - neotokyo
-	int32	assistradius; // assist radius, defaults to aggroradis if not set
-	uint16	see_invis;			// See Invis flag added
-	uint16	see_invis_undead;	// See Invis vs. Undead flag added
-	bool	see_hide;
-	bool	see_improved_hide;
-	bool	qglobal;
-	bool	npc_aggro;
-	uint8	spawn_limit;	//only this many may be in zone at a time (0=no limit)
-	uint8	mount_color;	//only used by horse class
-	float	attack_speed;	//%+- on attack delay of the mob.
-	int		attack_delay;	//delay between attacks in ms
-	int		accuracy_rating;	// flat bonus before mods
-	int		avoidance_rating;	// flat bonus before mods
-	bool	findable;		//can be found with find command
-	bool	trackable;
-	int16	slow_mitigation;
-	uint8	maxlevel;
-	uint32	scalerate;
-	bool	private_corpse;
-	bool	unique_spawn_by_name;
-	bool	underwater;
-	uint32	emoteid;
-	float	spellscale;
-	float	healscale;
-	bool	no_target_hotkey;
-	bool	raid_target;
-	uint8	armtexture;
-	uint8	bracertexture;
-	uint8	handtexture;
-	uint8	legtexture;
-	uint8	feettexture;
-	bool	ignore_despawn;
-	bool	show_name; // should default on
-	bool	untargetable;
-	bool	skip_global_loot;
-	bool	rare_spawn;
-	bool	skip_auto_scale; // just so it doesn't mess up bots or mercs, probably should add to DB too just in case
-	int8	stuck_behavior;
-	uint16	use_model;
-	int8	flymode;
-	bool	always_aggro;
-	int     exp_mod;
-	int 	heroic_strikethrough;
+	char            name[64];
+	char            lastname[64];
+	int64           current_hp;
+	int64           max_hp;
+	float           size;
+	float           runspeed;
+	uint8           gender;
+	uint16          race;
+	uint8           class_;
+	uint8           bodytype;    // added for targettype support
+	uint32          deity;        //not loaded from DB
+	uint8           level;
+	uint32          npc_id;
+	uint8           texture;
+	uint8           helmtexture;
+	uint32          herosforgemodel;
+	uint32          loottable_id;
+	uint32          npc_spells_id;
+	uint32          npc_spells_effects_id;
+	int32           npc_faction_id;
+	int32           faction_amount;    // faction association magnitude, will use primary faction
+	uint32          merchanttype;
+	uint32          alt_currency_type;
+	uint32          adventure_template;
+	uint32          trap_template;
+	uint8           light;
+	uint32          AC;
+	uint64          Mana;    //not loaded from DB
+	uint32          ATK;    //not loaded from DB
+	uint32          STR;
+	uint32          STA;
+	uint32          DEX;
+	uint32          AGI;
+	uint32          INT;
+	uint32          WIS;
+	uint32          CHA;
+	int32           MR;
+	int32           FR;
+	int32           CR;
+	int32           PR;
+	int32           DR;
+	int32           Corrup;
+	int32           PhR;
+	uint8           haircolor;
+	uint8           beardcolor;
+	uint8           eyecolor1;            // the eyecolors always seem to be the same, maybe left and right eye?
+	uint8           eyecolor2;
+	uint8           hairstyle;
+	uint8           luclinface;            //
+	uint8           beard;                //
+	uint32          drakkin_heritage;
+	uint32          drakkin_tattoo;
+	uint32          drakkin_details;
+	EQ::TintProfile armor_tint;
+	uint32          min_dmg;
+	uint32          max_dmg;
+	uint32          charm_ac;
+	uint32          charm_min_dmg;
+	uint32          charm_max_dmg;
+	int             charm_attack_delay;
+	int             charm_accuracy_rating;
+	int             charm_avoidance_rating;
+	int             charm_atk;
+	int16           attack_count;
+	char            special_abilities[512];
+	uint16          d_melee_texture1;
+	uint16          d_melee_texture2;
+	char            ammo_idfile[30];
+	uint8           prim_melee_type;
+	uint8           sec_melee_type;
+	uint8           ranged_type;
+	int64           hp_regen;
+	int64           hp_regen_per_second;
+	int64           mana_regen;
+	int32           aggroradius; // added for AI improvement - neotokyo
+	int32           assistradius; // assist radius, defaults to aggroradis if not set
+	uint16          see_invis;            // See Invis flag added
+	uint16          see_invis_undead;    // See Invis vs. Undead flag added
+	bool            see_hide;
+	bool            see_improved_hide;
+	bool            qglobal;
+	bool            npc_aggro;
+	uint8           spawn_limit;    //only this many may be in zone at a time (0=no limit)
+	uint8           mount_color;    //only used by horse class
+	float           attack_speed;    //%+- on attack delay of the mob.
+	int             attack_delay;    //delay between attacks in ms
+	int             accuracy_rating;    // flat bonus before mods
+	int             avoidance_rating;    // flat bonus before mods
+	bool            findable;        //can be found with find command
+	bool            trackable;
+	int16           slow_mitigation;
+	uint8           maxlevel;
+	uint32          scalerate;
+	bool            private_corpse;
+	bool            unique_spawn_by_name;
+	bool            underwater;
+	uint32          emoteid;
+	float           spellscale;
+	float           healscale;
+	bool            no_target_hotkey;
+	bool            raid_target;
+	uint8           armtexture;
+	uint8           bracertexture;
+	uint8           handtexture;
+	uint8           legtexture;
+	uint8           feettexture;
+	bool            ignore_despawn;
+	bool            show_name; // should default on
+	bool            untargetable;
+	bool            skip_global_loot;
+	bool            rare_spawn;
+	bool            skip_auto_scale; // just so it doesn't mess up bots or mercs, probably should add to DB too just in case
+	int8            stuck_behavior;
+	uint16          use_model;
+	int8            flymode;
+	bool            always_aggro;
+	int             exp_mod;
+	int             heroic_strikethrough;
+	bool            keeps_sold_items;
 };
 
 namespace player_lootitem {

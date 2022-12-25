@@ -16,6 +16,7 @@
 #include "../../strings.h"
 #include <ctime>
 
+
 class BaseNpcTypesRepository {
 public:
 	struct NpcTypes {
@@ -145,6 +146,7 @@ public:
 		int32_t     exp_mod;
 		int32_t     heroic_strikethrough;
 		int32_t     faction_amount;
+		uint8_t     keeps_sold_items;
 	};
 
 	static std::string PrimaryKey()
@@ -281,6 +283,7 @@ public:
 			"exp_mod",
 			"heroic_strikethrough",
 			"faction_amount",
+			"keeps_sold_items",
 		};
 	}
 
@@ -413,6 +416,7 @@ public:
 			"exp_mod",
 			"heroic_strikethrough",
 			"faction_amount",
+			"keeps_sold_items",
 		};
 	}
 
@@ -579,6 +583,7 @@ public:
 		e.exp_mod                = 100;
 		e.heroic_strikethrough   = 0;
 		e.faction_amount         = 0;
+		e.keeps_sold_items       = 0;
 
 		return e;
 	}
@@ -604,8 +609,9 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				npc_types_id
 			)
 		);
@@ -740,6 +746,7 @@ public:
 			e.exp_mod                = static_cast<int32_t>(atoi(row[123]));
 			e.heroic_strikethrough   = static_cast<int32_t>(atoi(row[124]));
 			e.faction_amount         = static_cast<int32_t>(atoi(row[125]));
+			e.keeps_sold_items       = static_cast<uint8_t>(strtoul(row[126], nullptr, 10));
 
 			return e;
 		}
@@ -898,6 +905,7 @@ public:
 		v.push_back(columns[123] + " = " + std::to_string(e.exp_mod));
 		v.push_back(columns[124] + " = " + std::to_string(e.heroic_strikethrough));
 		v.push_back(columns[125] + " = " + std::to_string(e.faction_amount));
+		v.push_back(columns[126] + " = " + std::to_string(e.keeps_sold_items));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -1045,6 +1053,7 @@ public:
 		v.push_back(std::to_string(e.exp_mod));
 		v.push_back(std::to_string(e.heroic_strikethrough));
 		v.push_back(std::to_string(e.faction_amount));
+		v.push_back(std::to_string(e.keeps_sold_items));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -1200,6 +1209,7 @@ public:
 			v.push_back(std::to_string(e.exp_mod));
 			v.push_back(std::to_string(e.heroic_strikethrough));
 			v.push_back(std::to_string(e.faction_amount));
+			v.push_back(std::to_string(e.keeps_sold_items));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
@@ -1359,6 +1369,7 @@ public:
 			e.exp_mod                = static_cast<int32_t>(atoi(row[123]));
 			e.heroic_strikethrough   = static_cast<int32_t>(atoi(row[124]));
 			e.faction_amount         = static_cast<int32_t>(atoi(row[125]));
+			e.keeps_sold_items       = static_cast<uint8_t>(strtoul(row[126], nullptr, 10));
 
 			all_entries.push_back(e);
 		}
@@ -1509,6 +1520,7 @@ public:
 			e.exp_mod                = static_cast<int32_t>(atoi(row[123]));
 			e.heroic_strikethrough   = static_cast<int32_t>(atoi(row[124]));
 			e.faction_amount         = static_cast<int32_t>(atoi(row[125]));
+			e.keeps_sold_items       = static_cast<uint8_t>(strtoul(row[126], nullptr, 10));
 
 			all_entries.push_back(e);
 		}
