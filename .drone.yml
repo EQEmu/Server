@@ -105,7 +105,7 @@ steps:
 
 trigger:
   branch:
-    - akkadius/build-test
+    - akkadius/build-testt
   event:
     - push
 
@@ -152,7 +152,7 @@ steps:
 
 trigger:
   branch:
-    - akkadius/build-test
+    - akkadius/build-testt
   event:
     - push
 
@@ -179,6 +179,6 @@ steps:
         rclone copy remote:* .
       - gh-release --assets=eqemu-server-linux-x64.zip,eqemu-server-linux-bots-x64.zip,eqemu-server-windows-x64.zip,eqemu-server-windows-bots-x64.zip -y
 
-depends_on:
-  - Build Windows Binaries
-  - Build Linux Binaries
+#depends_on:
+#  - Build Windows Binaries
+#  - Build Linux Binaries
