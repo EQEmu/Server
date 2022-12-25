@@ -86,6 +86,17 @@ steps:
     volumes:
       - name: cache
         path: /home/eqemu/.ccache/
+  - name: Upload Artifacts
+    image: akkadius/eqemu-build-releaser:latest
+    environment:
+      RCLONE_CONFIG_REMOTE_TYPE: ftp
+      RCLONE_FTP_HOST: drone.akkadius.com
+      RCLONE_FTP_USER: artifacts
+      RCLONE_FTP_PASS:
+        from_secret: RCLONE_FTP_PASS
+    commands:
+      - rclone copy eqemu-server-linux-x64.zip remote:
+      - rclone copy eqemu-server-linux-bots-x64.zip remote:
 
 trigger:
   branch:
@@ -99,7 +110,6 @@ kind: pipeline
 type: exec
 name: Build Windows Binaries
 
-
 platform:
   os: windows
   arch: amd64
@@ -109,16 +119,28 @@ steps:
     commands:
       - git submodule init
       - git submodule update
-  - name: build-win-x64
+  - name: Windows x64
     commands:
       - utils/scripts/build/windows-build-no-bots.ps1
-  - name: build-win-x64-bots
+  - name: Windows x64 Bots
     commands:
       - utils/scripts/build/windows-build-bots.ps1
-  - name: package-artifacts
+  - name: Package Artifacts
     commands:
       - utils/scripts/build/package-artifacts.ps1
       - dir *.zip
+      - rclone copy eqemu-server-windows-x64.zip remote:
+      - rclone copy eqemu-server-windows-bots-x64.zip remote:
+  - name: Upload Artifacts
+    environment:
+      RCLONE_CONFIG_REMOTE_TYPE: ftp
+      RCLONE_FTP_HOST: drone.akkadius.com
+      RCLONE_FTP_USER: artifacts
+      RCLONE_FTP_PASS:
+        from_secret: RCLONE_FTP_PASS
+    commands:
+      - rclone copy eqemu-server-windows-x64.zip remote:
+      - rclone copy eqemu-server-windows-bots-x64.zip remote:
 
 trigger:
   branch:
