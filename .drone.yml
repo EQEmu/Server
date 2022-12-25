@@ -82,6 +82,9 @@ steps:
     commands:
       - find build/bin/
       - find build-bots/bin/
+      - zip -j linux-build-x64.zip ./build/bin/*
+      - zip -j linux-build-bots-x64.zip ./build-bots/bin/*
+      - ls -lsh | grep zip
     volumes:
       - name: cache
         path: /home/eqemu/.ccache/
