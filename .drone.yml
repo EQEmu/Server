@@ -80,10 +80,8 @@ steps:
   - name: Package Artifacts
     image: akkadius/eqemu-server:v11
     commands:
-      - find build/bin/
-      - find build-bots/bin/
-      - zip -j linux-build-x64.zip ./build/bin/*
-      - zip -j linux-build-bots-x64.zip ./build-bots/bin/*
+      - zip -j eqemu-server-linux-x64.zip ./build/bin/*
+      - zip -j eqemu-server-linux-bots-x64.zip ./build-bots/bin/*
       - ls -lsh | grep zip
     volumes:
       - name: cache
@@ -101,9 +99,6 @@ kind: pipeline
 type: exec
 name: Build Windows Binaries
 
-# Limits how many of these builds can run on the drone runner at a time, this isn't about cores
-concurrency:
-  limit: 1
 
 platform:
   os: windows
@@ -123,7 +118,7 @@ steps:
   - name: package-artifacts
     commands:
       - utils/scripts/build/package-artifacts.ps1
-      - dir *
+      - dir *.zip
 
 trigger:
   branch:
