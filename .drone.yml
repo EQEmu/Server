@@ -171,6 +171,8 @@ steps:
       RCLONE_FTP_USER: artifacts
       RCLONE_FTP_PASS:
         from_secret: RCLONE_FTP_PASS
+      GH_RELEASE_GITHUB_API_TOKEN:
+        from_secret: GH_RELEASE_GITHUB_API_TOKEN
     commands:
       - rclone config create remote ftp env_auth true > /dev/null
       - |
