@@ -184,6 +184,20 @@ bool Lua_Inventory::HasItemEquippedByID(uint32 item_id) {
 	return self->HasItemEquippedByID(item_id);
 }
 
+luabind::object Lua_Inventory::GetAugmentIDsBySlotID(lua_State* L, int16 slot_id) {
+	auto lua_table = luabind::newtable(L);
+	if (d_) {
+		auto self = reinterpret_cast<NativeType*>(d_);
+		auto augments = self->GetAugmentIDsBySlotID(slot_id);
+		int index = 1;
+		for (auto item_id : augments) {
+			lua_table[index] = item_id;
+			index++;
+		}
+	}
+	return lua_table;
+}
+
 luabind::scope lua_register_inventory() {
 	return luabind::class_<Lua_Inventory>("Inventory")
 	.def(luabind::constructor<>())
@@ -201,6 +215,7 @@ luabind::scope lua_register_inventory() {
 	.def("FindFreeSlot", (int(Lua_Inventory::*)(bool,bool))&Lua_Inventory::FindFreeSlot)
 	.def("FindFreeSlot", (int(Lua_Inventory::*)(bool,bool,int))&Lua_Inventory::FindFreeSlot)
 	.def("FindFreeSlot", (int(Lua_Inventory::*)(bool,bool,int,bool))&Lua_Inventory::FindFreeSlot)
+	.def("GetAugmentIDsBySlotID", (luabind::object(Lua_Inventory::*)(lua_State* L,int16))&Lua_Inventory::GetAugmentIDsBySlotID)
 	.def("GetItem", (Lua_ItemInst(Lua_Inventory::*)(int))&Lua_Inventory::GetItem)
 	.def("GetItem", (Lua_ItemInst(Lua_Inventory::*)(int,int))&Lua_Inventory::GetItem)
 	.def("GetSlotByItemInst", (int(Lua_Inventory::*)(Lua_ItemInst))&Lua_Inventory::GetSlotByItemInst)

@@ -2772,6 +2772,18 @@ void Perl_Client_MaxSkills(Client* self)
 	self->MaxSkills();
 }
 
+perl::array Perl_Client_GetAugmentIDsBySlotID(Client* self, int16 slot_id)
+{
+	perl::array result;
+	auto augments = self->GetInv().GetAugmentIDsBySlotID(slot_id);
+
+	for (int i = 0; i < augments.size(); ++i) {
+		result.push_back(augments[i]);
+	}
+
+	return result;
+}
+
 #ifdef BOTS
 
 int Perl_Client_GetBotRequiredLevel(Client* self)
@@ -2958,6 +2970,7 @@ void perl_register_client()
 	package.add("GetAnon", &Perl_Client_GetAnon);
 	package.add("GetAugmentAt", &Perl_Client_GetAugmentAt);
 	package.add("GetAugmentIDAt", &Perl_Client_GetAugmentIDAt);
+	package.add("GetAugmentIDsBySlotID", &Perl_Client_GetAugmentIDsBySlotID);
 	package.add("GetBaseAGI", &Perl_Client_GetBaseAGI);
 	package.add("GetBaseCHA", &Perl_Client_GetBaseCHA);
 	package.add("GetBaseDEX", &Perl_Client_GetBaseDEX);
