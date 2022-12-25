@@ -95,8 +95,9 @@ steps:
       RCLONE_FTP_PASS:
         from_secret: RCLONE_FTP_PASS
     commands:
-      - rclone copy eqemu-server-linux-x64.zip remote:
-      - rclone copy eqemu-server-linux-bots-x64.zip remote:
+      - >
+        rclone copy eqemu-server-linux-x64.zip remote:
+        rclone copy eqemu-server-linux-bots-x64.zip remote:
 
 trigger:
   branch:
@@ -139,8 +140,9 @@ steps:
       RCLONE_FTP_PASS:
         from_secret: RCLONE_FTP_PASS
     commands:
-      - rclone copy eqemu-server-windows-x64.zip remote:
-      - rclone copy eqemu-server-windows-bots-x64.zip remote:
+      - > 
+        rclone copy eqemu-server-windows-x64.zip remote:
+        rclone copy eqemu-server-windows-bots-x64.zip remote:
 
 trigger:
   branch:
