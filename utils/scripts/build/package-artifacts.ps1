@@ -2,6 +2,6 @@ $cwd = Get-Location
 
 Set-Location -Path "$cwd"
 
-7z a build_x64.zip $cwd\build_x64\bin\RelWithDebInfo\*.exe $cwd\build_x64\bin\RelWithDebInfo\*.dll $cwd\build_x64\bin\RelWithDebInfo\*.pdb $cwd\build_x64\libs\zlibng\RelWithDebInfo\*.dll $cwd\build_x64\libs\zlibng\RelWithDebInfo\*.pdb
+7z a win-build-x64.zip $cwd\win-build-x64\bin\RelWithDebInfo\*.exe $cwd\win-build-x64\bin\RelWithDebInfo\*.dll $cwd\win-build-x64\bin\RelWithDebInfo\*.pdb $cwd\win-build-x64\libs\zlibng\RelWithDebInfo\*.dll $cwd\win-build-x64\libs\zlibng\RelWithDebInfo\*.pdb
 
-7z a build_bots_x64.zip $cwd\build_bots_x64\bin\RelWithDebInfo\*.exe $cwd\build_bots_x64\bin\RelWithDebInfo\*.dll $cwd\build_bots_x64\bin\RelWithDebInfo\*.pdb $cwd\build_bots_x64\libs\zlibng\RelWithDebInfo\*.dll $cwd\build_bots_x64\libs\zlibng\RelWithDebInfo\*.pdb
+7z a win-build-bots-x64.zip $cwd\win-build-bots-x64\bin\RelWithDebInfo\*.exe $cwd\win-build-bots-x64\bin\RelWithDebInfo\*.dll $cwd\win-build-bots-x64\bin\RelWithDebInfo\*.pdb $cwd\win-build-bots-x64\libs\zlibng\RelWithDebInfo\*.dll $cwd\win-build-bots-x64\libs\zlibng\RelWithDebInfo\*.pdb
