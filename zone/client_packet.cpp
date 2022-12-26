@@ -1228,8 +1228,6 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 			guildrank = row[5] ? atoi(row[5]) : GUILD_RANK_NONE;
 		}
 
-		LogInfo("Row[6] is {}, as a bool that is {}.", row[6], atobool(row[6]));
-
 		m_epp.exp_enabled = atobool(row[6]);
 
 		if (LFP) { LFP = atoi(row[0]); }
