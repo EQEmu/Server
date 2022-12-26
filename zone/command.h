@@ -306,6 +306,7 @@ void command_wpadd(Client *c, const Seperator *sep);
 void command_wpinfo(Client *c, const Seperator *sep);
 void command_worldwide(Client *c, const Seperator *sep);
 void command_xtargets(Client *c, const Seperator *sep);
+void command_xptoggle(Client *c, const Seperator *sep);
 void command_zclip(Client *c, const Seperator *sep);
 void command_zcolor(Client *c, const Seperator *sep);
 void command_zheader(Client *c, const Seperator *sep);

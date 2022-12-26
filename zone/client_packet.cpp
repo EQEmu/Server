@@ -1217,14 +1217,20 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	}
 
 	/* Load Character Data */
-	query = StringFormat("SELECT `lfp`, `lfg`, `xtargets`, `firstlogon`, `guild_id`, `rank` FROM `character_data` LEFT JOIN `guild_members` ON `id` = `char_id` WHERE `id` = %i", cid);
+	query = fmt::format(
+		"SELECT `lfp`, `lfg`, `xtargets`, `firstlogon`, `guild_id`, `rank`, `exp_enabled` FROM `character_data` LEFT JOIN `guild_members` ON `id` = `char_id` WHERE `id` = {}",
+		cid
+	);
 	auto results = database.QueryDatabase(query);
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	for (auto row : results) {
 		if (row[4] && atoi(row[4]) > 0) {
 			guild_id = atoi(row[4]);
-			if (row[5] != nullptr) { guildrank = atoi(row[5]); }
-			else { guildrank = GUILD_RANK_NONE; }
+			guildrank = row[5] ? atoi(row[5]) : GUILD_RANK_NONE;
 		}
+
+		LogInfo("Row[6] is {}, as a bool that is {}.", row[6], atobool(row[6]));
+
+		m_epp.exp_enabled = atobool(row[6]);
 
 		if (LFP) { LFP = atoi(row[0]); }
 		if (LFG) { LFG = atoi(row[1]); }

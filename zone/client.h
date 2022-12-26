@@ -239,6 +239,9 @@ public:
 	bool IsDevToolsEnabled() const;
 	void SetDevToolsEnabled(bool in_dev_tools_enabled);
 
+	bool IsEXPEnabled() const;
+	void SetEXPEnabled(bool in_exp_enabled);
+
 	void SetPrimaryWeaponOrnamentation(uint32 model_id);
 	void SetSecondaryWeaponOrnamentation(uint32 model_id);
 

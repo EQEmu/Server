@@ -9136,6 +9136,25 @@ void Client::SetDevToolsEnabled(bool in_dev_tools_enabled)
 	Client::dev_tools_enabled = in_dev_tools_enabled;
 }
 
+bool Client::IsEXPEnabled() const {
+	return m_epp.exp_enabled;
+}
+
+void Client::SetEXPEnabled(bool is_exp_enabled)
+{
+	auto c = CharacterDataRepository::FindOne(database, CharacterID());
+
+	c.exp_enabled = in_exp_enabled;
+
+	auto updated = CharacterDataRepository::UpdateOne(database, c);
+
+	if (!updated) {
+		return;
+	}
+
+	m_epp.exp_enabled = is_exp_enabled;
+}
+
 /**
  * @param model_id
  */
