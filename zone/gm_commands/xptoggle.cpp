@@ -36,8 +36,7 @@ void command_xptoggle(Client *c, const Seperator *sep)
 	}
 
 	// If the player had an xp modifier before they toggled xp off, retrieve it.
-	double getStoredXPModifier(Client *c)
-	{
+	double getStoredXPModifier(Client *c) {
 		double storedModifier = std::stod(c->GetBucket("xpmodifier"));
 		if (storedModifier >= 0) {
 			return storedModifier;
@@ -48,7 +47,6 @@ void command_xptoggle(Client *c, const Seperator *sep)
 	}
 
 	// If the player has an xp modifier before they toggle xp off, save it.
-	double saveStoredXPModifier(Client *c, double modifier)
-	{
+	double saveStoredXPModifier(Client *c, double modifier) {
 		c->SetBucket("xpmodifier", std::to_string(currentModifier));
 	}
