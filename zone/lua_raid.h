@@ -33,7 +33,7 @@ public:
 	int RaidCount();
 	int GetGroup(const char *c);
 	int GetGroup(Lua_Client c);
-	void SplitExp(uint32 exp, Lua_Mob other);
+	void SplitExp(uint64 exp, Lua_Mob other);
 	uint32 GetTotalRaidDamage(Lua_Mob other);
 	void SplitMoney(uint32 gid, uint32 copper, uint32 silver, uint32 gold, uint32 platinum);
 	void SplitMoney(uint32 gid, uint32 copper, uint32 silver, uint32 gold, uint32 platinum, Lua_Client splitter);

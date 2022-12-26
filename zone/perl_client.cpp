@@ -234,12 +234,12 @@ void Perl_Client_AddEXP(Client* self, uint32 add_exp, uint8 conlevel, bool resex
 	self->AddEXP(add_exp, conlevel, resexp);
 }
 
-void Perl_Client_SetEXP(Client* self, uint32 set_exp, uint32 set_aaxp) // @categories Experience and Level
+void Perl_Client_SetEXP(Client* self, uint64 set_exp, uint64 set_aaxp) // @categories Experience and Level
 {
 	self->SetEXP(set_exp, set_aaxp);
 }
 
-void Perl_Client_SetEXP(Client* self, uint32 set_exp, uint32 set_aaxp, bool resexp) // @categories Experience and Level
+void Perl_Client_SetEXP(Client* self, uint64 set_exp, uint64 set_aaxp, bool resexp) // @categories Experience and Level
 {
 	self->SetEXP(set_exp, set_aaxp, resexp);
 }
@@ -3275,8 +3275,8 @@ void perl_register_client()
 	package.add("SetDeity", &Perl_Client_SetDeity);
 	package.add("SetDuelTarget", &Perl_Client_SetDuelTarget);
 	package.add("SetDueling", &Perl_Client_SetDueling);
-	package.add("SetEXP", (void(*)(Client*, uint32, uint32))&Perl_Client_SetEXP);
-	package.add("SetEXP", (void(*)(Client*, uint32, uint32, bool))&Perl_Client_SetEXP);
+	package.add("SetEXP", (void(*)(Client*, uint64, uint64))&Perl_Client_SetEXP);
+	package.add("SetEXP", (void(*)(Client*, uint64, uint64, bool))&Perl_Client_SetEXP);
 	package.add("SetEXPModifier", (void(*)(Client*, uint32, double))&Perl_Client_SetEXPModifier);
 	package.add("SetEXPModifier", (void(*)(Client*, uint32, double, int16))&Perl_Client_SetEXPModifier);
 	package.add("SetEbonCrystals", &Perl_Client_SetEbonCrystals);

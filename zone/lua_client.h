@@ -92,8 +92,8 @@ public:
 	void AddEXP(uint32 add_exp);
 	void AddEXP(uint32 add_exp, int conlevel);
 	void AddEXP(uint32 add_exp, int conlevel, bool resexp);
-	void SetEXP(uint32 set_exp, uint32 set_aaxp);
-	void SetEXP(uint32 set_exp, uint32 set_aaxp, bool resexp);
+	void SetEXP(uint64 set_exp, uint64 set_aaxp);
+	void SetEXP(uint64 set_exp, uint64 set_aaxp, bool resexp);
 	void SetBindPoint();
 	void SetBindPoint(int to_zone);
 	void SetBindPoint(int to_zone, int to_instance);

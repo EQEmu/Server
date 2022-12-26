@@ -622,17 +622,17 @@ public:
 	void AddCrystals(uint32 Radiant, uint32 Ebon);
 	void SendCrystalCounts();
 
-	uint32 GetExperienceForKill(Mob *against);
-	void AddEXP(uint32 in_add_exp, uint8 conlevel = 0xFF, bool resexp = false);
-	uint32 CalcEXP(uint8 conlevel = 0xFF);
-	void CalculateNormalizedAAExp(uint32 &add_aaxp, uint8 conlevel, bool resexp);
-	void CalculateStandardAAExp(uint32 &add_aaxp, uint8 conlevel, bool resexp);
-	void CalculateLeadershipExp(uint32 &add_exp, uint8 conlevel);
-	void CalculateExp(uint32 in_add_exp, uint32 &add_exp, uint32 &add_aaxp, uint8 conlevel, bool resexp);
-	void SetEXP(uint32 set_exp, uint32 set_aaxp, bool resexp=false);
+	uint64 GetExperienceForKill(Mob *against);
+	void AddEXP(uint64 in_add_exp, uint8 conlevel = 0xFF, bool resexp = false);
+	uint64 CalcEXP(uint8 conlevel = 0xFF);
+	void CalculateNormalizedAAExp(uint64 &add_aaxp, uint8 conlevel, bool resexp);
+	void CalculateStandardAAExp(uint64 &add_aaxp, uint8 conlevel, bool resexp);
+	void CalculateLeadershipExp(uint64 &add_exp, uint8 conlevel);
+	void CalculateExp(uint64 in_add_exp, uint64 &add_exp, uint64 &add_aaxp, uint8 conlevel, bool resexp);
+	void SetEXP(uint64 set_exp, uint64 set_aaxp, bool resexp=false);
 	void AddLevelBasedExp(uint8 exp_percentage, uint8 max_level = 0, bool ignore_mods = false);
-	void SetLeadershipEXP(uint32 group_exp, uint32 raid_exp);
-	void AddLeadershipEXP(uint32 group_exp, uint32 raid_exp);
+	void SetLeadershipEXP(uint64 group_exp, uint64 raid_exp);
+	void AddLeadershipEXP(uint64 group_exp, uint64 raid_exp);
 	void SendLeadershipEXPUpdate();
 	bool IsLeadershipEXPOn();
 	inline int GetLeadershipAA(int AAID) { return m_pp.leader_abilities.ranks[AAID]; }
@@ -1605,7 +1605,7 @@ public:
 	void mod_client_death_npc(Mob* killerMob);
 	void mod_client_death_duel(Mob* killerMob);
 	void mod_client_death_env();
-	int32 mod_client_xp(int32 in_exp, NPC *npc);
+	int64 mod_client_xp(int64 in_exp, NPC *npc);
 	uint32 mod_client_xp_for_level(uint32 xp, uint16 check_level);
 	int mod_client_haste_cap(int cap);
 	int mod_consume(EQ::ItemData *item, EQ::item::ItemType type, int change);
