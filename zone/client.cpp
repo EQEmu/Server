@@ -9144,7 +9144,7 @@ void Client::SetEXPEnabled(bool is_exp_enabled)
 {
 	auto c = CharacterDataRepository::FindOne(database, CharacterID());
 
-	c.exp_enabled = in_exp_enabled;
+	c.exp_enabled = is_exp_enabled;
 
 	auto updated = CharacterDataRepository::UpdateOne(database, c);
 
