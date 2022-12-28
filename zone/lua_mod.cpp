@@ -581,10 +581,10 @@ void LuaMod::GetEXPForLevel(Client *self, uint16 level, uint32 &returnValue, boo
 	}
 }
 
-void LuaMod::GetExperienceForKill(Client *self, Mob *against, uint32 &returnValue, bool &ignoreDefault)
+void LuaMod::GetExperienceForKill(Client *self, Mob *against, uint64 &returnValue, bool &ignoreDefault)
 {
 	int start = lua_gettop(L);
-	uint32 retval = 0;
+	uint64 retval = 0;
 
 	try {
 		if (!m_has_get_experience_for_kill) {

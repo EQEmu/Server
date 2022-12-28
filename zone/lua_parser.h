@@ -206,7 +206,7 @@ public:
 	void CommonOutgoingHitSuccess(Mob *self, Mob* other, DamageHitInfo &hit, ExtraAttackOptions *opts, bool &ignoreDefault);
 	uint32 GetRequiredAAExperience(Client *self, bool &ignoreDefault);
 	uint32 GetEXPForLevel(Client *self, uint16 level, bool &ignoreDefault);
-	uint32 GetExperienceForKill(Client *self, Mob *against, bool &ignoreDefault);
+	uint64 GetExperienceForKill(Client *self, Mob *against, bool &ignoreDefault);
 
 private:
 	LuaParser();

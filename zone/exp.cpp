@@ -205,7 +205,7 @@ uint64 Client::CalcEXP(uint8 conlevel) {
 uint64 Client::GetExperienceForKill(Mob *against)
 {
 #ifdef LUA_EQEMU
-	uint32 lua_ret = 0;
+	uint64 lua_ret = 0;
 	bool ignoreDefault = false;
 	lua_ret = LuaParser::Instance()->GetExperienceForKill(this, against, ignoreDefault);
 
