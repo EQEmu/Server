@@ -1966,6 +1966,8 @@ public:
 	int64 GetSharedTaskId() const;
 private:
 
+	bool m_exp_enabled;
+
 	//Anti Spam Stuff
 	Timer *KarmaUpdateTimer;
 	uint32 TotalKarma;

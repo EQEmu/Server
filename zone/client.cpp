@@ -738,7 +738,7 @@ bool Client::Save(uint8 iCommitNow) {
 		}
 	}
 
-	database.SaveCharacterData(CharacterID(), AccountID(), &m_pp, &m_epp); /* Save Character Data */
+	database.SaveCharacterData(this, &m_pp, &m_epp); /* Save Character Data */
 
 	return true;
 }
@@ -9137,7 +9137,7 @@ void Client::SetDevToolsEnabled(bool in_dev_tools_enabled)
 }
 
 bool Client::IsEXPEnabled() const {
-	return m_epp.exp_enabled;
+	return m_exp_enabled;
 }
 
 void Client::SetEXPEnabled(bool is_exp_enabled)
@@ -9152,7 +9152,7 @@ void Client::SetEXPEnabled(bool is_exp_enabled)
 		return;
 	}
 
-	m_epp.exp_enabled = is_exp_enabled;
+	m_exp_enabled = is_exp_enabled;
 }
 
 /**
