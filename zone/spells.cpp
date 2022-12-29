@@ -4369,11 +4369,18 @@ uint16 Mob::FindBuffBySlot(int slot) {
 	return 0;
 }
 
-uint32 Mob::BuffCount() {
+uint32 Mob::BuffCount(bool is_beneficial, bool is_detrimental) {
 	uint32 active_buff_count = 0;
 	int buff_count = GetMaxTotalSlots();
 	for (int buff_slot = 0; buff_slot < buff_count; buff_slot++) {
-		if (IsValidSpell(buffs[buff_slot].spellid)) {
+		const auto is_spell_beneficial = IsBeneficialSpell(buffs[buff_slot].spellid);
+		if (
+			IsValidSpell(buffs[buff_slot].spellid) &&
+			(
+				(is_beneficial && is_spell_beneficial) ||
+				(is_detrimental && !is_spell_beneficial)
+			)
+		) {
 			active_buff_count++;
 		}
 	}

@@ -323,11 +323,6 @@ uint16 Lua_Mob::FindBuffBySlot(int slot) {
 	return self->FindBuffBySlot(slot);
 }
 
-uint32 Lua_Mob::BuffCount() {
-	Lua_Safe_Call_Int();
-	return self->BuffCount();
-}
-
 bool Lua_Mob::FindType(int type) {
 	Lua_Safe_Call_Bool();
 	return self->FindType(type);
@@ -2757,6 +2752,21 @@ bool Lua_Mob::IsAttackAllowed(Lua_Mob target, bool is_spell_attack) {
 	return self->IsAttackAllowed(target, is_spell_attack);
 }
 
+uint32 Lua_Mob::BuffCount() {
+	Lua_Safe_Call_Int();
+	return self->BuffCount();
+}
+
+uint32 Lua_Mob::BuffCount(bool is_beneficial) {
+	Lua_Safe_Call_Int();
+	return self->BuffCount(is_beneficial);
+}
+
+uint32 Lua_Mob::BuffCount(bool is_beneficial, bool is_detrimental) {
+	Lua_Safe_Call_Int();
+	return self->BuffCount(is_beneficial, is_detrimental);
+}
+
 #ifdef BOTS
 void Lua_Mob::DamageAreaBots(int64 damage) {
 	Lua_Safe_Call_Void();
@@ -2848,7 +2858,9 @@ luabind::scope lua_register_mob() {
 	.def("BehindMob", (bool(Lua_Mob::*)(Lua_Mob,float))&Lua_Mob::BehindMob)
 	.def("BehindMob", (bool(Lua_Mob::*)(Lua_Mob,float,float))&Lua_Mob::BehindMob)
 	.def("BehindMob", (bool(Lua_Mob::*)(void))&Lua_Mob::BehindMob)
-	.def("BuffCount", &Lua_Mob::BuffCount)
+	.def("BuffCount", (uint32(Lua_Mob::*)(void))&Lua_Mob::BuffCount)
+	.def("BuffCount", (uint32(Lua_Mob::*)(bool))&Lua_Mob::BuffCount)
+	.def("BuffCount", (uint32(Lua_Mob::*)(bool,bool))&Lua_Mob::BuffCount)
 	.def("BuffFadeAll", (void(Lua_Mob::*)(void))&Lua_Mob::BuffFadeAll)
 	.def("BuffFadeByEffect", (void(Lua_Mob::*)(int))&Lua_Mob::BuffFadeByEffect)
 	.def("BuffFadeByEffect", (void(Lua_Mob::*)(int,int))&Lua_Mob::BuffFadeByEffect)
