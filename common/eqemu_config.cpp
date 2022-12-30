@@ -86,6 +86,7 @@ void EQEmuConfig::parse_config()
 	if (_root["server"]["world"].get("locked", "false").asString() == "true") { Locked = true; }
 	WorldIP      = _root["server"]["world"]["tcp"].get("host", "127.0.0.1").asString();
 	WorldTCPPort = atoi(_root["server"]["world"]["tcp"].get("port", "9000").asString().c_str());
+	WorldUDPPort = atoi(_root["server"]["world"]["udp"].get("port", "9000").asString().c_str());
 
 	TelnetIP      = _root["server"]["world"]["telnet"].get("ip", "127.0.0.1").asString();
 	TelnetTCPPort = atoi(_root["server"]["world"]["telnet"].get("port", "9001").asString().c_str());
@@ -216,6 +217,9 @@ std::string EQEmuConfig::GetByName(const std::string &var_name) const
 	}
 	if (var_name == "WorldTCPPort") {
 		return (itoa(WorldTCPPort));
+	}
+	if (var_name == "WorldUDPPort") {
+		return (itoa(WorldUDPPort));
 	}
 	if (var_name == "WorldIP") {
 		return (WorldIP);
@@ -348,6 +352,7 @@ void EQEmuConfig::Dump() const
 	std::cout << "LoginLegacy = " << LoginLegacy << std::endl;
 	std::cout << "Locked = " << Locked << std::endl;
 	std::cout << "WorldTCPPort = " << WorldTCPPort << std::endl;
+	std::cout << "WorldUDPPort = " << WorldUDPPort << std::endl;
 	std::cout << "WorldIP = " << WorldIP << std::endl;
 	std::cout << "TelnetTCPPort = " << TelnetTCPPort << std::endl;
 	std::cout << "TelnetIP = " << TelnetIP << std::endl;

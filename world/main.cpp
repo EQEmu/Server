@@ -337,8 +337,8 @@ int main(int argc, char **argv)
 	);
 
 	WorldBoot::CheckForPossibleConfigurationIssues();
-
-	EQStreamManagerInterfaceOptions opts(9000, false, false);
+	
+	EQStreamManagerInterfaceOptions opts(Config->WorldUDPPort, false, false);
 	opts.daybreak_options.resend_delay_ms     = RuleI(Network, ResendDelayBaseMS);
 	opts.daybreak_options.resend_delay_factor = RuleR(Network, ResendDelayFactor);
 	opts.daybreak_options.resend_delay_min    = RuleI(Network, ResendDelayMinMS);

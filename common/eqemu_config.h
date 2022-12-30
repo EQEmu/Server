@@ -51,6 +51,7 @@ class EQEmuConfig
 		LinkedList<LoginConfig*> loginlist;
 		bool Locked;
 		uint16 WorldTCPPort;
+		uint16 WorldUDPPort;
 		std::string WorldIP;
 		uint16 TelnetTCPPort;
 		std::string TelnetIP;
