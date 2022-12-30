@@ -10782,7 +10782,7 @@ void bot_command_enforce_spell_list(Client* c, const Seperator *sep)
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"Usage: {} [True/False or blank to toggle]",
+				"Usage: {} [True|False] (Blank to toggle]",
 				sep->arg[0]
 			).c_str()
 		);
