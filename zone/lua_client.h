@@ -455,6 +455,8 @@ public:
 	std::string GetGuildPublicNote();
 	void MaxSkills();
 	luabind::object GetAugmentIDsBySlotID(lua_State* L, int16 slot_id);
+	bool IsEXPEnabled();
+	void SetEXPEnabled(bool is_exp_enabled);
 
 	void ApplySpell(int spell_id);
 	void ApplySpell(int spell_id, int duration);

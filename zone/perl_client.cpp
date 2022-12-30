@@ -2784,6 +2784,16 @@ perl::array Perl_Client_GetAugmentIDsBySlotID(Client* self, int16 slot_id)
 	return result;
 }
 
+bool Perl_Client_IsEXPEnabled(Client* self)
+{
+	return self->IsEXPEnabled();
+}
+
+void Perl_Client_SetEXPEnabled(Client* self, bool is_exp_enabled)
+{
+	self->SetEXPEnabled(is_exp_enabled);
+}
+
 #ifdef BOTS
 
 int Perl_Client_GetBotRequiredLevel(Client* self)
@@ -3119,6 +3129,7 @@ void perl_register_client()
 	package.add("IsBecomeNPC", &Perl_Client_IsBecomeNPC);
 	package.add("IsCrouching", &Perl_Client_IsCrouching);
 	package.add("IsDueling", &Perl_Client_IsDueling);
+	package.add("IsEXPEnabled", &Perl_Client_IsEXPEnabled);
 	package.add("IsGrouped", &Perl_Client_IsGrouped);
 	package.add("IsLD", &Perl_Client_IsLD);
 	package.add("IsMedding", &Perl_Client_IsMedding);
@@ -3282,6 +3293,7 @@ void perl_register_client()
 	package.add("SetEbonCrystals", &Perl_Client_SetEbonCrystals);
 	package.add("SetEndurance", &Perl_Client_SetEndurance);
 	package.add("SetEnvironmentDamageModifier", &Perl_Client_SetEnvironmentDamageModifier);
+	package.add("SetEXPEnabled", &Perl_Client_SetEXPEnabled);
 	package.add("SetFactionLevel", &Perl_Client_SetFactionLevel);
 	package.add("SetFactionLevel2", (void(*)(Client*, uint32, int32, uint8, uint8, uint8, int32))&Perl_Client_SetFactionLevel2);
 	package.add("SetFactionLevel2", (void(*)(Client*, uint32, int32, uint8, uint8, uint8, int32, uint8))&Perl_Client_SetFactionLevel2);

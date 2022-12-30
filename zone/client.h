@@ -239,6 +239,9 @@ public:
 	bool IsDevToolsEnabled() const;
 	void SetDevToolsEnabled(bool in_dev_tools_enabled);
 
+	bool IsEXPEnabled() const;
+	void SetEXPEnabled(bool is_exp_enabled);
+
 	void SetPrimaryWeaponOrnamentation(uint32 model_id);
 	void SetSecondaryWeaponOrnamentation(uint32 model_id);
 
@@ -1962,6 +1965,8 @@ public:
 	void SetSharedTaskId(int64 shared_task_id);
 	int64 GetSharedTaskId() const;
 private:
+
+	bool m_exp_enabled;
 
 	//Anti Spam Stuff
 	Timer *KarmaUpdateTimer;
