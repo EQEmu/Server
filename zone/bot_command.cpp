@@ -10782,7 +10782,7 @@ void bot_command_enforce_spell_list(Client* c, const Seperator *sep)
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"Usage: {} [True/False]",
+				"Usage: {} [1/0 or blank to toggle]",
 				sep->arg[0]
 			).c_str()
 		);
@@ -10795,20 +10795,26 @@ void bot_command_enforce_spell_list(Client* c, const Seperator *sep)
 		return;
 	}
 
-	bool toggle = (
-		sep->IsNumber(1) ?
-		(std::stoi(sep->arg[1]) ? true : false) :
-		atobool(sep->arg[1])
-	);
+	bool enforce_state = false;
+	bool toggle_enforce = true;
+	if (sep->IsNumber(1)) {
+		toggle_enforce = false;
+		enforce_state = std::stoi(sep->arg[1]) ? true : false;
+	} 
 
-	my_bot->SetBotEnforceSpellSetting(toggle, true);
+	if (toggle_enforce) {
+		my_bot->SetBotEnforceSpellSetting(!my_bot->GetBotEnforceSpellSetting(), true);
+	}
+	else {
+		my_bot->SetBotEnforceSpellSetting(enforce_state, true);
+	}
 
 	c->Message(
 		Chat::White,
 		fmt::format(
 			"{}'s Spell Settings List entries are now {}.",
 			my_bot->GetCleanName(),
-			toggle ? "enforced" : "optional"
+			my_bot->GetBotEnforceSpellSetting() ? "enforced" : "optional"
 		).c_str()
 	);
 }

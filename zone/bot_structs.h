@@ -85,7 +85,7 @@ struct BotSpellSetting {
 	uint8  max_level;
 	int8   min_hp;
 	int8   max_hp;
-	bool   is_enabled;
+	bool   is_enabled = true;
 };
 
 struct BotSpells_Struct {
