@@ -104,7 +104,7 @@ void Client::mod_client_death_duel(Mob* killerMob) { return; }
 void Client::mod_client_death_env() { return; }
 
 //Calculated xp before consider modifier, called whenever a client gets XP for killing a mob.
-int32 Client::mod_client_xp(int32 in_xp, NPC *npc) { return(in_xp); }
+int64 Client::mod_client_xp(int64 in_xp, NPC *npc) { return(in_xp); }
 
 //Client XP formula.  Changes here will cause clients to change level after gaining or losing xp.
 //Either modify this before your server goes live, or be prepared to write a quest script that fixes levels.

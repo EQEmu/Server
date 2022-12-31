@@ -48,7 +48,7 @@ int Lua_Raid::GetGroup(Lua_Client c) {
 	return self->GetGroup(c);
 }
 
-void Lua_Raid::SplitExp(uint32 exp, Lua_Mob other) {
+void Lua_Raid::SplitExp(uint64 exp, Lua_Mob other) {
 	Lua_Safe_Call_Void();
 	self->SplitExp(exp, other);
 }
