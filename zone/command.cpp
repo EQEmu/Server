@@ -140,6 +140,7 @@ int command_init(void)
 		command_add("enablerecipe", "[Recipe ID] - Enables a Recipe", AccountStatus::QuestTroupe, command_enablerecipe) ||
 		command_add("endurance", "Restores your or your target's endurance.", AccountStatus::Guide, command_endurance) ||
 		command_add("equipitem", "[slotid(0-21)] - Equip the item on your cursor into the specified slot", AccountStatus::Guide, command_equipitem) ||
+		command_add("exptoggle", "[Toggle] - Toggle your or your target's experience gain.", AccountStatus::QuestTroupe, command_exptoggle) ||
 		command_add("faction", "[Find (criteria | all ) | Review (criteria | all) | Reset (id)] - Resets Player's Faction", AccountStatus::QuestTroupe, command_faction) ||
 		command_add("factionassociation", "[factionid] [amount] - triggers a faction hits via association", AccountStatus::GMLeadAdmin, command_faction_association) ||
 		command_add("feature", "Change your or your target's feature's temporarily", AccountStatus::QuestTroupe, command_feature) ||
@@ -977,6 +978,7 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/enablerecipe.cpp"
 #include "gm_commands/endurance.cpp"
 #include "gm_commands/equipitem.cpp"
+#include "gm_commands/exptoggle.cpp"
 #include "gm_commands/faction.cpp"
 #include "gm_commands/feature.cpp"
 #include "gm_commands/findaa.cpp"

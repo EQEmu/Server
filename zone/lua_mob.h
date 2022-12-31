@@ -94,6 +94,8 @@ public:
 	bool FindBuff(int spell_id);
 	uint16 FindBuffBySlot(int slot);
 	uint32 BuffCount();
+	uint32 BuffCount(bool is_beneficial);
+	uint32 BuffCount(bool is_beneficial, bool is_detrimental);
 	bool FindType(int type);
 	bool FindType(int type, bool offensive);
 	bool FindType(int type, bool offensive, int threshold);

@@ -496,7 +496,7 @@ void Client::CalculateExp(uint64 in_add_exp, uint64 &add_exp, uint64 &add_aaxp, 
 	}
 
 	add_exp = GetEXP() + add_exp;
-	
+
 	//Enforce Percent XP Cap per kill, if rule is enabled
 	int kill_percent_xp_cap = RuleI(Character, ExperiencePercentCapPerKill);
 	if (kill_percent_xp_cap >= 0) {
@@ -509,6 +509,10 @@ void Client::CalculateExp(uint64 in_add_exp, uint64 &add_exp, uint64 &add_aaxp, 
 }
 
 void Client::AddEXP(uint64 in_add_exp, uint8 conlevel, bool resexp) {
+	if (!IsEXPEnabled()) {
+		return;
+	}
+
 
 	EVENT_ITEM_ScriptStopReturn();
 
