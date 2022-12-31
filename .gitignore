@@ -56,3 +56,7 @@ bin/
 /client_files/**/CMakeFiles/
 
 .idea
+
+# Clangd Generated Files.
+compile_flags.txt
+.cache/
