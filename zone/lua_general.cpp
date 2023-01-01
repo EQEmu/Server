@@ -2012,8 +2012,8 @@ std::string lua_get_data_remaining(std::string bucket_name) {
 	return DataBucket::GetDataRemaining(bucket_name);
 }
 
-int lua_get_item_stat(uint32 item_id, std::string stat_identifier) {
-	return quest_manager.getitemstat(item_id, stat_identifier);
+const int lua_get_item_stat(uint32 item_id, std::string identifier) {
+	return quest_manager.getitemstat(item_id, identifier);
 }
 
 int lua_get_spell_stat(uint32 spell_id, std::string stat_identifier) {

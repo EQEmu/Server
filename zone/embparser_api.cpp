@@ -2412,9 +2412,9 @@ std::string Perl__get_data_remaining(std::string bucket_name)
 	return DataBucket::GetDataRemaining(bucket_name);
 }
 
-int Perl__getitemstat(uint32 item_id, std::string stat_identifier)
+const int Perl__getitemstat(uint32 item_id, std::string identifier)
 {
-	return quest_manager.getitemstat(item_id, stat_identifier);
+	return quest_manager.getitemstat(item_id, identifier);
 }
 
 int Perl__getspellstat(uint32 spell_id, std::string stat_identifier)

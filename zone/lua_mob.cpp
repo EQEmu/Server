@@ -2213,9 +2213,9 @@ int Lua_Mob::GetWeaponDamageBonus(Lua_Item weapon, bool offhand) {
 	return self->GetWeaponDamageBonus(weapon, offhand);
 }
 
-int Lua_Mob::GetItemStat(uint32 itemid, const char* identifier) {
+const int Lua_Mob::GetItemStat(uint32 item_id, std::string identifier) {
 	Lua_Safe_Call_Int();
-	return self->GetItemStat(itemid, identifier);
+	return self->GetItemStat(item_id, identifier);
 }
 
 Lua_StatBonuses Lua_Mob::GetItemBonuses()
@@ -3090,7 +3090,7 @@ luabind::scope lua_register_mob() {
 	.def("GetInvul", (bool(Lua_Mob::*)(void))&Lua_Mob::GetInvul)
 	.def("GetItemBonuses", &Lua_Mob::GetItemBonuses)
 	.def("GetItemHPBonuses", &Lua_Mob::GetItemHPBonuses)
-	.def("GetItemStat", (int(Lua_Mob::*)(uint32,const char*))&Lua_Mob::GetItemStat)
+	.def("GetItemStat", &Lua_Mob::GetItemStat)
 	.def("GetLastName", &Lua_Mob::GetLastName)
 	.def("GetLevel", &Lua_Mob::GetLevel)
 	.def("GetLevelCon", (uint32(Lua_Mob::*)(int))&Lua_Mob::GetLevelCon)

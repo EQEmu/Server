@@ -1908,9 +1908,9 @@ void Perl_Mob_TempName(Mob* self, const char* name) // @categories Script Utilit
 	self->TempName(name);
 }
 
-int Perl_Mob_GetItemStat(Mob* self, uint32 item_id, const char* stat) // @categories Inventory and Items, Stats and Attributes
+const int Perl_Mob_GetItemStat(Mob* self, uint32 item_id, std::string identifier) // @categories Inventory and Items, Stats and Attributes
 {
-	return self->GetItemStat(item_id, stat);
+	return self->GetItemStat(item_id, identifier);
 }
 
 std::string Perl_Mob_GetGlobal(Mob* self, const char* varname)
