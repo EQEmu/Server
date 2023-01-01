@@ -59,8 +59,6 @@ void command_setanon(Client *c, const Seperator *sep)
 			return;
 		}
 
-		const std::string character_name = e.name;
-
 		e.anon = anon_flag;
 
 		auto updated = CharacterDataRepository::UpdateOne(content_db, e);
@@ -70,7 +68,7 @@ void command_setanon(Client *c, const Seperator *sep)
 				Chat::White,
 				fmt::format(
 					"Failed to change Anonymous Flag for {} ({}).",
-					character_name,
+					e.name,
 					character_id
 				).c_str()
 			);
@@ -95,7 +93,7 @@ void command_setanon(Client *c, const Seperator *sep)
 			Chat::White,
 			fmt::format(
 				"{} ({}) is {}.",
-				character_name,
+				e.name,
 				character_id,
 				anon_setting
 			).c_str()
