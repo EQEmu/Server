@@ -3686,6 +3686,11 @@ std::string lua_item_link(uint32 item_id, int16 charges, uint32 aug1, uint32 aug
 	return quest_manager.varlink(item_id, charges, aug1, aug2, aug3, aug4, aug5, aug6, attuned);
 }
 
+bool lua_do_augment_slots_match(uint32 item_one, uint32 item_two)
+{
+	return quest_manager.DoAugmentSlotsMatch(item_one, item_two);
+}
+
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
 	cur = table[#name]; \
 	if(luabind::type(cur) != LUA_TNIL) { \
@@ -4201,6 +4206,7 @@ luabind::scope lua_register_general() {
 		luabind::def("do_anim", (void(*)(int,int))&lua_do_anim),
 		luabind::def("do_anim", (void(*)(int,int,bool))&lua_do_anim),
 		luabind::def("do_anim", (void(*)(int,int,bool,int))&lua_do_anim),
+		luabind::def("do_augment_slots_match", &lua_do_augment_slots_match),
 		/*
 			Cross Zone
 		*/

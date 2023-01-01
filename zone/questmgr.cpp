@@ -3946,3 +3946,23 @@ void QuestManager::marquee(uint32 type, uint32 priority, uint32 fade_in, uint32 
 
 	initiator->SendMarqueeMessage(type, priority, fade_in, fade_out, duration, message);
 }
+
+bool QuestManager::DoAugmentSlotsMatch(uint32 item_one, uint32 item_two) {
+	const auto* inst_one = database.GetItem(item_one);
+	if (!inst_one) {
+		return false;
+	}
+
+	const auto* inst_two = database.GetItem(item_two);
+	if (!inst_two) {
+		return false;
+	}
+
+	for (auto i = EQ::invaug::SOCKET_BEGIN; i <= EQ::invaug::SOCKET_END; i++) {
+		if (inst_one->AugSlotType[i] != inst_two->AugSlotType[i]) {
+			return false;
+		}
+	}
+
+	return true;
+}
