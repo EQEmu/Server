@@ -1525,15 +1525,24 @@ bool SharedDatabase::LoadFactionAssociation(const std::string &prefix)
 }
 
 // Create appropriate EQ::ItemInstance class
-EQ::ItemInstance* SharedDatabase::CreateItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, uint32 aug6, uint8 attuned)
-{
+EQ::ItemInstance* SharedDatabase::CreateItem(
+	uint32 item_id,
+	int16 charges,
+	uint32 aug1,
+	uint32 aug2,
+	uint32 aug3,
+	uint32 aug4,
+	uint32 aug5,
+	uint32 aug6,
+	bool attuned
+) {
 	EQ::ItemInstance* inst = nullptr;
 
 	const EQ::ItemData* item = GetItem(item_id);
 	if (item) {
 		inst = CreateBaseItem(item, charges);
 
-		if (inst == nullptr) {
+		if (!inst) {
 			LogError("Error: valid item data returned a null reference for EQ::ItemInstance creation in SharedDatabase::CreateItem()");
 			LogError("Item Data = ID: {}, Name: {}, Charges: {}", item->ID, item->Name, charges);
 			return nullptr;
@@ -1553,13 +1562,22 @@ EQ::ItemInstance* SharedDatabase::CreateItem(uint32 item_id, int16 charges, uint
 
 
 // Create appropriate EQ::ItemInstance class
-EQ::ItemInstance* SharedDatabase::CreateItem(const EQ::ItemData* item, int16 charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, uint32 aug6, uint8 attuned)
-{
+EQ::ItemInstance* SharedDatabase::CreateItem(
+	const EQ::ItemData* item,
+	int16 charges,
+	uint32 aug1,
+	uint32 aug2,
+	uint32 aug3,
+	uint32 aug4,
+	uint32 aug5,
+	uint32 aug6,
+	bool attuned
+) {
 	EQ::ItemInstance* inst = nullptr;
 	if (item) {
 		inst = CreateBaseItem(item, charges);
 
-		if (inst == nullptr) {
+		if (!inst) {
 			LogError("Error: valid item data returned a null reference for EQ::ItemInstance creation in SharedDatabase::CreateItem()");
 			LogError("Item Data = ID: {}, Name: {}, Charges: {}", item->ID, item->Name, charges);
 			return nullptr;

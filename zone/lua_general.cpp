@@ -881,12 +881,6 @@ int lua_merchant_count_item(uint32 npc_id, uint32 item_id) {
 	return quest_manager.MerchantCountItem(npc_id, item_id);
 }
 
-std::string lua_item_link(int item_id) {
-	char text[250] = { 0 };
-
-	return quest_manager.varlink(text, item_id);
-}
-
 std::string lua_get_item_name(uint32 item_id) {
 	return quest_manager.getitemname(item_id);
 }
@@ -3656,6 +3650,42 @@ void lua_do_anim(int animation_id, int animation_speed, bool ackreq, int filter)
 	quest_manager.doanim(animation_id, animation_speed, ackreq, static_cast<eqFilterType>(filter));
 }
 
+std::string lua_item_link(uint32 item_id) {
+	return quest_manager.varlink(item_id);
+}
+
+std::string lua_item_link(uint32 item_id, int16 charges) {
+	return quest_manager.varlink(item_id, charges);
+}
+
+std::string lua_item_link(uint32 item_id, int16 charges, uint32 aug1) {
+	return quest_manager.varlink(item_id, charges, aug1);
+}
+
+std::string lua_item_link(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2) {
+	return quest_manager.varlink(item_id, charges, aug1, aug2);
+}
+
+std::string lua_item_link(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2, uint32 aug3) {
+	return quest_manager.varlink(item_id, charges, aug1, aug2, aug3);
+}
+
+std::string lua_item_link(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4) {
+	return quest_manager.varlink(item_id, charges, aug1, aug2, aug3, aug4);
+}
+
+std::string lua_item_link(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5) {
+	return quest_manager.varlink(item_id, charges, aug1, aug2, aug3, aug4, aug5);
+}
+
+std::string lua_item_link(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, uint32 aug6) {
+	return quest_manager.varlink(item_id, charges, aug1, aug2, aug3, aug4, aug5, aug6);
+}
+
+std::string lua_item_link(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, uint32 aug6, bool attuned) {
+	return quest_manager.varlink(item_id, charges, aug1, aug2, aug3, aug4, aug5, aug6, attuned);
+}
+
 bool lua_do_augment_slots_match(uint32 item_one, uint32 item_two)
 {
 	return quest_manager.DoAugmentSlotsMatch(item_one, item_two);
@@ -3997,7 +4027,15 @@ luabind::scope lua_register_general() {
 		luabind::def("merchant_set_item", (void(*)(uint32,uint32))&lua_merchant_set_item),
 		luabind::def("merchant_set_item", (void(*)(uint32,uint32,uint32))&lua_merchant_set_item),
 		luabind::def("merchant_count_item", &lua_merchant_count_item),
-		luabind::def("item_link", &lua_item_link),
+		luabind::def("item_link", (std::string(*)(uint32))&lua_item_link),
+		luabind::def("item_link", (std::string(*)(uint32,int16))&lua_item_link),
+		luabind::def("item_link", (std::string(*)(uint32,int16,uint32))&lua_item_link),
+		luabind::def("item_link", (std::string(*)(uint32,int16,uint32,uint32))&lua_item_link),
+		luabind::def("item_link", (std::string(*)(uint32,int16,uint32,uint32,uint32))&lua_item_link),
+		luabind::def("item_link", (std::string(*)(uint32,int16,uint32,uint32,uint32,uint32))&lua_item_link),
+		luabind::def("item_link", (std::string(*)(uint32,int16,uint32,uint32,uint32,uint32,uint32))&lua_item_link),
+		luabind::def("item_link", (std::string(*)(uint32,int16,uint32,uint32,uint32,uint32,uint32,uint32))&lua_item_link),
+		luabind::def("item_link", (std::string(*)(uint32,int16,uint32,uint32,uint32,uint32,uint32,uint32,bool))&lua_item_link),
 		luabind::def("get_item_name", (std::string(*)(uint32))&lua_get_item_name),
 		luabind::def("say_link", (std::string(*)(const char*,bool,const char*))&lua_say_link),
 		luabind::def("say_link", (std::string(*)(const char*,bool))&lua_say_link),
