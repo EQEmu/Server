@@ -126,7 +126,7 @@ public:
 		uint32 aug4 = 0,
 		uint32 aug5 = 0,
 		uint32 aug6 = 0,
-		uint8 attuned = 0
+		bool attuned = 0
 	);
 	EQ::ItemInstance *CreateItem(
 		const EQ::ItemData *item,
@@ -137,7 +137,7 @@ public:
 		uint32 aug4 = 0,
 		uint32 aug5 = 0,
 		uint32 aug6 = 0,
-		uint8 attuned = 0
+		bool attuned = 0
 	);
 	EQ::ItemInstance *CreateBaseItem(const EQ::ItemData *item, int16 charges = 0);
 

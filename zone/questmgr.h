@@ -281,7 +281,7 @@ public:
 	void MovePCInstance(int zone_id, int instance_id, const glm::vec4& position);
 	void FlagInstanceByGroupLeader(uint32 zone, int16 version);
 	void FlagInstanceByRaidLeader(uint32 zone, int16 version);
-	const char* varlink(char* perltext, int item_id);
+	std::string varlink(uint32 item_id, int16 charges = 0, uint32 aug1 = 0, uint32 aug2 = 0, uint32 aug3 = 0, uint32 aug4 = 0, uint32 aug5 = 0, uint32 aug6 = 0, bool attuned = false);
 	std::string saylink(char *saylink_text, bool silent, const char *link_name);
 	std::string getcharnamebyid(uint32 char_id);
 	uint32 getcharidbyname(const char* name);
