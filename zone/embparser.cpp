@@ -2004,6 +2004,15 @@ void PerlembParser::ExportEventVariables(
 			break;
 		}
 
+		case EVENT_ENTER_AREA:
+		case EVENT_LEAVE_AREA: {
+			if (extra_pointers && extra_pointers->size() >= 2) {
+				ExportVar(package_name.c_str(), "area_id", *std::any_cast<int*>(extra_pointers->at(0)));
+				ExportVar(package_name.c_str(), "area_type", *std::any_cast<int*>(extra_pointers->at(1)));
+			}
+			break;
+		}
+
 		default: {
 			break;
 		}
