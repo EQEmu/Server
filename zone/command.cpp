@@ -287,6 +287,7 @@ int command_init(void)
 		command_add("setadventurepoints", "[Theme] [Points] - Set your or your player target's available Adventure Points by Theme", AccountStatus::GMLeadAdmin, command_set_adventure_points) ||
 		command_add("setaltcurrency", "[Currency ID] [Amount] - Set your or your target's available Alternate Currency by Currency ID", AccountStatus::GMAdmin, command_setaltcurrency) ||
 		command_add("setanim", "[Animation ID (IDs are 0 to 4)] - Set target's appearance to Animation ID", AccountStatus::GMMgmt, command_setanim) ||
+		command_add("setanon", "[Anonymous Flag] - Set you or your target's Anonymous Flag (0 = Not Anonymous, 1 = Anonymous, 2 = Roleplaying)", AccountStatus::QuestTroupe, command_setanon) ||
 		command_add("setcrystals", "[value] - Set your or your player target's available radiant or ebon crystals", AccountStatus::GMAdmin, command_setcrystals) ||
 		command_add("setendurance", "[Endurance] - Set your or your target's Endurance", AccountStatus::GMAdmin, command_setendurance) ||
 		command_add("setfaction", "[Faction ID] - Sets targeted NPC's faction in the database", AccountStatus::GMAreas, command_setfaction) ||
@@ -1119,6 +1120,7 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/setaaxp.cpp"
 #include "gm_commands/setaltcurrency.cpp"
 #include "gm_commands/setanim.cpp"
+#include "gm_commands/setanon.cpp"
 #include "gm_commands/setcrystals.cpp"
 #include "gm_commands/setendurance.cpp"
 #include "gm_commands/setfaction.cpp"
