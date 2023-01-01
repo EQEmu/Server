@@ -3616,7 +3616,7 @@ std::string QuestManager::getinventoryslotname(int16 slot_id) {
 
 int QuestManager::getitemstat(uint32 item_id, std::string stat_identifier) {
 	QuestManagerCurrentQuestVars();
-	return EQ::InventoryProfile::GetItemStatValue(item_id, stat_identifier.c_str());
+	return EQ::InventoryProfile::GetItemStatValue(item_id, stat_identifier);
 }
 
 int QuestManager::getspellstat(uint32 spell_id, std::string stat_identifier, uint8 slot) {

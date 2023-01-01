@@ -3871,339 +3871,362 @@ std::string EQ::InventoryProfile::GetCustomItemData(int16 slot_id, std::string i
 	return "";
 }
 
-int EQ::InventoryProfile::GetItemStatValue(uint32 item_id, const char* identifier) {
-	const EQ::ItemInstance* inst = database.CreateItem(item_id);
-	if (!inst)
+int EQ::InventoryProfile::GetItemStatValue(uint32 item_id, std::string identifier) {
+	if (identifier.empty()) {
 		return 0;
-
-	const EQ::ItemData* item = inst->GetItem();
-	if (!item)
-		return 0;
-
-	if (!identifier)
-		return 0;
-
-	int32 stat = 0;
-
-	std::string id = identifier;
-	for(uint32 i = 0; i < id.length(); ++i)	{
-		id[i] = tolower(id[i]);
 	}
-	if (id == "itemclass")
-		stat = int32(item->ItemClass);
-	if (id == "id")
-		stat = int32(item->ID);
-	if (id == "idfile")
-		stat = atoi(&item->IDFile[2]);
-	if (id == "weight")
-		stat = int32(item->Weight);
-	if (id == "norent")
-		stat = int32(item->NoRent);
-	if (id == "nodrop")
-		stat = int32(item->NoDrop);
-	if (id == "size")
-		stat = int32(item->Size);
-	if (id == "slots")
-		stat = int32(item->Slots);
-	if (id == "price")
-		stat = int32(item->Price);
-	if (id == "icon")
-		stat = int32(item->Icon);
-	if (id == "loregroup")
-		stat = int32(item->LoreGroup);
-	if (id == "loreflag")
-		stat = int32(item->LoreFlag);
-	if (id == "pendingloreflag")
-		stat = int32(item->PendingLoreFlag);
-	if (id == "artifactflag")
-		stat = int32(item->ArtifactFlag);
-	if (id == "summonedflag")
-		stat = int32(item->SummonedFlag);
-	if (id == "fvnodrop")
-		stat = int32(item->FVNoDrop);
-	if (id == "favor")
-		stat = int32(item->Favor);
-	if (id == "guildfavor")
-		stat = int32(item->GuildFavor);
-	if (id == "pointtype")
-		stat = int32(item->PointType);
-	if (id == "bagtype")
-		stat = int32(item->BagType);
-	if (id == "bagslots")
-		stat = int32(item->BagSlots);
-	if (id == "bagsize")
-		stat = int32(item->BagSize);
-	if (id == "bagwr")
-		stat = int32(item->BagWR);
-	if (id == "benefitflag")
-		stat = int32(item->BenefitFlag);
-	if (id == "tradeskills")
-		stat = int32(item->Tradeskills);
-	if (id == "cr")
-		stat = int32(item->CR);
-	if (id == "dr")
-		stat = int32(item->DR);
-	if (id == "pr")
-		stat = int32(item->PR);
-	if (id == "mr")
-		stat = int32(item->MR);
-	if (id == "fr")
-		stat = int32(item->FR);
-	if (id == "astr")
-		stat = int32(item->AStr);
-	if (id == "asta")
-		stat = int32(item->ASta);
-	if (id == "aagi")
-		stat = int32(item->AAgi);
-	if (id == "adex")
-		stat = int32(item->ADex);
-	if (id == "acha")
-		stat = int32(item->ACha);
-	if (id == "aint")
-		stat = int32(item->AInt);
-	if (id == "awis")
-		stat = int32(item->AWis);
-	if (id == "hp")
-		stat = int32(item->HP);
-	if (id == "mana")
-		stat = int32(item->Mana);
-	if (id == "ac")
-		stat = int32(item->AC);
-	if (id == "deity")
-		stat = int32(item->Deity);
-	if (id == "skillmodvalue")
-		stat = int32(item->SkillModValue);
-	if (id == "skillmodtype")
-		stat = int32(item->SkillModType);
-	if (id == "banedmgrace")
-		stat = int32(item->BaneDmgRace);
-	if (id == "banedmgamt")
-		stat = int32(item->BaneDmgAmt);
-	if (id == "banedmgbody")
-		stat = int32(item->BaneDmgBody);
-	if (id == "magic")
-		stat = int32(item->Magic);
-	if (id == "casttime_")
-		stat = int32(item->CastTime_);
-	if (id == "reqlevel")
-		stat = int32(item->ReqLevel);
-	if (id == "bardtype")
-		stat = int32(item->BardType);
-	if (id == "bardvalue")
-		stat = int32(item->BardValue);
-	if (id == "light")
-		stat = int32(item->Light);
-	if (id == "delay")
-		stat = int32(item->Delay);
-	if (id == "reclevel")
-		stat = int32(item->RecLevel);
-	if (id == "recskill")
-		stat = int32(item->RecSkill);
-	if (id == "elemdmgtype")
-		stat = int32(item->ElemDmgType);
-	if (id == "elemdmgamt")
-		stat = int32(item->ElemDmgAmt);
-	if (id == "range")
-		stat = int32(item->Range);
-	if (id == "damage")
-		stat = int32(item->Damage);
-	if (id == "color")
-		stat = int32(item->Color);
-	if (id == "classes")
-		stat = int32(item->Classes);
-	if (id == "races")
-		stat = int32(item->Races);
-	if (id == "maxcharges")
-		stat = int32(item->MaxCharges);
-	if (id == "itemtype")
-		stat = int32(item->ItemType);
-	if (id == "material")
-		stat = int32(item->Material);
-	if (id == "casttime")
-		stat = int32(item->CastTime);
-	if (id == "elitematerial")
-		stat = int32(item->EliteMaterial);
-	if (id == "herosforgemodel")
-		stat = int32(item->HerosForgeModel);
-	if (id == "procrate")
-		stat = int32(item->ProcRate);
-	if (id == "combateffects")
-		stat = int32(item->CombatEffects);
-	if (id == "shielding")
-		stat = int32(item->Shielding);
-	if (id == "stunresist")
-		stat = int32(item->StunResist);
-	if (id == "strikethrough")
-		stat = int32(item->StrikeThrough);
-	if (id == "extradmgskill")
-		stat = int32(item->ExtraDmgSkill);
-	if (id == "extradmgamt")
-		stat = int32(item->ExtraDmgAmt);
-	if (id == "spellshield")
-		stat = int32(item->SpellShield);
-	if (id == "avoidance")
-		stat = int32(item->Avoidance);
-	if (id == "accuracy")
-		stat = int32(item->Accuracy);
-	if (id == "charmfileid")
-		stat = int32(item->CharmFileID);
-	if (id == "factionmod1")
-		stat = int32(item->FactionMod1);
-	if (id == "factionmod2")
-		stat = int32(item->FactionMod2);
-	if (id == "factionmod3")
-		stat = int32(item->FactionMod3);
-	if (id == "factionmod4")
-		stat = int32(item->FactionMod4);
-	if (id == "factionamt1")
-		stat = int32(item->FactionAmt1);
-	if (id == "factionamt2")
-		stat = int32(item->FactionAmt2);
-	if (id == "factionamt3")
-		stat = int32(item->FactionAmt3);
-	if (id == "factionamt4")
-		stat = int32(item->FactionAmt4);
-	if (id == "augtype")
-		stat = int32(item->AugType);
-	if (id == "ldontheme")
-		stat = int32(item->LDoNTheme);
-	if (id == "ldonprice")
-		stat = int32(item->LDoNPrice);
-	if (id == "ldonsold")
-		stat = int32(item->LDoNSold);
-	if (id == "banedmgraceamt")
-		stat = int32(item->BaneDmgRaceAmt);
-	if (id == "augrestrict")
-		stat = int32(item->AugRestrict);
-	if (id == "endur")
-		stat = int32(item->Endur);
-	if (id == "dotshielding")
-		stat = int32(item->DotShielding);
-	if (id == "attack")
-		stat = int32(item->Attack);
-	if (id == "regen")
-		stat = int32(item->Regen);
-	if (id == "manaregen")
-		stat = int32(item->ManaRegen);
-	if (id == "enduranceregen")
-		stat = int32(item->EnduranceRegen);
-	if (id == "haste")
-		stat = int32(item->Haste);
-	if (id == "damageshield")
-		stat = int32(item->DamageShield);
-	if (id == "recastdelay")
-		stat = int32(item->RecastDelay);
-	if (id == "recasttype")
-		stat = int32(item->RecastType);
-	if (id == "augdistiller")
-		stat = int32(item->AugDistiller);
-	if (id == "attuneable")
-		stat = int32(item->Attuneable);
-	if (id == "nopet")
-		stat = int32(item->NoPet);
-	if (id == "potionbelt")
-		stat = int32(item->PotionBelt);
-	if (id == "stackable")
-		stat = int32(item->Stackable);
-	if (id == "notransfer")
-		stat = int32(item->NoTransfer);
-	if (id == "questitemflag")
-		stat = int32(item->QuestItemFlag);
-	if (id == "stacksize")
-		stat = int32(item->StackSize);
-	if (id == "potionbeltslots")
-		stat = int32(item->PotionBeltSlots);
-	if (id == "book")
-		stat = int32(item->Book);
-	if (id == "booktype")
-		stat = int32(item->BookType);
-	if (id == "svcorruption")
-		stat = int32(item->SVCorruption);
-	if (id == "purity")
-		stat = int32(item->Purity);
-	if (id == "backstabdmg")
-		stat = int32(item->BackstabDmg);
-	if (id == "dsmitigation")
-		stat = int32(item->DSMitigation);
-	if (id == "heroicstr")
-		stat = int32(item->HeroicStr);
-	if (id == "heroicint")
-		stat = int32(item->HeroicInt);
-	if (id == "heroicwis")
-		stat = int32(item->HeroicWis);
-	if (id == "heroicagi")
-		stat = int32(item->HeroicAgi);
-	if (id == "heroicdex")
-		stat = int32(item->HeroicDex);
-	if (id == "heroicsta")
-		stat = int32(item->HeroicSta);
-	if (id == "heroiccha")
-		stat = int32(item->HeroicCha);
-	if (id == "heroicmr")
-		stat = int32(item->HeroicMR);
-	if (id == "heroicfr")
-		stat = int32(item->HeroicFR);
-	if (id == "heroiccr")
-		stat = int32(item->HeroicCR);
-	if (id == "heroicdr")
-		stat = int32(item->HeroicDR);
-	if (id == "heroicpr")
-		stat = int32(item->HeroicPR);
-	if (id == "heroicsvcorrup")
-		stat = int32(item->HeroicSVCorrup);
-	if (id == "healamt")
-		stat = int32(item->HealAmt);
-	if (id == "spelldmg")
-		stat = int32(item->SpellDmg);
-	if (id == "ldonsellbackrate")
-		stat = int32(item->LDoNSellBackRate);
-	if (id == "scriptfileid")
-		stat = int32(item->ScriptFileID);
-	if (id == "expendablearrow")
-		stat = int32(item->ExpendableArrow);
-	if (id == "clairvoyance")
-		stat = int32(item->Clairvoyance);
-	// Begin Effects
-	if (id == "clickeffect")
-		stat = int32(item->Click.Effect);
-	if (id == "clicktype")
-		stat = int32(item->Click.Type);
-	if (id == "clicklevel")
-		stat = int32(item->Click.Level);
-	if (id == "clicklevel2")
-		stat = int32(item->Click.Level2);
-	if (id == "proceffect")
-		stat = int32(item->Proc.Effect);
-	if (id == "proctype")
-		stat = int32(item->Proc.Type);
-	if (id == "proclevel")
-		stat = int32(item->Proc.Level);
-	if (id == "proclevel2")
-		stat = int32(item->Proc.Level2);
-	if (id == "worneffect")
-		stat = int32(item->Worn.Effect);
-	if (id == "worntype")
-		stat = int32(item->Worn.Type);
-	if (id == "wornlevel")
-		stat = int32(item->Worn.Level);
-	if (id == "wornlevel2")
-		stat = int32(item->Worn.Level2);
-	if (id == "focuseffect")
-		stat = int32(item->Focus.Effect);
-	if (id == "focustype")
-		stat = int32(item->Focus.Type);
-	if (id == "focuslevel")
-		stat = int32(item->Focus.Level);
-	if (id == "focuslevel2")
-		stat = int32(item->Focus.Level2);
-	if (id == "scrolleffect")
-		stat = int32(item->Scroll.Effect);
-	if (id == "scrolltype")
-		stat = int32(item->Scroll.Type);
-	if (id == "scrolllevel")
-		stat = int32(item->Scroll.Level);
-	if (id == "scrolllevel2")
-		stat = int32(item->Scroll.Level2);
+
+	const auto* inst = database.CreateItem(item_id);
+	if (!inst) {
+		return 0;
+	}
+
+	const auto* item = inst->GetItem();
+	if (!item) {
+		return 0;
+	}
+
+	int stat = 0;
+
+	if (Strings::EqualFold(identifier, "itemclass")) {
+		stat = static_cast<int>(item->ItemClass);
+	} else if (Strings::EqualFold(identifier, "id")) {
+		stat = static_cast<int>(item->ID);
+	} else if (Strings::EqualFold(identifier, "idfile")) {
+		stat = Strings::IsNumber(&item->IDFile[2]) ? std::stoi(&item->IDFile[2]) : 0;
+	} else if (Strings::EqualFold(identifier, "weight")) {
+		stat = static_cast<int>(item->Weight);
+	} else if (Strings::EqualFold(identifier, "norent")) {
+		stat = static_cast<int>(item->NoRent);
+	} else if (Strings::EqualFold(identifier, "nodrop")) {
+		stat = static_cast<int>(item->NoDrop);
+	} else if (Strings::EqualFold(identifier, "size")) {
+		stat = static_cast<int>(item->Size);
+	} else if (Strings::EqualFold(identifier, "slots")) {
+		stat = static_cast<int>(item->Slots);
+	} else if (Strings::EqualFold(identifier, "price")) {
+		stat = static_cast<int>(item->Price);
+	} else if (Strings::EqualFold(identifier, "icon")) {
+		stat = static_cast<int>(item->Icon);
+	} else if (Strings::EqualFold(identifier, "loregroup")) {
+		stat = static_cast<int>(item->LoreGroup);
+	} else if (Strings::EqualFold(identifier, "loreflag")) {
+		stat = static_cast<int>(item->LoreFlag);
+	} else if (Strings::EqualFold(identifier, "pendingloreflag")) {
+		stat = static_cast<int>(item->PendingLoreFlag);
+	} else if (Strings::EqualFold(identifier, "artifactflag")) {
+		stat = static_cast<int>(item->ArtifactFlag);
+	} else if (Strings::EqualFold(identifier, "summonedflag")) {
+		stat = static_cast<int>(item->SummonedFlag);
+	} else if (Strings::EqualFold(identifier, "fvnodrop")) {
+		stat = static_cast<int>(item->FVNoDrop);
+	} else if (Strings::EqualFold(identifier, "favor")) {
+		stat = static_cast<int>(item->Favor);
+	} else if (Strings::EqualFold(identifier, "guildfavor")) {
+		stat = static_cast<int>(item->GuildFavor);
+	} else if (Strings::EqualFold(identifier, "pointtype")) {
+		stat = static_cast<int>(item->PointType);
+	} else if (Strings::EqualFold(identifier, "bagtype")) {
+		stat = static_cast<int>(item->BagType);
+	} else if (Strings::EqualFold(identifier, "bagslots")) {
+		stat = static_cast<int>(item->BagSlots);
+	} else if (Strings::EqualFold(identifier, "bagsize")) {
+		stat = static_cast<int>(item->BagSize);
+	} else if (Strings::EqualFold(identifier, "bagwr")) {
+		stat = static_cast<int>(item->BagWR);
+	} else if (Strings::EqualFold(identifier, "benefitflag")) {
+		stat = static_cast<int>(item->BenefitFlag);
+	} else if (Strings::EqualFold(identifier, "tradeskills")) {
+		stat = static_cast<int>(item->Tradeskills);
+	} else if (Strings::EqualFold(identifier, "cr")) {
+		stat = static_cast<int>(item->CR);
+	} else if (Strings::EqualFold(identifier, "dr")) {
+		stat = static_cast<int>(item->DR);
+	} else if (Strings::EqualFold(identifier, "pr")) {
+		stat = static_cast<int>(item->PR);
+	} else if (Strings::EqualFold(identifier, "mr")) {
+		stat = static_cast<int>(item->MR);
+	} else if (Strings::EqualFold(identifier, "fr")) {
+		stat = static_cast<int>(item->FR);
+	} else if (Strings::EqualFold(identifier, "astr")) {
+		stat = static_cast<int>(item->AStr);
+	} else if (Strings::EqualFold(identifier, "asta")) {
+		stat = static_cast<int>(item->ASta);
+	} else if (Strings::EqualFold(identifier, "aagi")) {
+		stat = static_cast<int>(item->AAgi);
+	} else if (Strings::EqualFold(identifier, "adex")) {
+		stat = static_cast<int>(item->ADex);
+	} else if (Strings::EqualFold(identifier, "acha")) {
+		stat = static_cast<int>(item->ACha);
+	} else if (Strings::EqualFold(identifier, "aint")) {
+		stat = static_cast<int>(item->AInt);
+	} else if (Strings::EqualFold(identifier, "awis")) {
+		stat = static_cast<int>(item->AWis);
+	} else if (Strings::EqualFold(identifier, "hp")) {
+		stat = static_cast<int>(item->HP);
+	} else if (Strings::EqualFold(identifier, "mana")) {
+		stat = static_cast<int>(item->Mana);
+	} else if (Strings::EqualFold(identifier, "ac")) {
+		stat = static_cast<int>(item->AC);
+	} else if (Strings::EqualFold(identifier, "deity")) {
+		stat = static_cast<int>(item->Deity);
+	} else if (Strings::EqualFold(identifier, "skillmodvalue")) {
+		stat = static_cast<int>(item->SkillModValue);
+	} else if (Strings::EqualFold(identifier, "skillmodtype")) {
+		stat = static_cast<int>(item->SkillModType);
+	} else if (Strings::EqualFold(identifier, "banedmgrace")) {
+		stat = static_cast<int>(item->BaneDmgRace);
+	} else if (Strings::EqualFold(identifier, "banedmgamt")) {
+		stat = static_cast<int>(item->BaneDmgAmt);
+	} else if (Strings::EqualFold(identifier, "banedmgbody")) {
+		stat = static_cast<int>(item->BaneDmgBody);
+	} else if (Strings::EqualFold(identifier, "magic")) {
+		stat = static_cast<int>(item->Magic);
+	} else if (Strings::EqualFold(identifier, "casttime_")) {
+		stat = static_cast<int>(item->CastTime_);
+	} else if (Strings::EqualFold(identifier, "reqlevel")) {
+		stat = static_cast<int>(item->ReqLevel);
+	} else if (Strings::EqualFold(identifier, "bardtype")) {
+		stat = static_cast<int>(item->BardType);
+	} else if (Strings::EqualFold(identifier, "bardvalue")) {
+		stat = static_cast<int>(item->BardValue);
+	} else if (Strings::EqualFold(identifier, "light")) {
+		stat = static_cast<int>(item->Light);
+	} else if (Strings::EqualFold(identifier, "delay")) {
+		stat = static_cast<int>(item->Delay);
+	} else if (Strings::EqualFold(identifier, "reclevel")) {
+		stat = static_cast<int>(item->RecLevel);
+	} else if (Strings::EqualFold(identifier, "recskill")) {
+		stat = static_cast<int>(item->RecSkill);
+	} else if (Strings::EqualFold(identifier, "elemdmgtype")) {
+		stat = static_cast<int>(item->ElemDmgType);
+	} else if (Strings::EqualFold(identifier, "elemdmgamt")) {
+		stat = static_cast<int>(item->ElemDmgAmt);
+	} else if (Strings::EqualFold(identifier, "range")) {
+		stat = static_cast<int>(item->Range);
+	} else if (Strings::EqualFold(identifier, "damage")) {
+		stat = static_cast<int>(item->Damage);
+	} else if (Strings::EqualFold(identifier, "color")) {
+		stat = static_cast<int>(item->Color);
+	} else if (Strings::EqualFold(identifier, "classes")) {
+		stat = static_cast<int>(item->Classes);
+	} else if (Strings::EqualFold(identifier, "races")) {
+		stat = static_cast<int>(item->Races);
+	} else if (Strings::EqualFold(identifier, "maxcharges")) {
+		stat = static_cast<int>(item->MaxCharges);
+	} else if (Strings::EqualFold(identifier, "itemtype")) {
+		stat = static_cast<int>(item->ItemType);
+	} else if (Strings::EqualFold(identifier, "material")) {
+		stat = static_cast<int>(item->Material);
+	} else if (Strings::EqualFold(identifier, "casttime")) {
+		stat = static_cast<int>(item->CastTime);
+	} else if (Strings::EqualFold(identifier, "elitematerial")) {
+		stat = static_cast<int>(item->EliteMaterial);
+	} else if (Strings::EqualFold(identifier, "herosforgemodel")) {
+		stat = static_cast<int>(item->HerosForgeModel);
+	} else if (Strings::EqualFold(identifier, "procrate")) {
+		stat = static_cast<int>(item->ProcRate);
+	} else if (Strings::EqualFold(identifier, "combateffects")) {
+		stat = static_cast<int>(item->CombatEffects);
+	} else if (Strings::EqualFold(identifier, "shielding")) {
+		stat = static_cast<int>(item->Shielding);
+	} else if (Strings::EqualFold(identifier, "stunresist")) {
+		stat = static_cast<int>(item->StunResist);
+	} else if (Strings::EqualFold(identifier, "strikethrough")) {
+		stat = static_cast<int>(item->StrikeThrough);
+	} else if (Strings::EqualFold(identifier, "extradmgskill")) {
+		stat = static_cast<int>(item->ExtraDmgSkill);
+	} else if (Strings::EqualFold(identifier, "extradmgamt")) {
+		stat = static_cast<int>(item->ExtraDmgAmt);
+	} else if (Strings::EqualFold(identifier, "spellshield")) {
+		stat = static_cast<int>(item->SpellShield);
+	} else if (Strings::EqualFold(identifier, "avoidance")) {
+		stat = static_cast<int>(item->Avoidance);
+	} else if (Strings::EqualFold(identifier, "accuracy")) {
+		stat = static_cast<int>(item->Accuracy);
+	} else if (Strings::EqualFold(identifier, "charmfileid")) {
+		stat = static_cast<int>(item->CharmFileID);
+	} else if (Strings::EqualFold(identifier, "factionmod1")) {
+		stat = static_cast<int>(item->FactionMod1);
+	} else if (Strings::EqualFold(identifier, "factionmod2")) {
+		stat = static_cast<int>(item->FactionMod2);
+	} else if (Strings::EqualFold(identifier, "factionmod3")) {
+		stat = static_cast<int>(item->FactionMod3);
+	} else if (Strings::EqualFold(identifier, "factionmod4")) {
+		stat = static_cast<int>(item->FactionMod4);
+	} else if (Strings::EqualFold(identifier, "factionamt1")) {
+		stat = static_cast<int>(item->FactionAmt1);
+	} else if (Strings::EqualFold(identifier, "factionamt2")) {
+		stat = static_cast<int>(item->FactionAmt2);
+	} else if (Strings::EqualFold(identifier, "factionamt3")) {
+		stat = static_cast<int>(item->FactionAmt3);
+	} else if (Strings::EqualFold(identifier, "factionamt4")) {
+		stat = static_cast<int>(item->FactionAmt4);
+	} else if (Strings::EqualFold(identifier, "augtype")) {
+		stat = static_cast<int>(item->AugType);
+	} else if (Strings::EqualFold(identifier, "ldontheme")) {
+		stat = static_cast<int>(item->LDoNTheme);
+	} else if (Strings::EqualFold(identifier, "ldonprice")) {
+		stat = static_cast<int>(item->LDoNPrice);
+	} else if (Strings::EqualFold(identifier, "ldonsold")) {
+		stat = static_cast<int>(item->LDoNSold);
+	} else if (Strings::EqualFold(identifier, "banedmgraceamt")) {
+		stat = static_cast<int>(item->BaneDmgRaceAmt);
+	} else if (Strings::EqualFold(identifier, "augrestrict")) {
+		stat = static_cast<int>(item->AugRestrict);
+	} else if (Strings::EqualFold(identifier, "endur")) {
+		stat = static_cast<int>(item->Endur);
+	} else if (Strings::EqualFold(identifier, "dotshielding")) {
+		stat = static_cast<int>(item->DotShielding);
+	} else if (Strings::EqualFold(identifier, "attack")) {
+		stat = static_cast<int>(item->Attack);
+	} else if (Strings::EqualFold(identifier, "regen")) {
+		stat = static_cast<int>(item->Regen);
+	} else if (Strings::EqualFold(identifier, "manaregen")) {
+		stat = static_cast<int>(item->ManaRegen);
+	} else if (Strings::EqualFold(identifier, "enduranceregen")) {
+		stat = static_cast<int>(item->EnduranceRegen);
+	} else if (Strings::EqualFold(identifier, "haste")) {
+		stat = static_cast<int>(item->Haste);
+	} else if (Strings::EqualFold(identifier, "damageshield")) {
+		stat = static_cast<int>(item->DamageShield);
+	} else if (Strings::EqualFold(identifier, "recastdelay")) {
+		stat = static_cast<int>(item->RecastDelay);
+	} else if (Strings::EqualFold(identifier, "recasttype")) {
+		stat = static_cast<int>(item->RecastType);
+	} else if (Strings::EqualFold(identifier, "augdistiller")) {
+		stat = static_cast<int>(item->AugDistiller);
+	} else if (Strings::EqualFold(identifier, "attuneable")) {
+		stat = static_cast<int>(item->Attuneable);
+	} else if (Strings::EqualFold(identifier, "nopet")) {
+		stat = static_cast<int>(item->NoPet);
+	} else if (Strings::EqualFold(identifier, "potionbelt")) {
+		stat = static_cast<int>(item->PotionBelt);
+	} else if (Strings::EqualFold(identifier, "stackable")) {
+		stat = static_cast<int>(item->Stackable);
+	} else if (Strings::EqualFold(identifier, "notransfer")) {
+		stat = static_cast<int>(item->NoTransfer);
+	} else if (Strings::EqualFold(identifier, "questitemflag")) {
+		stat = static_cast<int>(item->QuestItemFlag);
+	} else if (Strings::EqualFold(identifier, "stacksize")) {
+		stat = static_cast<int>(item->StackSize);
+	} else if (Strings::EqualFold(identifier, "potionbeltslots")) {
+		stat = static_cast<int>(item->PotionBeltSlots);
+	} else if (Strings::EqualFold(identifier, "book")) {
+		stat = static_cast<int>(item->Book);
+	} else if (Strings::EqualFold(identifier, "booktype")) {
+		stat = static_cast<int>(item->BookType);
+	} else if (Strings::EqualFold(identifier, "svcorruption")) {
+		stat = static_cast<int>(item->SVCorruption);
+	} else if (Strings::EqualFold(identifier, "purity")) {
+		stat = static_cast<int>(item->Purity);
+	} else if (Strings::EqualFold(identifier, "backstabdmg")) {
+		stat = static_cast<int>(item->BackstabDmg);
+	} else if (Strings::EqualFold(identifier, "dsmitigation")) {
+		stat = static_cast<int>(item->DSMitigation);
+	} else if (Strings::EqualFold(identifier, "heroicstr")) {
+		stat = static_cast<int>(item->HeroicStr);
+	} else if (Strings::EqualFold(identifier, "heroicint")) {
+		stat = static_cast<int>(item->HeroicInt);
+	} else if (Strings::EqualFold(identifier, "heroicwis")) {
+		stat = static_cast<int>(item->HeroicWis);
+	} else if (Strings::EqualFold(identifier, "heroicagi")) {
+		stat = static_cast<int>(item->HeroicAgi);
+	} else if (Strings::EqualFold(identifier, "heroicdex")) {
+		stat = static_cast<int>(item->HeroicDex);
+	} else if (Strings::EqualFold(identifier, "heroicsta")) {
+		stat = static_cast<int>(item->HeroicSta);
+	} else if (Strings::EqualFold(identifier, "heroiccha")) {
+		stat = static_cast<int>(item->HeroicCha);
+	} else if (Strings::EqualFold(identifier, "heroicmr")) {
+		stat = static_cast<int>(item->HeroicMR);
+	} else if (Strings::EqualFold(identifier, "heroicfr")) {
+		stat = static_cast<int>(item->HeroicFR);
+	} else if (Strings::EqualFold(identifier, "heroiccr")) {
+		stat = static_cast<int>(item->HeroicCR);
+	} else if (Strings::EqualFold(identifier, "heroicdr")) {
+		stat = static_cast<int>(item->HeroicDR);
+	} else if (Strings::EqualFold(identifier, "heroicpr")) {
+		stat = static_cast<int>(item->HeroicPR);
+	} else if (Strings::EqualFold(identifier, "heroicsvcorrup")) {
+		stat = static_cast<int>(item->HeroicSVCorrup);
+	} else if (Strings::EqualFold(identifier, "healamt")) {
+		stat = static_cast<int>(item->HealAmt);
+	} else if (Strings::EqualFold(identifier, "spelldmg")) {
+		stat = static_cast<int>(item->SpellDmg);
+	} else if (Strings::EqualFold(identifier, "ldonsellbackrate")) {
+		stat = static_cast<int>(item->LDoNSellBackRate);
+	} else if (Strings::EqualFold(identifier, "scriptfileid")) {
+		stat = static_cast<int>(item->ScriptFileID);
+	} else if (Strings::EqualFold(identifier, "expendablearrow")) {
+		stat = static_cast<int>(item->ExpendableArrow);
+	} else if (Strings::EqualFold(identifier, "clairvoyance")) {
+		stat = static_cast<int>(item->Clairvoyance);
+	} else if (Strings::EqualFold(identifier, "clickeffect")) {
+		stat = static_cast<int>(item->Click.Effect);
+	} else if (Strings::EqualFold(identifier, "clicktype")) {
+		stat = static_cast<int>(item->Click.Type);
+	} else if (Strings::EqualFold(identifier, "clicklevel")) {
+		stat = static_cast<int>(item->Click.Level);
+	} else if (Strings::EqualFold(identifier, "clicklevel2")) {
+		stat = static_cast<int>(item->Click.Level2);
+	} else if (Strings::EqualFold(identifier, "proceffect")) {
+		stat = static_cast<int>(item->Proc.Effect);
+	} else if (Strings::EqualFold(identifier, "proctype")) {
+		stat = static_cast<int>(item->Proc.Type);
+	} else if (Strings::EqualFold(identifier, "proclevel")) {
+		stat = static_cast<int>(item->Proc.Level);
+	} else if (Strings::EqualFold(identifier, "proclevel2")) {
+		stat = static_cast<int>(item->Proc.Level2);
+	} else if (Strings::EqualFold(identifier, "worneffect")) {
+		stat = static_cast<int>(item->Worn.Effect);
+	} else if (Strings::EqualFold(identifier, "worntype")) {
+		stat = static_cast<int>(item->Worn.Type);
+	} else if (Strings::EqualFold(identifier, "wornlevel")) {
+		stat = static_cast<int>(item->Worn.Level);
+	} else if (Strings::EqualFold(identifier, "wornlevel2")) {
+		stat = static_cast<int>(item->Worn.Level2);
+	} else if (Strings::EqualFold(identifier, "focuseffect")) {
+		stat = static_cast<int>(item->Focus.Effect);
+	} else if (Strings::EqualFold(identifier, "focustype")) {
+		stat = static_cast<int>(item->Focus.Type);
+	} else if (Strings::EqualFold(identifier, "focuslevel")) {
+		stat = static_cast<int>(item->Focus.Level);
+	} else if (Strings::EqualFold(identifier, "focuslevel2")) {
+		stat = static_cast<int>(item->Focus.Level2);
+	} else if (Strings::EqualFold(identifier, "scrolleffect")) {
+		stat = static_cast<int>(item->Scroll.Effect);
+	} else if (Strings::EqualFold(identifier, "scrolltype")) {
+		stat = static_cast<int>(item->Scroll.Type);
+	} else if (Strings::EqualFold(identifier, "scrolllevel")) {
+		stat = static_cast<int>(item->Scroll.Level);
+	} else if (Strings::EqualFold(identifier, "scrolllevel2")) {
+		stat = static_cast<int>(item->Scroll.Level2);
+	} else if (Strings::EqualFold(identifier, "augslot1type")) {
+		stat = static_cast<int>(item->AugSlotType[0]);
+	} else if (Strings::EqualFold(identifier, "augslot2type")) {
+		stat = static_cast<int>(item->AugSlotType[1]);
+	} else if (Strings::EqualFold(identifier, "augslot3type")) {
+		stat = static_cast<int>(item->AugSlotType[2]);
+	} else if (Strings::EqualFold(identifier, "augslot4type")) {
+		stat = static_cast<int>(item->AugSlotType[3]);
+	} else if (Strings::EqualFold(identifier, "augslot5type")) {
+		stat = static_cast<int>(item->AugSlotType[4]);
+	} else if (Strings::EqualFold(identifier, "augslot6type")) {
+		stat = static_cast<int>(item->AugSlotType[5]);
+	} else if (Strings::EqualFold(identifier, "augslot1visible")) {
+		stat = static_cast<int>(item->AugSlotVisible[0]);
+	} else if (Strings::EqualFold(identifier, "augslot2visible")) {
+		stat = static_cast<int>(item->AugSlotVisible[1]);
+	} else if (Strings::EqualFold(identifier, "augslot3visible")) {
+		stat = static_cast<int>(item->AugSlotVisible[2]);
+	} else if (Strings::EqualFold(identifier, "augslot4visible")) {
+		stat = static_cast<int>(item->AugSlotVisible[3]);
+	} else if (Strings::EqualFold(identifier, "augslot5visible")) {
+		stat = static_cast<int>(item->AugSlotVisible[4]);
+	} else if (Strings::EqualFold(identifier, "augslot6visible")) {
+		stat = static_cast<int>(item->AugSlotVisible[5]);
+	}
 
 	safe_delete(inst);
 	return stat;
