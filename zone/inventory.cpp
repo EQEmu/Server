@@ -3890,341 +3890,677 @@ const int EQ::InventoryProfile::GetItemStatValue(uint32 item_id, std::string ide
 
 	if (Strings::EqualFold(identifier, "itemclass")) {
 		stat = static_cast<int>(item->ItemClass);
-	} else if (Strings::EqualFold(identifier, "id")) {
+	}
+
+	if (Strings::EqualFold(identifier, "id")) {
 		stat = static_cast<int>(item->ID);
-	} else if (Strings::EqualFold(identifier, "idfile")) {
+	}
+
+	if (Strings::EqualFold(identifier, "idfile")) {
 		stat = Strings::IsNumber(&item->IDFile[2]) ? std::stoi(&item->IDFile[2]) : 0;
-	} else if (Strings::EqualFold(identifier, "weight")) {
+	}
+
+	if (Strings::EqualFold(identifier, "weight")) {
 		stat = static_cast<int>(item->Weight);
-	} else if (Strings::EqualFold(identifier, "norent")) {
+	}
+
+	if (Strings::EqualFold(identifier, "norent")) {
 		stat = static_cast<int>(item->NoRent);
-	} else if (Strings::EqualFold(identifier, "nodrop")) {
+	}
+
+	if (Strings::EqualFold(identifier, "nodrop")) {
 		stat = static_cast<int>(item->NoDrop);
-	} else if (Strings::EqualFold(identifier, "size")) {
+	}
+
+	if (Strings::EqualFold(identifier, "size")) {
 		stat = static_cast<int>(item->Size);
-	} else if (Strings::EqualFold(identifier, "slots")) {
+	}
+
+	if (Strings::EqualFold(identifier, "slots")) {
 		stat = static_cast<int>(item->Slots);
-	} else if (Strings::EqualFold(identifier, "price")) {
+	}
+
+	if (Strings::EqualFold(identifier, "price")) {
 		stat = static_cast<int>(item->Price);
-	} else if (Strings::EqualFold(identifier, "icon")) {
+	}
+
+	if (Strings::EqualFold(identifier, "icon")) {
 		stat = static_cast<int>(item->Icon);
-	} else if (Strings::EqualFold(identifier, "loregroup")) {
+	}
+
+	if (Strings::EqualFold(identifier, "loregroup")) {
 		stat = static_cast<int>(item->LoreGroup);
-	} else if (Strings::EqualFold(identifier, "loreflag")) {
+	}
+
+	if (Strings::EqualFold(identifier, "loreflag")) {
 		stat = static_cast<int>(item->LoreFlag);
-	} else if (Strings::EqualFold(identifier, "pendingloreflag")) {
+	}
+
+	if (Strings::EqualFold(identifier, "pendingloreflag")) {
 		stat = static_cast<int>(item->PendingLoreFlag);
-	} else if (Strings::EqualFold(identifier, "artifactflag")) {
+	}
+
+	if (Strings::EqualFold(identifier, "artifactflag")) {
 		stat = static_cast<int>(item->ArtifactFlag);
-	} else if (Strings::EqualFold(identifier, "summonedflag")) {
+	}
+
+	if (Strings::EqualFold(identifier, "summonedflag")) {
 		stat = static_cast<int>(item->SummonedFlag);
-	} else if (Strings::EqualFold(identifier, "fvnodrop")) {
+	}
+
+	if (Strings::EqualFold(identifier, "fvnodrop")) {
 		stat = static_cast<int>(item->FVNoDrop);
-	} else if (Strings::EqualFold(identifier, "favor")) {
+	}
+
+	if (Strings::EqualFold(identifier, "favor")) {
 		stat = static_cast<int>(item->Favor);
-	} else if (Strings::EqualFold(identifier, "guildfavor")) {
+	}
+
+	if (Strings::EqualFold(identifier, "guildfavor")) {
 		stat = static_cast<int>(item->GuildFavor);
-	} else if (Strings::EqualFold(identifier, "pointtype")) {
+	}
+
+	if (Strings::EqualFold(identifier, "pointtype")) {
 		stat = static_cast<int>(item->PointType);
-	} else if (Strings::EqualFold(identifier, "bagtype")) {
+	}
+
+	if (Strings::EqualFold(identifier, "bagtype")) {
 		stat = static_cast<int>(item->BagType);
-	} else if (Strings::EqualFold(identifier, "bagslots")) {
+	}
+
+	if (Strings::EqualFold(identifier, "bagslots")) {
 		stat = static_cast<int>(item->BagSlots);
-	} else if (Strings::EqualFold(identifier, "bagsize")) {
+	}
+
+	if (Strings::EqualFold(identifier, "bagsize")) {
 		stat = static_cast<int>(item->BagSize);
-	} else if (Strings::EqualFold(identifier, "bagwr")) {
+	}
+
+	if (Strings::EqualFold(identifier, "bagwr")) {
 		stat = static_cast<int>(item->BagWR);
-	} else if (Strings::EqualFold(identifier, "benefitflag")) {
+	}
+
+	if (Strings::EqualFold(identifier, "benefitflag")) {
 		stat = static_cast<int>(item->BenefitFlag);
-	} else if (Strings::EqualFold(identifier, "tradeskills")) {
+	}
+
+	if (Strings::EqualFold(identifier, "tradeskills")) {
 		stat = static_cast<int>(item->Tradeskills);
-	} else if (Strings::EqualFold(identifier, "cr")) {
+	}
+
+	if (Strings::EqualFold(identifier, "cr")) {
 		stat = static_cast<int>(item->CR);
-	} else if (Strings::EqualFold(identifier, "dr")) {
+	}
+
+	if (Strings::EqualFold(identifier, "dr")) {
 		stat = static_cast<int>(item->DR);
-	} else if (Strings::EqualFold(identifier, "pr")) {
+	}
+
+	if (Strings::EqualFold(identifier, "pr")) {
 		stat = static_cast<int>(item->PR);
-	} else if (Strings::EqualFold(identifier, "mr")) {
+	}
+
+	if (Strings::EqualFold(identifier, "mr")) {
 		stat = static_cast<int>(item->MR);
-	} else if (Strings::EqualFold(identifier, "fr")) {
+	}
+
+	if (Strings::EqualFold(identifier, "fr")) {
 		stat = static_cast<int>(item->FR);
-	} else if (Strings::EqualFold(identifier, "astr")) {
+	}
+
+	if (Strings::EqualFold(identifier, "astr")) {
 		stat = static_cast<int>(item->AStr);
-	} else if (Strings::EqualFold(identifier, "asta")) {
+	}
+
+	if (Strings::EqualFold(identifier, "asta")) {
 		stat = static_cast<int>(item->ASta);
-	} else if (Strings::EqualFold(identifier, "aagi")) {
+	}
+
+	if (Strings::EqualFold(identifier, "aagi")) {
 		stat = static_cast<int>(item->AAgi);
-	} else if (Strings::EqualFold(identifier, "adex")) {
+	}
+
+	if (Strings::EqualFold(identifier, "adex")) {
 		stat = static_cast<int>(item->ADex);
-	} else if (Strings::EqualFold(identifier, "acha")) {
+	}
+
+	if (Strings::EqualFold(identifier, "acha")) {
 		stat = static_cast<int>(item->ACha);
-	} else if (Strings::EqualFold(identifier, "aint")) {
+	}
+
+	if (Strings::EqualFold(identifier, "aint")) {
 		stat = static_cast<int>(item->AInt);
-	} else if (Strings::EqualFold(identifier, "awis")) {
+	}
+
+	if (Strings::EqualFold(identifier, "awis")) {
 		stat = static_cast<int>(item->AWis);
-	} else if (Strings::EqualFold(identifier, "hp")) {
+	}
+
+	if (Strings::EqualFold(identifier, "hp")) {
 		stat = static_cast<int>(item->HP);
-	} else if (Strings::EqualFold(identifier, "mana")) {
+	}
+
+	if (Strings::EqualFold(identifier, "mana")) {
 		stat = static_cast<int>(item->Mana);
-	} else if (Strings::EqualFold(identifier, "ac")) {
+	}
+
+	if (Strings::EqualFold(identifier, "ac")) {
 		stat = static_cast<int>(item->AC);
-	} else if (Strings::EqualFold(identifier, "deity")) {
+	}
+
+	if (Strings::EqualFold(identifier, "deity")) {
 		stat = static_cast<int>(item->Deity);
-	} else if (Strings::EqualFold(identifier, "skillmodvalue")) {
+	}
+
+	if (Strings::EqualFold(identifier, "skillmodvalue")) {
 		stat = static_cast<int>(item->SkillModValue);
-	} else if (Strings::EqualFold(identifier, "skillmodtype")) {
+	}
+
+	if (Strings::EqualFold(identifier, "skillmodtype")) {
 		stat = static_cast<int>(item->SkillModType);
-	} else if (Strings::EqualFold(identifier, "banedmgrace")) {
+	}
+
+	if (Strings::EqualFold(identifier, "banedmgrace")) {
 		stat = static_cast<int>(item->BaneDmgRace);
-	} else if (Strings::EqualFold(identifier, "banedmgamt")) {
+	}
+
+	if (Strings::EqualFold(identifier, "banedmgamt")) {
 		stat = static_cast<int>(item->BaneDmgAmt);
-	} else if (Strings::EqualFold(identifier, "banedmgbody")) {
+	}
+
+	if (Strings::EqualFold(identifier, "banedmgbody")) {
 		stat = static_cast<int>(item->BaneDmgBody);
-	} else if (Strings::EqualFold(identifier, "magic")) {
+	}
+
+	if (Strings::EqualFold(identifier, "magic")) {
 		stat = static_cast<int>(item->Magic);
-	} else if (Strings::EqualFold(identifier, "casttime_")) {
+	}
+
+	if (Strings::EqualFold(identifier, "casttime_")) {
 		stat = static_cast<int>(item->CastTime_);
-	} else if (Strings::EqualFold(identifier, "reqlevel")) {
+	}
+
+	if (Strings::EqualFold(identifier, "reqlevel")) {
 		stat = static_cast<int>(item->ReqLevel);
-	} else if (Strings::EqualFold(identifier, "bardtype")) {
+	}
+
+	if (Strings::EqualFold(identifier, "bardtype")) {
 		stat = static_cast<int>(item->BardType);
-	} else if (Strings::EqualFold(identifier, "bardvalue")) {
+	}
+
+	if (Strings::EqualFold(identifier, "bardvalue")) {
 		stat = static_cast<int>(item->BardValue);
-	} else if (Strings::EqualFold(identifier, "light")) {
+	}
+
+	if (Strings::EqualFold(identifier, "light")) {
 		stat = static_cast<int>(item->Light);
-	} else if (Strings::EqualFold(identifier, "delay")) {
+	}
+
+	if (Strings::EqualFold(identifier, "delay")) {
 		stat = static_cast<int>(item->Delay);
-	} else if (Strings::EqualFold(identifier, "reclevel")) {
+	}
+
+	if (Strings::EqualFold(identifier, "reclevel")) {
 		stat = static_cast<int>(item->RecLevel);
-	} else if (Strings::EqualFold(identifier, "recskill")) {
+	}
+
+	if (Strings::EqualFold(identifier, "recskill")) {
 		stat = static_cast<int>(item->RecSkill);
-	} else if (Strings::EqualFold(identifier, "elemdmgtype")) {
+	}
+
+	if (Strings::EqualFold(identifier, "elemdmgtype")) {
 		stat = static_cast<int>(item->ElemDmgType);
-	} else if (Strings::EqualFold(identifier, "elemdmgamt")) {
+	}
+
+	if (Strings::EqualFold(identifier, "elemdmgamt")) {
 		stat = static_cast<int>(item->ElemDmgAmt);
-	} else if (Strings::EqualFold(identifier, "range")) {
+	}
+
+	if (Strings::EqualFold(identifier, "range")) {
 		stat = static_cast<int>(item->Range);
-	} else if (Strings::EqualFold(identifier, "damage")) {
+	}
+
+	if (Strings::EqualFold(identifier, "damage")) {
 		stat = static_cast<int>(item->Damage);
-	} else if (Strings::EqualFold(identifier, "color")) {
+	}
+
+	if (Strings::EqualFold(identifier, "color")) {
 		stat = static_cast<int>(item->Color);
-	} else if (Strings::EqualFold(identifier, "classes")) {
+	}
+
+	if (Strings::EqualFold(identifier, "classes")) {
 		stat = static_cast<int>(item->Classes);
-	} else if (Strings::EqualFold(identifier, "races")) {
+	}
+
+	if (Strings::EqualFold(identifier, "races")) {
 		stat = static_cast<int>(item->Races);
-	} else if (Strings::EqualFold(identifier, "maxcharges")) {
+	}
+
+	if (Strings::EqualFold(identifier, "maxcharges")) {
 		stat = static_cast<int>(item->MaxCharges);
-	} else if (Strings::EqualFold(identifier, "itemtype")) {
+	}
+
+	if (Strings::EqualFold(identifier, "itemtype")) {
 		stat = static_cast<int>(item->ItemType);
-	} else if (Strings::EqualFold(identifier, "material")) {
+	}
+
+	if (Strings::EqualFold(identifier, "material")) {
 		stat = static_cast<int>(item->Material);
-	} else if (Strings::EqualFold(identifier, "casttime")) {
+	}
+
+	if (Strings::EqualFold(identifier, "casttime")) {
 		stat = static_cast<int>(item->CastTime);
-	} else if (Strings::EqualFold(identifier, "elitematerial")) {
+	}
+
+	if (Strings::EqualFold(identifier, "elitematerial")) {
 		stat = static_cast<int>(item->EliteMaterial);
-	} else if (Strings::EqualFold(identifier, "herosforgemodel")) {
+	}
+
+	if (Strings::EqualFold(identifier, "herosforgemodel")) {
 		stat = static_cast<int>(item->HerosForgeModel);
-	} else if (Strings::EqualFold(identifier, "procrate")) {
+	}
+
+	if (Strings::EqualFold(identifier, "procrate")) {
 		stat = static_cast<int>(item->ProcRate);
-	} else if (Strings::EqualFold(identifier, "combateffects")) {
+	}
+
+	if (Strings::EqualFold(identifier, "combateffects")) {
 		stat = static_cast<int>(item->CombatEffects);
-	} else if (Strings::EqualFold(identifier, "shielding")) {
+	}
+
+	if (Strings::EqualFold(identifier, "shielding")) {
 		stat = static_cast<int>(item->Shielding);
-	} else if (Strings::EqualFold(identifier, "stunresist")) {
+	}
+
+	if (Strings::EqualFold(identifier, "stunresist")) {
 		stat = static_cast<int>(item->StunResist);
-	} else if (Strings::EqualFold(identifier, "strikethrough")) {
+	}
+
+	if (Strings::EqualFold(identifier, "strikethrough")) {
 		stat = static_cast<int>(item->StrikeThrough);
-	} else if (Strings::EqualFold(identifier, "extradmgskill")) {
+	}
+
+	if (Strings::EqualFold(identifier, "extradmgskill")) {
 		stat = static_cast<int>(item->ExtraDmgSkill);
-	} else if (Strings::EqualFold(identifier, "extradmgamt")) {
+	}
+
+	if (Strings::EqualFold(identifier, "extradmgamt")) {
 		stat = static_cast<int>(item->ExtraDmgAmt);
-	} else if (Strings::EqualFold(identifier, "spellshield")) {
+	}
+
+	if (Strings::EqualFold(identifier, "spellshield")) {
 		stat = static_cast<int>(item->SpellShield);
-	} else if (Strings::EqualFold(identifier, "avoidance")) {
+	}
+
+	if (Strings::EqualFold(identifier, "avoidance")) {
 		stat = static_cast<int>(item->Avoidance);
-	} else if (Strings::EqualFold(identifier, "accuracy")) {
+	}
+
+	if (Strings::EqualFold(identifier, "accuracy")) {
 		stat = static_cast<int>(item->Accuracy);
-	} else if (Strings::EqualFold(identifier, "charmfileid")) {
+	}
+
+	if (Strings::EqualFold(identifier, "charmfileid")) {
 		stat = static_cast<int>(item->CharmFileID);
-	} else if (Strings::EqualFold(identifier, "factionmod1")) {
+	}
+
+	if (Strings::EqualFold(identifier, "factionmod1")) {
 		stat = static_cast<int>(item->FactionMod1);
-	} else if (Strings::EqualFold(identifier, "factionmod2")) {
+	}
+
+	if (Strings::EqualFold(identifier, "factionmod2")) {
 		stat = static_cast<int>(item->FactionMod2);
-	} else if (Strings::EqualFold(identifier, "factionmod3")) {
+	}
+
+	if (Strings::EqualFold(identifier, "factionmod3")) {
 		stat = static_cast<int>(item->FactionMod3);
-	} else if (Strings::EqualFold(identifier, "factionmod4")) {
+	}
+
+	if (Strings::EqualFold(identifier, "factionmod4")) {
 		stat = static_cast<int>(item->FactionMod4);
-	} else if (Strings::EqualFold(identifier, "factionamt1")) {
+	}
+
+	if (Strings::EqualFold(identifier, "factionamt1")) {
 		stat = static_cast<int>(item->FactionAmt1);
-	} else if (Strings::EqualFold(identifier, "factionamt2")) {
+	}
+
+	if (Strings::EqualFold(identifier, "factionamt2")) {
 		stat = static_cast<int>(item->FactionAmt2);
-	} else if (Strings::EqualFold(identifier, "factionamt3")) {
+	}
+
+	if (Strings::EqualFold(identifier, "factionamt3")) {
 		stat = static_cast<int>(item->FactionAmt3);
-	} else if (Strings::EqualFold(identifier, "factionamt4")) {
+	}
+
+	if (Strings::EqualFold(identifier, "factionamt4")) {
 		stat = static_cast<int>(item->FactionAmt4);
-	} else if (Strings::EqualFold(identifier, "augtype")) {
+	}
+
+	if (Strings::EqualFold(identifier, "augtype")) {
 		stat = static_cast<int>(item->AugType);
-	} else if (Strings::EqualFold(identifier, "ldontheme")) {
+	}
+
+	if (Strings::EqualFold(identifier, "ldontheme")) {
 		stat = static_cast<int>(item->LDoNTheme);
-	} else if (Strings::EqualFold(identifier, "ldonprice")) {
+	}
+
+	if (Strings::EqualFold(identifier, "ldonprice")) {
 		stat = static_cast<int>(item->LDoNPrice);
-	} else if (Strings::EqualFold(identifier, "ldonsold")) {
+	}
+
+	if (Strings::EqualFold(identifier, "ldonsold")) {
 		stat = static_cast<int>(item->LDoNSold);
-	} else if (Strings::EqualFold(identifier, "banedmgraceamt")) {
+	}
+
+	if (Strings::EqualFold(identifier, "banedmgraceamt")) {
 		stat = static_cast<int>(item->BaneDmgRaceAmt);
-	} else if (Strings::EqualFold(identifier, "augrestrict")) {
+	}
+
+	if (Strings::EqualFold(identifier, "augrestrict")) {
 		stat = static_cast<int>(item->AugRestrict);
-	} else if (Strings::EqualFold(identifier, "endur")) {
+	}
+
+	if (Strings::EqualFold(identifier, "endur")) {
 		stat = static_cast<int>(item->Endur);
-	} else if (Strings::EqualFold(identifier, "dotshielding")) {
+	}
+
+	if (Strings::EqualFold(identifier, "dotshielding")) {
 		stat = static_cast<int>(item->DotShielding);
-	} else if (Strings::EqualFold(identifier, "attack")) {
+	}
+
+	if (Strings::EqualFold(identifier, "attack")) {
 		stat = static_cast<int>(item->Attack);
-	} else if (Strings::EqualFold(identifier, "regen")) {
+	}
+
+	if (Strings::EqualFold(identifier, "regen")) {
 		stat = static_cast<int>(item->Regen);
-	} else if (Strings::EqualFold(identifier, "manaregen")) {
+	}
+
+	if (Strings::EqualFold(identifier, "manaregen")) {
 		stat = static_cast<int>(item->ManaRegen);
-	} else if (Strings::EqualFold(identifier, "enduranceregen")) {
+	}
+
+	if (Strings::EqualFold(identifier, "enduranceregen")) {
 		stat = static_cast<int>(item->EnduranceRegen);
-	} else if (Strings::EqualFold(identifier, "haste")) {
+	}
+
+	if (Strings::EqualFold(identifier, "haste")) {
 		stat = static_cast<int>(item->Haste);
-	} else if (Strings::EqualFold(identifier, "damageshield")) {
+	}
+
+	if (Strings::EqualFold(identifier, "damageshield")) {
 		stat = static_cast<int>(item->DamageShield);
-	} else if (Strings::EqualFold(identifier, "recastdelay")) {
+	}
+
+	if (Strings::EqualFold(identifier, "recastdelay")) {
 		stat = static_cast<int>(item->RecastDelay);
-	} else if (Strings::EqualFold(identifier, "recasttype")) {
+	}
+
+	if (Strings::EqualFold(identifier, "recasttype")) {
 		stat = static_cast<int>(item->RecastType);
-	} else if (Strings::EqualFold(identifier, "augdistiller")) {
+	}
+
+	if (Strings::EqualFold(identifier, "augdistiller")) {
 		stat = static_cast<int>(item->AugDistiller);
-	} else if (Strings::EqualFold(identifier, "attuneable")) {
+	}
+
+	if (Strings::EqualFold(identifier, "attuneable")) {
 		stat = static_cast<int>(item->Attuneable);
-	} else if (Strings::EqualFold(identifier, "nopet")) {
+	}
+
+	if (Strings::EqualFold(identifier, "nopet")) {
 		stat = static_cast<int>(item->NoPet);
-	} else if (Strings::EqualFold(identifier, "potionbelt")) {
+	}
+
+	if (Strings::EqualFold(identifier, "potionbelt")) {
 		stat = static_cast<int>(item->PotionBelt);
-	} else if (Strings::EqualFold(identifier, "stackable")) {
+	}
+
+	if (Strings::EqualFold(identifier, "stackable")) {
 		stat = static_cast<int>(item->Stackable);
-	} else if (Strings::EqualFold(identifier, "notransfer")) {
+	}
+
+	if (Strings::EqualFold(identifier, "notransfer")) {
 		stat = static_cast<int>(item->NoTransfer);
-	} else if (Strings::EqualFold(identifier, "questitemflag")) {
+	}
+
+	if (Strings::EqualFold(identifier, "questitemflag")) {
 		stat = static_cast<int>(item->QuestItemFlag);
-	} else if (Strings::EqualFold(identifier, "stacksize")) {
+	}
+
+	if (Strings::EqualFold(identifier, "stacksize")) {
 		stat = static_cast<int>(item->StackSize);
-	} else if (Strings::EqualFold(identifier, "potionbeltslots")) {
+	}
+
+	if (Strings::EqualFold(identifier, "potionbeltslots")) {
 		stat = static_cast<int>(item->PotionBeltSlots);
-	} else if (Strings::EqualFold(identifier, "book")) {
+	}
+
+	if (Strings::EqualFold(identifier, "book")) {
 		stat = static_cast<int>(item->Book);
-	} else if (Strings::EqualFold(identifier, "booktype")) {
+	}
+
+	if (Strings::EqualFold(identifier, "booktype")) {
 		stat = static_cast<int>(item->BookType);
-	} else if (Strings::EqualFold(identifier, "svcorruption")) {
+	}
+
+	if (Strings::EqualFold(identifier, "svcorruption")) {
 		stat = static_cast<int>(item->SVCorruption);
-	} else if (Strings::EqualFold(identifier, "purity")) {
+	}
+
+	if (Strings::EqualFold(identifier, "purity")) {
 		stat = static_cast<int>(item->Purity);
-	} else if (Strings::EqualFold(identifier, "backstabdmg")) {
+	}
+
+	if (Strings::EqualFold(identifier, "backstabdmg")) {
 		stat = static_cast<int>(item->BackstabDmg);
-	} else if (Strings::EqualFold(identifier, "dsmitigation")) {
+	}
+
+	if (Strings::EqualFold(identifier, "dsmitigation")) {
 		stat = static_cast<int>(item->DSMitigation);
-	} else if (Strings::EqualFold(identifier, "heroicstr")) {
+	}
+
+	if (Strings::EqualFold(identifier, "heroicstr")) {
 		stat = static_cast<int>(item->HeroicStr);
-	} else if (Strings::EqualFold(identifier, "heroicint")) {
+	}
+
+	if (Strings::EqualFold(identifier, "heroicint")) {
 		stat = static_cast<int>(item->HeroicInt);
-	} else if (Strings::EqualFold(identifier, "heroicwis")) {
+	}
+
+	if (Strings::EqualFold(identifier, "heroicwis")) {
 		stat = static_cast<int>(item->HeroicWis);
-	} else if (Strings::EqualFold(identifier, "heroicagi")) {
+	}
+
+	if (Strings::EqualFold(identifier, "heroicagi")) {
 		stat = static_cast<int>(item->HeroicAgi);
-	} else if (Strings::EqualFold(identifier, "heroicdex")) {
+	}
+
+	if (Strings::EqualFold(identifier, "heroicdex")) {
 		stat = static_cast<int>(item->HeroicDex);
-	} else if (Strings::EqualFold(identifier, "heroicsta")) {
+	}
+
+	if (Strings::EqualFold(identifier, "heroicsta")) {
 		stat = static_cast<int>(item->HeroicSta);
-	} else if (Strings::EqualFold(identifier, "heroiccha")) {
+	}
+
+	if (Strings::EqualFold(identifier, "heroiccha")) {
 		stat = static_cast<int>(item->HeroicCha);
-	} else if (Strings::EqualFold(identifier, "heroicmr")) {
+	}
+
+	if (Strings::EqualFold(identifier, "heroicmr")) {
 		stat = static_cast<int>(item->HeroicMR);
-	} else if (Strings::EqualFold(identifier, "heroicfr")) {
+	}
+
+	if (Strings::EqualFold(identifier, "heroicfr")) {
 		stat = static_cast<int>(item->HeroicFR);
-	} else if (Strings::EqualFold(identifier, "heroiccr")) {
+	}
+
+	if (Strings::EqualFold(identifier, "heroiccr")) {
 		stat = static_cast<int>(item->HeroicCR);
-	} else if (Strings::EqualFold(identifier, "heroicdr")) {
+	}
+
+	if (Strings::EqualFold(identifier, "heroicdr")) {
 		stat = static_cast<int>(item->HeroicDR);
-	} else if (Strings::EqualFold(identifier, "heroicpr")) {
+	}
+
+	if (Strings::EqualFold(identifier, "heroicpr")) {
 		stat = static_cast<int>(item->HeroicPR);
-	} else if (Strings::EqualFold(identifier, "heroicsvcorrup")) {
+	}
+
+	if (Strings::EqualFold(identifier, "heroicsvcorrup")) {
 		stat = static_cast<int>(item->HeroicSVCorrup);
-	} else if (Strings::EqualFold(identifier, "healamt")) {
+	}
+
+	if (Strings::EqualFold(identifier, "healamt")) {
 		stat = static_cast<int>(item->HealAmt);
-	} else if (Strings::EqualFold(identifier, "spelldmg")) {
+	}
+
+	if (Strings::EqualFold(identifier, "spelldmg")) {
 		stat = static_cast<int>(item->SpellDmg);
-	} else if (Strings::EqualFold(identifier, "ldonsellbackrate")) {
+	}
+
+	if (Strings::EqualFold(identifier, "ldonsellbackrate")) {
 		stat = static_cast<int>(item->LDoNSellBackRate);
-	} else if (Strings::EqualFold(identifier, "scriptfileid")) {
+	}
+
+	if (Strings::EqualFold(identifier, "scriptfileid")) {
 		stat = static_cast<int>(item->ScriptFileID);
-	} else if (Strings::EqualFold(identifier, "expendablearrow")) {
+	}
+
+	if (Strings::EqualFold(identifier, "expendablearrow")) {
 		stat = static_cast<int>(item->ExpendableArrow);
-	} else if (Strings::EqualFold(identifier, "clairvoyance")) {
+	}
+
+	if (Strings::EqualFold(identifier, "clairvoyance")) {
 		stat = static_cast<int>(item->Clairvoyance);
-	} else if (Strings::EqualFold(identifier, "clickeffect")) {
+	}
+
+	if (Strings::EqualFold(identifier, "clickeffect")) {
 		stat = static_cast<int>(item->Click.Effect);
-	} else if (Strings::EqualFold(identifier, "clicktype")) {
+	}
+
+	if (Strings::EqualFold(identifier, "clicktype")) {
 		stat = static_cast<int>(item->Click.Type);
-	} else if (Strings::EqualFold(identifier, "clicklevel")) {
+	}
+
+	if (Strings::EqualFold(identifier, "clicklevel")) {
 		stat = static_cast<int>(item->Click.Level);
-	} else if (Strings::EqualFold(identifier, "clicklevel2")) {
+	}
+
+	if (Strings::EqualFold(identifier, "clicklevel2")) {
 		stat = static_cast<int>(item->Click.Level2);
-	} else if (Strings::EqualFold(identifier, "proceffect")) {
+	}
+
+	if (Strings::EqualFold(identifier, "proceffect")) {
 		stat = static_cast<int>(item->Proc.Effect);
-	} else if (Strings::EqualFold(identifier, "proctype")) {
+	}
+
+	if (Strings::EqualFold(identifier, "proctype")) {
 		stat = static_cast<int>(item->Proc.Type);
-	} else if (Strings::EqualFold(identifier, "proclevel")) {
+	}
+
+	if (Strings::EqualFold(identifier, "proclevel")) {
 		stat = static_cast<int>(item->Proc.Level);
-	} else if (Strings::EqualFold(identifier, "proclevel2")) {
+	}
+
+	if (Strings::EqualFold(identifier, "proclevel2")) {
 		stat = static_cast<int>(item->Proc.Level2);
-	} else if (Strings::EqualFold(identifier, "worneffect")) {
+	}
+
+	if (Strings::EqualFold(identifier, "worneffect")) {
 		stat = static_cast<int>(item->Worn.Effect);
-	} else if (Strings::EqualFold(identifier, "worntype")) {
+	}
+
+	if (Strings::EqualFold(identifier, "worntype")) {
 		stat = static_cast<int>(item->Worn.Type);
-	} else if (Strings::EqualFold(identifier, "wornlevel")) {
+	}
+
+	if (Strings::EqualFold(identifier, "wornlevel")) {
 		stat = static_cast<int>(item->Worn.Level);
-	} else if (Strings::EqualFold(identifier, "wornlevel2")) {
+	}
+
+	if (Strings::EqualFold(identifier, "wornlevel2")) {
 		stat = static_cast<int>(item->Worn.Level2);
-	} else if (Strings::EqualFold(identifier, "focuseffect")) {
+	}
+
+	if (Strings::EqualFold(identifier, "focuseffect")) {
 		stat = static_cast<int>(item->Focus.Effect);
-	} else if (Strings::EqualFold(identifier, "focustype")) {
+	}
+
+	if (Strings::EqualFold(identifier, "focustype")) {
 		stat = static_cast<int>(item->Focus.Type);
-	} else if (Strings::EqualFold(identifier, "focuslevel")) {
+	}
+
+	if (Strings::EqualFold(identifier, "focuslevel")) {
 		stat = static_cast<int>(item->Focus.Level);
-	} else if (Strings::EqualFold(identifier, "focuslevel2")) {
+	}
+
+	if (Strings::EqualFold(identifier, "focuslevel2")) {
 		stat = static_cast<int>(item->Focus.Level2);
-	} else if (Strings::EqualFold(identifier, "scrolleffect")) {
+	}
+
+	if (Strings::EqualFold(identifier, "scrolleffect")) {
 		stat = static_cast<int>(item->Scroll.Effect);
-	} else if (Strings::EqualFold(identifier, "scrolltype")) {
+	}
+
+	if (Strings::EqualFold(identifier, "scrolltype")) {
 		stat = static_cast<int>(item->Scroll.Type);
-	} else if (Strings::EqualFold(identifier, "scrolllevel")) {
+	}
+
+	if (Strings::EqualFold(identifier, "scrolllevel")) {
 		stat = static_cast<int>(item->Scroll.Level);
-	} else if (Strings::EqualFold(identifier, "scrolllevel2")) {
+	}
+
+	if (Strings::EqualFold(identifier, "scrolllevel2")) {
 		stat = static_cast<int>(item->Scroll.Level2);
-	} else if (Strings::EqualFold(identifier, "augslot1type")) {
+	}
+
+	if (Strings::EqualFold(identifier, "augslot1type")) {
 		stat = static_cast<int>(item->AugSlotType[0]);
-	} else if (Strings::EqualFold(identifier, "augslot2type")) {
+	}
+
+	if (Strings::EqualFold(identifier, "augslot2type")) {
 		stat = static_cast<int>(item->AugSlotType[1]);
-	} else if (Strings::EqualFold(identifier, "augslot3type")) {
+	}
+
+	if (Strings::EqualFold(identifier, "augslot3type")) {
 		stat = static_cast<int>(item->AugSlotType[2]);
-	} else if (Strings::EqualFold(identifier, "augslot4type")) {
+	}
+
+	if (Strings::EqualFold(identifier, "augslot4type")) {
 		stat = static_cast<int>(item->AugSlotType[3]);
-	} else if (Strings::EqualFold(identifier, "augslot5type")) {
+	}
+
+	if (Strings::EqualFold(identifier, "augslot5type")) {
 		stat = static_cast<int>(item->AugSlotType[4]);
-	} else if (Strings::EqualFold(identifier, "augslot6type")) {
+	}
+
+	if (Strings::EqualFold(identifier, "augslot6type")) {
 		stat = static_cast<int>(item->AugSlotType[5]);
-	} else if (Strings::EqualFold(identifier, "augslot1visible")) {
+	}
+
+	if (Strings::EqualFold(identifier, "augslot1visible")) {
 		stat = static_cast<int>(item->AugSlotVisible[0]);
-	} else if (Strings::EqualFold(identifier, "augslot2visible")) {
+	}
+
+	if (Strings::EqualFold(identifier, "augslot2visible")) {
 		stat = static_cast<int>(item->AugSlotVisible[1]);
-	} else if (Strings::EqualFold(identifier, "augslot3visible")) {
+	}
+
+	if (Strings::EqualFold(identifier, "augslot3visible")) {
 		stat = static_cast<int>(item->AugSlotVisible[2]);
-	} else if (Strings::EqualFold(identifier, "augslot4visible")) {
+	}
+
+	if (Strings::EqualFold(identifier, "augslot4visible")) {
 		stat = static_cast<int>(item->AugSlotVisible[3]);
-	} else if (Strings::EqualFold(identifier, "augslot5visible")) {
+	}
+
+	if (Strings::EqualFold(identifier, "augslot5visible")) {
 		stat = static_cast<int>(item->AugSlotVisible[4]);
-	} else if (Strings::EqualFold(identifier, "augslot6visible")) {
+	}
+
+	if (Strings::EqualFold(identifier, "augslot6visible")) {
 		stat = static_cast<int>(item->AugSlotVisible[5]);
 	}
 
