@@ -18,7 +18,7 @@ void command_zone(Client *c, const Seperator *sep)
 		zone_id = std::stoi(zone_input);
 
 		// validate
-		if (!GetZone(zone_id)) {
+		if (zone_id != 0 && !GetZone(zone_id)) {
 			c->Message(Chat::White, fmt::format("Could not find zone by id [{}]", zone_id).c_str());
 			return;
 		}
