@@ -346,6 +346,7 @@ public:
 	std::string GetRecipeName(uint32 recipe_id);
 	bool HasRecipeLearned(uint32 recipe_id);
 	bool DoAugmentSlotsMatch(uint32 item_one, uint32 item_two);
+	int8 DoesAugmentFit(EQ::ItemInstance* inst, uint32 augment_id);
 
 #ifdef BOTS
 	Bot *GetBot() const;

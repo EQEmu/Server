@@ -3947,7 +3947,8 @@ void QuestManager::marquee(uint32 type, uint32 priority, uint32 fade_in, uint32 
 	initiator->SendMarqueeMessage(type, priority, fade_in, fade_out, duration, message);
 }
 
-bool QuestManager::DoAugmentSlotsMatch(uint32 item_one, uint32 item_two) {
+bool QuestManager::DoAugmentSlotsMatch(uint32 item_one, uint32 item_two)
+{
 	const auto* inst_one = database.GetItem(item_one);
 	if (!inst_one) {
 		return false;
@@ -3965,4 +3966,18 @@ bool QuestManager::DoAugmentSlotsMatch(uint32 item_one, uint32 item_two) {
 	}
 
 	return true;
+}
+
+int8 QuestManager::DoesAugmentFit(EQ::ItemInstance* inst, uint32 augment_id)
+{
+	if (!inst) {
+		return INVALID_INDEX;
+	}
+
+	const auto* aug_inst = database.GetItem(augment_id);
+	if (!aug_inst) {
+		return INVALID_INDEX;
+	}
+
+	return inst->AvailableAugmentSlot(aug_inst->AugType);
 }
