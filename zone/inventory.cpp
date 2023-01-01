@@ -3871,7 +3871,7 @@ std::string EQ::InventoryProfile::GetCustomItemData(int16 slot_id, std::string i
 	return "";
 }
 
-int EQ::InventoryProfile::GetItemStatValue(uint32 item_id, std::string identifier) {
+const int EQ::InventoryProfile::GetItemStatValue(uint32 item_id, std::string identifier) {
 	if (identifier.empty()) {
 		return 0;
 	}

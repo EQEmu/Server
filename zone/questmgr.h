@@ -337,7 +337,7 @@ public:
 	std::string getgendername(uint32 gender_id);
 	std::string getdeityname(uint32 deity_id);
 	std::string getinventoryslotname(int16 slot_id);
-	int getitemstat(uint32 item_id, std::string stat_identifier);
+	const int getitemstat(uint32 item_id, std::string stat_identifier);
 	int getspellstat(uint32 spell_id, std::string stat_identifier, uint8 slot = 0);
 	const SPDat_Spell_Struct *getspell(uint32 spell_id);
 	std::string getenvironmentaldamagename(uint8 damage_type);

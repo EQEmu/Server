@@ -206,7 +206,7 @@ namespace EQ
 		void SetCustomItemData(uint32 character_id, int16 slot_id, std::string identifier, float value);
 		void SetCustomItemData(uint32 character_id, int16 slot_id, std::string identifier, bool value);
 		std::string GetCustomItemData(int16 slot_id, std::string identifier);
-		static int GetItemStatValue(uint32 item_id, std::string identifier);
+		static const int GetItemStatValue(uint32 item_id, std::string identifier);
 	protected:
 		///////////////////////////////
 		// Protected Methods
