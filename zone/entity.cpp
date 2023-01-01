@@ -4088,8 +4088,12 @@ void EntityList::ProcessMove(NPC *n, float x, float y, float z) {
 		std::vector<std::any> args;
 		args.push_back(&evt.area_id);
 		args.push_back(&evt.area_type);
-
-		if (evt.event_id == EVENT_ENTER_AREA) {
+		
+		if (evt.event_id == EVENT_ENTER) {
+			parse->EventNPC(EVENT_ENTER, evt.npc, evt.client, "", 0);
+		} else if (evt.event_id == EVENT_EXIT) {
+			parse->EventNPC(EVENT_EXIT, evt.npc, evt.client, "", 0);
+		} else if (evt.event_id == EVENT_ENTER_AREA) {
 			parse->EventNPC(EVENT_ENTER_AREA, evt.npc, evt.client, "", 0, &args);
 		} else if (evt.event_id == EVENT_LEAVE_AREA) {
 			parse->EventNPC(EVENT_LEAVE_AREA, evt.npc, evt.client, "", 0, &args);
