@@ -4084,10 +4084,16 @@ void EntityList::ProcessMove(NPC *n, float x, float y, float z) {
 
 	for (auto iter = events.begin(); iter != events.end(); ++iter) {
 		quest_proximity_event   &evt = (*iter);
+
 		std::vector<std::any> args;
 		args.push_back(&evt.area_id);
 		args.push_back(&evt.area_type);
-		parse->EventNPC(evt.event_id, evt.npc, evt.client, "", 0, &args);
+
+		if (evt.event_id == EVENT_ENTER_AREA) {
+			parse->EventNPC(EVENT_ENTER_AREA, evt.npc, evt.client, "", 0, &args);
+		} else if (evt.event_id == EVENT_LEAVE_AREA) {
+			parse->EventNPC(EVENT_LEAVE_AREA, evt.npc, evt.client, "", 0, &args);
+		}
 	}
 }
 
