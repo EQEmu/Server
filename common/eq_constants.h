@@ -1016,7 +1016,7 @@ enum FVNoDropFlagRule
 	AdminOnly = 2
 };
 
-enum Anonymity
+enum Anonymity : uint8
 {
 	NotAnonymous,
 	Anonymous,
