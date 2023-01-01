@@ -1443,12 +1443,6 @@ uint32_t Perl__MerchantCountItem(uint32 npc_id, uint32 item_id)
 	return quest_manager.MerchantCountItem(npc_id, item_id);
 }
 
-std::string Perl__varlink(int item_id)
-{
-	char text[250] = { 0 };
-	return quest_manager.varlink(text, item_id);
-}
-
 int Perl__CreateInstance(const char* zone_name, int16 version, int32 duration)
 {
 	return quest_manager.CreateInstance(zone_name, version, duration);
@@ -3936,6 +3930,51 @@ void Perl__set_proximity_range(float x_range, float y_range, float z_range, bool
 	quest_manager.set_proximity_range(x_range, y_range, z_range, enable_say);
 }
 
+std::string Perl__varlink(uint32 item_id)
+{
+	return quest_manager.varlink(item_id);
+}
+
+std::string Perl__varlink(uint32 item_id, int16 charges)
+{
+	return quest_manager.varlink(item_id, charges);
+}
+
+std::string Perl__varlink(uint32 item_id, int16 charges, uint32 aug1)
+{
+	return quest_manager.varlink(item_id, charges, aug1);
+}
+
+std::string Perl__varlink(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2)
+{
+	return quest_manager.varlink(item_id, charges, aug1, aug2);
+}
+
+std::string Perl__varlink(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2, uint32 aug3)
+{
+	return quest_manager.varlink(item_id, charges, aug1, aug2, aug3);
+}
+
+std::string Perl__varlink(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4)
+{
+	return quest_manager.varlink(item_id, charges, aug1, aug2, aug3, aug4);
+}
+
+std::string Perl__varlink(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5)
+{
+	return quest_manager.varlink(item_id, charges, aug1, aug2, aug3, aug4, aug5);
+}
+
+std::string Perl__varlink(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, uint32 aug6)
+{
+	return quest_manager.varlink(item_id, charges, aug1, aug2, aug3, aug4, aug5, aug6);
+}
+
+std::string Perl__varlink(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, uint32 aug6, bool attuned)
+{
+	return quest_manager.varlink(item_id, charges, aug1, aug2, aug3, aug4, aug5, aug6, attuned);
+}
+
 void perl_register_quest()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -4540,7 +4579,15 @@ void perl_register_quest()
 	package.add("updatetaskactivity", (void(*)(int, int, int))&Perl__updatetaskactivity);
 	package.add("updatetaskactivity", (void(*)(int, int, int, bool))&Perl__updatetaskactivity);
 	package.add("UpdateZoneHeader", &Perl__UpdateZoneHeader);
-	package.add("varlink", &Perl__varlink);
+	package.add("varlink", (std::string(*)(uint32))&Perl__varlink);
+	package.add("varlink", (std::string(*)(uint32, int16))&Perl__varlink);
+	package.add("varlink", (std::string(*)(uint32, int16, uint32))&Perl__varlink);
+	package.add("varlink", (std::string(*)(uint32, int16, uint32, uint32))&Perl__varlink);
+	package.add("varlink", (std::string(*)(uint32, int16, uint32, uint32, uint32))&Perl__varlink);
+	package.add("varlink", (std::string(*)(uint32, int16, uint32, uint32, uint32, uint32))&Perl__varlink);
+	package.add("varlink", (std::string(*)(uint32, int16, uint32, uint32, uint32, uint32, uint32))&Perl__varlink);
+	package.add("varlink", (std::string(*)(uint32, int16, uint32, uint32, uint32, uint32, uint32, uint32))&Perl__varlink);
+	package.add("varlink", (std::string(*)(uint32, int16, uint32, uint32, uint32, uint32, uint32, uint32, bool))&Perl__varlink);
 	package.add("voicetell", &Perl__voicetell);
 	package.add("we", &Perl__we);
 	package.add("wearchange", (void(*)(uint8, uint16))&Perl__wearchange);
