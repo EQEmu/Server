@@ -3691,7 +3691,7 @@ bool lua_do_augment_slots_match(uint32 item_one, uint32 item_two)
 	return quest_manager.DoAugmentSlotsMatch(item_one, item_two);
 }
 
-int8 lua_does_augment_fit(EQ::ItemInstance* inst, uint32 augment_id)
+int8 lua_does_augment_fit(Lua_ItemInst inst, uint32 augment_id)
 {
 	return quest_manager.DoesAugmentFit(inst, augment_id);
 }
