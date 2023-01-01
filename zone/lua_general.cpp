@@ -3656,6 +3656,11 @@ void lua_do_anim(int animation_id, int animation_speed, bool ackreq, int filter)
 	quest_manager.doanim(animation_id, animation_speed, ackreq, static_cast<eqFilterType>(filter));
 }
 
+bool lua_do_augment_slots_match(uint32 item_one, uint32 item_two)
+{
+	return quest_manager.DoAugmentSlotsMatch(item_one, item_two);
+}
+
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
 	cur = table[#name]; \
 	if(luabind::type(cur) != LUA_TNIL) { \
@@ -4163,6 +4168,7 @@ luabind::scope lua_register_general() {
 		luabind::def("do_anim", (void(*)(int,int))&lua_do_anim),
 		luabind::def("do_anim", (void(*)(int,int,bool))&lua_do_anim),
 		luabind::def("do_anim", (void(*)(int,int,bool,int))&lua_do_anim),
+		luabind::def("do_augment_slots_match", &lua_do_augment_slots_match),
 		/*
 			Cross Zone
 		*/
