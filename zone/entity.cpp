@@ -4023,10 +4023,6 @@ void EntityList::ProcessMove(Client *c, const glm::vec3& location)
 				parse->EventNPC(EVENT_LEAVE_AREA, evt.npc, evt.client, "", 0, &args);
 			}
 		} else {
-			std::vector<std::any> args;
-			args.push_back(&evt.area_id);
-			args.push_back(&evt.area_type);
-
 			if (evt.event_id == EVENT_ENTER) {
 				parse->EventPlayer(EVENT_ENTER, evt.client, "", 0);
 			} else if (evt.event_id == EVENT_EXIT) {
