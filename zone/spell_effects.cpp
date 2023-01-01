@@ -3565,7 +3565,7 @@ snare has both of them negative, yet their range should work the same:
 			if(ticdif < 0)
 				ticdif = 0;
 
-			result = updownsign * (ubase - (12 * ticdif));
+			result = ubase - (12 * ticdif);
 			degenerating_effects = true;
 			break;
 		}
