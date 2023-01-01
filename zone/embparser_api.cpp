@@ -3980,6 +3980,11 @@ bool Perl__do_augment_slots_match(uint32 item_one, uint32 item_two)
 	return quest_manager.DoAugmentSlotsMatch(item_one, item_two);
 }
 
+int8 Perl__does_augment_fit(EQ::ItemInstance* inst, uint32 augment_id)
+{
+	return quest_manager.DoesAugmentFit(inst, augment_id);
+}
+
 void perl_register_quest()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -4327,6 +4332,7 @@ void perl_register_quest()
 	package.add("doanim", (void(*)(int, int, bool))&Perl__doanim);
 	package.add("doanim", (void(*)(int, int, bool, int))&Perl__doanim);
 	package.add("do_augment_slots_match", &Perl__do_augment_slots_match);
+	package.add("does_augment_fit", &Perl__does_augment_fit);
 	package.add("echo", &Perl__echo);
 	package.add("emote", &Perl__emote);
 	package.add("enable_proximity_say", &Perl__enable_proximity_say);

@@ -332,19 +332,30 @@ bool EQ::ItemInstance::AvailableWearSlot(uint32 aug_wear_slots) const {
 	return (index <= EQ::invslot::EQUIPMENT_END);
 }
 
-int8 EQ::ItemInstance::AvailableAugmentSlot(int32 augtype) const
+int8 EQ::ItemInstance::AvailableAugmentSlot(int32 augment_type) const
 {
-	if (!m_item || !m_item->IsClassCommon())
+	if (!m_item || !m_item->IsClassCommon()) {
 		return INVALID_INDEX;
-
-	int index = invaug::SOCKET_BEGIN;
-	for (; index <= invaug::SOCKET_END; ++index) {
-		if (GetItem(index)) { continue; }
-		if (augtype == -1 || (m_item->AugSlotType[index] && ((1 << (m_item->AugSlotType[index] - 1)) & augtype)))
-			break;
 	}
 
-	return (index <= invaug::SOCKET_END) ? index : INVALID_INDEX;
+	auto i = invaug::SOCKET_BEGIN;
+	for (; i <= invaug::SOCKET_END; ++i) {
+		if (GetItem(i)) {
+			continue;
+		}
+
+		if (
+			augment_type == -1 ||
+			(
+				m_item->AugSlotType[i] &&
+				((1 << (m_item->AugSlotType[i] - 1)) & augment_type)
+			)
+		) {
+			break;
+		}
+	}
+
+	return (i <= invaug::SOCKET_END) ? i : INVALID_INDEX;
 }
 
 bool EQ::ItemInstance::IsAugmentSlotAvailable(int32 augtype, uint8 slot) const
