@@ -683,6 +683,7 @@ RULE_INT(Adventure, ItemIDToEnablePorts, 41000, "ItemID to enable adventure port
 RULE_INT(Adventure, LDoNTrapDistanceUse, 625, "LDoN trap distance use")
 RULE_REAL(Adventure, LDoNBaseTrapDifficulty, 15.0, "LDoN base trap difficulty")
 RULE_REAL(Adventure, LDoNCriticalFailTrapThreshold, 10.0, "LDoN critical fail trap threshold")
+RULE_INT(Adventure, LDoNLootCountModifier, 10, "LDoN Loot Count Modifier, lower is better (default is 10)")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(AA)
