@@ -189,19 +189,70 @@ uint8 *ZoneGuildManager::MakeGuildMembers(uint32 guild_id, const char *prefix_na
 	return(retbuffer);
 }
 
-void ZoneGuildManager::ListGuilds(Client *c) const {
+void ZoneGuildManager::ListGuilds(Client *c, uint32 guild_id) const {
 	if (m_guilds.size()) {
+		const auto& g = m_guilds.find(guild_id);
+		if (g == m_guilds.end()) {
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"Guild ID {} does not exist or is invalid.",
+					guild_id
+				).c_str()
+			);
+			return;
+		}
+
+		const auto leader_name = database.GetCharNameByID(g->second->leader_char_id);
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"Listing {} Guild{}.",
-				m_guilds.size(),
-				m_guilds.size() != 1 ? "s" : ""
+				"Guild {} | {}Name: {}",
+				g->first,
+				(
+					!leader_name.empty() ?
+					fmt::format(
+						"Leader: {} ({}) ",
+						leader_name,
+						g->second->leader_char_id
+					) :
+					""
+				),
+				g->second->name
 			).c_str()
 		);
+	} else {
+		c->Message(Chat::White, "There are no Guilds to list.");
+	}
+}
+
+void ZoneGuildManager::ListGuilds(Client *c, std::string search_criteria) const {
+	if (m_guilds.size()) {
+		if (search_criteria.empty()) {
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"Listing {} Guild{}.",
+					m_guilds.size(),
+					m_guilds.size() != 1 ? "s" : ""
+				).c_str()
+			);
+		}
+
+		auto found_count = 0;
 
 		for (const auto& guild : m_guilds) {
-			auto leader_name = database.GetCharNameByID(guild.second->leader_char_id);
+			if (
+				!search_criteria.empty() &&
+				!Strings::Contains(
+					Strings::ToLower(guild.second->name),
+					Strings::ToLower(search_criteria)
+				)
+			) {
+				continue;
+			}
+
+			const auto leader_name = database.GetCharNameByID(guild.second->leader_char_id);
 			c->Message(
 				Chat::White,
 				fmt::format(
@@ -219,7 +270,26 @@ void ZoneGuildManager::ListGuilds(Client *c) const {
 					guild.second->name
 				).c_str()
 			);
+
+			found_count++;
 		}
+
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Found {} Guild{}{}.",
+				found_count,
+				found_count != 1 ? "s" : "",
+				(
+					!search_criteria.empty() ?
+					fmt::format(
+						" matching '{}'",
+						search_criteria
+					) :
+					""
+				)
+			).c_str()
+		);
 	} else {
 		c->Message(Chat::White, "There are no Guilds to list.");
 	}
