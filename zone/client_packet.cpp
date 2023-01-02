@@ -4061,7 +4061,7 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 	}
 	if (IsAIControlled()) {
 		MessageString(Chat::Red, NOT_IN_CONTROL);
-		//Message(Chat::Red, "You cant cast right now, you arent in control of yourself!");
+		//Message(Chat::Red, "You cant cast right now, You aren't in control of yourself!");
 		return;
 	}
 
@@ -7597,11 +7597,11 @@ void Client::Handle_OP_GuildDemote(const EQApplicationPacket *app)
 	}
 
 	if (!IsInAGuild())
-		Message(0, "Error: You arent in a guild!");
+		Message(Chat::Red, "Error: You aren't in a guild!");
 	else if (!guild_mgr.CheckPermission(GuildID(), GuildRank(), GUILD_DEMOTE))
-		Message(0, "You dont have permission to demote.");
+		Message(Chat::Red, "You don't have permission to demote.");
 	else if (!worldserver.Connected())
-		Message(0, "Error: World server disconnected");
+		Message(Chat::Red, "Error: World server disconnected");
 	else {
 		GuildDemoteStruct* demote = (GuildDemoteStruct*)app->pBuffer;
 
@@ -7674,7 +7674,7 @@ void Client::Handle_OP_GuildInvite(const EQApplicationPacket *app)
 				if (gc->officer < client->GuildRank()) {
 					//demotion
 					if (!guild_mgr.CheckPermission(GuildID(), GuildRank(), GUILD_DEMOTE)) {
-						Message(Chat::Red, "You dont have permission to demote.");
+						Message(Chat::Red, "You don't have permission to demote.");
 						return;
 					}
 
@@ -7696,7 +7696,7 @@ void Client::Handle_OP_GuildInvite(const EQApplicationPacket *app)
 				else if (gc->officer > client->GuildRank()) {
 					//promotion
 					if (!guild_mgr.CheckPermission(GuildID(), GuildRank(), GUILD_PROMOTE)) {
-						Message(Chat::Red, "You dont have permission to demote.");
+						Message(Chat::Red, "You don't have permission to demote.");
 						return;
 					}
 
@@ -7731,7 +7731,7 @@ void Client::Handle_OP_GuildInvite(const EQApplicationPacket *app)
 				}
 
 				if (!guild_mgr.CheckPermission(GuildID(), GuildRank(), GUILD_INVITE)) {
-					Message(Chat::Red, "You dont have permission to invite.");
+					Message(Chat::Red, "You don't have permission to invite.");
 					return;
 				}
 
@@ -7919,9 +7919,9 @@ void Client::Handle_OP_GuildLeader(const EQApplicationPacket *app)
 	app->pBuffer[app->size - 1] = 0;
 	GuildMakeLeader* gml = (GuildMakeLeader*)app->pBuffer;
 	if (!IsInAGuild())
-		Message(0, "Error: You arent in a guild!");
+		Message(0, "Error: You aren't in a guild!");
 	else if (GuildRank() != GUILD_LEADER)
-		Message(0, "Error: You arent the guild leader!");
+		Message(0, "Error: You aren't the guild leader!");
 	else if (!worldserver.Connected())
 		Message(0, "Error: World server disconnected");
 	else {
@@ -8043,9 +8043,9 @@ void Client::Handle_OP_GuildPromote(const EQApplicationPacket *app)
 	}
 
 	if (!IsInAGuild())
-		Message(0, "Error: You arent in a guild!");
+		Message(0, "Error: You aren't in a guild!");
 	else if (!guild_mgr.CheckPermission(GuildID(), GuildRank(), GUILD_PROMOTE))
-		Message(0, "You dont have permission to promote.");
+		Message(Chat::Red, "You don't have permission to promote.");
 	else if (!worldserver.Connected())
 		Message(0, "Error: World server disconnected");
 	else {
@@ -8131,13 +8131,13 @@ void Client::Handle_OP_GuildRemove(const EQApplicationPacket *app)
 	}
 	GuildCommand_Struct* gc = (GuildCommand_Struct*)app->pBuffer;
 	if (!IsInAGuild())
-		Message(0, "Error: You arent in a guild!");
+		Message(0, "Error: You aren't in a guild!");
 	// we can always remove ourself, otherwise, our rank needs remove permissions
 	else if (strcasecmp(gc->othername, GetName()) != 0 &&
 		!guild_mgr.CheckPermission(GuildID(), GuildRank(), GUILD_REMOVE))
-		Message(0, "You dont have permission to remove guild members.");
+		Message(Chat::Red, "You don't have permission to remove guild members.");
 	else if (!worldserver.Connected())
-		Message(0, "Error: World server disconnected");
+		Message(Chat::Red, "Error: World server disconnected");
 	else {
 #ifdef BOTS
 		if (Bot::ProcessGuildRemoval(this, gc->othername))
