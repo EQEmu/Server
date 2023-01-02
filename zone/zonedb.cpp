@@ -3075,17 +3075,51 @@ void ZoneDatabase::QGlobalPurge()
 	database.QueryDatabase(query);
 }
 
-void ZoneDatabase::InsertDoor(uint32 ddoordbid, uint16 ddoorid, const char* ddoor_name, const glm::vec4& position, uint8 dopentype, uint16 dguildid, uint32 dlockpick, uint32 dkeyitem, uint8 ddoor_param, uint8 dinvert, int dincline, uint16 dsize, bool ddisabletimer){
+void ZoneDatabase::InsertDoor(
+	uint32 database_id,
+	uint8 id,
+	std::string name,
+	const glm::vec4 &position,
+	uint8 open_type,
+	uint16 guild_id,
+	uint32 lockpick,
+	uint32 key_item_id,
+	uint8 door_param,
+	uint8 invert,
+	int incline,
+	uint16 size,
+	bool disable_timer
+) {
+	auto e = DoorsRepository::NewEntity();
 
-	std::string query = StringFormat("REPLACE INTO doors (id, doorid, zone, version, name, "
-                                    "pos_x, pos_y, pos_z, heading, opentype, guild, lockpick, "
-                                    "keyitem, disable_timer, door_param, invert_state, incline, size) "
-                                    "VALUES('%i', '%i', '%s', '%i', '%s', '%f', '%f', "
-                                    "'%f', '%f', '%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i')",
-                                    ddoordbid, ddoorid, zone->GetShortName(), zone->GetInstanceVersion(),
-                                    ddoor_name, position.x, position.y, position.z, position.w,
-									dopentype, dguildid, dlockpick, dkeyitem, (ddisabletimer ? 1 : 0), ddoor_param, dinvert, dincline, dsize);
-    QueryDatabase(query);
+	e.id = database_id;
+	e.doorid = id;
+	e.zone = zone->GetShortName();
+	e.version = zone->GetInstanceVersion();
+	e.name = name;
+	e.pos_x = position.x;
+	e.pos_y = position.y;
+	e.pos_z = position.z;
+	e.opentype = open_type;
+	e.guild = guild_id;
+	e.lockpick = lockpick;
+	e.keyitem = key_item_id;
+	e.disable_timer = static_cast<int8_t>(disable_timer);
+	e.door_param = door_param;
+	e.invert_state = invert;
+	e.incline = incline;
+	e.size = size;
+
+	const auto& n = DoorsRepository::InsertOne(*this, e);
+	if (!n.id) {
+		LogError(
+			"Failed to create door in Zone [{}] Version [{}] Database ID [{}] ID [{}]",
+			zone->GetShortName(),
+			zone->GetInstanceVersion(),
+			database_id,
+			id
+		);
+	}
 }
 
 void ZoneDatabase::LoadAltCurrencyValues(uint32 char_id, std::map<uint32, uint32> &currency) {
