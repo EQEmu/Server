@@ -8045,7 +8045,7 @@ void Client::Handle_OP_GuildPromote(const EQApplicationPacket *app)
 	if (!IsInAGuild())
 		Message(0, "Error: You arent in a guild!");
 	else if (!guild_mgr.CheckPermission(GuildID(), GuildRank(), GUILD_PROMOTE))
-		Message(0, "You dont have permission to invite.");
+		Message(0, "You dont have permission to promote.");
 	else if (!worldserver.Connected())
 		Message(0, "Error: World server disconnected");
 	else {
