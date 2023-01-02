@@ -78,7 +78,7 @@ bool Perl_Raid_IsLeader(Raid* self, Client* c) // @categories Raid
 	return self->IsLeader(c);
 }
 
-Mob* Perl_Raid_GetLeader(Raid* self) // @categories Raid
+Client* Perl_Raid_GetLeader(Raid* self) // @categories Raid
 {
 	return self->GetLeader();
 }
