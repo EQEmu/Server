@@ -20,6 +20,8 @@
 #include "../common/eqemu_logsys.h"
 #include "../common/strings.h"
 
+#include "../common/repositories/doors_repository.h"
+
 #include "client.h"
 #include "doors.h"
 #include "entity.h"
@@ -87,8 +89,8 @@ Doors::Doors(const char *model, const glm::vec4 &position, uint8 open_type, uint
 	strn0cpy(m_door_name, model, 32);
 	strn0cpy(m_destination_zone_name, "NONE", 32);
 
-	m_database_id = (uint32) content_db.GetDoorsCountPlusOne(zone->GetShortName(), zone->GetInstanceVersion());
-	m_door_id     = (uint8) content_db.GetDoorsDBCountPlusOne(zone->GetShortName(), zone->GetInstanceVersion());
+	m_database_id = content_db.GetDoorsCountPlusOne();
+	m_door_id     = content_db.GetDoorsDBCountPlusOne(zone->GetShortName(), zone->GetInstanceVersion());
 
 	m_open_type               = open_type;
 	m_size                    = size;
@@ -685,53 +687,23 @@ void Doors::ToggleState(Mob *sender)
 	safe_delete(outapp);
 }
 
-int32 ZoneDatabase::GetDoorsCount(uint32 *oMaxID, const char *zone_name, int16 version)
+uint32 ZoneDatabase::GetDoorsCountPlusOne()
 {
+	const uint32 max_door_id = static_cast<uint32>(DoorsRepository::GetMaxId(*this));
 
-	std::string query   = StringFormat(
-		"SELECT MAX(id), count(*) FROM doors "
-		"WHERE zone = '%s' AND (version = %u OR version = -1)",
-		zone_name, version
-	);
-	auto        results = QueryDatabase(query);
-	if (!results.Success()) {
-		return -1;
-	}
-
-	if (results.RowCount() != 1) {
-		return -1;
-	}
-
-	auto row = results.begin();
-
-	if (!oMaxID) {
-		return atoi(row[1]);
-	}
-
-	if (row[0]) {
-		*oMaxID = atoi(row[0]);
-	}
-	else {
-		*oMaxID = 0;
-	}
-
-	return atoi(row[1]);
-
+	return (max_door_id + 1);
 }
 
-int32 ZoneDatabase::GetDoorsCountPlusOne(const char *zone_name, int16 version)
+int ZoneDatabase::GetDoorsDBCountPlusOne(std::string zone_short_name, int16 version)
 {
-	std::string query   = StringFormat(
-		"SELECT MAX(id) FROM doors WHERE zone = '%s' AND version = %u",
-		zone_name,
+	const auto query = fmt::format(
+		"SELECT COALESCE(MAX(doorid), 1) FROM doors "
+		"WHERE zone = '{}' AND (version = {} OR version = -1)",
+		zone_short_name,
 		version
 	);
-	auto        results = QueryDatabase(query);
-	if (!results.Success()) {
-		return -1;
-	}
-
-	if (results.RowCount() != 1) {
+	auto results = QueryDatabase(query);
+	if (!results.Success() || !results.RowCount()) {
 		return -1;
 	}
 
@@ -741,35 +713,7 @@ int32 ZoneDatabase::GetDoorsCountPlusOne(const char *zone_name, int16 version)
 		return 0;
 	}
 
-	return atoi(row[0]) + 1;
-}
-
-int32 ZoneDatabase::GetDoorsDBCountPlusOne(const char *zone_name, int16 version)
-{
-
-	uint32 oMaxID = 0;
-
-	std::string query   = StringFormat(
-		"SELECT MAX(doorid) FROM doors "
-		"WHERE zone = '%s' AND (version = %u OR version = -1)",
-		zone_name, version
-	);
-	auto        results = QueryDatabase(query);
-	if (!results.Success()) {
-		return -1;
-	}
-
-	if (results.RowCount() != 1) {
-		return -1;
-	}
-
-	auto row = results.begin();
-
-	if (!row[0]) {
-		return 0;
-	}
-
-	return atoi(row[0]) + 1;
+	return std::stoi(row[0]) + 1;
 }
 
 std::vector<DoorsRepository::Doors> ZoneDatabase::LoadDoors(const std::string &zone_name, int16 version)
@@ -847,9 +791,6 @@ void Doors::CreateDatabaseEntry()
 		return;
 	}
 
-	/**
-	 * Persist
-	 */
 	content_db.InsertDoor(
 		GetDoorDBID(),
 		GetDoorID(),
