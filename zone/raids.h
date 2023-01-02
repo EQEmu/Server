@@ -103,7 +103,7 @@ public:
 	~Raid();
 
 	void SetLeader(Client* c) { leader = c; }
-	inline	Client* GetLeader() { return leader; };
+	Client* GetLeader() { return leader; }
 	std::string GetLeaderName() { return leadername; }
 	bool IsLeader(Client* c) { return c == leader; }
 	bool IsLeader(const char* name) { return !strcmp(leadername, name); }
