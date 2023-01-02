@@ -704,7 +704,7 @@ int ZoneDatabase::GetDoorsDBCountPlusOne(std::string zone_short_name, int16 vers
 	);
 	auto results = QueryDatabase(query);
 	if (!results.Success() || !results.RowCount()) {
-		return 255;
+		return -1;
 	}
 
 	auto row = results.begin();
