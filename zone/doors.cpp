@@ -697,7 +697,7 @@ uint32 ZoneDatabase::GetDoorsCountPlusOne()
 int ZoneDatabase::GetDoorsDBCountPlusOne(std::string zone_short_name, int16 version)
 {
 	const auto query = fmt::format(
-		"SELECT MAX(doorid) FROM doors "
+		"SELECT COALESCE(MAX(doorid), 0) FROM doors "
 		"WHERE zone = '{}' AND (version = {} OR version = -1)",
 		zone_short_name,
 		version
