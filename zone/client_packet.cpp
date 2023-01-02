@@ -7599,7 +7599,7 @@ void Client::Handle_OP_GuildDemote(const EQApplicationPacket *app)
 	if (!IsInAGuild())
 		Message(0, "Error: You arent in a guild!");
 	else if (!guild_mgr.CheckPermission(GuildID(), GuildRank(), GUILD_DEMOTE))
-		Message(0, "You dont have permission to invite.");
+		Message(0, "You dont have permission to demote.");
 	else if (!worldserver.Connected())
 		Message(0, "Error: World server disconnected");
 	else {
