@@ -35,7 +35,7 @@ N(OP_AltCurrencyMerchantRequest),
 N(OP_AltCurrencyPurchase),
 N(OP_AltCurrencyReclaim),
 N(OP_AltCurrencySell),
-N(OP_AltCurrencySellSelection),
+N(OP_AltCurrencySellSelection), 		// Used by eqstr_us.txt 8066, 8068, 8069 		
 N(OP_Animation),
 N(OP_AnnoyingZoneUnknown),
 N(OP_ApplyPoison),
