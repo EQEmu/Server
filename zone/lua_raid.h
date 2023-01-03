@@ -41,6 +41,7 @@ public:
 	bool IsLeader(const char *c);
 	bool IsLeader(Lua_Client c);
 	Lua_Client GetLeader();
+	std::string GetLeaderName();
 	bool IsGroupLeader(const char *name);
 	bool IsGroupLeader(Lua_Client c);
 	int GetHighestLevel();
