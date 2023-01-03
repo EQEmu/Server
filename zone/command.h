@@ -232,6 +232,7 @@ void command_setaapts(Client *c, const Seperator *sep);
 void command_setaaxp(Client *c, const Seperator *sep);
 void command_setaltcurrency(Client *c, const Seperator *sep);
 void command_setanim(Client *c, const Seperator *sep);
+void command_setanon(Client *c, const Seperator *sep);
 void command_setcrystals(Client *c, const Seperator *sep);
 void command_setendurance(Client *c, const Seperator *sep);
 void command_setfaction(Client *c, const Seperator *sep);
