@@ -422,6 +422,17 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 			payload = PlayerEventDiscordFormatter::FormatEventSay(e, n);
 			break;
 		}
+		case PlayerEvent::GM_COMMAND: {
+			PlayerEvent::GMCommandEvent n;
+			std::stringstream     ss;
+			{
+				ss << e.player_event_log.event_data;
+				cereal::JSONInputArchive ar(ss);
+				n.serialize(ar);
+			}
+			payload = PlayerEventDiscordFormatter::FormatGMCommand(e, n);
+			break;
+		}
 		case PlayerEvent::SKILL_UP: {
 			PlayerEvent::SkillUpEvent n;
 			std::stringstream     ss;

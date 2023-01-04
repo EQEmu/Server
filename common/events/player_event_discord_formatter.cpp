@@ -115,6 +115,32 @@ std::string PlayerEventDiscordFormatter::FormatEventSay(
 	return ss.str();
 }
 
+std::string PlayerEventDiscordFormatter::FormatGMCommand(
+	const PlayerEvent::PlayerEventContainer &c,
+	const PlayerEvent::GMCommandEvent &e
+)
+{
+	std::vector<DiscordField> f = {};
+	BuildBaseFields(&f, c);
+	BuildDiscordField(&f, "Message", e.message);
+	BuildDiscordField(&f, "Target", e.target);
+
+	std::vector<DiscordEmbed> embeds = {};
+	BuildBaseEmbed(&embeds, f, c);
+
+	DiscordEmbedRoot root = DiscordEmbedRoot{
+		.embeds = embeds
+	};
+
+	std::stringstream ss;
+	{
+		cereal::JSONOutputArchive ar(ss);
+		root.serialize(ar);
+	}
+
+	return ss.str();
+}
+
 std::string PlayerEventDiscordFormatter::FormatWithNodata(const PlayerEvent::PlayerEventContainer &c)
 {
 	std::vector<DiscordField> f = {};

@@ -89,8 +89,6 @@ void WorldServer::ProcessMessage(uint16 opcode, EQ::Net::Packet &p)
 
 		discord_manager.QueuePlayerEventMessage(n);
 
-		LogInfo("Received event [{}]", n.player_event_log.event_type_id);
-
 		break;
 	}
 	case ServerOP_DiscordWebhookMessage: {

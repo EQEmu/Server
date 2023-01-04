@@ -594,7 +594,14 @@ int command_realdispatch(Client *c, std::string message, bool ignore_status)
 
 	parse->EventPlayer(EVENT_GM_COMMAND, c, message, 0);
 
-	RecordPlayerEventLogWithClient(c, PlayerEvent::GM_COMMAND, PlayerEvent::GMCommandEvent{message});
+	if (player_event_logs.IsEventEnabled(PlayerEvent::GM_COMMAND) && message != "#help") {
+		auto e = PlayerEvent::GMCommandEvent{
+			.message = message,
+			.target = c->GetTarget() ? c->GetTarget()->GetName() : "NONE"
+		};
+
+		RecordPlayerEventLogWithClient(c, PlayerEvent::GM_COMMAND, e);
+	}
 
 	cur->function(c, &sep);	// Dispatch C++ Command
 

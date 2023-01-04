@@ -280,13 +280,15 @@ namespace PlayerEvent {
 
 	struct GMCommandEvent {
 		std::string message;
+		std::string target;
 
 		// cereal
 		template<class Archive>
 		void serialize(Archive &ar)
 		{
 			ar(
-				CEREAL_NVP(message)
+				CEREAL_NVP(message),
+				CEREAL_NVP(target)
 			);
 		}
 	};
