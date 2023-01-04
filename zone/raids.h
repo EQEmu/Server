@@ -104,6 +104,7 @@ public:
 
 	void SetLeader(Client* c) { leader = c; }
 	Client* GetLeader() { return leader; }
+	std::string GetLeaderName() { return leadername; }
 	bool IsLeader(Client* c) { return c == leader; }
 	bool IsLeader(const char* name) { return !strcmp(leadername, name); }
 	void SetRaidLeader(const char *wasLead, const char *name);

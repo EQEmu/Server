@@ -83,6 +83,16 @@ bool Lua_Raid::IsLeader(Lua_Client c) {
 	return self->IsLeader(c);
 }
 
+Lua_Client Lua_Raid::GetLeader() {
+	Lua_Safe_Call_Class(Lua_Client);
+	return self->GetLeader();
+}
+
+std::string Lua_Raid::GetLeaderName() {
+	Lua_Safe_Call_String();
+	return self->GetLeaderName();
+}
+
 bool Lua_Raid::IsGroupLeader(const char *name) {
 	Lua_Safe_Call_Bool();
 	return self->IsGroupLeader(name);
@@ -181,6 +191,8 @@ luabind::scope lua_register_raid() {
 	.def("IsGroupLeader", (bool(Lua_Raid::*)(Lua_Client))&Lua_Raid::IsGroupLeader)
 	.def("IsLeader", (bool(Lua_Raid::*)(const char*))&Lua_Raid::IsLeader)
 	.def("IsLeader", (bool(Lua_Raid::*)(Lua_Client))&Lua_Raid::IsLeader)
+	.def("GetLeader", (Lua_Client(Lua_Raid::*)(void))&Lua_Raid::GetLeader)
+	.def("GetLeaderName", (std::string(Lua_Raid::*)(void)) & Lua_Raid::GetLeaderName)
 	.def("IsRaidMember", (bool(Lua_Raid::*)(const char*))&Lua_Raid::IsRaidMember)
 	.def("IsRaidMember", (bool(Lua_Raid::*)(Lua_Client))&Lua_Raid::IsRaidMember)
 	.def("RaidCount", (int(Lua_Raid::*)(void))&Lua_Raid::RaidCount)

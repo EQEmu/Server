@@ -78,6 +78,16 @@ bool Perl_Raid_IsLeader(Raid* self, Client* c) // @categories Raid
 	return self->IsLeader(c);
 }
 
+Client* Perl_Raid_GetLeader(Raid* self) // @categories Raid
+{
+	return self->GetLeader();
+}
+
+std::string Perl_Raid_GetLeaderName(Raid* self) // @categories Raid
+{
+	return self->GetLeaderName();
+}
+
 bool Perl_Raid_IsGroupLeader(Raid* self, const char* who) // @categories Group, Raid
 {
 	return self->IsGroupLeader(who);
@@ -165,6 +175,8 @@ void perl_register_raid()
 	package.add("GetID", &Perl_Raid_GetID);
 	package.add("GetLowestLevel", &Perl_Raid_GetLowestLevel);
 	package.add("GetMember", &Perl_Raid_GetMember);
+	package.add("GetLeader", &Perl_Raid_GetLeader);
+	package.add("GetLeaderName", &Perl_Raid_GetLeaderName);
 	package.add("GetTotalRaidDamage", &Perl_Raid_GetTotalRaidDamage);
 	package.add("GroupCount", &Perl_Raid_GroupCount);
 	package.add("IsGroupLeader", (bool(*)(Raid*, const char*))&Perl_Raid_IsGroupLeader);
