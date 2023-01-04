@@ -627,7 +627,7 @@ public:
 
 	uint64 GetExperienceForKill(Mob *against);
 	void AddEXP(uint64 in_add_exp, uint8 conlevel = 0xFF, bool resexp = false);
-	uint64 CalcEXP(uint8 conlevel = 0xFF);
+	uint64 CalcEXP(uint8 conlevel = 0xFF, bool ignore_mods = false);
 	void CalculateNormalizedAAExp(uint64 &add_aaxp, uint8 conlevel, bool resexp);
 	void CalculateStandardAAExp(uint64 &add_aaxp, uint8 conlevel, bool resexp);
 	void CalculateLeadershipExp(uint64 &add_exp, uint8 conlevel);

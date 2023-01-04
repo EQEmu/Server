@@ -104,7 +104,7 @@ static uint32 MaxBankedRaidLeadershipPoints(int Level)
 	return 10;
 }
 
-uint64 Client::CalcEXP(uint8 conlevel) {
+uint64 Client::CalcEXP(uint8 conlevel, bool ignore_mods) {
 
 	uint64 in_add_exp = EXP_FORMULA;
 
@@ -115,87 +115,82 @@ uint64 Client::CalcEXP(uint8 conlevel) {
 	float totalmod = 1.0;
 	float zemmod = 1.0;
 	//get modifiers
-	if(RuleR(Character, ExpMultiplier) >= 0){
+	if (RuleR(Character, ExpMultiplier) >= 0 && !ignore_mods) {
 		totalmod *= RuleR(Character, ExpMultiplier);
 	}
 
-	if(zone->newzone_data.zone_exp_multiplier >= 0){
+	if (zone->newzone_data.zone_exp_multiplier >= 0 && !ignore_mods) {
 		zemmod *= zone->newzone_data.zone_exp_multiplier;
 	}
 
-	if(RuleB(Character,UseRaceClassExpBonuses))
-	{
-		if(GetBaseRace() == HALFLING){
+	if (RuleB(Character,UseRaceClassExpBonuses) && !ignore_mods) {
+		if (GetBaseRace() == HALFLING) {
 			totalmod *= 1.05;
 		}
 
-		if(GetClass() == ROGUE || GetClass() == WARRIOR){
+		if ((GetClass() == ROGUE || GetClass() == WARRIOR) && !ignore_mods) {
 			totalmod *= 1.05;
 		}
 	}
 
-	if(zone->IsHotzone())
-	{
+	if (zone->IsHotzone() && !ignore_mods) {
 		totalmod += RuleR(Zone, HotZoneBonus);
 	}
 
 	in_add_exp = uint64(float(in_add_exp) * totalmod * zemmod);
 
-	if(RuleB(Character,UseXPConScaling))
-	{
+	if (RuleB(Character,UseXPConScaling)) {
 		if (conlevel != 0xFF) {
-			switch (conlevel)
-			{
-			case CON_GRAY:
-				in_add_exp = 0;
-				return 0;
-			case CON_GREEN:
-				in_add_exp = in_add_exp * RuleI(Character, GreenModifier) / 100;
-				break;
-			case CON_LIGHTBLUE:
-				in_add_exp = in_add_exp * RuleI(Character, LightBlueModifier)/100;
-				break;
-			case CON_BLUE:
-				in_add_exp = in_add_exp * RuleI(Character, BlueModifier)/100;
-				break;
-			case CON_WHITE:
-				in_add_exp = in_add_exp * RuleI(Character, WhiteModifier)/100;
-				break;
-			case CON_YELLOW:
-				in_add_exp = in_add_exp * RuleI(Character, YellowModifier)/100;
-				break;
-			case CON_RED:
-				in_add_exp = in_add_exp * RuleI(Character, RedModifier)/100;
-				break;
+			switch (conlevel) {
+				case CON_GRAY:
+					in_add_exp = 0;
+					return 0;
+				case CON_GREEN:
+					in_add_exp = in_add_exp * RuleI(Character, GreenModifier) / 100;
+					break;
+				case CON_LIGHTBLUE:
+					in_add_exp = in_add_exp * RuleI(Character, LightBlueModifier)/100;
+					break;
+				case CON_BLUE:
+					in_add_exp = in_add_exp * RuleI(Character, BlueModifier)/100;
+					break;
+				case CON_WHITE:
+					in_add_exp = in_add_exp * RuleI(Character, WhiteModifier)/100;
+					break;
+				case CON_YELLOW:
+					in_add_exp = in_add_exp * RuleI(Character, YellowModifier)/100;
+					break;
+				case CON_RED:
+					in_add_exp = in_add_exp * RuleI(Character, RedModifier)/100;
+					break;
 			}
 		}
 	}
 
 	float aatotalmod = 1.0;
-	if(zone->newzone_data.zone_exp_multiplier >= 0){
+	if (zone->newzone_data.zone_exp_multiplier >= 0) {
 		aatotalmod *= zone->newzone_data.zone_exp_multiplier;
 	}
 
 
 
-	if(RuleB(Character,UseRaceClassExpBonuses))
-	{
+	if (RuleB(Character,UseRaceClassExpBonuses)) {
 		if(GetBaseRace() == HALFLING){
 			aatotalmod *= 1.05;
 		}
 
-		if(GetClass() == ROGUE || GetClass() == WARRIOR){
+		if (GetClass() == ROGUE || GetClass() == WARRIOR) {
 			aatotalmod *= 1.05;
 		}
 	}
 
-	if(RuleB(Zone, LevelBasedEXPMods)){
-		if(zone->level_exp_mod[GetLevel()].ExpMod){
+	if (RuleB(Zone, LevelBasedEXPMods) && !ignore_mods) {
+		if (zone->level_exp_mod[GetLevel()].ExpMod) {
 			in_add_exp *= zone->level_exp_mod[GetLevel()].ExpMod;
 		}
 	}
 
-	if (RuleR(Character, FinalExpMultiplier) >= 0) {
+	if (RuleR(Character, FinalExpMultiplier) >= 0 && !ignore_mods) {
 		in_add_exp *= RuleR(Character, FinalExpMultiplier);
 	}
 
