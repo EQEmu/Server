@@ -8,24 +8,15 @@ extern WorldServer worldserver;
 
 void command_guild(Client *c, const Seperator *sep)
 {
-	int arguments = sep->argnum;
+	const auto arguments = sep->argnum;
 	if (!arguments) {
-		c->Message(Chat::White, "#guild create [Character ID|Character Name] [Guild Name]");
-		c->Message(Chat::White, "#guild delete [Guild ID]");
-		c->Message(Chat::White, "#guild help");
-		c->Message(Chat::White, "#guild info [Guild ID]");
-		c->Message(Chat::White, "#guild list");
-		c->Message(Chat::White, "#guild rename [Guild ID] [New Name]");
-		c->Message(Chat::White, "#guild set [Character ID|Character Name] [Guild ID] (Guild ID 0 is Guildless)");
-		c->Message(Chat::White, "#guild setleader [Guild ID] [Character ID|Character Name]");
-		c->Message(Chat::White, "#guild setrank [Character ID|Character Name] [Rank]");
-		c->Message(Chat::White, "#guild status [Character ID|Character Name]");
+		SendGuildSubCommands(c);
 		return;
 	}
 
-	auto target = c;
+	auto t = c;
 	if (c->GetTarget() && c->GetTarget()->IsClient()) {
-		target = c->GetTarget()->CastToClient();
+		t = c->GetTarget()->CastToClient();
 	}
 
 	bool is_create = !strcasecmp(sep->arg[1], "create");
@@ -34,6 +25,7 @@ void command_guild(Client *c, const Seperator *sep)
 	bool is_info = !strcasecmp(sep->arg[1], "info");
 	bool is_list = !strcasecmp(sep->arg[1], "list");
 	bool is_rename = !strcasecmp(sep->arg[1], "rename");
+	bool is_search = !strcasecmp(sep->arg[1], "search");
 	bool is_set = !strcasecmp(sep->arg[1], "set");
 	bool is_set_leader = !strcasecmp(sep->arg[1], "setleader");
 	bool is_set_rank = !strcasecmp(sep->arg[1], "setrank");
@@ -45,21 +37,13 @@ void command_guild(Client *c, const Seperator *sep)
 		!is_info &&
 		!is_list &&
 		!is_rename &&
+		!is_search &&
 		!is_set &&
 		!is_set_leader &&
 		!is_set_rank &&
 		!is_status
 	) {
-		c->Message(Chat::White, "#guild create [Character ID|Character Name] [Guild Name]");
-		c->Message(Chat::White, "#guild delete [Guild ID]");
-		c->Message(Chat::White, "#guild help");
-		c->Message(Chat::White, "#guild info [Guild ID]");
-		c->Message(Chat::White, "#guild list");
-		c->Message(Chat::White, "#guild rename [Guild ID] [New Name]");
-		c->Message(Chat::White, "#guild set [Character ID|Character Name] [Guild ID] (Guild ID 0 is Guildless)");
-		c->Message(Chat::White, "#guild setleader [Guild ID] [Character ID|Character Name]");
-		c->Message(Chat::White, "#guild setrank [Character ID|Character Name] [Rank]");
-		c->Message(Chat::White, "#guild status [Character ID|Character Name]");
+		SendGuildSubCommands(c);
 		return;
 	}
 
@@ -188,16 +172,7 @@ void command_guild(Client *c, const Seperator *sep)
 			);
 		}
 	} else if (is_help) {
-		c->Message(Chat::White, "#guild create [Character ID|Character Name] [Guild Name]");
-		c->Message(Chat::White, "#guild delete [Guild ID]");
-		c->Message(Chat::White, "#guild help");
-		c->Message(Chat::White, "#guild info [Guild ID]");
-		c->Message(Chat::White, "#guild list");
-		c->Message(Chat::White, "#guild rename [Guild ID] [New Name]");
-		c->Message(Chat::White, "#guild set [Character ID|Character Name] [Guild ID] (Guild ID 0 is Guildless)");
-		c->Message(Chat::White, "#guild setleader [Guild ID] [Character ID|Character Name]");
-		c->Message(Chat::White, "#guild setrank [Character ID|Character Name] [Rank]");
-		c->Message(Chat::White, "#guild status [Character ID|Character Name]");
+		SendGuildSubCommands(c);
 	} else if (is_info) {
 		if (arguments != 2 && c->IsInAGuild()) {
 			if (c->Admin() >= minStatusToEditOtherGuilds) {
@@ -223,7 +198,7 @@ void command_guild(Client *c, const Seperator *sep)
 			return;
 		}
 
-		guild_mgr.ListGuilds(c);
+		guild_mgr.ListGuilds(c, std::string());
 	} else if (is_rename) {
 		if (!sep->IsNumber(2)) {
 			c->Message(Chat::White, "Usage: #guild rename [Guild ID] [New Guild Name]");
@@ -269,6 +244,16 @@ void command_guild(Client *c, const Seperator *sep)
 				).c_str()
 			);
 		}
+	} else if (is_search) {
+		if (Strings::IsNumber(sep->arg[2])) {
+			const auto guild_id = std::stoul(sep->arg[2]);
+
+			guild_mgr.ListGuilds(c, guild_id);
+		} else {
+			const std::string search_criteria = sep->argplus[2];
+
+			guild_mgr.ListGuilds(c, search_criteria);
+		}
 	} else if (is_set) {
 		if (
 			arguments != 3 ||
@@ -292,7 +277,7 @@ void command_guild(Client *c, const Seperator *sep)
 			}
 
 			auto character_id = (
-				sep->IsNumber(2) ? 
+				sep->IsNumber(2) ?
 				std::stoul(sep->arg[2]) :
 				database.GetCharacterID(sep->arg[2])
 			);
@@ -330,7 +315,7 @@ void command_guild(Client *c, const Seperator *sep)
 					guild_id
 				);
 			}
-			
+
 			if (guild_id && guild_id != GUILD_NONE) {
 				c->Message(
 					Chat::White,
@@ -360,7 +345,7 @@ void command_guild(Client *c, const Seperator *sep)
 			!sep->IsNumber(2)
 		) {
 			c->Message(Chat::White, "Usage: #guild setleader [Guild ID] [Character ID|Character Name]");
-		} else {			
+		} else {
 			auto leader_id = (
 				sep->IsNumber(2) ?
 				std::stoul(sep->arg[2]) :
@@ -404,7 +389,7 @@ void command_guild(Client *c, const Seperator *sep)
 					return;
 				}
 
-				if (c->Admin() < minStatusToEditOtherGuilds) {					
+				if (c->Admin() < minStatusToEditOtherGuilds) {
 					if (c->GuildID() != guild_id) {
 						c->Message(Chat::White, "You cannot edit other peoples' guilds.");
 						return;
@@ -502,8 +487,8 @@ void command_guild(Client *c, const Seperator *sep)
 		}
 	} else if (is_status) {
 		auto client = (
-			target ?
-			target :
+			t ?
+			t :
 			(
 				arguments == 2 ?
 				entity_list.GetClientByName(sep->arg[2]) :
@@ -521,7 +506,7 @@ void command_guild(Client *c, const Seperator *sep)
 					fmt::format(
 						"{} {} not in a guild.",
 						c->GetTargetDescription(client, TargetDescriptionType::UCYou),
-						c == target ? "are" : "is"
+						c == t ? "are" : "is"
 					).c_str()
 				);
 			} else if (guild_mgr.IsGuildLeader(client->GuildID(), client->CharacterID())) {
@@ -530,17 +515,17 @@ void command_guild(Client *c, const Seperator *sep)
 					fmt::format(
 						"{} {} the leader of {}.",
 						c->GetTargetDescription(client, TargetDescriptionType::UCYou),
-						c == target ? "are" : "is",
+						c == t ? "are" : "is",
 						guild_mgr.GetGuildNameByID(client->GuildID())
 					).c_str()
 				);
 			} else {
-				c->Message( 
+				c->Message(
 					Chat::White,
 					fmt::format(
 						"{} {} a(n) {} of {}.",
 						c->GetTargetDescription(client, TargetDescriptionType::UCYou),
-						c == target ? "are" : "is",
+						c == t ? "are" : "is",
 						guild_mgr.GetRankName(client->GuildID(), client->GuildRank()),
 						guild_mgr.GetGuildNameByID(client->GuildID())
 					).c_str()
@@ -548,4 +533,19 @@ void command_guild(Client *c, const Seperator *sep)
 			}
 		}
 	}
+}
+
+void SendGuildSubCommands(Client *c)
+{
+	c->Message(Chat::White, "#guild create [Character ID|Character Name] [Guild Name]");
+	c->Message(Chat::White, "#guild delete [Guild ID]");
+	c->Message(Chat::White, "#guild help");
+	c->Message(Chat::White, "#guild info [Guild ID]");
+	c->Message(Chat::White, "#guild list");
+	c->Message(Chat::White, "#guild rename [Guild ID] [New Name]");
+	c->Message(Chat::White, "#guild search [Search Criteria]");
+	c->Message(Chat::White, "#guild set [Character ID|Character Name] [Guild ID] (Guild ID 0 is Guildless)");
+	c->Message(Chat::White, "#guild setleader [Guild ID] [Character ID|Character Name]");
+	c->Message(Chat::White, "#guild setrank [Character ID|Character Name] [Rank]");
+	c->Message(Chat::White, "#guild status [Character ID|Character Name]");
 }

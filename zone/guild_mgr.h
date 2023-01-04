@@ -80,7 +80,8 @@ public:
 	//called by worldserver when it receives a message from world.
 	void ProcessWorldPacket(ServerPacket *pack);
 
-	void ListGuilds(Client *c) const;
+	void ListGuilds(Client *c, std::string search_criteria = std::string()) const;
+	void ListGuilds(Client *c, uint32 guild_id = 0) const;
 	void DescribeGuild(Client *c, uint32 guild_id) const;
 
 
