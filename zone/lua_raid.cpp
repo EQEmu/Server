@@ -192,7 +192,7 @@ luabind::scope lua_register_raid() {
 	.def("IsLeader", (bool(Lua_Raid::*)(const char*))&Lua_Raid::IsLeader)
 	.def("IsLeader", (bool(Lua_Raid::*)(Lua_Client))&Lua_Raid::IsLeader)
 	.def("GetLeader", (Lua_Client(Lua_Raid::*)(void))&Lua_Raid::GetLeader)
-	.def("GetLeaderName", (Lua_Client(Lua_Raid::*)(void)) & Lua_Raid::GetLeaderName)
+	.def("GetLeaderName", (std::string(Lua_Raid::*)(void)) & Lua_Raid::GetLeaderName)
 	.def("IsRaidMember", (bool(Lua_Raid::*)(const char*))&Lua_Raid::IsRaidMember)
 	.def("IsRaidMember", (bool(Lua_Raid::*)(Lua_Client))&Lua_Raid::IsRaidMember)
 	.def("RaidCount", (int(Lua_Raid::*)(void))&Lua_Raid::RaidCount)
