@@ -647,6 +647,7 @@ namespace PlayerEvent {
 		uint32      recipe_id;
 		std::string recipe_name;
 		uint32      made_count;
+		uint32      tradeskill_id;
 
 		// cereal
 		template<class Archive>
@@ -655,7 +656,8 @@ namespace PlayerEvent {
 			ar(
 				CEREAL_NVP(recipe_id),
 				CEREAL_NVP(recipe_name),
-				CEREAL_NVP(made_count)
+				CEREAL_NVP(made_count),
+				CEREAL_NVP(tradeskill_id)
 			);
 		}
 	};
@@ -664,6 +666,7 @@ namespace PlayerEvent {
 		uint32      item_id;
 		std::string item_name;
 		int16       slot_id;
+		uint32      charges;
 
 		// cereal
 		template<class Archive>
@@ -672,7 +675,8 @@ namespace PlayerEvent {
 			ar(
 				CEREAL_NVP(item_id),
 				CEREAL_NVP(item_name),
-				CEREAL_NVP(slot_id)
+				CEREAL_NVP(slot_id),
+				CEREAL_NVP(charges)
 			);
 		}
 	};

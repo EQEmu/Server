@@ -903,6 +903,7 @@ void Client::DropItem(int16 slot_id, bool recurse)
 				.item_id = inst->GetID(),
 				.item_name = inst->GetItem()->Name,
 				.slot_id = slot_id,
+				.charges = (uint32) inst->GetCharges()
 			};
 			RecordPlayerEventLog(PlayerEvent::DROPPED_ITEM, e);
 		}
