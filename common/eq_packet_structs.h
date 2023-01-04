@@ -5163,10 +5163,10 @@ struct AltCurrencySelectItemReply_Struct {
 /*000*/ uint32	unknown000;
 /*004*/ uint8	unknown004; //0xff
 /*005*/ uint8	unknown005; //0xff
-/*006*/ uint8	unknown006; //0xff
-/*007*/ uint8	unknown007; //0xff
-/*008*/ char	item_name[64];
-/*072*/ uint32	unknown074;
+/*006*/ uint16	unknown006; //0xffff
+/*008*/ uint16	unknown008; //0xffff
+/*010*/ char	item_name[64];
+/*074*/ uint16	unknown074;
 /*076*/ uint32	cost;
 /*080*/ uint32	unknown080;
 /*084*/ uint32	unknown084;

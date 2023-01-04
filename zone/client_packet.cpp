@@ -2849,8 +2849,8 @@ void Client::Handle_OP_AltCurrencySellSelection(const EQApplicationPacket *app)
 		AltCurrencySelectItemReply_Struct *reply = (AltCurrencySelectItemReply_Struct*)outapp->pBuffer;
 		reply->unknown004 = 0xFF;
 		reply->unknown005 = 0xFF;
-		reply->unknown006 = 0xFF;
-		reply->unknown007 = 0xFF;
+		reply->unknown006 = 0xFFFF;
+		reply->unknown008 = 0xFFFF;
 		strcpy(reply->item_name, inst->GetItem()->Name);
 		reply->cost = cost;
 		FastQueuePacket(&outapp);
