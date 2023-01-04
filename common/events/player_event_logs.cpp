@@ -249,7 +249,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 	std::string payload;
 	switch (e.player_event_log.event_type_id) {
 		case PlayerEvent::AA_GAIN: {
-			PlayerEvent::AAGainedEvent n;
+			PlayerEvent::AAGainedEvent n{};
 			std::stringstream     ss;
 			{
 				ss << e.player_event_log.event_data;
@@ -260,7 +260,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 			break;
 		}
 		case PlayerEvent::AA_PURCHASE: {
-			PlayerEvent::AAPurchasedEvent n;
+			PlayerEvent::AAPurchasedEvent n{};
 			std::stringstream     ss;
 			{
 				ss << e.player_event_log.event_data;
@@ -272,7 +272,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 		}
 		case PlayerEvent::COMBINE_FAILURE:
 		case PlayerEvent::COMBINE_SUCCESS: {
-			PlayerEvent::CombineEvent n;
+			PlayerEvent::CombineEvent n{};
 			std::stringstream     ss;
 			{
 				ss << e.player_event_log.event_data;
@@ -283,7 +283,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 			break;
 		}
 		case PlayerEvent::DEATH: {
-			PlayerEvent::DeathEvent n;
+			PlayerEvent::DeathEvent n{};
 			std::stringstream     ss;
 			{
 				ss << e.player_event_log.event_data;
@@ -294,7 +294,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 			break;
 		}
 		case PlayerEvent::DISCOVER_ITEM: {
-			PlayerEvent::DiscoverItemEvent n;
+			PlayerEvent::DiscoverItemEvent n{};
 			std::stringstream              ss;
 			{
 				ss << e.player_event_log.event_data;
@@ -305,7 +305,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 			break;
 		}
 		case PlayerEvent::DROPPED_ITEM: {
-			PlayerEvent::DroppedItemEvent n;
+			PlayerEvent::DroppedItemEvent n{};
 			std::stringstream             ss;
 			{
 				ss << e.player_event_log.event_data;
@@ -320,7 +320,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 			break;
 		}
 		case PlayerEvent::FISH_SUCCESS: {
-			PlayerEvent::FishSuccessEvent n;
+			PlayerEvent::FishSuccessEvent n{};
 			std::stringstream     ss;
 			{
 				ss << e.player_event_log.event_data;
@@ -335,7 +335,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 			break;
 		}
 		case PlayerEvent::FORAGE_SUCCESS: {
-			PlayerEvent::ForageSuccessEvent n;
+			PlayerEvent::ForageSuccessEvent n{};
 			std::stringstream     ss;
 			{
 				ss << e.player_event_log.event_data;
@@ -346,7 +346,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 			break;
 		}
 		case PlayerEvent::ITEM_DESTROY: {
-			PlayerEvent::DestroyItemEvent n;
+			PlayerEvent::DestroyItemEvent n{};
 			std::stringstream     ss;
 			{
 				ss << e.player_event_log.event_data;
@@ -357,7 +357,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 			break;
 		}
 		case PlayerEvent::LEVEL_GAIN: {
-			PlayerEvent::LevelGainedEvent n;
+			PlayerEvent::LevelGainedEvent n{};
 			std::stringstream     ss;
 			{
 				ss << e.player_event_log.event_data;
@@ -368,7 +368,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 			break;
 		}
 		case PlayerEvent::LEVEL_LOSS: {
-			PlayerEvent::LevelLostEvent n;
+			PlayerEvent::LevelLostEvent n{};
 			std::stringstream     ss;
 			{
 				ss << e.player_event_log.event_data;
@@ -379,7 +379,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 			break;
 		}
 		case PlayerEvent::LOOT_ITEM: {
-			PlayerEvent::LootItemEvent n;
+			PlayerEvent::LootItemEvent n{};
 			std::stringstream     ss;
 			{
 				ss << e.player_event_log.event_data;
@@ -390,7 +390,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 			break;
 		}
 		case PlayerEvent::GROUNDSPAWN_PICKUP: {
-			PlayerEvent::GroundSpawnPickupEvent n;
+			PlayerEvent::GroundSpawnPickupEvent n{};
 			std::stringstream     ss;
 			{
 				ss << e.player_event_log.event_data;
@@ -401,7 +401,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 			break;
 		}
 		case PlayerEvent::NPC_HANDIN: {
-			PlayerEvent::HandinEvent n;
+			PlayerEvent::HandinEvent n{};
 			std::stringstream        ss;
 			{
 				ss << e.player_event_log.event_data;
@@ -412,7 +412,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 			break;
 		}
 		case PlayerEvent::SAY: {
-			PlayerEvent::SayEvent n;
+			PlayerEvent::SayEvent n{};
 			std::stringstream     ss;
 			{
 				ss << e.player_event_log.event_data;
@@ -423,7 +423,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 			break;
 		}
 		case PlayerEvent::GM_COMMAND: {
-			PlayerEvent::GMCommandEvent n;
+			PlayerEvent::GMCommandEvent n{};
 			std::stringstream     ss;
 			{
 				ss << e.player_event_log.event_data;
@@ -434,7 +434,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 			break;
 		}
 		case PlayerEvent::SKILL_UP: {
-			PlayerEvent::SkillUpEvent n;
+			PlayerEvent::SkillUpEvent n{};
 			std::stringstream     ss;
 			{
 				ss << e.player_event_log.event_data;
@@ -445,7 +445,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 			break;
 		}
 		case PlayerEvent::SPLIT_MONEY: {
-			PlayerEvent::SplitMoneyEvent n;
+			PlayerEvent::SplitMoneyEvent n{};
 			std::stringstream            ss;
 			{
 				ss << e.player_event_log.event_data;
@@ -456,7 +456,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 			break;
 		}
 		case PlayerEvent::TASK_ACCEPT: {
-			PlayerEvent::TaskAcceptEvent n;
+			PlayerEvent::TaskAcceptEvent n{};
 			std::stringstream     ss;
 			{
 				ss << e.player_event_log.event_data;
@@ -467,7 +467,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 			break;
 		}
 		case PlayerEvent::TASK_COMPLETE: {
-			PlayerEvent::TaskCompleteEvent n;
+			PlayerEvent::TaskCompleteEvent n{};
 			std::stringstream     ss;
 			{
 				ss << e.player_event_log.event_data;
@@ -478,7 +478,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 			break;
 		}
 		case PlayerEvent::TASK_UPDATE: {
-			PlayerEvent::TaskUpdateEvent n;
+			PlayerEvent::TaskUpdateEvent n{};
 			std::stringstream     ss;
 			{
 				ss << e.player_event_log.event_data;
@@ -489,7 +489,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 			break;
 		}
 		case PlayerEvent::TRADE: {
-			PlayerEvent::TradeEvent n;
+			PlayerEvent::TradeEvent n{};
 			std::stringstream     ss;
 			{
 				ss << e.player_event_log.event_data;
@@ -500,7 +500,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 			break;
 		}
 		case PlayerEvent::TRADER_PURCHASE: {
-			PlayerEvent::TraderPurchaseEvent n;
+			PlayerEvent::TraderPurchaseEvent n{};
 			std::stringstream     ss;
 			{
 				ss << e.player_event_log.event_data;
@@ -511,7 +511,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 			break;
 		}
 		case PlayerEvent::TRADER_SELL: {
-			PlayerEvent::TraderSellEvent n;
+			PlayerEvent::TraderSellEvent n{};
 			std::stringstream     ss;
 			{
 				ss << e.player_event_log.event_data;
@@ -522,7 +522,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 			break;
 		}
 		case PlayerEvent::REZ_ACCEPTED: {
-			PlayerEvent::ResurrectAcceptEvent n;
+			PlayerEvent::ResurrectAcceptEvent n{};
 			std::stringstream     ss;
 			{
 				ss << e.player_event_log.event_data;
@@ -538,7 +538,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 			break;
 		}
 		case PlayerEvent::MERCHANT_PURCHASE: {
-			PlayerEvent::MerchantPurchaseEvent n;
+			PlayerEvent::MerchantPurchaseEvent n{};
 			std::stringstream                  ss;
 			{
 				ss << e.player_event_log.event_data;
@@ -550,7 +550,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 			break;
 		}
 		case PlayerEvent::MERCHANT_SELL: {
-			PlayerEvent::MerchantSellEvent n;
+			PlayerEvent::MerchantSellEvent n{};
 			std::stringstream              ss;
 			{
 				ss << e.player_event_log.event_data;
@@ -562,7 +562,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 			break;
 		}
 		case PlayerEvent::ZONING: {
-			PlayerEvent::ZoningEvent n;
+			PlayerEvent::ZoningEvent n{};
 			std::stringstream        ss;
 			{
 				ss << e.player_event_log.event_data;
@@ -572,6 +572,13 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 
 			payload = PlayerEventDiscordFormatter::FormatZoningEvent(e, n);
 			break;
+		}
+		default: {
+			LogInfo(
+				"Player event [{}] ({}) Discord formatter not implemented",
+				e.player_event_log.event_type_name,
+				e.player_event_log.event_type_id
+			);
 		}
 	}
 
