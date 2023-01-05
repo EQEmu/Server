@@ -735,6 +735,15 @@ bool ZoneDatabase::GetBasePetItems(int32 equipmentset, uint32 *items) {
 	return true;
 }
 
+bool Pet::CheckSpellLevelRestriction(Mob *caster, uint16 spell_id)
+{
+	auto owner = GetOwner();
+	if (owner) {
+		return owner->CheckSpellLevelRestriction(caster, spell_id);
+	}
+	return true;
+}
+
 BeastlordPetData::PetStruct ZoneDatabase::GetBeastlordPetData(uint16 race_id) {
 	BeastlordPetData::PetStruct beastlord_pet_data;
 	std::string query = fmt::format(
