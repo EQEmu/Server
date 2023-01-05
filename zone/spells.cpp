@@ -801,7 +801,7 @@ bool Mob::DoCastingChecksOnTarget(bool check_on_casting, int32 spell_id, Mob *sp
 		Prevent buffs from being cast on targets who don't meet level restriction
 	*/
 
-	if (!spell_target->CheckSpellLevelRestriction(spell_id)) {
+	if (!spell_target->CheckSpellLevelRestriction(this, spell_id)) {
 		return false;
 	}
 	/*
@@ -3201,14 +3201,14 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 // spells 1-50: no restrictons
 // 51-65: SpellLevel/2+15
 // 66+ Group Spells 62, Single Target 61
-bool Mob::CheckSpellLevelRestriction(uint16 spell_id)
+bool Mob::CheckSpellLevelRestriction(Mob *caster, uint16 spell_id)
 {
 	bool check_for_restrictions = false;
 	bool can_cast = true;
 
 	// NON GM clients might be restricted by rule setting
-	if (IsClient()) {
-		if (RuleB(Spells, BuffLevelRestrictions) && !CastToClient()->GetGM()) {
+	if (caster->IsClient()) {
+		if (RuleB(Spells, BuffLevelRestrictions) && !caster->CastToClient()->GetGM()) {
 			check_for_restrictions = true;
 		}
 	}
@@ -4187,7 +4187,7 @@ bool Mob::SpellOnTarget(
 	}
 
 	// make sure spelltar is high enough level for the buff
-	if (!spelltar->CheckSpellLevelRestriction(spell_id)) {
+	if (!spelltar->CheckSpellLevelRestriction(this, spell_id)) {
 		safe_delete(action_packet);
 		return false;
 	}
