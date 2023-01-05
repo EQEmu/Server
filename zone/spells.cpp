@@ -734,10 +734,6 @@ bool Mob::DoCastingChecksOnTarget(bool check_on_casting, int32 spell_id, Mob *sp
 	*/
 
 	bool ignore_on_casting = false;
-	bool ignore_if_npc_or_gm = false;
-	if (!IsClient() || (IsClient() && CastToClient()->GetGM())) {
-		ignore_if_npc_or_gm = true;
-	}
 
 	if (check_on_casting){
 
@@ -804,15 +800,9 @@ bool Mob::DoCastingChecksOnTarget(bool check_on_casting, int32 spell_id, Mob *sp
 	/*
 		Prevent buffs from being cast on targets who don't meet level restriction
 	*/
-	if (!ignore_if_npc_or_gm && RuleB(Spells, BuffLevelRestrictions)) {
-		// casting_spell_targetid is guaranteed to be what we went, check for ST_Self for now should work though
-		if (spells[spell_id].target_type != ST_Self && !spell_target->CheckSpellLevelRestriction(spell_id)) {
-			LogSpells("Spell [{}] failed: recipient did not meet the level restrictions", spell_id);
-			if (!IsBardSong(spell_id)) {
-				MessageString(Chat::SpellFailure, SPELL_TOO_POWERFUL);
-			}
-			return false;
-		}
+
+	if (!spell_target->CheckSpellLevelRestriction(spell_id)) {
+		return false;
 	}
 	/*
 		Prevents buff from being cast based on tareget ing PC OR NPC (1 = PCs, 2 = NPCs)
@@ -3213,27 +3203,48 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 // 66+ Group Spells 62, Single Target 61
 bool Mob::CheckSpellLevelRestriction(uint16 spell_id)
 {
-	return true;
-}
+	bool check_for_restrictions = false;
+	bool can_cast = true;
 
-bool Client::CheckSpellLevelRestriction(uint16 spell_id)
-{
-	int SpellLevel = GetMinLevel(spell_id);
+	// NON GM clients might be restricted by rule setting
+	if (IsClient()) {
+		if (RuleB(Spells, BuffLevelRestrictions) && !CastToClient()->GetGM()) {
+			check_for_restrictions = true;
+		}
+	}
+	// NPCS might be restricted by rule setting
+	else if (RuleB(Spells, NPCBuffLevelRestrictions)) {
+		check_for_restrictions = true;
+	}
 
-	// Only check for beneficial buffs
-	if (IsBuffSpell(spell_id) && IsBeneficialSpell(spell_id)) {
-		if (SpellLevel > 65) {
-			if (IsGroupSpell(spell_id) && GetLevel() < 62)
-				return false;
-			else if (GetLevel() < 61)
-				return false;
-		} else if (SpellLevel > 50) { // 51-65
-			if (GetLevel() < (SpellLevel / 2 + 15))
-				return false;
+	if (check_for_restrictions) {
+		int SpellLevel = GetMinLevel(spell_id);
+
+		// Only check for beneficial buffs
+		if (IsBuffSpell(spell_id) && IsBeneficialSpell(spell_id)) {
+			if (SpellLevel > 65) {
+				if (IsGroupSpell(spell_id) && GetLevel() < 62) {
+					can_cast = false;
+				}
+				else if (GetLevel() < 61) {
+					can_cast = false;
+				}
+			} else if (SpellLevel > 50) { // 51-65
+				if (GetLevel() < (SpellLevel / 2 + 15)) {
+					can_cast = false;
+				}
+			}
 		}
 	}
 
-	return true;
+	if (!can_cast) {
+		LogSpells("Spell [{}] failed: recipient did not meet the level restrictions", spell_id);
+		if (!IsBardSong(spell_id)) {
+			MessageString(Chat::SpellFailure, SPELL_TOO_POWERFUL);
+		}
+	}
+
+	return can_cast;
 }
 
 uint32 Mob::GetFirstBuffSlot(bool disc, bool song)
@@ -4176,12 +4187,7 @@ bool Mob::SpellOnTarget(
 	}
 
 	// make sure spelltar is high enough level for the buff
-	if (RuleB(Spells, BuffLevelRestrictions) && !spelltar->CheckSpellLevelRestriction(spell_id)) {
-		LogSpells("Spell [{}] failed: recipient did not meet the level restrictions", spell_id);
-		if (!IsBardSong(spell_id)) {
-			MessageString(Chat::SpellFailure, SPELL_TOO_POWERFUL);
-		}
-
+	if (!spelltar->CheckSpellLevelRestriction(spell_id)) {
 		safe_delete(action_packet);
 		return false;
 	}
