@@ -457,6 +457,8 @@ public:
 	luabind::object GetAugmentIDsBySlotID(lua_State* L, int16 slot_id);
 	bool IsEXPEnabled();
 	void SetEXPEnabled(bool is_exp_enabled);
+	uint64 CalcEXP(uint8 consider_level);
+	uint64 CalcEXP(uint8 consider_level, bool ignore_modifiers);
 
 	void ApplySpell(int spell_id);
 	void ApplySpell(int spell_id, int duration);

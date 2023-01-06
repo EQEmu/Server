@@ -2916,6 +2916,16 @@ void Lua_Client::SetEXPEnabled(bool is_exp_enabled) {
 	self->SetEXPEnabled(is_exp_enabled);
 }
 
+uint64 Lua_Client::CalcEXP(uint8 consider_level) {
+	Lua_Safe_Call_Int();
+	return self->CalcEXP(consider_level);
+}
+
+uint64 Lua_Client::CalcEXP(uint8 consider_level, bool ignore_modifiers) {
+	Lua_Safe_Call_Int();
+	return self->CalcEXP(consider_level, ignore_modifiers);
+}
+
 #ifdef BOTS
 
 int Lua_Client::GetBotRequiredLevel()
@@ -3047,6 +3057,8 @@ luabind::scope lua_register_client() {
 	.def("BreakInvis", (void(Lua_Client::*)(void))&Lua_Client::BreakInvis)
 	.def("CalcATK", &Lua_Client::CalcATK)
 	.def("CalcCurrentWeight", &Lua_Client::CalcCurrentWeight)
+	.def("CalcEXP", (uint64(Lua_Client::*)(uint8))&Lua_Client::CalcEXP)
+	.def("CalcEXP", (uint64(Lua_Client::*)(uint8,bool))&Lua_Client::CalcEXP)
 	.def("CalcPriceMod", (float(Lua_Client::*)(Lua_Mob,bool))&Lua_Client::CalcPriceMod)
 	.def("CanHaveSkill", (bool(Lua_Client::*)(int))&Lua_Client::CanHaveSkill)
 	.def("CashReward", &Lua_Client::CashReward)

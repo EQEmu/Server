@@ -104,99 +104,84 @@ static uint32 MaxBankedRaidLeadershipPoints(int Level)
 	return 10;
 }
 
-uint64 Client::CalcEXP(uint8 conlevel) {
-
+uint64 Client::CalcEXP(uint8 consider_level, bool ignore_modifiers) {
 	uint64 in_add_exp = EXP_FORMULA;
 
-
-	if((XPRate != 0))
+	if (XPRate != 0) {
 		in_add_exp = static_cast<uint64>(in_add_exp * (static_cast<float>(XPRate) / 100.0f));
-
-	float totalmod = 1.0;
-	float zemmod = 1.0;
-	//get modifiers
-	if(RuleR(Character, ExpMultiplier) >= 0){
-		totalmod *= RuleR(Character, ExpMultiplier);
 	}
 
-	if(zone->newzone_data.zone_exp_multiplier >= 0){
-		zemmod *= zone->newzone_data.zone_exp_multiplier;
-	}
+	if (!ignore_modifiers) {
+		auto total_modifier = 1.0f;
+		auto zone_modifier  = 1.0f;
 
-	if(RuleB(Character,UseRaceClassExpBonuses))
-	{
-		if(GetBaseRace() == HALFLING){
-			totalmod *= 1.05;
+		if (RuleR(Character, ExpMultiplier) >= 0) {
+			total_modifier *= RuleR(Character, ExpMultiplier);
 		}
 
-		if(GetClass() == ROGUE || GetClass() == WARRIOR){
-			totalmod *= 1.05;
+		if (zone->newzone_data.zone_exp_multiplier >= 0) {
+			zone_modifier *= zone->newzone_data.zone_exp_multiplier;
 		}
+
+		if (RuleB(Character, UseRaceClassExpBonuses)) {
+			if (
+				GetClass() == WARRIOR ||
+				GetClass() == ROGUE ||
+				GetBaseRace() == HALFLING
+			) {
+				total_modifier *= 1.05;
+			}
+		}
+
+		if (zone->IsHotzone()) {
+			total_modifier += RuleR(Zone, HotZoneBonus);
+		}
+
+		in_add_exp = uint64(float(in_add_exp) * total_modifier * zone_modifier);
 	}
 
-	if(zone->IsHotzone())
-	{
-		totalmod += RuleR(Zone, HotZoneBonus);
-	}
-
-	in_add_exp = uint64(float(in_add_exp) * totalmod * zemmod);
-
-	if(RuleB(Character,UseXPConScaling))
-	{
-		if (conlevel != 0xFF) {
-			switch (conlevel)
-			{
-			case CON_GRAY:
-				in_add_exp = 0;
-				return 0;
-			case CON_GREEN:
-				in_add_exp = in_add_exp * RuleI(Character, GreenModifier) / 100;
-				break;
-			case CON_LIGHTBLUE:
-				in_add_exp = in_add_exp * RuleI(Character, LightBlueModifier)/100;
-				break;
-			case CON_BLUE:
-				in_add_exp = in_add_exp * RuleI(Character, BlueModifier)/100;
-				break;
-			case CON_WHITE:
-				in_add_exp = in_add_exp * RuleI(Character, WhiteModifier)/100;
-				break;
-			case CON_YELLOW:
-				in_add_exp = in_add_exp * RuleI(Character, YellowModifier)/100;
-				break;
-			case CON_RED:
-				in_add_exp = in_add_exp * RuleI(Character, RedModifier)/100;
-				break;
+	if (RuleB(Character,UseXPConScaling)) {
+		if (consider_level != 0xFF) {
+			switch (consider_level) {
+				case CON_GRAY:
+					in_add_exp = 0;
+					return 0;
+				case CON_GREEN:
+					in_add_exp = in_add_exp * RuleI(Character, GreenModifier) / 100;
+					break;
+				case CON_LIGHTBLUE:
+					in_add_exp = in_add_exp * RuleI(Character, LightBlueModifier) / 100;
+					break;
+				case CON_BLUE:
+					in_add_exp = in_add_exp * RuleI(Character, BlueModifier) / 100;
+					break;
+				case CON_WHITE:
+					in_add_exp = in_add_exp * RuleI(Character, WhiteModifier) / 100;
+					break;
+				case CON_YELLOW:
+					in_add_exp = in_add_exp * RuleI(Character, YellowModifier) / 100;
+					break;
+				case CON_RED:
+					in_add_exp = in_add_exp * RuleI(Character, RedModifier) / 100;
+					break;
 			}
 		}
 	}
 
-	float aatotalmod = 1.0;
-	if(zone->newzone_data.zone_exp_multiplier >= 0){
-		aatotalmod *= zone->newzone_data.zone_exp_multiplier;
-	}
-
-
-
-	if(RuleB(Character,UseRaceClassExpBonuses))
-	{
-		if(GetBaseRace() == HALFLING){
-			aatotalmod *= 1.05;
+	if (!ignore_modifiers) {
+		if (RuleB(Zone, LevelBasedEXPMods)) {
+			if (zone->level_exp_mod[GetLevel()].ExpMod) {
+				in_add_exp *= zone->level_exp_mod[GetLevel()].ExpMod;
+			}
 		}
 
-		if(GetClass() == ROGUE || GetClass() == WARRIOR){
-			aatotalmod *= 1.05;
+		if (RuleR(Character, FinalExpMultiplier) >= 0) {
+			in_add_exp *= RuleR(Character, FinalExpMultiplier);
 		}
-	}
 
-	if(RuleB(Zone, LevelBasedEXPMods)){
-		if(zone->level_exp_mod[GetLevel()].ExpMod){
-			in_add_exp *= zone->level_exp_mod[GetLevel()].ExpMod;
+		if (RuleB(Character, EnableCharacterEXPMods)) {
+			in_add_exp *= GetEXPModifier(zone->GetZoneID(), zone->GetInstanceVersion());
 		}
-	}
-
-	if (RuleR(Character, FinalExpMultiplier) >= 0) {
-		in_add_exp *= RuleR(Character, FinalExpMultiplier);
 	}
 
 	return in_add_exp;
