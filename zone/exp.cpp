@@ -602,33 +602,34 @@ void Client::SetEXP(uint64 set_exp, uint64 set_aaxp, bool isrezzexp) {
 			}
 		}
 	}
-	uint64 current_XP = GetEXP();
-	uint64 current_AAXP = GetAAXP();
-	uint64 totalCurrentExp = current_XP + current_AAXP;
-	uint64 totalAddExp = set_exp + set_aaxp;
-	if ((totalAddExp) > (totalCurrentExp)) {
-		uint64 exp_gained = set_exp - current_XP;
-		uint64 aaxp_gained = set_aaxp - current_AAXP;
+
+	uint64 current_exp = GetEXP();
+	uint64 current_aa_exp = GetAAXP();
+	uint64 total_current_exp = current_exp + current_aa_exp;
+	uint64 total_add_exp = set_exp + set_aaxp;
+	if (total_add_exp > total_current_exp) {
+		uint64 exp_gained = set_exp - current_exp;
+		uint64 aa_exp_gained = set_aaxp - current_aa_exp;
 		float exp_percent = (float)((float)exp_gained / (float)(GetEXPForLevel(GetLevel() + 1) - GetEXPForLevel(GetLevel())))*(float)100; //EXP needed for level
-		float aaxp_percent = (float)((float)aaxp_gained / (float)(RuleI(AA, ExpPerPoint)))*(float)100; //AAEXP needed for level
+		float aa_exp_percent = (float)((float)aa_exp_gained / (float)(RuleI(AA, ExpPerPoint)))*(float)100; //AAEXP needed for level
 		std::string exp_amount_message = "";
 		if (RuleI(Character, ShowExpValues) >= 1) {
-			if (exp_gained > 0 && aaxp_gained > 0) {
-				exp_amount_message = fmt::format("({}) ({})", exp_gained, aaxp_gained);
+			if (exp_gained > 0 && aa_exp_gained > 0) {
+				exp_amount_message = fmt::format("({}) ({})", exp_gained, aa_exp_gained);
 			}
 			else if (exp_gained > 0) {
 				exp_amount_message = fmt::format("({})", exp_gained);
 			}
 			else {
-				exp_amount_message = fmt::format("({}) AA", aaxp_gained);
+				exp_amount_message = fmt::format("({}) AA", aa_exp_gained);
 			}
 		}
-		
+
 		std::string exp_percent_message = "";
 		if (RuleI(Character, ShowExpValues) >= 2) {
-			if (exp_gained > 0 && aaxp_gained > 0) exp_percent_message = StringFormat("(%.3f%%, %.3f%%AA)", exp_percent, aaxp_percent);
+			if (exp_gained > 0 && aa_exp_gained > 0) exp_percent_message = StringFormat("(%.3f%%, %.3f%%AA)", exp_percent, aa_exp_percent);
 			else if (exp_gained > 0) exp_percent_message = StringFormat("(%.3f%%)", exp_percent);
-			else exp_percent_message = StringFormat("(%.3f%%AA)", aaxp_percent);
+			else exp_percent_message = StringFormat("(%.3f%%AA)", aa_exp_percent);
 		}
 		if (isrezzexp) {
 			if (RuleI(Character, ShowExpValues) > 0)
@@ -652,8 +653,8 @@ void Client::SetEXP(uint64 set_exp, uint64 set_aaxp, bool isrezzexp) {
 			}
 		}
 	}
-	else if(totalAddExp < totalCurrentExp){ //only loss message if you lose exp, no message if you gained/lost nothing.
-		uint64 exp_lost = current_XP - set_exp;
+	else if(total_add_exp < total_current_exp){ //only loss message if you lose exp, no message if you gained/lost nothing.
+		uint64 exp_lost = current_exp - set_exp;
 		float exp_percent = (float)((float)exp_lost / (float)(GetEXPForLevel(GetLevel() + 1) - GetEXPForLevel(GetLevel())))*(float)100;
 
 		if (RuleI(Character, ShowExpValues) == 1 && exp_lost > 0) Message(Chat::Yellow, "You have lost %i experience.", exp_lost);
