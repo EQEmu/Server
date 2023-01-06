@@ -112,8 +112,8 @@ uint64 Client::CalcEXP(uint8 consider_level, bool ignore_modifiers) {
 	}
 
 	if (!ignore_modifiers) {
-		float total_modifier = 1.0;
-		float zone_modifier   = 1.0;
+		auto total_modifier = 1.0f;
+		auto zone_modifier  = 1.0f;
 
 		if (RuleR(Character, ExpMultiplier) >= 0) {
 			total_modifier *= RuleR(Character, ExpMultiplier);
