@@ -3240,7 +3240,7 @@ bool Mob::CheckSpellLevelRestriction(Mob *caster, uint16 spell_id)
 	if (!can_cast) {
 		LogSpells("Spell [{}] failed: recipient did not meet the level restrictions", spell_id);
 		if (!IsBardSong(spell_id)) {
-			MessageString(Chat::SpellFailure, SPELL_TOO_POWERFUL);
+			caster->MessageString(Chat::SpellFailure, SPELL_TOO_POWERFUL);
 		}
 	}
 
