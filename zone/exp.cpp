@@ -178,6 +178,10 @@ uint64 Client::CalcEXP(uint8 consider_level, bool ignore_modifiers) {
 		if (RuleR(Character, FinalExpMultiplier) >= 0) {
 			in_add_exp *= RuleR(Character, FinalExpMultiplier);
 		}
+
+		if (RuleB(Character, EnableCharacterEXPMods)) {
+			in_add_exp *= GetEXPModifier(zone->GetZoneID(), zone->GetInstanceVersion());
+		}
 	}
 
 	return in_add_exp;
