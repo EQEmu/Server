@@ -3218,19 +3218,19 @@ bool Mob::CheckSpellLevelRestriction(Mob *caster, uint16 spell_id)
 	}
 
 	if (check_for_restrictions) {
-		int SpellLevel = GetMinLevel(spell_id);
+		int spell_level = GetMinLevel(spell_id);
 
 		// Only check for beneficial buffs
 		if (IsBuffSpell(spell_id) && IsBeneficialSpell(spell_id)) {
-			if (SpellLevel > 65) {
+			if (spell_level > 65) {
 				if (IsGroupSpell(spell_id) && GetLevel() < 62) {
 					can_cast = false;
 				}
 				else if (GetLevel() < 61) {
 					can_cast = false;
 				}
-			} else if (SpellLevel > 50) { // 51-65
-				if (GetLevel() < (SpellLevel / 2 + 15)) {
+			} else if (spell_level > 50) { // 51-65
+				if (GetLevel() < (spell_level / 2 + 15)) {
 					can_cast = false;
 				}
 			}
