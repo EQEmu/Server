@@ -167,23 +167,6 @@ uint64 Client::CalcEXP(uint8 conlevel, bool ignore_mods) {
 		}
 	}
 
-	float aatotalmod = 1.0;
-	if (zone->newzone_data.zone_exp_multiplier >= 0) {
-		aatotalmod *= zone->newzone_data.zone_exp_multiplier;
-	}
-
-
-
-	if (RuleB(Character,UseRaceClassExpBonuses)) {
-		if(GetBaseRace() == HALFLING){
-			aatotalmod *= 1.05;
-		}
-
-		if (GetClass() == ROGUE || GetClass() == WARRIOR) {
-			aatotalmod *= 1.05;
-		}
-	}
-
 	if (RuleB(Zone, LevelBasedEXPMods) && !ignore_mods) {
 		if (zone->level_exp_mod[GetLevel()].ExpMod) {
 			in_add_exp *= zone->level_exp_mod[GetLevel()].ExpMod;
