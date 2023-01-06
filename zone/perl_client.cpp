@@ -1597,14 +1597,14 @@ float Perl_Client_GetTargetRingZ(Client* self) // @categories Script Utility
 	return self->GetTargetRingZ();
 }
 
-uint64_t Perl_Client_CalcEXP(Client* self, uint8 conlevel)
+uint64_t Perl_Client_CalcEXP(Client* self, uint8 consider_level)
 {
-	return self->CalcEXP(conlevel);
+	return self->CalcEXP(consider_level);
 }
 
-uint64_t Perl_Client_CalcEXP(Client* self, uint8 conlevel, bool ignore_mods)
+uint64_t Perl_Client_CalcEXP(Client* self, uint8 consider_level, bool ignore_modifiers)
 {
-	return self->CalcEXP(conlevel, ignore_mods);
+	return self->CalcEXP(consider_level, ignore_modifiers);
 }
 
 void Perl_Client_QuestReward(Client* self, Mob* mob) // @categories Currency and Points, Experience and Level, Inventory and Items, Faction
