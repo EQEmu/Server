@@ -55,7 +55,56 @@ extern std::string GetMailPrefix();
 extern ChatChannelList *ChannelList;
 extern uint32          MailMessagesSent;
 
-void UCSDatabase::GetAccountStatus(Client *client)
+Database::Database()
+{
+	DBInitVars();
+}
+
+/*
+Establish a connection to a mysql database with the supplied parameters
+*/
+
+Database::Database(const char *host, const char *user, const char *passwd, const char *database, uint32 port)
+{
+	DBInitVars();
+	Connect(host, user, passwd, database, port);
+}
+
+bool Database::Connect(const char *host, const char *user, const char *passwd, const char *database, uint32 port)
+{
+	uint32 errnum = 0;
+	char   errbuf[MYSQL_ERRMSG_SIZE];
+	if (!Open(host, user, passwd, database, port, &errnum, errbuf)) {
+		LogError("Failed to connect to database: Error: {}", errbuf);
+		HandleMysqlError(errnum);
+
+		return false;
+	}
+	else {
+		LogInfo("Using database [{}] at [{}]:[{}]", database, host, port);
+		return true;
+	}
+}
+
+void Database::DBInitVars()
+{
+
+}
+
+
+void Database::HandleMysqlError(uint32 errnum)
+{
+}
+
+/*
+
+Close the connection to the database
+*/
+Database::~Database()
+{
+}
+
+void Database::GetAccountStatus(Client *client)
 {
 
 	std::string query = StringFormat(
@@ -95,7 +144,7 @@ void UCSDatabase::GetAccountStatus(Client *client)
 	);
 }
 
-int UCSDatabase::FindAccount(const char *characterName, Client *client)
+int Database::FindAccount(const char *characterName, Client *client)
 {
 
 	LogInfo("FindAccount for character [{}]", characterName);
@@ -139,7 +188,7 @@ int UCSDatabase::FindAccount(const char *characterName, Client *client)
 	return accountID;
 }
 
-bool UCSDatabase::VerifyMailKey(std::string characterName, int IPAddress, std::string MailKey)
+bool Database::VerifyMailKey(std::string characterName, int IPAddress, std::string MailKey)
 {
 
 	std::string query = StringFormat(
@@ -172,7 +221,7 @@ bool UCSDatabase::VerifyMailKey(std::string characterName, int IPAddress, std::s
 	return !strcmp(row[0], combinedKey);
 }
 
-int UCSDatabase::FindCharacter(const char *characterName)
+int Database::FindCharacter(const char *characterName)
 {
 	char        *safeCharName = RemoveApostrophes(characterName);
 	std::string query         = StringFormat(
@@ -199,7 +248,7 @@ int UCSDatabase::FindCharacter(const char *characterName)
 	return characterID;
 }
 
-bool UCSDatabase::GetVariable(const char *varname, char *varvalue, uint16 varvalue_len)
+bool Database::GetVariable(const char *varname, char *varvalue, uint16 varvalue_len)
 {
 
 	std::string query   = StringFormat("SELECT `value` FROM `variables` WHERE `varname` = '%s'", varname);
@@ -219,7 +268,7 @@ bool UCSDatabase::GetVariable(const char *varname, char *varvalue, uint16 varval
 	return true;
 }
 
-bool UCSDatabase::LoadChatChannels()
+bool Database::LoadChatChannels()
 {
 
 	LogInfo("Loading chat channels from the database");
@@ -241,9 +290,47 @@ bool UCSDatabase::LoadChatChannels()
 	return true;
 }
 
-void UCSDatabase::SetChannelPassword(std::string channelName, std::string password)
+bool Database::IsChatChannelInDB(std::string channelName)
 {
-	LogInfo("UCSDatabase::SetChannelPassword([{}], [{}])", channelName.c_str(), password.c_str());
+	std::string rquery = StringFormat("SELECT COUNT(*) FROM `chatchannels` WHERE `name` = '{}'", channelName);
+	auto results = QueryDatabase(rquery);
+	auto row = results.begin();
+	int number_of_channels = std::stoul(row[0]);
+	if (number_of_channels > 0) {
+		return true;
+	}
+	return false;
+}
+
+void Database::SaveChatChannel(std::string channelName, std::string channelOwner, std::string channelPassword, uint16 minstatus) {
+	if (this->IsChatChannelInDB(channelName)) { // If Channel exists, update it in the database
+		auto query = fmt::format("UPDATE chatchannels SET `name` = '{}', `owner` = '{}', `password` = '{}', `minstatus` = {}	WHERE name = '{}'", channelName, channelOwner, channelPassword, minstatus, channelName);
+		QueryDatabase(query);
+		return;
+	}
+	else { // If channel does not exist, save it to the database
+		auto query = fmt::format("INSERT INTO chatchannels (`name`, `owner`, `password`, `minstatus`) VALUES({}, {}, {}, {})", channelName, channelOwner, channelPassword, minstatus);
+		QueryDatabase(query);
+	}
+}
+
+void Database::DeleteChatChannel(std::string channelName) {
+	auto query = fmt::format("DELETE FROM chatchannels WHERE `name` = '{}'; ", channelName);
+	QueryDatabase(query);
+	return;
+}
+
+int Database::CurrentPlayerChannels(std::string PlayerName) {
+	std::string rquery = StringFormat("SELECT COUNT(*) FROM `chatchannels` WHERE `owner` = '{}'", PlayerName);
+	auto results = QueryDatabase(rquery);
+	auto row = results.begin();
+	int number_of_channels = std::stoul(row[0]);
+	return number_of_channels;
+}
+
+void Database::SetChannelPassword(std::string channelName, std::string password)
+{
+	LogInfo("Database::SetChannelPassword([{}], [{}])", channelName.c_str(), password.c_str());
 
 	std::string query = StringFormat(
 		"UPDATE `chatchannels` SET `password` = '%s' WHERE `name` = '%s'",
@@ -251,9 +338,9 @@ void UCSDatabase::SetChannelPassword(std::string channelName, std::string passwo
 	QueryDatabase(query);
 }
 
-void UCSDatabase::SetChannelOwner(std::string channelName, std::string owner)
+void Database::SetChannelOwner(std::string channelName, std::string owner)
 {
-	LogInfo("UCSDatabase::SetChannelOwner([{}], [{}])", channelName.c_str(), owner.c_str());
+	LogInfo("Database::SetChannelOwner([{}], [{}])", channelName.c_str(), owner.c_str());
 
 	std::string query = StringFormat(
 		"UPDATE `chatchannels` SET `owner` = '%s' WHERE `name` = '%s'",
@@ -264,7 +351,7 @@ void UCSDatabase::SetChannelOwner(std::string channelName, std::string owner)
 	QueryDatabase(query);
 }
 
-void UCSDatabase::SendHeaders(Client *client)
+void Database::SendHeaders(Client *client)
 {
 
 	int unknownField2 = 25015275;
@@ -356,7 +443,7 @@ void UCSDatabase::SendHeaders(Client *client)
 
 }
 
-void UCSDatabase::SendBody(Client *client, int messageNumber)
+void Database::SendBody(Client *client, int messageNumber)
 {
 
 	int characterID = FindCharacter(client->MailBoxName().c_str());
@@ -411,7 +498,7 @@ void UCSDatabase::SendBody(Client *client, int messageNumber)
 	safe_delete(outapp);
 }
 
-bool UCSDatabase::SendMail(
+bool Database::SendMail(
 	std::string recipient,
 	std::string from,
 	std::string subject,
@@ -484,7 +571,7 @@ bool UCSDatabase::SendMail(
 	return true;
 }
 
-void UCSDatabase::SetMessageStatus(int messageNumber, int status)
+void Database::SetMessageStatus(int messageNumber, int status)
 {
 
 	LogInfo("SetMessageStatus [{}] [{}]", messageNumber, status);
@@ -499,7 +586,7 @@ void UCSDatabase::SetMessageStatus(int messageNumber, int status)
 	QueryDatabase(query);
 }
 
-void UCSDatabase::ExpireMail()
+void Database::ExpireMail()
 {
 
 	LogInfo("Expiring mail");
@@ -557,7 +644,7 @@ void UCSDatabase::ExpireMail()
 	}
 }
 
-void UCSDatabase::AddFriendOrIgnore(int charID, int type, std::string name)
+void Database::AddFriendOrIgnore(int charID, int type, std::string name)
 {
 	std::string query = StringFormat(
 		"INSERT INTO `friends` (`charid`, `type`, `name`) "
@@ -579,7 +666,7 @@ void UCSDatabase::AddFriendOrIgnore(int charID, int type, std::string name)
 	}
 }
 
-void UCSDatabase::RemoveFriendOrIgnore(int charID, int type, std::string name)
+void Database::RemoveFriendOrIgnore(int charID, int type, std::string name)
 {
 	std::string query = StringFormat(
 		"DELETE FROM `friends` WHERE `charid` = %i AND `type` = %i AND `name` = '%s'",
@@ -600,7 +687,7 @@ void UCSDatabase::RemoveFriendOrIgnore(int charID, int type, std::string name)
 	}
 }
 
-void UCSDatabase::GetFriendsAndIgnore(int charID, std::vector<std::string> &friends, std::vector<std::string> &ignorees)
+void Database::GetFriendsAndIgnore(int charID, std::vector<std::string> &friends, std::vector<std::string> &ignorees)
 {
 
 	std::string query   = StringFormat("select `type`, `name` FROM `friends` WHERE `charid`=%i", charID);

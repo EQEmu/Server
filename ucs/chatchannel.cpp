@@ -69,9 +69,22 @@ ChatChannel::~ChatChannel() {
 
 ChatChannel* ChatChannelList::CreateChannel(std::string Name, std::string Owner, std::string Password, bool Permanent, int MinimumStatus) {
 
+	uint8 MaxPermPlayerChannels = RuleI(Chat, MaxPermanentPlayerChannels);
 	ChatChannel *NewChannel = new ChatChannel(CapitaliseName(Name), Owner, Password, Permanent, MinimumStatus);
 
 	ChatChannels.Insert(NewChannel);
+
+	if (MaxPermPlayerChannels > 0) { // If permenant player channels are enabled, save channel to database if not exceeding limit.
+		if (database.CurrentPlayerChannels(Owner) + 1 < MaxPermPlayerChannels) { // Ensure there is room to save another chat channel to the database.
+			database.SaveChatChannel(CapitaliseName(Name), Owner, Password, MinimumStatus); // Save chat channel to database.
+		}
+		else {
+			LogDebug("Maximum number of channels [{}] reached for player [{}], channel save to database aborted.", MaxPermPlayerChannels, Owner);
+		}
+	}
+	else {
+		LogDebug("Player saving of chat channels to database disabled, save to database aborted.");
+	}
 
 	return NewChannel;
 }
