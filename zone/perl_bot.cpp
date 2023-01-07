@@ -371,6 +371,11 @@ void Perl_Bot_SendPayload(Bot* self, int payload_id, std::string payload_value) 
 	self->SendPayload(payload_id, payload_value);
 }
 
+uint32 Perl_Bot_GetBotID(Bot* self) // @categories Script Utility
+{
+	return self->GetBotID();
+}
+
 void perl_register_bot()
 {
 	perl::interpreter state(PERL_GET_THX);
@@ -393,7 +398,7 @@ void perl_register_bot()
 	package.add("ApplySpellGroup", (void(*)(Bot*, int, int))&Perl_Bot_ApplySpellGroup);
 	package.add("ApplySpellGroup", (void(*)(Bot*, int, int, bool))&Perl_Bot_ApplySpellGroup);
 	package.add("CountAugmentEquippedByID", &Perl_Bot_CountAugmentEquippedByID);
-	package.add("CountBotItem", &Perl_Bot_CountBotItem); 
+	package.add("CountBotItem", &Perl_Bot_CountBotItem);
 	package.add("CountItemEquippedByID", &Perl_Bot_CountItemEquippedByID);
 	package.add("Escape", &Perl_Bot_Escape);
 	package.add("Fling", (void(*)(Bot*, float, float, float))&Perl_Bot_Fling);
@@ -411,6 +416,7 @@ void perl_register_bot()
 	package.add("GetBaseSTA", &Perl_Bot_GetBaseSTA);
 	package.add("GetBaseSTR", &Perl_Bot_GetBaseSTR);
 	package.add("GetBaseWIS", &Perl_Bot_GetBaseWIS);
+	package.add("GetBotID", &Perl_Bot_GetBotID);
 	package.add("GetBotItem", &Perl_Bot_GetBotItem);
 	package.add("GetBotItemIDBySlot", &Perl_Bot_GetBotItemIDBySlot);
 	package.add("GetExpansionBitmask", &Perl_Bot_GetExpansionBitmask);

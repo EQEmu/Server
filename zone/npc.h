@@ -27,7 +27,6 @@
 #include "zonedump.h"
 #include "../common/loottable.h"
 
-#include <any>
 #include <deque>
 #include <list>
 
@@ -251,7 +250,7 @@ public:
 	inline void	MerchantOpenShop() { merchant_open = true; }
 	inline void	MerchantCloseShop() { merchant_open = false; }
 	inline bool	IsMerchantOpen() { return merchant_open; }
-	void	Depop(bool StartSpawnTimer = false);
+	void	Depop(bool start_spawn_timer = false);
 	void	Stun(int duration);
 	void	UnStun();
 	uint32	GetSwarmOwner();
@@ -538,8 +537,6 @@ public:
 	void ReloadSpells();
 
 	static LootDropEntries_Struct NewLootDropEntry();
-
-	int DispatchZoneControllerEvent(QuestEventID evt, Mob* init, const std::string& data, uint32 extra, std::vector<std::any>* pointers);
 
 protected:
 

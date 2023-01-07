@@ -1111,14 +1111,25 @@ void NPC::UpdateEquipmentLight()
 	m_Light.Level[EQ::lightsource::LightEquipment] = EQ::lightsource::TypeToLevel(m_Light.Type[EQ::lightsource::LightEquipment]);
 }
 
-void NPC::Depop(bool StartSpawnTimer) {
-	uint32 emoteid = GetEmoteID();
-	if(emoteid != 0)
-		DoNPCEmote(EQ::constants::EmoteEventTypes::OnDespawn,emoteid);
+void NPC::Depop(bool start_spawn_timer) {
+	const auto emote_id = GetEmoteID();
+	if (emote_id) {
+		DoNPCEmote(EQ::constants::EmoteEventTypes::OnDespawn, emoteid);
+	}
+
+	if (IsNPC()) {
+		parse->EventNPC(EVENT_DESPAWN, this, nullptr, "", 0);
+		DispatchZoneControllerEvent(EVENT_DESPAWN_ZONE, this, "", 0, nullptr);
+#ifdef BOTS
+	} else if (IsBot()) {
+		parse->EventBot(EVENT_DESPAWN, CastToBot(), nullptr, "", 0);
+		DispatchZoneControllerEvent(EVENT_DESPAWN_ZONE, this, "", 0, nullptr);
+#endif
+	}
+
 	p_depop = true;
-	if (respawn2)
-	{
-		if (StartSpawnTimer) {
+	if (respawn2) {
+		if (start_spawn_timer) {
 			respawn2->DeathReset();
 		} else {
 			respawn2->Depop();
@@ -3778,19 +3789,4 @@ int NPC::GetRolledItemCount(uint32 item_id)
 	}
 
 	return rolled_count;
-}
-
-int NPC::DispatchZoneControllerEvent(QuestEventID evt, Mob* init,
-	const std::string& data, uint32 extra, std::vector<std::any>* pointers)
-{
-	int ret = 0;
-	if (RuleB(Zone, UseZoneController) && GetNPCTypeID() != ZONE_CONTROLLER_NPC_ID)
-	{
-		auto controller = entity_list.GetNPCByNPCTypeID(ZONE_CONTROLLER_NPC_ID);
-		if (controller)
-		{
-			ret = parse->EventNPC(evt, controller, init, data, extra, pointers);
-		}
-	}
-	return ret;
 }

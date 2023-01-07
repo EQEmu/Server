@@ -29,6 +29,9 @@
 #include "../common/light_source.h"
 #include "../common/emu_constants.h"
 #include "combat_record.h"
+#include "event_codes.h"
+
+#include <any>
 #include <set>
 #include <vector>
 #include <memory>
@@ -1431,6 +1434,8 @@ public:
 	std::string GetBucketKey();
 	std::string GetBucketRemaining(std::string bucket_name);
 	void SetBucket(std::string bucket_name, std::string bucket_value, std::string expiration = "");
+
+	int DispatchZoneControllerEvent(QuestEventID evt, Mob* init, const std::string& data, uint32 extra, std::vector<std::any>* pointers);
 
 #ifdef BOTS
 	// Bots HealRotation methods
