@@ -1149,7 +1149,7 @@ void Mob::InterruptSpell(uint16 message, uint16 color, uint16 spellid)
 			bard_song_mode = true;
 		} else {
 			spellid = casting_spell_id;
-		} 
+		}
 	}
 
 	LogSpells("Interrupt: casting_spell_id [{}] casting_spell_slot [{}]",
