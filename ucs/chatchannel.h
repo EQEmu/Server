@@ -27,6 +27,9 @@ public:
 	void SetPassword(std::string inPassword);
 	bool IsOwner(std::string Name) { return (Owner == Name); }
 	void SetOwner(std::string inOwner);
+	std::string GetOwnerName();
+	void SetTemporary();
+	void SetPermanent();
 	void SendChannelMembers(Client *c);
 	int GetMinStatus() { return MinimumStatus; }
 	bool ReadyToDelete() { return DeleteTimer.Check(); }
@@ -71,8 +74,8 @@ class ChatChannelList {
 public:
 	ChatChannel* CreateChannel(std::string Name, std::string Owner, std::string Passwordi, bool Permanent, int MinimumStatus = 0);
 	ChatChannel* FindChannel(std::string Name);
-	ChatChannel* AddClientToChannel(std::string Channel, Client *c);
-	ChatChannel* RemoveClientFromChannel(std::string Channel, Client *c);
+	ChatChannel* AddClientToChannel(std::string ChannelName, Client* c, bool commandDirected = false);
+	ChatChannel* RemoveClientFromChannel(std::string inChannelName, Client* c, bool commandDirected = false);
 	void RemoveClientFromAllChannels(Client *c);
 	void RemoveChannel(ChatChannel *Channel);
 	void RemoveAllChannels();

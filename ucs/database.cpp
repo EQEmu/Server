@@ -292,13 +292,15 @@ bool Database::LoadChatChannels()
 
 bool Database::IsChatChannelInDB(std::string channelName)
 {
-	std::string rquery = StringFormat("SELECT COUNT(*) FROM `chatchannels` WHERE `name` = '{}'", channelName);
+	std::string rquery = fmt::format("SELECT COUNT(*) FROM `chatchannels` WHERE `name` = '{}'", channelName);
 	auto results = QueryDatabase(rquery);
 	auto row = results.begin();
 	int number_of_channels = std::stoul(row[0]);
 	if (number_of_channels > 0) {
+		LogDebug("Chat channel [{}] is in the database.", channelName);
 		return true;
 	}
+	LogDebug("Chat channel [{}] is not in the database.", channelName);
 	return false;
 }
 
@@ -306,25 +308,28 @@ void Database::SaveChatChannel(std::string channelName, std::string channelOwner
 	if (this->IsChatChannelInDB(channelName)) { // If Channel exists, update it in the database
 		auto query = fmt::format("UPDATE chatchannels SET `name` = '{}', `owner` = '{}', `password` = '{}', `minstatus` = {}	WHERE name = '{}'", channelName, channelOwner, channelPassword, minstatus, channelName);
 		QueryDatabase(query);
+		LogDebug("Updating channel [{}], owned by [{}], in database.", channelName, channelOwner);
 		return;
 	}
 	else { // If channel does not exist, save it to the database
-		auto query = fmt::format("INSERT INTO chatchannels (`name`, `owner`, `password`, `minstatus`) VALUES({}, {}, {}, {})", channelName, channelOwner, channelPassword, minstatus);
+		auto query = fmt::format("INSERT INTO chatchannels (`name`, `owner`, `password`, `minstatus`) VALUES('{}', '{}', '{}', {})", channelName, channelOwner, channelPassword, minstatus);
 		QueryDatabase(query);
+		LogDebug("Saving channel [{}], owned by [{}], to database.", channelName, channelOwner);
 	}
 }
 
 void Database::DeleteChatChannel(std::string channelName) {
 	auto query = fmt::format("DELETE FROM chatchannels WHERE `name` = '{}'; ", channelName);
 	QueryDatabase(query);
-	return;
+	LogDebug("Deleting channel [{}] from the database.", channelName);
 }
 
 int Database::CurrentPlayerChannels(std::string PlayerName) {
-	std::string rquery = StringFormat("SELECT COUNT(*) FROM `chatchannels` WHERE `owner` = '{}'", PlayerName);
+	std::string rquery = fmt::format("SELECT COUNT(*) FROM `chatchannels` WHERE `owner` = '{}'", PlayerName);
 	auto results = QueryDatabase(rquery);
 	auto row = results.begin();
 	int number_of_channels = std::stoul(row[0]);
+	LogDebug("Player [{}] has [{}] permanent channels saved to the database.", PlayerName, number_of_channels);
 	return number_of_channels;
 }
 

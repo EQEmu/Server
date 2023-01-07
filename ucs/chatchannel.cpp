@@ -68,22 +68,18 @@ ChatChannel::~ChatChannel() {
 }
 
 ChatChannel* ChatChannelList::CreateChannel(std::string Name, std::string Owner, std::string Password, bool Permanent, int MinimumStatus) {
-
 	uint8 MaxPermPlayerChannels = RuleI(Chat, MaxPermanentPlayerChannels);
 	ChatChannel *NewChannel = new ChatChannel(CapitaliseName(Name), Owner, Password, Permanent, MinimumStatus);
 
 	ChatChannels.Insert(NewChannel);
 
-	if (MaxPermPlayerChannels > 0) { // If permenant player channels are enabled, save channel to database if not exceeding limit.
+	if ((MaxPermPlayerChannels > 0) && !(Owner == "*System*")) { // If permenant player channels are enabled (and not a system channel), save channel to database if not exceeding limit.
 		if (database.CurrentPlayerChannels(Owner) + 1 <= MaxPermPlayerChannels) { // Ensure there is room to save another chat channel to the database.
 			database.SaveChatChannel(CapitaliseName(Name), Owner, Password, MinimumStatus); // Save chat channel to database.
 		}
 		else {
 			LogDebug("Maximum number of channels [{}] reached for player [{}], channel save to database aborted.", MaxPermPlayerChannels, Owner);
 		}
-	}
-	else {
-		LogDebug("Player saving of chat channels to database disabled, save to database aborted.");
 	}
 
 	return NewChannel;
@@ -241,6 +237,19 @@ void ChatChannel::SetOwner(std::string inOwner) {
 
 	if(Permanent)
 		database.SetChannelOwner(Name, Owner);
+}
+
+std::string ChatChannel::GetOwnerName() {
+	return Owner;
+	
+}
+
+void ChatChannel::SetTemporary() {
+	Permanent = false;
+}
+
+void ChatChannel::SetPermanent() {
+	Permanent = true;
 }
 
 void ChatChannel::AddClient(Client *c) {
@@ -493,7 +502,7 @@ bool ChatChannel::IsClientInChannel(Client *c) {
 	return false;
 }
 
-ChatChannel *ChatChannelList::AddClientToChannel(std::string ChannelName, Client *c) {
+ChatChannel *ChatChannelList::AddClientToChannel(std::string ChannelName, Client *c, bool commandDirected) {
 
 	if(!c) return nullptr;
 
@@ -523,12 +532,15 @@ ChatChannel *ChatChannelList::AddClientToChannel(std::string ChannelName, Client
 		return nullptr;
 	}
 
-	LogDebug("AddClient to channel [[{}]] with password [[{}]]", NormalisedName.c_str(), Password.c_str());
-
 	ChatChannel *RequiredChannel = FindChannel(NormalisedName);
-
-	if(!RequiredChannel)
-		RequiredChannel = CreateChannel(NormalisedName, c->GetName(), Password, false, 0);
+	std::string ChannelOwner = c->GetName();
+	if (!RequiredChannel) {
+		if (!commandDirected) { // If the channel is system managed (i.e. Auction & OOC), set system as the owner
+			ChannelOwner = "*System*";
+		}
+		RequiredChannel = CreateChannel(NormalisedName, ChannelOwner, Password, false, 0);
+		LogDebug("Created and added Client to channel [{}] with password [{}]. Owner: {}. Command Directed: {}", NormalisedName.c_str(), Password.c_str(), ChannelOwner, commandDirected);
+	}
 
 	if(RequiredChannel->GetMinStatus() > c->GetAccountStatus()) {
 
@@ -564,25 +576,36 @@ ChatChannel *ChatChannelList::AddClientToChannel(std::string ChannelName, Client
 	return nullptr;
 }
 
-ChatChannel *ChatChannelList::RemoveClientFromChannel(std::string inChannelName, Client *c) {
+ChatChannel *ChatChannelList::RemoveClientFromChannel(std::string inChannelName, Client *c, bool commandDirected) {
 
 	if(!c) return nullptr;
 
 	std::string ChannelName = inChannelName;
 
-	if((inChannelName.length() > 0) && isdigit(ChannelName[0]))
+	if ((inChannelName.length() > 0) && isdigit(ChannelName[0])) {
 		ChannelName = c->ChannelSlotName(atoi(inChannelName.c_str()));
-
+	}
+		
 	ChatChannel *RequiredChannel = FindChannel(ChannelName);
 
-	if(!RequiredChannel)
+	if (!RequiredChannel) {
 		return nullptr;
+	}
+		
+	LogDebug("Client [{}] removed from channel [{}]. Channel is owned by {}. Command directed: {}", c->GetName(), ChannelName, RequiredChannel->GetOwnerName(), commandDirected);
+	if ((c->GetName() == RequiredChannel->GetOwnerName()) && commandDirected) { // Check if the client that is leaving is the the channel owner
+		LogDebug("Owner left the channel [{}], removing channel from database...", ChannelName);
+		database.DeleteChatChannel(ChannelName); // Remove the channel from the database.
+		LogDebug("Flagging [{}] channel as temporary...", ChannelName);
+		RequiredChannel->SetTemporary();
+	}
 
 	// RemoveClient will return false if there is no-one left in the channel, and the channel is not permanent and has
 	// no password.
-	//
-	if(!RequiredChannel->RemoveClient(c))
+	if (!RequiredChannel->RemoveClient(c)) {
+		LogDebug("Noone left in the temporary channel [{}] and no password is set; removing temporary channel.", ChannelName);
 		RemoveChannel(RequiredChannel);
+	}
 
 	return RequiredChannel;
 }

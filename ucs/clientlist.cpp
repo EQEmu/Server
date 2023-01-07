@@ -685,7 +685,7 @@ void Clientlist::Process()
 
 			case OP_Mail: {
 				std::string CommandString = (const char *)app->pBuffer + 1;
-				ProcessOPMailCommand((*it), CommandString);
+				ProcessOPMailCommand((*it), CommandString, false); // Flag as not commandDirected
 				break;
 			}
 
@@ -716,7 +716,7 @@ void Clientlist::Process()
 	}
 }
 
-void Clientlist::ProcessOPMailCommand(Client *c, std::string CommandString)
+void Clientlist::ProcessOPMailCommand(Client *c, std::string CommandString, bool commandDirected)
 {
 
 	if (CommandString.length() == 0)
@@ -758,7 +758,7 @@ void Clientlist::ProcessOPMailCommand(Client *c, std::string CommandString)
 	switch (CommandCode) {
 
 	case CommandJoin:
-		c->JoinChannels(Parameters);
+		c->JoinChannels(Parameters, commandDirected);
 		break;
 
 	case CommandLeaveAll:
@@ -766,7 +766,7 @@ void Clientlist::ProcessOPMailCommand(Client *c, std::string CommandString)
 		break;
 
 	case CommandLeave:
-		c->LeaveChannels(Parameters);
+		c->LeaveChannels(Parameters, commandDirected);
 		break;
 
 	case CommandListAll:
@@ -779,7 +779,7 @@ void Clientlist::ProcessOPMailCommand(Client *c, std::string CommandString)
 
 	case CommandSet:
 		c->LeaveAllChannels(false);
-		c->JoinChannels(Parameters);
+		c->JoinChannels(Parameters, commandDirected);
 		break;
 
 	case CommandAnnounce:
@@ -992,7 +992,7 @@ int Client::ChannelCount() {
 
 }
 
-void Client::JoinChannels(std::string ChannelNameList) {
+void Client::JoinChannels(std::string ChannelNameList, bool commandDirected) {
 
 	for (auto &elem : ChannelNameList) {
 		if (elem == '%') {
@@ -1018,16 +1018,16 @@ void Client::JoinChannels(std::string ChannelNameList) {
 		std::string::size_type Comma = ChannelNameList.find_first_of(", ", CurrentPos);
 
 		if (Comma == std::string::npos) {
+			ChatChannel* JoinedChannel = ChannelList->AddClientToChannel(ChannelNameList.substr(CurrentPos), this, commandDirected);
 
-			ChatChannel* JoinedChannel = ChannelList->AddClientToChannel(ChannelNameList.substr(CurrentPos), this);
-
-			if (JoinedChannel)
+			if (JoinedChannel) {
 				AddToChannelList(JoinedChannel);
-
+			}
+				
 			break;
 		}
 
-		ChatChannel* JoinedChannel = ChannelList->AddClientToChannel(ChannelNameList.substr(CurrentPos, Comma - CurrentPos), this);
+		ChatChannel* JoinedChannel = ChannelList->AddClientToChannel(ChannelNameList.substr(CurrentPos, Comma - CurrentPos), this, commandDirected);
 
 		if (JoinedChannel) {
 
@@ -1097,7 +1097,7 @@ void Client::JoinChannels(std::string ChannelNameList) {
 	safe_delete(outapp);
 }
 
-void Client::LeaveChannels(std::string ChannelNameList) {
+void Client::LeaveChannels(std::string ChannelNameList, bool commandDirected) {
 
 	LogInfo("Client: [{}] leaving channels [{}]", GetName().c_str(), ChannelNameList.c_str());
 
@@ -1109,7 +1109,7 @@ void Client::LeaveChannels(std::string ChannelNameList) {
 
 		if (Comma == std::string::npos) {
 
-			ChatChannel* JoinedChannel = ChannelList->RemoveClientFromChannel(ChannelNameList.substr(CurrentPos), this);
+			ChatChannel* JoinedChannel = ChannelList->RemoveClientFromChannel(ChannelNameList.substr(CurrentPos), this, commandDirected);
 
 			if (JoinedChannel)
 				RemoveFromChannelList(JoinedChannel);
@@ -1117,7 +1117,7 @@ void Client::LeaveChannels(std::string ChannelNameList) {
 			break;
 		}
 
-		ChatChannel* JoinedChannel = ChannelList->RemoveClientFromChannel(ChannelNameList.substr(CurrentPos, Comma - CurrentPos), this);
+		ChatChannel* JoinedChannel = ChannelList->RemoveClientFromChannel(ChannelNameList.substr(CurrentPos, Comma - CurrentPos), this, commandDirected);
 
 		if (JoinedChannel)
 			RemoveFromChannelList(JoinedChannel);
