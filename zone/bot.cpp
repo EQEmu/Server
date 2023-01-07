@@ -8602,16 +8602,16 @@ bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, fl
 		}
 	}
 
-	if( iSpellTypes == SpellType_Buff) {
+	if (iSpellTypes == SpellType_Buff) {
 		uint8 chanceToCast = caster->IsEngaged() ? caster->GetChanceToCastBySpellType(SpellType_Buff) : 100;
-		if(botCasterClass == BARD) {
+		if (botCasterClass == BARD) {
 			if(caster->AICastSpell(caster, chanceToCast, SpellType_Buff))
 				return true;
 			else
 				return false;
 		}
 
-		if(caster->HasGroup()) {
+		if (caster->HasGroup()) {
 			Group *g = caster->GetGroup();
 			if(g) {
 				for(int i = 0; i < MAX_GROUP_MEMBERS; i++) {
@@ -8673,6 +8673,30 @@ bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, fl
 					if (g->members[i]) {
 						if (caster->AICastSpell(g->members[i], iChance, SpellType_PreCombatBuff) || caster->AICastSpell(g->members[i]->GetPet(), iChance, SpellType_PreCombatBuff))
 							return true;
+					}
+				}
+			}
+		}
+	}
+
+	if (iSpellTypes == SpellType_InCombatBuff) {
+		if (botCasterClass == BARD) {
+			if (caster->AICastSpell(caster, iChance, SpellType_InCombatBuff)) {
+				return true;
+			}
+			else {
+				return false;
+			}
+		}
+
+		if (caster->HasGroup()) {
+			Group* g = caster->GetGroup();
+			if (g) {
+				for (int i = 0; i < MAX_GROUP_MEMBERS; i++) {
+					if (g->members[i]) {
+						if (caster->AICastSpell(g->members[i], iChance, SpellType_InCombatBuff) || caster->AICastSpell(g->members[i]->GetPet(), iChance, SpellType_InCombatBuff)) {
+							return true;
+						}
 					}
 				}
 			}
