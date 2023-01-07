@@ -67,18 +67,18 @@ ChatChannel::~ChatChannel() {
 		iterator.RemoveCurrent(false);
 }
 
-ChatChannel* ChatChannelList::CreateChannel(std::string Name, std::string Owner, std::string Password, bool Permanent, int MinimumStatus) {
+ChatChannel* ChatChannelList::CreateChannel(std::string Name, std::string Owner, std::string Password, bool Permanent, int MinimumStatus, bool SaveToDB) {
 	uint8 MaxPermPlayerChannels = RuleI(Chat, MaxPermanentPlayerChannels);
 	ChatChannel *NewChannel = new ChatChannel(CapitaliseName(Name), Owner, Password, Permanent, MinimumStatus);
 
 	ChatChannels.Insert(NewChannel);
 
-	if ((MaxPermPlayerChannels > 0) && !(Owner == "*System*")) { // If permenant player channels are enabled (and not a system channel), save channel to database if not exceeding limit.
-		if (database.CurrentPlayerChannels(Owner) + 1 <= MaxPermPlayerChannels) { // Ensure there is room to save another chat channel to the database.
+	if ((MaxPermPlayerChannels > 0) && !(Owner == "*System*") && SaveToDB) { // If permenant player channels are enabled (and not a system channel), save channel to database if not exceeding limit.
+		if (database.CurrentPlayerChannelCount(Owner) + 1 <= MaxPermPlayerChannels) { // Ensure there is room to save another chat channel to the database.
 			database.SaveChatChannel(CapitaliseName(Name), Owner, Password, MinimumStatus); // Save chat channel to database.
 		}
 		else {
-			LogDebug("Maximum number of channels [{}] reached for player [{}], channel save to database aborted.", MaxPermPlayerChannels, Owner);
+			LogDebug("Maximum number of channels [{}] reached for player [{}], channel [{}] save to database aborted.", MaxPermPlayerChannels, Owner, CapitaliseName(Name));
 		}
 	}
 
@@ -538,7 +538,7 @@ ChatChannel *ChatChannelList::AddClientToChannel(std::string ChannelName, Client
 		if (!commandDirected) { // If the channel is system managed (i.e. Auction & OOC), set system as the owner
 			ChannelOwner = "*System*";
 		}
-		RequiredChannel = CreateChannel(NormalisedName, ChannelOwner, Password, false, 0);
+		RequiredChannel = CreateChannel(NormalisedName, ChannelOwner, Password, false, 0, commandDirected);
 		LogDebug("Created and added Client to channel [{}] with password [{}]. Owner: {}. Command Directed: {}", NormalisedName.c_str(), Password.c_str(), ChannelOwner, commandDirected);
 	}
 

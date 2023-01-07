@@ -39,13 +39,14 @@ class UCSDatabase : public Database {
 public:
 	int FindAccount(const char *CharacterName, Client *c);
 	int FindCharacter(const char *CharacterName);
-	int CurrentPlayerChannels(std::string name);
 	bool VerifyMailKey(std::string CharacterName, int IPAddress, std::string MailKey);
 	bool GetVariable(const char* varname, char* varvalue, uint16 varvalue_len);
 	bool LoadChatChannels();
 	bool IsChatChannelInDB(std::string channelName);
 	void SaveChatChannel(std::string channelName, std::string channelOwner, std::string channelPassword, uint16 minstatus);
 	void DeleteChatChannel(std::string channelName);
+	int CurrentPlayerChannelCount(std::string PlayerName);
+	std::string CurrentPlayerChannels(std::string PlayerName);
 	void GetAccountStatus(Client *c);
 	void SetChannelPassword(std::string ChannelName, std::string Password);
 	void SetChannelOwner(std::string ChannelName, std::string Owner);

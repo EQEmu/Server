@@ -72,7 +72,7 @@ private:
 class ChatChannelList {
 
 public:
-	ChatChannel* CreateChannel(std::string Name, std::string Owner, std::string Passwordi, bool Permanent, int MinimumStatus = 0);
+	ChatChannel* CreateChannel(std::string Name, std::string Owner, std::string Password, bool Permanent, int MinimumStatus, bool SaveToDB = false);
 	ChatChannel* FindChannel(std::string Name);
 	ChatChannel* AddClientToChannel(std::string ChannelName, Client* c, bool commandDirected = false);
 	ChatChannel* RemoveClientFromChannel(std::string inChannelName, Client* c, bool commandDirected = false);

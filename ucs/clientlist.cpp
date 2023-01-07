@@ -758,6 +758,12 @@ void Clientlist::ProcessOPMailCommand(Client *c, std::string CommandString, bool
 	switch (CommandCode) {
 
 	case CommandJoin:
+
+		if (!commandDirected) {
+			LogDebug("Pre params: {}", Parameters);
+			//Append saved channels to params
+			LogDebug("Post params: {}", Parameters);
+		}
 		c->JoinChannels(Parameters, commandDirected);
 		break;
 
