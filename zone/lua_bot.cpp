@@ -355,6 +355,11 @@ void Lua_Bot::Stand() {
 	self->Stand();
 }
 
+uint32 Lua_Bot::GetBotID() {
+	Lua_Safe_Call_Int();
+	return self->GetBotID();
+}
+
 luabind::scope lua_register_bot() {
 	return luabind::class_<Lua_Bot, Lua_Mob>("Bot")
 	.def(luabind::constructor<>())
@@ -390,6 +395,7 @@ luabind::scope lua_register_bot() {
 	.def("GetBaseSTA", (int(Lua_Bot::*)(void))&Lua_Bot::GetBaseSTA)
 	.def("GetBaseSTR", (int(Lua_Bot::*)(void))&Lua_Bot::GetBaseSTR)
 	.def("GetBaseWIS", (int(Lua_Bot::*)(void))&Lua_Bot::GetBaseWIS)
+	.def("GetBotID", (uint32(Lua_Bot::*)(void))&Lua_Bot::GetBotID)
 	.def("GetBotItem", (Lua_ItemInst(Lua_Bot::*)(uint16))&Lua_Bot::GetBotItem)
 	.def("GetBotItemIDBySlot", (uint32(Lua_Bot::*)(uint16))&Lua_Bot::GetBotItemIDBySlot)
 	.def("GetExpansionBitmask", (int(Lua_Bot::*)(void))&Lua_Bot::GetExpansionBitmask)

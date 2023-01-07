@@ -1209,7 +1209,7 @@ void Bot::GenerateAppearance() {
 	if (GetRace() == BARBARIAN) // Barbarian w/Tatoo
 	{
 		iFace = zone->random.Int(0, 79);
-	}	
+	}
 	else
 	{
 		iFace = zone->random.Int(0, 7);
@@ -5142,7 +5142,7 @@ void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client*
 				insts[i - EQ::invslot::TRADE_BEGIN] = user_inv.GetItem(i);
 				client->DeleteItemInInventory(i);
 			}
-			
+
 			// copy to be filtered by task updates, null trade slots preserved for quest event arg
 			std::vector<EQ::ItemInstance*> items(insts, insts + std::size(insts));
 
@@ -6659,7 +6659,7 @@ float Bot::GetActSpellRange(uint16 spell_id, float range) {
 int32 Bot::GetActSpellDuration(uint16 spell_id, int32 duration) {
 	int increase = 100;
 	increase += GetFocusEffect(focusSpellDuration, spell_id);
-	int64 tic_inc = 0;	
+	int64 tic_inc = 0;
 	tic_inc = GetFocusEffect(focusSpellDurByTic, spell_id);
 
 	if(IsBeneficialSpell(spell_id)) {
@@ -6758,7 +6758,7 @@ bool Bot::CastSpell(
 				(IsAmnesiad() && IsDiscipline(spell_id))
 			) {
 				LogSpellsModerate("[Bot::CastSpell] Spell casting canceled: not able to cast now. Valid? [{}] casting [{}] waiting? [{}] spellend? [{}] stunned? [{}] feared? [{}] mezed? [{}] silenced? [{}]",
-					IsValidSpell(spell_id), casting_spell_id, delaytimer, spellend_timer.Enabled(), IsStunned(), IsFeared(), IsMezzed(), IsSilenced() 
+					IsValidSpell(spell_id), casting_spell_id, delaytimer, spellend_timer.Enabled(), IsStunned(), IsFeared(), IsMezzed(), IsSilenced()
 				);
 				if (IsSilenced() && !IsDiscipline(spell_id)) {
 					MessageString(Chat::White, SILENCED_STRING);
@@ -8762,6 +8762,8 @@ void EntityList::AddBot(Bot *new_bot, bool send_spawn_packet, bool dont_queue) {
 			}
 
 			parse->EventBot(EVENT_SPAWN, new_bot, nullptr, "", 0);
+
+			new_bot->DispatchZoneControllerEvent(EVENT_SPAWN_ZONE, new_bot, "", 0, nullptr);
 		}
 
 		bot_list.push_back(new_bot);
@@ -9969,8 +9971,8 @@ std::string Bot::GetHPString(int8 min_hp, int8 max_hp)
 	return hp_string;
 }
 
-void Bot::SetBotArcherySetting(bool bot_archer_setting, bool save) 
-{ 
+void Bot::SetBotArcherySetting(bool bot_archer_setting, bool save)
+{
 	m_bot_archery_setting = bot_archer_setting;
 	if (save) {
 		if (!database.botdb.SaveBotArcherSetting(GetBotID(), bot_archer_setting)) {

@@ -55,6 +55,7 @@ public:
 	bool HasBotSpellEntry(uint16 spellid);
 	void SendPayload(int payload_id);
 	void SendPayload(int payload_id, std::string payload_value);
+	uint32 GetBotID();
 
 	void ApplySpell(int spell_id);
 	void ApplySpell(int spell_id, int duration);
