@@ -1153,7 +1153,7 @@ void Mob::InterruptSpell(uint16 message, uint16 color, uint16 spellid)
 	}
 
 	if(IsNPC()) {
-		CastToNPC()->AI_Event_SpellCastFinished(false, CastingSlot::Gem1);
+		CastToNPC()->AI_Event_SpellCastFinished(false, 1);
 	}
 
 	if(casting_spell_aa_id && IsClient()) { //Rest AA Timer on failed cast
