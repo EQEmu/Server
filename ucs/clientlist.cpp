@@ -594,6 +594,35 @@ void Clientlist::CheckForStaleConnections(Client *c) {
 	}
 }
 
+std::string RemoveDuplicateChannels(std::string InChannels) {
+	// Split the string by ", " and store the names in a vector
+	std::vector<std::string> channel_names;
+	size_t start = 0, end = 0;
+	while ((end = InChannels.find(", ", start)) != std::string::npos) {
+		channel_names.push_back(InChannels.substr(start, end - start));
+		start = end + 2;
+	}
+	channel_names.push_back(InChannels.substr(start)); // Add the last channel
+
+	// Remove duplicates by inserting the names of the channels into an unordered set
+	// and then copying the unique elements back into the original vector
+	std::unordered_set<std::string> unique_channels;
+	channel_names.erase(std::remove_if(channel_names.begin(), channel_names.end(),
+		[&unique_channels](const std::string& channel) {
+			return !unique_channels.insert(channel).second;
+		}), channel_names.end());
+
+	// Concatenate the names of the unique channels into a single string
+	std::string unique_channels_string;
+	for (const std::string& channel : channel_names) {
+		unique_channels_string += channel + ", ";
+	}
+	// Remove the last comma and space
+	unique_channels_string.erase(unique_channels_string.size() - 2);
+
+	return unique_channels_string;
+}
+
 void Clientlist::Process()
 {
 	auto it = ClientChatConnections.begin();
@@ -758,17 +787,16 @@ void Clientlist::ProcessOPMailCommand(Client *c, std::string CommandString, bool
 	switch (CommandCode) {
 
 	case CommandJoin:
-
 		if (!commandDirected) {
-			LogDebug("Pre params: {}", Parameters);
 			//Append saved channels to params
-			LogDebug("Post params: {}", Parameters);
+			Parameters = Parameters + ", " + database.CurrentPlayerChannels(c->GetName());
+			Parameters = RemoveDuplicateChannels(Parameters);
 		}
 		c->JoinChannels(Parameters, commandDirected);
 		break;
 
 	case CommandLeaveAll:
-		c->LeaveAllChannels();
+		c->LeaveAllChannels(true, true);
 		break;
 
 	case CommandLeave:
@@ -876,6 +904,7 @@ void Clientlist::ProcessOPMailCommand(Client *c, std::string CommandString, bool
 		LogInfo("Unhandled OP_Mail command: [{}]", CommandString.c_str());
 	}
 }
+
 
 void Clientlist::CloseAllConnections() {
 
@@ -1104,6 +1133,7 @@ void Client::JoinChannels(std::string ChannelNameList, bool commandDirected) {
 }
 
 void Client::LeaveChannels(std::string ChannelNameList, bool commandDirected) {
+	LogDebug("Triggered:LeaveChannels on {},  Command Directed: {}", ChannelNameList, commandDirected);
 
 	LogInfo("Client: [{}] leaving channels [{}]", GetName().c_str(), ChannelNameList.c_str());
 
@@ -1188,13 +1218,13 @@ void Client::LeaveChannels(std::string ChannelNameList, bool commandDirected) {
 	safe_delete(outapp);
 }
 
-void Client::LeaveAllChannels(bool SendUpdatedChannelList) {
+void Client::LeaveAllChannels(bool SendUpdatedChannelList, bool commandDirected) {
 
 	for (auto &elem : JoinedChannels) {
 
 		if (elem) {
 
-			ChannelList->RemoveClientFromChannel(elem->GetName(), this);
+			ChannelList->RemoveClientFromChannel(elem->GetName(), this, commandDirected);
 
 			elem = nullptr;
 		}
@@ -2127,7 +2157,7 @@ void Client::ChannelKick(std::string CommandString) {
 
 	GeneralChannelMessage("Kicked " + Kickee + " from channel " + ChannelName);
 
-	RequiredClient->LeaveChannels(ChannelName);
+	RequiredClient->LeaveChannels(ChannelName, false);
 }
 
 void Client::ToggleInvites() {

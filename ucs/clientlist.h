@@ -94,7 +94,7 @@ public:
 	std::string GetName() { if(Characters.size()) return Characters[0].Name; else return ""; }
 	void JoinChannels(std::string ChannelNameList, bool commandDirected = false);
 	void LeaveChannels(std::string ChannelNameList, bool commandDirected = false);
-	void LeaveAllChannels(bool SendUpdatedChannelList = true);
+	void LeaveAllChannels(bool SendUpdatedChannelList = true, bool commandDirected = false);
 	void AddToChannelList(ChatChannel *JoinedChannel);
 	void RemoveFromChannelList(ChatChannel *JoinedChannel);
 	void SendChannelMessage(std::string Message);
@@ -112,6 +112,7 @@ public:
 	void ProcessChannelList(std::string CommandString);
 	void AccountUpdate();
 	int ChannelCount();
+	std::string RemoveDuplicateChannels(std::string InChannels);
 	inline void SetAccountID(int inAccountID) { AccountID = inAccountID; }
 	inline int GetAccountID() { return AccountID; }
 	inline void SetAccountStatus(int inStatus) { Status = inStatus; }

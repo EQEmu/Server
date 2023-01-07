@@ -324,21 +324,23 @@ void Database::DeleteChatChannel(std::string channelName) {
 	LogDebug("Deleting channel [{}] from the database.", channelName);
 }
 
+std::string Database::CurrentPlayerChannels(std::string PlayerName) {
+	std::string rquery = fmt::format("SELECT GROUP_CONCAT(`name` SEPARATOR ', ') FROM chatchannels WHERE `owner` = '{}'; ", PlayerName);
+	auto results = QueryDatabase(rquery);
+	auto row = results.begin();
+	std::string channels = row[0];
+	LogDebug("Player [{}] has the following permanent channels saved to the database: [{}].", PlayerName, channels);
+	return channels;
+}
+
+
 int Database::CurrentPlayerChannelCount(std::string PlayerName) {
-	std::string rquery = fmt::format("SELECT GROUP_CONCAT(`name`) FROM chatchannels WHERE `owner` = '{}'; ", PlayerName);
+	std::string rquery = fmt::format("SELECT COUNT(*) FROM chatchannels WHERE `owner` = '{}'; ", PlayerName);
 	auto results = QueryDatabase(rquery);
 	auto row = results.begin();
 	int number_of_channels = std::stoul(row[0]);
 	LogDebug("Player [{}] has [{}] permanent channels saved to the database.", PlayerName, number_of_channels);
 	return number_of_channels;
-}
-
-std::string Database::CurrentPlayerChannels(std::string PlayerName) {
-	std::string rquery = fmt::format("SELECT COUNT(*) FROM `chatchannels` WHERE `owner` = '{}'", PlayerName);
-	auto results = QueryDatabase(rquery);
-	auto row = results.begin();
-	std::string loaded_channels = row[0];
-	return loaded_channels;
 }
 
 void Database::SetChannelPassword(std::string channelName, std::string password)

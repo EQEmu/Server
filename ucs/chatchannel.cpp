@@ -48,7 +48,7 @@ ChatChannel::ChatChannel(std::string inName, std::string inOwner, std::string in
 	Moderated = false;
 
 	LogDebug(
-		"New ChatChannel created: Name: [[{}]], Owner: [[{}]], Password: [[{}]], MinStatus: [{}]",
+		"New ChatChannel created: Name: [{}], Owner: [{}], Password: [{}], MinStatus: [{}]",
 		Name.c_str(),
 		Owner.c_str(),
 		Password.c_str(),
@@ -577,7 +577,6 @@ ChatChannel *ChatChannelList::AddClientToChannel(std::string ChannelName, Client
 }
 
 ChatChannel *ChatChannelList::RemoveClientFromChannel(std::string inChannelName, Client *c, bool commandDirected) {
-
 	if(!c) return nullptr;
 
 	std::string ChannelName = inChannelName;
