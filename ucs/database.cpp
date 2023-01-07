@@ -325,6 +325,10 @@ void Database::DeleteChatChannel(std::string channelName) {
 }
 
 std::string Database::CurrentPlayerChannels(std::string PlayerName) {
+	int currentPlayerChannelCount = CurrentPlayerChannelCount(PlayerName);
+	if (currentPlayerChannelCount == 0) {
+		return "";
+	}
 	std::string rquery = fmt::format("SELECT GROUP_CONCAT(`name` SEPARATOR ', ') FROM chatchannels WHERE `owner` = '{}'; ", PlayerName);
 	auto results = QueryDatabase(rquery);
 	auto row = results.begin();
@@ -332,7 +336,6 @@ std::string Database::CurrentPlayerChannels(std::string PlayerName) {
 	LogDebug("Player [{}] has the following permanent channels saved to the database: [{}].", PlayerName, channels);
 	return channels;
 }
-
 
 int Database::CurrentPlayerChannelCount(std::string PlayerName) {
 	std::string rquery = fmt::format("SELECT COUNT(*) FROM chatchannels WHERE `owner` = '{}'; ", PlayerName);

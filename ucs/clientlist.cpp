@@ -779,11 +779,11 @@ void Clientlist::ProcessOPMailCommand(Client *c, std::string CommandString, bool
 		if (ParametersStart != std::string::npos)
 			Parameters = CommandString.substr(ParametersStart);
 	}
-	else
+	else {
 		Command = CommandString;
-
+	}
+		
 	int CommandCode = LookupCommand(Command.c_str());
-
 	switch (CommandCode) {
 
 	case CommandJoin:
