@@ -1152,8 +1152,8 @@ void Mob::InterruptSpell(uint16 message, uint16 color, uint16 spellid)
 		}
 	}
 
-	if(casting_spell_id && IsNPC()) {
-		CastToNPC()->AI_Event_SpellCastFinished(false, static_cast<uint16>(casting_spell_slot));
+	if(IsNPC()) {
+		CastToNPC()->AI_Event_SpellCastFinished(false, CastingSlot::Gem1);
 	}
 
 	if(casting_spell_aa_id && IsClient()) { //Rest AA Timer on failed cast
@@ -3206,6 +3206,11 @@ bool Mob::CheckSpellLevelRestriction(Mob *caster, uint16 spell_id)
 	bool check_for_restrictions = false;
 	bool can_cast = true;
 
+	if (!caster) {
+		LogSpells("CheckSpellLevelRestriction: No caster");
+		return false;
+	}
+
 	// NON GM clients might be restricted by rule setting
 	if (caster->IsClient()) {
 		if (RuleB(Spells, BuffLevelRestrictions) && !caster->CastToClient()->GetGM()) {
@@ -3241,6 +3246,9 @@ bool Mob::CheckSpellLevelRestriction(Mob *caster, uint16 spell_id)
 		LogSpells("Spell [{}] failed: recipient did not meet the level restrictions", spell_id);
 		if (!IsBardSong(spell_id)) {
 			caster->MessageString(Chat::SpellFailure, SPELL_TOO_POWERFUL);
+			if (!caster->IsClient()) {
+				caster->InterruptSpell();
+			}
 		}
 	}
 
