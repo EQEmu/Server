@@ -1801,7 +1801,7 @@ std::list<BotSpell> Bot::GetBotSpellsForSpellEffect(Bot* botCaster, int spellEff
 				continue;
 			}
 
-			if (IsEffectInSpell(botSpellList[i].spellid, spellEffect)) {
+			if (IsEffectInSpell(botSpellList[i].spellid, spellEffect) || GetTriggerSpellID(botSpellList[i].spellid, spellEffect)) {
 				BotSpell botSpell;
 				botSpell.SpellId = botSpellList[i].spellid;
 				botSpell.SpellIndex = i;
@@ -1833,7 +1833,7 @@ std::list<BotSpell> Bot::GetBotSpellsForSpellEffectAndTargetType(Bot* botCaster,
 				continue;
 			}
 
-			if (IsEffectInSpell(botSpellList[i].spellid, spellEffect)) {
+			if (IsEffectInSpell(botSpellList[i].spellid, spellEffect) || GetTriggerSpellID(botSpellList[i].spellid, spellEffect)) {
 				if (spells[botSpellList[i].spellid].target_type == targetType) {
 					BotSpell botSpell;
 					botSpell.SpellId = botSpellList[i].spellid;

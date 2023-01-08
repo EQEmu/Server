@@ -1480,6 +1480,7 @@ bool IsGroupSpell(uint16 spell_id);
 bool IsTGBCompatibleSpell(uint16 spell_id);
 bool IsBardSong(uint16 spell_id);
 bool IsEffectInSpell(uint16 spellid, int effect);
+uint16 GetTriggerSpellID(uint16 spell_id, uint32 effect);
 bool IsBlankSpellEffect(uint16 spellid, int effect_index);
 bool IsValidSpell(uint32 spellid);
 bool IsSummonSpell(uint16 spellid);
