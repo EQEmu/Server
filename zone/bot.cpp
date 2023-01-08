@@ -8760,14 +8760,14 @@ void EntityList::AddBot(Bot *new_bot, bool send_spawn_packet, bool dont_queue) {
 				AddToSpawnQueue(new_bot->GetID(), &ns);
 				safe_delete(ns);
 			}
-
-			new_bot->DispatchZoneControllerEvent(EVENT_SPAWN_ZONE, new_bot, "", 0, nullptr);
 		}
 
 		bot_list.push_back(new_bot);
 		mob_list.insert(std::pair<uint16, Mob*>(new_bot->GetID(), new_bot));
 
 		parse->EventBot(EVENT_SPAWN, new_bot, nullptr, "", 0);
+		
+		new_bot->DispatchZoneControllerEvent(EVENT_SPAWN_ZONE, new_bot, "", 0, nullptr);
 	}
 }
 
