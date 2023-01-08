@@ -41,7 +41,11 @@ public:
 	int FindCharacter(const char *CharacterName);
 	bool VerifyMailKey(std::string CharacterName, int IPAddress, std::string MailKey);
 	bool GetVariable(const char* varname, char* varvalue, uint16 varvalue_len);
+	void LoadBlockChannels();
 	bool LoadChatChannels();
+	bool IsOnChannelBlockList(std::string channelName);
+	void AddToChannelBlockList(std::string channelName);
+	void RemoveFromChannelBlockList(std::string channelName);
 	bool IsChatChannelInDB(std::string channelName);
 	void SaveChatChannel(std::string channelName, std::string channelOwner, std::string channelPassword, uint16 minstatus);
 	void DeleteChatChannel(std::string channelName);

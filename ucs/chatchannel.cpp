@@ -73,6 +73,10 @@ ChatChannel* ChatChannelList::CreateChannel(std::string Name, std::string Owner,
 
 	ChatChannels.Insert(NewChannel);
 
+	if (Owner == "*System*") {
+		SaveToDB = false;
+	}
+
 	if ((MaxPermPlayerChannels > 0) && !(Owner == "*System*") && SaveToDB) { // If permenant player channels are enabled (and not a system channel), save channel to database if not exceeding limit.
 		if (database.CurrentPlayerChannelCount(Owner) + 1 <= MaxPermPlayerChannels) { // Ensure there is room to save another chat channel to the database.
 			database.SaveChatChannel(CapitaliseName(Name), Owner, Password, MinimumStatus); // Save chat channel to database.
@@ -506,10 +510,13 @@ ChatChannel *ChatChannelList::AddClientToChannel(std::string ChannelName, Client
 
 	if(!c) return nullptr;
 
-	if((ChannelName.length() > 0) && (isdigit(ChannelName[0]))) {
+	if (database.IsOnChannelBlockList(ChannelName)) {
+		c->GeneralChannelMessage("That channel name is blocked by the server operator.");
+		return nullptr;
+	}
 
+	if ((ChannelName.length() > 0) && (isdigit(ChannelName[0]))) {
 		c->GeneralChannelMessage("The channel name can not begin with a number.");
-
 		return nullptr;
 	}
 
@@ -535,9 +542,6 @@ ChatChannel *ChatChannelList::AddClientToChannel(std::string ChannelName, Client
 	ChatChannel *RequiredChannel = FindChannel(NormalisedName);
 	std::string ChannelOwner = c->GetName();
 	if (!RequiredChannel) {
-		if (!commandDirected) { // If the channel is system managed (i.e. Auction & OOC), set system as the owner
-			ChannelOwner = "*System*";
-		}
 		RequiredChannel = CreateChannel(NormalisedName, ChannelOwner, Password, false, 0, commandDirected);
 		LogDebug("Created and added Client to channel [{}] with password [{}]. Owner: {}. Command Directed: {}", NormalisedName.c_str(), Password.c_str(), ChannelOwner, commandDirected);
 	}

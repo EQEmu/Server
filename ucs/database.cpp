@@ -55,6 +55,8 @@ extern std::string GetMailPrefix();
 extern ChatChannelList *ChannelList;
 extern uint32          MailMessagesSent;
 
+std::vector<std::string> BlockedChannelNames;
+
 Database::Database()
 {
 	DBInitVars();
@@ -268,9 +270,31 @@ bool Database::GetVariable(const char *varname, char *varvalue, uint16 varvalue_
 	return true;
 }
 
+
+void Database::LoadBlockChannels() {
+	LogInfo("Loading blocked channels from the database");
+
+	const std::string query = "SELECT `name`, `owner`, `password`, `minstatus` FROM `chatchannels` WHERE `owner` = '*Block*'";
+	auto results = QueryDatabase(query);
+	if (!results.Success()) {
+		return;
+	}
+
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		std::string channelName = row[0];
+		std::string channelOwner = row[1];
+		std::string channelPassword = row[2];
+
+		if (channelOwner == "*Block*") {
+			AddToChannelBlockList(channelName);
+			LogDebug("Name [{}] added to Channel Block List from database.", channelName);
+		}
+	}
+}
+
 bool Database::LoadChatChannels()
 {
-
+	LoadBlockChannels();
 	LogInfo("Loading chat channels from the database");
 
 	const std::string query   = "SELECT `name`, `owner`, `password`, `minstatus` FROM `chatchannels`";
@@ -280,14 +304,75 @@ bool Database::LoadChatChannels()
 	}
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		std::string channelName     = row[0];
-		std::string channelOwner    = row[1];
+		std::string channelName = row[0];
+		std::string channelOwner = row[1];
 		std::string channelPassword = row[2];
 
-		ChannelList->CreateChannel(channelName, channelOwner, channelPassword, true, atoi(row[3]), false);
-	}
 
+		if (IsOnChannelBlockList(channelName)) {
+			if (!(channelOwner == "*Block*")) { // Dont show that channels were blocked when the block entries themselves are detected.
+				LogDebug("Blocked channel [{}] load from database due to being blocked by server operator.", channelName);
+			}
+		}
+		else {
+			ChannelList->CreateChannel(channelName, channelOwner, channelPassword, true, atoi(row[3]), false);
+		}
+	}
 	return true;
+}
+
+bool Database::IsOnChannelBlockList(std::string channelName) {
+	// Ignore the input if it is empty
+	if (channelName == "") {
+		return false;
+	}
+	// Convert channelName to lowercase for case-insensitive comparison
+	std::string channelNameLower = channelName;
+	std::transform(channelNameLower.begin(), channelNameLower.end(), channelNameLower.begin(), ::tolower);
+	// Check if channelName is already in the BlockedChannelNames vector
+	bool isFound = false;
+	for (const std::string& name : BlockedChannelNames) {
+		std::string lowercaseName = name;
+		std::transform(lowercaseName.begin(), lowercaseName.end(), lowercaseName.begin(), ::tolower);
+		if (channelNameLower == lowercaseName) {
+			return true;
+		}
+	}
+	return false;
+}
+
+void Database::AddToChannelBlockList(std::string channelName) {
+	// Ignore the input if it is empty
+	if (channelName == "") {
+		return;
+	}
+	// Convert channelName to lowercase for case-insensitive comparison
+	std::string channelNameLower = channelName;
+	std::transform(channelNameLower.begin(), channelNameLower.end(), channelNameLower.begin(), ::tolower);
+	// Check if channelName is already in the BlockedChannelNames vector
+	bool isFound = false;
+	for (const std::string& name : BlockedChannelNames) {
+		std::string lowercaseName = name;
+		std::transform(lowercaseName.begin(), lowercaseName.end(), lowercaseName.begin(), ::tolower);
+		if (channelNameLower == lowercaseName) {
+			isFound = true;
+			break;
+		}
+	}
+	// Add channelName to the BlockedChannelNames vector if it is not already present
+	if (!isFound) {
+		BlockedChannelNames.push_back(channelName);
+	}
+}
+
+
+void Database::RemoveFromChannelBlockList(std::string channelName) {
+	if (!(channelName == "")) {
+		auto it = std::find(BlockedChannelNames.begin(), BlockedChannelNames.end(), channelName);
+		if (it != BlockedChannelNames.end()) {
+			BlockedChannelNames.erase(it);
+		}
+	}
 }
 
 bool Database::IsChatChannelInDB(std::string channelName)
@@ -305,7 +390,10 @@ bool Database::IsChatChannelInDB(std::string channelName)
 }
 
 void Database::SaveChatChannel(std::string channelName, std::string channelOwner, std::string channelPassword, uint16 minstatus) {
-	if (this->IsChatChannelInDB(channelName)) { // If Channel exists, update it in the database
+	if (IsOnChannelBlockList(channelName)) { //If channel name is blocked, do not save it to the database
+		return;
+	}
+	else if (this->IsChatChannelInDB(channelName)) { // If Channel exists, update it in the database
 		auto query = fmt::format("UPDATE chatchannels SET `name` = '{}', `owner` = '{}', `password` = '{}', `minstatus` = {}	WHERE name = '{}'", channelName, channelOwner, channelPassword, minstatus, channelName);
 		QueryDatabase(query);
 		LogDebug("Updating channel [{}], owned by [{}], in database.", channelName, channelOwner);

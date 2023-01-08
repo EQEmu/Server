@@ -48,8 +48,10 @@ int LookupCommand(const char *ChatCommand) {
 
 	for (int i = 0; i < CommandEndOfList; i++) {
 
-		if (!strcasecmp(Commands[i].CommandString, ChatCommand))
+		if (!strcasecmp(Commands[i].CommandString, ChatCommand)) {
 			return Commands[i].CommandCode;
+		}
+			
 	}
 
 	return -1;
@@ -711,10 +713,23 @@ void Clientlist::Process()
 				CheckForStaleConnections((*it));
 				break;
 			}
-
 			case OP_Mail: {
 				std::string CommandString = (const char *)app->pBuffer + 1;
-				ProcessOPMailCommand((*it), CommandString, false); // Flag as not commandDirected
+				bool commandDirected = false;
+				if (CommandString.empty()) {
+					break;
+				}
+
+				size_t pos = CommandString.find(' ');
+				std::string substr = (pos != std::string::npos) ? CommandString.substr(0, pos) : CommandString;
+				// Convert the string to lowercase using std::transform() and std::tolower().
+				std::transform(substr.begin(), substr.end(), substr.begin(), [](unsigned char c) { return std::tolower(c); });
+
+				if (substr == "leave") {
+					commandDirected = true;
+				}
+
+				ProcessOPMailCommand((*it), CommandString, commandDirected);
 				break;
 			}
 
@@ -804,6 +819,7 @@ void Clientlist::ProcessOPMailCommand(Client *c, std::string CommandString, bool
 		break;
 
 	case CommandListAll:
+
 		ChannelList->SendAllChannels(c);
 		break;
 
