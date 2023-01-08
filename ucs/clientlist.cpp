@@ -1695,6 +1695,7 @@ void Client::SetChannelPassword(std::string ChannelPassword) {
 	}
 
 	RequiredChannel->SetPassword(Password);
+	database.SaveChatChannel(RequiredChannel->GetName(), RequiredChannel->GetOwnerName(), Password, RequiredChannel->GetMinStatus()); // Update DB with new password
 
 	GeneralChannelMessage(Message);
 
@@ -1755,6 +1756,7 @@ void Client::SetChannelOwner(std::string CommandString) {
 	}
 
 	RequiredChannel->SetOwner(NewOwner);
+	database.SaveChatChannel(RequiredChannel->GetName(), NewOwner, RequiredChannel->GetPassword(), RequiredChannel->GetMinStatus()); // Update DB with new owner
 
 	if (RequiredChannel->IsModerator(NewOwner))
 		RequiredChannel->RemoveModerator(NewOwner);

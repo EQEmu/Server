@@ -26,6 +26,7 @@ public:
 	bool CheckPassword(std::string inPassword) { return Password.empty() || Password == inPassword; }
 	void SetPassword(std::string inPassword);
 	bool IsOwner(std::string Name) { return (Owner == Name); }
+	const std::string& GetPassword() { return Password; }
 	void SetOwner(std::string inOwner);
 	std::string GetOwnerName();
 	void SetTemporary();
