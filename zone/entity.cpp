@@ -685,56 +685,61 @@ void EntityList::AddCorpse(Corpse *corpse, uint32 in_id)
 		corpse_timer.Start();
 }
 
-void EntityList::AddNPC(NPC *npc, bool SendSpawnPacket, bool dontqueue)
+void EntityList::AddNPC(NPC *npc, bool send_spawn_packet, bool dont_queue)
 {
 	npc->SetID(GetFreeID());
 
 	//If this is not set here we will despawn pets from new AC changes
 	auto owner_id = npc->GetOwnerID();
-	if(owner_id) {
+	if (owner_id) {
 		auto owner = entity_list.GetMob(owner_id);
 		if (owner) {
 			owner->SetPetID(npc->GetID());
 		}
 	}
-	parse->EventNPC(EVENT_SPAWN, npc, nullptr, "", 0);
 
-	uint32 emoteid = npc->GetEmoteID();
-	if (emoteid != 0)
-		npc->DoNPCEmote(EQ::constants::EmoteEventTypes::OnSpawn, emoteid);
+	const auto emote_id = npc->GetEmoteID();
+	if (emote_id != 0) {
+		npc->DoNPCEmote(EQ::constants::EmoteEventTypes::OnSpawn, emote_id);
+	}
+
 	npc->SetSpawned();
-	if (SendSpawnPacket) {
-		if (dontqueue) { // aka, SEND IT NOW BITCH!
+
+	if (send_spawn_packet) {
+		if (dont_queue) {
 			auto app = new EQApplicationPacket;
 			npc->CreateSpawnPacket(app, npc);
 			QueueClients(npc, app);
 			npc->SendArmorAppearance();
-			npc->SetAppearance(npc->GetGuardPointAnim(),false);
-			if (!npc->IsTargetable())
+			npc->SetAppearance(npc->GetGuardPointAnim(), false);
+
+			if (!npc->IsTargetable()) {
 				npc->SendTargetable(false);
+			}
+
 			safe_delete(app);
 		} else {
 			auto ns = new NewSpawn_Struct;
 			memset(ns, 0, sizeof(NewSpawn_Struct));
-			npc->FillSpawnStruct(ns, nullptr);	// Not working on player newspawns, so it's safe to use a ForWho of 0
+			npc->FillSpawnStruct(ns, nullptr);
 			AddToSpawnQueue(npc->GetID(), &ns);
 			safe_delete(ns);
 		}
-		if (npc->IsFindable())
+
+		if (npc->IsFindable()) {
 			UpdateFindableNPCState(npc, false);
+		}
 	}
 
 	npc_list.insert(std::pair<uint16, NPC *>(npc->GetID(), npc));
 	mob_list.insert(std::pair<uint16, Mob *>(npc->GetID(), npc));
 
+	parse->EventNPC(EVENT_SPAWN, npc, nullptr, "", 0);
+
 	entity_list.ScanCloseMobs(npc->close_mobs, npc, true);
 
-	/* Zone controller process EVENT_SPAWN_ZONE */
 	npc->DispatchZoneControllerEvent(EVENT_SPAWN_ZONE, npc, "", 0, nullptr);
 
-	/**
-	 * Set whether NPC was spawned in or out of water
-	 */
 	if (zone->HasMap() && zone->HasWaterMap()) {
 		npc->SetSpawnedInWater(false);
 		if (zone->watermap->InLiquid(npc->GetPosition())) {
