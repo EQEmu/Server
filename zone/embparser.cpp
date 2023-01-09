@@ -168,10 +168,9 @@ const char *QuestEventSubroutines[_LargestEventID] = {
 	"EVENT_GM_COMMAND",
 	"EVENT_DESPAWN",
 	"EVENT_DESPAWN_ZONE",
-#ifdef BOTS
 	"EVENT_SPELL_EFFECT_BOT",
 	"EVENT_SPELL_EFFECT_BUFF_TIC_BOT",
-#endif
+	"EVENT_BOT_CREATE"
 };
 
 PerlembParser::PerlembParser() : perl(nullptr)
@@ -1120,14 +1119,10 @@ void PerlembParser::GetQuestTypes(
 	if (
 		event == EVENT_SPELL_EFFECT_CLIENT ||
 		event == EVENT_SPELL_EFFECT_NPC ||
-#ifdef BOTS
 		event == EVENT_SPELL_EFFECT_BOT ||
-#endif
 		event == EVENT_SPELL_EFFECT_BUFF_TIC_CLIENT ||
 		event == EVENT_SPELL_EFFECT_BUFF_TIC_NPC ||
-#ifdef BOTS
 		event == EVENT_SPELL_EFFECT_BUFF_TIC_BOT ||
-#endif
 		event == EVENT_SPELL_FADE ||
 		event == EVENT_SPELL_EFFECT_TRANSLOCATE_COMPLETE
 	) {
@@ -1573,14 +1568,12 @@ void PerlembParser::ExportEventVariables(
 			perl->eval(fmt::format("++${}{{${}::item3}};", hash_name, package_name).c_str());
 			perl->eval(fmt::format("++${}{{${}::item4}};", hash_name, package_name).c_str());
 
-#ifdef BOTS
 			if (npcmob->IsBot()) {
 				perl->eval(fmt::format("++${}{{${}::item5}};", hash_name, package_name).c_str());
 				perl->eval(fmt::format("++${}{{${}::item6}};", hash_name, package_name).c_str());
 				perl->eval(fmt::format("++${}{{${}::item7}};", hash_name, package_name).c_str());
 				perl->eval(fmt::format("++${}{{${}::item8}};", hash_name, package_name).c_str());
 			}
-#endif
 
 			break;
 		}
@@ -1754,14 +1747,10 @@ void PerlembParser::ExportEventVariables(
 		}
 
 
-#ifdef BOTS
 		case EVENT_SPELL_EFFECT_BUFF_TIC_BOT:
-#endif
 		case EVENT_SPELL_EFFECT_BUFF_TIC_CLIENT:
 		case EVENT_SPELL_EFFECT_BUFF_TIC_NPC:
-#ifdef BOTS
 		case EVENT_SPELL_EFFECT_BOT:
-#endif
 		case EVENT_SPELL_EFFECT_CLIENT:
 		case EVENT_SPELL_EFFECT_NPC:
 		case EVENT_SPELL_FADE: {
@@ -2049,6 +2038,16 @@ void PerlembParser::ExportEventVariables(
 #endif
 			}
 
+			break;
+		}
+
+		case EVENT_BOT_CREATE: {
+			Seperator sep(data);
+			ExportVar(package_name.c_str(), "bot_name", sep.arg[0]);
+			ExportVar(package_name.c_str(), "bot_id", sep.arg[1]);
+			ExportVar(package_name.c_str(), "bot_race", sep.arg[2]);
+			ExportVar(package_name.c_str(), "bot_class", sep.arg[3]);
+			ExportVar(package_name.c_str(), "bot_gender", sep.arg[4]);
 			break;
 		}
 

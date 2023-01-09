@@ -618,6 +618,15 @@ void handle_player_gm_command(
 	std::vector<std::any> *extra_pointers
 );
 
+void handle_player_bot_create(
+	QuestInterface *parse,
+	lua_State* L,
+	Client* client,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+);
+
 
 // Item
 void handle_item_click(

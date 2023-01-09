@@ -1128,6 +1128,31 @@ void handle_player_gm_command(
 	lua_setfield(L, -2, "message");
 }
 
+void handle_player_bot_create(
+	QuestInterface *parse,
+	lua_State* L,
+	Client* client,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+) {
+	Seperator sep(data.c_str());
+	lua_pushstring(L, sep.arg[0]);
+	lua_setfield(L, -2, "bot_name");
+
+	lua_pushinteger(L, std::stoi(sep.arg[1]));
+	lua_setfield(L, -2, "bot_id");
+
+	lua_pushinteger(L, std::stoi(sep.arg[2]));
+	lua_setfield(L, -2, "bot_race");
+
+	lua_pushinteger(L, std::stoi(sep.arg[3]));
+	lua_setfield(L, -2, "bot_class");
+
+	lua_pushinteger(L, std::stoi(sep.arg[4]));
+	lua_setfield(L, -2, "bot_gender");
+}
+
 // Item
 void handle_item_click(
 	QuestInterface *parse,
