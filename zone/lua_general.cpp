@@ -4617,7 +4617,8 @@ luabind::scope lua_register_events() {
 			luabind::value("level_down", static_cast<int>(EVENT_LEVEL_DOWN)),
 			luabind::value("gm_command", static_cast<int>(EVENT_GM_COMMAND)),
 			luabind::value("despawn", static_cast<int>(EVENT_DESPAWN)),
-			luabind::value("despawn_zone", static_cast<int>(EVENT_DESPAWN_ZONE))
+			luabind::value("despawn_zone", static_cast<int>(EVENT_DESPAWN_ZONE)),
+			luabind::value("bot_create", static_cast<int>(EVENT_BOT_CREATE))
 		)];
 }
 

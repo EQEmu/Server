@@ -111,10 +111,9 @@ typedef enum {
 	EVENT_GM_COMMAND,
 	EVENT_DESPAWN,
 	EVENT_DESPAWN_ZONE,
-#ifdef BOTS
-	EVENT_SPELL_EFFECT_BOT,
+	EVENT_BOT_CREATE,
+	EVENT_SPELL_EFFECT_BOT, // Add new events before these or Lua crashes
 	EVENT_SPELL_EFFECT_BUFF_TIC_BOT,
-#endif
 	_LargestEventID
 } QuestEventID;
 
