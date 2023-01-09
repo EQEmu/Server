@@ -169,7 +169,7 @@ const char *QuestEventSubroutines[_LargestEventID] = {
 	"EVENT_DESPAWN",
 	"EVENT_DESPAWN_ZONE",
 	"EVENT_BOT_CREATE",
-	"EVENT_SPELL_EFFECT_BOT", // Add new events before this or Lua crashes
+	"EVENT_SPELL_EFFECT_BOT", // Add new events before these or Lua crashes
 	"EVENT_SPELL_EFFECT_BUFF_TIC_BOT"
 };
 
