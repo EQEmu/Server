@@ -168,9 +168,9 @@ const char *QuestEventSubroutines[_LargestEventID] = {
 	"EVENT_GM_COMMAND",
 	"EVENT_DESPAWN",
 	"EVENT_DESPAWN_ZONE",
-	"EVENT_SPELL_EFFECT_BOT",
-	"EVENT_SPELL_EFFECT_BUFF_TIC_BOT",
-	"EVENT_BOT_CREATE"
+	"EVENT_BOT_CREATE",
+	"EVENT_SPELL_EFFECT_BOT", // Add new events before this or Lua crashes
+	"EVENT_SPELL_EFFECT_BUFF_TIC_BOT"
 };
 
 PerlembParser::PerlembParser() : perl(nullptr)
