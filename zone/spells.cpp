@@ -3215,9 +3215,14 @@ bool Mob::CheckSpellLevelRestriction(Mob *caster, uint16 spell_id)
 		return false;
 	}
 
+	if (caster->IsClient() && caster->CastToClient()->GetGM()) {
+		LogSpells("[CheckSpellLevelRestriction] GM casting - No restrictions");
+		return true;
+	}
+
 	// NON GM clients might be restricted by rule setting
 	if (caster->IsClient()) {
-		if (RuleB(Spells, BuffLevelRestrictions) && !caster->CastToClient()->GetGM()) {
+		if (RuleB(Spells, BuffLevelRestrictions)) {
 			check_for_restrictions = true;
 		}
 	}
