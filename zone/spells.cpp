@@ -3211,7 +3211,7 @@ bool Mob::CheckSpellLevelRestriction(Mob *caster, uint16 spell_id)
 	bool can_cast = true;
 
 	if (!caster) {
-		LogSpells("CheckSpellLevelRestriction: No caster");
+		LogSpells("[CheckSpellLevelRestriction] No caster");
 		return false;
 	}
 
