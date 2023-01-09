@@ -2025,6 +2025,21 @@ void PerlembParser::ExportEventVariables(
 			break;
 		}
 
+		case EVENT_DESPAWN: {
+			ExportVar(package_name.c_str(), "despawned_entity_id", npcmob->GetID());
+
+			if (npcmob->IsNPC()) {
+				ExportVar(package_name.c_str(), "despawned_bot_id", 0);
+				ExportVar(package_name.c_str(), "despawned_npc_id", npcmob->GetNPCTypeID());
+#ifdef BOTS
+			} else if (npcmob->IsBot()) {
+				ExportVar(package_name.c_str(), "despawned_bot_id", npcmob->CastToBot()->GetBotID());
+				ExportVar(package_name.c_str(), "despawned_npc_id", 0);
+#endif
+			}
+
+			break;
+		}
 		case EVENT_DESPAWN_ZONE: {
 			ExportVar(package_name.c_str(), "despawned_entity_id", mob->GetID());
 

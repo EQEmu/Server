@@ -8752,18 +8752,29 @@ Bot* EntityList::GetBotByBotName(std::string botName) {
 	return Result;
 }
 
-Client* EntityList::GetBotOwnerByBotEntityID(uint16 entityID) {
-	Client* Result = nullptr;
-	if (entityID > 0) {
+Client* EntityList::GetBotOwnerByBotEntityID(uint32 entityID) {
+	Client* c = nullptr;
+	if (entityID) {
 		for (std::list<Bot*>::iterator botListItr = bot_list.begin(); botListItr != bot_list.end(); ++botListItr) {
 			Bot* tempBot = *botListItr;
 			if (tempBot && tempBot->GetID() == entityID) {
-				Result = tempBot->GetBotOwner()->CastToClient();
+				c = tempBot->GetBotOwner()->CastToClient();
 				break;
 			}
 		}
 	}
-	return Result;
+	return c;
+}
+
+Client* EntityList::GetBotOwnerByBotID(const uint32 bot_id)  {
+	Client* c = nullptr;
+	if (bot_id) {
+		const auto owner_id = database.botdb.GetOwnerID(bot_id);
+		if (owner_id) {
+			c = GetClientByCharID(owner_id);
+		}
+	}
+	return c;
 }
 
 void EntityList::AddBot(Bot *new_bot, bool send_spawn_packet, bool dont_queue) {
