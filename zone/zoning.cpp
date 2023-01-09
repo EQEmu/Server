@@ -1215,7 +1215,7 @@ void Client::SetPEQZoneFlag(uint32 zone_id) {
 	}
 }
 
-bool Client::CanBeInZone() {
+bool Client::CanEnterZone(std::string zone_short_name, int16 instance_version) {
 	//check some critial rules to see if this char needs to be booted from the zone
 	//only enforce rules here which are serious enough to warrant being kicked from
 	//the zone
@@ -1224,38 +1224,55 @@ bool Client::CanBeInZone() {
 		return (true);
 	}
 
-	float safe_x, safe_y, safe_z, safe_heading;
-	int16 min_status = AccountStatus::Player;
-	uint8 min_level = 0;
-
 	auto z = GetZoneVersionWithFallback(
-		ZoneID(zone->GetShortName()),
-		zone->GetInstanceVersion()
+		zone_short_name.empty() ? ZoneID(zone->GetShortName()) : ZoneID(zone_short_name),
+		instance_version == -1 ? zone->GetInstanceVersion() : instance_version
 	);
+
 	if (!z) {
 		return false;
 	}
 
-	safe_x       = z->safe_x;
-	safe_y       = z->safe_y;
-	safe_z       = z->safe_z;
-	safe_heading = z->safe_heading;
-	min_status   = z->min_status;
-	min_level    = z->min_level;
-
-	if (GetLevel() < min_level) {
-		LogDebug("[CLIENT] Character does not meet min level requirement ([{}] < [{}])!", GetLevel(), min_level);
-		return (false);
+	if (GetLevel() < z->min_level) {
+		LogDebug(
+			"Character [{}] does not meet minimum level requirement ([{}] < [{}])!",
+			GetCleanName(),
+			GetLevel(),
+			z->min_level
+		);
+		return false;
 	}
-	if (Admin() < min_status) {
-		LogDebug("[CLIENT] Character does not meet min status requirement ([{}] < [{}])!", Admin(), min_status);
-		return (false);
+
+	if (GetLevel() > z->max_level) {
+		LogDebug(
+			"Character [{}] does not meet maximum level requirement ([{}] > [{}])!",
+			GetCleanName(),
+			GetLevel(),
+			z->max_level
+		);
+		return false;
+	}
+
+	if (Admin() < z->min_status) {
+		LogDebug(
+			"Character [{}] does not meet minimum status requirement ([{}] < [{}])!",
+			GetCleanName(),
+			Admin(),
+			z->min_status
+		);
+		return false;
 	}
 
 	if (!z->flag_needed.empty()) {
-		//the flag needed string is not empty, meaning a flag is required.
-		if (Admin() < minStatusToIgnoreZoneFlags && !HasZoneFlag(zone->GetZoneID())) {
-			LogInfo("Character [{}] does not have the flag to be in this zone [{}]!", GetCleanName(), z->flag_needed);
+		if (
+			Admin() < minStatusToIgnoreZoneFlags &&
+			!HasZoneFlag(zone->GetZoneID())
+		) {
+			LogInfo(
+				"Character [{}] does not have the flag to be in this zone [{}]!",
+				GetCleanName(),
+				z->flag_needed
+			);
 			return false;
 		}
 	}

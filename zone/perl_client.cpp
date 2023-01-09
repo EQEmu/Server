@@ -2799,6 +2799,16 @@ void Perl_Client_SetEXPEnabled(Client* self, bool is_exp_enabled)
 	self->SetEXPEnabled(is_exp_enabled);
 }
 
+bool Perl_Client_CanEnterZone(Client* self, std::string zone_short_name)
+{
+	return self->CanEnterZone(zone_short_name);
+}
+
+bool Perl_Client_CanEnterZone(Client* self, std::string zone_short_name, int16 instance_version)
+{
+	return self->CanEnterZone(zone_short_name, instance_version);
+}
+
 #ifdef BOTS
 
 int Perl_Client_GetBotRequiredLevel(Client* self)
@@ -2924,6 +2934,8 @@ void perl_register_client()
 	package.add("CalcPriceMod", (float(*)(Client*))&Perl_Client_CalcPriceMod);
 	package.add("CalcPriceMod", (float(*)(Client*, Mob*))&Perl_Client_CalcPriceMod);
 	package.add("CalcPriceMod", (float(*)(Client*, Mob*, bool))&Perl_Client_CalcPriceMod);
+	package.add("CanEnterZone", (bool(*)(Client*, std::string))&Perl_Client_CanEnterZone);
+	package.add("CanEnterZone", (bool(*)(Client*, std::string, int16))&Perl_Client_CanEnterZone);
 	package.add("CanHaveSkill", &Perl_Client_CanHaveSkill);
 	package.add("CashReward", &Perl_Client_CashReward);
 	package.add("ChangeLastName", &Perl_Client_ChangeLastName);

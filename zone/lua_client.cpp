@@ -2926,6 +2926,16 @@ uint64 Lua_Client::CalcEXP(uint8 consider_level, bool ignore_modifiers) {
 	return self->CalcEXP(consider_level, ignore_modifiers);
 }
 
+bool Lua_Client::CanEnterZone(std::string zone_short_name) {
+	Lua_Safe_Call_Bool();
+	return self->CanEnterZone(zone_short_name);
+}
+
+bool Lua_Client::CanEnterZone(std::string zone_short_name, int16 instance_version) {
+	Lua_Safe_Call_Bool();
+	return self->CanEnterZone(zone_short_name, instance_version);
+}
+
 #ifdef BOTS
 
 int Lua_Client::GetBotRequiredLevel()
@@ -3060,6 +3070,8 @@ luabind::scope lua_register_client() {
 	.def("CalcEXP", (uint64(Lua_Client::*)(uint8))&Lua_Client::CalcEXP)
 	.def("CalcEXP", (uint64(Lua_Client::*)(uint8,bool))&Lua_Client::CalcEXP)
 	.def("CalcPriceMod", (float(Lua_Client::*)(Lua_Mob,bool))&Lua_Client::CalcPriceMod)
+	.def("CanEnterZone", (bool(Lua_Client::*)(std::string))&Lua_Client::CanEnterZone)
+	.def("CanEnterZone", (bool(Lua_Client::*)(std::string,int16))&Lua_Client::CanEnterZone)
 	.def("CanHaveSkill", (bool(Lua_Client::*)(int))&Lua_Client::CanHaveSkill)
 	.def("CashReward", &Lua_Client::CashReward)
 	.def("ChangeLastName", (void(Lua_Client::*)(std::string))&Lua_Client::ChangeLastName)

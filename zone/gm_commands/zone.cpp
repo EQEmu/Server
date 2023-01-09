@@ -53,10 +53,14 @@ void command_zone(Client *c, const Seperator *sep)
 		return;
 	}
 
-	// status checking
-	auto min_status = content_db.GetMinStatus(zone_id, 0);
-	if (c->Admin() < min_status) {
-		c->Message(Chat::White, "Your status is not high enough to go to this zone.");
+	if (!c->CanEnterZone(ZoneName(zone_id))) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"You do not meet the requirements to enter {}.",
+				ZoneLongName(zone_id)
+			).c_str()
+		);
 		return;
 	}
 

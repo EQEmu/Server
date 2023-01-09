@@ -102,6 +102,17 @@ void command_peqzone(Client *c, const Seperator *sep)
 		return;
 	}
 
+	if (!c->CanEnterZone(zone_short_name)) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"You do not meet the requirements to enter {}.",
+				ZoneLongName(zone_id)
+			).c_str()
+		);
+		return;
+	}
+
 	if (RuleB(Zone, UsePEQZoneDebuffs)) {
 		c->SpellOnTarget(RuleI(Zone, PEQZoneDebuff1), c);
 		c->SpellOnTarget(RuleI(Zone, PEQZoneDebuff2), c);

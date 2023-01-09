@@ -904,9 +904,9 @@ void Client::CompleteConnect()
 	heroforge_wearchange_timer.Start(250);
 
 	// enforce some rules..
-	if (!CanBeInZone()) {
+	if (!CanEnterZone()) {
 		LogInfo("Kicking character [{}] from zone, not allowed here (missing requirements)", GetCleanName());
-		GoToSafeCoords(ZoneID("arena"), 0);
+		GoToSafeCoords(RuleI(World, FailedRequirementBootZoneID), 0);
 		return;
 	}
 }
