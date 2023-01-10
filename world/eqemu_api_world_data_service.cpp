@@ -207,7 +207,7 @@ void EQEmuApiWorldDataService::reload(Json::Value &r, const std::vector<std::str
 				message(
 					r,
 					fmt::format(
-						"	Attempting to reload Quests {}worldwide.",
+						"Attempting to reload Quests {}worldwide.",
 						(
 							global_repop ?
 								(
