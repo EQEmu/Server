@@ -126,22 +126,6 @@ void callGetClientList(Json::Value &response)
 	client_list.GetClientList(response);
 }
 
-void EQEmuApiWorldDataService::get(Json::Value &r, const std::vector<std::string> &args)
-{
-	const std::string &m = args[0];
-	if (m == "get_zone_list") {
-		callGetZoneList(r);
-	}
-	if (m == "get_database_schema") {
-		callGetDatabaseSchema(r);
-	}
-	if (m == "get_client_list") {
-		callGetClientList(r);
-	}
-	if (m == "reload") {
-		reload(r, args);
-	}
-}
 
 struct Reload {
 	std::string command{};
@@ -149,33 +133,46 @@ struct Reload {
 	std::string desc{};
 };
 
+std::vector<Reload> reload_types = {
+	Reload{.command = "aa", .opcode = ServerOP_ReloadAAData, .desc = "Alternate Advancement"},
+	Reload{.command = "alternate_currencies", .opcode = ServerOP_ReloadAlternateCurrencies, .desc = "Alternate Currencies"},
+	Reload{.command = "blocked_spells", .opcode = ServerOP_ReloadBlockedSpells, .desc = "Blocked Spells"},
+	Reload{.command = "commands", .opcode = ServerOP_ReloadCommands, .desc = "Commands"},
+	Reload{.command = "doors", .opcode = ServerOP_ReloadDoors, .desc = "Doors"},
+	Reload{.command = "dztemplates", .opcode = ServerOP_ReloadDzTemplates, .desc = "Dynamic Zone Templates"},
+	Reload{.command = "ground_spawns", .opcode = ServerOP_ReloadGroundSpawns, .desc = "Ground Spawns"},
+	Reload{.command = "level_mods", .opcode = ServerOP_ReloadLevelEXPMods, .desc = "Level Mods"},
+	Reload{.command = "logs", .opcode = ServerOP_ReloadLogs, .desc = "Log Settings"},
+	Reload{.command = "merchants", .opcode = ServerOP_ReloadMerchants, .desc = "Merchants"},
+	Reload{.command = "npc_emotes", .opcode = ServerOP_ReloadNPCEmotes, .desc = "NPC Emotes"},
+	Reload{.command = "objects", .opcode = ServerOP_ReloadObjects, .desc = "Objects"},
+	Reload{.command = "perl_export", .opcode = ServerOP_ReloadPerlExportSettings, .desc = "Perl Event Export Settings"},
+	Reload{.command = "rules", .opcode = ServerOP_ReloadRules, .desc = "Rules"},
+	Reload{.command = "static", .opcode = ServerOP_ReloadStaticZoneData, .desc = "Static Zone Data"},
+	Reload{.command = "tasks", .opcode = ServerOP_ReloadTasks, .desc = "Tasks"},
+	Reload{.command = "titles", .opcode = ServerOP_ReloadTitles, .desc = "Titles"},
+	Reload{.command = "traps", .opcode = ServerOP_ReloadTraps, .desc = "Traps"},
+	Reload{.command = "variables", .opcode = ServerOP_ReloadVariables, .desc = "Variables"},
+	Reload{.command = "veteran_rewards", .opcode = ServerOP_ReloadVeteranRewards, .desc = "Veteran Rewards"},
+	Reload{.command = "world", .opcode = ServerOP_ReloadWorld, .desc = "World"},
+	Reload{.command = "zone_points", .opcode = ServerOP_ReloadZonePoints, .desc = "Zone Points"},
+};
+
+void getReloadTypes(Json::Value &response)
+{
+	for (auto &c: reload_types) {
+		Json::Value v;
+
+		v["command"]     = c.command;
+		v["opcode"]      = c.opcode;
+		v["description"] = c.desc;
+		response.append(v);
+	}
+}
+
+
 void EQEmuApiWorldDataService::reload(Json::Value &r, const std::vector<std::string> &args)
 {
-	std::vector<Reload> reload_types = {
-		Reload{.command = "aa", .opcode = ServerOP_ReloadAAData, .desc = "Alternate Advancement"},
-		Reload{.command = "alternate_currencies", .opcode = ServerOP_ReloadAlternateCurrencies, .desc = "Alternate Currencies"},
-		Reload{.command = "blocked_spells", .opcode = ServerOP_ReloadBlockedSpells, .desc = "Blocked Spells"},
-		Reload{.command = "commands", .opcode = ServerOP_ReloadCommands, .desc = "Commands"},
-		Reload{.command = "doors", .opcode = ServerOP_ReloadDoors, .desc = "Doors"},
-		Reload{.command = "dztemplates", .opcode = ServerOP_ReloadDzTemplates, .desc = "Dynamic Zone Templates"},
-		Reload{.command = "ground_spawns", .opcode = ServerOP_ReloadGroundSpawns, .desc = "Ground Spawns"},
-		Reload{.command = "level_mods", .opcode = ServerOP_ReloadLevelEXPMods, .desc = "Level Mods"},
-		Reload{.command = "logs", .opcode = ServerOP_ReloadLogs, .desc = "Log Settings"},
-		Reload{.command = "merchants", .opcode = ServerOP_ReloadMerchants, .desc = "Merchants"},
-		Reload{.command = "npc_emotes", .opcode = ServerOP_ReloadNPCEmotes, .desc = "NPC Emotes"},
-		Reload{.command = "objects", .opcode = ServerOP_ReloadObjects, .desc = "Objects"},
-		Reload{.command = "perl_export", .opcode = ServerOP_ReloadPerlExportSettings, .desc = "Perl Event Export Settings"},
-		Reload{.command = "rules", .opcode = ServerOP_ReloadRules, .desc = "Rules"},
-		Reload{.command = "static", .opcode = ServerOP_ReloadStaticZoneData, .desc = "Static Zone Data"},
-		Reload{.command = "tasks", .opcode = ServerOP_ReloadTasks, .desc = "Tasks"},
-		Reload{.command = "titles", .opcode = ServerOP_ReloadTitles, .desc = "Titles"},
-		Reload{.command = "traps", .opcode = ServerOP_ReloadTraps, .desc = "Traps"},
-		Reload{.command = "variables", .opcode = ServerOP_ReloadVariables, .desc = "Variables"},
-		Reload{.command = "veteran_rewards", .opcode = ServerOP_ReloadVeteranRewards, .desc = "Veteran Rewards"},
-		Reload{.command = "world", .opcode = ServerOP_ReloadWorld, .desc = "World"},
-		Reload{.command = "zone_points", .opcode = ServerOP_ReloadZonePoints, .desc = "Zone Points"},
-	};
-
 	std::vector<std::string> commands{};
 	commands.reserve(reload_types.size());
 	for (auto &c: reload_types) {
@@ -250,4 +247,24 @@ void EQEmuApiWorldDataService::message(Json::Value &r, const std::string &messag
 	Json::Value v;
 	v["message"] = message;
 	r.append(v);
+}
+
+void EQEmuApiWorldDataService::get(Json::Value &r, const std::vector<std::string> &args)
+{
+	const std::string &m = args[0];
+	if (m == "get_zone_list") {
+		callGetZoneList(r);
+	}
+	if (m == "get_database_schema") {
+		callGetDatabaseSchema(r);
+	}
+	if (m == "get_client_list") {
+		callGetClientList(r);
+	}
+	if (m == "get_reload_types") {
+		getReloadTypes(r);
+	}
+	if (m == "reload") {
+		reload(r, args);
+	}
 }
