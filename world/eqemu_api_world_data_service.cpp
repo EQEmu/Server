@@ -244,9 +244,7 @@ void EQEmuApiWorldDataService::reload(Json::Value &r, const std::vector<std::str
 
 void EQEmuApiWorldDataService::message(Json::Value &r, const std::string &message)
 {
-	Json::Value v;
-	v["message"] = message;
-	r.append(v);
+	r["message"] = message;
 }
 
 void EQEmuApiWorldDataService::get(Json::Value &r, const std::vector<std::string> &args)
