@@ -297,30 +297,14 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 			break;
 	};
 
-	//OK, now we should know where were going...
+	auto zoning_message = ZoningMessage::ZoneSuccess;
 
-	//Check some rules first.
-	int8 myerror = 1;		//1 is succes
-
-	//not sure when we would use ZONE_ERROR_NOTREADY
-
-	//enforce min status and level
-	if (!ignore_restrictions && (Admin() < min_status || GetLevel() < zone_data->min_level)) {
-		myerror = ZONE_ERROR_NOEXPERIENCE;
-	}
-
-	if (!ignore_restrictions && !zone_data->flag_needed.empty()) {
-		//the flag needed string is not empty, meaning a flag is required.
-		if (Admin() < minStatusToIgnoreZoneFlags && !HasZoneFlag(target_zone_id)) {
-			LogInfo(
-				"Client [{}] does not have the proper flag to enter [{}] ({})",
-				GetCleanName(),
-				ZoneName(target_zone_id),
-				target_zone_id
-			);
-			Message(Chat::Red, "You do not have the flag to enter %s.", target_zone_name);
-			myerror = ZONE_ERROR_NOEXPERIENCE;
-		}
+	// Check Minimum Status, Minimum Level, Maximum Level, and Zone Flag
+	if (
+		!ignore_restrictions &&
+		!CanEnterZone(ZoneName(target_zone_id), target_instance_version)
+	) {
+		zoning_message = ZoningMessage::ZoneNoExperience;
 	}
 
 	//TODO: ADVENTURE ENTRANCE CHECK
@@ -345,7 +329,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 		);
 
 		if (!meets_zone_expansion_check) {
-			myerror = ZONE_ERROR_NOEXPANSION;
+			zoning_message = ZoningMessage::ZoneNoExpansion;
 		}
 	}
 
@@ -353,12 +337,11 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 		LogInfo("[{}] Bypassing Expansion zone checks because GM status is set", GetCleanName());
 	}
 
-	if (myerror == 1) {
-		//we have successfully zoned
+	if (zoning_message == ZoningMessage::ZoneSuccess) {
 		DoZoneSuccess(zc, target_zone_id, target_instance_id, target_x, target_y, target_z, target_heading, ignore_restrictions);
 	} else {
 		LogError("Zoning [{}]: Rules prevent this char from zoning into [{}]", GetName(), target_zone_name);
-		SendZoneError(zc, myerror);
+		SendZoneError(zc, zoning_message);
 	}
 }
 
@@ -1221,7 +1204,7 @@ bool Client::CanEnterZone(std::string zone_short_name, int16 instance_version) {
 	//the zone
 
 	if (Admin() >= RuleI(GM, MinStatusToZoneAnywhere)) {
-		return (true);
+		return true;
 	}
 
 	auto z = GetZoneVersionWithFallback(
@@ -1234,7 +1217,7 @@ bool Client::CanEnterZone(std::string zone_short_name, int16 instance_version) {
 	}
 
 	if (GetLevel() < z->min_level) {
-		LogDebug(
+		LogInfo(
 			"Character [{}] does not meet minimum level requirement ([{}] < [{}])!",
 			GetCleanName(),
 			GetLevel(),
@@ -1244,7 +1227,7 @@ bool Client::CanEnterZone(std::string zone_short_name, int16 instance_version) {
 	}
 
 	if (GetLevel() > z->max_level) {
-		LogDebug(
+		LogInfo(
 			"Character [{}] does not meet maximum level requirement ([{}] > [{}])!",
 			GetCleanName(),
 			GetLevel(),
@@ -1254,7 +1237,7 @@ bool Client::CanEnterZone(std::string zone_short_name, int16 instance_version) {
 	}
 
 	if (Admin() < z->min_status) {
-		LogDebug(
+		LogInfo(
 			"Character [{}] does not meet minimum status requirement ([{}] < [{}])!",
 			GetCleanName(),
 			Admin(),

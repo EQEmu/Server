@@ -281,7 +281,6 @@ RULE_BOOL(World, StartZoneSameAsBindOnCreation, true, "Should the start zone alw
 RULE_BOOL(World, EnforceCharacterLimitAtLogin, false, "Enforce the limit for characters that are online at login")
 RULE_BOOL(World, EnableDevTools, true, "Enable or Disable the Developer Tools globally (Most of the time you want this enabled)")
 RULE_BOOL(World, EnableChecksumVerification, false, "Enable or Disable the Checksum Verification for eqgame.exe and spells_us.txt")
-RULE_INT(World, FailedRequirementBootZoneID, 77, "Zone ID that players are booted to when they fail zone requirements, default is Arena (77)")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Zone)

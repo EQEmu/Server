@@ -53,17 +53,6 @@ void command_zone(Client *c, const Seperator *sep)
 		return;
 	}
 
-	if (!c->CanEnterZone(ZoneName(zone_id))) {
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"You do not meet the requirements to enter {}.",
-				ZoneLongName(zone_id)
-			).c_str()
-		);
-		return;
-	}
-
 #ifdef BOTS
 	// This block is necessary to clean up any bot objects owned by a Client
 	if (zone_id != c->GetZoneID()) {

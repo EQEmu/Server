@@ -906,7 +906,7 @@ void Client::CompleteConnect()
 	// enforce some rules..
 	if (!CanEnterZone()) {
 		LogInfo("Kicking character [{}] from zone, not allowed here (missing requirements)", GetCleanName());
-		GoToSafeCoords(RuleI(World, FailedRequirementBootZoneID), 0);
+		GoToBind();
 		return;
 	}
 }
