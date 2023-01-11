@@ -1,0 +1,28 @@
+name: SonarCloud
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    types: [opened, synchronize, reopened]
+jobs:
+  build:
+    name: Build and analyze
+    runs-on: windows-latest
+    env:
+      BUILD_WRAPPER_OUT_DIR: build_wrapper_output_directory # Directory where build-wrapper output will be placed
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+-         name: SonarCloud Scan for C and C++
+         uses: SonarSource/sonarcloud-github-c-cpp@v1.3
+      - name: Run build-wrapper
+        run: |
+          build-wrapper-win-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }}<insert_your_clean_build_command>
+      - name: Run sonar-scanner
+        env:
+          GITHUB_TOKEN: ${{ secrets.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 }}
+          SONAR_TOKEN: ${{ secrets.fc98d4917b2896b4efa39ea0f8a00660c02c4ee3 }}
+        run: |
+          sonar-scanner --define sonar.cfamily.build-wrapper-output="${{ env.BUILD_WRAPPER_OUT_DIR }}"
