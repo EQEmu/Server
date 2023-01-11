@@ -25,7 +25,9 @@
 
 class EQEmuApiWorldDataService {
 public:
-	static void get(Json::Value &response, const std::vector<std::string> &args);
+	static void get(Json::Value &r, const std::vector<std::string> &args);
+	static void reload(Json::Value &r, const std::vector<std::string> &args);
+	static void message(Json::Value &r, const std::string &message);
 };
 
 
