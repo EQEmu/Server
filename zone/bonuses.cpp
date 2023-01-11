@@ -1932,7 +1932,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 			effect_value = se_base;
 			limit_value = se_limit;
 			max_value = se_max;
-			i = EFFECT_COUNT; //End the loop
+			i = (EFFECT_COUNT - 1); // AISpellEffects do a single pass
 		}
 
 		switch (spell_effect_id)
