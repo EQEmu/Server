@@ -7728,21 +7728,18 @@ void Bot::DoEnduranceUpkeep() {
 		SetEndurance(GetEndurance() - upkeep_sum);
 }
 
-void Bot::Camp(bool databaseSave) {
+void Bot::Camp(bool save_to_database) {
 	Sit();
 
-	//auto group = GetGroup();
-	if(GetGroup())
+	if (GetGroup()) {
 		RemoveBotFromGroup(this, GetGroup());
-
-	// RemoveBotFromGroup() code is too complicated for this to work as-is (still needs to be addressed to prevent memory leaks)
-	//if (group->GroupCount() < 2)
-	//	group->DisbandGroup();
+	}
 
 	LeaveHealRotationMemberPool();
 
-	if(databaseSave)
+	if (save_to_database) {
 		Save();
+	}
 
 	Depop();
 }

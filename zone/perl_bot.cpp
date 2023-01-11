@@ -376,6 +376,16 @@ uint32 Perl_Bot_GetBotID(Bot* self) // @categories Script Utility
 	return self->GetBotID();
 }
 
+void Perl_Bot_Camp(Bot* self) // @categories Script Utility
+{
+	self->Camp();
+}
+
+void Perl_Bot_Camp(Bot* self, bool save_to_database) // @categories Script Utility
+{
+	self->Camp(save_to_database);
+}
+
 void perl_register_bot()
 {
 	perl::interpreter state(PERL_GET_THX);
@@ -397,6 +407,8 @@ void perl_register_bot()
 	package.add("ApplySpellGroup", (void(*)(Bot*, int))&Perl_Bot_ApplySpellGroup);
 	package.add("ApplySpellGroup", (void(*)(Bot*, int, int))&Perl_Bot_ApplySpellGroup);
 	package.add("ApplySpellGroup", (void(*)(Bot*, int, int, bool))&Perl_Bot_ApplySpellGroup);
+	package.add("Camp", (void(*)(Bot*))&Perl_Bot_Camp);
+	package.add("Camp", (void(*)(Bot*, bool))&Perl_Bot_Camp);
 	package.add("CountAugmentEquippedByID", &Perl_Bot_CountAugmentEquippedByID);
 	package.add("CountBotItem", &Perl_Bot_CountBotItem);
 	package.add("CountItemEquippedByID", &Perl_Bot_CountItemEquippedByID);
