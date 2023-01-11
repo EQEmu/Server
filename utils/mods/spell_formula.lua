@@ -35,7 +35,7 @@ function CalcSpellEffectValue_formula(e)
 	--FORMULA NUMBERS 100,000+++ are considered "custom" and other spells will use normal logic from source!!!
 	local switch = {
 		[100000] = function ()
-			result = updownsign * (ubase + (e.self:GetSTR/2)); --Half strength added to damage!
+			result = updownsign * (ubase + (e.self:GetSTR()/2)); --Half strength added to damage!
 		end,
 		[100001] = function ()
 			result = (updownsign * (ubase + (caster_level * 2))) * math.random(1,caster_level); -- multiplies final damage randomly from 1 up to caster level!
