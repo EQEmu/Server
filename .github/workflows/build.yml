@@ -10,7 +10,7 @@ jobs:
     name: Build
     runs-on: windows-latest
     env:
-      BUILD_WRAPPER_OUT_DIR: build_wrapper_output_directory # Directory where build-wrapper output will be placed
+      BUILD_WRAPPER_OUT_DIR: build/ # Directory where build-wrapper output will be placed
     steps:
       - uses: actions/checkout@v3
         with:
