@@ -360,6 +360,16 @@ uint32 Lua_Bot::GetBotID() {
 	return self->GetBotID();
 }
 
+void Lua_Bot::Camp() {
+	Lua_Safe_Call_Void();
+	self->Camp();
+}
+
+void Lua_Bot::Camp(bool save_to_database) {
+	Lua_Safe_Call_Void();
+	self->Camp(save_to_database);
+}
+
 luabind::scope lua_register_bot() {
 	return luabind::class_<Lua_Bot, Lua_Mob>("Bot")
 	.def(luabind::constructor<>())
@@ -378,6 +388,8 @@ luabind::scope lua_register_bot() {
 	.def("ApplySpellGroup", (void(Lua_Bot::*)(int))&Lua_Bot::ApplySpellGroup)
 	.def("ApplySpellGroup", (void(Lua_Bot::*)(int,int))&Lua_Bot::ApplySpellGroup)
 	.def("ApplySpellGroup", (void(Lua_Bot::*)(int,int,bool))&Lua_Bot::ApplySpellGroup)
+	.def("Camp", (void(Lua_Bot::*)(void))&Lua_Bot::Camp)
+	.def("Camp", (void(Lua_Bot::*)(bool))&Lua_Bot::Camp)
 	.def("CountBotItem", (uint32(Lua_Bot::*)(uint32))&Lua_Bot::CountBotItem)
 	.def("CountItemEquippedByID", (int(Lua_Bot::*)(uint32))&Lua_Bot::CountItemEquippedByID)
 	.def("Escape", (void(Lua_Bot::*)(void))&Lua_Bot::Escape)

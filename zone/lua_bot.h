@@ -56,6 +56,8 @@ public:
 	void SendPayload(int payload_id);
 	void SendPayload(int payload_id, std::string payload_value);
 	uint32 GetBotID();
+	void Camp();
+	void Camp(bool save_to_database);
 
 	void ApplySpell(int spell_id);
 	void ApplySpell(int spell_id, int duration);
