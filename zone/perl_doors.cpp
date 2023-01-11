@@ -149,12 +149,47 @@ void Perl_Doors_CreateDatabaseEntry(Doors* self) // @categories Doors
 	self->CreateDatabaseEntry();
 }
 
+void Perl_Doors_ForceClose(Doors* self, Mob* sender)
+{
+	self->ForceClose(sender);
+}
+
+void Perl_Doors_ForceClose(Doors* self, Mob* sender, bool alt_mode)
+{
+	self->ForceClose(sender, alt_mode);
+}
+
+void Perl_Doors_ForceOpen(Doors* self, Mob* sender)
+{
+	self->ForceOpen(sender);
+}
+
+void Perl_Doors_ForceOpen(Doors* self, Mob* sender, bool alt_mode)
+{
+	self->ForceOpen(sender, alt_mode);
+}
+
+bool Perl_Doors_GetDisableTimer(Doors* self)
+{
+	return self->GetDisableTimer();
+}
+
+void Perl_Doors_SetDisableTimer(Doors* self, bool disable_timer)
+{
+	self->SetDisableTimer(disable_timer);
+}
+
 void perl_register_doors()
 {
 	perl::interpreter perl(PERL_GET_THX);
 
 	auto package = perl.new_class<Doors>("Doors");
 	package.add("CreateDatabaseEntry", &Perl_Doors_CreateDatabaseEntry);
+	package.add("ForceClose", (void(*)(Doors*, Mob*))&Perl_Doors_ForceClose);
+	package.add("ForceClose", (void(*)(Doors*, Mob*, bool))&Perl_Doors_ForceClose);
+	package.add("ForceOpen", (void(*)(Doors*, Mob*))&Perl_Doors_ForceOpen);
+	package.add("ForceOpen", (void(*)(Doors*, Mob*, bool))&Perl_Doors_ForceOpen);
+	package.add("GetDisableTimer", &Perl_Doors_GetDisableTimer);
 	package.add("GetDoorDBID", &Perl_Doors_GetDoorDBID);
 	package.add("GetDoorID", &Perl_Doors_GetDoorID);
 	package.add("GetHeading", &Perl_Doors_GetHeading);
@@ -169,6 +204,7 @@ void perl_register_doors()
 	package.add("GetX", &Perl_Doors_GetX);
 	package.add("GetY", &Perl_Doors_GetY);
 	package.add("GetZ", &Perl_Doors_GetZ);
+	package.add("SetDisableTimer", &Perl_Doors_SetDisableTimer);
 	package.add("SetHeading", &Perl_Doors_SetHeading);
 	package.add("SetIncline", &Perl_Doors_SetIncline);
 	package.add("SetKeyItem", &Perl_Doors_SetKeyItem);
