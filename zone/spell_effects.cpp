@@ -28,6 +28,7 @@
 #include "../common/misc_functions.h"
 
 #include "quest_parser_collection.h"
+#include "lua_parser.h"
 #include "string_ids.h"
 #include "worldserver.h"
 
@@ -3412,6 +3413,16 @@ int64 Mob::CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level
 // generic formula calculations
 int64 Mob::CalcSpellEffectValue_formula(int64 formula, int64 base_value, int64 max_value, int caster_level, uint16 spell_id, int ticsremaining)
 {
+#ifdef LUA_EQEMU
+	int64 lua_ret = 0;
+	bool ignoreDefault = false;
+	lua_ret = LuaParser::Instance()->CalcSpellEffectValue_formula(this, formula, base_value, max_value, caster_level, spell_id, ticsremaining, ignoreDefault);
+
+	if (ignoreDefault) {
+		return lua_ret;
+	}
+#endif
+
 /*
 i need those formulas checked!!!!
 
