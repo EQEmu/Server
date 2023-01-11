@@ -633,7 +633,7 @@ void LuaMod::GetExperienceForKill(Client *self, Mob *against, uint64 &returnValu
 	}
 }
 
-void LuaMod::CalcSpellEffectValue_formula(Mob *self, int64 formula, int64 base_value, int64 max_value, int caster_level, uint16 spell_id, int ticsremaining, int64 &returnValue, bool &ignoreDefault)
+void LuaMod::CalcSpellEffectValue_formula(Mob *self, uint32 formula, int64 base_value, int64 max_value, int caster_level, uint16 spell_id, int ticsremaining, int64 &returnValue, bool &ignoreDefault)
 {
 	int start = lua_gettop(L);
 	int64 retval = 0;

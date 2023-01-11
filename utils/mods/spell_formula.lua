@@ -1,7 +1,5 @@
 function CalcSpellEffectValue_formula(e)
 	--THE FUNCTIONALITY OF THIS IS FOR ADDING CUSTOM SPELL FORMULAS WITHOUT INTERFERING WITH EXISTING FORMULAS
-	local qdebug = false;
-		
 	if (e.formula >= 100000) then
 		e.IgnoreDefault = true;
 	else 
@@ -23,7 +21,7 @@ function CalcSpellEffectValue_formula(e)
 		ubase = 0 - ubase;
 	end
 	
-	if ( max_value < base_value and max_value ~= 0 ) then
+	if (max_value < base_value and max_value ~= 0) then
 		--values are calculated down
 		updownsign = -1;
 	else
@@ -79,8 +77,6 @@ function CalcSpellEffectValue_formula(e)
 	if (base_value < 0 and result > 0) then
 		result = result * -1;
 	end
-	
-	if (qdebug) then eq.debug("Result is.." .. result) end
 	
 	eq.log_spells(
 			string.format("[Mob::CalcSpellEffectValue_formula] Result: [%i] (orig [%i]) cap [%i]",
