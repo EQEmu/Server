@@ -325,19 +325,12 @@ uint32 BotDatabase::GetOwnerID(const uint32 bot_id)
 		return 0;
 	}
 
-	query = StringFormat("SELECT `owner_id` FROM `bot_data` WHERE `bot_id` = '%u' LIMIT 1", bot_id);
-	auto results = database.QueryDatabase(query);
-	if (!results.Success()) {
-		return 0;
-	}
-	if (!results.RowCount()) {
+	const auto& l = BotDataRepository::FindOne(database, bot_id);
+	if (!l.bot_id) {
 		return 0;
 	}
 
-	auto row = results.begin();
-	const auto owner_id = atoi(row[0]);
-
-	return owner_id;
+	return l.owner_id;
 }
 
 bool BotDatabase::LoadBotID(const uint32 owner_id, const std::string& bot_name, uint32& bot_id)
