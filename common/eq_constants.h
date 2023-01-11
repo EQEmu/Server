@@ -684,14 +684,6 @@ namespace Zones {
 	constexpr uint16 APPRENTICE = 999; // Designer Apprentice
 }
 
-//ZoneChange_Struct->success values
-#define ZONE_ERROR_NOMSG 0
-#define ZONE_ERROR_NOTREADY -1
-#define ZONE_ERROR_VALIDPC -2
-#define ZONE_ERROR_STORYZONE -3
-#define ZONE_ERROR_NOEXPANSION -6
-#define ZONE_ERROR_NOEXPERIENCE -7
-
 
 typedef enum {
 	FilterNone = 0,
@@ -1021,6 +1013,17 @@ enum Anonymity : uint8
 	NotAnonymous,
 	Anonymous,
 	Roleplaying
+};
+
+enum ZoningMessage : int8
+{
+	ZoneNoMessage = 0,
+	ZoneSuccess = 1,
+	ZoneNotReady = -1,
+	ZoneValidPC = -2,
+	ZoneStoryZone = -3,
+	ZoneNoExpansion = -6,
+	ZoneNoExperience = -7
 };
 
 #endif /*COMMON_EQ_CONSTANTS_H*/

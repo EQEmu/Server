@@ -1352,6 +1352,8 @@ public:
 	void ClearPendingAdventureDoorClick() { safe_delete(adventure_door_timer); }
 	void ClearPendingAdventureData();
 
+	bool CanEnterZone(std::string zone_short_name = "", int16 instance_version = -1);
+
 	int GetAggroCount();
 	void IncrementAggroCount(bool raid_target = false);
 	void DecrementAggroCount();
@@ -1861,7 +1863,6 @@ private:
 	void NPCSpawn(const Seperator* sep);
 	uint32 GetEXPForLevel(uint16 level);
 
-	bool CanBeInZone();
 	void SendLogoutPackets();
 	void SendZoneInPackets();
 	bool AddPacket(const EQApplicationPacket *, bool);

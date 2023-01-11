@@ -53,13 +53,6 @@ void command_zone(Client *c, const Seperator *sep)
 		return;
 	}
 
-	// status checking
-	auto min_status = content_db.GetMinStatus(zone_id, 0);
-	if (c->Admin() < min_status) {
-		c->Message(Chat::White, "Your status is not high enough to go to this zone.");
-		return;
-	}
-
 #ifdef BOTS
 	// This block is necessary to clean up any bot objects owned by a Client
 	if (zone_id != c->GetZoneID()) {
