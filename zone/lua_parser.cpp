@@ -213,7 +213,6 @@ LuaParser::LuaParser() {
 	NPCArgumentDispatch[EVENT_LOOT_ZONE] = handle_npc_loot_zone;
 	NPCArgumentDispatch[EVENT_SPAWN_ZONE] = handle_npc_spawn_zone;
 	NPCArgumentDispatch[EVENT_PAYLOAD] = handle_npc_payload;
-	NPCArgumentDispatch[EVENT_DESPAWN] = handle_npc_despawn;
 	NPCArgumentDispatch[EVENT_DESPAWN_ZONE] = handle_npc_despawn_zone;
 
 	PlayerArgumentDispatch[EVENT_SAY] = handle_player_say;
