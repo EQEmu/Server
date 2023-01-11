@@ -377,10 +377,10 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 					if (
 						!(
 							(
-								spells[selectedBotSpell.SpellId].target_type == ST_Target || 
-								spells[selectedBotSpell.SpellId].target_type == ST_Pet || 
+								spells[selectedBotSpell.SpellId].target_type == ST_Target ||
+								spells[selectedBotSpell.SpellId].target_type == ST_Pet ||
 								(tar == this && spells[selectedBotSpell.SpellId].target_type != ST_TargetsTarget) ||
-								spells[selectedBotSpell.SpellId].target_type == ST_Group || 
+								spells[selectedBotSpell.SpellId].target_type == ST_Group ||
 								spells[selectedBotSpell.SpellId].target_type == ST_GroupTeleport ||
 								(botClass == BARD && spells[selectedBotSpell.SpellId].target_type == ST_AEBard)
 							) &&
@@ -2951,8 +2951,8 @@ bool Bot::AI_AddBotSpells(uint32 bot_spell_id) {
 		for (const auto &iter : spell_list->entries) {
 			LogAIDetail("([{}]) [{}]", iter.spellid, spells[iter.spellid].name);
 		}
-	} 
-	else 
+	}
+	else
 	{
 		debug_msg.append(" (not found)");
 		LogAI("[{}]", debug_msg);
@@ -3286,38 +3286,37 @@ DBbotspells_Struct* ZoneDatabase::GetBotSpells(uint32 bot_spell_id)
 				bot_spell_id
 			)
 		);
-		if (bse.empty()) {
-			return nullptr;
-		}
 
-		for (const auto& e : bse) {
-			DBbotspells_entries_Struct entry;
-			entry.spellid = e.spellid;
-			entry.type = e.type;
-			entry.minlevel = e.minlevel;
-			entry.maxlevel = e.maxlevel;
-			entry.manacost = e.manacost;
-			entry.recast_delay = e.recast_delay;
-			entry.priority = e.priority;
-			entry.min_hp = e.min_hp;
-			entry.max_hp = e.max_hp;
-			entry.resist_adjust = e.resist_adjust;
-			entry.bucket_name = e.bucket_name;
-			entry.bucket_value = e.bucket_value;
-			entry.bucket_comparison = e.bucket_comparison;
-
-			// some spell types don't make much since to be priority 0, so fix that
-			if (!(entry.type & SPELL_TYPES_INNATE) && entry.priority == 0) {
-				entry.priority = 1;
-			}
-
-			if (e.resist_adjust) {
+		if (!bse.empty()) {
+			for (const auto& e : bse) {
+				DBbotspells_entries_Struct entry;
+				entry.spellid = e.spellid;
+				entry.type = e.type;
+				entry.minlevel = e.minlevel;
+				entry.maxlevel = e.maxlevel;
+				entry.manacost = e.manacost;
+				entry.recast_delay = e.recast_delay;
+				entry.priority = e.priority;
+				entry.min_hp = e.min_hp;
+				entry.max_hp = e.max_hp;
 				entry.resist_adjust = e.resist_adjust;
-			} else if (IsValidSpell(e.spellid)) {
-				entry.resist_adjust = spells[e.spellid].resist_difficulty;
-			}
+				entry.bucket_name = e.bucket_name;
+				entry.bucket_value = e.bucket_value;
+				entry.bucket_comparison = e.bucket_comparison;
 
-			spell_set.entries.push_back(entry);
+				// some spell types don't make much since to be priority 0, so fix that
+				if (!(entry.type & SPELL_TYPES_INNATE) && entry.priority == 0) {
+					entry.priority = 1;
+				}
+
+				if (e.resist_adjust) {
+					entry.resist_adjust = e.resist_adjust;
+				} else if (IsValidSpell(e.spellid)) {
+					entry.resist_adjust = spells[e.spellid].resist_difficulty;
+				}
+
+				spell_set.entries.push_back(entry);
+			}
 		}
 
 		bot_spells_cache.insert(std::make_pair(bot_spell_id, spell_set));
@@ -3444,7 +3443,6 @@ void Bot::AI_Bot_Event_SpellCastFinished(bool iCastSucceeded, uint16 slot) {
 }
 
 bool Bot::HasBotSpellEntry(uint16 spellid) {
-	
 	auto* spell_list = content_db.GetBotSpells(GetBotSpellID());
 
 	if (!spell_list) {
