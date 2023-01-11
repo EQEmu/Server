@@ -1211,12 +1211,11 @@ bool BotDatabase::LoadItemSlots(const uint32 bot_id, std::map<uint16, uint32>& m
 			bot_id
 		)
 	);
-	if (l.empty()) {
-		return false;
-	}
 
-	for (const auto& e : l) {
-		m.insert(std::pair<uint16, uint32>(e.slot_id, e.item_id));
+	if (!l.empty()) {
+		for (const auto& e : l) {
+			m.insert(std::pair<uint16, uint32>(e.slot_id, e.item_id));
+		}
 	}
 
 	return true;
