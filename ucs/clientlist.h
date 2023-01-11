@@ -92,9 +92,9 @@ public:
 	void SendMailBoxes();
 	inline void QueuePacket(const EQApplicationPacket *p, bool ack_req=true) { ClientStream->QueuePacket(p, ack_req); }
 	std::string GetName() { if(Characters.size()) return Characters[0].Name; else return ""; }
-	void JoinChannels(std::string ChannelNameList, bool commandDirected = false);
-	void LeaveChannels(std::string ChannelNameList, bool commandDirected = false);
-	void LeaveAllChannels(bool SendUpdatedChannelList = true, bool commandDirected = false);
+	void JoinChannels(std::string channel_name_list, bool command_directed = false);
+	void LeaveChannels(std::string channel_name_list, bool command_directed = false);
+	void LeaveAllChannels(bool SendUpdatedChannelList = true, bool command_directed = false);
 	void AddToChannelList(ChatChannel *JoinedChannel);
 	void RemoveFromChannelList(ChatChannel *JoinedChannel);
 	void SendChannelMessage(std::string Message);
@@ -188,7 +188,7 @@ public:
 	void	CheckForStaleConnectionsAll();
 	void	CheckForStaleConnections(Client *c);
 	Client *IsCharacterOnline(std::string CharacterName);
-	void ProcessOPMailCommand(Client* c, std::string CommandString, bool commandDirected = false);
+	void ProcessOPMailCommand(Client* c, std::string command_string, bool command_directed = false);
 
 private:
 	EQ::Net::EQStreamManager *chatsf;
