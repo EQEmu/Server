@@ -45,6 +45,7 @@ void LuaMod::Init()
 	m_has_get_exp_for_level = parser_->HasFunction("GetEXPForLevel", package_name_);
 	m_has_get_experience_for_kill = parser_->HasFunction("GetExperienceForKill", package_name_);
 	m_has_common_outgoing_hit_success = parser_->HasFunction("CommonOutgoingHitSuccess", package_name_);
+	m_has_calc_spell_effect_value_formula = parser_->HasFunction("CalcSpellEffectValue_formula", package_name_);
 }
 
 void PutDamageHitInfo(lua_State *L, luabind::adl::object &e, DamageHitInfo &hit) {
@@ -618,6 +619,61 @@ void LuaMod::GetExperienceForKill(Client *self, Mob *against, uint64 &returnValu
 			auto returnValueObj = ret["ReturnValue"];
 			if (luabind::type(returnValueObj) == LUA_TNUMBER) {
 				returnValue = luabind::object_cast<uint32>(returnValueObj);
+			}
+		}
+	}
+	catch (std::exception &ex) {
+		parser_->AddError(ex.what());
+	}
+
+	int end = lua_gettop(L);
+	int n = end - start;
+	if (n > 0) {
+		lua_pop(L, n);
+	}
+}
+
+void LuaMod::CalcSpellEffectValue_formula(Mob *self, uint32 formula, int64 base_value, int64 max_value, int caster_level, uint16 spell_id, int ticsremaining, int64 &returnValue, bool &ignoreDefault)
+{
+	int start = lua_gettop(L);
+	int64 retval = 0;
+
+	try {
+		if (!m_has_calc_spell_effect_value_formula) {
+			return;
+		}
+
+		lua_getfield(L, LUA_REGISTRYINDEX, package_name_.c_str());
+		lua_getfield(L, -1, "CalcSpellEffectValue_formula");
+
+		Lua_Mob l_self(self);
+		luabind::adl::object e = luabind::newtable(L);
+		e["self"] = l_self;
+		e["formula"] = formula;
+		e["base_value"] = base_value;
+		e["max_value"] = max_value;
+		e["caster_level"] = caster_level;
+		e["spell_id"] = spell_id;
+		e["ticsremaining"] = ticsremaining;
+		e.push(L);
+
+		if (lua_pcall(L, 1, 1, 0)) {
+			std::string error = lua_tostring(L, -1);
+			parser_->AddError(error);
+			lua_pop(L, 2);
+			return;
+		}
+
+		if (lua_type(L, -1) == LUA_TTABLE) {
+			luabind::adl::object ret(luabind::from_stack(L, -1));
+			auto IgnoreDefaultObj = ret["IgnoreDefault"];
+			if (luabind::type(IgnoreDefaultObj) == LUA_TBOOLEAN) {
+				ignoreDefault = ignoreDefault || luabind::object_cast<bool>(IgnoreDefaultObj);
+			}
+
+			auto returnValueObj = ret["ReturnValue"];
+			if (luabind::type(returnValueObj) == LUA_TNUMBER) {
+				returnValue = luabind::object_cast<int64>(returnValueObj);
 			}
 		}
 	}

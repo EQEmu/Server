@@ -1312,7 +1312,7 @@ struct SPDat_Spell_Struct
 											// If it is a number between 1-4 it means components[number] is a focus and not to expend it
 											// If it is a valid itemid it means this item is a focus as well
 											// -- NOEXPENDREAGENT1 ... NOEXPENDREAGENT4
-/* 070 */	uint16 formula[EFFECT_COUNT]; // Spell's value formula -- LEVELAFFECT1MOD ... LEVELAFFECT12MOD
+/* 070 */	uint32 formula[EFFECT_COUNT]; // Spell's value formula -- LEVELAFFECT1MOD ... LEVELAFFECT12MOD
 /* 082 */	//int LightType; // probaly another effecttype flag -- LIGHTTYPE
 /* 083 */	int8 good_effect; //0=detrimental, 1=Beneficial, 2=Beneficial, Group Only -- BENEFICIAL
 /* 084 */	int activated; // probably another effecttype flag -- ACTIVATED

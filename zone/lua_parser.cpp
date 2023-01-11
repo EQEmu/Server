@@ -1494,6 +1494,15 @@ uint64 LuaParser::GetExperienceForKill(Client *self, Mob *against, bool &ignoreD
 	return retval;
 }
 
+int64 LuaParser::CalcSpellEffectValue_formula(Mob *self, uint32 formula, int64 base_value, int64 max_value, int caster_level, uint16 spell_id, int ticsremaining, bool &ignoreDefault)
+{
+	int64 retval = 0;
+	for (auto &mod : mods_) {
+		mod.CalcSpellEffectValue_formula(self, formula, base_value, max_value, caster_level, spell_id, ticsremaining, retval, ignoreDefault);
+	}
+	return retval;
+}
+
 #ifdef BOTS
 int LuaParser::EventBot(
 	QuestEventID evt,
