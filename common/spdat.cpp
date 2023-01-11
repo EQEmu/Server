@@ -976,7 +976,7 @@ bool IsCompleteHealSpell(uint16 spell_id)
 {
 	if (
 		(
-			SPELL_COMPLETE_HEAL ||
+			spell_id == SPELL_COMPLETE_HEAL ||
 			IsEffectInSpell(spell_id, SE_CompleteHeal) ||
 			IsPercentalHealSpell(spell_id) ||
 			GetTriggerSpellID(spell_id, SE_CompleteHeal)
