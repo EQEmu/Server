@@ -319,6 +319,20 @@ bool BotDatabase::LoadOwnerID(const uint32 bot_id, uint32& owner_id)
 	return true;
 }
 
+uint32 BotDatabase::GetOwnerID(const uint32 bot_id)
+{
+	if (!bot_id) {
+		return 0;
+	}
+
+	const auto& l = BotDataRepository::FindOne(database, bot_id);
+	if (!l.bot_id) {
+		return 0;
+	}
+
+	return l.owner_id;
+}
+
 bool BotDatabase::LoadBotID(const uint32 owner_id, const std::string& bot_name, uint32& bot_id)
 {
 	if (!owner_id || bot_name.empty()) {

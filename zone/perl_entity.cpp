@@ -406,6 +406,16 @@ Bot* Perl_EntityList_GetBotByName(EntityList* self, std::string bot_name) // @ca
 	return self->GetBotByBotName(bot_name);
 }
 
+Client* Perl_EntityList_GetBotOwnerByBotEntityID(EntityList* self, uint32_t entity_id) // @categories Script Utility, Bot
+{
+	return self->GetBotOwnerByBotEntityID(entity_id);
+}
+
+Client* Perl_EntityList_GetBotOwnerByBotID(EntityList* self, uint32_t bot_id) // @categories Script Utility, Bot
+{
+	return self->GetBotOwnerByBotID(bot_id);
+}
+
 perl::array Perl_EntityList_GetBotList(EntityList* self) // @categories Script Utility, Bot
 {
 	perl::array result;
@@ -618,6 +628,8 @@ void perl_register_entitylist()
 	package.add("GetBotByID", &Perl_EntityList_GetBotByID);
 	package.add("GetBotByName", &Perl_EntityList_GetBotByName);
 	package.add("GetBotList", &Perl_EntityList_GetBotList);
+	package.add("GetBotOwnerByBotEntityID", (Client*(*)(EntityList*, uint32))&Perl_EntityList_GetBotOwnerByBotEntityID);
+	package.add("GetBotOwnerByBotID", (Client*(*)(EntityList*, uint32))&Perl_EntityList_GetBotOwnerByBotID);
 	package.add("GetBotListByCharacterID", (perl::array(*)(EntityList*, uint32))&Perl_EntityList_GetBotListByCharacterID);
 	package.add("GetBotListByCharacterID", (perl::array(*)(EntityList*, uint32, uint8))&Perl_EntityList_GetBotListByCharacterID);
 	package.add("GetBotListByClientName", (perl::array(*)(EntityList*, std::string))&Perl_EntityList_GetBotListByClientName);

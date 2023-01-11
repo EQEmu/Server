@@ -8752,18 +8752,32 @@ Bot* EntityList::GetBotByBotName(std::string botName) {
 	return Result;
 }
 
-Client* EntityList::GetBotOwnerByBotEntityID(uint16 entityID) {
-	Client* Result = nullptr;
-	if (entityID > 0) {
-		for (std::list<Bot*>::iterator botListItr = bot_list.begin(); botListItr != bot_list.end(); ++botListItr) {
-			Bot* tempBot = *botListItr;
-			if (tempBot && tempBot->GetID() == entityID) {
-				Result = tempBot->GetBotOwner()->CastToClient();
+Client* EntityList::GetBotOwnerByBotEntityID(uint32 entity_id) {
+	Client* c = nullptr;
+
+	if (entity_id) {
+		for (const auto& b : bot_list) {
+			if (b && b->GetID() == entity_id) {
+				c = b->GetBotOwner()->CastToClient();
 				break;
 			}
 		}
 	}
-	return Result;
+
+	return c;
+}
+
+Client* EntityList::GetBotOwnerByBotID(const uint32 bot_id)  {
+	Client* c = nullptr;
+
+	if (bot_id) {
+		const auto owner_id = database.botdb.GetOwnerID(bot_id);
+		if (owner_id) {
+			c = GetClientByCharID(owner_id);
+		}
+	}
+
+	return c;
 }
 
 void EntityList::AddBot(Bot *new_bot, bool send_spawn_packet, bool dont_queue) {
@@ -8790,7 +8804,7 @@ void EntityList::AddBot(Bot *new_bot, bool send_spawn_packet, bool dont_queue) {
 		mob_list.insert(std::pair<uint16, Mob*>(new_bot->GetID(), new_bot));
 
 		parse->EventBot(EVENT_SPAWN, new_bot, nullptr, "", 0);
-		
+
 		new_bot->DispatchZoneControllerEvent(EVENT_SPAWN_ZONE, new_bot, "", 0, nullptr);
 	}
 }
