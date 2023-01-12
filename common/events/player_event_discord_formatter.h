@@ -24,10 +24,30 @@ struct DiscordField {
 	}
 };
 
+struct DiscordAuthor {
+	std::string name;
+	std::string icon_url;
+	std::string url;
+
+	// cereal
+	template<class Archive>
+	void serialize(Archive &ar)
+	{
+		ar(
+			CEREAL_NVP(name),
+			CEREAL_NVP(icon_url),
+			CEREAL_NVP(url)
+		);
+	}
+};
+
 struct DiscordEmbed {
 	std::vector<DiscordField> fields;
+	std::string               title;
 	std::string               description;
 	std::string               timestamp;
+	DiscordAuthor             author;
+
 
 	// cereal
 	template<class Archive>
@@ -35,21 +55,27 @@ struct DiscordEmbed {
 	{
 		ar(
 			CEREAL_NVP(fields),
+			CEREAL_NVP(title),
 			CEREAL_NVP(description),
-			CEREAL_NVP(timestamp)
+			CEREAL_NVP(timestamp),
+			CEREAL_NVP(author)
 		);
 	}
 };
 
-struct DiscordEmbedRoot {
+struct DiscordWebhook {
 	std::vector<DiscordEmbed> embeds;
+	std::string               content;
+	std::string               avatar_url;
 
 	// cereal
 	template<class Archive>
 	void serialize(Archive &ar)
 	{
 		ar(
-			CEREAL_NVP(embeds)
+			CEREAL_NVP(embeds),
+			CEREAL_NVP(avatar_url),
+			CEREAL_NVP(content)
 		);
 	}
 };
@@ -59,14 +85,14 @@ class PlayerEventDiscordFormatter {
 public:
 	static std::string GetCurrentTimestamp();
 	static std::string FormatEventSay(const PlayerEvent::PlayerEventContainer &c, const PlayerEvent::SayEvent &e);
-	static std::string FormatGMCommand(const PlayerEvent::PlayerEventContainer &c, const PlayerEvent::GMCommandEvent &e);
+	static std::string
+	FormatGMCommand(const PlayerEvent::PlayerEventContainer &c, const PlayerEvent::GMCommandEvent &e);
 	static void BuildDiscordField(
 		std::vector<DiscordField> *f,
 		const std::string &name,
 		const std::string &value,
 		bool is_inline = true
 	);
-	static void BuildBaseFields(std::vector<DiscordField> *f, const PlayerEvent::PlayerEventContainer &p);
 	static void BuildBaseEmbed(
 		std::vector<DiscordEmbed> *e,
 		const std::vector<DiscordField> &f,
@@ -177,6 +203,10 @@ public:
 	static std::string FormatZoningEvent(
 		const PlayerEvent::PlayerEventContainer &c,
 		const PlayerEvent::ZoningEvent &e
+	);
+	static DiscordWebhook BuildDiscordWebhook(
+		const PlayerEvent::PlayerEventContainer &p,
+		std::vector<DiscordEmbed> &embeds
 	);
 };
 

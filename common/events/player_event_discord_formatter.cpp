@@ -35,58 +35,23 @@ void PlayerEventDiscordFormatter::BuildDiscordField(
 	);
 }
 
-void PlayerEventDiscordFormatter::BuildBaseFields(
-	std::vector<DiscordField> *f,
-	const PlayerEvent::PlayerEventContainer &p
-)
-{
-	std::string guild_info;
-	if (!p.player_event.guild_name.empty()) {
-		guild_info = fmt::format("\n:shield: Guild [{}] ({})", p.player_event.guild_name, p.player_event.guild_id);
-	}
-
-	BuildDiscordField(
-		f, "Character",
-		fmt::format(
-			":scales: {} ({}) {}",
-			p.player_event.character_name,
-			p.player_event.character_id,
-			guild_info
-		)
-	);
-
-	std::string instance_info;
-	if (p.player_event.instance_id > 0) {
-		instance_info = fmt::format("Instance ID [{}]", p.player_event.instance_id);
-	}
-
-	BuildDiscordField(
-		f, "Zone", fmt::format(
-			":map: [{}] ({}) ({}) {}",
-			p.player_event.zone_long_name,
-			p.player_event.zone_short_name,
-			p.player_event.zone_id,
-			instance_info
-		)
-	);
-}
-
 void PlayerEventDiscordFormatter::BuildBaseEmbed(
 	std::vector<DiscordEmbed> *e,
 	const std::vector<DiscordField> &f,
 	const PlayerEvent::PlayerEventContainer c
 )
 {
-	e->emplace_back(
-		DiscordEmbed{
-			.fields = f,
-			.description = fmt::format(
-				":small_blue_diamond: [Player Event] {}",
-				PlayerEvent::EventName[c.player_event_log.event_type_id]
-			),
-			.timestamp = GetCurrentTimestamp()
-		}
-	);
+	auto d = DiscordEmbed{};
+	d.fields = f;
+	d.author = DiscordAuthor{
+		.name = fmt::format(
+			"[Player Event] {}",
+			PlayerEvent::EventName[c.player_event_log.event_type_id]
+		),
+	};
+	// d.timestamp = GetCurrentTimestamp()
+
+	e->emplace_back(d);
 }
 
 std::string PlayerEventDiscordFormatter::FormatEventSay(
@@ -95,16 +60,13 @@ std::string PlayerEventDiscordFormatter::FormatEventSay(
 )
 {
 	std::vector<DiscordField> f = {};
-	BuildBaseFields(&f, c);
 	BuildDiscordField(&f, "Message", e.message);
 	BuildDiscordField(&f, "Target", e.target);
 
 	std::vector<DiscordEmbed> embeds = {};
 	BuildBaseEmbed(&embeds, f, c);
 
-	DiscordEmbedRoot root = DiscordEmbedRoot{
-		.embeds = embeds
-	};
+	auto root = BuildDiscordWebhook(c, embeds);
 
 	std::stringstream ss;
 	{
@@ -121,16 +83,15 @@ std::string PlayerEventDiscordFormatter::FormatGMCommand(
 )
 {
 	std::vector<DiscordField> f = {};
-	BuildBaseFields(&f, c);
 	BuildDiscordField(&f, "Message", e.message);
-	BuildDiscordField(&f, "Target", e.target);
+	if (e.target != "NONE") {
+		BuildDiscordField(&f, "Target", e.target);
+	}
 
 	std::vector<DiscordEmbed> embeds = {};
 	BuildBaseEmbed(&embeds, f, c);
 
-	DiscordEmbedRoot root = DiscordEmbedRoot{
-		.embeds = embeds
-	};
+	auto root = BuildDiscordWebhook(c, embeds);
 
 	std::stringstream ss;
 	{
@@ -144,12 +105,9 @@ std::string PlayerEventDiscordFormatter::FormatGMCommand(
 std::string PlayerEventDiscordFormatter::FormatWithNodata(const PlayerEvent::PlayerEventContainer &c)
 {
 	std::vector<DiscordField> f = {};
-	BuildBaseFields(&f, c);
 	std::vector<DiscordEmbed> embeds = {};
 	BuildBaseEmbed(&embeds, f, c);
-	DiscordEmbedRoot  root = DiscordEmbedRoot{
-		.embeds = embeds
-	};
+	auto root = BuildDiscordWebhook(c, embeds);
 	std::stringstream ss;
 	{
 		cereal::JSONOutputArchive ar(ss);
@@ -165,7 +123,6 @@ std::string PlayerEventDiscordFormatter::FormatMerchantPurchaseEvent(
 )
 {
 	std::vector<DiscordField> f = {};
-	BuildBaseFields(&f, c);
 	BuildDiscordField(&f, "Merchant", fmt::format("{} ({}) NPC ID ({})", e.merchant_name, e.merchant_type, e.npc_id));
 	BuildDiscordField(&f, "Item", fmt::format("{} ({}) x({})", e.item_name, e.item_id, e.charges));
 	BuildDiscordField(
@@ -185,9 +142,7 @@ std::string PlayerEventDiscordFormatter::FormatMerchantPurchaseEvent(
 	);
 	std::vector<DiscordEmbed> embeds = {};
 	BuildBaseEmbed(&embeds, f, c);
-	DiscordEmbedRoot  root = DiscordEmbedRoot{
-		.embeds = embeds
-	};
+	auto root = BuildDiscordWebhook(c, embeds);
 	std::stringstream ss;
 	{
 		cereal::JSONOutputArchive ar(ss);
@@ -203,7 +158,6 @@ std::string PlayerEventDiscordFormatter::FormatMerchantSellEvent(
 )
 {
 	std::vector<DiscordField> f = {};
-	BuildBaseFields(&f, c);
 	BuildDiscordField(&f, "Merchant", fmt::format("{} ({}) NPC ID ({})", e.merchant_name, e.merchant_type, e.npc_id));
 	BuildDiscordField(&f, "Item", fmt::format("{} ({}) x({})", e.item_name, e.item_id, e.charges));
 	BuildDiscordField(
@@ -223,9 +177,7 @@ std::string PlayerEventDiscordFormatter::FormatMerchantSellEvent(
 	);
 	std::vector<DiscordEmbed> embeds = {};
 	BuildBaseEmbed(&embeds, f, c);
-	DiscordEmbedRoot  root = DiscordEmbedRoot{
-		.embeds = embeds
-	};
+	auto root = BuildDiscordWebhook(c, embeds);
 	std::stringstream ss;
 	{
 		cereal::JSONOutputArchive ar(ss);
@@ -256,7 +208,6 @@ std::string PlayerEventDiscordFormatter::FormatZoningEvent(
 	}
 
 	std::vector<DiscordField> f = {};
-	BuildBaseFields(&f, c);
 	BuildDiscordField(
 		&f,
 		"Zoning Information",
@@ -275,9 +226,8 @@ std::string PlayerEventDiscordFormatter::FormatZoningEvent(
 
 	std::vector<DiscordEmbed> embeds = {};
 	BuildBaseEmbed(&embeds, f, c);
-	DiscordEmbedRoot  root = DiscordEmbedRoot{
-		.embeds = embeds
-	};
+
+	auto root = BuildDiscordWebhook(c, embeds);
 	std::stringstream ss;
 	{
 		cereal::JSONOutputArchive ar(ss);
@@ -293,7 +243,6 @@ std::string PlayerEventDiscordFormatter::FormatAAGainedEvent(
 )
 {
 	std::vector<DiscordField> f = {};
-	BuildBaseFields(&f, c);
 	BuildDiscordField(
 		&f,
 		"Points Gained",
@@ -305,9 +254,7 @@ std::string PlayerEventDiscordFormatter::FormatAAGainedEvent(
 
 	std::vector<DiscordEmbed> embeds = {};
 	BuildBaseEmbed(&embeds, f, c);
-	DiscordEmbedRoot  root = DiscordEmbedRoot{
-		.embeds = embeds
-	};
+	auto root = BuildDiscordWebhook(c, embeds);
 	std::stringstream ss;
 	{
 		cereal::JSONOutputArchive ar(ss);
@@ -328,7 +275,6 @@ std::string PlayerEventDiscordFormatter::FormatAAPurchasedEvent(
 	}
 
 	std::vector<DiscordField> f = {};
-	BuildBaseFields(&f, c);
 	BuildDiscordField(
 		&f,
 		"AA Purchased",
@@ -340,9 +286,7 @@ std::string PlayerEventDiscordFormatter::FormatAAPurchasedEvent(
 
 	std::vector<DiscordEmbed> embeds = {};
 	BuildBaseEmbed(&embeds, f, c);
-	DiscordEmbedRoot  root = DiscordEmbedRoot{
-		.embeds = embeds
-	};
+	auto root = BuildDiscordWebhook(c, embeds);
 	std::stringstream ss;
 	{
 		cereal::JSONOutputArchive ar(ss);
@@ -358,7 +302,6 @@ std::string PlayerEventDiscordFormatter::FormatForageSuccessEvent(
 )
 {
 	std::vector<DiscordField> f = {};
-	BuildBaseFields(&f, c);
 	BuildDiscordField(
 		&f,
 		"Foraged Item",
@@ -370,9 +313,7 @@ std::string PlayerEventDiscordFormatter::FormatForageSuccessEvent(
 
 	std::vector<DiscordEmbed> embeds = {};
 	BuildBaseEmbed(&embeds, f, c);
-	DiscordEmbedRoot  root = DiscordEmbedRoot{
-		.embeds = embeds
-	};
+	auto root = BuildDiscordWebhook(c, embeds);
 	std::stringstream ss;
 	{
 		cereal::JSONOutputArchive ar(ss);
@@ -388,7 +329,6 @@ std::string PlayerEventDiscordFormatter::FormatDestroyItemEvent(
 )
 {
 	std::vector<DiscordField> f = {};
-	BuildBaseFields(&f, c);
 	BuildDiscordField(
 		&f,
 		"Destroyed Item",
@@ -400,9 +340,7 @@ std::string PlayerEventDiscordFormatter::FormatDestroyItemEvent(
 
 	std::vector<DiscordEmbed> embeds = {};
 	BuildBaseEmbed(&embeds, f, c);
-	DiscordEmbedRoot  root = DiscordEmbedRoot{
-		.embeds = embeds
-	};
+	auto root = BuildDiscordWebhook(c, embeds);
 	std::stringstream ss;
 	{
 		cereal::JSONOutputArchive ar(ss);
@@ -418,7 +356,6 @@ std::string PlayerEventDiscordFormatter::FormatLevelGainedEvent(
 )
 {
 	std::vector<DiscordField> f = {};
-	BuildBaseFields(&f, c);
 	BuildDiscordField(
 		&f,
 		"Level Information",
@@ -430,9 +367,7 @@ std::string PlayerEventDiscordFormatter::FormatLevelGainedEvent(
 
 	std::vector<DiscordEmbed> embeds = {};
 	BuildBaseEmbed(&embeds, f, c);
-	DiscordEmbedRoot  root = DiscordEmbedRoot{
-		.embeds = embeds
-	};
+	auto root = BuildDiscordWebhook(c, embeds);
 	std::stringstream ss;
 	{
 		cereal::JSONOutputArchive ar(ss);
@@ -448,7 +383,6 @@ std::string PlayerEventDiscordFormatter::FormatLevelLostEvent(
 )
 {
 	std::vector<DiscordField> f = {};
-	BuildBaseFields(&f, c);
 	BuildDiscordField(
 		&f,
 		"Level Information",
@@ -460,9 +394,7 @@ std::string PlayerEventDiscordFormatter::FormatLevelLostEvent(
 
 	std::vector<DiscordEmbed> embeds = {};
 	BuildBaseEmbed(&embeds, f, c);
-	DiscordEmbedRoot  root = DiscordEmbedRoot{
-		.embeds = embeds
-	};
+	auto root = BuildDiscordWebhook(c, embeds);
 	std::stringstream ss;
 	{
 		cereal::JSONOutputArchive ar(ss);
@@ -478,7 +410,6 @@ std::string PlayerEventDiscordFormatter::FormatLootItemEvent(
 )
 {
 	std::vector<DiscordField> f = {};
-	BuildBaseFields(&f, c);
 	BuildDiscordField(
 		&f,
 		"Looted Item",
@@ -494,9 +425,7 @@ std::string PlayerEventDiscordFormatter::FormatLootItemEvent(
 
 	std::vector<DiscordEmbed> embeds = {};
 	BuildBaseEmbed(&embeds, f, c);
-	DiscordEmbedRoot  root = DiscordEmbedRoot{
-		.embeds = embeds
-	};
+	auto root = BuildDiscordWebhook(c, embeds);
 	std::stringstream ss;
 	{
 		cereal::JSONOutputArchive ar(ss);
@@ -513,7 +442,6 @@ std::string PlayerEventDiscordFormatter::FormatGroundSpawnPickupEvent(
 )
 {
 	std::vector<DiscordField> f = {};
-	BuildBaseFields(&f, c);
 	BuildDiscordField(
 		&f,
 		"Picked Up Item",
@@ -525,9 +453,7 @@ std::string PlayerEventDiscordFormatter::FormatGroundSpawnPickupEvent(
 
 	std::vector<DiscordEmbed> embeds = {};
 	BuildBaseEmbed(&embeds, f, c);
-	DiscordEmbedRoot  root = DiscordEmbedRoot{
-		.embeds = embeds
-	};
+	auto root = BuildDiscordWebhook(c, embeds);
 	std::stringstream ss;
 	{
 		cereal::JSONOutputArchive ar(ss);
@@ -553,7 +479,6 @@ std::string PlayerEventDiscordFormatter::FormatSkillUpEvent(
 	}
 
 	std::vector<DiscordField> f = {};
-	BuildBaseFields(&f, c);
 	BuildDiscordField(
 		&f,
 		"Skill Information",
@@ -565,9 +490,7 @@ std::string PlayerEventDiscordFormatter::FormatSkillUpEvent(
 
 	std::vector<DiscordEmbed> embeds = {};
 	BuildBaseEmbed(&embeds, f, c);
-	DiscordEmbedRoot  root = DiscordEmbedRoot{
-		.embeds = embeds
-	};
+	auto root = BuildDiscordWebhook(c, embeds);
 	std::stringstream ss;
 	{
 		cereal::JSONOutputArchive ar(ss);
@@ -584,7 +507,6 @@ std::string PlayerEventDiscordFormatter::FormatTaskAcceptEvent(
 {
 
 	std::vector<DiscordField> f = {};
-	BuildBaseFields(&f, c);
 	BuildDiscordField(
 		&f,
 		"Task Information",
@@ -595,9 +517,7 @@ std::string PlayerEventDiscordFormatter::FormatTaskAcceptEvent(
 	);
 	std::vector<DiscordEmbed> embeds = {};
 	BuildBaseEmbed(&embeds, f, c);
-	DiscordEmbedRoot  root = DiscordEmbedRoot{
-		.embeds = embeds
-	};
+	auto root = BuildDiscordWebhook(c, embeds);
 	std::stringstream ss;
 	{
 		cereal::JSONOutputArchive ar(ss);
@@ -613,7 +533,6 @@ std::string PlayerEventDiscordFormatter::FormatTaskCompleteEvent(
 )
 {
 	std::vector<DiscordField> f = {};
-	BuildBaseFields(&f, c);
 	BuildDiscordField(
 		&f,
 		"Task Information",
@@ -624,9 +543,7 @@ std::string PlayerEventDiscordFormatter::FormatTaskCompleteEvent(
 	);
 	std::vector<DiscordEmbed> embeds = {};
 	BuildBaseEmbed(&embeds, f, c);
-	DiscordEmbedRoot  root = DiscordEmbedRoot{
-		.embeds = embeds
-	};
+	auto root = BuildDiscordWebhook(c, embeds);
 	std::stringstream ss;
 	{
 		cereal::JSONOutputArchive ar(ss);
@@ -642,7 +559,6 @@ std::string PlayerEventDiscordFormatter::FormatTaskUpdateEvent(
 )
 {
 	std::vector<DiscordField> f = {};
-	BuildBaseFields(&f, c);
 	BuildDiscordField(
 		&f,
 		"Task Information",
@@ -653,9 +569,7 @@ std::string PlayerEventDiscordFormatter::FormatTaskUpdateEvent(
 	);
 	std::vector<DiscordEmbed> embeds = {};
 	BuildBaseEmbed(&embeds, f, c);
-	DiscordEmbedRoot  root = DiscordEmbedRoot{
-		.embeds = embeds
-	};
+	auto root = BuildDiscordWebhook(c, embeds);
 	std::stringstream ss;
 	{
 		cereal::JSONOutputArchive ar(ss);
@@ -671,7 +585,6 @@ std::string PlayerEventDiscordFormatter::FormatResurrectAcceptEvent(
 )
 {
 	std::vector<DiscordField> f = {};
-	BuildBaseFields(&f, c);
 	BuildDiscordField(
 		&f,
 		"Resurrect Information",
@@ -682,9 +595,7 @@ std::string PlayerEventDiscordFormatter::FormatResurrectAcceptEvent(
 	);
 	std::vector<DiscordEmbed> embeds = {};
 	BuildBaseEmbed(&embeds, f, c);
-	DiscordEmbedRoot  root = DiscordEmbedRoot{
-		.embeds = embeds
-	};
+	auto root = BuildDiscordWebhook(c, embeds);
 	std::stringstream ss;
 	{
 		cereal::JSONOutputArchive ar(ss);
@@ -700,7 +611,6 @@ std::string PlayerEventDiscordFormatter::FormatCombineEvent(
 )
 {
 	std::vector<DiscordField> f = {};
-	BuildBaseFields(&f, c);
 	BuildDiscordField(
 		&f,
 		"Combine Information",
@@ -711,9 +621,7 @@ std::string PlayerEventDiscordFormatter::FormatCombineEvent(
 	);
 	std::vector<DiscordEmbed> embeds = {};
 	BuildBaseEmbed(&embeds, f, c);
-	DiscordEmbedRoot  root = DiscordEmbedRoot{
-		.embeds = embeds
-	};
+	auto root = BuildDiscordWebhook(c, embeds);
 	std::stringstream ss;
 	{
 		cereal::JSONOutputArchive ar(ss);
@@ -729,7 +637,6 @@ std::string PlayerEventDiscordFormatter::FormatFishSuccessEvent(
 )
 {
 	std::vector<DiscordField> f = {};
-	BuildBaseFields(&f, c);
 	BuildDiscordField(
 		&f,
 		"Fishing Information",
@@ -740,9 +647,7 @@ std::string PlayerEventDiscordFormatter::FormatFishSuccessEvent(
 	);
 	std::vector<DiscordEmbed> embeds = {};
 	BuildBaseEmbed(&embeds, f, c);
-	DiscordEmbedRoot  root = DiscordEmbedRoot{
-		.embeds = embeds
-	};
+	auto root = BuildDiscordWebhook(c, embeds);
 	std::stringstream ss;
 	{
 		cereal::JSONOutputArchive ar(ss);
@@ -773,7 +678,6 @@ std::string PlayerEventDiscordFormatter::FormatDeathEvent(
 	}
 
 	std::vector<DiscordField> f = {};
-	BuildBaseFields(&f, c);
 	BuildDiscordField(
 		&f,
 		"Death Information",
@@ -784,9 +688,7 @@ std::string PlayerEventDiscordFormatter::FormatDeathEvent(
 	);
 	std::vector<DiscordEmbed> embeds = {};
 	BuildBaseEmbed(&embeds, f, c);
-	DiscordEmbedRoot  root = DiscordEmbedRoot{
-		.embeds = embeds
-	};
+	auto root = BuildDiscordWebhook(c, embeds);
 	std::stringstream ss;
 	{
 		cereal::JSONOutputArchive ar(ss);
@@ -803,7 +705,7 @@ std::string PlayerEventDiscordFormatter::FormatNPCHandinEvent(
 {
 	std::string handin_info;
 	if (!e.handin_items.empty()) {
-		for (const auto& h : e.handin_items) {
+		for (const auto &h: e.handin_items) {
 			handin_info += fmt::format(
 				"{} ({}){}{}\n",
 				h.item_name,
@@ -816,7 +718,7 @@ std::string PlayerEventDiscordFormatter::FormatNPCHandinEvent(
 
 	std::string return_info;
 	if (!e.return_items.empty()) {
-		for (const auto& r : e.return_items) {
+		for (const auto &r: e.return_items) {
 			return_info += fmt::format(
 				"{} ({}){}{}\n",
 				r.item_name,
@@ -857,7 +759,6 @@ std::string PlayerEventDiscordFormatter::FormatNPCHandinEvent(
 	}
 
 	std::vector<DiscordField> f = {};
-	BuildBaseFields(&f, c);
 
 	if (!handin_info.empty()) {
 		BuildDiscordField(
@@ -893,9 +794,7 @@ std::string PlayerEventDiscordFormatter::FormatNPCHandinEvent(
 	}
 	std::vector<DiscordEmbed> embeds = {};
 	BuildBaseEmbed(&embeds, f, c);
-	DiscordEmbedRoot  root = DiscordEmbedRoot{
-		.embeds = embeds
-	};
+	auto root = BuildDiscordWebhook(c, embeds);
 	std::stringstream ss;
 	{
 		cereal::JSONOutputArchive ar(ss);
@@ -911,7 +810,6 @@ std::string PlayerEventDiscordFormatter::FormatDiscoverItemEvent(
 )
 {
 	std::vector<DiscordField> f = {};
-	BuildBaseFields(&f, c);
 	BuildDiscordField(
 		&f,
 		"Discovered Item",
@@ -923,9 +821,7 @@ std::string PlayerEventDiscordFormatter::FormatDiscoverItemEvent(
 
 	std::vector<DiscordEmbed> embeds = {};
 	BuildBaseEmbed(&embeds, f, c);
-	DiscordEmbedRoot  root = DiscordEmbedRoot{
-		.embeds = embeds
-	};
+	auto root = BuildDiscordWebhook(c, embeds);
 	std::stringstream ss;
 	{
 		cereal::JSONOutputArchive ar(ss);
@@ -941,7 +837,6 @@ std::string PlayerEventDiscordFormatter::FormatDroppedItemEvent(
 )
 {
 	std::vector<DiscordField> f = {};
-	BuildBaseFields(&f, c);
 	BuildDiscordField(
 		&f,
 		"Dropped Item",
@@ -956,9 +851,7 @@ std::string PlayerEventDiscordFormatter::FormatDroppedItemEvent(
 
 	std::vector<DiscordEmbed> embeds = {};
 	BuildBaseEmbed(&embeds, f, c);
-	DiscordEmbedRoot  root = DiscordEmbedRoot{
-		.embeds = embeds
-	};
+	auto root = BuildDiscordWebhook(c, embeds);
 	std::stringstream ss;
 	{
 		cereal::JSONOutputArchive ar(ss);
@@ -1008,7 +901,6 @@ std::string PlayerEventDiscordFormatter::FormatSplitMoneyEvent(
 	);
 
 	std::vector<DiscordField> f = {};
-	BuildBaseFields(&f, c);
 	BuildDiscordField(
 		&f,
 		"Split Money",
@@ -1017,9 +909,7 @@ std::string PlayerEventDiscordFormatter::FormatSplitMoneyEvent(
 
 	std::vector<DiscordEmbed> embeds = {};
 	BuildBaseEmbed(&embeds, f, c);
-	DiscordEmbedRoot  root = DiscordEmbedRoot{
-		.embeds = embeds
-	};
+	auto root = BuildDiscordWebhook(c, embeds);
 	std::stringstream ss;
 	{
 		cereal::JSONOutputArchive ar(ss);
@@ -1061,7 +951,6 @@ std::string PlayerEventDiscordFormatter::FormatTraderPurchaseEvent(
 	);
 
 	std::vector<DiscordField> f = {};
-	BuildBaseFields(&f, c);
 	BuildDiscordField(
 		&f,
 		"Purchase Information",
@@ -1070,9 +959,7 @@ std::string PlayerEventDiscordFormatter::FormatTraderPurchaseEvent(
 
 	std::vector<DiscordEmbed> embeds = {};
 	BuildBaseEmbed(&embeds, f, c);
-	DiscordEmbedRoot  root = DiscordEmbedRoot{
-		.embeds = embeds
-	};
+	auto root = BuildDiscordWebhook(c, embeds);
 	std::stringstream ss;
 	{
 		cereal::JSONOutputArchive ar(ss);
@@ -1114,7 +1001,6 @@ std::string PlayerEventDiscordFormatter::FormatTraderSellEvent(
 	);
 
 	std::vector<DiscordField> f = {};
-	BuildBaseFields(&f, c);
 	BuildDiscordField(
 		&f,
 		"Sale Information",
@@ -1123,9 +1009,7 @@ std::string PlayerEventDiscordFormatter::FormatTraderSellEvent(
 
 	std::vector<DiscordEmbed> embeds = {};
 	BuildBaseEmbed(&embeds, f, c);
-	DiscordEmbedRoot  root = DiscordEmbedRoot{
-		.embeds = embeds
-	};
+	auto root = BuildDiscordWebhook(c, embeds);
 	std::stringstream ss;
 	{
 		cereal::JSONOutputArchive ar(ss);
@@ -1142,7 +1026,7 @@ std::string PlayerEventDiscordFormatter::FormatTradeEvent(
 {
 	std::string character_1_item_info;
 	if (!e.character_1_give_items.empty()) {
-		for (const auto& i : e.character_1_give_items) {
+		for (const auto &i: e.character_1_give_items) {
 			std::string augment_info;
 			if (i.aug_1_item_id > 0) {
 				augment_info += fmt::format(
@@ -1207,7 +1091,7 @@ std::string PlayerEventDiscordFormatter::FormatTradeEvent(
 
 	std::string character_2_item_info;
 	if (!e.character_2_give_items.empty()) {
-		for (const auto& i : e.character_2_give_items) {
+		for (const auto &i: e.character_2_give_items) {
 			std::string augment_info;
 			if (i.aug_1_item_id > 0) {
 				augment_info += fmt::format(
@@ -1329,7 +1213,6 @@ std::string PlayerEventDiscordFormatter::FormatTradeEvent(
 	}
 
 	std::vector<DiscordField> f = {};
-	BuildBaseFields(&f, c);
 
 	if (!character_1_item_info.empty()) {
 		BuildDiscordField(
@@ -1365,9 +1248,7 @@ std::string PlayerEventDiscordFormatter::FormatTradeEvent(
 
 	std::vector<DiscordEmbed> embeds = {};
 	BuildBaseEmbed(&embeds, f, c);
-	DiscordEmbedRoot  root = DiscordEmbedRoot{
-		.embeds = embeds
-	};
+	auto root = BuildDiscordWebhook(c, embeds);
 	std::stringstream ss;
 	{
 		cereal::JSONOutputArchive ar(ss);
@@ -1375,4 +1256,45 @@ std::string PlayerEventDiscordFormatter::FormatTradeEvent(
 	}
 
 	return ss.str();
+}
+
+DiscordWebhook PlayerEventDiscordFormatter::BuildDiscordWebhook(
+	const PlayerEvent::PlayerEventContainer &p,
+	std::vector<DiscordEmbed> &embeds
+)
+{
+	DiscordWebhook w = DiscordWebhook{
+		.embeds = embeds
+	};
+
+	std::string instance_info;
+	if (p.player_event.instance_id > 0) {
+		instance_info = fmt::format("Instance ID [{}]", p.player_event.instance_id);
+	}
+
+	std::string guild_info;
+	if (!p.player_event.guild_name.empty()) {
+		guild_info = fmt::format(":shield: **Guild** [{}] ({})", p.player_event.guild_name, p.player_event.guild_id);
+	}
+
+	std::string character = fmt::format(
+		"{} ({}) {}",
+		p.player_event.character_name,
+		p.player_event.character_id,
+		guild_info
+	);
+
+	std::string zone = fmt::format(
+		"[{}] ({}) ({}) {}",
+		p.player_event.zone_long_name,
+		p.player_event.zone_short_name,
+		p.player_event.zone_id,
+		instance_info
+	);
+
+	w.content = fmt::format(":trident: **Character** {} :map: **Zone** {}", character, zone);
+
+//	w.avatar_url = "https://cdn.discordapp.com/icons/212663220849213441/a_710698e80c111a5674e1ef716d8e3f14.webp?size=96";
+
+	return w;
 }
