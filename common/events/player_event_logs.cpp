@@ -28,17 +28,32 @@ void PlayerEventLogs::Init()
 
 	// initialize settings from database
 	auto             s = PlayerEventLogSettingsRepository::All(*m_database);
-	std::vector<int> db_settings{};
-	db_settings.reserve(s.size());
+	std::vector<int> db{};
+	db.reserve(s.size());
 	for (auto &e: s) {
 		m_settings[e.id] = e;
-		db_settings.emplace_back(e.id);
+		db.emplace_back(e.id);
 	}
 
 	// insert entries that don't exist in database
 	for (int i = PlayerEvent::GM_COMMAND; i != PlayerEvent::MAX; i++) {
-		bool is_missing_in_database = std::find(db_settings.begin(), db_settings.end(), i) == db_settings.end();
-		if (is_missing_in_database) {
+		bool is_in_database = std::find(db.begin(), db.end(), i) != db.end();
+		bool is_deprecated  = Strings::Contains(PlayerEvent::EventName[i], "Deprecated");
+		bool is_implemented = !Strings::Contains(PlayerEvent::EventName[i], "Unimplemented");
+
+		// remove when deprecated
+		if (is_deprecated && is_in_database) {
+			LogInfo("[Deprecated] Removing PlayerEvent [{}] ({})", PlayerEvent::EventName[i], i);
+			PlayerEventLogSettingsRepository::DeleteWhere(*m_database, fmt::format("id = {}", i));
+		}
+		// remove when unimplemented if present
+		if (!is_implemented && is_in_database) {
+			LogInfo("[Unimplemented] Removing PlayerEvent [{}] ({})", PlayerEvent::EventName[i], i);
+			PlayerEventLogSettingsRepository::DeleteWhere(*m_database, fmt::format("id = {}", i));
+		}
+
+		bool is_missing_in_database = std::find(db.begin(), db.end(), i) == db.end();
+		if (is_missing_in_database && is_implemented && !is_deprecated) {
 			LogInfo(
 				"[New] PlayerEvent [{}] ({})",
 				PlayerEvent::EventName[i],
@@ -250,7 +265,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 	switch (e.player_event_log.event_type_id) {
 		case PlayerEvent::AA_GAIN: {
 			PlayerEvent::AAGainedEvent n{};
-			std::stringstream     ss;
+			std::stringstream          ss;
 			{
 				ss << e.player_event_log.event_data;
 				cereal::JSONInputArchive ar(ss);
@@ -261,7 +276,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 		}
 		case PlayerEvent::AA_PURCHASE: {
 			PlayerEvent::AAPurchasedEvent n{};
-			std::stringstream     ss;
+			std::stringstream             ss;
 			{
 				ss << e.player_event_log.event_data;
 				cereal::JSONInputArchive ar(ss);
@@ -273,7 +288,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 		case PlayerEvent::COMBINE_FAILURE:
 		case PlayerEvent::COMBINE_SUCCESS: {
 			PlayerEvent::CombineEvent n{};
-			std::stringstream     ss;
+			std::stringstream         ss;
 			{
 				ss << e.player_event_log.event_data;
 				cereal::JSONInputArchive ar(ss);
@@ -284,7 +299,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 		}
 		case PlayerEvent::DEATH: {
 			PlayerEvent::DeathEvent n{};
-			std::stringstream     ss;
+			std::stringstream       ss;
 			{
 				ss << e.player_event_log.event_data;
 				cereal::JSONInputArchive ar(ss);
@@ -321,7 +336,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 		}
 		case PlayerEvent::FISH_SUCCESS: {
 			PlayerEvent::FishSuccessEvent n{};
-			std::stringstream     ss;
+			std::stringstream             ss;
 			{
 				ss << e.player_event_log.event_data;
 				cereal::JSONInputArchive ar(ss);
@@ -336,7 +351,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 		}
 		case PlayerEvent::FORAGE_SUCCESS: {
 			PlayerEvent::ForageSuccessEvent n{};
-			std::stringstream     ss;
+			std::stringstream               ss;
 			{
 				ss << e.player_event_log.event_data;
 				cereal::JSONInputArchive ar(ss);
@@ -347,7 +362,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 		}
 		case PlayerEvent::ITEM_DESTROY: {
 			PlayerEvent::DestroyItemEvent n{};
-			std::stringstream     ss;
+			std::stringstream             ss;
 			{
 				ss << e.player_event_log.event_data;
 				cereal::JSONInputArchive ar(ss);
@@ -358,7 +373,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 		}
 		case PlayerEvent::LEVEL_GAIN: {
 			PlayerEvent::LevelGainedEvent n{};
-			std::stringstream     ss;
+			std::stringstream             ss;
 			{
 				ss << e.player_event_log.event_data;
 				cereal::JSONInputArchive ar(ss);
@@ -369,7 +384,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 		}
 		case PlayerEvent::LEVEL_LOSS: {
 			PlayerEvent::LevelLostEvent n{};
-			std::stringstream     ss;
+			std::stringstream           ss;
 			{
 				ss << e.player_event_log.event_data;
 				cereal::JSONInputArchive ar(ss);
@@ -380,7 +395,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 		}
 		case PlayerEvent::LOOT_ITEM: {
 			PlayerEvent::LootItemEvent n{};
-			std::stringstream     ss;
+			std::stringstream          ss;
 			{
 				ss << e.player_event_log.event_data;
 				cereal::JSONInputArchive ar(ss);
@@ -391,7 +406,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 		}
 		case PlayerEvent::GROUNDSPAWN_PICKUP: {
 			PlayerEvent::GroundSpawnPickupEvent n{};
-			std::stringstream     ss;
+			std::stringstream                   ss;
 			{
 				ss << e.player_event_log.event_data;
 				cereal::JSONInputArchive ar(ss);
@@ -424,7 +439,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 		}
 		case PlayerEvent::GM_COMMAND: {
 			PlayerEvent::GMCommandEvent n{};
-			std::stringstream     ss;
+			std::stringstream           ss;
 			{
 				ss << e.player_event_log.event_data;
 				cereal::JSONInputArchive ar(ss);
@@ -435,7 +450,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 		}
 		case PlayerEvent::SKILL_UP: {
 			PlayerEvent::SkillUpEvent n{};
-			std::stringstream     ss;
+			std::stringstream         ss;
 			{
 				ss << e.player_event_log.event_data;
 				cereal::JSONInputArchive ar(ss);
@@ -457,7 +472,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 		}
 		case PlayerEvent::TASK_ACCEPT: {
 			PlayerEvent::TaskAcceptEvent n{};
-			std::stringstream     ss;
+			std::stringstream            ss;
 			{
 				ss << e.player_event_log.event_data;
 				cereal::JSONInputArchive ar(ss);
@@ -468,7 +483,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 		}
 		case PlayerEvent::TASK_COMPLETE: {
 			PlayerEvent::TaskCompleteEvent n{};
-			std::stringstream     ss;
+			std::stringstream              ss;
 			{
 				ss << e.player_event_log.event_data;
 				cereal::JSONInputArchive ar(ss);
@@ -479,7 +494,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 		}
 		case PlayerEvent::TASK_UPDATE: {
 			PlayerEvent::TaskUpdateEvent n{};
-			std::stringstream     ss;
+			std::stringstream            ss;
 			{
 				ss << e.player_event_log.event_data;
 				cereal::JSONInputArchive ar(ss);
@@ -490,7 +505,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 		}
 		case PlayerEvent::TRADE: {
 			PlayerEvent::TradeEvent n{};
-			std::stringstream     ss;
+			std::stringstream       ss;
 			{
 				ss << e.player_event_log.event_data;
 				cereal::JSONInputArchive ar(ss);
@@ -501,7 +516,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 		}
 		case PlayerEvent::TRADER_PURCHASE: {
 			PlayerEvent::TraderPurchaseEvent n{};
-			std::stringstream     ss;
+			std::stringstream                ss;
 			{
 				ss << e.player_event_log.event_data;
 				cereal::JSONInputArchive ar(ss);
@@ -512,7 +527,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 		}
 		case PlayerEvent::TRADER_SELL: {
 			PlayerEvent::TraderSellEvent n{};
-			std::stringstream     ss;
+			std::stringstream            ss;
 			{
 				ss << e.player_event_log.event_data;
 				cereal::JSONInputArchive ar(ss);
@@ -523,7 +538,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 		}
 		case PlayerEvent::REZ_ACCEPTED: {
 			PlayerEvent::ResurrectAcceptEvent n{};
-			std::stringstream     ss;
+			std::stringstream                 ss;
 			{
 				ss << e.player_event_log.event_data;
 				cereal::JSONInputArchive ar(ss);

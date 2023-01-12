@@ -54,7 +54,11 @@ namespace PlayerEvent {
 		MAX // dont remove
 	};
 
-	// tied to Event
+	// Don't ever remove items, even if they are deprecated
+	// If event is deprecated just tag (Deprecated) in the name
+	// If event is unimplemented just tag (Unimplemented) in the name
+	// Events don't get saved to the database if unimplemented or deprecated
+	// Events tagged as deprecated will get automatically removed
 	static const char *EventName[PlayerEvent::MAX] = {
 		"None",
 		"GM Command",
@@ -73,10 +77,10 @@ namespace PlayerEvent {
 		"Loot Item",
 		"Merchant Purchase",
 		"Merchant Sell",
-		"Group Join",
-		"Group Leave",
-		"Raid Join",
-		"Raid Leave",
+		"Group Join (Unimplemented)",
+		"Group Leave (Unimplemented)",
+		"Raid Join (Unimplemented)",
+		"Raid Leave (Unimplemented)",
 		"Groundspawn Pickup",
 		"NPC Handin",
 		"Skill Up",
@@ -84,7 +88,7 @@ namespace PlayerEvent {
 		"Task Update",
 		"Task Complete",
 		"Trade",
-		"Given Item",
+		"Given Item (Unimplemented)",
 		"Say",
 		"Rez Accepted",
 		"Death",
@@ -92,12 +96,12 @@ namespace PlayerEvent {
 		"Combine Success",
 		"Dropped Item",
 		"Split Money",
-		"DZ Join",
-		"DZ Leave",
+		"DZ Join (Unimplemented)",
+		"DZ Leave (Unimplemented)",
 		"Trader Purchase",
 		"Trader Sell",
-		"Bandolier Create",
-		"Bandolier Swap",
+		"Bandolier Create (Unimplemented)",
+		"Bandolier Swap (Unimplemented)",
 		"Discover Item"
 	};
 
