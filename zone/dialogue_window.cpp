@@ -69,12 +69,13 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 	std::string animation = Strings::GetBetween(output, "+", "+");
 	if (!animation.empty()) {
 		LogDiaWind("Client [{}] Animation is not empty, contents are [{}]", c->GetCleanName(), animation);
-		Strings::FindReplace(output, fmt::format("+{}+", animation), "");
 
 		// we treat the animation field differently if it is a number
+		bool found_animation = false;
 		if (Strings::IsNumber(animation)) {
 			LogDiaWindDetail("Client [{}] Animation is a number, firing animation [{}]", c->GetCleanName(), animation);
 			target->DoAnim(std::stoi(animation));
+			found_animation = true;
 		}
 		else {
 			for (auto &a: animations) {
@@ -86,8 +87,13 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 						a.first
 					);
 					target->DoAnim(a.second);
+					found_animation = true;
 				}
 			}
+		}
+
+		if (found_animation) {
+			Strings::FindReplace(output, fmt::format("+{}+", animation), "");
 		}
 	}
 
