@@ -8971,8 +8971,15 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 					return;
 				}
 			}
-			else if ((item->Click.Type == EQ::item::ItemEffectClick) || (item->Click.Type == EQ::item::ItemEffectExpendable) || (item->Click.Type == EQ::item::ItemEffectEquipClick) || (item->Click.Type == EQ::item::ItemEffectClick2))
-			{
+			else if (
+				item->Click.Effect > 0 &&
+				(
+					(item->Click.Type == EQ::item::ItemEffectClick) ||
+					(item->Click.Type == EQ::item::ItemEffectExpendable) ||
+					(item->Click.Type == EQ::item::ItemEffectEquipClick) ||
+					(item->Click.Type == EQ::item::ItemEffectClick2)
+				)
+			) {
 				if (inst->GetCharges() == 0)
 				{
 					//Message(Chat::White, "This item is out of charges.");
