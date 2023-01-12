@@ -362,7 +362,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 			ZoneChange_Struct* zc2 = (ZoneChange_Struct*)outapp->pBuffer;
 
 			if (ztz->response <= 0) {
-				zc2->success = ZONE_ERROR_NOTREADY;
+				zc2->success = ZoningMessage::ZoneNotReady;
 				entity->CastToMob()->SetZone(ztz->current_zone_id, ztz->current_instance_id);
 				entity->CastToClient()->SetZoning(false);
 				entity->CastToClient()->SetLockSavePosition(false);

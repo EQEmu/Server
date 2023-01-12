@@ -133,6 +133,8 @@ public:
 #ifdef BOTS
 	Lua_Bot GetBotByID(uint32 bot_id);
 	Lua_Bot GetBotByName(std::string bot_name);
+	Lua_Client GetBotOwnerByBotEntityID(uint32 entity_id);
+	Lua_Client GetBotOwnerByBotID(uint32 bot_id);
 	Lua_Bot_List GetBotList();
 	Lua_Bot_List GetBotListByCharacterID(uint32 character_id);
 	Lua_Bot_List GetBotListByCharacterID(uint32 character_id, uint8 class_id);

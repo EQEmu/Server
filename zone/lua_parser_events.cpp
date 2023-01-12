@@ -438,6 +438,21 @@ void handle_npc_spawn_zone(
 	lua_setfield(L, -2, "other");
 }
 
+void handle_npc_despawn_zone(
+	QuestInterface *parse,
+	lua_State* L,
+	NPC* npc,
+	Mob *init,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+) {
+	Lua_Mob l_mob(init);
+	luabind::adl::object l_mob_o = luabind::adl::object(L, l_mob);
+	l_mob_o.push(L);
+	lua_setfield(L, -2, "other");
+}
+
 // Player
 void handle_player_say(
 	QuestInterface *parse,

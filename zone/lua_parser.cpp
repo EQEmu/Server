@@ -213,6 +213,7 @@ LuaParser::LuaParser() {
 	NPCArgumentDispatch[EVENT_LOOT_ZONE] = handle_npc_loot_zone;
 	NPCArgumentDispatch[EVENT_SPAWN_ZONE] = handle_npc_spawn_zone;
 	NPCArgumentDispatch[EVENT_PAYLOAD] = handle_npc_payload;
+	NPCArgumentDispatch[EVENT_DESPAWN_ZONE] = handle_npc_despawn_zone;
 
 	PlayerArgumentDispatch[EVENT_SAY] = handle_player_say;
 	PlayerArgumentDispatch[EVENT_ENVIRONMENTAL_DAMAGE] = handle_player_environmental_damage;
@@ -1489,6 +1490,15 @@ uint64 LuaParser::GetExperienceForKill(Client *self, Mob *against, bool &ignoreD
 	uint64 retval = 0;
 	for (auto &mod : mods_) {
 		mod.GetExperienceForKill(self, against, retval, ignoreDefault);
+	}
+	return retval;
+}
+
+int64 LuaParser::CalcSpellEffectValue_formula(Mob *self, uint32 formula, int64 base_value, int64 max_value, int caster_level, uint16 spell_id, int ticsremaining, bool &ignoreDefault)
+{
+	int64 retval = 0;
+	for (auto &mod : mods_) {
+		mod.CalcSpellEffectValue_formula(self, formula, base_value, max_value, caster_level, spell_id, ticsremaining, retval, ignoreDefault);
 	}
 	return retval;
 }

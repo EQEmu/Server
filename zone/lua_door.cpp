@@ -176,6 +176,11 @@ void Lua_Door::ForceClose(Lua_Mob sender, bool alt_mode) {
 	self->ForceClose(sender, alt_mode);
 }
 
+uint32 Lua_Door::GetID() {
+	Lua_Safe_Call_Int();
+	return self->GetID();
+}
+
 luabind::scope lua_register_door() {
 	return luabind::class_<Lua_Door, Lua_Entity>("Door")
 	.def(luabind::constructor<>())
@@ -191,6 +196,7 @@ luabind::scope lua_register_door() {
 	.def("GetDoorID", (uint32(Lua_Door::*)(void))&Lua_Door::GetDoorID)
 	.def("GetDoorName", (const char*(Lua_Door::*)(void))&Lua_Door::GetDoorName)
 	.def("GetHeading", (float(Lua_Door::*)(void))&Lua_Door::GetHeading)
+	.def("GetID", (uint32(Lua_Door::*)(void))&Lua_Door::GetID)
 	.def("GetIncline", (uint32(Lua_Door::*)(void))&Lua_Door::GetIncline)
 	.def("GetKeyItem", (uint32(Lua_Door::*)(void))&Lua_Door::GetKeyItem)
 	.def("GetLockPick", (uint32(Lua_Door::*)(void))&Lua_Door::GetLockPick)

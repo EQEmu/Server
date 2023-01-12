@@ -26,6 +26,7 @@ public:
 	void GetRequiredAAExperience(Client *self, uint32 &returnValue, bool &ignoreDefault);
 	void GetEXPForLevel(Client *self, uint16 level, uint32 &returnValue, bool &ignoreDefault);
 	void GetExperienceForKill(Client *self, Mob *against, uint64 &returnValue, bool &ignoreDefault);
+	void CalcSpellEffectValue_formula(Mob *self, uint32 formula, int64 base_value, int64 max_value, int caster_level, uint16 spell_id, int ticsremaining, int64 &returnValue, bool &ignoreDefault);
 private:
 	LuaParser *parser_;
 	lua_State *L;
@@ -40,4 +41,5 @@ private:
 	bool m_has_get_required_aa_experience;
 	bool m_has_get_exp_for_level;
 	bool m_has_get_experience_for_kill;
+	bool m_has_calc_spell_effect_value_formula;
 };
