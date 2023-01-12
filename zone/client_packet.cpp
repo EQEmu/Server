@@ -14521,6 +14521,8 @@ void Client::Handle_OP_TradeAcceptClick(const EQApplicationPacket *app)
 				other->trade->LogTrade();
 				trade->LogTrade();
 
+				other->PlayerTradeEventLog(other->trade, trade);
+
 				// start QS code
 				if (RuleB(QueryServ, PlayerLogTrades)) {
 					PlayerLogTrade_Struct event_entry;

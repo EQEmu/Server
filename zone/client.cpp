@@ -12129,7 +12129,7 @@ void Client::PlayerTradeEventLog(Trade *t, Trade *t2)
 	t_entries.reserve(t2_item_count);
 	if (t2_item_count > 0) {
 		for (uint16 i = EQ::invslot::TRADE_BEGIN; i <= EQ::invslot::TRADE_END; i++) {
-			const EQ::ItemInstance *inst = trader->GetInv().GetItem(i);
+			const EQ::ItemInstance *inst = trader2->GetInv().GetItem(i);
 			if (inst) {
 				t2_entries.emplace_back(
 					PlayerEvent::TradeItemEntry{
@@ -12155,7 +12155,7 @@ void Client::PlayerTradeEventLog(Trade *t, Trade *t2)
 
 				if (inst->IsClassBag()) {
 					for (uint8 j = EQ::invbag::SLOT_BEGIN; j <= EQ::invbag::SLOT_END; j++) {
-						inst = trader->GetInv().GetItem(i, j);
+						inst = trader2->GetInv().GetItem(i, j);
 						if (inst) {
 							t2_entries.emplace_back(
 								PlayerEvent::TradeItemEntry{
