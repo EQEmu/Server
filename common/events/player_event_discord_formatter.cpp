@@ -703,10 +703,10 @@ std::string PlayerEventDiscordFormatter::FormatNPCHandinEvent(
 	const PlayerEvent::HandinEvent &e
 )
 {
-	std::string handin_info;
+	std::string handin_items_info;
 	if (!e.handin_items.empty()) {
 		for (const auto &h: e.handin_items) {
-			handin_info += fmt::format(
+			handin_items_info += fmt::format(
 				"{} ({}){}{}\n",
 				h.item_name,
 				h.item_id,
@@ -716,10 +716,10 @@ std::string PlayerEventDiscordFormatter::FormatNPCHandinEvent(
 		}
 	}
 
-	std::string return_info;
+	std::string return_items_info;
 	if (!e.return_items.empty()) {
 		for (const auto &r: e.return_items) {
-			return_info += fmt::format(
+			return_items_info += fmt::format(
 				"{} ({}){}{}\n",
 				r.item_name,
 				r.item_id,
@@ -729,69 +729,111 @@ std::string PlayerEventDiscordFormatter::FormatNPCHandinEvent(
 		}
 	}
 
-	std::string money_info;
+	std::string handin_money_info;
 	if (e.handin_money.platinum) {
-		money_info += fmt::format(
+		handin_money_info += fmt::format(
 			":moneybag: {} Platinum\n",
 			Strings::Commify(std::to_string(e.handin_money.platinum))
 		);
 	}
 
 	if (e.handin_money.gold) {
-		money_info += fmt::format(
+		handin_money_info += fmt::format(
 			":moneybag: {} Gold\n",
 			Strings::Commify(std::to_string(e.handin_money.gold))
 		);
 	}
 
 	if (e.handin_money.silver) {
-		money_info += fmt::format(
+		handin_money_info += fmt::format(
 			":moneybag: {} Silver\n",
 			Strings::Commify(std::to_string(e.handin_money.silver))
 		);
 	}
 
 	if (e.handin_money.copper) {
-		money_info += fmt::format(
+		handin_money_info += fmt::format(
 			":moneybag: {} Copper",
 			Strings::Commify(std::to_string(e.handin_money.copper))
 		);
 	}
 
+
+	std::string return_money_info;
+	if (e.return_money.platinum) {
+		return_money_info += fmt::format(
+			":moneybag: {} Platinum\n",
+			Strings::Commify(std::to_string(e.return_money.platinum))
+		);
+	}
+
+	if (e.return_money.gold) {
+		return_money_info += fmt::format(
+			":moneybag: {} Gold\n",
+			Strings::Commify(std::to_string(e.return_money.gold))
+		);
+	}
+
+	if (e.return_money.silver) {
+		return_money_info += fmt::format(
+			":moneybag: {} Silver\n",
+			Strings::Commify(std::to_string(e.return_money.silver))
+		);
+	}
+
+	if (e.return_money.copper) {
+		return_money_info += fmt::format(
+			":moneybag: {} Copper",
+			Strings::Commify(std::to_string(e.return_money.copper))
+		);
+	}
+
 	std::vector<DiscordField> f = {};
 
-	if (!handin_info.empty()) {
+	if (!handin_items_info.empty()) {
 		BuildDiscordField(
 			&f,
 			"Handin Items",
 			fmt::format(
 				"{}",
-				handin_info
+				handin_items_info
 			)
 		);
 	}
 
-	if (!money_info.empty()) {
+	if (!handin_money_info.empty()) {
 		BuildDiscordField(
 			&f,
 			"Handin Money",
 			fmt::format(
 				"{}",
-				money_info
+				handin_money_info
 			)
 		);
 	}
 
-	if (!return_info.empty()) {
+	if (!return_items_info.empty()) {
 		BuildDiscordField(
 			&f,
 			"Return Items",
 			fmt::format(
 				"{}",
-				return_info
+				return_items_info
 			)
 		);
 	}
+
+	if (!return_money_info.empty()) {
+		BuildDiscordField(
+			&f,
+			"Return Money",
+			fmt::format(
+				"{}",
+				return_money_info
+			)
+		);
+	}
+
 	std::vector<DiscordEmbed> embeds = {};
 	BuildBaseEmbed(&embeds, f, c);
 	auto root = BuildDiscordWebhook(c, embeds);

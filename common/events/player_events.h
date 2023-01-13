@@ -848,6 +848,7 @@ namespace PlayerEvent {
 		std::vector<HandinEntry> handin_items;
 		HandinMoney              handin_money;
 		std::vector<HandinEntry> return_items;
+		HandinMoney              return_money;
 
 		// cereal
 		template<class Archive>
@@ -858,7 +859,8 @@ namespace PlayerEvent {
 				CEREAL_NVP(npc_name),
 				CEREAL_NVP(handin_items),
 				CEREAL_NVP(handin_money),
-				CEREAL_NVP(return_items)
+				CEREAL_NVP(return_items),
+				CEREAL_NVP(return_money)
 			);
 		}
 	};
