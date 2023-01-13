@@ -169,7 +169,6 @@ SET(zone_headers
     aggromanager.h
     api_service.h
     aura.h
-    basic_functions.h
     beacon.h
     bot.h
     bot_command.h
