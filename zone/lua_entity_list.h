@@ -144,6 +144,7 @@ public:
 	Lua_Bot GetRandomBot(float x, float y, float z, float distance);
 	Lua_Bot GetRandomBot(float x, float y, float z, float distance, Lua_Bot exclude_bot);
 	void SignalAllBotsByOwnerCharacterID(uint32 character_id, int signal_id);
+	void SignalAllBotsByOwnerName(std::string owner_name, int signal_id);
 	void SignalBotByBotID(uint32 bot_id, int signal_id);
 	void SignalBotByBotName(std::string bot_name, int signal_id);
 #endif
