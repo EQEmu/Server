@@ -476,6 +476,11 @@ void Perl_EntityList_SignalAllBotsByOwnerCharacterID(EntityList* self, uint32_t 
 	entity_list.SignalAllBotsByOwnerCharacterID(character_id, signal_id);
 }
 
+void Perl_EntityList_SignalAllBotsByOwnerName(EntityList* self, std::string owner_name, int signal_id) // @categories Script Utility
+{
+	entity_list.SignalAllBotsByOwnerName(owner_name, signal_id);
+}
+
 void Perl_EntityList_SignalBotByBotID(EntityList* self, uint32_t bot_id, int signal_id) // @categories Script Utility
 {
 	entity_list.SignalBotByBotID(bot_id, signal_id);
@@ -716,6 +721,7 @@ void perl_register_entitylist()
 	package.add("ReplaceWithTarget", &Perl_EntityList_ReplaceWithTarget);
 #ifdef BOTS
 	package.add("SignalAllBotsByOwnerCharacterID", &Perl_EntityList_SignalAllBotsByOwnerCharacterID);
+	package.add("SignalAllBotsByOwnerName", &Perl_EntityList_SignalAllBotsByOwnerName);
 #endif
 	package.add("SignalAllClients", &Perl_EntityList_SignalAllClients);
 #ifdef BOTS

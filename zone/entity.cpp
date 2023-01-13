@@ -5250,6 +5250,18 @@ void EntityList::SignalAllBotsByOwnerCharacterID(uint32 character_id, int signal
 	}
 }
 
+void EntityList::SignalAllBotsByOwnerName(std::string owner_name, int signal_id)
+{
+	auto client_bot_list = GetBotListByClientName(owner_name);
+	if (client_bot_list.empty()) {
+		return;
+	}
+
+	for (const auto& b : client_bot_list) {
+		b->Signal(signal_id);
+	}
+}
+
 void EntityList::SignalBotByBotID(uint32 bot_id, int signal_id)
 {
 	auto b = GetBotByBotID(bot_id);

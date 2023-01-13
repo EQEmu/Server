@@ -553,6 +553,7 @@ public:
 	std::vector<Bot *> GetBotListByCharacterID(uint32 character_id, uint8 class_id = 0);
 	std::vector<Bot *> GetBotListByClientName(std::string client_name, uint8 class_id = 0);
 	void SignalAllBotsByOwnerCharacterID(uint32 character_id, int signal_id);
+	void SignalAllBotsByOwnerName(std::string owner_name, int signal_id);
 	void SignalBotByBotID(uint32 bot_id, int signal_id);
 	void SignalBotByBotName(std::string bot_name, int signal_id);
 #endif
