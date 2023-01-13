@@ -233,7 +233,6 @@ SET(zone_headers
     lua_stat_bonuses.h
     map.h
     masterentity.h
-    maxskill.h
     message.h
     merc.h
     mob.h
