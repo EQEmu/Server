@@ -24,5 +24,8 @@ CREATE TABLE `player_event_logs`
     `event_data`      longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`event_data`)),
     `created_at`      datetime     DEFAULT NULL,
     PRIMARY KEY (`id`),
-    KEY               `event_created_at` (`event_type_id`,`created_at`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
+    KEY               `event_created_at` (`event_type_id`,`created_at`),
+    KEY               `zone_id` (`zone_id`),
+    KEY               `character_id` (`character_id`,`zone_id`) USING BTREE,
+    KEY               `created_at` (`created_at`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4
