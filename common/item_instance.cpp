@@ -534,10 +534,11 @@ bool EQ::ItemInstance::IsNoneEmptyContainer()
 }
 
 // Retrieve augment inside item
-EQ::ItemInstance* EQ::ItemInstance::GetAugment(uint8 slot) const
+EQ::ItemInstance* EQ::ItemInstance::GetAugment(uint8 augment_index) const
 {
-	if (m_item && m_item->IsClassCommon())
-		return GetItem(slot);
+	if (m_item && m_item->IsClassCommon()) {
+		return GetItem(augment_index);
+	}
 
 	return nullptr;
 }
@@ -663,12 +664,13 @@ bool EQ::ItemInstance::CanTransform(const ItemData *ItemToTry, const ItemData *C
 	return false;
 }
 
-uint32 EQ::ItemInstance::GetAugmentItemID(uint8 slot) const
+uint32 EQ::ItemInstance::GetAugmentItemID(uint8 augment_index) const
 {
-	if (!m_item || !m_item->IsClassCommon())
+	if (!m_item || !m_item->IsClassCommon()) {
 		return 0;
+	}
 
-	return GetItemID(slot);
+	return GetItemID(augment_index);
 }
 
 // Add an augment to the item

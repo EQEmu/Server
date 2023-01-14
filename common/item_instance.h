@@ -127,8 +127,8 @@ namespace EQ
 		//
 		// Augments
 		//
-		ItemInstance* GetAugment(uint8 slot) const;
-		uint32 GetAugmentItemID(uint8 slot) const;
+		ItemInstance* GetAugment(uint8 augment_index) const;
+		uint32 GetAugmentItemID(uint8 augment_index) const;
 		void PutAugment(uint8 slot, const ItemInstance& inst);
 		void PutAugment(SharedDatabase *db, uint8 slot, uint32 item_id);
 		void DeleteAugment(uint8 slot);

@@ -101,13 +101,13 @@ void Perl_Bot_RemoveBotItem(Bot* self, uint32 item_id)
 	return self->RemoveBotItem(item_id);
 }
 
-EQ::ItemInstance* Perl_Bot_GetAugmentAt(Bot* self, uint32 slot, uint32 aug_slot)
+EQ::ItemInstance* Perl_Bot_GetAugmentAt(Bot* self, int16 slot_id, uint8 augment_index)
 {
-	EQ::ItemInstance* inst = self->GetInv().GetItem(slot);
-	if (inst)
-	{
-		return inst->GetAugment(aug_slot);
+	auto* inst = self->GetInv().GetItem(slot_id);
+	if (inst) {
+		return inst->GetAugment(augment_index);
 	}
+
 	return nullptr;
 }
 
@@ -161,9 +161,9 @@ bool Perl_Bot_IsSitting(Bot* self) // @categories Account and Character
 	return self->IsSitting();
 }
 
-void Perl_Bot_SendSpellAnim(Bot* self, uint16 targetid, uint16 spell_id)
+void Perl_Bot_SendSpellAnim(Bot* self, uint16 target_id, uint16 spell_id)
 {
-	self->SendSpellAnim(targetid, spell_id);
+	self->SendSpellAnim(target_id, spell_id);
 }
 
 void Perl_Bot_Signal(Bot* self, int signal_id)
@@ -286,9 +286,9 @@ int Perl_Bot_GetInstrumentMod(Bot* self, uint16 spell_id) // @categories Spells 
 	return self->GetInstrumentMod(spell_id);
 }
 
-EQ::ItemInstance* Perl_Bot_GetItemAt(Bot* self, uint32 slot) // @categories Inventory and Items
+EQ::ItemInstance* Perl_Bot_GetItemAt(Bot* self, int16 slot_id) // @categories Inventory and Items
 {
-	return self->GetInv().GetItem(slot);
+	return self->GetInv().GetItem(slot_id);
 }
 
 bool Perl_Bot_IsGrouped(Bot* self) // @categories Account and Character, Group
