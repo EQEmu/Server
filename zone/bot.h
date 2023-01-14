@@ -393,14 +393,14 @@ public:
 	// Static Class Methods
 	//static void DestroyBotRaidObjects(Client* client);	// Can be removed after bot raids are dumped
 	static Bot* LoadBot(uint32 botID);
-	static uint32 SpawnedBotCount(const uint32 owner_id, uint8 class_id = 0);
+	static uint32 SpawnedBotCount(const uint32 owner_id, uint8 class_id = NO_CLASS);
 	static void LevelBotWithClient(Client* client, uint8 level, bool sendlvlapp);
 	//static bool SetBotOwnerCharacterID(uint32 botID, uint32 botOwnerCharacterID, std::string* error_message);
 	static bool IsBotAttackAllowed(Mob* attacker, Mob* target, bool& hasRuleDefined);
 	static Bot* GetBotByBotClientOwnerAndBotName(Client* c, std::string botName);
 	static void ProcessBotGroupInvite(Client* c, std::string botName);
 	static void ProcessBotGroupDisband(Client* c, std::string botName);
-	static void BotOrderCampAll(Client* c);
+	static void BotOrderCampAll(Client* c, uint8 class_id = NO_CLASS);
 	static void ProcessBotInspectionRequest(Bot* inspectedBot, Client* client);
 	static void LoadAndSpawnAllZonedBots(Client* bot_owner);
 	static bool GroupHasBot(Group* group);

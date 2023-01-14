@@ -1249,7 +1249,7 @@ int EQ::ItemInstance::GetItemBaneDamageBody(bool augments) const
 
 int EQ::ItemInstance::GetItemBaneDamageRace(bool augments) const
 {
-	int race = 0;
+	int race = RACE_DOUG_0;
 	const auto item = GetItem();
 	if (item) {
 		race = item->BaneDmgRace;

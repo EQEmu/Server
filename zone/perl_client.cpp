@@ -2871,6 +2871,16 @@ void Perl_Client_SetBotSpawnLimit(Client* self, int new_spawn_limit, uint8 class
 	self->SetBotSpawnLimit(new_spawn_limit, class_id);
 }
 
+void Perl_Client_CampAllBots(Client* self)
+{
+	self->CampAllBots();
+}
+
+void Perl_Client_CampAllBots(Client* self, uint8 class_id)
+{
+	self->CampAllBots(class_id);
+}
+
 #endif
 
 void perl_register_client()
@@ -2934,6 +2944,10 @@ void perl_register_client()
 	package.add("CalcPriceMod", (float(*)(Client*))&Perl_Client_CalcPriceMod);
 	package.add("CalcPriceMod", (float(*)(Client*, Mob*))&Perl_Client_CalcPriceMod);
 	package.add("CalcPriceMod", (float(*)(Client*, Mob*, bool))&Perl_Client_CalcPriceMod);
+#ifdef BOTS
+	package.add("CampAllBots", (void(*)(Client*))&Perl_Client_CampAllBots);
+	package.add("CampAllBots", (void(*)(Client*, uint8))&Perl_Client_CampAllBots);
+#endif
 	package.add("CanEnterZone", (bool(*)(Client*, std::string))&Perl_Client_CanEnterZone);
 	package.add("CanEnterZone", (bool(*)(Client*, std::string, int16))&Perl_Client_CanEnterZone);
 	package.add("CanHaveSkill", &Perl_Client_CanHaveSkill);

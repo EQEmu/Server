@@ -20,6 +20,7 @@
 
 #include "../common/types.h"
 
+#define NO_CLASS 0
 #define WARRIOR 1
 #define CLERIC 2
 #define PALADIN 3

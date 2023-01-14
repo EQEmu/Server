@@ -550,8 +550,8 @@ public:
 	inline const std::unordered_map<uint16, Client *> &GetClientList() { return client_list; }
 #ifdef BOTS
 	inline const std::list<Bot *> &GetBotList() { return bot_list; }
-	std::vector<Bot *> GetBotListByCharacterID(uint32 character_id, uint8 class_id = 0);
-	std::vector<Bot *> GetBotListByClientName(std::string client_name, uint8 class_id = 0);
+	std::vector<Bot *> GetBotListByCharacterID(uint32 character_id, uint8 class_id = NO_CLASS);
+	std::vector<Bot *> GetBotListByClientName(std::string client_name, uint8 class_id = NO_CLASS);
 	void SignalAllBotsByOwnerCharacterID(uint32 character_id, int signal_id);
 	void SignalAllBotsByOwnerName(std::string owner_name, int signal_id);
 	void SignalBotByBotID(uint32 bot_id, int signal_id);

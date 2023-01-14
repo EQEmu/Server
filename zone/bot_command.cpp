@@ -6548,7 +6548,7 @@ void bot_subcommand_bot_spawn(Client *c, const Seperator *sep)
 	std::string bot_name = sep->arg[1];
 
 	uint32 bot_id = 0;
-	uint8 bot_class = 0;
+	uint8 bot_class = NO_CLASS;
 	if (!database.botdb.LoadBotID(c->CharacterID(), bot_name, bot_id, bot_class)) {
 		c->Message(
 			Chat::White,

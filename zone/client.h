@@ -2068,12 +2068,14 @@ public:
 	bool GetBotPrecombat() { return m_bot_precombat; }
 	void SetBotPrecombat(bool flag = true) { m_bot_precombat = flag; }
 
-	int GetBotRequiredLevel(uint8 class_id = 0);
-	uint32 GetBotCreationLimit(uint8 class_id = 0);
-	int GetBotSpawnLimit(uint8 class_id = 0);
-	void SetBotCreationLimit(uint32 new_creation_limit, uint8 class_id = 0);
-	void SetBotRequiredLevel(int new_required_level, uint8 class_id = 0);
-	void SetBotSpawnLimit(int new_spawn_limit, uint8 class_id = 0);
+	int GetBotRequiredLevel(uint8 class_id = NO_CLASS);
+	uint32 GetBotCreationLimit(uint8 class_id = NO_CLASS);
+	int GetBotSpawnLimit(uint8 class_id = NO_CLASS);
+	void SetBotCreationLimit(uint32 new_creation_limit, uint8 class_id = NO_CLASS);
+	void SetBotRequiredLevel(int new_required_level, uint8 class_id = NO_CLASS);
+	void SetBotSpawnLimit(int new_spawn_limit, uint8 class_id = NO_CLASS);
+
+	void CampAllBots(uint8 class_id = NO_CLASS);
 
 private:
 	bool bot_owner_options[_booCount];
