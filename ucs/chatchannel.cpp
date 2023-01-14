@@ -542,8 +542,14 @@ ChatChannel *ChatChannelList::AddClientToChannel(std::string channel_name, Clien
 
 	ChatChannel *RequiredChannel = FindChannel(normalized_name);
 	std::string channel_owner = c->GetName();
+
+	bool permanent = false;
+	if (command_directed && RuleI(Chat, MaxPermanentPlayerChannels) > 0) {
+		permanent = true;
+	}
+
 	if (!RequiredChannel) {
-		RequiredChannel = CreateChannel(normalized_name, channel_owner, password, false, 0, command_directed);
+		RequiredChannel = CreateChannel(normalized_name, channel_owner, password, permanent, 0, command_directed);
 		LogDebug("Created and added Client to channel [{}] with password [{}]. Owner: {}. Command Directed: {}", normalized_name.c_str(), password.c_str(), channel_owner, command_directed);
 	}
 

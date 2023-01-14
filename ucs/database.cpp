@@ -315,7 +315,9 @@ bool Database::LoadChatChannels()
 			}
 		}
 		else {
-			ChannelList->CreateChannel(channel_name, channel_owner, channel_password, true, atoi(row[3]), false);
+			if (!ChannelList->FindChannel(channel_name)) {
+				ChannelList->CreateChannel(channel_name, channel_owner, channel_password, true, atoi(row[3]), false);
+			}
 		}
 	}
 	return true;
