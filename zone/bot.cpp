@@ -10173,17 +10173,19 @@ int32 Bot::GetRawItemAC()
 	return Total;
 }
 
-void Bot::SendSpellAnim(uint16 targetid, uint16 spell_id)
+void Bot::SendSpellAnim(uint16 target_id, uint16 spell_id)
 {
-	if (!targetid || !IsValidSpell(spell_id))
+	if (!target_id || !IsValidSpell(spell_id)) {
 		return;
+	}
 
 	EQApplicationPacket app(OP_Action, sizeof(Action_Struct));
-	Action_Struct* a = (Action_Struct*)app.pBuffer;
-	a->target = targetid;
-	a->source = GetID();
-	a->type = 231;
-	a->spell = spell_id;
+	auto* a = (Action_Struct*) app.pBuffer;
+
+	a->target      = target_id;
+	a->source      = GetID();
+	a->type        = 231;
+	a->spell       = spell_id;
 	a->hit_heading = GetHeading();
 
 	app.priority = 1;

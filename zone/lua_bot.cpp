@@ -260,16 +260,6 @@ void Lua_Bot::Fling(float value, float target_x, float target_y, float target_z,
 	self->Fling(value, target_x, target_y, target_z, ignore_los, clip_through_walls);
 }
 
-int Lua_Bot::GetItemIDAt(int slot_id) {
-	Lua_Safe_Call_Int();
-	return self->GetItemIDAt(slot_id);
-}
-
-int Lua_Bot::GetAugmentIDAt(int slot_id, int aug_slot) {
-	Lua_Safe_Call_Int();
-	return self->GetAugmentIDAt(slot_id, aug_slot);
-}
-
 int Lua_Bot::GetBaseSTR() {
 	Lua_Safe_Call_Int();
 	return self->GetBaseSTR();
@@ -370,6 +360,40 @@ void Lua_Bot::Camp(bool save_to_database) {
 	self->Camp(save_to_database);
 }
 
+Lua_ItemInst Lua_Bot::GetAugmentAt(int16 slot_id, uint8 augment_index)
+{
+	Lua_Safe_Call_Class(Lua_ItemInst);
+
+	auto* inst = self->GetInv().GetItem(slot_id);
+	if (inst) {
+		return Lua_ItemInst(inst->GetAugment(augment_index));
+	}
+
+	return Lua_ItemInst();
+}
+
+int Lua_Bot::GetAugmentIDAt(int16 slot_id, uint8 augment_index) {
+	Lua_Safe_Call_Int();
+	return self->GetAugmentIDAt(slot_id, augment_index);
+}
+
+int Lua_Bot::GetItemIDAt(int16 slot_id) {
+	Lua_Safe_Call_Int();
+	return self->GetItemIDAt(slot_id);
+}
+
+Lua_ItemInst Lua_Bot::GetItemAt(int16 slot_id) // @categories Inventory and Items
+{
+	Lua_Safe_Call_Class(Lua_ItemInst);
+	return Lua_ItemInst(self->GetInv().GetItem(slot_id));
+}
+
+void Lua_Bot::SendSpellAnim(uint16 target_id, uint16 spell_id)
+{
+	Lua_Safe_Call_Void();
+	self->SendSpellAnim(target_id, spell_id);
+}
+
 luabind::scope lua_register_bot() {
 	return luabind::class_<Lua_Bot, Lua_Mob>("Bot")
 	.def(luabind::constructor<>())
@@ -399,7 +423,8 @@ luabind::scope lua_register_bot() {
 	.def("Fling", (void(Lua_Bot::*)(float,float,float,float))&Lua_Bot::Fling)
 	.def("Fling", (void(Lua_Bot::*)(float,float,float,float,bool))&Lua_Bot::Fling)
 	.def("Fling", (void(Lua_Bot::*)(float,float,float,float,bool,bool))&Lua_Bot::Fling)
-	.def("GetAugmentIDAt", (int(Lua_Bot::*)(int,int))&Lua_Bot::GetAugmentIDAt)
+	.def("GetAugmentAt", (Lua_ItemInst(Lua_Bot::*)(int16,uint8))&Lua_Bot::GetAugmentAt)
+	.def("GetAugmentIDAt", (int(Lua_Bot::*)(int16,uint8))&Lua_Bot::GetAugmentIDAt)
 	.def("GetBaseAGI", (int(Lua_Bot::*)(void))&Lua_Bot::GetBaseAGI)
 	.def("GetBaseCHA", (int(Lua_Bot::*)(void))&Lua_Bot::GetBaseCHA)
 	.def("GetBaseDEX", (int(Lua_Bot::*)(void))&Lua_Bot::GetBaseDEX)
@@ -414,6 +439,8 @@ luabind::scope lua_register_bot() {
 	.def("GetGroup", (Lua_Group(Lua_Bot::*)(void))&Lua_Bot::GetGroup)
 	.def("GetHealAmount", (int(Lua_Bot::*)(void))&Lua_Bot::GetHealAmount)
 	.def("GetInstrumentMod", (int(Lua_Bot::*)(int))&Lua_Bot::GetInstrumentMod)
+	.def("GetItemAt", (Lua_ItemInst(Lua_Bot::*)(int16))&Lua_Bot::GetItemAt)
+	.def("GetItemIDAt", (int(Lua_Bot::*)(int16))&Lua_Bot::GetItemIDAt)
 	.def("GetOwner", (Lua_Mob(Lua_Bot::*)(void))&Lua_Bot::GetOwner)
 	.def("GetRawItemAC", (int(Lua_Bot::*)(void))&Lua_Bot::GetRawItemAC)
 	.def("GetSpellDamage", (int(Lua_Bot::*)(void))&Lua_Bot::GetSpellDamage)
@@ -430,6 +457,7 @@ luabind::scope lua_register_bot() {
 	.def("ReloadBotSpells", (bool(Lua_Bot::*)(void))&Lua_Bot::ReloadBotSpells)
 	.def("ReloadBotSpellSettings", (void(Lua_Bot::*)(void))&Lua_Bot::ReloadBotSpellSettings)
 	.def("RemoveBotItem", (void(Lua_Bot::*)(uint32))&Lua_Bot::RemoveBotItem)
+	.def("SendSpellAnim", (void(Lua_Bot::*)(uint16,uint16))&Lua_Bot::SendSpellAnim)
 	.def("SetExpansionBitmask", (void(Lua_Bot::*)(int))&Lua_Bot::SetExpansionBitmask)
 	.def("SetExpansionBitmask", (void(Lua_Bot::*)(int,bool))&Lua_Bot::SetExpansionBitmask)
 	.def("SetSpellDuration", (void(Lua_Bot::*)(int))&Lua_Bot::SetSpellDuration)
