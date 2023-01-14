@@ -537,6 +537,8 @@ public:
 	void SetBotCreationLimit(uint32 new_creation_limit, uint8 class_id);
 	void SetBotSpawnLimit(int new_spawn_limit);
 	void SetBotSpawnLimit(int new_spawn_limit, uint8 class_id);
+	void CampAllBots();
+	void CampAllBots(uint8 class_id);
 
 #endif
 

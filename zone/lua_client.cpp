@@ -3010,6 +3010,18 @@ void Lua_Client::SetBotSpawnLimit(int new_spawn_limit, uint8 class_id)
 	self->SetBotSpawnLimit(new_spawn_limit, class_id);
 }
 
+void Lua_Client::CampAllBots()
+{
+	Lua_Safe_Call_Void();
+	self->CampAllBots();
+}
+
+void Lua_Client::CampAllBots(uint8 class_id)
+{
+	Lua_Safe_Call_Void();
+	self->CampAllBots(class_id);
+}
+
 #endif
 
 luabind::scope lua_register_client() {
@@ -3070,6 +3082,10 @@ luabind::scope lua_register_client() {
 	.def("CalcEXP", (uint64(Lua_Client::*)(uint8))&Lua_Client::CalcEXP)
 	.def("CalcEXP", (uint64(Lua_Client::*)(uint8,bool))&Lua_Client::CalcEXP)
 	.def("CalcPriceMod", (float(Lua_Client::*)(Lua_Mob,bool))&Lua_Client::CalcPriceMod)
+#ifdef BOTS
+	.def("CampAllBots", (void(Lua_Client::*)(void))&Lua_Client::CampAllBots)
+	.def("CampAllBots", (void(Lua_Client::*)(uint8))&Lua_Client::CampAllBots)
+#endif
 	.def("CanEnterZone", (bool(Lua_Client::*)(std::string))&Lua_Client::CanEnterZone)
 	.def("CanEnterZone", (bool(Lua_Client::*)(std::string,int16))&Lua_Client::CanEnterZone)
 	.def("CanHaveSkill", (bool(Lua_Client::*)(int))&Lua_Client::CanHaveSkill)

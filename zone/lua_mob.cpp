@@ -1571,7 +1571,7 @@ void Lua_Mob::SendIllusionPacket(luabind::adl::object illusion) {
 		return;
 	}
 
-	int race = 0;
+	int race = RACE_DOUG_0;
 	int gender = 255;
 	int texture = 255;
 	int helmtexture = 255;

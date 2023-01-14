@@ -5027,9 +5027,9 @@ void EntityList::ZoneWho(Client *c, Who_All_Struct *Who)
 				FormatMSGID = 5024; // 5024 %T1[ANONYMOUS] %2 %3
 			else if (ClientEntry->GetAnon() == 2)
 				FormatMSGID = 5023; // 5023 %T1[ANONYMOUS] %2 %3 %4
-			uint32 PlayerClass = 0;
+			uint32 PlayerClass = NO_CLASS;
 			uint32 PlayerLevel = 0;
-			uint32 PlayerRace = 0;
+			uint32 PlayerRace = RACE_DOUG_0;
 			uint32 ZoneMSGID = 0xFFFFFFFF;
 
 			if (ClientEntry->GetAnon()==0) {

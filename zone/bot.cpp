@@ -6220,11 +6220,14 @@ void Bot::EquipBot(std::string* error_message) {
 	UpdateEquipmentLight();
 }
 
-void Bot::BotOrderCampAll(Client* c) {
-	if(c) {
-		std::list<Bot*> BotList = entity_list.GetBotsByBotOwnerCharacterID(c->CharacterID());
-		for(std::list<Bot*>::iterator botListItr = BotList.begin(); botListItr != BotList.end(); ++botListItr)
-			(*botListItr)->Camp();
+void Bot::BotOrderCampAll(Client* c, uint8 class_id) {
+	if (c) {
+		const auto& l = entity_list.GetBotsByBotOwnerCharacterID(c->CharacterID());
+		for (const auto& b : l) {
+			if (!class_id || b->GetClass() == class_id) {
+				b->Camp();
+			}
+		}
 	}
 }
 

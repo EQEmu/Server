@@ -362,8 +362,8 @@ public:
 	inline bool ProximitySayInUse() { return HaveProximitySays; }
 
 #ifdef BOTS
-	int createbotcount(uint8 class_id = 0);
-	int spawnbotcount(uint8 class_id = 0);
+	int createbotcount(uint8 class_id = NO_CLASS);
+	int spawnbotcount(uint8 class_id = NO_CLASS);
 	bool botquest();
 	bool createBot(const char *name, const char *lastname, uint8 level, uint16 race, uint8 botclass, uint8 gender);
 #endif

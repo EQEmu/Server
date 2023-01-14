@@ -4091,7 +4091,7 @@ void Client::UpdateLFP() {
 
 	for(unsigned int i=0; i<MAX_GROUP_MEMBERS; i++) {
 		LFPMembers[i].Name[0] = '\0';
-		LFPMembers[i].Class = 0;
+		LFPMembers[i].Class = NO_CLASS;
 		LFPMembers[i].Level = 0;
 		LFPMembers[i].Zone = 0;
 	}
