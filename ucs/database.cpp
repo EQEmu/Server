@@ -286,15 +286,8 @@ bool Database::LoadChatChannels()
 		std::string channel_password = row[2];
 		auto channel_min_status = row[3];
 
-		if (ChatChannelList::IsOnChannelBlockList(channel_name)) {
-			if (!(channel_owner == "*Block*")) { // Dont show that channels were blocked when the block entries themselves are detected.
-				LogDebug("Blocked channel [{}] load from database due to being blocked by server operator.", channel_name);
-			}
-		}
-		else {
-			if (!ChannelList->FindChannel(channel_name)) {
-				ChannelList->CreateChannel(channel_name, channel_owner, channel_password, true, atoi(channel_min_status), false);
-			}
+		if (!ChannelList->FindChannel(channel_name)) {
+			ChannelList->CreateChannel(channel_name, channel_owner, channel_password, true, atoi(channel_min_status), false);
 		}
 	}
 	return true;
