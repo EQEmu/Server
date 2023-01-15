@@ -4889,7 +4889,7 @@ void bot_command_taunt(Client *c, const Seperator *sep)
 	}
 
 	for (auto bot_iter : sbl) {
-		if (!bot_iter->HasPet()) {
+		if (!bot_iter->GetPet()) {
 			continue;
 		}
 
@@ -6859,7 +6859,7 @@ void bot_subcommand_bot_summon(Client *c, const Seperator *sep)
 		bot_iter->Teleport(c->GetPosition());
 		bot_iter->DoAnim(0);
 
-		if (!bot_iter->HasPet()) {
+		if (!bot_iter->GetPet()) {
 			continue;
 		}
 

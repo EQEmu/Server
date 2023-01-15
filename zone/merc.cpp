@@ -1397,7 +1397,7 @@ void Merc::AI_Process() {
 		if(!GetTarget())
 			return;
 
-		if(HasPet())
+		if(GetPet())
 			GetPet()->SetTarget(GetTarget());
 
 		if(!IsSitting())
@@ -2067,7 +2067,7 @@ bool Merc::AICastSpell(int8 iChance, uint32 iSpellTypes) {
 									if(g->members[i] && !g->members[i]->qglobal) {
 										int8 hpr = (int8)g->members[i]->GetHPRatio();
 
-										if(g->members[i]->HasPet() && g->members[i]->GetPet()->GetHPRatio() < checkHPR) {
+										if(g->members[i]->GetPet() && g->members[i]->GetPet()->GetHPRatio() < checkHPR) {
 											if(!tar || ((g->members[i]->GetPet()->GetHPRatio() + 25) < tar->GetHPRatio())) {
 												tar = g->members[i]->GetPet();
 												checkPetHPR = g->members[i]->GetPet()->GetHPRatio() + 25;
@@ -5743,7 +5743,7 @@ void Merc::Depop() {
 
 	entity_list.RemoveMerc(GetID());
 
-	if(HasPet())
+	if(GetPet())
 	{
 		GetPet()->Depop();
 	}
