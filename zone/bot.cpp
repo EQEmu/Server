@@ -4242,8 +4242,8 @@ void Bot::LoadAndSpawnAllZonedBots(Client* bot_owner) {
 						}
 
 						if (spawned_bots_count >= bot_spawn_limit) {
-							g->UpdatePlayer(bot_owner);
 							database.SetGroupID(b->GetCleanName(), 0, b->GetBotID());
+							g->UpdatePlayer(bot_owner);
 							continue;
 						}
 
