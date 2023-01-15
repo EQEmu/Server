@@ -32,19 +32,21 @@
 #include "lfguild.h"
 #include "worldserver.h"
 #include "../common/path_manager.h"
+#include "../common/zone_store.h"
 #include <list>
 #include <signal.h>
 #include <thread>
 
 volatile bool RunLoops = true;
 
-Database              database;
+QSDatabase              database;
 LFGuildManager        lfguildmanager;
 std::string           WorldShortName;
 const queryservconfig *Config;
 WorldServer           *worldserver = 0;
 EQEmuLogSys           LogSys;
 PathManager           path;
+ZoneStore             zone_store;
 
 void CatchSignal(int sig_num)
 {

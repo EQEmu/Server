@@ -39,7 +39,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 extern WorldServer           worldserver;
 extern const queryservconfig *Config;
-extern Database              database;
+extern QSDatabase              database;
 extern LFGuildManager        lfguildmanager;
 
 WorldServer::WorldServer()
