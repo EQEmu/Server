@@ -3573,8 +3573,8 @@ void NPC::AIYellForHelp(Mob *sender, Mob *attacker)
 
 	LogAIYellForHelp(
 		"NPC [{}] ID [{}] is starting to scan",
-		(!this ? "NULL MOB" : GetCleanName()),
-		(!this ? 0 : GetID())
+		GetCleanName(),
+		GetID()
 	);
 
 	for (auto &close_mob : entity_list.GetCloseMobList(sender)) {
