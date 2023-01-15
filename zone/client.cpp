@@ -11727,9 +11727,7 @@ void Client::MaxSkills()
 
 void Client::SendPath(Mob* target)
 {
-
 	if (!target) {
-		//empty length packet == not found.
 		EQApplicationPacket outapp(OP_FindPersonReply, 0);
 		QueuePacket(&outapp);
 		return;
