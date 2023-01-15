@@ -77,16 +77,14 @@ public:
 	ChatChannel* FindChannel(std::string Name);
 	ChatChannel* AddClientToChannel(std::string ChannelName, Client* c, bool command_directed = false);
 	ChatChannel* RemoveClientFromChannel(std::string in_channel_name, Client* c, bool command_directed = false);
-	void RemoveClientFromAllChannels(Client *c);
 	void RemoveChannel(ChatChannel *Channel);
 	void RemoveAllChannels();
 	void SendAllChannels(Client *c);
 	void Process();
 	static inline std::vector<std::string> GetBlockedChannelNames() { return m_blocked_channel_names; }
 	static inline void ClearChannelBlockList() { m_blocked_channel_names.clear(); };
-	static void AddToChannelBlockList(std::string channel_name);
-	static void RemoveFromChannelBlockList(std::string channel_name);
-	static bool IsOnChannelBlockList(std::string channel_name);
+	static void AddToChannelBlockList(const std::string& channel_name);
+	static bool IsOnChannelBlockList(const std::string& channel_name);
 	static inline void SetChannelBlockList(std::vector<std::string> new_list) { m_blocked_channel_names = new_list; }
 private:
 

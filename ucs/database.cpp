@@ -49,6 +49,8 @@
 #include "../common/misc_functions.h"
 #include "../common/strings.h"
 #include "chatchannel.h"
+#include "../common/repositories/chatchannel_reserved_names_repository.h"
+#include "../common/repositories/chatchannels_repository.h"
 
 extern Clientlist      *g_Clientlist;
 extern std::string GetMailPrefix();
@@ -296,33 +298,22 @@ bool Database::LoadChatChannels()
 void Database::LoadReservedNamesFromDB()
 {
 	ChatChannelList::ClearChannelBlockList();
-	std::string query = "SELECT name FROM reserved_channel_names";
-	auto results = QueryDatabase(query);
-	if (!results.Success()) {
+
+	auto channels = ChatchannelReservedNamesRepository::All(*this);
+	if (channels.empty()) {
 		LogDebug("No reserve names exist in the database...");
-		return; // If nothing is returned from the SQL query, return.
 	}
 
-	for (auto row : results) {
-		std::string current_row = row[0];
-		ChatChannelList::AddToChannelBlockList(current_row);
-		LogDebug("Adding channel [{}] to blocked list from database...", current_row);
+	for (auto &e: channels) {
+		ChatChannelList::AddToChannelBlockList(e.name);
+		LogDebug("Adding channel [{}] to blocked list from database...", e.name);
 	}
-
 }
 
 bool Database::IsChatChannelInDB(std::string channel_name)
 {
-	std::string query = fmt::format("SELECT COUNT(*) FROM `chatchannels` WHERE `name` = '{}'", Strings::Escape(channel_name));
-	auto results = QueryDatabase(query);
-	auto row = results.begin();
-	int number_of_channels = std::stoul(row[0]);
-	if (number_of_channels > 0) {
-		LogDebug("Chat channel [{}] is in the database.", channel_name);
-		return true;
-	}
-	LogDebug("Chat channel [{}] is not in the database.", channel_name);
-	return false;
+	int count64 = ChatchannelsRepository::Count(*this, fmt::format("name = {}", Strings::Escape(channel_name)));
+	return count > 0;
 }
 
 void Database::SaveChatChannel(std::string channel_name, std::string channel_owner, std::string channel_password, uint16 min_status) {

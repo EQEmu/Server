@@ -581,7 +581,7 @@ ChatChannel *ChatChannelList::AddClientToChannel(std::string channel_name, Clien
 	if (RequiredChannel->IsClientInChannel(c)) {
 		return nullptr;
 	}
-		
+
 
 	if(RequiredChannel->IsInvitee(c->GetName())) {
 
@@ -613,13 +613,13 @@ ChatChannel *ChatChannelList::RemoveClientFromChannel(std::string in_channel_nam
 	if ((in_channel_name.length() > 0) && isdigit(channel_name[0])) {
 		channel_name = c->ChannelSlotName(atoi(in_channel_name.c_str()));
 	}
-		
+
 	ChatChannel *RequiredChannel = FindChannel(channel_name);
 
 	if (!RequiredChannel) {
 		return nullptr;
 	}
-		
+
 	LogDebug("Client [{}] removed from channel [{}]. Channel is owned by {}. Command directed: {}", c->GetName(), channel_name, RequiredChannel->GetOwnerName(), command_directed);
 	if ((c->GetName() == RequiredChannel->GetOwnerName()) && command_directed) { // Check if the client that is leaving is the the channel owner
 		LogDebug("Owner left the channel [{}], removing channel from database...", channel_name);
@@ -751,40 +751,28 @@ std::string CapitaliseName(std::string inString) {
 	return NormalisedName;
 }
 
-bool ChatChannelList::IsOnChannelBlockList(std::string channel_name) {
-	// Ignore the input if it is empty
-	if (channel_name == "") {
+bool ChatChannelList::IsOnChannelBlockList(const std::string& channel_name) {
+	if (channel_name.empty()) {
 		return false;
 	}
-	// Check if channelName is already in the BlockedChannelNames vector
+
+	// Check if channel_name is already in the BlockedChannelNames vector
 	return Strings::Contains(ChatChannelList::GetBlockedChannelNames(), channel_name);
 }
 
-void ChatChannelList::AddToChannelBlockList(std::string channel_name) {
-	// Ignore the input if it is empty
-	if (channel_name == "") {
+void ChatChannelList::AddToChannelBlockList(const std::string& channel_name) {
+	if (channel_name.empty()) {
 		return;
 	}
+
 	// Check if channelName is already in the BlockedChannelNames vector
-	bool isFound = Strings::Contains(ChatChannelList::GetBlockedChannelNames(), channel_name);
+	bool is_found = Strings::Contains(ChatChannelList::GetBlockedChannelNames(), channel_name);
 
 	// Add channelName to the BlockedChannelNames vector if it is not already present
-	if (!isFound) {
+	if (!is_found) {
 		auto blocked_channel_names = GetBlockedChannelNames(); // Get current blocked list
 		blocked_channel_names.push_back(channel_name); // Add new name to local blocked list
 		SetChannelBlockList(blocked_channel_names); // Set blocked list to match local blocked list
-	}
-}
-
-
-void ChatChannelList::RemoveFromChannelBlockList(std::string channel_name) {
-	if (!(channel_name == "")) {
-		auto blocked_channel_names = GetBlockedChannelNames();
-		auto it = std::find(blocked_channel_names.begin(), blocked_channel_names.end(), channel_name);
-		if (it != blocked_channel_names.end()) {
-			blocked_channel_names.erase(it);
-			SetChannelBlockList(blocked_channel_names);
-		}
 	}
 }
 

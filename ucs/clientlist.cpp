@@ -51,7 +51,7 @@ int LookupCommand(const char *ChatCommand) {
 		if (!strcasecmp(Commands[i].CommandString, ChatCommand)) {
 			return Commands[i].CommandCode;
 		}
-			
+
 	}
 
 	return -1;
@@ -596,17 +596,21 @@ void Clientlist::CheckForStaleConnections(Client *c) {
 	}
 }
 
-std::string RemoveDuplicateChannels(std::string in_channels) {
+std::string RemoveDuplicateChannels(const std::string& in_channels) {
 	// Split the string by ", " and store the names in a vector
-	std::vector<std::string> channel_names = Strings::Split(in_channels, ', ');
+	std::vector<std::string> channel_names = Strings::Split(in_channels, ", ");
 
 	// Remove duplicates by inserting the names of the channels into an unordered set
 	// and then copying the unique elements back into the original vector
 	std::unordered_set<std::string> unique_channels;
-	channel_names.erase(std::remove_if(channel_names.begin(), channel_names.end(),
-		[&unique_channels](const std::string& channel) {
-			return !unique_channels.insert(channel).second;
-		}), channel_names.end());
+	channel_names.erase(
+		std::remove_if(
+			channel_names.begin(), channel_names.end(),
+			[&unique_channels](const std::string &channel) {
+				return !unique_channels.insert(channel).second;
+			}
+		), channel_names.end()
+	);
 
 	// Concatenate the names of the unique channels into a single string
 	std::string unique_channels_string = Strings::Implode(", ", channel_names);
@@ -781,7 +785,7 @@ void Clientlist::ProcessOPMailCommand(Client *c, std::string CommandString, bool
 	else {
 		Command = CommandString;
 	}
-		
+
 	int CommandCode = LookupCommand(Command.c_str());
 	switch (CommandCode) {
 
@@ -1058,7 +1062,7 @@ void Client::JoinChannels(std::string ChannelNameList, bool command_directed) {
 			if (JoinedChannel) {
 				AddToChannelList(JoinedChannel);
 			}
-				
+
 			break;
 		}
 
