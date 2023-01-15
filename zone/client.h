@@ -755,6 +755,8 @@ public:
 	uint32 GetMoney(uint8 type, uint8 subtype);
 	int GetAccountAge();
 
+	void SendPath(Mob* target);
+
 	bool IsDiscovered(uint32 itemid);
 	void DiscoverItem(uint32 itemid);
 

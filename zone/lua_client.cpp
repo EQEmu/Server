@@ -2936,6 +2936,12 @@ bool Lua_Client::CanEnterZone(std::string zone_short_name, int16 instance_versio
 	return self->CanEnterZone(zone_short_name, instance_version);
 }
 
+void Lua_Client::SendPath(Lua_Mob target)
+{
+	Lua_Safe_Call_Void();
+	self->SendPath(target);
+}
+
 #ifdef BOTS
 
 int Lua_Client::GetBotRequiredLevel()
@@ -3413,6 +3419,7 @@ luabind::scope lua_register_client() {
 	.def("SendMarqueeMessage", (void(Lua_Client::*)(uint32, std::string, uint32))&Lua_Client::SendMarqueeMessage)
 	.def("SendMarqueeMessage", (void(Lua_Client::*)(uint32, uint32, uint32, uint32, uint32, std::string))&Lua_Client::SendMarqueeMessage)
 	.def("SendOPTranslocateConfirm", (void(Lua_Client::*)(Lua_Mob,int))&Lua_Client::SendOPTranslocateConfirm)
+	.def("SendPath", (void(Lua_Client::*)(Lua_Mob))&Lua_Client::SendPath)
 	.def("SendPEQZoneFlagInfo", (void(Lua_Client::*)(Lua_Client))&Lua_Client::SendPEQZoneFlagInfo)
 	.def("SendSound", (void(Lua_Client::*)(void))&Lua_Client::SendSound)
 	.def("SendToGuildHall", (void(Lua_Client::*)(void))&Lua_Client::SendToGuildHall)
