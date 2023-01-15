@@ -31,7 +31,7 @@
 #include "../common/zone_store.h"
 #include "position.h"
 
-float Mob::GetActSpellRange(uint16 spell_id, float range, bool IsBard)
+float Mob::GetActSpellRange(uint16 spell_id, float range)
 {
 	float extrange = 100;
 
@@ -317,7 +317,9 @@ int64 Mob::GetExtraSpellAmt(uint16 spell_id, int64 extra_spell_amt, int64 base_s
 }
 
 int64 Mob::GetActSpellHealing(uint16 spell_id, int64 value, Mob* target, bool from_buff_tic) {
-
+	if (target == nullptr && IsBot()) {
+		target = this;
+	}
 
 	if (IsNPC()) {
 		value += value * CastToNPC()->GetSpellFocusHeal() / 100;
@@ -443,7 +445,7 @@ int64 Mob::GetActSpellHealing(uint16 spell_id, int64 value, Mob* target, bool fr
 }
 
 
-int32 Client::GetActSpellCost(uint16 spell_id, int32 cost)
+int32 Mob::GetActSpellCost(uint16 spell_id, int32 cost)
 {
 	//FrenziedDevastation doubles mana cost of all DD spells
 	int16 FrenziedDevastation = itembonuses.FrenziedDevastation + spellbonuses.FrenziedDevastation + aabonuses.FrenziedDevastation;
