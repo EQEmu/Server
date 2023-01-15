@@ -1950,9 +1950,12 @@ void PerlembParser::ExportEventVariables(
 		case EVENT_AUGMENT_REMOVE_CLIENT: {
 			Seperator sep(data);
 			ExportVar(package_name.c_str(), "item_id", sep.arg[0]);
-			ExportVar(package_name.c_str(), "augment_id", sep.arg[1]);
-			ExportVar(package_name.c_str(), "augment_slot", sep.arg[2]);
-			ExportVar(package_name.c_str(), "destroyed", sep.arg[3]);
+			ExportVar(package_name.c_str(), "item_slot", sep.arg[1]);
+			ExportVar(package_name.c_str(), "augment_id", sep.arg[2]);
+			ExportVar(package_name.c_str(), "augment_slot", sep.arg[3]);
+			if (sep.argnum >= 4) {
+				ExportVar(package_name.c_str(), "destroyed", sep.arg[4]);
+			}
 			break;
 		}
 

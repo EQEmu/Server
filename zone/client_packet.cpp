@@ -3101,8 +3101,9 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 							parse->EventItem(EVENT_AUGMENT_REMOVE, this, old_aug, nullptr, "", in_augment->augment_index, &args);
 
 							const auto export_string = fmt::format(
-								"{} {} {} {}",
+								"{} {} {} {} {}",
 								tobe_auged->GetID(),
+								item_slot,
 								aug->GetID(),
 								in_augment->augment_index,
 								false
@@ -3128,8 +3129,9 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 							args.push_back(aug);
 
 							const auto export_string = fmt::format(
-								"{} {} {}",
+								"{} {} {} {}",
 								tobe_auged->GetID(),
+								item_slot,
 								aug->GetID(),
 								in_augment->augment_index
 							);
@@ -3196,8 +3198,9 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 					args.push_back(aug);
 
 					const auto export_string = fmt::format(
-						"{} {} {} {}",
+						"{} {} {} {} {}",
 						tobe_auged->GetID(),
+						item_slot,
 						aug->GetID(),
 						in_augment->augment_index,
 						false
@@ -3259,8 +3262,9 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 					args.push_back(aug);
 
 					const auto export_string = fmt::format(
-						"{} {} {} {}",
+						"{} {} {} {} {}",
 						tobe_auged->GetID(),
+						item_slot,
 						aug->GetID(),
 						in_augment->augment_index,
 						true

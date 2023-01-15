@@ -1619,10 +1619,13 @@ void handle_player_augment_insert(
 	lua_pushinteger(L, std::stoul(sep.arg[0]));
 	lua_setfield(L, -2, "item_id");
 
-	lua_pushinteger(L, std::stoul(sep.arg[1]));
-	lua_setfield(L, -2, "augment_id");
+	lua_pushinteger(L, std::stoi(sep.arg[1]));
+	lua_setfield(L, -2, "item_slot");
 
 	lua_pushinteger(L, std::stoul(sep.arg[2]));
+	lua_setfield(L, -2, "augment_id");
+
+	lua_pushinteger(L, std::stoul(sep.arg[3]));
 	lua_setfield(L, -2, "augment_slot");
 }
 
@@ -1648,13 +1651,16 @@ void handle_player_augment_remove(
 	lua_pushinteger(L, std::stoul(sep.arg[0]));
 	lua_setfield(L, -2, "item_id");
 
-	lua_pushinteger(L, std::stoul(sep.arg[1]));
-	lua_setfield(L, -2, "augment_id");
+	lua_pushinteger(L, std::stoi(sep.arg[1]));
+	lua_setfield(L, -2, "item_slot");
 
 	lua_pushinteger(L, std::stoul(sep.arg[2]));
+	lua_setfield(L, -2, "augment_id");
+
+	lua_pushinteger(L, std::stoul(sep.arg[3]));
 	lua_setfield(L, -2, "augment_slot");
 
-	lua_pushboolean(L, Strings::ToBool(sep.arg[3]));
+	lua_pushboolean(L, Strings::ToBool(sep.arg[4]));
 	lua_setfield(L, -2, "destroyed");
 }
 

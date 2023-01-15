@@ -144,8 +144,9 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 				args.push_back(aug);
 
 				const auto export_string = fmt::format(
-					"{} {} {}",
+					"{} {} {} {}",
 					tobe_auged->GetID(),
+					-1,
 					aug->GetID(),
 					slot
 				);
