@@ -4220,19 +4220,6 @@ void Bot::LoadAndSpawnAllZonedBots(Client* bot_owner) {
 				auto spawned_bots_count = 0;
 				auto bot_spawn_limit = bot_owner->GetBotSpawnLimit();
 
-				worldserver.SendEmoteMessage(
-					0,
-					0,
-					AccountStatus::Player,
-					Chat::Yellow,
-					fmt::format(
-						"Spawned bot limit for {} is {} bot{}.",
-						bot_owner->GetCleanName(),
-						bot_spawn_limit,
-						bot_spawn_limit != 1 ? "s" : ""
-					).c_str()
-				);
-
 				if (!database.botdb.LoadAutoSpawnBotGroupsByOwnerID(bot_owner->CharacterID(), auto_spawn_botgroups)) {
 					bot_owner->Message(Chat::White, "Failed to load auto spawn bot groups by group ID.");
 					return;
@@ -4254,25 +4241,17 @@ void Bot::LoadAndSpawnAllZonedBots(Client* bot_owner) {
 							continue;
 						}
 
+						if (spawned_bots_count >= bot_spawn_limit) {
+							database.SetGroupID(b->GetCleanName(), 0, b->GetBotID());
+							continue;
+						}
+
 						if (!b->Spawn(bot_owner)) {
 							safe_delete(b);
 							continue;
 						}
 
 						spawned_bots_count++;
-
-						worldserver.SendEmoteMessage(
-							0,
-							0,
-							AccountStatus::Player,
-							Chat::Yellow,
-							fmt::format(
-								"Spawned bot count for {} is now {} bot{}.",
-								bot_owner->GetCleanName(),
-								spawned_bots_count,
-								spawned_bots_count != 1 ? "s" : ""
-							).c_str()
-						);
 
 						g->UpdatePlayer(b);
 
@@ -4282,22 +4261,6 @@ void Bot::LoadAndSpawnAllZonedBots(Client* bot_owner) {
 
 						if (!bot_owner->HasGroup()) {
 							database.SetGroupID(b->GetCleanName(), 0, b->GetBotID());
-						}
-
-						if (spawned_bots_count >= bot_spawn_limit) {
-							worldserver.SendEmoteMessage(
-								0,
-								0,
-								AccountStatus::Player,
-								Chat::Yellow,
-								fmt::format(
-									"Spawn limit for {} reached at {} bot{}.",
-									bot_owner->GetCleanName(),
-									bot_spawn_limit,
-									bot_spawn_limit != 1 ? "s" : ""
-								).c_str()
-							);
-							break;
 						}
 					}
 				}
