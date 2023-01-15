@@ -4210,12 +4210,22 @@ Bot* Bot::LoadBot(uint32 botID)
 // Load and spawn all zoned bots by bot owner character
 void Bot::LoadAndSpawnAllZonedBots(Client* bot_owner) {
 	if (bot_owner) {
+		std::list<std::pair<uint32,std::string>> auto_spawn_botgroups;
 		if (bot_owner->HasGroup()) {
+			std::vector<int> bot_class_spawn_limits;
+			std::vector<int> bot_class_spawned_count = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+			for (uint8 class_id = WARRIOR; class_id <= BERSERKER; class_id++) {
+				bot_class_spawn_limits[class_id - 1] = bot_owner->GetBotSpawnLimit(class_id);
+			}
+
 			auto* g = bot_owner->GetGroup();
 			if (g) {
 				uint32 group_id = g->GetID();
 				std::list<uint32> active_bots;
-				std::list<std::pair<uint32,std::string>> auto_spawn_botgroups;
+
+				auto spawned_bots_count = 0;
+				auto bot_spawn_limit = bot_owner->GetBotSpawnLimit();
 
 				if (!database.botdb.LoadAutoSpawnBotGroupsByOwnerID(bot_owner->CharacterID(), auto_spawn_botgroups)) {
 					bot_owner->Message(Chat::White, "Failed to load auto spawn bot groups by group ID.");
@@ -4238,10 +4248,28 @@ void Bot::LoadAndSpawnAllZonedBots(Client* bot_owner) {
 							continue;
 						}
 
+						if (bot_spawn_limit >= 0 && spawned_bots_count >= bot_spawn_limit) {
+							database.SetGroupID(b->GetCleanName(), 0, b->GetBotID());
+							g->UpdatePlayer(bot_owner);
+							continue;
+						}
+
+						auto spawned_bot_count_class = bot_class_spawned_count[b->GetClass() - 1];
+						auto bot_spawn_limit_class = bot_class_spawn_limits[b->GetClass() - 1];
+
+						if (bot_spawn_limit_class >= 0 && spawned_bot_count_class >= bot_spawn_limit_class) {
+							database.SetGroupID(b->GetCleanName(), 0, b->GetBotID());
+							g->UpdatePlayer(bot_owner);
+							continue;
+						}
+
 						if (!b->Spawn(bot_owner)) {
 							safe_delete(b);
 							continue;
 						}
+
+						spawned_bots_count++;
+						bot_class_spawned_count[b->GetClass() - 1]++;
 
 						g->UpdatePlayer(b);
 
@@ -4256,8 +4284,6 @@ void Bot::LoadAndSpawnAllZonedBots(Client* bot_owner) {
 				}
 			}
 		} else {
-			std::list<std::pair<uint32,std::string>> auto_spawn_botgroups;
-
 			if (!database.botdb.LoadAutoSpawnBotGroupsByOwnerID(bot_owner->CharacterID(), auto_spawn_botgroups)) {
 				bot_owner->Message(Chat::White, "Failed to load auto spawn bot groups by group ID.");
 				return;
@@ -9560,6 +9586,17 @@ void Bot::SpawnBotGroupByName(Client* c, std::string botgroup_name, uint32 leade
 
 	member_list[botgroup_id].remove(0);
 	member_list[botgroup_id].remove(leader->GetBotID());
+
+	auto bot_spawn_limit = c->GetBotSpawnLimit();
+	auto spawned_bot_count = 0;
+
+	std::vector<int> bot_class_spawn_limits;
+	std::vector<int> bot_class_spawned_count = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+	for (uint8 class_id = WARRIOR; class_id <= BERSERKER; class_id++) {
+		bot_class_spawn_limits[class_id - 1] = c->GetBotSpawnLimit(class_id);
+	}
+
 	for (const auto& member_iter : member_list[botgroup_id]) {
 		auto member = Bot::LoadBot(member_iter);
 		if (!member) {
@@ -9574,6 +9611,36 @@ void Bot::SpawnBotGroupByName(Client* c, std::string botgroup_name, uint32 leade
 			return;
 		}
 
+		if (bot_spawn_limit >= 0 && spawned_bot_count >= bot_spawn_limit) {
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"Failed to spawn {} because you have a max of {} bot{} spawned.",
+					member->GetCleanName(),
+					bot_spawn_limit,
+					bot_spawn_limit != 1 ? "s" : ""
+				).c_str()
+			);
+			return;
+		}
+
+		auto spawned_bot_count_class = bot_class_spawned_count[member->GetClass() - 1];
+		auto bot_spawn_limit_class = bot_class_spawn_limits[member->GetClass() - 1];
+
+		if (bot_spawn_limit_class >= 0 && spawned_bot_count_class >= bot_spawn_limit_class) {
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"Failed to spawn {} because you have a max of {} {} bot{} spawned.",
+					member->GetCleanName(),
+					bot_spawn_limit_class,
+					GetClassIDName(member->GetClass()),
+					bot_spawn_limit_class != 1 ? "s" : ""
+				).c_str()
+			);
+			continue;
+		}
+
 		if (!member->Spawn(c)) {
 			c->Message(
 				Chat::White,
@@ -9586,6 +9653,9 @@ void Bot::SpawnBotGroupByName(Client* c, std::string botgroup_name, uint32 leade
 			safe_delete(member);
 			return;
 		}
+
+		spawned_bot_count++;
+		bot_class_spawned_count[member->GetClass() - 1]++;
 
 		Bot::AddBotToGroup(member, g);
 	}
