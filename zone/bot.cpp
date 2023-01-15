@@ -4262,6 +4262,7 @@ void Bot::LoadAndSpawnAllZonedBots(Client* bot_owner) {
 							g->UpdatePlayer(bot_owner);
 							continue;
 						}
+
 						if (!b->Spawn(bot_owner)) {
 							safe_delete(b);
 							continue;
