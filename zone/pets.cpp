@@ -529,6 +529,23 @@ Mob* Mob::GetPet() {
 	return(tmp);
 }
 
+bool Mob::HasPet() const {
+	if (GetPetID() == 0) {
+		return false;
+	}
+
+	const auto m = entity_list.GetMob(GetPetID());
+	if (!m) {
+		return false;
+	}
+
+	if (m->GetOwnerID() != GetID()) {
+		return false;
+	}
+
+	return true;
+}
+
 void Mob::SetPet(Mob* newpet) {
 	Mob* oldpet = GetPet();
 	if (oldpet) {

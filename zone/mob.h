@@ -1052,7 +1052,7 @@ public:
 	inline uint16 GetOwnerID() const { return ownerid; }
 	inline virtual bool HasOwner() { if(GetOwnerID()==0){return false;} return( entity_list.GetMob(GetOwnerID()) != 0); }
 	inline virtual bool IsPet() { return(HasOwner() && !IsMerc()); }
-	inline bool HasPet() const { if(GetPetID()==0){return false;} return (entity_list.GetMob(GetPetID()) != 0);}
+	bool HasPet() const;
 	inline bool HasTempPetsActive() const { return(hasTempPet); }
 	inline void SetTempPetsActive(bool i) { hasTempPet = i; }
 	inline int16 GetTempPetCount() const { return count_TempPet; }
