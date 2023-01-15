@@ -169,7 +169,10 @@ const char *QuestEventSubroutines[_LargestEventID] = {
 	"EVENT_DESPAWN",
 	"EVENT_DESPAWN_ZONE",
 	"EVENT_BOT_CREATE",
-	"EVENT_SPELL_EFFECT_BOT", // Add new events before these or Lua crashes
+	"EVENT_AUGMENT_INSERT_CLIENT",
+	"EVENT_AUGMENT_REMOVE_CLIENT",
+	// Add new events before these or Lua crashes
+	"EVENT_SPELL_EFFECT_BOT",
 	"EVENT_SPELL_EFFECT_BUFF_TIC_BOT"
 };
 
@@ -1940,6 +1943,16 @@ void PerlembParser::ExportEventVariables(
 			ExportVar(package_name.c_str(), "item_id", extradata);
 			ExportVar(package_name.c_str(), "item_quantity", sep.arg[0]);
 			ExportVar(package_name.c_str(), "slot_id", sep.arg[1]);
+			break;
+		}
+
+		case EVENT_AUGMENT_INSERT_CLIENT:
+		case EVENT_AUGMENT_REMOVE_CLIENT: {
+			Seperator sep(data);
+			ExportVar(package_name.c_str(), "item_id", sep.arg[0]);
+			ExportVar(package_name.c_str(), "augment_id", sep.arg[1]);
+			ExportVar(package_name.c_str(), "augment_slot", sep.arg[2]);
+			ExportVar(package_name.c_str(), "destroyed", sep.arg[3]);
 			break;
 		}
 

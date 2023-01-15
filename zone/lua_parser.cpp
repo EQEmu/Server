@@ -156,6 +156,8 @@ const char *LuaEvents[_LargestEventID] = {
 	"event_despawn",
 	"event_despawn_zone",
 	"event_bot_create",
+	"event_augment_insert_client",
+	"event_augment_remove_client",
 };
 
 extern Zone *zone;
@@ -272,6 +274,8 @@ LuaParser::LuaParser() {
 	PlayerArgumentDispatch[EVENT_LEVEL_DOWN] = handle_player_level_down;
 	PlayerArgumentDispatch[EVENT_GM_COMMAND] = handle_player_gm_command;
 	PlayerArgumentDispatch[EVENT_BOT_CREATE] = handle_player_bot_create;
+	PlayerArgumentDispatch[EVENT_AUGMENT_INSERT_CLIENT] = handle_player_augment_insert;
+	PlayerArgumentDispatch[EVENT_AUGMENT_REMOVE_CLIENT] = handle_player_augment_remove;
 
 	ItemArgumentDispatch[EVENT_ITEM_CLICK] = handle_item_click;
 	ItemArgumentDispatch[EVENT_ITEM_CLICK_CAST] = handle_item_click;
