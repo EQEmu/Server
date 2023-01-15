@@ -34,7 +34,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include <cstdlib>
 #include <algorithm>
 
-extern Database database;
+extern UCSDatabase database;
 extern std::string WorldShortName;
 extern std::string GetMailPrefix();
 extern ChatChannelList *ChannelList;
