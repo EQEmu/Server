@@ -2864,7 +2864,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 
 			case SE_Instant_Mana_Pct: {
 				effect_value = spells[spell_id].base_value[i];
-				int64 amt = abs(GetMaxMana() * effect_value / 10000);
+				int64 amt = std::abs(GetMaxMana() * effect_value / 10000);
 				if (spells[spell_id].max_value[i] && amt > spells[spell_id].max_value[i])
 					amt = spells[spell_id].max_value[i];
 
@@ -2880,7 +2880,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			case SE_Instant_Endurance_Pct: {
 				effect_value = spells[spell_id].base_value[i];
 				if (IsClient()) {
-					int32 amt = abs(CastToClient()->GetMaxEndurance() * effect_value / 10000);
+					int32 amt = std::abs(CastToClient()->GetMaxEndurance() * effect_value / 10000);
 					if (spells[spell_id].max_value[i] && amt > spells[spell_id].max_value[i])
 						amt = spells[spell_id].max_value[i];
 
@@ -2899,7 +2899,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			*/
 			case SE_Health_Transfer: {
 				effect_value = spells[spell_id].limit_value[i];
-				int64 amt = abs(caster->GetMaxHP() * effect_value / 1000);
+				int64 amt = std::abs(caster->GetMaxHP() * effect_value / 1000);
 
 				if (effect_value < 0) {
 					Damage(caster, amt, spell_id, spell.skill, false, buffslot, false);
@@ -4059,7 +4059,7 @@ void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
 
 		case SE_Duration_HP_Pct: {
 			effect_value = spells[buff.spellid].base_value[i];
-			int64 amt = abs(GetMaxHP() * effect_value / 100);
+			int64 amt = std::abs(GetMaxHP() * effect_value / 100);
 			if (spells[buff.spellid].max_value[i] && amt > spells[buff.spellid].max_value[i])
 				amt = spells[buff.spellid].max_value[i];
 
@@ -4074,7 +4074,7 @@ void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
 
 		case SE_Duration_Mana_Pct: {
 			effect_value = spells[buff.spellid].base_value[i];
-			int32 amt = abs(GetMaxMana() * effect_value / 100);
+			int32 amt = std::abs(GetMaxMana() * effect_value / 100);
 			if (spells[buff.spellid].max_value[i] && amt > spells[buff.spellid].max_value[i])
 				amt = spells[buff.spellid].max_value[i];
 
@@ -4092,7 +4092,7 @@ void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
 			effect_value = spells[buff.spellid].base_value[i];
 
 			if (IsClient())	{
-				int32 amt = abs(CastToClient()->GetMaxEndurance() * effect_value / 100);
+				int32 amt = std::abs(CastToClient()->GetMaxEndurance() * effect_value / 100);
 				if (spells[buff.spellid].max_value[i] && amt > spells[buff.spellid].max_value[i])
 					amt = spells[buff.spellid].max_value[i];
 
@@ -6390,7 +6390,7 @@ int64 Mob::GetFocusEffect(focusType type, uint16 spell_id, Mob *caster, bool fro
 			if (!ins) {
 				continue;
 			}
-			
+
 			TempItem = ins->GetItem();
 			if (TempItem && TempItem->Focus.Effect > 0 && TempItem->Focus.Effect != SPELL_UNKNOWN) {
 				if(rand_effectiveness) {
