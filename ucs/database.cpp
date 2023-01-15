@@ -310,10 +310,10 @@ void UCSDatabase::SaveChatChannel(
 	ChatchannelsRepository::UpdateOne(*this, c);
 }
 
-void UCSDatabase::DeleteChatChannel(std::string channel_name) {
-	auto query = fmt::format("DELETE FROM chatchannels WHERE `name` = '{}'; ", Strings::Escape(channel_name));
-	QueryDatabase(query);
-	LogDebug("Deleting channel [{}] from the database.", channel_name);
+void UCSDatabase::DeleteChatChannel(std::string channel_name)
+{
+	ChatchannelsRepository::DeleteWhere(*this, fmt::format("`name` = '{}'", Strings::Escape(channel_name)));
+	LogInfo("Deleting channel [{}] from the database.", channel_name);
 }
 
 std::string UCSDatabase::CurrentPlayerChannels(std::string player_name) {
@@ -329,13 +329,9 @@ std::string UCSDatabase::CurrentPlayerChannels(std::string player_name) {
 	return channels;
 }
 
-int UCSDatabase::CurrentPlayerChannelCount(std::string player_name) {
-	std::string rquery = fmt::format("SELECT COUNT(*) FROM chatchannels WHERE `owner` = '{}'; ", Strings::Escape(player_name));
-	auto results = QueryDatabase(rquery);
-	auto row = results.begin();
-	int number_of_channels = std::stoul(row[0]);
-	LogDebug("Player [{}] has [{}] permanent channels saved to the database.", player_name, number_of_channels);
-	return number_of_channels;
+int UCSDatabase::CurrentPlayerChannelCount(std::string player_name)
+{
+	return (int) ChatchannelsRepository::Count(*this, fmt::format("`owner` = '{}'", Strings::Escape(player_name)));
 }
 
 void UCSDatabase::SetChannelPassword(std::string channel_name, std::string password)
