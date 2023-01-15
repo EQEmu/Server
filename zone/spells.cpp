@@ -740,7 +740,6 @@ bool Mob::DoCastingChecksOnTarget(bool check_on_casting, int32 spell_id, Mob *sp
 	}
 
 	if (check_on_casting) {
-
 		if (spells[spell_id].target_type == ST_AEClientV1 ||
 			spells[spell_id].target_type == ST_AECaster ||
 			spells[spell_id].target_type == ST_Ring ||

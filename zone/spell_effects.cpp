@@ -6390,6 +6390,7 @@ int64 Mob::GetFocusEffect(focusType type, uint16 spell_id, Mob *caster, bool fro
 			if (!ins) {
 				continue;
 			}
+			
 			TempItem = ins->GetItem();
 			if (TempItem && TempItem->Focus.Effect > 0 && TempItem->Focus.Effect != SPELL_UNKNOWN) {
 				if(rand_effectiveness) {
@@ -6461,6 +6462,7 @@ int64 Mob::GetFocusEffect(focusType type, uint16 spell_id, Mob *caster, bool fro
 				if (!ins) {
 					continue;
 				}
+
 				TempItem = ins->GetItem();
 				if (TempItem && TempItem->Focus.Effect > 0 && TempItem->Focus.Effect != SPELL_UNKNOWN) {
 					if (rand_effectiveness) {
@@ -6557,6 +6559,7 @@ int64 Mob::GetFocusEffect(focusType type, uint16 spell_id, Mob *caster, bool fro
 			if (focusspellid == 0 || focusspellid >= SPDAT_RECORDS) {
 				continue;
 			}
+
 			if (rand_effectiveness) {
 				focus_max2 = CalcFocusEffect(type, focusspellid, spell_id, true, buffs[buff_slot].casterid, caster);
 				if (focus_max2 > 0 && focus_max_real2 >= 0 && focus_max2 > focus_max_real2) {
