@@ -27,6 +27,7 @@
 #include "../common/types.h"
 #include "../common/database.h"
 #include "../common/linked_list.h"
+#include "../common/database.h"
 #include "clientlist.h"
 #include "chatchannel.h"
 #include <string>
