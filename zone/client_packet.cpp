@@ -3099,6 +3099,19 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 							args.assign(1, tobe_auged);
 							args.push_back(false);
 							parse->EventItem(EVENT_AUGMENT_REMOVE, this, old_aug, nullptr, "", in_augment->augment_index, &args);
+
+							const auto export_string = fmt::format(
+								"{} {} {} {} {}",
+								tobe_auged->GetID(),
+								item_slot,
+								aug->GetID(),
+								in_augment->augment_index,
+								false
+							);
+
+							args.push_back(aug);
+
+							parse->EventPlayer(EVENT_AUGMENT_REMOVE_CLIENT, this, export_string, 0, &args);
 						}
 
 						tobe_auged->PutAugment(in_augment->augment_index, *new_aug);
@@ -3112,6 +3125,18 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 
 							args.assign(1, tobe_auged);
 							parse->EventItem(EVENT_AUGMENT_INSERT, this, aug, nullptr, "", in_augment->augment_index, &args);
+
+							args.push_back(aug);
+
+							const auto export_string = fmt::format(
+								"{} {} {} {}",
+								tobe_auged->GetID(),
+								item_slot,
+								aug->GetID(),
+								in_augment->augment_index
+							);
+
+							parse->EventPlayer(EVENT_AUGMENT_INSERT_CLIENT, this, export_string, 0, &args);
 						} else {
 							Message(
 								Chat::Red,
@@ -3165,9 +3190,23 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 					std::vector<std::any> args;
 					args.push_back(aug);
 					parse->EventItem(EVENT_UNAUGMENT_ITEM, this, tobe_auged, nullptr, "", in_augment->augment_index, &args);
+
 					args.assign(1, tobe_auged);
 					args.push_back(false);
 					parse->EventItem(EVENT_AUGMENT_REMOVE, this, aug, nullptr, "", in_augment->augment_index, &args);
+
+					args.push_back(aug);
+
+					const auto export_string = fmt::format(
+						"{} {} {} {} {}",
+						tobe_auged->GetID(),
+						item_slot,
+						aug->GetID(),
+						in_augment->augment_index,
+						false
+					);
+
+					parse->EventPlayer(EVENT_AUGMENT_REMOVE_CLIENT, this, export_string, 0, &args);
 				} else {
 					Message(Chat::Red, "Error: Could not find augmentation to remove at index %i. Aborting.", in_augment->augment_index);
 					return;
@@ -3215,9 +3254,23 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 					std::vector<std::any> args;
 					args.push_back(aug);
 					parse->EventItem(EVENT_UNAUGMENT_ITEM, this, tobe_auged, nullptr, "", in_augment->augment_index, &args);
+
 					args.assign(1, tobe_auged);
 					args.push_back(true);
 					parse->EventItem(EVENT_AUGMENT_REMOVE, this, aug, nullptr, "", in_augment->augment_index, &args);
+
+					args.push_back(aug);
+
+					const auto export_string = fmt::format(
+						"{} {} {} {} {}",
+						tobe_auged->GetID(),
+						item_slot,
+						aug->GetID(),
+						in_augment->augment_index,
+						true
+					);
+
+					parse->EventPlayer(EVENT_AUGMENT_REMOVE_CLIENT, this, export_string, 0, &args);
 				} else {
 					Message(
 						Chat::Red,

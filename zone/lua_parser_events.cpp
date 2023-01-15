@@ -1597,6 +1597,73 @@ void handle_player_merchant(
 	lua_setfield(L, -2, "item_cost");
 }
 
+void handle_player_augment_insert(
+	QuestInterface *parse,
+	lua_State* L,
+	Client* client,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+) {
+	Lua_ItemInst l_item(std::any_cast<EQ::ItemInstance*>(extra_pointers->at(0)));
+	luabind::adl::object l_item_o = luabind::adl::object(L, l_item);
+	l_item_o.push(L);
+	lua_setfield(L, -2, "item");
+
+	Lua_ItemInst l_augment(std::any_cast<EQ::ItemInstance*>(extra_pointers->at(1)));
+	luabind::adl::object l_augment_o = luabind::adl::object(L, l_augment);
+	l_augment_o.push(L);
+	lua_setfield(L, -2, "augment");
+
+	Seperator sep(data.c_str());
+	lua_pushinteger(L, std::stoul(sep.arg[0]));
+	lua_setfield(L, -2, "item_id");
+
+	lua_pushinteger(L, std::stoi(sep.arg[1]));
+	lua_setfield(L, -2, "item_slot");
+
+	lua_pushinteger(L, std::stoul(sep.arg[2]));
+	lua_setfield(L, -2, "augment_id");
+
+	lua_pushinteger(L, std::stoul(sep.arg[3]));
+	lua_setfield(L, -2, "augment_slot");
+}
+
+void handle_player_augment_remove(
+	QuestInterface *parse,
+	lua_State* L,
+	Client* client,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+) {
+	Lua_ItemInst l_item(std::any_cast<EQ::ItemInstance*>(extra_pointers->at(0)));
+	luabind::adl::object l_item_o = luabind::adl::object(L, l_item);
+	l_item_o.push(L);
+	lua_setfield(L, -2, "item");
+
+	Lua_ItemInst l_augment(std::any_cast<EQ::ItemInstance*>(extra_pointers->at(2)));
+	luabind::adl::object l_augment_o = luabind::adl::object(L, l_augment);
+	l_augment_o.push(L);
+	lua_setfield(L, -2, "augment");
+
+	Seperator sep(data.c_str());
+	lua_pushinteger(L, std::stoul(sep.arg[0]));
+	lua_setfield(L, -2, "item_id");
+
+	lua_pushinteger(L, std::stoi(sep.arg[1]));
+	lua_setfield(L, -2, "item_slot");
+
+	lua_pushinteger(L, std::stoul(sep.arg[2]));
+	lua_setfield(L, -2, "augment_id");
+
+	lua_pushinteger(L, std::stoul(sep.arg[3]));
+	lua_setfield(L, -2, "augment_slot");
+
+	lua_pushboolean(L, Strings::ToBool(sep.arg[4]));
+	lua_setfield(L, -2, "destroyed");
+}
+
 // Bot
 
 #ifdef BOTS

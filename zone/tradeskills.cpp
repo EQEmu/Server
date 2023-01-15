@@ -140,6 +140,18 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 
 				args.assign(1, tobe_auged);
 				parse->EventItem(EVENT_AUGMENT_INSERT, user, aug, nullptr, "", slot, &args);
+
+				args.push_back(aug);
+
+				const auto export_string = fmt::format(
+					"{} {} {} {}",
+					tobe_auged->GetID(),
+					-1,
+					aug->GetID(),
+					slot
+				);
+
+				parse->EventPlayer(EVENT_AUGMENT_INSERT_CLIENT, user, export_string, 0, &args);
 			}
 
 			item_one_to_push = tobe_auged->Clone();

@@ -112,7 +112,10 @@ typedef enum {
 	EVENT_DESPAWN,
 	EVENT_DESPAWN_ZONE,
 	EVENT_BOT_CREATE,
-	EVENT_SPELL_EFFECT_BOT, // Add new events before these or Lua crashes
+	EVENT_AUGMENT_INSERT_CLIENT,
+	EVENT_AUGMENT_REMOVE_CLIENT,
+	// Add new events before these or Lua crashes
+	EVENT_SPELL_EFFECT_BOT,
 	EVENT_SPELL_EFFECT_BUFF_TIC_BOT,
 	_LargestEventID
 } QuestEventID;
