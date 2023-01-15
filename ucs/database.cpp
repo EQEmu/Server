@@ -55,8 +55,6 @@ extern std::string GetMailPrefix();
 extern ChatChannelList *ChannelList;
 extern uint32          MailMessagesSent;
 
-std::vector<std::string> BlockedChannelNames;
-
 Database::Database()
 {
 	DBInitVars();
@@ -286,7 +284,7 @@ void Database::LoadBlockChannels() {
 		std::string channel_password = row[2];
 
 		if (channel_owner == "*Block*") {
-			AddToChannelBlockList(channel_name);
+			ChatChannelList::AddToChannelBlockList(channel_name);
 			LogDebug("Name [{}] added to Channel Block List from database.", channel_name);
 		}
 	}
@@ -307,53 +305,20 @@ bool Database::LoadChatChannels()
 		std::string channel_name = row[0];
 		std::string channel_owner = row[1];
 		std::string channel_password = row[2];
+		auto channel_min_status = row[3];
 
-
-		if (IsOnChannelBlockList(channel_name)) {
+		if (ChatChannelList::IsOnChannelBlockList(channel_name)) {
 			if (!(channel_owner == "*Block*")) { // Dont show that channels were blocked when the block entries themselves are detected.
 				LogDebug("Blocked channel [{}] load from database due to being blocked by server operator.", channel_name);
 			}
 		}
 		else {
 			if (!ChannelList->FindChannel(channel_name)) {
-				ChannelList->CreateChannel(channel_name, channel_owner, channel_password, true, atoi(row[3]), false);
+				ChannelList->CreateChannel(channel_name, channel_owner, channel_password, true, atoi(channel_min_status), false);
 			}
 		}
 	}
 	return true;
-}
-
-bool Database::IsOnChannelBlockList(std::string channel_name) {
-	// Ignore the input if it is empty
-	if (channel_name == "") {
-		return false;
-	}
-	// Check if channelName is already in the BlockedChannelNames vector
-	return Strings::Contains(BlockedChannelNames, channel_name);
-}
-
-void Database::AddToChannelBlockList(std::string channel_name) {
-	// Ignore the input if it is empty
-	if (channel_name == "") {
-		return;
-	}
-	// Check if channelName is already in the BlockedChannelNames vector
-	bool isFound = Strings::Contains(BlockedChannelNames, channel_name);
-
-	// Add channelName to the BlockedChannelNames vector if it is not already present
-	if (!isFound) {
-		BlockedChannelNames.push_back(channel_name);
-	}
-}
-
-
-void Database::RemoveFromChannelBlockList(std::string channel_name) {
-	if (!(channel_name == "")) {
-		auto it = std::find(BlockedChannelNames.begin(), BlockedChannelNames.end(), channel_name);
-		if (it != BlockedChannelNames.end()) {
-			BlockedChannelNames.erase(it);
-		}
-	}
 }
 
 bool Database::IsChatChannelInDB(std::string channel_name)
@@ -371,7 +336,7 @@ bool Database::IsChatChannelInDB(std::string channel_name)
 }
 
 void Database::SaveChatChannel(std::string channel_name, std::string channel_owner, std::string channel_password, uint16 min_status) {
-	if (IsOnChannelBlockList(channel_name)) { //If channel name is blocked, do not save it to the database
+	if (ChatChannelList::IsOnChannelBlockList(channel_name)) { //If channel name is blocked, do not save it to the database
 		return;
 	}
 	else if (IsChatChannelInDB(channel_name)) { // If Channel exists, update it in the database
@@ -436,6 +401,67 @@ void Database::SetChannelOwner(std::string channel_name, std::string owner)
 	);
 
 	QueryDatabase(query);
+}
+
+bool Database::CheckNameFilter(std::string name, bool surname, bool is_channel_name)
+{
+	LogDebug("Checking if {} is on the Name Filter...", name);
+	name = Strings::ToLower(name);
+
+	if (!is_channel_name) {
+		// the minimum 4 is enforced by the client too
+		if (name.empty() || name.size() < 4) {
+			LogDebug("Name Filter Check Failed!");
+			return false;
+		}
+
+		// Given name length is enforced by the client too
+		if (!surname && name.size() > 15) {
+			LogDebug("Name Filter Check Failed!");
+			return false;
+		}
+	}
+
+	for (size_t i = 0; i < name.size(); i++) {
+		if (!isalpha(name[i])) {
+			LogDebug("Name Filter Check Failed!");
+			return false;
+		}
+	}
+
+	char c = '\0';
+	uint8 num_c = 0;
+	for (size_t x = 0; x < name.size(); ++x) {
+		if (name[x] == c) {
+			num_c++;
+		}
+		else {
+			num_c = 1;
+			c = name[x];
+		}
+
+		if (num_c > 2) {
+			LogDebug("Name Filter Check Failed!");
+			return false;
+		}
+	}
+
+	std::string query = "SELECT name FROM name_filter";
+	auto results = QueryDatabase(query);
+	if (!results.Success()) {
+		LogDebug("Name Filter Check Passed!");
+		return true;
+	}
+
+	for (auto row : results) {
+		std::string current_row = Strings::ToLower(row[0]);
+		if (name.find(current_row) != std::string::npos) {
+			LogDebug("Name Filter Check Failed!");
+			return false;
+		}
+	}
+	LogDebug("Name Filter Check Passed!");
+	return true;
 }
 
 void Database::SendHeaders(Client *client)

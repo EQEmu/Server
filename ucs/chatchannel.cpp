@@ -16,7 +16,7 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 */
-
+#pragma once
 #include "../common/eqemu_logsys.h"
 #include "../common/strings.h"
 #include "chatchannel.h"
@@ -69,6 +69,17 @@ ChatChannel::~ChatChannel() {
 
 ChatChannel* ChatChannelList::CreateChannel(std::string name, std::string owner, std::string password, bool permanent, int minimum_status, bool save_to_db) {
 	uint8 max_perm_player_channels = RuleI(Chat, MaxPermanentPlayerChannels);
+
+	if (!database.CheckNameFilter(name, false, true)) {
+		if (!(owner == "*System*")) {
+			return nullptr;
+		}
+		else {
+			LogDebug("Ignoring Name Filter as channel is owned by System...");
+		}
+	}
+
+
 	ChatChannel *NewChannel = new ChatChannel(CapitaliseName(name), owner, password, permanent, minimum_status);
 
 	ChatChannels.Insert(NewChannel);
@@ -509,7 +520,7 @@ ChatChannel *ChatChannelList::AddClientToChannel(std::string channel_name, Clien
 
 	if(!c) return nullptr;
 
-	if (database.IsOnChannelBlockList(channel_name)) { // Ensure channel name is not blocked
+	if (IsOnChannelBlockList(channel_name)) { // Ensure channel name is not blocked
 		c->GeneralChannelMessage("That channel name is blocked by the server operator.");
 		return nullptr;
 	}
@@ -550,6 +561,11 @@ ChatChannel *ChatChannelList::AddClientToChannel(std::string channel_name, Clien
 
 	if (!RequiredChannel) {
 		RequiredChannel = CreateChannel(normalized_name, channel_owner, password, permanent, 0, command_directed);
+		if (RequiredChannel == nullptr) {
+			LogDebug("Failed to create new channel with name: {}. Possible blocked or reserved channel name.", normalized_name);
+			c->GeneralChannelMessage("Failed to create new channel with provided name. Possible blocked or reserved channel name.");
+			return nullptr;
+		}
 		LogDebug("Created and added Client to channel [{}] with password [{}]. Owner: {}. Command Directed: {}", normalized_name.c_str(), password.c_str(), channel_owner, command_directed);
 	}
 
@@ -562,8 +578,10 @@ ChatChannel *ChatChannelList::AddClientToChannel(std::string channel_name, Clien
 		return nullptr;
 	}
 
-	if(RequiredChannel->IsClientInChannel(c))
+	if (RequiredChannel->IsClientInChannel(c)) {
 		return nullptr;
+	}
+		
 
 	if(RequiredChannel->IsInvitee(c->GetName())) {
 
@@ -731,6 +749,43 @@ std::string CapitaliseName(std::string inString) {
 	}
 
 	return NormalisedName;
+}
+
+bool ChatChannelList::IsOnChannelBlockList(std::string channel_name) {
+	// Ignore the input if it is empty
+	if (channel_name == "") {
+		return false;
+	}
+	// Check if channelName is already in the BlockedChannelNames vector
+	return Strings::Contains(ChatChannelList::GetBlockedChannelNames(), channel_name);
+}
+
+void ChatChannelList::AddToChannelBlockList(std::string channel_name) {
+	// Ignore the input if it is empty
+	if (channel_name == "") {
+		return;
+	}
+	// Check if channelName is already in the BlockedChannelNames vector
+	bool isFound = Strings::Contains(ChatChannelList::GetBlockedChannelNames(), channel_name);
+
+	// Add channelName to the BlockedChannelNames vector if it is not already present
+	if (!isFound) {
+		auto blocked_channel_names = GetBlockedChannelNames(); // Get current blocked list
+		blocked_channel_names.push_back(channel_name); // Add new name to local blocked list
+		SetChannelBlockList(blocked_channel_names); // Set blocked list to match local blocked list
+	}
+}
+
+
+void ChatChannelList::RemoveFromChannelBlockList(std::string channel_name) {
+	if (!(channel_name == "")) {
+		auto blocked_channel_names = GetBlockedChannelNames();
+		auto it = std::find(blocked_channel_names.begin(), blocked_channel_names.end(), channel_name);
+		if (it != blocked_channel_names.end()) {
+			blocked_channel_names.erase(it);
+			SetChannelBlockList(blocked_channel_names);
+		}
+	}
 }
 
 void ServerToClient45SayLink(std::string& clientSayLink, const std::string& serverSayLink) {

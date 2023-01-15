@@ -43,10 +43,8 @@ public:
 	bool GetVariable(const char* varname, char* varvalue, uint16 varvalue_len);
 	void LoadBlockChannels();
 	bool LoadChatChannels();
-	bool IsOnChannelBlockList(std::string channelName);
-	void AddToChannelBlockList(std::string channelName);
-	void RemoveFromChannelBlockList(std::string channelName);
 	bool IsChatChannelInDB(std::string channelName);
+	bool CheckNameFilter(std::string name, bool surname, bool is_channel_name);
 	void SaveChatChannel(std::string channelName, std::string channelOwner, std::string channelPassword, uint16 minstatus);
 	void DeleteChatChannel(std::string channelName);
 	int CurrentPlayerChannelCount(std::string PlayerName);
@@ -62,7 +60,6 @@ public:
 	void AddFriendOrIgnore(int CharID, int Type, std::string Name);
 	void RemoveFriendOrIgnore(int CharID, int Type, std::string Name);
 	void GetFriendsAndIgnore(int CharID, std::vector<std::string> &Friends, std::vector<std::string> &Ignorees);
-
 
 protected:
 	void HandleMysqlError(uint32 errnum);
