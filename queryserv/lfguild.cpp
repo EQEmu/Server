@@ -8,7 +8,7 @@
 #include "../common/rulesys.h"
 
 extern WorldServer *worldserver;
-extern Database database;
+extern QSDatabase database;
 
 PlayerLookingForGuild::PlayerLookingForGuild(char *Name, char *Comments, uint32 Level, uint32 Class, uint32 AACount, uint32 Timezone, uint32 TimePosted)
 {
