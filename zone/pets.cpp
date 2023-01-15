@@ -529,20 +529,18 @@ Mob* Mob::GetPet() {
 	return(tmp);
 }
 
-bool Mob::HasPet() {
+bool Mob::HasPet() const {
 
 	if (GetPetID() == 0) {
 		return false;
 	}
 
-	auto m = entity_list.GetMob(GetPetID());
+	const auto m = entity_list.GetMob(GetPetID());
 	if (!m) {
-		SetPetID(0);
 		return false;
 	}
 
 	if (m->GetOwnerID() != GetID()) {
-		SetPetID(0);
 		return false;
 	}
 
