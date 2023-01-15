@@ -4248,7 +4248,7 @@ void Bot::LoadAndSpawnAllZonedBots(Client* bot_owner) {
 							continue;
 						}
 
-						if (spawned_bots_count >= bot_spawn_limit) {
+						if (bot_spawn_limit >= 0 && spawned_bots_count >= bot_spawn_limit) {
 							database.SetGroupID(b->GetCleanName(), 0, b->GetBotID());
 							g->UpdatePlayer(bot_owner);
 							continue;
@@ -4257,7 +4257,7 @@ void Bot::LoadAndSpawnAllZonedBots(Client* bot_owner) {
 						auto spawned_bot_count_class = bot_class_spawned_count[b->GetClass() - 1];
 						auto bot_spawn_limit_class = bot_class_spawn_limits[b->GetClass() - 1];
 
-						if (spawned_bot_count_class >= bot_spawn_limit_class) {
+						if (bot_spawn_limit_class >= 0 && spawned_bot_count_class >= bot_spawn_limit_class) {
 							database.SetGroupID(b->GetCleanName(), 0, b->GetBotID());
 							g->UpdatePlayer(bot_owner);
 							continue;
@@ -9611,7 +9611,7 @@ void Bot::SpawnBotGroupByName(Client* c, std::string botgroup_name, uint32 leade
 			return;
 		}
 
-		if (spawned_bot_count >= bot_spawn_limit) {
+		if (bot_spawn_limit >= 0 && spawned_bot_count >= bot_spawn_limit) {
 			c->Message(
 				Chat::White,
 				fmt::format(
@@ -9627,7 +9627,7 @@ void Bot::SpawnBotGroupByName(Client* c, std::string botgroup_name, uint32 leade
 		auto spawned_bot_count_class = bot_class_spawned_count[member->GetClass() - 1];
 		auto bot_spawn_limit_class = bot_class_spawn_limits[member->GetClass() - 1];
 
-		if (spawned_bot_count_class >= bot_spawn_limit_class) {
+		if (bot_spawn_limit_class >= 0 && spawned_bot_count_class >= bot_spawn_limit_class) {
 			c->Message(
 				Chat::White,
 				fmt::format(
