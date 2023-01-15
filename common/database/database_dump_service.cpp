@@ -120,32 +120,27 @@ std::string DatabaseDumpService::GetBaseMySQLDumpCommand()
 
 std::string DatabaseDumpService::GetPlayerTablesList()
 {
-	const auto& tables = DatabaseSchema::GetPlayerTables();
-	return Strings::Join(tables, " ");
+	return Strings::Join(DatabaseSchema::GetPlayerTables(), " ");
 }
 
 std::string DatabaseDumpService::GetBotTablesList()
 {
-	const auto& tables = DatabaseSchema::GetBotTables();
-	return Strings::Join(tables, " ");
+	return Strings::Join(DatabaseSchema::GetBotTables(), " ");
 }
 
 std::string DatabaseDumpService::GetMercTablesList()
 {
-	const auto& tables = DatabaseSchema::GetMercTables();
-	return Strings::Join(tables, " ");
+	return Strings::Join(DatabaseSchema::GetMercTables(), " ");
 }
 
 std::string DatabaseDumpService::GetLoginTableList()
 {
-	const auto& tables = DatabaseSchema::GetLoginTables();
-	return Strings::Join(tables, " ");
+	return Strings::Join(DatabaseSchema::GetLoginTables(), " ");
 }
 
 std::string DatabaseDumpService::GetQueryServTables()
 {
-	const auto& tables = DatabaseSchema::GetQueryServerTables();
-	return Strings::Join(tables, " ");
+	return Strings::Join(DatabaseSchema::GetQueryServerTables(), " ");
 }
 
 std::string DatabaseDumpService::GetSystemTablesList()
@@ -164,14 +159,12 @@ std::string DatabaseDumpService::GetSystemTablesList()
 
 std::string DatabaseDumpService::GetStateTablesList()
 {
-	const auto& tables = DatabaseSchema::GetStateTables();
-	return Strings::Join(tables, " ");
+	return Strings::Join(DatabaseSchema::GetStateTables(), " ");
 }
 
 std::string DatabaseDumpService::GetContentTablesList()
 {
-	const auto& tables = DatabaseSchema::GetContentTables();
-	return Strings::Join(tables, " ");
+	return Strings::Join(DatabaseSchema::GetContentTables(), " ");
 }
 
 /**
