@@ -70,7 +70,7 @@ ChatChannel::~ChatChannel() {
 ChatChannel* ChatChannelList::CreateChannel(std::string name, std::string owner, std::string password, bool permanent, int minimum_status, bool save_to_db) {
 	uint8 max_perm_player_channels = RuleI(Chat, MaxPermanentPlayerChannels);
 
-	if (!database.CheckNameFilter(name, false, true)) {
+	if (!database.CheckChannelNameFilter(name)) {
 		if (!(owner == "*System*")) {
 			return nullptr;
 		}

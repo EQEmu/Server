@@ -51,6 +51,7 @@
 #include "chatchannel.h"
 #include "../common/repositories/chatchannel_reserved_names_repository.h"
 #include "../common/repositories/chatchannels_repository.h"
+#include "../common/repositories/name_filter_repository.h"
 
 extern Clientlist      *g_Clientlist;
 extern std::string GetMailPrefix();
@@ -329,12 +330,12 @@ std::string UCSDatabase::CurrentPlayerChannels(std::string player_name) {
 	return channels;
 }
 
-int UCSDatabase::CurrentPlayerChannelCount(std::string player_name)
+int UCSDatabase::CurrentPlayerChannelCount(const std::string& player_name)
 {
 	return (int) ChatchannelsRepository::Count(*this, fmt::format("`owner` = '{}'", Strings::Escape(player_name)));
 }
 
-void UCSDatabase::SetChannelPassword(std::string channel_name, std::string password)
+void UCSDatabase::SetChannelPassword(const std::string& channel_name, const std::string& password)
 {
 	LogInfo("UCSDatabase::SetChannelPassword([{}], [{}])", channel_name.c_str(), password.c_str());
 
@@ -344,9 +345,9 @@ void UCSDatabase::SetChannelPassword(std::string channel_name, std::string passw
 	QueryDatabase(query);
 }
 
-void UCSDatabase::SetChannelOwner(std::string channel_name, std::string owner)
+void UCSDatabase::SetChannelOwner(const std::string& channel_name, const std::string& owner)
 {
-	LogInfo("UCSDatabase::SetChannelOwner([{}], [{}])", channel_name.c_str(), owner.c_str());
+	LogInfo("Setting channel [{}] owner to [{}]", channel_name, owner);
 
 	std::string query = fmt::format(
 		"UPDATE `chatchannels` SET `owner` = '{}' WHERE `name` = '{}'",
@@ -357,64 +358,21 @@ void UCSDatabase::SetChannelOwner(std::string channel_name, std::string owner)
 	QueryDatabase(query);
 }
 
-bool UCSDatabase::CheckNameFilter(std::string name, bool surname, bool is_channel_name)
+bool UCSDatabase::CheckChannelNameFilter(std::string channel_name)
 {
-	LogDebug("Checking if {} is on the Name Filter...", name);
-	name = Strings::ToLower(name);
+	LogDebug("Checking if [{}] is on the name filter", channel_name);
 
-	if (!is_channel_name) {
-		// the minimum 4 is enforced by the client too
-		if (name.empty() || name.size() < 4) {
-			LogDebug("Name Filter Check Failed!");
-			return false;
-		}
-
-		// Given name length is enforced by the client too
-		if (!surname && name.size() > 15) {
-			LogDebug("Name Filter Check Failed!");
+	// TODO: This should potentially just be pulled into memory at some other point
+	// This if fine for now
+	for (auto &e: NameFilterRepository::All(*this)) {
+		if (Strings::Contains(Strings::ToLower(channel_name), Strings::ToLower(e.name))) {
+			LogInfo("Failed to pass name filter check for [{}] against word [{}]", channel_name, e.name);
 			return false;
 		}
 	}
 
-	for (size_t i = 0; i < name.size(); i++) {
-		if (!isalpha(name[i])) {
-			LogDebug("Name Filter Check Failed!");
-			return false;
-		}
-	}
-
-	char c = '\0';
-	uint8 num_c = 0;
-	for (size_t x = 0; x < name.size(); ++x) {
-		if (name[x] == c) {
-			num_c++;
-		}
-		else {
-			num_c = 1;
-			c = name[x];
-		}
-
-		if (num_c > 2) {
-			LogDebug("Name Filter Check Failed!");
-			return false;
-		}
-	}
-
-	std::string query = "SELECT name FROM name_filter";
-	auto results = QueryDatabase(query);
-	if (!results.Success()) {
-		LogDebug("Name Filter Check Passed!");
-		return true;
-	}
-
-	for (auto row : results) {
-		std::string current_row = Strings::ToLower(row[0]);
-		if (name.find(current_row) != std::string::npos) {
-			LogDebug("Name Filter Check Failed!");
-			return false;
-		}
-	}
 	LogDebug("Name Filter Check Passed!");
+
 	return true;
 }
 

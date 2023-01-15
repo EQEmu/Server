@@ -46,14 +46,14 @@ public:
 	bool LoadChatChannels();
 	void LoadReservedNamesFromDB();
 	bool IsChatChannelInDB(std::string channelName);
-	bool CheckNameFilter(std::string name, bool surname, bool is_channel_name);
+	bool CheckChannelNameFilter(std::string channel_name);
 	void SaveChatChannel(std::string channelName, std::string channelOwner, std::string channelPassword, uint16 minstatus);
 	void DeleteChatChannel(std::string channelName);
-	int CurrentPlayerChannelCount(std::string PlayerName);
+	int CurrentPlayerChannelCount(const std::string& PlayerName);
 	std::string CurrentPlayerChannels(std::string PlayerName);
 	void GetAccountStatus(Client *c);
-	void SetChannelPassword(std::string ChannelName, std::string Password);
-	void SetChannelOwner(std::string ChannelName, std::string Owner);
+	void SetChannelPassword(const std::string& ChannelName, const std::string& Password);
+	void SetChannelOwner(const std::string& ChannelName, const std::string& owner);
 	void SendHeaders(Client *c);
 	void SendBody(Client *c, int MessageNumber);
 	bool SendMail(std::string Recipient, std::string From, std::string Subject, std::string Body, std::string RecipientsString);
