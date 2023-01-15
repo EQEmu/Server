@@ -25,7 +25,7 @@
 #include <cstdlib>
 #include <algorithm>
 
-extern Database database;
+extern UCSDatabase database;
 extern uint32 ChatMessagesSent;
 
 void ServerToClient45SayLink(std::string& clientSayLink, const std::string& serverSayLink);

@@ -39,14 +39,16 @@
 #include "../common/net/servertalk_client_connection.h"
 #include "../common/discord_manager.h"
 #include "../common/path_manager.h"
+#include "../common/zone_store.h"
 
 ChatChannelList *ChannelList;
 Clientlist *g_Clientlist;
 EQEmuLogSys LogSys;
-Database database;
+UCSDatabase database;
 WorldServer *worldserver = nullptr;
 DiscordManager discord_manager;
 PathManager path;
+ZoneStore zone_store;
 
 const ucsconfig *Config;
 

@@ -39,7 +39,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 extern WorldServer     worldserver;
 extern Clientlist      *g_Clientlist;
 extern const ucsconfig *Config;
-extern Database        database;
+extern UCSDatabase       database;
 extern DiscordManager  discord_manager;
 
 void ProcessMailTo(Client *c, std::string from, std::string subject, std::string message);
