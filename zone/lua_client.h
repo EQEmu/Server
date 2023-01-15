@@ -461,6 +461,7 @@ public:
 	uint64 CalcEXP(uint8 consider_level, bool ignore_modifiers);
 	bool CanEnterZone(std::string zone_short_name);
 	bool CanEnterZone(std::string zone_short_name, int16 instance_version);
+	void SendPath(Lua_Mob target);
 
 	void ApplySpell(int spell_id);
 	void ApplySpell(int spell_id, int duration);

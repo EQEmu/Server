@@ -2809,6 +2809,11 @@ bool Perl_Client_CanEnterZone(Client* self, std::string zone_short_name, int16 i
 	return self->CanEnterZone(zone_short_name, instance_version);
 }
 
+void Perl_Client_SendPath(Client* self, Mob* target)
+{
+	self->SendPath(target);
+}
+
 #ifdef BOTS
 
 int Perl_Client_GetBotRequiredLevel(Client* self)
@@ -3271,6 +3276,7 @@ void perl_register_client()
 	package.add("SendOPTranslocateConfirm", &Perl_Client_SendOPTranslocateConfirm);
 	package.add("SendPayload", (void(*)(Client*, int))&Perl_Client_SendPayload);
 	package.add("SendPayload", (void(*)(Client*, int, std::string))&Perl_Client_SendPayload);
+	package.add("SendPath", &Perl_Client_SendPath);
 	package.add("SendPEQZoneFlagInfo", &Perl_Client_SendPEQZoneFlagInfo);
 	package.add("SendSound", &Perl_Client_SendSound);
 	package.add("SendSpellAnim", &Perl_Client_SendSpellAnim);
