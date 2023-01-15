@@ -197,7 +197,6 @@ public:
 	void RogueAssassinate(Mob* other) override;
 	void DoClassAttacks(Mob *target, bool IsRiposte=false);
 	bool CanDoSpecialAttack(Mob *other);
-	int32 CheckAggroAmount(uint16 spellid);
 	void CalcBonuses() override;
 	void CalcItemBonuses(StatBonuses* newbon);
 	void AddItemBonuses(const EQ::ItemInstance *inst, StatBonuses* newbon, bool isAug = false, bool isTribute = false, int rec_override = 0);
@@ -209,7 +208,6 @@ public:
 	Mob* GetOwner() override;
 	Mob* GetOwnerOrSelf() override;
 	inline bool HasOwner() override { return (GetBotOwner() ? true : false); }
-	int32 CheckHealAggroAmount(uint16 spellid, Mob *target, uint32 heal_possible = 0) override; 
 	int64 CalcMaxMana() override;
 	void SetAttackTimer() override;
 	uint64 GetClassHPFactor();

@@ -6103,20 +6103,6 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 	classattack_timer.Start(reuse / HasteModifier);
 }
 
-int32 Bot::CheckAggroAmount(uint16 spellid) {
-	int32 AggroAmount = Mob::CheckAggroAmount(spellid, nullptr);
-	int64 focusAggro = GetFocusEffect(focusSpellHateMod, spellid);
-	AggroAmount = (AggroAmount * (100 + focusAggro) / 100);
-	return AggroAmount;
-}
-
-int32 Bot::CheckHealAggroAmount(uint16 spellid, Mob *target, uint32 heal_possible) {
-	int32 AggroAmount = Mob::CheckHealAggroAmount(spellid, target, heal_possible);
-	int64 focusAggro = GetFocusEffect(focusSpellHateMod, spellid);
-	AggroAmount = (AggroAmount * (100 + focusAggro) / 100);
-	return AggroAmount;
-}
-
 void Bot::MakePet(uint16 spell_id, const char* pettype, const char *petname) {
 	Mob::MakePet(spell_id, pettype, petname);
 }
