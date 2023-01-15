@@ -80,7 +80,7 @@ void Aura::ProcessOnAllFriendlies(Mob *owner)
 		if (!mob) {
 			continue;
 		}
-		if (mob->IsClient() || mob->IsPetOwnerClient() || mob->IsMerc()) {
+		if (mob->IsClient() || mob->IsPetOwnerClient() || mob->IsMerc() || mob->IsBot()) {
 			auto it = casted_on.find(mob->GetID());
 
 			if (it != casted_on.end()) { // we are already on the list, let's check for removal

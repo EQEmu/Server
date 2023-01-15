@@ -144,15 +144,17 @@ public:
 	Bot(NPCType *npcTypeData, Client* botOwner);
 	Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double totalPlayTime, uint32 lastZoneId, NPCType *npcTypeData);
 
-	//abstract virtual function implementations requird by base abstract class
-	virtual bool Death(Mob* killerMob, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill);
-	virtual void Damage(Mob* from, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill, bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false, eSpecialAttacks special = eSpecialAttacks::None);
-	virtual bool Attack(Mob* other, int Hand = EQ::invslot::slotPrimary, bool FromRiposte = false, bool IsStrikethrough = false, bool IsFromSpell = false,
-		ExtraAttackOptions *opts = nullptr);
-	virtual bool HasRaid() { return (GetRaid() ? true : false); }
-	virtual bool HasGroup() { return (GetGroup() ? true : false); }
-	virtual Raid* GetRaid() { return entity_list.GetRaidByMob(this); }
-	virtual Group* GetGroup() { return entity_list.GetGroupByMob(this); }
+	//abstract virtual override function implementations requird by base abstract class
+	bool Death(Mob* killerMob, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill) override;
+	void Damage(Mob* from, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill, bool avoidable = true, int8 buffslot = -1, 
+		bool iBuffTic = false, eSpecialAttacks special = eSpecialAttacks::None) override;
+
+	bool Attack(Mob* other, int Hand = EQ::invslot::slotPrimary, bool FromRiposte = false, bool IsStrikethrough = false, bool IsFromSpell = false,
+		ExtraAttackOptions *opts = nullptr) override;
+	bool HasRaid() override { return (GetRaid() ? true : false); }
+	bool HasGroup() override { return (GetGroup() ? true : false); }
+	Raid* GetRaid() override { return entity_list.GetRaidByMob(this); }
+	Group* GetGroup() override { return entity_list.GetGroupByMob(this); }
 
 	// Common, but informal "interfaces" with Client object
 	uint32 CharacterID() { return GetBotID(); } // Just returns the Bot Id
@@ -167,71 +169,70 @@ public:
 	bool IsValidName();
 	static bool IsValidName(std::string& name);
 	bool Spawn(Client* botCharacterOwner);
-	virtual void SetLevel(uint8 in_level, bool command = false);
-	virtual void FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho);
-	virtual bool Process();
+	void SetLevel(uint8 in_level, bool command = false) override;
+	void FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) override;
+	bool Process() override;
 	void FinishTrade(Client* client, BotTradeType trade_type);
-	virtual bool Save();
-	virtual void Depop();
+	bool Save() override;
+	void Depop();
 	void CalcBotStats(bool showtext = true);
 	uint16 BotGetSpells(int spellslot) { return AIBot_spells[spellslot].spellid; }
 	uint32 BotGetSpellType(int spellslot) { return AIBot_spells[spellslot].type; }
 	uint16 BotGetSpellPriority(int spellslot) { return AIBot_spells[spellslot].priority; }
-	virtual float GetProcChances(float ProcBonus, uint16 hand);
-	virtual int GetHandToHandDamage(void);
-	virtual bool TryFinishingBlow(Mob *defender, int64 &damage);
-	virtual void DoRiposte(Mob* defender);
-	inline virtual int32 GetATK() const { return ATK + itembonuses.ATK + spellbonuses.ATK + ((GetSTR() + GetSkill(EQ::skills::SkillOffense)) * 9 / 10); }
-	inline virtual int32 GetATKBonus() const { return itembonuses.ATK + spellbonuses.ATK; }
+	float GetProcChances(float ProcBonus, uint16 hand) override;
+	int GetHandToHandDamage(void) override;
+	bool TryFinishingBlow(Mob *defender, int64 &damage) override;
+	void DoRiposte(Mob* defender) override;
+	inline int32 GetATK() const override { return ATK + itembonuses.ATK + spellbonuses.ATK + ((GetSTR() + GetSkill(EQ::skills::SkillOffense)) * 9 / 10); }
+	inline int32 GetATKBonus() const override { return itembonuses.ATK + spellbonuses.ATK; }
 	uint32 GetTotalATK();
 	uint32 GetATKRating();
 	uint16 GetPrimarySkillValue();
 	uint16	MaxSkill(EQ::skills::SkillType skillid, uint16 class_, uint16 level) const;
 	inline	uint16	MaxSkill(EQ::skills::SkillType skillid) const { return MaxSkill(skillid, GetClass(), GetLevel()); }
-	virtual int GetBaseSkillDamage(EQ::skills::SkillType skill, Mob *target = nullptr);
-	virtual void DoSpecialAttackDamage(Mob *who, EQ::skills::SkillType skill, int32 max_damage, int32 min_damage = 1, int32 hate_override = -1, int ReuseTime = 10, bool HitChance = false);
-	virtual void TryBackstab(Mob *other,int ReuseTime = 10);
-	virtual void RogueBackstab(Mob* other, bool min_damage = false, int ReuseTime = 10);
-	virtual void RogueAssassinate(Mob* other);
-	virtual void DoClassAttacks(Mob *target, bool IsRiposte=false);
+	int GetBaseSkillDamage(EQ::skills::SkillType skill, Mob *target = nullptr) override;
+	void DoSpecialAttackDamage(Mob *who, EQ::skills::SkillType skill, int32 max_damage, int32 min_damage = 1, int32 hate_override = -1, int ReuseTime = 10, bool HitChance = false);
+	void TryBackstab(Mob *other,int ReuseTime = 10) override;
+	void RogueBackstab(Mob* other, bool min_damage = false, int ReuseTime = 10) override;
+	void RogueAssassinate(Mob* other) override;
+	void DoClassAttacks(Mob *target, bool IsRiposte=false);
 	bool CanDoSpecialAttack(Mob *other);
-	virtual int32 CheckAggroAmount(uint16 spellid);
-	virtual void CalcBonuses();
+	int32 CheckAggroAmount(uint16 spellid);
+	void CalcBonuses() override;
 	void CalcItemBonuses(StatBonuses* newbon);
 	void AddItemBonuses(const EQ::ItemInstance *inst, StatBonuses* newbon, bool isAug = false, bool isTribute = false, int rec_override = 0);
 	int CalcRecommendedLevelBonus(uint8 level, uint8 reclevel, int basestat);
-	virtual void MakePet(uint16 spell_id, const char* pettype, const char *petname = nullptr);
-	virtual FACTION_VALUE GetReverseFactionCon(Mob* iOther);
-	inline virtual bool IsPet() { return false; }
-	virtual bool IsNPC() const { return false; }
-	virtual Mob* GetOwner();
-	virtual Mob* GetOwnerOrSelf();
-	inline virtual bool HasOwner() { return (GetBotOwner() ? true : false); }
-	virtual int32 CheckHealAggroAmount(uint16 spellid, Mob *target, uint32 heal_possible = 0);
-	virtual int64 CalcMaxMana();
-	virtual void SetAttackTimer();
+	void MakePet(uint16 spell_id, const char* pettype, const char *petname = nullptr) override;
+	FACTION_VALUE GetReverseFactionCon(Mob* iOther) override;
+	inline bool IsPet() override { return false; }
+	bool IsNPC() const override { return false; }
+	Mob* GetOwner() override;
+	Mob* GetOwnerOrSelf() override;
+	inline bool HasOwner() override { return (GetBotOwner() ? true : false); }
+	int32 CheckHealAggroAmount(uint16 spellid, Mob *target, uint32 heal_possible = 0) override; 
+	int64 CalcMaxMana() override;
+	void SetAttackTimer() override;
 	uint64 GetClassHPFactor();
-	virtual int64 CalcMaxHP();
+	int64 CalcMaxHP() override;
 	bool DoFinishedSpellAETarget(uint16 spell_id, Mob* spellTarget, EQ::spells::CastingSlot slot, bool &stopLogic);
 	bool DoFinishedSpellSingleTarget(uint16 spell_id, Mob* spellTarget, EQ::spells::CastingSlot slot, bool &stopLogic);
 	bool DoFinishedSpellGroupTarget(uint16 spell_id, Mob* spellTarget, EQ::spells::CastingSlot slot, bool &stopLogic);
 	void SendBotArcheryWearChange(uint8 material_slot, uint32 material, uint32 color);
 	void Camp(bool save_to_database = true);
-	virtual void AddToHateList(Mob* other, int64 hate = 0, int64 damage = 0, bool iYellForHelp = true, bool bFrenzy = false, bool iBuffTic = false, bool pet_command = false);
-	virtual void SetTarget(Mob* mob);
-	virtual void Zone();
+	void SetTarget(Mob* mob) override;
+	void Zone();
 	bool IsArcheryRange(Mob* target);
 	void ChangeBotArcherWeapons(bool isArcher);
 	void Sit();
 	void Stand();
 	bool IsSitting();
 	bool IsStanding();
-	virtual int GetWalkspeed() const { return (int)((float)_GetWalkSpeed() * 1.785714285f); } // 1.25 / 0.7 = 1.7857142857142857142857142857143
-	virtual int GetRunspeed() const { return (int)((float)_GetRunSpeed() * 1.785714285f); }
-	virtual void WalkTo(float x, float y, float z);
-	virtual void RunTo(float x, float y, float z);
-	virtual void StopMoving();
-	virtual void StopMoving(float new_heading);
+	int GetWalkspeed() const override { return (int)((float)_GetWalkSpeed() * 1.785714285f); } // 1.25 / 0.7 = 1.7857142857142857142857142857143
+	int GetRunspeed() const override { return (int)((float)_GetRunSpeed() * 1.785714285f); }
+	void WalkTo(float x, float y, float z) override;
+	void RunTo(float x, float y, float z) override;
+	void StopMoving() override;
+	void StopMoving(float new_heading) override;
 	//bool GetCombatJitterFlag() { return m_combat_jitter_flag; }
 	bool GetGuardFlag() { return m_guard_flag; }
 	void SetGuardFlag(bool flag = true) { m_guard_flag = flag; }
@@ -342,10 +343,10 @@ public:
 
 	void AI_Bot_Event_SpellCastFinished(bool iCastSucceeded, uint16 slot);
 	// AI Methods
-	virtual bool AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes);
-	virtual bool AI_EngagedCastCheck();
-	virtual bool AI_PursueCastCheck();
-	virtual bool AI_IdleCastCheck();
+	bool AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes);
+	bool AI_EngagedCastCheck() override;
+	bool AI_PursueCastCheck() override;
+	bool AI_IdleCastCheck() override;
 	bool AIHealRotation(Mob* tar, bool useFastHeals);
 	bool GetPauseAI() { return _pauseAI; }
 	void SetPauseAI(bool pause_flag) { _pauseAI = pause_flag; }
@@ -359,25 +360,22 @@ public:
 	void AI_Bot_Start(uint32 iMoveDelay = 0);
 
 	// Mob AI Virtual Override Methods
-	virtual void AI_Process();
-	virtual void AI_Stop();
+	void AI_Process() override;
+	void AI_Stop() override;
 
 	// Mob Spell Virtual Override Methods
-	virtual void SpellProcess();
-	virtual int64 GetActSpellHealing(uint16 spell_id, int64 value, Mob* target = nullptr);
-	virtual int32 GetActSpellCasttime(uint16 spell_id, int32 casttime);
-	virtual int32 GetActSpellCost(uint16 spell_id, int32 cost);
-	virtual float GetActSpellRange(uint16 spell_id, float range);
-	virtual int32 GetActSpellDuration(uint16 spell_id, int32 duration);
-	virtual float GetAOERange(uint16 spell_id);
+	void SpellProcess() override;
+	int32 GetActSpellDuration(uint16 spell_id, int32 duration) override;
+	float GetAOERange(uint16 spell_id) override;
 	virtual bool SpellEffect(Mob* caster, uint16 spell_id, float partial = 100);
-	virtual void DoBuffTic(const Buffs_Struct &buff, int slot, Mob* caster = nullptr);
+	void DoBuffTic(const Buffs_Struct &buff, int slot, Mob* caster = nullptr) override;
 	virtual bool CastSpell(uint16 spell_id, uint16 target_id, EQ::spells::CastingSlot slot = EQ::spells::CastingSlot::Item, int32 casttime = -1, int32 mana_cost = -1, uint32* oSpellWillFinish = 0,
-						   uint32 item_slot = 0xFFFFFFFF, int16 *resist_adjust = nullptr, uint32 aa_id = 0);
+						uint32 item_slot = 0xFFFFFFFF, int16 *resist_adjust = nullptr, uint32 aa_id = 0);
 	virtual bool SpellOnTarget(uint16 spell_id, Mob* spelltar);
-	virtual bool IsImmuneToSpell(uint16 spell_id, Mob *caster);
+	bool IsImmuneToSpell(uint16 spell_id, Mob *caster) override;
 	virtual bool DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_center, CastAction_type &CastAction, EQ::spells::CastingSlot slot);
-	virtual bool DoCastSpell(uint16 spell_id, uint16 target_id, EQ::spells::CastingSlot slot = EQ::spells::CastingSlot::Item, int32 casttime = -1, int32 mana_cost = -1, uint32* oSpellWillFinish = 0, uint32 item_slot = 0xFFFFFFFF, uint32 aa_id = 0);
+	virtual bool DoCastSpell(uint16 spell_id, uint16 target_id, EQ::spells::CastingSlot slot = EQ::spells::CastingSlot::Item, int32 casttime = -1, int32 mana_cost = -1, 
+						uint32* oSpellWillFinish = 0, uint32 item_slot = 0xFFFFFFFF, uint32 aa_id = 0);
 
 	bool GetBotOwnerDataBuckets();
 	bool GetBotDataBuckets();
@@ -387,7 +385,7 @@ public:
 	void BotTradeAddItem(const EQ::ItemInstance* inst, uint16 slot_id, std::string* error_message, bool save_to_database = true);
 	void EquipBot(std::string* error_message);
 	bool CheckLoreConflict(const EQ::ItemData* item);
-	virtual void UpdateEquipmentLight() { m_Light.Type[EQ::lightsource::LightEquipment] = m_inv.FindBrightestLightType(); m_Light.Level[EQ::lightsource::LightEquipment] = EQ::lightsource::TypeToLevel(m_Light.Type[EQ::lightsource::LightEquipment]); }
+	void UpdateEquipmentLight() override { m_Light.Type[EQ::lightsource::LightEquipment] = m_inv.FindBrightestLightType(); m_Light.Level[EQ::lightsource::LightEquipment] = EQ::lightsource::TypeToLevel(m_Light.Type[EQ::lightsource::LightEquipment]); }
 	inline EQ::InventoryProfile& GetInv() { return m_inv; }
 
 	// Static Class Methods
@@ -464,12 +462,12 @@ public:
 	Mob* GetBotOwner() { return this->_botOwner; }
 	uint32 GetBotArcheryRange();
 	EQ::ItemInstance* GetBotItem(uint16 slot_id);
-	virtual bool GetSpawnStatus() { return _spawnStatus; }
+	bool GetSpawnStatus() { return _spawnStatus; }
 	uint8 GetPetChooserID() { return _petChooserID; }
 	bool IsPetChooser() { return _petChooser; }
 	bool IsBotArcher() { return m_bot_archery_setting; }
 	bool IsBotCharmer() { return _botCharmer; }
-	virtual bool IsBot() const { return true; }
+	bool IsBot() const override { return true; }
 	bool GetRangerAutoWeaponSelect() { return _rangerAutoWeaponSelect; }
 	BotRoleType GetBotRole() { return _botRole; }
 	EQ::constants::StanceType GetBotStance() { return _botStance; }
@@ -524,32 +522,32 @@ public:
 
 	bool GetAltOutOfCombatBehavior() { return _altoutofcombatbehavior;}
 	bool GetShowHelm() { return _showhelm; }
-	inline virtual int32	GetSTR()	const { return STR; }
-	inline virtual int32	GetSTA()	const { return STA; }
-	inline virtual int32	GetDEX()	const { return DEX; }
-	inline virtual int32	GetAGI()	const { return AGI; }
-	inline virtual int32	GetINT()	const { return INT; }
-	inline virtual int32	GetWIS()	const { return WIS; }
-	inline virtual int32	GetCHA()	const { return CHA; }
-	inline virtual int32	GetMR()	const { return MR; }
-	inline virtual int32	GetFR()	const { return FR; }
-	inline virtual int32	GetDR()	const { return DR; }
-	inline virtual int32	GetPR()	const { return PR; }
-	inline virtual int32	GetCR()	const { return CR; }
-	inline virtual int32	GetCorrup()	const { return Corrup; }
+	inline int32	GetSTR()	const override { return STR; }
+	inline int32	GetSTA()	const override { return STA; }
+	inline int32	GetDEX()	const override { return DEX; }
+	inline int32	GetAGI()	const override { return AGI; }
+	inline int32	GetINT()	const override { return INT; }
+	inline int32	GetWIS()	const override { return WIS; }
+	inline int32	GetCHA()	const override { return CHA; }
+	inline int32	GetMR()	const override { return MR; }
+	inline int32	GetFR()	const override { return FR; }
+	inline int32	GetDR()	const override { return DR; }
+	inline int32	GetPR()	const override { return PR; }
+	inline int32	GetCR()	const override { return CR; }
+	inline int32	GetCorrup()	const override { return Corrup; }
 	//Heroic
-	inline virtual int32	GetHeroicSTR()	const { return itembonuses.HeroicSTR; }
-	inline virtual int32	GetHeroicSTA()	const { return itembonuses.HeroicSTA; }
-	inline virtual int32	GetHeroicDEX()	const { return itembonuses.HeroicDEX; }
-	inline virtual int32	GetHeroicAGI()	const { return itembonuses.HeroicAGI; }
-	inline virtual int32	GetHeroicINT()	const { return itembonuses.HeroicINT; }
-	inline virtual int32	GetHeroicWIS()	const { return itembonuses.HeroicWIS; }
-	inline virtual int32	GetHeroicCHA()	const { return itembonuses.HeroicCHA; }
-	inline virtual int32	GetHeroicMR()	const { return itembonuses.HeroicMR; }
-	inline virtual int32	GetHeroicFR()	const { return itembonuses.HeroicFR; }
-	inline virtual int32	GetHeroicDR()	const { return itembonuses.HeroicDR; }
-	inline virtual int32	GetHeroicPR()	const { return itembonuses.HeroicPR; }
-	inline virtual int32	GetHeroicCR()	const { return itembonuses.HeroicCR; }
+	inline int32	GetHeroicSTR()	const override { return itembonuses.HeroicSTR; }
+	inline int32	GetHeroicSTA()	const override { return itembonuses.HeroicSTA; }
+	inline int32	GetHeroicDEX()	const override { return itembonuses.HeroicDEX; }
+	inline int32	GetHeroicAGI()	const override { return itembonuses.HeroicAGI; }
+	inline int32	GetHeroicINT()	const override { return itembonuses.HeroicINT; }
+	inline int32	GetHeroicWIS()	const override { return itembonuses.HeroicWIS; }
+	inline int32	GetHeroicCHA()	const override { return itembonuses.HeroicCHA; }
+	inline int32	GetHeroicMR()	const override { return itembonuses.HeroicMR; }
+	inline int32	GetHeroicFR()	const override { return itembonuses.HeroicFR; }
+	inline int32	GetHeroicDR()	const override { return itembonuses.HeroicDR; }
+	inline int32	GetHeroicPR()	const override { return itembonuses.HeroicPR; }
+	inline int32	GetHeroicCR()	const override { return itembonuses.HeroicCR; }
 	inline virtual int32	GetHeroicCorrup()	const { return itembonuses.HeroicCorrup; }
 	// Mod2
 	inline virtual int32	GetShielding()		const { return itembonuses.MeleeMitigation; }
@@ -593,7 +591,7 @@ public:
 
 	// "SET" Class Methods
 	void SetBotSpellID(uint32 newSpellID);
-	virtual void SetSpawnStatus(bool spawnStatus) { _spawnStatus = spawnStatus; }
+	void SetSpawnStatus(bool spawnStatus) { _spawnStatus = spawnStatus; }
 	void SetPetChooserID(uint8 id) { _petChooserID = id; }
 	void SetBotArcherySetting(bool bot_archer_setting, bool save = false);
 	void SetBotCharmer(bool c) { _botCharmer = c; }
@@ -645,10 +643,10 @@ public:
 	std::string CreateSayLink(Client* botOwner, const char* message, const char* name);
 
 	// Class Destructors
-	virtual ~Bot();
+	~Bot() override;
 
 	// Publicized protected functions
-	virtual void BotRangedAttack(Mob* other);
+	void BotRangedAttack(Mob* other);
 
 	// Publicized private functions
 	static NPCType *FillNPCTypeStruct(
@@ -734,11 +732,11 @@ public:
 	void OwnerMessage(std::string message);
 
 protected:
-	virtual void PetAIProcess();
-	virtual void BotMeditate(bool isSitting);
-	virtual bool CheckBotDoubleAttack(bool Triple = false);
-	virtual void PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client* client);
-	virtual bool AIDoSpellCast(uint8 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgainBefore = 0);
+	void PetAIProcess();
+	void BotMeditate(bool isSitting);
+	bool CheckBotDoubleAttack(bool Triple = false);
+	void PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client* client);
+	bool AIDoSpellCast(uint8 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgainBefore = 0) override;
 
 	BotCastingRoles& GetCastingRoles() { return m_CastingRoles; }
 	void SetGroupHealer(bool flag = true) { m_CastingRoles.GroupHealer = flag; }
