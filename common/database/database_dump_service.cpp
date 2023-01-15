@@ -118,109 +118,60 @@ std::string DatabaseDumpService::GetBaseMySQLDumpCommand()
 	);
 }
 
-/**
- * @return
- */
 std::string DatabaseDumpService::GetPlayerTablesList()
 {
-	std::string              tables_list;
-	std::vector<std::string> tables = DatabaseSchema::GetPlayerTables();
-	for (const auto          &table : tables) {
-		tables_list += table + " ";
-	}
-
-	return Strings::Trim(tables_list);
+	const auto& tables = DatabaseSchema::GetPlayerTables();
+	return Strings::Join(tables, " ");
 }
 
-/**
- * @return
- */
 std::string DatabaseDumpService::GetBotTablesList()
 {
-	std::string              tables_list;
-	std::vector<std::string> tables = DatabaseSchema::GetBotTables();
-	for (const auto          &table : tables) {
-		tables_list += table + " ";
-	}
-
-	return Strings::Trim(tables_list);
+	const auto& tables = DatabaseSchema::GetBotTables();
+	return Strings::Join(tables, " ");
 }
 
-/**
- * @return
- */
+std::string DatabaseDumpService::GetMercTablesList()
+{
+	const auto& tables = DatabaseSchema::GetMercTables();
+	return Strings::Join(tables, " ");
+}
+
 std::string DatabaseDumpService::GetLoginTableList()
 {
-	std::string              tables_list;
-	std::vector<std::string> tables = DatabaseSchema::GetLoginTables();
-	for (const auto          &table : tables) {
-		tables_list += table + " ";
-	}
-
-	return Strings::Trim(tables_list);
+	const auto& tables = DatabaseSchema::GetLoginTables();
+	return Strings::Join(tables, " ");
 }
 
-/**
- * @return
- */
 std::string DatabaseDumpService::GetQueryServTables()
 {
-	std::string              tables_list;
-	std::vector<std::string> tables = DatabaseSchema::GetQueryServerTables();
-	for (const auto          &table : tables) {
-		tables_list += table + " ";
-	}
-
-	return Strings::Trim(tables_list);
+	const auto& tables = DatabaseSchema::GetQueryServerTables();
+	return Strings::Join(tables, " ");
 }
 
-/**
- * @return
- */
 std::string DatabaseDumpService::GetSystemTablesList()
 {
-	std::string tables_list;
+	auto system_tables = DatabaseSchema::GetServerTables();
+	auto version_tables = DatabaseSchema::GetVersionTables();
 
-	std::vector<std::string> tables = DatabaseSchema::GetServerTables();
-	for (const auto          &table : tables) {
-		tables_list += table + " ";
-	}
+	system_tables.insert(
+		std::end(system_tables),
+		std::begin(version_tables),
+		std::end(version_tables)
+	);
 
-	tables = DatabaseSchema::GetVersionTables();
-	for (const auto &table : tables) {
-		tables_list += table + " ";
-	}
-
-	return Strings::Trim(tables_list);
+	return Strings::Join(system_tables, " ");
 }
-/**
- * @return
- */
+
 std::string DatabaseDumpService::GetStateTablesList()
 {
-	std::string tables_list;
-
-	std::vector<std::string> tables = DatabaseSchema::GetStateTables();
-	for (const auto &table : tables) {
-		tables_list += table + " ";
-	}
-
-	return Strings::Trim(tables_list);
+	const auto& tables = DatabaseSchema::GetStateTables();
+	return Strings::Join(tables, " ");
 }
 
-/**
- * @return
- */
 std::string DatabaseDumpService::GetContentTablesList()
 {
-	std::string tables_list;
-
-	std::vector<std::string> tables = DatabaseSchema::GetContentTables();
-	for (const auto          &table : tables) {
-		tables_list += table + " ";
-	}
-
-	return Strings::Trim(tables_list);
+	const auto& tables = DatabaseSchema::GetContentTables();
+	return Strings::Join(tables, " ");
 }
 
 /**
@@ -304,6 +255,11 @@ void DatabaseDumpService::Dump()
 		if (IsDumpBotTables()) {
 			tables_to_dump += GetBotTablesList() + " ";
 			dump_descriptor += "-bots";
+		}
+
+		if (IsDumpMercTables()) {
+			tables_to_dump += GetMercTablesList() + " ";
+			dump_descriptor += "-mercs";
 		}
 
 		if (IsDumpSystemTables()) {
@@ -575,4 +531,14 @@ bool DatabaseDumpService::IsDumpBotTables() const
 void DatabaseDumpService::SetDumpBotTables(bool dump_bot_tables)
 {
 	DatabaseDumpService::dump_bot_tables = dump_bot_tables;
+}
+
+bool DatabaseDumpService::IsDumpMercTables() const
+{
+	return dump_merc_tables;
+}
+
+void DatabaseDumpService::SetDumpMercTables(bool dump_merc_tables)
+{
+	DatabaseDumpService::dump_merc_tables = dump_merc_tables;
 }
