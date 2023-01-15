@@ -455,7 +455,7 @@ Bot::~Bot() {
 	if(HasGroup())
 		Bot::RemoveBotFromGroup(this, GetGroup());
 
-	if(HasPet())
+	if(HasPet() && GetPet())
 		GetPet()->Depop();
 
 	entity_list.RemoveBot(GetID());
@@ -2191,7 +2191,7 @@ bool Bot::Process()
 	if (send_hp_update_timer.Check(false)) {
 
 		SendHPUpdate();
-		if (HasPet()) {
+		if (HasPet() && GetPet()) {
 			GetPet()->SendHPUpdate();
 		}
 
@@ -2439,7 +2439,7 @@ void Bot::SetGuardMode() {
 	m_GuardPoint = GetPosition();
 	SetGuardFlag();
 
-	if (HasPet() && (GetClass() != ENCHANTER || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 2)) {
+	if (HasPet() && GetPet() && (GetClass() != ENCHANTER || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 2)) {
 		GetPet()->StopMoving();
 	}
 }
@@ -2636,7 +2636,7 @@ void Bot::AI_Process()
 				AddToHateList(attack_target, 1);
 				SetTarget(attack_target);
 				SetAttackingFlag();
-				if (HasPet() && (GetClass() != ENCHANTER || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 2)) {
+				if (HasPet() && GetPet() && (GetClass() != ENCHANTER || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 2)) {
 
 					GetPet()->WipeHateList();
 					GetPet()->AddToHateList(attack_target, 1);
@@ -2677,7 +2677,7 @@ void Bot::AI_Process()
 				SetTarget(pull_target);
 				SetPullingFlag();
 				bot_owner->SetBotPulling();
-				if (HasPet() && (GetClass() != ENCHANTER || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 1)) {
+				if (HasPet() && GetPet() && (GetClass() != ENCHANTER || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 1)) {
 
 					GetPet()->WipeHateList();
 					GetPet()->SetTarget(nullptr);
@@ -2708,7 +2708,7 @@ void Bot::AI_Process()
 				IsAttackAllowed(lo_target))
 			{
 				AddToHateList(lo_target, 1);
-				if (HasPet() && (GetClass() != ENCHANTER || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 2)) {
+				if (HasPet() && GetPet() && (GetClass() != ENCHANTER || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 2)) {
 
 					GetPet()->AddToHateList(lo_target, 1);
 					GetPet()->SetTarget(lo_target);
@@ -2736,7 +2736,7 @@ void Bot::AI_Process()
 						IsAttackAllowed(bgm_target))
 					{
 						AddToHateList(bgm_target, 1);
-						if (HasPet() && (GetClass() != ENCHANTER || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 2)) {
+						if (HasPet() && GetPet() && (GetClass() != ENCHANTER || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 2)) {
 
 							GetPet()->AddToHateList(bgm_target, 1);
 							GetPet()->SetTarget(bgm_target);
@@ -2837,6 +2837,7 @@ void Bot::AI_Process()
 
 						if (
 							HasPet() &&
+							GetPet() &&
 							(
 								GetClass() != ENCHANTER ||
 								GetPet()->GetPetType() != petAnimation ||
@@ -2857,6 +2858,7 @@ void Bot::AI_Process()
 
 					if (
 						HasPet() &&
+						GetPet() &&
 						(
 							GetClass() != ENCHANTER ||
 							GetPet()->GetPetType() != petAnimation ||
@@ -2966,7 +2968,7 @@ void Bot::AI_Process()
 		)
 		{
 			// Normally, we wouldn't want to do this without class checks..but, too many issues can arise if we let enchanter animation pets run rampant
-			if (HasPet()) {
+			if (HasPet() && GetPet()) {
 
 				GetPet()->RemoveFromHateList(tar);
 				GetPet()->SetTarget(nullptr);
@@ -2997,7 +2999,7 @@ void Bot::AI_Process()
 //#pragma endregion
 
 		// This causes conflicts with default pet handler (bounces between targets)
-		if (NOT_PULLING_BOT && HasPet() && (GetClass() != ENCHANTER || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 2)) {
+		if (NOT_PULLING_BOT && HasPet() && GetPet() && (GetClass() != ENCHANTER || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 2)) {
 
 			// We don't add to hate list here because it's assumed to already be on the list
 			GetPet()->SetTarget(tar);
@@ -3515,7 +3517,7 @@ void Bot::AI_Process()
 
 						WipeHateList();
 						SetTarget(nullptr);
-						if (HasPet() && (GetClass() != ENCHANTER || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 2)) {
+						if (HasPet() && GetPet() && (GetClass() != ENCHANTER || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 2)) {
 
 							GetPet()->WipeHateList();
 							GetPet()->SetTarget(nullptr);
@@ -3606,7 +3608,7 @@ void Bot::AI_Process()
 								AddToHateList(hater, 1);
 								SetTarget(hater);
 								SetAttackingFlag();
-								if (HasPet() && (GetClass() != ENCHANTER || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 2)) {
+								if (HasPet() && GetPet() && (GetClass() != ENCHANTER || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 2)) {
 
 									GetPet()->AddToHateList(hater, 1);
 									GetPet()->SetTarget(hater);
@@ -3626,7 +3628,7 @@ void Bot::AI_Process()
 
 		SetTarget(nullptr);
 
-		if (HasPet() && (GetClass() != ENCHANTER || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 1)) {
+		if (HasPet() && GetPet() && (GetClass() != ENCHANTER || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 1)) {
 
 			GetPet()->WipeHateList();
 			GetPet()->SetTarget(nullptr);
@@ -3949,7 +3951,7 @@ void Bot::Depop() {
 	if(HasGroup())
 		Bot::RemoveBotFromGroup(this, GetGroup());
 
-	if(HasPet())
+	if(HasPet() && GetPet())
 		GetPet()->Depop();
 
 	_botOwner = 0;
@@ -9856,7 +9858,7 @@ std::vector<Mob*> Bot::GetApplySpellList(
 	} else {
 		l.push_back(this);
 
-		if (allow_pets && HasPet()) {
+		if (allow_pets && HasPet() && GetPet()) {
 			l.push_back(GetPet());
 		}
 		const auto& sbl = entity_list.GetBotListByCharacterID(CharacterID());
