@@ -530,7 +530,6 @@ Mob* Mob::GetPet() {
 }
 
 bool Mob::HasPet() const {
-
 	if (GetPetID() == 0) {
 		return false;
 	}
