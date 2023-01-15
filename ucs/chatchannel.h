@@ -83,6 +83,7 @@ public:
 	void SendAllChannels(Client *c);
 	void Process();
 	static inline std::vector<std::string> GetBlockedChannelNames() { return m_blocked_channel_names; }
+	static inline void ClearChannelBlockList() { m_blocked_channel_names.clear(); };
 	static void AddToChannelBlockList(std::string channel_name);
 	static void RemoveFromChannelBlockList(std::string channel_name);
 	static bool IsOnChannelBlockList(std::string channel_name);

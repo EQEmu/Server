@@ -269,34 +269,13 @@ bool Database::GetVariable(const char *varname, char *varvalue, uint16 varvalue_
 }
 
 
-void Database::LoadBlockChannels() {
-	LogInfo("Loading blocked channels from the database");
-
-	const std::string query = "SELECT `name`, `owner`, `password`, `minstatus` FROM `chatchannels` WHERE `owner` = '*Block*'";
-	auto results = QueryDatabase(query);
-	if (!results.Success()) {
-		return;
-	}
-
-	for (auto row = results.begin(); row != results.end(); ++row) {
-		std::string channel_name = row[0];
-		std::string channel_owner = row[1];
-		std::string channel_password = row[2];
-
-		if (channel_owner == "*Block*") {
-			ChatChannelList::AddToChannelBlockList(channel_name);
-			LogDebug("Name [{}] added to Channel Block List from database.", channel_name);
-		}
-	}
-}
-
 bool Database::LoadChatChannels()
 {
-	LoadBlockChannels();
+	LoadReservedNamesFromDB();
 	LogInfo("Loading chat channels from the database");
 
 	const std::string query   = "SELECT `name`, `owner`, `password`, `minstatus` FROM `chatchannels`";
-	auto              results = QueryDatabase(query);
+	auto results = QueryDatabase(query);
 	if (!results.Success()) {
 		return false;
 	}
@@ -319,6 +298,24 @@ bool Database::LoadChatChannels()
 		}
 	}
 	return true;
+}
+
+void Database::LoadReservedNamesFromDB()
+{
+	ChatChannelList::ClearChannelBlockList();
+	std::string query = "SELECT name FROM reserved_channel_names";
+	auto results = QueryDatabase(query);
+	if (!results.Success()) {
+		LogDebug("No reserve names exist in the database...");
+		return; // If nothing is returned from the SQL query, return.
+	}
+
+	for (auto row : results) {
+		std::string current_row = row[0];
+		ChatChannelList::AddToChannelBlockList(current_row);
+		LogDebug("Adding channel [{}] to blocked list from database...", current_row);
+	}
+
 }
 
 bool Database::IsChatChannelInDB(std::string channel_name)

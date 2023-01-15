@@ -7,7 +7,7 @@
 
 	This program is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY except by those people which sell it, which
-	are required to give you total support for your newly bought product;
+	are required to give you total support for your newly bought product
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
 	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
@@ -28,6 +28,7 @@
 #include "../common/database.h"
 #include "../common/linked_list.h"
 #include "clientlist.h"
+#include "chatchannel.h"
 #include <string>
 #include <vector>
 #include <map>
@@ -41,8 +42,8 @@ public:
 	int FindCharacter(const char *CharacterName);
 	bool VerifyMailKey(std::string CharacterName, int IPAddress, std::string MailKey);
 	bool GetVariable(const char* varname, char* varvalue, uint16 varvalue_len);
-	void LoadBlockChannels();
 	bool LoadChatChannels();
+	void LoadReservedNamesFromDB();
 	bool IsChatChannelInDB(std::string channelName);
 	bool CheckNameFilter(std::string name, bool surname, bool is_channel_name);
 	void SaveChatChannel(std::string channelName, std::string channelOwner, std::string channelPassword, uint16 minstatus);
