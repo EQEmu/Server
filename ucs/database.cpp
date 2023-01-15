@@ -257,8 +257,10 @@ void UCSDatabase::LoadReservedNamesFromDB()
 
 	for (auto &e: channels) {
 		ChatChannelList::AddToChannelBlockList(e.name);
-		LogDebug("Adding channel [{}] to blocked list from database...", e.name);
+		LogInfo("Adding channel [{}] to blocked list from database...", e.name);
 	}
+
+	LogInfo("Loaded [{}] reserved channel names", channels.size());
 }
 
 bool UCSDatabase::IsChatChannelInDB(std::string channel_name)
@@ -273,21 +275,39 @@ bool UCSDatabase::IsChatChannelInDB(std::string channel_name)
 	return r > 0;
 }
 
-void UCSDatabase::SaveChatChannel(std::string channel_name, std::string channel_owner, std::string channel_password, uint16 min_status) {
-	if (ChatChannelList::IsOnChannelBlockList(channel_name)) { //If channel name is blocked, do not save it to the database
+void UCSDatabase::SaveChatChannel(
+	std::string channel_name,
+	std::string channel_owner,
+	std::string channel_password,
+	uint16 min_status
+)
+{
+	auto e = ChatchannelsRepository::GetWhere(
+		*this,
+		fmt::format(
+			"name = {} LIMIT 1", Strings::Escape(channel_name)
+		)
+	);
+
+	// If channel name is blocked, do not save it to the database
+	if (ChatChannelList::IsOnChannelBlockList(channel_name)) {
+		LogInfo("Channel [{}] already found on the block list, ignoring", channel_name);
 		return;
 	}
-	else if (IsChatChannelInDB(channel_name)) { // If Channel exists, update it in the database
-		auto query = fmt::format("UPDATE chatchannels SET `name` = '{}', `owner` = '{}', `password` = '{}', `minstatus` = {}	WHERE name = '{}'", Strings::Escape(channel_name), Strings::Escape(channel_owner), Strings::Escape(channel_password), min_status, Strings::Escape(channel_name));
-		QueryDatabase(query);
-		LogDebug("Updating channel [{}], owned by [{}], in database.", channel_name, channel_owner);
+
+	// update if exists, create new if it doesn't
+	auto c = !e.empty() ? e[0] : ChatchannelsRepository::NewEntity();
+	c.name      = channel_name;
+	c.owner     = channel_owner;
+	c.password  = channel_password;
+	c.minstatus = min_status;
+
+	if (e.empty()) {
+		ChatchannelsRepository::InsertOne(*this, c);
 		return;
 	}
-	else { // If channel does not exist, save it to the database
-		auto query = fmt::format("INSERT INTO chatchannels (`name`, `owner`, `password`, `minstatus`) VALUES('{}', '{}', '{}', {})", Strings::Escape(channel_name), Strings::Escape(channel_owner), Strings::Escape(channel_password), min_status);
-		QueryDatabase(query);
-		LogDebug("Saving channel [{}], owned by [{}], to database.", channel_name, channel_owner);
-	}
+
+	ChatchannelsRepository::UpdateOne(*this, c);
 }
 
 void UCSDatabase::DeleteChatChannel(std::string channel_name) {
