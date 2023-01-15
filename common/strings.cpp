@@ -763,3 +763,10 @@ std::string Strings::Random(size_t length)
 	std::generate_n(str.begin(), length, randchar);
 	return str;
 }
+
+// a wrapper for stoi which will return a fallback if the string
+// fails to cast to a number
+bool Strings::Stoi(const std::string &s, int fallback)
+{
+	return Strings::IsNumber(s) ? std::stoi(s) : fallback;
+}
