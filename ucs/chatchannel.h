@@ -9,6 +9,8 @@
 
 class Client;
 
+#define SYSTEM_OWNER "*System*"
+
 class ChatChannel {
 
 public:

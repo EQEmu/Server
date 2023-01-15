@@ -67,11 +67,19 @@ ChatChannel::~ChatChannel() {
 		iterator.RemoveCurrent(false);
 }
 
-ChatChannel* ChatChannelList::CreateChannel(std::string name, std::string owner, std::string password, bool permanent, int minimum_status, bool save_to_db) {
+ChatChannel *ChatChannelList::CreateChannel(
+	std::string name,
+	std::string owner,
+	std::string password,
+	bool permanent,
+	int minimum_status,
+	bool save_to_db
+)
+{
 	uint8 max_perm_player_channels = RuleI(Chat, MaxPermanentPlayerChannels);
 
 	if (!database.CheckChannelNameFilter(name)) {
-		if (!(owner == "*System*")) {
+		if (!(owner == SYSTEM_OWNER)) {
 			return nullptr;
 		}
 		else {
@@ -84,16 +92,32 @@ ChatChannel* ChatChannelList::CreateChannel(std::string name, std::string owner,
 
 	ChatChannels.Insert(NewChannel);
 
-	if (owner == "*System*") {
+	if (owner == SYSTEM_OWNER) {
 		save_to_db = false;
 	}
 
-	if ((max_perm_player_channels > 0) && !(owner == "*System*") && save_to_db) { // If permenant player channels are enabled (and not a system channel), save channel to database if not exceeding limit.
-		if (database.CurrentPlayerChannelCount(owner) + 1 <= max_perm_player_channels) { // Ensure there is room to save another chat channel to the database.
-			database.SaveChatChannel(CapitaliseName(name), owner, password, minimum_status); // Save chat channel to database.
+	// If permanent player channels are enabled (and not a system channel)
+	// save channel to database if not exceeding limit.
+	bool can_save_channel = (max_perm_player_channels > 0) && !(owner == SYSTEM_OWNER) && save_to_db;
+	if (can_save_channel) {
+
+		// Ensure there is room to save another chat channel to the database.
+		bool player_under_channel_limit = database.CurrentPlayerChannelCount(owner) + 1 <= max_perm_player_channels;
+		if (player_under_channel_limit) {
+			database.SaveChatChannel(
+				CapitaliseName(name),
+				owner,
+				password,
+				minimum_status
+			);
 		}
 		else {
-			LogDebug("Maximum number of channels [{}] reached for player [{}], channel [{}] save to database aborted.", max_perm_player_channels, owner, CapitaliseName(name));
+			LogDebug(
+				"Maximum number of channels [{}] reached for player [{}], channel [{}] save to database aborted.",
+				max_perm_player_channels,
+				owner,
+				CapitaliseName(name)
+			);
 		}
 	}
 
