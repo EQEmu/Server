@@ -87,6 +87,19 @@ ChatChannel *ChatChannelList::CreateChannel(
 		}
 	}
 
+	if (IsOnChannelBlockList(name)) {
+		if (!(owner == SYSTEM_OWNER)) {
+			LogInfo("Channel name [{}] is a reserved/blocked channel name. Channel creation canceled.", name);
+			return nullptr;
+		}
+		else {
+			LogInfo("Ignoring reserved/blocked channel name [{}] as channel is owned by System...", name);
+		}
+	}
+	else {
+		LogDebug("Channel name [{}] passed the reserved/blocked channel name check...", name);
+	}
+
 
 	ChatChannel *NewChannel = new ChatChannel(CapitaliseName(name), owner, password, permanent, minimum_status);
 
@@ -207,7 +220,7 @@ void ChatChannelList::SendAllChannels(Client *c) {
 
 void ChatChannelList::RemoveChannel(ChatChannel *Channel) {
 
-	LogDebug("RemoveChannel ([{}])", Channel->GetName().c_str());
+	LogDebug("Remove channel [{}]", Channel->GetName().c_str());
 
 	LinkedListIterator<ChatChannel*> iterator(ChatChannels);
 
@@ -278,6 +291,7 @@ void ChatChannel::SetOwner(std::string inOwner) {
 		database.SetChannelOwner(Name, Owner);
 }
 
+// Returns the owner's name in type std::string()
 std::string ChatChannel::GetOwnerName() {
 	return Owner;
 }
@@ -332,7 +346,7 @@ bool ChatChannel::RemoveClient(Client *c) {
 
 	if(!c) return false;
 
-	LogDebug("RemoveClient [{}] from channel [{}]", c->GetName().c_str(), GetName().c_str());
+	LogDebug("Remove client [{}] from channel [{}]", c->GetName().c_str(), GetName().c_str());
 
 	bool HideMe = c->GetHideMe();
 
@@ -544,11 +558,7 @@ ChatChannel *ChatChannelList::AddClientToChannel(std::string channel_name, Clien
 
 	if(!c) return nullptr;
 
-	if (IsOnChannelBlockList(channel_name)) { // Ensure channel name is not blocked
-		c->GeneralChannelMessage("That channel name is blocked by the server operator.");
-		return nullptr;
-	}
-	else if ((channel_name.length() > 0) && (isdigit(channel_name[0]))) { // Ensure channel name does not start with a number
+	if ((channel_name.length() > 0) && (isdigit(channel_name[0]))) { // Ensure channel name does not start with a number
 		c->GeneralChannelMessage("The channel name can not begin with a number.");
 		return nullptr;
 	}
@@ -576,6 +586,19 @@ ChatChannel *ChatChannelList::AddClientToChannel(std::string channel_name, Clien
 	}
 
 	ChatChannel *RequiredChannel = FindChannel(normalized_name);
+
+	if (RequiredChannel) {
+		if (IsOnChannelBlockList(channel_name)) { // Ensure channel name is not blocked
+			if (!(RequiredChannel->GetOwnerName() == SYSTEM_OWNER)) {
+				c->GeneralChannelMessage("That channel name is blocked by the server operator.");
+				return nullptr;
+			}
+			else {
+				LogDebug("Reserved/blocked channel name check for [{}] ignored due to channel being owned by System...", normalized_name);
+			}
+		}
+	}
+
 	std::string channel_owner = c->GetName();
 
 	bool permanent = false;
@@ -593,19 +616,18 @@ ChatChannel *ChatChannelList::AddClientToChannel(std::string channel_name, Clien
 		LogDebug("Created and added Client to channel [{}] with password [{}]. Owner: {}. Command Directed: {}", normalized_name.c_str(), password.c_str(), channel_owner, command_directed);
 	}
 
-	if(RequiredChannel->GetMinStatus() > c->GetAccountStatus()) {
-
+	LogDebug("Checking status requirement of channel: {}. Channel status required: {}, player status: {}.", normalized_name, std::to_string(RequiredChannel->GetMinStatus()), std::to_string(c->GetAccountStatus()));
+	if (RequiredChannel->GetMinStatus() > c->GetAccountStatus()) {
 		std::string Message = "You do not have the required account status to join channel " + normalized_name;
 
 		c->GeneralChannelMessage(Message);
-
+		LogDebug("Client connection to channel [{}] refused due to insufficient status.", normalized_name);
 		return nullptr;
 	}
 
 	if (RequiredChannel->IsClientInChannel(c)) {
 		return nullptr;
 	}
-
 
 	if(RequiredChannel->IsInvitee(c->GetName())) {
 

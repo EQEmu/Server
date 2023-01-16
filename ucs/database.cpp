@@ -253,7 +253,7 @@ void UCSDatabase::LoadReservedNamesFromDB()
 
 	auto channels = ChatchannelReservedNamesRepository::All(*this);
 	if (channels.empty()) {
-		LogDebug("No reserve names exist in the database...");
+		LogDebug("No reserved names exist in the database...");
 	}
 
 	for (auto &e: channels) {
@@ -261,7 +261,7 @@ void UCSDatabase::LoadReservedNamesFromDB()
 		LogInfo("Adding channel [{}] to blocked list from database...", e.name);
 	}
 
-	LogInfo("Loaded [{}] reserved channel names", channels.size());
+	LogInfo("Loaded [{}] reserved channel name(s)", channels.size());
 }
 
 bool UCSDatabase::IsChatChannelInDB(std::string channel_name)
@@ -286,7 +286,7 @@ void UCSDatabase::SaveChatChannel(
 	auto e = ChatchannelsRepository::GetWhere(
 		*this,
 		fmt::format(
-			"name = {} LIMIT 1", Strings::Escape(channel_name)
+			"`name` = '{}' LIMIT 1", Strings::Escape(channel_name)
 		)
 	);
 

@@ -9,7 +9,7 @@
 
 class Client;
 
-#define SYSTEM_OWNER "*System*"
+#define SYSTEM_OWNER std::string("*System*")
 
 class ChatChannel {
 
