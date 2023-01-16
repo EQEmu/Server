@@ -621,7 +621,7 @@ ChatChannel *ChatChannelList::AddClientToChannel(std::string channel_name, Clien
 		std::string Message = "You do not have the required account status to join channel " + normalized_name;
 
 		c->GeneralChannelMessage(Message);
-		LogDebug("Client connection to channel [{}] refused due to insufficient status.", normalized_name);
+		LogInfo("Client [{}] connection to channel [{}] refused due to insufficient status.", c->GetName(), normalized_name);
 		return nullptr;
 	}
 
