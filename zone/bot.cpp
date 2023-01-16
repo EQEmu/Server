@@ -4216,7 +4216,8 @@ void Bot::LoadAndSpawnAllZonedBots(Client* bot_owner) {
 			std::vector<int> bot_class_spawned_count = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
 			for (uint8 class_id = WARRIOR; class_id <= BERSERKER; class_id++) {
-				bot_class_spawn_limits[class_id - 1] = bot_owner->GetBotSpawnLimit(class_id);
+				auto bot_class_limit = bot_owner->GetBotSpawnLimit(class_id);
+				bot_class_spawn_limits.push_back(bot_class_limit);
 			}
 
 			auto* g = bot_owner->GetGroup();
@@ -9305,7 +9306,8 @@ void Bot::SpawnBotGroupByName(Client* c, std::string botgroup_name, uint32 leade
 	std::vector<int> bot_class_spawned_count = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
 	for (uint8 class_id = WARRIOR; class_id <= BERSERKER; class_id++) {
-		bot_class_spawn_limits[class_id - 1] = c->GetBotSpawnLimit(class_id);
+		auto bot_class_limit = c->GetBotSpawnLimit(class_id);
+		bot_class_spawn_limits.push_back(bot_class_limit);
 	}
 
 	for (const auto& member_iter : member_list[botgroup_id]) {
