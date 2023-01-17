@@ -55,8 +55,12 @@ bin/
 /x64
 /client_files/**/CMakeFiles/
 
+# Visual Studio Code Generated Files
+/.vscode/
+
 .idea
 
 # Clangd Generated Files.
 compile_flags.txt
 .cache/
+
