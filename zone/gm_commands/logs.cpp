@@ -3,10 +3,6 @@
 
 extern WorldServer worldserver;
 
-inline void print_legend(Client *c) {
-	c->Message(Chat::White, "[Legend] [G = GM Say] [F = File] [C = Console] [D = Discord]");
-}
-
 void command_logs(Client *c, const Seperator *sep)
 {
 	int arguments = sep->argnum;
@@ -62,7 +58,6 @@ void command_logs(Client *c, const Seperator *sep)
 
 		uint32 max_category_id = (start_category_id + 49);
 
-		print_legend(c);
 		c->Message(Chat::White, "------------------------------------------------");
 
 		for (int index = start_category_id; index <= max_category_id; index++) {
@@ -77,7 +72,7 @@ void command_logs(Client *c, const Seperator *sep)
 			}
 
 			std::vector<std::string> gmsay;
-			for (int i = 0; i <= 3; i++) {
+			for (int i = 0; i <= 2; i++) {
 				if (i == 2) {
 					continue;
 				}
@@ -152,21 +147,15 @@ void command_logs(Client *c, const Seperator *sep)
 			c->Message(
 				0,
 				fmt::format(
-					"G [{}] C [{}] F [{}] D [{}] [{}] [{}] ",
+					"[{}] GM [{}] Console [{}] File [{}] Discord [{}] [{}] ",
+					index,
 					Strings::RTrim(gmsay_string, "-"),
 					Strings::RTrim(console_string, "-"),
 					Strings::RTrim(file_string, "-"),
 					Strings::RTrim(discord_string, "-"),
-					index,
 					Logs::LogCategoryName[index]
 				).c_str()
 			);
-
-			if (index % 10 == 0) {
-				c->Message(Chat::White, "------------------------------------------------");
-				print_legend(c);
-				c->Message(Chat::White, "------------------------------------------------");
-			}
 		}
 
 		c->Message(Chat::White, "------------------------------------------------");

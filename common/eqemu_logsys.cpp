@@ -308,7 +308,7 @@ void EQEmuLogSys::ProcessConsoleMessage(
 						;
 				}
 				else {
-					(!is_error ? std::cout : std::cerr) << "[" << e << "] ";
+					(!is_error ? std::cout : std::cerr) << rang::fgB::gray << "[" << e << "] ";
 				}
 			}
 			else {
