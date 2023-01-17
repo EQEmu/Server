@@ -33,6 +33,8 @@
 
 std::ofstream process_log;
 
+#include <filesystem>
+
 #ifdef _WINDOWS
 #include <direct.h>
 #include <conio.h>
@@ -45,7 +47,6 @@ std::ofstream process_log;
 #include <unistd.h>
 #include <sys/stat.h>
 #include <thread>
-#include <filesystem>
 
 #endif
 
