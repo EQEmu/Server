@@ -225,6 +225,8 @@ bool ZoneDatabase::LoadSpawnGroups(const char *zone_name, uint16 version, SpawnG
 		spawn_group_list->AddSpawnGroup(new_spawn_group);
 	}
 
+	LogInfo("Loaded [{}] spawn group(s)", Strings::Commify(results.RowCount()));
+
 	query = fmt::format(
 		SQL(
 			SELECT
@@ -272,6 +274,9 @@ bool ZoneDatabase::LoadSpawnGroups(const char *zone_name, uint16 version, SpawnG
 
 		spawn_group->AddSpawnEntry(new_spawn_entry);
 	}
+
+	LogInfo("Loaded [{}] spawn entries", Strings::Commify(results.RowCount()));
+
 
 	return true;
 }

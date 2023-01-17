@@ -618,6 +618,8 @@ void ZoneDatabase::LoadGlobalLoot()
 		return;
 	}
 
+	LogInfo("Loaded [{}] global loot entries", Strings::Commify(results.RowCount()));
+
 	// we might need this, lets not keep doing it in a loop
 	auto      zoneid = std::to_string(zone->GetZoneID());
 	for (auto row    = results.begin(); row != results.end(); ++row) {

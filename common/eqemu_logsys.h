@@ -179,8 +179,8 @@ namespace Logs {
 		"WebInterface Server",
 		"World Server",
 		"Zone Server",
-		"MySQL Error",
-		"MySQL Query",
+		"QueryErr",
+		"Query",
 		"Mercenaries",
 		"Quest Debug",
 		"Deprecated",
@@ -196,16 +196,16 @@ namespace Logs {
 		"Traps",
 		"NPC Roam Box",
 		"NPC Scaling",
-		"Mob Appearance",
+		"MobAppearance",
 		"Info",
 		"Warning",
 		"Critical",
 		"Emergency",
 		"Alert",
 		"Notice",
-		"AI Scan Close",
-		"AI Yell For Help",
-		"AI Cast Beneficial Close",
+		"AI Scan",
+		"AI Yell",
+		"AI CastBeneficial",
 		"AOE Cast",
 		"Entity Management",
 		"Flee",
@@ -227,9 +227,9 @@ namespace Logs {
 		"Hate",
 		"Discord",
 		"Faction",
-		"Packet-S->C",
-		"Packet-C->S",
-		"Packet-S->S",
+		"Packet S->C",
+		"Packet C->S",
+		"Packet S->S",
 		"Bugs",
 		"QuestErrors"
 	};
@@ -389,7 +389,13 @@ private:
 	std::string GetLinuxConsoleColorFromCategory(uint16 log_category);
 	uint16 GetWindowsConsoleColorFromCategory(uint16 log_category);
 
-	void ProcessConsoleMessage(uint16 log_category, const std::string &message);
+	void ProcessConsoleMessage(
+		uint16 log_category,
+		const std::string &message,
+		const char *file,
+		const char *func,
+		int line
+	);
 	void ProcessLogWrite(uint16 log_category, const std::string &message);
 	bool IsRfc5424LogCategory(uint16 log_category);
 	void InjectTablesIfNotExist();

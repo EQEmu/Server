@@ -231,6 +231,8 @@ bool Expedition::CacheAllFromDatabase()
 
 	CacheExpeditions(std::move(expeditions));
 
+	LogInfo("Loaded [{}] expedition(s)", Strings::Commify(zone->expedition_cache.size()));
+
 	LogExpeditions("Caching [{}] expedition(s) took [{}s]", zone->expedition_cache.size(), benchmark.elapsed());
 
 	return true;

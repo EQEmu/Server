@@ -155,7 +155,7 @@ int main(int argc, char **argv)
 
 	Config = WorldConfig::get();
 
-	LogInfo("CURRENT_VERSION: [{}]", CURRENT_VERSION);
+	LogInfo("CURRENT_VERSION [{}]", CURRENT_VERSION);
 
 	if (signal(SIGINT, CatchSignal) == SIG_ERR) {
 		LogError("Could not set signal handler");
@@ -214,7 +214,7 @@ int main(int argc, char **argv)
 			zoneserver_list.Add(new ZoneServer(connection, console.get()));
 
 			LogInfo(
-				"New Zone Server connection from [{}] at [{}:{}] zone_count ({})",
+				"New Zone Server connection from [{}] at [{}:{}] zone_count [{}]",
 				connection->Handle()->RemoteIP(),
 				connection->Handle()->RemotePort(),
 				connection->GetUUID(),

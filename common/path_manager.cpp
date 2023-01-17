@@ -22,10 +22,10 @@ void PathManager::LoadPaths()
 
 	std::filesystem::current_path(m_server_path);
 
-	LogInfo("[PathManager] server [{}]", m_server_path);
+	LogInfo("server [{}]", m_server_path);
 
 	if (!EQEmuConfig::LoadConfig()) {
-		LogError("[PathManager] Failed to load eqemu config");
+		LogError("Failed to load eqemu config");
 		return;
 	}
 
@@ -77,14 +77,14 @@ void PathManager::LoadPaths()
 		m_log_path = fs::relative(fs::path{m_server_path + "/" + c->LogDir}).string();
 	}
 
-	LogInfo("[PathManager] logs [{}]", m_log_path);
-	LogInfo("[PathManager] lua mods [{}]", m_lua_mods_path);
-	LogInfo("[PathManager] lua_modules [{}]", m_lua_modules_path);
-	LogInfo("[PathManager] maps [{}]", m_maps_path);
-	LogInfo("[PathManager] patches [{}]", m_patch_path);
-	LogInfo("[PathManager] plugins [{}]", m_plugins_path);
-	LogInfo("[PathManager] quests [{}]", m_quests_path);
-	LogInfo("[PathManager] shared_memory [{}]", m_shared_memory_path);
+	LogInfo("logs path [{}]", m_log_path);
+	LogInfo("lua mods path [{}]", m_lua_mods_path);
+	LogInfo("lua_modules path [{}]", m_lua_modules_path);
+	LogInfo("maps path [{}]", m_maps_path);
+	LogInfo("patches path [{}]", m_patch_path);
+	LogInfo("plugins path [{}]", m_plugins_path);
+	LogInfo("quests path [{}]", m_quests_path);
+	LogInfo("shared_memory path [{}]", m_shared_memory_path);
 }
 
 const std::string &PathManager::GetServerPath() const

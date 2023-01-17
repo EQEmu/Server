@@ -26,6 +26,7 @@
 #include "discord/discord.h"
 #include "repositories/discord_webhooks_repository.h"
 #include "repositories/logsys_categories_repository.h"
+#include "termcolor/rang.hpp"
 
 #include <iostream>
 #include <fstream>
@@ -300,7 +301,7 @@ std::string EQEmuLogSys::GetLinuxConsoleColorFromCategory(uint16 log_category)
 		case Logs::Crash:
 			return LC_RED;
 		default:
-			return LC_YELLOW;
+			return LC_WHITE;
 	}
 }
 
@@ -333,28 +334,122 @@ uint16 EQEmuLogSys::GetGMSayColorFromCategory(uint16 log_category)
 	}
 }
 
+size_t padding_size = 15;
+size_t function_padding_size = 0;
+
 /**
  * @param debug_level
  * @param log_category
  * @param message
  */
-void EQEmuLogSys::ProcessConsoleMessage(uint16 log_category, const std::string &message)
+void EQEmuLogSys::ProcessConsoleMessage(
+	uint16 log_category,
+	const std::string &message,
+	const char *file,
+	const char *func,
+	int line
+)
 {
-#ifdef _WINDOWS
-	HANDLE  console_handle;
-	console_handle = GetStdHandle(STD_OUTPUT_HANDLE);
-	CONSOLE_FONT_INFOEX info = { 0 };
-	info.cbSize = sizeof(info);
-	info.dwFontSize.Y = 12; // leave X as zero
-	info.FontWeight = FW_NORMAL;
-	wcscpy(info.FaceName, L"Lucida Console");
-	SetCurrentConsoleFontEx(console_handle, NULL, &info);
-	SetConsoleTextAttribute(console_handle, EQEmuLogSys::GetWindowsConsoleColorFromCategory(log_category));
-	std::cout << message << "\n";
-	SetConsoleTextAttribute(console_handle, Console::Color::White);
-#else
-	std::cout << EQEmuLogSys::GetLinuxConsoleColorFromCategory(log_category) << message << LC_RESET << std::endl;
-#endif
+
+	std::cout
+		<< ""
+		<< rang::fgB::black
+		<< rang::style::bold
+		<< fmt::format("{:>6}", GetPlatformName().substr(0, 6))
+		<< rang::style::reset
+		<< rang::fgB::gray
+		<< " | "
+		<< rang::style::bold
+		<< fmt::format("{:>10}", fmt::format("{}", Logs::LogCategoryName[log_category]).substr(0, 10))
+		<< rang::style::reset
+		<< rang::fgB::gray
+		<< " | "
+		<< rang::fgB::gray
+		<< rang::style::bold
+		<< fmt::format("{}", func)
+		<< rang::style::reset
+		<< " ";
+
+	if (RuleB(Logging, PrintFileFunctionAndLine)) {
+		std::cout
+			<< ""
+			<< rang::fgB::green
+			<< rang::style::bold
+			<< fmt::format("{:}", fmt::format("{}:{}:{}", file, func, line))
+			<< rang::style::reset
+			<< " | ";
+	}
+
+	if (log_category == Logs::LogCategory::MySQLQuery) {
+		auto s = Strings::Split(message, "--");
+		std::string query = Strings::Trim(s[0]);
+		std::string meta = Strings::Trim(s[1]);
+
+		std::cout <<
+		  rang::fgB::green
+		  <<
+		  query
+		  <<
+		  rang::style::reset;
+
+		std::cout <<
+		  rang::fgB::black
+		  <<
+		  " -- "
+		  <<
+		  meta
+		  <<
+		  rang::style::reset;
+	}
+	else if (Strings::Contains(message, "[")) {
+		for (auto &e: Strings::Split(message, " ")) {
+//			std::cout << e << std::endl;
+			if (Strings::Contains(e, "[") && Strings::Contains(e, "]")) {
+				e = Strings::Replace(e, "[", "");
+				e = Strings::Replace(e, "]", "");
+
+				bool is_upper = false;
+				for (int i = 0; i < strlen(e.c_str()); i++) {
+					if (isupper(e[i])) {
+						is_upper = true;
+					}
+				}
+
+				if (!is_upper) {
+					std::cout << "[" << rang::style::bold << rang::fgB::yellow << e << rang::style::reset << "] ";
+				}
+				else {
+					std::cout << "[" << e << "] ";
+				}
+			}
+			else {
+				std::cout << rang::fgB::gray << e << " ";
+			}
+		}
+	}
+	else {
+		std::cout << rang::fgB::gray << message << rang::style::reset;
+	}
+
+	std::cout << std::endl;
+
+	// fmt::format("[{}] [{}] {}", GetPlatformName(), Logs::LogCategoryName[log_category], prefix + output_message)
+
+//#ifdef _WINDOWS
+//	HANDLE  console_handle;
+//	console_handle = GetStdHandle(STD_OUTPUT_HANDLE);
+//	CONSOLE_FONT_INFOEX info = { 0 };
+//	info.cbSize = sizeof(info);
+//	info.dwFontSize.Y = 12; // leave X as zero
+//	info.FontWeight = FW_NORMAL;
+//	wcscpy(info.FaceName, L"Lucida Console");
+//	SetCurrentConsoleFontEx(console_handle, NULL, &info);
+//	SetConsoleTextAttribute(console_handle, EQEmuLogSys::GetWindowsConsoleColorFromCategory(log_category));
+//	std::cout << message << "\n";
+//	SetConsoleTextAttribute(console_handle, Console::Color::White);
+//#else
+//	std::cout << EQEmuLogSys::GetLinuxConsoleColorFromCategory(log_category) << message << LC_RESET << std::endl;
+//#endif
 
 	m_on_log_console_hook(log_category, message);
 }
@@ -445,7 +540,10 @@ void EQEmuLogSys::Out(
 	if (l.log_to_console_enabled) {
 		EQEmuLogSys::ProcessConsoleMessage(
 			log_category,
-			fmt::format("[{}] [{}] {}", GetPlatformName(), Logs::LogCategoryName[log_category], prefix + output_message)
+			output_message,
+			file,
+			func,
+			line
 		);
 	}
 	if (l.log_to_gmsay_enabled) {

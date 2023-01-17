@@ -141,7 +141,7 @@ void ClientListEntry::SetOnline(ZoneServer *iZS, CLE_Status iOnline)
 void ClientListEntry::SetOnline(CLE_Status iOnline)
 {
 	LogClientLogin(
-		"ClientListEntry::SetOnline for [{}] ({}) = [{}] ({})",
+		"Online status [{}] ({}) status [{}] ({})",
 		AccountName(),
 		AccountID(),
 		CLEStatusString[CLE_Status::Online],

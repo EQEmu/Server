@@ -304,6 +304,13 @@ bool RuleManager::LoadRules(Database *db, const std::string &rule_set_name, bool
 		}
 	}
 
+	LogInfo(
+		"Loaded [{}] rules(s) in rule_set [{}] id [{}]",
+		Strings::Commify(std::to_string(l.size())),
+		rule_set_name,
+		rule_set_id
+	);
+
 	return true;
 }
 

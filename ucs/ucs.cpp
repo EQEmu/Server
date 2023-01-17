@@ -153,13 +153,10 @@ int main() {
 	} else {
 		if(!RuleManager::Instance()->LoadRules(&database, "default", false)) {
 			LogInfo("No rule set configured, using default rules");
-		} else {
-			LogInfo("Loaded default rule set 'default'", tmp);
 		}
 	}
 
 	EQ::InitializeDynamicLookups();
-	LogInfo("Initialized dynamic dictionary entries");
 
 	database.ExpireMail();
 

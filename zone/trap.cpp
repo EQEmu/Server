@@ -495,6 +495,8 @@ bool ZoneDatabase::LoadTraps(const char* zonename, int16 version) {
 		Log(Logs::General, Logs::Traps, "Trap %d successfully loaded.", trap->trap_id);
 	}
 
+	LogInfo("Loaded [{}] trap(s)", Strings::Commify(results.RowCount()));
+
 	return true;
 }
 

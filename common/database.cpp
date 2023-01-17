@@ -975,6 +975,8 @@ bool Database::LoadVariables() {
 		varcache.Add(key, value);
 	}
 
+	LogInfo("Loaded [{}] variable(s)", Strings::Commify(std::to_string(results.RowCount())));
+
 	return true;
 }
 

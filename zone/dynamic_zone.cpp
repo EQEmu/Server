@@ -145,6 +145,7 @@ void DynamicZone::CacheAllFromDatabase()
 		zone->dynamic_zone_cache.emplace(dz_id, std::move(dz));
 	}
 
+	LogInfo("Loaded [{}] dynamic zone(s)", Strings::Commify(zone->dynamic_zone_cache.size()));
 	LogDynamicZones("Caching [{}] dynamic zone(s) took [{}s]", zone->dynamic_zone_cache.size(), bench.elapsed());
 }
 

@@ -457,10 +457,10 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app)
 		return false;
 	}
 
-	LogClientLogin("[HandleSendLoginInfoPacket] Checking Auth id [{}]", id);
+	LogClientLogin("Checking authentication id [{}]", id);
 
 	if ((cle = client_list.CheckAuth(id, password))) {
-		LogClientLogin("[HandleSendLoginInfoPacket] Checking Auth id [{}] passed", id);
+		LogClientLogin("Checking authentication id [{}] passed", id);
 		if (!is_player_zoning) {
 			// Track who is in and who is out of the game
 			char *inout= (char *) "";

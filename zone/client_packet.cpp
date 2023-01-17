@@ -430,6 +430,8 @@ void MapOpcodes()
 	ConnectedOpcodes[OP_SharedTaskAcceptNew]      = &Client::Handle_OP_SharedTaskAccept;
 	ConnectedOpcodes[OP_SharedTaskQuit]           = &Client::Handle_OP_SharedTaskQuit;
 	ConnectedOpcodes[OP_SharedTaskPlayerList]     = &Client::Handle_OP_SharedTaskPlayerList;
+
+	LogInfo("Mapped [{}] client opcode handlers", _maxEmuOpcode);
 }
 
 void ClearMappedOpcode(EmuOpcode op)

@@ -718,14 +718,12 @@ int ZoneDatabase::GetDoorsDBCountPlusOne(std::string zone_short_name, int16 vers
 
 std::vector<DoorsRepository::Doors> ZoneDatabase::LoadDoors(const std::string &zone_name, int16 version)
 {
-	LogInfo("Loading Doors from database");
-
 	auto door_entries = DoorsRepository::GetWhere(
 		*this, fmt::format(
 			"zone = '{}' AND (version = {} OR version = -1) {} ORDER BY doorid ASC",
 			zone_name, version, ContentFilterCriteria::apply()));
 
-	LogDoors("Loaded [{}] doors for [{}] version [{}]", door_entries.size(), zone_name, version);
+	LogDoors("Loaded [{}] doors for [{}] version [{}]", Strings::Commify(door_entries.size()), zone_name, version);
 
 	return door_entries;
 }
