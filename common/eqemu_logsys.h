@@ -394,7 +394,6 @@ private:
 		int line
 	);
 	void ProcessLogWrite(uint16 log_category, const std::string &message);
-	bool IsRfc5424LogCategory(uint16 log_category);
 	void InjectTablesIfNotExist();
 };
 

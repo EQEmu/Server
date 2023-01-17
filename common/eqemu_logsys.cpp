@@ -198,24 +198,6 @@ EQEmuLogSys *EQEmuLogSys::LoadLogSettingsDefaults()
 }
 
 /**
- * @param log_category
- * @return
- */
-bool EQEmuLogSys::IsRfc5424LogCategory(uint16 log_category)
-{
-	return (
-		log_category == Logs::Emergency ||
-		log_category == Logs::Alert ||
-		log_category == Logs::Critical ||
-		log_category == Logs::Error ||
-		log_category == Logs::Warning ||
-		log_category == Logs::Notice ||
-		log_category == Logs::Info ||
-		log_category == Logs::Debug
-	);
-}
-
-/**
  * @param debug_level
  * @param log_category
  * @param message
