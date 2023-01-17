@@ -94,7 +94,7 @@ void command_logs(Client *c, const Seperator *sep)
 			}
 
 			std::vector<std::string> file;
-			for (int i = 0; i <= 3; i++) {
+			for (int i = 0; i <= 2; i++) {
 				if (i == 2) {
 					continue;
 				}
@@ -111,7 +111,7 @@ void command_logs(Client *c, const Seperator *sep)
 			}
 
 			std::vector<std::string> console;
-			for (int i = 0; i <= 3; i++) {
+			for (int i = 0; i <= 2; i++) {
 				if (i == 2) {
 					continue;
 				}
@@ -128,7 +128,7 @@ void command_logs(Client *c, const Seperator *sep)
 			}
 
 			std::vector<std::string> discord;
-			for (int i = 0; i <= 3; i++) {
+			for (int i = 0; i <= 2; i++) {
 				if (i == 2) {
 					continue;
 				}
