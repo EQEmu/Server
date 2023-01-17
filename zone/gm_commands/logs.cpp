@@ -73,9 +73,6 @@ void command_logs(Client *c, const Seperator *sep)
 
 			std::vector<std::string> gmsay;
 			for (int i = 0; i <= 2; i++) {
-				if (i == 2) {
-					continue;
-				}
 				if (LogSys.log_settings[index].log_to_gmsay == i) {
 					gmsay.emplace_back(std::to_string(i));
 					continue;
@@ -90,9 +87,6 @@ void command_logs(Client *c, const Seperator *sep)
 
 			std::vector<std::string> file;
 			for (int i = 0; i <= 2; i++) {
-				if (i == 2) {
-					continue;
-				}
 				if (LogSys.log_settings[index].log_to_file == i) {
 					file.emplace_back(std::to_string(i));
 					continue;
@@ -107,9 +101,6 @@ void command_logs(Client *c, const Seperator *sep)
 
 			std::vector<std::string> console;
 			for (int i = 0; i <= 2; i++) {
-				if (i == 2) {
-					continue;
-				}
 				if (LogSys.log_settings[index].log_to_console == i) {
 					console.emplace_back(std::to_string(i));
 					continue;
@@ -124,9 +115,6 @@ void command_logs(Client *c, const Seperator *sep)
 
 			std::vector<std::string> discord;
 			for (int i = 0; i <= 2; i++) {
-				if (i == 2) {
-					continue;
-				}
 				if (LogSys.log_settings[index].log_to_discord == i) {
 					discord.emplace_back(std::to_string(i));
 					continue;
