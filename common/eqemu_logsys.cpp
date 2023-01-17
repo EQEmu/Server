@@ -91,7 +91,6 @@ EQEmuLogSys *EQEmuLogSys::LoadLogSettingsDefaults()
 	log_settings[Logs::WorldServer].log_to_console          = static_cast<uint8>(Logs::General);
 	log_settings[Logs::ZoneServer].log_to_console           = static_cast<uint8>(Logs::General);
 	log_settings[Logs::QSServer].log_to_console             = static_cast<uint8>(Logs::General);
-	log_settings[Logs::UCSServer].log_to_console            = static_cast<uint8>(Logs::General);
 	log_settings[Logs::Crash].log_to_console                = static_cast<uint8>(Logs::General);
 	log_settings[Logs::MySQLError].log_to_console           = static_cast<uint8>(Logs::General);
 	log_settings[Logs::Loginserver].log_to_console          = static_cast<uint8>(Logs::General);

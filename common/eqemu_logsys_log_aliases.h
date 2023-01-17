@@ -336,26 +336,6 @@
         OutF(LogSys, Logs::Detail, Logs::Tribute, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
-#define LogUCSServer(message, ...) do {\
-    if (LogSys.IsLogEnabled(Logs::General, Logs::UCSServer))\
-        OutF(LogSys, Logs::General, Logs::UCSServer, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
-} while (0)
-
-#define LogUCSServerDetail(message, ...) do {\
-    if (LogSys.IsLogEnabled(Logs::Detail, Logs::UCSServer))\
-        OutF(LogSys, Logs::Detail, Logs::UCSServer, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
-} while (0)
-
-#define LogWebInterfaceServer(message, ...) do {\
-    if (LogSys.IsLogEnabled(Logs::General, Logs::WebInterfaceServer))\
-        OutF(LogSys, Logs::General, Logs::WebInterfaceServer, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
-} while (0)
-
-#define LogWebInterfaceServerDetail(message, ...) do {\
-    if (LogSys.IsLogEnabled(Logs::Detail, Logs::WebInterfaceServer))\
-        OutF(LogSys, Logs::Detail, Logs::WebInterfaceServer, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
-} while (0)
-
 #define LogZoneServer(message, ...) do {\
     if (LogSys.IsLogEnabled(Logs::General, Logs::ZoneServer))\
         OutF(LogSys, Logs::General, Logs::ZoneServer, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
