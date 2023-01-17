@@ -3104,12 +3104,12 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 								"{} {} {} {} {}",
 								tobe_auged->GetID(),
 								item_slot,
-								aug->GetID(),
+								old_aug->GetID(),
 								in_augment->augment_index,
 								false
 							);
 
-							args.push_back(aug);
+							args.push_back(old_aug);
 
 							parse->EventPlayer(EVENT_AUGMENT_REMOVE_CLIENT, this, export_string, 0, &args);
 						}
