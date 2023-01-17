@@ -94,7 +94,7 @@ namespace Logs {
 		DeprecatedCSD, // deprecated
 		Loginserver,
 		ClientLogin,
-		HeadlessClient,
+		HeadlessClient, // deprecated
 		HPUpdate,
 		FixZ,
 		Food,
@@ -189,7 +189,7 @@ namespace Logs {
 		"Legacy Packet Logging (Deprecated)",
 		"Login Server",
 		"Client Login",
-		"Headless Client",
+		"Headless Client (Deprecated)",
 		"HP Update",
 		"FixZ",
 		"Food",

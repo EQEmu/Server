@@ -397,16 +397,6 @@
         OutF(LogSys, Logs::Detail, Logs::ClientLogin, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
-#define LogHeadlessClient(message, ...) do {\
-    if (LogSys.IsLogEnabled(Logs::General, Logs::HeadlessClient))\
-        OutF(LogSys, Logs::General, Logs::HeadlessClient, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
-} while (0)
-
-#define LogHeadlessClientDetail(message, ...) do {\
-    if (LogSys.IsLogEnabled(Logs::Detail, Logs::HeadlessClient))\
-        OutF(LogSys, Logs::Detail, Logs::HeadlessClient, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
-} while (0)
-
 #define LogHPUpdate(message, ...) do {\
     if (LogSys.IsLogEnabled(Logs::General, Logs::HPUpdate))\
         OutF(LogSys, Logs::General, Logs::HPUpdate, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\

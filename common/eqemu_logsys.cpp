@@ -91,7 +91,6 @@ EQEmuLogSys *EQEmuLogSys::LoadLogSettingsDefaults()
 	log_settings[Logs::Crash].log_to_console                = static_cast<uint8>(Logs::General);
 	log_settings[Logs::MySQLError].log_to_console           = static_cast<uint8>(Logs::General);
 	log_settings[Logs::Loginserver].log_to_console          = static_cast<uint8>(Logs::General);
-	log_settings[Logs::HeadlessClient].log_to_console       = static_cast<uint8>(Logs::General);
 	log_settings[Logs::NPCScaling].log_to_gmsay             = static_cast<uint8>(Logs::General);
 	log_settings[Logs::HotReload].log_to_gmsay              = static_cast<uint8>(Logs::General);
 	log_settings[Logs::HotReload].log_to_console            = static_cast<uint8>(Logs::General);
@@ -226,8 +225,11 @@ void EQEmuLogSys::ProcessConsoleMessage(
 	int line
 )
 {
-
-	bool is_error = (log_category == Logs::LogCategory::Error || log_category == Logs::LogCategory::MySQLError);
+	bool is_error = (
+		log_category == Logs::LogCategory::Error ||
+		log_category == Logs::LogCategory::MySQLError ||
+		log_category == Logs::LogCategory::QuestErrors
+	);
 
 	(!is_error ? std::cout : std::cerr)
 		<< ""
@@ -282,7 +284,6 @@ void EQEmuLogSys::ProcessConsoleMessage(
 	}
 	else if (Strings::Contains(message, "[")) {
 		for (auto &e: Strings::Split(message, " ")) {
-//			std::cout << e << std::endl;
 			if (Strings::Contains(e, "[") && Strings::Contains(e, "]")) {
 				e = Strings::Replace(e, "[", "");
 				e = Strings::Replace(e, "]", "");
