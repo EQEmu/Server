@@ -60,3 +60,6 @@ bin/
 # Clangd Generated Files.
 compile_flags.txt
 .cache/
+
+# vscode generated settings
+.vscode/
