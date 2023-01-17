@@ -22,19 +22,14 @@
 #include "rulesys.h"
 #include "platform.h"
 #include "strings.h"
-#include "misc.h"
-#include "discord/discord.h"
 #include "repositories/discord_webhooks_repository.h"
 #include "repositories/logsys_categories_repository.h"
 #include "termcolor/rang.hpp"
 
 #include <iostream>
-#include <fstream>
 #include <string>
-#include <iomanip>
 #include <time.h>
 #include <sys/stat.h>
-#include <algorithm>
 
 std::ofstream process_log;
 
