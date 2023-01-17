@@ -235,6 +235,7 @@ void EQEmuLogSys::ProcessConsoleMessage(
 		<< rang::style::bold
 		<< fmt::format("{:>6}", GetPlatformName().substr(0, 6))
 		<< rang::style::reset
+		<< rang::fgB::gray
 		<< " | "
 		<< (is_error ? rang::fgB::red : rang::fgB::gray)
 		<< rang::style::bold
@@ -296,12 +297,14 @@ void EQEmuLogSys::ProcessConsoleMessage(
 
 				if (!is_upper) {
 					(!is_error ? std::cout : std::cerr)
+						<< rang::fgB::gray
 						<< "["
 						<< rang::style::bold
 						<< rang::fgB::yellow
 						<< e
-						<< rang::style::reset
-						<< "] ";
+						<< rang::fgB::gray
+						<< "] "
+						;
 				}
 				else {
 					(!is_error ? std::cout : std::cerr) << "[" << e << "] ";
@@ -319,7 +322,6 @@ void EQEmuLogSys::ProcessConsoleMessage(
 		(!is_error ? std::cout : std::cerr)
 			<< (is_error ? rang::fgB::red : rang::fgB::gray)
 			<< message
-			<< rang::style::reset
 			<< " ";
 	}
 
@@ -335,12 +337,10 @@ void EQEmuLogSys::ProcessConsoleMessage(
 				origination_info.zone_short_name,
 				origination_info.zone_long_name,
 				origination_info.instance_id
-			)
-			<<
-			rang::style::reset;
+			);
 	}
 
-	(!is_error ? std::cout : std::cerr) << std::endl;
+	(!is_error ? std::cout : std::cerr) << rang::style::reset << std::endl;
 
 	m_on_log_console_hook(log_category, message);
 }
