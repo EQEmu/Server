@@ -336,16 +336,6 @@
         OutF(LogSys, Logs::Detail, Logs::Tribute, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
-#define LogZoneServer(message, ...) do {\
-    if (LogSys.IsLogEnabled(Logs::General, Logs::ZoneServer))\
-        OutF(LogSys, Logs::General, Logs::ZoneServer, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
-} while (0)
-
-#define LogZoneServerDetail(message, ...) do {\
-    if (LogSys.IsLogEnabled(Logs::Detail, Logs::ZoneServer))\
-        OutF(LogSys, Logs::Detail, Logs::ZoneServer, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
-} while (0)
-
 #define LogMySQLError(message, ...) do {\
     if (LogSys.IsLogEnabled(Logs::General, Logs::MySQLError))\
         OutF(LogSys, Logs::General, Logs::MySQLError, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\

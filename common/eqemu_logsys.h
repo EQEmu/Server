@@ -82,8 +82,8 @@ namespace Logs {
 		Tribute,
 		UCSServer, // deprecated
 		WebInterfaceServer, // deprecated
-		WorldServer,
-		ZoneServer,
+		WorldServer, // deprecated
+		ZoneServer, // deprecated
 		MySQLError,
 		MySQLQuery,
 		Mercenaries,
@@ -175,10 +175,10 @@ namespace Logs {
 		"Tradeskills",
 		"Trading",
 		"Tribute",
-		"UCS Server",
+		"UCS Server (Deprecated)",
 		"Web Interface (Deprecated)",
-		"World Server",
-		"Zone Server",
+		"World Server (Deprecated)",
+		"Zone Server (Deprecated)",
 		"QueryErr",
 		"Query",
 		"Mercenaries",
