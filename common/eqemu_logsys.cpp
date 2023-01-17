@@ -50,42 +50,9 @@ std::ofstream process_log;
 #include <unistd.h>
 #include <sys/stat.h>
 #include <thread>
+#include <filesystem>
 
 #endif
-
-/**
- * Linux ANSI console color defines
- */
-#define LC_RESET   "\033[0m"
-#define LC_BLACK   "\033[30m" /* Black */
-#define LC_RED     "\033[31m" /* Red */
-#define LC_GREEN   "\033[32m" /* Green */
-#define LC_YELLOW  "\033[33m" /* Yellow */
-#define LC_BLUE    "\033[34m" /* Blue */
-#define LC_MAGENTA "\033[35m" /* Magenta */
-#define LC_CYAN    "\033[36m" /* Cyan */
-#define LC_WHITE   "\033[37m" /* White */
-
-namespace Console {
-	enum Color {
-		Black        = 0,
-		Blue         = 1,
-		Green        = 2,
-		Cyan         = 3,
-		Red          = 4,
-		Magenta      = 5,
-		Brown        = 6,
-		LightGray    = 7,
-		DarkGray     = 8,
-		LightBlue    = 9,
-		LightGreen   = 10,
-		LightCyan    = 11,
-		LightRed     = 12,
-		LightMagenta = 13,
-		Yellow       = 14,
-		White        = 15
-	};
-}
 
 /**
  * EQEmuLogSys Constructor
@@ -297,7 +264,7 @@ void EQEmuLogSys::ProcessConsoleMessage(
 			<< ""
 			<< rang::fgB::green
 			<< rang::style::bold
-			<< fmt::format("{:}", fmt::format("{}:{}:{}", file, func, line))
+			<< fmt::format("{:}", fmt::format("{}:{}:{}", std::filesystem::path(file).filename().string(), func, line))
 			<< rang::style::reset
 			<< " | ";
 	}
@@ -399,33 +366,6 @@ constexpr const char *str_end(const char *str)
 }
 
 /**
- * @param str
- * @return
- */
-constexpr bool str_slant(const char *str)
-{
-	return *str == '/' ? true : (*str ? str_slant(str + 1) : false);
-}
-
-/**
- * @param str
- * @return
- */
-constexpr const char *r_slant(const char *str)
-{
-	return *str == '/' ? (str + 1) : r_slant(str - 1);
-}
-
-/**
- * @param str
- * @return
- */
-constexpr const char *base_file_name(const char *str)
-{
-	return str_slant(str) ? r_slant(str_end(str)) : str;
-}
-
-/**
  * Core logging function
  *
  * @param debug_level
@@ -452,7 +392,7 @@ void EQEmuLogSys::Out(
 
 	std::string prefix;
 	if (RuleB(Logging, PrintFileFunctionAndLine)) {
-		prefix = fmt::format("[{0}::{1}:{2}] ", base_file_name(file), func, line);
+		prefix = fmt::format("[{0}::{1}:{2}] ", std::filesystem::path(file).filename().string(), func, line);
 	}
 
 	// remove this when we remove all legacy logs
