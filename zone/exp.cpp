@@ -1070,7 +1070,7 @@ void Client::AddLevelBasedExp(uint8 exp_percentage, uint8 max_level, bool ignore
 	SetEXP(newexp, GetAAXP());
 }
 
-void Group::SplitExp(uint64 exp, Mob* other) {
+void Group::SplitExp(const uint64 exp, Mob* other) {
 	if (other->CastToNPC()->MerchantType != 0) {
 		return;
 	}
@@ -1079,13 +1079,13 @@ void Group::SplitExp(uint64 exp, Mob* other) {
 		return;
 	}
 
-	auto member_count = GroupCount();
+	const auto member_count = GroupCount();
 	if (!member_count) {
 		return;
 	}
 
 	auto group_experience = exp;
-	auto highest_level    = GetHighestLevel();
+	const auto highest_level    = GetHighestLevel();
 
 	auto group_modifier = 1.0f;
 	if (RuleB(Character, EnableGroupEXPModifier)) {
@@ -1104,30 +1104,30 @@ void Group::SplitExp(uint64 exp, Mob* other) {
 		);
 	}
 
-	auto consider_level = Mob::GetLevelCon(highest_level, other->GetLevel());
+	const uint8 consider_level = Mob::GetLevelCon(highest_level, other->GetLevel());
 	if (consider_level == CON_GRAY) {
 		return;
 	}
 
 	for (const auto& m : members) {
 		if (m && m->IsClient()) {
-			uint32 diff     = m->GetLevel() - highest_level;
-			uint32 max_diff = -(m->GetLevel() * 15 / 10 - m->GetLevel());
+			const int32 diff = m->GetLevel() - highest_level;
+			int32 max_diff = -(m->GetLevel() * 15 / 10 - m->GetLevel());
 
 			if (max_diff > -5) {
 				max_diff = -5;
 			}
 
 			if (diff >= max_diff) {
-				uint64 tmp  = (m->GetLevel() + 3) * (m->GetLevel() + 3) * 75 * 35 / 10;
-				uint64 tmp2 = group_experience / member_count;
+				const uint64 tmp  = (m->GetLevel() + 3) * (m->GetLevel() + 3) * 75 * 35 / 10;
+				const uint64 tmp2 = group_experience / member_count;
 				m->CastToClient()->AddEXP(tmp < tmp2 ? tmp : tmp2, consider_level);
 			}
 		}
 	}
 }
 
-void Raid::SplitExp(uint64 exp, Mob* other) {
+void Raid::SplitExp(const uint64 exp, Mob* other) {
 	if (other->CastToNPC()->MerchantType != 0) {
 		return;
 	}
@@ -1136,36 +1136,36 @@ void Raid::SplitExp(uint64 exp, Mob* other) {
 		return;
 	}
 
-	auto member_count = RaidCount();
+	const auto member_count = RaidCount();
 	if (!member_count) {
 		return;
 	}
 
 	auto raid_experience = exp;
-	auto highest_level   = GetHighestLevel();
+	const auto highest_level   = GetHighestLevel();
 
 	raid_experience = static_cast<uint64>(
 		static_cast<float>(raid_experience) *
 		(1.0f - RuleR(Character, RaidExpMultiplier))
 	);
 
-	auto consider_level = Mob::GetLevelCon(highest_level, other->GetLevel());
+	const auto consider_level = Mob::GetLevelCon(highest_level, other->GetLevel());
 	if (consider_level == CON_GRAY) {
 		return;
 	}
 
 	for (const auto& m : members) {
 		if (m.member) {
-			uint32 diff     = m.member->GetLevel() - highest_level;
-			uint32 max_diff = -(m.member->GetLevel() * 15 / 10 - m.member->GetLevel());
+			const int32 diff     = m.member->GetLevel() - highest_level;
+			int32 max_diff = -(m.member->GetLevel() * 15 / 10 - m.member->GetLevel());
 
 			if (max_diff > -5) {
 				max_diff = -5;
 			}
 
 			if (diff >= max_diff) {
-				uint64 tmp  = (m.member->GetLevel() + 3) * (m.member->GetLevel() + 3) * 75 * 35 / 10;
-				uint64 tmp2 = (raid_experience / member_count) + 1;
+				const uint64 tmp  = (m.member->GetLevel() + 3) * (m.member->GetLevel() + 3) * 75 * 35 / 10;
+				const uint64 tmp2 = (raid_experience / member_count) + 1;
 				m.member->AddEXP(tmp < tmp2 ? tmp : tmp2, consider_level);
 			}
 		}
