@@ -370,13 +370,18 @@ void EQEmuLogSys::ProcessConsoleMessage(
 				}
 			}
 			else {
-				(!is_error ? std::cout : std::cerr) << (is_error ? rang::fgB::red : rang::fgB::gray) << e << " ";
+				(!is_error ? std::cout : std::cerr)
+					<< (is_error ? rang::fgB::red : rang::fgB::gray)
+					<< e
+					<< " ";
 			}
 		}
 	}
 	else {
-		(!is_error ? std::cout : std::cerr) << (is_error ? rang::fgB::red : rang::fgB::gray) << message
-											<< rang::style::reset;
+		(!is_error ? std::cout : std::cerr)
+			<< (is_error ? rang::fgB::red : rang::fgB::gray)
+			<< message
+			<< rang::style::reset;
 	}
 
 	if (!origination_info.zone_short_name.empty()) {
@@ -384,7 +389,7 @@ void EQEmuLogSys::ProcessConsoleMessage(
 			<<
 			rang::fgB::black
 			<<
-			" -- "
+			"-- "
 			<<
 			fmt::format(
 				"[{}] ({}) inst_id [{}]",
