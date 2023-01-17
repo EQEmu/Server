@@ -1439,6 +1439,7 @@ public:
 	uint32 GetCorpseCount() { return database.GetCharacterCorpseCount(CharacterID()); }
 	uint32 GetCorpseID(int corpse) { return database.GetCharacterCorpseID(CharacterID(), corpse); }
 	uint32 GetCorpseItemAt(int corpse_id, int slot_id) { return database.GetCharacterCorpseItemAt(corpse_id, slot_id); }
+	bool HasItemOnCorpse(uint32 item_id) { return database.CharacterHasItemOnCorpse(CharacterID(), item_id); }
 	void SuspendMinion(int value);
 	void Doppelganger(uint16 spell_id, Mob *target, const char *name_override, int pet_count, int pet_duration);
 	void NotifyNewTitlesAvailable();

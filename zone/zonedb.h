@@ -454,6 +454,7 @@ public:
 	uint32		GetCharacterCorpseCount(uint32 char_id);
 	uint32		GetCharacterCorpseID(uint32 char_id, uint8 corpse);
 	uint32		GetCharacterCorpseItemAt(uint32 corpse_id, uint16 slotid);
+	bool		CharacterHasItemOnCorpse(uint32 charid, uint32 item_id);
 	uint32		GetPlayerCorpseTimeLeft(uint8 corpse, uint8 type);
 	void        SendCharacterCorpseToNonInstance(uint32 corpse_db_id);
 

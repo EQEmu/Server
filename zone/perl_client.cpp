@@ -1417,6 +1417,11 @@ uint32_t Perl_Client_GetCorpseItemAt(Client* self, uint32 corpse_id, uint16 slot
 	return self->GetCorpseItemAt(corpse_id, slot_id);
 }
 
+bool Perl_Client_HasItemOnCorpse(Client* self, uint32 item_id)
+{
+	return self->HasItemOnCorpse(item_id);
+}
+
 void Perl_Client_AssignToInstance(Client* self, uint16 instance_id) // @categories Adventures and Expeditions
 {
 	self->AssignToInstance(instance_id);
@@ -3150,6 +3155,7 @@ void perl_register_client()
 	package.add("HasDisciplineLearned", &Perl_Client_HasDisciplineLearned);
 	package.add("HasExpeditionLockout", &Perl_Client_HasExpeditionLockout);
 	package.add("HasItemEquippedByID", &Perl_Client_HasItemEquippedByID);
+	package.add("HasItemOnCorpse", &Perl_Client_HasItemOnCorpse);
 	package.add("HasPEQZoneFlag", &Perl_Client_HasPEQZoneFlag);
 	package.add("HasRecipeLearned", &Perl_Client_HasRecipeLearned);
 	package.add("HasSkill", &Perl_Client_HasSkill);

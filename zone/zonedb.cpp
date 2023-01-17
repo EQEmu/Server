@@ -4071,6 +4071,19 @@ uint32 ZoneDatabase::GetCharacterCorpseItemAt(uint32 corpse_id, uint16 slotid) {
 	return itemid;
 }
 
+bool ZoneDatabase::CharacterHasItemOnCorpse(uint32 corpse_id, uint32 item_id) {
+	// just returns true/false, we don't check count or anything
+	auto query = fmt::format(
+	    "SELECT ci.item_id FROM character_corpse_items ci INNER JOIN character_corpses cc on "
+	    "cc.id = ci.corpse_id WHERE cc.charid = {0} AND (ci.item_id = {1} OR ci.aug_1 = {1} OR ci.aug_2 "
+	    "= {1} OR ci.aug_3 = {1} OR ci.aug_4 = {1} OR ci.aug_5 = {1} OR ci.aug_6 = {1}) LIMIT 1",
+	    corpse_id, item_id);
+	auto results = QueryDatabase(query);
+	if (results.Success() && results.RowCount() > 0)
+		return true;
+	return false;
+}
+
 bool ZoneDatabase::LoadCharacterCorpseData(uint32 corpse_id, PlayerCorpse_Struct* pcs){
 	std::string query = StringFormat(
 		"SELECT           \n"

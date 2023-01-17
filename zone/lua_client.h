@@ -365,6 +365,7 @@ public:
 	int GetCorpseCount();
 	int GetCorpseID(int corpse);
 	int GetCorpseItemAt(int corpse, int slot);
+	bool HasItemOnCorpse(uint32 item_id);
 	void AssignToInstance(int instance_id);
 	void Freeze();
 	void UnFreeze();
