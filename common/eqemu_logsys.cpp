@@ -381,7 +381,8 @@ void EQEmuLogSys::ProcessConsoleMessage(
 		(!is_error ? std::cout : std::cerr)
 			<< (is_error ? rang::fgB::red : rang::fgB::gray)
 			<< message
-			<< rang::style::reset;
+			<< rang::style::reset
+			<< " ";
 	}
 
 	if (!origination_info.zone_short_name.empty()) {
