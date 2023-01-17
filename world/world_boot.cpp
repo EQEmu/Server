@@ -324,6 +324,11 @@ bool WorldBoot::DatabaseLoadRoutines(int argc, char **argv)
 
 	zone_store.LoadZones(content_db);
 
+	if (zone_store.GetZones().empty()) {
+		LogError("Failed to load zones data, check your schema for possible errors");
+		return 1;
+	}
+
 	LogInfo("Clearing groups");
 	database.ClearGroup();
 	LogInfo("Clearing raids");
