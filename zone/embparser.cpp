@@ -171,6 +171,8 @@ const char *QuestEventSubroutines[_LargestEventID] = {
 	"EVENT_BOT_CREATE",
 	"EVENT_AUGMENT_INSERT_CLIENT",
 	"EVENT_AUGMENT_REMOVE_CLIENT",
+	"EVENT_EQUIP_ITEM_BOT",
+	"EVENT_UNEQUIP_ITEM_BOT",
 	// Add new events before these or Lua crashes
 	"EVENT_SPELL_EFFECT_BOT",
 	"EVENT_SPELL_EFFECT_BUFF_TIC_BOT"
@@ -1939,6 +1941,15 @@ void PerlembParser::ExportEventVariables(
 
 		case EVENT_EQUIP_ITEM_CLIENT:
 		case EVENT_UNEQUIP_ITEM_CLIENT: {
+			Seperator sep(data);
+			ExportVar(package_name.c_str(), "item_id", extradata);
+			ExportVar(package_name.c_str(), "item_quantity", sep.arg[0]);
+			ExportVar(package_name.c_str(), "slot_id", sep.arg[1]);
+			break;
+		}
+
+		case EVENT_EQUIP_ITEM_BOT:
+		case EVENT_UNEQUIP_ITEM_BOT: {
 			Seperator sep(data);
 			ExportVar(package_name.c_str(), "item_id", extradata);
 			ExportVar(package_name.c_str(), "item_quantity", sep.arg[0]);

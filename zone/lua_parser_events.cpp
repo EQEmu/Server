@@ -1952,6 +1952,59 @@ void handle_bot_use_skill(
 	lua_setfield(L, -2, "skill_level");
 }
 
+void handle_bot_equip_item(
+	QuestInterface *parse,
+	lua_State* L,
+	Bot* bot,
+	Mob* init,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+) {
+	lua_pushnumber(L, extra_data);
+	lua_setfield(L, -2, "item_id");
+
+	Seperator sep(data.c_str());
+
+	lua_pushnumber(L, std::stoi(sep.arg[0]));
+	lua_setfield(L, -2, "item_quantity");
+
+	lua_pushnumber(L, std::stoi(sep.arg[1]));
+	lua_setfield(L, -2, "slot_id");
+
+	Lua_ItemInst l_item(extra_data);
+	luabind::adl::object l_item_o = luabind::adl::object(L, l_item);
+	l_item_o.push(L);
+	lua_setfield(L, -2, "item");
+}
+
+void handle_bot_unequip_item(
+	QuestInterface *parse,
+	lua_State* L,
+	Bot* bot,
+	Mob* init,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+) {
+	lua_pushnumber(L, extra_data);
+	lua_setfield(L, -2, "item_id");
+
+	Seperator sep(data.c_str());
+
+	lua_pushnumber(L, std::stoi(sep.arg[0]));
+	lua_setfield(L, -2, "item_quantity");
+
+	lua_pushnumber(L, std::stoi(sep.arg[1]));
+	lua_setfield(L, -2, "slot_id");
+
+	Lua_ItemInst l_item(extra_data);
+	luabind::adl::object l_item_o = luabind::adl::object(L, l_item);
+	l_item_o.push(L);
+	lua_setfield(L, -2, "item");
+}
+
+
 #endif
 
 #endif
