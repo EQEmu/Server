@@ -2332,21 +2332,21 @@ void Bot::BotRangedAttack(Mob* other) {
 
 	//break invis when you attack
 	if(invisible) {
-		LogCombatModerate("[Bot::BotRangedAttack] Removing invisibility due to melee attack");
+		LogCombatDetail("Removing invisibility due to melee attack");
 		BuffFadeByEffect(SE_Invisibility);
 		BuffFadeByEffect(SE_Invisibility2);
 		invisible = false;
 	}
 
 	if(invisible_undead) {
-		LogCombatModerate("[Bot::BotRangedAttack] Removing invisibility vs. undead due to melee attack");
+		LogCombatDetail("Removing invisibility vs. undead due to melee attack");
 		BuffFadeByEffect(SE_InvisVsUndead);
 		BuffFadeByEffect(SE_InvisVsUndead2);
 		invisible_undead = false;
 	}
 
 	if(invisible_animals) {
-		LogCombatModerate("[Bot::BotRangedAttack] Removing invisibility vs. animals due to melee attack");
+		LogCombatDetail("Removing invisibility vs. animals due to melee attack");
 		BuffFadeByEffect(SE_InvisVsAnimals);
 		invisible_animals = false;
 	}
@@ -5330,7 +5330,7 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 
 	if ((GetHP() <= 0) || (GetAppearance() == eaDead)) {
 		SetTarget(nullptr);
-		LogCombatModerate("[Bot::Attack] Attempted to attack [{}] while unconscious or, otherwise, appearing dead", other->GetCleanName());
+		LogCombatDetail("Attempted to attack [{}] while unconscious or, otherwise, appearing dead", other->GetCleanName());
 		return false;
 	}
 
@@ -6498,7 +6498,7 @@ bool Bot::CastSpell(
 				(IsSilenced() && !IsDiscipline(spell_id)) ||
 				(IsAmnesiad() && IsDiscipline(spell_id))
 			) {
-				LogSpellsModerate("[Bot::CastSpell] Spell casting canceled: not able to cast now. Valid? [{}] casting [{}] waiting? [{}] spellend? [{}] stunned? [{}] feared? [{}] mezed? [{}] silenced? [{}]",
+				LogSpellsDetail("Spell casting canceled: not able to cast now. Valid? [{}] casting [{}] waiting? [{}] spellend? [{}] stunned? [{}] feared? [{}] mezed? [{}] silenced? [{}]",
 					IsValidSpell(spell_id), casting_spell_id, delaytimer, spellend_timer.Enabled(), IsStunned(), IsFeared(), IsMezzed(), IsSilenced()
 				);
 				if (IsSilenced() && !IsDiscipline(spell_id)) {
@@ -6537,7 +6537,7 @@ bool Bot::CastSpell(
 			InterruptSpell(fizzle_msg, 0x121, spell_id);
 
 			uint32 use_mana = ((spells[spell_id].mana) / 4);
-			LogSpellsModerate("[Bot::CastSpell] Spell casting canceled: fizzled. [{}] mana has been consumed", use_mana);
+			LogSpellsDetail("Spell casting canceled: fizzled. [{}] mana has been consumed", use_mana);
 			SetMana(GetMana() - use_mana);
 			return false;
 		}
@@ -6595,19 +6595,19 @@ bool Bot::IsImmuneToSpell(uint16 spell_id, Mob *caster) {
 			if(caster->IsBot()) {
 				if(spells[spell_id].target_type == ST_Undead) {
 					if((GetBodyType() != BT_SummonedUndead) && (GetBodyType() != BT_Undead) && (GetBodyType() != BT_Vampire)) {
-						LogSpellsModerate("[Bot::IsImmuneToSpell] Bot's target is not an undead");
+						LogSpellsDetail("Bot's target is not an undead");
 						return true;
 					}
 				}
 				if(spells[spell_id].target_type == ST_Summoned) {
 					if((GetBodyType() != BT_SummonedUndead) && (GetBodyType() != BT_Summoned) && (GetBodyType() != BT_Summoned2) && (GetBodyType() != BT_Summoned3)) {
-						LogSpellsModerate("[Bot::IsImmuneToSpell] Bot's target is not a summoned creature");
+						LogSpellsDetail("Bot's target is not a summoned creature");
 						return true;
 					}
 				}
 			}
 
-			LogSpellsModerate("[Bot::IsImmuneToSpell] No bot immunities to spell [{}] found", spell_id);
+			LogSpellsDetail("No bot immunities to spell [{}] found", spell_id);
 		}
 	}
 
@@ -8712,7 +8712,7 @@ void EntityList::ScanCloseClientMobs(std::unordered_map<uint16, Mob*>& close_mob
 		}
 	}
 
-	LogAIScanCloseModerate("[EntityList::ScanCloseClientMobs] Close Client Mob List Size [{}] for mob [{}]", close_mobs.size(), scanning_mob->GetCleanName());
+	LogAIScanCloseDetail("Close Client Mob List Size [{}] for mob [{}]", close_mobs.size(), scanning_mob->GetCleanName());
 }
 
 uint8 Bot::GetNumberNeedingHealedInGroup(uint8 hpr, bool includePets) {

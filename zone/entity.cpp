@@ -697,12 +697,12 @@ void EntityList::AddNPC(NPC *npc, bool send_spawn_packet, bool dont_queue)
 			owner->SetPetID(npc->GetID());
 		}
 	}
-	
+
 	npc_list.insert(std::pair<uint16, NPC *>(npc->GetID(), npc));
 	mob_list.insert(std::pair<uint16, Mob *>(npc->GetID(), npc));
-	
+
 	parse->EventNPC(EVENT_SPAWN, npc, nullptr, "", 0);
-	
+
 	const auto emote_id = npc->GetEmoteID();
 	if (emote_id != 0) {
 		npc->DoNPCEmote(EQ::constants::EmoteEventTypes::OnSpawn, emote_id);
@@ -2956,7 +2956,7 @@ void EntityList::ScanCloseMobs(
 		}
 	}
 
-	LogAIScanCloseModerate(
+	LogAIScanCloseDetail(
 		"[{}] Scanning Close List | list_size [{}] moving [{}]",
 		scanning_mob->GetCleanName(),
 		close_mobs.size(),

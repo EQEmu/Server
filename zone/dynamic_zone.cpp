@@ -241,7 +241,7 @@ void DynamicZone::HandleWorldMessage(ServerPacket* pack)
 				auto expedition = Expedition::FindCachedExpeditionByDynamicZoneID(dz->GetID());
 				if (expedition)
 				{
-					LogExpeditionsModerate("Deleting expedition [{}] from zone cache", expedition->GetID());
+					LogExpeditionsDetail("Deleting expedition [{}] from zone cache", expedition->GetID());
 					zone->expedition_cache.erase(expedition->GetID());
 				}
 			}

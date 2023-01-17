@@ -92,7 +92,7 @@ Expedition* Expedition::TryCreate(Client* requester, DynamicZone& dz_request, bo
 	// request parses leader, members list, and lockouts while validating
 	if (!request.Validate(requester))
 	{
-		LogExpeditionsModerate("[{}] request by [{}] denied", request.GetExpeditionName(), requester->GetName());
+		LogExpeditionsDetail("[{}] request by [{}] denied", request.GetExpeditionName(), requester->GetName());
 		return nullptr;
 	}
 
@@ -432,7 +432,7 @@ void Expedition::SendClientExpeditionInvite(
 		return;
 	}
 
-	LogExpeditionsModerate(
+	LogExpeditionsDetail(
 		"Sending expedition [{}] invite to player [{}] inviter [{}] swap name [{}]",
 		m_id, client->GetName(), inviter_name, swap_remove_name
 	);
@@ -577,7 +577,7 @@ void Expedition::DzInviteResponse(Client* add_client, bool accepted, const std::
 		return;
 	}
 
-	LogExpeditionsModerate("Invite response by [{}] accepted [{}] swap_name [{}]",
+	LogExpeditionsDetail("Invite response by [{}] accepted [{}] swap_name [{}]",
 		add_client->GetName(), accepted, swap_remove_name);
 
 	// a null leader_client is handled by SendLeaderMessage fallbacks
@@ -683,7 +683,7 @@ void Expedition::TryAddClient(
 		return;
 	}
 
-	LogExpeditionsModerate(
+	LogExpeditionsDetail(
 		"Add player request for expedition [{}] by inviter [{}] add name [{}] swap name [{}]",
 		m_id, inviter_name, add_client->GetName(), swap_remove_name
 	);

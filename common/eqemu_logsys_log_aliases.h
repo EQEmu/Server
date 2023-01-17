@@ -37,8 +37,8 @@
 } while (0)
 
 #define LogAIDetail(message, ...) do {\
-    if (LogSys.IsLogEnabled(Logs::Moderate, Logs::AI))\
-        OutF(LogSys, Logs::Moderate, Logs::AI, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+    if (LogSys.IsLogEnabled(Logs::Detail, Logs::AI))\
+        OutF(LogSys, Logs::Detail, Logs::AI, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
 #define LogAggro(message, ...) do {\
@@ -74,11 +74,6 @@
 #define LogCombat(message, ...) do {\
     if (LogSys.IsLogEnabled(Logs::General, Logs::Combat))\
         OutF(LogSys, Logs::General, Logs::Combat, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
-} while (0)
-
-#define LogCombatModerate(message, ...) do {\
-    if (LogSys.IsLogEnabled(Logs::Moderate, Logs::Combat))\
-        OutF(LogSys, Logs::Moderate, Logs::Combat, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
 #define LogCombatDetail(message, ...) do {\
@@ -249,11 +244,6 @@
 #define LogSpells(message, ...) do {\
     if (LogSys.IsLogEnabled(Logs::General, Logs::Spells))\
         OutF(LogSys, Logs::General, Logs::Spells, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
-} while (0)
-
-#define LogSpellsModerate(message, ...) do {\
-    if (LogSys.IsLogEnabled(Logs::Moderate, Logs::Spells))\
-        OutF(LogSys, Logs::Moderate, Logs::Spells, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
 #define LogSpellsDetail(message, ...) do {\
@@ -527,11 +517,6 @@
         OutF(LogSys, Logs::General, Logs::AIScanClose, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
-#define LogAIScanCloseModerate(message, ...) do {\
-    if (LogSys.IsLogEnabled(Logs::Moderate, Logs::AIScanClose))\
-        OutF(LogSys, Logs::Moderate, Logs::AIScanClose, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
-} while (0)
-
 #define LogAIScanCloseDetail(message, ...) do {\
     if (LogSys.IsLogEnabled(Logs::Detail, Logs::AIScanClose))\
         OutF(LogSys, Logs::Detail, Logs::AIScanClose, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
@@ -778,11 +763,6 @@
 } while (0)
 
 // manually created
-
-#define LogExpeditionsModerate(message, ...) do {\
-    if (LogSys.IsLogEnabled(Logs::Moderate, Logs::Expeditions))\
-        OutF(LogSys, Logs::Moderate, Logs::Expeditions, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
-} while (0)
 
 #define LogBugs(message, ...) do {\
     if (LogSys.IsLogEnabled(Logs::General, Logs::Bugs))\
