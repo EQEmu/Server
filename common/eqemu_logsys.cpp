@@ -297,10 +297,10 @@ void EQEmuLogSys::ProcessConsoleMessage(
 		<< rang::style::bold
 		<< fmt::format("{:>6}", GetPlatformName().substr(0, 6))
 		<< rang::style::reset
-		<< (is_error ? rang::fgB::red : rang::fgB::gray)
 		<< " | "
+		<< (is_error ? rang::fgB::red : rang::fgB::gray)
 		<< rang::style::bold
-		<< fmt::format("{:>10}", fmt::format("{}", Logs::LogCategoryName[log_category]).substr(0, 10))
+		<< fmt::format("{:^10}", fmt::format("{}", Logs::LogCategoryName[log_category]).substr(0, 10))
 		<< rang::style::reset
 		<< rang::fgB::gray
 		<< " | "
@@ -321,25 +321,25 @@ void EQEmuLogSys::ProcessConsoleMessage(
 	}
 
 	if (log_category == Logs::LogCategory::MySQLQuery) {
-		auto s = Strings::Split(message, "--");
+		auto        s     = Strings::Split(message, "--");
 		std::string query = Strings::Trim(s[0]);
-		std::string meta = Strings::Trim(s[1]);
+		std::string meta  = Strings::Trim(s[1]);
 
 		std::cout <<
-		  rang::fgB::green
-		  <<
-		  query
-		  <<
-		  rang::style::reset;
+				  rang::fgB::green
+				  <<
+				  query
+				  <<
+				  rang::style::reset;
 
 		std::cout <<
-		  rang::fgB::black
-		  <<
-		  " -- "
-		  <<
-		  meta
-		  <<
-		  rang::style::reset;
+				  rang::fgB::black
+				  <<
+				  " -- "
+				  <<
+				  meta
+				  <<
+				  rang::style::reset;
 	}
 	else if (Strings::Contains(message, "[")) {
 		for (auto &e: Strings::Split(message, " ")) {
@@ -349,6 +349,7 @@ void EQEmuLogSys::ProcessConsoleMessage(
 				e = Strings::Replace(e, "]", "");
 
 				bool is_upper = false;
+
 				for (int i = 0; i < strlen(e.c_str()); i++) {
 					if (isupper(e[i])) {
 						is_upper = true;
@@ -356,19 +357,43 @@ void EQEmuLogSys::ProcessConsoleMessage(
 				}
 
 				if (!is_upper) {
-					std::cout << "[" << rang::style::bold << rang::fgB::yellow << e << rang::style::reset << "] ";
+					(!is_error ? std::cout : std::cerr)
+						<< "["
+						<< rang::style::bold
+						<< rang::fgB::yellow
+						<< e
+						<< rang::style::reset
+						<< "] ";
 				}
 				else {
-					std::cout << "[" << e << "] ";
+					(!is_error ? std::cout : std::cerr) << "[" << e << "] ";
 				}
 			}
 			else {
-				std::cout << (is_error ? rang::fgB::red : rang::fgB::gray) << e << " ";
+				(!is_error ? std::cout : std::cerr) << (is_error ? rang::fgB::red : rang::fgB::gray) << e << " ";
 			}
 		}
 	}
 	else {
-		(!is_error ? std::cout : std::cerr) << (is_error ? rang::fgB::red : rang::fgB::gray) << message << rang::style::reset;
+		(!is_error ? std::cout : std::cerr) << (is_error ? rang::fgB::red : rang::fgB::gray) << message
+											<< rang::style::reset;
+	}
+
+	if (!origination_info.zone_short_name.empty()) {
+		(!is_error ? std::cout : std::cerr)
+			<<
+			rang::fgB::black
+			<<
+			" -- "
+			<<
+			fmt::format(
+				"[{}] ({}) inst_id [{}]",
+				origination_info.zone_short_name,
+				origination_info.zone_long_name,
+				origination_info.instance_id
+			)
+			<<
+			rang::style::reset;
 	}
 
 	(!is_error ? std::cout : std::cerr) << std::endl;
