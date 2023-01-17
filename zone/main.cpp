@@ -309,6 +309,11 @@ int main(int argc, char** argv) {
 
 	zone_store.LoadZones(content_db);
 
+	if (zone_store.GetZones().empty()) {
+		LogError("Failed to load zones data, check your schema for possible errors");
+		return 1;
+	}
+
 	// load these here for now until spells and items can be truly repointed to "content_db"
 	database.SetSharedItemsCount(content_db.GetItemsCount());
 	database.SetSharedSpellsCount(content_db.GetSpellsCount());

@@ -249,66 +249,6 @@ void EQEmuLogSys::ProcessLogWrite(
  * @param log_category
  * @return
  */
-uint16 EQEmuLogSys::GetWindowsConsoleColorFromCategory(uint16 log_category)
-{
-	switch (log_category) {
-		case Logs::Status:
-		case Logs::Normal:
-			return Console::Color::Yellow;
-		case Logs::MySQLError:
-		case Logs::Error:
-		case Logs::QuestErrors:
-			return Console::Color::LightRed;
-		case Logs::MySQLQuery:
-		case Logs::Debug:
-			return Console::Color::LightGreen;
-		case Logs::Quests:
-			return Console::Color::LightCyan;
-		case Logs::Commands:
-		case Logs::Mercenaries:
-			return Console::Color::LightMagenta;
-		case Logs::Crash:
-			return Console::Color::LightRed;
-		default:
-			return Console::Color::Yellow;
-	}
-}
-
-/**
- * @param log_category
- * @return
- */
-std::string EQEmuLogSys::GetLinuxConsoleColorFromCategory(uint16 log_category)
-{
-	switch (log_category) {
-		case Logs::Status:
-		case Logs::Normal:
-			return LC_YELLOW;
-		case Logs::MySQLError:
-		case Logs::QuestErrors:
-		case Logs::Warning:
-		case Logs::Critical:
-		case Logs::Error:
-			return LC_RED;
-		case Logs::MySQLQuery:
-		case Logs::Debug:
-			return LC_GREEN;
-		case Logs::Quests:
-			return LC_CYAN;
-		case Logs::Commands:
-		case Logs::Mercenaries:
-			return LC_MAGENTA;
-		case Logs::Crash:
-			return LC_RED;
-		default:
-			return LC_WHITE;
-	}
-}
-
-/**
- * @param log_category
- * @return
- */
 uint16 EQEmuLogSys::GetGMSayColorFromCategory(uint16 log_category)
 {
 	switch (log_category) {
@@ -334,8 +274,6 @@ uint16 EQEmuLogSys::GetGMSayColorFromCategory(uint16 log_category)
 	}
 }
 
-size_t padding_size = 15;
-size_t function_padding_size = 0;
 
 /**
  * @param debug_level
@@ -351,13 +289,15 @@ void EQEmuLogSys::ProcessConsoleMessage(
 )
 {
 
-	std::cout
+	bool is_error = (log_category == Logs::LogCategory::Error || log_category == Logs::LogCategory::MySQLError);
+
+	(!is_error ? std::cout : std::cerr)
 		<< ""
 		<< rang::fgB::black
 		<< rang::style::bold
 		<< fmt::format("{:>6}", GetPlatformName().substr(0, 6))
 		<< rang::style::reset
-		<< rang::fgB::gray
+		<< (is_error ? rang::fgB::red : rang::fgB::gray)
 		<< " | "
 		<< rang::style::bold
 		<< fmt::format("{:>10}", fmt::format("{}", Logs::LogCategoryName[log_category]).substr(0, 10))
@@ -371,7 +311,7 @@ void EQEmuLogSys::ProcessConsoleMessage(
 		<< " ";
 
 	if (RuleB(Logging, PrintFileFunctionAndLine)) {
-		std::cout
+		(!is_error ? std::cout : std::cerr)
 			<< ""
 			<< rang::fgB::green
 			<< rang::style::bold
@@ -423,33 +363,15 @@ void EQEmuLogSys::ProcessConsoleMessage(
 				}
 			}
 			else {
-				std::cout << rang::fgB::gray << e << " ";
+				std::cout << (is_error ? rang::fgB::red : rang::fgB::gray) << e << " ";
 			}
 		}
 	}
 	else {
-		std::cout << rang::fgB::gray << message << rang::style::reset;
+		(!is_error ? std::cout : std::cerr) << (is_error ? rang::fgB::red : rang::fgB::gray) << message << rang::style::reset;
 	}
 
-	std::cout << std::endl;
-
-	// fmt::format("[{}] [{}] {}", GetPlatformName(), Logs::LogCategoryName[log_category], prefix + output_message)
-
-//#ifdef _WINDOWS
-//	HANDLE  console_handle;
-//	console_handle = GetStdHandle(STD_OUTPUT_HANDLE);
-//	CONSOLE_FONT_INFOEX info = { 0 };
-//	info.cbSize = sizeof(info);
-//	info.dwFontSize.Y = 12; // leave X as zero
-//	info.FontWeight = FW_NORMAL;
-//	wcscpy(info.FaceName, L"Lucida Console");
-//	SetCurrentConsoleFontEx(console_handle, NULL, &info);
-//	SetConsoleTextAttribute(console_handle, EQEmuLogSys::GetWindowsConsoleColorFromCategory(log_category));
-//	std::cout << message << "\n";
-//	SetConsoleTextAttribute(console_handle, Console::Color::White);
-//#else
-//	std::cout << EQEmuLogSys::GetLinuxConsoleColorFromCategory(log_category) << message << LC_RESET << std::endl;
-//#endif
+	(!is_error ? std::cout : std::cerr) << std::endl;
 
 	m_on_log_console_hook(log_category, message);
 }

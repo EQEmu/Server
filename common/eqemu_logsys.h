@@ -386,9 +386,6 @@ private:
 	std::string                                                                   m_platform_file_name;
 	std::string                                                                   m_log_path;
 
-	std::string GetLinuxConsoleColorFromCategory(uint16 log_category);
-	uint16 GetWindowsConsoleColorFromCategory(uint16 log_category);
-
 	void ProcessConsoleMessage(
 		uint16 log_category,
 		const std::string &message,
