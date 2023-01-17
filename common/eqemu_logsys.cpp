@@ -110,12 +110,8 @@ EQEmuLogSys *EQEmuLogSys::LoadLogSettingsDefaults()
 	/**
 	 * RFC 5424
 	 */
-	log_settings[Logs::Emergency].log_to_console = static_cast<uint8>(Logs::General);
-	log_settings[Logs::Alert].log_to_console     = static_cast<uint8>(Logs::General);
-	log_settings[Logs::Critical].log_to_console  = static_cast<uint8>(Logs::General);
 	log_settings[Logs::Error].log_to_console     = static_cast<uint8>(Logs::General);
 	log_settings[Logs::Warning].log_to_console   = static_cast<uint8>(Logs::General);
-	log_settings[Logs::Notice].log_to_console    = static_cast<uint8>(Logs::General);
 	log_settings[Logs::Info].log_to_console      = static_cast<uint8>(Logs::General);
 
 	/**

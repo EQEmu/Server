@@ -104,10 +104,10 @@ namespace Logs {
 		MobAppearance,
 		Info,
 		Warning,
-		Critical,
-		Emergency,
+		Critical, // deprecated
+		Emergency, // deprecated
 		Alert,
-		Notice,
+		Notice, // deprecated
 		AIScanClose,
 		AIYellForHelp,
 		AICastBeneficialClose,
@@ -199,10 +199,10 @@ namespace Logs {
 		"MobAppearance",
 		"Info",
 		"Warning",
-		"Critical",
-		"Emergency",
+		"Critical (Deprecated)",
+		"Emergency (Deprecated)",
 		"Alert",
-		"Notice",
+		"Notice (Deprecated)",
 		"AI Scan",
 		"AI Yell",
 		"AI CastBeneficial",
