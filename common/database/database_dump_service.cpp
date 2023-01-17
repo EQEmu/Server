@@ -324,7 +324,7 @@ void DatabaseDumpService::Dump()
 	}
 
 	if (!tables_to_dump.empty()) {
-		LogInfo("Dumping Tables [{}]", tables_to_dump);
+		LogInfo("Dumping Tables [{}]", Strings::Trim(tables_to_dump));
 	}
 
 	LogInfo("Database dump created at [{}.sql]", GetDumpFileNameWithPath());
