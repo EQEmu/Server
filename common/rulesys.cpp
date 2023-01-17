@@ -34,7 +34,7 @@ const char *RuleManager::s_categoryNames[_CatCount + 1] = {
 	"InvalidCategory"
 };
 
-const RuleManager::RuleInfo RuleManager::s_RuleInfo[_IntRuleCount + _RealRuleCount + _BoolRuleCount + 1] = {
+const RuleManager::RuleInfo RuleManager::s_RuleInfo[IntRuleCount + RealRuleCount + BoolRuleCount + 1] = {
 	/* this is done in three steps so we can reliably get to them by index*/
 	#define RULE_INT(category_name, rule_name, default_value, notes) \
 		{ #category_name ":" #rule_name, Category__##category_name, IntRule, Int__##rule_name, notes },
@@ -212,14 +212,14 @@ std::string RuleManager::_GetRuleName(RuleType type, uint16 index) {
 		case IntRule:
 			return s_RuleInfo[index].name;
 		case RealRule:
-			return s_RuleInfo[index + _IntRuleCount].name;
+			return s_RuleInfo[index + IntRuleCount].name;
 		case BoolRule:
-			return s_RuleInfo[index + _IntRuleCount + _RealRuleCount].name;
+			return s_RuleInfo[index + IntRuleCount + RealRuleCount].name;
 		default:
 			break;
 	}
 
-	return s_RuleInfo[_IntRuleCount + _RealRuleCount + _BoolRuleCount].name;
+	return s_RuleInfo[IntRuleCount + RealRuleCount + BoolRuleCount].name;
 }
 
 //assumes index is valid!
@@ -228,14 +228,14 @@ const std::string &RuleManager::_GetRuleNotes(RuleType type, uint16 index) {
 		case IntRule:
 			return s_RuleInfo[index].notes;
 		case RealRule:
-			return s_RuleInfo[index + _IntRuleCount].notes;
+			return s_RuleInfo[index + IntRuleCount].notes;
 		case BoolRule:
-			return s_RuleInfo[index + _IntRuleCount + _RealRuleCount].notes;
+			return s_RuleInfo[index + IntRuleCount + RealRuleCount].notes;
 		default:
 			break;
 	}
 
-	return s_RuleInfo[_IntRuleCount + _RealRuleCount + _BoolRuleCount].notes;
+	return s_RuleInfo[IntRuleCount + RealRuleCount + BoolRuleCount].notes;
 }
 
 bool RuleManager::LoadRules(Database *db, const std::string &rule_set_name, bool reload) {
@@ -325,15 +325,15 @@ void RuleManager::SaveRules(Database *db, const std::string &rule_set_name) {
 	}
 
 	int i;
-	for (i = 0; i < _IntRuleCount; i++) {
+	for (i = 0; i < IntRuleCount; i++) {
 		_SaveRule(db, IntRule, i);
 	}
 
-	for (i = 0; i < _RealRuleCount; i++) {
+	for (i = 0; i < RealRuleCount; i++) {
 		_SaveRule(db, RealRule, i);
 	}
 
-	for (i = 0; i < _BoolRuleCount; i++) {
+	for (i = 0; i < BoolRuleCount; i++) {
 		_SaveRule(db, BoolRule, i);
 	}
 }
@@ -536,7 +536,7 @@ bool RuleManager::RestoreRuleNotes(Database *db)
 				}
 			}
 
-			return s_RuleInfo[_IntRuleCount + _RealRuleCount + _BoolRuleCount];
+			return s_RuleInfo[IntRuleCount + RealRuleCount + BoolRuleCount];
 		}(e.rule_name);
 
 		if (Strings::Contains(rule.name, e.rule_name)) {
