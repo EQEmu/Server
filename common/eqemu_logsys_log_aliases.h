@@ -211,16 +211,6 @@
         OutF(LogSys, Logs::Detail, Logs::Pathing, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
-#define LogQSServer(message, ...) do {\
-    if (LogSys.IsLogEnabled(Logs::General, Logs::QSServer))\
-        OutF(LogSys, Logs::General, Logs::QSServer, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
-} while (0)
-
-#define LogQSServerDetail(message, ...) do {\
-    if (LogSys.IsLogEnabled(Logs::Detail, Logs::QSServer))\
-        OutF(LogSys, Logs::Detail, Logs::QSServer, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
-} while (0)
-
 #define LogQuests(message, ...) do {\
     if (LogSys.IsLogEnabled(Logs::General, Logs::Quests))\
         OutF(LogSys, Logs::General, Logs::Quests, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\

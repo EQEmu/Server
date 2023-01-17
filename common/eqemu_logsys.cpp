@@ -197,9 +197,6 @@ void EQEmuLogSys::ProcessLogWrite(
 uint16 EQEmuLogSys::GetGMSayColorFromCategory(uint16 log_category)
 {
 	switch (log_category) {
-		case Logs::Status:
-		case Logs::Normal:
-			return Chat::Yellow;
 		case Logs::MySQLError:
 		case Logs::QuestErrors:
 		case Logs::Error:
