@@ -106,7 +106,7 @@ namespace Logs {
 		Warning,
 		Critical, // deprecated
 		Emergency, // deprecated
-		Alert,
+		Alert, // deprecated
 		Notice, // deprecated
 		AIScanClose,
 		AIYellForHelp,
@@ -201,7 +201,7 @@ namespace Logs {
 		"Warning",
 		"Critical (Deprecated)",
 		"Emergency (Deprecated)",
-		"Alert",
+		"Alert (Deprecated)",
 		"Notice (Deprecated)",
 		"AI Scan",
 		"AI Yell",
