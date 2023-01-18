@@ -12012,7 +12012,7 @@ void Client::UseAugmentContainer(int container_slot)
 
 PlayerEvent::PlayerEvent Client::GetPlayerEvent()
 {
-	auto e = PlayerEvent::PlayerEvenbool IsDiscovered(uint32 item_id);t{};
+	auto e = PlayerEvent::PlayerEvent{};
 	e.account_id      = AccountID();
 	e.character_id    = CharacterID();
 	e.character_name  = GetCleanName();
