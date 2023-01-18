@@ -226,6 +226,9 @@ void EQEmuLogSys::ProcessConsoleMessage(
 		log_category == Logs::LogCategory::MySQLError ||
 		log_category == Logs::LogCategory::QuestErrors
 	);
+	bool is_warning = (
+		log_category == Logs::LogCategory::Warning
+	);
 
 	(!is_error ? std::cout : std::cerr)
 		<< ""
@@ -235,7 +238,7 @@ void EQEmuLogSys::ProcessConsoleMessage(
 		<< rang::style::reset
 		<< rang::fgB::gray
 		<< " | "
-		<< (is_error ? rang::fgB::red : rang::fgB::gray)
+		<< (is_error || is_warning ? rang::fgB::red : rang::fgB::gray)
 		<< rang::style::bold
 		<< fmt::format("{:^10}", fmt::format("{}", Logs::LogCategoryName[log_category]).substr(0, 10))
 		<< rang::style::reset
