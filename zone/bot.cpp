@@ -3380,7 +3380,7 @@ void Bot::AI_Process()
 				TEST_COMBATANTS();
 				if (attack_timer.Check()) { // Process primary weapon attacks
 
-					Attack(tar, EQ::invslot::slotPrimary);
+					Mob::Attack(tar, EQ::invslot::slotPrimary);
 
 					TEST_COMBATANTS();
 					TriggerDefensiveProcs(tar, EQ::invslot::slotPrimary, false);
@@ -3394,19 +3394,19 @@ void Bot::AI_Process()
 					if (CanThisClassDoubleAttack()) {
 
 						if (CheckBotDoubleAttack()) {
-							Attack(tar, EQ::invslot::slotPrimary, true);
+							Mob::Attack(tar, EQ::invslot::slotPrimary, true);
 						}
 
 						TEST_COMBATANTS();
 						if (GetSpecialAbility(SPECATK_TRIPLE) && CheckBotDoubleAttack(true)) {
 							// tripleSuccess = true;
-							Attack(tar, EQ::invslot::slotPrimary, true);
+							Mob::Attack(tar, EQ::invslot::slotPrimary, true);
 						}
 
 						TEST_COMBATANTS();
 						// quad attack, does this belong here??
 						if (GetSpecialAbility(SPECATK_QUAD) && CheckBotDoubleAttack(true)) {
-							Attack(tar, EQ::invslot::slotPrimary, true);
+							Mob::Attack(tar, EQ::invslot::slotPrimary, true);
 						}
 					}
 
@@ -3418,10 +3418,10 @@ void Bot::AI_Process()
 						if (zone->random.Int(0, 100) < flurrychance) {
 
 							MessageString(Chat::NPCFlurry, YOU_FLURRY);
-							Attack(tar, EQ::invslot::slotPrimary, false);
+							Mob::Attack(tar, EQ::invslot::slotPrimary, false);
 
 							TEST_COMBATANTS();
-							Attack(tar, EQ::invslot::slotPrimary, false);
+							Mob::Attack(tar, EQ::invslot::slotPrimary, false);
 						}
 					}
 
@@ -3434,7 +3434,7 @@ void Bot::AI_Process()
 						if (p_item && p_item->GetItem()->IsType2HWeapon()) {
 
 							if (zone->random.Int(0, 100) < ExtraAttackChanceBonus) {
-								Attack(tar, EQ::invslot::slotPrimary, false);
+								Mob::Attack(tar, EQ::invslot::slotPrimary, false);
 							}
 						}
 					}
@@ -3472,7 +3472,7 @@ void Bot::AI_Process()
 							float random = zone->random.Real(0, 1);
 							if (random < DualWieldProbability) { // Max 78% of DW
 
-								Attack(tar, EQ::invslot::slotSecondary);	// Single attack with offhand
+								Mob::Attack(tar, EQ::invslot::slotSecondary);	// Single attack with offhand
 
 								TEST_COMBATANTS();
 								TryCombatProcs(s_item, tar, EQ::invslot::slotSecondary);
@@ -3481,7 +3481,7 @@ void Bot::AI_Process()
 								if (CanThisClassDoubleAttack() && CheckBotDoubleAttack()) {
 
 									if (tar->GetHP() > -10) {
-										Attack(tar, EQ::invslot::slotSecondary);	// Single attack with offhand
+										Mob::Attack(tar, EQ::invslot::slotSecondary);	// Single attack with offhand
 									}
 								}
 							}
@@ -5319,171 +5319,6 @@ void Bot::Damage(Mob *from, int64 damage, uint16 spell_id, EQ::skills::SkillType
 			}
 		}
 	}
-}
-
-bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, bool IsFromSpell, ExtraAttackOptions *opts) {
-	if (!other) {
-		SetTarget(nullptr);
-		LogErrorDetail("[Bot::Attack] A null Mob object was passed to Bot::Attack for evaluation!");
-		return false;
-	}
-
-	if ((GetHP() <= 0) || (GetAppearance() == eaDead)) {
-		SetTarget(nullptr);
-		LogCombatModerate("[Bot::Attack] Attempted to attack [{}] while unconscious or, otherwise, appearing dead", other->GetCleanName());
-		return false;
-	}
-
-	//if(!GetTarget() || GetTarget() != other) // NPC::Attack() doesn't do this
-	//	SetTarget(other);
-
-	// apparently, we always want our target to be 'other'..why not just set it?
-	SetTarget(other);
-	// takes more to compare a call result, load for a call, load a compare to address and compare, and finally
-	// push a value to an address than to just load for a call and push a value to an address.
-
-	LogCombat("[Bot::Attack] Attacking [{}] with hand [{}] [{}]", other->GetCleanName(), Hand, (FromRiposte ? "(this is a riposte)" : ""));
-	if ((IsCasting() && (GetClass() != BARD) && !IsFromSpell) || (!IsAttackAllowed(other))) {
-		if(GetOwnerID())
-			entity_list.MessageClose(this, 1, 200, 10, "%s says, '%s is not a legal target master.'", GetCleanName(), GetTarget()->GetCleanName());
-
-		if(other) {
-			RemoveFromHateList(other);
-			LogCombat("[Bot::Attack] I am not allowed to attack [{}]", other->GetCleanName());
-		}
-		return false;
-	}
-
-	if(DivineAura()) {//cant attack while invulnerable
-		LogCombat("[Bot::Attack] Attack canceled, Divine Aura is in effect");
-		return false;
-	}
-
-	FaceTarget(GetTarget());
-	EQ::ItemInstance* weapon = nullptr;
-	if (Hand == EQ::invslot::slotPrimary) {
-		weapon = GetBotItem(EQ::invslot::slotPrimary);
-		OffHandAtk(false);
-	}
-
-	if (Hand == EQ::invslot::slotSecondary) {
-		weapon = GetBotItem(EQ::invslot::slotSecondary);
-		OffHandAtk(true);
-	}
-
-	if(weapon != nullptr) {
-		if (!weapon->IsWeapon()) {
-			LogCombat("[Bot::Attack] Attack canceled, Item [{}] ([{}]) is not a weapon", weapon->GetItem()->Name, weapon->GetID());
-			return false;
-		}
-		LogCombat("[Bot::Attack] Attacking with weapon: [{}] ([{}])", weapon->GetItem()->Name, weapon->GetID());
-	}
-	else
-		LogCombat("[Bot::Attack] Attacking without a weapon");
-
-	// calculate attack_skill and skillinuse depending on hand and weapon
-	// also send Packet to near clients
-	DamageHitInfo my_hit;
-	my_hit.skill = AttackAnimation(Hand, weapon);
-	LogCombat("[Bot::Attack] Attacking with [{}] in slot [{}] using skill [{}]", weapon?weapon->GetItem()->Name:"Fist", Hand, my_hit.skill);
-
-	// Now figure out damage
-	my_hit.damage_done = 1;
-	my_hit.min_damage = 0;
-	uint8 mylevel = GetLevel() ? GetLevel() : 1;
-	int64 hate = 0;
-	if (weapon)
-		hate = (weapon->GetItem()->Damage + weapon->GetItem()->ElemDmgAmt);
-
-	my_hit.base_damage = GetWeaponDamage(other, weapon, &hate);
-	if (hate == 0 && my_hit.base_damage > 1)
-		hate = my_hit.base_damage;
-
-	//if weapon damage > 0 then we know we can hit the target with this weapon
-	//otherwise we cannot and we set the damage to -5 later on
-	if (my_hit.base_damage > 0) {
-		my_hit.min_damage = 0;
-
-		// ***************************************************************
-		// *** Calculate the damage bonus, if applicable, for this hit ***
-		// ***************************************************************
-
-#ifndef EQEMU_NO_WEAPON_DAMAGE_BONUS
-
-		// If you include the preprocessor directive "#define EQEMU_NO_WEAPON_DAMAGE_BONUS", that indicates that you do not
-		// want damage bonuses added to weapon damage at all. This feature was requested by ChaosSlayer on the EQEmu Forums.
-		//
-		// This is not recommended for normal usage, as the damage bonus represents a non-trivial component of the DPS output
-		// of weapons wielded by higher-level melee characters (especially for two-handed weapons).
-		int ucDamageBonus = 0;
-		if (Hand == EQ::invslot::slotPrimary && GetLevel() >= 28 && IsWarriorClass()) {
-			// Damage bonuses apply only to hits from the main hand (Hand == MainPrimary) by characters level 28 and above
-			// who belong to a melee class. If we're here, then all of these conditions apply.
-			ucDamageBonus = GetWeaponDamageBonus(weapon ? weapon->GetItem() : (const EQ::ItemData*) nullptr);
-			my_hit.min_damage = ucDamageBonus;
-			hate += ucDamageBonus;
-		}
-#endif
-		//Live AA - Sinister Strikes *Adds weapon damage bonus to offhand weapon.
-		if (Hand == EQ::invslot::slotSecondary) {
-			if (aabonuses.SecondaryDmgInc || itembonuses.SecondaryDmgInc || spellbonuses.SecondaryDmgInc) {
-				ucDamageBonus = GetWeaponDamageBonus(weapon ? weapon->GetItem() : (const EQ::ItemData*) nullptr);
-				my_hit.min_damage = ucDamageBonus;
-				hate += ucDamageBonus;
-			}
-		}
-
-		LogCombat("[Bot::Attack] Damage calculated: base [{}] min damage [{}] skill [{}]", my_hit.base_damage, my_hit.min_damage, my_hit.skill);
-
-		int hit_chance_bonus = 0;
-		my_hit.offense = offense(my_hit.skill);
-		my_hit.hand = Hand;
-
-		if (opts) {
-			my_hit.base_damage *= opts->damage_percent;
-			my_hit.base_damage += opts->damage_flat;
-			hate *= opts->hate_percent;
-			hate += opts->hate_flat;
-			hit_chance_bonus += opts->hit_chance;
-		}
-
-		my_hit.tohit = GetTotalToHit(my_hit.skill, hit_chance_bonus);
-
-		DoAttack(other, my_hit, opts, FromRiposte);
-
-		LogCombat("[Bot::Attack] Final damage after all reductions: [{}]", my_hit.damage_done);
-	} else {
-		my_hit.damage_done = DMG_INVULNERABLE;
-	}
-
-	// Hate Generation is on a per swing basis, regardless of a hit, miss, or block, its always the same.
-	// If we are this far, this means we are atleast making a swing.
-	other->AddToHateList(this, hate);
-
-	///////////////////////////////////////////////////////////
-	////// Send Attack Damage
-	///////////////////////////////////////////////////////////
-	other->Damage(this, my_hit.damage_done, SPELL_UNKNOWN, my_hit.skill);
-
-	if (GetHP() < 0)
-		return false;
-
-	MeleeLifeTap(my_hit.damage_done);
-
-	if (my_hit.damage_done > 0)
-		CheckNumHitsRemaining(NumHit::OutgoingHitSuccess);
-
-	CommonBreakInvisibleFromCombat();
-	if (spellbonuses.NegateIfCombat)
-		BuffFadeByEffect(SE_NegateIfCombat);
-
-	if(GetTarget())
-		TriggerDefensiveProcs(other, Hand, true, my_hit.damage_done);
-
-	if (my_hit.damage_done > 0)
-		return true;
-	else
-		return false;
 }
 
 //proc chance includes proc bonus
