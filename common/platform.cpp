@@ -55,14 +55,12 @@ std::string GetPlatformName()
 			return "UCS";
 		case EQEmuExePlatform::ExePlatformLogin:
 			return "Login";
-		case EQEmuExePlatform::ExePlatformSocket_Server:
-			return "SocketServer";
 		case EQEmuExePlatform::ExePlatformSharedMemory:
-			return "SharedMemory";
+			return "SharedMem";
 		case EQEmuExePlatform::ExePlatformClientImport:
-			return "ClientImport";
+			return "Import";
 		case EQEmuExePlatform::ExePlatformClientExport:
-			return "ClientExport";
+			return "Export";
 		case EQEmuExePlatform::ExePlatformLaunch:
 			return "Launch";
 		case EQEmuExePlatform::ExePlatformHC:

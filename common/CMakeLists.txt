@@ -652,6 +652,7 @@ SET(common_headers
     patches/uf_limits.h
     patches/uf_ops.h
     patches/uf_structs.h
+    termcolor/rang.hpp
     stacktrace/backward.hpp
     StackWalker/StackWalker.h
     util/memory_stream.h

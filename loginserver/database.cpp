@@ -41,7 +41,7 @@ Database::Database(
 		exit(1);
 	}
 	else {
-		LogStatus("Using database [{0}] at [{1}:{2}]", name, host, port);
+		LogInfo("Using database [{0}] at [{1}:{2}]", name, host, port);
 	}
 }
 

@@ -1,4 +1,5 @@
 #include "world_server_cli.h"
+
 /**
  * @param argc
  * @param argv
@@ -26,6 +27,7 @@ void WorldserverCLI::CommandHandler(int argc, char **argv)
 	function_map["database:schema"]             = &WorldserverCLI::DatabaseGetSchema;
 	function_map["database:dump"]               = &WorldserverCLI::DatabaseDump;
 	function_map["test:test"]                   = &WorldserverCLI::TestCommand;
+	function_map["test:colors"]                 = &WorldserverCLI::TestColors;
 	function_map["test:expansion"]              = &WorldserverCLI::ExpansionTestCommand;
 	function_map["test:repository"]             = &WorldserverCLI::TestRepository;
 	function_map["test:repository2"]            = &WorldserverCLI::TestRepository2;
@@ -39,6 +41,7 @@ void WorldserverCLI::CommandHandler(int argc, char **argv)
 #include "cli/database_set_account_status.cpp"
 #include "cli/database_version.cpp"
 #include "cli/test.cpp"
+#include "cli/test_colors.cpp"
 #include "cli/test_expansion.cpp"
 #include "cli/test_repository.cpp"
 #include "cli/test_repository_2.cpp"

@@ -21,8 +21,6 @@
 #ifndef EQEMU_EQEMU_LOGSYS_LOG_ALIASES_H
 #define EQEMU_EQEMU_LOGSYS_LOG_ALIASES_H
 
-#ifdef BUILD_LOGGING
-
 #define LogAA(message, ...) do {\
     if (LogSys.IsLogEnabled(Logs::General, Logs::AA))\
         OutF(LogSys, Logs::General, Logs::AA, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
@@ -36,11 +34,6 @@
 #define LogAI(message, ...) do {\
     if (LogSys.IsLogEnabled(Logs::General, Logs::AI))\
         OutF(LogSys, Logs::General, Logs::AI, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
-} while (0)
-
-#define LogAIModerate(message, ...) do {\
-    if (LogSys.IsLogEnabled(Logs::Moderate, Logs::AI))\
-        OutF(LogSys, Logs::Moderate, Logs::AI, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
 #define LogAIDetail(message, ...) do {\
@@ -81,11 +74,6 @@
 #define LogCombat(message, ...) do {\
     if (LogSys.IsLogEnabled(Logs::General, Logs::Combat))\
         OutF(LogSys, Logs::General, Logs::Combat, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
-} while (0)
-
-#define LogCombatModerate(message, ...) do {\
-    if (LogSys.IsLogEnabled(Logs::Moderate, Logs::Combat))\
-        OutF(LogSys, Logs::Moderate, Logs::Combat, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
 #define LogCombatDetail(message, ...) do {\
@@ -213,16 +201,6 @@
         OutF(LogSys, Logs::Detail, Logs::Pathing, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
-#define LogQSServer(message, ...) do {\
-    if (LogSys.IsLogEnabled(Logs::General, Logs::QSServer))\
-        OutF(LogSys, Logs::General, Logs::QSServer, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
-} while (0)
-
-#define LogQSServerDetail(message, ...) do {\
-    if (LogSys.IsLogEnabled(Logs::Detail, Logs::QSServer))\
-        OutF(LogSys, Logs::Detail, Logs::QSServer, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
-} while (0)
-
 #define LogQuests(message, ...) do {\
     if (LogSys.IsLogEnabled(Logs::General, Logs::Quests))\
         OutF(LogSys, Logs::General, Logs::Quests, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
@@ -266,11 +244,6 @@
 #define LogSpells(message, ...) do {\
     if (LogSys.IsLogEnabled(Logs::General, Logs::Spells))\
         OutF(LogSys, Logs::General, Logs::Spells, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
-} while (0)
-
-#define LogSpellsModerate(message, ...) do {\
-    if (LogSys.IsLogEnabled(Logs::Moderate, Logs::Spells))\
-        OutF(LogSys, Logs::Moderate, Logs::Spells, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
 #define LogSpellsDetail(message, ...) do {\
@@ -336,46 +309,6 @@
 #define LogTributeDetail(message, ...) do {\
     if (LogSys.IsLogEnabled(Logs::Detail, Logs::Tribute))\
         OutF(LogSys, Logs::Detail, Logs::Tribute, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
-} while (0)
-
-#define LogUCSServer(message, ...) do {\
-    if (LogSys.IsLogEnabled(Logs::General, Logs::UCSServer))\
-        OutF(LogSys, Logs::General, Logs::UCSServer, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
-} while (0)
-
-#define LogUCSServerDetail(message, ...) do {\
-    if (LogSys.IsLogEnabled(Logs::Detail, Logs::UCSServer))\
-        OutF(LogSys, Logs::Detail, Logs::UCSServer, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
-} while (0)
-
-#define LogWebInterfaceServer(message, ...) do {\
-    if (LogSys.IsLogEnabled(Logs::General, Logs::WebInterfaceServer))\
-        OutF(LogSys, Logs::General, Logs::WebInterfaceServer, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
-} while (0)
-
-#define LogWebInterfaceServerDetail(message, ...) do {\
-    if (LogSys.IsLogEnabled(Logs::Detail, Logs::WebInterfaceServer))\
-        OutF(LogSys, Logs::Detail, Logs::WebInterfaceServer, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
-} while (0)
-
-#define LogWorldServer(message, ...) do {\
-    if (LogSys.IsLogEnabled(Logs::General, Logs::WorldServer))\
-        OutF(LogSys, Logs::General, Logs::WorldServer, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
-} while (0)
-
-#define LogWorldServerDetail(message, ...) do {\
-    if (LogSys.IsLogEnabled(Logs::Detail, Logs::WorldServer))\
-        OutF(LogSys, Logs::Detail, Logs::WorldServer, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
-} while (0)
-
-#define LogZoneServer(message, ...) do {\
-    if (LogSys.IsLogEnabled(Logs::General, Logs::ZoneServer))\
-        OutF(LogSys, Logs::General, Logs::ZoneServer, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
-} while (0)
-
-#define LogZoneServerDetail(message, ...) do {\
-    if (LogSys.IsLogEnabled(Logs::Detail, Logs::ZoneServer))\
-        OutF(LogSys, Logs::Detail, Logs::ZoneServer, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
 #define LogMySQLError(message, ...) do {\
@@ -447,16 +380,6 @@
 #define LogClientLoginDetail(message, ...) do {\
     if (LogSys.IsLogEnabled(Logs::Detail, Logs::ClientLogin))\
         OutF(LogSys, Logs::Detail, Logs::ClientLogin, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
-} while (0)
-
-#define LogHeadlessClient(message, ...) do {\
-    if (LogSys.IsLogEnabled(Logs::General, Logs::HeadlessClient))\
-        OutF(LogSys, Logs::General, Logs::HeadlessClient, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
-} while (0)
-
-#define LogHeadlessClientDetail(message, ...) do {\
-    if (LogSys.IsLogEnabled(Logs::Detail, Logs::HeadlessClient))\
-        OutF(LogSys, Logs::Detail, Logs::HeadlessClient, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
 #define LogHPUpdate(message, ...) do {\
@@ -592,11 +515,6 @@
 #define LogAIScanClose(message, ...) do {\
     if (LogSys.IsLogEnabled(Logs::General, Logs::AIScanClose))\
         OutF(LogSys, Logs::General, Logs::AIScanClose, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
-} while (0)
-
-#define LogAIScanCloseModerate(message, ...) do {\
-    if (LogSys.IsLogEnabled(Logs::Moderate, Logs::AIScanClose))\
-        OutF(LogSys, Logs::Moderate, Logs::AIScanClose, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
 #define LogAIScanCloseDetail(message, ...) do {\
@@ -846,11 +764,6 @@
 
 // manually created
 
-#define LogExpeditionsModerate(message, ...) do {\
-    if (LogSys.IsLogEnabled(Logs::Moderate, Logs::Expeditions))\
-        OutF(LogSys, Logs::Moderate, Logs::Expeditions, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
-} while (0)
-
 #define LogBugs(message, ...) do {\
     if (LogSys.IsLogEnabled(Logs::General, Logs::Bugs))\
         OutF(LogSys, Logs::General, Logs::Bugs, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
@@ -881,469 +794,5 @@
         OutF(LogSys, debug_level, log_category, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
-#else
-#define LogEmergency(message, ...) do {\
-} while (0)
-
-#define LogAlert(message, ...) do {\
-} while (0)
-
-#define LogCritical(message, ...) do {\
-} while (0)
-
-#define LogError(message, ...) do {\
-} while (0)
-
-#define LogWarning(message, ...) do {\
-} while (0)
-
-#define LogNotice(message, ...) do {\
-} while (0)
-
-#define LogInfo(message, ...) do {\
-} while (0)
-
-#define LogDebug(message, ...) do {\
-} while (0)
-
-/**
- * Category
- */
-
-#define LogAA(message, ...) do {\
-} while (0)
-
-#define LogAADetail(message, ...) do {\
-} while (0)
-
-#define LogAI(message, ...) do {\
-} while (0)
-
-#define LogAIModerate(message, ...) do {\
-} while (0)
-
-#define LogAIDetail(message, ...) do {\
-} while (0)
-
-#define LogAggro(message, ...) do {\
-} while (0)
-
-#define LogAggroDetail(message, ...) do {\
-} while (0)
-
-#define LogAttack(message, ...) do {\
-} while (0)
-
-#define LogAttackDetail(message, ...) do {\
-} while (0)
-
-#define LogPacketClientServer(message, ...) do {\
-} while (0)
-
-#define LogPacketClientServerDetail(message, ...) do {\
-} while (0)
-
-#define LogCombat(message, ...) do {\
-} while (0)
-
-#define LogCombatModerate(message, ...) do {\
-} while (0)
-
-#define LogCombatDetail(message, ...) do {\
-} while (0)
-
-#define LogCommands(message, ...) do {\
-} while (0)
-
-#define LogCommandsDetail(message, ...) do {\
-} while (0)
-
-#define LogCrash(message, ...) do {\
-} while (0)
-
-#define LogCrashDetail(message, ...) do {\
-} while (0)
-
-#define LogDoors(message, ...) do {\
-} while (0)
-
-#define LogDoorsDetail(message, ...) do {\
-} while (0)
-
-#define LogGroup(message, ...) do {\
-} while (0)
-
-#define LogGroupDetail(message, ...) do {\
-} while (0)
-
-#define LogGuilds(message, ...) do {\
-} while (0)
-
-#define LogGuildsDetail(message, ...) do {\
-} while (0)
-
-#define LogInventory(message, ...) do {\
-} while (0)
-
-#define LogInventoryDetail(message, ...) do {\
-} while (0)
-
-#define LogLauncher(message, ...) do {\
-} while (0)
-
-#define LogLauncherDetail(message, ...) do {\
-} while (0)
-
-#define LogNetcode(message, ...) do {\
-} while (0)
-
-#define LogNetcodeDetail(message, ...) do {\
-} while (0)
-
-#define LogNormal(message, ...) do {\
-} while (0)
-
-#define LogNormalDetail(message, ...) do {\
-} while (0)
-
-#define LogObject(message, ...) do {\
-} while (0)
-
-#define LogObjectDetail(message, ...) do {\
-} while (0)
-
-#define LogPathing(message, ...) do {\
-} while (0)
-
-#define LogPathingDetail(message, ...) do {\
-} while (0)
-
-#define LogQSServer(message, ...) do {\
-} while (0)
-
-#define LogQSServerDetail(message, ...) do {\
-} while (0)
-
-#define LogQuests(message, ...) do {\
-} while (0)
-
-#define LogQuestsDetail(message, ...) do {\
-} while (0)
-
-#define LogRules(message, ...) do {\
-} while (0)
-
-#define LogRulesDetail(message, ...) do {\
-} while (0)
-
-#define LogSkills(message, ...) do {\
-} while (0)
-
-#define LogSkillsDetail(message, ...) do {\
-} while (0)
-
-#define LogSpawns(message, ...) do {\
-} while (0)
-
-#define LogSpawnsDetail(message, ...) do {\
-} while (0)
-
-#define LogSpells(message, ...) do {\
-} while (0)
-
-#define LogSpellsModerate(message, ...) do {\
-} while (0)
-
-#define LogSpellsDetail(message, ...) do {\
-} while (0)
-
-#define LogTCPConnection(message, ...) do {\
-} while (0)
-
-#define LogTCPConnectionDetail(message, ...) do {\
-} while (0)
-
-#define LogTasks(message, ...) do {\
-} while (0)
-
-#define LogTasksDetail(message, ...) do {\
-} while (0)
-
-#define LogTradeskills(message, ...) do {\
-} while (0)
-
-#define LogTradeskillsDetail(message, ...) do {\
-} while (0)
-
-#define LogTrading(message, ...) do {\
-} while (0)
-
-#define LogTradingDetail(message, ...) do {\
-} while (0)
-
-#define LogTribute(message, ...) do {\
-} while (0)
-
-#define LogTributeDetail(message, ...) do {\
-} while (0)
-
-#define LogMySQLError(message, ...) do {\
-} while (0)
-
-#define LogMySQLErrorDetail(message, ...) do {\
-} while (0)
-
-#define LogMySQLQuery(message, ...) do {\
-} while (0)
-
-#define LogMySQLQueryDetail(message, ...) do {\
-} while (0)
-
-#define LogMercenaries(message, ...) do {\
-} while (0)
-
-#define LogMercenariesDetail(message, ...) do {\
-} while (0)
-
-#define LogQuestDebug(message, ...) do {\
-} while (0)
-
-#define LogQuestDebugDetail(message, ...) do {\
-} while (0)
-
-#define LogLoginserver(message, ...) do {\
-} while (0)
-
-#define LogLoginserverDetail(message, ...) do {\
-} while (0)
-
-#define LogClientLogin(message, ...) do {\
-} while (0)
-
-#define LogClientLoginDetail(message, ...) do {\
-} while (0)
-
-#define LogHeadlessClient(message, ...) do {\
-} while (0)
-
-#define LogHeadlessClientDetail(message, ...) do {\
-} while (0)
-
-#define LogHPUpdate(message, ...) do {\
-} while (0)
-
-#define LogHPUpdateDetail(message, ...) do {\
-} while (0)
-
-#define LogFixZ(message, ...) do {\
-} while (0)
-
-#define LogFixZDetail(message, ...) do {\
-} while (0)
-
-#define LogFood(message, ...) do {\
-} while (0)
-
-#define LogFoodDetail(message, ...) do {\
-} while (0)
-
-#define LogTraps(message, ...) do {\
-} while (0)
-
-#define LogTrapsDetail(message, ...) do {\
-} while (0)
-
-#define LogNPCRoamBox(message, ...) do {\
-} while (0)
-
-#define LogNPCRoamBoxDetail(message, ...) do {\
-} while (0)
-
-#define LogNPCScaling(message, ...) do {\
-} while (0)
-
-#define LogNPCScalingDetail(message, ...) do {\
-} while (0)
-
-#define LogMobAppearance(message, ...) do {\
-} while (0)
-
-#define LogMobAppearanceDetail(message, ...) do {\
-} while (0)
-
-#define LogStatus(message, ...) do {\
-} while (0)
-
-#define LogStatusDetail(message, ...) do {\
-} while (0)
-
-#define LogAIScanClose(message, ...) do {\
-} while (0)
-
-#define LogAIScanCloseModerate(message, ...) do {\
-} while (0)
-
-#define LogAIScanCloseDetail(message, ...) do {\
-} while (0)
-
-#define LogAIYellForHelp(message, ...) do {\
-} while (0)
-
-#define LogAIYellForHelpDetail(message, ...) do {\
-} while (0)
-
-#define LogAICastBeneficialClose(message, ...) do {\
-} while (0)
-
-#define LogAICastBeneficialCloseDetail(message, ...) do {\
-} while (0)
-
-#define LogAoeCast(message, ...) do {\
-} while (0)
-
-#define LogAoeCastDetail(message, ...) do {\
-} while (0)
-
-#define LogEntityManagement(message, ...) do {\
-} while (0)
-
-#define LogEntityManagementDetail(message, ...) do {\
-} while (0)
-
-#define LogFlee(message, ...) do {\
-} while (0)
-
-#define LogFleeDetail(message, ...) do {\
-} while (0)
-
-#define LogAura(message, ...) do {\
-} while (0)
-
-#define LogAuraDetail(message, ...) do {\
-} while (0)
-
-#define LogHotReload(message, ...) do {\
-} while (0)
-
-#define LogHotReloadDetail(message, ...) do {\
-} while (0)
-
-#define LogMerchants(message, ...) do {\
-} while (0)
-
-#define LogMerchantsDetail(message, ...) do {\
-} while (0)
-
-#define LogZonePoints(message, ...) do {\
-} while (0)
-
-#define LogZonePointsDetail(message, ...) do {\
-} while (0)
-
-#define LogExpeditions(message, ...) do {\
-} while (0)
-
-#define LogExpeditionsModerate(message, ...) do {\
-} while (0)
-
-#define LogExpeditionsDetail(message, ...) do {\
-} while (0)
-
-#define LogDynamicZones(message, ...) do {\
-} while (0)
-
-#define LogDynamicZonesDetail(message, ...) do {\
-} while (0)
-
-#define LogCheatList(message, ...) do {\
-} while (0)
-
-#define LogCheatDetail(message, ...) do {\
-} while (0)
-
-#define LogClientList(message, ...) do {\
-} while (0)
-
-#define LogClientListDetail(message, ...) do {\
-} while (0)
-
-#define LogDiaWind(message, ...) do {\
-} while (0)
-
-#define LogDiaWindDetail(message, ...) do {\
-} while (0)
-
-#define LogHTTP(message, ...) do {\
-} while (0)
-
-#define LogHTTPDetail(message, ...) do {\
-} while (0)
-
-#define LogSaylink(message, ...) do {\
-} while (0)
-
-#define LogSaylinkDetail(message, ...) do {\
-} while (0)
-
-#define LogScheduler(message, ...) do {\
-} while (0)
-
-#define LogSchedulerDetail(message, ...) do {\
-} while (0)
-
-#define LogCheat(message, ...) do {\
-} while (0)
-
-#define LogCheatDetail(message, ...) do {\
-} while (0)
-
-#define LogLoot(message, ...) do {\
-} while (0)
-
-#define LogLootDetail(message, ...) do {\
-} while (0)
-
-#define LogFood(message, ...) do {\
-} while (0)
-
-#define LogFoodDetail(message, ...) do {\
-} while (0)
-
-#define LogChecksumVerification(message, ...) do {\
-} while (0)
-
-#define LogChecksumVerificationDetail(message, ...) do {\
-} while (0)
-
-#define LogCombatRecord(message, ...) do {\
-} while (0)
-
-#define LogCombatRecordDetail(message, ...) do {\
-} while (0)
-
-#define LogHate(message, ...) do {\
-} while (0)
-
-#define LogHateDetail(message, ...) do {\
-} while (0)
-
-#define LogFaction(message, ...) do {\
-} while (0)
-
-#define LogFactionDetail(message, ...) do {\
-} while (0)
-
-#define LogBugs(message, ...) do {\
-} while (0)
-
-#define LogBugsDetail(message, ...) do {\
-} while (0)
-
-#define Log(debug_level, log_category, message, ...) do {\
-} while (0)
-
-#define LogF(debug_level, log_category, message, ...) do {\
-} while (0)
-#endif
 
 #endif //EQEMU_EQEMU_LOGSYS_LOG_ALIASES_H

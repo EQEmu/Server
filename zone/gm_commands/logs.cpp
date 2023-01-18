@@ -3,10 +3,6 @@
 
 extern WorldServer worldserver;
 
-inline void print_legend(Client *c) {
-	c->Message(Chat::White, "[Legend] [G = GM Say] [F = File] [C = Console] [D = Discord]");
-}
-
 void command_logs(Client *c, const Seperator *sep)
 {
 	int arguments = sep->argnum;
@@ -30,9 +26,9 @@ void command_logs(Client *c, const Seperator *sep)
 		return;
 	}
 
-	bool is_list = !strcasecmp(sep->arg[1], "list");
+	bool is_list   = !strcasecmp(sep->arg[1], "list");
 	bool is_reload = !strcasecmp(sep->arg[1], "reload");
-	bool is_set = !strcasecmp(sep->arg[1], "set");
+	bool is_set    = !strcasecmp(sep->arg[1], "set");
 
 	if (!is_list && !is_reload && !is_set) {
 		c->Message(
@@ -62,7 +58,6 @@ void command_logs(Client *c, const Seperator *sep)
 
 		uint32 max_category_id = (start_category_id + 49);
 
-		print_legend(c);
 		c->Message(Chat::White, "------------------------------------------------");
 
 		for (int index = start_category_id; index <= max_category_id; index++) {
@@ -71,16 +66,16 @@ void command_logs(Client *c, const Seperator *sep)
 				break;
 			}
 
-			bool is_deprecated_category = Strings::Contains(fmt::format("{}", Logs::LogCategoryName[index]), "Deprecated");
+			bool is_deprecated_category = Strings::Contains(
+				fmt::format("{}", Logs::LogCategoryName[index]),
+				"Deprecated"
+			);
 			if (is_deprecated_category) {
 				continue;
 			}
 
 			std::vector<std::string> gmsay;
-			for (int i = 0; i <= 3; i++) {
-				if (i == 2) {
-					continue;
-				}
+			for (int                 i = 0; i <= 2; i++) {
 				if (LogSys.log_settings[index].log_to_gmsay == i) {
 					gmsay.emplace_back(std::to_string(i));
 					continue;
@@ -94,10 +89,7 @@ void command_logs(Client *c, const Seperator *sep)
 			}
 
 			std::vector<std::string> file;
-			for (int i = 0; i <= 3; i++) {
-				if (i == 2) {
-					continue;
-				}
+			for (int                 i = 0; i <= 2; i++) {
 				if (LogSys.log_settings[index].log_to_file == i) {
 					file.emplace_back(std::to_string(i));
 					continue;
@@ -111,10 +103,7 @@ void command_logs(Client *c, const Seperator *sep)
 			}
 
 			std::vector<std::string> console;
-			for (int i = 0; i <= 3; i++) {
-				if (i == 2) {
-					continue;
-				}
+			for (int                 i = 0; i <= 2; i++) {
 				if (LogSys.log_settings[index].log_to_console == i) {
 					console.emplace_back(std::to_string(i));
 					continue;
@@ -128,10 +117,7 @@ void command_logs(Client *c, const Seperator *sep)
 			}
 
 			std::vector<std::string> discord;
-			for (int i = 0; i <= 3; i++) {
-				if (i == 2) {
-					continue;
-				}
+			for (int                 i = 0; i <= 2; i++) {
 				if (LogSys.log_settings[index].log_to_discord == i) {
 					discord.emplace_back(std::to_string(i));
 					continue;
@@ -144,29 +130,23 @@ void command_logs(Client *c, const Seperator *sep)
 				);
 			}
 
-			std::string gmsay_string = Strings::Join(gmsay, "-");
+			std::string gmsay_string   = Strings::Join(gmsay, "-");
 			std::string console_string = Strings::Join(console, "-");
-			std::string file_string = Strings::Join(file, "-");
+			std::string file_string    = Strings::Join(file, "-");
 			std::string discord_string = Strings::Join(discord, "-");
 
 			c->Message(
 				0,
 				fmt::format(
-					"G [{}] C [{}] F [{}] D [{}] [{}] [{}] ",
+					"[{}] GM [{}] Console [{}] File [{}] Discord [{}] [{}] ",
+					index,
 					Strings::RTrim(gmsay_string, "-"),
 					Strings::RTrim(console_string, "-"),
 					Strings::RTrim(file_string, "-"),
 					Strings::RTrim(discord_string, "-"),
-					index,
 					Logs::LogCategoryName[index]
 				).c_str()
 			);
-
-			if (index % 10 == 0) {
-				c->Message(Chat::White, "------------------------------------------------");
-				print_legend(c);
-				c->Message(Chat::White, "------------------------------------------------");
-			}
 		}
 
 		c->Message(Chat::White, "------------------------------------------------");
@@ -199,18 +179,21 @@ void command_logs(Client *c, const Seperator *sep)
 				).c_str()
 			);
 		}
-	} else if (is_reload) {
+	}
+	else if (is_reload) {
 		c->Message(Chat::White, "Attempting to reload Log Settings globally.");
 		auto pack = new ServerPacket(ServerOP_ReloadLogs, 0);
 		worldserver.SendPacket(pack);
 		safe_delete(pack);
-	} else if (is_set && sep->IsNumber(3)) {
-		auto logs_set = false;
+	}
+	else if (is_set && sep->IsNumber(3)) {
+		auto logs_set   = false;
 		bool is_console = !strcasecmp(sep->arg[2], "console");
-		bool is_file = !strcasecmp(sep->arg[2], "file");
-		bool is_gmsay = !strcasecmp(sep->arg[2], "gmsay");
+		bool is_file    = !strcasecmp(sep->arg[2], "file");
+		bool is_gmsay   = !strcasecmp(sep->arg[2], "gmsay");
+		bool is_discord = !strcasecmp(sep->arg[2], "discord");
 
-		if (!sep->IsNumber(4) || (!is_console && !is_file && !is_gmsay)) {
+		if (!sep->IsNumber(4) || (!is_console && !is_file && !is_gmsay && !is_discord)) {
 			c->Message(
 				Chat::White,
 				"#logs set [console|file|gmsay] [Category ID] [Debug Level (1-3)] - Sets log settings during the lifetime of the zone"
@@ -222,14 +205,19 @@ void command_logs(Client *c, const Seperator *sep)
 		logs_set = true;
 
 		auto category_id = std::stoul(sep->arg[3]);
-		auto setting = std::stoul(sep->arg[4]);
+		auto setting     = std::stoul(sep->arg[4]);
 
 		if (is_console) {
 			LogSys.log_settings[category_id].log_to_console = setting;
-		} else if (is_file) {
+		}
+		else if (is_file) {
 			LogSys.log_settings[category_id].log_to_file = setting;
-		} else if (is_gmsay) {
+		}
+		else if (is_gmsay) {
 			LogSys.log_settings[category_id].log_to_gmsay = setting;
+		}
+		else if (is_discord) {
+			LogSys.log_settings[category_id].log_to_discord = setting;
 		}
 
 		if (logs_set) {

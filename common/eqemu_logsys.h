@@ -39,8 +39,7 @@
 namespace Logs {
 	enum DebugLevel {
 		General = 1,    // 1 - Low-Level general debugging, useful info on single line
-		Moderate,       // 2 - Informational based, used in functions, when particular things load
-		Detail          // 3 - Use this for extreme detail in logging, usually in extreme debugging in the stack or interprocess communication
+		Detail          // 2 - Use this for very chatty logging you want to leave in but don't want on by default
 	};
 
 	/**
@@ -54,7 +53,7 @@ namespace Logs {
 		AI,
 		Aggro,
 		Attack,
-		DeprecatedCS,
+		DeprecatedCS, // deprecated
 		Combat,
 		Commands,
 		Crash,
@@ -65,36 +64,36 @@ namespace Logs {
 		Inventory,
 		Launcher,
 		Netcode,
-		Normal,
+		Normal, // deprecated
 		Object,
 		Pathing,
-		QSServer,
+		QSServer, // deprecated
 		Quests,
 		Rules,
 		Skills,
 		Spawns,
 		Spells,
-		Status,
+		Status, // deprecated
 		TCPConnection,
 		Tasks,
 		Tradeskills,
 		Trading,
 		Tribute,
-		UCSServer,
-		WebInterfaceServer,
-		WorldServer,
-		ZoneServer,
+		UCSServer, // deprecated
+		WebInterfaceServer, // deprecated
+		WorldServer, // deprecated
+		ZoneServer, // deprecated
 		MySQLError,
 		MySQLQuery,
 		Mercenaries,
 		QuestDebug,
-		DeprecatedSC,
-		DeprecatedCSU,
-		DeprecatedSCD,
-		DeprecatedCSD,
-		Loginserver,
+		DeprecatedSC, // deprecated
+		DeprecatedCSU, // deprecated
+		DeprecatedSCD, // deprecated
+		DeprecatedCSD, // deprecated
+		Loginserver, // deprecated
 		ClientLogin,
-		HeadlessClient,
+		HeadlessClient, // deprecated
 		HPUpdate,
 		FixZ,
 		Food,
@@ -104,10 +103,10 @@ namespace Logs {
 		MobAppearance,
 		Info,
 		Warning,
-		Critical,
-		Emergency,
-		Alert,
-		Notice,
+		Critical, // deprecated
+		Emergency, // deprecated
+		Alert, // deprecated
+		Notice, // deprecated
 		AIScanClose,
 		AIYellForHelp,
 		AICastBeneficialClose,
@@ -160,52 +159,52 @@ namespace Logs {
 		"Inventory",
 		"Launcher",
 		"Netcode",
-		"Normal",
+		"Normal (Deprecated)",
 		"Object",
 		"Pathing",
-		"QS Server",
+		"QS Server (Deprecated)",
 		"Quests",
 		"Rules",
 		"Skills",
 		"Spawns",
 		"Spells",
-		"Status",
+		"Status (Deprecated)",
 		"TCP Connection",
 		"Tasks",
 		"Tradeskills",
 		"Trading",
 		"Tribute",
-		"UCS Server",
-		"WebInterface Server",
-		"World Server",
-		"Zone Server",
-		"MySQL Error",
-		"MySQL Query",
+		"UCS Server (Deprecated)",
+		"Web Interface (Deprecated)",
+		"World Server (Deprecated)",
+		"Zone Server (Deprecated)",
+		"QueryErr",
+		"Query",
 		"Mercenaries",
 		"Quest Debug",
-		"Deprecated",
-		"Deprecated",
-		"Deprecated",
-		"Deprecated",
-		"Login Server",
+		"Legacy Packet Logging (Deprecated)",
+		"Legacy Packet Logging (Deprecated)",
+		"Legacy Packet Logging (Deprecated)",
+		"Legacy Packet Logging (Deprecated)",
+		"Login Server (Deprecated)",
 		"Client Login",
-		"Headless Client",
+		"Headless Client (Deprecated)",
 		"HP Update",
 		"FixZ",
 		"Food",
 		"Traps",
 		"NPC Roam Box",
 		"NPC Scaling",
-		"Mob Appearance",
+		"MobAppearance",
 		"Info",
 		"Warning",
-		"Critical",
-		"Emergency",
-		"Alert",
-		"Notice",
-		"AI Scan Close",
-		"AI Yell For Help",
-		"AI Cast Beneficial Close",
+		"Critical (Deprecated)",
+		"Emergency (Deprecated)",
+		"Alert (Deprecated)",
+		"Notice (Deprecated)",
+		"AI Scan",
+		"AI Yell",
+		"AI CastBeneficial",
 		"AOE Cast",
 		"Entity Management",
 		"Flee",
@@ -222,14 +221,14 @@ namespace Logs {
 		"DialogueWindow",
 		"HTTP",
 		"Saylink",
-		"ChecksumVerification",
+		"ChecksumVer",
 		"CombatRecord",
 		"Hate",
 		"Discord",
 		"Faction",
-		"Packet-S->C",
-		"Packet-C->S",
-		"Packet-S->S",
+		"Packet S->C",
+		"Packet C->S",
+		"Packet S->S",
 		"Bugs",
 		"QuestErrors"
 	};
@@ -386,12 +385,14 @@ private:
 	std::string                                                                   m_platform_file_name;
 	std::string                                                                   m_log_path;
 
-	std::string GetLinuxConsoleColorFromCategory(uint16 log_category);
-	uint16 GetWindowsConsoleColorFromCategory(uint16 log_category);
-
-	void ProcessConsoleMessage(uint16 log_category, const std::string &message);
+	void ProcessConsoleMessage(
+		uint16 log_category,
+		const std::string &message,
+		const char *file,
+		const char *func,
+		int line
+	);
 	void ProcessLogWrite(uint16 log_category, const std::string &message);
-	bool IsRfc5424LogCategory(uint16 log_category);
 	void InjectTablesIfNotExist();
 };
 

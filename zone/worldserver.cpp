@@ -204,11 +204,11 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		ServerConnectInfo* sci = (ServerConnectInfo*)pack->pBuffer;
 
 		if (sci->port == 0) {
-			LogCritical("World did not have a port to assign from this server, the port range was not large enough.");
+			LogError("World did not have a port to assign from this server, the port range was not large enough.");
 			Shutdown();
 		}
 		else {
-			LogInfo("World assigned Port: [{}] for this zone", sci->port);
+			LogInfo("World assigned Port [{}] for this zone", sci->port);
 			ZoneConfig::SetZonePort(sci->port);
 
 			LogSys.SetDiscordHandler(&Zone::DiscordWebhookMessageHandler);
@@ -3305,7 +3305,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		break;
 	}
 	default: {
-		LogInfo("[HandleMessage] Unknown ZS Opcode [{}] size [{}]", (int)pack->opcode, pack->size);
+		LogInfo("Unknown ZS Opcode [{}] size [{}]", (int)pack->opcode, pack->size);
 		break;
 	}
 	}

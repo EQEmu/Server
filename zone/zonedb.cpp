@@ -3689,7 +3689,7 @@ bool ZoneDatabase::LoadFactionData()
 		faction_ids.push_back(fr_row[0]);
 	}
 
-	LogInfo("[{}] Faction(s) loaded...", faction_ids.size());
+	LogInfo("Loaded [{}] faction(s)", Strings::Commify(std::to_string(faction_ids.size())));
 
 	const std::string faction_id_criteria(Strings::Implode(",", faction_ids));
 
@@ -3716,7 +3716,7 @@ bool ZoneDatabase::LoadFactionData()
 			faction_array[index]->max = atoi(br_row[2]);
 		}
 
-		LogInfo("[{}] Faction Base(s) loaded...", base_results.RowCount());
+		LogInfo("Loaded [{}] faction base(s)", Strings::Commify(std::to_string(base_results.RowCount())));
 	}
 	else {
 		LogInfo("Unable to load Faction Base data...");
@@ -3744,7 +3744,7 @@ bool ZoneDatabase::LoadFactionData()
 			faction_array[index]->mods[mr_row[2]] = atoi(mr_row[1]);
 		}
 
-		LogInfo("[{}] Faction Modifier(s) loaded", modifier_results.RowCount());
+		LogInfo("Loaded [{}] faction modifier(s)", Strings::Commify(std::to_string(modifier_results.RowCount())));
 	}
 	else {
 		LogError("Unable to load Faction Modifier data");
@@ -4369,6 +4369,8 @@ bool ZoneDatabase::LoadCharacterCorpses(uint32 zone_id, uint16 instance_id) {
 				atoul(row[10]))       // guild_consent_id     uint32 guild_consent_id
 		);
 	}
+
+	LogInfo("Loaded [{}] player corpse(s)", Strings::Commify(results.RowCount()));
 
 	return true;
 }

@@ -64,6 +64,8 @@ bool TitleManager::LoadTitles()
 		titles.push_back(title);
 	}
 
+	LogInfo("Loaded [{}] titles", Strings::Commify(std::to_string(results.RowCount())));
+
 	return true;
 }
 

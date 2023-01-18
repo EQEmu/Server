@@ -626,7 +626,7 @@ void LoginServer::SendInfo()
 	}
 
 	LogInfo(
-		"[LoginServer::SendInfo] protocol_version [{}] server_version [{}] long_name [{}] short_name [{}] account_name [{}] remote_ip_address [{}] local_ip [{}]",
+		"protocol_version [{}] server_version [{}] long_name [{}] short_name [{}] account_name [{}] remote_ip_address [{}] local_ip [{}]",
 		l->protocol_version,
 		l->server_version,
 		l->server_long_name,
