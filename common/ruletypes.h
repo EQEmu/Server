@@ -197,6 +197,9 @@ RULE_BOOL(Character, PetZoneWithOwner, true, "Should Pets Zone with Owner")
 RULE_BOOL(Character, FullManaOnDeath, true, "On death set mana to full")
 RULE_BOOL(Character, FullEndurOnDeath, true, "On death set endurance to full")
 RULE_INT(Character, ExperiencePercentCapPerKill, -1, "Caps the percentage of experience that can be gained per kill. -1 disables the cap; 0 blocks all (non-aa) xp.")
+RULE_BOOL(Character, EnableGroupEXPModifier, true, "Enable or disable the group experience modifier based on number of players in group, default is true")
+RULE_REAL(Character, GroupMemberEXPModifier, 0.2, "Sets the group experience modifier per members between 2 and 5, default is 0.2")
+RULE_REAL(Character, FullGroupEXPModifier, 2.16, "Sets the group experience modifier for a full group, default is 2.16")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Mercs)
@@ -426,6 +429,7 @@ RULE_BOOL(Spells, BuffsFadeOnDeath, true, "Disable to keep buffs from fading on 
 RULE_BOOL(Spells, IllusionsAlwaysPersist, false, "Allows Illusions to persist beyond death and zoning always.")
 RULE_BOOL(Spells, UseItemCastMessage, false, "Enable to use the \"item begins to glow\" messages when casting from an item.")
 RULE_BOOL(Spells, TargetsTargetRequiresCombatRange, true, "Disable to remove combat range requirement from Target's Target Spell Target Type")
+RULE_BOOL(Spells, NPCBuffLevelRestrictions, false, "Impose BuffLevelRestrictions on NPCs if true")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Combat)

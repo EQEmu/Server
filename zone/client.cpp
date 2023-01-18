@@ -11724,3 +11724,128 @@ void Client::MaxSkills()
 		}
 	}
 }
+
+void Client::SendPath(Mob* target)
+{
+	if (!target) {
+		EQApplicationPacket outapp(OP_FindPersonReply, 0);
+		QueuePacket(&outapp);
+		return;
+	}
+
+
+	if (
+		!RuleB(Pathing, Find) &&
+		RuleB(Bazaar, EnableWarpToTrader) &&
+		target->IsClient() &&
+		(
+			target->CastToClient()->Trader ||
+			target->CastToClient()->Buyer
+		)
+	) {
+		Message(
+			Chat::Yellow,
+			fmt::format(
+				"Moving you to Trader {}.",
+				target->GetName()
+			).c_str()
+		);
+		MovePC(
+			zone->GetZoneID(),
+			zone->GetInstanceID(),
+			target->GetX(),
+			target->GetY(),
+			target->GetZ(),
+			0.0f
+		);
+		return;
+	}
+
+	std::vector<FindPerson_Point> points;
+
+	if (!RuleB(Pathing, Find) || !zone->pathing) {
+		points.clear();
+		FindPerson_Point a;
+		FindPerson_Point b;
+
+		a.x = GetX();
+		a.y = GetY();
+		a.z = GetZ();
+		b.x = target->GetX();
+		b.y = target->GetY();
+		b.z = target->GetZ();
+
+		points.push_back(a);
+		points.push_back(b);
+	} else {
+		glm::vec3 path_start(
+			GetX(),
+			GetY(),
+			GetZ() + (GetSize() < 6.0 ? 6 : GetSize()) * HEAD_POSITION
+		);
+
+		glm::vec3 path_end(
+			target->GetX(),
+			target->GetY(),
+			target->GetZ() + (target->GetSize() < 6.0 ? 6 : target->GetSize()) * HEAD_POSITION
+		);
+
+		bool partial = false;
+		bool stuck = false;
+		auto path_list = zone->pathing->FindRoute(path_start, path_end, partial, stuck);
+
+		if (path_list.empty() || partial) {
+			EQApplicationPacket outapp(OP_FindPersonReply, 0);
+			QueuePacket(&outapp);
+			return;
+		}
+
+		// Live appears to send the points in this order:
+		// Final destination.
+		// Current Position.
+		// rest of the points.
+		FindPerson_Point p;
+
+		int point_number = 0;
+
+		bool leads_to_teleporter = false;
+
+		auto v = path_list.back();
+
+		p.x = v.pos.x;
+		p.y = v.pos.y;
+		p.z = v.pos.z;
+		points.push_back(p);
+
+		p.x = GetX();
+		p.y = GetY();
+		p.z = GetZ();
+		points.push_back(p);
+
+		for (const auto& n : path_list) {
+			if (n.teleport) {
+				leads_to_teleporter = true;
+				break;
+			}
+
+			glm::vec3 v = n.pos;
+			p.x = v.x;
+			p.y = v.y;
+			p.z = v.z;
+
+			points.push_back(p);
+
+			++point_number;
+		}
+
+		if (!leads_to_teleporter) {
+			p.x = target->GetX();
+			p.y = target->GetY();
+			p.z = target->GetZ();
+
+			points.push_back(p);
+		}
+	}
+
+	SendPathPacket(points);
+}

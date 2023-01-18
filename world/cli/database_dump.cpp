@@ -11,6 +11,7 @@ void WorldserverCLI::DatabaseDump(int argc, char **argv, argh::parser &cmd, std:
 		"--login-tables",
 		"--player-tables",
 		"--bot-tables",
+		"--merc-tables",
 		"--state-tables",
 		"--system-tables",
 		"--query-serv-tables",
@@ -42,6 +43,7 @@ void WorldserverCLI::DatabaseDump(int argc, char **argv, argh::parser &cmd, std:
 	s->SetDumpLoginServerTables(cmd[{"--login-tables"}] || dump_all);
 	s->SetDumpPlayerTables(cmd[{"--player-tables"}] || dump_all);
 	s->SetDumpBotTables(cmd[{"--bot-tables"}] || dump_all);
+	s->SetDumpMercTables(cmd[{"--merc-tables"}] || dump_all);
 	s->SetDumpStateTables(cmd[{"--state-tables"}] || dump_all);
 	s->SetDumpSystemTables(cmd[{"--system-tables"}] || dump_all);
 	s->SetDumpQueryServerTables(cmd[{"--query-serv-tables"}] || dump_all);

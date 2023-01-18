@@ -734,10 +734,6 @@ bool Mob::DoCastingChecksOnTarget(bool check_on_casting, int32 spell_id, Mob *sp
 	*/
 
 	bool ignore_on_casting = false;
-	bool ignore_if_npc_or_gm = false;
-	if (!IsClient() || (IsClient() && CastToClient()->GetGM())) {
-		ignore_if_npc_or_gm = true;
-	}
 
 	if (check_on_casting) {
 		if (spells[spell_id].target_type == ST_AEClientV1 ||
@@ -803,15 +799,9 @@ bool Mob::DoCastingChecksOnTarget(bool check_on_casting, int32 spell_id, Mob *sp
 	/*
 		Prevent buffs from being cast on targets who don't meet level restriction
 	*/
-	if (!ignore_if_npc_or_gm && RuleB(Spells, BuffLevelRestrictions)) {
-		// casting_spell_targetid is guaranteed to be what we went, check for ST_Self for now should work though
-		if (spells[spell_id].target_type != ST_Self && !spell_target->CheckSpellLevelRestriction(spell_id)) {
-			LogSpells("Spell [{}] failed: recipient did not meet the level restrictions", spell_id);
-			if (!IsBardSong(spell_id)) {
-				MessageString(Chat::SpellFailure, SPELL_TOO_POWERFUL);
-			}
-			return false;
-		}
+
+	if (!spell_target->CheckSpellLevelRestriction(this, spell_id)) {
+		return false;
 	}
 	/*
 		Prevents buff from being cast based on tareget ing PC OR NPC (1 = PCs, 2 = NPCs)
@@ -1161,6 +1151,9 @@ void Mob::InterruptSpell(uint16 message, uint16 color, uint16 spellid)
 		}
 	}
 
+	LogSpells("Interrupt: casting_spell_id [{}] casting_spell_slot [{}]",
+		casting_spell_id, (int) casting_spell_slot);
+
 	if(casting_spell_id && IsNPC()) {
 		CastToNPC()->AI_Event_SpellCastFinished(false, static_cast<uint16>(casting_spell_slot));
 	}
@@ -1275,8 +1268,9 @@ void Mob::StopCastSpell(int32 spell_id, bool send_spellbar_enable)
 		-AA that fail at CastSpell because they never get timer set.
 		-Instant cast items that fail at CastSpell because they never get timer set.
 	*/
-	if (casting_spell_id && IsNPC()) {
-		CastToNPC()->AI_Event_SpellCastFinished(false, static_cast<uint16>(casting_spell_slot));
+	// Often called before spell_id and slot are set.  For NPCs always update AI
+	if (IsNPC()) {
+		CastToNPC()->AI_Event_SpellCastFinished(false, 1);
 	}
 
 	if (send_spellbar_enable) {
@@ -2307,8 +2301,15 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, in
 		}
 	}
 
+	//determine the type of spell target we have
+	CastAction_type CastAction;
+	if (!DetermineSpellTargets(spell_id, spell_target, ae_center, CastAction, slot, isproc)) {
+		LogSpells("Spell [{}]: Determine spell targets failure.", spell_id);
+		return(false);
+	}
+
 	//If spell was casted then we already checked these so skip, otherwise check here if being called directly from spell finished.
-	if (!from_casted_spell){
+	if (!from_casted_spell) {
 		if (!DoCastingChecksZoneRestrictions(true, spell_id)) {
 			LogSpells("Spell [{}]: Zone restriction failure.", spell_id);
 			return false;
@@ -2317,13 +2318,6 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, in
 			LogSpells("Spell [{}]: Casting checks on Target failure.", spell_id);
 			return false;
 		}
-	}
-
-	//determine the type of spell target we have
-	CastAction_type CastAction;
-	if (!DetermineSpellTargets(spell_id, spell_target, ae_center, CastAction, slot, isproc)) {
-		LogSpells("Spell [{}]: Determine spell targets failure.", spell_id);
-		return(false);
 	}
 
 	LogSpells("Spell [{}]: target type [{}], target [{}], AE center [{}]", spell_id, CastAction, spell_target?spell_target->GetName():"NONE", ae_center?ae_center->GetName():"NONE");
@@ -3210,29 +3204,60 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 // spells 1-50: no restrictons
 // 51-65: SpellLevel/2+15
 // 66+ Group Spells 62, Single Target 61
-bool Mob::CheckSpellLevelRestriction(uint16 spell_id)
+bool Mob::CheckSpellLevelRestriction(Mob *caster, uint16 spell_id)
 {
-	return true;
-}
+	bool check_for_restrictions = false;
+	bool can_cast = true;
 
-bool Client::CheckSpellLevelRestriction(uint16 spell_id)
-{
-	int SpellLevel = GetMinLevel(spell_id);
+	if (!caster) {
+		LogSpells("[CheckSpellLevelRestriction] No caster");
+		return false;
+	}
 
-	// Only check for beneficial buffs
-	if (IsBuffSpell(spell_id) && IsBeneficialSpell(spell_id)) {
-		if (SpellLevel > 65) {
-			if (IsGroupSpell(spell_id) && GetLevel() < 62)
-				return false;
-			else if (GetLevel() < 61)
-				return false;
-		} else if (SpellLevel > 50) { // 51-65
-			if (GetLevel() < (SpellLevel / 2 + 15))
-				return false;
+	if (caster->IsClient() && caster->CastToClient()->GetGM()) {
+		LogSpells("[CheckSpellLevelRestriction] GM casting - No restrictions");
+		return true;
+	}
+
+	// NON GM clients might be restricted by rule setting
+	if (caster->IsClient()) {
+		if (RuleB(Spells, BuffLevelRestrictions)) {
+			check_for_restrictions = true;
+		}
+	}
+	// NPCS might be restricted by rule setting
+	else if (RuleB(Spells, NPCBuffLevelRestrictions)) {
+		check_for_restrictions = true;
+	}
+
+	if (check_for_restrictions) {
+		int spell_level = GetMinLevel(spell_id);
+
+		// Only check for beneficial buffs
+		if (IsBuffSpell(spell_id) && IsBeneficialSpell(spell_id)) {
+			if (spell_level > 65) {
+				if (IsGroupSpell(spell_id) && GetLevel() < 62) {
+					can_cast = false;
+				}
+				else if (GetLevel() < 61) {
+					can_cast = false;
+				}
+			} else if (spell_level > 50) { // 51-65
+				if (GetLevel() < (spell_level / 2 + 15)) {
+					can_cast = false;
+				}
+			}
 		}
 	}
 
-	return true;
+	if (!can_cast) {
+		LogSpells("Spell [{}] failed: recipient did not meet the level restrictions", spell_id);
+		if (!IsBardSong(spell_id)) {
+			caster->MessageString(Chat::SpellFailure, SPELL_TOO_POWERFUL);
+		}
+	}
+
+	return can_cast;
 }
 
 uint32 Mob::GetFirstBuffSlot(bool disc, bool song)
@@ -4175,12 +4200,7 @@ bool Mob::SpellOnTarget(
 	}
 
 	// make sure spelltar is high enough level for the buff
-	if (RuleB(Spells, BuffLevelRestrictions) && !spelltar->CheckSpellLevelRestriction(spell_id)) {
-		LogSpells("Spell [{}] failed: recipient did not meet the level restrictions", spell_id);
-		if (!IsBardSong(spell_id)) {
-			MessageString(Chat::SpellFailure, SPELL_TOO_POWERFUL);
-		}
-
+	if (!spelltar->CheckSpellLevelRestriction(this, spell_id)) {
 		safe_delete(action_packet);
 		return false;
 	}

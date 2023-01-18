@@ -529,6 +529,23 @@ Mob* Mob::GetPet() {
 	return(tmp);
 }
 
+bool Mob::HasPet() const {
+	if (GetPetID() == 0) {
+		return false;
+	}
+
+	const auto m = entity_list.GetMob(GetPetID());
+	if (!m) {
+		return false;
+	}
+
+	if (m->GetOwnerID() != GetID()) {
+		return false;
+	}
+
+	return true;
+}
+
 void Mob::SetPet(Mob* newpet) {
 	Mob* oldpet = GetPet();
 	if (oldpet) {
@@ -735,11 +752,11 @@ bool ZoneDatabase::GetBasePetItems(int32 equipmentset, uint32 *items) {
 	return true;
 }
 
-bool Pet::CheckSpellLevelRestriction(uint16 spell_id)
+bool Pet::CheckSpellLevelRestriction(Mob *caster, uint16 spell_id)
 {
 	auto owner = GetOwner();
 	if (owner)
-		return owner->CheckSpellLevelRestriction(spell_id);
+		return owner->CheckSpellLevelRestriction(caster, spell_id);
 	return true;
 }
 

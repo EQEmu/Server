@@ -3104,12 +3104,12 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 								"{} {} {} {} {}",
 								tobe_auged->GetID(),
 								item_slot,
-								aug->GetID(),
+								old_aug->GetID(),
 								in_augment->augment_index,
 								false
 							);
 
-							args.push_back(aug);
+							args.push_back(old_aug);
 
 							parse->EventPlayer(EVENT_AUGMENT_REMOVE_CLIENT, this, export_string, 0, &args);
 						}
@@ -6058,107 +6058,11 @@ void Client::Handle_OP_FindPersonRequest(const EQApplicationPacket *app)
 	if (app->size != sizeof(FindPersonRequest_Struct))
 		printf("Error in FindPersonRequest_Struct. Expected size of: %zu, but got: %i\n", sizeof(FindPersonRequest_Struct), app->size);
 	else {
-		FindPersonRequest_Struct* t = (FindPersonRequest_Struct*)app->pBuffer;
+		auto* t = (FindPersonRequest_Struct*)app->pBuffer;
 
-		std::vector<FindPerson_Point> points;
-		Mob* target = entity_list.GetMob(t->npc_id);
+		auto* m = entity_list.GetMob(t->npc_id);
 
-		if (target == nullptr) {
-			//empty length packet == not found.
-			EQApplicationPacket outapp(OP_FindPersonReply, 0);
-			QueuePacket(&outapp);
-			return;
-		}
-
-		if (!RuleB(Pathing, Find) && RuleB(Bazaar, EnableWarpToTrader) && target->IsClient() && (target->CastToClient()->Trader ||
-			target->CastToClient()->Buyer)) {
-			Message(Chat::Yellow, "Moving you to Trader %s", target->GetName());
-			MovePC(zone->GetZoneID(), zone->GetInstanceID(), target->GetX(), target->GetY(), target->GetZ(), 0.0f);
-		}
-
-		if (!RuleB(Pathing, Find) || !zone->pathing)
-		{
-			//fill in the path array...
-			//
-			points.clear();
-			FindPerson_Point a;
-			FindPerson_Point b;
-
-			a.x = GetX();
-			a.y = GetY();
-			a.z = GetZ();
-			b.x = target->GetX();
-			b.y = target->GetY();
-			b.z = target->GetZ();
-
-			points.push_back(a);
-			points.push_back(b);
-		}
-		else
-		{
-			glm::vec3 Start(GetX(), GetY(), GetZ() + (GetSize() < 6.0 ? 6 : GetSize()) * HEAD_POSITION);
-			glm::vec3 End(target->GetX(), target->GetY(), target->GetZ() + (target->GetSize() < 6.0 ? 6 : target->GetSize()) * HEAD_POSITION);
-
-			bool partial = false;
-			bool stuck = false;
-			auto pathlist = zone->pathing->FindRoute(Start, End, partial, stuck);
-
-			if (pathlist.empty() || partial)
-			{
-				EQApplicationPacket outapp(OP_FindPersonReply, 0);
-				QueuePacket(&outapp);
-				return;
-			}
-
-			// Live appears to send the points in this order:
-			// Final destination.
-			// Current Position.
-			// rest of the points.
-			FindPerson_Point p;
-
-			int PointNumber = 0;
-
-			bool LeadsToTeleporter = false;
-
-			auto v = pathlist.back();
-
-			p.x = v.pos.x;
-			p.y = v.pos.y;
-			p.z = v.pos.z;
-			points.push_back(p);
-
-			p.x = GetX();
-			p.y = GetY();
-			p.z = GetZ();
-			points.push_back(p);
-
-			for (auto Iterator = pathlist.begin(); Iterator != pathlist.end(); ++Iterator)
-			{
-				if ((*Iterator).teleport) // Teleporter
-				{
-					LeadsToTeleporter = true;
-					break;
-				}
-
-				glm::vec3 v = (*Iterator).pos;
-				p.x = v.x;
-				p.y = v.y;
-				p.z = v.z;
-				points.push_back(p);
-				++PointNumber;
-			}
-
-			if (!LeadsToTeleporter)
-			{
-				p.x = target->GetX();
-				p.y = target->GetY();
-				p.z = target->GetZ();
-
-				points.push_back(p);
-			}
-		}
-
-		SendPathPacket(points);
+		SendPath(m);
 	}
 }
 

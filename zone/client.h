@@ -560,7 +560,6 @@ public:
 	inline virtual int32 GetDelayDeath() const { return aabonuses.DelayDeath + spellbonuses.DelayDeath + itembonuses.DelayDeath + 11; }
 
 	virtual bool CheckFizzle(uint16 spell_id);
-	virtual bool CheckSpellLevelRestriction(uint16 spell_id);
 	virtual int GetCurrentBuffSlots() const;
 	virtual int GetCurrentSongSlots() const;
 	virtual int GetCurrentDiscSlots() const { return 1; }
@@ -755,6 +754,8 @@ public:
 	uint64 GetAllMoney();
 	uint32 GetMoney(uint8 type, uint8 subtype);
 	int GetAccountAge();
+
+	void SendPath(Mob* target);
 
 	bool IsDiscovered(uint32 itemid);
 	void DiscoverItem(uint32 itemid);

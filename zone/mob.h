@@ -373,7 +373,7 @@ public:
 	bool DoCastingChecksZoneRestrictions(bool check_on_casting, int32 spell_id);
 	bool DoCastingChecksOnTarget(bool check_on_casting, int32 spell_id, Mob* spell_target);
 	virtual bool CheckFizzle(uint16 spell_id);
-	virtual bool CheckSpellLevelRestriction(uint16 spell_id);
+	virtual bool CheckSpellLevelRestriction(Mob *caster, uint16 spell_id);
 	virtual bool IsImmuneToSpell(uint16 spell_id, Mob *caster);
 	virtual float GetAOERange(uint16 spell_id);
 	void InterruptSpell(uint16 spellid = SPELL_UNKNOWN);
@@ -1052,7 +1052,7 @@ public:
 	inline uint16 GetOwnerID() const { return ownerid; }
 	inline virtual bool HasOwner() { if(GetOwnerID()==0){return false;} return( entity_list.GetMob(GetOwnerID()) != 0); }
 	inline virtual bool IsPet() { return(HasOwner() && !IsMerc()); }
-	inline bool HasPet() const { if(GetPetID()==0){return false;} return (entity_list.GetMob(GetPetID()) != 0);}
+	bool HasPet() const;
 	inline bool HasTempPetsActive() const { return(hasTempPet); }
 	inline void SetTempPetsActive(bool i) { hasTempPet = i; }
 	inline int16 GetTempPetCount() const { return count_TempPet; }

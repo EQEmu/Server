@@ -4216,7 +4216,8 @@ void Bot::LoadAndSpawnAllZonedBots(Client* bot_owner) {
 			std::vector<int> bot_class_spawned_count = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
 			for (uint8 class_id = WARRIOR; class_id <= BERSERKER; class_id++) {
-				bot_class_spawn_limits[class_id - 1] = bot_owner->GetBotSpawnLimit(class_id);
+				auto bot_class_limit = bot_owner->GetBotSpawnLimit(class_id);
+				bot_class_spawn_limits.push_back(bot_class_limit);
 			}
 
 			auto* g = bot_owner->GetGroup();
@@ -8520,6 +8521,9 @@ Client* EntityList::GetBotOwnerByBotID(const uint32 bot_id)  {
 void EntityList::AddBot(Bot *new_bot, bool send_spawn_packet, bool dont_queue) {
 	if (new_bot) {
 		new_bot->SetID(GetFreeID());
+		bot_list.push_back(new_bot);
+		mob_list.insert(std::pair<uint16, Mob*>(new_bot->GetID(), new_bot));
+		parse->EventBot(EVENT_SPAWN, new_bot, nullptr, "", 0);
 		new_bot->SetSpawned();
 		if (send_spawn_packet) {
 			if (dont_queue) {
@@ -8536,11 +8540,6 @@ void EntityList::AddBot(Bot *new_bot, bool send_spawn_packet, bool dont_queue) {
 				safe_delete(ns);
 			}
 		}
-
-		bot_list.push_back(new_bot);
-		mob_list.insert(std::pair<uint16, Mob*>(new_bot->GetID(), new_bot));
-
-		parse->EventBot(EVENT_SPAWN, new_bot, nullptr, "", 0);
 
 		new_bot->DispatchZoneControllerEvent(EVENT_SPAWN_ZONE, new_bot, "", 0, nullptr);
 	}
@@ -9305,7 +9304,8 @@ void Bot::SpawnBotGroupByName(Client* c, std::string botgroup_name, uint32 leade
 	std::vector<int> bot_class_spawned_count = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
 	for (uint8 class_id = WARRIOR; class_id <= BERSERKER; class_id++) {
-		bot_class_spawn_limits[class_id - 1] = c->GetBotSpawnLimit(class_id);
+		auto bot_class_limit = c->GetBotSpawnLimit(class_id);
+		bot_class_spawn_limits.push_back(bot_class_limit);
 	}
 
 	for (const auto& member_iter : member_list[botgroup_id]) {
