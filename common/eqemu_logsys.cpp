@@ -246,6 +246,8 @@ void EQEmuLogSys::ProcessConsoleMessage(
 		<< rang::fgB::gray
 		<< rang::style::bold
 		<< fmt::format("{}", func)
+		<< rang::style::reset
+		<< rang::fgB::gray
 		<< " ";
 
 	if (RuleB(Logging, PrintFileFunctionAndLine)) {
