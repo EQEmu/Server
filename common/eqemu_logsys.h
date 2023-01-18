@@ -91,7 +91,7 @@ namespace Logs {
 		DeprecatedCSU, // deprecated
 		DeprecatedSCD, // deprecated
 		DeprecatedCSD, // deprecated
-		Loginserver,
+		Loginserver, // deprecated
 		ClientLogin,
 		HeadlessClient, // deprecated
 		HPUpdate,
@@ -186,7 +186,7 @@ namespace Logs {
 		"Legacy Packet Logging (Deprecated)",
 		"Legacy Packet Logging (Deprecated)",
 		"Legacy Packet Logging (Deprecated)",
-		"Login Server",
+		"Login Server (Deprecated)",
 		"Client Login",
 		"Headless Client (Deprecated)",
 		"HP Update",

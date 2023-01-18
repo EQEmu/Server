@@ -86,7 +86,6 @@ EQEmuLogSys *EQEmuLogSys::LoadLogSettingsDefaults()
 	 */
 	log_settings[Logs::Crash].log_to_console                = static_cast<uint8>(Logs::General);
 	log_settings[Logs::MySQLError].log_to_console           = static_cast<uint8>(Logs::General);
-	log_settings[Logs::Loginserver].log_to_console          = static_cast<uint8>(Logs::General);
 	log_settings[Logs::NPCScaling].log_to_gmsay             = static_cast<uint8>(Logs::General);
 	log_settings[Logs::HotReload].log_to_gmsay              = static_cast<uint8>(Logs::General);
 	log_settings[Logs::HotReload].log_to_console            = static_cast<uint8>(Logs::General);
