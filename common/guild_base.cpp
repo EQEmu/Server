@@ -63,7 +63,9 @@ bool BaseGuildManager::LoadGuilds() {
 	for (auto row=results.begin();row!=results.end();++row)
 		_CreateGuild(atoi(row[0]), row[1], atoi(row[2]), atoi(row[3]), row[4], row[5], row[6], row[7]);
 
-    query = "SELECT guild_id,`rank`,title,can_hear,can_speak,can_invite,can_remove,can_promote,can_demote,can_motd,can_warpeace FROM guild_ranks";
+	LogInfo("Loaded [{}] Guilds", Strings::Commify(std::to_string(results.RowCount())));
+
+	query = "SELECT guild_id,`rank`,title,can_hear,can_speak,can_invite,can_remove,can_promote,can_demote,can_motd,can_warpeace FROM guild_ranks";
 	results = m_db->QueryDatabase(query);
 
 	if (!results.Success())

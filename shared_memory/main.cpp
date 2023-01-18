@@ -164,13 +164,9 @@ int main(int argc, char **argv)
 			if (!RuleManager::Instance()->LoadRules(&database, "default", false)) {
 				LogInfo("No rule set configured, using default rules");
 			}
-			else {
-				LogInfo("Loaded default rule set 'default'");
-			}
 		}
 
 		EQ::InitializeDynamicLookups();
-		LogInfo("Initialized dynamic dictionary entries");
 	}
 
 
@@ -272,7 +268,6 @@ int main(int argc, char **argv)
 	}
 
 	if (load_all || load_factions) {
-		LogInfo("Loading factions");
 		try {
 			LoadFactions(&content_db, hotfix_name);
 		} catch (std::exception &ex) {

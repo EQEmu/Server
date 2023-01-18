@@ -151,7 +151,7 @@ int main(int argc, char** argv) {
 
 	QServ = new QueryServ;
 
-	LogInfo("Loading server configuration..");
+	LogInfo("Loading server configuration");
 	if (!ZoneConfig::LoadConfig()) {
 		LogError("Loading server configuration failed");
 		return 1;
@@ -231,7 +231,7 @@ int main(int argc, char** argv) {
 		worldserver.SetLauncherName("NONE");
 	}
 
-	LogInfo("Connecting to MySQL... ");
+	LogInfo("Connecting to MySQL");
 	if (!database.Connect(
 		Config->DatabaseHost.c_str(),
 		Config->DatabaseUsername.c_str(),
@@ -276,7 +276,7 @@ int main(int argc, char** argv) {
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 
-	LogInfo("CURRENT_VERSION: {}", CURRENT_VERSION);
+	LogInfo("CURRENT_VERSION [{}]", CURRENT_VERSION);
 
 	/*
 	* Setup nice signal handlers
@@ -296,10 +296,8 @@ int main(int argc, char** argv) {
 	}
 #endif
 
-	LogInfo("Mapping Incoming Opcodes");
 	MapOpcodes();
 
-	LogInfo("Loading Variables");
 	database.LoadVariables();
 
 	std::string hotfix_name;
@@ -309,40 +307,10 @@ int main(int argc, char** argv) {
 		}
 	}
 
-	LogInfo("Loading zone names");
-
 	zone_store.LoadZones(content_db);
 
-	LogInfo("Loading items");
-	if (!database.LoadItems(hotfix_name)) {
-		LogError("Loading items failed!");
-		LogError("Failed. But ignoring error and going on..");
-	}
-
-	LogInfo("Loading npc faction lists");
-	if (!content_db.LoadNPCFactionLists(hotfix_name)) {
-		LogError("Loading npcs faction lists failed!");
-		return 1;
-	}
-	LogInfo("Loading faction association hits");
-	if (!content_db.LoadFactionAssociation(hotfix_name)) {
-		LogError("Loading faction association hits failed!");
-		return 1;
-	}
-	LogInfo("Loading loot tables");
-	if (!database.LoadLoot(hotfix_name)) {
-		LogError("Loading loot failed!");
-		return 1;
-	}
-	LogInfo("Loading skill caps");
-	if (!content_db.LoadSkillCaps(std::string(hotfix_name))) {
-		LogError("Loading skill caps failed!");
-		return 1;
-	}
-
-	LogInfo("Loading spells");
-	if (!database.LoadSpells(hotfix_name, &SPDAT_RECORDS, &spells)) {
-		LogError("Loading spells failed!");
+	if (zone_store.GetZones().empty()) {
+		LogError("Failed to load zones data, check your schema for possible errors");
 		return 1;
 	}
 
@@ -350,37 +318,55 @@ int main(int argc, char** argv) {
 	database.SetSharedItemsCount(content_db.GetItemsCount());
 	database.SetSharedSpellsCount(content_db.GetSpellsCount());
 
-	LogInfo("Loading base data");
+	if (!database.LoadItems(hotfix_name)) {
+		LogError("Loading items failed!");
+		LogError("Failed. But ignoring error and going on..");
+	}
+
+	if (!content_db.LoadNPCFactionLists(hotfix_name)) {
+		LogError("Loading npcs faction lists failed!");
+		return 1;
+	}
+	if (!content_db.LoadFactionAssociation(hotfix_name)) {
+		LogError("Loading faction association hits failed!");
+		return 1;
+	}
+	if (!database.LoadLoot(hotfix_name)) {
+		LogError("Loading loot failed!");
+		return 1;
+	}
+	if (!content_db.LoadSkillCaps(std::string(hotfix_name))) {
+		LogError("Loading skill caps failed!");
+		return 1;
+	}
+	if (!database.LoadSpells(hotfix_name, &SPDAT_RECORDS, &spells)) {
+		LogError("Loading spells failed!");
+		return 1;
+	}
+
 	if (!database.LoadBaseData(hotfix_name)) {
 		LogError("Loading base data failed!");
 		return 1;
 	}
 
-	LogInfo("Loading guilds");
 	guild_mgr.LoadGuilds();
-
-	LogInfo("Loading factions");
 	content_db.LoadFactionData();
-
-	LogInfo("Loading titles");
 	title_manager.LoadTitles();
-
-	LogInfo("Loading tributes");
 	content_db.LoadTributes();
 
-	LogInfo("Loading corpse timers");
 	database.GetDecayTimes(npcCorpseDecayTimes);
 
-	LogInfo("Loading profanity list");
-	if (!EQ::ProfanityManager::LoadProfanityList(&database))
+	if (!EQ::ProfanityManager::LoadProfanityList(&database)) {
 		LogError("Loading profanity list failed!");
+	}
 
-	LogInfo("Loading commands");
 	int retval = command_init();
-	if (retval < 0)
+	if (retval < 0) {
 		LogError("Command loading failed");
-	else
-		LogInfo("{} commands loaded", retval);
+	}
+	else {
+		LogInfo("Loaded [{}] commands loaded", Strings::Commify(std::to_string(retval)));
+	}
 
 	//rules:
 	{
@@ -395,13 +381,9 @@ int main(int argc, char** argv) {
 			if (!RuleManager::Instance()->LoadRules(&database, "default", false)) {
 				LogInfo("No rule set configured, using default rules");
 			}
-			else {
-				LogInfo("Loaded default rule set 'default'");
-			}
 		}
 
 		EQ::InitializeDynamicLookups();
-		LogInfo("Initialized dynamic dictionary entries");
 	}
 
 	content_service.SetDatabase(&database)
@@ -509,7 +491,7 @@ int main(int argc, char** argv) {
 		 * Websocket server
 		 */
 		if (!websocker_server_opened && Config->ZonePort != 0) {
-			LogInfo("Websocket Server listener started ([{}]:[{}])", Config->TelnetIP.c_str(), Config->ZonePort);
+			LogInfo("Websocket Server listener started on address [{}] port [{}]", Config->TelnetIP.c_str(), Config->ZonePort);
 			ws_server = std::make_unique<EQ::Net::WebsocketServer>(Config->TelnetIP, Config->ZonePort);
 			RegisterApiService(ws_server);
 			websocker_server_opened = true;
@@ -519,7 +501,7 @@ int main(int argc, char** argv) {
 		 * EQStreamManager
 		 */
 		if (!eqsf_open && Config->ZonePort != 0) {
-			LogInfo("Starting EQ Network server on port {}", Config->ZonePort);
+			LogInfo("Starting EQ Network server on port [{}]", Config->ZonePort);
 
 			EQStreamManagerInterfaceOptions opts(Config->ZonePort, false, RuleB(Network, CompressZoneStream));
 			opts.daybreak_options.resend_delay_ms = RuleI(Network, ResendDelayBaseMS);
@@ -530,10 +512,16 @@ int main(int argc, char** argv) {
 			eqsm = std::make_unique<EQ::Net::EQStreamManager>(opts);
 			eqsf_open = true;
 
-			eqsm->OnNewConnection([&stream_identifier](std::shared_ptr<EQ::Net::EQStream> stream) {
-				stream_identifier.AddStream(stream);
-				LogInfo("New connection from IP {}:{}", long2ip(stream->GetRemoteIP()), ntohs(stream->GetRemotePort()));
-			});
+			eqsm->OnNewConnection(
+				[&stream_identifier](std::shared_ptr<EQ::Net::EQStream> stream) {
+					stream_identifier.AddStream(stream);
+					LogInfo(
+						"New connection from address [{}] port [{}]",
+						long2ip(stream->GetRemoteIP()),
+						ntohs(stream->GetRemotePort())
+					);
+				}
+			);
 		}
 
 		//give the stream identifier a chance to do its work....

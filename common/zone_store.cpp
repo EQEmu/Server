@@ -30,7 +30,7 @@ void ZoneStore::LoadZones(Database &db)
 {
 	m_zones = ZoneRepository::All(db);
 
-	LogInfo("[ZoneStore] Loaded [{}] zones", m_zones.size());
+	LogInfo("Loaded [{}] zones", m_zones.size());
 }
 
 /**

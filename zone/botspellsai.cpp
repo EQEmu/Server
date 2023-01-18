@@ -1751,7 +1751,7 @@ bool Bot::AIHealRotation(Mob* tar, bool useFastHeals) {
 		}
 	}
 
-	LogAIModerate("[Bot::AIHealRotation] heal spellid [{}] fastheals [{}] casterlevel [{}]",
+	LogAIDetail("[Bot::AIHealRotation] heal spellid [{}] fastheals [{}] casterlevel [{}]",
 		botSpell.SpellId, ((useFastHeals) ? ('T') : ('F')), GetLevel());
 
 	LogAIDetail("[Bot::AIHealRotation] target [{}] current_time [{}] donthealmebefore [{}]", tar->GetCleanName(), Timer::GetCurrentTime(), tar->DontHealMeBefore());

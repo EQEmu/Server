@@ -71,11 +71,11 @@ bool Database::Connect(const char* host, const char* user, const char* passwd, c
 	uint32 errnum= 0;
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	if (!Open(host, user, passwd, database, port, &errnum, errbuf)) {
-		LogError("[MySQL] Connection [{}] Failed to connect to database: Error [{}]", connection_label, errbuf);
+		LogError("Connection [{}] Failed to connect to database Error [{}]", connection_label, errbuf);
 		return false;
 	}
 	else {
-		LogInfo("[MySQL] Connection [{}] database [{}] at [{}]:[{}]", connection_label, database, host,port);
+		LogInfo("Connected to database [{}] [{}] @ [{}:{}]", connection_label, database, host,port);
 		return true;
 	}
 }
@@ -974,6 +974,8 @@ bool Database::LoadVariables() {
 		std::transform(std::begin(key), std::end(key), std::begin(key), ::tolower); // keys are lower case, DB doesn't have to be
 		varcache.Add(key, value);
 	}
+
+	LogInfo("Loaded [{}] variable(s)", Strings::Commify(std::to_string(results.RowCount())));
 
 	return true;
 }

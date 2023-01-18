@@ -436,7 +436,7 @@ namespace SoF
 
 	ENCODE(OP_DeleteCharge)
 	{
-		Log(Logs::Moderate, Logs::Netcode, "SoF::ENCODE(OP_DeleteCharge)");
+		Log(Logs::Detail, Logs::Netcode, "SoF::ENCODE(OP_DeleteCharge)");
 
 		ENCODE_FORWARD(OP_MoveItem);
 	}
@@ -923,7 +923,7 @@ namespace SoF
 		ENCODE_LENGTH_EXACT(LootingItem_Struct);
 		SETUP_DIRECT_ENCODE(LootingItem_Struct, structs::LootingItem_Struct);
 
-		Log(Logs::Moderate, Logs::Netcode, "SoF::ENCODE(OP_LootItem)");
+		Log(Logs::Detail, Logs::Netcode, "SoF::ENCODE(OP_LootItem)");
 
 		OUT(lootee);
 		OUT(looter);
@@ -954,7 +954,7 @@ namespace SoF
 		ENCODE_LENGTH_EXACT(MoveItem_Struct);
 		SETUP_DIRECT_ENCODE(MoveItem_Struct, structs::MoveItem_Struct);
 
-		Log(Logs::Moderate, Logs::Netcode, "SoF::ENCODE(OP_MoveItem)");
+		Log(Logs::Detail, Logs::Netcode, "SoF::ENCODE(OP_MoveItem)");
 
 		eq->from_slot = ServerToSoFSlot(emu->from_slot);
 		eq->to_slot = ServerToSoFSlot(emu->to_slot);
@@ -2631,7 +2631,7 @@ namespace SoF
 		DECODE_LENGTH_EXACT(structs::LootingItem_Struct);
 		SETUP_DIRECT_DECODE(LootingItem_Struct, structs::LootingItem_Struct);
 
-		Log(Logs::Moderate, Logs::Netcode, "SoF::DECODE(OP_LootItem)");
+		Log(Logs::Detail, Logs::Netcode, "SoF::DECODE(OP_LootItem)");
 
 		IN(lootee);
 		IN(looter);
@@ -2646,7 +2646,7 @@ namespace SoF
 		DECODE_LENGTH_EXACT(structs::MoveItem_Struct);
 		SETUP_DIRECT_DECODE(MoveItem_Struct, structs::MoveItem_Struct);
 
-		Log(Logs::Moderate, Logs::Netcode, "SoF::DECODE(OP_MoveItem)");
+		Log(Logs::Detail, Logs::Netcode, "SoF::DECODE(OP_MoveItem)");
 
 		emu->from_slot = SoFToServerSlot(eq->from_slot);
 		emu->to_slot = SoFToServerSlot(eq->to_slot);

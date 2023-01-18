@@ -579,7 +579,7 @@ namespace UF
 
 	ENCODE(OP_DeleteCharge)
 	{
-		Log(Logs::Moderate, Logs::Netcode, "UF::ENCODE(OP_DeleteCharge)");
+		Log(Logs::Detail, Logs::Netcode, "UF::ENCODE(OP_DeleteCharge)");
 
 		ENCODE_FORWARD(OP_MoveItem);
 	}
@@ -1349,7 +1349,7 @@ namespace UF
 		ENCODE_LENGTH_EXACT(LootingItem_Struct);
 		SETUP_DIRECT_ENCODE(LootingItem_Struct, structs::LootingItem_Struct);
 
-		Log(Logs::Moderate, Logs::Netcode, "UF::ENCODE(OP_LootItem)");
+		Log(Logs::Detail, Logs::Netcode, "UF::ENCODE(OP_LootItem)");
 
 		OUT(lootee);
 		OUT(looter);
@@ -1502,7 +1502,7 @@ namespace UF
 		ENCODE_LENGTH_EXACT(MoveItem_Struct);
 		SETUP_DIRECT_ENCODE(MoveItem_Struct, structs::MoveItem_Struct);
 
-		Log(Logs::Moderate, Logs::Netcode, "UF::ENCODE(OP_MoveItem)");
+		Log(Logs::Detail, Logs::Netcode, "UF::ENCODE(OP_MoveItem)");
 
 		eq->from_slot = ServerToUFSlot(emu->from_slot);
 		eq->to_slot = ServerToUFSlot(emu->to_slot);
@@ -2739,7 +2739,7 @@ namespace UF
 			}
 
 			float SpawnSize = emu->size;
-			if (!((emu->NPC == 0) || (emu->race <= RACE_GNOME_12) || (emu->race == RACE_IKSAR_128) || 
+			if (!((emu->NPC == 0) || (emu->race <= RACE_GNOME_12) || (emu->race == RACE_IKSAR_128) ||
 					(emu->race == RACE_VAH_SHIR_130) || (emu->race == RACE_FROGLOK_330) || (emu->race == RACE_DRAKKIN_522))
 				)
 			{
@@ -2942,7 +2942,7 @@ namespace UF
 
 			Buffer += sizeof(structs::Spawn_Struct_Position);
 
-			if ((emu->NPC == 0) || (emu->race <= RACE_GNOME_12) || (emu->race == RACE_IKSAR_128) || 
+			if ((emu->NPC == 0) || (emu->race <= RACE_GNOME_12) || (emu->race == RACE_IKSAR_128) ||
 					(emu->race == RACE_VAH_SHIR_130) || (emu->race == RACE_FROGLOK_330) || (emu->race == RACE_DRAKKIN_522)
 				)
 			{
@@ -2978,7 +2978,7 @@ namespace UF
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 			}
 
-			if ((emu->NPC == 0) || (emu->race <= RACE_GNOME_12) || (emu->race == RACE_IKSAR_128) || 
+			if ((emu->NPC == 0) || (emu->race <= RACE_GNOME_12) || (emu->race == RACE_IKSAR_128) ||
 					(emu->race == RACE_VAH_SHIR_130) || (emu->race == RACE_FROGLOK_330) || (emu->race == RACE_DRAKKIN_522)
 				)
 			{
@@ -3584,7 +3584,7 @@ namespace UF
 		DECODE_LENGTH_EXACT(structs::LootingItem_Struct);
 		SETUP_DIRECT_DECODE(LootingItem_Struct, structs::LootingItem_Struct);
 
-		Log(Logs::Moderate, Logs::Netcode, "UF::DECODE(OP_LootItem)");
+		Log(Logs::Detail, Logs::Netcode, "UF::DECODE(OP_LootItem)");
 
 		IN(lootee);
 		IN(looter);
@@ -3599,7 +3599,7 @@ namespace UF
 		DECODE_LENGTH_EXACT(structs::MoveItem_Struct);
 		SETUP_DIRECT_DECODE(MoveItem_Struct, structs::MoveItem_Struct);
 
-		Log(Logs::Moderate, Logs::Netcode, "UF::DECODE(OP_MoveItem)");
+		Log(Logs::Detail, Logs::Netcode, "UF::DECODE(OP_MoveItem)");
 
 		emu->from_slot = UFToServerSlot(eq->from_slot);
 		emu->to_slot = UFToServerSlot(eq->to_slot);

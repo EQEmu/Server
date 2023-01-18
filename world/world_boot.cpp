@@ -324,6 +324,11 @@ bool WorldBoot::DatabaseLoadRoutines(int argc, char **argv)
 
 	zone_store.LoadZones(content_db);
 
+	if (zone_store.GetZones().empty()) {
+		LogError("Failed to load zones data, check your schema for possible errors");
+		return 1;
+	}
+
 	LogInfo("Clearing groups");
 	database.ClearGroup();
 	LogInfo("Clearing raids");
@@ -338,12 +343,10 @@ bool WorldBoot::DatabaseLoadRoutines(int argc, char **argv)
 		LogError("Error: Could not load item data. But ignoring");
 	}
 
-	LogInfo("Loading skill caps");
 	if (!content_db.LoadSkillCaps(std::string(hotfix_name))) {
 		LogError("Error: Could not load skill cap data. But ignoring");
 	}
 
-	LogInfo("Loading guilds");
 	guild_mgr.LoadGuilds();
 
 	//rules:
@@ -369,9 +372,6 @@ bool WorldBoot::DatabaseLoadRoutines(int argc, char **argv)
 			if (!RuleManager::Instance()->LoadRules(&database, "default", false)) {
 				LogInfo("No rule set configured, using default rules");
 			}
-			else {
-				LogInfo("Loaded default rule set [default]", tmp.c_str());
-			}
 		}
 
 		if (!RuleManager::Instance()->RestoreRuleNotes(&database)) {
@@ -380,7 +380,6 @@ bool WorldBoot::DatabaseLoadRoutines(int argc, char **argv)
 	}
 
 	EQ::InitializeDynamicLookups();
-	LogInfo("Initialized dynamic dictionary entries");
 
 	if (RuleB(World, ClearTempMerchantlist)) {
 		LogInfo("Clearing temporary merchant lists");

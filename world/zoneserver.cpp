@@ -102,7 +102,7 @@ bool ZoneServer::SetZone(uint32 in_zone_id, uint32 in_instance_id, bool in_is_st
 
 	if (in_zone_id) {
 		LogInfo(
-			"Setting zone process to Zone: {} ({}) ID: {}{}{}",
+			"Setting zone process to Zone [{}] [{}] zone_id [{}] {}{}",
 			zone_long_name,
 			zone_short_name,
 			in_zone_id,

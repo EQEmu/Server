@@ -42,6 +42,7 @@
 #include "repositories/account_repository.h"
 #include "repositories/faction_association_repository.h"
 #include "path_manager.h"
+#include "repositories/loottable_repository.h"
 
 namespace ItemField
 {
@@ -942,10 +943,11 @@ bool SharedDatabase::LoadItems(const std::string &prefix) {
 		EQ::IPCMutex mutex("items");
 		mutex.Lock();
 		std::string file_name = fmt::format("{}/{}{}", path.GetSharedMemoryPath(), prefix, std::string("items"));
-		LogInfo("[Shared Memory] Attempting to load file [{}]", file_name);
 		items_mmf = std::make_unique<EQ::MemoryMappedFile>(file_name);
 		items_hash = std::make_unique<EQ::FixedMemoryHashSet<EQ::ItemData>>(static_cast<uint8*>(items_mmf->Get()), items_mmf->Size());
 		mutex.Unlock();
+
+		LogInfo("Loaded [{}] items via shared memory", Strings::Commify(m_shared_items_count));
 	} catch(std::exception& ex) {
 		LogError("Error Loading Items: {}", ex.what());
 		return false;
@@ -1438,10 +1440,12 @@ bool SharedDatabase::LoadNPCFactionLists(const std::string &prefix) {
 		EQ::IPCMutex mutex("faction");
 		mutex.Lock();
 		std::string file_name = fmt::format("{}/{}{}", path.GetSharedMemoryPath(), prefix, std::string("faction"));
-		LogInfo("[Shared Memory] Attempting to load file [{}]", file_name);
+		LogInfo("Loading [{}]", file_name);
 		faction_mmf = std::make_unique<EQ::MemoryMappedFile>(file_name);
 		faction_hash = std::make_unique<EQ::FixedMemoryHashSet<NPCFactionList>>(static_cast<uint8*>(faction_mmf->Get()), faction_mmf->Size());
 		mutex.Unlock();
+
+		LogInfo("Loaded faction lists via shared memory");
 	} catch(std::exception& ex) {
 		LogError("Error Loading npc factions: {}", ex.what());
 		return false;
@@ -1516,6 +1520,8 @@ bool SharedDatabase::LoadFactionAssociation(const std::string &prefix)
 		    new EQ::FixedMemoryHashSet<FactionAssociations>(reinterpret_cast<uint8 *>(faction_associations_mmf->Get()),
 								  faction_associations_mmf->Size()));
 		mutex.Unlock();
+
+		LogInfo("Loaded faction associations via shared memory");
 	} catch (std::exception &ex) {
 		LogError("Error Loading faction associations: {}", ex.what());
 		return false;
@@ -1724,8 +1730,11 @@ bool SharedDatabase::LoadSkillCaps(const std::string &prefix) {
 		EQ::IPCMutex mutex("skill_caps");
 		mutex.Lock();
 		std::string file_name = fmt::format("{}/{}{}", path.GetSharedMemoryPath(), prefix, std::string("skill_caps"));
-		LogInfo("[Shared Memory] Attempting to load file [{}]", file_name);
+		LogInfo("Loading [{}]", file_name);
 		skill_caps_mmf = std::make_unique<EQ::MemoryMappedFile>(file_name);
+
+		LogInfo("Loaded skill caps via shared memory");
+
 		mutex.Unlock();
 	} catch(std::exception &ex) {
 		LogError("Error loading skill caps: {}", ex.what());
@@ -1884,10 +1893,12 @@ bool SharedDatabase::LoadSpells(const std::string &prefix, int32 *records, const
 
 		std::string file_name = fmt::format("{}/{}{}", path.GetSharedMemoryPath(), prefix, std::string("spells"));
 		spells_mmf = std::make_unique<EQ::MemoryMappedFile>(file_name);
-		LogInfo("[Shared Memory] Attempting to load file [{}]", file_name);
+		LogInfo("Loading [{}]", file_name);
 		*records = *static_cast<uint32*>(spells_mmf->Get());
 		*sp = reinterpret_cast<const SPDat_Spell_Struct*>(static_cast<char*>(spells_mmf->Get()) + 4);
 		mutex.Unlock();
+
+		LogInfo("Loaded [{}] spells via shared memory", Strings::Commify(m_shared_spells_count));
 	}
 	catch(std::exception& ex) {
 		LogError("Error Loading Spells: {}", ex.what());
@@ -2099,6 +2110,8 @@ bool SharedDatabase::LoadBaseData(const std::string &prefix) {
 		std::string file_name = fmt::format("{}/{}{}", path.GetSharedMemoryPath(), prefix, std::string("base_data"));
 		base_data_mmf = std::make_unique<EQ::MemoryMappedFile>(file_name);
 		mutex.Unlock();
+
+		LogInfo("Loaded base data via shared memory");
 	} catch(std::exception& ex) {
 		LogError("Error Loading Base Data: {}", ex.what());
 		return false;
@@ -2423,6 +2436,9 @@ bool SharedDatabase::LoadLoot(const std::string &prefix) {
 		loot_table_hash = std::make_unique<EQ::FixedMemoryVariableHashSet<LootTable_Struct>>(
 			static_cast<uint8*>(loot_table_mmf->Get()),
 			loot_table_mmf->Size());
+
+		LogInfo("Loaded loot tables via shared memory");
+
 		std::string file_name_ld = fmt::format("{}/{}{}", path.GetSharedMemoryPath(), prefix, std::string("loot_drop"));
 		loot_drop_mmf = std::make_unique<EQ::MemoryMappedFile>(file_name_ld);
 		loot_drop_hash = std::make_unique<EQ::FixedMemoryVariableHashSet<LootDrop_Struct>>(

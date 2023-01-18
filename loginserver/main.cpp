@@ -148,6 +148,8 @@ void LoadServerConfig()
 
 void start_web_server()
 {
+	sleep(1);
+
 	int web_api_port = server.config.GetVariableInt("web_api", "port", 6000);
 	LogInfo("Webserver API now listening on port [{0}]", web_api_port);
 
@@ -253,9 +255,6 @@ int main(int argc, char **argv)
 #endif
 
 	LogInfo("Server Started");
-	if (LogSys.log_settings[Logs::Loginserver].log_to_console == 1) {
-		LogInfo("Loginserver logging set to level [1] for more debugging, enable detail [3]");
-	}
 
 	/**
 	 * Web API
@@ -267,8 +266,8 @@ int main(int argc, char **argv)
 	}
 
 	LogInfo("[Config] [Account] CanAutoCreateAccounts [{0}]", server.options.CanAutoCreateAccounts());
-	LogInfo("[Config] [Client_Configuration] DisplayExpansions [{0}]", server.options.IsDisplayExpansions());
-	LogInfo("[Config] [Client_Configuration] MaxExpansions [{0}]", server.options.GetMaxExpansions());
+	LogInfo("[Config] [ClientConfiguration] DisplayExpansions [{0}]", server.options.IsDisplayExpansions());
+	LogInfo("[Config] [ClientConfiguration] MaxExpansions [{0}]", server.options.GetMaxExpansions());
 
 #ifdef LSPX
 	LogInfo("[Config] [Account] CanAutoLinkAccounts [{0}]", server.options.CanAutoLinkAccounts());
