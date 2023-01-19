@@ -1644,7 +1644,7 @@ bool Mob::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 			(HasOwner() && GetOwner()->IsClient() && other->IsClient())
 		)
 	) {
-		for (auto const& [key, mob] : entity_list.GetCloseMobList(other)) {
+		for (auto const& [id, mob] : entity_list.GetCloseMobList(other)) {
 			if (!mob) {
 				continue;
 			}
