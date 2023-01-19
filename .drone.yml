@@ -10,7 +10,7 @@ concurrency:
 volumes:
   - name: cache
     host:
-      path: /var/lib/cache
+      path: /var/lib/cache-debug
 
 steps:
   - name: server-build
@@ -46,7 +46,7 @@ concurrency:
 volumes:
   - name: cache
     host:
-      path: /var/lib/cache
+      path: /var/lib/cache-release
 
 steps:
   - name: Init
@@ -68,7 +68,7 @@ steps:
     volumes:
       - name: cache
         path: /home/eqemu/.ccache/
-  - name: Package Artifacts
+  - name: Package Artifact
     image: akkadius/eqemu-server:v11
     commands:
       - zip -j eqemu-server-linux-x64.zip ./build/bin/*
@@ -76,7 +76,7 @@ steps:
     volumes:
       - name: cache
         path: /home/eqemu/.ccache/
-  - name: Upload Artifacts
+  - name: Upload Artifact
     image: akkadius/eqemu-build-releaser:v2
     environment:
       RCLONE_CONFIG_REMOTE_TYPE: ftp
@@ -115,11 +115,11 @@ steps:
   - name: Windows x64
     commands:
       - utils/scripts/build/windows-build.ps1
-  - name: Package Artifacts
+  - name: Package Artifact
     commands:
       - utils/scripts/build/package-artifacts.ps1
       - dir *.zip
-  - name: Upload Artifacts
+  - name: Upload Artifact
     environment:
       RCLONE_CONFIG_REMOTE_TYPE: ftp
       RCLONE_FTP_HOST: drone.akkadius.com
@@ -161,6 +161,8 @@ steps:
       - |
         rclone copy remote: --include "eqemu-server*.zip" .
       - gh-release --assets=eqemu-server-linux-x64.zip,eqemu-server-windows-x64.zip -y
+      - |
+        rclone delete remote: --include "eqemu-server*.zip"
 
 depends_on:
   - Build Windows Binaries
