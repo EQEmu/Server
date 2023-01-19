@@ -1492,7 +1492,7 @@ bool Mob::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 		|| ((IsClient() && CastToClient()->dead) || (other->IsClient() && other->CastToClient()->dead))
 		|| (GetHP() < 0)
 		|| (!IsAttackAllowed(other))
-		|| (GetAppearance() == eaDead)
+		|| (IsBot() && GetAppearance() == eaDead)
 		) {
 		LogCombat("Attack cancelled, invalid circumstances");
 		return false; // Only bards can attack while casting
@@ -1608,7 +1608,7 @@ bool Mob::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 			hate += ucDamageBonus;
 		}
 
-		LogCombatDetail("Damage calculated: base [{}] min damage [{}] skill [{}]", my_hit.base_damage, my_hit.min_damage, my_hit.skill);
+		LogCombatDetail("Damage calculated base [{}] min damage [{}] skill [{}]", my_hit.base_damage, my_hit.min_damage, my_hit.skill);
 
 		int hit_chance_bonus = 0;
 		my_hit.offense = offense(my_hit.skill); // we need this a few times
@@ -1626,7 +1626,7 @@ bool Mob::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 
 		DoAttack(other, my_hit, opts, bRiposte);
 
-		LogCombatDetail("Final damage after all reductions: [{}]", my_hit.damage_done);
+		LogCombatDetail("Final damage after all reductions [{}]", my_hit.damage_done);
 	}
 	else {
 		my_hit.damage_done = DMG_INVULNERABLE;
@@ -1644,9 +1644,7 @@ bool Mob::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 			(HasOwner() && GetOwner()->IsClient() && other->IsClient())
 		)
 	) {
-		auto const& mob_list = entity_list.GetCloseMobList(other);
-		for (auto const& [key, value] : mob_list) {
-			auto mob = value;
+		for (auto const& [key, mob] : entity_list.GetCloseMobList(other)) {
 			if (!mob) {
 				continue;
 			}
@@ -1668,7 +1666,7 @@ bool Mob::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 	///////////////////////////////////////////////////////////
 	other->Damage(this, my_hit.damage_done, SPELL_UNKNOWN, my_hit.skill, true, -1, false, m_specialattacks);
 
-	if (CastToClient()->IsDead() || GetHP() < 0) {
+	if (CastToClient()->IsDead() || (IsBot() && GetAppearance() == eaDead)) {
 		return false;
 	}
 
