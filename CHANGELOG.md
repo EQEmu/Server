@@ -1,3 +1,9 @@
+## [22.0.4]
+
+### Release Test
+
+Release test with smaller Linux bins
+
 ## [22.0.3]
 
 ### Release Test
