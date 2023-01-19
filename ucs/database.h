@@ -45,23 +45,23 @@ public:
 	bool GetVariable(const char* varname, char* varvalue, uint16 varvalue_len);
 	bool LoadChatChannels();
 	void LoadReservedNamesFromDB();
-	bool IsChatChannelInDB(std::string channelName);
-	bool CheckChannelNameFilter(std::string channel_name);
-	void SaveChatChannel(std::string channelName, std::string channelOwner, std::string channelPassword, uint16 minstatus);
-	void DeleteChatChannel(std::string channelName);
-	int CurrentPlayerChannelCount(const std::string& PlayerName);
-	std::string CurrentPlayerChannels(std::string PlayerName);
+	bool IsChatChannelInDB(const std::string& channel_name);
+	bool CheckChannelNameFilter(const std::string& channel_name);
+	void SaveChatChannel(const std::string& channel_name, const std::string& channel_owner, const std::string& channel_password, const uint16& min_status);
+	void DeleteChatChannel(const std::string& channel_name);
+	int CurrentPlayerChannelCount(const std::string& player_name);
+	std::string CurrentPlayerChannels(const std::string& player_name);
 	void GetAccountStatus(Client *c);
-	void SetChannelPassword(const std::string& ChannelName, const std::string& Password);
-	void SetChannelOwner(const std::string& ChannelName, const std::string& owner);
+	void SetChannelPassword(const std::string& channel_name, const std::string& password);
+	void SetChannelOwner(const std::string& channel_name, const std::string& owner);
 	void SendHeaders(Client *c);
-	void SendBody(Client *c, int MessageNumber);
-	bool SendMail(std::string Recipient, std::string From, std::string Subject, std::string Body, std::string RecipientsString);
-	void SetMessageStatus(int MessageNumber, int Status);
+	void SendBody(Client *c, const int& message_number);
+	bool SendMail(const std::string& recipient, const std::string& from, const std::string& subject, const std::string& body, const std::string& recipients_string);
+	void SetMessageStatus(const int& message_number, const int& Status);
 	void ExpireMail();
-	void AddFriendOrIgnore(int CharID, int Type, std::string Name);
-	void RemoveFriendOrIgnore(int CharID, int Type, std::string Name);
-	void GetFriendsAndIgnore(int CharID, std::vector<std::string> &Friends, std::vector<std::string> &Ignorees);
+	void AddFriendOrIgnore(const int& char_id, const int& type, const std::string& name);
+	void RemoveFriendOrIgnore(const int& char_id, const int& type, const std::string& name);
+	void GetFriendsAndIgnore(const int& char_id, std::vector<std::string> &Friends, std::vector<std::string> &Ignorees);
 
 protected:
 	void HandleMysqlError(uint32 errnum);

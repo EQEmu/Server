@@ -264,7 +264,7 @@ void UCSDatabase::LoadReservedNamesFromDB()
 	LogInfo("Loaded [{}] reserved channel name(s)", channels.size());
 }
 
-bool UCSDatabase::IsChatChannelInDB(std::string channel_name)
+bool UCSDatabase::IsChatChannelInDB(const std::string& channel_name)
 {
 	auto r = ChatchannelsRepository::Count(
 		*this,
@@ -277,10 +277,10 @@ bool UCSDatabase::IsChatChannelInDB(std::string channel_name)
 }
 
 void UCSDatabase::SaveChatChannel(
-	std::string channel_name,
-	std::string channel_owner,
-	std::string channel_password,
-	uint16 min_status
+	const std::string& channel_name,
+	const std::string& channel_owner,
+	const std::string& channel_password,
+	const uint16& min_status
 )
 {
 	auto e = ChatchannelsRepository::GetWhere(
@@ -311,18 +311,18 @@ void UCSDatabase::SaveChatChannel(
 	ChatchannelsRepository::UpdateOne(*this, c);
 }
 
-void UCSDatabase::DeleteChatChannel(std::string channel_name)
+void UCSDatabase::DeleteChatChannel(const std::string& channel_name)
 {
 	ChatchannelsRepository::DeleteWhere(*this, fmt::format("`name` = '{}'", Strings::Escape(channel_name)));
 	LogInfo("Deleting channel [{}] from the database.", channel_name);
 }
 
-std::string UCSDatabase::CurrentPlayerChannels(std::string player_name) {
+std::string UCSDatabase::CurrentPlayerChannels(const std::string& player_name) {
 	int current_player_channel_count = CurrentPlayerChannelCount(player_name);
 	if (current_player_channel_count == 0) {
 		return "";
 	}
-	std::string rquery = fmt::format("SELECT GROUP_CONCAT(`name` SEPARATOR ', ') FROM chatchannels WHERE `owner` = '{}'; ", Strings::Escape(player_name));
+	const auto rquery = fmt::format("SELECT GROUP_CONCAT(`name` SEPARATOR ', ') FROM chatchannels WHERE `owner` = '{}'; ", Strings::Escape(player_name));
 	auto results = QueryDatabase(rquery);
 	auto row = results.begin();
 	std::string channels = row[0];
@@ -358,7 +358,7 @@ void UCSDatabase::SetChannelOwner(const std::string& channel_name, const std::st
 	QueryDatabase(query);
 }
 
-bool UCSDatabase::CheckChannelNameFilter(std::string channel_name)
+bool UCSDatabase::CheckChannelNameFilter(const std::string& channel_name)
 {
 	LogDebug("Checking if [{}] is on the name filter", channel_name);
 
@@ -468,7 +468,7 @@ void UCSDatabase::SendHeaders(Client *client)
 
 }
 
-void UCSDatabase::SendBody(Client *client, int messageNumber)
+void UCSDatabase::SendBody(Client *client, const int& messageNumber)
 {
 
 	int characterID = FindCharacter(client->MailBoxName().c_str());
@@ -524,11 +524,11 @@ void UCSDatabase::SendBody(Client *client, int messageNumber)
 }
 
 bool UCSDatabase::SendMail(
-	std::string recipient,
-	std::string from,
-	std::string subject,
-	std::string body,
-	std::string recipientsString
+	const std::string& recipient,
+	const std::string& from,
+	const std::string& subject,
+	const std::string& body,
+	const std::string& recipientsString
 )
 {
 
@@ -596,7 +596,7 @@ bool UCSDatabase::SendMail(
 	return true;
 }
 
-void UCSDatabase::SetMessageStatus(int messageNumber, int status)
+void UCSDatabase::SetMessageStatus(const int& messageNumber, const int& status)
 {
 
 	LogInfo("SetMessageStatus [{}] [{}]", messageNumber, status);
@@ -669,7 +669,7 @@ void UCSDatabase::ExpireMail()
 	}
 }
 
-void UCSDatabase::AddFriendOrIgnore(int charID, int type, std::string name)
+void UCSDatabase::AddFriendOrIgnore(const int& charID, const int& type, const std::string& name)
 {
 	std::string query = StringFormat(
 		"INSERT INTO `friends` (`charid`, `type`, `name`) "
@@ -691,7 +691,7 @@ void UCSDatabase::AddFriendOrIgnore(int charID, int type, std::string name)
 	}
 }
 
-void UCSDatabase::RemoveFriendOrIgnore(int charID, int type, std::string name)
+void UCSDatabase::RemoveFriendOrIgnore(const int& charID, const int& type, const std::string& name)
 {
 	std::string query = StringFormat(
 		"DELETE FROM `friends` WHERE `charid` = %i AND `type` = %i AND `name` = '%s'",
@@ -712,7 +712,7 @@ void UCSDatabase::RemoveFriendOrIgnore(int charID, int type, std::string name)
 	}
 }
 
-void UCSDatabase::GetFriendsAndIgnore(int charID, std::vector<std::string> &friends, std::vector<std::string> &ignorees)
+void UCSDatabase::GetFriendsAndIgnore(const int& charID, std::vector<std::string> &friends, std::vector<std::string> &ignorees)
 {
 
 	std::string query   = StringFormat("select `type`, `name` FROM `friends` WHERE `charid`=%i", charID);
