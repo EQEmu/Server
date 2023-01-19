@@ -1476,7 +1476,7 @@ bool Mob::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 {
 	if (!other) {
 		SetTarget(nullptr);
-		LogError("[Mob::Attack] A null Mob object was passed for evaluation!");
+		LogError("A null Mob object was passed for evaluation!");
 		return false;
 	}
 
@@ -1484,7 +1484,7 @@ bool Mob::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 		SetTarget(other);
 	}
 
-	LogCombatDetail("[Mob::Attack] Attacking [{}] with hand [{}] [{}]", other ? other->GetName() : "nullptr", Hand, bRiposte ? "this is a riposte" : "");
+	LogCombatDetail("Attacking [{}] with hand [{}] [{}]", other ? other->GetName() : "nullptr", Hand, bRiposte ? "this is a riposte" : "");
 
 	if (
 		(IsCasting() && GetClass() != BARD && !IsFromSpell)
@@ -1494,12 +1494,12 @@ bool Mob::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 		|| (!IsAttackAllowed(other))
 		|| (GetAppearance() == eaDead)
 		) {
-		LogCombat("[Mob::Attack] Attack cancelled, invalid circumstances");
+		LogCombat("Attack cancelled, invalid circumstances");
 		return false; // Only bards can attack while casting
 	}
 
 	if (DivineAura() && !CastToClient()->GetGM()) { //cant attack while invulnerable unless your a gm
-		LogCombat("[Mob::Attack] Attack cancelled, Divine Aura is in effect");
+		LogCombat("Attack cancelled, Divine Aura is in effect");
 		MessageString(Chat::DefaultText, DIVINE_AURA_NO_ATK);
 		return false;
 	}
@@ -1525,20 +1525,20 @@ bool Mob::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 	}
 	if (weapon != nullptr) {
 		if (!weapon->IsWeapon()) {
-			LogCombat("[Mob::Attack] Attack cancelled, Item [{}] ([{}]) is not a weapon", weapon->GetItem()->Name, weapon->GetID());
+			LogCombat("Attack cancelled, Item [{}] ([{}]) is not a weapon", weapon->GetItem()->Name, weapon->GetID());
 			return(false);
 		}
-		LogCombatDetail("[Mob::Attack] Attacking with weapon: [{}] ([{}])", weapon->GetItem()->Name, weapon->GetID());
+		LogCombatDetail("Attacking with weapon: [{}] ([{}])", weapon->GetItem()->Name, weapon->GetID());
 	}
 	else {
-		LogCombatDetail("[Mob::Attack] Attacking without a weapon");
+		LogCombatDetail("Attacking without a weapon");
 	}
 
 	DamageHitInfo my_hit;
 	// calculate attack_skill and skillinuse depending on hand and weapon
 	// also send Packet to near clients
 	my_hit.skill = AttackAnimation(Hand, weapon);
-	LogCombatDetail("[Mob::Attack] Attacking with [{}] in slot [{}] using skill [{}]", weapon ? weapon->GetItem()->Name : "Fist", Hand, my_hit.skill);
+	LogCombatDetail("Attacking with [{}] in slot [{}] using skill [{}]", weapon ? weapon->GetItem()->Name : "Fist", Hand, my_hit.skill);
 
 	// Now figure out damage
 	my_hit.damage_done = 1;
@@ -1608,7 +1608,7 @@ bool Mob::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 			hate += ucDamageBonus;
 		}
 
-		LogCombatDetail("[Mob::Attack] Damage calculated: base [{}] min damage [{}] skill [{}]", my_hit.base_damage, my_hit.min_damage, my_hit.skill);
+		LogCombatDetail("Damage calculated: base [{}] min damage [{}] skill [{}]", my_hit.base_damage, my_hit.min_damage, my_hit.skill);
 
 		int hit_chance_bonus = 0;
 		my_hit.offense = offense(my_hit.skill); // we need this a few times
