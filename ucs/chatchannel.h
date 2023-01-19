@@ -9,6 +9,8 @@
 
 class Client;
 
+#define SYSTEM_OWNER std::string("*System*")
+
 class ChatChannel {
 
 public:
@@ -21,15 +23,19 @@ public:
 	bool IsClientInChannel(Client *c);
 
 	int MemberCount(int Status);
-	const std::string &GetName() { return Name; }
-	void SendMessageToChannel(std::string Message, Client* Sender);
-	bool CheckPassword(std::string inPassword) { return Password.empty() || Password == inPassword; }
-	void SetPassword(std::string inPassword);
-	bool IsOwner(std::string Name) { return (Owner == Name); }
-	void SetOwner(std::string inOwner);
+	const std::string &GetName() { return m_name; }
+	void SendMessageToChannel(const std::string& Message, Client* Sender);
+	bool CheckPassword(const std::string& in_password) { return m_password.empty() || m_password == in_password; }
+	void SetPassword(const std::string& in_password);
+	bool IsOwner(const std::string& name) { return (m_owner == name); }
+	const std::string& GetPassword() { return m_password; }
+	void SetOwner(std::string& inOwner);
+	std::string& GetOwnerName();
+	void SetTemporary();
+	void SetPermanent();
 	void SendChannelMembers(Client *c);
-	int GetMinStatus() { return MinimumStatus; }
-	bool ReadyToDelete() { return DeleteTimer.Check(); }
+	int GetMinStatus() { return m_minimum_status; }
+	bool ReadyToDelete() { return m_delete_timer.Check(); }
 	void SendOPList(Client *c);
 	void AddInvitee(const std::string &Invitee);
 	void RemoveInvitee(std::string Invitee);
@@ -40,48 +46,52 @@ public:
 	void AddVoice(const std::string &Voiced);
 	void RemoveVoice(const std::string &Voiced);
 	bool HasVoice(std::string Voiced);
-	inline bool IsModerated() { return Moderated; }
+	inline bool IsModerated() { return m_moderated; }
 	void SetModerated(bool inModerated);
 
 	friend class ChatChannelList;
 
 private:
 
-	std::string Name;
-	std::string Owner;
-	std::string Password;
+	std::string m_name;
+	std::string m_owner;
+	std::string m_password;
 
-	bool Permanent;
-	bool Moderated;
+	bool m_permanent;
+	bool m_moderated;
 
-	int MinimumStatus;
+	int m_minimum_status;
 
-	Timer DeleteTimer;
+	Timer m_delete_timer;
 
-	LinkedList<Client*> ClientsInChannel;
+	LinkedList<Client*> m_clients_in_channel;
 
-	std::vector<std::string> Moderators;
-	std::vector<std::string> Invitees;
-	std::vector<std::string> Voiced;
+	std::vector<std::string> m_moderators;
+	std::vector<std::string> m_invitees;
+	std::vector<std::string> m_voiced;
 
 };
 
 class ChatChannelList {
 
 public:
-	ChatChannel* CreateChannel(std::string Name, std::string Owner, std::string Passwordi, bool Permanent, int MinimumStatus = 0);
-	ChatChannel* FindChannel(std::string Name);
-	ChatChannel* AddClientToChannel(std::string Channel, Client *c);
-	ChatChannel* RemoveClientFromChannel(std::string Channel, Client *c);
-	void RemoveClientFromAllChannels(Client *c);
+	ChatChannel* CreateChannel(const std::string& name, const std::string& owner, const std::string& password, bool permanent, int minimum_status, bool save_to_database = false);
+	ChatChannel* FindChannel(std::string name);
+	ChatChannel* AddClientToChannel(std::string channel_name, Client* c, bool command_directed = false);
+	ChatChannel* RemoveClientFromChannel(const std::string& in_channel_name, Client* c, bool command_directed = false);
 	void RemoveChannel(ChatChannel *Channel);
 	void RemoveAllChannels();
 	void SendAllChannels(Client *c);
 	void Process();
-
+	static inline std::vector<std::string> GetBlockedChannelNames() { return m_blocked_channel_names; }
+	static inline void ClearChannelBlockList() { m_blocked_channel_names.clear(); };
+	static void AddToChannelBlockList(const std::string& channel_name);
+	static bool IsOnChannelBlockList(const std::string& channel_name);
+	static inline void SetChannelBlockList(std::vector<std::string> new_list) { m_blocked_channel_names = new_list; }
 private:
 
 	LinkedList<ChatChannel*> ChatChannels;
+	static inline std::vector<std::string> m_blocked_channel_names;
 
 };
 

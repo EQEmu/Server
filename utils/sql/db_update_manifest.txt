@@ -470,6 +470,7 @@
 9214|2022_12_24_character_exp_toggle.sql|SHOW COLUMNS FROM `character_data` LIKE 'exp_enabled'|empty|
 9215|2023_01_08_zone_max_level.sql|SHOW COLUMNS FROM `zone` LIKE 'max_level'|empty|
 9216|2023_01_15_merc_data.sql|SHOW TABLES LIKE 'mercs'|empty|
+9217|2023_01_15_chatchannel_reserved_names.sql|SHOW TABLES LIKE 'chatchannel_reserved_names'|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not

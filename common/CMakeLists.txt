@@ -182,6 +182,8 @@ SET(repositories
     repositories/base/base_char_create_combinations_repository.h
     repositories/base/base_char_create_point_allocations_repository.h
     repositories/base/base_char_recipe_list_repository.h
+    repositories/base/base_chatchannels_repository.h
+    repositories/base/base_chatchannel_reserved_names_repository.h
     repositories/base/base_completed_shared_tasks_repository.h
     repositories/base/base_completed_shared_task_activity_state_repository.h
     repositories/base/base_completed_shared_task_members_repository.h
@@ -358,6 +360,8 @@ SET(repositories
     repositories/char_create_combinations_repository.h
     repositories/char_create_point_allocations_repository.h
     repositories/char_recipe_list_repository.h
+    repositories/chatchannels_repository.h
+    repositories/chatchannel_reserved_names_repository.h
     repositories/completed_shared_tasks_repository.h
     repositories/completed_shared_task_activity_state_repository.h
     repositories/completed_shared_task_members_repository.h
