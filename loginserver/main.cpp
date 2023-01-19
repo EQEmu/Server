@@ -148,7 +148,7 @@ void LoadServerConfig()
 
 void start_web_server()
 {
-	sleep(1);
+	Sleep(1);
 
 	int web_api_port = server.config.GetVariableInt("web_api", "port", 6000);
 	LogInfo("Webserver API now listening on port [{0}]", web_api_port);
