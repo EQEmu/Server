@@ -93,7 +93,7 @@ steps:
 
 trigger:
   branch:
-    - akkadius/build-testt
+    - akkadius/build-test
   event:
     - push
 
@@ -135,7 +135,7 @@ steps:
 
 trigger:
   branch:
-    - akkadius/build-testt
+    - akkadius/build-test
   event:
     - push
 
