@@ -1100,7 +1100,7 @@ void Client::ClearPEQZoneFlag(uint32 zone_id) {
 
 	peqzone_flags.erase(zone_id);
 
-	if (!CharacterPeqzoneFlagsRepository::DeleteFlag(content_db, CharacterID(), zone_id)) {
+	if (!CharacterPeqzoneFlagsRepository::DeleteFlag(database, CharacterID(), zone_id)) {
 		LogError("MySQL Error while trying to clear PEQZone flag for [{}]", GetName());
 	}
 }
@@ -1111,7 +1111,7 @@ bool Client::HasPEQZoneFlag(uint32 zone_id) const {
 
 void Client::LoadPEQZoneFlags() {
 	const auto l = CharacterPeqzoneFlagsRepository::GetWhere(
-		content_db,
+		database,
 		fmt::format(
 			"id = {}",
 			CharacterID()
@@ -1193,7 +1193,7 @@ void Client::SetPEQZoneFlag(uint32 zone_id) {
 	f.id = CharacterID();
 	f.zone_id = zone_id;
 
-	if (!CharacterPeqzoneFlagsRepository::InsertOne(content_db, f).id) {
+	if (!CharacterPeqzoneFlagsRepository::InsertOne(database, f).id) {
 		LogError("MySQL Error while trying to set zone flag for [{}]", GetName());
 	}
 }
