@@ -166,3 +166,9 @@ steps:
 depends_on:
   - Build Windows Binaries
   - Build Linux Binaries
+
+trigger:
+  branch:
+    - akkadius/build-test
+  event:
+    - push
