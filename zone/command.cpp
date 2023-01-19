@@ -101,11 +101,7 @@ int command_init(void)
 		command_add("ban", "[Character Name] [Reason] - Ban by character name", AccountStatus::GMLeadAdmin, command_ban) ||
 		command_add("bind", "Sets your targets bind spot to their current location", AccountStatus::GMMgmt, command_bind) ||
 		command_add("bugs", "[Close|Delete|Review|Search|View] - Handles player bug reports", AccountStatus::QuestTroupe, command_bugs) ||
-
-#ifdef BOTS
 		command_add("bot", "Type \"#bot help\" or \"^help\" to the see the list of available commands for bots.", AccountStatus::Player, command_bot) ||
-#endif
-
 		command_add("camerashake", "[Duration (Milliseconds)] [Intensity (1-10)] - Shakes the camera on everyone's screen globally.", AccountStatus::QuestTroupe, command_camerashake) ||
 		command_add("castspell", "[Spell ID] [Instant (0 = False, 1 = True, Default is 1 if Unused)] - Cast a spell", AccountStatus::Guide, command_castspell) ||
 		command_add("chat", "[Channel ID] [Message] - Send a channel message to all zones", AccountStatus::GMMgmt, command_chat) ||
@@ -902,8 +898,6 @@ void command_apply_shared_memory(Client *c, const Seperator *sep) {
 	worldserver.SendPacket(&pack);
 }
 
-// All new code added to command.cpp should be BEFORE this comment line. Do no append code to this file below the BOTS code block.
-#ifdef BOTS
 #include "bot_command.h"
 // Function delegate to support the command interface for Bots with the client.
 void command_bot(Client *c, const Seperator *sep)
@@ -930,7 +924,6 @@ void command_bot(Client *c, const Seperator *sep)
 		}
 	}
 }
-#endif
 
 #include "gm_commands/acceptrules.cpp"
 #include "gm_commands/advnpcspawn.cpp"

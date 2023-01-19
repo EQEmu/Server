@@ -395,10 +395,8 @@ bool Database::DeleteCharacter(char *character_name)
 		return false;
 	}
 
-#ifdef BOTS
 	query = StringFormat("DELETE FROM `guild_members` WHERE `char_id` = '%d' AND GetMobTypeById(%i) = 'C'", character_id); // note: only use of GetMobTypeById()
 	QueryDatabase(query);
-#endif
 
 	std::string delete_type = "hard-deleted";
 	if (RuleB(Character, SoftDeletes)) {
@@ -418,21 +416,26 @@ bool Database::DeleteCharacter(char *character_name)
 
 		QueryDatabase(query);
 
-#ifdef BOTS
-		query = fmt::format(
-			SQL(
-				UPDATE
-				bot_data
-				SET
-				name = SUBSTRING(CONCAT(name, '-deleted-', UNIX_TIMESTAMP()), 1, 64)
-				WHERE
-				owner_id = '{}'
-			),
-			character_id
-		);
-		QueryDatabase(query);
-		LogInfo("character_name [{}] ({}) bots are being [{}]", character_name, character_id, delete_type);
-#endif
+		if (RuleB(Bots, AllowBots)) {
+			query = fmt::format(
+				SQL(
+					UPDATE
+					bot_data
+						SET
+					name = SUBSTRING(CONCAT(name, '-deleted-', UNIX_TIMESTAMP()), 1, 64)
+					WHERE
+					owner_id = '{}'
+				),
+				character_id
+			);
+			QueryDatabase(query);
+			LogInfo(
+				"[DeleteCharacter] character_name [{}] ({}) bots are being [{}]",
+				character_name,
+				character_id,
+				delete_type
+			);
+		}
 
 		return true;
 	}

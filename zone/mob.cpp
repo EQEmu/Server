@@ -33,9 +33,7 @@
 #include <sstream>
 #include <algorithm>
 
-#ifdef BOTS
 #include "bot.h"
-#endif
 
 extern EntityList entity_list;
 
@@ -509,9 +507,7 @@ Mob::Mob(
 
 	queue_wearchange_slot = -1;
 
-#ifdef BOTS
 	m_manual_follow = false;
-#endif
 
 	mob_close_scan_timer.Trigger();
 
@@ -564,9 +560,7 @@ Mob::~Mob()
 
 	close_mobs.clear();
 
-#ifdef BOTS
 	LeaveHealRotationTargetPool();
-#endif
 }
 
 uint32 Mob::GetAppearanceValue(EmuAppearance iAppearance) {
@@ -768,11 +762,7 @@ int Mob::_GetWalkSpeed() const {
 		return(0);
 
 	//runspeed cap.
-#ifdef BOTS
 	if (IsClient() || IsBot())
-#else
-	if(IsClient())
-#endif
 	{
 		if(speed_mod > runspeedcap)
 			speed_mod = runspeedcap;
@@ -831,11 +821,7 @@ int Mob::_GetRunSpeed() const {
 
 	if (!has_horse && movemod != 0)
 	{
-#ifdef BOTS
 		if (IsClient() || IsBot())
-#else
-		if (IsClient())
-#endif
 		{
 			speed_mod += (speed_mod * movemod / 100);
 		} else {
@@ -864,11 +850,7 @@ int Mob::_GetRunSpeed() const {
 		return(0);
 	}
 	//runspeed cap.
-#ifdef BOTS
 	if (IsClient() || IsBot())
-#else
-	if(IsClient())
-#endif
 	{
 		if(speed_mod > runspeedcap)
 			speed_mod = runspeedcap;
@@ -1520,8 +1502,7 @@ void Mob::SendHPUpdate(bool force_update_all)
 		}
 	}
 
-#ifdef BOTS
-	if (GetOwner() && GetOwner()->IsBot() && GetOwner()->CastToBot()->GetBotOwner() && GetOwner()->CastToBot()->GetBotOwner()->IsClient()) {
+	if (RuleB(Bots, AllowBots) && GetOwner() && GetOwner()->IsBot() && GetOwner()->CastToBot()->GetBotOwner() && GetOwner()->CastToBot()->GetBotOwner()->IsClient()) {
 		auto bot_owner = GetOwner()->CastToBot()->GetBotOwner()->CastToClient();
 		if (bot_owner) {
 			bot_owner->QueuePacket(&hp_packet, false);
@@ -1537,7 +1518,6 @@ void Mob::SendHPUpdate(bool force_update_all)
 			}
 		}
 	}
-#endif
 
 	if (GetPet() && GetPet()->IsClient()) {
 		GetPet()->CastToClient()->QueuePacket(&hp_packet, false);
@@ -1642,11 +1622,7 @@ void Mob::MakeSpawnUpdate(PlayerPositionUpdateServer_Struct* spu) {
 	spu->delta_y = FloatToEQ13(m_Delta.y);
 	spu->delta_z = FloatToEQ13(m_Delta.z);
 	spu->heading = FloatToEQ12(m_Position.w);
-#ifdef BOTS
 	if (IsClient() || IsBot())
-#else
-	if (IsClient())
-#endif
 		spu->animation = animation;
 	else
 		spu->animation = pRunAnimSpeed;//animation;
@@ -4265,11 +4241,9 @@ void Mob::SetTarget(Mob *mob)
 			DisplayInfo(mob);
 		}
 
-#ifdef BOTS
 		CastToClient()->SetBotPrecombat(false); // Any change in target will nullify this flag (target == mob checked above)
 	} else if (IsBot()) {
 		parse->EventBot(EVENT_TARGET_CHANGE, CastToBot(), mob, "", 0);
-#endif
 	}
 
 	if (IsPet() && GetOwner() && GetOwner()->IsClient()) {
@@ -6787,7 +6761,6 @@ void Mob::SetFeigned(bool in_feigned) {
 	feigned = in_feigned;
 }
 
-#ifdef BOTS
 bool Mob::JoinHealRotationTargetPool(std::shared_ptr<HealRotation>* heal_rotation)
 {
 	if (IsHealRotationTarget())
@@ -6851,7 +6824,6 @@ float Mob::HealRotationExtendedHealFrequency()
 
 	return m_target_of_heal_rotation->ExtendedHealFrequency(this);
 }
-#endif
 
 bool Mob::CanOpenDoors() const
 {
@@ -6891,10 +6863,8 @@ std::string Mob::GetBucketKey() {
 		return fmt::format("character-{}", CastToClient()->CharacterID());
 	} else if (IsNPC()) {
 		return fmt::format("npc-{}", GetNPCTypeID());
-#ifdef BOTS
 	} else if (IsBot()) {
 		return fmt::format("bot-{}", CastToBot()->GetBotID());
-#endif
 	}
 	return std::string();
 }

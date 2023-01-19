@@ -16,7 +16,7 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-#ifdef EMBPERL 
+#ifdef EMBPERL
 
 #include "../common/global_define.h"
 #include "../common/eqemu_logsys.h"
@@ -24,20 +24,18 @@
 #include "embperl.h"
 #include "masterentity.h"
 #include "command.h"
-#ifdef BOTS
 #include "bot_command.h"
-#endif
 
-const char *getItemName(unsigned itemid) 
-{ 
+const char *getItemName(unsigned itemid)
+{
 	const EQ::ItemData* item = nullptr;
-  item = database.GetItem(itemid); 
+  item = database.GetItem(itemid);
 
-  if (item) 
-    return item->Name; 
-  else 
-    return nullptr; 
-} 
+  if (item)
+    return item->Name;
+  else
+    return nullptr;
+}
 
 const char* Perl__qc_getItemName(unsigned itemid)
 {
@@ -46,13 +44,13 @@ const char* Perl__qc_getItemName(unsigned itemid)
 
 #ifdef EMBPERL_IO_CAPTURE
 
-XS(XS_EQEmuIO_PRINT); /* prototype to pass -Wmissing-prototypes */ 
-XS(XS_EQEmuIO_PRINT) 
-{ 
-    dXSARGS; 
+XS(XS_EQEmuIO_PRINT); /* prototype to pass -Wmissing-prototypes */
+XS(XS_EQEmuIO_PRINT)
+{
+    dXSARGS;
     if (items < 2)
     	return;
-//        Perl_croak(aTHX_ "Usage: EQEmuIO::PRINT(@strings)"); 
+//        Perl_croak(aTHX_ "Usage: EQEmuIO::PRINT(@strings)");
 
 	int r;
 	for (r = 1; r < items; r++) {

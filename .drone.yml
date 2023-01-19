@@ -19,7 +19,7 @@ steps:
     commands:
       - sudo chown eqemu:eqemu /drone/src/ * -R
       - sudo chown eqemu:eqemu /home/eqemu/.ccache/ * -R
-      - git submodule init && git submodule update && mkdir -p build && cd build && cmake -DEQEMU_BUILD_TESTS=ON -DEQEMU_BUILD_LOGIN=ON -DEQEMU_ENABLE_BOTS=ON -DEQEMU_BUILD_LUA=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_FLAGS_RELWITHDEBINFO:STRING="-O0 -g -DNDEBUG" -G 'Unix Makefiles' .. && make -j$((`nproc`-4))
+      - git submodule init && git submodule update && mkdir -p build && cd build && cmake -DEQEMU_BUILD_TESTS=ON -DEQEMU_BUILD_LOGIN=ON -DEQEMU_BUILD_LUA=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_FLAGS_RELWITHDEBINFO:STRING="-O0 -g -DNDEBUG" -G 'Unix Makefiles' .. && make -j$((`nproc`-4))
       - curl https://raw.githubusercontent.com/Akkadius/eqemu-install-v2/master/eqemu_config.json --output eqemu_config.json
       - ./bin/tests
     volumes:

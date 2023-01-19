@@ -33,9 +33,7 @@
 #include "string_ids.h"
 #include "../common/data_verification.h"
 
-#ifdef BOTS
 #include "bot.h"
-#endif
 
 extern QueryServ* QServ;
 
@@ -785,17 +783,14 @@ void Client::SetEXP(uint64 set_exp, uint64 set_aaxp, bool isrezzexp) {
 		else
 			MessageString(Chat::Experience, LOSE_LEVEL, ConvertArray(check_level, val1));
 
-#ifdef BOTS
 		uint8 myoldlevel = GetLevel();
-#endif
 
 		SetLevel(check_level);
 
-#ifdef BOTS
-		if(RuleB(Bots, BotLevelsWithOwner))
+		if (RuleB(Bots, AllowBots) && RuleB(Bots, BotLevelsWithOwner)) {
 			// hack way of doing this..but, least invasive... (same criteria as gain level for sendlvlapp)
-			Bot::LevelBotWithClient(this, GetLevel(), (myoldlevel==check_level-1));
-#endif
+			Bot::LevelBotWithClient(this, GetLevel(), (myoldlevel == check_level - 1));
+		}
 	}
 
 	//If were at max level then stop gaining experience if we make it to the cap

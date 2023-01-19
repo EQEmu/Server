@@ -7,10 +7,7 @@
 class Group;
 class Lua_Mob;
 class Lua_Client;
-
-#ifdef BOTS
 class Lua_Bot;
-#endif
 
 namespace luabind {
 	struct scope;

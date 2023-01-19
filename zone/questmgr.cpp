@@ -45,9 +45,7 @@
 #include <limits.h>
 #include <list>
 
-#ifdef BOTS
 #include "bot.h"
-#endif
 
 extern QueryServ* QServ;
 extern Zone* zone;
@@ -98,11 +96,9 @@ void QuestManager::Process() {
 					//this is inheriently unsafe if we ever make it so more than npc/client start timers
 					parse->EventPlayer(EVENT_TIMER, cur->mob->CastToClient(), cur->name, 0);
 				}
-#ifdef BOTS
 				else if (cur->mob->IsBot()) {
 					parse->EventBot(EVENT_TIMER, cur->mob->CastToBot(), nullptr, cur->name, 0);
 				}
-#endif
 
 				//we MUST reset our iterator since the quest could have removed/added any
 				//number of timers... worst case we have to check a bunch of timers twice
@@ -2237,8 +2233,6 @@ void QuestManager::popup(const char *title, const char *text, uint32 popupid, ui
 		initiator->SendPopupToClient(title, text, popupid, buttons, Duration);
 }
 
-#ifdef BOTS
-
 int QuestManager::createbotcount(uint8 class_id) {
 	QuestManagerCurrentQuestVars();
 	if (initiator) {
@@ -2443,8 +2437,6 @@ bool QuestManager::createBot(const char *name, const char *lastname, uint8 level
 	}
 	return false;
 }
-
-#endif //BOTS
 
 void QuestManager::taskselector(const std::vector<int>& tasks, bool ignore_cooldown) {
 	QuestManagerCurrentQuestVars();
@@ -3466,7 +3458,6 @@ NPC *QuestManager::GetNPC() const {
 	return nullptr;
 }
 
-#ifdef BOTS
 Bot *QuestManager::GetBot() const {
 	if (!quests_running_.empty()) {
 		running_quest e = quests_running_.top();
@@ -3475,7 +3466,6 @@ Bot *QuestManager::GetBot() const {
 
 	return nullptr;
 }
-#endif
 
 Mob *QuestManager::GetOwner() const {
 	if(!quests_running_.empty()) {

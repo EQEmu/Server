@@ -41,9 +41,7 @@
 #include "lua_stat_bonuses.h"
 #include "../common/path_manager.h"
 
-#ifdef BOTS
 #include "lua_bot.h"
-#endif
 
 const char *LuaEvents[_LargestEventID] = {
 	"event_say",
@@ -179,10 +177,7 @@ LuaParser::LuaParser() {
 		ItemArgumentDispatch[i] = handle_item_null;
 		SpellArgumentDispatch[i] = handle_spell_null;
 		EncounterArgumentDispatch[i] = handle_encounter_null;
-
-#ifdef BOTS
 		BotArgumentDispatch[i] = handle_bot_null;
-#endif
 	}
 
 	NPCArgumentDispatch[EVENT_SAY] = handle_npc_event_say;
@@ -298,7 +293,6 @@ LuaParser::LuaParser() {
 	EncounterArgumentDispatch[EVENT_ENCOUNTER_LOAD] = handle_encounter_load;
 	EncounterArgumentDispatch[EVENT_ENCOUNTER_UNLOAD] = handle_encounter_unload;
 
-#ifdef BOTS
 	BotArgumentDispatch[EVENT_CAST] = handle_bot_cast;
 	BotArgumentDispatch[EVENT_CAST_BEGIN] = handle_bot_cast;
 	BotArgumentDispatch[EVENT_CAST_ON] = handle_bot_cast;
@@ -1188,9 +1182,7 @@ void LuaParser::MapFunctions(lua_State *L) {
 			lua_register_special_abilities(),
 			lua_register_npc(),
 			lua_register_client(),
-#ifdef BOTS
 			lua_register_bot(),
-#endif
 			lua_register_inventory(),
 			lua_register_inventory_where(),
 			lua_register_iteminst(),
@@ -1202,9 +1194,7 @@ void LuaParser::MapFunctions(lua_State *L) {
 			lua_register_entity_list(),
 			lua_register_mob_list(),
 			lua_register_client_list(),
-#ifdef BOTS
 			lua_register_bot_list(),
-#endif
 			lua_register_npc_list(),
 			lua_register_corpse_list(),
 			lua_register_object_list(),
@@ -1507,7 +1497,6 @@ int64 LuaParser::CalcSpellEffectValue_formula(Mob *self, uint32 formula, int64 b
 	return retval;
 }
 
-#ifdef BOTS
 int LuaParser::EventBot(
 	QuestEventID evt,
 	Bot *bot,
@@ -1687,6 +1676,3 @@ void LuaParser::LoadBotScript(std::string filename) {
 void LuaParser::LoadGlobalBotScript(std::string filename) {
 	LoadScript(filename, "global_bot");
 }
-#endif
-
-#endif

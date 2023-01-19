@@ -16,8 +16,6 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-#ifdef BOTS
-
 #include "../common/data_verification.h"
 #include "../common/global_define.h"
 #include "../common/rulesys.h"
@@ -3233,5 +3231,3 @@ const char* BotDatabase::fail::DeleteHealRotation() { return "Failed to delete h
 const char* BotDatabase::fail::DeleteAllHealRotations() { return "Failed to delete all heal rotations"; }
 
 /* fail::Bot miscellaneous functions   */
-
-#endif // BOTS

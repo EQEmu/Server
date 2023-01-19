@@ -2043,7 +2043,6 @@ private:
 	bool m_has_quest_compass = false;
 	std::vector<uint32_t> m_dynamic_zone_ids;
 
-#ifdef BOTS
 
 public:
 	enum BotOwnerOption : size_t {
@@ -2082,7 +2081,6 @@ private:
 	bool m_bot_pulling;
 	bool m_bot_precombat;
 
-#endif
 	bool CanTradeFVNoDropItem();
 };
 

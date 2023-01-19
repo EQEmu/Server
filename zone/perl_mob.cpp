@@ -8,9 +8,7 @@
 #include "mob.h"
 #include "client.h"
 #include "dialogue_window.h"
-#ifdef BOTS
 #include "bot.h"
-#endif
 
 bool Perl_Mob_IsClient(Mob* self) // @categories Script Utility
 {
@@ -2713,7 +2711,6 @@ uint32 Perl_Mob_BuffCount(Mob* self, bool is_beneficial, bool is_detrimental) //
 	return self->BuffCount(is_beneficial, is_detrimental);
 }
 
-#ifdef BOTS
 void Perl_Mob_DamageAreaBots(Mob* self, int64 damage) // @categories Hate and Aggro
 {
 	self->DamageArea(damage, 0, EntityFilterType::Bots);
@@ -2788,7 +2785,6 @@ Bot* Perl_Mob_GetHateRandomBot(Mob* self) // @categories Hate and Aggro
 {
 	return self->GetHateRandomBot();
 }
-#endif
 
 void perl_register_mob()
 {
@@ -2840,9 +2836,7 @@ void perl_register_mob()
 	package.add("CastSpell", (void(*)(Mob*, uint16, uint16, int, int))&Perl_Mob_CastSpell);
 	package.add("CastSpell", (void(*)(Mob*, uint16, uint16, int, int, int))&Perl_Mob_CastSpell);
 	package.add("CastSpell", (void(*)(Mob*, uint16, uint16, int, int, int, int16))&Perl_Mob_CastSpell);
-#ifdef BOTS
 	package.add("CastToBot", &Perl_Mob_CastToBot);
-#endif
 	package.add("CastToClient", &Perl_Mob_CastToClient);
 	package.add("CastToCorpse", &Perl_Mob_CastToCorpse);
 	package.add("CastToMob", &Perl_Mob_CastToMob);
@@ -2871,12 +2865,10 @@ void perl_register_mob()
 	package.add("Damage", (void(*)(Mob*, Mob*, int64, uint16_t, int, bool, int8_t, bool))&Perl_Mob_Damage);
 	package.add("DamageArea", (void(*)(Mob*, int64))&Perl_Mob_DamageArea);
 	package.add("DamageArea", (void(*)(Mob*, int64, uint32))&Perl_Mob_DamageArea);
-#ifdef BOTS
 	package.add("DamageAreaBots", (void(*)(Mob*, int64))&Perl_Mob_DamageAreaBots);
 	package.add("DamageAreaBots", (void(*)(Mob*, int64, uint32))&Perl_Mob_DamageAreaBots);
 	package.add("DamageAreaBotsPercentage", (void(*)(Mob*, int64))&Perl_Mob_DamageAreaBotsPercentage);
 	package.add("DamageAreaBotsPercentage", (void(*)(Mob*, int64, uint32))&Perl_Mob_DamageAreaBotsPercentage);
-#endif
 	package.add("DamageAreaClients", (void(*)(Mob*, int64))&Perl_Mob_DamageAreaClients);
 	package.add("DamageAreaClients", (void(*)(Mob*, int64, uint32))&Perl_Mob_DamageAreaClients);
 	package.add("DamageAreaClientsPercentage", (void(*)(Mob*, int64))&Perl_Mob_DamageAreaClientsPercentage);
@@ -2889,12 +2881,10 @@ void perl_register_mob()
 	package.add("DamageAreaPercentage", (void(*)(Mob*, int64, uint32))&Perl_Mob_DamageAreaPercentage);
 	package.add("DamageHateList", (void(*)(Mob*, int64))&Perl_Mob_DamageHateList);
 	package.add("DamageHateList", (void(*)(Mob*, int64, uint32))&Perl_Mob_DamageHateList);
-#ifdef BOTS
 	package.add("DamageHateListBots", (void(*)(Mob*, int64))&Perl_Mob_DamageHateListBots);
 	package.add("DamageHateListBots", (void(*)(Mob*, int64, uint32))&Perl_Mob_DamageHateListBots);
 	package.add("DamageHateListBotsPercentage", (void(*)(Mob*, int64))&Perl_Mob_DamageHateListBotsPercentage);
 	package.add("DamageHateListBotsPercentage", (void(*)(Mob*, int64, uint32))&Perl_Mob_DamageHateListBotsPercentage);
-#endif
 	package.add("DamageHateListClients", (void(*)(Mob*, int64))&Perl_Mob_DamageHateListClients);
 	package.add("DamageHateListClients", (void(*)(Mob*, int64, uint32))&Perl_Mob_DamageHateListClients);
 	package.add("DamageHateListClientsPercentage", (void(*)(Mob*, int64))&Perl_Mob_DamageHateListClientsPercentage);
@@ -3012,10 +3002,8 @@ void perl_register_mob()
 	package.add("GetHateClosest", &Perl_Mob_GetHateClosest);
 	package.add("GetHateDamageTop", &Perl_Mob_GetHateDamageTop);
 	package.add("GetHateList", &Perl_Mob_GetHateList);
-#ifdef BOTS
 	package.add("GetHateListBots", (perl::array(*)(Mob*))&Perl_Mob_GetHateListBots);
 	package.add("GetHateListBots", (perl::array(*)(Mob*, uint32))&Perl_Mob_GetHateListBots);
-#endif
 	package.add("GetHateListClients", (perl::array(*)(Mob*))&Perl_Mob_GetHateListClients);
 	package.add("GetHateListClients", (perl::array(*)(Mob*, uint32))&Perl_Mob_GetHateListClients);
 	package.add("GetHateListNPCs", (perl::array(*)(Mob*))&Perl_Mob_GetHateListNPCs);
@@ -3023,9 +3011,7 @@ void perl_register_mob()
 	package.add("GetHateListByDistance", (perl::array(*)(Mob*))&Perl_Mob_GetHateListByDistance);
 	package.add("GetHateListByDistance", (perl::array(*)(Mob*, uint32))&Perl_Mob_GetHateListByDistance);
 	package.add("GetHateRandom", &Perl_Mob_GetHateRandom);
-#ifdef BOTS
 	package.add("GetHateRandomBot", &Perl_Mob_GetHateRandomBot);
-#endif
 	package.add("GetHateRandomClient", &Perl_Mob_GetHateRandomClient);
 	package.add("GetHateRandomNPC", &Perl_Mob_GetHateRandomNPC);
 	package.add("GetHateTop", &Perl_Mob_GetHateTop);

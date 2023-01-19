@@ -1,5 +1,3 @@
-#ifdef BOTS
-
 #include "bot.h"
 #include "client.h"
 
@@ -161,5 +159,3 @@ void Client::CampAllBots(uint8 class_id)
 {
 	Bot::BotOrderCampAll(this, class_id);
 }
-
-#endif

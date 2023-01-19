@@ -430,11 +430,6 @@ sub build_linux_source
     $cmake_options          = "";
     $source_folder_post_fix = "";
 
-    if ($build_options =~ /bots/i) {
-        $cmake_options          .= " -DEQEMU_ENABLE_BOTS=ON";
-        $source_folder_post_fix = "_bots";
-    }
-
     $current_directory = `pwd`;
     @directories       = split('/', $current_directory);
     foreach my $val (@directories) {
@@ -565,11 +560,7 @@ sub do_installer_routines
     fetch_peq_db_full();
     print "[Database] Fetching and Applying Latest Database Updates...\n";
     main_db_management();
-
-    # if bots
-    if ($build_options =~ /bots/i) {
-        bots_db_management();
-    }
+    bots_db_management();
 
     remove_duplicate_rule_values();
 

@@ -62,9 +62,7 @@ public:
 	void	DisbandGroup(bool joinraid = false);
 	void	GetMemberList(std::list<Mob*>& member_list, bool clear_list = true);
 	void	GetClientList(std::list<Client*>& client_list, bool clear_list = true);
-#ifdef BOTS
 	void	GetBotList(std::list<Bot*>& bot_list, bool clear_list = true);
-#endif
 	bool	IsGroupMember(Mob* c);
 	bool	IsGroupMember(const char* name);
 	bool	Process();

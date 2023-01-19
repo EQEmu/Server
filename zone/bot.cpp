@@ -16,8 +16,6 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-#ifdef BOTS
-
 #include "bot.h"
 #include "object.h"
 #include "doors.h"
@@ -9974,5 +9972,3 @@ void Bot::SendSpellAnim(uint16 target_id, uint16 spell_id)
 }
 
 uint8 Bot::spell_casting_chances[SPELL_TYPE_COUNT][PLAYER_CLASS_COUNT][EQ::constants::STANCE_TYPE_COUNT][cntHSND] = { 0 };
-
-#endif

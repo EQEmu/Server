@@ -36,7 +36,7 @@ namespace EQ
 	class ItemInstance;
 }
 
-typedef enum 
+typedef enum
 {
 	questUnloaded,
 	questLoaded,
@@ -47,7 +47,7 @@ class PerlembParser : public QuestInterface {
 public:
 	PerlembParser();
 	~PerlembParser();
-	
+
 	virtual int EventNPC(
 		QuestEventID evt,
 		NPC* npc,
@@ -96,8 +96,6 @@ public:
 		uint32 extra_data,
 		std::vector<std::any> *extra_pointers
 	);
-
-#ifdef BOTS
 	virtual int EventBot(
 		QuestEventID evt,
 		Bot *bot,
@@ -114,7 +112,6 @@ public:
 		uint32 extra_data,
 		std::vector<std::any> *extra_pointers
 	);
-#endif
 
 	virtual bool HasQuestSub(uint32 npcid, QuestEventID evt);
 	virtual bool HasGlobalQuestSub(QuestEventID evt);
@@ -122,11 +119,8 @@ public:
 	virtual bool GlobalPlayerHasQuestSub(QuestEventID evt);
 	virtual bool SpellHasQuestSub(uint32 spell_id, QuestEventID evt);
 	virtual bool ItemHasQuestSub(EQ::ItemInstance *itm, QuestEventID evt);
-
-#ifdef BOTS
 	virtual bool BotHasQuestSub(QuestEventID evt);
 	virtual bool GlobalBotHasQuestSub(QuestEventID evt);
-#endif	
 
 	virtual void LoadNPCScript(std::string filename, int npc_id);
 	virtual void LoadGlobalNPCScript(std::string filename);
@@ -134,11 +128,8 @@ public:
 	virtual void LoadGlobalPlayerScript(std::string filename);
 	virtual void LoadItemScript(std::string filename, EQ::ItemInstance *item);
 	virtual void LoadSpellScript(std::string filename, uint32 spell_id);
-
-#ifdef BOTS
 	virtual void LoadBotScript(std::string filename);
 	virtual void LoadGlobalBotScript(std::string filename);
-#endif
 
 	virtual void AddVar(std::string name, std::string val);
 	virtual std::string GetVar(std::string name);
@@ -147,7 +138,7 @@ public:
 
 private:
 	Embperl *perl;
-	
+
 	void ExportHash(const char *pkgprefix, const char *hashname, std::map<std::string, std::string> &vals);
 	void ExportVar(const char *pkgprefix, const char *varname, const char *value);
 	void ExportVar(const char *pkgprefix, const char *varname, int32 value);
@@ -163,7 +154,7 @@ private:
 		Mob* npcmob,
 		EQ::ItemInstance* item_inst,
 		const SPDat_Spell_Struct* spell,
-		Mob* mob, 
+		Mob* mob,
 		uint32 extradata,
 		bool global,
 		std::vector<std::any> *extra_pointers
@@ -185,7 +176,7 @@ private:
 		bool &isBotQuest,
 		bool &isGlobalBotQuest,
 		bool &isGlobalNPC,
-		bool &isItemQuest, 
+		bool &isItemQuest,
 		bool &isSpellQuest,
 		QuestEventID event,
 		Mob* npcmob,
@@ -199,12 +190,12 @@ private:
 		bool &isBotQuest,
 		bool &isGlobalBotQuest,
 		bool &isGlobalNPC,
-		bool &isItemQuest, 
+		bool &isItemQuest,
 		bool &isSpellQuest,
 		std::string &package_name,
 		QuestEventID event,
 		uint32 objid,
-		const char * data, 
+		const char * data,
 		Mob* npcmob,
 		EQ::ItemInstance* item_inst,
 		bool global
@@ -216,7 +207,7 @@ private:
 		bool isBotQuest,
 		bool isGlobalBotQuest,
 		bool isGlobalNPC,
-		bool isItemQuest, 
+		bool isItemQuest,
 		bool isSpellQuest,
 		std::string &package_name,
 		Mob *npcmob,
@@ -229,7 +220,7 @@ private:
 		bool isBotQuest,
 		bool isGlobalBotQuest,
 		bool isGlobalNPC,
-		bool isItemQuest, 
+		bool isItemQuest,
 		bool isSpellQuest,
 		std::string &package_name,
 		Mob *mob,
@@ -241,25 +232,22 @@ private:
 		std::string &package_name,
 		QuestEventID event,
 		uint32 objid,
-		const char* data, 
+		const char* data,
 		Mob* npcmob,
 		EQ::ItemInstance* item_inst,
 		Mob* mob,
 		uint32 extradata,
 		std::vector<std::any> *extra_pointers
 	);
-	
+
 	std::map<uint32, PerlQuestStatus> npc_quest_status_;
 	PerlQuestStatus global_npc_quest_status_;
 	PerlQuestStatus player_quest_status_;
 	PerlQuestStatus global_player_quest_status_;
 	std::map<uint32, PerlQuestStatus> item_quest_status_;
 	std::map<uint32, PerlQuestStatus> spell_quest_status_;
-
-#ifdef BOTS
 	PerlQuestStatus bot_quest_status_;
 	PerlQuestStatus global_bot_quest_status_;
-#endif
 
 	std::map<std::string, std::string> vars_;
 	SV *_empty_sv;

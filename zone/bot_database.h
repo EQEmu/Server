@@ -20,7 +20,6 @@
 #ifndef BOT_DATABASE_H
 #define BOT_DATABASE_H
 
-#ifdef BOTS
 
 #include <list>
 #include <map>
@@ -295,5 +294,3 @@ public:
 };
 
 #endif
-
-#endif // BOTS
