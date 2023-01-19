@@ -1198,7 +1198,7 @@ void Client::SetPEQZoneFlag(uint32 zone_id) {
 	}
 }
 
-bool Client::CanEnterZone(std::string zone_short_name, int16 instance_version) {
+bool Client::CanEnterZone(const std::string& zone_short_name, int16 instance_version) {
 	//check some critial rules to see if this char needs to be booted from the zone
 	//only enforce rules here which are serious enough to warrant being kicked from
 	//the zone
@@ -1246,11 +1246,8 @@ bool Client::CanEnterZone(std::string zone_short_name, int16 instance_version) {
 		return false;
 	}
 
-	if (!z->flag_needed.empty()) {
-		if (
-			Admin() < minStatusToIgnoreZoneFlags &&
-			!HasZoneFlag(zone->GetZoneID())
-		) {
+	if (!z->flag_needed.empty() && Strings::IsNumber(z->flag_needed) && std::stoi(z->flag_needed) == 1) {
+		if (Admin() < minStatusToIgnoreZoneFlags && !HasZoneFlag(z->zoneidnumber)) {
 			LogInfo(
 				"Character [{}] does not have the flag to be in this zone [{}]!",
 				GetCleanName(),
