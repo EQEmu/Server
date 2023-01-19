@@ -223,6 +223,7 @@ void EQEmuLogSys::ProcessConsoleMessage(
 	bool is_error = (
 		log_category == Logs::LogCategory::Error ||
 		log_category == Logs::LogCategory::MySQLError ||
+		log_category == Logs::LogCategory::Crash ||
 		log_category == Logs::LogCategory::QuestErrors
 	);
 	bool is_warning = (
@@ -237,7 +238,7 @@ void EQEmuLogSys::ProcessConsoleMessage(
 		<< rang::style::reset
 		<< rang::fgB::gray
 		<< " | "
-		<< (is_error || is_warning ? rang::fgB::red : rang::fgB::gray)
+		<< ((is_error || is_warning) ? rang::fgB::red : rang::fgB::gray)
 		<< rang::style::bold
 		<< fmt::format("{:^10}", fmt::format("{}", Logs::LogCategoryName[log_category]).substr(0, 10))
 		<< rang::style::reset
@@ -628,6 +629,11 @@ EQEmuLogSys *EQEmuLogSys::LoadLogDatabaseSettings()
 		}
 		LogInfo("Loaded [{}] Discord webhooks", webhooks.size());
 	}
+
+	// force override this setting
+	log_settings[Logs::Crash].log_to_console = static_cast<uint8>(Logs::General);
+	log_settings[Logs::Crash].log_to_gmsay   = static_cast<uint8>(Logs::General);
+	log_settings[Logs::Crash].log_to_file    = static_cast<uint8>(Logs::General);
 
 	return this;
 }
