@@ -902,26 +902,31 @@ void command_apply_shared_memory(Client *c, const Seperator *sep) {
 // Function delegate to support the command interface for Bots with the client.
 void command_bot(Client *c, const Seperator *sep)
 {
-	std::string bot_message = sep->msg;
-	if (bot_message.compare("#bot") == 0) {
-		bot_message[0] = BOT_COMMAND_CHAR;
-	}
-	else {
-		bot_message = bot_message.substr(bot_message.find_first_not_of("#bot"));
-		bot_message[0] = BOT_COMMAND_CHAR;
-	}
-
-	if (bot_command_dispatch(c, bot_message.c_str()) == -2) {
-		if (parse->PlayerHasQuestSub(EVENT_BOT_COMMAND)) {
-			int i = parse->EventPlayer(EVENT_BOT_COMMAND, c, bot_message, 0);
-			if (i == 0 && !RuleB(Chat, SuppressCommandErrors)) {
-				c->Message(Chat::Red, "Bot command '%s' not recognized.", bot_message.c_str());
-			}
+	if (RuleB(Bots, AllowBots)) {
+		std::string bot_message = sep->msg;
+		if (bot_message.compare("#bot") == 0) {
+			bot_message[0] = BOT_COMMAND_CHAR;
 		}
 		else {
-			if (!RuleB(Chat, SuppressCommandErrors))
-				c->Message(Chat::Red, "Bot command '%s' not recognized.", bot_message.c_str());
+			bot_message = bot_message.substr(bot_message.find_first_not_of("#bot"));
+			bot_message[0] = BOT_COMMAND_CHAR;
 		}
+
+		if (bot_command_dispatch(c, bot_message.c_str()) == -2) {
+			if (parse->PlayerHasQuestSub(EVENT_BOT_COMMAND)) {
+				int i = parse->EventPlayer(EVENT_BOT_COMMAND, c, bot_message, 0);
+				if (i == 0 && !RuleB(Chat, SuppressCommandErrors)) {
+					c->Message(Chat::Red, "Bot command '%s' not recognized.", bot_message.c_str());
+				}
+			}
+			else {
+				if (!RuleB(Chat, SuppressCommandErrors)) {
+					c->Message(Chat::Red, "Bot command '%s' not recognized.", bot_message.c_str());
+				}
+			}
+		}
+	} else {
+		c->Message(Chat::Red, "Bots are disabled on this server.");
 	}
 }
 
