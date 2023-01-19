@@ -1352,7 +1352,7 @@ public:
 	void ClearPendingAdventureDoorClick() { safe_delete(adventure_door_timer); }
 	void ClearPendingAdventureData();
 
-	bool CanEnterZone(std::string zone_short_name = "", int16 instance_version = -1);
+	bool CanEnterZone(const std::string& zone_short_name = "", int16 instance_version = -1);
 
 	int GetAggroCount();
 	void IncrementAggroCount(bool raid_target = false);
