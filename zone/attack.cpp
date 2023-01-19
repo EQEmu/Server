@@ -1510,7 +1510,6 @@ bool Mob::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 
 	const EQ::ItemInstance* weapon = nullptr;
 
-#ifdef BOTS
 
 	if (IsBot()) {
 		FaceTarget(GetTarget());
@@ -1524,20 +1523,6 @@ bool Mob::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 		weapon = (IsClient()) ? GetInv().GetItem(EQ::invslot::slotPrimary) : CastToBot()->GetBotItem(EQ::invslot::slotPrimary);
 		OffHandAtk(false);
 	}
-
-#else
-
-	if (Hand == EQ::invslot::slotSecondary) {
-		weapon = GetInv().GetItem(EQ::invslot::slotSecondary);
-		OffHandAtk(true);
-	}
-	else {
-		weapon = GetInv().GetItem(EQ::invslot::slotPrimary);
-		OffHandAtk(false);
-	}
-
-#endif
-
 	if (weapon != nullptr) {
 		if (!weapon->IsWeapon()) {
 			LogCombat("[Mob::Attack] Attack cancelled, Item [{}] ([{}]) is not a weapon", weapon->GetItem()->Name, weapon->GetID());
