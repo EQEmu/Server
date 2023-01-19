@@ -1626,7 +1626,7 @@ bool Mob::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 
 		DoAttack(other, my_hit, opts, bRiposte);
 
-		LogCombatDetail("[Bot::Attack] Final damage after all reductions: [{}]", my_hit.damage_done);
+		LogCombatDetail("Final damage after all reductions: [{}]", my_hit.damage_done);
 	}
 	else {
 		my_hit.damage_done = DMG_INVULNERABLE;
