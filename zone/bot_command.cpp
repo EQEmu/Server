@@ -7798,6 +7798,11 @@ void bot_subcommand_botgroup_load(Client *c, const Seperator *sep)
 		return;
 	}
 
+	if (c->GetFeigned()) {
+		c->Message(Chat::White, "You cannot spawn a bot-group while feigned.");
+		return;
+	}
+
 	auto* owner_group = c->GetGroup();
 	if (owner_group) {
 		std::list<Client*> member_list;
