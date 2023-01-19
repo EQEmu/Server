@@ -3261,10 +3261,6 @@ const int64& Mob::SetMana(int64 amount)
 	CalcMaxMana();
 	int64 mmana = GetMaxMana();
 	current_mana = amount < 0 ? 0 : (amount > mmana ? mmana : amount);
-/*
-	if(IsClient())
-		LogFile->write(EQEMuLog::Debug, "Setting mana for %s to %d (%4.1f%%)", GetName(), amount, GetManaRatio());
-*/
 
 	return current_mana;
 }
@@ -4162,8 +4158,8 @@ void Mob::ExecWeaponProc(const EQ::ItemInstance *inst, uint16 spell_id, Mob *on,
 	bool twinproc = false;
 	int32 twinproc_chance = 0;
 
-	if (IsClient()) {
-		twinproc_chance = CastToClient()->GetFocusEffect(focusTwincast, spell_id);
+	if (IsClient() || IsBot()) {
+		twinproc_chance = GetFocusEffect(focusTwincast, spell_id);
 	}
 
 	if (twinproc_chance && zone->random.Roll(twinproc_chance)) {
@@ -4642,18 +4638,21 @@ void Mob::TryTriggerOnCastRequirement()
 //Twincast Focus effects should stack across different types (Spell, AA - when implemented ect)
 void Mob::TryTwincast(Mob *caster, Mob *target, uint32 spell_id)
 {
-	if(!IsValidSpell(spell_id))
+	if (!IsValidSpell(spell_id)) {
 		return;
+	}
 
-	if(IsClient())
+	if (IsClient() || IsBot())
 	{
-		int focus = CastToClient()->GetFocusEffect(focusTwincast, spell_id);
+		int focus = GetFocusEffect(focusTwincast, spell_id);
 
 		if (focus > 0)
 		{
-			if(zone->random.Roll(focus))
+			if (zone->random.Roll(focus))
 			{
-				Message(Chat::Spells,"You twincast %s!", spells[spell_id].name);
+				if (IsClient()) {
+					Message(Chat::Spells,"You twincast %s!", spells[spell_id].name);
+				}
 				SpellFinished(spell_id, target, EQ::spells::CastingSlot::Item, 0, -1, spells[spell_id].resist_difficulty);
 			}
 		}
