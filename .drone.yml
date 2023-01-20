@@ -51,6 +51,9 @@ volumes:
 steps:
   - name: Init
     image: akkadius/eqemu-server:v11
+    environment:
+      GITHUB_TOKEN:
+        from_secret: GH_RELEASE_GITHUB_API_TOKEN
     commands:
       - ./utils/scripts/build/should-release/should-release
       - sudo chown eqemu:eqemu /drone/src/ * -R
@@ -110,6 +113,9 @@ platform:
 
 steps:
   - name: init
+    environment:
+      GITHUB_TOKEN:
+        from_secret: GH_RELEASE_GITHUB_API_TOKEN
     commands:
       - ./utils/scripts/build/should-release/should-release.exe
       - git submodule init
@@ -157,6 +163,8 @@ steps:
       RCLONE_FTP_PASS:
         from_secret: RCLONE_FTP_PASS
       GH_RELEASE_GITHUB_API_TOKEN:
+        from_secret: GH_RELEASE_GITHUB_API_TOKEN
+      GITHUB_TOKEN:
         from_secret: GH_RELEASE_GITHUB_API_TOKEN
     commands:
       - ./utils/scripts/build/should-release/should-release
