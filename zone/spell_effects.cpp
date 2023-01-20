@@ -717,14 +717,16 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						caster->MessageString(Chat::SpellFailure, IMMUNE_STUN);
 				} else {
 					int stun_resist = itembonuses.StunResist+spellbonuses.StunResist;
-					if (IsClient())
+					if (IsClient() || IsBot()) {
 						stun_resist += aabonuses.StunResist;
+					}
 
 					if (stun_resist <= 0 || zone->random.Int(0,99) >= stun_resist) {
 						LogCombat("Stunned. We had [{}] percent resist chance", stun_resist);
 
-						if (caster && caster->IsClient())
+						if (caster && (caster->IsClient() || caster->IsBot())) {
 							effect_value += effect_value*caster->GetFocusEffect(focusFcStunTimeMod, spell_id)/100;
+						}
 
 						Stun(effect_value);
 					} else {
@@ -807,7 +809,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					buffs[buffslot].ticsremaining = resistMod * buffs[buffslot].ticsremaining / 100;
 				}
 
-				if(IsClient())
+				if (IsClient() || IsBot())
 				{
 					if(buffs[buffslot].ticsremaining > RuleI(Character, MaxCharmDurationForPlayerCharacter))
 						buffs[buffslot].ticsremaining = RuleI(Character, MaxCharmDurationForPlayerCharacter);
@@ -865,21 +867,22 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Fear: %+i", effect_value);
 #endif
-				if(IsClient())
+				if (IsClient() || IsBot())
 				{
-					if(buffs[buffslot].ticsremaining > RuleI(Character, MaxFearDurationForPlayerCharacter))
+					if (buffs[buffslot].ticsremaining > RuleI(Character, MaxFearDurationForPlayerCharacter)) {
 						buffs[buffslot].ticsremaining = RuleI(Character, MaxFearDurationForPlayerCharacter);
+					}
 				}
 
 
-				if(RuleB(Combat, EnableFearPathing)){
-					if(IsClient())
+				if (RuleB(Combat, EnableFearPathing)) {
+					if (IsClient())
 					{
 						CastToClient()->AI_Start();
 					}
 
 					CalculateNewFearpoint();
-					if(currently_fleeing)
+					if (currently_fleeing)
 					{
 						break;
 					}
