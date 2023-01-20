@@ -55,7 +55,7 @@ std::ofstream process_log;
  */
 EQEmuLogSys::EQEmuLogSys()
 {
-	m_on_log_gmsay_hook   = [](uint16 log_type, const std::string &) {};
+	m_on_log_gmsay_hook   = [](uint16 log_type, const char *func, const std::string &) {};
 	m_on_log_console_hook = [](uint16 log_type, const std::string &) {};
 }
 
@@ -223,6 +223,7 @@ void EQEmuLogSys::ProcessConsoleMessage(
 	bool is_error = (
 		log_category == Logs::LogCategory::Error ||
 		log_category == Logs::LogCategory::MySQLError ||
+		log_category == Logs::LogCategory::Crash ||
 		log_category == Logs::LogCategory::QuestErrors
 	);
 	bool is_warning = (
@@ -237,7 +238,7 @@ void EQEmuLogSys::ProcessConsoleMessage(
 		<< rang::style::reset
 		<< rang::fgB::gray
 		<< " | "
-		<< (is_error || is_warning ? rang::fgB::red : rang::fgB::gray)
+		<< ((is_error || is_warning) ? rang::fgB::red : rang::fgB::gray)
 		<< rang::style::bold
 		<< fmt::format("{:^10}", fmt::format("{}", Logs::LogCategoryName[log_category]).substr(0, 10))
 		<< rang::style::reset
@@ -262,24 +263,26 @@ void EQEmuLogSys::ProcessConsoleMessage(
 
 	if (log_category == Logs::LogCategory::MySQLQuery) {
 		auto        s     = Strings::Split(message, "--");
-		std::string query = Strings::Trim(s[0]);
-		std::string meta  = Strings::Trim(s[1]);
+		if (s.size() > 1) {
+			std::string query = Strings::Trim(s[0]);
+			std::string meta  = Strings::Trim(s[1]);
 
-		std::cout <<
-				  rang::fgB::green
-				  <<
-				  query
-				  <<
-				  rang::style::reset;
+			std::cout <<
+					  rang::fgB::green
+					  <<
+					  query
+					  <<
+					  rang::style::reset;
 
-		std::cout <<
-				  rang::fgB::black
-				  <<
-				  " -- "
-				  <<
-				  meta
-				  <<
-				  rang::style::reset;
+			std::cout <<
+					  rang::fgB::black
+					  <<
+					  " -- "
+					  <<
+					  meta
+					  <<
+					  rang::style::reset;
+		}
 	}
 	else if (Strings::Contains(message, "[")) {
 		for (auto &e: Strings::Split(message, " ")) {
@@ -411,7 +414,7 @@ void EQEmuLogSys::Out(
 		);
 	}
 	if (l.log_to_gmsay_enabled) {
-		m_on_log_gmsay_hook(log_category, output_message);
+		m_on_log_gmsay_hook(log_category, func, output_message);
 	}
 	if (l.log_to_file_enabled) {
 		EQEmuLogSys::ProcessLogWrite(
@@ -525,6 +528,8 @@ void EQEmuLogSys::SilenceConsoleLogging()
 		log_settings[log_index].log_to_console      = 0;
 		log_settings[log_index].is_category_enabled = 0;
 	}
+
+	log_settings[Logs::Crash].log_to_console = static_cast<uint8>(Logs::General);
 }
 
 /**
@@ -628,6 +633,11 @@ EQEmuLogSys *EQEmuLogSys::LoadLogDatabaseSettings()
 		}
 		LogInfo("Loaded [{}] Discord webhooks", webhooks.size());
 	}
+
+	// force override this setting
+	log_settings[Logs::Crash].log_to_console = static_cast<uint8>(Logs::General);
+	log_settings[Logs::Crash].log_to_gmsay   = static_cast<uint8>(Logs::General);
+	log_settings[Logs::Crash].log_to_file    = static_cast<uint8>(Logs::General);
 
 	return this;
 }

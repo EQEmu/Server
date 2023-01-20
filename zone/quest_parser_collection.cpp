@@ -37,11 +37,8 @@ QuestParserCollection::QuestParserCollection() {
 	_player_quest_status = QuestUnloaded;
 	_global_player_quest_status = QuestUnloaded;
 	_global_npc_quest_status = QuestUnloaded;
-
-#ifdef BOTS
 	_bot_quest_status = QuestUnloaded;
 	_global_bot_quest_status = QuestUnloaded;
-#endif
 }
 
 QuestParserCollection::~QuestParserCollection() {
@@ -85,11 +82,8 @@ void QuestParserCollection::ReloadQuests(bool reset_timers) {
 	_player_quest_status = QuestUnloaded;
 	_global_player_quest_status = QuestUnloaded;
 	_global_npc_quest_status = QuestUnloaded;
-
-#ifdef BOTS
 	_bot_quest_status = QuestUnloaded;
 	_global_bot_quest_status = QuestUnloaded;
-#endif
 
 	_spell_quest_status.clear();
 	_item_quest_status.clear();
@@ -1085,7 +1079,6 @@ void QuestParserCollection::LoadPerlEventExportSettings(PerlEventExportSettings 
 	LogInfo("Loaded [{}] Perl Event Export Settings", settings.size());
 }
 
-#ifdef BOTS
 int QuestParserCollection::DispatchEventBot(
 	QuestEventID evt,
 	Bot *bot,
@@ -1312,4 +1305,3 @@ QuestInterface *QuestParserCollection::GetQIByGlobalBotQuest(std::string &filena
 
 	return nullptr;
 }
-#endif

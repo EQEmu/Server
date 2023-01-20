@@ -91,8 +91,6 @@ public:
 		uint32 extra_data,
 		std::vector<std::any> *extra_pointers
 	);
-
-#ifdef BOTS
 	virtual int EventBot(
 		QuestEventID evt,
 		Bot *bot,
@@ -109,7 +107,6 @@ public:
 		uint32 extra_data,
 		std::vector<std::any> *extra_pointers
 	);
-#endif
 
 	virtual bool HasQuestSub(uint32 npc_id, QuestEventID evt);
 	virtual bool HasGlobalQuestSub(QuestEventID evt);
@@ -119,11 +116,8 @@ public:
 	virtual bool ItemHasQuestSub(EQ::ItemInstance *itm, QuestEventID evt);
 	virtual bool EncounterHasQuestSub(std::string encounter_name, QuestEventID evt);
 	virtual bool HasEncounterSub(const std::string& package_name, QuestEventID evt);
-
-#ifdef BOTS
 	virtual bool BotHasQuestSub(QuestEventID evt);
 	virtual bool GlobalBotHasQuestSub(QuestEventID evt);
-#endif
 
 	virtual void LoadNPCScript(std::string filename, int npc_id);
 	virtual void LoadGlobalNPCScript(std::string filename);
@@ -132,11 +126,8 @@ public:
 	virtual void LoadItemScript(std::string filename, EQ::ItemInstance *item);
 	virtual void LoadSpellScript(std::string filename, uint32 spell_id);
 	virtual void LoadEncounterScript(std::string filename, std::string encounter_name);
-
-#ifdef BOTS
 	virtual void LoadBotScript(std::string filename);
 	virtual void LoadGlobalBotScript(std::string filename);
-#endif
 
 	virtual void AddVar(std::string name, std::string val);
 	virtual std::string GetVar(std::string name);
@@ -178,8 +169,6 @@ public:
 		uint32 extra_data,
 		std::vector<std::any> *extra_pointers
 	);
-
-#ifdef BOTS
 	virtual int DispatchEventBot(
 		QuestEventID evt,
 		Bot *bot,
@@ -188,7 +177,6 @@ public:
 		uint32 extra_data,
 		std::vector<std::any> *extra_pointers
 	);
-#endif
 
 	static LuaParser* Instance() {
 		static LuaParser inst;
@@ -263,8 +251,6 @@ private:
 		uint32 extra_data,
 		std::vector<std::any> *extra_pointers
 	);
-
-#ifdef BOTS
 	int _EventBot(
 		std::string package_name,
 		QuestEventID evt,
@@ -275,7 +261,6 @@ private:
 		std::vector<std::any> *extra_pointers,
 		luabind::adl::object *l_func = nullptr
 	);
-#endif
 
 	void LoadScript(std::string filename, std::string package_name);
 	void MapFunctions(lua_State *L);
@@ -291,11 +276,7 @@ private:
 	ItemArgumentHandler ItemArgumentDispatch[_LargestEventID];
 	SpellArgumentHandler SpellArgumentDispatch[_LargestEventID];
 	EncounterArgumentHandler EncounterArgumentDispatch[_LargestEventID];
-
-#ifdef BOTS
 	BotArgumentHandler BotArgumentDispatch[_LargestEventID];
-#endif
-
 };
 
 #endif

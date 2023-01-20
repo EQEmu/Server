@@ -30,7 +30,7 @@
 extern ZSList      zoneserver_list;
 extern WorldConfig Config;
 
-void WorldBoot::GMSayHookCallBackProcessWorld(uint16 log_category, std::string message)
+void WorldBoot::GMSayHookCallBackProcessWorld(uint16 log_category, const char *func, std::string message)
 {
 	// we don't want to loop up with chat messages
 	if (message.find("OP_SpecialMesg") != std::string::npos) {
@@ -71,15 +71,26 @@ void WorldBoot::GMSayHookCallBackProcessWorld(uint16 log_category, std::string m
 		AccountStatus::QuestTroupe,
 		LogSys.GetGMSayColorFromCategory(log_category),
 		"%s",
-		message.c_str()
+		fmt::format("[{}] [{}] {}", Logs::LogCategoryName[log_category], func, message).c_str()
 	);
 }
 
 bool WorldBoot::HandleCommandInput(int argc, char **argv)
 {
+	// command handler
+	if (argc > 1) {
+		LogSys.SilenceConsoleLogging();
+		path.LoadPaths();
+		WorldConfig::LoadConfig();
+		LoadDatabaseConnections();
+		RuleManager::Instance()->LoadRules(&database, "default", false);
+		LogSys.EnableConsoleLogging();
+		WorldserverCLI::CommandHandler(argc, argv);
+	}
+
 	// database version
 	uint32 database_version      = CURRENT_BINARY_DATABASE_VERSION;
-	uint32 bots_database_version = CURRENT_BINARY_BOTS_DATABASE_VERSION;
+	uint32 bots_database_version = RuleB(Bots, Enabled) ? CURRENT_BINARY_BOTS_DATABASE_VERSION : 0;
 	if (argc >= 2) {
 		if (strcasecmp(argv[1], "db_version") == 0) {
 			std::cout << "Binary Database Version: " << database_version << " : " << bots_database_version << std::endl;
@@ -87,24 +98,14 @@ bool WorldBoot::HandleCommandInput(int argc, char **argv)
 		}
 	}
 
-	// command handler
-	if (argc > 1) {
-		LogSys.SilenceConsoleLogging();
-		path.LoadPaths();
-		WorldConfig::LoadConfig();
-		LoadDatabaseConnections();
-		LogSys.EnableConsoleLogging();
-		WorldserverCLI::CommandHandler(argc, argv);
-	}
-
 	return false;
 }
 
 bool WorldBoot::LoadServerConfig()
 {
-	LogInfo("[WorldBoot::LoadServerConfig] Loading server configuration");
+	LogInfo("Loading server configuration");
 	if (!WorldConfig::LoadConfig()) {
-		LogError("[WorldBoot::LoadServerConfig] Loading server configuration failed");
+		LogError("Loading server configuration failed");
 		return false;
 	}
 

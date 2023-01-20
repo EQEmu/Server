@@ -70,10 +70,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "client.h"
 #include "../common/repositories/account_repository.h"
 
-
-#ifdef BOTS
 #include "bot.h"
-#endif
 
 extern QueryServ* QServ;
 extern Zone* zone;
@@ -1536,11 +1533,11 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 		LFG = false;
 	}
 
-#ifdef BOTS
-	database.botdb.LoadOwnerOptions(this);
-	// TODO: mod below function for loading spawned botgroups
-	Bot::LoadAndSpawnAllZonedBots(this);
-#endif
+	if (RuleB(Bots, Enabled)) {
+		database.botdb.LoadOwnerOptions(this);
+		// TODO: mod below function for loading spawned botgroups
+		Bot::LoadAndSpawnAllZonedBots(this);
+	}
 
 	m_inv.SetGMInventory((bool)m_pp.gm); // set to current gm state for calc
 	CalcBonuses();
@@ -3955,14 +3952,14 @@ void Client::Handle_OP_Buff(const EQApplicationPacket *app)
 	*/
 	if (app->size != sizeof(SpellBuffPacket_Struct))
 	{
-		LogError("[Client::Handle_OP_Buff] Size mismatch in OP_Buff. expected [{}] got [{}]", sizeof(SpellBuffPacket_Struct), app->size);
+		LogError("Size mismatch in OP_Buff. expected [{}] got [{}]", sizeof(SpellBuffPacket_Struct), app->size);
 		DumpPacket(app);
 		return;
 	}
 
 	SpellBuffPacket_Struct* sbf = (SpellBuffPacket_Struct*)app->pBuffer;
 	uint32 spid = sbf->buff.spellid;
-	LogSpells("[Client::Handle_OP_Buff] Client requested that buff with spell id [{}] be canceled", spid);
+	LogSpells("Client requested that buff with spell id [{}] be canceled", spid);
 
 	//something about IsDetrimentalSpell() crashes this portion of code..
 	//tbh we shouldn't use it anyway since this is a simple red vs blue buff check and
@@ -3998,13 +3995,14 @@ void Client::Handle_OP_BuffRemoveRequest(const EQApplicationPacket *app)
 	{
 		m = entity_list.GetMobID(brrs->EntityID);
 	}
-#ifdef BOTS
 	else {
-		Mob* bot_test = entity_list.GetMob(brrs->EntityID);
-		if (bot_test && bot_test->IsBot() && bot_test->GetOwner() == this)
-			m = bot_test;
+		if (RuleB(Bots, Enabled)) {
+			Mob *bot_test = entity_list.GetMob(brrs->EntityID);
+			if (bot_test && bot_test->IsBot() && bot_test->GetOwner() == this) {
+				m = bot_test;
+			}
+		}
 	}
-#endif
 
 	if (!m)
 		return;
@@ -4037,15 +4035,10 @@ void Client::Handle_OP_Bug(const EQApplicationPacket *app)
 
 void Client::Handle_OP_Camp(const EQApplicationPacket *app)
 {
-#ifdef BOTS
-	// This block is necessary to clean up any bot objects owned by a Client
-	Bot::BotOrderCampAll(this);
-	// Evidently, this is bad under certain conditions and causes crashes...
-	// Group and Raid code really needs to be overhauled to account for non-client types (mercs and bots)
-	//auto group = GetGroup();
-	//if (group && group->GroupCount() < 2)
-	//	group->DisbandGroup();
-#endif
+	if (RuleB(Bots, Enabled)) {
+		Bot::BotOrderCampAll(this);
+	}
+
 	if (IsLFP())
 		worldserver.StopLFP(CharacterID());
 
@@ -4126,7 +4119,7 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 
 	m_TargetRing = glm::vec3(castspell->x_pos, castspell->y_pos, castspell->z_pos);
 
-	LogSpells("[Client::Handle_OP_CastSpell] OP CastSpell: slot [{}] spell [{}] target [{}] inv [{}]", castspell->slot, castspell->spell_id, castspell->target_id, (unsigned long)castspell->inventoryslot);
+	LogSpells("OP CastSpell: slot [{}] spell [{}] target [{}] inv [{}]", castspell->slot, castspell->spell_id, castspell->target_id, (unsigned long)castspell->inventoryslot);
 	CastingSlot slot = static_cast<CastingSlot>(castspell->slot);
 
 	/* Memorized Spell */
@@ -4226,7 +4219,7 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 	/* Discipline -- older clients use the same slot as items, but we translate to it's own */
 	else if (slot == CastingSlot::Discipline) {
 		if (!UseDiscipline(castspell->spell_id, castspell->target_id)) {
-			LogSpells("[Client::Handle_OP_CastSpell] Unknown ability being used by [{}] spell being cast is: [{}]\n", GetName(), castspell->spell_id);
+			LogSpells("Unknown ability being used by [{}] spell being cast is: [{}]\n", GetName(), castspell->spell_id);
 			InterruptSpell(castspell->spell_id);
 			return;
 		}
@@ -6797,9 +6790,8 @@ void Client::Handle_OP_GroupDisband(const EQApplicationPacket *app)
 	if (!group)
 		return;
 
-#ifdef BOTS
 	// this block is necessary to allow more control over controlling how bots are zoned or camped.
-	if (Bot::GroupHasBot(group)) {
+	if (RuleB(Bots, Enabled) && Bot::GroupHasBot(group)) {
 		if (group->IsLeader(this)) {
 			if ((GetTarget() == 0 || GetTarget() == this) || (group->GroupCount() < 3)) {
 				Bot::ProcessBotGroupDisband(this, std::string());
@@ -6820,9 +6812,10 @@ void Client::Handle_OP_GroupDisband(const EQApplicationPacket *app)
 	}
 
 	group = GetGroup();
-	if (!group) //We must recheck this here.. incase the final bot disbanded the party..otherwise we crash
+	if (!group) {
 		return;
-#endif
+	}
+
 	Mob* memberToDisband = GetTarget();
 
 	if (!memberToDisband)
@@ -7012,11 +7005,9 @@ void Client::Handle_OP_GroupInvite2(const EQApplicationPacket *app)
 				}
 			}
 		}
-#ifdef BOTS
 		else if (Invitee->IsBot()) {
 			Bot::ProcessBotGroupInvite(this, std::string(Invitee->GetName()));
 		}
-#endif
 	}
 	else
 	{
@@ -7725,13 +7716,6 @@ void Client::Handle_OP_GuildInvite(const EQApplicationPacket *app)
 				return;
 			}
 		}
-#ifdef BOTS
-		else if (invitee->IsBot()) {
-			// The guild system is too tightly coupled with the character_data table so we have to avoid using much of the system
-			Bot::ProcessGuildInvite(this, invitee->CastToBot());
-			return;
-		}
-#endif
 	}
 }
 
@@ -8098,10 +8082,6 @@ void Client::Handle_OP_GuildRemove(const EQApplicationPacket *app)
 	else if (!worldserver.Connected())
 		Message(Chat::Red, "Error: World server disconnected");
 	else {
-#ifdef BOTS
-		if (Bot::ProcessGuildRemoval(this, gc->othername))
-			return;
-#endif
 		uint32 char_id;
 		Client* client = entity_list.GetClientByName(gc->othername);
 
@@ -8454,9 +8434,7 @@ void Client::Handle_OP_InspectRequest(const EQApplicationPacket *app)
 		else { ProcessInspectRequest(tmp->CastToClient(), this); }
 	}
 
-#ifdef BOTS
 	if (tmp != 0 && tmp->IsBot()) { Bot::ProcessBotInspectionRequest(tmp->CastToBot(), this); }
-#endif
 
 	return;
 }
@@ -8764,7 +8742,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 	using EQ::spells::CastingSlot;
 	if (app->size != sizeof(ItemVerifyRequest_Struct))
 	{
-		LogError("[Client::Handle_OP_ItemVerifyRequest] OP size error: OP_ItemVerifyRequest expected:[{}] got:[{}]", sizeof(ItemVerifyRequest_Struct), app->size);
+		LogError("OP size error: OP_ItemVerifyRequest expected:[{}] got:[{}]", sizeof(ItemVerifyRequest_Struct), app->size);
 		return;
 	}
 
@@ -8793,7 +8771,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 	}
 
 	if (slot_id < 0) {
-		LogDebug("[Client::Handle_OP_ItemVerifyRequest] Unknown slot being used by [{}] slot being used is [{}]", GetName(), request->slot);
+		LogDebug("Unknown slot being used by [{}] slot being used is [{}]", GetName(), request->slot);
 		return;
 	}
 
@@ -8854,7 +8832,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 	if (spell_id > 0 && (spells[spell_id].target_type == ST_Pet || spells[spell_id].target_type == ST_SummonedPet))
 		target_id = GetPetID();
 
-	LogDebug("[Client::Handle_OP_ItemVerifyRequest] OP ItemVerifyRequest: spell=[{}] target=[{}] inv=[{}]", spell_id, target_id, slot_id);
+	LogDebug("OP ItemVerifyRequest: spell=[{}] target=[{}] inv=[{}]", spell_id, target_id, slot_id);
 
 	if (m_inv.SupportsClickCasting(slot_id) || ((item->ItemType == EQ::item::ItemTypePotion || item->PotionBelt) && m_inv.SupportsPotionBeltCasting(slot_id))) // sanity check
 	{
@@ -8892,7 +8870,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 
 		if ((spell_id <= 0) && (item->ItemType != EQ::item::ItemTypeFood && item->ItemType != EQ::item::ItemTypeDrink && item->ItemType != EQ::item::ItemTypeAlcohol && item->ItemType != EQ::item::ItemTypeSpell))
 		{
-			LogDebug("[Client::Handle_OP_ItemVerifyRequest] Item with no effect right clicked by [{}]", GetName());
+			LogDebug("Item with no effect right clicked by [{}]", GetName());
 		}
 		else if (inst->IsClassCommon())
 		{
@@ -8953,7 +8931,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 							SendItemRecastTimer(item->RecastType); //Problem: When you loot corpse, recast display is not present. This causes it to display again. Could not get to display when sending from looting.
 							MessageString(Chat::Red, SPELL_RECAST);
 							SendSpellBarEnable(item->Click.Effect);
-							LogSpells("[Client::Handle_OP_ItemVerifyRequest] Casting of [{}] canceled: item spell reuse timer not expired", spell_id);
+							LogSpells("Casting of [{}] canceled: item spell reuse timer not expired", spell_id);
 							return;
 						}
 					}
@@ -8995,7 +8973,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 					if (augitem->RecastDelay > 0)
 					{
 						if (!GetPTimers().Expired(&database, (pTimerItemStart + augitem->RecastType), false)) {
-							LogSpells("[Client::Handle_OP_ItemVerifyRequest] Casting of [{}] canceled: item spell reuse timer from augment not expired", spell_id);
+							LogSpells("Casting of [{}] canceled: item spell reuse timer from augment not expired", spell_id);
 							MessageString(Chat::Red, SPELL_RECAST);
 							SendSpellBarEnable(augitem->Click.Effect);
 							return;
@@ -9033,12 +9011,12 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 				{
 					if (item->ItemType != EQ::item::ItemTypeFood && item->ItemType != EQ::item::ItemTypeDrink && item->ItemType != EQ::item::ItemTypeAlcohol)
 					{
-						LogDebug("[Client::Handle_OP_ItemVerifyRequest] Error: unknown item->Click.Type ([{}])", item->Click.Type);
+						LogDebug("Error: unknown item->Click.Type ([{}])", item->Click.Type);
 					}
 				}
 				else
 				{
-					LogDebug("[Client::Handle_OP_ItemVerifyRequest] Error: unknown item->Click.Type ([{}])", item->Click.Type);
+					LogDebug("Error: unknown item->Click.Type ([{}])", item->Click.Type);
 				}
 			}
 		}
@@ -11199,10 +11177,8 @@ void Client::Handle_OP_PopupResponse(const EQApplicationPacket *app)
 	if (t) {
 		if (t->IsNPC()) {
 			parse->EventNPC(EVENT_POPUP_RESPONSE, t->CastToNPC(), this, export_string, 0);
-#ifdef BOTS
 		} else if (t->IsBot()) {
 			parse->EventBot(EVENT_POPUP_RESPONSE, t->CastToBot(), this, export_string, 0);
-#endif
 		}
 	}
 }
@@ -12270,7 +12246,7 @@ void Client::Handle_OP_RecipesSearch(const EQApplicationPacket *app)
 	p_recipes_search_struct->query[55] = '\0';	//just to be sure.
 
 	LogTradeskills(
-		"[Handle_OP_RecipesSearch] Requested search recipes for object_type [{}] some_id [{}]",
+		"Requested search recipes for object_type [{}] some_id [{}]",
 		p_recipes_search_struct->object_type,
 		p_recipes_search_struct->some_id
 	);
@@ -13984,9 +13960,7 @@ void Client::Handle_OP_TargetCommand(const EQApplicationPacket *app)
 			}
 			if (GetGM() || RuleB(Spells, AlwaysSendTargetsBuffs) || nt == this || inspect_buffs || (nt->IsClient() && !nt->CastToClient()->GetPVP()) ||
 				(nt->IsPet() && nt->GetOwner() && nt->GetOwner()->IsClient() && !nt->GetOwner()->CastToClient()->GetPVP()) ||
-#ifdef BOTS
 				(nt->IsBot() && nt->GetOwner() && nt->GetOwner()->IsClient() && !nt->GetOwner()->CastToClient()->GetPVP()) || // TODO: bot pets
-#endif
 				(nt->IsMerc() && nt->GetOwner() && nt->GetOwner()->IsClient() && !nt->GetOwner()->CastToClient()->GetPVP()))
 			{
 				nt->SendBuffsToClient(this);
@@ -14421,11 +14395,9 @@ void Client::Handle_OP_TradeAcceptClick(const EQApplicationPacket *app)
 				FinishTrade(with->CastToNPC());
 			}
 		}
-#ifdef BOTS
 		// TODO: Log Bot trades
 		else if (with->IsBot())
 			with->CastToBot()->FinishTrade(this, Bot::BotTradeClientNormal);
-#endif
 		trade->Reset();
 	}
 
@@ -14475,7 +14447,7 @@ void Client::Handle_OP_Trader(const EQApplicationPacket *app)
 		{
 		case BazaarTrader_EndTraderMode: {
 			Trader_EndTrader();
-			LogTrading("Client::Handle_OP_Trader: End Trader Session");
+			LogTrading("End Trader Session");
 			break;
 		}
 		case BazaarTrader_EndTransaction: {
@@ -14484,16 +14456,16 @@ void Client::Handle_OP_Trader(const EQApplicationPacket *app)
 			if (c)
 			{
 				c->WithCustomer(0);
-				LogTrading("Client::Handle_OP_Trader: End Transaction");
+				LogTrading("End Transaction");
 			}
 			else
-				LogTrading("Client::Handle_OP_Trader: Null Client Pointer");
+				LogTrading("Null Client Pointer");
 
 			break;
 		}
 		case BazaarTrader_ShowItems: {
 			Trader_ShowItems();
-			LogTrading("Client::Handle_OP_Trader: Show Trader Items");
+			LogTrading("Show Trader Items");
 			break;
 		}
 		default: {
@@ -14516,7 +14488,7 @@ void Client::Handle_OP_Trader(const EQApplicationPacket *app)
 		{
 			GetItems_Struct* gis = GetTraderItems();
 
-			LogTrading("Client::Handle_OP_Trader: Start Trader Mode");
+			LogTrading("Start Trader Mode");
 			// Verify there are no NODROP or items with a zero price
 			bool TradeItemsValid = true;
 
@@ -14580,7 +14552,7 @@ void Client::Handle_OP_Trader(const EQApplicationPacket *app)
 			}
 		}
 		else {
-			LogTrading("Client::Handle_OP_Trader: Unknown TraderStruct code of: [{}]\n",
+			LogTrading("Unknown TraderStruct code of: [{}]\n",
 				ints->Code);
 
 			LogError("Unknown TraderStruct code of: [{}]\n", ints->Code);
@@ -14590,18 +14562,18 @@ void Client::Handle_OP_Trader(const EQApplicationPacket *app)
 	{
 		TraderStatus_Struct* tss = (TraderStatus_Struct*)app->pBuffer;
 
-		LogTrading("Client::Handle_OP_Trader: Trader Status Code: [{}]", tss->Code);
+		LogTrading("Trader Status Code: [{}]", tss->Code);
 
 		switch (tss->Code)
 		{
 		case BazaarTrader_EndTraderMode: {
 			Trader_EndTrader();
-			LogTrading("Client::Handle_OP_Trader: End Trader Session");
+			LogTrading("End Trader Session");
 			break;
 		}
 		case BazaarTrader_ShowItems: {
 			Trader_ShowItems();
-			LogTrading("Client::Handle_OP_Trader: Show Trader Items");
+			LogTrading("Show Trader Items");
 			break;
 		}
 		default: {
@@ -14614,7 +14586,7 @@ void Client::Handle_OP_Trader(const EQApplicationPacket *app)
 	}
 	else if (app->size == sizeof(TraderPriceUpdate_Struct))
 	{
-		LogTrading("Client::Handle_OP_Trader: Trader Price Update");
+		LogTrading("Trader Price Update");
 		HandleTraderPriceUpdate(app);
 	}
 	else {
@@ -14677,11 +14649,7 @@ void Client::Handle_OP_TradeRequest(const EQApplicationPacket *app)
 	if (tradee && tradee->IsClient()) {
 		tradee->CastToClient()->QueuePacket(app);
 	}
-#ifndef BOTS
-	else if (tradee && tradee->IsNPC()) {
-#else
 	else if (tradee && (tradee->IsNPC() || tradee->IsBot())) {
-#endif
         if (!tradee->IsEngaged()) {
             trade->Start(msg->to_mob_id);
             EQApplicationPacket *outapp = new EQApplicationPacket(OP_TradeRequestAck, sizeof(TradeRequest_Struct));
@@ -14815,18 +14783,18 @@ void Client::Handle_OP_TraderShop(const EQApplicationPacket *app)
 			if (c)
 			{
 				c->WithCustomer(0);
-				LogTrading("Client::Handle_OP_Trader: End Transaction - Code [{}]", Command);
+				LogTrading("End Transaction - Code [{}]", Command);
 			}
 			else
 			{
-				LogTrading("Client::Handle_OP_Trader: Null Client Pointer for Trader - Code [{}]", Command);
+				LogTrading("Null Client Pointer for Trader - Code [{}]", Command);
 			}
 			EQApplicationPacket empty(OP_ShopEndConfirm);
 			QueuePacket(&empty);
 		}
 		else
 		{
-			LogTrading("Client::Handle_OP_Trader: Unhandled Code [{}]", Command);
+			LogTrading("Unhandled Code [{}]", Command);
 		}
 	}
 	else
@@ -15419,7 +15387,7 @@ void Client::Handle_OP_SharedTaskRemovePlayer(const EQApplicationPacket *app)
 	auto *r = (SharedTaskRemovePlayer_Struct *) app->pBuffer;
 
 	LogTasks(
-		"[Handle_OP_SharedTaskRemovePlayer] field1 [{}] field2 [{}] player_name [{}]",
+		"field1 [{}] field2 [{}] player_name [{}]",
 		r->field1,
 		r->field2,
 		r->player_name
@@ -15441,7 +15409,7 @@ void Client::Handle_OP_SharedTaskRemovePlayer(const EQApplicationPacket *app)
 		strn0cpy(rp->player_name, r->player_name, sizeof(r->player_name));
 
 		LogTasks(
-			"[Handle_OP_SharedTaskRemovePlayer] source_character_id [{}] task_id [{}] player_name [{}]",
+			"source_character_id [{}] task_id [{}] player_name [{}]",
 			rp->source_character_id,
 			rp->task_id,
 			rp->player_name
@@ -15466,7 +15434,7 @@ void Client::Handle_OP_SharedTaskAddPlayer(const EQApplicationPacket *app)
 	auto *r = (SharedTaskAddPlayer_Struct *) app->pBuffer;
 
 	LogTasks(
-		"[SharedTaskAddPlayer_Struct] field1 [{}] field2 [{}] player_name [{}]",
+		"field1 [{}] field2 [{}] player_name [{}]",
 		r->field1,
 		r->field2,
 		r->player_name
@@ -15491,7 +15459,7 @@ void Client::Handle_OP_SharedTaskAddPlayer(const EQApplicationPacket *app)
 		strn0cpy(rp->player_name, r->player_name, sizeof(r->player_name));
 
 		LogTasks(
-			"[Handle_OP_SharedTaskRemovePlayer] source_character_id [{}] task_id [{}] player_name [{}]",
+			"source_character_id [{}] task_id [{}] player_name [{}]",
 			rp->source_character_id,
 			rp->task_id,
 			rp->player_name
@@ -15516,7 +15484,7 @@ void Client::Handle_OP_SharedTaskMakeLeader(const EQApplicationPacket *app)
 
 	auto *r = (SharedTaskMakeLeader_Struct *) app->pBuffer;
 	LogTasks(
-		"[SharedTaskMakeLeader_Struct] field1 [{}] field2 [{}] player_name [{}]",
+		"field1 [{}] field2 [{}] player_name [{}]",
 		r->field1,
 		r->field2,
 		r->player_name
@@ -15538,7 +15506,7 @@ void Client::Handle_OP_SharedTaskMakeLeader(const EQApplicationPacket *app)
 		strn0cpy(rp->player_name, r->player_name, sizeof(r->player_name));
 
 		LogTasks(
-			"[Handle_OP_SharedTaskRemovePlayer] source_character_id [{}] task_id [{}] player_name [{}]",
+			"source_character_id [{}] task_id [{}] player_name [{}]",
 			rp->source_character_id,
 			rp->task_id,
 			rp->player_name
@@ -15563,7 +15531,7 @@ void Client::Handle_OP_SharedTaskInviteResponse(const EQApplicationPacket *app)
 
 	auto *r = (SharedTaskInviteResponse_Struct *) app->pBuffer;
 	LogTasks(
-		"[SharedTaskInviteResponse] unknown00 [{}] invite_id [{}] accepted [{}]",
+		"unknown00 [{}] invite_id [{}] accepted [{}]",
 		r->unknown00,
 		r->invite_id,
 		r->accepted
@@ -15584,7 +15552,7 @@ void Client::Handle_OP_SharedTaskInviteResponse(const EQApplicationPacket *app)
 	strn0cpy(c->player_name, GetName(), sizeof(c->player_name));
 
 	LogTasks(
-		"[ServerOP_SharedTaskInviteAcceptedPlayer] source_character_id [{}] shared_task_id [{}]",
+		"source_character_id [{}] shared_task_id [{}]",
 		c->source_character_id,
 		c->shared_task_id
 	);
@@ -15599,7 +15567,7 @@ void Client::Handle_OP_SharedTaskAccept(const EQApplicationPacket* app)
 	auto buf = reinterpret_cast<SharedTaskAccept_Struct*>(app->pBuffer);
 
 	LogTasksDetail(
-		"[OP_SharedTaskAccept] unknown00 [{}] unknown04 [{}] npc_entity_id [{}] task_id [{}]",
+		"unknown00 [{}] unknown04 [{}] npc_entity_id [{}] task_id [{}]",
 		buf->unknown00,
 		buf->unknown04,
 		buf->npc_entity_id,

@@ -28,9 +28,7 @@
 #include "worldserver.h"
 #include "zone.h"
 
-#ifdef BOTS
 #include "bot.h"
-#endif
 
 extern QueryServ* QServ;
 extern WorldServer worldserver;
@@ -43,10 +41,9 @@ extern Zone* zone;
 
 
 void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
-#ifdef BOTS
-	// This block is necessary to clean up any bot objects owned by a Client
-	Bot::ProcessClientZoneChange(this);
-#endif
+	if (RuleB(Bots, Enabled)) {
+		Bot::ProcessClientZoneChange(this);
+	}
 
 	bZoning = true;
 	if (app->size != sizeof(ZoneChange_Struct)) {
@@ -195,7 +192,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 	int16 min_status = AccountStatus::Player;
 	uint8 min_level  = 0;
 
-	LogInfo("[Handle_OP_ZoneChange] Loaded zone flag [{}]", zone_data->flag_needed);
+	LogInfo("Loaded zone flag [{}]", zone_data->flag_needed);
 
 	safe_x       = zone_data->safe_x;
 	safe_y       = zone_data->safe_y;
@@ -636,7 +633,7 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 	}
 
 	LogInfo(
-		"[ZonePC] Client [{}] zone_id [{}] x [{}] y [{}] z [{}] heading [{}] ignorerestrictions [{}] zone_mode [{}]",
+		"Client [{}] zone_id [{}] x [{}] y [{}] z [{}] heading [{}] ignorerestrictions [{}] zone_mode [{}]",
 		GetCleanName(),
 		zoneID,
 		x,
@@ -1100,7 +1097,7 @@ void Client::ClearPEQZoneFlag(uint32 zone_id) {
 
 	peqzone_flags.erase(zone_id);
 
-	if (!CharacterPeqzoneFlagsRepository::DeleteFlag(content_db, CharacterID(), zone_id)) {
+	if (!CharacterPeqzoneFlagsRepository::DeleteFlag(database, CharacterID(), zone_id)) {
 		LogError("MySQL Error while trying to clear PEQZone flag for [{}]", GetName());
 	}
 }
@@ -1111,7 +1108,7 @@ bool Client::HasPEQZoneFlag(uint32 zone_id) const {
 
 void Client::LoadPEQZoneFlags() {
 	const auto l = CharacterPeqzoneFlagsRepository::GetWhere(
-		content_db,
+		database,
 		fmt::format(
 			"id = {}",
 			CharacterID()
@@ -1193,12 +1190,12 @@ void Client::SetPEQZoneFlag(uint32 zone_id) {
 	f.id = CharacterID();
 	f.zone_id = zone_id;
 
-	if (!CharacterPeqzoneFlagsRepository::InsertOne(content_db, f).id) {
+	if (!CharacterPeqzoneFlagsRepository::InsertOne(database, f).id) {
 		LogError("MySQL Error while trying to set zone flag for [{}]", GetName());
 	}
 }
 
-bool Client::CanEnterZone(std::string zone_short_name, int16 instance_version) {
+bool Client::CanEnterZone(const std::string& zone_short_name, int16 instance_version) {
 	//check some critial rules to see if this char needs to be booted from the zone
 	//only enforce rules here which are serious enough to warrant being kicked from
 	//the zone
@@ -1246,11 +1243,8 @@ bool Client::CanEnterZone(std::string zone_short_name, int16 instance_version) {
 		return false;
 	}
 
-	if (!z->flag_needed.empty()) {
-		if (
-			Admin() < minStatusToIgnoreZoneFlags &&
-			!HasZoneFlag(zone->GetZoneID())
-		) {
+	if (!z->flag_needed.empty() && Strings::IsNumber(z->flag_needed) && std::stoi(z->flag_needed) == 1) {
+		if (Admin() < minStatusToIgnoreZoneFlags && !HasZoneFlag(z->zoneidnumber)) {
 			LogInfo(
 				"Character [{}] does not have the flag to be in this zone [{}]!",
 				GetCleanName(),

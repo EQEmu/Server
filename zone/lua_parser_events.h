@@ -7,10 +7,7 @@ typedef void(*PlayerArgumentHandler)(QuestInterface*, lua_State*, Client*, std::
 typedef void(*ItemArgumentHandler)(QuestInterface*, lua_State*, Client*, EQ::ItemInstance*, Mob*, std::string, uint32, std::vector<std::any>*);
 typedef void(*SpellArgumentHandler)(QuestInterface*, lua_State*, Mob*, Client*, uint32, std::string, uint32, std::vector<std::any>*);
 typedef void(*EncounterArgumentHandler)(QuestInterface*, lua_State*, Encounter* encounter, std::string, uint32, std::vector<std::any>*);
-
-#ifdef BOTS
 typedef void(*BotArgumentHandler)(QuestInterface*, lua_State*, Bot*, Mob*, std::string, uint32, std::vector<std::any>*);
-#endif
 
 // NPC
 void handle_npc_event_say(
@@ -828,7 +825,6 @@ void handle_encounter_null(
 );
 
 // Bot
-#ifdef BOTS
 void handle_bot_null(
 	QuestInterface *parse,
 	lua_State* L,
@@ -958,8 +954,6 @@ void handle_bot_payload(
 	uint32 extra_data,
 	std::vector<std::any> *extra_pointers
 );
-
-#endif
 
 #endif
 #endif

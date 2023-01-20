@@ -391,14 +391,9 @@ bool Database::DeleteCharacter(char *character_name)
 	}
 
 	if (character_id <= 0) {
-		LogError("[DeleteCharacter] Invalid Character ID [{}]", character_name);
+		LogError("Invalid Character ID [{}]", character_name);
 		return false;
 	}
-
-#ifdef BOTS
-	query = StringFormat("DELETE FROM `guild_members` WHERE `char_id` = '%d' AND GetMobTypeById(%i) = 'C'", character_id); // note: only use of GetMobTypeById()
-	QueryDatabase(query);
-#endif
 
 	std::string delete_type = "hard-deleted";
 	if (RuleB(Character, SoftDeletes)) {
@@ -418,21 +413,26 @@ bool Database::DeleteCharacter(char *character_name)
 
 		QueryDatabase(query);
 
-#ifdef BOTS
-		query = fmt::format(
-			SQL(
-				UPDATE
-				bot_data
-				SET
-				name = SUBSTRING(CONCAT(name, '-deleted-', UNIX_TIMESTAMP()), 1, 64)
-				WHERE
-				owner_id = '{}'
-			),
-			character_id
-		);
-		QueryDatabase(query);
-		LogInfo("[DeleteCharacter] character_name [{}] ({}) bots are being [{}]", character_name, character_id, delete_type);
-#endif
+		if (RuleB(Bots, Enabled)) {
+			query = fmt::format(
+				SQL(
+					UPDATE
+					bot_data
+						SET
+					name = SUBSTRING(CONCAT(name, '-deleted-', UNIX_TIMESTAMP()), 1, 64)
+					WHERE
+					owner_id = '{}'
+				),
+				character_id
+			);
+			QueryDatabase(query);
+			LogInfo(
+				"[DeleteCharacter] character_name [{}] ({}) bots are being [{}]",
+				character_name,
+				character_id,
+				delete_type
+			);
+		}
 
 		return true;
 	}
@@ -444,7 +444,7 @@ bool Database::DeleteCharacter(char *character_name)
 		QueryDatabase(fmt::format("DELETE FROM {} WHERE {} = {}", table_name, character_id_column_name, character_id));
 	}
 
-	LogInfo("[DeleteCharacter] character_name [{}] ({}) is being [{}]", character_name, character_id, delete_type);
+	LogInfo("character_name [{}] ({}) is being [{}]", character_name, character_id, delete_type);
 
 	return true;
 }
@@ -2356,7 +2356,7 @@ void Database::SourceDatabaseTableFromUrl(std::string table_name, std::string ur
 		uri request_uri(url);
 
 		LogHTTP(
-			"[SourceDatabaseTableFromUrl] parsing url [{}] path [{}] host [{}] query_string [{}] protocol [{}] port [{}]",
+			"parsing url [{}] path [{}] host [{}] query_string [{}] protocol [{}] port [{}]",
 			url,
 			request_uri.get_path(),
 			request_uri.get_host(),
@@ -2410,7 +2410,7 @@ void Database::SourceDatabaseTableFromUrl(std::string table_name, std::string ur
 
 	}
 	catch (std::invalid_argument iae) {
-		LogError("[SourceDatabaseTableFromUrl] URI parser error [{}]", iae.what());
+		LogError("URI parser error [{}]", iae.what());
 	}
 }
 

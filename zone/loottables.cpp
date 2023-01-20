@@ -322,7 +322,7 @@ void NPC::AddLootDrop(
 		linker.SetItemData(item2);
 
 		LogLoot(
-			"[NPC::AddLootDrop] NPC [{}] Item ({}) [{}] charges [{}] chance [{}] trivial min/max [{}/{}] npc min/max [{}/{}]",
+			"NPC [{}] Item ({}) [{}] charges [{}] chance [{}] trivial min/max [{}/{}] npc min/max [{}/{}]",
 			GetName(),
 			item2->ID,
 			linker.GenerateLink(),

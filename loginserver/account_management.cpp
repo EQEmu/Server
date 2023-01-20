@@ -150,7 +150,7 @@ uint32 AccountManagement::CheckLoginserverUserCredentials(
 
 	if (!login_server_admin.loaded) {
 		LogError(
-			"CheckLoginUserCredentials account [{0}] source_loginserver [{1}] not found!",
+			"account [{0}] source_loginserver [{1}] not found!",
 			in_account_username,
 			source_loginserver
 		);
@@ -167,7 +167,7 @@ uint32 AccountManagement::CheckLoginserverUserCredentials(
 
 	if (!validated_credentials) {
 		LogError(
-			"CheckLoginUserCredentials account [{0}] source_loginserver [{1}] invalid credentials!",
+			"account [{0}] source_loginserver [{1}] invalid credentials!",
 			in_account_username,
 			source_loginserver
 		);
@@ -176,7 +176,7 @@ uint32 AccountManagement::CheckLoginserverUserCredentials(
 	}
 
 	LogInfo(
-		"CheckLoginUserCredentials account [{0}] source_loginserver [{1}] credentials validated success!",
+		"account [{0}] source_loginserver [{1}] credentials validated success!",
 		in_account_username,
 		source_loginserver
 	);
@@ -206,7 +206,7 @@ bool AccountManagement::UpdateLoginserverUserCredentials(
 
 	if (!login_server_account.loaded) {
 		LogError(
-			"ChangeLoginserverUserCredentials account [{0}] source_loginserver [{1}] not found!",
+			"account [{0}] source_loginserver [{1}] not found!",
 			in_account_username,
 			source_loginserver
 		);
@@ -225,7 +225,7 @@ bool AccountManagement::UpdateLoginserverUserCredentials(
 	);
 
 	LogInfo(
-		"ChangeLoginserverUserCredentials account [{0}] source_loginserver [{1}] credentials updated!",
+		"account [{0}] source_loginserver [{1}] credentials updated!",
 		in_account_username,
 		source_loginserver
 	);
@@ -401,7 +401,7 @@ uint32 AccountManagement::CheckExternalLoginserverUserCredentials(
 			while (running) {
 				std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 				if (std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() > REQUEST_TIMEOUT_MS) {
-					LogInfo("[CheckExternalLoginserverUserCredentials] Deadline exceeded [{}]", REQUEST_TIMEOUT_MS);
+					LogInfo("Deadline exceeded [{}]", REQUEST_TIMEOUT_MS);
 					running = false;
 				}
 

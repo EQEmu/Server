@@ -20,8 +20,6 @@
 #ifndef BOT_COMMAND_H
 #define BOT_COMMAND_H
 
-#ifdef BOTS
-
 class Client;
 class Seperator;
 
@@ -691,5 +689,3 @@ void helper_send_usage_required_bots(Client *bot_owner, BCEnum::SpType spell_typ
 bool helper_spell_check_fail(STBaseEntry* local_entry);
 bool helper_spell_list_fail(Client *bot_owner, bcst_list* spell_list, BCEnum::SpType spell_type);
 #endif
-
-#endif // BOTS

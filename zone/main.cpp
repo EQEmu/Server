@@ -45,9 +45,7 @@
 #include "zone.h"
 #include "queryserv.h"
 #include "command.h"
-#ifdef BOTS
 #include "bot_command.h"
-#endif
 #include "zonedb.h"
 #include "../common/zone_store.h"
 #include "titles.h"
@@ -394,18 +392,21 @@ int main(int argc, char** argv) {
 
 	EQ::SayLinkEngine::LoadCachedSaylinks();
 
-#ifdef BOTS
-	LogInfo("Loading bot commands");
-	int botretval = bot_command_init();
-	if (botretval<0)
-		LogError("Bot command loading failed");
-	else
-		LogInfo("[{}] bot commands loaded", botretval);
+	if (RuleB(Bots, Enabled) && database.DoesTableExist("bot_command_settings")) {
+		LogInfo("Loading bot commands");
+		int botretval = bot_command_init();
+		if (botretval < 0) {
+			LogError("Bot command loading failed");
+		}
+		else {
+			LogInfo("[{}] bot commands loaded", botretval);
+		}
 
-	LogInfo("Loading bot spell casting chances");
-	if (!database.botdb.LoadBotSpellCastingChances())
-		LogError("Bot spell casting chances loading failed");
-#endif
+		LogInfo("Loading bot spell casting chances");
+		if (!database.botdb.LoadBotSpellCastingChances()) {
+			LogError("Bot spell casting chances loading failed");
+		}
+	}
 
 	/**
 	 * NPC Scale Manager
@@ -604,9 +605,7 @@ int main(int argc, char** argv) {
 	safe_delete(task_manager);
 	safe_delete(npc_scale_manager);
 	command_deinit();
-#ifdef BOTS
 	bot_command_deinit();
-#endif
 	safe_delete(parse);
 	LogInfo("Proper zone shutdown complete.");
 	LogSys.CloseFileLogs();

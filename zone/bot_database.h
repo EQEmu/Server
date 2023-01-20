@@ -20,7 +20,6 @@
 #ifndef BOT_DATABASE_H
 #define BOT_DATABASE_H
 
-#ifdef BOTS
 
 #include <list>
 #include <map>
@@ -77,10 +76,6 @@ public:
 	bool LoadTimers(Bot* bot_inst);
 	bool SaveTimers(Bot* bot_inst);
 	bool DeleteTimers(const uint32 bot_id);
-
-	bool LoadGuildMembership(const uint32 bot_id, uint32& guild_id, uint8& guild_rank, std::string& guild_name);
-	bool SaveGuildMembership(const uint32 bot_id, const uint32 guild_id, const uint8 guild_rank);
-	bool DeleteGuildMembership(const uint32 bot_id);
 
 
 	/* Bot inventory functions   */
@@ -215,9 +210,6 @@ public:
 		static const char* LoadTimers();
 		static const char* SaveTimers();
 		static const char* DeleteTimers();
-		static const char* LoadGuildMembership();
-		static const char* SaveGuildMembership();
-		static const char* DeleteGuildMembership();
 
 		/* fail::Bot inventory functions   */
 		static const char* QueryInventoryCount();
@@ -295,5 +287,3 @@ public:
 };
 
 #endif
-
-#endif // BOTS

@@ -19,8 +19,6 @@
 #ifndef BOT_STRUCTS
 #define BOT_STRUCTS
 
-#ifdef BOTS
-
 #include "../common/types.h"
 
 #include <sstream>
@@ -104,7 +102,5 @@ struct BotSpells_Struct {
 	std::string	bucket_value;
 	uint8		bucket_comparison;
 };
-
-#endif // BOTS
 
 #endif // BOT_STRUCTS

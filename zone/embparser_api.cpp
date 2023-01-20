@@ -1073,8 +1073,6 @@ void Perl__npcfeature(char* feature, int value)
 	quest_manager.npcfeature(feature, value);
 }
 
-#ifdef BOTS
-
 int Perl__createbotcount()
 {
 	return quest_manager.createbotcount();
@@ -1104,8 +1102,6 @@ bool Perl__createBot(const char* firstname, const char* lastname, int level, int
 {
 	return quest_manager.createBot(firstname, lastname, level, race_id, class_id, gender_id);
 }
-
-#endif //BOTS
 
 void Perl__taskselector(perl::array task_ids)
 {
@@ -3991,14 +3987,12 @@ void perl_register_quest()
 
 	auto package = perl.new_package("quest");
 
-#ifdef BOTS
 	package.add("botquest", &Perl__botquest);
 	package.add("spawnbotcount", (int(*)())&Perl__spawnbotcount);
 	package.add("spawnbotcount", (int(*)(uint8))&Perl__spawnbotcount);
 	package.add("createbotcount", (int(*)())&Perl__createbotcount);
 	package.add("createbotcount", (int(*)(uint8))&Perl__createbotcount);
 	package.add("createBot", &Perl__createBot);
-#endif //BOTS
 
 	package.add("AssignGroupToInstance", &Perl__AssignGroupToInstance);
 	package.add("AssignRaidToInstance", &Perl__AssignRaidToInstance);

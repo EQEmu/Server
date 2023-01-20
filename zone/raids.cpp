@@ -566,7 +566,7 @@ void Raid::CastGroupSpell(Mob* caster, uint16 spellid, uint32 gid)
 #endif
 				}
 				else{
-					LogSpells("[Raid::CastGroupSpell] Raid spell: [{}] is out of range [{}] at distance [{}] from [{}]", members[x].member->GetName(), range, distance, caster->GetName());
+					LogSpells("Raid spell: [{}] is out of range [{}] at distance [{}] from [{}]", members[x].member->GetName(), range, distance, caster->GetName());
 				}
 			}
 		}

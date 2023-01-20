@@ -1349,7 +1349,7 @@ public:
 	void ClearPendingAdventureDoorClick() { safe_delete(adventure_door_timer); }
 	void ClearPendingAdventureData();
 
-	bool CanEnterZone(std::string zone_short_name = "", int16 instance_version = -1);
+	bool CanEnterZone(const std::string& zone_short_name = "", int16 instance_version = -1);
 
 	int GetAggroCount();
 	void IncrementAggroCount(bool raid_target = false);
@@ -2040,7 +2040,6 @@ private:
 	bool m_has_quest_compass = false;
 	std::vector<uint32_t> m_dynamic_zone_ids;
 
-#ifdef BOTS
 
 public:
 	enum BotOwnerOption : size_t {
@@ -2079,7 +2078,6 @@ private:
 	bool m_bot_pulling;
 	bool m_bot_precombat;
 
-#endif
 	bool CanTradeFVNoDropItem();
 };
 

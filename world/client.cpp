@@ -238,7 +238,7 @@ void Client::SendCharInfo() {
 		QueuePacket(outapp);
 	}
 	else {
-		LogInfo("[Error] Database did not return an OP_SendCharInfo packet for account [{}]", GetAccountID());
+		LogError("Database did not return an OP_SendCharInfo packet for account [{}]", GetAccountID());
 	}
 	safe_delete(outapp);
 }
@@ -1256,7 +1256,7 @@ bool Client::ChecksumVerificationCRCEQGame(uint64 checksum)
 		checksumint = atoll(checksumvar.c_str());
 	}
 	else {
-		LogChecksumVerification("[checksum_crc1_eqgame] variable not set in variables table.");
+		LogChecksumVerification("variable not set in variables table.");
 		return true;
 	}
 
@@ -1302,7 +1302,7 @@ bool Client::ChecksumVerificationCRCBaseData(uint64 checksum)
 		checksumint = atoll(checksumvar.c_str());
 	}
 	else {
-		LogChecksumVerification("[checksum_crc3_basedata] variable not set in variables table.");
+		LogChecksumVerification("variable not set in variables table.");
 		return true;
 	}
 

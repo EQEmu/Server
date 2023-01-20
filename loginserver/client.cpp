@@ -223,7 +223,7 @@ void Client::Handle_Login(const char *data, unsigned int size)
 			if (server.db->GetLoginDataFromAccountInfo(user, db_loginserver, db_account_password_hash, db_account_id)) {
 				result = VerifyLoginHash(user, db_loginserver, cred, db_account_password_hash);
 
-				LogDebug("[VerifyLoginHash] Success [{0}]", (result ? "true" : "false"));
+				LogDebug("Success [{0}]", (result ? "true" : "false"));
 			}
 			else {
 				m_client_status = cs_creating_account;
@@ -332,7 +332,7 @@ void Client::AttemptLoginAccountCreation(
 	const std::string &loginserver
 )
 {
-	LogInfo("[AttemptLoginAccountCreation] user [{}] loginserver [{}]", user, loginserver);
+	LogInfo("user [{}] loginserver [{}]", user, loginserver);
 
 #ifdef LSPX
 	if (loginserver == "eqemu") {
@@ -351,7 +351,7 @@ void Client::AttemptLoginAccountCreation(
 		);
 
 		if (account_id > 0) {
-			LogInfo("[AttemptLoginAccountCreation] Found and creating eqemu account [{}]", account_id);
+			LogInfo("Found and creating eqemu account [{}]", account_id);
 			CreateEQEmuAccount(user, pass, account_id);
 			return;
 		}

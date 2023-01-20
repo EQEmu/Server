@@ -36,15 +36,9 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "mob.h"
 #include "npc.h"
 
-
-#include <assert.h>
-#include <stdio.h>
 #include <stdlib.h>
-#include <boost/concept_check.hpp>
 
-#ifdef BOTS
 #include "bot.h"
-#endif
 
 extern QueryServ* QServ;
 extern WorldServer worldserver;
@@ -921,11 +915,7 @@ int Mob::ACSum(bool skip_caps)
 	if (ac < 0)
 		ac = 0;
 
-	if (!skip_caps && (IsClient()
-#ifdef BOTS
-		|| IsBot()
-#endif
-	)) {
+	if (!skip_caps && (IsClient() || IsBot())) {
 		auto softcap = GetACSoftcap();
 		auto returns = GetSoftcapReturns();
 		int total_aclimitmod = aabonuses.CombatStability + itembonuses.CombatStability + spellbonuses.CombatStability;
@@ -1455,7 +1445,6 @@ void Mob::DoAttack(Mob *other, DamageHitInfo &hit, ExtraAttackOptions *opts, boo
 			hit.damage_done = 0;
 		}
 
-#ifdef BOTS
 		if (IsBot()) {
 			const auto export_string = fmt::format(
 				"{} {}",
@@ -1464,7 +1453,6 @@ void Mob::DoAttack(Mob *other, DamageHitInfo &hit, ExtraAttackOptions *opts, boo
 			);
 			parse->EventBot(EVENT_USE_SKILL, CastToBot(), nullptr, export_string, 0);
 		}
-#endif
 	}
 }
 
@@ -1832,11 +1820,9 @@ bool Client::Death(Mob* killerMob, int64 damage, uint16 spell, EQ::skills::Skill
 			}
 
 			killerMob->TrySpellOnKill(killed_level, spell);
-#ifdef BOTS
 		} else if (killerMob->IsBot()) {
 			parse->EventBot(EVENT_SLAY, killerMob->CastToBot(), this, "", 0);
 			killerMob->TrySpellOnKill(killed_level, spell);
-#endif
 		}
 
 		if (
@@ -1922,10 +1908,8 @@ bool Client::Death(Mob* killerMob, int64 damage, uint16 spell, EQ::skills::Skill
 			exploss = 0;
 		} else if (killerMob->GetOwner() && killerMob->GetOwner()->IsClient()) {
 			exploss = 0;
-#ifdef BOTS
 		} else if (killerMob->IsBot()) {
 			exploss = 0;
-#endif
 		}
 	}
 
@@ -2374,7 +2358,6 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 
 			return false;
 		}
-#ifdef BOTS
 	} else if (IsBot()) {
 		if (parse->EventBot(EVENT_DEATH, CastToBot(), oos, export_string, 0) != 0) {
 			if (GetHP() < 0) {
@@ -2383,7 +2366,6 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 
 			return false;
 		}
-#endif
 	}
 
 	if (killer_mob && (killer_mob->IsClient() || killer_mob->IsBot()) && (spell != SPELL_UNKNOWN) && damage > 0) {
@@ -2478,11 +2460,9 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 
 		give_exp = give_exp->GetUltimateOwner();
 
-#ifdef BOTS
 		if (!RuleB(Bots, BotGroupXP) && !ownerInGroup) {
 			give_exp = nullptr;
 		}
-#endif //BOTS
 	}
 
 	if (give_exp && give_exp->IsTempPet() && give_exp->IsPetOwnerClient()) {
@@ -2515,7 +2495,7 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 		// handle task credit on behalf of the killer
 		if (RuleB(TaskSystem, EnableTaskSystem)) {
 			LogTasksDetail(
-				"[NPC::Death] Triggering HandleUpdateTasksOnKill for [{}] npc [{}]",
+				"Triggering HandleUpdateTasksOnKill for [{}] npc [{}]",
 				give_exp_client->GetCleanName(),
 				GetNPCTypeID()
 			);
@@ -2790,12 +2770,10 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 		}
 	}
 
-#ifdef BOTS
 	if (killer_mob->IsBot()) {
 		parse->EventBot(EVENT_NPC_SLAY, killer_mob->CastToBot(), this, "", 0);
 		killer_mob->TrySpellOnKill(killed_level, spell);
 	}
-#endif
 
 	WipeHateList();
 	p_depop = true;
@@ -2930,32 +2908,33 @@ void Mob::AddToHateList(Mob* other, int64 hate /*= 0*/, int64 damage /*= 0*/, bo
 	if (other->IsClient() && !on_hatelist && !IsOnFeignMemory(other))
 		other->CastToClient()->AddAutoXTarget(this);
 
-#ifdef BOTS
 	// if other is a bot, add the bots client to the hate list
-	while (other->IsBot()) {
+	if (RuleB(Bots, Enabled)) {
+		while (other->IsBot()) {
 
-		auto other_ = other->CastToBot();
-		if (!other_ || !other_->GetBotOwner()) {
+			auto other_ = other->CastToBot();
+			if (!other_ || !other_->GetBotOwner()) {
+				break;
+			}
+
+			auto owner_ = other_->GetBotOwner()->CastToClient();
+			if (!owner_ || owner_->IsDead() ||
+				!owner_->InZone()) { // added isdead and inzone checks to avoid issues in AddAutoXTarget(...) below
+				break;
+			}
+
+			if (owner_->GetFeigned()) {
+				AddFeignMemory(owner_);
+			}
+			else if (!hate_list.IsEntOnHateList(owner_)) {
+
+				hate_list.AddEntToHateList(owner_, 0, 0, false, true);
+				owner_->AddAutoXTarget(this); // this was being called on dead/out-of-zone clients
+			}
+
 			break;
 		}
-
-		auto owner_ = other_->GetBotOwner()->CastToClient();
-		if (!owner_ || owner_->IsDead() || !owner_->InZone()) { // added isdead and inzone checks to avoid issues in AddAutoXTarget(...) below
-			break;
-		}
-
-		if (owner_->GetFeigned()) {
-			AddFeignMemory(owner_);
-		}
-		else if (!hate_list.IsEntOnHateList(owner_)) {
-
-			hate_list.AddEntToHateList(owner_, 0, 0, false, true);
-			owner_->AddAutoXTarget(this); // this was being called on dead/out-of-zone clients
-		}
-
-		break;
 	}
-#endif //BOTS
 
 	// if other is a merc, add the merc client to the hate list
 	if (other->IsMerc()) {
@@ -3332,14 +3311,14 @@ int64 Mob::ReduceDamage(int64 damage)
 			int64 damage_to_reduce = damage * spellbonuses.MeleeThresholdGuard[SBIndex::THRESHOLDGUARD_MITIGATION_PERCENT] / 100;
 			if (damage_to_reduce >= buffs[slot].melee_rune)
 			{
-				LogSpellsDetail("[Mob::ReduceDamage] SE_MeleeThresholdGuard [{}] damage negated, [{}] damage remaining, fading buff", damage_to_reduce, buffs[slot].melee_rune);
+				LogSpellsDetail("SE_MeleeThresholdGuard [{}] damage negated, [{}] damage remaining, fading buff", damage_to_reduce, buffs[slot].melee_rune);
 				damage -= buffs[slot].melee_rune;
 				if (!TryFadeEffect(slot))
 					BuffFadeBySlot(slot);
 			}
 			else
 			{
-				LogSpellsDetail("[Mob::ReduceDamage] SE_MeleeThresholdGuard [{}] damage negated, [{}] damage remaining", damage_to_reduce, buffs[slot].melee_rune);
+				LogSpellsDetail("SE_MeleeThresholdGuard [{}] damage negated, [{}] damage remaining", damage_to_reduce, buffs[slot].melee_rune);
 				buffs[slot].melee_rune = (buffs[slot].melee_rune - damage_to_reduce);
 				damage -= damage_to_reduce;
 			}
@@ -3357,14 +3336,14 @@ int64 Mob::ReduceDamage(int64 damage)
 
 			if (spellbonuses.MitigateMeleeRune[SBIndex::MITIGATION_RUNE_MAX_HP_AMT] && (damage_to_reduce >= buffs[slot].melee_rune))
 			{
-				LogSpellsDetail("[Mob::ReduceDamage] SE_MitigateMeleeDamage [{}] damage negated, [{}] damage remaining, fading buff", damage_to_reduce, buffs[slot].melee_rune);
+				LogSpellsDetail("SE_MitigateMeleeDamage [{}] damage negated, [{}] damage remaining, fading buff", damage_to_reduce, buffs[slot].melee_rune);
 				damage -= buffs[slot].melee_rune;
 				if (!TryFadeEffect(slot))
 					BuffFadeBySlot(slot);
 			}
 			else
 			{
-				LogSpellsDetail("[Mob::ReduceDamage] SE_MitigateMeleeDamage [{}] damage negated, [{}] damage remaining", damage_to_reduce, buffs[slot].melee_rune);
+				LogSpellsDetail("SE_MitigateMeleeDamage [{}] damage negated, [{}] damage remaining", damage_to_reduce, buffs[slot].melee_rune);
 
 				if (spellbonuses.MitigateMeleeRune[SBIndex::MITIGATION_RUNE_MAX_HP_AMT])
 					buffs[slot].melee_rune = (buffs[slot].melee_rune - damage_to_reduce);
@@ -3483,14 +3462,14 @@ int64 Mob::AffectMagicalDamage(int64 damage, uint16 spell_id, const bool iBuffTi
 
 				if (spellbonuses.MitigateSpellRune[SBIndex::MITIGATION_RUNE_MAX_HP_AMT] && (damage_to_reduce >= buffs[slot].magic_rune))
 				{
-					LogSpellsDetail("[Mob::AffectMagicalDamage] SE_MitigateSpellDamage [{}] damage negated, [{}] damage remaining, fading buff", damage_to_reduce, buffs[slot].magic_rune);
+					LogSpellsDetail("SE_MitigateSpellDamage [{}] damage negated, [{}] damage remaining, fading buff", damage_to_reduce, buffs[slot].magic_rune);
 					damage -= buffs[slot].magic_rune;
 					if (!TryFadeEffect(slot))
 						BuffFadeBySlot(slot);
 				}
 				else
 				{
-					LogSpellsDetail("[Mob::AffectMagicalDamage] SE_MitigateMeleeDamage [{}] damage negated, [{}] damage remaining", damage_to_reduce, buffs[slot].magic_rune);
+					LogSpellsDetail("SE_MitigateMeleeDamage [{}] damage negated, [{}] damage remaining", damage_to_reduce, buffs[slot].magic_rune);
 
 					if (spellbonuses.MitigateSpellRune[SBIndex::MITIGATION_RUNE_MAX_HP_AMT])
 						buffs[slot].magic_rune = (buffs[slot].magic_rune - damage_to_reduce);
@@ -3556,7 +3535,7 @@ bool Mob::HasProcs() const
 		}
 	}
 
-	if (IsClient()) {
+	if (IsClient() || IsBot()) {
 		for (int i = 0; i < MAX_AA_PROCS; i += 4) {
 			if (aabonuses.SpellProc[i]) {
 				return true;
@@ -3574,7 +3553,7 @@ bool Mob::HasDefensiveProcs() const
 		}
 	}
 
-	if (IsClient()) {
+	if (IsClient() || IsBot()) {
 		for (int i = 0; i < MAX_AA_PROCS; i += 4) {
 			if (aabonuses.DefensiveProc[i]) {
 				return true;
@@ -3610,7 +3589,7 @@ bool Mob::HasRangedProcs() const
 		}
 	}
 
-	if (IsClient()) {
+	if (IsClient() || IsBot()) {
 		for (int i = 0; i < MAX_AA_PROCS; i += 4) {
 			if (aabonuses.RangedProc[i]) {
 				return true;
@@ -4379,7 +4358,7 @@ void Mob::TryDefensiveProc(Mob *on, uint16 hand) {
 		}
 
 		//AA Procs
-		if (IsClient()){
+		if (IsClient() || IsBot()){
 			for (int i = 0; i < MAX_AA_PROCS; i += 4) {
 				int32 aa_rank_id = aabonuses.DefensiveProc[i + +SBIndex::COMBAT_PROC_ORIGIN_ID];
 				int32 aa_spell_id = aabonuses.DefensiveProc[i + SBIndex::COMBAT_PROC_SPELL_ID];
@@ -4637,7 +4616,7 @@ void Mob::TrySpellProc(const EQ::ItemInstance *inst, const EQ::ItemData *weapon,
 	}
 
 	//AA Melee and Ranged Procs
-	if (IsClient()) {
+	if (IsClient() || IsBot()) {
 		for (int i = 0; i < MAX_AA_PROCS; i += 4) {
 
 			int32 aa_rank_id = 0;
@@ -4783,12 +4762,10 @@ void Mob::TryCriticalHit(Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *
 		return;
 	}
 
-#ifdef BOTS
 	if (IsPet() && GetOwner() && GetOwner()->IsBot()) {
 		TryPetCriticalHit(defender, hit);
 		return;
 	}
-#endif // BOTS
 
 	if (IsNPC() && !RuleB(Combat, NPCCanCrit))
 		return;
@@ -5259,12 +5236,10 @@ void Mob::ApplyDamageTable(DamageHitInfo &hit)
 #endif
 
 	// someone may want to add this to custom servers, can remove this if that's the case
-	if (!IsClient()
-#ifdef BOTS
-		&& !IsBot()
-#endif
-		)
+	if (!IsClient()&& !IsBot()) {
 		return;
+	}
+
 	// this was parsed, but we do see the min of 10 and the normal minus factor is 105, so makes sense
 	if (hit.offense < 115)
 		return;

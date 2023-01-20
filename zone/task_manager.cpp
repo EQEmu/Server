@@ -37,7 +37,7 @@ bool TaskManager::LoadTaskSets()
 
 	for (auto &task_set: rows) {
 		m_task_sets[task_set.id].push_back(task_set.taskid);
-		LogTasksDetail("[LoadTaskSets] Adding task_id [{}] to task_set [{}]", task_set.taskid, task_set.id);
+		LogTasksDetail("Adding task_id [{}] to task_set [{}]", task_set.taskid, task_set.id);
 	}
 
 	return true;
@@ -49,7 +49,7 @@ bool TaskManager::LoadTasks(int single_task)
 	std::string query;
 	if (single_task == 0) {
 		if (!LoadTaskSets()) {
-			LogTasks("[TaskManager::LoadTasks] LoadTaskSets failed");
+			LogTasks("LoadTaskSets failed");
 		}
 
 		task_query_filter = fmt::format("id > 0");
@@ -64,7 +64,7 @@ bool TaskManager::LoadTasks(int single_task)
 
 		if (task_id <= 0) {
 			// This shouldn't happen, as the SELECT is bounded by MAXTASKS
-			LogError("[TASKS]Task ID [{}] out of range while loading tasks from database", task_id);
+			LogError("Task ID [{}] out of range while loading tasks from database", task_id);
 			continue;
 		}
 
@@ -100,7 +100,7 @@ bool TaskManager::LoadTasks(int single_task)
 		m_task_data.try_emplace(task_id, std::move(ti));
 
 		LogTasksDetail(
-			"[LoadTasks] (Task) task_id [{}] type [{}] () duration [{}] duration_code [{}] title [{}] description [{}] "
+			"(Task) task_id [{}] type [{}] () duration [{}] duration_code [{}] title [{}] description [{}] "
 			" reward_text [{}] reward_id_list [{}] cash_reward [{}] exp_reward [{}] reward_method [{}] faction_reward [{}] min_level [{}] "
 			" max_level [{}] level_spread [{}] min_players [{}] max_players [{}] repeatable [{}] completion_emote [{}]"
 			" replay_group [{}] replay_timer_seconds [{}] request_group [{}] request_timer_seconds [{}]",
@@ -157,7 +157,7 @@ bool TaskManager::LoadTasks(int single_task)
 
 			// This shouldn't happen, as the SELECT is bounded by MAXTASKS
 			LogTasks(
-				"[LoadTasks] Error: Task or activity_information ID ([{}], [{}]) out of range while loading activities from database",
+				"Error: Task or activity_information ID ([{}], [{}]) out of range while loading activities from database",
 				task_id,
 				activity_id
 			);
@@ -167,7 +167,7 @@ bool TaskManager::LoadTasks(int single_task)
 		auto task_data = GetTaskData(task_id);
 		if (!task_data) {
 			LogTasks(
-				"[LoadTasks] Error: activity_information for non-existent task ([{}], [{}]) while loading activities from database",
+				"Error: activity_information for non-existent task ([{}], [{}]) while loading activities from database",
 				task_id,
 				activity_id
 			);
@@ -184,7 +184,7 @@ bool TaskManager::LoadTasks(int single_task)
 		// Change to (activityID != (Tasks[taskID]->activity_count + 1)) to index from 1
 		if (activity_id != task_data->activity_count) {
 			LogTasks(
-				"[LoadTasks] Error: Activities for Task [{}] (activity_id [{}]) are not sequential starting at 0. Not loading task ",
+				"Error: Activities for Task [{}] (activity_id [{}]) are not sequential starting at 0. Not loading task ",
 				task_id,
 				activity_id
 			);
@@ -240,7 +240,7 @@ bool TaskManager::LoadTasks(int single_task)
 		ad->optional = a.optional;
 
 		LogTasksDetail(
-			"[LoadTasks] (Activity) task_id [{}] activity_id [{}] slot [{}] activity_type [{}] goal_method [{}] goal_count [{}] zones [{}]"
+			"(Activity) task_id [{}] activity_id [{}] slot [{}] activity_type [{}] goal_method [{}] goal_count [{}] zones [{}]"
 			" target_name [{}] item_list [{}] skill_list [{}] spell_list [{}] description_override [{}]",
 			task_id,
 			activity_id,
@@ -274,11 +274,11 @@ bool TaskManager::SaveClientState(Client *client, ClientTaskState *cts)
 		return false;
 	}
 
-	constexpr const char *ERR_MYSQLERROR = "[TASKS]Error in TaskManager::SaveClientState {}";
+	constexpr const char *ERR_MYSQLERROR = "Error in TaskManager::SaveClientState {}";
 
 	int character_id = client->CharacterID();
 
-	LogTasks("[SaveClientState] character_id [{}]", character_id);
+	LogTasks("character_id [{}]", character_id);
 
 	if (cts->m_active_task_count > 0 ||
 		cts->m_active_task.task_id != TASKSLOTEMPTY ||
@@ -295,7 +295,7 @@ bool TaskManager::SaveClientState(Client *client, ClientTaskState *cts)
 			if (active_task.updated) {
 
 				LogTasks(
-					"[SaveClientState] character_id [{}] updating task_index [{}] task_id [{}]",
+					"character_id [{}] updating task_index [{}] task_id [{}]",
 					character_id,
 					slot,
 					task_id
@@ -333,7 +333,7 @@ bool TaskManager::SaveClientState(Client *client, ClientTaskState *cts)
 				}
 
 				LogTasks(
-					"[SaveClientState] Updating activity character_id [{}] updating task_index [{}] task_id [{}] activity_index [{}]",
+					"Updating activity character_id [{}] updating task_index [{}] task_id [{}] activity_index [{}]",
 					character_id,
 					slot,
 					task_id,
@@ -586,7 +586,7 @@ void TaskManager::TaskSetSelector(Client* client, Mob* mob, int task_set_id, boo
 
 	// A task_id of 0 in a TaskSet indicates that all Tasks in the set are enabled for all players.
 	if (m_task_sets[task_set_id][0] == 0) {
-		LogTasks("[TaskSetSelector] TaskSets[{}][0] == 0. All Tasks in Set enabled.", task_set_id);
+		LogTasks("TaskSets[{}][0] == 0. All Tasks in Set enabled.", task_set_id);
 		all_enabled = true;
 	}
 
@@ -628,7 +628,7 @@ void TaskManager::TaskQuestSetSelector(Client* client, Mob* mob, const std::vect
 	int player_level    = client->GetLevel();
 	ClientTaskState* client_task_state = client->GetTaskState();
 
-	LogTasks("[UPDATE] TaskQuestSetSelector called with size [{}]", tasks.size());
+	LogTasks("TaskQuestSetSelector called with size [{}]", tasks.size());
 
 	if (tasks.empty()) {
 		return;
@@ -674,7 +674,7 @@ void TaskManager::TaskQuestSetSelector(Client* client, Mob* mob, const std::vect
 
 void TaskManager::SharedTaskSelector(Client* client, Mob* mob, const std::vector<int>& tasks, bool ignore_cooldown)
 {
-	LogTasks("[UPDATE] SharedTaskSelector called with size [{}]", tasks.size());
+	LogTasks("SharedTaskSelector called with size [{}]", tasks.size());
 
 	if (tasks.empty()) {
 		return;
@@ -748,26 +748,26 @@ bool TaskManager::CanOfferSharedTask(int task_id, const SharedTaskRequest& reque
 	const auto task = GetTaskData(task_id);
 	if (!task)
 	{
-		LogTasksDetail("[CanOfferSharedTask] task data for task id [{}] not found", task_id);
+		LogTasksDetail("task data for task id [{}] not found", task_id);
 		return false;
 	}
 
 	if (task->type != TaskType::Shared)
 	{
-		LogTasksDetail("[CanOfferSharedTask] task [{}] is not a shared task type", task_id);
+		LogTasksDetail("task [{}] is not a shared task type", task_id);
 		return false;
 	}
 
 	if (task->min_level > 0 && request.lowest_level < task->min_level)
 	{
-		LogTasksDetail("[CanOfferSharedTask] lowest level [{}] is below task [{}] min level [{}]",
+		LogTasksDetail("lowest level [{}] is below task [{}] min level [{}]",
 			request.lowest_level, task_id, task->min_level);
 		return false;
 	}
 
 	if (task->max_level > 0 && request.highest_level > task->max_level)
 	{
-		LogTasksDetail("[CanOfferSharedTask] highest level [{}] exceeds task [{}] max level [{}]",
+		LogTasksDetail("highest level [{}] exceeds task [{}] max level [{}]",
 			request.highest_level, task_id, task->max_level);
 		return false;
 	}
@@ -831,7 +831,7 @@ void TaskManager::SendTaskSelector(Client* client, Mob* mob, const std::vector<i
 
 void TaskManager::SendSharedTaskSelector(Client* client, Mob* mob, const std::vector<int>& task_list)
 {
-	LogTasks("SendSharedTaskSelector for [{}] Tasks", task_list.size());
+	LogTasks("[{}] Tasks", task_list.size());
 
 	// request timer is only set when shared task selection shown (not for failed validations)
 	client->StartTaskRequestCooldownTimer();
@@ -890,7 +890,7 @@ void TaskManager::SendCompletedTasksToClient(Client *c, ClientTaskState *cts)
 	}
 
 	LogTasks(
-		"[SendCompletedTasksToClient] completed task count [{}] first tank to send is [{}] last is [{}]",
+		"completed task count [{}] first tank to send is [{}] last is [{}]",
 		cts->m_completed_tasks.size(),
 		first_task_to_send,
 		last_task_to_send
@@ -1008,7 +1008,7 @@ void TaskManager::SendActiveTaskToClient(
 		false
 	);
 
-	LogTasks("[SendActiveTasksToClient] task_id [{}] activity_count [{}] task_index [{}]",
+	LogTasks("task_id [{}] activity_count [{}] task_index [{}]",
 			 task_id,
 			 GetActivityCount(task_id),
 			 task_index);
@@ -1018,7 +1018,7 @@ void TaskManager::SendActiveTaskToClient(
 	for (int activity_id = 0; activity_id < GetActivityCount(task_id); activity_id++) {
 		if (client->GetTaskActivityState(task_type, fixed_index, activity_id) != ActivityHidden) {
 			LogTasks(
-				"[SendActiveTasksToClient] (Long Update) task_id [{}] activity_id [{}] fixed_index [{}] task_complete [{}]",
+				"(Long Update) task_id [{}] activity_id [{}] fixed_index [{}] task_complete [{}]",
 				task_id,
 				activity_id,
 				fixed_index,
@@ -1046,7 +1046,7 @@ void TaskManager::SendActiveTaskToClient(
 		}
 		else {
 			LogTasks(
-				"[SendActiveTasksToClient] (Short Update) task_id [{}] activity_id [{}] fixed_index [{}]",
+				"(Short Update) task_id [{}] activity_id [{}] fixed_index [{}]",
 				task_id,
 				activity_id,
 				fixed_index
@@ -1084,7 +1084,7 @@ void TaskManager::SendActiveTasksToClient(Client *client, bool task_complete)
 		}
 
 		LogTasksDetail("--");
-		LogTasksDetail("[SendActiveTasksToClient] Task [{}]", task_data->title);
+		LogTasksDetail("Task [{}]", task_data->title);
 
 		SendActiveTaskToClient(&state->m_active_quests[task_index], client, task_index, task_complete);
 	}
@@ -1112,13 +1112,13 @@ void TaskManager::SendSingleActiveTaskToClient(
 	);
 	Log(Logs::General,
 		Logs::Tasks,
-		"[UPDATE] SendSingleActiveTasksToClient: Task %i, Activities: %i",
+		"SendSingleActiveTasksToClient: Task %i, Activities: %i",
 		task_id,
 		GetActivityCount(task_id));
 
 	for (int activity_id = 0; activity_id < GetActivityCount(task_id); activity_id++) {
 		if (task_info.activity[activity_id].activity_state != ActivityHidden) {
-			LogTasks("[SendSingleActiveTaskToClient] Long [{}] [{}] complete [{}]",
+			LogTasks("Long [{}] [{}] complete [{}]",
 					 task_id,
 					 activity_id,
 					 task_complete);
@@ -1130,7 +1130,7 @@ void TaskManager::SendSingleActiveTaskToClient(
 			}
 		}
 		else {
-			LogTasks("[SendSingleActiveTaskToClient] Short [{}] [{}]", task_id, activity_id);
+			LogTasks("Short [{}] [{}]", task_id, activity_id);
 			SendTaskActivityShort(client, task_id, activity_id, task_info.slot);
 		}
 	}
@@ -1253,7 +1253,7 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *cts)
 
 	cts->m_active_task_count = 0;
 
-	LogTasks("[LoadClientState] for character_id [{}]", character_id);
+	LogTasks("for character_id [{}]", character_id);
 
 	// in a case where a client somehow lost local state with what state exists in world - we need
 	// to perform an inverse sync where we inject the task
@@ -1274,7 +1274,7 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *cts)
 
 		if (task_id < 0) {
 			LogTasks(
-				"[LoadClientState] Error: task_id [{}] out of range while loading character tasks from database",
+				"Error: task_id [{}] out of range while loading character tasks from database",
 				task_id
 			);
 			continue;
@@ -1286,14 +1286,14 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *cts)
 		auto task_info = cts->GetClientTaskInfo(type, slot);
 		if (task_info == nullptr) {
 			LogTasks(
-				"[LoadClientState] Error: slot [{}] out of range while loading character tasks from database",
+				"Error: slot [{}] out of range while loading character tasks from database",
 				slot
 			);
 			continue;
 		}
 
 		if (task_info->task_id != TASKSLOTEMPTY) {
-			LogTasks("[LoadClientState] Error: slot [{}] for task [{}] is already occupied", slot, task_id);
+			LogTasks("Error: slot [{}] for task [{}] is already occupied", slot, task_id);
 			continue;
 		}
 
@@ -1312,7 +1312,7 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *cts)
 		}
 
 		LogTasks(
-			"[LoadClientState] character_id [{}] task_id [{}] slot [{}] accepted_time [{}] was_rewarded [{}]",
+			"character_id [{}] task_id [{}] slot [{}] accepted_time [{}] was_rewarded [{}]",
 			character_id,
 			task_id,
 			slot,
@@ -1322,7 +1322,7 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *cts)
 	}
 
 	// Load Activities
-	LogTasks("[LoadClientState] Loading activities for character_id [{}]", character_id);
+	LogTasks("Loading activities for character_id [{}]", character_id);
 
 	auto character_activities = CharacterActivitiesRepository::GetWhere(
 		database,
@@ -1333,7 +1333,7 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *cts)
 		int task_id = character_activity.taskid;
 		if (task_id < 0) {
 			LogTasks(
-				"[LoadClientState] Error: task_id [{}] out of range while loading character activities from database character_id [{}]",
+				"Error: task_id [{}] out of range while loading character activities from database character_id [{}]",
 				task_id,
 				character_id
 			);
@@ -1343,7 +1343,7 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *cts)
 		int activity_id = character_activity.activityid;
 		if ((activity_id < 0) || (activity_id >= MAXACTIVITIESPERTASK)) {
 			LogTasks(
-				"[LoadClientState] Error: activity_id [{}] out of range while loading character activities from database character_id [{}]",
+				"Error: activity_id [{}] out of range while loading character activities from database character_id [{}]",
 				activity_id,
 				character_id
 			);
@@ -1373,7 +1373,7 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *cts)
 
 		if (task_info == nullptr) {
 			LogTasks(
-				"[LoadClientState] Error: activity_id [{}] found for task_id [{}] which client does not have character_id [{}]",
+				"Error: activity_id [{}] found for task_id [{}] which client does not have character_id [{}]",
 				activity_id,
 				task_id,
 				character_id
@@ -1394,7 +1394,7 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *cts)
 		task_info->activity[activity_id].updated = false;
 
 		LogTasks(
-			"[LoadClientState] character_id [{}] task_id [{}] activity_id [{}] done_count [{}] completed [{}]",
+			"character_id [{}] task_id [{}] activity_id [{}] done_count [{}] completed [{}]",
 			character_id,
 			task_id,
 			activity_id,
@@ -1423,7 +1423,7 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *cts)
 		for (auto &character_completed_task: character_completed_tasks) {
 			int task_id = character_completed_task.taskid;
 			if (task_id <= 0) {
-				LogError("[TASKS]Task ID [{}] out of range while loading completed tasks from database", task_id);
+				LogError("Task ID [{}] out of range while loading completed tasks from database", task_id);
 				continue;
 			}
 
@@ -1433,7 +1433,7 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *cts)
 			// completed.
 			int activity_id = character_completed_task.activityid;
 			if ((activity_id < -1) || (activity_id >= MAXACTIVITIESPERTASK)) {
-				LogError("[TASKS]activity_information ID [{}] out of range while loading completed tasks from database",
+				LogError("activity_information ID [{}] out of range while loading completed tasks from database",
 						 activity_id);
 				continue;
 			}
@@ -1487,7 +1487,7 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *cts)
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			int task_id = atoi(row[0]);
 			cts->m_enabled_tasks.push_back(task_id);
-			LogTasksDetail("[LoadClientState] Adding task_id [{}] to enabled tasks", task_id);
+			LogTasksDetail("Adding task_id [{}] to enabled tasks", task_id);
 		}
 	}
 
@@ -1509,7 +1509,7 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *cts)
 				task_id
 			);
 
-			LogError("[LoadClientState] Character [{}] has task [{}] which does not exist", character_id, task_id);
+			LogError("Character [{}] has task [{}] which does not exist", character_id, task_id);
 			cts->m_active_tasks[task_index].task_id = TASKSLOTEMPTY;
 			continue;
 		}
@@ -1523,7 +1523,7 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *cts)
 				);
 
 				LogTasks(
-					"[LoadClientState] Fatal error in character [{}] task state. activity_information [{}] for Task [{}] either missing from client state or from task",
+					"Fatal error in character [{}] task state. activity_information [{}] for Task [{}] either missing from client state or from task",
 					character_id,
 					activity_index,
 					task_id
@@ -1535,7 +1535,7 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *cts)
 	}
 
 	LogTasksDetail(
-		"[LoadClientState] m_active_task task_id is [{}] slot [{}]",
+		"m_active_task task_id is [{}] slot [{}]",
 		cts->m_active_task.task_id,
 		cts->m_active_task.slot
 	);
@@ -1544,7 +1544,7 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *cts)
 
 		// purely debugging
 		LogTasksDetail(
-			"[LoadClientState] Fetching task info for character_id [{}] task [{}] slot [{}] accepted_time [{}] updated [{}]",
+			"Fetching task info for character_id [{}] task [{}] slot [{}] accepted_time [{}] updated [{}]",
 			character_id,
 			cts->m_active_task.task_id,
 			cts->m_active_task.slot,
@@ -1557,7 +1557,7 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *cts)
 			for (int i = 0; i < task_data->activity_count; i++) {
 				if (cts->m_active_task.activity[i].activity_id >= 0) {
 					LogTasksDetail(
-						"[LoadClientState] -- character_id [{}] task [{}] activity_id [{}] done_count [{}] activity_state [{}] updated [{}]",
+						"-- character_id [{}] task [{}] activity_id [{}] done_count [{}] activity_state [{}] updated [{}]",
 						character_id,
 						cts->m_active_task.task_id,
 						cts->m_active_task.activity[i].activity_id,
@@ -1572,7 +1572,7 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *cts)
 
 	// shared task
 	LogTasksDetail(
-		"[LoadClientState] m_active_shared_task task_id is [{}] slot [{}]",
+		"m_active_shared_task task_id is [{}] slot [{}]",
 		cts->m_active_shared_task.task_id,
 		cts->m_active_shared_task.slot
 	);
@@ -1587,7 +1587,7 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *cts)
 		}
 	}
 
-	LogTasksDetail("[LoadClientState] for Character ID [{}] DONE!", character_id);
+	LogTasksDetail("for Character ID [{}] DONE!", character_id);
 	LogTasksDetail("---", character_id);
 
 	return true;
@@ -1645,7 +1645,7 @@ void TaskManager::SyncClientSharedTaskWithPersistedState(Client *c, ClientTaskSt
 					for (auto &a: activities) {
 
 						LogTasksDetail(
-							"[LoadClientState] shared_task loop local [{}] shared [{}]",
+							"shared_task loop local [{}] shared [{}]",
 							shared_task->activity[a.activity_id].done_count,
 							a.done_count
 						);
@@ -1674,7 +1674,7 @@ void TaskManager::SyncClientSharedTaskWithPersistedState(Client *c, ClientTaskSt
 						// live does this as long as the shared task is still active when entering game
 						if (!shared_task->was_rewarded && IsActiveTaskComplete(*shared_task))
 						{
-							LogTasksDetail("[LoadClientState] Syncing shared task completion for client [{}]", c->GetName());
+							LogTasksDetail("Syncing shared task completion for client [{}]", c->GetName());
 							const auto task_data = GetTaskData(shared_task->task_id);
 							cts->AddReplayTimer(c, *shared_task, *task_data); // live updates a fresh timer
 							cts->DispatchEventTaskComplete(c, *shared_task, task_data->activity_count - 1);
@@ -1706,7 +1706,7 @@ void TaskManager::SyncClientSharedTaskRemoveLocalIfNotExists(Client *c, ClientTa
 		// if we don't actually have a membership anywhere, remove ourself locally
 		if (members.empty()) {
 			LogTasksDetail(
-				"[SyncClientSharedTaskRemoveLocalIfNotExists] Client [{}] Shared task [{}] doesn't exist in world, removing from local",
+				"Client [{}] Shared task [{}] doesn't exist in world, removing from local",
 				c->GetCleanName(),
 				cts->m_active_shared_task.task_id
 			);
@@ -1751,7 +1751,7 @@ void TaskManager::SyncClientSharedTaskStateToLocal(
 	}
 
 	if (!has_character_shared_task) {
-		LogTasksDetail("[SyncClientSharedTaskStateToLocal] We don't have a shared character task locally");
+		LogTasksDetail("We don't have a shared character task locally");
 		auto stm = SharedTaskMembersRepository::GetWhere(
 			database,
 			fmt::format(
@@ -1761,14 +1761,14 @@ void TaskManager::SyncClientSharedTaskStateToLocal(
 		);
 
 		if (!stm.empty()) {
-			LogTasksDetail("[SyncClientSharedTaskStateToLocal] We have membership in database");
+			LogTasksDetail("We have membership in database");
 			auto s = SharedTasksRepository::FindOne(
 				database,
 				(int) stm.front().shared_task_id
 			);
 
 			if (s.id > 0) {
-				LogTasksDetail("[SyncClientSharedTaskStateToLocal] Creating entity");
+				LogTasksDetail("Creating entity");
 
 				// create task locally
 				auto ct = CharacterTasksRepository::NewEntity();
@@ -1813,7 +1813,7 @@ void TaskManager::HandleUpdateTasksOnKill(Client* client, NPC* npc)
 			continue;
 		}
 
-		LogTasksDetail("[HandleUpdateTasksOnKill] Looping through client [{}]", c->GetCleanName());
+		LogTasksDetail("Looping through client [{}]", c->GetCleanName());
 
 		c->GetTaskState()->UpdateTasksOnKill(c, client, npc);
 	}

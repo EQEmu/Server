@@ -265,6 +265,19 @@ void Doors::HandleClick(Client *sender, uint8 trigger)
 		}
 	}
 
+	// enforce flags before they hit zoning process
+	auto z = GetZone(m_destination_zone_name, 0);
+	if (z && !z->flag_needed.empty() && Strings::IsNumber(z->flag_needed) && std::stoi(z->flag_needed) == 1) {
+		if (sender->Admin() < minStatusToIgnoreZoneFlags && !sender->HasZoneFlag(z->zoneidnumber)) {
+			LogInfo(
+				"Character [{}] does not have the flag to be in this zone [{}]!",
+				sender->GetCleanName(),
+				z->flag_needed
+			);
+			sender->MessageString(Chat::LightBlue, DOORS_LOCKED);
+		}
+	}
+
 	/**
 	 * Guild Doors
 	 *

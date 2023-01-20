@@ -48,7 +48,7 @@ void SharedTaskManager::AttemptSharedTaskCreation(
 	auto task = GetSharedTaskDataByTaskId(requested_task_id);
 	if (task.id != 0 && task.type == TASK_TYPE_SHARED) {
 		LogTasksDetail(
-			"[AttemptSharedTaskCreation] Found Shared Task ({}) [{}]",
+			"Found Shared Task ({}) [{}]",
 			requested_task_id,
 			task.title
 		);
@@ -58,12 +58,12 @@ void SharedTaskManager::AttemptSharedTaskCreation(
 	// todo: this should be online group/raid members only (avoid queries)
 	auto request = SharedTask::GetRequestCharacters(*m_database, requested_character_id);
 	if (!CanRequestSharedTask(task.id, request)) {
-		LogTasksDetail("[AttemptSharedTaskCreation] Shared task validation failed");
+		LogTasksDetail("Shared task validation failed");
 		return;
 	}
 
 	for (auto& m: request.members) {
-		LogTasksDetail("[AttemptSharedTaskCreation] Request Members [{}]", m.character_name);
+		LogTasksDetail("Request Members [{}]", m.character_name);
  	}
 
 	// new shared task instance
@@ -181,7 +181,7 @@ void SharedTaskManager::AttemptSharedTaskCreation(
 	LoadDynamicZoneTemplate(&inserted);
 
 	LogTasks(
-		"[AttemptSharedTaskCreation] shared_task_id [{}] created successfully | task_id [{}] member_count [{}] activity_count [{}] current tasks in state [{}]",
+		"shared_task_id [{}] created successfully | task_id [{}] member_count [{}] activity_count [{}] current tasks in state [{}]",
 		new_shared_task.GetDbSharedTask().id,
 		task.id,
 		request.members.size(),
@@ -192,7 +192,7 @@ void SharedTaskManager::AttemptSharedTaskCreation(
 
 void SharedTaskManager::RemoveMember(SharedTask* s, const SharedTaskMember& member, bool remove_from_db)
 {
-	LogTasksDetail("[RemoveMember] shared_task_id [{}] member [{}]", s->GetDbSharedTask().id, member.character_name);
+	LogTasksDetail("shared_task_id [{}] member [{}]", s->GetDbSharedTask().id, member.character_name);
 
 	RemovePlayerFromSharedTask(s, member.character_id);
 	SendRemovePlayerFromSharedTaskPacket(member.character_id, s->GetDbSharedTask().task_id, remove_from_db);
@@ -217,12 +217,12 @@ void SharedTaskManager::RemoveMember(SharedTask* s, const SharedTaskMember& memb
 void SharedTaskManager::RemoveEveryoneFromSharedTask(SharedTask *t, uint32 requested_character_id)
 {
 	// caller validates leader
-	LogTasksDetail("[RemoveEveryoneFromSharedTask] Leader [{}]", requested_character_id);
+	LogTasksDetail("Leader [{}]", requested_character_id);
 
 	// inform clients of removal
 	for (auto &m: t->GetMembers()) {
 		LogTasksDetail(
-			"[RemoveEveryoneFromSharedTask] Sending removal to [{}] task_id [{}]",
+			"Sending removal to [{}] task_id [{}]",
 			m.character_id,
 			t->GetTaskData().id
 		);
@@ -244,7 +244,7 @@ void SharedTaskManager::RemoveEveryoneFromSharedTask(SharedTask *t, uint32 reque
 
 void SharedTaskManager::Terminate(SharedTask& s, bool send_fail, bool erase)
 {
-	LogTasksDetail("[Terminate] shared task [{}]", s.GetDbSharedTask().id);
+	LogTasksDetail("shared task [{}]", s.GetDbSharedTask().id);
 	for (const auto& member : s.GetMembers())
 	{
 		if (send_fail)
@@ -266,7 +266,7 @@ void SharedTaskManager::Terminate(SharedTask& s, bool send_fail, bool erase)
 void SharedTaskManager::DeleteSharedTask(int64 shared_task_id)
 {
 	LogTasksDetail(
-		"[DeleteSharedTask] shared_task_id [{}]",
+		"shared_task_id [{}]",
 		shared_task_id
 	);
 
@@ -291,7 +291,7 @@ void SharedTaskManager::DeleteSharedTask(int64 shared_task_id)
 
 void SharedTaskManager::LoadSharedTaskState()
 {
-	LogTasksDetail("[LoadSharedTaskState] Restoring state from the database");
+	LogTasksDetail("Restoring state from the database");
 
 	// load shared tasks
 	std::vector<SharedTask> shared_tasks = {};
@@ -325,7 +325,7 @@ void SharedTaskManager::LoadSharedTaskState()
 		SharedTask ns = {};
 
 		LogTasksDetail(
-			"[LoadSharedTaskState] Loading shared_task_id [{}] task_id [{}]",
+			"Loading shared_task_id [{}] task_id [{}]",
 			s.id,
 			s.task_id
 		);
@@ -336,7 +336,7 @@ void SharedTaskManager::LoadSharedTaskState()
 		// set database task data for internal referencing
 		auto task_data = GetSharedTaskDataByTaskId(s.task_id);
 
-		LogTasksDetail("[LoadSharedTaskState] [GetSharedTaskDataByTaskId] task_id [{}]", task_data.id);
+		LogTasksDetail("[GetSharedTaskDataByTaskId] task_id [{}]", task_data.id);
 
 		ns.SetTaskData(task_data);
 
@@ -363,7 +363,7 @@ void SharedTaskManager::LoadSharedTaskState()
 				for (auto &ad: activities_data) {
 					if (ad.taskid == s.task_id && ad.activityid == sta.activity_id) {
 						LogTasksDetail(
-							"[LoadSharedTaskState] shared_task_id [{}] task_id [{}] activity_id [{}] done_count [{}] max_done_count (goalcount) [{}]",
+							"shared_task_id [{}] task_id [{}] activity_id [{}] done_count [{}] max_done_count (goalcount) [{}]",
 							s.id,
 							s.task_id,
 							sta.activity_id,
@@ -409,7 +409,7 @@ void SharedTaskManager::LoadSharedTaskState()
 				shared_task_members.emplace_back(member);
 
 				LogTasksDetail(
-					"[LoadSharedTaskState] shared_task_id [{}] adding member character_id [{}] character_name [{}] is_leader [{}]",
+					"shared_task_id [{}] adding member character_id [{}] character_name [{}] is_leader [{}]",
 					s.id,
 					member.character_id,
 					member.character_name,
@@ -429,7 +429,7 @@ void SharedTaskManager::LoadSharedTaskState()
 				ns.dynamic_zone_ids.emplace_back(static_cast<uint32_t>(dz_entry.dynamic_zone_id));
 
 				LogTasksDetail(
-					"[LoadSharedTaskState] shared_task_id [{}] adding dynamic_zone_id [{}]",
+					"shared_task_id [{}] adding dynamic_zone_id [{}]",
 					s.id,
 					dz_entry.dynamic_zone_id
 				);
@@ -437,7 +437,7 @@ void SharedTaskManager::LoadSharedTaskState()
 		}
 
 		LogTasks(
-			"[LoadSharedTaskState] Loaded shared task state | shared_task_id [{}] task_id [{}] task_title [{}] member_count [{}] state_activity_count [{}]",
+			"Loaded shared task state | shared_task_id [{}] task_id [{}] task_title [{}] member_count [{}] state_activity_count [{}]",
 			s.id,
 			task_data.id,
 			task_data.title,
@@ -451,7 +451,7 @@ void SharedTaskManager::LoadSharedTaskState()
 	SetSharedTasks(shared_tasks);
 
 	LogTasks(
-		"[LoadSharedTaskState] Loaded [{}] shared tasks",
+		"Loaded [{}] shared tasks",
 		m_shared_tasks.size()
 	);
 
@@ -463,7 +463,7 @@ SharedTaskManager *SharedTaskManager::LoadTaskData()
 	m_task_data          = TasksRepository::All(*m_content_database);
 	m_task_activity_data = TaskActivitiesRepository::All(*m_content_database);
 
-	LogTasks("[LoadTaskData] Loaded tasks [{}] activities [{}]", m_task_data.size(), m_task_activity_data.size());
+	LogTasks("Loaded tasks [{}] activities [{}]", m_task_data.size(), m_task_activity_data.size());
 
 	return this;
 }
@@ -504,7 +504,7 @@ void SharedTaskManager::SharedTaskActivityUpdate(
 	auto shared_task = FindSharedTaskByTaskIdAndCharacterId(task_id, source_character_id);
 	if (shared_task) {
 		LogTasksDetail(
-			"[SharedTaskActivityUpdate] shared_task_id [{}] character_id [{}] task_id [{}] activity_id [{}] done_count [{}]",
+			"shared_task_id [{}] character_id [{}] task_id [{}] activity_id [{}] done_count [{}]",
 			shared_task->GetDbSharedTask().id,
 			source_character_id,
 			task_id,
@@ -518,7 +518,7 @@ void SharedTaskManager::SharedTaskActivityUpdate(
 				// discard updates out of bounds
 				if (a.done_count == a.max_done_count) {
 					LogTasksDetail(
-						"[SharedTaskActivityUpdate] done_count [{}] is greater than max [{}] discarding...",
+						"done_count [{}] is greater than max [{}] discarding...",
 						done_count,
 						a.max_done_count
 					);
@@ -528,7 +528,7 @@ void SharedTaskManager::SharedTaskActivityUpdate(
 				// if we are progressing
 				if (a.done_count < done_count) {
 					LogTasksDetail(
-						"[SharedTaskActivityUpdate] Propagating update for shared_task_id [{}] character_id [{}] task_id [{}] activity_id [{}] old_done_count [{}] new_done_count [{}]",
+						"Propagating update for shared_task_id [{}] character_id [{}] task_id [{}] activity_id [{}] old_done_count [{}] new_done_count [{}]",
 						shared_task->GetDbSharedTask().id,
 						source_character_id,
 						task_id,
@@ -560,7 +560,7 @@ void SharedTaskManager::SharedTaskActivityUpdate(
 					shared_task->SetSharedTaskActivityState(shared_task->m_shared_task_activity_state);
 
 					LogTasksDetail(
-						"[SharedTaskActivityUpdate] Debug done_count [{}]",
+						"Debug done_count [{}]",
 						a.done_count
 					);
 
@@ -591,7 +591,7 @@ void SharedTaskManager::SharedTaskActivityUpdate(
 				}
 
 				LogTasksDetail(
-					"[SharedTaskActivityUpdate] Discarding duplicate update for shared_task_id [{}] character_id [{}] task_id [{}] activity_id [{}] done_count [{}] ignore_quest_update [{}]",
+					"Discarding duplicate update for shared_task_id [{}] character_id [{}] task_id [{}] activity_id [{}] done_count [{}] ignore_quest_update [{}]",
 					shared_task->GetDbSharedTask().id,
 					source_character_id,
 					task_id,
@@ -810,10 +810,10 @@ void SharedTaskManager::PrintSharedTaskState()
 	for (auto &s: m_shared_tasks) {
 		auto task = GetSharedTaskDataByTaskId(s.GetDbSharedTask().task_id);
 
-		LogTasksDetail("[PrintSharedTaskState] # Shared Task");
+		LogTasksDetail("# Shared Task");
 
 		LogTasksDetail(
-			"[PrintSharedTaskState] shared_task_id [{}] task_id [{}] task_title [{}] member_count [{}] state_activity_count [{}]",
+			"shared_task_id [{}] task_id [{}] task_title [{}] member_count [{}] state_activity_count [{}]",
 			s.GetDbSharedTask().id,
 			task.id,
 			task.title,
@@ -821,12 +821,12 @@ void SharedTaskManager::PrintSharedTaskState()
 			s.GetActivityState().size()
 		);
 
-		LogTasksDetail("[PrintSharedTaskState] # Activities");
+		LogTasksDetail("# Activities");
 
 		// activity state
 		for (auto &a: s.m_shared_task_activity_state) {
 			LogTasksDetail(
-				"[PrintSharedTaskState] -- activity_id [{}] done_count [{}] max_done_count [{}] completed_time [{}]",
+				"-- activity_id [{}] done_count [{}] max_done_count [{}] completed_time [{}]",
 				a.activity_id,
 				a.done_count,
 				a.max_done_count,
@@ -834,22 +834,22 @@ void SharedTaskManager::PrintSharedTaskState()
 			);
 		}
 
-		LogTasksDetail("[PrintSharedTaskState] # Members");
+		LogTasksDetail("# Members");
 
 		// members
 		for (auto &m: s.m_members) {
 			LogTasksDetail(
-				"[PrintSharedTaskState] -- character_id [{}] is_leader [{}]",
+				"-- character_id [{}] is_leader [{}]",
 				m.character_id,
 				m.is_leader
 			);
 		}
 
-		LogTasksDetail("[PrintSharedTaskState] # Dynamic Zones");
+		LogTasksDetail("# Dynamic Zones");
 
 		for (auto &dz_id: s.dynamic_zone_ids) {
 			LogTasksDetail(
-				"[PrintSharedTaskState] -- dynamic_zone_id [{}]",
+				"-- dynamic_zone_id [{}]",
 				dz_id
 			);
 		}
@@ -897,7 +897,7 @@ void SharedTaskManager::MakeLeaderByPlayerName(SharedTask *s, const std::string 
 	std::vector<SharedTaskMember> members = s->GetMembers();
 	for (auto                     &m: members) {
 		LogTasksDetail(
-			"[MakeLeaderByPlayerName] character_id [{}] m.character_id [{}]",
+			"character_id [{}] m.character_id [{}]",
 			new_leader.character_id,
 			m.character_id
 		);
@@ -908,7 +908,7 @@ void SharedTaskManager::MakeLeaderByPlayerName(SharedTask *s, const std::string 
 		if (new_leader.character_id == m.character_id) {
 			found_new_leader = true;
 			LogTasksDetail(
-				"[MakeLeaderByPlayerName] shared_task_id [{}] character_name [{}]",
+				"shared_task_id [{}] character_name [{}]",
 				s->GetDbSharedTask().id,
 				character_name
 			);
@@ -1092,7 +1092,7 @@ SharedTask* SharedTaskManager::FindSharedTaskByDzId(uint32_t dz_id)
 void SharedTaskManager::QueueActiveInvitation(int64 shared_task_id, int64 character_id)
 {
 	LogTasksDetail(
-		"[QueueActiveInvitation] shared_task_id [{}] character_id [{}]",
+		"shared_task_id [{}] character_id [{}]",
 		shared_task_id,
 		character_id
 	);
@@ -1107,7 +1107,7 @@ void SharedTaskManager::QueueActiveInvitation(int64 shared_task_id, int64 charac
 bool SharedTaskManager::IsInvitationActive(uint32 shared_task_id, uint32 character_id)
 {
 	LogTasksDetail(
-		"[IsInvitationActive] shared_task_id [{}] character_id [{}]",
+		"shared_task_id [{}] character_id [{}]",
 		shared_task_id,
 		character_id
 	);
@@ -1124,7 +1124,7 @@ bool SharedTaskManager::IsInvitationActive(uint32 shared_task_id, uint32 charact
 void SharedTaskManager::RemoveActiveInvitation(int64 shared_task_id, int64 character_id)
 {
 	LogTasksDetail(
-		"[RemoveActiveInvitation] shared_task_id [{}] character_id [{}] pre_removal_count [{}]",
+		"shared_task_id [{}] character_id [{}] pre_removal_count [{}]",
 		shared_task_id,
 		character_id,
 		m_active_invitations.size()
@@ -1143,7 +1143,7 @@ void SharedTaskManager::RemoveActiveInvitation(int64 shared_task_id, int64 chara
 	);
 
 	LogTasksDetail(
-		"[RemoveActiveInvitation] shared_task_id [{}] character_id [{}] post_removal_count [{}]",
+		"shared_task_id [{}] character_id [{}] post_removal_count [{}]",
 		shared_task_id,
 		character_id,
 		m_active_invitations.size()
@@ -1721,7 +1721,7 @@ SharedTaskManager *SharedTaskManager::PurgeExpiredSharedTasks()
 	auto      now = std::time(nullptr);
 	for (auto &s: m_shared_tasks) {
 		if (s.GetDbSharedTask().expire_time > 0 && s.GetDbSharedTask().expire_time <= now) {
-			LogTasksDetail("[PurgeExpiredSharedTasks] Deleting expired task [{}]", s.GetDbSharedTask().id);
+			LogTasksDetail("Deleting expired task [{}]", s.GetDbSharedTask().id);
 			delete_tasks.push_back(s.GetDbSharedTask().id);
 		}
 	}
@@ -1773,11 +1773,11 @@ void SharedTaskManager::HandleCompletedTask(SharedTask* s)
 	auto db_task = s->GetDbSharedTask();
 	if (db_task.completion_time > 0)
 	{
-		LogTasksDetail("[HandleCompletedTask] shared task [{}] already completed", db_task.id);
+		LogTasksDetail("shared task [{}] already completed", db_task.id);
 		return;
 	}
 
-	LogTasksDetail("[HandleCompletedTask] Marking shared task [{}] completed", db_task.id);
+	LogTasksDetail("Marking shared task [{}] completed", db_task.id);
 	db_task.completion_time = std::time(nullptr);
 	db_task.is_locked = true;
 	SharedTasksRepository::UpdateOne(*m_database, db_task);

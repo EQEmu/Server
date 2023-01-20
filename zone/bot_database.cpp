@@ -16,8 +16,6 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-#ifdef BOTS
-
 #include "../common/data_verification.h"
 #include "../common/global_define.h"
 #include "../common/rulesys.h"
@@ -169,13 +167,18 @@ bool BotDatabase::LoadBotSpellCastingChances()
 /* Bot functions   */
 bool BotDatabase::QueryNameAvailablity(const std::string& bot_name, bool& available_flag)
 {
-	if (bot_name.empty() || bot_name.size() > 60 || !database.CheckUsedName(bot_name))
+	if (bot_name.empty() || bot_name.size() > 60 || !database.CheckUsedName(bot_name)) {
 		return false;
+	}
 
 	query = fmt::format(
-		"SELECT `id` FROM `vw_bot_character_mobs` WHERE `name` LIKE '{}' LIMIT 1",
+		"SELECT b.bot_id FROM bot_data b "
+		"INNER JOIN character_data c ON b.`name` = c.`name` "
+		"WHERE b.`name` LIKE '{0}' OR c.`name` LIKE '{0}' "
+		"LIMIT 1",
 		bot_name
 	);
+
 	auto results = database.QueryDatabase(query);
 	if (!results.Success()) {
 		return false;
@@ -972,70 +975,6 @@ bool BotDatabase::DeleteTimers(const uint32 bot_id)
 
 	return true;
 }
-
-bool BotDatabase::LoadGuildMembership(const uint32 bot_id, uint32& guild_id, uint8& guild_rank, std::string& guild_name)
-{
-	if (!bot_id)
-		return false;
-
-	query = StringFormat(
-		"SELECT"
-		" gm.`guild_id`,"
-		" gm.`rank`,"
-		" g.`name`"
-		" FROM `vw_guild_members` AS gm"
-		" JOIN `guilds` AS g"
-		" ON gm.`guild_id` = g.`id`"
-		" WHERE gm.`char_id` = '%u'"
-		" AND gm.`mob_type` = 'B'"
-		" LIMIT 1",
-		bot_id
-	);
-	auto results = database.QueryDatabase(query);
-	if (!results.Success())
-		return false;
-	if (!results.RowCount())
-		return true;
-
-	auto row = results.begin();
-	guild_id = atoi(row[0]);
-	guild_rank = atoi(row[1]);
-	guild_name = row[2];
-
-	return true;
-}
-
-bool BotDatabase::SaveGuildMembership(const uint32 bot_id, const uint32 guild_id, const uint8 guild_rank)
-{
-	if (!bot_id || !guild_id)
-		return false;
-
-	if (!DeleteGuildMembership(bot_id))
-		return false;
-
-	query = StringFormat("INSERT INTO `bot_guild_members` SET `bot_id` = '%u', `guild_id` = '%u', `rank` = '%u'", bot_id, guild_id, guild_rank);
-	auto results = database.QueryDatabase(query);
-	if (!results.Success()) {
-		DeleteGuildMembership(bot_id);
-		return false;
-	}
-
-	return true;
-}
-
-bool BotDatabase::DeleteGuildMembership(const uint32 bot_id)
-{
-	if (!bot_id)
-		return false;
-
-	query = StringFormat("DELETE FROM `bot_guild_members` WHERE `bot_id` = '%u'", bot_id);
-	auto results = database.QueryDatabase(query);
-	if (!results.Success())
-		return false;
-
-	return true;
-}
-
 
 /* Bot inventory functions   */
 bool BotDatabase::QueryInventoryCount(const uint32 bot_id, uint32& item_count)
@@ -2264,7 +2203,7 @@ bool BotDatabase::QueryBotGroupExistence(const std::string& group_name)
 	}
 
 	query = fmt::format(
-		"SELECT `group_name` FROM `vw_bot_groups` WHERE `group_name` = '{}' LIMIT 1",
+		"SELECT `group_name` FROM `bot_groups` WHERE `group_name` = '{}' LIMIT 1",
 		group_name
 	);
 
@@ -2604,7 +2543,11 @@ bool BotDatabase::LoadBotGroupIDForLoadBotGroup(const uint32 owner_id, const std
 	}
 
 	query = fmt::format(
-		"SELECT `groups_index`, `group_name` FROM `vw_bot_groups` WHERE `owner_id` = {}",
+		"SELECT groups_index, group_name FROM "
+		"bot_groups bg INNER JOIN bot_group_members bgm "
+		"ON bg.groups_index = bgm.groups_index "
+		"WHERE bgm.bot_id IN "
+		"(SELECT bot_id FROM bot_data WHERE WHERE owner_id = {})",
 		owner_id
 	);
 
@@ -2669,8 +2612,13 @@ bool BotDatabase::LoadBotGroupsListByOwnerID(const uint32 owner_id, std::list<st
 		return false;
 	}
 
+
 	query = fmt::format(
-		"SELECT `group_name`, `group_leader_name` FROM `vw_bot_groups` WHERE `owner_id` = {}",
+		"SELECT group_name, group_leader_name FROM "
+		"bot_groups bg INNER JOIN bot_group_members bgm "
+		"ON bg.groups_index = bgm.groups_index "
+		"WHERE bgm.bot_id IN "
+		"(SELECT bot_id FROM bot_data WHERE WHERE owner_id = {})",
 		owner_id
 	);
 
@@ -3180,9 +3128,6 @@ const char* BotDatabase::fail::DeleteStance() { return "Failed to delete stance"
 const char* BotDatabase::fail::LoadTimers() { return "Failed to load timers"; }
 const char* BotDatabase::fail::SaveTimers() { return "Failed to save timers"; }
 const char* BotDatabase::fail::DeleteTimers() { return "Failed to delete timers"; }
-const char* BotDatabase::fail::LoadGuildMembership() { return "Failed to load guild membership"; }
-const char* BotDatabase::fail::SaveGuildMembership() { return "Failed to save guild membership"; }
-const char* BotDatabase::fail::DeleteGuildMembership() { return "Failed to delete guild membership"; }
 
 /* fail::Bot inventory functions   */
 const char* BotDatabase::fail::QueryInventoryCount() { return "Failed to query inventory count"; }
@@ -3233,5 +3178,3 @@ const char* BotDatabase::fail::DeleteHealRotation() { return "Failed to delete h
 const char* BotDatabase::fail::DeleteAllHealRotations() { return "Failed to delete all heal rotations"; }
 
 /* fail::Bot miscellaneous functions   */
-
-#endif // BOTS

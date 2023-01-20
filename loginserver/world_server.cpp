@@ -80,7 +80,7 @@ void WorldServer::Reset()
 void WorldServer::ProcessNewLSInfo(uint16_t opcode, const EQ::Net::Packet &packet)
 {
 	LogNetcode(
-		"[ProcessNewLSInfo] Application packet received from server [{:#04x}] [Size: {}]\n{}",
+		"Application packet received from server [{:#04x}] [Size: {}]\n{}",
 		opcode,
 		packet.Length(),
 		packet.ToString()
@@ -125,7 +125,7 @@ void WorldServer::ProcessNewLSInfo(uint16_t opcode, const EQ::Net::Packet &packe
 void WorldServer::ProcessLSStatus(uint16_t opcode, const EQ::Net::Packet &packet)
 {
 	LogNetcode(
-		"[ProcessLSStatus] Application packet received from server [{:#04x}] [Size: {}]\n{}",
+		"Application packet received from server [{:#04x}] [Size: {}]\n{}",
 		opcode,
 		packet.Length(),
 		packet.ToString()
@@ -159,7 +159,7 @@ void WorldServer::ProcessLSStatus(uint16_t opcode, const EQ::Net::Packet &packet
 void WorldServer::ProcessUserToWorldResponseLegacy(uint16_t opcode, const EQ::Net::Packet &packet)
 {
 	LogNetcode(
-		"[ProcessUserToWorldResponseLegacy] Application packet received from server [{:#04x}] [Size: {}]\n{}",
+		"Application packet received from server [{:#04x}] [Size: {}]\n{}",
 		opcode,
 		packet.Length(),
 		packet.ToString()
@@ -255,7 +255,7 @@ void WorldServer::ProcessUserToWorldResponseLegacy(uint16_t opcode, const EQ::Ne
 void WorldServer::ProcessUserToWorldResponse(uint16_t opcode, const EQ::Net::Packet &packet)
 {
 	LogNetcode(
-		"[ProcessUserToWorldResponse] Application packet received from server [{:#04x}] [Size: {}]\n{}",
+		"Application packet received from server [{:#04x}] [Size: {}]\n{}",
 		opcode,
 		packet.Length(),
 		packet.ToString()
@@ -362,7 +362,7 @@ void WorldServer::ProcessUserToWorldResponse(uint16_t opcode, const EQ::Net::Pac
 void WorldServer::ProcessLSAccountUpdate(uint16_t opcode, const EQ::Net::Packet &packet)
 {
 	LogNetcode(
-		"[ProcessLSAccountUpdate] Application packet received from server [{:#04x}] [Size: {}]\n{}",
+		"Application packet received from server [{:#04x}] [Size: {}]\n{}",
 		opcode,
 		packet.Length(),
 		packet.ToString()
@@ -458,7 +458,7 @@ void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct *new_world_server_info
 
 		if (login_server_admin.loaded) {
 			LogDebug(
-				"WorldServer::Handle_NewLSInfo | Attempting to authenticate world admin... [{0}] ({1}) against worldserver [{2}]",
+				"Attempting to authenticate world admin... [{0}] ({1}) against worldserver [{2}]",
 				GetAccountName(),
 				login_server_admin.id,
 				GetServerShortName()
@@ -471,7 +471,7 @@ void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct *new_world_server_info
 				login_server_admin.account_password
 			)) {
 				LogDebug(
-					"WorldServer::Handle_NewLSInfo | Authenticating world admin... [{0}] ({1}) success! World ({2})",
+					"Authenticating world admin... [{0}] ({1}) success! World ({2})",
 					GetAccountName(),
 					login_server_admin.id,
 					GetServerShortName()
@@ -600,7 +600,7 @@ void WorldServer::SendClientAuth(
 	m_connection->Send(ServerOP_LSClientAuth, outapp);
 
 	LogNetcode(
-		"[ServerOP_LSClientAuth] Sending [{:#04x}] [Size: {}]\n{}",
+		"Sending [{:#04x}] [Size: {}]\n{}",
 		ServerOP_LSClientAuth,
 		outapp.Length(),
 		outapp.ToString()

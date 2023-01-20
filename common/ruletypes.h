@@ -585,9 +585,8 @@ RULE_INT(Range, CriticalDamage, 80, "The packet range in which critical hit mess
 RULE_INT(Range, MobCloseScanDistance, 600, "Close scan distance")
 RULE_CATEGORY_END()
 
-
-#ifdef BOTS
 RULE_CATEGORY(Bots)
+RULE_BOOL(Bots, Enabled, false, "Enable of disable bot functionality, default is false")
 RULE_INT(Bots, BotExpansionSettings, 16383, "Sets the expansion settings for bot use. Defaults to all expansions enabled up to TSS")
 RULE_BOOL(Bots, AllowCamelCaseNames, false, "Allows the use of 'MyBot' type names")
 RULE_BOOL(Bots, AllowBotEquipAnyRaceGear, false, "Allows Bots to wear Equipment even if their race is not valid")
@@ -616,7 +615,6 @@ RULE_BOOL(Bots, ResurrectionSickness, true, "Use Resurrection Sickness based on 
 RULE_INT(Bots, OldResurrectionSicknessSpell, 757, "757 is Default Old Resurrection Sickness Spell")
 RULE_INT(Bots, ResurrectionSicknessSpell, 756, "756 is Default Resurrection Sickness Spell")
 RULE_CATEGORY_END()
-#endif
 
 RULE_CATEGORY(Chat)
 RULE_BOOL(Chat, ServerWideOOC, true, "Enable server wide ooc-chat")
@@ -625,6 +623,7 @@ RULE_BOOL(Chat, EnableVoiceMacros, true, "Enable voice macros")
 RULE_BOOL(Chat, EnableMailKeyIPVerification, true, "Setting whether the authenticity of the client should be verified via its IP address when accessing the InGame mailbox")
 RULE_BOOL(Chat, EnableAntiSpam, true, "Enable anti-spam system for chat")
 RULE_BOOL(Chat, SuppressCommandErrors, false, "Do not suppress command errors by default")
+RULE_INT(Chat, MaxPermanentPlayerChannels, 0, "Maximum number of permanent chat channels a player can make. Default 0.")
 RULE_INT(Chat, MinStatusToBypassAntiSpam, 100, "Minimum status to bypass the anti-spam system")
 RULE_INT(Chat, MinimumMessagesPerInterval, 4, "Minimum number of chat messages allowed per interval. The karma value is added to this value")
 RULE_INT(Chat, MaximumMessagesPerInterval, 12, "Maximum value of chat messages allowed per interval")

@@ -911,9 +911,6 @@ int64 Merc::CalcMaxMana()
 			current_mana = curMana_cap;
 	}
 
-#if EQDEBUG >= 11
-	LogDebug("Merc::CalcMaxMana() called for [{}] - returning [{}]", GetName(), max_mana);
-#endif
 	return max_mana;
 }
 

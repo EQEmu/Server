@@ -408,9 +408,7 @@ namespace DatabaseSchema {
 			"bot_spell_settings",
 			"bot_spells_entries",
 			"bot_stances",
-			"bot_timers",
-			"vw_bot_character_mobs",
-			"vw_bot_groups"
+			"bot_timers"
 		};
 	}
 

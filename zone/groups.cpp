@@ -343,9 +343,9 @@ bool Group::AddMember(Mob* newmember, const char *NewMemberName, uint32 Characte
 
 	safe_delete(outapp);
 
-#ifdef BOTS
-	Bot::UpdateGroupCastingRoles(this);
-#endif
+	if (RuleB(Bots, Enabled)) {
+		Bot::UpdateGroupCastingRoles(this);
+	}
 
 	return true;
 }
@@ -524,9 +524,9 @@ bool Group::UpdatePlayer(Mob* update){
 	if (update->IsClient() && !mentoree && mentoree_name.length() && !mentoree_name.compare(update->GetName()))
 		mentoree = update->CastToClient();
 
-#ifdef BOTS
-	Bot::UpdateGroupCastingRoles(this);
-#endif
+	if (RuleB(Bots, Enabled)) {
+		Bot::UpdateGroupCastingRoles(this);
+	}
 
 	return updateSuccess;
 }
@@ -561,9 +561,9 @@ void Group::MemberZoned(Mob* removemob) {
 	if (removemob->IsClient() && removemob == mentoree)
 		mentoree = nullptr;
 
-#ifdef BOTS
-	Bot::UpdateGroupCastingRoles(this);
-#endif
+	if (RuleB(Bots, Enabled)) {
+		Bot::UpdateGroupCastingRoles(this);
+	}
 }
 
 void Group::SendGroupJoinOOZ(Mob* NewMember) {
@@ -782,9 +782,9 @@ bool Group::DelMember(Mob* oldmember, bool ignoresender)
 		ClearAllNPCMarks();
 	}
 
-#ifdef BOTS
-	Bot::UpdateGroupCastingRoles(this);
-#endif
+	if (RuleB(Bots, Enabled)) {
+		Bot::UpdateGroupCastingRoles(this);
+	}
 
 	return true;
 }
@@ -825,7 +825,7 @@ void Group::CastGroupSpell(Mob* caster, uint16 spell_id) {
 					caster->SpellOnTarget(spell_id, members[z]->GetPet());
 #endif
 			} else
-				LogSpells("[Group::CastGroupSpell] Group spell: [{}] is out of range [{}] at distance [{}] from [{}]", members[z]->GetName(), range, distance, caster->GetName());
+				LogSpells("Group spell: [{}] is out of range [{}] at distance [{}] from [{}]", members[z]->GetName(), range, distance, caster->GetName());
 		}
 	}
 
@@ -895,9 +895,9 @@ uint32 Group::GetTotalGroupDamage(Mob* other) {
 }
 
 void Group::DisbandGroup(bool joinraid) {
-#ifdef BOTS
-	Bot::UpdateGroupCastingRoles(this, true);
-#endif
+	if (RuleB(Bots, Enabled)) {
+		Bot::UpdateGroupCastingRoles(this, true);
+	}
 
 	auto outapp = new EQApplicationPacket(OP_GroupUpdate, sizeof(GroupUpdate_Struct));
 
@@ -990,7 +990,6 @@ void Group::GetClientList(std::list<Client*>& client_list, bool clear_list)
 	}
 }
 
-#ifdef BOTS
 void Group::GetBotList(std::list<Bot*>& bot_list, bool clear_list)
 {
 	if (clear_list)
@@ -1001,7 +1000,6 @@ void Group::GetBotList(std::list<Bot*>& bot_list, bool clear_list)
 			bot_list.push_back(bot_iter->CastToBot());
 	}
 }
-#endif
 
 bool Group::Process() {
 	if(disbandcheck && !GroupCount())

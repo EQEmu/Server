@@ -1919,7 +1919,7 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
     }
 
     if(results.ColumnCount() <= SPELL_LOAD_FIELD_COUNT) {
-		LogSpells("[SharedDatabase::LoadSpells] Fatal error loading spells: Spell field count < SPELL_LOAD_FIELD_COUNT([{}])", SPELL_LOAD_FIELD_COUNT);
+		LogSpells("Fatal error loading spells: Spell field count < SPELL_LOAD_FIELD_COUNT([{}])", SPELL_LOAD_FIELD_COUNT);
 		return;
     }
 
@@ -1928,9 +1928,9 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
     for (auto& row = results.begin(); row != results.end(); ++row) {
 	    const int tempid = atoi(row[0]);
         if(tempid >= max_spells) {
-      LogSpells("[SharedDatabase::LoadSpells] Non fatal error: spell.id >= max_spells, ignoring");
-            continue;
-        }
+			LogSpells("Non fatal error: spell.id >= max_spells, ignoring");
+			continue;
+		}
 
         ++counter;
         sp[tempid].id = tempid;
