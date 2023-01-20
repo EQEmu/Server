@@ -84,14 +84,20 @@ public:
 	void SendAllChannels(Client *c);
 	void Process();
 	static inline std::vector<std::string> GetBlockedChannelNames() { return m_blocked_channel_names; }
+	static inline std::vector<std::string> GetFilteredNames() { return m_filtered_names; }
 	static inline void ClearChannelBlockList() { m_blocked_channel_names.clear(); };
+	static inline void ClearFilteredNameList() { m_filtered_names.clear(); };
 	static void AddToChannelBlockList(const std::string& channel_name);
+	static void AddToFilteredNames(const std::string& name);
 	static bool IsOnChannelBlockList(const std::string& channel_name);
+	static bool IsOnFilteredNameList(const std::string& channel_name);
 	static inline void SetChannelBlockList(std::vector<std::string> new_list) { m_blocked_channel_names = new_list; }
+	static inline void SetFilteredNameList(std::vector<std::string> new_list) { m_filtered_names = new_list; }
 private:
 
 	LinkedList<ChatChannel*> ChatChannels;
 	static inline std::vector<std::string> m_blocked_channel_names;
+	static inline std::vector<std::string> m_filtered_names;
 
 };
 

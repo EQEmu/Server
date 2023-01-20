@@ -264,6 +264,22 @@ void UCSDatabase::LoadReservedNamesFromDB()
 	LogInfo("Loaded [{}] reserved channel name(s)", channels.size());
 }
 
+void UCSDatabase::LoadFilteredNamesFromDB()
+{
+	ChatChannelList::ClearFilteredNameList();
+
+	auto names = NameFilterRepository::All(*this);
+	if (names.empty()) {
+		LogDebug("No filtered names exist in the database...");
+	}
+
+	for (const auto& e : names) {
+		ChatChannelList::AddToFilteredNames(e.name);
+	}
+
+	LogInfo("Loaded [{}] filtered channel name(s)", names.size());
+}
+
 bool UCSDatabase::IsChatChannelInDB(const std::string& channel_name)
 {
 	auto r = ChatchannelsRepository::Count(
@@ -362,11 +378,9 @@ bool UCSDatabase::CheckChannelNameFilter(const std::string& channel_name)
 {
 	LogDebug("Checking if [{}] is on the name filter", channel_name);
 
-	// TODO: This should potentially just be pulled into memory at some other point
-	// This if fine for now
-	for (auto &e: NameFilterRepository::All(*this)) {
-		if (Strings::Contains(Strings::ToLower(channel_name), Strings::ToLower(e.name))) {
-			LogInfo("Failed to pass name filter check for [{}] against word [{}]", channel_name, e.name);
+	for (const auto &e: ChatChannelList::GetFilteredNames()) {
+		if (Strings::Contains(Strings::ToLower(channel_name), Strings::ToLower(e))) {
+			LogInfo("Failed to pass name filter check for [{}] against word [{}]", channel_name, e);
 			return false;
 		}
 	}

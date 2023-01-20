@@ -45,6 +45,7 @@ public:
 	bool GetVariable(const char* varname, char* varvalue, uint16 varvalue_len);
 	bool LoadChatChannels();
 	void LoadReservedNamesFromDB();
+	void LoadFilteredNamesFromDB();
 	bool IsChatChannelInDB(const std::string& channel_name);
 	bool CheckChannelNameFilter(const std::string& channel_name);
 	void SaveChatChannel(const std::string& channel_name, const std::string& channel_owner, const std::string& channel_password, const uint16& min_status);
