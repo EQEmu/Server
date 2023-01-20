@@ -1,4 +1,4 @@
-Try
+try
 {
 #    $cwd = Get-Location
 #
@@ -21,14 +21,14 @@ Try
 #
 #    7z a eqemu-server-windows-x64.zip $cwd\win-build-x64\bin\RelWithDebInfo\*.exe $cwd\win-build-x64\bin\RelWithDebInfo\*.dll $cwd\win-build-x64\bin\RelWithDebInfo\*.pdb $cwd\win-build-x64\libs\zlibng\RelWithDebInfo\*.dll $cwd\win-build-x64\libs\zlibng\RelWithDebInfo\*.pdb
 
-    .\utils\scripts\build\should-release\should-release.exe
+    .\utils\scripts\build\should-release\should-release.exe | exit
 
 #    dir *.zip
 #    rclone config create remote ftp env_auth true
 #    rclone copy eqemu-server-windows-x64.zip remote:
 #    rclone ls remote:
 }
-Catch
+finally
 {
     Write-Host ("Caught signal to end")
 }
