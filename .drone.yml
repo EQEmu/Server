@@ -37,7 +37,10 @@ trigger:
 
 kind: pipeline
 type: docker
-name: Build Linux Binaries
+name: Build Linux
+
+clone:
+  depth: 1
 
 # Limits how many of these builds can run on the drone runner at a time, this isn't about cores
 concurrency:
@@ -72,7 +75,7 @@ trigger:
 
 kind: pipeline
 type: exec
-name: Build Windows Binaries
+name: Build Windows
 
 clone:
   depth: 1
@@ -129,8 +132,8 @@ steps:
         rclone delete remote: --include "eqemu-server*.zip"
 
 depends_on:
-  - Build Windows Binaries
-  - Build Linux Binaries
+  - Build Windows
+  - Build Linux
 
 trigger:
   branch:
