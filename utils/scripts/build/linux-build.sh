@@ -12,6 +12,9 @@ mkdir -p build && cd build && cmake -DEQEMU_BUILD_TESTS=ON -DEQEMU_BUILD_LOGIN=O
 curl https://raw.githubusercontent.com/Akkadius/eqemu-install-v2/master/eqemu_config.json --output eqemu_config.json
 ./bin/tests
 
+# shellcheck disable=SC2164
+cd /drone/src/
+
 chmod +x ./utils/scripts/build/should-release/should-release
 ./utils/scripts/build/should-release/should-release || exit
 
