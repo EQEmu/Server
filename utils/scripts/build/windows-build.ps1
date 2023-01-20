@@ -28,7 +28,7 @@ try
 #    rclone copy eqemu-server-windows-x64.zip remote:
 #    rclone ls remote:
 }
-finally
+catch
 {
     Write-Host ("Caught signal to end")
 }
