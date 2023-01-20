@@ -122,7 +122,7 @@ steps:
       GITHUB_TOKEN:
         from_secret: GH_RELEASE_GITHUB_API_TOKEN
     commands:
-      - .\utils\scripts\build\build-release.bat
+      - .\utils\scripts\build\windows-build.ps1
 
 trigger:
   branch:
