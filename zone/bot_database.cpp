@@ -174,7 +174,7 @@ bool BotDatabase::QueryNameAvailablity(const std::string& bot_name, bool& availa
 	query = fmt::format(
 		"SELECT b.bot_id FROM bot_data b "
 		"INNER JOIN character_data c ON b.`name` = c.`name` "
-		"WHERE b.`name` LIKE '{}' OR c.`name` LIKE '{}' "
+		"WHERE b.`name` LIKE '{0}' OR c.`name` LIKE '{0}' "
 		"LIMIT 1",
 		bot_name
 	);
