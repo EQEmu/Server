@@ -32,8 +32,6 @@
 
 */
 
-#ifdef BOTS
-
 #include <string.h>
 #include <stdlib.h>
 #include <sstream>
@@ -10824,5 +10822,3 @@ void bot_command_enforce_spell_list(Client* c, const Seperator *sep)
 		).c_str()
 	);
 }
-
-#endif // BOTS

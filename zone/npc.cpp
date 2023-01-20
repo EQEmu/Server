@@ -43,9 +43,7 @@
 #include "water_map.h"
 #include "npc_scale_manager.h"
 
-#ifdef BOTS
 #include "bot.h"
-#endif
 
 #include <cctype>
 #include <stdio.h>
@@ -320,11 +318,9 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 	if (!EQ::ValueWithin(npc_type_data->npc_spells_id, EQ::constants::BotSpellIDs::Warrior, EQ::constants::BotSpellIDs::Berserker)) {
 		AI_Init();
 		AI_Start();
-#ifdef BOTS
 	} else {
 		CastToBot()->AI_Bot_Init();
 		CastToBot()->AI_Bot_Start();
-#endif
 	}
 
 	d_melee_texture1 = npc_type_data->d_melee_texture1;
@@ -1120,11 +1116,9 @@ void NPC::Depop(bool start_spawn_timer) {
 	if (IsNPC()) {
 		parse->EventNPC(EVENT_DESPAWN, this, nullptr, "", 0);
 		DispatchZoneControllerEvent(EVENT_DESPAWN_ZONE, this, "", 0, nullptr);
-#ifdef BOTS
 	} else if (IsBot()) {
 		parse->EventBot(EVENT_DESPAWN, CastToBot(), nullptr, "", 0);
 		DispatchZoneControllerEvent(EVENT_DESPAWN_ZONE, this, "", 0, nullptr);
-#endif
 	}
 
 	p_depop = true;

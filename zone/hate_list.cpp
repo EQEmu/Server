@@ -383,19 +383,10 @@ Mob *HateList::GetEntWithMostHateOnList(Mob *center, Mob *skip, bool skip_mezzed
 
 			int64 current_hate = cur->stored_hate_amount;
 
-#ifdef BOTS
 			if (cur->entity_on_hatelist->IsClient() || cur->entity_on_hatelist->IsBot()){
-
 				if (cur->entity_on_hatelist->IsClient() && cur->entity_on_hatelist->CastToClient()->IsSitting()){
 					aggro_mod += RuleI(Aggro, SittingAggroMod);
 				}
-#else
-			if (cur->entity_on_hatelist->IsClient()){
-
-				if (cur->entity_on_hatelist->CastToClient()->IsSitting()){
-					aggro_mod += RuleI(Aggro, SittingAggroMod);
-				}
-#endif
 
 				if (center){
 					if (center->GetTarget() == cur->entity_on_hatelist)
@@ -445,14 +436,12 @@ Mob *HateList::GetEntWithMostHateOnList(Mob *center, Mob *skip, bool skip_mezzed
 
 		if (top_client_type_in_range != nullptr && top_hate != nullptr) {
 			bool isTopClientType = top_hate->IsClient();
-#ifdef BOTS
 			if (!isTopClientType) {
 				if (top_hate->IsBot()) {
 					isTopClientType = true;
 					top_client_type_in_range = top_hate;
 				}
 			}
-#endif //BOTS
 
 			if (!isTopClientType) {
 				if (top_hate->IsMerc()) {
@@ -850,7 +839,6 @@ void HateList::RemoveStaleEntries(int time_ms, float dist)
 	}
 }
 
-#ifdef BOTS
 Bot* HateList::GetRandomBotOnHateList(bool skip_mezzed)
 {
 	int count = list.size();
@@ -899,7 +887,6 @@ Bot* HateList::GetRandomBotOnHateList(bool skip_mezzed)
 
 	return nullptr;
 }
-#endif
 
 Client* HateList::GetRandomClientOnHateList(bool skip_mezzed)
 {

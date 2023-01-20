@@ -31,9 +31,7 @@
 
 #include <string>
 
-#ifdef BOTS
 #include "bot.h"
-#endif
 
 #ifndef WIN32
 #include <stdlib.h>
@@ -198,10 +196,8 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 			act_power = CastToClient()->GetFocusEffect(focusPetPower, spell_id);//Client only
 			act_power = CastToClient()->mod_pet_power(act_power, spell_id);
 		}
-#ifdef BOTS
 		else if (IsBot())
 			act_power = CastToBot()->GetFocusEffect(focusPetPower, spell_id);
-#endif
 	}
 	else if (petpower > 0)
 		act_power = petpower;
@@ -231,11 +227,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 	memcpy(npc_type, base, sizeof(NPCType));
 
 	// If pet power is set to -1 in the DB, use stat scaling
-	if ((IsClient()
-#ifdef BOTS
-		|| IsBot()
-#endif
-		) && record.petpower == -1)
+	if ((IsClient() || IsBot()) && record.petpower == -1)
 	{
 		float scale_power = (float)act_power / 100.0f;
 		if(scale_power > 0)

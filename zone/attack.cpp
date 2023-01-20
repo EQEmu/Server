@@ -36,15 +36,9 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "mob.h"
 #include "npc.h"
 
-
-#include <assert.h>
-#include <stdio.h>
 #include <stdlib.h>
-#include <boost/concept_check.hpp>
 
-#ifdef BOTS
 #include "bot.h"
-#endif
 
 extern QueryServ* QServ;
 extern WorldServer worldserver;
@@ -921,11 +915,7 @@ int Mob::ACSum(bool skip_caps)
 	if (ac < 0)
 		ac = 0;
 
-	if (!skip_caps && (IsClient()
-#ifdef BOTS
-		|| IsBot()
-#endif
-	)) {
+	if (!skip_caps && (IsClient() || IsBot())) {
 		auto softcap = GetACSoftcap();
 		auto returns = GetSoftcapReturns();
 		int total_aclimitmod = aabonuses.CombatStability + itembonuses.CombatStability + spellbonuses.CombatStability;
@@ -1455,7 +1445,6 @@ void Mob::DoAttack(Mob *other, DamageHitInfo &hit, ExtraAttackOptions *opts, boo
 			hit.damage_done = 0;
 		}
 
-#ifdef BOTS
 		if (IsBot()) {
 			const auto export_string = fmt::format(
 				"{} {}",
@@ -1464,7 +1453,6 @@ void Mob::DoAttack(Mob *other, DamageHitInfo &hit, ExtraAttackOptions *opts, boo
 			);
 			parse->EventBot(EVENT_USE_SKILL, CastToBot(), nullptr, export_string, 0);
 		}
-#endif
 	}
 }
 
@@ -1820,11 +1808,9 @@ bool Client::Death(Mob* killerMob, int64 damage, uint16 spell, EQ::skills::Skill
 			}
 
 			killerMob->TrySpellOnKill(killed_level, spell);
-#ifdef BOTS
 		} else if (killerMob->IsBot()) {
 			parse->EventBot(EVENT_SLAY, killerMob->CastToBot(), this, "", 0);
 			killerMob->TrySpellOnKill(killed_level, spell);
-#endif
 		}
 
 		if (
@@ -1910,10 +1896,8 @@ bool Client::Death(Mob* killerMob, int64 damage, uint16 spell, EQ::skills::Skill
 			exploss = 0;
 		} else if (killerMob->GetOwner() && killerMob->GetOwner()->IsClient()) {
 			exploss = 0;
-#ifdef BOTS
 		} else if (killerMob->IsBot()) {
 			exploss = 0;
-#endif
 		}
 	}
 
@@ -2362,7 +2346,6 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 
 			return false;
 		}
-#ifdef BOTS
 	} else if (IsBot()) {
 		if (parse->EventBot(EVENT_DEATH, CastToBot(), oos, export_string, 0) != 0) {
 			if (GetHP() < 0) {
@@ -2371,7 +2354,6 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 
 			return false;
 		}
-#endif
 	}
 
 	if (killer_mob && (killer_mob->IsClient() || killer_mob->IsBot()) && (spell != SPELL_UNKNOWN) && damage > 0) {
@@ -2466,11 +2448,9 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 
 		give_exp = give_exp->GetUltimateOwner();
 
-#ifdef BOTS
 		if (!RuleB(Bots, BotGroupXP) && !ownerInGroup) {
 			give_exp = nullptr;
 		}
-#endif //BOTS
 	}
 
 	if (give_exp && give_exp->IsTempPet() && give_exp->IsPetOwnerClient()) {
@@ -2778,12 +2758,10 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 		}
 	}
 
-#ifdef BOTS
 	if (killer_mob->IsBot()) {
 		parse->EventBot(EVENT_NPC_SLAY, killer_mob->CastToBot(), this, "", 0);
 		killer_mob->TrySpellOnKill(killed_level, spell);
 	}
-#endif
 
 	WipeHateList();
 	p_depop = true;
@@ -2918,32 +2896,33 @@ void Mob::AddToHateList(Mob* other, int64 hate /*= 0*/, int64 damage /*= 0*/, bo
 	if (other->IsClient() && !on_hatelist && !IsOnFeignMemory(other))
 		other->CastToClient()->AddAutoXTarget(this);
 
-#ifdef BOTS
 	// if other is a bot, add the bots client to the hate list
-	while (other->IsBot()) {
+	if (RuleB(Bots, Enabled)) {
+		while (other->IsBot()) {
 
-		auto other_ = other->CastToBot();
-		if (!other_ || !other_->GetBotOwner()) {
+			auto other_ = other->CastToBot();
+			if (!other_ || !other_->GetBotOwner()) {
+				break;
+			}
+
+			auto owner_ = other_->GetBotOwner()->CastToClient();
+			if (!owner_ || owner_->IsDead() ||
+				!owner_->InZone()) { // added isdead and inzone checks to avoid issues in AddAutoXTarget(...) below
+				break;
+			}
+
+			if (owner_->GetFeigned()) {
+				AddFeignMemory(owner_);
+			}
+			else if (!hate_list.IsEntOnHateList(owner_)) {
+
+				hate_list.AddEntToHateList(owner_, 0, 0, false, true);
+				owner_->AddAutoXTarget(this); // this was being called on dead/out-of-zone clients
+			}
+
 			break;
 		}
-
-		auto owner_ = other_->GetBotOwner()->CastToClient();
-		if (!owner_ || owner_->IsDead() || !owner_->InZone()) { // added isdead and inzone checks to avoid issues in AddAutoXTarget(...) below
-			break;
-		}
-
-		if (owner_->GetFeigned()) {
-			AddFeignMemory(owner_);
-		}
-		else if (!hate_list.IsEntOnHateList(owner_)) {
-
-			hate_list.AddEntToHateList(owner_, 0, 0, false, true);
-			owner_->AddAutoXTarget(this); // this was being called on dead/out-of-zone clients
-		}
-
-		break;
 	}
-#endif //BOTS
 
 	// if other is a merc, add the merc client to the hate list
 	if (other->IsMerc()) {
@@ -4771,12 +4750,10 @@ void Mob::TryCriticalHit(Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *
 		return;
 	}
 
-#ifdef BOTS
 	if (IsPet() && GetOwner() && GetOwner()->IsBot()) {
 		TryPetCriticalHit(defender, hit);
 		return;
 	}
-#endif // BOTS
 
 	if (IsNPC() && !RuleB(Combat, NPCCanCrit))
 		return;
@@ -5247,12 +5224,10 @@ void Mob::ApplyDamageTable(DamageHitInfo &hit)
 #endif
 
 	// someone may want to add this to custom servers, can remove this if that's the case
-	if (!IsClient()
-#ifdef BOTS
-		&& !IsBot()
-#endif
-		)
+	if (!IsClient()&& !IsBot()) {
 		return;
+	}
+
 	// this was parsed, but we do see the min of 10 and the normal minus factor is 105, so makes sense
 	if (hit.offense < 115)
 		return;

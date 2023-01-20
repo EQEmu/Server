@@ -13,7 +13,7 @@ void command_level(Client *c, const Seperator *sep)
 		c->Message(Chat::White, "You must have a target to use this command.");
 		return;
 	}
-	
+
 	auto level = static_cast<uint8>(std::stoul(sep->arg[1]));
 	auto max_level = static_cast<uint8>(RuleI(Character, MaxLevel));
 
@@ -41,11 +41,8 @@ void command_level(Client *c, const Seperator *sep)
 	if (target->IsClient()) {
 		target->CastToClient()->SendLevelAppearance();
 
-#ifdef BOTS
-		if (RuleB(Bots, BotLevelsWithOwner)) {
+		if (RuleB(Bots, Enabled) && RuleB(Bots, BotLevelsWithOwner)) {
 			Bot::LevelBotWithClient(target->CastToClient(), level, true);
 		}
-#endif
-
 	}
 }

@@ -40,14 +40,14 @@ Assuming it is starting in c:/projects/eqemu and the x64 dependencies were extra
 
 	mkdir build
 	cd build
-	cmake -G "Visual Studio 15 2017 Win64" -DEQEMU_BUILD_TESTS=ON -DEQEMU_BUILD_LOGIN=ON -DEQEMU_BUILD_ZLIB=ON -DEQEMU_ENABLE_BOTS=ON -DCMAKE_TOOLCHAIN_FILE="c:/projects/eqemu/vcpkg/vcpkg-export-20180828-145455/scripts/buildsystems/vcpkg.cmake" ..
+	cmake -G "Visual Studio 15 2017 Win64" -DEQEMU_BUILD_TESTS=ON -DEQEMU_BUILD_LOGIN=ON -DEQEMU_BUILD_ZLIB=ON -DCMAKE_TOOLCHAIN_FILE="c:/projects/eqemu/vcpkg/vcpkg-export-20180828-145455/scripts/buildsystems/vcpkg.cmake" ..
 
 ##### Linux
 Similarly to Windows running CMake on Linux is simple it just omits the toolchain file and uses a different generator.
 
 	mkdir build
 	cd build
-	cmake -G "Unix Makefiles" -DEQEMU_BUILD_TESTS=ON -DEQEMU_ENABLE_BOTS=ON -DEQEMU_BUILD_LOGIN=ON ..
+	cmake -G "Unix Makefiles" -DEQEMU_BUILD_TESTS=ON -DEQEMU_BUILD_LOGIN=ON ..
 
 ### Building
 

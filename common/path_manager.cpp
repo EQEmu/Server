@@ -20,7 +20,14 @@ void PathManager::LoadPaths()
 {
 	m_server_path = File::FindEqemuConfigPath();
 
-	std::filesystem::current_path(m_server_path);
+	if (!m_server_path.empty()) {
+		std::filesystem::current_path(m_server_path);
+	}
+
+	if (m_server_path.empty()) {
+		LogInfo("Failed to load server path");
+		return;
+	}
 
 	LogInfo("server [{}]", m_server_path);
 

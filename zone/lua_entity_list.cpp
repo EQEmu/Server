@@ -17,9 +17,7 @@
 #include "lua_raid.h"
 #include "lua_spawn.h"
 
-#ifdef BOTS
 #include "lua_bot.h"
-#endif
 
 struct Lua_Mob_List {
 	std::vector<Lua_Mob> entries;
@@ -33,11 +31,9 @@ struct Lua_Client_List {
 	std::vector<Lua_Client> entries;
 };
 
-#ifdef BOTS
 struct Lua_Bot_List {
 	std::vector<Lua_Bot> entries;
 };
-#endif
 
 struct Lua_Corpse_List {
 	std::vector<Lua_Corpse> entries;
@@ -374,7 +370,6 @@ Lua_Client_List Lua_EntityList::GetClientList() {
 	return ret;
 }
 
-#ifdef BOTS
 Lua_Bot Lua_EntityList::GetBotByID(uint32 bot_id) {
 	Lua_Safe_Call_Class(Lua_Bot);
 	return Lua_Bot(self->GetBotByBotID(bot_id));
@@ -484,7 +479,6 @@ void Lua_EntityList::SignalBotByBotName(std::string bot_name, int signal_id) {
 	Lua_Safe_Call_Void();
 	self->SignalBotByBotName(bot_name, signal_id);
 }
-#endif
 
 Lua_Client_List Lua_EntityList::GetShuffledClientList() {
 	Lua_Safe_Call_Class(Lua_Client_List);
@@ -628,7 +622,6 @@ void Lua_EntityList::Marquee(uint32 type, uint32 priority, uint32 fade_in, uint3
 	self->Marquee(type, priority, fade_in, fade_out, duration, message);
 }
 
-#ifdef BOTS
 Lua_Bot Lua_EntityList::GetRandomBot() {
 	Lua_Safe_Call_Class(Lua_Bot);
 	return self->GetRandomBot();
@@ -643,7 +636,6 @@ Lua_Bot Lua_EntityList::GetRandomBot(float x, float y, float z, float distance, 
 	Lua_Safe_Call_Class(Lua_Bot);
 	return self->GetRandomBot(glm::vec3(x, y, z), distance, exclude_bot);
 }
-#endif
 
 luabind::scope lua_register_entity_list() {
 	return luabind::class_<Lua_EntityList>("EntityList")
@@ -660,7 +652,6 @@ luabind::scope lua_register_entity_list() {
 	.def("Fighting", (bool(Lua_EntityList::*)(Lua_Mob))&Lua_EntityList::Fighting)
 	.def("FilteredMessageClose", &Lua_EntityList::FilteredMessageClose)
 	.def("FindDoor", (Lua_Door(Lua_EntityList::*)(uint32))&Lua_EntityList::FindDoor)
-#ifdef BOTS
 	.def("GetBotByID", (Lua_Bot(Lua_EntityList::*)(uint32))&Lua_EntityList::GetBotByID)
 	.def("GetBotByName", (Lua_Bot(Lua_EntityList::*)(std::string))&Lua_EntityList::GetBotByName)
 	.def("GetBotList", (Lua_Bot_List(Lua_EntityList::*)(void))&Lua_EntityList::GetBotList)
@@ -670,7 +661,6 @@ luabind::scope lua_register_entity_list() {
 	.def("GetBotListByCharacterID", (Lua_Bot_List(Lua_EntityList::*)(uint32,uint8))&Lua_EntityList::GetBotListByCharacterID)
 	.def("GetBotListByClientName", (Lua_Bot_List(Lua_EntityList::*)(std::string))&Lua_EntityList::GetBotListByClientName)
 	.def("GetBotListByClientName", (Lua_Bot_List(Lua_EntityList::*)(std::string,uint8))&Lua_EntityList::GetBotListByClientName)
-#endif
 	.def("GetClientByAccID", (Lua_Client(Lua_EntityList::*)(uint32))&Lua_EntityList::GetClientByAccID)
 	.def("GetClientByCharID", (Lua_Client(Lua_EntityList::*)(uint32))&Lua_EntityList::GetClientByCharID)
 	.def("GetClientByID", (Lua_Client(Lua_EntityList::*)(int))&Lua_EntityList::GetClientByID)
@@ -703,11 +693,9 @@ luabind::scope lua_register_entity_list() {
 	.def("GetObjectList", (Lua_Object_List(Lua_EntityList::*)(void))&Lua_EntityList::GetObjectList)
 	.def("GetRaidByClient", (Lua_Raid(Lua_EntityList::*)(Lua_Client))&Lua_EntityList::GetRaidByClient)
 	.def("GetRaidByID", (Lua_Raid(Lua_EntityList::*)(int))&Lua_EntityList::GetRaidByID)
-#ifdef BOTS
 	.def("GetRandomBot", (Lua_Bot(Lua_EntityList::*)(void))&Lua_EntityList::GetRandomBot)
 	.def("GetRandomBot", (Lua_Bot(Lua_EntityList::*)(float,float,float,float))&Lua_EntityList::GetRandomBot)
 	.def("GetRandomBot", (Lua_Bot(Lua_EntityList::*)(float,float,float,float,Lua_Bot))&Lua_EntityList::GetRandomBot)
-#endif
 	.def("GetRandomClient", (Lua_Client(Lua_EntityList::*)(void))&Lua_EntityList::GetRandomClient)
 	.def("GetRandomClient", (Lua_Client(Lua_EntityList::*)(float,float,float,float))&Lua_EntityList::GetRandomClient)
 	.def("GetRandomClient", (Lua_Client(Lua_EntityList::*)(float,float,float,float,Lua_Client))&Lua_EntityList::GetRandomClient)
@@ -737,15 +725,11 @@ luabind::scope lua_register_entity_list() {
 	.def("RemoveFromTargets", (void(Lua_EntityList::*)(Lua_Mob, bool))&Lua_EntityList::RemoveFromTargets)
 	.def("RemoveNumbers", (std::string(Lua_EntityList::*)(const char*))&Lua_EntityList::RemoveNumbers)
 	.def("ReplaceWithTarget", (void(Lua_EntityList::*)(Lua_Mob, Lua_Mob))&Lua_EntityList::ReplaceWithTarget)
-#ifdef BOTS
 	.def("SignalAllBotsByOwnerCharacterID", (void(Lua_EntityList::*)(uint32, int))&Lua_EntityList::SignalAllBotsByOwnerCharacterID)
 	.def("SignalAllBotsByOwnerName", (void(Lua_EntityList::*)(std::string, int))&Lua_EntityList::SignalAllBotsByOwnerName)
-#endif
 	.def("SignalAllClients", (void(Lua_EntityList::*)(int))&Lua_EntityList::SignalAllClients)
-#ifdef BOTS
 	.def("SignalBotByBotID", (void(Lua_EntityList::*)(uint32, int))&Lua_EntityList::SignalBotByBotID)
 	.def("SignalBotByBotName", (void(Lua_EntityList::*)(std::string, int))&Lua_EntityList::SignalBotByBotName)
-#endif
 	.def("SignalMobsByNPCID", (void(Lua_EntityList::*)(uint32, int))&Lua_EntityList::SignalMobsByNPCID);
 }
 
@@ -759,12 +743,10 @@ luabind::scope lua_register_client_list() {
 	.def_readwrite("entries", &Lua_Client_List::entries, luabind::return_stl_iterator);
 }
 
-#ifdef BOTS
 luabind::scope lua_register_bot_list() {
 	return luabind::class_<Lua_Bot_List>("BotList")
 	.def_readwrite("entries", &Lua_Bot_List::entries, luabind::return_stl_iterator);
 }
-#endif
 
 luabind::scope lua_register_npc_list() {
 	return luabind::class_<Lua_NPC_List>("NPCList")

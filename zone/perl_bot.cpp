@@ -1,4 +1,3 @@
-#ifdef BOTS
 #include "../common/features.h"
 #ifdef EMBPERL_XS_CLASSES
 #include "../common/global_define.h"
@@ -470,5 +469,3 @@ void perl_register_bot()
 }
 
 #endif //EMBPERL_XS_CLASSES
-#endif //BOTS
-

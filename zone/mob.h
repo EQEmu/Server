@@ -36,9 +36,7 @@
 #include <vector>
 #include <memory>
 
-#ifdef BOTS
 #include "heal_rotation.h"
-#endif
 
 char* strn0cpy(char* dest, const char* source, uint32 size);
 
@@ -725,9 +723,7 @@ public:
 	Mob* GetHateRandom() { return hate_list.GetRandomEntOnHateList();}
 	Client* GetHateRandomClient() { return hate_list.GetRandomClientOnHateList(); }
 	NPC* GetHateRandomNPC() { return hate_list.GetRandomNPCOnHateList(); }
-#ifdef BOTS
 	Bot* GetHateRandomBot() { return hate_list.GetRandomBotOnHateList(); }
-#endif
 	Mob* GetHateMost() { return hate_list.GetEntWithMostHateOnList();}
 	Mob* GetHateClosest() { return hate_list.GetClosestEntOnHateList(this); }
 	bool IsEngaged() { return(!hate_list.IsHateListEmpty()); }
@@ -1437,7 +1433,6 @@ public:
 
 	int DispatchZoneControllerEvent(QuestEventID evt, Mob* init, const std::string& data, uint32 extra, std::vector<std::any>* pointers);
 
-#ifdef BOTS
 	// Bots HealRotation methods
 	bool IsHealRotationTarget() { return (m_target_of_heal_rotation.use_count() && m_target_of_heal_rotation.get()); }
 	bool JoinHealRotationTargetPool(std::shared_ptr<HealRotation>* heal_rotation);
@@ -1454,7 +1449,6 @@ public:
 	// not Bots HealRotation methods
 	void SetManualFollow(bool flag) { m_manual_follow = flag; }
 	bool GetManualFollow() const { return m_manual_follow; }
-#endif
 
 protected:
 	void CommonDamage(Mob* other, int64 &damage, const uint16 spell_id, const EQ::skills::SkillType attack_skill, bool &avoidable, const int8 buffslot, const bool iBuffTic, eSpecialAttacks specal = eSpecialAttacks::None);
@@ -1597,10 +1591,7 @@ protected:
 	virtual float GetDefensiveProcChances(float &ProcBonus, float &ProcChance, uint16 hand = EQ::invslot::slotPrimary, Mob *on = nullptr);
 	virtual float GetSkillProcChances(uint16 ReuseTime, uint16 hand = 0); // hand = MainCharm?
 	uint16 GetWeaponSpeedbyHand(uint16 hand);
-#ifdef BOTS
-	virtual
-#endif
-	int GetBaseSkillDamage(EQ::skills::SkillType skill, Mob *target = nullptr);
+	virtual int GetBaseSkillDamage(EQ::skills::SkillType skill, Mob *target = nullptr);
 	virtual int64 GetFocusEffect(focusType type, uint16 spell_id, Mob *caster = nullptr, bool from_buff_tic = false);
 	virtual EQ::InventoryProfile& GetInv() { return m_inv; }
 	void CalculateNewFearpoint();
@@ -1872,13 +1863,8 @@ protected:
 private:
 	Mob* target;
 	EQ::InventoryProfile m_inv;
-
-#ifdef BOTS
 	std::shared_ptr<HealRotation> m_target_of_heal_rotation;
-
 	bool m_manual_follow;
-#endif
-
 };
 
 #endif

@@ -77,24 +77,25 @@ void WorldBoot::GMSayHookCallBackProcessWorld(uint16 log_category, const char *f
 
 bool WorldBoot::HandleCommandInput(int argc, char **argv)
 {
-	// database version
-	uint32 database_version      = CURRENT_BINARY_DATABASE_VERSION;
-	uint32 bots_database_version = CURRENT_BINARY_BOTS_DATABASE_VERSION;
-	if (argc >= 2) {
-		if (strcasecmp(argv[1], "db_version") == 0) {
-			std::cout << "Binary Database Version: " << database_version << " : " << bots_database_version << std::endl;
-			return true;
-		}
-	}
-
 	// command handler
 	if (argc > 1) {
 		LogSys.SilenceConsoleLogging();
 		path.LoadPaths();
 		WorldConfig::LoadConfig();
 		LoadDatabaseConnections();
+		RuleManager::Instance()->LoadRules(&database, "default", false);
 		LogSys.EnableConsoleLogging();
 		WorldserverCLI::CommandHandler(argc, argv);
+	}
+
+	// database version
+	uint32 database_version      = CURRENT_BINARY_DATABASE_VERSION;
+	uint32 bots_database_version = RuleB(Bots, Enabled) ? CURRENT_BINARY_BOTS_DATABASE_VERSION : 0;
+	if (argc >= 2) {
+		if (strcasecmp(argv[1], "db_version") == 0) {
+			std::cout << "Binary Database Version: " << database_version << " : " << bots_database_version << std::endl;
+			return true;
+		}
 	}
 
 	return false;

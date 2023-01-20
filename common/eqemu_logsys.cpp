@@ -528,6 +528,8 @@ void EQEmuLogSys::SilenceConsoleLogging()
 		log_settings[log_index].log_to_console      = 0;
 		log_settings[log_index].is_category_enabled = 0;
 	}
+
+	log_settings[Logs::Crash].log_to_console = static_cast<uint8>(Logs::General);
 }
 
 /**

@@ -30,9 +30,7 @@
 #include "zonedb.h"
 #include "../common/zone_store.h"
 
-#ifdef BOTS
 #include "bot.h"
-#endif
 
 /**
  * Stores internal representation of mob texture by material slot
@@ -435,7 +433,6 @@ void Mob::SendWearChange(uint8 material_slot, Client *one_client)
 	wear_change->elite_material   = IsEliteMaterialItem(material_slot);
 	wear_change->hero_forge_model = static_cast<uint32>(GetHerosForgeModel(material_slot));
 
-#ifdef BOTS
 	if (IsBot()) {
 		auto item_inst = CastToBot()->GetBotItem(EQ::InventoryProfile::CalcSlotFromMaterial(material_slot));
 		if (item_inst)
@@ -446,9 +443,6 @@ void Mob::SendWearChange(uint8 material_slot, Client *one_client)
 	else {
 		wear_change->color.Color = GetEquipmentColor(material_slot);
 	}
-#else
-	wear_change->color.Color = GetEquipmentColor(material_slot);
-#endif
 
 	wear_change->wear_slot_id = material_slot;
 
