@@ -1559,14 +1559,14 @@ sub copy_file
 sub fetch_latest_windows_appveyor
 {
     print "[Update] Fetching Latest Windows Binaries (unstable) from Appveyor... \n";
-    get_remote_file("https://ci.appveyor.com/api/projects/KimLS/server-pglwk/artifacts/build_x64.zip",
-        "updates_staged/build_x64.zip",
+    get_remote_file("https://github.com/eqemu/server/releases/latest/download/eqemu-server-windows-x64.zip",
+        "updates_staged/eqemu-server-windows-x64.zip",
         1
     );
 
     print "[Update] Fetched Latest Windows Binaries (unstable) from Appveyor... \n";
     print "[Update] Extracting... --- \n";
-    unzip('updates_staged/build_x64.zip', 'updates_staged/binaries/');
+    unzip('updates_staged/eqemu-server-windows-x64.zip', 'updates_staged/binaries/');
     my @files;
     my $start_dir = "updates_staged/binaries";
     find(
@@ -1575,33 +1575,6 @@ sub fetch_latest_windows_appveyor
     );
     for my $file (@files) {
         my $destination_file = $file;
-        $destination_file =~ s/updates_staged\/binaries\///g;
-        print "[Update] Installing [" . $bin_dir . $destination_file . "]\n";
-        copy_file($file, $bin_dir . $destination_file);
-    }
-    print "[Update] Done\n";
-
-    rmtree('updates_staged');
-}
-
-sub fetch_latest_windows_appveyor_bots
-{
-    print "[Update] Fetching Latest Windows Binaries with Bots (unstable) from Appveyor... \n";
-    get_remote_file("https://ci.appveyor.com/api/projects/KimLS/server-87crp/artifacts/build_x64.zip",
-        "updates_staged/eqemu-x64-bots.zip",
-        1);
-
-    print "[Update] Fetched Latest Windows Binaries (unstable) from Appveyor... \n";
-    print "[Update] Extracting... --- \n";
-    unzip('updates_staged/eqemu-x64-bots.zip', 'updates_staged/binaries/');
-    my @files;
-    my $start_dir = "updates_staged/binaries";
-    find(
-        sub { push @files, $File::Find::name unless -d; },
-        $start_dir
-    );
-    for my $file (@files) {
-        $destination_file = $file;
         $destination_file =~ s/updates_staged\/binaries\///g;
         print "[Update] Installing [" . $bin_dir . $destination_file . "]\n";
         copy_file($file, $bin_dir . $destination_file);
@@ -1830,45 +1803,6 @@ sub map_files_fetch_bulk
 
     rmtree('maps/EQEmuMaps-master');
     unlink('maps/maps.zip');
-}
-
-sub map_files_fetch
-{
-    print "[Install] Fetching Latest Maps --- \n";
-
-    get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuMaps/master/!eqemu_maps_manifest.txt",
-        "updates_staged/eqemu_maps_manifest.txt");
-
-    #::: Get Data from manifest
-    open(FILE, "updates_staged/eqemu_maps_manifest.txt");
-    $i = 0;
-    while (<FILE>) {
-        chomp;
-        $o                 = $_;
-        @manifest_map_data = split(',', $o);
-        if ($manifest_map_data[0] ne "") {
-            $maps_manifest[$i] = [ $manifest_map_data[0], $manifest_map_data[1] ];
-            $i++;
-        }
-    }
-
-    #::: Download
-    $fc                        = 0;
-    for ($m                    = 0; $m <= $i; $m++) {
-        my $file_existing      = $maps_manifest[$m][0];
-        my $file_existing_size = (stat $file_existing)[7];
-        if ($file_existing_size != $maps_manifest[$m][1]) {
-            print "[Install] Updating: '" . $maps_manifest[$m][0] . "'\n";
-            get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuMaps/master/" . $maps_manifest[$m][0],
-                $maps_manifest[$m][0],
-                1);
-            $fc++;
-        }
-    }
-
-    if ($fc == 0) {
-        print "[Install] No Map Updates found... \n\n";
-    }
 }
 
 sub quest_files_fetch
