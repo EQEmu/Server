@@ -1204,7 +1204,7 @@ bool Bot::AIDoSpellCast(uint8 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgain
 		)
 	) {
 		casting_spell_AIindex = i;
-		LogAI("[Bot::AIDoSpellCast] spellid [{}] tar [{}] mana [{}] Name [{}]", AIBot_spells[i].spellid, tar->GetName(), mana_cost, spells[AIBot_spells[i].spellid].name);
+		LogAI("spellid [{}] tar [{}] mana [{}] Name [{}]", AIBot_spells[i].spellid, tar->GetName(), mana_cost, spells[AIBot_spells[i].spellid].name);
 		result = Mob::CastSpell(AIBot_spells[i].spellid, tar->GetID(), EQ::spells::CastingSlot::Gem2, spells[AIBot_spells[i].spellid].cast_time, AIBot_spells[i].manacost == -2 ? 0 : mana_cost, oDontDoAgainBefore, -1, -1, 0, &(AIBot_spells[i].resist_adjust));
 
 		if (IsCasting() && IsSitting())
@@ -1751,10 +1751,10 @@ bool Bot::AIHealRotation(Mob* tar, bool useFastHeals) {
 		}
 	}
 
-	LogAIDetail("[Bot::AIHealRotation] heal spellid [{}] fastheals [{}] casterlevel [{}]",
+	LogAIDetail("heal spellid [{}] fastheals [{}] casterlevel [{}]",
 		botSpell.SpellId, ((useFastHeals) ? ('T') : ('F')), GetLevel());
 
-	LogAIDetail("[Bot::AIHealRotation] target [{}] current_time [{}] donthealmebefore [{}]", tar->GetCleanName(), Timer::GetCurrentTime(), tar->DontHealMeBefore());
+	LogAIDetail("target [{}] current_time [{}] donthealmebefore [{}]", tar->GetCleanName(), Timer::GetCurrentTime(), tar->DontHealMeBefore());
 
 	// If there is still no spell id, then there isn't going to be one so we are done
 	if (botSpell.SpellId == 0)

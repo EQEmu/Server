@@ -391,7 +391,7 @@ bool Database::DeleteCharacter(char *character_name)
 	}
 
 	if (character_id <= 0) {
-		LogError("[DeleteCharacter] Invalid Character ID [{}]", character_name);
+		LogError("Invalid Character ID [{}]", character_name);
 		return false;
 	}
 
@@ -431,7 +431,7 @@ bool Database::DeleteCharacter(char *character_name)
 			character_id
 		);
 		QueryDatabase(query);
-		LogInfo("[DeleteCharacter] character_name [{}] ({}) bots are being [{}]", character_name, character_id, delete_type);
+		LogInfo("character_name [{}] ({}) bots are being [{}]", character_name, character_id, delete_type);
 #endif
 
 		return true;
@@ -444,7 +444,7 @@ bool Database::DeleteCharacter(char *character_name)
 		QueryDatabase(fmt::format("DELETE FROM {} WHERE {} = {}", table_name, character_id_column_name, character_id));
 	}
 
-	LogInfo("[DeleteCharacter] character_name [{}] ({}) is being [{}]", character_name, character_id, delete_type);
+	LogInfo("character_name [{}] ({}) is being [{}]", character_name, character_id, delete_type);
 
 	return true;
 }
@@ -2356,7 +2356,7 @@ void Database::SourceDatabaseTableFromUrl(std::string table_name, std::string ur
 		uri request_uri(url);
 
 		LogHTTP(
-			"[SourceDatabaseTableFromUrl] parsing url [{}] path [{}] host [{}] query_string [{}] protocol [{}] port [{}]",
+			"parsing url [{}] path [{}] host [{}] query_string [{}] protocol [{}] port [{}]",
 			url,
 			request_uri.get_path(),
 			request_uri.get_host(),
@@ -2410,7 +2410,7 @@ void Database::SourceDatabaseTableFromUrl(std::string table_name, std::string ur
 
 	}
 	catch (std::invalid_argument iae) {
-		LogError("[SourceDatabaseTableFromUrl] URI parser error [{}]", iae.what());
+		LogError("URI parser error [{}]", iae.what());
 	}
 }
 

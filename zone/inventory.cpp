@@ -3688,7 +3688,6 @@ bool Client::InterrogateInventory(Client* requester, bool log, bool silent, bool
 
 	if (log) {
 		LogError("Target interrogate inventory flag: [{}]", (GetInterrogateInvState() ? "TRUE" : "FALSE"));
-		LogDebug("[CLIENT] Client::InterrogateInventory() -- End");
 	}
 	if (!silent) {
 		requester->Message(Chat::Default, "Target interrogation flag: %s", (GetInterrogateInvState() ? "TRUE" : "FALSE"));

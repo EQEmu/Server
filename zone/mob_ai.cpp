@@ -131,7 +131,7 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes, bool bInnates
 				&& (AIspells[i].time_cancast + (zone->random.Int(0, 4) * 500)) <= Timer::GetCurrentTime() //break up the spelling casting over a period of time.
 				) {
 
-				LogAI("[Mob::AICastSpell] Casting: spellid [{}] tar [{}] dist2[[{}]]<=[{}] mana_cost[[{}]]<=[{}] cancast[[{}]]<=[{}] type [{}]",
+				LogAI("Casting: spellid [{}] tar [{}] dist2[[{}]]<=[{}] mana_cost[[{}]]<=[{}] cancast[[{}]]<=[{}] type [{}]",
 					AIspells[i].spellid, tar->GetName(), dist2, (spells[AIspells[i].spellid].range * spells[AIspells[i].spellid].range), mana_cost, GetMana(), AIspells[i].time_cancast, Timer::GetCurrentTime(), AIspells[i].type);
 
 				switch (AIspells[i].type) {
@@ -363,7 +363,7 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes, bool bInnates
 				}
 			}
 			else {
-				LogAI("[Mob::AICastSpell] NotCasting: spellid [{}] tar [{}] dist2[[{}]]<=[{}] mana_cost[[{}]]<=[{}] cancast[[{}]]<=[{}] type [{}]",
+				LogAI("NotCasting: spellid [{}] tar [{}] dist2[[{}]]<=[{}] mana_cost[[{}]]<=[{}] cancast[[{}]]<=[{}] type [{}]",
 					AIspells[i].spellid, tar->GetName(), dist2, (spells[AIspells[i].spellid].range * spells[AIspells[i].spellid].range), mana_cost, GetMana(), AIspells[i].time_cancast, Timer::GetCurrentTime(), AIspells[i].type);
 			}
 		}
@@ -372,7 +372,7 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes, bool bInnates
 }
 
 bool NPC::AIDoSpellCast(uint8 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgainBefore) {
-	LogAI("[Mob::AIDoSpellCast] spellid [{}] tar [{}] mana [{}] Name [{}]", AIspells[i].spellid, tar->GetName(), mana_cost, spells[AIspells[i].spellid].name);
+	LogAI("spellid [{}] tar [{}] mana [{}] Name [{}]", AIspells[i].spellid, tar->GetName(), mana_cost, spells[AIspells[i].spellid].name);
 	casting_spell_AIindex = i;
 
 	return CastSpell(AIspells[i].spellid, tar->GetID(), EQ::spells::CastingSlot::Gem2, AIspells[i].manacost == -2 ? 0 : -1, mana_cost, oDontDoAgainBefore, -1, -1, 0, &(AIspells[i].resist_adjust));
@@ -2062,7 +2062,7 @@ bool NPC::AI_IdleCastCheck() {
 				//last duration it was set to... try to put up a more reasonable timer...
 				AIautocastspell_timer->Start(RandomTimer(AISpellVar.idle_no_sp_recast_min, AISpellVar.idle_no_sp_recast_max), false);
 
-				LogSpells("[NPC::AI_IdleCastCheck] Mob [{}] Min [{}] Max [{}]", GetCleanName(), AISpellVar.idle_no_sp_recast_min, AISpellVar.idle_no_sp_recast_max);
+				LogSpells("Mob [{}] Min [{}] Max [{}]", GetCleanName(), AISpellVar.idle_no_sp_recast_min, AISpellVar.idle_no_sp_recast_max);
 
 			}	//else, spell casting finishing will reset the timer.
 		}	//else, spell casting finishing will reset the timer.

@@ -1425,7 +1425,7 @@ void Mob::SendHPUpdate(bool force_update_all)
 		if (current_hp != last_hp || force_update_all) {
 
 			LogHPUpdate(
-				"[SendHPUpdate] Update HP of self [{}] current_hp [{}] max_hp [{}] last_hp [{}]",
+				"Update HP of self [{}] current_hp [{}] max_hp [{}] last_hp [{}]",
 				GetCleanName(),
 				current_hp,
 				max_hp,
@@ -1453,14 +1453,14 @@ void Mob::SendHPUpdate(bool force_update_all)
 	auto current_hp_percent = GetIntHPRatio();
 
 	LogHPUpdateDetail(
-		"[SendHPUpdate] Client [{}] HP is [{}] last [{}]",
+		"Client [{}] HP is [{}] last [{}]",
 		GetCleanName(),
 		current_hp_percent,
 		last_hp_percent
 	);
 
 	if (current_hp_percent == last_hp_percent && !force_update_all) {
-		LogHPUpdateDetail("[SendHPUpdate] Same HP for mob [{}] skipping update", GetCleanName());
+		LogHPUpdateDetail("Same HP for mob [{}] skipping update", GetCleanName());
 		ResetHPUpdateTimer();
 		return;
 	}
@@ -1470,7 +1470,7 @@ void Mob::SendHPUpdate(bool force_update_all)
 			CastToClient()->SendHPUpdateMarquee();
 		}
 
-		LogHPUpdate("[SendHPUpdate] HP Changed for mob [{}] send update", GetCleanName());
+		LogHPUpdate("HP Changed for mob [{}] send update", GetCleanName());
 
 		last_hp_percent = current_hp_percent;
 	}
@@ -2553,7 +2553,7 @@ void Mob::SendIllusionPacket(
 	}
 
 	LogSpells(
-		"[Mob::SendIllusionPacket] Illusion: Race [{}] Gender [{}] Texture [{}] HelmTexture [{}] HairColor [{}] BeardColor [{}] EyeColor1 [{}] EyeColor2 [{}] HairStyle [{}] Face [{}] DrakkinHeritage [{}] DrakkinTattoo [{}] DrakkinDetails [{}] Size [{}]",
+		"Illusion: Race [{}] Gender [{}] Texture [{}] HelmTexture [{}] HairColor [{}] BeardColor [{}] EyeColor1 [{}] EyeColor2 [{}] HairStyle [{}] Face [{}] DrakkinHeritage [{}] DrakkinTattoo [{}] DrakkinDetails [{}] Size [{}]",
 		race,
 		gender,
 		new_texture,
@@ -4134,7 +4134,7 @@ void Mob::ExecWeaponProc(const EQ::ItemInstance *inst, uint16 spell_id, Mob *on,
 	if(!IsValidSpell(spell_id)) { // Check for a valid spell otherwise it will crash through the function
 		if(IsClient()){
 			Message(0, "Invalid spell proc %u", spell_id);
-			LogSpells("[Mob::ExecWeaponProc] Player [{}] Weapon Procced invalid spell [{}]", GetName(), spell_id);
+			LogSpells("Player [{}] Weapon Procced invalid spell [{}]", GetName(), spell_id);
 		}
 		return;
 	}

@@ -112,7 +112,7 @@ void Client::SendTaskFailed(int task_id, int task_index, TaskType task_type)
 	task_activity_complete->task_completed = 0; //Fail
 	task_activity_complete->stage_complete = 0; // 0 for task complete or failed.
 
-	LogTasks("[SendTaskFailed] Sending failure to client [{}]", GetCleanName());
+	LogTasks("Sending failure to client [{}]", GetCleanName());
 
 	QueuePacket(outapp);
 	safe_delete(outapp);

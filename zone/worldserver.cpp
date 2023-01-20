@@ -3450,7 +3450,7 @@ bool WorldServer::SendVoiceMacro(Client* From, uint32 Type, char* Target, uint32
 
 bool WorldServer::RezzPlayer(EQApplicationPacket* rpack, uint32 rezzexp, uint32 dbid, uint16 opcode)
 {
-	LogSpells("[WorldServer::RezzPlayer] rezzexp is [{}] (0 is normal for RezzComplete", rezzexp);
+	LogSpells("rezzexp is [{}] (0 is normal for RezzComplete", rezzexp);
 	auto pack = new ServerPacket(ServerOP_RezzPlayer, sizeof(RezzPlayer_Struct));
 	RezzPlayer_Struct* sem = (RezzPlayer_Struct*)pack->pBuffer;
 	sem->rezzopcode = opcode;
@@ -3459,9 +3459,9 @@ bool WorldServer::RezzPlayer(EQApplicationPacket* rpack, uint32 rezzexp, uint32 
 	sem->dbid = dbid;
 	bool ret = SendPacket(pack);
 	if (ret)
-		LogSpells("[WorldServer::RezzPlayer] Sending player rezz packet to world spellid:[{}]", sem->rez.spellid);
+		LogSpells("Sending player rezz packet to world spellid:[{}]", sem->rez.spellid);
 	else
-		LogSpells("[WorldServer::RezzPlayer] NOT Sending player rezz packet to world");
+		LogSpells("NOT Sending player rezz packet to world");
 
 	safe_delete(pack);
 	return ret;

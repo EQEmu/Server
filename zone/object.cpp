@@ -341,7 +341,7 @@ const EQ::ItemInstance* Object::GetItem(uint8 index) {
 void Object::PutItem(uint8 index, const EQ::ItemInstance* inst)
 {
 	if (index > 9) {
-		LogError("Object::PutItem: Invalid index specified ([{}])", index);
+		LogError("Invalid index specified ([{}])", index);
 		return;
 	}
 
@@ -477,7 +477,7 @@ void Object::RandomSpawn(bool send_packet) {
 		}
 	}
 
-	LogInfo("Object::RandomSpawn([{}]): [{}] ([{}], [{}], [{}])", m_data.object_name, m_inst->GetID(), m_data.x, m_data.y, m_data.z);
+	LogInfo("[{}] [{}] ([{}] [{}] [{}])", m_data.object_name, m_inst->GetID(), m_data.x, m_data.y, m_data.z);
 
 	respawn_timer.Disable();
 

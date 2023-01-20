@@ -1635,7 +1635,7 @@ bool ZoneDatabase::SaveCharacterInvSnapshot(uint32 character_id) {
 		character_id
 	);
 	auto results = database.QueryDatabase(query);
-	LogInventory("ZoneDatabase::SaveCharacterInventorySnapshot [{}] ([{}])", character_id, (results.Success() ? "pass" : "fail"));
+	LogInventory("[{}] ([{}])", character_id, (results.Success() ? "pass" : "fail"));
 	return results.Success();
 }
 
@@ -1852,7 +1852,7 @@ bool ZoneDatabase::RestoreCharacterInvSnapshot(uint32 character_id, uint32 times
 	// we should know what we're doing by the time we call this function..but,
 	// this is to prevent inventory deletions where no timestamp entries exists
 	if (!ValidateCharacterInvSnapshotTimestamp(character_id, timestamp)) {
-		LogError("ZoneDatabase::RestoreCharacterInvSnapshot() called for id: [{}] without valid snapshot entries @ [{}]", character_id, timestamp);
+		LogError("called for id: [{}] without valid snapshot entries @ [{}]", character_id, timestamp);
 		return false;
 	}
 
@@ -1917,7 +1917,7 @@ bool ZoneDatabase::RestoreCharacterInvSnapshot(uint32 character_id, uint32 times
 	);
 	results = database.QueryDatabase(query);
 
-	LogInventory("ZoneDatabase::RestoreCharacterInvSnapshot() [{}] snapshot for [{}] @ [{}]",
+	LogInventory("[{}] snapshot for [{}] @ [{}]",
 		(results.Success() ? "restored" : "failed to restore"), character_id, timestamp);
 
 	return results.Success();
