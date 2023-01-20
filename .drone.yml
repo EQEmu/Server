@@ -117,7 +117,7 @@ steps:
       GITHUB_TOKEN:
         from_secret: GH_RELEASE_GITHUB_API_TOKEN
     commands:
-      - . .\utils\scripts\build\should-release\build-release.bat
+      - . .\utils\scripts\build\build-release.bat
       - git submodule init
       - git submodule update
   - name: Windows x64
