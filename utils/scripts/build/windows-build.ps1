@@ -21,7 +21,7 @@ try
 #
 #    7z a eqemu-server-windows-x64.zip $cwd\win-build-x64\bin\RelWithDebInfo\*.exe $cwd\win-build-x64\bin\RelWithDebInfo\*.dll $cwd\win-build-x64\bin\RelWithDebInfo\*.pdb $cwd\win-build-x64\libs\zlibng\RelWithDebInfo\*.dll $cwd\win-build-x64\libs\zlibng\RelWithDebInfo\*.pdb
 
-    .\utils\scripts\build\should-release\should-release.exe | exit
+    .\utils\scripts\build\should-release\should-release.exe
 
 #    dir *.zip
 #    rclone config create remote ftp env_auth true
