@@ -19,9 +19,9 @@ try
     cmake --build . --config RelWithDebInfo --clean-first
     Set-Location -Path "$cwd"
 
-    7z a eqemu-server-windows-x64.zip $cwd\win-build-x64\bin\RelWithDebInfo\*.exe $cwd\win-build-x64\bin\RelWithDebInfo\*.dll $cwd\win-build-x64\bin\RelWithDebInfo\*.pdb $cwd\win-build-x64\libs\zlibng\RelWithDebInfo\*.dll $cwd\win-build-x64\libs\zlibng\RelWithDebInfo\*.pdb
-
     .\utils\scripts\build\should-release\should-release.exe; if ($LASTEXITCODE -ne 0) { exit }
+
+    7z a eqemu-server-windows-x64.zip $cwd\win-build-x64\bin\RelWithDebInfo\*.exe $cwd\win-build-x64\bin\RelWithDebInfo\*.dll $cwd\win-build-x64\bin\RelWithDebInfo\*.pdb $cwd\win-build-x64\libs\zlibng\RelWithDebInfo\*.dll $cwd\win-build-x64\libs\zlibng\RelWithDebInfo\*.pdb
 
     dir *.zip
     rclone config create remote ftp env_auth true
