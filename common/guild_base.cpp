@@ -960,8 +960,8 @@ bool BaseGuildManager::GetCharInfo(uint32 char_id, CharGuildInfo &into) {
 	}
 
 	//load up the rank info for each guild.
-	std::string query = StringFormat(GuildMemberBaseQuery " WHERE c.id=%d AND is_bot = 0 AND c.deleted_at IS NULL", char_id);
-    auto results = m_db->QueryDatabase(query);
+	std::string query   = StringFormat(GuildMemberBaseQuery " WHERE c.id=%d AND c.deleted_at IS NULL", char_id);
+	auto        results = m_db->QueryDatabase(query);
 	if (!results.Success()) {
 		return false;
 	}
