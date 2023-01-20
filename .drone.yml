@@ -37,28 +37,6 @@ trigger:
 
 kind: pipeline
 type: docker
-name: Check If Release
-
-# Limits how many of these builds can run on the drone runner at a time, this isn't about cores
-concurrency:
-  limit: 1
-
-steps:
-  - name: Init
-    image: akkadius/eqemu-server:v11
-    commands:
-      - if [ $(curl -s "https://api.github.com/repos/eqemu/server/tags" | jq -r '.[0].name' | sed 's/v//') = $(cat package.json | jq -r '.version') ]; then echo "Version tag is same as latest release exiting build"; exit 1; else echo "Local version different from remote, building..."; fi
-
-trigger:
-  branch:
-    - akkadius/build-test
-  event:
-    - push
-
----
-
-kind: pipeline
-type: docker
 name: Build Linux Binaries
 
 # Limits how many of these builds can run on the drone runner at a time, this isn't about cores
@@ -74,6 +52,7 @@ steps:
   - name: Init
     image: akkadius/eqemu-server:v11
     commands:
+      - ./utils/scripts/build/should-release/should-release
       - sudo chown eqemu:eqemu /drone/src/ * -R
       - sudo chown eqemu:eqemu /home/eqemu/.ccache/ * -R
       - git submodule init && git submodule update
@@ -135,6 +114,7 @@ platform:
 steps:
   - name: init
     commands:
+      - ./utils/scripts/build/should-release/should-release.exe
       - git submodule init
       - git submodule update
   - name: Windows x64
@@ -185,6 +165,7 @@ steps:
       GH_RELEASE_GITHUB_API_TOKEN:
         from_secret: GH_RELEASE_GITHUB_API_TOKEN
     commands:
+      - ./utils/scripts/build/should-release/should-release
       - rclone config create remote ftp env_auth true > /dev/null
       - |
         rclone copy remote: --include "eqemu-server*.zip" .
@@ -193,7 +174,6 @@ steps:
         rclone delete remote: --include "eqemu-server*.zip"
 
 depends_on:
-  - Check If Release
   - Build Windows Binaries
   - Build Linux Binaries
 
