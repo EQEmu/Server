@@ -98,9 +98,6 @@ trigger:
   event:
     - push
 
-depends_on:
-  - Check If Release
-
 ---
 
 kind: pipeline
@@ -143,9 +140,6 @@ trigger:
     - akkadius/build-test
   event:
     - push
-
-depends_on:
-  - Check If Release
 
 ---
 
