@@ -47,7 +47,7 @@ steps:
   - name: Init
     image: akkadius/eqemu-server:v11
     commands:
-      - if [ $(curl -s "https://api.github.com/repos/eqemu/server/tags" | jq -r '.[0].name' | sed 's/v//') = $(cat package.json | jq -r '.version') ]; then echo "Version tag is same as latest release exiting build"; exit 78; else echo "Local version different from remote, building..."; fi
+      - if [ $(curl -s "https://api.github.com/repos/eqemu/server/tags" | jq -r '.[0].name' | sed 's/v//') = $(cat package.json | jq -r '.version') ]; then echo "Version tag is same as latest release exiting build"; exit 1; else echo "Local version different from remote, building..."; fi
 
 trigger:
   branch:
