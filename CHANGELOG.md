@@ -1,3 +1,9 @@
+## [22.0.6]
+
+### Release Test
+
+Release test with bots #2
+
 ## [22.0.5]
 
 ### Release Test
