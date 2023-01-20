@@ -112,12 +112,12 @@ platform:
   arch: amd64
 
 steps:
-  - name: init
+  - name: Build Windows X64 Release
     environment:
       GITHUB_TOKEN:
         from_secret: GH_RELEASE_GITHUB_API_TOKEN
     commands:
-      - ./utils/scripts/build/should-release/should-release.exe
+      - ./utils/scripts/build/should-release/build-release.bat
       - git submodule init
       - git submodule update
   - name: Windows x64
