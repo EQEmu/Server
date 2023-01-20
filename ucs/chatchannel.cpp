@@ -837,11 +837,8 @@ void ChatChannelList::AddToFilteredNames(const std::string& name) {
 		return;
 	}
 
-	// Check if name is already in the FilteredNames vector
-	bool is_found = Strings::Contains(ChatChannelList::GetFilteredNames(), name);
-
 	// Add name to the filtered names vector if it is not already present
-	if (!is_found) {
+	if (!Strings::Contains(ChatChannelList::GetFilteredNames(), name)) {
 		auto filtered_names = GetFilteredNames(); // Get current filter name list
 		filtered_names.push_back(name); // Add new name to local filtered names list
 		SetFilteredNameList(filtered_names); // Set filtered names list to match local filtered names list

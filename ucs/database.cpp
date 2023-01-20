@@ -273,7 +273,7 @@ void UCSDatabase::LoadFilteredNamesFromDB()
 		LogDebug("No filtered names exist in the database...");
 	}
 
-	for (auto& e : names) {
+	for (const auto& e : names) {
 		ChatChannelList::AddToFilteredNames(e.name);
 	}
 
@@ -378,7 +378,7 @@ bool UCSDatabase::CheckChannelNameFilter(const std::string& channel_name)
 {
 	LogDebug("Checking if [{}] is on the name filter", channel_name);
 
-	for (auto &e: ChatChannelList::GetFilteredNames()) {
+	for (const auto &e: ChatChannelList::GetFilteredNames()) {
 		if (Strings::Contains(Strings::ToLower(channel_name), Strings::ToLower(e))) {
 			LogInfo("Failed to pass name filter check for [{}] against word [{}]", channel_name, e);
 			return false;
