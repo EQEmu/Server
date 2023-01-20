@@ -395,9 +395,6 @@ bool Database::DeleteCharacter(char *character_name)
 		return false;
 	}
 
-	query = StringFormat("DELETE FROM `guild_members` WHERE `char_id` = '%d' AND GetMobTypeById(%i) = 'C'", character_id); // note: only use of GetMobTypeById()
-	QueryDatabase(query);
-
 	std::string delete_type = "hard-deleted";
 	if (RuleB(Character, SoftDeletes)) {
 		delete_type = "soft-deleted";
