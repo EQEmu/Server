@@ -1026,8 +1026,6 @@ sub show_menu_prompt
                 print ">>> Windows\n";
                 print " [windows_server_download]	Updates server via latest 'stable' code\n";
                 print " [windows_server_latest]	Updates server via latest commit 'unstable'\n";
-                print " [windows_server_download_bots]	Updates server (bots) via latest 'stable'\n";
-                print " [windows_server_latest_bots]	Updates server (bots) via latest commit 'unstable'\n";
                 print " [fetch_dlls]			Grabs dll's needed to run windows binaries\n";
                 print " [setup_loginserver]		Sets up loginserver for Windows\n";
             }
@@ -1087,10 +1085,6 @@ sub show_menu_prompt
             fetch_latest_windows_appveyor();
             $dc = 1;
         }
-        elsif ($input eq "windows_server_latest_bots") {
-            fetch_latest_windows_appveyor_bots();
-            $dc = 1;
-        }
         elsif ($input eq "fetch_dlls") {
             fetch_server_dlls();
             $dc = 1;
@@ -1113,10 +1107,6 @@ sub show_menu_prompt
         }
         elsif ($input eq "new_server") {
             new_server();
-            $dc = 1;
-        }
-        elsif ($input eq "new_server_with_bots") {
-            new_server("bots");
             $dc = 1;
         }
         elsif ($input eq "setup_bots") {
