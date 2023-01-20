@@ -838,7 +838,7 @@ void Client::SetEXP(uint64 set_exp, uint64 set_aaxp, bool isrezzexp) {
 void Client::SetLevel(uint8 set_level, bool command)
 {
 	if (GetEXPForLevel(set_level) == 0xFFFFFFFF) {
-		LogError("Client::SetLevel() GetEXPForLevel([{}]) = 0xFFFFFFFF", set_level);
+		LogError("GetEXPForLevel([{}]) = 0xFFFFFFFF", set_level);
 		return;
 	}
 

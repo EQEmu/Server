@@ -157,13 +157,13 @@ bool Spawn2::Process() {
 	if (timer.Check()) {
 		timer.Disable();
 
-		LogSpawns("Spawn2 [{}]: Timer has triggered", spawn2_id);
+		LogSpawns("[{}]: Timer has triggered", spawn2_id);
 
 		//first check our spawn condition, if this isnt active
 		//then we reset the timer and try again next time.
 		if (condition_id != SC_AlwaysEnabled
 			&& !zone->spawn_conditions.Check(condition_id, condition_min_value)) {
-			LogSpawns("Spawn2 [{}]: spawning prevented by spawn condition [{}]", spawn2_id, condition_id);
+			LogSpawns("[{}]: spawning prevented by spawn condition [{}]", spawn2_id, condition_id);
 			Reset();
 			return (true);
 		}

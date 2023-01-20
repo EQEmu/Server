@@ -464,7 +464,7 @@ bool NpcScaleManager::ApplyGlobalBaseScalingToNPCStatically(NPC *&npc)
 
 	if (!g.level) {
 		LogNPCScaling(
-			"NpcScaleManager::ApplyGlobalBaseScalingToNPCStatically NPC: [{}] - scaling data not found for type: [{}] level: [{}]",
+			"NPC: [{}] - scaling data not found for type: [{}] level: [{}]",
 			npc->GetCleanName(),
 			npc_type,
 			npc_level
@@ -522,7 +522,7 @@ bool NpcScaleManager::ApplyGlobalBaseScalingToNPCDynamically(NPC *&npc)
 
 	if (!d.level) {
 		LogNPCScaling(
-			"NpcScaleManager::ApplyGlobalBaseScalingToNPCDynamically NPC: [{}] - scaling data not found for type: [{}] level: [{}]",
+			"NPC: [{}] - scaling data not found for type: [{}] level: [{}]",
 			npc->GetCleanName(),
 			npc_type,
 			npc_level

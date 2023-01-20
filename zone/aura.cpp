@@ -964,7 +964,7 @@ bool ZoneDatabase::GetAuraEntry(uint16 spell_id, AuraRecord &record)
 void Mob::AddAura(Aura *aura, AuraRecord &record)
 {
 	LogAura(
-		"[AddAura] aura owner [{}] spawn_id [{}] aura_name [{}]",
+		"aura owner [{}] spawn_id [{}] aura_name [{}]",
 		GetCleanName(),
 		aura->GetID(),
 		aura->GetCleanName()
@@ -999,7 +999,7 @@ void Mob::AddAura(Aura *aura, AuraRecord &record)
 void Mob::AddTrap(Aura *aura, AuraRecord &record)
 {
 	LogAura(
-		"[AddTrap] aura owner [{}] spawn_id [{}] aura_name [{}]",
+		"aura owner [{}] spawn_id [{}] aura_name [{}]",
 		GetCleanName(),
 		aura->GetID(),
 		aura->GetCleanName()
@@ -1048,7 +1048,7 @@ void Mob::RemoveAllAuras()
 		for (auto &e : aura_mgr.auras) {
 			if (e.aura) {
 				LogAura(
-					"[RemoveAllAuras] aura owner [{}] spawn_id [{}] aura_name [{}]",
+					"aura owner [{}] spawn_id [{}] aura_name [{}]",
 					GetCleanName(),
 					e.spawn_id,
 					e.name
@@ -1065,7 +1065,7 @@ void Mob::RemoveAllAuras()
 		for (auto &e : trap_mgr.auras) {
 			if (e.aura) {
 				LogAura(
-					"[RemoveAllAuras] trap owner [{}] spawn_id [{}] aura_name [{}]",
+					"trap owner [{}] spawn_id [{}] aura_name [{}]",
 					GetCleanName(),
 					e.spawn_id,
 					e.name
@@ -1085,7 +1085,7 @@ void Mob::RemoveAura(int spawn_id, bool skip_strip, bool expired)
 		auto &aura = aura_mgr.auras[i];
 		if (aura.spawn_id == spawn_id) {
 			LogAura(
-				"[RemoveAura] mob [{}] spawn_id [{}] skip_strip [{}] expired [{}]",
+				"mob [{}] spawn_id [{}] skip_strip [{}] expired [{}]",
 				GetCleanName(),
 				spawn_id,
 				skip_strip ? "true" : "false",

@@ -102,9 +102,9 @@ bool WorldBoot::HandleCommandInput(int argc, char **argv)
 
 bool WorldBoot::LoadServerConfig()
 {
-	LogInfo("[WorldBoot::LoadServerConfig] Loading server configuration");
+	LogInfo("Loading server configuration");
 	if (!WorldConfig::LoadConfig()) {
-		LogError("[WorldBoot::LoadServerConfig] Loading server configuration failed");
+		LogError("Loading server configuration failed");
 		return false;
 	}
 

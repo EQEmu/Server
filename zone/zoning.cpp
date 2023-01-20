@@ -195,7 +195,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 	int16 min_status = AccountStatus::Player;
 	uint8 min_level  = 0;
 
-	LogInfo("[Handle_OP_ZoneChange] Loaded zone flag [{}]", zone_data->flag_needed);
+	LogInfo("Loaded zone flag [{}]", zone_data->flag_needed);
 
 	safe_x       = zone_data->safe_x;
 	safe_y       = zone_data->safe_y;
@@ -636,7 +636,7 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 	}
 
 	LogInfo(
-		"[ZonePC] Client [{}] zone_id [{}] x [{}] y [{}] z [{}] heading [{}] ignorerestrictions [{}] zone_mode [{}]",
+		"Client [{}] zone_id [{}] x [{}] y [{}] z [{}] heading [{}] ignorerestrictions [{}] zone_mode [{}]",
 		GetCleanName(),
 		zoneID,
 		x,

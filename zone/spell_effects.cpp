@@ -1630,7 +1630,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				if (IsCorpse() && CastToCorpse()->IsPlayerCorpse()) {
 
 					if(caster)
-						LogSpells("[Mob::SpellEffect] corpse being rezzed using spell [{}] by [{}]",
+						LogSpells("corpse being rezzed using spell [{}] by [{}]",
 							spell_id, caster->GetName());
 
 					CastToCorpse()->CastRezz(spell_id, caster);
@@ -3360,7 +3360,7 @@ int64 Mob::CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level
 		&& IsInstrumentModAppliedToSpellEffect(spell_id, spells[spell_id].effect_id[effect_id])) {
 			oval = effect_value;
 			effect_value = effect_value * static_cast<int>(instrument_mod) / 10;
-			LogSpells("[Mob::CalcSpellEffectValue] Effect value [{}] altered with bard modifier of [{}] to yeild [{}]",
+			LogSpells("Effect value [{}] altered with bard modifier of [{}] to yeild [{}]",
 				oval, instrument_mod, effect_value);
 	}
 	/*
@@ -3387,7 +3387,7 @@ int64 Mob::CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level
 		int mod = caster->GetFocusEffect(focusFcBaseEffects, spell_id);
 		effect_value += effect_value * mod / 100;
 
-		LogSpells("[Mob::CalcSpellEffectValue] Instant Effect value [{}] altered with base effects modifier of [{}] to yeild [{}]",
+		LogSpells("Instant Effect value [{}] altered with base effects modifier of [{}] to yeild [{}]",
 			oval, mod, effect_value);
 	}
 	//This is checked from Mob::ApplySpellBonuses, applied to buffs that receive bonuses. See above, must be in 10% intervals to work.
@@ -3398,7 +3398,7 @@ int64 Mob::CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level
 			oval = effect_value;
 			effect_value = effect_value * static_cast<int>(instrument_mod) / 10;
 
-			LogSpells("[Mob::CalcSpellEffectValue] Bonus Effect value [{}] altered with base effects modifier of [{}] to yeild [{}]",
+			LogSpells("Bonus Effect value [{}] altered with base effects modifier of [{}] to yeild [{}]",
 				oval, instrument_mod, effect_value);
 		}
 	}
@@ -3472,7 +3472,7 @@ snare has both of them negative, yet their range should work the same:
 		updownsign = 1;
 	}
 
-	LogSpells("[Mob::CalcSpellEffectValue_formula] spell [{}] formula [{}] base [{}] max [{}] lvl [{}] Up/Down [{}]",
+	LogSpells("spell [{}] formula [{}] base [{}] max [{}] lvl [{}] Up/Down [{}]",
 		spell_id, formula, base_value, max_value, caster_level, updownsign);
 
 	switch(formula)
@@ -3695,7 +3695,7 @@ snare has both of them negative, yet their range should work the same:
 				result = ubase * (caster_level * (formula - 2000) + 1);
 			}
 			else
-				LogDebug("[Mob::CalcSpellEffectValue_formula] Unknown spell effect value forumula [{}]", formula);
+				LogDebug("Unknown spell effect value forumula [{}]", formula);
 		}
 	}
 
@@ -3720,7 +3720,7 @@ snare has both of them negative, yet their range should work the same:
 	if (base_value < 0 && result > 0)
 		result *= -1;
 
-	LogSpells("[Mob::CalcSpellEffectValue_formula] Result: [{}] (orig [{}]) cap [{}] [{}]", result, oresult, max_value, (base_value < 0 && result > 0)?"Inverted due to negative base":"");
+	LogSpells("Result: [{}] (orig [{}]) cap [{}] [{}]", result, oresult, max_value, (base_value < 0 && result > 0)?"Inverted due to negative base":"");
 
 	return result;
 }
@@ -3748,12 +3748,12 @@ void Mob::BuffProcess()
 					--buffs[buffs_i].ticsremaining;
 
 					if (buffs[buffs_i].ticsremaining < 0) {
-						LogSpells("[Mob::BuffProcess] Buff [{}] in slot [{}] has expired. Fading", buffs[buffs_i].spellid, buffs_i);
+						LogSpells("Buff [{}] in slot [{}] has expired. Fading", buffs[buffs_i].spellid, buffs_i);
 						BuffFadeBySlot(buffs_i);
 					}
 					else
 					{
-						LogSpells("[Mob::BuffProcess] Buff [{}] in slot [{}] has [{}] tics remaining", buffs[buffs_i].spellid, buffs_i, buffs[buffs_i].ticsremaining);
+						LogSpells("Buff [{}] in slot [{}] has [{}] tics remaining", buffs[buffs_i].spellid, buffs_i, buffs[buffs_i].ticsremaining);
 					}
 				}
 				else if (IsClient() && !(CastToClient()->ClientVersionBit() & EQ::versions::maskSoFAndLater))
@@ -4135,7 +4135,7 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 	if (IsClient() && !CastToClient()->IsDead())
 		CastToClient()->MakeBuffFadePacket(buffs[slot].spellid, slot);
 
-	LogSpells("[Mob::BuffFadeBySlot] Fading buff [{}] from slot [{}]", buffs[slot].spellid, slot);
+	LogSpells("Fading buff [{}] from slot [{}]", buffs[slot].spellid, slot);
 
 	std::string export_string = fmt::format(
 		"{} {} {} {}",
@@ -5497,7 +5497,7 @@ int64 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 						}
 						break;
 					default:
-						LogInfo("CalcFocusEffect: unknown limit spelltype [{}]", focus_spell.base_value[i]);
+						LogInfo("unknown limit spelltype [{}]", focus_spell.base_value[i]);
 						break;
 				}
 				break;
@@ -6074,7 +6074,7 @@ int64 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 				// this spits up a lot of garbage when calculating spell focuses
 				// since they have all kinds of extra effects on them.
 				default:
-					LogInfo("CalcFocusEffect: unknown effectid [{}]",
+					LogInfo("unknown effectid [{}]",
 						focus_spell.effect_id[i]);
 #endif
 		}
@@ -9690,21 +9690,21 @@ bool Mob::PassCharmTargetRestriction(Mob *target) {
 
 	if (target->IsClient() && IsClient()) {
 		MessageString(Chat::Red, CANNOT_AFFECT_PC);
-		LogSpells("[Mob::PassCharmTargetRestriction] Spell casting canceled: Can not cast charm on a client.");
+		LogSpells("Spell casting canceled: Can not cast charm on a client.");
 		return false;
 	}
 	else if (target->IsCorpse()) {
-		LogSpells("[Mob::PassCharmTargetRestriction] Spell casting canceled: Can not cast charm on a corpse.");
+		LogSpells("Spell casting canceled: Can not cast charm on a corpse.");
 		return false;
 	}
 	else if (GetPet() && IsClient()) {
 		MessageString(Chat::Red, ONLY_ONE_PET);
-		LogSpells("[Mob::PassCharmTargetRestriction] Spell casting canceled: Can not cast charm if you have a pet.");
+		LogSpells("Spell casting canceled: Can not cast charm if you have a pet.");
 		return false;
 	}
 	else if (target->GetOwner()) {
 		MessageString(Chat::Red, CANNOT_CHARM);
-		LogSpells("[Mob::PassCharmTargetRestriction] Spell casting canceled: Can not cast charm on a pet.");
+		LogSpells("Spell casting canceled: Can not cast charm on a pet.");
 		return false;
 	}
 	return true;

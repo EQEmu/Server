@@ -1803,7 +1803,7 @@ int32 NPC::GetEquipmentMaterial(uint8 material_slot) const
 {
 	int32 texture_profile_material = GetTextureProfileMaterial(material_slot);
 
-	Log(Logs::Detail, Logs::MobAppearance, "NPC::GetEquipmentMaterial [%s] material_slot: %u",
+	Log(Logs::Detail, Logs::MobAppearance, "[%s] material_slot: %u",
 		clean_name,
 		material_slot
 	);

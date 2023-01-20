@@ -595,7 +595,7 @@ void Zone::LoadTempMerchantData()
 		temp_merchant_list.origslot = temp_merchant_list.slot;
 
 		LogMerchants(
-			"[LoadTempMerchantData] Loading merchant temp items npc_id [{}] slot [{}] charges [{}] item [{}] origslot [{}]",
+			"Loading merchant temp items npc_id [{}] slot [{}] charges [{}] item [{}] origslot [{}]",
 			npc_id,
 			temp_merchant_list.slot,
 			temp_merchant_list.charges,
@@ -904,7 +904,7 @@ void Zone::Shutdown(bool quiet)
 	zone->ldon_trap_entry_list.clear();
 
 	LogInfo(
-		"[Zone Shutdown] Zone [{}] zone_id [{}] version [{}] instance_id [{}]",
+		"Zone [{}] zone_id [{}] version [{}] instance_id [{}]",
 		zone->GetShortName(),
 		zone->GetZoneID(),
 		zone->GetInstanceVersion(),
@@ -914,7 +914,7 @@ void Zone::Shutdown(bool quiet)
 	zone->SetZoneHasCurrentTime(false);
 	if (!quiet) {
 		LogInfo(
-			"[Zone Shutdown] Zone [{}] zone_id [{}] version [{}] instance_id [{}] Going to sleep",
+			"Zone [{}] zone_id [{}] version [{}] instance_id [{}] Going to sleep",
 			zone->GetShortName(),
 			zone->GetZoneID(),
 			zone->GetInstanceVersion(),
@@ -933,7 +933,7 @@ void Zone::Shutdown(bool quiet)
 	LogSys.CloseFileLogs();
 
 	if (RuleB(Zone, KillProcessOnDynamicShutdown)) {
-		LogInfo("[Zone Shutdown] Shutting down");
+		LogInfo("Shutting down");
 		EQ::EventLoop::Get().Shutdown();
 	}
 }
@@ -1290,7 +1290,7 @@ bool Zone::LoadZoneCFG(const char* filename, uint16 instance_version)
 	auto z = zone_store.GetZoneWithFallback(ZoneID(filename), instance_version);
 
 	if (!z) {
-		LogError("[LoadZoneCFG] Failed to load zone data for [{}] instance_version [{}]", filename, instance_version);
+		LogError("Failed to load zone data for [{}] instance_version [{}]", filename, instance_version);
 		return false;
 	}
 
@@ -1840,7 +1840,7 @@ void Zone::StartShutdownTimer(uint32 set_time)
 
 void Zone::ResetShutdownTimer() {
 	LogInfo(
-		"[ResetShutdownTimer] Reset to [{}] from original remaining time [{}] duration [{}] zone [{}]",
+		"Reset to [{}] from original remaining time [{}] duration [{}] zone [{}]",
 		Strings::SecondsToTime(autoshutdown_timer.GetDuration(), true),
 		Strings::SecondsToTime(autoshutdown_timer.GetRemainingTime(), true),
 		Strings::SecondsToTime(autoshutdown_timer.GetDuration(), true),
@@ -2950,7 +2950,7 @@ void Zone::SendDiscordMessage(const std::string& webhook_name, const std::string
 	}
 
 	if (not_found) {
-		LogDiscord("[SendDiscordMessage] Did not find valid webhook by webhook name [{}]", webhook_name);
+		LogDiscord("Did not find valid webhook by webhook name [{}]", webhook_name);
 	}
 }
 

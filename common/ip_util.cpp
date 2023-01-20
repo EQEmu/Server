@@ -198,7 +198,7 @@ std::string IpUtil::DNSLookupSync(const std::string &addr, int port)
 				std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 				if (std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() > 1500) {
 					LogInfo(
-						"[DNSLookupSync] Deadline exceeded [{}]",
+						"Deadline exceeded [{}]",
 						1500
 					);
 					running = false;
