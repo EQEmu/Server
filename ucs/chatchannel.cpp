@@ -803,8 +803,18 @@ bool ChatChannelList::IsOnChannelBlockList(const std::string& channel_name) {
 	}
 
 	// Check if channel_name is already in the BlockedChannelNames vector
-	return Strings::Contains(ChatChannelList::GetBlockedChannelNames(), channel_name);
+	return Strings::Contains(GetBlockedChannelNames(), channel_name);
 }
+
+bool ChatChannelList::IsOnFilteredNameList(const std::string& name) {
+	if (name.empty()) {
+		return false;
+	}
+
+	// Check if name is already in the filtered name vector
+	return Strings::Contains(GetFilteredNames(), name);
+}
+
 
 void ChatChannelList::AddToChannelBlockList(const std::string& channel_name) {
 	if (channel_name.empty()) {
@@ -819,6 +829,22 @@ void ChatChannelList::AddToChannelBlockList(const std::string& channel_name) {
 		auto blocked_channel_names = GetBlockedChannelNames(); // Get current blocked list
 		blocked_channel_names.push_back(channel_name); // Add new name to local blocked list
 		SetChannelBlockList(blocked_channel_names); // Set blocked list to match local blocked list
+	}
+}
+
+void ChatChannelList::AddToFilteredNames(const std::string& name) {
+	if (name.empty()) {
+		return;
+	}
+
+	// Check if name is already in the FilteredNames vector
+	bool is_found = Strings::Contains(ChatChannelList::GetFilteredNames(), name);
+
+	// Add name to the filtered names vector if it is not already present
+	if (!is_found) {
+		auto filtered_names = GetFilteredNames(); // Get current filter name list
+		filtered_names.push_back(name); // Add new name to local filtered names list
+		SetFilteredNameList(filtered_names); // Set filtered names list to match local filtered names list
 	}
 }
 
