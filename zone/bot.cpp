@@ -3375,7 +3375,7 @@ void Bot::AI_Process()
 				TEST_COMBATANTS();
 				if (attack_timer.Check()) { // Process primary weapon attacks
 
-					Mob::Attack(tar, EQ::invslot::slotPrimary);
+					Attack(tar, EQ::invslot::slotPrimary);
 
 					TEST_COMBATANTS();
 					TriggerDefensiveProcs(tar, EQ::invslot::slotPrimary, false);
@@ -3389,19 +3389,19 @@ void Bot::AI_Process()
 					if (CanThisClassDoubleAttack()) {
 
 						if (CheckBotDoubleAttack()) {
-							Mob::Attack(tar, EQ::invslot::slotPrimary, true);
+							Attack(tar, EQ::invslot::slotPrimary, true);
 						}
 
 						TEST_COMBATANTS();
 						if (GetSpecialAbility(SPECATK_TRIPLE) && CheckBotDoubleAttack(true)) {
 							// tripleSuccess = true;
-							Mob::Attack(tar, EQ::invslot::slotPrimary, true);
+							Attack(tar, EQ::invslot::slotPrimary, true);
 						}
 
 						TEST_COMBATANTS();
 						// quad attack, does this belong here??
 						if (GetSpecialAbility(SPECATK_QUAD) && CheckBotDoubleAttack(true)) {
-							Mob::Attack(tar, EQ::invslot::slotPrimary, true);
+							Attack(tar, EQ::invslot::slotPrimary, true);
 						}
 					}
 
@@ -3413,10 +3413,10 @@ void Bot::AI_Process()
 						if (zone->random.Int(0, 100) < flurrychance) {
 
 							MessageString(Chat::NPCFlurry, YOU_FLURRY);
-							Mob::Attack(tar, EQ::invslot::slotPrimary, false);
+							Attack(tar, EQ::invslot::slotPrimary, false);
 
 							TEST_COMBATANTS();
-							Mob::Attack(tar, EQ::invslot::slotPrimary, false);
+							Attack(tar, EQ::invslot::slotPrimary, false);
 						}
 					}
 
@@ -3429,7 +3429,7 @@ void Bot::AI_Process()
 						if (p_item && p_item->GetItem()->IsType2HWeapon()) {
 
 							if (zone->random.Int(0, 100) < ExtraAttackChanceBonus) {
-								Mob::Attack(tar, EQ::invslot::slotPrimary, false);
+								Attack(tar, EQ::invslot::slotPrimary, false);
 							}
 						}
 					}
@@ -3467,7 +3467,7 @@ void Bot::AI_Process()
 							float random = zone->random.Real(0, 1);
 							if (random < DualWieldProbability) { // Max 78% of DW
 
-								Mob::Attack(tar, EQ::invslot::slotSecondary);	// Single attack with offhand
+								Attack(tar, EQ::invslot::slotSecondary);	// Single attack with offhand
 
 								TEST_COMBATANTS();
 								TryCombatProcs(s_item, tar, EQ::invslot::slotSecondary);
@@ -3476,7 +3476,7 @@ void Bot::AI_Process()
 								if (CanThisClassDoubleAttack() && CheckBotDoubleAttack()) {
 
 									if (tar->GetHP() > -10) {
-										Mob::Attack(tar, EQ::invslot::slotSecondary);	// Single attack with offhand
+										Attack(tar, EQ::invslot::slotSecondary);	// Single attack with offhand
 									}
 								}
 							}
