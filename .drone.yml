@@ -64,6 +64,9 @@ steps:
         from_secret: RCLONE_FTP_PASS
     commands:
       - ./utils/scripts/build/linux-build.sh
+    volumes:
+      - name: cache
+        path: /home/eqemu/.ccache/
 
 trigger:
   branch:
