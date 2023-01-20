@@ -55,7 +55,7 @@ std::ofstream process_log;
  */
 EQEmuLogSys::EQEmuLogSys()
 {
-	m_on_log_gmsay_hook   = [](uint16 log_type, const std::string &) {};
+	m_on_log_gmsay_hook   = [](uint16 log_type, const char *func, const std::string &) {};
 	m_on_log_console_hook = [](uint16 log_type, const std::string &) {};
 }
 
@@ -412,7 +412,7 @@ void EQEmuLogSys::Out(
 		);
 	}
 	if (l.log_to_gmsay_enabled) {
-		m_on_log_gmsay_hook(log_category, output_message);
+		m_on_log_gmsay_hook(log_category, func, output_message);
 	}
 	if (l.log_to_file_enabled) {
 		EQEmuLogSys::ProcessLogWrite(

@@ -344,7 +344,7 @@ public:
 	// gmsay
 	uint16 GetGMSayColorFromCategory(uint16 log_category);
 
-	EQEmuLogSys *SetGMSayHandler(std::function<void(uint16 log_type, const std::string &)> f)
+	EQEmuLogSys *SetGMSayHandler(const std::function<void(uint16 log_type, const char *func, const std::string &)>& f)
 	{
 		m_on_log_gmsay_hook = f;
 		return this;
@@ -375,15 +375,15 @@ public:
 private:
 
 	// reference to database
-	Database                                                                      *m_database;
-	std::function<void(uint16 log_category, const std::string &)>                 m_on_log_gmsay_hook;
-	std::function<void(uint16 log_category, int webhook_id, const std::string &)> m_on_log_discord_hook;
-	std::function<void(uint16 log_category, const std::string &)>                 m_on_log_console_hook;
-	DiscordWebhooks                                                               m_discord_webhooks[MAX_DISCORD_WEBHOOK_ID]{};
-	bool                                                                          m_file_logs_enabled = false;
-	int                                                                           m_log_platform      = 0;
-	std::string                                                                   m_platform_file_name;
-	std::string                                                                   m_log_path;
+	Database                                                                        *m_database;
+	std::function<void(uint16 log_category, const char *func, const std::string &)> m_on_log_gmsay_hook;
+	std::function<void(uint16 log_category, int webhook_id, const std::string &)>   m_on_log_discord_hook;
+	std::function<void(uint16 log_category, const std::string &)>                   m_on_log_console_hook;
+	DiscordWebhooks                                                                 m_discord_webhooks[MAX_DISCORD_WEBHOOK_ID]{};
+	bool                                                                            m_file_logs_enabled = false;
+	int                                                                             m_log_platform      = 0;
+	std::string                                                                     m_platform_file_name;
+	std::string                                                                     m_log_path;
 
 	void ProcessConsoleMessage(
 		uint16 log_category,
