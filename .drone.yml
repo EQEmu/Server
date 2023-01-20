@@ -37,6 +37,31 @@ trigger:
 
 kind: pipeline
 type: docker
+name: Check If Release
+
+# Limits how many of these builds can run on the drone runner at a time, this isn't about cores
+concurrency:
+  limit: 1
+
+steps:
+  - name: Init
+    image: akkadius/eqemu-server:v11
+    commands:
+      - if [ $(curl -s "https://api.github.com/repos/eqemu/server/tags" | jq -r '.[0].name' | sed 's/v//') = $(cat package.json | jq -r '.version') ]; then echo "Version tag is same as latest release exiting build"; exit 78; else echo "Local version different from remote, building..."; fi
+    volumes:
+      - name: cache
+        path: /home/eqemu/.ccache/
+
+trigger:
+  branch:
+    - akkadius/build-test
+  event:
+    - push
+
+---
+
+kind: pipeline
+type: docker
 name: Build Linux Binaries
 
 # Limits how many of these builds can run on the drone runner at a time, this isn't about cores
@@ -97,6 +122,9 @@ trigger:
   event:
     - push
 
+depends_on:
+  - Check If Release
+
 ---
 
 kind: pipeline
@@ -139,6 +167,9 @@ trigger:
   event:
     - push
 
+depends_on:
+  - Check If Release
+
 ---
 
 kind: pipeline
@@ -165,6 +196,7 @@ steps:
         rclone delete remote: --include "eqemu-server*.zip"
 
 depends_on:
+  - Check If Release
   - Build Windows Binaries
   - Build Linux Binaries
 
