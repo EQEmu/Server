@@ -263,24 +263,26 @@ void EQEmuLogSys::ProcessConsoleMessage(
 
 	if (log_category == Logs::LogCategory::MySQLQuery) {
 		auto        s     = Strings::Split(message, "--");
-		std::string query = Strings::Trim(s[0]);
-		std::string meta  = Strings::Trim(s[1]);
+		if (s.size() > 1) {
+			std::string query = Strings::Trim(s[0]);
+			std::string meta  = Strings::Trim(s[1]);
 
-		std::cout <<
-				  rang::fgB::green
-				  <<
-				  query
-				  <<
-				  rang::style::reset;
+			std::cout <<
+					  rang::fgB::green
+					  <<
+					  query
+					  <<
+					  rang::style::reset;
 
-		std::cout <<
-				  rang::fgB::black
-				  <<
-				  " -- "
-				  <<
-				  meta
-				  <<
-				  rang::style::reset;
+			std::cout <<
+					  rang::fgB::black
+					  <<
+					  " -- "
+					  <<
+					  meta
+					  <<
+					  rang::style::reset;
+		}
 	}
 	else if (Strings::Contains(message, "[")) {
 		for (auto &e: Strings::Split(message, " ")) {
