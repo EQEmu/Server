@@ -392,16 +392,21 @@ int main(int argc, char** argv) {
 
 	EQ::SayLinkEngine::LoadCachedSaylinks();
 
-	LogInfo("Loading bot commands");
-	int botretval = bot_command_init();
-	if (botretval < 0)
-		LogError("Bot command loading failed");
-	else
-		LogInfo("[{}] bot commands loaded", botretval);
+	if (RuleB(Bots, Enabled) || !database.DoesTableExist("bot_command_settings")) {
+		LogInfo("Loading bot commands");
+		int botretval = bot_command_init();
+		if (botretval < 0) {
+			LogError("Bot command loading failed");
+		}
+		else {
+			LogInfo("[{}] bot commands loaded", botretval);
+		}
 
-	LogInfo("Loading bot spell casting chances");
-	if (!database.botdb.LoadBotSpellCastingChances())
-		LogError("Bot spell casting chances loading failed");
+		LogInfo("Loading bot spell casting chances");
+		if (!database.botdb.LoadBotSpellCastingChances()) {
+			LogError("Bot spell casting chances loading failed");
+		}
+	}
 
 	/**
 	 * NPC Scale Manager
