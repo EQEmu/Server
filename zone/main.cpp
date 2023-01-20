@@ -392,7 +392,7 @@ int main(int argc, char** argv) {
 
 	EQ::SayLinkEngine::LoadCachedSaylinks();
 
-	if (RuleB(Bots, Enabled) || !database.DoesTableExist("bot_command_settings")) {
+	if (RuleB(Bots, Enabled) && database.DoesTableExist("bot_command_settings")) {
 		LogInfo("Loading bot commands");
 		int botretval = bot_command_init();
 		if (botretval < 0) {
