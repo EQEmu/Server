@@ -600,7 +600,7 @@ int main(int argc, char** argv) {
 	safe_delete(task_manager);
 	safe_delete(npc_scale_manager);
 	command_deinit();
-	if (RuleB(Bots, AllowBots)) {
+	if (RuleB(Bots, Enabled)) {
 		bot_command_deinit();
 	}
 	safe_delete(parse);

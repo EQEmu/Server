@@ -787,7 +787,7 @@ void Client::SetEXP(uint64 set_exp, uint64 set_aaxp, bool isrezzexp) {
 
 		SetLevel(check_level);
 
-		if (RuleB(Bots, AllowBots) && RuleB(Bots, BotLevelsWithOwner)) {
+		if (RuleB(Bots, Enabled) && RuleB(Bots, BotLevelsWithOwner)) {
 			// hack way of doing this..but, least invasive... (same criteria as gain level for sendlvlapp)
 			Bot::LevelBotWithClient(this, GetLevel(), (myoldlevel == check_level - 1));
 		}

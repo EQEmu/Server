@@ -223,9 +223,6 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 	if (!database.botdb.LoadInspectMessage(GetBotID(), _botInspectMessage) && bot_owner)
 		bot_owner->Message(Chat::White, "%s for '%s'", BotDatabase::fail::LoadInspectMessage(), GetCleanName());
 
-	if (!database.botdb.LoadGuildMembership(GetBotID(), _guildId, _guildRank, _guildName) && bot_owner)
-		bot_owner->Message(Chat::White, "%s for '%s'", BotDatabase::fail::LoadGuildMembership(), GetCleanName());
-
 	std::string error_message;
 
 	EquipBot(&error_message);
@@ -6252,65 +6249,6 @@ void Bot::ProcessBotOwnerRefDelete(Mob* botOwner) {
 			}
 		}
 	}
-}
-
-void Bot::ProcessGuildInvite(Client* guildOfficer, Bot* botToGuild) {
-	if(guildOfficer && botToGuild) {
-		if(!botToGuild->IsInAGuild()) {
-			if (!guild_mgr.CheckPermission(guildOfficer->GuildID(), guildOfficer->GuildRank(), GUILD_INVITE)) {
-				guildOfficer->Message(Chat::White, "You dont have permission to invite.");
-				return;
-			}
-
-			if (!database.botdb.SaveGuildMembership(botToGuild->GetBotID(), guildOfficer->GuildID(), GUILD_MEMBER)) {
-				guildOfficer->Message(Chat::White, "%s for '%s'", BotDatabase::fail::SaveGuildMembership(), botToGuild->GetCleanName());
-				return;
-			}
-
-			ServerPacket* pack = new ServerPacket(ServerOP_GuildCharRefresh, sizeof(ServerGuildCharRefresh_Struct));
-			ServerGuildCharRefresh_Struct *s = (ServerGuildCharRefresh_Struct *) pack->pBuffer;
-			s->guild_id = guildOfficer->GuildID();
-			s->old_guild_id = GUILD_NONE;
-			s->char_id = botToGuild->GetBotID();
-			worldserver.SendPacket(pack);
-
-			safe_delete(pack);
-		} else {
-			guildOfficer->Message(Chat::White, "Bot is in a guild.");
-			return;
-		}
-	}
-}
-
-bool Bot::ProcessGuildRemoval(Client* guildOfficer, std::string botName) {
-	bool Result = false;
-	if(guildOfficer && !botName.empty()) {
-		Bot* botToUnGuild = entity_list.GetBotByBotName(botName);
-		if(botToUnGuild) {
-			if (database.botdb.DeleteGuildMembership(botToUnGuild->GetBotID()))
-				Result = true;
-		} else {
-			uint32 ownerId = 0;
-			if (!database.botdb.LoadOwnerID(botName, ownerId))
-				guildOfficer->Message(Chat::White, "%s for '%s'", BotDatabase::fail::LoadOwnerID(), botName.c_str());
-			uint32 botId = 0;
-			if (!database.botdb.LoadBotID(ownerId, botName, botId))
-				guildOfficer->Message(Chat::White, "%s for '%s'", BotDatabase::fail::LoadBotID(), botName.c_str());
-			if (botId && database.botdb.DeleteGuildMembership(botId))
-				Result = true;
-		}
-
-		if(Result) {
-			EQApplicationPacket* outapp = new EQApplicationPacket(OP_GuildManageRemove, sizeof(GuildManageRemove_Struct));
-			GuildManageRemove_Struct* gm = (GuildManageRemove_Struct*) outapp->pBuffer;
-			gm->guildeqid = guildOfficer->GuildID();
-			strcpy(gm->member, botName.c_str());
-			guildOfficer->Message(Chat::White, "%s successfully removed from your guild.", botName.c_str());
-			entity_list.QueueClientsGuild(guildOfficer, outapp, false, gm->guildeqid);
-			safe_delete(outapp);
-		}
-	}
-	return Result;
 }
 
 int64 Bot::CalcMaxMana() {

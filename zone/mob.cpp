@@ -1502,7 +1502,7 @@ void Mob::SendHPUpdate(bool force_update_all)
 		}
 	}
 
-	if (RuleB(Bots, AllowBots) && GetOwner() && GetOwner()->IsBot() && GetOwner()->CastToBot()->GetBotOwner() && GetOwner()->CastToBot()->GetBotOwner()->IsClient()) {
+	if (RuleB(Bots, Enabled) && GetOwner() && GetOwner()->IsBot() && GetOwner()->CastToBot()->GetBotOwner() && GetOwner()->CastToBot()->GetBotOwner()->IsClient()) {
 		auto bot_owner = GetOwner()->CastToBot()->GetBotOwner()->CastToClient();
 		if (bot_owner) {
 			bot_owner->QueuePacket(&hp_packet, false);

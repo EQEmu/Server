@@ -586,7 +586,7 @@ RULE_INT(Range, MobCloseScanDistance, 600, "Close scan distance")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Bots)
-RULE_BOOL(Bots, AllowBots, false, "Enable of disable bot functionality, default is false")
+RULE_BOOL(Bots, Enabled, false, "Enable of disable bot functionality, default is false")
 RULE_INT(Bots, BotExpansionSettings, 16383, "Sets the expansion settings for bot use. Defaults to all expansions enabled up to TSS")
 RULE_BOOL(Bots, AllowCamelCaseNames, false, "Allows the use of 'MyBot' type names")
 RULE_BOOL(Bots, AllowBotEquipAnyRaceGear, false, "Allows Bots to wear Equipment even if their race is not valid")

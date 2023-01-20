@@ -869,8 +869,8 @@ bool BaseGuildManager::QueryWithLogging(std::string query, const char *errmsg) {
 #define GuildMemberBaseQuery \
 "SELECT c.`id`, c.`name`, c.`class`, c.`level`, c.`last_login`, c.`zone_id`," \
 " g.`guild_id`, g.`rank`, g.`tribute_enable`, g.`total_tribute`, g.`last_tribute`," \
-" g.`banker`, g.`public_note`, g.`alt`" \
-" FROM `vw_bot_character_mobs` AS c LEFT JOIN `vw_guild_members` AS g ON c.`id` = g.`char_id` AND c.`mob_type` = g.`mob_type` "
+" g.`banker`, g.`public_note`, g.`alt` " \
+" FROM `character_data` AS c LEFT JOIN `guild_members` AS g ON c.`id` = g.`char_id` "
 static void ProcessGuildMember(MySQLRequestRow row, CharGuildInfo &into) {
 	//fields from `characer_`
 	into.char_id		= atoi(row[0]);
@@ -960,7 +960,7 @@ bool BaseGuildManager::GetCharInfo(uint32 char_id, CharGuildInfo &into) {
 	}
 
 	//load up the rank info for each guild.
-	std::string query = StringFormat(GuildMemberBaseQuery " WHERE c.id=%d AND c.mob_type = 'C' AND c.deleted_at IS NULL", char_id);
+	std::string query = StringFormat(GuildMemberBaseQuery " WHERE c.id=%d AND is_bot = 0 AND c.deleted_at IS NULL", char_id);
     auto results = m_db->QueryDatabase(query);
 	if (!results.Success()) {
 		return false;

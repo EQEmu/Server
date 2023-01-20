@@ -1533,7 +1533,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 		LFG = false;
 	}
 
-	if (RuleB(Bots, AllowBots)) {
+	if (RuleB(Bots, Enabled)) {
 		database.botdb.LoadOwnerOptions(this);
 		// TODO: mod below function for loading spawned botgroups
 		Bot::LoadAndSpawnAllZonedBots(this);
@@ -3996,7 +3996,7 @@ void Client::Handle_OP_BuffRemoveRequest(const EQApplicationPacket *app)
 		m = entity_list.GetMobID(brrs->EntityID);
 	}
 	else {
-		if (RuleB(Bots, AllowBots)) {
+		if (RuleB(Bots, Enabled)) {
 			Mob *bot_test = entity_list.GetMob(brrs->EntityID);
 			if (bot_test && bot_test->IsBot() && bot_test->GetOwner() == this) {
 				m = bot_test;
@@ -4035,7 +4035,7 @@ void Client::Handle_OP_Bug(const EQApplicationPacket *app)
 
 void Client::Handle_OP_Camp(const EQApplicationPacket *app)
 {
-	if (RuleB(Bots, AllowBots)) {
+	if (RuleB(Bots, Enabled)) {
 		Bot::BotOrderCampAll(this);
 	}
 
@@ -6791,7 +6791,7 @@ void Client::Handle_OP_GroupDisband(const EQApplicationPacket *app)
 		return;
 
 	// this block is necessary to allow more control over controlling how bots are zoned or camped.
-	if (RuleB(Bots, AllowBots) && Bot::GroupHasBot(group)) {
+	if (RuleB(Bots, Enabled) && Bot::GroupHasBot(group)) {
 		if (group->IsLeader(this)) {
 			if ((GetTarget() == 0 || GetTarget() == this) || (group->GroupCount() < 3)) {
 				Bot::ProcessBotGroupDisband(this, std::string());
@@ -7716,11 +7716,6 @@ void Client::Handle_OP_GuildInvite(const EQApplicationPacket *app)
 				return;
 			}
 		}
-		else if (invitee->IsBot()) {
-			// The guild system is too tightly coupled with the character_data table so we have to avoid using much of the system
-			Bot::ProcessGuildInvite(this, invitee->CastToBot());
-			return;
-		}
 	}
 }
 
@@ -8087,10 +8082,6 @@ void Client::Handle_OP_GuildRemove(const EQApplicationPacket *app)
 	else if (!worldserver.Connected())
 		Message(Chat::Red, "Error: World server disconnected");
 	else {
-		if (RuleB(Bots, AllowBots) && Bot::ProcessGuildRemoval(this, gc->othername)) {
-			return;
-		}
-
 		uint32 char_id;
 		Client* client = entity_list.GetClientByName(gc->othername);
 

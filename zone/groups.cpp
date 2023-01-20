@@ -343,7 +343,7 @@ bool Group::AddMember(Mob* newmember, const char *NewMemberName, uint32 Characte
 
 	safe_delete(outapp);
 
-	if (RuleB(Bots, AllowBots)) {
+	if (RuleB(Bots, Enabled)) {
 		Bot::UpdateGroupCastingRoles(this);
 	}
 
@@ -524,7 +524,7 @@ bool Group::UpdatePlayer(Mob* update){
 	if (update->IsClient() && !mentoree && mentoree_name.length() && !mentoree_name.compare(update->GetName()))
 		mentoree = update->CastToClient();
 
-	if (RuleB(Bots, AllowBots)) {
+	if (RuleB(Bots, Enabled)) {
 		Bot::UpdateGroupCastingRoles(this);
 	}
 
@@ -561,7 +561,7 @@ void Group::MemberZoned(Mob* removemob) {
 	if (removemob->IsClient() && removemob == mentoree)
 		mentoree = nullptr;
 
-	if (RuleB(Bots, AllowBots)) {
+	if (RuleB(Bots, Enabled)) {
 		Bot::UpdateGroupCastingRoles(this);
 	}
 }
@@ -782,7 +782,7 @@ bool Group::DelMember(Mob* oldmember, bool ignoresender)
 		ClearAllNPCMarks();
 	}
 
-	if (RuleB(Bots, AllowBots)) {
+	if (RuleB(Bots, Enabled)) {
 		Bot::UpdateGroupCastingRoles(this);
 	}
 
@@ -895,7 +895,7 @@ uint32 Group::GetTotalGroupDamage(Mob* other) {
 }
 
 void Group::DisbandGroup(bool joinraid) {
-	if (RuleB(Bots, AllowBots)) {
+	if (RuleB(Bots, Enabled)) {
 		Bot::UpdateGroupCastingRoles(this, true);
 	}
 

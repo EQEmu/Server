@@ -54,7 +54,7 @@ void command_zone(Client *c, const Seperator *sep)
 	}
 
 	// This block is necessary to clean up any bot objects owned by a Client
-	if (RuleB(Bots, AllowBots) && zone_id != c->GetZoneID()) {
+	if (RuleB(Bots, Enabled) && zone_id != c->GetZoneID()) {
 		Bot::ProcessClientZoneChange(c);
 	}
 

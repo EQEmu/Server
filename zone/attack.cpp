@@ -2897,7 +2897,7 @@ void Mob::AddToHateList(Mob* other, int64 hate /*= 0*/, int64 damage /*= 0*/, bo
 		other->CastToClient()->AddAutoXTarget(this);
 
 	// if other is a bot, add the bots client to the hate list
-	if (RuleB(Bots, AllowBots)) {
+	if (RuleB(Bots, Enabled)) {
 		while (other->IsBot()) {
 
 			auto other_ = other->CastToBot();

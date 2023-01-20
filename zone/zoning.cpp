@@ -41,7 +41,7 @@ extern Zone* zone;
 
 
 void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
-	if (RuleB(Bots, AllowBots)) {
+	if (RuleB(Bots, Enabled)) {
 		Bot::ProcessClientZoneChange(this);
 	}
 

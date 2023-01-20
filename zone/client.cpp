@@ -386,7 +386,7 @@ Client::Client(EQStreamInterface *ieqs) : Mob(
 Client::~Client() {
 	mMovementManager->RemoveClient(this);
 
-	if (RuleB(Bots, AllowBots)) {
+	if (RuleB(Bots, Enabled)) {
 		Bot::ProcessBotOwnerRefDelete(this);
 	}
 
@@ -1146,7 +1146,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 		}
 
 		if (message[0] == BOT_COMMAND_CHAR) {
-			if (RuleB(Bots, AllowBots)) {
+			if (RuleB(Bots, Enabled)) {
 				if (bot_command_dispatch(this, message) == -2) {
 					if (parse->PlayerHasQuestSub(EVENT_BOT_COMMAND)) {
 						int i = parse->EventPlayer(EVENT_BOT_COMMAND, this, message, 0);

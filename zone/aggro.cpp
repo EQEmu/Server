@@ -816,7 +816,7 @@ type', in which case, the answer is yes.
 			}
 		}
 
-		if (RuleB(Bots, AllowBots)) {
+		if (RuleB(Bots, Enabled)) {
 			// this is HIGHLY inefficient
 			bool HasRuleDefined     = false;
 			bool IsBotAttackAllowed = false;

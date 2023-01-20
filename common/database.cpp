@@ -416,7 +416,7 @@ bool Database::DeleteCharacter(char *character_name)
 
 		QueryDatabase(query);
 
-		if (RuleB(Bots, AllowBots)) {
+		if (RuleB(Bots, Enabled)) {
 			query = fmt::format(
 				SQL(
 					UPDATE

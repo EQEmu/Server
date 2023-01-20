@@ -902,7 +902,7 @@ void command_apply_shared_memory(Client *c, const Seperator *sep) {
 // Function delegate to support the command interface for Bots with the client.
 void command_bot(Client *c, const Seperator *sep)
 {
-	if (RuleB(Bots, AllowBots)) {
+	if (RuleB(Bots, Enabled)) {
 		std::string bot_message = sep->msg;
 		if (bot_message.compare("#bot") == 0) {
 			bot_message[0] = BOT_COMMAND_CHAR;
