@@ -21,6 +21,17 @@ try
 
     .\utils\scripts\build\should-release\should-release.exe; if ($LASTEXITCODE -ne 0) { exit }
 
+    # trim some fat
+    del $cwd\win-build-x64\export_client_files.pdb
+    del $cwd\win-build-x64\import_client_files.pdb
+    del $cwd\win-build-x64\shared_memory.pdb
+    del $cwd\win-build-x64\queryserv.pdb
+    del $cwd\win-build-x64\eqlaunch.pdb
+    del $cwd\win-build-x64\cppupnit.pdb
+    del $cwd\win-build-x64\zlib-ng.pdb
+    del $cwd\win-build-x64\tests.pdb
+    del $cwd\win-build-x64\tests.exe
+
     7z a eqemu-server-windows-x64.zip $cwd\win-build-x64\bin\RelWithDebInfo\*.exe $cwd\win-build-x64\bin\RelWithDebInfo\*.dll $cwd\win-build-x64\bin\RelWithDebInfo\*.pdb $cwd\win-build-x64\libs\zlibng\RelWithDebInfo\*.dll $cwd\win-build-x64\libs\zlibng\RelWithDebInfo\*.pdb
 
     dir *.zip
