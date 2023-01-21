@@ -176,9 +176,6 @@ int command_init(void)
 		command_add("goto", "[playername] or [x y z] [h] - Teleport to the provided coordinates or to your target", AccountStatus::Steward, command_goto) ||
 		command_add("grid", "[add/delete] [grid_num] [wandertype] [pausetype] - Create/delete a wandering grid", AccountStatus::GMAreas, command_grid) ||
 		command_add("guild", "Guild manipulation commands. Use argument help for more info.", AccountStatus::Steward, command_guild) ||
-		command_add("guildapprove", "[guildapproveid] - Approve a guild with specified ID (guild creator receives the id)", AccountStatus::Player, command_guildapprove) ||
-		command_add("guildcreate", "[guildname] - Creates an approval setup for guild name specified", AccountStatus::Player, command_guildcreate) ||
-		command_add("guildlist", "[guildapproveid] - Lists character names who have approved the guild specified by the approve id", AccountStatus::Player, command_guildlist) ||
 		command_add("haste", "[percentage] - Set your haste percentage", AccountStatus::GMAdmin, command_haste) ||
 		command_add("hatelist", "Display hate list for NPC.", AccountStatus::QuestTroupe, command_hatelist) ||
 		command_add("heal", "Completely heal your target", AccountStatus::Steward, command_heal) ||
@@ -1015,9 +1012,6 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/goto.cpp"
 #include "gm_commands/grid.cpp"
 #include "gm_commands/guild.cpp"
-#include "gm_commands/guildapprove.cpp"
-#include "gm_commands/guildcreate.cpp"
-#include "gm_commands/guildlist.cpp"
 #include "gm_commands/haste.cpp"
 #include "gm_commands/hatelist.cpp"
 #include "gm_commands/heal.cpp"
