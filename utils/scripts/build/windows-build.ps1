@@ -42,6 +42,7 @@ try
 catch
 {
     Write-Host ("Caught signal to end")
+    Write-Host $_
 }
 
 
