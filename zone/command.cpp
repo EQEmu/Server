@@ -333,7 +333,6 @@ int command_init(void)
 		command_add("trapinfo", "Gets infomation about the traps currently spawned in the zone.", AccountStatus::QuestTroupe, command_trapinfo) ||
 		command_add("tune", "Calculate statistical values related to combat.", AccountStatus::GMAdmin, command_tune) ||
 		command_add("undye", "Remove dye from all of your or your target's armor slots", AccountStatus::GMAdmin, command_undye) ||
-		command_add("undyeme", "Remove dye from all of your armor slots", AccountStatus::Player, command_undyeme) ||
 		command_add("unfreeze", "Unfreeze your target", AccountStatus::QuestTroupe, command_unfreeze) ||
 		command_add("unmemspell", "[Spell ID] - Unmemorize a Spell by ID for you or your target", AccountStatus::Guide, command_unmemspell) ||
 		command_add("unmemspells", " Unmemorize all spells for you or your target", AccountStatus::Guide, command_unmemspells) ||
@@ -1169,7 +1168,6 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/trapinfo.cpp"
 #include "gm_commands/tune.cpp"
 #include "gm_commands/undye.cpp"
-#include "gm_commands/undyeme.cpp"
 #include "gm_commands/unfreeze.cpp"
 #include "gm_commands/unmemspell.cpp"
 #include "gm_commands/unmemspells.cpp"
