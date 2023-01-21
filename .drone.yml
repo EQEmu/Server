@@ -1,39 +1,4 @@
 ---
-kind: pipeline
-type: docker
-name: EQEmulator Server Linux CI
-
-# Limits how many of these builds can run on the drone runner at a time, this isn't about cores
-concurrency:
-  limit: 1
-
-volumes:
-  - name: cache
-    host:
-      path: /var/lib/cache-debug
-
-steps:
-  - name: server-build
-    # Source build script https://github.com/Akkadius/akk-stack/blob/master/containers/eqemu-server/Dockerfile#L20
-    image: akkadius/eqemu-server:v11
-    commands:
-      - sudo chown eqemu:eqemu /drone/src/ * -R
-      - sudo chown eqemu:eqemu /home/eqemu/.ccache/ * -R
-      - git submodule init && git submodule update && mkdir -p build && cd build && cmake -DEQEMU_BUILD_TESTS=ON -DEQEMU_BUILD_LOGIN=ON -DEQEMU_BUILD_LUA=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_FLAGS_RELWITHDEBINFO:STRING="-O0 -g -DNDEBUG" -G 'Unix Makefiles' .. && make -j$((`nproc`-4))
-      - curl https://raw.githubusercontent.com/Akkadius/eqemu-install-v2/master/eqemu_config.json --output eqemu_config.json
-      - ./bin/tests
-    volumes:
-      - name: cache
-        path: /home/eqemu/.ccache/
-
-# remove this when merge
-trigger:
-  branch:
-    - noop
-  event:
-    - push
-
----
 
 kind: pipeline
 type: docker
@@ -68,12 +33,6 @@ steps:
       - name: cache
         path: /home/eqemu/.ccache/
 
-trigger:
-  branch:
-    - akkadius/build-test
-  event:
-    - push
-
 ---
 
 kind: pipeline
@@ -99,12 +58,6 @@ steps:
         from_secret: GH_RELEASE_GITHUB_API_TOKEN
     commands:
       - .\utils\scripts\build\windows-build.ps1
-
-trigger:
-  branch:
-    - akkadius/build-test
-  event:
-    - push
 
 ---
 
@@ -137,9 +90,3 @@ steps:
 depends_on:
   - Build Windows
   - Build Linux
-
-trigger:
-  branch:
-    - akkadius/build-test
-  event:
-    - push
