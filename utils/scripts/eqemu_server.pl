@@ -963,9 +963,6 @@ sub fetch_utility_scripts
 
 sub setup_bots
 {
-    if ($OS eq "Windows") {
-        fetch_latest_windows_appveyor_bots();
-    }
     if ($OS eq "Linux") {
         build_linux_source("bots");
     }
