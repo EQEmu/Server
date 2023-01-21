@@ -23,6 +23,7 @@ zip -j eqemu-server-linux-x64.zip ./build/bin/*
 
 # shellcheck disable=SC2010
 ls -lsh | grep zip
+sudo apt-get update && sudo apt-get install -y rclone
 rclone config create remote ftp env_auth true > /dev/null
 rclone copy eqemu-server-linux-x64.zip remote:
 rclone ls remote:
