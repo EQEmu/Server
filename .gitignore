@@ -1,0 +1,58 @@
+# Object files
+*.o
+*.obj
+
+# Libraries
+*.lib
+*.a
+
+# Shared objects (inc. Windows DLLs)
+*.dll
+*.so
+*.so.*
+*.dylib
+
+# Executables
+*.exe
+*.out
+*.app
+
+.bash_history
+
+# CMake
+CMakeCache.txt
+CMakeFiles
+Makefile
+cmake_install.cmake
+install_manifest.txt
+[Bb]uild*/
+log/
+logs/
+vcpkg/
+perl/
+
+.idea/*
+*cbp
+
+submodules/*
+cmake-build-debug/
+
+.nfs.*
+
+# Visual Studio and CMAKE Generated Files
+/.vs/
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+*.cmake
+*.ilk
+*.pdb
+*.sln
+*.dir/
+libs/
+bin/
+/Win32
+/x64
+/client_files/**/CMakeFiles/
+submodules/libuv
+.idea
