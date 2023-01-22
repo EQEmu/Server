@@ -7720,7 +7720,7 @@ void bot_subcommand_botgroup_list(Client *c, const Seperator *sep)
 		return;
 	}
 
-	std::list<std::pair<std::string, std::string>> botgroups_list;
+	std::list<std::pair<std::string, uint32>> botgroups_list;
 	if (!database.botdb.LoadBotGroupsListByOwnerID(c->CharacterID(), botgroups_list)) {
 		c->Message(Chat::White, "Failed to load bot-group.");
 		return;
@@ -7733,17 +7733,17 @@ void bot_subcommand_botgroup_list(Client *c, const Seperator *sep)
 
 	uint32 botgroup_count = 0;
 
-	for (auto botgroups_iter : botgroups_list) {
+	for (const auto& [group_name, group_leader_id] : botgroups_list) {
 		c->Message(
 			Chat::White,
 			fmt::format(
 				"Bot-group {} | Name: {} | Leader: {}{} | {}",
 				(botgroup_count + 1),
-				botgroups_iter.first,
-				botgroups_iter.second,
-				database.botdb.IsBotGroupAutoSpawn(botgroups_iter.first) ? " (Auto Spawn)" : "",
+				group_name,
+				database.botdb.GetBotNameByID(group_leader_id),
+				database.botdb.IsBotGroupAutoSpawn(group_name) ? " (Auto Spawn)" : "",
 				Saylink::Silent(
-					fmt::format("^botgroupload {}", botgroups_iter.first),
+					fmt::format("^botgroupload {}", group_name),
 					"Load"
 				)
 			).c_str()
