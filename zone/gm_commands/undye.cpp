@@ -3,7 +3,7 @@
 void command_undye(Client *c, const Seperator *sep)
 {
 	auto target = c;
-	if (c->GetTarget() && c->GetTarget()->IsClient()) {
+	if (c->GetTarget() && c->GetTarget()->IsClient() && c->GetGM()) {
 		target = c->GetTarget()->CastToClient();
 	}
 
