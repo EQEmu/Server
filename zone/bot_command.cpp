@@ -7720,7 +7720,7 @@ void bot_subcommand_botgroup_list(Client *c, const Seperator *sep)
 		return;
 	}
 
-	std::list<std::pair<std::string, int32>> botgroups_list;
+	std::list<std::pair<std::string, uint32>> botgroups_list;
 	if (!database.botdb.LoadBotGroupsListByOwnerID(c->CharacterID(), botgroups_list)) {
 		c->Message(Chat::White, "Failed to load bot-group.");
 		return;

@@ -167,7 +167,7 @@ public:
 	bool LoadBotGroupIDForLoadBotGroup(const uint32 owner_id, std::string_view botgroup_name, uint32& botgroup_id);
 	bool LoadBotGroup(const std::string& botgroup_name, std::map<uint32, std::list<uint32>>& member_list);
 
-	bool LoadBotGroupsListByOwnerID(const uint32 owner_id, std::list<std::pair<std::string, int32>>& botgroups_list);
+	bool LoadBotGroupsListByOwnerID(const uint32 owner_id, std::list<std::pair<std::string, uint32>>& botgroups_list);
 
 
 	/* Bot group functions   */

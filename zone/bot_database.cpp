@@ -2606,7 +2606,7 @@ bool BotDatabase::LoadBotGroup(const std::string& group_name, std::map<uint32, s
 	return true;
 }
 
-bool BotDatabase::LoadBotGroupsListByOwnerID(const uint32 owner_id, std::list<std::pair<std::string, int32>>& botgroups_list)
+bool BotDatabase::LoadBotGroupsListByOwnerID(const uint32 owner_id, std::list<std::pair<std::string, uint32>>& botgroups_list)
 {
 	if (!owner_id) {
 		return false;
@@ -2632,7 +2632,7 @@ bool BotDatabase::LoadBotGroupsListByOwnerID(const uint32 owner_id, std::list<st
 	}
 
 	for (auto row : results) {
-		botgroups_list.push_back(std::pair<std::string, int32>(row[0], atoi(row[1])));
+		botgroups_list.push_back(std::pair<std::string, uint32>(row[0], atoul(row[1])));
 	}
 
 	return true;
