@@ -78,9 +78,11 @@ void Bot::AI_Process_Raid()
 		leash_owner = bot_owner;
 		SetFollowID(leash_owner->GetID());
 	}
-	else if (r_group < 12 && raid->GetGroupLeader(r_group)->IsClient()) {
-		leash_owner = raid->GetGroupLeader(r_group);
-		SetFollowID(leash_owner->GetID());
+	else if (r_group < 12 && raid->GetGroupLeader(r_group) && raid->GetGroupLeader(r_group)->IsClient()) {
+		if (raid->GetGroupLeader(r_group)) {
+			leash_owner = raid->GetGroupLeader(r_group);
+			SetFollowID(leash_owner->GetID());
+		}
 	}
 	else {
 		leash_owner = bot_owner;
@@ -326,25 +328,27 @@ void Bot::AI_Process_Raid()
 					}
 
 					Mob* bgm_target = bg_member->GetTarget();
-					if (!bgm_target || !bgm_target->IsNPC()) {
-						continue;
-					}
-
-					if (!bgm_target->IsMezzed() &&
-						((bot_owner->GetBotOption(Client::booAutoDefend) && bgm_target->GetHateAmount(bg_member)) || leash_owner->AutoAttackEnabled()) &&
-						lo_distance <= leash_distance &&
-						DistanceSquared(m_Position, bgm_target->GetPosition()) <= leash_distance &&
-						(CheckLosFN(bgm_target) || leash_owner->CheckLosFN(bgm_target)) &&
-						IsAttackAllowed(bgm_target))
-					{
-						AddToHateList(bgm_target, 1);
-						if (HasPet() && (GetClass() != ENCHANTER || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 2)) {
-
-							GetPet()->AddToHateList(bgm_target, 1);
-							GetPet()->SetTarget(bgm_target);
+					if (bgm_target) {
+						if (!bgm_target || !bgm_target->IsNPC()) {
+							continue;
 						}
 
-						break;
+						if (!bgm_target->IsMezzed() &&
+							((bot_owner->GetBotOption(Client::booAutoDefend) && bgm_target->GetHateAmount(bg_member)) || leash_owner->AutoAttackEnabled()) &&
+							lo_distance <= leash_distance &&
+							DistanceSquared(m_Position, bgm_target->GetPosition()) <= leash_distance &&
+							(CheckLosFN(bgm_target) || leash_owner->CheckLosFN(bgm_target)) &&
+							IsAttackAllowed(bgm_target))
+						{
+							AddToHateList(bgm_target, 1);
+							if (HasPet() && (GetClass() != ENCHANTER || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 2)) {
+
+								GetPet()->AddToHateList(bgm_target, 1);
+								GetPet()->SetTarget(bgm_target);
+							}
+
+							break;
+						}
 					}
 				}
 			}
