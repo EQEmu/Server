@@ -75,13 +75,16 @@ void Bot::AI_Process_Raid()
 	// We also need a leash owner and follow mob (subset of primary AI criteria)
 	Client* leash_owner = nullptr;
 	if (r_group < 12 && raid->IsGroupLeader(this->GetName())) {
-		leash_owner = raid->GetLeader();
+		leash_owner = bot_owner;
+		SetFollowID(leash_owner->GetID());
 	}
-	else if (r_group < 12) {
+	else if (r_group < 12 && raid->GetGroupLeader(r_group)->IsClient()) {
 		leash_owner = raid->GetGroupLeader(r_group);
+		SetFollowID(leash_owner->GetID());
 	}
 	else {
 		leash_owner = bot_owner;
+		SetFollowID(leash_owner->GetID());
 	}
 
 	if (!leash_owner) {
@@ -428,9 +431,9 @@ void Bot::AI_Process_Raid()
 			auto assist_mob = raid->GetRaidMainAssistOneByName(this->GetName());
 			bool find_target = true;
 
-			if (!assist_mob) {
-				bot_owner->Message(Chat::Yellow, "Assist Mob is nullptr");
-			}
+			//if (!assist_mob) {
+			//	bot_owner->Message(Chat::Yellow, "Assist Mob is nullptr");
+			//}
 
 			if (assist_mob) {
 
