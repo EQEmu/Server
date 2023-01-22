@@ -26,6 +26,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include <string.h>
 #include <zlib.h>
 #include "bot.h"
+#include "bot_command.h"
 
 #ifdef _WINDOWS
 #define snprintf	_snprintf
@@ -604,7 +605,6 @@ void Client::CompleteConnect()
 		if (raid) {
 			SetRaidGrouped(true);
 			raid->LearnMembers();
-#ifdef BOTS
 			std::list<BotsAvailableList> bots_list;
 			database.botdb.LoadBotsList(this->CharacterID(), bots_list);
 			std::vector<RaidMember> r_members = raid->GetMembers();
@@ -628,7 +628,6 @@ void Client::CompleteConnect()
 					}
 				}
 			}
-#endif
 			raid->VerifyRaid();
 			raid->GetRaidDetails();
 			/*
@@ -11475,8 +11474,6 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 	case RaidCommandInviteIntoExisting:
 	case RaidCommandInvite: {
 
-#ifdef BOTS
-
 		Bot* player_to_invite = nullptr;
 		Client* player_to_invite_owner = nullptr;
 
@@ -11513,7 +11510,6 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 			}
 			else
 			{
-#endif
 				Client* player_to_invite = entity_list.GetClientByName(raid_command_packet->player_name);
 
 				if (!player_to_invite)
@@ -11552,14 +11548,11 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 
 				break;
 			}
-#ifdef BOTS
 		}
-#endif
 
 	case RaidCommandAcceptInvite: {
 		Client* player_accepting_invite = entity_list.GetClientByName(raid_command_packet->player_name);
 
-#ifdef BOTS
 		// If the accepting client is in a group with a Bot or the invitor is in a group with a Bot, send the invite to Bot:ProcessRaidInvite
 		// instead of remaining here.
 		Bot* b = nullptr;
@@ -11609,7 +11602,6 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 			break;
 		}
 
-#endif
 		if (player_accepting_invite) {
 			if (IsRaidGrouped()) {
 				player_accepting_invite->MessageString(Chat::White, ALREADY_IN_RAID, GetName()); //group failed, must invite members not in raid...
@@ -11881,14 +11873,11 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 		Raid* raid = entity_list.GetRaidByClient(this);
 		Client* c_to_disband = entity_list.GetClientByName(raid_command_packet->leader_name);
 		Client* c_doing_disband = entity_list.GetClientByName(raid_command_packet->player_name);
-#ifdef BOTS
 		Bot* b_to_disband = entity_list.GetBotByBotName(raid_command_packet->leader_name);
-#endif
 
 		if (raid) {
 			uint32 group = raid->GetGroup(raid_command_packet->leader_name);
 
-#ifdef BOTS
 			//Added to remove all bots if the Bot_Owner is removed from the Raid
 			//Does not camp the Bots, just removes from the raid
 			std::vector<Bot*> raid_members_bots;
@@ -11962,7 +11951,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 					break;
 				}
 			}
-#endif
+
 			if (group < 12) {
 				uint32 i = raid->GetPlayerIndex(raid_command_packet->leader_name);
 				if (raid->members[i].IsGroupLeader) { //assign group leader to someone else

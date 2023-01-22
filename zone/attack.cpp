@@ -1985,7 +1985,7 @@ bool Client::Death(Mob* killerMob, int64 damage, uint16 spell, EQ::skills::Skill
 				}
 
 				if (killerMob->CastToClient()->isgrouped) {
-					auto* group = entity_list.GetGroupByClient(killerMob->CastToClient());
+					Group* group = entity_list.GetGroupByClient(killerMob->CastToClient());
 					if (group) {
 						for (int i = 0; i < 6; i++) {
 							if (group->members[i]) {
@@ -2039,7 +2039,7 @@ bool Client::Death(Mob* killerMob, int64 damage, uint16 spell, EQ::skills::Skill
 			}
 		}
 
-		auto* r = entity_list.GetRaidByClient(this);
+		Raid* r = entity_list.GetRaidByClient(this);
 
 		if (r) {
 			r->MemberZoned(this);
@@ -2395,7 +2395,7 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 	SetPet(0);
 
 	if (GetSwarmOwner()) {
-		auto* owner = entity_list.GetMobID(GetSwarmOwner());
+		Mob* owner = entity_list.GetMobID(GetSwarmOwner());
 		if (owner) {
 			owner->SetTempPetCount(owner->GetTempPetCount() - 1);
 		}
@@ -4055,7 +4055,6 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 				}
 			}
 
-#ifdef BOTS
 			else if (owner && owner->IsBot() && RuleB(Bots, DisplaySpellDamage)) {
 				if (((spell_id != SPELL_UNKNOWN) || (FromDamageShield)) && damage > 0) {
 					//special crap for spell damage, looks hackish to me
@@ -4080,7 +4079,6 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 
 				}
 			}
-#endif
 			skip = owner;
 		}
 		else {
@@ -4225,7 +4223,6 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 				spells[spell_id].name /* Message4 */
 			);
 		}
-#ifdef BOTS
 		// If a bot is the attacker, send a damage message ot the Bot Owner
 		else if (attacker->GetTarget() && spell_id != SPELL_UNKNOWN && attacker->IsBot() && damage > 0 && !Critical && attacker && attacker != this && RuleB(Bots, DisplaySpellDamage)) {
 			attacker->CastToBot()->GetBotOwner()->FilteredMessageString(
@@ -4238,12 +4235,11 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 				attacker->GetCleanName(),
 				spells[spell_id].name);
 		}
-#endif
 	}
 
 } //end packet sending
 
-void Mob::HealDamage(uint64 amount, Mob *caster, uint16 spell_id)
+void Mob::HealDamage(uint64 amount, Mob* caster, uint16 spell_id)
 {
 	int64 maxhp = GetMaxHP();
 	int64 curhp = GetHP();
@@ -4257,7 +4253,7 @@ void Mob::HealDamage(uint64 amount, Mob *caster, uint16 spell_id)
 	if (acthealed > 100) {
 		if (caster) {
 			if (IsBuffSpell(spell_id)) { // hots
-										 // message to caster
+				// message to caster
 				if ((caster->IsClient() && caster == this)) {
 					if (caster->CastToClient()->ClientVersionBit() & EQ::versions::maskSoFAndLater) {
 						FilteredMessageString(caster, Chat::NonMelee, FilterHealOverTime,
@@ -4276,7 +4272,7 @@ void Mob::HealDamage(uint64 amount, Mob *caster, uint16 spell_id)
 						caster->FilteredMessageString(caster, Chat::NonMelee, FilterHealOverTime,
 							YOU_HEAL, GetCleanName(), itoa(acthealed));
 				}
-#ifdef BOTS
+
 				if (caster->IsBot() && this != caster->CastToBot()->GetBotOwner() && RuleB(Bots, DisplayHealDamage)) {
 
 
@@ -4302,7 +4298,7 @@ void Mob::HealDamage(uint64 amount, Mob *caster, uint16 spell_id)
 						spells[spell_id].name				// %9 spell name
 					);
 				}
-#endif // BOTS
+
 				// message to target
 				if ((IsClient() && caster != this)) {
 					if (CastToClient()->ClientVersionBit() & EQ::versions::maskSoFAndLater)
@@ -4317,39 +4313,23 @@ void Mob::HealDamage(uint64 amount, Mob *caster, uint16 spell_id)
 			else { // normal heals
 				FilteredMessageString(caster, Chat::NonMelee, FilterSpellDamage,
 					YOU_HEALED, caster->GetCleanName(), itoa(acthealed));
-#ifndef BOTS
+
 				if (caster != this)
 					caster->FilteredMessageString(caster, Chat::NonMelee, FilterSpellDamage,
 						YOU_HEAL, GetCleanName(), itoa(acthealed));
 			}
-#endif
-#ifdef	BOTS
-			if (caster->IsBot() && RuleB(Bots, DisplayHealDamage)) {
-				caster->CastToBot()->GetBotOwner()->FilteredMessageString(caster->CastToBot()->GetBotOwner(),
-					Chat::NonMelee, FilterSpellDamage, GENERIC_9_STRINGS,
-					caster->GetCleanName(), " healed ", this->GetCleanName(), " for ", itoa(acthealed), " hit points.", " ", " ", " ");
-			}
-			else if (caster != this) {
-				caster->FilteredMessageString(caster, Chat::NonMelee, FilterSpellDamage,
-					YOU_HEAL, GetCleanName(), itoa(acthealed));
-
-			}
 		}
-		else if (CastToClient()->GetFilter(FilterHealOverTime) != (FilterShowSelfOnly || FilterHide)) {
-  		Message(Chat::NonMelee, "You have been healed for %d points of damage.", acthealed);
+
+		if (curhp < maxhp) {
+			if ((curhp + amount) > maxhp)
+				curhp = maxhp;
+			else
+				curhp += amount;
+			SetHP(curhp);
+
+			SendHPUpdate();
+		}
 	}
-#endif // BOTS
-}
-
-if (curhp < maxhp) {
-	if ((curhp + amount) > maxhp)
-		curhp = maxhp;
-	else
-		curhp += amount;
-	SetHP(curhp);
-
-	SendHPUpdate();
-}
 }
 
 //proc chance includes proc bonus

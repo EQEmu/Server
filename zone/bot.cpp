@@ -8123,7 +8123,6 @@ bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, fl
 					}
 				}
 			}
-#ifdef BOTS
 			else if (caster->IsRaidGrouped())
 			{
 				//added raid check
@@ -8163,7 +8162,6 @@ bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, fl
 					}
 				}	
 			}
-#endif
 		}
 
 		if( botCasterClass == PALADIN || botCasterClass == BEASTLORD || botCasterClass == RANGER) {
@@ -8262,7 +8260,6 @@ bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, fl
 			else
 				return false;
 		}
-#ifdef BOTS
 //added raid check
 		if (caster->IsRaidGrouped()) {
 			Raid* raid = entity_list.GetRaidByBotName(caster->GetName());
@@ -8277,7 +8274,6 @@ bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, fl
 				}
 			}
 		}
-#endif
 		if(caster->HasGroup()) {
 			Group *g = caster->GetGroup();
 			if(g) {
@@ -10485,5 +10481,3 @@ void Bot::ProcessRaidInvite(Bot* invitee, Client* invitor) {
 		}
 	}
 }
-
-#endif

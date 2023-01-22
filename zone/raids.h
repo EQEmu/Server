@@ -88,10 +88,8 @@ struct RaidMember{
 	bool IsGroupLeader;
 	bool IsRaidLeader;
 	bool IsLooter;
-#ifdef BOTS
 	bool IsBot = false;
 	bool IsRaidMainAssistOne = false;
-#endif
 };
 
 struct GroupMentor {
@@ -117,11 +115,9 @@ public:
 	bool	IsRaid() { return true; }
 
 	void	AddMember(Client *c, uint32 group = 0xFFFFFFFF, bool rleader=false, bool groupleader=false, bool looter=false);
-#ifdef BOTS
 	void	AddBot(Bot* b, uint32 group = 0xFFFFFFFF, bool rleader=false, bool groupleader=false, bool looter=false); 
 	void    RaidBotGroupSay(Bot* b, uint8 language, uint8 lang_skill, const char* msg, ...); //Not yet implemented
-	Mob* GetRaidMainAssistOneByName(const char* name);
-#endif
+	Mob*    GetRaidMainAssistOneByName(const char* name);
 	void	RemoveMember(const char *c);
 	void	DisbandRaid();
 	void	MoveMember(const char *name, uint32 newGroup);

@@ -2210,7 +2210,6 @@ Raid* EntityList::GetRaidByClient(Client* client)
 
 	return nullptr;
 }
-#ifdef BOTS
 Raid* EntityList::GetRaidByBotName(const char* name)
 {
 
@@ -2232,9 +2231,7 @@ Raid* EntityList::GetRaidByBotName(const char* name)
 
 	return nullptr;
 }
-#endif
 
-#ifdef BOTS
 Raid* EntityList::GetRaidByBot(Bot* bot)
 {
 
@@ -2252,7 +2249,6 @@ Raid* EntityList::GetRaidByBot(Bot* bot)
 	}
 	return nullptr;
 }
-#endif
 
 
 Raid *EntityList::GetRaidByMob(Mob *mob)

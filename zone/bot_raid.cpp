@@ -16,16 +16,16 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-#ifdef BOTS
-
 #include "bot.h"
 #include "object.h"
 #include "raids.h"
 #include "doors.h"
 #include "quest_parser_collection.h"
 #include "lua_parser.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "../common/say_link.h"
+#include "../common/repositories/bot_spell_settings_repository.h"
+#include "../common/data_verification.h"
 
 extern volatile bool is_zone_loaded;
 extern bool Critical; 
@@ -746,12 +746,12 @@ void Bot::AI_Process_Raid()
 
 			if (atArcheryRange && !IsBotArcher()) {
 
-				SetBotArcher(true);
+				SetBotArcherySetting(true);
 				changeWeapons = true;
 			}
 			else if (!atArcheryRange && IsBotArcher()) {
 
-				SetBotArcher(false);
+				SetBotArcherySetting(false);
 				changeWeapons = true;
 			}
 
@@ -2627,4 +2627,3 @@ uint8 Bot::GetNumberNeedingHealedInRaidGroup(uint8 hpr, bool includePets) {
 		}
 	return needHealed;
 }
-#endif
