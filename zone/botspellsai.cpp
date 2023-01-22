@@ -3,7 +3,7 @@
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
-	the Free Software Foundation; version 2 of the License.
+	the Free Software Foundation; version 2 ogroupf the License.
 
 	This program is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY except by those people which sell it, which
@@ -31,6 +31,13 @@
 #endif
 
 bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
+
+	// Bot AI
+	Raid* raid = entity_list.GetRaidByBotName(this->GetName());
+	if (raid) {
+		return AICastSpell_Raid(tar, iChance, iSpellTypes);
+		//return true;
+	}
 
 	if (!tar) {
 		return false;

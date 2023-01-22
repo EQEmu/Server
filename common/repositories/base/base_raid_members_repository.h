@@ -28,6 +28,9 @@ public:
 		int8_t      isgroupleader;
 		int8_t      israidleader;
 		int8_t      islooter;
+#ifdef BOTS
+		int8_t			isbot;
+#endif
 	};
 
 	static std::string PrimaryKey()
@@ -47,6 +50,9 @@ public:
 			"isgroupleader",
 			"israidleader",
 			"islooter",
+#ifdef BOTS
+			"isbot",
+#endif
 		};
 	}
 
@@ -113,6 +119,11 @@ public:
 		e.islooter      = 0;
 
 		return e;
+#ifdef BOTS
+		e.isbot			    = 0;
+#endif
+
+		return e;
 	}
 
 	static RaidMembers GetRaidMembers(
@@ -155,6 +166,9 @@ public:
 			e.isgroupleader = static_cast<int8_t>(atoi(row[6]));
 			e.israidleader  = static_cast<int8_t>(atoi(row[7]));
 			e.islooter      = static_cast<int8_t>(atoi(row[8]));
+#ifdef BOTS
+			e.isbot			    = static_cast<int8_t>(atoi(row[9]));
+#endif
 
 			return e;
 		}
@@ -197,6 +211,9 @@ public:
 		v.push_back(columns[6] + " = " + std::to_string(e.isgroupleader));
 		v.push_back(columns[7] + " = " + std::to_string(e.israidleader));
 		v.push_back(columns[8] + " = " + std::to_string(e.islooter));
+#ifdef BOTS
+		v.push_back(columns[9] + " = " + std::to_string(e.isbot));
+#endif
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -227,6 +244,9 @@ public:
 		v.push_back(std::to_string(e.isgroupleader));
 		v.push_back(std::to_string(e.israidleader));
 		v.push_back(std::to_string(e.islooter));
+#ifdef BOTS
+		v.push_back(std::to_string(e.isbot));
+#endif
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -265,6 +285,9 @@ public:
 			v.push_back(std::to_string(e.isgroupleader));
 			v.push_back(std::to_string(e.israidleader));
 			v.push_back(std::to_string(e.islooter));
+#ifdef BOTS
+			v.push_back(std::to_string(e.isbot));
+#endif
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
@@ -307,6 +330,9 @@ public:
 			e.isgroupleader = static_cast<int8_t>(atoi(row[6]));
 			e.israidleader  = static_cast<int8_t>(atoi(row[7]));
 			e.islooter      = static_cast<int8_t>(atoi(row[8]));
+#ifdef BOTS
+			e.isbot			    = static_cast<int8_t>(atoi(row[9]));
+#endif
 
 			all_entries.push_back(e);
 		}
@@ -340,6 +366,9 @@ public:
 			e.isgroupleader = static_cast<int8_t>(atoi(row[6]));
 			e.israidleader  = static_cast<int8_t>(atoi(row[7]));
 			e.islooter      = static_cast<int8_t>(atoi(row[8]));
+#ifdef BOTS
+			e.isbot			= static_cast<int8_t>(atoi(row[9]));
+#endif
 
 			all_entries.push_back(e);
 		}

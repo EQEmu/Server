@@ -234,10 +234,24 @@ bool Group::AddMember(Mob* newmember, const char *NewMemberName, uint32 Characte
 	uint32 i = 0;
 	for (i = 0; i < MAX_GROUP_MEMBERS; ++i)
 	{
-		if(!strcasecmp(membername[i], NewMemberName))
+#ifdef BOTSS
+		if (newmember->IsBot() && !newmember->HasGroup() && !strcasecmp(membername[i], NewMemberName)) // Mitch
+		{
+			//Bot::RemoveBotFromGroup(newmember->CastToBot(), members[0]->GetGroup());
+			//Group::DelMember(newmember);
+			memset(membername[i], 0, 64);
+			members[i] = nullptr;
+		}
+		else if (!strcasecmp(membername[i], NewMemberName))
 		{
 			return false;
 		}
+#else
+		if (!strcasecmp(membername[i], NewMemberName))
+		{
+			return false;
+		}
+#endif
 	}
 
 	// Put them in the group
@@ -1126,7 +1140,13 @@ void Group::TeleportGroup(Mob* sender, uint32 zoneID, uint16 instance_id, float 
 }
 
 bool Group::LearnMembers() {
-	std::string query = StringFormat("SELECT name FROM group_id WHERE groupid = %lu", (unsigned long)GetID());
+	//std::string query = StringFormat("SELECT name FROM group_id WHERE groupid = %lu", (unsigned long)GetID());
+	std::string query = StringFormat("SELECT name FROM group_id "
+		"WHERE group_id.groupid = %lu AND group_id.name NOT "
+		"IN(SELECT group_leaders.leadername FROM group_leaders WHERE gid = %lu)"
+		, (unsigned long)GetID()
+		, (unsigned long)GetID());
+
 	auto results = database.QueryDatabase(query);
 	if (!results.Success())
         return false;
@@ -1141,7 +1161,7 @@ bool Group::LearnMembers() {
 		return false;
 	}
 
-	int memberIndex = 0;
+	int memberIndex = 1;	//starts at 1 becasuse leader [0] is done specifically
     for(auto row = results.begin(); row != results.end(); ++row) {
 		if(!row[0])
 			continue;
@@ -1151,7 +1171,24 @@ bool Group::LearnMembers() {
 
 		memberIndex++;
 	}
+	// for leader only [0] /Mitch
+	query = StringFormat("SELECT leadername FROM group_leaders WHERE group_leaders.gid = %lu", (unsigned long)GetID());
+	auto results2 = database.QueryDatabase(query);
+	if (!results2.Success())
+		return false;
 
+	if (results2.RowCount() == 0) {
+		LogError(
+			"Error getting group leader for group [{}]: [{}]",
+			(unsigned long)GetID(),
+			results2.ErrorMessage().c_str()
+		);
+
+		return false;
+	}
+	auto row2 = results2.begin();
+	members[0] = nullptr;
+	strn0cpy(membername[0], row2[0], 64);
 	return true;
 }
 
@@ -1161,6 +1198,22 @@ void Group::VerifyGroup() {
 		is in a valid state, to prevent dangling pointers.
 		Only called every once in a while (on member re-join for now).
 	*/
+
+	// To do
+	// Reset the membername array to match the group_id database records?
+	// When doing this manually, it seem to have resolved the issue.
+	// Only want to do this when the database Name does not match the array
+	// Could this be done from the LearnGroup method?
+	// reset the members and membername array for this group
+	// Mitch
+	for (int i = 0; i < MAX_GROUP_MEMBERS; i++) {
+		members[i] = nullptr; 
+		memset(membername[i],'\0',64);
+		//membername[i][0] == '\0');
+	}
+	// repopulate the membername array from the database to ensure the local zone instance has accurate information
+
+	Group::LearnMembers();
 
 	uint32 i;
 	for (i = 0; i < MAX_GROUP_MEMBERS; i++) {
@@ -1181,6 +1234,7 @@ void Group::VerifyGroup() {
 			members[i] = nullptr;
 			continue;
 		}
+
 
 		if(them != nullptr && members[i] != them) {	//our pointer is out of date... not so good.
 #if EQDEBUG >= 5

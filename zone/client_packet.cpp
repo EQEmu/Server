@@ -25,6 +25,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include <stdio.h>
 #include <string.h>
 #include <zlib.h>
+#include "bot.h"
 
 #ifdef _WINDOWS
 #define snprintf	_snprintf
@@ -603,6 +604,31 @@ void Client::CompleteConnect()
 		if (raid) {
 			SetRaidGrouped(true);
 			raid->LearnMembers();
+#ifdef BOTS
+			std::list<BotsAvailableList> bots_list;
+			database.botdb.LoadBotsList(this->CharacterID(), bots_list);
+			std::vector<RaidMember> r_members = raid->GetMembers();
+			for (const RaidMember& iter : r_members) {
+				if (iter.membername) {
+					for (const BotsAvailableList& b_iter : bots_list)
+					{
+						if (strcmp(iter.membername, b_iter.Name) == 0)
+						{
+							char buffer[71] = "^spawn ";
+							strcat(buffer, iter.membername);
+							bot_command_real_dispatch(this, buffer);
+							Bot* b = entity_list.GetBotByBotName(iter.membername);
+							if (b)
+							{
+								b->SetRaidGrouped(true);
+								b->p_raid_instance = raid;
+								//b->SetFollowID(this->GetID());
+							}
+						}
+					}
+				}
+			}
+#endif
 			raid->VerifyRaid();
 			raid->GetRaidDetails();
 			/*
@@ -7006,7 +7032,12 @@ void Client::Handle_OP_GroupInvite2(const EQApplicationPacket *app)
 			}
 		}
 		else if (Invitee->IsBot()) {
-			Bot::ProcessBotGroupInvite(this, std::string(Invitee->GetName()));
+			Client* inviter = entity_list.GetClientByName(gis->inviter_name);
+			//Bot* invitee = entity_list.GetBotByBotName(gis->invitee_name);
+			if (inviter->IsRaidGrouped())
+				Bot::ProcessRaidInvite(Invitee->CastToBot(), inviter);
+			else
+				Bot::ProcessBotGroupInvite(this, std::string(Invitee->GetName()));
 		}
 	}
 	else
@@ -11430,7 +11461,7 @@ void Client::Handle_OP_QueryUCSServerStatus(const EQApplicationPacket *app)
 	}
 }
 
-void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
+void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 {
 	if (app->size < sizeof(RaidGeneral_Struct)) {
 		LogError("Wrong size: OP_RaidCommand, size=[{}], expected at least [{}]", app->size, sizeof(RaidGeneral_Struct));
@@ -11438,218 +11469,256 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 		return;
 	}
 
-	RaidGeneral_Struct *raid_command_packet = (RaidGeneral_Struct*)app->pBuffer;
+	RaidGeneral_Struct* raid_command_packet = (RaidGeneral_Struct*)app->pBuffer;
 	switch (raid_command_packet->action)
 	{
-		case RaidCommandInviteIntoExisting:
-		case RaidCommandInvite: {
+	case RaidCommandInviteIntoExisting:
+	case RaidCommandInvite: {
 
-			Client *player_to_invite = entity_list.GetClientByName(raid_command_packet->player_name);
+#ifdef BOTS
 
-			if (!player_to_invite)
-				break;
+		Bot* player_to_invite = nullptr;
+		Client* player_to_invite_owner = nullptr;
 
-			Group *player_to_invite_group = player_to_invite->GetGroup();
+		if (entity_list.GetBotByBotName(raid_command_packet->player_name)) {
+			Bot* player_to_invite = entity_list.GetBotByBotName(raid_command_packet->player_name);
+			Client* player_to_invite_owner = player_to_invite->GetOwner()->CastToClient();
+			Group* player_to_invite_group = player_to_invite->GetGroup();
 
-			if (player_to_invite->HasRaid()) {
-				Message(Chat::Red, "%s is already in a raid.", player_to_invite->GetName());
-				break;
-			}
-
-			if (player_to_invite_group && player_to_invite_group->IsGroupMember(this)) {
-				MessageString(Chat::Red, ALREADY_IN_PARTY);
+			if (!player_to_invite) {
 				break;
 			}
 
-			if (player_to_invite_group && !player_to_invite_group->IsLeader(player_to_invite)) {
-				Message(Chat::Red, "You can only invite an ungrouped player or group leader to join your raid.");
+			//Not allowed: Invite a bot that is already within a raid.
+			if (player_to_invite->IsRaidGrouped()) {
+				MessageString(Chat::White, ALREADY_IN_RAID, GetName()); //must invite members not in raid...
+				return;
+			}
+
+			// Not allowed: Invite a bot that is not owned by the invitor
+			if (player_to_invite->IsBot() &&
+					player_to_invite->CastToBot()->GetOwner()->CastToClient()->CharacterID() !=
+					player_to_invite_owner->CharacterID()) {
+					Message(Chat::Red, "%s is not your Bot.  You can only invite your Bots, or players grouped with bots.", player_to_invite->GetName());
+			}
+
+			// Not allowed: Invite a bot that is in a group but the bot is not the group leader
+			if (player_to_invite_group && !player_to_invite_group->IsLeader(player_to_invite->CastToMob())) {
+				Message(Chat::Red, "You can only invite group leaders or ungrouped bots. Try %s instead.", player_to_invite_group->GetLeader()->GetName());
 				break;
 			}
 
-			/* Send out invite to the client */
-			auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidGeneral_Struct));
-			RaidGeneral_Struct *raid_command = (RaidGeneral_Struct*)outapp->pBuffer;
+			Bot::ProcessRaidInvite(player_to_invite, player_to_invite_owner);
+			break;
+			}
+			else
+			{
+#endif
+				Client* player_to_invite = entity_list.GetClientByName(raid_command_packet->player_name);
 
-			strn0cpy(raid_command->leader_name, raid_command_packet->leader_name, 64);
-			strn0cpy(raid_command->player_name, raid_command_packet->player_name, 64);
+				if (!player_to_invite)
+					break;
 
-			raid_command->parameter = 0;
-			raid_command->action = 20;
+				Group* player_to_invite_group = player_to_invite->GetGroup();
 
-			player_to_invite->QueuePacket(outapp);
+				if (player_to_invite->HasRaid()) {
+					Message(Chat::Red, "%s is already in a raid.", player_to_invite->GetName());
+					break;
+				}
 
-			safe_delete(outapp);
+				if (player_to_invite_group && player_to_invite_group->IsGroupMember(this)) {
+					MessageString(Chat::Red, ALREADY_IN_PARTY);
+					break;
+				}
+				// Not allowed: Invite a client that is in a group but not the groupleader
+				if (player_to_invite_group && !player_to_invite_group->IsLeader(player_to_invite)) {
+					Message(Chat::Red, "You can only invite an ungrouped player or group leader to join your raid.");
+					break;
+				}
 
+				/* Send out invite to the client */
+				auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidGeneral_Struct));
+				RaidGeneral_Struct* raid_command = (RaidGeneral_Struct*)outapp->pBuffer;
+
+				strn0cpy(raid_command->leader_name, raid_command_packet->leader_name, 64);
+				strn0cpy(raid_command->player_name, raid_command_packet->player_name, 64);
+
+				raid_command->parameter = 0;
+				raid_command->action = 20;
+
+				player_to_invite->QueuePacket(outapp);
+
+				safe_delete(outapp);
+
+				break;
+			}
+#ifdef BOTS
+		}
+#endif
+
+	case RaidCommandAcceptInvite: {
+		Client* player_accepting_invite = entity_list.GetClientByName(raid_command_packet->player_name);
+
+#ifdef BOTS
+		// If the accepting client is in a group with a Bot or the invitor is in a group with a Bot, send the invite to Bot:ProcessRaidInvite
+		// instead of remaining here.
+		Bot* b = nullptr;
+		Client* invitee = entity_list.GetClientByName(raid_command_packet->leader_name);
+		Client* invitor = entity_list.GetClientByName(raid_command_packet->player_name);
+		Group* g_invitee = invitee->GetGroup();
+		Group* g_invitor = invitor->GetGroup();
+
+		if (invitee && invitee->IsRaidGrouped()) {
+			invitor->MessageString(Chat::White, ALREADY_IN_RAID, GetName()); //group failed, must invite members not in raid...
+			return;
+		}
+
+		bool invitor_has_bot = false;
+		bool invitee_has_bot = false;
+
+		if (g_invitor && g_invitor->IsLeader(invitor))
+		{
+			for (int x = 0; x < 6; x++)
+			{
+				if (g_invitor->members[x] && g_invitor->members[x]->IsBot())
+				{
+					b = entity_list.GetBotByBotName(g_invitor->members[x]->GetName());
+					invitee_has_bot = true;
+				}
+			}
+		}
+		if (g_invitee && g_invitee->IsLeader(invitee))
+		{
+			for (int x = 0; x < 6; x++)
+			{
+				if (g_invitee->members[x] && g_invitee->members[x]->IsBot())
+				{
+					b = entity_list.GetBotByBotName(g_invitee->members[x]->GetName());
+					invitee_has_bot = true;
+					break;
+				}
+			}
+		}
+		if (invitor_has_bot || invitee_has_bot) {
+			Bot::ProcessRaidInvite(invitee, invitor);  //two clients with one or both having groups with bots
 			break;
 		}
-		case RaidCommandAcceptInvite: {
-			Client *player_accepting_invite = entity_list.GetClientByName(raid_command_packet->player_name);
-			if (player_accepting_invite) {
-				if (IsRaidGrouped()) {
-					player_accepting_invite->MessageString(Chat::White, ALREADY_IN_RAID, GetName()); //group failed, must invite members not in raid...
-					return;
+		else if (invitee && invitee->IsBot())
+		{
+			Bot::ProcessRaidInvite(b, player_accepting_invite); //client inviting a bot
+			break;
+		}
+
+#endif
+		if (player_accepting_invite) {
+			if (IsRaidGrouped()) {
+				player_accepting_invite->MessageString(Chat::White, ALREADY_IN_RAID, GetName()); //group failed, must invite members not in raid...
+				return;
+			}
+			Raid* raid = entity_list.GetRaidByClient(player_accepting_invite);
+			if (raid) {
+				raid->VerifyRaid();
+				Group* group = GetGroup();
+				if (group) {
+					if (group->GroupCount() + raid->RaidCount() > MAX_RAID_MEMBERS) {
+						player_accepting_invite->Message(Chat::Red, "Invite failed, group invite would create a raid larger than the maximum number of members allowed.");
+						return;
+					}
 				}
-				Raid *raid = entity_list.GetRaidByClient(player_accepting_invite);
-				if (raid) {
-					raid->VerifyRaid();
-					Group *group = GetGroup();
-					if (group) {
-						if (group->GroupCount() + raid->RaidCount() > MAX_RAID_MEMBERS) {
-							player_accepting_invite->Message(Chat::Red, "Invite failed, group invite would create a raid larger than the maximum number of members allowed.");
-							return;
-						}
+				else {
+					if (1 + raid->RaidCount() > MAX_RAID_MEMBERS) {
+						player_accepting_invite->Message(Chat::Red, "Invite failed, member invite would create a raid larger than the maximum number of members allowed.");
+						return;
 					}
-					else {
-						if (1 + raid->RaidCount() > MAX_RAID_MEMBERS) {
-							player_accepting_invite->Message(Chat::Red, "Invite failed, member invite would create a raid larger than the maximum number of members allowed.");
-							return;
-						}
-					}
-					if (group) {//add us all
-						uint32 free_group_id = raid->GetFreeGroup();
-						Client *addClient = nullptr;
-						for (int x = 0; x < 6; x++) {
-							if (group->members[x]) {
-								Client *c = nullptr;
-								if (group->members[x]->IsClient())
-									c = group->members[x]->CastToClient();
-								else
-									continue;
+				}
+				if (group) {//add us all
+					uint32 free_group_id = raid->GetFreeGroup();
+					Client* addClient = nullptr;
+					for (int x = 0; x < 6; x++) {
+						if (group->members[x]) {
+							Client* c = nullptr;
+							if (group->members[x]->IsClient())
+								c = group->members[x]->CastToClient();
+							else
+								continue;
 
-								if (!addClient)
-								{
-									addClient = c;
-									raid->SetGroupLeader(addClient->GetName());
-								}
+							if (!addClient)
+							{
+								addClient = c;
+								raid->SetGroupLeader(addClient->GetName());
+							}
 
-								raid->SendRaidCreate(c);
-								raid->SendMakeLeaderPacketTo(raid->leadername, c);
-								if (group->IsLeader(group->members[x]))
-									raid->AddMember(c, free_group_id, false, true);
-								else
-									raid->AddMember(c, free_group_id);
-								raid->SendBulkRaid(c);
-								if (raid->IsLocked()) {
-									raid->SendRaidLockTo(c);
-								}
+							raid->SendRaidCreate(c);
+							raid->SendMakeLeaderPacketTo(raid->leadername, c);
+							if (group->IsLeader(group->members[x]))
+								raid->AddMember(c, free_group_id, false, true);
+							else
+								raid->AddMember(c, free_group_id);
+							raid->SendBulkRaid(c);
+							if (raid->IsLocked()) {
+								raid->SendRaidLockTo(c);
 							}
 						}
-						group->JoinRaidXTarget(raid);
-						group->DisbandGroup(true);
-						raid->GroupUpdate(free_group_id);
 					}
-					else {
-						raid->SendRaidCreate(this);
-						raid->SendMakeLeaderPacketTo(raid->leadername, this);
-						raid->AddMember(this);
-						raid->SendBulkRaid(this);
-						if (raid->IsLocked()) {
-							raid->SendRaidLockTo(this);
-						}
+					group->JoinRaidXTarget(raid);
+					group->DisbandGroup(true);
+					raid->GroupUpdate(free_group_id);
+				}
+				else {
+					raid->SendRaidCreate(this);
+					raid->SendMakeLeaderPacketTo(raid->leadername, this);
+					raid->AddMember(this);
+					raid->SendBulkRaid(this);
+					if (raid->IsLocked()) {
+						raid->SendRaidLockTo(this);
 					}
 				}
-				else
+			}
+			else
+			{
+				Group* player_invited_group = player_accepting_invite->GetGroup();
+				Group* group = GetGroup();
+				if (group) //if our target has a group
 				{
-					Group *player_invited_group = player_accepting_invite->GetGroup();
-					Group *group = GetGroup();
-					if (group) //if our target has a group
-					{
-						raid = new Raid(player_accepting_invite);
-						entity_list.AddRaid(raid);
-						raid->SetRaidDetails();
+					raid = new Raid(player_accepting_invite);
+					entity_list.AddRaid(raid);
+					raid->SetRaidDetails();
 
-						uint32 raid_free_group_id = raid->GetFreeGroup();
+					uint32 raid_free_group_id = raid->GetFreeGroup();
 
-						/* If we already have a group then cycle through adding us... */
-						if (player_invited_group) {
-							Client *client_to_be_leader = nullptr;
-							for (int x = 0; x < 6; x++) {
-								if (player_invited_group->members[x]) {
-									if (!client_to_be_leader) {
-										if (player_invited_group->members[x]->IsClient()) {
-											client_to_be_leader = player_invited_group->members[x]->CastToClient();
-											raid->SetGroupLeader(client_to_be_leader->GetName());
-										}
-									}
-									if (player_invited_group->IsLeader(player_invited_group->members[x])) {
-										Client *c = nullptr;
-
-										if (player_invited_group->members[x]->IsClient())
-											c = player_invited_group->members[x]->CastToClient();
-										else
-											continue;
-
-										raid->SendRaidCreate(c);
-										raid->SendMakeLeaderPacketTo(raid->leadername, c);
-										raid->AddMember(c, raid_free_group_id, true, true, true);
-										raid->SendBulkRaid(c);
-
-										if (raid->IsLocked()) {
-											raid->SendRaidLockTo(c);
-										}
-									}
-									else {
-										Client *c = nullptr;
-
-										if (player_invited_group->members[x]->IsClient())
-											c = player_invited_group->members[x]->CastToClient();
-										else
-											continue;
-
-										raid->SendRaidCreate(c);
-										raid->SendMakeLeaderPacketTo(raid->leadername, c);
-										raid->AddMember(c, raid_free_group_id);
-										raid->SendBulkRaid(c);
-
-										if (raid->IsLocked()) {
-											raid->SendRaidLockTo(c);
-										}
-									}
-								}
-							}
-							player_invited_group->JoinRaidXTarget(raid, true);
-							player_invited_group->DisbandGroup(true);
-							raid->GroupUpdate(raid_free_group_id);
-							raid_free_group_id = raid->GetFreeGroup();
-						}
-						else {
-							raid->SendRaidCreate(player_accepting_invite);
-							raid->AddMember(player_accepting_invite, 0xFFFFFFFF, true, false, true);
-						}
-
-						Client *client_to_add = nullptr;
-						/* Add client to an existing group */
+					/* If we already have a group then cycle through adding us... */
+					if (player_invited_group) {
+						Client* client_to_be_leader = nullptr;
 						for (int x = 0; x < 6; x++) {
-							if (group->members[x]) {
-								if (!client_to_add) {
-									if (group->members[x]->IsClient()) {
-										client_to_add = group->members[x]->CastToClient();
-										raid->SetGroupLeader(client_to_add->GetName());
+							if (player_invited_group->members[x]) {
+								if (!client_to_be_leader) {
+									if (player_invited_group->members[x]->IsClient()) {
+										client_to_be_leader = player_invited_group->members[x]->CastToClient();
+										raid->SetGroupLeader(client_to_be_leader->GetName());
 									}
 								}
-								if (group->IsLeader(group->members[x])) {
-									Client *c = nullptr;
+								if (player_invited_group->IsLeader(player_invited_group->members[x])) {
+									Client* c = nullptr;
 
-									if (group->members[x]->IsClient())
-										c = group->members[x]->CastToClient();
+									if (player_invited_group->members[x]->IsClient())
+										c = player_invited_group->members[x]->CastToClient();
 									else
 										continue;
 
 									raid->SendRaidCreate(c);
 									raid->SendMakeLeaderPacketTo(raid->leadername, c);
-									raid->AddMember(c, raid_free_group_id, false, true);
+									raid->AddMember(c, raid_free_group_id, true, true, true);
 									raid->SendBulkRaid(c);
 
 									if (raid->IsLocked()) {
 										raid->SendRaidLockTo(c);
 									}
 								}
-								else
-								{
-									Client *c = nullptr;
+								else {
+									Client* c = nullptr;
 
-									if (group->members[x]->IsClient())
-										c = group->members[x]->CastToClient();
+									if (player_invited_group->members[x]->IsClient())
+										c = player_invited_group->members[x]->CastToClient();
 									else
 										continue;
 
@@ -11664,396 +11733,536 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 								}
 							}
 						}
-						group->JoinRaidXTarget(raid);
-						group->DisbandGroup(true);
-
+						player_invited_group->JoinRaidXTarget(raid, true);
+						player_invited_group->DisbandGroup(true);
 						raid->GroupUpdate(raid_free_group_id);
+						raid_free_group_id = raid->GetFreeGroup();
 					}
-					/* Target does not have a group */
 					else {
-						if (player_invited_group) {
+						raid->SendRaidCreate(player_accepting_invite);
+						raid->AddMember(player_accepting_invite, 0xFFFFFFFF, true, false, true);
+					}
 
-							raid = new Raid(player_accepting_invite);
+					Client* client_to_add = nullptr;
+					/* Add client to an existing group */
+					for (int x = 0; x < 6; x++) {
+						if (group->members[x]) {
+							if (!client_to_add) {
+								if (group->members[x]->IsClient()) {
+									client_to_add = group->members[x]->CastToClient();
+									raid->SetGroupLeader(client_to_add->GetName());
+								}
+							}
+							if (group->IsLeader(group->members[x])) {
+								Client* c = nullptr;
 
-							entity_list.AddRaid(raid);
-							raid->SetRaidDetails();
-							Client *addClientig = nullptr;
-							for (int x = 0; x < 6; x++) {
-								if (player_invited_group->members[x]) {
-									if (!addClientig) {
-										if (player_invited_group->members[x]->IsClient()) {
-											addClientig = player_invited_group->members[x]->CastToClient();
-											raid->SetGroupLeader(addClientig->GetName());
-										}
+								if (group->members[x]->IsClient())
+									c = group->members[x]->CastToClient();
+								else
+									continue;
+
+								raid->SendRaidCreate(c);
+								raid->SendMakeLeaderPacketTo(raid->leadername, c);
+								raid->AddMember(c, raid_free_group_id, false, true);
+								raid->SendBulkRaid(c);
+
+								if (raid->IsLocked()) {
+									raid->SendRaidLockTo(c);
+								}
+							}
+							else
+							{
+								Client* c = nullptr;
+
+								if (group->members[x]->IsClient())
+									c = group->members[x]->CastToClient();
+								else
+									continue;
+
+								raid->SendRaidCreate(c);
+								raid->SendMakeLeaderPacketTo(raid->leadername, c);
+								raid->AddMember(c, raid_free_group_id);
+								raid->SendBulkRaid(c);
+
+								if (raid->IsLocked()) {
+									raid->SendRaidLockTo(c);
+								}
+							}
+						}
+					}
+					group->JoinRaidXTarget(raid);
+					group->DisbandGroup(true);
+
+					raid->GroupUpdate(raid_free_group_id);
+				}
+				/* Target does not have a group */
+				else {
+					if (player_invited_group) {
+
+						raid = new Raid(player_accepting_invite);
+
+						entity_list.AddRaid(raid);
+						raid->SetRaidDetails();
+						Client* addClientig = nullptr;
+						for (int x = 0; x < 6; x++) {
+							if (player_invited_group->members[x]) {
+								if (!addClientig) {
+									if (player_invited_group->members[x]->IsClient()) {
+										addClientig = player_invited_group->members[x]->CastToClient();
+										raid->SetGroupLeader(addClientig->GetName());
 									}
-									if (player_invited_group->IsLeader(player_invited_group->members[x])) {
-										Client *c = nullptr;
+								}
+								if (player_invited_group->IsLeader(player_invited_group->members[x])) {
+									Client* c = nullptr;
 
-										if (player_invited_group->members[x]->IsClient())
-											c = player_invited_group->members[x]->CastToClient();
-										else
-											continue;
-
-										raid->SendRaidCreate(c);
-										raid->SendMakeLeaderPacketTo(raid->leadername, c);
-										raid->AddMember(c, 0, true, true, true);
-										raid->SendBulkRaid(c);
-
-										if (raid->IsLocked()) {
-											raid->SendRaidLockTo(c);
-										}
-									}
+									if (player_invited_group->members[x]->IsClient())
+										c = player_invited_group->members[x]->CastToClient();
 									else
-									{
-										Client *c = nullptr;
-										if (player_invited_group->members[x]->IsClient())
-											c = player_invited_group->members[x]->CastToClient();
-										else
-											continue;
+										continue;
 
-										raid->SendRaidCreate(c);
-										raid->SendMakeLeaderPacketTo(raid->leadername, c);
-										raid->AddMember(c, 0);
-										raid->SendBulkRaid(c);
-										if (raid->IsLocked()) {
-											raid->SendRaidLockTo(c);
-										}
+									raid->SendRaidCreate(c);
+									raid->SendMakeLeaderPacketTo(raid->leadername, c);
+									raid->AddMember(c, 0, true, true, true);
+									raid->SendBulkRaid(c);
+
+									if (raid->IsLocked()) {
+										raid->SendRaidLockTo(c);
+									}
+								}
+								else
+								{
+									Client* c = nullptr;
+									if (player_invited_group->members[x]->IsClient())
+										c = player_invited_group->members[x]->CastToClient();
+									else
+										continue;
+
+									raid->SendRaidCreate(c);
+									raid->SendMakeLeaderPacketTo(raid->leadername, c);
+									raid->AddMember(c, 0);
+									raid->SendBulkRaid(c);
+									if (raid->IsLocked()) {
+										raid->SendRaidLockTo(c);
 									}
 								}
 							}
-							raid->SendRaidCreate(this);
-							raid->SendMakeLeaderPacketTo(raid->leadername, this);
-							raid->SendBulkRaid(this);
-							player_invited_group->JoinRaidXTarget(raid, true);
-							raid->AddMember(this);
-							player_invited_group->DisbandGroup(true);
-							raid->GroupUpdate(0);
-							if (raid->IsLocked()) {
-								raid->SendRaidLockTo(this);
-							}
 						}
-						else { // neither has a group
-							raid = new Raid(player_accepting_invite);
-							entity_list.AddRaid(raid);
-							raid->SetRaidDetails();
-							raid->SendRaidCreate(player_accepting_invite);
-							raid->SendRaidCreate(this);
-							raid->SendMakeLeaderPacketTo(raid->leadername, this);
-							raid->AddMember(player_accepting_invite, 0xFFFFFFFF, true, false, true);
-							raid->SendBulkRaid(this);
-							raid->AddMember(this);
-							if (raid->IsLocked()) {
-								raid->SendRaidLockTo(this);
-							}
+						raid->SendRaidCreate(this);
+						raid->SendMakeLeaderPacketTo(raid->leadername, this);
+						raid->SendBulkRaid(this);
+						player_invited_group->JoinRaidXTarget(raid, true);
+						raid->AddMember(this);
+						player_invited_group->DisbandGroup(true);
+						raid->GroupUpdate(0);
+						if (raid->IsLocked()) {
+							raid->SendRaidLockTo(this);
+						}
+					}
+					else { // neither has a group
+						raid = new Raid(player_accepting_invite);
+						entity_list.AddRaid(raid);
+						raid->SetRaidDetails();
+						raid->SendRaidCreate(player_accepting_invite);
+						raid->SendRaidCreate(this);
+						raid->SendMakeLeaderPacketTo(raid->leadername, this);
+						raid->AddMember(player_accepting_invite, 0xFFFFFFFF, true, false, true);
+						raid->SendBulkRaid(this);
+						raid->AddMember(this);
+						if (raid->IsLocked()) {
+							raid->SendRaidLockTo(this);
 						}
 					}
 				}
 			}
-			break;
 		}
-		case RaidCommandDisband: {
-			Raid *raid = entity_list.GetRaidByClient(this);
-			if (raid) {
-				uint32 group = raid->GetGroup(raid_command_packet->leader_name);
+		break;
+	}
+	case RaidCommandDisband: {
+		Raid* raid = entity_list.GetRaidByClient(this);
+		Client* c_to_disband = entity_list.GetClientByName(raid_command_packet->leader_name);
+		Client* c_doing_disband = entity_list.GetClientByName(raid_command_packet->player_name);
+#ifdef BOTS
+		Bot* b_to_disband = entity_list.GetBotByBotName(raid_command_packet->leader_name);
+#endif
 
-				if (group < 12) {
-					uint32 i = raid->GetPlayerIndex(raid_command_packet->leader_name);
-					if (raid->members[i].IsGroupLeader) { //assign group leader to someone else
-						for (int x = 0; x < MAX_RAID_MEMBERS; x++) {
-							if (strlen(raid->members[x].membername) > 0 && i != x) {
-								if (raid->members[x].GroupNumber == group) {
-									raid->SetGroupLeader(raid_command_packet->leader_name, false);
-									raid->SetGroupLeader(raid->members[x].membername);
-									raid->UpdateGroupAAs(group);
-									break;
-								}
-							}
-						}
+		if (raid) {
+			uint32 group = raid->GetGroup(raid_command_packet->leader_name);
 
+#ifdef BOTS
+			//Added to remove all bots if the Bot_Owner is removed from the Raid
+			//Does not camp the Bots, just removes from the raid
+			std::vector<Bot*> raid_members_bots;
+			if (c_to_disband)
+			{
+				// Determine if the client has any BOTS in the raid
+				uint32 owner_id = c_to_disband->CharacterID();
+				for (int i = 0; i < MAX_RAID_MEMBERS; ++i)
+				{
+					if (raid->members[i].member && raid->members[i].member->IsBot() && raid->members[i].member->CastToBot()->GetOwner()->CastToClient()->CharacterID() == owner_id)
+					{
+						raid_members_bots.emplace_back(raid->members[i].member->CastToBot());
 					}
-					if (raid->members[i].IsRaidLeader) {
-						for (int x = 0; x < MAX_RAID_MEMBERS; x++) {
-							if (strlen(raid->members[x].membername) > 0 && strcmp(raid->members[x].membername, raid->members[i].membername) != 0)
-							{
-								raid->SetRaidLeader(raid->members[i].membername, raid->members[x].membername);
-								raid->UpdateRaidAAs();
-								raid->SendAllRaidLeadershipAA();
+				}
+				// If any of the bots are a group leader then re-create the botgroup on disband, dropping any clients
+				for (auto bot_iter : raid_members_bots) {
+					if (bot_iter && raid->IsRaidMember(bot_iter->GetName()) && raid->IsGroupLeader(bot_iter->GetName()))
+					{
+						// Remove the entire BOT group in this case
+						uint32 gid = raid->GetGroup(bot_iter->GetName());
+						 
+						std::vector<RaidMember> r_group_members = raid->GetRaidGroupMembers(gid);
+						Group* group_inst = new Group(bot_iter);
+						entity_list.AddGroup(group_inst);
+						database.SetGroupID(bot_iter->GetCleanName(), group_inst->GetID(), bot_iter->GetBotID());
+						database.SetGroupLeaderName(group_inst->GetID(), bot_iter->GetCleanName());
+						for (auto member_iter : r_group_members) {
+							if (!member_iter.member->IsClient() && strcmp(member_iter.membername, bot_iter->GetName()) == 0)
+								bot_iter->SetFollowID(owner_id);
+								
+							else
+								Bot::AddBotToGroup(member_iter.member->CastToBot(), group_inst);
+							raid->RemoveMember(bot_iter->GetName());
+						}
+					}
+					else if (bot_iter && raid->IsRaidMember(bot_iter->GetName()))
+					{
+						raid->RemoveMember(bot_iter->GetName());
+					}
+				}
+			}
+			else if (b_to_disband)
+			{
+				uint32 gid = raid->GetGroup(b_to_disband->GetName());
+				if (gid < 12 && raid->IsGroupLeader(b_to_disband->GetName()))
+				{
+					// If any of the bots are a group leader then re-create the botgroup on disband, dropping any clients
+					std::vector<RaidMember> r_group_members = raid->GetRaidGroupMembers(gid);
+					uint32 owner_id = b_to_disband->CastToBot()->GetOwner()->CastToClient()->CharacterID();
+					if (raid->IsGroupLeader(b_to_disband->GetName()))
+					{
+						// Remove the entire BOT group in this case
+						Group* group_inst = new Group(b_to_disband);
+						entity_list.AddGroup(group_inst);
+						database.SetGroupID(b_to_disband->GetCleanName(), group_inst->GetID(), b_to_disband->GetBotID());
+						database.SetGroupLeaderName(group_inst->GetID(), b_to_disband->GetCleanName());
+						for (auto member_iter : r_group_members) {
+							if (!member_iter.member->IsClient() && strcmp(member_iter.membername, b_to_disband->GetName()) == 0)
+								b_to_disband->SetFollowID(owner_id);
+							else
+								Bot::AddBotToGroup(member_iter.member->CastToBot(), group_inst);
+							raid->RemoveMember(member_iter.member->CastToBot()->GetName());
+						}
+					}
+					break;
+				}
+				else if (gid <12 && raid->GetGroupLeader(gid)->IsBot())
+				{
+					c_doing_disband->Message(Chat::Yellow, "%s is in a Bot Group.  Please disband %s instead to remove the entire Bot group.",
+						raid_command_packet->leader_name, raid->GetGroupLeader(gid)->CastToBot()->GetName());
+					break;
+				}
+			}
+#endif
+			if (group < 12) {
+				uint32 i = raid->GetPlayerIndex(raid_command_packet->leader_name);
+				if (raid->members[i].IsGroupLeader) { //assign group leader to someone else
+					for (int x = 0; x < MAX_RAID_MEMBERS; x++) {
+						if (strlen(raid->members[x].membername) > 0 && i != x) {
+							if (raid->members[x].GroupNumber == group) {
+								raid->SetGroupLeader(raid_command_packet->leader_name, false);
+								raid->SetGroupLeader(raid->members[x].membername);
+								raid->UpdateGroupAAs(group);
 								break;
 							}
 						}
 					}
-				}
 
-				raid->RemoveMember(raid_command_packet->leader_name);
-				Client *c = entity_list.GetClientByName(raid_command_packet->leader_name);
-				if (c)
-					raid->SendGroupDisband(c);
-				else {
-					auto pack =
-						new ServerPacket(ServerOP_RaidGroupDisband, sizeof(ServerRaidGeneralAction_Struct));
-					ServerRaidGeneralAction_Struct* rga = (ServerRaidGeneralAction_Struct*)pack->pBuffer;
-					rga->rid = GetID();
-					rga->zoneid = zone->GetZoneID();
-					rga->instance_id = zone->GetInstanceID();
-					strn0cpy(rga->playername, raid_command_packet->leader_name, 64);
-					worldserver.SendPacket(pack);
-					safe_delete(pack);
 				}
-				//r->SendRaidGroupRemove(ri->leader_name, grp);
-				raid->GroupUpdate(group);// break
-									//}
-			}
-			break;
-		}
-		case RaidCommandMoveGroup:
-		{
-			Raid *raid = entity_list.GetRaidByClient(this);
-			if (raid) {
-				/* Moving to group */
-				if (raid_command_packet->parameter < 12) {
-					uint8 group_count = raid->GroupCount(raid_command_packet->parameter);
-
-					if (group_count < 6) {
-						Client *c = entity_list.GetClientByName(raid_command_packet->leader_name);
-						uint32 old_group = raid->GetGroup(raid_command_packet->leader_name);
-						if (raid_command_packet->parameter == old_group) //don't rejoin grp if we order to join same group.
+				if (raid->members[i].IsRaidLeader) {
+					for (int x = 0; x < MAX_RAID_MEMBERS; x++) {
+						if (strlen(raid->members[x].membername) > 0 && strcmp(raid->members[x].membername, raid->members[i].membername) != 0)
+						{
+							raid->SetRaidLeader(raid->members[i].membername, raid->members[x].membername);
+							raid->UpdateRaidAAs();
+							raid->SendAllRaidLeadershipAA();
 							break;
-
-						if (raid->members[raid->GetPlayerIndex(raid_command_packet->leader_name)].IsGroupLeader) {
-							raid->SetGroupLeader(raid_command_packet->leader_name, false);
-
-							/* We were the leader of our old group */
-							if (old_group < 12) {
-								/* Assign new group leader if we can */
-								for (int x = 0; x < MAX_RAID_MEMBERS; x++) {
-									if (raid->members[x].GroupNumber == old_group) {
-										if (strcmp(raid_command_packet->leader_name, raid->members[x].membername) != 0 && strlen(raid_command_packet->leader_name) > 0) {
-											raid->SetGroupLeader(raid->members[x].membername);
-											raid->UpdateGroupAAs(old_group);
-
-											Client *client_to_update = entity_list.GetClientByName(raid->members[x].membername);
-											if (client_to_update) {
-												raid->SendRaidRemove(raid->members[x].membername, client_to_update);
-												raid->SendRaidCreate(client_to_update);
-												raid->SendMakeLeaderPacketTo(raid->leadername, client_to_update);
-												raid->SendRaidAdd(raid->members[x].membername, client_to_update);
-												raid->SendBulkRaid(client_to_update);
-												if (raid->IsLocked()) {
-													raid->SendRaidLockTo(client_to_update);
-												}
-											}
-											else {
-												auto pack = new ServerPacket(ServerOP_RaidChangeGroup, sizeof(ServerRaidGeneralAction_Struct));
-												ServerRaidGeneralAction_Struct *raid_command_packet = (ServerRaidGeneralAction_Struct*)pack->pBuffer;
-
-												raid_command_packet->rid = raid->GetID();
-												raid_command_packet->zoneid = zone->GetZoneID();
-												raid_command_packet->instance_id = zone->GetInstanceID();
-												strn0cpy(raid_command_packet->playername, raid->members[x].membername, 64);
-
-												worldserver.SendPacket(pack);
-
-												safe_delete(pack);
-											}
-											break;
-										}
-									}
-								}
-							}
 						}
-						if (group_count == 0) {
-							raid->SetGroupLeader(raid_command_packet->leader_name);
-							raid->UpdateGroupAAs(raid_command_packet->parameter);
-						}
-
-						raid->MoveMember(raid_command_packet->leader_name, raid_command_packet->parameter);
-						if (c) {
-							raid->SendGroupDisband(c);
-						}
-						else {
-							auto pack = new ServerPacket(ServerOP_RaidGroupDisband, sizeof(ServerRaidGeneralAction_Struct));
-							ServerRaidGeneralAction_Struct* raid_command = (ServerRaidGeneralAction_Struct*)pack->pBuffer;
-							raid_command->rid = raid->GetID();
-							raid_command->zoneid = zone->GetZoneID();
-							raid_command->instance_id = zone->GetInstanceID();
-							strn0cpy(raid_command->playername, raid_command_packet->leader_name, 64);
-							worldserver.SendPacket(pack);
-							safe_delete(pack);
-						}
-
-						/* Send group update to our new group */
-						raid->GroupUpdate(raid_command_packet->parameter);
-
-						/* If our old was a group send update there too */
-						if (old_group < 12)
-							raid->GroupUpdate(old_group);
-
 					}
 				}
-				/* Move player to ungrouped bank */
-				else {
-					Client *c = entity_list.GetClientByName(raid_command_packet->leader_name);
-					uint32 oldgrp = raid->GetGroup(raid_command_packet->leader_name);
+			}
+			raid->RemoveMember(raid_command_packet->leader_name);
+			Client* c = entity_list.GetClientByName(raid_command_packet->leader_name);
+			if (c) {
+
+				raid->SendGroupDisband(c);
+			}
+			else {
+				auto pack =
+					new ServerPacket(ServerOP_RaidGroupDisband, sizeof(ServerRaidGeneralAction_Struct));
+				ServerRaidGeneralAction_Struct* rga = (ServerRaidGeneralAction_Struct*)pack->pBuffer;
+				rga->rid = GetID();
+				rga->zoneid = zone->GetZoneID();
+				rga->instance_id = zone->GetInstanceID();
+				strn0cpy(rga->playername, raid_command_packet->leader_name, 64);
+				worldserver.SendPacket(pack);
+				safe_delete(pack);
+			}
+			//r->SendRaidGroupRemove(ri->leader_name, grp);
+			raid->GroupUpdate(group);// break
+			if (!raid->RaidCount())
+				raid->DisbandRaid();
+		}
+		break;
+	}
+	case RaidCommandMoveGroup:
+	{
+		Raid* raid = entity_list.GetRaidByClient(this);
+		if (raid) {
+			/* Moving to group */
+			if (raid_command_packet->parameter < 12) {
+				uint8 group_count = raid->GroupCount(raid_command_packet->parameter);
+
+				if (group_count < 6) {
+					Client* c = entity_list.GetClientByName(raid_command_packet->leader_name);
+					uint32 old_group = raid->GetGroup(raid_command_packet->leader_name);
+					if (raid_command_packet->parameter == old_group) //don't rejoin grp if we order to join same group.
+						break;
+
 					if (raid->members[raid->GetPlayerIndex(raid_command_packet->leader_name)].IsGroupLeader) {
 						raid->SetGroupLeader(raid_command_packet->leader_name, false);
-						for (int x = 0; x < MAX_RAID_MEMBERS; x++) {
-							if (raid->members[x].GroupNumber == oldgrp && strlen(raid->members[x].membername) > 0 && strcmp(raid->members[x].membername, raid_command_packet->leader_name) != 0){
 
-								raid->SetGroupLeader(raid->members[x].membername);
-								raid->UpdateGroupAAs(oldgrp);
+						/* We were the leader of our old group */
+						if (old_group < 12) {
+							/* Assign new group leader if we can */
+							for (int x = 0; x < MAX_RAID_MEMBERS; x++) {
+								if (raid->members[x].GroupNumber == old_group) {
+									if (strcmp(raid_command_packet->leader_name, raid->members[x].membername) != 0 && strlen(raid_command_packet->leader_name) > 0) {
+										raid->SetGroupLeader(raid->members[x].membername);
+										raid->UpdateGroupAAs(old_group);
 
-								Client *client_leaving_group = entity_list.GetClientByName(raid->members[x].membername);
-								if (client_leaving_group) {
-									raid->SendRaidRemove(raid->members[x].membername, client_leaving_group);
-									raid->SendRaidCreate(client_leaving_group);
-									raid->SendMakeLeaderPacketTo(raid->leadername, client_leaving_group);
-									raid->SendRaidAdd(raid->members[x].membername, client_leaving_group);
-									raid->SendBulkRaid(client_leaving_group);
-									if (raid->IsLocked()) {
-										raid->SendRaidLockTo(client_leaving_group);
+										Client* client_to_update = entity_list.GetClientByName(raid->members[x].membername);
+										if (client_to_update) {
+											raid->SendRaidRemove(raid->members[x].membername, client_to_update);
+											raid->SendRaidCreate(client_to_update);
+											raid->SendMakeLeaderPacketTo(raid->leadername, client_to_update);
+											raid->SendRaidAdd(raid->members[x].membername, client_to_update);
+											raid->SendBulkRaid(client_to_update);
+											if (raid->IsLocked()) {
+												raid->SendRaidLockTo(client_to_update);
+											}
+										}
+										else {
+											auto pack = new ServerPacket(ServerOP_RaidChangeGroup, sizeof(ServerRaidGeneralAction_Struct));
+											ServerRaidGeneralAction_Struct* raid_command_packet = (ServerRaidGeneralAction_Struct*)pack->pBuffer;
+
+											raid_command_packet->rid = raid->GetID();
+											raid_command_packet->zoneid = zone->GetZoneID();
+											raid_command_packet->instance_id = zone->GetInstanceID();
+											strn0cpy(raid_command_packet->playername, raid->members[x].membername, 64);
+
+											worldserver.SendPacket(pack);
+
+											safe_delete(pack);
+										}
+										break;
 									}
 								}
-								else {
-									auto pack = new ServerPacket( ServerOP_RaidChangeGroup, sizeof(ServerRaidGeneralAction_Struct));
-									ServerRaidGeneralAction_Struct *raid_command = (ServerRaidGeneralAction_Struct*)pack->pBuffer;
-
-									raid_command->rid = raid->GetID();
-									strn0cpy(raid_command->playername, raid->members[x].membername, 64);
-									raid_command->zoneid = zone->GetZoneID();
-									raid_command->instance_id = zone->GetInstanceID();
-
-									worldserver.SendPacket(pack);
-									safe_delete(pack);
-								}
-								break;
 							}
 						}
 					}
-					raid->MoveMember(raid_command_packet->leader_name, 0xFFFFFFFF);
+					if (group_count == 0) {
+						raid->SetGroupLeader(raid_command_packet->leader_name);
+						raid->UpdateGroupAAs(raid_command_packet->parameter);
+					}
+
+					raid->MoveMember(raid_command_packet->leader_name, raid_command_packet->parameter);
 					if (c) {
 						raid->SendGroupDisband(c);
 					}
 					else {
 						auto pack = new ServerPacket(ServerOP_RaidGroupDisband, sizeof(ServerRaidGeneralAction_Struct));
 						ServerRaidGeneralAction_Struct* raid_command = (ServerRaidGeneralAction_Struct*)pack->pBuffer;
-
 						raid_command->rid = raid->GetID();
 						raid_command->zoneid = zone->GetZoneID();
 						raid_command->instance_id = zone->GetInstanceID();
 						strn0cpy(raid_command->playername, raid_command_packet->leader_name, 64);
-
 						worldserver.SendPacket(pack);
-
 						safe_delete(pack);
 					}
 
-					raid->GroupUpdate(oldgrp);
+					/* Send group update to our new group */
+					raid->GroupUpdate(raid_command_packet->parameter);
+
+					/* If our old was a group send update there too */
+					if (old_group < 12)
+						raid->GroupUpdate(old_group);
+
 				}
 			}
+			/* Move player to ungrouped bank */
+			else {
+				Client* c = entity_list.GetClientByName(raid_command_packet->leader_name);
+				uint32 oldgrp = raid->GetGroup(raid_command_packet->leader_name);
+				if (raid->members[raid->GetPlayerIndex(raid_command_packet->leader_name)].IsGroupLeader) {
+					raid->SetGroupLeader(raid_command_packet->leader_name, false);
+					for (int x = 0; x < MAX_RAID_MEMBERS; x++) {
+						if (raid->members[x].GroupNumber == oldgrp && strlen(raid->members[x].membername) > 0 && strcmp(raid->members[x].membername, raid_command_packet->leader_name) != 0) {
 
-			Client *client_moved = entity_list.GetClientByName(raid_command_packet->leader_name);
+							raid->SetGroupLeader(raid->members[x].membername);
+							raid->UpdateGroupAAs(oldgrp);
 
-			if (client_moved && client_moved->GetRaid()) {
-				client_moved->GetRaid()->SendHPManaEndPacketsTo(client_moved);
-				client_moved->GetRaid()->SendHPManaEndPacketsFrom(client_moved);
+							Client* client_leaving_group = entity_list.GetClientByName(raid->members[x].membername);
+							if (client_leaving_group) {
+								raid->SendRaidRemove(raid->members[x].membername, client_leaving_group);
+								raid->SendRaidCreate(client_leaving_group);
+								raid->SendMakeLeaderPacketTo(raid->leadername, client_leaving_group);
+								raid->SendRaidAdd(raid->members[x].membername, client_leaving_group);
+								raid->SendBulkRaid(client_leaving_group);
+								if (raid->IsLocked()) {
+									raid->SendRaidLockTo(client_leaving_group);
+								}
+							}
+							else {
+								auto pack = new ServerPacket(ServerOP_RaidChangeGroup, sizeof(ServerRaidGeneralAction_Struct));
+								ServerRaidGeneralAction_Struct* raid_command = (ServerRaidGeneralAction_Struct*)pack->pBuffer;
 
-				Log(Logs::General, Logs::HPUpdate,
-					"Client::Handle_OP_RaidCommand :: %s sending and recieving HP/Mana/End updates",
-					client_moved->GetCleanName()
-				);
-			}
+								raid_command->rid = raid->GetID();
+								strn0cpy(raid_command->playername, raid->members[x].membername, 64);
+								raid_command->zoneid = zone->GetZoneID();
+								raid_command->instance_id = zone->GetInstanceID();
 
-			break;
-		}
-		case RaidCommandRaidLock:
-		{
-			Raid *raid = entity_list.GetRaidByClient(this);
-			if (raid) {
-				if (!raid->IsLocked())
-					raid->LockRaid(true);
-				else
-					raid->SendRaidLockTo(this);
-			}
-			break;
-		}
-		case RaidCommandRaidUnlock:
-		{
-			Raid *raid = entity_list.GetRaidByClient(this);
-			if (raid)
-			{
-				if (raid->IsLocked())
-					raid->LockRaid(false);
-				else
-					raid->SendRaidUnlockTo(this);
-			}
-			break;
-		}
-		case RaidCommandLootType2:
-		case RaidCommandLootType:
-		{
-			Raid *raid = entity_list.GetRaidByClient(this);
-			if (raid) {
-				Message(Chat::Yellow, "Loot type changed to: %d.", raid_command_packet->parameter);
-				raid->ChangeLootType(raid_command_packet->parameter);
-			}
-			break;
-		}
-
-		case RaidCommandAddLooter2:
-		case RaidCommandAddLooter:
-		{
-			Raid *raid = entity_list.GetRaidByClient(this);
-			if (raid) {
-				Message(Chat::Yellow, "Adding %s as a raid looter.", raid_command_packet->leader_name);
-				raid->AddRaidLooter(raid_command_packet->leader_name);
-			}
-			break;
-		}
-
-		case RaidCommandRemoveLooter2:
-		case RaidCommandRemoveLooter:
-		{
-			Raid *raid = entity_list.GetRaidByClient(this);
-			if (raid) {
-				Message(Chat::Yellow, "Removing %s as a raid looter.", raid_command_packet->leader_name);
-				raid->RemoveRaidLooter(raid_command_packet->leader_name);
-			}
-			break;
-		}
-
-		case RaidCommandMakeLeader:
-		{
-			Raid *raid = entity_list.GetRaidByClient(this);
-			if (raid) {
-				if (strcmp(raid->leadername, GetName()) == 0) {
-					raid->SetRaidLeader(GetName(), raid_command_packet->leader_name);
-					raid->UpdateRaidAAs();
-					raid->SendAllRaidLeadershipAA();
+								worldserver.SendPacket(pack);
+								safe_delete(pack);
+							}
+							break;
+						}
+					}
 				}
+				raid->MoveMember(raid_command_packet->leader_name, 0xFFFFFFFF);
+				if (c) {
+					raid->SendGroupDisband(c);
+				}
+				else {
+					auto pack = new ServerPacket(ServerOP_RaidGroupDisband, sizeof(ServerRaidGeneralAction_Struct));
+					ServerRaidGeneralAction_Struct* raid_command = (ServerRaidGeneralAction_Struct*)pack->pBuffer;
+
+					raid_command->rid = raid->GetID();
+					raid_command->zoneid = zone->GetZoneID();
+					raid_command->instance_id = zone->GetInstanceID();
+					strn0cpy(raid_command->playername, raid_command_packet->leader_name, 64);
+
+					worldserver.SendPacket(pack);
+
+					safe_delete(pack);
+				}
+
+				raid->GroupUpdate(oldgrp);
 			}
-			break;
 		}
 
-		case RaidCommandSetMotd:
+		Client* client_moved = entity_list.GetClientByName(raid_command_packet->leader_name);
+
+		if (client_moved && client_moved->GetRaid()) {
+			client_moved->GetRaid()->SendHPManaEndPacketsTo(client_moved);
+			client_moved->GetRaid()->SendHPManaEndPacketsFrom(client_moved);
+
+			Log(Logs::General, Logs::HPUpdate,
+				"Client::Handle_OP_RaidCommand :: %s sending and recieving HP/Mana/End updates",
+				client_moved->GetCleanName()
+			);
+		}
+
+		break;
+	}
+	case RaidCommandRaidLock:
+	{
+		Raid* raid = entity_list.GetRaidByClient(this);
+		if (raid) {
+			if (!raid->IsLocked())
+				raid->LockRaid(true);
+			else
+				raid->SendRaidLockTo(this);
+		}
+		break;
+	}
+	case RaidCommandRaidUnlock:
+	{
+		Raid* raid = entity_list.GetRaidByClient(this);
+		if (raid)
 		{
-			Raid *raid = entity_list.GetRaidByClient(this);
-			if (!raid)
-				break;
-			// we don't use the RaidGeneral here!
-			RaidMOTD_Struct *motd = (RaidMOTD_Struct *)app->pBuffer;
-			raid->SetRaidMOTD(std::string(motd->motd));
-			raid->SaveRaidMOTD();
-			raid->SendRaidMOTDToWorld();
-			break;
+			if (raid->IsLocked())
+				raid->LockRaid(false);
+			else
+				raid->SendRaidUnlockTo(this);
 		}
+		break;
+	}
+	case RaidCommandLootType2:
+	case RaidCommandLootType:
+	{
+		Raid* raid = entity_list.GetRaidByClient(this);
+		if (raid) {
+			Message(Chat::Yellow, "Loot type changed to: %d.", raid_command_packet->parameter);
+			raid->ChangeLootType(raid_command_packet->parameter);
+		}
+		break;
+	}
 
-		default: {
-			Message(Chat::Red, "Raid command (%d) NYI", raid_command_packet->action);
-			break;
+	case RaidCommandAddLooter2:
+	case RaidCommandAddLooter:
+	{
+		Raid* raid = entity_list.GetRaidByClient(this);
+		if (raid) {
+			Message(Chat::Yellow, "Adding %s as a raid looter.", raid_command_packet->leader_name);
+			raid->AddRaidLooter(raid_command_packet->leader_name);
 		}
+		break;
+	}
+
+	case RaidCommandRemoveLooter2:
+	case RaidCommandRemoveLooter:
+	{
+		Raid* raid = entity_list.GetRaidByClient(this);
+		if (raid) {
+			Message(Chat::Yellow, "Removing %s as a raid looter.", raid_command_packet->leader_name);
+			raid->RemoveRaidLooter(raid_command_packet->leader_name);
+		}
+		break;
+	}
+
+	case RaidCommandMakeLeader:
+	{
+		Raid* raid = entity_list.GetRaidByClient(this);
+		if (raid) {
+			if (strcmp(raid->leadername, GetName()) == 0) {
+				raid->SetRaidLeader(GetName(), raid_command_packet->leader_name);
+				raid->UpdateRaidAAs();
+				raid->SendAllRaidLeadershipAA();
+			}
+		}
+		break;
+	}
+
+	case RaidCommandSetMotd:
+	{
+		Raid* raid = entity_list.GetRaidByClient(this);
+		if (!raid)
+			break;
+		// we don't use the RaidGeneral here!
+		RaidMOTD_Struct* motd = (RaidMOTD_Struct*)app->pBuffer;
+		raid->SetRaidMOTD(std::string(motd->motd));
+		raid->SaveRaidMOTD();
+		raid->SendRaidMOTDToWorld();
+		break;
+	}
+
+	default: {
+		Message(Chat::Red, "Raid command (%d) NYI", raid_command_packet->action);
+		break;
+	}
 	}
 }
-
+	
 void Client::Handle_OP_RandomReq(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(RandomReq_Struct)) {

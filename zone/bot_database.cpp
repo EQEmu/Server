@@ -2723,8 +2723,7 @@ bool BotDatabase::LoadGroupedBotsByGroupID(const uint32 owner_id, const uint32 g
 		"SELECT `charid` FROM `group_id` WHERE `groupid` = {} AND `name` IN "
 		"(SELECT `name` FROM `bot_data` WHERE `owner_id` = {})",
 		group_id,
-		owner_id
-	);
+		owner_id);*/
 
 	auto results = database.QueryDatabase(query);
 	if (!results.Success()) {

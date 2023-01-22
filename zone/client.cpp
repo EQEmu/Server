@@ -818,9 +818,10 @@ void Client::QueuePacket(const EQApplicationPacket* app, bool ack_req, CLIENT_CO
 		// todo: save packets for later use
 		AddPacket(app, ack_req);
 	}
-	else
-		if(eqs)
-			eqs->QueuePacket(app, ack_req);
+	else if (eqs) 
+	{
+		eqs->QueuePacket(app, ack_req);
+	}
 }
 
 void Client::FastQueuePacket(EQApplicationPacket** app, bool ack_req, CLIENT_CONN_STATUS required_state) {
@@ -831,7 +832,7 @@ void Client::FastQueuePacket(EQApplicationPacket** app, bool ack_req, CLIENT_CON
 		return;
 	}
 	else {
-		if(eqs)
+		if(eqs) 
 			eqs->FastQueuePacket((EQApplicationPacket **)app, ack_req);
 		else if (app && (*app))
 			delete *app;

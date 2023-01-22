@@ -3954,7 +3954,7 @@ void Mob::QuestJournalledSay(Client *QuestInitiator, const char *str, Journal::O
 
 const char *Mob::GetCleanName()
 {
-	if (!strlen(clean_name)) {
+	if (!strlen(clean_name)) { 
 		CleanMobName(GetName(), clean_name);
 	}
 

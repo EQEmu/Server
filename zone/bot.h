@@ -33,6 +33,7 @@
 #include "../common/global_define.h"
 #include "guild_mgr.h"
 #include "worldserver.h"
+#include "raids.h"
 
 #include <sstream>
 
@@ -412,6 +413,15 @@ public:
 	static bool CheckDisciplineRecastTimers(Bot *caster, int timer_index);
 	static uint32 GetDisciplineRemainingTime(Bot *caster, int timer_index);
 
+	//Raid methods
+	void PetAIProcess_Raid();
+	void AI_Process_Raid();
+	bool AICastSpell_Raid(Mob* tar, uint8 iChance, uint32 iSpellTypes);
+	static void ProcessRaidInvite(Bot* invitee, Client* invitor);
+	static void ProcessRaidInvite(Client* invitee, Client* invitor);
+	uint8 GetNumberNeedingHealedInRaidGroup(uint8 hpr, bool includePets);
+	inline void SetDirtyAutoHaters() { m_dirtyautohaters = true; }
+
 	static std::list<BotSpell> GetBotSpellsForSpellEffect(Bot* botCaster, int spellEffect);
 	static std::list<BotSpell> GetBotSpellsForSpellEffectAndTargetType(Bot* botCaster, int spellEffect, SpellTargetType targetType);
 	static std::list<BotSpell> GetBotSpellsBySpellType(Bot* botCaster, uint32 spellType);
@@ -729,6 +739,8 @@ public:
 	void Signal(int signal_id);
 	void SendPayload(int payload_id, std::string payload_value = std::string());
 	void OwnerMessage(std::string message);
+	//Raid additions
+	Raid* p_raid_instance;
 
 protected:
 	void PetAIProcess();
@@ -794,6 +806,7 @@ private:
 	Timer m_auto_defend_timer;
 	//Timer m_combat_jitter_timer;
 	//bool m_combat_jitter_flag;
+	bool m_dirtyautohaters;
 	bool m_guard_flag;
 	bool m_hold_flag;
 	bool m_attack_flag;
@@ -865,6 +878,7 @@ private:
 
 	public:
 	static uint8 spell_casting_chances[SPELL_TYPE_COUNT][PLAYER_CLASS_COUNT][EQ::constants::STANCE_TYPE_COUNT][cntHSND];
+
 };
 
 bool IsSpellInBotList(DBbotspells_Struct* spell_list, uint16 iSpellID);

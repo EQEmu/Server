@@ -199,6 +199,10 @@ public:
 	Raid *GetRaidByClient(Client* client);
 	Raid *GetRaidByID(uint32 id);
 	Raid *GetRaidByLeaderName(const char *leader);
+#ifdef BOTS
+	Raid* GetRaidByBotName(const char* name);
+	Raid* GetRaidByBot(Bot* bot);
+#endif
 
 	Corpse *GetCorpseByOwner(Client* client);
 	Corpse *GetCorpseByOwnerWithinRange(Client* client, Mob* center, int range);
