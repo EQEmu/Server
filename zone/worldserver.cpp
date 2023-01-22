@@ -22,7 +22,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include <stdio.h>
 #include <iomanip>
 #include <stdarg.h>
-#include <limits.h>
 
 #ifdef _WINDOWS
 #include <process.h>
@@ -54,11 +53,10 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "worldserver.h"
 #include "zone.h"
 #include "zone_config.h"
-#include "zone_reload.h"
 #include "../common/shared_tasks.h"
 #include "shared_task_zone_messaging.h"
 #include "dialogue_window.h"
-#include "queryserv.h"
+#include "bot_command.h"
 
 extern EntityList entity_list;
 extern Zone* zone;
@@ -1929,6 +1927,9 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	{
 		zone->SendReloadMessage("Commands");
 		command_init();
+		if (RuleB(Bots, Enabled) && database.DoesTableExist("bot_command_settings")) {
+			bot_command_init();
+		}
 		break;
 	}
 	case ServerOP_ReloadContentFlags:
