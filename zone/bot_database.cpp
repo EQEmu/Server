@@ -173,13 +173,23 @@ bool BotDatabase::QueryNameAvailablity(const std::string& bot_name, bool& availa
 
 	query = fmt::format(
 		"SELECT b.bot_id FROM bot_data b "
-		"INNER JOIN character_data c ON b.`name` = c.`name` "
-		"WHERE b.`name` LIKE '{0}' OR c.`name` LIKE '{0}' "
+		"WHERE b.`name` LIKE '{}' "
 		"LIMIT 1",
 		bot_name
 	);
 
 	auto results = database.QueryDatabase(query);
+
+	if (!results.RowCount()) {
+		query = fmt::format(
+			"SELECT c.id FROM character_data c "
+			"WHERE c.`name` LIKE '{}' "
+			"LIMIT 1",
+			bot_name
+		);
+		results = database.QueryDatabase(query);
+	}
+
 	if (!results.Success()) {
 		return false;
 	}
