@@ -3,6 +3,14 @@
 #include "crash.h"
 #include "strings.h"
 #include "process/process.h"
+#include "http/httplib.h"
+#include "http/uri.h"
+#include "json/json.h"
+#include "version.h"
+#include "eqemu_config.h"
+#include "serverinfo.h"
+#include "rulesys.h"
+#include "platform.h"
 
 #include <cstdio>
 
@@ -10,6 +18,80 @@
 #define popen _popen
 #endif
 
+void SendCrashReport(const std::string &crash_report)
+{
+	// can configure multiple endpoints if need be
+	std::vector<std::string> endpoints = {
+		"http://spire.akkadius.com/api/v1/server-crash-report",
+//		"http://localhost:3010/api/v1/server-crash-report", // development
+	};
+
+	auto      config = EQEmuConfig::get();
+	for (auto &e: endpoints) {
+		uri u(e);
+
+		std::string base_url = fmt::format("{}://{}", u.get_scheme(), u.get_host());
+		if (u.get_port()) {
+			base_url += fmt::format(":{}", u.get_port());
+		}
+
+		// client
+		httplib::Client r(base_url);
+		r.set_connection_timeout(1, 0);
+		r.set_read_timeout(1, 0);
+		r.set_write_timeout(1, 0);
+		httplib::Headers headers = {
+			{"Content-Type", "application/json"}
+		};
+
+		// os info
+		auto os         = EQ::GetOS();
+		auto cpus       = EQ::GetCPUs();
+		auto process_id = EQ::GetPID();
+		auto rss        = EQ::GetRSS() / 1048576.0;
+		auto uptime     = static_cast<uint32>(EQ::GetUptime());
+
+		// payload
+		Json::Value p;
+		p["platform_name"]     = GetPlatformName();
+		p["crash_report"]      = crash_report;
+		p["server_version"]    = CURRENT_VERSION;
+		p["compile_date"]      = COMPILE_DATE;
+		p["compile_time"]      = COMPILE_TIME;
+		p["server_name"]       = config->LongName;
+		p["server_short_name"] = config->ShortName;
+		p["uptime"]            = uptime;
+		p["os_machine"]        = os.machine;
+		p["os_release"]        = os.release;
+		p["os_version"]        = os.version;
+		p["os_sysname"]        = os.sysname;
+		p["process_id"]        = process_id;
+		p["rss_memory"]        = rss;
+		p["cpus"]              = cpus.size();
+		p["origination_info"]  = "";
+
+		if (!LogSys.origination_info.zone_short_name.empty()) {
+			p["origination_info"] = fmt::format(
+				"{} ({}) instance_id [{}]",
+				LogSys.origination_info.zone_short_name,
+				LogSys.origination_info.zone_long_name,
+				LogSys.origination_info.instance_id
+			);
+		}
+
+		std::stringstream payload;
+		payload << p;
+
+		if (auto res = r.Post(e, payload.str(), "application/json")) {
+			if (res->status == 200) {
+				LogInfo("Sent crash report");
+			}
+			else {
+				LogError("Failed to send crash report to [{}]", e);
+			}
+		}
+	}
+}
 
 #if defined(_WINDOWS) && defined(CRASH_LOGGING)
 #include "StackWalker.h"
@@ -32,6 +114,11 @@ public:
 			} else {
 				buffer[i] = szText[i];
 			}
+		}
+
+		if (RuleB(Analytics, CrashReporting)) {
+			std::string crash_report = buffer;
+			SendCrashReport(crash_report);
 		}
 
 		Log(Logs::General, Logs::Crash, buffer);
@@ -181,11 +268,17 @@ void print_trace()
 	}
 
 	std::ifstream    input(temp_output_file);
+	std::string      crash_report;
 	for (std::string line; getline(input, line);) {
 		LogCrash("{}", line);
+		crash_report += fmt::format("{}\n", line);
 	}
 
 	std::remove(temp_output_file.c_str());
+
+	if (RuleB(Analytics, CrashReporting)) {
+		SendCrashReport(crash_report);
+	}
 
 	exit(1);
 }
