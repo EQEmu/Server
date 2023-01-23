@@ -2358,7 +2358,7 @@ bool BotDatabase::LoadLeaderIDByBotGroupID(const uint32 group_id, uint32& leader
 bool BotDatabase::LoadBotGroupNameByBotGroupID(const uint32 group_id, std::string& botgroup_name)
 {
 	if (!group_id) {
-		false;
+		return false;
 	}
 
 	query = fmt::format(
