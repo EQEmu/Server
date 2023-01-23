@@ -2624,7 +2624,7 @@ bool BotDatabase::LoadBotGroupsListByOwnerID(const uint32 owner_id, std::list<st
 
 
 	query = fmt::format(
-		"SELECT group_name, group_leader_id FROM "
+		"SELECT DISTINCT(group_name), group_leader_id FROM "
 		"bot_groups bg INNER JOIN bot_group_members bgm "
 		"ON bg.groups_index = bgm.groups_index "
 		"WHERE bgm.bot_id IN "
