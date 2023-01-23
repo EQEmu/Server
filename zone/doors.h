@@ -65,6 +65,7 @@ public:
 	float GetX();
 	float GetY();
 	float GetZ();
+	float GetHeading();
 
 private:
 

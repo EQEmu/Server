@@ -570,21 +570,6 @@ public:
 	std::vector<DoorsRepository::Doors> LoadDoors(const std::string& zone_name, int16 version);
 	uint32 GetDoorsCountPlusOne();
 	int GetDoorsDBCountPlusOne(std::string zone_short_name, int16 version);
-	void InsertDoor(
-		uint32 database_id,
-		uint8 id,
-		std::string name,
-		const glm::vec4 &position,
-		uint8 open_type,
-		uint16 guild_id,
-		uint32 ockpick,
-		uint32 key_item_id,
-		uint8 door_param,
-		uint8 invert,
-		int incline,
-		uint16 size,
-		bool disable_timer = false
-	);
 
 	/* Blocked Spells   */
 	int32	GetBlockedSpellsCount(uint32 zoneid);
