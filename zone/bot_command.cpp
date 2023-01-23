@@ -7192,7 +7192,13 @@ void bot_subcommand_botgroup_add_member(Client *c, const Seperator *sep)
 	std::list<Bot*> sbl;
 	MyBots::PopulateSBL_ByNamedBot(c, sbl, sep->arg[1]);
 	if (sbl.empty()) {
-		c->Message(Chat::White, "You must name a new member as a bot that you own to use this command.");
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Usage: (<target_leader>) {} [member_name]",
+				sep->arg[0]
+			).c_str()
+		);
 		return;
 	}
 
