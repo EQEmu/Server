@@ -837,37 +837,39 @@ void Doors::CreateDatabaseEntry()
 				GetDoorID()
 			);
 		}
-	} else {
-		auto e = DoorsRepository::NewEntity();
 
-		e.id           = GetDoorDBID();
-		e.doorid       = GetDoorID();
-		e.zone         = zone->GetShortName();
-		e.version      = zone->GetInstanceVersion();
-		e.name         = GetDoorName();
-		e.pos_x        = GetX();
-		e.pos_y        = GetY();
-		e.pos_z        = GetZ();
-		e.heading      = GetHeading();
-		e.opentype     = GetOpenType();
-		e.guild        = static_cast<uint16>(GetGuildID());
-		e.lockpick     = GetLockpick();
-		e.keyitem      = GetKeyItem();
-		e.door_param   = static_cast<uint8>(GetDoorParam());
-		e.invert_state = static_cast<uint8>(GetInvertState());
-		e.incline      = GetIncline();
-		e.size         = GetSize();
+		return;
+	}
+	
+	auto e = DoorsRepository::NewEntity();
 
-		const auto& n = DoorsRepository::InsertOne(content_db, e);
-		if (!n.id) {
-			LogError(
-				"Failed to create door in Zone [{}] Version [{}] Database ID [{}] ID [{}]",
-				zone->GetShortName(),
-				zone->GetInstanceVersion(),
-				GetDoorDBID(),
-				GetDoorID()
-			);
-		}
+	e.id           = GetDoorDBID();
+	e.doorid       = GetDoorID();
+	e.zone         = zone->GetShortName();
+	e.version      = zone->GetInstanceVersion();
+	e.name         = GetDoorName();
+	e.pos_x        = GetX();
+	e.pos_y        = GetY();
+	e.pos_z        = GetZ();
+	e.heading      = GetHeading();
+	e.opentype     = GetOpenType();
+	e.guild        = static_cast<uint16>(GetGuildID());
+	e.lockpick     = GetLockpick();
+	e.keyitem      = GetKeyItem();
+	e.door_param   = static_cast<uint8>(GetDoorParam());
+	e.invert_state = static_cast<uint8>(GetInvertState());
+	e.incline      = GetIncline();
+	e.size         = GetSize();
+
+	const auto& n = DoorsRepository::InsertOne(content_db, e);
+	if (!n.id) {
+		LogError(
+			"Failed to create door in Zone [{}] Version [{}] Database ID [{}] ID [{}]",
+			zone->GetShortName(),
+			zone->GetInstanceVersion(),
+			GetDoorDBID(),
+			GetDoorID()
+		);
 	}
 }
 
