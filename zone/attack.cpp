@@ -2770,7 +2770,7 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 		}
 	}
 
-	if (killer_mob->IsBot()) {
+	if (killer_mob && killer_mob->IsBot()) {
 		parse->EventBot(EVENT_NPC_SLAY, killer_mob->CastToBot(), this, "", 0);
 		killer_mob->TrySpellOnKill(killed_level, spell);
 	}

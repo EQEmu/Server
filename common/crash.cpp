@@ -27,7 +27,7 @@ void SendCrashReport(const std::string &crash_report)
 //		"http://localhost:3010/api/v1/server-crash-report", // development
 	};
 
-	auto config = EQEmuConfig::get();
+	auto      config = EQEmuConfig::get();
 	for (auto &e: endpoints) {
 		uri u(e);
 
