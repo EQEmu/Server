@@ -3075,53 +3075,6 @@ void ZoneDatabase::QGlobalPurge()
 	database.QueryDatabase(query);
 }
 
-void ZoneDatabase::InsertDoor(
-	uint32 database_id,
-	uint8 id,
-	std::string name,
-	const glm::vec4 &position,
-	uint8 open_type,
-	uint16 guild_id,
-	uint32 lockpick,
-	uint32 key_item_id,
-	uint8 door_param,
-	uint8 invert,
-	int incline,
-	uint16 size,
-	bool disable_timer
-) {
-	auto e = DoorsRepository::NewEntity();
-
-	e.id = database_id;
-	e.doorid = id;
-	e.zone = zone->GetShortName();
-	e.version = zone->GetInstanceVersion();
-	e.name = name;
-	e.pos_x = position.x;
-	e.pos_y = position.y;
-	e.pos_z = position.z;
-	e.opentype = open_type;
-	e.guild = guild_id;
-	e.lockpick = lockpick;
-	e.keyitem = key_item_id;
-	e.disable_timer = static_cast<int8_t>(disable_timer);
-	e.door_param = door_param;
-	e.invert_state = invert;
-	e.incline = incline;
-	e.size = size;
-
-	const auto& n = DoorsRepository::InsertOne(*this, e);
-	if (!n.id) {
-		LogError(
-			"Failed to create door in Zone [{}] Version [{}] Database ID [{}] ID [{}]",
-			zone->GetShortName(),
-			zone->GetInstanceVersion(),
-			database_id,
-			id
-		);
-	}
-}
-
 void ZoneDatabase::LoadAltCurrencyValues(uint32 char_id, std::map<uint32, uint32> &currency) {
 
 	std::string query = StringFormat("SELECT currency_id, amount "
