@@ -6412,7 +6412,7 @@ void Client::SetItemRecastTimer(int32 spell_id, uint32 inventory_slot)
 
 		GetPTimers().Start((pTimerItemStart + recast_type), static_cast<uint32>(recast_delay));
 		if (recast_type != -1) {
-			database.UpdateItemRecastTimestamps(
+			database.UpdateItemRecast(
 				CharacterID(),
 				recast_type,
 				GetPTimers().Get(pTimerItemStart + recast_type)->GetReadyTimestamp()
@@ -6423,6 +6423,13 @@ void Client::SetItemRecastTimer(int32 spell_id, uint32 inventory_slot)
 			SendItemRecastTimer(recast_type, static_cast<uint32>(recast_delay));
 		}
 	}
+}
+
+void Client::DeleteItemRecastTimer(int32 recast_type)
+{
+	database.DeleteItemRecast(CharacterID(), recast_type);
+	GetPTimers().Clear(&database, (pTimerItemStart + recast_type));
+	SendItemRecastTimer(recast_type, 1);
 }
 
 bool Client::HasItemRecastTimer(int32 spell_id, uint32 inventory_slot)

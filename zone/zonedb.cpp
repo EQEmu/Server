@@ -3380,11 +3380,24 @@ void ZoneDatabase::RemoveTempFactions(Client *client) {
 	QueryDatabase(query);
 }
 
-void ZoneDatabase::UpdateItemRecastTimestamps(uint32 char_id, uint32 recast_type, uint32 timestamp)
+void ZoneDatabase::UpdateItemRecast(uint32 character_id, uint32 recast_type, uint32 timestamp)
 {
-	std::string query =
-	    StringFormat("REPLACE INTO character_item_recast (id, recast_type, timestamp) VALUES (%u, %u, %u)", char_id,
-			 recast_type, timestamp);
+	const auto query = fmt::format(
+		"REPLACE INTO character_item_recast (id, recast_type, timestamp) VALUES ({}, {}, {})",
+		character_id,
+		recast_type,
+		timestamp
+	);
+	QueryDatabase(query);
+}
+
+void ZoneDatabase::DeleteItemRecast(uint32 character_id, uint32 recast_type)
+{
+	const auto query = fmt::format(
+		"DELETE FROM character_item_recast WHERE id = {} AND recast_type = {}",
+		character_id,
+		recast_type
+	);
 	QueryDatabase(query);
 }
 

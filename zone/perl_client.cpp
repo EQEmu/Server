@@ -2872,6 +2872,11 @@ void Perl_Client_CampAllBots(Client* self, uint8 class_id)
 	self->CampAllBots(class_id);
 }
 
+void Perl_Client_DeleteItemRecastTimer(Client* self, int recast_type)
+{
+	self->DeleteItemRecastTimer(recast_type);
+}
+
 void perl_register_client()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -2954,6 +2959,7 @@ void perl_register_client()
 	package.add("DeleteItemInInventory", (void(*)(Client*, int16))&Perl_Client_DeleteItemInInventory);
 	package.add("DeleteItemInInventory", (void(*)(Client*, int16, int16))&Perl_Client_DeleteItemInInventory);
 	package.add("DeleteItemInInventory", (void(*)(Client*, int16, int16, bool))&Perl_Client_DeleteItemInInventory);
+	package.add("DeleteItemRecastTimer", &Perl_Client_DeleteItemRecastTimer);
 	package.add("DiaWind", &Perl_Client_DiaWind);
 	package.add("DialogueWindow", &Perl_Client_DialogueWindow);
 	package.add("Disconnect", &Perl_Client_Disconnect);

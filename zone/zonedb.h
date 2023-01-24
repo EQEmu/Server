@@ -369,7 +369,8 @@ public:
 	void LoadPetInfo(Client *c);
 	void SavePetInfo(Client *c);
 	void RemoveTempFactions(Client *c);
-	void UpdateItemRecastTimestamps(uint32 char_id, uint32 recast_type, uint32 timestamp);
+	void UpdateItemRecast(uint32 char_id, uint32 recast_type, uint32 timestamp);
+	void DeleteItemRecast(uint32 char_id, uint32 recast_type);
 
 	bool DeleteCharacterAAs(uint32 character_id);
 	bool DeleteCharacterBandolier(uint32 character_id, uint32 band_id);
