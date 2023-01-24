@@ -30,7 +30,6 @@ try
     del $cwd\win-build-x64\bin\RelWithDebInfo\queryserv.pdb
     del $cwd\win-build-x64\bin\RelWithDebInfo\eqlaunch.pdb
     del $cwd\win-build-x64\bin\RelWithDebInfo\cppunit.pdb
-#    del $cwd\win-build-x64\bin\RelWithDebInfo\zlib-ng.pdb
     del $cwd\win-build-x64\bin\RelWithDebInfo\tests.pdb
     del $cwd\win-build-x64\bin\RelWithDebInfo\tests.exe
 
