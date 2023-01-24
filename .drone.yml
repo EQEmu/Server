@@ -39,6 +39,10 @@ kind: pipeline
 type: exec
 name: Build Windows
 
+# Limits how many of these builds can run on the drone runner at a time, this isn't about cores
+concurrency:
+  limit: 1
+
 clone:
   depth: 1
 
