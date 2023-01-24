@@ -130,7 +130,10 @@ public:
 				continue;
 			}
 
-			if (spells[spell_id].target_type != ST_Target && spells[spell_id].cast_restriction != 0) { // watch
+			if (
+				spells[spell_id].target_type != ST_Target &&
+				spells[spell_id].cast_restriction != 0
+			) {
 				continue;
 			}
 
