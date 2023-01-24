@@ -6357,6 +6357,7 @@ void Client::SendItemRecastTimer(int32 recast_type, uint32 recast_delay)
 		ItemRecastDelay_Struct *ird = (ItemRecastDelay_Struct *)outapp->pBuffer;
 		ird->recast_delay = recast_delay;
 		ird->recast_type = static_cast<uint32>(recast_type);
+		ird->unknown008 = 1;
 		QueuePacket(outapp);
 		safe_delete(outapp);
 	}
