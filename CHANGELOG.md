@@ -1,11 +1,30 @@
-## [22.1.1] - 01/23/2022
+## [22.1.2] - 01/24/2023
+
+### CI/CD
+
+* Build / Release Pipeline Changes ([#2788](https://github.com/EQEmu/Server/pull/2788)) ([Akkadius](https://github.com/Akkadius)) 2023-01-24
+
+### Code Cleanup
+
+* Cleanup #door Command. ([#2783](https://github.com/EQEmu/Server/pull/2783)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-01-24
+
+### Crash
+
+* Fix rarer world crash issue where scheduler database was not available ([#2789](https://github.com/EQEmu/Server/pull/2789)) ([Akkadius](https://github.com/Akkadius)) 2023-01-24
+
+### Fixes
+
+* Fix nullptr spell in BCSpells::Load() ([#2790](https://github.com/EQEmu/Server/pull/2790)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-01-24
+* Remove duplicate logic in GetActSpellHealing reducing HOT criticals ([#2786](https://github.com/EQEmu/Server/pull/2786)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-01-24
+
+## [22.1.1] - 01/23/2023
 
 ### Fixes
 
 * Fix botgrouplist to display unique entries. ([#2785](https://github.com/EQEmu/Server/pull/2785)) ([Aeadoin](https://github.com/Aeadoin)) 2023-01-23
 * Fix scenario where dereferenced object could be null. ([#2784](https://github.com/EQEmu/Server/pull/2784)) ([Aeadoin](https://github.com/Aeadoin)) 2023-01-23
 
-## [22.1.0] - 01/22/2022
+## [22.1.0] - 01/22/2023
 
 This is a first release using the new build system. Changelog entry representative of last year. Subsequent releases will consist of incremental changes since the last release.
 
