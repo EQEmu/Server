@@ -2877,6 +2877,11 @@ void Perl_Client_DeleteItemRecastTimer(Client* self, int recast_type)
 	self->DeleteItemRecastTimer(recast_type);
 }
 
+void Perl_Client_ResetItemCooldown(Client* self, uint32 item_id)
+{
+	self->ResetItemCooldown(item_id);
+}
+
 void perl_register_client()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -3237,6 +3242,7 @@ void perl_register_client()
 	package.add("ResetCastbarCooldownBySlot", &Perl_Client_ResetCastbarCooldownBySlot);
 	package.add("ResetCastbarCooldownBySpellID", &Perl_Client_ResetCastbarCooldownBySpellID);
 	package.add("ResetDisciplineTimer", &Perl_Client_ResetDisciplineTimer);
+	package.add("ResetItemCooldown", &Perl_Client_ResetItemCooldown);
 	package.add("ResetTrade", &Perl_Client_ResetTrade);
 	package.add("Save", &Perl_Client_Save);
 	package.add("SaveBackup", &Perl_Client_SaveBackup);

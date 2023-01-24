@@ -10459,6 +10459,36 @@ int Client::CountItem(uint32 item_id)
 	return quantity;
 }
 
+void Client::ResetItemCooldown(uint32 item_id)
+{
+	EQ::ItemInstance *item = nullptr;
+	static const int16 slots[][2] = {
+		{ EQ::invslot::POSSESSIONS_BEGIN, EQ::invslot::POSSESSIONS_END },
+		{ EQ::invbag::GENERAL_BAGS_BEGIN, EQ::invbag::GENERAL_BAGS_END },
+		{ EQ::invbag::CURSOR_BAG_BEGIN, EQ::invbag::CURSOR_BAG_END},
+		{ EQ::invslot::BANK_BEGIN, EQ::invslot::BANK_END },
+		{ EQ::invbag::BANK_BAGS_BEGIN, EQ::invbag::BANK_BAGS_END },
+		{ EQ::invslot::SHARED_BANK_BEGIN, EQ::invslot::SHARED_BANK_END },
+		{ EQ::invbag::SHARED_BANK_BAGS_BEGIN, EQ::invbag::SHARED_BANK_BAGS_END },
+	};
+	const size_t size = sizeof(slots) / sizeof(slots[0]);
+	for (int slot_index = 0; slot_index < size; ++slot_index) {
+		for (int slot_id = slots[slot_index][0]; slot_id <= slots[slot_index][1]; ++slot_id) {
+			item = GetInv().GetItem(slot_id);
+			if (item && item->GetID() == item_id) {
+				const EQ::ItemData* item_d = item->GetItem();
+				item->SetRecastTimestamp(0);
+				
+				if (item_d->RecastType) {
+					DeleteItemRecastTimer(item_d->RecastType);
+				}
+				
+				SendItemPacket(slot_id, item, ItemPacketCharmUpdate);
+			}
+		}
+	}
+}
+
 void Client::RemoveItem(uint32 item_id, uint32 quantity)
 {
 	EQ::ItemInstance *item = nullptr;
