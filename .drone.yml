@@ -91,10 +91,14 @@ steps:
       - |
         rclone delete remote: --include "eqemu-server*.zip"
 
+when:
+  branch:
+    - master
+  event:
+    - push
+
 depends_on:
   - Build Windows
   - Build Linux
 
-when:
-  branch:
-    - master
+
