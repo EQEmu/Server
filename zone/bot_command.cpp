@@ -122,10 +122,20 @@ public:
 		}
 
 		for (int spell_id = 2; spell_id < SPDAT_RECORDS; ++spell_id) {
-			if (spells[spell_id].player_1[0] == '\0')
+			if (!IsValidSpell(spell_id)) {
 				continue;
-			if (spells[spell_id].target_type != ST_Target && spells[spell_id].cast_restriction != 0) // watch
+			}
+
+			if (spells[spell_id].player_1[0] == '\0') {
 				continue;
+			}
+
+			if (
+				spells[spell_id].target_type != ST_Target &&
+				spells[spell_id].cast_restriction != 0
+			) {
+				continue;
+			}
 
 			auto target_type = BCEnum::TT_None;
 			switch (spells[spell_id].target_type) {
