@@ -437,8 +437,7 @@ int64 Mob::GetActSpellHealing(uint16 spell_id, int64 value, Mob* target, bool fr
 			}
 		}
 
-		if (critical_chance && zone->random.Roll(critical_chance))
-			value *= critical_modifier;
+		value *= critical_modifier;
 	}
 
 	if (IsNPC() && CastToNPC()->GetHealScale()) {
