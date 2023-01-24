@@ -94,3 +94,8 @@ steps:
 depends_on:
   - Build Windows
   - Build Linux
+
+when:
+  branch:
+    - master
+    - feature/*
