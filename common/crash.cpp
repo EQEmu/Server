@@ -23,8 +23,8 @@ void SendCrashReport(const std::string &crash_report)
 {
 	// can configure multiple endpoints if need be
 	std::vector<std::string> endpoints = {
-		"http://spire.akkadius.com/api/v1/server-crash-report",
-//		"http://localhost:3010/api/v1/server-crash-report", // development
+		"http://spire.akkadius.com/api/v1/analytics/server-crash-report",
+//		"http://localhost:3010/api/v1/analytics/server-crash-report", // development
 	};
 
 	auto      config = EQEmuConfig::get();
@@ -201,7 +201,7 @@ LONG WINAPI windows_exception_handler(EXCEPTION_POINTERS *ExceptionInfo)
 
 	if(EXCEPTION_STACK_OVERFLOW != ExceptionInfo->ExceptionRecord->ExceptionCode)
 	{
-		EQEmuStackWalker sw; 
+		EQEmuStackWalker sw;
 		sw.ShowCallstack(GetCurrentThread(), ExceptionInfo->ContextRecord);
 
 		if (RuleB(Analytics, CrashReporting)) {
