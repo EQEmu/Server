@@ -13,6 +13,7 @@
 #include "platform.h"
 
 #include <cstdio>
+#include <vector>
 
 #if WINDOWS
 #define popen _popen
@@ -26,7 +27,7 @@ void SendCrashReport(const std::string &crash_report)
 //		"http://localhost:3010/api/v1/server-crash-report", // development
 	};
 
-	auto      config = EQEmuConfig::get();
+	auto config = EQEmuConfig::get();
 	for (auto &e: endpoints) {
 		uri u(e);
 
@@ -103,27 +104,30 @@ public:
 	EQEmuStackWalker(DWORD dwProcessId, HANDLE hProcess) : StackWalker(dwProcessId, hProcess) { }
 	virtual void OnOutput(LPCSTR szText) {
 		char buffer[4096];
-		for(int i = 0; i < 4096; ++i) {
-			if(szText[i] == 0) {
+		for (int i = 0; i < 4096; ++i) {
+			if (szText[i] == 0) {
 				buffer[i] = '\0';
 				break;
 			}
 
-			if(szText[i] == '\n' || szText[i] == '\r') {
+			if (szText[i] == '\n' || szText[i] == '\r') {
 				buffer[i] = ' ';
-			} else {
+			}
+			else {
 				buffer[i] = szText[i];
 			}
 		}
 
-		if (RuleB(Analytics, CrashReporting)) {
-			std::string crash_report = buffer;
-			SendCrashReport(crash_report);
-		}
+		std::string line = buffer;
+		_lines.push_back(line);
 
 		Log(Logs::General, Logs::Crash, buffer);
 		StackWalker::OnOutput(szText);
 	}
+
+	const std::vector<std::string>& const GetLines() { return _lines; }
+private:
+	std::vector<std::string> _lines;
 };
 
 LONG WINAPI windows_exception_handler(EXCEPTION_POINTERS *ExceptionInfo)
@@ -197,7 +201,20 @@ LONG WINAPI windows_exception_handler(EXCEPTION_POINTERS *ExceptionInfo)
 
 	if(EXCEPTION_STACK_OVERFLOW != ExceptionInfo->ExceptionRecord->ExceptionCode)
 	{
-		EQEmuStackWalker sw; sw.ShowCallstack(GetCurrentThread(), ExceptionInfo->ContextRecord);
+		EQEmuStackWalker sw; 
+		sw.ShowCallstack(GetCurrentThread(), ExceptionInfo->ContextRecord);
+
+		if (RuleB(Analytics, CrashReporting)) {
+			std::string crash_report;
+			auto& lines = sw.GetLines();
+
+			for (auto& line : lines) {
+				crash_report += line;
+				crash_report += "\n";
+			}
+
+			SendCrashReport(crash_report);
+		}
 	}
 
 	return EXCEPTION_EXECUTE_HANDLER;
