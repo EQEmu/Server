@@ -90,12 +90,11 @@ steps:
       - gh-release --assets=eqemu-server-linux-x64.zip,eqemu-server-windows-x64.zip -y
       - |
         rclone delete remote: --include "eqemu-server*.zip"
-
-when:
-  branch:
-    - master
-  event:
-    - push
+    when:
+      branch:
+        - master
+      event:
+        - push
 
 depends_on:
   - Build Windows
