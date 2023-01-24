@@ -98,4 +98,3 @@ depends_on:
 when:
   branch:
     - master
-    - feature/*
