@@ -1,3 +1,10 @@
+## [22.1.1] - 01/23/2022
+
+### Fixes
+
+* Fix botgrouplist to display unique entries. ([#2785](https://github.com/EQEmu/Server/pull/2785)) ([Aeadoin](https://github.com/Aeadoin)) 2023-01-23
+* Fix scenario where dereferenced object could be null. ([#2784](https://github.com/EQEmu/Server/pull/2784)) ([Aeadoin](https://github.com/Aeadoin)) 2023-01-23
+
 ## [22.1.0] - 01/22/2022
 
 This is a first release using the new build system. Changelog entry representative of last year. Subsequent releases will consist of incremental changes since the last release.
