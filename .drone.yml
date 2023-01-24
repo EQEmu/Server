@@ -94,6 +94,8 @@ steps:
 trigger:
   branch:
     - master
+  event:
+    - push
 
 depends_on:
   - Build Windows
