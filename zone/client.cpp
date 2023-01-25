@@ -10462,6 +10462,12 @@ int Client::CountItem(uint32 item_id)
 void Client::ResetItemCooldown(uint32 item_id)
 {
 	EQ::ItemInstance *item = nullptr;
+	const EQ::ItemData* item_d = database.GetItem(item_id);
+	if (!item_d) {
+		return;
+	}
+	int recast_type = item_d->RecastType;
+	
 	static const int16 slots[][2] = {
 		{ EQ::invslot::POSSESSIONS_BEGIN, EQ::invslot::POSSESSIONS_END },
 		{ EQ::invbag::GENERAL_BAGS_BEGIN, EQ::invbag::GENERAL_BAGS_END },
@@ -10475,15 +10481,13 @@ void Client::ResetItemCooldown(uint32 item_id)
 	for (int slot_index = 0; slot_index < size; ++slot_index) {
 		for (int slot_id = slots[slot_index][0]; slot_id <= slots[slot_index][1]; ++slot_id) {
 			item = GetInv().GetItem(slot_id);
-			if (item && item->GetID() == item_id) {
-				const EQ::ItemData* item_d = item->GetItem();
-				item->SetRecastTimestamp(0);
-				
-				if (item_d->RecastType) {
-					DeleteItemRecastTimer(item_d->RecastType);
+			if (item) {
+				item_d = item->GetItem();
+				if (item->GetID() == item_id || (item_d->RecastType != -1 && item_d->RecastType == recast_type)) {	
+					item->SetRecastTimestamp(0);
+					DeleteItemRecastTimer(item_d->ID);
+					SendItemPacket(slot_id, item, ItemPacketCharmUpdate);
 				}
-				
-				SendItemPacket(slot_id, item, ItemPacketCharmUpdate);
 			}
 		}
 	}

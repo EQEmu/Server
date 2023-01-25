@@ -2872,9 +2872,9 @@ void Perl_Client_CampAllBots(Client* self, uint8 class_id)
 	self->CampAllBots(class_id);
 }
 
-void Perl_Client_DeleteItemRecastTimer(Client* self, int recast_type)
+void Perl_Client_DeleteItemRecastTimer(Client* self, uint32 item_id)
 {
-	self->DeleteItemRecastTimer(recast_type);
+	self->DeleteItemRecastTimer(item_id);
 }
 
 void Perl_Client_ResetItemCooldown(Client* self, uint32 item_id)
