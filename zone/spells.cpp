@@ -6344,7 +6344,7 @@ void Client::SendSpellAnim(uint16 target_id, uint16 spell_id)
 
 void Client::SendItemRecastTimer(int32 recast_type, uint32 recast_delay, bool in_ignore_casting_requirement)
 {
-	if (recast_type == -1) {
+	if (recast_type == RECAST_TYPE_UNLINKED_ITEM) {
 		return;
 	}
 
@@ -6414,14 +6414,14 @@ void Client::SetItemRecastTimer(int32 spell_id, uint32 inventory_slot)
 
 	if (recast_delay > 0) {
 		
-		if (recast_type != -1) {
+		if (recast_type != RECAST_TYPE_UNLINKED_ITEM) {
 			GetPTimers().Start((pTimerItemStart + recast_type), static_cast<uint32>(recast_delay));
 			database.UpdateItemRecast(
 				CharacterID(),
 				recast_type,
 				GetPTimers().Get(pTimerItemStart + recast_type)->GetReadyTimestamp()
 			);
-		} else if (recast_type == -1) {
+		} else if (recast_type == RECAST_TYPE_UNLINKED_ITEM) {
 			GetPTimers().Start((pTimerNegativeItemReuse * item_casting), static_cast<uint32>(recast_delay));
 			database.UpdateItemRecast(
 				CharacterID(),
