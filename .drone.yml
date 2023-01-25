@@ -4,9 +4,6 @@ kind: pipeline
 type: docker
 name: Build Linux
 
-clone:
-  depth: 1
-
 # Limits how many of these builds can run on the drone runner at a time, this isn't about cores
 concurrency:
   limit: 1
@@ -42,9 +39,6 @@ name: Build Windows
 # Limits how many of these builds can run on the drone runner at a time, this isn't about cores
 concurrency:
   limit: 1
-
-clone:
-  depth: 1
 
 platform:
   os: windows
