@@ -10483,7 +10483,7 @@ void Client::ResetItemCooldown(uint32 item_id)
 			item = GetInv().GetItem(slot_id);
 			if (item) {
 				item_d = item->GetItem();
-				if (item->GetID() == item_id || (item_d->RecastType != -1 && item_d->RecastType == recast_type)) {	
+				if (item_d && item->GetID() == item_id || (item_d->RecastType != -1 && item_d->RecastType == recast_type)) {	
 					item->SetRecastTimestamp(0);
 					DeleteItemRecastTimer(item_d->ID);
 					SendItemPacket(slot_id, item, ItemPacketCharmUpdate);
@@ -10506,8 +10506,8 @@ void Client::RemoveItem(uint32 item_id, uint32 quantity)
 		{ EQ::invbag::SHARED_BANK_BAGS_BEGIN, EQ::invbag::SHARED_BANK_BAGS_END },
 	};
 	int16 removed_count = 0;
-	const size_t size = sizeof(slots) / sizeof(slots[0]);
-	for (int slot_index = 0; slot_index < size; ++slot_index) {
+	const size_t slot_index_count = sizeof(slots) / sizeof(slots[0]);
+	for (int slot_index = 0; slot_index < slot_index_count; ++slot_index) {
 		for (int slot_id = slots[slot_index][0]; slot_id <= slots[slot_index][1]; ++slot_id) {
 			if (removed_count == quantity) {
 				break;
