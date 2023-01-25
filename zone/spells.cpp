@@ -6342,7 +6342,7 @@ void Client::SendSpellAnim(uint16 target_id, uint16 spell_id)
 	entity_list.QueueCloseClients(this, &app, false, RuleI(Range, SpellParticles));
 }
 
-void Client::SendItemRecastTimer(int32 recast_type, uint32 recast_delay, bool ignore_casting_requirement)
+void Client::SendItemRecastTimer(int32 recast_type, uint32 recast_delay, bool ignore)
 {
 	if (recast_type == -1) {
 		return;
@@ -6357,7 +6357,7 @@ void Client::SendItemRecastTimer(int32 recast_type, uint32 recast_delay, bool ig
 		ItemRecastDelay_Struct *ird = (ItemRecastDelay_Struct *)outapp->pBuffer;
 		ird->recast_delay = recast_delay;
 		ird->recast_type = static_cast<uint32>(recast_type);
-		ird->ignore_casting_requirement = ignore_casting_requirement; //True allows reset of item cast timers
+		ird->ignore_casting_requirement = ignore; //True allows reset of item cast timers
 		QueuePacket(outapp);
 		safe_delete(outapp);
 	}

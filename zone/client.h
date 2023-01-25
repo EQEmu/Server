@@ -1517,7 +1517,7 @@ public:
 
 	void SendReloadCommandMessages();
 
-	void SendItemRecastTimer(int32 recast_type, uint32 recast_delay = 0, bool ignore_casting_requirement = false);
+	void SendItemRecastTimer(int32 recast_type, uint32 recast_delay = 0, bool ignore = false);
 	void SetItemRecastTimer(int32 spell_id, uint32 inventory_slot);
 	void DeleteItemRecastTimer(uint32 item_id);
 	bool HasItemRecastTimer(int32 spell_id, uint32 inventory_slot);
