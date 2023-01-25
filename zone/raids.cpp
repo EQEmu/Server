@@ -220,7 +220,7 @@ void Raid::RemoveMember(const char *characterName)
 	Bot* bot;
 
 	if (RuleB(Bots, Enabled) && bot) {
-		Bot* bot = entity_list.GetBotByBotName(characterName);
+		bot = entity_list.GetBotByBotName(characterName);
 		bot->SetFollowID(bot->GetOwner()->CastToClient()->GetID());
 		bot->SetGrouped(false);
 		bot->SetTarget(nullptr);
@@ -1604,7 +1604,7 @@ void Raid::VerifyRaid()
 				//Raid requires client* we are forcing it here to be a BOT.  Care is needed here as any client function that
 				//does not exist within the Bot Class will likely corrupt memory for the member object. Good practice to test the IsBot
 				//attribute before calling a client function or casting to client.
-				Bot* b = entity_list.GetBotByBotName(members[x].membername);
+				b = entity_list.GetBotByBotName(members[x].membername);
 				members[x].member = b->CastToClient();
 				members[x].IsBot = true; //Used to identify those members who are Bots
 			}
