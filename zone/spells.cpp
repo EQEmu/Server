@@ -6506,9 +6506,9 @@ bool Client::HasItemRecastTimer(int32 spell_id, uint32 inventory_slot)
 		return false;
 	}
 	//if time is not expired, then it exists and therefore we have a recast on this item.
-	if (recast_type != -1 && !CastToClient()->GetPTimers().Expired(&database, (pTimerItemStart + recast_type), false)) {
+	if (recast_type != RECAST_TYPE_UNLINKED_ITEM && !CastToClient()->GetPTimers().Expired(&database, (pTimerItemStart + recast_type), false)) {
 		return true;
-	} else if (recast_type == -1 && !CastToClient()->GetPTimers().Expired(&database, (pTimerNegativeItemReuse * item_id), false)) {
+	} else if (recast_type == RECAST_TYPE_UNLINKED_ITEM && !CastToClient()->GetPTimers().Expired(&database, (pTimerNegativeItemReuse * item_id), false)) {
 		return true;
 	}
 
