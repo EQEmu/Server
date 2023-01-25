@@ -721,9 +721,9 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv)
 			inst->SetCharges(charges);
 
 		if (item->RecastDelay) {
-			if (item->RecastType != -1 && timestamps.count(item->RecastType)) {
+			if (item->RecastType != RECAST_TYPE_UNLINKED_ITEM && timestamps.count(item->RecastType)) {
 				inst->SetRecastTimestamp(timestamps.at(item->RecastType));
-			} else if (item->RecastType == -1 && timestamps.count(item->ID)) {
+			} else if (item->RecastType == RECAST_TYPE_UNLINKED_ITEM && timestamps.count(item->ID)) {
 				inst->SetRecastTimestamp(timestamps.at(item->ID));
 			}
 			else {
