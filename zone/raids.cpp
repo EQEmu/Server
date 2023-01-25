@@ -96,7 +96,6 @@ bool Raid::Process()
 void Raid::AddMember(Client *c, uint32 group, bool rleader, bool groupleader, bool looter){
 	if(!c)
 		return;
-
 	std::string query = StringFormat("INSERT INTO raid_members SET raidid = %lu, charid = %lu, "
                                     "groupid = %lu, _class = %d, level = %d, name = '%s', "
                                     "isgroupleader = %d, israidleader = %d, islooter = %d, isbot = 0",
@@ -218,9 +217,10 @@ void Raid::RemoveMember(const char *characterName)
 	auto results = database.QueryDatabase(query);
 
 	Client *client = entity_list.GetClientByName(characterName);
-	Bot* bot = entity_list.GetBotByBotName(characterName);
+	Bot* bot;
 
-	if (bot) {
+	if (RuleB(Bots, Enabled) && bot) {
+		Bot* bot = entity_list.GetBotByBotName(characterName);
 		bot->SetFollowID(bot->GetOwner()->CastToClient()->GetID());
 		bot->SetGrouped(false);
 		bot->SetTarget(nullptr);
@@ -1210,7 +1210,7 @@ void Raid::QueuePacket(const EQApplicationPacket *app, bool ack_req)
 void Raid::SendMakeLeaderPacket(const char *who) //30
 {
 		
-	if (entity_list.GetBotByBotName(who) && members[GetPlayerIndex(who)].IsBot)
+	if (RuleB(Bots, Enabled) && entity_list.GetBotByBotName(who) && members[GetPlayerIndex(who)].IsBot)
 		return;
 
 	auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidLeadershipUpdate_Struct));
@@ -1228,7 +1228,7 @@ void Raid::SendMakeLeaderPacketTo(const char *who, Client *to)
 	if(!to)
 		return;
 
-	if (members[GetPlayerIndex(who)].IsBot)
+	if (RuleB(Bots, Enabled) && members[GetPlayerIndex(who)].IsBot)
 		return;
 
 	auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidLeadershipUpdate_Struct));
@@ -1261,7 +1261,7 @@ void Raid::SendGroupUpdate(Client *to)
 	if(!to)
 		return;
 
-	if (members[GetPlayerIndex(to)].IsBot)
+	if (RuleB(Bots, Enabled) && members[GetPlayerIndex(to)].IsBot)
 		return;
 
 	auto outapp = new EQApplicationPacket(OP_GroupUpdate, sizeof(GroupUpdate2_Struct));
@@ -1452,7 +1452,7 @@ void Raid::SendRaidMOTDToWorld()
 
 void Raid::SendGroupLeadershipAA(Client *c, uint32 gid)
 {
-	if (members[GetPlayerIndex(c)].IsBot)
+	if (RuleB(Bots, Enabled) && members[GetPlayerIndex(c)].IsBot)
 		return;
 
 	auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidLeadershipUpdate_Struct));
@@ -1595,16 +1595,17 @@ void Raid::VerifyRaid()
 		}
 		else{
 			Client *c = entity_list.GetClientByName(members[x].membername);
-			Bot* b = entity_list.GetBotByBotName(members[x].membername); 
+			Bot* b;
 			if(c){
 				members[x].member = c;
 				members[x].IsBot = false;
 			}
-			else if(b){
+			else if(RuleB(Bots, Enabled) && b){
 				//Raid requires client* we are forcing it here to be a BOT.  Care is needed here as any client function that
 				//does not exist within the Bot Class will likely corrupt memory for the member object. Good practice to test the IsBot
 				//attribute before calling a client function or casting to client.
-				members[x].member = b->CastToClient(); 
+				Bot* b = entity_list.GetBotByBotName(members[x].membername);
+				members[x].member = b->CastToClient();
 				members[x].IsBot = true; //Used to identify those members who are Bots
 			}
 			else {

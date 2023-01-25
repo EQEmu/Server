@@ -16,6 +16,7 @@
 #include "../../strings.h"
 #include <ctime>
 
+
 class BaseRaidMembersRepository {
 public:
 	struct RaidMembers {
@@ -28,7 +29,7 @@ public:
 		int8_t      isgroupleader;
 		int8_t      israidleader;
 		int8_t      islooter;
-		int8_t			isbot;
+		int8_t      isbot;
 	};
 
 	static std::string PrimaryKey()
@@ -64,6 +65,7 @@ public:
 			"isgroupleader",
 			"israidleader",
 			"islooter",
+			"isbot",
 		};
 	}
 
@@ -113,7 +115,7 @@ public:
 		e.isgroupleader = 0;
 		e.israidleader  = 0;
 		e.islooter      = 0;
-		e.isbot = 0;
+		e.isbot         = 0;
 
 		return e;
 	}
@@ -139,8 +141,9 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				raid_members_id
 			)
 		);
@@ -158,7 +161,7 @@ public:
 			e.isgroupleader = static_cast<int8_t>(atoi(row[6]));
 			e.israidleader  = static_cast<int8_t>(atoi(row[7]));
 			e.islooter      = static_cast<int8_t>(atoi(row[8]));
-			e.isbot			    = static_cast<int8_t>(atoi(row[9]));
+			e.isbot         = static_cast<int8_t>(atoi(row[9]));
 
 			return e;
 		}
@@ -314,7 +317,7 @@ public:
 			e.isgroupleader = static_cast<int8_t>(atoi(row[6]));
 			e.israidleader  = static_cast<int8_t>(atoi(row[7]));
 			e.islooter      = static_cast<int8_t>(atoi(row[8]));
-			e.isbot			    = static_cast<int8_t>(atoi(row[9]));
+			e.isbot         = static_cast<int8_t>(atoi(row[9]));
 
 			all_entries.push_back(e);
 		}
@@ -348,7 +351,7 @@ public:
 			e.isgroupleader = static_cast<int8_t>(atoi(row[6]));
 			e.israidleader  = static_cast<int8_t>(atoi(row[7]));
 			e.islooter      = static_cast<int8_t>(atoi(row[8]));
-			e.isbot			= static_cast<int8_t>(atoi(row[9]));
+			e.isbot         = static_cast<int8_t>(atoi(row[9]));
 
 			all_entries.push_back(e);
 		}
