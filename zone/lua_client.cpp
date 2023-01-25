@@ -3014,12 +3014,6 @@ void Lua_Client::CampAllBots(uint8 class_id)
 	self->CampAllBots(class_id);
 }
 
-void Lua_Client::DeleteItemRecastTimer(uint32 item_id)
-{
-	Lua_Safe_Call_Void();
-	self->DeleteItemRecastTimer(item_id);
-}
-
 void Lua_Client::ResetItemCooldown(uint32 item_id)
 {
 	Lua_Safe_Call_Void();
@@ -3104,7 +3098,6 @@ luabind::scope lua_register_client() {
 	.def("DecreaseByID", (bool(Lua_Client::*)(uint32,int))&Lua_Client::DecreaseByID)
 	.def("DeleteItemInInventory", (void(Lua_Client::*)(int,int))&Lua_Client::DeleteItemInInventory)
 	.def("DeleteItemInInventory", (void(Lua_Client::*)(int,int,bool))&Lua_Client::DeleteItemInInventory)
-	.def("DeleteItemRecastTimer", (void(Lua_Client::*)(uint32))&Lua_Client::DeleteItemRecastTimer)
 	.def("DiaWind", (void(Lua_Client::*)(std::string))&Lua_Client::DialogueWindow)
 	.def("DialogueWindow", (void(Lua_Client::*)(std::string))&Lua_Client::DialogueWindow)
 	.def("DisableAreaEndRegen", &Lua_Client::DisableAreaEndRegen)
