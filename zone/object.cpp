@@ -508,7 +508,7 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 			}
 
 			if (item->RecastDelay) {
-				if (item->RecastType != -1) {
+				if (item->RecastType != RECAST_TYPE_UNLINKED_ITEM) {
 					m_inst->SetRecastTimestamp(
 						database.GetItemRecastTimestamp(sender->CharacterID(), item->RecastType));
 				} else {

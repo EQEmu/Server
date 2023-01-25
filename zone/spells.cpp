@@ -6444,13 +6444,13 @@ void Client::DeleteItemRecastTimer(uint32 item_id)
         return;
     }
 
-    const auto recast_type = d->RecastType != -1 ? d->RecastType : item_id;
-    const int timer_id = d->RecastType != -1 ? (pTimerItemStart + recast_type) : (pTimerNegativeItemReuse * item_id);
+    const auto recast_type = d->RecastType != RECAST_TYPE_UNLINKED_ITEM ? d->RecastType : item_id;
+    const int timer_id = d->RecastType != RECAST_TYPE_UNLINKED_ITEM ? (pTimerItemStart + recast_type) : (pTimerNegativeItemReuse * item_id);
     
     database.DeleteItemRecast(CharacterID(), recast_type);
     GetPTimers().Clear(&database, timer_id);
 
-    if (recast_type != -1) {
+    if (recast_type != RECAST_TYPE_UNLINKED_ITEM) {
         SendItemRecastTimer(recast_type, 1, true);
     }
 }

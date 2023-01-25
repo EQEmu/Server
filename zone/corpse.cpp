@@ -1210,7 +1210,7 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 
 		if (pkinst) {
 			if (pkitem->RecastDelay) {
-				if (pkitem->RecastType != -1) {
+				if (pkitem->RecastType != RECAST_TYPE_UNLINKED_ITEM) {
 					pkinst->SetRecastTimestamp(timestamps.count(pkitem->RecastType) ? timestamps.at(pkitem->RecastType) : 0);
 				} else {
 					pkinst->SetRecastTimestamp(timestamps.count(pkitem->ID) ? timestamps.at(pkitem->ID) : 0);
@@ -1270,7 +1270,7 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 			continue;
 
 		if (item->RecastDelay) {
-			if (item->RecastType != -1) {
+			if (item->RecastType != RECAST_TYPE_UNLINKED_ITEM) {
 				inst->SetRecastTimestamp(timestamps.count(item->RecastType) ? timestamps.at(item->RecastType) : 0);
 			} else {
 				inst->SetRecastTimestamp(timestamps.count(item->ID) ? timestamps.at(item->ID) : 0);
@@ -1491,7 +1491,7 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 		auto timestamps = database.GetItemRecastTimestamps(client->CharacterID());
 		const auto* d = inst->GetItem();
 		if (d->RecastDelay) {
-			if (d->RecastType != -1) {
+			if (d->RecastType != RECAST_TYPE_UNLINKED_ITEM) {
 				inst->SetRecastTimestamp(timestamps.count(d->RecastType) ? timestamps.at(d->RecastType) : 0);
 			} else {
 				inst->SetRecastTimestamp(timestamps.count(d->ID) ? timestamps.at(d->ID) : 0);

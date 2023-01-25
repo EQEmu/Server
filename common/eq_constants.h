@@ -79,6 +79,8 @@
 #define	ANIM_DEATH		0x73
 #define ANIM_LOOT		0x69
 
+constexpr int16 RECAST_TYPE_UNLINKED_ITEM = -1;
+
 typedef enum {
 	eaStanding = 0,
 	eaSitting,		//1

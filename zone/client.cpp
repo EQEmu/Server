@@ -10446,8 +10446,8 @@ int Client::CountItem(uint32 item_id)
 		{ EQ::invslot::SHARED_BANK_BEGIN, EQ::invslot::SHARED_BANK_END },
 		{ EQ::invbag::SHARED_BANK_BAGS_BEGIN, EQ::invbag::SHARED_BANK_BAGS_END },
 	};
-	const size_t size = sizeof(slots) / sizeof(slots[0]);
-	for (int slot_index = 0; slot_index < size; ++slot_index) {
+	const size_t slot_index_count = sizeof(slots) / sizeof(slots[0]);
+	for (int slot_index = 0; slot_index < slot_index_count; ++slot_index) {
 		for (int slot_id = slots[slot_index][0]; slot_id <= slots[slot_index][1]; ++slot_id) {
 			item = GetInv().GetItem(slot_id);
 			if (item && item->GetID() == item_id) {
@@ -10467,6 +10467,7 @@ void Client::ResetItemCooldown(uint32 item_id)
 		return;
 	}
 	int recast_type = item_d->RecastType;
+	bool found_item = false; 
 	
 	static const int16 slots[][2] = {
 		{ EQ::invslot::POSSESSIONS_BEGIN, EQ::invslot::POSSESSIONS_END },
@@ -10477,19 +10478,23 @@ void Client::ResetItemCooldown(uint32 item_id)
 		{ EQ::invslot::SHARED_BANK_BEGIN, EQ::invslot::SHARED_BANK_END },
 		{ EQ::invbag::SHARED_BANK_BAGS_BEGIN, EQ::invbag::SHARED_BANK_BAGS_END },
 	};
-	const size_t size = sizeof(slots) / sizeof(slots[0]);
-	for (int slot_index = 0; slot_index < size; ++slot_index) {
+	const size_t slot_index_count = sizeof(slots) / sizeof(slots[0]);
+	for (int slot_index = 0; slot_index < slot_index_count; ++slot_index) {
 		for (int slot_id = slots[slot_index][0]; slot_id <= slots[slot_index][1]; ++slot_id) {
 			item = GetInv().GetItem(slot_id);
 			if (item) {
 				item_d = item->GetItem();
-				if (item_d && item->GetID() == item_id || (item_d->RecastType != -1 && item_d->RecastType == recast_type)) {	
+				if (item_d && item->GetID() == item_id || (item_d->RecastType != RECAST_TYPE_UNLINKED_ITEM && item_d->RecastType == recast_type)) {	
 					item->SetRecastTimestamp(0);
 					DeleteItemRecastTimer(item_d->ID);
 					SendItemPacket(slot_id, item, ItemPacketCharmUpdate);
+					found_item = true;
 				}
 			}
 		}
+	}
+	if (!found_item) {
+		DeleteItemRecastTimer(item_id); //We didn't find the item but we still want to remove the timer
 	}
 }
 

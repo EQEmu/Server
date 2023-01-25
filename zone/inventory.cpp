@@ -717,7 +717,7 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 	auto timestamps = database.GetItemRecastTimestamps(CharacterID());
 	const auto* d = inst->GetItem();
 	if (d->RecastDelay) {
-		if (d->RecastType != -1) {
+		if (d->RecastType != RECAST_TYPE_UNLINKED_ITEM) {
 			inst->SetRecastTimestamp(timestamps.count(d->RecastType) ? timestamps.at(d->RecastType) : 0);
 		} else {
 			inst->SetRecastTimestamp(timestamps.count(d->ID) ? timestamps.at(d->ID) : 0);
