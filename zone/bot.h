@@ -19,8 +19,6 @@
 #ifndef BOT_H
 #define BOT_H
 
-#ifdef BOTS
-
 #include "bot_structs.h"
 #include "mob.h"
 #include "client.h"
@@ -146,11 +144,9 @@ public:
 
 	//abstract virtual override function implementations requird by base abstract class
 	bool Death(Mob* killerMob, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill) override;
-	void Damage(Mob* from, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill, bool avoidable = true, int8 buffslot = -1, 
+	void Damage(Mob* from, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill, bool avoidable = true, int8 buffslot = -1,
 		bool iBuffTic = false, eSpecialAttacks special = eSpecialAttacks::None) override;
 
-	bool Attack(Mob* other, int Hand = EQ::invslot::slotPrimary, bool FromRiposte = false, bool IsStrikethrough = false, bool IsFromSpell = false,
-		ExtraAttackOptions *opts = nullptr) override;
 	bool HasRaid() override { return (GetRaid() ? true : false); }
 	bool HasGroup() override { return (GetGroup() ? true : false); }
 	Raid* GetRaid() override { return entity_list.GetRaidByMob(this); }
@@ -372,8 +368,13 @@ public:
 	virtual bool SpellOnTarget(uint16 spell_id, Mob* spelltar);
 	bool IsImmuneToSpell(uint16 spell_id, Mob *caster) override;
 	virtual bool DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_center, CastAction_type &CastAction, EQ::spells::CastingSlot slot);
-	virtual bool DoCastSpell(uint16 spell_id, uint16 target_id, EQ::spells::CastingSlot slot = EQ::spells::CastingSlot::Item, int32 casttime = -1, int32 mana_cost = -1, 
+	virtual bool DoCastSpell(uint16 spell_id, uint16 target_id, EQ::spells::CastingSlot slot = EQ::spells::CastingSlot::Item, int32 casttime = -1, int32 mana_cost = -1,
 						uint32* oSpellWillFinish = 0, uint32 item_slot = 0xFFFFFFFF, uint32 aa_id = 0);
+	inline int64 GetFocusEffect(focusType type, uint16 spell_id, Mob *caster = nullptr, bool from_buff_tic = false) override
+		{ return Mob::GetFocusEffect(type, spell_id, caster, from_buff_tic); }
+	inline bool Attack(Mob* other, int Hand = EQ::invslot::slotPrimary, bool FromRiposte = false, bool IsStrikethrough = false,
+		bool IsFromSpell = false, ExtraAttackOptions *opts = nullptr) override
+			{ return Mob::Attack(other, Hand, FromRiposte, IsStrikethrough, IsFromSpell, opts); }
 
 	bool GetBotOwnerDataBuckets();
 	bool GetBotDataBuckets();
@@ -867,7 +868,5 @@ private:
 };
 
 bool IsSpellInBotList(DBbotspells_Struct* spell_list, uint16 iSpellID);
-
-#endif // BOTS
 
 #endif // BOT_H

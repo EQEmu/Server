@@ -2,9 +2,7 @@
 #include "../../common/http/httplib.h"
 #include "../../common/content/world_content_service.h"
 
-#ifdef BOTS
 #include "../bot.h"
-#endif
 
 void command_gearup(Client *c, const Seperator *sep)
 {
@@ -12,10 +10,8 @@ void command_gearup(Client *c, const Seperator *sep)
 	if (
 		c->GetTarget() &&
 		(
-			(c->GetTarget()->IsClient() && c->GetGM())
-#ifdef BOTS
-			|| c->GetTarget()->IsBot()
-#endif
+			(c->GetTarget()->IsClient() && c->GetGM()) ||
+			c->GetTarget()->IsBot()
 		)
 	) {
 		t = c->GetTarget();
@@ -119,19 +115,15 @@ void command_gearup(Client *c, const Seperator *sep)
 			bool has_item = false;
 			if (t->IsClient()) {
 				has_item = t->CastToClient()->GetInv().HasItem(item_id, 1, invWhereWorn) != INVALID_INDEX;
-#ifdef BOTS
 			} else if (t->IsBot()) {
 				has_item = t->CastToBot()->HasBotItem(item_id);
-#endif
 			}
 
 			bool can_wear_item = false;
 			if (t->IsClient()) {
 				can_wear_item = !t->CastToClient()->CheckLoreConflict(item) && !has_item;
-#ifdef BOTS
 			} else if (t->IsBot()) {
 				can_wear_item = !t->CastToBot()->CheckLoreConflict(item) && !has_item;
-#endif
 			}
 
 			if (!can_wear_item) {
@@ -142,10 +134,8 @@ void command_gearup(Client *c, const Seperator *sep)
 				can_wear_item &&
 				t->CanClassEquipItem(item_id) &&
 				(
-					t->CanRaceEquipItem(item_id)
-#ifdef BOTS
-					|| (t->IsBot() && !t->CanRaceEquipItem(item_id) && RuleB(Bots, AllowBotEquipAnyRaceGear))
-#endif
+					t->CanRaceEquipItem(item_id) ||
+					(t->IsBot() && !t->CanRaceEquipItem(item_id) && RuleB(Bots, AllowBotEquipAnyRaceGear))
 				)
 			) {
 				equipped.insert(slot_id);
@@ -156,10 +146,8 @@ void command_gearup(Client *c, const Seperator *sep)
 						0, 0, 0, 0, 0, 0, 0, 0,
 						slot_id
 					);
-#ifdef BOTS
 				} else if (t->IsBot()) {
 					t->CastToBot()->AddBotItem(slot_id, item_id);
-#endif
 				}
 
 				items_equipped++;

@@ -1,4 +1,3 @@
-#ifdef BOTS
 #ifdef LUA_EQEMU
 
 #include "lua.hpp"
@@ -473,5 +472,4 @@ luabind::scope lua_register_bot() {
 	.def("Stand", (void(Lua_Bot::*)(void))&Lua_Bot::Stand);
 }
 
-#endif
 #endif

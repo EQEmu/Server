@@ -157,13 +157,13 @@ bool Spawn2::Process() {
 	if (timer.Check()) {
 		timer.Disable();
 
-		LogSpawns("Spawn2 [{}]: Timer has triggered", spawn2_id);
+		LogSpawns("[{}]: Timer has triggered", spawn2_id);
 
 		//first check our spawn condition, if this isnt active
 		//then we reset the timer and try again next time.
 		if (condition_id != SC_AlwaysEnabled
 			&& !zone->spawn_conditions.Check(condition_id, condition_min_value)) {
-			LogSpawns("Spawn2 [{}]: spawning prevented by spawn condition [{}]", spawn2_id, condition_id);
+			LogSpawns("[{}]: spawning prevented by spawn condition [{}]", spawn2_id, condition_id);
 			Reset();
 			return (true);
 		}
@@ -575,6 +575,8 @@ bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spa
 		}
 	}
 
+	LogInfo("Loaded [{}] respawn timer(s)", Strings::Commify(results.RowCount()));
+
 	const char *zone_name = ZoneName(zoneid);
 	std::string query = StringFormat(
 		"SELECT "
@@ -633,6 +635,8 @@ bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spa
 
 		spawn2_list.Insert(new_spawn);
 	}
+
+	LogInfo("Loaded [{}] spawn2 entries", Strings::Commify(results.RowCount()));
 
 	NPC::SpawnZoneController();
 
@@ -1006,6 +1010,8 @@ bool SpawnConditionManager::LoadSpawnConditions(const char* zone_name, uint32 in
     LogSpawns("Loaded spawn condition [{}] with value [{}] and on_change [{}]", cond.condition_id, cond.value, cond.on_change);
     }
 
+	LogInfo("Loaded [{}] spawn_conditions", Strings::Commify(std::to_string(results.RowCount())));
+
 	//load values
 	query = StringFormat("SELECT id, value FROM spawn_condition_values "
                         "WHERE zone = '%s' AND instance_id = %u",
@@ -1031,6 +1037,8 @@ bool SpawnConditionManager::LoadSpawnConditions(const char* zone_name, uint32 in
     if (!results.Success()) {
 		return false;
     }
+
+	LogInfo("Loaded [{}] spawn_events", Strings::Commify(std::to_string(results.RowCount())));
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		SpawnEvent event;

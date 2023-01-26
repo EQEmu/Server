@@ -1666,7 +1666,6 @@ void handle_player_augment_remove(
 
 // Bot
 
-#ifdef BOTS
 void handle_bot_null(
 	QuestInterface *parse,
 	lua_State* L,
@@ -2004,7 +2003,5 @@ void handle_bot_unequip_item(
 	lua_setfield(L, -2, "item");
 }
 
-
-#endif
 
 #endif

@@ -57,10 +57,7 @@ struct QGlobal;
 struct UseAA_Struct;
 struct Who_All_Struct;
 
-#ifdef BOTS
 class Bot;
-class BotRaids;
-#endif
 
 extern EntityList entity_list;
 
@@ -118,10 +115,8 @@ public:
 	virtual const char* GetName() { return ""; }
 	bool CheckCoordLosNoZLeaps(float cur_x, float cur_y, float cur_z, float trg_x, float trg_y, float trg_z, float perwalk=1);
 
-#ifdef BOTS
 	Bot* CastToBot();
 	const Bot* CastToBot() const;
-#endif
 
 protected:
 	friend class EntityList;
@@ -191,10 +186,7 @@ public:
 	Client *GetClientByLSID(uint32 iLSID);
 	Client *GetClient(uint32 ip, uint16 port);
 
-#ifdef BOTS
 	Bot* GetRandomBot(const glm::vec3& location = glm::vec3(0.f), float distance = 0, Bot* exclude_bot = nullptr);
-#endif
-
 	Client* GetRandomClient(const glm::vec3& location = glm::vec3(0.f), float distance = 0, Client* exclude_client = nullptr);
 	NPC* GetRandomNPC(const glm::vec3& location = glm::vec3(0.f), float distance = 0, NPC* exclude_npc = nullptr);
 	Mob* GetRandomMob(const glm::vec3& location = glm::vec3(0.f), float distance = 0, Mob* exclude_mob = nullptr);
@@ -548,7 +540,6 @@ public:
 	inline const std::unordered_map<uint16, NPC *> &GetNPCList() { return npc_list; }
 	inline const std::unordered_map<uint16, Merc *> &GetMercList() { return merc_list; }
 	inline const std::unordered_map<uint16, Client *> &GetClientList() { return client_list; }
-#ifdef BOTS
 	inline const std::list<Bot *> &GetBotList() { return bot_list; }
 	std::vector<Bot *> GetBotListByCharacterID(uint32 character_id, uint8 class_id = NO_CLASS);
 	std::vector<Bot *> GetBotListByClientName(std::string client_name, uint8 class_id = NO_CLASS);
@@ -556,7 +547,6 @@ public:
 	void SignalAllBotsByOwnerName(std::string owner_name, int signal_id);
 	void SignalBotByBotID(uint32 bot_id, int signal_id);
 	void SignalBotByBotName(std::string bot_name, int signal_id);
-#endif
 	inline const std::unordered_map<uint16, Corpse *> &GetCorpseList() { return corpse_list; }
 	inline const std::unordered_map<uint16, Object *> &GetObjectList() { return object_list; }
 	inline const std::unordered_map<uint16, Doors *> &GetDoorsList() { return door_list; }
@@ -621,8 +611,7 @@ private:
 	Timer raid_timer;
 	Timer trap_timer;
 
-	// Please Do Not Declare Any EntityList Class Members After This Comment
-#ifdef BOTS
+
 	public:
 		void AddBot(Bot* new_bot, bool send_spawn_packet = true, bool dont_queue = false);
 		bool RemoveBot(uint16 entityID);
@@ -641,7 +630,6 @@ private:
 		void GetBotList(std::list<Bot*> &b_list);
 	private:
 		std::list<Bot*> bot_list;
-#endif
 };
 
 class BulkZoneSpawnPacket {

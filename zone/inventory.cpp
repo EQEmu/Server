@@ -25,9 +25,7 @@
 #include "zonedb.h"
 #include "../common/zone_store.h"
 
-#ifdef BOTS
 #include "bot.h"
-#endif
 
 extern WorldServer worldserver;
 
@@ -716,6 +714,15 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 	// in any other situation just use charges as passed
 
 	EQ::ItemInstance* inst = database.CreateItem(item, charges);
+	auto timestamps = database.GetItemRecastTimestamps(CharacterID());
+	const auto* d = inst->GetItem();
+	if (d->RecastDelay) {
+		if (d->RecastType != RECAST_TYPE_UNLINKED_ITEM) {
+			inst->SetRecastTimestamp(timestamps.count(d->RecastType) ? timestamps.at(d->RecastType) : 0);
+		} else {
+			inst->SetRecastTimestamp(timestamps.count(d->ID) ? timestamps.at(d->ID) : 0);
+		}
+	}
 
 	if(inst == nullptr) {
 		Message(Chat::Red, "An unknown server error has occurred and your item was not created.");
@@ -3688,7 +3695,6 @@ bool Client::InterrogateInventory(Client* requester, bool log, bool silent, bool
 
 	if (log) {
 		LogError("Target interrogate inventory flag: [{}]", (GetInterrogateInvState() ? "TRUE" : "FALSE"));
-		LogDebug("[CLIENT] Client::InterrogateInventory() -- End");
 	}
 	if (!silent) {
 		requester->Message(Chat::Default, "Target interrogation flag: %s", (GetInterrogateInvState() ? "TRUE" : "FALSE"));
@@ -4568,7 +4574,6 @@ const int EQ::InventoryProfile::GetItemStatValue(uint32 item_id, std::string ide
 	return stat;
 }
 
-#ifdef BOTS
 // Returns a slot's item ID (returns INVALID_ID if not found)
 int32 Bot::GetItemIDAt(int16 slot_id) {
 	if (slot_id <= EQ::invslot::POSSESSIONS_END && slot_id >= EQ::invslot::POSSESSIONS_BEGIN) {
@@ -4636,5 +4641,3 @@ int32 Bot::GetAugmentIDAt(int16 slot_id, uint8 augslot) {
 	// None found
 	return INVALID_ID;
 }
-
-#endif

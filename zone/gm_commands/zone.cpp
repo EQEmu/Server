@@ -53,12 +53,10 @@ void command_zone(Client *c, const Seperator *sep)
 		return;
 	}
 
-#ifdef BOTS
 	// This block is necessary to clean up any bot objects owned by a Client
-	if (zone_id != c->GetZoneID()) {
+	if (RuleB(Bots, Enabled) && zone_id != c->GetZoneID()) {
 		Bot::ProcessClientZoneChange(c);
 	}
-#endif
 
 	// fetch zone data
 	auto zd = GetZoneVersionWithFallback(zone_id, 0);

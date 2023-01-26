@@ -92,9 +92,9 @@ public:
 	void SendMailBoxes();
 	inline void QueuePacket(const EQApplicationPacket *p, bool ack_req=true) { ClientStream->QueuePacket(p, ack_req); }
 	std::string GetName() { if(Characters.size()) return Characters[0].Name; else return ""; }
-	void JoinChannels(std::string ChannelList);
-	void LeaveChannels(std::string ChannelList);
-	void LeaveAllChannels(bool SendUpdatedChannelList = true);
+	void JoinChannels(std::string& channel_name_list, bool command_directed = false);
+	void LeaveChannels(std::string& channel_name_list, bool command_directed = false);
+	void LeaveAllChannels(bool send_updated_channel_list = true, bool command_directed = false);
 	void AddToChannelList(ChatChannel *JoinedChannel);
 	void RemoveFromChannelList(ChatChannel *JoinedChannel);
 	void SendChannelMessage(std::string Message);
@@ -112,6 +112,7 @@ public:
 	void ProcessChannelList(std::string CommandString);
 	void AccountUpdate();
 	int ChannelCount();
+	std::string RemoveDuplicateChannels(std::string& in_channels);
 	inline void SetAccountID(int inAccountID) { AccountID = inAccountID; }
 	inline int GetAccountID() { return AccountID; }
 	inline void SetAccountStatus(int inStatus) { Status = inStatus; }
@@ -187,7 +188,7 @@ public:
 	void	CheckForStaleConnectionsAll();
 	void	CheckForStaleConnections(Client *c);
 	Client *IsCharacterOnline(std::string CharacterName);
-	void ProcessOPMailCommand(Client *c, std::string CommandString);
+	void ProcessOPMailCommand(Client* c, std::string command_string, bool command_directed = false);
 
 private:
 	EQ::Net::EQStreamManager *chatsf;

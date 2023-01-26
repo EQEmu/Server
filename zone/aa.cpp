@@ -36,9 +36,7 @@ Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 #include "zonedb.h"
 #include "../common/zone_store.h"
 
-#ifdef BOTS
 #include "bot.h"
-#endif
 
 extern QueryServ* QServ;
 
@@ -1596,13 +1594,11 @@ bool Mob::CanUseAlternateAdvancementRank(AA::Rank *rank) {
 			return false;
 		}
 	}
-#ifdef BOTS
 	else if (IsBot()) {
 		if (rank->expansion && !(CastToBot()->GetExpansionBitmask() & (1 << (rank->expansion - 1)))) {
 			return false;
 		}
 	}
-#endif
 	else {
 		if (rank->expansion && !(RuleI(World, ExpansionSettings) & (1 << (rank->expansion - 1)))) {
 			return false;
@@ -1700,7 +1696,6 @@ bool Mob::CanPurchaseAlternateAdvancementRank(AA::Rank *rank, bool check_price, 
 }
 
 void Zone::LoadAlternateAdvancement() {
-	LogInfo("Loading Alternate Advancement Data");
 	if(!content_db.LoadAlternateAdvancementAbilities(aa_abilities,
 		aa_ranks))
 	{
@@ -1710,7 +1705,6 @@ void Zone::LoadAlternateAdvancement() {
 		return;
 	}
 
-	LogInfo("Processing Alternate Advancement Data");
 	for(const auto &ability : aa_abilities) {
 		ability.second->first = GetAlternateAdvancementRank(ability.second->first_rank_id);
 
@@ -1760,14 +1754,11 @@ void Zone::LoadAlternateAdvancement() {
 			current = current->next;
 		}
 	}
-
-	LogInfo("Loaded Alternate Advancement Data");
 }
 
 bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std::unique_ptr<AA::Ability>> &abilities,
 													std::unordered_map<int, std::unique_ptr<AA::Rank>> &ranks)
 {
-	LogInfo("Loading Alternate Advancement Abilities");
 	abilities.clear();
 	std::string query = "SELECT id, name, category, classes, races, deities, drakkin_heritage, status, type, charges, "
 		"grant_only, reset_on_death, first_rank_id FROM aa_ability WHERE enabled = 1";
@@ -1798,11 +1789,10 @@ bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std
 		return false;
 	}
 
-	LogInfo("Loaded [{}] Alternate Advancement Abilities", (int)abilities.size());
+	LogInfo("Loaded [{}] Alternate Advancement Abilities", Strings::Commify((int)abilities.size()));
 	int expansion = RuleI(Expansion, CurrentExpansion);
 	bool use_expansion_aa = RuleB(Expansion, UseCurrentExpansionAAOnly);
 
-	LogInfo("Loading Alternate Advancement Ability Ranks");
 	ranks.clear();
 	if (use_expansion_aa && expansion >= 0) {
 		query = fmt::format("SELECT id, upper_hotkey_sid, lower_hotkey_sid, title_sid, desc_sid, cost, level_req, spell, spell_type, recast_time, "
@@ -1840,9 +1830,8 @@ bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std
 		return false;
 	}
 
-	LogInfo("Loaded [{}] Alternate Advancement Ability Ranks", (int)ranks.size());
+	LogInfo("Loaded [{}] Alternate Advancement Ability Ranks", Strings::Commify((int)ranks.size()));
 
-	LogInfo("Loading Alternate Advancement Ability Rank Effects");
 	query = "SELECT rank_id, slot, effect_id, base1, base2 FROM aa_rank_effects";
 	results = QueryDatabase(query);
 	if(results.Success()) {
@@ -1867,9 +1856,8 @@ bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std
 		return false;
 	}
 
-	LogInfo("Loaded Alternate Advancement Ability Rank Effects");
+	LogInfo("Loaded [{}] Alternate Advancement Ability Rank Effects", Strings::Commify(results.RowCount()));
 
-	LogInfo("Loading Alternate Advancement Ability Rank Prereqs");
 	query = "SELECT rank_id, aa_id, points FROM aa_rank_prereqs";
 	results = QueryDatabase(query);
 	if(results.Success()) {
@@ -1892,7 +1880,7 @@ bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std
 		return false;
 	}
 
-	LogInfo("Loaded Alternate Advancement Ability Rank Prereqs");
+	LogInfo("Loaded [{}] Alternate Advancement Ability Rank Prereqs", Strings::Commify(results.RowCount()));
 
 	return true;
 }

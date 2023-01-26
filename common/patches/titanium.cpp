@@ -380,7 +380,7 @@ namespace Titanium
 
 	ENCODE(OP_DeleteCharge)
 	{
-		Log(Logs::Moderate, Logs::Netcode, "Titanium::ENCODE(OP_DeleteCharge)");
+		Log(Logs::Detail, Logs::Netcode, "Titanium::ENCODE(OP_DeleteCharge)");
 
 		ENCODE_FORWARD(OP_MoveItem);
 	}
@@ -890,7 +890,7 @@ namespace Titanium
 		ENCODE_LENGTH_EXACT(LootingItem_Struct);
 		SETUP_DIRECT_ENCODE(LootingItem_Struct, structs::LootingItem_Struct);
 
-		Log(Logs::Moderate, Logs::Netcode, "Titanium::ENCODE(OP_LootItem)");
+		Log(Logs::Detail, Logs::Netcode, "Titanium::ENCODE(OP_LootItem)");
 
 		OUT(lootee);
 		OUT(looter);
@@ -934,7 +934,7 @@ namespace Titanium
 		ENCODE_LENGTH_EXACT(MoveItem_Struct);
 		SETUP_DIRECT_ENCODE(MoveItem_Struct, structs::MoveItem_Struct);
 
-		Log(Logs::Moderate, Logs::Netcode, "Titanium::ENCODE(OP_MoveItem)");
+		Log(Logs::Detail, Logs::Netcode, "Titanium::ENCODE(OP_MoveItem)");
 
 		eq->from_slot = ServerToTitaniumSlot(emu->from_slot);
 		eq->to_slot = ServerToTitaniumSlot(emu->to_slot);
@@ -2178,7 +2178,7 @@ namespace Titanium
 		DECODE_LENGTH_EXACT(structs::LootingItem_Struct);
 		SETUP_DIRECT_DECODE(LootingItem_Struct, structs::LootingItem_Struct);
 
-		Log(Logs::Moderate, Logs::Netcode, "Titanium::DECODE(OP_LootItem)");
+		Log(Logs::Detail, Logs::Netcode, "Titanium::DECODE(OP_LootItem)");
 
 		IN(lootee);
 		IN(looter);
@@ -2193,7 +2193,7 @@ namespace Titanium
 		DECODE_LENGTH_EXACT(structs::MoveItem_Struct);
 		SETUP_DIRECT_DECODE(MoveItem_Struct, structs::MoveItem_Struct);
 
-		Log(Logs::Moderate, Logs::Netcode, "Titanium::DECODE(OP_MoveItem)");
+		Log(Logs::Detail, Logs::Netcode, "Titanium::DECODE(OP_MoveItem)");
 
 		emu->from_slot = TitaniumToServerSlot(eq->from_slot);
 		emu->to_slot = TitaniumToServerSlot(eq->to_slot);

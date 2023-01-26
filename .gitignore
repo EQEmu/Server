@@ -60,3 +60,14 @@ bin/
 # Clangd Generated Files.
 compile_flags.txt
 .cache/
+
+# vscode generated settings
+.vscode/
+
+# Build pipeline
+!utils/scripts/build/
+!utils/scripts/build/should-release/should-release
+!utils/scripts/build/should-release/should-release.exe
+
+# CMake Files
+cmake-build-relwithdebinfo/*

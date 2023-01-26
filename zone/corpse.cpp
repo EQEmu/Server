@@ -44,9 +44,7 @@ Child of the Mob class.
 #include "mob.h"
 #include "raids.h"
 
-#ifdef BOTS
 #include "bot.h"
-#endif
 
 #include "quest_parser_collection.h"
 #include "string_ids.h"
@@ -1211,8 +1209,13 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 		auto pkinst = database.CreateItem(pkitem, pkitem->MaxCharges);
 
 		if (pkinst) {
-			if (pkitem->RecastDelay)
-				pkinst->SetRecastTimestamp(timestamps.count(pkitem->RecastType) ? timestamps.at(pkitem->RecastType) : 0);
+			if (pkitem->RecastDelay) {
+				if (pkitem->RecastType != RECAST_TYPE_UNLINKED_ITEM) {
+					pkinst->SetRecastTimestamp(timestamps.count(pkitem->RecastType) ? timestamps.at(pkitem->RecastType) : 0);
+				} else {
+					pkinst->SetRecastTimestamp(timestamps.count(pkitem->ID) ? timestamps.at(pkitem->ID) : 0);
+				}
+			}
 
 			LogInventory("MakeLootRequestPackets() Slot [{}], Item [{}]", EQ::invslot::CORPSE_BEGIN, pkitem->Name);
 
@@ -1266,8 +1269,13 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 		if (!inst)
 			continue;
 
-		if (item->RecastDelay)
-			inst->SetRecastTimestamp(timestamps.count(item->RecastType) ? timestamps.at(item->RecastType) : 0);
+		if (item->RecastDelay) {
+			if (item->RecastType != RECAST_TYPE_UNLINKED_ITEM) {
+				inst->SetRecastTimestamp(timestamps.count(item->RecastType) ? timestamps.at(item->RecastType) : 0);
+			} else {
+				inst->SetRecastTimestamp(timestamps.count(item->ID) ? timestamps.at(item->ID) : 0);
+			}
+		}
 
 		LogInventory("MakeLootRequestPackets() Slot [{}], Item [{}]", loot_slot, item->Name);
 
@@ -1479,6 +1487,16 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 
 		// get count for task update before it's mutated by AutoPutLootInInventory
 		int count = inst->IsStackable() ? inst->GetCharges() : 1;
+		//Set recast on item when looting it!
+		auto timestamps = database.GetItemRecastTimestamps(client->CharacterID());
+		const auto* d = inst->GetItem();
+		if (d->RecastDelay) {
+			if (d->RecastType != RECAST_TYPE_UNLINKED_ITEM) {
+				inst->SetRecastTimestamp(timestamps.count(d->RecastType) ? timestamps.at(d->RecastType) : 0);
+			} else {
+				inst->SetRecastTimestamp(timestamps.count(d->ID) ? timestamps.at(d->ID) : 0);
+			}
+		}
 
 		/* First add it to the looter - this will do the bag contents too */
 		if (lootitem->auto_loot > 0) {

@@ -9,9 +9,7 @@ struct Lua_HateList;
 class Lua_Item;
 class Lua_ItemInst;
 class Lua_StatBonuses;
-#ifdef BOTS
 class Lua_Bot;
-#endif
 class Lua_NPC;
 class Lua_Client;
 
@@ -213,10 +211,8 @@ public:
 	uint16 GetOwnerID();
 	Lua_Mob GetUltimateOwner();
 	Lua_HateList GetHateList();
-#ifdef BOTS
 	Lua_HateList GetHateListBots();
 	Lua_HateList GetHateListBots(uint32 distance);
-#endif
 	Lua_HateList GetHateListClients();
 	Lua_HateList GetHateListClients(uint32 distance);
 	Lua_HateList GetHateListNPCs();
@@ -227,9 +223,7 @@ public:
 	Lua_Mob GetHateTop();
 	Lua_Mob GetHateDamageTop(Lua_Mob other);
 	Lua_Mob GetHateRandom();
-#ifdef BOTS
 	Lua_Bot GetHateRandomBot();
-#endif
 	Lua_Client GetHateRandomClient();
 	Lua_NPC GetHateRandomNPC();
 	Lua_Mob GetHateClosest();
@@ -488,12 +482,10 @@ public:
 	void DamageArea(int64 damage, uint32 distance);
 	void DamageAreaPercentage(int64 damage);
 	void DamageAreaPercentage(int64 damage, uint32 distance);
-#ifdef BOTS
 	void DamageAreaBots(int64 damage);
 	void DamageAreaBots(int64 damage, uint32 distance);
 	void DamageAreaBotsPercentage(int64 damage);
 	void DamageAreaBotsPercentage(int64 damage, uint32 distance);
-#endif
 	void DamageAreaClients(int64 damage);
 	void DamageAreaClients(int64 damage, uint32 distance);
 	void DamageAreaClientsPercentage(int64 damage);
@@ -506,12 +498,10 @@ public:
 	void DamageHateList(int64 damage, uint32 distance);
 	void DamageHateListPercentage(int64 damage);
 	void DamageHateListPercentage(int64 damage, uint32 distance);
-#ifdef BOTS
 	void DamageHateListBots(int64 damage);
 	void DamageHateListBots(int64 damage, uint32 distance);
 	void DamageHateListBotsPercentage(int64 damage);
 	void DamageHateListBotsPercentage(int64 damage, uint32 distance);
-#endif
 	void DamageHateListClients(int64 damage);
 	void DamageHateListClients(int64 damage, uint32 distance);
 	void DamageHateListClientsPercentage(int64 damage);

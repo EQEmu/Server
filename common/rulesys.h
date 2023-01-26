@@ -57,6 +57,8 @@ public:
 		_IntRuleCount
 	} IntType;
 
+	static const int IntRuleCount = static_cast<int>(_IntRuleCount);
+
 	typedef enum {
 #define RULE_REAL(category_name, rule_name, default_value, notes) \
         Real__##rule_name,
@@ -66,6 +68,8 @@ public:
 		_RealRuleCount
 	} RealType;
 
+	static const int RealRuleCount = static_cast<int>(_RealRuleCount);
+
 	typedef enum {
 #define RULE_BOOL(category_name, rule_name, default_value, notes) \
         Bool__##rule_name,
@@ -74,6 +78,8 @@ public:
 
 		_BoolRuleCount
 	} BoolType;
+
+	static const int BoolRuleCount = static_cast<int>(_BoolRuleCount);
 
 	typedef enum {
 #define RULE_CATEGORY(category_name) \
@@ -95,7 +101,7 @@ public:
 	static const BoolType     InvalidBool     = _BoolRuleCount;
 	static const CategoryType InvalidCategory = _CatCount;
 
-	static const uint32 _RulesCount = _IntRuleCount + _RealRuleCount + _BoolRuleCount;
+	static const uint32 RulesCount = IntRuleCount + RealRuleCount + BoolRuleCount;
 
 	//fetch routines, you should generally use the Rule* macros instead of this
 	int GetIntRule(IntType t) const;
@@ -103,13 +109,13 @@ public:
 	bool GetBoolRule(BoolType t) const;
 
 	//management routines
-	static std::string GetRuleName(IntType t) { return s_RuleInfo[t].name; }
-	static std::string GetRuleName(RealType t) { return s_RuleInfo[t + _IntRuleCount].name; }
-	static std::string GetRuleName(BoolType t) { return s_RuleInfo[t + _IntRuleCount + _RealRuleCount].name; }
-	static const std::string &GetRuleNotes(IntType t) { return s_RuleInfo[t].notes; }
-	static const std::string &GetRuleNotes(RealType t) { return s_RuleInfo[t + _IntRuleCount].notes; }
-	static const std::string &GetRuleNotes(BoolType t) { return s_RuleInfo[t + _IntRuleCount + _RealRuleCount].notes; }
-	static uint32 CountRules() { return _RulesCount; }
+	static std::string GetRuleName(IntType t) { return s_RuleInfo[static_cast<int>(t)].name; }
+	static std::string GetRuleName(RealType t) { return s_RuleInfo[static_cast<int>(t) + IntRuleCount].name; }
+	static std::string GetRuleName(BoolType t) { return s_RuleInfo[static_cast<int>(t) + IntRuleCount + RealRuleCount].name; }
+	static const std::string &GetRuleNotes(IntType t) { return s_RuleInfo[static_cast<int>(t)].notes; }
+	static const std::string &GetRuleNotes(RealType t) { return s_RuleInfo[static_cast<int>(t) + IntRuleCount].notes; }
+	static const std::string &GetRuleNotes(BoolType t) { return s_RuleInfo[static_cast<int>(t) + IntRuleCount + RealRuleCount].notes; }
+	static uint32 CountRules() { return RulesCount; }
 	static CategoryType FindCategory(const std::string &category_name);
 	bool ListRules(const std::string &category_name, std::vector <std::string> &l);
 	bool ListCategories(std::vector <std::string> &l);
@@ -141,9 +147,9 @@ private:
 	int         m_activeRuleset;
 	std::string m_activeName;
 
-	int    m_RuleIntValues[_IntRuleCount];
-	float  m_RuleRealValues[_RealRuleCount];
-	uint32 m_RuleBoolValues[_BoolRuleCount];
+	int    m_RuleIntValues[IntRuleCount];
+	float  m_RuleRealValues[RealRuleCount];
+	uint32 m_RuleBoolValues[BoolRuleCount];
 
 	typedef enum {
 		IntRule,

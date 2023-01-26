@@ -145,6 +145,7 @@ void DynamicZone::CacheAllFromDatabase()
 		zone->dynamic_zone_cache.emplace(dz_id, std::move(dz));
 	}
 
+	LogInfo("Loaded [{}] dynamic zone(s)", Strings::Commify(zone->dynamic_zone_cache.size()));
 	LogDynamicZones("Caching [{}] dynamic zone(s) took [{}s]", zone->dynamic_zone_cache.size(), bench.elapsed());
 }
 
@@ -240,7 +241,7 @@ void DynamicZone::HandleWorldMessage(ServerPacket* pack)
 				auto expedition = Expedition::FindCachedExpeditionByDynamicZoneID(dz->GetID());
 				if (expedition)
 				{
-					LogExpeditionsModerate("Deleting expedition [{}] from zone cache", expedition->GetID());
+					LogExpeditionsDetail("Deleting expedition [{}] from zone cache", expedition->GetID());
 					zone->expedition_cache.erase(expedition->GetID());
 				}
 			}

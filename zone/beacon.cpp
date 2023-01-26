@@ -39,14 +39,6 @@ class Zone;
 #include "entity.h"
 #include "mob.h"
 
-
-#ifdef BOTS
-#include "bot.h"
-#endif
-
-
-#include "../common/spdat.h"
-
 extern EntityList entity_list;
 extern Zone* zone;
 

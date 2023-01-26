@@ -32,8 +32,6 @@
 
 */
 
-#ifdef BOTS
-
 #include <string.h>
 #include <stdlib.h>
 #include <sstream>
@@ -124,10 +122,20 @@ public:
 		}
 
 		for (int spell_id = 2; spell_id < SPDAT_RECORDS; ++spell_id) {
-			if (spells[spell_id].player_1[0] == '\0')
+			if (!IsValidSpell(spell_id)) {
 				continue;
-			if (spells[spell_id].target_type != ST_Target && spells[spell_id].cast_restriction != 0) // watch
+			}
+
+			if (spells[spell_id].player_1[0] == '\0') {
 				continue;
+			}
+
+			if (
+				spells[spell_id].target_type != ST_Target &&
+				spells[spell_id].cast_restriction != 0
+			) {
+				continue;
+			}
 
 			auto target_type = BCEnum::TT_None;
 			switch (spells[spell_id].target_type) {
@@ -7194,7 +7202,13 @@ void bot_subcommand_botgroup_add_member(Client *c, const Seperator *sep)
 	std::list<Bot*> sbl;
 	MyBots::PopulateSBL_ByNamedBot(c, sbl, sep->arg[1]);
 	if (sbl.empty()) {
-		c->Message(Chat::White, "You must name a new member as a bot that you own to use this command.");
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Usage: (<target_leader>) {} [member_name]",
+				sep->arg[0]
+			).c_str()
+		);
 		return;
 	}
 
@@ -7722,7 +7736,7 @@ void bot_subcommand_botgroup_list(Client *c, const Seperator *sep)
 		return;
 	}
 
-	std::list<std::pair<std::string, std::string>> botgroups_list;
+	std::list<std::pair<std::string, uint32>> botgroups_list;
 	if (!database.botdb.LoadBotGroupsListByOwnerID(c->CharacterID(), botgroups_list)) {
 		c->Message(Chat::White, "Failed to load bot-group.");
 		return;
@@ -7735,17 +7749,17 @@ void bot_subcommand_botgroup_list(Client *c, const Seperator *sep)
 
 	uint32 botgroup_count = 0;
 
-	for (auto botgroups_iter : botgroups_list) {
+	for (const auto& [group_name, group_leader_id] : botgroups_list) {
 		c->Message(
 			Chat::White,
 			fmt::format(
 				"Bot-group {} | Name: {} | Leader: {}{} | {}",
 				(botgroup_count + 1),
-				botgroups_iter.first,
-				botgroups_iter.second,
-				database.botdb.IsBotGroupAutoSpawn(botgroups_iter.first) ? " (Auto Spawn)" : "",
+				group_name,
+				database.botdb.GetBotNameByID(group_leader_id),
+				database.botdb.IsBotGroupAutoSpawn(group_name) ? " (Auto Spawn)" : "",
 				Saylink::Silent(
-					fmt::format("^botgroupload {}", botgroups_iter.first),
+					fmt::format("^botgroupload {}", group_name),
 					"Load"
 				)
 			).c_str()
@@ -7795,6 +7809,11 @@ void bot_subcommand_botgroup_load(Client *c, const Seperator *sep)
 				botgroup_name
 			).c_str()
 		);
+		return;
+	}
+
+	if (c->GetFeigned()) {
+		c->Message(Chat::White, "You cannot spawn a bot-group while feigned.");
 		return;
 	}
 
@@ -10819,5 +10838,3 @@ void bot_command_enforce_spell_list(Client* c, const Seperator *sep)
 		).c_str()
 	);
 }
-
-#endif // BOTS

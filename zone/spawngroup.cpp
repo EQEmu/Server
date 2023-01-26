@@ -225,6 +225,8 @@ bool ZoneDatabase::LoadSpawnGroups(const char *zone_name, uint16 version, SpawnG
 		spawn_group_list->AddSpawnGroup(new_spawn_group);
 	}
 
+	LogInfo("Loaded [{}] spawn group(s)", Strings::Commify(results.RowCount()));
+
 	query = fmt::format(
 		SQL(
 			SELECT
@@ -273,6 +275,9 @@ bool ZoneDatabase::LoadSpawnGroups(const char *zone_name, uint16 version, SpawnG
 		spawn_group->AddSpawnEntry(new_spawn_entry);
 	}
 
+	LogInfo("Loaded [{}] spawn entries", Strings::Commify(results.RowCount()));
+
+
 	return true;
 }
 
@@ -314,7 +319,7 @@ bool ZoneDatabase::LoadSpawnGroupsByID(int spawn_group_id, SpawnGroupList *spawn
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		LogSpawnsDetail(
-			"[LoadSpawnGroupsByID] Loading spawn_group spawn_group_id [{}] name [{}] spawn_limit [{}] dist [{}]",
+			"Loading spawn_group spawn_group_id [{}] name [{}] spawn_limit [{}] dist [{}]",
 			row[0],
 			row[1],
 			row[2],
@@ -372,7 +377,7 @@ bool ZoneDatabase::LoadSpawnGroupsByID(int spawn_group_id, SpawnGroupList *spawn
 		);
 
 		LogSpawnsDetail(
-			"[LoadSpawnGroupsByID] Loading spawn_entry spawn_group_id [{}] npc_id [{}] chance [{}] condition_value_filter [{}] spawn_limit [{}]",
+			"Loading spawn_entry spawn_group_id [{}] npc_id [{}] chance [{}] condition_value_filter [{}] spawn_limit [{}]",
 			row[0],
 			row[1],
 			row[2],

@@ -341,7 +341,7 @@ const EQ::ItemInstance* Object::GetItem(uint8 index) {
 void Object::PutItem(uint8 index, const EQ::ItemInstance* inst)
 {
 	if (index > 9) {
-		LogError("Object::PutItem: Invalid index specified ([{}])", index);
+		LogError("Invalid index specified ([{}])", index);
 		return;
 	}
 
@@ -477,7 +477,7 @@ void Object::RandomSpawn(bool send_packet) {
 		}
 	}
 
-	LogInfo("Object::RandomSpawn([{}]): [{}] ([{}], [{}], [{}])", m_data.object_name, m_inst->GetID(), m_data.x, m_data.y, m_data.z);
+	LogInfo("[{}] [{}] ([{}] [{}] [{}])", m_data.object_name, m_inst->GetID(), m_data.x, m_data.y, m_data.z);
 
 	respawn_timer.Disable();
 
@@ -507,9 +507,15 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 					cursordelete = true;	// otherwise, we delete the new one
 			}
 
-			if (item->RecastDelay)
-				m_inst->SetRecastTimestamp(
-				    database.GetItemRecastTimestamp(sender->CharacterID(), item->RecastType));
+			if (item->RecastDelay) {
+				if (item->RecastType != RECAST_TYPE_UNLINKED_ITEM) {
+					m_inst->SetRecastTimestamp(
+						database.GetItemRecastTimestamp(sender->CharacterID(), item->RecastType));
+				} else {
+					m_inst->SetRecastTimestamp(
+						database.GetItemRecastTimestamp(sender->CharacterID(), item->ID));
+				}
+			}
 
 			std::string export_string = fmt::format("{}", item->ID);
 			std::vector<std::any> args;

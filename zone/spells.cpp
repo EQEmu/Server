@@ -97,9 +97,7 @@ Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 	#include "../common/packet_dump_file.h"
 #endif
 
-#ifdef BOTS
 #include "bot.h"
-#endif
 
 #include "mob_movement_manager.h"
 #include "client.h"
@@ -256,10 +254,8 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 		}
 	} else if (IsNPC()) {
 		parse->EventNPC(EVENT_CAST_BEGIN, CastToNPC(), nullptr, export_string, 0);
-#ifdef BOTS
 	} else if (IsBot()) {
 		parse->EventBot(EVENT_CAST_BEGIN, CastToBot(), nullptr, export_string, 0);
-#endif
 	}
 
 	//To prevent NPC ghosting when spells are cast from scripts
@@ -1409,7 +1405,6 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 				channelchance -= attacked_count * 2;
 				channelchance += channelchance * channelbonuses / 100.0f;
 			}
-#ifdef BOTS
 			else if(IsBot()) {
 				float channelbonuses = 0.0f;
 
@@ -1423,7 +1418,6 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 				channelchance -= attacked_count * 2;
 				channelchance += channelchance * channelbonuses / 100.0f;
 			}
-#endif //BOTS
 			else {
 				// NPCs are just hard to interrupt, otherwise they get pwned
 				channelchance = 85;
@@ -1667,10 +1661,8 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 		parse->EventPlayer(EVENT_CAST, CastToClient(), export_string, 0);
 	} else if (IsNPC()) {
 		parse->EventNPC(EVENT_CAST, CastToNPC(), nullptr, export_string, 0);
-#ifdef BOTS
 	} else if (IsBot()) {
 		parse->EventBot(EVENT_CAST, CastToBot(), nullptr, export_string, 0);
-#endif
 	}
 
 	if(bard_song_mode)
@@ -2103,7 +2095,6 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 							}
 						}
 					}
-#ifdef BOTS
 					else if(IsBot())
 					{
 						if(IsGrouped())
@@ -2116,7 +2107,6 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 								group_id_caster = (GetRaid()->GetGroup(GetOwner()->CastToClient()) == 0xFFFF) ? 0 : (GetRaid()->GetGroup(GetOwner()->CastToClient()) + 1);
 						}
 					}
-#endif //BOTS
 
 					if(spell_target->IsClient())
 					{
@@ -2151,7 +2141,6 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 							}
 						}
 					}
-#ifdef BOTS
 					else if(spell_target->IsBot())
 					{
 						if(spell_target->IsGrouped())
@@ -2164,7 +2153,6 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 								group_id_target = (spell_target->GetRaid()->GetGroup(spell_target->GetOwner()->CastToClient()) == 0xFFFF) ? 0 : (spell_target->GetRaid()->GetGroup(spell_target->GetOwner()->CastToClient()) + 1);
 						}
 					}
-#endif //BOTS
 
 					if(group_id_caster == 0 || group_id_target == 0)
 					{
@@ -2429,7 +2417,6 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, in
 		case SingleTarget:
 		{
 
-#ifdef BOTS
 			if(IsBot()) {
 				bool StopLogic = false;
 				if(!CastToBot()->DoFinishedSpellSingleTarget(spell_id, spell_target, slot, StopLogic))
@@ -2437,7 +2424,6 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, in
 				if(StopLogic)
 					break;
 			}
-#endif //BOTS
 
 			if(spell_target == nullptr) {
 				LogSpells("Spell [{}]: Targeted spell, but we have no target", spell_id);
@@ -2498,7 +2484,6 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, in
 
 		case GroupSpell:
 		{
-#ifdef BOTS
 			if(IsBot()) {
 				bool StopLogic = false;
 				if(!CastToBot()->DoFinishedSpellGroupTarget(spell_id, spell_target, slot, StopLogic))
@@ -2506,7 +2491,6 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, in
 				if(StopLogic)
 					break;
 			}
-#endif //BOTS
 
 			// We hold off turning MBG off so we can still use it to calc the mana cost
 			if(spells[spell_id].can_mgb && HasMGB())
@@ -3445,9 +3429,7 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 
 	if((IsClient() && !CastToClient()->GetPVP()) ||
 		(IsPet() && GetOwner() && GetOwner()->IsClient() && !GetOwner()->CastToClient()->GetPVP()) ||
-#ifdef BOTS
 		(IsBot() && GetOwner() && GetOwner()->IsClient() && !GetOwner()->CastToClient()->GetPVP()) ||
-#endif
 		(IsMerc() && GetOwner() && GetOwner()->IsClient() && !GetOwner()->CastToClient()->GetPVP()))
 	{
 		EQApplicationPacket *outapp = MakeBuffsPacket();
@@ -3481,7 +3463,7 @@ int Mob::CanBuffStack(uint16 spellid, uint8 caster_level, bool iFailIfOverwrite)
 {
 	int i, ret, firstfree = -2;
 
-	LogAIModerate("Checking if buff [{}] cast at level [{}] can stack on me.[{}]", spellid, caster_level, iFailIfOverwrite?" failing if we would overwrite something":"");
+	LogAIDetail("Checking if buff [{}] cast at level [{}] can stack on me.[{}]", spellid, caster_level, iFailIfOverwrite?" failing if we would overwrite something":"");
 
 	int buff_count = GetMaxTotalSlots();
 	for (i=0; i < buff_count; i++)
@@ -3518,7 +3500,7 @@ int Mob::CanBuffStack(uint16 spellid, uint8 caster_level, bool iFailIfOverwrite)
 		}
 	}
 
-	LogAIModerate("Reporting that buff [{}] could successfully be placed into slot [{}]", spellid, firstfree);
+	LogAIDetail("Reporting that buff [{}] could successfully be placed into slot [{}]", spellid, firstfree);
 
 	return firstfree;
 }
@@ -3687,10 +3669,8 @@ bool Mob::SpellOnTarget(
 		parse->EventNPC(EVENT_CAST_ON, spelltar->CastToNPC(), this, export_string, 0);
 	} else if (spelltar->IsClient()) {
 		parse->EventPlayer(EVENT_CAST_ON, spelltar->CastToClient(), export_string, 0);
-#ifdef BOTS
 	} else if (spelltar->IsBot()) {
 		parse->EventBot(EVENT_CAST_ON, spelltar->CastToBot(), this, export_string, 0);
-#endif
 	}
 
 	mod_spell_cast(spell_id, spelltar, reflect_effectiveness, use_resist_adjust, resist_adjust, isproc);
@@ -5199,30 +5179,28 @@ int16 Mob::CalcResistChanceBonus()
 {
 	int resistchance = spellbonuses.ResistSpellChance + itembonuses.ResistSpellChance;
 
-	if(IsClient())
+	if (IsClient() || IsBot()) {
 		resistchance += aabonuses.ResistSpellChance;
-
+	}
 	return resistchance;
 }
 
 int16 Mob::CalcFearResistChance()
 {
 	int resistchance = spellbonuses.ResistFearChance + itembonuses.ResistFearChance;
-	if(IsClient()) {
+	if (IsClient() || IsBot()) {
 		resistchance += aabonuses.ResistFearChance;
-		if(aabonuses.Fearless == true)
+		if (aabonuses.Fearless == true) {
 			resistchance = 100;
+		}
 	}
-	if(spellbonuses.Fearless == true || itembonuses.Fearless == true)
+	if (spellbonuses.Fearless == true || itembonuses.Fearless == true) {
 		resistchance = 100;
+	}
 
 	return resistchance;
 }
 
-/**
- * @param spell_id
- * @return
- */
 float Mob::GetAOERange(uint16 spell_id)
 {
 	float range = spells[spell_id].aoe_range;
@@ -5705,11 +5683,11 @@ std::unordered_map<uint32, std::vector<uint16>> Client::LoadSpellGroupCache(uint
 		"SELECT a.spellgroup, a.id, a.rank "
 		"FROM spells_new a "
 		"INNER JOIN ("
-		"SELECT spellgroup, MAX(rank) rank "
+		"SELECT spellgroup, MAX(`rank`) `rank` "
 		"FROM spells_new "
 		"GROUP BY spellgroup) "
 		"b ON a.spellgroup = b.spellgroup AND a.rank = b.rank "
-		"WHERE a.spellgroup IN (SELECT DISTINCT spellgroup FROM spells_new WHERE spellgroup != 0 and classes{} BETWEEN {} AND {}) ORDER BY rank DESC",
+		"WHERE a.spellgroup IN (SELECT DISTINCT spellgroup FROM spells_new WHERE spellgroup != 0 and classes{} BETWEEN {} AND {}) ORDER BY `rank` DESC",
 		m_pp.class_, min_level, max_level
 	);
 
@@ -5901,9 +5879,12 @@ bool Mob::FindType(uint16 type, bool bOffensive, uint16 threshold) {
 											spells[buffs[i].spellid].base_value[j],
 											spells[buffs[i].spellid].max_value[j],
 											buffs[i].casterlevel, buffs[i].spellid);
-						Log(Logs::General, Logs::Normal,
-								"FindType: type = %d; value = %d; threshold = %d",
-								type, value, threshold);
+						LogSpells(
+							"FindType type [{}] value [{}] threshold [{}]",
+							type,
+							value,
+							threshold
+						);
 						if (value < threshold)
 							return true;
 					}
@@ -5938,7 +5919,7 @@ bool Mob::IsCombatProc(uint16 spell_id) {
 		}
 	}
 
-	if (IsClient()) {
+	if (IsClient() || IsBot()) {
 		for (int i = 0; i < MAX_AA_PROCS; i += 4) {
 			if (aabonuses.SpellProc[i + 1] == spell_id ||
 				aabonuses.RangedProc[i + 1] == spell_id ||
@@ -6361,9 +6342,9 @@ void Client::SendSpellAnim(uint16 target_id, uint16 spell_id)
 	entity_list.QueueCloseClients(this, &app, false, RuleI(Range, SpellParticles));
 }
 
-void Client::SendItemRecastTimer(int32 recast_type, uint32 recast_delay)
+void Client::SendItemRecastTimer(int32 recast_type, uint32 recast_delay, bool in_ignore_casting_requirement)
 {
-	if (recast_type == -1) {
+	if (recast_type == RECAST_TYPE_UNLINKED_ITEM) {
 		return;
 	}
 
@@ -6376,6 +6357,7 @@ void Client::SendItemRecastTimer(int32 recast_type, uint32 recast_delay)
 		ItemRecastDelay_Struct *ird = (ItemRecastDelay_Struct *)outapp->pBuffer;
 		ird->recast_delay = recast_delay;
 		ird->recast_type = static_cast<uint32>(recast_type);
+		ird->ignore_casting_requirement = in_ignore_casting_requirement; //True allows reset of item cast timers
 		QueuePacket(outapp);
 		safe_delete(outapp);
 	}
@@ -6388,10 +6370,12 @@ void Client::SetItemRecastTimer(int32 spell_id, uint32 inventory_slot)
 	int recast_delay = 0;
 	int recast_type = 0;
 	bool from_augment = false;
+	int item_casting = 0;
 
 	if (!item) {
 		return;
 	}
+	item_casting = item->GetItem()->ID;
 
 	//Check primary item.
 	if (item->GetItem()->RecastDelay > 0) {
@@ -6415,6 +6399,7 @@ void Client::SetItemRecastTimer(int32 spell_id, uint32 inventory_slot)
 				recast_delay = aug_i->GetItem()->RecastDelay;
 				recast_type = aug_i->GetItem()->RecastType;
 				from_augment = true;
+				item_casting = aug_i->GetItem()->ID;
 				break;
 			}
 		}
@@ -6428,13 +6413,20 @@ void Client::SetItemRecastTimer(int32 spell_id, uint32 inventory_slot)
 	recast_delay = std::max(recast_delay, 0);
 
 	if (recast_delay > 0) {
-
-		GetPTimers().Start((pTimerItemStart + recast_type), static_cast<uint32>(recast_delay));
-		if (recast_type != -1) {
-			database.UpdateItemRecastTimestamps(
+		
+		if (recast_type != RECAST_TYPE_UNLINKED_ITEM) {
+			GetPTimers().Start((pTimerItemStart + recast_type), static_cast<uint32>(recast_delay));
+			database.UpdateItemRecast(
 				CharacterID(),
 				recast_type,
 				GetPTimers().Get(pTimerItemStart + recast_type)->GetReadyTimestamp()
+			);
+		} else if (recast_type == RECAST_TYPE_UNLINKED_ITEM) {
+			GetPTimers().Start((pTimerNegativeItemReuse * item_casting), static_cast<uint32>(recast_delay));
+			database.UpdateItemRecast(
+				CharacterID(),
+				item_casting,
+				GetPTimers().Get(pTimerNegativeItemReuse * item_casting)->GetReadyTimestamp()
 			);
 		}
 
@@ -6444,12 +6436,32 @@ void Client::SetItemRecastTimer(int32 spell_id, uint32 inventory_slot)
 	}
 }
 
+void Client::DeleteItemRecastTimer(uint32 item_id)
+{
+    const auto* d = database.GetItem(item_id);
+    
+    if (!d) {
+        return;
+    }
+
+    const auto recast_type = d->RecastType != RECAST_TYPE_UNLINKED_ITEM ? d->RecastType : item_id;
+    const int timer_id = d->RecastType != RECAST_TYPE_UNLINKED_ITEM ? (pTimerItemStart + recast_type) : (pTimerNegativeItemReuse * item_id);
+    
+    database.DeleteItemRecast(CharacterID(), recast_type);
+    GetPTimers().Clear(&database, timer_id);
+
+    if (recast_type != RECAST_TYPE_UNLINKED_ITEM) {
+        SendItemRecastTimer(recast_type, 1, true);
+    }
+}
+
 bool Client::HasItemRecastTimer(int32 spell_id, uint32 inventory_slot)
 {
 	EQ::ItemInstance *item = CastToClient()->GetInv().GetItem(inventory_slot);
 
 	int recast_delay = 0;
 	int recast_type = 0;
+	int item_id = 0;
 	bool from_augment = false;
 
 	if (!item) {
@@ -6464,6 +6476,7 @@ bool Client::HasItemRecastTimer(int32 spell_id, uint32 inventory_slot)
 	if (item->GetItem()->RecastDelay > 0) {
 		recast_type = item->GetItem()->RecastType;
 		recast_delay = item->GetItem()->RecastDelay;
+		item_id = item->GetItem()->ID;
 	}
 	//Check augmenent
 	else {
@@ -6482,6 +6495,7 @@ bool Client::HasItemRecastTimer(int32 spell_id, uint32 inventory_slot)
 				if (aug_i->GetItem() && aug_i->GetItem()->RecastDelay > 0) {
 					recast_delay = aug_i->GetItem()->RecastDelay;
 					recast_type = aug_i->GetItem()->RecastType;
+					item_id = aug_i->GetItem()->ID;
 				}
 				break;
 			}
@@ -6492,7 +6506,9 @@ bool Client::HasItemRecastTimer(int32 spell_id, uint32 inventory_slot)
 		return false;
 	}
 	//if time is not expired, then it exists and therefore we have a recast on this item.
-	if (!CastToClient()->GetPTimers().Expired(&database, (pTimerItemStart + recast_type), false)) {
+	if (recast_type != RECAST_TYPE_UNLINKED_ITEM && !CastToClient()->GetPTimers().Expired(&database, (pTimerItemStart + recast_type), false)) {
+		return true;
+	} else if (recast_type == RECAST_TYPE_UNLINKED_ITEM && !CastToClient()->GetPTimers().Expired(&database, (pTimerNegativeItemReuse * item_id), false)) {
 		return true;
 	}
 

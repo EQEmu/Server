@@ -138,7 +138,7 @@ void WorldServer::ProcessMessage(uint16 opcode, EQ::Net::Packet &p)
 		}
 		else if (Message[0] == '[')
 		{
-			g_Clientlist->ProcessOPMailCommand(c, Message.substr(1, std::string::npos));
+			g_Clientlist->ProcessOPMailCommand(c, Message.substr(1, std::string::npos), true); // Flag as command_directed
 		}
 
 		break;

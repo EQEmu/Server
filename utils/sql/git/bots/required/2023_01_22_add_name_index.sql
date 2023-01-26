@@ -1,0 +1,1 @@
+create index `name` on bot_data(`name`);

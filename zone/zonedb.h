@@ -12,9 +12,7 @@
 #include "event_codes.h"
 #include "../common/repositories/doors_repository.h"
 
-#ifdef BOTS
 #include "bot_database.h"
-#endif
 
 #define WOLF 42
 
@@ -371,7 +369,8 @@ public:
 	void LoadPetInfo(Client *c);
 	void SavePetInfo(Client *c);
 	void RemoveTempFactions(Client *c);
-	void UpdateItemRecastTimestamps(uint32 char_id, uint32 recast_type, uint32 timestamp);
+	void UpdateItemRecast(uint32 char_id, uint32 recast_type, uint32 timestamp);
+	void DeleteItemRecast(uint32 char_id, uint32 recast_type);
 
 	bool DeleteCharacterAAs(uint32 character_id);
 	bool DeleteCharacterBandolier(uint32 character_id, uint32 band_id);
@@ -572,21 +571,6 @@ public:
 	std::vector<DoorsRepository::Doors> LoadDoors(const std::string& zone_name, int16 version);
 	uint32 GetDoorsCountPlusOne();
 	int GetDoorsDBCountPlusOne(std::string zone_short_name, int16 version);
-	void InsertDoor(
-		uint32 database_id,
-		uint8 id,
-		std::string name,
-		const glm::vec4 &position,
-		uint8 open_type,
-		uint16 guild_id,
-		uint32 ockpick,
-		uint32 key_item_id,
-		uint8 door_param,
-		uint8 invert,
-		int incline,
-		uint16 size,
-		bool disable_timer = false
-	);
 
 	/* Blocked Spells   */
 	int32	GetBlockedSpellsCount(uint32 zoneid);
@@ -633,10 +617,8 @@ public:
 	/* Things which really dont belong here... */
 	int16	CommandRequirement(const char* commandname);
 
-#ifdef BOTS
 	// bot database add-on to eliminate the need for a second database connection
 	BotDatabase botdb;
-#endif
 
 protected:
 	void ZDBInitVars();

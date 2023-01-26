@@ -94,18 +94,14 @@ int command_init(void)
 		command_add("aggrozone", "[aggro] - Aggro every mob in the zone with X aggro. Default is 0. Not recommend if you're not invulnerable.", AccountStatus::GMAdmin, command_aggrozone) ||
 		command_add("ai", "[factionid/spellslist/con/guard/roambox/stop/start] - Modify AI on NPC target", AccountStatus::GMAdmin, command_ai) ||
 		command_add("appearance", "[type] [value] - Send an appearance packet for you or your target", AccountStatus::GMLeadAdmin, command_appearance) ||
-		command_add("appearanceeffects", "[view] [set] [remove] appearance effects.", AccountStatus::GMAdmin, command_appearanceeffects) ||
+		command_add("appearanceeffects", "[Help|Remove|Set|View] - Modify appearance effects on yourself or your target.", AccountStatus::GMAdmin, command_appearanceeffects) ||
 		command_add("apply_shared_memory", "[shared_memory_name] - Tells every zone and world to apply a specific shared memory segment by name.", AccountStatus::GMImpossible, command_apply_shared_memory) ||
 		command_add("attack", "[Entity Name] - Make your NPC target attack an entity by name", AccountStatus::GMLeadAdmin, command_attack) ||
 		command_add("augmentitem", "Force augments an item. Must have the augment item window open.", AccountStatus::GMImpossible, command_augmentitem) ||
 		command_add("ban", "[Character Name] [Reason] - Ban by character name", AccountStatus::GMLeadAdmin, command_ban) ||
 		command_add("bind", "Sets your targets bind spot to their current location", AccountStatus::GMMgmt, command_bind) ||
 		command_add("bugs", "[Close|Delete|Review|Search|View] - Handles player bug reports", AccountStatus::QuestTroupe, command_bugs) ||
-
-#ifdef BOTS
 		command_add("bot", "Type \"#bot help\" or \"^help\" to the see the list of available commands for bots.", AccountStatus::Player, command_bot) ||
-#endif
-
 		command_add("camerashake", "[Duration (Milliseconds)] [Intensity (1-10)] - Shakes the camera on everyone's screen globally.", AccountStatus::QuestTroupe, command_camerashake) ||
 		command_add("castspell", "[Spell ID] [Instant (0 = False, 1 = True, Default is 1 if Unused)] - Cast a spell", AccountStatus::Guide, command_castspell) ||
 		command_add("chat", "[Channel ID] [Message] - Send a channel message to all zones", AccountStatus::GMMgmt, command_chat) ||
@@ -180,9 +176,6 @@ int command_init(void)
 		command_add("goto", "[playername] or [x y z] [h] - Teleport to the provided coordinates or to your target", AccountStatus::Steward, command_goto) ||
 		command_add("grid", "[add/delete] [grid_num] [wandertype] [pausetype] - Create/delete a wandering grid", AccountStatus::GMAreas, command_grid) ||
 		command_add("guild", "Guild manipulation commands. Use argument help for more info.", AccountStatus::Steward, command_guild) ||
-		command_add("guildapprove", "[guildapproveid] - Approve a guild with specified ID (guild creator receives the id)", AccountStatus::Player, command_guildapprove) ||
-		command_add("guildcreate", "[guildname] - Creates an approval setup for guild name specified", AccountStatus::Player, command_guildcreate) ||
-		command_add("guildlist", "[guildapproveid] - Lists character names who have approved the guild specified by the approve id", AccountStatus::Player, command_guildlist) ||
 		command_add("haste", "[percentage] - Set your haste percentage", AccountStatus::GMAdmin, command_haste) ||
 		command_add("hatelist", "Display hate list for NPC.", AccountStatus::QuestTroupe, command_hatelist) ||
 		command_add("heal", "Completely heal your target", AccountStatus::Steward, command_heal) ||
@@ -337,7 +330,6 @@ int command_init(void)
 		command_add("trapinfo", "Gets infomation about the traps currently spawned in the zone.", AccountStatus::QuestTroupe, command_trapinfo) ||
 		command_add("tune", "Calculate statistical values related to combat.", AccountStatus::GMAdmin, command_tune) ||
 		command_add("undye", "Remove dye from all of your or your target's armor slots", AccountStatus::GMAdmin, command_undye) ||
-		command_add("undyeme", "Remove dye from all of your armor slots", AccountStatus::Player, command_undyeme) ||
 		command_add("unfreeze", "Unfreeze your target", AccountStatus::QuestTroupe, command_unfreeze) ||
 		command_add("unmemspell", "[Spell ID] - Unmemorize a Spell by ID for you or your target", AccountStatus::Guide, command_unmemspell) ||
 		command_add("unmemspells", " Unmemorize all spells for you or your target", AccountStatus::Guide, command_unmemspells) ||
@@ -902,35 +894,37 @@ void command_apply_shared_memory(Client *c, const Seperator *sep) {
 	worldserver.SendPacket(&pack);
 }
 
-// All new code added to command.cpp should be BEFORE this comment line. Do no append code to this file below the BOTS code block.
-#ifdef BOTS
 #include "bot_command.h"
 // Function delegate to support the command interface for Bots with the client.
 void command_bot(Client *c, const Seperator *sep)
 {
-	std::string bot_message = sep->msg;
-	if (bot_message.compare("#bot") == 0) {
-		bot_message[0] = BOT_COMMAND_CHAR;
-	}
-	else {
-		bot_message = bot_message.substr(bot_message.find_first_not_of("#bot"));
-		bot_message[0] = BOT_COMMAND_CHAR;
-	}
-
-	if (bot_command_dispatch(c, bot_message.c_str()) == -2) {
-		if (parse->PlayerHasQuestSub(EVENT_BOT_COMMAND)) {
-			int i = parse->EventPlayer(EVENT_BOT_COMMAND, c, bot_message, 0);
-			if (i == 0 && !RuleB(Chat, SuppressCommandErrors)) {
-				c->Message(Chat::Red, "Bot command '%s' not recognized.", bot_message.c_str());
-			}
+	if (RuleB(Bots, Enabled)) {
+		std::string bot_message = sep->msg;
+		if (bot_message.compare("#bot") == 0) {
+			bot_message[0] = BOT_COMMAND_CHAR;
 		}
 		else {
-			if (!RuleB(Chat, SuppressCommandErrors))
-				c->Message(Chat::Red, "Bot command '%s' not recognized.", bot_message.c_str());
+			bot_message = bot_message.substr(bot_message.find_first_not_of("#bot"));
+			bot_message[0] = BOT_COMMAND_CHAR;
 		}
+
+		if (bot_command_dispatch(c, bot_message.c_str()) == -2) {
+			if (parse->PlayerHasQuestSub(EVENT_BOT_COMMAND)) {
+				int i = parse->EventPlayer(EVENT_BOT_COMMAND, c, bot_message, 0);
+				if (i == 0 && !RuleB(Chat, SuppressCommandErrors)) {
+					c->Message(Chat::Red, "Bot command '%s' not recognized.", bot_message.c_str());
+				}
+			}
+			else {
+				if (!RuleB(Chat, SuppressCommandErrors)) {
+					c->Message(Chat::Red, "Bot command '%s' not recognized.", bot_message.c_str());
+				}
+			}
+		}
+	} else {
+		c->Message(Chat::Red, "Bots are disabled on this server.");
 	}
 }
-#endif
 
 #include "gm_commands/acceptrules.cpp"
 #include "gm_commands/advnpcspawn.cpp"
@@ -1017,9 +1011,6 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/goto.cpp"
 #include "gm_commands/grid.cpp"
 #include "gm_commands/guild.cpp"
-#include "gm_commands/guildapprove.cpp"
-#include "gm_commands/guildcreate.cpp"
-#include "gm_commands/guildlist.cpp"
 #include "gm_commands/haste.cpp"
 #include "gm_commands/hatelist.cpp"
 #include "gm_commands/heal.cpp"
@@ -1171,7 +1162,6 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/trapinfo.cpp"
 #include "gm_commands/tune.cpp"
 #include "gm_commands/undye.cpp"
-#include "gm_commands/undyeme.cpp"
 #include "gm_commands/unfreeze.cpp"
 #include "gm_commands/unmemspell.cpp"
 #include "gm_commands/unmemspells.cpp"

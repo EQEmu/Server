@@ -22,20 +22,18 @@
 #include "rulesys.h"
 #include "platform.h"
 #include "strings.h"
-#include "misc.h"
-#include "discord/discord.h"
 #include "repositories/discord_webhooks_repository.h"
 #include "repositories/logsys_categories_repository.h"
+#include "termcolor/rang.hpp"
 
 #include <iostream>
-#include <fstream>
 #include <string>
-#include <iomanip>
 #include <time.h>
 #include <sys/stat.h>
-#include <algorithm>
 
 std::ofstream process_log;
+
+#include <filesystem>
 
 #ifdef _WINDOWS
 #include <direct.h>
@@ -53,45 +51,11 @@ std::ofstream process_log;
 #endif
 
 /**
- * Linux ANSI console color defines
- */
-#define LC_RESET   "\033[0m"
-#define LC_BLACK   "\033[30m" /* Black */
-#define LC_RED     "\033[31m" /* Red */
-#define LC_GREEN   "\033[32m" /* Green */
-#define LC_YELLOW  "\033[33m" /* Yellow */
-#define LC_BLUE    "\033[34m" /* Blue */
-#define LC_MAGENTA "\033[35m" /* Magenta */
-#define LC_CYAN    "\033[36m" /* Cyan */
-#define LC_WHITE   "\033[37m" /* White */
-
-namespace Console {
-	enum Color {
-		Black        = 0,
-		Blue         = 1,
-		Green        = 2,
-		Cyan         = 3,
-		Red          = 4,
-		Magenta      = 5,
-		Brown        = 6,
-		LightGray    = 7,
-		DarkGray     = 8,
-		LightBlue    = 9,
-		LightGreen   = 10,
-		LightCyan    = 11,
-		LightRed     = 12,
-		LightMagenta = 13,
-		Yellow       = 14,
-		White        = 15
-	};
-}
-
-/**
  * EQEmuLogSys Constructor
  */
 EQEmuLogSys::EQEmuLogSys()
 {
-	m_on_log_gmsay_hook   = [](uint16 log_type, const std::string &) {};
+	m_on_log_gmsay_hook   = [](uint16 log_type, const char *func, const std::string &) {};
 	m_on_log_console_hook = [](uint16 log_type, const std::string &) {};
 }
 
@@ -120,14 +84,8 @@ EQEmuLogSys *EQEmuLogSys::LoadLogSettingsDefaults()
 	/**
 	 * Set Defaults
 	 */
-	log_settings[Logs::WorldServer].log_to_console          = static_cast<uint8>(Logs::General);
-	log_settings[Logs::ZoneServer].log_to_console           = static_cast<uint8>(Logs::General);
-	log_settings[Logs::QSServer].log_to_console             = static_cast<uint8>(Logs::General);
-	log_settings[Logs::UCSServer].log_to_console            = static_cast<uint8>(Logs::General);
 	log_settings[Logs::Crash].log_to_console                = static_cast<uint8>(Logs::General);
 	log_settings[Logs::MySQLError].log_to_console           = static_cast<uint8>(Logs::General);
-	log_settings[Logs::Loginserver].log_to_console          = static_cast<uint8>(Logs::General);
-	log_settings[Logs::HeadlessClient].log_to_console       = static_cast<uint8>(Logs::General);
 	log_settings[Logs::NPCScaling].log_to_gmsay             = static_cast<uint8>(Logs::General);
 	log_settings[Logs::HotReload].log_to_gmsay              = static_cast<uint8>(Logs::General);
 	log_settings[Logs::HotReload].log_to_console            = static_cast<uint8>(Logs::General);
@@ -146,12 +104,8 @@ EQEmuLogSys *EQEmuLogSys::LoadLogSettingsDefaults()
 	/**
 	 * RFC 5424
 	 */
-	log_settings[Logs::Emergency].log_to_console = static_cast<uint8>(Logs::General);
-	log_settings[Logs::Alert].log_to_console     = static_cast<uint8>(Logs::General);
-	log_settings[Logs::Critical].log_to_console  = static_cast<uint8>(Logs::General);
 	log_settings[Logs::Error].log_to_console     = static_cast<uint8>(Logs::General);
 	log_settings[Logs::Warning].log_to_console   = static_cast<uint8>(Logs::General);
-	log_settings[Logs::Notice].log_to_console    = static_cast<uint8>(Logs::General);
 	log_settings[Logs::Info].log_to_console      = static_cast<uint8>(Logs::General);
 
 	/**
@@ -197,24 +151,6 @@ EQEmuLogSys *EQEmuLogSys::LoadLogSettingsDefaults()
 }
 
 /**
- * @param log_category
- * @return
- */
-bool EQEmuLogSys::IsRfc5424LogCategory(uint16 log_category)
-{
-	return (
-		log_category == Logs::Emergency ||
-		log_category == Logs::Alert ||
-		log_category == Logs::Critical ||
-		log_category == Logs::Error ||
-		log_category == Logs::Warning ||
-		log_category == Logs::Notice ||
-		log_category == Logs::Info ||
-		log_category == Logs::Debug
-	);
-}
-
-/**
  * @param debug_level
  * @param log_category
  * @param message
@@ -248,72 +184,9 @@ void EQEmuLogSys::ProcessLogWrite(
  * @param log_category
  * @return
  */
-uint16 EQEmuLogSys::GetWindowsConsoleColorFromCategory(uint16 log_category)
-{
-	switch (log_category) {
-		case Logs::Status:
-		case Logs::Normal:
-			return Console::Color::Yellow;
-		case Logs::MySQLError:
-		case Logs::Error:
-		case Logs::QuestErrors:
-			return Console::Color::LightRed;
-		case Logs::MySQLQuery:
-		case Logs::Debug:
-			return Console::Color::LightGreen;
-		case Logs::Quests:
-			return Console::Color::LightCyan;
-		case Logs::Commands:
-		case Logs::Mercenaries:
-			return Console::Color::LightMagenta;
-		case Logs::Crash:
-			return Console::Color::LightRed;
-		default:
-			return Console::Color::Yellow;
-	}
-}
-
-/**
- * @param log_category
- * @return
- */
-std::string EQEmuLogSys::GetLinuxConsoleColorFromCategory(uint16 log_category)
-{
-	switch (log_category) {
-		case Logs::Status:
-		case Logs::Normal:
-			return LC_YELLOW;
-		case Logs::MySQLError:
-		case Logs::QuestErrors:
-		case Logs::Warning:
-		case Logs::Critical:
-		case Logs::Error:
-			return LC_RED;
-		case Logs::MySQLQuery:
-		case Logs::Debug:
-			return LC_GREEN;
-		case Logs::Quests:
-			return LC_CYAN;
-		case Logs::Commands:
-		case Logs::Mercenaries:
-			return LC_MAGENTA;
-		case Logs::Crash:
-			return LC_RED;
-		default:
-			return LC_YELLOW;
-	}
-}
-
-/**
- * @param log_category
- * @return
- */
 uint16 EQEmuLogSys::GetGMSayColorFromCategory(uint16 log_category)
 {
 	switch (log_category) {
-		case Logs::Status:
-		case Logs::Normal:
-			return Chat::Yellow;
 		case Logs::MySQLError:
 		case Logs::QuestErrors:
 		case Logs::Error:
@@ -333,28 +206,144 @@ uint16 EQEmuLogSys::GetGMSayColorFromCategory(uint16 log_category)
 	}
 }
 
+
 /**
  * @param debug_level
  * @param log_category
  * @param message
  */
-void EQEmuLogSys::ProcessConsoleMessage(uint16 log_category, const std::string &message)
+void EQEmuLogSys::ProcessConsoleMessage(
+	uint16 log_category,
+	const std::string &message,
+	const char *file,
+	const char *func,
+	int line
+)
 {
-#ifdef _WINDOWS
-	HANDLE  console_handle;
-	console_handle = GetStdHandle(STD_OUTPUT_HANDLE);
-	CONSOLE_FONT_INFOEX info = { 0 };
-	info.cbSize = sizeof(info);
-	info.dwFontSize.Y = 12; // leave X as zero
-	info.FontWeight = FW_NORMAL;
-	wcscpy(info.FaceName, L"Lucida Console");
-	SetCurrentConsoleFontEx(console_handle, NULL, &info);
-	SetConsoleTextAttribute(console_handle, EQEmuLogSys::GetWindowsConsoleColorFromCategory(log_category));
-	std::cout << message << "\n";
-	SetConsoleTextAttribute(console_handle, Console::Color::White);
-#else
-	std::cout << EQEmuLogSys::GetLinuxConsoleColorFromCategory(log_category) << message << LC_RESET << std::endl;
-#endif
+	bool is_error = (
+		log_category == Logs::LogCategory::Error ||
+		log_category == Logs::LogCategory::MySQLError ||
+		log_category == Logs::LogCategory::Crash ||
+		log_category == Logs::LogCategory::QuestErrors
+	);
+	bool is_warning = (
+		log_category == Logs::LogCategory::Warning
+	);
+
+	(!is_error ? std::cout : std::cerr)
+		<< ""
+		<< rang::fgB::black
+		<< rang::style::bold
+		<< fmt::format("{:>6}", GetPlatformName().substr(0, 6))
+		<< rang::style::reset
+		<< rang::fgB::gray
+		<< " | "
+		<< ((is_error || is_warning) ? rang::fgB::red : rang::fgB::gray)
+		<< rang::style::bold
+		<< fmt::format("{:^10}", fmt::format("{}", Logs::LogCategoryName[log_category]).substr(0, 10))
+		<< rang::style::reset
+		<< rang::fgB::gray
+		<< " | "
+		<< rang::fgB::gray
+		<< rang::style::bold
+		<< fmt::format("{}", func)
+		<< rang::style::reset
+		<< rang::fgB::gray
+		<< " ";
+
+	if (RuleB(Logging, PrintFileFunctionAndLine)) {
+		(!is_error ? std::cout : std::cerr)
+			<< ""
+			<< rang::fgB::green
+			<< rang::style::bold
+			<< fmt::format("{:}", fmt::format("{}:{}:{}", std::filesystem::path(file).filename().string(), func, line))
+			<< rang::style::reset
+			<< " | ";
+	}
+
+	if (log_category == Logs::LogCategory::MySQLQuery) {
+		auto        s     = Strings::Split(message, "--");
+		if (s.size() > 1) {
+			std::string query = Strings::Trim(s[0]);
+			std::string meta  = Strings::Trim(s[1]);
+
+			std::cout <<
+					  rang::fgB::green
+					  <<
+					  query
+					  <<
+					  rang::style::reset;
+
+			std::cout <<
+					  rang::fgB::black
+					  <<
+					  " -- "
+					  <<
+					  meta
+					  <<
+					  rang::style::reset;
+		}
+	}
+	else if (Strings::Contains(message, "[")) {
+		for (auto &e: Strings::Split(message, " ")) {
+			if (Strings::Contains(e, "[") && Strings::Contains(e, "]")) {
+				e = Strings::Replace(e, "[", "");
+				e = Strings::Replace(e, "]", "");
+
+				bool is_upper = false;
+
+				for (int i = 0; i < strlen(e.c_str()); i++) {
+					if (isupper(e[i])) {
+						is_upper = true;
+					}
+				}
+
+				if (!is_upper) {
+					(!is_error ? std::cout : std::cerr)
+						<< rang::fgB::gray
+						<< "["
+						<< rang::style::bold
+						<< rang::fgB::yellow
+						<< e
+						<< rang::fgB::gray
+						<< "] "
+						;
+				}
+				else {
+					(!is_error ? std::cout : std::cerr) << rang::fgB::gray << "[" << e << "] ";
+				}
+			}
+			else {
+				(!is_error ? std::cout : std::cerr)
+					<< (is_error ? rang::fgB::red : rang::fgB::gray)
+					<< e
+					<< " ";
+			}
+		}
+	}
+	else {
+		(!is_error ? std::cout : std::cerr)
+			<< (is_error ? rang::fgB::red : rang::fgB::gray)
+			<< message
+			<< " ";
+	}
+
+	if (!origination_info.zone_short_name.empty()) {
+		(!is_error ? std::cout : std::cerr)
+			<<
+			rang::fgB::black
+			<<
+			"-- "
+			<<
+			fmt::format(
+				"[{}] ({}) inst_id [{}]",
+				origination_info.zone_short_name,
+				origination_info.zone_long_name,
+				origination_info.instance_id
+			);
+	}
+
+	(!is_error ? std::cout : std::cerr) << rang::style::reset << std::endl;
 
 	m_on_log_console_hook(log_category, message);
 }
@@ -366,33 +355,6 @@ void EQEmuLogSys::ProcessConsoleMessage(uint16 log_category, const std::string &
 constexpr const char *str_end(const char *str)
 {
 	return *str ? str_end(str + 1) : str;
-}
-
-/**
- * @param str
- * @return
- */
-constexpr bool str_slant(const char *str)
-{
-	return *str == '/' ? true : (*str ? str_slant(str + 1) : false);
-}
-
-/**
- * @param str
- * @return
- */
-constexpr const char *r_slant(const char *str)
-{
-	return *str == '/' ? (str + 1) : r_slant(str - 1);
-}
-
-/**
- * @param str
- * @return
- */
-constexpr const char *base_file_name(const char *str)
-{
-	return str_slant(str) ? r_slant(str_end(str)) : str;
 }
 
 /**
@@ -422,7 +384,7 @@ void EQEmuLogSys::Out(
 
 	std::string prefix;
 	if (RuleB(Logging, PrintFileFunctionAndLine)) {
-		prefix = fmt::format("[{0}::{1}:{2}] ", base_file_name(file), func, line);
+		prefix = fmt::format("[{0}::{1}:{2}] ", std::filesystem::path(file).filename().string(), func, line);
 	}
 
 	// remove this when we remove all legacy logs
@@ -445,11 +407,14 @@ void EQEmuLogSys::Out(
 	if (l.log_to_console_enabled) {
 		EQEmuLogSys::ProcessConsoleMessage(
 			log_category,
-			fmt::format("[{}] [{}] {}", GetPlatformName(), Logs::LogCategoryName[log_category], prefix + output_message)
+			output_message,
+			file,
+			func,
+			line
 		);
 	}
 	if (l.log_to_gmsay_enabled) {
-		m_on_log_gmsay_hook(log_category, output_message);
+		m_on_log_gmsay_hook(log_category, func, output_message);
 	}
 	if (l.log_to_file_enabled) {
 		EQEmuLogSys::ProcessLogWrite(
@@ -563,6 +528,8 @@ void EQEmuLogSys::SilenceConsoleLogging()
 		log_settings[log_index].log_to_console      = 0;
 		log_settings[log_index].is_category_enabled = 0;
 	}
+
+	log_settings[Logs::Crash].log_to_console = static_cast<uint8>(Logs::General);
 }
 
 /**
@@ -666,6 +633,11 @@ EQEmuLogSys *EQEmuLogSys::LoadLogDatabaseSettings()
 		}
 		LogInfo("Loaded [{}] Discord webhooks", webhooks.size());
 	}
+
+	// force override this setting
+	log_settings[Logs::Crash].log_to_console = static_cast<uint8>(Logs::General);
+	log_settings[Logs::Crash].log_to_gmsay   = static_cast<uint8>(Logs::General);
+	log_settings[Logs::Crash].log_to_file    = static_cast<uint8>(Logs::General);
 
 	return this;
 }

@@ -58,7 +58,7 @@ ClientListEntry::ClientListEntry(
 	ClearVars(true);
 
 	LogDebug(
-		"ClientListEntry in_id [{0}] in_loginserver_id [{1}] in_loginserver_name [{2}] in_login_name [{3}] in_login_key [{4}] "
+		"in_id [{0}] in_loginserver_id [{1}] in_loginserver_name [{2}] in_login_name [{3}] in_login_key [{4}] "
 		" in_is_world_admin [{5}] ip [{6}] local [{7}]",
 		in_id,
 		in_loginserver_id,
@@ -141,7 +141,7 @@ void ClientListEntry::SetOnline(ZoneServer *iZS, CLE_Status iOnline)
 void ClientListEntry::SetOnline(CLE_Status iOnline)
 {
 	LogClientLogin(
-		"ClientListEntry::SetOnline for [{}] ({}) = [{}] ({})",
+		"Online status [{}] ({}) status [{}] ({})",
 		AccountName(),
 		AccountID(),
 		CLEStatusString[CLE_Status::Online],
@@ -325,7 +325,7 @@ bool ClientListEntry::CheckStale()
 bool ClientListEntry::CheckAuth(uint32 loginserver_account_id, const char *key_password)
 {
 	LogDebug(
-		"ClientListEntry::CheckAuth ls_account_id [{0}] key_password [{1}] plskey [{2}]",
+		"ls_account_id [{0}] key_password [{1}] plskey [{2}]",
 		loginserver_account_id,
 		key_password,
 		plskey
@@ -333,7 +333,7 @@ bool ClientListEntry::CheckAuth(uint32 loginserver_account_id, const char *key_p
 	if (pLSID == loginserver_account_id && strncmp(plskey, key_password, 10) == 0) {
 
 		LogDebug(
-			"ClientListEntry::CheckAuth ls_account_id [{0}] key_password [{1}] plskey [{2}] lsid [{3}] paccountid [{4}]",
+			"ls_account_id [{0}] key_password [{1}] plskey [{2}] lsid [{3}] paccountid [{4}]",
 			loginserver_account_id,
 			key_password,
 			plskey,

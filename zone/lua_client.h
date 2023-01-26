@@ -462,50 +462,39 @@ public:
 	bool CanEnterZone(std::string zone_short_name);
 	bool CanEnterZone(std::string zone_short_name, int16 instance_version);
 	void SendPath(Lua_Mob target);
+	void ResetItemCooldown(uint32 item_id);
 
 	void ApplySpell(int spell_id);
 	void ApplySpell(int spell_id, int duration);
 	void ApplySpell(int spell_id, int duration, bool allow_pets);
-#ifdef BOTS
 	void ApplySpell(int spell_id, int duration, bool allow_pets, bool allow_bots);
-#endif
 
 	void ApplySpellGroup(int spell_id);
 	void ApplySpellGroup(int spell_id, int duration);
 	void ApplySpellGroup(int spell_id, int duration, bool allow_pets);
-#ifdef BOTS
 	void ApplySpellGroup(int spell_id, int duration, bool allow_pets, bool allow_bots);
-#endif
 
 	void ApplySpellRaid(int spell_id);
 	void ApplySpellRaid(int spell_id, int duration);
 	void ApplySpellRaid(int spell_id, int duration, bool allow_pets);
 	void ApplySpellRaid(int spell_id, int duration, bool allow_pets, bool is_raid_group_only);
-#ifdef BOTS
 	void ApplySpellRaid(int spell_id, int duration, bool allow_pets, bool is_raid_group_only, bool allow_bots);
-#endif
 
 	void SetSpellDuration(int spell_id);
 	void SetSpellDuration(int spell_id, int duration);
 	void SetSpellDuration(int spell_id, int duration, bool allow_pets);
-#ifdef BOTS
 	void SetSpellDuration(int spell_id, int duration, bool allow_pets, bool allow_bots);
-#endif
 
 	void SetSpellDurationGroup(int spell_id);
 	void SetSpellDurationGroup(int spell_id, int duration);
 	void SetSpellDurationGroup(int spell_id, int duration, bool allow_pets);
-#ifdef BOTS
 	void SetSpellDurationGroup(int spell_id, int duration, bool allow_pets, bool allow_bots);
-#endif
 
 	void SetSpellDurationRaid(int spell_id);
 	void SetSpellDurationRaid(int spell_id, int duration);
 	void SetSpellDurationRaid(int spell_id, int duration, bool allow_pets);
 	void SetSpellDurationRaid(int spell_id, int duration, bool allow_pets, bool is_raid_group_only);
-#ifdef BOTS
 	void SetSpellDurationRaid(int spell_id, int duration, bool allow_pets, bool is_raid_group_only, bool allow_bots);
-#endif
 
 
 	int GetEnvironmentDamageModifier();
@@ -524,8 +513,6 @@ public:
 	bool SendGMCommand(std::string message);
 	bool SendGMCommand(std::string message, bool ignore_status);
 
-#ifdef BOTS
-
 	int GetBotRequiredLevel();
 	int GetBotRequiredLevel(uint8 class_id);
 	uint32 GetBotCreationLimit();
@@ -540,8 +527,6 @@ public:
 	void SetBotSpawnLimit(int new_spawn_limit, uint8 class_id);
 	void CampAllBots();
 	void CampAllBots(uint8 class_id);
-
-#endif
 
 	void DialogueWindow(std::string markdown);
 

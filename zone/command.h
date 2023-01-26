@@ -122,9 +122,6 @@ void command_godmode(Client* c, const Seperator *sep);
 void command_goto(Client *c, const Seperator *sep);
 void command_grid(Client *c, const Seperator *sep);
 void command_guild(Client *c, const Seperator *sep);
-void command_guildapprove(Client *c, const Seperator *sep);
-void command_guildcreate(Client *c, const Seperator *sep);
-void command_guildlist(Client *c, const Seperator *sep);
 void command_haste(Client *c, const Seperator *sep);
 void command_hatelist(Client *c, const Seperator *sep);
 void command_heal(Client *c, const Seperator *sep);
@@ -284,7 +281,6 @@ void command_traindisc(Client *c, const Seperator *sep);
 void command_trapinfo(Client *c, const Seperator *sep);
 void command_tune(Client *c, const Seperator *sep);
 void command_undye(Client *c, const Seperator *sep);
-void command_undyeme(Client *c, const Seperator *sep);
 void command_unfreeze(Client *c, const Seperator *sep);
 void command_unlock(Client *c, const Seperator *sep);
 void command_unmemspell(Client *c, const Seperator *sep);
@@ -326,9 +322,7 @@ void command_zsky(Client *c, const Seperator *sep);
 void command_zstats(Client *c, const Seperator *sep);
 void command_zunderworld(Client *c, const Seperator *sep);
 
-#ifdef BOTS
 #include "bot.h"
 void command_bot(Client*c, const Seperator *sep);
-#endif
 
 #endif

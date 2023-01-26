@@ -52,9 +52,7 @@
 	#define strcasecmp	_stricmp
 #endif
 
-#ifdef BOTS
 #include "bot.h"
-#endif
 
 extern Zone *zone;
 extern volatile bool is_zone_loaded;
@@ -278,29 +276,15 @@ const Encounter* Entity::CastToEncounter() const
 	return static_cast<const Encounter *>(this);
 }
 
-#ifdef BOTS
 Bot *Entity::CastToBot()
 {
-#ifdef _EQDEBUG
-	if (!IsBot()) {
-		std::cout << "CastToBot error" << std::endl;
-		return 0;
-	}
-#endif
 	return static_cast<Bot *>(this);
 }
 
 const Bot *Entity::CastToBot() const
 {
-#ifdef _EQDEBUG
-	if (!IsBot()) {
-		std::cout << "CastToBot error" << std::endl;
-		return 0;
-	}
-#endif
 	return static_cast<const Bot *>(this);
 }
-#endif
 
 EntityList::EntityList()
 	:
@@ -554,11 +538,9 @@ void EntityList::MobProcess()
 			if(mob->IsMerc()) {
 				entity_list.RemoveMerc(id);
 			}
-#ifdef BOTS
 			else if(mob->IsBot()) {
 				entity_list.RemoveBot(id);
 			}
-#endif
 			else if(mob->IsNPC()) {
 				entity_list.RemoveNPC(id);
 			}
@@ -698,6 +680,11 @@ void EntityList::AddNPC(NPC *npc, bool send_spawn_packet, bool dont_queue)
 		}
 	}
 
+	npc_list.insert(std::pair<uint16, NPC *>(npc->GetID(), npc));
+	mob_list.insert(std::pair<uint16, Mob *>(npc->GetID(), npc));
+
+	parse->EventNPC(EVENT_SPAWN, npc, nullptr, "", 0);
+
 	const auto emote_id = npc->GetEmoteID();
 	if (emote_id != 0) {
 		npc->DoNPCEmote(EQ::constants::EmoteEventTypes::OnSpawn, emote_id);
@@ -730,11 +717,6 @@ void EntityList::AddNPC(NPC *npc, bool send_spawn_packet, bool dont_queue)
 			UpdateFindableNPCState(npc, false);
 		}
 	}
-
-	npc_list.insert(std::pair<uint16, NPC *>(npc->GetID(), npc));
-	mob_list.insert(std::pair<uint16, Mob *>(npc->GetID(), npc));
-
-	parse->EventNPC(EVENT_SPAWN, npc, nullptr, "", 0);
 
 	entity_list.ScanCloseMobs(npc->close_mobs, npc, true);
 
@@ -1869,7 +1851,6 @@ Client *EntityList::GetClientByLSID(uint32 iLSID)
 	return nullptr;
 }
 
-#ifdef BOTS
 Bot* EntityList::GetRandomBot(const glm::vec3& location, float distance, Bot* exclude_bot)
 {
 	auto is_whole_zone = false;
@@ -1900,7 +1881,6 @@ Bot* EntityList::GetRandomBot(const glm::vec3& location, float distance, Bot* ex
 	return bots_in_range[zone->random.Int(0, bots_in_range.size() - 1)];
 
 }
-#endif
 
 Client *EntityList::GetRandomClient(const glm::vec3& location, float distance, Client *exclude_client)
 {
@@ -2956,7 +2936,7 @@ void EntityList::ScanCloseMobs(
 		}
 	}
 
-	LogAIScanCloseModerate(
+	LogAIScanCloseDetail(
 		"[{}] Scanning Close List | list_size [{}] moving [{}]",
 		scanning_mob->GetCleanName(),
 		close_mobs.size(),
@@ -3145,13 +3125,8 @@ void EntityList::RemoveEntity(uint16 id)
 		return;
 	else if (entity_list.RemoveMerc(id))
 		return;
-
-#ifdef BOTS
-	// This block of code is necessary to clean up bot objects
 	else if (entity_list.RemoveBot(id))
 		return;
-#endif //BOTS
-
 	else
 		entity_list.RemoveObject(id);
 }
@@ -5186,7 +5161,6 @@ void EntityList::GetClientList(std::list<Client *> &c_list)
 	}
 }
 
-#ifdef BOTS
 void EntityList::GetBotList(std::list<Bot *> &b_list)
 {
 	b_list.clear();
@@ -5277,7 +5251,6 @@ void EntityList::SignalBotByBotName(std::string bot_name, int signal_id)
 		b->Signal(signal_id);
 	}
 }
-#endif
 
 void EntityList::GetCorpseList(std::list<Corpse *> &c_list)
 {

@@ -27,9 +27,7 @@
 #include "client.h"
 #include "mob.h"
 
-#ifdef BOTS
-	#include "bot.h"
-#endif
+#include "bot.h"
 
 #include <algorithm>
 
@@ -581,7 +579,7 @@ int64 Client::CalcMaxMana()
 				break;
 			}
 		default: {
-				LogSpells("[Client::CalcMaxMana] Invalid Class [{}] in CalcMaxMana", GetCasterClass());
+				LogSpells("Invalid Class [{}] in CalcMaxMana", GetCasterClass());
 				max_mana = 0;
 				break;
 			}
@@ -599,7 +597,7 @@ int64 Client::CalcMaxMana()
 			current_mana = curMana_cap;
 		}
 	}
-	LogSpells("[Client::CalcMaxMana] for [{}] returning [{}]", GetName(), max_mana);
+	LogSpells("for [{}] returning [{}]", GetName(), max_mana);
 	return max_mana;
 }
 
@@ -1663,7 +1661,7 @@ uint32 Mob::GetInstrumentMod(uint16 spell_id)
 		}
 	}
 
-	LogSpells("[Mob::GetInstrumentMod] Name [{}] spell [{}] mod [{}] modcap [{}]\n", GetName(), spell_id, effectmod, effectmodcap);
+	LogSpells("Name [{}] spell [{}] mod [{}] modcap [{}]\n", GetName(), spell_id, effectmod, effectmodcap);
 
 	return effectmod;
 }

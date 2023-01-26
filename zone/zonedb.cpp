@@ -1635,7 +1635,7 @@ bool ZoneDatabase::SaveCharacterInvSnapshot(uint32 character_id) {
 		character_id
 	);
 	auto results = database.QueryDatabase(query);
-	LogInventory("ZoneDatabase::SaveCharacterInventorySnapshot [{}] ([{}])", character_id, (results.Success() ? "pass" : "fail"));
+	LogInventory("[{}] ([{}])", character_id, (results.Success() ? "pass" : "fail"));
 	return results.Success();
 }
 
@@ -1852,7 +1852,7 @@ bool ZoneDatabase::RestoreCharacterInvSnapshot(uint32 character_id, uint32 times
 	// we should know what we're doing by the time we call this function..but,
 	// this is to prevent inventory deletions where no timestamp entries exists
 	if (!ValidateCharacterInvSnapshotTimestamp(character_id, timestamp)) {
-		LogError("ZoneDatabase::RestoreCharacterInvSnapshot() called for id: [{}] without valid snapshot entries @ [{}]", character_id, timestamp);
+		LogError("called for id: [{}] without valid snapshot entries @ [{}]", character_id, timestamp);
 		return false;
 	}
 
@@ -1917,7 +1917,7 @@ bool ZoneDatabase::RestoreCharacterInvSnapshot(uint32 character_id, uint32 times
 	);
 	results = database.QueryDatabase(query);
 
-	LogInventory("ZoneDatabase::RestoreCharacterInvSnapshot() [{}] snapshot for [{}] @ [{}]",
+	LogInventory("[{}] snapshot for [{}] @ [{}]",
 		(results.Success() ? "restored" : "failed to restore"), character_id, timestamp);
 
 	return results.Success();
@@ -3075,53 +3075,6 @@ void ZoneDatabase::QGlobalPurge()
 	database.QueryDatabase(query);
 }
 
-void ZoneDatabase::InsertDoor(
-	uint32 database_id,
-	uint8 id,
-	std::string name,
-	const glm::vec4 &position,
-	uint8 open_type,
-	uint16 guild_id,
-	uint32 lockpick,
-	uint32 key_item_id,
-	uint8 door_param,
-	uint8 invert,
-	int incline,
-	uint16 size,
-	bool disable_timer
-) {
-	auto e = DoorsRepository::NewEntity();
-
-	e.id = database_id;
-	e.doorid = id;
-	e.zone = zone->GetShortName();
-	e.version = zone->GetInstanceVersion();
-	e.name = name;
-	e.pos_x = position.x;
-	e.pos_y = position.y;
-	e.pos_z = position.z;
-	e.opentype = open_type;
-	e.guild = guild_id;
-	e.lockpick = lockpick;
-	e.keyitem = key_item_id;
-	e.disable_timer = static_cast<int8_t>(disable_timer);
-	e.door_param = door_param;
-	e.invert_state = invert;
-	e.incline = incline;
-	e.size = size;
-
-	const auto& n = DoorsRepository::InsertOne(*this, e);
-	if (!n.id) {
-		LogError(
-			"Failed to create door in Zone [{}] Version [{}] Database ID [{}] ID [{}]",
-			zone->GetShortName(),
-			zone->GetInstanceVersion(),
-			database_id,
-			id
-		);
-	}
-}
-
 void ZoneDatabase::LoadAltCurrencyValues(uint32 char_id, std::map<uint32, uint32> &currency) {
 
 	std::string query = StringFormat("SELECT currency_id, amount "
@@ -3380,11 +3333,24 @@ void ZoneDatabase::RemoveTempFactions(Client *client) {
 	QueryDatabase(query);
 }
 
-void ZoneDatabase::UpdateItemRecastTimestamps(uint32 char_id, uint32 recast_type, uint32 timestamp)
+void ZoneDatabase::UpdateItemRecast(uint32 character_id, uint32 recast_type, uint32 timestamp)
 {
-	std::string query =
-	    StringFormat("REPLACE INTO character_item_recast (id, recast_type, timestamp) VALUES (%u, %u, %u)", char_id,
-			 recast_type, timestamp);
+	const auto query = fmt::format(
+		"REPLACE INTO character_item_recast (id, recast_type, timestamp) VALUES ({}, {}, {})",
+		character_id,
+		recast_type,
+		timestamp
+	);
+	QueryDatabase(query);
+}
+
+void ZoneDatabase::DeleteItemRecast(uint32 character_id, uint32 recast_type)
+{
+	const auto query = fmt::format(
+		"DELETE FROM character_item_recast WHERE id = {} AND recast_type = {}",
+		character_id,
+		recast_type
+	);
 	QueryDatabase(query);
 }
 
@@ -3689,7 +3655,7 @@ bool ZoneDatabase::LoadFactionData()
 		faction_ids.push_back(fr_row[0]);
 	}
 
-	LogInfo("[{}] Faction(s) loaded...", faction_ids.size());
+	LogInfo("Loaded [{}] faction(s)", Strings::Commify(std::to_string(faction_ids.size())));
 
 	const std::string faction_id_criteria(Strings::Implode(",", faction_ids));
 
@@ -3716,7 +3682,7 @@ bool ZoneDatabase::LoadFactionData()
 			faction_array[index]->max = atoi(br_row[2]);
 		}
 
-		LogInfo("[{}] Faction Base(s) loaded...", base_results.RowCount());
+		LogInfo("Loaded [{}] faction base(s)", Strings::Commify(std::to_string(base_results.RowCount())));
 	}
 	else {
 		LogInfo("Unable to load Faction Base data...");
@@ -3744,7 +3710,7 @@ bool ZoneDatabase::LoadFactionData()
 			faction_array[index]->mods[mr_row[2]] = atoi(mr_row[1]);
 		}
 
-		LogInfo("[{}] Faction Modifier(s) loaded", modifier_results.RowCount());
+		LogInfo("Loaded [{}] faction modifier(s)", Strings::Commify(std::to_string(modifier_results.RowCount())));
 	}
 	else {
 		LogError("Unable to load Faction Modifier data");
@@ -4369,6 +4335,8 @@ bool ZoneDatabase::LoadCharacterCorpses(uint32 zone_id, uint16 instance_id) {
 				atoul(row[10]))       // guild_consent_id     uint32 guild_consent_id
 		);
 	}
+
+	LogInfo("Loaded [{}] player corpse(s)", Strings::Commify(results.RowCount()));
 
 	return true;
 }

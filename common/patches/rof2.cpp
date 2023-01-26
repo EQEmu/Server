@@ -716,7 +716,7 @@ namespace RoF2
 
 	ENCODE(OP_DeleteCharge)
 	{
-		Log(Logs::Moderate, Logs::Netcode, "RoF2::ENCODE(OP_DeleteCharge)");
+		Log(Logs::Detail, Logs::Netcode, "RoF2::ENCODE(OP_DeleteCharge)");
 
 		ENCODE_FORWARD(OP_MoveItem);
 	}
@@ -1644,7 +1644,7 @@ namespace RoF2
 		ENCODE_LENGTH_EXACT(LootingItem_Struct);
 		SETUP_DIRECT_ENCODE(LootingItem_Struct, structs::LootingItem_Struct);
 
-		Log(Logs::Moderate, Logs::Netcode, "RoF2::ENCODE(OP_LootItem)");
+		Log(Logs::Detail, Logs::Netcode, "RoF2::ENCODE(OP_LootItem)");
 
 		OUT(lootee);
 		OUT(looter);
@@ -1802,7 +1802,7 @@ namespace RoF2
 		ENCODE_LENGTH_EXACT(MoveItem_Struct);
 		SETUP_DIRECT_ENCODE(MoveItem_Struct, structs::MoveItem_Struct);
 
-		Log(Logs::Moderate, Logs::Netcode, "RoF2::ENCODE(OP_MoveItem)");
+		Log(Logs::Detail, Logs::Netcode, "RoF2::ENCODE(OP_MoveItem)");
 
 		eq->from_slot = ServerToRoF2Slot(emu->from_slot);
 		eq->to_slot = ServerToRoF2Slot(emu->to_slot);
@@ -3967,7 +3967,7 @@ namespace RoF2
 			}
 
 			float SpawnSize = emu->size;
-			if (!((emu->NPC == 0) || (emu->race <= RACE_GNOME_12) || (emu->race == RACE_IKSAR_128) || 
+			if (!((emu->NPC == 0) || (emu->race <= RACE_GNOME_12) || (emu->race == RACE_IKSAR_128) ||
 					(emu->race == RACE_VAH_SHIR_130) || (emu->race == RACE_FROGLOK_330) || (emu->race == RACE_DRAKKIN_522))
 				)
 			{
@@ -4172,7 +4172,7 @@ namespace RoF2
 			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0xffffffff); // These do something with OP_WeaponEquip1
 			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0xffffffff); // ^
 
-			if ((emu->NPC == 0) || (emu->race <= RACE_GNOME_12) || (emu->race == RACE_IKSAR_128) || 
+			if ((emu->NPC == 0) || (emu->race <= RACE_GNOME_12) || (emu->race == RACE_IKSAR_128) ||
 					(emu->race == RACE_VAH_SHIR_130) || (emu->race == RACE_FROGLOK_330) || (emu->race == RACE_DRAKKIN_522)
 				)
 			{
@@ -5023,7 +5023,7 @@ namespace RoF2
 		DECODE_LENGTH_EXACT(structs::LootingItem_Struct);
 		SETUP_DIRECT_DECODE(LootingItem_Struct, structs::LootingItem_Struct);
 
-		Log(Logs::Moderate, Logs::Netcode, "RoF2::DECODE(OP_LootItem)");
+		Log(Logs::Detail, Logs::Netcode, "RoF2::DECODE(OP_LootItem)");
 
 		IN(lootee);
 		IN(looter);
@@ -5038,7 +5038,7 @@ namespace RoF2
 		DECODE_LENGTH_EXACT(structs::MoveItem_Struct);
 		SETUP_DIRECT_DECODE(MoveItem_Struct, structs::MoveItem_Struct);
 
-		Log(Logs::Moderate, Logs::Netcode, "RoF2::DECODE(OP_MoveItem)");
+		Log(Logs::Detail, Logs::Netcode, "RoF2::DECODE(OP_MoveItem)");
 
 		emu->from_slot = RoF2ToServerSlot(eq->from_slot);
 		emu->to_slot = RoF2ToServerSlot(eq->to_slot);

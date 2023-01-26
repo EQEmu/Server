@@ -179,7 +179,8 @@ void NpcScaleManager::ResetNPCScaling(NPC *npc)
 
 bool NpcScaleManager::LoadScaleData()
 {
-	for (auto &s: NpcScaleGlobalBaseRepository::All(content_db)) {
+	auto rows = NpcScaleGlobalBaseRepository::All(content_db);
+	for (auto &s: rows) {
 		global_npc_scale scale_data;
 
 		scale_data.type              = s.type;
@@ -222,7 +223,7 @@ bool NpcScaleManager::LoadScaleData()
 		);
 	}
 
-	LogNPCScaling("Global Base Scaling Data Loaded");
+	LogInfo("Loaded [{}] global scaling data entries", Strings::Commify(rows.size()));
 
 	return true;
 }
@@ -463,7 +464,7 @@ bool NpcScaleManager::ApplyGlobalBaseScalingToNPCStatically(NPC *&npc)
 
 	if (!g.level) {
 		LogNPCScaling(
-			"NpcScaleManager::ApplyGlobalBaseScalingToNPCStatically NPC: [{}] - scaling data not found for type: [{}] level: [{}]",
+			"NPC: [{}] - scaling data not found for type: [{}] level: [{}]",
 			npc->GetCleanName(),
 			npc_type,
 			npc_level
@@ -521,7 +522,7 @@ bool NpcScaleManager::ApplyGlobalBaseScalingToNPCDynamically(NPC *&npc)
 
 	if (!d.level) {
 		LogNPCScaling(
-			"NpcScaleManager::ApplyGlobalBaseScalingToNPCDynamically NPC: [{}] - scaling data not found for type: [{}] level: [{}]",
+			"NPC: [{}] - scaling data not found for type: [{}] level: [{}]",
 			npc->GetCleanName(),
 			npc_type,
 			npc_level

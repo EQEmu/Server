@@ -322,7 +322,7 @@ void NPC::AddLootDrop(
 		linker.SetItemData(item2);
 
 		LogLoot(
-			"[NPC::AddLootDrop] NPC [{}] Item ({}) [{}] charges [{}] chance [{}] trivial min/max [{}/{}] npc min/max [{}/{}]",
+			"NPC [{}] Item ({}) [{}] charges [{}] chance [{}] trivial min/max [{}/{}] npc min/max [{}/{}]",
 			GetName(),
 			item2->ID,
 			linker.GenerateLink(),
@@ -617,6 +617,8 @@ void ZoneDatabase::LoadGlobalLoot()
 	if (!results.Success() || results.RowCount() == 0) {
 		return;
 	}
+
+	LogInfo("Loaded [{}] global loot entries", Strings::Commify(results.RowCount()));
 
 	// we might need this, lets not keep doing it in a loop
 	auto      zoneid = std::to_string(zone->GetZoneID());

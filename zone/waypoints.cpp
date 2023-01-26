@@ -239,7 +239,7 @@ void NPC::MoveTo(const glm::vec4 &position, bool saveguardspot)
 		if (m_GuardPoint.w == -1)
 			m_GuardPoint.w = CalculateHeadingToTarget(position.x, position.y);
 
-		LogAIModerate("Setting guard position to [{}]", to_string(static_cast<glm::vec3>(m_GuardPoint)).c_str());
+		LogAIDetail("Setting guard position to [{}]", to_string(static_cast<glm::vec3>(m_GuardPoint)).c_str());
 	}
 
 	cur_wp_pause        = 0;
@@ -261,7 +261,7 @@ void NPC::UpdateWaypoint(int wp_index)
 
 	m_CurrentWayPoint = glm::vec4(cur->x, cur->y, cur->z, cur->heading);
 	cur_wp_pause = cur->pause;
-	LogAIModerate("Next waypoint [{}]: ({}, {}, {}, {})", wp_index, m_CurrentWayPoint.x, m_CurrentWayPoint.y, m_CurrentWayPoint.z, m_CurrentWayPoint.w);
+	LogAIDetail("Next waypoint [{}]: ({}, {}, {}, {})", wp_index, m_CurrentWayPoint.x, m_CurrentWayPoint.y, m_CurrentWayPoint.z, m_CurrentWayPoint.w);
 
 }
 
@@ -559,7 +559,7 @@ void NPC::SetWaypointPause()
 
 void NPC::SaveGuardSpot(bool ClearGuardSpot) {
 	if (ClearGuardSpot) {
-		LogAIModerate("Clearing guard order.");
+		LogAIDetail("Clearing guard order.");
 		m_GuardPoint = glm::vec4();
 	} else {
 		m_GuardPoint = m_Position;
@@ -728,7 +728,7 @@ void Mob::SendTo(float new_x, float new_y, float new_z) {
 
 			float newz = zone->zonemap->FindBestZ(dest, nullptr);
 
-			LogAIModerate("BestZ returned {} at {}, {}, {}", newz, m_Position.x, m_Position.y, m_Position.z);
+			LogAIDetail("BestZ returned {} at {}, {}, {}", newz, m_Position.x, m_Position.y, m_Position.z);
 
 			if ((newz > -2000) && std::abs(newz - dest.z) < RuleR(Map, FixPathingZMaxDeltaSendTo)) // Sanity check.
 				m_Position.z = newz + 1;
@@ -792,7 +792,7 @@ float Mob::GetFixedZ(const glm::vec3 &destination, int32 z_find_offset) {
 
 		auto duration = timer.elapsed();
 
-		LogFixZ("Mob::GetFixedZ() ([{}]) returned [{}] at [{}], [{}], [{}] - Took [{}]",
+		LogFixZ("[{}] returned [{}] at [{}] [{}] [{}] - Took [{}]",
 			GetCleanName(),
 			new_z,
 			destination.x,
@@ -1330,7 +1330,6 @@ void NPC::RestoreGuardSpotCharm()
 /******************
 * Bot-specific overloads to make them play nice with the new movement system
 */
-#ifdef BOTS
 #include "bot.h"
 
 void Bot::WalkTo(float x, float y, float z)
@@ -1348,4 +1347,3 @@ void Bot::RunTo(float x, float y, float z)
 
 	Mob::RunTo(x, y, z);
 }
-#endif

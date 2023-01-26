@@ -52,9 +52,7 @@ void perl_register_object();
 void perl_register_doors();
 void perl_register_expedition();
 void perl_register_expedition_lock_messages();
-#ifdef BOTS
 void perl_register_bot();
-#endif // BOTS
 #endif // EMBPERL_XS_CLASSES
 #endif // EMBPERL_XS
 
@@ -183,11 +181,8 @@ PerlembParser::PerlembParser() : perl(nullptr)
 	global_npc_quest_status_    = questUnloaded;
 	player_quest_status_        = questUnloaded;
 	global_player_quest_status_ = questUnloaded;
-
-#ifdef BOTS
 	bot_quest_status_ = questUnloaded;
 	global_bot_quest_status_ = questUnloaded;
-#endif
 }
 
 PerlembParser::~PerlembParser()
@@ -221,11 +216,8 @@ void PerlembParser::ReloadQuests()
 	global_npc_quest_status_    = questUnloaded;
 	player_quest_status_        = questUnloaded;
 	global_player_quest_status_ = questUnloaded;
-
-#ifdef BOTS
 	bot_quest_status_ = questUnloaded;
 	global_bot_quest_status_ = questUnloaded;
-#endif
 
 	item_quest_status_.clear();
 	spell_quest_status_.clear();
@@ -923,10 +915,7 @@ int PerlembParser::SendCommands(
 			std::string qi  = (std::string) "$" + (std::string) pkgprefix + (std::string) "::questitem";
 			std::string sp  = (std::string) "$" + (std::string) pkgprefix + (std::string) "::spell";
 			std::string enl = (std::string) "$" + (std::string) pkgprefix + (std::string) "::entity_list";
-
-#ifdef BOTS
 			std::string bot = (std::string) "$" + (std::string) pkgprefix + (std::string) "::bot";
-#endif
 
 			if (clear_vars_.find(cl) != clear_vars_.end()) {
 				auto e = fmt::format("{} = undef;", cl);
@@ -953,12 +942,10 @@ int PerlembParser::SendCommands(
 				perl->eval(e.c_str());
 			}
 
-#ifdef BOTS
 			if (clear_vars_.find(bot) != clear_vars_.end()) {
 				auto e = fmt::format("{} = undef;", bot);
 				perl->eval(e.c_str());
 			}
-#endif
 		}
 
 		std::string buf;
@@ -982,14 +969,12 @@ int PerlembParser::SendCommands(
 			sv_setref_pv(npc, "NPC", curn);
 		}
 
-#ifdef BOTS
 		if (!other->IsClient() && other->IsBot()) {
 			Bot *curb = quest_manager.GetBot();
 			buf = fmt::format("{}::bot", pkgprefix);
 			SV *bot = get_sv(buf.c_str(), true);
 			sv_setref_pv(bot, "Bot", curb);
 		}
-#endif
 
 		//only export QuestItem if it's an item quest
 		if (item_inst) {
@@ -1023,20 +1008,14 @@ int PerlembParser::SendCommands(
 			std::string qi  = (std::string) "$" + (std::string) pkgprefix + (std::string) "::questitem";
 			std::string sp  = (std::string) "$" + (std::string) pkgprefix + (std::string) "::spell";
 			std::string enl = (std::string) "$" + (std::string) pkgprefix + (std::string) "::entity_list";
-
-#ifdef BOTS
 			std::string bot = (std::string) "$" + (std::string) pkgprefix + (std::string) "::bot";
-#endif
 
 			clear_vars_[cl]  = 1;
 			clear_vars_[np]  = 1;
 			clear_vars_[qi]  = 1;
 			clear_vars_[sp]  = 1;
 			clear_vars_[enl] = 1;
-
-#ifdef BOTS
 			clear_vars_[bot] = 1;
-#endif
 		}
 #endif
 
@@ -1101,9 +1080,7 @@ void PerlembParser::MapFunctions()
 	perl_register_doors();
 	perl_register_expedition();
 	perl_register_expedition_lock_messages();
-#ifdef BOTS
 	perl_register_bot();
-#endif // BOTS
 #endif // EMBPERL_XS_CLASSES
 }
 
@@ -1396,12 +1373,10 @@ void PerlembParser::ExportMobVariables(
 		ExportVar(package_name.c_str(), "status", mob->CastToClient()->Admin());
 	}
 
-#ifdef BOTS
 	if (mob && mob->IsBot()) {
 		ExportVar(package_name.c_str(), "bot_id", mob->CastToBot()->GetBotID());
 		ExportVar(package_name.c_str(), "bot_owner_char_id", mob->CastToBot()->GetBotOwnerCharacterID());
 	}
-#endif
 
 	if (
 		!isPlayerQuest &&
@@ -1555,11 +1530,9 @@ void PerlembParser::ExportEventVariables(
 			}
 
 			auto unique_id = npcmob->GetNPCTypeID();
-#ifdef BOTS
 			if (npcmob->IsBot()) {
 				unique_id = npcmob->CastToBot()->GetBotID();
 			}
-#endif
 
 			ExportVar(package_name.c_str(), "copper", GetVar(fmt::format("copper.{}", unique_id)).c_str());
 			ExportVar(package_name.c_str(), "silver", GetVar(fmt::format("silver.{}", unique_id)).c_str());
@@ -1835,17 +1808,8 @@ void PerlembParser::ExportEventVariables(
 				if (killed)
 				{
 					ExportVar(package_name.c_str(), "killed_entity_id", killed->GetID());
-
-					if (killed->IsNPC()) {
-						ExportVar(package_name.c_str(), "killed_bot_id", 0);
-						ExportVar(package_name.c_str(), "killed_npc_id", killed->GetNPCTypeID());
-#ifdef BOTS
-					} else if (killed->IsBot()) {
-						ExportVar(package_name.c_str(), "killed_bot_id", killed->CastToBot()->GetBotID());
-						ExportVar(package_name.c_str(), "killed_npc_id", 0);
-#endif
-					}
-
+					ExportVar(package_name.c_str(), "killed_bot_id", killed->IsBot() ? killed->CastToBot()->GetBotID() : 0);
+					ExportVar(package_name.c_str(), "killed_npc_id", killed->IsNPC() ? killed->GetNPCTypeID() : 0);
 					ExportVar(package_name.c_str(), "killed_x", killed->GetX());
 					ExportVar(package_name.c_str(), "killed_y", killed->GetY());
 					ExportVar(package_name.c_str(), "killed_z", killed->GetZ());
@@ -1866,17 +1830,8 @@ void PerlembParser::ExportEventVariables(
 
 		case EVENT_SPAWN_ZONE: {
 			ExportVar(package_name.c_str(), "spawned_entity_id", mob->GetID());
-
-			if (mob->IsNPC()) {
-				ExportVar(package_name.c_str(), "spawned_bot_id", 0);
-				ExportVar(package_name.c_str(), "spawned_npc_id", mob->GetNPCTypeID());
-#ifdef BOTS
-			} else if (mob->IsBot()) {
-				ExportVar(package_name.c_str(), "spawned_bot_id", mob->CastToBot()->GetBotID());
-				ExportVar(package_name.c_str(), "spawned_npc_id", 0);
-#endif
-			}
-
+			ExportVar(package_name.c_str(), "spawned_bot_id", mob->IsBot() ? mob->CastToBot()->GetBotID() : 0);
+			ExportVar(package_name.c_str(), "spawned_npc_id", mob->IsNPC() ? mob->GetNPCTypeID() : 0);
 			break;
 		}
 
@@ -2054,32 +2009,15 @@ void PerlembParser::ExportEventVariables(
 
 		case EVENT_DESPAWN: {
 			ExportVar(package_name.c_str(), "despawned_entity_id", npcmob->GetID());
-
-			if (npcmob->IsNPC()) {
-				ExportVar(package_name.c_str(), "despawned_bot_id", 0);
-				ExportVar(package_name.c_str(), "despawned_npc_id", npcmob->GetNPCTypeID());
-#ifdef BOTS
-			} else if (npcmob->IsBot()) {
-				ExportVar(package_name.c_str(), "despawned_bot_id", npcmob->CastToBot()->GetBotID());
-				ExportVar(package_name.c_str(), "despawned_npc_id", 0);
-#endif
-			}
-
+			ExportVar(package_name.c_str(), "despawned_bot_id", npcmob->IsBot() ? npcmob->CastToBot()->GetBotID() : 0);
+			ExportVar(package_name.c_str(), "despawned_npc_id", npcmob->IsNPC() ? npcmob->GetNPCTypeID() : 0);
 			break;
 		}
+
 		case EVENT_DESPAWN_ZONE: {
 			ExportVar(package_name.c_str(), "despawned_entity_id", mob->GetID());
-
-			if (mob->IsNPC()) {
-				ExportVar(package_name.c_str(), "despawned_bot_id", 0);
-				ExportVar(package_name.c_str(), "despawned_npc_id", mob->GetNPCTypeID());
-#ifdef BOTS
-			} else if (mob->IsBot()) {
-				ExportVar(package_name.c_str(), "despawned_bot_id", mob->CastToBot()->GetBotID());
-				ExportVar(package_name.c_str(), "despawned_npc_id", 0);
-#endif
-			}
-
+			ExportVar(package_name.c_str(), "despawned_bot_id", mob->IsBot() ? mob->CastToBot()->GetBotID() : 0);
+			ExportVar(package_name.c_str(), "despawned_npc_id", mob->IsNPC() ? mob->GetNPCTypeID() : 0);
 			break;
 		}
 
@@ -2099,7 +2037,6 @@ void PerlembParser::ExportEventVariables(
 	}
 }
 
-#ifdef BOTS
 void PerlembParser::LoadBotScript(std::string filename)
 {
 	if (!perl) {
@@ -2215,6 +2152,5 @@ int PerlembParser::EventGlobalBot(
 ) {
 	return EventCommon(evt, 0, data.c_str(), bot, nullptr, nullptr, mob, extra_data, true, extra_pointers);
 }
-#endif
 
 #endif

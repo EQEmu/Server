@@ -50,9 +50,7 @@ extern volatile bool RunLoops;
 #include "petitions.h"
 #include "command.h"
 #include "water_map.h"
-#ifdef BOTS
 #include "bot_command.h"
-#endif
 #include "string_ids.h"
 
 #include "guild_mgr.h"
@@ -369,7 +367,6 @@ Client::Client(EQStreamInterface *ieqs) : Mob(
 	SetDisplayMobInfoWindow(true);
 	SetDevToolsEnabled(true);
 
-#ifdef BOTS
 	bot_owner_options[booDeathMarquee] = false;
 	bot_owner_options[booStatsUpdate] = false;
 	bot_owner_options[booSpawnMessageSay] = false;
@@ -382,7 +379,6 @@ Client::Client(EQStreamInterface *ieqs) : Mob(
 
 	SetBotPulling(false);
 	SetBotPrecombat(false);
-#endif
 
 	AI_Init();
 }
@@ -390,9 +386,10 @@ Client::Client(EQStreamInterface *ieqs) : Mob(
 Client::~Client() {
 	mMovementManager->RemoveClient(this);
 
-#ifdef BOTS
-	Bot::ProcessBotOwnerRefDelete(this);
-#endif
+	if (RuleB(Bots, Enabled)) {
+		Bot::ProcessBotOwnerRefDelete(this);
+	}
+
 	if(IsInAGuild())
 		guild_mgr.SendGuildMemberUpdateToWorld(GetName(), GuildID(), 0, time(nullptr));
 
@@ -1148,30 +1145,32 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 			break;
 		}
 
-#ifdef BOTS
 		if (message[0] == BOT_COMMAND_CHAR) {
-			if (bot_command_dispatch(this, message) == -2) {
-				if (parse->PlayerHasQuestSub(EVENT_BOT_COMMAND)) {
-					int i = parse->EventPlayer(EVENT_BOT_COMMAND, this, message, 0);
-					if (i == 0 && !RuleB(Chat, SuppressCommandErrors)) {
-						Message(Chat::Red, "Bot command '%s' not recognized.", message);
+			if (RuleB(Bots, Enabled)) {
+				if (bot_command_dispatch(this, message) == -2) {
+					if (parse->PlayerHasQuestSub(EVENT_BOT_COMMAND)) {
+						int i = parse->EventPlayer(EVENT_BOT_COMMAND, this, message, 0);
+						if (i == 0 && !RuleB(Chat, SuppressCommandErrors)) {
+							Message(Chat::Red, "Bot command '%s' not recognized.", message);
+						}
+					}
+					else if (parse->PlayerHasQuestSub(EVENT_SAY)) {
+						int i = parse->EventPlayer(EVENT_SAY, this, message, 0);
+						if (i == 0 && !RuleB(Chat, SuppressCommandErrors)) {
+							Message(Chat::Red, "Bot command '%s' not recognized.", message);
+						}
+					}
+					else {
+						if (!RuleB(Chat, SuppressCommandErrors)) {
+							Message(Chat::Red, "Bot command '%s' not recognized.", message);
+						}
 					}
 				}
-				else if (parse->PlayerHasQuestSub(EVENT_SAY)) {
-					int i = parse->EventPlayer(EVENT_SAY, this, message, 0);
-					if (i == 0 && !RuleB(Chat, SuppressCommandErrors)) {
-						Message(Chat::Red, "Bot command '%s' not recognized.", message);
-					}
-				}
-				else {
-					if (!RuleB(Chat, SuppressCommandErrors)) {
-						Message(Chat::Red, "Bot command '%s' not recognized.", message);
-					}
-				}
+			} else {
+				Message(Chat::Red, "Bots are disabled on this server.");
 			}
 			break;
 		}
-#endif
 
 		if (EQ::ProfanityManager::IsCensorshipActive()) {
 			EQ::ProfanityManager::RedactMessage(message);
@@ -1223,20 +1222,15 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 			}
 
 		}
-
-#ifdef BOTS
-	else if (GetTarget() && GetTarget()->IsBot() && !IsInvisible(GetTarget())) {
-		if (DistanceNoZ(m_Position, GetTarget()->GetPosition()) <= RuleI(Range, Say)) {
-			if (GetTarget()->IsEngaged()) {
-				parse->EventBot(EVENT_AGGRO_SAY, GetTarget()->CastToBot(), this, message, language);
-			} else {
-				parse->EventBot(EVENT_SAY, GetTarget()->CastToBot(), this, message, language);
+		else if (GetTarget() && GetTarget()->IsBot() && !IsInvisible(GetTarget())) {
+			if (DistanceNoZ(m_Position, GetTarget()->GetPosition()) <= RuleI(Range, Say)) {
+				if (GetTarget()->IsEngaged()) {
+					parse->EventBot(EVENT_AGGRO_SAY, GetTarget()->CastToBot(), this, message, language);
+				} else {
+					parse->EventBot(EVENT_SAY, GetTarget()->CastToBot(), this, message, language);
+				}
 			}
 		}
-	}
-#endif
-
-
 		break;
 	}
 	case ChatChannel_UCSRelay:
@@ -7618,13 +7612,9 @@ void Client::GarbleMessage(char *message, uint8 variance)
 	int delimiter_count = 0;
 
 	// Don't garble # commands
-	if (message[0] == COMMAND_CHAR)
+	if (message[0] == COMMAND_CHAR || message[0] == BOT_COMMAND_CHAR) {
 		return;
-
-#ifdef BOTS
-	if (message[0] == BOT_COMMAND_CHAR)
-		return;
-#endif
+	}
 
 	for (size_t i = 0; i < strlen(message); i++) {
 		// Client expects hex values inside of a text link body
@@ -10456,8 +10446,8 @@ int Client::CountItem(uint32 item_id)
 		{ EQ::invslot::SHARED_BANK_BEGIN, EQ::invslot::SHARED_BANK_END },
 		{ EQ::invbag::SHARED_BANK_BAGS_BEGIN, EQ::invbag::SHARED_BANK_BAGS_END },
 	};
-	const size_t size = sizeof(slots) / sizeof(slots[0]);
-	for (int slot_index = 0; slot_index < size; ++slot_index) {
+	const size_t slot_index_count = sizeof(slots) / sizeof(slots[0]);
+	for (int slot_index = 0; slot_index < slot_index_count; ++slot_index) {
 		for (int slot_id = slots[slot_index][0]; slot_id <= slots[slot_index][1]; ++slot_id) {
 			item = GetInv().GetItem(slot_id);
 			if (item && item->GetID() == item_id) {
@@ -10467,6 +10457,45 @@ int Client::CountItem(uint32 item_id)
 	}
 
 	return quantity;
+}
+
+void Client::ResetItemCooldown(uint32 item_id)
+{
+	EQ::ItemInstance *item = nullptr;
+	const EQ::ItemData* item_d = database.GetItem(item_id);
+	if (!item_d) {
+		return;
+	}
+	int recast_type = item_d->RecastType;
+	bool found_item = false; 
+	
+	static const int16 slots[][2] = {
+		{ EQ::invslot::POSSESSIONS_BEGIN, EQ::invslot::POSSESSIONS_END },
+		{ EQ::invbag::GENERAL_BAGS_BEGIN, EQ::invbag::GENERAL_BAGS_END },
+		{ EQ::invbag::CURSOR_BAG_BEGIN, EQ::invbag::CURSOR_BAG_END},
+		{ EQ::invslot::BANK_BEGIN, EQ::invslot::BANK_END },
+		{ EQ::invbag::BANK_BAGS_BEGIN, EQ::invbag::BANK_BAGS_END },
+		{ EQ::invslot::SHARED_BANK_BEGIN, EQ::invslot::SHARED_BANK_END },
+		{ EQ::invbag::SHARED_BANK_BAGS_BEGIN, EQ::invbag::SHARED_BANK_BAGS_END },
+	};
+	const size_t slot_index_count = sizeof(slots) / sizeof(slots[0]);
+	for (int slot_index = 0; slot_index < slot_index_count; ++slot_index) {
+		for (int slot_id = slots[slot_index][0]; slot_id <= slots[slot_index][1]; ++slot_id) {
+			item = GetInv().GetItem(slot_id);
+			if (item) {
+				item_d = item->GetItem();
+				if (item_d && item->GetID() == item_id || (item_d->RecastType != RECAST_TYPE_UNLINKED_ITEM && item_d->RecastType == recast_type)) {	
+					item->SetRecastTimestamp(0);
+					DeleteItemRecastTimer(item_d->ID);
+					SendItemPacket(slot_id, item, ItemPacketCharmUpdate);
+					found_item = true;
+				}
+			}
+		}
+	}
+	if (!found_item) {
+		DeleteItemRecastTimer(item_id); //We didn't find the item but we still want to remove the timer
+	}
 }
 
 void Client::RemoveItem(uint32 item_id, uint32 quantity)
@@ -10482,8 +10511,8 @@ void Client::RemoveItem(uint32 item_id, uint32 quantity)
 		{ EQ::invbag::SHARED_BANK_BAGS_BEGIN, EQ::invbag::SHARED_BANK_BAGS_END },
 	};
 	int16 removed_count = 0;
-	const size_t size = sizeof(slots) / sizeof(slots[0]);
-	for (int slot_index = 0; slot_index < size; ++slot_index) {
+	const size_t slot_index_count = sizeof(slots) / sizeof(slots[0]);
+	for (int slot_index = 0; slot_index < slot_index_count; ++slot_index) {
 		for (int slot_id = slots[slot_index][0]; slot_id <= slots[slot_index][1]; ++slot_id) {
 			if (removed_count == quantity) {
 				break;
@@ -11612,14 +11641,12 @@ std::vector<Mob*> Client::GetApplySpellList(
 						l.push_back(m->GetPet());
 					}
 
-#ifdef BOTS
 					if (allow_bots) {
 						const auto& sbl = entity_list.GetBotListByCharacterID(m->CharacterID());
 						for (const auto& b : sbl) {
 							l.push_back(b);
 						}
 					}
-#endif
 				}
 			}
 		}
@@ -11635,14 +11662,12 @@ std::vector<Mob*> Client::GetApplySpellList(
 						l.push_back(m->GetPet());
 					}
 
-#ifdef BOTS
 					if (allow_bots) {
 						const auto& sbl = entity_list.GetBotListByCharacterID(m->CastToClient()->CharacterID());
 						for (const auto& b : sbl) {
 							l.push_back(b);
 						}
 					}
-#endif
 				}
 			}
 		}
@@ -11653,14 +11678,12 @@ std::vector<Mob*> Client::GetApplySpellList(
 			l.push_back(GetPet());
 		}
 
-#ifdef BOTS
 		if (allow_bots) {
 			const auto& sbl = entity_list.GetBotListByCharacterID(CharacterID());
 			for (const auto& b : sbl) {
 				l.push_back(b);
 			}
 		}
-#endif
 	}
 
 	return l;

@@ -327,7 +327,7 @@ public:
 	 * @param log_category
 	 * @param message
 	 */
-	static void GMSayHookCallBackProcess(uint16 log_category, std::string message)
+	static void GMSayHookCallBackProcess(uint16 log_category, const char *func, std::string message)
 	{
 		// we don't want to loop up with chat messages
 		if (message.find("OP_SpecialMesg") != std::string::npos) {
@@ -372,7 +372,7 @@ public:
 				0,
 				AccountStatus::QuestTroupe,
 				LogSys.GetGMSayColorFromCategory(log_category),
-				message.c_str()
+				fmt::format("[{}] [{}] {}", Logs::LogCategoryName[log_category], func, message).c_str()
 			);
 		}
 	}

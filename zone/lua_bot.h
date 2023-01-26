@@ -1,4 +1,3 @@
-#ifdef BOTS
 #ifndef EQEMU_LUA_BOT_H
 #define EQEMU_LUA_BOT_H
 #ifdef LUA_EQEMU
@@ -120,6 +119,5 @@ public:
 	void Fling(float value, float target_x, float target_y, float target_z, bool ignore_los, bool clip_through_walls);
 };
 
-#endif
 #endif
 #endif
