@@ -8128,7 +8128,7 @@ bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, fl
 				//added raid check
 				Raid* raid = entity_list.GetRaidByBotName(caster->GetName());
 				uint32 gid = raid->GetGroup(caster->GetName());
-				if (gid < 12) {
+				if (gid < MAX_RAID_GROUPS) {
 					std::vector<RaidMember> raid_group_members = raid->GetRaidGroupMembers(gid);
 					for (std::vector<RaidMember>::iterator iter = raid_group_members.begin(); iter != raid_group_members.end(); ++iter) {
 						//for (auto& iter : raid->GetRaidGroupMembers(g)) {
@@ -8215,7 +8215,7 @@ bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, fl
 						}
 					}
 				}
-				else if (gid < 12)
+				else if (gid < MAX_RAID_GROUPS)
 				{
 					std::vector<RaidMember> raid_group_members = raid->GetRaidGroupMembers(gid);
 					for (std::vector<RaidMember>::iterator iter = raid_group_members.begin(); iter != raid_group_members.end(); ++iter) {
@@ -8264,7 +8264,7 @@ bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, fl
 		if (caster->IsRaidGrouped()) {
 			Raid* raid = entity_list.GetRaidByBotName(caster->GetName());
 			uint32 g = raid->GetGroup(caster->GetName());
-			if (g < 12) {
+			if (g < MAX_RAID_GROUPS) {
 				std::vector<RaidMember> raid_group_members = raid->GetRaidGroupMembers(g);
 				for (std::vector<RaidMember>::iterator iter = raid_group_members.begin(); iter != raid_group_members.end(); ++iter) {
 					if (iter->member) {
@@ -8310,7 +8310,7 @@ bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, fl
 		{
 			Raid* raid = entity_list.GetRaidByBotName(caster->GetName());
 			uint32 gid = raid->GetGroup(caster->GetName());
-			if (gid < 12) {
+			if (gid < MAX_RAID_GROUPS){
 				std::vector<RaidMember> raid_group_members = raid->GetRaidGroupMembers(gid);
 				for (std::vector<RaidMember>::iterator iter = raid_group_members.begin(); iter != raid_group_members.end(); ++iter) {
 					if (iter->member && caster->GetNeedsCured(iter->member)) {
@@ -8348,7 +8348,7 @@ bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, fl
 		{
 			Raid* raid = entity_list.GetRaidByBotName(caster->GetName());
 			uint32 gid = raid->GetGroup(caster->GetName());
-			if (gid < 12) {
+			if (gid < MAX_RAID_GROUPS) {
 				std::vector<RaidMember> raid_group_members = raid->GetRaidGroupMembers(gid);
 				for (std::vector<RaidMember>::iterator iter = raid_group_members.begin(); iter != raid_group_members.end(); ++iter) {
 					if (iter->member && caster->GetNeedsHateRedux(iter->member)) {
@@ -8369,7 +8369,7 @@ bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, fl
 		if (caster->IsRaidGrouped()) {
 			Raid* raid = entity_list.GetRaidByBotName(caster->GetName());
 			uint32 g = raid->GetGroup(caster->GetName());
-			if (g < 12) {
+			if (g < MAX_RAID_GROUPS) {
 				std::vector<RaidMember> raid_group_members = raid->GetRaidGroupMembers(g);
 				for (std::vector<RaidMember>::iterator iter = raid_group_members.begin(); iter != raid_group_members.end(); ++iter) {
 					if (iter->member) {
@@ -9966,7 +9966,7 @@ void Bot::ProcessRaidInvite(Client* invitee, Client* invitor) {
 			raid->SendBulkRaid(invitee);
 			raid->SendMakeLeaderPacketTo(raid->leadername, invitee); //added to resolve Basic's raid window not showing a raid leader
 			uint32 raid_free_group_id = raid->GetFreeGroup();
-			for (int x = 0; x < 6; x++) {
+			for (int x = 0; x < MAX_GROUP_MEMBERS; x++) {
 				if (g_invitee->members[x]) {
 					Client* c = nullptr;
 					Bot* b = nullptr;
@@ -10034,7 +10034,7 @@ void Bot::ProcessRaidInvite(Client* invitee, Client* invitor) {
 		if (g_invitor)
 		{
 			//Second, add the invitor group as group 0
-			for (int x = 0; x < 6; x++) {
+			for (int x = 0; x < MAX_GROUP_MEMBERS; x++) {
 				if (g_invitor->members[x]) {
 					Client* c = nullptr;
 					Bot* b = nullptr;
@@ -10085,7 +10085,7 @@ void Bot::ProcessRaidInvite(Client* invitee, Client* invitor) {
 			{
 				//Third, add the invitee group
 				uint32 raid_free_group_id = raid->GetFreeGroup();
-				for (int x = 0; x < 6; x++) {
+				for (int x = 0; x < MAX_GROUP_MEMBERS; x++) {
 					if (g_invitee->members[x]) {
 						Client* c = nullptr;
 						Bot* b = nullptr;
@@ -10159,7 +10159,7 @@ void Bot::ProcessRaidInvite(Client* invitee, Client* invitor) {
 			{
 				//Third, add the invitee group
 				uint32 raid_free_group_id = raid->GetFreeGroup();
-				for (int x = 0; x < 6; x++) {
+				for (int x = 0; x < MAX_GROUP_MEMBERS; x++) {
 					if (g_invitee->members[x]) {
 						Client* c = nullptr;
 						Bot* b = nullptr;
@@ -10235,7 +10235,7 @@ void Bot::ProcessRaidInvite(Bot* invitee, Client* invitor) {
 		{
 			//As there is already a raid, just add this group
 			uint32 raid_free_group_id = raid->GetFreeGroup();
-			for (int x = 0; x < 6; x++) {
+			for (int x = 0; x < MAX_GROUP_MEMBERS; x++) {
 				if (g_invitee->members[x]) {
 					Client* c = nullptr;
 					Bot* b = nullptr;
@@ -10307,7 +10307,7 @@ void Bot::ProcessRaidInvite(Bot* invitee, Client* invitor) {
 		if (g_invitor)
 		{
 			//Second, add the invitor group as group 0
-			for (int x = 0; x < 6; x++) {
+			for (int x = 0; x < MAX_GROUP_MEMBERS; x++) {
 				if (g_invitor->members[x]) {
 					Client* c = nullptr;
 					Bot* b = nullptr;
@@ -10359,7 +10359,7 @@ void Bot::ProcessRaidInvite(Bot* invitee, Client* invitor) {
 			{
 				//Third, add the invitee group
 				uint32 raid_free_group_id = raid->GetFreeGroup();
-				for (int x = 0; x < 6; x++) {
+				for (int x = 0; x < MAX_GROUP_MEMBERS; x++) {
 					if (g_invitee->members[x]) {
 						Client* c = nullptr;
 						Bot* b = nullptr;
@@ -10423,7 +10423,7 @@ void Bot::ProcessRaidInvite(Bot* invitee, Client* invitor) {
 			{
 				//Third, add the invitee group
 				uint32 raid_free_group_id = raid->GetFreeGroup();
-				for (int x = 0; x < 6; x++) {
+				for (int x = 0; x < MAX_GROUP_MEMBERS; x++) {
 					if (g_invitee->members[x]) {
 						Client* c = nullptr;
 						Bot* b = nullptr;

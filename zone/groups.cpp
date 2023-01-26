@@ -1140,12 +1140,12 @@ void Group::TeleportGroup(Mob* sender, uint32 zoneID, uint16 instance_id, float 
 }
 
 bool Group::LearnMembers() {
-	//std::string query = StringFormat("SELECT name FROM group_id WHERE groupid = %lu", (unsigned long)GetID());
 	std::string query = StringFormat("SELECT name FROM group_id "
 		"WHERE group_id.groupid = %lu AND group_id.name NOT "
 		"IN(SELECT group_leaders.leadername FROM group_leaders WHERE gid = %lu)"
-		, (unsigned long)GetID()
-		, (unsigned long)GetID());
+		, GetID()
+		, GetID()
+	);
 
 	auto results = database.QueryDatabase(query);
 	if (!results.Success())
@@ -1171,8 +1171,10 @@ bool Group::LearnMembers() {
 
 		memberIndex++;
 	}
-	// for leader only [0] /Mitch
-	query = StringFormat("SELECT leadername FROM group_leaders WHERE group_leaders.gid = %lu", (unsigned long)GetID());
+	query = StringFormat("SELECT leadername FROM group_leaders "
+		"WHERE group_leaders.gid = %lu",
+		GetID()
+	);
 	auto results2 = database.QueryDatabase(query);
 	if (!results2.Success())
 		return false;
@@ -1205,11 +1207,10 @@ void Group::VerifyGroup() {
 	// Only want to do this when the database Name does not match the array
 	// Could this be done from the LearnGroup method?
 	// reset the members and membername array for this group
-	// Mitch
+	
 	for (int i = 0; i < MAX_GROUP_MEMBERS; i++) {
 		members[i] = nullptr; 
 		memset(membername[i],'\0',64);
-		//membername[i][0] == '\0');
 	}
 	// repopulate the membername array from the database to ensure the local zone instance has accurate information
 

@@ -2212,40 +2212,43 @@ Raid* EntityList::GetRaidByClient(Client* client)
 }
 Raid* EntityList::GetRaidByBotName(const char* name)
 {
+	std::list<RaidMember> rm;
+	auto GetMembersWithNames = [&rm](Raid* r) -> std::list<RaidMember> {
+		for (auto m : r->members) {
+			if (strlen(m.membername) > 0)
+				rm.push_back(m);
+		}
+		return rm;
+	};
 
-	std::list<Raid*>::iterator iterator;
-	iterator = raid_list.begin();
-
-	while (iterator != raid_list.end()) {
-		for (auto& member : (*iterator)->members) {
-			if (member.membername) {
-				if (strcmp(member.membername, name) == 0) {
-					//client->p_raid_instance = *iterator;
-					return *iterator;
-				}
+	for (const auto& r : raid_list) {
+		for (const auto& m : GetMembersWithNames(r)) {
+			if (strcmp(m.membername, name) == 0) {
+				return r;
 			}
 		}
-
-		++iterator;
 	}
-
 	return nullptr;
 }
 
 Raid* EntityList::GetRaidByBot(Bot* bot)
 {
-
-	std::list<Raid*>::iterator iterator;
-	iterator = raid_list.begin();
-
-	while (iterator != raid_list.end()) {
-		for (auto& member : (*iterator)->members) {
-			if (member.member && member.member->CastToBot() == bot) {
-				bot->p_raid_instance = *iterator;
-				return *iterator;
+	std::list<RaidMember> rm;
+	auto GetMembersWhoAreBots = [&rm](Raid* r) -> std::list<RaidMember> {
+		for (auto m : r->members) {
+			if (m.IsBot) {
+				rm.push_back(m);
 			}
 		}
-		++iterator;
+		return rm;
+	};
+
+	for (const auto& r : raid_list) {
+		for (const auto& m : GetMembersWhoAreBots(r)) {
+			if (m.member->CastToBot() == bot) {
+				return r;
+			}
+		}
 	}
 	return nullptr;
 }

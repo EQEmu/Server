@@ -19,29 +19,5 @@
 #ifndef BOT_RAID_H
 #define BOT_RAID_H
 
-#ifdef BOTS
-
-#include "bot_structs.h"
-#include "mob.h"
-#include "client.h"
-#include "pets.h"
-#include "heal_rotation.h"
-#include "groups.h"
-#include "corpse.h"
-#include "zonedb.h"
-#include "zone_store.h"
-#include "string_ids.h"
-#include "../common/misc_functions.h"
-#include "../common/global_define.h"
-#include "guild_mgr.h"
-#include "worldserver.h"
-
-#include <sstream>
-
-extern WorldServer worldserver;
-
-//void Bot::PetAIProcess_Raid();
-
-#endif // BOTS
 
 #endif // BOT_RAID_H
