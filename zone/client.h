@@ -966,6 +966,7 @@ public:
 	void SendCursorBuffer();
 	void DeleteItemInInventory(int16 slot_id, int16 quantity = 0, bool client_update = false, bool update_db = true);
 	int CountItem(uint32 item_id);
+	void ResetItemCooldown(uint32 item_id);
 	void RemoveItem(uint32 item_id, uint32 quantity = 1);
 	bool SwapItem(MoveItem_Struct* move_in);
 	void SwapItemResync(MoveItem_Struct* move_slots);
@@ -1516,8 +1517,9 @@ public:
 
 	void SendReloadCommandMessages();
 
-	void SendItemRecastTimer(int32 recast_type, uint32 recast_delay = 0);
+	void SendItemRecastTimer(int32 recast_type, uint32 recast_delay = 0, bool in_ignore_casting_requirement = false);
 	void SetItemRecastTimer(int32 spell_id, uint32 inventory_slot);
+	void DeleteItemRecastTimer(uint32 item_id);
 	bool HasItemRecastTimer(int32 spell_id, uint32 inventory_slot);
 
 	inline bool AggroMeterAvailable() const { return ((m_ClientVersionBit & EQ::versions::maskRoF2AndLater)) && RuleB(Character, EnableAggroMeter); } // RoF untested

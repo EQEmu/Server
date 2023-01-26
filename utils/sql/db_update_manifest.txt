@@ -471,6 +471,7 @@
 9215|2023_01_08_zone_max_level.sql|SHOW COLUMNS FROM `zone` LIKE 'max_level'|empty|
 9216|2023_01_15_merc_data.sql|SHOW TABLES LIKE 'mercs'|empty|
 9217|2023_01_15_chatchannel_reserved_names.sql|SHOW TABLES LIKE 'chatchannel_reserved_names'|empty|
+9218|2023_01_24_item_recast.sql|show columns from character_item_recast like '%recast_type%'|contains|smallint
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not

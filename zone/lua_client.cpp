@@ -3014,6 +3014,12 @@ void Lua_Client::CampAllBots(uint8 class_id)
 	self->CampAllBots(class_id);
 }
 
+void Lua_Client::ResetItemCooldown(uint32 item_id)
+{
+	Lua_Safe_Call_Void();
+	self->ResetItemCooldown(item_id);
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 	.def(luabind::constructor<>())
@@ -3373,6 +3379,7 @@ luabind::scope lua_register_client() {
 	.def("ResetCastbarCooldownBySlot", (void(Lua_Client::*)(int))&Lua_Client::ResetCastbarCooldownBySlot)
 	.def("ResetCastbarCooldownBySpellID", (void(Lua_Client::*)(uint32))&Lua_Client::ResetCastbarCooldownBySpellID)
 	.def("ResetDisciplineTimer", (void(Lua_Client::*)(uint32))&Lua_Client::ResetDisciplineTimer)
+	.def("ResetItemCooldown", (void(Lua_Client::*)(uint32))&Lua_Client::ResetItemCooldown)
 	.def("ResetTrade", (void(Lua_Client::*)(void))&Lua_Client::ResetTrade)
 	.def("RewardFaction", (void(Lua_Client::*)(int,int))&Lua_Client::RewardFaction)
 	.def("Save", (void(Lua_Client::*)(int))&Lua_Client::Save)

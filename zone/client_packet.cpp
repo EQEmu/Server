@@ -8927,9 +8927,12 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 				{
 					if (item->RecastDelay > 0)
 					{
-						if (!GetPTimers().Expired(&database, (pTimerItemStart + item->RecastType), false)) {
+						if (item->RecastType != RECAST_TYPE_UNLINKED_ITEM && !GetPTimers().Expired(&database, (pTimerItemStart + item->RecastType), false)) {
 							SendItemRecastTimer(item->RecastType); //Problem: When you loot corpse, recast display is not present. This causes it to display again. Could not get to display when sending from looting.
-							MessageString(Chat::Red, SPELL_RECAST);
+							SendSpellBarEnable(item->Click.Effect);
+							LogSpells("Casting of [{}] canceled: item spell reuse timer not expired", spell_id);
+							return;
+						} else if (item->RecastType == RECAST_TYPE_UNLINKED_ITEM  && !GetPTimers().Expired(&database, (pTimerNegativeItemReuse * item->ID), false)) {
 							SendSpellBarEnable(item->Click.Effect);
 							LogSpells("Casting of [{}] canceled: item spell reuse timer not expired", spell_id);
 							return;
@@ -8972,10 +8975,15 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 				{
 					if (augitem->RecastDelay > 0)
 					{
-						if (!GetPTimers().Expired(&database, (pTimerItemStart + augitem->RecastType), false)) {
+						if (augitem->RecastType != RECAST_TYPE_UNLINKED_ITEM && !GetPTimers().Expired(&database, (pTimerItemStart + augitem->RecastType), false)) {
 							LogSpells("Casting of [{}] canceled: item spell reuse timer from augment not expired", spell_id);
 							MessageString(Chat::Red, SPELL_RECAST);
 							SendSpellBarEnable(augitem->Click.Effect);
+							return;
+						} else if (augitem->RecastType == RECAST_TYPE_UNLINKED_ITEM  && !GetPTimers().Expired(&database, (pTimerNegativeItemReuse * augitem->ID), false)) {
+							MessageString(Chat::Red, SPELL_RECAST);
+							SendSpellBarEnable(augitem->Click.Effect);
+							LogSpells("Casting of [{}] canceled: item spell reuse timer not expired", spell_id);
 							return;
 						}
 					}
