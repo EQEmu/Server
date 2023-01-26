@@ -5080,8 +5080,7 @@ void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client*
 				return_iterator.from_bot_slot
 			);
 
-			parse->EventBot(EVENT_EQUIP_ITEM_BOT, this, nullptr, export_string , return_iterator.return_item_instance->GetID());
-
+			parse->EventBot(EVENT_UNEQUIP_ITEM_BOT, this, nullptr, export_string , return_iterator.return_item_instance->GetID());
 			if (return_instance) {
 				EQ::SayLinkEngine linker;
 				linker.SetLinkType(EQ::saylink::SayLinkItemInst);

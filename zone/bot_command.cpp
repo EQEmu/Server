@@ -9407,6 +9407,14 @@ void bot_subcommand_inventory_remove(Client *c, const Seperator *sep)
 				slot_id
 			)
 		);
+
+		std::string export_string = fmt::format(
+			"{} {}",
+			inst->IsStackable() ? inst->GetCharges() : 1,
+			slot_id
+		);
+
+		parse->EventBot(EVENT_UNEQUIP_ITEM_BOT, my_bot, nullptr, export_string, inst->GetID());
 	}
 }
 
