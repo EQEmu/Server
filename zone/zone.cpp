@@ -2984,6 +2984,12 @@ std::string Zone::GetAAName(int aa_id)
 		const auto& a = aa_abilities.find(current_aa_id);
 		if (a != aa_abilities.end()) {
 			return a->second.get()->name;
+		} else {
+			for (const auto& b : aa_abilities) {
+				if (b.second.get()->first->id == aa_id) {
+					return b.second.get()->name;
+				}
+			}
 		}
 	}
 

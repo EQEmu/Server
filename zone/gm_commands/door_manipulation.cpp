@@ -187,7 +187,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 			std::vector<std::string> set_size_options_negative;
 
 			std::vector<std::string> xyz_values = {
-				".1", "1", "5", "10", "25", "50", "100"
+				"0.1", "1", "5", "10", "25", "50", "100"
 			};
 
 			// build positive options x/y/z

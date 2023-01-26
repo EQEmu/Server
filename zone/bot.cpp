@@ -4876,6 +4876,10 @@ void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client*
 					continue;
 				}
 
+				if (trade_instance->GetItem()->ItemType == EQ::item::ItemTypeAugmentation) {
+					continue;
+				}
+
 				//if (stage_loop == stageStackable) {
 				//	// TODO: implement
 				//	continue;

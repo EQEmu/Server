@@ -3063,16 +3063,30 @@ void Mob::SetAppearenceEffects(int32 slot, int32 value)
 	}
 }
 
-void Mob::GetAppearenceEffects()
+void Mob::ListAppearanceEffects(Client* c)
 {
-	//used with GM command
 	if (!appearance_effects_id[0]) {
-		Message(Chat::Red, "No Appearance Effects exist on this mob");
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"{} {} no appearance effects.",
+				c->GetTargetDescription(this, TargetDescriptionType::UCYou),
+				c == this ? "have" : "has"
+			).c_str()
+		);
 		return;
 	}
 
 	for (int i = 0; i < MAX_APPEARANCE_EFFECTS; i++) {
-		Message(Chat::Red, "ID: %i :: App Effect ID %i :: Slot %i", i, appearance_effects_id[i], appearance_effects_slot[i]);
+		c->Message(
+			Chat::Red,
+			fmt::format(
+				"Effect {} | ID: {} Slot: {}",
+				i,
+				appearance_effects_id[i],
+				appearance_effects_slot[i]
+			).c_str()
+		);
 	}
 }
 

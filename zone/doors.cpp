@@ -802,20 +802,75 @@ void Doors::CreateDatabaseEntry()
 		return;
 	}
 
-	content_db.InsertDoor(
-		GetDoorDBID(),
-		GetDoorID(),
-		GetDoorName(),
-		m_position,
-		GetOpenType(),
-		static_cast<uint16>(GetGuildID()),
-		GetLockpick(),
-		GetKeyItem(),
-		static_cast<uint8>(GetDoorParam()),
-		static_cast<uint8>(GetInvertState()),
-		GetIncline(),
-		GetSize()
+	const auto& l = DoorsRepository::GetWhere(
+		content_db,
+		fmt::format(
+			"zone = '{}' AND doorid = {}",
+			zone->GetShortName(),
+			GetDoorID()
+		)
 	);
+	if (!l.empty()) {
+		auto e = l[0];
+
+		e.name         = GetDoorName();
+		e.pos_x        = GetX();
+		e.pos_y        = GetY();
+		e.pos_z        = GetZ();
+		e.heading      = GetHeading();
+		e.opentype     = GetOpenType();
+		e.guild        = static_cast<uint16>(GetGuildID());
+		e.lockpick     = GetLockpick();
+		e.keyitem      = GetKeyItem();
+		e.door_param   = static_cast<uint8>(GetDoorParam());
+		e.invert_state = static_cast<uint8>(GetInvertState());
+		e.incline      = GetIncline();
+		e.size         = GetSize();
+
+		auto updated = DoorsRepository::UpdateOne(content_db, e);
+		if (!updated) {
+			LogError(
+				"Failed to update door in Zone [{}] Version [{}] Database ID [{}] ID [{}]",
+				zone->GetShortName(),
+				zone->GetInstanceVersion(),
+				GetDoorDBID(),
+				GetDoorID()
+			);
+		}
+
+		return;
+	}
+	
+	auto e = DoorsRepository::NewEntity();
+
+	e.id           = GetDoorDBID();
+	e.doorid       = GetDoorID();
+	e.zone         = zone->GetShortName();
+	e.version      = zone->GetInstanceVersion();
+	e.name         = GetDoorName();
+	e.pos_x        = GetX();
+	e.pos_y        = GetY();
+	e.pos_z        = GetZ();
+	e.heading      = GetHeading();
+	e.opentype     = GetOpenType();
+	e.guild        = static_cast<uint16>(GetGuildID());
+	e.lockpick     = GetLockpick();
+	e.keyitem      = GetKeyItem();
+	e.door_param   = static_cast<uint8>(GetDoorParam());
+	e.invert_state = static_cast<uint8>(GetInvertState());
+	e.incline      = GetIncline();
+	e.size         = GetSize();
+
+	const auto& n = DoorsRepository::InsertOne(content_db, e);
+	if (!n.id) {
+		LogError(
+			"Failed to create door in Zone [{}] Version [{}] Database ID [{}] ID [{}]",
+			zone->GetShortName(),
+			zone->GetInstanceVersion(),
+			GetDoorDBID(),
+			GetDoorID()
+		);
+	}
 }
 
 float Doors::GetX()
@@ -831,4 +886,9 @@ float Doors::GetY()
 float Doors::GetZ()
 {
 	return m_position.z;
+}
+
+float Doors::GetHeading()
+{
+	return m_position.w;
 }

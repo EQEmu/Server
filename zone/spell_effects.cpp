@@ -2901,14 +2901,16 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				since effect can potentially kill caster.
 			*/
 			case SE_Health_Transfer: {
-				effect_value = spells[spell_id].limit_value[i];
-				int64 amt = std::abs(caster->GetMaxHP() * effect_value / 1000);
+				if (caster) {
+					effect_value = spells[spell_id].limit_value[i];
+					int64 amt = std::abs(caster->GetMaxHP() * effect_value / 1000);
 
-				if (effect_value < 0) {
-					Damage(caster, amt, spell_id, spell.skill, false, buffslot, false);
-				}
-				else {
-					HealDamage(amt, caster);
+					if (effect_value < 0) {
+						Damage(caster, amt, spell_id, spell.skill, false, buffslot, false);
+					}
+					else {
+						HealDamage(amt, caster);
+					}
 				}
 				break;
 			}

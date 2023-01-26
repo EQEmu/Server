@@ -143,6 +143,10 @@ bool ServerEventScheduler::ValidateDatabaseConnection()
 // this helps inform decisions to tell all zones to reload their events
 bool ServerEventScheduler::CheckIfEventsChanged()
 {
+	if (!m_database) {
+		return false;
+	}
+
 	auto events = ServerScheduledEventsRepository::GetWhere(*m_database, "deleted_at is null");
 
 	// first check if the size changed, if it did this is the easiest step
