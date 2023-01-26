@@ -5374,40 +5374,54 @@ void bot_subcommand_bot_clone(Client *c, const Seperator *sep)
 
 void bot_command_view_combos(Client *c, const Seperator *sep)
 {
-	const std::string class_substrs[17] = { "",
-		"%u (WAR)", "%u (CLR)", "%u (PAL)", "%u (RNG)",
-		"%u (SHD)", "%u (DRU)", "%u (MNK)", "%u (BRD)",
-		"%u (ROG)", "%u (SHM)", "%u (NEC)", "%u (WIZ)",
-		"%u (MAG)", "%u (ENC)", "%u (BST)", "%u (BER)"
+	const std::string class_substrs[17] = {
+		"",
+		"WAR", "CLR", "PAL", "RNG",
+		"SHD", "DRU", "MNK", "BRD",
+		"ROG", "SHM", "NEC", "WIZ",
+		"MAG", "ENC", "BST", "BER"
 	};
 
-	const std::string race_substrs[17] = { "",
-		"%u (HUM)", "%u (BAR)", "%u (ERU)", "%u (ELF)",
-		"%u (HIE)", "%u (DEF)", "%u (HEF)", "%u (DWF)",
-		"%u (TRL)", "%u (OGR)", "%u (HFL)", "%u (GNM)",
-		"%u (IKS)", "%u (VAH)", "%u (FRG)", "%u (DRK)"
+	const std::string race_substrs[17] = {
+		"",
+		"HUM", "BAR", "ERU", "ELF",
+		"HIE", "DEF", "HEF", "DWF",
+		"TRL", "OGR", "HFL", "GNM",
+		"IKS", "VAH", "FRG", "DRK"
 	};
 
-	const uint16 race_values[17] = { 0,
-		HUMAN, BARBARIAN, ERUDITE, WOOD_ELF,
-		HIGH_ELF, DARK_ELF, HALF_ELF, DWARF,
-		TROLL, OGRE, HALFLING, GNOME,
-		IKSAR, VAHSHIR, FROGLOK, DRAKKIN
+	const uint16 race_values[17] = {
+		RACE_DOUG_0,
+		RACE_HUMAN_1, RACE_BARBARIAN_2, RACE_ERUDITE_3, RACE_WOOD_ELF_4,
+		RACE_HIGH_ELF_5, RACE_DARK_ELF_6, RACE_HALF_ELF_7, RACE_DWARF_8,
+		RACE_TROLL_9, RACE_OGRE_10, RACE_HALFLING_11, RACE_GNOME_12,
+		RACE_IKSAR_128, RACE_VAH_SHIR_130, RACE_FROGLOK_330, RACE_DRAKKIN_522
 	};
-	if (helper_command_alias_fail(c, "bot_command_view_combos", sep->arg[0], "viewcombos"))
+
+	if (helper_command_alias_fail(c, "bot_command_view_combos", sep->arg[0], "viewcombos")) {
 		return;
+	}
+
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		std::string window_title = "Bot Races";
 		std::string window_text;
 		std::string message_separator = " ";
-		c->Message(Chat::White, "Usage: %s [bot_race]", sep->arg[0]);
-		window_text.append("<c \"#FFFFFF\">Races:<c \"#FFFF\">");
+		c->Message(Chat::White, fmt::format("Usage: {} [Race]", sep->arg[0]).c_str());
+
+		window_text.append("<c \"#FFFF\">");
+
 		for (int race_id = 0; race_id <= 15; ++race_id) {
 			window_text.append(message_separator);
-			window_text.append(StringFormat(race_substrs[race_id + 1].c_str(), race_values[race_id + 1]));
+			window_text.append(
+				fmt::format(
+					"{} ({})",
+					race_substrs[race_id + 1],
+					race_values[race_id + 1]
+				)
+			);
+
 			message_separator = ", ";
 		}
-		c->SendPopupToClient(window_title.c_str(), window_text.c_str());
+		c->SendPopupToClient("Bot Races", window_text.c_str());
 		return;
 	}
 
@@ -5415,53 +5429,92 @@ void bot_command_view_combos(Client *c, const Seperator *sep)
 		c->Message(Chat::White, "Invalid Race!");
 		return;
 	}
-	uint16 bot_race = atoi(sep->arg[1]);
-	auto classes_bitmask = database.botdb.GetRaceClassBitmask(bot_race);
-	auto race_name = GetRaceIDName(bot_race);
-	std::string window_title = "Bot Classes";
+
+	const uint16 bot_race = static_cast<uint16>(std::stoul(sep->arg[1]));
+	const std::string race_name = GetRaceIDName(bot_race);
+
+	if (!Mob::IsPlayerRace(bot_race)) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"{} ({}) is not a race bots can use.",
+				race_name,
+				bot_race
+			).c_str()
+		);
+		return;
+	}
+
+	const auto classes_bitmask = database.botdb.GetRaceClassBitmask(bot_race);
+
 	std::string window_text;
 	std::string message_separator = " ";
-	c->Message(Chat::White, "%s can be these classes.", race_name);
-	window_text.append("<c \"#FFFFFF\">Classes:<c \"#FFFF\">");
+
+	window_text.append("<c \"#FFFF\">");
+
+	const int object_max = 4;
+	auto object_count = 0;
+
 	for (int class_id = 0; class_id <= 15; ++class_id) {
 		if (classes_bitmask & GetPlayerClassBit(class_id)) {
 			window_text.append(message_separator);
-			window_text.append(StringFormat(class_substrs[class_id].c_str(), class_id));
+
+			if (object_count >= object_max) {
+				window_text.append(DialogueWindow::Break());
+				object_count = 0;
+			}
+
+			window_text.append(
+				fmt::format(
+					"{} ({})",
+					class_substrs[class_id],
+					class_id
+				)
+			);
+
+			++object_count;
 			message_separator = ", ";
 		}
 	}
-	c->SendPopupToClient(window_title.c_str(), window_text.c_str());
-	return;
+
+	c->SendPopupToClient(
+		fmt::format(
+			"Bot Classes for {} ({})",
+			race_name,
+			bot_race
+		).c_str(),
+		window_text.c_str()
+	);
 }
 
 void bot_subcommand_bot_create(Client *c, const Seperator *sep)
 {
 	const std::string class_substrs[17] = {
 		"",
-		"{} (WAR)", "{} (CLR)", "{} (PAL)", "{} (RNG)",
-		"{} (SHD)", "{} (DRU)", "{} (MNK)", "{} (BRD)",
-		"{} (ROG)", "{} (SHM)", "{} (NEC)", "{} (WIZ)",
-		"{} (MAG)", "{} (ENC)", "{} (BST)", "{} (BER)"
+		"WAR", "CLR", "PAL", "RNG",
+		"SHD", "DRU", "MNK", "BRD",
+		"ROG", "SHM", "NEC", "WIZ",
+		"MAG", "ENC", "BST", "BER"
 	};
 
 	const std::string race_substrs[17] = {
 		"",
-		"{} (HUM)", "{} (BAR)", "{} (ERU)", "{} (ELF)",
-		"{} (HIE)", "{} (DEF)", "{} (HEF)", "{} (DWF)",
-		"{} (TRL)", "{} (OGR)", "{} (HFL)", "{} (GNM)",
-		"{} (IKS)", "{} (VAH)", "{} (FRG)", "{} (DRK)"
+		"HUM", "BAR", "ERU", "ELF",
+		"HIE", "DEF", "HEF", "DWF",
+		"TRL", "OGR", "HFL", "GNM",
+		"IKS", "VAH", "FRG", "DRK"
 	};
 
 	const uint16 race_values[17] = {
-		0,
-		HUMAN, BARBARIAN, ERUDITE, WOOD_ELF,
-		HIGH_ELF, DARK_ELF, HALF_ELF, DWARF,
-		TROLL, OGRE, HALFLING, GNOME,
-		IKSAR, VAHSHIR, FROGLOK, DRAKKIN
+		RACE_DOUG_0,
+		RACE_HUMAN_1, RACE_BARBARIAN_2, RACE_ERUDITE_3, RACE_WOOD_ELF_4,
+		RACE_HIGH_ELF_5, RACE_DARK_ELF_6, RACE_HALF_ELF_7, RACE_DWARF_8,
+		RACE_TROLL_9, RACE_OGRE_10, RACE_HALFLING_11, RACE_GNOME_12,
+		RACE_IKSAR_128, RACE_VAH_SHIR_130, RACE_FROGLOK_330, RACE_DRAKKIN_522
 	};
 
 	const std::string gender_substrs[2] = {
-		"{} (M)", "{} (F)",
+		"Male", "Female",
 	};
 
 	if (helper_command_alias_fail(c, "bot_subcommand_bot_create", sep->arg[0], "botcreate")) {
@@ -5472,7 +5525,7 @@ void bot_subcommand_bot_create(Client *c, const Seperator *sep)
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"Usage: {} [bot_name] [bot_class] [bot_race] [bot_gender]",
+				"Usage: {} [Name] [Class] [Race] [Gender]",
 				sep->arg[0]
 			).c_str()
 		);
@@ -5480,22 +5533,27 @@ void bot_subcommand_bot_create(Client *c, const Seperator *sep)
 		std::string window_text;
 		std::string message_separator;
 		int object_count = 0;
-		const int object_max = 5;
+		const int object_max = 4;
 
-		window_text.append("<c \"#FFFFFF\">Classes:<c \"#FFFF\">");
+		window_text.append(
+			fmt::format(
+				"Classes{}<c \"#FFFF\">",
+				DialogueWindow::Break()
+			)
+		);
 
 		message_separator = " ";
-		object_count = 1;
+		object_count = 0;
 		for (int i = 0; i <= 15; ++i) {
 			window_text.append(message_separator);
 
 			if (object_count >= object_max) {
-				window_text.append("<br>");
+				window_text.append(DialogueWindow::Break());
 				object_count = 0;
 			}
 
 			window_text.append(
-				fmt::format("{} {}",
+				fmt::format("{} ({})",
 					class_substrs[i + 1],
 					(i + 1)
 				)
@@ -5505,22 +5563,27 @@ void bot_subcommand_bot_create(Client *c, const Seperator *sep)
 			message_separator = ", ";
 		}
 
-		window_text.append("<br><br>");
+		window_text.append(DialogueWindow::Break(2));
 
-		window_text.append("<c \"#FFFFFF\">Races:<c \"#FFFF\">");
+		window_text.append(
+			fmt::format(
+				"<c \"#FFFFFF\">Races{}<c \"#FFFF\">",
+				DialogueWindow::Break()
+			)
+		);
 
 		message_separator = " ";
-		object_count = 1;
+		object_count = 0;
 		for (int i = 0; i <= 15; ++i) {
 			window_text.append(message_separator);
 
 			if (object_count >= object_max) {
-				window_text.append("<br>");
+				window_text.append(DialogueWindow::Break());
 				object_count = 0;
 			}
 
 			window_text.append(
-				fmt::format("{}, {}",
+				fmt::format("{} ({})",
 					race_substrs[i + 1],
 					race_values[i + 1]
 				)
@@ -5530,16 +5593,21 @@ void bot_subcommand_bot_create(Client *c, const Seperator *sep)
 			message_separator = ", ";
 		}
 
-		window_text.append("<br><br>");
+		window_text.append(DialogueWindow::Break(2));
 
-		window_text.append("<c \"#FFFFFF\">Genders:<c \"#FFFF\">");
+		window_text.append(
+			fmt::format(
+				"<c \"#FFFFFF\">Genders{}<c \"#FFFF\">",
+				DialogueWindow::Break()
+			)
+		);
 
 		message_separator = " ";
 		for (int i = 0; i <= 1; ++i) {
 			window_text.append(message_separator);
 
 			window_text.append(
-				fmt::format("{}, {}",
+				fmt::format("{} ({})",
 					gender_substrs[i],
 					i
 				)
@@ -5548,13 +5616,12 @@ void bot_subcommand_bot_create(Client *c, const Seperator *sep)
 			message_separator = ", ";
 		}
 
-		c->SendPopupToClient("Bot Create Options", window_text.c_str());
+		c->SendPopupToClient("Bot Creation Options", window_text.c_str());
 
 		return;
 	}
 
-	auto arguments = sep->argnum;
-
+	const auto arguments = sep->argnum;
 	if (!arguments || sep->IsNumber(1)) {
 		c->Message(Chat::White, "You must name your bot!");
 		return;
@@ -5581,15 +5648,18 @@ void bot_subcommand_bot_create(Client *c, const Seperator *sep)
 		return;
 	}
 
-	auto bot_gender = 0;
+	auto bot_gender = MALE;
 
 	if (sep->IsNumber(4)) {
 		bot_gender = static_cast<uint8>(std::stoul(sep->arg[4]));
+		if (bot_gender == NEUTER) {
+			bot_gender = MALE;
+		}
 	} else {
 		if (!strcasecmp(sep->arg[4], "m") || !strcasecmp(sep->arg[4], "male")) {
-			bot_gender = 0;
+			bot_gender = MALE;
 		} else if (!strcasecmp(sep->arg[4], "f") || !strcasecmp(sep->arg[4], "female")) {
-			bot_gender = 1;
+			bot_gender = FEMALE;
 		}
 	}
 
