@@ -955,5 +955,25 @@ void handle_bot_payload(
 	std::vector<std::any> *extra_pointers
 );
 
+void handle_bot_equip_item(
+	QuestInterface *parse,
+	lua_State* L,
+	Bot* bot,
+	Mob* init,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+);
+
+void handle_bot_unequip_item(
+	QuestInterface *parse,
+	lua_State* L,
+	Bot* bot,
+	Mob* init,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+);
+
 #endif
 #endif

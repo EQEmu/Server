@@ -156,6 +156,8 @@ const char *LuaEvents[_LargestEventID] = {
 	"event_bot_create",
 	"event_augment_insert_client",
 	"event_augment_remove_client",
+	"event_equip_item_bot",
+	"event_unequip_item_bot",
 };
 
 extern Zone *zone;
@@ -308,6 +310,8 @@ LuaParser::LuaParser() {
 	BotArgumentDispatch[EVENT_TRADE] = handle_bot_trade;
 	BotArgumentDispatch[EVENT_USE_SKILL] = handle_bot_use_skill;
 	BotArgumentDispatch[EVENT_PAYLOAD] = handle_bot_payload;
+	BotArgumentDispatch[EVENT_EQUIP_ITEM_BOT] = handle_bot_equip_item;
+	BotArgumentDispatch[EVENT_UNEQUIP_ITEM_BOT] = handle_bot_equip_item;
 #endif
 
 	L = nullptr;

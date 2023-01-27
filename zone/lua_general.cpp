@@ -4625,7 +4625,9 @@ luabind::scope lua_register_events() {
 			luabind::value("despawn_zone", static_cast<int>(EVENT_DESPAWN_ZONE)),
 			luabind::value("bot_create", static_cast<int>(EVENT_BOT_CREATE)),
 			luabind::value("augment_insert_client", static_cast<int>(EVENT_AUGMENT_INSERT_CLIENT)),
-			luabind::value("augment_remove_client", static_cast<int>(EVENT_AUGMENT_REMOVE_CLIENT))
+			luabind::value("augment_remove_client", static_cast<int>(EVENT_AUGMENT_REMOVE_CLIENT)),
+			luabind::value("equip_item_bot", static_cast<int>(EVENT_EQUIP_ITEM_BOT)),
+			luabind::value("unequip_item_bot", static_cast<int>(EVENT_UNEQUIP_ITEM_BOT))
 		)];
 }
 
