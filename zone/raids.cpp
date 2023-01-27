@@ -186,8 +186,7 @@ void Raid::AddBot(Bot* b, uint32 group, bool rleader, bool groupleader, bool loo
 		b->GetName(), 
 		groupleader, 
 		rleader, 
-		looter
-	);
+		looter);
 	
 	auto results = database.QueryDatabase(query);
 

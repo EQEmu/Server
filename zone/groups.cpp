@@ -234,24 +234,10 @@ bool Group::AddMember(Mob* newmember, const char *NewMemberName, uint32 Characte
 	uint32 i = 0;
 	for (i = 0; i < MAX_GROUP_MEMBERS; ++i)
 	{
-#ifdef BOTSS
-		if (newmember->IsBot() && !newmember->HasGroup() && !strcasecmp(membername[i], NewMemberName)) // Mitch
-		{
-			//Bot::RemoveBotFromGroup(newmember->CastToBot(), members[0]->GetGroup());
-			//Group::DelMember(newmember);
-			memset(membername[i], 0, 64);
-			members[i] = nullptr;
-		}
-		else if (!strcasecmp(membername[i], NewMemberName))
-		{
-			return false;
-		}
-#else
 		if (!strcasecmp(membername[i], NewMemberName))
 		{
 			return false;
 		}
-#endif
 	}
 
 	// Put them in the group
@@ -1142,10 +1128,9 @@ void Group::TeleportGroup(Mob* sender, uint32 zoneID, uint16 instance_id, float 
 bool Group::LearnMembers() {
 	std::string query = StringFormat("SELECT name FROM group_id "
 		"WHERE group_id.groupid = %lu AND group_id.name NOT "
-		"IN(SELECT group_leaders.leadername FROM group_leaders WHERE gid = %lu)"
-		, GetID()
-		, GetID()
-	);
+		"IN(SELECT group_leaders.leadername FROM group_leaders WHERE gid = %lu)",
+		GetID(),
+		GetID());
 
 	auto results = database.QueryDatabase(query);
 	if (!results.Success())
@@ -1173,8 +1158,8 @@ bool Group::LearnMembers() {
 	}
 	query = StringFormat("SELECT leadername FROM group_leaders "
 		"WHERE group_leaders.gid = %lu",
-		GetID()
-	);
+		GetID());
+
 	auto results2 = database.QueryDatabase(query);
 	if (!results2.Success())
 		return false;

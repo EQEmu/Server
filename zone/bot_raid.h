@@ -20,4 +20,24 @@
 #define BOT_RAID_H
 
 
+#include "bot_structs.h"
+#include "mob.h"
+#include "client.h"
+#include "pets.h"
+#include "heal_rotation.h"
+#include "groups.h"
+#include "corpse.h"
+#include "zonedb.h"
+#include "../common/zone_store.h"
+#include "string_ids.h"
+#include "../common/misc_functions.h"
+#include "../common/global_define.h"
+#include "guild_mgr.h"
+#include "worldserver.h"
+#include "raids.h"
+
+#include <sstream>
+
+//void Bot::PetAIProcess_Raid();
+
 #endif // BOT_RAID_H

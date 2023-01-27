@@ -4291,7 +4291,7 @@ void Mob::HealDamage(uint64 amount, Mob* caster, uint16 spell_id)
 						s2,									// %2
 						this->GetCleanName(),				// %3 caster (bot's) target
 						s4,									// %4
-						itoa(acthealed),					// %5 amount healed
+						itoa(acthealed),				// %5 amount healed
 						s6,									// %6
 						caster->GetCleanName(),				// %7 caster (bot's) name
 						s8,									// %8
@@ -4300,7 +4300,7 @@ void Mob::HealDamage(uint64 amount, Mob* caster, uint16 spell_id)
 				}
 
 				// message to target
-				if ((IsClient() && caster != this)) {
+				if (IsClient() && caster != this) {
 					if (CastToClient()->ClientVersionBit() & EQ::versions::maskSoFAndLater)
 						FilteredMessageString(caster, Chat::NonMelee, FilterHealOverTime,
 							HOT_HEALED_OTHER, caster->GetCleanName(),
@@ -4319,6 +4319,10 @@ void Mob::HealDamage(uint64 amount, Mob* caster, uint16 spell_id)
 						YOU_HEAL, GetCleanName(), itoa(acthealed));
 			}
 		}
+		else if (CastToClient()->GetFilter(FilterHealOverTime) != (FilterShowSelfOnly || FilterHide)) {
+			Message(Chat::NonMelee, "You have been healed for %d points of damage.", acthealed);
+		}
+	}
 
 		if (curhp < maxhp) {
 			if ((curhp + amount) > maxhp)
