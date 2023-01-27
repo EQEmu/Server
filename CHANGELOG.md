@@ -1,3 +1,30 @@
+## [22.2.0] - 01/27/2023
+
+### Bots
+
+* Add EVENT_UNEQUIP_ITEM_BOT & EVENT_EQUIP_ITEM_BOT ([#2796](https://github.com/EQEmu/Server/pull/2796)) ([Aeadoin](https://github.com/Aeadoin)) 2023-01-27
+* ^create and ^viewcombos popup messages fix. ([#2797](https://github.com/EQEmu/Server/pull/2797)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-01-26
+
+### Code Cleanup
+
+* Cleanup #door Command. ([#2783](https://github.com/EQEmu/Server/pull/2783)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-01-24
+
+### Crash
+
+* Fix crash issue with log formatting during character creation ([#2798](https://github.com/EQEmu/Server/pull/2798)) ([Akkadius](https://github.com/Akkadius)) 2023-01-27
+
+### Feature
+
+* ResetItemCooldown added to lua/perl and fix item re-cast times to show properly ([#2793](https://github.com/EQEmu/Server/pull/2793)) ([Natedog2012](https://github.com/Natedog2012)) 2023-01-26
+
+### Git
+
+* Add CMake Files to .gitignore ([#2792](https://github.com/EQEmu/Server/pull/2792)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-01-25
+
+### Release
+
+* 22.1.2 ([#2791](https://github.com/EQEmu/Server/pull/2791)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-01-24
+
 ## [22.1.2] - 01/24/2023
 
 ### CI/CD
