@@ -2877,6 +2877,11 @@ void Perl_Client_ResetItemCooldown(Client* self, uint32 item_id)
 	self->ResetItemCooldown(item_id);
 }
 
+void Perl_Client_SetItemCooldown(Client* self, uint32 item_id, uint32 in_time)
+{
+	self->SetItemCooldown(item_id, false, in_time);
+}
+
 void perl_register_client()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -3313,6 +3318,7 @@ void perl_register_client()
 	package.add("SetHunger", &Perl_Client_SetHunger);
 	package.add("SetIPExemption", &Perl_Client_SetIPExemption);
 	package.add("SetInvulnerableEnvironmentDamage", &Perl_Client_SetInvulnerableEnvironmentDamage);
+	package.add("SetItemCooldown", &Perl_Client_SetItemCooldown);
 	package.add("SetLanguageSkill", &Perl_Client_SetLanguageSkill);
 	package.add("SetMaterial", &Perl_Client_SetMaterial);
 	package.add("SetPEQZoneFlag", &Perl_Client_SetPEQZoneFlag);

@@ -10498,6 +10498,71 @@ void Client::ResetItemCooldown(uint32 item_id)
 	}
 }
 
+void Client::SetItemCooldown(uint32 item_id, bool use_saved_timer, uint32 in_seconds)
+{
+	EQ::ItemInstance *item = nullptr;
+	const EQ::ItemData* item_d = database.GetItem(item_id);
+	if (!item_d) {
+		return;
+	}
+	int recast_type = item_d->RecastType;
+	auto timestamps = database.GetItemRecastTimestamps(CharacterID());
+	uint32 total_time = 0;
+	uint32 current_time = static_cast<uint32>(std::time(nullptr));
+	uint32 final_time = 0;
+	const auto timer_type = item_d->RecastType != RECAST_TYPE_UNLINKED_ITEM ? item_d->RecastType : item_id;
+	const int timer_id = recast_type != RECAST_TYPE_UNLINKED_ITEM ? (pTimerItemStart + recast_type) : (pTimerNegativeItemReuse * item_id);
+	
+	if (use_saved_timer) {
+		if (item_d->RecastType != RECAST_TYPE_UNLINKED_ITEM) {
+			total_time = timestamps.count(item_d->RecastType) ? timestamps.at(item_d->RecastType) : 0;
+		} else {
+			total_time = timestamps.count(item_id) ? timestamps.at(item_id) : 0;
+		}
+	} else {
+		total_time = current_time + in_seconds;
+	}
+	
+	if (total_time > current_time) {
+		final_time = total_time - current_time;
+	}
+	
+	static const int16 slots[][2] = {
+		{ EQ::invslot::POSSESSIONS_BEGIN, EQ::invslot::POSSESSIONS_END },
+		{ EQ::invbag::GENERAL_BAGS_BEGIN, EQ::invbag::GENERAL_BAGS_END },
+		{ EQ::invbag::CURSOR_BAG_BEGIN, EQ::invbag::CURSOR_BAG_END},
+		{ EQ::invslot::BANK_BEGIN, EQ::invslot::BANK_END },
+		{ EQ::invbag::BANK_BAGS_BEGIN, EQ::invbag::BANK_BAGS_END },
+		{ EQ::invslot::SHARED_BANK_BEGIN, EQ::invslot::SHARED_BANK_END },
+		{ EQ::invbag::SHARED_BANK_BAGS_BEGIN, EQ::invbag::SHARED_BANK_BAGS_END },
+	};
+	const size_t slot_index_count = sizeof(slots) / sizeof(slots[0]);
+	for (int slot_index = 0; slot_index < slot_index_count; ++slot_index) {
+		for (int slot_id = slots[slot_index][0]; slot_id <= slots[slot_index][1]; ++slot_id) {
+			item = GetInv().GetItem(slot_id);
+			if (item) {
+				item_d = item->GetItem();
+				if (item_d && item->GetID() == item_id || (item_d->RecastType != RECAST_TYPE_UNLINKED_ITEM && item_d->RecastType == recast_type)) {
+					item->SetRecastTimestamp(total_time);
+					SendItemPacket(slot_id, item, ItemPacketCharmUpdate);
+				}
+			}
+		}
+	}
+	
+	//Start timers and update in database only when timer is changed
+	if (!use_saved_timer) {
+		GetPTimers().Clear(&database, timer_id);
+		GetPTimers().Start((timer_id), in_seconds);
+		database.UpdateItemRecast(
+			CharacterID(),
+			timer_type,
+			GetPTimers().Get(timer_id)->GetReadyTimestamp()
+		);
+	}
+	SendItemRecastTimer(recast_type, final_time, true);
+}
+
 void Client::RemoveItem(uint32 item_id, uint32 quantity)
 {
 	EQ::ItemInstance *item = nullptr;

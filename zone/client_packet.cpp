@@ -8928,11 +8928,12 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 					if (item->RecastDelay > 0)
 					{
 						if (item->RecastType != RECAST_TYPE_UNLINKED_ITEM && !GetPTimers().Expired(&database, (pTimerItemStart + item->RecastType), false)) {
-							SendItemRecastTimer(item->RecastType); //Problem: When you loot corpse, recast display is not present. This causes it to display again. Could not get to display when sending from looting.
+							SetItemCooldown(item->ID, true);
 							SendSpellBarEnable(item->Click.Effect);
 							LogSpells("Casting of [{}] canceled: item spell reuse timer not expired", spell_id);
 							return;
 						} else if (item->RecastType == RECAST_TYPE_UNLINKED_ITEM  && !GetPTimers().Expired(&database, (pTimerNegativeItemReuse * item->ID), false)) {
+							SetItemCooldown(item->ID, true);
 							SendSpellBarEnable(item->Click.Effect);
 							LogSpells("Casting of [{}] canceled: item spell reuse timer not expired", spell_id);
 							return;
