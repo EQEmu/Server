@@ -376,6 +376,11 @@ public:
 		bool IsFromSpell = false, ExtraAttackOptions *opts = nullptr) override
 			{ return Mob::Attack(other, Hand, FromRiposte, IsStrikethrough, IsFromSpell, opts); }
 
+	[[nodiscard]] int GetMaxBuffSlots() const override { return EQ::spells::LONG_BUFFS; }
+	[[nodiscard]] int GetMaxSongSlots() const override { return EQ::spells::SHORT_BUFFS; }
+	[[nodiscard]] int GetMaxDiscSlots() const override { return EQ::spells::DISC_BUFFS; }
+	[[nodiscard]] int GetMaxTotalSlots() const override { return EQ::spells::TOTAL_BUFFS; }
+
 	bool GetBotOwnerDataBuckets();
 	bool GetBotDataBuckets();
 	bool CheckDataBucket(std::string bucket_name, std::string bucket_value, uint8 bucket_comparison);
