@@ -9408,7 +9408,7 @@ void bot_subcommand_inventory_remove(Client *c, const Seperator *sep)
 			)
 		);
 
-		std::string export_string = fmt::format(
+		const auto export_string = fmt::format(
 			"{} {}",
 			inst->IsStackable() ? inst->GetCharges() : 1,
 			slot_id
