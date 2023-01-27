@@ -21,10 +21,6 @@
 
 * Add CMake Files to .gitignore ([#2792](https://github.com/EQEmu/Server/pull/2792)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-01-25
 
-### Release
-
-* 22.1.2 ([#2791](https://github.com/EQEmu/Server/pull/2791)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-01-24
-
 ## [22.1.2] - 01/24/2023
 
 ### CI/CD
