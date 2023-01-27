@@ -4314,7 +4314,12 @@ void Mob::HealDamage(uint64 amount, Mob* caster, uint16 spell_id)
 				FilteredMessageString(caster, Chat::NonMelee, FilterSpellDamage,
 					YOU_HEALED, caster->GetCleanName(), itoa(acthealed));
 
-				if (caster != this)
+				if (RuleB(Bots, Enabled) && caster->IsBot() && RuleB(Bots, DisplayHealDamage)) {
+					caster->CastToBot()->GetBotOwner()->FilteredMessageString(caster->CastToBot()->GetBotOwner(),
+						Chat::NonMelee, FilterSpellDamage, GENERIC_9_STRINGS,
+						caster->GetCleanName(), " healed ", this->GetCleanName(), " for ", itoa(acthealed), " hit points.", " ", " ", " ");
+				}
+				else if (caster != this)
 					caster->FilteredMessageString(caster, Chat::NonMelee, FilterSpellDamage,
 						YOU_HEAL, GetCleanName(), itoa(acthealed));
 			}
@@ -4324,15 +4329,16 @@ void Mob::HealDamage(uint64 amount, Mob* caster, uint16 spell_id)
 		}
 	}
 
-		if (curhp < maxhp) {
-			if ((curhp + amount) > maxhp)
-				curhp = maxhp;
-			else
-				curhp += amount;
-			SetHP(curhp);
-
-			SendHPUpdate();
+	if (curhp < maxhp) {
+		if ((curhp + amount) > maxhp) {
+			curhp = maxhp;
 		}
+		else {
+			curhp += amount;
+		}
+		SetHP(curhp);
+
+		SendHPUpdate();
 	}
 }
 
