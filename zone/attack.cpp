@@ -3820,6 +3820,52 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 		//final damage has been determined.
 		SetHP(int64(GetHP() - damage));
 
+		auto export_string = fmt::format(
+			"{} {} {} {} {} {} {} {} {}",
+			attacker ? attacker->GetID() : 0,
+			damage,
+			spell_id,
+			static_cast<int>(skill_used),
+			FromDamageShield,
+			avoidable,
+			buffslot,
+			iBuffTic,
+			static_cast<int>(special)
+		);
+
+		std::vector<std::any> args;
+		args.push_back(attacker ? attacker : nullptr);
+		if (IsBot()) {
+			parse->EventBot(EVENT_DAMAGE_TAKEN, CastToBot(), attacker ? attacker : nullptr, export_string, 0);
+		} else if (IsClient()) {
+			parse->EventPlayer(EVENT_DAMAGE_TAKEN, CastToClient(), export_string, 0, &args);
+		} else if (IsNPC()) {
+			parse->EventNPC(EVENT_DAMAGE_TAKEN, CastToNPC(), attacker ? attacker : nullptr, export_string, 0);
+		}
+
+		if (attacker) {
+			export_string = fmt::format(
+				"{} {} {} {} {} {} {} {} {}",
+				GetID(),
+				damage,
+				spell_id,
+				static_cast<int>(skill_used),
+				FromDamageShield ? 1 : 0,
+				avoidable ? 1 : 0,
+				buffslot,
+				iBuffTic ? 1 : 0,
+				static_cast<int>(special)
+			);
+			if (attacker->IsBot()) {
+				parse->EventBot(EVENT_DAMAGE_GIVEN, attacker->CastToBot(), this, export_string, 0);
+			} else if (attacker->IsClient()) {
+				args.assign(1, this);
+				parse->EventPlayer(EVENT_DAMAGE_GIVEN, attacker->CastToClient(), export_string, 0, &args);
+			} else if (attacker->IsNPC()) {
+				parse->EventNPC(EVENT_DAMAGE_GIVEN, attacker->CastToNPC(), this, export_string, 0);
+			}
+		}
+
 		if (HasDied()) {
 			bool IsSaved = false;
 

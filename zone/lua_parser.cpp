@@ -158,6 +158,8 @@ const char *LuaEvents[_LargestEventID] = {
 	"event_augment_remove_client",
 	"event_equip_item_bot",
 	"event_unequip_item_bot",
+	"event_damage_given",
+	"event_damage_taken"
 };
 
 extern Zone *zone;
@@ -213,6 +215,8 @@ LuaParser::LuaParser() {
 	NPCArgumentDispatch[EVENT_SPAWN_ZONE] = handle_npc_spawn_zone;
 	NPCArgumentDispatch[EVENT_PAYLOAD] = handle_npc_payload;
 	NPCArgumentDispatch[EVENT_DESPAWN_ZONE] = handle_npc_despawn_zone;
+	NPCArgumentDispatch[EVENT_DAMAGE_GIVEN] = handle_npc_damage;
+	NPCArgumentDispatch[EVENT_DAMAGE_TAKEN] = handle_npc_damage;
 
 	PlayerArgumentDispatch[EVENT_SAY] = handle_player_say;
 	PlayerArgumentDispatch[EVENT_ENVIRONMENTAL_DAMAGE] = handle_player_environmental_damage;
@@ -273,6 +277,8 @@ LuaParser::LuaParser() {
 	PlayerArgumentDispatch[EVENT_BOT_CREATE] = handle_player_bot_create;
 	PlayerArgumentDispatch[EVENT_AUGMENT_INSERT_CLIENT] = handle_player_augment_insert;
 	PlayerArgumentDispatch[EVENT_AUGMENT_REMOVE_CLIENT] = handle_player_augment_remove;
+	PlayerArgumentDispatch[EVENT_DAMAGE_GIVEN] = handle_player_damage;
+	PlayerArgumentDispatch[EVENT_DAMAGE_TAKEN] = handle_player_damage;
 
 	ItemArgumentDispatch[EVENT_ITEM_CLICK] = handle_item_click;
 	ItemArgumentDispatch[EVENT_ITEM_CLICK_CAST] = handle_item_click;
@@ -312,6 +318,8 @@ LuaParser::LuaParser() {
 	BotArgumentDispatch[EVENT_PAYLOAD] = handle_bot_payload;
 	BotArgumentDispatch[EVENT_EQUIP_ITEM_BOT] = handle_bot_equip_item;
 	BotArgumentDispatch[EVENT_UNEQUIP_ITEM_BOT] = handle_bot_equip_item;
+	BotArgumentDispatch[EVENT_DAMAGE_GIVEN] = handle_bot_damage;
+	BotArgumentDispatch[EVENT_DAMAGE_TAKEN] = handle_bot_damage;
 #endif
 
 	L = nullptr;
