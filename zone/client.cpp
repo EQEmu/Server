@@ -2485,22 +2485,32 @@ uint64 Client::GetAllMoney() {
 }
 
 bool Client::CheckIncreaseSkill(EQ::skills::SkillType skillid, Mob *against_who, int chancemodi) {
-	if (IsDead() || IsUnconscious())
+	if (IsDead() || IsUnconscious()) {
 		return false;
-	if (IsAIControlled()) // no skillups while chamred =p
+	}
+
+	if (IsAIControlled()) { // no skillups while chamred =p
 		return false;
-	if (against_who != nullptr && against_who->IsCorpse()) // no skillups on corpses
+	}
+
+	if (against_who && against_who->IsCorpse()) { // no skillups on corpses
 		return false;
-	if (skillid > EQ::skills::HIGHEST_SKILL)
+	}
+
+	if (skillid > EQ::skills::HIGHEST_SKILL) {
 		return false;
+	}
+
 	int skillval = GetRawSkill(skillid);
 	int maxskill = GetMaxSkillAfterSpecializationRules(skillid, MaxSkill(skillid));
-	std::string export_string = fmt::format(
+
+	auto export_string = fmt::format(
 		"{} {}",
 		skillid,
 		skillval
 	);
 	parse->EventPlayer(EVENT_USE_SKILL, this, export_string, 0);
+
 	if (against_who) {
 		if (
 			against_who->GetSpecialAbility(IMMUNE_AGGRO) ||
@@ -2508,6 +2518,23 @@ bool Client::CheckIncreaseSkill(EQ::skills::SkillType skillid, Mob *against_who,
 			against_who->IsClient() ||
 			GetLevelCon(against_who->GetLevel()) == CON_GRAY
 		) {
+			if (against_who->IsNPC()) {
+				export_string = fmt::format(
+					"{} {} {}",
+					GetID(),
+					skillid,
+					skillval
+				);
+				parse->EventNPC(EVENT_SKILL_USED_ON, against_who->CastToNPC(), this, export_string, 0);
+			} else if (against_who->IsBot()) {
+				export_string = fmt::format(
+					"{} {} {}",
+					GetID(),
+					skillid,
+					skillval
+				);
+				parse->EventBot(EVENT_SKILL_USED_ON, against_who->CastToBot(), this, export_string, 0);
+			}
 			//false by default
 			if (!mod_can_increase_skill(skillid, against_who)) {
 				return false;
@@ -10467,8 +10494,8 @@ void Client::ResetItemCooldown(uint32 item_id)
 		return;
 	}
 	int recast_type = item_d->RecastType;
-	bool found_item = false; 
-	
+	bool found_item = false;
+
 	static const int16 slots[][2] = {
 		{ EQ::invslot::POSSESSIONS_BEGIN, EQ::invslot::POSSESSIONS_END },
 		{ EQ::invbag::GENERAL_BAGS_BEGIN, EQ::invbag::GENERAL_BAGS_END },
@@ -10484,7 +10511,16 @@ void Client::ResetItemCooldown(uint32 item_id)
 			item = GetInv().GetItem(slot_id);
 			if (item) {
 				item_d = item->GetItem();
-				if (item_d && item->GetID() == item_id || (item_d->RecastType != RECAST_TYPE_UNLINKED_ITEM && item_d->RecastType == recast_type)) {	
+				if (
+					item_d &&
+					(
+						item->GetID() == item_id ||
+						(
+							item_d->RecastType != RECAST_TYPE_UNLINKED_ITEM &&
+							item_d->RecastType == recast_type
+						)
+					)
+				) {
 					item->SetRecastTimestamp(0);
 					DeleteItemRecastTimer(item_d->ID);
 					SendItemPacket(slot_id, item, ItemPacketCharmUpdate);
@@ -10512,7 +10548,7 @@ void Client::SetItemCooldown(uint32 item_id, bool use_saved_timer, uint32 in_sec
 	uint32 final_time = 0;
 	const auto timer_type = item_d->RecastType != RECAST_TYPE_UNLINKED_ITEM ? item_d->RecastType : item_id;
 	const int timer_id = recast_type != RECAST_TYPE_UNLINKED_ITEM ? (pTimerItemStart + recast_type) : (pTimerNegativeItemReuse * item_id);
-	
+
 	if (use_saved_timer) {
 		if (item_d->RecastType != RECAST_TYPE_UNLINKED_ITEM) {
 			total_time = timestamps.count(item_d->RecastType) ? timestamps.at(item_d->RecastType) : 0;
@@ -10522,11 +10558,11 @@ void Client::SetItemCooldown(uint32 item_id, bool use_saved_timer, uint32 in_sec
 	} else {
 		total_time = current_time + in_seconds;
 	}
-	
+
 	if (total_time > current_time) {
 		final_time = total_time - current_time;
 	}
-	
+
 	static const int16 slots[][2] = {
 		{ EQ::invslot::POSSESSIONS_BEGIN, EQ::invslot::POSSESSIONS_END },
 		{ EQ::invbag::GENERAL_BAGS_BEGIN, EQ::invbag::GENERAL_BAGS_END },
@@ -10542,14 +10578,23 @@ void Client::SetItemCooldown(uint32 item_id, bool use_saved_timer, uint32 in_sec
 			item = GetInv().GetItem(slot_id);
 			if (item) {
 				item_d = item->GetItem();
-				if (item_d && item->GetID() == item_id || (item_d->RecastType != RECAST_TYPE_UNLINKED_ITEM && item_d->RecastType == recast_type)) {
+				if (
+					item_d &&
+					(
+						item->GetID() == item_id ||
+						(
+							item_d->RecastType != RECAST_TYPE_UNLINKED_ITEM &&
+							item_d->RecastType == recast_type
+						)
+					)
+				) {
 					item->SetRecastTimestamp(total_time);
 					SendItemPacket(slot_id, item, ItemPacketCharmUpdate);
 				}
 			}
 		}
 	}
-	
+
 	//Start timers and update in database only when timer is changed
 	if (!use_saved_timer) {
 		GetPTimers().Clear(&database, timer_id);

@@ -453,6 +453,27 @@ void handle_npc_despawn_zone(
 	lua_setfield(L, -2, "other");
 }
 
+void handle_npc_skill_used_on(
+	QuestInterface *parse,
+	lua_State* L,
+	NPC* npc,
+	Mob* init,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any>* extra_pointers
+) {
+	Seperator sep(data.c_str());
+
+	lua_pushinteger(L, std::stoul(sep.arg[0]));
+	lua_setfield(L, -2, "entity_id");
+
+	lua_pushinteger(L, std::stoi(sep.arg[1]));
+	lua_setfield(L, -2, "skill_id");
+
+	lua_pushinteger(L, std::stoi(sep.arg[2]));
+	lua_setfield(L, -2, "skill_value");
+}
+
 // Player
 void handle_player_say(
 	QuestInterface *parse,
@@ -2003,5 +2024,25 @@ void handle_bot_unequip_item(
 	lua_setfield(L, -2, "item");
 }
 
+void handle_bot_skill_used_on(
+	QuestInterface *parse,
+	lua_State* L,
+	Bot* bot,
+	Mob *init,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+) {
+	Seperator sep(data.c_str());
+
+	lua_pushinteger(L, std::stoul(sep.arg[0]));
+	lua_setfield(L, -2, "entity_id");
+
+	lua_pushinteger(L, std::stoi(sep.arg[1]));
+	lua_setfield(L, -2, "skill_id");
+
+	lua_pushinteger(L, std::stoi(sep.arg[2]));
+	lua_setfield(L, -2, "skill_value");
+}
 
 #endif
