@@ -472,6 +472,11 @@ void handle_npc_skill_used_on(
 
 	lua_pushinteger(L, std::stoi(sep.arg[2]));
 	lua_setfield(L, -2, "skill_value");
+
+	Lua_Mob l_mob(init);
+	luabind::adl::object l_mob_o = luabind::adl::object(L, l_mob);
+	l_mob_o.push(L);
+	lua_setfield(L, -2, "other");
 }
 
 // Player
@@ -2043,6 +2048,11 @@ void handle_bot_skill_used_on(
 
 	lua_pushinteger(L, std::stoi(sep.arg[2]));
 	lua_setfield(L, -2, "skill_value");
+
+	Lua_Mob l_mob(init);
+	luabind::adl::object l_mob_o = luabind::adl::object(L, l_mob);
+	l_mob_o.push(L);
+	lua_setfield(L, -2, "other");
 }
 
 #endif
