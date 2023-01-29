@@ -810,7 +810,7 @@ ServerLootItem_Struct* Corpse::GetItem(uint16 lootslot, ServerLootItem_Struct** 
 		end = itemlist.end();
 		for (; cur != end; ++cur) {
 			sitem2 = *cur;
-			if (sitem2->equip_slot >= bagstart && sitem2->equip_slot < bagstart + 10) {
+			if (sitem2->equip_slot >= bagstart && sitem2->equip_slot < bagstart + EQ::invbag::SLOT_COUNT) {
 				bag_item_data[sitem2->equip_slot - bagstart] = sitem2;
 			}
 		}
@@ -1354,7 +1354,7 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 
 	const EQ::ItemData *item = nullptr;
 	EQ::ItemInstance *inst = nullptr;
-	ServerLootItem_Struct *item_data = nullptr, *bag_item_data[10] = {};
+	ServerLootItem_Struct *item_data = nullptr, *bag_item_data[EQ::invbag::SLOT_COUNT] = {};
 
 	memset(bag_item_data, 0, sizeof(bag_item_data));
 	if (GetPlayerKillItem() > 1) {

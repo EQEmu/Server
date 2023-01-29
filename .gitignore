@@ -63,3 +63,25 @@ compile_flags.txt
 
 # vscode generated settings
 .vscode/
+/zone/client_process.cpp.bak
+/zone/client_packet.cpp.bak
+/zone/inventory.cpp.bak
+/zone/trading.cpp.bak
+/zone/zonedb.cpp.bak
+/CMakeSettings.json
+/zone/zonedb.h.bak
+/zone/corpse.cpp.bak
+/common/shareddb.cpp.bak
+/common/patches/uf_structs.h.bak
+/common/patches/uf_limits.h.bak
+/common/patches/uf.cpp.bak
+/common/patches/titanium_structs.h.bak
+/common/patches/titanium_limits.h.bak
+/common/patches/sod_structs.h.bak
+/common/patches/sod.cpp.bak
+/common/patches/rof_limits.h.bak
+/common/patches/rof2_limits.h.bak
+/common/patches/rof2.cpp.bak
+/common/inventory_profile.cpp.bak
+/common/eq_packet_structs.h.bak
+/common/emu_constants.h.bak

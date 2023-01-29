@@ -1893,12 +1893,12 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 		uint32 dstbagid = 0;
 
 		if (src_slot_id >= EQ::invbag::GENERAL_BAGS_BEGIN && src_slot_id <= EQ::invbag::GENERAL_BAGS_END) {
-			srcbag = m_inv.GetItem(((int)(src_slot_id / 10)) - 3);
+			srcbag = m_inv.GetItem(((int)(src_slot_id / EQ::invbag::SLOT_COUNT)) - 3);
 			if (srcbag)
 				srcbagid = srcbag->GetItem()->ID;
 		}
 		if (dst_slot_id >= EQ::invbag::GENERAL_BAGS_BEGIN && dst_slot_id <= EQ::invbag::GENERAL_BAGS_END) {
-			dstbag = m_inv.GetItem(((int)(dst_slot_id / 10)) - 3);
+			dstbag = m_inv.GetItem(((int)(dst_slot_id / EQ::invbag::SLOT_COUNT)) - 3);
 			if (dstbag)
 				dstbagid = dstbag->GetItem()->ID;
 		}
@@ -1927,8 +1927,8 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 		return false;
 	}
 	//verify shared bank transactions in the database
-	if (src_inst && src_slot_id >= EQ::invslot::SHARED_BANK_BEGIN && src_slot_id <= EQ::invbag::SHARED_BANK_BAGS_END) {
-		if(!database.VerifyInventory(account_id, src_slot_id, src_inst)) {
+	if (src_inst && (src_slot_id >= EQ::invslot::SHARED_BANK_BEGIN && src_slot_id <= EQ::invslot::SHARED_BANK_END || src_slot_id >= EQ::invbag::SHARED_BANK_BAGS_BEGIN && src_slot_id <= EQ::invbag::SHARED_BANK_BAGS_END)) {
+		if (!database.VerifyInventory(account_id, src_slot_id, src_inst)) {
 			LogError("Player [{}] on account [{}] was found exploiting the shared bank.\n", GetName(), account_name);
 			DeleteItemInInventory(dst_slot_id,0,true);
 			return(false);
@@ -1942,7 +1942,8 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 			}
 		}
 	}
-	if (dst_inst && dst_slot_id >= EQ::invslot::SHARED_BANK_BEGIN && dst_slot_id <= EQ::invbag::SHARED_BANK_BAGS_END) {
+
+	if (dst_inst && (dst_slot_id >= EQ::invslot::SHARED_BANK_BEGIN && dst_slot_id <= EQ::invslot::SHARED_BANK_END || dst_slot_id >= EQ::invbag::SHARED_BANK_BAGS_BEGIN && dst_slot_id <= EQ::invbag::SHARED_BANK_BAGS_END)){
 		if(!database.VerifyInventory(account_id, dst_slot_id, dst_inst)) {
 			LogError("Player [{}] on account [{}] was found exploting the shared bank.\n", GetName(), account_name);
 			DeleteItemInInventory(src_slot_id,0,true);

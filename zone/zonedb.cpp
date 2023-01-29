@@ -319,16 +319,18 @@ Trader_Struct* ZoneDatabase::LoadTraderItem(uint32 char_id)
 	auto loadti = new Trader_Struct;
 	memset(loadti,0,sizeof(Trader_Struct));
 
-	std::string query = StringFormat("SELECT * FROM trader WHERE char_id = %i ORDER BY slot_id LIMIT 80", char_id);
+	//imperium update 6-11-2022: update from hardcoded 80
+	std::string query = StringFormat("SELECT * FROM trader WHERE char_id = %i ORDER BY slot_id LIMIT %i", char_id, EQ::invtype::BAZAAR_SIZE);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
 		LogTrading("Failed to load trader information!\n");
 		return loadti;
 	}
 
+	//imperium update 6-11-2022: changed from hardcoded 80
 	loadti->Code = BazaarTrader_ShowItems;
 	for (auto& row = results.begin(); row != results.end(); ++row) {
-		if (atoi(row[5]) >= 80 || atoi(row[4]) < 0) {
+		if (atoi(row[5]) >= EQ::invtype::BAZAAR_SIZE || atoi(row[4]) < 0) {
 			LogTrading("Bad Slot number when trying to load trader information!\n");
 			continue;
 		}
@@ -344,15 +346,17 @@ TraderCharges_Struct* ZoneDatabase::LoadTraderItemWithCharges(uint32 char_id)
 	auto loadti = new TraderCharges_Struct;
 	memset(loadti,0,sizeof(TraderCharges_Struct));
 
-	std::string query = StringFormat("SELECT * FROM trader WHERE char_id=%i ORDER BY slot_id LIMIT 80", char_id);
+	//imperium update 6-11-2022: update from hardcoded 80
+	std::string query = StringFormat("SELECT * FROM trader WHERE char_id=%i ORDER BY slot_id LIMIT %i", char_id, EQ::invtype::BAZAAR_SIZE);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
 		LogTrading("Failed to load trader information!\n");
 		return loadti;
 	}
 
+	//imperium update 6-11-2022: update from hardcoded 80
 	for (auto& row = results.begin(); row != results.end(); ++row) {
-		if (atoi(row[5]) >= 80 || atoi(row[5]) < 0) {
+		if (atoi(row[5]) >= EQ::invtype::BAZAAR_SIZE || atoi(row[5]) < 0) {
 			LogTrading("Bad Slot number when trying to load trader information!\n");
 			continue;
 		}
@@ -367,7 +371,7 @@ TraderCharges_Struct* ZoneDatabase::LoadTraderItemWithCharges(uint32 char_id)
 
 EQ::ItemInstance* ZoneDatabase::LoadSingleTraderItem(uint32 CharID, int SerialNumber) {
 	std::string query = StringFormat("SELECT * FROM trader WHERE char_id = %i AND serialnumber = %i "
-                                    "ORDER BY slot_id LIMIT 80", CharID, SerialNumber);
+                                    "ORDER BY slot_id LIMIT %i", CharID, SerialNumber, EQ::invtype::BAZAAR_SIZE);
     auto results = QueryDatabase(query);
     if (!results.Success())
         return nullptr;
