@@ -171,6 +171,8 @@ const char *QuestEventSubroutines[_LargestEventID] = {
 	"EVENT_AUGMENT_REMOVE_CLIENT",
 	"EVENT_EQUIP_ITEM_BOT",
 	"EVENT_UNEQUIP_ITEM_BOT",
+	"EVENT_DAMAGE_GIVEN",
+	"EVENT_DAMAGE_TAKEN",
 	// Add new events before these or Lua crashes
 	"EVENT_SPELL_EFFECT_BOT",
 	"EVENT_SPELL_EFFECT_BUFF_TIC_BOT"
@@ -2028,6 +2030,21 @@ void PerlembParser::ExportEventVariables(
 			ExportVar(package_name.c_str(), "bot_race", sep.arg[2]);
 			ExportVar(package_name.c_str(), "bot_class", sep.arg[3]);
 			ExportVar(package_name.c_str(), "bot_gender", sep.arg[4]);
+			break;
+		}
+
+		case EVENT_DAMAGE_GIVEN:
+		case EVENT_DAMAGE_TAKEN:{
+			Seperator sep(data);
+			ExportVar(package_name.c_str(), "entity_id", sep.arg[0]);
+			ExportVar(package_name.c_str(), "damage", sep.arg[1]);
+			ExportVar(package_name.c_str(), "spell_id", sep.arg[2]);
+			ExportVar(package_name.c_str(), "skill_id", sep.arg[3]);
+			ExportVar(package_name.c_str(), "is_damage_shield", sep.arg[4]);
+			ExportVar(package_name.c_str(), "is_avoidable", sep.arg[5]);
+			ExportVar(package_name.c_str(), "buff_slot", sep.arg[6]);
+			ExportVar(package_name.c_str(), "is_buff_tic", sep.arg[7]);
+			ExportVar(package_name.c_str(), "special_attack", sep.arg[8]);
 			break;
 		}
 
