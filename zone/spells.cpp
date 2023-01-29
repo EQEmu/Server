@@ -3205,8 +3205,10 @@ bool Mob::CheckSpellLevelRestriction(Mob *caster, uint16 spell_id)
 
 	// NON GM clients might be restricted by rule setting
 	if (caster->IsClient()) {
-		if (RuleB(Spells, BuffLevelRestrictions)) {
-			check_for_restrictions = true;
+		if (IsClient()) { // Only restrict client on client for this rule
+			if (RuleB(Spells, BuffLevelRestrictions)) {
+				check_for_restrictions = true;
+			}
 		}
 	}
 	// NPCS might be restricted by rule setting
