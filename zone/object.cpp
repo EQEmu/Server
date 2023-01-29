@@ -519,7 +519,7 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 
 			std::string export_string = fmt::format("{}", item->ID);
 			std::vector<std::any> args;
-			args.push_back(m_inst);
+			args.emplace_back(m_inst);
 			if(parse->EventPlayer(EVENT_PLAYER_PICKUP, sender, export_string, GetID(), &args))
 			{
 				auto outapp = new EQApplicationPacket(OP_ClickObject, sizeof(ClickObject_Struct));
