@@ -1,7 +1,7 @@
 # EQEmulator Core Server
-|Travis CI (Linux)|Appveyor (Windows x86)   |Appveyor (Windows x64)   |
-|:---:|:---:|:---:| 
-|[![Linux CI](https://travis-ci.org/EQEmu/Server.svg?branch=master)](https://travis-ci.org/EQEmu/Server)   |[![Build status](https://ci.appveyor.com/api/projects/status/v3utuu0dttm2cqd0?svg=true)](https://ci.appveyor.com/project/KimLS/server)   |[![Build status](https://ci.appveyor.com/api/projects/status/scr25kmntx36c1ub?svg=true)](https://ci.appveyor.com/project/KimLS/server-87crp)   |
+| Drone (Linux x64) | Drone (Windows x64)   |
+|:---:|:---:|
+|[![Build Status](http://drone.akkadius.com/api/badges/EQEmu/Server/status.svg)](http://drone.akkadius.com/EQEmu/Server)   |[![Build Status](http://drone.akkadius.com/api/badges/EQEmu/Server/status.svg)](http://drone.akkadius.com/EQEmu/Server)   |
 
 ***
 
