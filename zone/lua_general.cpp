@@ -76,9 +76,9 @@ void load_encounter_with_data(std::string name, std::string info_str) {
 	entity_list.AddEncounter(enc);
 	lua_encounters[name] = enc;
 	lua_encounters_loaded[name] = true;
-	std::vector<std::any> info_ptrs;
-	info_ptrs.push_back(&info_str);
-	parse->EventEncounter(EVENT_ENCOUNTER_LOAD, name, "", 0, &info_ptrs);
+	std::vector<std::any> args;
+	args.emplace_back(&info_str);
+	parse->EventEncounter(EVENT_ENCOUNTER_LOAD, name, "", 0, &args);
 }
 
 void unload_encounter(std::string name) {
@@ -138,9 +138,9 @@ void unload_encounter_with_data(std::string name, std::string info_str) {
 	lua_encounters[name]->Depop();
 	lua_encounters.erase(name);
 	lua_encounters_loaded.erase(name);
-	std::vector<std::any> info_ptrs;
-	info_ptrs.push_back(&info_str);
-	parse->EventEncounter(EVENT_ENCOUNTER_UNLOAD, name, "", 0, &info_ptrs);
+	std::vector<std::any> args;
+	args.emplace_back(&info_str);
+	parse->EventEncounter(EVENT_ENCOUNTER_UNLOAD, name, "", 0, &args);
 }
 
 void register_event(std::string package_name, std::string name, int evt, luabind::adl::object func) {

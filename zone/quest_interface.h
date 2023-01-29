@@ -33,25 +33,25 @@ namespace EQ
 
 class QuestInterface {
 public:
-	virtual int EventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
+	virtual int EventNPC(QuestEventID evt, NPC* npc, Mob *init, const std::string& data, uint32 extra_data,
 		std::vector<std::any> *extra_pointers) { return 0; }
-	virtual int EventGlobalNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
+	virtual int EventGlobalNPC(QuestEventID evt, NPC* npc, Mob *init, const std::string& data, uint32 extra_data,
 		std::vector<std::any> *extra_pointers) { return 0; }
-	virtual int EventPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data,
+	virtual int EventPlayer(QuestEventID evt, Client *client, const std::string& data, uint32 extra_data,
 		std::vector<std::any> *extra_pointers) { return 0; }
-	virtual int EventGlobalPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data,
+	virtual int EventGlobalPlayer(QuestEventID evt, Client *client, const std::string& data, uint32 extra_data,
 		std::vector<std::any> *extra_pointers) { return 0; }
-	virtual int EventItem(QuestEventID evt, Client *client, EQ::ItemInstance *item, Mob *mob, std::string data, uint32 extra_data,
+	virtual int EventItem(QuestEventID evt, Client *client, EQ::ItemInstance *item, Mob *mob, const std::string& data, uint32 extra_data,
 		std::vector<std::any> *extra_pointers) { return 0; }
-	virtual int EventSpell(QuestEventID evt, Mob* mob, Client *client, uint32 spell_id, std::string data, uint32 extra_data,
+	virtual int EventSpell(QuestEventID evt, Mob* mob, Client *client, uint32 spell_id, const std::string& data, uint32 extra_data,
 		std::vector<std::any> *extra_pointers) { return 0; }
-	virtual int EventEncounter(QuestEventID evt, std::string encounter_name, std::string data, uint32 extra_data,
+	virtual int EventEncounter(QuestEventID evt, std::string encounter_name, const std::string& data, uint32 extra_data,
 		std::vector<std::any> *extra_pointers) { return 0; }
 	virtual int EventBot(
 		QuestEventID evt,
 		Bot *bot,
 		Mob *init,
-		std::string data,
+		const std::string& data,
 		uint32 extra_data,
 		std::vector<std::any> *extra_pointer
 	) {
@@ -62,7 +62,7 @@ public:
 		QuestEventID evt,
 		Bot *bot,
 		Mob *init,
-		std::string data,
+		const std::string& data,
 		uint32 extra_data,
 		std::vector<std::any> *extra_pointers
 	) {
@@ -90,19 +90,19 @@ public:
 	virtual void LoadBotScript(std::string filename) { }
 	virtual void LoadGlobalBotScript(std::string filename) { }
 
-	virtual int DispatchEventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
+	virtual int DispatchEventNPC(QuestEventID evt, NPC* npc, Mob *init, const std::string& data, uint32 extra_data,
 		std::vector<std::any> *extra_pointers) { return 0; }
-	virtual int DispatchEventPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data,
+	virtual int DispatchEventPlayer(QuestEventID evt, Client *client, const std::string& data, uint32 extra_data,
 		std::vector<std::any> *extra_pointers) { return 0; }
-	virtual int DispatchEventItem(QuestEventID evt, Client *client, EQ::ItemInstance *item, Mob *mob, std::string data, uint32 extra_data,
+	virtual int DispatchEventItem(QuestEventID evt, Client *client, EQ::ItemInstance *item, Mob *mob, const std::string& data, uint32 extra_data,
 		std::vector<std::any> *extra_pointers) { return 0; }
-	virtual int DispatchEventSpell(QuestEventID evt, Mob* mob, Client *client, uint32 spell_id, std::string data, uint32 extra_data,
+	virtual int DispatchEventSpell(QuestEventID evt, Mob* mob, Client *client, uint32 spell_id, const std::string& data, uint32 extra_data,
 		std::vector<std::any> *extra_pointers) { return 0; }
 	virtual int DispatchEventBot(
 		QuestEventID evt,
 		Bot *bot,
 		Mob *init,
-		std::string data,
+		const std::string& data,
 		uint32 extra_data,
 		std::vector<std::any> *extra_pointers
 	) {

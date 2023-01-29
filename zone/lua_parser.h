@@ -40,7 +40,7 @@ public:
 		QuestEventID evt,
 		NPC* npc,
 		Mob *init,
-		std::string data,
+		const std::string& data,
 		uint32 extra_data,
 		std::vector<std::any> *extra_pointers
 	);
@@ -48,21 +48,21 @@ public:
 		QuestEventID evt,
 		NPC* npc,
 		Mob *init,
-		std::string data,
+		const std::string& data,
 		uint32 extra_data,
 		std::vector<std::any> *extra_pointers
 	);
 	virtual int EventPlayer(
 		QuestEventID evt,
 		Client *client,
-		std::string data,
+		const std::string& data,
 		uint32 extra_data,
 		std::vector<std::any> *extra_pointers
 	);
 	virtual int EventGlobalPlayer(
 		QuestEventID evt,
 		Client *client,
-		std::string data,
+		const std::string& data,
 		uint32 extra_data,
 		std::vector<std::any> *extra_pointers
 	);
@@ -71,7 +71,7 @@ public:
 		Client *client,
 		EQ::ItemInstance *item,
 		Mob *mob,
-		std::string data,
+		const std::string& data,
 		uint32 extra_data,
 		std::vector<std::any> *extra_pointers
 	);
@@ -80,14 +80,14 @@ public:
 		Mob* mob,
 		Client *client,
 		uint32 spell_id,
-		std::string data,
+		const std::string& data,
 		uint32 extra_data,
 		std::vector<std::any> *extra_pointers
 	);
 	virtual int EventEncounter(
 		QuestEventID evt,
 		std::string encounter_name,
-		std::string data,
+		const std::string& data,
 		uint32 extra_data,
 		std::vector<std::any> *extra_pointers
 	);
@@ -95,7 +95,7 @@ public:
 		QuestEventID evt,
 		Bot *bot,
 		Mob *init,
-		std::string data,
+		const std::string& data,
 		uint32 extra_data,
 		std::vector<std::any> *extra_pointers
 	);
@@ -103,7 +103,7 @@ public:
 		QuestEventID evt,
 		Bot *bot,
 		Mob *init,
-		std::string data,
+		const std::string& data,
 		uint32 extra_data,
 		std::vector<std::any> *extra_pointers
 	);
@@ -140,14 +140,14 @@ public:
 		QuestEventID evt,
 		NPC* npc,
 		Mob *init,
-		std::string data,
+		const std::string& data,
 		uint32 extra_data,
 		std::vector<std::any> *extra_pointers
 	);
 	virtual int DispatchEventPlayer(
 		QuestEventID evt,
 		Client *client,
-		std::string data,
+		const std::string& data,
 		uint32 extra_data,
 		std::vector<std::any> *extra_pointers
 	);
@@ -156,7 +156,7 @@ public:
 		Client *client,
 		EQ::ItemInstance *item,
 		Mob *mob,
-		std::string data,
+		const std::string& data,
 		uint32 extra_data,
 		std::vector<std::any> *extra_pointers
 	);
@@ -165,7 +165,7 @@ public:
 		Mob* mob,
 		Client *client,
 		uint32 spell_id,
-		std::string data,
+		const std::string& data,
 		uint32 extra_data,
 		std::vector<std::any> *extra_pointers
 	);
@@ -173,7 +173,7 @@ public:
 		QuestEventID evt,
 		Bot *bot,
 		Mob *init,
-		std::string data,
+		const std::string& data,
 		uint32 extra_data,
 		std::vector<std::any> *extra_pointers
 	);
@@ -207,7 +207,7 @@ private:
 		QuestEventID evt,
 		NPC* npc,
 		Mob *init,
-		std::string data,
+		const std::string& data,
 		uint32 extra_data,
 		std::vector<std::any> *extra_pointers,
 		luabind::adl::object *l_func = nullptr
@@ -216,7 +216,7 @@ private:
 		std::string package_name,
 		QuestEventID evt,
 		Client *client,
-		std::string data,
+		const std::string& data,
 		uint32 extra_data,
 		std::vector<std::any> *extra_pointers,
 		luabind::adl::object *l_func = nullptr
@@ -227,7 +227,7 @@ private:
 		Client *client,
 		EQ::ItemInstance *item,
 		Mob *mob,
-		std::string data,
+		const std::string& data,
 		uint32 extra_data,
 		std::vector<std::any> *extra_pointers,
 		luabind::adl::object *l_func = nullptr
@@ -238,7 +238,7 @@ private:
 		Mob* mob,
 		Client *client,
 		uint32 spell_id,
-		std::string data,
+		const std::string& data,
 		uint32 extra_data,
 		std::vector<std::any> *extra_pointers,
 		luabind::adl::object *l_func = nullptr
@@ -247,7 +247,7 @@ private:
 		std::string package_name,
 		QuestEventID evt,
 		std::string encounter_name,
-		std::string data,
+		const std::string& data,
 		uint32 extra_data,
 		std::vector<std::any> *extra_pointers
 	);
@@ -256,7 +256,7 @@ private:
 		QuestEventID evt,
 		Bot *bot,
 		Mob *init,
-		std::string data,
+		const std::string& data,
 		uint32 extra_data,
 		std::vector<std::any> *extra_pointers,
 		luabind::adl::object *l_func = nullptr
