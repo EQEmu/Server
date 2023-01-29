@@ -425,7 +425,8 @@ void Lua_Bot::AddItem(const luabind::object& item_table) {
 	bool attuned = luabind::type(item_table["attuned"]) != LUA_TNIL ? luabind::object_cast<bool>(item_table["attuned"]) : false;
 	uint16 slot_id = luabind::type(item_table["slot_id"]) != LUA_TNIL ? luabind::object_cast<uint16>(item_table["slot_id"]) : EQ::invslot::slotCursor;
 
-	self->AddBotItem(
+	if (slot_id <= EQ::invslot::slotAmmo) {
+		self->AddBotItem(
 			slot_id,
 			item_id,
 			charges,
@@ -436,7 +437,21 @@ void Lua_Bot::AddItem(const luabind::object& item_table) {
 			augment_four,
 			augment_five,
 			augment_six
-	);
+		);
+	} else {
+		self->GetOwner()->CastToClient()->SummonItem(
+			item_id,
+			charges,
+			augment_one,
+			augment_two,
+			augment_three,
+			augment_four,
+			augment_five,
+			augment_six,
+			attuned,
+			slot_id
+		);
+	}
 }
 
 luabind::scope lua_register_bot() {

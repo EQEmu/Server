@@ -416,8 +416,33 @@ void Perl_Bot_AddItem(Bot *self, perl::reference table_ref)
 	bool attuned         = table.exists("attuned") && table["attuned"];
 	uint16 slot_id       = table.exists("slot_id") ? table["slot_id"] : EQ::invslot::slotCursor;
 
-	self->AddBotItem(slot_id, item_id, charges, attuned,augment_one, augment_two, augment_three,
-	                 augment_four, augment_five, augment_six);
+	if (slot_id <= EQ::invslot::slotAmmo) {
+		self->AddBotItem(
+				slot_id,
+				item_id,
+				charges,
+				attuned,
+				augment_one,
+				augment_two,
+				augment_three,
+				augment_four,
+				augment_five,
+				augment_six
+		);
+	} else {
+		self->GetOwner()->CastToClient()->SummonItem(
+				item_id,
+				charges,
+				augment_one,
+				augment_two,
+				augment_three,
+				augment_four,
+				augment_five,
+				augment_six,
+				attuned,
+				slot_id
+		);
+	}
 }
 
 void perl_register_bot()
