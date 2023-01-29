@@ -1,1 +1,1 @@
-ALTER TABLE `raid_members` ADD COLUMN `isbot` TINYINT(1) NOT NULL DEFAULT 0 COMMENT '';
+ALTER TABLE `raid_members` ADD COLUMN `botid` int(4) NOT NULL DEFAULT 0 AFTER `charid`;
