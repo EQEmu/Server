@@ -10563,7 +10563,7 @@ void Client::SetItemCooldown(uint32 item_id, bool use_saved_timer, uint32 in_sec
 	SendItemRecastTimer(recast_type, final_time, true);
 }
 
-int Client::GetItemCooldown(uint32 item_id)
+uint32 Client::GetItemCooldown(uint32 item_id)
 {
 	const EQ::ItemData* item_d = database.GetItem(item_id);
 	if (!item_d) {

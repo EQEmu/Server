@@ -2882,7 +2882,7 @@ void Perl_Client_SetItemCooldown(Client* self, uint32 item_id, uint32 in_time)
 	self->SetItemCooldown(item_id, false, in_time);
 }
 
-int Perl_Client_GetItemCooldown(Client* self, uint32 item_id)
+uint32 Perl_Client_GetItemCooldown(Client* self, uint32 item_id)
 {
 	return self->GetItemCooldown(item_id);
 }
