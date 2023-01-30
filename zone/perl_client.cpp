@@ -2882,6 +2882,11 @@ void Perl_Client_SetItemCooldown(Client* self, uint32 item_id, uint32 in_time)
 	self->SetItemCooldown(item_id, false, in_time);
 }
 
+uint32 Perl_Client_GetItemCooldown(Client* self, uint32 item_id)
+{
+	return self->GetItemCooldown(item_id);
+}
+
 void perl_register_client()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -3076,6 +3081,7 @@ void perl_register_client()
 	package.add("GetInventory", &Perl_Client_GetInventory);
 	package.add("GetInvulnerableEnvironmentDamage", &Perl_Client_GetInvulnerableEnvironmentDamage);
 	package.add("GetItemAt", &Perl_Client_GetItemAt);
+	package.add("GetItemCooldown", &Perl_Client_GetItemCooldown);
 	package.add("GetItemIDAt", &Perl_Client_GetItemIDAt);
 	package.add("GetItemInInventory", &Perl_Client_GetItemInInventory);
 	package.add("GetLDoNLosses", &Perl_Client_GetLDoNLosses);

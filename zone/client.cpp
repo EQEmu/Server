@@ -10563,6 +10563,29 @@ void Client::SetItemCooldown(uint32 item_id, bool use_saved_timer, uint32 in_sec
 	SendItemRecastTimer(recast_type, final_time, true);
 }
 
+uint32 Client::GetItemCooldown(uint32 item_id)
+{
+	const EQ::ItemData* item_d = database.GetItem(item_id);
+	if (!item_d) {
+		return 0;
+	}
+	
+	int recast_type = item_d->RecastType;
+	auto timestamps = database.GetItemRecastTimestamps(CharacterID());
+	const auto timer_type = recast_type != RECAST_TYPE_UNLINKED_ITEM ? recast_type : item_id;
+	uint32 total_time = 0;
+	uint32 current_time = static_cast<uint32>(std::time(nullptr));
+	uint32 final_time = 0;
+	
+	total_time = timestamps.count(timer_type) ? timestamps.at(timer_type) : 0;
+	
+	if (total_time > current_time) {
+		final_time = total_time - current_time;
+	}
+
+	return final_time;
+}
+
 void Client::RemoveItem(uint32 item_id, uint32 quantity)
 {
 	EQ::ItemInstance *item = nullptr;
