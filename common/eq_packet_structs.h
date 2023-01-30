@@ -29,7 +29,7 @@
 #include "textures.h"
 
 
-static const uint32 BUFF_COUNT = 25;
+static const uint32 BUFF_COUNT = 42;
 static const uint32 PET_BUFF_COUNT = 30;
 static const uint32 MAX_MERC = 100;
 static const uint32 MAX_MERC_GRADES = 10;
@@ -3632,17 +3632,19 @@ struct LevelAppearance_Struct { //Sends a little graphic on level up
 };
 
 struct MerchantList {
-	uint32 id;
-	uint32 slot;
-	uint32 item;
-	int16 faction_required;
-	int8 level_required;
-	uint16 alt_currency_cost;
-	uint32 classes_required;
-	uint8 probability;
+	uint32      id;
+	uint32      slot;
+	uint32      item;
+	int16       faction_required;
+	int8        level_required;
+	uint8       min_status;
+	uint8       max_status;
+	uint16      alt_currency_cost;
+	uint32      classes_required;
+	uint8       probability;
 	std::string bucket_name;
 	std::string bucket_value;
-	uint8 bucket_comparison;
+	uint8       bucket_comparison;
 };
 
 struct TempMerchantList {
@@ -4545,7 +4547,7 @@ struct ItemVerifyReply_Struct {
 struct ItemRecastDelay_Struct {
 /*000*/	uint32	recast_delay;	// in seconds
 /*004*/	uint32	recast_type;
-/*008*/	uint32	unknown008;
+/*008*/	bool	ignore_casting_requirement; //Ignores recast times allows items to be reset?
 /*012*/
 };
 

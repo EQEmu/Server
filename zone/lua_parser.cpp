@@ -156,6 +156,12 @@ const char *LuaEvents[_LargestEventID] = {
 	"event_bot_create",
 	"event_augment_insert_client",
 	"event_augment_remove_client",
+	"event_equip_item_bot",
+	"event_unequip_item_bot",
+	"event_damage_given",
+	"event_damage_taken",
+	"event_item_click_client",
+	"event_item_click_cast_client"
 };
 
 extern Zone *zone;
@@ -171,143 +177,153 @@ std::map<std::string, bool> lua_encounters_loaded;
 std::map<std::string, Encounter *> lua_encounters;
 
 LuaParser::LuaParser() {
-	for(int i = 0; i < _LargestEventID; ++i) {
-		NPCArgumentDispatch[i] = handle_npc_null;
-		PlayerArgumentDispatch[i] = handle_player_null;
-		ItemArgumentDispatch[i] = handle_item_null;
-		SpellArgumentDispatch[i] = handle_spell_null;
+	for (int i = 0; i < _LargestEventID; ++i) {
+		NPCArgumentDispatch[i]       = handle_npc_null;
+		PlayerArgumentDispatch[i]    = handle_player_null;
+		ItemArgumentDispatch[i]      = handle_item_null;
+		SpellArgumentDispatch[i]     = handle_spell_null;
 		EncounterArgumentDispatch[i] = handle_encounter_null;
-		BotArgumentDispatch[i] = handle_bot_null;
+		BotArgumentDispatch[i]       = handle_bot_null;
 	}
 
-	NPCArgumentDispatch[EVENT_SAY] = handle_npc_event_say;
-	NPCArgumentDispatch[EVENT_AGGRO_SAY] = handle_npc_event_say;
-	NPCArgumentDispatch[EVENT_PROXIMITY_SAY] = handle_npc_event_say;
-	NPCArgumentDispatch[EVENT_TRADE] = handle_npc_event_trade;
-	NPCArgumentDispatch[EVENT_HP] = handle_npc_event_hp;
-	NPCArgumentDispatch[EVENT_TARGET_CHANGE] = handle_npc_single_mob;
-	NPCArgumentDispatch[EVENT_CAST_ON] = handle_npc_cast;
-	NPCArgumentDispatch[EVENT_KILLED_MERIT] = handle_npc_single_client;
-	NPCArgumentDispatch[EVENT_SLAY] = handle_npc_single_mob;
-	NPCArgumentDispatch[EVENT_ENTER] = handle_npc_single_client;
-	NPCArgumentDispatch[EVENT_EXIT] = handle_npc_single_client;
-	NPCArgumentDispatch[EVENT_TASK_ACCEPTED] = handle_npc_task_accepted;
-	NPCArgumentDispatch[EVENT_POPUP_RESPONSE] = handle_npc_popup;
+	NPCArgumentDispatch[EVENT_SAY]             = handle_npc_event_say;
+	NPCArgumentDispatch[EVENT_AGGRO_SAY]       = handle_npc_event_say;
+	NPCArgumentDispatch[EVENT_PROXIMITY_SAY]   = handle_npc_event_say;
+	NPCArgumentDispatch[EVENT_TRADE]           = handle_npc_event_trade;
+	NPCArgumentDispatch[EVENT_HP]              = handle_npc_event_hp;
+	NPCArgumentDispatch[EVENT_TARGET_CHANGE]   = handle_npc_single_mob;
+	NPCArgumentDispatch[EVENT_CAST_ON]         = handle_npc_cast;
+	NPCArgumentDispatch[EVENT_KILLED_MERIT]    = handle_npc_single_client;
+	NPCArgumentDispatch[EVENT_SLAY]            = handle_npc_single_mob;
+	NPCArgumentDispatch[EVENT_ENTER]           = handle_npc_single_client;
+	NPCArgumentDispatch[EVENT_EXIT]            = handle_npc_single_client;
+	NPCArgumentDispatch[EVENT_TASK_ACCEPTED]   = handle_npc_task_accepted;
+	NPCArgumentDispatch[EVENT_POPUP_RESPONSE]  = handle_npc_popup;
 	NPCArgumentDispatch[EVENT_WAYPOINT_ARRIVE] = handle_npc_waypoint;
 	NPCArgumentDispatch[EVENT_WAYPOINT_DEPART] = handle_npc_waypoint;
-	NPCArgumentDispatch[EVENT_HATE_LIST] = handle_npc_hate;
-	NPCArgumentDispatch[EVENT_COMBAT] = handle_npc_hate;
-	NPCArgumentDispatch[EVENT_SIGNAL] = handle_npc_signal;
-	NPCArgumentDispatch[EVENT_TIMER] = handle_npc_timer;
-	NPCArgumentDispatch[EVENT_DEATH] = handle_npc_death;
-	NPCArgumentDispatch[EVENT_DEATH_COMPLETE] = handle_npc_death;
-	NPCArgumentDispatch[EVENT_DEATH_ZONE] = handle_npc_death;
-	NPCArgumentDispatch[EVENT_CAST] = handle_npc_cast;
-	NPCArgumentDispatch[EVENT_CAST_BEGIN] = handle_npc_cast;
-	NPCArgumentDispatch[EVENT_FEIGN_DEATH] = handle_npc_single_client;
-	NPCArgumentDispatch[EVENT_ENTER_AREA] = handle_npc_area;
-	NPCArgumentDispatch[EVENT_LEAVE_AREA] = handle_npc_area;
-	NPCArgumentDispatch[EVENT_LOOT_ZONE] = handle_npc_loot_zone;
-	NPCArgumentDispatch[EVENT_SPAWN_ZONE] = handle_npc_spawn_zone;
-	NPCArgumentDispatch[EVENT_PAYLOAD] = handle_npc_payload;
-	NPCArgumentDispatch[EVENT_DESPAWN_ZONE] = handle_npc_despawn_zone;
+	NPCArgumentDispatch[EVENT_HATE_LIST]       = handle_npc_hate;
+	NPCArgumentDispatch[EVENT_COMBAT]          = handle_npc_hate;
+	NPCArgumentDispatch[EVENT_SIGNAL]          = handle_npc_signal;
+	NPCArgumentDispatch[EVENT_TIMER]           = handle_npc_timer;
+	NPCArgumentDispatch[EVENT_DEATH]           = handle_npc_death;
+	NPCArgumentDispatch[EVENT_DEATH_COMPLETE]  = handle_npc_death;
+	NPCArgumentDispatch[EVENT_DEATH_ZONE]      = handle_npc_death;
+	NPCArgumentDispatch[EVENT_CAST]            = handle_npc_cast;
+	NPCArgumentDispatch[EVENT_CAST_BEGIN]      = handle_npc_cast;
+	NPCArgumentDispatch[EVENT_FEIGN_DEATH]     = handle_npc_single_client;
+	NPCArgumentDispatch[EVENT_ENTER_AREA]      = handle_npc_area;
+	NPCArgumentDispatch[EVENT_LEAVE_AREA]      = handle_npc_area;
+	NPCArgumentDispatch[EVENT_LOOT_ZONE]       = handle_npc_loot_zone;
+	NPCArgumentDispatch[EVENT_SPAWN_ZONE]      = handle_npc_spawn_zone;
+	NPCArgumentDispatch[EVENT_PAYLOAD]         = handle_npc_payload;
+	NPCArgumentDispatch[EVENT_DESPAWN_ZONE]    = handle_npc_despawn_zone;
+	NPCArgumentDispatch[EVENT_DAMAGE_GIVEN]    = handle_npc_damage;
+	NPCArgumentDispatch[EVENT_DAMAGE_TAKEN]    = handle_npc_damage;
 
-	PlayerArgumentDispatch[EVENT_SAY] = handle_player_say;
-	PlayerArgumentDispatch[EVENT_ENVIRONMENTAL_DAMAGE] = handle_player_environmental_damage;
-	PlayerArgumentDispatch[EVENT_DEATH] = handle_player_death;
-	PlayerArgumentDispatch[EVENT_DEATH_COMPLETE] = handle_player_death;
-	PlayerArgumentDispatch[EVENT_TIMER] = handle_player_timer;
-	PlayerArgumentDispatch[EVENT_DISCOVER_ITEM] = handle_player_discover_item;
-	PlayerArgumentDispatch[EVENT_FISH_SUCCESS] = handle_player_fish_forage_success;
-	PlayerArgumentDispatch[EVENT_FORAGE_SUCCESS] = handle_player_fish_forage_success;
-	PlayerArgumentDispatch[EVENT_CLICK_OBJECT] = handle_player_click_object;
-	PlayerArgumentDispatch[EVENT_CLICK_DOOR] = handle_player_click_door;
-	PlayerArgumentDispatch[EVENT_SIGNAL] = handle_player_signal;
-	PlayerArgumentDispatch[EVENT_POPUP_RESPONSE] = handle_player_popup_response;
-	PlayerArgumentDispatch[EVENT_PLAYER_PICKUP] = handle_player_pick_up;
-	PlayerArgumentDispatch[EVENT_CAST] = handle_player_cast;
-	PlayerArgumentDispatch[EVENT_CAST_BEGIN] = handle_player_cast;
-	PlayerArgumentDispatch[EVENT_CAST_ON] = handle_player_cast;
-	PlayerArgumentDispatch[EVENT_TASK_FAIL] = handle_player_task_fail;
-	PlayerArgumentDispatch[EVENT_ZONE] = handle_player_zone;
-	PlayerArgumentDispatch[EVENT_DUEL_WIN] = handle_player_duel_win;
-	PlayerArgumentDispatch[EVENT_DUEL_LOSE] = handle_player_duel_loss;
-	PlayerArgumentDispatch[EVENT_LOOT] = handle_player_loot;
-	PlayerArgumentDispatch[EVENT_TASK_STAGE_COMPLETE] = handle_player_task_stage_complete;
-	PlayerArgumentDispatch[EVENT_TASK_COMPLETE] = handle_player_task_update;
-	PlayerArgumentDispatch[EVENT_TASK_UPDATE] = handle_player_task_update;
-	PlayerArgumentDispatch[EVENT_TASK_BEFORE_UPDATE] = handle_player_task_update;
-	PlayerArgumentDispatch[EVENT_COMMAND] = handle_player_command;
-	PlayerArgumentDispatch[EVENT_COMBINE_SUCCESS] = handle_player_combine;
-	PlayerArgumentDispatch[EVENT_COMBINE_FAILURE] = handle_player_combine;
-	PlayerArgumentDispatch[EVENT_FEIGN_DEATH] = handle_player_feign;
-	PlayerArgumentDispatch[EVENT_ENTER_AREA] = handle_player_area;
-	PlayerArgumentDispatch[EVENT_LEAVE_AREA] = handle_player_area;
-	PlayerArgumentDispatch[EVENT_RESPAWN] = handle_player_respawn;
-	PlayerArgumentDispatch[EVENT_UNHANDLED_OPCODE] = handle_player_packet;
-	PlayerArgumentDispatch[EVENT_USE_SKILL] = handle_player_use_skill;
-	PlayerArgumentDispatch[EVENT_TEST_BUFF] = handle_test_buff;
-	PlayerArgumentDispatch[EVENT_COMBINE_VALIDATE] = handle_player_combine_validate;
-	PlayerArgumentDispatch[EVENT_BOT_COMMAND] = handle_player_bot_command;
-	PlayerArgumentDispatch[EVENT_WARP] = handle_player_warp;
-	PlayerArgumentDispatch[EVENT_COMBINE] = handle_player_quest_combine;
-	PlayerArgumentDispatch[EVENT_CONSIDER] = handle_player_consider;
-	PlayerArgumentDispatch[EVENT_CONSIDER_CORPSE] = handle_player_consider_corpse;
-	PlayerArgumentDispatch[EVENT_EQUIP_ITEM_CLIENT] = handle_player_equip_item;
-	PlayerArgumentDispatch[EVENT_UNEQUIP_ITEM_CLIENT] = handle_player_equip_item;
-	PlayerArgumentDispatch[EVENT_SKILL_UP] = handle_player_skill_up;
-	PlayerArgumentDispatch[EVENT_LANGUAGE_SKILL_UP] = handle_player_skill_up;
-	PlayerArgumentDispatch[EVENT_ALT_CURRENCY_MERCHANT_BUY] = handle_player_alt_currency_merchant;
+	PlayerArgumentDispatch[EVENT_SAY]                        = handle_player_say;
+	PlayerArgumentDispatch[EVENT_ENVIRONMENTAL_DAMAGE]       = handle_player_environmental_damage;
+	PlayerArgumentDispatch[EVENT_DEATH]                      = handle_player_death;
+	PlayerArgumentDispatch[EVENT_DEATH_COMPLETE]             = handle_player_death;
+	PlayerArgumentDispatch[EVENT_TIMER]                      = handle_player_timer;
+	PlayerArgumentDispatch[EVENT_DISCOVER_ITEM]              = handle_player_discover_item;
+	PlayerArgumentDispatch[EVENT_FISH_SUCCESS]               = handle_player_fish_forage_success;
+	PlayerArgumentDispatch[EVENT_FORAGE_SUCCESS]             = handle_player_fish_forage_success;
+	PlayerArgumentDispatch[EVENT_CLICK_OBJECT]               = handle_player_click_object;
+	PlayerArgumentDispatch[EVENT_CLICK_DOOR]                 = handle_player_click_door;
+	PlayerArgumentDispatch[EVENT_SIGNAL]                     = handle_player_signal;
+	PlayerArgumentDispatch[EVENT_POPUP_RESPONSE]             = handle_player_popup_response;
+	PlayerArgumentDispatch[EVENT_PLAYER_PICKUP]              = handle_player_pick_up;
+	PlayerArgumentDispatch[EVENT_CAST]                       = handle_player_cast;
+	PlayerArgumentDispatch[EVENT_CAST_BEGIN]                 = handle_player_cast;
+	PlayerArgumentDispatch[EVENT_CAST_ON]                    = handle_player_cast;
+	PlayerArgumentDispatch[EVENT_TASK_FAIL]                  = handle_player_task_fail;
+	PlayerArgumentDispatch[EVENT_ZONE]                       = handle_player_zone;
+	PlayerArgumentDispatch[EVENT_DUEL_WIN]                   = handle_player_duel_win;
+	PlayerArgumentDispatch[EVENT_DUEL_LOSE]                  = handle_player_duel_loss;
+	PlayerArgumentDispatch[EVENT_LOOT]                       = handle_player_loot;
+	PlayerArgumentDispatch[EVENT_TASK_STAGE_COMPLETE]        = handle_player_task_stage_complete;
+	PlayerArgumentDispatch[EVENT_TASK_COMPLETE]              = handle_player_task_update;
+	PlayerArgumentDispatch[EVENT_TASK_UPDATE]                = handle_player_task_update;
+	PlayerArgumentDispatch[EVENT_TASK_BEFORE_UPDATE]         = handle_player_task_update;
+	PlayerArgumentDispatch[EVENT_COMMAND]                    = handle_player_command;
+	PlayerArgumentDispatch[EVENT_COMBINE_SUCCESS]            = handle_player_combine;
+	PlayerArgumentDispatch[EVENT_COMBINE_FAILURE]            = handle_player_combine;
+	PlayerArgumentDispatch[EVENT_FEIGN_DEATH]                = handle_player_feign;
+	PlayerArgumentDispatch[EVENT_ENTER_AREA]                 = handle_player_area;
+	PlayerArgumentDispatch[EVENT_LEAVE_AREA]                 = handle_player_area;
+	PlayerArgumentDispatch[EVENT_RESPAWN]                    = handle_player_respawn;
+	PlayerArgumentDispatch[EVENT_UNHANDLED_OPCODE]           = handle_player_packet;
+	PlayerArgumentDispatch[EVENT_USE_SKILL]                  = handle_player_use_skill;
+	PlayerArgumentDispatch[EVENT_TEST_BUFF]                  = handle_test_buff;
+	PlayerArgumentDispatch[EVENT_COMBINE_VALIDATE]           = handle_player_combine_validate;
+	PlayerArgumentDispatch[EVENT_BOT_COMMAND]                = handle_player_bot_command;
+	PlayerArgumentDispatch[EVENT_WARP]                       = handle_player_warp;
+	PlayerArgumentDispatch[EVENT_COMBINE]                    = handle_player_quest_combine;
+	PlayerArgumentDispatch[EVENT_CONSIDER]                   = handle_player_consider;
+	PlayerArgumentDispatch[EVENT_CONSIDER_CORPSE]            = handle_player_consider_corpse;
+	PlayerArgumentDispatch[EVENT_EQUIP_ITEM_CLIENT]          = handle_player_equip_item;
+	PlayerArgumentDispatch[EVENT_UNEQUIP_ITEM_CLIENT]        = handle_player_equip_item;
+	PlayerArgumentDispatch[EVENT_SKILL_UP]                   = handle_player_skill_up;
+	PlayerArgumentDispatch[EVENT_LANGUAGE_SKILL_UP]          = handle_player_skill_up;
+	PlayerArgumentDispatch[EVENT_ALT_CURRENCY_MERCHANT_BUY]  = handle_player_alt_currency_merchant;
 	PlayerArgumentDispatch[EVENT_ALT_CURRENCY_MERCHANT_SELL] = handle_player_alt_currency_merchant;
-	PlayerArgumentDispatch[EVENT_MERCHANT_BUY] = handle_player_merchant;
-	PlayerArgumentDispatch[EVENT_MERCHANT_SELL] = handle_player_merchant;
-	PlayerArgumentDispatch[EVENT_INSPECT] = handle_player_inspect;
-	PlayerArgumentDispatch[EVENT_AA_BUY] = handle_player_aa_buy;
-	PlayerArgumentDispatch[EVENT_AA_GAIN] = handle_player_aa_gain;
-	PlayerArgumentDispatch[EVENT_PAYLOAD] = handle_player_payload;
-	PlayerArgumentDispatch[EVENT_LEVEL_UP] = handle_player_level_up;
-	PlayerArgumentDispatch[EVENT_LEVEL_DOWN] = handle_player_level_down;
-	PlayerArgumentDispatch[EVENT_GM_COMMAND] = handle_player_gm_command;
-	PlayerArgumentDispatch[EVENT_BOT_CREATE] = handle_player_bot_create;
-	PlayerArgumentDispatch[EVENT_AUGMENT_INSERT_CLIENT] = handle_player_augment_insert;
-	PlayerArgumentDispatch[EVENT_AUGMENT_REMOVE_CLIENT] = handle_player_augment_remove;
+	PlayerArgumentDispatch[EVENT_MERCHANT_BUY]               = handle_player_merchant;
+	PlayerArgumentDispatch[EVENT_MERCHANT_SELL]              = handle_player_merchant;
+	PlayerArgumentDispatch[EVENT_INSPECT]                    = handle_player_inspect;
+	PlayerArgumentDispatch[EVENT_AA_BUY]                     = handle_player_aa_buy;
+	PlayerArgumentDispatch[EVENT_AA_GAIN]                    = handle_player_aa_gain;
+	PlayerArgumentDispatch[EVENT_PAYLOAD]                    = handle_player_payload;
+	PlayerArgumentDispatch[EVENT_LEVEL_UP]                   = handle_player_level_up;
+	PlayerArgumentDispatch[EVENT_LEVEL_DOWN]                 = handle_player_level_down;
+	PlayerArgumentDispatch[EVENT_GM_COMMAND]                 = handle_player_gm_command;
+	PlayerArgumentDispatch[EVENT_BOT_CREATE]                 = handle_player_bot_create;
+	PlayerArgumentDispatch[EVENT_AUGMENT_INSERT_CLIENT]      = handle_player_augment_insert;
+	PlayerArgumentDispatch[EVENT_AUGMENT_REMOVE_CLIENT]      = handle_player_augment_remove;
+	PlayerArgumentDispatch[EVENT_DAMAGE_GIVEN]               = handle_player_damage;
+	PlayerArgumentDispatch[EVENT_DAMAGE_TAKEN]               = handle_player_damage;
+	PlayerArgumentDispatch[EVENT_ITEM_CLICK_CAST_CLIENT]     = handle_player_item_click;
+	PlayerArgumentDispatch[EVENT_ITEM_CLICK_CLIENT]          = handle_player_item_click;
 
-	ItemArgumentDispatch[EVENT_ITEM_CLICK] = handle_item_click;
+	ItemArgumentDispatch[EVENT_ITEM_CLICK]      = handle_item_click;
 	ItemArgumentDispatch[EVENT_ITEM_CLICK_CAST] = handle_item_click;
-	ItemArgumentDispatch[EVENT_TIMER] = handle_item_timer;
-	ItemArgumentDispatch[EVENT_WEAPON_PROC] = handle_item_proc;
-	ItemArgumentDispatch[EVENT_LOOT] = handle_item_loot;
-	ItemArgumentDispatch[EVENT_EQUIP_ITEM] = handle_item_equip;
-	ItemArgumentDispatch[EVENT_UNEQUIP_ITEM] = handle_item_equip;
-	ItemArgumentDispatch[EVENT_AUGMENT_ITEM] = handle_item_augment;
-	ItemArgumentDispatch[EVENT_UNAUGMENT_ITEM] = handle_item_augment;
-	ItemArgumentDispatch[EVENT_AUGMENT_INSERT] = handle_item_augment_insert;
-	ItemArgumentDispatch[EVENT_AUGMENT_REMOVE] = handle_item_augment_remove;
+	ItemArgumentDispatch[EVENT_TIMER]           = handle_item_timer;
+	ItemArgumentDispatch[EVENT_WEAPON_PROC]     = handle_item_proc;
+	ItemArgumentDispatch[EVENT_LOOT]            = handle_item_loot;
+	ItemArgumentDispatch[EVENT_EQUIP_ITEM]      = handle_item_equip;
+	ItemArgumentDispatch[EVENT_UNEQUIP_ITEM]    = handle_item_equip;
+	ItemArgumentDispatch[EVENT_AUGMENT_ITEM]    = handle_item_augment;
+	ItemArgumentDispatch[EVENT_UNAUGMENT_ITEM]  = handle_item_augment;
+	ItemArgumentDispatch[EVENT_AUGMENT_INSERT]  = handle_item_augment_insert;
+	ItemArgumentDispatch[EVENT_AUGMENT_REMOVE]  = handle_item_augment_remove;
 
-	SpellArgumentDispatch[EVENT_SPELL_EFFECT_CLIENT] = handle_spell_event;
-	SpellArgumentDispatch[EVENT_SPELL_EFFECT_BUFF_TIC_CLIENT] = handle_spell_event;
-	SpellArgumentDispatch[EVENT_SPELL_FADE] = handle_spell_event;
+	SpellArgumentDispatch[EVENT_SPELL_EFFECT_CLIENT]               = handle_spell_event;
+	SpellArgumentDispatch[EVENT_SPELL_EFFECT_BUFF_TIC_CLIENT]      = handle_spell_event;
+	SpellArgumentDispatch[EVENT_SPELL_FADE]                        = handle_spell_event;
 	SpellArgumentDispatch[EVENT_SPELL_EFFECT_TRANSLOCATE_COMPLETE] = handle_translocate_finish;
 
-	EncounterArgumentDispatch[EVENT_TIMER] = handle_encounter_timer;
-	EncounterArgumentDispatch[EVENT_ENCOUNTER_LOAD] = handle_encounter_load;
+	EncounterArgumentDispatch[EVENT_TIMER]            = handle_encounter_timer;
+	EncounterArgumentDispatch[EVENT_ENCOUNTER_LOAD]   = handle_encounter_load;
 	EncounterArgumentDispatch[EVENT_ENCOUNTER_UNLOAD] = handle_encounter_unload;
 
-	BotArgumentDispatch[EVENT_CAST] = handle_bot_cast;
-	BotArgumentDispatch[EVENT_CAST_BEGIN] = handle_bot_cast;
-	BotArgumentDispatch[EVENT_CAST_ON] = handle_bot_cast;
-	BotArgumentDispatch[EVENT_COMBAT] = handle_bot_combat;
-	BotArgumentDispatch[EVENT_DEATH] = handle_bot_death;
-	BotArgumentDispatch[EVENT_DEATH_COMPLETE] = handle_bot_death;
-	BotArgumentDispatch[EVENT_POPUP_RESPONSE] = handle_bot_popup_response;
-	BotArgumentDispatch[EVENT_SAY] = handle_bot_say;
-	BotArgumentDispatch[EVENT_SIGNAL] = handle_bot_signal;
-	BotArgumentDispatch[EVENT_SLAY] = handle_bot_slay;
-	BotArgumentDispatch[EVENT_TARGET_CHANGE] = handle_bot_target_change;
-	BotArgumentDispatch[EVENT_TIMER] = handle_bot_timer;
-	BotArgumentDispatch[EVENT_TRADE] = handle_bot_trade;
-	BotArgumentDispatch[EVENT_USE_SKILL] = handle_bot_use_skill;
-	BotArgumentDispatch[EVENT_PAYLOAD] = handle_bot_payload;
+	BotArgumentDispatch[EVENT_CAST]             = handle_bot_cast;
+	BotArgumentDispatch[EVENT_CAST_BEGIN]       = handle_bot_cast;
+	BotArgumentDispatch[EVENT_CAST_ON]          = handle_bot_cast;
+	BotArgumentDispatch[EVENT_COMBAT]           = handle_bot_combat;
+	BotArgumentDispatch[EVENT_DEATH]            = handle_bot_death;
+	BotArgumentDispatch[EVENT_DEATH_COMPLETE]   = handle_bot_death;
+	BotArgumentDispatch[EVENT_POPUP_RESPONSE]   = handle_bot_popup_response;
+	BotArgumentDispatch[EVENT_SAY]              = handle_bot_say;
+	BotArgumentDispatch[EVENT_SIGNAL]           = handle_bot_signal;
+	BotArgumentDispatch[EVENT_SLAY]             = handle_bot_slay;
+	BotArgumentDispatch[EVENT_TARGET_CHANGE]    = handle_bot_target_change;
+	BotArgumentDispatch[EVENT_TIMER]            = handle_bot_timer;
+	BotArgumentDispatch[EVENT_TRADE]            = handle_bot_trade;
+	BotArgumentDispatch[EVENT_USE_SKILL]        = handle_bot_use_skill;
+	BotArgumentDispatch[EVENT_PAYLOAD]          = handle_bot_payload;
+	BotArgumentDispatch[EVENT_EQUIP_ITEM_BOT]   = handle_bot_equip_item;
+	BotArgumentDispatch[EVENT_UNEQUIP_ITEM_BOT] = handle_bot_equip_item;
+	BotArgumentDispatch[EVENT_DAMAGE_GIVEN]     = handle_bot_damage;
+	BotArgumentDispatch[EVENT_DAMAGE_TAKEN]     = handle_bot_damage;
 #endif
 
 	L = nullptr;
@@ -323,7 +339,7 @@ LuaParser::~LuaParser() {
 	}
 }
 
-int LuaParser::EventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
+int LuaParser::EventNPC(QuestEventID evt, NPC* npc, Mob *init, const std::string& data, uint32 extra_data,
 						std::vector<std::any> *extra_pointers) {
 	evt = ConvertLuaEvent(evt);
 	if(evt >= _LargestEventID) {
@@ -342,7 +358,7 @@ int LuaParser::EventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data,
 	return _EventNPC(package_name, evt, npc, init, data, extra_data, extra_pointers);
 }
 
-int LuaParser::EventGlobalNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
+int LuaParser::EventGlobalNPC(QuestEventID evt, NPC* npc, Mob *init, const std::string& data, uint32 extra_data,
 							  std::vector<std::any> *extra_pointers) {
 	evt = ConvertLuaEvent(evt);
 	if(evt >= _LargestEventID) {
@@ -360,7 +376,7 @@ int LuaParser::EventGlobalNPC(QuestEventID evt, NPC* npc, Mob *init, std::string
 	return _EventNPC("global_npc", evt, npc, init, data, extra_data, extra_pointers);
 }
 
-int LuaParser::_EventNPC(std::string package_name, QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
+int LuaParser::_EventNPC(std::string package_name, QuestEventID evt, NPC* npc, Mob *init, const std::string& data, uint32 extra_data,
 						 std::vector<std::any> *extra_pointers, luabind::adl::object *l_func) {
 	const char *sub_name = LuaEvents[evt];
 
@@ -420,7 +436,7 @@ int LuaParser::_EventNPC(std::string package_name, QuestEventID evt, NPC* npc, M
 	return 0;
 }
 
-int LuaParser::EventPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data,
+int LuaParser::EventPlayer(QuestEventID evt, Client *client, const std::string& data, uint32 extra_data,
 		std::vector<std::any> *extra_pointers) {
 	evt = ConvertLuaEvent(evt);
 	if(evt >= _LargestEventID) {
@@ -438,7 +454,7 @@ int LuaParser::EventPlayer(QuestEventID evt, Client *client, std::string data, u
 	return _EventPlayer("player", evt, client, data, extra_data, extra_pointers);
 }
 
-int LuaParser::EventGlobalPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data,
+int LuaParser::EventGlobalPlayer(QuestEventID evt, Client *client, const std::string& data, uint32 extra_data,
 		std::vector<std::any> *extra_pointers) {
 	evt = ConvertLuaEvent(evt);
 	if(evt >= _LargestEventID) {
@@ -456,7 +472,7 @@ int LuaParser::EventGlobalPlayer(QuestEventID evt, Client *client, std::string d
 	return _EventPlayer("global_player", evt, client, data, extra_data, extra_pointers);
 }
 
-int LuaParser::_EventPlayer(std::string package_name, QuestEventID evt, Client *client, std::string data, uint32 extra_data,
+int LuaParser::_EventPlayer(std::string package_name, QuestEventID evt, Client *client, const std::string& data, uint32 extra_data,
 							std::vector<std::any> *extra_pointers, luabind::adl::object *l_func) {
 	const char *sub_name = LuaEvents[evt];
 	int start = lua_gettop(L);
@@ -514,7 +530,7 @@ int LuaParser::_EventPlayer(std::string package_name, QuestEventID evt, Client *
 	return 0;
 }
 
-int LuaParser::EventItem(QuestEventID evt, Client *client, EQ::ItemInstance *item, Mob *mob, std::string data, uint32 extra_data,
+int LuaParser::EventItem(QuestEventID evt, Client *client, EQ::ItemInstance *item, Mob *mob, const std::string& data, uint32 extra_data,
 		std::vector<std::any> *extra_pointers) {
 	evt = ConvertLuaEvent(evt);
 	if(evt >= _LargestEventID) {
@@ -535,7 +551,7 @@ int LuaParser::EventItem(QuestEventID evt, Client *client, EQ::ItemInstance *ite
 }
 
 int LuaParser::_EventItem(std::string package_name, QuestEventID evt, Client *client, EQ::ItemInstance *item, Mob *mob,
-						  std::string data, uint32 extra_data, std::vector<std::any> *extra_pointers, luabind::adl::object *l_func) {
+						  const std::string& data, uint32 extra_data, std::vector<std::any> *extra_pointers, luabind::adl::object *l_func) {
 	const char *sub_name = LuaEvents[evt];
 
 	int start = lua_gettop(L);
@@ -599,7 +615,7 @@ int LuaParser::_EventItem(std::string package_name, QuestEventID evt, Client *cl
 	return 0;
 }
 
-int LuaParser::EventSpell(QuestEventID evt, Mob* mob, Client *client, uint32 spell_id, std::string data, uint32 extra_data,
+int LuaParser::EventSpell(QuestEventID evt, Mob* mob, Client *client, uint32 spell_id, const std::string& data, uint32 extra_data,
 						  std::vector<std::any> *extra_pointers) {
 	evt = ConvertLuaEvent(evt);
 	if(evt >= _LargestEventID) {
@@ -615,7 +631,7 @@ int LuaParser::EventSpell(QuestEventID evt, Mob* mob, Client *client, uint32 spe
 	return _EventSpell(package_name, evt, mob, client, spell_id, data, extra_data, extra_pointers);
 }
 
-int LuaParser::_EventSpell(std::string package_name, QuestEventID evt, Mob* mob, Client *client, uint32 spell_id, std::string data, uint32 extra_data,
+int LuaParser::_EventSpell(std::string package_name, QuestEventID evt, Mob* mob, Client *client, uint32 spell_id, const std::string& data, uint32 extra_data,
 						   std::vector<std::any> *extra_pointers, luabind::adl::object *l_func) {
 	const char *sub_name = LuaEvents[evt];
 
@@ -681,7 +697,7 @@ int LuaParser::_EventSpell(std::string package_name, QuestEventID evt, Mob* mob,
 	return 0;
 }
 
-int LuaParser::EventEncounter(QuestEventID evt, std::string encounter_name, std::string data, uint32 extra_data, std::vector<std::any> *extra_pointers) {
+int LuaParser::EventEncounter(QuestEventID evt, std::string encounter_name, const std::string& data, uint32 extra_data, std::vector<std::any> *extra_pointers) {
 	evt = ConvertLuaEvent(evt);
 	if(evt >= _LargestEventID) {
 		return 0;
@@ -696,7 +712,7 @@ int LuaParser::EventEncounter(QuestEventID evt, std::string encounter_name, std:
 	return _EventEncounter(package_name, evt, encounter_name, data, extra_data, extra_pointers);
 }
 
-int LuaParser::_EventEncounter(std::string package_name, QuestEventID evt, std::string encounter_name, std::string data, uint32 extra_data,
+int LuaParser::_EventEncounter(std::string package_name, QuestEventID evt, std::string encounter_name, const std::string& data, uint32 extra_data,
 							   std::vector<std::any> *extra_pointers) {
 	const char *sub_name = LuaEvents[evt];
 
@@ -1226,7 +1242,7 @@ void LuaParser::MapFunctions(lua_State *L) {
 	}
 }
 
-int LuaParser::DispatchEventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
+int LuaParser::DispatchEventNPC(QuestEventID evt, NPC* npc, Mob *init, const std::string& data, uint32 extra_data,
 								 std::vector<std::any> *extra_pointers) {
 	evt = ConvertLuaEvent(evt);
 	if(evt >= _LargestEventID) {
@@ -1272,7 +1288,7 @@ int LuaParser::DispatchEventNPC(QuestEventID evt, NPC* npc, Mob *init, std::stri
     return ret;
 }
 
-int LuaParser::DispatchEventPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data,
+int LuaParser::DispatchEventPlayer(QuestEventID evt, Client *client, const std::string& data, uint32 extra_data,
 									std::vector<std::any> *extra_pointers) {
 	evt = ConvertLuaEvent(evt);
 	if(evt >= _LargestEventID) {
@@ -1301,7 +1317,7 @@ int LuaParser::DispatchEventPlayer(QuestEventID evt, Client *client, std::string
     return ret;
 }
 
-int LuaParser::DispatchEventItem(QuestEventID evt, Client *client, EQ::ItemInstance *item, Mob *mob, std::string data, uint32 extra_data,
+int LuaParser::DispatchEventItem(QuestEventID evt, Client *client, EQ::ItemInstance *item, Mob *mob, const std::string& data, uint32 extra_data,
 								  std::vector<std::any> *extra_pointers) {
 	evt = ConvertLuaEvent(evt);
 	if(evt >= _LargestEventID) {
@@ -1347,7 +1363,7 @@ int LuaParser::DispatchEventItem(QuestEventID evt, Client *client, EQ::ItemInsta
     return ret;
 }
 
-int LuaParser::DispatchEventSpell(QuestEventID evt, Mob* mob, Client *client, uint32 spell_id, std::string data, uint32 extra_data,
+int LuaParser::DispatchEventSpell(QuestEventID evt, Mob* mob, Client *client, uint32 spell_id, const std::string& data, uint32 extra_data,
 								   std::vector<std::any> *extra_pointers) {
 	evt = ConvertLuaEvent(evt);
 	if(evt >= _LargestEventID) {
@@ -1501,7 +1517,7 @@ int LuaParser::EventBot(
 	QuestEventID evt,
 	Bot *bot,
 	Mob *init,
-	std::string data,
+	const std::string& data,
 	uint32 extra_data,
 	std::vector<std::any> *extra_pointers
 ) {
@@ -1525,7 +1541,7 @@ int LuaParser::EventGlobalBot(
 	QuestEventID evt,
 	Bot *bot,
 	Mob *init,
-	std::string data,
+	const std::string& data,
 	uint32 extra_data,
 	std::vector<std::any> *extra_pointers
 ) {
@@ -1550,7 +1566,7 @@ int LuaParser::_EventBot(
 	QuestEventID evt,
 	Bot *bot,
 	Mob *init,
-	std::string data,
+	const std::string& data,
 	uint32 extra_data,
 	std::vector<std::any> *extra_pointers,
 	luabind::adl::object *l_func
@@ -1616,7 +1632,7 @@ int LuaParser::DispatchEventBot(
 	QuestEventID evt,
 	Bot *bot,
 	Mob *init,
-	std::string data,
+	const std::string& data,
 	uint32 extra_data,
 	std::vector<std::any> *extra_pointers
 ) {

@@ -507,13 +507,19 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 					cursordelete = true;	// otherwise, we delete the new one
 			}
 
-			if (item->RecastDelay)
-				m_inst->SetRecastTimestamp(
-				    database.GetItemRecastTimestamp(sender->CharacterID(), item->RecastType));
+			if (item->RecastDelay) {
+				if (item->RecastType != RECAST_TYPE_UNLINKED_ITEM) {
+					m_inst->SetRecastTimestamp(
+						database.GetItemRecastTimestamp(sender->CharacterID(), item->RecastType));
+				} else {
+					m_inst->SetRecastTimestamp(
+						database.GetItemRecastTimestamp(sender->CharacterID(), item->ID));
+				}
+			}
 
 			std::string export_string = fmt::format("{}", item->ID);
 			std::vector<std::any> args;
-			args.push_back(m_inst);
+			args.emplace_back(m_inst);
 			if(parse->EventPlayer(EVENT_PLAYER_PICKUP, sender, export_string, GetID(), &args))
 			{
 				auto outapp = new EQApplicationPacket(OP_ClickObject, sizeof(ClickObject_Struct));

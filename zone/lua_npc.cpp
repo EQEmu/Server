@@ -701,6 +701,66 @@ void Lua_NPC::SetKeepsSoldItems(bool keeps_sold_items) {
 	self->SetKeepsSoldItems(keeps_sold_items);
 }
 
+bool Lua_NPC::IsLDoNTrapped() {
+	Lua_Safe_Call_Bool();
+	return self->IsLDoNTrapped();
+}
+
+void Lua_NPC::SetLDoNTrapped(bool is_trapped) {
+	Lua_Safe_Call_Void();
+	self->SetLDoNTrapped(is_trapped);
+}
+
+uint8 Lua_NPC::GetLDoNTrapType() {
+	Lua_Safe_Call_Int();
+	return self->GetLDoNTrapType();
+}
+
+void Lua_NPC::SetLDoNTrapType(uint8 trap_type) {
+	Lua_Safe_Call_Void();
+	self->SetLDoNTrapType(trap_type);
+}
+
+uint16 Lua_NPC::GetLDoNTrapSpellID() {
+	Lua_Safe_Call_Int();
+	return self->GetLDoNTrapSpellID();
+}
+
+void Lua_NPC::SetLDoNTrapSpellID(uint16 spell_id) {
+	Lua_Safe_Call_Void();
+	self->SetLDoNTrapSpellID(spell_id);
+}
+
+bool Lua_NPC::IsLDoNLocked() {
+	Lua_Safe_Call_Bool();
+	return self->IsLDoNLocked();
+}
+
+void Lua_NPC::SetLDoNLocked(bool is_locked) {
+	Lua_Safe_Call_Void();
+	self->SetLDoNLocked(is_locked);
+}
+
+uint16 Lua_NPC::GetLDoNLockedSkill() {
+	Lua_Safe_Call_Int();
+	return self->GetLDoNLockedSkill();
+}
+
+void Lua_NPC::SetLDoNLockedSkill(uint16 skill_value) {
+	Lua_Safe_Call_Void();
+	self->SetLDoNLockedSkill(skill_value);
+}
+
+bool Lua_NPC::IsLDoNTrapDetected() {
+	Lua_Safe_Call_Bool();
+	return self->IsLDoNTrapDetected();
+}
+
+void Lua_NPC::SetLDoNTrapDetected(bool is_detected) {
+	Lua_Safe_Call_Void();
+	self->SetLDoNTrapDetected(is_detected);
+}
+
 luabind::scope lua_register_npc() {
 	return luabind::class_<Lua_NPC, Lua_Mob>("NPC")
 	.def(luabind::constructor<>())
@@ -753,6 +813,9 @@ luabind::scope lua_register_npc() {
 	.def("GetMaxDamage", (uint32(Lua_NPC::*)(int))&Lua_NPC::GetMaxDamage)
 	.def("GetMaxWp", (int(Lua_NPC::*)(void))&Lua_NPC::GetMaxWp)
 	.def("GetMinDMG", (uint32(Lua_NPC::*)(void))&Lua_NPC::GetMinDMG)
+	.def("GetLDoNLockedSkill", (uint16(Lua_NPC::*)(void))&Lua_NPC::GetLDoNLockedSkill)
+	.def("GetLDoNTrapType", (uint8(Lua_NPC::*)(void))&Lua_NPC::GetLDoNTrapType)
+	.def("GetLDoNTrapSpellID", (uint16(Lua_NPC::*)(void))&Lua_NPC::GetLDoNTrapSpellID)
 	.def("GetNPCFactionID", (int(Lua_NPC::*)(void))&Lua_NPC::GetNPCFactionID)
 	.def("GetNPCHate", (int64(Lua_NPC::*)(Lua_Mob))&Lua_NPC::GetNPCHate)
 	.def("GetNPCSpellsID", (int(Lua_NPC::*)(void))&Lua_NPC::GetNPCSpellsID)
@@ -784,6 +847,9 @@ luabind::scope lua_register_npc() {
 	.def("HasItem", (bool(Lua_NPC::*)(uint32))&Lua_NPC::HasItem)
 	.def("IsAnimal", (bool(Lua_NPC::*)(void))&Lua_NPC::IsAnimal)
 	.def("IsGuarding", (bool(Lua_NPC::*)(void))&Lua_NPC::IsGuarding)
+	.def("IsLDoNLocked", (bool(Lua_NPC::*)(void))&Lua_NPC::IsLDoNLocked)
+	.def("IsLDoNTrapped", (bool(Lua_NPC::*)(void))&Lua_NPC::IsLDoNTrapped)
+	.def("IsLDoNTrapDetected", (bool(Lua_NPC::*)(void))&Lua_NPC::IsLDoNTrapDetected)
 	.def("IsOnHatelist", (bool(Lua_NPC::*)(Lua_Mob))&Lua_NPC::IsOnHatelist)
 	.def("IsRaidTarget", (bool(Lua_NPC::*)(void))&Lua_NPC::IsRaidTarget)
 	.def("IsRareSpawn", (bool(Lua_NPC::*)(void))&Lua_NPC::IsRareSpawn)
@@ -817,6 +883,12 @@ luabind::scope lua_register_npc() {
 	.def("SetGold", (void(Lua_NPC::*)(uint32))&Lua_NPC::SetGold)
 	.def("SetGrid", (void(Lua_NPC::*)(int))&Lua_NPC::SetGrid)
 	.def("SetKeepsSoldItems", (void(Lua_NPC::*)(bool))&Lua_NPC::SetKeepsSoldItems)
+	.def("SetLDoNLocked", (void(Lua_NPC::*)(bool))&Lua_NPC::SetLDoNLocked)
+	.def("SetLDoNLockedSkill", (void(Lua_NPC::*)(uint16))&Lua_NPC::SetLDoNLockedSkill)
+	.def("SetLDoNTrapped", (void(Lua_NPC::*)(bool))&Lua_NPC::SetLDoNTrapped)
+	.def("SetLDoNTrapDetected", (void(Lua_NPC::*)(bool))&Lua_NPC::SetLDoNTrapDetected)
+	.def("SetLDoNTrapSpellID", (void(Lua_NPC::*)(uint16))&Lua_NPC::SetLDoNTrapSpellID)
+	.def("SetLDoNTrapType", (void(Lua_NPC::*)(uint8))&Lua_NPC::SetLDoNTrapType)
 	.def("SetNPCFactionID", (void(Lua_NPC::*)(int))&Lua_NPC::SetNPCFactionID)
 	.def("SetPetSpellID", (void(Lua_NPC::*)(int))&Lua_NPC::SetPetSpellID)
 	.def("SetPlatinum", (void(Lua_NPC::*)(uint32))&Lua_NPC::SetPlatinum)

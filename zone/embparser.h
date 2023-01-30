@@ -52,7 +52,7 @@ public:
 		QuestEventID evt,
 		NPC* npc,
 		Mob *init,
-		std::string data,
+		const std::string& data,
 		uint32 extra_data,
 		std::vector<std::any> *extra_pointers
 	);
@@ -60,21 +60,21 @@ public:
 		QuestEventID evt,
 		NPC* npc,
 		Mob *init,
-		std::string data,
+		const std::string& data,
 		uint32 extra_data,
 		std::vector<std::any> *extra_pointers
 	);
 	virtual int EventPlayer(
 		QuestEventID evt,
 		Client *client,
-		std::string data,
+		const std::string& data,
 		uint32 extra_data,
 		std::vector<std::any> *extra_pointers
 	);
 	virtual int EventGlobalPlayer(
 		QuestEventID evt,
 		Client *client,
-		std::string data,
+		const std::string& data,
 		uint32 extra_data,
 		std::vector<std::any> *extra_pointers
 	);
@@ -83,7 +83,7 @@ public:
 		Client *client,
 		EQ::ItemInstance *item,
 		Mob *mob,
-		std::string data,
+		const std::string& data,
 		uint32 extra_data,
 		std::vector<std::any> *extra_pointers
 	);
@@ -92,7 +92,7 @@ public:
 		Mob* mob,
 		Client *client,
 		uint32 spell_id,
-		std::string data,
+		const std::string& data,
 		uint32 extra_data,
 		std::vector<std::any> *extra_pointers
 	);
@@ -100,7 +100,7 @@ public:
 		QuestEventID evt,
 		Bot *bot,
 		Mob *init,
-		std::string data,
+		const std::string& data,
 		uint32 extra_data,
 		std::vector<std::any> *extra_pointers
 	);
@@ -108,7 +108,7 @@ public:
 		QuestEventID evt,
 		Bot *bot,
 		Mob *init,
-		std::string data,
+		const std::string& data,
 		uint32 extra_data,
 		std::vector<std::any> *extra_pointers
 	);

@@ -65,12 +65,12 @@ void ZoneLaunch::Start() {
 
 	if(m_port) {
 		std::string arg = m_zone + std::string(":") + std::to_string(m_port);
-		spec->args.push_back(arg);
+		spec->args.emplace_back(arg);
 	} else {
-		spec->args.push_back(m_zone);
+		spec->args.emplace_back(m_zone);
 	}
 
-	spec->args.push_back(m_launcherName);
+	spec->args.emplace_back(m_launcherName);
 	spec->handler = this;
 	spec->logFile = m_config->LogPrefix + m_zone + m_config->LogSuffix;
 

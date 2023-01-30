@@ -766,6 +766,10 @@ RULE_INT(Faction, DubiouslyFactionMinimum, -500, "Minimum faction for dubiously"
 RULE_INT(Faction, ThreateninglyFactionMinimum, -750, "Minimum faction for threateningly")
 RULE_CATEGORY_END()
 
+RULE_CATEGORY(Analytics)
+RULE_BOOL(Analytics, CrashReporting, true, "Automatic crash reporting analytics for EQEmu Server developers")
+RULE_CATEGORY_END()
+
 RULE_CATEGORY(Logging)
 RULE_BOOL(Logging, PrintFileFunctionAndLine, false, "Ex: [World Server] [net.cpp::main:309] Loading variables...")
 RULE_BOOL(Logging, WorldGMSayLogging, true, "Relay worldserver logging to zone processes via GM say output")

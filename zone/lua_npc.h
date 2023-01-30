@@ -161,6 +161,18 @@ public:
 	void SendPayload(int payload_id, std::string payload_value);
 	bool GetKeepsSoldItems();
 	void SetKeepsSoldItems(bool keeps_sold_items);
+	bool IsLDoNTrapped();
+	void SetLDoNTrapped(bool is_trapped);
+	uint8 GetLDoNTrapType();
+	void SetLDoNTrapType(uint8 trap_type);
+	uint16 GetLDoNTrapSpellID();
+	void SetLDoNTrapSpellID(uint16 spell_id);
+	bool IsLDoNLocked();
+	void SetLDoNLocked(bool is_locked);
+	uint16 GetLDoNLockedSkill();
+	void SetLDoNLockedSkill(uint16 skill_value);
+	bool IsLDoNTrapDetected();
+	void SetLDoNTrapDetected(bool is_detected);
 };
 
 #endif

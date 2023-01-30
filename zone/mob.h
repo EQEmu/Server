@@ -472,7 +472,7 @@ public:
 	inline void SetEndurUpkeep(bool val) { endur_upkeep = val; }
 	bool HasBuffWithSpellGroup(int spell_group);
 	void SetAppearenceEffects(int32 slot, int32 value);
-	void GetAppearenceEffects();
+	void ListAppearanceEffects(Client* c);
 	void ClearAppearenceEffects();
 	void SendSavedAppearenceEffects(Client *receiver);
 	void SetBuffDuration(int spell_id, int duration = 0);

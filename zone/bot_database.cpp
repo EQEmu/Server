@@ -173,13 +173,23 @@ bool BotDatabase::QueryNameAvailablity(const std::string& bot_name, bool& availa
 
 	query = fmt::format(
 		"SELECT b.bot_id FROM bot_data b "
-		"INNER JOIN character_data c ON b.`name` = c.`name` "
-		"WHERE b.`name` LIKE '{0}' OR c.`name` LIKE '{0}' "
+		"WHERE b.`name` LIKE '{}' "
 		"LIMIT 1",
 		bot_name
 	);
 
 	auto results = database.QueryDatabase(query);
+
+	if (!results.RowCount()) {
+		query = fmt::format(
+			"SELECT c.id FROM character_data c "
+			"WHERE c.`name` LIKE '{}' "
+			"LIMIT 1",
+			bot_name
+		);
+		results = database.QueryDatabase(query);
+	}
+
 	if (!results.Success()) {
 		return false;
 	}
@@ -2348,7 +2358,7 @@ bool BotDatabase::LoadLeaderIDByBotGroupID(const uint32 group_id, uint32& leader
 bool BotDatabase::LoadBotGroupNameByBotGroupID(const uint32 group_id, std::string& botgroup_name)
 {
 	if (!group_id) {
-		false;
+		return false;
 	}
 
 	query = fmt::format(
@@ -2536,18 +2546,18 @@ bool BotDatabase::RemoveMemberFromBotGroup(const uint32 member_id)
 	return true;
 }
 
-bool BotDatabase::LoadBotGroupIDForLoadBotGroup(const uint32 owner_id, const std::string& group_name, uint32& botgroup_id)
+bool BotDatabase::LoadBotGroupIDForLoadBotGroup(const uint32 owner_id, std::string_view group_name, uint32& botgroup_id)
 {
 	if (!owner_id || group_name.empty()) {
 		return false;
 	}
 
 	query = fmt::format(
-		"SELECT groups_index, group_name FROM "
+		"SELECT bg.groups_index, group_name FROM "
 		"bot_groups bg INNER JOIN bot_group_members bgm "
 		"ON bg.groups_index = bgm.groups_index "
 		"WHERE bgm.bot_id IN "
-		"(SELECT bot_id FROM bot_data WHERE WHERE owner_id = {})",
+		"(SELECT bot_id FROM bot_data WHERE owner_id = {})",
 		owner_id
 	);
 
@@ -2606,7 +2616,7 @@ bool BotDatabase::LoadBotGroup(const std::string& group_name, std::map<uint32, s
 	return true;
 }
 
-bool BotDatabase::LoadBotGroupsListByOwnerID(const uint32 owner_id, std::list<std::pair<std::string, std::string>>& botgroups_list)
+bool BotDatabase::LoadBotGroupsListByOwnerID(const uint32 owner_id, std::list<std::pair<std::string, uint32>>& botgroups_list)
 {
 	if (!owner_id) {
 		return false;
@@ -2614,11 +2624,11 @@ bool BotDatabase::LoadBotGroupsListByOwnerID(const uint32 owner_id, std::list<st
 
 
 	query = fmt::format(
-		"SELECT group_name, group_leader_name FROM "
+		"SELECT DISTINCT(group_name), group_leader_id FROM "
 		"bot_groups bg INNER JOIN bot_group_members bgm "
 		"ON bg.groups_index = bgm.groups_index "
 		"WHERE bgm.bot_id IN "
-		"(SELECT bot_id FROM bot_data WHERE WHERE owner_id = {})",
+		"(SELECT bot_id FROM bot_data WHERE owner_id = {})",
 		owner_id
 	);
 
@@ -2632,7 +2642,7 @@ bool BotDatabase::LoadBotGroupsListByOwnerID(const uint32 owner_id, std::list<st
 	}
 
 	for (auto row : results) {
-		botgroups_list.push_back(std::pair<std::string, std::string>(row[0], row[1]));
+		botgroups_list.push_back(std::pair<std::string, uint32>(row[0], atoul(row[1])));
 	}
 
 	return true;
@@ -3113,6 +3123,30 @@ bool BotDatabase::SaveBotArcherSetting(const uint32 bot_id, const bool bot_arche
 	return true;
 }
 
+std::string BotDatabase::GetBotNameByID(const uint32 bot_id)
+{
+
+	if (!bot_id) {
+		return nullptr;
+	}
+	query = fmt::format(
+		"SELECT `name` FROM `bot_data` WHERE `bot_id` = {}",
+		bot_id
+	);
+	auto results = database.QueryDatabase(query);
+
+	if (!results.Success()) {
+		return nullptr;
+	}
+
+	if (results.RowCount() == 1) {
+		auto row = results.begin();
+		return row[0];
+	}
+
+	return nullptr;
+}
+
 /* fail::Bot functions   */
 const char* BotDatabase::fail::LoadBotsList() { return "Failed to bots list"; }
 const char* BotDatabase::fail::LoadOwnerID() { return "Failed to load owner ID"; }
@@ -3178,3 +3212,4 @@ const char* BotDatabase::fail::DeleteHealRotation() { return "Failed to delete h
 const char* BotDatabase::fail::DeleteAllHealRotations() { return "Failed to delete all heal rotations"; }
 
 /* fail::Bot miscellaneous functions   */
+const char* BotDatabase::fail::GetBotNameByID() { return "Failed to get bot name by bot ID"; }

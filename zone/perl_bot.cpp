@@ -385,6 +385,66 @@ void Perl_Bot_Camp(Bot* self, bool save_to_database) // @categories Script Utili
 	self->Camp(save_to_database);
 }
 
+perl::array Perl_Bot_GetAugmentIDsBySlotID(Bot* self, int16 slot_id)
+{
+	perl::array result;
+	auto augments = self->GetInv().GetAugmentIDsBySlotID(slot_id);
+
+	for (int i = 0; i < augments.size(); ++i) {
+		result.push_back(augments[i]);
+	}
+
+	return result;
+}
+
+void Perl_Bot_AddItem(Bot *self, perl::reference table_ref)
+{
+	perl::hash table = table_ref;
+	if (!table.exists("item_id") || !table.exists("charges"))
+	{
+		return;
+	}
+
+	uint32 item_id       = table["item_id"];
+	int16 charges        = table["charges"];
+	uint32 augment_one   = table.exists("augment_one") ? table["augment_one"] : 0;
+	uint32 augment_two   = table.exists("augment_two") ? table["augment_two"] : 0;
+	uint32 augment_three = table.exists("augment_three") ? table["augment_three"] : 0;
+	uint32 augment_four  = table.exists("augment_four") ? table["augment_four"] : 0;
+	uint32 augment_five  = table.exists("augment_five") ? table["augment_five"] : 0;
+	uint32 augment_six   = table.exists("augment_six") ? table["augment_six"] : 0;
+	bool attuned         = table.exists("attuned") && table["attuned"];
+	uint16 slot_id       = table.exists("slot_id") ? table["slot_id"] : EQ::invslot::slotCursor;
+
+	if (slot_id <= EQ::invslot::slotAmmo) {
+		self->AddBotItem(
+				slot_id,
+				item_id,
+				charges,
+				attuned,
+				augment_one,
+				augment_two,
+				augment_three,
+				augment_four,
+				augment_five,
+				augment_six
+		);
+	} else {
+		self->GetOwner()->CastToClient()->SummonItem(
+				item_id,
+				charges,
+				augment_one,
+				augment_two,
+				augment_three,
+				augment_four,
+				augment_five,
+				augment_six,
+				attuned,
+				slot_id
+		);
+	}
+}
+
 void perl_register_bot()
 {
 	perl::interpreter state(PERL_GET_THX);
@@ -400,6 +460,7 @@ void perl_register_bot()
 	package.add("AddBotItem", (void(*)(Bot*, uint16, uint32, uint16, bool, uint32, uint32, uint32, uint32))&Perl_Bot_AddBotItem);
 	package.add("AddBotItem", (void(*)(Bot*, uint16, uint32, uint16, bool, uint32, uint32, uint32, uint32, uint32))&Perl_Bot_AddBotItem);
 	package.add("AddBotItem", (void(*)(Bot*, uint16, uint32, uint16, bool, uint32, uint32, uint32, uint32, uint32, uint32))&Perl_Bot_AddBotItem);
+	package.add("AddItem", &Perl_Bot_AddItem);
 	package.add("ApplySpell", (void(*)(Bot*, int))&Perl_Bot_ApplySpell);
 	package.add("ApplySpell", (void(*)(Bot*, int, int))&Perl_Bot_ApplySpell);
 	package.add("ApplySpell", (void(*)(Bot*, int, int, bool))&Perl_Bot_ApplySpell);
@@ -420,6 +481,7 @@ void perl_register_bot()
 	package.add("Fling", (void(*)(Bot*, float, float, float, float, bool, bool))&Perl_Bot_Fling);
 	package.add("GetAugmentAt", &Perl_Bot_GetAugmentAt);
 	package.add("GetAugmentIDAt", &Perl_Bot_GetAugmentIDAt);
+	package.add("GetAugmentIDsBySlotID", &Perl_Bot_GetAugmentIDsBySlotID);
 	package.add("GetBaseAGI", &Perl_Bot_GetBaseAGI);
 	package.add("GetBaseCHA", &Perl_Bot_GetBaseCHA);
 	package.add("GetBaseDEX", &Perl_Bot_GetBaseDEX);

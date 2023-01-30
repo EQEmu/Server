@@ -875,7 +875,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 		}
 
 		bool quest_npc = false;
-		if (parse->HasQuestSub(tradingWith->GetNPCTypeID(), EVENT_TRADE, true)) {
+		if (parse->HasQuestSub(tradingWith->GetNPCTypeID(), EVENT_TRADE)) {
 			// This is a quest NPC
 			quest_npc = true;
 		}
