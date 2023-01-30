@@ -1254,18 +1254,16 @@ void handle_player_item_click(
 	lua_setfield(L, -2, "slot_id");
 
 	if (extra_pointers && extra_pointers->size() >= 1) {
-		const auto* item = std::any_cast<EQ::ItemInstance*>(extra_pointers->at(0));
-
-		lua_pushnumber(L, item->GetID());
+		lua_pushnumber(L, std::any_cast<EQ::ItemInstance*>(extra_pointers->at(0))->GetID());
 		lua_setfield(L, -2, "item_id");
 
-		lua_pushstring(L, item->GetItem()->Name);
+		lua_pushstring(L, std::any_cast<EQ::ItemInstance*>(extra_pointers->at(0))->GetItem()->Name);
 		lua_setfield(L, -2, "item_name");
 
-		lua_pushnumber(L, item->GetItem()->Click.Effect);
+		lua_pushnumber(L, std::any_cast<EQ::ItemInstance*>(extra_pointers->at(0))->GetItem()->Click.Effect);
 		lua_setfield(L, -2, "spell_id");
 
-		Lua_ItemInst l_item(*item);
+		Lua_ItemInst l_item(std::any_cast<EQ::ItemInstance*>(extra_pointers->at(0)));
 		luabind::adl::object l_item_o = luabind::adl::object(L, l_item);
 		l_item_o.push(L);
 		lua_setfield(L, -2, "item");
