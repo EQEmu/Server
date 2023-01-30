@@ -3827,28 +3827,28 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 		const auto has_npc_given_event = (
 			(
 				IsNPC() &&
-				parse->HasQuestSub(CastToNPC()->GetNPCTypeID(), EVENT_DAMAGE_GIVEN, true)
+				parse->HasQuestSub(CastToNPC()->GetNPCTypeID(), EVENT_DAMAGE_GIVEN)
 			) ||
 			(
 				attacker->IsNPC() &&
-				parse->HasQuestSub(attacker->CastToNPC()->GetNPCTypeID(), EVENT_DAMAGE_GIVEN, true)
+				parse->HasQuestSub(attacker->CastToNPC()->GetNPCTypeID(), EVENT_DAMAGE_GIVEN)
 			)
 		);
 
 		const auto has_npc_taken_event = (
 			(
 				IsNPC() &&
-				parse->HasQuestSub(CastToNPC()->GetNPCTypeID(), EVENT_DAMAGE_TAKEN, true)
+				parse->HasQuestSub(CastToNPC()->GetNPCTypeID(), EVENT_DAMAGE_TAKEN)
 			) ||
 			(
 				attacker->IsNPC() &&
-				parse->HasQuestSub(attacker->CastToNPC()->GetNPCTypeID(), EVENT_DAMAGE_TAKEN, true)
+				parse->HasQuestSub(attacker->CastToNPC()->GetNPCTypeID(), EVENT_DAMAGE_TAKEN)
 			)
 		);
 
-		const auto has_player_given_event = parse->PlayerHasQuestSub(EVENT_DAMAGE_GIVEN, true);
+		const auto has_player_given_event = parse->PlayerHasQuestSub(EVENT_DAMAGE_GIVEN);
 
-		const auto has_player_taken_event = parse->PlayerHasQuestSub(EVENT_DAMAGE_TAKEN, true);
+		const auto has_player_taken_event = parse->PlayerHasQuestSub(EVENT_DAMAGE_TAKEN);
 
 		const auto has_given_event = (
 			has_bot_given_event ||

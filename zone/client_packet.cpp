@@ -4171,7 +4171,7 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 							auto* p_inst = (EQ::ItemInstance*) inst;
 							int i = 0;
 
-							if (parse->ItemHasQuestSub(p_inst, EVENT_ITEM_CLICK_CAST, true)) {
+							if (parse->ItemHasQuestSub(p_inst, EVENT_ITEM_CLICK_CAST)) {
 								i = parse->EventItem(
 									EVENT_ITEM_CLICK_CAST,
 									this,
@@ -4182,7 +4182,7 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 								);
 							}
 
-							if (parse->PlayerHasQuestSub(EVENT_ITEM_CLICK_CAST_CLIENT, true)) {
+							if (parse->PlayerHasQuestSub(EVENT_ITEM_CLICK_CAST_CLIENT)) {
 								std::vector<std::any> args;
 								args.emplace_back(p_inst);
 								i = parse->EventPlayer(EVENT_ITEM_CLICK_CAST_CLIENT, this, std::to_string(castspell->inventoryslot), 0, &args);
@@ -4209,7 +4209,7 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 
 						int i = 0;
 
-						if (parse->ItemHasQuestSub(p_inst, EVENT_ITEM_CLICK_CAST, true)) {
+						if (parse->ItemHasQuestSub(p_inst, EVENT_ITEM_CLICK_CAST)) {
 							i = parse->EventItem(
 								EVENT_ITEM_CLICK_CAST,
 								this,
@@ -4220,7 +4220,7 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 							);
 						}
 
-						if (parse->PlayerHasQuestSub(EVENT_ITEM_CLICK_CAST_CLIENT, true)) {
+						if (parse->PlayerHasQuestSub(EVENT_ITEM_CLICK_CAST_CLIENT)) {
 							std::vector<std::any> args;
 							args.emplace_back(p_inst);
 							i = parse->EventPlayer(EVENT_ITEM_CLICK_CAST_CLIENT, this, std::to_string(castspell->inventoryslot), 0, &args);
@@ -8874,11 +8874,11 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 	{
 		auto* p_inst = (EQ::ItemInstance*) inst;
 
-		if (parse->ItemHasQuestSub(p_inst, EVENT_ITEM_CLICK, true)) {
+		if (parse->ItemHasQuestSub(p_inst, EVENT_ITEM_CLICK)) {
 			parse->EventItem(EVENT_ITEM_CLICK, this, p_inst, nullptr, "", slot_id);
 		}
 
-		if (parse->PlayerHasQuestSub(EVENT_ITEM_CLICK_CLIENT, true)) {
+		if (parse->PlayerHasQuestSub(EVENT_ITEM_CLICK_CLIENT)) {
 			std::vector<std::any> args;
 			args.emplace_back(p_inst);
 			parse->EventPlayer(EVENT_ITEM_CLICK_CLIENT, this, std::to_string(slot_id), 0, &args);
@@ -8987,7 +8987,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 
 					int i = 0;
 
-					if (parse->ItemHasQuestSub(p_inst, EVENT_ITEM_CLICK_CAST, true)) {
+					if (parse->ItemHasQuestSub(p_inst, EVENT_ITEM_CLICK_CAST)) {
 						i = parse->EventItem(
 							EVENT_ITEM_CLICK_CAST,
 							this,
@@ -8998,7 +8998,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 						);
 					}
 
-					if (parse->PlayerHasQuestSub(EVENT_ITEM_CLICK_CAST_CLIENT, true)) {
+					if (parse->PlayerHasQuestSub(EVENT_ITEM_CLICK_CAST_CLIENT)) {
 						std::vector<std::any> args;
 						args.emplace_back(p_inst);
 						i = parse->EventPlayer(EVENT_ITEM_CLICK_CAST_CLIENT, this, std::to_string(slot_id), 0, &args);
@@ -9054,7 +9054,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 
 					int i = 0;
 
-					if (parse->ItemHasQuestSub(p_inst, EVENT_ITEM_CLICK_CAST, true)) {
+					if (parse->ItemHasQuestSub(p_inst, EVENT_ITEM_CLICK_CAST)) {
 						i = parse->EventItem(
 							EVENT_ITEM_CLICK_CAST,
 							this,
@@ -9065,7 +9065,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 						);
 					}
 
-					if (parse->PlayerHasQuestSub(EVENT_ITEM_CLICK_CAST_CLIENT, true)) {
+					if (parse->PlayerHasQuestSub(EVENT_ITEM_CLICK_CAST_CLIENT)) {
 						std::vector<std::any> args;
 						args.emplace_back(clickaug);
 						i = parse->EventPlayer(EVENT_ITEM_CLICK_CAST_CLIENT, this, std::to_string(slot_id), 0, &args);
