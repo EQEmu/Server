@@ -4627,7 +4627,11 @@ luabind::scope lua_register_events() {
 			luabind::value("augment_insert_client", static_cast<int>(EVENT_AUGMENT_INSERT_CLIENT)),
 			luabind::value("augment_remove_client", static_cast<int>(EVENT_AUGMENT_REMOVE_CLIENT)),
 			luabind::value("equip_item_bot", static_cast<int>(EVENT_EQUIP_ITEM_BOT)),
-			luabind::value("unequip_item_bot", static_cast<int>(EVENT_UNEQUIP_ITEM_BOT))
+			luabind::value("unequip_item_bot", static_cast<int>(EVENT_UNEQUIP_ITEM_BOT)),
+			luabind::value("damage_given", static_cast<int>(EVENT_DAMAGE_GIVEN)),
+			luabind::value("damage_taken", static_cast<int>(EVENT_DAMAGE_TAKEN)),
+			luabind::value("item_click_client", static_cast<int>(EVENT_ITEM_CLICK_CLIENT)),
+			luabind::value("item_click_cast_client", static_cast<int>(EVENT_ITEM_CLICK_CAST_CLIENT))
 		)];
 }
 

@@ -1235,10 +1235,38 @@ void handle_player_damage(
 	lua_setfield(L, -2, "special_attack");
 
 	if (extra_pointers && extra_pointers->size() >= 1) {
-		Lua_Mob l_mob(std::any_cast<Mob*>(extra_pointers->at(1)));
+		Lua_Mob l_mob(std::any_cast<Mob*>(extra_pointers->at(0)));
 		luabind::adl::object l_mob_o = luabind::adl::object(L, l_mob);
 		l_mob_o.push(L);
 		lua_setfield(L, -2, "other");
+	}
+}
+
+void handle_player_item_click(
+	QuestInterface *parse,
+	lua_State* L,
+	Client* client,
+	const std::string& data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+) {
+	lua_pushnumber(L, std::stoi(data));
+	lua_setfield(L, -2, "slot_id");
+
+	if (extra_pointers && extra_pointers->size() >= 1) {
+		lua_pushnumber(L, std::any_cast<EQ::ItemInstance*>(extra_pointers->at(0))->GetID());
+		lua_setfield(L, -2, "item_id");
+
+		lua_pushstring(L, std::any_cast<EQ::ItemInstance*>(extra_pointers->at(0))->GetItem()->Name);
+		lua_setfield(L, -2, "item_name");
+
+		lua_pushnumber(L, std::any_cast<EQ::ItemInstance*>(extra_pointers->at(0))->GetItem()->Click.Effect);
+		lua_setfield(L, -2, "spell_id");
+
+		Lua_ItemInst l_item(std::any_cast<EQ::ItemInstance*>(extra_pointers->at(0)));
+		luabind::adl::object l_item_o = luabind::adl::object(L, l_item);
+		l_item_o.push(L);
+		lua_setfield(L, -2, "item");
 	}
 }
 

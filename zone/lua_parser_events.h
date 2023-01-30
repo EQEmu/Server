@@ -661,6 +661,15 @@ void handle_player_damage(
 	std::vector<std::any> *extra_pointers
 );
 
+void handle_player_item_click(
+	QuestInterface *parse,
+	lua_State* L,
+	Client* client,
+	const std::string& data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+);
+
 // Item
 void handle_item_click(
 	QuestInterface *parse,

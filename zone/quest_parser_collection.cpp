@@ -103,8 +103,8 @@ void QuestParserCollection::RemoveEncounter(const std::string name) {
 	}
 }
 
-bool QuestParserCollection::HasQuestSub(uint32 npcid, QuestEventID evt, bool check_encounters) {
-	return HasQuestSubLocal(npcid, evt) || HasQuestSubGlobal(evt) || (check_encounters && NPCHasEncounterSub(npcid, evt));
+bool QuestParserCollection::HasQuestSub(uint32 npcid, QuestEventID evt) {
+	return HasQuestSubLocal(npcid, evt) || HasQuestSubGlobal(evt) || NPCHasEncounterSub(npcid, evt);
 }
 
 bool QuestParserCollection::NPCHasEncounterSub(uint32 npc_id, QuestEventID evt) {
@@ -162,8 +162,8 @@ bool QuestParserCollection::HasQuestSubGlobal(QuestEventID evt) {
 	return false;
 }
 
-bool QuestParserCollection::PlayerHasQuestSub(QuestEventID evt, bool check_encounters) {
-	return PlayerHasQuestSubLocal(evt) || PlayerHasQuestSubGlobal(evt) || (check_encounters && PlayerHasEncounterSub(evt));
+bool QuestParserCollection::PlayerHasQuestSub(QuestEventID evt) {
+	return PlayerHasQuestSubLocal(evt) || PlayerHasQuestSubGlobal(evt) || PlayerHasEncounterSub(evt);
 }
 
 bool QuestParserCollection::PlayerHasEncounterSub(QuestEventID evt) {
@@ -207,8 +207,8 @@ bool QuestParserCollection::SpellHasEncounterSub(uint32 spell_id, QuestEventID e
 	return HasEncounterSub(evt, package_name);
 }
 
-bool QuestParserCollection::SpellHasQuestSub(uint32 spell_id, QuestEventID evt, bool check_encounters) {
-	if (check_encounters && SpellHasEncounterSub(spell_id, evt)) {
+bool QuestParserCollection::SpellHasQuestSub(uint32 spell_id, QuestEventID evt) {
+	if (SpellHasEncounterSub(spell_id, evt)) {
 		return true;
 	}
 
@@ -241,11 +241,11 @@ bool QuestParserCollection::ItemHasEncounterSub(EQ::ItemInstance* item, QuestEve
 	return false;
 }
 
-bool QuestParserCollection::ItemHasQuestSub(EQ::ItemInstance *itm, QuestEventID evt, bool check_encounters) {
+bool QuestParserCollection::ItemHasQuestSub(EQ::ItemInstance *itm, QuestEventID evt) {
 	if (itm == nullptr)
 		return false;
 
-	if (check_encounters && ItemHasEncounterSub(itm, evt)) {
+	if (ItemHasEncounterSub(itm, evt)) {
 		return true;
 	}
 
