@@ -3691,7 +3691,7 @@ void NPC::ReloadSpells() {
 	AI_AddNPCSpellsEffects(GetNPCSpellsEffectsID());
 }
 
-void NPC::ScaleNPC(uint8 npc_level) {
+void NPC::ScaleNPC(uint8 npc_level, bool always_scale_stats, bool always_scale_special_abilities) {
 	if (GetLevel() != npc_level) {
 		SetLevel(npc_level);
 		RecalculateSkills();
@@ -3699,7 +3699,7 @@ void NPC::ScaleNPC(uint8 npc_level) {
 	}
 
 	npc_scale_manager->ResetNPCScaling(this);
-	npc_scale_manager->ScaleNPC(this);
+	npc_scale_manager->ScaleNPC(this, always_scale_stats, always_scale_special_abilities);
 }
 
 bool NPC::IsGuard()
