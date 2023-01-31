@@ -3969,7 +3969,7 @@ bool QuestManager::DoAugmentSlotsMatch(uint32 item_one, uint32 item_two)
 	return true;
 }
 
-int8 QuestManager::DoesAugmentFit(EQ::ItemInstance* inst, uint32 augment_id)
+int8 QuestManager::DoesAugmentFit(EQ::ItemInstance* inst, uint32 augment_id, uint8 augment_slot)
 {
 	if (!inst) {
 		return INVALID_INDEX;
@@ -3977,6 +3977,13 @@ int8 QuestManager::DoesAugmentFit(EQ::ItemInstance* inst, uint32 augment_id)
 
 	const auto* aug_inst = database.GetItem(augment_id);
 	if (!aug_inst) {
+		return INVALID_INDEX;
+	}
+
+	if (
+		augment_slot != 255 &&
+		!inst->IsAugmentSlotAvailable(aug_inst->AugType, augment_slot)
+	) {
 		return INVALID_INDEX;
 	}
 
