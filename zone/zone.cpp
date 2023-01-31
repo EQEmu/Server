@@ -1231,6 +1231,8 @@ bool Zone::Init(bool is_static) {
 
 void Zone::ReloadStaticData() {
 	LogInfo("Reloading Zone Static Data");
+	entity_list.RemoveAllObjects(); //Ground spawns are also objects we clear list then fill it
+	entity_list.RemoveAllDoors(); //Some objects are also doors so clear list before filling
 
 	if (!content_db.LoadStaticZonePoints(&zone_point_list, GetShortName(), GetInstanceVersion())) {
 		LogError("Loading static zone points failed");
@@ -1249,14 +1251,12 @@ void Zone::ReloadStaticData() {
 		LogError("Reloading ground spawns failed. continuing");
 	}
 
-	entity_list.RemoveAllObjects();
 	LogInfo("Reloading World Objects from DB");
 	if (!LoadZoneObjects())
 	{
 		LogError("Reloading World Objects failed. continuing");
 	}
 
-	entity_list.RemoveAllDoors();
 	LoadZoneDoors();
 	entity_list.RespawnAllDoors();
 

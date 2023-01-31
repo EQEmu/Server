@@ -1939,30 +1939,12 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		content_service.SetExpansionContext()->ReloadContentFlags();
 		break;
 	}
-	case ServerOP_ReloadDoors:
-	{
-		if (zone && zone->IsLoaded()) {
-			zone->SendReloadMessage("Doors");
-			entity_list.RemoveAllDoors();
-			zone->LoadZoneDoors();
-			entity_list.RespawnAllDoors();
-		}
-		break;
-	}
 	case ServerOP_ReloadDzTemplates:
 	{
 		if (zone)
 		{
 			zone->SendReloadMessage("Dynamic Zone Templates");
 			zone->LoadDynamicZoneTemplates();
-		}
-		break;
-	}
-	case ServerOP_ReloadGroundSpawns:
-	{
-		if (zone && zone->IsLoaded()) {
-			zone->SendReloadMessage("Ground Spawns");
-			zone->LoadGroundSpawns();
 		}
 		break;
 	}
@@ -1995,15 +1977,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		break;
 	}
-	case ServerOP_ReloadObjects:
-	{
-		if (zone && zone->IsLoaded()) {
-			zone->SendReloadMessage("Objects");
-			entity_list.RemoveAllObjects();
-			zone->LoadZoneObjects();
-		}
-		break;
-	}
 	case ServerOP_ReloadPerlExportSettings:
 	{
 		zone->SendReloadMessage("Perl Event Export Settings");
@@ -2016,6 +1989,9 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		RuleManager::Instance()->LoadRules(&database, RuleManager::Instance()->GetActiveRuleset(), true);
 		break;
 	}
+	case ServerOP_ReloadDoors:
+	case ServerOP_ReloadGroundSpawns:
+	case ServerOP_ReloadObjects:
 	case ServerOP_ReloadStaticZoneData: {
 		if (zone && zone->IsLoaded()) {
 			zone->SendReloadMessage("Static Zone Data");
