@@ -368,7 +368,8 @@ bool EQ::ItemInstance::IsAugmentSlotAvailable(int32 augment_type, uint8 slot) co
 		(
 			!GetItem(slot) &&
 			m_item->AugSlotVisible[slot]
-		) && augment_type == -1 ||
+		) &&
+		augment_type == -1 ||
 		(
 			m_item->AugSlotType[slot] &&
 			((1 << (m_item->AugSlotType[slot] - 1)) & augment_type)
