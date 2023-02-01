@@ -1624,8 +1624,6 @@ int bot_command_real_dispatch(Client *c, const char *message)
 {
 	Seperator sep(message, ' ', 10, 100, true); // "three word argument" should be considered 1 arg
 
-	bot_command_log_command(c, message);
-
 	std::string cstr(sep.arg[0]+1);
 
 	if(bot_command_list.count(cstr) != 1) {
