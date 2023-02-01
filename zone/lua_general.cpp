@@ -3700,7 +3700,7 @@ int8 lua_does_augment_fit(Lua_ItemInst inst, uint32 augment_id)
 	return quest_manager.DoesAugmentFit(inst, augment_id);
 }
 
-int8 lua_does_augment_fit(Lua_ItemInst inst, uint32 augment_id, uint8 augment_slot)
+int8 lua_does_augment_fit_slot(Lua_ItemInst inst, uint32 augment_id, uint8 augment_slot)
 {
 	return quest_manager.DoesAugmentFit(inst, augment_id, augment_slot);
 }
@@ -4223,7 +4223,7 @@ luabind::scope lua_register_general() {
 		luabind::def("do_anim", (void(*)(int,int,bool,int))&lua_do_anim),
 		luabind::def("do_augment_slots_match", &lua_do_augment_slots_match),
 		luabind::def("does_augment_fit", (int8(*)(Lua_ItemInst, uint32))&lua_does_augment_fit),
-		luabind::def("does_augment_fit", (int8(*)(Lua_ItemInst, uint32, uint8))&lua_does_augment_fit),
+		luabind::def("does_augment_fit_slot", (int8(*)(Lua_ItemInst, uint32, uint8))&lua_does_augment_fit_slot),
 		/*
 			Cross Zone
 		*/
