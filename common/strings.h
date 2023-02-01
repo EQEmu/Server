@@ -88,6 +88,7 @@ public:
 	static bool Contains(const std::string& subject, const std::string& search);
 	static int  ToInt(const std::string &s, int fallback = 0);
 	static bool IsNumber(const std::string &s);
+	static std::string RemoveNumbers(std::string s);
 	static bool IsFloat(const std::string &s);
 	static const std::string ToLower(std::string s);
 	static const std::string ToUpper(std::string s);

@@ -770,3 +770,16 @@ int Strings::ToInt(const std::string &s, int fallback)
 {
 	return Strings::IsNumber(s) ? std::stoi(s) : fallback;
 }
+
+std::string Strings::RemoveNumbers(std::string s)
+{
+	int      current = 0;
+	for (int i       = 0; i < s.length(); i++) {
+		if (!isdigit(s[i])) {
+			s[current] = s[i];
+			current++;
+		}
+	}
+
+	return s.substr(0, current);
+}
