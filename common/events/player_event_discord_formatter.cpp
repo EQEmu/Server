@@ -1,5 +1,6 @@
 #include "player_event_discord_formatter.h"
 #include "../repositories/character_data_repository.h"
+#include "../json/json_archive_single_line.h"
 #include <vector>
 #include <fmt/format.h>
 #include <cereal/archives/json.hpp>
@@ -70,7 +71,7 @@ std::string PlayerEventDiscordFormatter::FormatEventSay(
 
 	std::stringstream ss;
 	{
-		cereal::JSONOutputArchive ar(ss);
+		cereal::JSONOutputArchiveSingleLine ar(ss);
 		root.serialize(ar);
 	}
 
@@ -95,7 +96,7 @@ std::string PlayerEventDiscordFormatter::FormatGMCommand(
 
 	std::stringstream ss;
 	{
-		cereal::JSONOutputArchive ar(ss);
+		cereal::JSONOutputArchiveSingleLine ar(ss);
 		root.serialize(ar);
 	}
 
@@ -110,7 +111,7 @@ std::string PlayerEventDiscordFormatter::FormatWithNodata(const PlayerEvent::Pla
 	auto root = BuildDiscordWebhook(c, embeds);
 	std::stringstream ss;
 	{
-		cereal::JSONOutputArchive ar(ss);
+		cereal::JSONOutputArchiveSingleLine ar(ss);
 		root.serialize(ar);
 	}
 
@@ -145,7 +146,7 @@ std::string PlayerEventDiscordFormatter::FormatMerchantPurchaseEvent(
 	auto root = BuildDiscordWebhook(c, embeds);
 	std::stringstream ss;
 	{
-		cereal::JSONOutputArchive ar(ss);
+		cereal::JSONOutputArchiveSingleLine ar(ss);
 		root.serialize(ar);
 	}
 
@@ -180,7 +181,7 @@ std::string PlayerEventDiscordFormatter::FormatMerchantSellEvent(
 	auto root = BuildDiscordWebhook(c, embeds);
 	std::stringstream ss;
 	{
-		cereal::JSONOutputArchive ar(ss);
+		cereal::JSONOutputArchiveSingleLine ar(ss);
 		root.serialize(ar);
 	}
 
@@ -230,7 +231,7 @@ std::string PlayerEventDiscordFormatter::FormatZoningEvent(
 	auto root = BuildDiscordWebhook(c, embeds);
 	std::stringstream ss;
 	{
-		cereal::JSONOutputArchive ar(ss);
+		cereal::JSONOutputArchiveSingleLine ar(ss);
 		root.serialize(ar);
 	}
 
@@ -257,7 +258,7 @@ std::string PlayerEventDiscordFormatter::FormatAAGainedEvent(
 	auto root = BuildDiscordWebhook(c, embeds);
 	std::stringstream ss;
 	{
-		cereal::JSONOutputArchive ar(ss);
+		cereal::JSONOutputArchiveSingleLine ar(ss);
 		root.serialize(ar);
 	}
 
@@ -289,7 +290,7 @@ std::string PlayerEventDiscordFormatter::FormatAAPurchasedEvent(
 	auto root = BuildDiscordWebhook(c, embeds);
 	std::stringstream ss;
 	{
-		cereal::JSONOutputArchive ar(ss);
+		cereal::JSONOutputArchiveSingleLine ar(ss);
 		root.serialize(ar);
 	}
 
@@ -316,7 +317,7 @@ std::string PlayerEventDiscordFormatter::FormatForageSuccessEvent(
 	auto root = BuildDiscordWebhook(c, embeds);
 	std::stringstream ss;
 	{
-		cereal::JSONOutputArchive ar(ss);
+		cereal::JSONOutputArchiveSingleLine ar(ss);
 		root.serialize(ar);
 	}
 
@@ -343,7 +344,7 @@ std::string PlayerEventDiscordFormatter::FormatDestroyItemEvent(
 	auto root = BuildDiscordWebhook(c, embeds);
 	std::stringstream ss;
 	{
-		cereal::JSONOutputArchive ar(ss);
+		cereal::JSONOutputArchiveSingleLine ar(ss);
 		root.serialize(ar);
 	}
 
@@ -370,7 +371,7 @@ std::string PlayerEventDiscordFormatter::FormatLevelGainedEvent(
 	auto root = BuildDiscordWebhook(c, embeds);
 	std::stringstream ss;
 	{
-		cereal::JSONOutputArchive ar(ss);
+		cereal::JSONOutputArchiveSingleLine ar(ss);
 		root.serialize(ar);
 	}
 
@@ -397,7 +398,7 @@ std::string PlayerEventDiscordFormatter::FormatLevelLostEvent(
 	auto root = BuildDiscordWebhook(c, embeds);
 	std::stringstream ss;
 	{
-		cereal::JSONOutputArchive ar(ss);
+		cereal::JSONOutputArchiveSingleLine ar(ss);
 		root.serialize(ar);
 	}
 
@@ -428,7 +429,7 @@ std::string PlayerEventDiscordFormatter::FormatLootItemEvent(
 	auto root = BuildDiscordWebhook(c, embeds);
 	std::stringstream ss;
 	{
-		cereal::JSONOutputArchive ar(ss);
+		cereal::JSONOutputArchiveSingleLine ar(ss);
 		root.serialize(ar);
 	}
 
@@ -456,7 +457,7 @@ std::string PlayerEventDiscordFormatter::FormatGroundSpawnPickupEvent(
 	auto root = BuildDiscordWebhook(c, embeds);
 	std::stringstream ss;
 	{
-		cereal::JSONOutputArchive ar(ss);
+		cereal::JSONOutputArchiveSingleLine ar(ss);
 		root.serialize(ar);
 	}
 
@@ -493,7 +494,7 @@ std::string PlayerEventDiscordFormatter::FormatSkillUpEvent(
 	auto root = BuildDiscordWebhook(c, embeds);
 	std::stringstream ss;
 	{
-		cereal::JSONOutputArchive ar(ss);
+		cereal::JSONOutputArchiveSingleLine ar(ss);
 		root.serialize(ar);
 	}
 
@@ -520,7 +521,7 @@ std::string PlayerEventDiscordFormatter::FormatTaskAcceptEvent(
 	auto root = BuildDiscordWebhook(c, embeds);
 	std::stringstream ss;
 	{
-		cereal::JSONOutputArchive ar(ss);
+		cereal::JSONOutputArchiveSingleLine ar(ss);
 		root.serialize(ar);
 	}
 
@@ -546,7 +547,7 @@ std::string PlayerEventDiscordFormatter::FormatTaskCompleteEvent(
 	auto root = BuildDiscordWebhook(c, embeds);
 	std::stringstream ss;
 	{
-		cereal::JSONOutputArchive ar(ss);
+		cereal::JSONOutputArchiveSingleLine ar(ss);
 		root.serialize(ar);
 	}
 
@@ -572,7 +573,7 @@ std::string PlayerEventDiscordFormatter::FormatTaskUpdateEvent(
 	auto root = BuildDiscordWebhook(c, embeds);
 	std::stringstream ss;
 	{
-		cereal::JSONOutputArchive ar(ss);
+		cereal::JSONOutputArchiveSingleLine ar(ss);
 		root.serialize(ar);
 	}
 
@@ -598,7 +599,7 @@ std::string PlayerEventDiscordFormatter::FormatResurrectAcceptEvent(
 	auto root = BuildDiscordWebhook(c, embeds);
 	std::stringstream ss;
 	{
-		cereal::JSONOutputArchive ar(ss);
+		cereal::JSONOutputArchiveSingleLine ar(ss);
 		root.serialize(ar);
 	}
 
@@ -624,7 +625,7 @@ std::string PlayerEventDiscordFormatter::FormatCombineEvent(
 	auto root = BuildDiscordWebhook(c, embeds);
 	std::stringstream ss;
 	{
-		cereal::JSONOutputArchive ar(ss);
+		cereal::JSONOutputArchiveSingleLine ar(ss);
 		root.serialize(ar);
 	}
 
@@ -650,7 +651,7 @@ std::string PlayerEventDiscordFormatter::FormatFishSuccessEvent(
 	auto root = BuildDiscordWebhook(c, embeds);
 	std::stringstream ss;
 	{
-		cereal::JSONOutputArchive ar(ss);
+		cereal::JSONOutputArchiveSingleLine ar(ss);
 		root.serialize(ar);
 	}
 
@@ -691,7 +692,7 @@ std::string PlayerEventDiscordFormatter::FormatDeathEvent(
 	auto root = BuildDiscordWebhook(c, embeds);
 	std::stringstream ss;
 	{
-		cereal::JSONOutputArchive ar(ss);
+		cereal::JSONOutputArchiveSingleLine ar(ss);
 		root.serialize(ar);
 	}
 
@@ -839,7 +840,7 @@ std::string PlayerEventDiscordFormatter::FormatNPCHandinEvent(
 	auto root = BuildDiscordWebhook(c, embeds);
 	std::stringstream ss;
 	{
-		cereal::JSONOutputArchive ar(ss);
+		cereal::JSONOutputArchiveSingleLine ar(ss);
 		root.serialize(ar);
 	}
 
@@ -866,7 +867,7 @@ std::string PlayerEventDiscordFormatter::FormatDiscoverItemEvent(
 	auto root = BuildDiscordWebhook(c, embeds);
 	std::stringstream ss;
 	{
-		cereal::JSONOutputArchive ar(ss);
+		cereal::JSONOutputArchiveSingleLine ar(ss);
 		root.serialize(ar);
 	}
 
@@ -896,7 +897,7 @@ std::string PlayerEventDiscordFormatter::FormatDroppedItemEvent(
 	auto root = BuildDiscordWebhook(c, embeds);
 	std::stringstream ss;
 	{
-		cereal::JSONOutputArchive ar(ss);
+		cereal::JSONOutputArchiveSingleLine ar(ss);
 		root.serialize(ar);
 	}
 
@@ -954,7 +955,7 @@ std::string PlayerEventDiscordFormatter::FormatSplitMoneyEvent(
 	auto root = BuildDiscordWebhook(c, embeds);
 	std::stringstream ss;
 	{
-		cereal::JSONOutputArchive ar(ss);
+		cereal::JSONOutputArchiveSingleLine ar(ss);
 		root.serialize(ar);
 	}
 
@@ -1004,7 +1005,7 @@ std::string PlayerEventDiscordFormatter::FormatTraderPurchaseEvent(
 	auto root = BuildDiscordWebhook(c, embeds);
 	std::stringstream ss;
 	{
-		cereal::JSONOutputArchive ar(ss);
+		cereal::JSONOutputArchiveSingleLine ar(ss);
 		root.serialize(ar);
 	}
 
@@ -1054,7 +1055,7 @@ std::string PlayerEventDiscordFormatter::FormatTraderSellEvent(
 	auto root = BuildDiscordWebhook(c, embeds);
 	std::stringstream ss;
 	{
-		cereal::JSONOutputArchive ar(ss);
+		cereal::JSONOutputArchiveSingleLine ar(ss);
 		root.serialize(ar);
 	}
 
@@ -1293,7 +1294,7 @@ std::string PlayerEventDiscordFormatter::FormatTradeEvent(
 	auto root = BuildDiscordWebhook(c, embeds);
 	std::stringstream ss;
 	{
-		cereal::JSONOutputArchive ar(ss);
+		cereal::JSONOutputArchiveSingleLine ar(ss);
 		root.serialize(ar);
 	}
 

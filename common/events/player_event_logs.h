@@ -6,6 +6,7 @@
 #include "../servertalk.h"
 #include "../repositories/player_event_logs_repository.h"
 #include "../timer.h"
+#include "../json/json_archive_single_line.h"
 #include <cereal/archives/json.hpp>
 #include <mutex>
 
@@ -37,13 +38,15 @@ public:
 
 		std::stringstream ss;
 		{
-			cereal::JSONOutputArchive ar(ss);
+			cereal::JSONOutputArchiveSingleLine ar(ss);
 			e.serialize(ar);
 		}
 
 		n.event_type_name = PlayerEvent::EventName[t];
 		n.event_data      = Strings::Contains(ss.str(), "noop") ? "{}" : ss.str();
 		n.created_at      = std::time(nullptr);
+
+		LogInfo("Payload [{}]", n.event_data);
 
 		auto c = PlayerEvent::PlayerEventContainer{
 			.player_event = p,

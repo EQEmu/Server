@@ -617,6 +617,7 @@ SET(common_headers
     event/event_loop.h
     event/task.h
     event/timer.h
+    json/json_archive_single_line.h
     json/json.h
     json/json-forwards.h
     net/console_server.h
@@ -670,8 +671,7 @@ SET(common_headers
     StackWalker/StackWalker.h
     util/memory_stream.h
     util/directory.h
-    util/uuid.h
-    )
+    util/uuid.h)
 
 SOURCE_GROUP(Event FILES
     event/event_loop.h
