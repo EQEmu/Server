@@ -675,7 +675,7 @@ void handle_player_item_click(
 	QuestInterface *parse,
 	lua_State* L,
 	Client* client,
-	const std::string& data,
+	std::string data,
 	uint32 extra_data,
 	std::vector<std::any> *extra_pointers
 );
