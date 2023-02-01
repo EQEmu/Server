@@ -141,7 +141,6 @@ public:
 	void SetSimpleRoamBox(float box_size, float move_distance, int move_delay);
 	void RecalculateSkills();
 	void ReloadSpells();
-	void ScaleNPC(uint8 npc_level);
 	bool IsRaidTarget();
 	bool IsRareSpawn();
 	void ChangeLastName(std::string last_name);
@@ -173,6 +172,9 @@ public:
 	void SetLDoNLockedSkill(uint16 skill_value);
 	bool IsLDoNTrapDetected();
 	void SetLDoNTrapDetected(bool is_detected);
+	void ScaleNPC(uint8 npc_level);
+	void ScaleNPC(uint8 npc_level, bool always_scale_stats);
+	void ScaleNPC(uint8 npc_level, bool always_scale_stats, bool always_scale_special_abilities);
 };
 
 #endif
