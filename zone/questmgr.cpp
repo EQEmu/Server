@@ -3985,6 +3985,8 @@ int8 QuestManager::DoesAugmentFit(EQ::ItemInstance* inst, uint32 augment_id, uin
 		!inst->IsAugmentSlotAvailable(aug_inst->AugType, augment_slot)
 	) {
 		return INVALID_INDEX;
+	} else if (augment_slot != 255) {
+		return augment_slot;
 	}
 
 	return inst->AvailableAugmentSlot(aug_inst->AugType);
