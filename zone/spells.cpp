@@ -6986,8 +6986,8 @@ void Mob::SetHP(int64 hp)
 		return;
 	}
 
-	if (combat_record.InCombat()) {
-		combat_record.ProcessHPEvent(hp, current_hp);
+	if (m_combat_record.InCombat()) {
+		m_combat_record.ProcessHPEvent(hp, current_hp);
 	}
 
 	current_hp = hp;
@@ -6995,8 +6995,8 @@ void Mob::SetHP(int64 hp)
 
 void Mob::DrawDebugCoordinateNode(std::string node_name, const glm::vec4 vec)
 {
-	NPC* node = nullptr;
-	for (const auto& n : entity_list.GetNPCList()) {
+	NPC             *node = nullptr;
+	for (const auto &n: entity_list.GetNPCList()) {
 		if (n.second->GetCleanName() == node_name) {
 			node = n.second;
 			break;
@@ -7005,4 +7005,9 @@ void Mob::DrawDebugCoordinateNode(std::string node_name, const glm::vec4 vec)
 	if (!node) {
 		node = NPC::SpawnNodeNPC(node_name, "", GetPosition());
 	}
+}
+
+const CombatRecord &Mob::GetCombatRecord() const
+{
+	return m_combat_record;
 }

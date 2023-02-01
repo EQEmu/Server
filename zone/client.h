@@ -1680,6 +1680,7 @@ public:
 	std::string GetGuildPublicNote();
 
 	PlayerEvent::PlayerEvent GetPlayerEvent();
+	void RecordKilledNPCEvent(NPC *n);
 protected:
 	friend class Mob;
 	void CalcItemBonuses(StatBonuses* newbon);

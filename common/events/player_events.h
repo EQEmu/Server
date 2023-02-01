@@ -52,6 +52,9 @@ namespace PlayerEvent {
 		BANDOLIER_SWAP, // unimplemented
 		DISCOVER_ITEM,
 		POSSIBLE_HACK,
+		KILLED_NPC,
+		KILLED_NAMED_NPC,
+		KILLED_RAID_NPC,
 		MAX // dont remove
 	};
 
@@ -104,7 +107,10 @@ namespace PlayerEvent {
 		"Bandolier Create (Unimplemented)",
 		"Bandolier Swap (Unimplemented)",
 		"Discover Item",
-		"Possible Hack"
+		"Possible Hack",
+		"Killed NPC",
+		"Killed Named NPC",
+		"Killed Raid NPC"
 	};
 
 	// Generic struct used by all events
@@ -411,8 +417,8 @@ namespace PlayerEvent {
 
 	struct LevelGainedEvent {
 		uint32 from_level;
-		uint8 to_level;
-		int levels_gained;
+		uint8  to_level;
+		int    levels_gained;
 
 		// cereal
 		template<class Archive>
@@ -428,8 +434,8 @@ namespace PlayerEvent {
 
 	struct LevelLostEvent {
 		uint32 from_level;
-		uint8 to_level;
-		int levels_lost;
+		uint8  to_level;
+		int    levels_lost;
 
 		// cereal
 		template<class Archive>
@@ -867,7 +873,6 @@ namespace PlayerEvent {
 		}
 	};
 
-
 	struct PossibleHackEvent {
 		std::string message;
 
@@ -877,6 +882,27 @@ namespace PlayerEvent {
 		{
 			ar(
 				CEREAL_NVP(message)
+			);
+		}
+	};
+
+	struct KilledNPCEvent {
+		uint32      npc_id;
+		std::string npc_name;
+		uint32      combat_time_seconds;
+		uint64      total_damage_per_second_taken;
+		uint64      total_heal_per_second_taken;
+
+		// cereal
+		template<class Archive>
+		void serialize(Archive &ar)
+		{
+			ar(
+				CEREAL_NVP(npc_id),
+				CEREAL_NVP(npc_name),
+				CEREAL_NVP(combat_time_seconds),
+				CEREAL_NVP(total_damage_per_second_taken),
+				CEREAL_NVP(total_heal_per_second_taken)
 			);
 		}
 	};

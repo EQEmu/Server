@@ -46,8 +46,6 @@ public:
 		n.event_data      = Strings::Contains(ss.str(), "noop") ? "{}" : ss.str();
 		n.created_at      = std::time(nullptr);
 
-		LogInfo("Payload [{}]", n.event_data);
-
 		auto c = PlayerEvent::PlayerEventContainer{
 			.player_event = p,
 			.player_event_log = n

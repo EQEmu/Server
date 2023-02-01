@@ -15889,3 +15889,32 @@ void Client::SendMobPositions()
 	}
 	safe_delete(p);
 }
+
+struct RecordKillCheck {
+	PlayerEvent::EventType event;
+	bool                   check;
+};
+
+void Client::RecordKilledNPCEvent(NPC *n)
+{
+	bool is_named = Strings::Contains(n->GetName(), "#") && !n->IsRaidTarget();
+
+	std::vector<RecordKillCheck> checks = {
+		RecordKillCheck{.event = PlayerEvent::KILLED_NPC, .check = true},
+		RecordKillCheck{.event = PlayerEvent::KILLED_NAMED_NPC, .check = is_named},
+		RecordKillCheck{.event = PlayerEvent::KILLED_RAID_NPC, .check = n->IsRaidTarget()},
+	};
+
+	for (auto &c: checks) {
+		if (c.check && player_event_logs.IsEventEnabled(c.event)) {
+			auto e = PlayerEvent::KilledNPCEvent{
+				.npc_id = n->GetNPCTypeID(),
+				.npc_name = n->GetCleanName(),
+				.combat_time_seconds = static_cast<uint32>(n->GetCombatRecord().TimeInCombat()),
+				.total_damage_per_second_taken = static_cast<uint64>(n->GetCombatRecord().GetDamageReceivedPerSecond()),
+				.total_heal_per_second_taken = static_cast<uint64>(n->GetCombatRecord().GetHealedReceivedPerSecond()),
+			};
+			RecordPlayerEventLog(c.event, e);
+		}
+	}
+}

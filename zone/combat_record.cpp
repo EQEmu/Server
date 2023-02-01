@@ -4,50 +4,51 @@
 
 void CombatRecord::Start(std::string in_mob_name)
 {
-	start_time      = std::time(nullptr);
-	end_time        = 0;
-	damage_received = 0;
-	heal_received   = 0;
-	mob_name        = in_mob_name;
+	m_start_time      = std::time(nullptr);
+	m_end_time        = 0;
+	m_damage_received = 0;
+	m_heal_received   = 0;
+	m_mob_name        = in_mob_name;
 }
+
 
 void CombatRecord::Stop()
 {
-	end_time = std::time(nullptr);
+	m_end_time = std::time(nullptr);
 
 	double time_in_combat = TimeInCombat();
 
 	LogCombatRecord(
 		"[Summary] Mob [{}] [Received] DPS [{:.0f}] Heal/s [{:.0f}] Duration [{}] ({}s)",
-		mob_name,
-		time_in_combat > 0 ? (damage_received / time_in_combat) : damage_received,
-		time_in_combat > 0 ? (heal_received / time_in_combat) : heal_received,
+		m_mob_name,
+		GetDamageReceivedPerSecond(),
+		GetHealedReceivedPerSecond(),
 		time_in_combat > 0 ? Strings::SecondsToTime(time_in_combat) : "",
 		time_in_combat
 	);
 }
 
-bool CombatRecord::InCombat()
+bool CombatRecord::InCombat() const
 {
-	return start_time > 0;
+	return m_start_time > 0;
 }
 
 void CombatRecord::ProcessHPEvent(int64 hp, int64 current_hp)
 {
 	// damage
 	if (hp < current_hp) {
-		damage_received = damage_received + std::llabs(current_hp - hp);
+		m_damage_received = m_damage_received + std::llabs(current_hp - hp);
 	}
 
 	// heal
 	if (hp > current_hp && current_hp > 0) {
-		heal_received = heal_received + std::llabs(current_hp - hp);
+		m_heal_received = m_heal_received + std::llabs(current_hp - hp);
 	}
 
 	LogCombatRecordDetail(
 		"damage_received [{}] heal_received [{}] current_hp [{}] hp [{}] calc [{}]",
-		damage_received,
-		heal_received,
+		m_damage_received,
+		m_heal_received,
 		current_hp,
 		hp,
 		std::llabs(current_hp - hp)
@@ -56,5 +57,27 @@ void CombatRecord::ProcessHPEvent(int64 hp, int64 current_hp)
 
 double CombatRecord::TimeInCombat() const
 {
-	return difftime(end_time, start_time);
+	return m_end_time > m_start_time ? difftime(m_end_time, m_start_time) : 0;
+}
+
+float CombatRecord::GetDamageReceivedPerSecond() const
+{
+	double time_in_combat = TimeInCombat();
+	return time_in_combat > 0 ? (m_damage_received / time_in_combat) : m_damage_received;
+}
+
+float CombatRecord::GetHealedReceivedPerSecond() const
+{
+	double time_in_combat = TimeInCombat();
+	return time_in_combat > 0 ? (m_heal_received / time_in_combat) : m_heal_received;
+}
+
+int64 CombatRecord::GetDamageReceived() const
+{
+	return m_damage_received;
+}
+
+int64 CombatRecord::GetHealReceived() const
+{
+	return m_heal_received;
 }

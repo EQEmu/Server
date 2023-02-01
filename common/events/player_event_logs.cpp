@@ -647,7 +647,7 @@ void PlayerEventLogs::ReloadSettings()
 	}
 }
 
-const int32_t RETENTION_DAYS_DEFAULT = 30;
+const int32_t RETENTION_DAYS_DEFAULT = 7;
 
 void PlayerEventLogs::SetSettingsDefaults()
 {
@@ -693,6 +693,10 @@ void PlayerEventLogs::SetSettingsDefaults()
 	m_settings[PlayerEvent::BANDOLIER_CREATE].event_enabled   = 0;
 	m_settings[PlayerEvent::BANDOLIER_SWAP].event_enabled     = 0;
 	m_settings[PlayerEvent::DISCOVER_ITEM].event_enabled      = 1;
+	m_settings[PlayerEvent::POSSIBLE_HACK].event_enabled      = 1;
+	m_settings[PlayerEvent::KILLED_NPC].event_enabled         = 1;
+	m_settings[PlayerEvent::KILLED_NAMED_NPC].event_enabled   = 1;
+	m_settings[PlayerEvent::KILLED_RAID_NPC].event_enabled    = 1;
 
 	for (int i = PlayerEvent::GM_COMMAND; i != PlayerEvent::MAX; i++) {
 		m_settings[i].retention_days = RETENTION_DAYS_DEFAULT;

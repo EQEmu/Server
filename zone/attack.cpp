@@ -2533,6 +2533,7 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 				if (kr->members[i].member != nullptr && kr->members[i].member->IsClient()) { // If Group Member is Client
 					Client *c = kr->members[i].member;
 					parse->EventNPC(EVENT_KILLED_MERIT, this, c, "killed", 0);
+					c->RecordKilledNPCEvent(this);
 
 					if (RuleB(NPC, EnableMeritBasedFaction))
 						c->SetFactionLevel(c->CharacterID(), GetNPCFactionID(), c->GetBaseClass(), c->GetBaseRace(), c->GetDeity());
@@ -2580,6 +2581,7 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 				if (kg->members[i] != nullptr && kg->members[i]->IsClient()) { // If Group Member is Client
 					Client *c = kg->members[i]->CastToClient();
 					parse->EventNPC(EVENT_KILLED_MERIT, this, c, "killed", 0);
+					c->RecordKilledNPCEvent(this);
 
 					if (RuleB(NPC, EnableMeritBasedFaction))
 						c->SetFactionLevel(c->CharacterID(), GetNPCFactionID(), c->GetBaseClass(), c->GetBaseRace(), c->GetDeity());
@@ -2627,6 +2629,7 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 
 			/* Send the EVENT_KILLED_MERIT event */
 			parse->EventNPC(EVENT_KILLED_MERIT, this, give_exp_client, "killed", 0);
+			give_exp_client->RecordKilledNPCEvent(this);
 
 			if (RuleB(NPC, EnableMeritBasedFaction))
 				give_exp_client->SetFactionLevel(give_exp_client->CharacterID(), GetNPCFactionID(), give_exp_client->GetBaseClass(),
@@ -2804,7 +2807,7 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 
 	std::vector<std::any> args = { corpse };
 	parse->EventNPC(EVENT_DEATH_COMPLETE, this, oos, export_string, 0, &args);
-	combat_record.Stop();
+	m_combat_record.Stop();
 
 	/* Zone controller process EVENT_DEATH_ZONE (Death events) */
 	args.push_back(this);
