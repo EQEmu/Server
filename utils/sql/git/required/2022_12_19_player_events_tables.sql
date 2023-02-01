@@ -31,3 +31,4 @@ CREATE TABLE `player_event_logs`
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 
 DROP TABLE `hackers`;
+DROP TABLE `eventlog`;

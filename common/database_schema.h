@@ -321,7 +321,6 @@ namespace DatabaseSchema {
 			"discord_webhooks",
 			"dynamic_zone_members",
 			"dynamic_zones",
-			"eventlog",
 			"expedition_lockouts",
 			"expeditions",
 			"gm_ips",

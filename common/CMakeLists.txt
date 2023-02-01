@@ -200,7 +200,6 @@ SET(repositories
     repositories/base/base_dynamic_zones_repository.h
     repositories/base/base_dynamic_zone_members_repository.h
     repositories/base/base_dynamic_zone_templates_repository.h
-    repositories/base/base_eventlog_repository.h
     repositories/base/base_expeditions_repository.h
     repositories/base/base_expedition_lockouts_repository.h
     repositories/base/base_faction_association_repository.h
@@ -379,7 +378,6 @@ SET(repositories
     repositories/dynamic_zones_repository.h
     repositories/dynamic_zone_members_repository.h
     repositories/dynamic_zone_templates_repository.h
-    repositories/eventlog_repository.h
     repositories/expeditions_repository.h
     repositories/expedition_lockouts_repository.h
     repositories/faction_association_repository.h

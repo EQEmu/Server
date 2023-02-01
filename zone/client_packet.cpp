@@ -2242,9 +2242,6 @@ void Client::Handle_OP_AdventureMerchantSell(const EQApplicationPacket *app)
 		return;
 	}
 
-	if (RuleB(EventLog, RecordSellToMerchant))
-		LogMerchant(this, vendor, ams_in->charges, price, item, false);
-
 	if (!inst->IsStackable())
 	{
 		DeleteItemInInventory(ams_in->slot);
@@ -13448,9 +13445,6 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 	}
 	// end QS code
 
-	if (RuleB(EventLog, RecordBuyFromMerchant))
-		LogMerchant(this, tmp, mpo->quantity, mpo->price, item, true);
-
 	const auto& export_string = fmt::format(
 		"{} {} {} {} {}",
 		tmp->GetNPCTypeID(),
@@ -13562,9 +13556,6 @@ void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
 	}
 	else
 		mp->quantity = 1;
-
-	if (RuleB(EventLog, RecordSellToMerchant))
-		LogMerchant(this, vendor, mp->quantity, price, item, false);
 
 	int charges = mp->quantity;
 
@@ -14544,10 +14535,6 @@ void Client::Handle_OP_TradeAcceptClick(const EQApplicationPacket *app)
 				// TODO: query (other) as a hacker
 			}
 			else {
-				// Audit trade to database for both trade streams
-				other->trade->LogTrade();
-				trade->LogTrade();
-
 				other->PlayerTradeEventLog(other->trade, trade);
 
 				// start QS code

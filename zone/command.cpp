@@ -552,8 +552,6 @@ int command_realdispatch(Client *c, std::string message, bool ignore_status)
 {
 	Seperator sep(message.c_str(), ' ', 10, 100, true); // "three word argument" should be considered 1 arg
 
-	command_logcommand(c, message.c_str());
-
 	std::string cstr(sep.arg[0] + 1);
 
 	if (commandlist.count(cstr) != 1) {
@@ -1045,7 +1043,6 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/listpetition.cpp"
 #include "gm_commands/lootsim.cpp"
 #include "gm_commands/loc.cpp"
-#include "gm_commands/logcommand.cpp"
 #include "gm_commands/logs.cpp"
 #include "gm_commands/makepet.cpp"
 #include "gm_commands/mana.cpp"
