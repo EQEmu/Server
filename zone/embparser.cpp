@@ -363,7 +363,7 @@ int PerlembParser::EventCommon(
 }
 
 int PerlembParser::EventNPC(
-	QuestEventID evt, NPC *npc, Mob *mob, const std::string& data, uint32 extra_data,
+	QuestEventID evt, NPC *npc, Mob *mob, std::string data, uint32 extra_data,
 	std::vector<std::any> *extra_pointers
 )
 {
@@ -371,7 +371,7 @@ int PerlembParser::EventNPC(
 }
 
 int PerlembParser::EventGlobalNPC(
-	QuestEventID evt, NPC *npc, Mob *mob, const std::string& data, uint32 extra_data,
+	QuestEventID evt, NPC *npc, Mob *mob, std::string data, uint32 extra_data,
 	std::vector<std::any> *extra_pointers
 )
 {
@@ -379,7 +379,7 @@ int PerlembParser::EventGlobalNPC(
 }
 
 int PerlembParser::EventPlayer(
-	QuestEventID evt, Client *client, const std::string& data, uint32 extra_data,
+	QuestEventID evt, Client *client, std::string data, uint32 extra_data,
 	std::vector<std::any> *extra_pointers
 )
 {
@@ -387,7 +387,7 @@ int PerlembParser::EventPlayer(
 }
 
 int PerlembParser::EventGlobalPlayer(
-	QuestEventID evt, Client *client, const std::string& data, uint32 extra_data,
+	QuestEventID evt, Client *client, std::string data, uint32 extra_data,
 	std::vector<std::any> *extra_pointers
 )
 {
@@ -395,7 +395,7 @@ int PerlembParser::EventGlobalPlayer(
 }
 
 int PerlembParser::EventItem(
-	QuestEventID evt, Client *client, EQ::ItemInstance *item, Mob *mob, const std::string& data, uint32 extra_data,
+	QuestEventID evt, Client *client, EQ::ItemInstance *item, Mob *mob, std::string data, uint32 extra_data,
 	std::vector<std::any> *extra_pointers
 )
 {
@@ -404,7 +404,7 @@ int PerlembParser::EventItem(
 }
 
 int PerlembParser::EventSpell(
-	QuestEventID evt, Mob *mob, Client *client, uint32 spell_id, const std::string& data, uint32 extra_data,
+	QuestEventID evt, Mob *mob, Client *client, uint32 spell_id, std::string data, uint32 extra_data,
 	std::vector<std::any> *extra_pointers
 )
 {
@@ -2168,7 +2168,7 @@ int PerlembParser::EventBot(
 	QuestEventID evt,
 	Bot *bot,
 	Mob *mob,
-	const std::string& data,
+	std::string data,
 	uint32 extra_data,
 	std::vector<std::any> *extra_pointers
 ) {
@@ -2179,7 +2179,7 @@ int PerlembParser::EventGlobalBot(
 	QuestEventID evt,
 	Bot *bot,
 	Mob *mob,
-	const std::string& data,
+	std::string data,
 	uint32 extra_data,
 	std::vector<std::any> *extra_pointers
 ) {

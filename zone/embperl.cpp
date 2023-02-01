@@ -230,8 +230,8 @@ void Embperl::init_eval_file(void)
 int Embperl::eval_file(const char * packagename, const char * filename)
 {
 	std::vector<std::string> args;
-	args.emplace_back(packagename);
-	args.emplace_back(filename);
+	args.push_back(packagename);
+	args.push_back(filename);
 
 	return dosub("main::eval_file", &args);
 }
