@@ -28,4 +28,4 @@ CREATE TABLE `player_event_logs`
     KEY               `zone_id` (`zone_id`),
     KEY               `character_id` (`character_id`,`zone_id`) USING BTREE,
     KEY               `created_at` (`created_at`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
