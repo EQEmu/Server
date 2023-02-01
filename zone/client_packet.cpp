@@ -3479,10 +3479,10 @@ void Client::Handle_OP_BankerChange(const EQApplicationPacket *app)
 
 	if (!banker || distance > USE_NPC_RANGE2)
 	{
-		auto hacked_string = fmt::format(
+		auto message = fmt::format(
 		    "Player tried to make use of a banker(money) but {} is non-existant or too far away ({} units).",
 		    banker ? banker->GetName() : "UNKNOWN NPC", distance);
-		database.SetMQDetectionFlag(AccountName(), GetName(), hacked_string, zone->GetShortName());
+		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = message});
 		return;
 	}
 
@@ -4202,7 +4202,8 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 				const EQ::ItemData* item = inst->GetItem();
 				if (item->Click.Effect != (uint32)castspell->spell_id)
 				{
-					database.SetMQDetectionFlag(account_name, name, "OP_CastSpell with item, tried to cast a different spell.", zone->GetShortName());
+					std::string message = fmt::format("OP_CastSpell with item, tried to cast a different spell than what was on item - item spell id [{}] attempted [{}]", item->Click.Effect, (uint32)castspell->spell_id);
+					RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = message});
 					InterruptSpell(castspell->spell_id);	//CHEATER!!
 					return;
 				}
@@ -4243,7 +4244,7 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 						}
 						else
 						{
-							database.SetMQDetectionFlag(account_name, name, "OP_CastSpell with item, did not meet req level.", zone->GetShortName());
+							RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = "OP_CastSpell with item, did not meet req level."});
 							Message(Chat::Red, "Error: level not high enough.", castspell->inventoryslot);
 							InterruptSpell(castspell->spell_id);
 						}
@@ -5183,8 +5184,8 @@ void Client::Handle_OP_ControlBoat(const EQApplicationPacket *app)
 
 	if (!boat->IsNPC() || !boat->IsControllableBoat())
 	{
-		auto hacked_string = fmt::format("OP_Control Boat was sent against {} which is of race {}", boat->GetName(), boat->GetRace());
-		database.SetMQDetectionFlag(AccountName(), GetName(), hacked_string, zone->GetShortName());
+		auto message = fmt::format("OP_Control Boat was sent against {} which is of race {}", boat->GetName(), boat->GetRace());
+		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = message});
 		return;
 	}
 
@@ -5515,8 +5516,9 @@ void Client::Handle_OP_Disarm(const EQApplicationPacket *app) {
 		return;
 	if (pmob->GetID() != GetID()) {
 		// Client sent a disarm request with an originator ID not matching their own ID.
-		auto hack_str = fmt::format("Player {} ({}) sent OP_Disarm with source ID of: {}", GetCleanName(), GetID(), pmob->GetID());
-		database.SetMQDetectionFlag(account_name, name, hack_str, zone->GetShortName());
+		auto message = fmt::format("Player {} ({}) sent OP_Disarm with source ID of: {}", GetCleanName(), GetID(), pmob->GetID());
+		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = message});
+
 		return;
 	}
 	// No disarm on corpses
@@ -6243,7 +6245,7 @@ void Client::Handle_OP_GMBecomeNPC(const EQApplicationPacket *app)
 {
 	if (Admin() < minStatusToUseGMCommands) {
 		Message(Chat::Red, "Your account has been reported for hacking.");
-		database.SetHackerFlag(account_name, name, "/becomenpc");
+		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = "Used /becomenpc when they shouldn't be able to"});
 		return;
 	}
 	if (app->size != sizeof(BecomeNPC_Struct)) {
@@ -6283,7 +6285,7 @@ void Client::Handle_OP_GMDelCorpse(const EQApplicationPacket *app)
 		return;
 	if (Admin() < commandEditPlayerCorpses) {
 		Message(Chat::Red, "Your account has been reported for hacking.");
-		database.SetHackerFlag(account_name, name, "/delcorpse");
+		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = "Used /delcorpse"});
 		return;
 	}
 	GMDelCorpse_Struct* dc = (GMDelCorpse_Struct *)app->pBuffer;
@@ -6304,7 +6306,6 @@ void Client::Handle_OP_GMEmoteZone(const EQApplicationPacket *app)
 {
 	if (Admin() < minStatusToUseGMCommands) {
 		Message(Chat::Red, "Your account has been reported for hacking.");
-		database.SetHackerFlag(account_name, name, "/emote");
 		return;
 	}
 	if (app->size != sizeof(GMEmoteZone_Struct)) {
@@ -6337,7 +6338,7 @@ void Client::Handle_OP_GMFind(const EQApplicationPacket *app)
 {
 	if (Admin() < minStatusToUseGMCommands) {
 		Message(Chat::Red, "Your account has been reported for hacking.");
-		database.SetHackerFlag(account_name, name, "/find");
+		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = "Used /find"});
 		return;
 	}
 	if (app->size != sizeof(GMSummon_Struct)) {
@@ -6375,7 +6376,7 @@ void Client::Handle_OP_GMGoto(const EQApplicationPacket *app)
 	}
 	if (Admin() < minStatusToUseGMCommands) {
 		Message(Chat::Red, "Your account has been reported for hacking.");
-		database.SetHackerFlag(account_name, name, "/goto");
+		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = "Used /goto"});
 		return;
 	}
 	GMSummon_Struct* gmg = (GMSummon_Struct*)app->pBuffer;
@@ -6402,7 +6403,7 @@ void Client::Handle_OP_GMHideMe(const EQApplicationPacket *app)
 {
 	if (Admin() < minStatusToUseGMCommands) {
 		Message(Chat::Red, "Your account has been reported for hacking.");
-		database.SetHackerFlag(account_name, name, "/hideme");
+		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = "Used /hideme"});
 		return;
 	}
 	if (app->size != sizeof(SpawnAppearance_Struct)) {
@@ -6422,7 +6423,7 @@ void Client::Handle_OP_GMKick(const EQApplicationPacket *app)
 		return;
 	if (Admin() < minStatusToKick) {
 		Message(Chat::Red, "Your account has been reported for hacking.");
-		database.SetHackerFlag(account_name, name, "/kick");
+		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = "Used /kick"});
 		return;
 	}
 	GMKick_Struct* gmk = (GMKick_Struct *)app->pBuffer;
@@ -6452,7 +6453,7 @@ void Client::Handle_OP_GMKill(const EQApplicationPacket *app)
 {
 	if (Admin() < minStatusToUseGMCommands) {
 		Message(Chat::Red, "Your account has been reported for hacking.");
-		database.SetHackerFlag(account_name, name, "/kill");
+		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = "Used /kill"});
 		return;
 	}
 	if (app->size != sizeof(GMKill_Struct)) {
@@ -6504,7 +6505,7 @@ void Client::Handle_OP_GMLastName(const EQApplicationPacket *app)
 		else {
 			if (Admin() < minStatusToUseGMCommands) {
 				Message(Chat::Red, "Your account has been reported for hacking.");
-				database.SetHackerFlag(client->account_name, client->name, "/lastname");
+				RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = "Used /lastname"});
 				return;
 			}
 			else
@@ -6529,7 +6530,7 @@ void Client::Handle_OP_GMNameChange(const EQApplicationPacket *app)
 	const GMName_Struct* gmn = (const GMName_Struct *)app->pBuffer;
 	if (Admin() < minStatusToUseGMCommands) {
 		Message(Chat::Red, "Your account has been reported for hacking.");
-		database.SetHackerFlag(account_name, name, "/name");
+		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = "Used /name"});
 		return;
 	}
 	Client* client = entity_list.GetClientByName(gmn->oldname);
@@ -6672,7 +6673,7 @@ void Client::Handle_OP_GMToggle(const EQApplicationPacket *app)
 	}
 	if (Admin() < minStatusToUseGMCommands) {
 		Message(Chat::Red, "Your account has been reported for hacking.");
-		database.SetHackerFlag(account_name, name, "/toggle");
+		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = "Used /toggle"});
 		return;
 	}
 	GMToggle_Struct *ts = (GMToggle_Struct *)app->pBuffer;
@@ -6719,7 +6720,7 @@ void Client::Handle_OP_GMZoneRequest(const EQApplicationPacket *app)
 	}
 	if (Admin() < minStatusToBeGM) {
 		Message(Chat::Red, "Your account has been reported for hacking.");
-		database.SetHackerFlag(account_name, name, "/zone");
+		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = "Used /zone"});
 		return;
 	}
 
@@ -6775,7 +6776,7 @@ void Client::Handle_OP_GMZoneRequest2(const EQApplicationPacket *app)
 {
 	if (Admin() < minStatusToBeGM) {
 		Message(Chat::Red, "Your account has been reported for hacking.");
-		database.SetHackerFlag(account_name, name, "/zone");
+		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = "Used /zone"});
 		return;
 	}
 	if (app->size < sizeof(uint32)) {
@@ -8449,9 +8450,12 @@ void Client::Handle_OP_Illusion(const EQApplicationPacket *app)
 		return;
 	}
 
-	if (!GetGM())
-	{
-		database.SetMQDetectionFlag(AccountName(), GetName(), "OP_Illusion sent by non Game Master.", zone->GetShortName());
+	if (!GetGM()) {
+		RecordPlayerEventLog(
+			PlayerEvent::POSSIBLE_HACK,
+			PlayerEvent::PossibleHackEvent{.message = "OP_Illusion sent by non Game Master"}
+		);
+
 		return;
 	}
 
@@ -10248,13 +10252,13 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 		{
 			const EQ::ItemInstance *itm_from = GetInv().GetItem(mi->from_slot);
 			const EQ::ItemInstance *itm_to = GetInv().GetItem(mi->to_slot);
-			auto detect = fmt::format("Player issued a move item from {}(item id {}) to {}(item id {}) while casting {}.",
+			auto message = fmt::format("Player issued a move item from {}(item id {}) to {}(item id {}) while casting {}.",
 				mi->from_slot,
 				itm_from ? itm_from->GetID() : 0,
 				mi->to_slot,
 				itm_to ? itm_to->GetID() : 0,
 				casting_spell_id);
-			database.SetMQDetectionFlag(AccountName(), GetName(), detect, zone->GetShortName());
+			RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = message});
 			Kick("Inventory desync"); // Kick client to prevent client and server from getting out-of-sync inventory slots
 			return;
 		}
@@ -11237,7 +11241,7 @@ void Client::Handle_OP_PickPocket(const EQApplicationPacket *app)
 	if (!p_timers.Expired(&database, pTimerBeggingPickPocket, false))
 	{
 		Message(Chat::Red, "Ability recovery time not yet met.");
-		database.SetMQDetectionFlag(AccountName(), GetName(), "OP_PickPocket was sent again too quickly.", zone->GetShortName());
+		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = "OP_PickPocket was sent again too quickly."});
 		return;
 	}
 	PickPocket_Struct* pick_in = (PickPocket_Struct*)app->pBuffer;
@@ -11259,7 +11263,7 @@ void Client::Handle_OP_PickPocket(const EQApplicationPacket *app)
 	}
 	else if (Distance(GetPosition(), victim->GetPosition()) > 20) {
 		Message(Chat::Red, "Attempt to pickpocket out of range detected.");
-		database.SetMQDetectionFlag(AccountName(), GetName(), "OP_PickPocket was sent from outside combat range.", zone->GetShortName());
+		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = "OP_PickPocket was sent from outside combat range"});
 	}
 	else if (victim->IsNPC()) {
 		auto body = victim->GetBodyType();
@@ -13295,10 +13299,19 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 
 	if (!TakeMoneyFromPP(mpo->price))
 	{
-		auto hacker_str = fmt::format("Vendor Cheat: attempted to buy {} of {}: {} that cost {} cp but only has {} pp {} gp {} sp {} cp",
-			mpo->quantity, item->ID, item->Name,
-			mpo->price, m_pp.platinum, m_pp.gold, m_pp.silver, m_pp.copper);
-		database.SetMQDetectionFlag(AccountName(), GetName(), Strings::Escape(hacker_str), zone->GetShortName());
+		auto message = fmt::format(
+			"Vendor Cheat attempted to buy qty [{}] of item_id [{}] item_name[{}] that cost [{}] copper but only has platinum [{}] gold [{}] silver [{}] copper [{}]",
+			mpo->quantity,
+			item->ID,
+			item->Name,
+			mpo->price,
+			m_pp.platinum,
+			m_pp.gold,
+			m_pp.silver,
+			m_pp.copper
+		);
+
+		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = message});
 		safe_delete(outapp);
 		safe_delete(inst);
 		return;
@@ -13853,8 +13866,8 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 			{
 				if (ClientVersion() < EQ::versions::ClientVersion::SoF)
 				{
-					auto hack_str = fmt::format("Player sent OP_SpawnAppearance with AT_Invis: {}", sa->parameter);
-					database.SetMQDetectionFlag(account_name, name, hack_str, zone->GetShortName());
+					auto message = fmt::format("Player sent OP_SpawnAppearance with AT_Invis [{}]", sa->parameter);
+					RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = message});
 				}
 			}
 			return;
@@ -13953,8 +13966,8 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 		{
 			if (!HasSkill(EQ::skills::SkillSneak))
 			{
-				auto hack_str = fmt::format("Player sent OP_SpawnAppearance with AT_Sneak: {}", sa->parameter);
-				database.SetMQDetectionFlag(account_name, name, hack_str, zone->GetShortName());
+				auto message = fmt::format("Player sent OP_SpawnAppearance with AT_Sneak [{}]", sa->parameter);
+				RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = message});
 			}
 			return;
 		}
@@ -13963,8 +13976,8 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 	}
 	else if (sa->type == AT_Size)
 	{
-		auto hack_str = fmt::format("Player sent OP_SpawnAppearance with AT_Size: {}", sa->parameter);
-		database.SetMQDetectionFlag(account_name, name, hack_str, zone->GetShortName());
+		auto message = fmt::format("Player sent OP_SpawnAppearance with AT_Size [{}]", sa->parameter);
+		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = message});
 	}
 	else if (sa->type == AT_Light)	// client emitting light (lightstone, shiny shield)
 	{
@@ -14307,9 +14320,14 @@ void Client::Handle_OP_TargetCommand(const EQApplicationPacket *app)
 			else if (GetTarget()->GetBodyType() == BT_NoTarget2 || GetTarget()->GetBodyType() == BT_Special
 				|| GetTarget()->GetBodyType() == BT_NoTarget)
 			{
-				auto hacker_str = fmt::format("{} attempting to target something untargetable, {} bodytype: {}",
-					GetName(), GetTarget()->GetName(), (int)GetTarget()->GetBodyType());
-				database.SetMQDetectionFlag(AccountName(), GetName(), Strings::Escape(hacker_str), zone->GetShortName());
+				auto message = fmt::format(
+					"[{}] attempting to target something untargetable [{}] bodytype [{}]",
+					GetName(),
+					GetTarget()->GetName(),
+					(int) GetTarget()->GetBodyType()
+				);
+				RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = message});
+
 				SetTarget((Mob*)nullptr);
 				return;
 			}
@@ -14338,15 +14356,16 @@ void Client::Handle_OP_TargetCommand(const EQApplicationPacket *app)
 				{
 					if (DistanceSquared(m_Position, GetTarget()->GetPosition()) > (zone->newzone_data.maxclip*zone->newzone_data.maxclip))
 					{
-						auto hacker_str = fmt::format(
-						    "{} attempting to target something beyond the clip plane of {:.2f} "
+						auto message = fmt::format(
+						    "[{}] attempting to target something beyond the clip plane of {:.2f} "
 						    "units, from ({:.2f}, {:.2f}, {:.2f}) to {} ({:.2f}, {:.2f}, "
 						    "{:.2f})",
 						    GetName(),
 						    (zone->newzone_data.maxclip * zone->newzone_data.maxclip), GetX(),
 						    GetY(), GetZ(), GetTarget()->GetName(), GetTarget()->GetX(),
 						    GetTarget()->GetY(), GetTarget()->GetZ());
-						database.SetMQDetectionFlag(AccountName(), GetName(), Strings::Escape(hacker_str), zone->GetShortName());
+
+						RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = message});
 						SetTarget(nullptr);
 						return;
 					}
@@ -14354,13 +14373,21 @@ void Client::Handle_OP_TargetCommand(const EQApplicationPacket *app)
 			}
 			else if (DistanceSquared(m_Position, GetTarget()->GetPosition()) > (zone->newzone_data.maxclip*zone->newzone_data.maxclip))
 			{
-				auto hacker_str =
-				    fmt::format("{} attempting to target something beyond the clip plane of {:.2f} "
-						"units, from ({:.2f}, {:.2f}, {:.2f}) to {} ({:.2f}, {:.2f}, {:.2f})",
-						GetName(), (zone->newzone_data.maxclip * zone->newzone_data.maxclip),
-						GetX(), GetY(), GetZ(), GetTarget()->GetName(), GetTarget()->GetX(),
-						GetTarget()->GetY(), GetTarget()->GetZ());
-				database.SetMQDetectionFlag(AccountName(), GetName(), Strings::Escape(hacker_str), zone->GetShortName());
+				auto message = fmt::format(
+					"{} attempting to target something beyond the clip plane of {:.2f} "
+					"units, from ({:.2f}, {:.2f}, {:.2f}) to {} ({:.2f}, {:.2f}, {:.2f})",
+					GetName(),
+					(zone->newzone_data.maxclip * zone->newzone_data.maxclip),
+					GetX(),
+					GetY(),
+					GetZ(),
+					GetTarget()->GetName(),
+					GetTarget()->GetX(),
+					GetTarget()->GetY(),
+					GetTarget()->GetZ()
+				);
+
+				RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = message});
 				SetTarget(nullptr);
 				return;
 			}

@@ -850,7 +850,12 @@ void Client::DropItem(int16 slot_id, bool recurse)
 		}
 		invalid_drop = nullptr;
 
-		database.SetHackerFlag(AccountName(), GetCleanName(), "Tried to drop an item on the ground that was nodrop!");
+		std::string message = fmt::format(
+			"Tried to drop an item on the ground that was no-drop! item_name [{}] item_id ({})",
+			invalid_drop->GetItem()->Name,
+			invalid_drop->GetItem()->ID
+		);
+		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = message});
 		GetInv().DeleteItem(slot_id);
 		return;
 	}
@@ -1921,10 +1926,13 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 
 		if(!banker || distance > USE_NPC_RANGE2)
 		{
-			auto hacked_string = fmt::format("Player tried to make use of a banker(items) but {} is "
-							 "non-existant or too far away ({} units).",
-							 banker ? banker->GetName() : "UNKNOWN NPC", distance);
-			database.SetMQDetectionFlag(AccountName(), GetName(), hacked_string, zone->GetShortName());
+			auto message = fmt::format(
+				"Player tried to make use of a banker (items) but banker [{}] is "
+				"non-existent or too far away [{}] units",
+				banker ? banker->GetName() : "UNKNOWN NPC", distance
+			);
+			RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = message});
+
 			Kick("Inventory desync");	// Kicking player to avoid item loss do to client and server inventories not being sync'd
 			return false;
 		}

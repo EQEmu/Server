@@ -1703,7 +1703,7 @@ void Client::BuyTraderItem(TraderBuy_Struct* tbs, Client* Trader, const EQApplic
 	}
 
 	if(!TakeMoneyFromPP(TotalCost)) {
-		database.SetHackerFlag(account_name, name, "Attempted to buy something in bazaar but did not have enough money.");
+		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = "Attempted to buy something in bazaar but did not have enough money."});
 		TradeRequestFailed(app);
 		safe_delete(outapp);
 		return;

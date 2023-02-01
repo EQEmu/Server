@@ -327,7 +327,6 @@ namespace DatabaseSchema {
 			"gm_ips",
 			"group_id",
 			"group_leaders",
-			"hackers",
 			"instance_list",
 			"ip_exemptions",
 			"item_tick",

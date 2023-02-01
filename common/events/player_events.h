@@ -51,6 +51,7 @@ namespace PlayerEvent {
 		BANDOLIER_CREATE, // unimplemented
 		BANDOLIER_SWAP, // unimplemented
 		DISCOVER_ITEM,
+		POSSIBLE_HACK,
 		MAX // dont remove
 	};
 
@@ -102,7 +103,8 @@ namespace PlayerEvent {
 		"Trader Sell",
 		"Bandolier Create (Unimplemented)",
 		"Bandolier Swap (Unimplemented)",
-		"Discover Item"
+		"Discover Item",
+		"Possible Hack"
 	};
 
 	// Generic struct used by all events
@@ -864,6 +866,20 @@ namespace PlayerEvent {
 			);
 		}
 	};
+
+
+	struct PossibleHackEvent {
+		std::string message;
+
+		// cereal
+		template<class Archive>
+		void serialize(Archive &ar)
+		{
+			ar(
+				CEREAL_NVP(message)
+			);
+		}
+	};
 }
 
 #endif //EQEMU_PLAYER_EVENTS_H
@@ -885,7 +901,7 @@ namespace PlayerEvent {
         worldserver.SendPacket(\
             player_event_logs.RecordEvent(\
                 event_type,\
-                c->GetPlayerEvent(),\
+                (c)->GetPlayerEvent(),\
                 event_data\
             ).get()\
         );\

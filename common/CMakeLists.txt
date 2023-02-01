@@ -220,7 +220,6 @@ SET(repositories
     repositories/base/base_guilds_repository.h
     repositories/base/base_guild_ranks_repository.h
     repositories/base/base_guild_relations_repository.h
-    repositories/base/base_hackers_repository.h
     repositories/base/base_horses_repository.h
     repositories/base/base_instance_list_repository.h
     repositories/base/base_instance_list_player_repository.h
@@ -400,7 +399,6 @@ SET(repositories
     repositories/guilds_repository.h
     repositories/guild_ranks_repository.h
     repositories/guild_relations_repository.h
-    repositories/hackers_repository.h
     repositories/horses_repository.h
     repositories/instance_list_repository.h
     repositories/instance_list_player_repository.h
