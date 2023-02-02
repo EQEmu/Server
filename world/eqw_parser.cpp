@@ -218,8 +218,8 @@ EQWParser::~EQWParser() {
 bool EQWParser::eval_file(const char * packagename, const char * filename, std::string &error)
 {
 	std::vector<std::string> args;
-	args.emplace_back(packagename);
-	args.emplace_back(filename);
+	args.push_back(packagename);
+	args.push_back(filename);
 	return(dosub("eval_file", args, error));
 }
 

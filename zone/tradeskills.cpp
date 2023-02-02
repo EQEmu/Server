@@ -135,13 +135,13 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 			EQ::ItemInstance *aug = tobe_auged->GetAugment(slot);
 			if(aug) {
 				std::vector<std::any> args;
-				args.emplace_back(aug);
+				args.push_back(aug);
 				parse->EventItem(EVENT_AUGMENT_ITEM, user, tobe_auged, nullptr, "", slot, &args);
 
 				args.assign(1, tobe_auged);
 				parse->EventItem(EVENT_AUGMENT_INSERT, user, aug, nullptr, "", slot, &args);
 
-				args.emplace_back(aug);
+				args.push_back(aug);
 
 				const auto export_string = fmt::format(
 					"{} {} {} {}",
@@ -177,11 +177,11 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 				return;
 			}
 			std::vector<std::any> args;
-			args.emplace_back(aug);
+			args.push_back(aug);
 			parse->EventItem(EVENT_UNAUGMENT_ITEM, user, tobe_auged, nullptr, "", slot, &args);
 
 			args.assign(1, tobe_auged);
-			args.emplace_back(&is_solvent);
+			args.push_back(&is_solvent);
 
 			parse->EventItem(EVENT_AUGMENT_REMOVE, user, aug, nullptr, "", slot, &args);
 		}

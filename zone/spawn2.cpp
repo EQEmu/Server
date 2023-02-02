@@ -1058,10 +1058,10 @@ bool SpawnConditionManager::LoadSpawnConditions(const char* zone_name, uint32 in
 		event.next.month  = atoi(row[6]);
 		event.next.year   = atoi(row[7]);
 
-		event.enabled  = atoi(row[8]) != 0;
+		event.enabled  = atoi(row[8]) == 0 ? false : true;
 		event.action   = (SpawnEvent::Action) atoi(row[9]);
 		event.argument = atoi(row[10]);
-		event.strict   = atoi(row[11]) != 0;
+		event.strict   = atoi(row[11]) == 0 ? false : true;
 
 		spawn_events.push_back(event);
 

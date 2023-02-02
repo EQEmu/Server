@@ -76,9 +76,9 @@ void load_encounter_with_data(std::string name, std::string info_str) {
 	entity_list.AddEncounter(enc);
 	lua_encounters[name] = enc;
 	lua_encounters_loaded[name] = true;
-	std::vector<std::any> args;
-	args.emplace_back(&info_str);
-	parse->EventEncounter(EVENT_ENCOUNTER_LOAD, name, "", 0, &args);
+	std::vector<std::any> info_ptrs;
+	info_ptrs.push_back(&info_str);
+	parse->EventEncounter(EVENT_ENCOUNTER_LOAD, name, "", 0, &info_ptrs);
 }
 
 void unload_encounter(std::string name) {
@@ -138,9 +138,9 @@ void unload_encounter_with_data(std::string name, std::string info_str) {
 	lua_encounters[name]->Depop();
 	lua_encounters.erase(name);
 	lua_encounters_loaded.erase(name);
-	std::vector<std::any> args;
-	args.emplace_back(&info_str);
-	parse->EventEncounter(EVENT_ENCOUNTER_UNLOAD, name, "", 0, &args);
+	std::vector<std::any> info_ptrs;
+	info_ptrs.push_back(&info_str);
+	parse->EventEncounter(EVENT_ENCOUNTER_UNLOAD, name, "", 0, &info_ptrs);
 }
 
 void register_event(std::string package_name, std::string name, int evt, luabind::adl::object func) {
@@ -3700,6 +3700,11 @@ int8 lua_does_augment_fit(Lua_ItemInst inst, uint32 augment_id)
 	return quest_manager.DoesAugmentFit(inst, augment_id);
 }
 
+int8 lua_does_augment_fit_slot(Lua_ItemInst inst, uint32 augment_id, uint8 augment_slot)
+{
+	return quest_manager.DoesAugmentFit(inst, augment_id, augment_slot);
+}
+
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
 	cur = table[#name]; \
 	if(luabind::type(cur) != LUA_TNIL) { \
@@ -4217,7 +4222,8 @@ luabind::scope lua_register_general() {
 		luabind::def("do_anim", (void(*)(int,int,bool))&lua_do_anim),
 		luabind::def("do_anim", (void(*)(int,int,bool,int))&lua_do_anim),
 		luabind::def("do_augment_slots_match", &lua_do_augment_slots_match),
-		luabind::def("does_augment_fit", &lua_does_augment_fit),
+		luabind::def("does_augment_fit", (int8(*)(Lua_ItemInst, uint32))&lua_does_augment_fit),
+		luabind::def("does_augment_fit_slot", (int8(*)(Lua_ItemInst, uint32, uint8))&lua_does_augment_fit_slot),
 		/*
 			Cross Zone
 		*/

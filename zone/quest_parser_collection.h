@@ -73,22 +73,22 @@ public:
 	bool ItemHasQuestSub(EQ::ItemInstance *itm, QuestEventID evt);
 	bool BotHasQuestSub(QuestEventID evt);
 
-	int EventNPC(QuestEventID evt, NPC* npc, Mob *init, const std::string& data, uint32 extra_data,
+	int EventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
 		std::vector<std::any> *extra_pointers = nullptr);
-	int EventPlayer(QuestEventID evt, Client *client, const std::string& data, uint32 extra_data,
+	int EventPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data,
 		std::vector<std::any> *extra_pointers = nullptr);
-	int EventItem(QuestEventID evt, Client *client, EQ::ItemInstance *item, Mob *mob, const std::string& data, uint32 extra_data,
+	int EventItem(QuestEventID evt, Client *client, EQ::ItemInstance *item, Mob *mob, std::string data, uint32 extra_data,
 		std::vector<std::any> *extra_pointers = nullptr);
-	int EventSpell(QuestEventID evt, Mob* mob, Client *client, uint32 spell_id, const std::string& data, uint32 extra_data,
+	int EventSpell(QuestEventID evt, Mob* mob, Client *client, uint32 spell_id, std::string data, uint32 extra_data,
 		std::vector<std::any> *extra_pointers = nullptr);
-	int EventEncounter(QuestEventID evt, std::string encounter_name, const std::string& data, uint32 extra_data,
+	int EventEncounter(QuestEventID evt, std::string encounter_name, std::string data, uint32 extra_data,
 		std::vector<std::any> *extra_pointers = nullptr);
 
 	int EventBot(
 		QuestEventID evt,
 		Bot *bot,
 		Mob *init,
-		const std::string& data,
+		std::string data,
 		uint32 extra_data,
 		std::vector<std::any> *extra_pointers = nullptr
 	);
@@ -129,15 +129,15 @@ private:
 	bool BotHasQuestSubLocal(QuestEventID evt);
 	bool BotHasQuestSubGlobal(QuestEventID evt);
 
-	int EventNPCLocal(QuestEventID evt, NPC* npc, Mob *init, const std::string& data, uint32 extra_data, std::vector<std::any> *extra_pointers);
-	int EventNPCGlobal(QuestEventID evt, NPC* npc, Mob *init, const std::string& data, uint32 extra_data, std::vector<std::any> *extra_pointers);
-	int EventPlayerLocal(QuestEventID evt, Client *client, const std::string& data, uint32 extra_data,	std::vector<std::any> *extra_pointers);
-	int EventPlayerGlobal(QuestEventID evt, Client *client, const std::string& data, uint32 extra_data, std::vector<std::any> *extra_pointers);
+	int EventNPCLocal(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data, std::vector<std::any> *extra_pointers);
+	int EventNPCGlobal(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data, std::vector<std::any> *extra_pointers);
+	int EventPlayerLocal(QuestEventID evt, Client *client, std::string data, uint32 extra_data,	std::vector<std::any> *extra_pointers);
+	int EventPlayerGlobal(QuestEventID evt, Client *client, std::string data, uint32 extra_data, std::vector<std::any> *extra_pointers);
 	int EventBotLocal(
 		QuestEventID evt,
 		Bot *bot,
 		Mob *init,
-		const std::string& data,
+		std::string data,
 		uint32 extra_data,
 		std::vector<std::any> *extra_pointers
 	);
@@ -145,7 +145,7 @@ private:
 		QuestEventID evt,
 		Bot *bot,
 		Mob *init,
-		const std::string& data,
+		std::string data,
 		uint32 extra_data,
 		std::vector<std::any> *extra_pointers
 	);
@@ -160,19 +160,19 @@ private:
 	QuestInterface *GetQIByBotQuest(std::string &filename);
 	QuestInterface *GetQIByGlobalBotQuest(std::string &filename);
 
-	int DispatchEventNPC(QuestEventID evt, NPC* npc, Mob *init, const std::string& data, uint32 extra_data,
+	int DispatchEventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
 		std::vector<std::any> *extra_pointers);
-	int DispatchEventPlayer(QuestEventID evt, Client *client, const std::string& data, uint32 extra_data,
+	int DispatchEventPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data,
 		std::vector<std::any> *extra_pointers);
-	int DispatchEventItem(QuestEventID evt, Client *client, EQ::ItemInstance *item, Mob *mob, const std::string& data, uint32 extra_data,
+	int DispatchEventItem(QuestEventID evt, Client *client, EQ::ItemInstance *item, Mob *mob, std::string data, uint32 extra_data,
 		std::vector<std::any> *extra_pointers);
-	int DispatchEventSpell(QuestEventID evt, Mob* mob, Client *client, uint32 spell_id, const std::string& data, uint32 extra_data,
+	int DispatchEventSpell(QuestEventID evt, Mob* mob, Client *client, uint32 spell_id, std::string data, uint32 extra_data,
 		std::vector<std::any> *extra_pointers);
 	int DispatchEventBot(
 		QuestEventID evt,
 		Bot *bot,
 		Mob *init,
-		const std::string& data,
+		std::string data,
 		uint32 extra_data,
 		std::vector<std::any> *extra_pointers
 	);

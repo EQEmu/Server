@@ -1784,8 +1784,8 @@ void EntityList::DuelMessage(Mob *winner, Mob *loser, bool flee)
 {
 	if (winner->GetLevelCon(winner->GetLevel(), loser->GetLevel()) > 2) {
 		std::vector<std::any> args;
-		args.emplace_back(winner);
-		args.emplace_back(loser);
+		args.push_back(winner);
+		args.push_back(loser);
 
 		parse->EventPlayer(EVENT_DUEL_WIN, winner->CastToClient(), loser->GetName(), loser->CastToClient()->CharacterID(), &args);
 		parse->EventPlayer(EVENT_DUEL_LOSE, loser->CastToClient(), winner->GetName(), winner->CastToClient()->CharacterID(), &args);
@@ -3642,7 +3642,7 @@ void EntityList::ClearFeignAggro(Mob *targ)
 
 			if (targ->IsClient()) {
 				std::vector<std::any> args;
-				args.emplace_back(it->second);
+				args.push_back(it->second);
 				int i = parse->EventPlayer(EVENT_FEIGN_DEATH, targ->CastToClient(), "", 0, &args);
 				if (i != 0) {
 					++it;
@@ -3989,8 +3989,8 @@ void EntityList::ProcessMove(Client *c, const glm::vec3& location)
 		quest_proximity_event& evt = (*iter);
 
 		std::vector<std::any> args;
-		args.emplace_back(&evt.area_id);
-		args.emplace_back(&evt.area_type);
+		args.push_back(&evt.area_id);
+		args.push_back(&evt.area_type);
 
 		if (evt.npc) {
 			if (evt.event_id == EVENT_ENTER) {
@@ -4066,8 +4066,8 @@ void EntityList::ProcessMove(NPC *n, float x, float y, float z) {
 		quest_proximity_event   &evt = (*iter);
 
 		std::vector<std::any> args;
-		args.emplace_back(&evt.area_id);
-		args.emplace_back(&evt.area_type);
+		args.push_back(&evt.area_id);
+		args.push_back(&evt.area_type);
 
 		if (evt.event_id == EVENT_ENTER) {
 			parse->EventNPC(EVENT_ENTER, evt.npc, evt.client, "", 0);

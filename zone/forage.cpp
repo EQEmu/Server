@@ -375,7 +375,7 @@ void Client::GoFish()
 
 				if (inst) {
 					std::vector<std::any> args;
-					args.emplace_back(inst);
+					args.push_back(inst);
 					parse->EventPlayer(EVENT_FISH_SUCCESS, this, "", inst->GetID(), &args);
 				}
 			}
@@ -495,7 +495,7 @@ void Client::ForageItem(bool guarantee) {
 
 			if (inst) {
 				std::vector<std::any> args;
-				args.emplace_back(inst);
+				args.push_back(inst);
 				parse->EventPlayer(EVENT_FORAGE_SUCCESS, this, "", inst->GetID(), &args);
 			}
 		}
