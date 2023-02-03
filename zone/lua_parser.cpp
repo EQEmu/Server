@@ -242,6 +242,7 @@ LuaParser::LuaParser() {
 	PlayerArgumentDispatch[EVENT_DUEL_LOSE]                  = handle_player_duel_loss;
 	PlayerArgumentDispatch[EVENT_LOOT]                       = handle_player_loot;
 	PlayerArgumentDispatch[EVENT_TASK_STAGE_COMPLETE]        = handle_player_task_stage_complete;
+	PlayerArgumentDispatch[EVENT_TASK_ACCEPTED]				 = handle_player_task_accepted;
 	PlayerArgumentDispatch[EVENT_TASK_COMPLETE]              = handle_player_task_update;
 	PlayerArgumentDispatch[EVENT_TASK_UPDATE]                = handle_player_task_update;
 	PlayerArgumentDispatch[EVENT_TASK_BEFORE_UPDATE]         = handle_player_task_update;
