@@ -10419,6 +10419,7 @@ void Bot::ProcessRaidInvite(Bot* invitee, Client* invitor) {
 			//Second, add the single invitor
 			raid->SendRaidCreate(invitor);
 			raid->AddMember(invitor, 0xFFFFFFFF, true, false, true);
+//			raid->SendRaidAdd(invitor->GetName(), invitor);
 			raid->SendMakeLeaderPacketTo(invitor->GetName(), invitor);  //Mitch Jan 18
 			if (raid->IsLocked()) {
 				raid->SendRaidLockTo(invitor);

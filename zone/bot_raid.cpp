@@ -51,11 +51,11 @@ void Bot::AI_Process_Raid()
 #define PASSIVE (GetBotStance() == EQ::constants::stancePassive)
 #define NOT_PASSIVE (GetBotStance() != EQ::constants::stancePassive)
 
-	Raid* raid = entity_list.GetRaidByBotName(this->GetName());
+	Raid* raid = entity_list.GetRaidByBotName(GetName());
 	Client* bot_owner = (GetBotOwner() && GetBotOwner()->IsClient() ? GetBotOwner()->CastToClient() : nullptr);
 	uint32 r_group = raid->GetGroup(GetName());
 
-	LogAI("Bot_Raid: Entered Raid Process() for [{}].", this->GetCleanName());
+	LogAI("Bot_Raid: Entered Raid Process() for [{}].", GetCleanName());
 
 	//#pragma region PRIMARY AI SKIP CHECKS
 
@@ -74,11 +74,11 @@ void Bot::AI_Process_Raid()
 
 	// We also need a leash owner and follow mob (subset of primary AI criteria)
 	Client* leash_owner = nullptr;
-	if (r_group < 12 && raid->IsGroupLeader(this->GetName())) {
+	if (r_group < MAX_RAID_GROUPS && raid->IsGroupLeader(GetName())) {
 		leash_owner = bot_owner;
 		SetFollowID(leash_owner->GetID());
 	}
-	else if (r_group < 12 && raid->GetGroupLeader(r_group) && raid->GetGroupLeader(r_group)->IsClient()) {
+	else if (r_group < MAX_RAID_GROUPS && raid->GetGroupLeader(r_group) && raid->GetGroupLeader(r_group)->IsClient()) {
 		if (raid->GetGroupLeader(r_group)) {
 			leash_owner = raid->GetGroupLeader(r_group);
 			SetFollowID(leash_owner->GetID());
@@ -102,7 +102,7 @@ void Bot::AI_Process_Raid()
 		SetFollowID(leash_owner->GetID());
 	}
 	
-	if (this->mana_timer.Check(false)) {
+	if (mana_timer.Check(false)) {
 		raid->SendHPManaEndPacketsFrom(this);
 	}
 	if (send_hp_update_timer.Check(false)) {
@@ -432,7 +432,7 @@ void Bot::AI_Process_Raid()
 
 			// Raid Group roles can be expounded upon in the future
 			//r_group is the uint32 group id
-			auto assist_mob = raid->GetRaidMainAssistOneByName(this->GetName());
+			auto assist_mob = raid->GetRaidMainAssistOneByName(GetName());
 			bool find_target = true;
 
 			//if (!assist_mob) {
@@ -822,111 +822,8 @@ void Bot::AI_Process_Raid()
 									return;
 								}
 							}
-
-							//if (tar->IsRooted()) { // Move caster/rogue back from rooted mob - out of combat range, if necessary
-
-							//	if (GetArchetype() == ARCHETYPE_CASTER || GetClass() == ROGUE) {
-
-							//		if (tar_distance <= melee_distance_max) {
-
-							//			if (PlotPositionAroundTarget(this, Goal.x, Goal.y, Goal.z)) {
-							//			//if (PlotPositionBehindMeFacingTarget(tar, Goal.x, Goal.y, Goal.z)) {
-
-							//				Teleport(Goal);
-							//				//WalkTo(Goal.x, Goal.y, Goal.z);
-							//				SetCombatJitterFlag();
-
-							//				return;
-							//			}
-							//		}
-							//	}
-							//}
 						}
 					}
-					//else {
-
-					//	if (caster_distance_min && tar_distance < caster_distance_min && !tar->IsFeared()) { // Caster back-off adjustment
-
-					//		if (PlotPositionAroundTarget(this, Goal.x, Goal.y, Goal.z)) {
-					//		//if (PlotPositionBehindMeFacingTarget(tar, Goal.x, Goal.y, Goal.z)) {
-
-					//			if (DistanceSquared(Goal, tar->GetPosition()) <= caster_distance_max) {
-
-					//				Teleport(Goal);
-					//				//WalkTo(Goal.x, Goal.y, Goal.z);
-					//				SetCombatJitterFlag();
-
-					//				return;
-					//			}
-					//		}
-					//	}
-					//	else if (tar_distance < melee_distance_min) { // Melee back-off adjustment
-
-					//		if (PlotPositionAroundTarget(this, Goal.x, Goal.y, Goal.z)) {
-					//		//if (PlotPositionBehindMeFacingTarget(tar, Goal.x, Goal.y, Goal.z)) {
-
-					//			if (DistanceSquared(Goal, tar->GetPosition()) <= melee_distance_max) {
-
-					//				Teleport(Goal);
-					//				//WalkTo(Goal.x, Goal.y, Goal.z);
-					//				SetCombatJitterFlag();
-
-					//				return;
-					//			}
-					//		}
-					//	}
-					//	else if (backstab_weapon && !behind_mob) { // Move the rogue to behind the mob
-
-					//		if (PlotPositionAroundTarget(tar, Goal.x, Goal.y, Goal.z)) {
-					//		//if (PlotPositionOnArcBehindTarget(tar, Goal.x, Goal.y, Goal.z, melee_distance)) {
-
-					//			float distance_squared = DistanceSquared(Goal, tar->GetPosition());
-					//			if (/*distance_squared >= melee_distance_min && */distance_squared <= melee_distance_max) {
-
-					//				Teleport(Goal);
-					//				//RunTo(Goal.x, Goal.y, Goal.z);
-					//				SetCombatJitterFlag();
-
-					//				return;
-					//			}
-					//		}
-					//	}
-					//	else if (m_combat_jitter_timer.Check()) {
-
-					//		if (!caster_distance && PlotPositionAroundTarget(tar, Goal.x, Goal.y, Goal.z)) {
-					//		//if (!caster_distance && PlotPositionOnArcInFrontOfTarget(tar, Goal.x, Goal.y, Goal.z, melee_distance)) {
-
-					//			float distance_squared = DistanceSquared(Goal, tar->GetPosition());
-					//			if (/*distance_squared >= melee_distance_min && */distance_squared <= melee_distance_max) {
-
-					//				Teleport(Goal);
-					//				//WalkTo(Goal.x, Goal.y, Goal.z);
-					//				SetCombatJitterFlag();
-
-					//				return;
-					//			}
-					//		}
-					//		else if (caster_distance && PlotPositionAroundTarget(tar, Goal.x, Goal.y, Goal.z)) {
-					//		//else if (caster_distance && PlotPositionOnArcInFrontOfTarget(tar, Goal.x, Goal.y, Goal.z, caster_distance)) {
-
-					//			float distance_squared = DistanceSquared(Goal, tar->GetPosition());
-					//			if (/*distance_squared >= caster_distance_min && */distance_squared <= caster_distance_max) {
-
-					//				Teleport(Goal);
-					//				//WalkTo(Goal.x, Goal.y, Goal.z);
-					//				SetCombatJitterFlag();
-
-					//				return;
-					//			}
-					//		}
-					//	}
-
-					//	if (!IsFacingMob(tar)) {
-
-					//		FaceTarget(tar);
-					//		return;
-					//	}
-					//}
 				}
 				else {
 
@@ -1326,8 +1223,8 @@ void Bot::PetAIProcess_Raid() {
 	if (!HasPet() || !GetPet() || !GetPet()->IsNPC())
 		return;
 
-	Mob* BotOwner = this->GetBotOwner();
-	NPC* botPet = this->GetPet()->CastToNPC();
+	Mob* BotOwner = GetBotOwner();
+	NPC* botPet = GetPet()->CastToNPC();
 	if (!botPet->GetOwner() || !botPet->GetID() || !botPet->GetOwnerID()) {
 		Kill();
 		return;
@@ -1557,7 +1454,7 @@ bool Bot::AICastSpell_Raid(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 
 	// Bot AI Raid
 
-	Raid* raid = entity_list.GetRaidByBotName(this->GetName());
+	Raid* raid = entity_list.GetRaidByBotName(GetName());
 	uint32 r_group = raid->GetGroup(GetName());
 	if (!raid)
 		return false;
@@ -1640,7 +1537,7 @@ bool Bot::AICastSpell_Raid(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 			bool hasAggro = false;
 			bool isPrimaryHealer = false;
 
-			if (this->IsRaidGrouped()) {
+			if (IsRaidGrouped()) {
 				isPrimaryHealer = IsGroupHealer();
 			}
 
@@ -1725,7 +1622,7 @@ bool Bot::AICastSpell_Raid(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 				else {
 					float hpRatioToCast = 0.0f;
 
-					switch (this->GetBotStance()) {
+					switch (GetBotStance()) {
 					case EQ::constants::stanceEfficient:
 					case EQ::constants::stanceAggressive:
 						hpRatioToCast = isPrimaryHealer ? 90.0f : 50.0f;
@@ -1862,7 +1759,7 @@ bool Bot::AICastSpell_Raid(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 					continue;
 
 				// can not cast buffs for your own pet only on another pet that isn't yours
-				if ((spells[selectedBotSpell.SpellId].target_type == ST_Pet) && (tar != this->GetPet()))
+				if ((spells[selectedBotSpell.SpellId].target_type == ST_Pet) && (tar != GetPet()))
 					continue;
 
 				// Validate target
@@ -1911,7 +1808,7 @@ bool Bot::AICastSpell_Raid(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 				{
 					float manaRatioToCast = 75.0f;
 
-					switch (this->GetBotStance()) {
+					switch (GetBotStance()) {
 					case EQ::constants::stanceEfficient:
 						manaRatioToCast = 90.0f;
 						break;
@@ -1930,7 +1827,7 @@ bool Bot::AICastSpell_Raid(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 					}
 
 					//If we're at specified mana % or below, don't rune as enchanter
-					if (this->GetManaRatio() <= manaRatioToCast)
+					if (GetManaRatio() <= manaRatioToCast)
 						break;
 				}
 
@@ -1990,7 +1887,7 @@ bool Bot::AICastSpell_Raid(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 			{
 				float manaRatioToCast = 75.0f;
 
-				switch (this->GetBotStance()) {
+				switch (GetBotStance()) {
 				case EQ::constants::stanceEfficient:
 					manaRatioToCast = 90.0f;
 					break;
@@ -2011,7 +1908,7 @@ bool Bot::AICastSpell_Raid(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 				}
 
 				//If we're at specified mana % or below, don't nuke as cleric or enchanter
-				if (this->GetManaRatio() <= manaRatioToCast)
+				if (GetManaRatio() <= manaRatioToCast)
 					break;
 			}
 
@@ -2175,7 +2072,7 @@ bool Bot::AICastSpell_Raid(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 							continue;
 
 						// can not cast buffs for your own pet only on another pet that isn't yours
-						if ((spells[selectedBotSpell.SpellId].target_type == ST_Pet) && (tar != this->GetPet()))
+						if ((spells[selectedBotSpell.SpellId].target_type == ST_Pet) && (tar != GetPet()))
 							continue;
 
 						// Validate target
@@ -2458,7 +2355,7 @@ bool Bot::AICastSpell_Raid(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 			if (castedSpell) {
 				if (botClass != BARD) {
 					if (IsGroupSpell(botSpell.SpellId)) {
-						if (this->IsRaidGrouped()) {
+						if (IsRaidGrouped()) {
 							if (r_group) {
 								std::vector<RaidMember> raid_group_members = raid->GetRaidGroupMembers(r_group);
 								for (std::vector<RaidMember>::iterator iter = raid_group_members.begin(); iter != raid_group_members.end(); ++iter) {
@@ -2617,8 +2514,8 @@ void Raid::RaidBotGroupSay(Bot* b, uint8 language, uint8 lang_skill, const char*
 uint8 Bot::GetNumberNeedingHealedInRaidGroup(uint8 hpr, bool includePets) {
 	uint8 needHealed = 0;
 	Raid* raid = nullptr;
-	raid = entity_list.GetRaidByBotName(this->GetName());
-	uint32 r_group = raid->GetGroup(this->GetName());
+	raid = entity_list.GetRaidByBotName(GetName());
+	uint32 r_group = raid->GetGroup(GetName());
 	std::vector<RaidMember> raid_group_members = raid->GetRaidGroupMembers(r_group);
 	//for (std::vector<RaidMember>::iterator iter = raid_group_members.begin(); iter != raid_group_members.end(); ++iter) {
 	for (int i = 0; i< raid_group_members.size(); ++i) {

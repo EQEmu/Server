@@ -99,7 +99,7 @@ void Raid::AddMember(Client *c, uint32 group, bool rleader, bool groupleader, bo
 	}
 
 	const auto query = fmt::format(
-		"INSERT INTO raid_members SET raidid = {}, charid = {}, botid = 0, "
+		"REPLACE INTO raid_members SET raidid = {}, charid = {}, botid = 0, "
 		"groupid = {}, _class = {}, level = {}, name = '{}', "
 		"isgroupleader = {}, israidleader = {}, islooter = {}",
 		GetID(),
@@ -180,13 +180,15 @@ void Raid::AddMember(Client *c, uint32 group, bool rleader, bool groupleader, bo
 	safe_delete(pack);
 }
 
+
+
 void Raid::AddBot(Bot* b, uint32 group, bool rleader, bool groupleader, bool looter) {
 	if (!b) {
 		return;
 	}
 
 	const auto query = fmt::format(
-		"INSERT INTO raid_members SET raidid = {}, "
+		"REPLACE INTO raid_members SET raidid = {}, "
 		"charid = 0, botid = {}, groupid = {}, _class = {}, level = {}, name = '{}', "
 		"isgroupleader = {}, israidleader = {}, islooter = {}",
 		GetID(),
@@ -201,9 +203,6 @@ void Raid::AddBot(Bot* b, uint32 group, bool rleader, bool groupleader, bool loo
 	);
 
 	auto results = database.QueryDatabase(query);
-	if (!results.Success()) {
-		LogError("Error inserting into raid members: [{}]", results.ErrorMessage().c_str());
-	}
 
 	LearnMembers();
 	VerifyRaid();
@@ -295,17 +294,18 @@ void Raid::DisbandRaid()
 
 void Raid::MoveMember(const char *name, uint32 newGroup)
 {
+
 	const auto query = fmt::format(
 		"UPDATE raid_members SET groupid = {} WHERE name = '{}'",
 		newGroup,
 		name
-	);
+		);
 	auto results = database.QueryDatabase(query);
 
 	LearnMembers();
 	VerifyRaid();
 	SendRaidMoveAll(name);
-
+	
 	auto pack = new ServerPacket(ServerOP_RaidChangeGroup, sizeof(ServerRaidGeneralAction_Struct));
 	auto* rga = (ServerRaidGeneralAction_Struct*) pack->pBuffer;
 	strn0cpy(rga->playername, name, sizeof(rga->playername));
@@ -1065,19 +1065,21 @@ void Raid::SendRaidAdd(const char *who, Client *to)
 	if(!to)
 		return;
 
-	for(int x = 0; x < MAX_RAID_MEMBERS; x++)
+	std::vector<RaidMember> rm = GetMembers();
+
+	for (const auto& m : rm) 
 	{
-		if(strcmp(members[x].membername, who) == 0)
+		if (strcmp(m.membername, who) == 0)
 		{
 			auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidAddMember_Struct));
-			RaidAddMember_Struct *ram = (RaidAddMember_Struct*)outapp->pBuffer;
+			RaidAddMember_Struct* ram = (RaidAddMember_Struct*)outapp->pBuffer;
 			ram->raidGen.action = raidAdd;
-			ram->raidGen.parameter = members[x].GroupNumber;
-			strn0cpy(ram->raidGen.leader_name, members[x].membername, 64);
-			strn0cpy(ram->raidGen.player_name, members[x].membername, 64);
-			ram->_class = members[x]._class;
-			ram->level = members[x].level;
-			ram->isGroupLeader = members[x].IsGroupLeader;
+			ram->raidGen.parameter = m.GroupNumber;
+			strn0cpy(ram->raidGen.leader_name, m.membername, 64);
+			strn0cpy(ram->raidGen.player_name, m.membername, 64);
+			ram->_class = m._class;
+			ram->level = m.level;
+			ram->isGroupLeader = m.IsGroupLeader;
 			to->QueuePacket(outapp);
 			safe_delete(outapp);
 			return;
@@ -1087,23 +1089,24 @@ void Raid::SendRaidAdd(const char *who, Client *to)
 
 void Raid::SendRaidAddAll(const char *who)
 {
-	for (int x = 0; x < MAX_RAID_MEMBERS; x++)
-	{
-		if (strcmp(members[x].membername, who) == 0 )
+	std::vector<RaidMember> rm = GetMembers();
+
+	for (const auto& m : rm) {
+		if (strcmp(m.membername, who) == 0)
 		{
 			auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidAddMember_Struct));
 			RaidAddMember_Struct* ram = (RaidAddMember_Struct*)outapp->pBuffer;
 			ram->raidGen.action = raidAdd;
-			ram->raidGen.parameter = members[x].GroupNumber;
-			strcpy(ram->raidGen.leader_name, members[x].membername);
-			strcpy(ram->raidGen.player_name, members[x].membername);
-			ram->_class = members[x]._class;
-			ram->level = members[x].level;
-			ram->isGroupLeader = members[x].IsGroupLeader;
+			ram->raidGen.parameter = m.GroupNumber;
+			strcpy(ram->raidGen.leader_name, m.membername);
+			strcpy(ram->raidGen.player_name, m.membername);
+			ram->isGroupLeader = m.IsGroupLeader;
+			ram->_class = m._class;
+			ram->level = m.level;
+
 			QueuePacket(outapp);
 			safe_delete(outapp);
 			return;
-
 		}
 	}
 }
@@ -1203,12 +1206,13 @@ void Raid::SendRaidMoveAll(const char* who)
 	SendRaidRemoveAll(who);
 	if(c)
 		SendRaidCreate(c);
-	SendMakeLeaderPacket(leadername);
-	SendRaidAddAll(who);
 	if(c){
 		SendBulkRaid(c);
 	if(IsLocked()) { SendRaidLockTo(c); }
 	}
+	SendRaidAddAll(who);
+	SendMakeLeaderPacket(leadername);
+
 }
 
 void Raid::SendBulkRaid(Client *to)
@@ -1218,9 +1222,9 @@ void Raid::SendBulkRaid(Client *to)
 
 	for(int x = 0; x < MAX_RAID_MEMBERS; x++)
 	{
-		if(members[x].member && strlen(members[x].membername) > 0 && (strcmp(members[x].membername, to->GetName()) != 0)) //don't send ourself
+		if (members[x].member && strlen(members[x].membername) > 0 && (strcmp(members[x].membername, to->GetName()) != 0)) //don't send ourself
 		{
-				SendRaidAdd(members[x].membername, to);
+			SendRaidAdd(members[x].membername, to);
 		}
 	}
 }
@@ -1589,7 +1593,7 @@ bool Raid::LearnMembers()
 	const auto query = fmt::format(
 		"SELECT name, groupid, _class, level, "
 		"isgroupleader, israidleader, islooter, botid "
-		"FROM raid_members WHERE raidid = {}",
+		"FROM raid_members WHERE raidid = {} ORDER BY groupid",
 		GetID()
 	);
 
@@ -1612,7 +1616,7 @@ bool Raid::LearnMembers()
 
 		members[index].member = nullptr;
 		strn0cpy(members[index].membername, row[0], sizeof(members[index].membername));
-		int group_id = atoi(row[1]);
+		uint32 group_id = atoi(row[1]);
 
 		if (group_id > 11) {
 			members[index].GroupNumber = 0xFFFFFFFF;

@@ -11649,12 +11649,12 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 							}
 
 							raid->SendRaidCreate(c);
-							raid->SendMakeLeaderPacketTo(raid->leadername, c);
 							if (group->IsLeader(group->members[x]))
 								raid->AddMember(c, free_group_id, false, true);
 							else
 								raid->AddMember(c, free_group_id);
 							raid->SendBulkRaid(c);
+							raid->SendMakeLeaderPacketTo(raid->leadername, c);
 							if (raid->IsLocked()) {
 								raid->SendRaidLockTo(c);
 							}
@@ -11666,9 +11666,9 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 				}
 				else {
 					raid->SendRaidCreate(this);
-					raid->SendMakeLeaderPacketTo(raid->leadername, this);
 					raid->AddMember(this);
 					raid->SendBulkRaid(this);
+					raid->SendMakeLeaderPacketTo(raid->leadername, this);
 					if (raid->IsLocked()) {
 						raid->SendRaidLockTo(this);
 					}
@@ -11706,10 +11706,9 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 										continue;
 
 									raid->SendRaidCreate(c);
-									raid->SendMakeLeaderPacketTo(raid->leadername, c);
 									raid->AddMember(c, raid_free_group_id, true, true, true);
 									raid->SendBulkRaid(c);
-
+									raid->SendMakeLeaderPacketTo(raid->leadername, c);
 									if (raid->IsLocked()) {
 										raid->SendRaidLockTo(c);
 									}
@@ -11723,10 +11722,9 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 										continue;
 
 									raid->SendRaidCreate(c);
-									raid->SendMakeLeaderPacketTo(raid->leadername, c);
 									raid->AddMember(c, raid_free_group_id);
 									raid->SendBulkRaid(c);
-
+									raid->SendMakeLeaderPacketTo(raid->leadername, c);
 									if (raid->IsLocked()) {
 										raid->SendRaidLockTo(c);
 									}
@@ -11762,9 +11760,9 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 									continue;
 
 								raid->SendRaidCreate(c);
-								raid->SendMakeLeaderPacketTo(raid->leadername, c);
 								raid->AddMember(c, raid_free_group_id, false, true);
 								raid->SendBulkRaid(c);
+								raid->SendMakeLeaderPacketTo(raid->leadername, c);
 
 								if (raid->IsLocked()) {
 									raid->SendRaidLockTo(c);
@@ -11780,10 +11778,9 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 									continue;
 
 								raid->SendRaidCreate(c);
-								raid->SendMakeLeaderPacketTo(raid->leadername, c);
 								raid->AddMember(c, raid_free_group_id);
 								raid->SendBulkRaid(c);
-
+								raid->SendMakeLeaderPacketTo(raid->leadername, c);
 								if (raid->IsLocked()) {
 									raid->SendRaidLockTo(c);
 								}
@@ -11821,10 +11818,9 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 										continue;
 
 									raid->SendRaidCreate(c);
-									raid->SendMakeLeaderPacketTo(raid->leadername, c);
 									raid->AddMember(c, 0, true, true, true);
 									raid->SendBulkRaid(c);
-
+									raid->SendMakeLeaderPacketTo(raid->leadername, c);
 									if (raid->IsLocked()) {
 										raid->SendRaidLockTo(c);
 									}
@@ -11838,9 +11834,9 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 										continue;
 
 									raid->SendRaidCreate(c);
-									raid->SendMakeLeaderPacketTo(raid->leadername, c);
 									raid->AddMember(c, 0);
 									raid->SendBulkRaid(c);
+									raid->SendMakeLeaderPacketTo(raid->leadername, c);
 									if (raid->IsLocked()) {
 										raid->SendRaidLockTo(c);
 									}
@@ -11848,12 +11844,12 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 							}
 						}
 						raid->SendRaidCreate(this);
-						raid->SendMakeLeaderPacketTo(raid->leadername, this);
 						raid->SendBulkRaid(this);
 						player_invited_group->JoinRaidXTarget(raid, true);
 						raid->AddMember(this);
 						player_invited_group->DisbandGroup(true);
 						raid->GroupUpdate(0);
+						raid->SendMakeLeaderPacketTo(raid->leadername, this);
 						if (raid->IsLocked()) {
 							raid->SendRaidLockTo(this);
 						}
@@ -11864,10 +11860,10 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 						raid->SetRaidDetails();
 						raid->SendRaidCreate(player_accepting_invite);
 						raid->SendRaidCreate(this);
-						raid->SendMakeLeaderPacketTo(raid->leadername, this);
 						raid->AddMember(player_accepting_invite, 0xFFFFFFFF, true, false, true);
 						raid->SendBulkRaid(this);
 						raid->AddMember(this);
+						raid->SendMakeLeaderPacketTo(raid->leadername, this);
 						if (raid->IsLocked()) {
 							raid->SendRaidLockTo(this);
 						}

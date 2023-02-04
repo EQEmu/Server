@@ -9,7 +9,7 @@
 	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.					
 
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
@@ -1145,8 +1145,8 @@ bool Group::LearnMembers() {
 
 		return false;
 	}
-
-	int memberIndex = 1;	//starts at 1 becasuse leader [0] is done specifically
+	//starts at 1 becasuse leader [0] is done specifically in the next query from group_leaders, which is position 0
+	int memberIndex = 1;	
     for(auto row = results.begin(); row != results.end(); ++row) {
 		if(!row[0])
 			continue;
@@ -1156,6 +1156,7 @@ bool Group::LearnMembers() {
 
 		memberIndex++;
 	}
+	//position 0
 	query = StringFormat("SELECT leadername FROM group_leaders "
 		"WHERE group_leaders.gid = %lu",
 		GetID());
