@@ -583,6 +583,7 @@ RULE_INT(Range, SongMessages, 75, "The packet range in which song messages are s
 RULE_INT(Range, ClientPositionUpdates, 300, "Distance in which the own changed position is communicated to other clients")
 RULE_INT(Range, CriticalDamage, 80, "The packet range in which critical hit messages are sent")
 RULE_INT(Range, MobCloseScanDistance, 600, "Close scan distance")
+RULE_INT(Range, MaxDistanceToClickDoors, 30, "Max distance that a client can click a door from (Client says 'You can't reach that' at 25)")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Bots)
