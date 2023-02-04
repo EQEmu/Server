@@ -453,6 +453,50 @@ void handle_npc_despawn_zone(
 	lua_setfield(L, -2, "other");
 }
 
+void handle_npc_damage(
+	QuestInterface *parse,
+	lua_State* L,
+	NPC* npc,
+	Mob* init,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+) {
+	Seperator sep(data.c_str());
+
+	lua_pushnumber(L, std::stoul(sep.arg[0]));
+	lua_setfield(L, -2, "entity_id");
+
+	lua_pushnumber(L, std::stoll(sep.arg[1]));
+	lua_setfield(L, -2, "damage");
+
+	lua_pushnumber(L, std::stoi(sep.arg[2]));
+	lua_setfield(L, -2, "spell_id");
+
+	lua_pushnumber(L, std::stoi(sep.arg[3]));
+	lua_setfield(L, -2, "skill_id");
+
+	lua_pushboolean(L, std::stoi(sep.arg[4]) == 0 ? false : true);
+	lua_setfield(L, -2, "is_damage_shield");
+
+	lua_pushboolean(L, std::stoi(sep.arg[5]) == 0 ? false : true);
+	lua_setfield(L, -2, "is_avoidable");
+
+	lua_pushnumber(L, std::stoi(sep.arg[6]));
+	lua_setfield(L, -2, "buff_slot");
+
+	lua_pushboolean(L, std::stoi(sep.arg[7]) == 0 ? false : true);
+	lua_setfield(L, -2, "is_buff_tic");
+
+	lua_pushnumber(L, std::stoi(sep.arg[8]));
+	lua_setfield(L, -2, "special_attack");
+
+	Lua_Mob l_mob(init);
+	luabind::adl::object l_mob_o = luabind::adl::object(L, l_mob);
+	l_mob_o.push(L);
+	lua_setfield(L, -2, "other");
+}
+
 // Player
 void handle_player_say(
 	QuestInterface *parse,
@@ -1166,6 +1210,79 @@ void handle_player_bot_create(
 
 	lua_pushinteger(L, std::stoi(sep.arg[4]));
 	lua_setfield(L, -2, "bot_gender");
+}
+
+void handle_player_damage(
+	QuestInterface *parse,
+	lua_State* L,
+	Client* client,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+) {
+	Seperator sep(data.c_str());
+
+	lua_pushnumber(L, std::stoul(sep.arg[0]));
+	lua_setfield(L, -2, "entity_id");
+
+	lua_pushnumber(L, std::stoll(sep.arg[1]));
+	lua_setfield(L, -2, "damage");
+
+	lua_pushnumber(L, std::stoi(sep.arg[2]));
+	lua_setfield(L, -2, "spell_id");
+
+	lua_pushnumber(L, std::stoi(sep.arg[3]));
+	lua_setfield(L, -2, "skill_id");
+
+	lua_pushboolean(L, std::stoi(sep.arg[4]) == 0 ? false : true);
+	lua_setfield(L, -2, "is_damage_shield");
+
+	lua_pushboolean(L, std::stoi(sep.arg[5]) == 0 ? false : true);
+	lua_setfield(L, -2, "is_avoidable");
+
+	lua_pushnumber(L, std::stoi(sep.arg[6]));
+	lua_setfield(L, -2, "buff_slot");
+
+	lua_pushboolean(L, std::stoi(sep.arg[7]) == 0 ? false : true);
+	lua_setfield(L, -2, "is_buff_tic");
+
+	lua_pushnumber(L, std::stoi(sep.arg[8]));
+	lua_setfield(L, -2, "special_attack");
+
+	if (extra_pointers && extra_pointers->size() >= 1) {
+		Lua_Mob l_mob(std::any_cast<Mob*>(extra_pointers->at(0)));
+		luabind::adl::object l_mob_o = luabind::adl::object(L, l_mob);
+		l_mob_o.push(L);
+		lua_setfield(L, -2, "other");
+	}
+}
+
+void handle_player_item_click(
+	QuestInterface *parse,
+	lua_State* L,
+	Client* client,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+) {
+	lua_pushnumber(L, std::stoi(data));
+	lua_setfield(L, -2, "slot_id");
+
+	if (extra_pointers && extra_pointers->size() >= 1) {
+		lua_pushnumber(L, std::any_cast<EQ::ItemInstance*>(extra_pointers->at(0))->GetID());
+		lua_setfield(L, -2, "item_id");
+
+		lua_pushstring(L, std::any_cast<EQ::ItemInstance*>(extra_pointers->at(0))->GetItem()->Name);
+		lua_setfield(L, -2, "item_name");
+
+		lua_pushnumber(L, std::any_cast<EQ::ItemInstance*>(extra_pointers->at(0))->GetItem()->Click.Effect);
+		lua_setfield(L, -2, "spell_id");
+
+		Lua_ItemInst l_item(std::any_cast<EQ::ItemInstance*>(extra_pointers->at(0)));
+		luabind::adl::object l_item_o = luabind::adl::object(L, l_item);
+		l_item_o.push(L);
+		lua_setfield(L, -2, "item");
+	}
 }
 
 // Item
@@ -1949,6 +2066,76 @@ void handle_bot_use_skill(
 
 	lua_pushinteger(L, std::stoi(sep.arg[1]));
 	lua_setfield(L, -2, "skill_level");
+}
+
+void handle_bot_equip_item(
+	QuestInterface *parse,
+	lua_State* L,
+	Bot* bot,
+	Mob* init,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+) {
+	lua_pushnumber(L, extra_data);
+	lua_setfield(L, -2, "item_id");
+
+	Seperator sep(data.c_str());
+
+	lua_pushnumber(L, std::stoi(sep.arg[0]));
+	lua_setfield(L, -2, "item_quantity");
+
+	lua_pushnumber(L, std::stoi(sep.arg[1]));
+	lua_setfield(L, -2, "slot_id");
+
+	Lua_ItemInst l_item(extra_data);
+	luabind::adl::object l_item_o = luabind::adl::object(L, l_item);
+	l_item_o.push(L);
+	lua_setfield(L, -2, "item");
+}
+
+void handle_bot_damage(
+	QuestInterface *parse,
+	lua_State* L,
+	Bot* bot,
+	Mob* init,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+) {
+	Seperator sep(data.c_str());
+
+	lua_pushnumber(L, std::stoul(sep.arg[0]));
+	lua_setfield(L, -2, "entity_id");
+
+	lua_pushnumber(L, std::stoll(sep.arg[1]));
+	lua_setfield(L, -2, "damage");
+
+	lua_pushnumber(L, std::stoi(sep.arg[2]));
+	lua_setfield(L, -2, "spell_id");
+
+	lua_pushnumber(L, std::stoi(sep.arg[3]));
+	lua_setfield(L, -2, "skill_id");
+
+	lua_pushboolean(L, std::stoi(sep.arg[4]) == 0 ? false : true);
+	lua_setfield(L, -2, "is_damage_shield");
+
+	lua_pushboolean(L, std::stoi(sep.arg[5]) == 0 ? false : true);
+	lua_setfield(L, -2, "is_avoidable");
+
+	lua_pushnumber(L, std::stoi(sep.arg[6]));
+	lua_setfield(L, -2, "buff_slot");
+
+	lua_pushboolean(L, std::stoi(sep.arg[7]) == 0 ? false : true);
+	lua_setfield(L, -2, "is_buff_tic");
+
+	lua_pushnumber(L, std::stoi(sep.arg[8]));
+	lua_setfield(L, -2, "special_attack");
+
+	Lua_Mob l_mob(init);
+	luabind::adl::object l_mob_o = luabind::adl::object(L, l_mob);
+	l_mob_o.push(L);
+	lua_setfield(L, -2, "other");
 }
 
 #endif

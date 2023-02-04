@@ -8,6 +8,7 @@ class Bot;
 class Lua_Bot;
 class Lua_Mob;
 class Lua_Group;
+class Lua_Inventory;
 
 namespace luabind {
 	struct scope;
@@ -36,6 +37,7 @@ public:
 	void AddBotItem(uint16 slot_id, uint32 item_id, int16 charges, bool attuned, uint32 augment_one, uint32 augment_two, uint32 augment_three, uint32 augment_four);
 	void AddBotItem(uint16 slot_id, uint32 item_id, int16 charges, bool attuned, uint32 augment_one, uint32 augment_two, uint32 augment_three, uint32 augment_four, uint32 augment_five);
 	void AddBotItem(uint16 slot_id, uint32 item_id, int16 charges, bool attuned, uint32 augment_one, uint32 augment_two, uint32 augment_three, uint32 augment_four, uint32 augment_five, uint32 augment_six);
+	void AddItem(const luabind::object& item_table);
 	uint32 CountBotItem(uint32 item_id);
 	Lua_ItemInst GetBotItem(uint16 slot_id);
 	uint32 GetBotItemIDBySlot(uint16 slot_id);
@@ -59,6 +61,7 @@ public:
 	void Camp(bool save_to_database);
 	Lua_ItemInst GetAugmentAt(int16 slot_id, uint8 augment_index);
 	int GetAugmentIDAt(int16 slot_id, uint8 augment_index);
+	luabind::object GetAugmentIDsBySlotID(lua_State* L, int16 slot_id) const;
 	Lua_ItemInst GetItemAt(int16 slot_id);
 	int GetItemIDAt(int16 slot_id);
 	void SendSpellAnim(uint16 target_id, uint16 spell_id);

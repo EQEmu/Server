@@ -875,6 +875,9 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 			continue;
 		}
 
+		if (!EQ::ValueWithin(Admin(), static_cast<int16>(ml.min_status), static_cast<int16>(ml.max_status))) {
+			continue;
+		}
 
 		int32 faction_id = npc ? npc->GetPrimaryFaction() : 0;
 		int32 faction_level = (

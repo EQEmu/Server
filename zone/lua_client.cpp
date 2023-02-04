@@ -3020,6 +3020,18 @@ void Lua_Client::ResetItemCooldown(uint32 item_id)
 	self->ResetItemCooldown(item_id);
 }
 
+void Lua_Client::SetItemCooldown(uint32 item_id, uint32 in_time)
+{
+	Lua_Safe_Call_Void();
+	self->SetItemCooldown(item_id, false, in_time);
+}
+
+uint32 Lua_Client::GetItemCooldown(uint32 item_id)
+{
+	Lua_Safe_Call_Int();
+	return self->GetItemCooldown(item_id);
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 	.def(luabind::constructor<>())
@@ -3210,6 +3222,7 @@ luabind::scope lua_register_client() {
 	.def("GetInventory", (Lua_Inventory(Lua_Client::*)(void))&Lua_Client::GetInventory)
 	.def("GetInvulnerableEnvironmentDamage", (bool(Lua_Client::*)(void))&Lua_Client::GetInvulnerableEnvironmentDamage)
 	.def("GetItemIDAt", (int(Lua_Client::*)(int))&Lua_Client::GetItemIDAt)
+	.def("GetItemCooldown", (uint32(Lua_Client::*)(uint32))&Lua_Client::GetItemCooldown)
 	.def("GetLDoNLosses", (int(Lua_Client::*)(void))&Lua_Client::GetLDoNLosses)
 	.def("GetLDoNLossesTheme", (int(Lua_Client::*)(int))&Lua_Client::GetLDoNLossesTheme)
 	.def("GetLDoNPointsTheme", (int(Lua_Client::*)(int))&Lua_Client::GetLDoNPointsTheme)
@@ -3454,6 +3467,7 @@ luabind::scope lua_register_client() {
 	.def("SetHunger", (void(Lua_Client::*)(int))&Lua_Client::SetHunger)
 	.def("SetInvulnerableEnvironmentDamage", (void(Lua_Client::*)(int))&Lua_Client::SetInvulnerableEnvironmentDamage)
 	.def("SetIPExemption", (void(Lua_Client::*)(int))&Lua_Client::SetIPExemption)
+	.def("SetItemCooldown", (void(Lua_Client::*)(uint32,uint32))&Lua_Client::SetItemCooldown)
 	.def("SetLanguageSkill", (void(Lua_Client::*)(int,int))&Lua_Client::SetLanguageSkill)
 	.def("SetMaterial", (void(Lua_Client::*)(int,uint32))&Lua_Client::SetMaterial)
 	.def("SetPEQZoneFlag", (void(Lua_Client::*)(uint32))&Lua_Client::SetPEQZoneFlag)

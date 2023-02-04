@@ -210,6 +210,16 @@ void handle_npc_despawn_zone(
 	std::vector<std::any> *extra_pointers
 );
 
+void handle_npc_damage(
+	QuestInterface *parse,
+	lua_State* L,
+	NPC* npc,
+	Mob *init,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+);
+
 // Player
 void handle_player_say(
 	QuestInterface *parse,
@@ -652,6 +662,23 @@ void handle_player_augment_remove(
 	std::vector<std::any> *extra_pointers
 );
 
+void handle_player_damage(
+	QuestInterface *parse,
+	lua_State* L,
+	Client* client,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+);
+
+void handle_player_item_click(
+	QuestInterface *parse,
+	lua_State* L,
+	Client* client,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+);
 
 // Item
 void handle_item_click(
@@ -946,6 +973,26 @@ void handle_bot_use_skill(
 );
 
 void handle_bot_payload(
+	QuestInterface *parse,
+	lua_State* L,
+	Bot* bot,
+	Mob* init,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+);
+
+void handle_bot_equip_item(
+	QuestInterface *parse,
+	lua_State* L,
+	Bot* bot,
+	Mob* init,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+);
+
+void handle_bot_damage(
 	QuestInterface *parse,
 	lua_State* L,
 	Bot* bot,

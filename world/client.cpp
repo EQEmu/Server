@@ -1778,12 +1778,39 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 		pp.binds[0].heading = pp.heading;
 	}
 
-	LogInfo("Current location [{}] [{}] [{}] [{}] [{}] [{}]",
-			ZoneName(pp.zone_id), pp.zone_id, pp.x, pp.y, pp.z, pp.heading);
-	LogInfo("Bind location [{}] [{}] [{}] [{}] [{}]",
-			ZoneName(pp.binds[0].zone_id), pp.binds[0].zone_id, pp.binds[0].x, pp.binds[0].y, pp.binds[0].z);
-	LogInfo("Home location [{}] [{}] [{}] [{}] [{}]",
-			ZoneName(pp.binds[4].zone_id), pp.binds[4].zone_id, pp.binds[4].x, pp.binds[4].y, pp.binds[4].z);
+	if (GetZone(pp.zone_id)) {
+		LogInfo(
+			"Current location [{}] [{}] [{:.2f}] [{:.2f}] [{:.2f}] [{:.2f}]",
+			ZoneName(pp.zone_id),
+			pp.zone_id,
+			pp.x,
+			pp.y,
+			pp.z,
+			pp.heading
+		);
+	}
+
+	if (GetZone(pp.binds[0].zone_id)) {
+		LogInfo(
+			"Bind location [{}] [{}] [{:.2f}] [{:.2f}] [{:.2f}]",
+			ZoneName(pp.binds[0].zone_id),
+			pp.binds[0].zone_id,
+			pp.binds[0].x,
+			pp.binds[0].y,
+			pp.binds[0].z
+		);
+	}
+
+	if (GetZone(pp.binds[4].zone_id)) {
+		LogInfo(
+			"Home location [{}] [{}] [{:.2f}] [{:.2f}] [{:.2f}]",
+			ZoneName(pp.binds[4].zone_id),
+			pp.binds[4].zone_id,
+			pp.binds[4].x,
+			pp.binds[4].y,
+			pp.binds[4].z
+		);
+	}
 
 	/* Starting Items inventory */
 	content_db.SetStartingItems(&pp, &inv, pp.race, pp.class_, pp.deity, pp.zone_id, pp.name, GetAdmin());
