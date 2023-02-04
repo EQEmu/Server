@@ -4387,7 +4387,7 @@ void Client::Handle_OP_ClickDoor(const EQApplicationPacket *app)
 		distance
 	);
 
-	bool within_distance = distance < RuleI(Range, MaxDistanceToOpenDoors);
+	bool within_distance = distance < RuleI(Range, MaxDistanceToClickDoors);
 
 	// distance gate this because some doors are client controlled and the client
 	// will spam door click even across the zone to force a door back into desired state
