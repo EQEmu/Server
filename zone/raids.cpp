@@ -2021,3 +2021,13 @@ Mob* Raid::GetRaidMainAssistOneByName(const char* name)
 	}
 	return nullptr;
 }
+bool Raid::IsEngaged() {
+
+	std::vector<RaidMember> rm = GetMembers();
+	for (const auto& m : rm) {
+		if (m.member && !m.IsBot && (m.member->IsEngaged() || m.member->GetAggroCount() > 0)) {
+			return 1;
+		}
+	}
+	return 0;
+}

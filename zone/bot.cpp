@@ -2640,6 +2640,7 @@ void Bot::AI_Process()
 				InterruptSpell();
 				WipeHateList();
 				AddToHateList(attack_target, 1);
+//				GetBotOwner()->AddToHateList(attack_target, 1);
 				SetTarget(attack_target);
 				SetAttackingFlag();
 				if (HasPet() && (GetClass() != ENCHANTER || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 2)) {
@@ -7293,21 +7294,25 @@ void Bot::DoEnduranceUpkeep() {
 }
 
 void Bot::Camp(bool save_to_database) {
+	
+	Raid* bot_raid = entity_list.GetRaidByBotName(GetName());
+	if (bot_raid && bot_raid->IsEngaged()) {
+		GetBotOwner()->CastToClient()->Message(Chat::White, "You cannot camp bots while your raid is engaged.");
+		return;
+	} else if (bot_raid) {
+		uint32 gid = bot_raid->GetGroup(GetName());
+		bot_raid->SendRaidGroupRemove(GetName(), bot_raid->GetGroup(GetName()));
+		bot_raid->RemoveMember(GetName());
+		bot_raid->GroupUpdate(gid);
+	}
+		
 	Sit();
 
 	if (GetGroup()) {
 		RemoveBotFromGroup(this, GetGroup());
 	}
-	
-	Raid* bot_raid = entity_list.GetRaidByBotName(this->GetName());
-	if (bot_raid) {
-		uint32 gid = bot_raid->GetGroup(this->GetName());
-		bot_raid->SendRaidGroupRemove(this->GetName(), bot_raid->GetGroup(this->GetName()));
-		bot_raid->RemoveMember(this->GetName());
-		bot_raid->GroupUpdate(gid);
-	}
 
-  LeaveHealRotationMemberPool();
+	LeaveHealRotationMemberPool();
 
 	if (save_to_database) {
 		Save();

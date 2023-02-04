@@ -365,7 +365,8 @@ void Bot::AI_Process_Raid()
 		if (rest_timer.Enabled()) {
 			rest_timer.Disable();
 		}
-
+//		AddToHateList(GetTarget(), 1);
+		
 		//#pragma region PULLING FLAG (TARGET VALIDATION)
 
 		if (GetPullingFlag()) {

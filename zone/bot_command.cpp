@@ -6668,6 +6668,12 @@ void bot_subcommand_bot_spawn(Client *c, const Seperator *sep)
 		return;
 	}
 
+	Raid* raid = entity_list.GetRaidByClient(c);
+	if (raid && raid->IsEngaged()) {
+		c->Message(Chat::White, "You cannot spawn bots while your raid is engaged.");
+		return;
+	}
+
 	auto my_bot = Bot::LoadBot(bot_id);
 	if (!my_bot) {
 		c->Message(
@@ -7834,6 +7840,12 @@ void bot_subcommand_botgroup_load(Client *c, const Seperator *sep)
 			c->Message(Chat::White, "You cannot spawn bots while you are engaged,");
 			return;
 		}
+	}
+
+	Raid* raid = entity_list.GetRaidByClient(c);
+	if (raid && raid->IsEngaged()) {
+		c->Message(Chat::White, "You cannot spawn bots while your raid is engaged.");
+		return;
 	}
 
 	uint32 botgroup_id = 0;
