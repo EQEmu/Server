@@ -536,6 +536,8 @@ public:
 	void RecalculateSkills();
 	void ReloadSpells();
 
+	void SendPositionToClients();
+
 	static LootDropEntries_Struct NewLootDropEntry();
 
 protected:

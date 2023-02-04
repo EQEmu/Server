@@ -2083,6 +2083,7 @@ private:
 	bool m_bot_precombat;
 
 	bool CanTradeFVNoDropItem();
+	void SendMobPositions();
 };
 
 #endif

@@ -3783,3 +3783,14 @@ int NPC::GetRolledItemCount(uint32 item_id)
 
 	return rolled_count;
 }
+
+void NPC::SendPositionToClients()
+{
+	auto      p  = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
+	auto      *s = (PlayerPositionUpdateServer_Struct *) p->pBuffer;
+	for (auto &c: entity_list.GetClientList()) {
+		MakeSpawnUpdate(s);
+		c.second->QueuePacket(p, false);
+	}
+	safe_delete(p);
+}
