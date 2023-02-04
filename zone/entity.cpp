@@ -716,10 +716,10 @@ void EntityList::AddNPC(NPC *npc, bool send_spawn_packet, bool dont_queue)
 		if (npc->IsFindable()) {
 			UpdateFindableNPCState(npc, false);
 		}
-
-		npc->SendPositionToClients();
 	}
 
+	npc->SendPositionToClients();
+	
 	entity_list.ScanCloseMobs(npc->close_mobs, npc, true);
 
 	npc->DispatchZoneControllerEvent(EVENT_SPAWN_ZONE, npc, "", 0, nullptr);
