@@ -719,7 +719,7 @@ void EntityList::AddNPC(NPC *npc, bool send_spawn_packet, bool dont_queue)
 	}
 
 	npc->SendPositionToClients();
-	
+
 	entity_list.ScanCloseMobs(npc->close_mobs, npc, true);
 
 	npc->DispatchZoneControllerEvent(EVENT_SPAWN_ZONE, npc, "", 0, nullptr);
@@ -846,8 +846,10 @@ void EntityList::CheckSpawnQueue()
 				NPC *pnpc = it->second;
 				pnpc->SendArmorAppearance();
 				pnpc->SetAppearance(pnpc->GetGuardPointAnim(), false);
-				if (!pnpc->IsTargetable())
+				if (!pnpc->IsTargetable()) {
 					pnpc->SendTargetable(false);
+				}
+				pnpc->SendPositionToClients();
 			}
 			safe_delete(outapp);
 			iterator.RemoveCurrent();
