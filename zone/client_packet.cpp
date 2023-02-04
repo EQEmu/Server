@@ -4387,9 +4387,11 @@ void Client::Handle_OP_ClickDoor(const EQApplicationPacket *app)
 		distance
 	);
 
+	bool within_distance = distance < RuleI(Range, MaxDistanceToOpenDoors);
+
 	// distance gate this because some doors are client controlled and the client
 	// will spam door click even across the zone to force a door back into desired state
-	if (IsDevToolsEnabled() && distance < RuleI(Range, MaxDistanceToOpenDoors)) {
+	if (IsDevToolsEnabled() && within_distance) {
 		SetDoorToolEntityId(currentdoor->GetEntityID());
 		DoorManipulation::CommandHeader(this);
 		Message(
@@ -4402,13 +4404,21 @@ void Client::Handle_OP_ClickDoor(const EQApplicationPacket *app)
 		);
 	}
 
-	std::string export_string = fmt::format("{}", cd->doorid);
-	std::vector<std::any> args;
-	args.push_back(currentdoor);
-	if (parse->EventPlayer(EVENT_CLICK_DOOR, this, export_string, 0, &args) == 0)
-	{
+	// don't spam scripts with client controlled doors if not within distance
+	if (within_distance) {
+		std::string           export_string = fmt::format("{}", cd->doorid);
+		std::vector<std::any> args;
+		args.push_back(currentdoor);
+		if (parse->EventPlayer(EVENT_CLICK_DOOR, this, export_string, 0, &args) == 0) {
+			currentdoor->HandleClick(this, 0);
+		}
+	}
+	else {
+		// we let this pass because client controlled doors require this to force the linked doors
+		// back into state
 		currentdoor->HandleClick(this, 0);
 	}
+
 }
 
 void Client::Handle_OP_ClickObject(const EQApplicationPacket *app)
