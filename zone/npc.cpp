@@ -371,16 +371,16 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 		}
 	}
 
-	ldon_trapped       = false;
-	ldon_trap_type     = 0;
-	ldon_spell_id      = 0;
-	ldon_locked        = false;
-	ldon_locked_skill  = 0;
-	ldon_trap_detected = false;
+	SetLDoNTrapped(false);
+	SetLDoNTrapType(0);
+	SetLDoNTrapSpellID(0);
+	SetLDoNLocked(false);
+	SetLDoNLockedSkill(0);
+	SetLDoNTrapDetected(false);
 
 	if (npc_type_data->trap_template > 0) {
 		std::map<uint32, std::list<LDoNTrapTemplate *> >::iterator trap_ent_iter;
-		std::list<LDoNTrapTemplate *>                              trap_list;
+		std::list<LDoNTrapTemplate *> trap_list;
 
 		trap_ent_iter = zone->ldon_trap_entry_list.find(npc_type_data->trap_template);
 		if (trap_ent_iter != zone->ldon_trap_entry_list.end()) {
@@ -390,26 +390,25 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 				std::advance(trap_list_iter, zone->random.Int(0, trap_list.size() - 1));
 				LDoNTrapTemplate *trap_template = (*trap_list_iter);
 				if (trap_template) {
-					if ((uint8) trap_template->spell_id > 0) {
-						ldon_trapped  = true;
-						ldon_spell_id = trap_template->spell_id;
-					}
-					else {
-						ldon_trapped  = false;
-						ldon_spell_id = 0;
+					if (trap_template->spell_id > 0) {
+						SetLDoNTrapped(true);
+						SetLDoNTrapSpellID(trap_template->spell_id);
+					} else {
+						SetLDoNTrapped(false);
+						SetLDoNTrapSpellID(0);
 					}
 
-					ldon_trap_type     = (uint8) trap_template->type;
+					SetLDoNTrapType(static_cast<uint8>(trap_template->type));
+
 					if (trap_template->locked > 0) {
-						ldon_locked       = true;
-						ldon_locked_skill = trap_template->skill;
-					}
-					else {
-						ldon_locked       = false;
-						ldon_locked_skill = 0;
+						SetLDoNLocked(true);
+						SetLDoNLockedSkill(trap_template->skill);
+					} else {
+						SetLDoNLocked(false);
+						SetLDoNLockedSkill(0);
 					}
 
-					ldon_trap_detected = 0;
+					SetLDoNTrapDetected(false);
 				}
 			}
 		}
@@ -3692,7 +3691,7 @@ void NPC::ReloadSpells() {
 	AI_AddNPCSpellsEffects(GetNPCSpellsEffectsID());
 }
 
-void NPC::ScaleNPC(uint8 npc_level) {
+void NPC::ScaleNPC(uint8 npc_level, bool always_scale_stats, bool always_scale_special_abilities) {
 	if (GetLevel() != npc_level) {
 		SetLevel(npc_level);
 		RecalculateSkills();
@@ -3700,7 +3699,7 @@ void NPC::ScaleNPC(uint8 npc_level) {
 	}
 
 	npc_scale_manager->ResetNPCScaling(this);
-	npc_scale_manager->ScaleNPC(this);
+	npc_scale_manager->ScaleNPC(this, always_scale_stats, always_scale_special_abilities);
 }
 
 bool NPC::IsGuard()

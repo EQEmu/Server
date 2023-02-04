@@ -169,6 +169,12 @@ const char *QuestEventSubroutines[_LargestEventID] = {
 	"EVENT_BOT_CREATE",
 	"EVENT_AUGMENT_INSERT_CLIENT",
 	"EVENT_AUGMENT_REMOVE_CLIENT",
+	"EVENT_EQUIP_ITEM_BOT",
+	"EVENT_UNEQUIP_ITEM_BOT",
+	"EVENT_DAMAGE_GIVEN",
+	"EVENT_DAMAGE_TAKEN",
+	"EVENT_ITEM_CLICK_CLIENT",
+	"EVENT_ITEM_CLICK_CAST_CLIENT",
 	// Add new events before these or Lua crashes
 	"EVENT_SPELL_EFFECT_BOT",
 	"EVENT_SPELL_EFFECT_BUFF_TIC_BOT"
@@ -1709,6 +1715,20 @@ void PerlembParser::ExportEventVariables(
 			break;
 		}
 
+		case EVENT_ITEM_CLICK_CAST_CLIENT:
+		case EVENT_ITEM_CLICK_CLIENT: {
+			ExportVar(package_name.c_str(), "slot_id", data);
+			if (extra_pointers && extra_pointers->size() == 1) {
+				auto* item = std::any_cast<EQ::ItemInstance*>(extra_pointers->at(0));
+				if (item) {
+					ExportVar(package_name.c_str(), "item_id", item->GetID());
+					ExportVar(package_name.c_str(), "item_name", item->GetItem()->Name);
+					ExportVar(package_name.c_str(), "spell_id", item->GetItem()->Click.Effect);
+				}
+			}
+			break;
+		}
+
 		case EVENT_GROUP_CHANGE: {
 			if (mob && mob->IsClient()) {
 				ExportVar(package_name.c_str(), "grouped", mob->IsGrouped());
@@ -1901,6 +1921,15 @@ void PerlembParser::ExportEventVariables(
 			break;
 		}
 
+		case EVENT_EQUIP_ITEM_BOT:
+		case EVENT_UNEQUIP_ITEM_BOT: {
+			Seperator sep(data);
+			ExportVar(package_name.c_str(), "item_id", extradata);
+			ExportVar(package_name.c_str(), "item_quantity", sep.arg[0]);
+			ExportVar(package_name.c_str(), "slot_id", sep.arg[1]);
+			break;
+		}
+
 		case EVENT_AUGMENT_INSERT_CLIENT:
 		case EVENT_AUGMENT_REMOVE_CLIENT: {
 			Seperator sep(data);
@@ -2017,6 +2046,21 @@ void PerlembParser::ExportEventVariables(
 			ExportVar(package_name.c_str(), "bot_race", sep.arg[2]);
 			ExportVar(package_name.c_str(), "bot_class", sep.arg[3]);
 			ExportVar(package_name.c_str(), "bot_gender", sep.arg[4]);
+			break;
+		}
+
+		case EVENT_DAMAGE_GIVEN:
+		case EVENT_DAMAGE_TAKEN:{
+			Seperator sep(data);
+			ExportVar(package_name.c_str(), "entity_id", sep.arg[0]);
+			ExportVar(package_name.c_str(), "damage", sep.arg[1]);
+			ExportVar(package_name.c_str(), "spell_id", sep.arg[2]);
+			ExportVar(package_name.c_str(), "skill_id", sep.arg[3]);
+			ExportVar(package_name.c_str(), "is_damage_shield", sep.arg[4]);
+			ExportVar(package_name.c_str(), "is_avoidable", sep.arg[5]);
+			ExportVar(package_name.c_str(), "buff_slot", sep.arg[6]);
+			ExportVar(package_name.c_str(), "is_buff_tic", sep.arg[7]);
+			ExportVar(package_name.c_str(), "special_attack", sep.arg[8]);
 			break;
 		}
 

@@ -67,10 +67,10 @@ public:
 	void ReloadQuests(bool reset_timers = true);
 	void RemoveEncounter(const std::string name);
 
-	bool HasQuestSub(uint32 npcid, QuestEventID evt, bool check_encounters = false);
-	bool PlayerHasQuestSub(QuestEventID evt, bool check_encounters = false);
-	bool SpellHasQuestSub(uint32 spell_id, QuestEventID evt, bool check_encounters = false);
-	bool ItemHasQuestSub(EQ::ItemInstance *itm, QuestEventID evt, bool check_encounters = false);
+	bool HasQuestSub(uint32 npcid, QuestEventID evt);
+	bool PlayerHasQuestSub(QuestEventID evt);
+	bool SpellHasQuestSub(uint32 spell_id, QuestEventID evt);
+	bool ItemHasQuestSub(EQ::ItemInstance *itm, QuestEventID evt);
 	bool BotHasQuestSub(QuestEventID evt);
 
 	int EventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,

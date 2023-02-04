@@ -119,7 +119,7 @@ public:
 	virtual void Damage(Mob* from, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill, bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false, eSpecialAttacks special = eSpecialAttacks::None);
 	bool Attack(Mob* other, int Hand = EQ::invslot::slotPrimary, bool FromRiposte = false, bool IsStrikethrough = false,
 		bool IsFromSpell = false, ExtraAttackOptions *opts = nullptr) override;
-	virtual bool HasRaid() { return false; } 
+	virtual bool HasRaid() { return false; }
 	virtual bool HasGroup() { return false; }
 	virtual Raid* GetRaid() { return 0; }
 	virtual Group* GetGroup() { return 0; }
@@ -413,22 +413,22 @@ public:
 	void	ModifyNPCStat(std::string stat, std::string value);
 	virtual void SetLevel(uint8 in_level, bool command = false);
 
-	bool IsLDoNTrapped() const { return (ldon_trapped); }
+	bool IsLDoNTrapped() const { return ldon_trapped; }
 	void SetLDoNTrapped(bool n) { ldon_trapped = n; }
 
-	uint8 GetLDoNTrapType() const { return (ldon_trap_type); }
+	uint8 GetLDoNTrapType() const { return ldon_trap_type; }
 	void SetLDoNTrapType(uint8 n) { ldon_trap_type = n; }
 
-	uint16 GetLDoNTrapSpellID() const { return (ldon_spell_id); }
+	uint16 GetLDoNTrapSpellID() const { return ldon_spell_id; }
 	void SetLDoNTrapSpellID(uint16 n) { ldon_spell_id = n; }
 
-	bool IsLDoNLocked() const { return (ldon_locked); }
+	bool IsLDoNLocked() const { return ldon_locked; }
 	void SetLDoNLocked(bool n) { ldon_locked = n; }
 
-	uint16 GetLDoNLockedSkill() const { return (ldon_locked_skill); }
+	uint16 GetLDoNLockedSkill() const { return ldon_locked_skill; }
 	void SetLDoNLockedSkill(uint16 n) { ldon_locked_skill = n; }
 
-	bool IsLDoNTrapDetected() const { return (ldon_trap_detected); }
+	bool IsLDoNTrapDetected() const { return ldon_trap_detected; }
 	void SetLDoNTrapDetected(bool n) { ldon_trap_detected = n; }
 
 	const bool GetCombatEvent() const { return combat_event; }
@@ -531,7 +531,7 @@ public:
 
 	inline bool IsSkipAutoScale() const { return skip_auto_scale; }
 
-	void ScaleNPC(uint8 npc_level);
+	void ScaleNPC(uint8 npc_level, bool always_scale_stats = false, bool always_scale_special_abilities = false);
 
 	void RecalculateSkills();
 	void ReloadSpells();

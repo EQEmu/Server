@@ -3700,6 +3700,11 @@ int8 lua_does_augment_fit(Lua_ItemInst inst, uint32 augment_id)
 	return quest_manager.DoesAugmentFit(inst, augment_id);
 }
 
+int8 lua_does_augment_fit_slot(Lua_ItemInst inst, uint32 augment_id, uint8 augment_slot)
+{
+	return quest_manager.DoesAugmentFit(inst, augment_id, augment_slot);
+}
+
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
 	cur = table[#name]; \
 	if(luabind::type(cur) != LUA_TNIL) { \
@@ -4217,7 +4222,8 @@ luabind::scope lua_register_general() {
 		luabind::def("do_anim", (void(*)(int,int,bool))&lua_do_anim),
 		luabind::def("do_anim", (void(*)(int,int,bool,int))&lua_do_anim),
 		luabind::def("do_augment_slots_match", &lua_do_augment_slots_match),
-		luabind::def("does_augment_fit", &lua_does_augment_fit),
+		luabind::def("does_augment_fit", (int8(*)(Lua_ItemInst, uint32))&lua_does_augment_fit),
+		luabind::def("does_augment_fit_slot", (int8(*)(Lua_ItemInst, uint32, uint8))&lua_does_augment_fit_slot),
 		/*
 			Cross Zone
 		*/
@@ -4625,7 +4631,13 @@ luabind::scope lua_register_events() {
 			luabind::value("despawn_zone", static_cast<int>(EVENT_DESPAWN_ZONE)),
 			luabind::value("bot_create", static_cast<int>(EVENT_BOT_CREATE)),
 			luabind::value("augment_insert_client", static_cast<int>(EVENT_AUGMENT_INSERT_CLIENT)),
-			luabind::value("augment_remove_client", static_cast<int>(EVENT_AUGMENT_REMOVE_CLIENT))
+			luabind::value("augment_remove_client", static_cast<int>(EVENT_AUGMENT_REMOVE_CLIENT)),
+			luabind::value("equip_item_bot", static_cast<int>(EVENT_EQUIP_ITEM_BOT)),
+			luabind::value("unequip_item_bot", static_cast<int>(EVENT_UNEQUIP_ITEM_BOT)),
+			luabind::value("damage_given", static_cast<int>(EVENT_DAMAGE_GIVEN)),
+			luabind::value("damage_taken", static_cast<int>(EVENT_DAMAGE_TAKEN)),
+			luabind::value("item_click_client", static_cast<int>(EVENT_ITEM_CLICK_CLIENT)),
+			luabind::value("item_click_cast_client", static_cast<int>(EVENT_ITEM_CLICK_CAST_CLIENT))
 		)];
 }
 

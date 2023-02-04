@@ -472,7 +472,8 @@
 9216|2023_01_15_merc_data.sql|SHOW TABLES LIKE 'mercs'|empty|
 9217|2023_01_15_chatchannel_reserved_names.sql|SHOW TABLES LIKE 'chatchannel_reserved_names'|empty|
 9218|2023_01_24_item_recast.sql|show columns from character_item_recast like '%recast_type%'|contains|smallint
-9219|2023_01_21_bots_raid_members.sql|SHOW COLUMNS FROM `raid_members` LIKE 'botid'|empty|
+9219|2023_01_29_merchant_status_requirements.sql|SHOW COLUMNS FROM merchantlist LIKE 'min_status'|empty|
+9220|2023_01_21_bots_raid_members.sql|SHOW COLUMNS FROM `raid_members` LIKE 'botid'|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not

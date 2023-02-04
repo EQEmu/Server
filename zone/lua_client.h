@@ -463,6 +463,8 @@ public:
 	bool CanEnterZone(std::string zone_short_name, int16 instance_version);
 	void SendPath(Lua_Mob target);
 	void ResetItemCooldown(uint32 item_id);
+	void SetItemCooldown(uint32 item_id, uint32 in_time);
+	uint32 GetItemCooldown(uint32 item_id);
 
 	void ApplySpell(int spell_id);
 	void ApplySpell(int spell_id, int duration);

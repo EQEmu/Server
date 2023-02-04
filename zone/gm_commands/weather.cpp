@@ -22,10 +22,6 @@ void command_weather(Client *c, const Seperator *sep)
 			weather_message = "Raindrops begin to fall from the sky.";
 			new_weather = EQ::constants::WeatherTypes::Raining;
 			new_intensity = 0x01; // This is how it's done in Fear, and you can see a decent distance with it at this value
-		} else {
-			c->Message(Chat::White, "Usage: #weather [0|1|2] - [Off|Rain|Snow]");
-			c->Message(Chat::White, "Usage: #weather 3 [Type] [Intensity] - Manually set weather type and intensity");
-			return;
 		}
 
 		zone->zone_weather = new_weather;
