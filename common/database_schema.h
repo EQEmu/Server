@@ -341,6 +341,8 @@ namespace DatabaseSchema {
 			"respawn_times",
 			"saylink",
 			"server_scheduled_events",
+			"player_event_log_settings",
+			"player_event_logs"
 			"shared_task_activity_state",
 			"shared_task_dynamic_zones",
 			"shared_task_members",
