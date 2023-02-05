@@ -706,9 +706,9 @@ void TaskManager::SharedTaskSelector(Client* client, Mob* mob, const std::vector
 			validation_failed = true;
 
 			auto it = std::find_if(request.members.begin(), request.members.end(),
-				[&](const SharedTaskMember& member) {
-					return member.character_id == shared_task_members.front().character_id;
-				});
+								   [&](const SharedTaskMember& member) {
+									   return member.character_id == shared_task_members.front().character_id;
+								   });
 
 			if (it != request.members.end()) {
 				if (request.group_type == SharedTaskRequestGroupType::Group) {
@@ -761,14 +761,14 @@ bool TaskManager::CanOfferSharedTask(int task_id, const SharedTaskRequest& reque
 	if (task->min_level > 0 && request.lowest_level < task->min_level)
 	{
 		LogTasksDetail("lowest level [{}] is below task [{}] min level [{}]",
-			request.lowest_level, task_id, task->min_level);
+					   request.lowest_level, task_id, task->min_level);
 		return false;
 	}
 
 	if (task->max_level > 0 && request.highest_level > task->max_level)
 	{
 		LogTasksDetail("highest level [{}] exceeds task [{}] max level [{}]",
-			request.highest_level, task_id, task->max_level);
+					   request.highest_level, task_id, task->max_level);
 		return false;
 	}
 
@@ -1154,6 +1154,10 @@ void TaskManager::SendActiveTaskDescription(
 						+ sizeof(TaskDescriptionData1_Struct) + t->description.length() + 1
 						+ sizeof(TaskDescriptionData2_Struct) + 1 + sizeof(TaskDescriptionTrailer_Struct);
 
+	std::string reward = t->reward;
+	bool is_don_reward = (t->reward_point_type == ALT_CURRENCY_ID_RADIANT ||
+						  t->reward_point_type == ALT_CURRENCY_ID_EBON);
+
 	// If there is an item make the reward text into a link to the item (only the first item if a list
 	// is specified). I have been unable to get multiple item links to work.
 	//
@@ -1173,7 +1177,34 @@ void TaskManager::SendActiveTaskDescription(
 		}
 	}
 
-	packet_length += t->reward.length() + 1 + t->item_link.length() + 1;
+	// display alternate currency in reward window manually
+	// there may be a more formal packet structure for displaying this but this is what it is for
+	// now to have bare minimum support
+	if (reward.empty() && t->reward_point_type > 0 && !is_don_reward) {
+		for (const auto& ac : zone->AlternateCurrencies) {
+			if (t->reward_point_type == ac.id) {
+				const EQ::ItemData *item = database.GetItem(ac.item_id);
+				if (item) {
+					std::string currency_description = fmt::format(
+						"{} ({})",
+						item->Name,
+						t->reward_points
+					);
+
+					reward = currency_description;
+
+					EQ::SayLinkEngine linker;
+					linker.SetLinkType(EQ::saylink::SayLinkItemData);
+					linker.SetItemData(item);
+					linker.SetTaskUse();
+					linker.SetProxyText(currency_description.c_str());
+					t->item_link = linker.GenerateLink();
+				}
+			}
+		}
+	}
+
+	packet_length += reward.length() + 1 + t->item_link.length() + 1;
 
 	char                          *Ptr;
 	TaskDescriptionHeader_Struct  *task_description_header;
@@ -1190,7 +1221,7 @@ void TaskManager::SendActiveTaskDescription(
 	task_description_header->open_window    = bring_up_task_journal;
 	task_description_header->task_type      = static_cast<uint32>(t->type);
 
-	task_description_header->reward_type = t->reward_point_type;
+	task_description_header->reward_type = is_don_reward ? t->reward_point_type : 0;
 
 	Ptr = (char *) task_description_header + sizeof(TaskDescriptionHeader_Struct);
 
@@ -1224,16 +1255,17 @@ void TaskManager::SendActiveTaskDescription(
 
 	// we actually have 2 strings here. One is max length 96 and not parsed for item links
 	// We actually skipped past that string incorrectly before, so TODO: fix item link string
-	sprintf(Ptr, "%s", t->reward.c_str());
-	Ptr += t->reward.length() + 1;
+	sprintf(Ptr, "%s", reward.c_str());
+	Ptr += reward.length() + 1;
 
 	// second string is parsed for item links
 	sprintf(Ptr, "%s", t->item_link.c_str());
 	Ptr += t->item_link.length() + 1;
 
 	tdt = (TaskDescriptionTrailer_Struct *) Ptr;
+
 	// shared tasks show radiant/ebon crystal reward, non-shared tasks show generic points
-	tdt->Points = t->reward_points;
+	tdt->Points = is_don_reward ? t->reward_points : 0;
 
 	tdt->has_reward_selection = 0; // TODO: new rewards window
 
@@ -1720,7 +1752,7 @@ void TaskManager::SyncClientSharedTaskRemoveLocalIfNotExists(Client *c, ClientTa
 			CharacterActivitiesRepository::DeleteWhere(database, delete_where);
 
 			c->MessageString(Chat::Yellow, TaskStr::NO_LONGER_MEMBER_TITLE,
-				m_task_data[cts->m_active_shared_task.task_id].title.c_str());
+							 m_task_data[cts->m_active_shared_task.task_id].title.c_str());
 
 			// remove as active task if doesn't exist
 			cts->m_active_shared_task = {};
@@ -1830,7 +1862,7 @@ bool TaskManager::IsActiveTaskComplete(ClientTaskInformation& client_task)
 	for (int i = 0; i < task_data->activity_count; ++i)
 	{
 		if (client_task.activity[i].activity_state != ActivityCompleted &&
-		    !task_data->activity_information[i].optional)
+			!task_data->activity_information[i].optional)
 		{
 			return false;
 		}
