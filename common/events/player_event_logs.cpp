@@ -89,7 +89,7 @@ PlayerEventLogs *PlayerEventLogs::SetDatabase(Database *db)
 bool PlayerEventLogs::ValidateDatabaseConnection()
 {
 	if (!m_database) {
-		LogError("[PlayerEventLogs::ValidateDatabaseConnection] No database connection");
+		LogError("No database connection");
 		return false;
 	}
 
@@ -613,7 +613,7 @@ void PlayerEventLogs::Process()
 
 void PlayerEventLogs::ProcessRetentionTruncation()
 {
-	LogInfo("[PlayerEventLogs::ProcessRetentionTruncation] Running truncation");
+	LogInfo("Running truncation");
 
 	for (int i = PlayerEvent::GM_COMMAND; i != PlayerEvent::MAX; i++) {
 		if (m_settings[i].retention_days > 0) {
@@ -628,7 +628,7 @@ void PlayerEventLogs::ProcessRetentionTruncation()
 
 			if (deleted_count > 0) {
 				LogInfo(
-					"[PlayerEventLogs::ProcessRetentionTruncation] Truncated [{}] events of type [{}] ({}) older than [{}] days",
+					"Truncated [{}] events of type [{}] ({}) older than [{}] days",
 					deleted_count,
 					PlayerEvent::EventName[i],
 					i,
