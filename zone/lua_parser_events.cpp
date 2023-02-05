@@ -309,13 +309,18 @@ void handle_npc_death(
 	lua_setfield(L, -2, "other");
 
 	Seperator sep(data.c_str());
-	lua_pushinteger(L, std::stoi(sep.arg[0]));
-	lua_setfield(L, -2, "killer_id");
 
-	lua_pushinteger(L, std::stoi(sep.arg[1]));
-	lua_setfield(L, -2, "damage");
+	if (Strings::IsNumber(sep.arg[0])) {
+		lua_pushinteger(L, std::stoi(sep.arg[0]));
+		lua_setfield(L, -2, "killer_id");
+	}
 
-	int spell_id = std::stoi(sep.arg[2]);
+	if (Strings::IsNumber(sep.arg[1])) {
+		lua_pushinteger(L, std::stoi(sep.arg[1]));
+		lua_setfield(L, -2, "damage");
+	}
+
+	int spell_id = Strings::IsNumber(sep.arg[2]) ? std::stoi(sep.arg[2]) : 0;
 	if(IsValidSpell(spell_id)) {
 		Lua_Spell l_spell(&spells[spell_id]);
 		luabind::adl::object l_spell_o = luabind::adl::object(L, l_spell);
@@ -328,8 +333,10 @@ void handle_npc_death(
 		lua_setfield(L, -2, "spell");
 	}
 
-	lua_pushinteger(L, std::stoi(sep.arg[3]));
-	lua_setfield(L, -2, "skill_id");
+	if (Strings::IsNumber(sep.arg[3])) {
+		lua_pushinteger(L, std::stoi(sep.arg[3]));
+		lua_setfield(L, -2, "skill_id");
+	}
 
 	if (extra_pointers && extra_pointers->size() >= 1)
 	{
@@ -548,14 +555,18 @@ void handle_player_death(
 	l_mob_o.push(L);
 	lua_setfield(L, -2, "other");
 
-	lua_pushinteger(L, std::stoi(sep.arg[1]));
-	lua_setfield(L, -2, "killer_id");
+	if (Strings::IsNumber(sep.arg[1])) {
+		lua_pushinteger(L, std::stoi(sep.arg[1]));
+		lua_setfield(L, -2, "killer_id");
+	}
 
-	lua_pushinteger(L, std::stoi(sep.arg[2]));
-	lua_setfield(L, -2, "damage");
+	if (Strings::IsNumber(sep.arg[2])) {
+		lua_pushinteger(L, std::stoi(sep.arg[2]));
+		lua_setfield(L, -2, "damage");
+	}
 
-	int spell_id = std::stoi(sep.arg[3]);
-	if(IsValidSpell(spell_id)) {
+	int spell_id = Strings::IsNumber(sep.arg[3]) > 0 ? std::stoi(sep.arg[3]) : 0;
+	if (IsValidSpell(spell_id)) {
 		Lua_Spell l_spell(&spells[spell_id]);
 		luabind::adl::object l_spell_o = luabind::adl::object(L, l_spell);
 		l_spell_o.push(L);
@@ -567,8 +578,10 @@ void handle_player_death(
 		lua_setfield(L, -2, "spell");
 	}
 
-	lua_pushinteger(L, std::stoi(sep.arg[4]));
-	lua_setfield(L, -2, "skill");
+	if (Strings::IsNumber(sep.arg[4])) {
+		lua_pushinteger(L, std::stoi(sep.arg[4]));
+		lua_setfield(L, -2, "skill");
+	}
 }
 
 void handle_player_timer(
