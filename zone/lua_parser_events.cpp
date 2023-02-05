@@ -227,7 +227,7 @@ void handle_npc_waypoint(
 	l_mob_o.push(L);
 	lua_setfield(L, -2, "other");
 
-	lua_pushinteger(L, Strings::Stoi(data));
+	lua_pushinteger(L, Strings::Stoi(data, -1));
 	lua_setfield(L, -2, "wp");
 }
 
