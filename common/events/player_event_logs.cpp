@@ -9,7 +9,7 @@ const uint32 PROCESS_RETENTION_TRUNCATION_TIMER_INTERVAL = 60 * 60 * 1000; // 1 
 // general initialization routine
 void PlayerEventLogs::Init()
 {
-	m_process_batch_events_timer.SetTimer(RuleI(Logging, BatchEventProcessIntervalSeconds) * 1000);
+	m_process_batch_events_timer.SetTimer(RuleI(Logging, BatchPlayerEventProcessIntervalSeconds) * 1000);
 	m_process_retention_truncation_timer.SetTimer(PROCESS_RETENTION_TRUNCATION_TIMER_INTERVAL);
 
 	ValidateDatabaseConnection();
