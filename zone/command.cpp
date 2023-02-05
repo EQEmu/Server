@@ -254,8 +254,6 @@ int command_init(void)
 		command_add("questerrors", "Shows quest errors.", AccountStatus::GMAdmin, command_questerrors) ||
 		command_add("race", "[racenum] - Change your or your target's race. Use racenum 0 to return to normal", AccountStatus::Guide, command_race) ||
 		command_add("raidloot", "[All|GroupLeader|RaidLeader|Selected] - Sets your Raid Loot Type if you have permission to do so.", AccountStatus::Player, command_raidloot) ||
-		command_add("raidgroupsay", "Send a Raid Group Say Packet", AccountStatus::Player, command_raidgroupsay) ||
-		command_add("raidsay", "Send a Raid Say Packet", AccountStatus::Player, command_raidsay) ||
 		command_add("randomfeatures", "Temporarily randomizes the Facial Features of your target", AccountStatus::QuestTroupe, command_randomfeatures) ||
 		command_add("refreshgroup", "Refreshes Group for you or your player target.", AccountStatus::Player, command_refreshgroup) ||
 		command_add("reload", "Reloads different types of server data globally, use no argument for help menu.", AccountStatus::GMMgmt, command_reload) ||
