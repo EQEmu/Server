@@ -536,14 +536,14 @@ void command_npcedit(Client *c, const Seperator *sep)
 	} else if (!strcasecmp(sep->arg[1], "weapon")) {
 		if (sep->IsNumber(2)) {
 			auto     primary_model   = std::stoul(sep->arg[2]);
-			uint32_t secondary_model = sep->IsNumber(3) ? std::stoul(sep->arg[3]) : 0;
+			uint32_t secondary_model = sep->arg[3] && sep->IsNumber(3) ? std::stoul(sep->arg[3]) : 0;
 			n.d_melee_texture1 = primary_model;
 			n.d_melee_texture2 = secondary_model;
 			d = fmt::format(
 				"{} will have Model {} set to their Primary and Model {} set to their Secondary on repop.",
 				npc_id_string,
 				Strings::Commify(sep->arg[2]),
-				sep->IsNumber(3) ? Strings::Commify(sep->arg[3]) : 0
+				sep->arg[3] && sep->IsNumber(3) ? Strings::Commify(sep->arg[3]) : 0
 			);
 		} else {
 			c->Message(
