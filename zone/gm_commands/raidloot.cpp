@@ -68,3 +68,78 @@ void command_raidloot(Client *c, const Seperator *sep)
 	);
 }
 
+void command_raidgroupsay(Client* c, const Seperator* sep)
+{
+	//	const char* msg, Client* c, uint8 language, uint8 lang_skill
+
+	int arguments = sep->argnum;
+	if (!arguments) {
+		c->Message(Chat::White, "Usage: #raidgroupsay");
+		return;
+	}
+	uint8 language = atoi(sep->arg[1]);
+	uint8 lang_skill = atoi(sep->arg[2]);
+	uint32 groupToUse = atoi(sep->arg[3]);
+	char msg[1000];
+	strcpy(msg, sep->arg[4]);
+
+	auto raid = c->GetRaid();
+	if (!raid) {
+		c->Message(Chat::White, "You must be in a Raid to use this command.");
+		return;
+	}
+
+	raid->RaidGroupSay(msg, c, 0, 100);
+
+	auto pack = new ServerPacket(ServerOP_RaidGroupSay, sizeof(ServerRaidMessage_Struct) + strlen(msg) + 1);
+	ServerRaidMessage_Struct* rga = (ServerRaidMessage_Struct*)pack->pBuffer;
+	rga->rid = raid->GetID();
+	rga->gid = groupToUse;
+	rga->language = language;
+	rga->lang_skill = lang_skill;
+	strn0cpy(rga->from, c->GetName(), 64);
+
+	strcpy(rga->message, msg); // this is safe because we are allocating enough space for the entire msg above
+
+	worldserver.SendPacket(pack);
+	safe_delete(pack);
+}
+void command_raidsay(Client* c, const Seperator* sep)
+{
+	//	const char* msg, Client* c, uint8 language, uint8 lang_skill
+
+	int arguments = sep->argnum;
+	if (!arguments) {
+		c->Message(Chat::White, "Usage: #raidgroupsay");
+		return;
+	}
+	uint8 language = atoi(sep->arg[1]);
+	uint8 lang_skill = atoi(sep->arg[2]);
+	uint32 groupToUse = atoi(sep->arg[3]);
+	char msg[1000];
+	strcpy(msg, sep->arg[4]);
+
+	auto raid = c->GetRaid();
+	if (!raid) {
+		c->Message(Chat::White, "You must be in a Raid to use this command.");
+		return;
+	}
+
+	raid->RaidSay(msg, c, 0, 100);
+
+	if (!c)
+		return;
+
+	auto pack = new ServerPacket(ServerOP_RaidSay, sizeof(ServerRaidMessage_Struct) + strlen(msg) + 1);
+	ServerRaidMessage_Struct* rga = (ServerRaidMessage_Struct*)pack->pBuffer;
+	rga->rid = raid->GetID();
+	rga->gid = 0xFFFFFFFF;
+	rga->language = language;
+	rga->lang_skill = lang_skill;
+	strn0cpy(rga->from, c->GetName(), 64);
+
+	strcpy(rga->message, msg); // this is safe because we are allocating enough space for the entire msg above
+
+	worldserver.SendPacket(pack);
+	safe_delete(pack);
+}

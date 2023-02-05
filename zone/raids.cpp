@@ -2031,3 +2031,44 @@ bool Raid::IsEngaged() {
 	}
 	return 0;
 }
+void Raid::RaidGroupSay(const char* msg, const char* from, uint8 language, uint8 lang_skill)
+{
+	if (!from)
+		return;
+
+	uint32 groupToUse = GetGroup(from);
+
+	if (groupToUse > 11)
+		return;
+
+	auto pack = new ServerPacket(ServerOP_RaidGroupSay, sizeof(ServerRaidMessage_Struct) + strlen(msg) + 1);
+	ServerRaidMessage_Struct* rga = (ServerRaidMessage_Struct*)pack->pBuffer;
+	rga->rid = GetID();
+	rga->gid = groupToUse;
+	rga->language = language;
+	rga->lang_skill = lang_skill;
+	strn0cpy(rga->from, from, 64);
+
+	strcpy(rga->message, msg); // this is safe because we are allocating enough space for the entire msg above
+
+	worldserver.SendPacket(pack);
+	safe_delete(pack);
+}
+void Raid::RaidSay(const char* msg, const char* from, uint8 language, uint8 lang_skill)
+{
+	if (!from)
+		return;
+
+	auto pack = new ServerPacket(ServerOP_RaidSay, sizeof(ServerRaidMessage_Struct) + strlen(msg) + 1);
+	ServerRaidMessage_Struct* rga = (ServerRaidMessage_Struct*)pack->pBuffer;
+	rga->rid = GetID();
+	rga->gid = 0xFFFFFFFF;
+	rga->language = language;
+	rga->lang_skill = lang_skill;
+	strn0cpy(rga->from, from, 64);
+
+	strcpy(rga->message, msg);
+
+	worldserver.SendPacket(pack);
+	safe_delete(pack);
+}

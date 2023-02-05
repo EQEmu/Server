@@ -116,7 +116,8 @@ public:
 
 	void	AddMember(Client *c, uint32 group = 0xFFFFFFFF, bool rleader=false, bool groupleader=false, bool looter=false);
 	void	AddBot(Bot* b, uint32 group = 0xFFFFFFFF, bool rleader=false, bool groupleader=false, bool looter=false); 
-	void    RaidBotGroupSay(Bot* b, uint8 language, uint8 lang_skill, const char* msg, ...); //Not yet implemented
+	void    RaidGroupSay(const char* msg, const char* from, uint8 language, uint8 lang_skill);
+	void	RaidSay(const char* msg, const char* from, uint8 language, uint8 lang_skill);
 	bool	IsEngaged();
 	Mob*    GetRaidMainAssistOneByName(const char* name);
 	void	RemoveMember(const char *c);

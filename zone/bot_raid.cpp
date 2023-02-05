@@ -271,9 +271,8 @@ void Bot::AI_Process_Raid()
 
 			auto pull_target = bot_owner->GetTarget();
 			if (pull_target) {
-
-				Bot::BotGroupSay(this, "Pulling %s to the group..", pull_target->GetCleanName());
-				//raid->RaidBotGroupSay(this, 0, 100, "Pulling %s to the group..", pull_target->GetCleanName());
+				const auto msg = fmt::format("Pulling {} to the group..", pull_target->GetCleanName());
+				raid->RaidSay(msg.c_str(), GetCleanName(), 0, 100);
 				InterruptSpell();
 				WipeHateList();
 				AddToHateList(pull_target, 1);
@@ -1526,9 +1525,10 @@ bool Bot::AICastSpell_Raid(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 
 			castedSpell = AIDoSpellCast(botSpell.SpellIndex, addMob, botSpell.ManaCost);
 
-			if (castedSpell)
-				BotGroupSay(this, "Attempting to mez %s.", addMob->GetCleanName());
-				//raid->RaidBotGroupSay(this, 0, 100, "Attempting to mez %s.", addMob->GetCleanName());
+			if (castedSpell) {
+				const auto msg = fmt::format("Attempting to mez {}...", addMob->GetCleanName());
+				raid->RaidSay(msg.c_str(), GetCleanName(), 0, 100);
+			}
 		}
 		break;
 	}
@@ -1691,8 +1691,8 @@ bool Bot::AICastSpell_Raid(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 						if (IsGroupSpell(botSpell.SpellId)) {
 							if (IsRaidGrouped()) {
 								uint32 r_group = raid->GetGroup(GetName());
-								BotGroupSay(this, "Casting %s.", spells[botSpell.SpellId].name);
-								//raid->RaidBotGroupSay(this, 0, 100, "Casting %s.", spells[botSpell.SpellId].name);
+								const auto msg = fmt::format("Casting {}..", spells[botSpell.SpellId].name);
+								raid->RaidGroupSay(msg.c_str(), GetCleanName(), 0, 100);
 								std::vector<RaidMember> raid_group_members = raid->GetRaidGroupMembers(r_group);
 								//for (std::vector<RaidMember>::iterator iter = raid_group_members.begin(); iter != raid_group_members.end(); ++iter) {
 								for (int i = 0; i < raid_group_members.size(); ++i){
@@ -1703,8 +1703,13 @@ bool Bot::AICastSpell_Raid(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 							}
 						}
 						else {
-							if (tar != this)		//we don't need spam of bots healing themselves
-								BotGroupSay(this, "Casting %s on %s", spells[botSpell.SpellId].name, tar->GetCleanName());
+							if (tar != this) {		//we don't need spam of bots healing themselves
+								const auto msg = fmt::format("Casting {} on {}...",
+									spells[botSpell.SpellId].name,
+									tar->GetCleanName()
+								);
+								raid->RaidSay(msg.c_str(), GetCleanName(), 0, 100);
+							}
 							tar->SetDontHealMeBefore(Timer::GetCurrentTime() + 2000);
 						}
 					}
@@ -2311,8 +2316,10 @@ bool Bot::AICastSpell_Raid(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 
 			castedSpell = AIDoSpellCast(botSpell.SpellIndex, tar, botSpell.ManaCost);
 
-			if (castedSpell && GetClass() != BARD)
-				BotGroupSay(this, "Attempting to slow %s.", tar->GetCleanName());
+			if (castedSpell && GetClass() != BARD) {
+				const auto msg = fmt::format("Attempting to slow {}.", tar->GetCleanName());
+				raid->RaidSay(msg.c_str(), GetCleanName(), 0, 100);
+			}
 		}
 		break;
 	}
@@ -2397,7 +2404,8 @@ bool Bot::AICastSpell_Raid(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 
 				castedSpell = AIDoSpellCast(iter.SpellIndex, tar, iter.ManaCost);
 				if (castedSpell) {
-					BotGroupSay(this, "Attempting to reduce hate on %s.", tar->GetCleanName());
+					const auto msg = fmt::format("Attempting to reduce hate on {}.", tar->GetCleanName());
+					raid->RaidSay(msg.c_str(), GetCleanName(), 0, 100);
 					break;
 				}
 			}
@@ -2480,36 +2488,6 @@ bool Bot::AICastSpell_Raid(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 	}
 
 	return castedSpell;
-}
-
-void Raid::RaidBotGroupSay(Bot* b, uint8 language, uint8 lang_skill, const char* msg, ...)
-{
-	if (!b)
-		return;
-
-	char buf[1000];
-	va_list ap;
-	va_start(ap, msg);
-	vsnprintf(buf, 1000, msg, ap);
-	va_end(ap);
-
-	uint32 groupToUse = GetGroup(b->GetName());
-
-	if (groupToUse > 11)
-		return;
-
-	auto pack = new ServerPacket(ServerOP_RaidGroupSay, sizeof(ServerRaidMessage_Struct) + strlen(msg) + 1);
-	ServerRaidMessage_Struct* rga = (ServerRaidMessage_Struct*)pack->pBuffer;
-	rga->rid = GetID();
-	rga->gid = groupToUse;
-	rga->language = language;
-	rga->lang_skill = lang_skill;
-	strn0cpy(rga->from, b->GetName(), 64);
-
-	strcpy(rga->message, buf); // this is safe because we are allocating enough space for the entire msg above
-
-	worldserver.SendPacket(pack);
-	//safe_delete(pack);
 }
 
 uint8 Bot::GetNumberNeedingHealedInRaidGroup(uint8 hpr, bool includePets) {
