@@ -1078,7 +1078,7 @@ void ClientTaskState::RewardTask(Client *c, const TaskInformation *ti, ClientTas
 					const EQ::ItemData *item = database.GetItem(ac.item_id);
 					if (item) {
 						c->AddAlternateCurrencyValue(ti->reward_point_type, ti->reward_points);
-						c->Message(15, fmt::format("You have received ({}) {}!", ti->reward_points, item->Name).c_str());
+						c->Message(Chat::Yellow, fmt::format("You have received ({}) {}!", ti->reward_points, item->Name).c_str());
 					}
 				}
 			}

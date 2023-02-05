@@ -1180,7 +1180,7 @@ void TaskManager::SendActiveTaskDescription(
 	// display alternate currency in reward window manually
 	// there may be a more formal packet structure for displaying this but this is what it is for
 	// now to have bare minimum support
-	if (reward.empty() && t->reward_point_type > 0 && !is_don_reward) {
+	if (t->reward_point_type > 0 && t->reward_points > 0 && !is_don_reward) {
 		for (const auto& ac : zone->AlternateCurrencies) {
 			if (t->reward_point_type == ac.id) {
 				const EQ::ItemData *item = database.GetItem(ac.item_id);
@@ -1193,12 +1193,12 @@ void TaskManager::SendActiveTaskDescription(
 
 					reward = currency_description;
 
-					EQ::SayLinkEngine linker;
-					linker.SetLinkType(EQ::saylink::SayLinkItemData);
-					linker.SetItemData(item);
-					linker.SetTaskUse();
-					linker.SetProxyText(currency_description.c_str());
-					t->item_link = linker.GenerateLink();
+					EQ::SayLinkEngine l;
+					l.SetLinkType(EQ::saylink::SayLinkItemData);
+					l.SetItemData(item);
+					l.SetTaskUse();
+					l.SetProxyText(currency_description.c_str());
+					t->item_link = l.GenerateLink();
 				}
 			}
 		}
