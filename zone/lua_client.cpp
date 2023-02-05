@@ -3032,6 +3032,12 @@ uint32 Lua_Client::GetItemCooldown(uint32 item_id)
 	return self->GetItemCooldown(item_id);
 }
 
+void Lua_Client::UseAugmentContainer(int container_slot)
+{
+	Lua_Safe_Call_Void();
+	self->UseAugmentContainer(container_slot);
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 	.def(luabind::constructor<>())
@@ -3553,6 +3559,7 @@ luabind::scope lua_register_client() {
 	.def("UpdateLDoNPoints", (void(Lua_Client::*)(uint32,int))&Lua_Client::UpdateLDoNPoints)
 	.def("UpdateTaskActivity", (void(Lua_Client::*)(int,int,int))&Lua_Client::UpdateTaskActivity)
 	.def("UseDiscipline", (bool(Lua_Client::*)(int,int))&Lua_Client::UseDiscipline)
+	.def("UseAugmentContainer", (void(Lua_Client::*)(int))&Lua_Client::UseAugmentContainer)
 	.def("WorldKick", (void(Lua_Client::*)(void))&Lua_Client::WorldKick);
 }
 
