@@ -86,7 +86,16 @@ int main(int argc, char **argv)
 			return 1;
 		}
 	} else {
-		content_db.SetMysql(database.getMySQL());
+		if (!content_db.Connect(
+			Config->DatabaseHost.c_str(),
+			Config->DatabaseUsername.c_str(),
+			Config->DatabasePassword.c_str(),
+			Config->DatabaseDB.c_str(),
+			Config->DatabasePort
+		)) {
+			LogError("Cannot continue without a content database connection");
+			return 1;
+		}
 	}
 
 	LogSys.SetDatabase(&database)
