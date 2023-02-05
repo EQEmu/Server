@@ -5754,7 +5754,7 @@ void bot_subcommand_bot_dye_armor(Client *c, const Seperator *sep)
 		return;
 	}
 
-	if (helper_is_help_or_usage(sep->arg[1])) {
+	if (helper_is_help_or_usage(sep->arg[1]) || !sep->arg[1] || (sep->arg[1] && Strings::IsNumber(sep->arg[1]))) {
 		c->Message(
 			Chat::White,
 			fmt::format(
