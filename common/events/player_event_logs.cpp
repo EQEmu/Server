@@ -4,13 +4,12 @@
 #include "../platform.h"
 #include "../rulesys.h"
 
-const uint32 PROCESS_EVENTS_TIMER_INTERVAL               = 5 * 1000; // 5 seconds
 const uint32 PROCESS_RETENTION_TRUNCATION_TIMER_INTERVAL = 60 * 60 * 1000; // 1 hour
 
 // general initialization routine
 void PlayerEventLogs::Init()
 {
-	m_process_batch_events_timer.SetTimer(PROCESS_EVENTS_TIMER_INTERVAL);
+	m_process_batch_events_timer.SetTimer(RuleI(Logging, BatchEventProcessIntervalSeconds) * 1000);
 	m_process_retention_truncation_timer.SetTimer(PROCESS_RETENTION_TRUNCATION_TIMER_INTERVAL);
 
 	ValidateDatabaseConnection();
