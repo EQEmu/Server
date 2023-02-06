@@ -248,8 +248,9 @@ int Mob::compute_defense()
 {
 	int defense = GetSkill(EQ::skills::SkillDefense) * 400 / 225;
 	defense += (8000 * (GetAGI() - 40)) / 36000;
-	if (IsClient())
-		defense += CastToClient()->GetHeroicAGI() / 10;
+	if (IsClient() || IsBot()) {
+		defense += GetHeroicAGI() / 10;
+	}
 
 	//516 SE_AC_Mitigation_Max_Percent
 	auto ac_bonus = itembonuses.AC_Mitigation_Max_Percent + aabonuses.AC_Mitigation_Max_Percent + spellbonuses.AC_Mitigation_Max_Percent;

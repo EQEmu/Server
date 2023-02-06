@@ -1348,12 +1348,12 @@ int64 Mob::Tunecompute_defense(int avoidance_override, int add_avoidance)
 {
 	int defense = GetSkill(EQ::skills::SkillDefense) * 400 / 225;
 	defense += (8000 * (GetAGI() - 40)) / 36000;
-	if (IsClient()) {
+	if (IsClient() || IsBot()) {
 		if (avoidance_override) {
 			defense = avoidance_override;
 		}
-		else {
-			defense += CastToClient()->GetHeroicAGI() / 10;
+		else {orp
+			defense += GetHeroicAGI() / 10;
 		}
 		defense += add_avoidance; //1 pt = 10 heroic agi
 	}
