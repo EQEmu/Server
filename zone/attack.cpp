@@ -317,8 +317,9 @@ bool Mob::CheckHitChance(Mob* other, DamageHitInfo &hit)
 	Mob *defender = this;
 	Log(Logs::Detail, Logs::Attack, "CheckHitChance(%s) attacked by %s", defender->GetName(), attacker->GetName());
 
-	if (defender->IsClient() && defender->CastToClient()->IsSitting())
+	if ((defender->IsClient() || defender->IsBot()) && defender->IsSitting()) {
 		return true;
+	}
 
 	auto avoidance = defender->GetTotalDefense();
 	if (avoidance == -1) // some sort of auto avoid disc

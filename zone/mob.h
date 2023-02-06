@@ -657,6 +657,7 @@ public:
 	inline int32 GetHeroicStrikethrough() const  { return heroic_strikethrough; }
 	inline const bool GetKeepsSoldItems() const { return keeps_sold_items; }
 	inline void SetKeepsSoldItems(bool in_keeps_sold_items)  { keeps_sold_items = in_keeps_sold_items; }
+	virtual bool IsSitting() const { return false; }
 
 	void CopyHateList(Mob* to);
 
