@@ -317,7 +317,7 @@ bool Mob::CheckHitChance(Mob* other, DamageHitInfo &hit)
 	Mob *defender = this;
 	Log(Logs::Detail, Logs::Attack, "CheckHitChance(%s) attacked by %s", defender->GetName(), attacker->GetName());
 
-	if ((defender->IsClient() || defender->IsBot()) && defender->IsSitting()) {
+	if (!defender->IsNPC() && defender->IsSitting()) {
 		return true;
 	}
 
