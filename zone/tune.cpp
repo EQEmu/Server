@@ -1352,7 +1352,7 @@ int64 Mob::Tunecompute_defense(int avoidance_override, int add_avoidance)
 		if (avoidance_override) {
 			defense = avoidance_override;
 		}
-		else {orp
+		else {
 			defense += GetHeroicAGI() / 10;
 		}
 		defense += add_avoidance; //1 pt = 10 heroic agi
