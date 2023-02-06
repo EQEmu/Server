@@ -778,6 +778,12 @@ void Client::CompleteConnect()
 
 	parse->EventPlayer(EVENT_ENTER_ZONE, this, "", 0);
 
+	// the way that the client deals with positions during the initial spawn struct
+	// is subtly different from how it deals with getting a position update
+	// if a mob is slightly in the wall or slightly clipping a floor they will be
+	// sent to a succor point
+	SendMobPositions();
+
 	SetLastPositionBeforeBulkUpdate(GetPosition());
 
 	/* This sub event is for if a player logs in for the first time since entering world. */
@@ -15729,4 +15735,15 @@ bool Client::CanTradeFVNoDropItem()
 	}
 
 	return false;
+}
+
+void Client::SendMobPositions()
+{
+	auto      p  = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
+	auto      *s = (PlayerPositionUpdateServer_Struct *) p->pBuffer;
+	for (auto &m: entity_list.GetMobList()) {
+		m.second->MakeSpawnUpdate(s);
+		QueuePacket(p, false);
+	}
+	safe_delete(p);
 }
