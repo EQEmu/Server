@@ -200,6 +200,7 @@ RULE_INT(Character, ExperiencePercentCapPerKill, -1, "Caps the percentage of exp
 RULE_BOOL(Character, EnableGroupEXPModifier, true, "Enable or disable the group experience modifier based on number of players in group, default is true")
 RULE_REAL(Character, GroupMemberEXPModifier, 0.2, "Sets the group experience modifier per members between 2 and 5, default is 0.2")
 RULE_REAL(Character, FullGroupEXPModifier, 2.16, "Sets the group experience modifier for a full group, default is 2.16")
+RULE_BOOL(Character, IgnoreLevelBasedHasteCaps, false, "Ignores hard coded level based haste caps.")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Mercs)
