@@ -437,7 +437,7 @@ public:
 	/* Only allows players that killed corpse to loot */
 	const bool HasPrivateCorpse() const { return NPCTypedata_ours ? NPCTypedata_ours->private_corpse : NPCTypedata->private_corpse; }
 
-	virtual const bool IsUnderwaterOnly() const { return NPCTypedata_ours ? NPCTypedata_ours->underwater : NPCTypedata->underwater; }
+	virtual const bool IsUnderwaterOnly() const { return m_is_underwater_only; }
 	const char* GetRawNPCTypeName() const { return NPCTypedata_ours ? NPCTypedata_ours->name : NPCTypedata->name; }
 
 	virtual int GetKillExpMod() const { return NPCTypedata_ours ? NPCTypedata_ours->exp_mod : NPCTypedata->exp_mod; }
@@ -673,6 +673,8 @@ protected:
 	bool ldon_trap_detected;
 	QGlobalCache *qGlobals;
 	uint32 adventure_template_id;
+
+	bool m_is_underwater_only = false;
 
 	//mercenary stuff
 	std::list<MercType> mercTypeList;
