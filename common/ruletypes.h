@@ -317,6 +317,7 @@ RULE_BOOL(Map, FixPathingZOnSendTo, false, "Try to repair Z coordinates in the S
 RULE_BOOL(Map, FixZWhenPathing, true, "Automatically fix NPC Z coordinates when moving/pathing/engaged (Far less CPU intensive than its predecessor)")
 RULE_REAL(Map, DistanceCanTravelBeforeAdjustment, 10.0, "Distance a mob can path before FixZ is called, depends on FixZWhenPathing")
 RULE_BOOL(Map, MobZVisualDebug, false, "Displays spell effects determining whether or not NPC is hitting Best Z calcs (blue for hit, red for miss)")
+RULE_BOOL(Map, MobPathingVisualDebug, false, "Displays nodes in pathing points in realtime to help with visual debugging")
 RULE_REAL(Map, FixPathingZMaxDeltaSendTo, 20, "At runtime in SendTo: maximum change in Z to allow the BestZ code to apply")
 RULE_INT(Map, FindBestZHeightAdjust, 1, "Adds this to the current Z before seeking the best Z position")
 RULE_CATEGORY_END()
