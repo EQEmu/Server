@@ -86,7 +86,7 @@ class Strings {
 public:
 	static bool Contains(std::vector<std::string> container, std::string element);
 	static bool Contains(const std::string& subject, const std::string& search);
-	static bool Stoi(const std::string &s, int fallback = -1);
+	static int  ToInt(const std::string &s, int fallback = 0);
 	static bool IsNumber(const std::string &s);
 	static bool IsFloat(const std::string &s);
 	static const std::string ToLower(std::string s);
