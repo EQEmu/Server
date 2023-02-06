@@ -885,8 +885,9 @@ int Mob::ACSum(bool skip_caps)
 	// EQ math
 	ac = (ac * 4) / 3;
 	// anti-twink
-	if (!skip_caps && IsClient() && GetLevel() < RuleI(Combat, LevelToStopACTwinkControl))
+	if (!skip_caps && (IsClient() || IsBot()) && GetLevel() < RuleI(Combat, LevelToStopACTwinkControl)) {
 		ac = std::min(ac, 25 + 6 * GetLevel());
+	}
 	ac = std::max(0, ac + GetClassRaceACBonus());
 	if (IsNPC()) {
 		// This is the developer tweaked number
@@ -3957,10 +3958,11 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 		if (attacker) {
 			if (skill_used == EQ::skills::SkillBash) {
 				can_stun = true;
-				if (attacker->IsClient())
+				if (attacker->IsClient() || attacker->IsBot()) {
 					stunbash_chance = attacker->spellbonuses.StunBashChance +
-					attacker->itembonuses.StunBashChance +
-					attacker->aabonuses.StunBashChance;
+					                  attacker->itembonuses.StunBashChance +
+					                  attacker->aabonuses.StunBashChance;
+				}
 			}
 			else if (skill_used == EQ::skills::SkillKick &&
 				(attacker->GetLevel() > 55 || attacker->IsNPC()) && GetClass() == WARRIOR) {
@@ -5158,8 +5160,9 @@ void Mob::ApplyMeleeDamageMods(uint16 skill, int64 &damage, Mob *defender, Extra
 		dmgbonusmod += opts->melee_damage_bonus_flat;
 
 	if (defender) {
-		if (defender->IsClient() && defender->GetClass() == WARRIOR)
+		if ((defender->IsClient() || defender->IsBot()) && defender->GetClass() == WARRIOR) {
 			dmgbonusmod -= 5;
+		}
 		// 168 defensive
 		dmgbonusmod += (defender->spellbonuses.MeleeMitigationEffect +
 		                defender->itembonuses.MeleeMitigationEffect +
@@ -5479,7 +5482,7 @@ void Mob::TrySkillProc(Mob *on, EQ::skills::SkillType skill, uint16 ReuseTime, b
 		}
 	}
 
-	if (IsClient() && aabonuses.LimitToSkill[skill]) {
+	if ((IsClient() || IsBot()) && aabonuses.LimitToSkill[skill]) {
 
 		CanProc = true;
 		uint32 effect_id = 0;
