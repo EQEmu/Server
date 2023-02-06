@@ -748,6 +748,7 @@ RULE_BOOL(Inventory, DeleteTransformationMold, true, "False if you want mold to 
 RULE_BOOL(Inventory, AllowAnyWeaponTransformation, false, "Weapons can use any weapon transformation")
 RULE_BOOL(Inventory, TransformSummonedBags, false, "Transforms summoned bags into disenchanted ones instead of deleting")
 RULE_BOOL(Inventory, AllowMultipleOfSameAugment, false, "Allows multiple of the same augment to be placed in an item via #augmentitem or MQ2, set to true to allow")
+RULE_INT(Inventory, AlternateAugmentationSealer, 53, "Allows RoF+ clients to augment items from a special container type")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Client)

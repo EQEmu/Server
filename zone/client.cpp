@@ -11960,3 +11960,11 @@ void Client::SendPath(Mob* target)
 
 	SendPathPacket(points);
 }
+
+void Client::UseAugmentContainer(int container_slot) {
+	auto in_augment = new AugmentItem_Struct[sizeof(AugmentItem_Struct)];
+	in_augment->container_slot = container_slot;
+	in_augment->augment_slot = -1;
+	Object::HandleAugmentation(this, in_augment, nullptr);
+	safe_delete_array(in_augment);
+}

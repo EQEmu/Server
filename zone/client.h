@@ -952,6 +952,7 @@ public:
 	void MemorizeSpell(uint32 slot, uint32 spellid, uint32 scribing, uint32 reduction = 0);
 
 	// Item methods
+	void UseAugmentContainer(int container_slot);
 	void EVENT_ITEM_ScriptStopReturn();
 	uint32 NukeItem(uint32 itemnum, uint8 where_to_check =
 			(invWhereWorn | invWherePersonal | invWhereBank | invWhereSharedBank | invWhereTrading | invWhereCursor));
