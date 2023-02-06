@@ -3958,7 +3958,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 		if (attacker) {
 			if (skill_used == EQ::skills::SkillBash) {
 				can_stun = true;
-				if (attacker->IsClient() || attacker->IsBot()) {
+				if (attacker->IsClient() || attacker->IsBot() || attacker->IsMerc()) {
 					stunbash_chance = attacker->spellbonuses.StunBashChance +
 					                  attacker->itembonuses.StunBashChance +
 					                  attacker->aabonuses.StunBashChance;
@@ -5160,7 +5160,7 @@ void Mob::ApplyMeleeDamageMods(uint16 skill, int64 &damage, Mob *defender, Extra
 		dmgbonusmod += opts->melee_damage_bonus_flat;
 
 	if (defender) {
-		if ((defender->IsClient() || defender->IsBot()) && defender->GetClass() == WARRIOR) {
+		if ((defender->IsClient() || defender->IsBot() || defender->IsMerc()) && defender->GetClass() == WARRIOR) {
 			dmgbonusmod -= 5;
 		}
 		// 168 defensive
