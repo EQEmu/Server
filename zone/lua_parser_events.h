@@ -383,6 +383,15 @@ void handle_player_task_stage_complete(
 	std::vector<std::any> *extra_pointers
 );
 
+void handle_player_task_accepted(
+	QuestInterface* parse,
+	lua_State* L,
+	Client* client,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any>* extra_pointers
+);
+
 void handle_player_task_update(
 	QuestInterface *parse,
 	lua_State* L,

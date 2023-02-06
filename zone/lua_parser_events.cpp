@@ -836,6 +836,18 @@ void handle_player_task_stage_complete(
 	lua_setfield(L, -2, "activity_id");
 }
 
+void handle_player_task_accepted(
+	QuestInterface* parse,
+	lua_State* L,
+	Client* client,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any>* extra_pointers
+) {
+	lua_pushinteger(L, std::stoi(data));
+	lua_setfield(L, -2, "task_id");
+}
+
 void handle_player_task_update(
 	QuestInterface *parse,
 	lua_State* L,

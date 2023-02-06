@@ -2125,6 +2125,7 @@ void ClientTaskState::AcceptNewTask(
 	if (npc) {
 		parse->EventNPC(EVENT_TASK_ACCEPTED, npc, client, export_string, 0);
 	}
+	parse->EventPlayer(EVENT_TASK_ACCEPTED, client, export_string, 0);
 }
 
 void ClientTaskState::ProcessTaskProximities(Client *client, float x, float y, float z)
