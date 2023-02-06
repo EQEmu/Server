@@ -1002,8 +1002,9 @@ double Mob::RollD20(int offense, int mitigation)
 		1.6, 1.7, 1.8, 1.9, 2.0
 	};
 
-	if (IsClient() && CastToClient()->IsSitting())
+	if ((IsClient() || IsBot() || IsMerc()) && IsSitting()) {
 		return mods[19];
+	}
 
 	auto atk_roll = zone->random.Roll0(offense + 5);
 	auto def_roll = zone->random.Roll0(mitigation + 5);
