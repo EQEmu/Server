@@ -1030,11 +1030,11 @@ enum ZoningMessage : int8
 
 enum class RecipeCountType : uint8
 {
-	Success,
-	Fail,
 	Component,
+	Container,
+	Fail,
 	Salvage,
-	Container
+	Success
 };
 
 #endif /*COMMON_EQ_CONSTANTS_H*/
