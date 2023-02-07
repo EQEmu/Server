@@ -657,7 +657,10 @@ public:
 	inline int32 GetHeroicStrikethrough() const  { return heroic_strikethrough; }
 	inline const bool GetKeepsSoldItems() const { return keeps_sold_items; }
 	inline void SetKeepsSoldItems(bool in_keeps_sold_items)  { keeps_sold_items = in_keeps_sold_items; }
+
 	virtual bool IsSitting() const { return false; }
+
+	int CalcRecommendedLevelBonus(uint8 level, uint8 reclevel, int basestat);
 
 	void CopyHateList(Mob* to);
 
@@ -1451,6 +1454,8 @@ public:
 	// not Bots HealRotation methods
 	void SetManualFollow(bool flag) { m_manual_follow = flag; }
 	bool GetManualFollow() const { return m_manual_follow; }
+
+	void DrawDebugCoordinateNode(std::string node_name, const glm::vec4 vec);
 
 protected:
 	void CommonDamage(Mob* other, int64 &damage, const uint16 spell_id, const EQ::skills::SkillType attack_skill, bool &avoidable, const int8 buffslot, const bool iBuffTic, eSpecialAttacks specal = eSpecialAttacks::None);

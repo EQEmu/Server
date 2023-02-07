@@ -224,8 +224,10 @@ bool UCSDatabase::GetVariable(const char *varname, char *varvalue, uint16 varval
 
 
 bool UCSDatabase::LoadChatChannels()
-{
-	LoadFilteredNamesFromDB();
+{	
+	if (!RuleB(Chat, ChannelsIgnoreNameFilter)) {
+		LoadFilteredNamesFromDB();
+	}
 	LoadReservedNamesFromDB();
 	LogInfo("Loading chat channels from the database");
 

@@ -2887,6 +2887,11 @@ uint32 Perl_Client_GetItemCooldown(Client* self, uint32 item_id)
 	return self->GetItemCooldown(item_id);
 }
 
+void Perl_Client_UseAugmentContainer(Client* self, int container_slot)
+{
+	self->UseAugmentContainer(container_slot);
+}
+
 void perl_register_client()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -3414,6 +3419,7 @@ void perl_register_client()
 	package.add("UpdateWho", (void(*)(Client*))&Perl_Client_UpdateWho);
 	package.add("UpdateWho", (void(*)(Client*, uint8))&Perl_Client_UpdateWho);
 	package.add("UseDiscipline", &Perl_Client_UseDiscipline);
+	package.add("UseAugmentContainer", &Perl_Client_UseAugmentContainer);
 	package.add("WorldKick", &Perl_Client_WorldKick);
 }
 

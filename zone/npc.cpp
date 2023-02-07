@@ -160,42 +160,43 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 		size = 5;
 	}
 
-	taunting       = false;
-	proximity      = nullptr;
-	copper         = 0;
-	silver         = 0;
-	gold           = 0;
-	platinum       = 0;
-	max_dmg        = npc_type_data->max_dmg;
-	min_dmg        = npc_type_data->min_dmg;
-	attack_count   = npc_type_data->attack_count;
-	grid           = 0;
-	wp_m           = 0;
-	max_wp         = 0;
-	save_wp        = 0;
-	spawn_group_id = 0;
-	swarmInfoPtr   = nullptr;
-	spellscale     = npc_type_data->spellscale;
-	healscale      = npc_type_data->healscale;
-	pAggroRange    = npc_type_data->aggroradius;
-	pAssistRange   = npc_type_data->assistradius;
-	findable       = npc_type_data->findable;
-	trackable      = npc_type_data->trackable;
-	MR             = npc_type_data->MR;
-	CR             = npc_type_data->CR;
-	DR             = npc_type_data->DR;
-	FR             = npc_type_data->FR;
-	PR             = npc_type_data->PR;
-	Corrup         = npc_type_data->Corrup;
-	PhR          = npc_type_data->PhR;
-	STR          = npc_type_data->STR;
-	STA          = npc_type_data->STA;
-	AGI          = npc_type_data->AGI;
-	DEX          = npc_type_data->DEX;
-	INT          = npc_type_data->INT;
-	WIS          = npc_type_data->WIS;
-	CHA          = npc_type_data->CHA;
-	npc_mana     = npc_type_data->Mana;
+	taunting             = false;
+	proximity            = nullptr;
+	copper               = 0;
+	silver               = 0;
+	gold                 = 0;
+	platinum             = 0;
+	max_dmg              = npc_type_data->max_dmg;
+	min_dmg              = npc_type_data->min_dmg;
+	attack_count         = npc_type_data->attack_count;
+	grid                 = 0;
+	wp_m                 = 0;
+	max_wp               = 0;
+	save_wp              = 0;
+	spawn_group_id       = 0;
+	swarmInfoPtr         = nullptr;
+	spellscale           = npc_type_data->spellscale;
+	healscale            = npc_type_data->healscale;
+	pAggroRange          = npc_type_data->aggroradius;
+	pAssistRange         = npc_type_data->assistradius;
+	findable             = npc_type_data->findable;
+	trackable            = npc_type_data->trackable;
+	MR                   = npc_type_data->MR;
+	CR                   = npc_type_data->CR;
+	DR                   = npc_type_data->DR;
+	FR                   = npc_type_data->FR;
+	PR                   = npc_type_data->PR;
+	Corrup               = npc_type_data->Corrup;
+	PhR                  = npc_type_data->PhR;
+	STR                  = npc_type_data->STR;
+	STA                  = npc_type_data->STA;
+	AGI                  = npc_type_data->AGI;
+	DEX                  = npc_type_data->DEX;
+	INT                  = npc_type_data->INT;
+	WIS                  = npc_type_data->WIS;
+	CHA                  = npc_type_data->CHA;
+	npc_mana             = npc_type_data->Mana;
+	m_is_underwater_only = npc_type_data->underwater;
 
 	//quick fix of ordering if they screwed it up in the DB
 	if (max_dmg < min_dmg) {
@@ -3782,4 +3783,15 @@ int NPC::GetRolledItemCount(uint32 item_id)
 	}
 
 	return rolled_count;
+}
+
+void NPC::SendPositionToClients()
+{
+	auto      p  = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
+	auto      *s = (PlayerPositionUpdateServer_Struct *) p->pBuffer;
+	for (auto &c: entity_list.GetClientList()) {
+		MakeSpawnUpdate(s);
+		c.second->QueuePacket(p, false);
+	}
+	safe_delete(p);
 }

@@ -37,8 +37,8 @@ try
 
     dir *.zip
     rclone config create remote ftp env_auth true
-    rclone copy eqemu-server-windows-x64.zip remote:
-    rclone ls remote:
+    rclone copy eqemu-server-windows-x64.zip remote: 2>&1
+    rclone ls remote: 2>&1
 }
 catch
 {

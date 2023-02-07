@@ -278,6 +278,7 @@ public:
 	bool KeyRingCheck(uint32 item_id);
 	void KeyRingList();
 	virtual bool IsClient() const { return true; }
+	bool IsOfClientBotMerc() const override { return true; }
 	void CompleteConnect();
 	bool TryStacking(EQ::ItemInstance* item, uint8 type = ItemPacketTrade, bool try_worn = true, bool try_cursor = true);
 	void SendTraderPacket(Client* trader, uint32 Unknown72 = 51);
@@ -952,6 +953,7 @@ public:
 	void MemorizeSpell(uint32 slot, uint32 spellid, uint32 scribing, uint32 reduction = 0);
 
 	// Item methods
+	void UseAugmentContainer(int container_slot);
 	void EVENT_ITEM_ScriptStopReturn();
 	uint32 NukeItem(uint32 itemnum, uint8 where_to_check =
 			(invWhereWorn | invWherePersonal | invWhereBank | invWhereSharedBank | invWhereTrading | invWhereCursor));
@@ -1681,7 +1683,6 @@ protected:
 	void CalcItemBonuses(StatBonuses* newbon);
 	void AddItemBonuses(const EQ::ItemInstance *inst, StatBonuses* newbon, bool isAug = false, bool isTribute = false, int rec_override = 0, bool ammo_slot_item = false);
 	void AdditiveWornBonuses(const EQ::ItemInstance *inst, StatBonuses* newbon, bool isAug = false);
-	int CalcRecommendedLevelBonus(uint8 level, uint8 reclevel, int basestat);
 	void CalcEdibleBonuses(StatBonuses* newbon);
 	void ProcessItemCaps();
 	void MakeBuffFadePacket(uint16 spell_id, int slot_id, bool send_message = true);
@@ -2083,6 +2084,7 @@ private:
 	bool m_bot_precombat;
 
 	bool CanTradeFVNoDropItem();
+	void SendMobPositions();
 };
 
 #endif

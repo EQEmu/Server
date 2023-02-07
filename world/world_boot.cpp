@@ -290,15 +290,15 @@ bool WorldBoot::DatabaseLoadRoutines(int argc, char **argv)
 		}
 	}
 
-	if (!ignore_db) {
-		LogInfo("Checking Database Conversions");
-		database.CheckDatabaseConversions();
-	}
-
 	// logging system init
 	auto logging = LogSys.SetDatabase(&database)
 		->SetLogPath(path.GetLogPath())
 		->LoadLogDatabaseSettings();
+
+	if (!ignore_db) {
+		LogInfo("Checking Database Conversions");
+		database.CheckDatabaseConversions();
+	}
 
 	if (RuleB(Logging, WorldGMSayLogging)) {
 		logging->SetGMSayHandler(&WorldBoot::GMSayHookCallBackProcessWorld);

@@ -34,12 +34,10 @@ void command_list(Client *c, const Seperator *sep)
 		std::string search_string;
 
 		if (sep->arg[2]) {
-			search_string = sep->arg[2];
+			search_string = Strings::ToLower(sep->arg[2]);
 		}
 
-		/**
-		 * NPC
-		 */
+		// NPC
 		if (search_type.find("npcs") != std::string::npos) {
 			auto &entity_list_search = entity_list.GetMobList();
 
@@ -51,11 +49,7 @@ void command_list(Client *c, const Seperator *sep)
 
 				entity_count++;
 
-				std::string entity_name = entity->GetName();
-
-				/**
-				 * Filter by name
-				 */
+				std::string entity_name = Strings::ToLower(entity->GetName());
 				if (search_string.length() > 0 && entity_name.find(search_string) == std::string::npos) {
 					continue;
 				}
@@ -81,9 +75,7 @@ void command_list(Client *c, const Seperator *sep)
 			}
 		}
 
-		/**
-		 * Client
-		 */
+		// Client
 		if (search_type.find("players") != std::string::npos) {
 			auto &entity_list_search = entity_list.GetClientList();
 
@@ -92,7 +84,7 @@ void command_list(Client *c, const Seperator *sep)
 
 				entity_count++;
 
-				std::string entity_name = entity->GetName();
+				std::string entity_name = Strings::ToLower(entity->GetName());
 
 				/**
 				 * Filter by name
@@ -122,9 +114,7 @@ void command_list(Client *c, const Seperator *sep)
 			}
 		}
 
-		/**
-		 * Corpse
-		 */
+		// Corpse
 		if (search_type.find("corpses") != std::string::npos) {
 			auto &entity_list_search = entity_list.GetCorpseList();
 
@@ -133,11 +123,7 @@ void command_list(Client *c, const Seperator *sep)
 
 				entity_count++;
 
-				std::string entity_name = entity->GetName();
-
-				/**
-				 * Filter by name
-				 */
+				std::string entity_name = Strings::ToLower(entity->GetName());
 				if (search_string.length() > 0 && entity_name.find(search_string) == std::string::npos) {
 					continue;
 				}
@@ -163,9 +149,7 @@ void command_list(Client *c, const Seperator *sep)
 			}
 		}
 
-		/**
-		 * Doors
-		 */
+		// Doors
 		if (search_type.find("doors") != std::string::npos) {
 			auto &entity_list_search = entity_list.GetDoorsList();
 
@@ -174,11 +158,7 @@ void command_list(Client *c, const Seperator *sep)
 
 				entity_count++;
 
-				std::string entity_name = entity->GetDoorName();
-
-				/**
-				 * Filter by name
-				 */
+				std::string entity_name = Strings::ToLower(entity->GetDoorName());
 				if (search_string.length() > 0 && entity_name.find(search_string) == std::string::npos) {
 					continue;
 				}
@@ -205,9 +185,7 @@ void command_list(Client *c, const Seperator *sep)
 			}
 		}
 
-		/**
-		 * Objects
-		 */
+		// Objects
 		if (search_type.find("objects") != std::string::npos) {
 			auto &entity_list_search = entity_list.GetObjectList();
 
@@ -216,11 +194,7 @@ void command_list(Client *c, const Seperator *sep)
 
 				entity_count++;
 
-				std::string entity_name = entity->GetModelName();
-
-				/**
-				 * Filter by name
-				 */
+				std::string entity_name = Strings::ToLower(entity->GetModelName());
 				if (search_string.length() > 0 && entity_name.find(search_string) == std::string::npos) {
 					continue;
 				}
