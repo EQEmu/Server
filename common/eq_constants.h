@@ -1028,4 +1028,13 @@ enum ZoningMessage : int8
 	ZoneNoExperience = -7
 };
 
+enum class RecipeCountType : uint8
+{
+	Success,
+	Fail,
+	Component,
+	Salvage,
+	Container
+};
+
 #endif /*COMMON_EQ_CONSTANTS_H*/
