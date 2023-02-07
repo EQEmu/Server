@@ -999,7 +999,13 @@ void Mob::AI_Process() {
 				}
 
 				if (door->GetTriggerDoorID() > 0) {
-					continue;
+					auto trigger_door = entity_list.GetDoorsByDoorID(door->GetTriggerDoorID());
+					if (trigger_door) {
+						if (Strings::RemoveNumbers(door->GetDoorName()) !=
+							Strings::RemoveNumbers(trigger_door->GetDoorName())) {
+							continue;
+						}
+					}
 				}
 
 				if (door->GetDoorParam() > 0) {

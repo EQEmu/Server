@@ -778,6 +778,12 @@ void Client::CompleteConnect()
 
 	parse->EventPlayer(EVENT_ENTER_ZONE, this, "", 0);
 
+	// the way that the client deals with positions during the initial spawn struct
+	// is subtly different from how it deals with getting a position update
+	// if a mob is slightly in the wall or slightly clipping a floor they will be
+	// sent to a succor point
+	SendMobPositions();
+
 	SetLastPositionBeforeBulkUpdate(GetPosition());
 
 	/* This sub event is for if a player logs in for the first time since entering world. */
@@ -4379,27 +4385,46 @@ void Client::Handle_OP_ClickDoor(const EQApplicationPacket *app)
 		return;
 	}
 
-	// set door selected
-	if (IsDevToolsEnabled()) {
+	float distance = DistanceNoZ(GetPosition(), currentdoor->GetPosition());
+
+	LogDoors(
+		"Door [{}] client handle, client distance from door [{:.2f}]",
+		currentdoor->GetDoorID(),
+		distance
+	);
+
+	bool within_distance = distance < RuleI(Range, MaxDistanceToClickDoors);
+
+	// distance gate this because some doors are client controlled and the client
+	// will spam door click even across the zone to force a door back into desired state
+	if (IsDevToolsEnabled() && within_distance) {
 		SetDoorToolEntityId(currentdoor->GetEntityID());
 		DoorManipulation::CommandHeader(this);
 		Message(
 			Chat::White,
 			fmt::format(
 				"Door ({}) [{}]",
-				currentdoor->GetEntityID(),
+				currentdoor->GetDoorID(),
 				Saylink::Silent("#door edit")
 			).c_str()
 		);
 	}
 
-	std::string export_string = fmt::format("{}", cd->doorid);
-	std::vector<std::any> args;
-	args.push_back(currentdoor);
-	if (parse->EventPlayer(EVENT_CLICK_DOOR, this, export_string, 0, &args) == 0)
-	{
+	// don't spam scripts with client controlled doors if not within distance
+	if (within_distance) {
+		std::string           export_string = fmt::format("{}", cd->doorid);
+		std::vector<std::any> args;
+		args.push_back(currentdoor);
+		if (parse->EventPlayer(EVENT_CLICK_DOOR, this, export_string, 0, &args) == 0) {
+			currentdoor->HandleClick(this, 0);
+		}
+	}
+	else {
+		// we let this pass because client controlled doors require this to force the linked doors
+		// back into state
 		currentdoor->HandleClick(this, 0);
 	}
+
 }
 
 void Client::Handle_OP_ClickObject(const EQApplicationPacket *app)
@@ -15729,4 +15754,15 @@ bool Client::CanTradeFVNoDropItem()
 	}
 
 	return false;
+}
+
+void Client::SendMobPositions()
+{
+	auto      p  = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
+	auto      *s = (PlayerPositionUpdateServer_Struct *) p->pBuffer;
+	for (auto &m: entity_list.GetMobList()) {
+		m.second->MakeSpawnUpdate(s);
+		QueuePacket(p, false);
+	}
+	safe_delete(p);
 }

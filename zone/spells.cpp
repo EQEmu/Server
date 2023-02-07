@@ -6415,7 +6415,7 @@ void Client::SetItemRecastTimer(int32 spell_id, uint32 inventory_slot)
 	recast_delay = std::max(recast_delay, 0);
 
 	if (recast_delay > 0) {
-		
+
 		if (recast_type != RECAST_TYPE_UNLINKED_ITEM) {
 			GetPTimers().Start((pTimerItemStart + recast_type), static_cast<uint32>(recast_delay));
 			database.UpdateItemRecast(
@@ -6441,14 +6441,14 @@ void Client::SetItemRecastTimer(int32 spell_id, uint32 inventory_slot)
 void Client::DeleteItemRecastTimer(uint32 item_id)
 {
     const auto* d = database.GetItem(item_id);
-    
+
     if (!d) {
         return;
     }
 
     const auto recast_type = d->RecastType != RECAST_TYPE_UNLINKED_ITEM ? d->RecastType : item_id;
     const int timer_id = d->RecastType != RECAST_TYPE_UNLINKED_ITEM ? (pTimerItemStart + recast_type) : (pTimerNegativeItemReuse * item_id);
-    
+
     database.DeleteItemRecast(CharacterID(), recast_type);
     GetPTimers().Clear(&database, timer_id);
 
@@ -7001,4 +7001,18 @@ void Mob::SetHP(int64 hp)
 	}
 
 	current_hp = hp;
+}
+
+void Mob::DrawDebugCoordinateNode(std::string node_name, const glm::vec4 vec)
+{
+	NPC* node = nullptr;
+	for (const auto& n : entity_list.GetNPCList()) {
+		if (n.second->GetCleanName() == node_name) {
+			node = n.second;
+			break;
+		}
+	}
+	if (!node) {
+		node = NPC::SpawnNodeNPC(node_name, "", GetPosition());
+	}
 }
