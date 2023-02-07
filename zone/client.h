@@ -278,6 +278,7 @@ public:
 	bool KeyRingCheck(uint32 item_id);
 	void KeyRingList();
 	virtual bool IsClient() const { return true; }
+	bool IsOfClientBotMerc() const override { return true; }
 	void CompleteConnect();
 	bool TryStacking(EQ::ItemInstance* item, uint8 type = ItemPacketTrade, bool try_worn = true, bool try_cursor = true);
 	void SendTraderPacket(Client* trader, uint32 Unknown72 = 51);
