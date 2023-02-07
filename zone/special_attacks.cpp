@@ -2173,8 +2173,9 @@ int Mob::TryHeadShot(Mob *defender, EQ::skills::SkillType skillInUse)
 		if (HeadShot_Dmg && HeadShot_Level && (defender->GetLevel() <= HeadShot_Level)) {
 			int chance = GetDEX();
 			chance = 100 * chance / (chance + 3500);
-			if (IsClient())
-				chance += CastToClient()->GetHeroicDEX() / 25;
+			if (IsClient() || IsBot()) {
+				chance += GetHeroicDEX() / 25;
+			}
 			chance *= 10;
 			int norm = aabonuses.HSLevel[SBIndex::FINISHING_EFFECT_LEVEL_CHANCE_BONUS];
 			if (norm > 0)
@@ -2204,8 +2205,9 @@ int Mob::TryAssassinate(Mob *defender, EQ::skills::SkillType skillInUse)
 		int chance = GetDEX();
 		if (skillInUse == EQ::skills::SkillBackstab) {
 			chance = 100 * chance / (chance + 3500);
-			if (IsClient())
-				chance += CastToClient()->GetHeroicDEX();
+			if (IsClient() || IsBot()) {
+				chance += GetHeroicDEX();
+			}
 			chance *= 10;
 			int norm = aabonuses.AssassinateLevel[SBIndex::FINISHING_EFFECT_LEVEL_CHANCE_BONUS];
 			if (norm > 0)
