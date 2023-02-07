@@ -153,17 +153,7 @@ bool WorldBoot::LoadDatabaseConnections()
 		}
 	}
 	else {
-		if (!content_db.Connect(
-			c->DatabaseHost.c_str(),
-			c->DatabaseUsername.c_str(),
-			c->DatabasePassword.c_str(),
-			c->DatabaseDB.c_str(),
-			c->DatabasePort,
-			"content"
-		)) {
-			LogError("Cannot continue without a content database connection");
-			return false;
-		}
+		content_db.SetMySQL(database);
 	}
 
 	return true;

@@ -37,6 +37,8 @@ public:
 
 	bool DoesTableExist(std::string table_name);
 
+	void SetMySQL(const DBcore& o) { mysql = o.mysql; mysqlOwner = false; }
+
 protected:
 	bool Open(
 		const char *iHost,
@@ -53,7 +55,8 @@ protected:
 private:
 	bool Open(uint32 *errnum = nullptr, char *errbuf = nullptr);
 
-	MYSQL   mysql;
+	MYSQL*  mysql;
+	bool	mysqlOwner;
 	Mutex   MDatabase;
 	eStatus pStatus;
 
