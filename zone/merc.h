@@ -257,7 +257,7 @@ public:
 
 	void Sit();
 	void Stand();
-	bool IsSitting();
+	bool IsSitting() const override;
 	bool IsStanding();
 
 	// Merc-specific functions

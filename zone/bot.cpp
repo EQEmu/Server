@@ -571,7 +571,7 @@ void Bot::Stand() {
 	SetAppearance(eaStanding);
 }
 
-bool Bot::IsSitting() {
+bool Bot::IsSitting() const {
 	bool result = false;
 	if(GetAppearance() == eaSitting && !IsMoving())
 		result = true;
