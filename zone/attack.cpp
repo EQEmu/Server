@@ -318,7 +318,7 @@ bool Mob::CheckHitChance(Mob* other, DamageHitInfo &hit)
 	Mob *defender = this;
 	Log(Logs::Detail, Logs::Attack, "CheckHitChance(%s) attacked by %s", defender->GetName(), attacker->GetName());
 
-	if ((defender->IsClient() || defender->IsBot() || defender->IsMerc()) && defender->IsSitting()) {
+	if (defender->IsOfClientBotMerc() && defender->IsSitting()) {
 		return true;
 	}
 
@@ -5163,7 +5163,7 @@ void Mob::ApplyMeleeDamageMods(uint16 skill, int64 &damage, Mob *defender, Extra
 		dmgbonusmod += opts->melee_damage_bonus_flat;
 
 	if (defender) {
-		if ((defender->IsClient() || defender->IsBot() || defender->IsMerc()) && defender->GetClass() == WARRIOR) {
+		if (defender->IsOfClientBotMerc() && defender->GetClass() == WARRIOR) {
 			dmgbonusmod -= 5;
 		}
 		// 168 defensive
