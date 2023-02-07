@@ -1,3 +1,81 @@
+## [22.3.0] - 02/06/2023
+
+### Bots
+
+* Add GetAugmentIDsBySlotID & AddItem with table ref Methods. ([#2805](https://github.com/EQEmu/Server/pull/2805)) ([Aeadoin](https://github.com/Aeadoin)) 2023-01-29
+
+### Commands
+
+* #list now searches without case sensitivity ([#2825](https://github.com/EQEmu/Server/pull/2825)) ([Akkadius](https://github.com/Akkadius)) 2023-02-06
+* Remove extraneous else from #weather ([#2819](https://github.com/EQEmu/Server/pull/2819)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-02-01
+
+### Crash
+
+* Fix IsUnderwaterOnly crash where npc data references can be stale ([#2830](https://github.com/EQEmu/Server/pull/2830)) ([Akkadius](https://github.com/Akkadius)) 2023-02-06
+* Fix command crash with #npcedit weapon when second weapon not passed ni ([#2829](https://github.com/EQEmu/Server/pull/2829)) ([Akkadius](https://github.com/Akkadius)) 2023-02-06
+* Fix crash in bot command botdyearmor ([#2832](https://github.com/EQEmu/Server/pull/2832)) ([Akkadius](https://github.com/Akkadius)) 2023-02-06
+
+### DB Updates
+
+* Add Windows MySQL path auto detection for users where the path is not found ([#2836](https://github.com/EQEmu/Server/pull/2836)) ([Akkadius](https://github.com/Akkadius)) 2023-02-06
+
+### Doors
+
+* Have NPCs trigger double doors ([#2821](https://github.com/EQEmu/Server/pull/2821)) ([Akkadius](https://github.com/Akkadius)) 2023-02-06
+* Remove door dev tools spam on client controlled doors ([#2824](https://github.com/EQEmu/Server/pull/2824)) ([Akkadius](https://github.com/Akkadius)) 2023-02-06
+
+### Feature
+
+* Add Min/Max Status to Merchants ([#2806](https://github.com/EQEmu/Server/pull/2806)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-01-29
+
+### Fixes
+
+* #reload aa will now refresh the AA table properly for every client when changes are made ([#2814](https://github.com/EQEmu/Server/pull/2814)) ([Natedog2012](https://github.com/Natedog2012)) 2023-01-31
+* #reload static should now properly fill the entity_lists for… ([#2815](https://github.com/EQEmu/Server/pull/2815)) ([Natedog2012](https://github.com/Natedog2012)) 2023-01-31
+* BuffLevelRestrictions were restricting group buffs if mob targeted ([#2809](https://github.com/EQEmu/Server/pull/2809)) ([noudess](https://github.com/noudess)) 2023-01-29
+* Fix does_augment_fit_slot method. ([#2817](https://github.com/EQEmu/Server/pull/2817)) ([Aeadoin](https://github.com/Aeadoin)) 2023-02-01
+* Fix NPC ghosting at safe coordinates ([#2823](https://github.com/EQEmu/Server/pull/2823)) ([Akkadius](https://github.com/Akkadius)) 2023-02-06
+* Fixing % based mob see invis ([#2802](https://github.com/EQEmu/Server/pull/2802)) ([fryguy503](https://github.com/fryguy503)) 2023-01-29
+* Resolve issue with max buff count being 25 in ROF2. ([#2800](https://github.com/EQEmu/Server/pull/2800)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-01-28
+
+### Hotfix
+
+* Post revert build fix for https://github.com/EQEmu/Server/commit/54050924d81d1f83268fe01f9c2b36fe10626601  ([Akkadius](https://github.com/Akkadius)) 2023-02-01
+
+### Lua
+
+* Resolve stoi Exception ([#2736](https://github.com/EQEmu/Server/pull/2736)) ([Akkadius](https://github.com/Akkadius)) 2023-02-06
+
+### Pathing
+
+* Improvements to handling tight corridors pathing, clipping detection and recovery ([#2826](https://github.com/EQEmu/Server/pull/2826)) ([Akkadius](https://github.com/Akkadius)) 2023-02-06
+
+### Quest API
+
+* Add Augment Slot support to does_augment_fit ([#2813](https://github.com/EQEmu/Server/pull/2813)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-01-31
+* Add EVENT_DAMAGE_GIVEN and EVENT_DAMAGE_TAKEN to Perl/Lua. ([#2804](https://github.com/EQEmu/Server/pull/2804)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-01-29
+* Add EVENT_ITEM_CLICK_CLIENT and EVENT_ITEM_CLICK_CAST_CLIENT to Perl/Lua. ([#2810](https://github.com/EQEmu/Server/pull/2810)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-01-30
+* Add EVENT_TASKACCEPTED to Player scope ([#2822](https://github.com/EQEmu/Server/pull/2822)) ([Valorith](https://github.com/Valorith)) 2023-02-06
+* Add GetItemCooldown to return the time remaining on items… ([#2811](https://github.com/EQEmu/Server/pull/2811)) ([Natedog2012](https://github.com/Natedog2012)) 2023-01-30
+* Add LDoN Methods to Perl/Lua ([#2799](https://github.com/EQEmu/Server/pull/2799)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-01-29
+* Add Override Parameters to ScaleNPC() in Perl/Lua. ([#2816](https://github.com/EQEmu/Server/pull/2816)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-02-01
+* Add rule AlternateAugmentationSealer for using a different bagtype ([#2831](https://github.com/EQEmu/Server/pull/2831)) ([Natedog2012](https://github.com/Natedog2012)) 2023-02-06
+* Default ScaleNPC to always scale. ([#2818](https://github.com/EQEmu/Server/pull/2818)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-02-06
+
+### Readme
+
+* Update build badges with Drone  ([Akkadius](https://github.com/Akkadius)) 2023-01-29
+
+### Rules
+
+* Add rule to ignore name filter on chat channel creation. ([#2820](https://github.com/EQEmu/Server/pull/2820)) ([Valorith](https://github.com/Valorith)) 2023-02-06
+* Added rule to bypass level based haste caps ([#2835](https://github.com/EQEmu/Server/pull/2835)) ([jcr4990](https://github.com/jcr4990)) 2023-02-06
+* Fix rule updates that affected bot booting checks ([#2841](https://github.com/EQEmu/Server/pull/2841)) ([Akkadius](https://github.com/Akkadius)) 2023-02-06
+
+### Tasks
+
+* Implement alternate currency rewards ([#2827](https://github.com/EQEmu/Server/pull/2827)) ([Akkadius](https://github.com/Akkadius)) 2023-02-06
+
 ## [22.2.0] - 01/27/2023
 
 ### Bots
