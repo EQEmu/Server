@@ -3688,7 +3688,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 		DamageShield(attacker);
 	}
 
-	if (spell_id == SPELL_UNKNOWN && skill_used) {
+	if (spell_id == SPELL_UNKNOWN && skill_used >= EQ::skills::Skill1HBlunt) {
 		CheckNumHitsRemaining(NumHit::IncomingHitAttempts);
 
 		if (attacker)
