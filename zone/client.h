@@ -1683,7 +1683,6 @@ protected:
 	void CalcItemBonuses(StatBonuses* newbon);
 	void AddItemBonuses(const EQ::ItemInstance *inst, StatBonuses* newbon, bool isAug = false, bool isTribute = false, int rec_override = 0, bool ammo_slot_item = false);
 	void AdditiveWornBonuses(const EQ::ItemInstance *inst, StatBonuses* newbon, bool isAug = false);
-	int CalcRecommendedLevelBonus(uint8 level, uint8 reclevel, int basestat);
 	void CalcEdibleBonuses(StatBonuses* newbon);
 	void ProcessItemCaps();
 	void MakeBuffFadePacket(uint16 spell_id, int slot_id, bool send_message = true);
