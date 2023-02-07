@@ -122,7 +122,7 @@ public:
 	bool HasOrMayGetAggro();
 	bool UseDiscipline(int32 spell_id, int32 target);
 
-	virtual bool IsMerc() const { return true; }
+	bool IsMerc() const override { return true; }
 	bool IsOfClientBotMerc() const override { return true; }
 
 	virtual void FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho);
