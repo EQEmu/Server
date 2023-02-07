@@ -1025,7 +1025,7 @@ void EntityList::AESpell(
 			continue;
 		}
 
-		if (spells[spell_id].target_type == ST_AreaClientOnly && !current_mob->IsClient()) {
+		if (spells[spell_id].target_type == ST_AreaClientOnly && !current_mob->IsOfClientBot()) {
 			continue;
 		}
 
@@ -1038,13 +1038,11 @@ void EntityList::AESpell(
 		 * 1 = PC
 		 * 2 = NPC
 		 */
-		if (spells[spell_id].pcnpc_only_flag == 1 && !current_mob->IsClient() && !current_mob->IsMerc() &&
-		    !current_mob->IsBot()) {
+		if (spells[spell_id].pcnpc_only_flag == 1 && !current_mob->IsOfClientBotMerc()) {
 			continue;
 		}
 
-		if (spells[spell_id].pcnpc_only_flag == 2 &&
-		    (current_mob->IsClient() || current_mob->IsMerc() || current_mob->IsBot())) {
+		if (spells[spell_id].pcnpc_only_flag == 2 && current_mob->IsOfClientBotMerc()) {
 			continue;
 		}
 
@@ -1185,7 +1183,7 @@ void EntityList::MassGroupBuff(
 		if (current_mob->IsNPC()) {
 			Mob *owner = current_mob->GetOwner();
 			if (owner) {
-				if (!owner->IsClient()) {
+				if (!owner->IsOfClientBot()) {
 					continue;
 				}
 			}
