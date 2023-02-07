@@ -3993,6 +3993,8 @@ perl::array Perl__GetRecipeComponentItemIDs(uint32 recipe_id)
 	const auto& l = content_db.GetRecipeComponentItemIDs(RecipeCountType::Component, recipe_id);
 
 	if (!l.empty()) {
+		result.reserve(l.size());
+
 		for (int i = 0; i < l.size(); i++) {
 			result.push_back(l[i]);
 		}
@@ -4008,6 +4010,8 @@ perl::array Perl__GetRecipeContainerItemIDs(uint32 recipe_id)
 	const auto& l = content_db.GetRecipeComponentItemIDs(RecipeCountType::Container, recipe_id);
 
 	if (!l.empty()) {
+		result.reserve(l.size());
+
 		for (int i = 0; i < l.size(); i++) {
 			result.push_back(l[i]);
 		}
@@ -4023,6 +4027,8 @@ perl::array Perl__GetRecipeFailItemIDs(uint32 recipe_id)
 	const auto &l = content_db.GetRecipeComponentItemIDs(RecipeCountType::Fail, recipe_id);
 
 	if (!l.empty()) {
+		result.reserve(l.size());
+
 		for (int i = 0; i < l.size(); i++) {
 			result.push_back(l[i]);
 		}
@@ -4038,6 +4044,8 @@ perl::array Perl__GetRecipeSalvageItemIDs(uint32 recipe_id)
 	const auto& l = content_db.GetRecipeComponentItemIDs(RecipeCountType::Salvage, recipe_id);
 
 	if (!l.empty()) {
+		result.reserve(l.size());
+
 		for (int i = 0; i < l.size(); i++) {
 			result.push_back(l[i]);
 		}
@@ -4053,6 +4061,8 @@ perl::array Perl__GetRecipeSuccessItemIDs(uint32 recipe_id)
 	const auto& l = content_db.GetRecipeComponentItemIDs(RecipeCountType::Success, recipe_id);
 
 	if (!l.empty()) {
+		result.reserve(l.size());
+
 		for (int i = 0; i < l.size(); i++) {
 			result.push_back(l[i]);
 		}
