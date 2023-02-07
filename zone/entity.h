@@ -81,6 +81,7 @@ public:
 	virtual bool IsEncounter()		    const { return false; }
 	virtual bool IsBot()                const { return false; }
 	virtual bool IsAura()			    const { return false; }
+	virtual bool IsOfClientBot()        const { return false; }
 	virtual bool IsOfClientBotMerc()    const { return false; }
 
 	virtual bool Process() { return false; }
