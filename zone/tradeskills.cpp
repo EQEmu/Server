@@ -1682,7 +1682,7 @@ std::vector<uint32> ZoneDatabase::GetRecipeComponentItemIDs(RecipeCountType coun
 	return l;
 }
 
-uint8 ZoneDatabase::GetRecipeComponentCount(RecipeCountType count_type, uint32 recipe_id, uint32 item_id)
+int8 ZoneDatabase::GetRecipeComponentCount(RecipeCountType count_type, uint32 recipe_id, uint32 item_id)
 {
 	const auto& tr = TradeskillRecipeRepository::FindOne(content_db, recipe_id);
 	if (!tr.id) {
