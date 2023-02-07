@@ -67,20 +67,21 @@ public:
 	Entity();
 	virtual ~Entity();
 
-	virtual bool IsClient()			const { return false; }
-	virtual bool IsNPC()			const { return false; }
-	virtual bool IsMob()			const { return false; }
-	virtual bool IsMerc()			const { return false; }
-	virtual bool IsCorpse()			const { return false; }
-	virtual bool IsPlayerCorpse()	const { return false; }
-	virtual bool IsNPCCorpse()		const { return false; }
-	virtual bool IsObject()			const { return false; }
-	virtual bool IsDoor()			const { return false; }
-	virtual bool IsTrap()			const { return false; }
-	virtual bool IsBeacon()			const { return false; }
-	virtual bool IsEncounter()		const { return false; }
-	virtual bool IsBot()            const { return false; }
-	virtual bool IsAura()			const { return false; }
+	virtual bool IsClient()			    const { return false; }
+	virtual bool IsNPC()			    const { return false; }
+	virtual bool IsMob()			    const { return false; }
+	virtual bool IsMerc()			    const { return false; }
+	virtual bool IsCorpse()			    const { return false; }
+	virtual bool IsPlayerCorpse()	    const { return false; }
+	virtual bool IsNPCCorpse()		    const { return false; }
+	virtual bool IsObject()			    const { return false; }
+	virtual bool IsDoor()			    const { return false; }
+	virtual bool IsTrap()			    const { return false; }
+	virtual bool IsBeacon()			    const { return false; }
+	virtual bool IsEncounter()		    const { return false; }
+	virtual bool IsBot()                const { return false; }
+	virtual bool IsAura()			    const { return false; }
+	virtual bool IsOfClientBotMerc()    const { return false; }
 
 	virtual bool Process() { return false; }
 	virtual bool Save() { return true; }

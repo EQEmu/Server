@@ -123,6 +123,7 @@ public:
 	bool UseDiscipline(int32 spell_id, int32 target);
 
 	virtual bool IsMerc() const { return true; }
+	bool IsOfClientBotMerc() const override { return true; }
 
 	virtual void FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho);
 	static Merc* LoadMerc(Client *c, MercTemplate* merc_template, uint32 merchant_id, bool updateFromDB = false);
