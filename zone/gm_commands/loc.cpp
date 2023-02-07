@@ -29,6 +29,7 @@ void command_loc(Client *c, const Seperator *sep)
 		glm::vec3 hit;
 
 		auto best_z = zone->zonemap->FindBestZ(tarloc, &hit);
+		auto fixed_z = c->GetFixedZ(c->GetPosition());
 
 		if (best_z != BEST_Z_INVALID) {
 			c->Message(
@@ -37,6 +38,14 @@ void command_loc(Client *c, const Seperator *sep)
 					"Best Z for {} | {:.2f}",
 					c->GetTargetDescription(target, TargetDescriptionType::UCSelf),
 					best_z
+				).c_str()
+			);
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"Fixed Z for {} | {:.2f}",
+					c->GetTargetDescription(target, TargetDescriptionType::UCSelf),
+					fixed_z
 				).c_str()
 			);
 		} else {

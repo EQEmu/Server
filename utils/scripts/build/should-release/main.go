@@ -10,6 +10,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 )
@@ -57,6 +58,29 @@ func main() {
 			// path/to/whatever exists
 			packageJsonFile = walkUpToRoot
 		}
+	}
+
+	out, err := exec.Command("git", "rev-parse", "--abbrev-ref", "HEAD").Output()
+	if err != nil {
+		log.Fatal(err)
+	}
+	currentBranch := strings.TrimSpace(string(out))
+	if currentBranch != "master" {
+		fmt.Printf("Not on master, no need to release\n")
+		fmt.Printf("Exiting code 78 to halt pipeline steps gracefully\n")
+		os.Exit(78)
+	}
+
+	if len(os.Getenv("RCLONE_FTP_PASS")) == 0 {
+		fmt.Printf("Missing RCLONE_FTP_PASS no need to deploy\n")
+		fmt.Printf("Exiting code 78 to halt pipeline steps gracefully\n")
+		os.Exit(78)
+	}
+
+	if len(os.Getenv("GH_RELEASE_GITHUB_API_TOKEN")) == 0 {
+		fmt.Printf("Missing GH_RELEASE_GITHUB_API_TOKEN no need to deploy\n")
+		fmt.Printf("Exiting code 78 to halt pipeline steps gracefully\n")
+		os.Exit(78)
 	}
 
 	if len(packageJsonFile) == 0 {

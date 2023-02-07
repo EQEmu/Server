@@ -1199,6 +1199,25 @@ sub get_mysql_path
                 }
             }
         }
+        if ($path eq "") {
+            my @files;
+            my $start_dir = trim(`echo %programfiles%`);
+            find(
+                sub {
+                    if ($#files > 0) {
+                        return;
+                    }
+                    push @files, $File::Find::name unless $File::Find::name!~/mysql.exe/i;
+                },
+                $start_dir
+            );
+            for my $file (@files) {
+                if ($file=~/mysql.exe/i) {
+                    $path = $file;
+                    last;
+                }
+            }
+        }
     }
     if ($OS eq "Linux") {
         $path = `which mysql`;

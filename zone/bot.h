@@ -219,7 +219,7 @@ public:
 	void ChangeBotArcherWeapons(bool isArcher);
 	void Sit();
 	void Stand();
-	bool IsSitting();
+	bool IsSitting() const override;
 	bool IsStanding();
 	int GetWalkspeed() const override { return (int)((float)_GetWalkSpeed() * 1.785714285f); } // 1.25 / 0.7 = 1.7857142857142857142857142857143
 	int GetRunspeed() const override { return (int)((float)_GetRunSpeed() * 1.785714285f); }
@@ -472,6 +472,9 @@ public:
 	bool IsBotArcher() { return m_bot_archery_setting; }
 	bool IsBotCharmer() { return _botCharmer; }
 	bool IsBot() const override { return true; }
+	bool IsOfClientBot() const override { return true; }
+	bool IsOfClientBotMerc() const override { return true; }
+
 	bool GetRangerAutoWeaponSelect() { return _rangerAutoWeaponSelect; }
 	BotRoleType GetBotRole() { return _botRole; }
 	EQ::constants::StanceType GetBotStance() { return _botStance; }

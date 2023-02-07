@@ -1028,4 +1028,7 @@ enum ZoningMessage : int8
 	ZoneNoExperience = -7
 };
 
+#define ALT_CURRENCY_ID_RADIANT 4
+#define ALT_CURRENCY_ID_EBON 5
+
 #endif /*COMMON_EQ_CONSTANTS_H*/

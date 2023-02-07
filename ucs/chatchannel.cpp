@@ -78,7 +78,7 @@ ChatChannel *ChatChannelList::CreateChannel(
 {
 	uint8 max_perm_player_channels = RuleI(Chat, MaxPermanentPlayerChannels);
 
-	if (!database.CheckChannelNameFilter(name)) {
+	if (!RuleB(Chat, ChannelsIgnoreNameFilter) && !database.CheckChannelNameFilter(name)) {
 		if (!(owner == SYSTEM_OWNER)) {
 			return nullptr;
 		}

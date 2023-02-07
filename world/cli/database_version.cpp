@@ -1,5 +1,6 @@
 #include "../../common/version.h"
 #include "../../common/json/json.h"
+#include "../../common/rulesys.h"
 
 void WorldserverCLI::DatabaseVersion(int argc, char **argv, argh::parser &cmd, std::string &description)
 {
@@ -9,13 +10,13 @@ void WorldserverCLI::DatabaseVersion(int argc, char **argv, argh::parser &cmd, s
 		return;
 	}
 
-	Json::Value database_version;
+	Json::Value v;
 
-	database_version["database_version"]      = CURRENT_BINARY_DATABASE_VERSION;
-	database_version["bots_database_version"] = CURRENT_BINARY_BOTS_DATABASE_VERSION;
+	v["database_version"]      = CURRENT_BINARY_DATABASE_VERSION;
+	v["bots_database_version"] = RuleB(Bots, Enabled) ? CURRENT_BINARY_BOTS_DATABASE_VERSION : 0;
 
 	std::stringstream payload;
-	payload << database_version;
+	payload << v;
 
 	std::cout << payload.str() << std::endl;
 }

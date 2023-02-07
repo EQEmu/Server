@@ -385,7 +385,16 @@ void RuleManager::_SaveRule(Database *db, RuleType type, uint16 index) {
 		e.rule_value = rule_value;
 		e.notes      = rule_notes;
 
-		RuleValuesRepository::UpdateOne(*db, e);
+		db->QueryDatabase(
+			fmt::format(
+				"UPDATE rule_values SET rule_value = '{}', notes = '{}' WHERE ruleset_id = {} AND rule_name = '{}'",
+				rule_value,
+				Strings::Escape(rule_notes),
+				e.ruleset_id,
+				e.rule_name
+			)
+		);
+
 		return;
 	}
 

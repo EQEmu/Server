@@ -4292,7 +4292,7 @@ void Merc::Stand() {
 	SetAppearance(eaStanding);
 }
 
-bool Merc::IsSitting() {
+bool Merc::IsSitting() const {
 	bool result = false;
 
 	if(GetAppearance() == eaSitting && !IsMoving())
