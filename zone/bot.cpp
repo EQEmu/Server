@@ -2640,7 +2640,6 @@ void Bot::AI_Process()
 				InterruptSpell();
 				WipeHateList();
 				AddToHateList(attack_target, 1);
-//				GetBotOwner()->AddToHateList(attack_target, 1);
 				SetTarget(attack_target);
 				SetAttackingFlag();
 				if (HasPet() && (GetClass() != ENCHANTER || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 2)) {
@@ -4048,7 +4047,7 @@ bool Bot::Spawn(Client* botCharacterOwner) {
 		if (raid)
 		{
 			raid->VerifyRaid();
-			this->SetRaidGrouped(true);
+			SetRaidGrouped(true);
 		}
 		return true;
 	}
@@ -5305,7 +5304,7 @@ Raid* raid = entity_list.GetRaidByBotName(this->GetName());
  
 		for (int x = 0; x < MAX_RAID_MEMBERS; x++)
 		{
-			if (strcmp(raid->members[x].membername, this->GetName()) == 0) 
+			if (strcmp(raid->members[x].membername, GetName()) == 0) 
 			{
 				raid->members[x].member = nullptr;
 			}
@@ -6633,8 +6632,7 @@ bool Bot::DoFinishedSpellGroupTarget(uint16 spell_id, Mob* spellTarget, EQ::spel
 	}
 	else if (raid) 
 	{
-		//for (auto& iter : raid->GetRaidGroupMembers(raid->GetGroup(this->GetName()))) {
-		std::vector<RaidMember> raid_group_members = raid->GetRaidGroupMembers(raid->GetGroup(this->GetName()));
+		std::vector<RaidMember> raid_group_members = raid->GetRaidGroupMembers(raid->GetGroup(GetName()));
 		for (std::vector<RaidMember>::iterator iter = raid_group_members.begin(); iter != raid_group_members.end(); ++iter) {
 			if (iter->member) {
 				SpellOnTarget(spell_id, iter->member);
@@ -7338,9 +7336,9 @@ void Bot::Camp(bool save_to_database) {
 }
 
 void Bot::Zone() {
-	Raid* raid = entity_list.GetRaidByBotName(this->GetName());
+	Raid* raid = entity_list.GetRaidByBotName(GetName());
 	if (raid) {
-		raid->MemberZoned(this->CastToClient());
+		raid->MemberZoned(CastToClient());
 	}
 	else if (HasGroup()) {
 		GetGroup()->MemberZoned(this);

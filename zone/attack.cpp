@@ -4315,18 +4315,6 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 				spells[spell_id].name /* Message4 */
 			);
 		}
-		//// If a bot is the attacker, send a damage message to the Bot Owner
-		//else if (attacker->IsBot() && attacker->GetTarget() && spell_id != SPELL_UNKNOWN && damage > 0 && !Critical && attacker && attacker != this && RuleB(Bots, DisplaySpellDamage)) {
-		//	attacker->CastToBot()->GetBotOwner()->FilteredMessageString(
-		//		attacker->CastToBot()->GetBotOwner(),
-		//		Chat::DotDamage,
-		//		FilterDOT,
-		//		OTHER_HIT_DOT,
-		//		attacker->GetTarget()->GetCleanName(),
-		//		itoa(damage),
-		//		attacker->GetCleanName(),
-		//		spells[spell_id].name);
-		//}
 	}
 
 } //end packet sending
