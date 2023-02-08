@@ -26,10 +26,11 @@ bool Client::Process()
 {
 	EQApplicationPacket *app = m_connection->PopPacket();
 	while (app) {
+		auto o = m_connection->GetOpcodeManager();
 		LogPacketClientServer(
 			"[{}] [{:#06x}] Size [{}] {}",
 			OpcodeManager::EmuToName(app->GetOpcode()),
-			m_connection->GetOpcodeManager()->EmuToEQ(app->GetOpcode()),
+			o->EmuToEQ(app->GetOpcode()) == 0 ? app->GetProtocolOpcode() : o->EmuToEQ(app->GetOpcode()),
 			app->Size(),
 			(LogSys.IsLogEnabled(Logs::Detail, Logs::PacketClientServer) ? DumpPacketToString(app) : "")
 		);
