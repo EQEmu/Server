@@ -1,0 +1,490 @@
+std::string db_manifest = R"(
+5001|1_task_system.sql|SHOW TABLES LIKE 'tasks'|empty|
+# 5002|2_optional_maxclients.sql
+# 5003|14_optional_merchantlist.sql
+5004|35_task_stepped.sql|SHOW COLUMNS FROM `tasks` LIKE 'stepped'|not_empty|
+5005|42_task_min_maxlevel.sql|SHOW COLUMNS FROM `tasks` LIKE 'minlevel'|empty|
+5006|55_zone_shutdowndeleay.sql|SHOW COLUMNS FROM `zone` LIKE 'shutdowndelay'|empty|
+# 5007|68_optional_character_maxexplevel.sql
+# 5008|103_optional_chat_rules.sql
+5009|104_traps.sql|SHOW COLUMNS FROM `traps` LIKE 'respawn_time'|empty|
+# 5010|106_optional_proc_rules.sql
+5011|120_damageshieldtypes.sql|SHOW TABLES LIKE 'damageshieldtypes'|empty|
+# 5012|125_aggrozone.sql
+# 5013|127_optional_spell_rules.sql
+# 5014|129_optional_shared_plat_rule.sql
+# 5015|131_optional_combat_rules.sql
+5016|133_task_repeatable.sql|SHOW COLUMNS FROM `tasks` LIKE 'repeatable'|empty|
+5017|142_deathpeace_and_lifetap_aas.sql|SELECT * FROM db_version WHERE version > 5016|empty|
+# 5018|158_optional_death_exp_loss.sql
+# 5019|176_melody.sql
+5020|189_character_.sql|SELECT * FROM db_version WHERE version >= 5020|empty|
+5021|196_trader.sql|SHOW TABLES LIKE 'trader'|empty|
+# 5022|210_undyeme.sql
+5023|222_buyer.sql|SHOW TABLES LIKE 'buyer'|empty|
+# 5024|226_account_limiting.sql
+5025|230_spells_table.sql|SHOW TABLES LIKE 'spells_new'|empty|
+5026|235_horses_table.sql|SHOW TABLES LIKE 'horses'|empty|
+5027|243_spawn_timers.sql|SHOW TABLES LIKE 'respawn_times'|empty|
+5028|247_mail.sql|SHOW TABLES LIKE 'mail'|empty|
+5029|249_chatchannels.sql|SHOW TABLES LIKE 'chatchannels'|empty|
+# 5030|250_bot_spell_update.sql
+# 5031|250_optional_bot_spell_update.sql
+# 5032|285_optional_bot_spell_update.sql
+# 5033|292_augslots.sql|SELECT * FROM db_version WHERE version >= 5033|empty|
+5034|294_merchant_logging.sql|SHOW COLUMNS FROM `eventlog` LIKE 'event_nid'|empty|
+5035|304_faction_list.sql|SELECT * FROM db_version WHERE version >= 5035|empty|
+5036|326_aas.sql|SELECT * FROM db_version WHERE version > 5035|empty|
+# 5037|328_bot_management.sql
+# 5038|328_optional_bot_management.sql
+5039|340_gm_ips.sql|SHOW TABLES LIKE 'gm_ips'|empty|
+# 5040|356_combat.sql
+# 5041|360_peqzone.sql
+# 5042|364_ranged_dist_rule.sql
+# 5043|386_bot_save_raid.sql
+# 5044|434_optional_rest_state_rules.sql
+# 5045|447_sof_startzone_rule.sql
+# 5046|463_altadv_vars.sql
+# 5047|475_aa_actions.sql
+5048|500_spawn2_optimization.sql|SELECT * FROM db_version WHERE version >= 5048|empty|
+5049|503_bugs.sql|SHOW TABLES LIKE 'bugs'|empty|
+5050|518_drakkin_npc_type_features.sql|SHOW TABLES LIKE 'bugs'|empty|
+5051|524_rule_values_notes.sql|SELECT * FROM db_version WHERE version >= 5051|empty|
+5052|527_npc_armor_tint.sql|SELECT * FROM db_version WHERE version >= 5052|empty|
+5053|553_saylink_table.sql|SHOW TABLES LIKE 'saylink'|empty|
+5054|564_nokeyring.sql|SHOW COLUMNS FROM `doors` LIKE 'nokeyring'|empty|
+5055|600_group_leadership.sql|SELECT * FROM db_version WHERE version >= 5055|empty|
+5056|612_instance_changes.sql|SELECT * FROM db_version WHERE version >= 5056|empty|
+5057|615_adventure_assassination.sql|SELECT * FROM db_version WHERE version >= 5057|empty|
+5058|619_Adventure_Recruiter_Flavor.sql|SELECT * FROM db_version WHERE version >= 5058|empty|
+5059|621_LDoNTraps.sql|SHOW TABLES LIKE 'ldon_trap_templates'|empty|
+5060|633_ucs.sql|SHOW TABLES LIKE 'friends'|empty|
+5061|634_TrapTemplateDefaultValue.sql|SHOW COLUMNS FROM `npc_types` LIKE 'trap_template'|empty|
+# 5062|643_BotsTable.sql
+# 5063|646_archery_penalty_rule.sql
+5064|665_heroic_resists.sql|SELECT * FROM db_version WHERE version >= 5064|empty|
+5065|667_titles.sql|SHOW TABLES LIKE 'titles'|empty|
+5066|687_aa_table_changes.sql|SELECT * FROM db_version WHERE version >= 5066|empty|
+# 5067|699_peqzone_rule.sql
+5068|702_aashieldblock_tint_table.sql|SHOW TABLES LIKE 'npc_types_tint'|empty|
+# 5069|703_peqzone_rule.sql
+# 5070|704_rules.sql
+5071|710_tint_set_naming.sql|SELECT * FROM db_version WHERE version >= 5071|empty|
+5072|721_pathing_rules.sql|SELECT * FROM db_version WHERE version >= 5072|empty|
+# 5073|730_smart_delay_moving.sql
+# 5074|731_rule_assist_notarget_self.sql
+# 5075|732_sacrifice_rules.sql
+5076|745_slow_mitigation.sql|SELECT * FROM db_version WHERE version >= 5076|empty|
+# 5077|754_archery_base_damage_rule.sql
+5078|755_sof_altadv_vars_updates.sql|SELECT * FROM db_version WHERE version >= 5078|empty|
+# 5079|773_monk_rules.sql
+# 5080|853_optional_rule_aaexp.sql
+# 5081|858_optional_rule_ip_limit_by_status.sql
+# 5082|892_optional_bots_table_mod.sql
+# 5083|893_optional_bots_table_mod.sql
+5084|898_npc_maxlevel_scalerate.sql|SHOW COLUMNS FROM `npc_types` LIKE 'maxlevel'|empty|
+# 5085|902_optional_rule_snareflee.sql
+5086|923_spawn2_enabled.sql|SHOW COLUMNS FROM `spawn2` LIKE 'enabled'|empty|
+5087|962_hot_zone.sql|SHOW COLUMNS FROM `zone` LIKE 'hotzone'|empty|
+5088|964_reports.sql|SHOW TABLES LIKE 'reports'|empty|
+5089|971_veteran_rewards.sql|SHOW TABLES LIKE 'veteran_reward_templates'|empty|
+5090|977_raid_npc_private_corpses.sql|SELECT * FROM db_version WHERE version >= 5090|empty|
+5091|979_unique_spawn_by_name.sql|SHOW COLUMNS FROM `npc_types` LIKE 'unique_spawn_by_name'|empty|
+5092|980_account_ip.sql|SHOW TABLES LIKE 'account_ip'|empty|
+# 5093|1022_botadventuring.sql
+# 5094|1027_botactives.sql
+# 5095|1030_botzoningsupport.sql
+# 5096|1036_botbuffs.sql
+# 5097|1038_botpetstatepersists.sql
+5098|1038_grouptablesuniquecolumndefinitions.sql|SELECT * FROM db_version WHERE version >= 5098|empty|
+# 5099|1039_botguilds.sql
+# 5100|1040_DeprecatedBotRaidsSystems.sql
+5101|1057_titles.sql|SHOW TABLES LIKE 'player_titlesets'|empty|
+# 5102|1077_botgroups.sql
+5103|1136_spell_globals.sql|SHOW TABLES LIKE 'spell_globals'|empty|
+# 5104|1144_optional_rule_return_nodrop.sql
+5105|1195_account_suspendeduntil.sql|SELECT * FROM db_version WHERE version >= 5105|empty|
+5106|1259_npc_skill_types.sql|SHOW COLUMNS FROM `npc_types` LIKE 'prim_melee_type'|empty|
+# 5107|1280_bot_augs.sql
+# 5108|1290_optional_exp_loss_rule.sql
+5109|1293_guild_bank.sql|SHOW TABLES LIKE 'guild_bank'|empty|
+# 5110|1379_loginserver_trusted_server.sql
+5111|1392_recipe_learning.sql|SELECT * FROM db_version WHERE version >= 5111|empty|
+# 5112|1394_optional_rule_sod_hp_mana_end.sql
+5113|1404_faction_list.sql|SELECT * FROM db_version WHERE version >= 5113|empty|
+# 5114|1410_optional_sod_aas_ht_and_loh.sql
+# 5115|1436_login_server_table_fix.sql
+# 5116|1446_allowrest_optional.sql
+5117|1446_allowrest_required.sql|SELECT * FROM db_version WHERE version >= 5117|empty|
+# 5118|1450_cvs.sql
+5119|1451_guilds.sql|SELECT * FROM db_version WHERE version >= 5119|empty|
+5120|1498_instance_adventure.sql|SELECT * FROM db_version WHERE version >= 5120|empty|
+5121|1510_global_instances.sql|SELECT * FROM db_version WHERE version >= 5121|empty|
+5122|1511_map_path_loading.sql|SHOW COLUMNS FROM `zone` LIKE 'map_file_name'|empty|
+5123|1513_zone_points.sql|SELECT * FROM db_version WHERE version >= 5123|empty|
+5124|1519_zone_primary_key_id.sql|SELECT * FROM db_version WHERE version >= 5124|empty|
+5125|1542_items_table_cleanup.sql|SELECT * FROM db_version WHERE version >= 5125|empty|
+5126|1548_nimbuseffect_required.sql|SELECT * FROM db_version WHERE version >= 5126|empty|
+5127|1562_instanced_spawnconditions.sql|SHOW TABLES LIKE 'spawn_condition_values'|empty|
+# 5128|1586_waypoints_optional.sql
+5129|1610_tradeskill_required.sql|SELECT * FROM db_version WHERE version >= 5129|empty|
+5130|1618_zone.sql|SELECT * FROM db_version WHERE version >= 5130|empty|
+# 5131|1625_optional_rule_class_race_exp_bonus.sql
+# 5132|1672_optional_rules_respawn_window.sql
+# 5133|1679_optional_rules_blocked_buffs.sql
+5134|1696_modify_zone_and_object_tables.sql|SELECT * FROM db_version WHERE version >= 5134|empty|
+5135|1711_account_restricted_aa.sql|SHOW COLUMNS FROM `account` LIKE 'time_creation'|empty|
+# 5136|1717_optional_rule_bash_stun_chance.sql
+# 5137|1718_optional_rules_mod3s.sql
+# 5138|1719_optional_triggerOnCastAAs.sql
+# 5139|1720_optional_sql_AAs.sql
+# 5140|1720_required_sql_AA_effects_update.sql
+# 5141|1721_optional_sql_drakkin_breath_update.sql
+# 5142|1721_required_sql_altadv_vars_update.sql
+# 5143|1723_optional_sql_new_stats_window_rule.sql
+5144|1723_required_sql_corruption.sql|SELECT * FROM db_version WHERE version >= 5144|empty|
+# 5145|1736_optional_sql_feral_swipe.sql
+# 5146|1737_required_sql_rule_and_aa_update.sql
+# 5147|1746_optional_sql_bot_manaregen.sql
+# 5148|1747_optional_HoT_zone_and_zonepoints.sql
+# 5149|1750_optional_sql_reflect_rule.sql
+# 5150|1753_optional_haste_cap_rule.sql
+# 5151|1753_required_sql_healing_adept_aa.sql
+# 5152|1754_required_sql_healing_adept_aa_fix.sql
+# 5153|1755_required_sql_fear_resist_aas.sql
+# 5154|1784_optional_corpsedrag_rules.sql
+# 5155|1786_required_update_to_aas.sql
+# 5156|1790_required_aa_required_level_cost.sql
+5157|1793_resist_adjust.sql|SHOW COLUMNS FROM `npc_spells_entries` LIKE 'resist_adjust'|empty|
+# 5158|1799_optional_rest_regen_endurance_rule.sql
+5159|1802_required_doppelganger.sql|SELECT * FROM db_version WHERE version >= 5159|empty|
+5160|1803_required_tasks_xpreward_signed.sql|SELECT * FROM db_version WHERE version >= 5160|empty|
+5161|1804_required_ae_melee_updates.sql|SELECT * FROM db_version WHERE version >= 5161|empty|
+# 5162|1809_optional_rules.sql
+5163|1813_required_doppelganger_npcid_change.sql|SELECT * FROM db_version WHERE version >= 5163|empty|
+# 5164|1817_optional_npc_archery_bonus_rule.sql
+# 5165|1823_optional_delay_death.sql
+5166|1847_required_doors_dest_zone_size_32.sql|SELECT * FROM db_version WHERE version >= 5166|empty|
+# 5167|1859_optional_item_casts_use_focus_rule.sql
+# 5168|1884_optional_bot_spells_update.sql
+# 5169|1885_optional_rules_fv_pvp_expansions.sql
+# 5170|1889_optional_skill_cap_rule.sql
+5171|1908_required_npc_types_definitions.sql|SHOW COLUMNS FROM `npc_types` LIKE 'attack_count'|empty|
+# 5172|1926_optional_stat_cap.sql
+5173|1944_spawn2.sql|SHOW COLUMNS FROM `spawn2` LIKE 'animation'|empty|
+5174|1946_doors.sql|SELECT * FROM db_version WHERE version >= 5166|empty|
+# 5175|1960_optional_console_timeout_rule.sql
+# 5176|1962_optional_guild_creation_window_rules.sql
+# 5177|1963_optional_rule_live_like_focuses.sql
+# 5178|1968_optional_enrage_rules.sql
+# 5179|1972_optional_extradmg_item_cap.sql
+# 5180|1974_required_bot_spells_update.sql
+5181|1977_underwater.sql|SHOW COLUMNS FROM `npc_types` LIKE 'underwater'|empty|
+# 5182|1998_optional_intoxication_and_looting_rules.sql
+5183|2004_charges_alt_currency.sql|SHOW TABLES LIKE 'alternate_currency'|empty|
+# 5184|2015_optional_specialization_training_rule.sql
+# 5185|2016_optional_rule_bot_aa_expansion.sql
+# 5186|2023_optional_mysqlcli.sql
+# 5187|2024_optional_update_crystals.sql
+5188|2024_required_update.sql|SHOW TABLES LIKE 'char_create_combinations'|empty|
+5189|2057_required_discovered_items.sql|SHOW TABLES LIKE 'discovered_items'|empty|
+# 5190|2058_optional_rule_discovered_items.sql
+5191|2062_required_version_changes.sql|SELECT * FROM db_version WHERE version >= 5191|empty|
+5192|2069_required_pets.sql|SHOW TABLES LIKE 'pets_equipmentset'|empty|
+# 5193|2079_player_speech.sql
+# 5194|2087_required_bots_hp_and_mana_and_spell_updates.sql
+5195|2098_required_zonepoint_version_changes.sql|SELECT * FROM db_version WHERE version >= 5195|empty|
+5196|2099_required_discovered_items_account_status.sql|SELECT * FROM db_version WHERE version >= 5196|empty|
+5197|2104_required_group_roles.sql|SELECT * FROM db_version WHERE version >= 5197|empty|
+# 5198|2107_required_bot_stances.sql
+5199|2129_required_lfguild.sql|SHOW TABLES LIKE 'lfguild'|empty|
+5200|2133_required_faction_loot_despawn.sql|SELECT * FROM db_version WHERE version >= 5200|empty|
+5201|2136_extended_targets.sql|SELECT * FROM db_version WHERE version >= 5201|empty|
+5202|2142_emotes.sql|SELECT * FROM db_version WHERE version >= 5202|empty|
+# 5203|2154_optional_rule_spell_procs_resists_falloff.sql
+# 5204|2156_optional_charm_break_rule.sql
+# 5205|2159_optional_defensiveproc_rules.sql
+# 5206|2164_require_bots_bottimers.sql
+# 5207|2171_optional_SpecialAttackACBonus_rule.sql
+# 5208|2176_optional_aa_expansion_SOF_fix.sql
+# 5209|2176_optional_FrenzyBonus_rule.sql
+5210|2176_required_aa_updates.sql|SELECT * FROM db_version WHERE version >= 5210|empty|
+5211|2178_required_aa_updates.sql|SELECT * FROM db_version WHERE version >= 5211|empty|
+# 5212|2183_optional_bot_xp_rule.sql
+# 5213|2185_optional_NPCFlurryChacne_rule
+# 5214|2185_optional_NPCFlurryChacne_rule.sql
+# 5215|2185_optional_NPCFlurryChance_rule.sql
+5216|2185_required_aa_updates|SELECT * FROM db_version WHERE version >= 5216|empty|
+5217|2185_required_aa_updates.sql|SELECT * FROM db_version WHERE version >= 5217|empty|
+# 5218|2188_optional_miscspelleffect_rules
+# 5219|2188_optional_miscspelleffect_rules.sql
+# 5220|2188_required_aa_updates
+5221|2188_required_aa_updates.sql|SELECT * FROM db_version WHERE version >= 5221|empty|
+# 5222|2189_optional_taunt_rules
+# 5223|2189_optional_taunt_rules.sql
+5224|2195_required_sharedplatupdates.sql|SELECT * FROM db_version WHERE version >= 5224|empty|
+# 5225|2208_optional_aa_stacking_rule.sql
+# 5226|2208_optional_EnableSoulAbrasionAA.sql
+5227|2208_required_aa_updates.sql|SELECT * FROM db_version WHERE version >= 5227|empty|
+# 5228|2209_optional_additive_bonus_rule.sql
+5229|2213_loot_changes.sql|SELECT * FROM db_version WHERE version >= 5229|empty|
+5230|2214_faction_list_mod.sql|SHOW TABLES LIKE 'faction_list_mod'|empty|
+5231|2215_required_aa_updates.sql|SELECT * FROM db_version WHERE version >= 5231|empty|
+# 5232|2243_optional_char_max_level_rule.sql
+# 5233|2260_probability.sql
+5234|2262_required_pet_discipline_update.sql|SELECT * FROM db_version WHERE version >= 5234|empty|
+5235|2264_required_aa_updates.sql|SELECT * FROM db_version WHERE version >= 5235|empty|
+# 5236|2268_QueryServ.sql
+5237|2268_required_updates.sql|SELECT * FROM db_version WHERE version >= 5237|empty|
+# 5238|2274_optional_rule_iplimitdisconnectall.sql
+# 5239|2278_optional_rule_targetableswarmpet.sql
+# 5240|2280_optional_rule_targetableswarmpet-rename.sql
+5241|2283_required_npc_changes.sql|SHOW COLUMNS FROM `npc_types` LIKE 'spellscale'|empty|
+5242|2299_required_inspectmessage_fields.sql|SELECT * FROM db_version WHERE version >= 5242|empty|
+# 5243|2300_optional_loot_changes.sql
+# 5244|2304_QueryServ.sql
+# 5245|2340_required_maxbuffslotspet.sql
+# 5246|2361_QueryServ.sql
+# 5247|2361_required_qs_rule_values.sql
+5248|2370_required_aa_updates.sql|SELECT * FROM db_version WHERE version >= 5248|empty|
+5249|2376_required_aa_updates.sql|SELECT * FROM db_version WHERE version >= 5249|empty|
+5250|2380_optional_merc_data.sql|SELECT * FROM db_version WHERE version >= 5250|empty|
+5251|2380_optional_merc_merchant_npctypes_update.sql|SELECT * FROM db_version WHERE version >= 5251|empty|
+5252|2380_optional_merc_rules.sql|SELECT * FROM db_version WHERE version >= 5252|empty|
+5253|2383_required_group_ismerc.sql|SELECT * FROM db_version WHERE version >= 5253|empty|
+# 5254|2428_optional_levelbasedexpmods.sql
+# 5255|2448_optional_stun_proc_aggro_rule.sql
+5256|2471_required_aa_updates.sql|SELECT * FROM db_version WHERE version >= 5256|empty|
+5257|2482_required_start_zones.sql|SELECT * FROM db_version WHERE version >= 5257|empty|
+5258|2504_required_aa_updates.sql|SELECT * FROM db_version WHERE version >= 5258|empty|
+8000|mercs.sql|SHOW TABLES LIKE 'merc_stats'|empty|
+9000|2013_02_18_Merc_Rules_and_Tables.sql|SELECT * FROM `rule_values` WHERE `rule_name` LIKE '%Mercs:ResurrectRadius%'|empty|
+9001|2013_02_25_Impr_HT_LT.sql|SHOW TABLES LIKE 'merc_inventory'|empty|
+9002|2013_03_1_Merc_Rules_and_Equipment.sql|SHOW TABLES LIKE 'merc_inventory'|empty|
+# 9003|2013_03_23_Escape_FadingMemories.sql
+# 9004|2013_04_04_NaturesBounty.sql|SELECT * FROM `aa_effects` WHERE `aaid` = '1230' AND `slot` = '1' AND `effectid` = '313' AND `base1` = '15' AND `base2` = '0'|empty|
+9005|2013_04_08_Salvage.sql|SHOW COLUMNS FROM `tradeskill_recipe_entries` LIKE 'salvagecount'|empty|
+9006|2013_05_05_Account_Flags.sql|SHOW TABLES LIKE 'account_flags'|empty|
+9007|2013_05_05_Item_Tick.sql|SHOW TABLES LIKE 'item_tick'|empty|
+9008|2013_07_11_NPC_Special_Abilities.sql|SHOW COLUMNS FROM `npc_types` LIKE 'special_abilities'|empty|
+9009|2013_10_12_Merc_Special_Abilities.sql|SHOW COLUMNS FROM `merc_stats` LIKE 'special_abilities'|empty|
+# 9010|2013_10_12_Merc_vwMercNpcTypes.sql
+9011|2013_10_31_Recipe_disabling.sql|SHOW COLUMNS FROM `tradeskill_recipe` LIKE 'enabled'|empty|
+9012|2013_11_07_BaseData.sql|SHOW TABLES LIKE 'base_data'|empty|
+# 9013|2013_11_13_Instrument_Singing_Mastery.sql|SELECT * FROM `aa_effects` WHERE `aaid` = '213' AND `slot` = '1' AND `effectid` = '260' AND `base1` = '2' AND `base2` = '23'|empty|
+9014|2013_11_18_AssistRadius.sql|SHOW COLUMNS FROM `npc_types` LIKE 'assistradius'|empty|
+9015|2013_12_26_MerchantList_Class_Required.sql|SHOW COLUMNS FROM `merchantlist` LIKE 'classes_required'|empty|
+# 9016|2014_01_04_SongModCapAAs.sql|SELECT * FROM `aa_effects` WHERE `aaid` = '571' AND `slot` = '1' AND `effectid` = '261'|empty|
+9017|2014_01_08_SpellsNewAdditions.sql|SHOW COLUMNS FROM `spells_new` LIKE 'persistdeath'|empty|
+9018|2014_01_09_PreservePetSize.sql|SHOW COLUMNS FROM `character_pet_info` LIKE 'size'|empty|
+# 9019|2014_01_20_MezMastery.sql|SELECT * FROM `aa_effects` WHERE `aaid` = '781' AND `slot` = '1' AND `effectid` = '287'|empty|
+9020|2014_01_20_Not_Extendable.sql|SHOW COLUMNS FROM `spells_new` LIKE 'not_extendable'|empty|
+# 9021|2014_01_20_SpellCastingReinforcement.sql|SELECT * FROM `aa_effects` WHERE `aaid` = '86' AND `slot` = '1' AND `effectid` = '128'|empty|
+9022|2014_01_20_Weather.sql|SHOW COLUMNS FROM `zone` LIKE 'rain_chance1'|empty|
+# 9023|2014_01_27_CritcalMendAA.sql|SELECT * FROM `aa_effects` WHERE `aaid` = '230' AND `slot` = '1' AND `effectid` = '275'|empty
+# 9024|2014_02_02_SpellCriticalsAA.sql|SELECT * FROM `aa_effects` WHERE `aaid` = '4755' AND `slot` = '1' AND `effectid` = '294'|empty
+9025|2014_02_13_Rename_instance_lockout_tables.sql|SHOW TABLES LIKE 'instance_list'|empty|
+9026|2014_02_13_spells_new_update.sql|SHOW COLUMNS FROM `spells_new` LIKE 'ConeStartAngle'|empty|
+9027|2014_02_20_buff_update.sql|SHOW COLUMNS FROM `character_buffs` LIKE 'caston_y'|empty|
+9028|2014_02_26_roambox_update.sql|SHOW COLUMNS FROM `spawngroup` LIKE 'mindelay'|empty|
+# 9029|2014_02_26_virulentvenomAA.sql|SELECT * FROM `aa_effects` WHERE `aaid` = '888' AND `slot` = '1' AND `effectid` = '250'|empty|
+9030|2014_04_04_PhysicalResist.sql|SHOW COLUMNS FROM `npc_types` LIKE 'PhR'|empty|
+9031|2014_04_10_No_Target_With_Hotkey.sql|SHOW COLUMNS FROM `npc_types` LIKE 'no_target_hotkey'|empty|
+9032|2014_04_12_SlowMitigation.sql|SHOW COLUMNS FROM `npc_types` LIKE 'slow_mitigation'|contains|float
+9034|2014_04_25_spawn_events.sql|SHOW COLUMNS FROM `spawn_events` LIKE 'strict'|empty|
+9035|2014_04_27_AISpellEffects.sql|SHOW COLUMNS FROM `npc_types` LIKE 'npc_spells_effects_id'|empty|
+9036|2014_05_04_SlowMitigationFix.sql|SHOW COLUMNS FROM `npc_types` LIKE 'slow_mitigation'|contains|float
+# 9038|2014_06_25_AA_Updates.sql|SELECT * FROM `altadv_vars` WHERE `skill_id` = '1604'|empty
+# 9039|2014_07_04_AA_Updates.sql|SELECT * FROM `aa_effects` WHERE `aaid` = '158' AND `slot` = '1' AND `effectid` = '238'|empty
+9040|2014_07_10_npc_spells.sql|SHOW COLUMNS FROM `npc_spells` LIKE 'engaged_no_sp_recast_min'|empty|
+9041|2014_08_02_spells_new.sql|SHOW COLUMNS FROM `spells_new` LIKE 'viral_range'|empty|
+9042|2014_08_12_NPC_raid_targets.sql|SHOW COLUMNS FROM `npc_types` LIKE 'raid_target'|empty|
+9043|2014_08_18_spells_new_update.sql|SHOW COLUMNS FROM `spells_new` LIKE 'viral_targets'|empty|
+9044|2014_08_20_merchantlist_probability.sql|SHOW COLUMNS FROM `merchantlist` LIKE 'probability'|empty|
+9045|2014_08_23_Complete_QueryServ_Table_Structures.sql|SHOW TABLES LIKE 'qs_player_aa_rate_hourly'|empty|
+9046|2014_08_23_player_events_and_player_aa_rate_hourly.sql|SHOW TABLES LIKE 'qs_player_events'|empty|
+9048|2014_09_09_attack_delay.sql|SHOW COLUMNS FROM `npc_types` LIKE 'attack_delay'|empty|
+9050|2014_09_20_ban_messages.sql|SHOW COLUMNS FROM `account` LIKE 'ban_reason'|empty|
+9051|2014_10_11_RaidMOTD.sql|SHOW COLUMNS FROM `raid_details` LIKE 'motd'|empty|
+9052|2014_10_13_RaidLeadership.sql|SHOW TABLES LIKE 'raid_leaders'|empty|
+9053|2014_10_18_group_mentor.sql|SHOW COLUMNS FROM `group_leaders` LIKE 'mentoree'|empty|
+9054|2014_10_19_raid_group_mentor.sql|SHOW COLUMNS FROM `raid_leaders` LIKE 'mentoree'|empty|
+9055|2014_10_30_special_abilities_null.sql|SHOW COLUMNS FROM `npc_types` LIKE 'special_abilities'|contains|NO
+9056|2014_11_08_RaidMembers.sql|SHOW COLUMNS FROM `raid_members` LIKE 'groupid'|missing|unsigned
+9057|2014_11_13_spells_new_updates.sql|SHOW COLUMNS FROM `spells_new` LIKE 'disallow_sit'|empty|
+9058|2014_11_26_InventoryTableUpdate.sql|SHOW COLUMNS FROM `inventory` LIKE 'ornamenticon'|empty|
+9059|2014_12_01_mercs_table_update.sql|SHOW COLUMNS FROM `mercs` LIKE 'MercSize'|empty|
+9060|2014_12_09_items_table_update.sql|SHOW COLUMNS FROM `items` LIKE 'herosforgemodel'|empty|
+9061|2014_12_13_inventory_table_update.sql|SHOW COLUMNS FROM `inventory` LIKE 'ornament_hero_model'|empty|
+9062|2014_12_15_multiple_table_updates.sql|SHOW COLUMNS FROM `items` LIKE 'augslot6type'|empty|
+9063|2014_12_24_npc_types_update.sql|SHOW COLUMNS FROM `npc_types` LIKE 'd_melee_texture1'|empty|
+9064|2014_12_24_npc_types_table_update.sql|SHOW COLUMNS FROM `npc_types` LIKE 'herosforgemodel'|empty|
+9066|2014_12_31_npc_types_default_values_update.sql|SHOW COLUMNS FROM `npc_types` LIKE 'bodytype'|contains|YES
+9067|2015_01_21_npc_types_update.sql|SHOW COLUMNS FROM `npc_types` LIKE 'light'|empty|
+9068|2015_01_15_logsys_categories_table.sql|SHOW TABLES LIKE 'logsys_categories'|empty|
+9069|2015_01_25_logsys_Mercenaries_category.sql|SELECT * FROM `logsys_categories` WHERE `log_category_description` LIKE 'Mercenaries'|empty|
+9070|2015_01_28_quest_debug_log_category.sql|SELECT * FROM `logsys_categories` WHERE `log_category_description` LIKE 'Quest Debug'|empty|
+9071|2015_01_29_merc_stats_table_update.sql|SHOW COLUMNS FROM `merc_stats` LIKE 'statscale'|empty|
+9072|2015_01_30_merc_attack_delay.sql|SHOW COLUMNS FROM `merc_stats` LIKE 'attack_delay'|empty|
+9073|2015_01_31_character_item_recast.sql|SHOW TABLES LIKE 'character_item_recast'|empty|
+9074|2015_02_01_logsys_packet_logs.sql|SELECT * FROM `logsys_categories` WHERE `log_category_description` LIKE 'Packet: Server -> Client'|empty|
+9075|2015_02_02_logsys_packet_logs_with_dump.sql|SELECT * FROM `logsys_categories` WHERE `log_category_description` LIKE 'Packet: Server -> Client With Dump'|empty|
+9076|2015_02_04_average_coin.sql|SHOW COLUMNS FROM `loottable` WHERE Field = 'avgcoin'|contains|smallint
+9077|2015_02_12_zone_gravity.sql|SHOW COLUMNS FROM `zone` LIKE 'gravity'|empty|
+9078|2015_05_20_BuffInstrumentMod.sql|SHOW COLUMNS FROM `character_buffs` LIKE 'instrument_mod'|empty|
+9079|2015_05_23_BuffDurations.sql|SHOW COLUMNS FROM `character_buffs` LIKE 'ticsremaining'|contains|unsigned|
+9080|2015_05_23_PetBuffInstrumentMod.sql|SHOW COLUMNS FROM `character_pet_buffs` LIKE 'instrument_mod'|empty|
+9081|2015_05_23_dbstr_us.sql|SHOW TABLES LIKE 'db_str'|empty|
+9082|2015_05_25_npc_types_texture_fields.sql|SHOW COLUMNS FROM `npc_types` LIKE 'armtexture'|empty|
+9083|2015_06_07_aa_update.sql|SHOW COLUMNS FROM `character_alternate_abilities` LIKE 'charges'|empty|
+9084|2015_06_30_runspeed_adjustments.sql|SELECT `runspeed` FROM `npc_types` WHERE `runspeed` > 3|not_empty|
+9085|2015_07_01_Marquee_Rule.sql|SELECT * FROM `rule_values` WHERE `rule_name` LIKE '%Character:MarqueeHPUpdates%'|empty|
+9086|2015_07_02_aa_rework.sql|SHOW TABLES LIKE 'aa_ranks'|empty|
+9087|2015_09_25_inventory_snapshots.sql|SHOW TABLES LIKE 'inventory_snapshots'|empty|
+9088|2015_11_01_perl_event_export_settings.sql|SHOW TABLES LIKE 'perl_event_export_settings'|empty|
+9089|2015_11_02_ai_idle_no_spell_recast_default_changes.sql|SELECT * FROM `rule_values` WHERE `rule_name` LIKE '%Spells:AI_IdleNoSpellMinRecast%' AND `rule_value` = '500'|not_empty|
+9090|2015_12_01_spell_scribe_restriction_rule.sql|SELECT `rule_name` FROM `rule_values` WHERE `rule_name` LIKE 'Character:RestrictSpellScribing'|empty|
+9091|2015_12_07_command_settings.sql|SHOW TABLES LIKE 'command_settings'|empty|
+9092|2015_12_17_eqtime.sql|SHOW TABLES LIKE 'eqtime'|empty|
+9093|2015_12_21_items_updates_evoitem.sql|SHOW COLUMNS FROM `items` LIKE 'evoitem'|empty|
+9094|2015_12_29_quest_zone_events.sql|SELECT * FROM perl_event_export_settings WHERE event_description = 'EVENT_SPAWN_ZONE'|empty|
+9095|2016_01_08_command_find_aliases.sql|SELECT * FROM `command_settings` WHERE `command` LIKE 'findaliases'|empty|
+9096|2016_03_05_secondary_recall.sql|SHOW COLUMNS FROM `character_bind` LIKE 'slot'|empty|
+9097|2016_07_03_npc_class_as_last_name.sql|SELECT `rule_name` FROM `rule_values` WHERE `rule_name` LIKE 'NPC:UseClassAsLastName'|empty|
+9098|2016_08_26_object_size_tilt.sql|SHOW COLUMNS FROM `object` LIKE 'size'|empty|
+9099|2016_08_27_ip_exemptions.sql|SHOW TABLES LIKE 'ip_exemptions'|empty|
+9100|2016_08_27_object_display_name.sql|SHOW COLUMNS FROM `object` LIKE 'display_name'|empty|
+9101|2016_12_01_pcnpc_only.sql|SHOW COLUMNS FROM `spells_new` LIKE 'pcnpc_only_flag'|empty|
+9102|2017_01_10_book_languages.sql|SHOW COLUMNS FROM `books` LIKE 'language'|empty|
+9103|2017_01_30_book_languages_fix.sql|SELECT `language` from `books` WHERE `language` IS NULL|not_empty|
+9104|2017_02_09_npc_spells_entries_type_update.sql|SHOW COLUMNS IN `npc_spells_entries` LIKE 'type'|contains|smallint(5) unsigned
+9105|2017_02_15_bot_spells_entries.sql|SELECT `id` FROM `npc_spells_entries` WHERE `npc_spells_id` >= 701 AND `npc_spells_id` <= 712|not_empty|
+9106|2017_02_26_npc_spells_update_for_bots.sql|SELECT * FROM `npc_spells` WHERE `id` = '701' AND `name` = 'Cleric Bot'|not_empty|
+9107|2017_03_09_inventory_version.sql|SHOW TABLES LIKE 'inventory_version'|empty|
+9108|2017_04_07_ignore_despawn.sql|SHOW COLUMNS FROM `npc_types` LIKE 'ignore_despawn'|empty|
+9109|2017_04_08_doors_disable_timer.sql|SHOW COLUMNS FROM `doors` LIKE 'disable_timer'|empty|
+9110|2017_04_10_graveyard.sql|show index from graveyard WHERE key_name = 'zone_id_nonunique'|empty|
+9111|2017_06_24_saylink_index.sql|SHOW INDEX FROM `saylink` WHERE `key_name` = 'phrase_index'|empty|
+9112|2017_06_24_rule_values_expand.sql|SHOW COLUMNS FROM rule_values WHERE Field = 'rule_value' and Type = 'varchar(30)'|empty|
+9113|2017_07_19_show_name.sql|SHOW COLUMNS FROM `npc_types` LIKE 'show_name'|empty|
+9114|2017_07_22_aura.sql|SHOW TABLES LIKE 'auras'|empty|
+9115|2017_10_28_traps.sql|SHOW COLUMNS FROM `traps` LIKE 'triggered_number'|empty|
+9116|2017_12_16_GroundSpawn_Respawn_Timer.sql|SHOW COLUMNS FROM `ground_spawns` WHERE Field = 'respawn_timer' AND Type = 'int(11) unsigned'|empty|
+9117|2018_02_01_NPC_Spells_Min_Max_HP.sql|SHOW COLUMNS FROM `npc_spells_entries` LIKE 'min_hp'|empty|
+9118|2018_02_04_Charm_Stats.sql|SHOW COLUMNS FROM `npc_types` LIKE 'charm_ac'|empty|
+9119|2018_02_10_GlobalLoot.sql|SHOW TABLES LIKE 'global_loot'|empty|
+9120|2018_02_13_Heading.sql|SELECT value FROM variables WHERE varname = 'fixed_heading'|empty|
+9121|2018_02_18_bug_reports.sql|SHOW TABLES LIKE 'bug_reports'|empty|
+9122|2018_03_07_ucs_command.sql|SELECT * FROM `command_settings` WHERE `command` LIKE 'ucs'|empty|
+9123|2018_07_07_data_buckets.sql|SHOW TABLES LIKE 'data_buckets'|empty|
+9124|2018_07_09_tasks.sql|SHOW COLUMNS FROM `tasks` LIKE 'type'|empty|
+9125|2018_07_20_task_emote.sql|SHOW COLUMNS FROM `tasks` LIKE 'completion_emote'|empty|
+9126|2018_09_07_FastRegen.sql|SHOW COLUMNS FROM `zone` LIKE 'fast_regen_hp'|empty|
+9127|2018_09_07_NPCMaxAggroDist.sql|SHOW COLUMNS FROM `zone` LIKE 'npc_max_aggro_dist'|empty|
+9128|2018_08_13_inventory_version_update.sql|SHOW TABLES LIKE 'inventory_version'|not_empty|
+9129|2018_08_13_inventory_update.sql|SHOW TABLES LIKE 'inventory_versions'|empty|
+9130|2018_11_25_name_filter_update.sql|SHOW COLUMNS FROM `name_filter` LIKE 'id'|empty|
+9131|2018_12_13_spell_buckets.sql|SHOW TABLES LIKE 'spell_buckets'|empty|
+9132|2018_12_16_global_base_scaling.sql|SHOW TABLES LIKE 'npc_scale_global_base'|empty|
+9133|2018_11_25_StuckBehavior.sql|SHOW COLUMNS FROM `npc_types` LIKE 'stuck_behavior'|empty|
+9134|2019_01_04_update_global_base_scaling.sql|SELECT * FROM db_version WHERE version >= 9134|empty|
+9135|2019_01_10_multi_version_spawns.sql|SHOW COLUMNS FROM `spawn2` LIKE 'version'|contains|unsigned|
+9136|2019_02_04_profanity_command.sql|SHOW TABLES LIKE 'profanity_list'|empty|
+9137|2018_12_12_client_faction_tables.sql|SHOW TABLES LIKE 'faction_base_data'|empty|
+9138|2018_12_12_convert_to_client_functions.sql|SELECT `id` FROM `faction_list` WHERE `id` > 4999|empty|
+9139|2019_03_25_optional_npc_model.sql|SHOW COLUMNS FROM `npc_types` LIKE 'model'|empty|
+9140|2019_07_03_update_range.sql|SHOW COLUMNS FROM `zone` LIKE 'max_movement_update_range'|empty|
+9141|2019_07_10_npc_flymode.sql|SHOW COLUMNS FROM `npc_types` LIKE 'flymode'|empty|
+9142|2019_09_02_required_spawn_filter.sql|SHOW COLUMNS FROM `spawnentry` LIKE 'condition_value_filter'|empty|
+9143|2019_09_16_account_table_changes.sql|SHOW COLUMNS FROM `account` LIKE 'ls_id'|empty|
+9144|2019_11_09_logsys_description_update.sql|SELECT * FROM db_version WHERE version >= 9143|empty|
+9145|2019_12_24_banned_ips_update.sql|SHOW TABLES LIKE 'Banned_IPs'|not_empty|
+9146|2020_01_10_character_soft_deletes.sql|SHOW COLUMNS FROM `character_data` LIKE 'deleted_at'|empty|
+9147|2020_01_24_grid_centerpoint_wp.sql|SHOW COLUMNS FROM `grid_entries` LIKE 'centerpoint'|empty|
+9148|2020_01_28_corpse_guild_consent_id.sql|SHOW COLUMNS FROM `character_corpses` LIKE 'guild_consent_id'|empty|
+9149|2020_02_06_globalloot.sql|SHOW COLUMNS FROM `global_loot` LIKE 'hot_zone'|empty|
+9150|2020_02_06_aa_reset_on_death.sql|SHOW COLUMNS FROM `aa_ability` LIKE 'reset_on_death'|empty|
+9151|2020_03_05_npc_always_aggro.sql|SHOW COLUMNS FROM `npc_types` LIKE 'always_aggro'|empty|
+9152|2020_03_09_convert_myisam_to_innodb.sql|SELECT * FROM db_version WHERE version >= 9152|empty|
+9153|2020_05_09_items_subtype.sql|SHOW COLUMNS from `items` LIKE 'UNK219'|not_empty|
+9154|2020_04_11_expansions_content_filters.sql|SHOW COLUMNS from `zone` LIKE 'min_expansion'|empty|
+9155|2020_08_15_lootdrop_level_filtering.sql|SHOW COLUMNS from `lootdrop_entries` LIKE 'trivial_min_level'|empty|
+9156|2020_08_16_virtual_zonepoints.sql|SHOW COLUMNS from `zone_points` LIKE 'is_virtual'|empty|
+9157|2020_09_02_pet_taunting.sql|SHOW COLUMNS from `character_pet_info` LIKE 'taunting'|empty|
+9158|2020_12_09_underworld.sql|SHOW COLUMNS from `zone` LIKE 'underworld_teleport_index'|empty|
+9159|2020_12_22_expedition_system.sql|SELECT * FROM db_version WHERE version >= 9159|empty|
+9160|2021_02_14_npc_exp_mod.sql|SHOW COLUMNS from `npc_types` LIKE 'exp_mod'|empty|
+9161|2021_02_15_npc_spell_entries_unsigned.sql|SELECT * FROM db_version WHERE version >= 9161|empty|
+9162|2021_02_17_server_scheduled_events.sql|SELECT * FROM db_version WHERE version >= 9162|empty|
+9163|2021_04_17_zone_safe_heading_changes.sql|SHOW COLUMNS FROM `zone` LIKE 'safe_heading'|empty|
+9164|2021_04_23_character_exp_modifiers.sql|SHOW TABLES LIKE 'character_exp_modifiers'|empty|
+9165|2021_04_28_idle_pathing.sql|SHOW COLUMNS FROM `spawn2` LIKE 'path_when_zone_idle'|empty|
+9166|2021_02_12_dynamic_zone_members.sql|SHOW TABLES LIKE 'dynamic_zone_members'|empty|
+9167|2021_06_06_beastlord_pets.sql|SHOW TABLES LIKE 'pets_beastlord_data'|empty|
+9168|2021_08_31_pvp_duration.sql|SHOW COLUMNS FROM `spells_new` LIKE 'pvp_duration'|empty|
+9169|2021_06_06_dynamic_zone_moved_columns.sql|SELECT * FROM db_version WHERE version >= 9169|empty|
+9170|2021_03_03_instance_safereturns.sql|SHOW TABLES LIKE 'character_instance_safereturns'|empty|
+9171|2021_03_30_remove_dz_is_current_member.sql|SHOW COLUMNS FROM `dynamic_zone_members` LIKE 'is_current_member'|not_empty|
+9172|2021_05_21_shared_tasks.sql|SHOW TABLES LIKE 'shared_tasks'|empty|
+9173|2021_09_14_zone_lava_damage.sql|SHOW COLUMNS FROM `zone` LIKE 'lava_damage'|empty|
+9174|2021_10_09_not_null_door_columns.sql|SELECT * FROM db_version WHERE version >= 9174|empty|
+9175|2022_01_02_expansion_default_value_all.sql|SHOW COLUMNS FROM `forage` LIKE 'min_expansion'|contains|unsigned
+9176|2022_01_10_checksum_verification.sql|SHOW COLUMNS FROM `account` LIKE 'crc_eqgame'|empty|
+9177|2022_03_06_table_structure_changes.sql|SHOW COLUMNS FROM `pets` LIKE 'id'|empty|
+9178|2022_03_07_saylink_collation.sql|SELECT * FROM db_version WHERE version >= 9178|empty|
+9179|2022_04_30_hp_regen_per_second.sql|SHOW COLUMNS FROM `npc_types` LIKE 'hp_regen_per_second'|empty|
+9180|2022_05_01_character_peqzone_flags.sql|SHOW TABLES LIKE 'character_peqzone_flags'|empty|
+9181|2022_05_03_task_activity_goal_match_list.sql|SHOW COLUMNS FROM `task_activities` LIKE 'goal_match_list'|empty|
+9182|2022_05_02_npc_types_int64.sql|SHOW COLUMNS FROM `npc_types` LIKE 'hp'|missing|bigint
+9183|2022_05_07_merchant_data_buckets.sql|SHOW COLUMNS FROM `merchantlist` LIKE 'bucket_comparison'|empty
+9184|2022_05_21_schema_consistency.sql|SELECT * FROM db_version WHERE version >= 9184|empty|
+9185|2022_05_07_discord_webhooks.sql|SHOW TABLES LIKE 'discord_webhooks'|empty|
+9186|2022_07_09_zone_expansion_deprecate.sql|SHOW COLUMNS FROM `zone` LIKE 'expansion'|not_empty|
+9187|2022_07_09_task_zone_version_matching.sql|SHOW COLUMNS FROM `task_activities` LIKE 'zone_version'|empty|
+9188|2022_07_14_zone_expansion_revert.sql|SHOW COLUMNS FROM `zone` LIKE 'expansion'|empty|
+9189|2022_07_10_character_task_rewarded.sql|SHOW COLUMNS FROM `character_tasks` LIKE 'was_rewarded'|empty|
+9190|2022_07_13_task_reward_points.sql|SHOW COLUMNS FROM `tasks` LIKE 'reward_points'|empty|
+9191|2022_07_28_gm_state_changes.sql|SHOW COLUMNS FROM `account` LIKE 'invulnerable'|empty|
+9192|2022_07_13_task_lock_activity.sql|SHOW COLUMNS FROM `tasks` LIKE 'lock_activity_id'|empty|
+9193|2022_07_16_task_timer_groups.sql|SHOW COLUMNS FROM `tasks` LIKE 'replay_timer_group'|empty|
+9194|2022_07_23_dz_switch_id.sql|SHOW COLUMNS FROM `doors` LIKE 'dz_switch_id'|empty|
+9195|2022_07_23_dz_templates.sql|SHOW TABLES like 'dynamic_zone_templates'|empty|
+9196|2022_07_30_merchantlist_temp.sql|SHOW COLUMNS FROM `merchantlist_temp` LIKE 'zone_id'|empty|
+9197|2022_08_01_drop_expansion_account.sql|SHOW COLUMNS FROM `account` LIKE 'expansion'|not_empty|
+9198|2022_08_14_exp_modifier_instance_versions.sql|SHOW COLUMNS FROM `character_exp_modifiers` LIKE 'instance_version'|empty|
+9199|2022_08_08_task_req_activity_id.sql|SHOW COLUMNS FROM `task_activities` LIKE 'req_activity_id'|empty|
+9200|2022_08_19_zone_expansion_consistency.sql|SELECT * FROM db_version WHERE version >= 9200|empty|
+9201|2022_08_22_npc_types_heroic_strikethrough.sql|SHOW COLUMNS FROM `npc_types` LIKE 'heroic_strikethrough'|empty|
+9202|2022_08_24_task_activities_step.sql|SHOW COLUMNS FROM `task_activities` LIKE 'step'|contains|unsigned
+9203|2022_08_07_replace_task_goals.sql|SHOW COLUMNS FROM `task_activities` LIKE 'item_id'|empty|
+9204|2022_09_02_faction_association.sql|SHOW TABLES LIKE 'faction_association'|empty|
+9208|2022_09_25_task_concat_matchlists.sql|SHOW COLUMNS FROM `task_activities` LIKE 'npc_id'|not_empty|
+9209|2022_09_28_discord_webhooks.sql|SHOW COLUMNS FROM `logsys_categories` LIKE 'log_to_discord'|empty|
+9213|2022_12_24_npc_keeps_sold_items.sql|SHOW COLUMNS FROM `npc_types` LIKE 'keeps_sold_items'|empty|
+9214|2022_12_24_character_exp_toggle.sql|SHOW COLUMNS FROM `character_data` LIKE 'exp_enabled'|empty|
+9215|2023_01_08_zone_max_level.sql|SHOW COLUMNS FROM `zone` LIKE 'max_level'|empty|
+9216|2023_01_15_merc_data.sql|SHOW TABLES LIKE 'mercs'|empty|
+9217|2023_01_15_chatchannel_reserved_names.sql|SHOW TABLES LIKE 'chatchannel_reserved_names'|empty|
+9218|2023_01_24_item_recast.sql|show columns from character_item_recast like '%recast_type%'|contains|smallint
+9219|2023_01_29_merchant_status_requirements.sql|SHOW COLUMNS FROM merchantlist LIKE 'min_status'|empty|
+
+# Upgrade conditions:
+# 	This won't be needed after this system is implemented, but it is used database that are not
+#	yet using the versioning system to figure out where the database is schema wise to determine
+#	which updates are necessary to run
+#
+# Example: Version|Filename.sql|Query_to_Check_Condition_For_Needed_Update|match type|text to match
+#	0 = Database Version
+#	1 = Filename.sql
+#	2 = Query_to_Check_Condition_For_Needed_Update
+#	3 = Match Type - If condition from match type to Value 4 is true, update will flag for needing to be ran
+#		contains = If query results contains text from 4th value
+#		match = If query results matches text from 4th value
+#		missing = If query result is missing text from 4th value
+#		empty = If the query results in no results
+#		not_empty = If the query is not empty
+#	4 = Text to match
+#
+#
+
+)";

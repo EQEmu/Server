@@ -15,6 +15,7 @@ SET(common_sources
     database.cpp
     database_conversions.cpp
     database_instances.cpp
+    database/database_update.cpp
     dbcore.cpp
     deity.cpp
     dynamic_zone_base.cpp
@@ -506,6 +507,7 @@ SET(common_headers
     data_verification.h
     database.h
     database_schema.h
+    database/database_update.h
     dbcore.h
     deity.h
     discord/discord.h
@@ -666,7 +668,8 @@ SET(common_headers
     StackWalker/StackWalker.h
     util/memory_stream.h
     util/directory.h
-    util/uuid.h)
+    util/uuid.h
+)
 
 SOURCE_GROUP(Event FILES
     event/event_loop.h
