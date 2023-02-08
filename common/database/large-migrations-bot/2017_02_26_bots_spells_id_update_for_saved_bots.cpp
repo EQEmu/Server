@@ -1,3 +1,4 @@
+std::string _2017_02_26_bots_spells_id_update_for_saved_bots = R"(
 -- Update spells_id to new values
 UPDATE `bot_data` SET `spells_id` = '3001' WHERE `class` = '1';
 UPDATE `bot_data` SET `spells_id` = '3002' WHERE `class` = '2';
@@ -15,3 +16,5 @@ UPDATE `bot_data` SET `spells_id` = '3013' WHERE `class` = '13';
 UPDATE `bot_data` SET `spells_id` = '3014' WHERE `class` = '14';
 UPDATE `bot_data` SET `spells_id` = '3015' WHERE `class` = '15';
 UPDATE `bot_data` SET `spells_id` = '3016' WHERE `class` = '16';
+
+)";

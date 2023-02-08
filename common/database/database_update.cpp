@@ -9,7 +9,9 @@
 // don't remove these
 #include "database_update_manifest_old.cpp"
 #include "database_migrations.cpp"
+#include "database_migrations_bots.cpp"
 #include "database_update_manifest.cpp"
+#include "database_update_manifest_bots.cpp"
 #include "database_dump_service.h"
 
 DatabaseVersion DatabaseUpdate::GetDatabaseVersions()
@@ -60,10 +62,27 @@ void DatabaseUpdate::CheckDbUpdates()
 		);
 	}
 
-//	RunConversion(d);
+//	RunConversion();
 
-	CheckManifest(manifest_entries, v.server_database_version, b.server_database_version);
+	if (CheckManifest(manifest_entries, v.server_database_version, b.server_database_version)) {
+		LogInfo(
+			"Updates ran successfully, setting database version to [{}] from [{}]",
+			b.server_database_version,
+			v.server_database_version
+		);
+		m_database->QueryDatabase(fmt::format("UPDATE `db_version` SET `version` = {}", b.server_database_version));
+	}
 
+	if (b.bots_database_version > 0) {
+		if (CheckManifest(bot_manifest_entries, v.bots_database_version, b.bots_database_version)) {
+			LogInfo(
+				"Updates ran successfully, setting database version to [{}] from [{}]",
+				b.bots_database_version,
+				v.bots_database_version
+			);
+			m_database->QueryDatabase(fmt::format("UPDATE `db_version` SET `bots_version` = {}", b.bots_database_version));
+		}
+	}
 
 	std::exit(0);
 }
@@ -156,7 +175,7 @@ void DatabaseUpdate::RunConversion()
 					continue;
 				}
 
-				std::filesystem::path path("/home/eqemu/code/utils/sql/git/required/");
+				std::filesystem::path path("/home/eqemu/code/utils/sql/git/bots/required");
 				std::filesystem::path filename(c[1]);
 				std::filesystem::path filepath = path / filename;
 				std::ifstream         t(filepath.string());
@@ -187,7 +206,7 @@ void DatabaseUpdate::RunConversion()
 					std::string migration_var  =
 									"_" + Strings::ToLower(Strings::Replace(filename.string(), ".sql", ""));
 					std::string migration_file = fmt::format(
-						"/home/eqemu/code/common/database/large-migrations/{}",
+						"/home/eqemu/code/common/database/large-migrations-bot/{}",
 						new_file
 					);
 
@@ -206,7 +225,7 @@ void DatabaseUpdate::RunConversion()
 					f << migration_file_contents;
 					f.close();
 
-					migration_files.emplace_back(fmt::format("#include \"./large-migrations/{}\"", new_file));
+					migration_files.emplace_back(fmt::format("#include \"./large-migrations-bot/{}\"", new_file));
 				}
 
 				std::string new_entry = fmt::format(
@@ -235,22 +254,23 @@ void DatabaseUpdate::RunConversion()
 	}
 
 	// write to manifest file
-	std::string   manifest_write = "/home/eqemu/code/common/database/database_update_manifest.cpp";
+	std::string   manifest_write = "/home/eqemu/code/common/database/database_update_manifest_bots.cpp";
 	std::ofstream f;
 	f.open(manifest_write);
-	f << fmt::format("std::vector<ManifestEntry> manifest_entries = {{\n{}\n}};", Strings::Join(new_entries, ",\n"));
+	f << fmt::format("std::vector<ManifestEntry> bot_manifest_entries = {{\n{}\n}};", Strings::Join(new_entries, ",\n"));
 	f.close();
 
 
 	// write to migration include file
-	std::string   migration_include_file = "/home/eqemu/code/common/database/database_migrations.cpp";
+	std::string   migration_include_file = "/home/eqemu/code/common/database/database_migrations_bots.cpp";
 	std::ofstream mf;
 	mf.open(migration_include_file);
 	mf << Strings::Join(migration_files, "\n");
 	mf.close();
 }
 
-void DatabaseUpdate::CheckManifest(
+// return true if we ran updates
+bool DatabaseUpdate::CheckManifest(
 	std::vector<ManifestEntry> entries,
 	int version_low,
 	int version_high
@@ -290,7 +310,7 @@ void DatabaseUpdate::CheckManifest(
 		}
 
 		for (auto &m: missing_migrations) {
-			for (auto &e: manifest_entries) {
+			for (auto &e: entries) {
 				if (e.version == m) {
 					LogInfo(
 						"Running [{}] [{}] query [{}] condition [{}] match [{}]",
@@ -331,9 +351,10 @@ void DatabaseUpdate::CheckManifest(
 			}
 		}
 
-		LogInfo("Updates ran successfully, setting database version to [{}] from [{}]", version_high, version_low);
-		m_database->QueryDatabase(fmt::format("UPDATE `db_version` SET `version` = {}", version_high));
+		return true;
 	}
+
+	return false;
 }
 
 DatabaseUpdate *DatabaseUpdate::SetDatabase(Database *db)

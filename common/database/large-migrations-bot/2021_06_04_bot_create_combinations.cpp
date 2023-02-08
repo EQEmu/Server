@@ -1,3 +1,4 @@
+std::string _2021_06_04_bot_create_combinations = R"(
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
@@ -32,3 +33,5 @@ INSERT INTO `bot_create_combinations` VALUES (330, 3863); -- Froglok
 INSERT INTO `bot_create_combinations` VALUES (522, 15871); -- Drakkin
 
 SET FOREIGN_KEY_CHECKS = 1;
+
+)";

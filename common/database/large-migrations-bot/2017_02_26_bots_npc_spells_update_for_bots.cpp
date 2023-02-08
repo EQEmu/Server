@@ -1,3 +1,4 @@
+std::string _2017_02_26_bots_npc_spells_update_for_bots = R"(
 -- Re-ordered entries according to actual class values and added melee types (for future expansion)
 DELETE FROM `npc_spells` WHERE `id` >= '701' AND `id` <= '712';
 
@@ -17,3 +18,5 @@ INSERT INTO `npc_spells` VALUES (3013, 'Magician Bot', 0, -1, 3, -1, 0, -1, 0, 0
 INSERT INTO `npc_spells` VALUES (3014, 'Enchanter Bot', 0, -1, 3, -1, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 INSERT INTO `npc_spells` VALUES (3015, 'Beastlord Bot', 0, -1, 3, -1, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 INSERT INTO `npc_spells` VALUES (3016, 'Berserker Bot', 0, -1, 3, -1, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+
+)";

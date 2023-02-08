@@ -25,7 +25,7 @@ public:
 	std::string GetQueryResult(std::string query);
 	static bool ShouldRunMigration(ManifestEntry &e, std::string query_result);
 	void RunConversion();
-	void CheckManifest(std::vector<ManifestEntry> entries, int version_low, int version_high);
+	bool CheckManifest(std::vector<ManifestEntry> entries, int version_low, int version_high);
 
 	DatabaseUpdate *SetDatabase(Database *db);
 private:
