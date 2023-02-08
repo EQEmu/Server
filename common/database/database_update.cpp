@@ -10,34 +10,7 @@
 #include "database_update_manifest_old.cpp"
 #include "database_migrations.cpp"
 #include "database_update_manifest.cpp"
-
-std::string Get(const std::string &url)
-{
-	// split
-	auto s = Strings::Split(url, '/');
-
-	// url
-	std::string base_url = fmt::format("{}//{}", s[0], s[2]);
-	std::string endpoint = Strings::Replace(url, base_url, "");
-
-	// client
-	httplib::Client cli(base_url);
-	// 3 sec timeout
-	cli.set_connection_timeout(0, 3000000);
-	cli.set_read_timeout(3, 0);
-	cli.set_write_timeout(3, 0);
-
-	if (auto res = cli.Get(endpoint)) {
-		if (res->status == 200) {
-			return res->body;
-		}
-		else {
-			LogError("Failed to fetch [{}]", url);
-		}
-	}
-
-	return "";
-}
+#include "database_dump_service.h"
 
 DatabaseVersion DatabaseUpdate::GetDatabaseVersions()
 {
@@ -306,6 +279,14 @@ void DatabaseUpdate::CheckManifest(
 					);
 				}
 			}
+		}
+
+		if (!missing_migrations.empty()) {
+			auto s = new DatabaseDumpService();
+			s->SetDumpAllTables(true);
+			s->SetDumpWithCompression(true);
+			s->DatabaseDump();
+			delete s;
 		}
 
 		for (auto &m: missing_migrations) {
