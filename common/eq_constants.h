@@ -1028,6 +1028,15 @@ enum ZoningMessage : int8
 	ZoneNoExperience = -7
 };
 
+enum class RecipeCountType : uint8
+{
+	Component,
+	Container,
+	Fail,
+	Salvage,
+	Success
+};
+
 #define ALT_CURRENCY_ID_RADIANT 4
 #define ALT_CURRENCY_ID_EBON 5
 

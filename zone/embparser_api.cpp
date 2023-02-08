@@ -3986,6 +3986,111 @@ int8 Perl__does_augment_fit_slot(EQ::ItemInstance* inst, uint32 augment_id, uint
 	return quest_manager.DoesAugmentFit(inst, augment_id, augment_slot);
 }
 
+perl::array Perl__GetRecipeComponentItemIDs(uint32 recipe_id)
+{
+	perl::array result;
+
+	const auto& l = content_db.GetRecipeComponentItemIDs(RecipeCountType::Component, recipe_id);
+
+	if (!l.empty()) {
+		result.reserve(l.size());
+
+		for (int i = 0; i < l.size(); i++) {
+			result.push_back(l[i]);
+		}
+	}
+
+	return result;
+}
+
+perl::array Perl__GetRecipeContainerItemIDs(uint32 recipe_id)
+{
+	perl::array result;
+
+	const auto& l = content_db.GetRecipeComponentItemIDs(RecipeCountType::Container, recipe_id);
+
+	if (!l.empty()) {
+		result.reserve(l.size());
+
+		for (int i = 0; i < l.size(); i++) {
+			result.push_back(l[i]);
+		}
+	}
+
+	return result;
+}
+
+perl::array Perl__GetRecipeFailItemIDs(uint32 recipe_id)
+{
+	perl::array result;
+
+	const auto &l = content_db.GetRecipeComponentItemIDs(RecipeCountType::Fail, recipe_id);
+
+	if (!l.empty()) {
+		result.reserve(l.size());
+
+		for (int i = 0; i < l.size(); i++) {
+			result.push_back(l[i]);
+		}
+	}
+
+	return result;
+}
+
+perl::array Perl__GetRecipeSalvageItemIDs(uint32 recipe_id)
+{
+	perl::array result;
+
+	const auto& l = content_db.GetRecipeComponentItemIDs(RecipeCountType::Salvage, recipe_id);
+
+	if (!l.empty()) {
+		result.reserve(l.size());
+
+		for (int i = 0; i < l.size(); i++) {
+			result.push_back(l[i]);
+		}
+	}
+
+	return result;
+}
+
+perl::array Perl__GetRecipeSuccessItemIDs(uint32 recipe_id)
+{
+	perl::array result;
+
+	const auto& l = content_db.GetRecipeComponentItemIDs(RecipeCountType::Success, recipe_id);
+
+	if (!l.empty()) {
+		result.reserve(l.size());
+
+		for (int i = 0; i < l.size(); i++) {
+			result.push_back(l[i]);
+		}
+	}
+
+	return result;
+}
+
+int8 Perl__GetRecipeComponentCount(uint32 recipe_id, uint32 item_id)
+{
+	return content_db.GetRecipeComponentCount(RecipeCountType::Component, recipe_id, item_id);
+}
+
+int8 Perl__GetRecipeFailCount(uint32 recipe_id, uint32 item_id)
+{
+	return content_db.GetRecipeComponentCount(RecipeCountType::Fail, recipe_id, item_id);
+}
+
+int8 Perl__GetRecipeSalvageCount(uint32 recipe_id, uint32 item_id)
+{
+	return content_db.GetRecipeComponentCount(RecipeCountType::Salvage, recipe_id, item_id);
+}
+
+int8 Perl__GetRecipeSuccessCount(uint32 recipe_id, uint32 item_id)
+{
+	return content_db.GetRecipeComponentCount(RecipeCountType::Success, recipe_id, item_id);
+}
+
 void perl_register_quest()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -4396,6 +4501,15 @@ void perl_register_quest()
 	package.add("getgroupidbycharid", &Perl__getgroupidbycharid);
 	package.add("getinventoryslotname", &Perl__getinventoryslotname);
 	package.add("getraididbycharid", &Perl__getraididbycharid);
+	package.add("get_recipe_component_item_ids", &Perl__GetRecipeComponentItemIDs);
+	package.add("get_recipe_container_item_ids", &Perl__GetRecipeContainerItemIDs);
+	package.add("get_recipe_fail_item_ids", &Perl__GetRecipeFailItemIDs);
+	package.add("get_recipe_salvage_item_ids", &Perl__GetRecipeSalvageItemIDs);
+	package.add("get_recipe_success_item_ids", &Perl__GetRecipeSuccessItemIDs);
+	package.add("get_recipe_component_count", &Perl__GetRecipeComponentCount);
+	package.add("get_recipe_fail_count", &Perl__GetRecipeFailCount);
+	package.add("get_recipe_salvage_count", &Perl__GetRecipeSalvageCount);
+	package.add("get_recipe_success_count", &Perl__GetRecipeSuccessCount);
 	package.add("getracename", &Perl__getracename);
 	package.add("getremainingtimeMS", &Perl__getremainingtimeMS);
 	package.add("getspell", &Perl__getspell);

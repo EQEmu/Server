@@ -563,6 +563,8 @@ public:
 	void	UpdateRecipeMadecount(uint32 recipe_id, uint32 char_id, uint32 madecount);
 	bool	EnableRecipe(uint32 recipe_id);
 	bool	DisableRecipe(uint32 recipe_id);
+	std::vector<uint32> GetRecipeComponentItemIDs(RecipeCountType count_type, uint32 recipe_id);
+	int8 GetRecipeComponentCount(RecipeCountType count_type, uint32 recipe_id, uint32 item_id);
 
 	/* Tribute  */
 	bool	LoadTributes();
