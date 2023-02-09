@@ -4093,7 +4093,8 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 			a->source = 0;
 		else
 			a->source = attacker->GetID();
-		a->type = SkillDamageTypes[skill_used]; // was 0x1c
+		a->type = (EQ::ValueWithin(skill_used, EQ::skills::Skill1HBlunt, EQ::skills::Skill2HPiercing)) ?
+				SkillDamageTypes[skill_used] : SkillDamageTypes[EQ::skills::SkillHandtoHand]; // was 0x1c
 		a->damage = damage;
 		a->spellid = spell_id;
 		if (special == eSpecialAttacks::AERampage)
