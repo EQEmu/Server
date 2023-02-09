@@ -1390,35 +1390,18 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 
 			float channelchance, distance_moved, d_x, d_y, distancemod;
 
-			if(IsClient())
-			{
+			if (IsOfClientBot()) {
 				float channelbonuses = 0.0f;
 				//AA that effect Spell channel chance are no longer on live. http://everquest.allakhazam.com/history/patches-2006-2.html
 				//No harm in maintaining the effects regardless, since we do check for channel chance.
-				if (IsFromItem)
-					channelbonuses += spellbonuses.ChannelChanceItems + itembonuses.ChannelChanceItems + aabonuses.ChannelChanceItems;
-				else
-					channelbonuses += spellbonuses.ChannelChanceSpells + itembonuses.ChannelChanceSpells + aabonuses.ChannelChanceSpells;
-
+				channelbonuses += IsFromItem ?
+						spellbonuses.ChannelChanceItems + itembonuses.ChannelChanceItems + aabonuses.ChannelChanceItems :
+						spellbonuses.ChannelChanceSpells + itembonuses.ChannelChanceSpells + aabonuses.ChannelChanceSpells;
 				// max 93% chance at 252 skill
 				channelchance = 30 + GetSkill(EQ::skills::SkillChanneling) / 400.0f * 100;
 				channelchance -= attacked_count * 2;
 				channelchance += channelchance * channelbonuses / 100.0f;
-			}
-			else if(IsBot()) {
-				float channelbonuses = 0.0f;
-
-				if (IsFromItem)
-					channelbonuses += spellbonuses.ChannelChanceItems + itembonuses.ChannelChanceItems + aabonuses.ChannelChanceItems;
-				else
-					channelbonuses += spellbonuses.ChannelChanceSpells + itembonuses.ChannelChanceSpells + aabonuses.ChannelChanceSpells;
-
-				// max 93% chance at 252 skill
-				channelchance = 30 + GetSkill(EQ::skills::SkillChanneling) / 400.0f * 100;
-				channelchance -= attacked_count * 2;
-				channelchance += channelchance * channelbonuses / 100.0f;
-			}
-			else {
+			} else {
 				// NPCs are just hard to interrupt, otherwise they get pwned
 				channelchance = 85;
 				channelchance -= attacked_count;
@@ -2560,7 +2543,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, in
 
 		case CAHateList:
 		{
-			if(!IsClient())
+			if(!IsOfClientBotMerc())
 			{
 				hate_list.SpellCast(this, spell_id, spells[spell_id].range > spells[spell_id].aoe_range ? spells[spell_id].range : spells[spell_id].aoe_range);
 			}
@@ -3576,17 +3559,13 @@ bool Mob::SpellOnTarget(
 	) {
 		if (
 			spells[spell_id].pcnpc_only_flag == 1 &&
-			!spelltar->IsClient() &&
-			!spelltar->IsMerc() &&
-			!spelltar->IsBot()
+			!spelltar->IsOfClientBotMerc()
 		) {
 			return false;
 		} else if (
 			spells[spell_id].pcnpc_only_flag == 2 &&
 			(
-				spelltar->IsClient() ||
-				spelltar->IsMerc() ||
-				spelltar->IsBot()
+				spelltar->IsOfClientBotMerc()
 			)
 		) {
 			return false;
@@ -4956,7 +4935,7 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 			}
 		}
 
-		if(IsClient() && level >= 21 && temp_level_diff > 15)
+		if(IsOfClientBot()&& level >= 21 && temp_level_diff > 15)
 		{
 			temp_level_diff = 15;
 		}
@@ -5181,7 +5160,7 @@ int16 Mob::CalcResistChanceBonus()
 {
 	int resistchance = spellbonuses.ResistSpellChance + itembonuses.ResistSpellChance;
 
-	if (IsClient() || IsBot()) {
+	if (IsOfClientBot()) {
 		resistchance += aabonuses.ResistSpellChance;
 	}
 	return resistchance;
@@ -5190,7 +5169,7 @@ int16 Mob::CalcResistChanceBonus()
 int16 Mob::CalcFearResistChance()
 {
 	int resistchance = spellbonuses.ResistFearChance + itembonuses.ResistFearChance;
-	if (IsClient() || IsBot()) {
+	if (IsOfClientBot()) {
 		resistchance += aabonuses.ResistFearChance;
 		if (aabonuses.Fearless == true) {
 			resistchance = 100;
@@ -5921,7 +5900,7 @@ bool Mob::IsCombatProc(uint16 spell_id) {
 		}
 	}
 
-	if (IsClient() || IsBot()) {
+	if (IsOfClientBot()) {
 		for (int i = 0; i < MAX_AA_PROCS; i += 4) {
 			if (aabonuses.SpellProc[i + 1] == spell_id ||
 				aabonuses.RangedProc[i + 1] == spell_id ||
