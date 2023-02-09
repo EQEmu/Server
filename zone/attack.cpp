@@ -248,7 +248,7 @@ int Mob::compute_defense()
 {
 	int defense = GetSkill(EQ::skills::SkillDefense) * 400 / 225;
 	defense += (8000 * (GetAGI() - 40)) / 36000;
-	if (IsClient() || IsBot()) {
+	if (IsOfClientBot()) {
 		defense += GetHeroicAGI() / 10;
 	}
 
@@ -318,7 +318,7 @@ bool Mob::CheckHitChance(Mob* other, DamageHitInfo &hit)
 	Mob *defender = this;
 	Log(Logs::Detail, Logs::Attack, "CheckHitChance(%s) attacked by %s", defender->GetName(), attacker->GetName());
 
-	if ((defender->IsClient() || defender->IsBot() || defender->IsMerc()) && defender->IsSitting()) {
+	if (defender->IsOfClientBotMerc() && defender->IsSitting()) {
 		return true;
 	}
 
@@ -873,7 +873,7 @@ int Mob::ACSum(bool skip_caps)
 	int ac = 0; // this should be base AC whenever shrouds come around
 	ac += itembonuses.AC; // items + food + tribute
 	int shield_ac = 0;
-	if (HasShieldEquiped() && (IsClient() || IsBot())) {
+	if (HasShieldEquiped() && IsOfClientBot()) {
 		auto inst = (IsClient()) ? GetInv().GetItem(EQ::invslot::slotSecondary) : CastToBot()->GetBotItem(EQ::invslot::slotSecondary);
 		if (inst) {
 			if (inst->GetItemRecommendedLevel(true) <= GetLevel()) {
@@ -887,8 +887,9 @@ int Mob::ACSum(bool skip_caps)
 	// EQ math
 	ac = (ac * 4) / 3;
 	// anti-twink
-	if (!skip_caps && IsClient() && GetLevel() < RuleI(Combat, LevelToStopACTwinkControl))
+	if (!skip_caps && IsOfClientBot() && GetLevel() < RuleI(Combat, LevelToStopACTwinkControl)) {
 		ac = std::min(ac, 25 + 6 * GetLevel());
+	}
 	ac = std::max(0, ac + GetClassRaceACBonus());
 	if (IsNPC()) {
 		// This is the developer tweaked number
@@ -917,7 +918,7 @@ int Mob::ACSum(bool skip_caps)
 	if (ac < 0)
 		ac = 0;
 
-	if (!skip_caps && (IsClient() || IsBot())) {
+	if (!skip_caps && IsOfClientBot()) {
 		auto softcap = GetACSoftcap();
 		auto returns = GetSoftcapReturns();
 		int total_aclimitmod = aabonuses.CombatStability + itembonuses.CombatStability + spellbonuses.CombatStability;
@@ -1003,7 +1004,7 @@ double Mob::RollD20(int offense, int mitigation)
 		1.6, 1.7, 1.8, 1.9, 2.0
 	};
 
-	if ((IsClient() || IsBot() || IsMerc()) && IsSitting()) {
+	if (IsOfClientBotMerc() && IsSitting()) {
 		return mods[19];
 	}
 
@@ -3538,7 +3539,7 @@ bool Mob::HasProcs() const
 		}
 	}
 
-	if (IsClient() || IsBot()) {
+	if (IsOfClientBot()) {
 		for (int i = 0; i < MAX_AA_PROCS; i += 4) {
 			if (aabonuses.SpellProc[i]) {
 				return true;
@@ -3556,7 +3557,7 @@ bool Mob::HasDefensiveProcs() const
 		}
 	}
 
-	if (IsClient() || IsBot()) {
+	if (IsOfClientBot()) {
 		for (int i = 0; i < MAX_AA_PROCS; i += 4) {
 			if (aabonuses.DefensiveProc[i]) {
 				return true;
@@ -3592,7 +3593,7 @@ bool Mob::HasRangedProcs() const
 		}
 	}
 
-	if (IsClient() || IsBot()) {
+	if (IsOfClientBot()) {
 		for (int i = 0; i < MAX_AA_PROCS; i += 4) {
 			if (aabonuses.RangedProc[i]) {
 				return true;
@@ -3960,10 +3961,11 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 		if (attacker) {
 			if (skill_used == EQ::skills::SkillBash) {
 				can_stun = true;
-				if (attacker->IsClient())
+				if (attacker->IsClient() || attacker->IsBot() || attacker->IsMerc()) {
 					stunbash_chance = attacker->spellbonuses.StunBashChance +
-					attacker->itembonuses.StunBashChance +
-					attacker->aabonuses.StunBashChance;
+					                  attacker->itembonuses.StunBashChance +
+					                  attacker->aabonuses.StunBashChance;
+				}
 			}
 			else if (skill_used == EQ::skills::SkillKick &&
 				(attacker->GetLevel() > 55 || attacker->IsNPC()) && GetClass() == WARRIOR) {
@@ -4454,7 +4456,7 @@ void Mob::TryDefensiveProc(Mob *on, uint16 hand) {
 		}
 
 		//AA Procs
-		if (IsClient() || IsBot()){
+		if (IsOfClientBot()) {
 			for (int i = 0; i < MAX_AA_PROCS; i += 4) {
 				int32 aa_rank_id = aabonuses.DefensiveProc[i + +SBIndex::COMBAT_PROC_ORIGIN_ID];
 				int32 aa_spell_id = aabonuses.DefensiveProc[i + SBIndex::COMBAT_PROC_SPELL_ID];
@@ -4712,7 +4714,7 @@ void Mob::TrySpellProc(const EQ::ItemInstance *inst, const EQ::ItemData *weapon,
 	}
 
 	//AA Melee and Ranged Procs
-	if (IsClient() || IsBot()) {
+	if (IsOfClientBot()) {
 		for (int i = 0; i < MAX_AA_PROCS; i += 4) {
 
 			int32 aa_rank_id = 0;
@@ -5162,8 +5164,9 @@ void Mob::ApplyMeleeDamageMods(uint16 skill, int64 &damage, Mob *defender, Extra
 		dmgbonusmod += opts->melee_damage_bonus_flat;
 
 	if (defender) {
-		if (defender->IsClient() && defender->GetClass() == WARRIOR)
+		if (defender->IsOfClientBotMerc() && defender->GetClass() == WARRIOR) {
 			dmgbonusmod -= 5;
+		}
 		// 168 defensive
 		dmgbonusmod += (defender->spellbonuses.MeleeMitigationEffect +
 		                defender->itembonuses.MeleeMitigationEffect +
@@ -5483,7 +5486,7 @@ void Mob::TrySkillProc(Mob *on, EQ::skills::SkillType skill, uint16 ReuseTime, b
 		}
 	}
 
-	if (IsClient() && aabonuses.LimitToSkill[skill]) {
+	if (IsOfClientBot() && aabonuses.LimitToSkill[skill]) {
 
 		CanProc = true;
 		uint32 effect_id = 0;
@@ -5797,7 +5800,7 @@ void Mob::CommonOutgoingHitSuccess(Mob* defender, DamageHitInfo &hit, ExtraAttac
 	TryCriticalHit(defender, hit, opts);
 
 	hit.damage_done += hit.min_damage;
-	if (IsClient() || IsBot()) {
+	if (IsOfClientBot()) {
 		int extra = 0;
 		switch (hit.skill) {
 			case EQ::skills::SkillThrowing:

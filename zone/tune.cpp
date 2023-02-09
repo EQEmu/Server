@@ -1040,7 +1040,7 @@ int64 Mob::TuneACSum(bool skip_caps, int ac_override, int add_ac)
 	}
 
 	int shield_ac = 0;
-	if (HasShieldEquiped() && (IsClient() || IsBot())) {
+	if (HasShieldEquiped() && IsOfClientBot()) {
 		auto inst = (IsClient()) ? GetInv().GetItem(EQ::invslot::slotSecondary) : CastToBot()->GetBotItem(EQ::invslot::slotSecondary);
 		if (inst) {
 			if (inst->GetItemRecommendedLevel(true) <= GetLevel()) {
@@ -1348,7 +1348,7 @@ int64 Mob::Tunecompute_defense(int avoidance_override, int add_avoidance)
 {
 	int defense = GetSkill(EQ::skills::SkillDefense) * 400 / 225;
 	defense += (8000 * (GetAGI() - 40)) / 36000;
-	if (IsClient() || IsBot()) {
+	if (IsOfClientBot()) {
 		if (avoidance_override) {
 			defense = avoidance_override;
 		}
@@ -1490,7 +1490,7 @@ void Mob::TuneCommonOutgoingHitSuccess(Mob* defender, DamageHitInfo &hit, ExtraA
 		hit.damage_done = min_mod;
 
 	hit.damage_done += hit.min_damage;
-	if (IsClient() || IsBot()) {
+	if (IsOfClientBot()) {
 		int extra = 0;
 		switch (hit.skill) {
 		case EQ::skills::SkillThrowing:
