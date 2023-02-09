@@ -3580,30 +3580,5 @@ ALTER TABLE `merchantlist`
 ADD COLUMN `min_status` tinyint(3) UNSIGNED NOT NULL DEFAULT 0 AFTER `level_required`,
 ADD COLUMN `max_status` tinyint(3) UNSIGNED NOT NULL DEFAULT 255 AFTER `min_status`;
 )",
-	},
-	ManifestEntry{
-		.version = 9220,
-		.description = "Add new_table",
-		.query = "SHOW TABLES LIKE 'new_table'",
-		.condition = "empty",
-		.match = "",
-		.sql = R"(
-CREATE TABLE `new_table`  (
-  `id` int NOT NULL AUTO_INCREMENT,
-  PRIMARY KEY (`id`)
-);
-CREATE TABLE `new_table1`  (
-  `id` int NOT NULL AUTO_INCREMENT,
-  PRIMARY KEY (`id`)
-);
-CREATE TABLE `new_table2`  (
-  `id` int NOT NULL AUTO_INCREMENT,
-  PRIMARY KEY (`id`)
-);
-CREATE TABLE `new_table3`  (
-  `id` int NOT NULL AUTO_INCREMENT,
-  PRIMARY KEY (`id`)
-);
-)",
 	}
 };
