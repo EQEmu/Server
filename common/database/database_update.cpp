@@ -71,7 +71,8 @@ void DatabaseUpdate::CheckDbUpdates()
 				fmt::format(
 					"UPDATE `db_version` SET `bots_version` = {}",
 					b.bots_database_version
-				));
+				)
+			);
 		}
 	}
 }
