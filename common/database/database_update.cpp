@@ -198,12 +198,40 @@ bool DatabaseUpdate::UpdateManifest(
 							if (results.ErrorNumber() != 1065 && !results.ErrorMessage().empty()) {
 								LogError("[{}]", results.ErrorMessage());
 								errored_migration = true;
+
+								LogInfo("Required database update failed. This could be a problem");
+								LogInfo("Would you like to skip this update? [y/n] (Timeout 60s)");
+
+								// user input
+								std::string input;
+								bool   gave_input = false;
+								time_t start_time        = time(nullptr);
+								time_t wait_time_seconds = 60;
+
+								// spawn a concurrent thread that waits for input from std::cin
+								std::thread t1([&]() {
+									std::cin >> input;
+									gave_input = true;
+								});
+								t1.detach();
+
+								// check the inputReceived flag once every 50ms for 10 seconds
+								while (time(nullptr) < start_time + wait_time_seconds && !gave_input) {
+									std::this_thread::sleep_for(std::chrono::milliseconds(50));
+								}
+
+								// prompt for user skip
+								if (Strings::Trim(input) == "y") {
+									errored_migration = false;
+									LogInfo("Skipping update [{}] [{}]", e.version, e.description);
+								}
 							}
 						}
 					}
 
 					if (errored_migration) {
-						LogError("[Fatal] Database migration [{}] failed to run", e.description);
+						LogError("Fatal | Database migration [{}] failed to run", e.description);
+						LogError("Fatal | Shutting down");
 						std::exit(1);
 					}
 				}
@@ -247,7 +275,7 @@ bool DatabaseUpdate::CheckVersions(DatabaseVersion v, DatabaseVersion b)
 		);
 	}
 
-	LogInfo("{:>8} | [server.auto_database_updates] [<cyan>true]", "Config");
+	LogInfo("{:>8} | [server.auto_database_updates] [<green>true]", "Config");
 
 	LogInfo("{}", Strings::Repeat("-", BREAK_LENGTH));
 
