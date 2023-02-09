@@ -4,12 +4,12 @@
 #include "../database.h"
 
 struct ManifestEntry {
-	int         version{};
-	std::string description{};
-	std::string query{};
-	std::string condition{};
-	std::string match{};
-	std::string sql{};
+	int         version{};     // database version of the migration
+	std::string description{}; // description of the migration ex: "add_new_table" or "add_index_to_table"
+	std::string check{};       // query that checks against the condition
+	std::string condition{};   // condition or "match_type" - Possible values [contains|match|missing|empty|not_empty]
+	std::string match{};       // match field that is not always used, but works in conjunction with "condition" values [missing|match|contains]
+	std::string sql{};         // the SQL DDL that gets ran when the condition is true
 };
 
 struct DatabaseVersion {

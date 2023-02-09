@@ -2,7 +2,7 @@ std::vector<ManifestEntry> bot_manifest_entries = {
 	ManifestEntry{
 		.version = 9000,
 		.description = "2015_09_30_bots.sql",
-		.query = "SHOW TABLES LIKE 'bot_data'",
+		.check = "SHOW TABLES LIKE 'bot_data'",
 		.condition = "empty",
 		.match = "",
 		.sql = _2015_09_30_bots,
@@ -10,7 +10,7 @@ std::vector<ManifestEntry> bot_manifest_entries = {
 	ManifestEntry{
 		.version = 9001,
 		.description = "2016_03_24_bots_command_settings.sql",
-		.query = "SHOW TABLES LIKE 'bot_command_settings'",
+		.check = "SHOW TABLES LIKE 'bot_command_settings'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -122,7 +122,7 @@ INSERT INTO `bot_command_settings` VALUES
 	ManifestEntry{
 		.version = 9002,
 		.description = "2016_03_24_bots_command_rules.sql",
-		.query = "SELECT * FROM `rule_values` WHERE `rule_name` LIKE 'Bots:CommandSpellRank'",
+		.check = "SELECT * FROM `rule_values` WHERE `rule_name` LIKE 'Bots:CommandSpellRank'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -137,7 +137,7 @@ INSERT INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VAL
 	ManifestEntry{
 		.version = 9003,
 		.description = "2016_04_05_bots_pet_spell_id_field.sql",
-		.query = "SHOW COLUMNS FROM `bot_pets` LIKE 'pet_id'",
+		.check = "SHOW COLUMNS FROM `bot_pets` LIKE 'pet_id'",
 		.condition = "not_empty",
 		.match = "",
 		.sql = R"(
@@ -148,7 +148,7 @@ ALTER TABLE `bot_pets` CHANGE COLUMN `pet_id` `spell_id` INT(10) UNSIGNED NOT NU
 	ManifestEntry{
 		.version = 9004,
 		.description = "2016_04_07_bots_heal_override_target.sql",
-		.query = "SELECT `bot_command` FROM `bot_command_settings` WHERE `bot_command` LIKE 'healrotationclearhot'",
+		.check = "SELECT `bot_command` FROM `bot_command_settings` WHERE `bot_command` LIKE 'healrotationclearhot'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -161,7 +161,7 @@ INSERT INTO `bot_command_settings` VALUES
 	ManifestEntry{
 		.version = 9005,
 		.description = "2016_04_08_bots_heal_rotations.sql",
-		.query = "SHOW TABLES LIKE 'bot_heal_rotations'",
+		.check = "SHOW TABLES LIKE 'bot_heal_rotations'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -212,7 +212,7 @@ INSERT INTO `bot_command_settings` VALUES
 	ManifestEntry{
 		.version = 9006,
 		.description = "2016_04_12_bots_inventory_window.sql",
-		.query = "SELECT `bot_command` FROM `bot_command_settings` WHERE `bot_command` LIKE 'inventorywindow'",
+		.check = "SELECT `bot_command` FROM `bot_command_settings` WHERE `bot_command` LIKE 'inventorywindow'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -224,7 +224,7 @@ INSERT INTO `bot_command_settings` VALUES
 	ManifestEntry{
 		.version = 9007,
 		.description = "2016_06_23_bots_camel_case_name_rule.sql",
-		.query = "SELECT * FROM `rule_values` WHERE `rule_name` LIKE 'Bots:AllowCamelCaseNames'",
+		.check = "SELECT * FROM `rule_values` WHERE `rule_name` LIKE 'Bots:AllowCamelCaseNames'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -236,7 +236,7 @@ INSERT INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VAL
 	ManifestEntry{
 		.version = 9008,
 		.description = "2016_06_28_bots_inventory_charges_update.sql",
-		.query = "SELECT * FROM `information_schema`.`COLUMNS` isc WHERE isc.`TABLE_SCHEMA` = DATABASE() AND isc.`TABLE_NAME` = 'bot_inventories' AND isc.`COLUMN_NAME` = 'inst_charges' AND isc.`DATA_TYPE` = 'tinyint'",
+		.check = "SELECT * FROM `information_schema`.`COLUMNS` isc WHERE isc.`TABLE_SCHEMA` = DATABASE() AND isc.`TABLE_NAME` = 'bot_inventories' AND isc.`COLUMN_NAME` = 'inst_charges' AND isc.`DATA_TYPE` = 'tinyint'",
 		.condition = "not_empty",
 		.match = "",
 		.sql = R"(
@@ -247,7 +247,7 @@ ALTER TABLE `bot_inventories` MODIFY COLUMN `inst_charges` SMALLINT(3) UNSIGNED 
 	ManifestEntry{
 		.version = 9009,
 		.description = "2017_02_15_bots_bot_spells_entries.sql",
-		.query = "SELECT `id` FROM `npc_spells_entries` WHERE `npc_spells_id` >= 701 AND `npc_spells_id` <= 712",
+		.check = "SELECT `id` FROM `npc_spells_entries` WHERE `npc_spells_id` >= 701 AND `npc_spells_id` <= 712",
 		.condition = "not_empty",
 		.match = "",
 		.sql = R"(
@@ -286,7 +286,7 @@ DELETE FROM `npc_spells_entries` WHERE `npc_spells_id` >= '701' AND `npc_spells_
 	ManifestEntry{
 		.version = 9010,
 		.description = "2017_02_20_bots_bard_spell_update.sql",
-		.query = "SELECT * FROM `bot_spells_entries` WHERE (`npc_spells_id` = 711 OR `npc_spells_id` = 3008) AND `type` >= 0xFFFF0000",
+		.check = "SELECT * FROM `bot_spells_entries` WHERE (`npc_spells_id` = 711 OR `npc_spells_id` = 3008) AND `type` >= 0xFFFF0000",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -449,7 +449,7 @@ INSERT INTO `bot_spells_entries`(`npc_spells_id`,`spellid`,`type`,`minlevel`,`ma
 	ManifestEntry{
 		.version = 9011,
 		.description = "2017_02_23_bots_spell_casting_chances.sql",
-		.query = "SHOW TABLES LIKE 'bot_spell_casting_chances'",
+		.check = "SHOW TABLES LIKE 'bot_spell_casting_chances'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -11716,7 +11716,7 @@ INSERT INTO `bot_spell_casting_chances`(`spell_type_index`, `class_index`, `stan
 	ManifestEntry{
 		.version = 9012,
 		.description = "2017_02_26_bots_npc_spells_update_for_bots.sql",
-		.query = "SELECT * FROM `npc_spells` WHERE `id` = '701' AND `name` = 'Cleric Bot'",
+		.check = "SELECT * FROM `npc_spells` WHERE `id` = '701' AND `name` = 'Cleric Bot'",
 		.condition = "not_empty",
 		.match = "",
 		.sql = _2017_02_26_bots_npc_spells_update_for_bots,
@@ -11724,7 +11724,7 @@ INSERT INTO `bot_spell_casting_chances`(`spell_type_index`, `class_index`, `stan
 	ManifestEntry{
 		.version = 9013,
 		.description = "2017_02_26_bots_spells_id_update_for_saved_bots.sql",
-		.query = "SELECT * FROM `bot_data` WHERE `spells_id` >= '701' AND `spells_id` <= '712'",
+		.check = "SELECT * FROM `bot_data` WHERE `spells_id` >= '701' AND `spells_id` <= '712'",
 		.condition = "not_empty",
 		.match = "",
 		.sql = _2017_02_26_bots_spells_id_update_for_saved_bots,
@@ -11732,7 +11732,7 @@ INSERT INTO `bot_spell_casting_chances`(`spell_type_index`, `class_index`, `stan
 	ManifestEntry{
 		.version = 9014,
 		.description = "2017_02_26_bots_spells_id_update_for_bot_spells_entries.sql",
-		.query = "SELECT * FROM `bot_spells_entries` WHERE `npc_spells_id` >= '701' AND `npc_spells_id` <= '712'",
+		.check = "SELECT * FROM `bot_spells_entries` WHERE `npc_spells_id` >= '701' AND `npc_spells_id` <= '712'",
 		.condition = "not_empty",
 		.match = "",
 		.sql = _2017_02_26_bots_spells_id_update_for_bot_spells_entries,
@@ -11740,7 +11740,7 @@ INSERT INTO `bot_spell_casting_chances`(`spell_type_index`, `class_index`, `stan
 	ManifestEntry{
 		.version = 9015,
 		.description = "2017_02_26_bots_spell_casting_chances_update.sql",
-		.query = "SHOW COLUMNS FROM `bot_spell_casting_chances` LIKE 'value'",
+		.check = "SHOW COLUMNS FROM `bot_spell_casting_chances` LIKE 'value'",
 		.condition = "not_empty",
 		.match = "",
 		.sql = R"(
@@ -14672,7 +14672,7 @@ INSERT INTO `bot_spell_casting_chances` (`spell_type_index`, `class_id`, `stance
 	ManifestEntry{
 		.version = 9016,
 		.description = "2017_02_26_bots_spell_casting_chances_update.sql",
-		.query = "SHOW TABLES LIKE 'bot_spell_casting_chances'",
+		.check = "SHOW TABLES LIKE 'bot_spell_casting_chances'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -17604,7 +17604,7 @@ INSERT INTO `bot_spell_casting_chances` (`spell_type_index`, `class_id`, `stance
 	ManifestEntry{
 		.version = 9017,
 		.description = "2017_03_26_bots_spells_id_fix_for_saved_shadowknight_bots.sql",
-		.query = "SELECT * FROM `bot_data` WHERE `class` = '5' AND `spells_id` = '3004'",
+		.check = "SELECT * FROM `bot_data` WHERE `class` = '5' AND `spells_id` = '3004'",
 		.condition = "not_empty",
 		.match = "",
 		.sql = R"(
@@ -17616,7 +17616,7 @@ UPDATE `bot_data` SET `spells_id` = '3005' WHERE `class` = '5';
 	ManifestEntry{
 		.version = 9018,
 		.description = "2018_02_02_bot_spells_min_max_hp.sql",
-		.query = "SHOW COLUMNS FROM `bot_spells_entries` LIKE 'min_hp'",
+		.check = "SHOW COLUMNS FROM `bot_spells_entries` LIKE 'min_hp'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -17628,7 +17628,7 @@ ALTER TABLE `bot_spells_entries` ADD `max_hp` SMALLINT(5) DEFAULT '0';
 	ManifestEntry{
 		.version = 9019,
 		.description = "2018_04_12_bots_stop_melee_level.sql",
-		.query = "SHOW COLUMNS FROM `bot_data` LIKE 'stop_melee_level'",
+		.check = "SHOW COLUMNS FROM `bot_data` LIKE 'stop_melee_level'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -17646,7 +17646,7 @@ UPDATE `bot_data` SET `stop_melee_level` = @csml_value WHERE `class` IN ('2', '6
 	ManifestEntry{
 		.version = 9020,
 		.description = "2018_08_13_bots_inventory_update.sql",
-		.query = "SELECT * FROM `inventory_versions` WHERE `version` = 2 and `bot_step` = 0",
+		.check = "SELECT * FROM `inventory_versions` WHERE `version` = 2 and `bot_step` = 0",
 		.condition = "not_empty",
 		.match = "",
 		.sql = R"(
@@ -17660,7 +17660,7 @@ UPDATE `inventory_versions` SET `bot_step` = 1 WHERE `version` = 2;
 	ManifestEntry{
 		.version = 9021,
 		.description = "2018_10_09_bots_owner_options.sql",
-		.query = "SHOW TABLES LIKE 'bot_owner_options'",
+		.check = "SHOW TABLES LIKE 'bot_owner_options'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -17681,7 +17681,7 @@ INSERT INTO `bot_command_settings`(`bot_command`, `access`, `aliases`) VALUES ('
 	ManifestEntry{
 		.version = 9022,
 		.description = "2019_02_07_bots_stance_type_update.sql",
-		.query = "SELECT * FROM `bot_spell_casting_chances` WHERE `spell_type_index` = '255' AND `class_id` = '255' AND `stance_index` = '0'",
+		.check = "SELECT * FROM `bot_spell_casting_chances` WHERE `spell_type_index` = '255' AND `class_id` = '255' AND `stance_index` = '0'",
 		.condition = "not_empty",
 		.match = "",
 		.sql = R"(
@@ -17702,7 +17702,7 @@ UPDATE `bot_spell_casting_chances` SET `stance_index` = '1' WHERE `spell_type_in
 	ManifestEntry{
 		.version = 9023,
 		.description = "2019_06_22_bots_owner_option_stats_update.sql",
-		.query = "SELECT * FROM db_version WHERE bots_version >= 9023",
+		.check = "SELECT * FROM db_version WHERE bots_version >= 9023",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -17713,7 +17713,7 @@ ALTER TABLE `bot_owner_options` ADD COLUMN `stats_update` SMALLINT(3) UNSIGNED N
 	ManifestEntry{
 		.version = 9024,
 		.description = "2019_06_27_bots_pet_get_lost.sql",
-		.query = "SELECT `bot_command` FROM `bot_command_settings` WHERE `bot_command` LIKE 'petgetlost'",
+		.check = "SELECT `bot_command` FROM `bot_command_settings` WHERE `bot_command` LIKE 'petgetlost'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -17724,7 +17724,7 @@ INSERT INTO `bot_command_settings`(`bot_command`, `access`, `aliases`) VALUES ('
 	ManifestEntry{
 		.version = 9025,
 		.description = "2019_08_26_bots_owner_option_spawn_message.sql",
-		.query = "SELECT * FROM db_version WHERE bots_version >= 9025",
+		.check = "SELECT * FROM db_version WHERE bots_version >= 9025",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -17736,7 +17736,7 @@ ALTER TABLE `bot_owner_options` ADD COLUMN `spawn_message_type` SMALLINT(3) UNSI
 	ManifestEntry{
 		.version = 9026,
 		.description = "2019_09_09_bots_owner_options_rework.sql",
-		.query = "SHOW COLUMNS FROM `bot_owner_options` LIKE 'option_type'",
+		.check = "SHOW COLUMNS FROM `bot_owner_options` LIKE 'option_type'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -17756,7 +17756,7 @@ ENGINE=InnoDB;
 	ManifestEntry{
 		.version = 9027,
 		.description = "2020_03_30_bots_view_update.sql",
-		.query = "SELECT * FROM db_version WHERE bots_version >= 9027",
+		.check = "SELECT * FROM db_version WHERE bots_version >= 9027",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -17766,7 +17766,7 @@ DROP VIEW IF EXISTS `vw_bot_character_mobs`;
 	ManifestEntry{
 		.version = 9028,
 		.description = "2021_06_04_bot_create_combinations.sql",
-		.query = "SHOW TABLES LIKE 'bot_create_combinations'",
+		.check = "SHOW TABLES LIKE 'bot_create_combinations'",
 		.condition = "empty",
 		.match = "",
 		.sql = _2021_06_04_bot_create_combinations,
@@ -17774,7 +17774,7 @@ DROP VIEW IF EXISTS `vw_bot_character_mobs`;
 	ManifestEntry{
 		.version = 9029,
 		.description = "2022_06_21_bot_groups_auto_spawn.sql",
-		.query = "SHOW COLUMNS from `bot_groups` LIKE 'auto_spawm'",
+		.check = "SHOW COLUMNS from `bot_groups` LIKE 'auto_spawm'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -17784,7 +17784,7 @@ ALTER TABLE `bot_groups` ADD COLUMN `auto_spawn` tinyint(1) UNSIGNED NOT NULL DE
 	ManifestEntry{
 		.version = 9030,
 		.description = "2022_10_27_bot_data_buckets.sql",
-		.query = "SHOW COLUMNS FROM `bot_spells_entries` LIKE 'bucket_name'",
+		.check = "SHOW COLUMNS FROM `bot_spells_entries` LIKE 'bucket_name'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -17797,7 +17797,7 @@ ADD COLUMN `bucket_comparison` tinyint UNSIGNED NULL DEFAULT 0 AFTER `bucket_val
 	ManifestEntry{
 		.version = 9031,
 		.description = "2022_11_13_bot_spells_entries.sql",
-		.query = "SELECT * FROM db_version WHERE bots_version >= 9031",
+		.check = "SELECT * FROM db_version WHERE bots_version >= 9031",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -17817,7 +17817,7 @@ MODIFY COLUMN `bucket_comparison` tinyint(3) UNSIGNED NOT NULL DEFAULT 0 AFTER `
 	ManifestEntry{
 		.version = 9032,
 		.description = "2022_11_07_bot_expansion_bitmask.sql",
-		.query = "SHOW COLUMNS FROM `bot_data` LIKE 'expansion_bitmask'",
+		.check = "SHOW COLUMNS FROM `bot_data` LIKE 'expansion_bitmask'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -17829,7 +17829,7 @@ ADD COLUMN `expansion_bitmask` int(11) NOT NULL DEFAULT -1 AFTER `stop_melee_lev
 	ManifestEntry{
 		.version = 9033,
 		.description = "2022_11_19_bot_spell_settings.sql",
-		.query = "SHOW TABLES LIKE 'bot_spell_settings'",
+		.check = "SHOW TABLES LIKE 'bot_spell_settings'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -17851,7 +17851,7 @@ CREATE TABLE `bot_spell_settings` (
 	ManifestEntry{
 		.version = 9034,
 		.description = "2022_12_02_bot_spell_settings.sql",
-		.query = "SHOW COLUMNS FROM `bot_data` LIKE 'enforce_spell_settings'",
+		.check = "SHOW COLUMNS FROM `bot_data` LIKE 'enforce_spell_settings'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -17866,7 +17866,7 @@ ALTER TABLE `bot_spell_settings` DROP `max_level`;
 	ManifestEntry{
 		.version = 9035,
 		.description = "2022_12_04_bot_archery.sql",
-		.query = "SHOW COLUMNS FROM `bot_data` LIKE 'archery_setting'",
+		.check = "SHOW COLUMNS FROM `bot_data` LIKE 'archery_setting'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -17877,7 +17877,7 @@ ADD COLUMN `archery_setting` TINYINT(2) UNSIGNED NOT NULL DEFAULT '0' AFTER `enf
 	ManifestEntry{
 		.version = 9036,
 		.description = "2023_01_19_drop_bot_views.sql",
-		.query = "SHOW TABLES LIKE 'vw_groups'",
+		.check = "SHOW TABLES LIKE 'vw_groups'",
 		.condition = "not_empty",
 		.match = "",
 		.sql = R"(
@@ -17893,7 +17893,7 @@ DROP TABLE bot_guild_members;
 	ManifestEntry{
 		.version = 9037,
 		.description = "2023_01_22_add_name_index.sql",
-		.query = "",
+		.check = "",
 		.condition = "show index from bot_data WHERE key_name = 'name`",
 		.match = "empty",
 		.sql = R"(

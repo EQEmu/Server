@@ -99,18 +99,6 @@ std::string DatabaseUpdate::GetQueryResult(std::string query)
 	return Strings::Join(result_lines, "\n");
 }
 
-//# Example: Version|Filename.sql|Query_to_Check_Condition_For_Needed_Update|match type|text to match
-//#	0 = Database Version
-//#	1 = Filename.sql
-//#	2 = Query_to_Check_Condition_For_Needed_Update
-//#	3 = Match Type - If condition from match type to Value 4 is true, update will flag for needing to be ran
-//#		contains = If query results contains text from 4th value
-//#		match = If query results matches text from 4th value
-//#		missing = If query result is missing text from 4th value
-//#		empty = If the query results in no results
-//#		not_empty = If the query is not empty
-//#	4 = Text to match
-//#
 bool DatabaseUpdate::ShouldRunMigration(ManifestEntry &e, std::string query_result)
 {
 	std::string r = Strings::Trim(query_result);
@@ -148,7 +136,7 @@ bool DatabaseUpdate::UpdateManifest(
 			for (auto &e: entries) {
 				if (e.version == version) {
 					bool        has_migration = true;
-					std::string r             = GetQueryResult(e.query);
+					std::string r             = GetQueryResult(e.check);
 					if (ShouldRunMigration(e, r)) {
 						has_migration = false;
 						missing_migrations.emplace_back(e.version);

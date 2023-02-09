@@ -2,7 +2,7 @@ std::vector<ManifestEntry> manifest_entries = {
 	ManifestEntry{
 		.version = 9000,
 		.description = "2013_02_18_merc_rules_and_tables.sql",
-		.query = "SELECT * FROM `rule_values` WHERE `rule_name` LIKE '%Mercs:ResurrectRadius%'",
+		.check = "SELECT * FROM `rule_values` WHERE `rule_name` LIKE '%Mercs:ResurrectRadius%'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -64,7 +64,7 @@ CREATE TABLE mercbuffs (
 	ManifestEntry{
 		.version = 9001,
 		.description = "2013_02_25_impr_ht_lt.sql",
-		.query = "SHOW TABLES LIKE 'merc_inventory'",
+		.check = "SHOW TABLES LIKE 'merc_inventory'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -78,7 +78,7 @@ update aa_actions set redux_aa=596, redux_rate=17 where aaid=208;
 	ManifestEntry{
 		.version = 9002,
 		.description = "2013_03_1_merc_rules_and_equipment.sql",
-		.query = "SHOW TABLES LIKE 'merc_inventory'",
+		.check = "SHOW TABLES LIKE 'merc_inventory'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -175,7 +175,7 @@ INSERT INTO merc_inventory (merc_subtype_id, item_id, min_level, max_level) VALU
 	ManifestEntry{
 		.version = 9005,
 		.description = "2013_04_08_salvage.sql",
-		.query = "SHOW COLUMNS FROM `tradeskill_recipe_entries` LIKE 'salvagecount'",
+		.check = "SHOW COLUMNS FROM `tradeskill_recipe_entries` LIKE 'salvagecount'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -196,7 +196,7 @@ INSERT INTO `aa_effects` (`id`, `aaid`, `slot`, `effectid`, `base1`, `base2`) VA
 	ManifestEntry{
 		.version = 9006,
 		.description = "2013_05_05_account_flags.sql",
-		.query = "SHOW TABLES LIKE 'account_flags'",
+		.check = "SHOW TABLES LIKE 'account_flags'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -217,7 +217,7 @@ CREATE TABLE IF NOT EXISTS `account_flags` (
 	ManifestEntry{
 		.version = 9007,
 		.description = "2013_05_05_item_tick.sql",
-		.query = "SHOW TABLES LIKE 'item_tick'",
+		.check = "SHOW TABLES LIKE 'item_tick'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -240,7 +240,7 @@ CREATE TABLE IF NOT EXISTS `item_tick` (
 	ManifestEntry{
 		.version = 9008,
 		.description = "2013_07_11_npc_special_abilities.sql",
-		.query = "SHOW COLUMNS FROM `npc_types` LIKE 'special_abilities'",
+		.check = "SHOW COLUMNS FROM `npc_types` LIKE 'special_abilities'",
 		.condition = "empty",
 		.match = "",
 		.sql = _2013_07_11_npc_special_abilities,
@@ -248,7 +248,7 @@ CREATE TABLE IF NOT EXISTS `item_tick` (
 	ManifestEntry{
 		.version = 9009,
 		.description = "2013_10_12_merc_special_abilities.sql",
-		.query = "SHOW COLUMNS FROM `merc_stats` LIKE 'special_abilities'",
+		.check = "SHOW COLUMNS FROM `merc_stats` LIKE 'special_abilities'",
 		.condition = "empty",
 		.match = "",
 		.sql = _2013_10_12_merc_special_abilities,
@@ -256,7 +256,7 @@ CREATE TABLE IF NOT EXISTS `item_tick` (
 	ManifestEntry{
 		.version = 9011,
 		.description = "2013_10_31_recipe_disabling.sql",
-		.query = "SHOW COLUMNS FROM `tradeskill_recipe` LIKE 'enabled'",
+		.check = "SHOW COLUMNS FROM `tradeskill_recipe` LIKE 'enabled'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -267,7 +267,7 @@ ALTER TABLE `tradeskill_recipe` ADD `enabled` tinyint(1) NOT NULL DEFAULT '1';
 	ManifestEntry{
 		.version = 9012,
 		.description = "2013_11_07_basedata.sql",
-		.query = "SHOW TABLES LIKE 'base_data'",
+		.check = "SHOW TABLES LIKE 'base_data'",
 		.condition = "empty",
 		.match = "",
 		.sql = _2013_11_07_basedata,
@@ -275,7 +275,7 @@ ALTER TABLE `tradeskill_recipe` ADD `enabled` tinyint(1) NOT NULL DEFAULT '1';
 	ManifestEntry{
 		.version = 9014,
 		.description = "2013_11_18_assistradius.sql",
-		.query = "SHOW COLUMNS FROM `npc_types` LIKE 'assistradius'",
+		.check = "SHOW COLUMNS FROM `npc_types` LIKE 'assistradius'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -286,7 +286,7 @@ ALTER TABLE  `npc_types` ADD  `assistradius` INT( 10 ) UNSIGNED NOT NULL DEFAULT
 	ManifestEntry{
 		.version = 9015,
 		.description = "2013_12_26_merchantlist_class_required.sql",
-		.query = "SHOW COLUMNS FROM `merchantlist` LIKE 'classes_required'",
+		.check = "SHOW COLUMNS FROM `merchantlist` LIKE 'classes_required'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -298,7 +298,7 @@ ALTER TABLE  `npc_types` ADD  `assistradius` INT( 10 ) UNSIGNED NOT NULL DEFAULT
 	ManifestEntry{
 		.version = 9017,
 		.description = "2014_01_08_spellsnewadditions.sql",
-		.query = "SHOW COLUMNS FROM `spells_new` LIKE 'persistdeath'",
+		.check = "SHOW COLUMNS FROM `spells_new` LIKE 'persistdeath'",
 		.condition = "empty",
 		.match = "",
 		.sql = _2014_01_08_spellsnewadditions,
@@ -306,7 +306,7 @@ ALTER TABLE  `npc_types` ADD  `assistradius` INT( 10 ) UNSIGNED NOT NULL DEFAULT
 	ManifestEntry{
 		.version = 9018,
 		.description = "2014_01_09_preservepetsize.sql",
-		.query = "SHOW COLUMNS FROM `character_pet_info` LIKE 'size'",
+		.check = "SHOW COLUMNS FROM `character_pet_info` LIKE 'size'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -317,7 +317,7 @@ ALTER TABLE `character_pet_info` ADD `size` FLOAT NOT NULL DEFAULT '0';
 	ManifestEntry{
 		.version = 9020,
 		.description = "2014_01_20_not_extendable.sql",
-		.query = "SHOW COLUMNS FROM `spells_new` LIKE 'not_extendable'",
+		.check = "SHOW COLUMNS FROM `spells_new` LIKE 'not_extendable'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -328,7 +328,7 @@ ALTER TABLE `spells_new` CHANGE `field197` `not_extendable` INT(11) NOT NULL DEF
 	ManifestEntry{
 		.version = 9022,
 		.description = "2014_01_20_weather.sql",
-		.query = "SHOW COLUMNS FROM `zone` LIKE 'rain_chance1'",
+		.check = "SHOW COLUMNS FROM `zone` LIKE 'rain_chance1'",
 		.condition = "empty",
 		.match = "",
 		.sql = _2014_01_20_weather,
@@ -336,7 +336,7 @@ ALTER TABLE `spells_new` CHANGE `field197` `not_extendable` INT(11) NOT NULL DEF
 	ManifestEntry{
 		.version = 9025,
 		.description = "2014_02_13_rename_instance_lockout_tables.sql",
-		.query = "SHOW TABLES LIKE 'instance_list'",
+		.check = "SHOW TABLES LIKE 'instance_list'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -348,7 +348,7 @@ ALTER TABLE `instance_lockout_player` RENAME TO  `instance_list_player` ;
 	ManifestEntry{
 		.version = 9026,
 		.description = "2014_02_13_spells_new_update.sql",
-		.query = "SHOW COLUMNS FROM `spells_new` LIKE 'ConeStartAngle'",
+		.check = "SHOW COLUMNS FROM `spells_new` LIKE 'ConeStartAngle'",
 		.condition = "empty",
 		.match = "",
 		.sql = _2014_02_13_spells_new_update,
@@ -356,7 +356,7 @@ ALTER TABLE `instance_lockout_player` RENAME TO  `instance_list_player` ;
 	ManifestEntry{
 		.version = 9027,
 		.description = "2014_02_20_buff_update.sql",
-		.query = "SHOW COLUMNS FROM `character_buffs` LIKE 'caston_y'",
+		.check = "SHOW COLUMNS FROM `character_buffs` LIKE 'caston_y'",
 		.condition = "empty",
 		.match = "",
 		.sql = _2014_02_20_buff_update,
@@ -364,7 +364,7 @@ ALTER TABLE `instance_lockout_player` RENAME TO  `instance_list_player` ;
 	ManifestEntry{
 		.version = 9028,
 		.description = "2014_02_26_roambox_update.sql",
-		.query = "SHOW COLUMNS FROM `spawngroup` LIKE 'mindelay'",
+		.check = "SHOW COLUMNS FROM `spawngroup` LIKE 'mindelay'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -375,7 +375,7 @@ alter table `spawngroup` change `delay` `delay` int(11) not null default 45000;
 	ManifestEntry{
 		.version = 9030,
 		.description = "2014_04_04_physicalresist.sql",
-		.query = "SHOW COLUMNS FROM `npc_types` LIKE 'PhR'",
+		.check = "SHOW COLUMNS FROM `npc_types` LIKE 'PhR'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -392,7 +392,7 @@ UPDATE npc_types SET PhR = (20 + ((level - 60)*4))  WHERE PhR = 0 AND level > 60
 	ManifestEntry{
 		.version = 9031,
 		.description = "2014_04_10_no_target_with_hotkey.sql",
-		.query = "SHOW COLUMNS FROM `npc_types` LIKE 'no_target_hotkey'",
+		.check = "SHOW COLUMNS FROM `npc_types` LIKE 'no_target_hotkey'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -403,7 +403,7 @@ ALTER TABLE  `npc_types` ADD  `no_target_hotkey` tinyint( 1 ) UNSIGNED NOT NULL 
 	ManifestEntry{
 		.version = 9032,
 		.description = "2014_04_12_slowmitigation.sql",
-		.query = "SHOW COLUMNS FROM `npc_types` LIKE 'slow_mitigation'",
+		.check = "SHOW COLUMNS FROM `npc_types` LIKE 'slow_mitigation'",
 		.condition = "contains",
 		.match = "float",
 		.sql = R"(
@@ -420,7 +420,7 @@ ALTER TABLE npc_types MODIFY slow_mitigation smallint(4) NOT NULL DEFAULT  '0';
 	ManifestEntry{
 		.version = 9034,
 		.description = "2014_04_25_spawn_events.sql",
-		.query = "SHOW COLUMNS FROM `spawn_events` LIKE 'strict'",
+		.check = "SHOW COLUMNS FROM `spawn_events` LIKE 'strict'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -430,7 +430,7 @@ alter table spawn_events add column `strict` tinyint(4) not null default 0;
 	ManifestEntry{
 		.version = 9035,
 		.description = "2014_04_27_aispelleffects.sql",
-		.query = "SHOW COLUMNS FROM `npc_types` LIKE 'npc_spells_effects_id'",
+		.check = "SHOW COLUMNS FROM `npc_types` LIKE 'npc_spells_effects_id'",
 		.condition = "empty",
 		.match = "",
 		.sql = _2014_04_27_aispelleffects,
@@ -438,7 +438,7 @@ alter table spawn_events add column `strict` tinyint(4) not null default 0;
 	ManifestEntry{
 		.version = 9036,
 		.description = "2014_05_04_slowmitigationfix.sql",
-		.query = "SHOW COLUMNS FROM `npc_types` LIKE 'slow_mitigation'",
+		.check = "SHOW COLUMNS FROM `npc_types` LIKE 'slow_mitigation'",
 		.condition = "contains",
 		.match = "float",
 		.sql = R"(
@@ -451,7 +451,7 @@ ALTER TABLE npc_types MODIFY slow_mitigation smallint(4) NOT NULL DEFAULT  '0';
 	ManifestEntry{
 		.version = 9040,
 		.description = "2014_07_10_npc_spells.sql",
-		.query = "SHOW COLUMNS FROM `npc_spells` LIKE 'engaged_no_sp_recast_min'",
+		.check = "SHOW COLUMNS FROM `npc_spells` LIKE 'engaged_no_sp_recast_min'",
 		.condition = "empty",
 		.match = "",
 		.sql = _2014_07_10_npc_spells,
@@ -459,7 +459,7 @@ ALTER TABLE npc_types MODIFY slow_mitigation smallint(4) NOT NULL DEFAULT  '0';
 	ManifestEntry{
 		.version = 9041,
 		.description = "2014_08_02_spells_new.sql",
-		.query = "SHOW COLUMNS FROM `spells_new` LIKE 'viral_range'",
+		.check = "SHOW COLUMNS FROM `spells_new` LIKE 'viral_range'",
 		.condition = "empty",
 		.match = "",
 		.sql = _2014_08_02_spells_new,
@@ -467,7 +467,7 @@ ALTER TABLE npc_types MODIFY slow_mitigation smallint(4) NOT NULL DEFAULT  '0';
 	ManifestEntry{
 		.version = 9042,
 		.description = "2014_08_12_npc_raid_targets.sql",
-		.query = "SHOW COLUMNS FROM `npc_types` LIKE 'raid_target'",
+		.check = "SHOW COLUMNS FROM `npc_types` LIKE 'raid_target'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -478,7 +478,7 @@ ALTER TABLE `npc_types` ADD `raid_target` TINYINT(1) UNSIGNED NOT NULL DEFAULT '
 	ManifestEntry{
 		.version = 9043,
 		.description = "2014_08_18_spells_new_update.sql",
-		.query = "SHOW COLUMNS FROM `spells_new` LIKE 'viral_targets'",
+		.check = "SHOW COLUMNS FROM `spells_new` LIKE 'viral_targets'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -489,7 +489,7 @@ ALTER TABLE `spells_new` CHANGE `field192` `viral_timer` INT(11) NOT NULL DEFAUL
 	ManifestEntry{
 		.version = 9044,
 		.description = "2014_08_20_merchantlist_probability.sql",
-		.query = "SHOW COLUMNS FROM `merchantlist` LIKE 'probability'",
+		.check = "SHOW COLUMNS FROM `merchantlist` LIKE 'probability'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -499,7 +499,7 @@ ALTER TABLE `merchantlist` ADD `probability` INT(3) NOT NULL DEFAULT '100' AFTER
 	ManifestEntry{
 		.version = 9045,
 		.description = "2014_08_23_complete_queryserv_table_structures.sql",
-		.query = "SHOW TABLES LIKE 'qs_player_aa_rate_hourly'",
+		.check = "SHOW TABLES LIKE 'qs_player_aa_rate_hourly'",
 		.condition = "empty",
 		.match = "",
 		.sql = _2014_08_23_complete_queryserv_table_structures,
@@ -507,7 +507,7 @@ ALTER TABLE `merchantlist` ADD `probability` INT(3) NOT NULL DEFAULT '100' AFTER
 	ManifestEntry{
 		.version = 9046,
 		.description = "2014_08_23_player_events_and_player_aa_rate_hourly.sql",
-		.query = "SHOW TABLES LIKE 'qs_player_events'",
+		.check = "SHOW TABLES LIKE 'qs_player_events'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -539,7 +539,7 @@ CREATE TABLE `qs_player_aa_rate_hourly` (
 	ManifestEntry{
 		.version = 9048,
 		.description = "2014_09_09_attack_delay.sql",
-		.query = "SHOW COLUMNS FROM `npc_types` LIKE 'attack_delay'",
+		.check = "SHOW COLUMNS FROM `npc_types` LIKE 'attack_delay'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -552,7 +552,7 @@ UPDATE `npc_types` SET `attack_delay` = 30 WHERE `attack_speed` = 0;
 	ManifestEntry{
 		.version = 9050,
 		.description = "2014_09_20_ban_messages.sql",
-		.query = "SHOW COLUMNS FROM `account` LIKE 'ban_reason'",
+		.check = "SHOW COLUMNS FROM `account` LIKE 'ban_reason'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -563,7 +563,7 @@ ALTER TABLE `account` ADD COLUMN `ban_reason` TEXT NULL DEFAULT NULL, ADD COLUMN
 	ManifestEntry{
 		.version = 9051,
 		.description = "2014_10_11_raidmotd.sql",
-		.query = "SHOW COLUMNS FROM `raid_details` LIKE 'motd'",
+		.check = "SHOW COLUMNS FROM `raid_details` LIKE 'motd'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -574,7 +574,7 @@ ALTER TABLE `raid_details` ADD `motd` varchar(1024);
 	ManifestEntry{
 		.version = 9052,
 		.description = "2014_10_13_raidleadership.sql",
-		.query = "SHOW TABLES LIKE 'raid_leaders'",
+		.check = "SHOW TABLES LIKE 'raid_leaders'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -593,7 +593,7 @@ CREATE TABLE `raid_leaders` (
 	ManifestEntry{
 		.version = 9053,
 		.description = "2014_10_18_group_mentor.sql",
-		.query = "SHOW COLUMNS FROM `group_leaders` LIKE 'mentoree'",
+		.check = "SHOW COLUMNS FROM `group_leaders` LIKE 'mentoree'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -605,7 +605,7 @@ ALTER TABLE `group_leaders` ADD `mentor_percent` INT(4) DEFAULT 0 NOT NULL;
 	ManifestEntry{
 		.version = 9054,
 		.description = "2014_10_19_raid_group_mentor.sql",
-		.query = "SHOW COLUMNS FROM `raid_leaders` LIKE 'mentoree'",
+		.check = "SHOW COLUMNS FROM `raid_leaders` LIKE 'mentoree'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -617,7 +617,7 @@ ALTER TABLE `raid_leaders` ADD `mentor_percent` INT(4) DEFAULT 0 NOT NULL;
 	ManifestEntry{
 		.version = 9055,
 		.description = "2014_10_30_special_abilities_null.sql",
-		.query = "SHOW COLUMNS FROM `npc_types` LIKE 'special_abilities'",
+		.check = "SHOW COLUMNS FROM `npc_types` LIKE 'special_abilities'",
 		.condition = "contains",
 		.match = "NO",
 		.sql = R"(
@@ -631,7 +631,7 @@ ALTER TABLE `npc_types` MODIFY COLUMN `special_abilities`  text CHARACTER SET la
 	ManifestEntry{
 		.version = 9056,
 		.description = "2014_11_08_raidmembers.sql",
-		.query = "SHOW COLUMNS FROM `raid_members` LIKE 'groupid'",
+		.check = "SHOW COLUMNS FROM `raid_members` LIKE 'groupid'",
 		.condition = "missing",
 		.match = "unsigned",
 		.sql = R"(
@@ -641,7 +641,7 @@ ALTER TABLE `raid_members` CHANGE COLUMN `groupid` `groupid` INT(4) UNSIGNED NOT
 	ManifestEntry{
 		.version = 9057,
 		.description = "2014_11_13_spells_new_updates.sql",
-		.query = "SHOW COLUMNS FROM `spells_new` LIKE 'disallow_sit'",
+		.check = "SHOW COLUMNS FROM `spells_new` LIKE 'disallow_sit'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -660,7 +660,7 @@ ALTER TABLE `spells_new` CHANGE `field205` `no_block` INT(11) NOT NULL DEFAULT '
 	ManifestEntry{
 		.version = 9058,
 		.description = "2014_11_26_inventorytableupdate.sql",
-		.query = "SHOW COLUMNS FROM `inventory` LIKE 'ornamenticon'",
+		.check = "SHOW COLUMNS FROM `inventory` LIKE 'ornamenticon'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -674,7 +674,7 @@ ALTER TABLE `inventory`
 	ManifestEntry{
 		.version = 9059,
 		.description = "2014_12_01_mercs_table_update.sql",
-		.query = "SHOW COLUMNS FROM `mercs` LIKE 'MercSize'",
+		.check = "SHOW COLUMNS FROM `mercs` LIKE 'MercSize'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -685,7 +685,7 @@ ALTER TABLE `mercs` ADD `MercSize` float( 0 ) NOT NULL DEFAULT '5' AFTER `Gender
 	ManifestEntry{
 		.version = 9060,
 		.description = "2014_12_09_items_table_update.sql",
-		.query = "SHOW COLUMNS FROM `items` LIKE 'herosforgemodel'",
+		.check = "SHOW COLUMNS FROM `items` LIKE 'herosforgemodel'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -696,7 +696,7 @@ ALTER TABLE `items` ADD `herosforgemodel` int( 11 ) NOT NULL DEFAULT '0' AFTER `
 	ManifestEntry{
 		.version = 9061,
 		.description = "2014_12_13_inventory_table_update.sql",
-		.query = "SHOW COLUMNS FROM `inventory` LIKE 'ornament_hero_model'",
+		.check = "SHOW COLUMNS FROM `inventory` LIKE 'ornament_hero_model'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -706,7 +706,7 @@ ALTER TABLE `inventory` ADD `ornament_hero_model` int( 11 ) NOT NULL DEFAULT '0'
 	ManifestEntry{
 		.version = 9062,
 		.description = "2014_12_15_multiple_table_updates.sql",
-		.query = "SHOW COLUMNS FROM `items` LIKE 'augslot6type'",
+		.check = "SHOW COLUMNS FROM `items` LIKE 'augslot6type'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -731,7 +731,7 @@ ALTER TABLE `character_corpse_items` ADD `aug_6` int( 11 ) NOT NULL DEFAULT '0' 
 	ManifestEntry{
 		.version = 9063,
 		.description = "2014_12_24_npc_types_update.sql",
-		.query = "SHOW COLUMNS FROM `npc_types` LIKE 'd_melee_texture1'",
+		.check = "SHOW COLUMNS FROM `npc_types` LIKE 'd_melee_texture1'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -742,7 +742,7 @@ ALTER TABLE `npc_types` CHANGE `d_meele_texture2` `d_melee_texture2` INT(11) DEF
 	ManifestEntry{
 		.version = 9064,
 		.description = "2014_12_24_npc_types_table_update.sql",
-		.query = "SHOW COLUMNS FROM `npc_types` LIKE 'herosforgemodel'",
+		.check = "SHOW COLUMNS FROM `npc_types` LIKE 'herosforgemodel'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -752,7 +752,7 @@ ALTER TABLE `npc_types` ADD `herosforgemodel` int( 11 ) NOT NULL DEFAULT '0' AFT
 	ManifestEntry{
 		.version = 9066,
 		.description = "2014_12_31_npc_types_default_values_update.sql",
-		.query = "SHOW COLUMNS FROM `npc_types` LIKE 'bodytype'",
+		.check = "SHOW COLUMNS FROM `npc_types` LIKE 'bodytype'",
 		.condition = "contains",
 		.match = "YES",
 		.sql = R"(
@@ -768,7 +768,7 @@ ALTER TABLE `npc_types` MODIFY `d_melee_texture2` INT(11) NOT NULL DEFAULT '0';
 	ManifestEntry{
 		.version = 9067,
 		.description = "2015_01_21_npc_types_update.sql",
-		.query = "SHOW COLUMNS FROM `npc_types` LIKE 'light'",
+		.check = "SHOW COLUMNS FROM `npc_types` LIKE 'light'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -778,7 +778,7 @@ ALTER TABLE `npc_types` ADD `light` tinyint( 2 ) NOT NULL DEFAULT '0';
 	ManifestEntry{
 		.version = 9068,
 		.description = "2015_01_15_logsys_categories_table.sql",
-		.query = "SHOW TABLES LIKE 'logsys_categories'",
+		.check = "SHOW TABLES LIKE 'logsys_categories'",
 		.condition = "empty",
 		.match = "",
 		.sql = _2015_01_15_logsys_categories_table,
@@ -786,7 +786,7 @@ ALTER TABLE `npc_types` ADD `light` tinyint( 2 ) NOT NULL DEFAULT '0';
 	ManifestEntry{
 		.version = 9069,
 		.description = "2015_01_25_logsys_mercenaries_category.sql",
-		.query = "SELECT * FROM `logsys_categories` WHERE `log_category_description` LIKE 'Mercenaries'",
+		.check = "SELECT * FROM `logsys_categories` WHERE `log_category_description` LIKE 'Mercenaries'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -796,7 +796,7 @@ INSERT INTO `logsys_categories` (`log_category_id`,`log_category_description`,`l
 	ManifestEntry{
 		.version = 9070,
 		.description = "2015_01_28_quest_debug_log_category.sql",
-		.query = "SELECT * FROM `logsys_categories` WHERE `log_category_description` LIKE 'Quest Debug'",
+		.check = "SELECT * FROM `logsys_categories` WHERE `log_category_description` LIKE 'Quest Debug'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -807,7 +807,7 @@ INSERT INTO `logsys_categories` (`log_category_id`, `log_category_description`, 
 	ManifestEntry{
 		.version = 9071,
 		.description = "2015_01_29_merc_stats_table_update.sql",
-		.query = "SHOW COLUMNS FROM `merc_stats` LIKE 'statscale'",
+		.check = "SHOW COLUMNS FROM `merc_stats` LIKE 'statscale'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -817,7 +817,7 @@ ALTER TABLE `merc_stats` ADD `statscale` int( 11 ) NOT NULL DEFAULT '100' AFTER 
 	ManifestEntry{
 		.version = 9072,
 		.description = "2015_01_30_merc_attack_delay.sql",
-		.query = "SHOW COLUMNS FROM `merc_stats` LIKE 'attack_delay'",
+		.check = "SHOW COLUMNS FROM `merc_stats` LIKE 'attack_delay'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -830,7 +830,7 @@ UPDATE `merc_stats` SET `attack_delay` = 30 WHERE `attack_speed` = 0;
 	ManifestEntry{
 		.version = 9073,
 		.description = "2015_01_31_character_item_recast.sql",
-		.query = "SHOW TABLES LIKE 'character_item_recast'",
+		.check = "SHOW TABLES LIKE 'character_item_recast'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -847,7 +847,7 @@ CREATE TABLE `character_item_recast` (
 	ManifestEntry{
 		.version = 9074,
 		.description = "2015_02_01_logsys_packet_logs.sql",
-		.query = "SELECT * FROM `logsys_categories` WHERE `log_category_description` LIKE 'Packet: Server -> Client'",
+		.check = "SELECT * FROM `logsys_categories` WHERE `log_category_description` LIKE 'Packet: Server -> Client'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -859,7 +859,7 @@ REPLACE INTO `logsys_categories` (`log_category_id`, `log_category_description`)
 	ManifestEntry{
 		.version = 9075,
 		.description = "2015_02_02_logsys_packet_logs_with_dump.sql",
-		.query = "SELECT * FROM `logsys_categories` WHERE `log_category_description` LIKE 'Packet: Server -> Client With Dump'",
+		.check = "SELECT * FROM `logsys_categories` WHERE `log_category_description` LIKE 'Packet: Server -> Client With Dump'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -871,7 +871,7 @@ REPLACE INTO `logsys_categories` (`log_category_id`, `log_category_description`)
 	ManifestEntry{
 		.version = 9076,
 		.description = "2015_02_04_average_coin.sql",
-		.query = "SHOW COLUMNS FROM `loottable` WHERE Field = 'avgcoin'",
+		.check = "SHOW COLUMNS FROM `loottable` WHERE Field = 'avgcoin'",
 		.condition = "contains",
 		.match = "smallint",
 		.sql = R"(
@@ -883,7 +883,7 @@ UPDATE `loottable` SET avgcoin = 0;
 	ManifestEntry{
 		.version = 9077,
 		.description = "2015_02_12_zone_gravity.sql",
-		.query = "SHOW COLUMNS FROM `zone` LIKE 'gravity'",
+		.check = "SHOW COLUMNS FROM `zone` LIKE 'gravity'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -894,7 +894,7 @@ ADD COLUMN `gravity`  float NOT NULL DEFAULT .4 AFTER `snow_duration4`;
 	ManifestEntry{
 		.version = 9078,
 		.description = "2015_05_20_buffinstrumentmod.sql",
-		.query = "SHOW COLUMNS FROM `character_buffs` LIKE 'instrument_mod'",
+		.check = "SHOW COLUMNS FROM `character_buffs` LIKE 'instrument_mod'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -905,7 +905,7 @@ ALTER TABLE `character_buffs` ADD COLUMN `instrument_mod` int(10) DEFAULT 10 NOT
 	ManifestEntry{
 		.version = 9079,
 		.description = "2015_05_23_buffdurations.sql",
-		.query = "SHOW COLUMNS FROM `character_buffs` LIKE 'ticsremaining'",
+		.check = "SHOW COLUMNS FROM `character_buffs` LIKE 'ticsremaining'",
 		.condition = "contains",
 		.match = "unsigned",
 		.sql = R"(
@@ -917,7 +917,7 @@ ALTER TABLE `merc_buffs` CHANGE COLUMN `TicsRemaining` `TicsRemaining` INT(11) S
 	ManifestEntry{
 		.version = 9080,
 		.description = "2015_05_23_petbuffinstrumentmod.sql",
-		.query = "SHOW COLUMNS FROM `character_pet_buffs` LIKE 'instrument_mod'",
+		.check = "SHOW COLUMNS FROM `character_pet_buffs` LIKE 'instrument_mod'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -928,7 +928,7 @@ ALTER TABLE `character_pet_buffs` ADD COLUMN `instrument_mod` tinyint UNSIGNED D
 	ManifestEntry{
 		.version = 9081,
 		.description = "2015_05_23_dbstr_us.sql",
-		.query = "SHOW TABLES LIKE 'db_str'",
+		.check = "SHOW TABLES LIKE 'db_str'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -944,7 +944,7 @@ CREATE TABLE `db_str` (
 	ManifestEntry{
 		.version = 9082,
 		.description = "2015_05_25_npc_types_texture_fields.sql",
-		.query = "SHOW COLUMNS FROM `npc_types` LIKE 'armtexture'",
+		.check = "SHOW COLUMNS FROM `npc_types` LIKE 'armtexture'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -959,7 +959,7 @@ ADD COLUMN `feettexture` tinyint(2) NOT NULL DEFAULT '0' AFTER `legtexture`;
 	ManifestEntry{
 		.version = 9083,
 		.description = "2015_06_07_aa_update.sql",
-		.query = "SHOW COLUMNS FROM `character_alternate_abilities` LIKE 'charges'",
+		.check = "SHOW COLUMNS FROM `character_alternate_abilities` LIKE 'charges'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -970,7 +970,7 @@ ALTER TABLE character_alternate_abilities ADD COLUMN charges SMALLINT(11) UNSIGN
 	ManifestEntry{
 		.version = 9084,
 		.description = "2015_06_30_runspeed_adjustments.sql",
-		.query = "SELECT `runspeed` FROM `npc_types` WHERE `runspeed` > 3",
+		.check = "SELECT `runspeed` FROM `npc_types` WHERE `runspeed` > 3",
 		.condition = "not_empty",
 		.match = "",
 		.sql = R"(
@@ -986,7 +986,7 @@ UPDATE npc_types SET npc_types.runspeed = 3 WHERE npc_types.runspeed > 3;
 	ManifestEntry{
 		.version = 9085,
 		.description = "2015_07_01_marquee_rule.sql",
-		.query = "SELECT * FROM `rule_values` WHERE `rule_name` LIKE '%Character:MarqueeHPUpdates%'",
+		.check = "SELECT * FROM `rule_values` WHERE `rule_name` LIKE '%Character:MarqueeHPUpdates%'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -996,7 +996,7 @@ INSERT INTO `rule_values` (`rule_name`, `rule_value`, `notes`) VALUES ('Characte
 	ManifestEntry{
 		.version = 9086,
 		.description = "2015_07_02_aa_rework.sql",
-		.query = "SHOW TABLES LIKE 'aa_ranks'",
+		.check = "SHOW TABLES LIKE 'aa_ranks'",
 		.condition = "empty",
 		.match = "",
 		.sql = _2015_07_02_aa_rework,
@@ -1004,7 +1004,7 @@ INSERT INTO `rule_values` (`rule_name`, `rule_value`, `notes`) VALUES ('Characte
 	ManifestEntry{
 		.version = 9087,
 		.description = "2015_09_25_inventory_snapshots.sql",
-		.query = "SHOW TABLES LIKE 'inventory_snapshots'",
+		.check = "SHOW TABLES LIKE 'inventory_snapshots'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -1060,7 +1060,7 @@ INSERT INTO `rule_values` VALUES
 	ManifestEntry{
 		.version = 9088,
 		.description = "2015_11_01_perl_event_export_settings.sql",
-		.query = "SHOW TABLES LIKE 'perl_event_export_settings'",
+		.check = "SHOW TABLES LIKE 'perl_event_export_settings'",
 		.condition = "empty",
 		.match = "",
 		.sql = _2015_11_01_perl_event_export_settings,
@@ -1068,7 +1068,7 @@ INSERT INTO `rule_values` VALUES
 	ManifestEntry{
 		.version = 9089,
 		.description = "2015_11_02_ai_idle_no_spell_recast_default_changes.sql",
-		.query = "SELECT * FROM `rule_values` WHERE `rule_name` LIKE '%Spells:AI_IdleNoSpellMinRecast%' AND `rule_value` = '500'",
+		.check = "SELECT * FROM `rule_values` WHERE `rule_name` LIKE '%Spells:AI_IdleNoSpellMinRecast%' AND `rule_value` = '500'",
 		.condition = "not_empty",
 		.match = "",
 		.sql = R"(
@@ -1079,7 +1079,7 @@ UPDATE `rule_values` SET `rule_value` = '60000' WHERE `rule_value` = '2000' AND 
 	ManifestEntry{
 		.version = 9090,
 		.description = "2015_12_01_spell_scribe_restriction_rule.sql",
-		.query = "SELECT `rule_name` FROM `rule_values` WHERE `rule_name` LIKE 'Character:RestrictSpellScribing'",
+		.check = "SELECT `rule_name` FROM `rule_values` WHERE `rule_name` LIKE 'Character:RestrictSpellScribing'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -1096,7 +1096,7 @@ INSERT INTO `rule_values` VALUES ('10', 'Character:RestrictSpellScribing', 'fals
 	ManifestEntry{
 		.version = 9091,
 		.description = "2015_12_07_command_settings.sql",
-		.query = "SHOW TABLES LIKE 'command_settings'",
+		.check = "SHOW TABLES LIKE 'command_settings'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -1117,7 +1117,7 @@ INSERT INTO `command_settings` VALUES ('acceptrules', '90', ''),('advnpcspawn', 
 	ManifestEntry{
 		.version = 9092,
 		.description = "2015_12_17_eqtime.sql",
-		.query = "SHOW TABLES LIKE 'eqtime'",
+		.check = "SHOW TABLES LIKE 'eqtime'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -1137,7 +1137,7 @@ INSERT INTO eqtime values (0,1,28,12,3766,1444035661);
 	ManifestEntry{
 		.version = 9093,
 		.description = "2015_12_21_items_updates_evoitem.sql",
-		.query = "SHOW COLUMNS FROM `items` LIKE 'evoitem'",
+		.check = "SHOW COLUMNS FROM `items` LIKE 'evoitem'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -1154,7 +1154,7 @@ ALTER TABLE `items`
 	ManifestEntry{
 		.version = 9094,
 		.description = "2015_12_29_quest_zone_events.sql",
-		.query = "SELECT * FROM perl_event_export_settings WHERE event_description = 'EVENT_SPAWN_ZONE'",
+		.check = "SELECT * FROM perl_event_export_settings WHERE event_description = 'EVENT_SPAWN_ZONE'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -1167,7 +1167,7 @@ MODIFY COLUMN `notes`  text CHARACTER SET latin1 COLLATE latin1_swedish_ci NULL 
 	ManifestEntry{
 		.version = 9095,
 		.description = "2016_01_08_command_find_aliases.sql",
-		.query = "SELECT * FROM `command_settings` WHERE `command` LIKE 'findaliases'",
+		.check = "SELECT * FROM `command_settings` WHERE `command` LIKE 'findaliases'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -1178,7 +1178,7 @@ INSERT INTO `command_settings` VALUES ('findaliases', 0, 'fa');
 	ManifestEntry{
 		.version = 9096,
 		.description = "2016_03_05_secondary_recall.sql",
-		.query = "SHOW COLUMNS FROM `character_bind` LIKE 'slot'",
+		.check = "SHOW COLUMNS FROM `character_bind` LIKE 'slot'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -1194,7 +1194,7 @@ ALTER TABLE `character_bind` DROP COLUMN `is_home`;
 	ManifestEntry{
 		.version = 9097,
 		.description = "2016_07_03_npc_class_as_last_name.sql",
-		.query = "SELECT `rule_name` FROM `rule_values` WHERE `rule_name` LIKE 'NPC:UseClassAsLastName'",
+		.check = "SELECT `rule_name` FROM `rule_values` WHERE `rule_name` LIKE 'NPC:UseClassAsLastName'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -1206,7 +1206,7 @@ INSERT INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VAL
 	ManifestEntry{
 		.version = 9098,
 		.description = "2016_08_26_object_size_tilt.sql",
-		.query = "SHOW COLUMNS FROM `object` LIKE 'size'",
+		.check = "SHOW COLUMNS FROM `object` LIKE 'size'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -1219,7 +1219,7 @@ ALTER TABLE `object`
 	ManifestEntry{
 		.version = 9099,
 		.description = "2016_08_27_ip_exemptions.sql",
-		.query = "SHOW TABLES LIKE 'ip_exemptions'",
+		.check = "SHOW TABLES LIKE 'ip_exemptions'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -1242,7 +1242,7 @@ INSERT INTO `logsys_categories` (`log_category_id`, `log_category_description`, 
 	ManifestEntry{
 		.version = 9100,
 		.description = "2016_08_27_object_display_name.sql",
-		.query = "SHOW COLUMNS FROM `object` LIKE 'display_name'",
+		.check = "SHOW COLUMNS FROM `object` LIKE 'display_name'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -1253,7 +1253,7 @@ ALTER TABLE `object` ADD COLUMN `display_name` VARCHAR(64);
 	ManifestEntry{
 		.version = 9101,
 		.description = "2016_12_01_pcnpc_only.sql",
-		.query = "SHOW COLUMNS FROM `spells_new` LIKE 'pcnpc_only_flag'",
+		.check = "SHOW COLUMNS FROM `spells_new` LIKE 'pcnpc_only_flag'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -1265,7 +1265,7 @@ ALTER TABLE `spells_new` CHANGE `field184` `cast_not_standing` INT(11) DEFAULT 0
 	ManifestEntry{
 		.version = 9102,
 		.description = "2017_01_10_book_languages.sql",
-		.query = "SHOW COLUMNS FROM `books` LIKE 'language'",
+		.check = "SHOW COLUMNS FROM `books` LIKE 'language'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -1290,7 +1290,7 @@ drop table reading_is_fundamental;
 	ManifestEntry{
 		.version = 9103,
 		.description = "2017_01_30_book_languages_fix.sql",
-		.query = "SELECT `language` from `books` WHERE `language` IS NULL",
+		.check = "SELECT `language` from `books` WHERE `language` IS NULL",
 		.condition = "not_empty",
 		.match = "",
 		.sql = R"(
@@ -1304,7 +1304,7 @@ ALTER TABLE `books` MODIFY COLUMN `language` INT NOT NULL DEFAULT '0';
 	ManifestEntry{
 		.version = 9104,
 		.description = "2017_02_09_npc_spells_entries_type_update.sql",
-		.query = "SHOW COLUMNS IN `npc_spells_entries` LIKE 'type'",
+		.check = "SHOW COLUMNS IN `npc_spells_entries` LIKE 'type'",
 		.condition = "contains",
 		.match = "smallint(5) unsigned",
 		.sql = R"(
@@ -1315,7 +1315,7 @@ ALTER TABLE `npc_spells_entries` MODIFY COLUMN `type` INT(10) UNSIGNED NOT NULL 
 	ManifestEntry{
 		.version = 9105,
 		.description = "2017_02_15_bot_spells_entries.sql",
-		.query = "SELECT `id` FROM `npc_spells_entries` WHERE `npc_spells_id` >= 701 AND `npc_spells_id` <= 712",
+		.check = "SELECT `id` FROM `npc_spells_entries` WHERE `npc_spells_id` >= 701 AND `npc_spells_id` <= 712",
 		.condition = "not_empty",
 		.match = "",
 		.sql = R"(
@@ -1356,7 +1356,7 @@ DELETE FROM `npc_spells_entries` WHERE `npc_spells_id` >= '701' AND `npc_spells_
 	ManifestEntry{
 		.version = 9106,
 		.description = "2017_02_26_npc_spells_update_for_bots.sql",
-		.query = "SELECT * FROM `npc_spells` WHERE `id` = '701' AND `name` = 'Cleric Bot'",
+		.check = "SELECT * FROM `npc_spells` WHERE `id` = '701' AND `name` = 'Cleric Bot'",
 		.condition = "not_empty",
 		.match = "",
 		.sql = _2017_02_26_npc_spells_update_for_bots,
@@ -1364,7 +1364,7 @@ DELETE FROM `npc_spells_entries` WHERE `npc_spells_id` >= '701' AND `npc_spells_
 	ManifestEntry{
 		.version = 9107,
 		.description = "2017_03_09_inventory_version.sql",
-		.query = "SHOW TABLES LIKE 'inventory_version'",
+		.check = "SHOW TABLES LIKE 'inventory_version'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -1385,7 +1385,7 @@ INSERT INTO `inventory_version` VALUES (2, 0);
 	ManifestEntry{
 		.version = 9108,
 		.description = "2017_04_07_ignore_despawn.sql",
-		.query = "SHOW COLUMNS FROM `npc_types` LIKE 'ignore_despawn'",
+		.check = "SHOW COLUMNS FROM `npc_types` LIKE 'ignore_despawn'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -1395,7 +1395,7 @@ alter table npc_types add column `ignore_despawn` tinyint(2) not null default 0;
 	ManifestEntry{
 		.version = 9109,
 		.description = "2017_04_08_doors_disable_timer.sql",
-		.query = "SHOW COLUMNS FROM `doors` LIKE 'disable_timer'",
+		.check = "SHOW COLUMNS FROM `doors` LIKE 'disable_timer'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -1405,7 +1405,7 @@ ALTER TABLE `doors` ADD COLUMN `disable_timer` TINYINT(2) NOT NULL DEFAULT '0' A
 	ManifestEntry{
 		.version = 9110,
 		.description = "2017_04_10_graveyard.sql",
-		.query = "show index from graveyard WHERE key_name = 'zone_id_nonunique'",
+		.check = "show index from graveyard WHERE key_name = 'zone_id_nonunique'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -1417,7 +1417,7 @@ create index zone_id_nonunique on graveyard(zone_id);
 	ManifestEntry{
 		.version = 9111,
 		.description = "2017_06_24_saylink_index.sql",
-		.query = "SHOW INDEX FROM `saylink` WHERE `key_name` = 'phrase_index'",
+		.check = "SHOW INDEX FROM `saylink` WHERE `key_name` = 'phrase_index'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -1428,7 +1428,7 @@ ADD INDEX `phrase_index` (`phrase`) USING BTREE ;
 	ManifestEntry{
 		.version = 9112,
 		.description = "2017_06_24_rule_values_expand.sql",
-		.query = "SHOW COLUMNS FROM rule_values WHERE Field = 'rule_value' and Type = 'varchar(30)'",
+		.check = "SHOW COLUMNS FROM rule_values WHERE Field = 'rule_value' and Type = 'varchar(30)'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -1440,7 +1440,7 @@ MODIFY COLUMN `rule_value`  varchar(30) CHARACTER SET latin1 COLLATE latin1_swed
 	ManifestEntry{
 		.version = 9113,
 		.description = "2017_07_19_show_name.sql",
-		.query = "SHOW COLUMNS FROM `npc_types` LIKE 'show_name'",
+		.check = "SHOW COLUMNS FROM `npc_types` LIKE 'show_name'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -1453,7 +1453,7 @@ UPDATE `npc_types` SET `show_name` = 0, `untargetable` = 1 WHERE `bodytype` >= 6
 	ManifestEntry{
 		.version = 9114,
 		.description = "2017_07_22_aura.sql",
-		.query = "SHOW TABLES LIKE 'auras'",
+		.check = "SHOW TABLES LIKE 'auras'",
 		.condition = "empty",
 		.match = "",
 		.sql = _2017_07_22_aura,
@@ -1461,7 +1461,7 @@ UPDATE `npc_types` SET `show_name` = 0, `untargetable` = 1 WHERE `bodytype` >= 6
 	ManifestEntry{
 		.version = 9115,
 		.description = "2017_10_28_traps.sql",
-		.query = "SHOW COLUMNS FROM `traps` LIKE 'triggered_number'",
+		.check = "SHOW COLUMNS FROM `traps` LIKE 'triggered_number'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -1475,7 +1475,7 @@ alter table `traps` add column `undetectable` tinyint(4) not null default 0;
 	ManifestEntry{
 		.version = 9116,
 		.description = "2017_12_16_groundspawn_respawn_timer.sql",
-		.query = "SHOW COLUMNS FROM `ground_spawns` WHERE Field = 'respawn_timer' AND Type = 'int(11) unsigned'",
+		.check = "SHOW COLUMNS FROM `ground_spawns` WHERE Field = 'respawn_timer' AND Type = 'int(11) unsigned'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -1487,7 +1487,7 @@ UPDATE `ground_spawns` SET `respawn_timer` = `respawn_timer` / 1000;
 	ManifestEntry{
 		.version = 9117,
 		.description = "2018_02_01_npc_spells_min_max_hp.sql",
-		.query = "SHOW COLUMNS FROM `npc_spells_entries` LIKE 'min_hp'",
+		.check = "SHOW COLUMNS FROM `npc_spells_entries` LIKE 'min_hp'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -1499,7 +1499,7 @@ ALTER TABLE `npc_spells_entries` ADD `max_hp` SMALLINT(5) DEFAULT '0';
 	ManifestEntry{
 		.version = 9118,
 		.description = "2018_02_04_charm_stats.sql",
-		.query = "SHOW COLUMNS FROM `npc_types` LIKE 'charm_ac'",
+		.check = "SHOW COLUMNS FROM `npc_types` LIKE 'charm_ac'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -1516,7 +1516,7 @@ ALTER TABLE `npc_types` ADD `charm_atk` MEDIUMINT(9) DEFAULT '0';
 	ManifestEntry{
 		.version = 9119,
 		.description = "2018_02_10_globalloot.sql",
-		.query = "SHOW TABLES LIKE 'global_loot'",
+		.check = "SHOW TABLES LIKE 'global_loot'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -1545,7 +1545,7 @@ CREATE TABLE global_loot (
 	ManifestEntry{
 		.version = 9120,
 		.description = "2018_02_13_heading.sql",
-		.query = "SELECT value FROM variables WHERE varname = 'fixed_heading'",
+		.check = "SELECT value FROM variables WHERE varname = 'fixed_heading'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -1558,7 +1558,7 @@ INSERT INTO variables (varname, value, information) VALUES ('fixed_heading', 1, 
 	ManifestEntry{
 		.version = 9121,
 		.description = "2018_02_18_bug_reports.sql",
-		.query = "SHOW TABLES LIKE 'bug_reports'",
+		.check = "SHOW TABLES LIKE 'bug_reports'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -1612,7 +1612,7 @@ INSERT INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VAL
 	ManifestEntry{
 		.version = 9122,
 		.description = "2018_03_07_ucs_command.sql",
-		.query = "SELECT * FROM `command_settings` WHERE `command` LIKE 'ucs'",
+		.check = "SELECT * FROM `command_settings` WHERE `command` LIKE 'ucs'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -1623,7 +1623,7 @@ INSERT INTO `command_settings` VALUES ('ucs', '0', '');
 	ManifestEntry{
 		.version = 9123,
 		.description = "2018_07_07_data_buckets.sql",
-		.query = "SHOW TABLES LIKE 'data_buckets'",
+		.check = "SHOW TABLES LIKE 'data_buckets'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -1640,7 +1640,7 @@ CREATE TABLE `data_buckets` (
 	ManifestEntry{
 		.version = 9124,
 		.description = "2018_07_09_tasks.sql",
-		.query = "SHOW COLUMNS FROM `tasks` LIKE 'type'",
+		.check = "SHOW COLUMNS FROM `tasks` LIKE 'type'",
 		.condition = "empty",
 		.match = "",
 		.sql = _2018_07_09_tasks,
@@ -1648,7 +1648,7 @@ CREATE TABLE `data_buckets` (
 	ManifestEntry{
 		.version = 9125,
 		.description = "2018_07_20_task_emote.sql",
-		.query = "SHOW COLUMNS FROM `tasks` LIKE 'completion_emote'",
+		.check = "SHOW COLUMNS FROM `tasks` LIKE 'completion_emote'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -1659,7 +1659,7 @@ ALTER TABLE `tasks` ADD `completion_emote` VARCHAR(128) NOT NULL DEFAULT '';
 	ManifestEntry{
 		.version = 9126,
 		.description = "2018_09_07_fastregen.sql",
-		.query = "SHOW COLUMNS FROM `zone` LIKE 'fast_regen_hp'",
+		.check = "SHOW COLUMNS FROM `zone` LIKE 'fast_regen_hp'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -1672,7 +1672,7 @@ ALTER TABLE `zone` ADD `fast_regen_endurance` INT NOT NULL DEFAULT '180';
 	ManifestEntry{
 		.version = 9127,
 		.description = "2018_09_07_npcmaxaggrodist.sql",
-		.query = "SHOW COLUMNS FROM `zone` LIKE 'npc_max_aggro_dist'",
+		.check = "SHOW COLUMNS FROM `zone` LIKE 'npc_max_aggro_dist'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -1683,7 +1683,7 @@ ALTER TABLE `zone` ADD `npc_max_aggro_dist` INT NOT NULL DEFAULT '600';
 	ManifestEntry{
 		.version = 9128,
 		.description = "2018_08_13_inventory_version_update.sql",
-		.query = "SHOW TABLES LIKE 'inventory_version'",
+		.check = "SHOW TABLES LIKE 'inventory_version'",
 		.condition = "not_empty",
 		.match = "",
 		.sql = R"(
@@ -1694,7 +1694,7 @@ DROP TABLE IF EXISTS `inventory_version`;
 	ManifestEntry{
 		.version = 9129,
 		.description = "2018_08_13_inventory_update.sql",
-		.query = "SHOW TABLES LIKE 'inventory_versions'",
+		.check = "SHOW TABLES LIKE 'inventory_versions'",
 		.condition = "empty",
 		.match = "",
 		.sql = _2018_08_13_inventory_update,
@@ -1702,7 +1702,7 @@ DROP TABLE IF EXISTS `inventory_version`;
 	ManifestEntry{
 		.version = 9130,
 		.description = "2018_11_25_name_filter_update.sql",
-		.query = "SHOW COLUMNS FROM `name_filter` LIKE 'id'",
+		.check = "SHOW COLUMNS FROM `name_filter` LIKE 'id'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -1717,7 +1717,7 @@ ADD INDEX `name_search_index`(`name`);
 	ManifestEntry{
 		.version = 9131,
 		.description = "2018_12_13_spell_buckets.sql",
-		.query = "SHOW TABLES LIKE 'spell_buckets'",
+		.check = "SHOW TABLES LIKE 'spell_buckets'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -1736,7 +1736,7 @@ INSERT INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VAL
 	ManifestEntry{
 		.version = 9132,
 		.description = "2018_12_16_global_base_scaling.sql",
-		.query = "SHOW TABLES LIKE 'npc_scale_global_base'",
+		.check = "SHOW TABLES LIKE 'npc_scale_global_base'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -2060,7 +2060,7 @@ VALUES
 	ManifestEntry{
 		.version = 9133,
 		.description = "2018_11_25_stuckbehavior.sql",
-		.query = "SHOW COLUMNS FROM `npc_types` LIKE 'stuck_behavior'",
+		.check = "SHOW COLUMNS FROM `npc_types` LIKE 'stuck_behavior'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -2072,7 +2072,7 @@ UPDATE `npc_types` SET `stuck_behavior`=2 WHERE `underwater`=1;
 	ManifestEntry{
 		.version = 9134,
 		.description = "2019_01_04_update_global_base_scaling.sql",
-		.query = "SELECT * FROM db_version WHERE version >= 9134",
+		.check = "SELECT * FROM db_version WHERE version >= 9134",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -2353,7 +2353,7 @@ VALUES
 	ManifestEntry{
 		.version = 9135,
 		.description = "2019_01_10_multi_version_spawns.sql",
-		.query = "SHOW COLUMNS FROM `spawn2` LIKE 'version'",
+		.check = "SHOW COLUMNS FROM `spawn2` LIKE 'version'",
 		.condition = "contains",
 		.match = "unsigned",
 		.sql = R"(
@@ -2363,7 +2363,7 @@ ALTER TABLE `spawn2` MODIFY `version` SMALLINT(5) SIGNED NOT NULL DEFAULT '0';
 	ManifestEntry{
 		.version = 9136,
 		.description = "2019_02_04_profanity_command.sql",
-		.query = "SHOW TABLES LIKE 'profanity_list'",
+		.check = "SHOW TABLES LIKE 'profanity_list'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -2383,7 +2383,7 @@ REPLACE INTO `command_settings` VALUES ('profanity', 150, 'prof');
 	ManifestEntry{
 		.version = 9137,
 		.description = "2018_12_12_client_faction_tables.sql",
-		.query = "SHOW TABLES LIKE 'faction_base_data'",
+		.check = "SHOW TABLES LIKE 'faction_base_data'",
 		.condition = "empty",
 		.match = "",
 		.sql = _2018_12_12_client_faction_tables,
@@ -2391,7 +2391,7 @@ REPLACE INTO `command_settings` VALUES ('profanity', 150, 'prof');
 	ManifestEntry{
 		.version = 9138,
 		.description = "2018_12_12_convert_to_client_functions.sql",
-		.query = "SELECT `id` FROM `faction_list` WHERE `id` > 4999",
+		.check = "SELECT `id` FROM `faction_list` WHERE `id` > 4999",
 		.condition = "empty",
 		.match = "",
 		.sql = _2018_12_12_convert_to_client_functions,
@@ -2399,7 +2399,7 @@ REPLACE INTO `command_settings` VALUES ('profanity', 150, 'prof');
 	ManifestEntry{
 		.version = 9139,
 		.description = "2019_03_25_optional_npc_model.sql",
-		.query = "SHOW COLUMNS FROM `npc_types` LIKE 'model'",
+		.check = "SHOW COLUMNS FROM `npc_types` LIKE 'model'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -2410,7 +2410,7 @@ ALTER TABLE `npc_types` ADD COLUMN `model` SMALLINT(5) NOT NULL DEFAULT '0' AFTE
 	ManifestEntry{
 		.version = 9140,
 		.description = "2019_07_03_update_range.sql",
-		.query = "SHOW COLUMNS FROM `zone` LIKE 'max_movement_update_range'",
+		.check = "SHOW COLUMNS FROM `zone` LIKE 'max_movement_update_range'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -2420,7 +2420,7 @@ ALTER TABLE `zone` ADD COLUMN `max_movement_update_range` INT(11) UNSIGNED NOT N
 	ManifestEntry{
 		.version = 9141,
 		.description = "2019_07_10_npc_flymode.sql",
-		.query = "SHOW COLUMNS FROM `npc_types` LIKE 'flymode'",
+		.check = "SHOW COLUMNS FROM `npc_types` LIKE 'flymode'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -2430,7 +2430,7 @@ ALTER TABLE `npc_types` ADD COLUMN `flymode` tinyint(4) NOT NULL DEFAULT -1;
 	ManifestEntry{
 		.version = 9142,
 		.description = "2019_09_02_required_spawn_filter.sql",
-		.query = "SHOW COLUMNS FROM `spawnentry` LIKE 'condition_value_filter'",
+		.check = "SHOW COLUMNS FROM `spawnentry` LIKE 'condition_value_filter'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -2441,7 +2441,7 @@ ALTER TABLE `spawnentry` ADD COLUMN `condition_value_filter` MEDIUMINT(9) NOT NU
 	ManifestEntry{
 		.version = 9143,
 		.description = "2019_09_16_account_table_changes.sql",
-		.query = "SHOW COLUMNS FROM `account` LIKE 'ls_id'",
+		.check = "SHOW COLUMNS FROM `account` LIKE 'ls_id'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -2461,7 +2461,7 @@ ALTER TABLE `account`
 	ManifestEntry{
 		.version = 9144,
 		.description = "2019_11_09_logsys_description_update.sql",
-		.query = "SELECT * FROM db_version WHERE version >= 9143",
+		.check = "SELECT * FROM db_version WHERE version >= 9143",
 		.condition = "empty",
 		.match = "",
 		.sql = _2019_11_09_logsys_description_update,
@@ -2469,7 +2469,7 @@ ALTER TABLE `account`
 	ManifestEntry{
 		.version = 9145,
 		.description = "2019_12_24_banned_ips_update.sql",
-		.query = "SHOW TABLES LIKE 'Banned_IPs'",
+		.check = "SHOW TABLES LIKE 'Banned_IPs'",
 		.condition = "not_empty",
 		.match = "",
 		.sql = R"(
@@ -2484,7 +2484,7 @@ DROP TABLE IF EXISTS `Banned_IPs_`;
 	ManifestEntry{
 		.version = 9146,
 		.description = "2020_01_10_character_soft_deletes.sql",
-		.query = "SHOW COLUMNS FROM `character_data` LIKE 'deleted_at'",
+		.check = "SHOW COLUMNS FROM `character_data` LIKE 'deleted_at'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -2494,7 +2494,7 @@ ALTER TABLE `character_data` ADD COLUMN `deleted_at` datetime NULL DEFAULT NULL;
 	ManifestEntry{
 		.version = 9147,
 		.description = "2020_01_24_grid_centerpoint_wp.sql",
-		.query = "SHOW COLUMNS FROM `grid_entries` LIKE 'centerpoint'",
+		.check = "SHOW COLUMNS FROM `grid_entries` LIKE 'centerpoint'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -2505,7 +2505,7 @@ alter table spawngroup add column `wp_spawns` tinyint(1) unsigned not null defau
 	ManifestEntry{
 		.version = 9148,
 		.description = "2020_01_28_corpse_guild_consent_id.sql",
-		.query = "SHOW COLUMNS FROM `character_corpses` LIKE 'guild_consent_id'",
+		.check = "SHOW COLUMNS FROM `character_corpses` LIKE 'guild_consent_id'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -2516,7 +2516,7 @@ ALTER TABLE `character_corpses` ADD COLUMN `guild_consent_id` INT(11) UNSIGNED N
 	ManifestEntry{
 		.version = 9149,
 		.description = "2020_02_06_globalloot.sql",
-		.query = "SHOW COLUMNS FROM `global_loot` LIKE 'hot_zone'",
+		.check = "SHOW COLUMNS FROM `global_loot` LIKE 'hot_zone'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -2528,7 +2528,7 @@ ALTER TABLE `global_loot` ADD `hot_zone` TINYINT NULL;
 	ManifestEntry{
 		.version = 9150,
 		.description = "2020_02_06_aa_reset_on_death.sql",
-		.query = "SHOW COLUMNS FROM `aa_ability` LIKE 'reset_on_death'",
+		.check = "SHOW COLUMNS FROM `aa_ability` LIKE 'reset_on_death'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -2540,7 +2540,7 @@ UPDATE `aa_ability` SET `reset_on_death` = '1' WHERE `id` = 6001;
 	ManifestEntry{
 		.version = 9151,
 		.description = "2020_03_05_npc_always_aggro.sql",
-		.query = "SHOW COLUMNS FROM `npc_types` LIKE 'always_aggro'",
+		.check = "SHOW COLUMNS FROM `npc_types` LIKE 'always_aggro'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -2551,7 +2551,7 @@ ALTER TABLE `npc_types` ADD COLUMN `always_aggro` tinyint(1) NOT NULL DEFAULT 0;
 	ManifestEntry{
 		.version = 9152,
 		.description = "2020_03_09_convert_myisam_to_innodb.sql",
-		.query = "SELECT * FROM db_version WHERE version >= 9152",
+		.check = "SELECT * FROM db_version WHERE version >= 9152",
 		.condition = "empty",
 		.match = "",
 		.sql = _2020_03_09_convert_myisam_to_innodb,
@@ -2559,7 +2559,7 @@ ALTER TABLE `npc_types` ADD COLUMN `always_aggro` tinyint(1) NOT NULL DEFAULT 0;
 	ManifestEntry{
 		.version = 9153,
 		.description = "2020_05_09_items_subtype.sql",
-		.query = "SHOW COLUMNS from `items` LIKE 'UNK219'",
+		.check = "SHOW COLUMNS from `items` LIKE 'UNK219'",
 		.condition = "not_empty",
 		.match = "",
 		.sql = R"(
@@ -2570,7 +2570,7 @@ ALTER TABLE `items` CHANGE `UNK219` `subtype` int(11) not null default '0';
 	ManifestEntry{
 		.version = 9154,
 		.description = "2020_04_11_expansions_content_filters.sql",
-		.query = "SHOW COLUMNS from `zone` LIKE 'min_expansion'",
+		.check = "SHOW COLUMNS from `zone` LIKE 'min_expansion'",
 		.condition = "empty",
 		.match = "",
 		.sql = _2020_04_11_expansions_content_filters,
@@ -2578,7 +2578,7 @@ ALTER TABLE `items` CHANGE `UNK219` `subtype` int(11) not null default '0';
 	ManifestEntry{
 		.version = 9155,
 		.description = "2020_08_15_lootdrop_level_filtering.sql",
-		.query = "SHOW COLUMNS from `lootdrop_entries` LIKE 'trivial_min_level'",
+		.check = "SHOW COLUMNS from `lootdrop_entries` LIKE 'trivial_min_level'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -2594,7 +2594,7 @@ UPDATE `lootdrop_entries` SET `trivial_max_level` = 0 WHERE `trivial_max_level` 
 	ManifestEntry{
 		.version = 9156,
 		.description = "2020_08_16_virtual_zonepoints.sql",
-		.query = "SHOW COLUMNS from `zone_points` LIKE 'is_virtual'",
+		.check = "SHOW COLUMNS from `zone_points` LIKE 'is_virtual'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -2606,7 +2606,7 @@ ALTER TABLE `zone_points` ADD COLUMN `width` int NOT NULL DEFAULT '0' COMMENT ''
 	ManifestEntry{
 		.version = 9157,
 		.description = "2020_09_02_pet_taunting.sql",
-		.query = "SHOW COLUMNS from `character_pet_info` LIKE 'taunting'",
+		.check = "SHOW COLUMNS from `character_pet_info` LIKE 'taunting'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -2617,7 +2617,7 @@ ALTER TABLE `character_pet_info` ADD COLUMN `taunting` tinyint(1) NOT NULL DEFAU
 	ManifestEntry{
 		.version = 9158,
 		.description = "2020_12_09_underworld.sql",
-		.query = "SHOW COLUMNS from `zone` LIKE 'underworld_teleport_index'",
+		.check = "SHOW COLUMNS from `zone` LIKE 'underworld_teleport_index'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -2633,7 +2633,7 @@ UPDATE `zone` SET `underworld_teleport_index` = '-1' WHERE `zoneidnumber` = '150
 	ManifestEntry{
 		.version = 9159,
 		.description = "2020_12_22_expedition_system.sql",
-		.query = "SELECT * FROM db_version WHERE version >= 9159",
+		.check = "SELECT * FROM db_version WHERE version >= 9159",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -2725,7 +2725,7 @@ ENGINE=InnoDB
 	ManifestEntry{
 		.version = 9160,
 		.description = "2021_02_14_npc_exp_mod.sql",
-		.query = "SHOW COLUMNS from `npc_types` LIKE 'exp_mod'",
+		.check = "SHOW COLUMNS from `npc_types` LIKE 'exp_mod'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -2736,7 +2736,7 @@ ALTER TABLE `npc_types` ADD COLUMN `exp_mod` INT NOT NULL DEFAULT '100' AFTER `a
 	ManifestEntry{
 		.version = 9161,
 		.description = "2021_02_15_npc_spell_entries_unsigned.sql",
-		.query = "SELECT * FROM db_version WHERE version >= 9161",
+		.check = "SELECT * FROM db_version WHERE version >= 9161",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -2747,7 +2747,7 @@ ALTER TABLE `npc_spells_entries` MODIFY `spellid` SMALLINT(5) UNSIGNED NOT NULL 
 	ManifestEntry{
 		.version = 9162,
 		.description = "2021_02_17_server_scheduled_events.sql",
-		.query = "SELECT * FROM db_version WHERE version >= 9162",
+		.check = "SELECT * FROM db_version WHERE version >= 9162",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -2778,7 +2778,7 @@ CREATE TABLE `server_scheduled_events`
 	ManifestEntry{
 		.version = 9163,
 		.description = "2021_04_17_zone_safe_heading_changes.sql",
-		.query = "SHOW COLUMNS FROM `zone` LIKE 'safe_heading'",
+		.check = "SHOW COLUMNS FROM `zone` LIKE 'safe_heading'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -2789,7 +2789,7 @@ ALTER TABLE zone ADD COLUMN safe_heading float NOT NULL DEFAULT 0 AFTER safe_z;
 	ManifestEntry{
 		.version = 9164,
 		.description = "2021_04_23_character_exp_modifiers.sql",
-		.query = "SHOW TABLES LIKE 'character_exp_modifiers'",
+		.check = "SHOW TABLES LIKE 'character_exp_modifiers'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -2806,7 +2806,7 @@ CREATE TABLE `character_exp_modifiers`  (
 	ManifestEntry{
 		.version = 9165,
 		.description = "2021_04_28_idle_pathing.sql",
-		.query = "SHOW COLUMNS FROM `spawn2` LIKE 'path_when_zone_idle'",
+		.check = "SHOW COLUMNS FROM `spawn2` LIKE 'path_when_zone_idle'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -2829,7 +2829,7 @@ WHERE pathgrid != 0 AND g.type IN (4, 6);
 	ManifestEntry{
 		.version = 9166,
 		.description = "2021_02_12_dynamic_zone_members.sql",
-		.query = "SHOW TABLES LIKE 'dynamic_zone_members'",
+		.check = "SHOW TABLES LIKE 'dynamic_zone_members'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -2850,7 +2850,7 @@ DROP TABLE `expedition_members`;
 	ManifestEntry{
 		.version = 9167,
 		.description = "2021_06_06_beastlord_pets.sql",
-		.query = "SHOW TABLES LIKE 'pets_beastlord_data'",
+		.check = "SHOW TABLES LIKE 'pets_beastlord_data'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -2887,7 +2887,7 @@ SET FOREIGN_KEY_CHECKS = 1;
 	ManifestEntry{
 		.version = 9168,
 		.description = "2021_08_31_pvp_duration.sql",
-		.query = "SHOW COLUMNS FROM `spells_new` LIKE 'pvp_duration'",
+		.check = "SHOW COLUMNS FROM `spells_new` LIKE 'pvp_duration'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -2899,7 +2899,7 @@ ALTER TABLE `spells_new` CHANGE `field182` `pvp_duration_cap` int(11) NOT NULL D
 	ManifestEntry{
 		.version = 9169,
 		.description = "2021_06_06_dynamic_zone_moved_columns.sql",
-		.query = "SELECT * FROM db_version WHERE version >= 9169",
+		.check = "SELECT * FROM db_version WHERE version >= 9169",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -2932,7 +2932,7 @@ ALTER TABLE `expeditions`
 	ManifestEntry{
 		.version = 9170,
 		.description = "2021_03_03_instance_safereturns.sql",
-		.query = "SHOW TABLES LIKE 'character_instance_safereturns'",
+		.check = "SHOW TABLES LIKE 'character_instance_safereturns'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -2955,7 +2955,7 @@ CREATE TABLE `character_instance_safereturns` (
 	ManifestEntry{
 		.version = 9171,
 		.description = "2021_03_30_remove_dz_is_current_member.sql",
-		.query = "SHOW COLUMNS FROM `dynamic_zone_members` LIKE 'is_current_member'",
+		.check = "SHOW COLUMNS FROM `dynamic_zone_members` LIKE 'is_current_member'",
 		.condition = "not_empty",
 		.match = "",
 		.sql = R"(
@@ -2971,7 +2971,7 @@ ALTER TABLE `dynamic_zone_members`
 	ManifestEntry{
 		.version = 9172,
 		.description = "2021_05_21_shared_tasks.sql",
-		.query = "SHOW TABLES LIKE 'shared_tasks'",
+		.check = "SHOW TABLES LIKE 'shared_tasks'",
 		.condition = "empty",
 		.match = "",
 		.sql = _2021_05_21_shared_tasks,
@@ -2979,7 +2979,7 @@ ALTER TABLE `dynamic_zone_members`
 	ManifestEntry{
 		.version = 9173,
 		.description = "2021_09_14_zone_lava_damage.sql",
-		.query = "SHOW COLUMNS FROM `zone` LIKE 'lava_damage'",
+		.check = "SHOW COLUMNS FROM `zone` LIKE 'lava_damage'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -2990,7 +2990,7 @@ ALTER TABLE zone ADD lava_damage INT(11) NULL DEFAULT '50' AFTER underworld_tele
 	ManifestEntry{
 		.version = 9174,
 		.description = "2021_10_09_not_null_door_columns.sql",
-		.query = "SELECT * FROM db_version WHERE version >= 9174",
+		.check = "SELECT * FROM db_version WHERE version >= 9174",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -3018,7 +3018,7 @@ ALTER TABLE `doors`
 	ManifestEntry{
 		.version = 9175,
 		.description = "2022_01_02_expansion_default_value_all.sql",
-		.query = "SHOW COLUMNS FROM `forage` LIKE 'min_expansion'",
+		.check = "SHOW COLUMNS FROM `forage` LIKE 'min_expansion'",
 		.condition = "contains",
 		.match = "unsigned",
 		.sql = _2022_01_02_expansion_default_value_all,
@@ -3026,7 +3026,7 @@ ALTER TABLE `doors`
 	ManifestEntry{
 		.version = 9176,
 		.description = "2022_01_10_checksum_verification.sql",
-		.query = "SHOW COLUMNS FROM `account` LIKE 'crc_eqgame'",
+		.check = "SHOW COLUMNS FROM `account` LIKE 'crc_eqgame'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -3046,7 +3046,7 @@ ALTER TABLE `account` CHANGE `suspendeduntil` `suspendeduntil` datetime  NULL  C
 	ManifestEntry{
 		.version = 9177,
 		.description = "2022_03_06_table_structure_changes.sql",
-		.query = "SHOW COLUMNS FROM `pets` LIKE 'id'",
+		.check = "SHOW COLUMNS FROM `pets` LIKE 'id'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -3067,7 +3067,7 @@ CREATE UNIQUE INDEX `filename` ON books (name);
 	ManifestEntry{
 		.version = 9178,
 		.description = "2022_03_07_saylink_collation.sql",
-		.query = "SELECT * FROM db_version WHERE version >= 9178",
+		.check = "SELECT * FROM db_version WHERE version >= 9178",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -3078,7 +3078,7 @@ ALTER TABLE saylink CONVERT TO CHARACTER SET utf8 COLLATE utf8_bin;
 	ManifestEntry{
 		.version = 9179,
 		.description = "2022_04_30_hp_regen_per_second.sql",
-		.query = "SHOW COLUMNS FROM `npc_types` LIKE 'hp_regen_per_second'",
+		.check = "SHOW COLUMNS FROM `npc_types` LIKE 'hp_regen_per_second'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -3089,7 +3089,7 @@ ALTER TABLE npc_types ADD COLUMN hp_regen_per_second bigint DEFAULT 0 AFTER hp_r
 	ManifestEntry{
 		.version = 9180,
 		.description = "2022_05_01_character_peqzone_flags.sql",
-		.query = "SHOW TABLES LIKE 'character_peqzone_flags'",
+		.check = "SHOW TABLES LIKE 'character_peqzone_flags'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -3113,7 +3113,7 @@ SET FOREIGN_KEY_CHECKS = 1;
 	ManifestEntry{
 		.version = 9181,
 		.description = "2022_05_03_task_activity_goal_match_list.sql",
-		.query = "SHOW COLUMNS FROM `task_activities` LIKE 'goal_match_list'",
+		.check = "SHOW COLUMNS FROM `task_activities` LIKE 'goal_match_list'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -3124,7 +3124,7 @@ ALTER TABLE task_activities ADD goal_match_list text AFTER goalid;
 	ManifestEntry{
 		.version = 9182,
 		.description = "2022_05_02_npc_types_int64.sql",
-		.query = "SHOW COLUMNS FROM `npc_types` LIKE 'hp'",
+		.check = "SHOW COLUMNS FROM `npc_types` LIKE 'hp'",
 		.condition = "missing",
 		.match = "bigint",
 		.sql = R"(
@@ -3138,7 +3138,7 @@ ALTER TABLE npc_types MODIFY COLUMN mana_regen_rate BIGINT NOT NULL DEFAULT 0;
 	ManifestEntry{
 		.version = 9183,
 		.description = "2022_05_07_merchant_data_buckets.sql",
-		.query = "SHOW COLUMNS FROM `merchantlist` LIKE 'bucket_comparison'",
+		.check = "SHOW COLUMNS FROM `merchantlist` LIKE 'bucket_comparison'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -3151,7 +3151,7 @@ ADD COLUMN `bucket_comparison` tinyint UNSIGNED NULL DEFAULT 0 AFTER `bucket_val
 	ManifestEntry{
 		.version = 9184,
 		.description = "2022_05_21_schema_consistency.sql",
-		.query = "SELECT * FROM db_version WHERE version >= 9184",
+		.check = "SELECT * FROM db_version WHERE version >= 9184",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -3166,7 +3166,7 @@ ALTER TABLE npc_types MODIFY COLUMN hp_regen_per_second BIGINT NOT NULL DEFAULT 
 	ManifestEntry{
 		.version = 9185,
 		.description = "2022_05_07_discord_webhooks.sql",
-		.query = "SHOW TABLES LIKE 'discord_webhooks'",
+		.check = "SHOW TABLES LIKE 'discord_webhooks'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -3191,7 +3191,7 @@ ALTER TABLE logsys_categories
 	ManifestEntry{
 		.version = 9186,
 		.description = "2022_07_09_zone_expansion_deprecate.sql",
-		.query = "SHOW COLUMNS FROM `zone` LIKE 'expansion'",
+		.check = "SHOW COLUMNS FROM `zone` LIKE 'expansion'",
 		.condition = "not_empty",
 		.match = "",
 		.sql = R"(
@@ -3201,7 +3201,7 @@ ALTER TABLE logsys_categories
 	ManifestEntry{
 		.version = 9187,
 		.description = "2022_07_09_task_zone_version_matching.sql",
-		.query = "SHOW COLUMNS FROM `task_activities` LIKE 'zone_version'",
+		.check = "SHOW COLUMNS FROM `task_activities` LIKE 'zone_version'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -3212,7 +3212,7 @@ ALTER TABLE `task_activities` ADD COLUMN `zone_version` int(11) default -1 AFTER
 	ManifestEntry{
 		.version = 9188,
 		.description = "2022_07_14_zone_expansion_revert.sql",
-		.query = "SHOW COLUMNS FROM `zone` LIKE 'expansion'",
+		.check = "SHOW COLUMNS FROM `zone` LIKE 'expansion'",
 		.condition = "empty",
 		.match = "",
 		.sql = _2022_07_14_zone_expansion_revert,
@@ -3220,7 +3220,7 @@ ALTER TABLE `task_activities` ADD COLUMN `zone_version` int(11) default -1 AFTER
 	ManifestEntry{
 		.version = 9189,
 		.description = "2022_07_10_character_task_rewarded.sql",
-		.query = "SHOW COLUMNS FROM `character_tasks` LIKE 'was_rewarded'",
+		.check = "SHOW COLUMNS FROM `character_tasks` LIKE 'was_rewarded'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -3232,7 +3232,7 @@ ALTER TABLE `character_tasks`
 	ManifestEntry{
 		.version = 9190,
 		.description = "2022_07_13_task_reward_points.sql",
-		.query = "SHOW COLUMNS FROM `tasks` LIKE 'reward_points'",
+		.check = "SHOW COLUMNS FROM `tasks` LIKE 'reward_points'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -3255,7 +3255,7 @@ ALTER TABLE `tasks`
 	ManifestEntry{
 		.version = 9191,
 		.description = "2022_07_28_gm_state_changes.sql",
-		.query = "SHOW COLUMNS FROM `account` LIKE 'invulnerable'",
+		.check = "SHOW COLUMNS FROM `account` LIKE 'invulnerable'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -3269,7 +3269,7 @@ ALTER TABLE `account`
 	ManifestEntry{
 		.version = 9192,
 		.description = "2022_07_13_task_lock_activity.sql",
-		.query = "SHOW COLUMNS FROM `tasks` LIKE 'lock_activity_id'",
+		.check = "SHOW COLUMNS FROM `tasks` LIKE 'lock_activity_id'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -3281,7 +3281,7 @@ ALTER TABLE `tasks`
 	ManifestEntry{
 		.version = 9193,
 		.description = "2022_07_16_task_timer_groups.sql",
-		.query = "SHOW COLUMNS FROM `tasks` LIKE 'replay_timer_group'",
+		.check = "SHOW COLUMNS FROM `tasks` LIKE 'replay_timer_group'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -3297,7 +3297,7 @@ ALTER TABLE `character_task_timers`
 	ManifestEntry{
 		.version = 9194,
 		.description = "2022_07_23_dz_switch_id.sql",
-		.query = "SHOW COLUMNS FROM `doors` LIKE 'dz_switch_id'",
+		.check = "SHOW COLUMNS FROM `doors` LIKE 'dz_switch_id'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -3312,7 +3312,7 @@ ALTER TABLE `dynamic_zones`
 	ManifestEntry{
 		.version = 9195,
 		.description = "2022_07_23_dz_templates.sql",
-		.query = "SHOW TABLES like 'dynamic_zone_templates'",
+		.check = "SHOW TABLES like 'dynamic_zone_templates'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -3350,7 +3350,7 @@ ALTER TABLE `tasks`
 	ManifestEntry{
 		.version = 9196,
 		.description = "2022_07_30_merchantlist_temp.sql",
-		.query = "SHOW COLUMNS FROM `merchantlist_temp` LIKE 'zone_id'",
+		.check = "SHOW COLUMNS FROM `merchantlist_temp` LIKE 'zone_id'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -3363,7 +3363,7 @@ ALTER TABLE `merchantlist_temp` DROP PRIMARY KEY, ADD PRIMARY KEY (`npcid`, `slo
 	ManifestEntry{
 		.version = 9197,
 		.description = "2022_08_01_drop_expansion_account.sql",
-		.query = "SHOW COLUMNS FROM `account` LIKE 'expansion'",
+		.check = "SHOW COLUMNS FROM `account` LIKE 'expansion'",
 		.condition = "not_empty",
 		.match = "",
 		.sql = R"(
@@ -3374,7 +3374,7 @@ ALTER TABLE `account` DROP `expansion`;
 	ManifestEntry{
 		.version = 9198,
 		.description = "2022_08_14_exp_modifier_instance_versions.sql",
-		.query = "SHOW COLUMNS FROM `character_exp_modifiers` LIKE 'instance_version'",
+		.check = "SHOW COLUMNS FROM `character_exp_modifiers` LIKE 'instance_version'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -3387,7 +3387,7 @@ ADD PRIMARY KEY (character_id, zone_id, instance_version) USING BTREE;
 	ManifestEntry{
 		.version = 9199,
 		.description = "2022_08_08_task_req_activity_id.sql",
-		.query = "SHOW COLUMNS FROM `task_activities` LIKE 'req_activity_id'",
+		.check = "SHOW COLUMNS FROM `task_activities` LIKE 'req_activity_id'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -3399,7 +3399,7 @@ ALTER TABLE `task_activities`
 	ManifestEntry{
 		.version = 9200,
 		.description = "2022_08_19_zone_expansion_consistency.sql",
-		.query = "SELECT * FROM db_version WHERE version >= 9200",
+		.check = "SELECT * FROM db_version WHERE version >= 9200",
 		.condition = "empty",
 		.match = "",
 		.sql = _2022_08_19_zone_expansion_consistency,
@@ -3407,7 +3407,7 @@ ALTER TABLE `task_activities`
 	ManifestEntry{
 		.version = 9201,
 		.description = "2022_08_22_npc_types_heroic_strikethrough.sql",
-		.query = "SHOW COLUMNS FROM `npc_types` LIKE 'heroic_strikethrough'",
+		.check = "SHOW COLUMNS FROM `npc_types` LIKE 'heroic_strikethrough'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -3418,7 +3418,7 @@ ADD COLUMN `heroic_strikethrough` INT NOT NULL DEFAULT 0 AFTER `exp_mod`;
 	ManifestEntry{
 		.version = 9202,
 		.description = "2022_08_24_task_activities_step.sql",
-		.query = "SHOW COLUMNS FROM `task_activities` LIKE 'step'",
+		.check = "SHOW COLUMNS FROM `task_activities` LIKE 'step'",
 		.condition = "contains",
 		.match = "unsigned",
 		.sql = R"(
@@ -3429,7 +3429,7 @@ ALTER TABLE `task_activities` MODIFY `step` INT(11) NOT NULL DEFAULT '0';
 	ManifestEntry{
 		.version = 9203,
 		.description = "2022_08_07_replace_task_goals.sql",
-		.query = "SHOW COLUMNS FROM `task_activities` LIKE 'item_id'",
+		.check = "SHOW COLUMNS FROM `task_activities` LIKE 'item_id'",
 		.condition = "empty",
 		.match = "",
 		.sql = _2022_08_07_replace_task_goals,
@@ -3437,7 +3437,7 @@ ALTER TABLE `task_activities` MODIFY `step` INT(11) NOT NULL DEFAULT '0';
 	ManifestEntry{
 		.version = 9204,
 		.description = "2022_09_02_faction_association.sql",
-		.query = "SHOW TABLES LIKE 'faction_association'",
+		.check = "SHOW TABLES LIKE 'faction_association'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -3474,7 +3474,7 @@ ALTER TABLE `tasks` ADD `faction_amount` INT(10) NOT NULL DEFAULT '0';
 	ManifestEntry{
 		.version = 9208,
 		.description = "2022_09_25_task_concat_matchlists.sql",
-		.query = "SHOW COLUMNS FROM `task_activities` LIKE 'npc_id'",
+		.check = "SHOW COLUMNS FROM `task_activities` LIKE 'npc_id'",
 		.condition = "not_empty",
 		.match = "",
 		.sql = _2022_09_25_task_concat_matchlists,
@@ -3482,7 +3482,7 @@ ALTER TABLE `tasks` ADD `faction_amount` INT(10) NOT NULL DEFAULT '0';
 	ManifestEntry{
 		.version = 9209,
 		.description = "2022_09_28_discord_webhooks.sql",
-		.query = "SHOW COLUMNS FROM `logsys_categories` LIKE 'log_to_discord'",
+		.check = "SHOW COLUMNS FROM `logsys_categories` LIKE 'log_to_discord'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -3496,7 +3496,7 @@ ALTER TABLE logsys_categories
 	ManifestEntry{
 		.version = 9213,
 		.description = "2022_12_24_npc_keeps_sold_items.sql",
-		.query = "SHOW COLUMNS FROM `npc_types` LIKE 'keeps_sold_items'",
+		.check = "SHOW COLUMNS FROM `npc_types` LIKE 'keeps_sold_items'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -3507,7 +3507,7 @@ ADD COLUMN `keeps_sold_items` tinyint(1) UNSIGNED NOT NULL DEFAULT 1 AFTER `fact
 	ManifestEntry{
 		.version = 9214,
 		.description = "2022_12_24_character_exp_toggle.sql",
-		.query = "SHOW COLUMNS FROM `character_data` LIKE 'exp_enabled'",
+		.check = "SHOW COLUMNS FROM `character_data` LIKE 'exp_enabled'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -3519,7 +3519,7 @@ ADD COLUMN `exp_enabled` tinyint(1) UNSIGNED NOT NULL DEFAULT 1 AFTER `exp`;
 	ManifestEntry{
 		.version = 9215,
 		.description = "2023_01_08_zone_max_level.sql",
-		.query = "SHOW COLUMNS FROM `zone` LIKE 'max_level'",
+		.check = "SHOW COLUMNS FROM `zone` LIKE 'max_level'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -3530,7 +3530,7 @@ ADD COLUMN `max_level` tinyint(3) UNSIGNED NOT NULL DEFAULT 255 AFTER `min_level
 	ManifestEntry{
 		.version = 9216,
 		.description = "2023_01_15_merc_data.sql",
-		.query = "SHOW TABLES LIKE 'mercs'",
+		.check = "SHOW TABLES LIKE 'mercs'",
 		.condition = "empty",
 		.match = "",
 		.sql = _2023_01_15_merc_data,
@@ -3538,7 +3538,7 @@ ADD COLUMN `max_level` tinyint(3) UNSIGNED NOT NULL DEFAULT 255 AFTER `min_level
 	ManifestEntry{
 		.version = 9217,
 		.description = "2023_01_15_chatchannel_reserved_names.sql",
-		.query = "SHOW TABLES LIKE 'chatchannel_reserved_names'",
+		.check = "SHOW TABLES LIKE 'chatchannel_reserved_names'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -3561,7 +3561,7 @@ ADD UNIQUE INDEX(`name`)
 	ManifestEntry{
 		.version = 9218,
 		.description = "2023_01_24_item_recast.sql",
-		.query = "show columns from character_item_recast like '%recast_type%'",
+		.check = "show columns from character_item_recast like '%recast_type%'",
 		.condition = "contains",
 		.match = "smallint",
 		.sql = R"(
@@ -3572,7 +3572,7 @@ ALTER TABLE `character_item_recast`
 	ManifestEntry{
 		.version = 9219,
 		.description = "2023_01_29_merchant_status_requirements.sql",
-		.query = "SHOW COLUMNS FROM merchantlist LIKE 'min_status'",
+		.check = "SHOW COLUMNS FROM merchantlist LIKE 'min_status'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
@@ -3580,5 +3580,5 @@ ALTER TABLE `merchantlist`
 ADD COLUMN `min_status` tinyint(3) UNSIGNED NOT NULL DEFAULT 0 AFTER `level_required`,
 ADD COLUMN `max_status` tinyint(3) UNSIGNED NOT NULL DEFAULT 255 AFTER `min_status`;
 )",
-	}
+	},
 };
