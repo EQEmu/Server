@@ -379,7 +379,6 @@ public:
 
 	void DisableMySQLErrorLogs();
 	void EnableMySQLErrorLogs();
-
 private:
 
 	// reference to database

@@ -3583,7 +3583,7 @@ ADD COLUMN `max_status` tinyint(3) UNSIGNED NOT NULL DEFAULT 255 AFTER `min_stat
 	},
 	ManifestEntry{
 		.version = 9220,
-		.description = "New Database Check",
+		.description = "Add new_table",
 		.query = "SHOW TABLES LIKE 'new_table'",
 		.condition = "empty",
 		.match = "",

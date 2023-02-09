@@ -24,12 +24,13 @@ public:
 	void CheckDbUpdates();
 	std::string GetQueryResult(std::string query);
 	static bool ShouldRunMigration(ManifestEntry &e, std::string query_result);
-	void RunConversion();
-	bool CheckManifest(std::vector<ManifestEntry> entries, int version_low, int version_high);
+	bool UpdateManifest(std::vector<ManifestEntry> entries, int version_low, int version_high);
 
 	DatabaseUpdate *SetDatabase(Database *db);
+	bool HasPendingUpdates();
 private:
 	Database *m_database;
+	static bool CheckVersions(DatabaseVersion v, DatabaseVersion b);
 };
 
 #endif //EQEMU_DATABASE_UPDATE_H
