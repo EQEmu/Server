@@ -922,9 +922,6 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 		safe_delete(pack);
 	}
 
-	//Return true to proceed, false to return
-	if(!mod_client_message(message, chan_num)) { return; }
-
 	// Garble the message based on drunkness
 	if (m_pp.intoxication > 0 && !(RuleB(Chat, ServerWideOOC) && chan_num == ChatChannel_OOC) && !GetGM()) {
 		GarbleMessage(message, (int)(m_pp.intoxication / 3));
@@ -2544,10 +2541,7 @@ bool Client::CheckIncreaseSkill(EQ::skills::SkillType skillid, Mob *against_who,
 			against_who->IsClient() ||
 			GetLevelCon(against_who->GetLevel()) == CON_GRAY
 		) {
-			//false by default
-			if (!mod_can_increase_skill(skillid, against_who)) {
-				return false;
-			}
+			return false;
 		}
 	}
 
@@ -2564,7 +2558,6 @@ bool Client::CheckIncreaseSkill(EQ::skills::SkillType skillid, Mob *against_who,
 			// This result is increased by the existing SkillUpModifier rule
 			double working_chance = (((RuleI(Character, SkillUpMaximumChancePercentage) - RuleI(Character, SkillUpMinimumChancePercentage) + chancemodi) * (pow(0.99, skillval))) + RuleI(Character, SkillUpMinimumChancePercentage));
 			Chance = (working_chance * RuleI(Character, SkillUpModifier) / 100);
-			Chance = mod_increase_skill_chance(Chance, against_who);
 		}
 
 		if(zone->random.Real(0, 99) < Chance)
@@ -2961,8 +2954,6 @@ bool Client::BindWound(Mob *bindmob, bool start, bool fail)
 							max_percent = 70 + maxHPBonus;
 						}
 
-						max_percent = mod_bindwound_percent(max_percent, bindmob);
-
 						int64 max_hp = bindmob->GetMaxHP() * max_percent / 100;
 
 						// send bindmob new hp's
@@ -2982,8 +2973,6 @@ bool Client::BindWound(Mob *bindmob, bool start, bool fail)
 								aabonuses.BindWound;
 
 							bindhps += bindhps * bindBonus / 100;
-
-							bindhps = mod_bindwound_hp(bindhps, bindmob);
 
 							// if the bind takes them above the max bindable
 							// cap it at that value. Dont know if live does it this way
@@ -3026,8 +3015,6 @@ bool Client::BindWound(Mob *bindmob, bool start, bool fail)
 						if (max_percent > 100)
 							max_percent = 100;
 
-						max_percent = mod_bindwound_percent(max_percent, bindmob);
-
 						int max_hp = (bindmob->GetMaxHP() * max_percent) / 100;
 						if (max_hp > bindmob->GetMaxHP())
 							max_hp = bindmob->GetMaxHP();
@@ -3047,8 +3034,6 @@ bool Client::BindWound(Mob *bindmob, bool start, bool fail)
 
 							if (bindhps < 3)
 								bindhps = 3;
-
-							bindhps = mod_bindwound_hp(bindhps, bindmob);
 
 							bindhps += bindmob->GetHP();
 							if (bindhps > max_hp)
@@ -8387,8 +8372,6 @@ void Client::Consume(const EQ::ItemData *item, uint8 type, int16 slot, bool auto
 		return;
 
 	if (type == EQ::item::ItemTypeFood) {
-		increase = mod_food_value(item, increase);
-
 		if (increase < 0)
 			return;
 
@@ -8404,8 +8387,6 @@ void Client::Consume(const EQ::ItemData *item, uint8 type, int16 slot, bool auto
 		LogFood("Eating from slot: [{}]", (int)slot);
 
 	} else {
-		increase = mod_drink_value(item, increase);
-
 		if (increase < 0)
 			return;
 

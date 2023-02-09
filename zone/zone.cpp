@@ -1218,9 +1218,6 @@ bool Zone::Init(bool is_static) {
 	LoadGrids();
 	LoadTickItems();
 
-	//MODDING HOOK FOR ZONE INIT
-	mod_init();
-
 	// logging origination information
 	LogSys.origination_info.zone_short_name = zone->short_name;
 	LogSys.origination_info.zone_long_name  = zone->long_name;
@@ -1927,9 +1924,6 @@ void Zone::Repop()
 	initgrids_timer.Start();
 
 	entity_list.UpdateAllTraps(true, true);
-
-	//MODDING HOOK FOR REPOP
-	mod_repop();
 }
 
 void Zone::GetTimeSync()

@@ -194,7 +194,6 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 	if (petpower == -1) {
 		if (IsClient()) {
 			act_power = CastToClient()->GetFocusEffect(focusPetPower, spell_id);//Client only
-			act_power = CastToClient()->mod_pet_power(act_power, spell_id);
 		}
 		else if (IsBot())
 			act_power = CastToBot()->GetFocusEffect(focusPetPower, spell_id);

@@ -520,7 +520,7 @@ bool Mob::CheckWillAggro(Mob *mob) {
 	) {
 		if(CheckLosFN(mob)) {
 			LogAggro("Check aggro for [{}] target [{}]", GetName(), mob->GetName());
-			return mod_will_aggro(mob, this);
+			return true;
 		}
 	} else {
 		if (
@@ -548,7 +548,7 @@ bool Mob::CheckWillAggro(Mob *mob) {
 		) {
 			if(CheckLosFN(mob)) {
 				LogAggro("Check aggro for [{}] target [{}]", GetName(), mob->GetName());
-				return mod_will_aggro(mob, this);
+				return true;
 			}
 		}
 	}

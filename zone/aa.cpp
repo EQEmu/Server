@@ -59,7 +59,7 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 	if (IsOfClientBot()) {
 		act_power = GetFocusEffect(focusPetPower, spell_id);
 		if (IsClient()) {
-			act_power = CastToClient()->mod_pet_power(act_power, spell_id);
+			act_power = CastToClient()->GetFocusEffect(focusPetPower, spell_id);
 		}
 	}
 
@@ -301,15 +301,6 @@ void Mob::WakeTheDead(uint16 spell_id, Corpse *corpse_to_use, Mob *target, uint3
 	if (!corpse_to_use) {
 		return;
 	}
-
-	/* TODO: Does WTD use pet focus?
-	int act_power = 0;
-
-	if (IsClient()) {
-		act_power = CastToClient()->GetFocusEffect(focusPetPower, spell_id);
-		act_power = CastToClient()->mod_pet_power(act_power, spell_id);
-	}
-	*/
 
 	SwarmPet_Struct pet;
 	pet.count = 1;
