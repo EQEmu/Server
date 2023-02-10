@@ -5144,14 +5144,7 @@ void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client*
 
 		args.emplace_back(trade_iterator.trade_item_instance);
 
-		parse->EventBot(
-			EVENT_EQUIP_ITEM_BOT,
-			this,
-			nullptr,
-			export_string,
-			trade_iterator.trade_item_instance->GetID()
-			&args
-		);
+		parse->EventBot(EVENT_EQUIP_ITEM_BOT, this, nullptr, export_string, trade_iterator.trade_item_instance->GetID(), &args);
 
 		trade_iterator.trade_item_instance = nullptr; // actual deletion occurs in client delete below
 
