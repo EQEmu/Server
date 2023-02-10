@@ -27,6 +27,7 @@
 #include "../common/data_verification.h"
 #include "../common/misc_functions.h"
 
+#include "bot.h"
 #include "quest_parser_collection.h"
 #include "lua_parser.h"
 #include "string_ids.h"
@@ -6130,12 +6131,12 @@ void Mob::TryTriggerOnCastFocusEffect(focusType type, uint16 spell_id)
 	int32 proc_spellid   = 0;
 
 	// item focus
-	if (IsClient() && itembonuses.FocusEffects[type]) {
+	if (IsOfClientBot() && itembonuses.FocusEffects[type]) {
 		const EQ::ItemData *temp_item = nullptr;
 
 		for (int x = EQ::invslot::EQUIPMENT_BEGIN; x <= EQ::invslot::EQUIPMENT_END; x++) {
 			temp_item = nullptr;
-			EQ::ItemInstance *ins = CastToClient()->GetInv().GetItem(x);
+			EQ::ItemInstance const *ins = (IsClient()) ? CastToClient()->GetInv().GetItem(x) : CastToBot()->GetBotItem(x);
 			if (!ins) {
 				continue;
 			}
@@ -6195,7 +6196,7 @@ void Mob::TryTriggerOnCastFocusEffect(focusType type, uint16 spell_id)
 	}
 
 	// Only use one of this focus per AA effect.
-	if (IsClient() && aabonuses.FocusEffects[type]) {
+	if (IsOfClientBot() && aabonuses.FocusEffects[type]) {
 		for (const auto &aa : aa_ranks) {
 			auto ability_rank = zone->GetAlternateAdvancementAbilityAndRank(aa.first, aa.second.first);
 			auto ability      = ability_rank.first;
@@ -6209,7 +6210,7 @@ void Mob::TryTriggerOnCastFocusEffect(focusType type, uint16 spell_id)
 				continue;
 			}
 
-			proc_spellid = CastToClient()->CalcAAFocus(type, *rank, spell_id);
+			proc_spellid = CalcAAFocus(type, *rank, spell_id);
 			if (proc_spellid) {
 				TryTriggerOnCastProc(0, spell_id, proc_spellid);
 			}
