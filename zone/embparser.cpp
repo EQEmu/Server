@@ -1724,6 +1724,7 @@ void PerlembParser::ExportEventVariables(
 					ExportVar(package_name.c_str(), "item_id", item->GetID());
 					ExportVar(package_name.c_str(), "item_name", item->GetItem()->Name);
 					ExportVar(package_name.c_str(), "spell_id", item->GetItem()->Click.Effect);
+					ExportVar(package_name.c_str(), "item", "QuestItem", item);
 				}
 			}
 			break;
