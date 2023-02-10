@@ -2248,7 +2248,11 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 					dst_slot_id
 				);
 
-				parse->EventPlayer(EVENT_UNEQUIP_ITEM_CLIENT, this, export_string, dst_inst->GetItem()->ID);
+				std::vector<std::any> args;
+
+				args.emplace_back(dst_inst);
+
+				parse->EventPlayer(EVENT_UNEQUIP_ITEM_CLIENT, this, export_string, dst_inst->GetItem()->ID, &args);
 			}
 
 			if(src_inst) {
@@ -2260,7 +2264,11 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 					dst_slot_id
 				);
 
-				parse->EventPlayer(EVENT_EQUIP_ITEM_CLIENT, this, export_string, src_inst->GetItem()->ID);
+				std::vector<std::any> args;
+
+				args.emplace_back(src_inst);
+
+				parse->EventPlayer(EVENT_EQUIP_ITEM_CLIENT, this, export_string, src_inst->GetItem()->ID, &args);
 			}
 		}
 	}
