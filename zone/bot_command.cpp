@@ -9484,7 +9484,11 @@ void bot_subcommand_inventory_remove(Client *c, const Seperator *sep)
 			slot_id
 		);
 
-		parse->EventBot(EVENT_UNEQUIP_ITEM_BOT, my_bot, nullptr, export_string, inst->GetID());
+		std::vector<std::any> args;
+
+		args.emplace_back(inst);
+
+		parse->EventBot(EVENT_UNEQUIP_ITEM_BOT, my_bot, nullptr, export_string, inst->GetID(), &args);
 	}
 }
 
