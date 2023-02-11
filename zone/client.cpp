@@ -4067,7 +4067,13 @@ void Client::DiscoverItem(uint32 itemid) {
 									itemid, GetName(), Admin());
 	auto results = database.QueryDatabase(query);
 
-	parse->EventPlayer(EVENT_DISCOVER_ITEM, this, "", itemid);
+	auto* inst = database.CreateItem(itemid);
+
+	std::vector<std::any> args;
+
+	args.emplace_back(inst);
+
+	parse->EventPlayer(EVENT_DISCOVER_ITEM, this, "", itemid, &args);
 }
 
 void Client::UpdateLFP() {
@@ -10467,8 +10473,8 @@ void Client::ResetItemCooldown(uint32 item_id)
 		return;
 	}
 	int recast_type = item_d->RecastType;
-	bool found_item = false; 
-	
+	bool found_item = false;
+
 	static const int16 slots[][2] = {
 		{ EQ::invslot::POSSESSIONS_BEGIN, EQ::invslot::POSSESSIONS_END },
 		{ EQ::invbag::GENERAL_BAGS_BEGIN, EQ::invbag::GENERAL_BAGS_END },
@@ -10484,7 +10490,7 @@ void Client::ResetItemCooldown(uint32 item_id)
 			item = GetInv().GetItem(slot_id);
 			if (item) {
 				item_d = item->GetItem();
-				if (item_d && item->GetID() == item_id || (item_d->RecastType != RECAST_TYPE_UNLINKED_ITEM && item_d->RecastType == recast_type)) {	
+				if (item_d && item->GetID() == item_id || (item_d->RecastType != RECAST_TYPE_UNLINKED_ITEM && item_d->RecastType == recast_type)) {
 					item->SetRecastTimestamp(0);
 					DeleteItemRecastTimer(item_d->ID);
 					SendItemPacket(slot_id, item, ItemPacketCharmUpdate);
@@ -10512,7 +10518,7 @@ void Client::SetItemCooldown(uint32 item_id, bool use_saved_timer, uint32 in_sec
 	uint32 final_time = 0;
 	const auto timer_type = item_d->RecastType != RECAST_TYPE_UNLINKED_ITEM ? item_d->RecastType : item_id;
 	const int timer_id = recast_type != RECAST_TYPE_UNLINKED_ITEM ? (pTimerItemStart + recast_type) : (pTimerNegativeItemReuse * item_id);
-	
+
 	if (use_saved_timer) {
 		if (item_d->RecastType != RECAST_TYPE_UNLINKED_ITEM) {
 			total_time = timestamps.count(item_d->RecastType) ? timestamps.at(item_d->RecastType) : 0;
@@ -10522,11 +10528,11 @@ void Client::SetItemCooldown(uint32 item_id, bool use_saved_timer, uint32 in_sec
 	} else {
 		total_time = current_time + in_seconds;
 	}
-	
+
 	if (total_time > current_time) {
 		final_time = total_time - current_time;
 	}
-	
+
 	static const int16 slots[][2] = {
 		{ EQ::invslot::POSSESSIONS_BEGIN, EQ::invslot::POSSESSIONS_END },
 		{ EQ::invbag::GENERAL_BAGS_BEGIN, EQ::invbag::GENERAL_BAGS_END },
@@ -10549,7 +10555,7 @@ void Client::SetItemCooldown(uint32 item_id, bool use_saved_timer, uint32 in_sec
 			}
 		}
 	}
-	
+
 	//Start timers and update in database only when timer is changed
 	if (!use_saved_timer) {
 		GetPTimers().Clear(&database, timer_id);
@@ -10569,16 +10575,16 @@ uint32 Client::GetItemCooldown(uint32 item_id)
 	if (!item_d) {
 		return 0;
 	}
-	
+
 	int recast_type = item_d->RecastType;
 	auto timestamps = database.GetItemRecastTimestamps(CharacterID());
 	const auto timer_type = recast_type != RECAST_TYPE_UNLINKED_ITEM ? recast_type : item_id;
 	uint32 total_time = 0;
 	uint32 current_time = static_cast<uint32>(std::time(nullptr));
 	uint32 final_time = 0;
-	
+
 	total_time = timestamps.count(timer_type) ? timestamps.at(timer_type) : 0;
-	
+
 	if (total_time > current_time) {
 		final_time = total_time - current_time;
 	}
