@@ -175,6 +175,7 @@ const char *QuestEventSubroutines[_LargestEventID] = {
 	"EVENT_DAMAGE_TAKEN",
 	"EVENT_ITEM_CLICK_CLIENT",
 	"EVENT_ITEM_CLICK_CAST_CLIENT",
+	"EVENT_DESTROY_ITEM_CLIENT",
 	// Add new events before these or Lua crashes
 	"EVENT_SPELL_EFFECT_BOT",
 	"EVENT_SPELL_EFFECT_BUFF_TIC_BOT"
@@ -2130,6 +2131,17 @@ void PerlembParser::ExportEventVariables(
 			ExportVar(package_name.c_str(), "buff_slot", sep.arg[6]);
 			ExportVar(package_name.c_str(), "is_buff_tic", sep.arg[7]);
 			ExportVar(package_name.c_str(), "special_attack", sep.arg[8]);
+			break;
+		}
+
+		case EVENT_DESTROY_ITEM_CLIENT: {
+			if (extra_pointers && extra_pointers->size() == 1) {
+				EQ::ItemInstance* inst = std::any_cast<EQ::ItemInstance*>(extra_pointers->at(0));
+				ExportVar(package_name.c_str(), "item_id", inst->GetID());
+				ExportVar(package_name.c_str(), "item_name", inst->GetItem()->Name);
+				ExportVar(package_name.c_str(), "quantity", inst->IsStackable() ? inst->GetCharges() : 1);
+				ExportVar(package_name.c_str(), "item", "QuestItem", inst);
+			}
 			break;
 		}
 

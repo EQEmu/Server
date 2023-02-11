@@ -688,6 +688,14 @@ void handle_player_item_click(
 	uint32 extra_data,
 	std::vector<std::any> *extra_pointers
 );
+void handle_player_destroy_item(
+	QuestInterface *parse,
+	lua_State* L,
+	Client* client,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+);
 
 // Item
 void handle_item_click(

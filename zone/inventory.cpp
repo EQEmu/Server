@@ -1130,7 +1130,19 @@ void Client::SendCursorBuffer()
 		LogInventory("([{}]) Duplicate lore items are not allowed - destroying item [{}](id:[{}]) on cursor",
 			GetName(), test_item->Name, test_item->ID);
 		MessageString(Chat::Loot, 290);
-		parse->EventItem(EVENT_DESTROY_ITEM, this, test_inst, nullptr, "", 0);
+
+		if (parse->ItemHasQuestSub(test_inst, EVENT_DESTROY_ITEM)) {
+			parse->EventItem(EVENT_DESTROY_ITEM, this, test_inst, nullptr, "", 0);
+		}
+
+		if (parse->PlayerHasQuestSub(EVENT_DESTROY_ITEM_CLIENT)) {
+			std::vector<std::any> args;
+
+			args.emplace_back(test_inst);
+
+			parse->EventPlayer(EVENT_DESTROY_ITEM_CLIENT, this, "", 0, &args);
+		}
+
 		DeleteItemInInventory(EQ::invslot::slotCursor);
 		SendCursorBuffer();
 	}
@@ -1861,7 +1873,19 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 				LogInventory("([{}]) Duplicate lore items are not allowed - destroying item [{}](id:[{}]) on cursor",
 					GetName(), test_item->Name, test_item->ID);
 				MessageString(Chat::Loot, 290);
-				parse->EventItem(EVENT_DESTROY_ITEM, this, test_inst, nullptr, "", 0);
+
+				if (parse->ItemHasQuestSub(test_inst, EVENT_DESTROY_ITEM)) {
+					parse->EventItem(EVENT_DESTROY_ITEM, this, test_inst, nullptr, "", 0);
+				}
+
+				if (parse->PlayerHasQuestSub(EVENT_DESTROY_ITEM_CLIENT)) {
+					std::vector<std::any> args;
+
+					args.emplace_back(test_inst);
+
+					parse->EventPlayer(EVENT_DESTROY_ITEM_CLIENT, this, "", 0, &args);
+				}
+
 				DeleteItemInInventory(EQ::invslot::slotCursor, 0, true);
 
 				if (player_event_logs.IsEventEnabled(PlayerEvent::ITEM_DESTROY)) {
@@ -1886,8 +1910,8 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 			if(RuleB(QueryServ, PlayerLogMoves)) { QSSwapItemAuditor(move_in); } // QS Audit
 
 			EQ::ItemInstance *inst = m_inv.GetItem(EQ::invslot::slotCursor);
-			if(inst) {
-				parse->EventItem(EVENT_DESTROY_ITEM, this, inst, nullptr, "", 0);
+
+			if (inst) {
 				if (player_event_logs.IsEventEnabled(PlayerEvent::ITEM_DESTROY)) {
 					auto e = PlayerEvent::DestroyItemEvent{
 						.item_id = inst->GetItem()->ID,
@@ -1897,6 +1921,18 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 					};
 
 					RecordPlayerEventLog(PlayerEvent::ITEM_DESTROY, e);
+				}
+
+				if (parse->ItemHasQuestSub(inst, EVENT_DESTROY_ITEM)) {
+					parse->EventItem(EVENT_DESTROY_ITEM, this, inst, nullptr, "", 0);
+				}
+
+				if (parse->PlayerHasQuestSub(EVENT_DESTROY_ITEM_CLIENT)) {
+					std::vector<std::any> args;
+
+					args.emplace_back(inst);
+
+					parse->EventPlayer(EVENT_DESTROY_ITEM_CLIENT, this, "", 0, &args);
 				}
 			}
 
