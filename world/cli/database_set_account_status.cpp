@@ -19,6 +19,6 @@ void WorldserverCLI::DatabaseSetAccountStatus(int argc, char **argv, argh::parse
 
 	database.SetAccountStatus(
 		cmd(2).str(),
-		std::stoi(cmd(3).str())
+		Strings::ToInt(cmd(3).str())
 	);
 }

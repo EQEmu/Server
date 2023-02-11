@@ -178,7 +178,7 @@ void command_gearup(Client *c, const Seperator *sep)
 		c->Message(Chat::White, "Choose Armor by Expansion:");
 		std::string message;
 		for (auto row : results) {
-			const auto expansion = std::stoi(row[0]);
+			const auto expansion = Strings::ToInt(row[0]);
 			message += fmt::format(
 				"[{}] ",
 				Saylink::Silent(

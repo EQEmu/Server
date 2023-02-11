@@ -692,17 +692,17 @@ bool GuildBankManager::Load(uint32 guildID)
 	char donator[64], whoFor[64];
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		int area = atoi(row[0]);
-		int slot = atoi(row[1]);
-		int itemID = atoi(row[2]);
-		int qty = atoi(row[3]);
+		int area = Strings::ToInt(row[0]);
+		int slot = Strings::ToInt(row[1]);
+		int itemID = Strings::ToInt(row[2]);
+		int qty = Strings::ToInt(row[3]);
 
 		if (row[4])
 			strn0cpy(donator, row[4], sizeof(donator));
 		else
 			donator[0] = '\0';
 
-		int permissions = atoi(row[5]);
+		int permissions = Strings::ToInt(row[5]);
 
 		if (row[6])
 			strn0cpy(whoFor, row[6], sizeof(whoFor));

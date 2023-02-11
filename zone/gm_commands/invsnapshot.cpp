@@ -189,7 +189,7 @@ void command_invsnapshot(Client *c, const Seperator *sep)
 
 			auto list_count = 0;
 			if (sep->IsNumber(2)) {
-				list_count = atoi(sep->arg[2]);
+				list_count = Strings::ToInt(sep->arg[2]);
 			}
 			if (list_count < 1 || list_count > is_list.size()) {
 				list_count = is_list.size();
@@ -237,7 +237,7 @@ void command_invsnapshot(Client *c, const Seperator *sep)
 				return;
 			}
 
-			uint32 timestamp = atoul(sep->arg[2]);
+			uint32 timestamp = Strings::ToUnsignedInt(sep->arg[2]);
 
 			if (!database.ValidateCharacterInvSnapshotTimestamp(tc->CharacterID(), timestamp)) {
 				c->Message(
@@ -285,7 +285,7 @@ void command_invsnapshot(Client *c, const Seperator *sep)
 				return;
 			}
 
-			uint32 timestamp = atoul(sep->arg[2]);
+			uint32 timestamp = Strings::ToUnsignedInt(sep->arg[2]);
 
 			if (!database.ValidateCharacterInvSnapshotTimestamp(tc->CharacterID(), timestamp)) {
 				c->Message(
@@ -374,7 +374,7 @@ void command_invsnapshot(Client *c, const Seperator *sep)
 				return;
 			}
 
-			uint32 timestamp = atoul(sep->arg[2]);
+			uint32 timestamp = Strings::ToUnsignedInt(sep->arg[2]);
 
 			if (!database.ValidateCharacterInvSnapshotTimestamp(tc->CharacterID(), timestamp)) {
 				c->Message(

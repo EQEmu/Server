@@ -11,7 +11,7 @@ void command_gmzone(Client *c, const Seperator *sep)
 
 	std::string zone_short_name = Strings::ToLower(
 		sep->IsNumber(1) ?
-			ZoneName(std::stoul(sep->arg[1]), true) :
+			ZoneName(Strings::ToUnsignedInt(sep->arg[1]), true) :
 			sep->arg[1]
 	);
 	bool        is_unknown_zone = zone_short_name.find("unknown") != std::string::npos;
@@ -41,7 +41,7 @@ void command_gmzone(Client *c, const Seperator *sep)
 
 	auto zone_version = (
 		sep->IsNumber(2) ?
-			std::stoul(sep->arg[2]) :
+			Strings::ToUnsignedInt(sep->arg[2]) :
 			0
 	);
 
@@ -63,7 +63,7 @@ void command_gmzone(Client *c, const Seperator *sep)
 	uint32 duration               = 100000000;
 
 	if (!existing_zone_instance.empty()) {
-		instance_id = std::stoi(existing_zone_instance);
+		instance_id = Strings::ToInt(existing_zone_instance);
 		c->Message(
 			Chat::White,
 			fmt::format(

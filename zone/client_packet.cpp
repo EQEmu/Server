@@ -1229,17 +1229,17 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	);
 	auto results = database.QueryDatabase(query);
 	for (auto row : results) {
-		if (row[4] && atoi(row[4]) > 0) {
-			guild_id = atoi(row[4]);
-			guildrank = row[5] ? atoi(row[5]) : GUILD_RANK_NONE;
+		if (row[4] && Strings::ToInt(row[4]) > 0) {
+			guild_id = Strings::ToInt(row[4]);
+			guildrank = row[5] ? Strings::ToInt(row[5]) : GUILD_RANK_NONE;
 		}
 
 		SetEXPEnabled(atobool(row[6]));
 
-		if (LFP) { LFP = atoi(row[0]); }
-		if (LFG) { LFG = atoi(row[1]); }
+		if (LFP) { LFP = Strings::ToInt(row[0]); }
+		if (LFG) { LFG = Strings::ToInt(row[1]); }
 		if (row[3])
-			firstlogon = atoi(row[3]);
+			firstlogon = Strings::ToInt(row[3]);
 	}
 
 	if (RuleB(Character, SharedBankPlat))
@@ -6564,15 +6564,15 @@ void Client::Handle_OP_GMSearchCorpse(const EQApplicationPacket *app)
 
 		strn0cpy(charName, row[0], sizeof(charName));
 
-		uint32 ZoneID = atoi(row[1]);
-		float CorpseX = atof(row[2]);
-		float CorpseY = atof(row[3]);
-		float CorpseZ = atof(row[4]);
+		uint32 ZoneID = Strings::ToInt(row[1]);
+		float CorpseX = Strings::ToFloat(row[2]);
+		float CorpseY = Strings::ToFloat(row[3]);
+		float CorpseZ = Strings::ToFloat(row[4]);
 
 		strn0cpy(time_of_death, row[5], sizeof(time_of_death));
 
-		bool corpseRezzed = atoi(row[6]);
-		bool corpseBuried = atoi(row[7]);
+		bool corpseRezzed = Strings::ToInt(row[6]);
+		bool corpseBuried = Strings::ToInt(row[7]);
 
 		popupText += StringFormat("<tr><td>%s</td><td>%s</td><td>%8.0f</td><td>%8.0f</td><td>%8.0f</td><td>%s</td><td>%s</td><td>%s</td></tr>",
 			charName, StaticGetZoneName(ZoneID), CorpseX, CorpseY, CorpseZ, time_of_death,
@@ -12952,19 +12952,19 @@ void Client::Handle_OP_SetStartCity(const EQApplicationPacket *app)
 
 	bool valid_city = false;
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		if (atoi(row[1]) != 0)
-			zone_id = atoi(row[1]);
+		if (Strings::ToInt(row[1]) != 0)
+			zone_id = Strings::ToInt(row[1]);
 		else
-			zone_id = atoi(row[0]);
+			zone_id = Strings::ToInt(row[0]);
 
 		if (zone_id != start_city)
 			continue;
 
 		valid_city = true;
-		x = atof(row[2]);
-		y = atof(row[3]);
-		z = atof(row[4]);
-		heading = atof(row[5]);
+		x = Strings::ToFloat(row[2]);
+		y = Strings::ToFloat(row[3]);
+		z = Strings::ToFloat(row[4]);
+		heading = Strings::ToFloat(row[5]);
 	}
 
 	if (valid_city) {
@@ -12997,10 +12997,10 @@ void Client::Handle_OP_SetStartCity(const EQApplicationPacket *app)
 	Message(Chat::Yellow, "Use \"/setstartcity #\" to choose a home city from the following list:");
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		if (atoi(row[1]) != 0)
-			zone_id = atoi(row[1]);
+		if (Strings::ToInt(row[1]) != 0)
+			zone_id = Strings::ToInt(row[1]);
 		else
-			zone_id = atoi(row[0]);
+			zone_id = Strings::ToInt(row[0]);
 
 		std::string zone_long_name = ZoneLongName(zone_id);
 		Message(Chat::Yellow, "%d - %s", zone_id, zone_long_name.c_str());

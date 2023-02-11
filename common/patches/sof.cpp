@@ -2095,13 +2095,13 @@ namespace SoF
 			}
 			else
 			{
-			val = atoi(&emu->lastName[2]);
+			val = Strings::ToInt(&emu->lastName[2]);
 			}
 			}
 			else
 			{
 			sep[0] = nullptr;
-			ofs = atoi(&emu->lastName[2]);
+			ofs = Strings::ToInt(&emu->lastName[2]);
 			sep[0] = '=';
 			if ((sep[1] < '0') || (sep[1] > '9'))
 			{
@@ -2109,7 +2109,7 @@ namespace SoF
 			}
 			else
 			{
-			val = atoi(&sep[1]);
+			val = Strings::ToInt(&sep[1]);
 			}
 			}
 

@@ -200,6 +200,39 @@ bool Strings::IsNumber(const std::string &s)
 	}
 }
 
+bool Strings::IsUnsignedNumber(const std::string &s)
+{
+	try {
+		auto r = stoul(s);
+		return true;
+	}
+	catch (std::exception &) {
+		return false;
+	}
+}
+
+bool Strings::IsBigNumber(const std::string &s)
+{
+	try {
+		auto r = stoll(s);
+		return true;
+	}
+	catch (std::exception &) {
+		return false;
+	}
+}
+
+bool Strings::IsUnsignedBigNumber(const std::string &s)
+{
+	try {
+		auto r = stoull(s);
+		return true;
+	}
+	catch (std::exception &) {
+		return false;
+	}
+}
+
 bool Strings::IsFloat(const std::string &s)
 {
 	try {
@@ -769,6 +802,26 @@ std::string Strings::Random(size_t length)
 int Strings::ToInt(const std::string &s, int fallback)
 {
 	return Strings::IsNumber(s) ? std::stoi(s) : fallback;
+}
+
+int64 Strings::ToBigInt(const std::string &s, int64 fallback)
+{
+	return Strings::IsBigNumber(s) ? std::stoll(s) : fallback;
+}
+
+uint32 Strings::ToUnsignedInt(const std::string &s, uint32 fallback)
+{
+	return Strings::IsUnsignedNumber(s) ? std::stoul(s) : fallback;
+}
+
+uint64 Strings::ToUnsignedBigInt(const std::string &s, uint64 fallback)
+{
+	return Strings::IsUnsignedBigNumber(s) ? std::stoull(s) : fallback;
+}
+
+float Strings::ToFloat(const std::string &s, float fallback)
+{
+	return Strings::IsFloat(s) ? std::stof(s) : fallback;
 }
 
 std::string Strings::RemoveNumbers(std::string s)

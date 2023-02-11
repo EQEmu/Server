@@ -8,10 +8,10 @@ void command_texture(Client *c, const Seperator *sep)
 		return;
 	}
 
-	auto texture = static_cast<uint16>(std::min(std::stoul(sep->arg[1]), (unsigned long) 65535));
+	auto texture = static_cast<uint16>(std::min(Strings::ToUnsignedInt(sep->arg[1]), (uint32) 65535));
 	auto helmet_texture = static_cast<uint8>(
 		sep->IsNumber(2) ?
-		std::min(std::stoul(sep->arg[2]), (unsigned long) 255) :
+		std::min(Strings::ToUnsignedInt(sep->arg[2]), (uint32) 255) :
 		0
 	);
 

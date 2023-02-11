@@ -81,7 +81,7 @@ void command_corpse(Client *c, const Seperator *sep)
 			auto deleted_string = (
 				corpses_deleted ?
 				fmt::format(
-					"{} Player corpse{} deleted.",					
+					"{} Player corpse{} deleted.",
 					corpses_deleted,
 					corpses_deleted != 1 ? "s" : ""
 				) :
@@ -104,7 +104,7 @@ void command_corpse(Client *c, const Seperator *sep)
 		}
 
 		if (
-			target->IsNPCCorpse() || 
+			target->IsNPCCorpse() ||
 			c->Admin() >= commandEditPlayerCorpses
 		) {
 			c->Message(
@@ -116,7 +116,7 @@ void command_corpse(Client *c, const Seperator *sep)
 				).c_str()
 			);
 			target->CastToCorpse()->Delete();
-		} 
+		}
 	} else if (is_list_npc) {
 		entity_list.ListNPCCorpses(c);
 	} else if (is_list_player) {
@@ -150,7 +150,7 @@ void command_corpse(Client *c, const Seperator *sep)
 				return;
 			}
 
-			auto character_id = std::stoi(sep->arg[2]);
+			auto character_id = Strings::ToInt(sep->arg[2]);
 			c->Message(
 				Chat::White,
 				fmt::format(
@@ -174,7 +174,7 @@ void command_corpse(Client *c, const Seperator *sep)
 			c->Message(Chat::White, "Your status is not high enough to reset looter on a player corpse.");
 			return;
 		}
-		
+
 		target->CastToCorpse()->ResetLooter();
 		c->Message(
 			Chat::White,
@@ -196,7 +196,7 @@ void command_corpse(Client *c, const Seperator *sep)
 		}
 
 		if (
-			target->IsNPCCorpse() || 
+			target->IsNPCCorpse() ||
 			c->Admin() >= commandEditPlayerCorpses
 		) {
 			target->CastToCorpse()->RemoveCash();
@@ -219,7 +219,7 @@ void command_corpse(Client *c, const Seperator *sep)
 			c->Message(Chat::White, "Your status is not high enough to inspect the loot of a player corpse.");
 			return;
 		}
-		
+
 		target->CastToCorpse()->QueryLoot(c);
 	} else if (is_lock) {
 		if (!target || !target->IsCorpse()) {
@@ -271,7 +271,7 @@ void command_corpse(Client *c, const Seperator *sep)
 			bool bury_corpse = (
 				sep->IsNumber(2) ?
 				(
-					std::stoi(sep->arg[2]) != 0 ?
+					Strings::ToInt(sep->arg[2]) != 0 ?
 					true :
 					false
 				) :
@@ -302,7 +302,7 @@ void command_corpse(Client *c, const Seperator *sep)
 			bool bury_corpse = (
 				sep->IsNumber(2) ?
 				(
-					std::stoi(sep->arg[2]) != 0 ?
+					Strings::ToInt(sep->arg[2]) != 0 ?
 					true :
 					false
 				) :

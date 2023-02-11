@@ -174,11 +174,11 @@ void command_feature(Client *c, const Seperator *sep)
 		if (is_size_alias) {
 			c->Message(Chat::White, "Usage: #feature size [Size] - Change your or your target's Size temporarily (Valid values are 0 to 255, decimal increments are allowed.)");
 			if (sep->arg[1] && Strings::IsFloat(sep->arg[1])) {
-				size = std::stof(sep->arg[1]);
+				size = Strings::ToFloat(sep->arg[1]);
 			}
 		}
 		else {
-			size = std::stof(sep->arg[2]);
+			size = Strings::ToFloat(sep->arg[2]);
 		}
 
 		if (size < 0 || size > 255) {

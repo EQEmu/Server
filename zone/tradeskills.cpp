@@ -311,7 +311,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 				inst->IsAttuned(),
 				EQ::invslot::slotCursor,
 				container->GetItem()->Icon,
-				atoi(container->GetItem()->IDFile + 2)
+				Strings::ToInt(container->GetItem()->IDFile + 2)
 			);
 
 			user->MessageString(Chat::LightBlue, TRANSFORM_COMPLETE, inst->GetItem()->Name);
@@ -574,8 +574,8 @@ void Object::HandleAutoCombine(Client* user, const RecipeAutoCombine_Struct* rac
 
     uint8 needItemIndex = 0;
 	for (auto row = results.begin(); row != results.end(); ++row, ++needItemIndex) {
-		uint32 item = (uint32)atoi(row[0]);
-		uint8 num = (uint8) atoi(row[1]);
+		uint32 item = (uint32)Strings::ToInt(row[0]);
+		uint8 num = (uint8) Strings::ToInt(row[1]);
 
 		needcount += num;
 
@@ -783,12 +783,12 @@ void Client::SendTradeskillSearchResults(
 			continue;
 		}
 
-		uint32     recipe_id  = (uint32) atoi(row[0]);
+		uint32     recipe_id  = (uint32) Strings::ToInt(row[0]);
 		const char *name      = row[1];
-		uint32     trivial    = (uint32) atoi(row[2]);
-		uint32     comp_count = (uint32) atoi(row[3]);
-		uint32     tradeskill = (uint16) atoi(row[4]);
-		uint32     must_learn = (uint16) atoi(row[5]);
+		uint32     trivial    = (uint32) Strings::ToInt(row[2]);
+		uint32     comp_count = (uint32) Strings::ToInt(row[3]);
+		uint32     tradeskill = (uint16) Strings::ToInt(row[4]);
+		uint32     must_learn = (uint16) Strings::ToInt(row[5]);
 
 
 		// Skip the recipes that exceed the threshold in skill difference
@@ -885,9 +885,9 @@ void Client::SendTradeskillDetails(uint32 recipe_id) {
 		if(row[2] == nullptr || row[3] == nullptr)
 			continue;
 
-		uint32 item = (uint32)atoi(row[0]);
-		uint8 num = (uint8) atoi(row[1]);
-		uint32 icon = (uint32) atoi(row[2]);
+		uint32 item = (uint32)Strings::ToInt(row[0]);
+		uint8 num = (uint8) Strings::ToInt(row[1]);
+		uint32 icon = (uint32) Strings::ToInt(row[2]);
 
 		const char *name = row[3];
 		len = strlen(name);
@@ -1307,7 +1307,7 @@ bool ZoneDatabase::GetTradeRecipe(
         uint32 index = 0;
         buf2 = "";
         for (auto row = results.begin(); row != results.end(); ++row, ++index) {
-            uint32 recipeid = (uint32)atoi(row[0]);
+            uint32 recipeid = (uint32)Strings::ToInt(row[0]);
             if(first) {
                 buf2 += StringFormat("%u", recipeid);
                 first = false;
@@ -1380,7 +1380,7 @@ bool ZoneDatabase::GetTradeRecipe(
 	}
 
 	auto row = results.begin();
-	uint32 recipe_id = (uint32)atoi(row[0]);
+	uint32 recipe_id = (uint32)Strings::ToInt(row[0]);
 
 	//Right here we verify that we actually have ALL of the tradeskill components..
 	//instead of part which is possible with experimentation.
@@ -1411,7 +1411,7 @@ bool ZoneDatabase::GetTradeRecipe(
             if (!item)
                 continue;
 
-			if (item->ID == atoi(row[0])) {
+			if (item->ID == Strings::ToInt(row[0])) {
 				component_count++;
 			}
 
@@ -1419,11 +1419,11 @@ bool ZoneDatabase::GetTradeRecipe(
 				"Component count loop [{}] item [{}] recipe component_count [{}]",
 				component_count,
 				item->ID,
-				atoi(row[1])
+				Strings::ToInt(row[1])
 			);
 		}
 
-		if (component_count != atoi(row[1])) {
+		if (component_count != Strings::ToInt(row[1])) {
 			return false;
 		}
 	}
@@ -1488,14 +1488,14 @@ bool ZoneDatabase::GetTradeRecipe(
 
 	auto row = results.begin();
 
-	spec->tradeskill        = (EQ::skills::SkillType) atoi(row[1]);
-	spec->skill_needed      = (int16) atoi(row[2]);
-	spec->trivial           = (uint16) atoi(row[3]);
-	spec->nofail            = atoi(row[4]) ? true : false;
-	spec->replace_container = atoi(row[5]) ? true : false;
+	spec->tradeskill        = (EQ::skills::SkillType) Strings::ToInt(row[1]);
+	spec->skill_needed      = (int16) Strings::ToInt(row[2]);
+	spec->trivial           = (uint16) Strings::ToInt(row[3]);
+	spec->nofail            = Strings::ToInt(row[4]) ? true : false;
+	spec->replace_container = Strings::ToInt(row[5]) ? true : false;
 	spec->name              = row[6];
-	spec->must_learn        = (uint8) atoi(row[7]);
-	spec->quest             = atoi(row[8]) ? true : false;
+	spec->must_learn        = (uint8) Strings::ToInt(row[7]);
+	spec->quest             = Strings::ToInt(row[8]) ? true : false;
 	spec->has_learnt        = false;
 	spec->madecount         = 0;
 	spec->recipe_id         = recipe_id;
@@ -1527,8 +1527,8 @@ bool ZoneDatabase::GetTradeRecipe(
 
 	spec->onsuccess.clear();
 	for(auto row = results.begin(); row != results.end(); ++row) {
-		uint32 item = (uint32)atoi(row[0]);
-		uint8 num = (uint8) atoi(row[1]);
+		uint32 item = (uint32)Strings::ToInt(row[0]);
+		uint8 num = (uint8) Strings::ToInt(row[1]);
 		spec->onsuccess.push_back(std::pair<uint32,uint8>(item, num));
 	}
 
@@ -1541,8 +1541,8 @@ bool ZoneDatabase::GetTradeRecipe(
 	results = QueryDatabase(query);
 	if (results.Success()) {
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			uint32 item = (uint32) atoi(row[0]);
-			uint8  num  = (uint8) atoi(row[1]);
+			uint32 item = (uint32) Strings::ToInt(row[0]);
+			uint8  num  = (uint8) Strings::ToInt(row[1]);
 			spec->onfail.push_back(std::pair<uint32, uint8>(item, num));
 		}
 	}
@@ -1564,8 +1564,8 @@ bool ZoneDatabase::GetTradeRecipe(
 	results = QueryDatabase(query);
 	if (results.Success()) {
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			uint32 item = (uint32) atoi(row[0]);
-			uint8  num  = (uint8) atoi(row[1]);
+			uint32 item = (uint32) Strings::ToInt(row[0]);
+			uint8  num  = (uint8) Strings::ToInt(row[1]);
 			spec->salvage.push_back(std::pair<uint32, uint8>(item, num));
 		}
 	}

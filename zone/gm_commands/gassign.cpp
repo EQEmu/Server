@@ -13,7 +13,7 @@ void command_gassign(Client *c, const Seperator *sep)
 		return;
 	}
 
-	auto grid_id = std::stoul(sep->arg[1]);
+	auto grid_id = Strings::ToUnsignedInt(sep->arg[1]);
 
 	auto target = c->GetTarget()->CastToNPC();
 	if (target->GetSpawnPointID() > 0) {

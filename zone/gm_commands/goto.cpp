@@ -49,10 +49,10 @@ void command_goto(Client *c, const Seperator *sep)
 		c->MovePC(
 			zone->GetZoneID(),
 			zone->GetInstanceID(),
-			atof(sep->arg[1]),
-			atof(sep->arg[2]),
-			atof(sep->arg[3]),
-			(sep->arg[4] ? atof(sep->arg[4]) : c->GetHeading())
+			Strings::ToFloat(sep->arg[1]),
+			Strings::ToFloat(sep->arg[2]),
+			Strings::ToFloat(sep->arg[3]),
+			(sep->arg[4] ? Strings::ToFloat(sep->arg[4]) : c->GetHeading())
 		);
 	}
 	else {

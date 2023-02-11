@@ -11,7 +11,7 @@ void command_worldwide(Client *c, const Seperator *sep)
 		c->Message(Chat::White, "Usage: #worldwide remove [Spell ID] - Remove a spell worldwide");
 		return;
 	}
-	
+
 	bool is_cast = !strcasecmp(sep->arg[1], "cast");
 	bool is_remove = !strcasecmp(sep->arg[1], "remove");
 	bool is_message = !strcasecmp(sep->arg[1], "message");
@@ -39,7 +39,7 @@ void command_worldwide(Client *c, const Seperator *sep)
 			auto spell_id = std::stoul(sep->arg[2]);
 			bool disable_message = false;
 			if (sep->IsNumber(3)) {
-				disable_message = std::stoi(sep->arg[3]) ? true : false;
+				disable_message = Strings::ToInt(sep->arg[3]) ? true : false;
 			}
 
 			if (!IsValidSpell(spell_id)) {

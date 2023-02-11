@@ -34,8 +34,6 @@
 #include <vector>
 #include <map>
 
-//atoi is not uint32 or uint32 safe!!!!
-#define atoul(str) strtoul(str, nullptr, 10)
 
 class UCSDatabase : public Database {
 public:

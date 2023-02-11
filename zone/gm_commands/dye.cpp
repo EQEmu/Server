@@ -48,23 +48,23 @@ void command_dye(Client *c, const Seperator *sep)
 	}
 
 	if (arguments >= 1 && sep->IsNumber(1)) {
-		slot = atoi(sep->arg[1]);
+		slot = Strings::ToInt(sep->arg[1]);
 	}
 
 	if (arguments >= 2 && sep->IsNumber(2)) {
-		red = atoi(sep->arg[2]);
+		red = Strings::ToInt(sep->arg[2]);
 	}
 
 	if (arguments >= 3 && sep->IsNumber(3)) {
-		green = atoi(sep->arg[3]);
+		green = Strings::ToInt(sep->arg[3]);
 	}
 
 	if (arguments >= 4 && sep->IsNumber(4)) {
-		blue = atoi(sep->arg[4]);
+		blue = Strings::ToInt(sep->arg[4]);
 	}
 
 	if (arguments >= 5 && sep->IsNumber(5)) {
-		use_tint = atoi(sep->arg[5]);
+		use_tint = Strings::ToInt(sep->arg[5]);
 	}
 
 	if (RuleB(Command, DyeCommandRequiresDyes)) {

@@ -53,7 +53,7 @@ void command_guild(Client *c, const Seperator *sep)
 		} else {
 			auto leader_id = (
 				sep->IsNumber(2) ?
-				std::stoul(sep->arg[2]) :
+				Strings::ToUnsignedInt(sep->arg[2]) :
 				database.GetCharacterID(sep->arg[2])
 			);
 			auto leader_name = database.GetCharNameByID(leader_id);

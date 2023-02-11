@@ -6121,8 +6121,8 @@ void NPC::LoadMercTypes() {
 	{
 		MercType tempMercType;
 
-		tempMercType.Type = atoi(row[0]);
-		tempMercType.ClientVersion = atoi(row[1]);
+		tempMercType.Type = Strings::ToInt(row[0]);
+		tempMercType.ClientVersion = Strings::ToInt(row[1]);
 
 		mercTypeList.push_back(tempMercType);
 	}
@@ -6154,12 +6154,12 @@ void NPC::LoadMercs() {
 	{
 		MercData tempMerc;
 
-		tempMerc.MercTemplateID = atoi(row[0]);
-		tempMerc.MercType = atoi(row[1]);
-		tempMerc.MercSubType = atoi(row[2]);
-		tempMerc.CostFormula = atoi(row[3]);
-		tempMerc.ClientVersion = atoi(row[4]);
-		tempMerc.NPCID = atoi(row[5]);
+		tempMerc.MercTemplateID = Strings::ToInt(row[0]);
+		tempMerc.MercType = Strings::ToInt(row[1]);
+		tempMerc.MercSubType = Strings::ToInt(row[2]);
+		tempMerc.CostFormula = Strings::ToInt(row[3]);
+		tempMerc.ClientVersion = Strings::ToInt(row[4]);
+		tempMerc.NPCID = Strings::ToInt(row[5]);
 
 		mercDataList.push_back(tempMerc);
 	}

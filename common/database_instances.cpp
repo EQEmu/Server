@@ -167,8 +167,8 @@ bool Database::GetUnusedInstanceID(uint16 &instance_id)
 
 	auto row = results.begin();
 
-	if (atoi(row[0]) <= max) {
-		instance_id = atoi(row[0]);
+	if (Strings::ToInt(row[0]) <= max) {
+		instance_id = Strings::ToInt(row[0]);
 
 		return true;
 	}

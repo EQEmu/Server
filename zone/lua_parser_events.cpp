@@ -82,25 +82,25 @@ void handle_npc_event_trade(
 	}
 
 	auto money_string = fmt::format("platinum.{}", npc_id);
-	uint32 money_value = !parse->GetVar(money_string).empty() ? std::stoul(parse->GetVar(money_string)) : 0;
+	uint32 money_value = !parse->GetVar(money_string).empty() ? Strings::ToUnsignedInt(parse->GetVar(money_string)) : 0;
 
 	lua_pushinteger(L, money_value);
 	lua_setfield(L, -2, "platinum");
 
 	money_string = fmt::format("gold.{}", npc_id);
-	money_value = !parse->GetVar(money_string).empty() ? std::stoul(parse->GetVar(money_string)) : 0;
+	money_value = !parse->GetVar(money_string).empty() ? Strings::ToUnsignedInt(parse->GetVar(money_string)) : 0;
 
 	lua_pushinteger(L, money_value);
 	lua_setfield(L, -2, "gold");
 
 	money_string = fmt::format("silver.{}", npc_id);
-	money_value = !parse->GetVar(money_string).empty() ? std::stoul(parse->GetVar(money_string)) : 0;
+	money_value = !parse->GetVar(money_string).empty() ? Strings::ToUnsignedInt(parse->GetVar(money_string)) : 0;
 
 	lua_pushinteger(L, money_value);
 	lua_setfield(L, -2, "silver");
 
 	money_string = fmt::format("copper.{}", npc_id);
-	money_value = !parse->GetVar(money_string).empty() ? std::stoul(parse->GetVar(money_string)) : 0;
+	money_value = !parse->GetVar(money_string).empty() ? Strings::ToUnsignedInt(parse->GetVar(money_string)) : 0;
 
 	lua_pushinteger(L, money_value);
 	lua_setfield(L, -2, "copper");
@@ -464,31 +464,31 @@ void handle_npc_damage(
 ) {
 	Seperator sep(data.c_str());
 
-	lua_pushnumber(L, std::stoul(sep.arg[0]));
+	lua_pushnumber(L, Strings::ToUnsignedInt(sep.arg[0]));
 	lua_setfield(L, -2, "entity_id");
 
-	lua_pushnumber(L, std::stoll(sep.arg[1]));
+	lua_pushnumber(L, Strings::ToBigInt(sep.arg[1]));
 	lua_setfield(L, -2, "damage");
 
-	lua_pushnumber(L, std::stoi(sep.arg[2]));
+	lua_pushnumber(L, Strings::ToInt(sep.arg[2]));
 	lua_setfield(L, -2, "spell_id");
 
-	lua_pushnumber(L, std::stoi(sep.arg[3]));
+	lua_pushnumber(L, Strings::ToInt(sep.arg[3]));
 	lua_setfield(L, -2, "skill_id");
 
-	lua_pushboolean(L, std::stoi(sep.arg[4]) == 0 ? false : true);
+	lua_pushboolean(L, Strings::ToInt(sep.arg[4]) == 0 ? false : true);
 	lua_setfield(L, -2, "is_damage_shield");
 
-	lua_pushboolean(L, std::stoi(sep.arg[5]) == 0 ? false : true);
+	lua_pushboolean(L, Strings::ToInt(sep.arg[5]) == 0 ? false : true);
 	lua_setfield(L, -2, "is_avoidable");
 
-	lua_pushnumber(L, std::stoi(sep.arg[6]));
+	lua_pushnumber(L, Strings::ToInt(sep.arg[6]));
 	lua_setfield(L, -2, "buff_slot");
 
-	lua_pushboolean(L, std::stoi(sep.arg[7]) == 0 ? false : true);
+	lua_pushboolean(L, Strings::ToInt(sep.arg[7]) == 0 ? false : true);
 	lua_setfield(L, -2, "is_buff_tic");
 
-	lua_pushnumber(L, std::stoi(sep.arg[8]));
+	lua_pushnumber(L, Strings::ToInt(sep.arg[8]));
 	lua_setfield(L, -2, "special_attack");
 
 	Lua_Mob l_mob(init);
@@ -844,7 +844,7 @@ void handle_player_task_accepted(
 	uint32 extra_data,
 	std::vector<std::any>* extra_pointers
 ) {
-	lua_pushinteger(L, std::stoi(data));
+	lua_pushinteger(L, Strings::ToInt(data));
 	lua_setfield(L, -2, "task_id");
 }
 
@@ -1069,13 +1069,13 @@ void handle_player_warp(
 	std::vector<std::any> *extra_pointers
 ) {
 	Seperator sep(data.c_str());
-	lua_pushnumber(L, std::stof(sep.arg[0]));
+	lua_pushnumber(L, Strings::ToFloat(sep.arg[0]));
 	lua_setfield(L, -2, "from_x");
 
-	lua_pushnumber(L, std::stof(sep.arg[1]));
+	lua_pushnumber(L, Strings::ToFloat(sep.arg[1]));
 	lua_setfield(L, -2, "from_y");
 
-	lua_pushnumber(L, std::stof(sep.arg[2]));
+	lua_pushnumber(L, Strings::ToFloat(sep.arg[2]));
 	lua_setfield(L, -2, "from_z");
 }
 
@@ -1171,7 +1171,7 @@ void handle_player_level_up(
 	uint32 extra_data,
 	std::vector<std::any> *extra_pointers
 ) {
-	lua_pushinteger(L, std::stoul(data));
+	lua_pushinteger(L, Strings::ToUnsignedInt(data));
 	lua_setfield(L, -2, "levels_gained");
 }
 
@@ -1183,7 +1183,7 @@ void handle_player_level_down(
 	uint32 extra_data,
 	std::vector<std::any> *extra_pointers
 ) {
-	lua_pushinteger(L, std::stoul(data));
+	lua_pushinteger(L, Strings::ToUnsignedInt(data));
 	lua_setfield(L, -2, "levels_lost");
 }
 
@@ -1234,31 +1234,31 @@ void handle_player_damage(
 ) {
 	Seperator sep(data.c_str());
 
-	lua_pushnumber(L, std::stoul(sep.arg[0]));
+	lua_pushnumber(L, Strings::ToUnsignedInt(sep.arg[0]));
 	lua_setfield(L, -2, "entity_id");
 
-	lua_pushnumber(L, std::stoll(sep.arg[1]));
+	lua_pushnumber(L, Strings::ToBigInt(sep.arg[1]));
 	lua_setfield(L, -2, "damage");
 
-	lua_pushnumber(L, std::stoi(sep.arg[2]));
+	lua_pushnumber(L, Strings::ToInt(sep.arg[2]));
 	lua_setfield(L, -2, "spell_id");
 
-	lua_pushnumber(L, std::stoi(sep.arg[3]));
+	lua_pushnumber(L, Strings::ToInt(sep.arg[3]));
 	lua_setfield(L, -2, "skill_id");
 
-	lua_pushboolean(L, std::stoi(sep.arg[4]) == 0 ? false : true);
+	lua_pushboolean(L, Strings::ToInt(sep.arg[4]) == 0 ? false : true);
 	lua_setfield(L, -2, "is_damage_shield");
 
-	lua_pushboolean(L, std::stoi(sep.arg[5]) == 0 ? false : true);
+	lua_pushboolean(L, Strings::ToInt(sep.arg[5]) == 0 ? false : true);
 	lua_setfield(L, -2, "is_avoidable");
 
-	lua_pushnumber(L, std::stoi(sep.arg[6]));
+	lua_pushnumber(L, Strings::ToInt(sep.arg[6]));
 	lua_setfield(L, -2, "buff_slot");
 
-	lua_pushboolean(L, std::stoi(sep.arg[7]) == 0 ? false : true);
+	lua_pushboolean(L, Strings::ToInt(sep.arg[7]) == 0 ? false : true);
 	lua_setfield(L, -2, "is_buff_tic");
 
-	lua_pushnumber(L, std::stoi(sep.arg[8]));
+	lua_pushnumber(L, Strings::ToInt(sep.arg[8]));
 	lua_setfield(L, -2, "special_attack");
 
 	if (extra_pointers && extra_pointers->size() >= 1) {
@@ -1277,7 +1277,7 @@ void handle_player_item_click(
 	uint32 extra_data,
 	std::vector<std::any> *extra_pointers
 ) {
-	lua_pushnumber(L, std::stoi(data));
+	lua_pushnumber(L, Strings::ToInt(data));
 	lua_setfield(L, -2, "slot_id");
 
 	if (extra_pointers && extra_pointers->size() >= 1) {
@@ -1745,16 +1745,16 @@ void handle_player_augment_insert(
 	lua_setfield(L, -2, "augment");
 
 	Seperator sep(data.c_str());
-	lua_pushinteger(L, std::stoul(sep.arg[0]));
+	lua_pushinteger(L, Strings::ToUnsignedInt(sep.arg[0]));
 	lua_setfield(L, -2, "item_id");
 
 	lua_pushinteger(L, Strings::ToInt(sep.arg[1]));
 	lua_setfield(L, -2, "item_slot");
 
-	lua_pushinteger(L, std::stoul(sep.arg[2]));
+	lua_pushinteger(L, Strings::ToUnsignedInt(sep.arg[2]));
 	lua_setfield(L, -2, "augment_id");
 
-	lua_pushinteger(L, std::stoul(sep.arg[3]));
+	lua_pushinteger(L, Strings::ToUnsignedInt(sep.arg[3]));
 	lua_setfield(L, -2, "augment_slot");
 }
 
@@ -1777,16 +1777,16 @@ void handle_player_augment_remove(
 	lua_setfield(L, -2, "augment");
 
 	Seperator sep(data.c_str());
-	lua_pushinteger(L, std::stoul(sep.arg[0]));
+	lua_pushinteger(L, Strings::ToUnsignedInt(sep.arg[0]));
 	lua_setfield(L, -2, "item_id");
 
 	lua_pushinteger(L, Strings::ToInt(sep.arg[1]));
 	lua_setfield(L, -2, "item_slot");
 
-	lua_pushinteger(L, std::stoul(sep.arg[2]));
+	lua_pushinteger(L, Strings::ToUnsignedInt(sep.arg[2]));
 	lua_setfield(L, -2, "augment_id");
 
-	lua_pushinteger(L, std::stoul(sep.arg[3]));
+	lua_pushinteger(L, Strings::ToUnsignedInt(sep.arg[3]));
 	lua_setfield(L, -2, "augment_slot");
 
 	lua_pushboolean(L, Strings::ToBool(sep.arg[4]));
@@ -2037,25 +2037,25 @@ void handle_bot_trade(
 	}
 
 	auto money_string = fmt::format("platinum.{}", bot_id);
-	uint32 money_value = !parse->GetVar(money_string).empty() ? std::stoul(parse->GetVar(money_string)) : 0;
+	uint32 money_value = !parse->GetVar(money_string).empty() ? Strings::ToUnsignedInt(parse->GetVar(money_string)) : 0;
 
 	lua_pushinteger(L, money_value);
 	lua_setfield(L, -2, "platinum");
 
 	money_string = fmt::format("gold.{}", bot_id);
-	money_value = !parse->GetVar(money_string).empty() ? std::stoul(parse->GetVar(money_string)) : 0;
+	money_value = !parse->GetVar(money_string).empty() ? Strings::ToUnsignedInt(parse->GetVar(money_string)) : 0;
 
 	lua_pushinteger(L, money_value);
 	lua_setfield(L, -2, "gold");
 
 	money_string = fmt::format("silver.{}", bot_id);
-	money_value = !parse->GetVar(money_string).empty() ? std::stoul(parse->GetVar(money_string)) : 0;
+	money_value = !parse->GetVar(money_string).empty() ? Strings::ToUnsignedInt(parse->GetVar(money_string)) : 0;
 
 	lua_pushinteger(L, money_value);
 	lua_setfield(L, -2, "silver");
 
 	money_string = fmt::format("copper.{}", bot_id);
-	money_value = !parse->GetVar(money_string).empty() ? std::stoul(parse->GetVar(money_string)) : 0;
+	money_value = !parse->GetVar(money_string).empty() ? Strings::ToUnsignedInt(parse->GetVar(money_string)) : 0;
 
 	lua_pushinteger(L, money_value);
 	lua_setfield(L, -2, "copper");
@@ -2094,10 +2094,10 @@ void handle_bot_equip_item(
 
 	Seperator sep(data.c_str());
 
-	lua_pushnumber(L, std::stoi(sep.arg[0]));
+	lua_pushnumber(L, Strings::ToInt(sep.arg[0]));
 	lua_setfield(L, -2, "item_quantity");
 
-	lua_pushnumber(L, std::stoi(sep.arg[1]));
+	lua_pushnumber(L, Strings::ToInt(sep.arg[1]));
 	lua_setfield(L, -2, "slot_id");
 
 	Lua_ItemInst l_item(extra_data);
@@ -2117,31 +2117,31 @@ void handle_bot_damage(
 ) {
 	Seperator sep(data.c_str());
 
-	lua_pushnumber(L, std::stoul(sep.arg[0]));
+	lua_pushnumber(L, Strings::ToUnsignedInt(sep.arg[0]));
 	lua_setfield(L, -2, "entity_id");
 
-	lua_pushnumber(L, std::stoll(sep.arg[1]));
+	lua_pushnumber(L, Strings::ToBigInt(sep.arg[1]));
 	lua_setfield(L, -2, "damage");
 
-	lua_pushnumber(L, std::stoi(sep.arg[2]));
+	lua_pushnumber(L, Strings::ToInt(sep.arg[2]));
 	lua_setfield(L, -2, "spell_id");
 
-	lua_pushnumber(L, std::stoi(sep.arg[3]));
+	lua_pushnumber(L, Strings::ToInt(sep.arg[3]));
 	lua_setfield(L, -2, "skill_id");
 
-	lua_pushboolean(L, std::stoi(sep.arg[4]) == 0 ? false : true);
+	lua_pushboolean(L, Strings::ToInt(sep.arg[4]) == 0 ? false : true);
 	lua_setfield(L, -2, "is_damage_shield");
 
-	lua_pushboolean(L, std::stoi(sep.arg[5]) == 0 ? false : true);
+	lua_pushboolean(L, Strings::ToInt(sep.arg[5]) == 0 ? false : true);
 	lua_setfield(L, -2, "is_avoidable");
 
-	lua_pushnumber(L, std::stoi(sep.arg[6]));
+	lua_pushnumber(L, Strings::ToInt(sep.arg[6]));
 	lua_setfield(L, -2, "buff_slot");
 
-	lua_pushboolean(L, std::stoi(sep.arg[7]) == 0 ? false : true);
+	lua_pushboolean(L, Strings::ToInt(sep.arg[7]) == 0 ? false : true);
 	lua_setfield(L, -2, "is_buff_tic");
 
-	lua_pushnumber(L, std::stoi(sep.arg[8]));
+	lua_pushnumber(L, Strings::ToInt(sep.arg[8]));
 	lua_setfield(L, -2, "special_attack");
 
 	Lua_Mob l_mob(init);

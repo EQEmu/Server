@@ -11,8 +11,8 @@ void command_camerashake(Client *c, const Seperator *sep)
 		return;
 	}
 
-	auto duration = std::stoi(sep->arg[1]);
-	auto intensity = std::stoi(sep->arg[2]);
+	auto duration = Strings::ToInt(sep->arg[1]);
+	auto intensity = Strings::ToInt(sep->arg[2]);
 
 	auto pack = new ServerPacket(ServerOP_CameraShake, sizeof(ServerCameraShake_Struct));
 	ServerCameraShake_Struct *camera_shake = (ServerCameraShake_Struct *) pack->pBuffer;

@@ -14,7 +14,7 @@ void command_gender(Client *c, const Seperator *sep)
 		target = c->GetTarget();
 	}
 
-	auto gender_id = std::stoi(sep->arg[1]);
+	auto gender_id = Strings::ToInt(sep->arg[1]);
 	if (gender_id < 0 || gender_id > 2) {
 		c->Message(Chat::White, "Usage: #gender [Gender ID]");
 		c->Message(Chat::White, "Genders: 0 = Male, 1 = Female, 2 = Neuter");

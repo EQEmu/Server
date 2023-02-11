@@ -5678,7 +5678,7 @@ std::unordered_map<uint32, std::vector<uint16>> Client::LoadSpellGroupCache(uint
 	}
 
 	for (auto row : results) {
-		spell_group_cache[std::stoul(row[0])].push_back(static_cast<uint16>(std::stoul(row[1])));
+		spell_group_cache[Strings::ToUnsignedInt(row[0])].push_back(static_cast<uint16>(std::stoul(row[1])));
 	}
 
 	return spell_group_cache;

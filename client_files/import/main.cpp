@@ -241,10 +241,10 @@ void ImportSkillCaps(SharedDatabase *db) {
 		}
 
 		int class_id, skill_id, level, cap;
-		class_id = atoi(split[0].c_str());
-		skill_id = atoi(split[1].c_str());
-		level = atoi(split[2].c_str());
-		cap = atoi(split[3].c_str());
+		class_id = Strings::ToInt(split[0].c_str());
+		skill_id = Strings::ToInt(split[1].c_str());
+		level = Strings::ToInt(split[2].c_str());
+		cap = Strings::ToInt(split[3].c_str());
 
 		std::string sql = StringFormat("INSERT INTO skill_caps(class, skillID, level, cap) VALUES(%d, %d, %d, %d)",
 			class_id, skill_id, level, cap);
@@ -280,16 +280,16 @@ void ImportBaseData(SharedDatabase *db) {
 		int level, class_id;
 		double hp, mana, end, unk1, unk2, hp_fac, mana_fac, end_fac;
 
-		level = atoi(split[0].c_str());
-		class_id = atoi(split[1].c_str());
-		hp = atof(split[2].c_str());
-		mana = atof(split[3].c_str());
-		end = atof(split[4].c_str());
-		unk1 = atof(split[5].c_str());
-		unk2 = atof(split[6].c_str());
-		hp_fac = atof(split[7].c_str());
-		mana_fac = atof(split[8].c_str());
-		end_fac = atof(split[9].c_str());
+		level = Strings::ToInt(split[0].c_str());
+		class_id = Strings::ToInt(split[1].c_str());
+		hp = Strings::ToFloat(split[2].c_str());
+		mana = Strings::ToFloat(split[3].c_str());
+		end = Strings::ToFloat(split[4].c_str());
+		unk1 = Strings::ToFloat(split[5].c_str());
+		unk2 = Strings::ToFloat(split[6].c_str());
+		hp_fac = Strings::ToFloat(split[7].c_str());
+		mana_fac = Strings::ToFloat(split[8].c_str());
+		end_fac = Strings::ToFloat(split[9].c_str());
 
 		sql = StringFormat("INSERT INTO base_data(level, class, hp, mana, end, unk1, unk2, hp_fac, "
 			"mana_fac, end_fac) VALUES(%d, %d, %f, %f, %f, %f, %f, %f, %f, %f)",
@@ -339,8 +339,8 @@ void ImportDBStrings(SharedDatabase *db) {
 		int id, type;
 		std::string value;
 
-		id = atoi(split[0].c_str());
-		type = atoi(split[1].c_str());
+		id = Strings::ToInt(split[0].c_str());
+		type = Strings::ToInt(split[1].c_str());
 
 		if(split.size() >= 3) {
 			value = ::Strings::Escape(split[2]);

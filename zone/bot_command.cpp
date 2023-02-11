@@ -5113,7 +5113,7 @@ void bot_subcommand_bot_beard_color(Client *c, const Seperator *sep)
 		return;
 	}
 
-	uint8 uvalue = atoi(sep->arg[1]);
+	uint8 uvalue = Strings::ToInt(sep->arg[1]);
 
 	auto fail_type = BCEnum::AFT_None;
 	if (my_bot->GetGender() != MALE && my_bot->GetRace() != DWARF)
@@ -5150,7 +5150,7 @@ void bot_subcommand_bot_beard_style(Client *c, const Seperator *sep)
 		return;
 	}
 
-	uint8 uvalue = atoi(sep->arg[1]);
+	uint8 uvalue = Strings::ToInt(sep->arg[1]);
 
 	auto fail_type = BCEnum::AFT_None;
 	if (my_bot->GetGender() != MALE && my_bot->GetRace() != DWARF)
@@ -5719,7 +5719,7 @@ void bot_subcommand_bot_details(Client *c, const Seperator *sep)
 		return;
 	}
 
-	uint32 uvalue = atoi(sep->arg[1]);
+	uint32 uvalue = Strings::ToInt(sep->arg[1]);
 
 	auto fail_type = BCEnum::AFT_None;
 	if (my_bot->GetRace() != DRAKKIN)
@@ -5887,7 +5887,7 @@ void bot_subcommand_bot_eyes(Client *c, const Seperator *sep)
 		return;
 	}
 
-	uint8 uvalue = atoi(sep->arg[1]);
+	uint8 uvalue = Strings::ToInt(sep->arg[1]);
 
 	//uint8 eye_bias = 0;
 	//std::string arg2 = sep->arg[2];
@@ -5941,7 +5941,7 @@ void bot_subcommand_bot_face(Client *c, const Seperator *sep)
 		return;
 	}
 
-	uint8 uvalue = atoi(sep->arg[1]);
+	uint8 uvalue = Strings::ToInt(sep->arg[1]);
 
 	auto fail_type = BCEnum::AFT_None;
 	if (!PlayerAppearance::IsValidFace(my_bot->GetRace(), my_bot->GetGender(), uvalue)) {
@@ -5981,7 +5981,7 @@ void bot_subcommand_bot_follow_distance(Client *c, const Seperator *sep)
 			return;
 		}
 
-		bfd = atoi(sep->arg[2]);
+		bfd = Strings::ToInt(sep->arg[2]);
 		if (bfd < 1)
 			bfd = 1;
 		if (bfd > BOT_FOLLOW_DISTANCE_DEFAULT_MAX)
@@ -6047,7 +6047,7 @@ void bot_subcommand_bot_hair_color(Client *c, const Seperator *sep)
 		return;
 	}
 
-	uint8 uvalue = atoi(sep->arg[1]);
+	uint8 uvalue = Strings::ToInt(sep->arg[1]);
 
 	auto fail_type = BCEnum::AFT_None;
 	if (!PlayerAppearance::IsValidHairColor(my_bot->GetRace(), my_bot->GetGender(), uvalue))
@@ -6082,7 +6082,7 @@ void bot_subcommand_bot_hairstyle(Client *c, const Seperator *sep)
 		return;
 	}
 
-	uint8 uvalue = atoi(sep->arg[1]);
+	uint8 uvalue = Strings::ToInt(sep->arg[1]);
 
 	auto fail_type = BCEnum::AFT_None;
 	if (!PlayerAppearance::IsValidHair(my_bot->GetRace(), my_bot->GetGender(), uvalue))
@@ -6119,7 +6119,7 @@ void bot_subcommand_bot_heritage(Client *c, const Seperator *sep)
 		return;
 	}
 
-	uint32 uvalue = atoi(sep->arg[1]);
+	uint32 uvalue = Strings::ToInt(sep->arg[1]);
 
 	auto fail_type = BCEnum::AFT_None;
 	if (my_bot->GetRace() != DRAKKIN)
@@ -6256,13 +6256,13 @@ void bot_subcommand_bot_list(Client *c, const Seperator *sep)
 
 		if (!strcasecmp(sep->arg[i], "class")) {
 			filter_mask |= MaskClass;
-			filter_value[FilterClass] = atoi(sep->arg[i + 1]);
+			filter_value[FilterClass] = Strings::ToInt(sep->arg[i + 1]);
 			continue;
 		}
 
 		if (!strcasecmp(sep->arg[i], "race")) {
 			filter_mask |= MaskRace;
-			filter_value[FilterRace] = atoi(sep->arg[i + 1]);
+			filter_value[FilterRace] = Strings::ToInt(sep->arg[i + 1]);
 			continue;
 		}
 
@@ -6823,7 +6823,7 @@ void bot_subcommand_bot_stance(Client *c, const Seperator *sep)
 	if (!strcasecmp(sep->arg[1], "current"))
 		current_flag = true;
 	else if (sep->IsNumber(1)) {
-		bst = (EQ::constants::StanceType)atoi(sep->arg[1]);
+		bst = (EQ::constants::StanceType)Strings::ToInt(sep->arg[1]);
 		if (bst < EQ::constants::stanceUnknown || bst > EQ::constants::stanceBurnAE)
 			bst = EQ::constants::stanceUnknown;
 	}
@@ -6882,7 +6882,7 @@ void bot_subcommand_bot_stop_melee_level(Client *c, const Seperator *sep)
 	uint8 sml = RuleI(Bots, CasterStopMeleeLevel);
 
 	if (sep->IsNumber(1)) {
-		sml = atoi(sep->arg[1]);
+		sml = Strings::ToInt(sep->arg[1]);
 	}
 	else if (!strcasecmp(sep->arg[1], "sync")) {
 		sml = my_bot->GetLevel();
@@ -6988,7 +6988,7 @@ void bot_subcommand_bot_tattoo(Client *c, const Seperator *sep)
 		return;
 	}
 
-	uint32 uvalue = atoi(sep->arg[1]);
+	uint32 uvalue = Strings::ToInt(sep->arg[1]);
 
 	auto fail_type = BCEnum::AFT_None;
 	if (my_bot->GetRace() != DRAKKIN)
@@ -7232,7 +7232,7 @@ void bot_subcommand_bot_woad(Client *c, const Seperator *sep)
 		return;
 	}
 
-	uint8 uvalue = atoi(sep->arg[1]);
+	uint8 uvalue = Strings::ToInt(sep->arg[1]);
 
 	auto fail_type = BCEnum::AFT_None;
 	if (my_bot->GetRace() != BARBARIAN) {
@@ -8300,7 +8300,7 @@ void bot_subcommand_heal_rotation_adjust_critical(Client *c, const Seperator *se
 
 	uint8 armor_type_value = 255;
 	if (sep->IsNumber(1))
-		armor_type_value = atoi(armor_type_arg.c_str());
+		armor_type_value = Strings::ToInt(armor_type_arg.c_str());
 
 	if (armor_type_value > ARMOR_TYPE_LAST) {
 		c->Message(Chat::White, "You must specify a valid [armor_type: %u-%u] to use this command", ARMOR_TYPE_FIRST, ARMOR_TYPE_LAST);
@@ -8329,7 +8329,7 @@ void bot_subcommand_heal_rotation_adjust_critical(Client *c, const Seperator *se
 
 	float critical_ratio = CRITICAL_HP_RATIO_BASE;
 	if (sep->IsNumber(2))
-		critical_ratio = atof(critical_arg.c_str());
+		critical_ratio = Strings::ToFloat(critical_arg.c_str());
 	else if (!critical_arg.compare("+"))
 		critical_ratio = (*current_member->MemberOfHealRotation())->ArmorTypeCriticalHPRatio(armor_type_value) + HP_RATIO_DELTA;
 	else if (!critical_arg.compare("-"))
@@ -8366,7 +8366,7 @@ void bot_subcommand_heal_rotation_adjust_safe(Client *c, const Seperator *sep)
 
 	uint8 armor_type_value = 255;
 	if (sep->IsNumber(1))
-		armor_type_value = atoi(armor_type_arg.c_str());
+		armor_type_value = Strings::ToInt(armor_type_arg.c_str());
 
 	if (armor_type_value > ARMOR_TYPE_LAST) {
 		c->Message(Chat::White, "You must specify a valid [armor_type: %u-%u] to use this command", ARMOR_TYPE_FIRST, ARMOR_TYPE_LAST);
@@ -8395,7 +8395,7 @@ void bot_subcommand_heal_rotation_adjust_safe(Client *c, const Seperator *sep)
 
 	float safe_ratio = SAFE_HP_RATIO_BASE;
 	if (sep->IsNumber(2))
-		safe_ratio = atof(safe_arg.c_str());
+		safe_ratio = Strings::ToFloat(safe_arg.c_str());
 	else if (!safe_arg.compare("+"))
 		safe_ratio = (*current_member->MemberOfHealRotation())->ArmorTypeSafeHPRatio(armor_type_value) + HP_RATIO_DELTA;
 	else if (!safe_arg.compare("-"))
@@ -8509,7 +8509,7 @@ void bot_subcommand_heal_rotation_change_interval(Client *c, const Seperator *se
 	uint32 hr_change_interval_s = CASTING_CYCLE_DEFAULT_INTERVAL_S;
 
 	if (!change_interval_arg.empty()) {
-		hr_change_interval_s = atoi(change_interval_arg.c_str());
+		hr_change_interval_s = Strings::ToInt(change_interval_arg.c_str());
 	}
 	else {
 		hr_change_interval_s = (*current_member->MemberOfHealRotation())->IntervalS();
@@ -8657,14 +8657,14 @@ void bot_subcommand_heal_rotation_create(Client *c, const Seperator *sep)
 			hr_adaptive_targeting = true;
 		if (!fast_heals_arg.compare("on"))
 			hr_fast_heals = true;
-		hr_interval_s = atoi(interval_arg.c_str());
+		hr_interval_s = Strings::ToInt(interval_arg.c_str());
 	}
 	else if (!casting_override_arg.compare("off")) {
 		if (!adaptive_targeting_arg.compare("on"))
 			hr_adaptive_targeting = true;
 		if (!fast_heals_arg.compare("on"))
 			hr_fast_heals = true;
-		hr_interval_s = atoi(interval_arg.c_str());
+		hr_interval_s = Strings::ToInt(interval_arg.c_str());
 	}
 
 	if (hr_interval_s < CASTING_CYCLE_MINIMUM_INTERVAL_S || hr_interval_s > CASTING_CYCLE_MAXIMUM_INTERVAL_S)

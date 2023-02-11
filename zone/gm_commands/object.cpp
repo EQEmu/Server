@@ -50,7 +50,7 @@ void command_object(Client *c, const Seperator *sep)
 		if ((sep->arg[2][0] & 0xDF) == 'A') {
 			radius = 0; // List All
 		}
-		else if ((radius = atoi(sep->arg[2])) <= 0) {
+		else if ((radius = Strings::ToInt(sep->arg[2])) <= 0) {
 			radius = 500;
 		} // Invalid radius. Default to 500 units.
 
@@ -89,21 +89,21 @@ void command_object(Client *c, const Seperator *sep)
 		}
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			id = atoi(row[0]);
-			od.x       = atof(row[1]);
-			od.y       = atof(row[2]);
-			od.z       = atof(row[3]);
-			od.heading = atof(row[4]);
-			itemid = atoi(row[5]);
+			id = Strings::ToInt(row[0]);
+			od.x       = Strings::ToFloat(row[1]);
+			od.y       = Strings::ToFloat(row[2]);
+			od.z       = Strings::ToFloat(row[3]);
+			od.heading = Strings::ToFloat(row[4]);
+			itemid = Strings::ToInt(row[5]);
 			strn0cpy(od.object_name, row[6], sizeof(od.object_name));
 			od.object_name[sizeof(od.object_name) - 1] =
 				'\0'; // Required if strlen(row[col++]) exactly == sizeof(object_name)
 
-			od.object_type = atoi(row[7]);
-			icon = atoi(row[8]);
-			od.size       = atoi(row[9]);
-			od.solidtype  = atoi(row[10]);
-			od.unknown020 = atoi(row[11]);
+			od.object_type = Strings::ToInt(row[7]);
+			icon = Strings::ToInt(row[8]);
+			od.size       = Strings::ToInt(row[9]);
+			od.solidtype  = Strings::ToInt(row[10]);
+			od.unknown020 = Strings::ToInt(row[11]);
 
 			switch (od.object_type) {
 				case 0:                // Static Object
@@ -162,7 +162,7 @@ void command_object(Client *c, const Seperator *sep)
 		if (sep->argnum > 3) { // Model name in arg3?
 			if ((sep->arg[3][0] <= '9') && (sep->arg[3][0] >= '0')) {
 				// Nope, user must have specified ObjectID. Extract it.
-				id  = atoi(sep->arg[2]);
+				id  = Strings::ToInt(sep->arg[2]);
 				col = 1; // Bump all other arguments one to the right. Model is in arg4.
 			}
 			else {
@@ -179,18 +179,18 @@ void command_object(Client *c, const Seperator *sep)
 
 		memset(&od, 0, sizeof(od));
 
-		od.object_type = atoi(sep->arg[2 + col]);
+		od.object_type = Strings::ToInt(sep->arg[2 + col]);
 
 		switch (od.object_type) {
 			case 0: // Static Object
 				if ((sep->argnum - col) > 3) {
-					od.size = atoi(sep->arg[4 + col]); // Size specified
+					od.size = Strings::ToInt(sep->arg[4 + col]); // Size specified
 
 					if ((sep->argnum - col) > 4) {
-						od.solidtype = atoi(sep->arg[5 + col]); // SolidType specified
+						od.solidtype = Strings::ToInt(sep->arg[5 + col]); // SolidType specified
 
 						if ((sep->argnum - col) > 5) {
-							od.unknown020 = atoi(sep->arg[6 + col]);
+							od.unknown020 = Strings::ToInt(sep->arg[6 + col]);
 						} // Incline specified
 					}
 				}
@@ -205,7 +205,7 @@ void command_object(Client *c, const Seperator *sep)
 				return;
 
 			default: // Everything else == Tradeskill Object
-				icon = ((sep->argnum - col) > 3) ? atoi(sep->arg[4 + col]) : 0;
+				icon = ((sep->argnum - col) > 3) ? Strings::ToInt(sep->arg[4 + col]) : 0;
 
 				if (icon == 0) {
 					c->Message(Chat::White, "ERROR: Required property 'Icon' not specified for Tradeskill Object");
@@ -227,7 +227,7 @@ void command_object(Client *c, const Seperator *sep)
 			auto results = content_db.QueryDatabase(query);
 			if (results.Success() && results.RowCount() != 0) {
 				auto row = results.begin();
-				if (atoi(row[0]) > 0) { // Yep, in database already.
+				if (Strings::ToInt(row[0]) > 0) { // Yep, in database already.
 					id = 0;
 				}
 			}
@@ -239,7 +239,7 @@ void command_object(Client *c, const Seperator *sep)
 			}
 
 			if (id == 0) {
-				c->Message(Chat::White, "ERROR: An object already exists with the id %u", atoi(sep->arg[2]));
+				c->Message(Chat::White, "ERROR: An object already exists with the id %u", Strings::ToInt(sep->arg[2]));
 				return;
 			}
 		}
@@ -260,7 +260,7 @@ void command_object(Client *c, const Seperator *sep)
 		auto results = content_db.QueryDatabase(query);
 		if (results.Success() && results.RowCount() != 0) {
 			auto row = results.begin();
-			objectsFound = atoi(row[0]); // Number of nearby objects from database
+			objectsFound = Strings::ToInt(row[0]); // Number of nearby objects from database
 		}
 
 		// No objects found in database too close. How about spawned but not yet saved?
@@ -304,7 +304,7 @@ void command_object(Client *c, const Seperator *sep)
 			results = content_db.QueryDatabase(query);
 			if (results.Success() && results.RowCount() != 0) {
 				auto row = results.begin();
-				id       = atoi(row[0]);
+				id       = Strings::ToInt(row[0]);
 			}
 
 			id++;
@@ -352,7 +352,7 @@ void command_object(Client *c, const Seperator *sep)
 
 	if (strcasecmp(sep->arg[1], "edit") == 0) {
 
-		if ((sep->argnum < 2) || ((id = atoi(sep->arg[2])) < 1)) {
+		if ((sep->argnum < 2) || ((id = Strings::ToInt(sep->arg[2])) < 1)) {
 			c->Message(Chat::White, "Usage: #object Edit (ObjectID) [PropertyName] [NewValue]");
 			c->Message(Chat::White, "- Static Object (Type 0) Properties: model, type, size, solidtype, incline");
 			c->Message(Chat::White, "- Tradeskill Object (Type 2+) Properties: model, type, icon");
@@ -381,9 +381,9 @@ void command_object(Client *c, const Seperator *sep)
 			}
 
 			auto row = results.begin();
-			od.zone_id       = atoi(row[0]);
-			od.zone_instance = atoi(row[1]);
-			od.object_type   = atoi(row[2]);
+			od.zone_id       = Strings::ToInt(row[0]);
+			od.zone_instance = Strings::ToInt(row[1]);
+			od.object_type   = Strings::ToInt(row[2]);
 			uint32 objectsFound = 1;
 
 			// Object not in this zone?
@@ -471,7 +471,7 @@ void command_object(Client *c, const Seperator *sep)
 				return;
 			}
 
-			od.object_type = atoi(sep->arg[4]);
+			od.object_type = Strings::ToInt(sep->arg[4]);
 
 			switch (od.object_type) {
 				case 0:
@@ -514,7 +514,7 @@ void command_object(Client *c, const Seperator *sep)
 				return;
 			}
 
-			od.size = atoi(sep->arg[4]);
+			od.size = Strings::ToInt(sep->arg[4]);
 			o->SetObjectData(&od);
 
 			if (od.size == 0) { // 0 == unspecified == 100%
@@ -544,7 +544,7 @@ void command_object(Client *c, const Seperator *sep)
 				return;
 			}
 
-			od.solidtype = atoi(sep->arg[4]);
+			od.solidtype = Strings::ToInt(sep->arg[4]);
 			o->SetObjectData(&od);
 
 			c->Message(
@@ -565,7 +565,7 @@ void command_object(Client *c, const Seperator *sep)
 				return;
 			}
 
-			if ((icon = atoi(sep->arg[4])) == 0) {
+			if ((icon = Strings::ToInt(sep->arg[4])) == 0) {
 				c->Message(Chat::White, "ERROR: Invalid Icon specified. Please enter an icon number.");
 				return;
 			}
@@ -591,7 +591,7 @@ void command_object(Client *c, const Seperator *sep)
 				return;
 			}
 
-			od.unknown020 = atoi(sep->arg[4]);
+			od.unknown020 = Strings::ToInt(sep->arg[4]);
 			o->SetObjectData(&od);
 
 			c->Message(
@@ -622,7 +622,7 @@ void command_object(Client *c, const Seperator *sep)
 	if (strcasecmp(sep->arg[1], "move") == 0) {
 
 		if ((sep->argnum < 2) ||           // Not enough arguments
-			((id = atoi(sep->arg[2])) == 0) || // ID not specified
+			((id = Strings::ToInt(sep->arg[2])) == 0) || // ID not specified
 			(((sep->arg[3][0] < '0') || (sep->arg[3][0] > '9')) && ((sep->arg[3][0] & 0xDF) != 'T') &&
 			 (sep->arg[3][0] != '-') && (sep->arg[3][0] != '.'))) { // Location argument not specified correctly
 			c->Message(Chat::White, "Usage: #object Move (ObjectID) ToMe|(x y z [h])");
@@ -638,9 +638,9 @@ void command_object(Client *c, const Seperator *sep)
 			}
 
 			auto row = results.begin();
-			od.zone_id       = atoi(row[0]);
-			od.zone_instance = atoi(row[1]);
-			od.object_type   = atoi(row[2]);
+			od.zone_id       = Strings::ToInt(row[0]);
+			od.zone_instance = Strings::ToInt(row[1]);
+			od.object_type   = Strings::ToInt(row[2]);
 
 			if (od.zone_id != zone->GetZoneID()) {
 				c->Message(Chat::White, "ERROR: Object %u is not in this zone", id);
@@ -702,23 +702,23 @@ void command_object(Client *c, const Seperator *sep)
 			c->MovePC(c->GetX() - x2, c->GetY() - y2, c->GetZ(), c->GetHeading());
 		} // Move to x, y, z [h]
 		else {
-			od.x = atof(sep->arg[3]);
+			od.x = Strings::ToFloat(sep->arg[3]);
 			if (sep->argnum > 3) {
-				od.y = atof(sep->arg[4]);
+				od.y = Strings::ToFloat(sep->arg[4]);
 			}
 			else {
 				o->GetLocation(nullptr, &od.y, nullptr);
 			}
 
 			if (sep->argnum > 4) {
-				od.z = atof(sep->arg[5]);
+				od.z = Strings::ToFloat(sep->arg[5]);
 			}
 			else {
 				o->GetLocation(nullptr, nullptr, &od.z);
 			}
 
 			if (sep->argnum > 5) {
-				o->SetHeading(atof(sep->arg[6]));
+				o->SetHeading(Strings::ToFloat(sep->arg[6]));
 			}
 		}
 
@@ -739,7 +739,7 @@ void command_object(Client *c, const Seperator *sep)
 
 	if (strcasecmp(sep->arg[1], "rotate") == 0) {
 		// Insufficient or invalid arguments
-		if ((sep->argnum < 3) || ((id = atoi(sep->arg[2])) == 0)) {
+		if ((sep->argnum < 3) || ((id = Strings::ToInt(sep->arg[2])) == 0)) {
 			c->Message(Chat::White, "Usage: #object Rotate (ObjectID) (Heading, 0-512)");
 			return;
 		}
@@ -753,7 +753,7 @@ void command_object(Client *c, const Seperator *sep)
 			return;
 		}
 
-		o->SetHeading(atof(sep->arg[3]));
+		o->SetHeading(Strings::ToFloat(sep->arg[3]));
 
 		// Despawn and respawn object to reflect change
 		app = new EQApplicationPacket();
@@ -770,7 +770,7 @@ void command_object(Client *c, const Seperator *sep)
 
 	if (strcasecmp(sep->arg[1], "save") == 0) {
 		// Insufficient or invalid arguments
-		if ((sep->argnum < 2) || ((id = atoi(sep->arg[2])) == 0)) {
+		if ((sep->argnum < 2) || ((id = Strings::ToInt(sep->arg[2])) == 0)) {
 			c->Message(Chat::White, "Usage: #object Save (ObjectID)");
 			return;
 		}
@@ -787,9 +787,9 @@ void command_object(Client *c, const Seperator *sep)
 		auto        results = content_db.QueryDatabase(query);
 		if (results.Success() && results.RowCount() != 0) {
 			auto row = results.begin();
-			od.zone_id       = atoi(row[0]);
-			od.zone_instance = atoi(row[1]);
-			od.object_type   = atoi(row[2]);
+			od.zone_id       = Strings::ToInt(row[0]);
+			od.zone_instance = Strings::ToInt(row[1]);
+			od.object_type   = Strings::ToInt(row[2]);
 
 			// ID already in database. Not a new object.
 			bNewObject = false;
@@ -1014,7 +1014,7 @@ void command_object(Client *c, const Seperator *sep)
 			return;
 		}
 
-		od.zone_instance = atoi(sep->arg[3]);
+		od.zone_instance = Strings::ToInt(sep->arg[3]);
 
 		if (od.zone_instance == zone->GetInstanceVersion()) {
 			c->Message(Chat::White, "ERROR: Source and destination instance versions are the same.");
@@ -1046,7 +1046,7 @@ void command_object(Client *c, const Seperator *sep)
 			return;
 		}
 
-		id = atoi(sep->arg[2]);
+		id = Strings::ToInt(sep->arg[2]);
 
 		std::string query   = StringFormat(
 			"INSERT INTO object "
@@ -1085,13 +1085,13 @@ void command_object(Client *c, const Seperator *sep)
 
 		auto row = results.begin();
 		// Wrong ZoneID?
-		if (atoi(row[0]) != zone->GetZoneID()) {
+		if (Strings::ToInt(row[0]) != zone->GetZoneID()) {
 			c->Message(Chat::White, "ERROR: Object %u is not part of this zone.", id);
 			return;
 		}
 
 		// Wrong Instance Version?
-		if (atoi(row[1]) != zone->GetInstanceVersion()) {
+		if (Strings::ToInt(row[1]) != zone->GetInstanceVersion()) {
 			c->Message(Chat::White, "ERROR: Object %u is not part of this instance version.", id);
 			return;
 		}
@@ -1106,7 +1106,7 @@ void command_object(Client *c, const Seperator *sep)
 
 	if (strcasecmp(sep->arg[1], "delete") == 0) {
 
-		if ((sep->argnum < 2) || ((id = atoi(sep->arg[2])) <= 0)) {
+		if ((sep->argnum < 2) || ((id = Strings::ToInt(sep->arg[2])) <= 0)) {
 			c->Message(
 				Chat::White, "Usage: #object Delete (ObjectID) -- NOTE: Object deletions are permanent and "
 							 "cannot be undone!"
@@ -1156,7 +1156,7 @@ void command_object(Client *c, const Seperator *sep)
 
 		auto row = results.begin();
 
-		switch (atoi(row[0])) {
+		switch (Strings::ToInt(row[0])) {
 			case 0: // Static Object
 				query   = StringFormat(
 					"DELETE FROM object WHERE id = %u "
@@ -1185,7 +1185,7 @@ void command_object(Client *c, const Seperator *sep)
 
 	if (strcasecmp(sep->arg[1], "undo") == 0) {
 		// Insufficient or invalid arguments
-		if ((sep->argnum < 2) || ((id = atoi(sep->arg[2])) == 0)) {
+		if ((sep->argnum < 2) || ((id = Strings::ToInt(sep->arg[2])) == 0)) {
 			c->Message(
 				Chat::White, "Usage: #object Undo (ObjectID) -- Reload object from database, undoing any "
 							 "changes you have made"
@@ -1236,16 +1236,16 @@ void command_object(Client *c, const Seperator *sep)
 
 		auto row = results.begin();
 
-		od.x       = atof(row[0]);
-		od.y       = atof(row[1]);
-		od.z       = atof(row[2]);
-		od.heading = atof(row[3]);
+		od.x       = Strings::ToFloat(row[0]);
+		od.y       = Strings::ToFloat(row[1]);
+		od.z       = Strings::ToFloat(row[2]);
+		od.heading = Strings::ToFloat(row[3]);
 		strn0cpy(od.object_name, row[4], sizeof(od.object_name));
-		od.object_type = atoi(row[5]);
-		icon = atoi(row[6]);
-		od.size       = atoi(row[7]);
-		od.solidtype  = atoi(row[8]);
-		od.unknown020 = atoi(row[9]);
+		od.object_type = Strings::ToInt(row[5]);
+		icon = Strings::ToInt(row[6]);
+		od.size       = Strings::ToInt(row[7]);
+		od.solidtype  = Strings::ToInt(row[8]);
+		od.unknown020 = Strings::ToInt(row[9]);
 
 		if (od.object_type == 0) {
 			od.object_type = staticType;

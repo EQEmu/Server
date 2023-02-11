@@ -10,7 +10,7 @@ void command_zheader(Client *c, const Seperator *sep)
 
 	auto zone_id = (
 		sep->IsNumber(2) ?
-		std::stoul(sep->arg[2]) :
+		Strings::ToUnsignedInt(sep->arg[2]) :
 		ZoneID(sep->arg[2])
 	);
 	if (!zone_id) {
@@ -28,7 +28,7 @@ void command_zheader(Client *c, const Seperator *sep)
 	auto zone_long_name = ZoneLongName(zone_id);
 	auto version = (
 		sep->IsNumber(3) ?
-		std::stoul(sep->arg[3]) :
+		Strings::ToUnsignedInt(sep->arg[3]) :
 		0
 	);
 

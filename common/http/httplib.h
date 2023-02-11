@@ -272,6 +272,8 @@ inline const unsigned char *ASN1_STRING_get0_data(const ASN1_STRING *asn1) {
 #include <brotli/encode.h>
 #endif
 
+#include "../strings.h"
+
 /*
  * Declaration
  */
@@ -3812,12 +3814,12 @@ inline bool brotli_decompressor::decompress(const char *data,
 					if (std::regex_match(b, e, cm, re_another_range)) {
 						ssize_t first = -1;
 						if (!cm.str(1).empty()) {
-							first = static_cast<ssize_t>(std::stoll(cm.str(1)));
+							first = static_cast<ssize_t>(Strings::ToBigInt(cm.str(1)));
 						}
 
 						ssize_t last = -1;
 						if (!cm.str(2).empty()) {
-							last = static_cast<ssize_t>(std::stoll(cm.str(2)));
+							last = static_cast<ssize_t>(Strings::ToBigInt(cm.str(2)));
 						}
 
 						if (first != -1 && last != -1 && first > last) {

@@ -131,7 +131,7 @@ std::vector<std::string> EQW::ListBootedZones() {
 std::map<std::string,std::string> EQW::GetZoneDetails(Const_char *zone_ref) {
 	std::map<std::string,std::string> res;
 
-	ZoneServer *zs = zoneserver_list.FindByID(atoi(zone_ref));
+	ZoneServer *zs = zoneserver_list.FindByID(Strings::ToInt(zone_ref));
 	if(zs == nullptr) {
 		res["error"] = "Invalid zone.";
 		return(res);
@@ -316,7 +316,7 @@ int EQW::CountBugs() {
         return 0;
 
     auto row = results.begin();
-    return atoi(row[0]);
+    return Strings::ToInt(row[0]);
 }
 
 std::vector<std::string> EQW::ListBugs(uint32 offset) {

@@ -7,14 +7,14 @@ void command_delpetition(Client *c, const Seperator *sep)
 		return;
 	}
 
-	c->Message(Chat::Red, "Attempting to delete petition number: %i", atoi(sep->argplus[1]));
-	std::string query   = StringFormat("DELETE FROM petitions WHERE petid = %i", atoi(sep->argplus[1]));
+	c->Message(Chat::Red, "Attempting to delete petition number: %i", Strings::ToInt(sep->argplus[1]));
+	std::string query   = StringFormat("DELETE FROM petitions WHERE petid = %i", Strings::ToInt(sep->argplus[1]));
 	auto        results = database.QueryDatabase(query);
 	if (!results.Success()) {
 		return;
 	}
 
-	LogInfo("Delete petition request from [{}], petition number:", c->GetName(), atoi(sep->argplus[1]));
+	LogInfo("Delete petition request from [{}], petition number:", c->GetName(), Strings::ToInt(sep->argplus[1]));
 
 }
 

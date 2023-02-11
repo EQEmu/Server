@@ -2,7 +2,7 @@
 
 void command_equipitem(Client *c, const Seperator *sep)
 {
-	uint32 slot_id = atoi(sep->arg[1]);
+	uint32 slot_id = Strings::ToInt(sep->arg[1]);
 	if (sep->IsNumber(1) && (slot_id >= EQ::invslot::EQUIPMENT_BEGIN && slot_id <= EQ::invslot::EQUIPMENT_END)) {
 		const EQ::ItemInstance *from_inst  = c->GetInv().GetItem(EQ::invslot::slotCursor);
 		const EQ::ItemInstance *to_inst    = c->GetInv().GetItem(slot_id); // added (desync issue when forcing stack to stack)

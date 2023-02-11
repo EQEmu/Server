@@ -1770,8 +1770,8 @@ void Client::SendBazaarWelcome()
 
 		bws->Beginning.Action = BazaarWelcome;
 
-		bws->Traders = atoi(row[0]);
-		bws->Items = atoi(row[1]);
+		bws->Traders = Strings::ToInt(row[0]);
+		bws->Items = Strings::ToInt(row[1]);
 
 		if (ClientVersion() >= EQ::versions::ClientVersion::RoF)
 		{
@@ -1790,7 +1790,7 @@ void Client::SendBazaarWelcome()
 
 	auto row = results.begin();
 	Message(Chat::NPCQuestSay, "There are %i Buyers waiting to purchase your loot. Type /barter to search for them, "
-				"or use /buyer to set up your own Buy Lines.", atoi(row[0]));
+				"or use /buyer to set up your own Buy Lines.", Strings::ToInt(row[0]));
 }
 
 void Client::SendBazaarResults(
@@ -2034,26 +2034,26 @@ void Client::SendBazaarResults(
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		VARSTRUCT_ENCODE_TYPE(uint32, bufptr, Action);
-		Count = atoi(row[0]);
+		Count = Strings::ToInt(row[0]);
 		VARSTRUCT_ENCODE_TYPE(uint32, bufptr, Count);
-		SerialNumber = atoi(row[3]);
+		SerialNumber = Strings::ToInt(row[3]);
 		VARSTRUCT_ENCODE_TYPE(int32, bufptr, SerialNumber);
-		Client *Trader2 = entity_list.GetClientByCharID(atoi(row[1]));
+		Client *Trader2 = entity_list.GetClientByCharID(Strings::ToInt(row[1]));
 		if (Trader2) {
 			ID = Trader2->GetID();
 			VARSTRUCT_ENCODE_TYPE(uint32, bufptr, ID);
 		}
 		else {
-			LogTrading("Unable to find trader: [{}]\n", atoi(row[1]));
+			LogTrading("Unable to find trader: [{}]\n", Strings::ToInt(row[1]));
 			VARSTRUCT_ENCODE_TYPE(uint32, bufptr, 0);
 		}
-		Cost = atoi(row[5]);
+		Cost = Strings::ToInt(row[5]);
 		VARSTRUCT_ENCODE_TYPE(uint32, bufptr, Cost);
-		StatValue = atoi(row[8]);
+		StatValue = Strings::ToInt(row[8]);
 		VARSTRUCT_ENCODE_TYPE(uint32, bufptr, StatValue);
-		bool Stackable = atoi(row[10]);
+		bool Stackable = Strings::ToInt(row[10]);
 		if (Stackable) {
-			int Charges = atoi(row[9]);
+			int Charges = Strings::ToInt(row[9]);
 			sprintf(temp_buffer, "%s(%i)", row[7], Charges);
 		}
 		else {
@@ -2077,7 +2077,7 @@ void Client::SendBazaarResults(
 
 		bufptr += 64;
 
-		VARSTRUCT_ENCODE_TYPE(uint32, bufptr, atoi(row[1])); // ItemID
+		VARSTRUCT_ENCODE_TYPE(uint32, bufptr, Strings::ToInt(row[1])); // ItemID
 	}
 
 	auto outapp = new EQApplicationPacket(OP_BazaarSearch, Size);
@@ -2466,12 +2466,12 @@ void Client::SendBuyerResults(char* searchString, uint32 searchID) {
 	for (auto row = results.begin(); row != results.end(); ++row) {
         char itemName[64];
 
-        uint32 charID = atoi(row[0]);
-		uint32 buySlot = atoi(row[1]);
-		uint32 itemID = atoi(row[2]);
+        uint32 charID = Strings::ToInt(row[0]);
+		uint32 buySlot = Strings::ToInt(row[1]);
+		uint32 itemID = Strings::ToInt(row[2]);
 		strcpy(itemName, row[3]);
-		uint32 quantity = atoi(row[4]);
-		uint32 price = atoi(row[5]);
+		uint32 quantity = Strings::ToInt(row[4]);
+		uint32 price = Strings::ToInt(row[5]);
 
         // Each item in the search results is sent as a single fixed length packet, although the position of
 		// the fields varies due to the use of variable length strings. The reason the packet is so big, is
@@ -2568,11 +2568,11 @@ void Client::ShowBuyLines(const EQApplicationPacket *app) {
 
     for (auto row = results.begin(); row != results.end(); ++row) {
         char ItemName[64];
-        uint32 BuySlot = atoi(row[1]);
-        uint32 ItemID = atoi(row[2]);
+        uint32 BuySlot = Strings::ToInt(row[1]);
+        uint32 ItemID = Strings::ToInt(row[2]);
 		strcpy(ItemName, row[3]);
-		uint32 Quantity = atoi(row[4]);
-		uint32 Price = atoi(row[5]);
+		uint32 Quantity = Strings::ToInt(row[4]);
+		uint32 Price = Strings::ToInt(row[5]);
 
 		auto outapp = new EQApplicationPacket(OP_Barter, 936);
 

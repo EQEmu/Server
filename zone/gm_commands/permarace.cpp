@@ -17,9 +17,9 @@ void command_permarace(Client *c, const Seperator *sep)
 		target = c->GetTarget()->CastToClient();
 	}
 
-	auto race_id = std::stoi(sep->arg[1]);
+	auto race_id = Strings::ToInt(sep->arg[1]);
 	auto gender_id = Mob::GetDefaultGender(race_id, target->GetBaseGender());
-	
+
 	LogInfo("Race changed by {} for {} to {} ({})",
 		c->GetCleanName(),
 		c->GetTargetDescription(target),

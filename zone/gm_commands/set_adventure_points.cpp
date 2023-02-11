@@ -4,7 +4,7 @@
 void command_set_adventure_points(Client *c, const Seperator *sep)
 {
 	int arguments = sep->argnum;
-	
+
 	if (
 		!arguments ||
 		!sep->IsNumber(1) ||
@@ -45,12 +45,12 @@ void command_set_adventure_points(Client *c, const Seperator *sep)
 					theme.second
 				).c_str()
 			);
-		}		
+		}
 		c->Message(Chat::White, "Note: Theme 0 splits the points evenly across all Themes.");
 		return;
 	}
 
-	auto points = std::stoi(sep->arg[2]);
+	auto points = Strings::ToInt(sep->arg[2]);
 
 	c->Message(
 		Chat::White,

@@ -16,7 +16,7 @@ void command_databuckets(Client *c, const Seperator *sep)
 				break;
 			}
 			if (strcasecmp(sep->arg[i], "limit") == 0) {
-				limit = (uint8) atoi(sep->arg[i + 1]);
+				limit = (uint8) Strings::ToInt(sep->arg[i + 1]);
 				continue;
 			}
 		}
@@ -46,7 +46,7 @@ void command_databuckets(Client *c, const Seperator *sep)
 						"<td>Value</td>"
 						"</tr>";
 		for (auto   row          = results.begin(); row != results.end(); ++row) {
-			auto        id      = static_cast<uint32>(atoi(row[0]));
+			auto        id      = static_cast<uint32>(Strings::ToInt(row[0]));
 			std::string key     = row[1];
 			std::string value   = row[2];
 			std::string expires = row[3];

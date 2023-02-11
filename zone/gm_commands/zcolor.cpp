@@ -13,9 +13,9 @@ void command_zcolor(Client *c, const Seperator *sep)
 		return;
 	}
 
-	auto red = std::stoul(sep->arg[1]);
-	auto green = std::stoul(sep->arg[2]);
-	auto blue = std::stoul(sep->arg[3]);
+	auto red = Strings::ToUnsignedInt(sep->arg[1]);
+	auto green = Strings::ToUnsignedInt(sep->arg[2]);
+	auto blue = Strings::ToUnsignedInt(sep->arg[3]);
 	auto permanent = sep->arg[4] ? atobool(sep->arg[4]) : false;
 	if (
 		red < 0 ||
@@ -29,7 +29,7 @@ void command_zcolor(Client *c, const Seperator *sep)
 		return;
 	}
 
-	if (permanent) {		
+	if (permanent) {
 		auto query = fmt::format(
 			"UPDATE zone SET fog_red = {}, fog_green = {}, fog_blue = {} "
 			"WHERE zoneidnumber = {} AND version = {}",

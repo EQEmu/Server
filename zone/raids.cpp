@@ -1458,8 +1458,8 @@ void Raid::GetRaidDetails()
 
     auto row = results.begin();
 
-    locked = atoi(row[0]);
-    LootType = atoi(row[1]);
+    locked = Strings::ToInt(row[0]);
+    LootType = Strings::ToInt(row[1]);
 	motd = std::string(row[2]);
 }
 
@@ -1496,17 +1496,17 @@ bool Raid::LearnMembers()
 
         members[index].member = nullptr;
         strn0cpy(members[index].membername, row[0], 64);
-        int groupNum = atoi(row[1]);
+        int groupNum = Strings::ToInt(row[1]);
         if(groupNum > 11)
             members[index].GroupNumber = 0xFFFFFFFF;
         else
             members[index].GroupNumber = groupNum;
 
-        members[index]._class = atoi(row[2]);
-        members[index].level = atoi(row[3]);
-        members[index].IsGroupLeader = atoi(row[4]);
-        members[index].IsRaidLeader = atoi(row[5]);
-        members[index].IsLooter = atoi(row[6]);
+        members[index]._class = Strings::ToInt(row[2]);
+        members[index].level = Strings::ToInt(row[3]);
+        members[index].IsGroupLeader = Strings::ToInt(row[4]);
+        members[index].IsRaidLeader = Strings::ToInt(row[5]);
+        members[index].IsLooter = Strings::ToInt(row[6]);
         ++index;
     }
 
