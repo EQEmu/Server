@@ -1602,6 +1602,9 @@ void PerlembParser::ExportEventVariables(
 		case EVENT_CLICK_DOOR: {
 			ExportVar(package_name.c_str(), "doorid", data);
 			ExportVar(package_name.c_str(), "version", zone->GetInstanceVersion());
+			if (extra_pointers && extra_pointers->size() == 1) {
+				ExportVar(package_name.c_str(), "door", "Doors", std::any_cast<Doors*>(extra_pointers->at(0)));
+			}
 			break;
 		}
 
