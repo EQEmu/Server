@@ -5849,8 +5849,7 @@ uint16 Mob::GetSpellIDFromSlot(uint8 slot)
 bool Mob::FindType(uint16 type, bool bOffensive, uint16 threshold) {
 	int buff_count = GetMaxTotalSlots();
 	for (int i = 0; i < buff_count; i++) {
-		if (buffs[i].spellid != SPELL_UNKNOWN) {
-
+		if (IsValidSpell(buffs[i].spellid)) {
 			for (int j = 0; j < EFFECT_COUNT; j++) {
 				// adjustments necessary for offensive npc casting behavior
 				if (bOffensive) {
