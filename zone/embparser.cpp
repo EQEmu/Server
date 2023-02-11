@@ -1561,6 +1561,13 @@ void PerlembParser::ExportEventVariables(
 			break;
 		}
 
+		case EVENT_TARGET_CHANGE: {
+			if (extra_pointers && extra_pointers->size() == 1) {
+				ExportVar(package_name.c_str(), "target", "Mob", std::any_cast<Mob*>(extra_pointers->at(0)));
+			}
+			break;
+		}
+
 		case EVENT_WAYPOINT_ARRIVE:
 		case EVENT_WAYPOINT_DEPART: {
 			ExportVar(package_name.c_str(), "wp", data);

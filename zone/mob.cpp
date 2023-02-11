@@ -4259,11 +4259,14 @@ void Mob::SetTarget(Mob *mob)
 	target = mob;
 	entity_list.UpdateHoTT(this);
 
+	std::vector<std::any> args;
+
+	args.emplace_back(mob);
+
 	if (IsNPC()) {
-		parse->EventNPC(EVENT_TARGET_CHANGE, CastToNPC(), mob, "", 0);
-	}
-	else if (IsClient()) {
-		parse->EventPlayer(EVENT_TARGET_CHANGE, CastToClient(), "", 0);
+		parse->EventNPC(EVENT_TARGET_CHANGE, CastToNPC(), mob, "", 0, &args);
+	} else if (IsClient()) {
+		parse->EventPlayer(EVENT_TARGET_CHANGE, CastToClient(), "", 0, &args);
 
 		if (CastToClient()->admin > AccountStatus::GMMgmt) {
 			DisplayInfo(mob);
@@ -4271,7 +4274,7 @@ void Mob::SetTarget(Mob *mob)
 
 		CastToClient()->SetBotPrecombat(false); // Any change in target will nullify this flag (target == mob checked above)
 	} else if (IsBot()) {
-		parse->EventBot(EVENT_TARGET_CHANGE, CastToBot(), mob, "", 0);
+		parse->EventBot(EVENT_TARGET_CHANGE, CastToBot(), mob, "", 0, &args);
 	}
 
 	if (IsPet() && GetOwner() && GetOwner()->IsClient()) {
