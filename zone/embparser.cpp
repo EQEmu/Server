@@ -2086,15 +2086,15 @@ void PerlembParser::ExportEventVariables(
 			break;
 		}
 
-        case EVENT_AA_EXP_GAIN: {
-        	ExportVar(package_name.c_str(), "aa_exp_gained", data);
-        	break;
-        }
+		case EVENT_AA_EXP_GAIN: {
+			ExportVar(package_name.c_str(), "aa_exp_gained", data);
+			break;
+		}
 
-        case EVENT_EXP_GAIN: {
-        	ExportVar(package_name.c_str(), "exp_gained", data);
-        	break;
-        }
+		case EVENT_EXP_GAIN: {
+			ExportVar(package_name.c_str(), "exp_gained", data);
+			break;
+		}
 
 		case EVENT_INSPECT: {
 			ExportVar(package_name.c_str(), "target_id", extradata);
