@@ -609,21 +609,21 @@ void handle_player_aa_gain(
 );
 
 void handle_player_aa_exp_gain(
-        QuestInterface *parse,
-        lua_State* L,
-        Client* client,
-        std::string data,
-        uint32 extra_data,
-        std::vector<std::any> *extra_pointers
+		QuestInterface *parse,
+		lua_State* L,
+		Client* client,
+		std::string data,
+		uint32 extra_data,
+		std::vector<std::any> *extra_pointers
 );
 
 void handle_player_exp_gain(
-        QuestInterface *parse,
-        lua_State* L,
-        Client* client,
-        std::string data,
-        uint32 extra_data,
-        std::vector<std::any> *extra_pointers
+		QuestInterface *parse,
+		lua_State* L,
+		Client* client,
+		std::string data,
+		uint32 extra_data,
+		std::vector<std::any> *extra_pointers
 );
 
 void handle_player_payload(
