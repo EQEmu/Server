@@ -2082,7 +2082,7 @@ void PerlembParser::ExportEventVariables(
 		}
 
 		case EVENT_AA_GAIN: {
-			ExportVar(package_name.c_str(), "aa_gained", extradata);
+			ExportVar(package_name.c_str(), "aa_gained", data);
 			break;
 		}
 
