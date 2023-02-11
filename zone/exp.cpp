@@ -801,13 +801,13 @@ void Client::SetEXP(uint64 set_exp, uint64 set_aaxp, bool isrezzexp) {
 		}
 	}
 
-    if (m_pp.exp != set_exp) {
+    if (parse->PlayerHasQuestSub(EVENT_EXP_GAIN) && m_pp.exp != set_exp) {
         const auto exp_value = set_exp - m_pp.exp;
         const auto export_string = fmt::format("{}", exp_value);
         parse->EventPlayer(EVENT_EXP_GAIN, this, export_string, 0);
     }
 
-    if (m_pp.expAA != set_aaxp) {
+    if (parse->PlayerHasQuestSub(EVENT_AA_EXP_GAIN) && m_pp.expAA != set_aaxp) {
         const auto aa_exp_value = set_aaxp - m_pp.expAA;
         const auto export_string = fmt::format("{}", aa_exp_value);
         parse->EventPlayer(EVENT_AA_EXP_GAIN, this, export_string, 0);

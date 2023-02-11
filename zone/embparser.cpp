@@ -2015,7 +2015,7 @@ void PerlembParser::ExportEventVariables(
 
 		case EVENT_LEVEL_UP: {
 			ExportVar(package_name.c_str(), "levels_gained", data);
-			break;d
+			break;
 		}
 
 		case EVENT_LEVEL_DOWN: {
