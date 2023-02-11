@@ -27,7 +27,6 @@
 #include "../common/data_verification.h"
 #include "../common/misc_functions.h"
 
-#include "bot.h"
 #include "quest_parser_collection.h"
 #include "lua_parser.h"
 #include "string_ids.h"
