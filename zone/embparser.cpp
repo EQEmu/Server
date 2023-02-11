@@ -161,6 +161,8 @@ const char *QuestEventSubroutines[_LargestEventID] = {
 	"EVENT_TASK_BEFORE_UPDATE",
 	"EVENT_AA_BUY",
 	"EVENT_AA_GAIN",
+    "EVENT_AAXP_GAIN",
+    "EVENT_XP_GAIN",
 	"EVENT_PAYLOAD",
 	"EVENT_LEVEL_DOWN",
 	"EVENT_GM_COMMAND",
@@ -2080,9 +2082,19 @@ void PerlembParser::ExportEventVariables(
 		}
 
 		case EVENT_AA_GAIN: {
-			ExportVar(package_name.c_str(), "aa_gained", data);
+			ExportVar(package_name.c_str(), "aa_gained", extradata);
 			break;
 		}
+
+        case EVENT_AAXP_GAIN: {
+            ExportVar(package_name.c_str(), "aaxp_value", extradata);
+            break;
+        }
+
+        case EVENT_XP_GAIN: {
+            ExportVar(package_name.c_str(), "xp_value", extradata);
+            break;
+        }
 
 		case EVENT_INSPECT: {
 			ExportVar(package_name.c_str(), "target_id", extradata);

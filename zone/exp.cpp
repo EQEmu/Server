@@ -804,6 +804,17 @@ void Client::SetEXP(uint64 set_exp, uint64 set_aaxp, bool isrezzexp) {
 		}
 	}
 
+    if (m_pp.exp != set_exp) {
+        const auto xp_value = set_exp - m_pp.exp;
+        const auto export_string = fmt::format("{}",xp_value);
+        parse->EventPlayer(EVENT_XP_GAIN, this,export_string, xp_value);
+    }
+    if (m_pp.expAA != set_aaxp) {
+        const auto aaxp_value = set_aaxp - m_pp.expAA;
+        const auto export_string = fmt::format("{}",aaxp_value);
+        parse->EventPlayer(EVENT_AAXP_GAIN, this, export_string, aaxp_value);
+    }
+
 	//set the client's EXP and AAEXP
 	m_pp.exp = set_exp;
 	m_pp.expAA = set_aaxp;
