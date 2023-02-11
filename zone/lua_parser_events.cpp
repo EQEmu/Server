@@ -1172,19 +1172,19 @@ void handle_player_aa_exp_gain(
         std::vector<std::any> *extra_pointers
 ) {
     lua_pushinteger(L, Strings::ToInt(data));
-    lua_setfield(L, -2, "aa_exp_value");
+    lua_setfield(L, -2, "aa_exp_gained");
 }
 
 void handle_player_exp_gain(
         QuestInterface *parse,
         lua_State* L,
-        Client* client,
+        Client* client,d
         std::string data,
         uint32 extra_data,
         std::vector<std::any> *extra_pointers
 ) {
     lua_pushinteger(L, Strings::ToInt(data));
-    lua_setfield(L, -2, "exp_value");
+    lua_setfield(L, -2, "exp_gained");
 }
 
 void handle_player_level_up(

@@ -1999,12 +1999,12 @@ void PerlembParser::ExportEventVariables(
 		}
 
         case EVENT_AA_EXP_GAIN: {
-            ExportVar(package_name.c_str(), "aa_exp_value", data);
+            ExportVar(package_name.c_str(), "aa_exp_gained", data);
             break;
         }
 
         case EVENT_EXP_GAIN: {
-            ExportVar(package_name.c_str(), "exp_value", data);
+            ExportVar(package_name.c_str(), "exp_gained", data);
             break;
         }
 
@@ -2015,7 +2015,7 @@ void PerlembParser::ExportEventVariables(
 
 		case EVENT_LEVEL_UP: {
 			ExportVar(package_name.c_str(), "levels_gained", data);
-			break;
+			break;d
 		}
 
 		case EVENT_LEVEL_DOWN: {
