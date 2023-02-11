@@ -6254,7 +6254,6 @@ uint16 Mob::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 			if (SympatheticProcList.size() > MAX_SYMPATHETIC_PROCS)
 				continue;
 
-
 			EQ::ItemInstance const* ins = GetInv().GetItem(x);
 			if (!ins)
 				continue;
