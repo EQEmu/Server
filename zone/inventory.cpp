@@ -903,6 +903,9 @@ void Client::DropItem(int16 slot_id, bool recurse)
 			}
 		}
 
+
+		int i = 0;
+
 		if (player_event_logs.IsEventEnabled(PlayerEvent::DROPPED_ITEM)) {
 			auto e = PlayerEvent::DroppedItemEvent{
 				.item_id = inst->GetID(),
@@ -913,20 +916,24 @@ void Client::DropItem(int16 slot_id, bool recurse)
 			RecordPlayerEventLog(PlayerEvent::DROPPED_ITEM, e);
 		}
 
-		int i = parse->EventItem(EVENT_DROP_ITEM, this, inst, nullptr, "", slot_id);
-		if (i != 0) {
-			LogInventory("Item drop handled by [EVENT_DROP_ITEM]");
-			safe_delete(inst);
+		if (parse->ItemHasQuestSub(EVENT_DROP_ITEM)) {
+			parse->EventItem(EVENT_DROP_ITEM, this, inst, nullptr, "", slot_id);
+			if (i != 0) {
+				LogInventory("Item drop handled by [EVENT_DROP_ITEM]");
+				safe_delete(inst);
+			}
 		}
 
-		std::vector<std::any> args;
+		if (parse->PlayerHasQuestSub(EVENT_DROP_ITEM_CLIENT)) {
+			std::vector<std::any> args;
 
-		args.emplace_back(inst);
+			args.emplace_back(inst);
 
-		i = parse->EventPlayer(EVENT_DROP_ITEM_CLIENT, this, "", slot_id, &args);
-		if (i != 0) {
-			LogInventory("Item drop handled by [EVENT_DROP_ITEM_CLIENT]");
-			safe_delete(inst);
+			i = parse->EventPlayer(EVENT_DROP_ITEM_CLIENT, this, "", slot_id, &args);
+			if (i != 0) {
+				LogInventory("Item drop handled by [EVENT_DROP_ITEM_CLIENT]");
+				safe_delete(inst);
+			}
 		}
 	} else {
 		// Item doesn't exist in inventory!
