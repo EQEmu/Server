@@ -916,7 +916,7 @@ void Client::DropItem(int16 slot_id, bool recurse)
 			RecordPlayerEventLog(PlayerEvent::DROPPED_ITEM, e);
 		}
 
-		if (parse->ItemHasQuestSub(EVENT_DROP_ITEM)) {
+		if (parse->ItemHasQuestSub(inst, EVENT_DROP_ITEM)) {
 			parse->EventItem(EVENT_DROP_ITEM, this, inst, nullptr, "", slot_id);
 			if (i != 0) {
 				LogInventory("Item drop handled by [EVENT_DROP_ITEM]");
