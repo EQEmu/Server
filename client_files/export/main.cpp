@@ -183,7 +183,7 @@ bool SkillUsable(SharedDatabase *db, int skill_id, int class_id)
 	}
 
 	auto row = results.begin();
-	if (row[0] && atoi(row[0]) > 0) {
+	if (row[0] && Strings::ToInt(row[0]) > 0) {
 		return true;
 	}
 
@@ -207,7 +207,7 @@ int GetSkill(SharedDatabase *db, int skill_id, int class_id, int level)
 	}
 
 	auto row = results.begin();
-	return atoi(row[0]);
+	return Strings::ToInt(row[0]);
 }
 
 void ExportSkillCaps(SharedDatabase *db)

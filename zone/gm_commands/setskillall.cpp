@@ -24,7 +24,7 @@ void command_setskillall(Client *c, const Seperator *sep)
 				c->GetTargetDescription(target)
 			);
 
-			auto skill_level = static_cast<uint16>(std::stoul(sep->arg[1]));
+			auto skill_level = static_cast<uint16>(Strings::ToUnsignedInt(sep->arg[1]));
 
 			c->Message(
 				Chat::White,

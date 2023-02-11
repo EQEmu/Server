@@ -39,16 +39,16 @@ void command_nudge(Client *c, const Seperator *sep)
 
 		switch (argsep.arg[0][0]) {
 			case 'x':
-				position_offset.x = std::stof(argsep.arg[1]);
+				position_offset.x = Strings::ToFloat(argsep.arg[1]);
 				break;
 			case 'y':
-				position_offset.y = std::stof(argsep.arg[1]);
+				position_offset.y = Strings::ToFloat(argsep.arg[1]);
 				break;
 			case 'z':
-				position_offset.z = std::stof(argsep.arg[1]);
+				position_offset.z = Strings::ToFloat(argsep.arg[1]);
 				break;
 			case 'h':
-				position_offset.w = std::stof(argsep.arg[1]);
+				position_offset.w = Strings::ToFloat(argsep.arg[1]);
 				break;
 			default:
 				break;

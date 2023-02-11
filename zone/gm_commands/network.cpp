@@ -86,11 +86,11 @@ void command_network(Client *c, const Seperator *sep)
 
 		std::string value = sep->arg[3];
 		if (!strcasecmp(sep->arg[2], "max_connection_count")) {
-			opts.daybreak_options.max_connection_count = std::stoull(value);
+			opts.daybreak_options.max_connection_count = Strings::ToUnsignedBigInt(value);
 			manager->SetOptions(opts);
 		}
 		else if (!strcasecmp(sep->arg[2], "keepalive_delay_ms")) {
-			opts.daybreak_options.keepalive_delay_ms = std::stoull(value);
+			opts.daybreak_options.keepalive_delay_ms = Strings::ToUnsignedBigInt(value);
 			manager->SetOptions(opts);
 		}
 		else if (!strcasecmp(sep->arg[2], "resend_delay_factor")) {
@@ -98,51 +98,51 @@ void command_network(Client *c, const Seperator *sep)
 			manager->SetOptions(opts);
 		}
 		else if (!strcasecmp(sep->arg[2], "resend_delay_ms")) {
-			opts.daybreak_options.resend_delay_ms = std::stoull(value);
+			opts.daybreak_options.resend_delay_ms = Strings::ToUnsignedBigInt(value);
 			manager->SetOptions(opts);
 		}
 		else if (!strcasecmp(sep->arg[2], "resend_delay_min")) {
-			opts.daybreak_options.resend_delay_min = std::stoull(value);
+			opts.daybreak_options.resend_delay_min = Strings::ToUnsignedBigInt(value);
 			manager->SetOptions(opts);
 		}
 		else if (!strcasecmp(sep->arg[2], "resend_delay_max")) {
-			opts.daybreak_options.resend_delay_max = std::stoull(value);
+			opts.daybreak_options.resend_delay_max = Strings::ToUnsignedBigInt(value);
 			manager->SetOptions(opts);
 		}
 		else if (!strcasecmp(sep->arg[2], "connect_delay_ms")) {
-			opts.daybreak_options.connect_delay_ms = std::stoull(value);
+			opts.daybreak_options.connect_delay_ms = Strings::ToUnsignedBigInt(value);
 			manager->SetOptions(opts);
 		}
 		else if (!strcasecmp(sep->arg[2], "connect_stale_ms")) {
-			opts.daybreak_options.connect_stale_ms = std::stoull(value);
+			opts.daybreak_options.connect_stale_ms = Strings::ToUnsignedBigInt(value);
 			manager->SetOptions(opts);
 		}
 		else if (!strcasecmp(sep->arg[2], "stale_connection_ms")) {
-			opts.daybreak_options.stale_connection_ms = std::stoull(value);
+			opts.daybreak_options.stale_connection_ms = Strings::ToUnsignedBigInt(value);
 			manager->SetOptions(opts);
 		}
 		else if (!strcasecmp(sep->arg[2], "hold_size")) {
-			opts.daybreak_options.hold_size = std::stoull(value);
+			opts.daybreak_options.hold_size = Strings::ToUnsignedBigInt(value);
 			manager->SetOptions(opts);
 		}
 		else if (!strcasecmp(sep->arg[2], "hold_length_ms")) {
-			opts.daybreak_options.hold_length_ms = std::stoull(value);
+			opts.daybreak_options.hold_length_ms = Strings::ToUnsignedBigInt(value);
 			manager->SetOptions(opts);
 		}
 		else if (!strcasecmp(sep->arg[2], "simulated_in_packet_loss")) {
-			opts.daybreak_options.simulated_in_packet_loss = std::stoull(value);
+			opts.daybreak_options.simulated_in_packet_loss = Strings::ToUnsignedBigInt(value);
 			manager->SetOptions(opts);
 		}
 		else if (!strcasecmp(sep->arg[2], "simulated_out_packet_loss")) {
-			opts.daybreak_options.simulated_out_packet_loss = std::stoull(value);
+			opts.daybreak_options.simulated_out_packet_loss = Strings::ToUnsignedBigInt(value);
 			manager->SetOptions(opts);
 		}
 		else if (!strcasecmp(sep->arg[2], "resend_timeout")) {
-			opts.daybreak_options.resend_timeout = std::stoull(value);
+			opts.daybreak_options.resend_timeout = Strings::ToUnsignedBigInt(value);
 			manager->SetOptions(opts);
 		}
 		else if (!strcasecmp(sep->arg[2], "connection_close_time")) {
-			opts.daybreak_options.connection_close_time = std::stoull(value);
+			opts.daybreak_options.connection_close_time = Strings::ToUnsignedBigInt(value);
 			manager->SetOptions(opts);
 		}
 		else {

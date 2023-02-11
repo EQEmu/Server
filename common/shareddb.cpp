@@ -126,7 +126,7 @@ uint32 SharedDatabase::GetTotalTimeEntitledOnAccount(uint32 AccountID) {
 	const std::string query = StringFormat("SELECT `time_played` FROM `character_data` WHERE `account_id` = %u", AccountID);
 	auto results = QueryDatabase(query);
 	for (auto& row = results.begin(); row != results.end(); ++row) {
-		EntitledTime += atoi(row[0]);
+		EntitledTime += Strings::ToInt(row[0]);
 	}
 	return EntitledTime;
 }
@@ -228,8 +228,8 @@ bool SharedDatabase::VerifyInventory(uint32 account_id, int16 slot_id, const EQ:
 
 	auto& row = results.begin();
 
-	const uint32 id = atoi(row[0]);
-	const uint16 charges = atoi(row[1]);
+	const uint32 id = Strings::ToInt(row[0]);
+	const uint16 charges = Strings::ToInt(row[1]);
 
     uint16 expect_charges;
 
@@ -436,7 +436,7 @@ int32 SharedDatabase::GetSharedPlatinum(uint32 account_id)
 
 	auto& row = results.begin();
 
-	return atoi(row[0]);
+	return Strings::ToInt(row[0]);
 }
 
 bool SharedDatabase::SetSharedPlatinum(uint32 account_id, int32 amount_to_add) {
@@ -473,9 +473,9 @@ bool SharedDatabase::SetStartingItems(PlayerProfile_Struct* pp, EQ::InventoryPro
 
 
 	for (auto& row = results.begin(); row != results.end(); ++row) {
-		const int32 itemid = atoi(row[0]);
-		const int32 charges = atoi(row[1]);
-		int32 slot = atoi(row[2]);
+		const int32 itemid = Strings::ToInt(row[0]);
+		const int32 charges = Strings::ToInt(row[1]);
+		int32 slot = Strings::ToInt(row[2]);
 		myitem = GetItem(itemid);
 
 		if(!myitem)
@@ -518,17 +518,17 @@ bool SharedDatabase::GetSharedBank(uint32 id, EQ::InventoryProfile *inv, bool is
 	}
 
 	for (auto& row = results.begin(); row != results.end(); ++row) {
-		int16 slot_id = static_cast<int16>(atoi(row[0]));
-		uint32 item_id = static_cast<uint32>(atoi(row[1]));
-		const int16 charges = static_cast<int16>(atoi(row[2]));
+		int16 slot_id = static_cast<int16>(Strings::ToInt(row[0]));
+		uint32 item_id = static_cast<uint32>(Strings::ToInt(row[1]));
+		const int16 charges = static_cast<int16>(Strings::ToInt(row[2]));
 
 		uint32 aug[EQ::invaug::SOCKET_COUNT];
-		aug[0] = static_cast<uint32>(atoi(row[3]));
-		aug[1] = static_cast<uint32>(atoi(row[4]));
-		aug[2] = static_cast<uint32>(atoi(row[5]));
-		aug[3] = static_cast<uint32>(atoi(row[6]));
-		aug[4] = static_cast<uint32>(atoi(row[7]));
-		aug[5] = static_cast<uint32>(atoi(row[8]));
+		aug[0] = static_cast<uint32>(Strings::ToInt(row[3]));
+		aug[1] = static_cast<uint32>(Strings::ToInt(row[4]));
+		aug[2] = static_cast<uint32>(Strings::ToInt(row[5]));
+		aug[3] = static_cast<uint32>(Strings::ToInt(row[6]));
+		aug[4] = static_cast<uint32>(Strings::ToInt(row[7]));
+		aug[5] = static_cast<uint32>(Strings::ToInt(row[8]));
 
 		const EQ::ItemData *item = GetItem(item_id);
 
@@ -616,7 +616,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv)
 	const auto bank_size = inv->GetLookup()->InventoryTypeSize.Bank;
 
 	for (auto& row = results.begin(); row != results.end(); ++row) {
-		int16 slot_id = atoi(row[0]);
+		int16 slot_id = Strings::ToInt(row[0]);
 
 		if (slot_id <= EQ::invslot::POSSESSIONS_END && slot_id >= EQ::invslot::POSSESSIONS_BEGIN) { // Titanium thru UF check
 			if (((static_cast<uint64>(1) << slot_id) & pmask) == 0) {
@@ -645,9 +645,9 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv)
 			}
 		}
 
-		uint32 item_id = atoi(row[1]);
-		const uint16 charges = atoi(row[2]);
-		const uint32 color = atoul(row[3]);
+		uint32 item_id = Strings::ToInt(row[1]);
+		const uint16 charges = Strings::ToInt(row[2]);
+		const uint32 color = Strings::ToUnsignedInt(row[3]);
 
 		uint32 aug[EQ::invaug::SOCKET_COUNT];
 
@@ -658,7 +658,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv)
 		aug[4] = std::stoul(row[8]);
 		aug[5] = std::stoul(row[9]);
 
-		const bool instnodrop = (row[10] && static_cast<uint16>(atoi(row[10]))) ? true : false;
+		const bool instnodrop = (row[10] && static_cast<uint16>(Strings::ToInt(row[10]))) ? true : false;
 
 		const uint32 ornament_icon = std::stoul(row[12]);
 		const uint32 ornament_idfile = std::stoul(row[13]);
@@ -794,20 +794,20 @@ bool SharedDatabase::GetInventory(uint32 account_id, char *name, EQ::InventoryPr
 	}
 
 	for (auto& row = results.begin(); row != results.end(); ++row) {
-		int16 slot_id = atoi(row[0]);
-		uint32 item_id = atoi(row[1]);
-		const int8 charges = atoi(row[2]);
-		const uint32 color = atoul(row[3]);
+		int16 slot_id = Strings::ToInt(row[0]);
+		uint32 item_id = Strings::ToInt(row[1]);
+		const int8 charges = Strings::ToInt(row[2]);
+		const uint32 color = Strings::ToUnsignedInt(row[3]);
 
 		uint32 aug[EQ::invaug::SOCKET_COUNT];
-		aug[0] = static_cast<uint32>(atoi(row[4]));
-		aug[1] = static_cast<uint32>(atoi(row[5]));
-		aug[2] = static_cast<uint32>(atoi(row[6]));
-		aug[3] = static_cast<uint32>(atoi(row[7]));
-		aug[4] = static_cast<uint32>(atoi(row[8]));
-		aug[5] = static_cast<uint32>(atoi(row[9]));
+		aug[0] = static_cast<uint32>(Strings::ToInt(row[4]));
+		aug[1] = static_cast<uint32>(Strings::ToInt(row[5]));
+		aug[2] = static_cast<uint32>(Strings::ToInt(row[6]));
+		aug[3] = static_cast<uint32>(Strings::ToInt(row[7]));
+		aug[4] = static_cast<uint32>(Strings::ToInt(row[8]));
+		aug[5] = static_cast<uint32>(Strings::ToInt(row[9]));
 
-		const bool instnodrop = (row[10] && static_cast<uint16>(atoi(row[10]))) ? true : false;
+		const bool instnodrop = (row[10] && static_cast<uint16>(Strings::ToInt(row[10]))) ? true : false;
 		const uint32 ornament_icon = std::stoul(row[12]);
 		const uint32 ornament_idfile = std::stoul(row[13]);
 		uint32 ornament_hero_model = std::stoul(row[14]);
@@ -892,7 +892,7 @@ std::map<uint32, uint32> SharedDatabase::GetItemRecastTimestamps(uint32 char_id)
 		return timers;
 
 	for (auto& row = results.begin(); row != results.end(); ++row)
-		timers[atoul(row[0])] = atoul(row[1]);
+		timers[Strings::ToUnsignedInt(row[0])] = Strings::ToUnsignedInt(row[1]);
 	return timers; // RVO or move assigned
 }
 
@@ -905,7 +905,7 @@ uint32 SharedDatabase::GetItemRecastTimestamp(uint32 char_id, uint32 recast_type
 		return 0;
 
 	auto& row = results.begin();
-	return static_cast<uint32>(atoul(row[0]));
+	return static_cast<uint32>(Strings::ToUnsignedInt(row[0]));
 }
 
 void SharedDatabase::ClearOldRecastTimestamps(uint32 char_id)
@@ -933,10 +933,10 @@ void SharedDatabase::GetItemsCount(int32 &item_count, uint32 &max_id)
 	auto& row = results.begin();
 
 	if (row[0])
-		max_id = atoi(row[0]);
+		max_id = Strings::ToInt(row[0]);
 
 	if (row[1])
-		item_count = atoi(row[1]);
+		item_count = Strings::ToInt(row[1]);
 }
 
 bool SharedDatabase::LoadItems(const std::string &prefix) {
@@ -1065,7 +1065,7 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 		item.Favor = std::stoul(row[ItemField::favor]);
 		item.GuildFavor = std::stoul(row[ItemField::guildfavor]);
 		item.Price = std::stoul(row[ItemField::price]);
-		item.SellRate = std::stof(row[ItemField::sellrate]);
+		item.SellRate = Strings::ToFloat(row[ItemField::sellrate]);
 
 		// Display
 		item.Color = std::stoul(row[ItemField::color]);
@@ -1349,7 +1349,7 @@ std::string SharedDatabase::GetBook(const char *txtfile, int16 *language)
 
     auto& row = results.begin();
     txtout.assign(row[0],strlen(row[0]));
-    *language = static_cast<int16>(atoi(row[1]));
+    *language = static_cast<int16>(Strings::ToInt(row[1]));
 
     return txtout;
 }
@@ -1369,8 +1369,8 @@ void SharedDatabase::GetFactionListInfo(uint32 &list_count, uint32 &max_lists) {
 
     auto& row = results.begin();
 
-    list_count = static_cast<uint32>(atoul(row[0]));
-    max_lists = static_cast<uint32>(atoul(row[1] ? row[1] : "0"));
+    list_count = static_cast<uint32>(Strings::ToUnsignedInt(row[0]));
+    max_lists = static_cast<uint32>(Strings::ToUnsignedInt(row[1] ? row[1] : "0"));
 }
 
 const NPCFactionList* SharedDatabase::GetNPCFactionEntry(uint32 id) const
@@ -1403,7 +1403,7 @@ void SharedDatabase::LoadNPCFactionLists(void *data, uint32 size, uint32 list_co
     uint32 current_entry = 0;
 
     for(auto& row = results.begin(); row != results.end(); ++row) {
-	    const uint32 id = static_cast<uint32>(atoul(row[0]));
+	    const uint32 id = static_cast<uint32>(Strings::ToUnsignedInt(row[0]));
         if(id != current_id) {
             if(current_id != 0) {
                 hash.insert(current_id, faction);
@@ -1413,8 +1413,8 @@ void SharedDatabase::LoadNPCFactionLists(void *data, uint32 size, uint32 list_co
             current_entry = 0;
             current_id = id;
             faction.id = id;
-            faction.primaryfaction = static_cast<uint32>(atoul(row[1]));
-            faction.assistprimaryfaction = (atoi(row[2]) == 0);
+            faction.primaryfaction = static_cast<uint32>(Strings::ToUnsignedInt(row[1]));
+            faction.assistprimaryfaction = (Strings::ToInt(row[2]) == 0);
         }
 
         if(!row[3])
@@ -1423,10 +1423,10 @@ void SharedDatabase::LoadNPCFactionLists(void *data, uint32 size, uint32 list_co
         if(current_entry >= MAX_NPC_FACTIONS)
 				continue;
 
-        faction.factionid[current_entry] = static_cast<uint32>(atoul(row[3]));
-        faction.factionvalue[current_entry] = static_cast<int32>(atoi(row[4]));
-        faction.factionnpcvalue[current_entry] = static_cast<int8>(atoi(row[5]));
-        faction.factiontemp[current_entry] = static_cast<uint8>(atoi(row[6]));
+        faction.factionid[current_entry] = static_cast<uint32>(Strings::ToUnsignedInt(row[3]));
+        faction.factionvalue[current_entry] = static_cast<int32>(Strings::ToInt(row[4]));
+        faction.factionnpcvalue[current_entry] = static_cast<int8>(Strings::ToInt(row[5]));
+        faction.factiontemp[current_entry] = static_cast<uint8>(Strings::ToInt(row[6]));
         ++current_entry;
     }
 
@@ -1664,7 +1664,7 @@ bool SharedDatabase::GetCommandSettings(std::map<std::string, std::pair<uint8, s
 		return false;
 
 	for (auto& row = results.begin(); row != results.end(); ++row) {
-		command_settings[row[0]].first = atoi(row[1]);
+		command_settings[row[0]].first = Strings::ToInt(row[1]);
 		if (row[2][0] == 0)
 			continue;
 
@@ -1762,10 +1762,10 @@ void SharedDatabase::LoadSkillCaps(void *data) {
 	}
 
     for(auto& row = results.begin(); row != results.end(); ++row) {
-	    const uint8 skillID = atoi(row[0]);
-	    const uint8 class_ = atoi(row[1]) - 1;
-	    const uint8 level = atoi(row[2]);
-	    const uint16 cap = atoi(row[3]);
+	    const uint8 skillID = Strings::ToInt(row[0]);
+	    const uint8 class_ = Strings::ToInt(row[1]) - 1;
+	    const uint8 level = Strings::ToInt(row[2]);
+	    const uint16 cap = Strings::ToInt(row[3]);
 
         if(skillID >= skill_count || class_ >= class_count || level >= level_count)
             continue;
@@ -1864,9 +1864,9 @@ void SharedDatabase::LoadDamageShieldTypes(SPDat_Spell_Struct* sp, int32 iMaxSpe
     }
 
     for(auto& row = results.begin(); row != results.end(); ++row) {
-	    const int spellID = atoi(row[0]);
+	    const int spellID = Strings::ToInt(row[0]);
         if((spellID > 0) && (spellID <= iMaxSpellID))
-            sp[spellID].damage_shield_type = atoi(row[1]);
+            sp[spellID].damage_shield_type = Strings::ToInt(row[1]);
     }
 
 }
@@ -1884,7 +1884,7 @@ int SharedDatabase::GetMaxSpellID() {
 
     auto& row = results.begin();
 
-	return atoi(row[0]);
+	return Strings::ToInt(row[0]);
 }
 
 bool SharedDatabase::LoadSpells(const std::string &prefix, int32 *records, const SPDat_Spell_Struct **sp) {
@@ -1930,7 +1930,7 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 	int counter = 0;
 
     for (auto& row = results.begin(); row != results.end(); ++row) {
-	    const int tempid = atoi(row[0]);
+	    const int tempid = Strings::ToInt(row[0]);
         if(tempid >= max_spells) {
 			LogSpells("Non fatal error: spell.id >= max_spells, ignoring");
 			continue;
@@ -1947,141 +1947,141 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 		strn0cpy(sp[tempid].cast_on_other, row[7], sizeof(sp[tempid].cast_on_other));
 		strn0cpy(sp[tempid].spell_fades, row[8], sizeof(sp[tempid].spell_fades));
 
-		sp[tempid].range=static_cast<float>(atof(row[9]));
-		sp[tempid].aoe_range=static_cast<float>(atof(row[10]));
-		sp[tempid].push_back=static_cast<float>(atof(row[11]));
-		sp[tempid].push_up=static_cast<float>(atof(row[12]));
-		sp[tempid].cast_time=atoi(row[13]);
-		sp[tempid].recovery_time=atoi(row[14]);
-		sp[tempid].recast_time=atoi(row[15]);
-		sp[tempid].buff_duration_formula=atoi(row[16]);
-		sp[tempid].buff_duration=atoi(row[17]);
-		sp[tempid].aoe_duration=atoi(row[18]);
-		sp[tempid].mana=atoi(row[19]);
+		sp[tempid].range=static_cast<float>(Strings::ToFloat(row[9]));
+		sp[tempid].aoe_range=static_cast<float>(Strings::ToFloat(row[10]));
+		sp[tempid].push_back=static_cast<float>(Strings::ToFloat(row[11]));
+		sp[tempid].push_up=static_cast<float>(Strings::ToFloat(row[12]));
+		sp[tempid].cast_time=Strings::ToInt(row[13]);
+		sp[tempid].recovery_time=Strings::ToInt(row[14]);
+		sp[tempid].recast_time=Strings::ToInt(row[15]);
+		sp[tempid].buff_duration_formula=Strings::ToInt(row[16]);
+		sp[tempid].buff_duration=Strings::ToInt(row[17]);
+		sp[tempid].aoe_duration=Strings::ToInt(row[18]);
+		sp[tempid].mana=Strings::ToInt(row[19]);
 
 		int y=0;
 		for(y=0; y< EFFECT_COUNT;y++)
-			sp[tempid].base_value[y]=atoi(row[20+y]); // effect_base_value
+			sp[tempid].base_value[y]=Strings::ToInt(row[20+y]); // effect_base_value
 
 		for(y=0; y < EFFECT_COUNT; y++)
-			sp[tempid].limit_value[y]=atoi(row[32+y]); // effect_limit_value
+			sp[tempid].limit_value[y]=Strings::ToInt(row[32+y]); // effect_limit_value
 
 		for(y=0; y< EFFECT_COUNT;y++)
-			sp[tempid].max_value[y]=atoi(row[44+y]);
+			sp[tempid].max_value[y]=Strings::ToInt(row[44+y]);
 
 		for(y=0; y< 4;y++)
-			sp[tempid].component[y]=atoi(row[58+y]);
+			sp[tempid].component[y]=Strings::ToInt(row[58+y]);
 
 		for(y=0; y< 4;y++)
-			sp[tempid].component_count[y]=atoi(row[62+y]);
+			sp[tempid].component_count[y]=Strings::ToInt(row[62+y]);
 
 		for(y=0; y< 4;y++)
-			sp[tempid].no_expend_reagent[y]=atoi(row[66+y]);
+			sp[tempid].no_expend_reagent[y]=Strings::ToInt(row[66+y]);
 
 		for(y=0; y< EFFECT_COUNT;y++)
-			sp[tempid].formula[y]=atoi(row[70+y]);
+			sp[tempid].formula[y]=Strings::ToInt(row[70+y]);
 
-		sp[tempid].good_effect=atoi(row[83]);
-		sp[tempid].activated=atoi(row[84]);
-		sp[tempid].resist_type=atoi(row[85]);
+		sp[tempid].good_effect=Strings::ToInt(row[83]);
+		sp[tempid].activated=Strings::ToInt(row[84]);
+		sp[tempid].resist_type=Strings::ToInt(row[85]);
 
 		for(y=0; y< EFFECT_COUNT;y++)
-			sp[tempid].effect_id[y]=atoi(row[86+y]);
+			sp[tempid].effect_id[y]=Strings::ToInt(row[86+y]);
 
-		sp[tempid].target_type = static_cast<SpellTargetType>(atoi(row[98]));
-		sp[tempid].base_difficulty=atoi(row[99]);
+		sp[tempid].target_type = static_cast<SpellTargetType>(Strings::ToInt(row[98]));
+		sp[tempid].base_difficulty=Strings::ToInt(row[99]);
 
-		int tmp_skill = atoi(row[100]);
+		int tmp_skill = Strings::ToInt(row[100]);
 
 		if (tmp_skill < 0 || tmp_skill > EQ::skills::HIGHEST_SKILL)
 			sp[tempid].skill = EQ::skills::SkillBegging; /* not much better we can do. */ // can probably be changed to client-based 'SkillNone' once activated
         else
 			sp[tempid].skill = static_cast<EQ::skills::SkillType>(tmp_skill);
 
-		sp[tempid].zone_type=atoi(row[101]);
-		sp[tempid].environment_type=atoi(row[102]);
-		sp[tempid].time_of_day=atoi(row[103]);
+		sp[tempid].zone_type=Strings::ToInt(row[101]);
+		sp[tempid].environment_type=Strings::ToInt(row[102]);
+		sp[tempid].time_of_day=Strings::ToInt(row[103]);
 
 		for(y=0; y < PLAYER_CLASS_COUNT;y++)
-			sp[tempid].classes[y]=atoi(row[104+y]);
+			sp[tempid].classes[y]=Strings::ToInt(row[104+y]);
 
-		sp[tempid].casting_animation=atoi(row[120]);
-		sp[tempid].spell_affect_index=atoi(row[123]);
-		sp[tempid].disallow_sit=atoi(row[124]);
-		sp[tempid].deity_agnostic=atoi(row[125]);
+		sp[tempid].casting_animation=Strings::ToInt(row[120]);
+		sp[tempid].spell_affect_index=Strings::ToInt(row[123]);
+		sp[tempid].disallow_sit=Strings::ToInt(row[124]);
+		sp[tempid].deity_agnostic=Strings::ToInt(row[125]);
 
 		for (y = 0; y < 16; y++)
-			sp[tempid].deities[y]=atoi(row[126+y]);
+			sp[tempid].deities[y]=Strings::ToInt(row[126+y]);
 
-		sp[tempid].new_icon=atoi(row[144]);
-		sp[tempid].uninterruptable=atoi(row[146]) != 0;
-		sp[tempid].resist_difficulty=atoi(row[147]);
-		sp[tempid].unstackable_dot = atoi(row[148]) != 0;
-		sp[tempid].recourse_link = atoi(row[150]);
-		sp[tempid].no_partial_resist = atoi(row[151]) != 0;
+		sp[tempid].new_icon=Strings::ToInt(row[144]);
+		sp[tempid].uninterruptable=Strings::ToInt(row[146]) != 0;
+		sp[tempid].resist_difficulty=Strings::ToInt(row[147]);
+		sp[tempid].unstackable_dot = Strings::ToInt(row[148]) != 0;
+		sp[tempid].recourse_link = Strings::ToInt(row[150]);
+		sp[tempid].no_partial_resist = Strings::ToInt(row[151]) != 0;
 
-		sp[tempid].short_buff_box = atoi(row[154]);
-		sp[tempid].description_id = atoi(row[155]);
-		sp[tempid].type_description_id = atoi(row[156]);
-		sp[tempid].effect_description_id = atoi(row[157]);
+		sp[tempid].short_buff_box = Strings::ToInt(row[154]);
+		sp[tempid].description_id = Strings::ToInt(row[155]);
+		sp[tempid].type_description_id = Strings::ToInt(row[156]);
+		sp[tempid].effect_description_id = Strings::ToInt(row[157]);
 
-		sp[tempid].npc_no_los = atoi(row[159]) != 0;
-		sp[tempid].feedbackable = atoi(row[160]) != 0;
-		sp[tempid].reflectable = atoi(row[161]) != 0;
-		sp[tempid].bonus_hate=atoi(row[162]);
+		sp[tempid].npc_no_los = Strings::ToInt(row[159]) != 0;
+		sp[tempid].feedbackable = Strings::ToInt(row[160]) != 0;
+		sp[tempid].reflectable = Strings::ToInt(row[161]) != 0;
+		sp[tempid].bonus_hate=Strings::ToInt(row[162]);
 
-		sp[tempid].ldon_trap = atoi(row[165]) != 0;
-		sp[tempid].endurance_cost=atoi(row[166]);
-		sp[tempid].timer_id=atoi(row[167]);
-		sp[tempid].is_discipline = atoi(row[168]) != 0;
-		sp[tempid].hate_added=atoi(row[173]);
-		sp[tempid].endurance_upkeep=atoi(row[174]);
-		sp[tempid].hit_number_type = atoi(row[175]);
-		sp[tempid].hit_number = atoi(row[176]);
-		sp[tempid].pvp_resist_base=atoi(row[177]);
-		sp[tempid].pvp_resist_per_level=atoi(row[178]);
-		sp[tempid].pvp_resist_cap=atoi(row[179]);
-		sp[tempid].spell_category=atoi(row[180]);
-		sp[tempid].pvp_duration = atoi(row[181]);
-		sp[tempid].pvp_duration_cap = atoi(row[182]);
-		sp[tempid].pcnpc_only_flag=atoi(row[183]);
-		sp[tempid].cast_not_standing = atoi(row[184]) != 0;
-		sp[tempid].can_mgb=atoi(row[185]);
-		sp[tempid].dispel_flag = atoi(row[186]);
-		sp[tempid].min_resist = atoi(row[189]);
-		sp[tempid].max_resist = atoi(row[190]);
-		sp[tempid].viral_targets = atoi(row[191]);
-		sp[tempid].viral_timer = atoi(row[192]);
-		sp[tempid].nimbus_effect = atoi(row[193]);
-		sp[tempid].directional_start = static_cast<float>(atoi(row[194]));
-		sp[tempid].directional_end = static_cast<float>(atoi(row[195]));
-		sp[tempid].sneak = atoi(row[196]) != 0;
-		sp[tempid].not_focusable = atoi(row[197]) != 0;
-		sp[tempid].no_detrimental_spell_aggro = atoi(row[198]) != 0;
-		sp[tempid].suspendable = atoi(row[200]) != 0;
-		sp[tempid].viral_range = atoi(row[201]);
-		sp[tempid].song_cap = atoi(row[202]);
-		sp[tempid].no_block = atoi(row[205]);
-		sp[tempid].spell_group=atoi(row[207]);
-		sp[tempid].rank = atoi(row[208]);
-		sp[tempid].no_resist=atoi(row[209]);
-		sp[tempid].cast_restriction = atoi(row[211]);
-		sp[tempid].allow_rest = atoi(row[212]) != 0;
-		sp[tempid].can_cast_in_combat = atoi(row[213]) != 0;
-		sp[tempid].can_cast_out_of_combat = atoi(row[214]) != 0;
-		sp[tempid].override_crit_chance = atoi(row[217]);
-		sp[tempid].aoe_max_targets = atoi(row[218]);
-		sp[tempid].no_heal_damage_item_mod = atoi(row[219]);
-		sp[tempid].caster_requirement_id = atoi(row[220]);
-		sp[tempid].spell_class = atoi(row[221]);
-		sp[tempid].spell_subclass = atoi(row[222]);
-		sp[tempid].persist_death = atoi(row[224]) != 0;
-		sp[tempid].min_distance = static_cast<float>(atof(row[227]));
-		sp[tempid].min_distance_mod = static_cast<float>(atof(row[228]));
-		sp[tempid].max_distance = static_cast<float>(atof(row[229]));
-		sp[tempid].max_distance_mod = static_cast<float>(atof(row[230]));
-		sp[tempid].min_range = static_cast<float>(atoi(row[231]));
-		sp[tempid].no_remove = atoi(row[232]) != 0;
+		sp[tempid].ldon_trap = Strings::ToInt(row[165]) != 0;
+		sp[tempid].endurance_cost=Strings::ToInt(row[166]);
+		sp[tempid].timer_id=Strings::ToInt(row[167]);
+		sp[tempid].is_discipline = Strings::ToInt(row[168]) != 0;
+		sp[tempid].hate_added=Strings::ToInt(row[173]);
+		sp[tempid].endurance_upkeep=Strings::ToInt(row[174]);
+		sp[tempid].hit_number_type = Strings::ToInt(row[175]);
+		sp[tempid].hit_number = Strings::ToInt(row[176]);
+		sp[tempid].pvp_resist_base=Strings::ToInt(row[177]);
+		sp[tempid].pvp_resist_per_level=Strings::ToInt(row[178]);
+		sp[tempid].pvp_resist_cap=Strings::ToInt(row[179]);
+		sp[tempid].spell_category=Strings::ToInt(row[180]);
+		sp[tempid].pvp_duration = Strings::ToInt(row[181]);
+		sp[tempid].pvp_duration_cap = Strings::ToInt(row[182]);
+		sp[tempid].pcnpc_only_flag=Strings::ToInt(row[183]);
+		sp[tempid].cast_not_standing = Strings::ToInt(row[184]) != 0;
+		sp[tempid].can_mgb=Strings::ToInt(row[185]);
+		sp[tempid].dispel_flag = Strings::ToInt(row[186]);
+		sp[tempid].min_resist = Strings::ToInt(row[189]);
+		sp[tempid].max_resist = Strings::ToInt(row[190]);
+		sp[tempid].viral_targets = Strings::ToInt(row[191]);
+		sp[tempid].viral_timer = Strings::ToInt(row[192]);
+		sp[tempid].nimbus_effect = Strings::ToInt(row[193]);
+		sp[tempid].directional_start = static_cast<float>(Strings::ToInt(row[194]));
+		sp[tempid].directional_end = static_cast<float>(Strings::ToInt(row[195]));
+		sp[tempid].sneak = Strings::ToInt(row[196]) != 0;
+		sp[tempid].not_focusable = Strings::ToInt(row[197]) != 0;
+		sp[tempid].no_detrimental_spell_aggro = Strings::ToInt(row[198]) != 0;
+		sp[tempid].suspendable = Strings::ToInt(row[200]) != 0;
+		sp[tempid].viral_range = Strings::ToInt(row[201]);
+		sp[tempid].song_cap = Strings::ToInt(row[202]);
+		sp[tempid].no_block = Strings::ToInt(row[205]);
+		sp[tempid].spell_group=Strings::ToInt(row[207]);
+		sp[tempid].rank = Strings::ToInt(row[208]);
+		sp[tempid].no_resist=Strings::ToInt(row[209]);
+		sp[tempid].cast_restriction = Strings::ToInt(row[211]);
+		sp[tempid].allow_rest = Strings::ToInt(row[212]) != 0;
+		sp[tempid].can_cast_in_combat = Strings::ToInt(row[213]) != 0;
+		sp[tempid].can_cast_out_of_combat = Strings::ToInt(row[214]) != 0;
+		sp[tempid].override_crit_chance = Strings::ToInt(row[217]);
+		sp[tempid].aoe_max_targets = Strings::ToInt(row[218]);
+		sp[tempid].no_heal_damage_item_mod = Strings::ToInt(row[219]);
+		sp[tempid].caster_requirement_id = Strings::ToInt(row[220]);
+		sp[tempid].spell_class = Strings::ToInt(row[221]);
+		sp[tempid].spell_subclass = Strings::ToInt(row[222]);
+		sp[tempid].persist_death = Strings::ToInt(row[224]) != 0;
+		sp[tempid].min_distance = static_cast<float>(Strings::ToFloat(row[227]));
+		sp[tempid].min_distance_mod = static_cast<float>(Strings::ToFloat(row[228]));
+		sp[tempid].max_distance = static_cast<float>(Strings::ToFloat(row[229]));
+		sp[tempid].max_distance_mod = static_cast<float>(Strings::ToFloat(row[230]));
+		sp[tempid].min_range = static_cast<float>(Strings::ToInt(row[231]));
+		sp[tempid].no_remove = Strings::ToInt(row[232]) != 0;
 		sp[tempid].damage_shield_type = 0;
     }
 
@@ -2100,7 +2100,7 @@ int SharedDatabase::GetMaxBaseDataLevel() {
 
     auto& row = results.begin();
 
-	return atoi(row[0]);
+	return Strings::ToInt(row[0]);
 }
 
 bool SharedDatabase::LoadBaseData(const std::string &prefix) {
@@ -2134,8 +2134,8 @@ void SharedDatabase::LoadBaseData(void *data, int max_level) {
 	}
 
 	for (auto& row = results.begin(); row != results.end(); ++row) {
-		const int lvl = atoi(row[0]);
-		const int cl = atoi(row[1]);
+		const int lvl = Strings::ToInt(row[0]);
+		const int cl = Strings::ToInt(row[1]);
 
         if(lvl <= 0) {
             LogError("Non fatal error: base_data.level <= 0, ignoring.");
@@ -2158,14 +2158,14 @@ void SharedDatabase::LoadBaseData(void *data, int max_level) {
         }
 
         BaseDataStruct *bd = reinterpret_cast<BaseDataStruct*>(base_ptr + (((16 * (lvl - 1)) + (cl - 1)) * sizeof(BaseDataStruct)));
-		bd->base_hp = atof(row[2]);
-		bd->base_mana = atof(row[3]);
-		bd->base_end = atof(row[4]);
-		bd->hp_regen = atof(row[5]);
-		bd->end_regen = atof(row[6]);
-		bd->hp_factor = atof(row[7]);
-		bd->mana_factor = atof(row[8]);
-		bd->endurance_factor = atof(row[9]);
+		bd->base_hp = Strings::ToFloat(row[2]);
+		bd->base_mana = Strings::ToFloat(row[3]);
+		bd->base_end = Strings::ToFloat(row[4]);
+		bd->hp_regen = Strings::ToFloat(row[5]);
+		bd->end_regen = Strings::ToFloat(row[6]);
+		bd->hp_factor = Strings::ToFloat(row[7]);
+		bd->mana_factor = Strings::ToFloat(row[8]);
+		bd->endurance_factor = Strings::ToFloat(row[9]);
     }
 }
 
@@ -2218,9 +2218,9 @@ void SharedDatabase::GetLootTableInfo(uint32 &loot_table_count, uint32 &max_loot
 
 	auto& row = results.begin();
 
-    loot_table_count = static_cast<uint32>(atoul(row[0]));
-	max_loot_table = static_cast<uint32>(atoul(row[1] ? row[1] : "0"));
-	loot_table_entries = static_cast<uint32>(atoul(row[2]));
+    loot_table_count = static_cast<uint32>(Strings::ToUnsignedInt(row[0]));
+	max_loot_table = static_cast<uint32>(Strings::ToUnsignedInt(row[1] ? row[1] : "0"));
+	loot_table_entries = static_cast<uint32>(Strings::ToUnsignedInt(row[2]));
 }
 
 void SharedDatabase::GetLootDropInfo(uint32 &loot_drop_count, uint32 &max_loot_drop, uint32 &loot_drop_entries) {
@@ -2243,9 +2243,9 @@ void SharedDatabase::GetLootDropInfo(uint32 &loot_drop_count, uint32 &max_loot_d
 
     auto& row =results.begin();
 
-    loot_drop_count = static_cast<uint32>(atoul(row[0]));
-	max_loot_drop = static_cast<uint32>(atoul(row[1] ? row[1] : "0"));
-	loot_drop_entries = static_cast<uint32>(atoul(row[2]));
+    loot_drop_count = static_cast<uint32>(Strings::ToUnsignedInt(row[0]));
+	max_loot_drop = static_cast<uint32>(Strings::ToUnsignedInt(row[1] ? row[1] : "0"));
+	loot_drop_entries = static_cast<uint32>(Strings::ToUnsignedInt(row[2]));
 }
 
 void SharedDatabase::LoadLootTables(void *data, uint32 size) {
@@ -2289,7 +2289,7 @@ void SharedDatabase::LoadLootTables(void *data, uint32 size) {
 	uint32 current_entry = 0;
 
 	for (auto& row = results.begin(); row != results.end(); ++row) {
-		const uint32 id = static_cast<uint32>(atoul(row[0]));
+		const uint32 id = static_cast<uint32>(Strings::ToUnsignedInt(row[0]));
 		if (id != current_id) {
 			if (current_id != 0) {
 				hash.insert(
@@ -2301,12 +2301,12 @@ void SharedDatabase::LoadLootTables(void *data, uint32 size) {
 			memset(loot_table, 0, sizeof(LootTable_Struct) + (sizeof(LootTableEntries_Struct) * 128));
 			current_entry = 0;
 			current_id    = id;
-			lt->mincash = static_cast<uint32>(atoul(row[1]));
-			lt->maxcash = static_cast<uint32>(atoul(row[2]));
-			lt->avgcoin = static_cast<uint32>(atoul(row[3]));
+			lt->mincash = static_cast<uint32>(Strings::ToUnsignedInt(row[1]));
+			lt->maxcash = static_cast<uint32>(Strings::ToUnsignedInt(row[2]));
+			lt->avgcoin = static_cast<uint32>(Strings::ToUnsignedInt(row[3]));
 
-			lt->content_flags.min_expansion = static_cast<int16>(atoi(row[9]));
-			lt->content_flags.max_expansion = static_cast<int16>(atoi(row[10]));
+			lt->content_flags.min_expansion = static_cast<int16>(Strings::ToInt(row[9]));
+			lt->content_flags.max_expansion = static_cast<int16>(Strings::ToInt(row[10]));
 
 			strn0cpy(lt->content_flags.content_flags,          row[11], sizeof(lt->content_flags.content_flags));
 			strn0cpy(lt->content_flags.content_flags_disabled, row[12],  sizeof(lt->content_flags.content_flags_disabled));
@@ -2320,11 +2320,11 @@ void SharedDatabase::LoadLootTables(void *data, uint32 size) {
 			continue;
 		}
 
-		lt->Entries[current_entry].lootdrop_id = static_cast<uint32>(atoul(row[4]));
-		lt->Entries[current_entry].multiplier  = static_cast<uint8>(atoi(row[5]));
-		lt->Entries[current_entry].droplimit   = static_cast<uint8>(atoi(row[6]));
-		lt->Entries[current_entry].mindrop     = static_cast<uint8>(atoi(row[7]));
-		lt->Entries[current_entry].probability = static_cast<float>(atof(row[8]));
+		lt->Entries[current_entry].lootdrop_id = static_cast<uint32>(Strings::ToUnsignedInt(row[4]));
+		lt->Entries[current_entry].multiplier  = static_cast<uint8>(Strings::ToInt(row[5]));
+		lt->Entries[current_entry].droplimit   = static_cast<uint8>(Strings::ToInt(row[6]));
+		lt->Entries[current_entry].mindrop     = static_cast<uint8>(Strings::ToInt(row[7]));
+		lt->Entries[current_entry].probability = static_cast<float>(Strings::ToFloat(row[8]));
 
 		++(lt->NumEntries);
 		++current_entry;
@@ -2383,7 +2383,7 @@ void SharedDatabase::LoadLootDrops(void *data, uint32 size) {
 	uint32 current_entry = 0;
 
 	for (auto& row = results.begin(); row != results.end(); ++row) {
-		const auto id = static_cast<uint32>(atoul(row[0]));
+		const auto id = static_cast<uint32>(Strings::ToUnsignedInt(row[0]));
 		if (id != current_id) {
 			if (current_id != 0) {
 				hash.insert(
@@ -2396,8 +2396,8 @@ void SharedDatabase::LoadLootDrops(void *data, uint32 size) {
 			current_entry = 0;
 			current_id    = id;
 
-			p_loot_drop_struct->content_flags.min_expansion = static_cast<int16>(atoi(row[10]));
-			p_loot_drop_struct->content_flags.max_expansion = static_cast<int16>(atoi(row[11]));
+			p_loot_drop_struct->content_flags.min_expansion = static_cast<int16>(Strings::ToInt(row[10]));
+			p_loot_drop_struct->content_flags.max_expansion = static_cast<int16>(Strings::ToInt(row[11]));
 
 			strn0cpy(p_loot_drop_struct->content_flags.content_flags,          row[12], sizeof(p_loot_drop_struct->content_flags.content_flags));
 			strn0cpy(p_loot_drop_struct->content_flags.content_flags_disabled, row[13], sizeof(p_loot_drop_struct->content_flags.content_flags_disabled));
@@ -2407,15 +2407,15 @@ void SharedDatabase::LoadLootDrops(void *data, uint32 size) {
 			continue;
 		}
 
-		p_loot_drop_struct->Entries[current_entry].item_id           = static_cast<uint32>(atoul(row[1]));
-		p_loot_drop_struct->Entries[current_entry].item_charges      = static_cast<int8>(atoi(row[2]));
-		p_loot_drop_struct->Entries[current_entry].equip_item        = static_cast<uint8>(atoi(row[3]));
-		p_loot_drop_struct->Entries[current_entry].chance            = static_cast<float>(atof(row[4]));
-		p_loot_drop_struct->Entries[current_entry].trivial_min_level = static_cast<uint16>(atoi(row[5]));
-		p_loot_drop_struct->Entries[current_entry].trivial_max_level = static_cast<uint16>(atoi(row[6]));
-		p_loot_drop_struct->Entries[current_entry].npc_min_level     = static_cast<uint16>(atoi(row[7]));
-		p_loot_drop_struct->Entries[current_entry].npc_max_level     = static_cast<uint16>(atoi(row[8]));
-		p_loot_drop_struct->Entries[current_entry].multiplier        = static_cast<uint8>(atoi(row[9]));
+		p_loot_drop_struct->Entries[current_entry].item_id           = static_cast<uint32>(Strings::ToUnsignedInt(row[1]));
+		p_loot_drop_struct->Entries[current_entry].item_charges      = static_cast<int8>(Strings::ToInt(row[2]));
+		p_loot_drop_struct->Entries[current_entry].equip_item        = static_cast<uint8>(Strings::ToInt(row[3]));
+		p_loot_drop_struct->Entries[current_entry].chance            = static_cast<float>(Strings::ToFloat(row[4]));
+		p_loot_drop_struct->Entries[current_entry].trivial_min_level = static_cast<uint16>(Strings::ToInt(row[5]));
+		p_loot_drop_struct->Entries[current_entry].trivial_max_level = static_cast<uint16>(Strings::ToInt(row[6]));
+		p_loot_drop_struct->Entries[current_entry].npc_min_level     = static_cast<uint16>(Strings::ToInt(row[7]));
+		p_loot_drop_struct->Entries[current_entry].npc_max_level     = static_cast<uint16>(Strings::ToInt(row[8]));
+		p_loot_drop_struct->Entries[current_entry].multiplier        = static_cast<uint8>(Strings::ToInt(row[9]));
 
 		++(p_loot_drop_struct->NumEntries);
 		++current_entry;
@@ -2511,7 +2511,7 @@ uint32 SharedDatabase::GetSpellsCount()
 	auto& row = results.begin();
 
 	if (row[0]) {
-		return atoul(row[0]);
+		return Strings::ToUnsignedInt(row[0]);
 	}
 
 	return 0;
@@ -2527,7 +2527,7 @@ uint32 SharedDatabase::GetItemsCount()
 	auto& row = results.begin();
 
 	if (row[0]) {
-		return atoul(row[0]);
+		return Strings::ToUnsignedInt(row[0]);
 	}
 
 	return 0;

@@ -60,7 +60,7 @@ void EQEmuDatabase::GetPlayer(std::string name)
 		while ((row = mysql_fetch_row(res)) != NULL)
 		{
 			player_entry pe;
-			pe.id = atoi(row[1]);
+			pe.id = Strings::ToInt(row[1]);
 			pe.data = new char[sizeof(PlayerProfile_Struct)];
 			memcpy(pe.data, row[0], sizeof(PlayerProfile_Struct));
 			player_list.push_back(pe);
@@ -97,7 +97,7 @@ void EQEmuDatabase::GetPlayers()
 		while ((row = mysql_fetch_row(res)) != NULL)
 		{
 			player_entry pe;
-			pe.id = atoi(row[1]);
+			pe.id = Strings::ToInt(row[1]);
 			pe.data = new char[sizeof(PlayerProfile_Struct)];
 			memcpy(pe.data, row[0], sizeof(PlayerProfile_Struct));
 			player_list.push_back(pe);

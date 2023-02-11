@@ -764,16 +764,16 @@ Ground_Spawns* ZoneDatabase::LoadGroundSpawns(uint32 zone_id, int16 version, Gro
 
 	int spawnIndex=0;
     for (auto row = results.begin(); row != results.end(); ++row, ++spawnIndex) {
-        gs->spawn[spawnIndex].max_x=atof(row[0]);
-        gs->spawn[spawnIndex].max_y=atof(row[1]);
-        gs->spawn[spawnIndex].max_z=atof(row[2]);
-        gs->spawn[spawnIndex].min_x=atof(row[3]);
-        gs->spawn[spawnIndex].min_y=atof(row[4]);
-        gs->spawn[spawnIndex].heading=atof(row[5]);
+        gs->spawn[spawnIndex].max_x=Strings::ToFloat(row[0]);
+        gs->spawn[spawnIndex].max_y=Strings::ToFloat(row[1]);
+        gs->spawn[spawnIndex].max_z=Strings::ToFloat(row[2]);
+        gs->spawn[spawnIndex].min_x=Strings::ToFloat(row[3]);
+        gs->spawn[spawnIndex].min_y=Strings::ToFloat(row[4]);
+        gs->spawn[spawnIndex].heading=Strings::ToFloat(row[5]);
         strcpy(gs->spawn[spawnIndex].name,row[6]);
-        gs->spawn[spawnIndex].item=atoi(row[7]);
-        gs->spawn[spawnIndex].max_allowed=atoi(row[8]);
-        gs->spawn[spawnIndex].respawntimer=atoi(row[9]);
+        gs->spawn[spawnIndex].item=Strings::ToInt(row[7]);
+        gs->spawn[spawnIndex].max_allowed=Strings::ToInt(row[8]);
+        gs->spawn[spawnIndex].respawntimer=Strings::ToInt(row[9]);
     }
 	return gs;
 }

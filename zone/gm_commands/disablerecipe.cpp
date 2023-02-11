@@ -8,8 +8,8 @@ void command_disablerecipe(Client *c, const Seperator *sep)
 		return;
 	}
 
-	auto recipe_id = std::stoul(sep->arg[1]);
-	if (!recipe_id) {		
+	auto recipe_id = Strings::ToUnsignedInt(sep->arg[1]);
+	if (!recipe_id) {
 		c->Message(Chat::White, "Usage: #disablerecipe [Recipe ID]");
 		return;
 	}

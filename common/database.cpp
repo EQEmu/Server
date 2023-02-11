@@ -124,7 +124,7 @@ uint32 Database::CheckLogin(const char* name, const char* password, const char *
 	auto id = std::stoul(row[0]);
 
 	if (oStatus) {
-		*oStatus = std::stoi(row[1]);
+		*oStatus = Strings::ToInt(row[1]);
 	}
 
 	return id;
@@ -345,7 +345,7 @@ bool Database::ReserveName(uint32 account_id, char* name) {
 	std::string query = StringFormat("SELECT `account_id`, `name` FROM `character_data` WHERE `name` = '%s'", name);
 	auto results = QueryDatabase(query);
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		if (row[0] && atoi(row[0]) > 0){
+		if (row[0] && Strings::ToInt(row[0]) > 0){
 			LogInfo("Account: [{}] tried to request name: [{}], but it is already taken", account_id, name);
 			return false;
 		}
@@ -387,7 +387,7 @@ bool Database::DeleteCharacter(char *character_name)
 	std::string query   = StringFormat("SELECT `id` from `character_data` WHERE `name` = '%s'", character_name);
 	auto        results = QueryDatabase(query);
 	for (auto   row     = results.begin(); row != results.end(); ++row) {
-		character_id = atoi(row[0]);
+		character_id = Strings::ToInt(row[0]);
 	}
 
 	if (character_id <= 0) {
@@ -787,7 +787,7 @@ uint32 Database::GetCharacterID(const char *name) {
 	auto row = results.begin();
 	if (results.RowCount() == 1)
 	{
-		return atoi(row[0]);
+		return Strings::ToInt(row[0]);
 	}
 	return 0;
 }
@@ -812,10 +812,10 @@ uint32 Database::GetAccountIDByChar(const char* charname, uint32* oCharID) {
 
 	auto row = results.begin();
 
-	uint32 accountId = atoi(row[0]);
+	uint32 accountId = Strings::ToInt(row[0]);
 
 	if (oCharID)
-		*oCharID = atoi(row[1]);
+		*oCharID = Strings::ToInt(row[1]);
 
 	return accountId;
 }
@@ -832,7 +832,7 @@ uint32 Database::GetAccountIDByChar(uint32 char_id) {
 		return 0;
 
 	auto row = results.begin();
-	return atoi(row[0]);
+	return Strings::ToInt(row[0]);
 }
 
 uint32 Database::GetAccountIDByName(std::string account_name, std::string loginserver, int16* status, uint32* lsid) {
@@ -880,7 +880,7 @@ void Database::GetAccountName(uint32 accountid, char* name, uint32* oLSAccountID
 
 	strcpy(name, row[0]);
 	if (row[1] && oLSAccountID) {
-		*oLSAccountID = atoi(row[1]);
+		*oLSAccountID = Strings::ToInt(row[1]);
 	}
 
 }
@@ -968,7 +968,7 @@ bool Database::LoadVariables() {
 
 	std::string key, value;
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		varcache.last_update = atoi(row[2]); // ahh should we be comparing if this is newer?
+		varcache.last_update = Strings::ToInt(row[2]); // ahh should we be comparing if this is newer?
 		key = row[0];
 		value = row[1];
 		std::transform(std::begin(key), std::end(key), std::begin(key), ::tolower); // keys are lower case, DB doesn't have to be
@@ -1052,15 +1052,15 @@ bool Database::GetZoneGraveyard(const uint32 graveyard_id, uint32* graveyard_zon
 	auto row = results.begin();
 
 	if(graveyard_zoneid != nullptr)
-		*graveyard_zoneid = atoi(row[0]);
+		*graveyard_zoneid = Strings::ToInt(row[0]);
 	if(graveyard_x != nullptr)
-		*graveyard_x = atof(row[1]);
+		*graveyard_x = Strings::ToFloat(row[1]);
 	if(graveyard_y != nullptr)
-		*graveyard_y = atof(row[2]);
+		*graveyard_y = Strings::ToFloat(row[2]);
 	if(graveyard_z != nullptr)
-		*graveyard_z = atof(row[3]);
+		*graveyard_z = Strings::ToFloat(row[3]);
 	if(graveyard_heading != nullptr)
-		*graveyard_heading = atof(row[4]);
+		*graveyard_heading = Strings::ToFloat(row[4]);
 
 	return true;
 }
@@ -1198,7 +1198,7 @@ void Database::GetAccountFromID(uint32 id, char* oAccountName, int16* oStatus) {
 	if (oAccountName)
 		strcpy(oAccountName, row[0]);
 	if (oStatus)
-		*oStatus = atoi(row[1]);
+		*oStatus = Strings::ToInt(row[1]);
 }
 
 void Database::ClearMerchantTemp(){
@@ -1244,7 +1244,7 @@ uint8 Database::GetServerType() {
 		return 0;
 
 	auto row = results.begin();
-	return atoi(row[0]);
+	return Strings::ToInt(row[0]);
 }
 
 bool Database::MoveCharacterToZone(uint32 character_id, uint32 zone_id)
@@ -1296,7 +1296,7 @@ uint8 Database::GetRaceSkill(uint8 skillid, uint8 in_race)
 		return 0;
 
 	auto row = results.begin();
-	return atoi(row[0]);
+	return Strings::ToInt(row[0]);
 }
 
 uint8 Database::GetSkillCap(uint8 skillid, uint8 in_race, uint8 in_class, uint16 in_level)
@@ -1312,12 +1312,12 @@ uint8 Database::GetSkillCap(uint8 skillid, uint8 in_race, uint8 in_class, uint16
 	if (results.Success() && results.RowsAffected() != 0)
 	{
 		auto row = results.begin();
-		skill_level = atoi(row[0]);
-		skill_formula = atoi(row[1]);
-		skill_cap = atoi(row[2]);
-		if (atoi(row[3]) > skill_cap)
-			skill_cap2 = (atoi(row[3])-skill_cap)/10; //Split the post-50 skill cap into difference between pre-50 cap and post-50 cap / 10 to determine amount of points per level.
-		skill_cap3 = atoi(row[4]);
+		skill_level = Strings::ToInt(row[0]);
+		skill_formula = Strings::ToInt(row[1]);
+		skill_cap = Strings::ToInt(row[2]);
+		if (Strings::ToInt(row[3]) > skill_cap)
+			skill_cap2 = (Strings::ToInt(row[3])-skill_cap)/10; //Split the post-50 skill cap into difference between pre-50 cap and post-50 cap / 10 to determine amount of points per level.
+		skill_cap3 = Strings::ToInt(row[4]);
 	}
 
 	int race_skill = GetRaceSkill(skillid,in_race);
@@ -1488,7 +1488,7 @@ uint32 Database::GetGroupID(const char* name){
 
 	auto row = results.begin();
 
-	return atoi(row[0]);
+	return Strings::ToInt(row[0]);
 }
 
 std::string Database::GetGroupLeaderForLogin(std::string character_name) {
@@ -1591,7 +1591,7 @@ char *Database::GetGroupLeadershipInfo(uint32 gid, char* leaderbuf, char* mainta
 		strcpy(mentoree, row[5]);
 
 	if (mentor_percent)
-		*mentor_percent = atoi(row[6]);
+		*mentor_percent = Strings::ToInt(row[6]);
 
 	if(GLAA && results.LengthOfColumn(7) == sizeof(GroupLeadershipAA_Struct))
 		memcpy(GLAA, row[7], sizeof(GroupLeadershipAA_Struct));
@@ -1638,7 +1638,7 @@ uint8 Database::GetAgreementFlag(uint32 acctid) {
 
 	auto row = results.begin();
 
-	return atoi(row[0]);
+	return Strings::ToInt(row[0]);
 }
 
 void Database::SetAgreementFlag(uint32 acctid) {
@@ -1724,7 +1724,7 @@ uint32 Database::GetRaidID(const char* name)
 	}
 
 	if (row[0]) // would it ever be possible to have a null here?
-		return atoi(row[0]);
+		return Strings::ToInt(row[0]);
 
 	return 0;
 }
@@ -1807,7 +1807,7 @@ void Database::GetGroupLeadershipInfo(uint32 gid, uint32 rid, char *maintank,
 		strcpy(mentoree, row[4]);
 
 	if (mentor_percent)
-		*mentor_percent = atoi(row[5]);
+		*mentor_percent = Strings::ToInt(row[5]);
 
 	if (GLAA && results.LengthOfColumn(6) == sizeof(GroupLeadershipAA_Struct))
 		memcpy(GLAA, row[6], sizeof(GroupLeadershipAA_Struct));
@@ -1980,16 +1980,16 @@ bool Database::GetAdventureStats(uint32 char_id, AdventureStats_Struct *as)
 
 	auto row = results.begin();
 
-	as->success.guk = atoi(row[0]);
-	as->success.mir = atoi(row[1]);
-	as->success.mmc = atoi(row[2]);
-	as->success.ruj = atoi(row[3]);
-	as->success.tak = atoi(row[4]);
-	as->failure.guk = atoi(row[5]);
-	as->failure.mir = atoi(row[6]);
-	as->failure.mmc = atoi(row[7]);
-	as->failure.ruj = atoi(row[8]);
-	as->failure.tak = atoi(row[9]);
+	as->success.guk = Strings::ToInt(row[0]);
+	as->success.mir = Strings::ToInt(row[1]);
+	as->success.mmc = Strings::ToInt(row[2]);
+	as->success.ruj = Strings::ToInt(row[3]);
+	as->success.tak = Strings::ToInt(row[4]);
+	as->failure.guk = Strings::ToInt(row[5]);
+	as->failure.mir = Strings::ToInt(row[6]);
+	as->failure.mmc = Strings::ToInt(row[7]);
+	as->failure.ruj = Strings::ToInt(row[8]);
+	as->failure.tak = Strings::ToInt(row[9]);
 	as->failure.total = as->failure.guk + as->failure.mir + as->failure.mmc + as->failure.ruj + as->failure.tak;
 	as->success.total = as->success.guk + as->success.mir + as->success.mmc + as->success.ruj + as->success.tak;
 
@@ -2008,7 +2008,7 @@ uint32 Database::GetGuildIDByCharID(uint32 character_id)
 		return 0;
 
 	auto row = results.begin();
-	return atoi(row[0]);
+	return Strings::ToInt(row[0]);
 }
 
 uint32 Database::GetGroupIDByCharID(uint32 character_id)
@@ -2030,7 +2030,7 @@ uint32 Database::GetGroupIDByCharID(uint32 character_id)
 		return 0;
 
 	auto row = results.begin();
-	return atoi(row[0]);
+	return Strings::ToInt(row[0]);
 }
 
 uint32 Database::GetRaidIDByCharID(uint32 character_id) {
@@ -2044,7 +2044,7 @@ uint32 Database::GetRaidIDByCharID(uint32 character_id) {
 	);
 	auto results = QueryDatabase(query);
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		return atoi(row[0]);
+		return Strings::ToInt(row[0]);
 	}
 	return 0;
 }
@@ -2058,7 +2058,7 @@ int Database::CountInvSnapshots() {
 
 	auto row = results.begin();
 
-	int64 count = atoll(row[0]);
+	int64 count = Strings::ToBigInt(row[0]);
 	if (count > 2147483647)
 		return -2;
 	if (count < 0)
@@ -2094,12 +2094,12 @@ struct TimeOfDay_Struct Database::LoadTime(time_t &realtime)
 	else{
 		auto row = results.begin();
 
-		eqTime.minute = atoi(row[0]);
-		eqTime.hour = atoi(row[1]);
-		eqTime.day = atoi(row[2]);
-		eqTime.month = atoi(row[3]);
-		eqTime.year = atoi(row[4]);
-		realtime = atoi(row[5]);
+		eqTime.minute = Strings::ToInt(row[0]);
+		eqTime.hour = Strings::ToInt(row[1]);
+		eqTime.day = Strings::ToInt(row[2]);
+		eqTime.month = Strings::ToInt(row[3]);
+		eqTime.year = Strings::ToInt(row[4]);
+		realtime = Strings::ToInt(row[5]);
 	}
 
 	return eqTime;
@@ -2166,7 +2166,7 @@ int Database::GetInstanceID(uint32 char_id, uint32 zone_id) {
 
 	if (results.Success() && results.RowCount() > 0) {
 		auto row = results.begin();
-		return atoi(row[0]);;
+		return Strings::ToInt(row[0]);;
 	}
 
 	return 0;

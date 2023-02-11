@@ -14,7 +14,7 @@ void command_xtargets(Client *c, const Seperator *sep)
 		return;
 	}
 
-	const auto new_max = static_cast<uint8>(std::stoul(sep->arg[1]));
+	const auto new_max = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[1]));
 
 	if (!EQ::ValueWithin(new_max, 5, XTARGET_HARDCAP)) {
 		c->Message(

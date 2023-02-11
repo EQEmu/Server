@@ -8,7 +8,7 @@ void command_time(Client *c, const Seperator *sep)
 
 		TimeOfDay_Struct world_time;
 		zone->zone_time.GetCurrentEQTimeOfDay(time(0), &world_time);
-		
+
 		auto time_string = fmt::format(
 			"{:02}:{:02} {} (Timezone: {:02}:{:02} {})",
 			(
@@ -47,7 +47,7 @@ void command_time(Client *c, const Seperator *sep)
 	}
 
 	uint8 minutes = 0;
-	auto hours = static_cast<uint8>(std::stoul(sep->arg[1]) + 1);
+	auto hours = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[1]) + 1);
 
 	if (hours > 24) {
 		hours = 24;

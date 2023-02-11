@@ -86,8 +86,15 @@ class Strings {
 public:
 	static bool Contains(std::vector<std::string> container, std::string element);
 	static bool Contains(const std::string& subject, const std::string& search);
-	static int  ToInt(const std::string &s, int fallback = 0);
+	static int ToInt(const std::string &s, int fallback = 0);
+	static int64 ToBigInt(const std::string &s, int64 fallback = 0);
+	static uint32 ToUnsignedInt(const std::string &s, uint32 fallback = 0);
+	static uint64 ToUnsignedBigInt(const std::string &s, uint64 fallback = 0);
+	static float ToFloat(const std::string &s, float fallback = 0.0f);
 	static bool IsNumber(const std::string &s);
+	static bool IsUnsignedNumber(const std::string &s);
+	static bool IsBigNumber(const std::string &s);
+	static bool IsUnsignedBigNumber(const std::string &s);
 	static std::string RemoveNumbers(std::string s);
 	static bool IsFloat(const std::string &s);
 	static const std::string ToLower(std::string s);

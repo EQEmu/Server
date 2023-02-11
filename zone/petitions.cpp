@@ -270,22 +270,22 @@ void ZoneDatabase::RefreshPetitionsFromDB()
 	}
 
     for (auto row = results.begin(); row != results.end(); ++row) {
-        newpet = new Petition(atoi(row[0]));
+        newpet = new Petition(Strings::ToInt(row[0]));
         newpet->SetCName(row[1]);
         newpet->SetAName(row[2]);
         newpet->SetLastGM(row[3]);
         newpet->SetPetitionText(row[4]);
-        newpet->SetZone(atoi(row[5]));
-        newpet->SetUrgency(atoi(row[6]));
-        newpet->SetClass(atoi(row[7]));
-        newpet->SetRace(atoi(row[8]));
-        newpet->SetLevel(atoi(row[9]));
-        newpet->SetCheckouts(atoi(row[10]));
-        newpet->SetUnavails(atoi(row[11]));
+        newpet->SetZone(Strings::ToInt(row[5]));
+        newpet->SetUrgency(Strings::ToInt(row[6]));
+        newpet->SetClass(Strings::ToInt(row[7]));
+        newpet->SetRace(Strings::ToInt(row[8]));
+        newpet->SetLevel(Strings::ToInt(row[9]));
+        newpet->SetCheckouts(Strings::ToInt(row[10]));
+        newpet->SetUnavails(Strings::ToInt(row[11]));
         newpet->SetSentTime2(atol(row[13]));
         newpet->SetGMText(row[14]);
 
-        if (atoi(row[12]) == 1)
+        if (Strings::ToInt(row[12]) == 1)
             newpet->SetCheckedOut(true);
         else
             newpet->SetCheckedOut(false);

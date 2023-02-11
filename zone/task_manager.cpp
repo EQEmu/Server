@@ -199,9 +199,9 @@ bool TaskManager::LoadTasks(int single_task)
 		ad->target_name          = a.target_name;
 		ad->item_list            = a.item_list;
 		ad->skill_list           = a.skill_list;
-		ad->skill_id             = Strings::IsNumber(a.skill_list) ? std::stoi(a.skill_list) : 0; // for older clients
+		ad->skill_id             = Strings::IsNumber(a.skill_list) ? Strings::ToInt(a.skill_list) : 0; // for older clients
 		ad->spell_list           = a.spell_list;
-		ad->spell_id             = Strings::IsNumber(a.spell_list) ? std::stoi(a.spell_list) : 0; // for older clients
+		ad->spell_id             = Strings::IsNumber(a.spell_list) ? Strings::ToInt(a.spell_list) : 0; // for older clients
 		ad->description_override = a.description_override;
 		ad->npc_match_list       = a.npc_match_list;
 		ad->item_id_list         = a.item_id_list;
@@ -233,7 +233,7 @@ bool TaskManager::LoadTasks(int single_task)
 
 		for (auto &&e : zones) {
 			if (Strings::IsNumber(e)) {
-				ad->zone_ids.push_back(std::stoi(e));
+				ad->zone_ids.push_back(Strings::ToInt(e));
 			}
 		}
 
@@ -1164,7 +1164,7 @@ void TaskManager::SendActiveTaskDescription(
 	if (!t->reward_id_list.empty() && t->item_link.empty()) {
 		auto items   = Strings::Split(t->reward_id_list, "|");
 		auto item    = items.front();
-		int  item_id = Strings::IsNumber(items.front()) ? std::stoi(items.front()) : 0;
+		int  item_id = Strings::IsNumber(items.front()) ? Strings::ToInt(items.front()) : 0;
 
 		if (item_id) {
 			const EQ::ItemData *reward_item = database.GetItem(item_id);
@@ -1517,7 +1517,7 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *cts)
 	auto results = database.QueryDatabase(query);
 	if (results.Success()) {
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			int task_id = atoi(row[0]);
+			int task_id = Strings::ToInt(row[0]);
 			cts->m_enabled_tasks.push_back(task_id);
 			LogTasksDetail("Adding task_id [{}] to enabled tasks", task_id);
 		}

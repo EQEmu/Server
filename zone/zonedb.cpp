@@ -150,8 +150,8 @@ uint32 ZoneDatabase::GetSpawnTimeLeft(uint32 id, uint16 instance_id)
 
     timeval tv;
     gettimeofday(&tv, nullptr);
-    uint32 resStart = atoi(row[0]);
-    uint32 resDuration = atoi(row[1]);
+    uint32 resStart = Strings::ToInt(row[0]);
+    uint32 resDuration = Strings::ToInt(row[1]);
 
     //compare our values to current time
     if((resStart + resDuration) <= tv.tv_sec) {
@@ -200,16 +200,16 @@ void ZoneDatabase::LoadWorldContainer(uint32 parentid, EQ::ItemInstance* contain
 	}
 
     for (auto& row = results.begin(); row != results.end(); ++row) {
-        uint8 index = (uint8)atoi(row[0]);
-        uint32 item_id = (uint32)atoi(row[1]);
-        int8 charges = (int8)atoi(row[2]);
+        uint8 index = (uint8)Strings::ToInt(row[0]);
+        uint32 item_id = (uint32)Strings::ToInt(row[1]);
+        int8 charges = (int8)Strings::ToInt(row[2]);
 		uint32 aug[EQ::invaug::SOCKET_COUNT];
-        aug[0] = (uint32)atoi(row[3]);
-        aug[1] = (uint32)atoi(row[4]);
-        aug[2] = (uint32)atoi(row[5]);
-        aug[3] = (uint32)atoi(row[6]);
-        aug[4] = (uint32)atoi(row[7]);
-		aug[5] = (uint32)atoi(row[8]);
+        aug[0] = (uint32)Strings::ToInt(row[3]);
+        aug[1] = (uint32)Strings::ToInt(row[4]);
+        aug[2] = (uint32)Strings::ToInt(row[5]);
+        aug[3] = (uint32)Strings::ToInt(row[6]);
+        aug[4] = (uint32)Strings::ToInt(row[7]);
+		aug[5] = (uint32)Strings::ToInt(row[8]);
 
         EQ::ItemInstance* inst = database.CreateItem(item_id, charges);
 		if (inst && inst->GetItem()->IsClassCommon()) {
@@ -300,13 +300,13 @@ Trader_Struct* ZoneDatabase::LoadTraderItem(uint32 char_id)
 
 	loadti->Code = BazaarTrader_ShowItems;
 	for (auto& row = results.begin(); row != results.end(); ++row) {
-		if (atoi(row[5]) >= 80 || atoi(row[4]) < 0) {
+		if (Strings::ToInt(row[5]) >= 80 || Strings::ToInt(row[4]) < 0) {
 			LogTrading("Bad Slot number when trying to load trader information!\n");
 			continue;
 		}
 
-		loadti->Items[atoi(row[5])] = atoi(row[1]);
-		loadti->ItemCost[atoi(row[5])] = atoi(row[4]);
+		loadti->Items[Strings::ToInt(row[5])] = Strings::ToInt(row[1]);
+		loadti->ItemCost[Strings::ToInt(row[5])] = Strings::ToInt(row[4]);
 	}
 	return loadti;
 }
@@ -324,15 +324,15 @@ TraderCharges_Struct* ZoneDatabase::LoadTraderItemWithCharges(uint32 char_id)
 	}
 
 	for (auto& row = results.begin(); row != results.end(); ++row) {
-		if (atoi(row[5]) >= 80 || atoi(row[5]) < 0) {
+		if (Strings::ToInt(row[5]) >= 80 || Strings::ToInt(row[5]) < 0) {
 			LogTrading("Bad Slot number when trying to load trader information!\n");
 			continue;
 		}
 
-		loadti->ItemID[atoi(row[5])] = atoi(row[1]);
-		loadti->SerialNumber[atoi(row[5])] = atoi(row[2]);
-		loadti->Charges[atoi(row[5])] = atoi(row[3]);
-		loadti->ItemCost[atoi(row[5])] = atoi(row[4]);
+		loadti->ItemID[Strings::ToInt(row[5])] = Strings::ToInt(row[1]);
+		loadti->SerialNumber[Strings::ToInt(row[5])] = Strings::ToInt(row[2]);
+		loadti->Charges[Strings::ToInt(row[5])] = Strings::ToInt(row[3]);
+		loadti->ItemCost[Strings::ToInt(row[5])] = Strings::ToInt(row[4]);
 	}
 	return loadti;
 }
@@ -351,9 +351,9 @@ EQ::ItemInstance* ZoneDatabase::LoadSingleTraderItem(uint32 CharID, int SerialNu
 
     auto& row = results.begin();
 
-    int ItemID = atoi(row[1]);
-	int Charges = atoi(row[3]);
-	int Cost = atoi(row[4]);
+    int ItemID = Strings::ToInt(row[1]);
+	int Charges = Strings::ToInt(row[3]);
+	int Cost = Strings::ToInt(row[4]);
 
 	const EQ::ItemData *item = database.GetItem(ItemID);
 
@@ -621,96 +621,96 @@ bool ZoneDatabase::LoadCharacterData(uint32 character_id, PlayerProfile_Struct* 
 	for (auto& row = results.begin(); row != results.end(); ++row) {
 		strcpy(pp->name, row[r]); r++;											 // "`name`,                    "
 		strcpy(pp->last_name, row[r]); r++;										 // "last_name,                 "
-		pp->gender = atoi(row[r]); r++;											 // "gender,                    "
-		pp->race = atoi(row[r]); r++;											 // "race,                      "
-		pp->class_ = atoi(row[r]); r++;											 // "class,                     "
-		pp->level = atoi(row[r]); r++;											 // "`level`,                   "
-		pp->deity = atoi(row[r]); r++;											 // "deity,                     "
-		pp->birthday = atoi(row[r]); r++;										 // "birthday,                  "
-		pp->lastlogin = atoi(row[r]); r++;										 // "last_login,                "
-		pp->timePlayedMin = atoi(row[r]); r++;									 // "time_played,               "
-		pp->pvp = atoi(row[r]); r++;											 // "pvp_status,                "
-		pp->level2 = atoi(row[r]); r++;											 // "level2,                    "
-		pp->anon = atoi(row[r]); r++;											 // "anon,                      "
-		pp->gm = atoi(row[r]); r++;												 // "gm,                        "
-		pp->intoxication = atoi(row[r]); r++;									 // "intoxication,              "
-		pp->haircolor = atoi(row[r]); r++;										 // "hair_color,                "
-		pp->beardcolor = atoi(row[r]); r++;										 // "beard_color,               "
-		pp->eyecolor1 = atoi(row[r]); r++;										 // "eye_color_1,               "
-		pp->eyecolor2 = atoi(row[r]); r++;										 // "eye_color_2,               "
-		pp->hairstyle = atoi(row[r]); r++;										 // "hair_style,                "
-		pp->beard = atoi(row[r]); r++;											 // "beard,                     "
-		pp->ability_time_seconds = atoi(row[r]); r++;							 // "ability_time_seconds,      "
-		pp->ability_number = atoi(row[r]); r++;									 // "ability_number,            "
-		pp->ability_time_minutes = atoi(row[r]); r++;							 // "ability_time_minutes,      "
-		pp->ability_time_hours = atoi(row[r]); r++;								 // "ability_time_hours,        "
+		pp->gender = Strings::ToInt(row[r]); r++;											 // "gender,                    "
+		pp->race = Strings::ToInt(row[r]); r++;											 // "race,                      "
+		pp->class_ = Strings::ToInt(row[r]); r++;											 // "class,                     "
+		pp->level = Strings::ToInt(row[r]); r++;											 // "`level`,                   "
+		pp->deity = Strings::ToInt(row[r]); r++;											 // "deity,                     "
+		pp->birthday = Strings::ToInt(row[r]); r++;										 // "birthday,                  "
+		pp->lastlogin = Strings::ToInt(row[r]); r++;										 // "last_login,                "
+		pp->timePlayedMin = Strings::ToInt(row[r]); r++;									 // "time_played,               "
+		pp->pvp = Strings::ToInt(row[r]); r++;											 // "pvp_status,                "
+		pp->level2 = Strings::ToInt(row[r]); r++;											 // "level2,                    "
+		pp->anon = Strings::ToInt(row[r]); r++;											 // "anon,                      "
+		pp->gm = Strings::ToInt(row[r]); r++;												 // "gm,                        "
+		pp->intoxication = Strings::ToInt(row[r]); r++;									 // "intoxication,              "
+		pp->haircolor = Strings::ToInt(row[r]); r++;										 // "hair_color,                "
+		pp->beardcolor = Strings::ToInt(row[r]); r++;										 // "beard_color,               "
+		pp->eyecolor1 = Strings::ToInt(row[r]); r++;										 // "eye_color_1,               "
+		pp->eyecolor2 = Strings::ToInt(row[r]); r++;										 // "eye_color_2,               "
+		pp->hairstyle = Strings::ToInt(row[r]); r++;										 // "hair_style,                "
+		pp->beard = Strings::ToInt(row[r]); r++;											 // "beard,                     "
+		pp->ability_time_seconds = Strings::ToInt(row[r]); r++;							 // "ability_time_seconds,      "
+		pp->ability_number = Strings::ToInt(row[r]); r++;									 // "ability_number,            "
+		pp->ability_time_minutes = Strings::ToInt(row[r]); r++;							 // "ability_time_minutes,      "
+		pp->ability_time_hours = Strings::ToInt(row[r]); r++;								 // "ability_time_hours,        "
 		strcpy(pp->title, row[r]); r++;											 // "title,                     "
 		strcpy(pp->suffix, row[r]); r++;										 // "suffix,                    "
-		pp->exp = atoi(row[r]); r++;											 // "exp,                       "
-		pp->points = atoi(row[r]); r++;											 // "points,                    "
-		pp->mana = atoi(row[r]); r++;											 // "mana,                      "
-		pp->cur_hp = atoi(row[r]); r++;											 // "cur_hp,                    "
-		pp->STR = atoi(row[r]); r++;											 // "str,                       "
-		pp->STA = atoi(row[r]); r++;											 // "sta,                       "
-		pp->CHA = atoi(row[r]); r++;											 // "cha,                       "
-		pp->DEX = atoi(row[r]); r++;											 // "dex,                       "
-		pp->INT = atoi(row[r]); r++;											 // "`int`,                     "
-		pp->AGI = atoi(row[r]); r++;											 // "agi,                       "
-		pp->WIS = atoi(row[r]); r++;											 // "wis,                       "
-		pp->face = atoi(row[r]); r++;											 // "face,                      "
-		pp->y = atof(row[r]); r++;												 // "y,                         "
-		pp->x = atof(row[r]); r++;												 // "x,                         "
-		pp->z = atof(row[r]); r++;												 // "z,                         "
-		pp->heading = atof(row[r]); r++;										 // "heading,                   "
-		pp->pvp2 = atoi(row[r]); r++;											 // "pvp2,                      "
-		pp->pvptype = atoi(row[r]); r++;										 // "pvp_type,                  "
-		pp->autosplit = atoi(row[r]); r++;										 // "autosplit_enabled,         "
-		pp->zone_change_count = atoi(row[r]); r++;								 // "zone_change_count,         "
-		pp->drakkin_heritage = atoi(row[r]); r++;								 // "drakkin_heritage,          "
-		pp->drakkin_tattoo = atoi(row[r]); r++;									 // "drakkin_tattoo,            "
-		pp->drakkin_details = atoi(row[r]); r++;								 // "drakkin_details,           "
-		pp->toxicity = atoi(row[r]); r++;										 // "toxicity,                  "
-		pp->hunger_level = atoi(row[r]); r++;									 // "hunger_level,              "
-		pp->thirst_level = atoi(row[r]); r++;									 // "thirst_level,              "
-		pp->ability_up = atoi(row[r]); r++;										 // "ability_up,                "
-		pp->zone_id = atoi(row[r]); r++;										 // "zone_id,                   "
-		pp->zoneInstance = atoi(row[r]); r++;									 // "zone_instance,             "
-		pp->leadAAActive = atoi(row[r]); r++;									 // "leadership_exp_on,         "
-		pp->ldon_points_guk = atoi(row[r]); r++;								 // "ldon_points_guk,           "
-		pp->ldon_points_mir = atoi(row[r]); r++;								 // "ldon_points_mir,           "
-		pp->ldon_points_mmc = atoi(row[r]); r++;								 // "ldon_points_mmc,           "
-		pp->ldon_points_ruj = atoi(row[r]); r++;								 // "ldon_points_ruj,           "
-		pp->ldon_points_tak = atoi(row[r]); r++;								 // "ldon_points_tak,           "
-		pp->ldon_points_available = atoi(row[r]); r++;							 // "ldon_points_available,     "
-		pp->tribute_time_remaining = atoi(row[r]); r++;							 // "tribute_time_remaining,    "
-		pp->showhelm = atoi(row[r]); r++;										 // "show_helm,                 "
-		pp->career_tribute_points = atoi(row[r]); r++;							 // "career_tribute_points,     "
-		pp->tribute_points = atoi(row[r]); r++;									 // "tribute_points,            "
-		pp->tribute_active = atoi(row[r]); r++;									 // "tribute_active,            "
-		pp->endurance = atoi(row[r]); r++;										 // "endurance,                 "
-		pp->group_leadership_exp = atoi(row[r]); r++;							 // "group_leadership_exp,      "
-		pp->raid_leadership_exp = atoi(row[r]); r++;							 // "raid_leadership_exp,       "
-		pp->group_leadership_points = atoi(row[r]); r++;						 // "group_leadership_points,   "
-		pp->raid_leadership_points = atoi(row[r]); r++;							 // "raid_leadership_points,    "
-		pp->air_remaining = atoi(row[r]); r++;									 // "air_remaining,             "
-		pp->PVPKills = atoi(row[r]); r++;										 // "pvp_kills,                 "
-		pp->PVPDeaths = atoi(row[r]); r++;										 // "pvp_deaths,                "
-		pp->PVPCurrentPoints = atoi(row[r]); r++;								 // "pvp_current_points,        "
-		pp->PVPCareerPoints = atoi(row[r]); r++;								 // "pvp_career_points,         "
-		pp->PVPBestKillStreak = atoi(row[r]); r++;								 // "pvp_best_kill_streak,      "
-		pp->PVPWorstDeathStreak = atoi(row[r]); r++;							 // "pvp_worst_death_streak,    "
-		pp->PVPCurrentKillStreak = atoi(row[r]); r++;							 // "pvp_current_kill_streak,   "
-		pp->aapoints_spent = atoi(row[r]); r++;									 // "aa_points_spent,           "
-		pp->expAA = atoi(row[r]); r++;											 // "aa_exp,                    "
-		pp->aapoints = atoi(row[r]); r++;										 // "aa_points,                 "
-		pp->groupAutoconsent = atoi(row[r]); r++;								 // "group_auto_consent,        "
-		pp->raidAutoconsent = atoi(row[r]); r++;								 // "raid_auto_consent,         "
-		pp->guildAutoconsent = atoi(row[r]); r++;								 // "guild_auto_consent,        "
-		pp->RestTimer = atoi(row[r]); r++;										 // "RestTimer,                 "
-		m_epp->aa_effects = atoi(row[r]); r++;									 // "`e_aa_effects`,			"
-		m_epp->perAA = atoi(row[r]); r++;										 // "`e_percent_to_aa`,			"
-		m_epp->expended_aa = atoi(row[r]); r++;									 // "`e_expended_aa_spent`,		"
-		m_epp->last_invsnapshot_time = atoul(row[r]); r++;						 // "`e_last_invsnapshot`		"
+		pp->exp = Strings::ToInt(row[r]); r++;											 // "exp,                       "
+		pp->points = Strings::ToInt(row[r]); r++;											 // "points,                    "
+		pp->mana = Strings::ToInt(row[r]); r++;											 // "mana,                      "
+		pp->cur_hp = Strings::ToInt(row[r]); r++;											 // "cur_hp,                    "
+		pp->STR = Strings::ToInt(row[r]); r++;											 // "str,                       "
+		pp->STA = Strings::ToInt(row[r]); r++;											 // "sta,                       "
+		pp->CHA = Strings::ToInt(row[r]); r++;											 // "cha,                       "
+		pp->DEX = Strings::ToInt(row[r]); r++;											 // "dex,                       "
+		pp->INT = Strings::ToInt(row[r]); r++;											 // "`int`,                     "
+		pp->AGI = Strings::ToInt(row[r]); r++;											 // "agi,                       "
+		pp->WIS = Strings::ToInt(row[r]); r++;											 // "wis,                       "
+		pp->face = Strings::ToInt(row[r]); r++;											 // "face,                      "
+		pp->y = Strings::ToFloat(row[r]); r++;												 // "y,                         "
+		pp->x = Strings::ToFloat(row[r]); r++;												 // "x,                         "
+		pp->z = Strings::ToFloat(row[r]); r++;												 // "z,                         "
+		pp->heading = Strings::ToFloat(row[r]); r++;										 // "heading,                   "
+		pp->pvp2 = Strings::ToInt(row[r]); r++;											 // "pvp2,                      "
+		pp->pvptype = Strings::ToInt(row[r]); r++;										 // "pvp_type,                  "
+		pp->autosplit = Strings::ToInt(row[r]); r++;										 // "autosplit_enabled,         "
+		pp->zone_change_count = Strings::ToInt(row[r]); r++;								 // "zone_change_count,         "
+		pp->drakkin_heritage = Strings::ToInt(row[r]); r++;								 // "drakkin_heritage,          "
+		pp->drakkin_tattoo = Strings::ToInt(row[r]); r++;									 // "drakkin_tattoo,            "
+		pp->drakkin_details = Strings::ToInt(row[r]); r++;								 // "drakkin_details,           "
+		pp->toxicity = Strings::ToInt(row[r]); r++;										 // "toxicity,                  "
+		pp->hunger_level = Strings::ToInt(row[r]); r++;									 // "hunger_level,              "
+		pp->thirst_level = Strings::ToInt(row[r]); r++;									 // "thirst_level,              "
+		pp->ability_up = Strings::ToInt(row[r]); r++;										 // "ability_up,                "
+		pp->zone_id = Strings::ToInt(row[r]); r++;										 // "zone_id,                   "
+		pp->zoneInstance = Strings::ToInt(row[r]); r++;									 // "zone_instance,             "
+		pp->leadAAActive = Strings::ToInt(row[r]); r++;									 // "leadership_exp_on,         "
+		pp->ldon_points_guk = Strings::ToInt(row[r]); r++;								 // "ldon_points_guk,           "
+		pp->ldon_points_mir = Strings::ToInt(row[r]); r++;								 // "ldon_points_mir,           "
+		pp->ldon_points_mmc = Strings::ToInt(row[r]); r++;								 // "ldon_points_mmc,           "
+		pp->ldon_points_ruj = Strings::ToInt(row[r]); r++;								 // "ldon_points_ruj,           "
+		pp->ldon_points_tak = Strings::ToInt(row[r]); r++;								 // "ldon_points_tak,           "
+		pp->ldon_points_available = Strings::ToInt(row[r]); r++;							 // "ldon_points_available,     "
+		pp->tribute_time_remaining = Strings::ToInt(row[r]); r++;							 // "tribute_time_remaining,    "
+		pp->showhelm = Strings::ToInt(row[r]); r++;										 // "show_helm,                 "
+		pp->career_tribute_points = Strings::ToInt(row[r]); r++;							 // "career_tribute_points,     "
+		pp->tribute_points = Strings::ToInt(row[r]); r++;									 // "tribute_points,            "
+		pp->tribute_active = Strings::ToInt(row[r]); r++;									 // "tribute_active,            "
+		pp->endurance = Strings::ToInt(row[r]); r++;										 // "endurance,                 "
+		pp->group_leadership_exp = Strings::ToInt(row[r]); r++;							 // "group_leadership_exp,      "
+		pp->raid_leadership_exp = Strings::ToInt(row[r]); r++;							 // "raid_leadership_exp,       "
+		pp->group_leadership_points = Strings::ToInt(row[r]); r++;						 // "group_leadership_points,   "
+		pp->raid_leadership_points = Strings::ToInt(row[r]); r++;							 // "raid_leadership_points,    "
+		pp->air_remaining = Strings::ToInt(row[r]); r++;									 // "air_remaining,             "
+		pp->PVPKills = Strings::ToInt(row[r]); r++;										 // "pvp_kills,                 "
+		pp->PVPDeaths = Strings::ToInt(row[r]); r++;										 // "pvp_deaths,                "
+		pp->PVPCurrentPoints = Strings::ToInt(row[r]); r++;								 // "pvp_current_points,        "
+		pp->PVPCareerPoints = Strings::ToInt(row[r]); r++;								 // "pvp_career_points,         "
+		pp->PVPBestKillStreak = Strings::ToInt(row[r]); r++;								 // "pvp_best_kill_streak,      "
+		pp->PVPWorstDeathStreak = Strings::ToInt(row[r]); r++;							 // "pvp_worst_death_streak,    "
+		pp->PVPCurrentKillStreak = Strings::ToInt(row[r]); r++;							 // "pvp_current_kill_streak,   "
+		pp->aapoints_spent = Strings::ToInt(row[r]); r++;									 // "aa_points_spent,           "
+		pp->expAA = Strings::ToInt(row[r]); r++;											 // "aa_exp,                    "
+		pp->aapoints = Strings::ToInt(row[r]); r++;										 // "aa_points,                 "
+		pp->groupAutoconsent = Strings::ToInt(row[r]); r++;								 // "group_auto_consent,        "
+		pp->raidAutoconsent = Strings::ToInt(row[r]); r++;								 // "raid_auto_consent,         "
+		pp->guildAutoconsent = Strings::ToInt(row[r]); r++;								 // "guild_auto_consent,        "
+		pp->RestTimer = Strings::ToInt(row[r]); r++;										 // "RestTimer,                 "
+		m_epp->aa_effects = Strings::ToInt(row[r]); r++;									 // "`e_aa_effects`,			"
+		m_epp->perAA = Strings::ToInt(row[r]); r++;										 // "`e_percent_to_aa`,			"
+		m_epp->expended_aa = Strings::ToInt(row[r]); r++;									 // "`e_expended_aa_spent`,		"
+		m_epp->last_invsnapshot_time = Strings::ToUnsignedInt(row[r]); r++;						 // "`e_last_invsnapshot`		"
 		m_epp->next_invsnapshot_time = m_epp->last_invsnapshot_time + (RuleI(Character, InvSnapshotMinIntervalM) * 60);
 	}
 	return true;
@@ -719,7 +719,7 @@ bool ZoneDatabase::LoadCharacterData(uint32 character_id, PlayerProfile_Struct* 
 bool ZoneDatabase::LoadCharacterFactionValues(uint32 character_id, faction_map & val_list) {
 	std::string query = StringFormat("SELECT `faction_id`, `current_value` FROM `faction_values` WHERE `char_id` = %i", character_id);
 	auto results = database.QueryDatabase(query);
-	for (auto& row = results.begin(); row != results.end(); ++row) { val_list[atoi(row[0])] = atoi(row[1]); }
+	for (auto& row = results.begin(); row != results.end(); ++row) { val_list[Strings::ToInt(row[0])] = Strings::ToInt(row[1]); }
 	return true;
 }
 
@@ -738,9 +738,9 @@ bool ZoneDatabase::LoadCharacterMemmedSpells(uint32 character_id, PlayerProfile_
 		pp->mem_spells[i] = 0xFFFFFFFF;
 	}
 	for (auto& row = results.begin(); row != results.end(); ++row) {
-		i = atoi(row[0]);
-		if (i < EQ::spells::SPELL_GEM_COUNT && atoi(row[1]) <= SPDAT_RECORDS){
-			pp->mem_spells[i] = atoi(row[1]);
+		i = Strings::ToInt(row[0]);
+		if (i < EQ::spells::SPELL_GEM_COUNT && Strings::ToInt(row[1]) <= SPDAT_RECORDS){
+			pp->mem_spells[i] = Strings::ToInt(row[1]);
 		}
 	}
 	return true;
@@ -766,8 +766,8 @@ bool ZoneDatabase::LoadCharacterSpellBook(uint32 character_id, PlayerProfile_Str
 	// Load them all so that server actions are valid..but, nix them in translators.
 
 	for (auto& row = results.begin(); row != results.end(); ++row) {
-		int idx = atoi(row[0]);
-		int id = atoi(row[1]);
+		int idx = Strings::ToInt(row[0]);
+		int id = Strings::ToInt(row[1]);
 
 		if (idx < 0 || idx >= EQ::spells::SPELLBOOK_SIZE)
 			continue;
@@ -794,9 +794,9 @@ bool ZoneDatabase::LoadCharacterLanguages(uint32 character_id, PlayerProfile_Str
 		pp->languages[i] = 0;
 
 	for (auto& row = results.begin(); row != results.end(); ++row) {
-		i = atoi(row[0]);
+		i = Strings::ToInt(row[0]);
 		if (i < MAX_PP_LANGUAGE){
-			pp->languages[i] = atoi(row[1]);
+			pp->languages[i] = Strings::ToInt(row[1]);
 		}
 	}
 
@@ -807,8 +807,8 @@ bool ZoneDatabase::LoadCharacterLeadershipAA(uint32 character_id, PlayerProfile_
 	std::string query = StringFormat("SELECT slot, `rank` FROM character_leadership_abilities WHERE `id` = %u", character_id);
 	auto results = database.QueryDatabase(query); uint32 slot = 0;
 	for (auto& row = results.begin(); row != results.end(); ++row) {
-		slot = atoi(row[0]);
-		pp->leader_abilities.ranks[slot] = atoi(row[1]);
+		slot = Strings::ToInt(row[0]);
+		pp->leader_abilities.ranks[slot] = Strings::ToInt(row[1]);
 	}
 	return true;
 }
@@ -827,7 +827,7 @@ bool ZoneDatabase::LoadCharacterDisciplines(uint32 character_id, PlayerProfile_S
 	memset(pp->disciplines.values, 0, (sizeof(pp->disciplines.values[0]) * MAX_PP_DISCIPLINES));
 	for (auto& row = results.begin(); row != results.end(); ++row) {
 		if (i < MAX_PP_DISCIPLINES)
-			pp->disciplines.values[i] = atoi(row[0]);
+			pp->disciplines.values[i] = Strings::ToInt(row[0]);
         ++i;
     }
 	return true;
@@ -848,9 +848,9 @@ bool ZoneDatabase::LoadCharacterSkills(uint32 character_id, PlayerProfile_Struct
 		pp->skills[i] = 0;
 
 	for (auto& row = results.begin(); row != results.end(); ++row) {
-		i = atoi(row[0]);
+		i = Strings::ToInt(row[0]);
 		if (i < MAX_PP_SKILL)
-			pp->skills[i] = atoi(row[1]);
+			pp->skills[i] = Strings::ToInt(row[1]);
 	}
 
 	return true;
@@ -880,22 +880,22 @@ bool ZoneDatabase::LoadCharacterCurrency(uint32 character_id, PlayerProfile_Stru
 		"WHERE `id` = %i         ", character_id);
 	auto results = database.QueryDatabase(query);
 	for (auto& row = results.begin(); row != results.end(); ++row) {
-		pp->platinum = atoi(row[0]);
-		pp->gold = atoi(row[1]);
-		pp->silver = atoi(row[2]);
-		pp->copper = atoi(row[3]);
-		pp->platinum_bank = atoi(row[4]);
-		pp->gold_bank = atoi(row[5]);
-		pp->silver_bank = atoi(row[6]);
-		pp->copper_bank = atoi(row[7]);
-		pp->platinum_cursor = atoi(row[8]);
-		pp->gold_cursor = atoi(row[9]);
-		pp->silver_cursor = atoi(row[10]);
-		pp->copper_cursor = atoi(row[11]);
-		pp->currentRadCrystals = atoi(row[12]);
-		pp->careerRadCrystals = atoi(row[13]);
-		pp->currentEbonCrystals = atoi(row[14]);
-		pp->careerEbonCrystals = atoi(row[15]);
+		pp->platinum = Strings::ToInt(row[0]);
+		pp->gold = Strings::ToInt(row[1]);
+		pp->silver = Strings::ToInt(row[2]);
+		pp->copper = Strings::ToInt(row[3]);
+		pp->platinum_bank = Strings::ToInt(row[4]);
+		pp->gold_bank = Strings::ToInt(row[5]);
+		pp->silver_bank = Strings::ToInt(row[6]);
+		pp->copper_bank = Strings::ToInt(row[7]);
+		pp->platinum_cursor = Strings::ToInt(row[8]);
+		pp->gold_cursor = Strings::ToInt(row[9]);
+		pp->silver_cursor = Strings::ToInt(row[10]);
+		pp->copper_cursor = Strings::ToInt(row[11]);
+		pp->currentRadCrystals = Strings::ToInt(row[12]);
+		pp->careerRadCrystals = Strings::ToInt(row[13]);
+		pp->currentEbonCrystals = Strings::ToInt(row[14]);
+		pp->careerEbonCrystals = Strings::ToInt(row[15]);
 	}
 	return true;
 }
@@ -905,11 +905,11 @@ bool ZoneDatabase::LoadCharacterMaterialColor(uint32 character_id, PlayerProfile
 	auto results = database.QueryDatabase(query); int i = 0; int r = 0;
 	for (auto& row = results.begin(); row != results.end(); ++row) {
 		r = 0;
-		i = atoi(row[r]); /* Slot */ r++;
-		pp->item_tint.Slot[i].Blue = atoi(row[r]); r++;
-		pp->item_tint.Slot[i].Green = atoi(row[r]); r++;
-		pp->item_tint.Slot[i].Red = atoi(row[r]); r++;
-		pp->item_tint.Slot[i].UseTint = atoi(row[r]);
+		i = Strings::ToInt(row[r]); /* Slot */ r++;
+		pp->item_tint.Slot[i].Blue = Strings::ToInt(row[r]); r++;
+		pp->item_tint.Slot[i].Green = Strings::ToInt(row[r]); r++;
+		pp->item_tint.Slot[i].Red = Strings::ToInt(row[r]); r++;
+		pp->item_tint.Slot[i].UseTint = Strings::ToInt(row[r]);
 	}
 	return true;
 }
@@ -930,13 +930,13 @@ bool ZoneDatabase::LoadCharacterBandolier(uint32 character_id, PlayerProfile_Str
 
 	for (auto& row = results.begin(); row != results.end(); ++row) {
 		r = 0;
-		i = atoi(row[r]); /* Bandolier ID */ r++;
-		si = atoi(row[r]); /* Bandolier Slot */ r++;
+		i = Strings::ToInt(row[r]); /* Bandolier ID */ r++;
+		si = Strings::ToInt(row[r]); /* Bandolier Slot */ r++;
 
-		const EQ::ItemData* item_data = database.GetItem(atoi(row[r]));
+		const EQ::ItemData* item_data = database.GetItem(Strings::ToInt(row[r]));
 		if (item_data) {
 			pp->bandoliers[i].Items[si].ID = item_data->ID; r++;
-			pp->bandoliers[i].Items[si].Icon = atoi(row[r]); r++; // Must use db value in case an Ornamentation is assigned
+			pp->bandoliers[i].Items[si].Icon = Strings::ToInt(row[r]); r++; // Must use db value in case an Ornamentation is assigned
 			strncpy(pp->bandoliers[i].Items[si].Name, item_data->Name, 64);
 		}
 		else {
@@ -961,9 +961,9 @@ bool ZoneDatabase::LoadCharacterTribute(uint32 character_id, PlayerProfile_Struc
 	}
 	i = 0;
 	for (auto& row = results.begin(); row != results.end(); ++row) {
-		if(atoi(row[1]) != TRIBUTE_NONE){
-			pp->tributes[i].tier = atoi(row[0]);
-			pp->tributes[i].tribute = atoi(row[1]);
+		if(Strings::ToInt(row[1]) != TRIBUTE_NONE){
+			pp->tributes[i].tier = Strings::ToInt(row[0]);
+			pp->tributes[i].tribute = Strings::ToInt(row[1]);
 			i++;
 		}
 	}
@@ -984,12 +984,12 @@ bool ZoneDatabase::LoadCharacterPotions(uint32 character_id, PlayerProfile_Struc
 	}
 
 	for (auto& row = results.begin(); row != results.end(); ++row) {
-		i = atoi(row[0]);
-		const EQ::ItemData *item_data = database.GetItem(atoi(row[1]));
+		i = Strings::ToInt(row[0]);
+		const EQ::ItemData *item_data = database.GetItem(Strings::ToInt(row[1]));
 		if (!item_data)
 			continue;
 		pp->potionbelt.Items[i].ID = item_data->ID;
-		pp->potionbelt.Items[i].Icon = atoi(row[2]);
+		pp->potionbelt.Items[i].Icon = Strings::ToInt(row[2]);
 		strncpy(pp->potionbelt.Items[i].Name, item_data->Name, 64);
 	}
 
@@ -1007,16 +1007,16 @@ bool ZoneDatabase::LoadCharacterBindPoint(uint32 character_id, PlayerProfile_Str
 		return true;
 
 	for (auto& row = results.begin(); row != results.end(); ++row) {
-		int index = atoi(row[0]);
+		int index = Strings::ToInt(row[0]);
 		if (index < 0 || index > 4)
 			continue;
 
-		pp->binds[index].zone_id = atoi(row[1]);
-		pp->binds[index].instance_id = atoi(row[2]);
-		pp->binds[index].x = atoi(row[3]);
-		pp->binds[index].y = atoi(row[4]);
-		pp->binds[index].z = atoi(row[5]);
-		pp->binds[index].heading = atoi(row[6]);
+		pp->binds[index].zone_id = Strings::ToInt(row[1]);
+		pp->binds[index].instance_id = Strings::ToInt(row[2]);
+		pp->binds[index].x = Strings::ToInt(row[3]);
+		pp->binds[index].y = Strings::ToInt(row[4]);
+		pp->binds[index].z = Strings::ToInt(row[5]);
+		pp->binds[index].heading = Strings::ToInt(row[6]);
 	}
 
 	return true;
@@ -1552,7 +1552,7 @@ bool ZoneDatabase::NoRentExpired(const char* name){
         return false;
 
 	auto& row = results.begin();
-	uint32 seconds = atoi(row[0]);
+	uint32 seconds = Strings::ToInt(row[0]);
 
 	return (seconds>1800);
 }
@@ -1633,7 +1633,7 @@ int ZoneDatabase::CountCharacterInvSnapshots(uint32 character_id) {
 
 	auto& row = results.begin();
 
-	int64 count = atoll(row[0]);
+	int64 count = Strings::ToBigInt(row[0]);
 	if (count > 2147483647)
 		return -2;
 	if (count < 0)
@@ -1682,7 +1682,7 @@ void ZoneDatabase::ListCharacterInvSnapshots(uint32 character_id, std::list<std:
 		return;
 
 	for (auto row : results)
-		is_list.push_back(std::pair<uint32, int>(atoul(row[0]), atoi(row[1])));
+		is_list.push_back(std::pair<uint32, int>(Strings::ToUnsignedInt(row[0]), Strings::ToInt(row[1])));
 }
 
 bool ZoneDatabase::ValidateCharacterInvSnapshotTimestamp(uint32 character_id, uint32 timestamp) {
@@ -1732,7 +1732,7 @@ void ZoneDatabase::ParseCharacterInvSnapshot(uint32 character_id, uint32 timesta
 		return;
 
 	for (auto row : results)
-		parse_list.push_back(std::pair<int16, uint32>(atoi(row[0]), atoul(row[1])));
+		parse_list.push_back(std::pair<int16, uint32>(Strings::ToInt(row[0]), Strings::ToUnsignedInt(row[1])));
 }
 
 void ZoneDatabase::DivergeCharacterInvSnapshotFromInventory(uint32 character_id, uint32 timestamp, std::list<std::pair<int16, uint32>> &compare_list) {
@@ -1776,7 +1776,7 @@ void ZoneDatabase::DivergeCharacterInvSnapshotFromInventory(uint32 character_id,
 		return;
 
 	for (auto row : results)
-		compare_list.push_back(std::pair<int16, uint32>(atoi(row[0]), atoul(row[1])));
+		compare_list.push_back(std::pair<int16, uint32>(Strings::ToInt(row[0]), Strings::ToUnsignedInt(row[1])));
 }
 
 void ZoneDatabase::DivergeCharacterInventoryFromInvSnapshot(uint32 character_id, uint32 timestamp, std::list<std::pair<int16, uint32>> &compare_list) {
@@ -1817,7 +1817,7 @@ void ZoneDatabase::DivergeCharacterInventoryFromInvSnapshot(uint32 character_id,
 		return;
 
 	for (auto row : results)
-		compare_list.push_back(std::pair<int16, uint32>(atoi(row[0]), atoul(row[1])));
+		compare_list.push_back(std::pair<int16, uint32>(Strings::ToInt(row[0]), Strings::ToUnsignedInt(row[1])));
 }
 
 bool ZoneDatabase::RestoreCharacterInvSnapshot(uint32 character_id, uint32 timestamp) {
@@ -2051,9 +2051,9 @@ const NPCType *ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 				auto& armorTint_row = armortint_results.begin();
 
 				for (int index = EQ::textures::textureBegin; index <= EQ::textures::LastTexture; index++) {
-					t->armor_tint.Slot[index].Color = atoi(armorTint_row[index * 3]) << 16;
-					t->armor_tint.Slot[index].Color |= atoi(armorTint_row[index * 3 + 1]) << 8;
-					t->armor_tint.Slot[index].Color |= atoi(armorTint_row[index * 3 + 2]);
+					t->armor_tint.Slot[index].Color = Strings::ToInt(armorTint_row[index * 3]) << 16;
+					t->armor_tint.Slot[index].Color |= Strings::ToInt(armorTint_row[index * 3 + 1]) << 8;
+					t->armor_tint.Slot[index].Color |= Strings::ToInt(armorTint_row[index * 3 + 2]);
 					t->armor_tint.Slot[index].Color |= (t->armor_tint.Slot[index].Color)
 						? (0xFF << 24) : 0;
 				}
@@ -2229,62 +2229,62 @@ const NPCType* ZoneDatabase::GetMercType(uint32 id, uint16 raceid, uint32 client
 		tmpNPCType = new NPCType;
 		memset(tmpNPCType, 0, sizeof *tmpNPCType);
 
-		tmpNPCType->npc_id = atoi(row[0]);
+		tmpNPCType->npc_id = Strings::ToInt(row[0]);
 
 		strn0cpy(tmpNPCType->name, row[1], 50);
 
-		tmpNPCType->level = atoi(row[2]);
-		tmpNPCType->race = atoi(row[3]);
-		tmpNPCType->class_ = atoi(row[4]);
-		tmpNPCType->max_hp = atoi(row[5]);
+		tmpNPCType->level = Strings::ToInt(row[2]);
+		tmpNPCType->race = Strings::ToInt(row[3]);
+		tmpNPCType->class_ = Strings::ToInt(row[4]);
+		tmpNPCType->max_hp = Strings::ToInt(row[5]);
 		tmpNPCType->current_hp = tmpNPCType->max_hp;
-		tmpNPCType->Mana = atoi(row[6]);
-		tmpNPCType->gender = atoi(row[7]);
-		tmpNPCType->texture = atoi(row[8]);
-		tmpNPCType->helmtexture = atoi(row[9]);
-		tmpNPCType->attack_delay = atoi(row[10]) * 100; // TODO: fix DB
-		tmpNPCType->STR = atoi(row[11]);
-		tmpNPCType->STA = atoi(row[12]);
-		tmpNPCType->DEX = atoi(row[13]);
-		tmpNPCType->AGI = atoi(row[14]);
-		tmpNPCType->INT = atoi(row[15]);
-		tmpNPCType->WIS = atoi(row[16]);
-		tmpNPCType->CHA = atoi(row[17]);
-		tmpNPCType->MR = atoi(row[18]);
-		tmpNPCType->CR = atoi(row[19]);
-		tmpNPCType->DR = atoi(row[20]);
-		tmpNPCType->FR = atoi(row[21]);
-		tmpNPCType->PR = atoi(row[22]);
-		tmpNPCType->Corrup = atoi(row[23]);
-		tmpNPCType->min_dmg = atoi(row[24]);
-		tmpNPCType->max_dmg = atoi(row[25]);
-		tmpNPCType->attack_count = atoi(row[26]);
+		tmpNPCType->Mana = Strings::ToInt(row[6]);
+		tmpNPCType->gender = Strings::ToInt(row[7]);
+		tmpNPCType->texture = Strings::ToInt(row[8]);
+		tmpNPCType->helmtexture = Strings::ToInt(row[9]);
+		tmpNPCType->attack_delay = Strings::ToInt(row[10]) * 100; // TODO: fix DB
+		tmpNPCType->STR = Strings::ToInt(row[11]);
+		tmpNPCType->STA = Strings::ToInt(row[12]);
+		tmpNPCType->DEX = Strings::ToInt(row[13]);
+		tmpNPCType->AGI = Strings::ToInt(row[14]);
+		tmpNPCType->INT = Strings::ToInt(row[15]);
+		tmpNPCType->WIS = Strings::ToInt(row[16]);
+		tmpNPCType->CHA = Strings::ToInt(row[17]);
+		tmpNPCType->MR = Strings::ToInt(row[18]);
+		tmpNPCType->CR = Strings::ToInt(row[19]);
+		tmpNPCType->DR = Strings::ToInt(row[20]);
+		tmpNPCType->FR = Strings::ToInt(row[21]);
+		tmpNPCType->PR = Strings::ToInt(row[22]);
+		tmpNPCType->Corrup = Strings::ToInt(row[23]);
+		tmpNPCType->min_dmg = Strings::ToInt(row[24]);
+		tmpNPCType->max_dmg = Strings::ToInt(row[25]);
+		tmpNPCType->attack_count = Strings::ToInt(row[26]);
 
 		if (row[27] != nullptr)
 			strn0cpy(tmpNPCType->special_abilities, row[27], 512);
 		else
 			tmpNPCType->special_abilities[0] = '\0';
 
-		tmpNPCType->d_melee_texture1 = atoi(row[28]);
-		tmpNPCType->d_melee_texture2 = atoi(row[29]);
-		tmpNPCType->prim_melee_type = atoi(row[30]);
-		tmpNPCType->sec_melee_type = atoi(row[31]);
-		tmpNPCType->runspeed = atof(row[32]);
+		tmpNPCType->d_melee_texture1 = Strings::ToInt(row[28]);
+		tmpNPCType->d_melee_texture2 = Strings::ToInt(row[29]);
+		tmpNPCType->prim_melee_type = Strings::ToInt(row[30]);
+		tmpNPCType->sec_melee_type = Strings::ToInt(row[31]);
+		tmpNPCType->runspeed = Strings::ToFloat(row[32]);
 
-		tmpNPCType->hp_regen = atoi(row[33]);
-		tmpNPCType->mana_regen = atoi(row[34]);
+		tmpNPCType->hp_regen = Strings::ToInt(row[33]);
+		tmpNPCType->mana_regen = Strings::ToInt(row[34]);
 
 		tmpNPCType->aggroradius = RuleI(Mercs, AggroRadius);
 
 		if (row[35] && strlen(row[35]))
-			tmpNPCType->bodytype = (uint8)atoi(row[35]);
+			tmpNPCType->bodytype = (uint8)Strings::ToInt(row[35]);
 		else
 			tmpNPCType->bodytype = 1;
 
-		uint32 armor_tint_id = atoi(row[36]);
-		tmpNPCType->armor_tint.Slot[0].Color = (atoi(row[37]) & 0xFF) << 16;
-		tmpNPCType->armor_tint.Slot[0].Color |= (atoi(row[38]) & 0xFF) << 8;
-		tmpNPCType->armor_tint.Slot[0].Color |= (atoi(row[39]) & 0xFF);
+		uint32 armor_tint_id = Strings::ToInt(row[36]);
+		tmpNPCType->armor_tint.Slot[0].Color = (Strings::ToInt(row[37]) & 0xFF) << 16;
+		tmpNPCType->armor_tint.Slot[0].Color |= (Strings::ToInt(row[38]) & 0xFF) << 8;
+		tmpNPCType->armor_tint.Slot[0].Color |= (Strings::ToInt(row[39]) & 0xFF);
 		tmpNPCType->armor_tint.Slot[0].Color |= (tmpNPCType->armor_tint.Slot[0].Color) ? (0xFF << 24) : 0;
 
 		if (armor_tint_id == 0)
@@ -2309,21 +2309,21 @@ const NPCType* ZoneDatabase::GetMercType(uint32 id, uint16 raceid, uint32 client
 				auto& armorTint_row = results.begin();
 
 				for (int index = EQ::textures::textureBegin; index <= EQ::textures::LastTexture; index++) {
-					tmpNPCType->armor_tint.Slot[index].Color = atoi(armorTint_row[index * 3]) << 16;
-					tmpNPCType->armor_tint.Slot[index].Color |= atoi(armorTint_row[index * 3 + 1]) << 8;
-					tmpNPCType->armor_tint.Slot[index].Color |= atoi(armorTint_row[index * 3 + 2]);
+					tmpNPCType->armor_tint.Slot[index].Color = Strings::ToInt(armorTint_row[index * 3]) << 16;
+					tmpNPCType->armor_tint.Slot[index].Color |= Strings::ToInt(armorTint_row[index * 3 + 1]) << 8;
+					tmpNPCType->armor_tint.Slot[index].Color |= Strings::ToInt(armorTint_row[index * 3 + 2]);
 					tmpNPCType->armor_tint.Slot[index].Color |= (tmpNPCType->armor_tint.Slot[index].Color) ? (0xFF << 24) : 0;
 				}
 			}
 		} else
 			armor_tint_id = 0;
 
-		tmpNPCType->AC = atoi(row[40]);
-		tmpNPCType->ATK = atoi(row[41]);
-		tmpNPCType->accuracy_rating = atoi(row[42]);
-		tmpNPCType->scalerate = atoi(row[43]);
-		tmpNPCType->spellscale = atoi(row[44]);
-		tmpNPCType->healscale = atoi(row[45]);
+		tmpNPCType->AC = Strings::ToInt(row[40]);
+		tmpNPCType->ATK = Strings::ToInt(row[41]);
+		tmpNPCType->accuracy_rating = Strings::ToInt(row[42]);
+		tmpNPCType->scalerate = Strings::ToInt(row[43]);
+		tmpNPCType->spellscale = Strings::ToInt(row[44]);
+		tmpNPCType->healscale = Strings::ToInt(row[45]);
 		tmpNPCType->skip_global_loot = true;
 		tmpNPCType->skip_auto_scale = true;
 
@@ -2357,35 +2357,35 @@ bool ZoneDatabase::LoadMercInfo(Client *client) {
 		return false;
 
     for (auto& row = results.begin(); row != results.end(); ++row) {
-        uint8 slot = atoi(row[1]);
+        uint8 slot = Strings::ToInt(row[1]);
 
         if(slot >= MAXMERCS)
             continue;
 
-        client->GetMercInfo(slot).mercid = atoi(row[0]);
+        client->GetMercInfo(slot).mercid = Strings::ToInt(row[0]);
         client->GetMercInfo(slot).slot = slot;
         snprintf(client->GetMercInfo(slot).merc_name, 64, "%s", row[2]);
-        client->GetMercInfo(slot).MercTemplateID = atoi(row[3]);
-        client->GetMercInfo(slot).SuspendedTime = atoi(row[4]);
-        client->GetMercInfo(slot).IsSuspended = atoi(row[5]) == 1 ? true : false;
-		client->GetMercInfo(slot).MercTimerRemaining = atoi(row[6]);
-		client->GetMercInfo(slot).Gender = atoi(row[7]);
-		client->GetMercInfo(slot).MercSize = atof(row[8]);
+        client->GetMercInfo(slot).MercTemplateID = Strings::ToInt(row[3]);
+        client->GetMercInfo(slot).SuspendedTime = Strings::ToInt(row[4]);
+        client->GetMercInfo(slot).IsSuspended = Strings::ToInt(row[5]) == 1 ? true : false;
+		client->GetMercInfo(slot).MercTimerRemaining = Strings::ToInt(row[6]);
+		client->GetMercInfo(slot).Gender = Strings::ToInt(row[7]);
+		client->GetMercInfo(slot).MercSize = Strings::ToFloat(row[8]);
 		client->GetMercInfo(slot).State = 5;
-		client->GetMercInfo(slot).Stance = atoi(row[9]);
-		client->GetMercInfo(slot).hp = atoi(row[10]);
-		client->GetMercInfo(slot).mana = atoi(row[11]);
-		client->GetMercInfo(slot).endurance = atoi(row[12]);
-		client->GetMercInfo(slot).face = atoi(row[13]);
-		client->GetMercInfo(slot).luclinHairStyle = atoi(row[14]);
-		client->GetMercInfo(slot).luclinHairColor = atoi(row[15]);
-		client->GetMercInfo(slot).luclinEyeColor = atoi(row[16]);
-		client->GetMercInfo(slot).luclinEyeColor2 = atoi(row[17]);
-		client->GetMercInfo(slot).luclinBeardColor = atoi(row[18]);
-		client->GetMercInfo(slot).luclinBeard = atoi(row[19]);
-		client->GetMercInfo(slot).drakkinHeritage = atoi(row[20]);
-		client->GetMercInfo(slot).drakkinTattoo = atoi(row[21]);
-		client->GetMercInfo(slot).drakkinDetails = atoi(row[22]);
+		client->GetMercInfo(slot).Stance = Strings::ToInt(row[9]);
+		client->GetMercInfo(slot).hp = Strings::ToInt(row[10]);
+		client->GetMercInfo(slot).mana = Strings::ToInt(row[11]);
+		client->GetMercInfo(slot).endurance = Strings::ToInt(row[12]);
+		client->GetMercInfo(slot).face = Strings::ToInt(row[13]);
+		client->GetMercInfo(slot).luclinHairStyle = Strings::ToInt(row[14]);
+		client->GetMercInfo(slot).luclinHairColor = Strings::ToInt(row[15]);
+		client->GetMercInfo(slot).luclinEyeColor = Strings::ToInt(row[16]);
+		client->GetMercInfo(slot).luclinEyeColor2 = Strings::ToInt(row[17]);
+		client->GetMercInfo(slot).luclinBeardColor = Strings::ToInt(row[18]);
+		client->GetMercInfo(slot).luclinBeard = Strings::ToInt(row[19]);
+		client->GetMercInfo(slot).drakkinHeritage = Strings::ToInt(row[20]);
+		client->GetMercInfo(slot).drakkinTattoo = Strings::ToInt(row[21]);
+		client->GetMercInfo(slot).drakkinDetails = Strings::ToInt(row[22]);
     }
 
 	return true;
@@ -2415,29 +2415,29 @@ bool ZoneDatabase::LoadCurrentMerc(Client *client) {
 
 
     for (auto& row = results.begin(); row != results.end(); ++row) {
-        client->GetMercInfo(slot).mercid = atoi(row[0]);
+        client->GetMercInfo(slot).mercid = Strings::ToInt(row[0]);
         client->GetMercInfo(slot).slot = slot;
         snprintf(client->GetMercInfo(slot).merc_name, 64, "%s", row[1]);
-        client->GetMercInfo(slot).MercTemplateID = atoi(row[2]);
-        client->GetMercInfo(slot).SuspendedTime = atoi(row[3]);
-        client->GetMercInfo(slot).IsSuspended = atoi(row[4]) == 1? true: false;
-        client->GetMercInfo(slot).MercTimerRemaining = atoi(row[5]);
-		client->GetMercInfo(slot).Gender = atoi(row[6]);
-		client->GetMercInfo(slot).MercSize = atof(row[7]);
-		client->GetMercInfo(slot).State = atoi(row[8]);
-		client->GetMercInfo(slot).hp = atoi(row[9]);
-		client->GetMercInfo(slot).mana = atoi(row[10]);
-		client->GetMercInfo(slot).endurance = atoi(row[11]);
-		client->GetMercInfo(slot).face = atoi(row[12]);
-		client->GetMercInfo(slot).luclinHairStyle = atoi(row[13]);
-		client->GetMercInfo(slot).luclinHairColor = atoi(row[14]);
-		client->GetMercInfo(slot).luclinEyeColor = atoi(row[15]);
-		client->GetMercInfo(slot).luclinEyeColor2 = atoi(row[16]);
-		client->GetMercInfo(slot).luclinBeardColor = atoi(row[17]);
-		client->GetMercInfo(slot).luclinBeard = atoi(row[18]);
-		client->GetMercInfo(slot).drakkinHeritage = atoi(row[19]);
-		client->GetMercInfo(slot).drakkinTattoo = atoi(row[20]);
-		client->GetMercInfo(slot).drakkinDetails = atoi(row[21]);
+        client->GetMercInfo(slot).MercTemplateID = Strings::ToInt(row[2]);
+        client->GetMercInfo(slot).SuspendedTime = Strings::ToInt(row[3]);
+        client->GetMercInfo(slot).IsSuspended = Strings::ToInt(row[4]) == 1? true: false;
+        client->GetMercInfo(slot).MercTimerRemaining = Strings::ToInt(row[5]);
+		client->GetMercInfo(slot).Gender = Strings::ToInt(row[6]);
+		client->GetMercInfo(slot).MercSize = Strings::ToFloat(row[7]);
+		client->GetMercInfo(slot).State = Strings::ToInt(row[8]);
+		client->GetMercInfo(slot).hp = Strings::ToInt(row[9]);
+		client->GetMercInfo(slot).mana = Strings::ToInt(row[10]);
+		client->GetMercInfo(slot).endurance = Strings::ToInt(row[11]);
+		client->GetMercInfo(slot).face = Strings::ToInt(row[12]);
+		client->GetMercInfo(slot).luclinHairStyle = Strings::ToInt(row[13]);
+		client->GetMercInfo(slot).luclinHairColor = Strings::ToInt(row[14]);
+		client->GetMercInfo(slot).luclinEyeColor = Strings::ToInt(row[15]);
+		client->GetMercInfo(slot).luclinEyeColor2 = Strings::ToInt(row[16]);
+		client->GetMercInfo(slot).luclinBeardColor = Strings::ToInt(row[17]);
+		client->GetMercInfo(slot).luclinBeard = Strings::ToInt(row[18]);
+		client->GetMercInfo(slot).drakkinHeritage = Strings::ToInt(row[19]);
+		client->GetMercInfo(slot).drakkinTattoo = Strings::ToInt(row[20]);
+		client->GetMercInfo(slot).drakkinDetails = Strings::ToInt(row[21]);
 	}
 
 	return true;
@@ -2584,34 +2584,34 @@ void ZoneDatabase::LoadMercBuffs(Merc *merc) {
         if(buffCount == BUFF_COUNT)
             break;
 
-        buffs[buffCount].spellid = atoi(row[0]);
-        buffs[buffCount].casterlevel = atoi(row[1]);
-        buffs[buffCount].ticsremaining = atoi(row[3]);
+        buffs[buffCount].spellid = Strings::ToInt(row[0]);
+        buffs[buffCount].casterlevel = Strings::ToInt(row[1]);
+        buffs[buffCount].ticsremaining = Strings::ToInt(row[3]);
 
         if(CalculatePoisonCounters(buffs[buffCount].spellid) > 0)
-            buffs[buffCount].counters = atoi(row[4]);
+            buffs[buffCount].counters = Strings::ToInt(row[4]);
 
         if(CalculateDiseaseCounters(buffs[buffCount].spellid) > 0)
-            buffs[buffCount].counters = atoi(row[5]);
+            buffs[buffCount].counters = Strings::ToInt(row[5]);
 
         if(CalculateCurseCounters(buffs[buffCount].spellid) > 0)
-            buffs[buffCount].counters = atoi(row[6]);
+            buffs[buffCount].counters = Strings::ToInt(row[6]);
 
 		if(CalculateCorruptionCounters(buffs[buffCount].spellid) > 0)
-            buffs[buffCount].counters = atoi(row[7]);
+            buffs[buffCount].counters = Strings::ToInt(row[7]);
 
-        buffs[buffCount].hit_number = atoi(row[8]);
-		buffs[buffCount].melee_rune = atoi(row[9]);
-		buffs[buffCount].magic_rune = atoi(row[10]);
-		buffs[buffCount].dot_rune = atoi(row[11]);
-		buffs[buffCount].caston_x = atoi(row[12]);
+        buffs[buffCount].hit_number = Strings::ToInt(row[8]);
+		buffs[buffCount].melee_rune = Strings::ToInt(row[9]);
+		buffs[buffCount].magic_rune = Strings::ToInt(row[10]);
+		buffs[buffCount].dot_rune = Strings::ToInt(row[11]);
+		buffs[buffCount].caston_x = Strings::ToInt(row[12]);
 		buffs[buffCount].casterid = 0;
 
-        bool IsPersistent = atoi(row[13])? true: false;
+        bool IsPersistent = Strings::ToInt(row[13])? true: false;
 
-        buffs[buffCount].caston_y = atoi(row[13]);
-        buffs[buffCount].caston_z = atoi(row[14]);
-        buffs[buffCount].ExtraDIChance = atoi(row[15]);
+        buffs[buffCount].caston_y = Strings::ToInt(row[13]);
+        buffs[buffCount].caston_z = Strings::ToInt(row[14]);
+        buffs[buffCount].ExtraDIChance = Strings::ToInt(row[15]);
 
         buffs[buffCount].persistant_buff = IsPersistent;
 
@@ -2670,10 +2670,10 @@ void ZoneDatabase::LoadMercEquipment(Merc *merc) {
 		if (itemCount == EQ::invslot::EQUIPMENT_COUNT)
             break;
 
-        if(atoi(row[0]) == 0)
+        if(Strings::ToInt(row[0]) == 0)
             continue;
 
-        merc->AddItem(itemCount, atoi(row[0]));
+        merc->AddItem(itemCount, Strings::ToInt(row[0]));
         itemCount++;
     }
 }
@@ -2691,7 +2691,7 @@ uint8 ZoneDatabase::GetGridType(uint32 grid, uint32 zoneid ) {
 
     auto& row = results.begin();
 
-	return atoi(row[0]);
+	return Strings::ToInt(row[0]);
 }
 
 void ZoneDatabase::SaveMerchantTemp(uint32 npcid, uint32 slot, uint32 zone_id, uint32 instance_id, uint32 item, uint32 charges){
@@ -2722,7 +2722,7 @@ uint32 ZoneDatabase::GetZoneTZ(uint32 zoneid, uint32 version) {
         return 0;
 
     auto& row = results.begin();
-    return atoi(row[0]);
+    return Strings::ToInt(row[0]);
 }
 
 bool ZoneDatabase::SetZoneTZ(uint32 zoneid, uint32 version, uint32 tz) {
@@ -2809,7 +2809,7 @@ uint8 ZoneDatabase::GroupCount(uint32 groupid) {
 
     auto& row = results.begin();
 
-	return atoi(row[0]);
+	return Strings::ToInt(row[0]);
 }
 
 uint8 ZoneDatabase::RaidGroupCount(uint32 raidid, uint32 groupid) {
@@ -2827,7 +2827,7 @@ uint8 ZoneDatabase::RaidGroupCount(uint32 raidid, uint32 groupid) {
 
     auto& row = results.begin();
 
-	return atoi(row[0]);
+	return Strings::ToInt(row[0]);
  }
 
 int32 ZoneDatabase::GetBlockedSpellsCount(uint32 zoneid)
@@ -2843,7 +2843,7 @@ int32 ZoneDatabase::GetBlockedSpellsCount(uint32 zoneid)
 
     auto& row = results.begin();
 
-	return atoi(row[0]);
+	return Strings::ToInt(row[0]);
 }
 
 bool ZoneDatabase::LoadBlockedSpells(int32 blockedSpellsCount, ZoneSpellsBlocked* into, uint32 zoneid)
@@ -2868,10 +2868,10 @@ bool ZoneDatabase::LoadBlockedSpells(int32 blockedSpellsCount, ZoneSpellsBlocked
         }
 
         memset(&into[index], 0, sizeof(ZoneSpellsBlocked));
-        into[index].spellid = atoi(row[1]);
-        into[index].type = atoi(row[2]);
-        into[index].m_Location = glm::vec3(atof(row[3]), atof(row[4]), atof(row[5]));
-        into[index].m_Difference = glm::vec3(atof(row[6]), atof(row[7]), atof(row[8]));
+        into[index].spellid = Strings::ToInt(row[1]);
+        into[index].type = Strings::ToInt(row[2]);
+        into[index].m_Location = glm::vec3(Strings::ToFloat(row[3]), Strings::ToFloat(row[4]), Strings::ToFloat(row[5]));
+        into[index].m_Difference = glm::vec3(Strings::ToFloat(row[6]), Strings::ToFloat(row[7]), Strings::ToFloat(row[8]));
         strn0cpy(into[index].message, row[9], 255);
     }
 
@@ -2893,7 +2893,7 @@ uint32 ZoneDatabase::GetKarma(uint32 acct_id)
 		return 0;
 
 	for (auto& row = results.begin(); row != results.end(); ++row) {
-		return atoi(row[0]);
+		return Strings::ToInt(row[0]);
 	}
 
 	return 0;
@@ -2973,12 +2973,12 @@ void ZoneDatabase::ListAllInstances(Client* client, uint32 character_id)
 
 	uint32 instance_count = 0;
 	for (auto row : results) {
-		auto instance_id = std::stoul(row[0]);
-		auto zone_id = std::stoul(row[1]);
-		auto version = std::stoul(row[2]);
-		auto start_time = std::stoul(row[3]);
-		auto duration = std::stoul(row[4]);
-		auto never_expires = std::stoi(row[5]) ? true : false;
+		auto instance_id = Strings::ToUnsignedInt(row[0]);
+		auto zone_id = Strings::ToUnsignedInt(row[1]);
+		auto version = Strings::ToUnsignedInt(row[2]);
+		auto start_time = Strings::ToUnsignedInt(row[3]);
+		auto duration = Strings::ToUnsignedInt(row[4]);
+		auto never_expires = Strings::ToInt(row[5]) ? true : false;
 		std::string remaining_time_string = "Never";
 		timeval time_value;
 		gettimeofday(&time_value, nullptr);
@@ -3058,7 +3058,7 @@ void ZoneDatabase::LoadAltCurrencyValues(uint32 char_id, std::map<uint32, uint32
     }
 
     for (auto& row = results.begin(); row != results.end(); ++row)
-        currency[atoi(row[0])] = atoi(row[1]);
+        currency[Strings::ToInt(row[0])] = Strings::ToInt(row[1]);
 
 }
 
@@ -3117,28 +3117,28 @@ void ZoneDatabase::LoadBuffs(Client *client)
 	}
 
 	for (auto& row = results.begin(); row != results.end(); ++row) {
-		uint32 slot_id = atoul(row[1]);
+		uint32 slot_id = Strings::ToUnsignedInt(row[1]);
 		if (slot_id >= client->GetMaxBuffSlots())
 			continue;
 
-		uint32 spell_id = atoul(row[0]);
+		uint32 spell_id = Strings::ToUnsignedInt(row[0]);
 		if (!IsValidSpell(spell_id))
 			continue;
 
 		Client *caster = entity_list.GetClientByName(row[3]);
-		uint32 caster_level = atoi(row[2]);
-		int32 ticsremaining = atoi(row[4]);
-		uint32 counters = atoul(row[5]);
-		uint32 hit_number = atoul(row[6]);
-		uint32 melee_rune = atoul(row[7]);
-		uint32 magic_rune = atoul(row[8]);
-		uint8 persistent = atoul(row[9]);
-		uint32 dot_rune = atoul(row[10]);
-		int32 caston_x = atoul(row[11]);
-		int32 caston_y = atoul(row[12]);
-		int32 caston_z = atoul(row[13]);
-		int32 ExtraDIChance = atoul(row[14]);
-		uint32 instrument_mod = atoul(row[15]);
+		uint32 caster_level = Strings::ToInt(row[2]);
+		int32 ticsremaining = Strings::ToInt(row[4]);
+		uint32 counters = Strings::ToUnsignedInt(row[5]);
+		uint32 hit_number = Strings::ToUnsignedInt(row[6]);
+		uint32 melee_rune = Strings::ToUnsignedInt(row[7]);
+		uint32 magic_rune = Strings::ToUnsignedInt(row[8]);
+		uint8 persistent = Strings::ToUnsignedInt(row[9]);
+		uint32 dot_rune = Strings::ToUnsignedInt(row[10]);
+		int32 caston_x = Strings::ToUnsignedInt(row[11]);
+		int32 caston_y = Strings::ToUnsignedInt(row[12]);
+		int32 caston_z = Strings::ToUnsignedInt(row[13]);
+		int32 ExtraDIChance = Strings::ToUnsignedInt(row[14]);
+		uint32 instrument_mod = Strings::ToUnsignedInt(row[15]);
 
 		buffs[slot_id].spellid = spell_id;
 		buffs[slot_id].casterlevel = caster_level;
@@ -3222,7 +3222,7 @@ void ZoneDatabase::LoadAuras(Client *c)
 		return;
 
 	for (auto& row = results.begin(); row != results.end(); ++row)
-		c->MakeAura(atoi(row[0]));
+		c->MakeAura(Strings::ToInt(row[0]));
 }
 
 void ZoneDatabase::SavePetInfo(Client *client)
@@ -3347,7 +3347,7 @@ void ZoneDatabase::LoadPetInfo(Client *client)
 
 	PetInfo *pi;
 	for (auto& row = results.begin(); row != results.end(); ++row) {
-		uint16 pet = atoi(row[0]);
+		uint16 pet = Strings::ToInt(row[0]);
 
 		if (pet == 0)
 			pi = petinfo;
@@ -3357,12 +3357,12 @@ void ZoneDatabase::LoadPetInfo(Client *client)
 			continue;
 
 		strncpy(pi->Name, row[1], 64);
-		pi->petpower = atoi(row[2]);
-		pi->SpellID = atoi(row[3]);
-		pi->HP = atoul(row[4]);
-		pi->Mana = atoul(row[5]);
-		pi->size = atof(row[6]);
-		pi->taunting = (bool) atoi(row[7]);
+		pi->petpower = Strings::ToInt(row[2]);
+		pi->SpellID = Strings::ToInt(row[3]);
+		pi->HP = Strings::ToUnsignedInt(row[4]);
+		pi->Mana = Strings::ToUnsignedInt(row[5]);
+		pi->size = Strings::ToFloat(row[6]);
+		pi->taunting = (bool) Strings::ToInt(row[7]);
 	}
 
 	query = StringFormat("SELECT `pet`, `slot`, `spell_id`, `caster_level`, `castername`, "
@@ -3375,7 +3375,7 @@ void ZoneDatabase::LoadPetInfo(Client *client)
 	}
 
 	for (auto& row = results.begin(); row != results.end(); ++row) {
-		uint16 pet = atoi(row[0]);
+		uint16 pet = Strings::ToInt(row[0]);
 		if (pet == 0)
 			pi = petinfo;
 		else if (pet == 1)
@@ -3383,20 +3383,20 @@ void ZoneDatabase::LoadPetInfo(Client *client)
 		else
 			continue;
 
-		uint32 slot_id = atoul(row[1]);
+		uint32 slot_id = Strings::ToUnsignedInt(row[1]);
 		if (slot_id >= RuleI(Spells, MaxTotalSlotsPET))
 			continue;
 
-		uint32 spell_id = atoul(row[2]);
+		uint32 spell_id = Strings::ToUnsignedInt(row[2]);
 		if (!IsValidSpell(spell_id))
 			continue;
 
-		uint32 caster_level = atoi(row[3]);
+		uint32 caster_level = Strings::ToInt(row[3]);
 		int caster_id = 0;
 		// The castername field is currently unused
-		int32 ticsremaining = atoi(row[5]);
-		uint32 counters = atoul(row[6]);
-		uint8 bard_mod = atoul(row[7]);
+		int32 ticsremaining = Strings::ToInt(row[5]);
+		uint32 counters = Strings::ToUnsignedInt(row[6]);
+		uint8 bard_mod = Strings::ToUnsignedInt(row[7]);
 
 		pi->Buffs[slot_id].spellid = spell_id;
 		pi->Buffs[slot_id].level = caster_level;
@@ -3418,7 +3418,7 @@ void ZoneDatabase::LoadPetInfo(Client *client)
 	}
 
 	for (auto& row = results.begin(); row != results.end(); ++row) {
-		uint16 pet = atoi(row[0]);
+		uint16 pet = Strings::ToInt(row[0]);
 		if (pet == 0)
 			pi = petinfo;
 		else if (pet == 1)
@@ -3426,11 +3426,11 @@ void ZoneDatabase::LoadPetInfo(Client *client)
 		else
 			continue;
 
-		int slot = atoi(row[1]);
+		int slot = Strings::ToInt(row[1]);
 		if (slot < EQ::invslot::EQUIPMENT_BEGIN || slot > EQ::invslot::EQUIPMENT_END)
 			continue;
 
-		pi->Items[slot] = atoul(row[2]);
+		pi->Items[slot] = Strings::ToUnsignedInt(row[2]);
 	}
 }
 
@@ -3589,7 +3589,7 @@ bool ZoneDatabase::LoadFactionData()
 
     auto& fmr_row = faction_max_results.begin();
 
-	max_faction = atoul(fmr_row[0]);
+	max_faction = Strings::ToUnsignedInt(fmr_row[0]);
 	faction_array = new Faction *[max_faction + 1];
 
 	memset(faction_array, 0, (sizeof(Faction*) * (max_faction + 1)));
@@ -3606,7 +3606,7 @@ bool ZoneDatabase::LoadFactionData()
 
 	for (auto fr_row : faction_results) {
 
-		uint32 index = atoul(fr_row[0]);
+		uint32 index = Strings::ToUnsignedInt(fr_row[0]);
 		if (index > max_faction) {
 			Log(Logs::General, Logs::Error, "Faction '%u' is out-of-bounds for faction array size!", index);
 			continue;
@@ -3620,7 +3620,7 @@ bool ZoneDatabase::LoadFactionData()
 
 		faction_array[index] = new Faction;
 		strn0cpy(faction_array[index]->name, fr_row[1], 50);
-		faction_array[index]->base = atoi(fr_row[2]);
+		faction_array[index]->base = Strings::ToInt(fr_row[2]);
 		faction_array[index]->min = MIN_PERSONAL_FACTION;
 		faction_array[index]->max = MAX_PERSONAL_FACTION;
 
@@ -3639,7 +3639,7 @@ bool ZoneDatabase::LoadFactionData()
 
 		for (auto br_row : base_results) {
 
-			uint32 index = atoul(br_row[0]);
+			uint32 index = Strings::ToUnsignedInt(br_row[0]);
 			if (index > max_faction) {
 				LogError("Faction [{}] is out-of-bounds for faction array size in Base adjustment!", index);
 				continue;
@@ -3650,8 +3650,8 @@ bool ZoneDatabase::LoadFactionData()
 				continue;
 			}
 
-			faction_array[index]->min = atoi(br_row[1]);
-			faction_array[index]->max = atoi(br_row[2]);
+			faction_array[index]->min = Strings::ToInt(br_row[1]);
+			faction_array[index]->max = Strings::ToInt(br_row[2]);
 		}
 
 		LogInfo("Loaded [{}] faction base(s)", Strings::Commify(std::to_string(base_results.RowCount())));
@@ -3668,7 +3668,7 @@ bool ZoneDatabase::LoadFactionData()
 
 		for (auto mr_row : modifier_results) {
 
-			uint32 index = atoul(mr_row[0]);
+			uint32 index = Strings::ToUnsignedInt(mr_row[0]);
 			if (index > max_faction) {
 				Log(Logs::General, Logs::Error, "Faction '%u' is out-of-bounds for faction array size in Modifier adjustment!", index);
 				continue;
@@ -3679,7 +3679,7 @@ bool ZoneDatabase::LoadFactionData()
 				continue;
 			}
 
-			faction_array[index]->mods[mr_row[2]] = atoi(mr_row[1]);
+			faction_array[index]->mods[mr_row[2]] = Strings::ToInt(mr_row[1]);
 		}
 
 		LogInfo("Loaded [{}] faction modifier(s)", Strings::Commify(std::to_string(modifier_results.RowCount())));
@@ -3768,7 +3768,7 @@ uint32 ZoneDatabase::GetCharacterCorpseDecayTimer(uint32 corpse_db_id){
 	auto results = QueryDatabase(query);
 	auto& row = results.begin();
 	if (results.Success() && results.RowsAffected() != 0)
-		return atoul(row[0]);
+		return Strings::ToUnsignedInt(row[0]);
 
 	return 0;
 }
@@ -3959,7 +3959,7 @@ uint32 ZoneDatabase::GetCharacterBuriedCorpseCount(uint32 char_id) {
 	auto results = QueryDatabase(query);
 
 	for (auto& row = results.begin(); row != results.end(); ++row) {
-		return atoi(row[0]);
+		return Strings::ToInt(row[0]);
 	}
 	return 0;
 }
@@ -3969,7 +3969,7 @@ uint32 ZoneDatabase::GetCharacterCorpseCount(uint32 char_id) {
 	auto results = QueryDatabase(query);
 
 	for (auto& row = results.begin(); row != results.end(); ++row) {
-		return atoi(row[0]);
+		return Strings::ToInt(row[0]);
 	}
 	return 0;
 }
@@ -3981,7 +3981,7 @@ uint32 ZoneDatabase::GetCharacterCorpseID(uint32 char_id, uint8 corpse) {
 	auto& row = results.begin();
 
 	if (row != results.end())
-		return atoul(row[0]);
+		return Strings::ToUnsignedInt(row[0]);
 	else
 		return 0;
 }
@@ -3993,7 +3993,7 @@ uint32 ZoneDatabase::GetCharacterCorpseItemCount(uint32 corpse_id){
 	auto results = QueryDatabase(query);
 	auto& row = results.begin();
 	if (results.Success() && results.RowsAffected() != 0){
-		return atoi(row[0]);
+		return Strings::ToInt(row[0]);
 	}
 	return 0;
 }
@@ -4053,39 +4053,39 @@ bool ZoneDatabase::LoadCharacterCorpseData(uint32 corpse_id, PlayerCorpse_Struct
 	auto results = QueryDatabase(query);
 	uint16 i = 0;
 	for (auto& row = results.begin(); row != results.end(); ++row) {
-		pcs->locked = atoi(row[i++]);						// is_locked,
-		pcs->exp = atoul(row[i++]);							// exp,
-		pcs->size = atoi(row[i++]);							// size,
-		pcs->level = atoi(row[i++]);						// `level`,
-		pcs->race = atoi(row[i++]);							// race,
-		pcs->gender = atoi(row[i++]);						// gender,
-		pcs->class_ = atoi(row[i++]);						// class,
-		pcs->deity = atoi(row[i++]);						// deity,
-		pcs->texture = atoi(row[i++]);						// texture,
-		pcs->helmtexture = atoi(row[i++]);					// helm_texture,
-		pcs->copper = atoul(row[i++]);						// copper,
-		pcs->silver = atoul(row[i++]);						// silver,
-		pcs->gold = atoul(row[i++]);						// gold,
-		pcs->plat = atoul(row[i++]);						// platinum,
-		pcs->haircolor = atoi(row[i++]);					// hair_color,
-		pcs->beardcolor = atoi(row[i++]);					// beard_color,
-		pcs->eyecolor1 = atoi(row[i++]);					// eye_color_1,
-		pcs->eyecolor2 = atoi(row[i++]);					// eye_color_2,
-		pcs->hairstyle = atoi(row[i++]);					// hair_style,
-		pcs->face = atoi(row[i++]);							// face,
-		pcs->beard = atoi(row[i++]);						// beard,
-		pcs->drakkin_heritage = atoul(row[i++]);			// drakkin_heritage,
-		pcs->drakkin_tattoo = atoul(row[i++]);				// drakkin_tattoo,
-		pcs->drakkin_details = atoul(row[i++]);				// drakkin_details,
-		pcs->item_tint.Head.Color = atoul(row[i++]);		// wc_1,
-		pcs->item_tint.Chest.Color = atoul(row[i++]);		// wc_2,
-		pcs->item_tint.Arms.Color = atoul(row[i++]);		// wc_3,
-		pcs->item_tint.Wrist.Color = atoul(row[i++]);		// wc_4,
-		pcs->item_tint.Hands.Color = atoul(row[i++]);		// wc_5,
-		pcs->item_tint.Legs.Color = atoul(row[i++]);		// wc_6,
-		pcs->item_tint.Feet.Color = atoul(row[i++]);		// wc_7,
-		pcs->item_tint.Primary.Color = atoul(row[i++]);		// wc_8,
-		pcs->item_tint.Secondary.Color = atoul(row[i++]);	// wc_9
+		pcs->locked = Strings::ToInt(row[i++]);						// is_locked,
+		pcs->exp = Strings::ToUnsignedInt(row[i++]);							// exp,
+		pcs->size = Strings::ToInt(row[i++]);							// size,
+		pcs->level = Strings::ToInt(row[i++]);						// `level`,
+		pcs->race = Strings::ToInt(row[i++]);							// race,
+		pcs->gender = Strings::ToInt(row[i++]);						// gender,
+		pcs->class_ = Strings::ToInt(row[i++]);						// class,
+		pcs->deity = Strings::ToInt(row[i++]);						// deity,
+		pcs->texture = Strings::ToInt(row[i++]);						// texture,
+		pcs->helmtexture = Strings::ToInt(row[i++]);					// helm_texture,
+		pcs->copper = Strings::ToUnsignedInt(row[i++]);						// copper,
+		pcs->silver = Strings::ToUnsignedInt(row[i++]);						// silver,
+		pcs->gold = Strings::ToUnsignedInt(row[i++]);						// gold,
+		pcs->plat = Strings::ToUnsignedInt(row[i++]);						// platinum,
+		pcs->haircolor = Strings::ToInt(row[i++]);					// hair_color,
+		pcs->beardcolor = Strings::ToInt(row[i++]);					// beard_color,
+		pcs->eyecolor1 = Strings::ToInt(row[i++]);					// eye_color_1,
+		pcs->eyecolor2 = Strings::ToInt(row[i++]);					// eye_color_2,
+		pcs->hairstyle = Strings::ToInt(row[i++]);					// hair_style,
+		pcs->face = Strings::ToInt(row[i++]);							// face,
+		pcs->beard = Strings::ToInt(row[i++]);						// beard,
+		pcs->drakkin_heritage = Strings::ToUnsignedInt(row[i++]);			// drakkin_heritage,
+		pcs->drakkin_tattoo = Strings::ToUnsignedInt(row[i++]);				// drakkin_tattoo,
+		pcs->drakkin_details = Strings::ToUnsignedInt(row[i++]);				// drakkin_details,
+		pcs->item_tint.Head.Color = Strings::ToUnsignedInt(row[i++]);		// wc_1,
+		pcs->item_tint.Chest.Color = Strings::ToUnsignedInt(row[i++]);		// wc_2,
+		pcs->item_tint.Arms.Color = Strings::ToUnsignedInt(row[i++]);		// wc_3,
+		pcs->item_tint.Wrist.Color = Strings::ToUnsignedInt(row[i++]);		// wc_4,
+		pcs->item_tint.Hands.Color = Strings::ToUnsignedInt(row[i++]);		// wc_5,
+		pcs->item_tint.Legs.Color = Strings::ToUnsignedInt(row[i++]);		// wc_6,
+		pcs->item_tint.Feet.Color = Strings::ToUnsignedInt(row[i++]);		// wc_7,
+		pcs->item_tint.Primary.Color = Strings::ToUnsignedInt(row[i++]);		// wc_8,
+		pcs->item_tint.Secondary.Color = Strings::ToUnsignedInt(row[i++]);	// wc_9
 	}
 	query = StringFormat(
 		"SELECT                       \n"
@@ -4112,16 +4112,16 @@ bool ZoneDatabase::LoadCharacterCorpseData(uint32 corpse_id, PlayerCorpse_Struct
 	uint16 r = 0;
 	for (auto& row = results.begin(); row != results.end(); ++row) {
 		memset(&pcs->items[i], 0, sizeof (player_lootitem::ServerLootItem_Struct));
-		pcs->items[i].equip_slot = atoi(row[r++]);		// equip_slot,
-		pcs->items[i].item_id = atoul(row[r++]); 		// item_id,
-		pcs->items[i].charges = atoi(row[r++]); 		// charges,
-		pcs->items[i].aug_1 = atoi(row[r++]); 			// aug_1,
-		pcs->items[i].aug_2 = atoi(row[r++]); 			// aug_2,
-		pcs->items[i].aug_3 = atoi(row[r++]); 			// aug_3,
-		pcs->items[i].aug_4 = atoi(row[r++]); 			// aug_4,
-		pcs->items[i].aug_5 = atoi(row[r++]); 			// aug_5,
-		pcs->items[i].aug_6 = atoi(row[r++]); 			// aug_6,
-		pcs->items[i].attuned = atoi(row[r++]); 		// attuned,
+		pcs->items[i].equip_slot = Strings::ToInt(row[r++]);		// equip_slot,
+		pcs->items[i].item_id = Strings::ToUnsignedInt(row[r++]); 		// item_id,
+		pcs->items[i].charges = Strings::ToInt(row[r++]); 		// charges,
+		pcs->items[i].aug_1 = Strings::ToInt(row[r++]); 			// aug_1,
+		pcs->items[i].aug_2 = Strings::ToInt(row[r++]); 			// aug_2,
+		pcs->items[i].aug_3 = Strings::ToInt(row[r++]); 			// aug_3,
+		pcs->items[i].aug_4 = Strings::ToInt(row[r++]); 			// aug_4,
+		pcs->items[i].aug_5 = Strings::ToInt(row[r++]); 			// aug_5,
+		pcs->items[i].aug_6 = Strings::ToInt(row[r++]); 			// aug_6,
+		pcs->items[i].attuned = Strings::ToInt(row[r++]); 		// attuned,
 		r = 0;
 		i++;
 	}
@@ -4140,14 +4140,14 @@ Corpse* ZoneDatabase::SummonBuriedCharacterCorpses(uint32 char_id, uint32 dest_z
 
 	for (auto& row = results.begin(); row != results.end(); ++row) {
 		corpse = Corpse::LoadCharacterCorpseEntity(
-			atoul(row[0]), 			 // uint32 in_dbid
+			Strings::ToUnsignedInt(row[0]), 			 // uint32 in_dbid
 			char_id, 				 // uint32 in_charid
 			row[1], 				 // char* in_charname
 			position,
 			row[2], 				 // char* time_of_death
-			atoi(row[3]) == 1, 		 // bool rezzed
+			Strings::ToInt(row[3]) == 1, 		 // bool rezzed
 			false,					 // bool was_at_graveyard
-			atoul(row[4])            // uint32 guild_consent_id
+			Strings::ToUnsignedInt(row[4])            // uint32 guild_consent_id
 		);
 		if (!corpse)
             continue;
@@ -4180,14 +4180,14 @@ bool ZoneDatabase::SummonAllCharacterCorpses(uint32 char_id, uint32 dest_zone_id
 
 	for (auto& row = results.begin(); row != results.end(); ++row) {
 		corpse = Corpse::LoadCharacterCorpseEntity(
-			atoul(row[0]),
+			Strings::ToUnsignedInt(row[0]),
 			char_id,
 			row[1],
 			position,
 			row[2],
-			atoi(row[3]) == 1,
+			Strings::ToInt(row[3]) == 1,
 			false,
-			atoul(row[4]));
+			Strings::ToUnsignedInt(row[4]));
 
 		if (corpse) {
 			entity_list.AddCorpse(corpse);
@@ -4217,7 +4217,7 @@ int ZoneDatabase::CountCharacterCorpses(uint32 char_id) {
 	);
 	auto results = QueryDatabase(query);
 	for (auto& row = results.begin(); row != results.end(); ++row) {
-		return atoi(row[0]);
+		return Strings::ToInt(row[0]);
 	}
 	return 0;
 }
@@ -4239,7 +4239,7 @@ int ZoneDatabase::CountCharacterCorpsesByZoneID(uint32 char_id, uint32 zone_id) 
 	);
 	auto results = QueryDatabase(query);
 	for (auto& row = results.begin(); row != results.end(); ++row) {
-		return atoi(row[0]);
+		return Strings::ToInt(row[0]);
 	}
 	return 0;
 }
@@ -4267,16 +4267,16 @@ Corpse* ZoneDatabase::LoadCharacterCorpse(uint32 player_corpse_id) {
 	);
 	auto results = QueryDatabase(query);
 	for (auto& row = results.begin(); row != results.end(); ++row) {
-        auto position = glm::vec4(atof(row[3]), atof(row[4]), atof(row[5]), atof(row[6]));
+        auto position = glm::vec4(Strings::ToFloat(row[3]), Strings::ToFloat(row[4]), Strings::ToFloat(row[5]), Strings::ToFloat(row[6]));
 		NewCorpse = Corpse::LoadCharacterCorpseEntity(
-				atoul(row[0]), 		 // id					  uint32 in_dbid
-				atoul(row[1]),		 // charid				  uint32 in_charid
+				Strings::ToUnsignedInt(row[0]), 		 // id					  uint32 in_dbid
+				Strings::ToUnsignedInt(row[1]),		 // charid				  uint32 in_charid
 				row[2], 			 //	char_name
 				position,
 				row[7],				 // time_of_death		  char* time_of_death
-				atoi(row[8]) == 1, 	 // is_rezzed			  bool rezzed
-				atoi(row[9]),		 // was_at_graveyard	  bool was_at_graveyard
-				atoul(row[10])       // guild_consent_id      uint32 guild_consent_id
+				Strings::ToInt(row[8]) == 1, 	 // is_rezzed			  bool rezzed
+				Strings::ToInt(row[9]),		 // was_at_graveyard	  bool was_at_graveyard
+				Strings::ToUnsignedInt(row[10])       // guild_consent_id      uint32 guild_consent_id
 			);
 		entity_list.AddCorpse(NewCorpse);
 	}
@@ -4294,17 +4294,17 @@ bool ZoneDatabase::LoadCharacterCorpses(uint32 zone_id, uint16 instance_id) {
 
 	auto results = QueryDatabase(query);
 	for (auto& row = results.begin(); row != results.end(); ++row) {
-        auto position = glm::vec4(atof(row[3]), atof(row[4]), atof(row[5]), atof(row[6]));
+        auto position = glm::vec4(Strings::ToFloat(row[3]), Strings::ToFloat(row[4]), Strings::ToFloat(row[5]), Strings::ToFloat(row[6]));
 		entity_list.AddCorpse(
 			 Corpse::LoadCharacterCorpseEntity(
-				atoul(row[0]), 		  // id					  uint32 in_dbid
-				atoul(row[1]), 		  // charid				  uint32 in_charid
+				Strings::ToUnsignedInt(row[0]), 		  // id					  uint32 in_dbid
+				Strings::ToUnsignedInt(row[1]), 		  // charid				  uint32 in_charid
 				row[2], 			  //					  char_name
 				position,
 				row[7], 			  // time_of_death		  char* time_of_death
-				atoi(row[8]) == 1, 	  // is_rezzed			  bool rezzed
-				atoi(row[9]),
-				atoul(row[10]))       // guild_consent_id     uint32 guild_consent_id
+				Strings::ToInt(row[8]) == 1, 	  // is_rezzed			  bool rezzed
+				Strings::ToInt(row[9]),
+				Strings::ToUnsignedInt(row[10]))       // guild_consent_id     uint32 guild_consent_id
 		);
 	}
 
@@ -4317,7 +4317,7 @@ uint32 ZoneDatabase::GetFirstCorpseID(uint32 char_id) {
 	std::string query = StringFormat("SELECT `id` FROM `character_corpses` WHERE `charid` = '%u' AND `is_buried` = 0 ORDER BY `time_of_death` LIMIT 1", char_id);
 	auto results = QueryDatabase(query);
 	for (auto& row = results.begin(); row != results.end(); ++row) {
-		return atoi(row[0]);
+		return Strings::ToInt(row[0]);
 	}
 	return 0;
 }
@@ -4344,7 +4344,7 @@ bool ZoneDatabase::BuryAllCharacterCorpses(uint32 char_id) {
 	std::string query = StringFormat("SELECT `id` FROM `character_corpses` WHERE `charid` = %u", char_id);
 	auto results = QueryDatabase(query);
 	for (auto& row = results.begin(); row != results.end(); ++row) {
-		BuryCharacterCorpse(atoi(row[0]));
+		BuryCharacterCorpse(Strings::ToInt(row[0]));
 		return true;
 	}
 	return false;
@@ -4376,7 +4376,7 @@ uint32 ZoneDatabase::LoadSaylinkID(const char* saylink_text, bool auto_insert)
 	}
 
 	auto& row = results.begin();
-	return atoi(row[0]);
+	return Strings::ToInt(row[0]);
 }
 
 uint32 ZoneDatabase::SaveSaylinkID(const char* saylink_text)
@@ -4414,7 +4414,7 @@ double ZoneDatabase::GetAAEXPModifier(uint32 character_id, uint32 zone_id, int16
 
 	auto results = database.QueryDatabase(query);
 	for (auto& row = results.begin(); row != results.end(); ++row) {
-		return atof(row[0]);
+		return Strings::ToFloat(row[0]);
 	}
 
 	return 1.0f;
@@ -4442,7 +4442,7 @@ double ZoneDatabase::GetEXPModifier(uint32 character_id, uint32 zone_id, int16 i
 
 	auto results = database.QueryDatabase(query);
 	for (auto& row = results.begin(); row != results.end(); ++row) {
-		return atof(row[0]);
+		return Strings::ToFloat(row[0]);
 	}
 
 	return 1.0f;

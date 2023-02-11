@@ -14,9 +14,9 @@ void command_grid(Client *c, const Seperator *sep)
 		);
 	}
 	else if (strcasecmp("add", command_type) == 0) {
-		auto grid_id     = atoi(sep->arg[2]);
-		auto wander_type = atoi(sep->arg[3]);
-		auto pause_type  = atoi(sep->arg[4]);
+		auto grid_id     = Strings::ToInt(sep->arg[2]);
+		auto wander_type = Strings::ToInt(sep->arg[3]);
+		auto pause_type  = Strings::ToInt(sep->arg[4]);
 		if (!content_db.GridExistsInZone(zone_id, grid_id)) {
 			content_db.ModifyGrid(c, false, grid_id, wander_type, pause_type, zone_id);
 			c->Message(
@@ -76,7 +76,7 @@ void command_grid(Client *c, const Seperator *sep)
 		// Spawn grid nodes
 		std::map<std::vector<float>, int32> zoffset;
 		for (auto                           row : results) {
-			glm::vec4          node_position = glm::vec4(atof(row[0]), atof(row[1]), atof(row[2]), atof(row[3]));
+			glm::vec4          node_position = glm::vec4(Strings::ToFloat(row[0]), Strings::ToFloat(row[1]), Strings::ToFloat(row[2]), Strings::ToFloat(row[3]));
 			std::vector<float> node_loc{
 				node_position.x,
 				node_position.y,
@@ -95,7 +95,7 @@ void command_grid(Client *c, const Seperator *sep)
 			}
 
 			node_position.z += zoffset[node_loc];
-			NPC::SpawnGridNodeNPC(node_position, grid_id, atoi(row[4]), zoffset[node_loc]);
+			NPC::SpawnGridNodeNPC(node_position, grid_id, Strings::ToInt(row[4]), zoffset[node_loc]);
 		}
 		c->Message(
 			Chat::White,
@@ -123,7 +123,7 @@ void command_grid(Client *c, const Seperator *sep)
 		);
 	}
 	else if (strcasecmp("delete", command_type) == 0) {
-		auto grid_id = atoi(sep->arg[2]);
+		auto grid_id = Strings::ToInt(sep->arg[2]);
 		content_db.ModifyGrid(c, true, grid_id, 0, 0, zone_id);
 		c->Message(
 			Chat::White,

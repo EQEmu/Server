@@ -392,7 +392,7 @@ bool ZoneDatabase::LoadTributes() {
 	}
 
     for (auto row = results.begin(); row != results.end(); ++row) {
-        uint32 id = atoul(row[0]);
+        uint32 id = Strings::ToUnsignedInt(row[0]);
 		tributeData.name = row[1];
 		tributeData.description = row[2];
 		tributeData.unknown = strtoul(row[3], nullptr, 10);
@@ -410,7 +410,7 @@ bool ZoneDatabase::LoadTributes() {
 	}
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		uint32 id = atoul(row[0]);
+		uint32 id = Strings::ToUnsignedInt(row[0]);
 
 		if (tribute_list.count(id) != 1) {
 			LogError("Error in LoadTributes: unknown tribute [{}] in tribute_levels", (unsigned long) id);
@@ -426,9 +426,9 @@ bool ZoneDatabase::LoadTributes() {
 
 		TributeLevel_Struct &s = cur.tiers[cur.tier_count];
 
-		s.level           = atoul(row[1]);
-		s.cost            = atoul(row[2]);
-		s.tribute_item_id = atoul(row[3]);
+		s.level           = Strings::ToUnsignedInt(row[1]);
+		s.cost            = Strings::ToUnsignedInt(row[2]);
+		s.tribute_item_id = Strings::ToUnsignedInt(row[3]);
 		cur.tier_count++;
 	}
 

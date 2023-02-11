@@ -327,7 +327,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 
 		if (results.RowCount() != 0) {
 			auto row = results.begin();
-			monsterid = atoi(row[0]);
+			monsterid = Strings::ToInt(row[0]);
 		}
 
 		// since we don't have any monsters, just make it look like an earth pet for now
@@ -491,13 +491,13 @@ bool ZoneDatabase::GetPoweredPetEntry(const char *pet_type, int16 petpower, PetR
 
 	auto row = results.begin();
 
-	into->npc_type = atoi(row[0]);
-	into->temporary = atoi(row[1]);
-	into->petpower = atoi(row[2]);
-	into->petcontrol = atoi(row[3]);
-	into->petnaming = atoi(row[4]);
-	into->monsterflag = atoi(row[5]);
-	into->equipmentset = atoi(row[6]);
+	into->npc_type = Strings::ToInt(row[0]);
+	into->temporary = Strings::ToInt(row[1]);
+	into->petpower = Strings::ToInt(row[2]);
+	into->petcontrol = Strings::ToInt(row[3]);
+	into->petnaming = Strings::ToInt(row[4]);
+	into->monsterflag = Strings::ToInt(row[5]);
+	into->equipmentset = Strings::ToInt(row[6]);
 
 	return true;
 }
@@ -719,20 +719,20 @@ bool ZoneDatabase::GetBasePetItems(int32 equipmentset, uint32 *items) {
 		}
 
 		auto row = results.begin();
-		nextset = atoi(row[0]);
+		nextset = Strings::ToInt(row[0]);
 
 		query = StringFormat("SELECT slot, item_id FROM pets_equipmentset_entries WHERE set_id='%d'", curset);
 		results = QueryDatabase(query);
 		if (results.Success()) {
 			for (row = results.begin(); row != results.end(); ++row)
 			{
-				slot = atoi(row[0]);
+				slot = Strings::ToInt(row[0]);
 
 				if (slot > EQ::invslot::EQUIPMENT_END)
 					continue;
 
 				if (items[slot] == 0)
-					items[slot] = atoi(row[1]);
+					items[slot] = Strings::ToInt(row[1]);
 			}
 		}
 
@@ -768,11 +768,11 @@ BeastlordPetData::PetStruct ZoneDatabase::GetBeastlordPetData(uint16 race_id) {
 	}
 
 	auto row = results.begin();
-	beastlord_pet_data.race_id = atoi(row[0]);
-	beastlord_pet_data.texture = atoi(row[1]);
-	beastlord_pet_data.helm_texture = atoi(row[2]);
-	beastlord_pet_data.gender = atoi(row[3]);
-	beastlord_pet_data.size_modifier = atof(row[4]);
-	beastlord_pet_data.face = atoi(row[5]);
+	beastlord_pet_data.race_id = Strings::ToInt(row[0]);
+	beastlord_pet_data.texture = Strings::ToInt(row[1]);
+	beastlord_pet_data.helm_texture = Strings::ToInt(row[2]);
+	beastlord_pet_data.gender = Strings::ToInt(row[3]);
+	beastlord_pet_data.size_modifier = Strings::ToFloat(row[4]);
+	beastlord_pet_data.face = Strings::ToInt(row[5]);
 	return beastlord_pet_data;
 }

@@ -14,5 +14,5 @@ void command_faction_association(Client *c, const Seperator *sep)
 		target = c->GetTarget()->CastToClient();
 	}
 
-	target->RewardFaction(atoi(sep->arg[1]), atoi(sep->arg[2]));
+	target->RewardFaction(Strings::ToInt(sep->arg[1]), Strings::ToInt(sep->arg[2]));
 }

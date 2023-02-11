@@ -4,7 +4,7 @@ void command_haste(Client *c, const Seperator *sep)
 {
 	// #haste command to set client attack speed. Takes a percentage (100 = twice normal attack speed)
 	if (sep->arg[1][0] != 0) {
-		uint16 Haste = atoi(sep->arg[1]);
+		uint16 Haste = Strings::ToInt(sep->arg[1]);
 		if (Haste > 85) {
 			Haste = 85;
 		}

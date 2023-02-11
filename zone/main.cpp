@@ -162,7 +162,7 @@ int main(int argc, char** argv) {
 	uint32 instance_id = 0;
 	std::string z_name;
 	if (argc == 4) {
-		instance_id = atoi(argv[3]);
+		instance_id = Strings::ToInt(argv[3]);
 		worldserver.SetLauncherName(argv[2]);
 		auto zone_port = Strings::Split(argv[1], ':');
 
@@ -172,7 +172,7 @@ int main(int argc, char** argv) {
 
 		if (zone_port.size() > 1) {
 			std::string p_name = zone_port[1];
-			Config->SetZonePort(atoi(p_name.c_str()));
+			Config->SetZonePort(Strings::ToInt(p_name.c_str()));
 		}
 
 		worldserver.SetLaunchedName(z_name.c_str());
@@ -193,7 +193,7 @@ int main(int argc, char** argv) {
 
 		if (zone_port.size() > 1) {
 			std::string p_name = zone_port[1];
-			Config->SetZonePort(atoi(p_name.c_str()));
+			Config->SetZonePort(Strings::ToInt(p_name.c_str()));
 		}
 
 		worldserver.SetLaunchedName(z_name.c_str());
@@ -214,7 +214,7 @@ int main(int argc, char** argv) {
 
 		if (zone_port.size() > 1) {
 			std::string p_name = zone_port[1];
-			Config->SetZonePort(atoi(p_name.c_str()));
+			Config->SetZonePort(Strings::ToInt(p_name.c_str()));
 		}
 
 		worldserver.SetLaunchedName(z_name.c_str());

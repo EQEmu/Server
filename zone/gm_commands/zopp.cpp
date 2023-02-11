@@ -25,9 +25,9 @@ void command_zopp(Client *c, const Seperator *sep)
 			packettype = ItemPacketLimbo;
 		}
 
-		int16  slotid  = atoi(sep->arg[2]);
-		uint32 itemid  = atoi(sep->arg[3]);
-		int16  charges = sep->argnum == 4 ? atoi(sep->arg[4]) : 1; // defaults to 1 charge if not specified
+		int16  slotid  = Strings::ToInt(sep->arg[2]);
+		uint32 itemid  = Strings::ToInt(sep->arg[3]);
+		int16  charges = sep->argnum == 4 ? Strings::ToInt(sep->arg[4]) : 1; // defaults to 1 charge if not specified
 
 		const EQ::ItemData *FakeItem = database.GetItem(itemid);
 

@@ -29,7 +29,7 @@ void command_resetaa_timer(Client *c, const Seperator *sep)
 	}
 
 	if (sep->IsNumber(1)) {
-		int timer_id = std::stoi(sep->arg[1]);
+		int timer_id = Strings::ToInt(sep->arg[1]);
 		c->Message(
 			Chat::White,
 			fmt::format(

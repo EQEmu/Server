@@ -36,7 +36,7 @@ void command_npcspawn(Client *c, const Seperator *sep)
 			sep->IsNumber(2) ?
 			(
 				is_add ?
-				std::stoi(sep->arg[2]) :
+				Strings::ToInt(sep->arg[2]) :
 				1
 			) : (
 				is_add ?

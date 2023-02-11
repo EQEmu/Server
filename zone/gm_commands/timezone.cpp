@@ -26,7 +26,7 @@ void command_timezone(Client *c, const Seperator *sep)
 	}
 
 	uint8 minutes = 0;
-	auto hours = static_cast<uint8>(std::stoul(sep->arg[1]));
+	auto hours = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[1]));
 
 	if (hours > 24) {
 		hours = 24;

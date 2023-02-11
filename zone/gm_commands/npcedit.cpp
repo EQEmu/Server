@@ -122,7 +122,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "hp")) {
 		if (sep->IsNumber(2)) {
-			auto hp = std::stoll(sep->arg[2]);
+			auto hp = Strings::ToBigInt(sep->arg[2]);
 			n.hp = hp;
 			d = fmt::format(
 				"{} now has {} Health.",
@@ -135,7 +135,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "mana")) {
 		if (sep->IsNumber(2)) {
-			auto mana = std::stoll(sep->arg[2]);
+			auto mana = Strings::ToBigInt(sep->arg[2]);
 			n.mana = mana;
 			d = fmt::format(
 				"{} now has {} Mana.",
@@ -188,7 +188,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "herosforgemodel")) {
 		if (sep->IsNumber(2)) {
-			auto heros_forge_model = std::stoi(sep->arg[2]);
+			auto heros_forge_model = Strings::ToInt(sep->arg[2]);
 			n.herosforgemodel = heros_forge_model;
 			d = fmt::format(
 				"{} is now using Hero's Forge Model {}.",
@@ -204,7 +204,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "size")) {
 		if (sep->IsNumber(2)) {
-			auto size = std::stof(sep->arg[2]);
+			auto size = Strings::ToFloat(sep->arg[2]);
 			n.size = size;
 			d = fmt::format(
 				"{} is now Size {:.2f}.",
@@ -217,7 +217,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "hpregen")) {
 		if (sep->IsNumber(2)) {
-			auto hp_regen = std::stoll(sep->arg[2]);
+			auto hp_regen = Strings::ToBigInt(sep->arg[2]);
 			n.hp_regen_rate = hp_regen;
 			d = fmt::format(
 				"{} now regenerates {} Health per Tick.",
@@ -230,7 +230,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "hp_regen_per_second")) {
 		if (sep->IsNumber(2)) {
-			auto hp_regen_per_second = std::stoll(sep->arg[2]);
+			auto hp_regen_per_second = Strings::ToBigInt(sep->arg[2]);
 			n.hp_regen_per_second = hp_regen_per_second;
 			d = fmt::format(
 				"{} now regenerates {} HP per Second.",
@@ -246,7 +246,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "manaregen")) {
 		if (sep->IsNumber(2)) {
-			auto mana_regen = std::stoll(sep->arg[2]);
+			auto mana_regen = Strings::ToBigInt(sep->arg[2]);
 			n.mana_regen_rate = mana_regen;
 			d = fmt::format(
 				"{} now regenerates {} Mana per Tick.",
@@ -339,7 +339,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "faction")) {
 		if (sep->IsNumber(2)) {
-			auto faction_id   = std::stoi(sep->arg[2]);
+			auto faction_id   = Strings::ToInt(sep->arg[2]);
 			auto faction_name = content_db.GetFactionName(faction_id);
 			n.npc_faction_id = faction_id;
 			d = fmt::format(
@@ -406,7 +406,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "attackcount")) {
 		if (sep->IsNumber(2)) {
-			auto attack_count = static_cast<int16>(std::stoi(sep->arg[2]));
+			auto attack_count = static_cast<int16>(Strings::ToInt(sep->arg[2]));
 			n.attack_count = attack_count;
 			d = fmt::format(
 				"{} now has an Attack Count of {}.",
@@ -619,7 +619,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "runspeed")) {
 		if (sep->IsNumber(2)) {
-			auto run_speed = std::stof(sep->arg[2]);
+			auto run_speed = Strings::ToFloat(sep->arg[2]);
 			n.runspeed = run_speed;
 			d = fmt::format(
 				"{} now runs at a Run Speed of {:.2f}.",
@@ -813,7 +813,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "attackspeed")) {
 		if (sep->IsNumber(2)) {
-			auto attack_speed = std::stof(sep->arg[2]);
+			auto attack_speed = Strings::ToFloat(sep->arg[2]);
 			n.attack_speed = attack_speed;
 			d = fmt::format(
 				"{} now has an Attack Speed of {:.2f}.",

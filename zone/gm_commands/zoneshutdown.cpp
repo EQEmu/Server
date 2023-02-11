@@ -18,7 +18,7 @@ void command_zoneshutdown(Client *c, const Seperator *sep)
 		ServerZoneStateChange_struct *s   = (ServerZoneStateChange_struct *) pack->pBuffer;
 		strcpy(s->adminname, c->GetName());
 		if (sep->arg[1][0] >= '0' && sep->arg[1][0] <= '9') {
-			s->ZoneServerID = atoi(sep->arg[1]);
+			s->ZoneServerID = Strings::ToInt(sep->arg[1]);
 		}
 		else {
 			s->zoneid = ZoneID(sep->arg[1]);

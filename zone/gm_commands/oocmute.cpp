@@ -10,7 +10,7 @@ void command_oocmute(Client *c, const Seperator *sep)
 		return;
 	}
 
-	bool is_muted = std::stoi(sep->arg[1]) ? true : false;
+	bool is_muted = Strings::ToInt(sep->arg[1]) ? true : false;
 
 	ServerPacket pack(ServerOP_OOCMute, sizeof(ServerOOCMute_Struct));
 	auto o = (ServerOOCMute_Struct*) pack.pBuffer;

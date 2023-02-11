@@ -93,7 +93,7 @@ bool Database::GetLoginDataFromAccountInfo(
 
 	auto row = results.begin();
 
-	id       = atoi(row[0]);
+	id       = Strings::ToInt(row[0]);
 	password = row[1];
 
 	LogDebug(
@@ -145,7 +145,7 @@ bool Database::GetLoginTokenDataFromToken(
 		}
 
 		if (strcmp(row[2], "login_server_id") == 0) {
-			db_account_id  = atoi(row[3]);
+			db_account_id  = Strings::ToInt(row[3]);
 			found_login_id = true;
 			continue;
 		}

@@ -197,11 +197,11 @@ void command_tune(Client *c, const Seperator *sep)
 	}
 
 	if (!strcasecmp(sep->arg[1], "FindATK")) {
-		float pct_mitigation = atof(sep->arg[3]);
-		int   interval       = atoi(sep->arg[4]);
-		int   max_loop       = atoi(sep->arg[5]);
-		int   ac_override    = atoi(sep->arg[6]);
-		int   info_level     = atoi(sep->arg[7]);
+		float pct_mitigation = Strings::ToFloat(sep->arg[3]);
+		int   interval       = Strings::ToInt(sep->arg[4]);
+		int   max_loop       = Strings::ToInt(sep->arg[5]);
+		int   ac_override    = Strings::ToInt(sep->arg[6]);
+		int   info_level     = Strings::ToInt(sep->arg[7]);
 
 		if (!pct_mitigation) {
 			c->Message(Chat::White, "[#Tune] - Error must enter the desired percent mitigation on defender.");
@@ -277,11 +277,11 @@ void command_tune(Client *c, const Seperator *sep)
 	}
 
 	if (!strcasecmp(sep->arg[1], "FindAC")) {
-		float pct_mitigation = atof(sep->arg[3]);
-		int   interval       = atoi(sep->arg[4]);
-		int   max_loop       = atoi(sep->arg[5]);
-		int   atk_override   = atoi(sep->arg[6]);
-		int   info_level     = atoi(sep->arg[7]);
+		float pct_mitigation = Strings::ToFloat(sep->arg[3]);
+		int   interval       = Strings::ToInt(sep->arg[4]);
+		int   max_loop       = Strings::ToInt(sep->arg[5]);
+		int   atk_override   = Strings::ToInt(sep->arg[6]);
+		int   info_level     = Strings::ToInt(sep->arg[7]);
 
 		if (!pct_mitigation) {
 			c->Message(Chat::White, "#Tune - Error must enter the desired percent mitigation on defender.");
@@ -358,11 +358,11 @@ void command_tune(Client *c, const Seperator *sep)
 	}
 
 	if (!strcasecmp(sep->arg[1], "FindAccuracy")) {
-		float hit_chance     = atof(sep->arg[3]);
-		int   interval       = atoi(sep->arg[4]);
-		int   max_loop       = atoi(sep->arg[5]);
-		int   avoid_override = atoi(sep->arg[6]);
-		int   info_level     = atoi(sep->arg[7]);
+		float hit_chance     = Strings::ToFloat(sep->arg[3]);
+		int   interval       = Strings::ToInt(sep->arg[4]);
+		int   max_loop       = Strings::ToInt(sep->arg[5]);
+		int   avoid_override = Strings::ToInt(sep->arg[6]);
+		int   info_level     = Strings::ToInt(sep->arg[7]);
 
 		if (!hit_chance) {
 			c->Message(Chat::White, "#Tune - Error must enter the desired hit chance on defender.");
@@ -439,11 +439,11 @@ void command_tune(Client *c, const Seperator *sep)
 	}
 
 	if (!strcasecmp(sep->arg[1], "FindAvoidance")) {
-		float hit_chance   = atof(sep->arg[3]);
-		int   interval     = atoi(sep->arg[4]);
-		int   max_loop     = atoi(sep->arg[5]);
-		int   acc_override = atoi(sep->arg[6]);
-		int   info_level   = atoi(sep->arg[7]);
+		float hit_chance   = Strings::ToFloat(sep->arg[3]);
+		int   interval     = Strings::ToInt(sep->arg[4]);
+		int   max_loop     = Strings::ToInt(sep->arg[5]);
+		int   acc_override = Strings::ToInt(sep->arg[6]);
+		int   info_level   = Strings::ToInt(sep->arg[7]);
 
 		if (!hit_chance) {
 			c->Message(Chat::White, "#Tune - Error must enter the desired hit chance on defender.");

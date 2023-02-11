@@ -7,8 +7,8 @@ void command_setskill(Client *c, const Seperator *sep)
 		target = c->GetTarget()->CastToClient();
 	}
 
-	auto skill_id    = sep->IsNumber(1) ? std::stoi(sep->arg[1]) : -1;
-	auto skill_value = sep->IsNumber(2) ? std::stoi(sep->arg[2]) : -1;
+	auto skill_id    = sep->IsNumber(1) ? Strings::ToInt(sep->arg[1]) : -1;
+	auto skill_value = sep->IsNumber(2) ? Strings::ToInt(sep->arg[2]) : -1;
 	if (
 		skill_id < 0 ||
 		skill_id > EQ::skills::HIGHEST_SKILL ||

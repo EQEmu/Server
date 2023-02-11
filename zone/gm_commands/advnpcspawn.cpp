@@ -91,9 +91,9 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
 			return;
 		}
 
-		auto spawngroup_id = std::stoul(sep->arg[2]);
-		auto npc_id = std::stoul(sep->arg[3]);
-		auto spawn_chance = std::stoul(sep->arg[4]);
+		auto spawngroup_id = Strings::ToUnsignedInt(sep->arg[2]);
+		auto npc_id = Strings::ToUnsignedInt(sep->arg[3]);
+		auto spawn_chance = Strings::ToUnsignedInt(sep->arg[4]);
 
 		auto query = fmt::format(
 			SQL(
@@ -129,14 +129,14 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
 				zone->GetInstanceVersion(),
 				c,
 				0,
-				std::stoul(sep->arg[2])
+				Strings::ToUnsignedInt(sep->arg[2])
 			)
 		) {
 			c->Message(
 				Chat::White,
 				fmt::format(
 					"Spawn Added | Added spawn from Spawngroup ID {}.",
-					std::stoul(sep->arg[2])
+					Strings::ToUnsignedInt(sep->arg[2])
 				).c_str()
 			);
 		}
@@ -149,7 +149,7 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
 
 		auto query = fmt::format(
 			"UPDATE spawngroup SET dist = 0, min_x = 0, max_x = 0, min_y = 0, max_y = 0, delay = 0 WHERE id = {}",
-			std::stoul(sep->arg[2])
+			Strings::ToUnsignedInt(sep->arg[2])
 		);
 		auto results = content_db.QueryDatabase(query);
 		if (!results.Success()) {
@@ -161,7 +161,7 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
 			Chat::White,
 			fmt::format(
 				"Spawngroup {} Roambox Cleared | Delay: 0 Distance: 0.00",
-				std::stoul(sep->arg[2])
+				Strings::ToUnsignedInt(sep->arg[2])
 			).c_str()
 		);
 
@@ -169,7 +169,7 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
 			Chat::White,
 			fmt::format(
 				"Spawngroup {} Roambox Cleared | Minimum X: 0.00 Maximum X: 0.00",
-				std::stoul(sep->arg[2])
+				Strings::ToUnsignedInt(sep->arg[2])
 			).c_str()
 		);
 
@@ -177,7 +177,7 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
 			Chat::White,
 			fmt::format(
 				"Spawngroup {} Roambox Cleared | Minimum Y: 0.00 Maximum Y: 0.00",
-				std::stoul(sep->arg[2])
+				Strings::ToUnsignedInt(sep->arg[2])
 			).c_str()
 		);
 		return;
@@ -231,13 +231,13 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
 			);
 			return;
 		}
-		auto spawngroup_id = std::stoul(sep->arg[2]);
-		auto distance = std::stof(sep->arg[3]);
-		auto minimum_x = std::stof(sep->arg[4]);
-		auto maximum_x = std::stof(sep->arg[5]);
-		auto minimum_y = std::stof(sep->arg[6]);
-		auto maximum_y = std::stof(sep->arg[7]);
-		auto delay = std::stoi(sep->arg[8]);
+		auto spawngroup_id = Strings::ToUnsignedInt(sep->arg[2]);
+		auto distance = Strings::ToFloat(sep->arg[3]);
+		auto minimum_x = Strings::ToFloat(sep->arg[4]);
+		auto maximum_x = Strings::ToFloat(sep->arg[5]);
+		auto minimum_y = Strings::ToFloat(sep->arg[6]);
+		auto maximum_y = Strings::ToFloat(sep->arg[7]);
+		auto delay = Strings::ToInt(sep->arg[8]);
 
 		auto query = fmt::format(
 			"UPDATE spawngroup SET dist = {:.2f}, min_x = {:.2f}, max_x = {:.2f}, max_y = {:.2f}, min_y = {:.2f}, delay = {} WHERE id = {}",
@@ -304,8 +304,8 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
 		}
 
 		auto spawn2_id = spawn2->GetID();
-		auto respawn_timer = std::stoul(sep->arg[2]);
-		auto variance = sep->IsNumber(3) ? std::stoul(sep->arg[3]) : spawn2->GetVariance();
+		auto respawn_timer = Strings::ToUnsignedInt(sep->arg[2]);
+		auto variance = sep->IsNumber(3) ? Strings::ToUnsignedInt(sep->arg[3]) : spawn2->GetVariance();
 
 		auto query = fmt::format(
 			"UPDATE spawn2 SET respawntime = {}, variance = {} WHERE id = {}",
@@ -343,13 +343,13 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
 		}
 
 		std::string spawngroup_name = sep->arg[2];
-		auto spawn_limit = sep->IsNumber(3) ? std::stoi(sep->arg[3]) : 0;
-		auto distance = sep->IsNumber(4) ? std::stof(sep->arg[4]) : 0.0f;
-		auto minimum_x = sep->IsNumber(5) ? std::stof(sep->arg[5]) : 0.0f;
-		auto maximum_x = sep->IsNumber(6) ? std::stof(sep->arg[6]) : 0.0f;
-		auto minimum_y = sep->IsNumber(7) ? std::stof(sep->arg[7]) : 0.0f;
-		auto maximum_y = sep->IsNumber(8) ? std::stof(sep->arg[8]) : 0.0f;
-		auto delay = sep->IsNumber(9) ? std::stoi(sep->arg[9]) : 0;
+		auto spawn_limit = sep->IsNumber(3) ? Strings::ToInt(sep->arg[3]) : 0;
+		auto distance = sep->IsNumber(4) ? Strings::ToFloat(sep->arg[4]) : 0.0f;
+		auto minimum_x = sep->IsNumber(5) ? Strings::ToFloat(sep->arg[5]) : 0.0f;
+		auto maximum_x = sep->IsNumber(6) ? Strings::ToFloat(sep->arg[6]) : 0.0f;
+		auto minimum_y = sep->IsNumber(7) ? Strings::ToFloat(sep->arg[7]) : 0.0f;
+		auto maximum_y = sep->IsNumber(8) ? Strings::ToFloat(sep->arg[8]) : 0.0f;
+		auto delay = sep->IsNumber(9) ? Strings::ToInt(sep->arg[9]) : 0;
 
 		auto query = fmt::format(
 			"INSERT INTO spawngroup"
@@ -497,7 +497,7 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
 		}
 
 		auto target = c->GetTarget()->CastToNPC();
-		auto version = std::stoul(sep->arg[2]);
+		auto version = Strings::ToUnsignedInt(sep->arg[2]);
 
 		auto query = fmt::format(
 			"UPDATE spawn2 SET version = {} WHERE spawngroupID = {}",

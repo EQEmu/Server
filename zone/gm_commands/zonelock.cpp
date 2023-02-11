@@ -51,7 +51,7 @@ void command_zonelock(Client *c, const Seperator *sep)
 	else if (!is_list && c->Admin() >= commandLockZones) {
 		auto        zone_id         = (
 			sep->IsNumber(2) ?
-				static_cast<uint16>(std::stoul(sep->arg[2])) :
+				static_cast<uint16>(Strings::ToUnsignedInt(sep->arg[2])) :
 				static_cast<uint16>(ZoneID(sep->arg[2]))
 		);
 		std::string zone_short_name = Strings::ToLower(ZoneName(zone_id, true));

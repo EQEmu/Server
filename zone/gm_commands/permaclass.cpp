@@ -13,8 +13,8 @@ void command_permaclass(Client *c, const Seperator *sep)
 		target = c->GetTarget()->CastToClient();
 	}
 
-	auto class_id = std::stoi(sep->arg[1]);
-	
+	auto class_id = Strings::ToInt(sep->arg[1]);
+
 	LogInfo("Class changed by {} for {} to {} ({})",
 		c->GetCleanName(),
 		c->GetTargetDescription(target),
