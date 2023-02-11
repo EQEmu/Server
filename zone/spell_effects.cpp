@@ -6248,19 +6248,20 @@ uint16 Mob::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 	//item focus
 	if (IsOfClientBot() && itembonuses.FocusEffects[type]) {
 
-		const EQ::ItemData* TempItem = nullptr;
 
 		for (int x = EQ::invslot::EQUIPMENT_BEGIN; x <= EQ::invslot::EQUIPMENT_END; x++)
 		{
 			if (SympatheticProcList.size() > MAX_SYMPATHETIC_PROCS)
 				continue;
 
-			TempItem = nullptr;
+
 			EQ::ItemInstance const* ins = GetInv().GetItem(x);
 			if (!ins)
 				continue;
-			TempItem = ins->GetItem();
-			if (TempItem && TempItem->Focus.Effect > 0 && IsValidSpell(TempItem->Focus.Effect)) {
+			if (
+					auto TempItem = ins->GetItem();
+					TempItem && TempItem->Focus.Effect > 0 && IsValidSpell(TempItem->Focus.Effect)
+			) {
 
 				proc_spellid = CalcFocusEffect(type, TempItem->Focus.Effect, spell_id);
 				if (IsValidSpell(proc_spellid)){
@@ -6275,8 +6276,7 @@ uint16 Mob::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 				if (SympatheticProcList.size() > MAX_SYMPATHETIC_PROCS)
 					continue;
 
-				EQ::ItemInstance const* aug = nullptr;
-				aug = ins->GetAugment(y);
+				auto aug = ins->GetAugment(y);
 				if (aug)
 				{
 					const EQ::ItemData* TempItemAug = aug->GetItem();
