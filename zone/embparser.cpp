@@ -1780,6 +1780,9 @@ void PerlembParser::ExportEventVariables(
 		case EVENT_CLICK_OBJECT: {
 			ExportVar(package_name.c_str(), "objectid", data);
 			ExportVar(package_name.c_str(), "clicker_id", extradata);
+			if (extra_pointers && extra_pointers->size() == 1) {
+				ExportVar(package_name.c_str(), "object", "Object", std::any_cast<Object*>(extra_pointers->at(0)));
+			}
 			break;
 		}
 
