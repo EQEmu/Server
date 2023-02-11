@@ -86,8 +86,6 @@ Bot::Bot(NPCType *npcTypeData, Client* botOwner) : NPC(npcTypeData, nullptr, glm
 
 	m_alt_combat_hate_timer.Start(250);
 	m_auto_defend_timer.Disable();
-	//m_combat_jitter_timer.Disable();
-	//SetCombatJitterFlag(false);
 	SetGuardFlag(false);
 	SetHoldFlag(false);
 	SetAttackFlag(false);
@@ -198,8 +196,6 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 
 	m_alt_combat_hate_timer.Start(250);
 	m_auto_defend_timer.Disable();
-	//m_combat_jitter_timer.Disable();
-	//SetCombatJitterFlag(false);
 	SetGuardFlag(false);
 	SetHoldFlag(false);
 	SetAttackFlag(false);
@@ -251,10 +247,11 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 
 	LoadAAs();
 
-	// copied from client CompleteConnect() handler - watch for problems
-	// (may have to move to post-spawn location if certain buffs still don't process correctly)
-	if (database.botdb.LoadBuffs(this) && bot_owner) {
-
+	if (!database.botdb.LoadBuffs(this)) {
+		if (bot_owner) {
+			bot_owner->Message(Chat::White, "&s for '%s'", BotDatabase::fail::LoadBuffs(), GetCleanName());
+		}
+	} else {
 		//reapply some buffs
 		uint32 buff_count = GetMaxTotalSlots();
 		for (uint32 j1 = 0; j1 < buff_count; j1++) {
@@ -326,11 +323,6 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 					}
 					break;
 				}
-				//case SE_SummonHorse: {
-				//	SummonHorse(buffs[j1].spellid);
-				//	//hasmount = true;	//this was false, is that the correct thing?
-				//	break;
-				//}
 				case SE_Silence:
 				{
 					Silence(true);
@@ -357,12 +349,8 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 				{
 					if (!zone->CanLevitate())
 					{
-						//if (!GetGM())
-						//{
 							SendAppearancePacket(AT_Levitate, 0);
 							BuffFadeByEffect(SE_Levitate);
-							//Message(Chat::White, "You can't levitate in this zone.");
-						//}
 					}
 					else {
 						SendAppearancePacket(AT_Levitate, 2);
@@ -399,9 +387,6 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 				}
 			}
 		}
-	}
-	else {
-		bot_owner->Message(Chat::White, "&s for '%s'", BotDatabase::fail::LoadBuffs(), GetCleanName());
 	}
 
 	CalcBotStats(false);
@@ -6355,7 +6340,17 @@ bool Bot::CastSpell(
 	return Result;
 }
 
-bool Bot::SpellOnTarget(uint16 spell_id, Mob* spelltar) {
+bool Bot::SpellOnTarget(
+		uint16 spell_id,
+		Mob *spelltar,
+		int reflect_effectiveness,
+		bool use_resist_adjust,
+		int16 resist_adjust,
+		bool isproc,
+		int level_override,
+		int duration_override,
+		bool disable_buff_overwrite
+) {
 	if (!IsValidSpell(spell_id)) {
 		return false;
 	}
