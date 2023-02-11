@@ -959,7 +959,7 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 	long_name = 0;
 	aggroedmobs       =0;
 	m_graveyard_id    = 0;
-	pgraveyard_zoneid = 0;
+	pgraveyard_zoneid = 0; 
 	m_max_clients     = 0;
 	pvpzone           = false;
 
