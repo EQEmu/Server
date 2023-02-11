@@ -918,6 +918,16 @@ void Client::DropItem(int16 slot_id, bool recurse)
 			LogInventory("Item drop handled by [EVENT_DROP_ITEM]");
 			safe_delete(inst);
 		}
+
+		std::vector<std::any> args;
+
+		args.emplace_back(inst);
+
+		i = parse->EventPlayer(EVENT_DROP_ITEM_CLIENT, this, "", slot_id, &args);
+		if (i != 0) {
+			LogInventory("Item drop handled by [EVENT_DROP_ITEM_CLIENT]");
+			safe_delete(inst);
+		}
 	} else {
 		// Item doesn't exist in inventory!
 		LogInventory("DropItem() - No item found in slot [{}]", slot_id);
