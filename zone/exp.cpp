@@ -804,17 +804,17 @@ void Client::SetEXP(uint64 set_exp, uint64 set_aaxp, bool isrezzexp) {
 		}
 	}
 
-    if (parse->PlayerHasQuestSub(EVENT_EXP_GAIN) && m_pp.exp != set_exp) {
-        const auto exp_value = set_exp - m_pp.exp;
-        const auto export_string = fmt::format("{}", exp_value);
-        parse->EventPlayer(EVENT_EXP_GAIN, this, export_string, 0);
-    }
+	if (parse->PlayerHasQuestSub(EVENT_EXP_GAIN) && m_pp.exp != set_exp) {
+    	const auto exp_value = set_exp - m_pp.exp;
+    	const auto export_string = fmt::format("{}", exp_value);
+    	parse->EventPlayer(EVENT_EXP_GAIN, this, export_string, 0);
+	}
 
-    if (parse->PlayerHasQuestSub(EVENT_AA_EXP_GAIN) && m_pp.expAA != set_aaxp) {
-        const auto aa_exp_value = set_aaxp - m_pp.expAA;
-        const auto export_string = fmt::format("{}", aa_exp_value);
-        parse->EventPlayer(EVENT_AA_EXP_GAIN, this, export_string, 0);
-    }
+	if (parse->PlayerHasQuestSub(EVENT_AA_EXP_GAIN) && m_pp.expAA != set_aaxp) {
+    	const auto aa_exp_value = set_aaxp - m_pp.expAA;
+    	const auto export_string = fmt::format("{}", aa_exp_value);
+    	parse->EventPlayer(EVENT_AA_EXP_GAIN, this, export_string, 0);
+	}
 
 	//set the client's EXP and AAEXP
 	m_pp.exp = set_exp;
@@ -822,8 +822,9 @@ void Client::SetEXP(uint64 set_exp, uint64 set_aaxp, bool isrezzexp) {
 
 	if (GetLevel() < 51) {
 		m_epp.perAA = 0;	// turn off aa exp if they drop below 51
-	} else
-		SendAlternateAdvancementStats();	//otherwise, send them an AA update
+	} else {
+        SendAlternateAdvancementStats();    //otherwise, send them an AA update
+	}
 
 	//send the expdata in any case so the xp bar isnt stuck after leveling
 	uint32 tmpxp1 = GetEXPForLevel(GetLevel()+1);
