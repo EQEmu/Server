@@ -608,7 +608,7 @@ void handle_player_aa_gain(
 	std::vector<std::any> *extra_pointers
 );
 
-void handle_player_aaxp_gain(
+void handle_player_aa_exp_gain(
         QuestInterface *parse,
         lua_State* L,
         Client* client,
@@ -617,7 +617,7 @@ void handle_player_aaxp_gain(
         std::vector<std::any> *extra_pointers
 );
 
-void handle_player_xp_gain(
+void handle_player_exp_gain(
         QuestInterface *parse,
         lua_State* L,
         Client* client,
