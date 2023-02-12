@@ -573,15 +573,24 @@ int ClientTaskState::UpdateTasks(Client* client, const TaskUpdateFilter& filter,
 						client_task.task_id
 					);
 					if (parse->EventPlayer(EVENT_TASK_BEFORE_UPDATE, client, export_string, 0) != 0) {
-						LogTasks("client [{}] task [{}]-[{}] update prevented by quest",
-								 client->GetName(), client_task.task_id, client_activity.activity_id);
+						LogTasks(
+							"client [{}] task [{}]-[{}] update prevented by quest",
+							client->GetName(),
+							client_task.task_id,
+							client_activity.activity_id
+						);
 
 						continue;
 					}
 				}
 
-				LogTasks("client [{}] task [{}] activity [{}] increment [{}]",
-					client->GetName(), client_task.task_id, client_activity.activity_id, count);
+				LogTasks(
+					"client [{}] task [{}] activity [{}] increment [{}]",
+					client->GetName(),
+					client_task.task_id,
+					client_activity.activity_id,
+					count
+				);
 
 				int updated = IncrementDoneCount(client, task, client_task.slot, client_activity.activity_id, count);
 				max_updated = std::max(max_updated, updated);
