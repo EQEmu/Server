@@ -3005,8 +3005,12 @@ void Mob::AddToHateList(Mob* other, int64 hate /*= 0*/, int64 damage /*= 0*/, bo
 	}
 
 	if (!wasengaged) {
-		if (IsNPC() && other->IsClient() && other->CastToClient())
-			parse->EventNPC(EVENT_AGGRO, CastToNPC(), other, "", 0);
+		if (IsNPC() && other->IsClient() && other->CastToClient()) {
+			if (parse->HasQuestSub(GetNPCTypeID(), EVENT_AGGRO)) {
+				parse->EventNPC(EVENT_AGGRO, CastToNPC(), other, "", 0);
+			}
+		}
+
 		AI_Event_Engaged(other, iYellForHelp);
 	}
 }
