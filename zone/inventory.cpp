@@ -1136,10 +1136,7 @@ void Client::SendCursorBuffer()
 		}
 
 		if (parse->PlayerHasQuestSub(EVENT_DESTROY_ITEM_CLIENT)) {
-			std::vector<std::any> args;
-
-			args.emplace_back(test_inst);
-
+			std::vector<std::any> args = { test_inst };
 			parse->EventPlayer(EVENT_DESTROY_ITEM_CLIENT, this, "", 0, &args);
 		}
 
@@ -1879,10 +1876,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 				}
 
 				if (parse->PlayerHasQuestSub(EVENT_DESTROY_ITEM_CLIENT)) {
-					std::vector<std::any> args;
-
-					args.emplace_back(test_inst);
-
+					std::vector<std::any> args = { test_inst };
 					parse->EventPlayer(EVENT_DESTROY_ITEM_CLIENT, this, "", 0, &args);
 				}
 
@@ -1928,10 +1922,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 				}
 
 				if (parse->PlayerHasQuestSub(EVENT_DESTROY_ITEM_CLIENT)) {
-					std::vector<std::any> args;
-
-					args.emplace_back(inst);
-
+					std::vector<std::any> args = { inst };
 					parse->EventPlayer(EVENT_DESTROY_ITEM_CLIENT, this, "", 0, &args);
 				}
 			}
