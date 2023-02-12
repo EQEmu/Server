@@ -446,13 +446,17 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 	}
 
 	// final check for any additional quest requirements .. "check_zone" in this case - exported as variable [validate_type]
-	std::string export_string = fmt::format("check_zone {}", zone->GetZoneID());
-	if (parse->EventPlayer(EVENT_COMBINE_VALIDATE, user, export_string, spec.recipe_id) != 0) {
-		user->Message(Chat::Emote, "You cannot make this combine because the location requirement has not been met.");
-		auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
-		user->QueuePacket(outapp);
-		safe_delete(outapp);
-		return;
+	if (parse->PlayerHasQuestSub(EVENT_COMBINE_VALIDATE)) {
+		if (parse->EventPlayer(EVENT_COMBINE_VALIDATE, user, fmt::format("check_zone {}", zone->GetZoneID()), spec.recipe_id) != 0) {
+			user->Message(
+				Chat::Emote,
+				"You cannot make this combine because the location requirement has not been met."
+			);
+			auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
+			user->QueuePacket(outapp);
+			safe_delete(outapp);
+			return;
+		}
 	}
 
 	// Send acknowledgement packets to client
