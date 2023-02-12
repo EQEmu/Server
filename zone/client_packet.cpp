@@ -4413,11 +4413,12 @@ void Client::Handle_OP_ClickDoor(const EQApplicationPacket *app)
 
 	// don't spam scripts with client controlled doors if not within distance
 	if (within_distance) {
-		std::string           export_string = fmt::format("{}", cd->doorid);
-		std::vector<std::any> args;
-		args.push_back(currentdoor);
-		if (parse->EventPlayer(EVENT_CLICK_DOOR, this, export_string, 0, &args) == 0) {
-			currentdoor->HandleClick(this, 0);
+		if (parse->PlayerHasQuestSub(EVENT_CLICK_DOOR)) {
+			std::vector<std::any> args;
+			args.push_back(currentdoor);
+			if (parse->EventPlayer(EVENT_CLICK_DOOR, this, std::to_string(cd->doorid), 0, &args) == 0) {
+				currentdoor->HandleClick(this, 0);
+			}
 		}
 	}
 	else {
