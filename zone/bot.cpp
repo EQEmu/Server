@@ -9184,7 +9184,7 @@ void Bot::Signal(int signal_id)
 void Bot::SendPayload(int payload_id, std::string payload_value)
 {
 	if (parse->BotHasQuestSub(EVENT_PAYLOAD)) {
-		const auto &export_string = fmt::format("{} {}", payload_id, payload_value);
+		const auto& export_string = fmt::format("{} {}", payload_id, payload_value);
 
 		parse->EventBot(EVENT_PAYLOAD, this, nullptr, export_string, 0);
 	}
