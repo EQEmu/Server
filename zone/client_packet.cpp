@@ -2596,15 +2596,18 @@ void Client::Handle_OP_AltCurrencyPurchase(const EQApplicationPacket *app)
 			QServ->PlayerLogEvent(Player_Log_Alternate_Currency_Transactions, CharacterID(), event_desc);
 		}
 
-		const auto& export_string = fmt::format(
-			"{} {} {} {} {}",
-			alt_cur_id,
-			tar->GetNPCTypeID(),
-			tar->MerchantType,
-			item->ID,
-			cost
-		);
-		parse->EventPlayer(EVENT_ALT_CURRENCY_MERCHANT_BUY, this, export_string, 0);
+		if (parse->PlayerHasQuestSub(EVENT_ALT_CURRENCY_MERCHANT_BUY)) {
+			const auto export_string = fmt::format(
+				"{} {} {} {} {}",
+				alt_cur_id,
+				tar->GetNPCTypeID(),
+				tar->MerchantType,
+				item->ID,
+				cost
+			);
+
+			parse->EventPlayer(EVENT_ALT_CURRENCY_MERCHANT_BUY, this, export_string, 0);
+		}
 
 		uint64 current_balance = AddAlternateCurrencyValue(alt_cur_id, -((int32) cost));
 		int16  charges         = 1;
@@ -2787,15 +2790,18 @@ void Client::Handle_OP_AltCurrencySell(const EQApplicationPacket *app)
 			QServ->PlayerLogEvent(Player_Log_Alternate_Currency_Transactions, CharacterID(), event_desc);
 		}
 
-		const auto& export_string = fmt::format(
-			"{} {} {} {} {}",
-			alt_cur_id,
-			tar->GetNPCTypeID(),
-			tar->MerchantType,
-			item->ID,
-			cost
-		);
-		parse->EventPlayer(EVENT_ALT_CURRENCY_MERCHANT_SELL, this, export_string, 0);
+		if (parse->PlayerHasQuestSub(EVENT_ALT_CURRENCY_MERCHANT_SELL)) {
+			const auto export_string = fmt::format(
+				"{} {} {} {} {}",
+				alt_cur_id,
+				tar->GetNPCTypeID(),
+				tar->MerchantType,
+				item->ID,
+				cost
+			);
+
+			parse->EventPlayer(EVENT_ALT_CURRENCY_MERCHANT_SELL, this, export_string, 0);
+		}
 
 		FastQueuePacket(&outapp);
 		uint64 new_balance = AddAlternateCurrencyValue(alt_cur_id, cost);
@@ -13575,16 +13581,19 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 		safe_delete(qspack);
 	}
 	// end QS code
+	
+	if (parse->PlayerHasQuestSub(EVENT_MERCHANT_BUY)) {
+		const auto export_string = fmt::format(
+			"{} {} {} {} {}",
+			tmp->GetNPCTypeID(),
+			tmp->CastToNPC()->MerchantType,
+			item_id,
+			mpo->quantity,
+			mpo->price
+		);
 
-	const auto& export_string = fmt::format(
-		"{} {} {} {} {}",
-		tmp->GetNPCTypeID(),
-		tmp->CastToNPC()->MerchantType,
-		item_id,
-		mpo->quantity,
-		mpo->price
-	);
-	parse->EventPlayer(EVENT_MERCHANT_BUY, this, export_string, 0);
+		parse->EventPlayer(EVENT_MERCHANT_BUY, this, export_string, 0);
+	}
 
 	if (player_event_logs.IsEventEnabled(PlayerEvent::MERCHANT_PURCHASE)) {
 		auto e = PlayerEvent::MerchantPurchaseEvent{
@@ -13772,15 +13781,18 @@ void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
 	}
 	// end QS code
 
-	const auto& export_string = fmt::format(
-		"{} {} {} {} {}",
-		vendor->GetNPCTypeID(),
-		vendor->CastToNPC()->MerchantType,
-		itemid,
-		mp->quantity,
-		price
-	);
-	parse->EventPlayer(EVENT_MERCHANT_SELL, this, export_string, 0);
+	if (parse->PlayerHasQuestSub(EVENT_MERCHANT_SELL)) {
+		const auto export_string = fmt::format(
+			"{} {} {} {} {}",
+			vendor->GetNPCTypeID(),
+			vendor->CastToNPC()->MerchantType,
+			itemid,
+			mp->quantity,
+			price
+		);
+
+		parse->EventPlayer(EVENT_MERCHANT_SELL, this, export_string, 0);
+	}
 
 	if (player_event_logs.IsEventEnabled(PlayerEvent::MERCHANT_SELL)) {
 		auto e = PlayerEvent::MerchantSellEvent{
