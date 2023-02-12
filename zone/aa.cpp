@@ -1226,7 +1226,7 @@ void Client::FinishAlternateAdvancementPurchase(AA::Rank *rank, bool ignore_cost
 	}
 
 	if (parse->PlayerHasQuestSub(EVENT_AA_BUY)) {
-		const auto export_string = fmt::format(
+		const auto& export_string = fmt::format(
 			"{} {} {} {}",
 			cost,
 			rank->id,
