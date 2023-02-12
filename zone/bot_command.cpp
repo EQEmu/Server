@@ -9478,17 +9478,17 @@ void bot_subcommand_inventory_remove(Client *c, const Seperator *sep)
 			)
 		);
 
-		const auto export_string = fmt::format(
-			"{} {}",
-			inst->IsStackable() ? inst->GetCharges() : 1,
-			slot_id
-		);
+		if (parse->BotHasQuestSub(EVENT_UNEQUIP_ITEM_BOT)) {
+			const auto export_string = fmt::format(
+				"{} {}",
+				inst->IsStackable() ? inst->GetCharges() : 1,
+				slot_id
+			);
 
-		std::vector<std::any> args;
+			std::vector<std::any> args = { inst };
 
-		args.emplace_back(inst);
-
-		parse->EventBot(EVENT_UNEQUIP_ITEM_BOT, my_bot, nullptr, export_string, inst->GetID(), &args);
+			parse->EventBot(EVENT_UNEQUIP_ITEM_BOT, my_bot, nullptr, export_string, inst->GetID(), &args);
+		}
 	}
 }
 

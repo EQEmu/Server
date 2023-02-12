@@ -1432,7 +1432,11 @@ bool Client::AutoPutLootInInventory(EQ::ItemInstance& inst, bool try_worn, bool 
 					if (worn_slot_material != EQ::textures::materialInvalid) {
 						SendWearChange(worn_slot_material);
 					}
-					parse->EventItem(EVENT_EQUIP_ITEM, this, &inst, nullptr, "", i);
+
+					if (parse->ItemHasQuestSub(&inst, EVENT_EQUIP_ITEM)) {
+						parse->EventItem(EVENT_EQUIP_ITEM, this, &inst, nullptr, "", i);
+					}
+
 					return true;
 				}
 			}
@@ -2214,61 +2218,73 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 
 		if (src_slot_id <= EQ::invslot::EQUIPMENT_END) {
 			if(src_inst) {
-				parse->EventItem(EVENT_UNEQUIP_ITEM, this, src_inst, nullptr, "", src_slot_id);
+				if (parse->ItemHasQuestSub(src_inst, EVENT_UNEQUIP_ITEM)) {
+					parse->EventItem(EVENT_UNEQUIP_ITEM, this, src_inst, nullptr, "", src_slot_id);
+				}
 
-				std::string export_string = fmt::format(
-					"{} {}",
-					src_inst->IsStackable() ? src_inst->GetCharges() : 1,
-					src_slot_id
-				);
+				if (parse->PlayerHasQuestSub(EVENT_UNEQUIP_ITEM_CLIENT)) {
+					const auto export_string = fmt::format(
+						"{} {}",
+						src_inst->IsStackable() ? src_inst->GetCharges() : 1,
+						src_slot_id
+					);
 
-				parse->EventPlayer(EVENT_UNEQUIP_ITEM_CLIENT, this, export_string, src_inst->GetItem()->ID);
+					parse->EventPlayer(EVENT_UNEQUIP_ITEM_CLIENT, this, export_string, src_inst->GetItem()->ID);
+				}
 			}
 
-			if(dst_inst) {
-				parse->EventItem(EVENT_EQUIP_ITEM, this, dst_inst, nullptr, "", src_slot_id);
+			if (dst_inst) {
+				if (parse->ItemHasQuestSub(dst_inst, EVENT_EQUIP_ITEM)) {
+					parse->EventItem(EVENT_EQUIP_ITEM, this, dst_inst, nullptr, "", src_slot_id);
+				}
 
-				std::string export_string = fmt::format(
-					"{} {}",
-					dst_inst->IsStackable() ? dst_inst->GetCharges() : 1,
-					src_slot_id
-				);
+				if (parse->PlayerHasQuestSub(EVENT_EQUIP_ITEM_CLIENT)) {
+					const auto export_string = fmt::format(
+						"{} {}",
+						dst_inst->IsStackable() ? dst_inst->GetCharges() : 1,
+						src_slot_id
+					);
 
-				parse->EventPlayer(EVENT_EQUIP_ITEM_CLIENT, this, export_string, dst_inst->GetItem()->ID);
+					parse->EventPlayer(EVENT_EQUIP_ITEM_CLIENT, this, export_string, dst_inst->GetItem()->ID);
+				}
 			}
 		}
 
 		if (dst_slot_id <= EQ::invslot::EQUIPMENT_END) {
-			if(dst_inst) {
-				parse->EventItem(EVENT_UNEQUIP_ITEM, this, dst_inst, nullptr, "", dst_slot_id);
+			if (dst_inst) {
+				if (parse->ItemHasQuestSub(dst_inst, EVENT_UNEQUIP_ITEM)) {
+					parse->EventItem(EVENT_UNEQUIP_ITEM, this, dst_inst, nullptr, "", dst_slot_id);
+				}
 
-				std::string export_string = fmt::format(
-					"{} {}",
-					dst_inst->IsStackable() ? dst_inst->GetCharges() : 1,
-					dst_slot_id
-				);
+				if (parse->PlayerHasQuestSub(EVENT_UNEQUIP_ITEM_CLIENT)) {
+					const auto export_string = fmt::format(
+						"{} {}",
+						dst_inst->IsStackable() ? dst_inst->GetCharges() : 1,
+						dst_slot_id
+					);
 
-				std::vector<std::any> args;
+					std::vector<std::any> args = { dst_inst };
 
-				args.emplace_back(dst_inst);
-
-				parse->EventPlayer(EVENT_UNEQUIP_ITEM_CLIENT, this, export_string, dst_inst->GetItem()->ID, &args);
+					parse->EventPlayer(EVENT_UNEQUIP_ITEM_CLIENT, this, export_string, dst_inst->GetItem()->ID, &args);
+				}
 			}
 
-			if(src_inst) {
-				parse->EventItem(EVENT_EQUIP_ITEM, this, src_inst, nullptr, "", dst_slot_id);
+			if (src_inst) {
+				if (parse->ItemHasQuestSub(src_inst, EVENT_EQUIP_ITEM)) {
+					parse->EventItem(EVENT_EQUIP_ITEM, this, src_inst, nullptr, "", dst_slot_id);
+				}
 
-				std::string export_string = fmt::format(
-					"{} {}",
-					src_inst->IsStackable() ? src_inst->GetCharges() : 1,
-					dst_slot_id
-				);
+				if (parse->PlayerHasQuestSub(EVENT_EQUIP_ITEM_CLIENT)) {
+					const auto export_string = fmt::format(
+						"{} {}",
+						src_inst->IsStackable() ? src_inst->GetCharges() : 1,
+						dst_slot_id
+					);
 
-				std::vector<std::any> args;
+					std::vector<std::any> args = { src_inst };
 
-				args.emplace_back(src_inst);
-
-				parse->EventPlayer(EVENT_EQUIP_ITEM_CLIENT, this, export_string, src_inst->GetItem()->ID, &args);
+					parse->EventPlayer(EVENT_EQUIP_ITEM_CLIENT, this, export_string, src_inst->GetItem()->ID, &args);
+				}
 			}
 		}
 	}
