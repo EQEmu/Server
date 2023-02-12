@@ -388,8 +388,7 @@ void Client::GoFish()
 					}
 
 					if (parse->PlayerHasQuestSub(EVENT_FISH_SUCCESS)) {
-						std::vector<std::any> args;
-						args.push_back(inst);
+						std::vector<std::any> args = { inst };
 						parse->EventPlayer(EVENT_FISH_SUCCESS, this, "", inst->GetID(), &args);
 					}
 				}
@@ -521,8 +520,7 @@ void Client::ForageItem(bool guarantee) {
 				}
 
 				if (parse->PlayerHasQuestSub(EVENT_FORAGE_SUCCESS)) {
-					std::vector<std::any> args;
-					args.push_back(inst);
+					std::vector<std::any> args = { inst };
 					parse->EventPlayer(EVENT_FORAGE_SUCCESS, this, "", inst->GetID(), &args);
 				}
 			}
