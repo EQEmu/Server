@@ -529,8 +529,8 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 			}
 
 			if (parse->PlayerHasQuestSub(EVENT_PLAYER_PICKUP)) {
-				std::vector<std::any> args;
-				args.push_back(m_inst);
+				std::vector<std::any> args = { m_inst };
+
 				if (parse->EventPlayer(EVENT_PLAYER_PICKUP, sender, std::to_string(item->ID), GetID(), &args)) {
 					auto outapp = new EQApplicationPacket(OP_ClickObject, sizeof(ClickObject_Struct));
 					memcpy(outapp->pBuffer, click_object, sizeof(ClickObject_Struct));
