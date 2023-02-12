@@ -534,7 +534,7 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 				if (parse->EventPlayer(EVENT_PLAYER_PICKUP, sender, std::to_string(item->ID), GetID(), &args)) {
 					auto outapp = new EQApplicationPacket(OP_ClickObject, sizeof(ClickObject_Struct));
 					memcpy(outapp->pBuffer, click_object, sizeof(ClickObject_Struct));
-					auto* co = (ClickObject_Struct *) outapp->pBuffer;
+					auto* co = (ClickObject_Struct*) outapp->pBuffer;
 					co->drop_id = 0;
 					entity_list.QueueClients(nullptr, outapp, false);
 					safe_delete(outapp);
