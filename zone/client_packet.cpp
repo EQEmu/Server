@@ -13581,7 +13581,7 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 		safe_delete(qspack);
 	}
 	// end QS code
-	
+
 	if (parse->PlayerHasQuestSub(EVENT_MERCHANT_BUY)) {
 		const auto& export_string = fmt::format(
 			"{} {} {} {} {}",
