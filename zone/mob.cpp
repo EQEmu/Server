@@ -5355,32 +5355,35 @@ int16 Mob::GetCritDmgMod(uint16 skill, Mob* owner)
 
 void Mob::SetGrouped(bool v)
 {
-	if(v)
-	{
+	if (v) {
 		israidgrouped = false;
 	}
+
 	isgrouped = v;
 
-	if(IsClient())
-	{
+	if (IsClient()) {
+		if (parse->PlayerHasQuestSub(EVENT_GROUP_CHANGE)) {
 			parse->EventPlayer(EVENT_GROUP_CHANGE, CastToClient(), "", 0);
+		}
 
-		if(!v)
+		if (!v) {
 			CastToClient()->RemoveGroupXTargets();
+		}
 	}
 }
 
 void Mob::SetRaidGrouped(bool v)
 {
-	if(v)
-	{
+	if (v) {
 		isgrouped = false;
 	}
+
 	israidgrouped = v;
 
-	if(IsClient())
-	{
-		parse->EventPlayer(EVENT_GROUP_CHANGE, CastToClient(), "", 0);
+	if (IsClient()) {
+		if (parse->PlayerHasQuestSub(EVENT_GROUP_CHANGE)) {
+			parse->EventPlayer(EVENT_GROUP_CHANGE, CastToClient(), "", 0);
+		}
 	}
 }
 
