@@ -3662,19 +3662,25 @@ void EntityList::ClearFeignAggro(Mob *targ)
 			}
 
 			if (targ->IsClient()) {
-				std::vector<std::any> args;
-				args.push_back(it->second);
-				int i = parse->EventPlayer(EVENT_FEIGN_DEATH, targ->CastToClient(), "", 0, &args);
-				if (i != 0) {
-					++it;
-					continue;
-				}
+				if (parse->PlayerHasQuestSub(EVENT_FEIGN_DEATH)) {
+					std::vector<std::any> args = { it->second };
 
-				if (it->second->IsNPC()) {
-					int i = parse->EventNPC(EVENT_FEIGN_DEATH, it->second->CastToNPC(), targ, "", 0);
+					int i = parse->EventPlayer(EVENT_FEIGN_DEATH, targ->CastToClient(), "", 0, &args);
 					if (i != 0) {
 						++it;
 						continue;
+					}
+				}
+
+				if (it->second->IsNPC()) {
+					if (parse->HasQuestSub(it->second->GetNPCTypeID(), EVENT_FEIGN_DEATH)) {
+						std::vector<std::any> args = { it->second };
+
+						int i = parse->EventNPC(EVENT_FEIGN_DEATH, it->second->CastToNPC(), targ, "", 0);
+						if (i != 0) {
+							++it;
+							continue;
+						}
 					}
 				}
 			}
