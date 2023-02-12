@@ -8089,7 +8089,10 @@ void Client::TryItemTick(int slot)
 		if (GetLevel() >= zone->tick_items[iid].level && zone->random.Int(0, 100) >= (100 - zone->tick_items[iid].chance) && (zone->tick_items[iid].bagslot || slot <= EQ::invslot::EQUIPMENT_END))
 		{
 			EQ::ItemInstance* e_inst = (EQ::ItemInstance*)inst;
-			parse->EventItem(EVENT_ITEM_TICK, this, e_inst, nullptr, "", slot);
+
+			if (parse->ItemHasQuestSub(e_inst, EVENT_ITEM_TICK)) {
+				parse->EventItem(EVENT_ITEM_TICK, this, e_inst, nullptr, "", slot);
+			}
 		}
 	}
 
@@ -8107,8 +8110,11 @@ void Client::TryItemTick(int slot)
 		{
 			if( GetLevel() >= zone->tick_items[iid].level && zone->random.Int(0, 100) >= (100 - zone->tick_items[iid].chance) )
 			{
-				EQ::ItemInstance* e_inst = (EQ::ItemInstance*)a_inst;
-				parse->EventItem(EVENT_ITEM_TICK, this, e_inst, nullptr, "", slot);
+				EQ::ItemInstance* e_inst = (EQ::ItemInstance*) a_inst;
+
+				if (parse->ItemHasQuestSub(e_inst, EVENT_ITEM_TICK)) {
+					parse->EventItem(EVENT_ITEM_TICK, this, e_inst, nullptr, "", slot);
+				}
 			}
 		}
 	}
