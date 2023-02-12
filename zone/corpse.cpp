@@ -1420,17 +1420,18 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 			}
 		}
 
-		std::string export_string = fmt::format(
+		const auto export_string = fmt::format(
 			"{} {} {} {}",
 			inst->GetItem()->ID,
 			inst->GetCharges(),
 			EntityList::RemoveNumbers(corpse_name),
 			GetID()
 		);
-		std::vector<std::any> args;
-		args.push_back(inst);
-		args.push_back(this);
-		bool prevent_loot = false;
+
+		std::vector<std::any> args = { inst, this };
+
+		auto prevent_loot = false;
+
 		if (RuleB(Zone, UseZoneController)) {
 			auto controller = entity_list.GetNPCByNPCTypeID(ZONE_CONTROLLER_NPC_ID);
 			if (controller) {
