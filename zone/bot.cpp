@@ -5166,8 +5166,11 @@ void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client*
 			std::vector<EQ::ItemInstance*> items(insts, insts + std::size(insts));
 
 			// Check if EVENT_TRADE accepts any items
-			std::vector<std::any> item_list(items.begin(), items.end());
-			parse->EventBot(EVENT_TRADE, this, client, "", 0, &item_list);
+			if (parse->BotHasQuestSub(EVENT_TRADE)) {
+				std::vector<std::any> item_list(items.begin(), items.end());
+				parse->EventBot(EVENT_TRADE, this, client, "", 0, &item_list);
+			}
+
 			CalcBotStats(false);
 
 		} else {
@@ -5182,8 +5185,11 @@ void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client*
 			std::vector<EQ::ItemInstance*> items(insts, insts + std::size(insts));
 
 			// Check if EVENT_TRADE accepts any items
-			std::vector<std::any> item_list(items.begin(), items.end());
-			parse->EventBot(EVENT_TRADE, this, client, "", 0, &item_list);
+			if (parse->BotHasQuestSub(EVENT_TRADE)) {
+				std::vector<std::any> item_list(items.begin(), items.end());
+				parse->EventBot(EVENT_TRADE, this, client, "", 0, &item_list);
+			}
+
 			CalcBotStats(false);
 		}
 	}
