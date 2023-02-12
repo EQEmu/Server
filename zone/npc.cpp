@@ -898,7 +898,10 @@ bool NPC::Process()
 	}
 
 	if (tic_timer.Check()) {
-		parse->EventNPC(EVENT_TICK, this, nullptr, "", 0);
+		if (parse->HasQuestSub(GetNPCTypeID(), EVENT_TICK)) {
+			parse->EventNPC(EVENT_TICK, this, nullptr, "", 0);
+		}
+
 		BuffProcess();
 
 		if (currently_fleeing) {
