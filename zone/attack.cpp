@@ -1814,7 +1814,9 @@ bool Client::Death(Mob* killerMob, int64 damage, uint16 spell, EQ::skills::Skill
 
 	if (killerMob) {
 		if (killerMob->IsNPC()) {
-			parse->EventNPC(EVENT_SLAY, killerMob->CastToNPC(), this, "", 0);
+			if (parse->HasQuestSub(killerMob->GetNPCTypeID(), EVENT_SLAY)) {
+				parse->EventNPC(EVENT_SLAY, killerMob->CastToNPC(), this, "", 0);
+			}
 
 			mod_client_death_npc(killerMob);
 
@@ -1825,7 +1827,9 @@ bool Client::Death(Mob* killerMob, int64 damage, uint16 spell, EQ::skills::Skill
 
 			killerMob->TrySpellOnKill(killed_level, spell);
 		} else if (killerMob->IsBot()) {
-			parse->EventBot(EVENT_SLAY, killerMob->CastToBot(), this, "", 0);
+			if (parse->BotHasQuestSub(EVENT_SLAY)) {
+				parse->EventBot(EVENT_SLAY, killerMob->CastToBot(), this, "", 0);
+			}
 			killerMob->TrySpellOnKill(killed_level, spell);
 		}
 
