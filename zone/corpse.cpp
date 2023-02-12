@@ -1469,7 +1469,7 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 		}
 
 		// do we want this to have a fail option too? Sure?
-		if (parse->EventItem(EVENT_LOOT, client, inst, this, export_string, 0) != 0) {
+		if (parse->EventItem(EVENT_LOOT, client, inst, this, export_string, 0, &args) != 0) {
 			prevent_loot = true;
 		}
 
