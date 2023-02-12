@@ -3992,9 +3992,7 @@ void EntityList::ProcessMove(Client *c, const glm::vec3& location)
 	for (auto iter = events.begin(); iter != events.end(); ++iter) {
 		quest_proximity_event& evt = (*iter);
 
-		std::vector<std::any> args;
-		args.push_back(&evt.area_id);
-		args.push_back(&evt.area_type);
+		std::vector<std::any> args = { &evt.area_id, &evt.area_type };
 
 		if (evt.npc) {
 			if (evt.event_id == EVENT_ENTER) {
@@ -4043,20 +4041,22 @@ void EntityList::ProcessMove(NPC *n, float x, float y, float z) {
 
 	std::list<quest_proximity_event> events;
 
-	for (auto iter = area_list.begin(); iter != area_list.end(); ++iter) {
-
-		Area &a     = (*iter);
+	for (const auto& a : area_list) {
 		bool old_in = true;
 		bool new_in = true;
-		if (last_x < a.min_x || last_x > a.max_x ||
-			last_y < a.min_y || last_y > a.max_y ||
-			last_z < a.min_z || last_z > a.max_z) {
+		if (
+			!EQ::ValueWithin(last_x, a.min_x, a.max_x) ||
+			!EQ::ValueWithin(last_y, a.min_y, a.max_y) ||
+			!EQ::ValueWithin(last_z, a.min_z, a.max_z)
+		) {
 			old_in = false;
 		}
 
-		if (x < a.min_x || x > a.max_x ||
-			y < a.min_y || y > a.max_y ||
-			z < a.min_z || z > a.max_z) {
+		if (
+			!EQ::ValueWithin(x, a.min_x, a.max_x) ||
+			!EQ::ValueWithin(y, a.min_y, a.max_y) ||
+			!EQ::ValueWithin(z, a.min_z, a.max_z)
+		) {
 			new_in = false;
 		}
 
@@ -4068,7 +4068,7 @@ void EntityList::ProcessMove(NPC *n, float x, float y, float z) {
 			evt.npc       = n;
 			evt.area_id   = a.id;
 			evt.area_type = a.type;
-			events.push_back(evt);
+			events.emplace_back(evt);
 		}
 		else if (!old_in && new_in) {
 			//were not in but now are
@@ -4078,16 +4078,12 @@ void EntityList::ProcessMove(NPC *n, float x, float y, float z) {
 			evt.npc       = n;
 			evt.area_id   = a.id;
 			evt.area_type = a.type;
-			events.push_back(evt);
+			events.emplace_back(evt);
 		}
 	}
 
-	for (auto iter = events.begin(); iter != events.end(); ++iter) {
-		quest_proximity_event   &evt = (*iter);
-
-		std::vector<std::any> args;
-		args.push_back(&evt.area_id);
-		args.push_back(&evt.area_type);
+	for (const auto& evt : events) {
+		std::vector<std::any> args = { &evt.area_id, &evt.area_type };
 
 		if (evt.event_id == EVENT_ENTER) {
 			if (parse->HasQuestSub(evt.npc->GetNPCTypeID(), EVENT_ENTER)) {
