@@ -5169,14 +5169,18 @@ void Client::ShowSkillsWindow()
 
 void Client::Signal(int signal_id)
 {
-	const auto export_string = fmt::format("{}", signal_id);
-	parse->EventPlayer(EVENT_SIGNAL, this, export_string, 0);
+	if (parse->PlayerHasQuestSub(EVENT_SIGNAL)) {
+		parse->EventPlayer(EVENT_SIGNAL, this, std::to_string(signal_id), 0);
+	}
 }
 
 void Client::SendPayload(int payload_id, std::string payload_value)
 {
-	const auto export_string = fmt::format("{} {}", payload_id, payload_value);
-	parse->EventPlayer(EVENT_PAYLOAD, this, export_string, 0);
+	if (parse->PlayerHasQuestSub(EVENT_PAYLOAD)) {
+		const auto& export_string = fmt::format("{} {}", payload_id, payload_value);
+
+		parse->EventPlayer(EVENT_PAYLOAD, this, export_string, 0);
+	}
 }
 
 void Client::SendRewards()

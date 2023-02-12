@@ -3056,8 +3056,11 @@ void NPC::SignalNPC(int _signal_id)
 
 void NPC::SendPayload(int payload_id, std::string payload_value)
 {
-	const auto export_string = fmt::format("{} {}", payload_id, payload_value);
-	parse->EventNPC(EVENT_PAYLOAD, this, nullptr, export_string, 0);
+	if (parse->HasQuestSub(GetNPCTypeID(), EVENT_PAYLOAD)) {
+		const auto& export_string = fmt::format("{} {}", payload_id, payload_value);
+
+		parse->EventNPC(EVENT_PAYLOAD, this, nullptr, export_string, 0);
+	}
 }
 
 NPC_Emote_Struct* NPC::GetNPCEmote(uint32 emoteid, uint8 event_) {
