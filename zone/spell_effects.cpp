@@ -162,7 +162,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 		}
 	}
 
-	std::string export_string = fmt::format(
+	const auto& export_string = fmt::format(
 		"{} {} {} {}",
 		caster ? caster->GetID() : 0,
 		buffslot >= 0 ? buffs[buffslot].ticsremaining : 0,
@@ -3797,7 +3797,7 @@ void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
 
 	const SPDat_Spell_Struct &spell = spells[buff.spellid];
 
-	const auto export_string = fmt::format(
+	const auto& export_string = fmt::format(
 		"{} {} {} {}",
 		caster ? caster->GetID() : 0,
 		buffs[slot].ticsremaining,
@@ -4154,7 +4154,7 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 
 	LogSpells("Fading buff [{}] from slot [{}]", buffs[slot].spellid, slot);
 
-	const auto export_string = fmt::format(
+	const auto& export_string = fmt::format(
 		"{} {} {} {}",
 		buffs[slot].casterid,
 		buffs[slot].ticsremaining,

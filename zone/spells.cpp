@@ -237,7 +237,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 		}
 	}
 
-	const auto export_string = fmt::format(
+	const auto& export_string = fmt::format(
 		"{} {} {}",
 		spell_id,
 		GetID(),
@@ -1642,7 +1642,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 	// at this point the spell has successfully been cast
 	//
 
-	const auto export_string = fmt::format(
+	const auto& export_string = fmt::format(
 		"{} {} {}",
 		spell_id,
 		GetID(),
@@ -3654,7 +3654,7 @@ bool Mob::SpellOnTarget(
 	);
 
 	/* Send the EVENT_CAST_ON event */
-	const auto export_string = fmt::format(
+	const auto& export_string = fmt::format(
 		"{} {} {}",
 		spell_id,
 		GetID(),
