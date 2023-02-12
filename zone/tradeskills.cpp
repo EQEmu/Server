@@ -151,7 +151,7 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 				args.push_back(aug);
 
 				if (parse->PlayerHasQuestSub(EVENT_AUGMENT_INSERT_CLIENT)) {
-					const auto export_string = fmt::format(
+					const auto& export_string = fmt::format(
 						"{} {} {} {}",
 						tobe_auged->GetID(),
 						-1,

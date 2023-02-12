@@ -3129,7 +3129,7 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 							}
 
 							if (parse->PlayerHasQuestSub(EVENT_AUGMENT_REMOVE_CLIENT)) {
-								const auto export_string = fmt::format(
+								const auto& export_string = fmt::format(
 									"{} {} {} {} {}",
 									tobe_auged->GetID(),
 									item_slot,
@@ -3181,7 +3181,7 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 							args.push_back(aug);
 
 							if (parse->PlayerHasQuestSub(EVENT_AUGMENT_INSERT_CLIENT)) {
-								const auto export_string = fmt::format(
+								const auto& export_string = fmt::format(
 									"{} {} {} {}",
 									tobe_auged->GetID(),
 									item_slot,
@@ -3274,7 +3274,7 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 					args.push_back(aug);
 
 					if (parse->PlayerHasQuestSub(EVENT_AUGMENT_REMOVE_CLIENT)) {
-						const auto export_string = fmt::format(
+						const auto& export_string = fmt::format(
 							"{} {} {} {} {}",
 							tobe_auged->GetID(),
 							item_slot,
@@ -3362,7 +3362,7 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 					args.push_back(aug);
 
 					if (parse->PlayerHasQuestSub(EVENT_AUGMENT_REMOVE_CLIENT)) {
-						const auto export_string = fmt::format(
+						const auto& export_string = fmt::format(
 							"{} {} {} {} {}",
 							tobe_auged->GetID(),
 							item_slot,
