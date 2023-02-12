@@ -1922,7 +1922,10 @@ void Mob::AI_Event_Engaged(Mob *attacker, bool yell_for_help)
 			//if the target dies before it goes off
 			if (attacker->GetHP() > 0) {
 				if (!CastToNPC()->GetCombatEvent() && GetHP() > 0) {
-					parse->EventNPC(EVENT_COMBAT, CastToNPC(), attacker, "1", 0);
+					if (parse->HasQuestSub(GetNPCTypeID(), EVENT_COMBAT)) {
+						parse->EventNPC(EVENT_COMBAT, CastToNPC(), attacker, "1", 0);
+					}
+
 					auto emote_id = GetEmoteID();
 					if (emote_id) {
 						CastToNPC()->DoNPCEmote(EQ::constants::EmoteEventTypes::EnterCombat, emoteid);
@@ -1937,7 +1940,9 @@ void Mob::AI_Event_Engaged(Mob *attacker, bool yell_for_help)
 	}
 
 	if (IsBot()) {
-		parse->EventBot(EVENT_COMBAT, CastToBot(), attacker, "1", 0);
+		if (parse->BotHasQuestSub(EVENT_COMBAT)) {
+			parse->EventBot(EVENT_COMBAT, CastToBot(), attacker, "1", 0);
+		}
 	}
 }
 
@@ -1965,7 +1970,11 @@ void Mob::AI_Event_NoLongerEngaged() {
 		if (CastToNPC()->GetCombatEvent() && GetHP() > 0) {
 			if (entity_list.GetNPCByID(GetID())) {
 				auto emote_id = CastToNPC()->GetEmoteID();
-				parse->EventNPC(EVENT_COMBAT, CastToNPC(), nullptr, "0", 0);
+
+				if (parse->HasQuestSub(GetNPCTypeID(), EVENT_COMBAT)) {
+					parse->EventNPC(EVENT_COMBAT, CastToNPC(), nullptr, "0", 0);
+				}
+
 				if (emote_id) {
 					CastToNPC()->DoNPCEmote(EQ::constants::EmoteEventTypes::LeaveCombat, emoteid);
 				}
@@ -1975,7 +1984,9 @@ void Mob::AI_Event_NoLongerEngaged() {
 			}
 		}
 	} else if (IsBot()) {
-		parse->EventBot(EVENT_COMBAT, CastToBot(), nullptr, "0", 0);
+		if (parse->BotHasQuestSub(EVENT_COMBAT)) {
+			parse->EventBot(EVENT_COMBAT, CastToBot(), nullptr, "0", 0);
+		}
 	}
 }
 
