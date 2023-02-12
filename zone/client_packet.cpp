@@ -6020,14 +6020,17 @@ void Client::Handle_OP_EnvDamage(const EQApplicationPacket *app)
 		return;
 	} else {
 		SetHP(GetHP() - (damage * RuleR(Character, EnvironmentDamageMulipliter)));
-		int final_damage = (damage * RuleR(Character, EnvironmentDamageMulipliter));
-		std::string export_string = fmt::format(
-			"{} {} {}",
-			ed->damage,
-			ed->dmgtype,
-			final_damage
-		);
-		parse->EventPlayer(EVENT_ENVIRONMENTAL_DAMAGE, this, export_string, 0);
+
+		if (parse->PlayerHasQuestSub(EVENT_ENVIRONMENTAL_DAMAGE)) {
+			int        final_damage  = (damage * RuleR(Character, EnvironmentDamageMulipliter));
+			const auto export_string = fmt::format(
+				"{} {} {}",
+				ed->damage,
+				ed->dmgtype,
+				final_damage
+			);
+			parse->EventPlayer(EVENT_ENVIRONMENTAL_DAMAGE, this, export_string, 0);
+		}
 	}
 
 	if (GetHP() <= 0) {
