@@ -2223,7 +2223,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 				}
 
 				if (parse->PlayerHasQuestSub(EVENT_UNEQUIP_ITEM_CLIENT)) {
-					const auto export_string = fmt::format(
+					const auto& export_string = fmt::format(
 						"{} {}",
 						src_inst->IsStackable() ? src_inst->GetCharges() : 1,
 						src_slot_id
@@ -2239,7 +2239,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 				}
 
 				if (parse->PlayerHasQuestSub(EVENT_EQUIP_ITEM_CLIENT)) {
-					const auto export_string = fmt::format(
+					const auto& export_string = fmt::format(
 						"{} {}",
 						dst_inst->IsStackable() ? dst_inst->GetCharges() : 1,
 						src_slot_id
@@ -2257,7 +2257,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 				}
 
 				if (parse->PlayerHasQuestSub(EVENT_UNEQUIP_ITEM_CLIENT)) {
-					const auto export_string = fmt::format(
+					const auto& export_string = fmt::format(
 						"{} {}",
 						dst_inst->IsStackable() ? dst_inst->GetCharges() : 1,
 						dst_slot_id
@@ -2275,7 +2275,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 				}
 
 				if (parse->PlayerHasQuestSub(EVENT_EQUIP_ITEM_CLIENT)) {
-					const auto export_string = fmt::format(
+					const auto& export_string = fmt::format(
 						"{} {}",
 						src_inst->IsStackable() ? src_inst->GetCharges() : 1,
 						dst_slot_id

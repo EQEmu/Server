@@ -5060,7 +5060,7 @@ void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client*
 			BotRemoveEquipItem(return_iterator.from_bot_slot);
 
 			if (parse->BotHasQuestSub(EVENT_UNEQUIP_ITEM_BOT)) {
-				const auto export_string = fmt::format(
+				const auto& export_string = fmt::format(
 					"{} {}",
 					return_iterator.return_item_instance->IsStackable() ? return_iterator.return_item_instance->GetCharges() : 1,
 					return_iterator.from_bot_slot
@@ -5128,7 +5128,7 @@ void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client*
 		BotAddEquipItem(trade_iterator.to_bot_slot, (trade_iterator.trade_item_instance ? trade_iterator.trade_item_instance->GetID() : 0));
 
 		if (parse->BotHasQuestSub(EVENT_EQUIP_ITEM_BOT)) {
-			const auto export_string = fmt::format(
+			const auto& export_string = fmt::format(
 				"{} {}",
 				trade_iterator.trade_item_instance->IsStackable() ? trade_iterator.trade_item_instance->GetCharges() : 1,
 				trade_iterator.to_bot_slot
