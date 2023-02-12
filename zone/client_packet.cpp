@@ -9241,7 +9241,7 @@ void Client::Handle_OP_LDoNInspect(const EQApplicationPacket *app)
 	auto* t = GetTarget();
 	if (t && t->GetClass() == LDON_TREASURE && !t->IsAura()) {
 		if (parse->PlayerHasQuestSub(EVENT_INSPECT)) {
-			std::vector<std::any> args = {t};
+			std::vector<std::any> args = { t };
 			if (parse->EventPlayer(EVENT_INSPECT, this, "", t->GetID(), &args) == 0) {
 				Message(Chat::Yellow, fmt::format("{}", t->GetCleanName()).c_str());
 			}
