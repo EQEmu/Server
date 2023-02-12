@@ -1420,7 +1420,7 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 			}
 		}
 
-		const auto export_string = fmt::format(
+		const auto& export_string = fmt::format(
 			"{} {} {} {}",
 			inst->GetItem()->ID,
 			inst->GetCharges(),
