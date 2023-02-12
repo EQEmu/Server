@@ -3998,23 +3998,39 @@ void EntityList::ProcessMove(Client *c, const glm::vec3& location)
 
 		if (evt.npc) {
 			if (evt.event_id == EVENT_ENTER) {
-				parse->EventNPC(EVENT_ENTER, evt.npc, evt.client, "", 0);
+				if (parse->HasQuestSub(evt.npc->GetNPCTypeID(), EVENT_ENTER)) {
+					parse->EventNPC(EVENT_ENTER, evt.npc, evt.client, "", 0);
+				}
 			} else if (evt.event_id == EVENT_EXIT) {
-				parse->EventNPC(EVENT_EXIT, evt.npc, evt.client, "", 0);
+				if (parse->HasQuestSub(evt.npc->GetNPCTypeID(), EVENT_EXIT)) {
+					parse->EventNPC(EVENT_EXIT, evt.npc, evt.client, "", 0);
+				}
 			} else if (evt.event_id == EVENT_ENTER_AREA) {
-				parse->EventNPC(EVENT_ENTER_AREA, evt.npc, evt.client, "", 0, &args);
+				if (parse->HasQuestSub(evt.npc->GetNPCTypeID(), EVENT_ENTER_AREA)) {
+					parse->EventNPC(EVENT_ENTER_AREA, evt.npc, evt.client, "", 0, &args);
+				}
 			} else if (evt.event_id == EVENT_LEAVE_AREA) {
-				parse->EventNPC(EVENT_LEAVE_AREA, evt.npc, evt.client, "", 0, &args);
+				if (parse->HasQuestSub(evt.npc->GetNPCTypeID(), EVENT_LEAVE_AREA)) {
+					parse->EventNPC(EVENT_LEAVE_AREA, evt.npc, evt.client, "", 0, &args);
+				}
 			}
 		} else {
 			if (evt.event_id == EVENT_ENTER) {
-				parse->EventPlayer(EVENT_ENTER, evt.client, "", 0);
+				if (parse->PlayerHasQuestSub(EVENT_ENTER)) {
+					parse->EventPlayer(EVENT_ENTER, evt.client, "", 0);
+				}
 			} else if (evt.event_id == EVENT_EXIT) {
-				parse->EventPlayer(EVENT_EXIT, evt.client, "", 0);
+				if (parse->PlayerHasQuestSub(EVENT_EXIT)) {
+					parse->EventPlayer(EVENT_EXIT, evt.client, "", 0);
+				}
 			} else if (evt.event_id == EVENT_ENTER_AREA) {
-				parse->EventPlayer(EVENT_ENTER_AREA, evt.client, "", 0, &args);
+				if (parse->PlayerHasQuestSub(EVENT_ENTER_AREA)) {
+					parse->EventPlayer(EVENT_ENTER_AREA, evt.client, "", 0, &args);
+				}
 			} else if (evt.event_id == EVENT_LEAVE_AREA) {
-				parse->EventPlayer(EVENT_LEAVE_AREA, evt.client, "", 0, &args);
+				if (parse->PlayerHasQuestSub(EVENT_LEAVE_AREA)) {
+					parse->EventPlayer(EVENT_LEAVE_AREA, evt.client, "", 0, &args);
+				}
 			}
 		}
 	}
@@ -4074,13 +4090,21 @@ void EntityList::ProcessMove(NPC *n, float x, float y, float z) {
 		args.push_back(&evt.area_type);
 
 		if (evt.event_id == EVENT_ENTER) {
-			parse->EventNPC(EVENT_ENTER, evt.npc, evt.client, "", 0);
+			if (parse->HasQuestSub(evt.npc->GetNPCTypeID(), EVENT_ENTER)) {
+				parse->EventNPC(EVENT_ENTER, evt.npc, evt.client, "", 0);
+			}
 		} else if (evt.event_id == EVENT_EXIT) {
-			parse->EventNPC(EVENT_EXIT, evt.npc, evt.client, "", 0);
+			if (parse->HasQuestSub(evt.npc->GetNPCTypeID(), EVENT_EXIT)) {
+				parse->EventNPC(EVENT_EXIT, evt.npc, evt.client, "", 0);
+			}
 		} else if (evt.event_id == EVENT_ENTER_AREA) {
-			parse->EventNPC(EVENT_ENTER_AREA, evt.npc, evt.client, "", 0, &args);
+			if (parse->HasQuestSub(evt.npc->GetNPCTypeID(), EVENT_ENTER_AREA)) {
+				parse->EventNPC(EVENT_ENTER_AREA, evt.npc, evt.client, "", 0, &args);
+			}
 		} else if (evt.event_id == EVENT_LEAVE_AREA) {
-			parse->EventNPC(EVENT_LEAVE_AREA, evt.npc, evt.client, "", 0, &args);
+			if (parse->HasQuestSub(evt.npc->GetNPCTypeID(), EVENT_LEAVE_AREA)) {
+				parse->EventNPC(EVENT_LEAVE_AREA, evt.npc, evt.client, "", 0, &args);
+			}
 		}
 	}
 }
