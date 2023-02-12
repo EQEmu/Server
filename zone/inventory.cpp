@@ -925,9 +925,7 @@ void Client::DropItem(int16 slot_id, bool recurse)
 		}
 
 		if (parse->PlayerHasQuestSub(EVENT_DROP_ITEM_CLIENT)) {
-			std::vector<std::any> args;
-
-			args.emplace_back(inst);
+			std::vector<std::any> args = { inst };
 
 			i = parse->EventPlayer(EVENT_DROP_ITEM_CLIENT, this, "", slot_id, &args);
 			if (i != 0) {
