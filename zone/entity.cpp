@@ -683,7 +683,9 @@ void EntityList::AddNPC(NPC *npc, bool send_spawn_packet, bool dont_queue)
 	npc_list.insert(std::pair<uint16, NPC *>(npc->GetID(), npc));
 	mob_list.insert(std::pair<uint16, Mob *>(npc->GetID(), npc));
 
-	parse->EventNPC(EVENT_SPAWN, npc, nullptr, "", 0);
+	if (parse->HasQuestSub(npc->GetNPCTypeID())) {
+		parse->EventNPC(EVENT_SPAWN, npc, nullptr, "", 0);
+	}
 
 	const auto emote_id = npc->GetEmoteID();
 	if (emote_id != 0) {
@@ -722,7 +724,9 @@ void EntityList::AddNPC(NPC *npc, bool send_spawn_packet, bool dont_queue)
 
 	entity_list.ScanCloseMobs(npc->close_mobs, npc, true);
 
-	npc->DispatchZoneControllerEvent(EVENT_SPAWN_ZONE, npc, "", 0, nullptr);
+	if (parse->HasQuestSub(ZONE_CONTROLLER_NPC_ID, EVENT_SPAWN_ZONE)) {
+		npc->DispatchZoneControllerEvent(EVENT_SPAWN_ZONE, npc, "", 0, nullptr);
+	}
 
 	if (zone->HasMap() && zone->HasWaterMap()) {
 		npc->SetSpawnedInWater(false);
