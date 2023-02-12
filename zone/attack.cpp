@@ -1451,12 +1451,14 @@ void Mob::DoAttack(Mob *other, DamageHitInfo &hit, ExtraAttackOptions *opts, boo
 		}
 
 		if (IsBot()) {
-			const auto export_string = fmt::format(
-				"{} {}",
-				hit.skill,
-				GetSkill(hit.skill)
-			);
-			parse->EventBot(EVENT_USE_SKILL, CastToBot(), nullptr, export_string, 0);
+			if (parse->BotHasQuestSub(EVENT_USE_SKILL)) {
+				const auto export_string = fmt::format(
+					"{} {}",
+					hit.skill,
+					GetSkill(hit.skill)
+				);
+				parse->EventBot(EVENT_USE_SKILL, CastToBot(), nullptr, export_string, 0);
+			}
 		}
 	}
 }

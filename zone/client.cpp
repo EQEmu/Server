@@ -2508,22 +2508,35 @@ uint64 Client::GetAllMoney() {
 }
 
 bool Client::CheckIncreaseSkill(EQ::skills::SkillType skillid, Mob *against_who, int chancemodi) {
-	if (IsDead() || IsUnconscious())
+	if (IsDead() || IsUnconscious()) {
 		return false;
-	if (IsAIControlled()) // no skillups while chamred =p
+	}
+
+	if (IsAIControlled()) { // no skillups while chamred =p
 		return false;
-	if (against_who != nullptr && against_who->IsCorpse()) // no skillups on corpses
+	}
+
+	if (against_who && against_who->IsCorpse()) { // no skillups on corpses
 		return false;
-	if (skillid > EQ::skills::HIGHEST_SKILL)
+	}
+
+	if (skillid > EQ::skills::HIGHEST_SKILL) {
 		return false;
-	int skillval = GetRawSkill(skillid);
-	int maxskill = GetMaxSkillAfterSpecializationRules(skillid, MaxSkill(skillid));
-	std::string export_string = fmt::format(
-		"{} {}",
-		skillid,
-		skillval
-	);
-	parse->EventPlayer(EVENT_USE_SKILL, this, export_string, 0);
+	}
+
+	auto skillval = GetRawSkill(skillid);
+	auto maxskill = GetMaxSkillAfterSpecializationRules(skillid, MaxSkill(skillid));
+
+	if (parse->PlayerHasQuestSub(EVENT_USE_SKILL)) {
+		const auto export_string = fmt::format(
+			"{} {}",
+			skillid,
+			skillval
+		);
+
+		parse->EventPlayer(EVENT_USE_SKILL, this, export_string, 0);
+	}
+
 	if (against_who) {
 		if (
 			against_who->GetSpecialAbility(IMMUNE_AGGRO) ||
@@ -2557,23 +2570,27 @@ bool Client::CheckIncreaseSkill(EQ::skills::SkillType skillid, Mob *against_who,
 		if(zone->random.Real(0, 99) < Chance)
 		{
 			SetSkill(skillid, GetRawSkill(skillid) + 1);
-			std::string export_string = fmt::format(
-				"{} {} {} {}",
-				skillid,
-				skillval+1,
-				maxskill,
-				0
-			);
-			parse->EventPlayer(EVENT_SKILL_UP, this, export_string, 0);
 
 			if (player_event_logs.IsEventEnabled(PlayerEvent::SKILL_UP)) {
 				auto e = PlayerEvent::SkillUpEvent{
 					.skill_id = static_cast<uint32>(skillid),
-					.value = (skillval + 1),
+					.value = static_cast<int>((skillval + 1)),
 					.max_skill = static_cast<int16>(maxskill),
 					.against_who = (against_who) ? against_who->GetCleanName() : GetCleanName(),
 				};
 				RecordPlayerEventLog(PlayerEvent::SKILL_UP, e);
+			}
+
+			if (parse->PlayerHasQuestSub(EVENT_SKILL_UP)) {
+				const auto export_string = fmt::format(
+					"{} {} {} {}",
+					skillid,
+					skillval + 1,
+					maxskill,
+					0
+				);
+
+				parse->EventPlayer(EVENT_SKILL_UP, this, export_string, 0);
 			}
 
 			LogSkills("Skill [{}] at value [{}] successfully gain with [{}] chance (mod [{}])", skillid, skillval, Chance, chancemodi);
@@ -2603,13 +2620,18 @@ void Client::CheckLanguageSkillIncrease(uint8 langid, uint8 TeacherSkill) {
 
 		if(zone->random.Real(0,100) < Chance) {	// if they make the roll
 			IncreaseLanguageSkill(langid);	// increase the language skill by 1
-			std::string export_string = fmt::format(
-				"{} {} {}",
-				langid,
-				LangSkill + 1,
-				100
-			);
-			parse->EventPlayer(EVENT_LANGUAGE_SKILL_UP, this, export_string, 0);
+
+			if (parse->PlayerHasQuestSub(EVENT_LANGUAGE_SKILL_UP)) {
+				const auto export_string = fmt::format(
+					"{} {} {}",
+					langid,
+					LangSkill + 1,
+					100
+				);
+
+				parse->EventPlayer(EVENT_LANGUAGE_SKILL_UP, this, export_string, 0);
+			}
+
 			LogSkills("Language [{}] at value [{}] successfully gain with [{}] % chance", langid, LangSkill, Chance);
 		}
 		else
