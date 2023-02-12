@@ -1830,6 +1830,7 @@ bool Client::Death(Mob* killerMob, int64 damage, uint16 spell, EQ::skills::Skill
 			if (parse->BotHasQuestSub(EVENT_SLAY)) {
 				parse->EventBot(EVENT_SLAY, killerMob->CastToBot(), this, "", 0);
 			}
+
 			killerMob->TrySpellOnKill(killed_level, spell);
 		}
 
