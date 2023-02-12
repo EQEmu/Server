@@ -4758,6 +4758,32 @@ void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client*
 			}
 		}
 
+		for (int m = EQ::invaug::SOCKET_BEGIN; m <= EQ::invaug::SOCKET_END; ++m) {
+			const auto augment = trade_instance->GetAugment(m);
+			if (!augment) {
+				continue;
+			}
+
+			if (!CheckLoreConflict(augment->GetItem())) {
+				continue;
+			}
+
+			linker.SetLinkType(EQ::saylink::SayLinkItemInst);
+			linker.SetItemInst(augment);
+
+			item_link = linker.GenerateLink();
+
+			client->Message(
+					Chat::Yellow,
+					fmt::format(
+							"This bot already has {}, the trade has been cancelled!",
+							item_link
+					).c_str()
+			);
+			client->ResetTrade();
+			return;
+		}
+
 		if (CheckLoreConflict(trade_instance->GetItem())) {
 			if (trade_event_exists) {
 				event_trade.push_back(ClientTrade(trade_instance, trade_index));
