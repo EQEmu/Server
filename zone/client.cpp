@@ -4074,8 +4074,6 @@ void Client::DiscoverItem(uint32 item_id) {
 
 	auto d = DiscoveredItemsRepository::InsertOne(database, e);
 
-	parse->EventPlayer(EVENT_DISCOVER_ITEM, this, "", item_id);
-
 	if (player_event_logs.IsEventEnabled(PlayerEvent::DISCOVER_ITEM)) {
 		const auto* item = database.GetItem(item_id);
 
@@ -4084,6 +4082,14 @@ void Client::DiscoverItem(uint32 item_id) {
 			.item_name = item->Name,
 		};
 		RecordPlayerEventLog(PlayerEvent::DISCOVER_ITEM, e);
+
+	}
+
+	if (parse->PlayerHasQuestSub(EVENT_DISCOVER_ITEM)) {
+		const auto* item = database.GetItem(item_id);
+		std::vector<std::any> args = {item};
+
+		parse->EventPlayer(EVENT_DISCOVER_ITEM, this, "", item_id, &args);
 	}
 }
 
