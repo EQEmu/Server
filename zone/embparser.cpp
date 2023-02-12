@@ -1743,6 +1743,7 @@ void PerlembParser::ExportEventVariables(
 
 		case EVENT_HATE_LIST: {
 			ExportVar(package_name.c_str(), "hate_state", data);
+			ExportVar(package_name.c_str(), "hate_entity", "Mob", mob);
 			break;
 		}
 
