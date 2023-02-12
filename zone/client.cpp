@@ -2528,7 +2528,7 @@ bool Client::CheckIncreaseSkill(EQ::skills::SkillType skillid, Mob *against_who,
 	auto maxskill = GetMaxSkillAfterSpecializationRules(skillid, MaxSkill(skillid));
 
 	if (parse->PlayerHasQuestSub(EVENT_USE_SKILL)) {
-		const auto export_string = fmt::format(
+		const auto& export_string = fmt::format(
 			"{} {}",
 			skillid,
 			skillval
@@ -2582,7 +2582,7 @@ bool Client::CheckIncreaseSkill(EQ::skills::SkillType skillid, Mob *against_who,
 			}
 
 			if (parse->PlayerHasQuestSub(EVENT_SKILL_UP)) {
-				const auto export_string = fmt::format(
+				const auto& export_string = fmt::format(
 					"{} {} {} {}",
 					skillid,
 					skillval + 1,
@@ -2622,7 +2622,7 @@ void Client::CheckLanguageSkillIncrease(uint8 langid, uint8 TeacherSkill) {
 			IncreaseLanguageSkill(langid);	// increase the language skill by 1
 
 			if (parse->PlayerHasQuestSub(EVENT_LANGUAGE_SKILL_UP)) {
-				const auto export_string = fmt::format(
+				const auto& export_string = fmt::format(
 					"{} {} {}",
 					langid,
 					LangSkill + 1,
