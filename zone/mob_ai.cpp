@@ -1753,9 +1753,10 @@ void NPC::AI_DoMovement() {
 						RotateTo(m_CurrentWayPoint.w);
 					}
 
-					//kick off event_waypoint arrive
-					std::string export_string = fmt::format("{}", cur_wp);
-					parse->EventNPC(EVENT_WAYPOINT_ARRIVE, CastToNPC(), nullptr, export_string, 0);
+					if (parse->HasQuestSub(GetNPCTypeID(), EVENT_WAYPOINT_ARRIVE)) {
+						parse->EventNPC(EVENT_WAYPOINT_ARRIVE, CastToNPC(), nullptr, std::to_string(cur_wp), 0);
+					}
+
 					// No need to move as we are there.  Next loop will
 					// take care of normal grids, even at pause 0.
 					// We do need to call and setup a wp if we're cur_wp=-2
@@ -1871,9 +1872,9 @@ void NPC::AI_SetupNextWaypoint() {
 		entity_list.OpenDoorsNear(this);
 
 		if (!DistractedFromGrid) {
-			//kick off event_waypoint depart
-			std::string export_string = fmt::format("{}", cur_wp);
-			parse->EventNPC(EVENT_WAYPOINT_DEPART, CastToNPC(), nullptr, export_string, 0);
+			if (parse->HasQuestSub(GetNPCTypeID(), EVENT_WAYPOINT_DEPART)) {
+				parse->EventNPC(EVENT_WAYPOINT_DEPART, CastToNPC(), nullptr, std::to_string(cur_wp), 0);
+			}
 
 			//setup our next waypoint, if we are still on our normal grid
 			//remember that the quest event above could have done anything it wanted with our grid
