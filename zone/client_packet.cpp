@@ -2597,7 +2597,7 @@ void Client::Handle_OP_AltCurrencyPurchase(const EQApplicationPacket *app)
 		}
 
 		if (parse->PlayerHasQuestSub(EVENT_ALT_CURRENCY_MERCHANT_BUY)) {
-			const auto export_string = fmt::format(
+			const auto& export_string = fmt::format(
 				"{} {} {} {} {}",
 				alt_cur_id,
 				tar->GetNPCTypeID(),
@@ -2791,7 +2791,7 @@ void Client::Handle_OP_AltCurrencySell(const EQApplicationPacket *app)
 		}
 
 		if (parse->PlayerHasQuestSub(EVENT_ALT_CURRENCY_MERCHANT_SELL)) {
-			const auto export_string = fmt::format(
+			const auto& export_string = fmt::format(
 				"{} {} {} {} {}",
 				alt_cur_id,
 				tar->GetNPCTypeID(),
@@ -13583,7 +13583,7 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 	// end QS code
 	
 	if (parse->PlayerHasQuestSub(EVENT_MERCHANT_BUY)) {
-		const auto export_string = fmt::format(
+		const auto& export_string = fmt::format(
 			"{} {} {} {} {}",
 			tmp->GetNPCTypeID(),
 			tmp->CastToNPC()->MerchantType,
@@ -13782,7 +13782,7 @@ void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
 	// end QS code
 
 	if (parse->PlayerHasQuestSub(EVENT_MERCHANT_SELL)) {
-		const auto export_string = fmt::format(
+		const auto& export_string = fmt::format(
 			"{} {} {} {} {}",
 			vendor->GetNPCTypeID(),
 			vendor->CastToNPC()->MerchantType,
