@@ -2166,8 +2166,6 @@ void ClientTaskState::AcceptNewTask(
 
 	NPC *npc = entity_list.GetID(npc_type_id)->CastToNPC();
 	if (npc) {
-		parse->EventNPC(EVENT_TASK_ACCEPTED, npc, client, std::to_string(task_id), 0);
-
 		if (player_event_logs.IsEventEnabled(PlayerEvent::TASK_ACCEPT)) {
 			auto e = PlayerEvent::TaskAcceptEvent{
 				.npc_id = static_cast<uint32>(npc_type_id),
@@ -2176,6 +2174,10 @@ void ClientTaskState::AcceptNewTask(
 				.task_name = task_manager->GetTaskName(static_cast<uint32>(task_id)),
 			};
 			RecordPlayerEventLogWithClient(client, PlayerEvent::TASK_ACCEPT, e);
+		}
+
+		if (parse->HasQuestSub(npc->GetNPCTypeID(), EVENT_TASK_ACCEPTED)) {
+			parse->EventNPC(EVENT_TASK_ACCEPTED, npc, client, std::to_string(task_id), 0);
 		}
 	} else {
 		if (player_event_logs.IsEventEnabled(PlayerEvent::TASK_ACCEPT)) {
@@ -2186,7 +2188,6 @@ void ClientTaskState::AcceptNewTask(
 				.task_name = task_manager->GetTaskName(static_cast<uint32>(task_id)),
 			};
 			RecordPlayerEventLogWithClient(client, PlayerEvent::TASK_ACCEPT, e);
-		}
 	}
 
 	if (parse->PlayerHasQuestSub(EVENT_TASK_ACCEPTED)) {
