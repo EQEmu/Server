@@ -43,17 +43,13 @@ void CheatManager::CheatDetected(CheatTypes type, glm::vec3 position1, glm::vec3
 					zone->GetShortName()
 				);
 				LogCheat(fmt::runtime(message));
-
-				if (parse->PlayerHasQuestSub(EVENT_WARP)) {
-					const auto& export_string = fmt::format(
-						"{} {} {}",
-						position1.x,
-						position1.y,
-						position1.z
-					);
-
-					parse->EventPlayer(EVENT_WARP, m_target, export_string, 0);
-				}
+				std::string export_string = fmt::format(
+					"{} {} {}",
+					position1.x,
+					position1.y,
+					position1.z
+				);
+				parse->EventPlayer(EVENT_WARP, m_target, export_string, 0);
 			}
 			break;
 		case MQWarpAbsolute:
@@ -76,19 +72,14 @@ void CheatManager::CheatDetected(CheatTypes type, glm::vec3 position1, glm::vec3
 					zone->GetShortName()
 				);
 				LogCheat(fmt::runtime(message));
-
-				if (parse->PlayerHasQuestSub(EVENT_WARP)) {
-					const auto& export_string = fmt::format(
-						"{} {} {}",
-						position1.x,
-						position1.y,
-						position1.z
-					);
-
-					parse->EventPlayer(EVENT_WARP, m_target, export_string, 0);;
-				}
-
-				m_time_since_last_warp_detection.Start(2500)
+				std::string export_string = fmt::format(
+					"{} {} {}",
+					position1.x,
+					position1.y,
+					position1.z
+				);
+				parse->EventPlayer(EVENT_WARP, m_target, export_string, 0);
+				m_time_since_last_warp_detection.Start(2500);
 			}
 			break;
 		case MQWarpShadowStep:
