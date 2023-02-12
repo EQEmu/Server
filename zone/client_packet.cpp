@@ -4414,8 +4414,7 @@ void Client::Handle_OP_ClickDoor(const EQApplicationPacket *app)
 	// don't spam scripts with client controlled doors if not within distance
 	if (within_distance) {
 		if (parse->PlayerHasQuestSub(EVENT_CLICK_DOOR)) {
-			std::vector<std::any> args;
-			args.push_back(currentdoor);
+			std::vector<std::any> args = { currentdoor };
 			if (parse->EventPlayer(EVENT_CLICK_DOOR, this, std::to_string(cd->doorid), 0, &args) == 0) {
 				currentdoor->HandleClick(this, 0);
 			}
@@ -4437,18 +4436,17 @@ void Client::Handle_OP_ClickObject(const EQApplicationPacket *app)
 		return;
 	}
 
-	ClickObject_Struct* click_object = (ClickObject_Struct*)app->pBuffer;
-	Entity* entity = entity_list.GetID(click_object->drop_id);
+	auto* click_object = (ClickObject_Struct*) app->pBuffer;
+	auto* entity = entity_list.GetID(click_object->drop_id);
 	if (entity && entity->IsObject()) {
-		Object* object = entity->CastToObject();
+		auto* object = entity->CastToObject();
 
 		object->HandleClick(this, click_object);
 
-		std::vector<std::any> args;
-		args.push_back(object);
-
-		std::string export_string = fmt::format("{}", click_object->drop_id);
-		parse->EventPlayer(EVENT_CLICK_OBJECT, this, export_string, GetID(), &args);
+		if (parse->PlayerHasQuestSub(EVENT_CLICK_OBJECT)) {
+			std::vector<std::any> args = { object };
+			parse->EventPlayer(EVENT_CLICK_OBJECT, this, std::to_string(click_object->drop_id), GetID(), &args);
+		}
 	}
 
 	// Observed in RoF after OP_ClickObjectAction:
