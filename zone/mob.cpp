@@ -4271,7 +4271,7 @@ void Mob::SetTarget(Mob *mob)
 		args.emplace_back(mob);
 
 		if (IsNPC()) {
-			if (parse->HasQuestSub(EVENT_TARGET_CHANGE)) {
+			if (parse->HasQuestSub(GetNPCTypeID(), EVENT_TARGET_CHANGE)) {
 				parse->EventNPC(EVENT_TARGET_CHANGE, CastToNPC(), mob, "", 0, &args);
 			}
 		} else if (IsClient()) {
