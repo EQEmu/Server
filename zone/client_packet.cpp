@@ -6304,7 +6304,9 @@ void Client::Handle_OP_Fishing(const EQApplicationPacket *app)
 	}
 
 	if (CanFish()) {
-		parse->EventPlayer(EVENT_FISH_START, this, "", 0);
+		if (parse->PlayerHasQuestSub(EVENT_FISH_START)) {
+			parse->EventPlayer(EVENT_FISH_START, this, "", 0);
+		}
 
 		//these will trigger GoFish() after a delay if we're able to actually fish, and if not, we won't stop the client from trying again immediately (although we may need to tell it to repop the button)
 		p_timers.Start(pTimerFishing, FishingReuseTime - 1);
