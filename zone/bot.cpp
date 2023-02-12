@@ -253,7 +253,7 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 		}
 	} else {
 		//reapply some buffs
-		uint32 buff_count = GetMaxTotalSlots();
+		uint32 buff_count = GetMaxBuffSlots();
 		for (uint32 j1 = 0; j1 < buff_count; j1++) {
 			if (!IsValidSpell(buffs[j1].spellid)) {
 				continue;
