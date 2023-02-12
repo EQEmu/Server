@@ -509,24 +509,29 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 				.recipe_id = spec.recipe_id,
 				.recipe_name = spec.name,
 				.made_count = spec.madecount,
-				.tradeskill_id = (uint32)spec.tradeskill
+				.tradeskill_id = (uint32) spec.tradeskill
 			};
 			RecordPlayerEventLogWithClient(user, PlayerEvent::COMBINE_SUCCESS, e);
 		}
 
-		parse->EventPlayer(EVENT_COMBINE_SUCCESS, user, spec.name, spec.recipe_id);
-	} else {
+		if (parse->PlayerHasQuestSub(EVENT_COMBINE_SUCCESS)) {
+			parse->EventPlayer(EVENT_COMBINE_SUCCESS, user, spec.name, spec.recipe_id);
+		}
+	}
+	else {
 		if (player_event_logs.IsEventEnabled(PlayerEvent::COMBINE_FAILURE)) {
 			auto e = PlayerEvent::CombineEvent{
 				.recipe_id = spec.recipe_id,
 				.recipe_name = spec.name,
 				.made_count = spec.madecount,
-				.tradeskill_id = (uint32)spec.tradeskill
+				.tradeskill_id = (uint32) spec.tradeskill
 			};
 			RecordPlayerEventLogWithClient(user, PlayerEvent::COMBINE_FAILURE, e);
 		}
 
-		parse->EventPlayer(EVENT_COMBINE_FAILURE, user, spec.name, spec.recipe_id);
+		if (parse->PlayerHasQuestSub(EVENT_COMBINE_FAILURE)) {
+			parse->EventPlayer(EVENT_COMBINE_FAILURE, user, spec.name, spec.recipe_id);
+		}
 	}
 }
 
@@ -701,9 +706,13 @@ void Object::HandleAutoCombine(Client* user, const RecipeAutoCombine_Struct* rac
 	}
 
 	if (success) {
-		parse->EventPlayer(EVENT_COMBINE_SUCCESS, user, spec.name, spec.recipe_id);
+		if (parse->PlayerHasQuestSub(EVENT_COMBINE_SUCCESS)) {
+			parse->EventPlayer(EVENT_COMBINE_SUCCESS, user, spec.name, spec.recipe_id);
+		}
 	} else {
-		parse->EventPlayer(EVENT_COMBINE_FAILURE, user, spec.name, spec.recipe_id);
+		if (parse->PlayerHasQuestSub(EVENT_COMBINE_FAILURE)) {
+			parse->EventPlayer(EVENT_COMBINE_FAILURE, user, spec.name, spec.recipe_id);
+		}
 	}
 }
 
