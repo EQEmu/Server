@@ -4258,9 +4258,9 @@ void Mob::SetTarget(Mob *mob)
 
 	target = mob;
 	entity_list.UpdateHoTT(this);
-	
+
 	const auto has_target_change_event = (
-		parse->HasQuestSub(EVENT_TARGET_CHANGE) ||
+		parse->HasQuestSub(GetNPCTypeID(), EVENT_TARGET_CHANGE) ||
 		parse->PlayerHasQuestSub(EVENT_TARGET_CHANGE) ||
 		parse->BotHasQuestSub(EVENT_TARGET_CHANGE)
 	);
