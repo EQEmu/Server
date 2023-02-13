@@ -11334,16 +11334,20 @@ void Client::Handle_OP_PopupResponse(const EQApplicationPacket *app)
 			break;
 	}
 
-	const auto export_string = fmt::format("{}", popup_response->popupid);
-
-	parse->EventPlayer(EVENT_POPUP_RESPONSE, this, export_string, 0);
+	if (parse->PlayerHasQuestSub(EVENT_POPUP_RESPONSE)) {
+		parse->EventPlayer(EVENT_POPUP_RESPONSE, this, std::to_string(popup_response->popupid), 0);
+	}
 
 	auto t = GetTarget();
 	if (t) {
 		if (t->IsNPC()) {
-			parse->EventNPC(EVENT_POPUP_RESPONSE, t->CastToNPC(), this, export_string, 0);
+			if (parse->HasQuestSub(t->GetNPCTypeID(), EVENT_POPUP_RESPONSE)) {
+				parse->EventNPC(EVENT_POPUP_RESPONSE, t->CastToNPC(), this, std::to_string(popup_response->popupid), 0);
+			}
 		} else if (t->IsBot()) {
-			parse->EventBot(EVENT_POPUP_RESPONSE, t->CastToBot(), this, export_string, 0);
+			if (parse->BotHasQuestSub(EVENT_POPUP_RESPONSE)) {
+				parse->EventBot(EVENT_POPUP_RESPONSE, t->CastToBot(), this, std::to_string(popup_response->popupid), 0);
+			}
 		}
 	}
 }
