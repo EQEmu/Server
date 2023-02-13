@@ -148,6 +148,8 @@ const char *LuaEvents[_LargestEventID] = {
 	"event_task_before_update",
 	"event_aa_buy",
 	"event_aa_gain",
+	"event_aa_exp_gain",
+	"event_exp_gain",
 	"event_payload",
 	"event_level_down",
 	"event_gm_command",
@@ -275,6 +277,8 @@ LuaParser::LuaParser() {
 	PlayerArgumentDispatch[EVENT_INSPECT]                    = handle_player_inspect;
 	PlayerArgumentDispatch[EVENT_AA_BUY]                     = handle_player_aa_buy;
 	PlayerArgumentDispatch[EVENT_AA_GAIN]                    = handle_player_aa_gain;
+	PlayerArgumentDispatch[EVENT_AA_EXP_GAIN]                = handle_player_aa_exp_gain;
+	PlayerArgumentDispatch[EVENT_EXP_GAIN]                   = handle_player_exp_gain;
 	PlayerArgumentDispatch[EVENT_PAYLOAD]                    = handle_player_payload;
 	PlayerArgumentDispatch[EVENT_LEVEL_UP]                   = handle_player_level_up;
 	PlayerArgumentDispatch[EVENT_LEVEL_DOWN]                 = handle_player_level_down;

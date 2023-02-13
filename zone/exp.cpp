@@ -804,14 +804,23 @@ void Client::SetEXP(uint64 set_exp, uint64 set_aaxp, bool isrezzexp) {
 		}
 	}
 
+	if (parse->PlayerHasQuestSub(EVENT_EXP_GAIN) && m_pp.exp != set_exp) {
+		parse->EventPlayer(EVENT_EXP_GAIN, this, std::to_string(set_exp - m_pp.exp), 0);
+	}
+
+	if (parse->PlayerHasQuestSub(EVENT_AA_EXP_GAIN) && m_pp.expAA != set_aaxp) {
+		parse->EventPlayer(EVENT_AA_EXP_GAIN, this, std::to_string(set_aaxp - m_pp.expAA), 0);
+	}
+
 	//set the client's EXP and AAEXP
 	m_pp.exp = set_exp;
 	m_pp.expAA = set_aaxp;
 
 	if (GetLevel() < 51) {
 		m_epp.perAA = 0;	// turn off aa exp if they drop below 51
-	} else
-		SendAlternateAdvancementStats();	//otherwise, send them an AA update
+	} else {
+		SendAlternateAdvancementStats();    //otherwise, send them an AA update
+	}
 
 	//send the expdata in any case so the xp bar isnt stuck after leveling
 	uint32 tmpxp1 = GetEXPForLevel(GetLevel()+1);
