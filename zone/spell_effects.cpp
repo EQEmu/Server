@@ -162,16 +162,15 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 		}
 	}
 
-	const auto& export_string = fmt::format(
-		"{} {} {} {}",
-		caster ? caster->GetID() : 0,
-		buffslot >= 0 ? buffs[buffslot].ticsremaining : 0,
-		caster ? caster->GetLevel() : 0,
-		buffslot
-	);
-
 	if (IsClient()) {
 		if (parse->SpellHasQuestSub(spell_id, EVENT_SPELL_EFFECT_CLIENT)) {
+			const auto &export_string = fmt::format(
+				"{} {} {} {}",
+				caster ? caster->GetID() : 0,
+				buffslot >= 0 ? buffs[buffslot].ticsremaining : 0,
+				caster ? caster->GetLevel() : 0,
+				buffslot
+			);
 			if (parse->EventSpell(EVENT_SPELL_EFFECT_CLIENT, nullptr, CastToClient(), spell_id, export_string, 0) != 0) {
 				CalcBonuses();
 				return true;
@@ -179,6 +178,13 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 		}
 	} else if (IsNPC()) {
 		if (parse->SpellHasQuestSub(spell_id, EVENT_SPELL_EFFECT_NPC)) {
+			const auto &export_string = fmt::format(
+				"{} {} {} {}",
+				caster ? caster->GetID() : 0,
+				buffslot >= 0 ? buffs[buffslot].ticsremaining : 0,
+				caster ? caster->GetLevel() : 0,
+				buffslot
+			);
 			if (parse->EventSpell(EVENT_SPELL_EFFECT_NPC, this, nullptr, spell_id, export_string, 0) != 0) {
 				CalcBonuses();
 				return true;
@@ -186,6 +192,13 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 		}
 	} else if (IsBot()) {
 		if (parse->SpellHasQuestSub(spell_id, EVENT_SPELL_EFFECT_BOT)) {
+			const auto &export_string = fmt::format(
+				"{} {} {} {}",
+				caster ? caster->GetID() : 0,
+				buffslot >= 0 ? buffs[buffslot].ticsremaining : 0,
+				caster ? caster->GetLevel() : 0,
+				buffslot
+			);
 			if (parse->EventSpell(EVENT_SPELL_EFFECT_BOT, this, nullptr, spell_id, export_string, 0) != 0) {
 				CalcBonuses();
 				return true;
@@ -4154,15 +4167,17 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 
 	LogSpells("Fading buff [{}] from slot [{}]", buffs[slot].spellid, slot);
 
-	const auto& export_string = fmt::format(
-		"{} {} {} {}",
-		buffs[slot].casterid,
-		buffs[slot].ticsremaining,
-		buffs[slot].casterlevel,
-		slot
-	);
-
 	const auto has_fade_event = parse->SpellHasQuestSub(buffs[slot].spellid, EVENT_SPELL_FADE);
+	std::string export_string = "";
+	if (has_fade_event) {
+		export_string = fmt::format(
+			"{} {} {} {}",
+			buffs[slot].casterid,
+			buffs[slot].ticsremaining,
+			buffs[slot].casterlevel,
+			slot
+		);
+	}
 
 	if (IsClient()) {
 		if (has_fade_event) {

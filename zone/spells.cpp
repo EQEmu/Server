@@ -237,15 +237,14 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 		}
 	}
 
-	const auto& export_string = fmt::format(
-		"{} {} {}",
-		spell_id,
-		GetID(),
-		GetCasterLevel(spell_id)
-	);
-
 	if (IsClient()) {
 		if (parse->PlayerHasQuestSub(EVENT_CAST_BEGIN)) {
+			const auto& export_string = fmt::format(
+				"{} {} {}",
+				spell_id,
+				GetID(),
+				GetCasterLevel(spell_id)
+			);
 			if (parse->EventPlayer(EVENT_CAST_BEGIN, CastToClient(), export_string, 0) != 0) {
 				if (IsDiscipline(spell_id)) {
 					CastToClient()->SendDisciplineTimer(spells[spell_id].timer_id, 0);
@@ -258,10 +257,22 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 		}
 	} else if (IsNPC()) {
 		if (parse->HasQuestSub(GetNPCTypeID(), EVENT_CAST_BEGIN)) {
+			const auto& export_string = fmt::format(
+				"{} {} {}",
+				spell_id,
+				GetID(),
+				GetCasterLevel(spell_id)
+			);
 			parse->EventNPC(EVENT_CAST_BEGIN, CastToNPC(), nullptr, export_string, 0);
 		}
 	} else if (IsBot()) {
 		if (parse->BotHasQuestSub(EVENT_CAST_BEGIN)) {
+			const auto& export_string = fmt::format(
+				"{} {} {}",
+				spell_id,
+				GetID(),
+				GetCasterLevel(spell_id)
+			);
 			parse->EventBot(EVENT_CAST_BEGIN, CastToBot(), nullptr, export_string, 0);
 		}
 	}
@@ -3653,24 +3664,34 @@ bool Mob::SpellOnTarget(
 		(spellOwner->IsClient() ? FilterPCSpells : FilterNPCSpells) /* EQ Filter Type: (8 or 9) */
 	);
 
-	/* Send the EVENT_CAST_ON event */
-	const auto& export_string = fmt::format(
-		"{} {} {}",
-		spell_id,
-		GetID(),
-		caster_level
-	);
-
 	if (spelltar->IsNPC()) {
 		if (parse->HasQuestSub(spelltar->GetNPCTypeID(), EVENT_CAST_ON)) {
+			const auto& export_string = fmt::format(
+				"{} {} {}",
+				spell_id,
+				GetID(),
+				caster_level
+			);
 			parse->EventNPC(EVENT_CAST_ON, spelltar->CastToNPC(), this, export_string, 0);
 		}
 	} else if (spelltar->IsClient()) {
 		if (parse->PlayerHasQuestSub(EVENT_CAST_ON)) {
+			const auto& export_string = fmt::format(
+				"{} {} {}",
+				spell_id,
+				GetID(),
+				caster_level
+			);
 			parse->EventPlayer(EVENT_CAST_ON, spelltar->CastToClient(), export_string, 0);
 		}
 	} else if (spelltar->IsBot()) {
 		if (parse->BotHasQuestSub(EVENT_CAST_ON)) {
+			const auto& export_string = fmt::format(
+				"{} {} {}",
+				spell_id,
+				GetID(),
+				caster_level
+			);
 			parse->EventBot(EVENT_CAST_ON, spelltar->CastToBot(), this, export_string, 0);
 		}
 	}
