@@ -4922,110 +4922,119 @@ void Client::Handle_OP_ConsentDeny(const EQApplicationPacket *app)
 
 void Client::Handle_OP_Consider(const EQApplicationPacket *app)
 {
-	if (app->size != sizeof(Consider_Struct))
-	{
+	if (app->size != sizeof(Consider_Struct)) {
 		LogDebug("Size mismatch in Consider expected [{}] got [{}]", sizeof(Consider_Struct), app->size);
 		return;
 	}
-	Consider_Struct* conin = (Consider_Struct*)app->pBuffer;
-	Mob* tmob = entity_list.GetMob(conin->targetid);
-	if (tmob == 0)
-		return;
 
-	std::string export_string = fmt::format("{}", conin->targetid);
-	if (parse->EventPlayer(EVENT_CONSIDER, this, export_string, 0) == 1) {
+	auto *conin = (Consider_Struct*) app->pBuffer;
+	auto *t     = entity_list.GetMob(conin->targetid);
+	if (!t) {
 		return;
 	}
 
-	if (tmob->GetClass() == LDON_TREASURE)
-	{
-		Message(Chat::Yellow, "%s", tmob->GetCleanName());
+	if (parse->PlayerHasQuestSub(EVENT_CONSIDER)) {
+		std::vector<std::any> args = { t };
+
+		if (parse->EventPlayer(EVENT_CONSIDER, this, std::to_string(conin->targetid), 0, &args) == 1) {
+			return;
+		}
+	}
+
+	if (t->GetClass() == LDON_TREASURE) {
+		Message(Chat::Yellow, fmt::format("{}", t->GetCleanName()).c_str());
 		return;
 	}
 
 	auto outapp = new EQApplicationPacket(OP_Consider, sizeof(Consider_Struct));
-	Consider_Struct* con = (Consider_Struct*)outapp->pBuffer;
+	auto* con = (Consider_Struct*) outapp->pBuffer;
 	con->playerid = GetID();
 	con->targetid = conin->targetid;
-	if (tmob->IsNPC())
-		con->faction = GetFactionLevel(character_id, tmob->GetNPCTypeID(), GetFactionRace(), class_, deity, (tmob->IsNPC()) ? tmob->CastToNPC()->GetPrimaryFaction() : 0, tmob); // Dec. 20, 2001; TODO: Send the players proper deity
-	else
+	if (t->IsNPC()) {
+		con->faction = GetFactionLevel(
+			character_id,
+			t->GetNPCTypeID(),
+			GetFactionRace(),
+			class_,
+			deity,
+			(t->IsNPC()) ? t->CastToNPC()->GetPrimaryFaction() : 0,
+			t
+		);
+	} else {
 		con->faction = 1;
-	con->level = GetLevelCon(tmob->GetLevel());
+	}
+
+	con->level = GetLevelCon(t->GetLevel());
 
 	if (ClientVersion() <= EQ::versions::ClientVersion::Titanium) {
-		if (con->level == CON_GRAY)	{
+		if (con->level == CON_GRAY) {
 			con->level = CON_GREEN;
-		}
-		if (con->level == CON_WHITE) {
+		} else if (con->level == CON_WHITE) {
 			con->level = CON_WHITE_TITANIUM;
 		}
 	}
 
 	if (zone->IsPVPZone()) {
-		if (!tmob->IsNPC())
-			con->pvpcon = tmob->CastToClient()->GetPVP();
+		if (!t->IsNPC()) {
+			con->pvpcon = t->CastToClient()->GetPVP();
+		}
 	}
 
 	// If we're feigned show NPC as indifferent
-	if (tmob->IsNPC())
-	{
-		if (GetFeigned())
+	if (t->IsNPC()) {
+		if (GetFeigned()) {
 			con->faction = FACTION_INDIFFERENTLY;
+		}
 	}
 
-	if (!(con->faction == FACTION_SCOWLS))
-	{
-		if (tmob->IsNPC())
-		{
-			if (tmob->CastToNPC()->IsOnHatelist(this))
+	if (!(con->faction == FACTION_SCOWLS)) {
+		if (t->IsNPC()) {
+			if (t->CastToNPC()->IsOnHatelist(this)) {
 				con->faction = FACTION_THREATENINGLY;
+			}
 		}
 	}
 
 	if (con->faction == FACTION_APPREHENSIVELY) {
 		con->faction = FACTION_SCOWLS;
-	}
-	else if (con->faction == FACTION_DUBIOUSLY) {
+	} else if (con->faction == FACTION_DUBIOUSLY) {
 		con->faction = FACTION_THREATENINGLY;
-	}
-	else if (con->faction == FACTION_SCOWLS) {
+	} else if (con->faction == FACTION_SCOWLS) {
 		con->faction = FACTION_APPREHENSIVELY;
-	}
-	else if (con->faction == FACTION_THREATENINGLY) {
+	} else if (con->faction == FACTION_THREATENINGLY) {
 		con->faction = FACTION_DUBIOUSLY;
 	}
 
-	mod_consider(tmob, con);
+	mod_consider(t, con);
 
 	QueuePacket(outapp);
 	// only wanted to check raid target once
 	// and need con to still be around so, do it here!
-	if (tmob->IsRaidTarget()) {
+	if (t->IsRaidTarget()) {
 		uint32 color = 0;
 		switch (con->level) {
-		case CON_GREEN:
-			color = 2;
-			break;
-		case CON_LIGHTBLUE:
-			color = 10;
-			break;
-		case CON_BLUE:
-			color = 4;
-			break;
-		case CON_WHITE_TITANIUM:
-		case CON_WHITE:
-			color = 10;
-			break;
-		case CON_YELLOW:
-			color = 15;
-			break;
-		case CON_RED:
-			color = 13;
-			break;
-		case CON_GRAY:
-			color = 6;
-			break;
+			case CON_GREEN:
+				color = 2;
+				break;
+			case CON_LIGHTBLUE:
+				color = 10;
+				break;
+			case CON_BLUE:
+				color = 4;
+				break;
+			case CON_WHITE_TITANIUM:
+			case CON_WHITE:
+				color = 10;
+				break;
+			case CON_YELLOW:
+				color = 15;
+				break;
+			case CON_RED:
+				color = 13;
+				break;
+			case CON_GRAY:
+				color = 6;
+				break;
 		}
 
 		if (ClientVersion() <= EQ::versions::ClientVersion::Titanium) {
@@ -5039,11 +5048,11 @@ void Client::Handle_OP_Consider(const EQApplicationPacket *app)
 
 	// this could be done better, but this is only called when you con so w/e
 	// Shroud of Stealth has a special message
-	if (improved_hidden && (!tmob->see_improved_hide && (tmob->SeeInvisible() || tmob->see_hide)))
-		MessageString(Chat::NPCQuestSay, SOS_KEEPS_HIDDEN);
-	// we are trying to hide but they can see us
-	else if ((invisible || invisible_undead || hidden || invisible_animals) && !IsInvisible(tmob))
+	if (improved_hidden && (!t->see_improved_hide && (t->SeeInvisible() || t->see_hide))) {
+		MessageString(Chat::NPCQuestSay, SOS_KEEPS_HIDDEN); // we are trying to hide but they can see us
+	} else if ((invisible || invisible_undead || hidden || invisible_animals) && !IsInvisible(t)) {
 		MessageString(Chat::NPCQuestSay, SUSPECT_SEES_YOU);
+	}
 
 	safe_delete(outapp);
 
@@ -5057,18 +5066,21 @@ void Client::Handle_OP_ConsiderCorpse(const EQApplicationPacket *app)
 		return;
 	}
 
-	Consider_Struct* conin = (Consider_Struct*)app->pBuffer;
-	Corpse* target = entity_list.GetCorpseByID(conin->targetid);
-	std::string export_string = fmt::format("{}", conin->targetid);
-	if (!target) {
+	auto* conin = (Consider_Struct*)app->pBuffer;
+	auto* t = entity_list.GetCorpseByID(conin->targetid);
+	if (!t) {
 		return;
 	}
 
-	if (parse->EventPlayer(EVENT_CONSIDER_CORPSE, this, export_string, 0)) {
-		return;
+	if (parse->PlayerHasQuestSub(EVENT_CONSIDER_CORPSE)) {
+		std::vector<std::any> args = { t };
+
+		if (parse->EventPlayer(EVENT_CONSIDER_CORPSE, this, std::to_string(conin->targetid), 0, &args)) {
+			return;
+		}
 	}
 
-	uint32 decay_time = target->GetDecayTime();
+	uint32 decay_time = t->GetDecayTime();
 	if (decay_time) {
 		auto time_string = Strings::SecondsToTime(decay_time, true);
 		Message(
@@ -5079,12 +5091,12 @@ void Client::Handle_OP_ConsiderCorpse(const EQApplicationPacket *app)
 			).c_str()
 		);
 
-		if (target->IsPlayerCorpse()) {
+		if (t->IsPlayerCorpse()) {
 			Message(
 				Chat::NPCQuestSay,
 				fmt::format(
 					"This corpse {} be resurrected.",
-					target->IsRezzed() ? "cannot" : "can"
+					t->IsRezzed() ? "cannot" : "can"
 				).c_str()
 			);
 		}
