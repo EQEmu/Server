@@ -23,6 +23,7 @@
 #include "../common/spdat.h"
 #include "../common/strings.h"
 #include "../common/say_link.h"
+#include "../common/events/player_event_logs.h"
 
 #include "entity.h"
 #include "event_codes.h"
@@ -2431,6 +2432,7 @@ bool QuestManager::createBot(const char *name, const char *lastname, uint8 level
 				);
 
 				parse->EventPlayer(EVENT_BOT_CREATE, initiator, export_string, 0);
+
 				return true;
 			}
 		}
@@ -2940,7 +2942,6 @@ std::string QuestManager::varlink(
 
 	return linker.GenerateLink();
 }
-
 std::string QuestManager::getitemname(uint32 item_id) {
 	const EQ::ItemData* item_data = database.GetItem(item_id);
 	if (!item_data) {
@@ -3985,4 +3986,172 @@ int8 QuestManager::DoesAugmentFit(EQ::ItemInstance* inst, uint32 augment_id, uin
 	}
 
 	return inst->AvailableAugmentSlot(aug_inst->AugType);
+}
+
+void QuestManager::SendPlayerHandinEvent() {
+	QuestManagerCurrentQuestVars();
+	if (!owner || !owner->IsNPC() || !initiator) {
+		return;
+	}
+
+	if (
+		!initiator->EntityVariableExists("HANDIN_ITEMS") &&
+		!initiator->EntityVariableExists("HANDIN_MONEY") &&
+		!initiator->EntityVariableExists("RETURN_ITEMS") &&
+		!initiator->EntityVariableExists("RETURN_MONEY")
+	) {
+		return;
+	}
+
+	auto handin_items = initiator->GetEntityVariable("HANDIN_ITEMS");
+	auto return_items = initiator->GetEntityVariable("RETURN_ITEMS");
+	auto handin_money = initiator->GetEntityVariable("HANDIN_MONEY");
+	auto return_money = initiator->GetEntityVariable("RETURN_MONEY");
+
+	std::vector<PlayerEvent::HandinEntry> hi = {};
+	std::vector<PlayerEvent::HandinEntry> ri = {};
+	PlayerEvent::HandinMoney              hm{};
+	PlayerEvent::HandinMoney              rm{};
+
+	// Handin Items
+	if (!handin_items.empty()) {
+		if (Strings::Contains(handin_items, ",")) {
+			const auto handin_data = Strings::Split(handin_items, ",");
+
+			for (const auto &h: handin_data) {
+				const auto item_data = Strings::Split(h, "-");
+
+				if (
+					item_data.size() == 3 &&
+					Strings::IsNumber(item_data[0]) &&
+					Strings::IsNumber(item_data[1]) &&
+					Strings::IsNumber(item_data[2])
+					) {
+					const auto item_id = static_cast<uint32>(std::stoul(item_data[0]));
+					if (item_id != 0) {
+						const auto *item = database.GetItem(item_id);
+
+						hi.emplace_back(
+							PlayerEvent::HandinEntry{
+								.item_id = item_id,
+								.item_name = item->Name,
+								.charges = static_cast<uint16>(std::stoul(item_data[1])),
+								.attuned = std::stoi(item_data[2]) ? true : false
+							}
+						);
+					}
+				}
+			}
+		}
+		else if (Strings::Contains(handin_items, "|")) {
+			const auto item_data = Strings::Split(handin_items, "|");
+
+			if (
+				item_data.size() == 3 &&
+				Strings::IsNumber(item_data[0]) &&
+				Strings::IsNumber(item_data[1]) &&
+				Strings::IsNumber(item_data[2])
+				) {
+				const auto item_id = static_cast<uint32>(std::stoul(item_data[0]));
+				const auto *item = database.GetItem(item_id);
+
+				hi.emplace_back(
+					PlayerEvent::HandinEntry{
+						.item_id = item_id,
+						.item_name = item->Name,
+						.charges = static_cast<uint16>(std::stoul(item_data[1])),
+						.attuned = std::stoi(item_data[2]) ? true : false
+					}
+				);
+			}
+		}
+	}
+
+	// Handin Money
+	if (!handin_money.empty()) {
+		const auto hms = Strings::Split(handin_money, "|");
+		hm.copper   = static_cast<uint32>(std::stoul(hms[0]));
+		hm.silver   = static_cast<uint32>(std::stoul(hms[1]));
+		hm.gold     = static_cast<uint32>(std::stoul(hms[2]));
+		hm.platinum = static_cast<uint32>(std::stoul(hms[3]));
+	}
+
+	// Return Items
+	if (!return_items.empty()) {
+		if (Strings::Contains(return_items, ",")) {
+			const auto return_data = Strings::Split(return_items, ",");
+
+			for (const auto &r: return_data) {
+				const auto item_data = Strings::Split(r, "|");
+
+				if (
+					item_data.size() == 3 &&
+					Strings::IsNumber(item_data[0]) &&
+					Strings::IsNumber(item_data[1]) &&
+					Strings::IsNumber(item_data[2])
+					) {
+					const auto item_id = static_cast<uint32>(std::stoul(item_data[0]));
+					const auto *item   = database.GetItem(item_id);
+
+					ri.emplace_back(
+						PlayerEvent::HandinEntry{
+							.item_id = item_id,
+							.item_name = item->Name,
+							.charges = static_cast<uint16>(std::stoul(item_data[1])),
+							.attuned = std::stoi(item_data[2]) ? true : false
+						}
+					);
+				}
+			}
+		}
+		else if (Strings::Contains(return_items, "|")) {
+			const auto item_data = Strings::Split(return_items, "|");
+
+			if (
+				item_data.size() == 3 &&
+				Strings::IsNumber(item_data[0]) &&
+				Strings::IsNumber(item_data[1]) &&
+				Strings::IsNumber(item_data[2])
+				) {
+				const auto item_id = static_cast<uint32>(std::stoul(item_data[0]));
+				const auto *item   = database.GetItem(item_id);
+
+				ri.emplace_back(
+					PlayerEvent::HandinEntry{
+						.item_id = item_id,
+						.item_name = item->Name,
+						.charges = static_cast<uint16>(std::stoul(item_data[1])),
+						.attuned = std::stoi(item_data[2]) ? true : false
+					}
+				);
+			}
+		}
+	}
+
+	// Return Money
+	if (!return_money.empty()) {
+		const auto rms = Strings::Split(return_money, "|");
+		rm.copper   = static_cast<uint32>(std::stoul(rms[0]));
+		rm.silver   = static_cast<uint32>(std::stoul(rms[1]));
+		rm.gold     = static_cast<uint32>(std::stoul(rms[2]));
+		rm.platinum = static_cast<uint32>(std::stoul(rms[3]));
+	}
+
+	initiator->DeleteEntityVariable("HANDIN_ITEMS");
+	initiator->DeleteEntityVariable("HANDIN_MONEY");
+	initiator->DeleteEntityVariable("RETURN_ITEMS");
+	initiator->DeleteEntityVariable("RETURN_MONEY");
+
+	if (player_event_logs.IsEventEnabled(PlayerEvent::NPC_HANDIN)) {
+		auto e = PlayerEvent::HandinEvent{
+			.npc_id = owner->CastToNPC()->GetNPCTypeID(),
+			.npc_name = owner->GetCleanName(),
+			.handin_items = hi,
+			.handin_money = hm,
+			.return_items = ri,
+			.return_money = rm
+		};
+
+		RecordPlayerEventLogWithClient(initiator, PlayerEvent::NPC_HANDIN, e);
+	}
 }

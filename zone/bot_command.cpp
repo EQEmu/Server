@@ -1624,8 +1624,6 @@ int bot_command_real_dispatch(Client *c, const char *message)
 {
 	Seperator sep(message, ' ', 10, 100, true); // "three word argument" should be considered 1 arg
 
-	bot_command_log_command(c, message);
-
 	std::string cstr(sep.arg[0]+1);
 
 	if(bot_command_list.count(cstr) != 1) {
@@ -1658,77 +1656,6 @@ int bot_command_real_dispatch(Client *c, const char *message)
 	return 0;
 
 }
-
-void bot_command_log_command(Client *c, const char *message)
-{
-int admin = c->Admin();
-
-	bool continueevents = false;
-	switch (zone->loglevelvar){ //catch failsafe
-		case 9: { // log only LeadGM
-			if (
-				admin >= AccountStatus::GMLeadAdmin &&
-				admin < AccountStatus::GMMgmt
-			) {
-				continueevents = true;
-			}
-			break;
-		}
-		case 8: { // log only GM
-			if (
-				admin >= AccountStatus::GMAdmin &&
-				admin < AccountStatus::GMLeadAdmin
-			) {
-				continueevents = true;
-			}
-			break;
-		}
-		case 1: {
-			if (admin >= AccountStatus::GMMgmt) {
-				continueevents = true;
-			}
-			break;
-		}
-		case 2: {
-			if (admin >= AccountStatus::GMLeadAdmin) {
-				continueevents = true;
-			}
-			break;
-		}
-		case 3: {
-			if (admin >= AccountStatus::GMAdmin) {
-				continueevents = true;
-			}
-			break;
-		}
-		case 4: {
-			if (admin >= AccountStatus::QuestTroupe) {
-				continueevents = true;
-			}
-			break;
-		}
-		case 5: {
-			if (admin >= AccountStatus::ApprenticeGuide) {
-				continueevents = true;
-			}
-			break;
-		}
-		case 6: {
-			if (admin >= AccountStatus::Steward) {
-				continueevents = true;
-			}
-			break;
-		}
-		case 7: {
-			continueevents = true;
-			break;
-		}
-	}
-
-	if (continueevents)
-		database.logevents(c->AccountName(), c->AccountID(), admin,c->GetName(), c->GetTarget()?c->GetTarget()->GetName():"None", "BotCommand", message, 1);
-}
-
 
 /*
  * helper functions by use

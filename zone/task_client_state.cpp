@@ -14,6 +14,7 @@
 #include "worldserver.h"
 #include "dynamic_zone.h"
 #include "string_ids.h"
+#include "../common/events/player_event_logs.h"
 
 #define EBON_CRYSTAL 40902
 #define RADIANT_CRYSTAL 40903
@@ -925,6 +926,16 @@ int ClientTaskState::IncrementDoneCount(
 
 			int event_res = DispatchEventTaskComplete(client, *info, activity_id);
 
+			if (player_event_logs.IsEventEnabled(PlayerEvent::TASK_COMPLETE)) {
+				auto e = PlayerEvent::TaskCompleteEvent{
+					.task_id = static_cast<uint32>(info->task_id),
+					.task_name = task_manager->GetTaskName(static_cast<uint32>(info->task_id)),
+					.activity_id = static_cast<uint32>(info->activity[activity_id].activity_id),
+					.done_count = static_cast<uint32>(info->activity[activity_id].done_count)
+				};
+				RecordPlayerEventLogWithClient(client, PlayerEvent::TASK_COMPLETE, e);
+			}
+
 			/* QS: PlayerLogTaskUpdates :: Complete */
 			if (RuleB(QueryServ, PlayerLogTaskUpdates)) {
 				std::string event_desc = StringFormat(
@@ -963,6 +974,16 @@ int ClientTaskState::IncrementDoneCount(
 			activity_id,
 			task_index
 		);
+
+		if (player_event_logs.IsEventEnabled(PlayerEvent::TASK_UPDATE)) {
+			auto e = PlayerEvent::TaskUpdateEvent{
+				.task_id = static_cast<uint32>(info->task_id),
+				.task_name = task_manager->GetTaskName(static_cast<uint32>(info->task_id)),
+				.activity_id = static_cast<uint32>(info->activity[activity_id].activity_id),
+				.done_count = static_cast<uint32>(info->activity[activity_id].done_count)
+			};
+			RecordPlayerEventLogWithClient(client, PlayerEvent::TASK_UPDATE, e);
+		}
 	}
 
 	task_manager->SaveClientState(client, this);
@@ -2134,6 +2155,26 @@ void ClientTaskState::AcceptNewTask(
 	NPC *npc = entity_list.GetID(npc_type_id)->CastToNPC();
 	if (npc) {
 		parse->EventNPC(EVENT_TASK_ACCEPTED, npc, client, export_string, 0);
+
+		if (player_event_logs.IsEventEnabled(PlayerEvent::TASK_ACCEPT)) {
+			auto e = PlayerEvent::TaskAcceptEvent{
+				.npc_id = static_cast<uint32>(npc_type_id),
+				.npc_name = npc->GetCleanName(),
+				.task_id = static_cast<uint32>(task_id),
+				.task_name = task_manager->GetTaskName(static_cast<uint32>(task_id)),
+			};
+			RecordPlayerEventLogWithClient(client, PlayerEvent::TASK_ACCEPT, e);
+		}
+	} else {
+		if (player_event_logs.IsEventEnabled(PlayerEvent::TASK_ACCEPT)) {
+			auto e = PlayerEvent::TaskAcceptEvent{
+				.npc_id = 0,
+				.npc_name = "No NPC",
+				.task_id = static_cast<uint32>(task_id),
+				.task_name = task_manager->GetTaskName(static_cast<uint32>(task_id)),
+			};
+			RecordPlayerEventLogWithClient(client, PlayerEvent::TASK_ACCEPT, e);
+		}
 	}
 	parse->EventPlayer(EVENT_TASK_ACCEPTED, client, export_string, 0);
 }

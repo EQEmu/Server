@@ -66,6 +66,9 @@ extern volatile bool RunLoops;
 #include "../common/repositories/character_spells_repository.h"
 #include "../common/repositories/character_disciplines_repository.h"
 #include "../common/repositories/character_data_repository.h"
+#include "../common/repositories/discovered_items_repository.h"
+#include "../common/events/player_events.h"
+#include "../common/events/player_event_logs.h"
 
 
 extern QueryServ* QServ;
@@ -1122,6 +1125,17 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 		break;
 	}
 	case ChatChannel_Say: { /* Say */
+		if (player_event_logs.IsEventEnabled(PlayerEvent::SAY)) {
+			std::string msg = message;
+			if (!msg.empty() && msg.at(0) != '#' && msg.at(0) != '^') {
+				auto e = PlayerEvent::SayEvent{
+					.message = message,
+					.target = GetTarget() ? GetTarget()->GetCleanName() : ""
+				};
+				RecordPlayerEventLog(PlayerEvent::SAY, e);
+			}
+		}
+
 		if (message[0] == COMMAND_CHAR) {
 			if (command_dispatch(this, message, false) == -2) {
 				if (parse->PlayerHasQuestSub(EVENT_COMMAND)) {
@@ -2542,6 +2556,17 @@ bool Client::CheckIncreaseSkill(EQ::skills::SkillType skillid, Mob *against_who,
 				0
 			);
 			parse->EventPlayer(EVENT_SKILL_UP, this, export_string, 0);
+
+			if (player_event_logs.IsEventEnabled(PlayerEvent::SKILL_UP)) {
+				auto e = PlayerEvent::SkillUpEvent{
+					.skill_id = static_cast<uint32>(skillid),
+					.value = (skillval + 1),
+					.max_skill = static_cast<int16>(maxskill),
+					.against_who = (against_who) ? against_who->GetCleanName() : GetCleanName(),
+				};
+				RecordPlayerEventLog(PlayerEvent::SKILL_UP, e);
+			}
+
 			LogSkills("Skill [{}] at value [{}] successfully gain with [{}] chance (mod [{}])", skillid, skillval, Chance, chancemodi);
 			return true;
 		} else {
@@ -2762,35 +2787,6 @@ void Client::MemorizeSpell(uint32 slot,uint32 spellid,uint32 scribing, uint32 re
 	outapp->priority = 5;
 	QueuePacket(outapp);
 	safe_delete(outapp);
-}
-
-void Client::LogMerchant(Client* player, Mob* merchant, uint32 quantity, uint32 price, const EQ::ItemData* item, bool buying)
-{
-	if(!player || !merchant || !item)
-		return;
-
-	std::string LogText = "Qty: ";
-
-	char Buffer[255];
-	memset(Buffer, 0, sizeof(Buffer));
-
-	snprintf(Buffer, sizeof(Buffer)-1, "%3i", quantity);
-	LogText += Buffer;
-	snprintf(Buffer, sizeof(Buffer)-1, "%10i", price);
-	LogText += " TotalValue: ";
-	LogText += Buffer;
-	snprintf(Buffer, sizeof(Buffer)-1, " ItemID: %7i", item->ID);
-	LogText += Buffer;
-	LogText += " ";
-	snprintf(Buffer, sizeof(Buffer)-1, " %s", item->Name);
-	LogText += Buffer;
-
-	if (buying==true) {
-		database.logevents(player->AccountName(),player->AccountID(),player->admin,player->GetName(),merchant->GetName(),"Buying from Merchant",LogText.c_str(),2);
-	}
-	else {
-		database.logevents(player->AccountName(),player->AccountID(),player->admin,player->GetName(),merchant->GetName(),"Selling to Merchant",LogText.c_str(),3);
-	}
 }
 
 void Client::Disarm(Client* disarmer, int chance) {
@@ -4044,36 +4040,42 @@ void Client::KeyRingList()
 	}
 }
 
-bool Client::IsDiscovered(uint32 itemid) {
-
-	std::string query = StringFormat("SELECT count(*) FROM discovered_items WHERE item_id = '%lu'", itemid);
-	auto results = database.QueryDatabase(query);
-	if (!results.Success()) {
+bool Client::IsDiscovered(uint32 item_id) {
+	const auto& l = DiscoveredItemsRepository::GetWhere(
+		database,
+		fmt::format(
+			"item_id = {}",
+			item_id
+		)
+	);
+	if (l.empty()) {
 		return false;
 	}
-
-	auto row = results.begin();
-	if (!atoi(row[0]))
-		return false;
 
 	return true;
 }
 
-void Client::DiscoverItem(uint32 itemid) {
+void Client::DiscoverItem(uint32 item_id) {
+	auto e = DiscoveredItemsRepository::NewEntity();
 
-	std::string query = StringFormat("INSERT INTO discovered_items "
-									"SET item_id = %lu, char_name = '%s', "
-									"discovered_date = UNIX_TIMESTAMP(), account_status = %i",
-									itemid, GetName(), Admin());
-	auto results = database.QueryDatabase(query);
+	e.account_status = Admin();
+	e.char_name = GetCleanName();
+	e.discovered_date = std::time(nullptr);
+	e.item_id = item_id;
 
-	auto* inst = database.CreateItem(itemid);
+	auto d = DiscoveredItemsRepository::InsertOne(database, e);
 
-	std::vector<std::any> args;
+	parse->EventPlayer(EVENT_DISCOVER_ITEM, this, "", item_id);
 
-	args.emplace_back(inst);
+	if (player_event_logs.IsEventEnabled(PlayerEvent::DISCOVER_ITEM)) {
+		const auto* item = database.GetItem(item_id);
 
-	parse->EventPlayer(EVENT_DISCOVER_ITEM, this, "", itemid, &args);
+		auto e = PlayerEvent::DiscoverItemEvent{
+			.item_id = item_id,
+			.item_name = item->Name,
+		};
+		RecordPlayerEventLog(PlayerEvent::DISCOVER_ITEM, e);
+	}
 }
 
 void Client::UpdateLFP() {
@@ -6870,7 +6872,7 @@ void Client::SetAlternateCurrencyValue(uint32 currency_id, uint32 new_amount)
 	SendAlternateCurrencyValue(currency_id);
 }
 
-void Client::AddAlternateCurrencyValue(uint32 currency_id, int32 amount, int8 method)
+int Client::AddAlternateCurrencyValue(uint32 currency_id, int32 amount, int8 method)
 {
 
 	/* Added via Quest, rest of the logging methods may be done inline due to information available in that area of the code */
@@ -6883,12 +6885,12 @@ void Client::AddAlternateCurrencyValue(uint32 currency_id, int32 amount, int8 me
 	}
 
 	if(amount == 0) {
-		return;
+		return 0;
 	}
 
 	if(!alternate_currency_loaded) {
 		alternate_currency_queued_operations.push(std::make_pair(currency_id, amount));
-		return;
+		return 0;
 	}
 
 	int new_value = 0;
@@ -6907,6 +6909,8 @@ void Client::AddAlternateCurrencyValue(uint32 currency_id, int32 amount, int8 me
 		database.UpdateAltCurrencyValue(CharacterID(), currency_id, new_value);
 	}
 	SendAlternateCurrencyValue(currency_id);
+
+	return new_value;
 }
 
 void Client::SendAlternateCurrencyValues()
@@ -11859,7 +11863,7 @@ void Client::SendPath(Mob* target)
 			target->CastToClient()->Trader ||
 			target->CastToClient()->Buyer
 		)
-	) {
+		) {
 		Message(
 			Chat::Yellow,
 			fmt::format(
@@ -11894,7 +11898,8 @@ void Client::SendPath(Mob* target)
 
 		points.push_back(a);
 		points.push_back(b);
-	} else {
+	}
+	else {
 		glm::vec3 path_start(
 			GetX(),
 			GetY(),
@@ -11907,8 +11912,8 @@ void Client::SendPath(Mob* target)
 			target->GetZ() + (target->GetSize() < 6.0 ? 6 : target->GetSize()) * HEAD_POSITION
 		);
 
-		bool partial = false;
-		bool stuck = false;
+		bool partial   = false;
+		bool stuck     = false;
 		auto path_list = zone->pathing->FindRoute(path_start, path_end, partial, stuck);
 
 		if (path_list.empty() || partial) {
@@ -11939,7 +11944,7 @@ void Client::SendPath(Mob* target)
 		p.z = GetZ();
 		points.push_back(p);
 
-		for (const auto& n : path_list) {
+		for (const auto &n: path_list) {
 			if (n.teleport) {
 				leads_to_teleporter = true;
 				break;
@@ -11967,10 +11972,201 @@ void Client::SendPath(Mob* target)
 	SendPathPacket(points);
 }
 
-void Client::UseAugmentContainer(int container_slot) {
+void Client::UseAugmentContainer(int container_slot)
+{
 	auto in_augment = new AugmentItem_Struct[sizeof(AugmentItem_Struct)];
 	in_augment->container_slot = container_slot;
-	in_augment->augment_slot = -1;
+	in_augment->augment_slot   = -1;
 	Object::HandleAugmentation(this, in_augment, nullptr);
 	safe_delete_array(in_augment);
+}
+
+PlayerEvent::PlayerEvent Client::GetPlayerEvent()
+{
+	auto e = PlayerEvent::PlayerEvent{};
+	e.account_id      = AccountID();
+	e.character_id    = CharacterID();
+	e.character_name  = GetCleanName();
+	e.x               = GetX();
+	e.y               = GetY();
+	e.z               = GetZ();
+	e.heading         = GetHeading();
+	e.zone_id         = GetZoneID();
+	e.zone_short_name = zone ? zone->GetShortName() : "";
+	e.zone_long_name  = zone ? zone->GetLongName() : "";
+	e.instance_id     = GetInstanceID();
+	e.guild_id        = GuildID();
+	e.guild_name      = guild_mgr.GetGuildName(GuildID());
+	e.account_name    = AccountName();
+
+	return e;
+}
+
+void Client::PlayerTradeEventLog(Trade *t, Trade *t2)
+{
+	Client *trader       = t->GetOwner()->CastToClient();
+	Client *trader2      = t2->GetOwner()->CastToClient();
+	uint8  t_item_count  = 0;
+	uint8  t2_item_count = 0;
+
+	auto money_t  = PlayerEvent::Money{
+		.platinum = t->pp,
+		.gold = t->gp,
+		.silver = t->sp,
+		.copper = t->cp,
+	};
+	auto money_t2 = PlayerEvent::Money{
+		.platinum = t2->pp,
+		.gold = t2->gp,
+		.silver = t2->sp,
+		.copper = t2->cp,
+	};
+
+	// trader 1 item count
+	for (uint16 i = EQ::invslot::TRADE_BEGIN; i <= EQ::invslot::TRADE_END; i++) {
+		if (trader->GetInv().GetItem(i)) {
+			t_item_count++;
+		}
+	}
+
+	// trader 2 item count
+	for (uint16 i = EQ::invslot::TRADE_BEGIN; i <= EQ::invslot::TRADE_END; i++) {
+		if (trader2->GetInv().GetItem(i)) {
+			t2_item_count++;
+		}
+	}
+
+	std::vector<PlayerEvent::TradeItemEntry> t_entries = {};
+	t_entries.reserve(t_item_count);
+	if (t_item_count > 0) {
+		for (uint16 i = EQ::invslot::TRADE_BEGIN; i <= EQ::invslot::TRADE_END; i++) {
+			const EQ::ItemInstance *inst = trader->GetInv().GetItem(i);
+			if (inst) {
+				t_entries.emplace_back(
+					PlayerEvent::TradeItemEntry{
+						.slot = i,
+						.item_id = inst->GetItem()->ID,
+						.item_name = inst->GetItem()->Name,
+						.charges = static_cast<uint16>(inst->GetCharges()),
+						.aug_1_item_id = inst->GetAugmentItemID(0),
+						.aug_1_item_name = inst->GetAugment(0) ? inst->GetAugment(0)->GetItem()->Name : "",
+						.aug_2_item_id = inst->GetAugmentItemID(1),
+						.aug_2_item_name = inst->GetAugment(1) ? inst->GetAugment(1)->GetItem()->Name : "",
+						.aug_3_item_id = inst->GetAugmentItemID(2),
+						.aug_3_item_name = inst->GetAugment(2) ? inst->GetAugment(2)->GetItem()->Name : "",
+						.aug_4_item_id = inst->GetAugmentItemID(3),
+						.aug_4_item_name = inst->GetAugment(3) ? inst->GetAugment(3)->GetItem()->Name : "",
+						.aug_5_item_id = inst->GetAugmentItemID(4),
+						.aug_5_item_name = inst->GetAugment(4) ? inst->GetAugment(4)->GetItem()->Name : "",
+						.aug_6_item_id = inst->GetAugmentItemID(5),
+						.aug_6_item_name = inst->GetAugment(5) ? inst->GetAugment(5)->GetItem()->Name : "",
+						.in_bag = false,
+					}
+				);
+
+				if (inst->IsClassBag()) {
+					for (uint8 j = EQ::invbag::SLOT_BEGIN; j <= EQ::invbag::SLOT_END; j++) {
+						inst = trader->GetInv().GetItem(i, j);
+						if (inst) {
+							t_entries.emplace_back(
+								PlayerEvent::TradeItemEntry{
+									.slot = j,
+									.item_id = inst->GetItem()->ID,
+									.item_name = inst->GetItem()->Name,
+									.charges = static_cast<uint16>(inst->GetCharges()),
+									.aug_1_item_id = inst->GetAugmentItemID(0),
+									.aug_1_item_name = inst->GetAugment(0) ? inst->GetAugment(0)->GetItem()->Name : "",
+									.aug_2_item_id = inst->GetAugmentItemID(1),
+									.aug_2_item_name = inst->GetAugment(1) ? inst->GetAugment(1)->GetItem()->Name : "",
+									.aug_3_item_id = inst->GetAugmentItemID(2),
+									.aug_3_item_name = inst->GetAugment(2) ? inst->GetAugment(2)->GetItem()->Name : "",
+									.aug_4_item_id = inst->GetAugmentItemID(3),
+									.aug_4_item_name = inst->GetAugment(3) ? inst->GetAugment(3)->GetItem()->Name : "",
+									.aug_5_item_id = inst->GetAugmentItemID(4),
+									.aug_5_item_name = inst->GetAugment(4) ? inst->GetAugment(4)->GetItem()->Name : "",
+									.aug_6_item_id = inst->GetAugmentItemID(5),
+									.aug_6_item_name = inst->GetAugment(5) ? inst->GetAugment(5)->GetItem()->Name : "",
+									.in_bag = true,
+								}
+							);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	std::vector<PlayerEvent::TradeItemEntry> t2_entries = {};
+	t_entries.reserve(t2_item_count);
+	if (t2_item_count > 0) {
+		for (uint16 i = EQ::invslot::TRADE_BEGIN; i <= EQ::invslot::TRADE_END; i++) {
+			const EQ::ItemInstance *inst = trader2->GetInv().GetItem(i);
+			if (inst) {
+				t2_entries.emplace_back(
+					PlayerEvent::TradeItemEntry{
+						.slot = i,
+						.item_id = inst->GetItem()->ID,
+						.item_name = inst->GetItem()->Name,
+						.charges = static_cast<uint16>(inst->GetCharges()),
+						.aug_1_item_id = inst->GetAugmentItemID(0),
+						.aug_1_item_name = inst->GetAugment(0) ? inst->GetAugment(0)->GetItem()->Name : "",
+						.aug_2_item_id = inst->GetAugmentItemID(1),
+						.aug_2_item_name = inst->GetAugment(1) ? inst->GetAugment(1)->GetItem()->Name : "",
+						.aug_3_item_id = inst->GetAugmentItemID(2),
+						.aug_3_item_name = inst->GetAugment(2) ? inst->GetAugment(2)->GetItem()->Name : "",
+						.aug_4_item_id = inst->GetAugmentItemID(3),
+						.aug_4_item_name = inst->GetAugment(3) ? inst->GetAugment(3)->GetItem()->Name : "",
+						.aug_5_item_id = inst->GetAugmentItemID(4),
+						.aug_5_item_name = inst->GetAugment(4) ? inst->GetAugment(4)->GetItem()->Name : "",
+						.aug_6_item_id = inst->GetAugmentItemID(5),
+						.aug_6_item_name = inst->GetAugment(5) ? inst->GetAugment(5)->GetItem()->Name : "",
+						.in_bag = false,
+					}
+				);
+
+				if (inst->IsClassBag()) {
+					for (uint8 j = EQ::invbag::SLOT_BEGIN; j <= EQ::invbag::SLOT_END; j++) {
+						inst = trader2->GetInv().GetItem(i, j);
+						if (inst) {
+							t2_entries.emplace_back(
+								PlayerEvent::TradeItemEntry{
+									.slot = j,
+									.item_id = inst->GetItem()->ID,
+									.item_name = inst->GetItem()->Name,
+									.charges = static_cast<uint16>(inst->GetCharges()),
+									.aug_1_item_id = inst->GetAugmentItemID(0),
+									.aug_1_item_name = inst->GetAugment(0) ? inst->GetAugment(0)->GetItem()->Name : "",
+									.aug_2_item_id = inst->GetAugmentItemID(1),
+									.aug_2_item_name = inst->GetAugment(1) ? inst->GetAugment(1)->GetItem()->Name : "",
+									.aug_3_item_id = inst->GetAugmentItemID(2),
+									.aug_3_item_name = inst->GetAugment(2) ? inst->GetAugment(2)->GetItem()->Name : "",
+									.aug_4_item_id = inst->GetAugmentItemID(3),
+									.aug_4_item_name = inst->GetAugment(3) ? inst->GetAugment(3)->GetItem()->Name : "",
+									.aug_5_item_id = inst->GetAugmentItemID(4),
+									.aug_5_item_name = inst->GetAugment(4) ? inst->GetAugment(4)->GetItem()->Name : "",
+									.aug_6_item_id = inst->GetAugmentItemID(5),
+									.aug_6_item_name = inst->GetAugment(5) ? inst->GetAugment(5)->GetItem()->Name : "",
+									.in_bag = true,
+								}
+							);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	auto e = PlayerEvent::TradeEvent{
+		.character_1_id = trader->CharacterID(),
+		.character_1_name = trader->GetCleanName(),
+		.character_2_id = trader2->CharacterID(),
+		.character_2_name = trader2->GetCleanName(),
+		.character_1_give_money = money_t,
+		.character_2_give_money = money_t2,
+		.character_1_give_items = t_entries,
+		.character_2_give_items = t2_entries
+	};
+
+	RecordPlayerEventLogWithClient(trader, PlayerEvent::TRADE, e);
+	RecordPlayerEventLogWithClient(trader2, PlayerEvent::TRADE, e);
 }

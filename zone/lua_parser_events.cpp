@@ -59,7 +59,7 @@ void handle_npc_event_trade(
 	uint32 extra_data,
 	std::vector<std::any> *extra_pointers
 ) {
-	Lua_Client l_client(reinterpret_cast<Client*>(init));
+	Lua_Client           l_client(reinterpret_cast<Client *>(init));
 	luabind::adl::object l_client_o = luabind::adl::object(L, l_client);
 	l_client_o.push(L);
 	lua_setfield(L, -2, "other");
@@ -104,6 +104,10 @@ void handle_npc_event_trade(
 
 	lua_pushinteger(L, money_value);
 	lua_setfield(L, -2, "copper");
+
+	// set a reference to the client inside of the trade object as well for plugins to process
+	l_client_o.push(L);
+	lua_setfield(L, -2, "other");
 
 	lua_setfield(L, -2, "trade");
 }

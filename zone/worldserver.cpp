@@ -57,6 +57,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "shared_task_zone_messaging.h"
 #include "dialogue_window.h"
 #include "bot_command.h"
+#include "queryserv.h"
+#include "../common/events/player_event_logs.h"
 
 extern EntityList entity_list;
 extern Zone* zone;
@@ -1958,8 +1960,9 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	}
 	case ServerOP_ReloadLogs:
 	{
-			zone->SendReloadMessage("Log Settings");
-			LogSys.LoadLogDatabaseSettings();
+		zone->SendReloadMessage("Log Settings");
+		LogSys.LoadLogDatabaseSettings();
+		player_event_logs.ReloadSettings();
 		break;
 	}
 	case ServerOP_ReloadMerchants: {

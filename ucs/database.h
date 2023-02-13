@@ -30,6 +30,7 @@
 #include "../common/database.h"
 #include "clientlist.h"
 #include "chatchannel.h"
+#include "../common/shareddb.h"
 #include <string>
 #include <vector>
 #include <map>

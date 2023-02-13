@@ -700,7 +700,7 @@ void TaskManager::SharedTaskSelector(Client* client, Mob* mob, const std::vector
 	if (request.group_type != SharedTaskRequestGroupType::Solo) {
 		auto shared_task_members = SharedTaskMembersRepository::GetWhere(
 			database,
-			fmt::format("character_id IN ({}) LIMIT 1", fmt::join(request.character_ids, ",")));
+			fmt::format("character_id IN ({}) LIMIT 1", Strings::Join(request.character_ids, ",")));
 
 		if (!shared_task_members.empty()) {
 			validation_failed = true;

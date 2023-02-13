@@ -25,9 +25,11 @@
 #include "object.h"
 
 #include "quest_parser_collection.h"
+#include "worldserver.h"
 #include "zonedb.h"
 #include "../common/zone_store.h"
 #include "../common/repositories/criteria/content_filter_criteria.h"
+#include "../common/events/player_event_logs.h"
 
 #include <iostream>
 
@@ -37,6 +39,7 @@ const char DEFAULT_OBJECT_NAME_SUFFIX[] = "_ACTORDEF";
 
 extern Zone* zone;
 extern EntityList entity_list;
+extern WorldServer worldserver;
 
 // Loading object from database
 Object::Object(uint32 id, uint32 type, uint32 icon, const Object_Struct& object, const EQ::ItemInstance* inst)
@@ -517,6 +520,14 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 				}
 			}
 
+			if (player_event_logs.IsEventEnabled(PlayerEvent::GROUNDSPAWN_PICKUP)) {
+				auto e = PlayerEvent::GroundSpawnPickupEvent{
+					.item_id = item->ID,
+					.item_name = item->Name,
+				};
+				RecordPlayerEventLogWithClient(sender, PlayerEvent::GROUNDSPAWN_PICKUP, e);
+			}
+
 			std::string export_string = fmt::format("{}", item->ID);
 			std::vector<std::any> args;
 			args.push_back(m_inst);
@@ -542,12 +553,13 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 			sender->SendItemPacket(EQ::invslot::slotCursor, m_inst, ItemPacketTrade);
 
 			// Could be an undiscovered ground_spawn
-			if (m_ground_spawn && (RuleB(Character, EnableDiscoveredItems)))
-			{
-				if (!sender->GetGM() && !sender->IsDiscovered(item->ID))
-				{
-					sender->DiscoverItem(item->ID);
-				}
+			if (
+				m_ground_spawn &&
+				RuleB(Character, EnableDiscoveredItems) &&
+				!sender->GetGM() &&
+				!sender->IsDiscovered(item->ID)
+			) {
+				sender->DiscoverItem(item->ID);
 			}
 
 			if(cursordelete)	// delete the item if it's a duplicate lore. We have to do this because the client expects the item packet

@@ -50,11 +50,11 @@ void ExpeditionDatabase::PurgeExpiredExpeditions()
 	auto results = database.QueryDatabase(query);
 	if (results.Success())
 	{
-		std::vector<uint32_t> expedition_ids;
+		std::vector<std::string> expedition_ids;
 		std::vector<uint32_t> dynamic_zone_ids;
 		for (auto row = results.begin(); row != results.end(); ++row)
 		{
-			expedition_ids.emplace_back(static_cast<uint32_t>(strtoul(row[0], nullptr, 10)));
+			expedition_ids.emplace_back(row[0]);
 			dynamic_zone_ids.emplace_back(static_cast<uint32_t>(strtoul(row[1], nullptr, 10)));
 		}
 

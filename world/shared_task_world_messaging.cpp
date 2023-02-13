@@ -323,7 +323,7 @@ void SharedTaskWorldMessaging::HandleZoneMessage(ServerPacket *pack)
 					}
 				}
 
-				std::string player_list = fmt::format("{}", fmt::join(player_names, ", "));
+				std::string player_list = fmt::format("{}", Strings::Join(player_names, ", "));
 				client_list.SendCharacterMessageID(buf->source_character_id, Chat::Yellow, TaskStr::MEMBERS_PRINT, {player_list});
 			}
 

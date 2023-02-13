@@ -100,7 +100,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 			break;
 		}
 		case ServerOP_QSPlayerLogTrades: {
-			QSPlayerLogTrade_Struct *QS = (QSPlayerLogTrade_Struct *) p.Data();
+			PlayerLogTrade_Struct *QS = (PlayerLogTrade_Struct *) p.Data();
 			database.LogPlayerTrade(QS, QS->_detail_count);
 			break;
 		}

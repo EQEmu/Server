@@ -9,22 +9,21 @@
  * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
  */
 
-#ifndef EQEMU_BASE_HACKERS_REPOSITORY_H
-#define EQEMU_BASE_HACKERS_REPOSITORY_H
+#ifndef EQEMU_BASE_PLAYER_EVENT_LOG_SETTINGS_REPOSITORY_H
+#define EQEMU_BASE_PLAYER_EVENT_LOG_SETTINGS_REPOSITORY_H
 
 #include "../../database.h"
 #include "../../strings.h"
 #include <ctime>
 
-class BaseHackersRepository {
+class BasePlayerEventLogSettingsRepository {
 public:
-	struct Hackers {
-		int32_t     id;
-		std::string account;
-		std::string name;
-		std::string hacked;
-		std::string zone;
-		std::string date;
+	struct PlayerEventLogSettings {
+		int64_t     id;
+		std::string event_name;
+		int8_t      event_enabled;
+		int32_t     retention_days;
+		int32_t     discord_webhook_id;
 	};
 
 	static std::string PrimaryKey()
@@ -36,11 +35,10 @@ public:
 	{
 		return {
 			"id",
-			"account",
-			"name",
-			"hacked",
-			"zone",
-			"date",
+			"event_name",
+			"event_enabled",
+			"retention_days",
+			"discord_webhook_id",
 		};
 	}
 
@@ -48,11 +46,10 @@ public:
 	{
 		return {
 			"id",
-			"account",
-			"name",
-			"hacked",
-			"zone",
-			"date",
+			"event_name",
+			"event_enabled",
+			"retention_days",
+			"discord_webhook_id",
 		};
 	}
 
@@ -68,7 +65,7 @@ public:
 
 	static std::string TableName()
 	{
-		return std::string("hackers");
+		return std::string("player_event_log_settings");
 	}
 
 	static std::string BaseSelect()
@@ -89,57 +86,56 @@ public:
 		);
 	}
 
-	static Hackers NewEntity()
+	static PlayerEventLogSettings NewEntity()
 	{
-		Hackers e{};
+		PlayerEventLogSettings e{};
 
-		e.id      = 0;
-		e.account = "";
-		e.name    = "";
-		e.hacked  = "";
-		e.zone    = "";
-		e.date    = std::time(nullptr);
+		e.id                 = 0;
+		e.event_name         = "";
+		e.event_enabled      = 0;
+		e.retention_days     = 0;
+		e.discord_webhook_id = 0;
 
 		return e;
 	}
 
-	static Hackers GetHackers(
-		const std::vector<Hackers> &hackerss,
-		int hackers_id
+	static PlayerEventLogSettings GetPlayerEventLogSettings(
+		const std::vector<PlayerEventLogSettings> &player_event_log_settingss,
+		int player_event_log_settings_id
 	)
 	{
-		for (auto &hackers : hackerss) {
-			if (hackers.id == hackers_id) {
-				return hackers;
+		for (auto &player_event_log_settings : player_event_log_settingss) {
+			if (player_event_log_settings.id == player_event_log_settings_id) {
+				return player_event_log_settings;
 			}
 		}
 
 		return NewEntity();
 	}
 
-	static Hackers FindOne(
+	static PlayerEventLogSettings FindOne(
 		Database& db,
-		int hackers_id
+		int player_event_log_settings_id
 	)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
-				hackers_id
+				PrimaryKey(),
+				player_event_log_settings_id
 			)
 		);
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			Hackers e{};
+			PlayerEventLogSettings e{};
 
-			e.id      = static_cast<int32_t>(atoi(row[0]));
-			e.account = row[1] ? row[1] : "";
-			e.name    = row[2] ? row[2] : "";
-			e.hacked  = row[3] ? row[3] : "";
-			e.zone    = row[4] ? row[4] : "";
-			e.date    = row[5] ? row[5] : "";
+			e.id                 = strtoll(row[0], nullptr, 10);
+			e.event_name         = row[1] ? row[1] : "";
+			e.event_enabled      = static_cast<int8_t>(atoi(row[2]));
+			e.retention_days     = static_cast<int32_t>(atoi(row[3]));
+			e.discord_webhook_id = static_cast<int32_t>(atoi(row[4]));
 
 			return e;
 		}
@@ -149,7 +145,7 @@ public:
 
 	static int DeleteOne(
 		Database& db,
-		int hackers_id
+		int player_event_log_settings_id
 	)
 	{
 		auto results = db.QueryDatabase(
@@ -157,7 +153,7 @@ public:
 				"DELETE FROM {} WHERE {} = {}",
 				TableName(),
 				PrimaryKey(),
-				hackers_id
+				player_event_log_settings_id
 			)
 		);
 
@@ -166,18 +162,18 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		const Hackers &e
+		const PlayerEventLogSettings &e
 	)
 	{
 		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		v.push_back(columns[1] + " = '" + Strings::Escape(e.account) + "'");
-		v.push_back(columns[2] + " = '" + Strings::Escape(e.name) + "'");
-		v.push_back(columns[3] + " = '" + Strings::Escape(e.hacked) + "'");
-		v.push_back(columns[4] + " = '" + Strings::Escape(e.zone) + "'");
-		v.push_back(columns[5] + " = '" + Strings::Escape(e.date) + "'");
+		v.push_back(columns[0] + " = " + std::to_string(e.id));
+		v.push_back(columns[1] + " = '" + Strings::Escape(e.event_name) + "'");
+		v.push_back(columns[2] + " = " + std::to_string(e.event_enabled));
+		v.push_back(columns[3] + " = " + std::to_string(e.retention_days));
+		v.push_back(columns[4] + " = " + std::to_string(e.discord_webhook_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -192,19 +188,18 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static Hackers InsertOne(
+	static PlayerEventLogSettings InsertOne(
 		Database& db,
-		Hackers e
+		PlayerEventLogSettings e
 	)
 	{
 		std::vector<std::string> v;
 
 		v.push_back(std::to_string(e.id));
-		v.push_back("'" + Strings::Escape(e.account) + "'");
-		v.push_back("'" + Strings::Escape(e.name) + "'");
-		v.push_back("'" + Strings::Escape(e.hacked) + "'");
-		v.push_back("'" + Strings::Escape(e.zone) + "'");
-		v.push_back("'" + Strings::Escape(e.date) + "'");
+		v.push_back("'" + Strings::Escape(e.event_name) + "'");
+		v.push_back(std::to_string(e.event_enabled));
+		v.push_back(std::to_string(e.retention_days));
+		v.push_back(std::to_string(e.discord_webhook_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -226,7 +221,7 @@ public:
 
 	static int InsertMany(
 		Database& db,
-		const std::vector<Hackers> &entries
+		const std::vector<PlayerEventLogSettings> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
@@ -235,11 +230,10 @@ public:
 			std::vector<std::string> v;
 
 			v.push_back(std::to_string(e.id));
-			v.push_back("'" + Strings::Escape(e.account) + "'");
-			v.push_back("'" + Strings::Escape(e.name) + "'");
-			v.push_back("'" + Strings::Escape(e.hacked) + "'");
-			v.push_back("'" + Strings::Escape(e.zone) + "'");
-			v.push_back("'" + Strings::Escape(e.date) + "'");
+			v.push_back("'" + Strings::Escape(e.event_name) + "'");
+			v.push_back(std::to_string(e.event_enabled));
+			v.push_back(std::to_string(e.retention_days));
+			v.push_back(std::to_string(e.discord_webhook_id));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
@@ -257,9 +251,9 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static std::vector<Hackers> All(Database& db)
+	static std::vector<PlayerEventLogSettings> All(Database& db)
 	{
-		std::vector<Hackers> all_entries;
+		std::vector<PlayerEventLogSettings> all_entries;
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -271,14 +265,13 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Hackers e{};
+			PlayerEventLogSettings e{};
 
-			e.id      = static_cast<int32_t>(atoi(row[0]));
-			e.account = row[1] ? row[1] : "";
-			e.name    = row[2] ? row[2] : "";
-			e.hacked  = row[3] ? row[3] : "";
-			e.zone    = row[4] ? row[4] : "";
-			e.date    = row[5] ? row[5] : "";
+			e.id                 = strtoll(row[0], nullptr, 10);
+			e.event_name         = row[1] ? row[1] : "";
+			e.event_enabled      = static_cast<int8_t>(atoi(row[2]));
+			e.retention_days     = static_cast<int32_t>(atoi(row[3]));
+			e.discord_webhook_id = static_cast<int32_t>(atoi(row[4]));
 
 			all_entries.push_back(e);
 		}
@@ -286,9 +279,9 @@ public:
 		return all_entries;
 	}
 
-	static std::vector<Hackers> GetWhere(Database& db, const std::string &where_filter)
+	static std::vector<PlayerEventLogSettings> GetWhere(Database& db, const std::string &where_filter)
 	{
-		std::vector<Hackers> all_entries;
+		std::vector<PlayerEventLogSettings> all_entries;
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -301,14 +294,13 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Hackers e{};
+			PlayerEventLogSettings e{};
 
-			e.id      = static_cast<int32_t>(atoi(row[0]));
-			e.account = row[1] ? row[1] : "";
-			e.name    = row[2] ? row[2] : "";
-			e.hacked  = row[3] ? row[3] : "";
-			e.zone    = row[4] ? row[4] : "";
-			e.date    = row[5] ? row[5] : "";
+			e.id                 = strtoll(row[0], nullptr, 10);
+			e.event_name         = row[1] ? row[1] : "";
+			e.event_enabled      = static_cast<int8_t>(atoi(row[2]));
+			e.retention_days     = static_cast<int32_t>(atoi(row[3]));
+			e.discord_webhook_id = static_cast<int32_t>(atoi(row[4]));
 
 			all_entries.push_back(e);
 		}
@@ -369,4 +361,4 @@ public:
 
 };
 
-#endif //EQEMU_BASE_HACKERS_REPOSITORY_H
+#endif //EQEMU_BASE_PLAYER_EVENT_LOG_SETTINGS_REPOSITORY_H

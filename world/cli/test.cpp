@@ -1,4 +1,6 @@
-#include "../../common/zone_store.h"
+#include <cereal/archives/json.hpp>
+#include <cereal/types/vector.hpp>
+#include "../../common/events/player_events.h"
 
 void WorldserverCLI::TestCommand(int argc, char **argv, argh::parser &cmd, std::string &description)
 {
@@ -8,14 +10,5 @@ void WorldserverCLI::TestCommand(int argc, char **argv, argh::parser &cmd, std::
 		return;
 	}
 
-	zone_store.LoadZones(database);
-
-	const char* zonename = ZoneName(0);
-	if (zonename == 0) {
-		LogInfo("Zone name is 0");
-	}
-	if (zonename == nullptr) {
-		LogInfo("Zone name is nullptr");
-	}
-
+	
 }

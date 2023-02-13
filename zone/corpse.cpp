@@ -49,6 +49,7 @@ Child of the Mob class.
 #include "quest_parser_collection.h"
 #include "string_ids.h"
 #include "worldserver.h"
+#include "../common/events/player_event_logs.h"
 #include <iostream>
 
 
@@ -1443,6 +1444,18 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 			prevent_loot = true;
 		}
 
+		if (player_event_logs.IsEventEnabled(PlayerEvent::LOOT_ITEM) && !IsPlayerCorpse()) {
+			auto e = PlayerEvent::LootItemEvent{
+				.item_id = inst->GetItem()->ID,
+				.item_name = inst->GetItem()->Name,
+				.charges = inst->GetCharges(),
+				.npc_id = GetNPCTypeID(),
+				.corpse_name = EntityList::RemoveNumbers(corpse_name)
+			};
+
+			RecordPlayerEventLogWithClient(client, PlayerEvent::LOOT_ITEM, e);
+		}
+
 		if (!IsPlayerCorpse())
 		{
 			// dynamic zones may prevent looting by non-members or based on lockouts
@@ -1471,9 +1484,14 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 		// safe to ACK now
 		client->QueuePacket(app);
 
-		if (!IsPlayerCorpse() && RuleB(Character, EnableDiscoveredItems)) {
-			if (client && !client->GetGM() && !client->IsDiscovered(inst->GetItem()->ID))
-				client->DiscoverItem(inst->GetItem()->ID);
+		if (
+			!IsPlayerCorpse() &&
+			RuleB(Character, EnableDiscoveredItems) &&
+			client &&
+			!client->GetGM() &&
+			!client->IsDiscovered(inst->GetItem()->ID)
+		) {
+			client->DiscoverItem(inst->GetItem()->ID);
 		}
 
 		if (zone->adv_data) {

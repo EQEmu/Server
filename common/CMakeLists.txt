@@ -33,9 +33,11 @@ SET(common_sources
     eq_stream_proxy.cpp
     eqtime.cpp
     event_sub.cpp
+    events/player_event_logs.cpp
+    events/player_event_discord_formatter.cpp
     expedition_lockout_timer.cpp
     extprofile.cpp
-    discord_manager.cpp
+    discord/discord_manager.cpp
     faction.cpp
     file.cpp
     guild_base.cpp
@@ -198,7 +200,6 @@ SET(repositories
     repositories/base/base_dynamic_zones_repository.h
     repositories/base/base_dynamic_zone_members_repository.h
     repositories/base/base_dynamic_zone_templates_repository.h
-    repositories/base/base_eventlog_repository.h
     repositories/base/base_expeditions_repository.h
     repositories/base/base_expedition_lockouts_repository.h
     repositories/base/base_faction_association_repository.h
@@ -218,7 +219,6 @@ SET(repositories
     repositories/base/base_guilds_repository.h
     repositories/base/base_guild_ranks_repository.h
     repositories/base/base_guild_relations_repository.h
-    repositories/base/base_hackers_repository.h
     repositories/base/base_horses_repository.h
     repositories/base/base_instance_list_repository.h
     repositories/base/base_instance_list_player_repository.h
@@ -264,6 +264,8 @@ SET(repositories
     repositories/base/base_pets_equipmentset_repository.h
     repositories/base/base_pets_equipmentset_entries_repository.h
     repositories/base/base_player_titlesets_repository.h
+    repositories/base/base_player_event_log_settings_repository.h
+    repositories/base/base_player_event_logs_repository.h
     repositories/base/base_quest_globals_repository.h
     repositories/base/base_raid_details_repository.h
     repositories/base/base_raid_members_repository.h
@@ -376,7 +378,6 @@ SET(repositories
     repositories/dynamic_zones_repository.h
     repositories/dynamic_zone_members_repository.h
     repositories/dynamic_zone_templates_repository.h
-    repositories/eventlog_repository.h
     repositories/expeditions_repository.h
     repositories/expedition_lockouts_repository.h
     repositories/faction_association_repository.h
@@ -396,7 +397,6 @@ SET(repositories
     repositories/guilds_repository.h
     repositories/guild_ranks_repository.h
     repositories/guild_relations_repository.h
-    repositories/hackers_repository.h
     repositories/horses_repository.h
     repositories/instance_list_repository.h
     repositories/instance_list_player_repository.h
@@ -442,6 +442,8 @@ SET(repositories
     repositories/pets_equipmentset_repository.h
     repositories/pets_equipmentset_entries_repository.h
     repositories/player_titlesets_repository.h
+    repositories/player_event_log_settings_repository.h
+    repositories/player_event_logs_repository.h
     repositories/quest_globals_repository.h
     repositories/raid_details_repository.h
     repositories/raid_members_repository.h
@@ -507,7 +509,7 @@ SET(common_headers
     dbcore.h
     deity.h
     discord/discord.h
-    discord_manager.h
+    discord/discord_manager.h
     dynamic_zone_base.h
     emu_constants.h
     emu_limits.h
@@ -530,6 +532,9 @@ SET(common_headers
     eq_stream_locator.h
     eq_stream_proxy.h
     eqtime.h
+    events/player_event_logs.h
+    events/player_event_discord_formatter.h
+    events/player_events.h
     errmsg.h
     event_sub.h
     expedition_lockout_timer.h
@@ -608,6 +613,7 @@ SET(common_headers
     event/event_loop.h
     event/task.h
     event/timer.h
+    json/json_archive_single_line.h
     json/json.h
     json/json-forwards.h
     net/console_server.h
@@ -661,8 +667,7 @@ SET(common_headers
     StackWalker/StackWalker.h
     util/memory_stream.h
     util/directory.h
-    util/uuid.h
-    )
+    util/uuid.h)
 
 SOURCE_GROUP(Event FILES
     event/event_loop.h

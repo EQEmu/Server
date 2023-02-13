@@ -3803,6 +3803,11 @@ int8 lua_get_recipe_success_count(uint32 recipe_id, uint32 item_id)
 	return content_db.GetRecipeComponentCount(RecipeCountType::Success, recipe_id, item_id);
 }
 
+void lua_send_player_handin_event()
+{
+	quest_manager.SendPlayerHandinEvent();
+}
+
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
 	cur = table[#name]; \
 	if(luabind::type(cur) != LUA_TNIL) { \
@@ -4331,6 +4336,7 @@ luabind::scope lua_register_general() {
 		luabind::def("get_recipe_fail_count", (int8(*)(uint32,uint32))&lua_get_recipe_fail_count),
 		luabind::def("get_recipe_salvage_count", (int8(*)(uint32,uint32))&lua_get_recipe_salvage_count),
 		luabind::def("get_recipe_success_count", (int8(*)(uint32,uint32))&lua_get_recipe_success_count),
+		luabind::def("send_player_handin_event", (void(*)(void))&lua_send_player_handin_event),
 		/*
 			Cross Zone
 		*/

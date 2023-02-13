@@ -50,7 +50,6 @@
 #include "../common/strings.h"
 #include "../common/servertalk.h"
 
-
 void QSDatabase::AddSpeech(
 	const char *from,
 	const char *to,
@@ -125,7 +124,7 @@ void QSDatabase::LogPlayerDropItem(QSPlayerDropItem_Struct *QS)
 	}
 }
 
-void QSDatabase::LogPlayerTrade(QSPlayerLogTrade_Struct *QS, uint32 detailCount)
+void QSDatabase::LogPlayerTrade(PlayerLogTrade_Struct *QS, uint32 detailCount)
 {
 
 	std::string query   = StringFormat(
@@ -134,10 +133,10 @@ void QSDatabase::LogPlayerTrade(QSPlayerLogTrade_Struct *QS, uint32 detailCount)
 		"`char1_sp` = '%i', `char1_cp` = '%i', `char1_items` = '%i', "
 		"`char2_id` = '%i', `char2_pp` = '%i', `char2_gp` = '%i', "
 		"`char2_sp` = '%i', `char2_cp` = '%i', `char2_items` = '%i'",
-		QS->char1_id, QS->char1_money.platinum, QS->char1_money.gold,
-		QS->char1_money.silver, QS->char1_money.copper, QS->char1_count,
-		QS->char2_id, QS->char2_money.platinum, QS->char2_money.gold,
-		QS->char2_money.silver, QS->char2_money.copper, QS->char2_count
+		QS->character_1_id, QS->character_1_money.platinum, QS->character_1_money.gold,
+		QS->character_1_money.silver, QS->character_1_money.copper, QS->character_1_item_count,
+		QS->character_2_id, QS->character_2_money.platinum, QS->character_2_money.gold,
+		QS->character_2_money.silver, QS->character_2_money.copper, QS->character_2_item_count
 	);
 	auto        results = QueryDatabase(query);
 	if (!results.Success()) {
@@ -157,10 +156,10 @@ void QSDatabase::LogPlayerTrade(QSPlayerLogTrade_Struct *QS, uint32 detailCount)
 			"`from_id` = '%i', `from_slot` = '%i', `to_id` = '%i', `to_slot` = '%i', "
 			"`item_id` = '%i', `charges` = '%i', `aug_1` = '%i', `aug_2` = '%i', "
 			"`aug_3` = '%i', `aug_4` = '%i', `aug_5` = '%i'",
-			lastIndex, QS->items[i].from_id, QS->items[i].from_slot,
-			QS->items[i].to_id, QS->items[i].to_slot, QS->items[i].item_id,
-			QS->items[i].charges, QS->items[i].aug_1, QS->items[i].aug_2,
-			QS->items[i].aug_3, QS->items[i].aug_4, QS->items[i].aug_5
+			lastIndex, QS->item_entries[i].from_character_id, QS->item_entries[i].from_slot,
+			QS->item_entries[i].to_character_id, QS->item_entries[i].to_slot, QS->item_entries[i].item_id,
+			QS->item_entries[i].charges, QS->item_entries[i].aug_1, QS->item_entries[i].aug_2,
+			QS->item_entries[i].aug_3, QS->item_entries[i].aug_4, QS->item_entries[i].aug_5
 		);
 		results = QueryDatabase(query);
 		if (!results.Success()) {

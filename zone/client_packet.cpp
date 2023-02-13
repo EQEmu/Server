@@ -71,6 +71,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/repositories/account_repository.h"
 
 #include "bot.h"
+#include "../common/events/player_event_logs.h"
 
 extern QueryServ* QServ;
 extern Zone* zone;
@@ -790,6 +791,7 @@ void Client::CompleteConnect()
 	/* This sub event is for if a player logs in for the first time since entering world. */
 	if (firstlogon == 1) {
 		parse->EventPlayer(EVENT_CONNECT, this, "", 0);
+		RecordPlayerEventLog(PlayerEvent::WENT_ONLINE, PlayerEvent::EmptyEvent{});
 		/* QS: PlayerLogConnectDisconnect */
 		if (RuleB(QueryServ, PlayerLogConnectDisconnect)) {
 			std::string event_desc = StringFormat("Connect :: Logged into zoneid:%i instid:%i", GetZoneID(), GetInstanceID());
@@ -2240,9 +2242,6 @@ void Client::Handle_OP_AdventureMerchantSell(const EQApplicationPacket *app)
 		return;
 	}
 
-	if (RuleB(EventLog, RecordSellToMerchant))
-		LogMerchant(this, vendor, ams_in->charges, price, item, false);
-
 	if (!inst->IsStackable())
 	{
 		DeleteItemInInventory(ams_in->slot);
@@ -2600,10 +2599,28 @@ void Client::Handle_OP_AltCurrencyPurchase(const EQApplicationPacket *app)
 		);
 		parse->EventPlayer(EVENT_ALT_CURRENCY_MERCHANT_BUY, this, export_string, 0);
 
-		AddAlternateCurrencyValue(alt_cur_id, -((int32)cost));
-		int16 charges = 1;
-		if (item->MaxCharges != 0)
+		uint64 current_balance = AddAlternateCurrencyValue(alt_cur_id, -((int32) cost));
+		int16  charges         = 1;
+		if (item->MaxCharges != 0) {
 			charges = item->MaxCharges;
+		}
+
+		if (player_event_logs.IsEventEnabled(PlayerEvent::MERCHANT_PURCHASE)) {
+			auto e = PlayerEvent::MerchantPurchaseEvent{
+				.npc_id = tar->GetNPCTypeID(),
+				.merchant_name = tar->GetCleanName(),
+				.merchant_type = tar->MerchantType,
+				.item_id = item->ID,
+				.item_name = item->Name,
+				.charges = charges,
+				.cost = cost,
+				.alternate_currency_id = alt_cur_id,
+				.player_money_balance = GetCarriedMoney(),
+				.player_currency_balance = current_balance,
+			};
+
+			RecordPlayerEventLog(PlayerEvent::MERCHANT_PURCHASE, e);
+		}
 
 		EQ::ItemInstance *inst = database.CreateItem(item, charges);
 		if (!AutoPutLootInInventory(*inst, true, true))
@@ -2774,7 +2791,25 @@ void Client::Handle_OP_AltCurrencySell(const EQApplicationPacket *app)
 		parse->EventPlayer(EVENT_ALT_CURRENCY_MERCHANT_SELL, this, export_string, 0);
 
 		FastQueuePacket(&outapp);
-		AddAlternateCurrencyValue(alt_cur_id, cost);
+		uint64 new_balance = AddAlternateCurrencyValue(alt_cur_id, cost);
+
+		if (player_event_logs.IsEventEnabled(PlayerEvent::MERCHANT_SELL)) {
+			auto e = PlayerEvent::MerchantSellEvent{
+				.npc_id = tar->GetNPCTypeID(),
+				.merchant_name = tar->GetCleanName(),
+				.merchant_type = tar->CastToNPC()->MerchantType,
+				.item_id = item->ID,
+				.item_name = item->Name,
+				.charges = static_cast<int16>(sell->charges),
+				.cost = cost,
+				.alternate_currency_id = 0,
+				.player_money_balance = GetCarriedMoney(),
+				.player_currency_balance = new_balance,
+			};
+
+			RecordPlayerEventLog(PlayerEvent::MERCHANT_SELL, e);
+		}
+
 		Save(1);
 	}
 }
@@ -3441,10 +3476,10 @@ void Client::Handle_OP_BankerChange(const EQApplicationPacket *app)
 
 	if (!banker || distance > USE_NPC_RANGE2)
 	{
-		auto hacked_string = fmt::format(
+		auto message = fmt::format(
 		    "Player tried to make use of a banker(money) but {} is non-existant or too far away ({} units).",
 		    banker ? banker->GetName() : "UNKNOWN NPC", distance);
-		database.SetMQDetectionFlag(AccountName(), GetName(), hacked_string, zone->GetShortName());
+		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = message});
 		return;
 	}
 
@@ -4164,7 +4199,8 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 				const EQ::ItemData* item = inst->GetItem();
 				if (item->Click.Effect != (uint32)castspell->spell_id)
 				{
-					database.SetMQDetectionFlag(account_name, name, "OP_CastSpell with item, tried to cast a different spell.", zone->GetShortName());
+					std::string message = fmt::format("OP_CastSpell with item, tried to cast a different spell than what was on item - item spell id [{}] attempted [{}]", item->Click.Effect, (uint32)castspell->spell_id);
+					RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = message});
 					InterruptSpell(castspell->spell_id);	//CHEATER!!
 					return;
 				}
@@ -4205,7 +4241,7 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 						}
 						else
 						{
-							database.SetMQDetectionFlag(account_name, name, "OP_CastSpell with item, did not meet req level.", zone->GetShortName());
+							RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = "OP_CastSpell with item, did not meet req level."});
 							Message(Chat::Red, "Error: level not high enough.", castspell->inventoryslot);
 							InterruptSpell(castspell->spell_id);
 						}
@@ -5145,8 +5181,8 @@ void Client::Handle_OP_ControlBoat(const EQApplicationPacket *app)
 
 	if (!boat->IsNPC() || !boat->IsControllableBoat())
 	{
-		auto hacked_string = fmt::format("OP_Control Boat was sent against {} which is of race {}", boat->GetName(), boat->GetRace());
-		database.SetMQDetectionFlag(AccountName(), GetName(), hacked_string, zone->GetShortName());
+		auto message = fmt::format("OP_Control Boat was sent against {} which is of race {}", boat->GetName(), boat->GetRace());
+		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = message});
 		return;
 	}
 
@@ -5415,6 +5451,17 @@ void Client::Handle_OP_DeleteItem(const EQApplicationPacket *app)
 	}
 	DeleteItemInInventory(alc->from_slot, 1);
 
+	if (player_event_logs.IsEventEnabled(PlayerEvent::ITEM_DESTROY)) {
+		auto e = PlayerEvent::DestroyItemEvent{
+			.item_id = inst->GetItem()->ID,
+			.item_name = inst->GetItem()->Name,
+			.charges = inst->GetCharges(),
+			.reason = "Client deleted",
+		};
+
+		RecordPlayerEventLog(PlayerEvent::ITEM_DESTROY, e);
+	}
+
 	return;
 }
 
@@ -5466,8 +5513,9 @@ void Client::Handle_OP_Disarm(const EQApplicationPacket *app) {
 		return;
 	if (pmob->GetID() != GetID()) {
 		// Client sent a disarm request with an originator ID not matching their own ID.
-		auto hack_str = fmt::format("Player {} ({}) sent OP_Disarm with source ID of: {}", GetCleanName(), GetID(), pmob->GetID());
-		database.SetMQDetectionFlag(account_name, name, hack_str, zone->GetShortName());
+		auto message = fmt::format("Player {} ({}) sent OP_Disarm with source ID of: {}", GetCleanName(), GetID(), pmob->GetID());
+		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = message});
+
 		return;
 	}
 	// No disarm on corpses
@@ -6194,7 +6242,7 @@ void Client::Handle_OP_GMBecomeNPC(const EQApplicationPacket *app)
 {
 	if (Admin() < minStatusToUseGMCommands) {
 		Message(Chat::Red, "Your account has been reported for hacking.");
-		database.SetHackerFlag(account_name, name, "/becomenpc");
+		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = "Used /becomenpc when they shouldn't be able to"});
 		return;
 	}
 	if (app->size != sizeof(BecomeNPC_Struct)) {
@@ -6234,7 +6282,7 @@ void Client::Handle_OP_GMDelCorpse(const EQApplicationPacket *app)
 		return;
 	if (Admin() < commandEditPlayerCorpses) {
 		Message(Chat::Red, "Your account has been reported for hacking.");
-		database.SetHackerFlag(account_name, name, "/delcorpse");
+		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = "Used /delcorpse"});
 		return;
 	}
 	GMDelCorpse_Struct* dc = (GMDelCorpse_Struct *)app->pBuffer;
@@ -6255,7 +6303,6 @@ void Client::Handle_OP_GMEmoteZone(const EQApplicationPacket *app)
 {
 	if (Admin() < minStatusToUseGMCommands) {
 		Message(Chat::Red, "Your account has been reported for hacking.");
-		database.SetHackerFlag(account_name, name, "/emote");
 		return;
 	}
 	if (app->size != sizeof(GMEmoteZone_Struct)) {
@@ -6288,7 +6335,7 @@ void Client::Handle_OP_GMFind(const EQApplicationPacket *app)
 {
 	if (Admin() < minStatusToUseGMCommands) {
 		Message(Chat::Red, "Your account has been reported for hacking.");
-		database.SetHackerFlag(account_name, name, "/find");
+		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = "Used /find"});
 		return;
 	}
 	if (app->size != sizeof(GMSummon_Struct)) {
@@ -6326,7 +6373,7 @@ void Client::Handle_OP_GMGoto(const EQApplicationPacket *app)
 	}
 	if (Admin() < minStatusToUseGMCommands) {
 		Message(Chat::Red, "Your account has been reported for hacking.");
-		database.SetHackerFlag(account_name, name, "/goto");
+		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = "Used /goto"});
 		return;
 	}
 	GMSummon_Struct* gmg = (GMSummon_Struct*)app->pBuffer;
@@ -6353,7 +6400,7 @@ void Client::Handle_OP_GMHideMe(const EQApplicationPacket *app)
 {
 	if (Admin() < minStatusToUseGMCommands) {
 		Message(Chat::Red, "Your account has been reported for hacking.");
-		database.SetHackerFlag(account_name, name, "/hideme");
+		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = "Used /hideme"});
 		return;
 	}
 	if (app->size != sizeof(SpawnAppearance_Struct)) {
@@ -6373,7 +6420,7 @@ void Client::Handle_OP_GMKick(const EQApplicationPacket *app)
 		return;
 	if (Admin() < minStatusToKick) {
 		Message(Chat::Red, "Your account has been reported for hacking.");
-		database.SetHackerFlag(account_name, name, "/kick");
+		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = "Used /kick"});
 		return;
 	}
 	GMKick_Struct* gmk = (GMKick_Struct *)app->pBuffer;
@@ -6403,7 +6450,7 @@ void Client::Handle_OP_GMKill(const EQApplicationPacket *app)
 {
 	if (Admin() < minStatusToUseGMCommands) {
 		Message(Chat::Red, "Your account has been reported for hacking.");
-		database.SetHackerFlag(account_name, name, "/kill");
+		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = "Used /kill"});
 		return;
 	}
 	if (app->size != sizeof(GMKill_Struct)) {
@@ -6455,7 +6502,7 @@ void Client::Handle_OP_GMLastName(const EQApplicationPacket *app)
 		else {
 			if (Admin() < minStatusToUseGMCommands) {
 				Message(Chat::Red, "Your account has been reported for hacking.");
-				database.SetHackerFlag(client->account_name, client->name, "/lastname");
+				RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = "Used /lastname"});
 				return;
 			}
 			else
@@ -6480,7 +6527,7 @@ void Client::Handle_OP_GMNameChange(const EQApplicationPacket *app)
 	const GMName_Struct* gmn = (const GMName_Struct *)app->pBuffer;
 	if (Admin() < minStatusToUseGMCommands) {
 		Message(Chat::Red, "Your account has been reported for hacking.");
-		database.SetHackerFlag(account_name, name, "/name");
+		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = "Used /name"});
 		return;
 	}
 	Client* client = entity_list.GetClientByName(gmn->oldname);
@@ -6623,7 +6670,7 @@ void Client::Handle_OP_GMToggle(const EQApplicationPacket *app)
 	}
 	if (Admin() < minStatusToUseGMCommands) {
 		Message(Chat::Red, "Your account has been reported for hacking.");
-		database.SetHackerFlag(account_name, name, "/toggle");
+		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = "Used /toggle"});
 		return;
 	}
 	GMToggle_Struct *ts = (GMToggle_Struct *)app->pBuffer;
@@ -6670,7 +6717,7 @@ void Client::Handle_OP_GMZoneRequest(const EQApplicationPacket *app)
 	}
 	if (Admin() < minStatusToBeGM) {
 		Message(Chat::Red, "Your account has been reported for hacking.");
-		database.SetHackerFlag(account_name, name, "/zone");
+		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = "Used /zone"});
 		return;
 	}
 
@@ -6726,7 +6773,7 @@ void Client::Handle_OP_GMZoneRequest2(const EQApplicationPacket *app)
 {
 	if (Admin() < minStatusToBeGM) {
 		Message(Chat::Red, "Your account has been reported for hacking.");
-		database.SetHackerFlag(account_name, name, "/zone");
+		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = "Used /zone"});
 		return;
 	}
 	if (app->size < sizeof(uint32)) {
@@ -8400,9 +8447,12 @@ void Client::Handle_OP_Illusion(const EQApplicationPacket *app)
 		return;
 	}
 
-	if (!GetGM())
-	{
-		database.SetMQDetectionFlag(AccountName(), GetName(), "OP_Illusion sent by non Game Master.", zone->GetShortName());
+	if (!GetGM()) {
+		RecordPlayerEventLog(
+			PlayerEvent::POSSIBLE_HACK,
+			PlayerEvent::PossibleHackEvent{.message = "OP_Illusion sent by non Game Master"}
+		);
+
 		return;
 	}
 
@@ -10199,13 +10249,13 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 		{
 			const EQ::ItemInstance *itm_from = GetInv().GetItem(mi->from_slot);
 			const EQ::ItemInstance *itm_to = GetInv().GetItem(mi->to_slot);
-			auto detect = fmt::format("Player issued a move item from {}(item id {}) to {}(item id {}) while casting {}.",
+			auto message = fmt::format("Player issued a move item from {}(item id {}) to {}(item id {}) while casting {}.",
 				mi->from_slot,
 				itm_from ? itm_from->GetID() : 0,
 				mi->to_slot,
 				itm_to ? itm_to->GetID() : 0,
 				casting_spell_id);
-			database.SetMQDetectionFlag(AccountName(), GetName(), detect, zone->GetShortName());
+			RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = message});
 			Kick("Inventory desync"); // Kick client to prevent client and server from getting out-of-sync inventory slots
 			return;
 		}
@@ -11188,7 +11238,7 @@ void Client::Handle_OP_PickPocket(const EQApplicationPacket *app)
 	if (!p_timers.Expired(&database, pTimerBeggingPickPocket, false))
 	{
 		Message(Chat::Red, "Ability recovery time not yet met.");
-		database.SetMQDetectionFlag(AccountName(), GetName(), "OP_PickPocket was sent again too quickly.", zone->GetShortName());
+		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = "OP_PickPocket was sent again too quickly."});
 		return;
 	}
 	PickPocket_Struct* pick_in = (PickPocket_Struct*)app->pBuffer;
@@ -11210,7 +11260,7 @@ void Client::Handle_OP_PickPocket(const EQApplicationPacket *app)
 	}
 	else if (Distance(GetPosition(), victim->GetPosition()) > 20) {
 		Message(Chat::Red, "Attempt to pickpocket out of range detected.");
-		database.SetMQDetectionFlag(AccountName(), GetName(), "OP_PickPocket was sent from outside combat range.", zone->GetShortName());
+		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = "OP_PickPocket was sent from outside combat range"});
 	}
 	else if (victim->IsNPC()) {
 		auto body = victim->GetBodyType();
@@ -12696,16 +12746,27 @@ void Client::Handle_OP_RezzAnswer(const EQApplicationPacket *app)
 {
 	VERIFY_PACKET_LENGTH(OP_RezzAnswer, app, Resurrect_Struct);
 
-	const Resurrect_Struct* ra = (const Resurrect_Struct*)app->pBuffer;
+	const auto* r = (const Resurrect_Struct*) app->pBuffer;
 
-	LogSpells("[Client::Handle_OP_RezzAnswer] Received OP_RezzAnswer from client. Pendingrezzexp is [{}] action is [{}]",
-		PendingRezzXP, ra->action ? "ACCEPT" : "DECLINE");
+	LogSpells(
+		"[Client::Handle_OP_RezzAnswer] Received OP_RezzAnswer from client. Pendingrezzexp is [{}] action is [{}]",
+		PendingRezzXP,
+		r->action ? "ACCEPT" : "DECLINE"
+	);
 
 
-	OPRezzAnswer(ra->action, ra->spellid, ra->zone_id, ra->instance_id, ra->x, ra->y, ra->z);
+	OPRezzAnswer(r->action, r->spellid, r->zone_id, r->instance_id, r->x, r->y, r->z);
 
-	if (ra->action == 1)
-	{
+	if (r->action == ResurrectionActions::Accept) {
+		if (player_event_logs.IsEventEnabled(PlayerEvent::REZ_ACCEPTED)) {
+			auto e = PlayerEvent::ResurrectAcceptEvent{
+				.resurrecter_name = r->rezzer_name,
+				.spell_name = spells[r->spellid].name,
+				.spell_id = r->spellid,
+			};
+			RecordPlayerEventLog(PlayerEvent::REZ_ACCEPTED, e);
+		}
+
 		EQApplicationPacket* outapp = app->Copy();
 		// Send the OP_RezzComplete to the world server. This finds it's way to the zone that
 		// the rezzed corpse is in to mark the corpse as rezzed.
@@ -12713,7 +12774,6 @@ void Client::Handle_OP_RezzAnswer(const EQApplicationPacket *app)
 		worldserver.RezzPlayer(outapp, 0, 0, OP_RezzComplete);
 		safe_delete(outapp);
 	}
-	return;
 }
 
 void Client::Handle_OP_Sacrifice(const EQApplicationPacket *app)
@@ -13236,10 +13296,19 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 
 	if (!TakeMoneyFromPP(mpo->price))
 	{
-		auto hacker_str = fmt::format("Vendor Cheat: attempted to buy {} of {}: {} that cost {} cp but only has {} pp {} gp {} sp {} cp",
-			mpo->quantity, item->ID, item->Name,
-			mpo->price, m_pp.platinum, m_pp.gold, m_pp.silver, m_pp.copper);
-		database.SetMQDetectionFlag(AccountName(), GetName(), Strings::Escape(hacker_str), zone->GetShortName());
+		auto message = fmt::format(
+			"Vendor Cheat attempted to buy qty [{}] of item_id [{}] item_name[{}] that cost [{}] copper but only has platinum [{}] gold [{}] silver [{}] copper [{}]",
+			mpo->quantity,
+			item->ID,
+			item->Name,
+			mpo->price,
+			m_pp.platinum,
+			m_pp.gold,
+			m_pp.silver,
+			m_pp.copper
+		);
+
+		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = message});
 		safe_delete(outapp);
 		safe_delete(inst);
 		return;
@@ -13304,6 +13373,23 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 	safe_delete(inst);
 	safe_delete(outapp);
 
+	if (player_event_logs.IsEventEnabled(PlayerEvent::MERCHANT_PURCHASE)) {
+		auto e = PlayerEvent::MerchantPurchaseEvent{
+			.npc_id = tmp->GetNPCTypeID(),
+			.merchant_name = tmp->GetCleanName(),
+			.merchant_type = tmp->CastToNPC()->MerchantType,
+			.item_id = item->ID,
+			.item_name = item->Name,
+			.charges = static_cast<int16>(mpo->quantity),
+			.cost = mpo->price,
+			.alternate_currency_id = 0,
+			.player_money_balance = GetCarriedMoney(),
+			.player_currency_balance = 0,
+		};
+
+		RecordPlayerEventLog(PlayerEvent::MERCHANT_PURCHASE, e);
+	}
+
 	// start QS code
 	// stacking purchases not supported at this time - entire process will need some work to catch them properly
 	if (RuleB(QueryServ, PlayerLogMerchantTransactions)) {
@@ -13359,9 +13445,6 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 	}
 	// end QS code
 
-	if (RuleB(EventLog, RecordBuyFromMerchant))
-		LogMerchant(this, tmp, mpo->quantity, mpo->price, item, true);
-
 	const auto& export_string = fmt::format(
 		"{} {} {} {} {}",
 		tmp->GetNPCTypeID(),
@@ -13372,10 +13455,24 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 	);
 	parse->EventPlayer(EVENT_MERCHANT_BUY, this, export_string, 0);
 
-	if ((RuleB(Character, EnableDiscoveredItems)))
-	{
-		if (!GetGM() && !IsDiscovered(item_id))
-			DiscoverItem(item_id);
+	if (player_event_logs.IsEventEnabled(PlayerEvent::MERCHANT_PURCHASE)) {
+		auto e = PlayerEvent::MerchantPurchaseEvent{
+			.npc_id = tmp->GetNPCTypeID(),
+			.merchant_name = tmp->GetCleanName(),
+			.merchant_type = tmp->CastToNPC()->MerchantType,
+			.item_id = item->ID,
+			.item_name = item->Name,
+			.charges = static_cast<int16>(mpo->quantity),
+			.cost = mpo->price,
+			.alternate_currency_id = 0,
+			.player_money_balance = GetCarriedMoney(),
+			.player_currency_balance = 0,
+		};
+		RecordPlayerEventLog(PlayerEvent::MERCHANT_PURCHASE, e);
+	}
+
+	if (RuleB(Character, EnableDiscoveredItems) && !GetGM() && !IsDiscovered(item_id)) {
+		DiscoverItem(item_id);
 	}
 
 	t1.stop();
@@ -13460,9 +13557,6 @@ void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
 	else
 		mp->quantity = 1;
 
-	if (RuleB(EventLog, RecordSellToMerchant))
-		LogMerchant(this, vendor, mp->quantity, price, item, false);
-
 	int charges = mp->quantity;
 
 	if (vendor->GetKeepsSoldItems()) {
@@ -13475,7 +13569,7 @@ void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
 				charges,
 				true
 			)
-		) > 0) {
+			) > 0) {
 			EQ::ItemInstance *inst2 = inst->Clone();
 
 			while (true) {
@@ -13557,6 +13651,22 @@ void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
 	);
 	parse->EventPlayer(EVENT_MERCHANT_SELL, this, export_string, 0);
 
+	if (player_event_logs.IsEventEnabled(PlayerEvent::MERCHANT_SELL)) {
+		auto e = PlayerEvent::MerchantSellEvent{
+			.npc_id = vendor->GetNPCTypeID(),
+			.merchant_name = vendor->GetCleanName(),
+			.merchant_type = vendor->CastToNPC()->MerchantType,
+			.item_id = item->ID,
+			.item_name = item->Name,
+			.charges = static_cast<int16>(mp->quantity),
+			.cost = price,
+			.alternate_currency_id = 0,
+			.player_money_balance = GetCarriedMoney(),
+			.player_currency_balance = 0,
+		};
+
+		RecordPlayerEventLog(PlayerEvent::MERCHANT_SELL, e);
+	}
 
 	// Now remove the item from the player, this happens regardless of outcome
 	DeleteItemInInventory(
@@ -13747,8 +13857,8 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 			{
 				if (ClientVersion() < EQ::versions::ClientVersion::SoF)
 				{
-					auto hack_str = fmt::format("Player sent OP_SpawnAppearance with AT_Invis: {}", sa->parameter);
-					database.SetMQDetectionFlag(account_name, name, hack_str, zone->GetShortName());
+					auto message = fmt::format("Player sent OP_SpawnAppearance with AT_Invis [{}]", sa->parameter);
+					RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = message});
 				}
 			}
 			return;
@@ -13847,8 +13957,8 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 		{
 			if (!HasSkill(EQ::skills::SkillSneak))
 			{
-				auto hack_str = fmt::format("Player sent OP_SpawnAppearance with AT_Sneak: {}", sa->parameter);
-				database.SetMQDetectionFlag(account_name, name, hack_str, zone->GetShortName());
+				auto message = fmt::format("Player sent OP_SpawnAppearance with AT_Sneak [{}]", sa->parameter);
+				RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = message});
 			}
 			return;
 		}
@@ -13857,8 +13967,8 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 	}
 	else if (sa->type == AT_Size)
 	{
-		auto hack_str = fmt::format("Player sent OP_SpawnAppearance with AT_Size: {}", sa->parameter);
-		database.SetMQDetectionFlag(account_name, name, hack_str, zone->GetShortName());
+		auto message = fmt::format("Player sent OP_SpawnAppearance with AT_Size [{}]", sa->parameter);
+		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = message});
 	}
 	else if (sa->type == AT_Light)	// client emitting light (lightstone, shiny shield)
 	{
@@ -14201,9 +14311,14 @@ void Client::Handle_OP_TargetCommand(const EQApplicationPacket *app)
 			else if (GetTarget()->GetBodyType() == BT_NoTarget2 || GetTarget()->GetBodyType() == BT_Special
 				|| GetTarget()->GetBodyType() == BT_NoTarget)
 			{
-				auto hacker_str = fmt::format("{} attempting to target something untargetable, {} bodytype: {}",
-					GetName(), GetTarget()->GetName(), (int)GetTarget()->GetBodyType());
-				database.SetMQDetectionFlag(AccountName(), GetName(), Strings::Escape(hacker_str), zone->GetShortName());
+				auto message = fmt::format(
+					"[{}] attempting to target something untargetable [{}] bodytype [{}]",
+					GetName(),
+					GetTarget()->GetName(),
+					(int) GetTarget()->GetBodyType()
+				);
+				RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = message});
+
 				SetTarget((Mob*)nullptr);
 				return;
 			}
@@ -14232,15 +14347,16 @@ void Client::Handle_OP_TargetCommand(const EQApplicationPacket *app)
 				{
 					if (DistanceSquared(m_Position, GetTarget()->GetPosition()) > (zone->newzone_data.maxclip*zone->newzone_data.maxclip))
 					{
-						auto hacker_str = fmt::format(
-						    "{} attempting to target something beyond the clip plane of {:.2f} "
+						auto message = fmt::format(
+						    "[{}] attempting to target something beyond the clip plane of {:.2f} "
 						    "units, from ({:.2f}, {:.2f}, {:.2f}) to {} ({:.2f}, {:.2f}, "
 						    "{:.2f})",
 						    GetName(),
 						    (zone->newzone_data.maxclip * zone->newzone_data.maxclip), GetX(),
 						    GetY(), GetZ(), GetTarget()->GetName(), GetTarget()->GetX(),
 						    GetTarget()->GetY(), GetTarget()->GetZ());
-						database.SetMQDetectionFlag(AccountName(), GetName(), Strings::Escape(hacker_str), zone->GetShortName());
+
+						RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = message});
 						SetTarget(nullptr);
 						return;
 					}
@@ -14248,13 +14364,21 @@ void Client::Handle_OP_TargetCommand(const EQApplicationPacket *app)
 			}
 			else if (DistanceSquared(m_Position, GetTarget()->GetPosition()) > (zone->newzone_data.maxclip*zone->newzone_data.maxclip))
 			{
-				auto hacker_str =
-				    fmt::format("{} attempting to target something beyond the clip plane of {:.2f} "
-						"units, from ({:.2f}, {:.2f}, {:.2f}) to {} ({:.2f}, {:.2f}, {:.2f})",
-						GetName(), (zone->newzone_data.maxclip * zone->newzone_data.maxclip),
-						GetX(), GetY(), GetZ(), GetTarget()->GetName(), GetTarget()->GetX(),
-						GetTarget()->GetY(), GetTarget()->GetZ());
-				database.SetMQDetectionFlag(AccountName(), GetName(), Strings::Escape(hacker_str), zone->GetShortName());
+				auto message = fmt::format(
+					"{} attempting to target something beyond the clip plane of {:.2f} "
+					"units, from ({:.2f}, {:.2f}, {:.2f}) to {} ({:.2f}, {:.2f}, {:.2f})",
+					GetName(),
+					(zone->newzone_data.maxclip * zone->newzone_data.maxclip),
+					GetX(),
+					GetY(),
+					GetZ(),
+					GetTarget()->GetName(),
+					GetTarget()->GetX(),
+					GetTarget()->GetY(),
+					GetTarget()->GetZ()
+				);
+
+				RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = message});
 				SetTarget(nullptr);
 				return;
 			}
@@ -14411,16 +14535,14 @@ void Client::Handle_OP_TradeAcceptClick(const EQApplicationPacket *app)
 				// TODO: query (other) as a hacker
 			}
 			else {
-				// Audit trade to database for both trade streams
-				other->trade->LogTrade();
-				trade->LogTrade();
+				other->PlayerTradeEventLog(other->trade, trade);
 
 				// start QS code
 				if (RuleB(QueryServ, PlayerLogTrades)) {
-					QSPlayerLogTrade_Struct event_entry;
+					PlayerLogTrade_Struct event_entry;
 					std::list<void*> event_details;
 
-					memset(&event_entry, 0, sizeof(QSPlayerLogTrade_Struct));
+					memset(&event_entry, 0, sizeof(PlayerLogTrade_Struct));
 
 					// Perform actual trade
 					FinishTrade(other, true, &event_entry, &event_details);
@@ -14430,18 +14552,18 @@ void Client::Handle_OP_TradeAcceptClick(const EQApplicationPacket *app)
 
 					auto qs_pack = new ServerPacket(
 						ServerOP_QSPlayerLogTrades,
-						sizeof(QSPlayerLogTrade_Struct) +
-						(sizeof(QSTradeItems_Struct) * event_entry._detail_count));
-					QSPlayerLogTrade_Struct* qs_buf = (QSPlayerLogTrade_Struct*)qs_pack->pBuffer;
+						sizeof(PlayerLogTrade_Struct) +
+						(sizeof(PlayerLogTradeItemsEntry_Struct) * event_entry._detail_count));
+					PlayerLogTrade_Struct* qs_buf = (PlayerLogTrade_Struct*)qs_pack->pBuffer;
 
-					memcpy(qs_buf, &event_entry, sizeof(QSPlayerLogTrade_Struct));
+					memcpy(qs_buf, &event_entry, sizeof(PlayerLogTrade_Struct));
 
 					int offset = 0;
 
 					for (auto iter = event_details.begin(); iter != event_details.end();
 					++iter, ++offset) {
-						QSTradeItems_Struct* detail = reinterpret_cast<QSTradeItems_Struct*>(*iter);
-						qs_buf->items[offset] = *detail;
+						PlayerLogTradeItemsEntry_Struct* detail = reinterpret_cast<PlayerLogTradeItemsEntry_Struct*>(*iter);
+						qs_buf->item_entries[offset] = *detail;
 						safe_delete(detail);
 					}
 
@@ -15766,4 +15888,33 @@ void Client::SendMobPositions()
 		QueuePacket(p, false);
 	}
 	safe_delete(p);
+}
+
+struct RecordKillCheck {
+	PlayerEvent::EventType event;
+	bool                   check;
+};
+
+void Client::RecordKilledNPCEvent(NPC *n)
+{
+	bool is_named = Strings::Contains(n->GetName(), "#") && !n->IsRaidTarget();
+
+	std::vector<RecordKillCheck> checks = {
+		RecordKillCheck{.event = PlayerEvent::KILLED_NPC, .check = true},
+		RecordKillCheck{.event = PlayerEvent::KILLED_NAMED_NPC, .check = is_named},
+		RecordKillCheck{.event = PlayerEvent::KILLED_RAID_NPC, .check = n->IsRaidTarget()},
+	};
+
+	for (auto &c: checks) {
+		if (c.check && player_event_logs.IsEventEnabled(c.event)) {
+			auto e = PlayerEvent::KilledNPCEvent{
+				.npc_id = n->GetNPCTypeID(),
+				.npc_name = n->GetCleanName(),
+				.combat_time_seconds = static_cast<uint32>(n->GetCombatRecord().TimeInCombat()),
+				.total_damage_per_second_taken = static_cast<uint64>(n->GetCombatRecord().GetDamageReceivedPerSecond()),
+				.total_heal_per_second_taken = static_cast<uint64>(n->GetCombatRecord().GetHealedReceivedPerSecond()),
+			};
+			RecordPlayerEventLog(c.event, e);
+		}
+	}
 }

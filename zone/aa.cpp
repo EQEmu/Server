@@ -23,6 +23,7 @@ Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 #include "../common/races.h"
 #include "../common/spdat.h"
 #include "../common/strings.h"
+#include "../common/events/player_event_logs.h"
 #include "aa.h"
 #include "client.h"
 #include "corpse.h"
@@ -35,9 +36,11 @@ Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 #include "titles.h"
 #include "zonedb.h"
 #include "../common/zone_store.h"
+#include "worldserver.h"
 
 #include "bot.h"
 
+extern WorldServer worldserver;
 extern QueryServ* QServ;
 
 void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, uint32 duration_override, bool followme, bool sticktarg, uint16 *eye_id) {
@@ -1179,6 +1182,17 @@ void Client::FinishAlternateAdvancementPurchase(AA::Rank *rank, bool ignore_cost
 
 	SendAlternateAdvancementPoints();
 	SendAlternateAdvancementStats();
+
+	if (player_event_logs.IsEventEnabled(PlayerEvent::AA_PURCHASE)) {
+		auto e = PlayerEvent::AAPurchasedEvent{
+			.aa_id = rank->id,
+			.aa_cost = cost,
+			.aa_previous_id = rank->prev_id,
+			.aa_next_id = rank->next_id
+		};
+
+		RecordPlayerEventLog(PlayerEvent::AA_PURCHASE, e);
+	}
 
 	if (rank->prev) {
 		MessageString(
