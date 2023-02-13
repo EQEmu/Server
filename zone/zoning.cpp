@@ -202,19 +202,21 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 	min_status   = zone_data->min_status;
 	min_level    = zone_data->min_level;
 
-	const auto& export_string = fmt::format(
-		"{} {} {} {} {} {}",
-		zone->GetZoneID(),
-		zone->GetInstanceID(),
-		zone->GetInstanceVersion(),
-		target_zone_id,
-		target_instance_id,
-		target_instance_version
-	);
+	if (parse->PlayerHasQuestSub(EVENT_ZONE)) {
+		const auto& export_string = fmt::format(
+			"{} {} {} {} {} {}",
+			zone->GetZoneID(),
+			zone->GetInstanceID(),
+			zone->GetInstanceVersion(),
+			target_zone_id,
+			target_instance_id,
+			target_instance_version
+		);
 
-	if (parse->EventPlayer(EVENT_ZONE, this, export_string, 0) != 0) {
-		SendZoneCancel(zc);
-		return;
+		if (parse->EventPlayer(EVENT_ZONE, this, export_string, 0) != 0) {
+			SendZoneCancel(zc);
+			return;
+		}
 	}
 
 	if (player_event_logs.IsEventEnabled(PlayerEvent::ZONING)) {
