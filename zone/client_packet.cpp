@@ -468,10 +468,10 @@ int Client::HandlePacket(const EQApplicationPacket *app)
 	switch (client_state) {
 	case CLIENT_CONNECTING: {
 		if (ConnectingOpcodes.count(opcode) != 1) {
-			//Hate const cast but everything in lua needs to be non-const even if i make it non-mutable
-			std::vector<std::any> args;
-			args.push_back(const_cast<EQApplicationPacket*>(app));
-			parse->EventPlayer(EVENT_UNHANDLED_OPCODE, this, "", 1, &args);
+			if (parse->PlayerHasQuestSub(EVENT_UNHANDLED_OPCODE)) {
+				std::vector<std::any> args = {const_cast<EQApplicationPacket *>(app)};
+				parse->EventPlayer(EVENT_UNHANDLED_OPCODE, this, "", 1, &args);
+			}
 
 			break;
 		}
@@ -493,9 +493,10 @@ int Client::HandlePacket(const EQApplicationPacket *app)
 		ClientPacketProc p;
 		p = ConnectedOpcodes[opcode];
 		if (p == nullptr) {
-			std::vector<std::any> args;
-			args.push_back(const_cast<EQApplicationPacket*>(app));
-			parse->EventPlayer(EVENT_UNHANDLED_OPCODE, this, "", 0, &args);
+			if (parse->PlayerHasQuestSub(EVENT_UNHANDLED_OPCODE)) {
+				std::vector<std::any> args = {const_cast<EQApplicationPacket *>(app)};
+				parse->EventPlayer(EVENT_UNHANDLED_OPCODE, this, "", 0, &args);
+			}
 
 			break;
 		}
