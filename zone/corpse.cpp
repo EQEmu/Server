@@ -1420,28 +1420,41 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 			}
 		}
 
-		std::string export_string = fmt::format(
-			"{} {} {} {}",
-			inst->GetItem()->ID,
-			inst->GetCharges(),
-			EntityList::RemoveNumbers(corpse_name),
-			GetID()
-		);
-		std::vector<std::any> args;
-		args.push_back(inst);
-		args.push_back(this);
-		bool prevent_loot = false;
+		auto prevent_loot = false;
+
 		if (RuleB(Zone, UseZoneController)) {
 			auto controller = entity_list.GetNPCByNPCTypeID(ZONE_CONTROLLER_NPC_ID);
-			if (controller){
-				if (parse->EventNPC(EVENT_LOOT_ZONE, controller, client, export_string, 0, &args) != 0) {
-					prevent_loot = true;
+			if (controller) {
+				if (parse->HasQuestSub(ZONE_CONTROLLER_NPC_ID, EVENT_LOOT_ZONE)) {
+					const auto& export_string = fmt::format(
+						"{} {} {} {}",
+						inst->GetItem()->ID,
+						inst->GetCharges(),
+						EntityList::RemoveNumbers(corpse_name),
+						GetID()
+					);
+
+					std::vector<std::any> args = { inst, this };
+					if (parse->EventNPC(EVENT_LOOT_ZONE, controller, client, export_string, 0, &args) != 0) {
+						prevent_loot = true;
+					}
 				}
 			}
 		}
 
-		if (parse->EventPlayer(EVENT_LOOT, client, export_string, 0, &args) != 0) {
-			prevent_loot = true;
+		if (parse->PlayerHasQuestSub(EVENT_LOOT)) {
+			const auto& export_string = fmt::format(
+				"{} {} {} {}",
+				inst->GetItem()->ID,
+				inst->GetCharges(),
+				EntityList::RemoveNumbers(corpse_name),
+				GetID()
+			);
+
+			std::vector<std::any> args = { inst, this };
+			if (parse->EventPlayer(EVENT_LOOT, client, export_string, 0, &args) != 0) {
+				prevent_loot = true;
+			}
 		}
 
 		if (player_event_logs.IsEventEnabled(PlayerEvent::LOOT_ITEM) && !IsPlayerCorpse()) {
@@ -1468,9 +1481,19 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 			}
 		}
 
-		// do we want this to have a fail option too? Sure?
-		if (parse->EventItem(EVENT_LOOT, client, inst, this, export_string, 0) != 0) {
-			prevent_loot = true;
+		if (parse->ItemHasQuestSub(inst, EVENT_LOOT)) {
+			const auto& export_string = fmt::format(
+				"{} {} {} {}",
+				inst->GetItem()->ID,
+				inst->GetCharges(),
+				EntityList::RemoveNumbers(corpse_name),
+				GetID()
+			);
+
+			std::vector<std::any> args = { inst, this };
+			if (parse->EventItem(EVENT_LOOT, client, inst, this, export_string, 0, &args) != 0) {
+				prevent_loot = true;
+			}
 		}
 
 		if (prevent_loot) {
