@@ -1783,11 +1783,17 @@ void PerlembParser::ExportEventVariables(
 
 		case EVENT_FORAGE_SUCCESS: {
 			ExportVar(package_name.c_str(), "foraged_item", extradata);
+			if (extra_pointers && extra_pointers->size() == 1) {
+				ExportVar(package_name.c_str(), "item", "QuestItem", std::any_cast<EQ::ItemInstance*>(extra_pointers->at(0)));
+			}
 			break;
 		}
 
 		case EVENT_FISH_SUCCESS: {
 			ExportVar(package_name.c_str(), "fished_item", extradata);
+			if (extra_pointers && extra_pointers->size() == 1) {
+				ExportVar(package_name.c_str(), "item", "QuestItem", std::any_cast<EQ::ItemInstance*>(extra_pointers->at(0)));
+			}
 			break;
 		}
 
