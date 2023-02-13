@@ -163,6 +163,7 @@ const char *LuaEvents[_LargestEventID] = {
 	"event_item_click_client",
 	"event_item_click_cast_client",
 	"event_destroy_item_client"
+	"event_drop_item_client"
 };
 
 extern Zone *zone;
@@ -287,6 +288,7 @@ LuaParser::LuaParser() {
 	PlayerArgumentDispatch[EVENT_ITEM_CLICK_CLIENT]          = handle_player_item_click;
 	PlayerArgumentDispatch[EVENT_DESTROY_ITEM_CLIENT]        = handle_player_destroy_item;
 	PlayerArgumentDispatch[EVENT_TARGET_CHANGE]              = handle_player_target_change;
+	PlayerArgumentDispatch[EVENT_DROP_ITEM_CLIENT]           = handle_player_drop_item;
 
 	ItemArgumentDispatch[EVENT_ITEM_CLICK]      = handle_item_click;
 	ItemArgumentDispatch[EVENT_ITEM_CLICK_CAST] = handle_item_click;

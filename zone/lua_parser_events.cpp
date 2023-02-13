@@ -1334,6 +1334,40 @@ void handle_player_destroy_item(
 		lua_setfield(L, -2, "quantity");
 
 		Lua_ItemInst         l_item(std::any_cast<EQ::ItemInstance *>(extra_pointers->at(0)));
+
+		luabind::adl::object l_item_o = luabind::adl::object(L, l_item);
+		l_item_o.push(L);
+		lua_setfield(L, -2, "item");
+	}
+}
+
+void handle_player_drop_item(
+	QuestInterface *parse,
+	lua_State* L,
+	Client* client,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+) {
+	lua_pushnumber(L, extra_data);
+	lua_setfield(L, -2, "slot_id");
+
+	if (extra_pointers && extra_pointers->size() == 1) {
+		EQ::ItemInstance* item_inst = std::any_cast<EQ::ItemInstance*>(extra_pointers->at(0));
+
+		lua_pushnumber(L, item_inst->IsStackable() ? item_inst->GetCharges() : 1);
+		lua_setfield(L, -2, "quantity");
+
+		lua_pushnumber(L, item_inst->GetItem()->ID);
+		lua_setfield(L, -2, "item_id");
+
+		lua_pushstring(L, item_inst->GetItem()->Name);
+		lua_setfield(L, -2, "item_name");
+
+		lua_pushnumber(L, item_inst->GetItem()->Click.Effect);
+		lua_setfield(L, -2, "spell_id");
+
+		Lua_Item             l_item(item_inst->GetItem());
 		luabind::adl::object l_item_o = luabind::adl::object(L, l_item);
 		l_item_o.push(L);
 		lua_setfield(L, -2, "item");

@@ -176,6 +176,7 @@ const char *QuestEventSubroutines[_LargestEventID] = {
 	"EVENT_ITEM_CLICK_CLIENT",
 	"EVENT_ITEM_CLICK_CAST_CLIENT",
 	"EVENT_DESTROY_ITEM_CLIENT",
+	"EVENT_DROP_ITEM_CLIENT",
 	// Add new events before these or Lua crashes
 	"EVENT_SPELL_EFFECT_BOT",
 	"EVENT_SPELL_EFFECT_BUFF_TIC_BOT"
@@ -1880,6 +1881,19 @@ void PerlembParser::ExportEventVariables(
 			ExportVar(package_name.c_str(), "itemid", item_inst->GetItem()->ID);
 			ExportVar(package_name.c_str(), "spell_id", item_inst->GetItem()->Click.Effect);
 			ExportVar(package_name.c_str(), "slotid", extradata);
+			break;
+		}
+
+		case EVENT_DROP_ITEM_CLIENT: {
+			if (extra_pointers && extra_pointers->size() == 1) {
+				EQ::ItemInstance* item_instance = std::any_cast<EQ::ItemInstance*>(extra_pointers->at(0));
+				ExportVar(package_name.c_str(), "quantity", item_instance->IsStackable() ? item_instance->GetCharges() : 1);
+				ExportVar(package_name.c_str(), "item_name", item_instance->GetItem()->Name);
+				ExportVar(package_name.c_str(), "item_id", item_instance->GetItem()->ID);
+				ExportVar(package_name.c_str(), "spell_id", item_instance->GetItem()->Click.Effect);
+				ExportVar(package_name.c_str(), "slot_id", extradata);
+				ExportVar(package_name.c_str(), "item", "QuestItem", item_instance);
+			}
 			break;
 		}
 

@@ -4751,7 +4751,8 @@ luabind::scope lua_register_events() {
 			luabind::value("damage_taken", static_cast<int>(EVENT_DAMAGE_TAKEN)),
 			luabind::value("item_click_client", static_cast<int>(EVENT_ITEM_CLICK_CLIENT)),
 			luabind::value("item_click_cast_client", static_cast<int>(EVENT_ITEM_CLICK_CAST_CLIENT)),
-			luabind::value("destroy_item_client", static_cast<int>(EVENT_DESTROY_ITEM_CLIENT))
+			luabind::value("destroy_item_client", static_cast<int>(EVENT_DESTROY_ITEM_CLIENT)),
+			luabind::value("drop_item_client", static_cast<int>(EVENT_DROP_ITEM_CLIENT))
 		)];
 }
 
