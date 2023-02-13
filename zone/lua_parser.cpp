@@ -161,7 +161,8 @@ const char *LuaEvents[_LargestEventID] = {
 	"event_damage_given",
 	"event_damage_taken",
 	"event_item_click_client",
-	"event_item_click_cast_client"
+	"event_item_click_cast_client",
+	"event_destroy_item_client"
 };
 
 extern Zone *zone;
@@ -284,6 +285,7 @@ LuaParser::LuaParser() {
 	PlayerArgumentDispatch[EVENT_DAMAGE_TAKEN]               = handle_player_damage;
 	PlayerArgumentDispatch[EVENT_ITEM_CLICK_CAST_CLIENT]     = handle_player_item_click;
 	PlayerArgumentDispatch[EVENT_ITEM_CLICK_CLIENT]          = handle_player_item_click;
+	PlayerArgumentDispatch[EVENT_DESTROY_ITEM_CLIENT]        = handle_player_destroy_item;
 
 	ItemArgumentDispatch[EVENT_ITEM_CLICK]      = handle_item_click;
 	ItemArgumentDispatch[EVENT_ITEM_CLICK_CAST] = handle_item_click;

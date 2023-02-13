@@ -1315,6 +1315,31 @@ void handle_player_item_click(
 	}
 }
 
+void handle_player_destroy_item(
+	QuestInterface *parse,
+	lua_State* L,
+	Client* client,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+) {
+	if (extra_pointers && extra_pointers->size() >= 1) {
+		lua_pushnumber(L, std::any_cast<EQ::ItemInstance*>(extra_pointers->at(0))->GetID());
+		lua_setfield(L, -2, "item_id");
+
+		lua_pushstring(L, std::any_cast<EQ::ItemInstance*>(extra_pointers->at(0))->GetItem()->Name);
+		lua_setfield(L, -2, "item_name");
+
+		lua_pushnumber(L, std::any_cast<EQ::ItemInstance*>(extra_pointers->at(0))->IsStackable() ? std::any_cast<EQ::ItemInstance*>(extra_pointers->at(0))->GetCharges() : 1);
+		lua_setfield(L, -2, "quantity");
+
+		Lua_ItemInst         l_item(std::any_cast<EQ::ItemInstance *>(extra_pointers->at(0)));
+		luabind::adl::object l_item_o = luabind::adl::object(L, l_item);
+		l_item_o.push(L);
+		lua_setfield(L, -2, "item");
+	}
+}
+
 // Item
 void handle_item_click(
 	QuestInterface *parse,
