@@ -8161,7 +8161,9 @@ void Client::TryItemTimer(int slot)
 	auto it_iter = item_timers.begin();
 	while(it_iter != item_timers.end()) {
 		if(it_iter->second.Check()) {
-			parse->EventItem(EVENT_TIMER, this, inst, nullptr, it_iter->first, 0);
+			if (parse->ItemHasQuestSub(inst, EVENT_TIMER)) {
+				parse->EventItem(EVENT_TIMER, this, inst, nullptr, it_iter->first, 0);
+			}
 		}
 		++it_iter;
 	}
@@ -8181,7 +8183,9 @@ void Client::TryItemTimer(int slot)
 		auto it_iter = item_timers.begin();
 		while(it_iter != item_timers.end()) {
 			if(it_iter->second.Check()) {
-				parse->EventItem(EVENT_TIMER, this, a_inst, nullptr, it_iter->first, 0);
+				if (parse->ItemHasQuestSub(a_inst, EVENT_TIMER)) {
+					parse->EventItem(EVENT_TIMER, this, a_inst, nullptr, it_iter->first, 0);
+				}
 			}
 			++it_iter;
 		}
