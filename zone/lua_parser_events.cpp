@@ -1340,6 +1340,22 @@ void handle_player_destroy_item(
 	}
 }
 
+void handle_player_target_change(
+	QuestInterface *parse,
+	lua_State* L,
+	Client* client,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+) {
+	if (extra_pointers && extra_pointers->size() == 1) {
+		Lua_Mob              l_mob(std::any_cast<Mob*>(extra_pointers->at(0)));
+		luabind::adl::object l_mob_o = luabind::adl::object(L, l_mob);
+		l_mob_o.push(L);
+		lua_setfield(L, -2, "other");
+	}
+}
+
 // Item
 void handle_item_click(
 	QuestInterface *parse,

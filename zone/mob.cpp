@@ -4259,19 +4259,36 @@ void Mob::SetTarget(Mob *mob)
 	target = mob;
 	entity_list.UpdateHoTT(this);
 
-	if (IsNPC()) {
-		parse->EventNPC(EVENT_TARGET_CHANGE, CastToNPC(), mob, "", 0);
-	}
-	else if (IsClient()) {
-		parse->EventPlayer(EVENT_TARGET_CHANGE, CastToClient(), "", 0);
+	const auto has_target_change_event = (
+		parse->HasQuestSub(GetNPCTypeID(), EVENT_TARGET_CHANGE) ||
+		parse->PlayerHasQuestSub(EVENT_TARGET_CHANGE) ||
+		parse->BotHasQuestSub(EVENT_TARGET_CHANGE)
+	);
 
-		if (CastToClient()->admin > AccountStatus::GMMgmt) {
-			DisplayInfo(mob);
+	if (has_target_change_event) {
+		std::vector<std::any> args;
+
+		args.emplace_back(mob);
+
+		if (IsNPC()) {
+			if (parse->HasQuestSub(GetNPCTypeID(), EVENT_TARGET_CHANGE)) {
+				parse->EventNPC(EVENT_TARGET_CHANGE, CastToNPC(), mob, "", 0, &args);
+			}
+		} else if (IsClient()) {
+			if (parse->PlayerHasQuestSub(EVENT_TARGET_CHANGE)) {
+				parse->EventPlayer(EVENT_TARGET_CHANGE, CastToClient(), "", 0, &args);
+			}
+
+			if (CastToClient()->admin > AccountStatus::GMMgmt) {
+				DisplayInfo(mob);
+			}
+
+			CastToClient()->SetBotPrecombat(false); // Any change in target will nullify this flag (target == mob checked above)
+		} else if (IsBot()) {
+			if (parse->BotHasQuestSub(EVENT_TARGET_CHANGE)) {
+				parse->EventBot(EVENT_TARGET_CHANGE, CastToBot(), mob, "", 0, &args);
+			}
 		}
-
-		CastToClient()->SetBotPrecombat(false); // Any change in target will nullify this flag (target == mob checked above)
-	} else if (IsBot()) {
-		parse->EventBot(EVENT_TARGET_CHANGE, CastToBot(), mob, "", 0);
 	}
 
 	if (IsPet() && GetOwner() && GetOwner()->IsClient()) {

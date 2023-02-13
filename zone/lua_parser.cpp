@@ -286,6 +286,7 @@ LuaParser::LuaParser() {
 	PlayerArgumentDispatch[EVENT_ITEM_CLICK_CAST_CLIENT]     = handle_player_item_click;
 	PlayerArgumentDispatch[EVENT_ITEM_CLICK_CLIENT]          = handle_player_item_click;
 	PlayerArgumentDispatch[EVENT_DESTROY_ITEM_CLIENT]        = handle_player_destroy_item;
+	PlayerArgumentDispatch[EVENT_TARGET_CHANGE]              = handle_player_target_change;
 
 	ItemArgumentDispatch[EVENT_ITEM_CLICK]      = handle_item_click;
 	ItemArgumentDispatch[EVENT_ITEM_CLICK_CAST] = handle_item_click;
