@@ -924,6 +924,7 @@ public:
 	void TryTriggerOnCastRequirement();
 	void TryTwincast(Mob *caster, Mob *target, uint32 spell_id);
 	void TrySympatheticProc(Mob *target, uint32 spell_id);
+	uint16 GetSympatheticFocusEffect(focusType type, uint16 spell_id);
 	bool TryFadeEffect(int slot);
 	uint16 GetSpellEffectResistChance(uint16 spell_id);
 	int32 GetVulnerability(Mob *caster, uint32 spell_id, uint32 ticsremaining, bool from_buff_tic = false);

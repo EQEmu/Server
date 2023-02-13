@@ -4661,7 +4661,7 @@ void Mob::TryTwincast(Mob *caster, Mob *target, uint32 spell_id)
 		return;
 	}
 
-	if (IsClient() || IsBot())
+	if (IsOfClientBot())
 	{
 		int focus = GetFocusEffect(focusTwincast, spell_id);
 
@@ -4955,7 +4955,7 @@ void Mob::TrySympatheticProc(Mob *target, uint32 spell_id)
 	if(target == nullptr || !IsValidSpell(spell_id) || !IsClient())
 		return;
 
-	uint16 focus_spell = CastToClient()->GetSympatheticFocusEffect(focusSympatheticProc,spell_id);
+	uint16 focus_spell = GetSympatheticFocusEffect(focusSympatheticProc,spell_id);
 
 	if(!IsValidSpell(focus_spell))
 		return;

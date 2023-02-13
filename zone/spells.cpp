@@ -1638,7 +1638,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 		return;
 	}
 
-	if(IsClient()) {
+	if(IsOfClientBotMerc()) {
 		TrySympatheticProc(target, spell_id);
 	}
 

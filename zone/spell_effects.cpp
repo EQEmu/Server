@@ -6270,7 +6270,7 @@ bool Mob::TryTriggerOnCastProc(uint16 focusspellid, uint16 spell_id, uint16 proc
 	return false;
 }
 
-uint16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
+uint16 Mob::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 
 	if (IsBardSong(spell_id))
 		return 0;
@@ -6281,21 +6281,21 @@ uint16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 	std::vector<int> SympatheticProcList;
 
 	//item focus
-	if (itembonuses.FocusEffects[type]){
+	if (IsOfClientBot() && itembonuses.FocusEffects[type]) {
 
-		const EQ::ItemData* TempItem = nullptr;
 
 		for (int x = EQ::invslot::EQUIPMENT_BEGIN; x <= EQ::invslot::EQUIPMENT_END; x++)
 		{
 			if (SympatheticProcList.size() > MAX_SYMPATHETIC_PROCS)
 				continue;
 
-			TempItem = nullptr;
-			EQ::ItemInstance* ins = GetInv().GetItem(x);
+			EQ::ItemInstance const* ins = GetInv().GetItem(x);
 			if (!ins)
 				continue;
-			TempItem = ins->GetItem();
-			if (TempItem && TempItem->Focus.Effect > 0 && IsValidSpell(TempItem->Focus.Effect)) {
+			if (
+					auto TempItem = ins->GetItem();
+					TempItem && TempItem->Focus.Effect > 0 && IsValidSpell(TempItem->Focus.Effect)
+			) {
 
 				proc_spellid = CalcFocusEffect(type, TempItem->Focus.Effect, spell_id);
 				if (IsValidSpell(proc_spellid)){
@@ -6310,11 +6310,10 @@ uint16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 				if (SympatheticProcList.size() > MAX_SYMPATHETIC_PROCS)
 					continue;
 
-				EQ::ItemInstance *aug = nullptr;
-				aug = ins->GetAugment(y);
-				if(aug)
+				auto aug = ins->GetAugment(y);
+				if (aug)
 				{
-					const EQ::ItemData* TempItemAug = aug->GetItem();
+					auto TempItemAug = aug->GetItem();
 					if (TempItemAug && TempItemAug->Focus.Effect > 0 && IsValidSpell(TempItemAug->Focus.Effect)) {
 						proc_spellid = CalcFocusEffect(type, TempItemAug->Focus.Effect, spell_id);
 						if (IsValidSpell(proc_spellid)){
@@ -6330,52 +6329,56 @@ uint16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 
 	//Spell Focus
 	if (spellbonuses.FocusEffects[type]){
-		int buff_slot = 0;
 		uint16 focusspellid = 0;
 		int buff_max = GetMaxTotalSlots();
-		for (buff_slot = 0; buff_slot < buff_max; buff_slot++) {
+		for (int buff_slot = 0; buff_slot < buff_max; buff_slot++) {
 
-			if (SympatheticProcList.size() > MAX_SYMPATHETIC_PROCS)
+			if (SympatheticProcList.size() > MAX_SYMPATHETIC_PROCS) {
 				continue;
+			}
 
 			focusspellid = buffs[buff_slot].spellid;
-			if (!IsValidSpell(focusspellid))
+			if (!IsValidSpell(focusspellid)) {
 				continue;
+			}
 
 				proc_spellid = CalcFocusEffect(type, focusspellid, spell_id);
 
-			if (IsValidSpell(proc_spellid)){
+			if (IsValidSpell(proc_spellid)) {
 
 				ProcChance = GetSympatheticProcChances(spell_id, GetSympatheticSpellProcRate(proc_spellid));
-				if(zone->random.Roll(ProcChance))
- 					SympatheticProcList.push_back(proc_spellid);
+				if (zone->random.Roll(ProcChance)) {
+					SympatheticProcList.push_back(proc_spellid);
+				}
 			}
 		}
 	}
 
 	/*Note: At present, ff designing custom AA to have a sympathetic proc effect, only use one focus
 	effect within the aa_effects data for each AA*[No live AA's use this effect to my knowledge]*/
-	if (aabonuses.FocusEffects[type]) {
+	if (IsOfClientBot() && aabonuses.FocusEffects[type]) {
 		for (const auto &aa : aa_ranks) {
-			if (SympatheticProcList.size() > MAX_SYMPATHETIC_PROCS)
+			if (SympatheticProcList.size() > MAX_SYMPATHETIC_PROCS) {
 				break;
+			}
 
 			auto ability_rank = zone->GetAlternateAdvancementAbilityAndRank(aa.first, aa.second.first);
 			auto ability = ability_rank.first;
 			auto rank = ability_rank.second;
 
-			if(!ability) {
+			if (!ability) {
 				continue;
 			}
 
-			if (rank->effects.empty())
+			if (rank->effects.empty()) {
 				continue;
-
+			}
 			proc_spellid = CalcAAFocus(type, *rank, spell_id);
 			if (IsValidSpell(proc_spellid)) {
 				ProcChance = GetSympatheticProcChances(spell_id, rank->effects[0].base_value);
-				if (zone->random.Roll(ProcChance))
+				if (zone->random.Roll(ProcChance)) {
 					SympatheticProcList.push_back(proc_spellid);
+				}
 			}
 		}
 	}
@@ -6387,7 +6390,6 @@ uint16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 		SympatheticProcList.clear();
 		return FinalSympatheticProc;
 	}
-
 	return 0;
 }
 
