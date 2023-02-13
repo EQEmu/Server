@@ -1420,22 +1420,21 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 			}
 		}
 
-		const auto& export_string = fmt::format(
-			"{} {} {} {}",
-			inst->GetItem()->ID,
-			inst->GetCharges(),
-			EntityList::RemoveNumbers(corpse_name),
-			GetID()
-		);
-
-		std::vector<std::any> args = { inst, this };
-
 		auto prevent_loot = false;
 
 		if (RuleB(Zone, UseZoneController)) {
 			auto controller = entity_list.GetNPCByNPCTypeID(ZONE_CONTROLLER_NPC_ID);
 			if (controller) {
 				if (parse->HasQuestSub(ZONE_CONTROLLER_NPC_ID, EVENT_LOOT_ZONE)) {
+					const auto& export_string = fmt::format(
+						"{} {} {} {}",
+						inst->GetItem()->ID,
+						inst->GetCharges(),
+						EntityList::RemoveNumbers(corpse_name),
+						GetID()
+					);
+
+					std::vector<std::any> args = { inst, this };
 					if (parse->EventNPC(EVENT_LOOT_ZONE, controller, client, export_string, 0, &args) != 0) {
 						prevent_loot = true;
 					}
@@ -1444,6 +1443,15 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 		}
 
 		if (parse->PlayerHasQuestSub(EVENT_LOOT)) {
+			const auto& export_string = fmt::format(
+				"{} {} {} {}",
+				inst->GetItem()->ID,
+				inst->GetCharges(),
+				EntityList::RemoveNumbers(corpse_name),
+				GetID()
+			);
+
+			std::vector<std::any> args = { inst, this };
 			if (parse->EventPlayer(EVENT_LOOT, client, export_string, 0, &args) != 0) {
 				prevent_loot = true;
 			}
@@ -1474,6 +1482,15 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 		}
 
 		if (parse->ItemHasQuestSub(inst, EVENT_LOOT)) {
+			const auto& export_string = fmt::format(
+				"{} {} {} {}",
+				inst->GetItem()->ID,
+				inst->GetCharges(),
+				EntityList::RemoveNumbers(corpse_name),
+				GetID()
+			);
+
+			std::vector<std::any> args = { inst, this };
 			if (parse->EventItem(EVENT_LOOT, client, inst, this, export_string, 0, &args) != 0) {
 				prevent_loot = true;
 			}
