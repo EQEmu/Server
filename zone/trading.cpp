@@ -851,8 +851,10 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 			tradingWith->FaceTarget(this);
 		}
 
-		std::vector<std::any> item_list(items.begin(), items.end());
-		parse->EventNPC(EVENT_TRADE, tradingWith->CastToNPC(), this, "", 0, &item_list);
+		if (parse->HasQuestSub(tradingWith->GetNPCTypeID(), EVENT_TRADE)) {
+			std::vector<std::any> item_list(items.begin(), items.end());
+			parse->EventNPC(EVENT_TRADE, tradingWith->CastToNPC(), this, "", 0, &item_list);
+		}
 
 		for(int i = 0; i < 4; ++i) {
 			if(insts[i]) {
