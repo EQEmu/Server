@@ -1047,7 +1047,6 @@ int Client::CalcHaste()
 	else {   // 1-50
 		cap = level + 25;
 	}
-	cap = mod_client_haste_cap(cap);
 	if (h > cap) {
 		h = cap;
 	}
@@ -1064,7 +1063,6 @@ int Client::CalcHaste()
 		h += spellbonuses.hastetype3 > 10 ? 10 : spellbonuses.hastetype3;
 	}
 	h += ExtraHaste;	//GM granted haste.
-	h = mod_client_haste(h);
 	Haste = 100 + h;
 	return Haste;
 }

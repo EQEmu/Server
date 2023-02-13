@@ -260,8 +260,6 @@ bool Spawn2::Process() {
 
 		NPC *npc = new NPC(tmp, this, glm::vec4(x, y, z, heading), GravityBehavior::Water);
 
-		npc->mod_prespawn(this);
-
 		npcthis = npc;
 		npc->AddLootTable();
 		if (npc->DropsGlobalLoot()) {

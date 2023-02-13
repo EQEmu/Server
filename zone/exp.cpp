@@ -1066,8 +1066,6 @@ uint32 Client::GetEXPForLevel(uint16 check_level)
 		finalxp = uint64(finalxp * classmod);
 	}
 
-	finalxp = mod_client_xp_for_level(finalxp, check_level);
-
 	return finalxp;
 }
 

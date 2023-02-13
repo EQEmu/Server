@@ -332,8 +332,6 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 		int32 max_dmg = GetBaseSkillDamage(EQ::skills::SkillFrenzy, GetTarget());
 		DoAnim(anim1HWeapon, 0, false);
 
-		max_dmg = mod_frenzy_damage(max_dmg);
-
 		if (GetClass() == BERSERKER) {
 			int chance = GetLevel() * 2 + GetSkill(EQ::skills::SkillFrenzy);
 			if (zone->random.Roll0(450) < chance)
@@ -527,9 +525,6 @@ int Mob::MonkSpecialAttack(Mob *other, uint8 unchecked_type)
 	int32 ht = 0;
 	if (max_dmg > 0)
 		ht = max_dmg;
-
-	// This can potentially stack with changes to kick damage
-	ht = ndamage = mod_monk_special_damage(ndamage, skill_type);
 
 	DoSpecialAttackDamage(other, skill_type, max_dmg, min_dmg, ht, reuse);
 

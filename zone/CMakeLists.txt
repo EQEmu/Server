@@ -97,7 +97,6 @@ SET(zone_sources
     mob_appearance.cpp
     mob_movement_manager.cpp
     mob_info.cpp
-    mod_functions.cpp
     npc.cpp
     npc_ai.cpp
     npc_scale_manager.cpp
