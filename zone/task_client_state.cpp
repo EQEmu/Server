@@ -2202,6 +2202,7 @@ void ClientTaskState::AcceptNewTask(
 				.task_name = task_manager->GetTaskName(static_cast<uint32>(task_id)),
 			};
 			RecordPlayerEventLogWithClient(client, PlayerEvent::TASK_ACCEPT, e);
+		}
 	}
 
 	if (parse->PlayerHasQuestSub(EVENT_TASK_ACCEPTED)) {

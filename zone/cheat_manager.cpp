@@ -81,10 +81,10 @@ void CheatManager::CheatDetected(CheatTypes type, glm::vec3 position1, glm::vec3
 						position1.z
 					);
 
-					parse->EventPlayer(EVENT_WARP, m_target, export_string, 0);;
+					parse->EventPlayer(EVENT_WARP, m_target, export_string, 0);
 				}
 
-				m_time_since_last_warp_detection.Start(2500)
+				m_time_since_last_warp_detection.Start(2500);
 			}
 			break;
 		case MQWarpShadowStep:
