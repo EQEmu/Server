@@ -2156,8 +2156,9 @@ void Client::HandleRespawnFromHover(uint32 Option)
 		}
 
 		//After they've respawned into the same zone, trigger EVENT_RESPAWN
-		std::string export_string = fmt::format("{}", Option);
-		parse->EventPlayer(EVENT_RESPAWN, this, export_string, is_rez ? 1 : 0);
+		if (parse->PlayerHasQuestSub(EVENT_RESPAWN)) {
+			parse->EventPlayer(EVENT_RESPAWN, this, std::to_string(Option), is_rez ? 1 : 0);
+		}
 
 		//Pop Rez option from the respawn options list;
 		//easiest way to make sure it stays at the end and
