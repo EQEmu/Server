@@ -9398,13 +9398,13 @@ void Client::Handle_OP_LDoNDisarmTraps(const EQApplicationPacket *app)
 
 void Client::Handle_OP_LDoNInspect(const EQApplicationPacket *app)
 {
-	Mob * target = GetTarget();
-	if (target && target->GetClass() == LDON_TREASURE && !target->IsAura())
-	{
-		std::vector<std::any> args = { target };
-		if (parse->EventPlayer(EVENT_INSPECT, this, "", target->GetID(), &args) == 0)
-		{
-			Message(Chat::Yellow, "%s", target->GetCleanName());
+	auto* t = GetTarget();
+	if (t && t->GetClass() == LDON_TREASURE && !t->IsAura()) {
+		if (parse->PlayerHasQuestSub(EVENT_INSPECT)) {
+			std::vector<std::any> args = { t };
+			if (parse->EventPlayer(EVENT_INSPECT, this, "", t->GetID(), &args) == 0) {
+				Message(Chat::Yellow, fmt::format("{}", t->GetCleanName()).c_str());
+			}
 		}
 	}
 }
