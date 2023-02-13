@@ -140,22 +140,30 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 			if(aug) {
 				std::vector<std::any> args;
 				args.push_back(aug);
-				parse->EventItem(EVENT_AUGMENT_ITEM, user, tobe_auged, nullptr, "", slot, &args);
+
+				if (parse->ItemHasQuestSub(tobe_auged, EVENT_AUGMENT_ITEM)) {
+					parse->EventItem(EVENT_AUGMENT_ITEM, user, tobe_auged, nullptr, "", slot, &args);
+				}
 
 				args.assign(1, tobe_auged);
-				parse->EventItem(EVENT_AUGMENT_INSERT, user, aug, nullptr, "", slot, &args);
+
+				if (parse->ItemHasQuestSub(aug, EVENT_AUGMENT_INSERT)) {
+					parse->EventItem(EVENT_AUGMENT_INSERT, user, aug, nullptr, "", slot, &args);
+				}
 
 				args.push_back(aug);
 
-				const auto export_string = fmt::format(
-					"{} {} {} {}",
-					tobe_auged->GetID(),
-					-1,
-					aug->GetID(),
-					slot
-				);
+				if (parse->PlayerHasQuestSub(EVENT_AUGMENT_INSERT_CLIENT)) {
+					const auto& export_string = fmt::format(
+						"{} {} {} {}",
+						tobe_auged->GetID(),
+						-1,
+						aug->GetID(),
+						slot
+					);
 
-				parse->EventPlayer(EVENT_AUGMENT_INSERT_CLIENT, user, export_string, 0, &args);
+					parse->EventPlayer(EVENT_AUGMENT_INSERT_CLIENT, user, export_string, 0, &args);
+				}
 			}
 
 			item_one_to_push = tobe_auged->Clone();
@@ -182,12 +190,17 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 			}
 			std::vector<std::any> args;
 			args.push_back(aug);
-			parse->EventItem(EVENT_UNAUGMENT_ITEM, user, tobe_auged, nullptr, "", slot, &args);
+
+			if (parse->ItemHasQuestSub(tobe_auged, EVENT_UNAUGMENT_ITEM)) {
+				parse->EventItem(EVENT_UNAUGMENT_ITEM, user, tobe_auged, nullptr, "", slot, &args);
+			}
 
 			args.assign(1, tobe_auged);
 			args.push_back(&is_solvent);
 
-			parse->EventItem(EVENT_AUGMENT_REMOVE, user, aug, nullptr, "", slot, &args);
+			if (parse->ItemHasQuestSub(aug, EVENT_AUGMENT_REMOVE)) {
+				parse->EventItem(EVENT_AUGMENT_REMOVE, user, aug, nullptr, "", slot, &args);
+			}
 		}
 
 		if (is_solvent) {
