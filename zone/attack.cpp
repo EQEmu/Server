@@ -2403,6 +2403,13 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 		}
 	} else if (IsBot()) {
 		if (parse->BotHasQuestSub(EVENT_DEATH)) {
+			const auto& export_string = fmt::format(
+				"{} {} {} {}",
+				killer_mob ? killer_mob->GetID() : 0,
+				damage,
+				spell,
+				static_cast<int>(attack_skill)
+			);
 			if (parse->EventBot(EVENT_DEATH, CastToBot(), oos, export_string, 0) != 0) {
 				if (GetHP() < 0) {
 					SetHP(0);
@@ -2860,8 +2867,7 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 
 		parse->EventNPC(EVENT_DEATH_COMPLETE, this, oos, export_string, 0, &args);
 	}
-	
-	std::vector<std::any> args = { corpse };
+
 	/* Zone controller process EVENT_DEATH_ZONE (Death events) */
 
 	if (parse->HasQuestSub(ZONE_CONTROLLER_NPC_ID, EVENT_DEATH_ZONE)) {
