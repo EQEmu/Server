@@ -725,12 +725,9 @@ void Client::SetEXP(uint64 set_exp, uint64 set_aaxp, bool isrezzexp) {
 			SendSound();
 		}
 
-		const auto export_string = fmt::format(
-			"{}",
-			gained
-		);
-
-		parse->EventPlayer(EVENT_AA_GAIN, this, export_string, 0);
+		if (parse->PlayerHasQuestSub(EVENT_AA_GAIN)) {
+			parse->EventPlayer(EVENT_AA_GAIN, this, std::to_string(gained), 0);
+		}
 
 		RecordPlayerEventLog(PlayerEvent::AA_GAIN, PlayerEvent::AAGainedEvent{gained});
 
