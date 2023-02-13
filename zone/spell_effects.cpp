@@ -162,28 +162,47 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 		}
 	}
 
-	std::string export_string = fmt::format(
-		"{} {} {} {}",
-		caster ? caster->GetID() : 0,
-		buffslot >= 0 ? buffs[buffslot].ticsremaining : 0,
-		caster ? caster->GetLevel() : 0,
-		buffslot
-	);
-
 	if (IsClient()) {
-		if (parse->EventSpell(EVENT_SPELL_EFFECT_CLIENT, nullptr, CastToClient(), spell_id, export_string, 0) != 0) {
-			CalcBonuses();
-			return true;
+		if (parse->SpellHasQuestSub(spell_id, EVENT_SPELL_EFFECT_CLIENT)) {
+			const auto &export_string = fmt::format(
+				"{} {} {} {}",
+				caster ? caster->GetID() : 0,
+				buffslot >= 0 ? buffs[buffslot].ticsremaining : 0,
+				caster ? caster->GetLevel() : 0,
+				buffslot
+			);
+			if (parse->EventSpell(EVENT_SPELL_EFFECT_CLIENT, nullptr, CastToClient(), spell_id, export_string, 0) != 0) {
+				CalcBonuses();
+				return true;
+			}
 		}
 	} else if (IsNPC()) {
-		if (parse->EventSpell(EVENT_SPELL_EFFECT_NPC, this, nullptr, spell_id, export_string, 0) != 0) {
-			CalcBonuses();
-			return true;
+		if (parse->SpellHasQuestSub(spell_id, EVENT_SPELL_EFFECT_NPC)) {
+			const auto &export_string = fmt::format(
+				"{} {} {} {}",
+				caster ? caster->GetID() : 0,
+				buffslot >= 0 ? buffs[buffslot].ticsremaining : 0,
+				caster ? caster->GetLevel() : 0,
+				buffslot
+			);
+			if (parse->EventSpell(EVENT_SPELL_EFFECT_NPC, this, nullptr, spell_id, export_string, 0) != 0) {
+				CalcBonuses();
+				return true;
+			}
 		}
 	} else if (IsBot()) {
-		if (parse->EventSpell(EVENT_SPELL_EFFECT_BOT, this, nullptr, spell_id, export_string, 0) != 0) {
-			CalcBonuses();
-			return true;
+		if (parse->SpellHasQuestSub(spell_id, EVENT_SPELL_EFFECT_BOT)) {
+			const auto &export_string = fmt::format(
+				"{} {} {} {}",
+				caster ? caster->GetID() : 0,
+				buffslot >= 0 ? buffs[buffslot].ticsremaining : 0,
+				caster ? caster->GetLevel() : 0,
+				buffslot
+			);
+			if (parse->EventSpell(EVENT_SPELL_EFFECT_BOT, this, nullptr, spell_id, export_string, 0) != 0) {
+				CalcBonuses();
+				return true;
+			}
 		}
 	}
 
@@ -3791,7 +3810,7 @@ void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
 
 	const SPDat_Spell_Struct &spell = spells[buff.spellid];
 
-	std::string export_string = fmt::format(
+	const auto& export_string = fmt::format(
 		"{} {} {} {}",
 		caster ? caster->GetID() : 0,
 		buffs[slot].ticsremaining,
@@ -3800,16 +3819,22 @@ void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
 	);
 
 	if (IsClient()) {
-		if (parse->EventSpell(EVENT_SPELL_EFFECT_BUFF_TIC_CLIENT, nullptr, CastToClient(), buff.spellid, export_string, 0) != 0) {
-			return;
+		if (parse->SpellHasQuestSub(buff.spellid, EVENT_SPELL_EFFECT_BUFF_TIC_CLIENT)) {
+			if (parse->EventSpell(EVENT_SPELL_EFFECT_BUFF_TIC_CLIENT, nullptr, CastToClient(), buff.spellid, export_string, 0) != 0) {
+				return;
+			}
 		}
 	} else if (IsNPC()) {
-		if (parse->EventSpell(EVENT_SPELL_EFFECT_BUFF_TIC_NPC, this, nullptr, buff.spellid, export_string, 0) != 0) {
-			return;
+		if (parse->SpellHasQuestSub(buff.spellid, EVENT_SPELL_EFFECT_BUFF_TIC_NPC)) {
+			if (parse->EventSpell(EVENT_SPELL_EFFECT_BUFF_TIC_NPC, this, nullptr, buff.spellid, export_string, 0) != 0) {
+				return;
+			}
 		}
 	} else if (IsBot()) {
-		if (parse->EventSpell(EVENT_SPELL_EFFECT_BUFF_TIC_BOT, this, nullptr, buff.spellid, export_string, 0) != 0) {
-			return;
+		if (parse->SpellHasQuestSub(buff.spellid, EVENT_SPELL_EFFECT_BUFF_TIC_BOT)) {
+			if (parse->EventSpell(EVENT_SPELL_EFFECT_BUFF_TIC_BOT, this, nullptr, buff.spellid, export_string, 0) != 0) {
+				return;
+			}
 		}
 	}
 
@@ -4142,25 +4167,35 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 
 	LogSpells("Fading buff [{}] from slot [{}]", buffs[slot].spellid, slot);
 
-	std::string export_string = fmt::format(
-		"{} {} {} {}",
-		buffs[slot].casterid,
-		buffs[slot].ticsremaining,
-		buffs[slot].casterlevel,
-		slot
-	);
+	const auto has_fade_event = parse->SpellHasQuestSub(buffs[slot].spellid, EVENT_SPELL_FADE);
+	std::string export_string = "";
+	if (has_fade_event) {
+		export_string = fmt::format(
+			"{} {} {} {}",
+			buffs[slot].casterid,
+			buffs[slot].ticsremaining,
+			buffs[slot].casterlevel,
+			slot
+		);
+	}
 
 	if (IsClient()) {
-		if (parse->EventSpell(EVENT_SPELL_FADE, nullptr, CastToClient(), buffs[slot].spellid, export_string, 0) != 0) {
-			return;
+		if (has_fade_event) {
+			if (parse->EventSpell(EVENT_SPELL_FADE, nullptr, CastToClient(), buffs[slot].spellid, export_string, 0) != 0) {
+				return;
+			}
 		}
 	} else if (IsNPC()) {
-		if (parse->EventSpell(EVENT_SPELL_FADE, this, nullptr, buffs[slot].spellid, export_string, 0) != 0) {
-			return;
+		if (has_fade_event) {
+			if (parse->EventSpell(EVENT_SPELL_FADE, this, nullptr, buffs[slot].spellid, export_string, 0) != 0) {
+				return;
+			}
 		}
 	} else if (IsBot()) {
-		if (parse->EventSpell(EVENT_SPELL_FADE, this, nullptr, buffs[slot].spellid, export_string, 0) != 0) {
-			return;
+		if (has_fade_event) {
+			if (parse->EventSpell(EVENT_SPELL_FADE, this, nullptr, buffs[slot].spellid, export_string, 0) != 0) {
+				return;
+			}
 		}
 	}
 
