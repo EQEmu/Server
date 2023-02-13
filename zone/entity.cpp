@@ -4134,24 +4134,31 @@ void EntityList::ClearAreas()
 	area_list.clear();
 }
 
-void EntityList::ProcessProximitySay(const char *Message, Client *c, uint8 language)
+void EntityList::ProcessProximitySay(const char *message, Client *c, uint8 language)
 {
-	if (!Message || !c)
+	if (!message || !c) {
 		return;
+	}
 
-	auto iter = proximity_list.begin();
-	for (; iter != proximity_list.end(); ++iter) {
-		NPC *d = (*iter);
-		NPCProximity *l = d->proximity;
-		if (l == nullptr || !l->say)
+	for (const auto& n : proximity_list) {
+		auto* p = n->proximity;
+		if (!p || !p->say) {
 			continue;
+		}
 
-		if (c->GetX() < l->min_x || c->GetX() > l->max_x
-				|| c->GetY() < l->min_y || c->GetY() > l->max_y
-				|| c->GetZ() < l->min_z || c->GetZ() > l->max_z)
+		if (!parse->HasQuestSub(n->GetNPCTypeID(), EVENT_PROXIMITY_SAY)) {
 			continue;
+		}
 
-		parse->EventNPC(EVENT_PROXIMITY_SAY, d, c, Message, language);
+		if (
+			!EQ::ValueWithin(c->GetX(), p->min_x, p->max_x) ||
+			!EQ::ValueWithin(c->GetY(), p->min_y, p->max_y) ||
+			!EQ::ValueWithin(c->GetZ(), p->min_z, p->max_z)
+		) {
+			continue;
+		}
+
+		parse->EventNPC(EVENT_PROXIMITY_SAY, n, c, message, language);
 	}
 }
 
