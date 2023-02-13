@@ -1746,7 +1746,6 @@ void PerlembParser::ExportEventVariables(
 			break;
 		}
 
-
 		case EVENT_SPELL_EFFECT_BUFF_TIC_BOT:
 		case EVENT_SPELL_EFFECT_BUFF_TIC_CLIENT:
 		case EVENT_SPELL_EFFECT_BUFF_TIC_NPC:
