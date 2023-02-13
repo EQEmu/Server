@@ -2470,8 +2470,10 @@ void NPC::CheckSignal() {
 	if (!signal_q.empty()) {
 		int signal_id = signal_q.front();
 		signal_q.pop_front();
-		const auto export_string = fmt::format("{}", signal_id);
-		parse->EventNPC(EVENT_SIGNAL, this, nullptr, export_string, 0);
+
+		if (parse->HasQuestSub(GetNPCTypeID(), EVENT_SIGNAL)) {
+			parse->EventNPC(EVENT_SIGNAL, this, nullptr, std::to_string(signal_id), 0);
+		}
 	}
 }
 

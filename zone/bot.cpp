@@ -9224,14 +9224,18 @@ void Bot::SpawnBotGroupByName(Client* c, std::string botgroup_name, uint32 leade
 
 void Bot::Signal(int signal_id)
 {
-	const auto export_string = fmt::format("{}", signal_id);
-	parse->EventBot(EVENT_SIGNAL, this, nullptr, export_string, 0);
+	if (parse->BotHasQuestSub(EVENT_SIGNAL)) {
+		parse->EventBot(EVENT_SIGNAL, this, nullptr, std::to_string(signal_id), 0);
+	}
 }
 
 void Bot::SendPayload(int payload_id, std::string payload_value)
 {
-	const auto export_string = fmt::format("{} {}", payload_id, payload_value);
-	parse->EventBot(EVENT_PAYLOAD, this, nullptr, export_string, 0);
+	if (parse->BotHasQuestSub(EVENT_PAYLOAD)) {
+		const auto& export_string = fmt::format("{} {}", payload_id, payload_value);
+
+		parse->EventBot(EVENT_PAYLOAD, this, nullptr, export_string, 0);
+	}
 }
 
 void Bot::OwnerMessage(std::string message)
