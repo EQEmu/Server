@@ -3674,8 +3674,6 @@ void EntityList::ClearFeignAggro(Mob *targ)
 
 				if (it->second->IsNPC()) {
 					if (parse->HasQuestSub(it->second->GetNPCTypeID(), EVENT_FEIGN_DEATH)) {
-						std::vector<std::any> args = { it->second };
-
 						int i = parse->EventNPC(EVENT_FEIGN_DEATH, it->second->CastToNPC(), targ, "", 0);
 						if (i != 0) {
 							++it;
