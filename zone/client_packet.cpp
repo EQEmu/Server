@@ -793,8 +793,12 @@ void Client::CompleteConnect()
 
 	/* This sub event is for if a player logs in for the first time since entering world. */
 	if (firstlogon == 1) {
-		parse->EventPlayer(EVENT_CONNECT, this, "", 0);
 		RecordPlayerEventLog(PlayerEvent::WENT_ONLINE, PlayerEvent::EmptyEvent{});
+
+		if (parse->PlayerHasQuestSub(EVENT_CONNECT)) {
+			parse->EventPlayer(EVENT_CONNECT, this, "", 0);
+		}
+
 		/* QS: PlayerLogConnectDisconnect */
 		if (RuleB(QueryServ, PlayerLogConnectDisconnect)) {
 			std::string event_desc = StringFormat("Connect :: Logged into zoneid:%i instid:%i", GetZoneID(), GetInstanceID());
