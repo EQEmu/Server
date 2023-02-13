@@ -1382,9 +1382,11 @@ void Mob::CreateHPPacket(EQApplicationPacket* app)
 	{
 		if (ds->hp < GetNextHPEvent())
 		{
-			std::string export_string = fmt::format("{}", GetNextHPEvent());
 			SetNextHPEvent(-1);
-			parse->EventNPC(EVENT_HP, CastToNPC(), nullptr, export_string, 0);
+
+			if (parse->HasQuestSub(GetNPCTypeID(), EVENT_HP)) {
+				parse->EventNPC(EVENT_HP, CastToNPC(), nullptr, std::to_string(GetNextHPEvent()), 0);
+			}
 		}
 	}
 
@@ -1392,9 +1394,11 @@ void Mob::CreateHPPacket(EQApplicationPacket* app)
 	{
 		if (ds->hp > GetNextIncHPEvent())
 		{
-			std::string export_string = fmt::format("{}", GetNextIncHPEvent());
 			SetNextIncHPEvent(-1);
-			parse->EventNPC(EVENT_HP, CastToNPC(), nullptr, export_string, 1);
+
+			if (parse->HasQuestSub(GetNPCTypeID(), EVENT_HP)) {
+				parse->EventNPC(EVENT_HP, CastToNPC(), nullptr, std::to_string(GetNextIncHPEvent()), 1);
+			}
 		}
 	}
 }
