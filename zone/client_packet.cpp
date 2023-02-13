@@ -14445,8 +14445,10 @@ void Client::Handle_OP_TestBuff(const EQApplicationPacket *app)
 	if (!RuleB(Character, EnableTestBuff)) {
 		return;
 	}
-	parse->EventPlayer(EVENT_TEST_BUFF, this, "", 0);
-	return;
+
+	if (parse->PlayerHasQuestSub(EVENT_TEST_BUFF)) {
+		parse->EventPlayer(EVENT_TEST_BUFF, this, "", 0);
+	}
 }
 
 void Client::Handle_OP_TGB(const EQApplicationPacket *app)
