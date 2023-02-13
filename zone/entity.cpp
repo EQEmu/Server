@@ -1787,12 +1787,29 @@ void EntityList::QueueClientsStatus(Mob *sender, const EQApplicationPacket *app,
 void EntityList::DuelMessage(Mob *winner, Mob *loser, bool flee)
 {
 	if (winner->GetLevelCon(winner->GetLevel(), loser->GetLevel()) > 2) {
-		std::vector<std::any> args;
-		args.push_back(winner);
-		args.push_back(loser);
+		if (parse->PlayerHasQuestSub(EVENT_DUEL_WIN)) {
+			std::vector<std::any> args = { winner, loser };
 
-		parse->EventPlayer(EVENT_DUEL_WIN, winner->CastToClient(), loser->GetName(), loser->CastToClient()->CharacterID(), &args);
-		parse->EventPlayer(EVENT_DUEL_LOSE, loser->CastToClient(), winner->GetName(), winner->CastToClient()->CharacterID(), &args);
+			parse->EventPlayer(
+				EVENT_DUEL_WIN,
+				winner->CastToClient(),
+				loser->GetName(),
+				loser->CastToClient()->CharacterID(),
+				&args
+			);
+		}
+
+		if (parse->PlayerHasQuestSub(EVENT_DUEL_LOSE)) {
+			std::vector<std::any> args = { winner, loser };
+
+			parse->EventPlayer(
+				EVENT_DUEL_LOSE,
+				loser->CastToClient(),
+				winner->GetName(),
+				winner->CastToClient()->CharacterID(),
+				&args
+			);
+		}
 	}
 
 	auto it = client_list.begin();
