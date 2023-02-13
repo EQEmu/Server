@@ -1870,6 +1870,7 @@ void PerlembParser::ExportEventVariables(
 			ExportVar(package_name.c_str(), "spawned_entity_id", mob->GetID());
 			ExportVar(package_name.c_str(), "spawned_bot_id", mob->IsBot() ? mob->CastToBot()->GetBotID() : 0);
 			ExportVar(package_name.c_str(), "spawned_npc_id", mob->IsNPC() ? mob->GetNPCTypeID() : 0);
+			ExportVar(package_name.c_str(), "spawned", "Mob", mob);
 			break;
 		}
 
