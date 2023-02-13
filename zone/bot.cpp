@@ -5340,9 +5340,12 @@ void Bot::Damage(Mob *from, int64 damage, uint16 spell_id, EQ::skills::SkillType
 		spell_id = SPELL_UNKNOWN;
 
 	//handle EVENT_ATTACK. Resets after we have not been attacked for 12 seconds
-	if(attacked_timer.Check()) {
-		LogCombat("Triggering EVENT_ATTACK due to attack by [{}]", from->GetName());
-		parse->EventBot(EVENT_ATTACK, this, from, "", 0);
+	if (attacked_timer.Check()) {
+		if (parse->BotHasQuestSub(EVENT_ATTACK)) {
+			LogCombat("Triggering EVENT_ATTACK due to attack by [{}]", from->GetName());
+
+			parse->EventBot(EVENT_ATTACK, this, from, "", 0);
+		}
 	}
 
 	attacked_timer.Start(CombatEventTimer_expire);
