@@ -1591,6 +1591,7 @@ void PerlembParser::ExportEventVariables(
 
 		case EVENT_NPC_SLAY: {
 			ExportVar(package_name.c_str(), "killed", mob->GetNPCTypeID());
+			ExportVar(package_name.c_str(), "killed_npc", "NPC", mob->CastToNPC());
 			break;
 		}
 
