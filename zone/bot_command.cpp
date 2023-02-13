@@ -9935,7 +9935,6 @@ uint32 helper_bot_create(Client *bot_owner, std::string bot_name, uint8 bot_clas
 	);
 
 	bot_id = my_bot->GetBotID();
-	
 	if (parse->PlayerHasQuestSub(EVENT_BOT_CREATE)) {
 		const auto& export_string = fmt::format(
 			"{} {} {} {} {}",
