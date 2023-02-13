@@ -9935,17 +9935,18 @@ uint32 helper_bot_create(Client *bot_owner, std::string bot_name, uint8 bot_clas
 	);
 
 	bot_id = my_bot->GetBotID();
+	if (parse->PlayerHasQuestSub(EVENT_BOT_CREATE)) {
+		const auto& export_string = fmt::format(
+			"{} {} {} {} {}",
+			bot_name,
+			bot_id,
+			bot_race,
+			bot_class,
+			bot_gender
+		);
 
-	const auto export_string = fmt::format(
-		"{} {} {} {} {}",
-		bot_name,
-		bot_id,
-		bot_race,
-		bot_class,
-		bot_gender
-	);
-
-	parse->EventPlayer(EVENT_BOT_CREATE, bot_owner, export_string, 0);
+		parse->EventPlayer(EVENT_BOT_CREATE, bot_owner, export_string, 0);
+	}
 
 	safe_delete(my_bot);
 

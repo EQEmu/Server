@@ -2427,16 +2427,18 @@ bool QuestManager::createBot(const char *name, const char *lastname, uint8 level
 					).c_str()
 				);
 
-				const auto export_string = fmt::format(
-					"{} {} {} {} {}",
-					name,
-					new_bot->GetBotID(),
-					race,
-					botclass,
-					gender
-				);
+				if (parse->PlayerHasQuestSub(EVENT_BOT_CREATE)) {
+					const auto& export_string = fmt::format(
+						"{} {} {} {} {}",
+						name,
+						new_bot->GetBotID(),
+						race,
+						botclass,
+						gender
+					);
 
-				parse->EventPlayer(EVENT_BOT_CREATE, initiator, export_string, 0);
+					parse->EventPlayer(EVENT_BOT_CREATE, initiator, export_string, 0);
+				}
 
 				return true;
 			}
