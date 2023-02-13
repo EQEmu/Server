@@ -565,17 +565,33 @@ int ClientTaskState::UpdateTasks(Client* client, const TaskUpdateFilter& filter,
 
 			if (CanUpdate(client, filter, client_task.task_id, activity, client_activity))
 			{
-				auto args = fmt::format("{} {} {}", count, client_activity.activity_id, client_task.task_id);
-				if (parse->EventPlayer(EVENT_TASK_BEFORE_UPDATE, client, args, 0) != 0)
-				{
-					LogTasks("client [{}] task [{}]-[{}] update prevented by quest",
-						client->GetName(), client_task.task_id, client_activity.activity_id);
+				if (parse->PlayerHasQuestSub(EVENT_TASK_BEFORE_UPDATE)) {
+					const auto& export_string = fmt::format(
+						"{} {} {}",
+						count,
+						client_activity.activity_id,
+						client_task.task_id
+					);
 
-					continue;
+					if (parse->EventPlayer(EVENT_TASK_BEFORE_UPDATE, client, export_string, 0) != 0) {
+						LogTasks(
+							"client [{}] task [{}]-[{}] update prevented by quest",
+							client->GetName(),
+							client_task.task_id,
+							client_activity.activity_id
+						);
+
+						continue;
+					}
 				}
 
-				LogTasks("client [{}] task [{}] activity [{}] increment [{}]",
-					client->GetName(), client_task.task_id, client_activity.activity_id, count);
+				LogTasks(
+					"client [{}] task [{}] activity [{}] increment [{}]",
+					client->GetName(),
+					client_task.task_id,
+					client_activity.activity_id,
+					count
+				);
 
 				int updated = IncrementDoneCount(client, task, client_task.slot, client_activity.activity_id, count);
 				max_updated = std::max(max_updated, updated);
@@ -854,13 +870,16 @@ int ClientTaskState::IncrementDoneCount(
 	info->activity[activity_id].done_count += count;
 
 	if (!ignore_quest_update) {
-		std::string export_string = fmt::format(
-			"{} {} {}",
-			info->activity[activity_id].done_count,
-			info->activity[activity_id].activity_id,
-			info->task_id
-		);
-		parse->EventPlayer(EVENT_TASK_UPDATE, client, export_string, 0);
+		if (parse->PlayerHasQuestSub(EVENT_TASK_UPDATE)) {
+			const auto& export_string = fmt::format(
+				"{} {} {}",
+				info->activity[activity_id].done_count,
+				info->activity[activity_id].activity_id,
+				info->task_id
+			);
+
+			parse->EventPlayer(EVENT_TASK_UPDATE, client, export_string, 0);
+		}
 	}
 
 	if (task_data->type != TaskType::Shared) {
@@ -896,12 +915,15 @@ int ClientTaskState::IncrementDoneCount(
 		task_manager->SendSingleActiveTaskToClient(client, *info, task_complete, false);
 
 		if (!ignore_quest_update) {
-			std::string export_string = fmt::format(
-				"{} {}",
-				info->task_id,
-				info->activity[activity_id].activity_id
-			);
-			parse->EventPlayer(EVENT_TASK_STAGE_COMPLETE, client, export_string, 0);
+			if (parse->PlayerHasQuestSub(EVENT_TASK_STAGE_COMPLETE)) {
+				const auto& export_string = fmt::format(
+					"{} {}",
+					info->task_id,
+					info->activity[activity_id].activity_id
+				);
+
+				parse->EventPlayer(EVENT_TASK_STAGE_COMPLETE, client, export_string, 0);
+			}
 		}
 		/* QS: PlayerLogTaskUpdates :: Update */
 		if (RuleB(QueryServ, PlayerLogTaskUpdates)) {
@@ -993,13 +1015,18 @@ int ClientTaskState::IncrementDoneCount(
 
 int ClientTaskState::DispatchEventTaskComplete(Client* client, ClientTaskInformation& info, int activity_id)
 {
-	std::string export_string = fmt::format(
-		"{} {} {}",
-		info.activity[activity_id].done_count,
-		info.activity[activity_id].activity_id,
-		info.task_id
-	);
-	return parse->EventPlayer(EVENT_TASK_COMPLETE, client, export_string, 0);
+	if (parse->PlayerHasQuestSub(EVENT_TASK_COMPLETE)) {
+		const auto& export_string = fmt::format(
+			"{} {} {}",
+			info.activity[activity_id].done_count,
+			info.activity[activity_id].activity_id,
+			info.task_id
+		);
+
+		return parse->EventPlayer(EVENT_TASK_COMPLETE, client, export_string, 0);
+	}
+
+	return 0;
 }
 
 void ClientTaskState::RewardTask(Client *c, const TaskInformation *ti, ClientTaskInformation& client_task)
@@ -2150,12 +2177,9 @@ void ClientTaskState::AcceptNewTask(
 	client->MessageString(Chat::DefaultText, YOU_ASSIGNED_TASK, task->title.c_str());
 
 	task_manager->SaveClientState(client, this);
-	std::string export_string = std::to_string(task_id);
 
 	NPC *npc = entity_list.GetID(npc_type_id)->CastToNPC();
 	if (npc) {
-		parse->EventNPC(EVENT_TASK_ACCEPTED, npc, client, export_string, 0);
-
 		if (player_event_logs.IsEventEnabled(PlayerEvent::TASK_ACCEPT)) {
 			auto e = PlayerEvent::TaskAcceptEvent{
 				.npc_id = static_cast<uint32>(npc_type_id),
@@ -2164,6 +2188,10 @@ void ClientTaskState::AcceptNewTask(
 				.task_name = task_manager->GetTaskName(static_cast<uint32>(task_id)),
 			};
 			RecordPlayerEventLogWithClient(client, PlayerEvent::TASK_ACCEPT, e);
+		}
+
+		if (parse->HasQuestSub(npc->GetNPCTypeID(), EVENT_TASK_ACCEPTED)) {
+			parse->EventNPC(EVENT_TASK_ACCEPTED, npc, client, std::to_string(task_id), 0);
 		}
 	} else {
 		if (player_event_logs.IsEventEnabled(PlayerEvent::TASK_ACCEPT)) {
@@ -2174,9 +2202,11 @@ void ClientTaskState::AcceptNewTask(
 				.task_name = task_manager->GetTaskName(static_cast<uint32>(task_id)),
 			};
 			RecordPlayerEventLogWithClient(client, PlayerEvent::TASK_ACCEPT, e);
-		}
 	}
-	parse->EventPlayer(EVENT_TASK_ACCEPTED, client, export_string, 0);
+
+	if (parse->PlayerHasQuestSub(EVENT_TASK_ACCEPTED)) {
+		parse->EventPlayer(EVENT_TASK_ACCEPTED, client, std::to_string(task_id), 0);
+	}
 }
 
 void ClientTaskState::ProcessTaskProximities(Client *client, float x, float y, float z)

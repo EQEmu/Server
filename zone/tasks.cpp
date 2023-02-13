@@ -96,9 +96,9 @@ void Client::SendTaskActivityComplete(
 
 void Client::SendTaskFailed(int task_id, int task_index, TaskType task_type)
 {
-	// 0x54eb
-	std::string export_string = fmt::format("{}", task_id);
-	parse->EventPlayer(EVENT_TASK_FAIL, this, export_string, 0);
+	if (parse->PlayerHasQuestSub(EVENT_TASK_FAIL)) {
+		parse->EventPlayer(EVENT_TASK_FAIL, this, std::to_string(task_id), 0);
+	}
 
 	TaskActivityComplete_Struct *task_activity_complete;
 
