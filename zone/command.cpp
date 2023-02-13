@@ -590,7 +590,9 @@ int command_realdispatch(Client *c, std::string message, bool ignore_status)
 		return -1;
 	}
 
-	parse->EventPlayer(EVENT_GM_COMMAND, c, message, 0);
+	if (parse->PlayerHasQuestSub(EVENT_GM_COMMAND)) {
+		parse->EventPlayer(EVENT_GM_COMMAND, c, message, 0);
+	}
 
 	if (player_event_logs.IsEventEnabled(PlayerEvent::GM_COMMAND) && message != "#help") {
 		auto e = PlayerEvent::GMCommandEvent{
