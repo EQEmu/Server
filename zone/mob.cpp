@@ -1394,11 +1394,10 @@ void Mob::CreateHPPacket(EQApplicationPacket* app)
 	{
 		if (ds->hp > GetNextIncHPEvent())
 		{
-			SetNextIncHPEvent(-1);
-
 			if (parse->HasQuestSub(CastToNPC()->GetNPCTypeID(), EVENT_HP)) {
 				parse->EventNPC(EVENT_HP, CastToNPC(), nullptr, std::to_string(GetNextIncHPEvent()), 1);
 			}
+			SetNextIncHPEvent(-1);
 		}
 	}
 }
