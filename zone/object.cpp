@@ -508,11 +508,9 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 				int16 loreslot = sender->GetInv().HasItem(item->ID, 0, invWhereBank);
 				if (loreslot != INVALID_INDEX) { // if the duplicate is in the bank, delete it.
 					sender->DeleteItemInInventory(loreslot);
-					LogInfo("Deleting in loreslot [{}]", loreslot);
 				}
 				else {
 					cursordelete = true;
-					LogInfo("Cursor delete groundspawn");
 				}    // otherwise, we delete the new one
 			}
 
