@@ -15239,7 +15239,6 @@ void Client::Handle_OP_Translocate(const EQApplicationPacket *app)
 		);
 
 		int quest_return = 0;
-
 		if (parse->SpellHasQuestSub(spell_id, EVENT_SPELL_EFFECT_TRANSLOCATE_COMPLETE)) {
 			quest_return = parse->EventSpell(EVENT_SPELL_EFFECT_TRANSLOCATE_COMPLETE, nullptr, this, spell_id, "", 0);
 		}
