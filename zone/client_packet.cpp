@@ -4562,12 +4562,13 @@ void Client::Handle_OP_ClickDoor(const EQApplicationPacket *app)
 	if (within_distance) {
 		if (parse->PlayerHasQuestSub(EVENT_CLICK_DOOR)) {
 			std::vector<std::any> args = {currentdoor};
-			if (parse->EventPlayer(EVENT_CLICK_DOOR, this, std::to_string(cd->doorid), 0, &args) == 0) {
+
+			int quest_return = 0;
+			quest_return = parse->EventPlayer(EVENT_CLICK_DOOR, this, std::to_string(cd->doorid), 0, &args);
+
+			if (quest_return == 0) {
 				currentdoor->HandleClick(this, 0);
 			}
-		}
-		else {
-			currentdoor->HandleClick(this, 0);
 		}
 	}
 	else {
