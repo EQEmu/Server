@@ -111,7 +111,7 @@ namespace cereal
 				@param indentChar The type of character to indent with
 				@param indentLength The number of indentChar to use for indentation
 							   (0 corresponds to no indentation) */
-			explicit Options( int precision = JSONWriterSL::Writer::kDefaultMaxDecimalPlaces,
+			explicit Options( int precision = 324,
 							  IndentChar indentChar = IndentChar::space,
 							  unsigned int indentLength = 4,
 							  bool singleLine = false) :
