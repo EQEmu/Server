@@ -3195,6 +3195,11 @@ bool Mob::CheckSpellLevelRestriction(Mob *caster, uint16 spell_id)
 	bool check_for_restrictions = false;
 	bool can_cast = true;
 
+	if (spells[spell_id].target_type == ST_Self) {
+		LogSpells("[CheckSpellLevelRestriction] Self Only spell - no restrictions");
+		return true;
+	}
+
 	if (!caster) {
 		LogSpells("[CheckSpellLevelRestriction] No caster");
 		return false;
