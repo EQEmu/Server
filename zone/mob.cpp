@@ -1395,7 +1395,6 @@ void Mob::CreateHPPacket(EQApplicationPacket* app)
 			if (parse->HasQuestSub(CastToNPC()->GetNPCTypeID(), EVENT_HP)) {
 				parse->EventNPC(EVENT_HP, CastToNPC(), nullptr, export_string, 1);
 			}
-			SetNextIncHPEvent(-1);
 		}
 	}
 }
