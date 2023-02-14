@@ -761,7 +761,7 @@ uint32 Strings::TimeToSeconds(std::string time_string)
 		time_unit.end()
 	);
 
-	auto unit = std::stoul(time_unit);
+	auto unit = Strings::ToUnsignedInt(time_unit);
 	uint32 duration = 0;
 
 	if (Strings::Contains(time_string, "s")) {
@@ -788,7 +788,7 @@ bool Strings::ToBool(std::string bool_string)
 		Strings::Contains(bool_string, "on") ||
 		Strings::Contains(bool_string, "enable") ||
 		Strings::Contains(bool_string, "enabled") ||
-		(Strings::IsNumber(bool_string) && std::stoi(bool_string))
+		(Strings::IsNumber(bool_string) && Strings::ToInt(bool_string))
 	) {
 		return true;
 	}

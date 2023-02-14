@@ -26,7 +26,7 @@ void command_removeitem(Client *c, const Seperator *sep)
 	}
 
 	auto item_link = database.CreateItemLink(item_id);
-	auto amount = sep->IsNumber(2) ? std::stoul(sep->arg[2]) : 1;
+	auto amount = sep->IsNumber(2) ? Strings::ToUnsignedInt(sep->arg[2]) : 1;
 	auto item_count = target->CountItem(item_id);
 	if (item_count) {
 		if (item_count >= amount) {

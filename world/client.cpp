@@ -834,7 +834,7 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 				if (!strcasecmp(row[1], char_name)) {
 					if (
 						RuleB(World, EnableTutorialButton) &&
-						std::stoi(row[2]) <= RuleI(World, MaxLevelForTutorial)
+						Strings::ToInt(row[2]) <= RuleI(World, MaxLevelForTutorial)
 					) {
 						tutorial_enabled = true;
 						break;

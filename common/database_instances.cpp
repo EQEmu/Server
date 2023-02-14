@@ -194,7 +194,7 @@ bool Database::GetUnusedInstanceID(uint16 &instance_id)
 	max_reserved_instance_id++;
 
 	for (auto row : results) {
-		if (max_reserved_instance_id < std::stoul(row[0])) {
+		if (max_reserved_instance_id < Strings::ToUnsignedInt(row[0])) {
 			instance_id = max_reserved_instance_id;
 			return true;
 		}
@@ -301,7 +301,7 @@ uint16 Database::GetInstanceID(uint32 zone_id, uint32 character_id, int16 versio
 
 	auto row = results.begin();
 
-	return static_cast<uint16>(std::stoul(row[0]));
+	return static_cast<uint16>(Strings::ToUnsignedInt(row[0]));
 }
 
 std::vector<uint16> Database::GetInstanceIDs(uint32 zone_id, uint32 character_id)
@@ -328,7 +328,7 @@ std::vector<uint16> Database::GetInstanceIDs(uint32 zone_id, uint32 character_id
 	}
 
 	for (auto row : results) {
-		l.push_back(static_cast<uint16>(std::stoul(row[0])));
+		l.push_back(static_cast<uint16>(Strings::ToUnsignedInt(row[0])));
 	}
 
 	return l;

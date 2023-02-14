@@ -16,12 +16,12 @@ void command_dbspawn2(Client *c, const Seperator *sep)
 
 	auto position = c->GetPosition();
 
-	auto spawngroup_id = std::stoul(sep->arg[1]);
-	auto respawn = std::stoul(sep->arg[2]);
-	auto variance = std::stoul(sep->arg[3]);
+	auto spawngroup_id = Strings::ToUnsignedInt(sep->arg[1]);
+	auto respawn = Strings::ToUnsignedInt(sep->arg[2]);
+	auto variance = Strings::ToUnsignedInt(sep->arg[3]);
 
-	auto condition_id = sep->IsNumber(4) ? static_cast<uint16>(std::stoul(sep->arg[4])) : static_cast<uint16>(0);
-	auto condition_minimum = sep->IsNumber(5) ? static_cast<int16>(std::stoul(sep->arg[5])) : static_cast<int16>(0);
+	auto condition_id = sep->IsNumber(4) ? static_cast<uint16>(Strings::ToUnsignedInt(sep->arg[4])) : static_cast<uint16>(0);
+	auto condition_minimum = sep->IsNumber(5) ? static_cast<int16>(Strings::ToUnsignedInt(sep->arg[5])) : static_cast<int16>(0);
 
 	if (!database.CreateSpawn2(
 		c,

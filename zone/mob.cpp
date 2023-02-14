@@ -6279,8 +6279,8 @@ void Mob::ProcessSpecialAbilities(const std::string &str) {
 			Strings::IsNumber(sub_sp[0]) &&
 			Strings::IsNumber(sub_sp[1])
 		) {
-			int ability_id = std::stoi(sub_sp[0]);
-			int value = std::stoi(sub_sp[1]);
+			int ability_id = Strings::ToInt(sub_sp[0]);
+			int value = Strings::ToInt(sub_sp[1]);
 
 			SetSpecialAbility(ability_id, value);
 
@@ -6307,7 +6307,7 @@ void Mob::ProcessSpecialAbilities(const std::string &str) {
 				}
 
 				if (Strings::IsNumber(sub_sp[i])) {
-					SetSpecialAbilityParam(ability_id, param_id, std::stoi(sub_sp[i]));
+					SetSpecialAbilityParam(ability_id, param_id, Strings::ToInt(sub_sp[i]));
 				}
 			}
 		}

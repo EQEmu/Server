@@ -21,7 +21,7 @@ void command_emotesearch(Client *c, const Seperator *sep)
 		while (iterator.MoreElements()) {
 			auto &e = iterator.GetData();
 			auto current_text = Strings::ToLower(e->text);
-			
+
 			if (Strings::Contains(current_text, Strings::ToLower(search_criteria))) {
 				c->Message(
 					Chat::White,
@@ -64,8 +64,8 @@ void command_emotesearch(Client *c, const Seperator *sep)
 			iterator.Advance();
 		}
 	} else {
-		auto emote_id = std::stoul(search_criteria);
-		
+		auto emote_id = Strings::ToUnsignedInt(search_criteria);
+
 		LinkedListIterator<NPC_Emote_Struct *> iterator(zone->NPCEmoteList);
 		iterator.Reset();
 		while (iterator.MoreElements()) {

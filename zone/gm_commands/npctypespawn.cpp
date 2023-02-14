@@ -8,7 +8,7 @@ void command_npctypespawn(Client *c, const Seperator *sep)
 		return;
 	}
 
-	auto npc_id = std::stoul(sep->arg[1]);
+	auto npc_id = Strings::ToUnsignedInt(sep->arg[1]);
 	int faction_id = 0;
 
 	auto npc_type = content_db.LoadNPCTypesData(npc_id);

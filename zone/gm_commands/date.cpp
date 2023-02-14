@@ -16,12 +16,12 @@ void command_date(Client *c, const Seperator *sep)
 	TimeOfDay_Struct eq_time;
 	zone->zone_time.GetCurrentEQTimeOfDay(time(0), &eq_time);
 
-	auto year = static_cast<uint16>(std::stoul(sep->arg[1]));
-	auto month = static_cast<uint8>(std::stoul(sep->arg[2]));
-	auto day = static_cast<uint8>(std::stoul(sep->arg[3]));
+	auto year = static_cast<uint16>(Strings::ToUnsignedInt(sep->arg[1]));
+	auto month = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[2]));
+	auto day = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[3]));
 
-	auto hour = !sep->IsNumber(4) ? eq_time.hour : static_cast<uint8>(std::stoul(sep->arg[4]) + 1);
-	auto minute = !sep->IsNumber(5) ? eq_time.minute : static_cast<uint8>(std::stoul(sep->arg[5]));
+	auto hour = !sep->IsNumber(4) ? eq_time.hour : static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[4]) + 1);
+	auto minute = !sep->IsNumber(5) ? eq_time.minute : static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[5]));
 
 	c->Message(
 		Chat::White,

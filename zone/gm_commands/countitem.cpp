@@ -18,8 +18,8 @@ void command_countitem(Client *c, const Seperator *sep)
 	) {
 		target = c->GetTarget();
 	}
-	
-	auto item_id = std::stoul(sep->arg[1]);
+
+	auto item_id = Strings::ToUnsignedInt(sep->arg[1]);
 	if (!database.GetItem(item_id)) {
 		c->Message(
 			Chat::White,

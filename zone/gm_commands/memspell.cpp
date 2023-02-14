@@ -43,7 +43,7 @@ void command_memspell(Client *c, const Seperator *sep)
 		return;
 	}
 
-	auto spell_gem = sep->IsNumber(2) ? std::stoul(sep->arg[2]) : empty_slot;
+	auto spell_gem = sep->IsNumber(2) ? Strings::ToUnsignedInt(sep->arg[2]) : empty_slot;
 	if (spell_gem > EQ::spells::SPELL_GEM_COUNT) {
 		c->Message(
 			Chat::White,

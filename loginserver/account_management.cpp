@@ -381,7 +381,7 @@ uint32 AccountManagement::CheckExternalLoginserverUserCredentials(
 			auto s = Strings::Split(server.options.GetEQEmuLoginServerAddress(), ':');
 			if (s.size() == 2) {
 				auto address = s[0];
-				auto port    = std::stoi(s[1]);
+				auto port    = Strings::ToInt(s[1]);
 
 				EQ::Net::DNSLookup(
 					address, port, false, [&](const std::string &addr) {

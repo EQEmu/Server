@@ -2572,7 +2572,7 @@ bool BotDatabase::LoadBotGroupIDForLoadBotGroup(const uint32 owner_id, std::stri
 
 	for (auto row : results) {
 		if (!group_name.compare(row[1])) {
-			botgroup_id = std::stoul(row[0]);
+			botgroup_id = Strings::ToUnsignedInt(row[0]);
 			break;
 		}
 	}
@@ -2610,7 +2610,7 @@ bool BotDatabase::LoadBotGroup(const std::string& group_name, std::map<uint32, s
 	}
 
 	for (auto row : results) {
-		member_list[botgroup_id].push_back(std::stoul(row[0]));
+		member_list[botgroup_id].push_back(Strings::ToUnsignedInt(row[0]));
 	}
 
 	return true;
@@ -2714,7 +2714,7 @@ bool BotDatabase::LoadAutoSpawnBotGroupsByOwnerID(const uint32 owner_id, std::li
 
 	for (auto row : results) {
 		group_list.push_back(
-			std::pair<uint32,std::string>(std::stoul(row[0]), row[1])
+			std::pair<uint32,std::string>(Strings::ToUnsignedInt(row[0]), row[1])
 		);
 	}
 
@@ -2746,7 +2746,7 @@ bool BotDatabase::LoadGroupedBotsByGroupID(const uint32 owner_id, const uint32 g
 	}
 
 	for (auto row : results) {
-		group_list.push_back(std::stoul(row[0]));
+		group_list.push_back(Strings::ToUnsignedInt(row[0]));
 	}
 
 	return true;

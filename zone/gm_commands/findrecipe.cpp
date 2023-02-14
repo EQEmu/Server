@@ -11,7 +11,7 @@ void command_findrecipe(Client *c, const Seperator *sep)
 	}
 
 	if (sep->IsNumber(1)) {
-		auto recipe_id = static_cast<uint16>(std::stoul(sep->arg[1]));
+		auto recipe_id = static_cast<uint16>(Strings::ToUnsignedInt(sep->arg[1]));
 		auto r = TradeskillRecipeRepository::GetWhere(
 			database,
 			fmt::format("id = {}", recipe_id)
@@ -42,7 +42,7 @@ void command_findrecipe(Client *c, const Seperator *sep)
 	} else {
 		auto search_criteria = Strings::ToLower(sep->argplus[1]);
 		int found_count = 0;
-	
+
 		auto rl = TradeskillRecipeRepository::GetWhere(
 			database,
 			fmt::format("`name` LIKE '%{}%' ORDER BY `id` ASC", search_criteria)

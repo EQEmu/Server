@@ -4068,10 +4068,6 @@ bool Client::IsDiscovered(uint32 item_id) {
 		return false;
 	}
 
-	auto row = results.begin();
-	if (!Strings::ToInt(row[0]))
-		return false;
-
 	return true;
 }
 
@@ -9328,8 +9324,8 @@ void Client::SendToGuildHall()
 	uint16      instance_id             = 0;
 	std::string guild_hall_instance_key = fmt::format("guild-hall-instance-{}", GuildID());
 	std::string instance_data           = DataBucket::GetData(guild_hall_instance_key);
-	if (!instance_data.empty() && std::stoi(instance_data) > 0) {
-		instance_id = std::stoi(instance_data);
+	if (!instance_data.empty() && Strings::ToInt(instance_data) > 0) {
+		instance_id = Strings::ToInt(instance_data);
 	}
 
 	if (instance_id <= 0) {

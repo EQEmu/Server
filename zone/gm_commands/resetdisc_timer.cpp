@@ -29,7 +29,7 @@ void command_resetdisc_timer(Client *c, const Seperator *sep)
 	}
 
 	if (sep->IsNumber(1)) {
-		auto timer_id = std::stoul(sep->arg[1]);
+		auto timer_id = Strings::ToUnsignedInt(sep->arg[1]);
 		c->Message(
 			Chat::White,
 			fmt::format(

@@ -1189,7 +1189,7 @@ void handle_player_aa_exp_gain(
 	uint32 extra_data,
 	std::vector<std::any> *extra_pointers
 ) {
-	lua_pushinteger(L, std::stoull(data));
+	lua_pushinteger(L, Strings::ToUnsignedBigInt(data));
 	lua_setfield(L, -2, "aa_exp_gained");
 }
 
@@ -1201,7 +1201,7 @@ void handle_player_exp_gain(
 	uint32 extra_data,
 	std::vector<std::any> *extra_pointers
 ) {
-	lua_pushinteger(L, std::stoull(data));
+	lua_pushinteger(L, Strings::ToUnsignedBigInt(data));
 	lua_setfield(L, -2, "exp_gained");
 }
 

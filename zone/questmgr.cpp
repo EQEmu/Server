@@ -4034,7 +4034,7 @@ void QuestManager::SendPlayerHandinEvent() {
 					Strings::IsNumber(item_data[1]) &&
 					Strings::IsNumber(item_data[2])
 					) {
-					const auto item_id = static_cast<uint32>(std::stoul(item_data[0]));
+					const auto item_id = static_cast<uint32>(Strings::ToUnsignedInt(item_data[0]));
 					if (item_id != 0) {
 						const auto *item = database.GetItem(item_id);
 
@@ -4042,8 +4042,8 @@ void QuestManager::SendPlayerHandinEvent() {
 							PlayerEvent::HandinEntry{
 								.item_id = item_id,
 								.item_name = item->Name,
-								.charges = static_cast<uint16>(std::stoul(item_data[1])),
-								.attuned = std::stoi(item_data[2]) ? true : false
+								.charges = static_cast<uint16>(Strings::ToUnsignedInt(item_data[1])),
+								.attuned = Strings::ToInt(item_data[2]) ? true : false
 							}
 						);
 					}
@@ -4059,15 +4059,15 @@ void QuestManager::SendPlayerHandinEvent() {
 				Strings::IsNumber(item_data[1]) &&
 				Strings::IsNumber(item_data[2])
 				) {
-				const auto item_id = static_cast<uint32>(std::stoul(item_data[0]));
+				const auto item_id = static_cast<uint32>(Strings::ToUnsignedInt(item_data[0]));
 				const auto *item = database.GetItem(item_id);
 
 				hi.emplace_back(
 					PlayerEvent::HandinEntry{
 						.item_id = item_id,
 						.item_name = item->Name,
-						.charges = static_cast<uint16>(std::stoul(item_data[1])),
-						.attuned = std::stoi(item_data[2]) ? true : false
+						.charges = static_cast<uint16>(Strings::ToUnsignedInt(item_data[1])),
+						.attuned = Strings::ToInt(item_data[2]) ? true : false
 					}
 				);
 			}
@@ -4077,10 +4077,10 @@ void QuestManager::SendPlayerHandinEvent() {
 	// Handin Money
 	if (!handin_money.empty()) {
 		const auto hms = Strings::Split(handin_money, "|");
-		hm.copper   = static_cast<uint32>(std::stoul(hms[0]));
-		hm.silver   = static_cast<uint32>(std::stoul(hms[1]));
-		hm.gold     = static_cast<uint32>(std::stoul(hms[2]));
-		hm.platinum = static_cast<uint32>(std::stoul(hms[3]));
+		hm.copper   = static_cast<uint32>(Strings::ToUnsignedInt(hms[0]));
+		hm.silver   = static_cast<uint32>(Strings::ToUnsignedInt(hms[1]));
+		hm.gold     = static_cast<uint32>(Strings::ToUnsignedInt(hms[2]));
+		hm.platinum = static_cast<uint32>(Strings::ToUnsignedInt(hms[3]));
 	}
 
 	// Return Items
@@ -4097,15 +4097,15 @@ void QuestManager::SendPlayerHandinEvent() {
 					Strings::IsNumber(item_data[1]) &&
 					Strings::IsNumber(item_data[2])
 					) {
-					const auto item_id = static_cast<uint32>(std::stoul(item_data[0]));
+					const auto item_id = static_cast<uint32>(Strings::ToUnsignedInt(item_data[0]));
 					const auto *item   = database.GetItem(item_id);
 
 					ri.emplace_back(
 						PlayerEvent::HandinEntry{
 							.item_id = item_id,
 							.item_name = item->Name,
-							.charges = static_cast<uint16>(std::stoul(item_data[1])),
-							.attuned = std::stoi(item_data[2]) ? true : false
+							.charges = static_cast<uint16>(Strings::ToUnsignedInt(item_data[1])),
+							.attuned = Strings::ToInt(item_data[2]) ? true : false
 						}
 					);
 				}
@@ -4120,15 +4120,15 @@ void QuestManager::SendPlayerHandinEvent() {
 				Strings::IsNumber(item_data[1]) &&
 				Strings::IsNumber(item_data[2])
 				) {
-				const auto item_id = static_cast<uint32>(std::stoul(item_data[0]));
+				const auto item_id = static_cast<uint32>(Strings::ToUnsignedInt(item_data[0]));
 				const auto *item   = database.GetItem(item_id);
 
 				ri.emplace_back(
 					PlayerEvent::HandinEntry{
 						.item_id = item_id,
 						.item_name = item->Name,
-						.charges = static_cast<uint16>(std::stoul(item_data[1])),
-						.attuned = std::stoi(item_data[2]) ? true : false
+						.charges = static_cast<uint16>(Strings::ToUnsignedInt(item_data[1])),
+						.attuned = Strings::ToInt(item_data[2]) ? true : false
 					}
 				);
 			}
@@ -4138,10 +4138,10 @@ void QuestManager::SendPlayerHandinEvent() {
 	// Return Money
 	if (!return_money.empty()) {
 		const auto rms = Strings::Split(return_money, "|");
-		rm.copper   = static_cast<uint32>(std::stoul(rms[0]));
-		rm.silver   = static_cast<uint32>(std::stoul(rms[1]));
-		rm.gold     = static_cast<uint32>(std::stoul(rms[2]));
-		rm.platinum = static_cast<uint32>(std::stoul(rms[3]));
+		rm.copper   = static_cast<uint32>(Strings::ToUnsignedInt(rms[0]));
+		rm.silver   = static_cast<uint32>(Strings::ToUnsignedInt(rms[1]));
+		rm.gold     = static_cast<uint32>(Strings::ToUnsignedInt(rms[2]));
+		rm.platinum = static_cast<uint32>(Strings::ToUnsignedInt(rms[3]));
 	}
 
 	initiator->DeleteEntityVariable("HANDIN_ITEMS");

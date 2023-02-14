@@ -1258,7 +1258,7 @@ uint32 BaseGuildManager::GetGuildIDByCharacterID(uint32 character_id)
 	}
 
 	auto row = results.begin();
-	auto guild_id = std::stoul(row[0]);
+	auto guild_id = Strings::ToUnsignedInt(row[0]);
 	return guild_id;
 }
 

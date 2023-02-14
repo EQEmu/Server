@@ -121,7 +121,7 @@ uint32 Database::CheckLogin(const char* name, const char* password, const char *
 
 	auto row = results.begin();
 
-	auto id = std::stoul(row[0]);
+	auto id = Strings::ToUnsignedInt(row[0]);
 
 	if (oStatus) {
 		*oStatus = Strings::ToInt(row[1]);
@@ -202,11 +202,11 @@ int16 Database::CheckStatus(uint32 account_id)
 	}
 
 	auto row = results.begin();
-	int16 status = std::stoi(row[0]);
+	int16 status = Strings::ToInt(row[0]);
 	int32 date_diff = 0;
 
 	if (row[1]) {
-		date_diff = std::stoi(row[1]);
+		date_diff = Strings::ToInt(row[1]);
 	}
 
 	if (date_diff > 0) {
@@ -852,14 +852,14 @@ uint32 Database::GetAccountIDByName(std::string account_name, std::string logins
 	}
 
 	auto row = results.begin();
-	auto account_id = std::stoul(row[0]);
+	auto account_id = Strings::ToUnsignedInt(row[0]);
 
 	if (status) {
-		*status = static_cast<int16>(std::stoi(row[1]));
+		*status = static_cast<int16>(Strings::ToInt(row[1]));
 	}
 
 	if (lsid) {
-		*lsid = row[2] ? std::stoul(row[2]) : 0;
+		*lsid = row[2] ? Strings::ToUnsignedInt(row[2]) : 0;
 	}
 
 	return account_id;
@@ -1168,13 +1168,13 @@ uint32 Database::GetAccountIDFromLSID(
 	}
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		account_id = std::stoi(row[0]);
+		account_id = Strings::ToInt(row[0]);
 
 		if (in_account_name) {
 			strcpy(in_account_name, row[1]);
 		}
 		if (in_status) {
-			*in_status = std::stoi(row[2]);
+			*in_status = Strings::ToInt(row[2]);
 		}
 	}
 
@@ -1362,10 +1362,10 @@ uint32 Database::GetCharacterInfo(std::string character_name, uint32 *account_id
 	}
 
 	auto row = results.begin();
-	auto character_id = std::stoul(row[0]);
-	*account_id = std::stoul(row[1]);
-	*zone_id = std::stoul(row[2]);
-	*instance_id = std::stoul(row[3]);
+	auto character_id = Strings::ToUnsignedInt(row[0]);
+	*account_id = Strings::ToUnsignedInt(row[1]);
+	*zone_id = Strings::ToUnsignedInt(row[2]);
+	*instance_id = Strings::ToUnsignedInt(row[3]);
 
 	return character_id;
 }
@@ -1502,7 +1502,7 @@ std::string Database::GetGroupLeaderForLogin(std::string character_name) {
 
 	if (results.Success() && results.RowCount()) {
 		auto row = results.begin();
-		group_id = std::stoul(row[0]);
+		group_id = Strings::ToUnsignedInt(row[0]);
 	}
 
 	if (!group_id) {
@@ -2126,7 +2126,7 @@ int Database::GetIPExemption(std::string account_ip) {
 	}
 
 	auto row = results.begin();
-	return std::stoi(row[0]);
+	return Strings::ToInt(row[0]);
 }
 
 void Database::SetIPExemption(std::string account_ip, int exemption_amount) {
@@ -2140,7 +2140,7 @@ void Database::SetIPExemption(std::string account_ip, int exemption_amount) {
 	auto results = QueryDatabase(query);
 	if (results.Success() && results.RowCount()) {
 		auto row = results.begin();
-		exemption_id = std::stoul(row[0]);
+		exemption_id = Strings::ToUnsignedInt(row[0]);
 	}
 
 	query = fmt::format(

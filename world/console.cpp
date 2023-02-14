@@ -422,7 +422,7 @@ void ConsoleGuildSay(
 	}
 
 	auto from = args[0];
-	auto guild_id = Strings::IsNumber(args[1]) ? std::stoul(args[1]) : 0;
+	auto guild_id = Strings::IsNumber(args[1]) ? Strings::ToUnsignedInt(args[1]) : 0;
 	if (!guild_id) {
 		return;
 	}

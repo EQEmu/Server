@@ -123,11 +123,11 @@ void command_ai(Client *c, const Seperator *sep)
 				uint32 minimum_delay = 2500;
 
 				if (sep->IsNumber(7)) {
-					delay = std::stoul(sep->arg[7]);
+					delay = Strings::ToUnsignedInt(sep->arg[7]);
 				}
 
 				if (sep->IsNumber(8)) {
-					minimum_delay = std::stoul(sep->arg[8]);
+					minimum_delay = Strings::ToUnsignedInt(sep->arg[8]);
 				}
 
 				target->CastToNPC()->AI_SetRoambox(
@@ -183,11 +183,11 @@ void command_ai(Client *c, const Seperator *sep)
 				uint32 minimum_delay = 2500;
 
 				if (sep->IsNumber(4)) {
-					delay = std::stoul(sep->arg[4]);
+					delay = Strings::ToUnsignedInt(sep->arg[4]);
 				}
 
 				if (sep->IsNumber(5)) {
-					minimum_delay = std::stoul(sep->arg[5]);
+					minimum_delay = Strings::ToUnsignedInt(sep->arg[5]);
 				}
 
 				target->CastToNPC()->AI_SetRoambox(
@@ -233,7 +233,7 @@ void command_ai(Client *c, const Seperator *sep)
 		}
 	} else if (is_spells) {
 		if (sep->IsNumber(2)) {
-			auto spell_list_id = std::stoul(sep->arg[2]);
+			auto spell_list_id = Strings::ToUnsignedInt(sep->arg[2]);
 			if (spell_list_id >= 0) {
 				target->CastToNPC()->AI_AddNPCSpells(spell_list_id);
 
