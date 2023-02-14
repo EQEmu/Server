@@ -204,6 +204,7 @@ protected:
 
 	Timer respawn_timer;
 	Timer decay_timer;
+	void FixZ();
 };
 
 #endif
