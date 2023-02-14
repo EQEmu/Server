@@ -19,6 +19,8 @@ cmake -Wno-dev -G "Visual Studio 17 2022" -A x64 -DEQEMU_BUILD_TESTS=ON -DEQEMU_
 cmake --build . --config RelWithDebInfo --clean-first
 Set-Location -Path "$cwd"
 
+if ($LASTEXITCODE -ne 0) { echo "Build emitted error"; exit 1 }
+
 .\utils\scripts\build\should-release\should-release.exe; if ($LASTEXITCODE -ne 0) { exit }
 
 # trim some fat
