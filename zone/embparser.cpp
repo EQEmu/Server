@@ -1956,7 +1956,6 @@ void PerlembParser::ExportEventVariables(
 			if (extra_pointers && extra_pointers->size() == 1) {
 				ExportVar(package_name.c_str(), "target", "Mob", std::any_cast<Mob*>(extra_pointers->at(0)));
 			}
-			ExportVar(package_name.c_str(), "entity_id", Strings::ToInt(data));
 			break;
 		}
 
