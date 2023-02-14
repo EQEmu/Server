@@ -447,6 +447,15 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 		}
 	}
 
+	// Check if Combine would result in Lore conflict
+	for (const auto& e : spec.onsuccess) {
+		auto success_item_inst = database.GetItem(e.first);
+		if (user->CheckLoreConflict(success_item_inst)) {
+			user->MessageString(Chat::Red, TRADESKILL_COMBINE_LORE, success_item_inst->Name);
+			return;
+		}
+	}
+
 	// final check for any additional quest requirements .. "check_zone" in this case - exported as variable [validate_type]
 	if (parse->PlayerHasQuestSub(EVENT_COMBINE_VALIDATE)) {
 		if (parse->EventPlayer(EVENT_COMBINE_VALIDATE, user, fmt::format("check_zone {}", zone->GetZoneID()), spec.recipe_id) != 0) {
@@ -687,6 +696,18 @@ void Object::HandleAutoCombine(Client* user, const RecipeAutoCombine_Struct* rac
 		}
 	}
 
+	DBTradeskillRecipe_Struct recipe_struct;
+
+	// Check if Combine would result in Lore conflict
+	for (const auto& e : recipe_struct.onsuccess) {
+		auto success_item_inst = database.GetItem(e.first);
+		if (user->CheckLoreConflict(success_item_inst)) {
+			user->QueuePacket(outapp);
+			safe_delete(outapp);
+			user->MessageString(Chat::Red, TRADESKILL_COMBINE_LORE, success_item_inst->Name);
+			return;
+		}
+	}
 	//otherwise, we found it all...
 	outp->reply_code = 0x00000000;	//success for finding it...
 	user->QueuePacket(outapp);
