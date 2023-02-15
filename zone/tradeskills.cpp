@@ -253,6 +253,9 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 {
 	if (!user || !in_combine) {
 		LogError("Client or NewCombine_Struct not set in Object::HandleCombine");
+		auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
+		user->QueuePacket(outapp);
+		safe_delete(outapp);
 		return;
 	}
 
@@ -278,6 +281,9 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 				Chat::Red,
 				"Error: Server is not aware of the tradeskill container you are attempting to use"
 			);
+			auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
+			user->QueuePacket(outapp);
+			safe_delete(outapp);
 			return;
 		}
 		c_type         = worldo->m_type;
@@ -304,6 +310,9 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 
 	if (!inst || !inst->IsType(EQ::item::ItemClassBag)) {
 		user->Message(Chat::Red, "Error: Server does not recognize specified tradeskill container");
+		auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
+		user->QueuePacket(outapp);
+		safe_delete(outapp);
 		return;
 	}
 
@@ -427,22 +436,34 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 	if (spec.tradeskill == EQ::skills::SkillAlchemy) {
 		if (user_pp.class_ != SHAMAN) {
 			user->Message(Chat::Red, "This tradeskill can only be performed by a shaman.");
+			auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
+			user->QueuePacket(outapp);
+			safe_delete(outapp);
 			return;
 		}
 		else if (user_pp.level < MIN_LEVEL_ALCHEMY) {
 			user->Message(Chat::Red, "You cannot perform alchemy until you reach level %i.", MIN_LEVEL_ALCHEMY);
+			auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
+			user->QueuePacket(outapp);
+			safe_delete(outapp);
 			return;
 		}
 	}
 	else if (spec.tradeskill == EQ::skills::SkillTinkering) {
 		if (user_pp.race != GNOME) {
 			user->Message(Chat::Red, "Only gnomes can tinker.");
+			auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
+			user->QueuePacket(outapp);
+			safe_delete(outapp);
 			return;
 		}
 	}
 	else if (spec.tradeskill == EQ::skills::SkillMakePoison) {
 		if (user_pp.class_ != ROGUE) {
 			user->Message(Chat::Red, "Only rogues can mix poisons.");
+			auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
+			user->QueuePacket(outapp);
+			safe_delete(outapp);
 			return;
 		}
 	}
@@ -456,6 +477,9 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 			linker.SetItemData(success_item_inst);
 			auto item_link = linker.GenerateLink();
 			user->MessageString(Chat::Red, TRADESKILL_COMBINE_LORE, item_link.c_str());
+			auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
+			user->QueuePacket(outapp);
+			safe_delete(outapp);
 			return;
 		}
 	}
@@ -706,13 +730,13 @@ void Object::HandleAutoCombine(Client* user, const RecipeAutoCombine_Struct* rac
 	for (const auto& e : recipe_struct.onsuccess) {
 		auto success_item_inst = database.GetItem(e.first);
 		if (user->CheckLoreConflict(success_item_inst)) {
-			user->QueuePacket(outapp);
-			safe_delete(outapp);
 			EQ::SayLinkEngine linker;
 			linker.SetLinkType(EQ::saylink::SayLinkItemData);
 			linker.SetItemData(success_item_inst);
 			auto item_link = linker.GenerateLink();
 			user->MessageString(Chat::Red, TRADESKILL_COMBINE_LORE, item_link.c_str());
+			user->QueuePacket(outapp);
+			safe_delete(outapp);
 			return;
 		}
 	}
