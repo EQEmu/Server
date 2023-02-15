@@ -4094,7 +4094,7 @@ void Client::DiscoverItem(uint32 item_id) {
 
 	if (parse->PlayerHasQuestSub(EVENT_DISCOVER_ITEM)) {
 		auto* item = database.CreateItem(item_id);
-		std::vector<std::any> args = {item};
+		std::vector<std::any> args = { item };
 
 		parse->EventPlayer(EVENT_DISCOVER_ITEM, this, "", item_id, &args);
 	}
