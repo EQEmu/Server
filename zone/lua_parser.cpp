@@ -164,7 +164,7 @@ const char *LuaEvents[_LargestEventID] = {
 	"event_damage_taken",
 	"event_item_click_client",
 	"event_item_click_cast_client",
-	"event_destroy_item_client"
+	"event_destroy_item_client",
 	"event_drop_item_client"
 };
 
