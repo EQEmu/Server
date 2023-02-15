@@ -451,7 +451,11 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 	for (const auto& e : spec.onsuccess) {
 		auto success_item_inst = database.GetItem(e.first);
 		if (user->CheckLoreConflict(success_item_inst)) {
-			user->MessageString(Chat::Red, TRADESKILL_COMBINE_LORE, success_item_inst->Name);
+			EQ::SayLinkEngine linker;
+			linker.SetLinkType(EQ::saylink::SayLinkItemData);
+			linker.SetItemData(success_item_inst);
+			auto item_link = linker.GenerateLink();
+			user->MessageString(Chat::Red, TRADESKILL_COMBINE_LORE, item_link.c_str());
 			return;
 		}
 	}
@@ -704,7 +708,11 @@ void Object::HandleAutoCombine(Client* user, const RecipeAutoCombine_Struct* rac
 		if (user->CheckLoreConflict(success_item_inst)) {
 			user->QueuePacket(outapp);
 			safe_delete(outapp);
-			user->MessageString(Chat::Red, TRADESKILL_COMBINE_LORE, success_item_inst->Name);
+			EQ::SayLinkEngine linker;
+			linker.SetLinkType(EQ::saylink::SayLinkItemData);
+			linker.SetItemData(success_item_inst);
+			auto item_link = linker.GenerateLink();
+			user->MessageString(Chat::Red, TRADESKILL_COMBINE_LORE, item_link.c_str());
 			return;
 		}
 	}
