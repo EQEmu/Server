@@ -4560,11 +4560,15 @@ void Client::Handle_OP_ClickDoor(const EQApplicationPacket *app)
 
 	// don't spam scripts with client controlled doors if not within distance
 	if (within_distance) {
+		int quest_return = 0;
 		if (parse->PlayerHasQuestSub(EVENT_CLICK_DOOR)) {
-			std::vector<std::any> args = { currentdoor };
-			if (parse->EventPlayer(EVENT_CLICK_DOOR, this, std::to_string(cd->doorid), 0, &args) == 0) {
-				currentdoor->HandleClick(this, 0);
-			}
+			std::vector<std::any> args = {currentdoor};
+
+			quest_return = parse->EventPlayer(EVENT_CLICK_DOOR, this, std::to_string(cd->doorid), 0, &args);
+		}
+
+		if (quest_return == 0) {
+			currentdoor->HandleClick(this, 0);
 		}
 	}
 	else {
@@ -15235,34 +15239,37 @@ void Client::Handle_OP_Translocate(const EQApplicationPacket *app)
 			zone->GetInstanceID() == PendingTranslocateData.instance_id
 		);
 
+		int quest_return = 0;
 		if (parse->SpellHasQuestSub(spell_id, EVENT_SPELL_EFFECT_TRANSLOCATE_COMPLETE)) {
-			if (parse->EventSpell(EVENT_SPELL_EFFECT_TRANSLOCATE_COMPLETE, nullptr, this, spell_id, "", 0) == 0) {
-				// If the spell has a translocate to bind effect, AND we are already in the zone the client
-				// is bound in, use the GoToBind method. If we send OP_Translocate in this case, the client moves itself
-				// to the bind coords it has from the PlayerProfile, but with the X and Y reversed. I suspect they are
-				// reversed in the pp, and since spells like Gate are handled serverside, this has not mattered before.
-				if (
-					IsTranslocateSpell(spell_id) &&
-					in_translocate_zone
-				) {
-					PendingTranslocate = false;
-					GoToBind();
-					return;
-				}
+			quest_return = parse->EventSpell(EVENT_SPELL_EFFECT_TRANSLOCATE_COMPLETE, nullptr, this, spell_id, "", 0);
+		}
 
-				////Was sending the packet back to initiate client zone...
-				////but that could be abusable, so lets go through proper channels
-				MovePC(
-					PendingTranslocateData.zone_id,
-					PendingTranslocateData.instance_id,
-					PendingTranslocateData.x,
-					PendingTranslocateData.y,
-					PendingTranslocateData.z,
-					PendingTranslocateData.heading,
-					0,
-					ZoneSolicited
-				);
+		if (quest_return == 0) {
+			// If the spell has a translocate to bind effect, AND we are already in the zone the client
+			// is bound in, use the GoToBind method. If we send OP_Translocate in this case, the client moves itself
+			// to the bind coords it has from the PlayerProfile, but with the X and Y reversed. I suspect they are
+			// reversed in the pp, and since spells like Gate are handled serverside, this has not mattered before.
+			if (
+				IsTranslocateSpell(spell_id) &&
+				in_translocate_zone
+				) {
+				PendingTranslocate = false;
+				GoToBind();
+				return;
 			}
+
+			////Was sending the packet back to initiate client zone...
+			////but that could be abusable, so lets go through proper channels
+			MovePC(
+				PendingTranslocateData.zone_id,
+				PendingTranslocateData.instance_id,
+				PendingTranslocateData.x,
+				PendingTranslocateData.y,
+				PendingTranslocateData.z,
+				PendingTranslocateData.heading,
+				0,
+				ZoneSolicited
+			);
 		}
 	}
 

@@ -1378,26 +1378,22 @@ void Mob::CreateHPPacket(EQApplicationPacket* app)
 	ds->hp = (int)GetHPRatio();
 
 	// hp event
-	if (IsNPC() && (GetNextHPEvent() > 0))
-	{
-		if (ds->hp < GetNextHPEvent())
-		{
+	if (IsNPC() && (GetNextHPEvent() > 0)) {
+		if (ds->hp < GetNextHPEvent()) {
+			std::string export_string = fmt::format("{}", GetNextHPEvent());
 			SetNextHPEvent(-1);
-
-			if (parse->HasQuestSub(GetNPCTypeID(), EVENT_HP)) {
-				parse->EventNPC(EVENT_HP, CastToNPC(), nullptr, std::to_string(GetNextHPEvent()), 0);
+			if (parse->HasQuestSub(CastToNPC()->GetNPCTypeID(), EVENT_HP)) {
+				parse->EventNPC(EVENT_HP, CastToNPC(), nullptr, export_string, 0);
 			}
 		}
 	}
 
-	if (IsNPC() && (GetNextIncHPEvent() > 0))
-	{
-		if (ds->hp > GetNextIncHPEvent())
-		{
+	if (IsNPC() && (GetNextIncHPEvent() > 0)) {
+		if (ds->hp > GetNextIncHPEvent()) {
+			std::string export_string = fmt::format("{}", GetNextIncHPEvent());
 			SetNextIncHPEvent(-1);
-
-			if (parse->HasQuestSub(GetNPCTypeID(), EVENT_HP)) {
-				parse->EventNPC(EVENT_HP, CastToNPC(), nullptr, std::to_string(GetNextIncHPEvent()), 1);
+			if (parse->HasQuestSub(CastToNPC()->GetNPCTypeID(), EVENT_HP)) {
+				parse->EventNPC(EVENT_HP, CastToNPC(), nullptr, export_string, 1);
 			}
 		}
 	}
