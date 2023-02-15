@@ -1514,8 +1514,9 @@ bool BotDatabase::SavePetBuffs(const uint32 bot_id, const SpellBuff_Struct* pet_
 		return true;
 
 	for (int buff_index = 0; buff_index < PET_BUFF_COUNT; ++buff_index) {
-		if (!pet_buffs[buff_index].spellid || pet_buffs[buff_index].spellid == SPELL_UNKNOWN)
+		if (!IsValidSpell(pet_buffs[buff_index].spellid)) {
 			continue;
+		}
 
 		query = StringFormat(
 			"INSERT INTO `bot_pet_buffs` ("

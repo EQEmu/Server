@@ -823,7 +823,7 @@ void Client::InspectBuffs(Client* Inspector, int Rank)
 	uint32 buff_count = GetMaxTotalSlots();
 	uint32 packet_index = 0;
 	for (uint32 i = 0; i < buff_count; i++) {
-		if (buffs[i].spellid == SPELL_UNKNOWN)
+		if (!IsValidSpell(buffs[i].spellid))
 			continue;
 		ib->spell_id[packet_index] = buffs[i].spellid;
 		if (Rank > 1)
