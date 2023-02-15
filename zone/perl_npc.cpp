@@ -898,7 +898,9 @@ void perl_register_npc()
 	package.add("SetSaveWaypoint", &Perl_NPC_SetSaveWaypoint);
 	package.add("SetSecSkill", &Perl_NPC_SetSecSkill);
 	package.add("SetSilver", &Perl_NPC_SetSilver);
-	package.add("SetSimpleRoamBox", &Perl_NPC_SetSimpleRoamBox);
+	package.add("SetSimpleRoamBox", (void(*)(NPC*, float))&Perl_NPC_SetSimpleRoamBox);
+	package.add("SetSimpleRoamBox", (void(*)(NPC*, float, float))&Perl_NPC_SetSimpleRoamBox);
+	package.add("SetSimpleRoamBox", (void(*)(NPC*, float, float, int))&Perl_NPC_SetSimpleRoamBox);
 	package.add("SetSp2", &Perl_NPC_SetSp2);
 	package.add("SetSpellFocusDMG", &Perl_NPC_SetSpellFocusDMG);
 	package.add("SetSpellFocusHeal", &Perl_NPC_SetSpellFocusHeal);
