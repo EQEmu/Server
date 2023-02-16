@@ -1,3 +1,85 @@
+## [22.4.0] - 02/17/2023
+
+### Bots
+
+* Add Additional HeroicAgi/Dex Modifiers. ([#2838](https://github.com/EQEmu/Server/pull/2838)) ([Aeadoin](https://github.com/Aeadoin)) 2023-02-07
+* Add Additional HeroicStr modifiers. ([#2837](https://github.com/EQEmu/Server/pull/2837)) ([Aeadoin](https://github.com/Aeadoin)) 2023-02-07
+* Add IsBot() to methods in attack.cpp where applicable. ([#2840](https://github.com/EQEmu/Server/pull/2840)) ([Aeadoin](https://github.com/Aeadoin)) 2023-02-09
+* Add Lore Check for Augments. ([#2874](https://github.com/EQEmu/Server/pull/2874)) ([Aeadoin](https://github.com/Aeadoin)) 2023-02-12
+* Add Pet Power Support for Temp Pets. ([#2853](https://github.com/EQEmu/Server/pull/2853)) ([Aeadoin](https://github.com/Aeadoin)) 2023-02-11
+* Add Support for TryTriggerOnCastFocusEffect ([#2864](https://github.com/EQEmu/Server/pull/2864)) ([Aeadoin](https://github.com/Aeadoin)) 2023-02-13
+* Add TotalDominationBonus modifiers. ([#2852](https://github.com/EQEmu/Server/pull/2852)) ([Aeadoin](https://github.com/Aeadoin)) 2023-02-09
+* ST_AreaClientOnly spells to land on Bots ([#2849](https://github.com/EQEmu/Server/pull/2849)) ([Aeadoin](https://github.com/Aeadoin)) 2023-02-09
+* Update ResistSpell to use temp_level_diff client formula ([#2851](https://github.com/EQEmu/Server/pull/2851)) ([Aeadoin](https://github.com/Aeadoin)) 2023-02-09
+
+### CI
+
+* Fix Windows stderr not bubbling properly ([#2925](https://github.com/EQEmu/Server/pull/2925)) ([Akkadius](https://github.com/Akkadius)) 2023-02-14
+
+### Code
+
+* Add IsOfClientBot() virtual method. ([#2845](https://github.com/EQEmu/Server/pull/2845)) ([Aeadoin](https://github.com/Aeadoin)) 2023-02-07
+* Doors EVENT_CLICK_DOOR syntax adjustment  ([Akkadius](https://github.com/Akkadius)) 2023-02-14
+* Remove Unused Mod Hooks ([#2856](https://github.com/EQEmu/Server/pull/2856)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-02-13
+
+### Crash
+
+* Crash fix where invalid input to #heromodel would crash zone ([#2937](https://github.com/EQEmu/Server/pull/2937)) ([Akkadius](https://github.com/Akkadius)) 2023-02-15
+* Fix Bot Crash in Bot::Bot Constructor. ([#2868](https://github.com/EQEmu/Server/pull/2868)) ([Aeadoin](https://github.com/Aeadoin)) 2023-02-12
+* Fix Crash in FindType ([#2867](https://github.com/EQEmu/Server/pull/2867)) ([Aeadoin](https://github.com/Aeadoin)) 2023-02-13
+* Fix crash in Mob::CommonDamage when attacker was null ([#2872](https://github.com/EQEmu/Server/pull/2872)) ([Aeadoin](https://github.com/Aeadoin)) 2023-02-13
+* Fix crash issue with dropping items and order of operations ([#2939](https://github.com/EQEmu/Server/pull/2939)) ([joligario](https://github.com/joligario)) 2023-02-16
+* Fix issue where long short names overflow file_name  ([Akkadius](https://github.com/Akkadius)) 2023-02-09
+* Fix potential crash in Mob::CommonDamage ([#2848](https://github.com/EQEmu/Server/pull/2848)) ([Aeadoin](https://github.com/Aeadoin)) 2023-02-09
+
+### Doors
+
+* Fix issue where NPC's wouldn't open doors because door param overflow ([#2934](https://github.com/EQEmu/Server/pull/2934)) ([Akkadius](https://github.com/Akkadius)) 2023-02-15
+
+### Feature
+
+* Add IsOfClientBotMerc() virtual method. ([#2843](https://github.com/EQEmu/Server/pull/2843)) ([Aeadoin](https://github.com/Aeadoin)) 2023-02-07
+
+### Fixes
+
+* Another doors fix  ([Akkadius](https://github.com/Akkadius)) 2023-02-14
+* Fix CheckNumHitsRemaining() with 1H Blunt ([#2846](https://github.com/EQEmu/Server/pull/2846)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-02-07
+* Fix Door opening regression caused by #2880  ([Akkadius](https://github.com/Akkadius)) 2023-02-14
+* Fix EVENT_SPELL_EFFECT_TRANSLOCATE_COMPLETE regression caused by  #2897 ([#2928](https://github.com/EQEmu/Server/pull/2928)) ([Akkadius](https://github.com/Akkadius)) 2023-02-14
+* Fix HP_EVENT regression ([#2927](https://github.com/EQEmu/Server/pull/2927)) ([Akkadius](https://github.com/Akkadius)) 2023-02-14
+* Fix crash in EVENT_DISCOVER_ITEM ([#2933](https://github.com/EQEmu/Server/pull/2933)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-02-15
+* Fix crash where dropped items crash Lua logic ([#2936](https://github.com/EQEmu/Server/pull/2936)) ([Akkadius](https://github.com/Akkadius)) 2023-02-15
+* Fix for interrupting item casts to no longer lock the client if cast time of item greater than 0 ([#2921](https://github.com/EQEmu/Server/pull/2921)) ([Natedog2012](https://github.com/Natedog2012)) 2023-02-13
+* Fix issue where Lore groundspawn pickups will desync ROF2+ ([#2929](https://github.com/EQEmu/Server/pull/2929)) ([Akkadius](https://github.com/Akkadius)) 2023-02-14
+* Fix issue with EVENT_HP firing regression from #2904 ([#2924](https://github.com/EQEmu/Server/pull/2924)) ([Akkadius](https://github.com/Akkadius)) 2023-02-14
+* Replace uses of SPELL_UNKNOWN with IsValidSpell() ([#2938](https://github.com/EQEmu/Server/pull/2938)) ([Aeadoin](https://github.com/Aeadoin)) 2023-02-16
+* Self Only Spells will no longer check target level or buff restrictions ([#2931](https://github.com/EQEmu/Server/pull/2931)) ([noudess](https://github.com/noudess)) 2023-02-15
+
+### Groundspawns
+
+* Fix issue where groundspawns appear floating high off the ground ([#2930](https://github.com/EQEmu/Server/pull/2930)) ([Akkadius](https://github.com/Akkadius)) 2023-02-15
+
+### Logging
+
+* Add raw opcode when emu translated opcode is not found (OP_Unknown) via (C->S) ([#2847](https://github.com/EQEmu/Server/pull/2847)) ([Akkadius](https://github.com/Akkadius)) 2023-02-08
+* Implement Player Event Logging system ([#2833](https://github.com/EQEmu/Server/pull/2833)) ([Akkadius](https://github.com/Akkadius)) 2023-02-13
+
+### Quest
+
+* Fix SetSimpleRoamBox in Perl to have optional params again ([#2935](https://github.com/EQEmu/Server/pull/2935)) ([Akkadius](https://github.com/Akkadius)) 2023-02-15
+
+### Rules
+
+* Add Group/Raid Experience Rules ([#2850](https://github.com/EQEmu/Server/pull/2850)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-02-13
+
+### Tradeskills
+
+* Check if combine would result in lore conflict ([#2932](https://github.com/EQEmu/Server/pull/2932)) ([Aeadoin](https://github.com/Aeadoin)) 2023-02-16
+
+### Windows
+
+* Fix MSVC compilation bug via workaround ([#2926](https://github.com/EQEmu/Server/pull/2926)) ([Akkadius](https://github.com/Akkadius)) 2023-02-14
+
 ## [22.3.0] - 02/06/2023
 
 ### Bots
