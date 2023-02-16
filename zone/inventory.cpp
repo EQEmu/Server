@@ -848,13 +848,14 @@ void Client::DropItem(int16 slot_id, bool recurse)
 				}
 			}
 		}
-		invalid_drop = nullptr;
-
+		
 		std::string message = fmt::format(
 			"Tried to drop an item on the ground that was no-drop! item_name [{}] item_id ({})",
 			invalid_drop->GetItem()->Name,
 			invalid_drop->GetItem()->ID
 		);
+		
+		invalid_drop = nullptr;
 		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = message});
 		GetInv().DeleteItem(slot_id);
 		return;
