@@ -1079,7 +1079,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				}
 				int buff_count = GetMaxTotalSlots();
 				for(int slot = 0; slot < buff_count; slot++) {
-					if(	buffs[slot].spellid != SPELL_UNKNOWN &&
+					if(IsValidSpell(buffs[slot].spellid) &&
 						spells[buffs[slot].spellid].dispel_flag == 0 &&
 						!IsDiscipline(buffs[slot].spellid))
 					{
@@ -1110,7 +1110,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				int chance = spells[spell_id].base_value[i];
 				int buff_count = GetMaxTotalSlots();
 				for(int slot = 0; slot < buff_count; slot++) {
-					if (buffs[slot].spellid != SPELL_UNKNOWN &&
+					if (IsValidSpell(buffs[slot].spellid) &&
 						IsDetrimentalSpell(buffs[slot].spellid) &&
 						spells[buffs[slot].spellid].dispel_flag == 0)
 					{
@@ -1137,7 +1137,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				int chance = spells[spell_id].base_value[i];
 				int buff_count = GetMaxTotalSlots();
 				for(int slot = 0; slot < buff_count; slot++) {
-					if (buffs[slot].spellid != SPELL_UNKNOWN &&
+					if (IsValidSpell(buffs[slot].spellid) &&
 						IsBeneficialSpell(buffs[slot].spellid) &&
 						spells[buffs[slot].spellid].dispel_flag == 0)
 					{
@@ -1336,7 +1336,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				if (BeneficialSpell(spell_id) && spells[spell_id].buff_duration == 0) {
 					int buff_count = GetMaxBuffSlots();
 					for (int slot = 0; slot < buff_count; slot++) {
-						if (buffs[slot].spellid != SPELL_UNKNOWN && IsEffectInSpell(buffs[slot].spellid, SE_Blind)) {
+						if (IsValidSpell(buffs[slot].spellid) && IsEffectInSpell(buffs[slot].spellid, SE_Blind)) {
 							if (caster && TryDispel(caster->GetCasterLevel(spell_id), buffs[slot].casterlevel, 1)) {
 								BuffFadeBySlot(slot);
 								slot = buff_count;
@@ -3755,12 +3755,13 @@ void Mob::BuffProcess()
 
 	for (int buffs_i = 0; buffs_i < buff_count; ++buffs_i)
 	{
-		if (buffs[buffs_i].spellid != SPELL_UNKNOWN)
+		if (IsValidSpell(buffs[buffs_i].spellid))
 		{
 			DoBuffTic(buffs[buffs_i], buffs_i, entity_list.GetMob(buffs[buffs_i].casterid));
 			// If the Mob died during DoBuffTic, then the buff we are currently processing will have been removed
-			if(buffs[buffs_i].spellid == SPELL_UNKNOWN)
+			if(!IsValidSpell(buffs[buffs_i].spellid)) {
 				continue;
+			}
 
 			// DF_Permanent uses -1 DF_Aura uses -4 but we need to check negatives for some spells for some reason?
 			if (spells[buffs[buffs_i].spellid].buff_duration_formula != DF_Permanent &&
@@ -6429,7 +6430,7 @@ int64 Mob::GetFocusEffect(focusType type, uint16 spell_id, Mob *caster, bool fro
 			}
 
 			TempItem = ins->GetItem();
-			if (TempItem && TempItem->Focus.Effect > 0 && TempItem->Focus.Effect != SPELL_UNKNOWN) {
+			if (TempItem && IsValidSpell(TempItem->Focus.Effect)) {
 				if(rand_effectiveness) {
 					focus_max = CalcFocusEffect(type, TempItem->Focus.Effect, spell_id, true);
 					if (focus_max > 0 && focus_max_real >= 0 && focus_max > focus_max_real) {
@@ -6461,7 +6462,7 @@ int64 Mob::GetFocusEffect(focusType type, uint16 spell_id, Mob *caster, bool fro
 				aug = ins->GetAugment(y);
 				if (aug) {
 					const EQ::ItemData* TempItemAug = aug->GetItem();
-					if (TempItemAug && TempItemAug->Focus.Effect > 0 && TempItemAug->Focus.Effect != SPELL_UNKNOWN) {
+					if (TempItemAug && IsValidSpell(TempItemAug->Focus.Effect)) {
 						if(rand_effectiveness) {
 							focus_max = CalcFocusEffect(type, TempItemAug->Focus.Effect, spell_id, true);
 							if (focus_max > 0 && focus_max_real >= 0 && focus_max > focus_max_real) {
@@ -6501,7 +6502,7 @@ int64 Mob::GetFocusEffect(focusType type, uint16 spell_id, Mob *caster, bool fro
 				}
 
 				TempItem = ins->GetItem();
-				if (TempItem && TempItem->Focus.Effect > 0 && TempItem->Focus.Effect != SPELL_UNKNOWN) {
+				if (TempItem && IsValidSpell(TempItem->Focus.Effect)) {
 					if (rand_effectiveness) {
 						focus_max = CalcFocusEffect(type, TempItem->Focus.Effect, spell_id, true);
 						if (focus_max > 0 && focus_max_real >= 0 && focus_max > focus_max_real) {
@@ -6711,7 +6712,7 @@ int64 NPC::GetFocusEffect(focusType type, uint16 spell_id, Mob* caster, bool fro
 
 			TempItem = cur;
 
-			if (TempItem && TempItem->Focus.Effect > 0 && TempItem->Focus.Effect != SPELL_UNKNOWN) {
+			if (TempItem && IsValidSpell(TempItem->Focus.Effect)) {
 				if(rand_effectiveness) {
 					focus_max = CalcFocusEffect(type, TempItem->Focus.Effect, spell_id, true);
 					if (focus_max > 0 && focus_max_real >= 0 && focus_max > focus_max_real) {
@@ -9754,7 +9755,7 @@ bool Mob::PassLimitToSkill(EQ::skills::SkillType skill, int32 spell_id, int proc
 
 	if (!aa_id && spellbonuses.LimitToSkill[EQ::skills::HIGHEST_SKILL + 2]) {
 
-		if (spell_id == SPELL_UNKNOWN) {
+		if (!IsValidSpell(spell_id)) {
 			return false;
 		}
 
@@ -10361,13 +10362,13 @@ void Mob::SetBuffDuration(int spell_id, int duration) {
 	for (int slot = 0; slot < buff_count; slot++) {
 
 		if (!adjust_all_buffs) {
-			if (buffs[slot].spellid != SPELL_UNKNOWN && buffs[slot].spellid == spell_id) {
+			if (IsValidSpell(buffs[slot].spellid) && buffs[slot].spellid == spell_id) {
 				SpellOnTarget(buffs[slot].spellid, this, 0, false, 0, false, -1, duration, true);
 				return;
 			}
 		}
 		else {
-			if (buffs[slot].spellid != SPELL_UNKNOWN) {
+			if (IsValidSpell(buffs[slot].spellid)) {
 				SpellOnTarget(buffs[slot].spellid, this, 0, false, 0, false, -1, duration, true);
 			}
 		}
@@ -10409,7 +10410,7 @@ int Mob::GetBuffStatValueBySpell(int32 spell_id, const char* stat_identifier)
 
 	int buff_count = GetMaxTotalSlots();
 	for (int slot = 0; slot < buff_count; slot++) {
-		if (buffs[slot].spellid != SPELL_UNKNOWN && buffs[slot].spellid == spell_id) {
+		if (IsValidSpell(buffs[slot].spellid) && buffs[slot].spellid == spell_id) {
 			return GetBuffStatValueBySlot(slot, stat_identifier);
 		}
 	}
