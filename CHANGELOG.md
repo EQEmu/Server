@@ -12,6 +12,11 @@
 * ST_AreaClientOnly spells to land on Bots ([#2849](https://github.com/EQEmu/Server/pull/2849)) ([Aeadoin](https://github.com/Aeadoin)) 2023-02-09
 * Update ResistSpell to use temp_level_diff client formula ([#2851](https://github.com/EQEmu/Server/pull/2851)) ([Aeadoin](https://github.com/Aeadoin)) 2023-02-09
 
+### Bots & Mercenaries
+
+* Add 100% Hit chance if sitting while attacked. ([#2839](https://github.com/EQEmu/Server/pull/2839)) ([Aeadoin](https://github.com/Aeadoin)) 2023-02-07
+* Add Support for TrySympatheticProc ([#2866](https://github.com/EQEmu/Server/pull/2866)) ([Aeadoin](https://github.com/Aeadoin)) 2023-02-13
+
 ### CI
 
 * Fix Windows stderr not bubbling properly ([#2925](https://github.com/EQEmu/Server/pull/2925)) ([Akkadius](https://github.com/Akkadius)) 2023-02-14
@@ -64,8 +69,63 @@
 * Add raw opcode when emu translated opcode is not found (OP_Unknown) via (C->S) ([#2847](https://github.com/EQEmu/Server/pull/2847)) ([Akkadius](https://github.com/Akkadius)) 2023-02-08
 * Implement Player Event Logging system ([#2833](https://github.com/EQEmu/Server/pull/2833)) ([Akkadius](https://github.com/Akkadius)) 2023-02-13
 
-### Quest
+### Quest API
 
+* (Performance) Check equip or scale item events exist before export and execute ([#2898](https://github.com/EQEmu/Server/pull/2898)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-02-13
+* (Performance) Check event EVENT_AA_BUY or EVENT_AA_GAIN exist before export and execute ([#2892](https://github.com/EQEmu/Server/pull/2892)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-02-13
+* (Performance) Check event EVENT_AGGRO, EVENT_ATTACK, or EVENT_COMBAT exist before export and execute ([#2901](https://github.com/EQEmu/Server/pull/2901)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-02-13
+* (Performance) Check event EVENT_COMBINE, EVENT_COMBINE_SUCCESS, EVENT_COMBINE_FAILURE, or EVENT_COMBINE_VALIDATE exist before export and execute ([#2896](https://github.com/EQEmu/Server/pull/2896)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-02-13
+* (Performance) Check event EVENT_DEATH, EVENT_DEATH_COMPLETE, or EVENT_DEATH_ZONE exist before export and execute ([#2909](https://github.com/EQEmu/Server/pull/2909)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-02-13
+* (Performance) Check event EVENT_ENVIRONMENTAL_DAMAGE exists before export and execute ([#2899](https://github.com/EQEmu/Server/pull/2899)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-02-13
+* (Performance) Check event EVENT_FEIGN_DEATH exists before export and execute ([#2916](https://github.com/EQEmu/Server/pull/2916)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-02-13
+* (Performance) Check event EVENT_ITEM_TICK or EVENT_WEAPON_PROC exist before export and execute ([#2914](https://github.com/EQEmu/Server/pull/2914)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-02-13
+* (Performance) Check event EVENT_LANGUAGE_SKILL_UP, EVENT_SKILL_UP, or EVENT_USE_SKILL exist before export and execute ([#2894](https://github.com/EQEmu/Server/pull/2894)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-02-13
+* (Performance) Check event EVENT_PAYLOAD or EVENT_SIGNAL exist before export and execute ([#2902](https://github.com/EQEmu/Server/pull/2902)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-02-13
+* (Performance) Check event EVENT_SLAY exists before export and execute ([#2910](https://github.com/EQEmu/Server/pull/2910)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-02-13
+* (Performance) Check event EVENT_WAYPOINT_ARRIVE or EVENT_WAYPOINT_DEPART exist before export and execute ([#2905](https://github.com/EQEmu/Server/pull/2905)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-02-13
+* (Performance) Check event exists before export and execute EVENT_AGGRO_SAY, EVENT_SAY, and EVENT_PROXIMITY_SAY ([#2882](https://github.com/EQEmu/Server/pull/2882)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-02-13
+* (Performance) Check event exists before export and execute EVENT_BOT_CREATE ([#2886](https://github.com/EQEmu/Server/pull/2886)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-02-13
+* (Performance) Check event exists before export and execute EVENT_CLICK_DOOR and EVENT_CLICK_OBJECT ([#2880](https://github.com/EQEmu/Server/pull/2880)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-02-13
+* (Performance) Check event exists before export and execute EVENT_DESPAWN and EVENT_DESPAWN_ZONE ([#2887](https://github.com/EQEmu/Server/pull/2887)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-02-13
+* (Performance) Check event exists before export and execute EVENT_DISCOVER_ITEM ([#2912](https://github.com/EQEmu/Server/pull/2912)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-02-13
+* (Performance) Check event exists before export and execute EVENT_DUEL_LOSE and EVENT_DUEL_WIN ([#2915](https://github.com/EQEmu/Server/pull/2915)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-02-13
+* (Performance) Check event exists before export and execute EVENT_ENTER_ZONE and EVENT_ZONE ([#2900](https://github.com/EQEmu/Server/pull/2900)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-02-13
+* (Performance) Check event exists before export and execute EVENT_GM_COMMAND ([#2890](https://github.com/EQEmu/Server/pull/2890)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-02-13
+* (Performance) Check event exists before export and execute EVENT_GROUP_CHANGE ([#2884](https://github.com/EQEmu/Server/pull/2884)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-02-13
+* (Performance) Check event exists before export and execute EVENT_HP ([#2904](https://github.com/EQEmu/Server/pull/2904)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-02-13
+* (Performance) Check event exists before export and execute EVENT_KILLED_MERIT ([#2911](https://github.com/EQEmu/Server/pull/2911)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-02-13
+* (Performance) Check event exists before export and execute EVENT_LEVEL_UP and EVENT_LEVEL_DOWN ([#2889](https://github.com/EQEmu/Server/pull/2889)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-02-13
+* (Performance) Check event exists before export and execute EVENT_POPUP_RESPONSE ([#2881](https://github.com/EQEmu/Server/pull/2881)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-02-13
+* (Performance) Check event exists before export and execute EVENT_RESPAWN ([#2917](https://github.com/EQEmu/Server/pull/2917)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-02-13
+* (Performance) Check event exists before export and execute EVENT_TICK ([#2919](https://github.com/EQEmu/Server/pull/2919)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-02-13
+* (Performance) Check event exists before export and execute EVENT_TIMER ([#2903](https://github.com/EQEmu/Server/pull/2903)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-02-13
+* (Performance) Check event exists before export and execute EVENT_TRADE ([#2906](https://github.com/EQEmu/Server/pull/2906)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-02-13
+* (Performance) Check event exists before export and execute EVENT_UNHANDLED_OPCODE ([#2918](https://github.com/EQEmu/Server/pull/2918)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-02-13
+* (Performance) Check event exists before export and execute EVENT_WARP ([#2907](https://github.com/EQEmu/Server/pull/2907)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-02-13
+* (Performance) Check event exists before export and execute area events ([#2888](https://github.com/EQEmu/Server/pull/2888)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-02-13
+* (Performance) Check merchant events exist before export and execute ([#2893](https://github.com/EQEmu/Server/pull/2893)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-02-13
+* (Performance) Check spell or cast events exist before export and execute ([#2897](https://github.com/EQEmu/Server/pull/2897)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-02-13
+* (Performance) Check task events exist before export and execute ([#2883](https://github.com/EQEmu/Server/pull/2883)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-02-13
+* (Performance) Check event exists before export and execute EVENT_CONNECT and EVENT_DISCONNECT ([#2913](https://github.com/EQEmu/Server/pull/2913)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-02-13
+* (Performance) Check event exists before export and execute EVENT_TEST_BUFF ([#2920](https://github.com/EQEmu/Server/pull/2920)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-02-13
+* Add $target export to EVENT_INSPECT in Perl ([#2891](https://github.com/EQEmu/Server/pull/2891)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-02-13
+* Add Additional XP Events EVENT_AA_EXP_GAIN, EVENT_EXP_GAIN ([#2865](https://github.com/EQEmu/Server/pull/2865)) ([Valorith](https://github.com/Valorith)) 2023-02-13
+* Add EVENT_DESTROY_ITEM_CLIENT to Perl/Lua. ([#2871](https://github.com/EQEmu/Server/pull/2871)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-02-13
+* Add EVENT_DROP_ITEM_CLIENT to Perl/Lua ([#2869](https://github.com/EQEmu/Server/pull/2869)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-02-13
+* Add Recipe-based methods to Perl/Lua. ([#2844](https://github.com/EQEmu/Server/pull/2844)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-02-08
+* Export $door to EVENT_CLICKDOOR in Perl ([#2861](https://github.com/EQEmu/Server/pull/2861)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-02-11
+* Export $hate_entity to EVENT_HATE_LIST in Perl ([#2885](https://github.com/EQEmu/Server/pull/2885)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-02-13
+* Export $item and $augment to augment events in Perl ([#2895](https://github.com/EQEmu/Server/pull/2895)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-02-13
+* Export $item and $corpse to EVENT_LOOT and EVENT_LOOT_ZONE in Perl ([#2878](https://github.com/EQEmu/Server/pull/2878)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-02-13
+* Export $item to Client/Bot Equip Events in Perl ([#2860](https://github.com/EQEmu/Server/pull/2860)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-02-11
+* Export $item to EVENT_DISCOVER_ITEM in Perl ([#2863](https://github.com/EQEmu/Server/pull/2863)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-02-11
+* Export $item to EVENT_PLAYER_PICKUP in Perl. ([#2875](https://github.com/EQEmu/Server/pull/2875)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-02-13
+* Export $item to Fishing and Forage Events in Perl ([#2876](https://github.com/EQEmu/Server/pull/2876)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-02-13
+* Export $killed_npc to EVENT_NPC_SLAY to Perl ([#2879](https://github.com/EQEmu/Server/pull/2879)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-02-13
+* Export $object to EVENT_CLICK_OBJECT in Perl ([#2862](https://github.com/EQEmu/Server/pull/2862)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-02-11
+* Export $spawned to EVENT_SPAWN_ZONE in Perl ([#2877](https://github.com/EQEmu/Server/pull/2877)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-02-13
+* Export target to EVENT_TARGET_CHANGE in Perl/Lua. ([#2870](https://github.com/EQEmu/Server/pull/2870)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-02-13
+* Export targets to EVENT_CONSIDER and EVENT_CONSIDER_CORPSE ([#2908](https://github.com/EQEmu/Server/pull/2908)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-02-13
 * Fix SetSimpleRoamBox in Perl to have optional params again ([#2935](https://github.com/EQEmu/Server/pull/2935)) ([Akkadius](https://github.com/Akkadius)) 2023-02-15
 
 ### Rules
