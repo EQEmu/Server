@@ -2453,7 +2453,6 @@ void Bot::AI_Process()
 	Client* bot_owner = (GetBotOwner() && GetBotOwner()->IsClient() ? GetBotOwner()->CastToClient() : nullptr);
 	Group* bot_group = GetGroup();
 
-//#pragma region PRIMARY AI SKIP CHECKS
 
 	// Primary reasons for not processing AI
 	if (!bot_owner || !bot_group || !IsAIControlled()) {
