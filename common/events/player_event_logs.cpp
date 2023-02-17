@@ -693,7 +693,7 @@ void PlayerEventLogs::SetSettingsDefaults()
 	m_settings[PlayerEvent::BANDOLIER_SWAP].event_enabled     = 0;
 	m_settings[PlayerEvent::DISCOVER_ITEM].event_enabled      = 1;
 	m_settings[PlayerEvent::POSSIBLE_HACK].event_enabled      = 1;
-	m_settings[PlayerEvent::KILLED_NPC].event_enabled         = 1;
+	m_settings[PlayerEvent::KILLED_NPC].event_enabled         = 0;
 	m_settings[PlayerEvent::KILLED_NAMED_NPC].event_enabled   = 1;
 	m_settings[PlayerEvent::KILLED_RAID_NPC].event_enabled    = 1;
 
