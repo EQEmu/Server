@@ -963,7 +963,7 @@ bool BotDatabase::SaveTimers(Bot* bot_inst)
 			continue;
 
 		query = fmt::format(
-				"REPLACE INTO `bot_timers` (`bot_id`, `timer_id`, `timer_value`) VALUES ('%u', '%u', '%u')",
+				"REPLACE INTO `bot_timers` (`bot_id`, `timer_id`, `timer_value`) VALUES ('{}', '{}', '{}')",
 				bot_inst->GetBotID(), (timer_index + 1), bot_timers[timer_index]
 		);
 		auto results = database.QueryDatabase(query);
