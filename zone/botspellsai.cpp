@@ -262,7 +262,7 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 
 					uint32 TempDontHealMeBeforeTime = tar->DontHealMeBefore();
 
-					if (IsValidSpellRange(botSpell.SpellId, tar)) {
+					if (IsValidSpellRange(botSpell.SpellId, tar) || botClass == BARD) {
 						castedSpell = AIDoSpellCast(botSpell.SpellIndex, tar, botSpell.ManaCost, &TempDontHealMeBeforeTime);
 					}
 
@@ -460,9 +460,7 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 
 						uint32 TempDontBuffMeBefore = tar->DontBuffMeBefore();
 
-						if (IsValidSpellRange(selectedBotSpell.SpellId, tar)) {
-							castedSpell = AIDoSpellCast(selectedBotSpell.SpellIndex, tar, selectedBotSpell.ManaCost, &TempDontBuffMeBefore);
-						}
+						castedSpell = AIDoSpellCast(selectedBotSpell.SpellIndex, tar, selectedBotSpell.ManaCost, &TempDontBuffMeBefore);
 
 						if (TempDontBuffMeBefore != tar->DontBuffMeBefore())
 							tar->SetDontBuffMeBefore(TempDontBuffMeBefore);
@@ -497,7 +495,7 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 					tar = this; //target self for invul type spells
 				}
 
-				if (IsValidSpellRange(botSpell.SpellId, tar)) {
+				if (IsValidSpellRange(botSpell.SpellId, tar) || botClass == BARD) {
 					castedSpell = AIDoSpellCast(botSpell.SpellIndex, tar, botSpell.ManaCost);
 				}
 			}
@@ -584,11 +582,9 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 					}
 				}
 
-				if (!IsValidSpellRange(botSpell.SpellId, tar)) {
-					break;
+				if (IsValidSpellRange(botSpell.SpellId, tar)) {
+					castedSpell = AIDoSpellCast(botSpell.SpellIndex, tar, botSpell.ManaCost);
 				}
-
-				castedSpell = AIDoSpellCast(botSpell.SpellIndex, tar, botSpell.ManaCost);
 			}
 			break;
 		}
@@ -652,9 +648,7 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 				if (botSpell.SpellId == 0)
 					break;
 
-				if (IsValidSpellRange(botSpell.SpellId, tar)) {
-					castedSpell = AIDoSpellCast(botSpell.SpellIndex, tar, botSpell.ManaCost);
-				}
+				castedSpell = AIDoSpellCast(botSpell.SpellIndex, tar, botSpell.ManaCost);
 			}
 			break;
 		}
@@ -786,9 +780,7 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 
 					if (CheckSpellRecastTimers(this, itr->SpellIndex)) {
 						uint32 TempDontBuffMeBefore = tar->DontBuffMeBefore();
-						if (IsValidSpellRange(selectedBotSpell.SpellId, tar)) {
-							castedSpell = AIDoSpellCast(selectedBotSpell.SpellIndex, tar, selectedBotSpell.ManaCost, &TempDontBuffMeBefore);
-						}
+						castedSpell = AIDoSpellCast(selectedBotSpell.SpellIndex, tar, selectedBotSpell.ManaCost, &TempDontBuffMeBefore);
 						if (TempDontBuffMeBefore != tar->DontBuffMeBefore())
 							tar->SetDontBuffMeBefore(TempDontBuffMeBefore);
 					}
@@ -880,9 +872,7 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 
 							uint32 TempDontDotMeBefore = tar->DontDotMeBefore();
 
-							if (IsValidSpellRange(botSpell.SpellId, tar)) {
 								castedSpell = AIDoSpellCast(selectedBotSpell.SpellIndex, tar, selectedBotSpell.ManaCost, &TempDontDotMeBefore);
-							}
 
 							if (TempDontDotMeBefore != tar->DontDotMeBefore())
 								tar->SetDontDotMeBefore(TempDontDotMeBefore);
@@ -1040,9 +1030,7 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 
 				uint32 TempDontCureMeBeforeTime = tar->DontCureMeBefore();
 
-				if (IsValidSpellRange(botSpell.SpellId, tar)) {
 					castedSpell = AIDoSpellCast(botSpell.SpellIndex, tar, botSpell.ManaCost, &TempDontCureMeBeforeTime);
-				}
 
 				if (castedSpell) {
 					if (botClass != BARD) {
@@ -1134,9 +1122,7 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 				if (tar->CanBuffStack(iter.SpellId, botLevel, true) < 0)
 					continue;
 
-				if (IsValidSpellRange(botSpell.SpellId, tar)) {
 					castedSpell = AIDoSpellCast(iter.SpellIndex, tar, iter.ManaCost);
-				}
 				if (castedSpell)
 					break;
 			}
@@ -1168,9 +1154,7 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 				if (tar->CanBuffStack(iter.SpellId, botLevel, true) < 0)
 					continue;
 
-				if (IsValidSpellRange(botSpell.SpellId, tar)) {
 					castedSpell = AIDoSpellCast(iter.SpellIndex, tar, iter.ManaCost);
-				}
 				if (castedSpell)
 					break;
 			}
@@ -1806,8 +1790,9 @@ bool Bot::AIHealRotation(Mob* tar, bool useFastHeals) {
 		return false;
 
 	uint32 TempDontHealMeBeforeTime = tar->DontHealMeBefore();
-
-	castedSpell = AIDoSpellCast(botSpell.SpellIndex, tar, botSpell.ManaCost, &TempDontHealMeBeforeTime);
+	if (IsValidSpellRange(botSpell.SpellId, tar)) {
+		castedSpell = AIDoSpellCast(botSpell.SpellIndex, tar, botSpell.ManaCost, &TempDontHealMeBeforeTime);
+	}
 
 	if (castedSpell) {
 		BotGroupSay(
@@ -3506,7 +3491,7 @@ bool Bot::IsValidSpellRange(uint16 spell_id, Mob const* tar) {
 
 	if (tar) {
 		int spellrange = .8 * (GetActSpellRange(spell_id, spells[spell_id].range) * GetActSpellRange(spell_id, spells[spell_id].range));
-		if (DistanceSquared(m_Position, tar->GetPosition()) >= spellrange) {
+		if (spellrange >= DistanceSquared(m_Position, tar->GetPosition())) {
 			return true;
 		}
 	}

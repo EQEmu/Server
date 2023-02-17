@@ -3139,11 +3139,11 @@ void Bot::AI_Process()
 				ChangeBotArcherWeapons(IsBotArcher());
 			}
 		}
-
+		bool stop_melee_level = GetLevel() >= GetStopMeleeLevel();
 		if (IsBotArcher() && atArcheryRange) {
 			atCombatRange = true;
 		}
-		else if (caster_distance_max && tar_distance <= caster_distance_max) {
+		else if (caster_distance_max && tar_distance <= caster_distance_max && stop_melee_level) {
 			atCombatRange = true;
 		}
 		else if (tar_distance <= melee_distance) {
