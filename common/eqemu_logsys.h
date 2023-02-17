@@ -136,6 +136,7 @@ namespace Logs {
 		PacketServerToServer,
 		Bugs,
 		QuestErrors,
+		PlayerEvents,
 		MaxCategoryID /* Don't Remove this */
 	};
 
@@ -230,7 +231,8 @@ namespace Logs {
 		"Packet C->S",
 		"Packet S->S",
 		"Bugs",
-		"QuestErrors"
+		"QuestErrors",
+		"PlayerEvents",
 	};
 }
 
