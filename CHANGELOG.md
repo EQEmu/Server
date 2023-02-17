@@ -1,3 +1,24 @@
+## [22.4.1] - 02/17/2023 
+
+### Bots
+
+* Set Taunt to enabled for SK/Paladin Bots by Default. ([#2941](https://github.com/EQEmu/Server/pull/2941)) ([Aeadoin](https://github.com/Aeadoin)) 2023-02-17
+
+### DevTools
+
+* Fix NPC targetting dev tools display window ([#2943](https://github.com/EQEmu/Server/pull/2943)) ([Akkadius](https://github.com/Akkadius)) 2023-02-17
+
+### Fixes
+
+* Issue with AssignRaidToInstance that was using the groups repository instead of raid ([#2947](https://github.com/EQEmu/Server/pull/2947)) ([Akkadius](https://github.com/Akkadius)) 2023-02-17
+* Missing comma in schema list breaking dumps  ([Akkadius](https://github.com/Akkadius)) 2023-02-17
+
+### Player Events
+
+* Fix issue with item instances not being validated properly before accessing causing crashes on handin ([#2945](https://github.com/EQEmu/Server/pull/2945)) ([Akkadius](https://github.com/Akkadius)) 2023-02-17
+* Fix rare out of bound issue when loading event types ([#2946](https://github.com/EQEmu/Server/pull/2946)) ([Akkadius](https://github.com/Akkadius)) 2023-02-17
+* Turn off KILLED_NPC (trash) off by default ([#2948](https://github.com/EQEmu/Server/pull/2948)) ([Akkadius](https://github.com/Akkadius)) 2023-02-17
+
 ## [22.4.0] - 02/17/2023 
 
 ### Bots
