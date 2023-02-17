@@ -553,6 +553,7 @@ void bot_command_attack(Client *c, const Seperator *sep);
 void bot_command_bind_affinity(Client *c, const Seperator *sep);
 void bot_command_bot(Client *c, const Seperator *sep);
 void bot_command_botgroup(Client *c, const Seperator *sep);
+void bot_command_caster_range(Client* c, const Seperator* sep);
 void bot_command_charm(Client *c, const Seperator *sep);
 void bot_command_cure(Client *c, const Seperator *sep);
 void bot_command_defensive(Client *c, const Seperator *sep);

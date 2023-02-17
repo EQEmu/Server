@@ -485,6 +485,8 @@ bool BotDatabase::LoadBot(const uint32 bot_id, Bot*& loaded_bot)
 		loaded_bot->SetBotEnforceSpellSetting((l.enforce_spell_settings ? true : false));
 
 		loaded_bot->SetBotArcherySetting((l.archery_setting ? true : false));
+
+		loaded_bot->SetBotCasterRange(l.caster_range);
 	}
 
 	return true;
@@ -545,6 +547,7 @@ bool BotDatabase::SaveNewBot(Bot* bot_inst, uint32& bot_id)
 	e.expansion_bitmask      = bot_inst->GetExpansionBitmask();
 	e.enforce_spell_settings = bot_inst->GetBotEnforceSpellSetting();
 	e.archery_setting        = bot_inst->IsBotArcher() ? 1 : 0;
+	e.caster_range           = bot_inst->GetBotCasterRange();
 
 	auto b = BotDataRepository::InsertOne(database, e);
 	if (!b.bot_id) {
@@ -3148,6 +3151,27 @@ std::string BotDatabase::GetBotNameByID(const uint32 bot_id)
 	return nullptr;
 }
 
+bool BotDatabase::SaveBotCasterRange(const uint32 owner_id, const uint32 bot_id, const uint32 bot_caster_range_value)
+{
+	if (!owner_id || !bot_id)
+		return false;
+
+	query = StringFormat(
+			"UPDATE `bot_data`"
+			" SET `caster_range` = '%u'"
+			" WHERE `owner_id` = '%u'"
+			" AND `bot_id` = '%u'",
+			bot_caster_range_value,
+			owner_id,
+			bot_id
+	);
+	auto results = database.QueryDatabase(query);
+	if (!results.Success())
+		return false;
+
+	return true;
+}
+
 /* fail::Bot functions   */
 const char* BotDatabase::fail::LoadBotsList() { return "Failed to bots list"; }
 const char* BotDatabase::fail::LoadOwnerID() { return "Failed to load owner ID"; }
@@ -3202,6 +3226,7 @@ const char* BotDatabase::fail::ToggleAllHelmAppearances() { return "Failed to sa
 const char* BotDatabase::fail::SaveFollowDistance() { return "Failed to save follow distance"; }
 const char* BotDatabase::fail::SaveAllFollowDistances() { return "Failed to save all follow distances"; }
 const char* BotDatabase::fail::SaveStopMeleeLevel() { return "Failed to save stop melee level"; }
+const char* BotDatabase::fail::SaveBotCasterRange() { return "Failed to save caster range"; }
 
 /* fail::Bot heal rotation functions   */
 const char* BotDatabase::fail::LoadHealRotationIDByBotID() { return "Failed to load heal rotation ID by bot ID"; }

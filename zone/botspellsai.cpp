@@ -98,8 +98,10 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 				if (!(!addMob->IsImmuneToSpell(botSpell.SpellId, this) && addMob->CanBuffStack(botSpell.SpellId, botLevel, true) >= 0)) {
 					break;
 				}
-				castedSpell = AIDoSpellCast(botSpell.SpellIndex, addMob, botSpell.ManaCost);
 
+				if (IsValidSpellRange(botSpell.SpellId, addMob)) {
+					castedSpell = AIDoSpellCast(botSpell.SpellIndex, addMob, botSpell.ManaCost);
+				}
 				if (castedSpell) {
 					BotGroupSay(
 						this,
@@ -260,7 +262,9 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 
 					uint32 TempDontHealMeBeforeTime = tar->DontHealMeBefore();
 
-					castedSpell = AIDoSpellCast(botSpell.SpellIndex, tar, botSpell.ManaCost, &TempDontHealMeBeforeTime);
+					if (IsValidSpellRange(botSpell.SpellId, tar)) {
+						castedSpell = AIDoSpellCast(botSpell.SpellIndex, tar, botSpell.ManaCost, &TempDontHealMeBeforeTime);
+					}
 
 					if (castedSpell) {
 						/*if (TempDontHealMeBeforeTime != tar->DontHealMeBefore())
@@ -340,7 +344,9 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 				}
 				uint32 TempDontRootMeBefore = tar->DontRootMeBefore();
 
-				castedSpell = AIDoSpellCast(botSpell.SpellIndex, tar, botSpell.ManaCost, &TempDontRootMeBefore);
+				if (IsValidSpellRange(botSpell.SpellId, tar)) {
+					castedSpell = AIDoSpellCast(botSpell.SpellIndex, tar, botSpell.ManaCost, &TempDontRootMeBefore);
+				}
 
 				if (TempDontRootMeBefore != tar->DontRootMeBefore()) {
 					tar->SetDontRootMeBefore(TempDontRootMeBefore);
@@ -454,7 +460,9 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 
 						uint32 TempDontBuffMeBefore = tar->DontBuffMeBefore();
 
-						castedSpell = AIDoSpellCast(selectedBotSpell.SpellIndex, tar, selectedBotSpell.ManaCost, &TempDontBuffMeBefore);
+						if (IsValidSpellRange(selectedBotSpell.SpellId, tar)) {
+							castedSpell = AIDoSpellCast(selectedBotSpell.SpellIndex, tar, selectedBotSpell.ManaCost, &TempDontBuffMeBefore);
+						}
 
 						if (TempDontBuffMeBefore != tar->DontBuffMeBefore())
 							tar->SetDontBuffMeBefore(TempDontBuffMeBefore);
@@ -488,7 +496,10 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 				if (IsInvulnerabilitySpell(botSpell.SpellId)) {
 					tar = this; //target self for invul type spells
 				}
-				castedSpell = AIDoSpellCast(botSpell.SpellIndex, tar, botSpell.ManaCost);
+
+				if (IsValidSpellRange(botSpell.SpellId, tar)) {
+					castedSpell = AIDoSpellCast(botSpell.SpellIndex, tar, botSpell.ManaCost);
+				}
 			}
 			break;
 		}
@@ -573,6 +584,10 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 					}
 				}
 
+				if (!IsValidSpellRange(botSpell.SpellId, tar)) {
+					break;
+				}
+
 				castedSpell = AIDoSpellCast(botSpell.SpellIndex, tar, botSpell.ManaCost);
 			}
 			break;
@@ -594,7 +609,9 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 				// TODO: Check target to see if there is anything to dispel
 
 				if (tar->CountDispellableBuffs() > 0) {
-					castedSpell = AIDoSpellCast(botSpell.SpellIndex, tar, botSpell.ManaCost);
+					if (IsValidSpellRange(botSpell.SpellId, tar)) {
+						castedSpell = AIDoSpellCast(botSpell.SpellIndex, tar, botSpell.ManaCost);
+					}
 				}
 			}
 			break;
@@ -635,7 +652,9 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 				if (botSpell.SpellId == 0)
 					break;
 
-				castedSpell = AIDoSpellCast(botSpell.SpellIndex, tar, botSpell.ManaCost);
+				if (IsValidSpellRange(botSpell.SpellId, tar)) {
+					castedSpell = AIDoSpellCast(botSpell.SpellIndex, tar, botSpell.ManaCost);
+				}
 			}
 			break;
 		}
@@ -767,8 +786,9 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 
 					if (CheckSpellRecastTimers(this, itr->SpellIndex)) {
 						uint32 TempDontBuffMeBefore = tar->DontBuffMeBefore();
-						castedSpell = AIDoSpellCast(selectedBotSpell.SpellIndex, tar, selectedBotSpell.ManaCost, &TempDontBuffMeBefore);
-
+						if (IsValidSpellRange(selectedBotSpell.SpellId, tar)) {
+							castedSpell = AIDoSpellCast(selectedBotSpell.SpellIndex, tar, selectedBotSpell.ManaCost, &TempDontBuffMeBefore);
+						}
 						if (TempDontBuffMeBefore != tar->DontBuffMeBefore())
 							tar->SetDontBuffMeBefore(TempDontBuffMeBefore);
 					}
@@ -797,7 +817,9 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 				if (!(!tar->IsImmuneToSpell(botSpell.SpellId, this) && (tar->CanBuffStack(botSpell.SpellId, botLevel, true) >= 0)))
 					break;
 
-				castedSpell = AIDoSpellCast(botSpell.SpellIndex, tar, botSpell.ManaCost);
+				if (IsValidSpellRange(botSpell.SpellId, tar)) {
+					castedSpell = AIDoSpellCast(botSpell.SpellIndex, tar, botSpell.ManaCost);
+				}
 			}
 			break;
 		}
@@ -820,7 +842,9 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 
 					uint32 TempDontSnareMeBefore = tar->DontSnareMeBefore();
 
+				if (IsValidSpellRange(botSpell.SpellId, tar)) {
 					castedSpell = AIDoSpellCast(botSpell.SpellIndex, tar, botSpell.ManaCost, &TempDontSnareMeBefore);
+				}
 
 					if (TempDontSnareMeBefore != tar->DontSnareMeBefore())
 						tar->SetDontSnareMeBefore(TempDontSnareMeBefore);
@@ -856,7 +880,9 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 
 							uint32 TempDontDotMeBefore = tar->DontDotMeBefore();
 
-							castedSpell = AIDoSpellCast(selectedBotSpell.SpellIndex, tar, selectedBotSpell.ManaCost, &TempDontDotMeBefore);
+							if (IsValidSpellRange(botSpell.SpellId, tar)) {
+								castedSpell = AIDoSpellCast(selectedBotSpell.SpellIndex, tar, selectedBotSpell.ManaCost, &TempDontDotMeBefore);
+							}
 
 							if (TempDontDotMeBefore != tar->DontDotMeBefore())
 								tar->SetDontDotMeBefore(TempDontDotMeBefore);
@@ -888,7 +914,9 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 
 							uint32 TempDontDotMeBefore = tar->DontDotMeBefore();
 
-							castedSpell = AIDoSpellCast(selectedBotSpell.SpellIndex, tar, selectedBotSpell.ManaCost, &TempDontDotMeBefore);
+							if (IsValidSpellRange(botSpell.SpellId, tar)) {
+								castedSpell = AIDoSpellCast(selectedBotSpell.SpellIndex, tar, selectedBotSpell.ManaCost, &TempDontDotMeBefore);
+							}
 
 							if (TempDontDotMeBefore != tar->DontDotMeBefore())
 								tar->SetDontDotMeBefore(TempDontDotMeBefore);
@@ -929,7 +957,9 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 							if (tar->CanBuffStack(iter.SpellId, botLevel, true) < 0)
 								continue;
 
-							castedSpell = AIDoSpellCast(iter.SpellIndex, tar, iter.ManaCost);
+							if (IsValidSpellRange(botSpell.SpellId, tar)) {
+								castedSpell = AIDoSpellCast(iter.SpellIndex, tar, iter.ManaCost);
+							}
 							if (castedSpell)
 								break;
 						}
@@ -956,7 +986,9 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 				if (!(!tar->IsImmuneToSpell(botSpell.SpellId, this) && tar->CanBuffStack(botSpell.SpellId, botLevel, true) >= 0))
 					break;
 
-				castedSpell = AIDoSpellCast(botSpell.SpellIndex, tar, botSpell.ManaCost);
+				if (IsValidSpellRange(botSpell.SpellId, tar)) {
+					castedSpell = AIDoSpellCast(botSpell.SpellIndex, tar, botSpell.ManaCost);
+				}
 
 				if (castedSpell && GetClass() != BARD) {
 					BotGroupSay(
@@ -992,7 +1024,9 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 				if (!(!tar->IsImmuneToSpell(botSpell.SpellId, this) && (tar->CanBuffStack(botSpell.SpellId, botLevel, true) >= 0)))
 					break;
 
-				castedSpell = AIDoSpellCast(botSpell.SpellIndex, tar, botSpell.ManaCost);
+				if (IsValidSpellRange(botSpell.SpellId, tar)) {
+					castedSpell = AIDoSpellCast(botSpell.SpellIndex, tar, botSpell.ManaCost);
+				}
 			}
 			break;
 		}
@@ -1006,7 +1040,9 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 
 				uint32 TempDontCureMeBeforeTime = tar->DontCureMeBefore();
 
-				castedSpell = AIDoSpellCast(botSpell.SpellIndex, tar, botSpell.ManaCost, &TempDontCureMeBeforeTime);
+				if (IsValidSpellRange(botSpell.SpellId, tar)) {
+					castedSpell = AIDoSpellCast(botSpell.SpellIndex, tar, botSpell.ManaCost, &TempDontCureMeBeforeTime);
+				}
 
 				if (castedSpell) {
 					if (botClass != BARD) {
@@ -1054,7 +1090,9 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 					if (tar->CanBuffStack(iter.SpellId, botLevel, true) < 0)
 						continue;
 
-					castedSpell = AIDoSpellCast(iter.SpellIndex, tar, iter.ManaCost);
+					if (IsValidSpellRange(botSpell.SpellId, tar)) {
+						castedSpell = AIDoSpellCast(iter.SpellIndex, tar, iter.ManaCost);
+					}
 					if (castedSpell) {
 						BotGroupSay(
 							this,
@@ -1096,7 +1134,9 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 				if (tar->CanBuffStack(iter.SpellId, botLevel, true) < 0)
 					continue;
 
-				castedSpell = AIDoSpellCast(iter.SpellIndex, tar, iter.ManaCost);
+				if (IsValidSpellRange(botSpell.SpellId, tar)) {
+					castedSpell = AIDoSpellCast(iter.SpellIndex, tar, iter.ManaCost);
+				}
 				if (castedSpell)
 					break;
 			}
@@ -1128,7 +1168,9 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 				if (tar->CanBuffStack(iter.SpellId, botLevel, true) < 0)
 					continue;
 
-				castedSpell = AIDoSpellCast(iter.SpellIndex, tar, iter.ManaCost);
+				if (IsValidSpellRange(botSpell.SpellId, tar)) {
+					castedSpell = AIDoSpellCast(iter.SpellIndex, tar, iter.ManaCost);
+				}
 				if (castedSpell)
 					break;
 			}
@@ -3454,5 +3496,19 @@ bool Bot::HasBotSpellEntry(uint16 spellid) {
 		}
 	}
 
+	return false;
+}
+
+bool Bot::IsValidSpellRange(uint16 spell_id, Mob const* tar) {
+	if (!IsValidSpell(spell_id)) {
+		return false;
+	}
+
+	if (tar) {
+		int spellrange = .8 * (GetActSpellRange(spell_id, spells[spell_id].range) * GetActSpellRange(spell_id, spells[spell_id].range));
+		if (DistanceSquared(m_Position, tar->GetPosition()) >= spellrange) {
+			return true;
+		}
+	}
 	return false;
 }
