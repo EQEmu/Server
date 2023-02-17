@@ -92,7 +92,6 @@ uint32 ZoneDatabase::GetZoneForage(uint32 ZoneID, uint8 skill) {
 
 		item[index]   = atoi(row[0]);
 		chance[index] = atoi(row[1]) + chancepool;
-		LogError("Possible Forage: [{}] with a [{}] chance", item[index], chance[index]);
 		chancepool = chance[index];
 	}
 

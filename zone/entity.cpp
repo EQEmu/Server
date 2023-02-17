@@ -552,12 +552,10 @@ void EntityList::MobProcess()
 #endif
 				Group *g = GetGroupByMob(mob);
 				if(g) {
-					LogError("About to delete a client still in a group");
 					g->DelMember(mob);
 				}
 				Raid *r = entity_list.GetRaidByClient(mob->CastToClient());
 				if(r) {
-					LogError("About to delete a client still in a raid");
 					r->MemberZoned(mob->CastToClient());
 				}
 				entity_list.RemoveClient(id);
