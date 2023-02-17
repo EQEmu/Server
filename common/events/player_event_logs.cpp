@@ -30,6 +30,9 @@ void PlayerEventLogs::Init()
 	std::vector<int> db{};
 	db.reserve(s.size());
 	for (auto &e: s) {
+		if (e.id >= PlayerEvent::MAX) {
+			continue;
+		}
 		m_settings[e.id] = e;
 		db.emplace_back(e.id);
 	}
