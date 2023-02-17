@@ -2468,9 +2468,10 @@ void Bot::AI_Process()
 	}
 
 	// We also need a leash owner and follow mob (subset of primary AI criteria)
+	auto group_leader = bot_group->GetLeader();
 	Client* leash_owner = nullptr;
-	if (bot_group->GetLeader() && bot_group->GetLeader()->IsClient()) {
-		leash_owner = bot_group->GetLeader()->CastToClient();
+	if (group_leader && group_leader->IsClient()) {
+		leash_owner = group_leader->CastToClient();
 	}
 	else {
 		leash_owner = bot_owner;
