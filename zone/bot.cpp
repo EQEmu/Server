@@ -2469,12 +2469,17 @@ void Bot::AI_Process()
 	}
 
 	// We also need a leash owner and follow mob (subset of primary AI criteria)
-	Client* leash_owner = (bot_group->GetLeader() && bot_group->GetLeader()->IsClient() ? bot_group->GetLeader()->CastToClient() : bot_owner);
+	Client* leash_owner = nullptr;
+	if (bot_group->GetLeader() && bot_group->GetLeader()->IsClient()) {
+		leash_owner = bot_group->GetLeader()->CastToClient();
+	}
+	else {
+		leash_owner = bot_owner;
+	}
+
 	if (!leash_owner) {
 		return;
 	}
-
-//#pragma endregion
 
 	Mob* follow_mob = entity_list.GetMob(GetFollowID());
 	if (!follow_mob) {
