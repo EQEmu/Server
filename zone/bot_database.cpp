@@ -3153,21 +3153,24 @@ std::string BotDatabase::GetBotNameByID(const uint32 bot_id)
 
 bool BotDatabase::SaveBotCasterRange(const uint32 owner_id, const uint32 bot_id, const uint32 bot_caster_range_value)
 {
-	if (!owner_id || !bot_id)
+	if (!owner_id || !bot_id) {
 		return false;
+		}
 
-	query = StringFormat(
+	query = fmt::format(
 			"UPDATE `bot_data`"
-			" SET `caster_range` = '%u'"
-			" WHERE `owner_id` = '%u'"
-			" AND `bot_id` = '%u'",
+			" SET `caster_range` = '{}'"
+			" WHERE `owner_id` = '{}'"
+			" AND `bot_id` = '{}'",
 			bot_caster_range_value,
 			owner_id,
 			bot_id
 	);
 	auto results = database.QueryDatabase(query);
-	if (!results.Success())
+
+	if (!results.Success()) {
 		return false;
+		}
 
 	return true;
 }

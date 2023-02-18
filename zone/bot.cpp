@@ -9816,23 +9816,15 @@ float Bot::GetBotCasterMaxRange(float melee_distance_max) {// Calculate caster d
 	float caster_distance_max = 0.0f;
 	float caster_distance_min = 0.0f;
 	float caster_distance = 0.0f;
-	{
-		if (!GetBotCasterRange()) {
-			if (GetLevel() >= GetStopMeleeLevel() && GetClass() >= WARRIOR && GetClass() <= BERSERKER) {
-				caster_distance_max = MAX_CASTER_DISTANCE[GetClass() - 1];
-			}
-		}
-		else {
-			caster_distance_max = GetBotCasterRange() * GetBotCasterRange();
-		}
-		if (caster_distance_max) {
 
-			caster_distance_min = melee_distance_max;
-			if (caster_distance_max <= caster_distance_min) {
-				caster_distance_max = caster_distance_min * 1.25f;
-			}
-
-			caster_distance = ((caster_distance_max + caster_distance_min) / 2);
+	caster_distance_max = GetBotCasterRange() * GetBotCasterRange();
+	if (!GetBotCasterRange() && GetLevel() >= GetStopMeleeLevel() && GetClass() >= WARRIOR && GetClass() <= BERSERKER) {
+		caster_distance_max = MAX_CASTER_DISTANCE[GetClass() - 1];
+	}
+	if (caster_distance_max) {
+		caster_distance_min = melee_distance_max;
+		if (caster_distance_max <= caster_distance_min) {
+			caster_distance_max = caster_distance_min * 1.25f;
 		}
 	}
 	return caster_distance_max;
