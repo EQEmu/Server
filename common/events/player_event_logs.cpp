@@ -5,7 +5,6 @@
 #include "../rulesys.h"
 
 const uint32 PROCESS_RETENTION_TRUNCATION_TIMER_INTERVAL = 60 * 60 * 1000; // 1 hour
-const uint32 MAX_BATCH_QUEUE_FLUSH_SIZE = 10000;
 
 // general initialization routine
 void PlayerEventLogs::Init()
@@ -141,7 +140,7 @@ void PlayerEventLogs::AddToQueue(const PlayerEventLogsRepository::PlayerEventLog
 	m_record_batch_queue.emplace_back(log);
 	m_batch_queue_lock.unlock();
 
-	if (m_record_batch_queue.size() >= MAX_BATCH_QUEUE_FLUSH_SIZE) {
+	if (m_record_batch_queue.size() >= RuleI(Logging, BatchPlayerEventProcessChunkSize)) {
 		ProcessBatchQueue();
 	}
 }
