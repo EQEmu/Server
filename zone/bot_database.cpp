@@ -962,7 +962,10 @@ bool BotDatabase::SaveTimers(Bot* bot_inst)
 		if (bot_timers[timer_index] <= Timer::GetCurrentTime())
 			continue;
 
-		query = StringFormat("INSERT INTO `bot_timers` (`bot_id`, `timer_id`, `timer_value`) VALUES ('%u', '%u', '%u')", bot_inst->GetBotID(), (timer_index + 1), bot_timers[timer_index]);
+		query = fmt::format(
+				"REPLACE INTO `bot_timers` (`bot_id`, `timer_id`, `timer_value`) VALUES ('{}', '{}', '{}')",
+				bot_inst->GetBotID(), (timer_index + 1), bot_timers[timer_index]
+		);
 		auto results = database.QueryDatabase(query);
 		if (!results.Success()) {
 			DeleteTimers(bot_inst->GetBotID());
