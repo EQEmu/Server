@@ -121,7 +121,7 @@ void PlayerEventLogs::ProcessBatchQueue()
 
 	// flush many
 	PlayerEventLogsRepository::InsertMany(*m_database, m_record_batch_queue);
-	LogInfo(
+	LogPlayerEventsDetail(
 		"Processing batch player event log queue of [{}] took [{}]",
 		m_record_batch_queue.size(),
 		benchmark.elapsed()
