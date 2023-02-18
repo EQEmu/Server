@@ -3155,7 +3155,7 @@ bool BotDatabase::SaveBotCasterRange(const uint32 owner_id, const uint32 bot_id,
 {
 	if (!owner_id || !bot_id) {
 		return false;
-		}
+	}
 
 	query = fmt::format(
 			"UPDATE `bot_data`"
@@ -3170,7 +3170,7 @@ bool BotDatabase::SaveBotCasterRange(const uint32 owner_id, const uint32 bot_id,
 
 	if (!results.Success()) {
 		return false;
-		}
+	}
 
 	return true;
 }
