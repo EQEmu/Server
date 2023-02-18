@@ -1455,6 +1455,10 @@ void Raid::SendRaidMOTD(Client *c)
 	if (!c || motd.empty())
 		return;
 
+	if (members[GetPlayerIndex(c)].IsBot) {
+		return;
+	}
+
 	size_t size = motd.size() + 1;
 	auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidMOTD_Struct) + size);
 	RaidMOTD_Struct *rmotd = (RaidMOTD_Struct *)outapp->pBuffer;
