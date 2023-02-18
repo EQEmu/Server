@@ -471,6 +471,9 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 	// Check if Combine would result in Lore conflict
 	for (const auto& e : spec.onsuccess) {
 		auto success_item_inst = database.GetItem(e.first);
+		if (success_item_inst->LoreGroup > 0) {
+			continue;
+		}
 		if (user->CheckLoreConflict(success_item_inst)) {
 			EQ::SayLinkEngine linker;
 			linker.SetLinkType(EQ::saylink::SayLinkItemData);
