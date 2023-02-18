@@ -9490,7 +9490,7 @@ void Bot::ListBotSpells(uint8 min_level)
 	auto spell_count = 0;
 	auto spell_number = 1;
 
-	for (const auto& s : (AIBot_spells.size() > AIBot_spells_enforced.size()) ? AIBot_spells : AIBot_spells_enforced) {
+	for (const auto& s : (GetBotEnforceSpellSetting()) ? AIBot_spells_enforced : AIBot_spells) {
 		auto b = bot_spell_settings.find(s.spellid);
 		if (b == bot_spell_settings.end() && s.minlevel >= min_level) {
 			bot_owner->Message(
