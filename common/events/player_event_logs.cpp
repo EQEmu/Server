@@ -139,6 +139,10 @@ void PlayerEventLogs::AddToQueue(const PlayerEventLogsRepository::PlayerEventLog
 	m_batch_queue_lock.lock();
 	m_record_batch_queue.emplace_back(log);
 	m_batch_queue_lock.unlock();
+
+	if (m_record_batch_queue.size() >= RuleI(Logging, BatchPlayerEventProcessChunkSize)) {
+		ProcessBatchQueue();
+	}
 }
 
 // fills common event data in the SendEvent function
