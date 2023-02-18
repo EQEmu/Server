@@ -1,3 +1,25 @@
+## [22.4.2] - 02/18/2023 
+
+### Content
+
+* Added optional SQL 2023_02_17_fix_sseru_mischief_doors.sql to fix sseru/mischief doors ([#2955](https://github.com/EQEmu/Server/pull/2955)) ([Akkadius](https://github.com/Akkadius)) 2023-02-18
+
+### Logging
+
+* Remove noisy raid/group/forage errors ([#2952](https://github.com/EQEmu/Server/pull/2952)) ([Akkadius](https://github.com/Akkadius)) 2023-02-18
+
+### MySQL
+
+* Add keepalives to UCS and Loginserver ([#2953](https://github.com/EQEmu/Server/pull/2953)) ([Akkadius](https://github.com/Akkadius)) 2023-02-18
+
+### Player Events
+
+* Add logging category to hold processing batch logs ([#2954](https://github.com/EQEmu/Server/pull/2954)) ([Akkadius](https://github.com/Akkadius)) 2023-02-18
+
+### Tradeskills
+
+* Fix regression caused by #2932 ([#2956](https://github.com/EQEmu/Server/pull/2956)) ([Aeadoin](https://github.com/Aeadoin)) 2023-02-18
+
 ## [22.4.1] - 02/17/2023 
 
 ### Bots
