@@ -699,6 +699,7 @@ void PlayerEventLogs::SetSettingsDefaults()
 	m_settings[PlayerEvent::KILLED_NPC].event_enabled         = 0;
 	m_settings[PlayerEvent::KILLED_NAMED_NPC].event_enabled   = 1;
 	m_settings[PlayerEvent::KILLED_RAID_NPC].event_enabled    = 1;
+	m_settings[PlayerEvent::ITEM_CREATION].event_enabled      = 1;
 
 	for (int i = PlayerEvent::GM_COMMAND; i != PlayerEvent::MAX; i++) {
 		m_settings[i].retention_days = RETENTION_DAYS_DEFAULT;

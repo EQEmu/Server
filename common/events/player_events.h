@@ -55,6 +55,7 @@ namespace PlayerEvent {
 		KILLED_NPC,
 		KILLED_NAMED_NPC,
 		KILLED_RAID_NPC,
+		ITEM_CREATION,
 		MAX // dont remove
 	};
 
@@ -110,7 +111,8 @@ namespace PlayerEvent {
 		"Possible Hack",
 		"Killed NPC",
 		"Killed Named NPC",
-		"Killed Raid NPC"
+		"Killed Raid NPC",
+		"Item Creation"
 	};
 
 	// Generic struct used by all events
@@ -180,6 +182,40 @@ namespace PlayerEvent {
 		{
 			ar(
 				CEREAL_NVP(noop)
+			);
+		}
+	};
+
+	// used in Trade event
+	struct ItemCreationEvent {
+		int64       item_id;
+		std::string item_name;
+		uint16      to_slot;
+		int16       charges;
+		uint32      aug1;
+		uint32      aug2;
+		uint32      aug3;
+		uint32      aug4;
+		uint32      aug5;
+		uint32      aug6;
+		bool        attuned;
+
+		// cereal
+		template<class Archive>
+		void serialize(Archive &ar)
+		{
+			ar(
+				CEREAL_NVP(item_id),
+				CEREAL_NVP(item_name),
+				CEREAL_NVP(to_slot),
+				CEREAL_NVP(charges),
+				CEREAL_NVP(aug1),
+				CEREAL_NVP(aug2),
+				CEREAL_NVP(aug3),
+				CEREAL_NVP(aug4),
+				CEREAL_NVP(aug5),
+				CEREAL_NVP(aug6),
+				CEREAL_NVP(attuned)
 			);
 		}
 	};
