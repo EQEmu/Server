@@ -4478,23 +4478,19 @@ uint32 Bot::CountBotItem(uint32 item_id) {
 	return item_count;
 }
 
-bool Bot::HasBotItem(uint32 item_id) {
-	bool has_item = false;
-	EQ::ItemInstance *inst = nullptr;
+int16 Bot::HasBotItem(uint32 item_id) {
+	EQ::ItemInstance const *inst = nullptr;
 
 	for (uint16 slot_id = EQ::invslot::EQUIPMENT_BEGIN; slot_id <= EQ::invslot::EQUIPMENT_END; ++slot_id) {
 		inst = GetBotItem(slot_id);
 		if (!inst || !inst->GetItem()) {
 			continue;
 		}
-
 		if (inst->GetID() == item_id) {
-			has_item = true;
-			break;
+			return slot_id;
 		}
 	}
-
-	return has_item;
+	return INVALID_INDEX;
 }
 
 void Bot::RemoveBotItem(uint32 item_id) {
