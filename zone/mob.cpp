@@ -2374,14 +2374,14 @@ void Mob::ShowBuffList(Client* client) {
 	}
 }
 
-void Mob::GMMove(float x, float y, float z, float heading) {
+void Mob::GMMove(float x, float y, float z, float heading, bool save_guard_spot) {
 	m_Position.x = x;
 	m_Position.y = y;
 	m_Position.z = z;
 	SetHeading(heading);
 	mMovementManager->SendCommandToClients(this, 0.0, 0.0, 0.0, 0.0, 0, ClientRangeAny);
 
-	if (IsNPC()) {
+	if (IsNPC() && save_guard_spot) {
 		CastToNPC()->SaveGuardSpot(glm::vec4(x, y, z, heading));
 	}
 }
@@ -3714,10 +3714,19 @@ bool Mob::HateSummon() {
 			// probably should be like half melee range, but we can't get melee range nicely because reasons :)
 			new_pos = target->TryMoveAlong(new_pos, 5.0f, angle);
 
-			if (target->IsClient())
+			if (target->IsClient()) {
 				target->CastToClient()->MovePC(zone->GetZoneID(), zone->GetInstanceID(), new_pos.x, new_pos.y, new_pos.z, new_pos.w, 0, SummonPC);
-			else
-				target->GMMove(new_pos.x, new_pos.y, new_pos.z, new_pos.w);
+			}
+			else {
+				bool set_new_guard_spot;
+				bool target_is_client_pet;
+
+				target_is_client_pet = (target->IsPet() &&
+										target->IsPetOwnerClient());
+				set_new_guard_spot = !(IsNPC() && target_is_client_pet);
+				target->GMMove(new_pos.x, new_pos.y, new_pos.z, new_pos.w,
+								set_new_guard_spot);
+			}
 
 			return true;
 		} else if(summon_level == 2) {
