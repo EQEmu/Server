@@ -28,6 +28,7 @@ public:
 	void TransactionBegin();
 	void TransactionCommit();
 	void TransactionRollback();
+	std::string Escape(const std::string& s);
 	uint32 DoEscapeString(char *tobuf, const char *frombuf, uint32 fromlen);
 	void ping();
 	MYSQL *getMySQL() { return &mysql; }
