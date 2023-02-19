@@ -4182,7 +4182,11 @@ void Mob::ExecWeaponProc(const EQ::ItemInstance *inst, uint16 spell_id, Mob *on,
 }
 
 uint32 Mob::GetZoneID() const {
-	return(zone->GetZoneID());
+	return zone->GetZoneID();
+}
+
+uint16 Mob::GetInstanceVersion() const {
+	return zone->GetInstanceVersion();
 }
 
 int Mob::GetHaste()

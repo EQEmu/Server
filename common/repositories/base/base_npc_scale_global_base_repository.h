@@ -16,11 +16,14 @@
 #include "../../strings.h"
 #include <ctime>
 
+
 class BaseNpcScaleGlobalBaseRepository {
 public:
 	struct NpcScaleGlobalBase {
 		int32_t     type;
 		int32_t     level;
+		uint32_t    zone_id;
+		int32_t     instance_version;
 		int32_t     ac;
 		int32_t     hp;
 		int32_t     accuracy;
@@ -59,6 +62,8 @@ public:
 		return {
 			"type",
 			"level",
+			"zone_id",
+			"instance_version",
 			"ac",
 			"hp",
 			"accuracy",
@@ -93,6 +98,8 @@ public:
 		return {
 			"type",
 			"level",
+			"zone_id",
+			"instance_version",
 			"ac",
 			"hp",
 			"accuracy",
@@ -161,6 +168,8 @@ public:
 
 		e.type              = 0;
 		e.level             = 0;
+		e.zone_id           = 0;
+		e.instance_version  = -1;
 		e.ac                = 0;
 		e.hp                = 0;
 		e.accuracy          = 0;
@@ -212,8 +221,9 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				npc_scale_global_base_id
 			)
 		);
@@ -224,32 +234,34 @@ public:
 
 			e.type              = static_cast<int32_t>(atoi(row[0]));
 			e.level             = static_cast<int32_t>(atoi(row[1]));
-			e.ac                = static_cast<int32_t>(atoi(row[2]));
-			e.hp                = static_cast<int32_t>(atoi(row[3]));
-			e.accuracy          = static_cast<int32_t>(atoi(row[4]));
-			e.slow_mitigation   = static_cast<int32_t>(atoi(row[5]));
-			e.attack            = static_cast<int32_t>(atoi(row[6]));
-			e.strength          = static_cast<int32_t>(atoi(row[7]));
-			e.stamina           = static_cast<int32_t>(atoi(row[8]));
-			e.dexterity         = static_cast<int32_t>(atoi(row[9]));
-			e.agility           = static_cast<int32_t>(atoi(row[10]));
-			e.intelligence      = static_cast<int32_t>(atoi(row[11]));
-			e.wisdom            = static_cast<int32_t>(atoi(row[12]));
-			e.charisma          = static_cast<int32_t>(atoi(row[13]));
-			e.magic_resist      = static_cast<int32_t>(atoi(row[14]));
-			e.cold_resist       = static_cast<int32_t>(atoi(row[15]));
-			e.fire_resist       = static_cast<int32_t>(atoi(row[16]));
-			e.poison_resist     = static_cast<int32_t>(atoi(row[17]));
-			e.disease_resist    = static_cast<int32_t>(atoi(row[18]));
-			e.corruption_resist = static_cast<int32_t>(atoi(row[19]));
-			e.physical_resist   = static_cast<int32_t>(atoi(row[20]));
-			e.min_dmg           = static_cast<int32_t>(atoi(row[21]));
-			e.max_dmg           = static_cast<int32_t>(atoi(row[22]));
-			e.hp_regen_rate     = static_cast<int32_t>(atoi(row[23]));
-			e.attack_delay      = static_cast<int32_t>(atoi(row[24]));
-			e.spell_scale       = static_cast<int32_t>(atoi(row[25]));
-			e.heal_scale        = static_cast<int32_t>(atoi(row[26]));
-			e.special_abilities = row[27] ? row[27] : "";
+			e.zone_id           = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.instance_version  = static_cast<int32_t>(atoi(row[3]));
+			e.ac                = static_cast<int32_t>(atoi(row[4]));
+			e.hp                = static_cast<int32_t>(atoi(row[5]));
+			e.accuracy          = static_cast<int32_t>(atoi(row[6]));
+			e.slow_mitigation   = static_cast<int32_t>(atoi(row[7]));
+			e.attack            = static_cast<int32_t>(atoi(row[8]));
+			e.strength          = static_cast<int32_t>(atoi(row[9]));
+			e.stamina           = static_cast<int32_t>(atoi(row[10]));
+			e.dexterity         = static_cast<int32_t>(atoi(row[11]));
+			e.agility           = static_cast<int32_t>(atoi(row[12]));
+			e.intelligence      = static_cast<int32_t>(atoi(row[13]));
+			e.wisdom            = static_cast<int32_t>(atoi(row[14]));
+			e.charisma          = static_cast<int32_t>(atoi(row[15]));
+			e.magic_resist      = static_cast<int32_t>(atoi(row[16]));
+			e.cold_resist       = static_cast<int32_t>(atoi(row[17]));
+			e.fire_resist       = static_cast<int32_t>(atoi(row[18]));
+			e.poison_resist     = static_cast<int32_t>(atoi(row[19]));
+			e.disease_resist    = static_cast<int32_t>(atoi(row[20]));
+			e.corruption_resist = static_cast<int32_t>(atoi(row[21]));
+			e.physical_resist   = static_cast<int32_t>(atoi(row[22]));
+			e.min_dmg           = static_cast<int32_t>(atoi(row[23]));
+			e.max_dmg           = static_cast<int32_t>(atoi(row[24]));
+			e.hp_regen_rate     = static_cast<int32_t>(atoi(row[25]));
+			e.attack_delay      = static_cast<int32_t>(atoi(row[26]));
+			e.spell_scale       = static_cast<int32_t>(atoi(row[27]));
+			e.heal_scale        = static_cast<int32_t>(atoi(row[28]));
+			e.special_abilities = row[29] ? row[29] : "";
 
 			return e;
 		}
@@ -285,32 +297,34 @@ public:
 
 		v.push_back(columns[0] + " = " + std::to_string(e.type));
 		v.push_back(columns[1] + " = " + std::to_string(e.level));
-		v.push_back(columns[2] + " = " + std::to_string(e.ac));
-		v.push_back(columns[3] + " = " + std::to_string(e.hp));
-		v.push_back(columns[4] + " = " + std::to_string(e.accuracy));
-		v.push_back(columns[5] + " = " + std::to_string(e.slow_mitigation));
-		v.push_back(columns[6] + " = " + std::to_string(e.attack));
-		v.push_back(columns[7] + " = " + std::to_string(e.strength));
-		v.push_back(columns[8] + " = " + std::to_string(e.stamina));
-		v.push_back(columns[9] + " = " + std::to_string(e.dexterity));
-		v.push_back(columns[10] + " = " + std::to_string(e.agility));
-		v.push_back(columns[11] + " = " + std::to_string(e.intelligence));
-		v.push_back(columns[12] + " = " + std::to_string(e.wisdom));
-		v.push_back(columns[13] + " = " + std::to_string(e.charisma));
-		v.push_back(columns[14] + " = " + std::to_string(e.magic_resist));
-		v.push_back(columns[15] + " = " + std::to_string(e.cold_resist));
-		v.push_back(columns[16] + " = " + std::to_string(e.fire_resist));
-		v.push_back(columns[17] + " = " + std::to_string(e.poison_resist));
-		v.push_back(columns[18] + " = " + std::to_string(e.disease_resist));
-		v.push_back(columns[19] + " = " + std::to_string(e.corruption_resist));
-		v.push_back(columns[20] + " = " + std::to_string(e.physical_resist));
-		v.push_back(columns[21] + " = " + std::to_string(e.min_dmg));
-		v.push_back(columns[22] + " = " + std::to_string(e.max_dmg));
-		v.push_back(columns[23] + " = " + std::to_string(e.hp_regen_rate));
-		v.push_back(columns[24] + " = " + std::to_string(e.attack_delay));
-		v.push_back(columns[25] + " = " + std::to_string(e.spell_scale));
-		v.push_back(columns[26] + " = " + std::to_string(e.heal_scale));
-		v.push_back(columns[27] + " = '" + Strings::Escape(e.special_abilities) + "'");
+		v.push_back(columns[2] + " = " + std::to_string(e.zone_id));
+		v.push_back(columns[3] + " = " + std::to_string(e.instance_version));
+		v.push_back(columns[4] + " = " + std::to_string(e.ac));
+		v.push_back(columns[5] + " = " + std::to_string(e.hp));
+		v.push_back(columns[6] + " = " + std::to_string(e.accuracy));
+		v.push_back(columns[7] + " = " + std::to_string(e.slow_mitigation));
+		v.push_back(columns[8] + " = " + std::to_string(e.attack));
+		v.push_back(columns[9] + " = " + std::to_string(e.strength));
+		v.push_back(columns[10] + " = " + std::to_string(e.stamina));
+		v.push_back(columns[11] + " = " + std::to_string(e.dexterity));
+		v.push_back(columns[12] + " = " + std::to_string(e.agility));
+		v.push_back(columns[13] + " = " + std::to_string(e.intelligence));
+		v.push_back(columns[14] + " = " + std::to_string(e.wisdom));
+		v.push_back(columns[15] + " = " + std::to_string(e.charisma));
+		v.push_back(columns[16] + " = " + std::to_string(e.magic_resist));
+		v.push_back(columns[17] + " = " + std::to_string(e.cold_resist));
+		v.push_back(columns[18] + " = " + std::to_string(e.fire_resist));
+		v.push_back(columns[19] + " = " + std::to_string(e.poison_resist));
+		v.push_back(columns[20] + " = " + std::to_string(e.disease_resist));
+		v.push_back(columns[21] + " = " + std::to_string(e.corruption_resist));
+		v.push_back(columns[22] + " = " + std::to_string(e.physical_resist));
+		v.push_back(columns[23] + " = " + std::to_string(e.min_dmg));
+		v.push_back(columns[24] + " = " + std::to_string(e.max_dmg));
+		v.push_back(columns[25] + " = " + std::to_string(e.hp_regen_rate));
+		v.push_back(columns[26] + " = " + std::to_string(e.attack_delay));
+		v.push_back(columns[27] + " = " + std::to_string(e.spell_scale));
+		v.push_back(columns[28] + " = " + std::to_string(e.heal_scale));
+		v.push_back(columns[29] + " = '" + Strings::Escape(e.special_abilities) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -334,6 +348,8 @@ public:
 
 		v.push_back(std::to_string(e.type));
 		v.push_back(std::to_string(e.level));
+		v.push_back(std::to_string(e.zone_id));
+		v.push_back(std::to_string(e.instance_version));
 		v.push_back(std::to_string(e.ac));
 		v.push_back(std::to_string(e.hp));
 		v.push_back(std::to_string(e.accuracy));
@@ -391,6 +407,8 @@ public:
 
 			v.push_back(std::to_string(e.type));
 			v.push_back(std::to_string(e.level));
+			v.push_back(std::to_string(e.zone_id));
+			v.push_back(std::to_string(e.instance_version));
 			v.push_back(std::to_string(e.ac));
 			v.push_back(std::to_string(e.hp));
 			v.push_back(std::to_string(e.accuracy));
@@ -452,32 +470,34 @@ public:
 
 			e.type              = static_cast<int32_t>(atoi(row[0]));
 			e.level             = static_cast<int32_t>(atoi(row[1]));
-			e.ac                = static_cast<int32_t>(atoi(row[2]));
-			e.hp                = static_cast<int32_t>(atoi(row[3]));
-			e.accuracy          = static_cast<int32_t>(atoi(row[4]));
-			e.slow_mitigation   = static_cast<int32_t>(atoi(row[5]));
-			e.attack            = static_cast<int32_t>(atoi(row[6]));
-			e.strength          = static_cast<int32_t>(atoi(row[7]));
-			e.stamina           = static_cast<int32_t>(atoi(row[8]));
-			e.dexterity         = static_cast<int32_t>(atoi(row[9]));
-			e.agility           = static_cast<int32_t>(atoi(row[10]));
-			e.intelligence      = static_cast<int32_t>(atoi(row[11]));
-			e.wisdom            = static_cast<int32_t>(atoi(row[12]));
-			e.charisma          = static_cast<int32_t>(atoi(row[13]));
-			e.magic_resist      = static_cast<int32_t>(atoi(row[14]));
-			e.cold_resist       = static_cast<int32_t>(atoi(row[15]));
-			e.fire_resist       = static_cast<int32_t>(atoi(row[16]));
-			e.poison_resist     = static_cast<int32_t>(atoi(row[17]));
-			e.disease_resist    = static_cast<int32_t>(atoi(row[18]));
-			e.corruption_resist = static_cast<int32_t>(atoi(row[19]));
-			e.physical_resist   = static_cast<int32_t>(atoi(row[20]));
-			e.min_dmg           = static_cast<int32_t>(atoi(row[21]));
-			e.max_dmg           = static_cast<int32_t>(atoi(row[22]));
-			e.hp_regen_rate     = static_cast<int32_t>(atoi(row[23]));
-			e.attack_delay      = static_cast<int32_t>(atoi(row[24]));
-			e.spell_scale       = static_cast<int32_t>(atoi(row[25]));
-			e.heal_scale        = static_cast<int32_t>(atoi(row[26]));
-			e.special_abilities = row[27] ? row[27] : "";
+			e.zone_id           = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.instance_version  = static_cast<int32_t>(atoi(row[3]));
+			e.ac                = static_cast<int32_t>(atoi(row[4]));
+			e.hp                = static_cast<int32_t>(atoi(row[5]));
+			e.accuracy          = static_cast<int32_t>(atoi(row[6]));
+			e.slow_mitigation   = static_cast<int32_t>(atoi(row[7]));
+			e.attack            = static_cast<int32_t>(atoi(row[8]));
+			e.strength          = static_cast<int32_t>(atoi(row[9]));
+			e.stamina           = static_cast<int32_t>(atoi(row[10]));
+			e.dexterity         = static_cast<int32_t>(atoi(row[11]));
+			e.agility           = static_cast<int32_t>(atoi(row[12]));
+			e.intelligence      = static_cast<int32_t>(atoi(row[13]));
+			e.wisdom            = static_cast<int32_t>(atoi(row[14]));
+			e.charisma          = static_cast<int32_t>(atoi(row[15]));
+			e.magic_resist      = static_cast<int32_t>(atoi(row[16]));
+			e.cold_resist       = static_cast<int32_t>(atoi(row[17]));
+			e.fire_resist       = static_cast<int32_t>(atoi(row[18]));
+			e.poison_resist     = static_cast<int32_t>(atoi(row[19]));
+			e.disease_resist    = static_cast<int32_t>(atoi(row[20]));
+			e.corruption_resist = static_cast<int32_t>(atoi(row[21]));
+			e.physical_resist   = static_cast<int32_t>(atoi(row[22]));
+			e.min_dmg           = static_cast<int32_t>(atoi(row[23]));
+			e.max_dmg           = static_cast<int32_t>(atoi(row[24]));
+			e.hp_regen_rate     = static_cast<int32_t>(atoi(row[25]));
+			e.attack_delay      = static_cast<int32_t>(atoi(row[26]));
+			e.spell_scale       = static_cast<int32_t>(atoi(row[27]));
+			e.heal_scale        = static_cast<int32_t>(atoi(row[28]));
+			e.special_abilities = row[29] ? row[29] : "";
 
 			all_entries.push_back(e);
 		}
@@ -504,32 +524,34 @@ public:
 
 			e.type              = static_cast<int32_t>(atoi(row[0]));
 			e.level             = static_cast<int32_t>(atoi(row[1]));
-			e.ac                = static_cast<int32_t>(atoi(row[2]));
-			e.hp                = static_cast<int32_t>(atoi(row[3]));
-			e.accuracy          = static_cast<int32_t>(atoi(row[4]));
-			e.slow_mitigation   = static_cast<int32_t>(atoi(row[5]));
-			e.attack            = static_cast<int32_t>(atoi(row[6]));
-			e.strength          = static_cast<int32_t>(atoi(row[7]));
-			e.stamina           = static_cast<int32_t>(atoi(row[8]));
-			e.dexterity         = static_cast<int32_t>(atoi(row[9]));
-			e.agility           = static_cast<int32_t>(atoi(row[10]));
-			e.intelligence      = static_cast<int32_t>(atoi(row[11]));
-			e.wisdom            = static_cast<int32_t>(atoi(row[12]));
-			e.charisma          = static_cast<int32_t>(atoi(row[13]));
-			e.magic_resist      = static_cast<int32_t>(atoi(row[14]));
-			e.cold_resist       = static_cast<int32_t>(atoi(row[15]));
-			e.fire_resist       = static_cast<int32_t>(atoi(row[16]));
-			e.poison_resist     = static_cast<int32_t>(atoi(row[17]));
-			e.disease_resist    = static_cast<int32_t>(atoi(row[18]));
-			e.corruption_resist = static_cast<int32_t>(atoi(row[19]));
-			e.physical_resist   = static_cast<int32_t>(atoi(row[20]));
-			e.min_dmg           = static_cast<int32_t>(atoi(row[21]));
-			e.max_dmg           = static_cast<int32_t>(atoi(row[22]));
-			e.hp_regen_rate     = static_cast<int32_t>(atoi(row[23]));
-			e.attack_delay      = static_cast<int32_t>(atoi(row[24]));
-			e.spell_scale       = static_cast<int32_t>(atoi(row[25]));
-			e.heal_scale        = static_cast<int32_t>(atoi(row[26]));
-			e.special_abilities = row[27] ? row[27] : "";
+			e.zone_id           = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.instance_version  = static_cast<int32_t>(atoi(row[3]));
+			e.ac                = static_cast<int32_t>(atoi(row[4]));
+			e.hp                = static_cast<int32_t>(atoi(row[5]));
+			e.accuracy          = static_cast<int32_t>(atoi(row[6]));
+			e.slow_mitigation   = static_cast<int32_t>(atoi(row[7]));
+			e.attack            = static_cast<int32_t>(atoi(row[8]));
+			e.strength          = static_cast<int32_t>(atoi(row[9]));
+			e.stamina           = static_cast<int32_t>(atoi(row[10]));
+			e.dexterity         = static_cast<int32_t>(atoi(row[11]));
+			e.agility           = static_cast<int32_t>(atoi(row[12]));
+			e.intelligence      = static_cast<int32_t>(atoi(row[13]));
+			e.wisdom            = static_cast<int32_t>(atoi(row[14]));
+			e.charisma          = static_cast<int32_t>(atoi(row[15]));
+			e.magic_resist      = static_cast<int32_t>(atoi(row[16]));
+			e.cold_resist       = static_cast<int32_t>(atoi(row[17]));
+			e.fire_resist       = static_cast<int32_t>(atoi(row[18]));
+			e.poison_resist     = static_cast<int32_t>(atoi(row[19]));
+			e.disease_resist    = static_cast<int32_t>(atoi(row[20]));
+			e.corruption_resist = static_cast<int32_t>(atoi(row[21]));
+			e.physical_resist   = static_cast<int32_t>(atoi(row[22]));
+			e.min_dmg           = static_cast<int32_t>(atoi(row[23]));
+			e.max_dmg           = static_cast<int32_t>(atoi(row[24]));
+			e.hp_regen_rate     = static_cast<int32_t>(atoi(row[25]));
+			e.attack_delay      = static_cast<int32_t>(atoi(row[26]));
+			e.spell_scale       = static_cast<int32_t>(atoi(row[27]));
+			e.heal_scale        = static_cast<int32_t>(atoi(row[28]));
+			e.special_abilities = row[29] ? row[29] : "";
 
 			all_entries.push_back(e);
 		}
