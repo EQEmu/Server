@@ -43,7 +43,7 @@ public:
 	uint32 GetBotItemIDBySlot(uint16 slot_id);
 	int GetExpansionBitmask();
 	Lua_Mob GetOwner();
-	bool HasBotItem(uint32 item_id);
+	int16 HasBotItem(uint32 item_id);
 	void OwnerMessage(std::string message);
 	bool ReloadBotDataBuckets();
 	bool ReloadBotOwnerDataBuckets();

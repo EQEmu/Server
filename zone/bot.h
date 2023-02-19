@@ -720,7 +720,7 @@ public:
 	uint32 CountBotItem(uint32 item_id);
 	std::map<uint16, uint32> GetBotItemSlots();
 	uint32 GetBotItemBySlot(uint16 slot_id);
-	bool HasBotItem(uint32 item_id);
+	int16 HasBotItem(uint32 item_id);
 	void RemoveBotItem(uint32 item_id);
 	uint32 GetTotalPlayTime();
 
