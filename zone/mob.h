@@ -686,7 +686,7 @@ public:
 	float GetMovespeed() const { return IsRunning() ? GetRunspeed() : GetWalkspeed(); }
 	bool IsRunning() const { return m_is_running; }
 	void SetRunning(bool val) { m_is_running = val; }
-	virtual void GMMove(float x, float y, float z, float heading = 0.01);
+	virtual void GMMove(float x, float y, float z, float heading = 0.01, bool save_guard_spot = true);
 	virtual void GMMove(const glm::vec4 &position);
 	void SetDelta(const glm::vec4& delta);
 	void MakeSpawnUpdateNoDelta(PlayerPositionUpdateServer_Struct* spu);
