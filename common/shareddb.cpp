@@ -385,7 +385,7 @@ bool SharedDatabase::DeleteInventorySlot(uint32 char_id, int16 slot_id) {
 
 	const int16 base_slot_id = EQ::InventoryProfile::CalcSlotId(slot_id, EQ::invbag::SLOT_BEGIN);
     query = StringFormat("DELETE FROM inventory WHERE charid = %i AND slotid >= %i AND slotid < %i",
-                        char_id, base_slot_id, (base_slot_id+10));
+                        char_id, base_slot_id, (base_slot_id+EQ::invbag::SLOT_COUNT));
     results = QueryDatabase(query);
     if (!results.Success()) {
         return false;
@@ -412,7 +412,7 @@ bool SharedDatabase::DeleteSharedBankSlot(uint32 char_id, int16 slot_id) {
     const int16 base_slot_id = EQ::InventoryProfile::CalcSlotId(slot_id, EQ::invbag::SLOT_BEGIN);
     query = StringFormat("DELETE FROM sharedbank WHERE acctid = %i "
                         "AND slotid >= %i AND slotid < %i",
-                        account_id, base_slot_id, (base_slot_id+10));
+                        account_id, base_slot_id, (base_slot_id+EQ::invbag::SLOT_COUNT));
     results = QueryDatabase(query);
     if (!results.Success()) {
         return false;
@@ -741,12 +741,16 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv)
 		int16 put_slot_id;
 		if (slot_id >= 8000 && slot_id <= 8999) {
 			put_slot_id = inv->PushCursor(*inst);
-		} else if (slot_id >= 3111 && slot_id <= 3179) {
+		}
+		/* COMMENTING THIS OUT FOR NOW.. THIS IS CAUSING ISSUES
+		else if (slot_id >= 3111 && slot_id <= 3179) {
 			// Admins: please report any occurrences of this error
 			LogError("Warning: Defunct location for item in inventory: charid={}, item_id={}, slot_id={} .. pushing to cursor...",
 				char_id, item_id, slot_id);
 			put_slot_id = inv->PushCursor(*inst);
-		} else {
+		} 
+		*/
+		else {
 			put_slot_id = inv->PutItem(slot_id, *inst);
 		}
 
@@ -1215,7 +1219,7 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 
 		// Bag
 		item.BagSize = static_cast<uint8>(std::stoul(row[ItemField::bagsize]));
-		item.BagSlots = static_cast<uint8>(EQ::Clamp(std::stoi(row[ItemField::bagslots]), 0, 10)); // Will need to be changed from std::min to just use database value when bag slots are increased
+		item.BagSlots = static_cast<uint8>(EQ::Clamp(std::stoi(row[ItemField::bagslots]), 0, (int)(EQ::invbag::SLOT_COUNT)));
 		item.BagType = static_cast<uint8>(std::stoul(row[ItemField::bagtype]));
 		item.BagWR = static_cast<uint8>(EQ::Clamp(std::stoi(row[ItemField::bagwr]), 0, 100));
 

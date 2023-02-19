@@ -910,7 +910,7 @@ void Client::Trader_ShowItems(){
 	Trader_Struct* outints = (Trader_Struct*)outapp->pBuffer;
 	Trader_Struct* TraderItems = database.LoadTraderItem(CharacterID());
 
-	for(int i = 0; i < 80; i++){
+	for(int i = 0; i < EQ::invtype::BAZAAR_SIZE; i++){
 		outints->ItemCost[i] = TraderItems->ItemCost[i];
 		outints->Items[i] = TraderItems->Items[i];
 	}
@@ -1011,7 +1011,7 @@ void Client::Trader_EndTrader() {
 			tdis->Unknown012 = 0;
 			Customer->Message(Chat::Red, "The Trader is no longer open for business");
 
-			for(int i = 0; i < 80; i++) {
+			for(int i = 0; i < EQ::invtype::BAZAAR_SIZE; i++) {
 				if(gis->Items[i] != 0) {
 
 					if (Customer->ClientVersion() >= EQ::versions::ClientVersion::RoF)
@@ -1112,7 +1112,7 @@ void Client::BulkSendTraderInventory(uint32 char_id) {
 
 	TraderCharges_Struct* TraderItems = database.LoadTraderItemWithCharges(char_id);
 
-	for (uint8 i = 0;i < 80; i++) { // need to transition away from 'magic number'
+	for (uint8 i = 0;i < EQ::invtype::BAZAAR_SIZE; i++) { // need to transition away from 'magic number'
 		if((TraderItems->ItemID[i] == 0) || (TraderItems->ItemCost[i] <= 0)) {
 			continue;
 		}
@@ -1201,12 +1201,12 @@ GetItems_Struct* Client::GetTraderItems(){
 	uint8 ndx = 0;
 
 	for (int i = EQ::invslot::GENERAL_BEGIN; i <= EQ::invslot::GENERAL_END; i++) {
-		if (ndx >= 80)
+		if (ndx >= EQ::invtype::BAZAAR_SIZE)
 			break;
 		item = GetInv().GetItem(i);
 		if (item && item->GetItem()->BagType == EQ::item::BagTypeTradersSatchel){
 			for (int x = EQ::invbag::SLOT_BEGIN; x <= EQ::invbag::SLOT_END; x++) {
-				if (ndx >= 80)
+				if (ndx >= EQ::invtype::BAZAAR_SIZE)
 					break;
 
 				SlotID = EQ::InventoryProfile::CalcSlotId(i, x);
@@ -1366,7 +1366,7 @@ void Client::FindAndNukeTraderItem(int32 SerialNumber, int16 Quantity, Client* C
 
 			bool TestSlot = true;
 
-			for(int i = 0;i < 80;i++){
+			for(int i = 0;i < EQ::invtype::BAZAAR_SIZE;i++){
 
 				if(TestSlot && TraderItems->SerialNumber[i] == SerialNumber)
 				{
@@ -2017,7 +2017,7 @@ static void UpdateTraderCustomerItemsAdded(uint32 CustomerID, TraderCharges_Stru
 
 	Customer->Message(Chat::Red, "The Trader has put up %s for sale.", item->Name);
 
-	for(int i = 0; i < 80; i++) {
+	for(int i = 0; i < EQ::invtype::BAZAAR_SIZE; i++) {
 
 		if(gis->ItemID[i] == ItemID) {
 
@@ -2065,7 +2065,7 @@ static void UpdateTraderCustomerPriceChanged(uint32 CustomerID, TraderCharges_St
 		tdis->Unknown012 = 0;
 		Customer->Message(Chat::Red, "The Trader has withdrawn the %s from sale.", item->Name);
 
-		for(int i = 0; i < 80; i++) {
+		for(int i = 0; i < EQ::invtype::BAZAAR_SIZE; i++) {
 
 			if(gis->ItemID[i] == ItemID) {
 				if (Customer->ClientVersion() >= EQ::versions::ClientVersion::RoF)
@@ -2107,7 +2107,7 @@ static void UpdateTraderCustomerPriceChanged(uint32 CustomerID, TraderCharges_St
 	// Let the customer know the price in the window has suddenly just changed on them.
 	Customer->Message(Chat::Red, "The Trader has changed the price of %s.", item->Name);
 
-	for(int i = 0; i < 80; i++) {
+	for(int i = 0; i < EQ::invtype::BAZAAR_SIZE; i++) {
 		if((gis->ItemID[i] != ItemID) ||
 			((!item->Stackable) && (gis->Charges[i] != Charges)))
 			continue;
@@ -2155,7 +2155,7 @@ void Client::HandleTraderPriceUpdate(const EQApplicationPacket *app) {
 
 	uint32 OldPrice = 0;
 
-	for(int i = 0; i < 80; i++) {
+	for(int i = 0; i < EQ::invtype::BAZAAR_SIZE; i++) {
 
 		if((gis->ItemID[i] > 0) && (gis->SerialNumber[i] == tpus->SerialNumber)) {
 			// We found the item that the Trader wants to change the price of (or add back up for sale).
@@ -2195,7 +2195,7 @@ void Client::HandleTraderPriceUpdate(const EQApplicationPacket *app) {
 
 		int32 ChargesOnItemToAdd = 0;
 
-		for(int i = 0; i < 80; i++) {
+		for(int i = 0; i < EQ::invtype::BAZAAR_SIZE; i++) {
 
 			if((newgis->Items[i] > 0) && (newgis->SerialNumber[i] == tpus->SerialNumber)) {
 
@@ -2235,7 +2235,7 @@ void Client::HandleTraderPriceUpdate(const EQApplicationPacket *app) {
 
 			bool SameItemWithDifferingCharges = false;
 
-			for(int i = 0; i < 80; i++) {
+			for(int i = 0; i < EQ::invtype::BAZAAR_SIZE; i++) {
 				if((newgis->Items[i] == IDOfItemToAdd) && (newgis->Charges[i] != ChargesOnItemToAdd)) {
 
 					SameItemWithDifferingCharges = true;
@@ -2250,7 +2250,7 @@ void Client::HandleTraderPriceUpdate(const EQApplicationPacket *app) {
 
 		// Now put all Items with a matching ItemID up for trade.
 		//
-		for(int i = 0; i < 80; i++) {
+		for(int i = 0; i < EQ::invtype::BAZAAR_SIZE; i++) {
 
 			if(newgis->Items[i] == IDOfItemToAdd) {
 
