@@ -44,7 +44,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 extern QueryServ* QServ;
 extern WorldServer worldserver;
 extern FastMath g_Math;
-extern bool Critical;
 
 #ifdef _WINDOWS
 #define snprintf	_snprintf
@@ -1997,7 +1996,7 @@ bool Client::Death(Mob* killerMob, int64 damage, uint16 spell, EQ::skills::Skill
 				}
 
 				if (killerMob->CastToClient()->isgrouped) {
-					Group* group = entity_list.GetGroupByClient(killerMob->CastToClient());
+					auto* group = entity_list.GetGroupByClient(killerMob->CastToClient());
 					if (group) {
 						for (int i = 0; i < 6; i++) {
 							if (group->members[i]) {
@@ -2051,7 +2050,7 @@ bool Client::Death(Mob* killerMob, int64 damage, uint16 spell, EQ::skills::Skill
 			}
 		}
 
-		Raid* r = entity_list.GetRaidByClient(this);
+		auto* r = entity_list.GetRaidByClient(this);
 
 		if (r) {
 			r->MemberZoned(this);
@@ -2445,7 +2444,7 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 	SetPet(0);
 
 	if (GetSwarmOwner()) {
-		Mob* owner = entity_list.GetMobID(GetSwarmOwner());
+		auto* owner = entity_list.GetMobID(GetSwarmOwner());
 		if (owner) {
 			owner->SetTempPetCount(owner->GetTempPetCount() - 1);
 		}
