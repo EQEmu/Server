@@ -622,7 +622,6 @@ RULE_BOOL(Bots, OldRaceRezEffects, false, "Older clients had ID 757 for races wi
 RULE_BOOL(Bots, ResurrectionSickness, true, "Use Resurrection Sickness based on Resurrection spell cast, set to false to disable Resurrection Sickness.")
 RULE_INT(Bots, OldResurrectionSicknessSpell, 757, "757 is Default Old Resurrection Sickness Spell")
 RULE_INT(Bots, ResurrectionSicknessSpell, 756, "756 is Default Resurrection Sickness Spell")
-
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Chat)
