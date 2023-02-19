@@ -41,14 +41,6 @@ void NpcScaleManager::ScaleNPC(
 	auto zone_id          = npc->GetZoneID();
 	auto instance_version = npc->GetInstanceVersion();
 
-	LogNPCScaling(
-		"Attempting to find data for Type [{}] Level [{}] Zone ID [{}] Version [{}]",
-		npc_type,
-		npc_level,
-		zone_id,
-		instance_version
-	);
-
 	global_npc_scale scale_data = GetGlobalScaleDataForTypeLevel(
 		npc_type,
 		npc_level,
