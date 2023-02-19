@@ -409,7 +409,7 @@ void Database::AssignRaidToInstance(uint32 raid_id, uint32 instance_id)
 	auto zone_id = GetInstanceZoneID(instance_id);
 	auto version = GetInstanceVersion(instance_id);
 
-	auto l = GroupIdRepository::GetWhere(
+	auto l = RaidMembersRepository::GetWhere(
 		*this,
 		fmt::format(
 			"raidid = {}",

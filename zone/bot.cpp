@@ -77,7 +77,7 @@ Bot::Bot(NPCType *npcTypeData, Client* botOwner) : NPC(npcTypeData, nullptr, glm
 	SetBotCharmer(false);
 	SetPetChooser(false);
 	SetRangerAutoWeaponSelect(false);
-	SetTaunting(GetClass() == WARRIOR);
+	SetTaunting(GetClass() == WARRIOR || GetClass() == PALADIN || GetClass() == SHADOWKNIGHT);
 	SetDefaultBotStance();
 
 	SetAltOutOfCombatBehavior(GetClass() == BARD); // will need to be updated if more classes make use of this flag
@@ -5352,7 +5352,7 @@ void Bot::Damage(Mob *from, int64 damage, uint16 spell_id, EQ::skills::SkillType
 
 	attacked_timer.Start(CombatEventTimer_expire);
 	// if spell is lifetap add hp to the caster
-	if (spell_id != SPELL_UNKNOWN && IsLifetapSpell(spell_id)) {
+	if (IsValidSpell(spell_id) && IsLifetapSpell(spell_id)) {
 		int64 healed = GetActSpellHealing(spell_id, damage);
 		LogCombatDetail("Applying lifetap heal of [{}] to [{}]", healed, GetCleanName());
 		HealDamage(healed);
@@ -7043,7 +7043,7 @@ void Bot::CalcRestState() {
 
 	uint32 buff_count = GetMaxTotalSlots();
 	for (unsigned int j = 0; j < buff_count; j++) {
-		if(buffs[j].spellid != SPELL_UNKNOWN) {
+		if(IsValidSpell(buffs[j].spellid)) {
 			if(IsDetrimentalSpell(buffs[j].spellid) && (buffs[j].ticsremaining > 0))
 				if(!DetrimentalSpellAllowsRest(buffs[j].spellid))
 					return;
@@ -7294,7 +7294,7 @@ void Bot::DoEnduranceUpkeep() {
 	uint32 buffs_i;
 	uint32 buff_count = GetMaxTotalSlots();
 	for (buffs_i = 0; buffs_i < buff_count; buffs_i++) {
-		if (buffs[buffs_i].spellid != SPELL_UNKNOWN) {
+		if (IsValidSpell(buffs[buffs_i].spellid)) {
 			int upkeep = spells[buffs[buffs_i].spellid].endurance_upkeep;
 			if(upkeep > 0) {
 				if(cost_redux > 0) {
@@ -8716,7 +8716,7 @@ bool Bot::GetNeedsCured(Mob *tar) {
 			int buffsWithCounters = 0;
 			needCured = true;
 			for (unsigned int j = 0; j < buff_count; j++) {
-				if(tar->GetBuffs()[j].spellid != SPELL_UNKNOWN) {
+				if(IsValidSpell(tar->GetBuffs()[j].spellid)) {
 					if(CalculateCounters(tar->GetBuffs()[j].spellid) > 0) {
 						buffsWithCounters++;
 						if(buffsWithCounters == 1 && (tar->GetBuffs()[j].ticsremaining < 2 || (int32)((tar->GetBuffs()[j].ticsremaining * 6) / tar->GetBuffs()[j].counters) < 2)) {
@@ -9490,7 +9490,7 @@ void Bot::ListBotSpells(uint8 min_level)
 	auto spell_count = 0;
 	auto spell_number = 1;
 
-	for (const auto& s : (AIBot_spells.size() > AIBot_spells_enforced.size()) ? AIBot_spells : AIBot_spells_enforced) {
+	for (const auto& s : (GetBotEnforceSpellSetting()) ? AIBot_spells_enforced : AIBot_spells) {
 		auto b = bot_spell_settings.find(s.spellid);
 		if (b == bot_spell_settings.end() && s.minlevel >= min_level) {
 			bot_owner->Message(

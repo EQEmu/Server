@@ -30,6 +30,9 @@ void PlayerEventLogs::Init()
 	std::vector<int> db{};
 	db.reserve(s.size());
 	for (auto &e: s) {
+		if (e.id >= PlayerEvent::MAX) {
+			continue;
+		}
 		m_settings[e.id] = e;
 		db.emplace_back(e.id);
 	}
@@ -118,7 +121,7 @@ void PlayerEventLogs::ProcessBatchQueue()
 
 	// flush many
 	PlayerEventLogsRepository::InsertMany(*m_database, m_record_batch_queue);
-	LogInfo(
+	LogPlayerEventsDetail(
 		"Processing batch player event log queue of [{}] took [{}]",
 		m_record_batch_queue.size(),
 		benchmark.elapsed()
@@ -136,6 +139,10 @@ void PlayerEventLogs::AddToQueue(const PlayerEventLogsRepository::PlayerEventLog
 	m_batch_queue_lock.lock();
 	m_record_batch_queue.emplace_back(log);
 	m_batch_queue_lock.unlock();
+
+	if (m_record_batch_queue.size() >= RuleI(Logging, BatchPlayerEventProcessChunkSize)) {
+		ProcessBatchQueue();
+	}
 }
 
 // fills common event data in the SendEvent function
@@ -693,9 +700,10 @@ void PlayerEventLogs::SetSettingsDefaults()
 	m_settings[PlayerEvent::BANDOLIER_SWAP].event_enabled     = 0;
 	m_settings[PlayerEvent::DISCOVER_ITEM].event_enabled      = 1;
 	m_settings[PlayerEvent::POSSIBLE_HACK].event_enabled      = 1;
-	m_settings[PlayerEvent::KILLED_NPC].event_enabled         = 1;
+	m_settings[PlayerEvent::KILLED_NPC].event_enabled         = 0;
 	m_settings[PlayerEvent::KILLED_NAMED_NPC].event_enabled   = 1;
 	m_settings[PlayerEvent::KILLED_RAID_NPC].event_enabled    = 1;
+	m_settings[PlayerEvent::ITEM_CREATION].event_enabled      = 1;
 
 	for (int i = PlayerEvent::GM_COMMAND; i != PlayerEvent::MAX; i++) {
 		m_settings[i].retention_days = RETENTION_DAYS_DEFAULT;

@@ -783,6 +783,7 @@ RULE_BOOL(Logging, PrintFileFunctionAndLine, false, "Ex: [World Server] [net.cpp
 RULE_BOOL(Logging, WorldGMSayLogging, true, "Relay worldserver logging to zone processes via GM say output")
 RULE_BOOL(Logging, PlayerEventsQSProcess, false, "Have query server process player events instead of world. Useful when wanting to use a dedicated server and database for processing player events on separate disk")
 RULE_INT(Logging, BatchPlayerEventProcessIntervalSeconds, 5, "This is the interval in which player events are processed in world or qs")
+RULE_INT(Logging, BatchPlayerEventProcessChunkSize, 10000, "This is the cap of events that can be inserted into the queue before a force flush. This is to keep from hitting MySQL max_allowed_packet and killing the connection")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(HotReload)

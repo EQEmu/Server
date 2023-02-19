@@ -92,8 +92,7 @@ uint32 ZoneDatabase::GetZoneForage(uint32 ZoneID, uint8 skill) {
 
 		item[index]   = Strings::ToInt(row[0]);
 		chance[index] = Strings::ToInt(row[1]) + chancepool;
-		LogError("Possible Forage: [{}] with a [{}] chance", item[index], chance[index]);
-		chancepool = chance[index];
+		chancepool    = chance[index];
 	}
 
 	if(chancepool == 0 || index < 1)

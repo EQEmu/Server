@@ -224,6 +224,13 @@ void EQEmuApiWorldDataService::reload(Json::Value &r, const std::vector<std::str
 			else {
 				pack = new ServerPacket(c.opcode, 0);
 				message(r, fmt::format("Reloading [{}] globally", c.desc));
+
+				if (c.opcode == ServerOP_ReloadLogs) {
+					LogSys.LoadLogDatabaseSettings();
+				}
+				else if (c.opcode == ServerOP_ReloadRules) {
+					RuleManager::Instance()->LoadRules(&database, RuleManager::Instance()->GetActiveRuleset(), true);
+				}
 			}
 
 			found_command = true;

@@ -794,6 +794,23 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 		}
 	}
 
+	if (player_event_logs.IsEventEnabled(PlayerEvent::ITEM_CREATION)) {
+		auto e = PlayerEvent::ItemCreationEvent{};
+		e.item_id   = item->ID;
+		e.item_name = item->Name;
+		e.to_slot   = to_slot;
+		e.charges   = charges;
+		e.aug1      = aug1;
+		e.aug2      = aug2;
+		e.aug3      = aug3;
+		e.aug4      = aug4;
+		e.aug5      = aug5;
+		e.aug6      = aug6;
+		e.attuned   = attuned;
+
+		RecordPlayerEventLog(PlayerEvent::ITEM_CREATION, e);
+	}
+
 	// put item into inventory
 	if (to_slot == EQ::invslot::slotCursor) {
 		PushItemOnCursor(*inst);
@@ -848,13 +865,14 @@ void Client::DropItem(int16 slot_id, bool recurse)
 				}
 			}
 		}
-		invalid_drop = nullptr;
 
 		std::string message = fmt::format(
 			"Tried to drop an item on the ground that was no-drop! item_name [{}] item_id ({})",
 			invalid_drop->GetItem()->Name,
 			invalid_drop->GetItem()->ID
 		);
+
+		invalid_drop = nullptr;
 		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = message});
 		GetInv().DeleteItem(slot_id);
 		return;

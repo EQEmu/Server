@@ -1694,8 +1694,9 @@ void Client::Damage(Mob* other, int64 damage, uint16 spell_id, EQ::skills::Skill
 	if (dead || IsCorpse())
 		return;
 
-	if (spell_id == 0)
+	if (!IsValidSpell(spell_id)) {
 		spell_id = SPELL_UNKNOWN;
+	}
 
 	// cut all PVP spell damage to 2/3
 	// Blasting ourselfs is considered PvP
@@ -1719,8 +1720,9 @@ void Client::Damage(Mob* other, int64 damage, uint16 spell_id, EQ::skills::Skill
 
 	if (damage > 0) {
 
-		if (spell_id == SPELL_UNKNOWN)
+		if (!IsValidSpell(spell_id)) {
 			CheckIncreaseSkill(EQ::skills::SkillDefense, other, -15);
+		}
 	}
 }
 
@@ -1755,7 +1757,7 @@ bool Client::Death(Mob* killerMob, int64 damage, uint16 spell, EQ::skills::Skill
 		}
 	}
 
-	if (killerMob && (killerMob->IsClient() || killerMob->IsBot()) && (spell != SPELL_UNKNOWN) && damage > 0) {
+	if (killerMob && killerMob->IsOfClientBot() && IsValidSpell(spell) && damage > 0) {
 		char val1[20] = { 0 };
 
 		entity_list.MessageCloseString(
@@ -1794,8 +1796,8 @@ bool Client::Death(Mob* killerMob, int64 damage, uint16 spell, EQ::skills::Skill
 	d->killer_id = killerMob ? killerMob->GetID() : 0;
 	d->corpseid = GetID();
 	d->bindzoneid = m_pp.binds[0].zone_id;
-	d->spell_id = spell == SPELL_UNKNOWN ? 0xffffffff : spell;
-	d->attack_skill = spell != SPELL_UNKNOWN ? 0xe7 : attack_skill;
+	d->spell_id = IsValidSpell(spell) ? spell : 0xffffffff;
+	d->attack_skill = IsValidSpell(spell) ? 0xe7 : attack_skill;
 	d->damage = damage;
 	app.priority = 6;
 	entity_list.QueueClients(this, &app);
@@ -1923,7 +1925,7 @@ bool Client::Death(Mob* killerMob, int64 damage, uint16 spell, EQ::skills::Skill
 		}
 	}
 
-	if (spell != SPELL_UNKNOWN) {
+	if (IsValidSpell(spell)) {
 		uint32 buff_count = GetMaxTotalSlots();
 		for (uint16 buffIt = 0; buffIt < buff_count; buffIt++) {
 			if (buffs[buffIt].spellid == spell && buffs[buffIt].client) {
@@ -2416,7 +2418,7 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 		}
 	}
 
-	if (killer_mob && (killer_mob->IsClient() || killer_mob->IsBot()) && (spell != SPELL_UNKNOWN) && damage > 0) {
+	if (killer_mob && killer_mob->IsOfClientBot() && IsValidSpell(spell) && damage > 0) {
 		char val1[20] = { 0 };
 
 		entity_list.MessageCloseString(
@@ -2946,7 +2948,7 @@ void Mob::AddToHateList(Mob* other, int64 hate /*= 0*/, int64 damage /*= 0*/, bo
 	if (GetSpecialAbility(IMMUNE_AGGRO_CLIENT) && other->IsClient())
 		return;
 
-	if (spell_id != SPELL_UNKNOWN && NoDetrimentalSpellAggro(spell_id))
+	if (IsValidSpell(spell_id) && NoDetrimentalSpellAggro(spell_id))
 		return;
 
 	if (other == myowner)
@@ -3110,8 +3112,9 @@ void Mob::DamageShield(Mob* attacker, bool spell_ds) {
 		DS = spellbonuses.DamageShield;
 		rev_ds = attacker->spellbonuses.ReverseDamageShield;
 
-		if (spellbonuses.DamageShieldSpellID != 0 && spellbonuses.DamageShieldSpellID != SPELL_UNKNOWN)
+		if (IsValidSpell(spellbonuses.DamageShieldSpellID)) {
 			spellid = spellbonuses.DamageShieldSpellID;
+		}
 	}
 	else {
 		DS = spellbonuses.SpellDamageShield + itembonuses.SpellDamageShield + aabonuses.SpellDamageShield;
@@ -3180,8 +3183,9 @@ void Mob::DamageShield(Mob* attacker, bool spell_ds) {
 	//if we've gotten to this point, we know we know "attacker" hit "this" (us) for damage & we aren't invulnerable
 	uint16 rev_ds_spell_id = SPELL_UNKNOWN;
 
-	if (spellbonuses.ReverseDamageShieldSpellID != 0 && spellbonuses.ReverseDamageShieldSpellID != SPELL_UNKNOWN)
+	if (IsValidSpell(spellbonuses.ReverseDamageShieldSpellID)) {
 		rev_ds_spell_id = spellbonuses.ReverseDamageShieldSpellID;
+	}
 
 	if (rev_ds < 0) {
 		LogCombat("Applying Reverse Damage Shield of value [{}] to [{}]", rev_ds, attacker->GetName());
@@ -3614,7 +3618,7 @@ int64 Mob::ReduceAllDamage(int64 damage)
 bool Mob::HasProcs() const
 {
 	for (int i = 0; i < MAX_PROCS; i++) {
-		if (PermaProcs[i].spellID != SPELL_UNKNOWN || SpellProcs[i].spellID != SPELL_UNKNOWN) {
+		if (IsValidSpell(PermaProcs[i].spellID) || IsValidSpell(SpellProcs[i].spellID)) {
 			return true;
 		}
 	}
@@ -3632,7 +3636,7 @@ bool Mob::HasProcs() const
 bool Mob::HasDefensiveProcs() const
 {
 	for (int i = 0; i < MAX_PROCS; i++) {
-		if (DefensiveProcs[i].spellID != SPELL_UNKNOWN) {
+		if (IsValidSpell(DefensiveProcs[i].spellID)) {
 			return true;
 		}
 	}
@@ -3668,7 +3672,7 @@ bool Mob::HasSkillProcSuccess() const
 bool Mob::HasRangedProcs() const
 {
 	for (int i = 0; i < MAX_PROCS; i++){
-		if (RangedProcs[i].spellID != SPELL_UNKNOWN) {
+		if (IsValidSpell(RangedProcs[i].spellID)) {
 			return true;
 		}
 	}
@@ -3760,16 +3764,16 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 		damage = DMG_INVULNERABLE;
 	}
 
-	if (spell_id != SPELL_UNKNOWN || attacker == nullptr)
+	if (IsValidSpell(spell_id) || attacker == nullptr)
 		avoidable = false;
 
 	// only apply DS if physical damage (no spell damage)
 	// damage shield calls this function with spell_id set, so its unavoidable
-	if (attacker && damage > 0 && spell_id == SPELL_UNKNOWN && skill_used != EQ::skills::SkillArchery && skill_used != EQ::skills::SkillThrowing) {
+	if (attacker && damage > 0 && !IsValidSpell(spell_id) && skill_used != EQ::skills::SkillArchery && skill_used != EQ::skills::SkillThrowing) {
 		DamageShield(attacker);
 	}
 
-	if (spell_id == SPELL_UNKNOWN && skill_used >= EQ::skills::Skill1HBlunt) {
+	if (!IsValidSpell(spell_id) && skill_used >= EQ::skills::Skill1HBlunt) {
 		CheckNumHitsRemaining(NumHit::IncomingHitAttempts);
 
 		if (attacker)
@@ -3796,7 +3800,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 		//if there is some damage being done and theres an attacker involved
 		if (attacker) {
 			// if spell is lifetap add hp to the caster
-			if (spell_id != SPELL_UNKNOWN && IsLifetapSpell(spell_id)) {
+			if (IsValidSpell(spell_id) && IsLifetapSpell(spell_id)) {
 				int64 healed = damage;
 
 				healed = RuleB(Spells, CompoundLifetapHeals) ? attacker->GetActSpellHealing(spell_id, healed) : healed;
@@ -3867,7 +3871,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 		}
 
 		//see if any runes want to reduce this damage
-		if (spell_id == SPELL_UNKNOWN) {
+		if (!IsValidSpell(spell_id)) {
 			damage = ReduceDamage(damage);
 			LogCombat("Melee Damage reduced to [{}]", damage);
 			damage = ReduceAllDamage(damage);
@@ -4147,12 +4151,12 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 			}
 		}
 
-		if (spell_id != SPELL_UNKNOWN && !iBuffTic) {
+		if (IsValidSpell(spell_id) && !iBuffTic) {
 			//see if root will break
 			if (IsRooted() && !FromDamageShield)  // neotoyko: only spells cancel root
 				TryRootFadeByDamage(buffslot, attacker);
 		}
-		else if (spell_id == SPELL_UNKNOWN)
+		else if (!IsValidSpell(spell_id))
 		{
 			//increment chances of interrupting
 			if (IsCasting()) { //shouldnt interrupt on regular spell damage
@@ -4213,17 +4217,18 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 			//attacker is a pet, let pet owners see their pet's damage
 			Mob* owner = attacker->GetOwner();
 			if (owner && owner->IsClient()) {
-				if (((spell_id != SPELL_UNKNOWN) || (FromDamageShield)) && damage>0) {
+				if ((IsValidSpell(spell_id) || (FromDamageShield)) && damage > 0) {
 					//special crap for spell damage, looks hackish to me
 					char val1[20] = { 0 };
 					owner->MessageString(Chat::NonMelee, OTHER_HIT_NONMELEE, GetCleanName(), ConvertArray(damage, val1));
 				}
 				else {
 					if (damage > 0) {
-						if (spell_id != SPELL_UNKNOWN)
+						if (IsValidSpell(spell_id)) {
 							filter = iBuffTic ? FilterDOT : FilterSpellDamage;
-						else
+						} else {
 							filter = FilterPetHits;
+						}
 					}
 					else if (damage == -5)
 						filter = FilterNone;	//cant filter invulnerable
@@ -4240,7 +4245,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 			//attacker is not a pet, send to the attacker
 			//if the attacker is a client, try them with the correct filter
 			if (attacker && (attacker->IsClient() || attacker->IsBot())) {
-				if ((spell_id != SPELL_UNKNOWN || FromDamageShield) && damage > 0) {
+				if ((IsValidSpell(spell_id) || FromDamageShield) && damage > 0) {
 					//special crap for spell damage, looks hackish to me
 					char val1[20] = { 0 };
 					if (FromDamageShield) {
@@ -4265,10 +4270,12 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 				// Only try to queue these packets to a client
 				else if (attacker && (attacker->IsClient())) {
 					if (damage > 0) {
-						if (spell_id != SPELL_UNKNOWN)
+						if (IsValidSpell(spell_id)) {
 							filter = iBuffTic ? FilterDOT : FilterSpellDamage;
-						else
-							filter = FilterNone;	//cant filter our own hits
+						}
+						else {
+							filter = FilterNone;    //cant filter our own hits
+						}
 					}
 					else if (damage == -5)
 						filter = FilterNone;	//cant filter invulnerable
@@ -4283,10 +4290,12 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 
 		//send damage to all clients around except the specified skip mob (attacker or the attacker's owner) and ourself
 		if (damage > 0) {
-			if (spell_id != SPELL_UNKNOWN)
+			if (IsValidSpell(spell_id)) {
 				filter = iBuffTic ? FilterDOT : FilterSpellDamage;
-			else
+			}
+			else {
 				filter = FilterOthersHit;
+			}
 		}
 		else if (damage == -5)
 			filter = FilterNone;	//cant filter invulnerable
@@ -4347,7 +4356,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 	else {
 		//else, it is a buff tic...
 		// So we can see our dot dmg like live shows it.
-		if (spell_id != SPELL_UNKNOWN && damage > 0 && attacker && attacker != this && !attacker->IsCorpse()) {
+		if (IsValidSpell(spell_id) && damage > 0 && attacker && attacker != this && !attacker->IsCorpse()) {
 			//might filter on (attack_skill>200 && attack_skill<250), but I dont think we need it
 			if (attacker->IsClient()) {
 				attacker->FilteredMessageString(attacker, Chat::DotDamage,
@@ -4740,7 +4749,7 @@ void Mob::TrySpellProc(const EQ::ItemInstance *inst, const EQ::ItemData *weapon,
 		// Not ranged
 		if (!rangedattk) {
 			// Perma procs (Not used for AA, they are handled below)
-			if (PermaProcs[i].spellID != SPELL_UNKNOWN) {
+			if (IsValidSpell(PermaProcs[i].spellID)) {
 				if (zone->random.Roll(PermaProcs[i].chance)) { // TODO: Do these get spell bonus?
 					LogCombat("Permanent proc [{}] procing spell [{}] ([{}] percent chance)", i, PermaProcs[i].spellID, PermaProcs[i].chance);
 					ExecWeaponProc(nullptr, PermaProcs[i].spellID, on);
@@ -4751,7 +4760,7 @@ void Mob::TrySpellProc(const EQ::ItemInstance *inst, const EQ::ItemData *weapon,
 			}
 
 			// Spell procs (buffs)
-			if (SpellProcs[i].spellID != SPELL_UNKNOWN) {
+			if (IsValidSpell(SpellProcs[i].spellID)) {
 				if (SpellProcs[i].base_spellID == POISON_PROC) {
 					poison_slot=i;
 					continue; // Process the poison proc last per @mackal
@@ -4776,7 +4785,7 @@ void Mob::TrySpellProc(const EQ::ItemInstance *inst, const EQ::ItemData *weapon,
 		}
 		else if (rangedattk) { // ranged only
 							   // ranged spell procs (buffs)
-			if (RangedProcs[i].spellID != SPELL_UNKNOWN) {
+			if (IsValidSpell(RangedProcs[i].spellID)) {
 
 				passed_skill_limit_check = PassLimitToSkill(skillinuse, RangedProcs[i].base_spellID, ProcType::RANGED_PROC);
 

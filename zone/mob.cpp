@@ -2331,7 +2331,7 @@ void Mob::ShowBuffs(Client* client) {
 	uint32 i;
 	uint32 buff_count = GetMaxTotalSlots();
 	for (i=0; i < buff_count; i++) {
-		if (buffs[i].spellid != SPELL_UNKNOWN) {
+		if (IsValidSpell(buffs[i].spellid)) {
 			if (spells[buffs[i].spellid].buff_duration_formula == DF_Permanent)
 				client->Message(Chat::White, "  %i: %s: Permanent", i, spells[buffs[i].spellid].name);
 			else
@@ -2365,7 +2365,7 @@ void Mob::ShowBuffList(Client* client) {
 	uint32 i;
 	uint32 buff_count = GetMaxTotalSlots();
 	for (i = 0; i < buff_count; i++) {
-		if (buffs[i].spellid != SPELL_UNKNOWN) {
+		if (IsValidSpell(buffs[i].spellid)) {
 			if (spells[buffs[i].spellid].buff_duration_formula == DF_Permanent)
 				client->Message(Chat::White, "  %i: %s: Permanent", i, spells[buffs[i].spellid].name);
 			else
@@ -4103,7 +4103,7 @@ void Mob::ExecWeaponProc(const EQ::ItemInstance *inst, uint16 spell_id, Mob *on,
 		return;
 	}
 
-	if(spell_id == SPELL_UNKNOWN || on->GetSpecialAbility(NO_HARM_FROM_CLIENT)) {
+	if(!IsValidSpell(spell_id) || on->GetSpecialAbility(NO_HARM_FROM_CLIENT)) {
 		//This is so 65535 doesn't get passed to the client message and to logs because it is not relavant information for debugging.
 		return;
 	}
@@ -4261,6 +4261,10 @@ void Mob::SetTarget(Mob *mob)
 		parse->BotHasQuestSub(EVENT_TARGET_CHANGE)
 	);
 
+	if (IsClient() && CastToClient()->admin > AccountStatus::GMMgmt) {
+		DisplayInfo(mob);
+	}
+
 	if (has_target_change_event) {
 		std::vector<std::any> args;
 
@@ -4273,10 +4277,6 @@ void Mob::SetTarget(Mob *mob)
 		} else if (IsClient()) {
 			if (parse->PlayerHasQuestSub(EVENT_TARGET_CHANGE)) {
 				parse->EventPlayer(EVENT_TARGET_CHANGE, CastToClient(), "", 0, &args);
-			}
-
-			if (CastToClient()->admin > AccountStatus::GMMgmt) {
-				DisplayInfo(mob);
 			}
 
 			CastToClient()->SetBotPrecombat(false); // Any change in target will nullify this flag (target == mob checked above)
@@ -4364,8 +4364,9 @@ int Mob::CountDispellableBuffs()
 		if(spells[buffs[x].spellid].good_effect == 0)
 			continue;
 
-		if(buffs[x].spellid != SPELL_UNKNOWN &&	spells[buffs[x].spellid].buff_duration_formula != DF_Permanent)
+		if(IsValidSpell(buffs[x].spellid) && spells[buffs[x].spellid].buff_duration_formula != DF_Permanent) {
 			val++;
+		}
 	}
 	return val;
 }
@@ -4926,9 +4927,9 @@ bool Mob::TryFadeEffect(int slot)
 				if(spell_id)
 				{
 
-					if(spell_id == SPELL_UNKNOWN)
+					if (!IsValidSpell(spell_id)) {
 						return false;
-
+					}
 					if(IsValidSpell(spell_id))
 					{
 						if (IsBeneficialSpell(spell_id)) {
@@ -5285,7 +5286,7 @@ void Mob::DoKnockback(Mob *caster, uint32 push_back, uint32 push_up)
 
 void Mob::TrySpellOnKill(uint8 level, uint16 spell_id)
 {
-	if (spell_id != SPELL_UNKNOWN)
+	if (IsValidSpell(spell_id))
 	{
 		if(IsEffectInSpell(spell_id, SE_ProcOnSpellKillShot)) {
 			for (int i = 0; i < EFFECT_COUNT; i++) {
@@ -5599,7 +5600,7 @@ void Mob::DoGravityEffect()
 	int buff_count = GetMaxTotalSlots();
 	for (int slot = 0; slot < buff_count; slot++)
 	{
-		if (buffs[slot].spellid != SPELL_UNKNOWN && IsEffectInSpell(buffs[slot].spellid, SE_GravityEffect))
+		if (IsValidSpell(buffs[slot].spellid) && IsEffectInSpell(buffs[slot].spellid, SE_GravityEffect))
 		{
 			for (int i = 0; i < EFFECT_COUNT; i++)
 			{
@@ -6170,19 +6171,20 @@ FACTION_VALUE Mob::GetSpecialFactionCon(Mob* iOther) {
 
 bool Mob::HasSpellEffect(int effect_id)
 {
-    int i;
+	int i;
 
-    int buff_count = GetMaxTotalSlots();
-    for(i = 0; i < buff_count; i++)
-    {
-        if(buffs[i].spellid == SPELL_UNKNOWN) { continue; }
+	int buff_count = GetMaxTotalSlots();
+	for(i = 0; i < buff_count; i++)
+	{
+		if (!IsValidSpell(buffs[i].spellid)) {
+			continue;
+		}
 
-        if(IsEffectInSpell(buffs[i].spellid, effect_id))
-        {
-            return(1);
-        }
-    }
-    return(0);
+		if (IsEffectInSpell(buffs[i].spellid, effect_id)) {
+			return(1);
+		}
+	}
+	return(0);
 }
 
 int Mob::GetSpecialAbility(int ability)

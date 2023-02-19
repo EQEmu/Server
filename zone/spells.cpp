@@ -1144,8 +1144,9 @@ void Mob::ZeroBardPulseVars()
 
 void Mob::InterruptSpell(uint16 spellid)
 {
-	if (spellid == SPELL_UNKNOWN)
+	if (!IsValidSpell(spellid)) {
 		spellid = casting_spell_id;
+	}
 
 	InterruptSpell(0, 0x121, spellid);
 }
@@ -1156,7 +1157,7 @@ void Mob::InterruptSpell(uint16 message, uint16 color, uint16 spellid)
 	EQApplicationPacket *outapp = nullptr;
 	uint16 message_other;
 	bool bard_song_mode = false; //has the bard song gone to auto repeat mode
-	if (spellid == SPELL_UNKNOWN) {
+	if (!IsValidSpell(spellid)) {
 		if(bardsong) {
 			spellid = bardsong;
 			bard_song_mode = true;
@@ -3192,8 +3193,10 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 // 66+ Group Spells 62, Single Target 61
 bool Mob::CheckSpellLevelRestriction(Mob *caster, uint16 spell_id)
 {
-	bool check_for_restrictions = false;
-	bool can_cast = true;
+	if (spells[spell_id].target_type == ST_Self) {
+		LogSpells("[CheckSpellLevelRestriction] Self Only spell - no restrictions");
+		return true;
+	}
 
 	if (!caster) {
 		LogSpells("[CheckSpellLevelRestriction] No caster");
@@ -3204,6 +3207,9 @@ bool Mob::CheckSpellLevelRestriction(Mob *caster, uint16 spell_id)
 		LogSpells("[CheckSpellLevelRestriction] GM casting - No restrictions");
 		return true;
 	}
+
+	bool check_for_restrictions = false;
+	bool can_cast = true;
 
 	// NON GM clients might be restricted by rule setting
 	if (caster->IsClient()) {
@@ -3279,7 +3285,7 @@ uint32 Client::GetLastBuffSlot(bool disc, bool song)
 bool Mob::HasDiscBuff()
 {
 	int slot = GetFirstBuffSlot(true, false);
-	return buffs[slot].spellid != SPELL_UNKNOWN;
+	return IsValidSpell(buffs[slot].spellid);
 }
 
 // returns the slot the buff was added to, -1 if it wasn't added due to
@@ -3324,7 +3330,7 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 	for (buffslot = 0; buffslot < buff_count; buffslot++) {
 		const Buffs_Struct &curbuf = buffs[buffslot];
 
-		if (curbuf.spellid != SPELL_UNKNOWN) {
+		if (IsValidSpell(curbuf.spellid)) {
 			// there's a buff in this slot
 			ret = CheckStackConflict(curbuf.spellid, curbuf.casterlevel, spell_id,
 					caster_level, entity_list.GetMobID(curbuf.casterid), caster, buffslot);
@@ -3475,7 +3481,7 @@ int Mob::CanBuffStack(uint16 spellid, uint8 caster_level, bool iFailIfOverwrite)
 		const Buffs_Struct &curbuf = buffs[i];
 
 		// no buff in this slot
-		if (curbuf.spellid == SPELL_UNKNOWN)
+		if (!IsValidSpell(curbuf.spellid))
 		{
 			// if we haven't found a free slot, this is the first one so save it
 			if(firstfree == -2)
@@ -5860,7 +5866,7 @@ bool Client::SpellBucketCheck(uint16 spell_id, uint32 character_id) {
 int16 Mob::GetBuffSlotFromType(uint16 type) {
 	uint32 buff_count = GetMaxTotalSlots();
 	for (int i = 0; i < buff_count; i++) {
-		if (buffs[i].spellid != SPELL_UNKNOWN) {
+		if (IsValidSpell(buffs[i].spellid)) {
 			for (int j = 0; j < EFFECT_COUNT; j++) {
 				if (spells[buffs[i].spellid].effect_id[j] == type )
 					return i;
@@ -5872,8 +5878,9 @@ int16 Mob::GetBuffSlotFromType(uint16 type) {
 
 uint16 Mob::GetSpellIDFromSlot(uint8 slot)
 {
-	if (buffs[slot].spellid != SPELL_UNKNOWN)
+	if (IsValidSpell(buffs[slot].spellid)) {
 		return buffs[slot].spellid;
+	}
 	return 0;
 }
 
@@ -5915,7 +5922,7 @@ bool Mob::IsCombatProc(uint16 spell_id) {
 		return false;
 	}
 
-	if (spell_id == SPELL_UNKNOWN) {
+	if (!IsValidSpell(spell_id)) {
 		return(false);
 	}
 	/*
@@ -5943,13 +5950,13 @@ bool Mob::IsCombatProc(uint16 spell_id) {
 }
 
 bool Mob::AddProcToWeapon(uint16 spell_id, bool bPerma, uint16 iChance, uint16 base_spell_id, int level_override, uint32 proc_reuse_time) {
-	if(spell_id == SPELL_UNKNOWN)
+	if(!IsValidSpell(spell_id))
 		return(false);
 
 	int i;
 	if (bPerma) {
 		for (i = 0; i < MAX_PROCS; i++) {
-			if (PermaProcs[i].spellID == SPELL_UNKNOWN) {
+			if (!IsValidSpell(PermaProcs[i].spellID)) {
 				PermaProcs[i].spellID = spell_id;
 				PermaProcs[i].chance = iChance;
 				PermaProcs[i].base_spellID = base_spell_id;
@@ -5981,7 +5988,7 @@ bool Mob::AddProcToWeapon(uint16 spell_id, bool bPerma, uint16 iChance, uint16 b
 		// Find a slot and use it as normal.
 
 		for (i = 0; i < MAX_PROCS; i++) {
-			if (SpellProcs[i].spellID == SPELL_UNKNOWN) {
+			if (!IsValidSpell(SpellProcs[i].spellID)) {
 				SpellProcs[i].spellID = spell_id;
 				SpellProcs[i].chance = iChance;
 				SpellProcs[i].base_spellID = base_spell_id;;
@@ -6012,12 +6019,12 @@ bool Mob::RemoveProcFromWeapon(uint16 spell_id, bool bAll) {
 
 bool Mob::AddDefensiveProc(uint16 spell_id, uint16 iChance, uint16 base_spell_id, uint32 proc_reuse_time)
 {
-	if(spell_id == SPELL_UNKNOWN)
+	if(!IsValidSpell(spell_id))
 		return(false);
 
 	int i;
 	for (i = 0; i < MAX_PROCS; i++) {
-		if (DefensiveProcs[i].spellID == SPELL_UNKNOWN) {
+		if (!IsValidSpell(DefensiveProcs[i].spellID)) {
 			DefensiveProcs[i].spellID = spell_id;
 			DefensiveProcs[i].chance = iChance;
 			DefensiveProcs[i].base_spellID = base_spell_id;
@@ -6046,12 +6053,12 @@ bool Mob::RemoveDefensiveProc(uint16 spell_id, bool bAll)
 
 bool Mob::AddRangedProc(uint16 spell_id, uint16 iChance, uint16 base_spell_id, uint32 proc_reuse_time)
 {
-	if(spell_id == SPELL_UNKNOWN)
+	if(!IsValidSpell(spell_id))
 		return(false);
 
 	int i;
 	for (i = 0; i < MAX_PROCS; i++) {
-		if (RangedProcs[i].spellID == SPELL_UNKNOWN) {
+		if (!IsValidSpell(RangedProcs[i].spellID)) {
 			RangedProcs[i].spellID = spell_id;
 			RangedProcs[i].chance = iChance;
 			RangedProcs[i].base_spellID = base_spell_id;
@@ -6082,17 +6089,16 @@ bool Mob::RemoveRangedProc(uint16 spell_id, bool bAll)
 // behavior should be used.
 bool Mob::UseBardSpellLogic(uint16 spell_id, int slot)
 {
-	if(spell_id == SPELL_UNKNOWN)
+	if (!IsValidSpell(spell_id)) {
 		spell_id = casting_spell_id;
-
-	if(slot == -1)
+	}
+	if (slot == -1) {
 		slot = static_cast<int>(casting_spell_slot);
-
+	}
 	// should we treat this as a bard singing?
 	return
 	(
-		spell_id != 0 &&
-		spell_id != SPELL_UNKNOWN &&
+		IsValidSpell(spell_id) &&
 		slot != -1 &&
 		GetClass() == BARD &&
 		slot <= EQ::spells::SPELL_GEM_COUNT &&
@@ -6188,7 +6194,7 @@ void Mob::SendPetBuffsToClient()
 
 	for(int buffslot = 0; buffslot < MaxSlots; buffslot++)
 	{
-		if(buffs[buffslot].spellid != SPELL_UNKNOWN) {
+		if (IsValidSpell(buffs[buffslot].spellid)) {
 			pbs->spellid[buffslot] = buffs[buffslot].spellid;
 			pbs->ticsremaining[buffslot] = buffs[buffslot].ticsremaining;
 			PetBuffCount++;
@@ -6220,7 +6226,7 @@ EQApplicationPacket *Mob::MakeBuffsPacket(bool for_target)
 	uint32 buff_count = for_target ? GetMaxBuffSlots() : GetMaxTotalSlots();
 	for(int i = 0; i < buff_count; ++i)
 	{
-		if(buffs[i].spellid != SPELL_UNKNOWN)
+		if (IsValidSpell(buffs[i].spellid))
 		{
 			++count;
 		}
@@ -6253,7 +6259,7 @@ EQApplicationPacket *Mob::MakeBuffsPacket(bool for_target)
 	uint32 index = 0;
 	for(int i = 0; i < buff_count; ++i)
 	{
-		if(buffs[i].spellid != SPELL_UNKNOWN)
+		if (IsValidSpell(buffs[i].spellid))
 		{
 			buff->entries[index].buff_slot = i;
 			buff->entries[index].spell_id = buffs[i].spellid;

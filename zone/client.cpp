@@ -4093,8 +4093,8 @@ void Client::DiscoverItem(uint32 item_id) {
 	}
 
 	if (parse->PlayerHasQuestSub(EVENT_DISCOVER_ITEM)) {
-		const auto* item = database.GetItem(item_id);
-		std::vector<std::any> args = {item};
+		auto* item = database.CreateItem(item_id);
+		std::vector<std::any> args = { item };
 
 		parse->EventPlayer(EVENT_DISCOVER_ITEM, this, "", item_id, &args);
 	}
@@ -6687,7 +6687,7 @@ void Client::SendStatsWindow(Client* client, bool use_window)
 	uint32 magic_rune_number = 0;
 	uint32 buff_count = GetMaxTotalSlots();
 	for (int i=0; i < buff_count; i++) {
-		if (buffs[i].spellid != SPELL_UNKNOWN) {
+		if (IsValidSpell(buffs[i].spellid)) {
 			if (buffs[i].melee_rune > 0) { rune_number += buffs[i].melee_rune; }
 
 			if (buffs[i].magic_rune > 0) { magic_rune_number += buffs[i].magic_rune; }
@@ -8494,7 +8494,7 @@ void Client::ShowNumHits()
 	uint32 buffcount = GetMaxTotalSlots();
 	for (uint32 buffslot = 0; buffslot < buffcount; buffslot++) {
 		const Buffs_Struct &curbuff = buffs[buffslot];
-		if (curbuff.spellid != SPELL_UNKNOWN && curbuff.hit_number)
+		if (IsValidSpell(curbuff.spellid) && curbuff.hit_number)
 			Message(0, "You have %d hits left on %s", curbuff.hit_number, GetSpellName(curbuff.spellid));
 	}
 	return;
