@@ -2088,7 +2088,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 	// Check for No Drop Hacks
 	Mob* with = trade->With();
 	if (((with && with->IsClient() && !with->CastToClient()->IsBecomeNPC() && dst_slot_id >= EQ::invslot::TRADE_BEGIN && dst_slot_id <= EQ::invslot::TRADE_END) ||
-		(dst_slot_id >= EQ::invslot::SHARED_BANK_BEGIN && dst_slot_id <= EQ::invbag::SHARED_BANK_BAGS_END))
+		(dst_slot_id >= EQ::invslot::SHARED_BANK_BEGIN && dst_slot_id <= EQ::invslot::SHARED_BANK_END) || (dst_slot_id >= EQ::invbag::SHARED_BANK_BAGS_BEGIN) && (dst_slot_id <= EQ::invbag::SHARED_BANK_BAGS_END))
 	&& GetInv().CheckNoDrop(src_slot_id)
 	&& !CanTradeFVNoDropItem()) {
 		auto ndh_inst = m_inv[src_slot_id];
