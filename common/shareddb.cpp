@@ -252,7 +252,8 @@ bool SharedDatabase::SaveInventory(uint32 char_id, const EQ::ItemInstance* inst,
 	if (slot_id >= EQ::invslot::GUILD_TRIBUTE_BEGIN && slot_id <= EQ::invslot::GUILD_TRIBUTE_END)
 		return true;
 
-	if (slot_id >= EQ::invslot::SHARED_BANK_BEGIN && slot_id <= EQ::invbag::SHARED_BANK_BAGS_END) {
+	if ((slot_id >= EQ::invslot::SHARED_BANK_BEGIN && slot_id <= EQ::invslot::SHARED_BANK_END) || 
+	    (slot_id >= EQ::invbag::SHARED_BANK_BAGS_BEGIN && slot_id <= EQ::invbag::SHARED_BANK_BAGS_END)) {
         // Shared bank inventory
 		if (!inst) {
 			return DeleteSharedBankSlot(char_id, slot_id);
