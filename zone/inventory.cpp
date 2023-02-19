@@ -2049,7 +2049,6 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 		(src_slot_id >= EQ::invslot::SHARED_BANK_BEGIN) && (src_slot_id <= EQ::invslot::SHARED_BANK_END) ||
 		(src_slot_id >= EQ::invbag::SHARED_BANK_BAGS_BEGIN) && (src_slot_id <= EQ::invbag::SHARED_BANK_BAGS_END)) {
 		if (!database.VerifyInventory(account_id, src_slot_id, src_inst)) {
-		if(!database.VerifyInventory(account_id, src_slot_id, src_inst)) {
 			LogError("Player [{}] on account [{}] was found exploiting the shared bank.\n", GetName(), account_name);
 			DeleteItemInInventory(dst_slot_id,0,true);
 			return(false);
@@ -2066,6 +2065,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 			}
 		}
 	}
+	
 	if (dst_inst &&
 		(dst_slot_id >= EQ::invslot::SHARED_BANK_BEGIN) && (dst_slot_id <= EQ::invslot::SHARED_BANK_END) ||
 		(dst_slot_id >= EQ::invbag::SHARED_BANK_BAGS_BEGIN) && (dst_slot_id <= EQ::invbag::SHARED_BANK_BAGS_END)) {
