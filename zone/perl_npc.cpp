@@ -584,6 +584,16 @@ bool Perl_NPC_GetCombatState(NPC* self) // @categories Script Utility
 	return self->GetCombatEvent();
 }
 
+void Perl_NPC_SetSimpleRoamBox(NPC* self, float box_size) // @categories Script Utility
+{
+	self->SetSimpleRoamBox(box_size);
+}
+
+void Perl_NPC_SetSimpleRoamBox(NPC* self, float box_size, float move_distance) // @categories Script Utility
+{
+	self->SetSimpleRoamBox(box_size, move_distance);
+}
+
 void Perl_NPC_SetSimpleRoamBox(NPC* self, float box_size, float move_distance, int move_delay) // @categories Script Utility
 {
 	self->SetSimpleRoamBox(box_size, move_distance, move_delay);
