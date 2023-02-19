@@ -3715,17 +3715,30 @@ bool Mob::HateSummon() {
 			new_pos = target->TryMoveAlong(new_pos, 5.0f, angle);
 
 			if (target->IsClient()) {
-				target->CastToClient()->MovePC(zone->GetZoneID(), zone->GetInstanceID(), new_pos.x, new_pos.y, new_pos.z, new_pos.w, 0, SummonPC);
-			}
-			else {
+				target->CastToClient()->MovePC(
+					zone->GetZoneID(),
+					zone->GetInstanceID(),
+					new_pos.x,
+					new_pos.y,
+					new_pos.z,
+					new_pos.w,
+					0,
+					SummonPC
+				);
+			} else {
 				bool target_is_client_pet = (
-												target->IsPet() &&
-												target->IsPetOwnerClient()
-											);
+					target->IsPet() &&
+					target->IsPetOwnerClient()
+				);
 				bool set_new_guard_spot = !(IsNPC() && target_is_client_pet);
 
-				target->GMMove(new_pos.x, new_pos.y, new_pos.z, new_pos.w,
-								set_new_guard_spot);
+				target->GMMove(
+					new_pos.x,
+					new_pos.y,
+					new_pos.z,
+					new_pos.w,
+					set_new_guard_spot
+				);
 			}
 
 			return true;
