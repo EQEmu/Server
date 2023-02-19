@@ -225,7 +225,7 @@ namespace RoF2
 
 		const int16 SLOT_INVALID = IINVALID;
 		const int16 SLOT_BEGIN = INULL;		
-		const int16 SLOT_COUNT = 100; // there is where you change bag size
+		const int16 SLOT_COUNT = 200; // there is where you change bag size
 		const int16 SLOT_END = SLOT_COUNT - 1; 
 
 		/* if you change slot count you will have to modify the locations below to fit the larger dimensions of bags */
