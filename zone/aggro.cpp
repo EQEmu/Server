@@ -520,7 +520,7 @@ bool Mob::CheckWillAggro(Mob *mob) {
 	) {
 		if(CheckLosFN(mob)) {
 			LogAggro("Check aggro for [{}] target [{}]", GetName(), mob->GetName());
-			return mod_will_aggro(mob, this);
+			return true;
 		}
 	} else {
 		if (
@@ -548,7 +548,7 @@ bool Mob::CheckWillAggro(Mob *mob) {
 		) {
 			if(CheckLosFN(mob)) {
 				LogAggro("Check aggro for [{}] target [{}]", GetName(), mob->GetName());
-				return mod_will_aggro(mob, this);
+				return true;
 			}
 		}
 	}
@@ -1491,19 +1491,16 @@ bool Mob::PassCharismaCheck(Mob* caster, uint16 spell_id) {
 			resist_check = ResistSpell(spells[spell_id].resist_type, spell_id, caster, false,0, false, true);
 
 		//2: The mob makes a resistance check against the charm
-		if (resist_check == 100)
+		if (resist_check == 100) {
 			return true;
-
-		else
-		{
-			if (caster->IsClient())
-			{
+		} else {
+			if (caster->IsOfClientBot()) {
 				//3: At maxed ability, Total Domination has a 50% chance of preventing the charm break that otherwise would have occurred.
 				int16 TotalDominationBonus = caster->aabonuses.CharmBreakChance + caster->spellbonuses.CharmBreakChance + caster->itembonuses.CharmBreakChance;
 
-				if (zone->random.Int(0, 99) < TotalDominationBonus)
+				if (zone->random.Int(0, 99) < TotalDominationBonus) {
 					return true;
-
+				}
 			}
 		}
 	}

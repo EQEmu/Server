@@ -172,7 +172,7 @@ public:
 				DELETE FROM {}
 				WHERE dynamic_zone_id IN ({});
 			),
-				TableName(), fmt::join(dynamic_zone_ids, ",")
+				TableName(), Strings::Join(dynamic_zone_ids, ",")
 			));
 		}
 	}

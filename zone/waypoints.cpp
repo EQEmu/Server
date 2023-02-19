@@ -165,10 +165,12 @@ void NPC::ResumeWandering()
 
 		if (m_CurrentWayPoint.x == GetX() && m_CurrentWayPoint.y == GetY())
 		{	// are we we at a waypoint? if so, trigger event and start to next
-			std::string export_string = fmt::format("{}", cur_wp);
 			CalculateNewWaypoint();
 			SetAppearance(eaStanding, false);
-			parse->EventNPC(EVENT_WAYPOINT_DEPART, this, nullptr, export_string, 0);
+
+			if (parse->HasQuestSub(GetNPCTypeID(), EVENT_WAYPOINT_DEPART)) {
+				parse->EventNPC(EVENT_WAYPOINT_DEPART, this, nullptr, std::to_string(cur_wp), 0);
+			}
 		}	// if not currently at a waypoint, we continue on to the one we were headed to before the stop
 	}
 	else
@@ -771,22 +773,34 @@ float Mob::GetFixedZ(const glm::vec3 &destination, int32 z_find_offset) {
 	float new_z = destination.z;
 
 	if (zone->HasMap()) {
-
-		if (flymode == GravityBehavior::Flying)
+		if (flymode == GravityBehavior::Flying) {
 			return new_z;
+		}
 
-		if (zone->HasWaterMap() && zone->watermap->InLiquid(glm::vec3(m_Position)))
+		if (zone->HasWaterMap() && zone->watermap->InLiquid(glm::vec3(m_Position))) {
 			return new_z;
+		}
 
-		/*
-		 * Any more than 5 in the offset makes NPC's hop/snap to ceiling in small corridors
-		 */
-		new_z = FindDestGroundZ(destination, z_find_offset);
+		new_z = FindDestGroundZ(destination, (-GetZOffset() / 2));
 		if (new_z != BEST_Z_INVALID) {
 			new_z += GetZOffset();
 
 			if (new_z < -2000) {
 				new_z = m_Position.z;
+			}
+		}
+
+		// prevent ceiling clipping
+		// if client is close in distance (not counting Z) and we clipped up into a ceiling
+		// this helps us snap back down (or up) if it were to happen
+		// other fixes were put in place to prevent clipping into the ceiling to begin with
+		if (std::abs(new_z - m_Position.z) > 15) {
+			LogFixZ("TRIGGER clipping detection");
+			auto t = GetTarget();
+			if (t && DistanceNoZ(GetPosition(), t->GetPosition()) < 20) {
+				new_z = FindDestGroundZ(t->GetPosition(), -t->GetZOffset());
+				new_z += GetZOffset();
+				GMMove(t->GetPosition().x, t->GetPosition().y, new_z, t->GetPosition().w);
 			}
 		}
 
@@ -833,6 +847,10 @@ void Mob::FixZ(int32 z_find_offset /*= 5*/, bool fix_client_z /*= false*/) {
 		}
 
 		m_Position.z = new_z;
+
+		if (RuleB(Map, MobPathingVisualDebug)) {
+			DrawDebugCoordinateNode(fmt::format("{} new fixed z node", GetCleanName()), GetPosition());
+		}
 	}
 	else {
 		if (RuleB(Map, MobZVisualDebug)) {
@@ -928,6 +946,7 @@ float Mob::GetZOffset() const {
 		case RACE_RABBIT_668:
 			offset = 5.0f;
 			break;
+		case RACE_WURM_158:
 		case RACE_BLIND_DREAMER_669:
 			offset = 7.0f;
 			break;

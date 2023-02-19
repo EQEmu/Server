@@ -1281,44 +1281,6 @@ bool Database::MoveCharacterToZone(const char *charname, uint32 zone_id)
 	return results.RowsAffected() != 0;
 }
 
-bool Database::SetHackerFlag(const char* accountname, const char* charactername, const char* hacked) {
-	std::string query = StringFormat("INSERT INTO `hackers` (account, name, hacked) values('%s','%s','%s')", accountname, charactername, hacked);
-	auto results = QueryDatabase(query);
-
-	if (!results.Success()) {
-		return false;
-	}
-
-	return results.RowsAffected() != 0;
-}
-
-bool Database::SetMQDetectionFlag(const char* accountname, const char* charactername, const char* hacked, const char* zone) {
-	//Utilize the "hacker" table, but also give zone information.
-	std::string query = StringFormat("INSERT INTO hackers(account,name,hacked,zone) values('%s','%s','%s','%s')", accountname, charactername, hacked, zone);
-	auto results = QueryDatabase(query);
-
-	if (!results.Success())
-	{
-		return false;
-	}
-
-	return results.RowsAffected() != 0;
-}
-
-bool Database::SetMQDetectionFlag(const char* accountname, const char* charactername, const std::string &hacked, const char* zone) {
-	//Utilize the "hacker" table, but also give zone information.
-	auto query = fmt::format("INSERT INTO hackers(account, name, hacked, zone) values('{}', '{}', '{}', '{}')",
-				 accountname, charactername, hacked, zone);
-	auto results = QueryDatabase(query);
-
-	if (!results.Success())
-	{
-		return false;
-	}
-
-	return results.RowsAffected() != 0;
-}
-
 uint8 Database::GetRaceSkill(uint8 skillid, uint8 in_race)
 {
 	uint16 race_cap = 0;

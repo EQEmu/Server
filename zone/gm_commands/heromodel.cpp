@@ -21,7 +21,7 @@ void command_heromodel(Client *c, const Seperator *sep)
 		t = c->GetTarget();
 	}
 
-	auto hero_forge_model = std::stoul(sep->arg[1]);
+	auto hero_forge_model = Strings::IsNumber(sep->arg[1]) ? std::stoul(sep->arg[1]) : 0;
 
 	if (arguments > 1) {
 		auto slot = static_cast<uint8>(std::stoul(sep->arg[2]));

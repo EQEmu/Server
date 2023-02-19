@@ -643,10 +643,11 @@ void Clientlist::Process()
 		while (KeyValid && !(*it)->GetForceDisconnect() && (app = (*it)->ClientStream->PopPacket())) {
 			EmuOpcode opcode = app->GetOpcode();
 
+			auto o = (*it)->ClientStream->GetOpcodeManager();
 			LogPacketClientServer(
 				"[{}] [{:#06x}] Size [{}] {}",
 				OpcodeManager::EmuToName(app->GetOpcode()),
-				(*it)->ClientStream->GetOpcodeManager()->EmuToEQ(app->GetOpcode()),
+				o->EmuToEQ(app->GetOpcode()) == 0 ? app->GetProtocolOpcode() : o->EmuToEQ(app->GetOpcode()),
 				app->Size(),
 				(LogSys.IsLogEnabled(Logs::Detail, Logs::PacketClientServer) ? DumpPacketToString(app) : "")
 			);

@@ -67,20 +67,22 @@ public:
 	Entity();
 	virtual ~Entity();
 
-	virtual bool IsClient()			const { return false; }
-	virtual bool IsNPC()			const { return false; }
-	virtual bool IsMob()			const { return false; }
-	virtual bool IsMerc()			const { return false; }
-	virtual bool IsCorpse()			const { return false; }
-	virtual bool IsPlayerCorpse()	const { return false; }
-	virtual bool IsNPCCorpse()		const { return false; }
-	virtual bool IsObject()			const { return false; }
-	virtual bool IsDoor()			const { return false; }
-	virtual bool IsTrap()			const { return false; }
-	virtual bool IsBeacon()			const { return false; }
-	virtual bool IsEncounter()		const { return false; }
-	virtual bool IsBot()            const { return false; }
-	virtual bool IsAura()			const { return false; }
+	virtual bool IsClient()			    const { return false; }
+	virtual bool IsNPC()			    const { return false; }
+	virtual bool IsMob()			    const { return false; }
+	virtual bool IsMerc()			    const { return false; }
+	virtual bool IsCorpse()			    const { return false; }
+	virtual bool IsPlayerCorpse()	    const { return false; }
+	virtual bool IsNPCCorpse()		    const { return false; }
+	virtual bool IsObject()			    const { return false; }
+	virtual bool IsDoor()			    const { return false; }
+	virtual bool IsTrap()			    const { return false; }
+	virtual bool IsBeacon()			    const { return false; }
+	virtual bool IsEncounter()		    const { return false; }
+	virtual bool IsBot()                const { return false; }
+	virtual bool IsAura()			    const { return false; }
+	virtual bool IsOfClientBot()        const { return false; }
+	virtual bool IsOfClientBotMerc()    const { return false; }
 
 	virtual bool Process() { return false; }
 	virtual bool Save() { return true; }
@@ -263,7 +265,7 @@ public:
 	void	RemoveArea(int id);
 	void	ClearAreas();
 	void	ReloadMerchants();
-	void	ProcessProximitySay(const char *Message, Client *c, uint8 language = 0);
+	void	ProcessProximitySay(const char *message, Client *c, uint8 language = 0);
 	void	SendAATimer(uint32 charid,UseAA_Struct* uaa);
 	Doors *FindDoor(uint8 door_id);
 	Object *FindObject(uint32 object_id);

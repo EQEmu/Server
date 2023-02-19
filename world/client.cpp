@@ -49,6 +49,8 @@
 #include "sof_char_create_data.h"
 #include "../common/zone_store.h"
 #include "../common/repositories/account_repository.h"
+#include "../common/repositories/player_event_logs_repository.h"
+#include "../common/events/player_event_logs.h"
 
 #include <iostream>
 #include <iomanip>
@@ -818,7 +820,8 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 				zone_id = database.MoveCharacterToBind(charid, 4);
 			} else {
 				LogInfo("[{}] is trying to go home before they're able.", char_name);
-				database.SetHackerFlag(GetAccountName(), char_name, "MQGoHome: player tried to go home before they were able.");
+				RecordPossibleHack("[MQGoHome] player tried to go home before they were able");
+
 				eqs->Close();
 				return true;
 			}
@@ -844,7 +847,8 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 				database.MoveCharacterToZone(charid, zone_id);
 			} else {
 				LogInfo("[{}] is trying to go to the Tutorial but they are not allowed.", char_name);
-				database.SetHackerFlag(GetAccountName(), char_name, "MQTutorial: player tried to enter the tutorial without having tutorial enabled for this character.");
+				RecordPossibleHack("[MQTutorial] player tried to enter the tutorial without having tutorial enabled for this character");
+
 				eqs->Close();
 				return true;
 			}
@@ -1010,10 +1014,11 @@ bool Client::HandlePacket(const EQApplicationPacket *app) {
 
 	EmuOpcode opcode = app->GetOpcode();
 
+	auto o = eqs->GetOpcodeManager();
 	LogPacketClientServer(
 		"[{}] [{:#06x}] Size [{}] {}",
 		OpcodeManager::EmuToName(app->GetOpcode()),
-		eqs->GetOpcodeManager()->EmuToEQ(app->GetOpcode()),
+		o->EmuToEQ(app->GetOpcode()) == 0 ? app->GetProtocolOpcode() : o->EmuToEQ(app->GetOpcode()),
 		app->Size(),
 		(LogSys.IsLogEnabled(Logs::Detail, Logs::PacketClientServer) ? DumpPacketToString(app) : "")
 	);
@@ -2358,4 +2363,25 @@ bool Client::StoreCharacter(
 	}
 
 	return true;
+}
+
+void Client::RecordPossibleHack(const std::string& message)
+{
+	if (player_event_logs.IsEventEnabled(PlayerEvent::POSSIBLE_HACK)) {
+		auto event = PlayerEvent::PossibleHackEvent{.message = message};
+		std::stringstream ss;
+		{
+			cereal::JSONOutputArchiveSingleLine ar(ss);
+			event.serialize(ar);
+		}
+
+		auto e = PlayerEventLogsRepository::NewEntity();
+		e.character_id    = charid;
+		e.account_id      = GetCLE() ? GetAccountID() : 0;
+		e.event_type_id   = PlayerEvent::POSSIBLE_HACK;
+		e.event_type_name = PlayerEvent::EventName[PlayerEvent::POSSIBLE_HACK];
+		e.event_data      = ss.str();
+		e.created_at      = std::time(nullptr);
+		PlayerEventLogsRepository::InsertOne(database, e);
+	}
 }

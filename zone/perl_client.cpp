@@ -2755,6 +2755,11 @@ void Perl_Client_Signal(Client* self, int signal_id)
 	self->Signal(signal_id);
 }
 
+void Perl_Client_SignalClient(Client* self, int signal_id) // @categories Script Utility
+{
+	self->Signal(signal_id);
+}
+
 std::string Perl_Client_GetGuildPublicNote(Client* self)
 {
 	return self->GetGuildPublicNote();
@@ -2885,6 +2890,11 @@ void Perl_Client_SetItemCooldown(Client* self, uint32 item_id, uint32 in_time)
 uint32 Perl_Client_GetItemCooldown(Client* self, uint32 item_id)
 {
 	return self->GetItemCooldown(item_id);
+}
+
+void Perl_Client_UseAugmentContainer(Client* self, int container_slot)
+{
+	self->UseAugmentContainer(container_slot);
 }
 
 void perl_register_client()
@@ -3357,6 +3367,7 @@ void perl_register_client()
 	package.add("SetTitleSuffix", (void(*)(Client*, std::string, bool))&Perl_Client_SetTitleSuffix);
 	package.add("SetZoneFlag", &Perl_Client_SetZoneFlag);
 	package.add("Signal", &Perl_Client_Signal);
+	package.add("SignalClient", &Perl_Client_SignalClient);
 	package.add("SilentMessage", &Perl_Client_SilentMessage);
 	package.add("Sit", &Perl_Client_Sit);
 	package.add("SlotConvert2", &Perl_Client_SlotConvert2);
@@ -3414,6 +3425,7 @@ void perl_register_client()
 	package.add("UpdateWho", (void(*)(Client*))&Perl_Client_UpdateWho);
 	package.add("UpdateWho", (void(*)(Client*, uint8))&Perl_Client_UpdateWho);
 	package.add("UseDiscipline", &Perl_Client_UseDiscipline);
+	package.add("UseAugmentContainer", &Perl_Client_UseAugmentContainer);
 	package.add("WorldKick", &Perl_Client_WorldKick);
 }
 

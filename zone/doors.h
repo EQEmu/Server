@@ -38,7 +38,7 @@ public:
 	uint16 GetSize() { return m_size; }
 	uint32 GetClientVersionMask() { return m_client_version_mask; }
 	uint32 GetDoorDBID() { return m_database_id; }
-	uint32 GetDoorParam() { return m_door_param; }
+	int32 GetDoorParam() { return m_door_param; }
 	uint32 GetEntityID() { return m_entity_id; }
 	uint32 GetGuildID() { return m_guild_id; }
 	uint32 GetKeyItem() { return m_key_item_id; }
@@ -82,7 +82,7 @@ private:
 	uint8     m_no_key_ring;
 	uint8     m_trigger_door;
 	uint8     m_trigger_type;
-	uint32    m_door_param;
+	int32     m_door_param;
 	uint16    m_size;
 	int       m_invert_state;
 	uint32    m_entity_id;

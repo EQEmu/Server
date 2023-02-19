@@ -22,26 +22,31 @@
 
 EQEmuExePlatform exe_platform = ExePlatformNone;
 
-void RegisterExecutablePlatform(EQEmuExePlatform p) {
+void RegisterExecutablePlatform(EQEmuExePlatform p)
+{
 	exe_platform = p;
 }
 
-const EQEmuExePlatform& GetExecutablePlatform() {
+const EQEmuExePlatform &GetExecutablePlatform()
+{
 	return exe_platform;
 }
 
-/**
- * @return
- */
-int GetExecutablePlatformInt(){
+int GetExecutablePlatformInt()
+{
 	return exe_platform;
 }
 
-/**
- * Returns platform name by string
- *
- * @return
- */
+bool IsWorld()
+{
+	return exe_platform == EQEmuExePlatform::ExePlatformWorld;
+}
+
+bool IsQueryServ()
+{
+	return exe_platform == EQEmuExePlatform::ExePlatformQueryServ;
+}
+
 std::string GetPlatformName()
 {
 	switch (GetExecutablePlatformInt()) {

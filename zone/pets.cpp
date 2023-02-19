@@ -194,7 +194,6 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 	if (petpower == -1) {
 		if (IsClient()) {
 			act_power = CastToClient()->GetFocusEffect(focusPetPower, spell_id);//Client only
-			act_power = CastToClient()->mod_pet_power(act_power, spell_id);
 		}
 		else if (IsBot())
 			act_power = CastToBot()->GetFocusEffect(focusPetPower, spell_id);
@@ -575,7 +574,7 @@ void NPC::GetPetState(SpellBuff_Struct *pet_buffs, uint32 *items, char *name) {
 
 	//save their buffs.
 	for (int i=EQ::invslot::EQUIPMENT_BEGIN; i < GetPetMaxTotalSlots(); i++) {
-		if (buffs[i].spellid != SPELL_UNKNOWN) {
+		if (IsValidSpell(buffs[i].spellid)) {
 			pet_buffs[i].spellid = buffs[i].spellid;
 			pet_buffs[i].effect_type = i+1;
 			pet_buffs[i].duration = buffs[i].ticsremaining;
@@ -601,7 +600,7 @@ void NPC::SetPetState(SpellBuff_Struct *pet_buffs, uint32 *items) {
 	for (i = 0; i < GetPetMaxTotalSlots(); i++) {
 		for(int z = 0; z < GetPetMaxTotalSlots(); z++) {
 		// check for duplicates
-			if(buffs[z].spellid != SPELL_UNKNOWN && buffs[z].spellid == pet_buffs[i].spellid) {
+			if(IsValidSpell(buffs[z].spellid) && buffs[z].spellid == pet_buffs[i].spellid) {
 				buffs[z].spellid = SPELL_UNKNOWN;
 				pet_buffs[i].spellid = 0xFFFFFFFF;
 			}

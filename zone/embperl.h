@@ -25,6 +25,8 @@ Eglin
 #include <perlbind/perlbind.h>
 namespace perl = perlbind;
 
+#undef Null
+
 #ifdef WIN32
 #define snprintf _snprintf
 #endif

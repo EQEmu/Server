@@ -1,11 +1,11 @@
-#ifndef EQEMU_HACKERS_REPOSITORY_H
-#define EQEMU_HACKERS_REPOSITORY_H
+#ifndef EQEMU_PLAYER_EVENT_LOG_SETTINGS_REPOSITORY_H
+#define EQEMU_PLAYER_EVENT_LOG_SETTINGS_REPOSITORY_H
 
 #include "../database.h"
 #include "../strings.h"
-#include "base/base_hackers_repository.h"
+#include "base/base_player_event_log_settings_repository.h"
 
-class HackersRepository: public BaseHackersRepository {
+class PlayerEventLogSettingsRepository: public BasePlayerEventLogSettingsRepository {
 public:
 
     /**
@@ -32,10 +32,10 @@ public:
      *
      * Example custom methods in a repository
      *
-     * HackersRepository::GetByZoneAndVersion(int zone_id, int zone_version)
-     * HackersRepository::GetWhereNeverExpires()
-     * HackersRepository::GetWhereXAndY()
-     * HackersRepository::DeleteWhereXAndY()
+     * PlayerEventLogSettingsRepository::GetByZoneAndVersion(int zone_id, int zone_version)
+     * PlayerEventLogSettingsRepository::GetWhereNeverExpires()
+     * PlayerEventLogSettingsRepository::GetWhereXAndY()
+     * PlayerEventLogSettingsRepository::DeleteWhereXAndY()
      *
      * Most of the above could be covered by base methods, but if you as a developer
      * find yourself re-using logic for other parts of the code, its best to just make a
@@ -47,4 +47,4 @@ public:
 
 };
 
-#endif //EQEMU_HACKERS_REPOSITORY_H
+#endif //EQEMU_PLAYER_EVENT_LOG_SETTINGS_REPOSITORY_H

@@ -67,6 +67,7 @@ namespace EQ
 #include "task_manager.h"
 #include "task_client_state.h"
 #include "cheat_manager.h"
+#include "../common/events/player_events.h"
 
 #ifdef _WINDOWS
 	// since windows defines these within windef.h (which windows.h include)
@@ -277,7 +278,9 @@ public:
 	void KeyRingAdd(uint32 item_id);
 	bool KeyRingCheck(uint32 item_id);
 	void KeyRingList();
-	virtual bool IsClient() const { return true; }
+	bool IsClient() const override { return true; }
+	bool IsOfClientBot() const override { return true; }
+	bool IsOfClientBotMerc() const override { return true; }
 	void CompleteConnect();
 	bool TryStacking(EQ::ItemInstance* item, uint8 type = ItemPacketTrade, bool try_worn = true, bool try_cursor = true);
 	void SendTraderPacket(Client* trader, uint32 Unknown72 = 51);
@@ -327,7 +330,6 @@ public:
 	bool ShouldISpawnFor(Client *c) { return !GMHideMe(c) && !IsHoveringForRespawn(); }
 	virtual bool Process();
 	void ProcessPackets();
-	void LogMerchant(Client* player, Mob* merchant, uint32 quantity, uint32 price, const EQ::ItemData* item, bool buying);
 	void QueuePacket(const EQApplicationPacket* app, bool ack_req = true, CLIENT_CONN_STATUS = CLIENT_CONNECTINGALL, eqFilterType filter=FilterNone);
 	void FastQueuePacket(EQApplicationPacket** app, bool ack_req = true, CLIENT_CONN_STATUS = CLIENT_CONNECTINGALL);
 	void ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_skill, const char* orig_message, const char* targetname = nullptr, bool is_silent = false);
@@ -840,9 +842,9 @@ public:
 
 	void Fling(float value, float target_x, float target_y, float target_z, bool ignore_los = false, bool clip_through_walls = false, bool calculate_speed = false);
 
-	inline bool IsStanding() const {return (playeraction == 0);}
-	inline bool IsSitting() const {return (playeraction == 1);}
-	inline bool IsCrouching() const {return (playeraction == 2);}
+	inline bool IsStanding() const { return (playeraction == 0); }
+	inline bool IsSitting() const override { return (playeraction == 1); }
+	inline bool IsCrouching() const { return (playeraction == 2); }
 	inline bool IsBecomeNPC() const { return npcflag; }
 	inline uint8 GetBecomeNPCLevel() const { return npclevel; }
 	inline void SetBecomeNPC(bool flag) { npcflag = flag; }
@@ -952,6 +954,7 @@ public:
 	void MemorizeSpell(uint32 slot, uint32 spellid, uint32 scribing, uint32 reduction = 0);
 
 	// Item methods
+	void UseAugmentContainer(int container_slot);
 	void EVENT_ITEM_ScriptStopReturn();
 	uint32 NukeItem(uint32 itemnum, uint8 where_to_check =
 			(invWhereWorn | invWherePersonal | invWhereBank | invWhereSharedBank | invWhereTrading | invWhereCursor));
@@ -1484,7 +1487,7 @@ public:
 	void ConsentCorpses(std::string consent_name, bool deny = false);
 	void SendAltCurrencies();
 	void SetAlternateCurrencyValue(uint32 currency_id, uint32 new_amount);
-	void AddAlternateCurrencyValue(uint32 currency_id, int32 amount, int8 method = 0);
+	int AddAlternateCurrencyValue(uint32 currency_id, int32 amount, int8 method = 0);
 	void SendAlternateCurrencyValues();
 	void SendAlternateCurrencyValue(uint32 currency_id, bool send_if_null = true);
 	uint32 GetAlternateCurrencyValue(uint32 currency_id) const;
@@ -1595,28 +1598,6 @@ public:
 	void Consume(const EQ::ItemData *item, uint8 type, int16 slot, bool auto_consume);
 	void PlayMP3(const char* fname);
 	void ExpeditionSay(const char *str, int ExpID);
-	int mod_client_damage(int64 damage, EQ::skills::SkillType skillinuse, int hand, const EQ::ItemInstance* weapon, Mob* other);
-	bool mod_client_message(char* message, uint8 chan_num);
-	bool mod_can_increase_skill(EQ::skills::SkillType skillid, Mob* against_who);
-	double mod_increase_skill_chance(double chance, Mob* against_who);
-	int mod_bindwound_percent(int max_percent, Mob* bindmob);
-	int mod_bindwound_hp(int bindhps, Mob* bindmob);
-	int mod_client_haste(int h);
-	void mod_consider(Mob* tmob, Consider_Struct* con);
-	bool mod_saylink(const std::string&, bool silentsaylink);
-	int16 mod_pet_power(int16 act_power, uint16 spell_id);
-	float mod_tradeskill_chance(float chance, DBTradeskillRecipe_Struct *spec);
-	float mod_tradeskill_skillup(float chance_stage2);
-	int32 mod_tribute_item_value(int32 pts, const EQ::ItemInstance* item);
-	void mod_client_death_npc(Mob* killerMob);
-	void mod_client_death_duel(Mob* killerMob);
-	void mod_client_death_env();
-	int64 mod_client_xp(int64 in_exp, NPC *npc);
-	uint32 mod_client_xp_for_level(uint32 xp, uint16 check_level);
-	int mod_client_haste_cap(int cap);
-	int mod_consume(EQ::ItemData *item, EQ::item::ItemType type, int change);
-	int mod_food_value(const EQ::ItemData *item, int change);
-	int mod_drink_value(const EQ::ItemData *item, int change);
 
 	inline int32 GetEnvironmentDamageModifier() const { return environment_damage_modifier; }
 	void SetEnvironmentDamageModifier(int32 val) { environment_damage_modifier = val; }
@@ -1676,18 +1657,18 @@ public:
 
 	std::string GetGuildPublicNote();
 
+	PlayerEvent::PlayerEvent GetPlayerEvent();
+	void RecordKilledNPCEvent(NPC *n);
 protected:
 	friend class Mob;
 	void CalcItemBonuses(StatBonuses* newbon);
 	void AddItemBonuses(const EQ::ItemInstance *inst, StatBonuses* newbon, bool isAug = false, bool isTribute = false, int rec_override = 0, bool ammo_slot_item = false);
 	void AdditiveWornBonuses(const EQ::ItemInstance *inst, StatBonuses* newbon, bool isAug = false);
-	int CalcRecommendedLevelBonus(uint8 level, uint8 reclevel, int basestat);
 	void CalcEdibleBonuses(StatBonuses* newbon);
 	void ProcessItemCaps();
 	void MakeBuffFadePacket(uint16 spell_id, int slot_id, bool send_message = true);
 	bool client_data_loaded;
 
-	uint16 GetSympatheticFocusEffect(focusType type, uint16 spell_id);
 
 	void FinishAlternateAdvancementPurchase(AA::Rank *rank, bool ignore_cost);
 
@@ -2083,6 +2064,8 @@ private:
 	bool m_bot_precombat;
 
 	bool CanTradeFVNoDropItem();
+	void SendMobPositions();
+	void PlayerTradeEventLog(Trade *t, Trade *t2);
 };
 
 #endif

@@ -25,9 +25,11 @@
 #include "object.h"
 
 #include "quest_parser_collection.h"
+#include "worldserver.h"
 #include "zonedb.h"
 #include "../common/zone_store.h"
 #include "../common/repositories/criteria/content_filter_criteria.h"
+#include "../common/events/player_event_logs.h"
 
 #include <iostream>
 
@@ -37,6 +39,7 @@ const char DEFAULT_OBJECT_NAME_SUFFIX[] = "_ACTORDEF";
 
 extern Zone* zone;
 extern EntityList entity_list;
+extern WorldServer worldserver;
 
 // Loading object from database
 Object::Object(uint32 id, uint32 type, uint32 icon, const Object_Struct& object, const EQ::ItemInstance* inst)
@@ -68,6 +71,8 @@ Object::Object(uint32 id, uint32 type, uint32 icon, const Object_Struct& object,
 	m_data.size = object.size;
 	m_data.tilt_x = object.tilt_x;
 	m_data.tilt_y = object.tilt_y;
+
+	FixZ();
 }
 
 //creating a re-ocurring ground spawn.
@@ -96,6 +101,8 @@ Object::Object(const EQ::ItemInstance* inst, char* name,float max_x,float min_x,
 	respawn_timer.Disable();
 	strcpy(m_data.object_name, name);
 	RandomSpawn(false);
+
+	FixZ();
 
 	// Hardcoded portion for unknown members
 	m_data.unknown024	= 0x7f001194;
@@ -164,6 +171,8 @@ Object::Object(Client* client, const EQ::ItemInstance* inst)
 			strcpy(m_data.object_name, DEFAULT_OBJECT_NAME);
 		}
 	}
+
+	FixZ();
 }
 
 Object::Object(const EQ::ItemInstance *inst, float x, float y, float z, float heading, uint32 decay_time)
@@ -220,6 +229,8 @@ Object::Object(const EQ::ItemInstance *inst, float x, float y, float z, float he
 			strcpy(m_data.object_name, DEFAULT_OBJECT_NAME);
 		}
 	}
+
+	FixZ();
 }
 
 Object::Object(const char *model, float x, float y, float z, float heading, uint8 type, uint32 decay_time)
@@ -243,6 +254,8 @@ Object::Object(const char *model, float x, float y, float z, float heading, uint
 	m_data.y = y;
 	m_data.z = z;
 	m_data.zone_id = zone->GetZoneID();
+
+	FixZ();
 
 	if (decay_time)
 		decay_timer.Start();
@@ -490,21 +503,25 @@ void Object::RandomSpawn(bool send_packet) {
 
 bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 {
-	if(m_ground_spawn){//This is a Cool Groundspawn
+	if(m_ground_spawn) {//This is a Cool Groundspawn
 		respawn_timer.Start();
 	}
 	if (m_type == OT_DROPPEDITEM) {
 		bool cursordelete = false;
+		bool duplicate_lore = false;
 		if (m_inst && sender) {
 			// if there is a lore conflict, delete the offending item from the server inventory
 			// the client updates itself and takes care of sending "duplicate lore item" messages
 			auto item = m_inst->GetItem();
-			if(sender->CheckLoreConflict(item)) {
+			if (sender->CheckLoreConflict(item)) {
+				duplicate_lore = true;
 				int16 loreslot = sender->GetInv().HasItem(item->ID, 0, invWhereBank);
-				if (loreslot != INVALID_INDEX) // if the duplicate is in the bank, delete it.
+				if (loreslot != INVALID_INDEX) { // if the duplicate is in the bank, delete it.
 					sender->DeleteItemInInventory(loreslot);
-				else
-					cursordelete = true;	// otherwise, we delete the new one
+				}
+				else {
+					cursordelete = true;
+				}    // otherwise, we delete the new one
 			}
 
 			if (item->RecastDelay) {
@@ -517,41 +534,49 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 				}
 			}
 
-			std::string export_string = fmt::format("{}", item->ID);
-			std::vector<std::any> args;
-			args.push_back(m_inst);
-			if(parse->EventPlayer(EVENT_PLAYER_PICKUP, sender, export_string, GetID(), &args))
-			{
-				auto outapp = new EQApplicationPacket(OP_ClickObject, sizeof(ClickObject_Struct));
-				memcpy(outapp->pBuffer, click_object, sizeof(ClickObject_Struct));
-				ClickObject_Struct* co = (ClickObject_Struct*)outapp->pBuffer;
-				co->drop_id = 0;
-				entity_list.QueueClients(nullptr, outapp, false);
-				safe_delete(outapp);
-
-				// No longer using a tradeskill object
-				sender->SetTradeskillObject(nullptr);
-				user = nullptr;
-
-				return true;
+			if (player_event_logs.IsEventEnabled(PlayerEvent::GROUNDSPAWN_PICKUP)) {
+				auto e = PlayerEvent::GroundSpawnPickupEvent{
+					.item_id = item->ID,
+					.item_name = item->Name,
+				};
+				RecordPlayerEventLogWithClient(sender, PlayerEvent::GROUNDSPAWN_PICKUP, e);
 			}
 
+			if (parse->PlayerHasQuestSub(EVENT_PLAYER_PICKUP)) {
+				std::vector<std::any> args = { m_inst };
+
+				if (parse->EventPlayer(EVENT_PLAYER_PICKUP, sender, std::to_string(item->ID), GetID(), &args)) {
+					auto outapp = new EQApplicationPacket(OP_ClickObject, sizeof(ClickObject_Struct));
+					memcpy(outapp->pBuffer, click_object, sizeof(ClickObject_Struct));
+					auto* co = (ClickObject_Struct*) outapp->pBuffer;
+					co->drop_id = 0;
+					entity_list.QueueClients(nullptr, outapp, false);
+					safe_delete(outapp);
+
+					sender->SetTradeskillObject(nullptr);
+					user = nullptr;
+
+					return true;
+				}
+			}
 
 			// Transfer item to client
 			sender->PutItemInInventory(EQ::invslot::slotCursor, *m_inst, false);
 			sender->SendItemPacket(EQ::invslot::slotCursor, m_inst, ItemPacketTrade);
 
 			// Could be an undiscovered ground_spawn
-			if (m_ground_spawn && (RuleB(Character, EnableDiscoveredItems)))
-			{
-				if (!sender->GetGM() && !sender->IsDiscovered(item->ID))
-				{
-					sender->DiscoverItem(item->ID);
-				}
+			if (
+				m_ground_spawn &&
+				RuleB(Character, EnableDiscoveredItems) &&
+				!sender->GetGM() &&
+				!sender->IsDiscovered(item->ID)
+			) {
+				sender->DiscoverItem(item->ID);
 			}
 
-			if(cursordelete)	// delete the item if it's a duplicate lore. We have to do this because the client expects the item packet
-				sender->DeleteItemInInventory(EQ::invslot::slotCursor);
+			if (cursordelete) {    // delete the item if it's a duplicate lore. We have to do this because the client expects the item packet
+				sender->DeleteItemInInventory(EQ::invslot::slotCursor, 1, true);
+			}
 
 			sender->DropItemQS(m_inst, true);
 
@@ -571,8 +596,18 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 
 		// Remove object
 		content_db.DeleteObject(m_id);
-		if(!m_ground_spawn)
+		if (!m_ground_spawn) {
 			entity_list.RemoveEntity(GetID());
+		}
+
+		// we have to delete the entity on click or the client desyncs
+		// this is a way to immediately respawn the groundspawn after killing it and
+		// deleting the item from the player
+		// I believe older clients somehow sent this automatically but we are no longer with ROF2+
+		if (duplicate_lore) {
+			sender->Message(Chat::Yellow, "Duplicate lore item detected");
+			respawn_timer.Trigger();
+		}
 	} else {
 		// Tradeskill item
 		auto outapp = new EQApplicationPacket(OP_ClickObjectAction, sizeof(ClickObjectAction_Struct));
@@ -1146,4 +1181,16 @@ void Object::SetEntityVariable(std::string variable_name, std::string variable_v
 	}
 
 	o_EntityVariables[variable_name] = variable_value;
+}
+
+void Object::FixZ()
+{
+	float best_z = BEST_Z_INVALID;
+	if (zone->zonemap != nullptr) {
+		auto dest = glm::vec3(m_data.x, m_data.y, m_data.z + 5);
+		best_z = zone->zonemap->FindBestZ(dest, nullptr);
+		if (best_z != BEST_Z_INVALID) {
+			m_data.z = best_z;
+		}
+	}
 }

@@ -148,6 +148,8 @@ const char *LuaEvents[_LargestEventID] = {
 	"event_task_before_update",
 	"event_aa_buy",
 	"event_aa_gain",
+	"event_aa_exp_gain",
+	"event_exp_gain",
 	"event_payload",
 	"event_level_down",
 	"event_gm_command",
@@ -161,7 +163,9 @@ const char *LuaEvents[_LargestEventID] = {
 	"event_damage_given",
 	"event_damage_taken",
 	"event_item_click_client",
-	"event_item_click_cast_client"
+	"event_item_click_cast_client",
+	"event_destroy_item_client",
+	"event_drop_item_client"
 };
 
 extern Zone *zone;
@@ -242,6 +246,7 @@ LuaParser::LuaParser() {
 	PlayerArgumentDispatch[EVENT_DUEL_LOSE]                  = handle_player_duel_loss;
 	PlayerArgumentDispatch[EVENT_LOOT]                       = handle_player_loot;
 	PlayerArgumentDispatch[EVENT_TASK_STAGE_COMPLETE]        = handle_player_task_stage_complete;
+	PlayerArgumentDispatch[EVENT_TASK_ACCEPTED]              = handle_player_task_accepted;
 	PlayerArgumentDispatch[EVENT_TASK_COMPLETE]              = handle_player_task_update;
 	PlayerArgumentDispatch[EVENT_TASK_UPDATE]                = handle_player_task_update;
 	PlayerArgumentDispatch[EVENT_TASK_BEFORE_UPDATE]         = handle_player_task_update;
@@ -272,6 +277,8 @@ LuaParser::LuaParser() {
 	PlayerArgumentDispatch[EVENT_INSPECT]                    = handle_player_inspect;
 	PlayerArgumentDispatch[EVENT_AA_BUY]                     = handle_player_aa_buy;
 	PlayerArgumentDispatch[EVENT_AA_GAIN]                    = handle_player_aa_gain;
+	PlayerArgumentDispatch[EVENT_AA_EXP_GAIN]                = handle_player_aa_exp_gain;
+	PlayerArgumentDispatch[EVENT_EXP_GAIN]                   = handle_player_exp_gain;
 	PlayerArgumentDispatch[EVENT_PAYLOAD]                    = handle_player_payload;
 	PlayerArgumentDispatch[EVENT_LEVEL_UP]                   = handle_player_level_up;
 	PlayerArgumentDispatch[EVENT_LEVEL_DOWN]                 = handle_player_level_down;
@@ -283,6 +290,9 @@ LuaParser::LuaParser() {
 	PlayerArgumentDispatch[EVENT_DAMAGE_TAKEN]               = handle_player_damage;
 	PlayerArgumentDispatch[EVENT_ITEM_CLICK_CAST_CLIENT]     = handle_player_item_click;
 	PlayerArgumentDispatch[EVENT_ITEM_CLICK_CLIENT]          = handle_player_item_click;
+	PlayerArgumentDispatch[EVENT_DESTROY_ITEM_CLIENT]        = handle_player_destroy_item;
+	PlayerArgumentDispatch[EVENT_TARGET_CHANGE]              = handle_player_target_change;
+	PlayerArgumentDispatch[EVENT_DROP_ITEM_CLIENT]           = handle_player_drop_item;
 
 	ItemArgumentDispatch[EVENT_ITEM_CLICK]      = handle_item_click;
 	ItemArgumentDispatch[EVENT_ITEM_CLICK_CAST] = handle_item_click;

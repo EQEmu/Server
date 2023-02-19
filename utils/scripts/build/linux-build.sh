@@ -27,5 +27,5 @@ zip -j eqemu-server-linux-x64.zip ./build/bin/*
 ls -lsh | grep zip
 sudo apt-get update && sudo apt-get install -y rclone
 rclone config create remote ftp env_auth true > /dev/null
-rclone copy eqemu-server-linux-x64.zip remote:
-rclone ls remote:
+rclone copy eqemu-server-linux-x64.zip remote: 2>&1
+rclone ls remote: 2>&1

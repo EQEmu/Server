@@ -28,8 +28,8 @@
  */
 void NpcScaleManager::ScaleNPC(
 	NPC *npc,
-	bool stats_always_scale,
-	bool special_abilities_always_scale
+	bool always_scale,
+	bool override_special_abilities
 )
 {
 	if (npc->IsSkipAutoScale() || npc->GetNPCTypeID() == 0) {
@@ -53,84 +53,84 @@ void NpcScaleManager::ScaleNPC(
 		return;
 	}
 
-	if (stats_always_scale || (npc->GetAC() == 0 && is_auto_scaled)) {
+	if (always_scale || (npc->GetAC() == 0 && is_auto_scaled)) {
 		npc->ModifyNPCStat("ac", std::to_string(scale_data.ac));
 	}
 
-	if (stats_always_scale || npc->GetMaxHP() == 0) {
+	if (always_scale || npc->GetMaxHP() == 0) {
 		npc->ModifyNPCStat("max_hp", std::to_string(scale_data.hp));
 		npc->Heal();
 	}
 
-	if (stats_always_scale || npc->GetAccuracyRating() == 0) {
+	if (always_scale || npc->GetAccuracyRating() == 0) {
 		npc->ModifyNPCStat("accuracy", std::to_string(scale_data.accuracy));
 	}
 
-	if (stats_always_scale || npc->GetSlowMitigation() == 0) {
+	if (always_scale || npc->GetSlowMitigation() == 0) {
 		npc->ModifyNPCStat("slow_mitigation", std::to_string(scale_data.slow_mitigation));
 	}
 
-	if (stats_always_scale || npc->GetATK() == 0) {
+	if (always_scale || npc->GetATK() == 0) {
 		npc->ModifyNPCStat("atk", std::to_string(scale_data.attack));
 	}
 
-	if (stats_always_scale || npc->GetSTR() == 0) {
+	if (always_scale || npc->GetSTR() == 0) {
 		npc->ModifyNPCStat("str", std::to_string(scale_data.strength));
 	}
 
-	if (stats_always_scale || npc->GetSTA() == 0) {
+	if (always_scale || npc->GetSTA() == 0) {
 		npc->ModifyNPCStat("sta", std::to_string(scale_data.stamina));
 	}
 
-	if (stats_always_scale || npc->GetDEX() == 0) {
+	if (always_scale || npc->GetDEX() == 0) {
 		npc->ModifyNPCStat("dex", std::to_string(scale_data.dexterity));
 	}
 
-	if (stats_always_scale || npc->GetAGI() == 0) {
+	if (always_scale || npc->GetAGI() == 0) {
 		npc->ModifyNPCStat("agi", std::to_string(scale_data.agility));
 	}
 
-	if (stats_always_scale || npc->GetINT() == 0) {
+	if (always_scale || npc->GetINT() == 0) {
 		npc->ModifyNPCStat("int", std::to_string(scale_data.intelligence));
 	}
 
-	if (stats_always_scale || npc->GetWIS() == 0) {
+	if (always_scale || npc->GetWIS() == 0) {
 		npc->ModifyNPCStat("wis", std::to_string(scale_data.wisdom));
 	}
 
-	if (stats_always_scale || npc->GetCHA() == 0) {
+	if (always_scale || npc->GetCHA() == 0) {
 		npc->ModifyNPCStat("cha", std::to_string(scale_data.charisma));
 	}
 
-	if (stats_always_scale || npc->GetMR() == 0) {
+	if (always_scale || npc->GetMR() == 0) {
 		npc->ModifyNPCStat("mr", std::to_string(scale_data.magic_resist));
 	}
 
-	if (stats_always_scale || npc->GetCR() == 0) {
+	if (always_scale || npc->GetCR() == 0) {
 		npc->ModifyNPCStat("cr", std::to_string(scale_data.cold_resist));
 	}
 
-	if (stats_always_scale || npc->GetFR() == 0) {
+	if (always_scale || npc->GetFR() == 0) {
 		npc->ModifyNPCStat("fr", std::to_string(scale_data.fire_resist));
 	}
 
-	if (stats_always_scale || npc->GetPR() == 0) {
+	if (always_scale || npc->GetPR() == 0) {
 		npc->ModifyNPCStat("pr", std::to_string(scale_data.poison_resist));
 	}
 
-	if (stats_always_scale || npc->GetDR() == 0) {
+	if (always_scale || npc->GetDR() == 0) {
 		npc->ModifyNPCStat("dr", std::to_string(scale_data.disease_resist));
 	}
 
-	if (stats_always_scale || (npc->GetCorrup() == 0 && is_auto_scaled)) {
+	if (always_scale || (npc->GetCorrup() == 0 && is_auto_scaled)) {
 		npc->ModifyNPCStat("cor", std::to_string(scale_data.corruption_resist));
 	}
 
-	if (stats_always_scale || (npc->GetPhR() == 0 && is_auto_scaled)) {
+	if (always_scale || (npc->GetPhR() == 0 && is_auto_scaled)) {
 		npc->ModifyNPCStat("phr", std::to_string(scale_data.physical_resist));
 	}
 
-	if (stats_always_scale || npc->GetMinDMG() == 0) {
+	if (always_scale || npc->GetMinDMG() == 0) {
 		int min_dmg = scale_data.min_dmg;
 		if (RuleB(Combat, UseNPCDamageClassLevelMods)) {
 			int32 class_level_damage_mod = GetClassLevelDamageMod(npc->GetLevel(), npc->GetClass());
@@ -142,7 +142,7 @@ void NpcScaleManager::ScaleNPC(
 		npc->ModifyNPCStat("min_hit", std::to_string(min_dmg));
 	}
 
-	if (stats_always_scale || npc->GetMaxDMG() == 0) {
+	if (always_scale || npc->GetMaxDMG() == 0) {
 		int max_dmg = scale_data.max_dmg;
 		if (RuleB(Combat, UseNPCDamageClassLevelMods)) {
 			int32 class_level_damage_mod = GetClassLevelDamageMod(npc->GetLevel(), npc->GetClass());
@@ -154,23 +154,23 @@ void NpcScaleManager::ScaleNPC(
 		npc->ModifyNPCStat("max_hit", std::to_string(max_dmg));
 	}
 
-	if (stats_always_scale || (npc->GetHPRegen() == 0 && is_auto_scaled)) {
+	if (always_scale || (npc->GetHPRegen() == 0 && is_auto_scaled)) {
 		npc->ModifyNPCStat("hp_regen", std::to_string(scale_data.hp_regen_rate));
 	}
 
-	if (stats_always_scale || npc->GetAttackDelay() == 0) {
+	if (always_scale || npc->GetAttackDelay() == 0) {
 		npc->ModifyNPCStat("attack_delay", std::to_string(scale_data.attack_delay));
 	}
 
-	if (stats_always_scale || npc->GetSpellScale() == 0) {
+	if (always_scale || npc->GetSpellScale() == 0) {
 		npc->ModifyNPCStat("spell_scale", std::to_string(scale_data.spell_scale));
 	}
 
-	if (stats_always_scale || npc->GetHealScale() == 0) {
+	if (always_scale || npc->GetHealScale() == 0) {
 		npc->ModifyNPCStat("heal_scale", std::to_string(scale_data.heal_scale));
 	}
 
-	if (special_abilities_always_scale || (!npc->HasSpecialAbilities() && is_auto_scaled)) {
+	if (override_special_abilities || (!npc->HasSpecialAbilities() && is_auto_scaled)) {
 		npc->ModifyNPCStat("special_abilities", scale_data.special_abilities);
 	}
 

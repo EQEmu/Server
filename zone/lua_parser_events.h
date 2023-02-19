@@ -383,6 +383,15 @@ void handle_player_task_stage_complete(
 	std::vector<std::any> *extra_pointers
 );
 
+void handle_player_task_accepted(
+	QuestInterface* parse,
+	lua_State* L,
+	Client* client,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any>* extra_pointers
+);
+
 void handle_player_task_update(
 	QuestInterface *parse,
 	lua_State* L,
@@ -599,6 +608,24 @@ void handle_player_aa_gain(
 	std::vector<std::any> *extra_pointers
 );
 
+void handle_player_aa_exp_gain(
+	QuestInterface *parse,
+	lua_State* L,
+	Client* client,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+);
+
+void handle_player_exp_gain(
+	QuestInterface *parse,
+	lua_State* L,
+	Client* client,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+);
+
 void handle_player_payload(
 	QuestInterface *parse,
 	lua_State* L,
@@ -672,6 +699,33 @@ void handle_player_damage(
 );
 
 void handle_player_item_click(
+	QuestInterface *parse,
+	lua_State* L,
+	Client* client,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+);
+
+void handle_player_destroy_item(
+	QuestInterface *parse,
+	lua_State* L,
+	Client* client,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+);
+
+void handle_player_target_change(
+	QuestInterface *parse,
+	lua_State* L,
+	Client* client,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+);
+
+void handle_player_drop_item(
 	QuestInterface *parse,
 	lua_State* L,
 	Client* client,

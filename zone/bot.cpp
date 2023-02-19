@@ -79,7 +79,7 @@ Bot::Bot(NPCType *npcTypeData, Client* botOwner) : NPC(npcTypeData, nullptr, glm
 	SetBotCharmer(false);
 	SetPetChooser(false);
 	SetRangerAutoWeaponSelect(false);
-	SetTaunting(GetClass() == WARRIOR);
+	SetTaunting(GetClass() == WARRIOR || GetClass() == PALADIN || GetClass() == SHADOWKNIGHT);
 	SetDefaultBotStance();
 
 	SetAltOutOfCombatBehavior(GetClass() == BARD); // will need to be updated if more classes make use of this flag
@@ -88,8 +88,6 @@ Bot::Bot(NPCType *npcTypeData, Client* botOwner) : NPC(npcTypeData, nullptr, glm
 
 	m_alt_combat_hate_timer.Start(250);
 	m_auto_defend_timer.Disable();
-	//m_combat_jitter_timer.Disable();
-	//SetCombatJitterFlag(false);
 	SetGuardFlag(false);
 	SetHoldFlag(false);
 	SetAttackFlag(false);
@@ -200,8 +198,6 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 
 	m_alt_combat_hate_timer.Start(250);
 	m_auto_defend_timer.Disable();
-	//m_combat_jitter_timer.Disable();
-	//SetCombatJitterFlag(false);
 	SetGuardFlag(false);
 	SetHoldFlag(false);
 	SetAttackFlag(false);
@@ -253,12 +249,13 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 
 	LoadAAs();
 
-	// copied from client CompleteConnect() handler - watch for problems
-	// (may have to move to post-spawn location if certain buffs still don't process correctly)
-	if (database.botdb.LoadBuffs(this) && bot_owner) {
-
+	if (!database.botdb.LoadBuffs(this)) {
+		if (bot_owner) {
+			bot_owner->Message(Chat::White, "&s for '%s'", BotDatabase::fail::LoadBuffs(), GetCleanName());
+		}
+	} else {
 		//reapply some buffs
-		uint32 buff_count = GetMaxTotalSlots();
+		uint32 buff_count = GetMaxBuffSlots();
 		for (uint32 j1 = 0; j1 < buff_count; j1++) {
 			if (!IsValidSpell(buffs[j1].spellid)) {
 				continue;
@@ -328,11 +325,6 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 					}
 					break;
 				}
-				//case SE_SummonHorse: {
-				//	SummonHorse(buffs[j1].spellid);
-				//	//hasmount = true;	//this was false, is that the correct thing?
-				//	break;
-				//}
 				case SE_Silence:
 				{
 					Silence(true);
@@ -359,12 +351,8 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 				{
 					if (!zone->CanLevitate())
 					{
-						//if (!GetGM())
-						//{
 							SendAppearancePacket(AT_Levitate, 0);
 							BuffFadeByEffect(SE_Levitate);
-							//Message(Chat::White, "You can't levitate in this zone.");
-						//}
 					}
 					else {
 						SendAppearancePacket(AT_Levitate, 2);
@@ -401,9 +389,6 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 				}
 			}
 		}
-	}
-	else {
-		bot_owner->Message(Chat::White, "&s for '%s'", BotDatabase::fail::LoadBuffs(), GetCleanName());
 	}
 
 	CalcBotStats(false);
@@ -573,7 +558,7 @@ void Bot::Stand() {
 	SetAppearance(eaStanding);
 }
 
-bool Bot::IsSitting() {
+bool Bot::IsSitting() const {
 	bool result = false;
 	if(GetAppearance() == eaSitting && !IsMoving())
 		result = true;
@@ -4775,6 +4760,33 @@ void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client*
 			}
 		}
 
+		for (int m = EQ::invaug::SOCKET_BEGIN; m <= EQ::invaug::SOCKET_END; ++m) {
+			const auto augment = trade_instance->GetAugment(m);
+			if (!augment) {
+				continue;
+			}
+
+			if (!CheckLoreConflict(augment->GetItem())) {
+				continue;
+			}
+
+			linker.SetLinkType(EQ::saylink::SayLinkItemInst);
+			linker.SetItemInst(augment);
+
+			item_link = linker.GenerateLink();
+
+			client->Message(
+					Chat::Yellow,
+					fmt::format(
+							"{} already has {}, the trade has been cancelled!",
+							GetCleanName(),
+							item_link
+					).c_str()
+			);
+			client->ResetTrade();
+			return;
+		}
+
 		if (CheckLoreConflict(trade_instance->GetItem())) {
 			if (trade_event_exists) {
 				event_trade.push_back(ClientTrade(trade_instance, trade_index));
@@ -5091,13 +5103,25 @@ void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client*
 
 			BotRemoveEquipItem(return_iterator.from_bot_slot);
 
-			const auto export_string = fmt::format(
-				"{} {}",
-				return_iterator.return_item_instance->IsStackable() ? return_iterator.return_item_instance->GetCharges() : 1,
-				return_iterator.from_bot_slot
-			);
+			if (parse->BotHasQuestSub(EVENT_UNEQUIP_ITEM_BOT)) {
+				const auto& export_string = fmt::format(
+					"{} {}",
+					return_iterator.return_item_instance->IsStackable() ? return_iterator.return_item_instance->GetCharges() : 1,
+					return_iterator.from_bot_slot
+				);
 
-			parse->EventBot(EVENT_UNEQUIP_ITEM_BOT, this, nullptr, export_string , return_iterator.return_item_instance->GetID());
+				std::vector<std::any> args = { return_iterator.return_item_instance };
+
+				parse->EventBot(
+					EVENT_UNEQUIP_ITEM_BOT,
+					this,
+					nullptr,
+					export_string,
+					return_iterator.return_item_instance->GetID(),
+					&args
+				);
+			}
+
 			if (return_instance) {
 				EQ::SayLinkEngine linker;
 				linker.SetLinkType(EQ::saylink::SayLinkItemInst);
@@ -5147,13 +5171,24 @@ void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client*
 		m_inv.PutItem(trade_iterator.to_bot_slot, *trade_iterator.trade_item_instance);
 		BotAddEquipItem(trade_iterator.to_bot_slot, (trade_iterator.trade_item_instance ? trade_iterator.trade_item_instance->GetID() : 0));
 
-		const auto export_string = fmt::format(
-			"{} {}",
-			trade_iterator.trade_item_instance->IsStackable() ? trade_iterator.trade_item_instance->GetCharges() : 1,
-			trade_iterator.to_bot_slot
-		);
+		if (parse->BotHasQuestSub(EVENT_EQUIP_ITEM_BOT)) {
+			const auto& export_string = fmt::format(
+				"{} {}",
+				trade_iterator.trade_item_instance->IsStackable() ? trade_iterator.trade_item_instance->GetCharges() : 1,
+				trade_iterator.to_bot_slot
+			);
 
-		parse->EventBot(EVENT_EQUIP_ITEM_BOT, this, nullptr, export_string , trade_iterator.trade_item_instance->GetID());
+			std::vector<std::any> args = { trade_iterator.trade_item_instance };
+
+			parse->EventBot(
+				EVENT_EQUIP_ITEM_BOT,
+				this,
+				nullptr,
+				export_string,
+				trade_iterator.trade_item_instance->GetID(),
+				&args
+			);
+		}
 
 		trade_iterator.trade_item_instance = nullptr; // actual deletion occurs in client delete below
 
@@ -5190,8 +5225,11 @@ void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client*
 			std::vector<EQ::ItemInstance*> items(insts, insts + std::size(insts));
 
 			// Check if EVENT_TRADE accepts any items
-			std::vector<std::any> item_list(items.begin(), items.end());
-			parse->EventBot(EVENT_TRADE, this, client, "", 0, &item_list);
+			if (parse->BotHasQuestSub(EVENT_TRADE)) {
+				std::vector<std::any> item_list(items.begin(), items.end());
+				parse->EventBot(EVENT_TRADE, this, client, "", 0, &item_list);
+			}
+
 			CalcBotStats(false);
 
 		} else {
@@ -5206,8 +5244,11 @@ void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client*
 			std::vector<EQ::ItemInstance*> items(insts, insts + std::size(insts));
 
 			// Check if EVENT_TRADE accepts any items
-			std::vector<std::any> item_list(items.begin(), items.end());
-			parse->EventBot(EVENT_TRADE, this, client, "", 0, &item_list);
+			if (parse->BotHasQuestSub(EVENT_TRADE)) {
+				std::vector<std::any> item_list(items.begin(), items.end());
+				parse->EventBot(EVENT_TRADE, this, client, "", 0, &item_list);
+			}
+
 			CalcBotStats(false);
 		}
 	}
@@ -5297,7 +5338,7 @@ bool Bot::Death(Mob *killerMob, int64 damage, uint16 spell_id, EQ::skills::Skill
 		my_owner->CastToClient()->SetBotPulling(false);
 	}
 
-Raid* raid = entity_list.GetRaidByBotName(this->GetName());
+Raid* raid = entity_list.GetRaidByBotName(GetName());
 	
 	if (raid) 
 	{
@@ -5311,15 +5352,17 @@ Raid* raid = entity_list.GetRaidByBotName(this->GetName());
 		}
 	}
 
-	const auto export_string = fmt::format(
-		"{} {} {} {}",
-		killerMob ? killerMob->GetID() : 0,
-		damage,
-		spell_id,
-		static_cast<int>(attack_skill)
-	);
+	if (parse->BotHasQuestSub(EVENT_DEATH_COMPLETE)) {
+		const auto& export_string = fmt::format(
+			"{} {} {} {}",
+			killerMob ? killerMob->GetID() : 0,
+			damage,
+			spell_id,
+			static_cast<int>(attack_skill)
+		);
 
-	parse->EventBot(EVENT_DEATH_COMPLETE, this, killerMob, export_string, 0);
+		parse->EventBot(EVENT_DEATH_COMPLETE, this, killerMob, export_string, 0);
+	}
 
 	entity_list.RemoveBot(GetID());
 
@@ -5331,14 +5374,17 @@ void Bot::Damage(Mob *from, int64 damage, uint16 spell_id, EQ::skills::SkillType
 		spell_id = SPELL_UNKNOWN;
 
 	//handle EVENT_ATTACK. Resets after we have not been attacked for 12 seconds
-	if(attacked_timer.Check()) {
-		LogCombat("Triggering EVENT_ATTACK due to attack by [{}]", from->GetName());
-		parse->EventBot(EVENT_ATTACK, this, from, "", 0);
+	if (attacked_timer.Check()) {
+		if (parse->BotHasQuestSub(EVENT_ATTACK)) {
+			LogCombat("Triggering EVENT_ATTACK due to attack by [{}]", from->GetName());
+
+			parse->EventBot(EVENT_ATTACK, this, from, "", 0);
+		}
 	}
 
 	attacked_timer.Start(CombatEventTimer_expire);
 	// if spell is lifetap add hp to the caster
-	if (spell_id != SPELL_UNKNOWN && IsLifetapSpell(spell_id)) {
+	if (IsValidSpell(spell_id) && IsLifetapSpell(spell_id)) {
 		int64 healed = GetActSpellHealing(spell_id, damage);
 		LogCombatDetail("Applying lifetap heal of [{}] to [{}]", healed, GetCleanName());
 		HealDamage(healed);
@@ -6379,7 +6425,17 @@ bool Bot::CastSpell(
 	return Result;
 }
 
-bool Bot::SpellOnTarget(uint16 spell_id, Mob* spelltar) {
+bool Bot::SpellOnTarget(
+		uint16 spell_id,
+		Mob *spelltar,
+		int reflect_effectiveness,
+		bool use_resist_adjust,
+		int16 resist_adjust,
+		bool isproc,
+		int level_override,
+		int duration_override,
+		bool disable_buff_overwrite
+) {
 	if (!IsValidSpell(spell_id)) {
 		return false;
 	}
@@ -7034,7 +7090,7 @@ void Bot::CalcRestState() {
 
 	uint32 buff_count = GetMaxTotalSlots();
 	for (unsigned int j = 0; j < buff_count; j++) {
-		if(buffs[j].spellid != SPELL_UNKNOWN) {
+		if(IsValidSpell(buffs[j].spellid)) {
 			if(IsDetrimentalSpell(buffs[j].spellid) && (buffs[j].ticsremaining > 0))
 				if(!DetrimentalSpellAllowsRest(buffs[j].spellid))
 					return;
@@ -7285,7 +7341,7 @@ void Bot::DoEnduranceUpkeep() {
 	uint32 buffs_i;
 	uint32 buff_count = GetMaxTotalSlots();
 	for (buffs_i = 0; buffs_i < buff_count; buffs_i++) {
-		if (buffs[buffs_i].spellid != SPELL_UNKNOWN) {
+		if (IsValidSpell(buffs[buffs_i].spellid)) {
 			int upkeep = spells[buffs[buffs_i].spellid].endurance_upkeep;
 			if(upkeep > 0) {
 				if(cost_redux > 0) {
@@ -8520,7 +8576,11 @@ void EntityList::AddBot(Bot *new_bot, bool send_spawn_packet, bool dont_queue) {
 		new_bot->SetID(GetFreeID());
 		bot_list.push_back(new_bot);
 		mob_list.insert(std::pair<uint16, Mob*>(new_bot->GetID(), new_bot));
-		parse->EventBot(EVENT_SPAWN, new_bot, nullptr, "", 0);
+
+		if (parse->BotHasQuestSub(EVENT_SPAWN)) {
+			parse->EventBot(EVENT_SPAWN, new_bot, nullptr, "", 0);
+		}
+
 		new_bot->SetSpawned();
 		if (send_spawn_packet) {
 			if (dont_queue) {
@@ -8538,7 +8598,9 @@ void EntityList::AddBot(Bot *new_bot, bool send_spawn_packet, bool dont_queue) {
 			}
 		}
 
-		new_bot->DispatchZoneControllerEvent(EVENT_SPAWN_ZONE, new_bot, "", 0, nullptr);
+		if (parse->HasQuestSub(ZONE_CONTROLLER_NPC_ID, EVENT_SPAWN_ZONE)) {
+			new_bot->DispatchZoneControllerEvent(EVENT_SPAWN_ZONE, new_bot, "", 0, nullptr);
+		}
 	}
 }
 
@@ -8860,7 +8922,7 @@ bool Bot::GetNeedsCured(Mob *tar) {
 			int buffsWithCounters = 0;
 			needCured = true;
 			for (unsigned int j = 0; j < buff_count; j++) {
-				if(tar->GetBuffs()[j].spellid != SPELL_UNKNOWN) {
+				if(IsValidSpell(tar->GetBuffs()[j].spellid)) {
 					if(CalculateCounters(tar->GetBuffs()[j].spellid) > 0) {
 						buffsWithCounters++;
 						if(buffsWithCounters == 1 && (tar->GetBuffs()[j].ticsremaining < 2 || (int32)((tar->GetBuffs()[j].ticsremaining * 6) / tar->GetBuffs()[j].counters) < 2)) {
@@ -9379,14 +9441,18 @@ void Bot::SpawnBotGroupByName(Client* c, std::string botgroup_name, uint32 leade
 
 void Bot::Signal(int signal_id)
 {
-	const auto export_string = fmt::format("{}", signal_id);
-	parse->EventBot(EVENT_SIGNAL, this, nullptr, export_string, 0);
+	if (parse->BotHasQuestSub(EVENT_SIGNAL)) {
+		parse->EventBot(EVENT_SIGNAL, this, nullptr, std::to_string(signal_id), 0);
+	}
 }
 
 void Bot::SendPayload(int payload_id, std::string payload_value)
 {
-	const auto export_string = fmt::format("{} {}", payload_id, payload_value);
-	parse->EventBot(EVENT_PAYLOAD, this, nullptr, export_string, 0);
+	if (parse->BotHasQuestSub(EVENT_PAYLOAD)) {
+		const auto& export_string = fmt::format("{} {}", payload_id, payload_value);
+
+		parse->EventBot(EVENT_PAYLOAD, this, nullptr, export_string, 0);
+	}
 }
 
 void Bot::OwnerMessage(std::string message)
@@ -9630,7 +9696,7 @@ void Bot::ListBotSpells(uint8 min_level)
 	auto spell_count = 0;
 	auto spell_number = 1;
 
-	for (const auto& s : (AIBot_spells.size() > AIBot_spells_enforced.size()) ? AIBot_spells : AIBot_spells_enforced) {
+	for (const auto& s : (GetBotEnforceSpellSetting()) ? AIBot_spells_enforced : AIBot_spells) {
 		auto b = bot_spell_settings.find(s.spellid);
 		if (b == bot_spell_settings.end() && s.minlevel >= min_level) {
 			bot_owner->Message(

@@ -1017,15 +1017,32 @@ enum Anonymity : uint8
 	Roleplaying
 };
 
-enum ZoningMessage : int8
-{
-	ZoneNoMessage = 0,
-	ZoneSuccess = 1,
-	ZoneNotReady = -1,
-	ZoneValidPC = -2,
-	ZoneStoryZone = -3,
-	ZoneNoExpansion = -6,
+enum ZoningMessage : int8 {
+	ZoneNoMessage    = 0,
+	ZoneSuccess      = 1,
+	ZoneNotReady     = -1,
+	ZoneValidPC      = -2,
+	ZoneStoryZone    = -3,
+	ZoneNoExpansion  = -6,
 	ZoneNoExperience = -7
+};
+
+enum class RecipeCountType : uint8
+{
+	Component,
+	Container,
+	Fail,
+	Salvage,
+	Success
+};
+
+#define ALT_CURRENCY_ID_RADIANT 4
+#define ALT_CURRENCY_ID_EBON 5
+
+enum ResurrectionActions
+{
+	Decline,
+	Accept
 };
 
 #endif /*COMMON_EQ_CONSTANTS_H*/

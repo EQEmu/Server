@@ -86,7 +86,7 @@ public:
 		"special_abilities"
 	};
 
-	void ScaleNPC(NPC* npc, bool always_scale_stats = false, bool always_scale_special_abilities = false);
+	void ScaleNPC(NPC* npc, bool always_scale = false, bool override_special_abilities = false);
 	void ResetNPCScaling(NPC* npc);
 	bool IsAutoScaled(NPC* npc);
 	bool LoadScaleData();

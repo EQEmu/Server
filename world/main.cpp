@@ -58,6 +58,7 @@
 
 #include "../common/unix.h"
 #include <sys/sem.h>
+#include <thread>
 
 #if not defined (FREEBSD) && not defined (DARWIN)
 union semun {
@@ -96,6 +97,7 @@ union semun {
 #include "shared_task_manager.h"
 #include "world_boot.h"
 #include "../common/path_manager.h"
+#include "../common/events/player_event_logs.h"
 
 
 ZoneStore           zone_store;
@@ -118,6 +120,7 @@ EQEmuLogSys         LogSys;
 WorldContentService content_service;
 WebInterfaceList    web_interface;
 PathManager         path;
+PlayerEventLogs     player_event_logs;
 
 void CatchSignal(int sig_num);
 
@@ -126,6 +129,13 @@ inline void UpdateWindowTitle(std::string new_title)
 #ifdef _WINDOWS
 	SetConsoleTitle(new_title.c_str());
 #endif
+}
+
+void PlayerEventQueueListener() {
+	while (RunLoops) {
+		player_event_logs.Process();
+		Sleep(1000);
+	}
 }
 
 /**
@@ -370,6 +380,13 @@ int main(int argc, char **argv)
 			);
 		}
 	);
+
+	player_event_logs.SetDatabase(&database)->Init();
+
+	if (!RuleB(Logging, PlayerEventsQSProcess)) {
+		LogInfo("[PlayerEventQueueListener] Booting queue processor");
+		std::thread(PlayerEventQueueListener).detach();
+	}
 
 	auto loop_fn = [&](EQ::Timer* t) {
 		Timer::SetCurrentTime();

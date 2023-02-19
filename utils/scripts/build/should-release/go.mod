@@ -1,6 +1,6 @@
 module should-release
 
-go 1.19
+go 1.18
 
 require (
 	github.com/google/go-github/v41 v41.0.0

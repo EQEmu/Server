@@ -999,7 +999,13 @@ void Mob::AI_Process() {
 				}
 
 				if (door->GetTriggerDoorID() > 0) {
-					continue;
+					auto trigger_door = entity_list.GetDoorsByDoorID(door->GetTriggerDoorID());
+					if (trigger_door) {
+						if (Strings::RemoveNumbers(door->GetDoorName()) !=
+							Strings::RemoveNumbers(trigger_door->GetDoorName())) {
+							continue;
+						}
+					}
 				}
 
 				if (door->GetDoorParam() > 0) {
@@ -1747,9 +1753,10 @@ void NPC::AI_DoMovement() {
 						RotateTo(m_CurrentWayPoint.w);
 					}
 
-					//kick off event_waypoint arrive
-					std::string export_string = fmt::format("{}", cur_wp);
-					parse->EventNPC(EVENT_WAYPOINT_ARRIVE, CastToNPC(), nullptr, export_string, 0);
+					if (parse->HasQuestSub(GetNPCTypeID(), EVENT_WAYPOINT_ARRIVE)) {
+						parse->EventNPC(EVENT_WAYPOINT_ARRIVE, CastToNPC(), nullptr, std::to_string(cur_wp), 0);
+					}
+
 					// No need to move as we are there.  Next loop will
 					// take care of normal grids, even at pause 0.
 					// We do need to call and setup a wp if we're cur_wp=-2
@@ -1865,9 +1872,9 @@ void NPC::AI_SetupNextWaypoint() {
 		entity_list.OpenDoorsNear(this);
 
 		if (!DistractedFromGrid) {
-			//kick off event_waypoint depart
-			std::string export_string = fmt::format("{}", cur_wp);
-			parse->EventNPC(EVENT_WAYPOINT_DEPART, CastToNPC(), nullptr, export_string, 0);
+			if (parse->HasQuestSub(GetNPCTypeID(), EVENT_WAYPOINT_DEPART)) {
+				parse->EventNPC(EVENT_WAYPOINT_DEPART, CastToNPC(), nullptr, std::to_string(cur_wp), 0);
+			}
 
 			//setup our next waypoint, if we are still on our normal grid
 			//remember that the quest event above could have done anything it wanted with our grid
@@ -1916,14 +1923,17 @@ void Mob::AI_Event_Engaged(Mob *attacker, bool yell_for_help)
 			//if the target dies before it goes off
 			if (attacker->GetHP() > 0) {
 				if (!CastToNPC()->GetCombatEvent() && GetHP() > 0) {
-					parse->EventNPC(EVENT_COMBAT, CastToNPC(), attacker, "1", 0);
+					if (parse->HasQuestSub(GetNPCTypeID(), EVENT_COMBAT)) {
+						parse->EventNPC(EVENT_COMBAT, CastToNPC(), attacker, "1", 0);
+					}
+
 					auto emote_id = GetEmoteID();
 					if (emote_id) {
 						CastToNPC()->DoNPCEmote(EQ::constants::EmoteEventTypes::EnterCombat, emoteid);
 					}
 
 					std::string mob_name = GetCleanName();
-					combat_record.Start(mob_name);
+					m_combat_record.Start(mob_name);
 					CastToNPC()->SetCombatEvent(true);
 				}
 			}
@@ -1931,7 +1941,9 @@ void Mob::AI_Event_Engaged(Mob *attacker, bool yell_for_help)
 	}
 
 	if (IsBot()) {
-		parse->EventBot(EVENT_COMBAT, CastToBot(), attacker, "1", 0);
+		if (parse->BotHasQuestSub(EVENT_COMBAT)) {
+			parse->EventBot(EVENT_COMBAT, CastToBot(), attacker, "1", 0);
+		}
 	}
 }
 
@@ -1959,17 +1971,23 @@ void Mob::AI_Event_NoLongerEngaged() {
 		if (CastToNPC()->GetCombatEvent() && GetHP() > 0) {
 			if (entity_list.GetNPCByID(GetID())) {
 				auto emote_id = CastToNPC()->GetEmoteID();
-				parse->EventNPC(EVENT_COMBAT, CastToNPC(), nullptr, "0", 0);
+
+				if (parse->HasQuestSub(GetNPCTypeID(), EVENT_COMBAT)) {
+					parse->EventNPC(EVENT_COMBAT, CastToNPC(), nullptr, "0", 0);
+				}
+
 				if (emote_id) {
 					CastToNPC()->DoNPCEmote(EQ::constants::EmoteEventTypes::LeaveCombat, emoteid);
 				}
 
-				combat_record.Stop();
+				m_combat_record.Stop();
 				CastToNPC()->SetCombatEvent(false);
 			}
 		}
 	} else if (IsBot()) {
-		parse->EventBot(EVENT_COMBAT, CastToBot(), nullptr, "0", 0);
+		if (parse->BotHasQuestSub(EVENT_COMBAT)) {
+			parse->EventBot(EVENT_COMBAT, CastToBot(), nullptr, "0", 0);
+		}
 	}
 }
 
@@ -2463,8 +2481,10 @@ void NPC::CheckSignal() {
 	if (!signal_q.empty()) {
 		int signal_id = signal_q.front();
 		signal_q.pop_front();
-		const auto export_string = fmt::format("{}", signal_id);
-		parse->EventNPC(EVENT_SIGNAL, this, nullptr, export_string, 0);
+
+		if (parse->HasQuestSub(GetNPCTypeID(), EVENT_SIGNAL)) {
+			parse->EventNPC(EVENT_SIGNAL, this, nullptr, std::to_string(signal_id), 0);
+		}
 	}
 }
 

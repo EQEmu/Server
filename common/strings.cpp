@@ -225,6 +225,20 @@ std::string Strings::Join(const std::vector<std::string> &ar, const std::string 
 	return ret;
 }
 
+std::string Strings::Join(const std::vector<uint32_t> &ar, const std::string &delim)
+{
+	std::string ret;
+	for (size_t i = 0; i < ar.size(); ++i) {
+		if (i != 0) {
+			ret += delim;
+		}
+
+		ret += std::to_string(ar[i]);
+	}
+
+	return ret;
+}
+
 void
 Strings::FindReplace(std::string &string_subject, const std::string &search_string, const std::string &replace_string)
 {
@@ -762,4 +776,24 @@ std::string Strings::Random(size_t length)
 	std::string str(length, 0);
 	std::generate_n(str.begin(), length, randchar);
 	return str;
+}
+
+// a wrapper for stoi which will return a fallback if the string
+// fails to cast to a number
+int Strings::ToInt(const std::string &s, int fallback)
+{
+	return Strings::IsNumber(s) ? std::stoi(s) : fallback;
+}
+
+std::string Strings::RemoveNumbers(std::string s)
+{
+	int      current = 0;
+	for (int i       = 0; i < s.length(); i++) {
+		if (!isdigit(s[i])) {
+			s[current] = s[i];
+			current++;
+		}
+	}
+
+	return s.substr(0, current);
 }

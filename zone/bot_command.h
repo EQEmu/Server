@@ -543,7 +543,6 @@ void bot_command_deinit(void);
 int bot_command_add(std::string bot_command_name, const char *desc, int access, BotCmdFuncPtr function);
 int bot_command_not_avail(Client *c, const char *message);
 int bot_command_real_dispatch(Client *c, char const *message);
-void bot_command_log_command(Client *c, const char *message);
 
 // Bot Commands
 void bot_command_actionable(Client *c, const Seperator *sep);

@@ -43,6 +43,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/shared_tasks.h"
 #include "shared_task_manager.h"
 #include "../common/content/world_content_service.h"
+#include "../common/repositories/player_event_logs_repository.h"
+#include "../common/events/player_event_logs.h"
 
 extern ClientList client_list;
 extern GroupLFPList LFPGroupList;
@@ -367,6 +369,30 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			}
 
 			zoneserver_list.SendPacket(pack);
+			break;
+		}
+		case ServerOP_PlayerEvent: {
+			auto                         n = PlayerEvent::PlayerEventContainer{};
+			auto                         s = (ServerSendPlayerEvent_Struct *) pack->pBuffer;
+			EQ::Util::MemoryStreamReader ss(s->cereal_data, s->cereal_size);
+			cereal::BinaryInputArchive   archive(ss);
+			archive(n);
+
+			// by default process events in world
+			// if set, process events in queryserver
+			// if you want to offload event recording to a dedicated QS instance
+			if (!RuleB(Logging, PlayerEventsQSProcess)) {
+				player_event_logs.AddToQueue(n.player_event_log);
+			}
+			else {
+				QSLink.SendPacket(pack);
+			}
+
+			// if discord enabled for event, ship to UCS to process
+			if (player_event_logs.IsEventDiscordEnabled(n.player_event_log.event_type_id)) {
+				UCSLink.SendPacket(pack);
+			}
+
 			break;
 		}
 		case ServerOP_DetailsChange: {
@@ -1356,6 +1382,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			zoneserver_list.SendPacket(pack);
 			UCSLink.SendPacket(pack);
 			LogSys.LoadLogDatabaseSettings();
+			player_event_logs.ReloadSettings();
 			break;
 		}
 		case ServerOP_ReloadTasks: {

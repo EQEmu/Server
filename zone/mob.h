@@ -514,7 +514,7 @@ public:
 	virtual bool Death(Mob* killerMob, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill) = 0;
 	virtual void Damage(Mob* from, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill,
 		bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false, eSpecialAttacks special = eSpecialAttacks::None) = 0;
-	virtual void SetHP(int64 hp);
+	void SetHP(int64 hp);
 	bool ChangeHP(Mob* other, int32 amount, uint16 spell_id = 0, int8 buffslot = -1, bool iBuffTic = false);
 	inline void SetOOCRegen(int64 new_ooc_regen) { ooc_regen = new_ooc_regen; }
 	virtual void Heal();
@@ -628,7 +628,7 @@ public:
 	virtual void SetEndurance(int32 newEnd) { return; }
 	int64 GetItemHPBonuses();
 	int64 GetSpellHPBonuses();
-	virtual const int64& SetMana(int64 amount);
+	const int64& SetMana(int64 amount);
 	inline float GetManaRatio() const { return max_mana == 0 ? 100 :
 		((static_cast<float>(current_mana) / max_mana) * 100); }
 	virtual int64 CalcMaxMana();
@@ -657,6 +657,10 @@ public:
 	inline int32 GetHeroicStrikethrough() const  { return heroic_strikethrough; }
 	inline const bool GetKeepsSoldItems() const { return keeps_sold_items; }
 	inline void SetKeepsSoldItems(bool in_keeps_sold_items)  { keeps_sold_items = in_keeps_sold_items; }
+
+	virtual bool IsSitting() const { return false; }
+
+	int CalcRecommendedLevelBonus(uint8 level, uint8 reclevel, int basestat);
 
 	void CopyHateList(Mob* to);
 
@@ -920,6 +924,7 @@ public:
 	void TryTriggerOnCastRequirement();
 	void TryTwincast(Mob *caster, Mob *target, uint32 spell_id);
 	void TrySympatheticProc(Mob *target, uint32 spell_id);
+	uint16 GetSympatheticFocusEffect(focusType type, uint16 spell_id);
 	bool TryFadeEffect(int slot);
 	uint16 GetSpellEffectResistChance(uint16 spell_id);
 	int32 GetVulnerability(Mob *caster, uint32 spell_id, uint32 ticsremaining, bool from_buff_tic = false);
@@ -1318,45 +1323,6 @@ public:
 	inline uint32 GetEmoteID() { return emoteid; }
 
 	bool HasSpellEffect(int effect_id);
-	int mod_effect_value(int effect_value, uint16 spell_id, int effect_type, Mob *caster, uint16 caster_id);
-	float mod_hit_chance(float chancetohit, EQ::skills::SkillType skillinuse, Mob *attacker);
-	float mod_riposte_chance(float ripostchance, Mob *attacker);
-	float mod_block_chance(float blockchance, Mob *attacker);
-	float mod_parry_chance(float parrychance, Mob *attacker);
-	float mod_dodge_chance(float dodgechance, Mob *attacker);
-	float mod_monk_weight(float monkweight, Mob *attacker);
-	float mod_mitigation_rating(float mitigation_rating, Mob *attacker);
-	float mod_attack_rating(float attack_rating, Mob *defender);
-	int64 mod_kick_damage(int64 dmg);
-	int64 mod_bash_damage(int64 dmg);
-	int64 mod_frenzy_damage(int64 dmg);
-	int64 mod_monk_special_damage(int64 ndamage, EQ::skills::SkillType skill_type);
-	int64 mod_backstab_damage(int64 ndamage);
-	int64 mod_archery_bonus_chance(int bonuschance, const EQ::ItemInstance *RangeWeapon);
-	uint64 mod_archery_bonus_damage(uint64 MaxDmg, const EQ::ItemInstance *RangeWeapon);
-	int64 mod_archery_damage(int64 TotalDmg, bool hasbonus, const EQ::ItemInstance *RangeWeapon);
-	uint64 mod_throwing_damage(uint64 MaxDmg);
-	int32 mod_cast_time(int32 cast_time);
-	int mod_buff_duration(int res, Mob *caster, Mob *target, uint16 spell_id);
-	int mod_spell_stack(uint16 spellid1, int caster_level1, Mob *caster1, uint16 spellid2, int caster_level2, Mob *caster2);
-	int mod_spell_resist(
-		int resist_chance,
-		int level_mod,
-		int resist_modifier,
-		int target_resist,
-		uint8 resist_type,
-		uint16 spell_id,
-		Mob *caster
-	);
-	void mod_spell_cast(
-		uint16 spell_id,
-		Mob *spelltar,
-		bool reflect,
-		bool use_resist_adjust,
-		int16 resist_adjust,
-		bool isproc
-	);
-	bool mod_will_aggro(Mob *attacker, Mob *on);
 
 	//Command #Tune functions
 	void TuneGetStats(Mob* defender, Mob *attacker);
@@ -1450,6 +1416,8 @@ public:
 	// not Bots HealRotation methods
 	void SetManualFollow(bool flag) { m_manual_follow = flag; }
 	bool GetManualFollow() const { return m_manual_follow; }
+
+	void DrawDebugCoordinateNode(std::string node_name, const glm::vec4 vec);
 
 protected:
 	void CommonDamage(Mob* other, int64 &damage, const uint16 spell_id, const EQ::skills::SkillType attack_skill, bool &avoidable, const int8 buffslot, const bool iBuffTic, eSpecialAttacks specal = eSpecialAttacks::None);
@@ -1735,7 +1703,9 @@ protected:
 	bool spawned_in_water;
 	bool is_boat;
 
-	CombatRecord combat_record{};
+	CombatRecord m_combat_record{};
+public:
+	const CombatRecord &GetCombatRecord() const;
 
 public:
 	bool GetWasSpawnedInWater() const;

@@ -332,8 +332,6 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 		int32 max_dmg = GetBaseSkillDamage(EQ::skills::SkillFrenzy, GetTarget());
 		DoAnim(anim1HWeapon, 0, false);
 
-		max_dmg = mod_frenzy_damage(max_dmg);
-
 		if (GetClass() == BERSERKER) {
 			int chance = GetLevel() * 2 + GetSkill(EQ::skills::SkillFrenzy);
 			if (zone->random.Roll0(450) < chance)
@@ -527,9 +525,6 @@ int Mob::MonkSpecialAttack(Mob *other, uint8 unchecked_type)
 	int32 ht = 0;
 	if (max_dmg > 0)
 		ht = max_dmg;
-
-	// This can potentially stack with changes to kick damage
-	ht = ndamage = mod_monk_special_damage(ndamage, skill_type);
 
 	DoSpecialAttackDamage(other, skill_type, max_dmg, min_dmg, ht, reuse);
 
@@ -2173,8 +2168,9 @@ int Mob::TryHeadShot(Mob *defender, EQ::skills::SkillType skillInUse)
 		if (HeadShot_Dmg && HeadShot_Level && (defender->GetLevel() <= HeadShot_Level)) {
 			int chance = GetDEX();
 			chance = 100 * chance / (chance + 3500);
-			if (IsClient())
-				chance += CastToClient()->GetHeroicDEX() / 25;
+			if (IsClient() || IsBot()) {
+				chance += GetHeroicDEX() / 25;
+			}
 			chance *= 10;
 			int norm = aabonuses.HSLevel[SBIndex::FINISHING_EFFECT_LEVEL_CHANCE_BONUS];
 			if (norm > 0)
@@ -2204,8 +2200,9 @@ int Mob::TryAssassinate(Mob *defender, EQ::skills::SkillType skillInUse)
 		int chance = GetDEX();
 		if (skillInUse == EQ::skills::SkillBackstab) {
 			chance = 100 * chance / (chance + 3500);
-			if (IsClient())
-				chance += CastToClient()->GetHeroicDEX();
+			if (IsClient() || IsBot()) {
+				chance += GetHeroicDEX();
+			}
 			chance *= 10;
 			int norm = aabonuses.AssassinateLevel[SBIndex::FINISHING_EFFECT_LEVEL_CHANCE_BONUS];
 			if (norm > 0)

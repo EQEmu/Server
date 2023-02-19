@@ -1378,23 +1378,23 @@ void Mob::CreateHPPacket(EQApplicationPacket* app)
 	ds->hp = (int)GetHPRatio();
 
 	// hp event
-	if (IsNPC() && (GetNextHPEvent() > 0))
-	{
-		if (ds->hp < GetNextHPEvent())
-		{
+	if (IsNPC() && (GetNextHPEvent() > 0)) {
+		if (ds->hp < GetNextHPEvent()) {
 			std::string export_string = fmt::format("{}", GetNextHPEvent());
 			SetNextHPEvent(-1);
-			parse->EventNPC(EVENT_HP, CastToNPC(), nullptr, export_string, 0);
+			if (parse->HasQuestSub(CastToNPC()->GetNPCTypeID(), EVENT_HP)) {
+				parse->EventNPC(EVENT_HP, CastToNPC(), nullptr, export_string, 0);
+			}
 		}
 	}
 
-	if (IsNPC() && (GetNextIncHPEvent() > 0))
-	{
-		if (ds->hp > GetNextIncHPEvent())
-		{
+	if (IsNPC() && (GetNextIncHPEvent() > 0)) {
+		if (ds->hp > GetNextIncHPEvent()) {
 			std::string export_string = fmt::format("{}", GetNextIncHPEvent());
 			SetNextIncHPEvent(-1);
-			parse->EventNPC(EVENT_HP, CastToNPC(), nullptr, export_string, 1);
+			if (parse->HasQuestSub(CastToNPC()->GetNPCTypeID(), EVENT_HP)) {
+				parse->EventNPC(EVENT_HP, CastToNPC(), nullptr, export_string, 1);
+			}
 		}
 	}
 }
@@ -2331,7 +2331,7 @@ void Mob::ShowBuffs(Client* client) {
 	uint32 i;
 	uint32 buff_count = GetMaxTotalSlots();
 	for (i=0; i < buff_count; i++) {
-		if (buffs[i].spellid != SPELL_UNKNOWN) {
+		if (IsValidSpell(buffs[i].spellid)) {
 			if (spells[buffs[i].spellid].buff_duration_formula == DF_Permanent)
 				client->Message(Chat::White, "  %i: %s: Permanent", i, spells[buffs[i].spellid].name);
 			else
@@ -2365,7 +2365,7 @@ void Mob::ShowBuffList(Client* client) {
 	uint32 i;
 	uint32 buff_count = GetMaxTotalSlots();
 	for (i = 0; i < buff_count; i++) {
-		if (buffs[i].spellid != SPELL_UNKNOWN) {
+		if (IsValidSpell(buffs[i].spellid)) {
 			if (spells[buffs[i].spellid].buff_duration_formula == DF_Permanent)
 				client->Message(Chat::White, "  %i: %s: Permanent", i, spells[buffs[i].spellid].name);
 			else
@@ -4103,7 +4103,7 @@ void Mob::ExecWeaponProc(const EQ::ItemInstance *inst, uint16 spell_id, Mob *on,
 		return;
 	}
 
-	if(spell_id == SPELL_UNKNOWN || on->GetSpecialAbility(NO_HARM_FROM_CLIENT)) {
+	if(!IsValidSpell(spell_id) || on->GetSpecialAbility(NO_HARM_FROM_CLIENT)) {
 		//This is so 65535 doesn't get passed to the client message and to logs because it is not relavant information for debugging.
 		return;
 	}
@@ -4139,9 +4139,19 @@ void Mob::ExecWeaponProc(const EQ::ItemInstance *inst, uint16 spell_id, Mob *on,
 		//const cast is dirty but it would require redoing a ton of interfaces at this point
 		//It should be safe as we don't have any truly const EQ::ItemInstance floating around anywhere.
 		//So we'll live with it for now
-		int i = parse->EventItem(EVENT_WEAPON_PROC, CastToClient(), const_cast<EQ::ItemInstance*>(inst), on, "", spell_id);
-		if(i != 0) {
-			return;
+		if (parse->ItemHasQuestSub(const_cast<EQ::ItemInstance*>(inst), EVENT_WEAPON_PROC)) {
+			int i = parse->EventItem(
+				EVENT_WEAPON_PROC,
+				CastToClient(),
+				const_cast<EQ::ItemInstance*>(inst),
+				on,
+				"",
+				spell_id
+			);
+
+			if (i != 0) {
+				return;
+			}
 		}
 	}
 
@@ -4245,19 +4255,36 @@ void Mob::SetTarget(Mob *mob)
 	target = mob;
 	entity_list.UpdateHoTT(this);
 
-	if (IsNPC()) {
-		parse->EventNPC(EVENT_TARGET_CHANGE, CastToNPC(), mob, "", 0);
+	const auto has_target_change_event = (
+		parse->HasQuestSub(GetNPCTypeID(), EVENT_TARGET_CHANGE) ||
+		parse->PlayerHasQuestSub(EVENT_TARGET_CHANGE) ||
+		parse->BotHasQuestSub(EVENT_TARGET_CHANGE)
+	);
+
+	if (IsClient() && CastToClient()->admin > AccountStatus::GMMgmt) {
+		DisplayInfo(mob);
 	}
-	else if (IsClient()) {
-		parse->EventPlayer(EVENT_TARGET_CHANGE, CastToClient(), "", 0);
 
-		if (CastToClient()->admin > AccountStatus::GMMgmt) {
-			DisplayInfo(mob);
+	if (has_target_change_event) {
+		std::vector<std::any> args;
+
+		args.emplace_back(mob);
+
+		if (IsNPC()) {
+			if (parse->HasQuestSub(GetNPCTypeID(), EVENT_TARGET_CHANGE)) {
+				parse->EventNPC(EVENT_TARGET_CHANGE, CastToNPC(), mob, "", 0, &args);
+			}
+		} else if (IsClient()) {
+			if (parse->PlayerHasQuestSub(EVENT_TARGET_CHANGE)) {
+				parse->EventPlayer(EVENT_TARGET_CHANGE, CastToClient(), "", 0, &args);
+			}
+
+			CastToClient()->SetBotPrecombat(false); // Any change in target will nullify this flag (target == mob checked above)
+		} else if (IsBot()) {
+			if (parse->BotHasQuestSub(EVENT_TARGET_CHANGE)) {
+				parse->EventBot(EVENT_TARGET_CHANGE, CastToBot(), mob, "", 0, &args);
+			}
 		}
-
-		CastToClient()->SetBotPrecombat(false); // Any change in target will nullify this flag (target == mob checked above)
-	} else if (IsBot()) {
-		parse->EventBot(EVENT_TARGET_CHANGE, CastToBot(), mob, "", 0);
 	}
 
 	if (IsPet() && GetOwner() && GetOwner()->IsClient()) {
@@ -4337,8 +4364,9 @@ int Mob::CountDispellableBuffs()
 		if(spells[buffs[x].spellid].good_effect == 0)
 			continue;
 
-		if(buffs[x].spellid != SPELL_UNKNOWN &&	spells[buffs[x].spellid].buff_duration_formula != DF_Permanent)
+		if(IsValidSpell(buffs[x].spellid) && spells[buffs[x].spellid].buff_duration_formula != DF_Permanent) {
 			val++;
+		}
 	}
 	return val;
 }
@@ -4630,7 +4658,7 @@ void Mob::TryTwincast(Mob *caster, Mob *target, uint32 spell_id)
 		return;
 	}
 
-	if (IsClient() || IsBot())
+	if (IsOfClientBot())
 	{
 		int focus = GetFocusEffect(focusTwincast, spell_id);
 
@@ -4899,9 +4927,9 @@ bool Mob::TryFadeEffect(int slot)
 				if(spell_id)
 				{
 
-					if(spell_id == SPELL_UNKNOWN)
+					if (!IsValidSpell(spell_id)) {
 						return false;
-
+					}
 					if(IsValidSpell(spell_id))
 					{
 						if (IsBeneficialSpell(spell_id)) {
@@ -4924,7 +4952,7 @@ void Mob::TrySympatheticProc(Mob *target, uint32 spell_id)
 	if(target == nullptr || !IsValidSpell(spell_id) || !IsClient())
 		return;
 
-	uint16 focus_spell = CastToClient()->GetSympatheticFocusEffect(focusSympatheticProc,spell_id);
+	uint16 focus_spell = GetSympatheticFocusEffect(focusSympatheticProc,spell_id);
 
 	if(!IsValidSpell(focus_spell))
 		return;
@@ -5258,7 +5286,7 @@ void Mob::DoKnockback(Mob *caster, uint32 push_back, uint32 push_up)
 
 void Mob::TrySpellOnKill(uint8 level, uint16 spell_id)
 {
-	if (spell_id != SPELL_UNKNOWN)
+	if (IsValidSpell(spell_id))
 	{
 		if(IsEffectInSpell(spell_id, SE_ProcOnSpellKillShot)) {
 			for (int i = 0; i < EFFECT_COUNT; i++) {
@@ -5355,32 +5383,35 @@ int16 Mob::GetCritDmgMod(uint16 skill, Mob* owner)
 
 void Mob::SetGrouped(bool v)
 {
-	if(v)
-	{
+	if (v) {
 		israidgrouped = false;
 	}
+
 	isgrouped = v;
 
-	if(IsClient())
-	{
+	if (IsClient()) {
+		if (parse->PlayerHasQuestSub(EVENT_GROUP_CHANGE)) {
 			parse->EventPlayer(EVENT_GROUP_CHANGE, CastToClient(), "", 0);
+		}
 
-		if(!v)
+		if (!v) {
 			CastToClient()->RemoveGroupXTargets();
+		}
 	}
 }
 
 void Mob::SetRaidGrouped(bool v)
 {
-	if(v)
-	{
+	if (v) {
 		isgrouped = false;
 	}
+
 	israidgrouped = v;
 
-	if(IsClient())
-	{
-		parse->EventPlayer(EVENT_GROUP_CHANGE, CastToClient(), "", 0);
+	if (IsClient()) {
+		if (parse->PlayerHasQuestSub(EVENT_GROUP_CHANGE)) {
+			parse->EventPlayer(EVENT_GROUP_CHANGE, CastToClient(), "", 0);
+		}
 	}
 }
 
@@ -5569,7 +5600,7 @@ void Mob::DoGravityEffect()
 	int buff_count = GetMaxTotalSlots();
 	for (int slot = 0; slot < buff_count; slot++)
 	{
-		if (buffs[slot].spellid != SPELL_UNKNOWN && IsEffectInSpell(buffs[slot].spellid, SE_GravityEffect))
+		if (IsValidSpell(buffs[slot].spellid) && IsEffectInSpell(buffs[slot].spellid, SE_GravityEffect))
 		{
 			for (int i = 0; i < EFFECT_COUNT; i++)
 			{
@@ -6140,19 +6171,20 @@ FACTION_VALUE Mob::GetSpecialFactionCon(Mob* iOther) {
 
 bool Mob::HasSpellEffect(int effect_id)
 {
-    int i;
+	int i;
 
-    int buff_count = GetMaxTotalSlots();
-    for(i = 0; i < buff_count; i++)
-    {
-        if(buffs[i].spellid == SPELL_UNKNOWN) { continue; }
+	int buff_count = GetMaxTotalSlots();
+	for(i = 0; i < buff_count; i++)
+	{
+		if (!IsValidSpell(buffs[i].spellid)) {
+			continue;
+		}
 
-        if(IsEffectInSpell(buffs[i].spellid, effect_id))
-        {
-            return(1);
-        }
-    }
-    return(0);
+		if (IsEffectInSpell(buffs[i].spellid, effect_id)) {
+			return(1);
+		}
+	}
+	return(0);
 }
 
 int Mob::GetSpecialAbility(int ability)

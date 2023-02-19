@@ -1113,7 +1113,7 @@ void Merc::DoEnduranceUpkeep() {
 	uint32 buffs_i;
 	uint32 buff_count = GetMaxTotalSlots();
 	for (buffs_i = 0; buffs_i < buff_count; buffs_i++) {
-		if (buffs[buffs_i].spellid != SPELL_UNKNOWN) {
+		if (IsValidSpell(buffs[buffs_i].spellid)) {
 			int upkeep = spells[buffs[buffs_i].spellid].endurance_upkeep;
 			if(upkeep > 0) {
 				has_effect = true;
@@ -1158,7 +1158,7 @@ void Merc::CalcRestState() {
 
 	uint32 buff_count = GetMaxTotalSlots();
 	for (unsigned int j = 0; j < buff_count; j++) {
-		if(buffs[j].spellid != SPELL_UNKNOWN) {
+		if(IsValidSpell(buffs[j].spellid)) {
 			if(IsDetrimentalSpell(buffs[j].spellid) && (buffs[j].ticsremaining > 0))
 				if(!DetrimentalSpellAllowsRest(buffs[j].spellid))
 					return;
@@ -2579,7 +2579,7 @@ int64 Merc::GetFocusEffect(focusType type, uint16 spell_id, bool from_buff_tic) 
 			if (equipment[x] == 0)
 				continue;
 			TempItem = database.GetItem(equipment[x]);
-			if (TempItem && TempItem->Focus.Effect > 0 && TempItem->Focus.Effect != SPELL_UNKNOWN) {
+			if (TempItem && IsValidSpell(TempItem->Focus.Effect)) {
 				if(rand_effectiveness) {
 					focus_max = CalcFocusEffect(type, TempItem->Focus.Effect, spell_id, true);
 					if (focus_max > 0 && focus_max_real >= 0 && focus_max > focus_max_real) {
@@ -3895,7 +3895,7 @@ bool Merc::GetNeedsCured(Mob *tar) {
 			needCured = true;
 
 			for (unsigned int j = 0; j < buff_count; j++) {
-				if(tar->GetBuffs()[j].spellid != SPELL_UNKNOWN) {
+				if (IsValidSpell(tar->GetBuffs()[j].spellid)) {
 					if(CalculateCounters(tar->GetBuffs()[j].spellid) > 0) {
 						buffsWithCounters++;
 
@@ -4292,7 +4292,7 @@ void Merc::Stand() {
 	SetAppearance(eaStanding);
 }
 
-bool Merc::IsSitting() {
+bool Merc::IsSitting() const {
 	bool result = false;
 
 	if(GetAppearance() == eaSitting && !IsMoving())
