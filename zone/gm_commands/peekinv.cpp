@@ -112,7 +112,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 		Chat::White,
 		fmt::format(
 			"Displaying inventory of {}.",
-			c->GetTargetDescription(t, TargetDescriptionType::UCSelf)
+			c->GetTargetDescription(t)
 		).c_str()
 	);
 
