@@ -9320,7 +9320,7 @@ void bot_subcommand_inventory_remove(Client *c, const Seperator *sep)
 		return;
 	}
 
-	const auto* inst = my_bot->GetBotItem(slot_id);
+	auto* inst = my_bot->GetBotItem(slot_id);
 	if (!inst) {
 		std::string slot_message = "is";
 		switch (slot_id) {
