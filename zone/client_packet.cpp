@@ -2144,7 +2144,7 @@ void Client::Handle_OP_AdventureMerchantRequest(const EQApplicationPacket *app)
 				theme = LDoNThemes::RUJ;
 			} else if (item->LDoNTheme & LDoNThemeBits::MMCBit) {
 				theme = LDoNThemes::MMC;
-			} else if (item->LDoNTheme & LDoNThemeBits::RUJBit) {
+			} else if (item->LDoNTheme & LDoNThemeBits::MIRBit) {
 				theme = LDoNThemes::MIR;
 			} else if (item->LDoNTheme & LDoNThemeBits::GUKBit) {
 				theme = LDoNThemes::GUK;
