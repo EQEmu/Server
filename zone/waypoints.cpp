@@ -781,26 +781,24 @@ float Mob::GetFixedZ(const glm::vec3 &destination, int32 z_find_offset) {
 			return new_z;
 		}
 
-		new_z = FindDestGroundZ(destination, (-GetZOffset() / 2));
+		new_z = FindDestGroundZ(destination, ((-GetZOffset() / 2) + z_find_offset));
+
+		if (RuleB(Map, MobPathingVisualDebug)) {
+			DrawDebugCoordinateNode(
+				fmt::format("{} search z node", GetCleanName()),
+				glm::vec4{
+					m_Position.x,
+					m_Position.y,
+					((-GetZOffset() / 2) + z_find_offset),
+					m_Position.w
+				}
+			);
+		}
 		if (new_z != BEST_Z_INVALID) {
 			new_z += GetZOffset();
 
 			if (new_z < -2000) {
 				new_z = m_Position.z;
-			}
-		}
-
-		// prevent ceiling clipping
-		// if client is close in distance (not counting Z) and we clipped up into a ceiling
-		// this helps us snap back down (or up) if it were to happen
-		// other fixes were put in place to prevent clipping into the ceiling to begin with
-		if (std::abs(new_z - m_Position.z) > 15) {
-			LogFixZ("TRIGGER clipping detection");
-			auto t = GetTarget();
-			if (t && DistanceNoZ(GetPosition(), t->GetPosition()) < 20) {
-				new_z = FindDestGroundZ(t->GetPosition(), -t->GetZOffset());
-				new_z += GetZOffset();
-				GMMove(t->GetPosition().x, t->GetPosition().y, new_z, t->GetPosition().w);
 			}
 		}
 

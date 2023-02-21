@@ -1427,6 +1427,8 @@ protected:
 	int _GetRunSpeed() const;
 	int _GetFearSpeed() const;
 
+	Timer m_z_clip_check_timer;
+
 	virtual bool AI_EngagedCastCheck() { return(false); }
 	virtual bool AI_PursueCastCheck() { return(false); }
 	virtual bool AI_IdleCastCheck() { return(false); }
