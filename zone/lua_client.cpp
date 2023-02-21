@@ -3038,6 +3038,12 @@ void Lua_Client::UseAugmentContainer(int container_slot)
 	self->UseAugmentContainer(container_slot);
 }
 
+bool Lua_Client::IsAutoFireEnabled()
+{
+	Lua_Safe_Call_Bool();
+	return self->AutoFireEnabled();
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 	.def(luabind::constructor<>())
@@ -3296,6 +3302,7 @@ luabind::scope lua_register_client() {
 	.def("IncreaseSkill", (void(Lua_Client::*)(int))&Lua_Client::IncreaseSkill)
 	.def("IncreaseSkill", (void(Lua_Client::*)(int,int))&Lua_Client::IncreaseSkill)
 	.def("IncrementAA", (void(Lua_Client::*)(int))&Lua_Client::IncrementAA)
+	.def("IsAutoFireEnabled", (bool(Lua_Client::*)(void))&Lua_Client::IsAutoFireEnabled)
 	.def("IsCrouching", (bool(Lua_Client::*)(void))&Lua_Client::IsCrouching)
 	.def("IsDead", &Lua_Client::IsDead)
 	.def("IsDueling", (bool(Lua_Client::*)(void))&Lua_Client::IsDueling)
