@@ -1074,7 +1074,6 @@ void Mob::AI_Process() {
 		if (IsNPC() && m_z_clip_check_timer.Check()) {
 			auto t = GetTarget();
 			if (t && DistanceNoZ(GetPosition(), t->GetPosition()) < 75 && std::abs(GetPosition().z - t->GetPosition().z) > 15 && !CheckLosFN(t)) {
-				LogDebug("Clip detection [{}]", GetCleanName());
 				GMMove(t->GetPosition().x, t->GetPosition().y, t->GetPosition().z, t->GetPosition().w);
 				FaceTarget(t);
 			}
