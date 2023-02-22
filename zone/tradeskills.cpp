@@ -469,29 +469,13 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 	}
 
 	//pull the list of components so we can compare during lore check
-	std::string query = fmt::format("SELECT tre.item_id "
-	                                 "FROM tradeskill_recipe_entries AS tre "
-	                                 "WHERE tre.componentcount > 0 AND tre.recipe_id = {}",
+	const auto query = fmt::format("SELECT item_id "
+	                                 "FROM tradeskill_recipe_entries "
+	                                 "WHERE componentcount > 0 AND recipe_id = {}",
 	                                 spec.recipe_id);
 	auto results = content_db.QueryDatabase(query);
 
-	if (!results.Success()) {
-		auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
-		user->QueuePacket(outapp);
-		safe_delete(outapp);
-		return;
-	}
-
-	if(results.RowCount() < 1) {
-		LogTradeskills("Error in HandleCombine: no components returned");
-		auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
-		user->QueuePacket(outapp);
-		safe_delete(outapp);
-		return;
-	}
-
-	if(results.RowCount() > 10) {
-		LogTradeskills("Error in HandleCombine: too many components returned ({})", results.RowCount());
+	if(!results.Success() || results.RowCount() < 1 || results.RowCount() > 10) {
 		auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
 		user->QueuePacket(outapp);
 		safe_delete(outapp);
@@ -641,9 +625,9 @@ void Object::HandleAutoCombine(Client* user, const RecipeAutoCombine_Struct* rac
 	}
 
     //pull the list of components
-	std::string query = fmt::format("SELECT tre.item_id, tre.componentcount "
-                                    "FROM tradeskill_recipe_entries AS tre "
-                                    "WHERE tre.componentcount > 0 AND tre.recipe_id = {}",
+	const auto query = fmt::format("SELECT item_id, componentcount "
+                                    "FROM tradeskill_recipe_entries "
+                                    "WHERE componentcount > 0 AND recipe_id = {}",
                                     rac->recipe_id);
     auto results = content_db.QueryDatabase(query);
 	if (!results.Success()) {
@@ -1898,8 +1882,18 @@ bool ZoneDatabase::DisableRecipe(uint32 recipe_id)
 bool Client::CheckTradeskillLoreConflict(DBTradeskillRecipe_Struct& spec, MySQLRequestResult& results)
 {
 	std::vector< std::pair<uint32,uint8>> lore_conflict_list;
-	std::merge(spec.onsuccess.begin(), spec.onsuccess.end(), spec.onfail.begin(), spec.onfail.end(), std::back_inserter(lore_conflict_list));
-	std::merge(lore_conflict_list.begin(), lore_conflict_list.end(), spec.salvage.begin(), spec.salvage.end(), std::back_inserter(lore_conflict_list));
+
+	std::merge(
+			spec.onsuccess.begin(), spec.onsuccess.end(),
+			spec.onfail.begin(), spec.onfail.end(),
+			std::back_inserter(lore_conflict_list)
+	);
+
+	std::merge(
+			lore_conflict_list.begin(), lore_conflict_list.end(),
+			spec.salvage.begin(), spec.salvage.end(),
+			std::back_inserter(lore_conflict_list)
+	);
 
 	for (auto& e : lore_conflict_list) {
 		if (e.first) {
@@ -1907,14 +1901,16 @@ bool Client::CheckTradeskillLoreConflict(DBTradeskillRecipe_Struct& spec, MySQLR
 			if (!item_inst || item_inst->LoreGroup > 0) {
 				continue;
 			}
-			for (auto row = results.begin(); row != results.end(); ++row) {
+
+			for (auto row : results) {
 				if (row[0]) {
-					auto component_item_inst = atoi(row[0]);
+					auto component_item_inst = Strings::ToInt(row[0]);
 					if (component_item_inst == item_inst->ID) {
 						continue;
 					}
 				}
 			}
+
 			if (CheckLoreConflict(item_inst)) {
 				EQ::SayLinkEngine linker;
 				linker.SetLinkType(EQ::saylink::SayLinkItemData);
