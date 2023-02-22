@@ -475,7 +475,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 	                                 spec.recipe_id);
 	auto results = content_db.QueryDatabase(query);
 
-	if(!results.Success() || results.RowCount() < 1 || results.RowCount() > 10) {
+	if (!results.Success() || results.RowCount() < 1 || results.RowCount() > 10) {
 		auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
 		user->QueuePacket(outapp);
 		safe_delete(outapp);
