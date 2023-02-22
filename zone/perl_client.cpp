@@ -2897,6 +2897,11 @@ void Perl_Client_UseAugmentContainer(Client* self, int container_slot)
 	self->UseAugmentContainer(container_slot);
 }
 
+bool Perl_Client_IsAutoAttackEnabled(Client* self)
+{
+	return self->AutoAttackEnabled();
+}
+
 void perl_register_client()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -3159,6 +3164,7 @@ void perl_register_client()
 	package.add("IncreaseSkill", (void(*)(Client*, int))&Perl_Client_IncreaseSkill);
 	package.add("IncreaseSkill", (void(*)(Client*, int, int))&Perl_Client_IncreaseSkill);
 	package.add("IncrementAA", &Perl_Client_IncrementAA);
+	package.add("IsAutoAttackEnabled", &Perl_Client_IsAutoAttackEnabled);
 	package.add("IsBecomeNPC", &Perl_Client_IsBecomeNPC);
 	package.add("IsCrouching", &Perl_Client_IsCrouching);
 	package.add("IsDueling", &Perl_Client_IsDueling);
