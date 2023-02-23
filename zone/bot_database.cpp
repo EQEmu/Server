@@ -639,10 +639,11 @@ bool BotDatabase::DeleteBot(const uint32 bot_id)
 
 bool BotDatabase::LoadBuffs(Bot* bot_inst)
 {
-	if (!bot_inst)
+	if (!bot_inst) {
 		return false;
+	}
 
-	query = StringFormat(
+	query = fmt::format(
 		"SELECT"
 		" `spell_id`,"
 		" `caster_level`,"
@@ -663,45 +664,60 @@ bool BotDatabase::LoadBuffs(Bot* bot_inst)
 		" `extra_di_chance`,"
 		" `instrument_mod`"
 		" FROM `bot_buffs`"
-		" WHERE `bot_id` = '%u'",
+		" WHERE `bot_id` = '{}'",
 		bot_inst->GetBotID()
 	);
 	auto results = database.QueryDatabase(query);
-	if (!results.Success())
+	if (!results.Success()) {
 		return false;
-	if (!results.RowCount())
+	}
+	if (!results.RowCount()) {
 		return true;
+	}
 
 	Buffs_Struct* bot_buffs = bot_inst->GetBuffs();
-	if (!bot_buffs)
+
+	if (!bot_buffs) {
 		return false;
+	}
+
+	uint32 max_slots = bot_inst->GetMaxBuffSlots();
+	for (int index = 0; index < max_slots; index++) {
+		bot_buffs[index].spellid = SPELL_UNKNOWN;
+	}
 
 	int buff_count = 0;
 	for (auto row = results.begin(); row != results.end() && buff_count < BUFF_COUNT; ++row) {
-		bot_buffs[buff_count].spellid = atoi(row[0]);
-		bot_buffs[buff_count].casterlevel = atoi(row[1]);
+		bot_buffs[buff_count].spellid = atoul(row[0]);
+		bot_buffs[buff_count].casterlevel = atoul(row[1]);
 		//row[2] (duration_formula) can probably be removed
-		bot_buffs[buff_count].ticsremaining = atoi(row[3]);
+		bot_buffs[buff_count].ticsremaining = Strings::ToInt(row[3]);
 
-		if (CalculatePoisonCounters(bot_buffs[buff_count].spellid) > 0)
-			bot_buffs[buff_count].counters = atoi(row[4]);
-		else if (CalculateDiseaseCounters(bot_buffs[buff_count].spellid) > 0)
-			bot_buffs[buff_count].counters = atoi(row[5]);
-		else if (CalculateCurseCounters(bot_buffs[buff_count].spellid) > 0)
-			bot_buffs[buff_count].counters = atoi(row[6]);
-		else if (CalculateCorruptionCounters(bot_buffs[buff_count].spellid) > 0)
-			bot_buffs[buff_count].counters = atoi(row[7]);
+		if (CalculatePoisonCounters(bot_buffs[buff_count].spellid) > 0) {
+			bot_buffs[buff_count].counters = atoul(row[4]);
+		}
+		else if (CalculateDiseaseCounters(bot_buffs[buff_count].spellid) > 0) {
+			bot_buffs[buff_count].counters = atoul(row[5]);
+		}
+		else if (CalculateCurseCounters(bot_buffs[buff_count].spellid) > 0) {
+			bot_buffs[buff_count].counters = atoul(row[6]);
+		}
+		else if (CalculateCorruptionCounters(bot_buffs[buff_count].spellid) > 0) {
+			bot_buffs[buff_count].counters = atoul(row[7]);
+		} else {
+			bot_buffs[buff_count].counters = 0;
+		}
 
-		bot_buffs[buff_count].hit_number = atoi(row[8]);
-		bot_buffs[buff_count].melee_rune = atoi(row[9]);
-		bot_buffs[buff_count].magic_rune = atoi(row[10]);
-		bot_buffs[buff_count].dot_rune = atoi(row[11]);
-		bot_buffs[buff_count].persistant_buff = ((atoi(row[12])) ? (true) : (false));
-		bot_buffs[buff_count].caston_x = atoi(row[13]);
-		bot_buffs[buff_count].caston_y = atoi(row[14]);
-		bot_buffs[buff_count].caston_z = atoi(row[15]);
-		bot_buffs[buff_count].ExtraDIChance = atoi(row[16]);
-		bot_buffs[buff_count].instrument_mod = atoi(row[17]);
+		bot_buffs[buff_count].hit_number = atoul(row[8]);
+		bot_buffs[buff_count].melee_rune = atoul(row[9]);
+		bot_buffs[buff_count].magic_rune = atoul(row[10]);
+		bot_buffs[buff_count].dot_rune = atoul(row[11]);
+		bot_buffs[buff_count].persistant_buff = (Strings::ToBool(row[12])) != 0;
+		bot_buffs[buff_count].caston_x = Strings::ToInt(row[13]);
+		bot_buffs[buff_count].caston_y = Strings::ToInt(row[14]);
+		bot_buffs[buff_count].caston_z = Strings::ToInt(row[15]);
+		bot_buffs[buff_count].ExtraDIChance = Strings::ToInt(row[16]);
+		bot_buffs[buff_count].instrument_mod = atoul(row[17]);
 		bot_buffs[buff_count].casterid = 0;
 		++buff_count;
 	}
