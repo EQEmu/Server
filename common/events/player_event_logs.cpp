@@ -607,7 +607,7 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 	return payload;
 }
 
-// general process function, used in world or UCS depending on rule Logging:PlayerEventsQSProcess
+// general process function, used in world or QS depending on rule Logging:PlayerEventsQSProcess
 void PlayerEventLogs::Process()
 {
 	if (m_process_batch_events_timer.Check()) {

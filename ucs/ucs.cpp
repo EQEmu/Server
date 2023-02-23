@@ -179,8 +179,6 @@ int main() {
 	std::signal(SIGKILL, CatchSignal);
 	std::signal(SIGSEGV, CatchSignal);
 
-	std::thread(PlayerEventQueueListener).detach();
-
 	worldserver = new WorldServer;
 
 	// uncomment to simulate timed crash for catching SIGSEV

@@ -131,12 +131,6 @@ inline void UpdateWindowTitle(std::string new_title)
 #endif
 }
 
-void PlayerEventQueueListener() {
-	while (RunLoops) {
-		player_event_logs.Process();
-		Sleep(1000);
-	}
-}
 
 /**
  * World process entrypoint
@@ -381,12 +375,8 @@ int main(int argc, char **argv)
 		}
 	);
 
+	Timer player_event_process_timer(1000);
 	player_event_logs.SetDatabase(&database)->Init();
-
-	if (!RuleB(Logging, PlayerEventsQSProcess)) {
-		LogInfo("[PlayerEventQueueListener] Booting queue processor");
-		std::thread(PlayerEventQueueListener).detach();
-	}
 
 	auto loop_fn = [&](EQ::Timer* t) {
 		Timer::SetCurrentTime();
@@ -434,6 +424,10 @@ int main(int argc, char **argv)
 		event_scheduler.Process(&zoneserver_list);
 
 		client_list.Process();
+
+		if (player_event_process_timer.Check()) {
+			player_event_logs.Process();
+		}
 
 		if (PurgeInstanceTimer.Check()) {
 			database.PurgeExpiredInstances();
