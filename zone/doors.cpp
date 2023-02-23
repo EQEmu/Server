@@ -54,10 +54,11 @@ Doors::Doors(const DoorsRepository::Doors &door) :
 	strn0cpy(m_destination_zone_name, door.dest_zone.c_str(), sizeof(m_destination_zone_name));
 
 	// destination helpers
-	if (Strings::ToLower(door.dest_zone) != "none" && !door.dest_zone.empty()) {
+	if (!door.dest_zone.empty() && Strings::ToLower(door.dest_zone) != "none" && !door.dest_zone.empty()) {
 		m_has_destination_zone = true;
 	}
-	if (Strings::ToLower(door.dest_zone) == Strings::ToLower(door.zone)) {
+	if (!door.dest_zone.empty() && !door.zone.empty() &&
+		Strings::ToLower(door.dest_zone) == Strings::ToLower(door.zone)) {
 		m_same_destination_zone = true;
 	}
 

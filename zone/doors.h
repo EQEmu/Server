@@ -72,8 +72,8 @@ public:
 
 private:
 
-	bool      m_has_destination_zone;
-	bool      m_same_destination_zone;
+	bool      m_has_destination_zone = false;
+	bool      m_same_destination_zone = false;
 	uint32    m_database_id;
 	uint8     m_door_id;
 	char      m_zone_name[32];
