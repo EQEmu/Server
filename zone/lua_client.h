@@ -466,6 +466,7 @@ public:
 	void SetItemCooldown(uint32 item_id, uint32 in_time);
 	uint32 GetItemCooldown(uint32 item_id);
 	void UseAugmentContainer(int container_slot);
+	bool IsAutoAttackEnabled();
 	bool IsAutoFireEnabled();
 
 	void ApplySpell(int spell_id);
