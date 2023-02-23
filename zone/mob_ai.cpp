@@ -1626,87 +1626,134 @@ void NPC::AI_DoMovement() {
 
 		// Set a new destination
 		if (!IsMoving() && time_until_can_move < Timer::GetCurrentTime()) {
-			auto move_x = static_cast<float>(zone->random.Real(-roambox_distance, roambox_distance));
-			auto move_y = static_cast<float>(zone->random.Real(-roambox_distance, roambox_distance));
 
-			roambox_destination_x = EQ::Clamp((GetX() + move_x), roambox_min_x, roambox_max_x);
-			roambox_destination_y = EQ::Clamp((GetY() + move_y), roambox_min_y, roambox_max_y);
+			// make several attempts to find a valid next move in the box
+			bool can_path = false;
+			for (int i = 0; i < 10; i++) {
+				auto move_x      = static_cast<float>(zone->random.Real(-roambox_distance, roambox_distance));
+				auto move_y      = static_cast<float>(zone->random.Real(-roambox_distance, roambox_distance));
+				auto requested_x = EQ::Clamp((GetX() + move_x), roambox_min_x, roambox_max_x);
+				auto requested_y = EQ::Clamp((GetY() + move_y), roambox_min_y, roambox_max_y);
+				auto requested_z = GetGroundZ(requested_x, requested_y);
 
-			/**
-			 * If our roambox was configured with large distances, chances of hitting the min or max end of
-			 * the clamp is high, this causes NPC's to gather on the border of a box, to reduce clustering
-			 * either lower the roambox distance or the code will do a simple random between min - max when it
-			 * hits the min or max of the clamp
-			 */
-			if (roambox_destination_x == roambox_min_x || roambox_destination_x == roambox_max_x) {
-				roambox_destination_x = static_cast<float>(zone->random.Real(roambox_min_x, roambox_max_x));
-			}
+				std::vector<float> heights = {0, 250, -250};
+				for (auto &h: heights) {
+					if (CheckLosFN(requested_x, requested_y, requested_z + h, GetSize())) {
+						LogNPCRoamBox(
+							"[{}] Found line of sight to path attempt [{}] at height [{}]",
+							GetCleanName(),
+							i,
+							h
+						);
+						can_path = true;
+						break;
+					}
+				}
 
-			if (roambox_destination_y == roambox_min_y || roambox_destination_y == roambox_max_y) {
-				roambox_destination_y = static_cast<float>(zone->random.Real(roambox_min_y, roambox_max_y));
-			}
+				if (!can_path) {
+					LogNPCRoamBox(
+						"[{}] | Failed line of sight to path attempt [{}]",
+						GetCleanName(),
+						i
+					);
+					continue;
+				}
 
-			/**
-			 * If mob was not spawned in water, let's not randomly roam them into water
-			 * if the roam box was sloppily configured
-			 */
-			if (!GetWasSpawnedInWater()) {
-				roambox_destination_z = GetGroundZ(roambox_destination_x, roambox_destination_y);
-				if (zone->HasMap() && zone->HasWaterMap()) {
+				roambox_destination_x = requested_x;
+				roambox_destination_y = requested_y;
+
+				/**
+				 * If our roambox was configured with large distances, chances of hitting the min or max end of
+				 * the clamp is high, this causes NPC's to gather on the border of a box, to reduce clustering
+				 * either lower the roambox distance or the code will do a simple random between min - max when it
+				 * hits the min or max of the clamp
+				 */
+				if (roambox_destination_x == roambox_min_x || roambox_destination_x == roambox_max_x) {
+					roambox_destination_x = static_cast<float>(zone->random.Real(roambox_min_x, roambox_max_x));
+				}
+
+				if (roambox_destination_y == roambox_min_y || roambox_destination_y == roambox_max_y) {
+					roambox_destination_y = static_cast<float>(zone->random.Real(roambox_min_y, roambox_max_y));
+				}
+
+				/**
+				 * If mob was not spawned in water, let's not randomly roam them into water
+				 * if the roam box was sloppily configured
+				 */
+				if (!GetWasSpawnedInWater()) {
+					roambox_destination_z = GetGroundZ(roambox_destination_x, roambox_destination_y);
+					if (zone->HasMap() && zone->HasWaterMap()) {
+						auto position = glm::vec3(
+							roambox_destination_x,
+							roambox_destination_y,
+							roambox_destination_z
+						);
+
+						/**
+						 * If someone brought us into water when we naturally wouldn't path there, return to spawn
+						 */
+						if (zone->watermap->InLiquid(position) && zone->watermap->InLiquid(m_Position)) {
+							roambox_destination_x = m_SpawnPoint.x;
+							roambox_destination_y = m_SpawnPoint.y;
+						}
+
+						if (zone->watermap->InLiquid(position)) {
+							LogNPCRoamBoxDetail("[{}] | My destination is in water and I don't belong there!", GetCleanName());
+
+							return;
+						}
+					}
+				}
+				else { // Mob was in water, make sure new spot is in water also
+					roambox_destination_z = m_Position.z;
 					auto position = glm::vec3(
 						roambox_destination_x,
 						roambox_destination_y,
-						roambox_destination_z
+						m_Position.z + 15
 					);
-
-					/**
-					 * If someone brought us into water when we naturally wouldn't path there, return to spawn
-					 */
-					if (zone->watermap->InLiquid(position) && zone->watermap->InLiquid(m_Position)) {
+					if (zone->HasWaterMap() && !zone->watermap->InLiquid(position)) {
 						roambox_destination_x = m_SpawnPoint.x;
 						roambox_destination_y = m_SpawnPoint.y;
-					}
-
-					if (zone->watermap->InLiquid(position)) {
-						LogNPCRoamBoxDetail("[{}] | My destination is in water and I don't belong there!", GetCleanName());
-
-						return;
+						roambox_destination_z = m_SpawnPoint.z;
 					}
 				}
-			}
-			else { // Mob was in water, make sure new spot is in water also
-				roambox_destination_z = m_Position.z;
-				auto position = glm::vec3(
+
+				LogNPCRoamBox(
+					"[{}] | Pathing to [{}] [{}] [{}]",
+					GetCleanName(),
 					roambox_destination_x,
 					roambox_destination_y,
-					m_Position.z + 15
+					roambox_destination_z
 				);
-				if (zone->HasWaterMap() && !zone->watermap->InLiquid(position)) {
-					roambox_destination_x = m_SpawnPoint.x;
-					roambox_destination_y = m_SpawnPoint.y;
-					roambox_destination_z = m_SpawnPoint.z;
+
+				LogNPCRoamBox(
+					"NPC ({}) distance [{}] X (min/max) [{} / {}] Y (min/max) [{} / {}] | Dest x/y/z [{} / {} / {}]",
+					GetCleanName(),
+					roambox_distance,
+					roambox_min_x,
+					roambox_max_x,
+					roambox_min_y,
+					roambox_max_y,
+					roambox_destination_x,
+					roambox_destination_y,
+					roambox_destination_z
+				);
+
+				if (can_path) {
+					SetCurrentWP(EQ::WaypointStatus::RoamBoxPauseInProgress);
+					NavigateTo(roambox_destination_x, roambox_destination_y, roambox_destination_z);
+					return;
 				}
 			}
 
-			LogNPCRoamBox("[{}] | Pathing to [{}] [{}] [{}]", GetCleanName(),
-				roambox_destination_x, roambox_destination_y,
-				roambox_destination_z);
-
-			LogNPCRoamBox(
-				"NPC ({}) distance [{}] X (min/max) [{} / {}] Y (min/max) [{} / {}] | Dest x/y/z [{} / {} / {}]",
-				GetCleanName(),
-				roambox_distance,
-				roambox_min_x,
-				roambox_max_x,
-				roambox_min_y,
-				roambox_max_y,
-				roambox_destination_x,
-				roambox_destination_y,
-				roambox_destination_z
+			// failed to find path, reset timer
+			int roambox_move_delay = EQ::ClampLower(GetRoamboxDelay(), GetRoamboxMinDelay());
+			int move_delay_max     = (roambox_move_delay > 0 ? roambox_move_delay : (int) GetRoamboxMinDelay() * 4);
+			int random_timer       = RandomTimer(
+				GetRoamboxMinDelay(),
+				move_delay_max
 			);
-
-			SetCurrentWP(EQ::WaypointStatus::RoamBoxPauseInProgress);
-			NavigateTo(roambox_destination_x, roambox_destination_y, roambox_destination_z);
+			time_until_can_move = Timer::GetCurrentTime() + random_timer;
 		}
 
 		return;
