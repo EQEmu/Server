@@ -69,6 +69,7 @@ public:
 		int32_t     expansion_bitmask;
 		uint8_t     enforce_spell_settings;
 		uint8_t     archery_setting;
+		uint32_t    caster_range;
 	};
 
 	static std::string PrimaryKey()
@@ -129,6 +130,7 @@ public:
 			"expansion_bitmask",
 			"enforce_spell_settings",
 			"archery_setting",
+			"caster_range",
 		};
 	}
 
@@ -185,6 +187,7 @@ public:
 			"expansion_bitmask",
 			"enforce_spell_settings",
 			"archery_setting",
+			"caster_range",
 		};
 	}
 
@@ -275,6 +278,7 @@ public:
 		e.expansion_bitmask      = -1;
 		e.enforce_spell_settings = 0;
 		e.archery_setting        = 0;
+		e.caster_range           = 0;
 
 		return e;
 	}
@@ -361,6 +365,7 @@ public:
 			e.expansion_bitmask      = static_cast<int32_t>(atoi(row[47]));
 			e.enforce_spell_settings = static_cast<uint8_t>(strtoul(row[48], nullptr, 10));
 			e.archery_setting        = static_cast<uint8_t>(strtoul(row[49], nullptr, 10));
+			e.caster_range           = static_cast<uint32_t>(strtoul(row[50], nullptr, 10));
 
 			return e;
 		}
@@ -443,6 +448,7 @@ public:
 		v.push_back(columns[47] + " = " + std::to_string(e.expansion_bitmask));
 		v.push_back(columns[48] + " = " + std::to_string(e.enforce_spell_settings));
 		v.push_back(columns[49] + " = " + std::to_string(e.archery_setting));
+		v.push_back(columns[50] + " = " + std::to_string(e.caster_range));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -514,6 +520,7 @@ public:
 		v.push_back(std::to_string(e.expansion_bitmask));
 		v.push_back(std::to_string(e.enforce_spell_settings));
 		v.push_back(std::to_string(e.archery_setting));
+		v.push_back(std::to_string(e.caster_range));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -593,6 +600,7 @@ public:
 			v.push_back(std::to_string(e.expansion_bitmask));
 			v.push_back(std::to_string(e.enforce_spell_settings));
 			v.push_back(std::to_string(e.archery_setting));
+			v.push_back(std::to_string(e.caster_range));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
@@ -676,6 +684,7 @@ public:
 			e.expansion_bitmask      = static_cast<int32_t>(atoi(row[47]));
 			e.enforce_spell_settings = static_cast<uint8_t>(strtoul(row[48], nullptr, 10));
 			e.archery_setting        = static_cast<uint8_t>(strtoul(row[49], nullptr, 10));
+			e.caster_range           = static_cast<uint32_t>(strtoul(row[50], nullptr, 10));
 
 			all_entries.push_back(e);
 		}
@@ -750,6 +759,7 @@ public:
 			e.expansion_bitmask      = static_cast<int32_t>(atoi(row[47]));
 			e.enforce_spell_settings = static_cast<uint8_t>(strtoul(row[48], nullptr, 10));
 			e.archery_setting        = static_cast<uint8_t>(strtoul(row[49], nullptr, 10));
+			e.caster_range           = static_cast<uint32_t>(strtoul(row[50], nullptr, 10));
 
 			all_entries.push_back(e);
 		}

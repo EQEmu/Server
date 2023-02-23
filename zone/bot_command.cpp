@@ -1366,6 +1366,7 @@ int bot_command_init(void)
 		bot_command_add("bottitle", "Sets a bots title", AccountStatus::Player, bot_subcommand_bot_title) ||
 		bot_command_add("botupdate", "Updates a bot to reflect any level changes that you have experienced", AccountStatus::Player, bot_subcommand_bot_update) ||
 		bot_command_add("botwoad", "Changes the Barbarian woad of a bot", AccountStatus::Player, bot_subcommand_bot_woad) ||
+		bot_command_add("casterrange", "Controls the range casters will try to stay away from a mob (if too far, they will skip spells that are out-of-range)", AccountStatus::Player, bot_command_caster_range) ||
 		bot_command_add("charm", "Attempts to have a bot charm your target", AccountStatus::Player, bot_command_charm) ||
 		bot_command_add("circle", "Orders a Druid bot to open a magical doorway to a specified destination", AccountStatus::Player, bot_subcommand_circle) ||
 		bot_command_add("cure", "Orders a bot to remove any ailments", AccountStatus::Player, bot_command_cure) ||
@@ -10847,4 +10848,54 @@ void bot_command_enforce_spell_list(Client* c, const Seperator *sep)
 			my_bot->GetBotEnforceSpellSetting() ? "enforced" : "optional"
 		).c_str()
 	);
+}
+
+void bot_command_caster_range(Client* c, const Seperator* sep)
+{
+	if (helper_command_alias_fail(c, "bot_command_caster_range", sep->arg[0], "casterrange")) {
+		return;
+	}
+	if (helper_is_help_or_usage(sep->arg[1])) {
+		c->Message(Chat::White, "usage: <target_bot> %s [current | value: 0 - 300].", sep->arg[0]);
+		c->Message(Chat::White, "note: Can only be used for Casters or Hybrids.");
+		c->Message(Chat::White, "note: Use [current] to check the current setting.");
+		c->Message(Chat::White, "note: Set the value to the minimum distance you want your bot to try to remain from its target.");
+		c->Message(Chat::White, "note: If they are too far for a spell, it will be skipped.");
+		return;
+	}
+
+	auto my_bot = ActionableBots::AsTarget_ByBot(c);
+	if (!my_bot) {
+		c->Message(Chat::White, "You must <target> a bot that you own to use this command.");
+		return;
+	}
+	if (!IsCasterClass(my_bot->GetClass()) && !IsHybridClass(my_bot->GetClass())) {
+		c->Message(Chat::White, "You must <target> a caster or hybrid class to use this command.");
+		return;
+	}
+
+	uint32 crange = 0;
+	if (sep->IsNumber(1)) {
+		crange = atoi(sep->arg[1]);
+		if (crange >= 0 && crange <= 300) {
+			my_bot->SetBotCasterRange(crange);
+			if (!database.botdb.SaveBotCasterRange(c->CharacterID(), my_bot->GetBotID(), crange)) {
+				c->Message(Chat::White, "%s for '%s'", BotDatabase::fail::SaveBotCasterRange(), my_bot->GetCleanName());
+				return;
+			}
+			else {
+				c->Message(Chat::White, "Successfully set Caster Range for %s to %u.", my_bot->GetCleanName(), crange);
+			}
+		}
+		else {
+			c->Message(Chat::White, "You must enter a value within the range of 0 - 300.");
+			return;
+		}
+	}
+	else if (!strcasecmp(sep->arg[1], "current")) {
+		c->Message(Chat::White, "My current range is %u.", my_bot->GetBotCasterRange());
+	}
+	else {
+		c->Message(Chat::White, "Incorrect argument, use help for a list of options.");
+	}
 }
