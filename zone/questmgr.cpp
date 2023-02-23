@@ -88,13 +88,13 @@ void QuestManager::Process() {
 	end = QTimerList.end();
 	while (cur != end) {
 		if (cur->Timer_.Enabled() && cur->Timer_.Check()) {
-			if (entity_list.IsMobInZone(cur->mob)) {
-				if (cur->mob && cur->mob->IsNPC()) {
+			if (cur->mob && entity_list.IsMobInZone(cur->mob)) {
+				if (cur->mob->IsNPC()) {
 					if (parse->HasQuestSub(cur->mob->GetNPCTypeID(), EVENT_TIMER)) {
 						parse->EventNPC(EVENT_TIMER, cur->mob->CastToNPC(), nullptr, cur->name, 0);
 					}
 				}
-				else if (cur->mob && cur->mob->IsEncounter()) {
+				else if (cur->mob->IsEncounter()) {
 					parse->EventEncounter(
 						EVENT_TIMER,
 						cur->mob->CastToEncounter()->GetEncounterName(),
@@ -103,13 +103,13 @@ void QuestManager::Process() {
 						nullptr
 					);
 				}
-				else if (cur->mob && cur->mob->IsClient()) {
+				else if (cur->mob->IsClient()) {
 					if (parse->PlayerHasQuestSub(EVENT_TIMER)) {
 						//this is inheriently unsafe if we ever make it so more than npc/client start timers
 						parse->EventPlayer(EVENT_TIMER, cur->mob->CastToClient(), cur->name, 0);
 					}
 				}
-				else if (cur->mob && cur->mob->IsBot()) {
+				else if (cur->mob->IsBot()) {
 					if (parse->BotHasQuestSub(EVENT_TIMER)) {
 						parse->EventBot(EVENT_TIMER, cur->mob->CastToBot(), nullptr, cur->name, 0);
 					}
