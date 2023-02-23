@@ -66,14 +66,14 @@ void NPC::AI_SetRoambox(
 	uint32 min_delay
 )
 {
-	roambox_distance      = distance;
-	roambox_max_x         = max_x;
-	roambox_min_x         = min_x;
-	roambox_max_y         = max_y;
-	roambox_min_y         = min_y;
-	roambox_destination_x = roambox_max_x + 1; // this will trigger a recalc
-	roambox_delay         = delay;
-	roambox_min_delay     = min_delay;
+	m_roambox.distance  = distance;
+	m_roambox.max_x     = max_x;
+	m_roambox.min_x     = min_x;
+	m_roambox.max_y     = max_y;
+	m_roambox.min_y     = min_y;
+	m_roambox.dest_x    = max_x + 1; // this will trigger a recalc
+	m_roambox.delay     = delay;
+	m_roambox.min_delay = min_delay;
 }
 
 void NPC::DisplayWaypointInfo(Client *client) {

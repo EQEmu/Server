@@ -2240,16 +2240,16 @@ void Bot::AI_Bot_Init()
 	AIautocastspell_timer.reset(nullptr);
 	casting_spell_AIindex = static_cast<uint8>(AIBot_spells.size());
 
-	roambox_max_x = 0;
-	roambox_max_y = 0;
-	roambox_min_x = 0;
-	roambox_min_y = 0;
-	roambox_distance = 0;
-	roambox_destination_x = 0;
-	roambox_destination_y = 0;
-	roambox_destination_z = 0;
-	roambox_min_delay = 2500;
-	roambox_delay = 2500;
+	m_roambox.max_x     = 0;
+	m_roambox.max_y     = 0;
+	m_roambox.min_x     = 0;
+	m_roambox.min_y     = 0;
+	m_roambox.distance  = 0;
+	m_roambox.dest_x    = 0;
+	m_roambox.dest_y    = 0;
+	m_roambox.dest_z    = 0;
+	m_roambox.delay     = 2500;
+	m_roambox.min_delay = 2500;
 }
 
 void Bot::SpellProcess() {
