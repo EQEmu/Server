@@ -37,7 +37,12 @@ public:
 
 	bool DoesTableExist(std::string table_name);
 
-	void SetMySQL(const DBcore& o) { mysql = o.mysql; mysqlOwner = false; }
+	void SetMySQL(const DBcore &o)
+	{
+		mysql      = o.mysql;
+		mysqlOwner = false;
+	}
+	void SetMutex(Mutex *mutex);
 
 protected:
 	bool Open(
@@ -56,8 +61,8 @@ private:
 	bool Open(uint32 *errnum = nullptr, char *errbuf = nullptr);
 
 	MYSQL*  mysql;
-	bool	mysqlOwner;
-	Mutex   MDatabase;
+	bool    mysqlOwner;
+	Mutex   *m_mutex;
 	eStatus pStatus;
 
 	std::mutex m_query_lock{};

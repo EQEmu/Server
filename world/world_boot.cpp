@@ -30,6 +30,8 @@
 extern ZSList      zoneserver_list;
 extern WorldConfig Config;
 
+auto mutex = new Mutex;
+
 void WorldBoot::GMSayHookCallBackProcessWorld(uint16 log_category, const char *func, std::string message)
 {
 	// we don't want to loop up with chat messages
@@ -136,9 +138,7 @@ bool WorldBoot::LoadDatabaseConnections()
 		return false;
 	}
 
-	/**
-	 * Multi-tenancy: Content database
-	 */
+	// Multi-tenancy - content database
 	if (!c->ContentDbHost.empty()) {
 		if (!content_db.Connect(
 			c->ContentDbHost.c_str(),
@@ -154,6 +154,11 @@ bool WorldBoot::LoadDatabaseConnections()
 	}
 	else {
 		content_db.SetMySQL(database);
+		// when database and content_db share the same underlying mysql connection
+		// it needs to be protected by a shared mutex otherwise we produce concurrency issues
+		// when database actions are occurring in different threads
+		database.SetMutex(mutex);
+		content_db.SetMutex(mutex);
 	}
 
 	return true;
@@ -650,5 +655,10 @@ void WorldBoot::CheckForPossibleConfigurationIssues()
 		);
 		std::cout << std::endl;
 	}
+}
+
+void WorldBoot::Shutdown()
+{
+	safe_delete(mutex);
 }
 

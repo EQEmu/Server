@@ -43,7 +43,7 @@ DBcore::DBcore()
 	pCompress       = false;
 	pSSL            = false;
 	pStatus         = Closed;
-
+	m_mutex         = new Mutex;
 }
 
 DBcore::~DBcore()
@@ -66,12 +66,12 @@ DBcore::~DBcore()
 // Sends the MySQL server a keepalive
 void DBcore::ping()
 {
-	if (!MDatabase.trylock()) {
+	if (!m_mutex->trylock()) {
 		// well, if's it's locked, someone's using it. If someone's using it, it doesnt need a keepalive
 		return;
 	}
 	mysql_ping(mysql);
-	MDatabase.unlock();
+	m_mutex->unlock();
 }
 
 MySQLRequestResult DBcore::QueryDatabase(std::string query, bool retryOnFailureOnce)
@@ -92,7 +92,7 @@ MySQLRequestResult DBcore::QueryDatabase(const char *query, uint32 querylen, boo
 	BenchTimer timer;
 	timer.reset();
 
-	LockMutex lock(&MDatabase);
+	LockMutex lock(m_mutex);
 
 	// Reconnect if we are not connected before hand.
 	if (pStatus != Connected) {
@@ -217,7 +217,7 @@ bool DBcore::Open(
 	bool iSSL
 )
 {
-	LockMutex lock(&MDatabase);
+	LockMutex lock(m_mutex);
 	safe_delete_array(pHost);
 	safe_delete_array(pUser);
 	safe_delete_array(pPassword);
@@ -237,7 +237,7 @@ bool DBcore::Open(uint32 *errnum, char *errbuf)
 	if (errbuf) {
 		errbuf[0] = 0;
 	}
-	LockMutex lock(&MDatabase);
+	LockMutex lock(m_mutex);
 	if (GetStatus() == Connected) {
 		return true;
 	}
@@ -297,4 +297,11 @@ std::string DBcore::Escape(const std::string& s)
 	mysql_real_escape_string(&mysql, temp.data(), s.c_str(), s_len);
 
 	return temp.data();
+}
+
+void DBcore::SetMutex(Mutex *mutex)
+{
+	safe_delete(m_mutex);
+
+	DBcore::m_mutex = mutex;
 }

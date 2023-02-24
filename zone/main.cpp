@@ -231,6 +231,8 @@ int main(int argc, char** argv) {
 		worldserver.SetLauncherName("NONE");
 	}
 
+	auto mutex = new Mutex;
+
 	LogInfo("Connecting to MySQL");
 	if (!database.Connect(
 		Config->DatabaseHost.c_str(),
@@ -242,9 +244,7 @@ int main(int argc, char** argv) {
 		return 1;
 	}
 
-	/**
-	 * Multi-tenancy: Content Database
-	 */
+	// Multi-tenancy: Content Database
 	if (!Config->ContentDbHost.empty()) {
 		if (!content_db.Connect(
 			Config->ContentDbHost.c_str() ,
@@ -259,6 +259,11 @@ int main(int argc, char** argv) {
 		}
 	} else {
 		content_db.SetMySQL(database);
+		// when database and content_db share the same underlying mysql connection
+		// it needs to be protected by a shared mutex otherwise we produce concurrency issues
+		// when database actions are occurring in different threads
+		database.SetMutex(mutex);
+		content_db.SetMutex(mutex);
 	}
 
 	/* Register Log System and Settings */
@@ -613,6 +618,9 @@ int main(int argc, char** argv) {
 	safe_delete(parse);
 	LogInfo("Proper zone shutdown complete.");
 	LogSys.CloseFileLogs();
+
+	safe_delete(mutex);
+
 	return 0;
 }
 

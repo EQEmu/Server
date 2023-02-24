@@ -478,6 +478,8 @@ int main(int argc, char **argv)
 	LogInfo("Signaling HTTP service to stop");
 	LogSys.CloseFileLogs();
 
+	WorldBoot::Shutdown();
+
 	return 0;
 }
 
