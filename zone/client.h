@@ -792,7 +792,7 @@ public:
 	void SendTradeskillDetails(uint32 recipe_id);
 	bool TradeskillExecute(DBTradeskillRecipe_Struct *spec);
 	void CheckIncreaseTradeskill(int16 bonusstat, int16 stat_modifier, float skillup_modifier, uint16 success_modifier, EQ::skills::SkillType tradeskill);
-	bool CheckTradeskillLoreConflict(DBTradeskillRecipe_Struct& spec, MySQLRequestResult& results);
+	bool CheckTradeskillLoreConflict(int32 recipe_id);
 	void InitInnates();
 
 	void GMKill();

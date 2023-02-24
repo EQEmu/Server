@@ -468,22 +468,8 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 		}
 	}
 
-	//pull the list of components so we can compare during lore check
-	const auto query = fmt::format("SELECT item_id "
-	                                 "FROM tradeskill_recipe_entries "
-	                                 "WHERE componentcount > 0 AND recipe_id = {}",
-	                                 spec.recipe_id);
-	auto results = content_db.QueryDatabase(query);
-
-	if (!results.Success() || results.RowCount() < 1 || results.RowCount() > 10) {
-		auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
-		user->QueuePacket(outapp);
-		safe_delete(outapp);
-		return;
-	}
-
 	// Check if Combine would result in Lore conflict
-	if (user->CheckTradeskillLoreConflict(spec, results)) {
+	if (user->CheckTradeskillLoreConflict(spec.recipe_id)) {
 		auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
 		user->QueuePacket(outapp);
 		safe_delete(outapp);
@@ -701,10 +687,8 @@ void Object::HandleAutoCombine(Client* user, const RecipeAutoCombine_Struct* rac
 		return;
 	}
 
-	DBTradeskillRecipe_Struct recipe_struct;
-
 	// Check if Combine would result in Lore conflict
-	if (user->CheckTradeskillLoreConflict(recipe_struct, results)) {
+	if (user->CheckTradeskillLoreConflict(rac->recipe_id)) {
 		user->QueuePacket(outapp);
 		safe_delete(outapp);
 		return;
@@ -1879,38 +1863,25 @@ bool ZoneDatabase::DisableRecipe(uint32 recipe_id)
 	return false;
 }
 
-bool Client::CheckTradeskillLoreConflict(DBTradeskillRecipe_Struct& spec, MySQLRequestResult& results)
+bool Client::CheckTradeskillLoreConflict(int32 recipe_id)
 {
-	std::vector< std::pair<uint32,uint8>> lore_conflict_list;
-
-	std::merge(
-			spec.onsuccess.begin(), spec.onsuccess.end(),
-			spec.onfail.begin(), spec.onfail.end(),
-			std::back_inserter(lore_conflict_list)
+	const auto& recipe_entries = TradeskillRecipeEntriesRepository::GetWhere(
+			content_db,
+			fmt::format(
+					"recipe_id = {} ORDER BY id ASC",
+					recipe_id
+			)
 	);
+	if (recipe_entries.empty()) {
+		return false;
+	}
 
-	std::merge(
-			lore_conflict_list.begin(), lore_conflict_list.end(),
-			spec.salvage.begin(), spec.salvage.end(),
-			std::back_inserter(lore_conflict_list)
-	);
-
-	for (auto& e : lore_conflict_list) {
-		if (e.first) {
-			auto item_inst = database.GetItem(e.first);
-			if (!item_inst || item_inst->LoreGroup > 0) {
+	for (auto& e : recipe_entries) {
+		auto item_inst = database.GetItem(e.item_id);
+		if (item_inst) {
+			if (item_inst->LoreGroup == 0 || e.componentcount > 0) {
 				continue;
 			}
-
-			for (auto row : results) {
-				if (row[0]) {
-					auto component_item_inst = Strings::ToInt(row[0]);
-					if (component_item_inst == item_inst->ID) {
-						continue;
-					}
-				}
-			}
-
 			if (CheckLoreConflict(item_inst)) {
 				EQ::SayLinkEngine linker;
 				linker.SetLinkType(EQ::saylink::SayLinkItemData);
