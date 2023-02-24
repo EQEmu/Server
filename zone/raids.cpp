@@ -100,7 +100,7 @@ void Raid::AddMember(Client *c, uint32 group, bool rleader, bool groupleader, bo
 	}
 
 	const auto query = fmt::format(
-		"REPLACE INTO raid_members SET raidid = {}, charid = {}, botid = 0, "
+		"REPLACE INTO raid_members SET raidid = {}, charid = {}, bot_id = 0, "
 		"groupid = {}, _class = {}, level = {}, name = '{}', "
 		"isgroupleader = {}, israidleader = {}, islooter = {}",
 		GetID(),
@@ -190,7 +190,7 @@ void Raid::AddBot(Bot* b, uint32 group, bool rleader, bool groupleader, bool loo
 
 	const auto query = fmt::format(
 		"REPLACE INTO raid_members SET raidid = {}, "
-		"charid = 0, botid = {}, groupid = {}, _class = {}, level = {}, name = '{}', "
+		"charid = 0, bot_id = {}, groupid = {}, _class = {}, level = {}, name = '{}', "
 		"isgroupleader = {}, israidleader = {}, islooter = {}",
 		GetID(),
 		b->GetBotID(),
@@ -1609,7 +1609,7 @@ bool Raid::LearnMembers()
 
 	const auto query = fmt::format(
 		"SELECT name, groupid, _class, level, "
-		"isgroupleader, israidleader, islooter, botid "
+		"isgroupleader, israidleader, islooter, bot_id "
 		"FROM raid_members WHERE raidid = {} ORDER BY groupid",
 		GetID()
 	);

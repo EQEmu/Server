@@ -23,7 +23,7 @@ public:
 		uint64_t    id;
 		int32_t     raidid;
 		int32_t     charid;
-		int32_t     botid;
+		int32_t     bot_id;
 		uint32_t    groupid;
 		int8_t      _class;
 		int8_t      level;
@@ -44,7 +44,7 @@ public:
 			"id",
 			"raidid",
 			"charid",
-			"botid",
+			"bot_id",
 			"groupid",
 			"_class",
 			"level",
@@ -61,7 +61,7 @@ public:
 			"id",
 			"raidid",
 			"charid",
-			"botid",
+			"bot_id",
 			"groupid",
 			"_class",
 			"level",
@@ -112,7 +112,7 @@ public:
 		e.id            = 0;
 		e.raidid        = 0;
 		e.charid        = 0;
-		e.botid         = 0;
+		e.bot_id        = 0;
 		e.groupid       = 0;
 		e._class        = 0;
 		e.level         = 0;
@@ -159,7 +159,7 @@ public:
 			e.id            = strtoull(row[0], nullptr, 10);
 			e.raidid        = static_cast<int32_t>(atoi(row[1]));
 			e.charid        = static_cast<int32_t>(atoi(row[2]));
-			e.botid         = static_cast<int32_t>(atoi(row[3]));
+			e.bot_id        = static_cast<int32_t>(atoi(row[3]));
 			e.groupid       = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
 			e._class        = static_cast<int8_t>(atoi(row[5]));
 			e.level         = static_cast<int8_t>(atoi(row[6]));
@@ -202,7 +202,7 @@ public:
 
 		v.push_back(columns[1] + " = " + std::to_string(e.raidid));
 		v.push_back(columns[2] + " = " + std::to_string(e.charid));
-		v.push_back(columns[3] + " = " + std::to_string(e.botid));
+		v.push_back(columns[3] + " = " + std::to_string(e.bot_id));
 		v.push_back(columns[4] + " = " + std::to_string(e.groupid));
 		v.push_back(columns[5] + " = " + std::to_string(e._class));
 		v.push_back(columns[6] + " = " + std::to_string(e.level));
@@ -234,7 +234,7 @@ public:
 		v.push_back(std::to_string(e.id));
 		v.push_back(std::to_string(e.raidid));
 		v.push_back(std::to_string(e.charid));
-		v.push_back(std::to_string(e.botid));
+		v.push_back(std::to_string(e.bot_id));
 		v.push_back(std::to_string(e.groupid));
 		v.push_back(std::to_string(e._class));
 		v.push_back(std::to_string(e.level));
@@ -274,7 +274,7 @@ public:
 			v.push_back(std::to_string(e.id));
 			v.push_back(std::to_string(e.raidid));
 			v.push_back(std::to_string(e.charid));
-			v.push_back(std::to_string(e.botid));
+			v.push_back(std::to_string(e.bot_id));
 			v.push_back(std::to_string(e.groupid));
 			v.push_back(std::to_string(e._class));
 			v.push_back(std::to_string(e.level));
@@ -318,7 +318,7 @@ public:
 			e.id            = strtoull(row[0], nullptr, 10);
 			e.raidid        = static_cast<int32_t>(atoi(row[1]));
 			e.charid        = static_cast<int32_t>(atoi(row[2]));
-			e.botid         = static_cast<int32_t>(atoi(row[3]));
+			e.bot_id        = static_cast<int32_t>(atoi(row[3]));
 			e.groupid       = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
 			e._class        = static_cast<int8_t>(atoi(row[5]));
 			e.level         = static_cast<int8_t>(atoi(row[6]));
@@ -353,7 +353,7 @@ public:
 			e.id            = strtoull(row[0], nullptr, 10);
 			e.raidid        = static_cast<int32_t>(atoi(row[1]));
 			e.charid        = static_cast<int32_t>(atoi(row[2]));
-			e.botid         = static_cast<int32_t>(atoi(row[3]));
+			e.bot_id        = static_cast<int32_t>(atoi(row[3]));
 			e.groupid       = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
 			e._class        = static_cast<int8_t>(atoi(row[5]));
 			e.level         = static_cast<int8_t>(atoi(row[6]));
