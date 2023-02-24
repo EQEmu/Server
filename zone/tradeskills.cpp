@@ -1879,7 +1879,7 @@ bool Client::CheckTradeskillLoreConflict(int32 recipe_id)
 	for (auto& e : recipe_entries) {
 		auto item_inst = database.GetItem(e.item_id);
 		if (item_inst) {
-			if (item_inst->LoreGroup == 0 || e.componentcount > 0) {
+			if (item_inst->LoreGroup == 0 || e.componentcount > 0 || e.iscontainer) {
 				continue;
 			}
 			if (CheckLoreConflict(item_inst)) {
