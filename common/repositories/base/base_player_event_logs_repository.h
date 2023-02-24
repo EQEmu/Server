@@ -240,8 +240,8 @@ public:
 		v.push_back(columns[7] + " = " + std::to_string(e.z));
 		v.push_back(columns[8] + " = " + std::to_string(e.heading));
 		v.push_back(columns[9] + " = " + std::to_string(e.event_type_id));
-		v.push_back(columns[10] + " = '" + Strings::Escape(e.event_type_name) + "'");
-		v.push_back(columns[11] + " = '" + Strings::Escape(e.event_data) + "'");
+		v.push_back(columns[10] + " = '" + db.Escape(e.event_type_name) + "'");
+		v.push_back(columns[11] + " = '" + db.Escape(e.event_data) + "'");
 		v.push_back(columns[12] + " = FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
 
 		auto results = db.QueryDatabase(
@@ -274,8 +274,8 @@ public:
 		v.push_back(std::to_string(e.z));
 		v.push_back(std::to_string(e.heading));
 		v.push_back(std::to_string(e.event_type_id));
-		v.push_back("'" + Strings::Escape(e.event_type_name) + "'");
-		v.push_back("'" + Strings::Escape(e.event_data) + "'");
+		v.push_back("'" + db.Escape(e.event_type_name) + "'");
+		v.push_back("'" + db.Escape(e.event_data) + "'");
 		v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
 
 		auto results = db.QueryDatabase(
@@ -316,8 +316,8 @@ public:
 			v.push_back(std::to_string(e.z));
 			v.push_back(std::to_string(e.heading));
 			v.push_back(std::to_string(e.event_type_id));
-			v.push_back("'" + Strings::Escape(e.event_type_name) + "'");
-			v.push_back("'" + Strings::Escape(e.event_data) + "'");
+			v.push_back("'" + db.Escape(e.event_type_name) + "'");
+			v.push_back("'" + db.Escape(e.event_data) + "'");
 			v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");

@@ -1,3 +1,50 @@
+## [22.4.3] - 02/21/2023 
+
+### Bots
+
+* Change HasBotItem(item_id) to return slot_id instead of bool. ([#2966](https://github.com/EQEmu/Server/pull/2966)) ([Aeadoin](https://github.com/Aeadoin)) 2023-02-19
+* Change SaveTimers to Replace instead of Insert. ([#2951](https://github.com/EQEmu/Server/pull/2951)) ([Aeadoin](https://github.com/Aeadoin)) 2023-02-18
+* Fix output of ^spells while ^Enforcespellsettings is enabled ([#2959](https://github.com/EQEmu/Server/pull/2959)) ([Aeadoin](https://github.com/Aeadoin)) 2023-02-18
+
+### Crash
+
+* Fix crash with EVENT_UNEQUIP_ITEM_BOT ([#2973](https://github.com/EQEmu/Server/pull/2973)) ([Aeadoin](https://github.com/Aeadoin)) 2023-02-20
+* Fix world crash in player event processing ([#2960](https://github.com/EQEmu/Server/pull/2960)) ([Akkadius](https://github.com/Akkadius)) 2023-02-18
+
+### Database
+
+* Address deadlock in player events ([#2974](https://github.com/EQEmu/Server/pull/2974)) ([Akkadius](https://github.com/Akkadius)) 2023-02-21
+
+### Fixes
+
+* Fix MIR LDoN Theme Items on LDoN Merchants ([#2971](https://github.com/EQEmu/Server/pull/2971)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-02-20
+* Fix OOCMute not functioning ([#2970](https://github.com/EQEmu/Server/pull/2970)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-02-20
+
+### Pathing
+
+* Improvements to z-clipping, z-recovery and z-calculations ([#2975](https://github.com/EQEmu/Server/pull/2975)) ([Akkadius](https://github.com/Akkadius)) 2023-02-21
+
+### Pets
+
+* Client Pet summoned by NPC should not change guard location. ([#2967](https://github.com/EQEmu/Server/pull/2967)) ([noudess](https://github.com/noudess)) 2023-02-19
+
+### Player Events
+
+* Create new event ITEM_CREATION ([#2944](https://github.com/EQEmu/Server/pull/2944)) ([Akkadius](https://github.com/Akkadius)) 2023-02-18
+
+### Quest API
+
+* Add client->SignalClient() overload to Perl ([#2963](https://github.com/EQEmu/Server/pull/2963)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-02-19
+* Fix Perl SetSimpleRoamBox Overloads ([#2961](https://github.com/EQEmu/Server/pull/2961)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-02-19
+
+### Reload API
+
+* Add world handlers for certain opcodes ([#2958](https://github.com/EQEmu/Server/pull/2958)) ([Akkadius](https://github.com/Akkadius)) 2023-02-18
+
+### SQL
+
+* Add date to optional Drakkin Guktan Faction Update ([#2965](https://github.com/EQEmu/Server/pull/2965)) ([joligario](https://github.com/joligario)) 2023-02-19
+
 ## [22.4.2] - 02/18/2023 
 
 ### Content

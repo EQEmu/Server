@@ -146,6 +146,8 @@ public:
 	bool SaveOwnerOption(const uint32 owner_id, size_t type, const bool flag);
 	bool SaveOwnerOption(const uint32 owner_id, const std::pair<size_t, size_t> type, const std::pair<bool, bool> flag);
 
+	bool SaveBotCasterRange(const uint32 owner_id, const uint32 bot_id, const uint32 bot_caster_range_value);
+
 	/* Bot bot-group functions   */
 	bool QueryBotGroupExistence(const std::string& botgroup_name);
 
@@ -250,6 +252,7 @@ public:
 		static const char* SaveFollowDistance();
 		static const char* SaveAllFollowDistances();
 		static const char* SaveStopMeleeLevel();
+		static const char* SaveBotCasterRange();
 
 		/* fail::Bot bot-group functions   */
 		static const char* QueryBotGroupExistence();

@@ -66,14 +66,14 @@ void NPC::AI_SetRoambox(
 	uint32 min_delay
 )
 {
-	roambox_distance      = distance;
-	roambox_max_x         = max_x;
-	roambox_min_x         = min_x;
-	roambox_max_y         = max_y;
-	roambox_min_y         = min_y;
-	roambox_destination_x = roambox_max_x + 1; // this will trigger a recalc
-	roambox_delay         = delay;
-	roambox_min_delay     = min_delay;
+	m_roambox.distance  = distance;
+	m_roambox.max_x     = max_x;
+	m_roambox.min_x     = min_x;
+	m_roambox.max_y     = max_y;
+	m_roambox.min_y     = min_y;
+	m_roambox.dest_x    = max_x + 1; // this will trigger a recalc
+	m_roambox.delay     = delay;
+	m_roambox.min_delay = min_delay;
 }
 
 void NPC::DisplayWaypointInfo(Client *client) {
@@ -781,26 +781,24 @@ float Mob::GetFixedZ(const glm::vec3 &destination, int32 z_find_offset) {
 			return new_z;
 		}
 
-		new_z = FindDestGroundZ(destination, (-GetZOffset() / 2));
+		new_z = FindDestGroundZ(destination, ((-GetZOffset() / 2) + z_find_offset));
+
+		if (RuleB(Map, MobPathingVisualDebug)) {
+			DrawDebugCoordinateNode(
+				fmt::format("{} search z node", GetCleanName()),
+				glm::vec4{
+					m_Position.x,
+					m_Position.y,
+					((-GetZOffset() / 2) + z_find_offset),
+					m_Position.w
+				}
+			);
+		}
 		if (new_z != BEST_Z_INVALID) {
 			new_z += GetZOffset();
 
 			if (new_z < -2000) {
 				new_z = m_Position.z;
-			}
-		}
-
-		// prevent ceiling clipping
-		// if client is close in distance (not counting Z) and we clipped up into a ceiling
-		// this helps us snap back down (or up) if it were to happen
-		// other fixes were put in place to prevent clipping into the ceiling to begin with
-		if (std::abs(new_z - m_Position.z) > 15) {
-			LogFixZ("TRIGGER clipping detection");
-			auto t = GetTarget();
-			if (t && DistanceNoZ(GetPosition(), t->GetPosition()) < 20) {
-				new_z = FindDestGroundZ(t->GetPosition(), -t->GetZOffset());
-				new_z += GetZOffset();
-				GMMove(t->GetPosition().x, t->GetPosition().y, new_z, t->GetPosition().w);
 			}
 		}
 

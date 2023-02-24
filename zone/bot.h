@@ -349,6 +349,8 @@ public:
 	void SetStopMeleeLevel(uint8 level);
 	void SetGuardMode();
 	void SetHoldMode();
+	uint32 GetBotCasterRange() { return m_bot_caster_range; }
+	bool IsValidSpellRange(uint16 spell_id, Mob const* tar);
 
 	// Bot AI Methods
 	void AI_Bot_Init();
@@ -500,7 +502,7 @@ public:
 	EQ::constants::StanceType GetBotStance() { return _botStance; }
 	uint8 GetChanceToCastBySpellType(uint32 spellType);
 	bool GetBotEnforceSpellSetting() { return m_enforce_spell_settings; }
-
+	float GetBotCasterMaxRange(float melee_distance_max);
 	bool IsGroupHealer() { return m_CastingRoles.GroupHealer; }
 	bool IsGroupSlower() { return m_CastingRoles.GroupSlower; }
 	bool IsGroupNuker() { return m_CastingRoles.GroupNuker; }
@@ -633,6 +635,7 @@ public:
 		else
 			_botStance = EQ::constants::stancePassive;
 	}
+	void SetBotCasterRange(uint32 bot_caster_range) { m_bot_caster_range = bot_caster_range; }
 	void SetSpellRecastTimer(int timer_index, int32 recast_delay);
 	void SetDisciplineRecastTimer(int timer_index, int32 recast_delay);
 	void SetAltOutOfCombatBehavior(bool behavior_flag) { _altoutofcombatbehavior = behavior_flag;}
@@ -730,7 +733,7 @@ public:
 	uint32 CountBotItem(uint32 item_id);
 	std::map<uint16, uint32> GetBotItemSlots();
 	uint32 GetBotItemBySlot(uint16 slot_id);
-	bool HasBotItem(uint32 item_id);
+	int16 HasBotItem(uint32 item_id);
 	void RemoveBotItem(uint32 item_id);
 	uint32 GetTotalPlayTime();
 
@@ -833,7 +836,7 @@ private:
 	bool m_pulling_flag;
 	bool m_returning_flag;
 	eStandingPetOrder m_previous_pet_order;
-
+	uint32 m_bot_caster_range;
 	BotCastingRoles m_CastingRoles;
 	std::map<std::string,std::string> bot_data_buckets;
 	std::map<std::string,std::string> bot_owner_data_buckets;

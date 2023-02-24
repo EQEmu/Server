@@ -65,8 +65,8 @@ Lua_Mob Lua_Bot::GetOwner() {
 	return Lua_Mob(self->GetOwner());
 }
 
-bool Lua_Bot::HasBotItem(uint32 item_id) {
-	Lua_Safe_Call_Bool();
+int16 Lua_Bot::HasBotItem(uint32 item_id) {
+	Lua_Safe_Call_Int();
 	return self->HasBotItem(item_id);
 }
 
@@ -507,7 +507,7 @@ luabind::scope lua_register_bot() {
 	.def("GetRawItemAC", (int(Lua_Bot::*)(void))&Lua_Bot::GetRawItemAC)
 	.def("GetSpellDamage", (int(Lua_Bot::*)(void))&Lua_Bot::GetSpellDamage)
 	.def("HasAugmentEquippedByID", (bool(Lua_Bot::*)(uint32))&Lua_Bot::HasAugmentEquippedByID)
-	.def("HasBotItem", (bool(Lua_Bot::*)(uint32))&Lua_Bot::HasBotItem)
+	.def("HasBotItem", (int16(Lua_Bot::*)(uint32))&Lua_Bot::HasBotItem)
 	.def("HasBotSpellEntry", (bool(Lua_Bot::*)(uint16)) & Lua_Bot::HasBotSpellEntry)
 	.def("HasItemEquippedByID", (bool(Lua_Bot::*)(uint32))&Lua_Bot::HasItemEquippedByID)
 	.def("IsGrouped", (bool(Lua_Bot::*)(void))&Lua_Bot::IsGrouped)
