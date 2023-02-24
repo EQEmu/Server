@@ -53,6 +53,14 @@ Doors::Doors(const DoorsRepository::Doors &door) :
 	strn0cpy(m_door_name, door.name.c_str(), sizeof(m_door_name));
 	strn0cpy(m_destination_zone_name, door.dest_zone.c_str(), sizeof(m_destination_zone_name));
 
+	// destination helpers
+	if (!door.dest_zone.empty() && Strings::ToLower(door.dest_zone) != "none" && !door.dest_zone.empty()) {
+		m_has_destination_zone = true;
+	}
+	if (!door.dest_zone.empty() && !door.zone.empty() && Strings::EqualFold(door.dest_zone, door.zone)) {
+		m_same_destination_zone = true;
+	}
+
 	m_database_id             = door.id;
 	m_door_id                 = door.doorid;
 	m_incline                 = door.incline;
@@ -450,7 +458,7 @@ void Doors::HandleClick(Client *sender, uint8 trigger)
 			m_close_timer.Start();
 		}
 
-		if (strncmp(m_destination_zone_name, "NONE", strlen("NONE")) == 0) {
+		if (!HasDestinationZone()) {
 			SetOpenState(true);
 		}
 	}
@@ -497,19 +505,15 @@ void Doors::HandleClick(Client *sender, uint8 trigger)
 		}
 	}
 
-	/**
-	 * Teleport door
-	 */
-	if (((m_open_type == 57) || (m_open_type == 58)) &&
-		(strncmp(m_destination_zone_name, "NONE", strlen("NONE")) != 0)) {
+	// teleport door
+	if (((m_open_type == 57) || (m_open_type == 58)) && HasDestinationZone()) {
+		bool has_key_required = (required_key_item && ((required_key_item == player_key) || sender->GetGM()));
 
-		/**
-		 * If click destination is same zone and doesn't require a key
-		 */
-		if ((strncmp(m_destination_zone_name, m_zone_name, strlen(m_zone_name)) == 0) && (!required_key_item)) {
+		if (IsDestinationZoneSame() && (!required_key_item)) {
 			if (!disable_add_to_key_ring) {
 				sender->KeyRingAdd(player_key);
 			}
+
 			sender->MovePC(
 				zone->GetZoneID(),
 				zone->GetInstanceID(),
@@ -519,14 +523,7 @@ void Doors::HandleClick(Client *sender, uint8 trigger)
 				m_destination.w
 			);
 		}
-			/**
-			 * If requires a key
-			 */
-		else if (
-			(!IsDoorOpen() || m_open_type == 58) &&
-			(required_key_item && ((required_key_item == player_key) || sender->GetGM()))
-			) {
-
+		else if ((!IsDoorOpen() || m_open_type == 58) && has_key_required) {
 			if (!disable_add_to_key_ring) {
 				sender->KeyRingAdd(player_key);
 			}
@@ -895,4 +892,14 @@ float Doors::GetZ()
 float Doors::GetHeading()
 {
 	return m_position.w;
+}
+
+bool Doors::HasDestinationZone() const
+{
+	return m_has_destination_zone;
+}
+
+bool Doors::IsDestinationZoneSame() const
+{
+	return m_same_destination_zone;
 }
