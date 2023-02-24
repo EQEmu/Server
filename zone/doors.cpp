@@ -57,8 +57,7 @@ Doors::Doors(const DoorsRepository::Doors &door) :
 	if (!door.dest_zone.empty() && Strings::ToLower(door.dest_zone) != "none" && !door.dest_zone.empty()) {
 		m_has_destination_zone = true;
 	}
-	if (!door.dest_zone.empty() && !door.zone.empty() &&
-		Strings::ToLower(door.dest_zone) == Strings::ToLower(door.zone)) {
+	if (!door.dest_zone.empty() && !door.zone.empty() && Strings::EqualFold(door.dest_zone, door.zone)) {
 		m_same_destination_zone = true;
 	}
 
