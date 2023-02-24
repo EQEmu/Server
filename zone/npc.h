@@ -80,6 +80,19 @@ struct AISpellsVar_Struct {
 	uint8	idle_beneficial_chance;
 };
 
+struct Roambox {
+	float  max_x;
+	float  max_y;
+	float  min_x;
+	float  min_y;
+	float  distance;
+	float  dest_x;
+	float  dest_y;
+	float  dest_z;
+	uint32 delay;
+	uint32 min_delay;
+};
+
 class SwarmPet;
 class Client;
 class Group;
@@ -538,6 +551,8 @@ public:
 
 protected:
 
+	void HandleRoambox();
+
 	const NPCType*	NPCTypedata;
 	NPCType*	NPCTypedata_ours;	//special case for npcs with uniquely created data.
 
@@ -635,16 +650,8 @@ protected:
 	glm::vec4 m_GuardPoint;
 	glm::vec4 m_GuardPointSaved;
 	EmuAppearance guard_anim;
-	float roambox_max_x;
-	float roambox_max_y;
-	float roambox_min_x;
-	float roambox_min_y;
-	float roambox_distance;
-	float roambox_destination_x;
-	float roambox_destination_y;
-	float roambox_destination_z;
-	uint32 roambox_delay;
-	uint32 roambox_min_delay;
+
+	Roambox m_roambox = {};
 
 	uint16	skills[EQ::skills::HIGHEST_SKILL + 1];
 

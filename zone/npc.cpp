@@ -255,15 +255,18 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 	}
 
 	guard_anim            = eaStanding;
-	roambox_distance      = 0;
-	roambox_max_x         = -2;
-	roambox_max_y         = -2;
-	roambox_min_x         = -2;
-	roambox_min_y         = -2;
-	roambox_destination_x = -2;
-	roambox_destination_y = -2;
-	roambox_min_delay     = 1000;
-	roambox_delay         = 1000;
+
+	m_roambox.max_x     = -2;
+	m_roambox.max_y     = -2;
+	m_roambox.min_x     = -2;
+	m_roambox.min_y     = -2;
+	m_roambox.distance  = 0;
+	m_roambox.dest_x    = -2;
+	m_roambox.dest_y    = -2;
+	m_roambox.dest_z    = 0;
+	m_roambox.delay     = 1000;
+	m_roambox.min_delay = 1000;
+
 	p_depop               = false;
 	loottable_id          = npc_type_data->loottable_id;
 	skip_global_loot      = npc_type_data->skip_global_loot;
@@ -440,52 +443,52 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 
 float NPC::GetRoamboxMaxX() const
 {
-	return roambox_max_x;
+	return m_roambox.max_x;
 }
 
 float NPC::GetRoamboxMaxY() const
 {
-	return roambox_max_y;
+	return m_roambox.max_y;
 }
 
 float NPC::GetRoamboxMinX() const
 {
-	return roambox_min_x;
+	return m_roambox.min_x;
 }
 
 float NPC::GetRoamboxMinY() const
 {
-	return roambox_min_y;
+	return m_roambox.min_y;
 }
 
 float NPC::GetRoamboxDistance() const
 {
-	return roambox_distance;
+	return m_roambox.distance;
 }
 
 float NPC::GetRoamboxDestinationX() const
 {
-	return roambox_destination_x;
+	return m_roambox.dest_x;
 }
 
 float NPC::GetRoamboxDestinationY() const
 {
-	return roambox_destination_y;
+	return m_roambox.dest_y;
 }
 
 float NPC::GetRoamboxDestinationZ() const
 {
-	return roambox_destination_z;
+	return m_roambox.dest_z;
 }
 
 uint32 NPC::GetRoamboxDelay() const
 {
-	return roambox_delay;
+	return m_roambox.delay;
 }
 
 uint32 NPC::GetRoamboxMinDelay() const
 {
-	return roambox_min_delay;
+	return m_roambox.min_delay;
 }
 
 NPC::~NPC()
@@ -3810,4 +3813,150 @@ void NPC::SendPositionToClients()
 		c.second->QueuePacket(p, false);
 	}
 	safe_delete(p);
+}
+
+void NPC::HandleRoambox()
+{
+	bool has_arrived = GetCWP() == EQ::WaypointStatus::RoamBoxPauseInProgress && !IsMoving();
+	if (has_arrived) {
+		int roambox_move_delay = EQ::ClampLower(GetRoamboxDelay(), GetRoamboxMinDelay());
+		int move_delay_max     = (roambox_move_delay > 0 ? roambox_move_delay : (int) GetRoamboxMinDelay() * 4);
+		int random_timer       = RandomTimer(
+			GetRoamboxMinDelay(),
+			move_delay_max
+		);
+
+		LogNPCRoamBoxDetail(
+			"({}) random_timer [{}] roambox_move_delay [{}] move_min [{}] move_max [{}]",
+			GetCleanName(),
+			random_timer,
+			roambox_move_delay,
+			(int) GetRoamboxMinDelay(),
+			move_delay_max
+		);
+
+		time_until_can_move = Timer::GetCurrentTime() + random_timer;
+		SetCurrentWP(0);
+		return;
+	}
+
+	bool ready_to_set_new_destination = !IsMoving() && time_until_can_move < Timer::GetCurrentTime();
+	if (ready_to_set_new_destination) {
+		// make several attempts to find a valid next move in the box
+		bool can_path = false;
+		for (int i = 0; i < 10; i++) {
+			auto move_x      = static_cast<float>(zone->random.Real(-m_roambox.distance, m_roambox.distance));
+			auto move_y      = static_cast<float>(zone->random.Real(-m_roambox.distance, m_roambox.distance));
+			auto requested_x = EQ::Clamp((GetX() + move_x), m_roambox.min_x, m_roambox.max_x);
+			auto requested_y = EQ::Clamp((GetY() + move_y), m_roambox.min_y, m_roambox.max_y);
+			auto requested_z = GetGroundZ(requested_x, requested_y);
+
+			std::vector<float> heights = {0, 250, -250};
+			for (auto &h: heights) {
+				if (CheckLosFN(requested_x, requested_y, requested_z + h, GetSize())) {
+					LogNPCRoamBox("[{}] Found line of sight to path attempt [{}] at height [{}]", GetCleanName(), i, h);
+					can_path = true;
+					break;
+				}
+			}
+
+			if (!can_path) {
+				LogNPCRoamBox("[{}] | Failed line of sight to path attempt [{}]", GetCleanName(), i);
+				continue;
+			}
+
+			m_roambox.dest_x = requested_x;
+			m_roambox.dest_y = requested_y;
+
+			/**
+			 * If our roambox was configured with large distances, chances of hitting the min or max end of
+			 * the clamp is high, this causes NPC's to gather on the border of a box, to reduce clustering
+			 * either lower the roambox distance or the code will do a simple random between min - max when it
+			 * hits the min or max of the clamp
+			 */
+			if (m_roambox.dest_x == m_roambox.min_x || m_roambox.dest_x == m_roambox.max_x) {
+				m_roambox.dest_x = static_cast<float>(zone->random.Real(m_roambox.min_x, m_roambox.max_x));
+			}
+
+			if (m_roambox.dest_y == m_roambox.min_y || m_roambox.dest_y == m_roambox.max_y) {
+				m_roambox.dest_y = static_cast<float>(zone->random.Real(m_roambox.min_y, m_roambox.max_y));
+			}
+
+			// If mob was not spawned in water, let's not randomly roam them into water
+			// if the roam box was sloppily configured
+			if (!GetWasSpawnedInWater()) {
+				m_roambox.dest_z = GetGroundZ(m_roambox.dest_x, m_roambox.dest_y);
+				if (zone->HasMap() && zone->HasWaterMap()) {
+					auto position = glm::vec3(
+						m_roambox.dest_x,
+						m_roambox.dest_y,
+						m_roambox.dest_z
+					);
+
+					// If someone brought us into water when we naturally wouldn't path there, return to spawn
+					if (zone->watermap->InLiquid(position) && zone->watermap->InLiquid(m_Position)) {
+						m_roambox.dest_x = m_SpawnPoint.x;
+						m_roambox.dest_y = m_SpawnPoint.y;
+					}
+
+					if (zone->watermap->InLiquid(position)) {
+						LogNPCRoamBoxDetail("[{}] | My destination is in water and I don't belong there!", GetCleanName());
+
+						return;
+					}
+				}
+			}
+			else { // Mob was in water, make sure new spot is in water also
+				m_roambox.dest_z = m_Position.z;
+				auto position = glm::vec3(
+					m_roambox.dest_x,
+					m_roambox.dest_y,
+					m_Position.z + 15
+				);
+				if (zone->HasWaterMap() && !zone->watermap->InLiquid(position)) {
+					m_roambox.dest_x = m_SpawnPoint.x;
+					m_roambox.dest_y = m_SpawnPoint.y;
+					m_roambox.dest_z = m_SpawnPoint.z;
+				}
+			}
+
+			LogNPCRoamBox(
+				"[{}] | Pathing to [{}] [{}] [{}]",
+				GetCleanName(),
+				m_roambox.dest_x,
+				m_roambox.dest_y,
+				m_roambox.dest_z
+			);
+
+			LogNPCRoamBox(
+				"NPC ({}) distance [{}] X (min/max) [{} / {}] Y (min/max) [{} / {}] | Dest x/y/z [{} / {} / {}]",
+				GetCleanName(),
+				m_roambox.distance,
+				m_roambox.min_x,
+				m_roambox.max_x,
+				m_roambox.min_y,
+				m_roambox.max_y,
+				m_roambox.dest_x,
+				m_roambox.dest_y,
+				m_roambox.dest_z
+			);
+
+			if (can_path) {
+				SetCurrentWP(EQ::WaypointStatus::RoamBoxPauseInProgress);
+				NavigateTo(m_roambox.dest_x, m_roambox.dest_y, m_roambox.dest_z);
+				return;
+			}
+		}
+
+		// failed to find path, reset timer
+		int roambox_move_delay = EQ::ClampLower(GetRoamboxDelay(), GetRoamboxMinDelay());
+		int move_delay_max     = (roambox_move_delay > 0 ? roambox_move_delay : (int) GetRoamboxMinDelay() * 4);
+		int random_timer       = RandomTimer(
+			GetRoamboxMinDelay(),
+			move_delay_max
+		);
+		time_until_can_move = Timer::GetCurrentTime() + random_timer;
+	}
+
+	return;
 }
