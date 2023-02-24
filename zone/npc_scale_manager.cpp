@@ -38,8 +38,8 @@ void NpcScaleManager::ScaleNPC(
 	auto npc_type         = GetNPCScalingType(npc);
 	auto npc_level        = npc->GetLevel();
 	auto is_auto_scaled   = IsAutoScaled(npc);
-	auto zone_id          = npc->GetZoneID();
-	auto instance_version = npc->GetInstanceVersion();
+	auto zone_id          = zone->GetZoneID();
+	auto instance_version = zone->GetInstanceVersion();
 
 	global_npc_scale scale_data = GetGlobalScaleDataForTypeLevel(
 		npc_type,
@@ -538,8 +538,8 @@ bool NpcScaleManager::ApplyGlobalBaseScalingToNPCStatically(NPC *&npc)
 {
 	auto npc_type         = GetNPCScalingType(npc);
 	auto npc_level        = npc->GetLevel();
-	auto zone_id          = npc->GetZoneID();
-	auto instance_version = npc->GetInstanceVersion();
+	auto zone_id          = zone->GetZoneID();
+	auto instance_version = zone->GetInstanceVersion();
 
 	global_npc_scale g = GetGlobalScaleDataForTypeLevel(
 		npc_type,
@@ -603,8 +603,8 @@ bool NpcScaleManager::ApplyGlobalBaseScalingToNPCDynamically(NPC *&npc)
 {
 	auto npc_type         = GetNPCScalingType(npc);
 	auto npc_level        = npc->GetLevel();
-	auto zone_id          = npc->GetZoneID();
-	auto instance_version = npc->GetInstanceVersion();
+	auto zone_id          = zone->GetZoneID();
+	auto instance_version = zone->GetInstanceVersion();
 
 	global_npc_scale d = GetGlobalScaleDataForTypeLevel(
 		npc_type,

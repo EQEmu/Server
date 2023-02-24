@@ -22,6 +22,8 @@
 #define EQEMU_NPC_SCALE_MANAGER_H
 
 #include "npc.h"
+#include "zone.h"
+extern Zone* zone;
 
 class NpcScaleManager {
 public:
