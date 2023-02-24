@@ -664,13 +664,15 @@ bool BotDatabase::LoadBuffs(Bot* bot_inst)
 		" `extra_di_chance`,"
 		" `instrument_mod`"
 		" FROM `bot_buffs`"
-		" WHERE `bot_id` = '{}'",
+		" WHERE `bot_id` = {}",
 		bot_inst->GetBotID()
 	);
 	auto results = database.QueryDatabase(query);
+
 	if (!results.Success()) {
 		return false;
 	}
+
 	if (!results.RowCount()) {
 		return true;
 	}
@@ -693,19 +695,15 @@ bool BotDatabase::LoadBuffs(Bot* bot_inst)
 		//row[2] (duration_formula) can probably be removed
 		bot_buffs[buff_count].ticsremaining = Strings::ToInt(row[3]);
 
+		bot_buffs[buff_count].counters = 0;
 		if (CalculatePoisonCounters(bot_buffs[buff_count].spellid) > 0) {
 			bot_buffs[buff_count].counters = atoul(row[4]);
-		}
-		else if (CalculateDiseaseCounters(bot_buffs[buff_count].spellid) > 0) {
+		} else if (CalculateDiseaseCounters(bot_buffs[buff_count].spellid) > 0) {
 			bot_buffs[buff_count].counters = atoul(row[5]);
-		}
-		else if (CalculateCurseCounters(bot_buffs[buff_count].spellid) > 0) {
+		} else if (CalculateCurseCounters(bot_buffs[buff_count].spellid) > 0) {
 			bot_buffs[buff_count].counters = atoul(row[6]);
-		}
-		else if (CalculateCorruptionCounters(bot_buffs[buff_count].spellid) > 0) {
+		} else if (CalculateCorruptionCounters(bot_buffs[buff_count].spellid) > 0) {
 			bot_buffs[buff_count].counters = atoul(row[7]);
-		} else {
-			bot_buffs[buff_count].counters = 0;
 		}
 
 		bot_buffs[buff_count].hit_number = atoul(row[8]);
