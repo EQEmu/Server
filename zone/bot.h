@@ -411,7 +411,7 @@ public:
 	//static bool SetBotOwnerCharacterID(uint32 botID, uint32 botOwnerCharacterID, std::string* error_message);
 	static bool IsBotAttackAllowed(Mob* attacker, Mob* target, bool& hasRuleDefined);
 	static Bot* GetBotByBotClientOwnerAndBotName(Client* c, std::string botName);
-	static void ProcessBotGroupInvite(Client* c, std::string botName);
+	static void ProcessBotGroupInvite(Client* c, std::string const& botName);
 	static void ProcessBotGroupDisband(Client* c, std::string botName);
 	static void BotOrderCampAll(Client* c, uint8 class_id = NO_CLASS);
 	static void ProcessBotInspectionRequest(Bot* inspectedBot, Client* client);

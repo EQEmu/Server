@@ -7269,11 +7269,11 @@ void Client::Handle_OP_GroupInvite2(const EQApplicationPacket *app)
 		}
 		else if (Invitee->IsBot()) {
 			Client* inviter = entity_list.GetClientByName(gis->inviter_name);
-			//Bot* invitee = entity_list.GetBotByBotName(gis->invitee_name);
-			if (inviter->IsRaidGrouped())
+			if (inviter->IsRaidGrouped() && inviter->HasGroup() && inviter->GetGroup()->GroupCount() >= MAX_GROUP_MEMBERS) {
 				Bot::ProcessRaidInvite(Invitee->CastToBot(), inviter);
-			else
+			} else {
 				Bot::ProcessBotGroupInvite(this, std::string(Invitee->GetName()));
+			}
 		}
 	}
 	else

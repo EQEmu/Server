@@ -7601,11 +7601,11 @@ Bot* Bot::GetBotByBotClientOwnerAndBotName(Client* c, std::string botName) {
 	return Result;
 }
 
-void Bot::ProcessBotGroupInvite(Client* c, std::string botName) {
+void Bot::ProcessBotGroupInvite(Client* c, std::string const& botName) {
 	if(c) {
 		Bot* invitedBot = GetBotByBotClientOwnerAndBotName(c, botName);
 
-		if(invitedBot && !invitedBot->HasGroup()) {
+		if(invitedBot && !invitedBot->HasGroup() && !invitedBot->HasRaid()) {
 			if(!c->IsGrouped()) {
 				Group *g = new Group(c);
 				if(AddBotToGroup(invitedBot, g)) {
@@ -7620,6 +7620,12 @@ void Bot::ProcessBotGroupInvite(Client* c, std::string botName) {
 			} else {
 				AddBotToGroup(invitedBot, c->GetGroup());
 				database.SetGroupID(invitedBot->GetCleanName(), c->GetGroup()->GetID(), invitedBot->GetBotID());
+			}
+			if (c->HasRaid() && c->HasGroup()) {
+				Raid* raid = entity_list.GetRaidByClient(c);
+				if (raid) {
+					raid->AddBot(invitedBot, raid->GetGroup(c), false, false, false);
+				}
 			}
 		}
 	}
@@ -10364,7 +10370,6 @@ void Bot::ProcessRaidInvite(Bot* invitee, Client* invitor) {
 					}
 				}
 			}
-			//			raid->SendBulkRaid(invitor); //Send a raid updates to the invitor
 			g_invitee->JoinRaidXTarget(raid, true);
 			g_invitee->DisbandGroup(true);
 			if (raid->IsLocked()) {
@@ -10373,13 +10378,7 @@ void Bot::ProcessRaidInvite(Bot* invitee, Client* invitor) {
 		}
 		else
 		{
-			//As there is already a raid and no group, just add this single client
-			//raid->SendRaidCreate(invitee);
-			//raid->SendMakeLeaderPacketTo(raid->leadername, invitee);
 			raid->AddBot(invitee);
-			//if (raid->IsLocked()) {
-			//	raid->SendRaidLockTo(invitee);
-			//}
 		}
 	}
 	else
@@ -10389,9 +10388,6 @@ void Bot::ProcessRaidInvite(Bot* invitee, Client* invitor) {
 		raid = new Raid(invitor);
 		entity_list.AddRaid(raid);
 		raid->SetRaidDetails();
-//		raid->SendRaidCreate(invitor);
-//		raid->SetLeader(invitor);	//Added Jan 18
-//		raid->SendMakeLeaderPacketTo(raid->leadername, invitor);
 
 		if (g_invitor)
 		{
@@ -10428,7 +10424,6 @@ void Bot::ProcessRaidInvite(Bot* invitee, Client* invitor) {
 							raid->SendRaidCreate(c);
 							raid->SendMakeLeaderPacketTo(raid->leadername, c);
 							raid->AddMember(c, 0, false, false, false);
-							//raid->GroupUpdate(0, true);
 							if (raid->IsLocked()) {
 								raid->SendRaidLockTo(c);
 							}
@@ -10436,8 +10431,6 @@ void Bot::ProcessRaidInvite(Bot* invitee, Client* invitor) {
 					}
 				}
 			}
-//			raid->GroupUpdate(0, true);
-//			raid->SendBulkRaid(invitee); //Send a raid updates to the invitor
 			g_invitor->JoinRaidXTarget(raid, true);
 			g_invitor->DisbandGroup(true); //Added Jan 23 to fix group database and entity integrity
 			raid->GroupUpdate(0, true);
@@ -10484,7 +10477,6 @@ void Bot::ProcessRaidInvite(Bot* invitee, Client* invitor) {
 						}
 					}
 				}
-				//raid->SendBulkRaid(invitor); //Send a raid updates to the invitor
 				g_invitee->JoinRaidXTarget(raid, true);
 				g_invitee->DisbandGroup(true);
 				raid->GroupUpdate(raid_free_group_id);
@@ -10504,8 +10496,7 @@ void Bot::ProcessRaidInvite(Bot* invitee, Client* invitor) {
 			//Second, add the single invitor
 			raid->SendRaidCreate(invitor);
 			raid->AddMember(invitor, 0xFFFFFFFF, true, false, true);
-//			raid->SendRaidAdd(invitor->GetName(), invitor);
-			raid->SendMakeLeaderPacketTo(invitor->GetName(), invitor);  //Mitch Jan 18
+			raid->SendMakeLeaderPacketTo(invitor->GetName(), invitor);
 			if (raid->IsLocked()) {
 				raid->SendRaidLockTo(invitor);
 			}
@@ -10549,7 +10540,6 @@ void Bot::ProcessRaidInvite(Bot* invitee, Client* invitor) {
 						}
 					}
 				}
-				//				raid->SendBulkRaid(invitor); //Send a raid updates to the invitor
 				g_invitee->JoinRaidXTarget(raid, true);
 				g_invitee->DisbandGroup(true);
 				raid->GroupUpdate(raid_free_group_id);
@@ -10560,13 +10550,8 @@ void Bot::ProcessRaidInvite(Bot* invitee, Client* invitor) {
 			else
 			{
 				//Third, no group so add the single client invitee
-				//raid->SendRaidCreate(invitee);
-				//raid->SendMakeLeaderPacketTo(raid->leadername, invitee);
 				raid->AddBot(invitee);
 				invitee->SetFollowID(invitor->GetID());
-				//if (raid->IsLocked()) {
-				//	raid->SendRaidLockTo(invitee);
-				//}
 			}
 		}
 	}
