@@ -113,7 +113,9 @@ bool PlayerEventLogs::IsEventEnabled(PlayerEvent::EventType event)
 // this processes any current player events on the queue
 void PlayerEventLogs::ProcessBatchQueue()
 {
+	m_batch_queue_lock.lock();
 	if (m_record_batch_queue.empty()) {
+		m_batch_queue_lock.unlock();
 		return;
 	}
 
@@ -128,7 +130,6 @@ void PlayerEventLogs::ProcessBatchQueue()
 	);
 
 	// empty
-	m_batch_queue_lock.lock();
 	m_record_batch_queue = {};
 	m_batch_queue_lock.unlock();
 }

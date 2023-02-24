@@ -90,7 +90,7 @@ uint32 Perl_Bot_CountBotItem(Bot* self, uint32 item_id)
 	return self->CountBotItem(item_id);
 }
 
-bool Perl_Bot_HasBotItem(Bot* self, uint32 item_id)
+int16 Perl_Bot_HasBotItem(Bot* self, uint32 item_id)
 {
 	return self->HasBotItem(item_id);
 }

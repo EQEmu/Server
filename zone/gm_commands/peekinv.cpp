@@ -3,6 +3,12 @@
 
 void command_peekinv(Client *c, const Seperator *sep)
 {
+	auto arguments = sep->argnum;
+	if (!arguments) {
+		SendPeekInvSubCommands(c);
+		return;
+	}
+
 	// this can be cleaned up once inventory is cleaned up
 	enum {
 		peekNone       = 0x0000,
@@ -15,63 +21,83 @@ void command_peekinv(Client *c, const Seperator *sep)
 		peekShBank     = 0x0040,
 		peekTrade      = 0x0080,
 		peekWorld      = 0x0100,
-		peekOutOfScope = (peekWorld * 2) // less than
+		peekOutOfScope = (peekWorld * 2)
 	};
-
-	static const char *scope_prefix[] = {"equip", "gen", "cursor", "limbo", "trib", "bank", "shbank", "trade", "world"};
 
 	static const int16 scope_range[][2] = {
-		{EQ::invslot::EQUIPMENT_BEGIN,   EQ::invslot::EQUIPMENT_END},
-		{EQ::invslot::GENERAL_BEGIN,     EQ::invslot::GENERAL_END},
-		{EQ::invslot::slotCursor,        EQ::invslot::slotCursor},
-		{EQ::invslot::SLOT_INVALID,      EQ::invslot::SLOT_INVALID},
-		{EQ::invslot::TRIBUTE_BEGIN,     EQ::invslot::TRIBUTE_END},
-		{EQ::invslot::BANK_BEGIN,        EQ::invslot::BANK_END},
-		{EQ::invslot::SHARED_BANK_BEGIN, EQ::invslot::SHARED_BANK_END},
-		{EQ::invslot::TRADE_BEGIN,       EQ::invslot::TRADE_END},
-		{EQ::invslot::SLOT_BEGIN,        (EQ::invtype::WORLD_SIZE - 1)}
+		{ EQ::invslot::EQUIPMENT_BEGIN,   EQ::invslot::EQUIPMENT_END },
+		{ EQ::invslot::GENERAL_BEGIN,     EQ::invslot::GENERAL_END },
+		{ EQ::invslot::slotCursor,        EQ::invslot::slotCursor },
+		{ EQ::invslot::SLOT_INVALID,      EQ::invslot::SLOT_INVALID },
+		{ EQ::invslot::TRIBUTE_BEGIN,     EQ::invslot::TRIBUTE_END },
+		{ EQ::invslot::BANK_BEGIN,        EQ::invslot::BANK_END },
+		{ EQ::invslot::SHARED_BANK_BEGIN, EQ::invslot::SHARED_BANK_END },
+		{ EQ::invslot::TRADE_BEGIN,       EQ::invslot::TRADE_END },
+		{ EQ::invslot::SLOT_BEGIN,        (EQ::invtype::WORLD_SIZE - 1) }
 	};
 
-	static const bool scope_bag[] = {false, true, true, true, false, true, true, true, true};
+	static const bool scope_bag[] = {
+		false, // Equip
+		true, // General
+		true, // Cursor
+		true, // Cursor Limbo
+		false, // Tribute
+		true, // Bank
+		true, // Shared Bank
+		true, // Trade
+		true // World
+	};
 
-	if (!c) {
+	int scope_mask = peekNone;
+
+	const bool is_all          = !strcasecmp(sep->arg[1], "all");
+	const bool is_all_bank     = !strcasecmp(sep->arg[1], "allbank");
+	const bool is_bank         = !strcasecmp(sep->arg[1], "bank");
+	const bool is_cursor       = !strcasecmp(sep->arg[1], "cursor");
+	const bool is_cursor_limbo = !strcasecmp(sep->arg[1], "curlimbo");
+	const bool is_equipment    = !strcasecmp(sep->arg[1], "equip");
+	const bool is_general      = !strcasecmp(sep->arg[1], "gen");
+	const bool is_limbo        = !strcasecmp(sep->arg[1], "limbo");
+	const bool is_possessions  = !strcasecmp(sep->arg[1], "poss");
+	const bool is_shared_bank  = !strcasecmp(sep->arg[1], "shbank");
+	const bool is_trade        = !strcasecmp(sep->arg[1], "trade");
+	const bool is_tribute      = !strcasecmp(sep->arg[1], "trib");
+	const bool is_world        = !strcasecmp(sep->arg[1], "world");
+
+	if (is_all) {
+		scope_mask = (peekOutOfScope - 1);
+	} else if (is_all_bank) {
+		scope_mask |= (peekBank | peekShBank);
+	} else if (is_bank) {
+		scope_mask |= peekBank;
+	} else if (is_cursor) {
+		scope_mask |= peekCursor;
+	} else if (is_cursor_limbo) {
+		scope_mask |= (peekCursor | peekLimbo);
+	} else if (is_equipment) {
+		scope_mask |= peekEquip;
+	} else if (is_general) {
+		scope_mask |= peekGen;
+	} else if (is_limbo) {
+		scope_mask |= peekLimbo;
+	} else if (is_possessions) {
+		scope_mask |= (peekEquip | peekGen | peekCursor);
+	} else if (is_shared_bank) {
+		scope_mask |= peekShBank;
+	} else if (is_tribute) {
+		scope_mask |= peekTrib;
+	} else if (is_trade) {
+		scope_mask |= peekTrade;
+	} else if (is_world) {
+		scope_mask |= peekWorld;
+	} else {
+		SendPeekInvSubCommands(c);
 		return;
 	}
 
-	if (c->GetTarget() && !c->GetTarget()->IsClient()) {
-		c->Message(Chat::White, "You must target a PC for this command.");
-		return;
-	}
-
-	int scopeMask = peekNone;
-
-	if (strcasecmp(sep->arg[1], "all") == 0) { scopeMask = (peekOutOfScope - 1); }
-	else if (strcasecmp(sep->arg[1], "equip") == 0) { scopeMask |= peekEquip; }
-	else if (strcasecmp(sep->arg[1], "gen") == 0) { scopeMask |= peekGen; }
-	else if (strcasecmp(sep->arg[1], "cursor") == 0) { scopeMask |= peekCursor; }
-	else if (strcasecmp(sep->arg[1], "poss") == 0) { scopeMask |= (peekEquip | peekGen | peekCursor); }
-	else if (strcasecmp(sep->arg[1], "limbo") == 0) { scopeMask |= peekLimbo; }
-	else if (strcasecmp(sep->arg[1], "curlim") == 0) { scopeMask |= (peekCursor | peekLimbo); }
-	else if (strcasecmp(sep->arg[1], "trib") == 0) { scopeMask |= peekTrib; }
-	else if (strcasecmp(sep->arg[1], "bank") == 0) { scopeMask |= peekBank; }
-	else if (strcasecmp(sep->arg[1], "shbank") == 0) { scopeMask |= peekShBank; }
-	else if (strcasecmp(sep->arg[1], "allbank") == 0) { scopeMask |= (peekBank | peekShBank); }
-	else if (strcasecmp(sep->arg[1], "trade") == 0) { scopeMask |= peekTrade; }
-	else if (strcasecmp(sep->arg[1], "world") == 0) { scopeMask |= peekWorld; }
-
-	if (!scopeMask) {
-		c->Message(
-			Chat::White,
-			"Usage: #peekinv [equip|gen|cursor|poss|limbo|curlim|trib|bank|shbank|allbank|trade|world|all]"
-		);
-		c->Message(Chat::White, "- Displays a portion of the targeted user's inventory");
-		c->Message(Chat::White, "- Caution: 'all' is a lot of information!");
-		return;
-	}
-
-	Client *targetClient = c;
-	if (c->GetTarget()) {
-		targetClient = c->GetTarget()->CastToClient();
+	auto t = c;
+	if (c->GetTarget() && c->GetTarget()->IsClient()) {
+		t = c->GetTarget()->CastToClient();
 	}
 
 	const EQ::ItemInstance *inst_main = nullptr;
@@ -82,62 +108,81 @@ void command_peekinv(Client *c, const Seperator *sep)
 	EQ::SayLinkEngine linker;
 	linker.SetLinkType(EQ::saylink::SayLinkItemInst);
 
-	c->Message(Chat::White, "Displaying inventory for %s...", targetClient->GetName());
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"Displaying inventory of {}.",
+			c->GetTargetDescription(t)
+		).c_str()
+	);
 
-	Object *objectTradeskill = targetClient->GetTradeskillObject();
+	auto o           = t->GetTradeskillObject();
+	auto found_items = false;
 
-	bool itemsFound = false;
-
-	for (int scopeIndex = 0, scopeBit = peekEquip; scopeBit < peekOutOfScope; ++scopeIndex, scopeBit <<= 1) {
-		if (scopeBit & ~scopeMask) {
+	for (int scope_index = 0, scope_bit = peekEquip; scope_bit < peekOutOfScope; ++scope_index, scope_bit <<= 1) {
+		if (scope_bit & ~scope_mask) {
 			continue;
 		}
 
-		if (scopeBit & peekWorld) {
-			if (objectTradeskill == nullptr) {
-				c->Message(Chat::Default, "No world tradeskill object selected...");
+		if (scope_bit & peekWorld) {
+			if (!o) {
+				c->Message(Chat::White, "No world Tradeskill object selected.");
 				continue;
-			}
-			else {
+			} else {
 				c->Message(
 					Chat::White,
-					"[WorldObject DBID: %i (entityid: %i)]",
-					objectTradeskill->GetDBID(),
-					objectTradeskill->GetID());
+					fmt::format(
+						"[World Object] Database ID: {} Entity ID: {}",
+						o->GetDBID(),
+						o->GetID()
+					).c_str()
+				);
 			}
 		}
 
-		for (int16 indexMain = scope_range[scopeIndex][0]; indexMain <= scope_range[scopeIndex][1]; ++indexMain) {
-			if (indexMain == EQ::invslot::SLOT_INVALID) {
+		for (int16 index_main = scope_range[scope_index][0]; index_main <= scope_range[scope_index][1]; ++index_main) {
+			if (index_main == EQ::invslot::SLOT_INVALID) {
 				continue;
 			}
 
-			inst_main = ((scopeBit & peekWorld) ? objectTradeskill->GetItem(indexMain) : targetClient->GetInv().GetItem(
-				indexMain
-			));
+			inst_main = (
+				(scope_bit & peekWorld) ?
+				o->GetItem(index_main) :
+				t->GetInv().GetItem(index_main)
+			);
+
 			if (inst_main) {
-				itemsFound = true;
+				found_items = true;
 				item_data  = inst_main->GetItem();
-			}
-			else {
+			} else {
 				item_data = nullptr;
 			}
 
 			linker.SetItemInst(inst_main);
 
-			c->Message(
-				(item_data == nullptr),
-				"%sSlot: %i, Item: %i (%s), Charges: %i",
-				scope_prefix[scopeIndex],
-				((scopeBit & peekWorld) ? (EQ::invslot::WORLD_BEGIN + indexMain) : indexMain),
-				((item_data == nullptr) ? 0 : item_data->ID),
-				linker.GenerateLink().c_str(),
-				((inst_main == nullptr) ? 0 : inst_main->GetCharges())
-			);
+			if (item_data) {
+				c->Message(
+					Chat::White,
+					fmt::format(
+						"Slot {} | {} ({}){}",
+						((scope_bit & peekWorld) ? (EQ::invslot::WORLD_BEGIN + index_main) : index_main),
+						linker.GenerateLink(),
+						item_data->ID,
+						(
+							inst_main->IsStackable() && inst_main->GetCharges() > 0 ?
+							fmt::format(
+								" (Stack of {})",
+								inst_main->GetCharges()
+							) :
+							""
+						)
+					).c_str()
+				);
+			}
 
 			if (inst_main && inst_main->IsClassCommon()) {
-				for (uint8 indexAug = EQ::invaug::SOCKET_BEGIN; indexAug <= EQ::invaug::SOCKET_END; ++indexAug) {
-					inst_aug = inst_main->GetItem(indexAug);
+				for (uint8 augment_index = EQ::invaug::SOCKET_BEGIN; augment_index <= EQ::invaug::SOCKET_END; ++augment_index) {
+					inst_aug = inst_main->GetItem(augment_index);
 					if (!inst_aug) { // extant only
 						continue;
 					}
@@ -146,25 +191,33 @@ void command_peekinv(Client *c, const Seperator *sep)
 					linker.SetItemInst(inst_aug);
 
 					c->Message(
-						(item_data == nullptr),
-						".%sAugSlot: %i (Slot #%i, Aug idx #%i), Item: %i (%s), Charges: %i",
-						scope_prefix[scopeIndex],
-						INVALID_INDEX,
-						((scopeBit & peekWorld) ? (EQ::invslot::WORLD_BEGIN + indexMain) : indexMain),
-						indexAug,
-						((item_data == nullptr) ? 0 : item_data->ID),
-						linker.GenerateLink().c_str(),
-						((inst_sub == nullptr) ? 0 : inst_sub->GetCharges())
+						Chat::White,
+						fmt::format(
+							"Slot {} (Augment Slot {}) | {} ({}){}",
+							((scope_bit & peekWorld) ? (EQ::invslot::WORLD_BEGIN + index_main) : index_main),
+							augment_index,
+							linker.GenerateLink(),
+							item_data->ID,
+							(
+								inst_aug->IsStackable() && inst_aug->GetCharges() > 0 ?
+								fmt::format(
+									" (Stack of {})",
+									inst_aug->GetCharges()
+								) :
+								""
+							)
+						).c_str()
 					);
+
 				}
 			}
 
-			if (!scope_bag[scopeIndex] || !(inst_main && inst_main->IsClassBag())) {
+			if (!scope_bag[scope_index] || !(inst_main && inst_main->IsClassBag())) {
 				continue;
 			}
 
-			for (uint8 indexSub = EQ::invbag::SLOT_BEGIN; indexSub <= EQ::invbag::SLOT_END; ++indexSub) {
-				inst_sub = inst_main->GetItem(indexSub);
+			for (uint8 sub_index = EQ::invbag::SLOT_BEGIN; sub_index <= EQ::invbag::SLOT_END; ++sub_index) {
+				inst_sub = inst_main->GetItem(sub_index);
 				if (!inst_sub) { // extant only
 					continue;
 				}
@@ -173,20 +226,32 @@ void command_peekinv(Client *c, const Seperator *sep)
 				linker.SetItemInst(inst_sub);
 
 				c->Message(
-					(item_data == nullptr),
-					"..%sBagSlot: %i (Slot #%i, Bag idx #%i), Item: %i (%s), Charges: %i",
-					scope_prefix[scopeIndex],
-					((scopeBit & peekWorld) ? INVALID_INDEX : EQ::InventoryProfile::CalcSlotId(indexMain, indexSub)),
-					((scopeBit & peekWorld) ? (EQ::invslot::WORLD_BEGIN + indexMain) : indexMain),
-					indexSub,
-					((item_data == nullptr) ? 0 : item_data->ID),
-					linker.GenerateLink().c_str(),
-					((inst_sub == nullptr) ? 0 : inst_sub->GetCharges())
+					Chat::White,
+					fmt::format(
+						"Slot {} Bag Slot {} | {} ({}){}",
+						(
+							(scope_bit & peekWorld) ?
+							INVALID_INDEX :
+							EQ::InventoryProfile::CalcSlotId(index_main, sub_index)
+						),
+						((scope_bit & peekWorld) ? (EQ::invslot::WORLD_BEGIN + index_main) : index_main),
+						sub_index,
+						linker.GenerateLink(),
+						item_data->ID,
+						(
+							inst_sub->IsStackable() && inst_sub->GetCharges() > 0 ?
+							fmt::format(
+								" (Stack of {})",
+								inst_sub->GetCharges()
+							) :
+							""
+						)
+					).c_str()
 				);
 
 				if (inst_sub->IsClassCommon()) {
-					for (uint8 indexAug = EQ::invaug::SOCKET_BEGIN; indexAug <= EQ::invaug::SOCKET_END; ++indexAug) {
-						inst_aug = inst_sub->GetItem(indexAug);
+					for (uint8 augment_index = EQ::invaug::SOCKET_BEGIN; augment_index <= EQ::invaug::SOCKET_END; ++augment_index) {
+						inst_aug = inst_sub->GetItem(augment_index);
 						if (!inst_aug) { // extant only
 							continue;
 						}
@@ -195,58 +260,73 @@ void command_peekinv(Client *c, const Seperator *sep)
 						linker.SetItemInst(inst_aug);
 
 						c->Message(
-							(item_data == nullptr),
-							"...%sAugSlot: %i (Slot #%i, Sub idx #%i, Aug idx #%i), Item: %i (%s), Charges: %i",
-							scope_prefix[scopeIndex],
-							INVALID_INDEX,
-							((scopeBit & peekWorld) ? INVALID_INDEX : EQ::InventoryProfile::CalcSlotId(
-								indexMain,
-								indexSub
-							)),
-							indexSub,
-							indexAug,
-							((item_data == nullptr) ? 0 : item_data->ID),
-							linker.GenerateLink().c_str(),
-							((inst_sub == nullptr) ? 0 : inst_sub->GetCharges())
+							Chat::White,
+							fmt::format(
+								"Slot {} Bag Slot {} (Augment Slot {}) | {} ({}){}",
+								(
+									(scope_bit & peekWorld) ?
+									INVALID_INDEX :
+									EQ::InventoryProfile::CalcSlotId(index_main,sub_index)
+								),
+								sub_index,
+								augment_index,
+								linker.GenerateLink(),
+								item_data->ID,
+								(
+									inst_sub->IsStackable() && inst_sub->GetCharges() > 0 ?
+									fmt::format(
+										" (Stack of {})",
+										inst_sub->GetCharges()
+									) :
+									""
+								)
+							).c_str()
 						);
 					}
 				}
 			}
 		}
 
-		if (scopeBit & peekLimbo) {
+		if (scope_bit & peekLimbo) {
 			int       limboIndex = 0;
-			for (auto it         = targetClient->GetInv().cursor_cbegin();
-				(it != targetClient->GetInv().cursor_cend());
-				++it, ++limboIndex) {
-				if (it == targetClient->GetInv().cursor_cbegin()) {
+			for (auto it = t->GetInv().cursor_cbegin(); (it != t->GetInv().cursor_cend()); ++it, ++limboIndex) {
+				if (it == t->GetInv().cursor_cbegin()) {
 					continue;
 				}
 
 				inst_main = *it;
 				if (inst_main) {
-					itemsFound = true;
+					found_items = true;
 					item_data  = inst_main->GetItem();
-				}
-				else {
+				} else {
 					item_data = nullptr;
 				}
 
 				linker.SetItemInst(inst_main);
 
-				c->Message(
-					(item_data == nullptr),
-					"%sSlot: %i, Item: %i (%s), Charges: %i",
-					scope_prefix[scopeIndex],
-					(8000 + limboIndex),
-					((item_data == nullptr) ? 0 : item_data->ID),
-					linker.GenerateLink().c_str(),
-					((inst_main == nullptr) ? 0 : inst_main->GetCharges())
-				);
+				if (item_data) {
+					c->Message(
+						Chat::White,
+						fmt::format(
+							"Slot {} | {} ({}){}",
+							(8000 + limboIndex),
+							item_data->ID,
+							linker.GenerateLink(),
+							(
+								inst_main->IsStackable() && inst_main->GetCharges() > 0 ?
+								fmt::format(
+									" (Stack of {})",
+									inst_main->GetCharges()
+								) :
+								""
+							)
+						).c_str()
+					);
+				}
 
 				if (inst_main && inst_main->IsClassCommon()) {
-					for (uint8 indexAug = EQ::invaug::SOCKET_BEGIN; indexAug <= EQ::invaug::SOCKET_END; ++indexAug) {
-						inst_aug = inst_main->GetItem(indexAug);
+					for (uint8 augment_index = EQ::invaug::SOCKET_BEGIN; augment_index <= EQ::invaug::SOCKET_END; ++augment_index) {
+						inst_aug = inst_main->GetItem(augment_index);
 						if (!inst_aug) { // extant only
 							continue;
 						}
@@ -255,25 +335,32 @@ void command_peekinv(Client *c, const Seperator *sep)
 						linker.SetItemInst(inst_aug);
 
 						c->Message(
-							(item_data == nullptr),
-							".%sAugSlot: %i (Slot #%i, Aug idx #%i), Item: %i (%s), Charges: %i",
-							scope_prefix[scopeIndex],
-							INVALID_INDEX,
-							(8000 + limboIndex),
-							indexAug,
-							((item_data == nullptr) ? 0 : item_data->ID),
-							linker.GenerateLink().c_str(),
-							((inst_sub == nullptr) ? 0 : inst_sub->GetCharges())
+							Chat::White,
+							fmt::format(
+								"Slot {} (Augment Slot {}) | {} ({}){}",
+								(8000 + limboIndex),
+								augment_index,
+								linker.GenerateLink(),
+								item_data->ID,
+								(
+									inst_aug->IsStackable() && inst_aug->GetCharges() > 0 ?
+									fmt::format(
+										" (Stack of {})",
+										inst_aug->GetCharges()
+									) :
+									""
+								)
+							).c_str()
 						);
 					}
 				}
 
-				if (!scope_bag[scopeIndex] || !(inst_main && inst_main->IsClassBag())) {
+				if (!scope_bag[scope_index] || !(inst_main && inst_main->IsClassBag())) {
 					continue;
 				}
 
-				for (uint8 indexSub = EQ::invbag::SLOT_BEGIN; indexSub <= EQ::invbag::SLOT_END; ++indexSub) {
-					inst_sub = inst_main->GetItem(indexSub);
+				for (uint8 sub_index = EQ::invbag::SLOT_BEGIN; sub_index <= EQ::invbag::SLOT_END; ++sub_index) {
+					inst_sub = inst_main->GetItem(sub_index);
 					if (!inst_sub) {
 						continue;
 					}
@@ -282,23 +369,32 @@ void command_peekinv(Client *c, const Seperator *sep)
 
 					linker.SetItemInst(inst_sub);
 
-					c->Message(
-						(item_data == nullptr),
-						"..%sBagSlot: %i (Slot #%i, Bag idx #%i), Item: %i (%s), Charges: %i",
-						scope_prefix[scopeIndex],
-						INVALID_INDEX,
-						(8000 + limboIndex),
-						indexSub,
-						((item_data == nullptr) ? 0 : item_data->ID),
-						linker.GenerateLink().c_str(),
-						((inst_sub == nullptr) ? 0 : inst_sub->GetCharges())
-					);
+					if (item_data) {
+						c->Message(
+							Chat::White,
+							fmt::format(
+								"Slot {} Bag Slot {} | {} ({}){}",
+								(8000 + limboIndex),
+								sub_index,
+								linker.GenerateLink(),
+								item_data->ID,
+								(
+									inst_sub->IsStackable() && inst_sub->GetCharges() > 0 ?
+									fmt::format(
+										" (Stack of {})",
+										inst_sub->GetCharges()
+									) :
+									""
+								)
+							).c_str()
+						);
+					}
 
 					if (inst_sub->IsClassCommon()) {
-						for (uint8 indexAug = EQ::invaug::SOCKET_BEGIN;
-							indexAug <= EQ::invaug::SOCKET_END;
-							++indexAug) {
-							inst_aug = inst_sub->GetItem(indexAug);
+						for (uint8 augment_index = EQ::invaug::SOCKET_BEGIN;
+							augment_index <= EQ::invaug::SOCKET_END;
+							++augment_index) {
+							inst_aug = inst_sub->GetItem(augment_index);
 							if (!inst_aug) { // extant only
 								continue;
 							}
@@ -307,16 +403,23 @@ void command_peekinv(Client *c, const Seperator *sep)
 							linker.SetItemInst(inst_aug);
 
 							c->Message(
-								(item_data == nullptr),
-								"...%sAugSlot: %i (Slot #%i, Sub idx #%i, Aug idx #%i), Item: %i (%s), Charges: %i",
-								scope_prefix[scopeIndex],
-								INVALID_INDEX,
-								(8000 + limboIndex),
-								indexSub,
-								indexAug,
-								((item_data == nullptr) ? 0 : item_data->ID),
-								linker.GenerateLink().c_str(),
-								((inst_sub == nullptr) ? 0 : inst_sub->GetCharges())
+								Chat::White,
+								fmt::format(
+									"Slot {} Bag Slot {} (Augment Slot {}) | {} ({}){}",
+									(8000 + limboIndex),
+									sub_index,
+									augment_index,
+									linker.GenerateLink(),
+									item_data->ID,
+									(
+										inst_sub->IsStackable() && inst_sub->GetCharges() > 0 ?
+										fmt::format(
+											" (Stack of {})",
+											inst_sub->GetCharges()
+										) :
+										""
+									)
+								).c_str()
 							);
 						}
 					}
@@ -325,8 +428,23 @@ void command_peekinv(Client *c, const Seperator *sep)
 		}
 	}
 
-	if (!itemsFound) {
+	if (!found_items) {
 		c->Message(Chat::White, "No items found.");
 	}
 }
 
+void SendPeekInvSubCommands(Client* c) {
+	c->Message(Chat::White, "Usage: #peekinv equip - Shows items in Equipment slots");
+	c->Message(Chat::White, "Usage: #peekinv gen - Shows items in General slots");
+	c->Message(Chat::White, "Usage: #peekinv cursor - Shows items in Cursor slots");
+	c->Message(Chat::White, "Usage: #peekinv poss - Shows items in Equipment, General, and Cursor slots");
+	c->Message(Chat::White, "Usage: #peekinv limbo - Shows items in Limbo slots");
+	c->Message(Chat::White, "Usage: #peekinv curlim - Shows items in Cursor and Limbo slots");
+	c->Message(Chat::White, "Usage: #peekinv trib - Shows items in Tribute slots");
+	c->Message(Chat::White, "Usage: #peekinv bank - Shows items in Bank slots");
+	c->Message(Chat::White, "Usage: #peekinv shbank - Shows items in Shared Bank slots");
+	c->Message(Chat::White, "Usage: #peekinv allbank - Shows items in Bank and Shared Bank slots");
+	c->Message(Chat::White, "Usage: #peekinv trade - Shows items in Trade slots");
+	c->Message(Chat::White, "Usage: #peekinv world - Shows items in World slots");
+	c->Message(Chat::White, "Usage: #peekinv all - Shows items in all slots");
+}
