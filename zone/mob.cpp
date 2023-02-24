@@ -103,6 +103,7 @@ Mob::Mob(
 	attack_dw_timer(2000),
 	ranged_timer(2000),
 	hp_regen_per_second_timer(1000),
+	m_z_clip_check_timer(1000),
 	tic_timer(6000),
 	mana_timer(2000),
 	spellend_timer(0),
@@ -2374,14 +2375,14 @@ void Mob::ShowBuffList(Client* client) {
 	}
 }
 
-void Mob::GMMove(float x, float y, float z, float heading) {
+void Mob::GMMove(float x, float y, float z, float heading, bool save_guard_spot) {
 	m_Position.x = x;
 	m_Position.y = y;
 	m_Position.z = z;
 	SetHeading(heading);
 	mMovementManager->SendCommandToClients(this, 0.0, 0.0, 0.0, 0.0, 0, ClientRangeAny);
 
-	if (IsNPC()) {
+	if (IsNPC() && save_guard_spot) {
 		CastToNPC()->SaveGuardSpot(glm::vec4(x, y, z, heading));
 	}
 }
@@ -3714,10 +3715,32 @@ bool Mob::HateSummon() {
 			// probably should be like half melee range, but we can't get melee range nicely because reasons :)
 			new_pos = target->TryMoveAlong(new_pos, 5.0f, angle);
 
-			if (target->IsClient())
-				target->CastToClient()->MovePC(zone->GetZoneID(), zone->GetInstanceID(), new_pos.x, new_pos.y, new_pos.z, new_pos.w, 0, SummonPC);
-			else
-				target->GMMove(new_pos.x, new_pos.y, new_pos.z, new_pos.w);
+			if (target->IsClient()) {
+				target->CastToClient()->MovePC(
+					zone->GetZoneID(),
+					zone->GetInstanceID(),
+					new_pos.x,
+					new_pos.y,
+					new_pos.z,
+					new_pos.w,
+					0,
+					SummonPC
+				);
+			} else {
+				bool target_is_client_pet = (
+					target->IsPet() &&
+					target->IsPetOwnerClient()
+				);
+				bool set_new_guard_spot = !(IsNPC() && target_is_client_pet);
+
+				target->GMMove(
+					new_pos.x,
+					new_pos.y,
+					new_pos.z,
+					new_pos.w,
+					set_new_guard_spot
+				);
+			}
 
 			return true;
 		} else if(summon_level == 2) {
@@ -4166,7 +4189,7 @@ void Mob::ExecWeaponProc(const EQ::ItemInstance *inst, uint16 spell_id, Mob *on,
 		twinproc = true;
 	}
 
-	if (IsBeneficialSpell(spell_id) && (!IsNPC() || (IsNPC() && CastToNPC()->GetInnateProcSpellID() != spell_id))) { // NPC innate procs don't take this path ever
+	if (IsBeneficialSpell(spell_id) && (!IsNPC() || (IsNPC() && CastToNPC()->GetInnateProcSpellID() != spell_id)) && spells[spell_id].target_type != ST_TargetsTarget) { // NPC innate procs don't take this path ever
 		SpellFinished(spell_id, this, EQ::spells::CastingSlot::Item, 0, -1, spells[spell_id].resist_difficulty, true, level_override);
 		if (twinproc) {
 			SpellFinished(spell_id, this, EQ::spells::CastingSlot::Item, 0, -1, spells[spell_id].resist_difficulty, true, level_override);

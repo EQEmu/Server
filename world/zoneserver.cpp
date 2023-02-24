@@ -1332,6 +1332,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		case ServerOP_ItemStatus:
 		case ServerOP_KickPlayer:
 		case ServerOP_KillPlayer:
+		case ServerOP_OOCMute:
 		case ServerOP_OOZGroupMessage:
 		case ServerOP_Petition:
 		case ServerOP_RaidGroupSay:

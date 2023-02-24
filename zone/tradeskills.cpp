@@ -469,22 +469,11 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 	}
 
 	// Check if Combine would result in Lore conflict
-	for (const auto& e : spec.onsuccess) {
-		auto success_item_inst = database.GetItem(e.first);
-		if (success_item_inst->LoreGroup > 0) {
-			continue;
-		}
-		if (user->CheckLoreConflict(success_item_inst)) {
-			EQ::SayLinkEngine linker;
-			linker.SetLinkType(EQ::saylink::SayLinkItemData);
-			linker.SetItemData(success_item_inst);
-			auto item_link = linker.GenerateLink();
-			user->MessageString(Chat::Red, TRADESKILL_COMBINE_LORE, item_link.c_str());
-			auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
-			user->QueuePacket(outapp);
-			safe_delete(outapp);
-			return;
-		}
+	if (user->CheckTradeskillLoreConflict(spec.recipe_id)) {
+		auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
+		user->QueuePacket(outapp);
+		safe_delete(outapp);
+		return;
 	}
 
 	// final check for any additional quest requirements .. "check_zone" in this case - exported as variable [validate_type]
@@ -622,9 +611,9 @@ void Object::HandleAutoCombine(Client* user, const RecipeAutoCombine_Struct* rac
 	}
 
     //pull the list of components
-	std::string query = StringFormat("SELECT tre.item_id, tre.componentcount "
-                                    "FROM tradeskill_recipe_entries AS tre "
-                                    "WHERE tre.componentcount > 0 AND tre.recipe_id = %u",
+	const auto query = fmt::format("SELECT item_id, componentcount "
+                                    "FROM tradeskill_recipe_entries "
+                                    "WHERE componentcount > 0 AND recipe_id = {}",
                                     rac->recipe_id);
     auto results = content_db.QueryDatabase(query);
 	if (!results.Success()) {
@@ -698,6 +687,13 @@ void Object::HandleAutoCombine(Client* user, const RecipeAutoCombine_Struct* rac
 		return;
 	}
 
+	// Check if Combine would result in Lore conflict
+	if (user->CheckTradeskillLoreConflict(rac->recipe_id)) {
+		user->QueuePacket(outapp);
+		safe_delete(outapp);
+		return;
+	}
+
 	//now we know they have everything...
 
 	//remove all the items from the players inventory, with updates...
@@ -727,22 +723,6 @@ void Object::HandleAutoCombine(Client* user, const RecipeAutoCombine_Struct* rac
 		}
 	}
 
-	DBTradeskillRecipe_Struct recipe_struct;
-
-	// Check if Combine would result in Lore conflict
-	for (const auto& e : recipe_struct.onsuccess) {
-		auto success_item_inst = database.GetItem(e.first);
-		if (user->CheckLoreConflict(success_item_inst)) {
-			EQ::SayLinkEngine linker;
-			linker.SetLinkType(EQ::saylink::SayLinkItemData);
-			linker.SetItemData(success_item_inst);
-			auto item_link = linker.GenerateLink();
-			user->MessageString(Chat::Red, TRADESKILL_COMBINE_LORE, item_link.c_str());
-			user->QueuePacket(outapp);
-			safe_delete(outapp);
-			return;
-		}
-	}
 	//otherwise, we found it all...
 	outp->reply_code = 0x00000000;	//success for finding it...
 	user->QueuePacket(outapp);
@@ -1880,5 +1860,37 @@ bool ZoneDatabase::DisableRecipe(uint32 recipe_id)
 
 	return results.RowsAffected() > 0;
 
+	return false;
+}
+
+bool Client::CheckTradeskillLoreConflict(int32 recipe_id)
+{
+	const auto& recipe_entries = TradeskillRecipeEntriesRepository::GetWhere(
+			content_db,
+			fmt::format(
+					"recipe_id = {} ORDER BY id ASC",
+					recipe_id
+			)
+	);
+	if (recipe_entries.empty()) {
+		return false;
+	}
+
+	for (auto& e : recipe_entries) {
+		auto item_inst = database.GetItem(e.item_id);
+		if (item_inst) {
+			if (item_inst->LoreGroup == 0 || e.componentcount > 0 || e.iscontainer) {
+				continue;
+			}
+			if (CheckLoreConflict(item_inst)) {
+				EQ::SayLinkEngine linker;
+				linker.SetLinkType(EQ::saylink::SayLinkItemData);
+				linker.SetItemData(item_inst);
+				auto item_link = linker.GenerateLink();
+				MessageString(Chat::Red, TRADESKILL_COMBINE_LORE, item_link.c_str());
+				return true;
+			}
+		}
+	}
 	return false;
 }

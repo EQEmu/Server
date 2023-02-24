@@ -116,7 +116,7 @@ void command_gearup(Client *c, const Seperator *sep)
 			if (t->IsClient()) {
 				has_item = t->CastToClient()->GetInv().HasItem(item_id, 1, invWhereWorn) != INVALID_INDEX;
 			} else if (t->IsBot()) {
-				has_item = t->CastToBot()->HasBotItem(item_id);
+				has_item = t->CastToBot()->HasBotItem(item_id) != INVALID_INDEX;
 			}
 
 			bool can_wear_item = false;

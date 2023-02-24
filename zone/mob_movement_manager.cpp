@@ -236,7 +236,7 @@ public:
 
 			if (RuleB(Map, FixZWhenPathing)) {
 				m_distance_moved_since_correction += distance_moved;
-				if (m_distance_moved_since_correction > RuleR(Map, DistanceCanTravelBeforeAdjustment)) {
+				if (m_distance_moved_since_correction > (mob->IsEngaged() ? 1 : 10)) {
 					m_distance_moved_since_correction = 0.0;
 					mob->FixZ();
 				}
