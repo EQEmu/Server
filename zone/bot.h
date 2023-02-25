@@ -150,7 +150,7 @@ public:
 
 	bool HasRaid() final { return (GetRaid() ? true : false); }
 	bool HasGroup() final { return (GetGroup() ? true : false); }
-	Raid* GetRaid() final { return entity_list.GetRaidByMob(this); }
+	Raid* GetRaid() final { return entity_list.GetRaidByBot(this); }
 	Group* GetGroup() final { return entity_list.GetGroupByMob(this); }
 
 	// Common, but informal "interfaces" with Client object

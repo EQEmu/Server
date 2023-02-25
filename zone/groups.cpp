@@ -1200,52 +1200,23 @@ void Group::VerifyGroup() {
 		Only called every once in a while (on member re-join for now).
 	*/
 
-	// To do
-	// Reset the membername array to match the group_id database records?
-	// When doing this manually, it seem to have resolved the issue.
-	// Only want to do this when the database Name does not match the array
-	// Could this be done from the LearnGroup method?
-	// reset the members and membername array for this group
-	
-	for (int i = 0; i < MAX_GROUP_MEMBERS; i++) {
-		members[i] = nullptr; 
-		memset(membername[i],'\0',64);
-	}
-	// repopulate the membername array from the database to ensure the local zone instance has accurate information
-
-	Group::LearnMembers();
-
-	uint32 i;
-	for (i = 0; i < MAX_GROUP_MEMBERS; i++) {
+	for (uint32 i = 0; i < MAX_GROUP_MEMBERS; i++) {
 		if (membername[i][0] == '\0') {
-#if EQDEBUG >= 7
-	LogDebug("Group [{}]: Verify [{}]: Empty.\n", (unsigned long)GetID(), i);
-#endif
 			members[i] = nullptr;
 			continue;
 		}
 
 		Mob *them = entity_list.GetMob(membername[i]);
 		if(them == nullptr && members[i] != nullptr) {	//they aren't in zone
-#if EQDEBUG >= 6
-		LogDebug("Member of group [{}] named [{}] has disappeared!!", (unsigned long)GetID(), membername[i]);
-#endif
 			membername[i][0] = '\0';
 			members[i] = nullptr;
 			continue;
 		}
 
-
 		if(them != nullptr && members[i] != them) {	//our pointer is out of date... not so good.
-#if EQDEBUG >= 5
-		LogDebug("Member of group [{}] named [{}] had an out of date pointer!!", (unsigned long)GetID(), membername[i]);
-#endif
 			members[i] = them;
 			continue;
 		}
-#if EQDEBUG >= 8
-		LogDebug("Member of group [{}] named [{}] is valid", (unsigned long)GetID(), membername[i]);
-#endif
 	}
 }
 

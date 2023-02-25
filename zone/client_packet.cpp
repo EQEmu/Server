@@ -7271,8 +7271,10 @@ void Client::Handle_OP_GroupInvite2(const EQApplicationPacket *app)
 			Client* inviter = entity_list.GetClientByName(gis->inviter_name);
 			if (inviter->IsRaidGrouped() && inviter->HasGroup() && inviter->GetGroup()->GroupCount() >= MAX_GROUP_MEMBERS) {
 				Bot::ProcessRaidInvite(Invitee->CastToBot(), inviter);
-			} else {
+			} else if (!Invitee->HasRaid()) {
 				Bot::ProcessBotGroupInvite(this, std::string(Invitee->GetName()));
+			} else {
+				MessageString(Chat::LightGray, ALREADY_IN_YOUR_RAID);
 			}
 		}
 	}
