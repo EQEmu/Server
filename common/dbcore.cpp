@@ -80,7 +80,8 @@ void DBcore::ping()
 
 MySQLRequestResult DBcore::QueryDatabase(std::string query, bool retryOnFailureOnce)
 {
-	return QueryDatabase(query.c_str(), query.length(), retryOnFailureOnce);
+	auto r = QueryDatabase(query.c_str(), query.length(), retryOnFailureOnce);
+	return r;
 }
 
 bool DBcore::DoesTableExist(std::string table_name)
@@ -101,8 +102,6 @@ MySQLRequestResult DBcore::QueryDatabase(const char *query, uint32 querylen, boo
 	if (pStatus != Connected) {
 		Open();
 	}
-
-
 
 	// request query. != 0 indicates some kind of error.
 	if (mysql_real_query(&mysql, query, querylen) != 0) {
@@ -298,4 +297,13 @@ const std::string &DBcore::GetOriginHost() const
 void DBcore::SetOriginHost(const std::string &origin_host)
 {
 	DBcore::origin_host = origin_host;
+}
+
+std::string DBcore::Escape(const std::string& s)
+{
+	const std::size_t s_len = s.length();
+	std::vector<char> temp((s_len * 2) + 1, '\0');
+	mysql_real_escape_string(&mysql, temp.data(), s.c_str(), s_len);
+
+	return temp.data();
 }
