@@ -2786,6 +2786,16 @@ Bot* Perl_Mob_GetHateRandomBot(Mob* self) // @categories Hate and Aggro
 	return self->GetHateRandomBot();
 }
 
+bool Perl_Mob_IsFindable(Mob* self) // @categories Script Utility
+{
+	return self->IsFindable();
+}
+
+bool Perl_Mob_IsTrackable(Mob* self) // @categories Script Utility
+{
+	return self->IsTrackable();
+}
+
 void perl_register_mob()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -3122,6 +3132,7 @@ void perl_register_mob()
 	package.add("IsEngaged", &Perl_Mob_IsEngaged);
 	package.add("IsEnraged", &Perl_Mob_IsEnraged);
 	package.add("IsFeared", &Perl_Mob_IsFeared);
+	package.add("IsFindable", &Perl_Mob_IsFindable);
 	package.add("IsHorse", &Perl_Mob_IsHorse);
 	package.add("IsImmuneToSpell", &Perl_Mob_IsImmuneToSpell);
 	package.add("IsInvisible", (bool(*)(Mob*))&Perl_Mob_IsInvisible);
@@ -3142,6 +3153,7 @@ void perl_register_mob()
 	package.add("IsStunned", &Perl_Mob_IsStunned);
 	package.add("IsTargetable", &Perl_Mob_IsTargetable);
 	package.add("IsTargeted", &Perl_Mob_IsTargeted);
+	package.add("IsTrackable", &Perl_Mob_IsTrackable);
 	package.add("IsTrap", &Perl_Mob_IsTrap);
 	package.add("IsWarriorClass", &Perl_Mob_IsWarriorClass);
 	package.add("Kill", &Perl_Mob_Kill);
