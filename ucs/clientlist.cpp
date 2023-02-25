@@ -793,7 +793,10 @@ void Clientlist::ProcessOPMailCommand(Client *c, std::string command_string, boo
 	case CommandJoin:
 		if (!command_directed) {
 			//Append saved channels to params
-			parameters = parameters + ", " + database.CurrentPlayerChannels(c->GetName());
+			auto const savedChannels = database.CurrentPlayerChannels(c->GetName());
+			if (savedChannels.length() > 0) {
+				parameters = parameters + ", " + savedChannels;
+			}
 			parameters = RemoveDuplicateChannels(parameters);
 		}
 		c->JoinChannels(parameters, command_directed);
