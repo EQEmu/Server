@@ -3051,11 +3051,6 @@ bool Lua_Client::IsAutoFireEnabled()
 	return self->AutoFireEnabled();
 }
 
-bool Lua_Client::IsBerserk() {
-	Lua_Safe_Call_Bool();
-	return self->IsBerserk();
-}
-
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 	.def(luabind::constructor<>())
