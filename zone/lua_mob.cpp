@@ -2823,11 +2823,6 @@ Lua_HateList Lua_Mob::GetHateListBots(uint32 distance) {
 	return ret;
 }
 
-bool Lua_Mob::HasSpecialAbilities() {
-	Lua_Safe_Call_Bool();
-	return self->HasSpecialAbilities();
-}
-
 luabind::scope lua_register_mob() {
 	return luabind::class_<Lua_Mob, Lua_Entity>("Mob")
 	.def(luabind::constructor<>())
