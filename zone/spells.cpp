@@ -3161,6 +3161,11 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 		}
 		if (sp2_value != sp1_value)
 			values_equal = false;
+
+		if (RuleB(Spells, ResurrectionEffectsBlock) && IsResurrectionEffects(spellid1)) {
+			LogSpells("ResurrectionEffectsBlock triggered -- [{}] is blocked by [{}]", sp2.name, sp1.name);
+			return -1;	// can't stack
+		}
 		//we dont return here... a better value on this one effect dosent mean they are
 		//all better...
 
