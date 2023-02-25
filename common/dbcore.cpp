@@ -294,7 +294,7 @@ std::string DBcore::Escape(const std::string& s)
 {
 	const std::size_t s_len = s.length();
 	std::vector<char> temp((s_len * 2) + 1, '\0');
-	mysql_real_escape_string(&mysql, temp.data(), s.c_str(), s_len);
+	mysql_real_escape_string(mysql, temp.data(), s.c_str(), s_len);
 
 	return temp.data();
 }
