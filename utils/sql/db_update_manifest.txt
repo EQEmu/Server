@@ -474,6 +474,7 @@
 9218|2023_01_24_item_recast.sql|show columns from character_item_recast like '%recast_type%'|contains|smallint
 9219|2023_01_29_merchant_status_requirements.sql|SHOW COLUMNS FROM merchantlist LIKE 'min_status'|empty|
 9220|2022_12_19_player_events_tables.sql|SHOW TABLES LIKE 'player_event_logs'|empty|
+9221|2023_02_24_npc_scaling_zone_id_instance_version|SHOW COLUMNS FROM `npc_scale_global_base` LIKE 'zone_id'|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not
