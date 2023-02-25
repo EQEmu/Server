@@ -34,16 +34,16 @@
 
 DBcore::DBcore()
 {
-	mysql           = mysql_init(nullptr);
-	mysqlOwner		= true;
-	pHost           = nullptr;
-	pUser           = nullptr;
-	pPassword       = nullptr;
-	pDatabase       = nullptr;
-	pCompress       = false;
-	pSSL            = false;
-	pStatus         = Closed;
-	m_mutex         = new Mutex;
+	mysql      = mysql_init(nullptr);
+	mysqlOwner = true;
+	pHost      = nullptr;
+	pUser      = nullptr;
+	pPassword  = nullptr;
+	pDatabase  = nullptr;
+	pCompress  = false;
+	pSSL       = false;
+	pStatus    = Closed;
+	m_mutex    = new Mutex;
 }
 
 DBcore::~DBcore()
