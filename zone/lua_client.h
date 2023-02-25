@@ -468,7 +468,6 @@ public:
 	void UseAugmentContainer(int container_slot);
 	bool IsAutoAttackEnabled();
 	bool IsAutoFireEnabled();
-	bool IsBerserk();
 
 	void ApplySpell(int spell_id);
 	void ApplySpell(int spell_id, int duration);

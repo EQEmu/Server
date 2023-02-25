@@ -3316,7 +3316,6 @@ luabind::scope lua_register_client() {
 	.def("IncrementAA", (void(Lua_Client::*)(int))&Lua_Client::IncrementAA)
 	.def("IsAutoAttackEnabled", (bool(Lua_Client::*)(void))&Lua_Client::IsAutoAttackEnabled)
 	.def("IsAutoFireEnabled", (bool(Lua_Client::*)(void))&Lua_Client::IsAutoFireEnabled)
-	.def("IsBerserk", (bool(Lua_Client::*)(void))&Lua_Client::IsBerserk)
 	.def("IsCrouching", (bool(Lua_Client::*)(void))&Lua_Client::IsCrouching)
 	.def("IsDead", &Lua_Client::IsDead)
 	.def("IsDueling", (bool(Lua_Client::*)(void))&Lua_Client::IsDueling)

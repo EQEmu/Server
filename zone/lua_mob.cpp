@@ -2258,6 +2258,12 @@ int Lua_Mob::GetWeaponDamage(Lua_Mob against, Lua_ItemInst weapon) {
 	Lua_Safe_Call_Int();
 	return self->GetWeaponDamage(against, weapon);
 }
+
+bool Lua_Mob::IsBerserk() {
+	Lua_Safe_Call_Bool();
+	return self->IsBerserk();
+}
+
 bool Lua_Mob::TryFinishingBlow(Lua_Mob defender, int64 &damage) {
 	Lua_Safe_Call_Bool();
 	return self->TryFinishingBlow(defender, damage);
@@ -3151,6 +3157,7 @@ luabind::scope lua_register_mob() {
 	.def("IsAttackAllowed", (bool(Lua_Mob::*)(Lua_Mob))&Lua_Mob::IsAttackAllowed)
 	.def("IsAttackAllowed", (bool(Lua_Mob::*)(Lua_Mob,bool))&Lua_Mob::IsAttackAllowed)
 	.def("IsBeneficialAllowed", (bool(Lua_Mob::*)(Lua_Mob))&Lua_Mob::IsBeneficialAllowed)
+	.def("IsBerserk", &Lua_Mob::IsBerserk)
 	.def("IsBlind", (bool(Lua_Mob::*)(void))&Lua_Mob::IsBlind)
 	.def("IsCasting", &Lua_Mob::IsCasting)
 	.def("IsEliteMaterialItem", (uint32(Lua_Mob::*)(uint8))&Lua_Mob::IsEliteMaterialItem)

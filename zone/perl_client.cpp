@@ -2907,11 +2907,6 @@ bool Perl_Client_IsAutoFireEnabled(Client* self)
 	return self->AutoFireEnabled();
 }
 
-bool Perl_Client_IsBerserk(Client* self)
-{
-	return self->IsBerserk();
-}
-
 void perl_register_client()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -3177,7 +3172,6 @@ void perl_register_client()
 	package.add("IsAutoAttackEnabled", &Perl_Client_IsAutoAttackEnabled);
 	package.add("IsAutoFireEnabled", &Perl_Client_IsAutoFireEnabled);
 	package.add("IsBecomeNPC", &Perl_Client_IsBecomeNPC);
-	package.add("IsBerserk", &Perl_Client_IsBerserk);
 	package.add("IsCrouching", &Perl_Client_IsCrouching);
 	package.add("IsDueling", &Perl_Client_IsDueling);
 	package.add("IsEXPEnabled", &Perl_Client_IsEXPEnabled);
