@@ -218,11 +218,6 @@ struct ClientReward
 	uint32 amount;
 };
 
-class ClientFactory {
-public:
-	Client *MakeClient(std::shared_ptr<EQStreamInterface> ieqs);
-};
-
 class Client : public Mob
 {
 public:
