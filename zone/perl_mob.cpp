@@ -2786,6 +2786,11 @@ Bot* Perl_Mob_GetHateRandomBot(Mob* self) // @categories Hate and Aggro
 	return self->GetHateRandomBot();
 }
 
+bool Perl_Mob_HasSpecialAbilities(Mob* self) // @categories Script Utility
+{
+	return self->HasSpecialAbilities();
+}
+
 void perl_register_mob()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -3098,6 +3103,7 @@ void perl_register_mob()
 	package.add("HasPet", &Perl_Mob_HasPet);
 	package.add("HasProcs", &Perl_Mob_HasProcs);
 	package.add("HasShieldEquiped", &Perl_Mob_HasShieldEquiped);
+	package.add("HasSpecialAbilities", &Perl_Mob_HasSpecialAbilities);
 	package.add("HasTwoHandBluntEquiped", &Perl_Mob_HasTwoHandBluntEquiped);
 	package.add("HasTwoHanderEquipped", &Perl_Mob_HasTwoHanderEquipped);
 	package.add("HateSummon", &Perl_Mob_HateSummon);

@@ -2823,6 +2823,11 @@ Lua_HateList Lua_Mob::GetHateListBots(uint32 distance) {
 	return ret;
 }
 
+bool Lua_Mob::HasSpecialAbilities() {
+	Lua_Safe_Call_Bool();
+	return self->HasSpecialAbilities();
+}
+
 luabind::scope lua_register_mob() {
 	return luabind::class_<Lua_Mob, Lua_Entity>("Mob")
 	.def(luabind::constructor<>())
@@ -3145,6 +3150,7 @@ luabind::scope lua_register_mob() {
 	.def("HasPet", (bool(Lua_Mob::*)(void))&Lua_Mob::HasPet)
 	.def("HasProcs", &Lua_Mob::HasProcs)
 	.def("HasShieldEquiped", (bool(Lua_Mob::*)(void))&Lua_Mob::HasShieldEquiped)
+	.def("HasSpecialAbilities", (bool(Lua_Mob::*)(void))&Lua_Mob::HasSpecialAbilities)
 	.def("HasTwoHandBluntEquiped", (bool(Lua_Mob::*)(void))&Lua_Mob::HasTwoHandBluntEquiped)
 	.def("HasTwoHanderEquipped", (bool(Lua_Mob::*)(void))&Lua_Mob::HasTwoHanderEquipped)
 	.def("Heal", &Lua_Mob::Heal)
