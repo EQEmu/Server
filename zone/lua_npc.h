@@ -174,6 +174,7 @@ public:
 	void SetLDoNTrapDetected(bool is_detected);
 	void ScaleNPC(uint8 npc_level);
 	void ScaleNPC(uint8 npc_level, bool override_special_abilities);
+	bool IsUnderwaterOnly();
 };
 
 #endif
