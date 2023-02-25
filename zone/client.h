@@ -697,7 +697,6 @@ public:
 	void SetFactionLevel(uint32 char_id, uint32 npc_id, uint8 char_class, uint8 char_race, uint8 char_deity, bool quest = false);
 	void SetFactionLevel2(uint32 char_id, int32 faction_id, uint8 char_class, uint8 char_race, uint8 char_deity, int32 value, uint8 temp);
 	int32 GetRawItemAC();
-	uint16 GetCombinedAC_TEST();
 
 	inline uint32 LSAccountID() const { return lsaccountid; }
 	inline uint32 GetWID() const { return WID; }
