@@ -15,6 +15,7 @@ public:
 	static void RegisterLoginservers();
 	static bool DatabaseLoadRoutines(int argc, char **argv);
 	static void CheckForPossibleConfigurationIssues();
+	static void Shutdown();
 };
 
 
