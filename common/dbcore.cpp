@@ -70,19 +70,17 @@ DBcore::~DBcore()
 // Sends the MySQL server a keepalive
 void DBcore::ping()
 {
-	if (!m_query_lock.try_lock()) {
+	if (!MDatabase.trylock()) {
 		// well, if's it's locked, someone's using it. If someone's using it, it doesnt need a keepalive
 		return;
 	}
 	mysql_ping(&mysql);
-	m_query_lock.unlock();
+	MDatabase.unlock();
 }
 
 MySQLRequestResult DBcore::QueryDatabase(std::string query, bool retryOnFailureOnce)
 {
-	m_query_lock.lock();
 	auto r = QueryDatabase(query.c_str(), query.length(), retryOnFailureOnce);
-	m_query_lock.unlock();
 	return r;
 }
 
@@ -97,6 +95,8 @@ MySQLRequestResult DBcore::QueryDatabase(const char *query, uint32 querylen, boo
 {
 	BenchTimer timer;
 	timer.reset();
+
+	LockMutex lock(&MDatabase);
 
 	// Reconnect if we are not connected before hand.
 	if (pStatus != Connected) {
