@@ -346,6 +346,7 @@ std::vector<std::string> UCSDatabase::CurrentPlayerChannels(const std::string& p
 	for (auto &e: rows) {
 		channels.emplace_back(e.name);
 	}
+	LogDebug("Player [{}] has the following permanent channels saved to the database: [{}].", player_name, Strings::Join(channels, ", "));
 	return channels;
 }
 
