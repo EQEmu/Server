@@ -1335,9 +1335,11 @@ bool Bot::AI_IdleCastCheck() {
 		case ROGUE:
 		case WARRIOR:
 		case BERSERKER: {
-			if (!AICastSpell(this, 100, SpellType_Heal)) {
-				if (!AICastSpell(this, 100, SpellType_Buff)) {
-					if (!entity_list.Bot_AICheckCloseBeneficialSpells(this, 100, BotAISpellRange, SpellType_Buff)) {
+			if (!AICastSpell(this, 100, SpellType_Cure)) {
+				if (!AICastSpell(this, 100, SpellType_Heal)) {
+					if (!AICastSpell(this, 100, SpellType_Buff)) {
+						if (!entity_list.Bot_AICheckCloseBeneficialSpells(this, 100, BotAISpellRange, SpellType_Buff)) {
+						}
 					}
 				}
 			}
@@ -1352,10 +1354,12 @@ bool Bot::AI_IdleCastCheck() {
 		case NECROMANCER:
 		case ENCHANTER: {
 			if (!AICastSpell(this, 100, SpellType_Pet)) {
-				if (!AICastSpell(GetPet(), 100, SpellType_Cure)) {
-					if (!AICastSpell(this, 100, SpellType_Buff)) {
-						if (!AICastSpell(GetPet(), 100, SpellType_Heal)) {
-							if (!entity_list.Bot_AICheckCloseBeneficialSpells(this, 100, BotAISpellRange, SpellType_Buff)) {
+				if (!AICastSpell(this, 100, SpellType_Cure)) {
+					if (!AICastSpell(GetPet(), 100, SpellType_Cure)) {
+						if (!AICastSpell(this, 100, SpellType_Buff)) {
+							if (!AICastSpell(GetPet(), 100, SpellType_Heal)) {
+								if (!entity_list.Bot_AICheckCloseBeneficialSpells(this, 100, BotAISpellRange, SpellType_Buff)) {
+								}
 							}
 						}
 					}
@@ -1388,16 +1392,12 @@ bool Bot::AI_IdleCastCheck() {
 		}
 		case WIZARD: { // This can eventually be move into the BEASTLORD case handler once pre-combat is fully implemented
 			if (pre_combat) {
-				if (!entity_list.Bot_AICheckCloseBeneficialSpells(this, 100, BotAISpellRange, SpellType_Cure)) {
-					if (!AICastSpell(this, 100, SpellType_Pet)) {
+				if (!AICastSpell(this, 100, SpellType_Pet)) {
+					if (!AICastSpell(this, 100, SpellType_Cure)) {
 						if (!AICastSpell(this, 100, SpellType_Heal)) {
-							if (!entity_list.Bot_AICheckCloseBeneficialSpells(this, 100, BotAISpellRange, SpellType_Heal)) {
-								if (!AICastSpell(this, 100, SpellType_Buff)) {
-									if (!AICastSpell(GetPet(), 100, SpellType_Heal)) {
-										if (!entity_list.Bot_AICheckCloseBeneficialSpells(this, 100, BotAISpellRange, SpellType_PreCombatBuff)) {
-											if (!entity_list.Bot_AICheckCloseBeneficialSpells(this, 100, BotAISpellRange, SpellType_Buff)) {
-											}
-										}
+							if (!AICastSpell(this, 100, SpellType_Buff)) {
+								if (!entity_list.Bot_AICheckCloseBeneficialSpells(this, 100, BotAISpellRange, SpellType_PreCombatBuff)) {
+									if (!entity_list.Bot_AICheckCloseBeneficialSpells(this, 100, BotAISpellRange, SpellType_Buff)) {
 									}
 								}
 							}
@@ -1406,15 +1406,11 @@ bool Bot::AI_IdleCastCheck() {
 				}
 			}
 			else {
-				if (!entity_list.Bot_AICheckCloseBeneficialSpells(this, 100, BotAISpellRange, SpellType_Cure)) {
+				if (!AICastSpell(this, 100, SpellType_Cure)) {
 					if (!AICastSpell(this, 100, SpellType_Pet)) {
 						if (!AICastSpell(this, 100, SpellType_Heal)) {
-							if (!entity_list.Bot_AICheckCloseBeneficialSpells(this, 100, BotAISpellRange, SpellType_Heal)) {
-								if (!AICastSpell(this, 100, SpellType_Buff)) {
-									if (!AICastSpell(GetPet(), 100, SpellType_Heal)) {
-										if (!entity_list.Bot_AICheckCloseBeneficialSpells(this, 100, BotAISpellRange, SpellType_Buff)) {
-										}
-									}
+							if (!AICastSpell(this, 100, SpellType_Buff)) {
+								if (!entity_list.Bot_AICheckCloseBeneficialSpells(this, 100, BotAISpellRange, SpellType_Buff)) {
 								}
 							}
 						}
