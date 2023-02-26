@@ -1866,11 +1866,11 @@ bool ZoneDatabase::DisableRecipe(uint32 recipe_id)
 bool Client::CheckTradeskillLoreConflict(int32 recipe_id)
 {
 	auto recipe_entries = TradeskillRecipeEntriesRepository::GetWhere(
-			content_db,
-			fmt::format(
-					"recipe_id = {} ORDER BY componentcount DESC",
-					recipe_id
-			)
+		content_db,
+		fmt::format(
+			"recipe_id = {} ORDER BY componentcount DESC",
+			recipe_id
+		)
 	);
 	if (recipe_entries.empty()) {
 		return false;
@@ -1878,22 +1878,22 @@ bool Client::CheckTradeskillLoreConflict(int32 recipe_id)
 
 	const EQ::ItemData* f_item_inst = nullptr;
 	const EQ::ItemData* e_item_inst = nullptr;
-	for (auto& f : recipe_entries) {
+	for (auto &f : recipe_entries) {
 		if (f.item_id) {
 			f_item_inst = database.GetItem(f.item_id);
-			for (auto &e: recipe_entries) {
+			for (auto &e : recipe_entries) {
 				if (e.item_id && f_item_inst && f_item_inst->LoreGroup != 0) {
 					e_item_inst = database.GetItem(e.item_id);
 					if (
 						e_item_inst &&
 						e_item_inst->LoreGroup != 0 &&
+						(
+							e.item_id == f.item_id ||
 							(
-								e.item_id == f.item_id ||
-								(
-									f_item_inst->LoreGroup > 0 &&
-									f_item_inst->LoreGroup == e_item_inst->LoreGroup
-								)
-							) &&
+								f_item_inst->LoreGroup > 0 &&
+								f_item_inst->LoreGroup == e_item_inst->LoreGroup
+							)
+						) &&
 						e.componentcount == 0 &&
 						f.componentcount > 0
 					) {
@@ -1901,10 +1901,12 @@ bool Client::CheckTradeskillLoreConflict(int32 recipe_id)
 					}
 				}
 			}
+
 			if (f_item_inst) {
 				if (f_item_inst->LoreGroup == 0 || f.componentcount > 0 || f.iscontainer) {
 					continue;
 				}
+
 				if (CheckLoreConflict(f_item_inst)) {
 					EQ::SayLinkEngine linker;
 					linker.SetLinkType(EQ::saylink::SayLinkItemData);
