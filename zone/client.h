@@ -845,9 +845,6 @@ public:
 	inline void SetBecomeNPC(bool flag) { npcflag = flag; }
 	inline void SetBecomeNPCLevel(uint8 level) { npclevel = level; }
 	EQStreamInterface* Connection() { return eqs; }
-#ifdef PACKET_PROFILER
-	void DumpPacketProfile() { if(eqs) eqs->DumpPacketProfile(); }
-#endif
 	uint32 GetEquippedItemFromTextureSlot(uint8 material_slot) const; // returns item id
 	uint32 GetEquipmentColor(uint8 material_slot) const;
 	virtual void UpdateEquipmentLight() { m_Light.Type[EQ::lightsource::LightEquipment] = m_inv.FindBrightestLightType(); m_Light.Level[EQ::lightsource::LightEquipment] = EQ::lightsource::TypeToLevel(m_Light.Type[EQ::lightsource::LightEquipment]); }
