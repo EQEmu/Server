@@ -794,8 +794,8 @@ void Clientlist::ProcessOPMailCommand(Client *c, std::string command_string, boo
 		if (!command_directed) {
 			//Append saved channels to params
 			const auto saved_channels = database.CurrentPlayerChannels(c->GetName());
-			if (saved_channels.length() > 0) {
-				parameters += fmt::format(", {}", saved_channels);
+			if (!saved_channels.empty()) {
+				parameters += fmt::format(", {}", Strings::Join(saved_channels, ", "));
 			}
 			parameters = RemoveDuplicateChannels(parameters);
 		}
