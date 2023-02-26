@@ -1876,24 +1876,43 @@ bool Client::CheckTradeskillLoreConflict(int32 recipe_id)
 		return false;
 	}
 
+	const EQ::ItemData* f_item_inst = nullptr;
+	const EQ::ItemData* e_item_inst = nullptr;
 	for (auto& f : recipe_entries) {
-		for (auto &e: recipe_entries) {
-			if (f.componentcount > 0 && e.item_id == f.item_id && e.componentcount == 0) {
-				e.item_id = 0;
+		if (f.item_id) {
+			f_item_inst = database.GetItem(f.item_id);
+			for (auto &e: recipe_entries) {
+				if (e.item_id && f_item_inst && f_item_inst->LoreGroup != 0) {
+					e_item_inst = database.GetItem(e.item_id);
+					if (
+						e_item_inst &&
+						e_item_inst->LoreGroup != 0 &&
+							(
+								e.item_id == f.item_id ||
+								(
+									f_item_inst->LoreGroup > 0 &&
+									f_item_inst->LoreGroup == e_item_inst->LoreGroup
+								)
+							) &&
+						e.componentcount == 0 &&
+						f.componentcount > 0
+					) {
+						e.item_id = 0;
+					}
+				}
 			}
-		}
-		auto item_inst = database.GetItem(f.item_id);
-		if (item_inst) {
-			if (item_inst->LoreGroup >= 0 || f.componentcount > 0 || f.iscontainer) {
-				continue;
-			}
-			if (CheckLoreConflict(item_inst)) {
-				EQ::SayLinkEngine linker;
-				linker.SetLinkType(EQ::saylink::SayLinkItemData);
-				linker.SetItemData(item_inst);
-				auto item_link = linker.GenerateLink();
-				MessageString(Chat::Red, TRADESKILL_COMBINE_LORE, item_link.c_str());
-				return true;
+			if (f_item_inst) {
+				if (f_item_inst->LoreGroup == 0 || f.componentcount > 0 || f.iscontainer) {
+					continue;
+				}
+				if (CheckLoreConflict(f_item_inst)) {
+					EQ::SayLinkEngine linker;
+					linker.SetLinkType(EQ::saylink::SayLinkItemData);
+					linker.SetItemData(f_item_inst);
+					auto item_link = linker.GenerateLink();
+					MessageString(Chat::Red, TRADESKILL_COMBINE_LORE, item_link.c_str());
+					return true;
+				}
 			}
 		}
 	}
