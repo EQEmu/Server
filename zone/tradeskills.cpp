@@ -1881,22 +1881,23 @@ bool Client::CheckTradeskillLoreConflict(int32 recipe_id)
 			if (f.componentcount > 0 && e.item_id == f.item_id && e.componentcount == 0) {
 				e.item_id = 0;
 			}
-			auto item_inst = database.GetItem(e.item_id);
-			if (item_inst) {
-				if (item_inst->LoreGroup >= 0 || e.componentcount > 0 || e.iscontainer) {
-					continue;
-				}
-				if (CheckLoreConflict(item_inst)) {
-					EQ::SayLinkEngine linker;
-					linker.SetLinkType(EQ::saylink::SayLinkItemData);
-					linker.SetItemData(item_inst);
-					auto item_link = linker.GenerateLink();
-					MessageString(Chat::Red, TRADESKILL_COMBINE_LORE, item_link.c_str());
-					return true;
-				}
+		}
+		auto item_inst = database.GetItem(f.item_id);
+		if (item_inst) {
+			if (item_inst->LoreGroup >= 0 || f.componentcount > 0 || f.iscontainer) {
+				continue;
+			}
+			if (CheckLoreConflict(item_inst)) {
+				EQ::SayLinkEngine linker;
+				linker.SetLinkType(EQ::saylink::SayLinkItemData);
+				linker.SetItemData(item_inst);
+				auto item_link = linker.GenerateLink();
+				MessageString(Chat::Red, TRADESKILL_COMBINE_LORE, item_link.c_str());
+				return true;
 			}
 		}
 	}
+
 	return false;
 }
 
