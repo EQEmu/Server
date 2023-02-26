@@ -338,8 +338,6 @@ public:
 	bool HasRecipeLearned(uint32 recipe_id);
 	bool CanIncreaseTradeskill(EQ::skills::SkillType tradeskill);
 
-	EQApplicationPacket* ReturnItemPacket(int16 slot_id, const EQ::ItemInstance* inst, ItemPacketType packet_type);
-
 	bool GetRevoked() const { return revoked; }
 	void SetRevoked(bool rev) { revoked = rev; }
 	inline uint32 GetIP() const { return ip; }
