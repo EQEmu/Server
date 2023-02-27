@@ -255,7 +255,6 @@ SET(zone_headers
     quest_parser_collection.h
     raids.h
     raycast_mesh.h
-    skills.h
     shared_task_zone_messaging.h
     spawn2.cpp
     spawn2.h
