@@ -767,6 +767,11 @@ void Lua_NPC::ScaleNPC(uint8 npc_level, bool override_special_abilities)
 	self->ScaleNPC(npc_level, true, override_special_abilities);
 }
 
+bool Lua_NPC::HasSpecialAbilities() {
+	Lua_Safe_Call_Bool();
+	return self->HasSpecialAbilities();
+}
+
 luabind::scope lua_register_npc() {
 	return luabind::class_<Lua_NPC, Lua_Mob>("NPC")
 	.def(luabind::constructor<>())
