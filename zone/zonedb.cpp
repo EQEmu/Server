@@ -13,6 +13,7 @@
 #include "zonedb.h"
 #include "aura.h"
 #include "../common/repositories/criteria/content_filter_criteria.h"
+#include "../common/repositories/character_disciplines_repository.h"
 #include "../common/repositories/npc_types_repository.h"
 
 #include <ctime>
@@ -814,26 +815,27 @@ bool ZoneDatabase::LoadCharacterLeadershipAA(uint32 character_id, PlayerProfile_
 }
 
 bool ZoneDatabase::LoadCharacterDisciplines(uint32 character_id, PlayerProfile_Struct* pp){
-	auto query = fmt::format(
-		"SELECT "
-		"disc_id, slot_id "
-		"FROM "
-		"`character_disciplines`"
-		"WHERE `id` = {} ORDER BY `slot_id`", character_id);
-	auto results = database.QueryDatabase(query);
 
-	if (!results.Success() || !results.RowCount()) {
+	auto character_disciplines = CharacterDisciplinesRepository::GetWhere(
+		database, fmt::format(
+			"`id` = {} ORDER BY `slot_id`",
+			character_id
+		)
+	);
+
+	if (character_disciplines.empty()) {
 		return false;
 	}
 
 	int i = 0;
 	/* Initialize Disciplines */
 	memset(pp->disciplines.values, 0, (sizeof(pp->disciplines.values[0]) * MAX_PP_DISCIPLINES));
-	for (auto& row = results.begin(); row != results.end(); ++row) {
-		if (i < MAX_PP_DISCIPLINES)
-			pp->disciplines.values[Strings::ToInt(row[1])] = atoi(row[0]);
-        ++i;
-    }
+	for (auto& row : character_disciplines) {
+		if (i < MAX_PP_DISCIPLINES && IsValidSpell(row.disc_id)) {
+			pp->disciplines.values[row.slot_id] = row.disc_id;
+		}
+		++i;
+	}
 	return true;
 }
 
