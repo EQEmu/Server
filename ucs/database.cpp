@@ -337,7 +337,7 @@ void UCSDatabase::DeleteChatChannel(const std::string& channel_name)
 }
 
 std::vector<std::string> UCSDatabase::CurrentPlayerChannels(const std::string& player_name) {
-	auto rows = ChatchannelsRepository::GetWhere(*this,	fmt::format("`owner` = '{}' LIMIT 1", Strings::Escape(player_name)));
+	auto rows = ChatchannelsRepository::GetWhere(*this,	fmt::format("`owner` = '{}'", Strings::Escape(player_name)));
 	if (rows.empty()) {
 		return {};
 	}
@@ -346,7 +346,7 @@ std::vector<std::string> UCSDatabase::CurrentPlayerChannels(const std::string& p
 	for (auto &e: rows) {
 		channels.emplace_back(e.name);
 	}
-	LogDebug("Player [{}] has the following permanent channels saved to the database: [{}].", player_name, Strings::Join(channels, ", "));
+	LogDebug("Player [{}] has the following [{}] permanent channels saved to the database: [{}].", player_name, rows.size(), Strings::Join(channels, ", "));
 	return channels;
 }
 

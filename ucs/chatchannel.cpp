@@ -667,7 +667,7 @@ ChatChannel *ChatChannelList::RemoveClientFromChannel(const std::string& in_chan
 	}
 
 	LogDebug("Client [{}] removed from channel [{}]. Channel is owned by {}. Command directed: {}", c->GetName(), channel_name, required_channel->GetOwnerName(), command_directed);
-	if (c->GetName() == required_channel->GetOwnerName() && command_directed) { // Check if the client that is leaving is the the channel owner
+	if (c->GetName() == required_channel->GetOwnerName() && command_directed) { // Check if the client that is leaving is the channel owner
 		LogDebug("Owner left the channel [{}], removing channel from database...", channel_name);
 		database.DeleteChatChannel(channel_name); // Remove the channel from the database.
 		LogDebug("Flagging [{}] channel as temporary...", channel_name);
