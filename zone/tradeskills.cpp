@@ -1876,41 +1876,35 @@ bool Client::CheckTradeskillLoreConflict(int32 recipe_id)
 		return false;
 	}
 
-	const EQ::ItemData* f_item_inst = nullptr;
-	const EQ::ItemData* e_item_inst = nullptr;
+	const EQ::ItemData* fi = nullptr;
+	const EQ::ItemData* ei = nullptr;
 	for (auto &f : recipe_entries) {
 		if (f.item_id) {
-			f_item_inst = database.GetItem(f.item_id);
+			fi = database.GetItem(f.item_id);
 			for (auto &e : recipe_entries) {
-				if (e.item_id && f_item_inst && f_item_inst->LoreGroup != 0) {
-					e_item_inst = database.GetItem(e.item_id);
-					if (
-						e_item_inst &&
-						e_item_inst->LoreGroup != 0 &&
-						(
-							e.item_id == f.item_id ||
-							(
-								f_item_inst->LoreGroup > 0 &&
-								f_item_inst->LoreGroup == e_item_inst->LoreGroup
-							)
-						) &&
-						e.componentcount == 0 &&
-						f.componentcount > 0
-					) {
+				bool fi_is_valid = e.item_id && fi && fi->LoreGroup != 0;
+				bool item_id_match = e.item_id == f.item_id;
+
+				if (fi_is_valid) {
+					ei = database.GetItem(e.item_id);
+					bool ei_is_valid = ei && ei->LoreGroup != 0;
+					bool unique_lore_group_match = fi->LoreGroup > 0 && fi->LoreGroup == ei->LoreGroup;
+					bool component_count_is_valid = e.componentcount == 0 && f.componentcount > 0;
+					if (ei_is_valid && (item_id_match || unique_lore_group_match) && component_count_is_valid) {
 						e.item_id = 0;
 					}
 				}
 			}
 
-			if (f_item_inst) {
-				if (f_item_inst->LoreGroup == 0 || f.componentcount > 0 || f.iscontainer) {
+			if (fi) {
+				if (fi->LoreGroup == 0 || f.componentcount > 0 || f.iscontainer) {
 					continue;
 				}
 
-				if (CheckLoreConflict(f_item_inst)) {
+				if (CheckLoreConflict(fi)) {
 					EQ::SayLinkEngine linker;
 					linker.SetLinkType(EQ::saylink::SayLinkItemData);
-					linker.SetItemData(f_item_inst);
+					linker.SetItemData(fi);
 					auto item_link = linker.GenerateLink();
 					MessageString(Chat::Red, TRADESKILL_COMBINE_LORE, item_link.c_str());
 					return true;
