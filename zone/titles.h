@@ -51,7 +51,6 @@ public:
 	EQApplicationPacket *MakeTitlesPacket(Client *client);
 	std::string GetPrefix(int title_id);
 	std::string GetSuffix(int title_id);
-	int NumberOfAvailableTitles(Client *client);
 	bool IsClientEligibleForTitle(Client *client, TitleEntry title);
 	bool IsNewAATitleAvailable(int aa_points, int class_id);
 	bool IsNewTradeSkillTitleAvailable(int skill_id, int skill_value);
