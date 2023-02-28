@@ -1192,10 +1192,6 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 			sender = GetPet();
 		}
 
-		if (!is_silent) {
-			entity_list.ChannelMessage(sender, chan_num, language, lang_skill, message);
-		}
-
 		if (parse->PlayerHasQuestSub(EVENT_SAY)) {
 			parse->EventPlayer(EVENT_SAY, this, message, language);
 		}
@@ -1251,6 +1247,11 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 				}
 			}
 		}
+
+		if (!is_silent) {
+			entity_list.ChannelMessage(sender, chan_num, language, lang_skill, message);
+		}
+
 		break;
 	}
 	case ChatChannel_UCSRelay:
