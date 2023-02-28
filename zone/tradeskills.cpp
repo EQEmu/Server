@@ -1888,15 +1888,18 @@ bool Client::CheckTradeskillLoreConflict(int32 recipe_id)
 				if (fi_is_valid) {
 					auto tre_update_item_inst = database.GetItem(tre_update_item.item_id);
 					bool ei_is_valid = tre_update_item_inst && tre_update_item_inst->LoreGroup != 0;
-					bool unique_lore_group_match = tre_inst->LoreGroup > 0 && tre_inst->LoreGroup == tre_update_item_inst->LoreGroup;
-					bool component_count_is_valid = tre_update_item.componentcount == 0 && tre.componentcount > 0;
 
-					// If the recipe item is a component, and matches a unique lore group (> 0) or the item_id matches another entry in the recipe
-					// zero out the item_id, this will prevent us from doing a lore check inadvertently where
-					// the item is a component, and returned on success, fail, salvage.
-					// or uses an item that is part of a unique loregroup that returns an item of the same unique loregroup
-					if (ei_is_valid && (tre_update_item.item_id == tre.item_id || unique_lore_group_match) && component_count_is_valid) {
-						tre_update_item.item_id = 0;
+					if (ei_is_valid) {
+						bool unique_lore_group_match = tre_inst->LoreGroup > 0 && tre_inst->LoreGroup == tre_update_item_inst->LoreGroup;
+						bool component_count_is_valid = tre_update_item.componentcount == 0 && tre.componentcount > 0;
+
+						// If the recipe item is a component, and matches a unique lore group (> 0) or the item_id matches another entry in the recipe
+						// zero out the item_id, this will prevent us from doing a lore check inadvertently where
+						// the item is a component, and returned on success, fail, salvage.
+						// or uses an item that is part of a unique loregroup that returns an item of the same unique loregroup
+						if (ei_is_valid && (tre_update_item.item_id == tre.item_id || unique_lore_group_match) && component_count_is_valid) {
+							tre_update_item.item_id = 0;
+						}
 					}
 				}
 			}
