@@ -7274,7 +7274,7 @@ void Client::Handle_OP_GroupInvite2(const EQApplicationPacket *app)
 			} else if (!Invitee->HasRaid()) {
 				Bot::ProcessBotGroupInvite(this, std::string(Invitee->GetName()));
 			} else {
-				MessageString(Chat::LightGray, ALREADY_IN_YOUR_RAID);
+				MessageString(Chat::LightGray, ALREADY_IN_YOUR_RAID, Invitee->GetCleanName());
 			}
 		}
 	}
