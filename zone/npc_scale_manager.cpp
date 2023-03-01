@@ -261,44 +261,55 @@ bool NpcScaleManager::LoadScaleData()
 		const auto has_multiple_versions = Strings::Contains(s.instance_version_list, "|");
 
 		if (!has_multiple_zones && !has_multiple_versions) {
+			scale_data.zone_id          = std::stoul(s.zone_id_list);
+			scale_data.instance_version = static_cast<uint16>(std::stoul(s.instance_version_list));
+
 			npc_global_base_scaling_data.insert(
 				std::make_pair(
 					std::make_tuple(
 						scale_data.type,
 						scale_data.level,
-						std::stoul(s.zone_id_list),
-						static_cast<uint16>(std::stoul(s.instance_version_list))
+						scale_data.zone_id,
+						scale_data.instance_version
 					),
 					scale_data
 				)
 			);
 		} else if (has_multiple_zones && !has_multiple_versions) {
+			scale_data.instance_version = static_cast<uint16>(std::stoul(s.instance_version_list));
+
 			const auto zones = Strings::Split(s.zone_id_list, "|");
 
 			for (const auto &z : zones) {
+				scale_data.zone_id          = std::stoul(z);
+
 				npc_global_base_scaling_data.insert(
 					std::make_pair(
 						std::make_tuple(
 							scale_data.type,
 							scale_data.level,
-							std::stoul(z),
-							static_cast<uint16>(std::stoul(s.instance_version_list))
+							scale_data.zone_id,
+							scale_data.instance_version
 						),
 						scale_data
 					)
 				);
 			}
 		} else if (!has_multiple_zones && has_multiple_versions) {
+			scale_data.zone_id = std::stoul(s.zone_id_list);
+
 			const auto versions = Strings::Split(s.instance_version_list, "|");
 
 			for (const auto &v : versions) {
+				scale_data.instance_version = static_cast<uint16>(std::stoul(v));
+
 				npc_global_base_scaling_data.insert(
 					std::make_pair(
 						std::make_tuple(
 							scale_data.type,
 							scale_data.level,
-							std::stoul(s.zone_id_list),
-							static_cast<uint16>(std::stoul(v))
+							scale_data.zone_id,
+							scale_data.instance_version
 						),
 						scale_data
 					)
@@ -309,14 +320,18 @@ bool NpcScaleManager::LoadScaleData()
 			const auto versions = Strings::Split(s.instance_version_list, "|");
 
 			for (const auto &z : zones) {
+				scale_data.zone_id = std::stoul(z);
+
 				for (const auto &v : versions) {
+					scale_data.instance_version = static_cast<uint16>(std::stoul(v));
+
 					npc_global_base_scaling_data.insert(
 						std::make_pair(
 							std::make_tuple(
 								scale_data.type,
 								scale_data.level,
-								std::stoul(z),
-								static_cast<uint16>(std::stoul(v))
+								scale_data.zone_id,
+								scale_data.instance_version
 							),
 							scale_data
 						)
