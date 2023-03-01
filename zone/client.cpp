@@ -6381,7 +6381,7 @@ void Client::SendStatsWindow(Client* client, bool use_window)
 				if(CalcMaxMana() > 0) {
 					cur_name = " M: ";
 					cur_field = itoa(GetMana());
-					total_field = itoa(CalcMaxMana());
+					total_field = itoa(GetMaxMana());
 				}
 				else { continue; }
 
@@ -6437,6 +6437,7 @@ void Client::SendStatsWindow(Client* client, bool use_window)
 
 				base_regen_field = itoa(LevelRegen());
 				item_regen_field = itoa(itembonuses.HPRegen);
+				item_regen_field += GetHeroicSTA() * RuleR(Character, HeroicStaminaMultiplier) / 20;
 				cap_regen_field = itoa(CalcHPRegenCap());
 				spell_regen_field = itoa(spellbonuses.HPRegen);
 				aa_regen_field = itoa(aabonuses.HPRegen);
@@ -6450,6 +6451,10 @@ void Client::SendStatsWindow(Client* client, bool use_window)
 
 					base_regen_field = itoa(CalcBaseManaRegen());
 					item_regen_field = itoa(itembonuses.ManaRegen);
+					item_regen_field += (GetCasterClass() == 'W') ?
+						GetHeroicWIS() * RuleR(Character, HeroicWisdomMultiplier) / 25 :
+						GetHeroicINT() * RuleR(Character, HeroicIntelligenceMultiplier) / 25;
+
 					cap_regen_field = itoa(CalcManaRegenCap());
 					spell_regen_field = itoa(spellbonuses.ManaRegen);
 					aa_regen_field = itoa(aabonuses.ManaRegen);
@@ -6464,6 +6469,12 @@ void Client::SendStatsWindow(Client* client, bool use_window)
 
 				base_regen_field = itoa(((GetLevel() * 4 / 10) + 2));
 				item_regen_field = itoa(itembonuses.EnduranceRegen);
+				double heroic_str = GetHeroicSTR() * RuleR(Character, HeroicStrengthMultiplier);
+				double heroic_sta = GetHeroicSTA() * RuleR(Character, HeroicStaminaMultiplier);
+				double heroic_dex = GetHeroicDEX() * RuleR(Character, HeroicDexterityMultiplier);
+				double heroic_agi = GetHeroicAGI() * RuleR(Character, HeroicAgilityMultiplier);
+				double heroic_stats = (heroic_str + heroic_sta + heroic_dex + heroic_agi) / 4;
+				item_regen_field += heroic_stats;
 				cap_regen_field = itoa(CalcEnduranceRegenCap());
 				spell_regen_field = itoa(spellbonuses.EnduranceRegen);
 				aa_regen_field = itoa(aabonuses.EnduranceRegen);
