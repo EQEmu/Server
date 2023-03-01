@@ -1218,6 +1218,8 @@ bool Zone::Init(bool is_static) {
 	LoadGrids();
 	LoadTickItems();
 
+	npc_scale_manager->LoadScaleData();
+
 	// logging origination information
 	LogSys.origination_info.zone_short_name = zone->short_name;
 	LogSys.origination_info.zone_long_name  = zone->long_name;
