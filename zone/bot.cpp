@@ -6690,10 +6690,10 @@ int64 Bot::CalcManaRegenCap() {
 	int64 cap = RuleI(Character, ItemManaRegenCap) + aabonuses.ItemManaRegenCap;
 	switch(GetCasterClass()) {
 		case 'I':
-			cap += (itembonuses.HeroicINT / 25);
+			cap += itembonuses.HeroicINT * RuleR(Character, HeroicIntelligenceMultipler) / 25;
 			break;
 		case 'W':
-			cap += (itembonuses.HeroicWIS / 25);
+			cap += itembonuses.HeroicWIS * RuleR(Character, HeroicWisdomMultipler) / 25;
 			break;
 	}
 	return (cap * RuleI(Character, ManaRegenMultiplier) / 100);
@@ -7086,6 +7086,7 @@ int32 Bot::LevelRegen() {
 int64 Bot::CalcHPRegen() {
 	int32 regen = (LevelRegen() + itembonuses.HPRegen + spellbonuses.HPRegen);
 	regen += (aabonuses.HPRegen + GroupLeadershipAAHealthRegeneration());
+
 	regen = ((regen * RuleI(Character, HPRegenMultiplier)) / 100);
 	return regen;
 }
@@ -7105,9 +7106,9 @@ int64 Bot::CalcManaRegen() {
 		regen = (2 + spellbonuses.ManaRegen + itembonuses.ManaRegen);
 
 	if(GetCasterClass() == 'I')
-		regen += (itembonuses.HeroicINT / 25);
+		regen += itembonuses.HeroicINT * RuleR(Character, HeroicIntelligenceMultipler) / 25;
 	else if(GetCasterClass() == 'W')
-		regen += (itembonuses.HeroicWIS / 25);
+		regen += itembonuses.HeroicWIS * RuleR(Character, HeroicWisdomMultipler) / 25;
 	else
 		regen = 0;
 

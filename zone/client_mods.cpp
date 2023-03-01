@@ -623,7 +623,9 @@ int64 Client::CalcBaseMana()
 				}
 				auto base_data = database.GetBaseData(GetLevel(), GetClass());
 				if (base_data) {
-					max_m = base_data->base_mana + (ConvertedWisInt * base_data->mana_factor) + (GetHeroicINT() * 10);
+					max_m = base_data->base_mana +
+						(ConvertedWisInt * base_data->mana_factor) +
+						(GetHeroicINT() * RuleR(Character, HeroicIntelligenceMultipler) * 10);
 				}
 			}
 			else {
@@ -655,7 +657,9 @@ int64 Client::CalcBaseMana()
 				}
 				auto base_data = database.GetBaseData(GetLevel(), GetClass());
 				if (base_data) {
-					max_m = base_data->base_mana + (ConvertedWisInt * base_data->mana_factor) + (GetHeroicWIS() * 10);
+					max_m = base_data->base_mana +
+						(ConvertedWisInt * base_data->mana_factor) +
+						((GetHeroicWIS() * RuleR(Character, HeroicWisdomMultipler)) * 10);
 				}
 			}
 			else {
@@ -752,10 +756,10 @@ int64 Client::CalcManaRegen(bool bCombat)
 
 	switch (GetCasterClass()) {
 	case 'W':
-		heroic_bonus = GetHeroicWIS();
+		heroic_bonus = GetHeroicWIS() * RuleR(Character, HeroicWisdomMultipler);
 		break;
 	default:
-		heroic_bonus = GetHeroicINT();
+		heroic_bonus = GetHeroicINT() * RuleR(Character, HeroicIntelligenceMultipler);
 		break;
 	}
 
