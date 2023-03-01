@@ -140,7 +140,7 @@ public:
 	void movepc(int zone_id, float x, float y, float z, float heading);
 	void gmmove(float x, float y, float z);
 	void movegrp(int zoneid, float x, float y, float z);
-	void doanim(int animation_id, int animation_speed = 1, bool ackreq = true, eqFilterType filter = FilterNone);
+	void doanim(int animation_id, int animation_speed = 0, bool ackreq = true, eqFilterType filter = FilterNone);
 	void addskill(int skill_id, int value);
 	void setlanguage(int skill_id, int value);
 	void setskill(int skill_id, int value);
