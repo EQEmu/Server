@@ -93,18 +93,6 @@ EQApplicationPacket *TitleManager::MakeTitlesPacket(Client *client)
 	return(outapp);
 }
 
-int TitleManager::NumberOfAvailableTitles(Client *client)
-{
-	int count = 0;
-	for (const auto& title : titles) {
-		if (IsClientEligibleForTitle(client, title)) {
-			++count;
-		}
-	}
-
-	return count;
-}
-
 std::string TitleManager::GetPrefix(int title_id)
 {
 	if (!title_id) {

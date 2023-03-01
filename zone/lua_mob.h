@@ -515,6 +515,7 @@ public:
 	bool IsAttackAllowed(Lua_Mob target, bool is_spell_attack);
 	bool IsFindable();
 	bool IsTrackable();
+	float GetDefaultRaceSize();
 };
 
 #endif

@@ -3376,31 +3376,6 @@ void Client::SendItemPacket(int16 slot_id, const EQ::ItemInstance* inst, ItemPac
 	FastQueuePacket(&outapp);
 }
 
-EQApplicationPacket* Client::ReturnItemPacket(int16 slot_id, const EQ::ItemInstance* inst, ItemPacketType packet_type)
-{
-	if (!inst)
-		return nullptr;
-
-	// Serialize item into |-delimited string
-	std::string packet = inst->Serialize(slot_id);
-
-	EmuOpcode opcode = OP_Unknown;
-	EQApplicationPacket* outapp = nullptr;
-	BulkItemPacket_Struct* itempacket = nullptr;
-
-	// Construct packet
-	opcode = OP_ItemPacket;
-	outapp = new EQApplicationPacket(opcode, packet.length()+1);
-	itempacket = (BulkItemPacket_Struct*)outapp->pBuffer;
-	memcpy(itempacket->SerializedItem, packet.c_str(), packet.length());
-
-#if EQDEBUG >= 9
-		DumpPacket(outapp);
-#endif
-
-	return outapp;
-}
-
 static int16 BandolierSlotToWeaponSlot(int BandolierSlot)
 {
 	switch (BandolierSlot)

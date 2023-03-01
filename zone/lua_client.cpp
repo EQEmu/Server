@@ -3049,7 +3049,6 @@ bool Lua_Client::IsAutoFireEnabled()
 {
 	Lua_Safe_Call_Bool();
 	return self->AutoFireEnabled();
-
 }
 
 luabind::scope lua_register_client() {
