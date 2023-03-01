@@ -6134,8 +6134,11 @@ void Bot::ProcessBotOwnerRefDelete(Mob* botOwner) {
 int64 Bot::CalcMaxMana() {
 	switch(GetCasterClass()) {
 		case 'I':
+			max_mana = (GenerateBaseManaPoints() + itembonuses.Mana + spellbonuses.Mana + GroupLeadershipAAManaEnhancement());
+			max_mana += (GetHeroicINT() * 10);
 		case 'W': {
 			max_mana = (GenerateBaseManaPoints() + itembonuses.Mana + spellbonuses.Mana + GroupLeadershipAAManaEnhancement());
+			max_mana += (GetHeroicWIS() * 10);
 			break;
 		}
 		case 'N': {
@@ -7085,6 +7088,7 @@ int32 Bot::LevelRegen() {
 
 int64 Bot::CalcHPRegen() {
 	int32 regen = (LevelRegen() + itembonuses.HPRegen + spellbonuses.HPRegen);
+	regen += GetHeroicSTA() / 20;
 	regen += (aabonuses.HPRegen + GroupLeadershipAAHealthRegeneration());
 	regen = ((regen * RuleI(Character, HPRegenMultiplier)) / 100);
 	return regen;
@@ -7156,6 +7160,7 @@ int64 Bot::CalcMaxHP() {
 	int32 bot_hp = 0;
 	uint32 nd = 10000;
 	bot_hp += (GenerateBaseHitPoints() + itembonuses.HP);
+	bot_hp += (GetHeroicSTA() * 10);
 	nd += aabonuses.MaxHP;
 	bot_hp = ((float)bot_hp * (float)nd / (float)10000);
 	bot_hp += (spellbonuses.HP + aabonuses.HP);
