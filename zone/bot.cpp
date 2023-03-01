@@ -7088,7 +7088,7 @@ int32 Bot::LevelRegen() {
 
 int64 Bot::CalcHPRegen() {
 	int32 regen = (LevelRegen() + itembonuses.HPRegen + spellbonuses.HPRegen);
-	regen += GetHeroicSTA() / 20;
+	regen += GetHeroicSTA() * RuleR(Character, HeroicStaminaMultiplier) / 20;
 	regen += (aabonuses.HPRegen + GroupLeadershipAAHealthRegeneration());
 
 	regen = ((regen * RuleI(Character, HPRegenMultiplier)) / 100);
@@ -7161,7 +7161,7 @@ int64 Bot::CalcMaxHP() {
 	int32 bot_hp = 0;
 	uint32 nd = 10000;
 	bot_hp += (GenerateBaseHitPoints() + itembonuses.HP);
-	bot_hp += (GetHeroicSTA() * 10);
+	bot_hp += GetHeroicSTA() * RuleR(Character, HeroicStaminaMultiplier) * 10;
 	nd += aabonuses.MaxHP;
 	bot_hp = ((float)bot_hp * (float)nd / (float)10000);
 	bot_hp += (spellbonuses.HP + aabonuses.HP);
