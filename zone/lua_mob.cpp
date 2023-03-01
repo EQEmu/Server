@@ -2823,6 +2823,22 @@ Lua_HateList Lua_Mob::GetHateListBots(uint32 distance) {
 	return ret;
 }
 
+bool Lua_Mob::IsFindable() {
+	Lua_Safe_Call_Bool();
+	return self->IsFindable();
+}
+
+
+bool Lua_Mob::IsTrackable() {
+	Lua_Safe_Call_Bool();
+	return self->IsTrackable();
+}
+
+float Lua_Mob::GetDefaultRaceSize() {
+	Lua_Safe_Call_Real();
+	return self->GetDefaultRaceSize();
+}
+
 luabind::scope lua_register_mob() {
 	return luabind::class_<Lua_Mob, Lua_Entity>("Mob")
 	.def(luabind::constructor<>())
@@ -3022,6 +3038,7 @@ luabind::scope lua_register_mob() {
 	.def("GetDEX", &Lua_Mob::GetDEX)
 	.def("GetDR", &Lua_Mob::GetDR)
 	.def("GetDamageAmount", (uint32(Lua_Mob::*)(Lua_Mob))&Lua_Mob::GetDamageAmount)
+	.def("GetDefaultRaceSize", &Lua_Mob::GetDefaultRaceSize)
 	.def("GetDeity", &Lua_Mob::GetDeity)
 	.def("GetDisplayAC", &Lua_Mob::GetDisplayAC)
 	.def("GetDrakkinDetails", &Lua_Mob::GetDrakkinDetails)
@@ -3164,6 +3181,7 @@ luabind::scope lua_register_mob() {
 	.def("IsEngaged", (bool(Lua_Mob::*)(void))&Lua_Mob::IsEngaged)
 	.def("IsEnraged", (bool(Lua_Mob::*)(void))&Lua_Mob::IsEnraged)
 	.def("IsFeared", (bool(Lua_Mob::*)(void))&Lua_Mob::IsFeared)
+	.def("IsFindable", (bool(Lua_Mob::*)(void))&Lua_Mob::IsFindable)
 	.def("IsHorse", &Lua_Mob::IsHorse)
 	.def("IsImmuneToSpell", (bool(Lua_Mob::*)(int,Lua_Mob))&Lua_Mob::IsImmuneToSpell)
 	.def("IsInvisible", (bool(Lua_Mob::*)(Lua_Mob))&Lua_Mob::IsInvisible)
@@ -3179,6 +3197,7 @@ luabind::scope lua_register_mob() {
 	.def("IsStunned", (bool(Lua_Mob::*)(void))&Lua_Mob::IsStunned)
 	.def("IsTargetable", (bool(Lua_Mob::*)(void))&Lua_Mob::IsTargetable)
 	.def("IsTargeted", &Lua_Mob::IsTargeted)
+	.def("IsTrackable", (bool(Lua_Mob::*)(void))&Lua_Mob::IsTrackable)
 	.def("IsWarriorClass", &Lua_Mob::IsWarriorClass)
 	.def("Kill", (void(Lua_Mob::*)(void))&Lua_Mob::Kill)
 	.def("Mesmerize", (void(Lua_Mob::*)(void))&Lua_Mob::Mesmerize)

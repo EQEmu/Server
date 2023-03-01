@@ -1073,9 +1073,15 @@ void Mob::AI_Process() {
 	if (engaged) {
 		if (IsNPC() && m_z_clip_check_timer.Check()) {
 			auto t = GetTarget();
-			if (t && DistanceNoZ(GetPosition(), t->GetPosition()) < 75 && std::abs(GetPosition().z - t->GetPosition().z) > 15 && !CheckLosFN(t)) {
-				GMMove(t->GetPosition().x, t->GetPosition().y, t->GetPosition().z, t->GetPosition().w);
-				FaceTarget(t);
+			if (t) {
+				float self_z   = GetZ() - GetZOffset();
+				float target_z = t->GetPosition().z - t->GetZOffset();
+				if (DistanceNoZ(GetPosition(), t->GetPosition()) < 75 &&
+					std::abs(self_z - target_z) >= 25 && !CheckLosFN(t)) {
+					float new_z = FindDestGroundZ(t->GetPosition());
+					GMMove(t->GetPosition().x, t->GetPosition().y, new_z + GetZOffset(), t->GetPosition().w, false);
+					FaceTarget(t);
+				}
 			}
 		}
 

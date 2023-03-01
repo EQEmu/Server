@@ -22,37 +22,41 @@
 #define EQEMU_NPC_SCALE_MANAGER_H
 
 #include "npc.h"
+#include "zone.h"
+extern Zone* zone;
 
 class NpcScaleManager {
 public:
 	struct global_npc_scale {
-		int type;
-		int level;
-		int ac;
-		int64 hp;
-		int accuracy;
-		int slow_mitigation;
-		int attack;
-		int strength;
-		int stamina;
-		int dexterity;
-		int agility;
-		int intelligence;
-		int wisdom;
-		int charisma;
-		int magic_resist;
-		int cold_resist;
-		int fire_resist;
-		int poison_resist;
-		int disease_resist;
-		int corruption_resist;
-		int physical_resist;
-		int min_dmg;
-		int max_dmg;
-		int64 hp_regen_rate;
-		int attack_delay;
-		int spell_scale;
-		int heal_scale;
+		int8   type;
+		uint8  level;
+		uint32 zone_id;
+		uint16 instance_version;
+		int    ac;
+		int64  hp;
+		int    accuracy;
+		int    slow_mitigation;
+		int    attack;
+		int    strength;
+		int    stamina;
+		int    dexterity;
+		int    agility;
+		int    intelligence;
+		int    wisdom;
+		int    charisma;
+		int    magic_resist;
+		int    cold_resist;
+		int    fire_resist;
+		int    poison_resist;
+		int    disease_resist;
+		int    corruption_resist;
+		int    physical_resist;
+		int    min_dmg;
+		int    max_dmg;
+		int64  hp_regen_rate;
+		int    attack_delay;
+		int    spell_scale;
+		int    heal_scale;
 
 		std::string special_abilities;
 	};
@@ -91,9 +95,14 @@ public:
 	bool IsAutoScaled(NPC* npc);
 	bool LoadScaleData();
 
-	global_npc_scale GetGlobalScaleDataForTypeLevel(int8 npc_type, int npc_level);
+	global_npc_scale GetGlobalScaleDataForTypeLevel(
+		int8 npc_type,
+		uint8 npc_level,
+		uint32 zone_id,
+		uint16 instance_version
+	);
 
-	std::map<std::pair<int, int>, global_npc_scale> npc_global_base_scaling_data;
+	std::map<std::tuple<int8, uint8, uint32, uint16>, global_npc_scale> npc_global_base_scaling_data;
 
 	int8 GetNPCScalingType(NPC * &npc);
 	std::string GetNPCScalingTypeName(NPC * &npc);

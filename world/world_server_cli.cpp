@@ -31,10 +31,12 @@ void WorldserverCLI::CommandHandler(int argc, char **argv)
 	function_map["test:expansion"]              = &WorldserverCLI::ExpansionTestCommand;
 	function_map["test:repository"]             = &WorldserverCLI::TestRepository;
 	function_map["test:repository2"]            = &WorldserverCLI::TestRepository2;
+	function_map["test:db-concurrency"]         = &WorldserverCLI::TestDatabaseConcurrency;
 
 	EQEmuCommand::HandleMenu(function_map, cmd, argc, argv);
 }
 
+#include "cli/database_concurrency.cpp"
 #include "cli/copy_character.cpp"
 #include "cli/database_dump.cpp"
 #include "cli/database_get_schema.cpp"

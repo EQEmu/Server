@@ -29,6 +29,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "lfguild.h"
 #include "queryservconfig.h"
 #include "worldserver.h"
+#include "../common/events/player_events.h"
+#include "../common/events/player_event_logs.h"
 #include <iomanip>
 #include <iostream>
 #include <stdarg.h>
@@ -87,6 +89,17 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 {
 	switch (opcode) {
 		case 0: {
+			break;
+		}
+		case ServerOP_PlayerEvent: {
+			auto                         n = PlayerEvent::PlayerEventContainer{};
+			auto                         s = (ServerSendPlayerEvent_Struct *) p.Data();
+			EQ::Util::MemoryStreamReader ss(s->cereal_data, s->cereal_size);
+			cereal::BinaryInputArchive   archive(ss);
+			archive(n);
+
+			player_event_logs.AddToQueue(n.player_event_log);
+
 			break;
 		}
 		case ServerOP_KeepAlive: {

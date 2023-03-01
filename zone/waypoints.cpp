@@ -934,6 +934,7 @@ float Mob::GetZOffset() const {
 		case RACE_AMYGDALAN_663:
 			offset = 5.0f;
 			break;
+		case RACE_SPECTRAL_IKSAR_147:
 		case RACE_SANDMAN_664:
 			offset = 4.0f;
 			break;
