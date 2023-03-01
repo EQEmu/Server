@@ -82,6 +82,19 @@ QuestManager::QuestManager() {
 QuestManager::~QuestManager() {
 }
 
+QuestManager::QuestTimer::QuestTimer(int duration, Mob *_mob, std::string _name)
+	: mob(_mob), name(_name), Timer_(duration) {
+	Timer_.Start(duration, false);
+	// mob the same if a client logs out one char and logs in a new
+	// one in same zone.  Use charid as a secondary key.
+	if (_mob && _mob->IsClient()) {
+		charid = _mob->CastToClient()->CharacterID();
+		}
+	else {
+		charid = 0;
+	}
+}
+
 void QuestManager::Process() {
 	std::list<QuestTimer>::iterator cur = QTimerList.begin(), end;
 
@@ -104,9 +117,15 @@ void QuestManager::Process() {
 					);
 				}
 				else if (cur->mob->IsClient()) {
-					if (parse->PlayerHasQuestSub(EVENT_TIMER)) {
-						//this is inheriently unsafe if we ever make it so more than npc/client start timers
-						parse->EventPlayer(EVENT_TIMER, cur->mob->CastToClient(), cur->name, 0);
+					if ( cur->mob->CastToClient()->CharacterID() == cur->charid && 
+						 parse->PlayerHasQuestSub(EVENT_TIMER)) {
+							//this is inheriently unsafe if we ever make it so more than npc/client start timers
+							parse->EventPlayer(EVENT_TIMER, cur->mob->CastToClient(), cur->name, 0);
+						}
+					else {
+						// Client timer is for previously logged out char on
+						// same client instance that was never stopped.
+						cur = QTimerList.erase(cur);
 					}
 				}
 				else if (cur->mob->IsBot()) {
