@@ -2130,7 +2130,7 @@ void QuestManager::playertexture(int newtexture)
 	initiator->SendIllusionPacket(initiator->GetRace(), 0xFF, newtexture);
 }
 
-void QuestManager::playerfeature(char *feature, int setting)
+void QuestManager::playerfeature(const char* feature, int setting)
 {
 	QuestManagerCurrentQuestVars();
 	uint16 Race = initiator->GetRace();
@@ -2187,7 +2187,7 @@ void QuestManager::playerfeature(char *feature, int setting)
 										DrakkinHeritage, DrakkinTattoo, DrakkinDetails, Size);
 }
 
-void QuestManager::npcfeature(char *feature, int setting)
+void QuestManager::npcfeature(const char* feature, int setting)
 {
 	QuestManagerCurrentQuestVars();
 	uint16 Race = owner->GetRace();

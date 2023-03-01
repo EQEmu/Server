@@ -208,8 +208,8 @@ public:
 	void playergender(int gender_id);
 	void playersize(int newsize);
 	void playertexture(int newtexture);
-	void playerfeature(char *feature, int setting);
-	void npcfeature(char *feature, int setting);
+	void playerfeature(const char* feature, int setting);
+	void npcfeature(const char* feature, int setting);
 	void popup(const char *title, const char *text, uint32 popupid, uint32 buttons, uint32 Duration);
 	void taskselector(const std::vector<int>& tasks, bool ignore_cooldown = false);
 	void tasksetselector(int tasksettid, bool ignore_cooldown = false);
