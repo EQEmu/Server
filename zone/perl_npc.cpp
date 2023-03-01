@@ -770,6 +770,11 @@ bool Perl_NPC_IsUnderwaterOnly(NPC* self) // @categories Script Utility
 	return self->IsUnderwaterOnly();
 }
 
+bool Perl_NPC_HasSpecialAbilities(NPC* self) // @categories Script Utility
+{
+	return self->HasSpecialAbilities();
+}
+
 void perl_register_npc()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -857,6 +862,7 @@ void perl_register_npc()
 	package.add("GetSwarmTarget", &Perl_NPC_GetSwarmTarget);
 	package.add("GetWaypointMax", &Perl_NPC_GetWaypointMax);
 	package.add("HasAISpellEffect", &Perl_NPC_HasAISpellEffect);
+	package.add("HasSpecialAbilities", &Perl_NPC_HasSpecialAbilities);
 	package.add("HasItem", &Perl_NPC_HasItem);
 	package.add("IsAnimal", &Perl_NPC_IsAnimal);
 	package.add("IsGuarding", &Perl_NPC_IsGuarding);

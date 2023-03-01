@@ -42,7 +42,6 @@ char* strn0cpy(char* dest, const char* source, uint32 size);
 
 #define MAX_SPECIAL_ATTACK_PARAMS 8
 
-class EGNode;
 class Client;
 class EQApplicationPacket;
 class Group;

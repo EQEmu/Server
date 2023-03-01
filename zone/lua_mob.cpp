@@ -2823,6 +2823,11 @@ Lua_HateList Lua_Mob::GetHateListBots(uint32 distance) {
 	return ret;
 }
 
+float Lua_Mob::GetDefaultRaceSize() {
+	Lua_Safe_Call_Real();
+	return self->GetDefaultRaceSize();
+}
+
 luabind::scope lua_register_mob() {
 	return luabind::class_<Lua_Mob, Lua_Entity>("Mob")
 	.def(luabind::constructor<>())
@@ -3022,6 +3027,7 @@ luabind::scope lua_register_mob() {
 	.def("GetDEX", &Lua_Mob::GetDEX)
 	.def("GetDR", &Lua_Mob::GetDR)
 	.def("GetDamageAmount", (uint32(Lua_Mob::*)(Lua_Mob))&Lua_Mob::GetDamageAmount)
+	.def("GetDefaultRaceSize", &Lua_Mob::GetDefaultRaceSize)
 	.def("GetDeity", &Lua_Mob::GetDeity)
 	.def("GetDisplayAC", &Lua_Mob::GetDisplayAC)
 	.def("GetDrakkinDetails", &Lua_Mob::GetDrakkinDetails)
