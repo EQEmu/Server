@@ -827,14 +827,12 @@ bool ZoneDatabase::LoadCharacterDisciplines(uint32 character_id, PlayerProfile_S
 		return false;
 	}
 
-	int i = 0;
 	/* Initialize Disciplines */
 	memset(pp->disciplines.values, 0, (sizeof(pp->disciplines.values[0]) * MAX_PP_DISCIPLINES));
 	for (auto& row : character_disciplines) {
-		if (i < MAX_PP_DISCIPLINES && IsValidSpell(row.disc_id)) {
+		if (row.slot_id < MAX_PP_DISCIPLINES && IsValidSpell(row.disc_id)) {
 			pp->disciplines.values[row.slot_id] = row.disc_id;
 		}
-		++i;
 	}
 	return true;
 }
