@@ -48,10 +48,10 @@ ChatChannel::ChatChannel(std::string inName, std::string inOwner, std::string in
 	m_moderated = false;
 
 	LogDebug(
-		"New ChatChannel created: Name: [{}], Owner: [{}], Password: [{}], MinStatus: [{}]",
-		m_name.c_str(),
-		m_owner.c_str(),
-		m_password.c_str(),
+		"New ChatChannel created: Name: [{}] Owner: [{}] Password: [{}] MinStatus: [{}]",
+		m_name,
+		m_owner,
+		m_password,
 		m_minimum_status
 	);
 
