@@ -435,11 +435,17 @@ Bot::~Bot() {
 	AI_Stop();
 	LeaveHealRotationMemberPool();
 
-	if(HasGroup())
+	if (HasGroup()) {
 		Bot::RemoveBotFromGroup(this, GetGroup());
+	}
 
-	if(HasPet())
+	if (HasRaid()) {
+		RemoveBotFromRaid(this);
+	}
+
+	if (HasPet()) {
 		GetPet()->Depop();
+	}
 
 	entity_list.RemoveBot(GetID());
 }
@@ -3919,9 +3925,10 @@ void Bot::PetAIProcess() {
 void Bot::Depop() {
 	WipeHateList();
 	entity_list.RemoveFromHateLists(this);
-	if(HasGroup())
+
+	if (HasGroup()) {
 		Bot::RemoveBotFromGroup(this, GetGroup());
-	
+	}
 	if(HasPet())
 		GetPet()->Depop();
 
@@ -7342,18 +7349,7 @@ void Bot::DoEnduranceUpkeep() {
 }
 
 void Bot::Camp(bool save_to_database) {
-	
-	Raid* bot_raid = entity_list.GetRaidByBotName(GetName());
-	if (bot_raid && bot_raid->IsEngaged()) {
-		GetBotOwner()->CastToClient()->Message(Chat::White, "You cannot camp bots while your raid is engaged.");
-		return;
-	} else if (bot_raid) {
-		uint32 gid = bot_raid->GetGroup(GetName());
-		bot_raid->SendRaidGroupRemove(GetName(), bot_raid->GetGroup(GetName()));
-		bot_raid->RemoveMember(GetName());
-		bot_raid->GroupUpdate(gid);
-	}
-		
+
 	Sit();
 
 	if (GetGroup()) {
@@ -7620,6 +7616,18 @@ void Bot::ProcessBotGroupDisband(Client* c, std::string botName) {
 			tempBot = GetBotByBotClientOwnerAndBotName(c, botName);
 
 		RemoveBotFromGroup(tempBot, c->GetGroup());
+	}
+}
+
+// Processes a raid disband request from a Client for a Bot.
+void Bot::RemoveBotFromRaid(Bot* bot) {
+
+	Raid* bot_raid = entity_list.GetRaidByBotName(bot->GetName());
+	if (bot_raid) {
+		uint32 gid = bot_raid->GetGroup(bot->GetName());
+		bot_raid->SendRaidGroupRemove(bot->GetName(), gid);
+		bot_raid->RemoveMember(bot->GetName());
+		bot_raid->GroupUpdate(gid);
 	}
 }
 

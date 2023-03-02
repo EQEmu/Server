@@ -436,6 +436,7 @@ public:
 	bool AICastSpell_Raid(Mob* tar, uint8 iChance, uint32 iSpellTypes);
 	static void ProcessRaidInvite(Bot* invitee, Client* invitor);
 	static void ProcessRaidInvite(Client* invitee, Client* invitor);
+	static void RemoveBotFromRaid(Bot* bot);
 	uint8 GetNumberNeedingHealedInRaidGroup(uint8 hpr, bool includePets);
 	inline void SetDirtyAutoHaters() { m_dirtyautohaters = true; }
 
