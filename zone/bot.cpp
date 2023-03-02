@@ -4534,46 +4534,44 @@ void Bot::RemoveBotItem(uint32 item_id) {
 
 bool Bot::RemoveBotFromGroup(Bot* bot, Group* group) {
 	bool Result = false;
-	if(bot && group) {
-		if(bot->HasGroup()) {
-			if(!group->IsLeader(bot)) {
-				bot->SetFollowID(0);
-				if(group->DelMember(bot))
-					database.SetGroupID(bot->GetCleanName(), 0, bot->GetBotID());
-			} else {
-				for(int i = 0; i < MAX_GROUP_MEMBERS; i++) {
-					if(!group->members[i])
-						continue;
-
-					group->members[i]->SetFollowID(0);
-				}
-				group->DisbandGroup();
+	if (bot && group && bot->HasGroup())  {
+		if (!group->IsLeader(bot)) {
+			bot->SetFollowID(0);
+			if (group->DelMember(bot)) {
 				database.SetGroupID(bot->GetCleanName(), 0, bot->GetBotID());
 			}
-			Result = true;
+		} else {
+			for (int i = 0; i < MAX_GROUP_MEMBERS; i++) {
+				if (!group->members[i]) {
+					continue;
+				}
+
+				group->members[i]->SetFollowID(0);
+			}
+			group->DisbandGroup();
+			database.SetGroupID(bot->GetCleanName(), 0, bot->GetBotID());
 		}
+		Result = true;
 	}
 	return Result;
 }
 
 bool Bot::AddBotToGroup(Bot* bot, Group* group) {
 	bool Result = false;
-	if(bot && group) {
-		if(!bot->HasGroup()) {
-			// Add bot to this group
-			if(group->AddMember(bot)) {
-				if(group->GetLeader()) {
-					bot->SetFollowID(group->GetLeader()->GetID());
-					// Need to send this only once when a group is formed with a bot so the client knows it is also the group leader
-					if(group->GroupCount() == 2 && group->GetLeader()->IsClient()) {
-						group->UpdateGroupAAs();
-						Mob *TempLeader = group->GetLeader();
-						group->SendUpdate(groupActUpdate, TempLeader);
-					}
+	if (bot && group) {
+		// Add bot to this group
+		if (group->AddMember(bot)) {
+			if (group->GetLeader()) {
+				bot->SetFollowID(group->GetLeader()->GetID());
+				// Need to send this only once when a group is formed with a bot so the client knows it is also the group leader
+				if(group->GroupCount() == 2 && group->GetLeader()->IsClient()) {
+					group->UpdateGroupAAs();
+					Mob *TempLeader = group->GetLeader();
+					group->SendUpdate(groupActUpdate, TempLeader);
 				}
-				group->VerifyGroup();
-				Result = true;
 			}
+			group->VerifyGroup();
+			Result = true;
 		}
 	}
 	return Result;
