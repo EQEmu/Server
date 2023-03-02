@@ -1865,32 +1865,63 @@ bool ZoneDatabase::DisableRecipe(uint32 recipe_id)
 
 bool Client::CheckTradeskillLoreConflict(int32 recipe_id)
 {
-	const auto& recipe_entries = TradeskillRecipeEntriesRepository::GetWhere(
-			content_db,
-			fmt::format(
-					"recipe_id = {} ORDER BY id ASC",
-					recipe_id
-			)
+	auto recipe_entries = TradeskillRecipeEntriesRepository::GetWhere(
+		content_db,
+		fmt::format(
+			"recipe_id = {} ORDER BY componentcount DESC",
+			recipe_id
+		)
 	);
 	if (recipe_entries.empty()) {
 		return false;
 	}
 
-	for (auto& e : recipe_entries) {
-		auto item_inst = database.GetItem(e.item_id);
-		if (item_inst) {
-			if (item_inst->LoreGroup == 0 || e.componentcount > 0 || e.iscontainer) {
-				continue;
+	// validate which items from the recipe we will call CheckLoreConflict on
+	for (const auto &tre : recipe_entries) {
+		if (tre.item_id) {
+			auto tre_inst = database.GetItem(tre.item_id);
+
+			// To compare items we iterate against each item in the recipe that have a loregroup.
+			for (auto &tre_update_item : recipe_entries) {
+				bool fi_is_valid = tre_update_item.item_id && tre_inst && tre_inst->LoreGroup != 0;
+
+				if (fi_is_valid) {
+					auto tre_update_item_inst = database.GetItem(tre_update_item.item_id);
+					bool ei_is_valid = tre_update_item_inst && tre_update_item_inst->LoreGroup != 0;
+
+					if (ei_is_valid) {
+						bool unique_lore_group_match = tre_inst->LoreGroup > 0 && tre_inst->LoreGroup == tre_update_item_inst->LoreGroup;
+						bool component_count_is_valid = tre_update_item.componentcount == 0 && tre.componentcount > 0;
+
+						// If the recipe item is a component, and matches a unique lore group (> 0) or the item_id matches another entry in the recipe
+						// zero out the item_id, this will prevent us from doing a lore check inadvertently where
+						// the item is a component, and returned on success, fail, salvage.
+						// or uses an item that is part of a unique loregroup that returns an item of the same unique loregroup
+						if (ei_is_valid && (tre_update_item.item_id == tre.item_id || unique_lore_group_match) && component_count_is_valid) {
+							tre_update_item.item_id = 0;
+						}
+					}
+				}
 			}
-			if (CheckLoreConflict(item_inst)) {
-				EQ::SayLinkEngine linker;
-				linker.SetLinkType(EQ::saylink::SayLinkItemData);
-				linker.SetItemData(item_inst);
-				auto item_link = linker.GenerateLink();
-				MessageString(Chat::Red, TRADESKILL_COMBINE_LORE, item_link.c_str());
-				return true;
+
+			if (tre_inst) {
+				if (tre_inst->LoreGroup == 0 || tre.componentcount > 0 || tre.iscontainer) {
+					continue;
+				}
+
+				if (CheckLoreConflict(tre_inst)) {
+					EQ::SayLinkEngine linker;
+					linker.SetLinkType(EQ::saylink::SayLinkItemData);
+					linker.SetItemData(tre_inst);
+					auto item_link = linker.GenerateLink();
+					MessageString(Chat::Red, TRADESKILL_COMBINE_LORE, item_link.c_str());
+					return true;
+				}
 			}
 		}
 	}
+
 	return false;
 }
+
+

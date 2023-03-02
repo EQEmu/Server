@@ -218,11 +218,6 @@ struct ClientReward
 	uint32 amount;
 };
 
-class ClientFactory {
-public:
-	Client *MakeClient(std::shared_ptr<EQStreamInterface> ieqs);
-};
-
 class Client : public Mob
 {
 public:
@@ -342,8 +337,6 @@ public:
 	int GetRecipeMadeCount(uint32 recipe_id);
 	bool HasRecipeLearned(uint32 recipe_id);
 	bool CanIncreaseTradeskill(EQ::skills::SkillType tradeskill);
-
-	EQApplicationPacket* ReturnItemPacket(int16 slot_id, const EQ::ItemInstance* inst, ItemPacketType packet_type);
 
 	bool GetRevoked() const { return revoked; }
 	void SetRevoked(bool rev) { revoked = rev; }
@@ -697,7 +690,6 @@ public:
 	void SetFactionLevel(uint32 char_id, uint32 npc_id, uint8 char_class, uint8 char_race, uint8 char_deity, bool quest = false);
 	void SetFactionLevel2(uint32 char_id, int32 faction_id, uint8 char_class, uint8 char_race, uint8 char_deity, int32 value, uint8 temp);
 	int32 GetRawItemAC();
-	uint16 GetCombinedAC_TEST();
 
 	inline uint32 LSAccountID() const { return lsaccountid; }
 	inline uint32 GetWID() const { return WID; }
@@ -851,9 +843,6 @@ public:
 	inline void SetBecomeNPC(bool flag) { npcflag = flag; }
 	inline void SetBecomeNPCLevel(uint8 level) { npclevel = level; }
 	EQStreamInterface* Connection() { return eqs; }
-#ifdef PACKET_PROFILER
-	void DumpPacketProfile() { if(eqs) eqs->DumpPacketProfile(); }
-#endif
 	uint32 GetEquippedItemFromTextureSlot(uint8 material_slot) const; // returns item id
 	uint32 GetEquipmentColor(uint8 material_slot) const;
 	virtual void UpdateEquipmentLight() { m_Light.Type[EQ::lightsource::LightEquipment] = m_inv.FindBrightestLightType(); m_Light.Level[EQ::lightsource::LightEquipment] = EQ::lightsource::TypeToLevel(m_Light.Type[EQ::lightsource::LightEquipment]); }
@@ -1595,7 +1584,6 @@ public:
 	void SetAccountFlag(std::string flag, std::string val);
 	std::string GetAccountFlag(std::string flag);
 	void SetGMStatus(int16 new_status);
-	float GetDamageMultiplier(EQ::skills::SkillType how_long_has_this_been_missing);
 	void Consume(const EQ::ItemData *item, uint8 type, int16 slot, bool auto_consume);
 	void PlayMP3(const char* fname);
 	void ExpeditionSay(const char *str, int ExpID);

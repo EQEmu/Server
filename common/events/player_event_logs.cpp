@@ -140,10 +140,6 @@ void PlayerEventLogs::AddToQueue(const PlayerEventLogsRepository::PlayerEventLog
 	m_batch_queue_lock.lock();
 	m_record_batch_queue.emplace_back(log);
 	m_batch_queue_lock.unlock();
-
-	if (m_record_batch_queue.size() >= RuleI(Logging, BatchPlayerEventProcessChunkSize)) {
-		ProcessBatchQueue();
-	}
 }
 
 // fills common event data in the SendEvent function
@@ -607,10 +603,10 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 	return payload;
 }
 
-// general process function, used in world or UCS depending on rule Logging:PlayerEventsQSProcess
+// general process function, used in world or QS depending on rule Logging:PlayerEventsQSProcess
 void PlayerEventLogs::Process()
 {
-	if (m_process_batch_events_timer.Check()) {
+	if (m_process_batch_events_timer.Check() || m_record_batch_queue.size() >= RuleI(Logging, BatchPlayerEventProcessChunkSize)) {
 		ProcessBatchQueue();
 	}
 
