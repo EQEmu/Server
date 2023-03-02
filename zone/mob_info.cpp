@@ -795,20 +795,18 @@ void Mob::DisplayInfo(Mob *mob)
 				window_text += WriteDisplayInfoSection(mob, "Proximity", npc_proximity, 1, true);
 			}
 
-			int8        npc_type        = npc_scale_manager->GetNPCScalingType(npc);
-			std::string npc_type_string = npc_scale_manager->GetNPCScalingTypeName(npc);
-
 			client->Message(
-				0,
-				"| # Target: %s Type: %i (%s)",
-				npc->GetCleanName(),
-				npc_type,
-				npc_type_string.c_str());
+				Chat::White,
+				fmt::format(
+					"| # Target: {} Type: {} ({})",
+					npc->GetCleanName(),
+					npc_scale_manager->GetNPCScalingType(npc),
+					npc_scale_manager->GetNPCScalingTypeName(npc)
+				).c_str()
+			);
 
 			NPCCommandsMenu(client, npc);
 		}
-
-		// std::cout << "Window Length: " << window_text.length() << std::endl;
 
 		if (client->GetDisplayMobInfoWindow()) {
 			client->SendFullPopup(

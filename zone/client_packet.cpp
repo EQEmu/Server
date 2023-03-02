@@ -8773,11 +8773,11 @@ void Client::Handle_OP_ItemLinkClick(const EQApplicationPacket *app)
 		}
 
 		if (!response.empty()) {
-			ChannelMessageReceived(ChatChannel_Say, 0, 100, response.c_str(), nullptr, true);
-
 			if (!silentsaylink) {
 				Message(Chat::LightGray, "You say, '%s'", response.c_str());
 			}
+
+			ChannelMessageReceived(ChatChannel_Say, 0, 100, response.c_str(), nullptr, true);
 
 			return;
 		}

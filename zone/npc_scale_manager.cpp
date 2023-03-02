@@ -30,21 +30,27 @@ void NpcScaleManager::ScaleNPC(
 	NPC *npc,
 	bool always_scale,
 	bool override_special_abilities
-)
-{
+) {
 	if (npc->IsSkipAutoScale() || npc->GetNPCTypeID() == 0) {
 		return;
 	}
 
-	int8 npc_type       = GetNPCScalingType(npc);
-	int  npc_level      = npc->GetLevel();
-	bool is_auto_scaled = IsAutoScaled(npc);
+	auto npc_type         = GetNPCScalingType(npc);
+	auto npc_level        = npc->GetLevel();
+	auto is_auto_scaled   = IsAutoScaled(npc);
+	auto zone_id          = zone->GetZoneID();
+	auto instance_version = zone->GetInstanceVersion();
 
-	global_npc_scale scale_data = GetGlobalScaleDataForTypeLevel(npc_type, npc_level);
+	global_npc_scale scale_data = GetGlobalScaleDataForTypeLevel(
+		npc_type,
+		npc_level,
+		zone_id,
+		instance_version
+	);
 
 	if (!scale_data.level) {
 		LogNPCScaling(
-			"NPC: [{}] - scaling data not found for type: [{}] level: [{}]",
+			"NPC: [{}] - scaling data not found for type [{}] level [{}]",
 			npc->GetCleanName(),
 			npc_type,
 			npc_level
@@ -209,11 +215,13 @@ void NpcScaleManager::ResetNPCScaling(NPC* npc)
 bool NpcScaleManager::LoadScaleData()
 {
 	auto rows = NpcScaleGlobalBaseRepository::All(content_db);
-	for (auto &s: rows) {
+	for (const auto &s : rows) {
 		global_npc_scale scale_data;
 
 		scale_data.type              = s.type;
 		scale_data.level             = s.level;
+		scale_data.zone_id           = s.zone_id;
+		scale_data.instance_version  = s.instance_version;
 		scale_data.ac                = s.ac;
 		scale_data.hp                = s.hp;
 		scale_data.accuracy          = s.accuracy;
@@ -246,7 +254,12 @@ bool NpcScaleManager::LoadScaleData()
 
 		npc_global_base_scaling_data.insert(
 			std::make_pair(
-				std::make_pair(scale_data.type, scale_data.level),
+				std::make_tuple(
+					scale_data.type,
+					scale_data.level,
+					scale_data.zone_id,
+					scale_data.instance_version
+				),
 				scale_data
 			)
 		);
@@ -262,9 +275,45 @@ bool NpcScaleManager::LoadScaleData()
  * @param npc_level
  * @return NpcScaleManager::global_npc_scale
  */
-NpcScaleManager::global_npc_scale NpcScaleManager::GetGlobalScaleDataForTypeLevel(int8 npc_type, int npc_level)
-{
-	auto iter = npc_global_base_scaling_data.find(std::make_pair(npc_type, npc_level));
+NpcScaleManager::global_npc_scale NpcScaleManager::GetGlobalScaleDataForTypeLevel(
+	int8 npc_type,
+	uint8 npc_level,
+	uint32 zone_id,
+	uint16 instance_version
+) {
+	auto iter = npc_global_base_scaling_data.find(
+		std::make_tuple(
+			npc_type,
+			npc_level,
+			zone_id,
+			instance_version
+		)
+	);
+
+	if (iter != npc_global_base_scaling_data.end()) {
+		return iter->second;
+	}
+
+	iter = npc_global_base_scaling_data.find(
+		std::make_tuple(
+			npc_type,
+			npc_level,
+			zone_id,
+			0
+		)
+	);
+	if (iter != npc_global_base_scaling_data.end()) {
+		return iter->second;
+	}
+
+	iter = npc_global_base_scaling_data.find(
+		std::make_tuple(
+			npc_type,
+			npc_level,
+			0,
+			0
+		)
+	);
 	if (iter != npc_global_base_scaling_data.end()) {
 		return iter->second;
 	}
@@ -487,14 +536,21 @@ bool NpcScaleManager::IsAutoScaled(NPC* npc)
  */
 bool NpcScaleManager::ApplyGlobalBaseScalingToNPCStatically(NPC *&npc)
 {
-	int8 npc_type  = GetNPCScalingType(npc);
-	int  npc_level = npc->GetLevel();
+	auto npc_type         = GetNPCScalingType(npc);
+	auto npc_level        = npc->GetLevel();
+	auto zone_id          = zone->GetZoneID();
+	auto instance_version = zone->GetInstanceVersion();
 
-	global_npc_scale g = GetGlobalScaleDataForTypeLevel(npc_type, npc_level);
+	global_npc_scale g = GetGlobalScaleDataForTypeLevel(
+		npc_type,
+		npc_level,
+		zone_id,
+		instance_version
+	);
 
 	if (!g.level) {
 		LogNPCScaling(
-			"NPC: [{}] - scaling data not found for type: [{}] level: [{}]",
+			"NPC: [{}] - scaling data not found for type [{}] level [{}]",
 			npc->GetCleanName(),
 			npc_type,
 			npc_level
@@ -503,7 +559,7 @@ bool NpcScaleManager::ApplyGlobalBaseScalingToNPCStatically(NPC *&npc)
 		return false;
 	}
 
-	auto n = NpcTypesRepository::FindOne(content_db, (int) npc->GetNPCTypeID());
+	auto n = NpcTypesRepository::FindOne(content_db, static_cast<int>(npc->GetNPCTypeID()));
 	if (n.id > 0) {
 		n.AC                = g.ac;
 		n.hp                = g.hp;
@@ -528,8 +584,8 @@ bool NpcScaleManager::ApplyGlobalBaseScalingToNPCStatically(NPC *&npc)
 		n.maxdmg            = g.max_dmg;
 		n.hp_regen_rate     = g.hp_regen_rate;
 		n.attack_delay      = g.attack_delay;
-		n.spellscale        = (float) g.spell_scale;
-		n.healscale         = (float) g.heal_scale;
+		n.spellscale        = static_cast<float>(g.spell_scale);
+		n.healscale         = static_cast<float>(g.heal_scale);
 		n.special_abilities = g.special_abilities;
 
 		return NpcTypesRepository::UpdateOne(content_db, n);
@@ -545,14 +601,21 @@ bool NpcScaleManager::ApplyGlobalBaseScalingToNPCStatically(NPC *&npc)
  */
 bool NpcScaleManager::ApplyGlobalBaseScalingToNPCDynamically(NPC *&npc)
 {
-	int8 npc_type  = GetNPCScalingType(npc);
-	int  npc_level = npc->GetLevel();
+	auto npc_type         = GetNPCScalingType(npc);
+	auto npc_level        = npc->GetLevel();
+	auto zone_id          = zone->GetZoneID();
+	auto instance_version = zone->GetInstanceVersion();
 
-	global_npc_scale d = GetGlobalScaleDataForTypeLevel(npc_type, npc_level);
+	global_npc_scale d = GetGlobalScaleDataForTypeLevel(
+		npc_type,
+		npc_level,
+		zone_id,
+		instance_version
+	);
 
 	if (!d.level) {
 		LogNPCScaling(
-			"NPC: [{}] - scaling data not found for type: [{}] level: [{}]",
+			"NPC: [{}] - scaling data not found for type [{}] level [{}]",
 			npc->GetCleanName(),
 			npc_type,
 			npc_level
@@ -561,7 +624,7 @@ bool NpcScaleManager::ApplyGlobalBaseScalingToNPCDynamically(NPC *&npc)
 		return false;
 	}
 
-	auto n = NpcTypesRepository::FindOne(content_db, (int) npc->GetNPCTypeID());
+	auto n = NpcTypesRepository::FindOne(content_db, static_cast<int>(npc->GetNPCTypeID()));
 	if (n.id > 0) {
 		n.AC                = 0;
 		n.hp                = 0;

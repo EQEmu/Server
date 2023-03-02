@@ -83,7 +83,7 @@ int main(int argc, char **argv) {
 			return 1;
 		}
 	} else {
-		content_db.SetMysql(database.getMySQL());
+		content_db.SetMySQL(database);
 	}
 
 	LogSys.SetDatabase(&database)

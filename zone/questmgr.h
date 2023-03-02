@@ -140,7 +140,7 @@ public:
 	void movepc(int zone_id, float x, float y, float z, float heading);
 	void gmmove(float x, float y, float z);
 	void movegrp(int zoneid, float x, float y, float z);
-	void doanim(int animation_id, int animation_speed = 1, bool ackreq = true, eqFilterType filter = FilterNone);
+	void doanim(int animation_id, int animation_speed = 0, bool ackreq = true, eqFilterType filter = FilterNone);
 	void addskill(int skill_id, int value);
 	void setlanguage(int skill_id, int value);
 	void setskill(int skill_id, int value);
@@ -208,8 +208,8 @@ public:
 	void playergender(int gender_id);
 	void playersize(int newsize);
 	void playertexture(int newtexture);
-	void playerfeature(char *feature, int setting);
-	void npcfeature(char *feature, int setting);
+	void playerfeature(const char* feature, int setting);
+	void npcfeature(const char* feature, int setting);
 	void popup(const char *title, const char *text, uint32 popupid, uint32 buttons, uint32 Duration);
 	void taskselector(const std::vector<int>& tasks, bool ignore_cooldown = false);
 	void tasksetselector(int tasksettid, bool ignore_cooldown = false);
