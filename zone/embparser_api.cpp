@@ -1063,12 +1063,12 @@ void Perl__playertexture(int texture_id)
 	quest_manager.playertexture(texture_id);
 }
 
-void Perl__playerfeature(char* feature, int value)
+void Perl__playerfeature(const char* feature, int value)
 {
 	quest_manager.playerfeature(feature, value);
 }
 
-void Perl__npcfeature(char* feature, int value)
+void Perl__npcfeature(const char* feature, int value)
 {
 	quest_manager.npcfeature(feature, value);
 }
