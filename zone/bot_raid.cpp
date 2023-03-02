@@ -321,7 +321,7 @@ void Bot::AI_Process_Raid()
 				std::vector<RaidMember> raid_group_members = raid->GetRaidGroupMembers(r_group);
 				for (std::vector<RaidMember>::iterator iter = raid_group_members.begin(); iter != raid_group_members.end(); ++iter) {
 
-					Mob* bg_member = iter->member;// bot_group->members[counter];
+					Mob* bg_member = iter->member;
 					if (!bg_member) {
 						continue;
 					}
@@ -1448,6 +1448,93 @@ std::vector<RaidMember> Raid::GetRaidGroupMembers(uint32 gid)
 		}
 	}
 	return raid_group_members;
+}
+
+// Returns Bot members that are in the raid
+// passing in owner will return Bots that have the same owner.
+std::vector<Bot*> Raid::GetRaidBotMembers(uint32 owner)
+{
+	std::vector<Bot*> raid_members_bots;
+	raid_members_bots.clear();
+
+	for (int i = 0; i < MAX_RAID_MEMBERS; i++) {
+		if (
+			members[i].member &&
+			members[i].member->IsBot()
+			) {
+			auto b_member = members[i].member->CastToBot();
+			if (owner && b_member->GetOwnerID() == owner) {
+				raid_members_bots.emplace_back(b_member);
+			} else if (!owner) {
+				raid_members_bots.emplace_back(b_member);
+			}
+		}
+	}
+
+	return raid_members_bots;
+}
+
+// Returns Bot members that are in the group specified
+// passing in owner will return only Bots that have the same owner.
+std::vector<Bot*> Raid::GetRaidGroupBotMembers(uint32 gid, uint32 owner)
+{
+	std::vector<Bot*> raid_members_bots;
+	raid_members_bots.clear();
+
+	for (int i = 0; i < MAX_RAID_MEMBERS; i++) {
+		if (
+			members[i].member &&
+			members[i].member->IsBot() &&
+			members[i].GroupNumber == gid
+		) {
+			auto b_member = members[i].member->CastToBot();
+			if (owner && b_member->GetOwnerID() == owner) {
+				raid_members_bots.emplace_back(b_member);
+			} else if (!owner) {
+				raid_members_bots.emplace_back(b_member);
+			}
+		}
+	}
+
+	return raid_members_bots;
+}
+
+void Raid::HandleBotGroupDisband(uint32 owner, uint32 gid)
+{
+	auto raid_members_bots = (gid) ? GetRaidGroupBotMembers(gid, owner) : GetRaidBotMembers(owner);
+
+	// If any of the bots are a group leader then re-create the botgroup on disband, dropping any clients
+	for (auto& bot_iter: raid_members_bots) {
+
+		// Remove the entire BOT group in this case
+		if (
+			bot_iter &&
+			IsRaidMember(bot_iter->GetName()) &&
+			IsGroupLeader(bot_iter->GetName())
+			) {
+			auto r_group_members = GetRaidGroupMembers(GetGroup(bot_iter->GetName()));
+			auto group_inst = new Group(bot_iter);
+			entity_list.AddGroup(group_inst);
+			database.SetGroupID(bot_iter->GetCleanName(), group_inst->GetID(), bot_iter->GetBotID());
+			database.SetGroupLeaderName(group_inst->GetID(), bot_iter->GetCleanName());
+
+			for (auto member_iter: r_group_members) {
+				if (member_iter.member->IsBot()) {
+					auto b_member = member_iter.member->CastToBot();
+					Bot::RemoveBotFromGroup(b_member, b_member->GetGroup());
+					if (strcmp(b_member->GetCleanName(), bot_iter->GetCleanName()) == 0) {
+						bot_iter->SetFollowID(owner);
+					} else {
+						Bot::AddBotToGroup(b_member, group_inst);
+					}
+					Bot::RemoveBotFromRaid(b_member);
+				}
+			}
+		} else if (bot_iter && IsRaidMember(bot_iter->GetName())) {
+			Bot::RemoveBotFromGroup(bot_iter, bot_iter->GetGroup());
+			Bot::RemoveBotFromRaid(bot_iter);
+		}
+	}
 }
 
 bool Bot::AICastSpell_Raid(Mob* tar, uint8 iChance, uint32 iSpellTypes) {

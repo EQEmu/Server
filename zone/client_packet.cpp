@@ -12198,82 +12198,21 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 				//Added to remove all bots if the Bot_Owner is removed from the Raid
 				//Does not camp the Bots, just removes from the raid
 				if (c_to_disband) {
-					std::vector<Bot*> raid_members_bots;
-					uint32 owner_id = c_to_disband->CharacterID();
+					raid->HandleBotGroupDisband(c_to_disband->CharacterID());
 
-					// Determine if the client has any BOTS in the raid
-					for (int i = 0; i < MAX_RAID_MEMBERS; ++i) {
-						if (raid->members[i].member && raid->members[i].IsBot &&
-							raid->members[i].member->CastToBot()->GetOwner()->CastToClient()->CharacterID() == owner_id
-						) {
-							raid_members_bots.emplace_back(raid->members[i].member->CastToBot());
-						}
-					}
-
-					// If any of the bots are a group leader then re-create the botgroup on disband, dropping any clients
-					for (auto bot_iter: raid_members_bots) {
-						// Remove the entire BOT group in this case
-						if (
-							bot_iter &&
-							raid->IsRaidMember(bot_iter->GetName()) &&
-							raid->IsGroupLeader(bot_iter->GetName())
-						) {
-							std::vector<RaidMember> r_group_members = raid->GetRaidGroupMembers(raid->GetGroup(bot_iter->GetName()));
-							auto group_inst = new Group(bot_iter);
-							entity_list.AddGroup(group_inst);
-							database.SetGroupID(bot_iter->GetCleanName(), group_inst->GetID(), bot_iter->GetBotID());
-							database.SetGroupLeaderName(group_inst->GetID(), bot_iter->GetCleanName());
-
-							for (auto member_iter: r_group_members) {
-								if (member_iter.member->IsBot()) {
-									auto b_member = member_iter.member->CastToBot();
-									Bot::RemoveBotFromGroup(b_member, b_member->GetGroup());
-									if (strcmp(b_member->GetName(), bot_iter->GetName()) == 0) {
-										bot_iter->SetFollowID(owner_id);
-									} else {
-										Bot::AddBotToGroup(b_member, group_inst);
-									}
-									Bot::RemoveBotFromRaid(b_member);
-								}
-							}
-						} else if (bot_iter && raid->IsRaidMember(bot_iter->GetName())) {
-							Bot::RemoveBotFromGroup(bot_iter, bot_iter->GetGroup());
-							Bot::RemoveBotFromRaid(bot_iter);
-						}
-					}
 				} else if (b_to_disband) {
 					uint32 gid = raid->GetGroup(b_to_disband->GetName());
 					if (gid < 12 && raid->IsGroupLeader(b_to_disband->GetName())) {
-						// If any of the bots are a group leader then re-create the botgroup on disband, dropping any clients
-						std::vector<RaidMember> r_group_members = raid->GetRaidGroupMembers(gid);
 						uint32 owner_id = b_to_disband->CastToBot()->GetOwner()->CastToClient()->CharacterID();
-
-						// Remove the entire BOT group
-						auto group_inst = new Group(b_to_disband);
-						entity_list.AddGroup(group_inst);
-						database.SetGroupID(b_to_disband->GetCleanName(), group_inst->GetID(),b_to_disband->GetBotID());
-						database.SetGroupLeaderName(group_inst->GetID(), b_to_disband->GetCleanName());
-
-						for (auto member_iter: r_group_members) {
-							if (member_iter.member->IsBot()) {
-								auto b_member = member_iter.member->CastToBot();
-								Bot::RemoveBotFromGroup(b_member, b_member->GetGroup());
-								if (strcmp(b_member->GetName(), b_to_disband->GetName()) == 0) {
-									b_to_disband->SetFollowID(owner_id);
-								} else {
-									Bot::AddBotToGroup(b_member, group_inst);
-								}
-								Bot::RemoveBotFromRaid(b_member);
-							}
-						}
+						raid->HandleBotGroupDisband(owner_id, gid);
 						break;
-					} else if (gid < 12 && raid->GetGroupLeader(gid)->IsBot()) {
+					} else if (gid < 12 && raid->GetGroupLeader(gid) && raid->GetGroupLeader(gid)->IsBot()) {
 						c_doing_disband->Message(
 							Chat::Yellow,
 							fmt::format(
 								"{} is in a Bot Group.  Please disband {} instead to remove the entire Bot group.",
 								raid_command_packet->leader_name,
-								raid->GetGroupLeader(gid)->CastToBot()->GetName()
+								raid->GetGroupLeader(gid)->CastToBot()->GetCleanName()
 							).c_str()
 						);
 						break;
