@@ -255,7 +255,7 @@ public:
 	std::vector<RaidMember> GetRaidGroupMembers(uint32 gid);
 	std::vector<Bot*> GetRaidGroupBotMembers(uint32 gid);
 	std::vector<Bot*> GetRaidBotMembers(uint32 owner = 0);
-	void HandleBotGroupDisband(uint32 owner, uint32 gid = 0);
+	void HandleBotGroupDisband(uint32 owner, uint32 gid = RAID_GROUPLESS);
 
 	RaidMember members[MAX_RAID_MEMBERS];
 	char leadername[64];

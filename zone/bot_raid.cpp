@@ -1498,7 +1498,7 @@ std::vector<Bot*> Raid::GetRaidGroupBotMembers(uint32 gid)
 
 void Raid::HandleBotGroupDisband(uint32 owner, uint32 gid)
 {
-	auto raid_members_bots = gid ? GetRaidGroupBotMembers(gid) : GetRaidBotMembers(owner);
+	auto raid_members_bots = gid != RAID_GROUPLESS ? GetRaidGroupBotMembers(gid) : GetRaidBotMembers(owner);
 
 	// If any of the bots are a group leader then re-create the botgroup on disband, dropping any clients
 	for (auto& bot_iter: raid_members_bots) {
@@ -1513,13 +1513,13 @@ void Raid::HandleBotGroupDisband(uint32 owner, uint32 gid)
 			auto group_inst = new Group(bot_iter);
 			entity_list.AddGroup(group_inst);
 			database.SetGroupID(bot_iter->GetCleanName(), group_inst->GetID(), bot_iter->GetBotID());
-			database.SetGroupLeaderName(group_inst->GetID(), bot_iter->GetCleanName());
+			database.SetGroupLeaderName(group_inst->GetID(), bot_iter->GetName());
 
 			for (auto member_iter: r_group_members) {
 				if (member_iter.member->IsBot()) {
 					auto b_member = member_iter.member->CastToBot();
 					Bot::RemoveBotFromGroup(b_member, b_member->GetGroup());
-					if (strcmp(b_member->GetCleanName(), bot_iter->GetCleanName()) == 0) {
+					if (strcmp(b_member->GetName(), bot_iter->GetName()) == 0) {
 						bot_iter->SetFollowID(owner);
 					} else {
 						Bot::AddBotToGroup(b_member, group_inst);
@@ -1527,6 +1527,9 @@ void Raid::HandleBotGroupDisband(uint32 owner, uint32 gid)
 					Bot::RemoveBotFromRaid(b_member);
 				}
 			}
+		} else {
+			Bot::RemoveBotFromGroup(bot_iter, bot_iter->GetGroup());
+			Bot::RemoveBotFromRaid(bot_iter);
 		}
 	}
 }

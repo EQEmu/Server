@@ -4537,6 +4537,9 @@ bool Bot::RemoveBotFromGroup(Bot* bot, Group* group) {
 			bot->SetFollowID(0);
 			if (group->DelMember(bot)) {
 				database.SetGroupID(bot->GetCleanName(), 0, bot->GetBotID());
+				if (group->GroupCount() < 1) {
+					group->DisbandGroup();
+				}
 			}
 		} else {
 			for (int i = 0; i < MAX_GROUP_MEMBERS; i++) {
@@ -7611,6 +7614,8 @@ void Bot::ProcessBotGroupInvite(Client* c, std::string const& botName) {
 					raid->AddBot(invitedBot, raid->GetGroup(c), false, false, false);
 				}
 			}
+		} else if (invitedBot->HasGroup()) {
+			c->MessageString(Chat::LightGray, TARGET_ALREADY_IN_GROUP, invitedBot->GetCleanName());
 		}
 	}
 }
@@ -7637,7 +7642,6 @@ void Bot::RemoveBotFromRaid(Bot* bot) {
 		uint32 gid = bot_raid->GetGroup(bot->GetName());
 		bot_raid->SendRaidGroupRemove(bot->GetName(), gid);
 		bot_raid->RemoveMember(bot->GetName());
-		bot_raid->GroupUpdate(gid);
 	}
 }
 
@@ -10112,7 +10116,6 @@ void Bot::ProcessRaidInvite(Client* invitee, Client* invitor) {
 				}
 			}
 			raid->GroupUpdate(raid_free_group_id);
-//			raid->SendBulkRaid(invitor); //Send a raid updates to the invitor
 			g_invitee->JoinRaidXTarget(raid, true);
 			g_invitee->DisbandGroup(true);
 			if (raid->IsLocked()) {

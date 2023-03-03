@@ -1354,9 +1354,10 @@ void Raid::SendGroupUpdate(Client *to)
 
 void Raid::GroupUpdate(uint32 gid, bool initial)
 {
-	if(gid > 11) //ungrouped member doesn't need grouping.
+	if(gid > 11) {//ungrouped member doesn't need grouping.
 		return;
-	for(int x = 0; x < MAX_RAID_MEMBERS; x++)
+	}
+	for (int x = 0; x < MAX_RAID_MEMBERS; x++)
 	{
 		if(strlen(members[x].membername) > 0){
 			if(members[x].GroupNumber == gid){
