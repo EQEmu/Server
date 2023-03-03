@@ -375,11 +375,11 @@ private:
 
 	class QuestTimer {
 	public:
-		QuestTimer(int duration, Mob *_mob, std::string _name);
+		inline QuestTimer(int duration, Mob *_mob, std::string _name)
+			: mob(_mob), name(_name), Timer_(duration) { Timer_.Start(duration, false); }
 		Mob*   mob;
 		std::string name;
 		Timer Timer_;
-		uint32 charid;
 	};
 	class SignalTimer {
 	public:

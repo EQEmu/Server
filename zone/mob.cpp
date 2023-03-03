@@ -518,7 +518,9 @@ Mob::Mob(
 }
 
 Mob::~Mob()
-{
+{ 
+	quest_manager.stopalltimers(this);
+
 	mMovementManager->RemoveMob(this);
 
 	AI_Stop();
