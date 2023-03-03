@@ -213,7 +213,7 @@ public:
 	bool DoFinishedSpellSingleTarget(uint16 spell_id, Mob* spellTarget, EQ::spells::CastingSlot slot, bool &stopLogic);
 	bool DoFinishedSpellGroupTarget(uint16 spell_id, Mob* spellTarget, EQ::spells::CastingSlot slot, bool &stopLogic);
 	void SendBotArcheryWearChange(uint8 material_slot, uint32 material, uint32 color);
-	void Camp(bool save_to_database = true);
+	void Camp(bool save_to_database = true, bool camp_all = false);
 	void SetTarget(Mob* mob) override;
 	void Zone();
 	bool IsArcheryRange(Mob* target);

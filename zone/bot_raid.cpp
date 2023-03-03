@@ -1476,7 +1476,7 @@ std::vector<Bot*> Raid::GetRaidBotMembers(uint32 owner)
 
 // Returns Bot members that are in the group specified
 // passing in owner will return only Bots that have the same owner.
-std::vector<Bot*> Raid::GetRaidGroupBotMembers(uint32 gid, uint32 owner)
+std::vector<Bot*> Raid::GetRaidGroupBotMembers(uint32 gid)
 {
 	std::vector<Bot*> raid_members_bots;
 	raid_members_bots.clear();
@@ -1488,11 +1488,8 @@ std::vector<Bot*> Raid::GetRaidGroupBotMembers(uint32 gid, uint32 owner)
 			members[i].GroupNumber == gid
 		) {
 			auto b_member = members[i].member->CastToBot();
-			if (owner && b_member->GetOwnerID() == owner) {
-				raid_members_bots.emplace_back(b_member);
-			} else if (!owner) {
-				raid_members_bots.emplace_back(b_member);
-			}
+			raid_members_bots.emplace_back(b_member);
+			raid_members_bots.emplace_back(b_member);
 		}
 	}
 
@@ -1501,7 +1498,7 @@ std::vector<Bot*> Raid::GetRaidGroupBotMembers(uint32 gid, uint32 owner)
 
 void Raid::HandleBotGroupDisband(uint32 owner, uint32 gid)
 {
-	auto raid_members_bots = (gid) ? GetRaidGroupBotMembers(gid, owner) : GetRaidBotMembers(owner);
+	auto raid_members_bots = gid ? GetRaidGroupBotMembers(gid) : GetRaidBotMembers(owner);
 
 	// If any of the bots are a group leader then re-create the botgroup on disband, dropping any clients
 	for (auto& bot_iter: raid_members_bots) {
@@ -1530,9 +1527,6 @@ void Raid::HandleBotGroupDisband(uint32 owner, uint32 gid)
 					Bot::RemoveBotFromRaid(b_member);
 				}
 			}
-		} else if (bot_iter && IsRaidMember(bot_iter->GetName())) {
-			Bot::RemoveBotFromGroup(bot_iter, bot_iter->GetGroup());
-			Bot::RemoveBotFromRaid(bot_iter);
 		}
 	}
 }

@@ -6142,7 +6142,7 @@ void Bot::BotOrderCampAll(Client* c, uint8 class_id) {
 		const auto& l = entity_list.GetBotsByBotOwnerCharacterID(c->CharacterID());
 		for (const auto& b : l) {
 			if (!class_id || b->GetClass() == class_id) {
-				b->Camp();
+				b->Camp(true);
 			}
 		}
 	}
@@ -7349,12 +7349,21 @@ void Bot::DoEnduranceUpkeep() {
 		SetEndurance(GetEndurance() - upkeep_sum);
 }
 
-void Bot::Camp(bool save_to_database) {
+void Bot::Camp(bool save_to_database, bool camp_all) {
 
 	Sit();
 
-	if (GetGroup()) {
-		RemoveBotFromGroup(this, GetGroup());
+	if (HasGroup()) {
+		auto g = GetGroup();
+		if (!camp_all && g->IsLeader(this)) {
+			for (auto m : g->members) {
+				if (m->IsBot()) {
+					m->CastToBot()->Camp(true);
+				}
+			}
+		} else {
+			RemoveBotFromGroup(this, GetGroup());
+		}
 	}
 
 	LeaveHealRotationMemberPool();
