@@ -52,7 +52,7 @@ public:
 	void SaveChatChannel(const std::string& channel_name, const std::string& channel_owner, const std::string& channel_password, const uint16& min_status);
 	void DeleteChatChannel(const std::string& channel_name);
 	int CurrentPlayerChannelCount(const std::string& player_name);
-	std::string CurrentPlayerChannels(const std::string& player_name);
+	std::vector<std::string> CurrentPlayerChannels(const std::string& player_name);
 	void GetAccountStatus(Client *c);
 	void SetChannelPassword(const std::string& channel_name, const std::string& password);
 	void SetChannelOwner(const std::string& channel_name, const std::string& owner);
