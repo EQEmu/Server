@@ -42,6 +42,8 @@
 #include <cstring>
 #include <iostream>
 
+inline bool g_is_forced_tty = std::getenv("IS_TTY");
+
 namespace rang {
 
 /* For better compability with most of terminals do not use any style settings
@@ -220,6 +222,10 @@ inline bool isMsysPty(int fd) noexcept
 
 inline bool isTerminal(const std::streambuf *osbuf) noexcept
 {
+	if (g_is_forced_tty) {
+		return g_is_forced_tty;
+	}
+
 using std::cerr;
 using std::clog;
 using std::cout;
