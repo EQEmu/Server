@@ -216,12 +216,17 @@ bool NpcScaleManager::LoadScaleData()
 {
 	auto rows = NpcScaleGlobalBaseRepository::All(content_db);
 	for (const auto &s : rows) {
+		if (
+			s.zone_id_list.empty() ||
+			s.instance_version_list.empty()
+		) {
+			continue;
+		}
+
 		global_npc_scale scale_data;
 
 		scale_data.type              = s.type;
 		scale_data.level             = s.level;
-		scale_data.zone_id           = s.zone_id;
-		scale_data.instance_version  = s.instance_version;
 		scale_data.ac                = s.ac;
 		scale_data.hp                = s.hp;
 		scale_data.accuracy          = s.accuracy;
@@ -252,17 +257,88 @@ bool NpcScaleManager::LoadScaleData()
 			scale_data.special_abilities = s.special_abilities;
 		}
 
-		npc_global_base_scaling_data.insert(
-			std::make_pair(
-				std::make_tuple(
-					scale_data.type,
-					scale_data.level,
-					scale_data.zone_id,
-					scale_data.instance_version
-				),
-				scale_data
-			)
-		);
+		const auto has_multiple_zones    = Strings::Contains(s.zone_id_list, "|");
+		const auto has_multiple_versions = Strings::Contains(s.instance_version_list, "|");
+
+		if (!has_multiple_zones && !has_multiple_versions) {
+			scale_data.zone_id          = std::stoul(s.zone_id_list);
+			scale_data.instance_version = static_cast<uint16>(std::stoul(s.instance_version_list));
+
+			npc_global_base_scaling_data.insert(
+				std::make_pair(
+					std::make_tuple(
+						scale_data.type,
+						scale_data.level,
+						scale_data.zone_id,
+						scale_data.instance_version
+					),
+					scale_data
+				)
+			);
+		} else if (has_multiple_zones && !has_multiple_versions) {
+			scale_data.instance_version = static_cast<uint16>(std::stoul(s.instance_version_list));
+
+			const auto zones = Strings::Split(s.zone_id_list, "|");
+
+			for (const auto &z : zones) {
+				scale_data.zone_id          = std::stoul(z);
+
+				npc_global_base_scaling_data.insert(
+					std::make_pair(
+						std::make_tuple(
+							scale_data.type,
+							scale_data.level,
+							scale_data.zone_id,
+							scale_data.instance_version
+						),
+						scale_data
+					)
+				);
+			}
+		} else if (!has_multiple_zones && has_multiple_versions) {
+			scale_data.zone_id = std::stoul(s.zone_id_list);
+
+			const auto versions = Strings::Split(s.instance_version_list, "|");
+
+			for (const auto &v : versions) {
+				scale_data.instance_version = static_cast<uint16>(std::stoul(v));
+
+				npc_global_base_scaling_data.insert(
+					std::make_pair(
+						std::make_tuple(
+							scale_data.type,
+							scale_data.level,
+							scale_data.zone_id,
+							scale_data.instance_version
+						),
+						scale_data
+					)
+				);
+			}
+		} else if (has_multiple_zones && has_multiple_versions) {
+			const auto zones    = Strings::Split(s.zone_id_list, "|");
+			const auto versions = Strings::Split(s.instance_version_list, "|");
+
+			for (const auto &z : zones) {
+				scale_data.zone_id = std::stoul(z);
+
+				for (const auto &v : versions) {
+					scale_data.instance_version = static_cast<uint16>(std::stoul(v));
+
+					npc_global_base_scaling_data.insert(
+						std::make_pair(
+							std::make_tuple(
+								scale_data.type,
+								scale_data.level,
+								scale_data.zone_id,
+								scale_data.instance_version
+							),
+							scale_data
+						)
+					);
+				}
+			}
+		}
 	}
 
 	LogInfo("Loaded [{}] global scaling data entries", Strings::Commify(rows.size()));
