@@ -250,7 +250,7 @@ int Mob::compute_defense()
 	int defense = GetSkill(EQ::skills::SkillDefense) * 400 / 225;
 	defense += (8000 * (GetAGI() - 40)) / 36000;
 	if (IsOfClientBot()) {
-		defense += GetHeroicAGI() / 10;
+		defense += GetHeroicAGI() * RuleR(Character, HeroicAgilityMultiplier) / 10;
 	}
 
 	//516 SE_AC_Mitigation_Max_Percent
@@ -883,7 +883,7 @@ int Mob::ACSum(bool skip_caps)
 				shield_ac = CalcRecommendedLevelBonus(GetLevel(), inst->GetItemRecommendedLevel(true), inst->GetItemArmorClass(true));
 			}
 		}
-		shield_ac += GetHeroicSTR() / 10;
+		shield_ac += GetHeroicSTR() * RuleR(Character, HeroicStrengthMultiplier) / 10;
 	}
 	// EQ math
 	ac = (ac * 4) / 3;
@@ -5897,10 +5897,10 @@ void Mob::CommonOutgoingHitSuccess(Mob* defender, DamageHitInfo &hit, ExtraAttac
 		switch (hit.skill) {
 			case EQ::skills::SkillThrowing:
 			case EQ::skills::SkillArchery:
-				extra = GetHeroicDEX() / 10;
+				extra = GetHeroicDEX() * RuleR(Character, HeroicDexterityMultiplier) / 10;
 				break;
 			default:
-				extra = GetHeroicSTR() / 10;
+				extra = GetHeroicSTR() * RuleR(Character, HeroicStrengthMultiplier) / 10;
 				break;
 		}
 		hit.damage_done += extra;

@@ -1049,7 +1049,7 @@ int64 Mob::TuneACSum(bool skip_caps, int ac_override, int add_ac)
 				shield_ac = CalcRecommendedLevelBonus(GetLevel(), inst->GetItemRecommendedLevel(true),inst->GetItemArmorClass(true));
 			}
 		}
-		shield_ac += GetHeroicSTR() / 10;
+		shield_ac += GetHeroicSTR() * RuleR(Character, HeroicStrengthMultiplier) / 10;
 	}
 	// EQ math
 	ac = (ac * 4) / 3;
@@ -1353,7 +1353,7 @@ int64 Mob::Tunecompute_defense(int avoidance_override, int add_avoidance)
 			defense = avoidance_override;
 		}
 		else {
-			defense += GetHeroicAGI() / 10;
+			defense += GetHeroicAGI() * RuleR(Character, HeroicAgilityMultiplier) / 10;
 		}
 		defense += add_avoidance; //1 pt = 10 heroic agi
 	}
@@ -1493,13 +1493,13 @@ void Mob::TuneCommonOutgoingHitSuccess(Mob* defender, DamageHitInfo &hit, ExtraA
 	if (IsOfClientBot()) {
 		int extra = 0;
 		switch (hit.skill) {
-		case EQ::skills::SkillThrowing:
-		case EQ::skills::SkillArchery:
-			extra = GetHeroicDEX() / 10;
-			break;
-		default:
-			extra = GetHeroicSTR() / 10;
-			break;
+			case EQ::skills::SkillThrowing:
+			case EQ::skills::SkillArchery:
+				extra = GetHeroicDEX() * RuleR(Character, HeroicDexterityMultiplier) / 10;
+				break;
+			default:
+				extra = GetHeroicSTR() * RuleR(Character, HeroicStrengthMultiplier) / 10;
+				break;
 		}
 		hit.damage_done += extra;
 	}
