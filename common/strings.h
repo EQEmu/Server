@@ -92,9 +92,6 @@ public:
 	static uint64 ToUnsignedBigInt(const std::string &s, uint64 fallback = 0);
 	static float ToFloat(const std::string &s, float fallback = 0.0f);
 	static bool IsNumber(const std::string &s);
-	static bool IsUnsignedNumber(const std::string &s);
-	static bool IsBigNumber(const std::string &s);
-	static bool IsUnsignedBigNumber(const std::string &s);
 	static std::string RemoveNumbers(std::string s);
 	static bool IsFloat(const std::string &s);
 	static const std::string ToLower(std::string s);

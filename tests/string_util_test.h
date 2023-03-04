@@ -31,6 +31,8 @@ public:
 		TEST_ADD(StringUtilTest::SearchDeliminatedStringTest);
 		TEST_ADD(StringUtilTest::SplitStringTest);
 		TEST_ADD(StringUtilTest::FromCharsTest);
+		TEST_ADD(StringUtilTest::TestIsFloat);
+		TEST_ADD(StringUtilTest::TestIsNumber);
 	}
 
 	~StringUtilTest() {
@@ -115,6 +117,26 @@ public:
 		Strings::from_chars(float_chars, float_value);
 		TEST_ASSERT(float_value == 3.14f);
 
+	}
+
+	void TestIsFloat() {
+		TEST_ASSERT_EQUALS(Strings::IsFloat("0.23424523"), true);
+		TEST_ASSERT_EQUALS(Strings::IsFloat("12312312313.23424523"), true);
+		TEST_ASSERT_EQUALS(Strings::IsFloat("12312312313"), true);
+		TEST_ASSERT_EQUALS(Strings::IsFloat(".234234"), true);
+		TEST_ASSERT_EQUALS(Strings::IsFloat(".234234f"), false);
+		TEST_ASSERT_EQUALS(Strings::IsFloat("Johnson"), false);
+	}
+
+	void TestIsNumber() {
+		TEST_ASSERT_EQUALS(Strings::IsNumber("0.23424523"), false);
+		TEST_ASSERT_EQUALS(Strings::IsNumber("12312312313.23424523"), false);
+		TEST_ASSERT_EQUALS(Strings::IsNumber("12312312313"), true);
+		TEST_ASSERT_EQUALS(Strings::IsNumber("12312312313f"), false); // character at end
+		TEST_ASSERT_EQUALS(Strings::IsNumber("18446744073709551616"), true); // 64
+		TEST_ASSERT_EQUALS(Strings::IsNumber("-18"), true);
+		TEST_ASSERT_EQUALS(Strings::IsNumber("-f18"), false);
+		TEST_ASSERT_EQUALS(Strings::IsNumber("-18446744073709551616"), true); // 64
 	}
 };
 
