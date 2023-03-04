@@ -395,15 +395,29 @@ Corpse::Corpse(Client* client, int32 in_rezexp) : Mob (
 			!RuleB(Character, RespawnFromHover) ||
 			client->ClientVersion() < EQ::versions::ClientVersion::SoF
 		) {
-			SetCash((pp->copper + pp->copper_cursor), (pp->silver + pp->silver_cursor), (pp->gold + pp->gold_cursor), (pp->platinum + pp->platinum_cursor));
-			pp->copper			= 0;
-			pp->copper_cursor	= 0;
-			pp->silver			= 0;
-			pp->silver_cursor	= 0;
-			pp->gold			= 0;
-			pp->gold_cursor		= 0;
-			pp->platinum		= 0;
-			pp->platinum_cursor = 0;
+			auto corpse_copper   = pp->copper;
+			auto corpse_silver   = pp->silver;
+			auto corpse_gold     = pp->gold;
+			auto corpse_platinum = pp->platinum;
+
+			pp->copper   = 0;
+			pp->silver   = 0;
+			pp->gold     = 0;
+			pp->platinum = 0;
+
+			if (RuleB(Character, LeaveCursorMoneyOnCorpse)) {
+				corpse_copper += pp->copper_cursor;
+				corpse_silver += pp->silver_cursor;
+				corpse_gold += pp->gold_cursor;
+				corpse_platinum += pp->platinum_cursor;
+
+				pp->copper_cursor   = 0;
+				pp->silver_cursor   = 0;
+				pp->gold_cursor     = 0;
+				pp->platinum_cursor = 0;
+			}
+
+			SetCash(corpse_copper, corpse_silver, corpse_gold, corpse_platinum);
 		}
 
 		// get their tints
