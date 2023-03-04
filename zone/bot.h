@@ -434,11 +434,14 @@ public:
 	void PetAIProcess_Raid();
 	void AI_Process_Raid();
 	bool AICastSpell_Raid(Mob* tar, uint8 iChance, uint32 iSpellTypes);
-	static void ProcessRaidInvite(Bot* invitee, Client* invitor);
+	static void ProcessRaidInvite(Bot* invitee, Client* invitor, bool group_invite = false);
 	static void ProcessRaidInvite(Client* invitee, Client* invitor);
 	static void RemoveBotFromRaid(Bot* bot);
 	uint8 GetNumberNeedingHealedInRaidGroup(uint8 hpr, bool includePets);
 	inline void SetDirtyAutoHaters() { m_dirtyautohaters = true; }
+	static void CreateBotRaid(Mob* invitee, Client* invitor, bool group_invite, Raid* raid = nullptr);
+	static void ProcessBotGroupAdd(Group *group, Raid *raid, bool new_raid = false);
+
 
 	static std::list<BotSpell> GetBotSpellsForSpellEffect(Bot* botCaster, int spellEffect);
 	static std::list<BotSpell> GetBotSpellsForSpellEffectAndTargetType(Bot* botCaster, int spellEffect, SpellTargetType targetType);

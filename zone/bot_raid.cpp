@@ -1463,7 +1463,7 @@ std::vector<Bot*> Raid::GetRaidBotMembers(uint32 owner)
 			members[i].member->IsBot()
 			) {
 			auto b_member = members[i].member->CastToBot();
-			if (owner && b_member->GetOwnerID() == owner) {
+			if (owner && b_member->GetBotOwnerCharacterID() == owner) {
 				raid_members_bots.emplace_back(b_member);
 			} else if (!owner) {
 				raid_members_bots.emplace_back(b_member);
@@ -1506,6 +1506,7 @@ void Raid::HandleBotGroupDisband(uint32 owner, uint32 gid)
 		// Remove the entire BOT group in this case
 		if (
 			bot_iter &&
+			gid != RAID_GROUPLESS &&
 			IsRaidMember(bot_iter->GetName()) &&
 			IsGroupLeader(bot_iter->GetName())
 			) {
@@ -1518,7 +1519,6 @@ void Raid::HandleBotGroupDisband(uint32 owner, uint32 gid)
 			for (auto member_iter: r_group_members) {
 				if (member_iter.member->IsBot()) {
 					auto b_member = member_iter.member->CastToBot();
-					Bot::RemoveBotFromGroup(b_member, b_member->GetGroup());
 					if (strcmp(b_member->GetName(), bot_iter->GetName()) == 0) {
 						bot_iter->SetFollowID(owner);
 					} else {
@@ -1528,7 +1528,6 @@ void Raid::HandleBotGroupDisband(uint32 owner, uint32 gid)
 				}
 			}
 		} else {
-			Bot::RemoveBotFromGroup(bot_iter, bot_iter->GetGroup());
 			Bot::RemoveBotFromRaid(bot_iter);
 		}
 	}
@@ -2594,3 +2593,130 @@ uint8 Bot::GetNumberNeedingHealedInRaidGroup(uint8 hpr, bool includePets) {
 		}
 	return needHealed;
 }
+
+void Bot::ProcessRaidInvite(Bot* invitee, Client* invitor, bool group_invite) {
+
+	if (!invitee || !invitor) {
+		return;
+	}
+
+	if (invitee->IsBot() && invitee->GetBotOwnerCharacterID() != invitor->CharacterID()) {
+		invitor->Message(
+			Chat::Red,
+			fmt::format(
+				"{} is not your Bot. You can only invite your Bots, or players grouped with bots.",
+				invitee->GetCleanName()
+			).c_str()
+		);
+		return;
+	}
+
+	Raid* raid = entity_list.GetRaidByClient(invitor);
+
+	Bot::CreateBotRaid(invitee, invitor, group_invite, raid);
+}
+
+void Bot::CreateBotRaid(Mob* invitee, Client* invitor, bool group_invite, Raid* raid) {
+
+	Group* g_invitee = invitee->GetGroup();
+	Group* g_invitor = invitor->GetGroup();
+
+	if (g_invitee && invitor->IsClient()) {
+		if (!g_invitee->IsLeader(invitee)) {
+			invitor->Message(
+				Chat::Red,
+				fmt::format(
+					"You can only invite group leaders or ungrouped bots. Try {} instead.",
+					g_invitee->GetLeader()->GetCleanName()
+				).c_str()
+			);
+			return;
+		}
+	}
+
+	bool new_raid = false;
+	if (!raid) {
+		new_raid = true;
+		raid = new Raid(invitor);
+		entity_list.AddRaid(raid);
+		raid->SetRaidDetails();
+	}
+
+	// Add Invitor to new raid
+	if (new_raid) {
+		if (g_invitor) {
+			ProcessBotGroupAdd(g_invitor, raid, true);
+		} else {
+			raid->SendRaidCreate(invitor);
+			raid->AddMember(invitor, 0xFFFFFFFF, true, false, true);
+			raid->SendMakeLeaderPacketTo(invitor->GetName(), invitor);
+			if (raid->IsLocked()) {
+				raid->SendRaidLockTo(invitor);
+			}
+		}
+	}
+
+	// Add Bot Group, or Individual Bot to Raid
+	if (invitee->IsBot()) {
+		if (g_invitee) {
+			ProcessBotGroupAdd(g_invitee, raid);
+		} else {
+			auto gid = raid->GetGroup(invitor->GetName());
+			auto b = invitee->CastToBot();
+
+			// gives us a choice to either invite directly into the clients Raid Group, or just into the Raid
+			if (group_invite && raid->GroupCount(gid) < MAX_GROUP_MEMBERS) {
+				raid->AddBot(b, gid);
+			} else {
+				raid->AddBot(b);
+			}
+
+			if (new_raid) {
+				invitee->SetFollowID(invitor->GetID());
+			}
+		}
+	}
+	// Add invitees group if they are a client with bots
+	else if (invitee->IsClient()) {
+		if (g_invitee) {
+			ProcessBotGroupAdd(g_invitee, raid);
+		}
+	}
+}
+
+void Bot::ProcessBotGroupAdd(Group *group, Raid *raid, bool new_raid) {
+
+	uint32 raid_free_group_id = raid->GetFreeGroup();
+	for (int x = 0; x < MAX_GROUP_MEMBERS; x++) {
+		if (group->members[x]) {
+			Client* c = nullptr;
+			Bot* b = nullptr;
+
+			if (group->members[x] && group->members[x]->IsBot()) {
+				b = group->members[x]->CastToBot();
+				raid->AddBot(b, raid_free_group_id, false, x == 0, false);
+				raid->SetGroupLeader(b->GetName());
+			}
+
+			else if (group->members[x] && group->members[x]->IsClient()) {
+				c = group->members[x]->CastToClient();
+				raid->SendRaidCreate(c);
+				raid->AddMember(
+					c,
+					raid_free_group_id,
+					new_raid,
+					x == 0,
+					false
+				);
+				raid->SendMakeLeaderPacketTo(raid->leadername, c);
+				raid->SendBulkRaid(c);
+			}
+		}
+	}
+
+	group->JoinRaidXTarget(raid);
+	group->DisbandGroup(true);
+	raid->GroupUpdate(raid_free_group_id);
+}
+
+

@@ -7018,34 +7018,34 @@ void Client::Handle_OP_GroupDisband(const EQApplicationPacket *app)
 			memberToDisband = this;
 		}
 
-		if (!memberToDisband->IsBot()) {
-			if (!memberToDisband->IsClient()) {
-				return;
-			}
-
-			//we have a raid.. see if we're in a raid group
-			uint32 grp = raid->GetGroup(memberToDisband->GetName());
-			bool wasGrpLdr = raid->members[raid->GetPlayerIndex(memberToDisband->GetName())].IsGroupLeader;
-			if (grp < 12) {
-				if (wasGrpLdr) {
-					raid->SetGroupLeader(memberToDisband->GetName(), false);
-					for (int x = 0; x < MAX_RAID_MEMBERS; x++) {
-						if (raid->members[x].GroupNumber == grp) {
-							if (strlen(raid->members[x].membername) > 0 &&
-							    strcmp(raid->members[x].membername, memberToDisband->GetName()) != 0) {
-								raid->SetGroupLeader(raid->members[x].membername);
-								break;
-							}
+		if (!memberToDisband->IsOfClientBot()) {
+			return;
+		}
+		//we have a raid.. see if we're in a raid group
+		uint32 grp = raid->GetGroup(memberToDisband->GetName());
+		bool wasGrpLdr = raid->members[raid->GetPlayerIndex(memberToDisband->GetName())].IsGroupLeader;
+		if (grp < 12) {
+			if (wasGrpLdr) {
+				raid->SetGroupLeader(memberToDisband->GetName(), false);
+				for (int x = 0; x < MAX_RAID_MEMBERS; x++) {
+					if (raid->members[x].GroupNumber == grp) {
+						if (strlen(raid->members[x].membername) > 0 &&
+						    strcmp(raid->members[x].membername, memberToDisband->GetName()) != 0) {
+							raid->SetGroupLeader(raid->members[x].membername);
+							break;
 						}
 					}
 				}
-				raid->MoveMember(memberToDisband->GetName(), 0xFFFFFFFF);
-				raid->GroupUpdate(grp);
+			}
+			raid->MoveMember(memberToDisband->GetName(), 0xFFFFFFFF);
+			raid->GroupUpdate(grp);
+
+			if (memberToDisband->IsClient()) {
 				raid->SendGroupDisband(memberToDisband->CastToClient());
 			}
-			//we're done
-			return;
 		}
+		//we're done
+		return;
 	}
 
 	Group* group = GetGroup();
@@ -7059,10 +7059,6 @@ void Client::Handle_OP_GroupDisband(const EQApplicationPacket *app)
 		if (group->IsLeader(this)) {
 			if ((GetTarget() == 0 || GetTarget() == this) || (group->GroupCount() < 3)) {
 				Bot::ProcessBotGroupDisband(this, std::string());
-				if (HasRaid()) {
-					auto gid = raid->GetGroup(this->GetName());
-					raid->HandleBotGroupDisband(this->CharacterID(), gid);
-				}
 			}
 			else {
 				Mob* tempMember = entity_list.GetMob(gd->name1); //Name1 is the target you are disbanding
@@ -7070,9 +7066,6 @@ void Client::Handle_OP_GroupDisband(const EQApplicationPacket *app)
 				if (tempMember && tempMember->IsBot()) {
 					auto b = tempMember->CastToBot();
 					Bot::RemoveBotFromGroup(b, group);
-					if (b->HasRaid()) {
-						Bot::RemoveBotFromRaid(b);
-					}
 
 					if (LFP)
 					{
@@ -7282,16 +7275,13 @@ void Client::Handle_OP_GroupInvite2(const EQApplicationPacket *app)
 		}
 		else if (Invitee->IsBot()) {
 			Client* inviter = entity_list.GetClientByName(gis->inviter_name);
-			if (
-				inviter->IsRaidGrouped() && inviter->HasGroup() &&
-				!Invitee->HasRaid() && inviter->GetGroup()->GroupCount() >= MAX_GROUP_MEMBERS
-			) {
-				Bot::ProcessRaidInvite(Invitee->CastToBot(), inviter);
+			if (inviter && inviter->IsRaidGrouped() && !Invitee->HasRaid()) {
+				Bot::ProcessRaidInvite(Invitee->CastToBot(), inviter, true);
 			}
 			else if (!Invitee->HasRaid()) {
 				Bot::ProcessBotGroupInvite(this, std::string(Invitee->GetName()));
 			} else {
-				MessageString(Chat::LightGray, ALREADY_IN_YOUR_RAID, Invitee->GetCleanName());
+				MessageString(Chat::LightGray, ALREADY_IN_RAID, Invitee->GetCleanName());
 			}
 		}
 	}
@@ -11798,11 +11788,9 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 	case RaidCommandInvite: {
 
 		Bot* player_to_invite = nullptr;
-		Client* player_to_invite_owner = nullptr;
 
 		if (RuleB(Bots, Enabled) && entity_list.GetBotByBotName(raid_command_packet->player_name)) {
 			Bot* player_to_invite = entity_list.GetBotByBotName(raid_command_packet->player_name);
-			Client* player_to_invite_owner = player_to_invite->GetOwner()->CastToClient();
 			Group* player_to_invite_group = player_to_invite->GetGroup();
 
 			if (!player_to_invite) {
@@ -11819,32 +11807,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 				return;
 			}
 
-			if (
-				player_to_invite->IsBot() &&
-				player_to_invite->CastToBot()->GetOwner()->CastToClient()->CharacterID() !=
-				player_to_invite_owner->CharacterID()
-			) {
-				Message(
-					Chat::Red,
-					fmt::format(
-						"{} is not your Bot. You can only invite your Bots, or players grouped with bots.",
-						player_to_invite->GetCleanName()
-					).c_str()
-				);
-			}
-
-			if (player_to_invite_group && !player_to_invite_group->IsLeader(player_to_invite->CastToMob())) {
-				Message(
-					Chat::Red,
-					fmt::format(
-						"You can only invite group leaders or ungrouped bots. Try {} instead.",
-						player_to_invite_group->GetLeader()->GetCleanName()
-					).c_str()
-				);
-				break;
-			}
-
-			Bot::ProcessRaidInvite(player_to_invite, player_to_invite_owner);
+			Bot::ProcessRaidInvite(player_to_invite, this);
 			break;
 
 		} else {
@@ -11896,6 +11859,11 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 		Bot* b = nullptr;
 		Client* invitee = entity_list.GetClientByName(raid_command_packet->leader_name);
 		Client* invitor = entity_list.GetClientByName(raid_command_packet->player_name);
+
+		if (!invitee && !invitor) {
+			return;
+		}
+
 		Group* g_invitee = invitee->GetGroup();
 		Group* g_invitor = invitor->GetGroup();
 
@@ -11927,9 +11895,6 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 			}
 			if (invitor_has_bot || invitee_has_bot) {
 				Bot::ProcessRaidInvite(invitee, invitor);  //two clients with one or both having groups with bots
-				break;
-			} else if (invitee && invitee->IsBot()) {
-				Bot::ProcessRaidInvite(b, player_accepting_invite); //client inviting a bot
 				break;
 			}
 		}
@@ -12221,7 +12186,6 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 						raid->HandleBotGroupDisband(owner_id, gid);
 
 					} else if (b_to_disband && raid->IsRaidMember(b_to_disband->GetName())) {
-						Bot::RemoveBotFromGroup(b_to_disband, b_to_disband->GetGroup());
 						Bot::RemoveBotFromRaid(b_to_disband);
 
 					} else if (gid < 12 && raid->GetGroupLeader(gid) && raid->GetGroupLeader(gid)->IsBot()) {
