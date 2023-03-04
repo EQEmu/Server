@@ -2632,6 +2632,10 @@ void Client::Handle_OP_AltCurrencyPurchase(const EQApplicationPacket *app)
 			RecordPlayerEventLog(PlayerEvent::MERCHANT_PURCHASE, e);
 		}
 
+		if (RuleB(Character, EnableDiscoveredItems) && !GetGM() && !IsDiscovered(item->ID)) {
+			DiscoverItem(item->ID);
+		}
+
 		EQ::ItemInstance *inst = database.CreateItem(item, charges);
 		if (!AutoPutLootInInventory(*inst, true, true))
 		{
