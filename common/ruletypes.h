@@ -434,7 +434,7 @@ RULE_BOOL(Spells, IllusionsAlwaysPersist, false, "Allows Illusions to persist be
 RULE_BOOL(Spells, UseItemCastMessage, false, "Enable to use the \"item begins to glow\" messages when casting from an item.")
 RULE_BOOL(Spells, TargetsTargetRequiresCombatRange, true, "Disable to remove combat range requirement from Target's Target Spell Target Type")
 RULE_BOOL(Spells, NPCBuffLevelRestrictions, false, "Impose BuffLevelRestrictions on NPCs if true")
-RULE_BOOL(Spells, ResurrectionEffectsBlock, false, "If enabled, resurrection effects cannot be overwritten.")
+RULE_BOOL(Spells, ResurrectionEffectsBlock, true, "If enabled, resurrection effects cannot be overwritten.")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Combat)
