@@ -319,7 +319,7 @@ public:
 
 	void AddLootDrop(
 		const EQ::ItemData *item2,
-		ItemList *i out temlist,
+		ItemList *itemlist,
 		LootDropEntries_Struct loot_drop,
 		bool wear_change = false,
 		uint32 aug1 = 0,
