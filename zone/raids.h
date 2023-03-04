@@ -131,7 +131,7 @@ public:
 	bool	IsRaidMember(const char* name);
 	bool	IsRaidMember(Client *c);
 	void	UpdateLevel(const char *name, int newLevel);
-	
+	void	SetNewRaidLeader(uint32 i);
 
 	uint32	GetFreeGroup();
 	uint8	GroupCount(uint32 gid);

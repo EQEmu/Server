@@ -2676,11 +2676,9 @@ void Bot::CreateBotRaid(Mob* invitee, Client* invitor, bool group_invite, Raid* 
 			}
 		}
 	}
-	// Add invitees group if they are a client with bots
-	else if (invitee->IsClient()) {
-		if (g_invitee) {
-			ProcessBotGroupAdd(g_invitee, raid);
-		}
+	// Add Client invitee if they have Bots in their group
+	else if (g_invitee && invitee->IsClient()) {
+		ProcessBotGroupAdd(g_invitee, raid);
 	}
 }
 
@@ -2695,7 +2693,6 @@ void Bot::ProcessBotGroupAdd(Group *group, Raid *raid, bool new_raid) {
 			if (group->members[x] && group->members[x]->IsBot()) {
 				b = group->members[x]->CastToBot();
 				raid->AddBot(b, raid_free_group_id, false, x == 0, false);
-				raid->SetGroupLeader(b->GetName());
 			}
 
 			else if (group->members[x] && group->members[x]->IsClient()) {

@@ -2089,3 +2089,19 @@ void Raid::RaidSay(const char* msg, const char* from, uint8 language, uint8 lang
 	worldserver.SendPacket(pack);
 	safe_delete(pack);
 }
+
+void Raid::SetNewRaidLeader(uint32 i)
+{
+	if (members[i].IsRaidLeader) {
+		for (int x = 0; x < MAX_RAID_MEMBERS; x++) {
+			if (!members[x].IsBot) {
+				if (strlen(members[x].membername) > 0 && strcmp(members[x].membername, members[i].membername) != 0) {
+					SetRaidLeader(members[i].membername, members[x].membername);
+					UpdateRaidAAs();
+					SendAllRaidLeadershipAA();
+					break;
+				}
+			}
+		}
+	}
+}

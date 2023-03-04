@@ -12164,7 +12164,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 	}
 	case RaidCommandDisband: {
 		Raid* raid = entity_list.GetRaidByClient(this);
-		const Client* c_to_disband = entity_list.GetClientByName(raid_command_packet->leader_name);
+		Client* c_to_disband = entity_list.GetClientByName(raid_command_packet->leader_name);
 		Client* c_doing_disband = entity_list.GetClientByName(raid_command_packet->player_name);
 
 		if (raid) {
@@ -12177,11 +12177,21 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 				//Does not camp the Bots, just removes from the raid
 				if (c_to_disband) {
 					raid->HandleBotGroupDisband(c_to_disband->CharacterID());
-
+					raid->RemoveMember(raid_command_packet->leader_name);
+					if (raid->IsLeader(c_to_disband->GetName())) {
+						uint32 i = raid->GetPlayerIndex(raid_command_packet->leader_name);
+						raid->SetNewRaidLeader(i);
+					}
+					raid->SendGroupDisband(c_to_disband);
+					raid->GroupUpdate(group);
+					if (!raid->RaidCount() || !raid->GetLeader()) {
+						raid->DisbandRaid();
+					}
+					break;
 				} else if (b_to_disband) {
 					uint32 gid = raid->GetGroup(b_to_disband->GetName());
 
-					if (gid < 12 && (raid->IsGroupLeader(b_to_disband->GetName()) || raid->GroupCount(gid) < 3)) {
+					if (gid < 12 && (raid->IsGroupLeader(b_to_disband->GetName()) || raid->GroupCount(gid) < 2)) {
 						uint32 owner_id = b_to_disband->CastToBot()->GetOwner()->CastToClient()->CharacterID();
 						raid->HandleBotGroupDisband(owner_id, gid);
 
@@ -12215,19 +12225,8 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 							}
 						}
 					}
-
 				}
-				if (raid->members[i].IsRaidLeader) {
-					for (int x = 0; x < MAX_RAID_MEMBERS; x++) {
-						if (strlen(raid->members[x].membername) > 0 && strcmp(raid->members[x].membername, raid->members[i].membername) != 0)
-						{
-							raid->SetRaidLeader(raid->members[i].membername, raid->members[x].membername);
-							raid->UpdateRaidAAs();
-							raid->SendAllRaidLeadershipAA();
-							break;
-						}
-					}
-				}
+				raid->SetNewRaidLeader(i);
 			}
 			raid->RemoveMember(raid_command_packet->leader_name);
 			Client* c = entity_list.GetClientByName(raid_command_packet->leader_name);
@@ -12246,7 +12245,6 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 				worldserver.SendPacket(pack);
 				safe_delete(pack);
 			}
-			//r->SendRaidGroupRemove(ri->leader_name, grp);
 			raid->GroupUpdate(group);// break
 			if (!raid->RaidCount())
 				raid->DisbandRaid();
@@ -12501,7 +12499,9 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 	}
 	}
 }
-	
+
+
+
 void Client::Handle_OP_RandomReq(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(RandomReq_Struct)) {
