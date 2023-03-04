@@ -43,7 +43,7 @@ bool BotDatabase::LoadBotCommandSettings(std::map<std::string, std::pair<uint8, 
 		return false;
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		bot_command_settings[row[0]].first = atoi(row[1]);
+		bot_command_settings[row[0]].first = Strings::ToInt(row[1]);
 		if (row[2][0] == 0)
 			continue;
 
@@ -138,19 +138,19 @@ bool BotDatabase::LoadBotSpellCastingChances()
 		return false;
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		uint8 spell_type_index = atoi(row[0]);
+		uint8 spell_type_index = Strings::ToInt(row[0]);
 		if (spell_type_index >= Bot::SPELL_TYPE_COUNT)
 			continue;
-		uint8 class_index = atoi(row[1]);
+		uint8 class_index = Strings::ToInt(row[1]);
 		if (class_index < WARRIOR || class_index > BERSERKER)
 			continue;
 		--class_index;
-		uint8 stance_index = atoi(row[2]);
+		uint8 stance_index = Strings::ToInt(row[2]);
 		if (stance_index >= EQ::constants::STANCE_TYPE_COUNT)
 			continue;
 
 		for (uint8 conditional_index = nHSND; conditional_index < cntHSND; ++conditional_index) {
-			uint8 value = atoi(row[3 + conditional_index]);
+			uint8 value = Strings::ToInt(row[3 + conditional_index]);
 			if (!value)
 				continue;
 			if (value > 100)
@@ -223,7 +223,7 @@ bool BotDatabase::QueryBotCount(const uint32 owner_id, int class_id, uint32& bot
 	}
 
 	auto row = results.begin();
-	bot_count = std::stoul(row[0]);
+	bot_count = Strings::ToUnsignedInt(row[0]);
 
 	if (EQ::ValueWithin(class_id, WARRIOR, BERSERKER)) {
 		query = fmt::format(
@@ -241,7 +241,7 @@ bool BotDatabase::QueryBotCount(const uint32 owner_id, int class_id, uint32& bot
 		}
 
 		auto row = results.begin();
-		bot_class_count = std::stoul(row[0]);
+		bot_class_count = Strings::ToUnsignedInt(row[0]);
 	}
 
 	return true;
@@ -269,7 +269,7 @@ bool BotDatabase::LoadBotsList(const uint32 owner_id, std::list<BotsAvailableLis
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		BotsAvailableList bot_entry;
 
-		bot_entry.ID = atoi(row[0]);
+		bot_entry.ID = Strings::ToInt(row[0]);
 
 		memset(&bot_entry.Name, 0, sizeof(bot_entry.Name));
 		std::string bot_name = row[1];
@@ -283,11 +283,11 @@ bool BotDatabase::LoadBotsList(const uint32 owner_id, std::list<BotsAvailableLis
 			 bot_owner = bot_owner.substr(0, 63);
 		if (!bot_owner.empty())
 			 strcpy(bot_entry.Owner, bot_owner.c_str());
-		bot_entry.Class = atoi(row[2]);
-		bot_entry.Level = atoi(row[3]);
-		bot_entry.Race = atoi(row[4]);
-		bot_entry.Gender = atoi(row[5]);
-		bot_entry.Owner_ID = atoi(row[7]);
+		bot_entry.Class = Strings::ToInt(row[2]);
+		bot_entry.Level = Strings::ToInt(row[3]);
+		bot_entry.Race = Strings::ToInt(row[4]);
+		bot_entry.Gender = Strings::ToInt(row[5]);
+		bot_entry.Owner_ID = Strings::ToInt(row[7]);
 		bots_list.push_back(bot_entry);
 	}
 
@@ -307,7 +307,7 @@ bool BotDatabase::LoadOwnerID(const std::string& bot_name, uint32& owner_id)
 		return true;
 
 	auto row = results.begin();
-	owner_id = atoi(row[0]);
+	owner_id = Strings::ToInt(row[0]);
 
 	return true;
 }
@@ -325,7 +325,7 @@ bool BotDatabase::LoadOwnerID(const uint32 bot_id, uint32& owner_id)
 		return true;
 
 	auto row = results.begin();
-	owner_id = atoi(row[0]);
+	owner_id = Strings::ToInt(row[0]);
 
 	return true;
 }
@@ -366,7 +366,7 @@ bool BotDatabase::LoadBotID(const uint32 owner_id, const std::string& bot_name, 
 	}
 
 	auto row = results.begin();
-	bot_id = std::stoul(row[0]);
+	bot_id = Strings::ToUnsignedInt(row[0]);
 
 	return true;
 }
@@ -393,8 +393,8 @@ bool BotDatabase::LoadBotID(const uint32 owner_id, const std::string& bot_name, 
 	}
 
 	auto row = results.begin();
-	bot_id = std::stoul(row[0]);
-	bot_class_id = static_cast<uint8>(std::stoul(row[1]));
+	bot_id = Strings::ToUnsignedInt(row[0]);
+	bot_class_id = static_cast<uint8>(Strings::ToUnsignedInt(row[1]));
 
 	return true;
 }
@@ -693,32 +693,32 @@ bool BotDatabase::LoadBuffs(Bot* bot_inst)
 
 	int buff_count = 0;
 	for (auto row = results.begin(); row != results.end() && buff_count < BUFF_COUNT; ++row) {
-		bot_buffs[buff_count].spellid = atoul(row[0]);
-		bot_buffs[buff_count].casterlevel = atoul(row[1]);
+		bot_buffs[buff_count].spellid = Strings::ToUnsignedInt(row[0]);
+		bot_buffs[buff_count].casterlevel = Strings::ToUnsignedInt(row[1]);
 		//row[2] (duration_formula) can probably be removed
 		bot_buffs[buff_count].ticsremaining = Strings::ToInt(row[3]);
 
 		bot_buffs[buff_count].counters = 0;
 		if (CalculatePoisonCounters(bot_buffs[buff_count].spellid) > 0) {
-			bot_buffs[buff_count].counters = atoul(row[4]);
+			bot_buffs[buff_count].counters = Strings::ToUnsignedInt(row[4]);
 		} else if (CalculateDiseaseCounters(bot_buffs[buff_count].spellid) > 0) {
-			bot_buffs[buff_count].counters = atoul(row[5]);
+			bot_buffs[buff_count].counters = Strings::ToUnsignedInt(row[5]);
 		} else if (CalculateCurseCounters(bot_buffs[buff_count].spellid) > 0) {
-			bot_buffs[buff_count].counters = atoul(row[6]);
+			bot_buffs[buff_count].counters = Strings::ToUnsignedInt(row[6]);
 		} else if (CalculateCorruptionCounters(bot_buffs[buff_count].spellid) > 0) {
-			bot_buffs[buff_count].counters = atoul(row[7]);
+			bot_buffs[buff_count].counters = Strings::ToUnsignedInt(row[7]);
 		}
 
-		bot_buffs[buff_count].hit_number = atoul(row[8]);
-		bot_buffs[buff_count].melee_rune = atoul(row[9]);
-		bot_buffs[buff_count].magic_rune = atoul(row[10]);
-		bot_buffs[buff_count].dot_rune = atoul(row[11]);
+		bot_buffs[buff_count].hit_number = Strings::ToUnsignedInt(row[8]);
+		bot_buffs[buff_count].melee_rune = Strings::ToUnsignedInt(row[9]);
+		bot_buffs[buff_count].magic_rune = Strings::ToUnsignedInt(row[10]);
+		bot_buffs[buff_count].dot_rune = Strings::ToUnsignedInt(row[11]);
 		bot_buffs[buff_count].persistant_buff = (Strings::ToBool(row[12])) != 0;
 		bot_buffs[buff_count].caston_x = Strings::ToInt(row[13]);
 		bot_buffs[buff_count].caston_y = Strings::ToInt(row[14]);
 		bot_buffs[buff_count].caston_z = Strings::ToInt(row[15]);
 		bot_buffs[buff_count].ExtraDIChance = Strings::ToInt(row[16]);
-		bot_buffs[buff_count].instrument_mod = atoul(row[17]);
+		bot_buffs[buff_count].instrument_mod = Strings::ToUnsignedInt(row[17]);
 		bot_buffs[buff_count].casterid = 0;
 		++buff_count;
 	}
@@ -839,7 +839,7 @@ bool BotDatabase::LoadStance(const uint32 bot_id, int& bot_stance)
 		return true;
 
 	auto row = results.begin();
-	bot_stance = atoi(row[0]);
+	bot_stance = Strings::ToInt(row[0]);
 
 	return true;
 }
@@ -859,7 +859,7 @@ bool BotDatabase::LoadStance(Bot* bot_inst, bool& stance_flag)
 		return true;
 
 	auto row = results.begin();
-	bot_inst->SetBotStance((EQ::constants::StanceType)atoi(row[0]));
+	bot_inst->SetBotStance((EQ::constants::StanceType)Strings::ToInt(row[0]));
 	stance_flag = true;
 
 	return true;
@@ -952,9 +952,9 @@ bool BotDatabase::LoadTimers(Bot* bot_inst)
 	uint32 timer_value = 0;
 	uint32 max_value = 0;
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		timer_id = atoi(row[0]) - 1;
-		timer_value = atoi(row[1]);
-		max_value = atoi(row[2]);
+		timer_id = Strings::ToInt(row[0]) - 1;
+		timer_value = Strings::ToInt(row[1]);
+		max_value = Strings::ToInt(row[2]);
 
 		if (timer_id >= 0 && timer_id < MaxTimer && timer_value < (Timer::GetCurrentTime() + max_value))
 			bot_timers[timer_id] = timer_value;
@@ -1020,7 +1020,7 @@ bool BotDatabase::QueryInventoryCount(const uint32 bot_id, uint32& item_count)
 		return true;
 
 	auto row = results.begin();
-	item_count = atoi(row[0]);
+	item_count = Strings::ToInt(row[0]);
 
 	return true;
 }
@@ -1059,22 +1059,22 @@ bool BotDatabase::LoadItems(const uint32 bot_id, EQ::InventoryProfile& inventory
 		return true;
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		int16 slot_id = atoi(row[0]);
+		int16 slot_id = Strings::ToInt(row[0]);
 		if (slot_id < EQ::invslot::EQUIPMENT_BEGIN || slot_id > EQ::invslot::EQUIPMENT_END)
 			continue;
 
-		uint32 item_id = atoi(row[1]);
-		uint16 item_charges = (uint16)atoi(row[2]);
+		uint32 item_id = Strings::ToInt(row[1]);
+		uint16 item_charges = (uint16)Strings::ToInt(row[2]);
 
 		EQ::ItemInstance* item_inst = database.CreateItem(
 			item_id,
 			item_charges,
-			(uint32)atoul(row[9]),
-			(uint32)atoul(row[10]),
-			(uint32)atoul(row[11]),
-			(uint32)atoul(row[12]),
-			(uint32)atoul(row[13]),
-			(uint32)atoul(row[14])
+			(uint32)Strings::ToUnsignedInt(row[9]),
+			(uint32)Strings::ToUnsignedInt(row[10]),
+			(uint32)Strings::ToUnsignedInt(row[11]),
+			(uint32)Strings::ToUnsignedInt(row[12]),
+			(uint32)Strings::ToUnsignedInt(row[13]),
+			(uint32)Strings::ToUnsignedInt(row[14])
 		);
 		if (!item_inst) {
 			LogError("Warning: bot_id [{}] has an invalid item_id [{}] in inventory slot [{}]", bot_id, item_id, slot_id);
@@ -1088,12 +1088,12 @@ bool BotDatabase::LoadItems(const uint32 bot_id, EQ::InventoryProfile& inventory
 		else
 			item_inst->SetCharges(item_charges);
 
-		uint32 item_color = atoul(row[3]);
+		uint32 item_color = Strings::ToUnsignedInt(row[3]);
 		if (item_color > 0)
 			item_inst->SetColor(item_color);
 
 		if (item_inst->GetItem()->Attuneable) {
-			if (atoi(row[4]))
+			if (Strings::ToInt(row[4]))
 				item_inst->SetAttuned(true);
 			else if (slot_id >= EQ::invslot::EQUIPMENT_BEGIN && slot_id <= EQ::invslot::EQUIPMENT_END)
 				item_inst->SetAttuned(true);
@@ -1125,9 +1125,9 @@ bool BotDatabase::LoadItems(const uint32 bot_id, EQ::InventoryProfile& inventory
 			}
 		}
 
-		item_inst->SetOrnamentIcon((uint32)atoul(row[6]));
-		item_inst->SetOrnamentationIDFile((uint32)atoul(row[7]));
-		item_inst->SetOrnamentHeroModel((uint32)atoul(row[8]));
+		item_inst->SetOrnamentIcon((uint32)Strings::ToUnsignedInt(row[6]));
+		item_inst->SetOrnamentationIDFile((uint32)Strings::ToUnsignedInt(row[7]));
+		item_inst->SetOrnamentHeroModel((uint32)Strings::ToUnsignedInt(row[8]));
 
 		if (inventory_inst.PutItem(slot_id, *item_inst) == INVALID_INDEX)
 			LogError("Warning: Invalid slot_id for item in inventory: bot_id = [{}], item_id = [{}], slot_id = [{}]", bot_id, item_id, slot_id);
@@ -1174,7 +1174,7 @@ bool BotDatabase::LoadItemBySlot(const uint32 bot_id, const uint32 slot_id, uint
 		return true;
 
 	auto row = results.begin();
-	item_id = atoi(row[0]);
+	item_id = Strings::ToInt(row[0]);
 
 	return true;
 }
@@ -1315,7 +1315,7 @@ bool BotDatabase::LoadEquipmentColor(const uint32 bot_id, const uint8 material_s
 		return true;
 
 	auto row = results.begin();
-	rgb = atoul(row[0]);
+	rgb = Strings::ToUnsignedInt(row[0]);
 
 	return true;
 }
@@ -1366,7 +1366,7 @@ bool BotDatabase::LoadPetIndex(const uint32 bot_id, uint32& pet_index)
 		return true;
 
 	auto row = results.begin();
-	pet_index = atoi(row[0]);
+	pet_index = Strings::ToInt(row[0]);
 
 	return true;
 }
@@ -1384,7 +1384,7 @@ bool BotDatabase::LoadPetSpellID(const uint32 bot_id, uint32& pet_spell_id)
 		return true;
 
 	auto row = results.begin();
-	pet_spell_id = atoi(row[0]);
+	pet_spell_id = Strings::ToInt(row[0]);
 
 	return true;
 }
@@ -1408,10 +1408,10 @@ bool BotDatabase::LoadPetStats(const uint32 bot_id, std::string& pet_name, uint3
 		return true;
 
 	auto row = results.begin();
-	pet_spell_id = atoi(row[0]);
+	pet_spell_id = Strings::ToInt(row[0]);
 	pet_name = row[1];
-	pet_mana = atoi(row[2]);
-	pet_hp = atoi(row[3]);
+	pet_mana = Strings::ToInt(row[2]);
+	pet_hp = Strings::ToInt(row[3]);
 
 	return true;
 }
@@ -1497,9 +1497,9 @@ bool BotDatabase::LoadPetBuffs(const uint32 bot_id, SpellBuff_Struct* pet_buffs)
 
 	int buff_index = 0;
 	for (auto row = results.begin(); row != results.end() && buff_index < PET_BUFF_COUNT; ++row) {
-		pet_buffs[buff_index].spellid = atoi(row[0]);
-		pet_buffs[buff_index].level = atoi(row[1]);
-		pet_buffs[buff_index].duration = atoi(row[2]);
+		pet_buffs[buff_index].spellid = Strings::ToInt(row[0]);
+		pet_buffs[buff_index].level = Strings::ToInt(row[1]);
+		pet_buffs[buff_index].duration = Strings::ToInt(row[2]);
 
 		// Work around for loading the counters and setting them back to max. Need entry in DB for saved counters
 		if (CalculatePoisonCounters(pet_buffs[buff_index].spellid) > 0)
@@ -1605,7 +1605,7 @@ bool BotDatabase::LoadPetItems(const uint32 bot_id, uint32* pet_items)
 
 	int item_index = EQ::invslot::EQUIPMENT_BEGIN;
 	for (auto row = results.begin(); row != results.end() && (item_index >= EQ::invslot::EQUIPMENT_BEGIN && item_index <= EQ::invslot::EQUIPMENT_END); ++row) {
-		pet_items[item_index] = atoi(row[0]);
+		pet_items[item_index] = Strings::ToInt(row[0]);
 		++item_index;
 	}
 
@@ -2145,7 +2145,7 @@ bool BotDatabase::LoadOwnerOptions(Client *owner)
 
 	for (auto row : results) {
 
-		owner->SetBotOption(static_cast<Client::BotOwnerOption>(atoul(row[0])), (atoul(row[1]) != 0));
+		owner->SetBotOption(static_cast<Client::BotOwnerOption>(Strings::ToUnsignedInt(row[0])), (Strings::ToUnsignedInt(row[1]) != 0));
 	}
 
 	return true;
@@ -2267,7 +2267,7 @@ bool BotDatabase::LoadBotGroupIDByBotGroupName(const std::string& group_name, ui
 	}
 
 	auto row = results.begin();
-	botgroup_id = std::stoul(row[0]);
+	botgroup_id = Strings::ToUnsignedInt(row[0]);
 
 	return true;
 }
@@ -2293,7 +2293,7 @@ bool BotDatabase::LoadBotGroupIDByLeaderID(const uint32 leader_id, uint32& botgr
 	}
 
 	auto row = results.begin();
-	botgroup_id = std::stoul(row[0]);
+	botgroup_id = Strings::ToUnsignedInt(row[0]);
 
 	return true;
 }
@@ -2319,7 +2319,7 @@ bool BotDatabase::LoadBotGroupIDByMemberID(const uint32 member_id, uint32& botgr
 	}
 
 	auto row = results.begin();
-	botgroup_id = std::stoul(row[0]);
+	botgroup_id = Strings::ToUnsignedInt(row[0]);
 
 	return true;
 }
@@ -2345,7 +2345,7 @@ bool BotDatabase::LoadLeaderIDByBotGroupName(const std::string& group_name, uint
 	}
 
 	auto row = results.begin();
-	leader_id = std::stoul(row[0]);
+	leader_id = Strings::ToUnsignedInt(row[0]);
 
 	return true;
 }
@@ -2371,7 +2371,7 @@ bool BotDatabase::LoadLeaderIDByBotGroupID(const uint32 group_id, uint32& leader
 	}
 
 	auto row = results.begin();
-	leader_id = std::stoul(row[0]);
+	leader_id = Strings::ToUnsignedInt(row[0]);
 
 	return true;
 }
@@ -2593,7 +2593,7 @@ bool BotDatabase::LoadBotGroupIDForLoadBotGroup(const uint32 owner_id, std::stri
 
 	for (auto row : results) {
 		if (!group_name.compare(row[1])) {
-			botgroup_id = std::stoul(row[0]);
+			botgroup_id = Strings::ToUnsignedInt(row[0]);
 			break;
 		}
 	}
@@ -2631,7 +2631,7 @@ bool BotDatabase::LoadBotGroup(const std::string& group_name, std::map<uint32, s
 	}
 
 	for (auto row : results) {
-		member_list[botgroup_id].push_back(std::stoul(row[0]));
+		member_list[botgroup_id].push_back(Strings::ToUnsignedInt(row[0]));
 	}
 
 	return true;
@@ -2663,7 +2663,7 @@ bool BotDatabase::LoadBotGroupsListByOwnerID(const uint32 owner_id, std::list<st
 	}
 
 	for (auto row : results) {
-		botgroups_list.push_back(std::pair<std::string, uint32>(row[0], atoul(row[1])));
+		botgroups_list.push_back(std::pair<std::string, uint32>(row[0], Strings::ToUnsignedInt(row[1])));
 	}
 
 	return true;
@@ -2735,7 +2735,7 @@ bool BotDatabase::LoadAutoSpawnBotGroupsByOwnerID(const uint32 owner_id, std::li
 
 	for (auto row : results) {
 		group_list.push_back(
-			std::pair<uint32,std::string>(std::stoul(row[0]), row[1])
+			std::pair<uint32,std::string>(Strings::ToUnsignedInt(row[0]), row[1])
 		);
 	}
 
@@ -2767,7 +2767,7 @@ bool BotDatabase::LoadGroupedBotsByGroupID(const uint32 owner_id, const uint32 g
 	}
 
 	for (auto row : results) {
-		group_list.push_back(std::stoul(row[0]));
+		group_list.push_back(Strings::ToUnsignedInt(row[0]));
 	}
 
 	return true;
@@ -2788,7 +2788,7 @@ bool BotDatabase::LoadHealRotationIDByBotID(const uint32 bot_id, uint32& hr_inde
 		return true;
 
 	auto row = results.begin();
-	hr_index = atoi(row[0]);
+	hr_index = Strings::ToInt(row[0]);
 
 	return true;
 }
@@ -2835,20 +2835,20 @@ bool BotDatabase::LoadHealRotation(Bot* hr_member, std::list<uint32>& member_lis
 		return true;
 
 	auto row = results.begin();
-	(*hr_member->MemberOfHealRotation())->SetIntervalS((uint32)atoi(row[0]));
-	(*hr_member->MemberOfHealRotation())->SetFastHeals((bool)atoi(row[1]));
-	(*hr_member->MemberOfHealRotation())->SetAdaptiveTargeting((bool)atoi(row[2]));
-	(*hr_member->MemberOfHealRotation())->SetCastingOverride((bool)atoi(row[3]));
-	(*hr_member->MemberOfHealRotation())->SetArmorTypeSafeHPRatio(ARMOR_TYPE_UNKNOWN, atof(row[4]));
-	(*hr_member->MemberOfHealRotation())->SetArmorTypeSafeHPRatio(ARMOR_TYPE_CLOTH, atof(row[5]));
-	(*hr_member->MemberOfHealRotation())->SetArmorTypeSafeHPRatio(ARMOR_TYPE_LEATHER, atof(row[6]));
-	(*hr_member->MemberOfHealRotation())->SetArmorTypeSafeHPRatio(ARMOR_TYPE_CHAIN, atof(row[7]));
-	(*hr_member->MemberOfHealRotation())->SetArmorTypeSafeHPRatio(ARMOR_TYPE_PLATE, atof(row[8]));
-	(*hr_member->MemberOfHealRotation())->SetArmorTypeCriticalHPRatio(ARMOR_TYPE_UNKNOWN, atof(row[9]));
-	(*hr_member->MemberOfHealRotation())->SetArmorTypeCriticalHPRatio(ARMOR_TYPE_CLOTH, atof(row[10]));
-	(*hr_member->MemberOfHealRotation())->SetArmorTypeCriticalHPRatio(ARMOR_TYPE_LEATHER, atof(row[11]));
-	(*hr_member->MemberOfHealRotation())->SetArmorTypeCriticalHPRatio(ARMOR_TYPE_CHAIN, atof(row[12]));
-	(*hr_member->MemberOfHealRotation())->SetArmorTypeCriticalHPRatio(ARMOR_TYPE_PLATE, atof(row[13]));
+	(*hr_member->MemberOfHealRotation())->SetIntervalS((uint32)Strings::ToInt(row[0]));
+	(*hr_member->MemberOfHealRotation())->SetFastHeals((bool)Strings::ToInt(row[1]));
+	(*hr_member->MemberOfHealRotation())->SetAdaptiveTargeting((bool)Strings::ToInt(row[2]));
+	(*hr_member->MemberOfHealRotation())->SetCastingOverride((bool)Strings::ToInt(row[3]));
+	(*hr_member->MemberOfHealRotation())->SetArmorTypeSafeHPRatio(ARMOR_TYPE_UNKNOWN, Strings::ToFloat(row[4]));
+	(*hr_member->MemberOfHealRotation())->SetArmorTypeSafeHPRatio(ARMOR_TYPE_CLOTH, Strings::ToFloat(row[5]));
+	(*hr_member->MemberOfHealRotation())->SetArmorTypeSafeHPRatio(ARMOR_TYPE_LEATHER, Strings::ToFloat(row[6]));
+	(*hr_member->MemberOfHealRotation())->SetArmorTypeSafeHPRatio(ARMOR_TYPE_CHAIN, Strings::ToFloat(row[7]));
+	(*hr_member->MemberOfHealRotation())->SetArmorTypeSafeHPRatio(ARMOR_TYPE_PLATE, Strings::ToFloat(row[8]));
+	(*hr_member->MemberOfHealRotation())->SetArmorTypeCriticalHPRatio(ARMOR_TYPE_UNKNOWN, Strings::ToFloat(row[9]));
+	(*hr_member->MemberOfHealRotation())->SetArmorTypeCriticalHPRatio(ARMOR_TYPE_CLOTH, Strings::ToFloat(row[10]));
+	(*hr_member->MemberOfHealRotation())->SetArmorTypeCriticalHPRatio(ARMOR_TYPE_LEATHER, Strings::ToFloat(row[11]));
+	(*hr_member->MemberOfHealRotation())->SetArmorTypeCriticalHPRatio(ARMOR_TYPE_CHAIN, Strings::ToFloat(row[12]));
+	(*hr_member->MemberOfHealRotation())->SetArmorTypeCriticalHPRatio(ARMOR_TYPE_PLATE, Strings::ToFloat(row[13]));
 
 	load_flag = true;
 
@@ -2875,7 +2875,7 @@ bool BotDatabase::LoadHealRotationMembers(const uint32 hr_index, std::list<uint3
 
 	for (auto row : results) {
 		if (row[0])
-			member_list.push_back(atoi(row[0]));
+			member_list.push_back(Strings::ToInt(row[0]));
 	}
 
 	return true;
@@ -3045,7 +3045,7 @@ bool BotDatabase::DeleteAllHealRotations(const uint32 owner_id)
 		if (!row[0])
 			continue;
 
-		DeleteHealRotation(atoi(row[0]));
+		DeleteHealRotation(Strings::ToInt(row[0]));
 	}
 
 	return true;
@@ -3077,7 +3077,7 @@ uint16 BotDatabase::GetRaceClassBitmask(uint16 bot_race)
 	uint16 classes = 0;
 	if (results.RowCount() == 1) {
 		auto row = results.begin();
-		classes = atoi(row[0]);
+		classes = Strings::ToInt(row[0]);
 	}
 	return classes;
 }

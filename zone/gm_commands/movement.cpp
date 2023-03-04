@@ -61,11 +61,11 @@ void command_movement(Client *c, const Seperator *sep)
 
 		mgr.SendCommandToClients(
 			target,
-			atof(sep->arg[2]),
-			atof(sep->arg[3]),
-			atof(sep->arg[4]),
-			atof(sep->arg[5]),
-			atoi(sep->arg[6]),
+			Strings::ToFloat(sep->arg[2]),
+			Strings::ToFloat(sep->arg[3]),
+			Strings::ToFloat(sep->arg[4]),
+			Strings::ToFloat(sep->arg[5]),
+			Strings::ToInt(sep->arg[6]),
 			ClientRangeAny
 		);
 	}

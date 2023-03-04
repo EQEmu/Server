@@ -288,7 +288,7 @@ bool PTimerList::Load(Database *db) {
 	PersistentTimer *cur;
 
     for (auto row = results.begin(); row != results.end(); ++row) {
-		type = atoi(row[0]);
+		type = Strings::ToInt(row[0]);
 		start_time = strtoul(row[1], nullptr, 10);
 		timer_time = strtoul(row[2], nullptr, 10);
 		enabled = (row[3][0] == '1');

@@ -9,7 +9,7 @@ void command_findaa(Client *c, const Seperator *sep)
 	}
 
 	if (sep->IsNumber(1)) {
-		int aa_id = std::stoi(sep->arg[1]);
+		int aa_id = Strings::ToInt(sep->arg[1]);
 		auto aa_name = zone->GetAAName(aa_id);
 		if (!aa_name.empty()) {
 			c->Message(

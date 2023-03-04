@@ -5232,7 +5232,7 @@ int Mob::QGVarDuration(const char *fmt)
 
 	// Set val to value after type character
 	// e.g., for "M3924", set to 3924
-	int val = atoi(&fmt[0] + 1);
+	int val = Strings::ToInt(&fmt[0] + 1);
 
 	switch (fmt[0])
 	{
@@ -6310,8 +6310,8 @@ void Mob::ProcessSpecialAbilities(const std::string &str) {
 			Strings::IsNumber(sub_sp[0]) &&
 			Strings::IsNumber(sub_sp[1])
 		) {
-			int ability_id = std::stoi(sub_sp[0]);
-			int value = std::stoi(sub_sp[1]);
+			int ability_id = Strings::ToInt(sub_sp[0]);
+			int value = Strings::ToInt(sub_sp[1]);
 
 			SetSpecialAbility(ability_id, value);
 
@@ -6338,7 +6338,7 @@ void Mob::ProcessSpecialAbilities(const std::string &str) {
 				}
 
 				if (Strings::IsNumber(sub_sp[i])) {
-					SetSpecialAbilityParam(ability_id, param_id, std::stoi(sub_sp[i]));
+					SetSpecialAbilityParam(ability_id, param_id, Strings::ToInt(sub_sp[i]));
 				}
 			}
 		}
@@ -6947,9 +6947,9 @@ std::string Mob::GetBucketKey() {
 std::string Mob::GetBucketRemaining(std::string bucket_name) {
 	std::string full_bucket_name = fmt::format("{}-{}", GetBucketKey(), bucket_name);
 	std::string bucket_remaining = DataBucket::GetDataRemaining(full_bucket_name);
-	if (!bucket_remaining.empty() && atoi(bucket_remaining.c_str()) > 0) {
+	if (!bucket_remaining.empty() && Strings::ToInt(bucket_remaining.c_str()) > 0) {
 		return bucket_remaining;
-	} else if (atoi(bucket_remaining.c_str()) == 0) {
+	} else if (Strings::ToInt(bucket_remaining.c_str()) == 0) {
 		return "0";
 	}
 	return std::string();

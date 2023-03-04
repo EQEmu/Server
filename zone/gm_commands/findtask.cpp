@@ -11,7 +11,7 @@ void command_findtask(Client *c, const Seperator *sep)
 		}
 
 		if (sep->IsNumber(1)) {
-			auto task_id      = std::stoul(sep->arg[1]);
+			auto task_id      = Strings::ToUnsignedInt(sep->arg[1]);
 			auto task_name    = task_manager->GetTaskName(task_id);
 
 			std::string task_message = (

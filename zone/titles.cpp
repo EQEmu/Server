@@ -47,20 +47,20 @@ bool TitleManager::LoadTitles()
 
 	for (auto row : results) {
 		TitleEntry title;
-		title.title_id = std::stoi(row[0]);
-		title.skill_id = (EQ::skills::SkillType) std::stoi(row[1]);
-		title.min_skill_value = std::stoi(row[2]);
-		title.max_skill_value = std::stoi(row[3]);
-		title.min_aa_points = std::stoi(row[4]);
-		title.max_aa_points = std::stoi(row[5]);
-		title.class_id = std::stoi(row[6]);
-		title.gender_id = std::stoi(row[7]);
-		title.character_id = std::stoi(row[8]);
-		title.status = std::stoi(row[9]);
-		title.item_id = std::stoi(row[10]);
+		title.title_id = Strings::ToInt(row[0]);
+		title.skill_id = (EQ::skills::SkillType) Strings::ToInt(row[1]);
+		title.min_skill_value = Strings::ToInt(row[2]);
+		title.max_skill_value = Strings::ToInt(row[3]);
+		title.min_aa_points = Strings::ToInt(row[4]);
+		title.max_aa_points = Strings::ToInt(row[5]);
+		title.class_id = Strings::ToInt(row[6]);
+		title.gender_id = Strings::ToInt(row[7]);
+		title.character_id = Strings::ToInt(row[8]);
+		title.status = Strings::ToInt(row[9]);
+		title.item_id = Strings::ToInt(row[10]);
 		title.prefix = row[11];
 		title.suffix = row[12];
-		title.titleset = std::stoi(row[13]);
+		title.titleset = Strings::ToInt(row[13]);
 		titles.push_back(title);
 	}
 

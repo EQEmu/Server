@@ -10,11 +10,11 @@ void command_weather(Client *c, const Seperator *sep)
 
 	int arguments = sep->argnum;
 	if (arguments == 1) {
-		auto new_weather = static_cast<uint8>(std::stoul(sep->arg[1]));
+		auto new_weather = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[1]));
 		uint8 new_intensity = 0;
 		std::string weather_message = "The sky clears.";
 
-		if (new_weather == EQ::constants::WeatherTypes::Snowing) {	
+		if (new_weather == EQ::constants::WeatherTypes::Snowing) {
 			weather_message = "Snowflakes begin to fall from the sky.";
 			new_weather = EQ::constants::WeatherTypes::Snowing;
 			new_intensity = 0x02;
@@ -41,15 +41,15 @@ void command_weather(Client *c, const Seperator *sep)
 
 		safe_delete(outapp);
 	} else if (arguments == 3) {
-		auto command_type = static_cast<uint8>(std::stoul(sep->arg[1]));
+		auto command_type = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[1]));
 		uint8 new_weather = EQ::constants::WeatherTypes::None;
 		uint8 new_intensity = 0;
 		std::string weather_message;
 
 		if (zone->zone_weather == EQ::constants::WeatherTypes::None) {
 			if (command_type > EQ::constants::WeatherTypes::Snowing) {
-				new_weather = static_cast<uint8>(std::stoul(sep->arg[2]));
-				new_intensity = static_cast<uint8>(std::stoul(sep->arg[3]));
+				new_weather = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[2]));
+				new_intensity = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[3]));
 
 				weather_message = fmt::format(
 					"Sending {} ({}) with an intensity of {}.",
@@ -57,7 +57,7 @@ void command_weather(Client *c, const Seperator *sep)
 					new_weather,
 					new_intensity
 				);
-			} else if (command_type == EQ::constants::WeatherTypes::Snowing) {	
+			} else if (command_type == EQ::constants::WeatherTypes::Snowing) {
 				weather_message = "Snowflakes begin to fall from the sky.";
 				new_weather = EQ::constants::WeatherTypes::Snowing;
 				new_intensity = 0x02;
@@ -73,9 +73,9 @@ void command_weather(Client *c, const Seperator *sep)
 			if (new_weather != EQ::constants::WeatherTypes::Raining) {
 				outapp->pBuffer[0] = new_weather;
 			}
-			
+
 			outapp->pBuffer[4] = new_intensity;
- 
+
 			c->Message(Chat::White, weather_message.c_str());
 			entity_list.QueueClients(c, outapp);
 

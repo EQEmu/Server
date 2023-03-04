@@ -49,7 +49,7 @@ void command_peqzone(Client *c, const Seperator *sep)
 
 	auto zone_id = (
 		sep->IsNumber(1) ?
-		static_cast<uint16>(std::stoul(sep->arg[1])) :
+		static_cast<uint16>(Strings::ToUnsignedInt(sep->arg[1])) :
 		static_cast<uint16>(ZoneID(sep->arg[1]))
 	);
 	auto zone_short_name = ZoneName(zone_id);

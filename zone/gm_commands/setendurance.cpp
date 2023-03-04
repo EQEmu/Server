@@ -8,13 +8,13 @@ void command_setendurance(Client *c, const Seperator *sep)
 		return;
 	}
 
-	auto endurance = static_cast<int>(std::min(std::stoll(sep->arg[1]), (long long) 2000000000));
+	auto endurance = static_cast<int>(std::min(Strings::ToBigInt(sep->arg[1]), (int64) 2000000000));
 	bool set_to_max = false;
 	Mob* target = c;
 	if (c->GetTarget()) {
 		target = c->GetTarget();
 	}
-	
+
 	if (target->IsClient()) {
 		if (endurance >= target->CastToClient()->GetMaxEndurance()) {
 			endurance = target->CastToClient()->GetMaxEndurance();

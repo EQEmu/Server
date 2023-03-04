@@ -38,7 +38,7 @@ void command_spawnstatus(Client *c, const Seperator *sep)
 
 	uint32 spawn_id = 0;
 	if (is_search) {
-		spawn_id = std::stoul(sep->arg[1]);
+		spawn_id = Strings::ToUnsignedInt(sep->arg[1]);
 	}
 
 	LinkedListIterator<Spawn2*> iterator(zone->spawn2_list);

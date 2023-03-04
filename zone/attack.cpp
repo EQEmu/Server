@@ -1979,10 +1979,10 @@ bool Client::Death(Mob* killerMob, int64 damage, uint16 spell, EQ::skills::Skill
 			database.GetVariable("ServerType", tmp);
 			if (tmp[0] == '1' && tmp[1] == '\0' && killerMob && killerMob->IsClient()) {
 				database.GetVariable("PvPreward", tmp);
-				auto reward = atoi(tmp.c_str());
+				auto reward = Strings::ToInt(tmp.c_str());
 				if (reward == 3) {
 					database.GetVariable("PvPitem", tmp);
-					auto pvp_item_id = atoi(tmp.c_str());
+					auto pvp_item_id = Strings::ToInt(tmp.c_str());
 					const auto* item = database.GetItem(pvp_item_id);
 					if (item) {
 						new_corpse->SetPlayerKillItemID(pvp_item_id);

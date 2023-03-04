@@ -1048,12 +1048,12 @@ void ClientTaskState::RewardTask(Client *c, const TaskInformation *ti, ClientTas
 		for (const auto &i: Strings::Split(ti->reward_id_list, "|")) {
 			// handle charges
 			int16  charges = -1;
-			uint32 item_id = Strings::IsNumber(i) ? std::stoi(i) : 0;
+			uint32 item_id = Strings::IsNumber(i) ? Strings::ToInt(i) : 0;
 			if (Strings::Contains(i, ",")) {
 				auto s = Strings::Split(i, ",");
 				if (!s.empty() && s.size() == 2) {
-					item_id = Strings::IsNumber(s[0]) ? std::stoi(s[0]) : 0;
-					charges = Strings::IsNumber(s[1]) ? std::stoi(s[1]) : 0;
+					item_id = Strings::IsNumber(s[0]) ? Strings::ToInt(s[0]) : 0;
+					charges = Strings::IsNumber(s[1]) ? Strings::ToInt(s[1]) : 0;
 				}
 			}
 

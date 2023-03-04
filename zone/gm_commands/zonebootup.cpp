@@ -14,7 +14,7 @@ void command_zonebootup(Client *c, const Seperator *sep)
 	else {
 		auto                         pack = new ServerPacket(ServerOP_ZoneBootup, sizeof(ServerZoneStateChange_struct));
 		ServerZoneStateChange_struct *s   = (ServerZoneStateChange_struct *) pack->pBuffer;
-		s->ZoneServerID = atoi(sep->arg[1]);
+		s->ZoneServerID = Strings::ToInt(sep->arg[1]);
 		strcpy(s->adminname, c->GetName());
 		s->zoneid     = ZoneID(sep->arg[2]);
 		s->makestatic = (bool) (strcasecmp(sep->arg[3], "static") == 0);

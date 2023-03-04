@@ -1660,7 +1660,7 @@ int QuestManager::QGVarDuration(const char *fmt)
 
 	// Set val to value after type character
 	// e.g., for "M3924", set to 3924
-	int val = atoi(&fmt[0] + 1);
+	int val = Strings::ToInt(&fmt[0] + 1);
 
 	switch (fmt[0])
 	{
@@ -1925,9 +1925,9 @@ void QuestManager::showgrid(int grid) {
     }
 
     for(auto row = results.begin(); row != results.end(); ++row) {
-        pt.x = atof(row[0]);
-        pt.y = atof(row[1]);
-        pt.z = atof(row[2]);
+        pt.x = Strings::ToFloat(row[0]);
+        pt.y = Strings::ToFloat(row[1]);
+        pt.z = Strings::ToFloat(row[2]);
 
         pts.push_back(pt);
     }
@@ -3054,7 +3054,7 @@ uint32 QuestManager::GetInstanceTimerByID(uint16 instance_id) {
 
 	if (results.Success()) {
 		auto row = results.begin();
-		uint32 timer = atoi(row[0]);
+		uint32 timer = Strings::ToInt(row[0]);
 		return timer;
 	}
 	return 0;
@@ -3534,71 +3534,71 @@ std::string QuestManager::GetEncounter() const {
 
 void QuestManager::UpdateZoneHeader(std::string type, std::string value) {
 	if (strcasecmp(type.c_str(), "ztype") == 0)
-		zone->newzone_data.ztype = atoi(value.c_str());
+		zone->newzone_data.ztype = Strings::ToInt(value.c_str());
 	else if (strcasecmp(type.c_str(), "fog_red") == 0) {
 		for (int i = 0; i < 4; i++) {
-			zone->newzone_data.fog_red[i] = atoi(value.c_str());
+			zone->newzone_data.fog_red[i] = Strings::ToInt(value.c_str());
 		}
 	} else if (strcasecmp(type.c_str(), "fog_green") == 0) {
 		for (int i = 0; i < 4; i++) {
-			zone->newzone_data.fog_green[i] = atoi(value.c_str());
+			zone->newzone_data.fog_green[i] = Strings::ToInt(value.c_str());
 		}
 	} else if (strcasecmp(type.c_str(), "fog_blue") == 0) {
 		for (int i = 0; i < 4; i++) {
-			zone->newzone_data.fog_blue[i] = atoi(value.c_str());
+			zone->newzone_data.fog_blue[i] = Strings::ToInt(value.c_str());
 		}
 	} else if (strcasecmp(type.c_str(), "fog_minclip") == 0) {
 		for (int i = 0; i < 4; i++) {
-			zone->newzone_data.fog_minclip[i] = atof(value.c_str());
+			zone->newzone_data.fog_minclip[i] = Strings::ToFloat(value.c_str());
 		}
 	} else if (strcasecmp(type.c_str(), "fog_maxclip") == 0) {
 		for (int i = 0; i < 4; i++) {
-			zone->newzone_data.fog_maxclip[i] = atof(value.c_str());
+			zone->newzone_data.fog_maxclip[i] = Strings::ToFloat(value.c_str());
 		}
 	} else if (strcasecmp(type.c_str(), "gravity") == 0) {
-		zone->newzone_data.gravity = atof(value.c_str());
+		zone->newzone_data.gravity = Strings::ToFloat(value.c_str());
 	} else if (strcasecmp(type.c_str(), "time_type") == 0) {
-		zone->newzone_data.time_type = atoi(value.c_str());
+		zone->newzone_data.time_type = Strings::ToInt(value.c_str());
 	} else if (strcasecmp(type.c_str(), "rain_chance") == 0) {
 		for (int i = 0; i < 4; i++) {
-			zone->newzone_data.rain_chance[i] = atoi(value.c_str());
+			zone->newzone_data.rain_chance[i] = Strings::ToInt(value.c_str());
 		}
 	} else if (strcasecmp(type.c_str(), "rain_duration") == 0) {
 		for (int i = 0; i < 4; i++) {
-			zone->newzone_data.rain_duration[i] = atoi(value.c_str());
+			zone->newzone_data.rain_duration[i] = Strings::ToInt(value.c_str());
 		}
 	} else if (strcasecmp(type.c_str(), "snow_chance") == 0) {
 		for (int i = 0; i < 4; i++) {
-			zone->newzone_data.snow_chance[i] = atoi(value.c_str());
+			zone->newzone_data.snow_chance[i] = Strings::ToInt(value.c_str());
 		}
 	} else if (strcasecmp(type.c_str(), "snow_duration") == 0) {
 		for (int i = 0; i < 4; i++) {
-			zone->newzone_data.snow_duration[i] = atoi(value.c_str());
+			zone->newzone_data.snow_duration[i] = Strings::ToInt(value.c_str());
 		}
 	} else if (strcasecmp(type.c_str(), "sky") == 0) {
-		zone->newzone_data.sky = atoi(value.c_str());
+		zone->newzone_data.sky = Strings::ToInt(value.c_str());
 	} else if (strcasecmp(type.c_str(), "safe_x") == 0) {
-		zone->newzone_data.safe_x = atof(value.c_str());
+		zone->newzone_data.safe_x = Strings::ToFloat(value.c_str());
 	} else if (strcasecmp(type.c_str(), "safe_y") == 0) {
-		zone->newzone_data.safe_y = atof(value.c_str());
+		zone->newzone_data.safe_y = Strings::ToFloat(value.c_str());
 	} else if (strcasecmp(type.c_str(), "safe_z") == 0) {
-		zone->newzone_data.safe_z = atof(value.c_str());
+		zone->newzone_data.safe_z = Strings::ToFloat(value.c_str());
 	} else if (strcasecmp(type.c_str(), "max_z") == 0) {
-		zone->newzone_data.max_z = atof(value.c_str());
+		zone->newzone_data.max_z = Strings::ToFloat(value.c_str());
 	} else if (strcasecmp(type.c_str(), "underworld") == 0) {
-		zone->newzone_data.underworld = atof(value.c_str());
+		zone->newzone_data.underworld = Strings::ToFloat(value.c_str());
 	} else if (strcasecmp(type.c_str(), "minclip") == 0) {
-		zone->newzone_data.minclip = atof(value.c_str());
+		zone->newzone_data.minclip = Strings::ToFloat(value.c_str());
 	} else if (strcasecmp(type.c_str(), "maxclip") == 0) {
-		zone->newzone_data.maxclip = atof(value.c_str());
+		zone->newzone_data.maxclip = Strings::ToFloat(value.c_str());
 	} else if (strcasecmp(type.c_str(), "fog_density") == 0) {
-		zone->newzone_data.fog_density = atof(value.c_str());
+		zone->newzone_data.fog_density = Strings::ToFloat(value.c_str());
 	} else if (strcasecmp(type.c_str(), "suspendbuffs") == 0) {
-		zone->newzone_data.suspend_buffs = atoi(value.c_str());
+		zone->newzone_data.suspend_buffs = Strings::ToInt(value.c_str());
 	} else if (strcasecmp(type.c_str(), "lavadamage") == 0) {
-		zone->newzone_data.lava_damage = atoi(value.c_str());
+		zone->newzone_data.lava_damage = Strings::ToInt(value.c_str());
 	} else if (strcasecmp(type.c_str(), "minlavadamage") == 0) {
-		zone->newzone_data.min_lava_damage = atoi(value.c_str());
+		zone->newzone_data.min_lava_damage = Strings::ToInt(value.c_str());
 	}
 
 	auto outapp = new EQApplicationPacket(OP_NewZone, sizeof(NewZone_Struct));
@@ -4044,16 +4044,17 @@ void QuestManager::SendPlayerHandinEvent() {
 					Strings::IsNumber(item_data[1]) &&
 					Strings::IsNumber(item_data[2])
 					) {
-					const auto item_id = static_cast<uint32>(std::stoul(item_data[0]));
+					const auto item_id = static_cast<uint32>(Strings::ToUnsignedInt(item_data[0]));
 					if (item_id != 0) {
 						const auto *item = database.GetItem(item_id);
+
 						if (item) {
 							hi.emplace_back(
 								PlayerEvent::HandinEntry{
 									.item_id = item_id,
 									.item_name = item->Name,
-									.charges = static_cast<uint16>(std::stoul(item_data[1])),
-									.attuned = std::stoi(item_data[2]) ? true : false
+									.charges = static_cast<uint16>(Strings::ToUnsignedInt(item_data[1])),
+									.attuned = Strings::ToInt(item_data[2]) ? true : false
 								}
 							);
 						}
@@ -4069,15 +4070,16 @@ void QuestManager::SendPlayerHandinEvent() {
 				Strings::IsNumber(item_data[1]) &&
 				Strings::IsNumber(item_data[2])
 				) {
-				const auto item_id = static_cast<uint32>(std::stoul(item_data[0]));
+				const auto item_id = static_cast<uint32>(Strings::ToUnsignedInt(item_data[0]));
 				const auto *item = database.GetItem(item_id);
+
 				if (item) {
 					hi.emplace_back(
 						PlayerEvent::HandinEntry{
 							.item_id = item_id,
 							.item_name = item->Name,
-							.charges = static_cast<uint16>(std::stoul(item_data[1])),
-							.attuned = std::stoi(item_data[2]) ? true : false
+							.charges = static_cast<uint16>(Strings::ToUnsignedInt(item_data[1])),
+							.attuned = Strings::ToInt(item_data[2]) ? true : false
 						}
 					);
 				}
@@ -4088,10 +4090,10 @@ void QuestManager::SendPlayerHandinEvent() {
 	// Handin Money
 	if (!handin_money.empty()) {
 		const auto hms = Strings::Split(handin_money, "|");
-		hm.copper   = static_cast<uint32>(std::stoul(hms[0]));
-		hm.silver   = static_cast<uint32>(std::stoul(hms[1]));
-		hm.gold     = static_cast<uint32>(std::stoul(hms[2]));
-		hm.platinum = static_cast<uint32>(std::stoul(hms[3]));
+		hm.copper   = static_cast<uint32>(Strings::ToUnsignedInt(hms[0]));
+		hm.silver   = static_cast<uint32>(Strings::ToUnsignedInt(hms[1]));
+		hm.gold     = static_cast<uint32>(Strings::ToUnsignedInt(hms[2]));
+		hm.platinum = static_cast<uint32>(Strings::ToUnsignedInt(hms[3]));
 	}
 
 	// Return Items
@@ -4106,7 +4108,7 @@ void QuestManager::SendPlayerHandinEvent() {
 					Strings::IsNumber(item_data[1]) &&
 					Strings::IsNumber(item_data[2])
 					) {
-					const auto item_id = static_cast<uint32>(std::stoul(item_data[0]));
+					const auto item_id = static_cast<uint32>(Strings::ToUnsignedInt(item_data[0]));
 					const auto *item   = database.GetItem(item_id);
 
 					if (item) {
@@ -4114,8 +4116,8 @@ void QuestManager::SendPlayerHandinEvent() {
 							PlayerEvent::HandinEntry{
 								.item_id = item_id,
 								.item_name = item->Name,
-								.charges = static_cast<uint16>(std::stoul(item_data[1])),
-								.attuned = std::stoi(item_data[2]) ? true : false
+								.charges = static_cast<uint16>(Strings::ToUnsignedInt(item_data[1])),
+								.attuned = Strings::ToInt(item_data[2]) ? true : false
 							}
 						);
 					}
@@ -4130,7 +4132,7 @@ void QuestManager::SendPlayerHandinEvent() {
 				Strings::IsNumber(item_data[1]) &&
 				Strings::IsNumber(item_data[2])
 				) {
-				const auto item_id = static_cast<uint32>(std::stoul(item_data[0]));
+				const auto item_id = static_cast<uint32>(Strings::ToUnsignedInt(item_data[0]));
 				const auto *item   = database.GetItem(item_id);
 
 				if (item) {
@@ -4138,8 +4140,8 @@ void QuestManager::SendPlayerHandinEvent() {
 						PlayerEvent::HandinEntry{
 							.item_id = item_id,
 							.item_name = item->Name,
-							.charges = static_cast<uint16>(std::stoul(item_data[1])),
-							.attuned = std::stoi(item_data[2]) ? true : false
+							.charges = static_cast<uint16>(Strings::ToUnsignedInt(item_data[1])),
+							.attuned = Strings::ToInt(item_data[2]) ? true : false
 						}
 					);
 				}
@@ -4150,10 +4152,10 @@ void QuestManager::SendPlayerHandinEvent() {
 	// Return Money
 	if (!return_money.empty()) {
 		const auto rms = Strings::Split(return_money, "|");
-		rm.copper   = static_cast<uint32>(std::stoul(rms[0]));
-		rm.silver   = static_cast<uint32>(std::stoul(rms[1]));
-		rm.gold     = static_cast<uint32>(std::stoul(rms[2]));
-		rm.platinum = static_cast<uint32>(std::stoul(rms[3]));
+		rm.copper   = static_cast<uint32>(Strings::ToUnsignedInt(rms[0]));
+		rm.silver   = static_cast<uint32>(Strings::ToUnsignedInt(rms[1]));
+		rm.gold     = static_cast<uint32>(Strings::ToUnsignedInt(rms[2]));
+		rm.platinum = static_cast<uint32>(Strings::ToUnsignedInt(rms[3]));
 	}
 
 	initiator->DeleteEntityVariable("HANDIN_ITEMS");

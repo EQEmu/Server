@@ -59,7 +59,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		);
 	} else if (!strcasecmp(sep->arg[1], "level")) {
 		if (sep->IsNumber(2)) {
-			auto level = static_cast<uint8_t>(std::stoul(sep->arg[2]));
+			auto level = static_cast<uint8_t>(Strings::ToUnsignedInt(sep->arg[2]));
 			n.level = level;
 			d = fmt::format(
 				"{} is now level {}.",
@@ -72,7 +72,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "race")) {
 		if (sep->IsNumber(2)) {
-			auto race_id = static_cast<uint16_t>(std::stoul(sep->arg[2]));
+			auto race_id = static_cast<uint16_t>(Strings::ToUnsignedInt(sep->arg[2]));
 			n.race = race_id;
 			d = fmt::format(
 				"{} is now a(n) {} ({}).",
@@ -86,7 +86,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "class")) {
 		if (sep->IsNumber(2)) {
-			auto class_id = static_cast<uint8_t>(std::stoul(sep->arg[2]));
+			auto class_id = static_cast<uint8_t>(Strings::ToUnsignedInt(sep->arg[2]));
 			n.class_ = class_id;
 			d = fmt::format(
 				"{} is now a(n) {} ({}).",
@@ -100,7 +100,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "bodytype")) {
 		if (sep->IsNumber(2)) {
-			auto body_type_id   = static_cast<uint8_t>(std::stoul(sep->arg[2]));
+			auto body_type_id   = static_cast<uint8_t>(Strings::ToUnsignedInt(sep->arg[2]));
 			auto body_type_name = EQ::constants::GetBodyTypeName(static_cast<bodyType>(body_type_id));
 			n.bodytype = body_type_id;
 			d = fmt::format(
@@ -122,7 +122,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "hp")) {
 		if (sep->IsNumber(2)) {
-			auto hp = std::stoll(sep->arg[2]);
+			auto hp = Strings::ToBigInt(sep->arg[2]);
 			n.hp = hp;
 			d = fmt::format(
 				"{} now has {} Health.",
@@ -135,7 +135,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "mana")) {
 		if (sep->IsNumber(2)) {
-			auto mana = std::stoll(sep->arg[2]);
+			auto mana = Strings::ToBigInt(sep->arg[2]);
 			n.mana = mana;
 			d = fmt::format(
 				"{} now has {} Mana.",
@@ -148,7 +148,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "gender")) {
 		if (sep->IsNumber(2)) {
-			auto gender_id = static_cast<uint8_t>(std::stoul(sep->arg[2]));
+			auto gender_id = static_cast<uint8_t>(Strings::ToUnsignedInt(sep->arg[2]));
 			n.gender = gender_id;
 			d = fmt::format(
 				"{} is now a {} ({}).",
@@ -162,7 +162,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "texture")) {
 		if (sep->IsNumber(2)) {
-			auto texture = static_cast<uint8_t>(std::stoul(sep->arg[2]));
+			auto texture = static_cast<uint8_t>(Strings::ToUnsignedInt(sep->arg[2]));
 			n.texture = texture;
 			d = fmt::format(
 				"{} is now using Texture {}.",
@@ -175,7 +175,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "helmtexture")) {
 		if (sep->IsNumber(2)) {
-			auto helmet_texture = static_cast<uint8_t>(std::stoul(sep->arg[2]));
+			auto helmet_texture = static_cast<uint8_t>(Strings::ToUnsignedInt(sep->arg[2]));
 			n.helmtexture = helmet_texture;
 			d = fmt::format(
 				"{} is now using Helmet Texture {}.",
@@ -188,7 +188,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "herosforgemodel")) {
 		if (sep->IsNumber(2)) {
-			auto heros_forge_model = std::stoi(sep->arg[2]);
+			auto heros_forge_model = Strings::ToInt(sep->arg[2]);
 			n.herosforgemodel = heros_forge_model;
 			d = fmt::format(
 				"{} is now using Hero's Forge Model {}.",
@@ -204,7 +204,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "size")) {
 		if (sep->IsNumber(2)) {
-			auto size = std::stof(sep->arg[2]);
+			auto size = Strings::ToFloat(sep->arg[2]);
 			n.size = size;
 			d = fmt::format(
 				"{} is now Size {:.2f}.",
@@ -217,7 +217,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "hpregen")) {
 		if (sep->IsNumber(2)) {
-			auto hp_regen = std::stoll(sep->arg[2]);
+			auto hp_regen = Strings::ToBigInt(sep->arg[2]);
 			n.hp_regen_rate = hp_regen;
 			d = fmt::format(
 				"{} now regenerates {} Health per Tick.",
@@ -230,7 +230,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "hp_regen_per_second")) {
 		if (sep->IsNumber(2)) {
-			auto hp_regen_per_second = std::stoll(sep->arg[2]);
+			auto hp_regen_per_second = Strings::ToBigInt(sep->arg[2]);
 			n.hp_regen_per_second = hp_regen_per_second;
 			d = fmt::format(
 				"{} now regenerates {} HP per Second.",
@@ -246,7 +246,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "manaregen")) {
 		if (sep->IsNumber(2)) {
-			auto mana_regen = std::stoll(sep->arg[2]);
+			auto mana_regen = Strings::ToBigInt(sep->arg[2]);
 			n.mana_regen_rate = mana_regen;
 			d = fmt::format(
 				"{} now regenerates {} Mana per Tick.",
@@ -259,7 +259,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "loottable")) {
 		if (sep->IsNumber(2)) {
-			auto loottable_id = std::stoul(sep->arg[2]);
+			auto loottable_id = Strings::ToUnsignedInt(sep->arg[2]);
 			n.loottable_id = loottable_id;
 			d = fmt::format(
 				"{} is now using Loottable ID {}.",
@@ -272,7 +272,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "merchantid")) {
 		if (sep->IsNumber(2)) {
-			auto merchant_id = std::stoul(sep->arg[2]);
+			auto merchant_id = Strings::ToUnsignedInt(sep->arg[2]);
 			n.merchant_id = merchant_id;
 			d = fmt::format(
 				"{} is now using Merchant ID {}.",
@@ -285,7 +285,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "alt_currency_id")) {
 		if (sep->IsNumber(2)) {
-			auto alternate_currency_id      = std::stoul(sep->arg[2]);
+			auto alternate_currency_id      = Strings::ToUnsignedInt(sep->arg[2]);
 			auto alternate_currency_item_id = zone->GetCurrencyItemID(alternate_currency_id);
 			n.alt_currency_id = alternate_currency_id;
 			d = fmt::format(
@@ -310,7 +310,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "spell")) {
 		if (sep->IsNumber(2)) {
-			auto spell_list_id = std::stoul(sep->arg[2]);
+			auto spell_list_id = Strings::ToUnsignedInt(sep->arg[2]);
 			n.npc_spells_id = spell_list_id;
 			d = fmt::format(
 				"{} is now using Spell List ID {}.",
@@ -323,7 +323,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "npc_spells_effects_id")) {
 		if (sep->IsNumber(2)) {
-			auto spell_effects_id = std::stoul(sep->arg[2]);
+			auto spell_effects_id = Strings::ToUnsignedInt(sep->arg[2]);
 			n.npc_spells_effects_id = spell_effects_id;
 			d = fmt::format(
 				"{} is now using Spells Effects ID {}.",
@@ -339,7 +339,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "faction")) {
 		if (sep->IsNumber(2)) {
-			auto faction_id   = std::stoi(sep->arg[2]);
+			auto faction_id   = Strings::ToInt(sep->arg[2]);
 			auto faction_name = content_db.GetFactionName(faction_id);
 			n.npc_faction_id = faction_id;
 			d = fmt::format(
@@ -361,7 +361,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "adventure_template_id")) {
 		if (sep->IsNumber(2)) {
-			auto adventure_template_id = std::stoul(sep->arg[2]);
+			auto adventure_template_id = Strings::ToUnsignedInt(sep->arg[2]);
 			n.adventure_template_id = adventure_template_id;
 			d = fmt::format(
 				"{} is now using Adventure Template ID {}.",
@@ -377,7 +377,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "trap_template")) {
 		if (sep->IsNumber(2)) {
-			auto trap_template = std::stoul(sep->arg[2]);
+			auto trap_template = Strings::ToUnsignedInt(sep->arg[2]);
 			n.trap_template = trap_template;
 			d = fmt::format(
 				"{} is now using Trap Template ID {}.",
@@ -390,8 +390,8 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "damage")) {
 		if (sep->IsNumber(2) && sep->IsNumber(3)) {
-			auto minimum_damage = std::stoul(sep->arg[2]);
-			auto maximum_damage = std::stoul(sep->arg[3]);
+			auto minimum_damage = Strings::ToUnsignedInt(sep->arg[2]);
+			auto maximum_damage = Strings::ToUnsignedInt(sep->arg[3]);
 			n.mindmg = minimum_damage;
 			n.maxdmg = maximum_damage;
 			d = fmt::format(
@@ -406,7 +406,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "attackcount")) {
 		if (sep->IsNumber(2)) {
-			auto attack_count = static_cast<int16>(std::stoi(sep->arg[2]));
+			auto attack_count = static_cast<int16>(Strings::ToInt(sep->arg[2]));
 			n.attack_count = attack_count;
 			d = fmt::format(
 				"{} now has an Attack Count of {}.",
@@ -441,7 +441,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		);
 	} else if (!strcasecmp(sep->arg[1], "aggroradius")) {
 		if (sep->IsNumber(2)) {
-			auto aggro_radius = std::stoul(sep->arg[2]);
+			auto aggro_radius = Strings::ToUnsignedInt(sep->arg[2]);
 			n.aggroradius = aggro_radius;
 			d = fmt::format(
 				"{} now has an Aggro Radius of {}.",
@@ -454,7 +454,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "assistradius")) {
 		if (sep->IsNumber(2)) {
-			auto assist_radius = std::stoul(sep->arg[2]);
+			auto assist_radius = Strings::ToUnsignedInt(sep->arg[2]);
 			n.assistradius = assist_radius;
 			d = fmt::format(
 				"{} now has an Assist Radius of {}",
@@ -487,7 +487,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		n.drakkin_details = t->GetDrakkinDetails();
 	} else if (!strcasecmp(sep->arg[1], "armortint_id")) {
 		if (sep->IsNumber(2)) {
-			auto armor_tint_id = std::stoul(sep->arg[2]);
+			auto armor_tint_id = Strings::ToUnsignedInt(sep->arg[2]);
 			n.armortint_id = armor_tint_id;
 			d = fmt::format(
 				"{} is now using Armor Tint ID {}.",
@@ -500,9 +500,9 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "color")) {
 		if (sep->IsNumber(2)) {
-			auto  red   = static_cast<uint8_t>(std::stoul(sep->arg[2]));
-			uint8_t green = sep->IsNumber(3) ? static_cast<uint8_t>(std::stoul(sep->arg[3])) : 0;
-			uint8_t blue  = sep->IsNumber(4) ? static_cast<uint8_t>(std::stoul(sep->arg[4])) : 0;
+			auto  red   = static_cast<uint8_t>(Strings::ToUnsignedInt(sep->arg[2]));
+			uint8_t green = sep->IsNumber(3) ? static_cast<uint8_t>(Strings::ToUnsignedInt(sep->arg[3])) : 0;
+			uint8_t blue  = sep->IsNumber(4) ? static_cast<uint8_t>(Strings::ToUnsignedInt(sep->arg[4])) : 0;
 			n.armortint_red = red;
 			n.armortint_green = green;
 			n.armortint_blue = blue;
@@ -522,7 +522,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "ammoidfile")) {
 		if (sep->IsNumber(2)) {
-			auto ammo_id_file = std::stoul(sep->arg[2]);
+			auto ammo_id_file = Strings::ToUnsignedInt(sep->arg[2]);
 			n.ammo_idfile = ammo_id_file;
 			d = fmt::format(
 				"{} is now using Ammo ID File {}.",
@@ -535,8 +535,8 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "weapon")) {
 		if (sep->IsNumber(2)) {
-			auto     primary_model   = std::stoul(sep->arg[2]);
-			uint32_t secondary_model = sep->arg[3] && sep->IsNumber(3) ? std::stoul(sep->arg[3]) : 0;
+			auto     primary_model   = Strings::ToUnsignedInt(sep->arg[2]);
+			uint32_t secondary_model = sep->arg[3] && sep->IsNumber(3) ? Strings::ToUnsignedInt(sep->arg[3]) : 0;
 			n.d_melee_texture1 = primary_model;
 			n.d_melee_texture2 = secondary_model;
 			d = fmt::format(
@@ -554,8 +554,8 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "meleetype")) {
 		if (sep->IsNumber(2)) {
-			auto     primary_type   = std::stoul(sep->arg[2]);
-			uint32_t secondary_type = sep->IsNumber(3) ? std::stoul(sep->arg[3]) : 0;
+			auto     primary_type   = Strings::ToUnsignedInt(sep->arg[2]);
+			uint32_t secondary_type = sep->IsNumber(3) ? Strings::ToUnsignedInt(sep->arg[3]) : 0;
 
 			auto primary_skill   = EQ::skills::GetSkillName(static_cast<EQ::skills::SkillType>(primary_type));
 			auto secondary_skill = EQ::skills::GetSkillName(static_cast<EQ::skills::SkillType>(secondary_type));
@@ -594,7 +594,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "rangedtype")) {
 		if (sep->IsNumber(2)) {
-			auto ranged_type = std::stoul(sep->arg[2]);
+			auto ranged_type = Strings::ToUnsignedInt(sep->arg[2]);
 
 			auto ranged_skill = EQ::skills::GetSkillName(static_cast<EQ::skills::SkillType>(ranged_type));
 
@@ -619,7 +619,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "runspeed")) {
 		if (sep->IsNumber(2)) {
-			auto run_speed = std::stof(sep->arg[2]);
+			auto run_speed = Strings::ToFloat(sep->arg[2]);
 			n.runspeed = run_speed;
 			d = fmt::format(
 				"{} now runs at a Run Speed of {:.2f}.",
@@ -632,7 +632,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "mr")) {
 		if (sep->IsNumber(2)) {
-			auto magic_resist = static_cast<int16_t>(std::stoul(sep->arg[2]));
+			auto magic_resist = static_cast<int16_t>(Strings::ToUnsignedInt(sep->arg[2]));
 			n.MR = magic_resist;
 			d = fmt::format(
 				"{} now has a Magic Resistance of {}.",
@@ -645,7 +645,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "pr")) {
 		if (sep->IsNumber(2)) {
-			auto poison_resist = static_cast<int16_t>(std::stoul(sep->arg[2]));
+			auto poison_resist = static_cast<int16_t>(Strings::ToUnsignedInt(sep->arg[2]));
 			n.PR = poison_resist;
 			d = fmt::format(
 				"{} now has a Poison Resistance of {}.",
@@ -658,7 +658,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "dr")) {
 		if (sep->IsNumber(2)) {
-			auto disease_resist = static_cast<int16_t>(std::stoul(sep->arg[2]));
+			auto disease_resist = static_cast<int16_t>(Strings::ToUnsignedInt(sep->arg[2]));
 			n.DR = disease_resist;
 			d = fmt::format(
 				"{} now has a Disease Resistance of {}.",
@@ -671,7 +671,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "fr")) {
 		if (sep->IsNumber(2)) {
-			auto fire_resist = static_cast<int16_t>(std::stoul(sep->arg[2]));
+			auto fire_resist = static_cast<int16_t>(Strings::ToUnsignedInt(sep->arg[2]));
 			n.FR = fire_resist;
 			d = fmt::format(
 				"{} now has a Fire Resistance of {}.",
@@ -684,7 +684,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "cr")) {
 		if (sep->IsNumber(2)) {
-			auto cold_resist = static_cast<int16_t>(std::stoul(sep->arg[2]));
+			auto cold_resist = static_cast<int16_t>(Strings::ToUnsignedInt(sep->arg[2]));
 			n.CR = cold_resist;
 			d = fmt::format(
 				"{} now has a Cold Resistance of {}.",
@@ -697,7 +697,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "corrup")) {
 		if (sep->IsNumber(2)) {
-			auto corruption_resist = static_cast<int16_t>(std::stoul(sep->arg[2]));
+			auto corruption_resist = static_cast<int16_t>(Strings::ToUnsignedInt(sep->arg[2]));
 			n.Corrup = corruption_resist;
 			d = fmt::format(
 				"{} now has a Corruption Resistance of {}.",
@@ -710,7 +710,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "phr")) {
 		if (sep->IsNumber(2)) {
-			auto physical_resist = static_cast<uint16_t>(std::stoul(sep->arg[2]));
+			auto physical_resist = static_cast<uint16_t>(Strings::ToUnsignedInt(sep->arg[2]));
 			n.PhR = physical_resist;
 			d = fmt::format(
 				"{} now has a Physical Resistance of {}.",
@@ -723,7 +723,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "seeinvis")) {
 		if (sep->IsNumber(2)) {
-			auto see_invisible = static_cast<int16_t>(std::stoul(sep->arg[2]));
+			auto see_invisible = static_cast<int16_t>(Strings::ToUnsignedInt(sep->arg[2]));
 			n.see_invis = see_invisible;
 			d = fmt::format(
 				"{} can {} See Invisible.",
@@ -739,7 +739,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "seeinvisundead")) {
 		if (sep->IsNumber(2)) {
-			auto see_invisible_undead = static_cast<int16_t>(std::stoul(sep->arg[2]));
+			auto see_invisible_undead = static_cast<int16_t>(Strings::ToUnsignedInt(sep->arg[2]));
 			n.see_invis_undead = see_invisible_undead;
 			d = fmt::format(
 				"{} can {} See Invisible vs. Undead.",
@@ -755,7 +755,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "qglobal")) {
 		if (sep->IsNumber(2)) {
-			auto use_qglobals = std::stoul(sep->arg[2]);
+			auto use_qglobals = Strings::ToUnsignedInt(sep->arg[2]);
 			n.qglobal = use_qglobals;
 			d = fmt::format(
 				"{} can {} use Quest Globals.",
@@ -771,7 +771,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "ac")) {
 		if (sep->IsNumber(2)) {
-			auto armor_class = static_cast<int16_t>(std::stoul(sep->arg[2]));
+			auto armor_class = static_cast<int16_t>(Strings::ToUnsignedInt(sep->arg[2]));
 			n.AC = armor_class;
 			d = fmt::format(
 				"{} now has {} Armor Class.",
@@ -784,7 +784,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "npcaggro")) {
 		if (sep->IsNumber(2)) {
-			auto aggro_npcs = static_cast<int8_t>(std::stoul(sep->arg[2]));
+			auto aggro_npcs = static_cast<int8_t>(Strings::ToUnsignedInt(sep->arg[2]));
 			n.npc_aggro = aggro_npcs;
 			d = fmt::format(
 				"{} will {} aggro other NPCs that have a hostile faction.",
@@ -800,7 +800,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "spawn_limit")) {
 		if (sep->IsNumber(2)) {
-			auto spawn_limit = static_cast<int8_t>(std::stoul(sep->arg[2]));
+			auto spawn_limit = static_cast<int8_t>(Strings::ToUnsignedInt(sep->arg[2]));
 			n.spawn_limit = spawn_limit;
 			d = fmt::format(
 				"{} now has a Spawn Limit of {}.",
@@ -813,7 +813,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "attackspeed")) {
 		if (sep->IsNumber(2)) {
-			auto attack_speed = std::stof(sep->arg[2]);
+			auto attack_speed = Strings::ToFloat(sep->arg[2]);
 			n.attack_speed = attack_speed;
 			d = fmt::format(
 				"{} now has an Attack Speed of {:.2f}.",
@@ -826,7 +826,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "attackdelay")) {
 		if (sep->IsNumber(2)) {
-			auto attack_delay = static_cast<uint8_t>(std::stoul(sep->arg[2]));
+			auto attack_delay = static_cast<uint8_t>(Strings::ToUnsignedInt(sep->arg[2]));
 			n.attack_delay = attack_delay;
 			d = fmt::format(
 				"{} now has an Attack Delay of {}.",
@@ -839,7 +839,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "findable")) {
 		if (sep->IsNumber(2)) {
-			auto is_findable = static_cast<int8_t>(std::stoul(sep->arg[2]));
+			auto is_findable = static_cast<int8_t>(Strings::ToUnsignedInt(sep->arg[2]));
 			n.findable = is_findable;
 			d = fmt::format(
 				"{} is {} Findable.",
@@ -855,7 +855,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "str")) {
 		if (sep->IsNumber(2)) {
-			auto strength = std::stoul(sep->arg[2]);
+			auto strength = Strings::ToUnsignedInt(sep->arg[2]);
 			n.STR = strength;
 			d = fmt::format(
 				"{} now has {} Strength.",
@@ -868,7 +868,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "sta")) {
 		if (sep->IsNumber(2)) {
-			auto stamina = std::stoul(sep->arg[2]);
+			auto stamina = Strings::ToUnsignedInt(sep->arg[2]);
 			n.STA = stamina;
 			d = fmt::format(
 				"{} now has {} Stamina.",
@@ -881,7 +881,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "agi")) {
 		if (sep->IsNumber(2)) {
-			auto agility = std::stoul(sep->arg[2]);
+			auto agility = Strings::ToUnsignedInt(sep->arg[2]);
 			n.AGI = agility;
 			d = fmt::format(
 				"{} now has {} Agility.",
@@ -894,7 +894,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "dex")) {
 		if (sep->IsNumber(2)) {
-			auto dexterity = std::stoul(sep->arg[2]);
+			auto dexterity = Strings::ToUnsignedInt(sep->arg[2]);
 			n.DEX = dexterity;
 			d = fmt::format(
 				"{} now has {} Dexterity.",
@@ -907,7 +907,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "int")) {
 		if (sep->IsNumber(2)) {
-			auto intelligence = std::stoul(sep->arg[2]);
+			auto intelligence = Strings::ToUnsignedInt(sep->arg[2]);
 			n._INT = intelligence;
 			d = fmt::format(
 				"{} now has {} Intelligence.",
@@ -920,7 +920,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "wis")) {
 		if (sep->IsNumber(2)) {
-			auto wisdom = std::stoul(sep->arg[2]);
+			auto wisdom = Strings::ToUnsignedInt(sep->arg[2]);
 			n.WIS = wisdom;
 			d = fmt::format(
 				"{} now has {} Wisdom.",
@@ -933,7 +933,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "cha")) {
 		if (sep->IsNumber(2)) {
-			auto charisma = std::stoul(sep->arg[2]);
+			auto charisma = Strings::ToUnsignedInt(sep->arg[2]);
 			n.CHA = charisma;
 			d = fmt::format(
 				"{} now has {} Charisma.",
@@ -946,7 +946,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "seehide")) {
 		if (sep->IsNumber(2)) {
-			auto see_hide = static_cast<int8_t>(std::stoi(sep->arg[2]));
+			auto see_hide = static_cast<int8_t>(Strings::ToInt(sep->arg[2]));
 			n.see_hide = see_hide;
 			d = fmt::format(
 				"{} can {} See Hide.",
@@ -962,7 +962,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "seeimprovedhide")) {
 		if (sep->IsNumber(2)) {
-			auto see_improved_hide = static_cast<int8>(std::stoi(sep->arg[2]));
+			auto see_improved_hide = static_cast<int8>(Strings::ToInt(sep->arg[2]));
 			n.see_improved_hide = see_improved_hide;
 			d = fmt::format(
 				"{} can {} See Improved Hide.",
@@ -978,7 +978,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "trackable")) {
 		if (sep->IsNumber(2)) {
-			auto is_trackable = static_cast<int8_t>(std::stoi(sep->arg[2]));
+			auto is_trackable = static_cast<int8_t>(Strings::ToInt(sep->arg[2]));
 			n.trackable = is_trackable;
 			d = fmt::format(
 				"{} is {} Trackable.",
@@ -994,7 +994,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "atk")) {
 		if (sep->IsNumber(2)) {
-			auto attack = std::stoi(sep->arg[2]);
+			auto attack = Strings::ToInt(sep->arg[2]);
 			n.ATK = attack;
 			d = fmt::format(
 				"{} now has {} Attack.",
@@ -1007,7 +1007,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "accuracy")) {
 		if (sep->IsNumber(2)) {
-			auto accuracy = std::stoi(sep->arg[2]);
+			auto accuracy = Strings::ToInt(sep->arg[2]);
 			n.Accuracy = accuracy;
 			d = fmt::format(
 				"{} now has {} Accuracy.",
@@ -1020,7 +1020,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "avoidance")) {
 		if (sep->IsNumber(2)) {
-			auto avoidance = std::stoul(sep->arg[2]);
+			auto avoidance = Strings::ToUnsignedInt(sep->arg[2]);
 			n.Avoidance = avoidance;
 			d = fmt::format(
 				"{} now has {} Avoidance.",
@@ -1033,7 +1033,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "slow_mitigation")) {
 		if (sep->IsNumber(2)) {
-			auto slow_mitigation = static_cast<int16_t>(std::stoi(sep->arg[2]));
+			auto slow_mitigation = static_cast<int16_t>(Strings::ToInt(sep->arg[2]));
 			n.slow_mitigation = slow_mitigation;
 			d = fmt::format(
 				"{} now has {} Slow Mitigation.",
@@ -1049,7 +1049,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "version")) {
 		if (sep->IsNumber(2)) {
-			auto version = static_cast<uint16_t>(std::stoul(sep->arg[2]));
+			auto version = static_cast<uint16_t>(Strings::ToUnsignedInt(sep->arg[2]));
 			n.version = version;
 			d = fmt::format(
 				"{} is now using Version {}.",
@@ -1062,7 +1062,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "maxlevel")) {
 		if (sep->IsNumber(2)) {
-			auto max_level = static_cast<int8_t>(std::stoi(sep->arg[2]));
+			auto max_level = static_cast<int8_t>(Strings::ToInt(sep->arg[2]));
 			n.maxlevel = max_level;
 			d = fmt::format(
 				"{} now has a Maximum Level of {}.",
@@ -1075,7 +1075,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "scalerate")) {
 		if (sep->IsNumber(2)) {
-			auto scale_rate = std::stoi(sep->arg[2]);
+			auto scale_rate = Strings::ToInt(sep->arg[2]);
 			n.scalerate = scale_rate;
 			d = fmt::format(
 				"{} now has a Scaling Rate of {}%%.",
@@ -1091,7 +1091,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "spellscale")) {
 		if (sep->IsNumber(2)) {
-			auto spell_scale = std::stoul(sep->arg[2]);
+			auto spell_scale = Strings::ToUnsignedInt(sep->arg[2]);
 			n.spellscale = static_cast<float>(spell_scale);
 			d = fmt::format(
 				"{} now has a Spell Scaling Rate of {}%%.",
@@ -1107,7 +1107,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "healscale")) {
 		if (sep->IsNumber(2)) {
-			auto heal_scale = std::stoul(sep->arg[2]);
+			auto heal_scale = Strings::ToUnsignedInt(sep->arg[2]);
 			n.healscale = static_cast<float>(heal_scale);
 			d = fmt::format(
 				"{} now has a Heal Scaling Rate of {}%%.",
@@ -1123,7 +1123,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "no_target")) {
 		if (sep->IsNumber(2)) {
-			auto is_no_target = static_cast<uint8_t>(std::stoul(sep->arg[2]));
+			auto is_no_target = static_cast<uint8_t>(Strings::ToUnsignedInt(sep->arg[2]));
 			n.no_target_hotkey = is_no_target;
 			d = fmt::format(
 				"{} is {} Targetable with Target Hotkey.",
@@ -1139,7 +1139,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "raidtarget")) {
 		if (sep->IsNumber(2)) {
-			auto is_raid_target = static_cast<uint8_t>(std::stoul(sep->arg[2]));
+			auto is_raid_target = static_cast<uint8_t>(Strings::ToUnsignedInt(sep->arg[2]));
 			n.raid_target = is_raid_target;
 			d = fmt::format(
 				"{} is {} designated as a Raid Target.",
@@ -1155,7 +1155,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		return;
 	} else if (!strcasecmp(sep->arg[1], "armtexture")) {
 		if (sep->IsNumber(2)) {
-			auto arm_texture = static_cast<int8_t>(std::stoi(sep->arg[2]));
+			auto arm_texture = static_cast<int8_t>(Strings::ToInt(sep->arg[2]));
 			n.armtexture = arm_texture;
 			d = fmt::format(
 				"{} is now using Arm Texture {}.",
@@ -1168,7 +1168,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "bracertexture")) {
 		if (sep->IsNumber(2)) {
-			auto bracer_texture = static_cast<int8_t>(std::stoi(sep->arg[2]));
+			auto bracer_texture = static_cast<int8_t>(Strings::ToInt(sep->arg[2]));
 			n.bracertexture = bracer_texture;
 			d = fmt::format(
 				"{} is now using Bracer Texture {}.",
@@ -1181,7 +1181,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "handtexture")) {
 		if (sep->IsNumber(2)) {
-			auto hand_texture = static_cast<int8_t>(std::stoi(sep->arg[2]));
+			auto hand_texture = static_cast<int8_t>(Strings::ToInt(sep->arg[2]));
 			n.handtexture = hand_texture;
 			d = fmt::format(
 				"{} is now using Hand Texture {}.",
@@ -1194,7 +1194,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "legtexture")) {
 		if (sep->IsNumber(2)) {
-			auto leg_texture = static_cast<int8_t>(std::stoi(sep->arg[2]));
+			auto leg_texture = static_cast<int8_t>(Strings::ToInt(sep->arg[2]));
 			n.legtexture = leg_texture;
 			d = fmt::format(
 				"{} is now using Leg Texture {}.",
@@ -1207,7 +1207,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "feettexture")) {
 		if (sep->IsNumber(2)) {
-			auto feet_texture = static_cast<int8_t>(std::stoi(sep->arg[2]));
+			auto feet_texture = static_cast<int8_t>(Strings::ToInt(sep->arg[2]));
 			n.feettexture = feet_texture;
 			d = fmt::format(
 				"{} is now using Feet Texture {}.",
@@ -1220,7 +1220,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "walkspeed")) {
 		if (sep->IsNumber(2)) {
-			auto walk_speed = static_cast<int8_t>(std::stoi(sep->arg[2]));
+			auto walk_speed = static_cast<int8_t>(Strings::ToInt(sep->arg[2]));
 			n.walkspeed = walk_speed;
 			d = fmt::format(
 				"{} now walks at a Walk Speed of {}.",
@@ -1233,7 +1233,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "show_name")) {
 		if (sep->IsNumber(2)) {
-			auto show_name = static_cast<int8_t>(std::stoi(sep->arg[2]));
+			auto show_name = static_cast<int8_t>(Strings::ToInt(sep->arg[2]));
 			n.show_name = show_name;
 			d = fmt::format(
 				"{} will {} show their name.",
@@ -1249,7 +1249,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "untargetable")) {
 		if (sep->IsNumber(2)) {
-			auto is_untargetable = static_cast<int8_t>(std::stoi(sep->arg[2]));
+			auto is_untargetable = static_cast<int8_t>(Strings::ToInt(sep->arg[2]));
 			n.untargetable = is_untargetable;
 			d = fmt::format(
 				"{} will {} be untargetable.",
@@ -1265,7 +1265,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "charm_ac")) {
 		if (sep->IsNumber(2)) {
-			auto charm_armor_class = static_cast<int16_t>(std::stoi(sep->arg[2]));
+			auto charm_armor_class = static_cast<int16_t>(Strings::ToInt(sep->arg[2]));
 			n.charm_ac = charm_armor_class;
 			d = fmt::format(
 				"{} now has {} Armor Class while Charmed.",
@@ -1278,7 +1278,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "charm_min_dmg")) {
 		if (sep->IsNumber(2)) {
-			auto charm_minimum_damage = std::stoi(sep->arg[2]);
+			auto charm_minimum_damage = Strings::ToInt(sep->arg[2]);
 			n.charm_min_dmg = charm_minimum_damage;
 			d = fmt::format(
 				"{} now does {} Minimum Damage while Charmed.",
@@ -1294,7 +1294,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "charm_max_dmg")) {
 		if (sep->IsNumber(2)) {
-			auto charm_maximum_damage = std::stoi(sep->arg[2]);
+			auto charm_maximum_damage = Strings::ToInt(sep->arg[2]);
 			n.charm_max_dmg = charm_maximum_damage;
 			d = fmt::format(
 				"{} now does {} Maximum Damage while Charmed.",
@@ -1310,7 +1310,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "charm_attack_delay")) {
 		if (sep->IsNumber(2)) {
-			auto charm_attack_delay = static_cast<int8_t>(std::stoi(sep->arg[2]));
+			auto charm_attack_delay = static_cast<int8_t>(Strings::ToInt(sep->arg[2]));
 			n.charm_attack_delay = charm_attack_delay;
 			d = fmt::format(
 				"{} now has {} Attack Delay while Charmed.",
@@ -1326,7 +1326,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "charm_accuracy_rating")) {
 		if (sep->IsNumber(2)) {
-			auto charm_accuracy_rating = std::stoi(sep->arg[2]);
+			auto charm_accuracy_rating = Strings::ToInt(sep->arg[2]);
 			n.charm_accuracy_rating = charm_accuracy_rating;
 			d = fmt::format(
 				"{} now has {} Accuracy Rating while Charmed.",
@@ -1342,7 +1342,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "charm_avoidance_rating")) {
 		if (sep->IsNumber(2)) {
-			auto charm_avoidance_rating = std::stoi(sep->arg[2]);
+			auto charm_avoidance_rating = Strings::ToInt(sep->arg[2]);
 			n.charm_avoidance_rating = charm_avoidance_rating;
 			d = fmt::format(
 				"{} now has {} Avoidance Rating while Charmed.",
@@ -1358,7 +1358,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "charm_atk")) {
 		if (sep->IsNumber(2)) {
-			auto charm_attack = std::stoi(sep->arg[2]);
+			auto charm_attack = Strings::ToInt(sep->arg[2]);
 			n.charm_atk = charm_attack;
 			d = fmt::format(
 				"{} now has {} Attack while Charmed.",
@@ -1371,7 +1371,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "skip_global_loot")) {
 		if (sep->IsNumber(2)) {
-			auto skip_global_loot = static_cast<int8_t>(std::stoi(sep->arg[2]));
+			auto skip_global_loot = static_cast<int8_t>(Strings::ToInt(sep->arg[2]));
 			n.skip_global_loot = skip_global_loot;
 			d = fmt::format(
 				"{} will {} skip Global Loot.",
@@ -1387,7 +1387,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "rarespawn")) {
 		if (sep->IsNumber(2)) {
-			auto is_rare_spawn = static_cast<int8_t>(std::stoi(sep->arg[2]));
+			auto is_rare_spawn = static_cast<int8_t>(Strings::ToInt(sep->arg[2]));
 			n.rare_spawn = is_rare_spawn;
 			d = fmt::format(
 				"{} is {} designated as a Rare Spawn.",
@@ -1403,7 +1403,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "stuck_behavior")) {
 		if (sep->IsNumber(2)) {
-			auto behavior_id   = static_cast<int8_t>(std::stoi(sep->arg[2]));
+			auto behavior_id   = static_cast<int8_t>(Strings::ToInt(sep->arg[2]));
 			if (behavior_id > EQ::constants::StuckBehavior::EvadeCombat) {
 				behavior_id = EQ::constants::StuckBehavior::EvadeCombat;
 			}
@@ -1432,7 +1432,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "flymode")) {
 		if (sep->IsNumber(2)) {
-			auto flymode_id = static_cast<int8_t>(std::stoi(sep->arg[2]));
+			auto flymode_id = static_cast<int8_t>(Strings::ToInt(sep->arg[2]));
 			if (flymode_id > GravityBehavior::LevitateWhileRunning) {
 				flymode_id = GravityBehavior::LevitateWhileRunning;
 			}
@@ -1461,7 +1461,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "always_aggro")) {
 		if (sep->IsNumber(2)) {
-			auto always_aggro = static_cast<int8_t>(std::stoi(sep->arg[2]));
+			auto always_aggro = static_cast<int8_t>(Strings::ToInt(sep->arg[2]));
 			n.always_aggro = always_aggro;
 			d = fmt::format(
 				"{} will {} Always Aggro.",
@@ -1477,7 +1477,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "exp_mod")) {
 		if (sep->IsNumber(2)) {
-			auto experience_modifier = std::stoi(sep->arg[2]);
+			auto experience_modifier = Strings::ToInt(sep->arg[2]);
 			n.exp_mod = experience_modifier;
 			d = fmt::format(
 				"{} now has an Experience Modifier of {}%%.",
@@ -1493,7 +1493,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "keeps_sold_items")) {
 		if (sep->IsNumber(2)) {
-			auto keeps_sold_items = static_cast<uint8_t>(std::stoul(sep->arg[2]));
+			auto keeps_sold_items = static_cast<uint8_t>(Strings::ToUnsignedInt(sep->arg[2]));
 			n.keeps_sold_items = keeps_sold_items;
 			d = fmt::format(
 				"{} will {} Keep Sold Items.",
@@ -1509,7 +1509,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "setanimation")) {
 		if (sep->IsNumber(2)) {
-			auto animation_id   = std::stoul(sep->arg[2]);
+			auto animation_id   = Strings::ToUnsignedInt(sep->arg[2]);
 			if (animation_id > EQ::constants::SpawnAnimations::Looting) {
 				animation_id = EQ::constants::SpawnAnimations::Looting;
 			}
@@ -1546,7 +1546,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "respawntime")) {
 		if (sep->IsNumber(2)) {
-			auto respawn_time = std::stoul(sep->arg[2]);
+			auto respawn_time = Strings::ToUnsignedInt(sep->arg[2]);
 			if (respawn_time) {
 				d = fmt::format(
 					"{} now has a Respawn Timer of {} ({}) on Spawn Group ID {}.",

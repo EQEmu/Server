@@ -4012,7 +4012,7 @@ void Client::KeyRingLoad()
 	}
 
 	for (auto row = results.begin(); row != results.end(); ++row)
-		keyring.push_back(atoi(row[0]));
+		keyring.push_back(Strings::ToInt(row[0]));
 
 }
 
@@ -5221,8 +5221,8 @@ void Client::SendRewards()
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		ClientReward cr;
-		cr.id = atoi(row[0]);
-		cr.amount = atoi(row[1]);
+		cr.id = Strings::ToInt(row[0]);
+		cr.amount = Strings::ToInt(row[1]);
 		rewards.push_back(cr);
 	}
 
@@ -5290,7 +5290,7 @@ bool Client::TryReward(uint32 claim_id)
 
 	auto row = results.begin();
 
-	uint32 amt = atoi(row[0]);
+	uint32 amt = Strings::ToInt(row[0]);
 	if (amt == 0)
 		return false;
 
@@ -8483,7 +8483,7 @@ void Client::ExpeditionSay(const char *str, int ExpID) {
 				).c_str()
 			);
 		}
-		// ChannelList->CreateChannel(ChannelName, ChannelOwner, ChannelPassword, true, atoi(row[3]));
+		// ChannelList->CreateChannel(ChannelName, ChannelOwner, ChannelPassword, true, Strings::ToInt(row[3]));
 	}
 
 
@@ -9324,8 +9324,8 @@ void Client::SendToGuildHall()
 	uint16      instance_id             = 0;
 	std::string guild_hall_instance_key = fmt::format("guild-hall-instance-{}", GuildID());
 	std::string instance_data           = DataBucket::GetData(guild_hall_instance_key);
-	if (!instance_data.empty() && std::stoi(instance_data) > 0) {
-		instance_id = std::stoi(instance_data);
+	if (!instance_data.empty() && Strings::ToInt(instance_data) > 0) {
+		instance_id = Strings::ToInt(instance_data);
 	}
 
 	if (instance_id <= 0) {
@@ -10456,7 +10456,7 @@ void Client::SendToInstance(std::string instance_type, std::string zone_short_na
 	uint16 instance_id = 0;
 
 	if (current_bucket_value.length() > 0) {
-		instance_id = atoi(current_bucket_value.c_str());
+		instance_id = Strings::ToInt(current_bucket_value.c_str());
 	} else {
 		if(!database.GetUnusedInstanceID(instance_id)) {
 			Message(Chat::White, "Server was unable to find a free instance id.");

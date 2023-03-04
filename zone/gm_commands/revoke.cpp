@@ -25,7 +25,7 @@ void command_revoke(Client *c, const Seperator *sep)
 		return;
 	}
 
-	bool revoked = std::stoi(sep->arg[2]) ? true : false;
+	bool revoked = Strings::ToInt(sep->arg[2]) ? true : false;
 
 	auto query = fmt::format(
 		"UPDATE account SET revoked = {} WHERE id = {}",

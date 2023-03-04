@@ -8,7 +8,7 @@ void command_zone_instance(Client *c, const Seperator *sep)
 		return;
 	}
 
-	auto instance_id = std::stoul(sep->arg[1]);
+	auto instance_id = Strings::ToUnsignedInt(sep->arg[1]);
 	if (!instance_id) {
 		c->Message(Chat::White, "You must enter a valid Instance ID.");
 		return;
@@ -52,9 +52,9 @@ void command_zone_instance(Client *c, const Seperator *sep)
 		return;
 	}
 
-	auto x = sep->IsNumber(2) ? std::stof(sep->arg[2]) : 0.0f;
-	auto y = sep->IsNumber(3) ? std::stof(sep->arg[3]) : 0.0f;
-	auto z = sep->IsNumber(4) ? std::stof(sep->arg[4]) : 0.0f;
+	auto x = sep->IsNumber(2) ? Strings::ToFloat(sep->arg[2]) : 0.0f;
+	auto y = sep->IsNumber(3) ? Strings::ToFloat(sep->arg[3]) : 0.0f;
+	auto z = sep->IsNumber(4) ? Strings::ToFloat(sep->arg[4]) : 0.0f;
 	auto zone_mode = sep->IsNumber(2) ? ZoneSolicited : ZoneToSafeCoords;
 
 	c->MovePC(

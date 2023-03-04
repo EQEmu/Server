@@ -313,7 +313,7 @@ namespace cron
 		{
 			try
 			{
-				return static_cast<cron_int>(std::stoul(text.data()));
+				return static_cast<cron_int>(Strings::ToUnsignedInt(text.data()));
 			}
 			catch (std::exception const & ex)
 			{

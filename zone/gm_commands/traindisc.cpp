@@ -13,11 +13,11 @@ void command_traindisc(Client *c, const Seperator *sep)
 	}
 
 	uint8 rule_max_level = (uint8) RuleI(Character, MaxLevel);
-	uint8 max_level      = (uint8) std::stoi(sep->arg[1]);
+	uint8 max_level      = (uint8) Strings::ToInt(sep->arg[1]);
 	uint8 min_level      = (
 		sep->IsNumber(2) ?
 			(uint8)
-				std::stoi(sep->arg[2]) :
+				Strings::ToInt(sep->arg[2]) :
 			1
 	); // Default to Level 1 if there isn't a 2nd argument
 

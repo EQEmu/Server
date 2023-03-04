@@ -1018,7 +1018,7 @@ void Client::LoadZoneFlags() {
 	zone_flags.clear();
 
 	for (auto row : results) {
-		zone_flags.insert(std::stoul(row[0]));
+		zone_flags.insert(Strings::ToUnsignedInt(row[0]));
 	}
 }
 
@@ -1262,7 +1262,7 @@ bool Client::CanEnterZone(const std::string& zone_short_name, int16 instance_ver
 		return false;
 	}
 
-	if (!z->flag_needed.empty() && Strings::IsNumber(z->flag_needed) && std::stoi(z->flag_needed) == 1) {
+	if (!z->flag_needed.empty() && Strings::IsNumber(z->flag_needed) && Strings::ToInt(z->flag_needed) == 1) {
 		if (Admin() < minStatusToIgnoreZoneFlags && !HasZoneFlag(z->zoneidnumber)) {
 			LogInfo(
 				"Character [{}] does not have the flag to be in this zone [{}]!",

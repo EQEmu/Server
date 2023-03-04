@@ -16,7 +16,7 @@ void command_memspell(Client *c, const Seperator *sep)
 		target = c->GetTarget()->CastToClient();
 	}
 
-	auto spell_id = static_cast<uint16>(std::stoul(sep->arg[1]));
+	auto spell_id = static_cast<uint16>(Strings::ToUnsignedInt(sep->arg[1]));
 	if (!IsValidSpell(spell_id)) {
 		c->Message(
 			Chat::White,
@@ -43,7 +43,7 @@ void command_memspell(Client *c, const Seperator *sep)
 		return;
 	}
 
-	auto spell_gem = sep->IsNumber(2) ? std::stoul(sep->arg[2]) : empty_slot;
+	auto spell_gem = sep->IsNumber(2) ? Strings::ToUnsignedInt(sep->arg[2]) : empty_slot;
 	if (spell_gem > EQ::spells::SPELL_GEM_COUNT) {
 		c->Message(
 			Chat::White,

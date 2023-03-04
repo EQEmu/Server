@@ -15,8 +15,8 @@ void command_wpadd(Client *c, const Seperator *sep)
 		}
 
 		if (sep->arg[1][0]) {
-			if (atoi(sep->arg[1]) >= 0) {
-				pause = atoi(sep->arg[1]);
+			if (Strings::ToInt(sep->arg[1]) >= 0) {
+				pause = Strings::ToInt(sep->arg[1]);
 			}
 			else {
 				c->Message(Chat::White, "Usage: #wpadd [pause] [-h]");

@@ -79,7 +79,7 @@ void command_instance(Client *c, const Seperator *sep)
 		}
 
 		std::string character_name = sep->arg[3];
-		uint16 instance_id = static_cast<uint16>(std::stoul(sep->arg[2]));
+		uint16 instance_id = static_cast<uint16>(Strings::ToUnsignedInt(sep->arg[2]));
 		uint32 character_id = database.GetCharacterID(character_name.c_str());
 		if (instance_id <= 0 || character_id <= 0) {
 			c->Message(Chat::White, "You must enter a valid Instance ID and player name.");
@@ -146,11 +146,11 @@ void command_instance(Client *c, const Seperator *sep)
 
 		uint32 zone_id = (
 			sep->IsNumber(2) ?
-			std::stoul(sep->arg[2]) :
+			Strings::ToUnsignedInt(sep->arg[2]) :
 			ZoneID(sep->arg[2])
 		);
-		uint32 version = std::stoul(sep->arg[3]);
-		uint32 duration = std::stoul(sep->arg[4]);
+		uint32 version = Strings::ToUnsignedInt(sep->arg[3]);
+		uint32 duration = Strings::ToUnsignedInt(sep->arg[4]);
 		std::string zone_short_name = ZoneName(zone_id);
 		if (zone_short_name.empty()) {
 			c->Message(
@@ -210,7 +210,7 @@ void command_instance(Client *c, const Seperator *sep)
 			return;
 		}
 
-		uint16 instance_id = std::stoul(sep->arg[2]);
+		uint16 instance_id = Strings::ToUnsignedInt(sep->arg[2]);
 		if (!database.CheckInstanceExists(instance_id)) {
 			c->Message(
 				Chat::White,
@@ -269,7 +269,7 @@ void command_instance(Client *c, const Seperator *sep)
 		}
 
 		std::string character_name = sep->arg[3];
-		uint16 instance_id = static_cast<uint16>(std::stoul(sep->arg[2]));
+		uint16 instance_id = static_cast<uint16>(Strings::ToUnsignedInt(sep->arg[2]));
 		uint32 character_id = database.GetCharacterID(character_name.c_str());
 		if (instance_id <= 0 || character_id <= 0) {
 			c->Message(Chat::White, "You must enter a valid Instance ID and player name.");

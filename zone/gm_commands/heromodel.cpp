@@ -21,10 +21,10 @@ void command_heromodel(Client *c, const Seperator *sep)
 		t = c->GetTarget();
 	}
 
-	auto hero_forge_model = Strings::IsNumber(sep->arg[1]) ? std::stoul(sep->arg[1]) : 0;
+	auto hero_forge_model = Strings::IsNumber(sep->arg[1]) ? Strings::ToUnsignedInt(sep->arg[1]) : 0;
 
 	if (arguments > 1) {
-		auto slot = static_cast<uint8>(std::stoul(sep->arg[2]));
+		auto slot = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[2]));
 		c->GetTarget()->SendTextureWC(slot, 0, hero_forge_model, 0, 0, 0);
 	} else {
 		if (hero_forge_model) {

@@ -166,14 +166,14 @@ void ConsoleWho(
 		}
 		else if (Strings::IsNumber(arg)) {
 			if (whom.lvllow == 0xFFFF) {
-				whom.lvllow  = atoi(arg.c_str());
+				whom.lvllow  = Strings::ToInt(arg.c_str());
 				whom.lvlhigh = whom.lvllow;
 			}
-			else if (atoi(arg.c_str()) > int(whom.lvllow)) {
-				whom.lvlhigh = atoi(arg.c_str());
+			else if (Strings::ToInt(arg.c_str()) > int(whom.lvllow)) {
+				whom.lvlhigh = Strings::ToInt(arg.c_str());
 			}
 			else {
-				whom.lvllow = atoi(arg.c_str());
+				whom.lvllow = Strings::ToInt(arg.c_str());
 			}
 		}
 		else {
@@ -200,11 +200,11 @@ void ConsoleUptime(
 		return;
 	}
 
-	if (Strings::IsNumber(args[0]) && atoi(args[0].c_str()) > 0) {
+	if (Strings::IsNumber(args[0]) && Strings::ToInt(args[0].c_str()) > 0) {
 		auto                pack = new ServerPacket(ServerOP_Uptime, sizeof(ServerUptime_Struct));
 		ServerUptime_Struct *sus = (ServerUptime_Struct *) pack->pBuffer;
 		snprintf(sus->adminname, sizeof(sus->adminname), "*%s", connection->UserName().c_str());
-		sus->zoneserverid = atoi(args[0].c_str());
+		sus->zoneserverid = Strings::ToInt(args[0].c_str());
 		ZoneServer *zs = zoneserver_list.FindByID(sus->zoneserverid);
 		if (zs) {
 			zs->SendPacket(pack);
@@ -284,7 +284,7 @@ void ConsoleEmote(
 			0,
 			0,
 			AccountStatus::Player,
-			atoi(args[1].c_str()),
+			Strings::ToInt(args[1].c_str()),
 			Strings::Join(join_args, " ").c_str()
 		);
 	}
@@ -295,7 +295,7 @@ void ConsoleEmote(
 				0,
 				0,
 				AccountStatus::Player,
-				atoi(args[1].c_str()),
+				Strings::ToInt(args[1].c_str()),
 				Strings::Join(join_args, " ").c_str()
 			);
 		}
@@ -304,7 +304,7 @@ void ConsoleEmote(
 				args[0].c_str(),
 				0,
 				AccountStatus::Player,
-				atoi(args[1].c_str()),
+				Strings::ToInt(args[1].c_str()),
 				Strings::Join(join_args, " ").c_str()
 			);
 		}
@@ -422,7 +422,7 @@ void ConsoleGuildSay(
 	}
 
 	auto from = args[0];
-	auto guild_id = Strings::IsNumber(args[1]) ? std::stoul(args[1]) : 0;
+	auto guild_id = Strings::IsNumber(args[1]) ? Strings::ToUnsignedInt(args[1]) : 0;
 	if (!guild_id) {
 		return;
 	}
@@ -585,7 +585,7 @@ void ConsoleZoneShutdown(
 		pack->opcode = ServerOP_ZoneShutdown;
 		strcpy(s->adminname, tmpname);
 		if (Strings::IsNumber(args[0])) {
-			s->ZoneServerID = atoi(args[0].c_str());
+			s->ZoneServerID = Strings::ToInt(args[0].c_str());
 		}
 		else {
 			s->zoneid = ZoneID(args[0].c_str());
@@ -639,12 +639,12 @@ void ConsoleZoneBootup(
 		if (args.size() > 2) {
 			zoneserver_list.SOPZoneBootup(
 				tmpname,
-				atoi(args[0].c_str()),
+				Strings::ToInt(args[0].c_str()),
 				args[1].c_str(),
 				(bool) (strcasecmp(args[1].c_str(), "static") == 0));
 		}
 		else {
-			zoneserver_list.SOPZoneBootup(tmpname, atoi(args[0].c_str()), args[1].c_str(), false);
+			zoneserver_list.SOPZoneBootup(tmpname, Strings::ToInt(args[0].c_str()), args[1].c_str(), false);
 		}
 	}
 }
@@ -751,10 +751,10 @@ void ConsoleFlag(
 		connection->SendLine("Usage: flag [status] [accountname]");
 	}
 	else {
-		if (atoi(args[0].c_str()) > connection->Admin()) {
+		if (Strings::ToInt(args[0].c_str()) > connection->Admin()) {
 			connection->SendLine("You cannot set people's status to higher than your own");
 		}
-		else if (!database.SetAccountStatus(args[1].c_str(), atoi(args[0].c_str()))) {
+		else if (!database.SetAccountStatus(args[1].c_str(), Strings::ToInt(args[0].c_str()))) {
 			connection->SendLine("Unable to flag account!");
 		}
 		else {
@@ -821,8 +821,8 @@ void ConsoleWorldShutdown(
 {
 	if (args.size() == 2) {
 		int32 time, interval;
-		if (Strings::IsNumber(args[0]) && Strings::IsNumber(args[1]) && ((time = atoi(args[0].c_str())) > 0) &&
-			((interval = atoi(args[1].c_str())) > 0)) {
+		if (Strings::IsNumber(args[0]) && Strings::IsNumber(args[1]) && ((time = Strings::ToInt(args[0].c_str())) > 0) &&
+			((interval = Strings::ToInt(args[1].c_str())) > 0)) {
 			zoneserver_list.WorldShutDown(time, interval);
 		}
 		else {
@@ -886,7 +886,7 @@ void ConsoleSignalCharByName(
 		return;
 	}
 
-	connection->SendLine(StringFormat("Signal Sent to %s with ID %i", (char *) args[0].c_str(), atoi(args[1].c_str())));
+	connection->SendLine(StringFormat("Signal Sent to %s with ID %i", (char *) args[0].c_str(), Strings::ToInt(args[1].c_str())));
 	uint32 message_len = strlen((char *) args[0].c_str()) + 1;
 	auto pack = new ServerPacket(ServerOP_CZSignal, sizeof(CZSignal_Struct) + message_len);
 	CZSignal_Struct* CZS = (CZSignal_Struct*) pack->pBuffer;
@@ -894,7 +894,7 @@ void ConsoleSignalCharByName(
 	int update_identifier = 0;
 	CZS->update_type = update_type;
 	CZS->update_identifier = update_identifier;
-	CZS->signal_id = atoi(args[1].c_str());
+	CZS->signal_id = Strings::ToInt(args[1].c_str());
 	strn0cpy(CZS->client_name, (char *) args[0].c_str(), 64);
 	zoneserver_list.SendPacket(pack);
 	safe_delete(pack);

@@ -116,11 +116,11 @@ void command_feature(Client *c, const Seperator *sep)
 	float value_changed = 0.0f;
 
 	if (is_beard) {
-		face.beard = static_cast<uint8>(std::stoul(sep->arg[2]));
+		face.beard = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[2]));
 		feature_changed = "Beard";
 		value_changed = face.beard;
 	} else if (is_beard_color) {
-		face.beardcolor = static_cast<uint8>(std::stoul(sep->arg[2]));
+		face.beardcolor = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[2]));
 		feature_changed = "Beard Color";
 		value_changed = face.beardcolor;
 	} else if (is_details) {
@@ -129,31 +129,31 @@ void command_feature(Client *c, const Seperator *sep)
 			return;
 		}
 
-		face.drakkin_details = static_cast<uint8>(std::stoul(sep->arg[2]));
+		face.drakkin_details = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[2]));
 		feature_changed = "Drakkin Details";
 		value_changed = static_cast<float>(face.drakkin_details);
 	} else if (is_eyes) {
-		face.eyecolor1 = static_cast<uint8>(std::stoul(sep->arg[2]));
+		face.eyecolor1 = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[2]));
 		feature_changed = "Eyes";
 		value_changed = face.eyecolor1; // eyecolor2 isn't used
 	} else if (is_face) {
-		face.face = static_cast<uint8>(std::stoul(sep->arg[2]));
+		face.face = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[2]));
 		feature_changed = "Face";
 		value_changed = face.face;
 	} else if (is_gender) {
-		gender = static_cast<uint8>(std::stoul(sep->arg[2]));
+		gender = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[2]));
 		feature_changed = "Gender";
 		value_changed = gender;
 	} else if (is_hair) {
-		face.hairstyle = static_cast<uint8>(std::stoul(sep->arg[2]));
+		face.hairstyle = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[2]));
 		feature_changed = "Hair";
 		value_changed = face.hairstyle;
 	} else if (is_hair_color) {
-		face.haircolor = static_cast<uint8>(std::stoul(sep->arg[2]));
+		face.haircolor = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[2]));
 		feature_changed = "Hair Color";
 		value_changed = face.haircolor;
 	} else if (is_helm) {
-		helm_texture = static_cast<uint8>(std::stoul(sep->arg[2]));
+		helm_texture = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[2]));
 		feature_changed = "Helmet Texture";
 		value_changed = helm_texture;
 	} else if (is_heritage) {
@@ -162,11 +162,11 @@ void command_feature(Client *c, const Seperator *sep)
 			return;
 		}
 
-		face.drakkin_heritage = static_cast<uint8>(std::stoul(sep->arg[2]));
+		face.drakkin_heritage = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[2]));
 		feature_changed = "Drakkin Heritage";
 		value_changed = static_cast<float>(face.drakkin_heritage);
 	} else if (is_race) {
-		race = static_cast<uint16>(std::stoul(sep->arg[2]));
+		race = static_cast<uint16>(Strings::ToUnsignedInt(sep->arg[2]));
 		feature_changed = "Race";
 		value_changed = race;
 	} else if (is_size) {
@@ -174,11 +174,11 @@ void command_feature(Client *c, const Seperator *sep)
 		if (is_size_alias) {
 			c->Message(Chat::White, "Usage: #feature size [Size] - Change your or your target's Size temporarily (Valid values are 0 to 255, decimal increments are allowed.)");
 			if (sep->arg[1] && Strings::IsFloat(sep->arg[1])) {
-				size = std::stof(sep->arg[1]);
+				size = Strings::ToFloat(sep->arg[1]);
 			}
 		}
 		else {
-			size = std::stof(sep->arg[2]);
+			size = Strings::ToFloat(sep->arg[2]);
 		}
 
 		if (size < 0 || size > 255) {
@@ -194,11 +194,11 @@ void command_feature(Client *c, const Seperator *sep)
 			return;
 		}
 
-		face.drakkin_tattoo = static_cast<uint8>(std::stoul(sep->arg[2]));
+		face.drakkin_tattoo = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[2]));
 		feature_changed = "Drakkin Tattoos";
 		value_changed = static_cast<float>(face.drakkin_tattoo);
 	} else if (is_texture) {
-		texture = static_cast<uint8>(std::stoul(sep->arg[2]));
+		texture = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[2]));
 		feature_changed = "Texture";
 		value_changed = texture;
 	}

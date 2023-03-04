@@ -13,11 +13,11 @@ void command_wc(Client *c, const Seperator *sep)
 	}
 	else {
 		uint32 hero_forge_model = 0;
-		uint32 wearslot         = atoi(sep->arg[1]);
+		uint32 wearslot         = Strings::ToInt(sep->arg[1]);
 
 		// Hero Forge
 		if (sep->argnum > 2) {
-			hero_forge_model = atoi(sep->arg[3]);
+			hero_forge_model = Strings::ToInt(sep->arg[3]);
 
 			if (hero_forge_model != 0 && hero_forge_model < 1000) {
 				// Shorthand Hero Forge ID. Otherwise use the value the user entered.
@@ -28,17 +28,17 @@ void command_wc(Client *c, const Seperator *sep)
 		// Leaving here to add color option to the #wc command eventually
 		uint32 Color;
 		if (c->GetTarget()->IsClient())
-			Color = c->GetTarget()->GetEquipmentColor(atoi(sep->arg[1]));
+			Color = c->GetTarget()->GetEquipmentColor(Strings::ToInt(sep->arg[1]));
 		else
-			Color = c->GetTarget()->GetArmorTint(atoi(sep->arg[1]));
+			Color = c->GetTarget()->GetArmorTint(Strings::ToInt(sep->arg[1]));
 		*/
 		c->GetTarget()->SendTextureWC(
 			wearslot,
-			atoi(sep->arg[2]),
+			Strings::ToInt(sep->arg[2]),
 			hero_forge_model,
-			atoi(sep->arg[4]),
-			atoi(sep->arg[5]),
-			atoi(sep->arg[6]));
+			Strings::ToInt(sep->arg[4]),
+			Strings::ToInt(sep->arg[5]),
+			Strings::ToInt(sep->arg[6]));
 	}
 }
 

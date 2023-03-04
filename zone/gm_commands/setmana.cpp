@@ -8,7 +8,7 @@ void command_setmana(Client *c, const Seperator *sep)
 		return;
 	}
 
-	auto mana = static_cast<int>(std::min(std::stoll(sep->arg[1]), (long long) 2000000000));
+	auto mana = static_cast<int>(std::min(Strings::ToBigInt(sep->arg[1]), (int64) 2000000000));
 	bool set_to_max = false;
 	Mob* target = c;
 	if (c->GetTarget()) {

@@ -14,7 +14,7 @@ void command_suspend(Client *c, const Seperator *sep)
 	}
 
 	const std::string character_name = Strings::ToLower(sep->arg[1]);
-	auto days = std::stoul(sep->arg[2]);
+	auto days = Strings::ToUnsignedInt(sep->arg[2]);
 
 	const std::string reason = sep->arg[3] ? sep->argplus[3] : "";
 

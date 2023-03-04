@@ -9,7 +9,7 @@ void command_findzone(Client *c, const Seperator *sep)
 	}
 
 	std::string query;
-	int         id = atoi((const char *) sep->arg[1]);
+	int         id = Strings::ToInt((const char *) sep->arg[1]);
 
 	std::string arg1 = sep->arg[1];
 
@@ -53,7 +53,7 @@ void command_findzone(Client *c, const Seperator *sep)
 		std::string zone_id    = row[0];
 		std::string short_name = row[1];
 		std::string long_name  = row[2];
-		int         version    = atoi(row[3]);
+		int         version    = Strings::ToInt(row[3]);
 
 		if (++count > maxrows) {
 			c->Message(Chat::White, "%i zones shown. Too many results.", maxrows);

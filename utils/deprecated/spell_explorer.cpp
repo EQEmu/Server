@@ -4,43 +4,43 @@
 #include "../zone/spdat.h"
 
 int main(int argc, char** argv) {
-	
+
 	int spid = 0;
-	
+
 	if(argc != 2) {
 		printf("Invalid args: %s [spell id]\n", argv[0]);
 		return(1);
 	}
-	
-	spid = atoi(argv[1]);
-	
-	
+
+	spid = Strings::ToInt(argv[1]);
+
+
 	int tempid=0;
 	int16 counter=0;
 	char spell_line[2048];
-	
+
 	FILE *sf = fopen("spells_us.txt", "r");
-	
+
 	if(sf == NULL) {
 		printf("Unable to open spells_us.txt file.\n");
 		return false;
 	}
-	
+
 	SPDat_Spell_Struct sp;
-		
+
 	while(!feof(sf)) {
 		fgets(spell_line, sizeof(spell_line), sf);
 		Seperator sep(spell_line, '^', 205, 100, false, 0, 0, false);
-		
+
 		if(spell_line[0]=='\0')
 			break;
-		
-		tempid = atoi(sep.arg[0]);
+
+		tempid = Strings::ToInt(sep.arg[0]);
 		if(tempid != spid)
 			continue;
-		
+
 		printf("Found spell %d\n", spid);
-		
+
 		counter++;
 		strcpy(sp.name, sep.arg[1]);
 		strcpy(sp.player_1, sep.arg[2]);
@@ -55,83 +55,83 @@ int main(int argc, char** argv) {
 		sp.aoerange=atof(sep.arg[10]);
 		sp.pushback=atof(sep.arg[11]);
 		sp.pushup=atof(sep.arg[12]);
-		sp.cast_time=atoi(sep.arg[13]);
-		sp.recovery_time=atoi(sep.arg[14]);
-		sp.recast_time=atoi(sep.arg[15]);
-		sp.buffdurationformula=atoi(sep.arg[16]);
-		sp.buffduration=atoi(sep.arg[17]);
-		sp.AEDuration=atoi(sep.arg[18]);
-		sp.mana=atoi(sep.arg[19]);
-		
+		sp.cast_time=Strings::ToInt(sep.arg[13]);
+		sp.recovery_time=Strings::ToInt(sep.arg[14]);
+		sp.recast_time=Strings::ToInt(sep.arg[15]);
+		sp.buffdurationformula=Strings::ToInt(sep.arg[16]);
+		sp.buffduration=Strings::ToInt(sep.arg[17]);
+		sp.AEDuration=Strings::ToInt(sep.arg[18]);
+		sp.mana=Strings::ToInt(sep.arg[19]);
+
 		int y=0;
 		for(y=0; y < EFFECT_COUNT;y++)
-			sp.base[y]=atoi(sep.arg[20+y]);
+			sp.base[y]=Strings::ToInt(sep.arg[20+y]);
 		for(y=0;y<11;y++)
-			sp.base2[y]=atoi(sep.arg[33+y]);
+			sp.base2[y]=Strings::ToInt(sep.arg[33+y]);
 		for(y=0; y < EFFECT_COUNT;y++)
-			sp.max[y]=atoi(sep.arg[44+y]);
-		
-		sp.icon=atoi(sep.arg[56]);
-		sp.memicon=atoi(sep.arg[57]);
-		
+			sp.max[y]=Strings::ToInt(sep.arg[44+y]);
+
+		sp.icon=Strings::ToInt(sep.arg[56]);
+		sp.memicon=Strings::ToInt(sep.arg[57]);
+
 		for(y=0; y< 4;y++)
-			sp.components[y]=atoi(sep.arg[58+y]);
-		
+			sp.components[y]=Strings::ToInt(sep.arg[58+y]);
+
 		for(y=0; y< 4;y++)
-			sp.component_counts[y]=atoi(sep.arg[62+y]);
-		
+			sp.component_counts[y]=Strings::ToInt(sep.arg[62+y]);
+
 		for(y=0; y< 4;y++)
-			sp.NoexpendReagent[y]=atoi(sep.arg[66+y]);
-		
+			sp.NoexpendReagent[y]=Strings::ToInt(sep.arg[66+y]);
+
 		for(y=0; y< 12;y++)
-			sp.formula[y]=atoi(sep.arg[70+y]);
-		
-		sp.LightType=atoi(sep.arg[82]);
-		sp.goodEffect=atoi(sep.arg[83]);
-		sp.Activated=atoi(sep.arg[84]);
-		sp.resisttype=atoi(sep.arg[85]);
-		
+			sp.formula[y]=Strings::ToInt(sep.arg[70+y]);
+
+		sp.LightType=Strings::ToInt(sep.arg[82]);
+		sp.goodEffect=Strings::ToInt(sep.arg[83]);
+		sp.Activated=Strings::ToInt(sep.arg[84]);
+		sp.resisttype=Strings::ToInt(sep.arg[85]);
+
 		for(y=0; y< 12;y++)
-			sp.effectid[y]=atoi(sep.arg[86+y]);
-		
-		sp.targettype=(SpellTargetType)atoi(sep.arg[98]);
-		sp.basediff=atoi(sep.arg[99]);
-		sp.skill=(SkillType)atoi(sep.arg[100]);
-		sp.zonetype=atoi(sep.arg[101]);
-		sp.EnvironmentType=atoi(sep.arg[102]);
-		sp.TimeOfDay=atoi(sep.arg[103]);
-		
+			sp.effectid[y]=Strings::ToInt(sep.arg[86+y]);
+
+		sp.targettype=(SpellTargetType)Strings::ToInt(sep.arg[98]);
+		sp.basediff=Strings::ToInt(sep.arg[99]);
+		sp.skill=(SkillType)Strings::ToInt(sep.arg[100]);
+		sp.zonetype=Strings::ToInt(sep.arg[101]);
+		sp.EnvironmentType=Strings::ToInt(sep.arg[102]);
+		sp.TimeOfDay=Strings::ToInt(sep.arg[103]);
+
 		for(y=0; y< 16;y++)
-			sp.classes[y]=atoi(sep.arg[104+y]);
-		
-		sp.CastingAnim=atoi(sep.arg[120]);
-		sp.TargetAnim=atoi(sep.arg[121]);
-		sp.TravelType=atoi(sep.arg[122]);
-		sp.SpellAffectIndex=atoi(sep.arg[123]);
-		
+			sp.classes[y]=Strings::ToInt(sep.arg[104+y]);
+
+		sp.CastingAnim=Strings::ToInt(sep.arg[120]);
+		sp.TargetAnim=Strings::ToInt(sep.arg[121]);
+		sp.TravelType=Strings::ToInt(sep.arg[122]);
+		sp.SpellAffectIndex=Strings::ToInt(sep.arg[123]);
+
 		for(y=0; y< 23;y++) {
-			sp.spacing124[y]=atoi(sep.arg[124+y]);
+			sp.spacing124[y]=Strings::ToInt(sep.arg[124+y]);
 		}
-		
-		sp.ResistDiff=atoi(sep.arg[147]);
-		sp.dot_stacking_exempt=atoi(sep.arg[148]);
-		sp.deletable=atoi(sep.arg[149]);
-		
-		sp.RecourseLink = atoi(sep.arg[150]);
-		sp.descnum = atoi(sep.arg[155]);
-		sp.typedescnum = atoi(sep.arg[156]);
-		sp.effectdescnum = atoi(sep.arg[157]);
+
+		sp.ResistDiff=Strings::ToInt(sep.arg[147]);
+		sp.dot_stacking_exempt=Strings::ToInt(sep.arg[148]);
+		sp.deletable=Strings::ToInt(sep.arg[149]);
+
+		sp.RecourseLink = Strings::ToInt(sep.arg[150]);
+		sp.descnum = Strings::ToInt(sep.arg[155]);
+		sp.typedescnum = Strings::ToInt(sep.arg[156]);
+		sp.effectdescnum = Strings::ToInt(sep.arg[157]);
 
 //		for(y=0; y< 17;y++)
-//			sp.Spacing4[y] = atoi(sep.arg[158+y]);
-		
+//			sp.Spacing4[y] = Strings::ToInt(sep.arg[158+y]);
+
 		break;
 	}
 
 	fclose(sf);
-	
+
 	const struct SPDat_Spell_Struct *s=&sp;
-	
+
 	printf("Spell info for spell #%d:\n", spid);
 	printf("  name: %s\n", s->name);
 	printf("  player_1: %s\n", s->player_1);
@@ -181,7 +181,7 @@ int main(int argc, char** argv) {
 	printf(" RecourseLink: %d\n", s->RecourseLink);
 	printf("  Spacing124[23]: %d, %d, %d, %d, %d\n", s->spacing124[0], s->spacing124[1], s->spacing124[2], s->spacing124[3], s->spacing124[4]);
 
-	
+
 
 	return(0);
 }

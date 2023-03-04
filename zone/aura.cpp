@@ -946,17 +946,17 @@ bool ZoneDatabase::GetAuraEntry(uint16 spell_id, AuraRecord &record)
 
 	auto row = results.begin();
 
-	record.npc_type = atoi(row[0]);
+	record.npc_type = Strings::ToInt(row[0]);
 	strn0cpy(record.name, row[1], 64);
-	record.spell_id   = atoi(row[2]);
-	record.distance   = atoi(row[3]);
+	record.spell_id   = Strings::ToInt(row[2]);
+	record.distance   = Strings::ToInt(row[3]);
 	record.distance *= record.distance; // so we can avoid sqrt
-	record.aura_type  = atoi(row[4]);
-	record.spawn_type = atoi(row[5]);
-	record.movement   = atoi(row[6]);
-	record.duration   = atoi(row[7]) * 1000; // DB is in seconds
-	record.icon       = atoi(row[8]);
-	record.cast_time  = atoi(row[9]) * 1000; // DB is in seconds
+	record.aura_type  = Strings::ToInt(row[4]);
+	record.spawn_type = Strings::ToInt(row[5]);
+	record.movement   = Strings::ToInt(row[6]);
+	record.duration   = Strings::ToInt(row[7]) * 1000; // DB is in seconds
+	record.icon       = Strings::ToInt(row[8]);
+	record.cast_time  = Strings::ToInt(row[9]) * 1000; // DB is in seconds
 
 	return true;
 }

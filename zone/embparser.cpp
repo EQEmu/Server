@@ -1952,7 +1952,7 @@ void PerlembParser::ExportEventVariables(
 		}
 
 		case EVENT_CONSIDER: {
-			ExportVar(package_name.c_str(), "entity_id", std::stoi(data));
+			ExportVar(package_name.c_str(), "entity_id", Strings::ToInt(data));
 			if (extra_pointers && extra_pointers->size() == 1) {
 				ExportVar(package_name.c_str(), "target", "Mob", std::any_cast<Mob*>(extra_pointers->at(0)));
 			}
@@ -1960,7 +1960,7 @@ void PerlembParser::ExportEventVariables(
 		}
 
 		case EVENT_CONSIDER_CORPSE: {
-			ExportVar(package_name.c_str(), "corpse_entity_id", std::stoi(data));
+			ExportVar(package_name.c_str(), "corpse_entity_id", Strings::ToInt(data));
 			if (extra_pointers && extra_pointers->size() == 1) {
 				ExportVar(package_name.c_str(), "corpse", "Corpse", std::any_cast<Corpse*>(extra_pointers->at(0)));
 			}
@@ -1968,7 +1968,7 @@ void PerlembParser::ExportEventVariables(
 		}
 
 		case EVENT_COMBINE: {
-			ExportVar(package_name.c_str(), "container_slot", std::stoi(data));
+			ExportVar(package_name.c_str(), "container_slot", Strings::ToInt(data));
 			break;
 		}
 

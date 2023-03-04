@@ -82,7 +82,7 @@ void command_flagedit(Client *c, const Seperator *sep)
 	if (is_give) {
 		uint32 zone_id = (
 			sep->IsNumber(2) ?
-			std::stoul(sep->arg[2]) :
+			Strings::ToUnsignedInt(sep->arg[2]) :
 			ZoneID(sep->arg[2])
 		);
 		std::string zone_short_name = Strings::ToLower(ZoneName(zone_id, true));
@@ -129,7 +129,7 @@ void command_flagedit(Client *c, const Seperator *sep)
 				row[0],
 				row[1],
 				(
-					std::stoi(row[2]) != 0 ?
+					Strings::ToInt(row[2]) != 0 ?
 					fmt::format(
 						"[Version {}]",
 						row[2]
@@ -151,7 +151,7 @@ void command_flagedit(Client *c, const Seperator *sep)
 	} else if (is_lock) {
 		uint32 zone_id = (
 			sep->IsNumber(2) ?
-			std::stoul(sep->arg[2]) :
+			Strings::ToUnsignedInt(sep->arg[2]) :
 			ZoneID(sep->arg[2])
 		);
 		std::string zone_short_name = Strings::ToLower(ZoneName(zone_id, true));
@@ -206,7 +206,7 @@ void command_flagedit(Client *c, const Seperator *sep)
 	} else if (is_take) {
 		uint32 zone_id = (
 			sep->IsNumber(2) ?
-			std::stoul(sep->arg[2]) :
+			Strings::ToUnsignedInt(sep->arg[2]) :
 			ZoneID(sep->arg[2])
 		);
 		std::string zone_short_name = Strings::ToLower(ZoneName(zone_id, true));
@@ -234,7 +234,7 @@ void command_flagedit(Client *c, const Seperator *sep)
 	} else if (is_unlock) {
 		uint32 zone_id = (
 			sep->IsNumber(2) ?
-			std::stoul(sep->arg[2]) :
+			Strings::ToUnsignedInt(sep->arg[2]) :
 			ZoneID(sep->arg[2])
 		);
 		std::string zone_short_name = Strings::ToLower(ZoneName(zone_id, true));

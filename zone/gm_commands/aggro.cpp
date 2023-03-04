@@ -21,7 +21,7 @@ void command_aggro(Client *c, const Seperator *sep)
 
 	NPC* target = c->GetTarget()->CastToNPC();
 
-	float distance = std::stof(sep->arg[1]);
+	float distance = Strings::ToFloat(sep->arg[1]);
 	bool verbose = !strcasecmp("-v", sep->arg[2]);
 	entity_list.DescribeAggro(c, target, distance, verbose);
 }

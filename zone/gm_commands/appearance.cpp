@@ -13,7 +13,7 @@ void command_appearance(Client *c, const Seperator *sep)
 		if ((c->GetTarget())) {
 			t = c->GetTarget();
 		}
-		t->SendAppearancePacket(atoi(sep->arg[1]), atoi(sep->arg[2]));
+		t->SendAppearancePacket(Strings::ToInt(sep->arg[1]), Strings::ToInt(sep->arg[2]));
 		c->Message(
 			Chat::White,
 			"Sending appearance packet: target=%s, type=%s, value=%s",

@@ -47,7 +47,7 @@ void EQLConfig::LoadSettings() {
 	}
     else {
         auto row = results.begin();
-        m_dynamics = atoi(row[0]);
+        m_dynamics = Strings::ToInt(row[0]);
     }
 
 	query = StringFormat("SELECT zone, port FROM launcher_zones WHERE launcher = '%s'", namebuf);
@@ -60,7 +60,7 @@ void EQLConfig::LoadSettings() {
     LauncherZone zs;
     for (auto row = results.begin(); row != results.end(); ++row) {
         zs.name = row[0];
-		zs.port = atoi(row[1]);
+		zs.port = Strings::ToInt(row[1]);
 		m_zones[zs.name] = zs;
     }
 

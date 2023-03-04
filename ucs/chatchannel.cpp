@@ -657,7 +657,7 @@ ChatChannel *ChatChannelList::RemoveClientFromChannel(const std::string& in_chan
 	std::string channel_name = in_channel_name;
 
 	if (in_channel_name.length() > 0 && isdigit(channel_name[0])) {
-		channel_name = c->ChannelSlotName(atoi(in_channel_name.c_str()));
+		channel_name = c->ChannelSlotName(Strings::ToInt(in_channel_name.c_str()));
 	}
 
 	auto *required_channel = FindChannel(channel_name);

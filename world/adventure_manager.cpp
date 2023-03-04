@@ -679,41 +679,41 @@ bool AdventureManager::LoadAdventureTemplates()
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		auto adventure_template = new AdventureTemplate;
-		adventure_template->id = atoi(row[0]);
+		adventure_template->id = Strings::ToInt(row[0]);
 		strcpy(adventure_template->zone, row[1]);
 
-		adventure_template->zone_version = atoi(row[2]);
-		adventure_template->is_hard      = atoi(row[3]);
-		adventure_template->min_level    = atoi(row[4]);
-		adventure_template->max_level    = atoi(row[5]);
-		adventure_template->type         = atoi(row[6]);
-		adventure_template->type_data    = atoi(row[7]);
-		adventure_template->type_count   = atoi(row[8]);
-		adventure_template->assa_x       = atof(row[9]);
-		adventure_template->assa_y       = atof(row[10]);
-		adventure_template->assa_z       = atof(row[11]);
-		adventure_template->assa_h       = atof(row[12]);
+		adventure_template->zone_version = Strings::ToInt(row[2]);
+		adventure_template->is_hard      = Strings::ToInt(row[3]);
+		adventure_template->min_level    = Strings::ToInt(row[4]);
+		adventure_template->max_level    = Strings::ToInt(row[5]);
+		adventure_template->type         = Strings::ToInt(row[6]);
+		adventure_template->type_data    = Strings::ToInt(row[7]);
+		adventure_template->type_count   = Strings::ToInt(row[8]);
+		adventure_template->assa_x       = Strings::ToFloat(row[9]);
+		adventure_template->assa_y       = Strings::ToFloat(row[10]);
+		adventure_template->assa_z       = Strings::ToFloat(row[11]);
+		adventure_template->assa_h       = Strings::ToFloat(row[12]);
 
 		strn0cpy(adventure_template->text, row[13], sizeof(adventure_template->text));
 
-		adventure_template->duration          = atoi(row[14]);
-		adventure_template->zone_in_time      = atoi(row[15]);
-		adventure_template->win_points        = atoi(row[16]);
-		adventure_template->lose_points       = atoi(row[17]);
-		adventure_template->theme             = atoi(row[18]);
-		adventure_template->zone_in_zone_id   = atoi(row[19]);
-		adventure_template->zone_in_x         = atof(row[20]);
-		adventure_template->zone_in_y         = atof(row[21]);
-		adventure_template->zone_in_object_id = atoi(row[22]);
-		adventure_template->dest_x            = atof(row[23]);
-		adventure_template->dest_y            = atof(row[24]);
-		adventure_template->dest_z            = atof(row[25]);
-		adventure_template->dest_h            = atof(row[26]);
-		adventure_template->graveyard_zone_id = atoi(row[27]);
-		adventure_template->graveyard_x       = atof(row[28]);
-		adventure_template->graveyard_y       = atof(row[29]);
-		adventure_template->graveyard_z       = atof(row[30]);
-		adventure_template->graveyard_radius  = atof(row[31]);
+		adventure_template->duration          = Strings::ToInt(row[14]);
+		adventure_template->zone_in_time      = Strings::ToInt(row[15]);
+		adventure_template->win_points        = Strings::ToInt(row[16]);
+		adventure_template->lose_points       = Strings::ToInt(row[17]);
+		adventure_template->theme             = Strings::ToInt(row[18]);
+		adventure_template->zone_in_zone_id   = Strings::ToInt(row[19]);
+		adventure_template->zone_in_x         = Strings::ToFloat(row[20]);
+		adventure_template->zone_in_y         = Strings::ToFloat(row[21]);
+		adventure_template->zone_in_object_id = Strings::ToInt(row[22]);
+		adventure_template->dest_x            = Strings::ToFloat(row[23]);
+		adventure_template->dest_y            = Strings::ToFloat(row[24]);
+		adventure_template->dest_z            = Strings::ToFloat(row[25]);
+		adventure_template->dest_h            = Strings::ToFloat(row[26]);
+		adventure_template->graveyard_zone_id = Strings::ToInt(row[27]);
+		adventure_template->graveyard_x       = Strings::ToFloat(row[28]);
+		adventure_template->graveyard_y       = Strings::ToFloat(row[29]);
+		adventure_template->graveyard_z       = Strings::ToFloat(row[30]);
+		adventure_template->graveyard_radius  = Strings::ToFloat(row[31]);
 
 		adventure_templates[adventure_template->id] = adventure_template;
 	}
@@ -732,8 +732,8 @@ bool AdventureManager::LoadAdventureEntries()
 
     for (auto row = results.begin(); row != results.end(); ++row)
     {
-        int id = atoi(row[0]);
-        int template_id = atoi(row[1]);
+        int id = Strings::ToInt(row[0]);
+        int template_id = Strings::ToInt(row[1]);
         AdventureTemplate* tid = nullptr;
 
         auto t_iter = adventure_templates.find(template_id);
@@ -1108,26 +1108,26 @@ void AdventureManager::LoadLeaderboardInfo()
 
         LeaderboardInfo lbi;
         lbi.name = row[0];
-        lbi.wins = atoi(row[3]);
-        lbi.guk_wins = atoi(row[3]);
-        lbi.wins += atoi(row[4]);
-        lbi.mir_wins = atoi(row[4]);
-        lbi.wins += atoi(row[5]);
-        lbi.mmc_wins = atoi(row[5]);
-        lbi.wins += atoi(row[6]);
-        lbi.ruj_wins = atoi(row[6]);
-        lbi.wins += atoi(row[7]);
-        lbi.tak_wins = atoi(row[7]);
-        lbi.losses = atoi(row[8]);
-        lbi.guk_losses = atoi(row[8]);
-        lbi.losses += atoi(row[9]);
-        lbi.mir_losses = atoi(row[9]);
-        lbi.losses += atoi(row[10]);
-        lbi.mmc_losses = atoi(row[10]);
-        lbi.losses += atoi(row[11]);
-        lbi.ruj_losses = atoi(row[11]);
-        lbi.losses += atoi(row[12]);
-        lbi.tak_losses = atoi(row[12]);
+        lbi.wins = Strings::ToInt(row[3]);
+        lbi.guk_wins = Strings::ToInt(row[3]);
+        lbi.wins += Strings::ToInt(row[4]);
+        lbi.mir_wins = Strings::ToInt(row[4]);
+        lbi.wins += Strings::ToInt(row[5]);
+        lbi.mmc_wins = Strings::ToInt(row[5]);
+        lbi.wins += Strings::ToInt(row[6]);
+        lbi.ruj_wins = Strings::ToInt(row[6]);
+        lbi.wins += Strings::ToInt(row[7]);
+        lbi.tak_wins = Strings::ToInt(row[7]);
+        lbi.losses = Strings::ToInt(row[8]);
+        lbi.guk_losses = Strings::ToInt(row[8]);
+        lbi.losses += Strings::ToInt(row[9]);
+        lbi.mir_losses = Strings::ToInt(row[9]);
+        lbi.losses += Strings::ToInt(row[10]);
+        lbi.mmc_losses = Strings::ToInt(row[10]);
+        lbi.losses += Strings::ToInt(row[11]);
+        lbi.ruj_losses = Strings::ToInt(row[11]);
+        lbi.losses += Strings::ToInt(row[12]);
+        lbi.tak_losses = Strings::ToInt(row[12]);
 
         leaderboard_info_wins.push_back(lbi);
         leaderboard_info_percentage.push_back(lbi);

@@ -14,7 +14,7 @@ void command_setanim(Client *c, const Seperator *sep)
 	}
 
 
-	int animation_id = std::stoi(sep->arg[1]);
+	int animation_id = Strings::ToInt(sep->arg[1]);
 	if (
 		animation_id < 0 ||
 		animation_id > eaLooting
@@ -36,7 +36,7 @@ void command_setanim(Client *c, const Seperator *sep)
 	} else if (animation_id == eaLooting) {
 		animation_name = "Looting";
 	}
-	
+
 	c->Message(
 		Chat::White,
 		fmt::format(

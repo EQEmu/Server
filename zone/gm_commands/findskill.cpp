@@ -11,7 +11,7 @@ void command_findskill(Client *c, const Seperator *sep)
 
 	std::map<EQ::skills::SkillType, std::string> skills = EQ::skills::GetSkillTypeMap();
 	if (sep->IsNumber(1)) {
-		int skill_id = std::stoi(sep->arg[1]);
+		int skill_id = Strings::ToInt(sep->arg[1]);
 		if (skill_id >= EQ::skills::Skill1HBlunt && skill_id < EQ::skills::SkillCount) {
 			for (auto skill : skills) {
 				if (skill_id == skill.first) {

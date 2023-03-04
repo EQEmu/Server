@@ -226,7 +226,7 @@ bool atobool(char* iBool) {
 		return true;
 	if (!strcasecmp(iBool, "n"))
 		return false;
-	if (atoi(iBool))
+	if (Strings::ToInt(iBool))
 		return true;
 	return false;
 }

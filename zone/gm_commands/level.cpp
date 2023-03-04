@@ -14,7 +14,7 @@ void command_level(Client *c, const Seperator *sep)
 		return;
 	}
 
-	auto level = static_cast<uint8>(std::stoul(sep->arg[1]));
+	auto level = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[1]));
 	auto max_level = static_cast<uint8>(RuleI(Character, MaxLevel));
 
 	if (c->Admin() < RuleI(GM, MinStatusToLevelTarget)) {

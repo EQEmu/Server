@@ -18,6 +18,7 @@
 #include "misc.h"
 #include "types.h"
 #include <cstring>
+#include "strings.h"
 
 std::map<int,std::string> DBFieldNames;
 
@@ -150,7 +151,7 @@ static char *temp=nullptr;
 		return false;
 	}
 	ptr++;
-	uint32 id = atoi(field[id_pos].c_str());
+	uint32 id = Strings::ToInt(field[id_pos].c_str());
 	items[id]=field;
 
 	for(i=0;i<10;i++) {

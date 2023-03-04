@@ -92,16 +92,16 @@ const NPCType *Horse::BuildHorseType(uint16 spell_id) {
     strcpy(npc_type->special_abilities, "19,1^20,1^24,1");
     npc_type->current_hp = 1;
     npc_type->max_hp = 1;
-    npc_type->race = atoi(row[0]);
-    npc_type->gender = atoi(row[1]); // Drogmor's are female horses. Yuck.
+    npc_type->race = Strings::ToInt(row[0]);
+    npc_type->gender = Strings::ToInt(row[1]); // Drogmor's are female horses. Yuck.
     npc_type->class_ = 1;
     npc_type->deity = 1;
     npc_type->level = 1;
     npc_type->npc_id = 0;
     npc_type->loottable_id = 0;
-    npc_type->texture = atoi(row[2]);     // mount color
-    npc_type->helmtexture = atoi(row[2]); // mount color
-    npc_type->runspeed = atof(row[3]);
+    npc_type->texture = Strings::ToInt(row[2]);     // mount color
+    npc_type->helmtexture = Strings::ToInt(row[2]); // mount color
+    npc_type->runspeed = Strings::ToFloat(row[3]);
 
     npc_type->light = 0;
     npc_type->STR = 75;

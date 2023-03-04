@@ -10,7 +10,7 @@ void command_findcharacter(Client *c, const Seperator *sep)
 	}
 
 	if (sep->IsNumber(1)) {
-		const auto character_id = std::stoul(sep->arg[1]);
+		const auto character_id = Strings::ToUnsignedInt(sep->arg[1]);
 
 		const auto& e = CharacterDataRepository::FindOne(content_db, character_id);
 		if (!e.id) {

@@ -11,7 +11,7 @@ void command_depop(Client *c, const Seperator *sep)
 	auto start_spawn_timer = false;
 
 	if (sep->IsNumber(1)) {
-		start_spawn_timer = std::stoi(sep->arg[1]) ? true : false;
+		start_spawn_timer = Strings::ToInt(sep->arg[1]) ? true : false;
 	}
 
 	c->Message(
