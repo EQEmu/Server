@@ -3964,10 +3964,10 @@ void NPC::HandleRoambox()
 	return;
 }
 
-void NPC::SetTaunting(bool tog) {
-	this->taunting = tog;
+void NPC::SetTaunting(bool is_taunting) {
+	taunting = is_taunting;
 
 	if (IsPet() && IsPetOwnerClient()) {
-		GetOwner()->CastToClient()->SetPetCommandState(PET_BUTTON_TAUNT, tog);
+		GetOwner()->CastToClient()->SetPetCommandState(PET_BUTTON_TAUNT, is_taunting);
 	}
 }
