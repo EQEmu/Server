@@ -310,7 +310,7 @@ public:
 	uint16	GetPetSpellID() const {return pet_spell_id;}
 	void	SetPetSpellID(uint16 amt) {pet_spell_id = amt;}
 	uint32	GetMaxDamage(uint8 tlevel);
-	void	SetTaunting(bool tog) {taunting = tog;}
+	void	SetTaunting(bool is_taunting);
 	bool	IsTaunting() const { return taunting; }
 	void	PickPocket(Client* thief);
 	void	Disarm(Client* client, int chance);
