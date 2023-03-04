@@ -116,10 +116,10 @@ public:
 
 	void	AddMember(Client *c, uint32 group = 0xFFFFFFFF, bool rleader=false, bool groupleader=false, bool looter=false);
 	void	AddBot(Bot* b, uint32 group = 0xFFFFFFFF, bool rleader=false, bool groupleader=false, bool looter=false); 
-	void    RaidGroupSay(const char* msg, const char* from, uint8 language, uint8 lang_skill);
+	void	RaidGroupSay(const char* msg, const char* from, uint8 language, uint8 lang_skill);
 	void	RaidSay(const char* msg, const char* from, uint8 language, uint8 lang_skill);
 	bool	IsEngaged();
-	Mob*    GetRaidMainAssistOneByName(const char* name);
+	Mob*	GetRaidMainAssistOneByName(const char* name);
 	void	RemoveMember(const char *c);
 	void	DisbandRaid();
 	void	MoveMember(const char *name, uint32 newGroup);

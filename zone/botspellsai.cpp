@@ -34,10 +34,6 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 
 	// Bot AI
 	Raid* raid = entity_list.GetRaidByBotName(this->GetName());
-	if (raid) {
-		return AICastSpell_Raid(tar, iChance, iSpellTypes);
-		//return true;
-	}
 
 	if (!tar) {
 		return false;
@@ -76,51 +72,7 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 
 	switch (iSpellTypes) {
 		case SpellType_Mez: {
-			if (tar->GetBodyType() != BT_Giant) {
-				if (!checked_los) {
-					if (!CheckLosFN(tar)) {
-						break;	//cannot see target... we assume that no spell is going to work since we will only be casting detrimental spells in this call
-					}
-					checked_los = true;
-				}
-
-				//TODO
-				//Check if single target or AoE mez is best
-				//if (TARGETS ON MT IS => 3 THEN botSpell = AoEMez)
-				//if (TARGETS ON MT IS <= 2 THEN botSpell = BestMez)
-
-				botSpell = GetBestBotSpellForMez(this);
-
-				if (botSpell.SpellId == 0) {
-					break;
-				}
-
-				Mob* addMob = GetFirstIncomingMobToMez(this, botSpell);
-
-				if (!addMob) {
-					//Say("!addMob.");
-					break;
-				}
-
-				if (!(!addMob->IsImmuneToSpell(botSpell.SpellId, this) && addMob->CanBuffStack(botSpell.SpellId, botLevel, true) >= 0)) {
-					break;
-				}
-
-				if (IsValidSpellRange(botSpell.SpellId, addMob)) {
-					castedSpell = AIDoSpellCast(botSpell.SpellIndex, addMob, botSpell.ManaCost);
-				}
-				if (castedSpell) {
-					BotGroupSay(
-						this,
-						fmt::format(
-							"Attempting to mesmerize {} with {}.",
-							addMob->GetCleanName(),
-							spells[botSpell.SpellId].name
-						).c_str()
-					);
-				}
-			}
-			break;
+			return BotCastMez(tar, botLevel, checked_los, castedSpell, botSpell, raid);
 		}
 		case SpellType_Heal: {
 			if (tar->DontHealMeBefore() < Timer::GetCurrentTime()) {
@@ -1178,6 +1130,65 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 			break;
 	}
 
+	return castedSpell;
+}
+
+bool Bot::BotCastMez(Mob *tar, uint8 botLevel, bool checked_los, bool &castedSpell, BotSpell &botSpell, Raid* raid) {
+
+	if (!checked_los) {
+		if (!CheckLosFN(tar)) {
+			return false;//cannot see target... we assume that no spell is going to work since we will only be casting detrimental spells in this call
+		}
+		checked_los = true;
+	}
+
+	//TODO
+	//Check if single target or AoE mez is best
+	//if (TARGETS ON MT IS => 3 THEN botSpell = AoEMez)
+	//if (TARGETS ON MT IS <= 2 THEN botSpell = BestMez)
+
+	botSpell = GetBestBotSpellForMez(this);
+
+	if (!IsValidSpell(botSpell.SpellId)) {
+		return false;
+	}
+
+	Mob* addMob = GetFirstIncomingMobToMez(this, botSpell);
+
+	if (!addMob) {
+		return false;
+	}
+
+	if (!(!addMob->IsImmuneToSpell(botSpell.SpellId, this) && addMob->CanBuffStack(botSpell.SpellId, botLevel, true) >= 0)) {
+		return false;
+	}
+
+	if (IsValidSpellRange(botSpell.SpellId, addMob)) {
+		castedSpell = AIDoSpellCast(botSpell.SpellIndex, addMob, botSpell.ManaCost);
+	}
+	if (castedSpell) {
+		if (raid) {
+			raid->RaidSay(
+				GetCleanName(),
+				fmt::format(
+					"Attempting to mesmerize {} with {}.",
+					addMob->GetCleanName(),
+					spells[botSpell.SpellId].name
+				).c_str(),
+				0,
+				100
+			);
+		} else {
+			BotGroupSay(
+				this,
+				fmt::format(
+					"Attempting to mesmerize {} with {}.",
+					addMob->GetCleanName(),
+					spells[botSpell.SpellId].name
+				).c_str()
+			);
+		}
+	}
 	return castedSpell;
 }
 

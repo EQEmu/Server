@@ -440,7 +440,7 @@ Bot::~Bot() {
 	}
 
 	if (HasRaid()) {
-		RemoveBotFromRaid(this);
+		Bot::RemoveBotFromRaid(this);
 	}
 
 	if (HasPet()) {
@@ -7356,19 +7356,6 @@ void Bot::Camp(bool save_to_database, bool camp_all) {
 
 	Sit();
 
-	if (HasGroup()) {
-		auto g = GetGroup();
-		if (!camp_all && g->IsLeader(this)) {
-			for (auto m : g->members) {
-				if (m->IsBot()) {
-					m->CastToBot()->Camp(true);
-				}
-			}
-		} else {
-			RemoveBotFromGroup(this, GetGroup());
-		}
-	}
-
 	LeaveHealRotationMemberPool();
 
 	if (save_to_database) {
@@ -7642,7 +7629,7 @@ void Bot::RemoveBotFromRaid(Bot* bot) {
 		uint32 gid = bot_raid->GetGroup(bot->GetName());
 		bot_raid->SendRaidGroupRemove(bot->GetName(), gid);
 		bot_raid->RemoveMember(bot->GetName());
-
+		bot_raid->GroupUpdate(gid);
 		if (!bot_raid->RaidCount()) {
 			bot_raid->DisbandRaid();
 		}

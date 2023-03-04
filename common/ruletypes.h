@@ -615,8 +615,6 @@ RULE_REAL(Bots, LeashDistance, 562500.0f, "Distance a bot is allowed to travel f
 RULE_BOOL(Bots, AllowApplyPoisonCommand, true, "Allows the use of the bot command 'applypoison'")
 RULE_BOOL(Bots, AllowApplyPotionCommand, true, "Allows the use of the bot command 'applypotion'")
 RULE_BOOL(Bots, RestrictApplyPotionToRogue, true, "Restricts the bot command 'applypotion' to rogue-usable potions (i.e., poisons)")
-RULE_BOOL(Bots, DisplayHealDamage, false, "Enables the display of bot heal damage to the bot owner client")
-RULE_BOOL(Bots, DisplaySpellDamage, false, "Enables the display of bot spell damage to the bot owner client")
 RULE_BOOL(Bots, OldRaceRezEffects, false, "Older clients had ID 757 for races with high starting STR, but it doesn't seem used anymore")
 RULE_BOOL(Bots, ResurrectionSickness, true, "Use Resurrection Sickness based on Resurrection spell cast, set to false to disable Resurrection Sickness.")
 RULE_INT(Bots, OldResurrectionSicknessSpell, 757, "757 is Default Old Resurrection Sickness Spell")

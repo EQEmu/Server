@@ -2579,14 +2579,14 @@ uint8 Bot::GetNumberNeedingHealedInRaidGroup(uint8 hpr, bool includePets) {
 	raid = entity_list.GetRaidByBotName(GetName());
 	uint32 r_group = raid->GetGroup(GetName());
 	std::vector<RaidMember> raid_group_members = raid->GetRaidGroupMembers(r_group);
-	//for (std::vector<RaidMember>::iterator iter = raid_group_members.begin(); iter != raid_group_members.end(); ++iter) {
-	for (int i = 0; i< raid_group_members.size(); ++i) {
-		if (raid_group_members.at(i).member && !raid_group_members.at(i).member->qglobal) {
-			if (raid_group_members.at(i).member->GetHPRatio() <= hpr)
+
+	for (auto& m : raid_group_members) {
+		if (m.member && !m.member->qglobal) {
+			if (m.member->GetHPRatio() <= hpr)
 				needHealed++;
 
 				if (includePets) {
-					if (raid_group_members.at(i).member->GetPet() && raid_group_members.at(i).member->GetPet()->GetHPRatio() <= hpr)
+					if (m.member->GetPet() && m.member->GetPet()->GetHPRatio() <= hpr)
 						needHealed++;
 				}
 			}
