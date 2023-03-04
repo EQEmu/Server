@@ -2086,6 +2086,10 @@ void Client::Handle_OP_AdventureMerchantPurchase(const EQApplicationPacket *app)
 	if (item->MaxCharges != 0)
 		charges = item->MaxCharges;
 
+	if (RuleB(Character, EnableDiscoveredItems) && !GetGM() && !IsDiscovered(item->ID)) {
+		DiscoverItem(item->ID);
+	}
+
 	EQ::ItemInstance *inst = database.CreateItem(item, charges);
 	if (!AutoPutLootInInventory(*inst, true, true))
 	{
@@ -2630,6 +2634,10 @@ void Client::Handle_OP_AltCurrencyPurchase(const EQApplicationPacket *app)
 			};
 
 			RecordPlayerEventLog(PlayerEvent::MERCHANT_PURCHASE, e);
+		}
+
+		if (RuleB(Character, EnableDiscoveredItems) && !GetGM() && !IsDiscovered(item->ID)) {
+			DiscoverItem(item->ID);
 		}
 
 		EQ::ItemInstance *inst = database.CreateItem(item, charges);
