@@ -434,8 +434,7 @@ public:
 	void PetAIProcess_Raid();
 	void AI_Process_Raid();
 	bool AICastSpell_Raid(Mob* tar, uint8 iChance, uint32 iSpellTypes);
-	static void ProcessRaidInvite(Bot* invitee, Client* invitor, bool group_invite = false);
-	static void ProcessRaidInvite(Client* invitee, Client* invitor);
+	static void ProcessRaidInvite(Mob* invitee, Client* invitor, bool group_invite = false);
 	static void RemoveBotFromRaid(Bot* bot);
 	uint8 GetNumberNeedingHealedInRaidGroup(uint8 hpr, bool includePets);
 	inline void SetDirtyAutoHaters() { m_dirtyautohaters = true; }

@@ -2594,13 +2594,13 @@ uint8 Bot::GetNumberNeedingHealedInRaidGroup(uint8 hpr, bool includePets) {
 	return needHealed;
 }
 
-void Bot::ProcessRaidInvite(Bot* invitee, Client* invitor, bool group_invite) {
+void Bot::ProcessRaidInvite(Mob* invitee, Client* invitor, bool group_invite) {
 
 	if (!invitee || !invitor) {
 		return;
 	}
 
-	if (invitee->IsBot() && invitee->GetBotOwnerCharacterID() != invitor->CharacterID()) {
+	if (invitee->IsBot() && invitee->CastToBot()->GetBotOwnerCharacterID() != invitor->CharacterID()) {
 		invitor->Message(
 			Chat::Red,
 			fmt::format(
