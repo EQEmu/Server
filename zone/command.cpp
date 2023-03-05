@@ -983,7 +983,6 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/emptyinventory.cpp"
 #include "gm_commands/enablerecipe.cpp"
 #include "gm_commands/endurance.cpp"
-#include "gm_commands/equipitem.cpp"
 #include "gm_commands/exptoggle.cpp"
 #include "gm_commands/faction.cpp"
 #include "gm_commands/feature.cpp"
