@@ -338,14 +338,14 @@ void ZoneGuildManager::DescribeGuild(Client *c, uint32 guild_id) const {
 	popup_text += "</tr>";
 
 	for (uint8 guild_rank = 0; guild_rank <= GUILD_MAX_RANK; guild_rank++) {
-		auto can_hear_guild_chat = info->ranks[guild_rank].permissions[GUILD_HEAR] ? "<c \"#00FF00\">✔</c>" : "<c \"#F62217\">❌</c>";
-		auto can_speak_guild_chat = info->ranks[guild_rank].permissions[GUILD_SPEAK] ? "<c \"#00FF00\">✔</c>" : "<c \"#F62217\">❌</c>";
-		auto can_invite = info->ranks[guild_rank].permissions[GUILD_INVITE] ? "<c \"#00FF00\">✔</c>" : "<c \"#F62217\">❌</c>";
-		auto can_remove = info->ranks[guild_rank].permissions[GUILD_REMOVE] ? "<c \"#00FF00\">✔</c>" : "<c \"#F62217\">❌</c>";
-		auto can_promote = info->ranks[guild_rank].permissions[GUILD_PROMOTE] ? "<c \"#00FF00\">✔</c>" : "<c \"#F62217\">❌</c>";
-		auto can_demote = info->ranks[guild_rank].permissions[GUILD_DEMOTE] ? "<c \"#00FF00\">✔</c>" : "<c \"#F62217\">❌</c>";
-		auto can_set_motd = info->ranks[guild_rank].permissions[GUILD_MOTD] ? "<c \"#00FF00\">✔</c>" : "<c \"#F62217\">❌</c>";
-		auto can_war_peace = info->ranks[guild_rank].permissions[GUILD_WARPEACE] ? "<c \"#00FF00\">✔</c>" : "<c \"#F62217\">❌</c>";
+		auto can_hear_guild_chat = info->ranks[guild_rank].permissions[GUILD_HEAR] ? "<c \"#00FF00\">Y</c>" : "<c \"#F62217\">N</c>";
+		auto can_speak_guild_chat = info->ranks[guild_rank].permissions[GUILD_SPEAK] ? "<c \"#00FF00\">Y</c>" : "<c \"#F62217\">N</c>";
+		auto can_invite = info->ranks[guild_rank].permissions[GUILD_INVITE] ? "<c \"#00FF00\">Y</c>" : "<c \"#F62217\">N</c>";
+		auto can_remove = info->ranks[guild_rank].permissions[GUILD_REMOVE] ? "<c \"#00FF00\">Y</c>" : "<c \"#F62217\">N</c>";
+		auto can_promote = info->ranks[guild_rank].permissions[GUILD_PROMOTE] ? "<c \"#00FF00\">Y</c>" : "<c \"#F62217\">N</c>";
+		auto can_demote = info->ranks[guild_rank].permissions[GUILD_DEMOTE] ? "<c \"#00FF00\">Y</c>" : "<c \"#F62217\">N</c>";
+		auto can_set_motd = info->ranks[guild_rank].permissions[GUILD_MOTD] ? "<c \"#00FF00\">Y</c>" : "<c \"#F62217\">N</c>";
+		auto can_war_peace = info->ranks[guild_rank].permissions[GUILD_WARPEACE] ? "<c \"#00FF00\">Y</c>" : "<c \"#F62217\">N</c>";
 		popup_text += fmt::format(
 			"<tr>"
 			"<td>{} ({})</td>"
