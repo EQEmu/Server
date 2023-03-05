@@ -183,9 +183,10 @@ Client::Client(EQStreamInterface *ieqs) : Mob(
   consent_throttle_timer(2000),
   tmSitting(0)
 {
+	for (auto client_filter = FilterNone; client_filter < _FilterCount; client_filter = eqFilterType(client_filter + 1)) {
+		SetFilter(client_filter, FilterShow);
+	}
 
-	for (int client_filter = 0; client_filter < _FilterCount; client_filter++)
-		ClientFilters[client_filter] = FilterShow;
 	cheat_manager.SetClient(this);
 	mMovementManager->AddClient(this);
 	character_id = 0;
@@ -3103,14 +3104,14 @@ void Client::ServerFilter(SetServerFilter_Struct* filter){
 */
 #define Filter0(type) \
 	if(filter->filters[type] == 1) \
-		ClientFilters[type] = FilterShow; \
+		SetFilter(type, FilterShow); \
 	else \
-		ClientFilters[type] = FilterHide;
+		SetFilter(type, FilterHide);
 #define Filter1(type) \
 	if(filter->filters[type] == 0) \
-		ClientFilters[type] = FilterShow; \
+		SetFilter(type, FilterShow); \
 	else \
-		ClientFilters[type] = FilterHide;
+		SetFilter(type, FilterHide);
 
 	Filter0(FilterGuildChat);
 	Filter0(FilterSocials);
@@ -3120,44 +3121,49 @@ void Client::ServerFilter(SetServerFilter_Struct* filter){
 	Filter0(FilterOOC);
 	Filter0(FilterBadWords);
 
-	if(filter->filters[FilterPCSpells] == 0)
-		ClientFilters[FilterPCSpells] = FilterShow;
-	else if(filter->filters[FilterPCSpells] == 1)
-		ClientFilters[FilterPCSpells] = FilterHide;
-	else
-		ClientFilters[FilterPCSpells] = FilterShowGroupOnly;
+	if (filter->filters[FilterPCSpells] == 0) {
+		SetFilter(FilterPCSpells, FilterShow);
+	} else if (filter->filters[FilterPCSpells] == 1) {
+		SetFilter(FilterPCSpells, FilterHide);
+	} else {
+		SetFilter(FilterPCSpells, FilterShowGroupOnly);
+	}
 
 	Filter1(FilterNPCSpells);
 
-	if(filter->filters[FilterBardSongs] == 0)
-		ClientFilters[FilterBardSongs] = FilterShow;
-	else if(filter->filters[FilterBardSongs] == 1)
-		ClientFilters[FilterBardSongs] = FilterShowSelfOnly;
-	else if(filter->filters[FilterBardSongs] == 2)
-		ClientFilters[FilterBardSongs] = FilterShowGroupOnly;
-	else
-		ClientFilters[FilterBardSongs] = FilterHide;
+	if (filter->filters[FilterBardSongs] == 0) {
+		SetFilter(FilterBardSongs, FilterShow);
+	} else if (filter->filters[FilterBardSongs] == 1) {
+		SetFilter(FilterBardSongs, FilterShowSelfOnly);
+	} else if (filter->filters[FilterBardSongs] == 2) {
+		SetFilter(FilterBardSongs, FilterShowGroupOnly);
+	} else {
+		SetFilter(FilterBardSongs, FilterHide);
+	}
 
-	if(filter->filters[FilterSpellCrits] == 0)
-		ClientFilters[FilterSpellCrits] = FilterShow;
-	else if(filter->filters[FilterSpellCrits] == 1)
-		ClientFilters[FilterSpellCrits] = FilterShowSelfOnly;
-	else
-		ClientFilters[FilterSpellCrits] = FilterHide;
+	if (filter->filters[FilterSpellCrits] == 0) {
+		SetFilter(FilterSpellCrits, FilterShow);
+	} else if (filter->filters[FilterSpellCrits] == 1) {
+		SetFilter(FilterSpellCrits, FilterShowSelfOnly);
+	} else {
+		SetFilter(FilterSpellCrits, FilterHide);
+	}
 
-	if (filter->filters[FilterMeleeCrits] == 0)
-		ClientFilters[FilterMeleeCrits] = FilterShow;
-	else if (filter->filters[FilterMeleeCrits] == 1)
-		ClientFilters[FilterMeleeCrits] = FilterShowSelfOnly;
-	else
-		ClientFilters[FilterMeleeCrits] = FilterHide;
+	if (filter->filters[FilterMeleeCrits] == 0) {
+		SetFilter(FilterMeleeCrits, FilterShow);
+	} else if (filter->filters[FilterMeleeCrits] == 1) {
+		SetFilter(FilterMeleeCrits, FilterShowSelfOnly);
+	} else {
+		SetFilter(FilterMeleeCrits, FilterHide);
+	}
 
-	if(filter->filters[FilterSpellDamage] == 0)
-		ClientFilters[FilterSpellDamage] = FilterShow;
-	else if(filter->filters[FilterSpellDamage] == 1)
-		ClientFilters[FilterSpellDamage] = FilterShowSelfOnly;
-	else
-		ClientFilters[FilterSpellDamage] = FilterHide;
+	if (filter->filters[FilterSpellDamage] == 0) {
+		SetFilter(FilterSpellDamage, FilterShow);
+	} else if (filter->filters[FilterSpellDamage] == 1) {
+		SetFilter(FilterSpellDamage, FilterShowSelfOnly);
+	} else {
+		SetFilter(FilterSpellDamage, FilterHide);
+	}
 
 	Filter0(FilterMyMisses);
 	Filter0(FilterOthersMiss);
@@ -3166,19 +3172,21 @@ void Client::ServerFilter(SetServerFilter_Struct* filter){
 	Filter1(FilterDamageShields);
 
 	if (ClientVersionBit() & EQ::versions::maskSoDAndLater) {
-		if (filter->filters[FilterDOT] == 0)
-			ClientFilters[FilterDOT] = FilterShow;
-		else if (filter->filters[FilterDOT] == 1)
-			ClientFilters[FilterDOT] = FilterShowSelfOnly;
-		else if (filter->filters[FilterDOT] == 2)
-			ClientFilters[FilterDOT] = FilterShowGroupOnly;
-		else
-			ClientFilters[FilterDOT] = FilterHide;
+		if (filter->filters[FilterDOT] == 0) {
+			SetFilter(FilterDOT, FilterShow);
+		} else if (filter->filters[FilterDOT] == 1) {
+			SetFilter(FilterDOT, FilterShowSelfOnly);
+		} else if (filter->filters[FilterDOT] == 2) {
+			SetFilter(FilterDOT, FilterShowGroupOnly);
+		} else {
+			SetFilter(FilterDOT, FilterHide);
+		}
 	} else {
-		if (filter->filters[FilterDOT] == 0) // show functions as self only
-			ClientFilters[FilterDOT] = FilterShowSelfOnly;
-		else
-			ClientFilters[FilterDOT] = FilterHide;
+		if (filter->filters[FilterDOT] == 0) { // show functions as self only
+			SetFilter(FilterDOT, FilterShowSelfOnly);
+		} else {
+			SetFilter(FilterDOT, FilterHide);
+		}
 	}
 
 	Filter1(FilterPetHits);
@@ -3187,15 +3195,14 @@ void Client::ServerFilter(SetServerFilter_Struct* filter){
 	Filter1(FilterPetSpells);
 
 	if (ClientVersionBit() & EQ::versions::maskSoDAndLater) {
-		if (filter->filters[FilterHealOverTime] == 0)
-			ClientFilters[FilterHealOverTime] = FilterShow;
-		// This is called 'Show Mine Only' in the clients
-		else if (filter->filters[FilterHealOverTime] == 1)
-			ClientFilters[FilterHealOverTime] = FilterShowSelfOnly;
-		else
-			ClientFilters[FilterHealOverTime] = FilterHide;
-	} else {
-		// these clients don't have a 'self only' filter
+		if (filter->filters[FilterHealOverTime] == 0) {
+			SetFilter(FilterHealOverTime, FilterShow);
+		} else if (filter->filters[FilterHealOverTime] == 1) {
+			SetFilter(FilterHealOverTime, FilterShowSelfOnly);
+		} else {
+			SetFilter(FilterHealOverTime, FilterHide);
+		}
+	} else { // these clients don't have a 'self only' filter
 		Filter1(FilterHealOverTime);
 	}
 }
