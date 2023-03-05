@@ -931,8 +931,8 @@ private:
 
 	bool BotCastSong(Mob* tar, uint8 botLevel);
 
-	void GetBotGroupValidTargets(const Client* bot_owner, Client* leash_owner, float lo_distance, float leash_distance,
-	                             Mob* const& bg_member, Mob* bgm_target);
+	void AddBotGroupTarget(const Client* bot_owner, Client* leash_owner, float lo_distance, float leash_distance,
+	                       Mob* const& bg_member, Mob* bgm_target);
 };
 
 bool IsSpellInBotList(DBbotspells_Struct* spell_list, uint16 iSpellID);

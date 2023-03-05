@@ -2712,7 +2712,7 @@ void Bot::AI_Process()
 					if (!bgm_target || !bgm_target->IsNPC()) {
 						continue;
 					}
-					GetBotGroupValidTargets(bot_owner, leash_owner, lo_distance, leash_distance, bg_member, bgm_target);
+					AddBotGroupTarget(bot_owner, leash_owner, lo_distance, leash_distance, bg_member, bgm_target);
 				}
 			} else if (raid) {
 				for (const auto& raid_member : raid->members) {
@@ -2724,7 +2724,8 @@ void Bot::AI_Process()
 					if (!rm_target || !rm_target->IsNPC()) {
 						continue;
 					}
-					GetBotGroupValidTargets(bot_owner, leash_owner, lo_distance, leash_distance, raid_member.member, rm_target);
+					AddBotGroupTarget(bot_owner, leash_owner, lo_distance, leash_distance, raid_member.member,
+					                  rm_target);
 				}
 			}
 		}
@@ -3584,8 +3585,7 @@ void Bot::AI_Process()
 #undef NOT_PASSIVE
 }
 
-void Bot::GetBotGroupValidTargets(const Client* bot_owner, Client* leash_owner, float lo_distance, float leash_distance,
-                                  Mob* const& bg_member, Mob* bgm_target) {
+void Bot::AddBotGroupTarget(const Client* bot_owner, Client* leash_owner, float lo_distance, float leash_distance, Mob* const& bg_member, Mob* bgm_target) {
 	if (!bgm_target->IsMezzed() &&
 	    ((bot_owner->GetBotOption(Client::booAutoDefend) && bgm_target->GetHateAmount(bg_member)) || leash_owner->AutoAttackEnabled()) &&
 		lo_distance <= leash_distance &&

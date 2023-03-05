@@ -11860,7 +11860,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 		Client* invitee = entity_list.GetClientByName(raid_command_packet->leader_name);
 		Client* invitor = entity_list.GetClientByName(raid_command_packet->player_name);
 
-		if (!invitee && !invitor) {
+		if (!invitee || !invitor) {
 			return;
 		}
 
