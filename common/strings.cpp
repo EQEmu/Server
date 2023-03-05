@@ -781,27 +781,72 @@ std::string Strings::Random(size_t length)
 // fails to cast to a number
 int Strings::ToInt(const std::string &s, int fallback)
 {
-	return Strings::IsNumber(s) ? std::stoi(s) : fallback;
+	if (!Strings::IsNumber(s)) {
+		return fallback;
+	}
+
+	try {
+		return std::stoi(s);
+	}
+	catch (std::exception &) {
+		return fallback;
+	}
 }
 
 int64 Strings::ToBigInt(const std::string &s, int64 fallback)
 {
-	return Strings::IsNumber(s) ? std::stoll(s) : fallback;
+	if (!Strings::IsNumber(s)) {
+		return fallback;
+	}
+
+	try {
+		return std::stoll(s);
+	}
+	catch (std::exception &) {
+		return fallback;
+	}
 }
 
 uint32 Strings::ToUnsignedInt(const std::string &s, uint32 fallback)
 {
-	return Strings::IsNumber(s) ? std::stoul(s) : fallback;
+	if (!Strings::IsNumber(s)) {
+		return fallback;
+	}
+
+	try {
+		return std::stoul(s);
+	}
+	catch (std::exception &) {
+		return fallback;
+	}
 }
 
 uint64 Strings::ToUnsignedBigInt(const std::string &s, uint64 fallback)
 {
-	return Strings::IsNumber(s) ? std::stoull(s) : fallback;
+	if (!Strings::IsNumber(s)) {
+		return fallback;
+	}
+
+	try {
+		return std::stoull(s);
+	}
+	catch (std::exception &) {
+		return fallback;
+	}
 }
 
 float Strings::ToFloat(const std::string &s, float fallback)
 {
-	return Strings::IsFloat(s) ? std::stof(s) : fallback;
+	if (!Strings::IsFloat(s)) {
+		return fallback;
+	}
+
+	try {
+		return std::stof(s);
+	}
+	catch (std::exception &) {
+		return fallback;
+	}
 }
 
 std::string Strings::RemoveNumbers(std::string s)
