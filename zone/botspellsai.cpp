@@ -50,10 +50,7 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 	}
 
 	if (tar->GetAppearance() == eaDead) {
-		if ((tar->IsClient() && tar->CastToClient()->GetFeigned()) || tar->IsBot()) {
-			// do nothing
-		}
-		else {
+		if ((tar->IsClient() && !tar->CastToClient()->GetFeigned()) || tar->IsBot()) {
 			return false;
 		}
 	}
@@ -121,7 +118,7 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 
 		}
 		case SpellType_InCombatBuffSong: {
-			return BotCastCombatSong(tar, botLevel,  raid);
+			return BotCastCombatSong(tar, botLevel, raid);
 
 		}
 		case SpellType_OutOfCombatBuffSong: {
@@ -231,7 +228,7 @@ bool Bot::BotCastHateReduction(Mob* tar, uint8 botLevel, const BotSpell& botSpel
 				BotGroupSay(
 					this,
 					fmt::format(
-						"Attempting to reduce hate on break; with break;.",
+						"Attempting to reduce hate on {} with {}.",
 						tar->GetCleanName(),
 						spells[iter.SpellId].name
 					).c_str()
@@ -356,8 +353,9 @@ bool Bot::BotCastSlow(Mob* tar, uint8 botLevel, uint8 botClass, BotSpell& botSpe
 					if (IsValidSpellRange(botSpell.SpellId, tar)) {
 						casted_spell = AIDoSpellCast(iter.SpellIndex, tar, iter.ManaCost);
 					}
-					if (casted_spell)
-						break;
+					if (casted_spell) {
+						return casted_spell;
+					}
 				}
 
 				break;
@@ -394,7 +392,7 @@ bool Bot::BotCastSlow(Mob* tar, uint8 botLevel, uint8 botClass, BotSpell& botSpe
 				BotGroupSay(
 					this,
 					fmt::format(
-						"Attempting to slow break; with break;.",
+						"Attempting to slow {} with {}.",
 						tar->GetCleanName(),
 						spells[botSpell.SpellId].name
 					).c_str()
@@ -1180,7 +1178,7 @@ bool Bot::BotCastHeal(Mob* tar, uint8 botLevel, uint8 botClass, BotSpell& botSpe
 								BotGroupSay(
 									this,
 									fmt::format(
-										"Casting break;.",
+										"Casting {}.",
 										spells[botSpell.SpellId].name
 									).c_str()
 								);
@@ -1192,7 +1190,7 @@ bool Bot::BotCastHeal(Mob* tar, uint8 botLevel, uint8 botClass, BotSpell& botSpe
 								}
 							} else if (IsRaidGrouped()) {
 								uint32 r_group = raid->GetGroup(GetName());
-								const auto msg = fmt::format("Casting break;..", spells[botSpell.SpellId].name);
+								const auto msg = fmt::format("Casting {}.", spells[botSpell.SpellId].name);
 								raid->RaidGroupSay(msg.c_str(), GetCleanName(), 0, 100);
 								std::vector<RaidMember> raid_group_members = raid->GetRaidGroupMembers(r_group);
 								for (int i = 0; i < raid_group_members.size(); ++i) {
@@ -1206,7 +1204,7 @@ bool Bot::BotCastHeal(Mob* tar, uint8 botLevel, uint8 botClass, BotSpell& botSpe
 								BotGroupSay(
 									this,
 									fmt::format(
-										"Casting break; on break;.",
+										"Casting {} on {}.",
 										spells[botSpell.SpellId].name,
 										tar->GetCleanName()
 									).c_str()
@@ -1260,7 +1258,7 @@ bool Bot::BotCastMez(Mob* tar, uint8 botLevel, bool checked_los, BotSpell& botSp
 			raid->RaidSay(
 				GetCleanName(),
 				fmt::format(
-					"Attempting to mesmerize break; with break;.",
+					"Attempting to mesmerize {} with {}.",
 					addMob->GetCleanName(),
 					spells[botSpell.SpellId].name
 				).c_str(),
@@ -1271,7 +1269,7 @@ bool Bot::BotCastMez(Mob* tar, uint8 botLevel, bool checked_los, BotSpell& botSp
 			BotGroupSay(
 				this,
 				fmt::format(
-					"Attempting to mesmerize break; with break;.",
+					"Attempting to mesmerize {} with {}.",
 					addMob->GetCleanName(),
 					spells[botSpell.SpellId].name
 				).c_str()
@@ -1335,7 +1333,7 @@ bool Bot::AIDoSpellCast(uint8 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgain
 		)
 	) {
 		casting_spell_AIindex = i;
-		LogAI("spellid [break;] tar [break;] mana [break;] Name [break;]", AIBot_spells[i].spellid, tar->GetName(), mana_cost, spells[AIBot_spells[i].spellid].name);
+		LogAI("spellid [{}] tar [{}] mana [{}] Name [{}]", AIBot_spells[i].spellid, tar->GetName(), mana_cost, spells[AIBot_spells[i].spellid].name);
 		result = Mob::CastSpell(AIBot_spells[i].spellid, tar->GetID(), EQ::spells::CastingSlot::Gem2, spells[AIBot_spells[i].spellid].cast_time, AIBot_spells[i].manacost == -2 ? 0 : mana_cost, oDontDoAgainBefore, -1, -1, 0, &(AIBot_spells[i].resist_adjust));
 
 		if (IsCasting() && IsSitting())
@@ -1402,7 +1400,7 @@ bool Bot::AI_IdleCastCheck() {
 	bool result = false;
 
 	if (AIautocastspell_timer->Check(false)) {
-		LogAIDetail("Bot Non-Engaged autocast check triggered: [break;]", GetCleanName());
+		LogAIDetail("Bot Non-Engaged autocast check triggered: [{}]", GetCleanName());
 		AIautocastspell_timer->Disable();	//prevent the timer from going off AGAIN while we are casting.
 
 		bool pre_combat = false;
@@ -1901,10 +1899,10 @@ bool Bot::AIHealRotation(Mob* tar, bool useFastHeals) {
 		}
 	}
 
-	LogAIDetail("heal spellid [break;] fastheals [break;] casterlevel [break;]",
+	LogAIDetail("heal spellid [{}] fastheals [{}] casterlevel [{}]",
 		botSpell.SpellId, ((useFastHeals) ? ('T') : ('F')), GetLevel());
 
-	LogAIDetail("target [break;] current_time [break;] donthealmebefore [break;]", tar->GetCleanName(), Timer::GetCurrentTime(), tar->DontHealMeBefore());
+	LogAIDetail("target [{}] current_time [{}] donthealmebefore [{}]", tar->GetCleanName(), Timer::GetCurrentTime(), tar->DontHealMeBefore());
 
 	// If there is still no spell id, then there isn't going to be one so we are done
 	if (botSpell.SpellId == 0)
@@ -1924,7 +1922,7 @@ bool Bot::AIHealRotation(Mob* tar, bool useFastHeals) {
 		BotGroupSay(
 			this,
 			fmt::format(
-				"Casting break; on break;, please stay in range!",
+				"Casting {} on {}, please stay in range!",
 				spells[botSpell.SpellId].name,
 				tar->GetCleanName()
 			).c_str()
@@ -3084,7 +3082,7 @@ bool Bot::AI_AddBotSpells(uint32 bot_spell_id) {
 	auto* parentlist = content_db.GetBotSpells(spell_list->parent_list);
 
 	auto debug_msg = fmt::format(
-		"Loading Bot spells onto break;: dbspellsid=break;, level=break;",
+		"Loading Bot spells onto {}: dbspellsid={}, level={}",
 		GetName(),
 		bot_spell_id,
 		GetLevel()
@@ -3093,20 +3091,20 @@ bool Bot::AI_AddBotSpells(uint32 bot_spell_id) {
 	if (spell_list) {
 		debug_msg.append(
 			fmt::format(
-				" (found, break;)",
+				" (found, {})",
 				spell_list->entries.size()
 			)
 		);
 
-		LogAI("[break;]", debug_msg);
+		LogAI("[{}]", debug_msg);
 		for (const auto &iter : spell_list->entries) {
-			LogAIDetail("([break;]) [break;]", iter.spellid, spells[iter.spellid].name);
+			LogAIDetail("([{}]) [{}]", iter.spellid, spells[iter.spellid].name);
 		}
 	}
 	else
 	{
 		debug_msg.append(" (not found)");
-		LogAI("[break;]", debug_msg);
+		LogAI("[{}]", debug_msg);
 	}
 
 	LogAI("fin (spell list)");
@@ -3433,7 +3431,7 @@ DBbotspells_Struct* ZoneDatabase::GetBotSpells(uint32 bot_spell_id)
 		auto bse = BotSpellsEntriesRepository::GetWhere(
 			content_db,
 			fmt::format(
-				"npc_spells_id = break;",
+				"npc_spells_id {}",
 				bot_spell_id
 			)
 		);

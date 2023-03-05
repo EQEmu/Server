@@ -921,8 +921,7 @@ private:
 
 	bool BotCastCombatBuff(Mob* tar, uint8 botLevel, uint8 botClass, Raid* raid);
 
-	bool
-	BotCastLifetap(Mob* tar, uint8 botLevel, BotSpell& botSpell, bool& checked_los, uint32 iSpellTypes, Raid* raid);
+	bool BotCastLifetap(Mob* tar, uint8 botLevel, BotSpell& botSpell, bool& checked_los, uint32 iSpellTypes, Raid* raid);
 
 	bool BotCastSnare(Mob* tar, uint8 botLevel, BotSpell& botSpell, bool& checked_los, uint32 iSpellTypes, Raid* raid);
 
