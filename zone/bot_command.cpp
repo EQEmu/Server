@@ -3179,7 +3179,14 @@ void bot_command_find_aliases(Client *c, const Seperator *sep)
 		if (strcasecmp(find_iter->second.c_str(), alias_iter.second.c_str()) || c->Admin() < command_iter->second->access)
 			continue;
 
-		c->Message(Chat::White, "%c%s", BOT_COMMAND_CHAR, alias_iter.first.c_str());
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"^{}",
+				alias_iter.first
+			).c_str()
+		);
+
 		++bot_command_aliases_shown;
 	}
 	c->Message(Chat::White, "%d bot command alias%s listed.", bot_command_aliases_shown, bot_command_aliases_shown != 1 ? "es" : "");
@@ -3413,7 +3420,15 @@ void bot_command_help(Client *c, const Seperator *sep)
 		if (c->Admin() < command_iter.second->access)
 			continue;
 
-		c->Message(Chat::White, "%c%s - %s", BOT_COMMAND_CHAR, command_iter.first.c_str(), command_iter.second->desc == nullptr ? "[no description]" : command_iter.second->desc);
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"^{} - {}",
+				command_iter.first,
+				command_iter.second->desc ? command_iter.second->desc : "No Description"
+			).c_str()
+		);
+
 		++bot_commands_shown;
 	}
 	if (parse->PlayerHasQuestSub(EVENT_BOT_COMMAND)) {
@@ -3654,8 +3669,14 @@ void bot_command_item_use(Client* c, const Seperator* sep)
 			continue;
 		}
 
-		msg = StringFormat("%cinventorygive byname %s", BOT_COMMAND_CHAR, bot_iter->GetCleanName());
-		text_link = bot_iter->CreateSayLink(c, msg.c_str(), bot_iter->GetCleanName());
+		text_link = bot_iter->CreateSayLink(
+			c,
+			fmt::format(
+				"^inventorygive byname {}",
+				bot_iter->GetCleanName()
+			).c_str(),
+			bot_iter->GetCleanName()
+		);
 
 		for (auto slot_iter : equipable_slot_list) {
 			// needs more failure criteria - this should cover the bulk for now
@@ -10243,7 +10264,15 @@ void helper_send_available_subcommands(Client *bot_owner, const char* command_si
 		if (bot_owner->Admin() < find_iter->second->access)
 			continue;
 
-		bot_owner->Message(Chat::White, "%c%s - %s", BOT_COMMAND_CHAR, subcommand_iter, ((find_iter != bot_command_list.end()) ? (find_iter->second->desc) : ("[no description]")));
+		bot_owner->Message(
+			Chat::White,
+			fmt::format(
+				"^{} - {}",
+				subcommand_iter,
+				find_iter != bot_command_list.end() ? find_iter->second->desc : "No Description"
+			).c_str()
+		);
+
 		++bot_subcommands_shown;
 	}
 
