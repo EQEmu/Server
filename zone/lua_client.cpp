@@ -36,11 +36,6 @@ void Lua_Client::Save(int commit_now) {
 	self->Save(commit_now);
 }
 
-void Lua_Client::SaveBackup() {
-	Lua_Safe_Call_Void();
-	self->SaveBackup();
-}
-
 bool Lua_Client::Connected() {
 	Lua_Safe_Call_Bool();
 	return self->Connected();
@@ -3418,7 +3413,6 @@ luabind::scope lua_register_client() {
 	.def("RewardFaction", (void(Lua_Client::*)(int,int))&Lua_Client::RewardFaction)
 	.def("Save", (void(Lua_Client::*)(int))&Lua_Client::Save)
 	.def("Save", (void(Lua_Client::*)(void))&Lua_Client::Save)
-	.def("SaveBackup", (void(Lua_Client::*)(void))&Lua_Client::SaveBackup)
 	.def("ScribeSpell", (void(Lua_Client::*)(int,int))&Lua_Client::ScribeSpell)
 	.def("ScribeSpell", (void(Lua_Client::*)(int,int,bool))&Lua_Client::ScribeSpell)
 	.def("ScribeSpells", (uint16(Lua_Client::*)(uint8,uint8))&Lua_Client::ScribeSpells)
