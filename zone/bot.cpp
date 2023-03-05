@@ -8771,26 +8771,31 @@ void EntityList::ScanCloseClientMobs(std::unordered_map<uint16, Mob*>& close_mob
 	LogAIScanCloseDetail("Close Client Mob List Size [{}] for mob [{}]", close_mobs.size(), scanning_mob->GetCleanName());
 }
 
-uint8 Bot::GetNumberNeedingHealedInGroup(uint8 hpr, bool includePets) {
-	uint8 needHealed = 0;
-	Group *g = nullptr;
-	if(HasGroup()) {
-		g = GetGroup();
-		if(g) {
-			for(int i = 0; i < MAX_GROUP_MEMBERS; i++) {
-				if(g->members[i] && !g->members[i]->qglobal) {
-					if(g->members[i]->GetHPRatio() <= hpr)
-						needHealed++;
+uint8 Bot::GetNumberNeedingHealedInGroup(uint8 hpr, bool includePets, Raid* raid) {
 
-					if(includePets) {
-						if(g->members[i]->GetPet() && g->members[i]->GetPet()->GetHPRatio() <= hpr)
-							needHealed++;
+	uint8 need_healed = 0;
+	if (HasGroup()) {
+
+		auto group_members = GetGroup();
+		if (group_members) {
+
+			for (auto member : group_members->members) {
+				if (member && !member->qglobal) {
+
+					if (member->GetHPRatio() <= hpr) {
+						need_healed++;
+					}
+
+					if (includePets) {
+						if (member->GetPet() && member->GetPet()->GetHPRatio() <= hpr) {
+							need_healed++;
+						}
 					}
 				}
 			}
 		}
 	}
-	return needHealed;
+	return GetNumberNeedingHealedInRaidGroup(need_healed, hpr, includePets, raid);
 }
 
 int Bot::GetRawACNoShield(int &shield_ac) {
