@@ -432,9 +432,7 @@ public:
 	static uint32 GetDisciplineRemainingTime(Bot *caster, int timer_index);
 
 	//Raid methods
-	void PetAIProcess_Raid();
 	void AI_Process_Raid();
-	bool AICastSpell_Raid(Mob* tar, uint8 iChance, uint32 iSpellTypes);
 	static void ProcessRaidInvite(Mob* invitee, Client* invitor, bool group_invite = false);
 	static void RemoveBotFromRaid(Bot* bot);
 	inline void SetDirtyAutoHaters() { m_dirtyautohaters = true; }
@@ -511,12 +509,6 @@ public:
 	bool IsGroupNuker() { return m_CastingRoles.GroupNuker; }
 	bool IsGroupDoter() { return m_CastingRoles.GroupDoter; }
 	static void UpdateGroupCastingRoles(const Group* group, bool disband = false);
-
-	//bool IsRaidHealer() { return m_CastingRoles.RaidHealer; }
-	//bool IsRaidSlower() { return m_CastingRoles.RaidSlower; }
-	//bool IsRaidNuker() { return m_CastingRoles.RaidNuker; }
-	//bool IsRaidDoter() { return m_CastingRoles.RaidDoter; }
-	//static void UpdateRaidCastingRoles(const Raid* raid, bool disband = false);
 
 	bool IsBotCaster() { return IsCasterClass(GetClass()); }
 	bool IsBotHybrid() { return IsHybridClass(GetClass()); }
@@ -938,6 +930,9 @@ private:
 	bool BotCastCombatSong(Mob* tar, uint8 botLevel);
 
 	bool BotCastSong(Mob* tar, uint8 botLevel);
+
+	void GetBotGroupValidTargets(const Client* bot_owner, Client* leash_owner, float lo_distance, float leash_distance,
+	                             Mob* const& bg_member, Mob* bgm_target);
 };
 
 bool IsSpellInBotList(DBbotspells_Struct* spell_list, uint16 iSpellID);

@@ -38,6 +38,4 @@
 
 #include <sstream>
 
-//void Bot::PetAIProcess_Raid();
-
 #endif // BOT_RAID_H
