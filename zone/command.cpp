@@ -188,7 +188,7 @@ int command_init(void)
 		command_add("incstat", "Increases or Decreases a client's stats permanently.", AccountStatus::GMMgmt, command_incstat) ||
 		command_add("instance", "Modify Instances", AccountStatus::GMMgmt, command_instance) ||
 		command_add("interrogateinv", "use [help] argument for available options", AccountStatus::Player, command_interrogateinv) ||
-		command_add("interrupt", "[message id] [color] - Interrupt your casting. Arguments are optional.", AccountStatus::Guide, command_interrupt) ||
+		command_add("interrupt", "[Message id] [Color] - Interrupt your casting. Arguments are optional.", AccountStatus::Guide, command_interrupt) ||
 		command_add("invsnapshot", "Manipulates inventory snapshots for your current target", AccountStatus::QuestTroupe, command_invsnapshot) ||
 		command_add("invul", "[On|Off]] - Turn player target's or your invulnerable flag on or off", AccountStatus::QuestTroupe, command_invul) ||
 		command_add("ipban", "[IP] - Ban IP", AccountStatus::GMMgmt, command_ipban) ||
