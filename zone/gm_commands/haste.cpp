@@ -1,3 +1,5 @@
+#include "../client.h"
+
 void command_haste(Client *c, const Seperator *sep)
 {
 	const auto arguments = sep->argnum;
