@@ -34,7 +34,6 @@ public:
 	void Sit();
 	void Save();
 	void Save(int commit_now);
-	void SaveBackup();
 	bool Connected();
 	bool InZone();
 	void Kick();

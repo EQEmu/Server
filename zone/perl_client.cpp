@@ -19,11 +19,6 @@ bool Perl_Client_Save(Client* self, uint8 commit_now) // @categories Script Util
 	return self->Save(commit_now);
 }
 
-void Perl_Client_SaveBackup(Client* self) // @categories Script Utility
-{
-	self->SaveBackup();
-}
-
 bool Perl_Client_Connected(Client* self) // @categories Script Utility
 {
 	return self->Connected();
@@ -3272,7 +3267,6 @@ void perl_register_client()
 	package.add("ResetItemCooldown", &Perl_Client_ResetItemCooldown);
 	package.add("ResetTrade", &Perl_Client_ResetTrade);
 	package.add("Save", &Perl_Client_Save);
-	package.add("SaveBackup", &Perl_Client_SaveBackup);
 	package.add("ScribeSpell", (void(*)(Client*, uint16, int))&Perl_Client_ScribeSpell);
 	package.add("ScribeSpell", (void(*)(Client*, uint16, int, bool))&Perl_Client_ScribeSpell);
 	package.add("ScribeSpells", &Perl_Client_ScribeSpells);
