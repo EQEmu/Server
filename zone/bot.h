@@ -832,7 +832,6 @@ private:
 
 	std::shared_ptr<HealRotation> m_member_of_heal_rotation;
 
-	std::map<uint32, BotAA> botAAs;
 	InspectMessage_Struct _botInspectMessage;
 	bool _altoutofcombatbehavior;
 	bool _showhelm;
