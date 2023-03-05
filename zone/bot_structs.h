@@ -34,22 +34,6 @@ struct BotsAvailableList {
 	uint32 Owner_ID;
 };
 
-struct BotGroup {
-	uint32 BotGroupID;
-	uint32 BotID;
-};
-
-struct BotGroupList {
-	std::string BotGroupName;
-	std::string BotGroupLeaderName;
-};
-
-struct SpawnedBotsList {
-	char BotName[64];
-	char ZoneName[64];
-	uint32 BotLeaderCharID;
-};
-
 struct BotSpell {
 	uint16 SpellId;
 	int SpellIndex;
