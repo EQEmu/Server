@@ -78,8 +78,6 @@ extern volatile bool is_zone_loaded;
 extern WorldServer worldserver;
 extern uint32 numclients;
 extern PetitionList petition_list;
-bool commandlogged;
-char entirecommand[255];
 
 void UpdateWindowTitle(char* iNewTitle);
 
