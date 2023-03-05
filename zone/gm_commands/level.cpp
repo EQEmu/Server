@@ -2,22 +2,21 @@
 
 void command_level(Client *c, const Seperator *sep)
 {
-	int arguments = sep->argnum;
+	const auto arguments = sep->argnum;
 	if (!arguments || !sep->IsNumber(1)) {
 		c->Message(Chat::White, "Usage: #level [Level]");
 		return;
 	}
 
-	auto target = c->GetTarget();
-	if (!target) {
-		c->Message(Chat::White, "You must have a target to use this command.");
-		return;
+	Mob* t = c;
+	if (c->GetTarget()) {
+		t = c->GetTarget();
 	}
 
 	auto level = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[1]));
 	auto max_level = static_cast<uint8>(RuleI(Character, MaxLevel));
 
-	if (c->Admin() < RuleI(GM, MinStatusToLevelTarget)) {
+	if (c != t && c->Admin() < RuleI(GM, MinStatusToLevelTarget)) {
 		c->Message(Chat::White, "Your status is not high enough to change another person's level.");
 		return;
 	}
@@ -37,12 +36,12 @@ void command_level(Client *c, const Seperator *sep)
 		return;
 	}
 
-	target->SetLevel(level, true);
-	if (target->IsClient()) {
-		target->CastToClient()->SendLevelAppearance();
+	t->SetLevel(level, true);
+	if (t->IsClient()) {
+		t->CastToClient()->SendLevelAppearance();
 
 		if (RuleB(Bots, Enabled) && RuleB(Bots, BotLevelsWithOwner)) {
-			Bot::LevelBotWithClient(target->CastToClient(), level, true);
+			Bot::LevelBotWithClient(t->CastToClient(), level, true);
 		}
 	}
 }
