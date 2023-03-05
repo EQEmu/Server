@@ -3374,7 +3374,7 @@ DBbotspells_Struct* ZoneDatabase::GetBotSpells(uint32 bot_spell_id)
 		auto bse = BotSpellsEntriesRepository::GetWhere(
 			content_db,
 			fmt::format(
-				"npc_spells_id {}",
+				"npc_spells_id = {}",
 				bot_spell_id
 			)
 		);
