@@ -10143,8 +10143,7 @@ void helper_command_depart_list(Client* bot_owner, Bot* druid_bot, Bot* wizard_b
 			}
 
 			msg = fmt::format(
-				"{}circle {}{}",
-				std::string(1, BOT_COMMAND_CHAR),
+				"^circle {}{}",
 				spells[local_entry->spell_id].teleport_zone,
 				single_flag ? " single" : ""
 			);
@@ -10179,8 +10178,7 @@ void helper_command_depart_list(Client* bot_owner, Bot* druid_bot, Bot* wizard_b
 			}
 
 			msg = fmt::format(
-				"{}portal {}{}",
-				std::to_string(BOT_COMMAND_CHAR),
+				"^portal {}{}",
 				spells[local_entry->spell_id].teleport_zone,
 				single_flag ? " single" : ""
 			);
