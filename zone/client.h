@@ -1313,7 +1313,6 @@ public:
 	bool m_requested_shared_task_removal = false;
 
 	std::vector<Client*> GetPartyMembers();
-	void HandleUpdateTasksOnKill(uint32 npc_type_id);
 
 	inline const EQ::versions::ClientVersion ClientVersion() const { return m_ClientVersion; }
 	inline const uint32 ClientVersionBit() const { return m_ClientVersionBit; }
