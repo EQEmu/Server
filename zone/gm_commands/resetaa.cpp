@@ -7,15 +7,14 @@ void command_resetaa(Client *c, const Seperator *sep)
 		return;
 	}
 
-	auto target = c->GetTarget()->CastToClient();
-	target->ResetAA();
-		
+	auto t = c->GetTarget()->CastToClient();
+	t->ResetAA();
+
 	c->Message(
 		Chat::White,
 		fmt::format(
 			"Successfully reset all Alternate Advancements for {}.",
-			c->GetTargetDescription(target)
+			c->GetTargetDescription(t)
 		).c_str()
 	);
 }
-
