@@ -907,37 +907,37 @@ private:
 
 	bool BotCastHeal(Mob* tar, uint8 botLevel, uint8 botClass, BotSpell& botSpell, Raid* raid);
 
-	bool BotCastRoot(Mob* tar, uint8 botLevel, uint32 iSpellTypes, BotSpell& botSpell, bool& checked_los, Raid* raid);
+	bool BotCastRoot(Mob* tar, uint8 botLevel, uint32 iSpellTypes, BotSpell& botSpell, const bool& checked_los);
 
-	bool BotCastBuff(Mob* tar, uint8 botLevel, uint8 botClass, Raid* raid);
+	bool BotCastBuff(Mob* tar, uint8 botLevel, uint8 botClass);
 
-	bool BotCastEscape(Mob*& tar, uint8 botClass, BotSpell& botSpell, uint32 iSpellTypes, Raid* raid);
+	bool BotCastEscape(Mob*& tar, uint8 botClass, BotSpell& botSpell, uint32 iSpellTypes);
 
-	bool BotCastNuke(Mob* tar, uint8 botLevel, uint8 botClass, BotSpell& botSpell, bool& checked_los, Raid* raid);
+	bool BotCastNuke(Mob* tar, uint8 botLevel, uint8 botClass, BotSpell& botSpell, const bool& checked_los);
 
-	bool BotCastDispel(Mob* tar, BotSpell& botSpell, uint32 iSpellTypes, bool& checked_los, Raid* raid);
+	bool BotCastDispel(Mob* tar, BotSpell& botSpell, uint32 iSpellTypes, const bool& checked_los);
 
-	bool BotCastPet(Mob* tar, uint8 botClass, BotSpell& botSpell, Raid* raid);
+	bool BotCastPet(Mob* tar, uint8 botClass, BotSpell& botSpell);
 
-	bool BotCastCombatBuff(Mob* tar, uint8 botLevel, uint8 botClass, Raid* raid);
+	bool BotCastCombatBuff(Mob* tar, uint8 botLevel, uint8 botClass);
 
-	bool BotCastLifetap(Mob* tar, uint8 botLevel, BotSpell& botSpell, bool& checked_los, uint32 iSpellTypes, Raid* raid);
+	bool BotCastLifetap(Mob* tar, uint8 botLevel, BotSpell& botSpell, const bool& checked_los, uint32 iSpellTypes);
 
-	bool BotCastSnare(Mob* tar, uint8 botLevel, BotSpell& botSpell, bool& checked_los, uint32 iSpellTypes, Raid* raid);
+	bool BotCastSnare(Mob* tar, uint8 botLevel, BotSpell& botSpell, const bool& checked_los, uint32 iSpellTypes);
 
-	bool BotCastDOT(Mob* tar, uint8 botLevel, const BotSpell& botSpell, bool& checked_los, Raid* raid);
+	bool BotCastDOT(Mob* tar, uint8 botLevel, const BotSpell& botSpell, const bool& checked_los);
 
-	bool BotCastSlow(Mob* tar, uint8 botLevel, uint8 botClass, BotSpell& botSpell, bool& checked_los, Raid* raid);
+	bool BotCastSlow(Mob* tar, uint8 botLevel, uint8 botClass, BotSpell& botSpell, const bool& checked_los, Raid* raid);
 
-	bool BotCastDebuff(Mob* tar, uint8 botLevel, BotSpell& botSpell, bool checked_los, Raid* raid);
+	bool BotCastDebuff(Mob* tar, uint8 botLevel, BotSpell& botSpell, bool checked_los);
 
 	bool BotCastCure(Mob* tar, uint8 botClass, BotSpell& botSpell, Raid* raid);
 
-	bool BotCastHateReduction(Mob* tar, uint8 botLevel, const BotSpell& botSpell, Raid* raid);
+	bool BotCastHateReduction(Mob* tar, uint8 botLevel, const BotSpell& botSpell);
 
-	bool BotCastCombatSong(Mob* tar, uint8 botLevel, Raid* raid);
+	bool BotCastCombatSong(Mob* tar, uint8 botLevel);
 
-	bool BotCastSong(Mob* tar, uint8 botLevel, Raid* raid);
+	bool BotCastSong(Mob* tar, uint8 botLevel);
 };
 
 bool IsSpellInBotList(DBbotspells_Struct* spell_list, uint16 iSpellID);
