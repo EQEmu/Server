@@ -1,20 +1,29 @@
-#include "../client.h"
-
 void command_haste(Client *c, const Seperator *sep)
 {
-	// #haste command to set client attack speed. Takes a percentage (100 = twice normal attack speed)
-	if (sep->arg[1][0] != 0) {
-		uint16 Haste = Strings::ToInt(sep->arg[1]);
-		if (Haste > 85) {
-			Haste = 85;
-		}
-		c->SetExtraHaste(Haste);
-		// SetAttackTimer must be called to make this take effect, so player needs to change
-		// the primary weapon.
-		c->Message(Chat::White, "Haste set to %d%% - Need to re-equip primary weapon before it takes effect", Haste);
+	const auto arguments = sep->argnum;
+	if (!arguments || !sep->IsNumber(1)) {
+		c->Message(Chat::White, "Usage: #haste [Percentage] - Set GM Bonus Haste (100 is 100% more Attack Speed)");
+		return;
 	}
-	else {
-		c->Message(Chat::White, "Usage: #haste [percentage]");
+
+	auto t = c;
+	if (c->GetGM() && c->GetTarget() && c->GetTarget()->IsClient()) {
+		t = c->GetTarget()->CastToClient();
 	}
+
+	const auto extra_haste = Strings::ToInt(sep->arg[1]);
+
+	t->SetExtraHaste(extra_haste);
+	t->CalcBonuses();
+	t->SetAttackTimer();
+
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"GM Haste Bonus set to {}%% for {}.",
+			Strings::Commify(extra_haste),
+			c->GetTargetDescription(t)
+		).c_str()
+	);
 }
 
