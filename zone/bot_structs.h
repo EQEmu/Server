@@ -55,12 +55,6 @@ struct BotCastingRoles {
 	//bool RaidDoter;
 };
 
-struct BotAA {
-	uint32 aa_id;
-	uint8 req_level;
-	uint8 total_levels;
-};
-
 struct BotSpellSetting {
 	int16  priority;
 	uint8  min_level;
