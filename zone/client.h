@@ -1737,8 +1737,6 @@ private:
 	inline uint32 GetRestTimer() const { return AggroCount ? m_pp.RestTimer : rest_timer.GetRemainingTime() / 1000; }
 	void UpdateRestTimer(uint32 new_timer);
 
-	uint32 pLastUpdate;
-	uint32 pLastUpdateWZ;
 	uint8 playeraction;
 
 	EQStreamInterface* eqs;
