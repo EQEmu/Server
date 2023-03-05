@@ -1794,7 +1794,6 @@ private:
 	bool Trader;
 	bool Buyer;
 	std::string BuyerWelcomeMessage;
-	bool AbilityTimer;
 	int Haste; //precalced value
 	uint32 tmSitting; // time stamp started sitting, used for HP regen bonus added on MAY 5, 2004
 
