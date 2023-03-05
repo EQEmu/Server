@@ -639,7 +639,6 @@ void bot_subcommand_botgroup_list(Client *c, const Seperator *sep);
 void bot_subcommand_botgroup_load(Client *c, const Seperator *sep);
 void bot_subcommand_botgroup_remove_member(Client *c, const Seperator *sep);
 void bot_subcommand_circle(Client *c, const Seperator *sep);
-void bot_subcommand_evacuate(Client *c, const Seperator *sep);
 void bot_subcommand_heal_rotation_adaptive_targeting(Client *c, const Seperator *sep);
 void bot_subcommand_heal_rotation_add_member(Client *c, const Seperator *sep);
 void bot_subcommand_heal_rotation_add_target(Client *c, const Seperator *sep);
@@ -668,7 +667,6 @@ void bot_subcommand_pet_get_lost(Client *c, const Seperator *sep);
 void bot_subcommand_pet_remove(Client *c, const Seperator *sep);
 void bot_subcommand_pet_set_type(Client *c, const Seperator *sep);
 void bot_subcommand_portal(Client *c, const Seperator *sep);
-void bot_subcommand_succor(Client *c, const Seperator *sep);
 
 
 // bot command helpers
