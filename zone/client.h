@@ -1773,7 +1773,6 @@ private:
 	bool medding;
 	uint16 horseId;
 	bool revoked;
-	uint32 pQueuedSaveWorkID;
 	uint16 pClientSideTarget;
 	uint32 weight;
 	bool berserk;
