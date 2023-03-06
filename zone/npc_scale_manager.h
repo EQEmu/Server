@@ -57,6 +57,7 @@ public:
 		int    attack_delay;
 		int    spell_scale;
 		int    heal_scale;
+		int    heroic_strikethrough;
 
 		std::string special_abilities;
 	};

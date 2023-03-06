@@ -50,6 +50,7 @@ public:
 		int32_t     spell_scale;
 		int32_t     heal_scale;
 		std::string special_abilities;
+		int32_t     heroic_strikethrough;
 	};
 
 	static std::string PrimaryKey()
@@ -90,6 +91,7 @@ public:
 			"spell_scale",
 			"heal_scale",
 			"special_abilities",
+			"heroic_strikethrough",
 		};
 	}
 
@@ -126,6 +128,7 @@ public:
 			"spell_scale",
 			"heal_scale",
 			"special_abilities",
+			"heroic_strikethrough",
 		};
 	}
 
@@ -196,6 +199,7 @@ public:
 		e.spell_scale           = 100;
 		e.heal_scale            = 100;
 		e.special_abilities     = "";
+		e.heroic_strikethrough  = 0;
 
 		return e;
 	}
@@ -262,6 +266,7 @@ public:
 			e.spell_scale           = static_cast<int32_t>(atoi(row[27]));
 			e.heal_scale            = static_cast<int32_t>(atoi(row[28]));
 			e.special_abilities     = row[29] ? row[29] : "";
+			e.heroic_strikethrough  = static_cast<int32_t>(atoi(row[30]));
 
 			return e;
 		}
@@ -325,6 +330,7 @@ public:
 		v.push_back(columns[27] + " = " + std::to_string(e.spell_scale));
 		v.push_back(columns[28] + " = " + std::to_string(e.heal_scale));
 		v.push_back(columns[29] + " = '" + Strings::Escape(e.special_abilities) + "'");
+		v.push_back(columns[30] + " = " + std::to_string(e.heroic_strikethrough));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -376,6 +382,7 @@ public:
 		v.push_back(std::to_string(e.spell_scale));
 		v.push_back(std::to_string(e.heal_scale));
 		v.push_back("'" + Strings::Escape(e.special_abilities) + "'");
+		v.push_back(std::to_string(e.heroic_strikethrough));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -435,6 +442,7 @@ public:
 			v.push_back(std::to_string(e.spell_scale));
 			v.push_back(std::to_string(e.heal_scale));
 			v.push_back("'" + Strings::Escape(e.special_abilities) + "'");
+			v.push_back(std::to_string(e.heroic_strikethrough));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
@@ -498,6 +506,7 @@ public:
 			e.spell_scale           = static_cast<int32_t>(atoi(row[27]));
 			e.heal_scale            = static_cast<int32_t>(atoi(row[28]));
 			e.special_abilities     = row[29] ? row[29] : "";
+			e.heroic_strikethrough  = static_cast<int32_t>(atoi(row[30]));
 
 			all_entries.push_back(e);
 		}
@@ -552,6 +561,7 @@ public:
 			e.spell_scale           = static_cast<int32_t>(atoi(row[27]));
 			e.heal_scale            = static_cast<int32_t>(atoi(row[28]));
 			e.special_abilities     = row[29] ? row[29] : "";
+			e.heroic_strikethrough  = static_cast<int32_t>(atoi(row[30]));
 
 			all_entries.push_back(e);
 		}
