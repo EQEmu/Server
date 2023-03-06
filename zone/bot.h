@@ -934,6 +934,28 @@ private:
 
 	void SetOwnerTarget(Client* bot_owner);
 
+	Client* SetLeashOwner(Client* bot_owner, Group* bot_group, Raid* raid, uint32 r_group) const;
+
+	Mob* SetFollowMob(Client* leash_owner);
+
+	void SetBerserkState();
+
+	bool CheckIfIncapacitated();
+
+	bool CheckIfCasting(float fm_distance);
+
+	bool IsAIProcessValid(const Client* bot_owner, const Group* bot_group, const Raid* raid);
+
+	void HealRotationChecks();
+
+	void SetBotTarget(Client* bot_owner, Raid* raid, Group* bot_group, Client* leash_owner, float lo_distance,
+	                  float leash_distance, bool bo_alt_combat);
+
+	bool PullingFlagChecks(Client* bot_owner);
+
+	bool ReturningFlagChecks(Client* bot_owner, float fm_distance);
+
+	void AcquireBotTarget(Group* bot_group, Client* leash_owner, float leash_distance);
 };
 
 

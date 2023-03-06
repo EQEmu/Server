@@ -2470,24 +2470,11 @@ void Bot::AI_Process()
 	
 
 	// Primary reasons for not processing AI
-	if (!bot_owner || !bot_group || !raid || !IsAIControlled()) {
+	if (!IsAIProcessValid(bot_owner, bot_group, raid)) {
 		return;
 	}
 
-	if (bot_owner->IsDead()) {
-		SetTarget(nullptr);
-		SetBotOwner(nullptr);
-		return;
-	}
-
-	// We also need a leash owner and follow mob (subset of primary AI criteria)
-	Client* leash_owner = nullptr;
-	if (raid && r_group < MAX_RAID_GROUPS && raid->GetGroupLeader(r_group) && raid->GetGroupLeader(r_group)->IsClient()) {
-		leash_owner = raid->GetGroupLeader(r_group);
-	} else {
-		bot_group->VerifyGroup();
-		leash_owner = (bot_group->GetLeader() && bot_group->GetLeader()->IsClient() ? bot_group->GetLeader()->CastToClient() : bot_owner);
-	}
+	auto leash_owner = SetLeashOwner(bot_owner, bot_group, raid, r_group);
 
 	if (!leash_owner) {
 		return;
@@ -2495,12 +2482,7 @@ void Bot::AI_Process()
 
 	SetFollowID(leash_owner->GetID());
 
-	Mob* follow_mob = entity_list.GetMob(GetFollowID());
-	if (!follow_mob) {
-
-		follow_mob = leash_owner;
-		SetFollowID(leash_owner->GetID());
-	}
+	auto follow_mob = SetFollowMob(leash_owner);
 
 	if (mana_timer.Check(false)) {
 		raid->SendHPManaEndPacketsFrom(this);
@@ -2509,32 +2491,10 @@ void Bot::AI_Process()
 		raid->SendHPManaEndPacketsFrom(this);
 	}
 
-	// Berserk updates should occur if primary AI criteria are met
-	if (GetClass() == WARRIOR || GetClass() == BERSERKER) {
-
-		if (!berserk && GetHP() > 0 && GetHPRatio() < 30.0f) {
-			entity_list.MessageCloseString(this, false, 200, 0, BERSERK_START, GetName());
-			berserk = true;
-		}
-
-		if (berserk && GetHPRatio() >= 30.0f) {
-			entity_list.MessageCloseString(this, false, 200, 0, BERSERK_END, GetName());
-			berserk = false;
-		}
-	}
+	SetBerserkState();
 
 	// Secondary reasons for not processing AI
-	if (GetPauseAI() || IsStunned() || IsMezzed() || (GetAppearance() == eaDead)) {
-
-		if (IsCasting()) {
-			InterruptSpell();
-		}
-
-		if (IsMyHealRotationSet() || (AmICastingForHealRotation() && m_member_of_heal_rotation->CastingMember() == this)) {
-
-			AdvanceHealRotation(false);
-			m_member_of_heal_rotation->SetMemberIsCasting(this, false);
-		}
+	if (CheckIfIncapacitated()) {
 		return;
 	}
 
@@ -2544,62 +2504,13 @@ void Bot::AI_Process()
 
 // CURRENTLY CASTING CHECKS
 
-	if (IsCasting()) {
-
-		if (IsHealRotationMember() &&
-			m_member_of_heal_rotation->CastingOverride() &&
-			m_member_of_heal_rotation->CastingTarget() != nullptr &&
-			m_member_of_heal_rotation->CastingReady() &&
-			m_member_of_heal_rotation->CastingMember() == this &&
-			!m_member_of_heal_rotation->MemberIsCasting(this))
-		{
-			InterruptSpell();
-		}
-		else if (AmICastingForHealRotation() && m_member_of_heal_rotation->CastingMember() == this) {
-
-			AdvanceHealRotation(false);
-			return;
-		}
-		else if (GetClass() != BARD) {
-
-			if (IsEngaged()) {
-				return;
-			}
-
-			if (
-				(NOT_GUARDING && fm_distance > GetFollowDistance()) || // Cancel out-of-combat casting if movement to follow mob is required
-				(GUARDING && DistanceSquared(GetPosition(), GetGuardPoint()) > GetFollowDistance()) // Cancel out-of-combat casting if movement to guard point is required
-			) {
-				InterruptSpell();
-			}
-
-			return;
-		}
-	}
-	else if (IsHealRotationMember()) {
-		m_member_of_heal_rotation->SetMemberIsCasting(this, false);
-	}
-
-	// Can't move if rooted...
-	if (IsRooted() && IsMoving()) {
-		StopMoving();
+	if (CheckIfCasting(fm_distance)) {
 		return;
 	}
 
 // HEAL ROTATION CASTING CHECKS
 
-	if (IsMyHealRotationSet()) {
-
-		if (AIHealRotation(HealRotationTarget(), UseHealRotationFastHeals())) {
-			m_member_of_heal_rotation->SetMemberIsCasting(this);
-			m_member_of_heal_rotation->UpdateTargetHealingStats(HealRotationTarget());
-			AdvanceHealRotation();
-		}
-		else {
-			m_member_of_heal_rotation->SetMemberIsCasting(this, false);
-			AdvanceHealRotation(false);
-		}
-	}
+	HealRotationChecks();
 
 	bool bo_alt_combat = (RuleB(Bots, AllowOwnerOptionAltCombat) && bot_owner->GetBotOption(Client::booAltCombat));
 
@@ -2612,39 +2523,7 @@ void Bot::AI_Process()
 
 //ALT COMBAT (ACQUIRE HATE)
 
-	else if (bo_alt_combat && m_alt_combat_hate_timer.Check(false)) {
-		// Empty hate list - let's find some aggro
-		if (!IsEngaged() && NOT_HOLDING && NOT_PASSIVE && (!bot_owner->GetBotPulling() || NOT_PULLING_BOT)) {
-			SetLeashOwnerTarget(leash_owner, bot_owner, lo_distance, leash_distance);
-			}
-
-		else if (bot_group) {
-			for (const auto& bg_member: bot_group->members) {
-				if (!bg_member) {
-					continue;
-				}
-
-				auto bgm_target = bg_member->GetTarget();
-				if (!bgm_target || !bgm_target->IsNPC()) {
-					continue;
-				}
-				SetBotGroupTarget(bot_owner, leash_owner, lo_distance, leash_distance, bg_member, bgm_target);
-			}
-		}
-		else if (raid) {
-			for (const auto& raid_member : raid->members) {
-				if (!raid_member.member){
-					continue;
-				}
-
-				auto rm_target = raid_member.member->GetTarget();
-				if (!rm_target || !rm_target->IsNPC()) {
-					continue;
-				}
-				SetBotGroupTarget(bot_owner, leash_owner, lo_distance, leash_distance, raid_member.member,rm_target);
-			}
-		}
-	}
+	SetBotTarget(bot_owner, raid, bot_group, leash_owner, lo_distance, leash_distance, bo_alt_combat);
 
 	glm::vec3 Goal(0, 0, 0);
 
@@ -2658,57 +2537,15 @@ void Bot::AI_Process()
 // PULLING FLAG (TARGET VALIDATION)
 
 		if (GetPullingFlag()) {
-
-			if (!GetTarget()) {
-
-				WipeHateList();
-				SetTarget(nullptr);
-				SetPullingFlag(false);
-				SetReturningFlag(false);
-				bot_owner->SetBotPulling(false);
-				if (GetPet()) {
-					GetPet()->SetPetOrder(m_previous_pet_order);
-				}
-
+			if (!PullingFlagChecks(bot_owner)) {
 				return;
-			}
-			else if (GetTarget()->GetHateList().size()) {
-
-				WipeHateList();
-				SetTarget(nullptr);
-				SetPullingFlag(false);
-				SetReturningFlag();
-
-				return;
-			}
-			else {
-				// Default action is to aggress towards enemy
 			}
 		}
-
-
 
 // RETURNING FLAG
 
 		else if (GetReturningFlag()) {
-
-			// Need to make it back to group before clearing return flag
-			if (fm_distance <= GetFollowDistance()) {
-
-				// Once we're back, clear blocking flags so everyone else can join in
-				SetReturningFlag(false);
-				bot_owner->SetBotPulling(false);
-				if (GetPet()) {
-					GetPet()->SetPetOrder(m_previous_pet_order);
-				}
-			}
-
-			// Need to keep puller out of combat until they reach their 'return to' destination
-			if (HasTargetReflection()) {
-
-				SetTarget(nullptr);
-				WipeHateList();
-
+			if (!ReturningFlagChecks(bot_owner, fm_distance)) {
 				return;
 			}
 		}
@@ -2716,75 +2553,7 @@ void Bot::AI_Process()
 // ALT COMBAT (ACQUIRE TARGET)
 
 		else if (bo_alt_combat && m_alt_combat_hate_timer.Check()) { // Find a mob from hate list to target
-
-			// Group roles can be expounded upon in the future
-			auto assist_mob = entity_list.GetMob(bot_group->GetMainAssistName());
-			bool find_target = true;
-
-			if (assist_mob) {
-				if (assist_mob->GetTarget()) {
-					if (assist_mob != this) {
-						if (GetTarget() != assist_mob->GetTarget()) {
-							SetTarget(assist_mob->GetTarget());
-						}
-
-						if (
-							HasPet() &&
-							(
-								GetClass() != ENCHANTER ||
-								GetPet()->GetPetType() != petAnimation ||
-								GetAA(aaAnimationEmpathy) >= 2
-							)
-						) {
-							// This artificially inflates pet's target aggro..but, less expensive than checking hate each AI process
-							GetPet()->AddToHateList(assist_mob->GetTarget(), 1);
-							GetPet()->SetTarget(assist_mob->GetTarget());
-						}
-					}
-
-					find_target = false;
-				} else if (assist_mob != this) {
-					if (GetTarget()) {
-						SetTarget(nullptr);
-					}
-
-					if (
-						HasPet() &&
-						(
-							GetClass() != ENCHANTER ||
-							GetPet()->GetPetType() != petAnimation ||
-							GetAA(aaAnimationEmpathy) >= 1
-						)
-					) {
-						GetPet()->WipeHateList();
-						GetPet()->SetTarget(nullptr);
-					}
-
-					find_target = false;
-				}
-			}
-
-			if (find_target) {
-				if (IsRooted()) {
-					auto closest = hate_list.GetClosestEntOnHateList(this, true);
-					if (closest) {
-						SetTarget(closest);
-					}
-				} else {
-					// This will keep bots on target for now..but, future updates will allow for rooting/stunning
-					auto escaping = hate_list.GetEscapingEntOnHateList(leash_owner, leash_distance);
-					if (escaping) {
-						SetTarget(escaping);
-					}
-
-					if (!GetTarget()) {
-						auto most_hate = hate_list.GetEntWithMostHateOnList(this, nullptr, true);
-						if (most_hate) {
-							SetTarget(most_hate);
-						}
-					}
-				}
-			}
+			AcquireBotTarget(bot_group, leash_owner, leash_distance);
 		}
 
 // DEFAULT (ACQUIRE TARGET)
@@ -3475,6 +3244,294 @@ void Bot::AI_Process()
 
 
 	}
+}
+
+void Bot::AcquireBotTarget(Group* bot_group, Client* leash_owner,
+                           float leash_distance) {// Group roles can be expounded upon in the future
+	auto assist_mob = entity_list.GetMob(bot_group->GetMainAssistName());
+	bool find_target = true;
+
+	if (assist_mob) {
+		if (assist_mob->GetTarget()) {
+			if (assist_mob != this) {
+				if (GetTarget() != assist_mob->GetTarget()) {
+					SetTarget(assist_mob->GetTarget());
+				}
+
+				if (
+					HasPet() &&
+					(
+						GetClass() != ENCHANTER ||
+						GetPet()->GetPetType() != petAnimation ||
+						GetAA(aaAnimationEmpathy) >= 2
+					)
+				) {
+					// This artificially inflates pet's target aggro..but, less expensive than checking hate each AI process
+					GetPet()->AddToHateList(assist_mob->GetTarget(), 1);
+					GetPet()->SetTarget(assist_mob->GetTarget());
+				}
+			}
+
+			find_target = false;
+		} else if (assist_mob != this) {
+			if (GetTarget()) {
+				SetTarget(nullptr);
+			}
+
+			if (
+				HasPet() &&
+				(
+					GetClass() != ENCHANTER ||
+					GetPet()->GetPetType() != petAnimation ||
+					GetAA(aaAnimationEmpathy) >= 1
+				)
+			) {
+				GetPet()->WipeHateList();
+				GetPet()->SetTarget(nullptr);
+			}
+
+			find_target = false;
+		}
+	}
+
+	if (find_target) {
+		if (IsRooted()) {
+			auto closest = hate_list.GetClosestEntOnHateList(this, true);
+			if (closest) {
+				SetTarget(closest);
+			}
+		} else {
+			// This will keep bots on target for now..but, future updates will allow for rooting/stunning
+			auto escaping = hate_list.GetEscapingEntOnHateList(leash_owner, leash_distance);
+			if (escaping) {
+				SetTarget(escaping);
+			}
+
+			if (!GetTarget()) {
+				auto most_hate = hate_list.GetEntWithMostHateOnList(this, nullptr, true);
+				if (most_hate) {
+					SetTarget(most_hate);
+				}
+			}
+		}
+	}
+}
+
+bool Bot::ReturningFlagChecks(Client* bot_owner, float fm_distance) {// Need to make it back to group before clearing return flag
+
+	if (fm_distance <= GetFollowDistance()) {
+
+		// Once we're back, clear blocking flags so everyone else can join in
+		SetReturningFlag(false);
+		bot_owner->SetBotPulling(false);
+
+		if (GetPet()) {
+			GetPet()->SetPetOrder(m_previous_pet_order);
+		}
+	}
+
+	// Need to keep puller out of combat until they reach their 'return to' destination
+	if (HasTargetReflection()) {
+
+		SetTarget(nullptr);
+		WipeHateList();
+		return false;
+	}
+	return true;
+}
+
+bool Bot::PullingFlagChecks(Client* bot_owner) {
+
+	if (!GetTarget()) {
+
+		WipeHateList();
+		SetTarget(nullptr);
+		SetPullingFlag(false);
+		SetReturningFlag(false);
+		bot_owner->SetBotPulling(false);
+
+		if (GetPet()) {
+			GetPet()->SetPetOrder(m_previous_pet_order);
+		}
+
+		return false;
+	}
+	else if (GetTarget()->GetHateList().size()) {
+
+		WipeHateList();
+		SetTarget(nullptr);
+		SetPullingFlag(false);
+		SetReturningFlag();
+
+		return false;
+	}
+
+	return true;
+}
+
+void Bot::SetBotTarget(Client* bot_owner, Raid* raid, Group* bot_group, Client* leash_owner, float lo_distance, float leash_distance, bool bo_alt_combat) {
+
+	if (bo_alt_combat && m_alt_combat_hate_timer.Check(false)) {
+		// Empty hate list - let's find some aggro
+		if (!IsEngaged() && NOT_HOLDING && NOT_PASSIVE && (!bot_owner->GetBotPulling() || NOT_PULLING_BOT)) {
+			SetLeashOwnerTarget(leash_owner, bot_owner, lo_distance, leash_distance);
+			}
+
+		else if (bot_group) {
+			for (const auto& bg_member: bot_group->members) {
+				if (!bg_member) {
+					continue;
+				}
+
+				auto bgm_target = bg_member->GetTarget();
+				if (!bgm_target || !bgm_target->IsNPC()) {
+					continue;
+				}
+				SetBotGroupTarget(bot_owner, leash_owner, lo_distance, leash_distance, bg_member, bgm_target);
+			}
+		}
+		else if (raid) {
+			for (const auto& raid_member : raid->members) {
+				if (!raid_member.member){
+					continue;
+				}
+
+				auto rm_target = raid_member.member->GetTarget();
+				if (!rm_target || !rm_target->IsNPC()) {
+					continue;
+				}
+				SetBotGroupTarget(bot_owner, leash_owner, lo_distance, leash_distance, raid_member.member, rm_target);
+			}
+		}
+	}
+}
+
+void Bot::HealRotationChecks() {
+
+	if (IsMyHealRotationSet()) {
+		if (AIHealRotation(HealRotationTarget(), UseHealRotationFastHeals())) {
+			m_member_of_heal_rotation->SetMemberIsCasting(this);
+			m_member_of_heal_rotation->UpdateTargetHealingStats(HealRotationTarget());
+			AdvanceHealRotation();
+		}
+		else {
+			m_member_of_heal_rotation->SetMemberIsCasting(this, false);
+			AdvanceHealRotation(false);
+		}
+	}
+}
+
+bool Bot::IsAIProcessValid(const Client* bot_owner, const Group* bot_group, const Raid* raid) {
+
+	if (!bot_owner || !bot_group || !raid || !IsAIControlled()) {
+		return false;
+	}
+
+	if (bot_owner->IsDead()) {
+		SetTarget(nullptr);
+		SetBotOwner(nullptr);
+		return false;
+	}
+	return true;
+}
+
+bool Bot::CheckIfCasting(float fm_distance) {
+
+	if (IsCasting()) {
+		if (IsHealRotationMember() &&
+			m_member_of_heal_rotation->CastingOverride() &&
+			m_member_of_heal_rotation->CastingTarget() != nullptr &&
+			m_member_of_heal_rotation->CastingReady() &&
+			m_member_of_heal_rotation->CastingMember() == this &&
+			!m_member_of_heal_rotation->MemberIsCasting(this))
+		{
+			InterruptSpell();
+		}
+		else if (AmICastingForHealRotation() && m_member_of_heal_rotation->CastingMember() == this) {
+
+			AdvanceHealRotation(false);
+			return true;
+		}
+		else if (GetClass() != BARD) {
+
+			if (IsEngaged()) {
+				return true;
+			}
+
+			if (
+				(NOT_GUARDING && fm_distance > GetFollowDistance()) || // Cancel out-of-combat casting if movement to follow mob is required
+				(GUARDING && DistanceSquared(GetPosition(), GetGuardPoint()) > GetFollowDistance()) // Cancel out-of-combat casting if movement to guard point is required
+			) {
+				InterruptSpell();
+			}
+
+			return true;
+		}
+	}
+	else if (IsHealRotationMember()) {
+		m_member_of_heal_rotation->SetMemberIsCasting(this, false);
+	}
+	return false;
+}
+
+bool Bot::CheckIfIncapacitated() {
+
+	if (GetPauseAI() || IsStunned() || IsMezzed() || (GetAppearance() == eaDead)) {
+
+		if (IsCasting()) {
+			InterruptSpell();
+		}
+
+		if (IsMyHealRotationSet() || (AmICastingForHealRotation() && m_member_of_heal_rotation->CastingMember() == this)) {
+			AdvanceHealRotation(false);
+			m_member_of_heal_rotation->SetMemberIsCasting(this, false);
+		}
+		return true;
+	}
+
+	if (IsRooted() && IsMoving()) {
+		StopMoving();
+		return true;
+	}
+
+	return false;
+}
+
+void Bot::SetBerserkState() {// Berserk updates should occur if primary AI criteria are met
+	if (GetClass() == WARRIOR || GetClass() == BERSERKER) {
+
+		if (!berserk && GetHP() > 0 && GetHPRatio() < 30.0f) {
+			entity_list.MessageCloseString(this, false, 200, 0, BERSERK_START, GetName());
+			berserk = true;
+		}
+
+		if (berserk && GetHPRatio() >= 30.0f) {
+			entity_list.MessageCloseString(this, false, 200, 0, BERSERK_END, GetName());
+			berserk = false;
+		}
+	}
+}
+
+Mob* Bot::SetFollowMob(Client* leash_owner) {
+	Mob* follow_mob = entity_list.GetMob(GetFollowID());
+	if (!follow_mob) {
+
+		follow_mob = leash_owner;
+		SetFollowID(leash_owner->GetID());
+	}
+	return follow_mob;
+}
+
+Client* Bot::SetLeashOwner(Client* bot_owner, Group* bot_group, Raid* raid, uint32 r_group) const {
+
+	Client* leash_owner = nullptr;
+	if (raid && r_group < MAX_RAID_GROUPS && raid->GetGroupLeader(r_group) && raid->GetGroupLeader(r_group)->IsClient()) {
+		leash_owner = raid->GetGroupLeader(r_group);
+	} else {
+		bot_group->VerifyGroup();
+		leash_owner = (bot_group->GetLeader() && bot_group->GetLeader()->IsClient() ? bot_group->GetLeader()->CastToClient() : bot_owner);
+	}
+	return leash_owner;
 }
 
 void Bot::SetLeashOwnerTarget(Client* leash_owner, Client* bot_owner, float lo_distance, float leash_distance) {
