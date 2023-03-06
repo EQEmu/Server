@@ -41,7 +41,7 @@ constexpr float MAX_CASTER_DISTANCE[PLAYER_CLASS_COUNT] = {
 
 void Bot::AI_Process_Raid()
 {
-#define TEST_COMBATANTS() if (!GetTarget() || GetAppearance() == eaDead) { return; }
+#define TEST_COMBATANTS if (!GetTarget() || GetAppearance() == eaDead) { return; }
 #define PULLING_BOT (GetPullingFlag() || GetReturningFlag())
 #define NOT_PULLING_BOT (!GetPullingFlag() && !GetReturningFlag())
 #define GUARDING (GetGuardFlag())
@@ -56,6 +56,7 @@ void Bot::AI_Process_Raid()
 	uint32 r_group = raid->GetGroup(GetName());
 
 	LogAI("Bot_Raid: Entered Raid Process() for [{}].", GetCleanName());
+
 
 	//#pragma region PRIMARY AI SKIP CHECKS
 
@@ -839,12 +840,12 @@ void Bot::AI_Process_Raid()
 			}
 
 			// Up to this point, GetTarget() has been safe to dereference since the initial
-			// TEST_COMBATANTS() call. Due to the chance of the target dying and our pointer
+			// TEST_COMBATANTS call. Due to the chance of the target dying and our pointer
 			// being nullified, we need to test it before dereferencing to avoid crashes
 
 			if (IsBotArcher() && ranged_timer.Check(false)) { // Can shoot mezzed, stunned and dead!?
 
-				TEST_COMBATANTS();
+				TEST_COMBATANTS;
 				if (GetTarget()->GetHPRatio() <= 99.0f) {
 					BotRangedAttack(tar);
 				}
@@ -853,49 +854,49 @@ void Bot::AI_Process_Raid()
 
 				// We can't fight if we don't have a target, are stun/mezzed or dead..
 				// Stop attacking if the target is enraged
-				TEST_COMBATANTS();
+				TEST_COMBATANTS;
 				if (tar->IsEnraged() && !BehindMob(tar, GetX(), GetY())) {
 					return;
 				}
 
 				// First, special attack per class (kick, backstab etc..)
-				TEST_COMBATANTS();
+				TEST_COMBATANTS;
 				DoClassAttacks(tar);
 
-				TEST_COMBATANTS();
+				TEST_COMBATANTS;
 				if (attack_timer.Check()) { // Process primary weapon attacks
 
 					Attack(tar, EQ::invslot::slotPrimary);
 
-					TEST_COMBATANTS();
+					TEST_COMBATANTS;
 					TriggerDefensiveProcs(tar, EQ::invslot::slotPrimary, false);
 
-					TEST_COMBATANTS();
+					TEST_COMBATANTS;
 					//TryWeaponProc(p_item, tar, EQ::invslot::slotPrimary);
 					TryCombatProcs(p_item, tar, EQ::invslot::slotPrimary);
 					// bool tripleSuccess = false;
 
-					TEST_COMBATANTS();
+					TEST_COMBATANTS;
 					if (CanThisClassDoubleAttack()) {
 
 						if (CheckBotDoubleAttack()) {
 							Attack(tar, EQ::invslot::slotPrimary, true);
 						}
 
-						TEST_COMBATANTS();
+						TEST_COMBATANTS;
 						if (GetSpecialAbility(SPECATK_TRIPLE) && CheckBotDoubleAttack(true)) {
 							// tripleSuccess = true;
 							Attack(tar, EQ::invslot::slotPrimary, true);
 						}
 
-						TEST_COMBATANTS();
+						TEST_COMBATANTS;
 						// quad attack, does this belong here??
 						if (GetSpecialAbility(SPECATK_QUAD) && CheckBotDoubleAttack(true)) {
 							Attack(tar, EQ::invslot::slotPrimary, true);
 						}
 					}
 
-					TEST_COMBATANTS();
+					TEST_COMBATANTS;
 					// Live AA - Flurry, Rapid Strikes ect (Flurry does not require Triple Attack).
 					int32 flurrychance = (aabonuses.FlurryChance + spellbonuses.FlurryChance + itembonuses.FlurryChance);
 					if (flurrychance) {
@@ -905,12 +906,12 @@ void Bot::AI_Process_Raid()
 							MessageString(Chat::NPCFlurry, YOU_FLURRY);
 							Attack(tar, EQ::invslot::slotPrimary, false);
 
-							TEST_COMBATANTS();
+							TEST_COMBATANTS;
 							Attack(tar, EQ::invslot::slotPrimary, false);
 						}
 					}
 
-					TEST_COMBATANTS();
+					TEST_COMBATANTS;
 					//int32 ExtraAttackChanceBonus = (spellbonuses.ExtraAttackChance + itembonuses.ExtraAttackChance + aabonuses.ExtraAttackChance);
 					auto ExtraAttackChanceBonus =
 						(spellbonuses.ExtraAttackChance[0] + itembonuses.ExtraAttackChance[0] +
@@ -926,7 +927,7 @@ void Bot::AI_Process_Raid()
 					}
 				}
 
-				TEST_COMBATANTS();
+				TEST_COMBATANTS;
 				if (attack_dw_timer.Check() && CanThisClassDualWield()) { // Process secondary weapon attacks
 
 					const EQ::ItemData* s_itemdata = nullptr;
@@ -960,11 +961,11 @@ void Bot::AI_Process_Raid()
 
 								Attack(tar, EQ::invslot::slotSecondary);	// Single attack with offhand
 
-								TEST_COMBATANTS();
+								TEST_COMBATANTS;
 								TryCombatProcs(s_item, tar, EQ::invslot::slotSecondary);
 								//TryWeaponProc(s_item, tar, EQ::invslot::slotSecondary);
 
-								TEST_COMBATANTS();
+								TEST_COMBATANTS;
 								if (CanThisClassDoubleAttack() && CheckBotDoubleAttack()) {
 
 									if (tar->GetHP() > -10) {
@@ -1059,13 +1060,14 @@ void Bot::AI_Process_Raid()
 
 		//#pragma region AUTO DEFEND
 
-				// This is as close as I could get without modifying the aggro mechanics and making it an expensive process...
-				// 'class Client' doesn't make use of hate_list...
+		// This is as close as I could get without modifying the aggro mechanics and making it an expensive process...
+		// 'class Client' doesn't make use of hate_list...
 		if (RuleB(Bots, AllowOwnerOptionAutoDefend) && bot_owner->GetBotOption(Client::booAutoDefend)) {
 
 			if (!m_auto_defend_timer.Enabled()) {
 
-				m_auto_defend_timer.Start(zone->random.Int(250, 1250)); // random timer to simulate 'awareness' (cuts down on scanning overhead)
+				m_auto_defend_timer.Start(zone->random.Int(250,
+				                                           1250)); // random timer to simulate 'awareness' (cuts down on scanning overhead)
 				return;
 			}
 
@@ -1076,24 +1078,27 @@ void Bot::AI_Process_Raid()
 					auto xhaters = bot_owner->GetXTargetAutoMgr();
 					if (xhaters && !xhaters->empty()) {
 
-						for (auto hater_iter : xhaters->get_list()) {
+						for (auto hater_iter: xhaters->get_list()) {
 
 							if (!hater_iter.spawn_id) {
 								continue;
 							}
 
-							if (bot_owner->GetBotPulling() && bot_owner->GetTarget() && hater_iter.spawn_id == bot_owner->GetTarget()->GetID()) {
+							if (bot_owner->GetBotPulling() && bot_owner->GetTarget() &&
+							    hater_iter.spawn_id == bot_owner->GetTarget()->GetID()) {
 								continue;
 							}
 
 							auto hater = entity_list.GetMob(hater_iter.spawn_id);
-							if (hater && !hater->IsMezzed() && DistanceSquared(hater->GetPosition(), bot_owner->GetPosition()) <= leash_distance) {
+							if (hater && !hater->IsMezzed() &&
+							    DistanceSquared(hater->GetPosition(), bot_owner->GetPosition()) <= leash_distance) {
 
 								// This is roughly equivilent to npc attacking a client pet owner
 								AddToHateList(hater, 1);
 								SetTarget(hater);
 								SetAttackingFlag();
-								if (HasPet() && (GetClass() != ENCHANTER || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 2)) {
+								if (HasPet() && (GetClass() != ENCHANTER || GetPet()->GetPetType() != petAnimation ||
+								                 GetAA(aaAnimationEmpathy) >= 2)) {
 
 									GetPet()->AddToHateList(hater, 1);
 									GetPet()->SetTarget(hater);
@@ -1113,7 +1118,8 @@ void Bot::AI_Process_Raid()
 
 		SetTarget(nullptr);
 
-		if (HasPet() && (GetClass() != ENCHANTER || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 1)) {
+		if (HasPet() &&
+		    (GetClass() != ENCHANTER || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 1)) {
 
 			GetPet()->WipeHateList();
 			GetPet()->SetTarget(nullptr);
@@ -1125,8 +1131,9 @@ void Bot::AI_Process_Raid()
 
 		//#pragma region OK TO IDLE
 
-				// Ok to idle
-		if ((NOT_GUARDING && fm_distance <= GetFollowDistance()) || (GUARDING && DistanceSquared(GetPosition(), GetGuardPoint()) <= GetFollowDistance())) {
+		// Ok to idle
+		if ((NOT_GUARDING && fm_distance <= GetFollowDistance()) ||
+		    (GUARDING && DistanceSquared(GetPosition(), GetGuardPoint()) <= GetFollowDistance())) {
 
 			if (!IsMoving() && AI_think_timer->Check() && !spellend_timer.Enabled()) {
 
@@ -1135,8 +1142,7 @@ void Bot::AI_Process_Raid()
 					if (!AI_IdleCastCheck() && !IsCasting() && GetClass() != BARD) {
 						BotMeditate(true);
 					}
-				}
-				else {
+				} else {
 
 					if (GetClass() != BARD) {
 						BotMeditate(true);
@@ -1152,8 +1158,7 @@ void Bot::AI_Process_Raid()
 
 			if (GUARDING) {
 				Goal = GetGuardPoint();
-			}
-			else {
+			} else {
 				Goal = follow_mob->GetPosition();
 			}
 			float destination_distance = DistanceSquared(GetPosition(), Goal);
@@ -1174,15 +1179,13 @@ void Bot::AI_Process_Raid()
 
 					if (running) {
 						RunTo(Goal.x, Goal.y, Goal.z);
-					}
-					else {
+					} else {
 						WalkTo(Goal.x, Goal.y, Goal.z);
 					}
 
 					return;
 				}
-			}
-			else {
+			} else {
 
 				if (IsMoving()) {
 
@@ -1201,20 +1204,8 @@ void Bot::AI_Process_Raid()
 				return;
 			}
 		}
-
-		//#pragma endregion
-
 	}
 
-#undef TEST_COMBATANTS
-#undef PULLING_BOT
-#undef NOT_PULLING_BOT
-#undef GUARDING
-#undef NOT_GUARDING
-#undef HOLDING
-#undef NOT_HOLDING
-#undef PASSIVE
-#undef NOT_PASSIVE
 }
 
 std::vector<RaidMember> Raid::GetRaidGroupMembers(uint32 gid) 
@@ -1233,7 +1224,7 @@ std::vector<RaidMember> Raid::GetRaidGroupMembers(uint32 gid)
 }
 
 // Returns Bot members that are in the raid
-// passing in owner will return Bots that have the same owner.
+// passing in owner will return all Bots that have the same owner.
 std::vector<Bot*> Raid::GetRaidBotMembers(uint32 owner)
 {
 	std::vector<Bot*> raid_members_bots;
@@ -1389,7 +1380,7 @@ void Bot::CreateBotRaid(Mob* invitee, Client* invitor, bool group_invite, Raid* 
 	// Add Invitor to new raid
 	if (new_raid) {
 		if (g_invitor) {
-			ProcessBotGroupAdd(g_invitor, raid, true);
+			ProcessBotGroupAdd(g_invitor, raid, nullptr, true, true);
 		} else {
 			raid->SendRaidCreate(invitor);
 			raid->AddMember(invitor, 0xFFFFFFFF, true, false, true);
@@ -1400,63 +1391,71 @@ void Bot::CreateBotRaid(Mob* invitee, Client* invitor, bool group_invite, Raid* 
 		}
 	}
 
-	// Add Bot Group, or Individual Bot to Raid
-	if (invitee->IsBot()) {
-		if (g_invitee) {
-			ProcessBotGroupAdd(g_invitee, raid);
-		} else {
-			auto gid = raid->GetGroup(invitor->GetName());
-			auto b = invitee->CastToBot();
-
-			// gives us a choice to either invite directly into the clients Raid Group, or just into the Raid
-			if (group_invite && raid->GroupCount(gid) < MAX_GROUP_MEMBERS) {
-				raid->AddBot(b, gid);
-			} else {
-				raid->AddBot(b);
-			}
-
-			if (new_raid) {
-				invitee->SetFollowID(invitor->GetID());
-			}
-		}
-	}
-	// Add Client invitee if they have Bots in their group
-	else if (g_invitee && invitee->IsClient()) {
+	// Add Bot Group or Client Bot Group to raid
+	if (g_invitee) {
 		ProcessBotGroupAdd(g_invitee, raid);
+
+	// Add individual client to raid
+	} else if (invitee->IsClient()) {
+		ProcessBotGroupAdd(g_invitee, raid, invitee->CastToClient());
+
+	// Add individual bot to raid
+	} else {
+		auto gid = raid->GetGroup(invitor->GetName());
+		auto b = invitee->CastToBot();
+
+		// gives us a choice to either invite directly into the clients Raid Group, or just into the Raid
+		if (group_invite && raid->GroupCount(gid) < MAX_GROUP_MEMBERS) {
+			raid->AddBot(b, gid);
+		} else {
+			raid->AddBot(b);
+		}
+
+		if (new_raid) {
+			invitee->SetFollowID(invitor->GetID());
+		}
 	}
 }
 
-void Bot::ProcessBotGroupAdd(Group *group, Raid *raid, bool new_raid) {
+void Bot::ProcessBotGroupAdd(Group* group, Raid* raid, Client* client, bool new_raid, bool initial) {
 
 	uint32 raid_free_group_id = raid->GetFreeGroup();
-	for (int x = 0; x < MAX_GROUP_MEMBERS; x++) {
-		if (group->members[x]) {
-			Client* c = nullptr;
-			Bot* b = nullptr;
+	if (group) {
+		for (int x = 0; x < MAX_GROUP_MEMBERS; x++) {
+			if (group->members[x]) {
+				Client* c = nullptr;
+				Bot* b = nullptr;
 
-			if (group->members[x] && group->members[x]->IsBot()) {
-				b = group->members[x]->CastToBot();
-				raid->AddBot(b, raid_free_group_id, false, x == 0, false);
+				if (group->members[x] && group->members[x]->IsBot()) {
+					b = group->members[x]->CastToBot();
+					raid->AddBot(b, raid_free_group_id, false, x == 0, false);
+				} else if (group->members[x] && group->members[x]->IsClient()) {
+					c = group->members[x]->CastToClient();
+					raid->SendRaidCreate(c);
+					raid->AddMember(
+						c,
+						raid_free_group_id,
+						new_raid,
+						x == 0,
+						false
+					);
+					raid->SendMakeLeaderPacketTo(raid->leadername, c);
+					raid->SendBulkRaid(c);
+				}
 			}
-
-			else if (group->members[x] && group->members[x]->IsClient()) {
-				c = group->members[x]->CastToClient();
-				raid->SendRaidCreate(c);
-				raid->AddMember(
-					c,
-					raid_free_group_id,
-					new_raid,
-					x == 0,
-					false
-				);
-				raid->SendMakeLeaderPacketTo(raid->leadername, c);
-				raid->SendBulkRaid(c);
-			}
+		}
+		group->JoinRaidXTarget(raid, initial);
+		group->DisbandGroup(true);
+	} else if (client) {
+		raid->SendRaidCreate(client);
+		raid->AddMember(client, RAID_GROUPLESS, false, false, true);
+		raid->SendMakeLeaderPacketTo(raid->leadername, client);
+		raid->SendBulkRaid(client);
+		if (raid->IsLocked()) {
+			raid->SendRaidLockTo(client);
 		}
 	}
 
-	group->JoinRaidXTarget(raid);
-	group->DisbandGroup(true);
 	raid->GroupUpdate(raid_free_group_id);
 }
 

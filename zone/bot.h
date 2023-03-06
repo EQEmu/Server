@@ -43,9 +43,6 @@ constexpr uint32 BOT_FOLLOW_DISTANCE_WALK = 1000; // as DSq value (~31.623 units
 
 constexpr uint32 BOT_KEEP_ALIVE_INTERVAL = 5000; // 5 seconds
 
-//constexpr uint32 BOT_COMBAT_JITTER_INTERVAL_MIN = 5000; // 5 seconds
-//constexpr uint32 BOT_COMBAT_JITTER_INTERVAL_MAX = 20000; // 20 seconds
-
 extern WorldServer worldserver;
 
 constexpr int BotAISpellRange = 100; // TODO: Write a method that calcs what the bot's spell range is based on spell, equipment, AA, whatever and replace this
@@ -53,8 +50,6 @@ constexpr int MaxSpellTimer = 15;
 constexpr int MaxDisciplineTimer = 10;
 constexpr int DisciplineReuseStart = MaxSpellTimer + 1;
 constexpr int MaxTimer = MaxSpellTimer + MaxDisciplineTimer;
-
-
 
 // nHSND	negative Healer/Slower/Nuker/Doter
 // pH		positive Healer
@@ -436,8 +431,9 @@ public:
 	static void ProcessRaidInvite(Mob* invitee, Client* invitor, bool group_invite = false);
 	static void RemoveBotFromRaid(Bot* bot);
 	inline void SetDirtyAutoHaters() { m_dirtyautohaters = true; }
-	static void CreateBotRaid(Mob* invitee, Client* invitor, bool group_invite, Raid* raid = nullptr);
-	static void ProcessBotGroupAdd(Group *group, Raid *raid, bool new_raid = false);
+	static void CreateBotRaid(Mob* invitee, Client* invitor, bool group_invite, Raid* raid);
+	static void
+	ProcessBotGroupAdd(Group* group, Raid* raid, Client* client = nullptr, bool new_raid = false, bool initial = false);
 
 
 	static std::list<BotSpell> GetBotSpellsForSpellEffect(Bot* botCaster, int spellEffect);
@@ -931,9 +927,15 @@ private:
 
 	bool BotCastSong(Mob* tar, uint8 botLevel);
 
-	void AddBotGroupTarget(const Client* bot_owner, Client* leash_owner, float lo_distance, float leash_distance,
-	                       Mob* const& bg_member, Mob* bgm_target);
+	void SetLeashOwnerTarget(Client* leash_owner, Client* bot_owner, float lo_distance, float leash_distance);
+	void SetBotGroupTarget(const Client* bot_owner, Client* leash_owner, float lo_distance, float leash_distance, Mob* const& bg_member, Mob* bgm_target);
+
+	void BotPullerProcess(Client* bot_owner, Raid* raid);
+
+	void SetOwnerTarget(Client* bot_owner);
+
 };
+
 
 bool IsSpellInBotList(DBbotspells_Struct* spell_list, uint16 iSpellID);
 

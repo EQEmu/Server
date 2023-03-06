@@ -11852,7 +11852,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 	}
 
 	case RaidCommandAcceptInvite: {
-		Client* player_accepting_invite = entity_list.GetClientByName(raid_command_packet->player_name);
+		Client* player_sending_invite = entity_list.GetClientByName(raid_command_packet->player_name);
 
 		// If the accepting client is in a group with a Bot or the invitor is in a group with a Bot, send the invite to Bot:ProcessRaidInvite
 		// instead of remaining here.
@@ -11877,17 +11877,15 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 
 		if (RuleB(Bots, Enabled)) {
 			if (g_invitor && g_invitor->IsLeader(invitor)) {
-				for (int x = 0; x < MAX_GROUP_MEMBERS; x++) {
-					if (g_invitor->members[x] && g_invitor->members[x]->IsBot()) {
-						b = entity_list.GetBotByBotName(g_invitor->members[x]->GetName());
+				for (const auto& g_invitor_member : g_invitor->members) {
+					if (g_invitor_member && g_invitor_member->IsBot()) {
 						invitee_has_bot = true;
 					}
 				}
 			}
 			if (g_invitee && g_invitee->IsLeader(invitee)) {
-				for (int x = 0; x < MAX_GROUP_MEMBERS; x++) {
-					if (g_invitee->members[x] && g_invitee->members[x]->IsBot()) {
-						b = entity_list.GetBotByBotName(g_invitee->members[x]->GetName());
+				for (const auto& g_invitee_member : g_invitee->members) {
+					if (g_invitee_member && g_invitee_member->IsBot()) {
 						invitee_has_bot = true;
 						break;
 					}
@@ -11899,24 +11897,24 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 			}
 		}
 
-		if (player_accepting_invite) {
+		if (player_sending_invite) {
 			if (IsRaidGrouped()) {
-				player_accepting_invite->MessageString(Chat::White, ALREADY_IN_RAID, GetName()); //group failed, must invite members not in raid...
+				player_sending_invite->MessageString(Chat::White, ALREADY_IN_RAID, GetName()); //group failed, must invite members not in raid...
 				return;
 			}
-			Raid* raid = entity_list.GetRaidByClient(player_accepting_invite);
+			Raid* raid = entity_list.GetRaidByClient(player_sending_invite);
 			if (raid) {
 				raid->VerifyRaid();
 				Group* group = GetGroup();
 				if (group) {
 					if (group->GroupCount() + raid->RaidCount() > MAX_RAID_MEMBERS) {
-						player_accepting_invite->Message(Chat::Red, "Invite failed, group invite would create a raid larger than the maximum number of members allowed.");
+						player_sending_invite->Message(Chat::Red, "Invite failed, group invite would create a raid larger than the maximum number of members allowed.");
 						return;
 					}
 				}
 				else {
 					if (1 + raid->RaidCount() > MAX_RAID_MEMBERS) {
-						player_accepting_invite->Message(Chat::Red, "Invite failed, member invite would create a raid larger than the maximum number of members allowed.");
+						player_sending_invite->Message(Chat::Red, "Invite failed, member invite would create a raid larger than the maximum number of members allowed.");
 						return;
 					}
 				}
@@ -11965,32 +11963,32 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 			}
 			else
 			{
-				Group* player_invited_group = player_accepting_invite->GetGroup();
+				auto player_sending_invite_group = player_sending_invite->GetGroup();
 				Group* group = GetGroup();
 				if (group) //if our target has a group
 				{
-					raid = new Raid(player_accepting_invite);
+					raid = new Raid(player_sending_invite);
 					entity_list.AddRaid(raid);
 					raid->SetRaidDetails();
 
 					uint32 raid_free_group_id = raid->GetFreeGroup();
 
 					/* If we already have a group then cycle through adding us... */
-					if (player_invited_group) {
+					if (player_sending_invite_group) {
 						Client* client_to_be_leader = nullptr;
-						for (int x = 0; x < MAX_GROUP_MEMBERS; x++) {
-							if (player_invited_group->members[x]) {
+						for (const auto& sending_invite_member : player_sending_invite_group->members) {
+							if (sending_invite_member) {
 								if (!client_to_be_leader) {
-									if (player_invited_group->members[x]->IsClient()) {
-										client_to_be_leader = player_invited_group->members[x]->CastToClient();
+									if (sending_invite_member->IsClient()) {
+										client_to_be_leader = sending_invite_member->CastToClient();
 										raid->SetGroupLeader(client_to_be_leader->GetName());
 									}
 								}
-								if (player_invited_group->IsLeader(player_invited_group->members[x])) {
+								if (player_sending_invite_group->IsLeader(sending_invite_member)) {
 									Client* c = nullptr;
 
-									if (player_invited_group->members[x]->IsClient())
-										c = player_invited_group->members[x]->CastToClient();
+									if (sending_invite_member->IsClient())
+										c = sending_invite_member->CastToClient();
 									else
 										continue;
 
@@ -12005,8 +12003,8 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 								else {
 									Client* c = nullptr;
 
-									if (player_invited_group->members[x]->IsClient())
-										c = player_invited_group->members[x]->CastToClient();
+									if (sending_invite_member->IsClient())
+										c = sending_invite_member->CastToClient();
 									else
 										continue;
 
@@ -12020,14 +12018,14 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 								}
 							}
 						}
-						player_invited_group->JoinRaidXTarget(raid, true);
-						player_invited_group->DisbandGroup(true);
+						player_sending_invite_group->JoinRaidXTarget(raid, true);
+						player_sending_invite_group->DisbandGroup(true);
 						raid->GroupUpdate(raid_free_group_id);
 						raid_free_group_id = raid->GetFreeGroup();
 					}
 					else {
-						raid->SendRaidCreate(player_accepting_invite);
-						raid->AddMember(player_accepting_invite, 0xFFFFFFFF, true, false, true);
+						raid->SendRaidCreate(player_sending_invite);
+						raid->AddMember(player_sending_invite, 0xFFFFFFFF, true, false, true);
 					}
 
 					Client* client_to_add = nullptr;
@@ -12083,26 +12081,26 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 				}
 				/* Target does not have a group */
 				else {
-					if (player_invited_group) {
+					if (player_sending_invite_group) {
 
-						raid = new Raid(player_accepting_invite);
+						raid = new Raid(player_sending_invite);
 
 						entity_list.AddRaid(raid);
 						raid->SetRaidDetails();
 						Client* addClientig = nullptr;
 						for (int x = 0; x < MAX_GROUP_MEMBERS; x++) {
-							if (player_invited_group->members[x]) {
+							if (player_sending_invite_group->members[x]) {
 								if (!addClientig) {
-									if (player_invited_group->members[x]->IsClient()) {
-										addClientig = player_invited_group->members[x]->CastToClient();
+									if (player_sending_invite_group->members[x]->IsClient()) {
+										addClientig = player_sending_invite_group->members[x]->CastToClient();
 										raid->SetGroupLeader(addClientig->GetName());
 									}
 								}
-								if (player_invited_group->IsLeader(player_invited_group->members[x])) {
+								if (player_sending_invite_group->IsLeader(player_sending_invite_group->members[x])) {
 									Client* c = nullptr;
 
-									if (player_invited_group->members[x]->IsClient())
-										c = player_invited_group->members[x]->CastToClient();
+									if (player_sending_invite_group->members[x]->IsClient())
+										c = player_sending_invite_group->members[x]->CastToClient();
 									else
 										continue;
 
@@ -12117,8 +12115,8 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 								else
 								{
 									Client* c = nullptr;
-									if (player_invited_group->members[x]->IsClient())
-										c = player_invited_group->members[x]->CastToClient();
+									if (player_sending_invite_group->members[x]->IsClient())
+										c = player_sending_invite_group->members[x]->CastToClient();
 									else
 										continue;
 
@@ -12134,9 +12132,9 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 						}
 						raid->SendRaidCreate(this);
 						raid->SendBulkRaid(this);
-						player_invited_group->JoinRaidXTarget(raid, true);
+						player_sending_invite_group->JoinRaidXTarget(raid, true);
 						raid->AddMember(this);
-						player_invited_group->DisbandGroup(true);
+						player_sending_invite_group->DisbandGroup(true);
 						raid->GroupUpdate(0);
 						raid->SendMakeLeaderPacketTo(raid->leadername, this);
 						if (raid->IsLocked()) {
@@ -12144,12 +12142,12 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 						}
 					}
 					else { // neither has a group
-						raid = new Raid(player_accepting_invite);
+						raid = new Raid(player_sending_invite);
 						entity_list.AddRaid(raid);
 						raid->SetRaidDetails();
-						raid->SendRaidCreate(player_accepting_invite);
+						raid->SendRaidCreate(player_sending_invite);
 						raid->SendRaidCreate(this);
-						raid->AddMember(player_accepting_invite, 0xFFFFFFFF, true, false, true);
+						raid->AddMember(player_sending_invite, 0xFFFFFFFF, true, false, true);
 						raid->SendBulkRaid(this);
 						raid->AddMember(this);
 						raid->SendMakeLeaderPacketTo(raid->leadername, this);

@@ -2449,7 +2449,8 @@ constexpr float MAX_CASTER_DISTANCE[PLAYER_CLASS_COUNT] = {
 
 void Bot::AI_Process()
 {
-#define TEST_COMBATANTS() if (!GetTarget() || GetAppearance() == eaDead) { return; }
+
+#define TEST_COMBATANTS if (!GetTarget() || GetAppearance() == eaDead) { return; }
 #define PULLING_BOT (GetPullingFlag() || GetReturningFlag())
 #define NOT_PULLING_BOT (!GetPullingFlag() && !GetReturningFlag())
 #define GUARDING (GetGuardFlag())
@@ -2458,7 +2459,6 @@ void Bot::AI_Process()
 #define NOT_HOLDING (!GetHoldFlag())
 #define PASSIVE (GetBotStance() == EQ::constants::stancePassive)
 #define NOT_PASSIVE (GetBotStance() != EQ::constants::stancePassive)
-
 
 	Client* bot_owner = (GetBotOwner() && GetBotOwner()->IsClient() ? GetBotOwner()->CastToClient() : nullptr);
 	auto raid = entity_list.GetRaidByBotName(GetName());
@@ -2542,7 +2542,7 @@ void Bot::AI_Process()
 	float lo_distance = DistanceSquared(m_Position, leash_owner->GetPosition());
 	float leash_distance = RuleR(Bots, LeashDistance);
 
-//#pragma region CURRENTLY CASTING CHECKS
+// CURRENTLY CASTING CHECKS
 
 	if (IsCasting()) {
 
@@ -2604,134 +2604,47 @@ void Bot::AI_Process()
 	bool bo_alt_combat = (RuleB(Bots, AllowOwnerOptionAltCombat) && bot_owner->GetBotOption(Client::booAltCombat));
 
 	if (GetAttackFlag()) { // Push owner's target onto our hate list
-
-		if (GetPet() && PULLING_BOT) {
-			GetPet()->SetPetOrder(m_previous_pet_order);
-		}
-
-		SetAttackFlag(false);
-		SetAttackingFlag(false);
-		SetPullFlag(false);
-		SetPullingFlag(false);
-		SetReturningFlag(false);
-		bot_owner->SetBotPulling(false);
-
-		if (NOT_HOLDING && NOT_PASSIVE) {
-
-			auto attack_target = bot_owner->GetTarget();
-			if (attack_target) {
-
-				InterruptSpell();
-				WipeHateList();
-				AddToHateList(attack_target, 1);
-				SetTarget(attack_target);
-				SetAttackingFlag();
-				if (HasPet() && (GetClass() != ENCHANTER || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 2)) {
-
-					GetPet()->WipeHateList();
-					GetPet()->AddToHateList(attack_target, 1);
-					GetPet()->SetTarget(attack_target);
-				}
-			}
-		}
+		SetOwnerTarget(bot_owner);
 	}
-
 	else if (GetPullFlag()) { // Push owner's target onto our hate list and set flags so other bots do not aggro
-
-		SetAttackFlag(false);
-		SetAttackingFlag(false);
-		SetPullFlag(false);
-		SetPullingFlag(false);
-		SetReturningFlag(false);
-		bot_owner->SetBotPulling(false);
-
-		if (NOT_HOLDING && NOT_PASSIVE) {
-			auto pull_target = bot_owner->GetTarget();
-			if (pull_target) {
-				if (raid) {
-					const auto msg = fmt::format("Pulling {} to the group..", pull_target->GetCleanName());
-					raid->RaidSay(msg.c_str(), GetCleanName(), 0, 100);
-				} else {
-					BotGroupSay(
-						this,
-						fmt::format(
-							"Pulling {}.",
-							pull_target->GetCleanName()
-						).c_str()
-					);
-				}
-
-				InterruptSpell();
-				WipeHateList();
-				AddToHateList(pull_target, 1);
-				SetTarget(pull_target);
-				SetPullingFlag();
-				bot_owner->SetBotPulling();
-				if (HasPet() && (GetClass() != ENCHANTER || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 1)) {
-
-					GetPet()->WipeHateList();
-					GetPet()->SetTarget(nullptr);
-					m_previous_pet_order = GetPet()->GetPetOrder();
-					GetPet()->SetPetOrder(SPO_Guard);
-				}
-			}
-		}
+		BotPullerProcess(bot_owner, raid);
 	}
 
 //ALT COMBAT (ACQUIRE HATE)
 
-	else if (bo_alt_combat && m_alt_combat_hate_timer.Check(false)) { // 'Alt Combat' gives some more 'control' options on how bots process aggro
-
+	else if (bo_alt_combat && m_alt_combat_hate_timer.Check(false)) {
 		// Empty hate list - let's find some aggro
 		if (!IsEngaged() && NOT_HOLDING && NOT_PASSIVE && (!bot_owner->GetBotPulling() || NOT_PULLING_BOT)) {
-
-			Mob* lo_target = leash_owner->GetTarget();
-			if (lo_target &&
-				lo_target->IsNPC() &&
-				!lo_target->IsMezzed() &&
-				((bot_owner->GetBotOption(Client::booAutoDefend) && lo_target->GetHateAmount(leash_owner)) || leash_owner->AutoAttackEnabled()) &&
-				lo_distance <= leash_distance &&
-				DistanceSquared(m_Position, lo_target->GetPosition()) <= leash_distance &&
-				(CheckLosFN(lo_target) || leash_owner->CheckLosFN(lo_target)) &&
-				IsAttackAllowed(lo_target))
-			{
-				AddToHateList(lo_target, 1);
-				if (HasPet() && (GetClass() != ENCHANTER || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 2)) {
-
-					GetPet()->AddToHateList(lo_target, 1);
-					GetPet()->SetTarget(lo_target);
-				}
+			SetLeashOwnerTarget(leash_owner, bot_owner, lo_distance, leash_distance);
 			}
-			else if (bot_group) {
-				for (const auto& bg_member : bot_group->members) {
-					if (!bg_member) {
-						continue;
-					}
 
-					auto bgm_target = bg_member->GetTarget();
-					if (!bgm_target || !bgm_target->IsNPC()) {
-						continue;
-					}
-					AddBotGroupTarget(bot_owner, leash_owner, lo_distance, leash_distance, bg_member, bgm_target);
+		else if (bot_group) {
+			for (const auto& bg_member: bot_group->members) {
+				if (!bg_member) {
+					continue;
 				}
-			} else if (raid) {
-				for (const auto& raid_member : raid->members) {
-					if (!raid_member.member){
-						continue;
-					}
 
-					auto rm_target = raid_member.member->GetTarget();
-					if (!rm_target || !rm_target->IsNPC()) {
-						continue;
-					}
-					AddBotGroupTarget(bot_owner, leash_owner, lo_distance, leash_distance, raid_member.member,
-					                  rm_target);
+				auto bgm_target = bg_member->GetTarget();
+				if (!bgm_target || !bgm_target->IsNPC()) {
+					continue;
 				}
+				SetBotGroupTarget(bot_owner, leash_owner, lo_distance, leash_distance, bg_member, bgm_target);
+			}
+		}
+		else if (raid) {
+			for (const auto& raid_member : raid->members) {
+				if (!raid_member.member){
+					continue;
+				}
+
+				auto rm_target = raid_member.member->GetTarget();
+				if (!rm_target || !rm_target->IsNPC()) {
+					continue;
+				}
+				SetBotGroupTarget(bot_owner, leash_owner, lo_distance, leash_distance, raid_member.member,rm_target);
 			}
 		}
 	}
-
-//#pragma endregion
 
 	glm::vec3 Goal(0, 0, 0);
 
@@ -2742,7 +2655,7 @@ void Bot::AI_Process()
 			rest_timer.Disable();
 		}
 
-//#pragma region PULLING FLAG (TARGET VALIDATION)
+// PULLING FLAG (TARGET VALIDATION)
 
 		if (GetPullingFlag()) {
 
@@ -2773,9 +2686,9 @@ void Bot::AI_Process()
 			}
 		}
 
-//#pragma endregion
 
-//#pragma region RETURNING FLAG
+
+// RETURNING FLAG
 
 		else if (GetReturningFlag()) {
 
@@ -2800,9 +2713,7 @@ void Bot::AI_Process()
 			}
 		}
 
-//#pragma endregion
-
-//#pragma region ALT COMBAT (ACQUIRE TARGET)
+// ALT COMBAT (ACQUIRE TARGET)
 
 		else if (bo_alt_combat && m_alt_combat_hate_timer.Check()) { // Find a mob from hate list to target
 
@@ -2876,9 +2787,7 @@ void Bot::AI_Process()
 			}
 		}
 
-//#pragma endregion
-
-//#pragma region DEFAULT (ACQUIRE TARGET)
+// DEFAULT (ACQUIRE TARGET)
 
 		else {
 
@@ -2886,10 +2795,8 @@ void Bot::AI_Process()
 			// ..that action occurs through commands or out-of-combat checks
 			// (Use current target, if already in combat)
 		}
-
-//#pragma endregion
-
-//#pragma region VERIFY TARGET AND STANCE
+		
+// VERIFY TARGET AND STANCE
 
 		Mob* tar = GetTarget(); // We should have a target..if not, we're awaiting new orders
 		if (!tar || PASSIVE) {
@@ -2918,23 +2825,18 @@ void Bot::AI_Process()
 			return;
 		}
 
-//#pragma endregion
 
-//#pragma region ATTACKING FLAG (HATE VALIDATION)
+
+// ATTACKING FLAG (HATE VALIDATION)
 
 		if (GetAttackingFlag() && tar->CheckAggro(this)) {
 			SetAttackingFlag(false);
 		}
-
-//#pragma endregion
-
+		
 		float tar_distance = DistanceSquared(m_Position, tar->GetPosition());
 
-//#pragma region TARGET VALIDATION
+// TARGET VALIDATION
 
-		// DOUBLE-CHECK THIS CRITERIA
-
-		// Verify that our target has attackable criteria
 		if (HOLDING ||
 			!tar->IsNPC() ||
 			tar->IsMezzed() ||
@@ -2976,7 +2878,7 @@ void Bot::AI_Process()
 			return;
 		}
 
-//#pragma endregion
+
 
 		// This causes conflicts with default pet handler (bounces between targets)
 		if (NOT_PULLING_BOT && HasPet() && (GetClass() != ENCHANTER || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 2)) {
@@ -2993,7 +2895,7 @@ void Bot::AI_Process()
 			SendAddPlayerState(PlayerState::Aggressive);
 		}
 
-//#pragma region PULLING FLAG (ACTIONABLE RANGE)
+// PULLING FLAG (ACTIONABLE RANGE)
 
 		if (GetPullingFlag()) {
 
@@ -3007,9 +2909,9 @@ void Bot::AI_Process()
 			}
 		}
 
-//#pragma endregion
 
-//#pragma region COMBAT RANGE CALCS
+
+// COMBAT RANGE CALCS
 
 		bool atCombatRange = false;
 
@@ -3151,9 +3053,9 @@ void Bot::AI_Process()
 			atCombatRange = true;
 		}
 
-//#pragma endregion
 
-//#pragma region ENGAGED AT COMBAT RANGE
+
+// ENGAGED AT COMBAT RANGE
 
 		// We can fight
 		if (atCombatRange) {
@@ -3209,12 +3111,12 @@ void Bot::AI_Process()
 			}
 
 			// Up to this point, GetTarget() has been safe to dereference since the initial
-			// TEST_COMBATANTS() call. Due to the chance of the target dying and our pointer
+			// TEST_COMBATANTS call. Due to the chance of the target dying and our pointer
 			// being nullified, we need to test it before dereferencing to avoid crashes
 
 			if (IsBotArcher() && ranged_timer.Check(false)) { // Can shoot mezzed, stunned and dead!?
 
-				TEST_COMBATANTS();
+				TEST_COMBATANTS;
 				if (GetTarget()->GetHPRatio() <= 99.0f) {
 					BotRangedAttack(tar);
 				}
@@ -3223,49 +3125,49 @@ void Bot::AI_Process()
 
 				// We can't fight if we don't have a target, are stun/mezzed or dead..
 				// Stop attacking if the target is enraged
-				TEST_COMBATANTS();
+				TEST_COMBATANTS;
 				if (tar->IsEnraged() && !BehindMob(tar, GetX(), GetY())) {
 					return;
 				}
 
 				// First, special attack per class (kick, backstab etc..)
-				TEST_COMBATANTS();
+				TEST_COMBATANTS;
 				DoClassAttacks(tar);
 
-				TEST_COMBATANTS();
+				TEST_COMBATANTS;
 				if (attack_timer.Check()) { // Process primary weapon attacks
 
 					Attack(tar, EQ::invslot::slotPrimary);
 
-					TEST_COMBATANTS();
+					TEST_COMBATANTS;
 					TriggerDefensiveProcs(tar, EQ::invslot::slotPrimary, false);
 
-					TEST_COMBATANTS();
+					TEST_COMBATANTS;
 					TryCombatProcs(p_item, tar, EQ::invslot::slotPrimary);
 
 					// bool tripleSuccess = false;
 
-					TEST_COMBATANTS();
+					TEST_COMBATANTS;
 					if (CanThisClassDoubleAttack()) {
 
 						if (CheckBotDoubleAttack()) {
 							Attack(tar, EQ::invslot::slotPrimary, true);
 						}
 
-						TEST_COMBATANTS();
+						TEST_COMBATANTS;
 						if (GetSpecialAbility(SPECATK_TRIPLE) && CheckBotDoubleAttack(true)) {
 							// tripleSuccess = true;
 							Attack(tar, EQ::invslot::slotPrimary, true);
 						}
 
-						TEST_COMBATANTS();
+						TEST_COMBATANTS;
 						// quad attack, does this belong here??
 						if (GetSpecialAbility(SPECATK_QUAD) && CheckBotDoubleAttack(true)) {
 							Attack(tar, EQ::invslot::slotPrimary, true);
 						}
 					}
 
-					TEST_COMBATANTS();
+					TEST_COMBATANTS;
 					// Live AA - Flurry, Rapid Strikes ect (Flurry does not require Triple Attack).
 					int32 flurrychance = (aabonuses.FlurryChance + spellbonuses.FlurryChance + itembonuses.FlurryChance);
 					if (flurrychance) {
@@ -3275,12 +3177,12 @@ void Bot::AI_Process()
 							MessageString(Chat::NPCFlurry, YOU_FLURRY);
 							Attack(tar, EQ::invslot::slotPrimary, false);
 
-							TEST_COMBATANTS();
+							TEST_COMBATANTS;
 							Attack(tar, EQ::invslot::slotPrimary, false);
 						}
 					}
 
-					TEST_COMBATANTS();
+					TEST_COMBATANTS;
 					auto ExtraAttackChanceBonus =
 						(spellbonuses.ExtraAttackChance[0] + itembonuses.ExtraAttackChance[0] +
 						aabonuses.ExtraAttackChance[0]);
@@ -3295,7 +3197,7 @@ void Bot::AI_Process()
 					}
 				}
 
-				TEST_COMBATANTS();
+				TEST_COMBATANTS;
 				if (attack_dw_timer.Check() && CanThisClassDualWield()) { // Process secondary weapon attacks
 
 					const EQ::ItemData* s_itemdata = nullptr;
@@ -3329,10 +3231,10 @@ void Bot::AI_Process()
 
 								Attack(tar, EQ::invslot::slotSecondary);	// Single attack with offhand
 
-								TEST_COMBATANTS();
+								TEST_COMBATANTS;
 								TryCombatProcs(s_item, tar, EQ::invslot::slotSecondary);
 
-								TEST_COMBATANTS();
+								TEST_COMBATANTS;
 								if (CanThisClassDoubleAttack() && CheckBotDoubleAttack()) {
 
 									if (tar->GetHP() > -10) {
@@ -3350,9 +3252,9 @@ void Bot::AI_Process()
 			}
 		}
 
-//#pragma endregion
 
-//#pragma region ENGAGED NOT AT COMBAT RANGE
+
+// ENGAGED NOT AT COMBAT RANGE
 
 		else { // To far away to fight (GetTarget() validity can be iffy below this point - including outer scopes)
 
@@ -3401,7 +3303,7 @@ void Bot::AI_Process()
 			}
 		} // End not in combat range
 
-//#pragma endregion
+
 
 		if (!IsMoving() && !spellend_timer.Enabled()) { // This may actually need work...
 
@@ -3425,7 +3327,7 @@ void Bot::AI_Process()
 			SetReturningFlag(false);
 		}
 
-//#pragma region AUTO DEFEND
+// AUTO DEFEND
 
 		// This is as close as I could get without modifying the aggro mechanics and making it an expensive process...
 		// 'class Client' doesn't make use of hate_list...
@@ -3477,7 +3379,7 @@ void Bot::AI_Process()
 			}
 		}
 
-//#pragma endregion
+
 
 		SetTarget(nullptr);
 
@@ -3491,7 +3393,7 @@ void Bot::AI_Process()
 			SendRemovePlayerState(PlayerState::Aggressive);
 		}
 
-//#pragma region OK TO IDLE
+// OK TO IDLE
 
 		// Ok to idle
 		if ((NOT_GUARDING && fm_distance <= GetFollowDistance()) || (GUARDING && DistanceSquared(GetPosition(), GetGuardPoint()) <= GetFollowDistance())) {
@@ -3570,22 +3472,105 @@ void Bot::AI_Process()
 			}
 		}
 
-//#pragma endregion
+
 
 	}
-
-#undef TEST_COMBATANTS
-#undef PULLING_BOT
-#undef NOT_PULLING_BOT
-#undef GUARDING
-#undef NOT_GUARDING
-#undef HOLDING
-#undef NOT_HOLDING
-#undef PASSIVE
-#undef NOT_PASSIVE
 }
 
-void Bot::AddBotGroupTarget(const Client* bot_owner, Client* leash_owner, float lo_distance, float leash_distance, Mob* const& bg_member, Mob* bgm_target) {
+void Bot::SetLeashOwnerTarget(Client* leash_owner, Client* bot_owner, float lo_distance, float leash_distance) {
+
+	Mob* lo_target = leash_owner->GetTarget();
+	if (lo_target &&
+		lo_target->IsNPC() &&
+		!lo_target->IsMezzed() &&
+		((bot_owner->GetBotOption(Client::booAutoDefend) && lo_target->GetHateAmount(leash_owner)) || leash_owner->AutoAttackEnabled()) &&
+		lo_distance <= leash_distance &&
+		DistanceSquared(m_Position, lo_target->GetPosition()) <= leash_distance &&
+		(CheckLosFN(lo_target) || leash_owner->CheckLosFN(lo_target)) &&
+		IsAttackAllowed(lo_target))
+	{
+		AddToHateList(lo_target, 1);
+		if (HasPet() && (GetClass() != ENCHANTER || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 2)) {
+			GetPet()->AddToHateList(lo_target, 1);
+			GetPet()->SetTarget(lo_target);
+		}
+	}
+}
+
+void Bot::SetOwnerTarget(Client* bot_owner) {
+	if (GetPet() && PULLING_BOT) {
+		GetPet()->SetPetOrder(m_previous_pet_order);
+	}
+
+	SetAttackFlag(false);
+	SetAttackingFlag(false);
+	SetPullFlag(false);
+	SetPullingFlag(false);
+	SetReturningFlag(false);
+	bot_owner->SetBotPulling(false);
+
+	if (NOT_HOLDING && NOT_PASSIVE) {
+
+		auto attack_target = bot_owner->GetTarget();
+		if (attack_target) {
+
+			InterruptSpell();
+			WipeHateList();
+			AddToHateList(attack_target, 1);
+			SetTarget(attack_target);
+			SetAttackingFlag();
+			if (HasPet() && (GetClass() != ENCHANTER || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 2)) {
+
+				GetPet()->WipeHateList();
+				GetPet()->AddToHateList(attack_target, 1);
+				GetPet()->SetTarget(attack_target);
+			}
+		}
+	}
+}
+
+void Bot::BotPullerProcess(Client* bot_owner, Raid* raid) {
+	SetAttackFlag(false);
+	SetAttackingFlag(false);
+	SetPullFlag(false);
+	SetPullingFlag(false);
+	SetReturningFlag(false);
+	bot_owner->SetBotPulling(false);
+
+	if (NOT_HOLDING && NOT_PASSIVE) {
+		auto pull_target = bot_owner->GetTarget();
+		if (pull_target) {
+			if (raid) {
+				const auto msg = fmt::format("Pulling {} to the group..", pull_target->GetCleanName());
+				raid->RaidSay(msg.c_str(), GetCleanName(), 0, 100);
+			} else {
+				BotGroupSay(
+					this,
+					fmt::format(
+						"Pulling {}.",
+						pull_target->GetCleanName()
+					).c_str()
+				);
+			}
+
+			InterruptSpell();
+			WipeHateList();
+			AddToHateList(pull_target, 1);
+			SetTarget(pull_target);
+			SetPullingFlag();
+			bot_owner->SetBotPulling();
+			if (HasPet() && (GetClass() != ENCHANTER || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 1)) {
+
+				GetPet()->WipeHateList();
+				GetPet()->SetTarget(nullptr);
+				m_previous_pet_order = GetPet()->GetPetOrder();
+				GetPet()->SetPetOrder(SPO_Guard);
+			}
+		}
+	}
+}
+
+void Bot::SetBotGroupTarget(const Client* bot_owner, Client* leash_owner, float lo_distance, float leash_distance, Mob* const& bg_member, Mob* bgm_target) {
 	if (!bgm_target->IsMezzed() &&
 	    ((bot_owner->GetBotOption(Client::booAutoDefend) && bgm_target->GetHateAmount(bg_member)) || leash_owner->AutoAttackEnabled()) &&
 		lo_distance <= leash_distance &&
