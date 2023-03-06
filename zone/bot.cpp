@@ -456,7 +456,7 @@ void Bot::SetBotSpellID(uint32 newSpellID) {
 	npc_spells_id = newSpellID;
 }
 
-void Bot::SetSurname(const std::string_view bot_surname) {
+void Bot::SetSurname(std::string_view bot_surname) {
 
 	_surname = bot_surname.substr(0, 31);
 

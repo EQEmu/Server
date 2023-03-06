@@ -240,7 +240,7 @@ public:
 	bool GetNeedsHateRedux(Mob *tar);
 	bool HasOrMayGetAggro();
 	void SetDefaultBotStance();
-	void SetSurname(const std::string_view bot_surname);
+	void SetSurname(std::string_view bot_surname);
 	void SetTitle(std::string_view bot_title);
 	void SetSuffix(std::string_view bot_suffix);
 	std::string GetSurname() const { return _surname; }
