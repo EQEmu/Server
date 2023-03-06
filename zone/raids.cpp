@@ -1590,8 +1590,8 @@ void Raid::GetRaidDetails()
 
     auto row = results.begin();
 
-    locked = atoi(row[0]);
-    LootType = atoi(row[1]);
+    locked = Strings::ToInt(row[0]);
+    LootType = Strings::ToInt(row[1]);
 	motd = std::string(row[2]);
 }
 
@@ -1649,7 +1649,7 @@ bool Raid::LearnMembers()
 		members[index].IsBot         = atoi(row[7]) > 0;
 		++index;
 	}
-
+  
 	return true;
 }
 

@@ -2858,25 +2858,25 @@ DBnpcspells_Struct *ZoneDatabase::GetNPCSpells(uint32 iDBSpellsID)
 		auto row = results.begin();
 		DBnpcspells_Struct spell_set;
 
-		spell_set.parent_list = atoi(row[1]);
-		spell_set.attack_proc = atoi(row[2]);
-		spell_set.proc_chance = atoi(row[3]);
-		spell_set.range_proc = atoi(row[4]);
-		spell_set.rproc_chance = atoi(row[5]);
-		spell_set.defensive_proc = atoi(row[6]);
-		spell_set.dproc_chance = atoi(row[7]);
-		spell_set.fail_recast = atoi(row[8]);
-		spell_set.engaged_no_sp_recast_min = atoi(row[9]);
-		spell_set.engaged_no_sp_recast_max = atoi(row[10]);
-		spell_set.engaged_beneficial_self_chance = atoi(row[11]);
-		spell_set.engaged_beneficial_other_chance = atoi(row[12]);
-		spell_set.engaged_detrimental_chance = atoi(row[13]);
-		spell_set.pursue_no_sp_recast_min = atoi(row[14]);
-		spell_set.pursue_no_sp_recast_max = atoi(row[15]);
-		spell_set.pursue_detrimental_chance = atoi(row[16]);
-		spell_set.idle_no_sp_recast_min = atoi(row[17]);
-		spell_set.idle_no_sp_recast_max = atoi(row[18]);
-		spell_set.idle_beneficial_chance = atoi(row[19]);
+		spell_set.parent_list = Strings::ToInt(row[1]);
+		spell_set.attack_proc = Strings::ToInt(row[2]);
+		spell_set.proc_chance = Strings::ToInt(row[3]);
+		spell_set.range_proc = Strings::ToInt(row[4]);
+		spell_set.rproc_chance = Strings::ToInt(row[5]);
+		spell_set.defensive_proc = Strings::ToInt(row[6]);
+		spell_set.dproc_chance = Strings::ToInt(row[7]);
+		spell_set.fail_recast = Strings::ToInt(row[8]);
+		spell_set.engaged_no_sp_recast_min = Strings::ToInt(row[9]);
+		spell_set.engaged_no_sp_recast_max = Strings::ToInt(row[10]);
+		spell_set.engaged_beneficial_self_chance = Strings::ToInt(row[11]);
+		spell_set.engaged_beneficial_other_chance = Strings::ToInt(row[12]);
+		spell_set.engaged_detrimental_chance = Strings::ToInt(row[13]);
+		spell_set.pursue_no_sp_recast_min = Strings::ToInt(row[14]);
+		spell_set.pursue_no_sp_recast_max = Strings::ToInt(row[15]);
+		spell_set.pursue_detrimental_chance = Strings::ToInt(row[16]);
+		spell_set.idle_no_sp_recast_min = Strings::ToInt(row[17]);
+		spell_set.idle_no_sp_recast_max = Strings::ToInt(row[18]);
+		spell_set.idle_beneficial_chance = Strings::ToInt(row[19]);
 
 		// pulling fixed values from an auto-increment field is dangerous...
 		query = StringFormat(
@@ -2894,23 +2894,23 @@ DBnpcspells_Struct *ZoneDatabase::GetNPCSpells(uint32 iDBSpellsID)
 		int entryIndex = 0;
 		for (row = results.begin(); row != results.end(); ++row, ++entryIndex) {
 			DBnpcspells_entries_Struct entry;
-			int spell_id = atoi(row[0]);
+			int spell_id = Strings::ToInt(row[0]);
 			entry.spellid = spell_id;
-			entry.type = atoul(row[1]);
-			entry.minlevel = atoi(row[2]);
-			entry.maxlevel = atoi(row[3]);
-			entry.manacost = atoi(row[4]);
-			entry.recast_delay = atoi(row[5]);
-			entry.priority = atoi(row[6]);
-			entry.min_hp = atoi(row[7]);
-			entry.max_hp = atoi(row[8]);
+			entry.type = Strings::ToUnsignedInt(row[1]);
+			entry.minlevel = Strings::ToInt(row[2]);
+			entry.maxlevel = Strings::ToInt(row[3]);
+			entry.manacost = Strings::ToInt(row[4]);
+			entry.recast_delay = Strings::ToInt(row[5]);
+			entry.priority = Strings::ToInt(row[6]);
+			entry.min_hp = Strings::ToInt(row[7]);
+			entry.max_hp = Strings::ToInt(row[8]);
 
 			// some spell types don't make much since to be priority 0, so fix that
 			if (!(entry.type & SPELL_TYPES_INNATE) && entry.priority == 0)
 				entry.priority = 1;
 
 			if (row[9])
-				entry.resist_adjust = atoi(row[9]);
+				entry.resist_adjust = Strings::ToInt(row[9]);
 			else if (IsValidSpell(spell_id))
 				entry.resist_adjust = spells[spell_id].resist_difficulty;
 
@@ -2941,7 +2941,7 @@ uint32 ZoneDatabase::GetMaxNPCSpellsID() {
     if (!row[0])
         return 0;
 
-    return atoi(row[0]);
+    return Strings::ToInt(row[0]);
 }
 
 DBnpcspellseffects_Struct *ZoneDatabase::GetNPCSpellsEffects(uint32 iDBSpellsEffectsID)
@@ -2981,7 +2981,7 @@ DBnpcspellseffects_Struct *ZoneDatabase::GetNPCSpellsEffects(uint32 iDBSpellsEff
 		return nullptr;
 
 	auto row = results.begin();
-	uint32 tmpparent_list = atoi(row[1]);
+	uint32 tmpparent_list = Strings::ToInt(row[1]);
 
 	query = StringFormat("SELECT spell_effect_id, minlevel, "
 			     "maxlevel,se_base, se_limit, se_max "
@@ -3001,13 +3001,13 @@ DBnpcspellseffects_Struct *ZoneDatabase::GetNPCSpellsEffects(uint32 iDBSpellsEff
 
 	int entryIndex = 0;
 	for (row = results.begin(); row != results.end(); ++row, ++entryIndex) {
-		int spell_effect_id = atoi(row[0]);
+		int spell_effect_id = Strings::ToInt(row[0]);
 		npc_spellseffects_cache[iDBSpellsEffectsID]->entries[entryIndex].spelleffectid = spell_effect_id;
-		npc_spellseffects_cache[iDBSpellsEffectsID]->entries[entryIndex].minlevel = atoi(row[1]);
-		npc_spellseffects_cache[iDBSpellsEffectsID]->entries[entryIndex].maxlevel = atoi(row[2]);
-		npc_spellseffects_cache[iDBSpellsEffectsID]->entries[entryIndex].base_value = atoi(row[3]);
-		npc_spellseffects_cache[iDBSpellsEffectsID]->entries[entryIndex].limit = atoi(row[4]);
-		npc_spellseffects_cache[iDBSpellsEffectsID]->entries[entryIndex].max_value = atoi(row[5]);
+		npc_spellseffects_cache[iDBSpellsEffectsID]->entries[entryIndex].minlevel = Strings::ToInt(row[1]);
+		npc_spellseffects_cache[iDBSpellsEffectsID]->entries[entryIndex].maxlevel = Strings::ToInt(row[2]);
+		npc_spellseffects_cache[iDBSpellsEffectsID]->entries[entryIndex].base_value = Strings::ToInt(row[3]);
+		npc_spellseffects_cache[iDBSpellsEffectsID]->entries[entryIndex].limit = Strings::ToInt(row[4]);
+		npc_spellseffects_cache[iDBSpellsEffectsID]->entries[entryIndex].max_value = Strings::ToInt(row[5]);
 	}
 
 	return npc_spellseffects_cache[iDBSpellsEffectsID];
@@ -3028,6 +3028,6 @@ uint32 ZoneDatabase::GetMaxNPCSpellsEffectsID() {
     if (!row[0])
         return 0;
 
-    return atoi(row[0]);
+    return Strings::ToInt(row[0]);
 }
 

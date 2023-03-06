@@ -12,8 +12,8 @@ void command_removeitem(Client *c, const Seperator *sep)
 	if (c->GetTarget() && c->GetTarget()->IsClient()) {
 		target = c->GetTarget()->CastToClient();
 	}
-	
-	auto item_id = std::stoi(sep->arg[1]);
+
+	auto item_id = Strings::ToInt(sep->arg[1]);
 	if (!database.GetItem(item_id)) {
 		c->Message(
 			Chat::White,
@@ -24,9 +24,9 @@ void command_removeitem(Client *c, const Seperator *sep)
 		);
 		return;
 	}
-	
+
 	auto item_link = database.CreateItemLink(item_id);
-	auto amount = sep->IsNumber(2) ? std::stoul(sep->arg[2]) : 1;
+	auto amount = sep->IsNumber(2) ? Strings::ToUnsignedInt(sep->arg[2]) : 1;
 	auto item_count = target->CountItem(item_id);
 	if (item_count) {
 		if (item_count >= amount) {

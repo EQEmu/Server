@@ -64,17 +64,17 @@ void command_who(Client *c, const Seperator *sep)
 	c->Message(Chat::Who, "------------------------------");
 
 	for (auto row : results) {
-		auto account_id = std::stoul(row[0]);
+		auto account_id = Strings::ToUnsignedInt(row[0]);
 		std::string player_name = row[1];
-		auto zone_id = std::stoul(row[2]);
+		auto zone_id = Strings::ToUnsignedInt(row[2]);
 		std::string zone_short_name = ZoneName(zone_id);
 		std::string zone_long_name = ZoneLongName(zone_id);
-		auto zone_instance = std::stoul(row[3]);
+		auto zone_instance = Strings::ToUnsignedInt(row[3]);
 		std::string guild_name = row[4];
-		auto player_level = std::stoul(row[5]);
-		auto player_race = std::stoul(row[6]);
-		auto player_class = std::stoul(row[7]);
-		auto account_status = std::stoul(row[8]);
+		auto player_level = Strings::ToUnsignedInt(row[5]);
+		auto player_race = Strings::ToUnsignedInt(row[6]);
+		auto player_class = Strings::ToUnsignedInt(row[7]);
+		auto account_status = Strings::ToUnsignedInt(row[8]);
 		std::string account_name = row[9];
 		std::string account_ip = row[10];
 		std::string base_class_name = GetClassIDName(static_cast<uint8>(player_class));

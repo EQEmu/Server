@@ -22,7 +22,7 @@ void command_emote(Client *c, const Seperator *sep)
 	bool is_zone = !strcasecmp(sep->arg[1], "zone");
 
 	const std::string emote_message = sep->argplus[3];
-	const auto emote_type = std::stoul(sep->arg[2]);
+	const auto emote_type = Strings::ToUnsignedInt(sep->arg[2]);
 
 	if (is_zone) {
 		if (!Strings::Contains(emote_message, "^")) {

@@ -42,15 +42,15 @@ void command_npcloot(Client *c, const Seperator *sep)
 			return;
 		}
 
-		auto item_id = std::stoul(sep->arg[2]);
-		auto item_charges = sep->IsNumber(3) ? static_cast<uint16>(std::stoul(sep->arg[3])) : 1;
+		auto item_id = Strings::ToUnsignedInt(sep->arg[2]);
+		auto item_charges = sep->IsNumber(3) ? static_cast<uint16>(Strings::ToUnsignedInt(sep->arg[3])) : 1;
 		bool equip_item = arguments >= 4 ? atobool(sep->arg[4]) : false;
-		auto augment_one_id = sep->IsNumber(5) ? std::stoul(sep->arg[5]) : 0;
-		auto augment_two_id = sep->IsNumber(6) ? std::stoul(sep->arg[6]) : 0;
-		auto augment_three_id = sep->IsNumber(7) ? std::stoul(sep->arg[7]) : 0;
-		auto augment_four_id = sep->IsNumber(8) ? std::stoul(sep->arg[8]) : 0;
-		auto augment_five_id = sep->IsNumber(9) ? std::stoul(sep->arg[9]) : 0;
-		auto augment_six_id = sep->IsNumber(10) ? std::stoul(sep->arg[10]) : 0;
+		auto augment_one_id = sep->IsNumber(5) ? Strings::ToUnsignedInt(sep->arg[5]) : 0;
+		auto augment_two_id = sep->IsNumber(6) ? Strings::ToUnsignedInt(sep->arg[6]) : 0;
+		auto augment_three_id = sep->IsNumber(7) ? Strings::ToUnsignedInt(sep->arg[7]) : 0;
+		auto augment_four_id = sep->IsNumber(8) ? Strings::ToUnsignedInt(sep->arg[8]) : 0;
+		auto augment_five_id = sep->IsNumber(9) ? Strings::ToUnsignedInt(sep->arg[9]) : 0;
+		auto augment_six_id = sep->IsNumber(10) ? Strings::ToUnsignedInt(sep->arg[10]) : 0;
 
 		auto item_data = database.GetItem(item_id);
 
@@ -114,10 +114,10 @@ void command_npcloot(Client *c, const Seperator *sep)
 		auto target = c->GetTarget()->CastToNPC();
 
 		if (sep->IsNumber(2)) {
-			uint16 platinum = EQ::Clamp(std::stoi(sep->arg[2]), 0, 65535);
-			uint16 gold = sep->IsNumber(3) ? EQ::Clamp(std::stoi(sep->arg[3]), 0, 65535) : 0;
-			uint16 silver = sep->IsNumber(4) ? EQ::Clamp(std::stoi(sep->arg[4]), 0, 65535) : 0;
-			uint16 copper = sep->IsNumber(5) ? EQ::Clamp(std::stoi(sep->arg[5]), 0, 65535) : 0;
+			uint16 platinum = EQ::Clamp(Strings::ToInt(sep->arg[2]), 0, 65535);
+			uint16 gold = sep->IsNumber(3) ? EQ::Clamp(Strings::ToInt(sep->arg[3]), 0, 65535) : 0;
+			uint16 silver = sep->IsNumber(4) ? EQ::Clamp(Strings::ToInt(sep->arg[4]), 0, 65535) : 0;
+			uint16 copper = sep->IsNumber(5) ? EQ::Clamp(Strings::ToInt(sep->arg[5]), 0, 65535) : 0;
 			target->AddCash(
 				copper,
 				silver,
@@ -204,7 +204,7 @@ void command_npcloot(Client *c, const Seperator *sep)
 			}
 		} else {
 			if (sep->IsNumber(2)) {
-				auto item_id = std::stoul(sep->arg[2]);
+				auto item_id = Strings::ToUnsignedInt(sep->arg[2]);
 				auto item_count = target->CountItem(item_id);
 				if (item_count) {
 					target->RemoveItem(item_id);

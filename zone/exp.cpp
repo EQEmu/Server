@@ -1263,7 +1263,7 @@ uint8 Client::GetCharMaxLevelFromQGlobal() {
 	for (const auto& global : global_map) {
 		if (global.name == "CharMaxLevel") {
 			if (Strings::IsNumber(global.value)) {
-				return static_cast<uint8>(std::stoul(global.value));
+				return static_cast<uint8>(Strings::ToUnsignedInt(global.value));
 			}
 		}
 	}
@@ -1281,7 +1281,7 @@ uint8 Client::GetCharMaxLevelFromBucket()
 	auto bucket_value = DataBucket::GetData(new_bucket_name);
 	if (!bucket_value.empty()) {
 		if (Strings::IsNumber(bucket_value)) {
-			return static_cast<uint8>(std::stoul(bucket_value));
+			return static_cast<uint8>(Strings::ToUnsignedInt(bucket_value));
 		}
 	}
 
@@ -1293,7 +1293,7 @@ uint8 Client::GetCharMaxLevelFromBucket()
 	bucket_value = DataBucket::GetData(old_bucket_name);
 	if (!bucket_value.empty()) {
 		if (Strings::IsNumber(bucket_value)) {
-			return static_cast<uint8>(std::stoul(bucket_value));
+			return static_cast<uint8>(Strings::ToUnsignedInt(bucket_value));
 		}
 	}
 

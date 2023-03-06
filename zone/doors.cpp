@@ -276,7 +276,7 @@ void Doors::HandleClick(Client *sender, uint8 trigger)
 
 	// enforce flags before they hit zoning process
 	auto z = GetZone(m_destination_zone_name, 0);
-	if (z && !z->flag_needed.empty() && Strings::IsNumber(z->flag_needed) && std::stoi(z->flag_needed) == 1) {
+	if (z && !z->flag_needed.empty() && Strings::IsNumber(z->flag_needed) && Strings::ToInt(z->flag_needed) == 1) {
 		if (sender->Admin() < minStatusToIgnoreZoneFlags && !sender->HasZoneFlag(z->zoneidnumber)) {
 			LogInfo(
 				"Character [{}] does not have the flag to be in this zone [{}]!",
@@ -727,7 +727,7 @@ int ZoneDatabase::GetDoorsDBCountPlusOne(std::string zone_short_name, int16 vers
 		return 0;
 	}
 
-	return std::stoi(row[0]) + 1;
+	return Strings::ToInt(row[0]) + 1;
 }
 
 std::vector<DoorsRepository::Doors> ZoneDatabase::LoadDoors(const std::string &zone_name, int16 version)

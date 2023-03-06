@@ -32,7 +32,7 @@ Database::Database(
 		user.c_str(),
 		pass.c_str(),
 		name.c_str(),
-		std::stoi(port),
+		Strings::ToInt(port),
 		&errnum,
 		errbuf
 	)
@@ -93,7 +93,7 @@ bool Database::GetLoginDataFromAccountInfo(
 
 	auto row = results.begin();
 
-	id       = atoi(row[0]);
+	id       = Strings::ToInt(row[0]);
 	password = row[1];
 
 	LogDebug(
@@ -145,7 +145,7 @@ bool Database::GetLoginTokenDataFromToken(
 		}
 
 		if (strcmp(row[2], "login_server_id") == 0) {
-			db_account_id  = atoi(row[3]);
+			db_account_id  = Strings::ToInt(row[3]);
 			found_login_id = true;
 			continue;
 		}
@@ -178,7 +178,7 @@ unsigned int Database::GetFreeID(const std::string &loginserver)
 
 	auto row = results.begin();
 
-	return std::stoi(row[0]);
+	return Strings::ToInt(row[0]);
 }
 
 /**
@@ -368,12 +368,12 @@ Database::DbWorldRegistration Database::GetWorldRegistration(
 	auto row = results.begin();
 
 	r.loaded                  = true;
-	r.server_id               = std::stoi(row[0]);
+	r.server_id               = Strings::ToInt(row[0]);
 	r.server_description      = row[1];
-	r.server_list_type        = std::stoi(row[3]);
-	r.is_server_trusted       = std::stoi(row[2]) > 0;
+	r.server_list_type        = Strings::ToInt(row[3]);
+	r.is_server_trusted       = Strings::ToInt(row[2]) > 0;
 	r.server_list_description = row[4];
-	r.server_admin_id         = std::stoi(row[5]);
+	r.server_admin_id         = Strings::ToInt(row[5]);
 
 	if (r.server_admin_id <= 0) {
 		return r;
@@ -513,7 +513,7 @@ bool Database::CreateWorldRegistration(
 
 	auto row = results.begin();
 
-	id = std::stoi(row[0]);
+	id = Strings::ToInt(row[0]);
 	auto insert_query = fmt::format(
 		"INSERT INTO login_world_servers SET id = {0}, long_name = '{1}', short_name = '{2}', last_ip_address = '{3}', \n"
 		"login_server_list_type_id = 3, login_server_admin_id = {4}, is_server_trusted = 0, tag_description = ''",
@@ -647,7 +647,7 @@ Database::DbLoginServerAdmin Database::GetLoginServerAdmin(const std::string &ac
 	if (results.RowCount() == 1) {
 		auto row = results.begin();
 		r.loaded                  = true;
-		r.id                      = std::stoi(row[0]);
+		r.id                      = Strings::ToInt(row[0]);
 		r.account_name            = row[1];
 		r.account_password        = row[2];
 		r.first_name              = row[3];
@@ -683,7 +683,7 @@ Database::DbLoginServerAccount Database::GetLoginServerAccountByAccountName(
 	if (results.RowCount() == 1) {
 		auto row = results.begin();
 		r.loaded             = true;
-		r.id                 = std::stoi(row[0]);
+		r.id                 = Strings::ToInt(row[0]);
 		r.account_name       = row[1];
 		r.account_password   = row[2];
 		r.account_email      = row[3];

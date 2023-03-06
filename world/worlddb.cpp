@@ -120,22 +120,22 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, EQApplicationPacket **o
 		inventory_profile.SetInventoryVersion(client_version);
 		inventory_profile.SetGMInventory(true); // charsel can not interact with items..but, no harm in setting to full expansion support
 
-		uint32 character_id = (uint32) atoi(row[0]);
+		uint32 character_id = (uint32) Strings::ToInt(row[0]);
 		uint8 has_home = 0;
 		uint8 has_bind = 0;
 
 		memset(&pp, 0, sizeof(PlayerProfile_Struct));
 		memset(p_character_select_entry_struct->Name, 0, sizeof(p_character_select_entry_struct->Name));
 		strcpy(p_character_select_entry_struct->Name, row[1]);
-		p_character_select_entry_struct->Class = (uint8) atoi(row[4]);
-		p_character_select_entry_struct->Race = (uint32) atoi(row[3]);
-		p_character_select_entry_struct->Level = (uint8) atoi(row[5]);
+		p_character_select_entry_struct->Class = (uint8) Strings::ToInt(row[4]);
+		p_character_select_entry_struct->Race = (uint32) Strings::ToInt(row[3]);
+		p_character_select_entry_struct->Level = (uint8) Strings::ToInt(row[5]);
 		p_character_select_entry_struct->ShroudClass = p_character_select_entry_struct->Class;
 		p_character_select_entry_struct->ShroudRace = p_character_select_entry_struct->Race;
-		p_character_select_entry_struct->Zone = (uint16) atoi(row[19]);
+		p_character_select_entry_struct->Zone = (uint16) Strings::ToInt(row[19]);
 		p_character_select_entry_struct->Instance = 0;
-		p_character_select_entry_struct->Gender = (uint8) atoi(row[2]);
-		p_character_select_entry_struct->Face = (uint8) atoi(row[15]);
+		p_character_select_entry_struct->Gender = (uint8) Strings::ToInt(row[2]);
+		p_character_select_entry_struct->Face = (uint8) Strings::ToInt(row[15]);
 
 		for (uint32 material_slot = 0; material_slot < EQ::textures::materialCount; material_slot++) {
 			p_character_select_entry_struct->Equip[material_slot].Material = 0;
@@ -148,28 +148,28 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, EQApplicationPacket **o
 
 		p_character_select_entry_struct->Unknown15 = 0xFF;
 		p_character_select_entry_struct->Unknown19 = 0xFF;
-		p_character_select_entry_struct->DrakkinTattoo = (uint32) atoi(row[17]);
-		p_character_select_entry_struct->DrakkinDetails = (uint32) atoi(row[18]);
-		p_character_select_entry_struct->Deity = (uint32) atoi(row[6]);
+		p_character_select_entry_struct->DrakkinTattoo = (uint32) Strings::ToInt(row[17]);
+		p_character_select_entry_struct->DrakkinDetails = (uint32) Strings::ToInt(row[18]);
+		p_character_select_entry_struct->Deity = (uint32) Strings::ToInt(row[6]);
 		p_character_select_entry_struct->PrimaryIDFile = 0;                            // Processed Below
 		p_character_select_entry_struct->SecondaryIDFile = 0;                        // Processed Below
-		p_character_select_entry_struct->HairColor = (uint8) atoi(row[9]);
-		p_character_select_entry_struct->BeardColor = (uint8) atoi(row[10]);
-		p_character_select_entry_struct->EyeColor1 = (uint8) atoi(row[11]);
-		p_character_select_entry_struct->EyeColor2 = (uint8) atoi(row[12]);
-		p_character_select_entry_struct->HairStyle = (uint8) atoi(row[13]);
-		p_character_select_entry_struct->Beard = (uint8) atoi(row[14]);
+		p_character_select_entry_struct->HairColor = (uint8) Strings::ToInt(row[9]);
+		p_character_select_entry_struct->BeardColor = (uint8) Strings::ToInt(row[10]);
+		p_character_select_entry_struct->EyeColor1 = (uint8) Strings::ToInt(row[11]);
+		p_character_select_entry_struct->EyeColor2 = (uint8) Strings::ToInt(row[12]);
+		p_character_select_entry_struct->HairStyle = (uint8) Strings::ToInt(row[13]);
+		p_character_select_entry_struct->Beard = (uint8) Strings::ToInt(row[14]);
 		p_character_select_entry_struct->GoHome = 0;                                // Processed Below
 		p_character_select_entry_struct->Tutorial = 0;                                // Processed Below
-		p_character_select_entry_struct->DrakkinHeritage = (uint32) atoi(row[16]);
+		p_character_select_entry_struct->DrakkinHeritage = (uint32) Strings::ToInt(row[16]);
 		p_character_select_entry_struct->Unknown1 = 0;
 		p_character_select_entry_struct->Enabled = 1;
-		p_character_select_entry_struct->LastLogin = (uint32) atoi(row[7]);            // RoF2 value: 1212696584
+		p_character_select_entry_struct->LastLogin = (uint32) Strings::ToInt(row[7]);            // RoF2 value: 1212696584
 		p_character_select_entry_struct->Unknown2 = 0;
 
 		if (RuleB(World, EnableReturnHomeButton)) {
 			int now = time(nullptr);
-			if ((now - atoi(row[7])) >= RuleI(World, MinOfflineTimeToReturnHome))
+			if ((now - Strings::ToInt(row[7])) >= RuleI(World, MinOfflineTimeToReturnHome))
 				p_character_select_entry_struct->GoHome = 1;
 		}
 
@@ -194,20 +194,20 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, EQApplicationPacket **o
 		auto results_bind = database.QueryDatabase(character_list_query);
 		auto bind_count = results_bind.RowCount();
 		for (auto row_b = results_bind.begin(); row_b != results_bind.end(); ++row_b) {
-			if (row_b[6] && atoi(row_b[6]) == 4) {
+			if (row_b[6] && Strings::ToInt(row_b[6]) == 4) {
 				has_home = 1;
 				// If our bind count is less than 5, we need to actually make use of this data so lets parse it
 				if (bind_count < 5) {
-					pp.binds[4].zone_id     = atoi(row_b[0]);
-					pp.binds[4].instance_id = atoi(row_b[1]);
-					pp.binds[4].x           = atof(row_b[2]);
-					pp.binds[4].y           = atof(row_b[3]);
-					pp.binds[4].z           = atof(row_b[4]);
-					pp.binds[4].heading     = atof(row_b[5]);
+					pp.binds[4].zone_id     = Strings::ToInt(row_b[0]);
+					pp.binds[4].instance_id = Strings::ToInt(row_b[1]);
+					pp.binds[4].x           = Strings::ToFloat(row_b[2]);
+					pp.binds[4].y           = Strings::ToFloat(row_b[3]);
+					pp.binds[4].z           = Strings::ToFloat(row_b[4]);
+					pp.binds[4].heading     = Strings::ToFloat(row_b[5]);
 				}
 			}
 
-			if (row_b[6] && atoi(row_b[6]) == 0)
+			if (row_b[6] && Strings::ToInt(row_b[6]) == 0)
 				has_bind = 1;
 		}
 
@@ -233,8 +233,8 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, EQApplicationPacket **o
 			auto results_bind = content_db.QueryDatabase(character_list_query);
 			for (auto row_d = results_bind.begin(); row_d != results_bind.end(); ++row_d) {
 				/* If a bind_id is specified, make them start there */
-				if (atoi(row_d[1]) != 0) {
-					pp.binds[4].zone_id = (uint32) atoi(row_d[1]);
+				if (Strings::ToInt(row_d[1]) != 0) {
+					pp.binds[4].zone_id = (uint32) Strings::ToInt(row_d[1]);
 
 					auto z = GetZone(pp.binds[4].zone_id);
 					if (z) {
@@ -246,11 +246,11 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, EQApplicationPacket **o
 				}
 					/* Otherwise, use the zone and coordinates given */
 				else {
-					pp.binds[4].zone_id = (uint32) atoi(row_d[0]);
-					float x = atof(row_d[2]);
-					float y = atof(row_d[3]);
-					float z = atof(row_d[4]);
-					float heading = atof(row_d[5]);
+					pp.binds[4].zone_id = (uint32) Strings::ToInt(row_d[0]);
+					float x = Strings::ToFloat(row_d[2]);
+					float y = Strings::ToFloat(row_d[3]);
+					float z = Strings::ToFloat(row_d[4]);
+					float heading = Strings::ToFloat(row_d[5]);
 					if (x == 0 && y == 0 && z == 0 && heading == 0) {
 						auto zone = GetZone(pp.binds[4].zone_id);
 						if (zone) {
@@ -350,11 +350,11 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, EQApplicationPacket **o
 		auto results_b = database.QueryDatabase(character_list_query);
 		uint8 slot = 0;
 		for (auto row_b = results_b.begin(); row_b != results_b.end(); ++row_b) {
-			slot = atoi(row_b[0]);
-			pp.item_tint.Slot[slot].Red     = atoi(row_b[1]);
-			pp.item_tint.Slot[slot].Green   = atoi(row_b[2]);
-			pp.item_tint.Slot[slot].Blue    = atoi(row_b[3]);
-			pp.item_tint.Slot[slot].UseTint = atoi(row_b[4]);
+			slot = Strings::ToInt(row_b[0]);
+			pp.item_tint.Slot[slot].Red     = Strings::ToInt(row_b[1]);
+			pp.item_tint.Slot[slot].Green   = Strings::ToInt(row_b[2]);
+			pp.item_tint.Slot[slot].Blue    = Strings::ToInt(row_b[3]);
+			pp.item_tint.Slot[slot].UseTint = Strings::ToInt(row_b[4]);
 		}
 
 		if (GetCharSelInventory(account_id, p_character_select_entry_struct->Name, &inventory_profile)) {
@@ -380,7 +380,7 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, EQApplicationPacket **o
 						p_character_select_entry_struct->Equip[matslot].Material = item_id_file;
 					} else {
 						if (strlen(item->IDFile) > 2) {
-							item_id_file = atoi(&item->IDFile[2]);
+							item_id_file = Strings::ToInt(&item->IDFile[2]);
 							p_character_select_entry_struct->Equip[matslot].Material = item_id_file;
 						}
 					}
@@ -439,12 +439,12 @@ int WorldDatabase::MoveCharacterToBind(int character_id, uint8 bind_number)
 	int zone_id, instance_id;
 	double x, y, z, heading;
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		zone_id = atoi(row[0]);
-		instance_id = atoi(row[1]);
-		x = atof(row[2]);
-		y = atof(row[3]);
-		z = atof(row[4]);
-		heading = atof(row[5]);
+		zone_id = Strings::ToInt(row[0]);
+		instance_id = Strings::ToInt(row[1]);
+		x = Strings::ToFloat(row[2]);
+		y = Strings::ToFloat(row[3]);
+		z = Strings::ToFloat(row[4]);
+		heading = Strings::ToFloat(row[5]);
 	}
 
 	query = fmt::format(
@@ -596,16 +596,16 @@ bool WorldDatabase::GetStartZone(
     else {
 		LogInfo("Found starting location in start_zones");
 		auto row = results.begin();
-		pp->x                = atof(row[0]);
-		pp->y                = atof(row[1]);
-		pp->z                = atof(row[2]);
-		pp->heading          = atof(row[3]);
-		pp->zone_id          = atoi(row[4]);
-		pp->binds[0].zone_id = atoi(row[5]);
-		pp->binds[0].x       = atof(row[6]);
-		pp->binds[0].y       = atof(row[7]);
-		pp->binds[0].z       = atof(row[8]);
-		pp->binds[0].heading = atof(row[3]);
+		pp->x                = Strings::ToFloat(row[0]);
+		pp->y                = Strings::ToFloat(row[1]);
+		pp->z                = Strings::ToFloat(row[2]);
+		pp->heading          = Strings::ToFloat(row[3]);
+		pp->zone_id          = Strings::ToInt(row[4]);
+		pp->binds[0].zone_id = Strings::ToInt(row[5]);
+		pp->binds[0].x       = Strings::ToFloat(row[6]);
+		pp->binds[0].y       = Strings::ToFloat(row[7]);
+		pp->binds[0].z       = Strings::ToFloat(row[8]);
+		pp->binds[0].heading = Strings::ToFloat(row[3]);
 	}
 
 	if (
@@ -792,7 +792,7 @@ bool WorldDatabase::GetCharacterLevel(const char *name, int &level)
         return false;
 
     auto row = results.begin();
-    level = atoi(row[0]);
+    level = Strings::ToInt(row[0]);
 
     return true;
 }
@@ -808,21 +808,21 @@ bool WorldDatabase::LoadCharacterCreateAllocations()
 
     for (auto row = results.begin(); row != results.end(); ++row) {
         RaceClassAllocation allocate;
-		allocate.Index = atoi(row[0]);
-		allocate.BaseStats[0] = atoi(row[1]);
-		allocate.BaseStats[3] = atoi(row[2]);
-		allocate.BaseStats[1] = atoi(row[3]);
-		allocate.BaseStats[2] = atoi(row[4]);
-		allocate.BaseStats[4] = atoi(row[5]);
-		allocate.BaseStats[5] = atoi(row[6]);
-		allocate.BaseStats[6] = atoi(row[7]);
-		allocate.DefaultPointAllocation[0] = atoi(row[8]);
-		allocate.DefaultPointAllocation[3] = atoi(row[9]);
-		allocate.DefaultPointAllocation[1] = atoi(row[10]);
-		allocate.DefaultPointAllocation[2] = atoi(row[11]);
-		allocate.DefaultPointAllocation[4] = atoi(row[12]);
-		allocate.DefaultPointAllocation[5] = atoi(row[13]);
-		allocate.DefaultPointAllocation[6] = atoi(row[14]);
+		allocate.Index = Strings::ToInt(row[0]);
+		allocate.BaseStats[0] = Strings::ToInt(row[1]);
+		allocate.BaseStats[3] = Strings::ToInt(row[2]);
+		allocate.BaseStats[1] = Strings::ToInt(row[3]);
+		allocate.BaseStats[2] = Strings::ToInt(row[4]);
+		allocate.BaseStats[4] = Strings::ToInt(row[5]);
+		allocate.BaseStats[5] = Strings::ToInt(row[6]);
+		allocate.BaseStats[6] = Strings::ToInt(row[7]);
+		allocate.DefaultPointAllocation[0] = Strings::ToInt(row[8]);
+		allocate.DefaultPointAllocation[3] = Strings::ToInt(row[9]);
+		allocate.DefaultPointAllocation[1] = Strings::ToInt(row[10]);
+		allocate.DefaultPointAllocation[2] = Strings::ToInt(row[11]);
+		allocate.DefaultPointAllocation[4] = Strings::ToInt(row[12]);
+		allocate.DefaultPointAllocation[5] = Strings::ToInt(row[13]);
+		allocate.DefaultPointAllocation[6] = Strings::ToInt(row[14]);
 
 		character_create_allocations.push_back(allocate);
     }
@@ -841,12 +841,12 @@ bool WorldDatabase::LoadCharacterCreateCombos()
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		RaceClassCombos combo;
-		combo.AllocationIndex = atoi(row[0]);
-		combo.Race = atoi(row[1]);
-		combo.Class = atoi(row[2]);
-		combo.Deity = atoi(row[3]);
-		combo.Zone = atoi(row[4]);
-		combo.ExpansionRequired = atoi(row[5]);
+		combo.AllocationIndex = Strings::ToInt(row[0]);
+		combo.Race = Strings::ToInt(row[1]);
+		combo.Class = Strings::ToInt(row[2]);
+		combo.Deity = Strings::ToInt(row[3]);
+		combo.Zone = Strings::ToInt(row[4]);
+		combo.ExpansionRequired = Strings::ToInt(row[5]);
 
 		character_create_race_class_combos.push_back(combo);
 	}
@@ -901,7 +901,7 @@ bool WorldDatabase::GetCharSelInventory(uint32 account_id, char *name, EQ::Inven
 		return false;
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		int16 slot_id = atoi(row[0]);
+		int16 slot_id = Strings::ToInt(row[0]);
 
 		switch (slot_id) {
 		case EQ::invslot::slotFace:
@@ -916,22 +916,22 @@ bool WorldDatabase::GetCharSelInventory(uint32 account_id, char *name, EQ::Inven
 			break;
 		}
 
-		uint32 item_id = atoi(row[1]);
-		int8 charges = atoi(row[2]);
-		uint32 color = atoul(row[3]);
+		uint32 item_id = Strings::ToInt(row[1]);
+		int8 charges = Strings::ToInt(row[2]);
+		uint32 color = Strings::ToUnsignedInt(row[3]);
 
 		uint32 aug[EQ::invaug::SOCKET_COUNT];
-		aug[0] = (uint32)atoi(row[4]);
-		aug[1] = (uint32)atoi(row[5]);
-		aug[2] = (uint32)atoi(row[6]);
-		aug[3] = (uint32)atoi(row[7]);
-		aug[4] = (uint32)atoi(row[8]);
-		aug[5] = (uint32)atoi(row[9]);
+		aug[0] = (uint32)Strings::ToInt(row[4]);
+		aug[1] = (uint32)Strings::ToInt(row[5]);
+		aug[2] = (uint32)Strings::ToInt(row[6]);
+		aug[3] = (uint32)Strings::ToInt(row[7]);
+		aug[4] = (uint32)Strings::ToInt(row[8]);
+		aug[5] = (uint32)Strings::ToInt(row[9]);
 
-		bool instnodrop = ((row[10] && (uint16)atoi(row[10])) ? true : false);
-		uint32 ornament_icon = (uint32)atoul(row[12]);
-		uint32 ornament_idfile = (uint32)atoul(row[13]);
-		uint32 ornament_hero_model = (uint32)atoul(row[14]);
+		bool instnodrop = ((row[10] && (uint16)Strings::ToInt(row[10])) ? true : false);
+		uint32 ornament_icon = (uint32)Strings::ToUnsignedInt(row[12]);
+		uint32 ornament_idfile = (uint32)Strings::ToUnsignedInt(row[13]);
+		uint32 ornament_hero_model = (uint32)Strings::ToUnsignedInt(row[14]);
 
 		const EQ::ItemData *item = content_db.GetItem(item_id);
 		if (!item)

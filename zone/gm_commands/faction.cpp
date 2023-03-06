@@ -53,7 +53,7 @@ void command_faction(Client *c, const Seperator *sep)
 		uint32    found_count = 0;
 		for (auto row : results) {
 			uint32      faction_number = (found_count + 1);
-			auto        faction_id     = std::stoul(row[0]);
+			auto        faction_id     = Strings::ToUnsignedInt(row[0]);
 			std::string faction_name   = row[1];
 			std::string faction_value  = row[2];
 			std::string reset_link     = Saylink::Silent(
@@ -107,7 +107,7 @@ void command_faction(Client *c, const Seperator *sep)
 					)
 					) {
 					uint32 character_id = target->CharacterID();
-					uint32 faction_id   = std::stoul(faction_filter.c_str());
+					uint32 faction_id   = Strings::ToUnsignedInt(faction_filter.c_str());
 					if (target->ReloadCharacterFaction(target, faction_id, character_id)) {
 						c->Message(
 							Chat::White,

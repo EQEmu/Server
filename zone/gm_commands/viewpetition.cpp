@@ -15,7 +15,7 @@ void command_viewpetition(Client *c, const Seperator *sep)
 		return;
 	}
 
-	LogInfo("View petition request from [{}], petition number: [{}]", c->GetName(), atoi(sep->argplus[1]));
+	LogInfo("View petition request from [{}], petition number: [{}]", c->GetName(), Strings::ToInt(sep->argplus[1]));
 
 	if (results.RowCount() == 0) {
 		c->Message(Chat::Red, "There was an error in your request: ID not found! Please check the Id and try again.");

@@ -34,7 +34,7 @@ void command_giveitem(Client *c, const Seperator *sep)
 			augment_six   = link_body.augment_6;
 		}
 		else if (sep->IsNumber(1)) {
-			item_id = atoi(sep->arg[1]);
+			item_id = Strings::ToInt(sep->arg[1]);
 		}
 		else if (!sep->IsNumber(1)) {
 			c->Message(
@@ -65,31 +65,31 @@ void command_giveitem(Client *c, const Seperator *sep)
 		}
 
 		if (arguments >= 2 && sep->IsNumber(2)) {
-			charges = atoi(sep->arg[2]);
+			charges = Strings::ToInt(sep->arg[2]);
 		}
 
 		if (arguments >= 3 && sep->IsNumber(3)) {
-			augment_one = atoi(sep->arg[3]);
+			augment_one = Strings::ToInt(sep->arg[3]);
 		}
 
 		if (arguments >= 4 && sep->IsNumber(4)) {
-			augment_two = atoi(sep->arg[4]);
+			augment_two = Strings::ToInt(sep->arg[4]);
 		}
 
 		if (arguments >= 5 && sep->IsNumber(5)) {
-			augment_three = atoi(sep->arg[5]);
+			augment_three = Strings::ToInt(sep->arg[5]);
 		}
 
 		if (arguments >= 6 && sep->IsNumber(6)) {
-			augment_four = atoi(sep->arg[6]);
+			augment_four = Strings::ToInt(sep->arg[6]);
 		}
 
 		if (arguments >= 7 && sep->IsNumber(7)) {
-			augment_five = atoi(sep->arg[7]);
+			augment_five = Strings::ToInt(sep->arg[7]);
 		}
 
 		if (arguments == 8 && sep->IsNumber(8)) {
-			augment_six = atoi(sep->arg[8]);
+			augment_six = Strings::ToInt(sep->arg[8]);
 		}
 
 		client_target->SummonItem(

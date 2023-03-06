@@ -15,7 +15,7 @@ void command_findspell(Client *c, const Seperator *sep)
 	}
 
 	if (sep->IsNumber(1)) {
-		int spell_id = std::stoi(sep->arg[1]);
+		int spell_id = Strings::ToInt(sep->arg[1]);
 		if (!IsValidSpell(spell_id)) {
 			c->Message(
 				Chat::White,

@@ -44,15 +44,15 @@ bool LFGuildManager::LoadDatabase()
 	}
 
     for (auto row = results.begin(); row != results.end(); ++row) {
-		uint32 type = atoul(row[0]);
+		uint32 type = Strings::ToUnsignedInt(row[0]);
 		if(type == 0)
 		{
-			PlayerLookingForGuild p(row[1], row[2], atoul(row[3]), atoul(row[5]), atoul(row[6]), atoul(row[7]), atoul(row[8]));
+			PlayerLookingForGuild p(row[1], row[2], Strings::ToUnsignedInt(row[3]), Strings::ToUnsignedInt(row[5]), Strings::ToUnsignedInt(row[6]), Strings::ToUnsignedInt(row[7]), Strings::ToUnsignedInt(row[8]));
 			Players.push_back(p);
 			continue;
 		}
 
-        GuildLookingForPlayers g(row[1], row[2], atoul(row[3]), atoul(row[4]), atoul(row[5]), atoul(row[6]), atoul(row[7]), atoul(row[8]));
+        GuildLookingForPlayers g(row[1], row[2], Strings::ToUnsignedInt(row[3]), Strings::ToUnsignedInt(row[4]), Strings::ToUnsignedInt(row[5]), Strings::ToUnsignedInt(row[6]), Strings::ToUnsignedInt(row[7]), Strings::ToUnsignedInt(row[8]));
         Guilds.push_back(g);
 	}
 

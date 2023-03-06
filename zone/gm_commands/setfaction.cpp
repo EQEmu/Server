@@ -7,7 +7,7 @@ void command_setfaction(Client *c, const Seperator *sep)
 		c->Message(Chat::White, "Usage: #setfaction [Faction ID]");
 		return;
 	}
-	
+
 	if (
 		!c->GetTarget() ||
 		(
@@ -21,7 +21,7 @@ void command_setfaction(Client *c, const Seperator *sep)
 
 	NPC* target = c->GetTarget()->CastToNPC();
 	auto npc_id = target->GetNPCTypeID();
-	auto faction_id = std::stoi(sep->arg[1]);
+	auto faction_id = Strings::ToInt(sep->arg[1]);
 	auto faction_name = content_db.GetFactionName(faction_id);
 	if (!faction_name.empty()) {
 		c->Message(

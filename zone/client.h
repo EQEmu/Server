@@ -353,8 +353,7 @@ public:
 	void UpdateLFP();
 
 	virtual bool Save() { return Save(0); }
-					bool Save(uint8 iCommitNow); // 0 = delayed, 1=async now, 2=sync now
-					void SaveBackup();
+	bool Save(uint8 iCommitNow); // 0 = delayed, 1=async now, 2=sync now
 
 	/* New PP Save Functions */
 	bool SaveCurrency(){ return database.SaveCharacterCurrency(this->CharacterID(), &m_pp); }
@@ -986,7 +985,7 @@ public:
 	inline bool IsTrader() const { return(Trader); }
 	inline bool IsBuyer() const { return(Buyer); }
 	eqFilterMode GetFilter(eqFilterType filter_id) const { return ClientFilters[filter_id]; }
-	void SetFilter(eqFilterType filter_id, eqFilterMode value) { ClientFilters[filter_id]=value; }
+	void SetFilter(eqFilterType filter_id, eqFilterMode filter_mode) { ClientFilters[filter_id] = filter_mode; }
 
 	void CancelSneakHide();
 	void BreakInvis();
@@ -1313,7 +1312,6 @@ public:
 	bool m_requested_shared_task_removal = false;
 
 	std::vector<Client*> GetPartyMembers();
-	void HandleUpdateTasksOnKill(uint32 npc_type_id);
 
 	inline const EQ::versions::ClientVersion ClientVersion() const { return m_ClientVersion; }
 	inline const uint32 ClientVersionBit() const { return m_ClientVersionBit; }
@@ -1737,8 +1735,6 @@ private:
 	inline uint32 GetRestTimer() const { return AggroCount ? m_pp.RestTimer : rest_timer.GetRemainingTime() / 1000; }
 	void UpdateRestTimer(uint32 new_timer);
 
-	uint32 pLastUpdate;
-	uint32 pLastUpdateWZ;
 	uint8 playeraction;
 
 	EQStreamInterface* eqs;
@@ -1777,7 +1773,6 @@ private:
 	bool medding;
 	uint16 horseId;
 	bool revoked;
-	uint32 pQueuedSaveWorkID;
 	uint16 pClientSideTarget;
 	uint32 weight;
 	bool berserk;
@@ -1794,7 +1789,6 @@ private:
 	bool Trader;
 	bool Buyer;
 	std::string BuyerWelcomeMessage;
-	bool AbilityTimer;
 	int Haste; //precalced value
 	uint32 tmSitting; // time stamp started sitting, used for HP regen bonus added on MAY 5, 2004
 

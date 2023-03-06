@@ -4024,7 +4024,7 @@ const int EQ::InventoryProfile::GetItemStatValue(uint32 item_id, std::string ide
 	}
 
 	if (Strings::EqualFold(identifier, "idfile")) {
-		stat = Strings::IsNumber(&item->IDFile[2]) ? std::stoi(&item->IDFile[2]) : 0;
+		stat = Strings::IsNumber(&item->IDFile[2]) ? Strings::ToInt(&item->IDFile[2]) : 0;
 	}
 
 	if (Strings::EqualFold(identifier, "weight")) {

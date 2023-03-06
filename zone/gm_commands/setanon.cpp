@@ -12,7 +12,7 @@ void command_setanon(Client *c, const Seperator *sep)
 	}
 
 	if (arguments == 1) {
-		const uint8 anon_flag = static_cast<uint8>(std::stoul(sep->arg[1]));
+		const uint8 anon_flag = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[1]));
 		auto t = c;
 		if (c->GetTarget() && c->GetTarget()->IsClient() && c->GetGM()) {
 			t = c->GetTarget()->CastToClient();
@@ -44,8 +44,8 @@ void command_setanon(Client *c, const Seperator *sep)
 			).c_str()
 		);
 	} else if (arguments == 2) {
-		const auto character_id = std::stoi(sep->arg[1]);
-		const uint8 anon_flag = static_cast<uint8>(std::stoul(sep->arg[2]));
+		const auto character_id = Strings::ToInt(sep->arg[1]);
+		const uint8 anon_flag = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[2]));
 
 		auto e = CharacterDataRepository::FindOne(content_db, character_id);
 		if (!e.id) {

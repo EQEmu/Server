@@ -3,10 +3,10 @@
 void command_wp(Client *c, const Seperator *sep)
 {
 	auto command_type = sep->arg[1];
-	auto grid_id      = atoi(sep->arg[2]);
+	auto grid_id      = Strings::ToInt(sep->arg[2]);
 	if (grid_id != 0) {
-		auto pause    = atoi(sep->arg[3]);
-		auto waypoint = atoi(sep->arg[4]);
+		auto pause    = Strings::ToInt(sep->arg[3]);
+		auto waypoint = Strings::ToInt(sep->arg[4]);
 		auto zone_id  = zone->GetZoneID();
 		if (strcasecmp("add", command_type) == 0) {
 			if (waypoint == 0) { // Default to highest if it's left blank, or we enter 0

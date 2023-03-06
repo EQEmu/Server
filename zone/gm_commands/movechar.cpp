@@ -10,7 +10,7 @@ void command_movechar(Client *c, const Seperator *sep)
 
 	std::string character_name = (
 		sep->IsNumber(1) ?
-		database.GetCharNameByID(std::stoul(sep->arg[1])) :
+		database.GetCharNameByID(Strings::ToUnsignedInt(sep->arg[1])) :
 		sep->arg[1]
 	);
 	auto character_id = database.GetCharacterID(character_name.c_str());
@@ -29,7 +29,7 @@ void command_movechar(Client *c, const Seperator *sep)
 
 	std::string zone_short_name = Strings::ToLower(
 		sep->IsNumber(2) ?
-		ZoneName(std::stoul(sep->arg[2]), true) :
+		ZoneName(Strings::ToUnsignedInt(sep->arg[2]), true) :
 		sep->arg[2]
 	);
 
@@ -39,7 +39,7 @@ void command_movechar(Client *c, const Seperator *sep)
 			Chat::White,
 			fmt::format(
 				"Zone ID {} could not be found.",
-				std::stoul(sep->arg[2])
+				Strings::ToUnsignedInt(sep->arg[2])
 			).c_str()
 		);
 		return;

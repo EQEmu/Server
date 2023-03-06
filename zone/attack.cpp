@@ -250,7 +250,7 @@ int Mob::compute_defense()
 	int defense = GetSkill(EQ::skills::SkillDefense) * 400 / 225;
 	defense += (8000 * (GetAGI() - 40)) / 36000;
 	if (IsOfClientBot()) {
-		defense += GetHeroicAGI() / 10;
+		defense += GetHeroicAGI() * RuleR(Character, HeroicAgilityMultiplier) / 10;
 	}
 
 	//516 SE_AC_Mitigation_Max_Percent
@@ -883,7 +883,7 @@ int Mob::ACSum(bool skip_caps)
 				shield_ac = CalcRecommendedLevelBonus(GetLevel(), inst->GetItemRecommendedLevel(true), inst->GetItemArmorClass(true));
 			}
 		}
-		shield_ac += GetHeroicSTR() / 10;
+		shield_ac += GetHeroicSTR() * RuleR(Character, HeroicStrengthMultiplier) / 10;
 	}
 	// EQ math
 	ac = (ac * 4) / 3;
@@ -1979,10 +1979,10 @@ bool Client::Death(Mob* killerMob, int64 damage, uint16 spell, EQ::skills::Skill
 			database.GetVariable("ServerType", tmp);
 			if (tmp[0] == '1' && tmp[1] == '\0' && killerMob && killerMob->IsClient()) {
 				database.GetVariable("PvPreward", tmp);
-				auto reward = atoi(tmp.c_str());
+				auto reward = Strings::ToInt(tmp.c_str());
 				if (reward == 3) {
 					database.GetVariable("PvPitem", tmp);
-					auto pvp_item_id = atoi(tmp.c_str());
+					auto pvp_item_id = Strings::ToInt(tmp.c_str());
 					const auto* item = database.GetItem(pvp_item_id);
 					if (item) {
 						new_corpse->SetPlayerKillItemID(pvp_item_id);
@@ -5902,10 +5902,10 @@ void Mob::CommonOutgoingHitSuccess(Mob* defender, DamageHitInfo &hit, ExtraAttac
 		switch (hit.skill) {
 			case EQ::skills::SkillThrowing:
 			case EQ::skills::SkillArchery:
-				extra = GetHeroicDEX() / 10;
+				extra = GetHeroicDEX() * RuleR(Character, HeroicDexterityMultiplier) / 10;
 				break;
 			default:
-				extra = GetHeroicSTR() / 10;
+				extra = GetHeroicSTR() * RuleR(Character, HeroicStrengthMultiplier) / 10;
 				break;
 		}
 		hit.damage_done += extra;

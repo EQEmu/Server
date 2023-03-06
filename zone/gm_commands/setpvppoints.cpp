@@ -13,7 +13,7 @@ void command_setpvppoints(Client *c, const Seperator *sep)
 		target = c->GetTarget()->CastToClient();
 	}
 
-	uint32 pvp_points = static_cast<uint32>(std::min(std::stoull(sep->arg[1]), (unsigned long long) 2000000000));
+	uint32 pvp_points = static_cast<uint32>(std::min(Strings::ToUnsignedBigInt(sep->arg[1]), (uint64) 2000000000));
 	target->SetPVPPoints(pvp_points);
 	target->Save();
 	target->SendPVPStats();

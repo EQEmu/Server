@@ -3583,9 +3583,11 @@ void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 		inst = GetBotItem(EQ::invslot::slotPrimary);
 		if (inst) {
 			item = inst->GetItem();
-			if (item) {
-				if (strlen(item->IDFile) > 2)
-					ns->spawn.equipment.Primary.Material = atoi(&item->IDFile[2]);
+
+			if(item) {
+				if(strlen(item->IDFile) > 2)
+					ns->spawn.equipment.Primary.Material = Strings::ToInt(&item->IDFile[2]);
+
 
 				ns->spawn.equipment_tint.Primary.Color = GetEquipmentColor(EQ::textures::weaponPrimary);
 			}
@@ -3594,9 +3596,10 @@ void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 		inst = GetBotItem(EQ::invslot::slotSecondary);
 		if (inst) {
 			item = inst->GetItem();
-			if (item) {
-				if (strlen(item->IDFile) > 2)
-					ns->spawn.equipment.Secondary.Material = atoi(&item->IDFile[2]);
+
+			if(item) {
+				if(strlen(item->IDFile) > 2)
+					ns->spawn.equipment.Secondary.Material = Strings::ToInt(&item->IDFile[2]);
 
 				ns->spawn.equipment_tint.Secondary.Color = GetEquipmentColor(EQ::textures::weaponSecondary);
 			}
@@ -6163,10 +6166,10 @@ int64 Bot::CalcManaRegenCap() {
 	int64 cap = RuleI(Character, ItemManaRegenCap) + aabonuses.ItemManaRegenCap;
 	switch(GetCasterClass()) {
 		case 'I':
-			cap += (itembonuses.HeroicINT / 25);
+			cap += itembonuses.HeroicINT * RuleR(Character, HeroicIntelligenceMultiplier) / 25;
 			break;
 		case 'W':
-			cap += (itembonuses.HeroicWIS / 25);
+			cap += itembonuses.HeroicWIS * RuleR(Character, HeroicWisdomMultiplier) / 25;
 			break;
 	}
 	return (cap * RuleI(Character, ManaRegenMultiplier) / 100);
@@ -6558,8 +6561,9 @@ int32 Bot::LevelRegen() {
 
 int64 Bot::CalcHPRegen() {
 	int32 regen = (LevelRegen() + itembonuses.HPRegen + spellbonuses.HPRegen);
-	regen += GetHeroicSTA() / 20;
+	regen += GetHeroicSTA() * RuleR(Character, HeroicStaminaMultiplier) / 20;
 	regen += (aabonuses.HPRegen + GroupLeadershipAAHealthRegeneration());
+
 	regen = ((regen * RuleI(Character, HPRegenMultiplier)) / 100);
 	return regen;
 }
@@ -6578,10 +6582,11 @@ int64 Bot::CalcManaRegen() {
 	} else
 		regen = (2 + spellbonuses.ManaRegen + itembonuses.ManaRegen);
 
-	if (GetCasterClass() == 'I')
-		regen += (itembonuses.HeroicINT / 25);
-	else if (GetCasterClass() == 'W')
-		regen += (itembonuses.HeroicWIS / 25);
+	if(GetCasterClass() == 'I')
+		regen += itembonuses.HeroicINT * RuleR(Character, HeroicIntelligenceMultiplier) / 25;
+	else if(GetCasterClass() == 'W')
+		regen += itembonuses.HeroicWIS * RuleR(Character, HeroicWisdomMultiplier) / 25;
+    
 	else
 		regen = 0;
 
@@ -6630,7 +6635,7 @@ int64 Bot::CalcMaxHP() {
 	int32 bot_hp = 0;
 	uint32 nd = 10000;
 	bot_hp += (GenerateBaseHitPoints() + itembonuses.HP);
-	bot_hp += (GetHeroicSTA() * 10);
+	bot_hp += GetHeroicSTA() * RuleR(Character, HeroicStaminaMultiplier) * 10;
 	nd += aabonuses.MaxHP;
 	bot_hp = ((float)bot_hp * (float)nd / (float)10000);
 	bot_hp += (spellbonuses.HP + aabonuses.HP);
@@ -6670,36 +6675,44 @@ int64 Bot::CalcMaxEndurance() {
 int64 Bot::CalcBaseEndurance() {
 	int32 base_end = 0;
 	int32 base_endurance = 0;
-	int32 ConvertedStats = 0;
+	int32 converted_stats = 0;
 	int32 sta_end = 0;
-	int Stats = 0;
+	int stats = 0;
 	if (GetOwner() && GetOwner()->CastToClient() && GetOwner()->CastToClient()->ClientVersion() >= EQ::versions::ClientVersion::SoD && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
-		int HeroicStats = 0;
-		Stats = ((GetSTR() + GetSTA() + GetDEX() + GetAGI()) / 4);
-		HeroicStats = ((GetHeroicSTR() + GetHeroicSTA() + GetHeroicDEX() + GetHeroicAGI()) / 4);
-		if (Stats > 100) {
-			ConvertedStats = (((Stats - 100) * 5 / 2) + 100);
-			if (Stats > 201)
-				ConvertedStats -= ((Stats - 201) * 5 / 4);
-		} else
-			ConvertedStats = Stats;
+		double heroic_stats = 0;
+		stats = ((GetSTR() + GetSTA() + GetDEX() + GetAGI()) / 4);
+		double heroic_str = GetHeroicSTR() * RuleR(Character, HeroicStrengthMultiplier);
+		double heroic_sta = GetHeroicSTA() * RuleR(Character, HeroicStaminaMultiplier);
+		double heroic_dex = GetHeroicDEX() * RuleR(Character, HeroicDexterityMultiplier);
+		double heroic_agi = GetHeroicAGI() * RuleR(Character, HeroicAgilityMultiplier);
+		heroic_stats = (heroic_str + heroic_sta + heroic_dex + heroic_agi) / 4;
+
+		if (stats > 100) {
+			converted_stats = (((stats - 100) * 5 / 2) + 100);
+			if (stats > 201) {
+				converted_stats -= ((stats - 201) * 5 / 4);
+			}
+		} else {
+			converted_stats = stats;
+		}
 
 		if (GetLevel() < 41) {
-			sta_end = (GetLevel() * 75 * ConvertedStats / 1000);
+			sta_end = (GetLevel() * 75 * converted_stats / 1000);
 			base_endurance = (GetLevel() * 15);
 		} else if (GetLevel() < 81) {
-			sta_end = ((3 * ConvertedStats) + ((GetLevel() - 40) * 15 * ConvertedStats / 100));
+			sta_end = ((3 * converted_stats) + ((GetLevel() - 40) * 15 * converted_stats / 100));
 			base_endurance = (600 + ((GetLevel() - 40) * 30));
 		} else {
-			sta_end = (9 * ConvertedStats);
+			sta_end = (9 * converted_stats);
 			base_endurance = (1800 + ((GetLevel() - 80) * 18));
 		}
-		base_end = (base_endurance + sta_end + (HeroicStats * 10));
+		base_end = (base_endurance + sta_end + (heroic_stats * 10));
 	} else {
-		Stats = (GetSTR()+GetSTA()+GetDEX()+GetAGI());
-		int LevelBase = (GetLevel() * 15);
-		int at_most_800 = Stats;
-		if (at_most_800 > 800)
+
+		stats = (GetSTR() + GetSTA() + GetDEX() + GetAGI());
+		int level_base = (GetLevel() * 15);
+		int at_most_800 = stats;
+		if(at_most_800 > 800)
 			at_most_800 = 800;
 
 		int Bonus400to800 = 0;
@@ -6707,16 +6720,17 @@ int64 Bot::CalcBaseEndurance() {
 		int Bonus800plus = 0;
 		int HalfBonus800plus = 0;
 		int BonusUpto800 = int(at_most_800 / 4) ;
-		if (Stats > 400) {
+    
+		if(stats > 400) {
 			Bonus400to800 = int((at_most_800 - 400) / 4);
 			HalfBonus400to800 = int(std::max((at_most_800 - 400), 0) / 8);
-			if (Stats > 800) {
-				Bonus800plus = (int((Stats - 800) / 8) * 2);
-				HalfBonus800plus = int((Stats - 800) / 16);
+			if(stats > 800) {
+				Bonus800plus = (int((stats - 800) / 8) * 2);
+				HalfBonus800plus = int((stats - 800) / 16);
 			}
 		}
 		int bonus_sum = (BonusUpto800 + Bonus400to800 + HalfBonus400to800 + Bonus800plus + HalfBonus800plus);
-		base_end = LevelBase;
+		base_end = level_base;
 		base_end += ((bonus_sum * 3 * GetLevel()) / 40);
 	}
 	return base_end;

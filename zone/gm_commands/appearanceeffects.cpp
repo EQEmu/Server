@@ -35,8 +35,8 @@ void command_appearanceeffects(Client *c, const Seperator *sep)
 			return;
 		}
 
-		const auto effect_id = std::stoul(sep->arg[2]);
-		const auto slot_id   = std::stoul(sep->arg[3]);
+		const auto effect_id = Strings::ToUnsignedInt(sep->arg[2]);
+		const auto slot_id   = Strings::ToUnsignedInt(sep->arg[3]);
 
 		t->SendAppearanceEffect(
 			effect_id,

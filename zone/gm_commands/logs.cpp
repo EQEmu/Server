@@ -53,7 +53,7 @@ void command_logs(Client *c, const Seperator *sep)
 	if (is_list || (is_set && !sep->IsNumber(3))) {
 		uint32 start_category_id = 1;
 		if (sep->IsNumber(2)) {
-			start_category_id = std::stoul(sep->arg[2]);
+			start_category_id = Strings::ToUnsignedInt(sep->arg[2]);
 		}
 
 		uint32 max_category_id = (start_category_id + 49);
@@ -204,8 +204,8 @@ void command_logs(Client *c, const Seperator *sep)
 
 		logs_set = true;
 
-		auto category_id = std::stoul(sep->arg[3]);
-		auto setting     = std::stoul(sep->arg[4]);
+		auto category_id = Strings::ToUnsignedInt(sep->arg[3]);
+		auto setting     = Strings::ToUnsignedInt(sep->arg[4]);
 
 		if (is_console) {
 			LogSys.log_settings[category_id].log_to_console = setting;

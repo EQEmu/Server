@@ -8,10 +8,10 @@ void command_lootsim(Client *c, const Seperator *sep)
 		return;
 	}
 
-	auto npc_id       = std::stoul(sep->arg[1]);
-	auto loottable_id = std::stoul(sep->arg[2]);
-	auto iterations   = std::stoul(sep->arg[3]) > 1000 ? 1000 : std::stoul(sep->arg[3]);
-	auto log_enabled  = arguments > 3 ? std::stoul(sep->arg[4]) : false;
+	auto npc_id       = Strings::ToUnsignedInt(sep->arg[1]);
+	auto loottable_id = Strings::ToUnsignedInt(sep->arg[2]);
+	auto iterations   = Strings::ToUnsignedInt(sep->arg[3]) > 1000 ? 1000 : Strings::ToUnsignedInt(sep->arg[3]);
+	auto log_enabled  = arguments > 3 ? Strings::ToUnsignedInt(sep->arg[4]) : false;
 
 	// temporarily disable loot logging unless set explicitly
 	LogSys.log_settings[Logs::Loot].log_to_console = log_enabled ? LogSys.log_settings[Logs::Loot].log_to_console : 0;

@@ -14,10 +14,10 @@ void command_zsafecoords(Client *c, const Seperator *sep)
 		return;
 	}
 
-	auto x = std::stof(sep->arg[1]);
-	auto y = std::stof(sep->arg[2]);
-	auto z = std::stof(sep->arg[3]);
-	auto heading = sep->arg[3] ? std::stof(sep->arg[3]) : c->GetHeading();
+	auto x = Strings::ToFloat(sep->arg[1]);
+	auto y = Strings::ToFloat(sep->arg[2]);
+	auto z = Strings::ToFloat(sep->arg[3]);
+	auto heading = sep->arg[3] ? Strings::ToFloat(sep->arg[3]) : c->GetHeading();
 	auto permanent = sep->arg[4] ? atobool(sep->arg[4]) : false;
 	if (permanent) {
 		auto query = fmt::format(
@@ -31,7 +31,7 @@ void command_zsafecoords(Client *c, const Seperator *sep)
 		);
 		database.QueryDatabase(query);
 	}
-	
+
 	zone->newzone_data.safe_x = x;
 	zone->newzone_data.safe_y = y;
 	zone->newzone_data.safe_z = z;

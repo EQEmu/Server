@@ -3287,7 +3287,7 @@ char *EntityList::MakeNameUnique(char *name)
 		if (it->second->IsMob()) {
 			if (strncasecmp(it->second->CastToMob()->GetName(), name, len) == 0) {
 				if (Seperator::IsNumber(&it->second->CastToMob()->GetName()[len])) {
-					used[atoi(&it->second->CastToMob()->GetName()[len])] = true;
+					used[Strings::ToInt(&it->second->CastToMob()->GetName()[len])] = true;
 				}
 			}
 		}
@@ -5932,7 +5932,7 @@ void EntityList::DespawnGridNodes(int32 grid_id) {
 			mob->IsNPC() &&
 			mob->GetRace() == RACE_NODE_2254 &&
 			mob->EntityVariableExists("grid_id") &&
-			std::stoi(mob->GetEntityVariable("grid_id")) == grid_id)
+			Strings::ToInt(mob->GetEntityVariable("grid_id")) == grid_id)
 		{
 			mob->Depop();
 		}

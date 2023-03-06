@@ -12,8 +12,8 @@ void command_nukeitem(Client *c, const Seperator *sep)
 	if (c->GetTarget() && c->GetTarget()->IsClient()) {
 		target = c->GetTarget()->CastToClient();
 	}
-	
-	auto item_id = std::stoi(sep->arg[1]);
+
+	auto item_id = Strings::ToInt(sep->arg[1]);
 	auto deleted_count = target->NukeItem(item_id);
 	if (deleted_count) {
 		c->Message(

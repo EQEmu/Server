@@ -207,19 +207,19 @@ bool ZoneDatabase::LoadSpawnGroups(const char *zone_name, uint16 version, SpawnG
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		auto new_spawn_group = std::make_unique<SpawnGroup>(
-			atoi(row[0]),
+			Strings::ToInt(row[0]),
 			row[1],
-			atoi(row[2]),
-			atof(row[3]),
-			atof(row[4]),
-			atof(row[5]),
-			atof(row[6]),
-			atof(row[7]),
-			atoi(row[8]),
-			atoi(row[9]),
-			atoi(row[10]),
-			atoi(row[11]),
-			atoi(row[12])
+			Strings::ToInt(row[2]),
+			Strings::ToFloat(row[3]),
+			Strings::ToFloat(row[4]),
+			Strings::ToFloat(row[5]),
+			Strings::ToFloat(row[6]),
+			Strings::ToFloat(row[7]),
+			Strings::ToInt(row[8]),
+			Strings::ToInt(row[9]),
+			Strings::ToInt(row[10]),
+			Strings::ToInt(row[11]),
+			Strings::ToInt(row[12])
 		);
 
 		spawn_group_list->AddSpawnGroup(new_spawn_group);
@@ -260,13 +260,13 @@ bool ZoneDatabase::LoadSpawnGroups(const char *zone_name, uint16 version, SpawnG
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		auto new_spawn_entry = std::make_unique<SpawnEntry>(
-			atoi(row[1]),
-			atoi(row[2]),
-			atoi(row[3]),
-			(row[4] ? atoi(row[4]) : 0)
+			Strings::ToInt(row[1]),
+			Strings::ToInt(row[2]),
+			Strings::ToInt(row[3]),
+			(row[4] ? Strings::ToInt(row[4]) : 0)
 		);
 
-		SpawnGroup *spawn_group = spawn_group_list->GetSpawnGroup(atoi(row[0]));
+		SpawnGroup *spawn_group = spawn_group_list->GetSpawnGroup(Strings::ToInt(row[0]));
 
 		if (!spawn_group) {
 			continue;
@@ -327,19 +327,19 @@ bool ZoneDatabase::LoadSpawnGroupsByID(int spawn_group_id, SpawnGroupList *spawn
 		);
 
 		auto new_spawn_group = std::make_unique<SpawnGroup>(
-			atoi(row[0]),
+			Strings::ToInt(row[0]),
 			row[1],
-			atoi(row[2]),
-			atof(row[3]),
-			atof(row[4]),
-			atof(row[5]),
-			atof(row[6]),
-			atof(row[7]),
-			atoi(row[8]),
-			atoi(row[9]),
-			atoi(row[10]),
-			atoi(row[11]),
-			atoi(row[12])
+			Strings::ToInt(row[2]),
+			Strings::ToFloat(row[3]),
+			Strings::ToFloat(row[4]),
+			Strings::ToFloat(row[5]),
+			Strings::ToFloat(row[6]),
+			Strings::ToFloat(row[7]),
+			Strings::ToInt(row[8]),
+			Strings::ToInt(row[9]),
+			Strings::ToInt(row[10]),
+			Strings::ToInt(row[11]),
+			Strings::ToInt(row[12])
 		);
 
 		spawn_group_list->AddSpawnGroup(new_spawn_group);
@@ -370,10 +370,10 @@ bool ZoneDatabase::LoadSpawnGroupsByID(int spawn_group_id, SpawnGroupList *spawn
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		auto new_spawn_entry = std::make_unique<SpawnEntry>(
-			atoi(row[1]),
-			atoi(row[2]),
-			atoi(row[3]),
-			(row[4] ? atoi(row[4]) : 0)
+			Strings::ToInt(row[1]),
+			Strings::ToInt(row[2]),
+			Strings::ToInt(row[3]),
+			(row[4] ? Strings::ToInt(row[4]) : 0)
 		);
 
 		LogSpawnsDetail(
@@ -385,7 +385,7 @@ bool ZoneDatabase::LoadSpawnGroupsByID(int spawn_group_id, SpawnGroupList *spawn
 			row[4]
 		);
 
-		SpawnGroup *spawn_group = spawn_group_list->GetSpawnGroup(atoi(row[0]));
+		SpawnGroup *spawn_group = spawn_group_list->GetSpawnGroup(Strings::ToInt(row[0]));
 		if (!spawn_group) {
 			continue;
 		}

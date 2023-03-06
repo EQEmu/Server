@@ -278,7 +278,7 @@ int DATLoader::Open(char *base_path, char *zone_name, Archive *archive) {
 			if(Token == "*QUADSPERTILE")
 			{
 				Token = GetToken(ZonBuffer, ZonPosition);
-				QuadsPerTile = atoi(Token.c_str());
+				QuadsPerTile = Strings::ToInt(Token.c_str());
 #ifdef DEBUGDAT
 				printf("Set QuadsPerTile to %i\n", QuadsPerTile);
 #endif

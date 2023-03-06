@@ -239,7 +239,7 @@ int32 Mob::GetEquipmentMaterial(uint8 material_slot) const
 					if (inst->GetOrnamentationAug(ornamentation_augment_type)) {
 						item = inst->GetOrnamentationAug(ornamentation_augment_type)->GetItem();
 						if (item && strlen(item->IDFile) > 2 && Strings::IsNumber(&item->IDFile[2])) {
-							equipment_material = std::stoi(&item->IDFile[2]);
+							equipment_material = Strings::ToInt(&item->IDFile[2]);
 						}
 					} else if (inst->GetOrnamentationIDFile()) {
 						equipment_material = inst->GetOrnamentationIDFile();
@@ -248,7 +248,7 @@ int32 Mob::GetEquipmentMaterial(uint8 material_slot) const
 			}
 
 			if (!equipment_material && strlen(item->IDFile) > 2 && Strings::IsNumber(&item->IDFile[2])) {
-				equipment_material = std::stoi(&item->IDFile[2]);
+				equipment_material = Strings::ToInt(&item->IDFile[2]);
 			}
 		}
 		else {

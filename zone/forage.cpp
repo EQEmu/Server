@@ -90,9 +90,9 @@ uint32 ZoneDatabase::GetZoneForage(uint32 ZoneID, uint8 skill) {
 			break;
 		}
 
-		item[index]   = atoi(row[0]);
-		chance[index] = atoi(row[1]) + chancepool;
-		chancepool = chance[index];
+		item[index]   = Strings::ToInt(row[0]);
+		chance[index] = Strings::ToInt(row[1]) + chancepool;
+		chancepool    = chance[index];
 	}
 
 	if(chancepool == 0 || index < 1)
@@ -158,12 +158,12 @@ uint32 ZoneDatabase::GetZoneFishing(uint32 ZoneID, uint8 skill, uint32 &npc_id, 
         if (index >= 50)
             break;
 
-        item[index] = atoi(row[0]);
-        chance[index] = atoi(row[1])+chancepool;
+        item[index] = Strings::ToInt(row[0]);
+        chance[index] = Strings::ToInt(row[1])+chancepool;
         chancepool = chance[index];
 
-        npc_ids[index] = atoi(row[2]);
-        npc_chances[index] = atoi(row[3]);
+        npc_ids[index] = Strings::ToInt(row[2]);
+        npc_chances[index] = Strings::ToInt(row[3]);
     }
 
 	npc_id = 0;

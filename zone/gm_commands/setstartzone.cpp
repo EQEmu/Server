@@ -19,7 +19,7 @@ void command_setstartzone(Client *c, const Seperator *sep)
 
 	auto zone_id = (
 		sep->IsNumber(1) ?
-		std::stoul(sep->arg[1]) :
+		Strings::ToUnsignedInt(sep->arg[1]) :
 		ZoneID(sep->arg[1])
 	);
 

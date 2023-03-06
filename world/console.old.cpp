@@ -494,13 +494,13 @@ void Console::ProcessCommand(const char* command) {
 				// do nothing
 			}
 			else if (strcasecmp(sep.arg[0], "signalcharbyname") == 0) {
-				SendMessage(1, "Signal Sent to %s with ID %i", (char*) sep.arg[1], atoi(sep.arg[2]));
+				SendMessage(1, "Signal Sent to %s with ID %i", (char*) sep.arg[1], Strings::ToInt(sep.arg[2]));
 				uint32 message_len = strlen((char*) sep.arg[1]) + 1;
 				auto pack = new ServerPacket(ServerOP_CZSignalClientByName,
 							     sizeof(CZClientSignalByName_Struct) + message_len);
 				CZClientSignalByName_Struct* CZSC = (CZClientSignalByName_Struct*) pack->pBuffer;
 				strn0cpy(CZSC->Name, (char*) sep.arg[1], 64);
-				CZSC->data = atoi(sep.arg[2]);
+				CZSC->data = Strings::ToInt(sep.arg[2]);
 				zoneserver_list.SendPacket(pack);
 				safe_delete(pack);
 			}
@@ -522,11 +522,11 @@ void Console::ProcessCommand(const char* command) {
 				}
 			}
 			else if (strcasecmp(sep.arg[0], "uptime") == 0) {
-				if (sep.IsNumber(1) && atoi(sep.arg[1]) > 0) {
+				if (sep.IsNumber(1) && Strings::ToInt(sep.arg[1]) > 0) {
 					auto pack = new ServerPacket(ServerOP_Uptime, sizeof(ServerUptime_Struct));
 					ServerUptime_Struct* sus = (ServerUptime_Struct*) pack->pBuffer;
 					snprintf(sus->adminname, sizeof(sus->adminname), "*%s", GetName());
-					sus->zoneserverid = atoi(sep.arg[1]);
+					sus->zoneserverid = Strings::ToInt(sep.arg[1]);
 					ZoneServer* zs = zoneserver_list.FindByID(sus->zoneserverid);
 					if (zs)
 						zs->SendPacket(pack);
@@ -603,13 +603,13 @@ void Console::ProcessCommand(const char* command) {
 			}
 			else if (strcasecmp(sep.arg[0], "emote") == 0) {
 				if (strcasecmp(sep.arg[1], "world") == 0)
-					zoneserver_list.SendEmoteMessageRaw(0, 0, 0, atoi(sep.arg[2]), sep.argplus[3]);
+					zoneserver_list.SendEmoteMessageRaw(0, 0, 0, Strings::ToInt(sep.arg[2]), sep.argplus[3]);
 				else {
 					ZoneServer* zs = zoneserver_list.FindByName(sep.arg[1]);
 					if (zs != 0)
-						zs->SendEmoteMessageRaw(0, 0, 0, atoi(sep.arg[2]), sep.argplus[3]);
+						zs->SendEmoteMessageRaw(0, 0, 0, Strings::ToInt(sep.arg[2]), sep.argplus[3]);
 					else
-						zoneserver_list.SendEmoteMessageRaw(sep.arg[1], 0, 0, atoi(sep.arg[2]), sep.argplus[3]);
+						zoneserver_list.SendEmoteMessageRaw(sep.arg[1], 0, 0, Strings::ToInt(sep.arg[2]), sep.argplus[3]);
 				}
 			}
 			else if (strcasecmp(sep.arg[0], "movechar") == 0) {
@@ -634,11 +634,11 @@ void Console::ProcessCommand(const char* command) {
 					SendMessage(1, "Usage: flag [status] [accountname]");
 				else
 				{
-					if (atoi(sep.arg[1]) > Admin())
+					if (Strings::ToInt(sep.arg[1]) > Admin())
 						SendMessage(1, "You cannot set people's status to higher than your own");
-					else if (atoi(sep.arg[1]) < 0 && Admin() < consoleFlagStatus)
+					else if (Strings::ToInt(sep.arg[1]) < 0 && Admin() < consoleFlagStatus)
 							SendMessage(1, "You have too low of status to change flags");
-					else if (!database.SetAccountStatus(sep.arg[2], atoi(sep.arg[1])))
+					else if (!database.SetAccountStatus(sep.arg[2], Strings::ToInt(sep.arg[1])))
 							SendMessage(1, "Unable to flag account!");
 					else
 							SendMessage(1, "Account Flaged");
@@ -672,13 +672,13 @@ void Console::ProcessCommand(const char* command) {
 						whom->gmlookup = 1;
 					else if (sep.IsNumber(i)) {
 						if (whom->lvllow == 0xFFFF) {
-							whom->lvllow = atoi(sep.arg[i]);
+							whom->lvllow = Strings::ToInt(sep.arg[i]);
 							whom->lvlhigh = whom->lvllow;
 						}
-						else if (atoi(sep.arg[i]) > int(whom->lvllow))
-							whom->lvlhigh = atoi(sep.arg[i]);
+						else if (Strings::ToInt(sep.arg[i]) > int(whom->lvllow))
+							whom->lvlhigh = Strings::ToInt(sep.arg[i]);
 						else
-							whom->lvllow = atoi(sep.arg[i]);
+							whom->lvllow = Strings::ToInt(sep.arg[i]);
 					}
 					else
 						strn0cpy(whom->whom, sep.arg[i], sizeof(whom->whom));
@@ -709,7 +709,7 @@ void Console::ProcessCommand(const char* command) {
 					pack->opcode = ServerOP_ZoneShutdown;
 					strcpy(s->adminname, tmpname);
 					if (sep.arg[1][0] >= '0' && sep.arg[1][0] <= '9')
-						s->ZoneServerID = atoi(sep.arg[1]);
+						s->ZoneServerID = Strings::ToInt(sep.arg[1]);
 					else
 						s->zoneid = ZoneID(sep.arg[1]);
 
@@ -738,12 +738,12 @@ void Console::ProcessCommand(const char* command) {
 					strcpy(&tmpname[1], paccountname);
 
 					LogInfo("Console ZoneBootup: [{}], [{}], [{}]",tmpname,sep.arg[2],sep.arg[1]);
-					zoneserver_list.SOPZoneBootup(tmpname, atoi(sep.arg[1]), sep.arg[2], (bool) (strcasecmp(sep.arg[3], "static") == 0));
+					zoneserver_list.SOPZoneBootup(tmpname, Strings::ToInt(sep.arg[1]), sep.arg[2], (bool) (strcasecmp(sep.arg[3], "static") == 0));
 				}
 			}
 			else if (strcasecmp(sep.arg[0], "worldshutdown") == 0 && admin >= consoleWorldStatus) {
 				int32 time, interval;
-				if(sep.IsNumber(1) && sep.IsNumber(2) && ((time=atoi(sep.arg[1]))>0) && ((interval=atoi(sep.arg[2]))>0)) {
+				if(sep.IsNumber(1) && sep.IsNumber(2) && ((time=Strings::ToInt(sep.arg[1]))>0) && ((interval=Strings::ToInt(sep.arg[2]))>0)) {
 					zoneserver_list.WorldShutDown(time, interval);
 				}
 				else if(strcasecmp(sep.arg[1], "now") == 0) {

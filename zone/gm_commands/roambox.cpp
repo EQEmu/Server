@@ -52,10 +52,10 @@ void command_roambox(Client *c, const Seperator *sep)
 		int delay = 15000;
 
 		if (arguments >= 2) {
-			box_size = std::stof(sep->arg[2]);
+			box_size = Strings::ToFloat(sep->arg[2]);
 
 			if (arguments == 3) {
-				delay = std::stoi(sep->arg[3]);
+				delay = Strings::ToInt(sep->arg[3]);
 			}
 		}
 

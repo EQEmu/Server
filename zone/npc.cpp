@@ -1394,7 +1394,7 @@ NPC* NPC::SpawnNPC(const char* spawncommand, const glm::vec4& position, Client* 
 		if (!sep.IsNumber(3)) {
 			sprintf(sep.arg[3], "0");
 		}
-		if (atoi(sep.arg[4]) > 2100000000 || atoi(sep.arg[4]) <= 0) {
+		if (Strings::ToInt(sep.arg[4]) > 2100000000 || Strings::ToInt(sep.arg[4]) <= 0) {
 			sprintf(sep.arg[4], " ");
 		}
 		if (!strcmp(sep.arg[5], "-")) {
@@ -1428,7 +1428,7 @@ NPC* NPC::SpawnNPC(const char* spawncommand, const glm::vec4& position, Client* 
 
 		// Autoselect NPC Gender
 		if (sep.arg[5][0] == 0) {
-			sprintf(sep.arg[5], "%i", (int) Mob::GetDefaultGender(atoi(sep.arg[1])));
+			sprintf(sep.arg[5], "%i", (int) Mob::GetDefaultGender(Strings::ToInt(sep.arg[1])));
 		}
 
 		//Time to create the NPC!!
@@ -1436,22 +1436,22 @@ NPC* NPC::SpawnNPC(const char* spawncommand, const glm::vec4& position, Client* 
 		memset(npc_type, 0, sizeof(NPCType));
 
 		strncpy(npc_type->name, sep.arg[0], 60);
-		npc_type->current_hp       = atoi(sep.arg[4]);
-		npc_type->max_hp           = atoi(sep.arg[4]);
-		npc_type->race             = atoi(sep.arg[1]);
-		npc_type->gender           = atoi(sep.arg[5]);
-		npc_type->class_           = atoi(sep.arg[6]);
+		npc_type->current_hp       = Strings::ToInt(sep.arg[4]);
+		npc_type->max_hp           = Strings::ToInt(sep.arg[4]);
+		npc_type->race             = Strings::ToInt(sep.arg[1]);
+		npc_type->gender           = Strings::ToInt(sep.arg[5]);
+		npc_type->class_           = Strings::ToInt(sep.arg[6]);
 		npc_type->deity            = 1;
-		npc_type->level            = atoi(sep.arg[2]);
+		npc_type->level            = Strings::ToInt(sep.arg[2]);
 		npc_type->npc_id           = 0;
 		npc_type->loottable_id     = 0;
-		npc_type->texture          = atoi(sep.arg[3]);
+		npc_type->texture          = Strings::ToInt(sep.arg[3]);
 		npc_type->light            = 0; // spawncommand needs update
 		npc_type->runspeed         = 1.25;
-		npc_type->d_melee_texture1 = atoi(sep.arg[7]);
-		npc_type->d_melee_texture2 = atoi(sep.arg[8]);
-		npc_type->merchanttype     = atoi(sep.arg[9]);
-		npc_type->bodytype         = atoi(sep.arg[10]);
+		npc_type->d_melee_texture1 = Strings::ToInt(sep.arg[7]);
+		npc_type->d_melee_texture2 = Strings::ToInt(sep.arg[8]);
+		npc_type->merchanttype     = Strings::ToInt(sep.arg[9]);
+		npc_type->bodytype         = Strings::ToInt(sep.arg[10]);
 
 		npc_type->STR = 0;
 		npc_type->STA = 0;
@@ -1514,7 +1514,7 @@ uint32 ZoneDatabase::CreateNewNPCCommand(
 		if (results.Success()) {
 			if (results.RowCount() != 0) {
 				auto row = results.begin();
-				npc_type_id = atoi(row[0]) + 1;
+				npc_type_id = Strings::ToInt(row[0]) + 1;
 				// Prevent the npc_type id from exceeding the range for this zone
 				if (npc_type_id >= (starting_npc_id + 1000)) {
 					npc_type_id = 0;
@@ -1673,10 +1673,10 @@ uint32 ZoneDatabase::DeleteSpawnLeaveInNPCTypeTable(const char *zone, Client *cl
 
 	auto row = results.begin();
 	if (row[0])
-		id = atoi(row[0]);
+		id = Strings::ToInt(row[0]);
 
 	if (row[1])
-		spawngroupID = atoi(row[1]);
+		spawngroupID = Strings::ToInt(row[1]);
 
 	query = StringFormat("DELETE FROM spawn2 WHERE id = '%i'", id);
 	results = QueryDatabase(query);
@@ -1715,10 +1715,10 @@ uint32 ZoneDatabase::DeleteSpawnRemoveFromNPCTypeTable(const char *zone, uint32 
 	auto row = results.begin();
 
 	if (row[0])
-		id = atoi(row[0]);
+		id = Strings::ToInt(row[0]);
 
 	if (row[1])
-		spawngroupID = atoi(row[1]);
+		spawngroupID = Strings::ToInt(row[1]);
 
 	query = StringFormat("DELETE FROM spawn2 WHERE id = '%i'", id);
 	results = QueryDatabase(query);
@@ -2485,43 +2485,43 @@ void NPC::ModifyNPCStat(std::string stat, std::string value)
 	LogNPCScaling("NPC::ModifyNPCStat: Key [{}] Value [{}] ", variable_key, value);
 
 	if (stat_lower == "ac") {
-		AC = atoi(value.c_str());
+		AC = Strings::ToInt(value.c_str());
 		CalcAC();
 		return;
 	}
 	else if (stat_lower == "str") {
-		STR = atoi(value.c_str());
+		STR = Strings::ToInt(value.c_str());
 		return;
 	}
 	else if (stat_lower == "sta") {
-		STA = atoi(value.c_str());
+		STA = Strings::ToInt(value.c_str());
 		return;
 	}
 	else if (stat_lower == "agi") {
-		AGI = atoi(value.c_str());
+		AGI = Strings::ToInt(value.c_str());
 		CalcAC();
 		return;
 	}
 	else if (stat_lower == "dex") {
-		DEX = atoi(value.c_str());
+		DEX = Strings::ToInt(value.c_str());
 		return;
 	}
 	else if (stat_lower == "wis") {
-		WIS = atoi(value.c_str());
+		WIS = Strings::ToInt(value.c_str());
 		CalcMaxMana();
 		return;
 	}
 	else if (stat_lower == "int" || stat_lower == "_int") {
-		INT = atoi(value.c_str());
+		INT = Strings::ToInt(value.c_str());
 		CalcMaxMana();
 		return;
 	}
 	else if (stat_lower == "cha") {
-		CHA = atoi(value.c_str());
+		CHA = Strings::ToInt(value.c_str());
 		return;
 	}
 	else if (stat_lower == "max_hp") {
-		base_hp = std::stoull(value.c_str());
+		base_hp = Strings::ToUnsignedBigInt(value.c_str());
 
 		CalcMaxHP();
 		if (current_hp > max_hp) {
@@ -2531,7 +2531,7 @@ void NPC::ModifyNPCStat(std::string stat, std::string value)
 		return;
 	}
 	else if (stat_lower == "max_mana") {
-		npc_mana = std::stoull(value.c_str());
+		npc_mana = Strings::ToUnsignedBigInt(value.c_str());
 		CalcMaxMana();
 		if (current_mana > max_mana) {
 			current_mana = max_mana;
@@ -2539,35 +2539,35 @@ void NPC::ModifyNPCStat(std::string stat, std::string value)
 		return;
 	}
 	else if (stat_lower == "mr") {
-		MR = atoi(value.c_str());
+		MR = Strings::ToInt(value.c_str());
 		return;
 	}
 	else if (stat_lower == "fr") {
-		FR = atoi(value.c_str());
+		FR = Strings::ToInt(value.c_str());
 		return;
 	}
 	else if (stat_lower == "cr") {
-		CR = atoi(value.c_str());
+		CR = Strings::ToInt(value.c_str());
 		return;
 	}
 	else if (stat_lower == "cor") {
-		Corrup = atoi(value.c_str());
+		Corrup = Strings::ToInt(value.c_str());
 		return;
 	}
 	else if (stat_lower == "pr") {
-		PR = atoi(value.c_str());
+		PR = Strings::ToInt(value.c_str());
 		return;
 	}
 	else if (stat_lower == "dr") {
-		DR = atoi(value.c_str());
+		DR = Strings::ToInt(value.c_str());
 		return;
 	}
 	else if (stat_lower == "phr") {
-		PhR = atoi(value.c_str());
+		PhR = Strings::ToInt(value.c_str());
 		return;
 	}
 	else if (stat_lower == "runspeed") {
-		runspeed       = (float) atof(value.c_str());
+		runspeed       = (float) Strings::ToFloat(value.c_str());
 		base_runspeed  = (int) ((float) runspeed * 40.0f);
 		base_walkspeed = base_runspeed * 100 / 265;
 		walkspeed      = ((float) base_walkspeed) * 0.025f;
@@ -2585,64 +2585,64 @@ void NPC::ModifyNPCStat(std::string stat, std::string value)
 		return;
 	}
 	else if (stat_lower == "attack_speed") {
-		attack_speed = (float) atof(value.c_str());
+		attack_speed = (float) Strings::ToFloat(value.c_str());
 		CalcBonuses();
 		return;
 	}
 	else if (stat_lower == "attack_delay") {
 		/* TODO: fix DB */
-		attack_delay = atoi(value.c_str()) * 100;
+		attack_delay = Strings::ToInt(value.c_str()) * 100;
 		CalcBonuses();
 		return;
 	}
 	else if (stat_lower == "atk") {
-		ATK = atoi(value.c_str());
+		ATK = Strings::ToInt(value.c_str());
 		return;
 	}
 	else if (stat_lower == "accuracy") {
-		accuracy_rating = atoi(value.c_str());
+		accuracy_rating = Strings::ToInt(value.c_str());
 		return;
 	}
 	else if (stat_lower == "avoidance") {
-		avoidance_rating = atoi(value.c_str());
+		avoidance_rating = Strings::ToInt(value.c_str());
 		return;
 	}
 	else if (stat_lower == "trackable") {
-		trackable = atoi(value.c_str());
+		trackable = Strings::ToInt(value.c_str());
 		return;
 	}
 	else if (stat_lower == "min_hit") {
-		min_dmg     = atoi(value.c_str());
+		min_dmg     = Strings::ToInt(value.c_str());
 		// TODO: fix DB
 		base_damage = round((max_dmg - min_dmg) / 1.9);
 		min_damage  = min_dmg - round(base_damage / 10.0);
 		return;
 	}
 	else if (stat_lower == "max_hit") {
-		max_dmg     = atoi(value.c_str());
+		max_dmg     = Strings::ToInt(value.c_str());
 		// TODO: fix DB
 		base_damage = round((max_dmg - min_dmg) / 1.9);
 		min_damage  = min_dmg - round(base_damage / 10.0);
 		return;
 	}
 	else if (stat_lower == "attack_count") {
-		attack_count = atoi(value.c_str());
+		attack_count = Strings::ToInt(value.c_str());
 		return;
 	}
 	else if (stat_lower == "see_invis") {
-		see_invis = atoi(value.c_str());
+		see_invis = Strings::ToInt(value.c_str());
 		return;
 	}
 	else if (stat_lower == "see_invis_undead") {
-		see_invis_undead = atoi(value.c_str());
+		see_invis_undead = Strings::ToInt(value.c_str());
 		return;
 	}
 	else if (stat_lower == "see_hide") {
-		see_hide = atoi(value.c_str());
+		see_hide = Strings::ToInt(value.c_str());
 		return;
 	}
 	else if (stat_lower == "see_improved_hide") {
-		see_improved_hide = atoi(value.c_str());
+		see_improved_hide = Strings::ToInt(value.c_str());
 		return;
 	}
 	else if (stat_lower == "hp_regen") {
@@ -2658,44 +2658,44 @@ void NPC::ModifyNPCStat(std::string stat, std::string value)
 		return;
 	}
 	else if (stat_lower == "level") {
-		SetLevel(atoi(value.c_str()));
+		SetLevel(Strings::ToInt(value.c_str()));
 		return;
 	}
 	else if (stat_lower == "aggro") {
-		pAggroRange = atof(value.c_str());
+		pAggroRange = Strings::ToFloat(value.c_str());
 		return;
 	}
 	else if (stat_lower == "assist") {
-		pAssistRange = atof(value.c_str());
+		pAssistRange = Strings::ToFloat(value.c_str());
 		return;
 	}
 	else if (stat_lower == "slow_mitigation") {
-		slow_mitigation = atoi(value.c_str());
+		slow_mitigation = Strings::ToInt(value.c_str());
 		return;
 	}
 	else if (stat_lower == "loottable_id") {
-		loottable_id = atof(value.c_str());
+		loottable_id = Strings::ToFloat(value.c_str());
 		return;
 	}
 	else if (stat_lower == "healscale") {
-		healscale = atof(value.c_str());
+		healscale = Strings::ToFloat(value.c_str());
 		return;
 	}
 	else if (stat_lower == "spellscale") {
-		spellscale = atof(value.c_str());
+		spellscale = Strings::ToFloat(value.c_str());
 		return;
 	}
 	else if (stat_lower == "npc_spells_id") {
-		AI_AddNPCSpells(atoi(value.c_str()));
+		AI_AddNPCSpells(Strings::ToInt(value.c_str()));
 		return;
 	}
 	else if (stat_lower == "npc_spells_effects_id") {
-		AI_AddNPCSpellsEffects(atoi(value.c_str()));
+		AI_AddNPCSpellsEffects(Strings::ToInt(value.c_str()));
 		CalcBonuses();
 		return;
 	}
 	else if (stat_lower == "heroic_strikethrough") {
-		heroic_strikethrough = atoi(value.c_str());
+		heroic_strikethrough = Strings::ToInt(value.c_str());
 		return;
 	}
 	else if (stat_lower == "keeps_sold_items") {
@@ -3962,4 +3962,12 @@ void NPC::HandleRoambox()
 	}
 
 	return;
+}
+
+void NPC::SetTaunting(bool is_taunting) {
+	taunting = is_taunting;
+
+	if (IsPet() && IsPetOwnerClient()) {
+		GetOwner()->CastToClient()->SetPetCommandState(PET_BUTTON_TAUNT, is_taunting);
+	}
 }

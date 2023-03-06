@@ -13,7 +13,7 @@ void command_flymode(Client *c, const Seperator *sep)
 		target = c->GetTarget();
 	}
 
-	auto flymode_id = std::stoul(sep->arg[1]);
+	auto flymode_id = Strings::ToUnsignedInt(sep->arg[1]);
 	if (!EQ::ValueWithin(flymode_id, EQ::constants::GravityBehavior::Ground, EQ::constants::GravityBehavior::LevitateWhileRunning)) {
 		c->Message(Chat::White, "Usage:: #flymode [Flymode ID]");
 		c->Message(Chat::White, "0 = Ground, 1 = Flying, 2 = Levitating, 3 = Water, 4 = Floating, 5 = Levitating While Running");

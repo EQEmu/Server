@@ -6,7 +6,7 @@ void command_viewzoneloot(Client *c, const Seperator *sep)
 	auto                       npc_list    = entity_list.GetNPCList();
 	uint32                     loot_amount = 0, loot_id = 1, search_item_id = 0;
 	if (sep->argnum == 1 && sep->IsNumber(1)) {
-		search_item_id = atoi(sep->arg[1]);
+		search_item_id = Strings::ToInt(sep->arg[1]);
 	}
 	else if (sep->argnum == 1 && !sep->IsNumber(1)) {
 		c->Message(

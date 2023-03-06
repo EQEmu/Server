@@ -39,7 +39,7 @@ void command_bugs(Client *c, const Seperator *sep)
 			return;
 		}
 
-		auto bug_id = std::stoul(sep->arg[2]);
+		auto bug_id = Strings::ToUnsignedInt(sep->arg[2]);
 
 		auto r = BugReportsRepository::FindOne(content_db, bug_id);
 		if (!r.id) {
@@ -80,7 +80,7 @@ void command_bugs(Client *c, const Seperator *sep)
 			return;
 		}
 
-		auto bug_id = std::stoul(sep->arg[2]);
+		auto bug_id = Strings::ToUnsignedInt(sep->arg[2]);
 		auto deleted_count = BugReportsRepository::DeleteOne(content_db, bug_id);
 		if (!deleted_count) {
 			c->Message(
@@ -109,7 +109,7 @@ void command_bugs(Client *c, const Seperator *sep)
 			return;
 		}
 
-		auto bug_id = std::stoul(sep->arg[2]);
+		auto bug_id = Strings::ToUnsignedInt(sep->arg[2]);
 		auto bug_review = sep->argplus[3];
 
 		auto r = BugReportsRepository::FindOne(content_db, bug_id);
@@ -203,7 +203,7 @@ void command_bugs(Client *c, const Seperator *sep)
 			return;
 		}
 
-		auto bug_id = std::stoul(sep->arg[2]);
+		auto bug_id = Strings::ToUnsignedInt(sep->arg[2]);
 
 		auto r = BugReportsRepository::FindOne(content_db, bug_id);
 		if (!r.id) {

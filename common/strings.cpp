@@ -191,24 +191,23 @@ std::string Strings::Escape(const std::string &s)
 
 bool Strings::IsNumber(const std::string &s)
 {
-	try {
-		auto r = stoi(s);
-		return true;
+	for (char const &c: s) {
+		if (c == s[0] && s[0] == '-') {
+			continue;
+		}
+		if (std::isdigit(c) == 0) {
+			return false;
+		}
 	}
-	catch (std::exception &) {
-		return false;
-	}
+
+	return true;
 }
 
 bool Strings::IsFloat(const std::string &s)
 {
-	try {
-		auto r = stof(s);
-		return true;
-	}
-	catch (std::exception &) {
-		return false;
-	}
+	char* ptr;
+	strtof(s.c_str(), &ptr);
+	return (*ptr) == '\0';
 }
 
 std::string Strings::Join(const std::vector<std::string> &ar, const std::string &delim)
@@ -728,7 +727,7 @@ uint32 Strings::TimeToSeconds(std::string time_string)
 		time_unit.end()
 	);
 
-	auto unit = std::stoul(time_unit);
+	auto unit = Strings::ToUnsignedInt(time_unit);
 	uint32 duration = 0;
 
 	if (Strings::Contains(time_string, "s")) {
@@ -755,7 +754,7 @@ bool Strings::ToBool(std::string bool_string)
 		Strings::Contains(bool_string, "on") ||
 		Strings::Contains(bool_string, "enable") ||
 		Strings::Contains(bool_string, "enabled") ||
-		(Strings::IsNumber(bool_string) && std::stoi(bool_string))
+		(Strings::IsNumber(bool_string) && Strings::ToInt(bool_string))
 	) {
 		return true;
 	}
@@ -782,7 +781,72 @@ std::string Strings::Random(size_t length)
 // fails to cast to a number
 int Strings::ToInt(const std::string &s, int fallback)
 {
-	return Strings::IsNumber(s) ? std::stoi(s) : fallback;
+	if (!Strings::IsNumber(s)) {
+		return fallback;
+	}
+
+	try {
+		return std::stoi(s);
+	}
+	catch (std::exception &) {
+		return fallback;
+	}
+}
+
+int64 Strings::ToBigInt(const std::string &s, int64 fallback)
+{
+	if (!Strings::IsNumber(s)) {
+		return fallback;
+	}
+
+	try {
+		return std::stoll(s);
+	}
+	catch (std::exception &) {
+		return fallback;
+	}
+}
+
+uint32 Strings::ToUnsignedInt(const std::string &s, uint32 fallback)
+{
+	if (!Strings::IsNumber(s)) {
+		return fallback;
+	}
+
+	try {
+		return std::stoul(s);
+	}
+	catch (std::exception &) {
+		return fallback;
+	}
+}
+
+uint64 Strings::ToUnsignedBigInt(const std::string &s, uint64 fallback)
+{
+	if (!Strings::IsNumber(s)) {
+		return fallback;
+	}
+
+	try {
+		return std::stoull(s);
+	}
+	catch (std::exception &) {
+		return fallback;
+	}
+}
+
+float Strings::ToFloat(const std::string &s, float fallback)
+{
+	if (!Strings::IsFloat(s)) {
+		return fallback;
+	}
+
+	try {
+		return std::stof(s);
+	}
+	catch (std::exception &) {
+		return fallback;
+	}
 }
 
 std::string Strings::RemoveNumbers(std::string s)

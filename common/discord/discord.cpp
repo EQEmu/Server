@@ -57,7 +57,7 @@ void Discord::SendWebhookMessage(const std::string &message, const std::string &
 						LogDiscord("JSON serialization failure [{}] via [{}]", ex.what(), res->body);
 					}
 
-					retry_timer = std::stoi(response["retry_after"].asString()) + 500;
+					retry_timer = Strings::ToInt(response["retry_after"].asString()) + 500;
 				}
 
 				LogDiscord("Rate limited... retrying message in [{}ms]", retry_timer);
@@ -125,7 +125,7 @@ void Discord::SendPlayerEventMessage(
 						LogDiscord("JSON serialization failure [{}] via [{}]", ex.what(), res->body);
 					}
 
-					retry_timer = std::stoi(response["retry_after"].asString()) + 500;
+					retry_timer = Strings::ToInt(response["retry_after"].asString()) + 500;
 				}
 
 				LogDiscord("Rate limited... retrying message in [{}ms]", retry_timer);

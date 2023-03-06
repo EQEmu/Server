@@ -11,7 +11,7 @@ void command_viewrecipe(Client *c, const Seperator *sep)
 		return;
 	}
 
-	auto recipe_id = static_cast<uint16>(std::stoul(sep->arg[1]));
+	auto recipe_id = static_cast<uint16>(Strings::ToUnsignedInt(sep->arg[1]));
 	auto re = TradeskillRecipeEntriesRepository::GetWhere(
 		database,
 		fmt::format("recipe_id = {} ORDER BY id ASC", recipe_id)
@@ -55,7 +55,7 @@ void command_viewrecipe(Client *c, const Seperator *sep)
 				can_summon_items && e.item_id > 1000 ? fmt::format(" | {}", Saylink::Silent(fmt::format("#si {}", e.item_id), "Summon")) : ""
 			).c_str()
 		);
-		
+
 		std::vector<std::string> emv;
 		bool has_message = false;
 
@@ -69,7 +69,7 @@ void command_viewrecipe(Client *c, const Seperator *sep)
 
 			has_message = true;
 		}
-		
+
 		if (e.failcount) {
 			emv.push_back(
 				fmt::format(
@@ -80,7 +80,7 @@ void command_viewrecipe(Client *c, const Seperator *sep)
 
 			has_message = true;
 		}
-		
+
 		if (e.salvagecount) {
 			emv.push_back(
 				fmt::format(
@@ -91,7 +91,7 @@ void command_viewrecipe(Client *c, const Seperator *sep)
 
 			has_message = true;
 		}
-		
+
 		if (e.successcount) {
 			emv.push_back(
 				fmt::format(

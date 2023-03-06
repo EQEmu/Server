@@ -13,7 +13,7 @@ void command_delacct(Client *c, const Seperator *sep)
 	std::string account_name;
 
 	if (sep->IsNumber(1)) {
-		account_id = std::stoul(sep->arg[1]);
+		account_id = Strings::ToUnsignedInt(sep->arg[1]);
 		auto a = AccountRepository::FindOne(content_db, account_id);
 		if (!a.id) {
 			c->Message(

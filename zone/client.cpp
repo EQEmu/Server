@@ -78,8 +78,6 @@ extern volatile bool is_zone_loaded;
 extern WorldServer worldserver;
 extern uint32 numclients;
 extern PetitionList petition_list;
-bool commandlogged;
-char entirecommand[255];
 
 void UpdateWindowTitle(char* iNewTitle);
 
@@ -183,9 +181,10 @@ Client::Client(EQStreamInterface *ieqs) : Mob(
   consent_throttle_timer(2000),
   tmSitting(0)
 {
+	for (auto client_filter = FilterNone; client_filter < _FilterCount; client_filter = eqFilterType(client_filter + 1)) {
+		SetFilter(client_filter, FilterShow);
+	}
 
-	for (int client_filter = 0; client_filter < _FilterCount; client_filter++)
-		ClientFilters[client_filter] = FilterShow;
 	cheat_manager.SetClient(this);
 	mMovementManager->AddClient(this);
 	character_id = 0;
@@ -241,7 +240,6 @@ Client::Client(EQStreamInterface *ieqs) : Mob(
 	casting_spell_id = 0;
 	npcflag = false;
 	npclevel = 0;
-	pQueuedSaveWorkID = 0;
 	position_update_same_count = 0;
 	fishing_timer.Disable();
 	dead_timer.Disable();
@@ -249,8 +247,6 @@ Client::Client(EQStreamInterface *ieqs) : Mob(
 	autosave_timer.Disable();
 	GetMercTimer()->Disable();
 	instalog = false;
-	pLastUpdate = 0;
-	pLastUpdateWZ = 0;
 	m_pp.autosplit = false;
 	// initialise haste variable
 	m_tradeskill_object = nullptr;
@@ -741,9 +737,6 @@ bool Client::Save(uint8 iCommitNow) {
 	database.SaveCharacterData(this, &m_pp, &m_epp); /* Save Character Data */
 
 	return true;
-}
-
-void Client::SaveBackup() {
 }
 
 CLIENTPACKET::CLIENTPACKET()
@@ -3105,14 +3098,14 @@ void Client::ServerFilter(SetServerFilter_Struct* filter){
 */
 #define Filter0(type) \
 	if(filter->filters[type] == 1) \
-		ClientFilters[type] = FilterShow; \
+		SetFilter(type, FilterShow); \
 	else \
-		ClientFilters[type] = FilterHide;
+		SetFilter(type, FilterHide);
 #define Filter1(type) \
 	if(filter->filters[type] == 0) \
-		ClientFilters[type] = FilterShow; \
+		SetFilter(type, FilterShow); \
 	else \
-		ClientFilters[type] = FilterHide;
+		SetFilter(type, FilterHide);
 
 	Filter0(FilterGuildChat);
 	Filter0(FilterSocials);
@@ -3122,44 +3115,49 @@ void Client::ServerFilter(SetServerFilter_Struct* filter){
 	Filter0(FilterOOC);
 	Filter0(FilterBadWords);
 
-	if(filter->filters[FilterPCSpells] == 0)
-		ClientFilters[FilterPCSpells] = FilterShow;
-	else if(filter->filters[FilterPCSpells] == 1)
-		ClientFilters[FilterPCSpells] = FilterHide;
-	else
-		ClientFilters[FilterPCSpells] = FilterShowGroupOnly;
+	if (filter->filters[FilterPCSpells] == 0) {
+		SetFilter(FilterPCSpells, FilterShow);
+	} else if (filter->filters[FilterPCSpells] == 1) {
+		SetFilter(FilterPCSpells, FilterHide);
+	} else {
+		SetFilter(FilterPCSpells, FilterShowGroupOnly);
+	}
 
 	Filter1(FilterNPCSpells);
 
-	if(filter->filters[FilterBardSongs] == 0)
-		ClientFilters[FilterBardSongs] = FilterShow;
-	else if(filter->filters[FilterBardSongs] == 1)
-		ClientFilters[FilterBardSongs] = FilterShowSelfOnly;
-	else if(filter->filters[FilterBardSongs] == 2)
-		ClientFilters[FilterBardSongs] = FilterShowGroupOnly;
-	else
-		ClientFilters[FilterBardSongs] = FilterHide;
+	if (filter->filters[FilterBardSongs] == 0) {
+		SetFilter(FilterBardSongs, FilterShow);
+	} else if (filter->filters[FilterBardSongs] == 1) {
+		SetFilter(FilterBardSongs, FilterShowSelfOnly);
+	} else if (filter->filters[FilterBardSongs] == 2) {
+		SetFilter(FilterBardSongs, FilterShowGroupOnly);
+	} else {
+		SetFilter(FilterBardSongs, FilterHide);
+	}
 
-	if(filter->filters[FilterSpellCrits] == 0)
-		ClientFilters[FilterSpellCrits] = FilterShow;
-	else if(filter->filters[FilterSpellCrits] == 1)
-		ClientFilters[FilterSpellCrits] = FilterShowSelfOnly;
-	else
-		ClientFilters[FilterSpellCrits] = FilterHide;
+	if (filter->filters[FilterSpellCrits] == 0) {
+		SetFilter(FilterSpellCrits, FilterShow);
+	} else if (filter->filters[FilterSpellCrits] == 1) {
+		SetFilter(FilterSpellCrits, FilterShowSelfOnly);
+	} else {
+		SetFilter(FilterSpellCrits, FilterHide);
+	}
 
-	if (filter->filters[FilterMeleeCrits] == 0)
-		ClientFilters[FilterMeleeCrits] = FilterShow;
-	else if (filter->filters[FilterMeleeCrits] == 1)
-		ClientFilters[FilterMeleeCrits] = FilterShowSelfOnly;
-	else
-		ClientFilters[FilterMeleeCrits] = FilterHide;
+	if (filter->filters[FilterMeleeCrits] == 0) {
+		SetFilter(FilterMeleeCrits, FilterShow);
+	} else if (filter->filters[FilterMeleeCrits] == 1) {
+		SetFilter(FilterMeleeCrits, FilterShowSelfOnly);
+	} else {
+		SetFilter(FilterMeleeCrits, FilterHide);
+	}
 
-	if(filter->filters[FilterSpellDamage] == 0)
-		ClientFilters[FilterSpellDamage] = FilterShow;
-	else if(filter->filters[FilterSpellDamage] == 1)
-		ClientFilters[FilterSpellDamage] = FilterShowSelfOnly;
-	else
-		ClientFilters[FilterSpellDamage] = FilterHide;
+	if (filter->filters[FilterSpellDamage] == 0) {
+		SetFilter(FilterSpellDamage, FilterShow);
+	} else if (filter->filters[FilterSpellDamage] == 1) {
+		SetFilter(FilterSpellDamage, FilterShowSelfOnly);
+	} else {
+		SetFilter(FilterSpellDamage, FilterHide);
+	}
 
 	Filter0(FilterMyMisses);
 	Filter0(FilterOthersMiss);
@@ -3168,19 +3166,21 @@ void Client::ServerFilter(SetServerFilter_Struct* filter){
 	Filter1(FilterDamageShields);
 
 	if (ClientVersionBit() & EQ::versions::maskSoDAndLater) {
-		if (filter->filters[FilterDOT] == 0)
-			ClientFilters[FilterDOT] = FilterShow;
-		else if (filter->filters[FilterDOT] == 1)
-			ClientFilters[FilterDOT] = FilterShowSelfOnly;
-		else if (filter->filters[FilterDOT] == 2)
-			ClientFilters[FilterDOT] = FilterShowGroupOnly;
-		else
-			ClientFilters[FilterDOT] = FilterHide;
+		if (filter->filters[FilterDOT] == 0) {
+			SetFilter(FilterDOT, FilterShow);
+		} else if (filter->filters[FilterDOT] == 1) {
+			SetFilter(FilterDOT, FilterShowSelfOnly);
+		} else if (filter->filters[FilterDOT] == 2) {
+			SetFilter(FilterDOT, FilterShowGroupOnly);
+		} else {
+			SetFilter(FilterDOT, FilterHide);
+		}
 	} else {
-		if (filter->filters[FilterDOT] == 0) // show functions as self only
-			ClientFilters[FilterDOT] = FilterShowSelfOnly;
-		else
-			ClientFilters[FilterDOT] = FilterHide;
+		if (filter->filters[FilterDOT] == 0) { // show functions as self only
+			SetFilter(FilterDOT, FilterShowSelfOnly);
+		} else {
+			SetFilter(FilterDOT, FilterHide);
+		}
 	}
 
 	Filter1(FilterPetHits);
@@ -3189,15 +3189,14 @@ void Client::ServerFilter(SetServerFilter_Struct* filter){
 	Filter1(FilterPetSpells);
 
 	if (ClientVersionBit() & EQ::versions::maskSoDAndLater) {
-		if (filter->filters[FilterHealOverTime] == 0)
-			ClientFilters[FilterHealOverTime] = FilterShow;
-		// This is called 'Show Mine Only' in the clients
-		else if (filter->filters[FilterHealOverTime] == 1)
-			ClientFilters[FilterHealOverTime] = FilterShowSelfOnly;
-		else
-			ClientFilters[FilterHealOverTime] = FilterHide;
-	} else {
-		// these clients don't have a 'self only' filter
+		if (filter->filters[FilterHealOverTime] == 0) {
+			SetFilter(FilterHealOverTime, FilterShow);
+		} else if (filter->filters[FilterHealOverTime] == 1) {
+			SetFilter(FilterHealOverTime, FilterShowSelfOnly);
+		} else {
+			SetFilter(FilterHealOverTime, FilterHide);
+		}
+	} else { // these clients don't have a 'self only' filter
 		Filter1(FilterHealOverTime);
 	}
 }
@@ -4014,7 +4013,7 @@ void Client::KeyRingLoad()
 	}
 
 	for (auto row = results.begin(); row != results.end(); ++row)
-		keyring.push_back(atoi(row[0]));
+		keyring.push_back(Strings::ToInt(row[0]));
 
 }
 
@@ -5171,7 +5170,7 @@ void Client::ShowSkillsWindow()
 			"<td>{}</td>",
 			(
 				skill_maxed ?
-				"<c \"#00FF00\">✔</c>" :
+				"<c \"#00FF00\">Max</c>" :
 				fmt::format(
 					"{}/{}",
 					current_skill,
@@ -5223,8 +5222,8 @@ void Client::SendRewards()
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		ClientReward cr;
-		cr.id = atoi(row[0]);
-		cr.amount = atoi(row[1]);
+		cr.id = Strings::ToInt(row[0]);
+		cr.amount = Strings::ToInt(row[1]);
 		rewards.push_back(cr);
 	}
 
@@ -5292,7 +5291,7 @@ bool Client::TryReward(uint32 claim_id)
 
 	auto row = results.begin();
 
-	uint32 amt = atoi(row[0]);
+	uint32 amt = Strings::ToInt(row[0]);
 	if (amt == 0)
 		return false;
 
@@ -6383,7 +6382,7 @@ void Client::SendStatsWindow(Client* client, bool use_window)
 				if(CalcMaxMana() > 0) {
 					cur_name = " M: ";
 					cur_field = itoa(GetMana());
-					total_field = itoa(CalcMaxMana());
+					total_field = itoa(GetMaxMana());
 				}
 				else { continue; }
 
@@ -6438,7 +6437,8 @@ void Client::SendStatsWindow(Client* client, bool use_window)
 				regen_row_color = color_red;
 
 				base_regen_field = itoa(LevelRegen());
-				item_regen_field = itoa(itembonuses.HPRegen);
+				item_regen_field = itoa(
+					itembonuses.HPRegen +(GetHeroicSTA() * RuleR(Character, HeroicStaminaMultiplier) / 20));
 				cap_regen_field = itoa(CalcHPRegenCap());
 				spell_regen_field = itoa(spellbonuses.HPRegen);
 				aa_regen_field = itoa(aabonuses.HPRegen);
@@ -6446,12 +6446,15 @@ void Client::SendStatsWindow(Client* client, bool use_window)
 				break;
 			}
 			case 1: {
-				if(CalcMaxMana() > 0) {
+				if(GetMaxMana() > 0) {
 					regen_row_header = "M: ";
 					regen_row_color = color_blue;
 
 					base_regen_field = itoa(CalcBaseManaRegen());
-					item_regen_field = itoa(itembonuses.ManaRegen);
+					int32 heroic_mana_regen = (GetCasterClass() == 'W') ?
+						GetHeroicWIS() * RuleR(Character, HeroicWisdomMultiplier) / 25 :
+						GetHeroicINT() * RuleR(Character, HeroicIntelligenceMultiplier) / 25;
+					item_regen_field = itoa(itembonuses.ManaRegen + heroic_mana_regen);
 					cap_regen_field = itoa(CalcManaRegenCap());
 					spell_regen_field = itoa(spellbonuses.ManaRegen);
 					aa_regen_field = itoa(aabonuses.ManaRegen);
@@ -6465,7 +6468,12 @@ void Client::SendStatsWindow(Client* client, bool use_window)
 				regen_row_color = color_green;
 
 				base_regen_field = itoa(((GetLevel() * 4 / 10) + 2));
-				item_regen_field = itoa(itembonuses.EnduranceRegen);
+				double heroic_str = GetHeroicSTR() * RuleR(Character, HeroicStrengthMultiplier);
+				double heroic_sta = GetHeroicSTA() * RuleR(Character, HeroicStaminaMultiplier);
+				double heroic_dex = GetHeroicDEX() * RuleR(Character, HeroicDexterityMultiplier);
+				double heroic_agi = GetHeroicAGI() * RuleR(Character, HeroicAgilityMultiplier);
+				double heroic_stats = (heroic_str + heroic_sta + heroic_dex + heroic_agi) / 4;
+				item_regen_field = itoa(itembonuses.EnduranceRegen + heroic_stats);
 				cap_regen_field = itoa(CalcEnduranceRegenCap());
 				spell_regen_field = itoa(spellbonuses.EnduranceRegen);
 				aa_regen_field = itoa(aabonuses.EnduranceRegen);
@@ -8485,7 +8493,7 @@ void Client::ExpeditionSay(const char *str, int ExpID) {
 				).c_str()
 			);
 		}
-		// ChannelList->CreateChannel(ChannelName, ChannelOwner, ChannelPassword, true, atoi(row[3]));
+		// ChannelList->CreateChannel(ChannelName, ChannelOwner, ChannelPassword, true, Strings::ToInt(row[3]));
 	}
 
 
@@ -9326,8 +9334,8 @@ void Client::SendToGuildHall()
 	uint16      instance_id             = 0;
 	std::string guild_hall_instance_key = fmt::format("guild-hall-instance-{}", GuildID());
 	std::string instance_data           = DataBucket::GetData(guild_hall_instance_key);
-	if (!instance_data.empty() && std::stoi(instance_data) > 0) {
-		instance_id = std::stoi(instance_data);
+	if (!instance_data.empty() && Strings::ToInt(instance_data) > 0) {
+		instance_id = Strings::ToInt(instance_data);
 	}
 
 	if (instance_id <= 0) {
@@ -10458,7 +10466,7 @@ void Client::SendToInstance(std::string instance_type, std::string zone_short_na
 	uint16 instance_id = 0;
 
 	if (current_bucket_value.length() > 0) {
-		instance_id = atoi(current_bucket_value.c_str());
+		instance_id = Strings::ToInt(current_bucket_value.c_str());
 	} else {
 		if(!database.GetUnusedInstanceID(instance_id)) {
 			Message(Chat::White, "Server was unable to find a free instance id.");

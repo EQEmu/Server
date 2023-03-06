@@ -3179,7 +3179,14 @@ void bot_command_find_aliases(Client *c, const Seperator *sep)
 		if (strcasecmp(find_iter->second.c_str(), alias_iter.second.c_str()) || c->Admin() < command_iter->second->access)
 			continue;
 
-		c->Message(Chat::White, "%c%s", BOT_COMMAND_CHAR, alias_iter.first.c_str());
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"^{}",
+				alias_iter.first
+			).c_str()
+		);
+
 		++bot_command_aliases_shown;
 	}
 	c->Message(Chat::White, "%d bot command alias%s listed.", bot_command_aliases_shown, bot_command_aliases_shown != 1 ? "es" : "");
@@ -3413,7 +3420,15 @@ void bot_command_help(Client *c, const Seperator *sep)
 		if (c->Admin() < command_iter.second->access)
 			continue;
 
-		c->Message(Chat::White, "%c%s - %s", BOT_COMMAND_CHAR, command_iter.first.c_str(), command_iter.second->desc == nullptr ? "[no description]" : command_iter.second->desc);
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"^{} - {}",
+				command_iter.first,
+				command_iter.second->desc ? command_iter.second->desc : "No Description"
+			).c_str()
+		);
+
 		++bot_commands_shown;
 	}
 	if (parse->PlayerHasQuestSub(EVENT_BOT_COMMAND)) {
@@ -3654,8 +3669,14 @@ void bot_command_item_use(Client* c, const Seperator* sep)
 			continue;
 		}
 
-		msg = StringFormat("%cinventorygive byname %s", BOT_COMMAND_CHAR, bot_iter->GetCleanName());
-		text_link = bot_iter->CreateSayLink(c, msg.c_str(), bot_iter->GetCleanName());
+		text_link = bot_iter->CreateSayLink(
+			c,
+			fmt::format(
+				"^inventorygive byname {}",
+				bot_iter->GetCleanName()
+			).c_str(),
+			bot_iter->GetCleanName()
+		);
 
 		for (auto slot_iter : equipable_slot_list) {
 			// needs more failure criteria - this should cover the bulk for now
@@ -5041,7 +5062,7 @@ void bot_subcommand_bot_beard_color(Client *c, const Seperator *sep)
 		return;
 	}
 
-	uint8 uvalue = atoi(sep->arg[1]);
+	uint8 uvalue = Strings::ToInt(sep->arg[1]);
 
 	auto fail_type = BCEnum::AFT_None;
 	if (my_bot->GetGender() != MALE && my_bot->GetRace() != DWARF)
@@ -5078,7 +5099,7 @@ void bot_subcommand_bot_beard_style(Client *c, const Seperator *sep)
 		return;
 	}
 
-	uint8 uvalue = atoi(sep->arg[1]);
+	uint8 uvalue = Strings::ToInt(sep->arg[1]);
 
 	auto fail_type = BCEnum::AFT_None;
 	if (my_bot->GetGender() != MALE && my_bot->GetRace() != DWARF)
@@ -5358,7 +5379,7 @@ void bot_command_view_combos(Client *c, const Seperator *sep)
 		return;
 	}
 
-	const uint16 bot_race = static_cast<uint16>(std::stoul(sep->arg[1]));
+	const uint16 bot_race = static_cast<uint16>(Strings::ToUnsignedInt(sep->arg[1]));
 	const std::string race_name = GetRaceIDName(bot_race);
 
 	if (!Mob::IsPlayerRace(bot_race)) {
@@ -5562,14 +5583,14 @@ void bot_subcommand_bot_create(Client *c, const Seperator *sep)
 		return;
 	}
 
-	auto bot_class = static_cast<uint8>(std::stoul(sep->arg[2]));
+	auto bot_class = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[2]));
 
 	if (arguments < 3 || !sep->IsNumber(3)) {
 		c->Message(Chat::White, "Invalid race!");
 		return;
 	}
 
-	auto bot_race = static_cast<uint16>(std::stoul(sep->arg[3]));
+	auto bot_race = static_cast<uint16>(Strings::ToUnsignedInt(sep->arg[3]));
 
 	if (arguments < 4) {
 		c->Message(Chat::White, "Invalid gender!");
@@ -5579,7 +5600,7 @@ void bot_subcommand_bot_create(Client *c, const Seperator *sep)
 	auto bot_gender = MALE;
 
 	if (sep->IsNumber(4)) {
-		bot_gender = static_cast<uint8>(std::stoul(sep->arg[4]));
+		bot_gender = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[4]));
 		if (bot_gender == NEUTER) {
 			bot_gender = MALE;
 		}
@@ -5647,7 +5668,7 @@ void bot_subcommand_bot_details(Client *c, const Seperator *sep)
 		return;
 	}
 
-	uint32 uvalue = atoi(sep->arg[1]);
+	uint32 uvalue = Strings::ToInt(sep->arg[1]);
 
 	auto fail_type = BCEnum::AFT_None;
 	if (my_bot->GetRace() != DRAKKIN)
@@ -5700,7 +5721,7 @@ void bot_subcommand_bot_dye_armor(Client *c, const Seperator *sep)
 
 	bool dye_all = (sep->arg[1][0] == '*');
 	if (!dye_all) {
-		material_slot = std::stoi(sep->arg[1]);
+		material_slot = Strings::ToInt(sep->arg[1]);
 		slot_id = EQ::InventoryProfile::CalcSlotFromMaterial(material_slot);
 
 		if (!sep->IsNumber(1) || slot_id == INVALID_INDEX || material_slot > EQ::textures::LastTintableTexture) {
@@ -5715,7 +5736,7 @@ void bot_subcommand_bot_dye_armor(Client *c, const Seperator *sep)
 		return;
 	}
 
-	uint32 red_value = std::stoul(sep->arg[2]);
+	uint32 red_value = Strings::ToUnsignedInt(sep->arg[2]);
 	if (red_value > 255) {
 		red_value = 255;
 	}
@@ -5725,7 +5746,7 @@ void bot_subcommand_bot_dye_armor(Client *c, const Seperator *sep)
 		return;
 	}
 
-	uint32 green_value = std::stoul(sep->arg[3]);
+	uint32 green_value = Strings::ToUnsignedInt(sep->arg[3]);
 	if (green_value > 255) {
 		green_value = 255;
 	}
@@ -5735,7 +5756,7 @@ void bot_subcommand_bot_dye_armor(Client *c, const Seperator *sep)
 		return;
 	}
 
-	uint32 blue_value = std::stoul(sep->arg[4]);
+	uint32 blue_value = Strings::ToUnsignedInt(sep->arg[4]);
 	if (blue_value > 255) {
 		blue_value = 255;
 	}
@@ -5815,7 +5836,7 @@ void bot_subcommand_bot_eyes(Client *c, const Seperator *sep)
 		return;
 	}
 
-	uint8 uvalue = atoi(sep->arg[1]);
+	uint8 uvalue = Strings::ToInt(sep->arg[1]);
 
 	//uint8 eye_bias = 0;
 	//std::string arg2 = sep->arg[2];
@@ -5869,7 +5890,7 @@ void bot_subcommand_bot_face(Client *c, const Seperator *sep)
 		return;
 	}
 
-	uint8 uvalue = atoi(sep->arg[1]);
+	uint8 uvalue = Strings::ToInt(sep->arg[1]);
 
 	auto fail_type = BCEnum::AFT_None;
 	if (!PlayerAppearance::IsValidFace(my_bot->GetRace(), my_bot->GetGender(), uvalue)) {
@@ -5909,7 +5930,7 @@ void bot_subcommand_bot_follow_distance(Client *c, const Seperator *sep)
 			return;
 		}
 
-		bfd = atoi(sep->arg[2]);
+		bfd = Strings::ToInt(sep->arg[2]);
 		if (bfd < 1)
 			bfd = 1;
 		if (bfd > BOT_FOLLOW_DISTANCE_DEFAULT_MAX)
@@ -5975,7 +5996,7 @@ void bot_subcommand_bot_hair_color(Client *c, const Seperator *sep)
 		return;
 	}
 
-	uint8 uvalue = atoi(sep->arg[1]);
+	uint8 uvalue = Strings::ToInt(sep->arg[1]);
 
 	auto fail_type = BCEnum::AFT_None;
 	if (!PlayerAppearance::IsValidHairColor(my_bot->GetRace(), my_bot->GetGender(), uvalue))
@@ -6010,7 +6031,7 @@ void bot_subcommand_bot_hairstyle(Client *c, const Seperator *sep)
 		return;
 	}
 
-	uint8 uvalue = atoi(sep->arg[1]);
+	uint8 uvalue = Strings::ToInt(sep->arg[1]);
 
 	auto fail_type = BCEnum::AFT_None;
 	if (!PlayerAppearance::IsValidHair(my_bot->GetRace(), my_bot->GetGender(), uvalue))
@@ -6047,7 +6068,7 @@ void bot_subcommand_bot_heritage(Client *c, const Seperator *sep)
 		return;
 	}
 
-	uint32 uvalue = atoi(sep->arg[1]);
+	uint32 uvalue = Strings::ToInt(sep->arg[1]);
 
 	auto fail_type = BCEnum::AFT_None;
 	if (my_bot->GetRace() != DRAKKIN)
@@ -6184,13 +6205,13 @@ void bot_subcommand_bot_list(Client *c, const Seperator *sep)
 
 		if (!strcasecmp(sep->arg[i], "class")) {
 			filter_mask |= MaskClass;
-			filter_value[FilterClass] = atoi(sep->arg[i + 1]);
+			filter_value[FilterClass] = Strings::ToInt(sep->arg[i + 1]);
 			continue;
 		}
 
 		if (!strcasecmp(sep->arg[i], "race")) {
 			filter_mask |= MaskRace;
-			filter_value[FilterRace] = atoi(sep->arg[i + 1]);
+			filter_value[FilterRace] = Strings::ToInt(sep->arg[i + 1]);
 			continue;
 		}
 
@@ -6757,7 +6778,7 @@ void bot_subcommand_bot_stance(Client *c, const Seperator *sep)
 	if (!strcasecmp(sep->arg[1], "current"))
 		current_flag = true;
 	else if (sep->IsNumber(1)) {
-		bst = (EQ::constants::StanceType)atoi(sep->arg[1]);
+		bst = (EQ::constants::StanceType)Strings::ToInt(sep->arg[1]);
 		if (bst < EQ::constants::stanceUnknown || bst > EQ::constants::stanceBurnAE)
 			bst = EQ::constants::stanceUnknown;
 	}
@@ -6816,7 +6837,7 @@ void bot_subcommand_bot_stop_melee_level(Client *c, const Seperator *sep)
 	uint8 sml = RuleI(Bots, CasterStopMeleeLevel);
 
 	if (sep->IsNumber(1)) {
-		sml = atoi(sep->arg[1]);
+		sml = Strings::ToInt(sep->arg[1]);
 	}
 	else if (!strcasecmp(sep->arg[1], "sync")) {
 		sml = my_bot->GetLevel();
@@ -6922,7 +6943,7 @@ void bot_subcommand_bot_tattoo(Client *c, const Seperator *sep)
 		return;
 	}
 
-	uint32 uvalue = atoi(sep->arg[1]);
+	uint32 uvalue = Strings::ToInt(sep->arg[1]);
 
 	auto fail_type = BCEnum::AFT_None;
 	if (my_bot->GetRace() != DRAKKIN)
@@ -7166,7 +7187,7 @@ void bot_subcommand_bot_woad(Client *c, const Seperator *sep)
 		return;
 	}
 
-	uint8 uvalue = atoi(sep->arg[1]);
+	uint8 uvalue = Strings::ToInt(sep->arg[1]);
 
 	auto fail_type = BCEnum::AFT_None;
 	if (my_bot->GetRace() != BARBARIAN) {
@@ -8240,7 +8261,7 @@ void bot_subcommand_heal_rotation_adjust_critical(Client *c, const Seperator *se
 
 	uint8 armor_type_value = 255;
 	if (sep->IsNumber(1))
-		armor_type_value = atoi(armor_type_arg.c_str());
+		armor_type_value = Strings::ToInt(armor_type_arg.c_str());
 
 	if (armor_type_value > ARMOR_TYPE_LAST) {
 		c->Message(Chat::White, "You must specify a valid [armor_type: %u-%u] to use this command", ARMOR_TYPE_FIRST, ARMOR_TYPE_LAST);
@@ -8269,7 +8290,7 @@ void bot_subcommand_heal_rotation_adjust_critical(Client *c, const Seperator *se
 
 	float critical_ratio = CRITICAL_HP_RATIO_BASE;
 	if (sep->IsNumber(2))
-		critical_ratio = atof(critical_arg.c_str());
+		critical_ratio = Strings::ToFloat(critical_arg.c_str());
 	else if (!critical_arg.compare("+"))
 		critical_ratio = (*current_member->MemberOfHealRotation())->ArmorTypeCriticalHPRatio(armor_type_value) + HP_RATIO_DELTA;
 	else if (!critical_arg.compare("-"))
@@ -8306,7 +8327,7 @@ void bot_subcommand_heal_rotation_adjust_safe(Client *c, const Seperator *sep)
 
 	uint8 armor_type_value = 255;
 	if (sep->IsNumber(1))
-		armor_type_value = atoi(armor_type_arg.c_str());
+		armor_type_value = Strings::ToInt(armor_type_arg.c_str());
 
 	if (armor_type_value > ARMOR_TYPE_LAST) {
 		c->Message(Chat::White, "You must specify a valid [armor_type: %u-%u] to use this command", ARMOR_TYPE_FIRST, ARMOR_TYPE_LAST);
@@ -8335,7 +8356,7 @@ void bot_subcommand_heal_rotation_adjust_safe(Client *c, const Seperator *sep)
 
 	float safe_ratio = SAFE_HP_RATIO_BASE;
 	if (sep->IsNumber(2))
-		safe_ratio = atof(safe_arg.c_str());
+		safe_ratio = Strings::ToFloat(safe_arg.c_str());
 	else if (!safe_arg.compare("+"))
 		safe_ratio = (*current_member->MemberOfHealRotation())->ArmorTypeSafeHPRatio(armor_type_value) + HP_RATIO_DELTA;
 	else if (!safe_arg.compare("-"))
@@ -8449,7 +8470,7 @@ void bot_subcommand_heal_rotation_change_interval(Client *c, const Seperator *se
 	uint32 hr_change_interval_s = CASTING_CYCLE_DEFAULT_INTERVAL_S;
 
 	if (!change_interval_arg.empty()) {
-		hr_change_interval_s = atoi(change_interval_arg.c_str());
+		hr_change_interval_s = Strings::ToInt(change_interval_arg.c_str());
 	}
 	else {
 		hr_change_interval_s = (*current_member->MemberOfHealRotation())->IntervalS();
@@ -8597,14 +8618,14 @@ void bot_subcommand_heal_rotation_create(Client *c, const Seperator *sep)
 			hr_adaptive_targeting = true;
 		if (!fast_heals_arg.compare("on"))
 			hr_fast_heals = true;
-		hr_interval_s = atoi(interval_arg.c_str());
+		hr_interval_s = Strings::ToInt(interval_arg.c_str());
 	}
 	else if (!casting_override_arg.compare("off")) {
 		if (!adaptive_targeting_arg.compare("on"))
 			hr_adaptive_targeting = true;
 		if (!fast_heals_arg.compare("on"))
 			hr_fast_heals = true;
-		hr_interval_s = atoi(interval_arg.c_str());
+		hr_interval_s = Strings::ToInt(interval_arg.c_str());
 	}
 
 	if (hr_interval_s < CASTING_CYCLE_MINIMUM_INTERVAL_S || hr_interval_s > CASTING_CYCLE_MAXIMUM_INTERVAL_S)
@@ -9327,7 +9348,7 @@ void bot_subcommand_inventory_remove(Client *c, const Seperator *sep)
 		return;
 	}
 
-	auto slot_id = static_cast<uint16>(std::stoul(sep->arg[1]));
+	auto slot_id = static_cast<uint16>(Strings::ToUnsignedInt(sep->arg[1]));
 	if (slot_id > EQ::invslot::EQUIPMENT_END || slot_id < EQ::invslot::EQUIPMENT_BEGIN) {
 		c->Message(Chat::White, "Valid slots are 0 to 22.");
 		return;
@@ -10155,8 +10176,7 @@ void helper_command_depart_list(Client* bot_owner, Bot* druid_bot, Bot* wizard_b
 			}
 
 			msg = fmt::format(
-				"{}circle {}{}",
-				std::to_string(BOT_COMMAND_CHAR),
+				"^circle {}{}",
 				spells[local_entry->spell_id].teleport_zone,
 				single_flag ? " single" : ""
 			);
@@ -10191,8 +10211,7 @@ void helper_command_depart_list(Client* bot_owner, Bot* druid_bot, Bot* wizard_b
 			}
 
 			msg = fmt::format(
-				"{}portal {}{}",
-				std::to_string(BOT_COMMAND_CHAR),
+				"^portal {}{}",
 				spells[local_entry->spell_id].teleport_zone,
 				single_flag ? " single" : ""
 			);
@@ -10257,7 +10276,15 @@ void helper_send_available_subcommands(Client *bot_owner, const char* command_si
 		if (bot_owner->Admin() < find_iter->second->access)
 			continue;
 
-		bot_owner->Message(Chat::White, "%c%s - %s", BOT_COMMAND_CHAR, subcommand_iter, ((find_iter != bot_command_list.end()) ? (find_iter->second->desc) : ("[no description]")));
+		bot_owner->Message(
+			Chat::White,
+			fmt::format(
+				"^{} - {}",
+				subcommand_iter,
+				find_iter != bot_command_list.end() ? find_iter->second->desc : "No Description"
+			).c_str()
+		);
+
 		++bot_subcommands_shown;
 	}
 
@@ -10319,7 +10346,7 @@ void bot_command_spell_list(Client* c, const Seperator *sep)
 	uint8 min_level = 0;
 
 	if (sep->IsNumber(1)) {
-		min_level = static_cast<uint8>(std::stoul(sep->arg[1]));
+		min_level = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[1]));
 	}
 
 	my_bot->ListBotSpells(min_level);
@@ -10366,7 +10393,7 @@ void bot_command_spell_settings_add(Client *c, const Seperator *sep)
 		return;
 	}
 
-	auto spell_id = static_cast<uint16>(std::stoul(sep->arg[1]));
+	auto spell_id = static_cast<uint16>(Strings::ToUnsignedInt(sep->arg[1]));
 
 	if (!IsValidSpell(spell_id)) {
 		c->Message(
@@ -10393,9 +10420,9 @@ void bot_command_spell_settings_add(Client *c, const Seperator *sep)
 		return;
 	}
 
-	auto priority = static_cast<int16>(std::stoi(sep->arg[2]));
-	auto min_hp = static_cast<int8>(EQ::Clamp(std::stoi(sep->arg[3]), -1, 99));
-	auto max_hp = static_cast<int8>(EQ::Clamp(std::stoi(sep->arg[4]), -1, 100));
+	auto priority = static_cast<int16>(Strings::ToInt(sep->arg[2]));
+	auto min_hp = static_cast<int8>(EQ::Clamp(Strings::ToInt(sep->arg[3]), -1, 99));
+	auto max_hp = static_cast<int8>(EQ::Clamp(Strings::ToInt(sep->arg[4]), -1, 100));
 
 	BotSpellSetting bs;
 
@@ -10481,7 +10508,7 @@ void bot_command_spell_settings_delete(Client *c, const Seperator *sep)
 		return;
 	}
 
-	auto spell_id = static_cast<uint16>(std::stoul(sep->arg[1]));
+	auto spell_id = static_cast<uint16>(Strings::ToUnsignedInt(sep->arg[1]));
 
 	if (!IsValidSpell(spell_id)) {
 		c->Message(
@@ -10589,7 +10616,7 @@ void bot_command_spell_settings_toggle(Client *c, const Seperator *sep)
 		return;
 	}
 
-	auto spell_id = static_cast<uint16>(std::stoul(sep->arg[1]));
+	auto spell_id = static_cast<uint16>(Strings::ToUnsignedInt(sep->arg[1]));
 	if (!IsValidSpell(spell_id)) {
 		c->Message(
 			Chat::White,
@@ -10603,7 +10630,7 @@ void bot_command_spell_settings_toggle(Client *c, const Seperator *sep)
 
 	bool toggle = (
 		sep->IsNumber(2) ?
-		(std::stoi(sep->arg[2]) ? true : false) :
+		(Strings::ToInt(sep->arg[2]) ? true : false) :
 		atobool(sep->arg[2])
 	);
 
@@ -10694,7 +10721,7 @@ void bot_command_spell_settings_update(Client *c, const Seperator *sep)
 		return;
 	}
 
-	auto spell_id = static_cast<uint16>(std::stoul(sep->arg[1]));
+	auto spell_id = static_cast<uint16>(Strings::ToUnsignedInt(sep->arg[1]));
 
 	if (!IsValidSpell(spell_id)) {
 		c->Message(
@@ -10707,9 +10734,9 @@ void bot_command_spell_settings_update(Client *c, const Seperator *sep)
 		return;
 	}
 
-	auto priority = static_cast<int16>(std::stoi(sep->arg[2]));
-	auto min_hp = static_cast<int8>(EQ::Clamp(std::stoi(sep->arg[3]), -1, 99));
-	auto max_hp = static_cast<int8>(EQ::Clamp(std::stoi(sep->arg[4]), -1, 100));
+	auto priority = static_cast<int16>(Strings::ToInt(sep->arg[2]));
+	auto min_hp = static_cast<int8>(EQ::Clamp(Strings::ToInt(sep->arg[3]), -1, 99));
+	auto max_hp = static_cast<int8>(EQ::Clamp(Strings::ToInt(sep->arg[4]), -1, 100));
 
 	BotSpellSetting bs;
 
@@ -10784,7 +10811,7 @@ void bot_spell_info_dialogue_window(Client* c, const Seperator *sep)
 		return;
 	}
 
-	auto spell_id = static_cast<uint16>(std::stoul(sep->arg[1]));
+	auto spell_id = static_cast<uint16>(Strings::ToUnsignedInt(sep->arg[1]));
 	auto min_level = spells[spell_id].classes;
 	auto class_level = min_level[my_bot->GetBotClass() - 1];
 
