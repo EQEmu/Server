@@ -3232,7 +3232,7 @@ Mob* Bot::SetFollowMob(Client* leash_owner) {
 Client* Bot::SetLeashOwner(Client* bot_owner, Group* bot_group, Raid* raid, uint32 r_group) const {
 
 	Client* leash_owner = nullptr;
-	if (raid && r_group < MAX_RAID_GROUPS && raid->GetGroupLeader(r_group) && raid->GetGroupLeader(r_group)->IsClient()) {
+	if (raid && r_group < MAX_RAID_GROUPS && raid->GetGroupLeader(r_group)) {
 		leash_owner =
 			raid->GetGroupLeader(r_group) &&
 			raid->GetGroupLeader(r_group)->IsClient() ?
@@ -3241,6 +3241,9 @@ Client* Bot::SetLeashOwner(Client* bot_owner, Group* bot_group, Raid* raid, uint
 	} else if (bot_group) {
 		bot_group->VerifyGroup();
 		leash_owner = (bot_group->GetLeader() && bot_group->GetLeader()->IsClient() ? bot_group->GetLeader()->CastToClient() : bot_owner);
+
+	} else {
+		leash_owner = bot_owner;
 	}
 	return leash_owner;
 }
