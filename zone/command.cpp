@@ -177,7 +177,7 @@ int command_init(void)
 		command_add("goto", "[playername] or [x y z] [h] - Teleport to the provided coordinates or to your target", AccountStatus::Steward, command_goto) ||
 		command_add("grid", "[add/delete] [grid_num] [wandertype] [pausetype] - Create/delete a wandering grid", AccountStatus::GMAreas, command_grid) ||
 		command_add("guild", "Guild manipulation commands. Use argument help for more info.", AccountStatus::Steward, command_guild) ||
-		command_add("haste", "[percentage] - Set your haste percentage", AccountStatus::GMAdmin, command_haste) ||
+		command_add("haste", "[Percentage] - Set your or your target's GM Bonus Haste (100 is 100% more Attack Speed)", AccountStatus::GMAdmin, command_haste) ||
 		command_add("hatelist", "Display hate list for NPC.", AccountStatus::QuestTroupe, command_hatelist) ||
 		command_add("heal", "Completely heal your target", AccountStatus::Steward, command_heal) ||
 		command_add("help", "[Search Criteria] - List available commands and their description, specify partial command as argument to search", AccountStatus::Player, command_help) ||
