@@ -146,7 +146,7 @@ public:
 	bool HasRaid() final { return GetRaid() != nullptr; }
 	bool HasGroup() final { return GetGroup() != nullptr; }
 	Raid* GetRaid() final { return entity_list.GetRaidByBot(this); }
-	Group* GetGroup() final { return entity_list.GetGroupByMob(this->CastToMob()); }
+	Group* GetGroup() final { return entity_list.GetGroupByMob(this); }
 
 	// Common, but informal "interfaces" with Client object
 	uint32 CharacterID() const { return GetBotID(); }
@@ -240,9 +240,9 @@ public:
 	bool GetNeedsHateRedux(Mob *tar);
 	bool HasOrMayGetAggro();
 	void SetDefaultBotStance();
-	void SetSurname(std::string bot_surname);
-	void SetTitle(std::string bot_title);
-	void SetSuffix(std::string bot_suffix);
+	void SetSurname(const std::string_view bot_surname);
+	void SetTitle(std::string_view bot_title);
+	void SetSuffix(std::string_view bot_suffix);
 	std::string GetSurname() const { return _surname; }
 	std::string GetTitle() const { return _title; }
 	std::string GetSuffix() const { return _suffix; }
@@ -464,8 +464,8 @@ public:
 	static BotSpell GetBestBotSpellForResistDebuff(Bot* botCaster, Mob* target);
 
 	static NPCType *CreateDefaultNPCTypeStructForBot(
-		std::string botName,
-		std::string botLastName,
+		const std::string& botName,
+		const std::string& botLastName,
 		uint8 botLevel,
 		uint16 botRace,
 		uint8 botClass,
@@ -669,8 +669,8 @@ public:
 	// Publicized private functions
 	static NPCType *FillNPCTypeStruct(
 		uint32 botSpellsID,
-		std::string botName,
-		std::string botLastName,
+		const std::string& botName,
+		const std::string& botLastName,
 		uint8 botLevel,
 		uint16 botRace,
 		uint8 botClass,
