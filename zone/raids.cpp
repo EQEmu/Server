@@ -2025,6 +2025,7 @@ bool Raid::DoesAnyMemberHaveExpeditionLockout(
 		return Expedition::HasLockoutByCharacterName(raid_member.membername, expedition_name, event_name);
 	});
 }
+
 Mob* Raid::GetRaidMainAssistOneByName(const char* name)
 {
 	Raid* raid = entity_list.GetRaidByBotName(name);

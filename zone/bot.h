@@ -955,7 +955,15 @@ private:
 
 	bool ReturningFlagChecks(Client* bot_owner, float fm_distance);
 
-	void AcquireBotTarget(Group* bot_group, Client* leash_owner, float leash_distance);
+	void AcquireBotTarget(Group* bot_group, Raid* raid, Client* leash_owner, float leash_distance);
+
+	Mob* GetBotTarget(Client* bot_owner);
+
+	bool IsValidTarget(Client* bot_owner, Client* leash_owner, float lo_distance, float leash_distance, bool bo_alt_combat,
+	              Mob* tar, float tar_distance);
+
+	void CheckCombatRange(Mob* tar, float tar_distance, bool& atCombatRange, const EQ::ItemInstance*& p_item,
+	                      const EQ::ItemInstance*& s_item);
 };
 
 

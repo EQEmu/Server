@@ -2465,9 +2465,17 @@ void Bot::AI_Process()
 	uint32 r_group = RAID_GROUPLESS;
 	if (raid) {
 		r_group = raid->GetGroup(GetName());
+
+		if (mana_timer.Check(false)) {
+			raid->SendHPManaEndPacketsFrom(this);
+		}
+
+		if (send_hp_update_timer.Check(false)) {
+			raid->SendHPManaEndPacketsFrom(this);
+		}
 	}
+
 	auto bot_group = GetGroup();
-	
 
 	// Primary reasons for not processing AI
 	if (!IsAIProcessValid(bot_owner, bot_group, raid)) {
@@ -2483,13 +2491,6 @@ void Bot::AI_Process()
 	SetFollowID(leash_owner->GetID());
 
 	auto follow_mob = SetFollowMob(leash_owner);
-
-	if (mana_timer.Check(false)) {
-		raid->SendHPManaEndPacketsFrom(this);
-	}
-	if (send_hp_update_timer.Check(false)) {
-		raid->SendHPManaEndPacketsFrom(this);
-	}
 
 	SetBerserkState();
 
@@ -2553,48 +2554,17 @@ void Bot::AI_Process()
 // ALT COMBAT (ACQUIRE TARGET)
 
 		else if (bo_alt_combat && m_alt_combat_hate_timer.Check()) { // Find a mob from hate list to target
-			AcquireBotTarget(bot_group, leash_owner, leash_distance);
+			AcquireBotTarget(bot_group, nullptr, leash_owner, leash_distance);
 		}
 
 // DEFAULT (ACQUIRE TARGET)
 
-		else {
-
-			// Default behavior doesn't have a means of acquiring a target from the bot's hate list..
-			// ..that action occurs through commands or out-of-combat checks
-			// (Use current target, if already in combat)
-		}
-		
 // VERIFY TARGET AND STANCE
 
-		Mob* tar = GetTarget(); // We should have a target..if not, we're awaiting new orders
-		if (!tar || PASSIVE) {
-			if (GetTarget()) {
-				SetTarget(nullptr);
-			}
-
-			WipeHateList();
-			SetAttackFlag(false);
-			SetAttackingFlag(false);
-			if (PULLING_BOT) {
-
-				// 'Flags' should only be set on the bot that is pulling
-				SetPullingFlag(false);
-				SetReturningFlag(false);
-				bot_owner->SetBotPulling(false);
-				if (GetPet()) {
-					GetPet()->SetPetOrder(m_previous_pet_order);
-				}
-			}
-
-			if (GetArchetype() == ARCHETYPE_CASTER) {
-				BotMeditate(true);
-			}
-
+		auto tar = GetBotTarget(bot_owner);
+		if (!tar) {
 			return;
 		}
-
-
 
 // ATTACKING FLAG (HATE VALIDATION)
 
@@ -2606,48 +2576,9 @@ void Bot::AI_Process()
 
 // TARGET VALIDATION
 
-		if (HOLDING ||
-			!tar->IsNPC() ||
-			tar->IsMezzed() ||
-			lo_distance > leash_distance ||
-			tar_distance > leash_distance ||
-			(!GetAttackingFlag() && !CheckLosFN(tar) && !leash_owner->CheckLosFN(tar)) || // This is suppose to keep bots from attacking things behind walls
-			!IsAttackAllowed(tar) ||
-			(bo_alt_combat &&
-				(!GetAttackingFlag() && NOT_PULLING_BOT && !leash_owner->AutoAttackEnabled() && !tar->GetHateAmount(this) && !tar->GetHateAmount(leash_owner))
-			)
-		)
-		{
-			// Normally, we wouldn't want to do this without class checks..but, too many issues can arise if we let enchanter animation pets run rampant
-			if (HasPet()) {
-
-				GetPet()->RemoveFromHateList(tar);
-				GetPet()->SetTarget(nullptr);
-			}
-
-			RemoveFromHateList(tar);
-			SetTarget(nullptr);
-
-			SetAttackFlag(false);
-			SetAttackingFlag(false);
-			if (PULLING_BOT) {
-
-				SetPullingFlag(false);
-				SetReturningFlag(false);
-				bot_owner->SetBotPulling(false);
-				if (GetPet()) {
-					GetPet()->SetPetOrder(m_previous_pet_order);
-				}
-			}
-
-			if (IsMoving()) {
-				StopMoving();
-			}
-
+		if (!IsValidTarget(bot_owner, leash_owner, lo_distance, leash_distance, bo_alt_combat, tar, tar_distance)) {
 			return;
 		}
-
-
 
 		// This causes conflicts with default pet handler (bounces between targets)
 		if (NOT_PULLING_BOT && HasPet() && (GetClass() != ENCHANTER || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 2)) {
@@ -2678,151 +2609,12 @@ void Bot::AI_Process()
 			}
 		}
 
-
-
 // COMBAT RANGE CALCS
 
-		bool atCombatRange = false;
-
-		const auto* p_item = GetBotItem(EQ::invslot::slotPrimary);
-		const auto* s_item = GetBotItem(EQ::invslot::slotSecondary);
-
-		bool behind_mob = false;
-		bool backstab_weapon = false;
-		if (GetClass() == ROGUE) {
-
-			behind_mob = BehindMob(tar, GetX(), GetY()); // Can be separated for other future use
-			backstab_weapon = p_item && p_item->GetItemBackstabDamage();
-		}
-
-		// Calculate melee distances
-		float melee_distance_max = 0.0f;
-		float melee_distance = 0.0f;
-		{
-			float size_mod = GetSize();
-			float other_size_mod = tar->GetSize();
-
-			if (GetRace() == RT_DRAGON || GetRace() == RT_WURM || GetRace() == RT_DRAGON_7) { // For races with a fixed size
-				size_mod = 60.0f;
-			}
-			else if (size_mod < 6.0f) {
-				size_mod = 8.0f;
-			}
-
-			if (tar->GetRace() == RT_DRAGON || tar->GetRace() == RT_WURM || tar->GetRace() == RT_DRAGON_7) { // For races with a fixed size
-				other_size_mod = 60.0f;
-			}
-			else if (other_size_mod < 6.0f) {
-				other_size_mod = 8.0f;
-			}
-
-			if (other_size_mod > size_mod) {
-				size_mod = other_size_mod;
-			}
-
-			if (size_mod > 29.0f) {
-				size_mod *= size_mod;
-			}
-			else if (size_mod > 19.0f) {
-				size_mod *= (size_mod * 2.0f);
-			}
-			else {
-				size_mod *= (size_mod * 4.0f);
-			}
-
-			// Prevention of ridiculously sized hit boxes
-			if (size_mod > 10000.0f) {
-				size_mod = (size_mod / 7.0f);
-			}
-
-			melee_distance_max = size_mod;
-
-			switch (GetClass()) {
-			case WARRIOR:
-			case PALADIN:
-			case SHADOWKNIGHT:
-				if (p_item && p_item->GetItem()->IsType2HWeapon()) {
-					melee_distance = melee_distance_max * 0.45f;
-				}
-				else if ((s_item && s_item->GetItem()->IsTypeShield()) || (!p_item && !s_item)) {
-					melee_distance = melee_distance_max * 0.35f;
-				}
-				else {
-					melee_distance = melee_distance_max * 0.40f;
-				}
-
-				break;
-			case NECROMANCER:
-			case WIZARD:
-			case MAGICIAN:
-			case ENCHANTER:
-				if (p_item && p_item->GetItem()->IsType2HWeapon()) {
-					melee_distance = melee_distance_max * 0.95f;
-				}
-				else {
-					melee_distance = melee_distance_max * 0.75f;
-				}
-
-				break;
-			case ROGUE:
-				if (behind_mob && backstab_weapon) {
-					if (p_item->GetItem()->IsType2HWeapon()) { // 'p_item' tested in 'backstab_weapon' check above
-						melee_distance = melee_distance_max * 0.30f;
-					}
-					else {
-						melee_distance = melee_distance_max * 0.25f;
-					}
-
-					break;
-				}
-				// Fall-through
-			default:
-				if (p_item && p_item->GetItem()->IsType2HWeapon()) {
-					melee_distance = melee_distance_max * 0.70f;
-				}
-				else {
-					melee_distance = melee_distance_max * 0.50f;
-				}
-
-				break;
-			}
-		}
-		float melee_distance_min = melee_distance / 2.0f;
-		float caster_distance_max = GetBotCasterMaxRange(melee_distance_max);
-
-		bool atArcheryRange = IsArcheryRange(tar);
-
-		if (GetRangerAutoWeaponSelect()) {
-
-			bool changeWeapons = false;
-
-			if (atArcheryRange && !IsBotArcher()) {
-
-				SetBotArcherySetting(true);
-				changeWeapons = true;
-			}
-			else if (!atArcheryRange && IsBotArcher()) {
-
-				SetBotArcherySetting(false);
-				changeWeapons = true;
-			}
-
-			if (changeWeapons) {
-				ChangeBotArcherWeapons(IsBotArcher());
-			}
-		}
-		bool stop_melee_level = GetLevel() >= GetStopMeleeLevel();
-		if (IsBotArcher() && atArcheryRange) {
-			atCombatRange = true;
-		}
-		else if (caster_distance_max && tar_distance <= caster_distance_max && stop_melee_level) {
-			atCombatRange = true;
-		}
-		else if (tar_distance <= melee_distance) {
-			atCombatRange = true;
-		}
-
-
+		bool atCombatRange;
+		const EQ::ItemInstance* p_item;
+		const EQ::ItemInstance* s_item;
+		CheckCombatRange(tar, tar_distance, atCombatRange, p_item, s_item);
 
 // ENGAGED AT COMBAT RANGE
 
@@ -2830,13 +2622,10 @@ void Bot::AI_Process()
 		if (atCombatRange) {
 
 			if (IsMoving()) {
-				// Since we're using a pseudo-shadowstep for jitter, disregard the combat jitter flag
 				StopMoving(CalculateHeadingToTarget(tar->GetX(), tar->GetY()));
 				return;
 			}
 
-			// Combat 'jitter' code
-			// Note: Combat Jitter is disabled until a working movement solution can be found
 			if (AI_movement_timer->Check() && (!spellend_timer.Enabled() || GetClass() == BARD)) {
 
 				if (!IsRooted()) {
@@ -3020,8 +2809,6 @@ void Bot::AI_Process()
 				return;
 			}
 		}
-
-
 
 // ENGAGED NOT AT COMBAT RANGE
 
@@ -3246,10 +3033,230 @@ void Bot::AI_Process()
 	}
 }
 
-void Bot::AcquireBotTarget(Group* bot_group, Client* leash_owner,
-                           float leash_distance) {// Group roles can be expounded upon in the future
-	auto assist_mob = entity_list.GetMob(bot_group->GetMainAssistName());
+void Bot::CheckCombatRange(Mob* tar, float tar_distance, bool& atCombatRange, const EQ::ItemInstance*& p_item, const EQ::ItemInstance*& s_item) {
+
+	atCombatRange= false;
+	p_item= GetBotItem(EQ::invslot::slotPrimary);
+	s_item= GetBotItem(EQ::invslot::slotSecondary);
+	bool behind_mob = false;
+	bool backstab_weapon = false;
+	if (GetClass() == ROGUE) {
+
+		behind_mob = BehindMob(tar, GetX(), GetY()); // Can be separated for other future use
+		backstab_weapon = p_item && p_item->GetItemBackstabDamage();
+	}
+
+	// Calculate melee distances
+	float melee_distance_max = 0.0f;
+	float melee_distance = 0.0f;
+	{
+		float size_mod = GetSize();
+		float other_size_mod = tar->GetSize();
+
+		if (GetRace() == RT_DRAGON || GetRace() == RT_WURM || GetRace() == RT_DRAGON_7) { // For races with a fixed size
+			size_mod = 60.0f;
+		}
+		else if (size_mod < 6.0f) {
+			size_mod = 8.0f;
+		}
+
+		if (tar->GetRace() == RT_DRAGON || tar->GetRace() == RT_WURM || tar->GetRace() == RT_DRAGON_7) { // For races with a fixed size
+			other_size_mod = 60.0f;
+		}
+		else if (other_size_mod < 6.0f) {
+			other_size_mod = 8.0f;
+		}
+
+		if (other_size_mod > size_mod) {
+			size_mod = other_size_mod;
+		}
+
+		if (size_mod > 29.0f) {
+			size_mod *= size_mod;
+		}
+		else if (size_mod > 19.0f) {
+			size_mod *= (size_mod * 2.0f);
+		}
+		else {
+			size_mod *= (size_mod * 4.0f);
+		}
+
+		// Prevention of ridiculously sized hit boxes
+		if (size_mod > 10000.0f) {
+			size_mod = (size_mod / 7.0f);
+		}
+
+		melee_distance_max = size_mod;
+
+		switch (GetClass()) {
+		case WARRIOR:
+		case PALADIN:
+		case SHADOWKNIGHT:
+			if (p_item && p_item->GetItem()->IsType2HWeapon()) {
+				melee_distance = melee_distance_max * 0.45f;
+			}
+			else if ((s_item && s_item->GetItem()->IsTypeShield()) || (!p_item && !s_item)) {
+				melee_distance = melee_distance_max * 0.35f;
+			}
+			else {
+				melee_distance = melee_distance_max * 0.40f;
+			}
+
+			break;
+		case NECROMANCER:
+		case WIZARD:
+		case MAGICIAN:
+		case ENCHANTER:
+			if (p_item && p_item->GetItem()->IsType2HWeapon()) {
+				melee_distance = melee_distance_max * 0.95f;
+			}
+			else {
+				melee_distance = melee_distance_max * 0.75f;
+			}
+
+			break;
+		case ROGUE:
+			if (behind_mob && backstab_weapon) {
+				if (p_item->GetItem()->IsType2HWeapon()) {
+					melee_distance = melee_distance_max * 0.30f;
+				}
+				else {
+					melee_distance = melee_distance_max * 0.25f;
+				}
+
+				break;
+			}
+			// Fall-through
+		default:
+			if (p_item && p_item->GetItem()->IsType2HWeapon()) {
+				melee_distance = melee_distance_max * 0.70f;
+			}
+			else {
+				melee_distance = melee_distance_max * 0.50f;
+			}
+
+			break;
+		}
+	}
+	float melee_distance_min = melee_distance / 2.0f;
+	float caster_distance_max = GetBotCasterMaxRange(melee_distance_max);
+
+	bool atArcheryRange = IsArcheryRange(tar);
+
+	if (GetRangerAutoWeaponSelect()) {
+
+		bool changeWeapons = false;
+
+		if (atArcheryRange && !IsBotArcher()) {
+
+			SetBotArcherySetting(true);
+			changeWeapons = true;
+		}
+		else if (!atArcheryRange && IsBotArcher()) {
+
+			SetBotArcherySetting(false);
+			changeWeapons = true;
+		}
+
+		if (changeWeapons) {
+			ChangeBotArcherWeapons(IsBotArcher());
+		}
+	}
+	bool stop_melee_level = GetLevel() >= GetStopMeleeLevel();
+	if (IsBotArcher() && atArcheryRange) {
+		atCombatRange = true;
+	}
+	else if (caster_distance_max && tar_distance <= caster_distance_max && stop_melee_level) {
+		atCombatRange = true;
+	}
+	else if (tar_distance <= melee_distance) {
+		atCombatRange = true;
+	}
+}
+
+bool Bot::IsValidTarget(Client* bot_owner, Client* leash_owner, float lo_distance, float leash_distance, bool bo_alt_combat, Mob* tar, float tar_distance) {
+
+	if (HOLDING ||
+		!tar->IsNPC() ||
+		tar->IsMezzed() ||
+		lo_distance > leash_distance ||
+		tar_distance > leash_distance ||
+		(!GetAttackingFlag() && !CheckLosFN(tar) && !leash_owner->CheckLosFN(tar)) || // This is suppose to keep bots from attacking things behind walls
+		!IsAttackAllowed(tar) ||
+		(bo_alt_combat &&
+			(!GetAttackingFlag() && NOT_PULLING_BOT && !leash_owner->AutoAttackEnabled() && !tar->GetHateAmount(this) && !tar->GetHateAmount(leash_owner))
+		)
+	)
+	{
+		// Normally, we wouldn't want to do this without class checks..but, too many issues can arise if we let enchanter animation pets run rampant
+		if (HasPet()) {
+			GetPet()->RemoveFromHateList(tar);
+			GetPet()->SetTarget(nullptr);
+		}
+
+		RemoveFromHateList(tar);
+		SetTarget(nullptr);
+
+		SetAttackFlag(false);
+		SetAttackingFlag(false);
+
+		if (PULLING_BOT) {
+			SetPullingFlag(false);
+			SetReturningFlag(false);
+			bot_owner->SetBotPulling(false);
+			if (GetPet()) {
+				GetPet()->SetPetOrder(m_previous_pet_order);
+			}
+		}
+
+		if (IsMoving()) {
+			StopMoving();
+		}
+
+		return false;
+	}
+	return true;
+}
+
+Mob* Bot::GetBotTarget(Client* bot_owner) {
+
+	Mob* tar = GetTarget();
+	if (!tar || PASSIVE) {
+		if (GetTarget()) {
+			SetTarget(nullptr);
+		}
+
+		WipeHateList();
+		SetAttackFlag(false);
+		SetAttackingFlag(false);
+		if (PULLING_BOT) {
+
+			// 'Flags' should only be set on the bot that is pulling
+			SetPullingFlag(false);
+			SetReturningFlag(false);
+			bot_owner->SetBotPulling(false);
+			if (GetPet()) {
+				GetPet()->SetPetOrder(m_previous_pet_order);
+			}
+		}
+
+		if (GetArchetype() == ARCHETYPE_CASTER) {
+			BotMeditate(true);
+		}
+	}
+	return tar;
+}
+
+void Bot::AcquireBotTarget(Group* bot_group, Raid* raid, Client* leash_owner, float leash_distance) {// Group roles can be expounded upon in the future
+	Mob* assist_mob = nullptr;
 	bool find_target = true;
+
+	if (bot_group) {
+		assist_mob = entity_list.GetMob(bot_group->GetMainAssistName());
+	}
+	else if (raid) {
+		assist_mob = raid->GetRaidMainAssistOneByName(GetName());
+	}
 
 	if (assist_mob) {
 		if (assist_mob->GetTarget()) {
@@ -3302,8 +3309,7 @@ void Bot::AcquireBotTarget(Group* bot_group, Client* leash_owner,
 			}
 		} else {
 			// This will keep bots on target for now..but, future updates will allow for rooting/stunning
-			auto escaping = hate_list.GetEscapingEntOnHateList(leash_owner, leash_distance);
-			if (escaping) {
+			if (auto escaping = hate_list.GetEscapingEntOnHateList(leash_owner, leash_distance)) {
 				SetTarget(escaping);
 			}
 
@@ -3423,7 +3429,7 @@ void Bot::HealRotationChecks() {
 
 bool Bot::IsAIProcessValid(const Client* bot_owner, const Group* bot_group, const Raid* raid) {
 
-	if (!bot_owner || !bot_group || !raid || !IsAIControlled()) {
+	if (!bot_owner || !bot_group && !raid || !IsAIControlled()) {
 		return false;
 	}
 
@@ -3527,7 +3533,7 @@ Client* Bot::SetLeashOwner(Client* bot_owner, Group* bot_group, Raid* raid, uint
 	Client* leash_owner = nullptr;
 	if (raid && r_group < MAX_RAID_GROUPS && raid->GetGroupLeader(r_group) && raid->GetGroupLeader(r_group)->IsClient()) {
 		leash_owner = raid->GetGroupLeader(r_group);
-	} else {
+	} else if (bot_group){
 		bot_group->VerifyGroup();
 		leash_owner = (bot_group->GetLeader() && bot_group->GetLeader()->IsClient() ? bot_group->GetLeader()->CastToClient() : bot_owner);
 	}
