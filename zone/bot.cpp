@@ -1230,7 +1230,7 @@ void Bot::GenerateAppearance() {
 		iHairColor = zone->random.Int(0, 19);
 	}
 
-	uint8 iEyeColor1 = (uint8)zone->random.Int(0, 9);
+	auto iEyeColor1 = (uint8)zone->random.Int(0, 9);
 	uint8 iEyeColor2 = 0;
 	if (GetRace() == DRAKKIN) {
 		iEyeColor1 = iEyeColor2 = (uint8)zone->random.Int(0, 11);
@@ -1258,361 +1258,6 @@ void Bot::GenerateAppearance() {
 	drakkin_heritage = iHeritage;
 	drakkin_tattoo = iTattoo;
 	drakkin_details = iDetails;
-}
-
-int32 Bot::acmod() {
-	int agility = GetAGI();
-	int level = GetLevel();
-	if(agility < 1 || level < 1)
-		return 0;
-
-	if(agility <= 74) {
-		if(agility == 1)
-			return -24;
-		else if(agility <= 3)
-			return -23;
-		else if(agility == 4)
-			return -22;
-		else if(agility <= 6)
-			return -21;
-		else if(agility <= 8)
-			return -20;
-		else if(agility == 9)
-			return -19;
-		else if(agility <= 11)
-			return -18;
-		else if(agility == 12)
-			return -17;
-		else if(agility <= 14)
-			return -16;
-		else if(agility <= 16)
-			return -15;
-		else if(agility == 17)
-			return -14;
-		else if(agility <= 19)
-			return -13;
-		else if(agility == 20)
-			return -12;
-		else if(agility <= 22)
-			return -11;
-		else if(agility <= 24)
-			return -10;
-		else if(agility == 25)
-			return -9;
-		else if(agility <= 27)
-			return -8;
-		else if(agility == 28)
-			return -7;
-		else if(agility <= 30)
-			return -6;
-		else if(agility <= 32)
-			return -5;
-		else if(agility == 33)
-			return -4;
-		else if(agility <= 35)
-			return -3;
-		else if(agility == 36)
-			return -2;
-		else if(agility <= 38)
-			return -1;
-		else if(agility <= 65)
-			return 0;
-		else if(agility <= 70)
-			return 1;
-		else if(agility <= 74)
-			return 5;
-	} else if(agility <= 137) {
-		if(agility == 75) {
-			if(level <= 6)
-				return 9;
-			else if(level <= 19)
-				return 23;
-			else if(level <= 39)
-				return 33;
-			else
-				return 39;
-		} else if(agility >= 76 && agility <= 79) {
-			if(level <= 6)
-				return 10;
-			else if(level <= 19)
-				return 23;
-			else if(level <= 39)
-				return 33;
-			else
-				return 40;
-		} else if(agility == 80) {
-			if(level <= 6)
-				return 11;
-			else if(level <= 19)
-				return 24;
-			else if(level <= 39)
-				return 34;
-			else
-				return 41;
-		} else if(agility >= 81 && agility <= 85) {
-			if(level <= 6)
-				return 12;
-			else if(level <= 19)
-				return 25;
-			else if(level <= 39)
-				return 35;
-			else
-				return 42;
-		} else if(agility >= 86 && agility <= 90) {
-			if(level <= 6)
-				return 12;
-			else if(level <= 19)
-				return 26;
-			else if(level <= 39)
-				return 36;
-			else
-				return 42;
-		} else if(agility >= 91 && agility <= 95) {
-			if(level <= 6)
-				return 13;
-			else if(level <= 19)
-				return 26;
-			else if(level <= 39)
-				return 36;
-			else
-				return 43;
-		} else if(agility >= 96 && agility <= 99) {
-			if(level <= 6)
-				return 14;
-			else if(level <= 19)
-				return 27;
-			else if(level <= 39)
-				return 37;
-			else
-				return 44;
-		} else if(agility == 100 && level >= 7) {
-			if(level <= 19)
-				return 28;
-			else if (level <= 39)
-				return 38;
-			else
-				return 45;
-		}
-		else if(level <= 6)
-			return 15;
-		//level is >6
-		else if(agility >= 101 && agility <= 105) {
-			if(level <= 19)
-				return 29;
-			else if(level <= 39)
-				return 39;// not verified
-			else
-				return 45;
-		} else if(agility >= 106 && agility <= 110) {
-			if(level <= 19)
-				return 29;
-			else if(level <= 39)
-				return 39;// not verified
-			else
-				return 46;
-		} else if(agility >= 111 && agility <= 115) {
-			if(level <= 19)
-				return 30;
-			else if(level <= 39)
-				return 40;// not verified
-			else
-				return 47;
-		} else if(agility >= 116 && agility <= 119) {
-			if(level <= 19)
-				return 31;
-			else if(level <= 39)
-				return 41;
-			else
-				return 47;
-		}
-		else if(level <= 19)
-			return 32;
-		//level is > 19
-		else if(agility == 120) {
-			if(level <= 39)
-				return 42;
-			else
-				return 48;
-		} else if(agility <= 125) {
-			if(level <= 39)
-				return 42;
-			else
-				return 49;
-		} else if(agility <= 135) {
-			if(level <= 39)
-				return 42;
-			else
-				return 50;
-		} else {
-			if(level <= 39)
-				return 42;
-			else
-				return 51;
-		}
-	} else if(agility <= 300) {
-		if(level <= 6) {
-			if(agility <= 139)
-				return 21;
-			else if(agility == 140)
-				return 22;
-			else if(agility <= 145)
-				return 23;
-			else if(agility <= 150)
-				return 23;
-			else if(agility <= 155)
-				return 24;
-			else if(agility <= 159)
-				return 25;
-			else if(agility == 160)
-				return 26;
-			else if(agility <= 165)
-				return 26;
-			else if(agility <= 170)
-				return 27;
-			else if(agility <= 175)
-				return 28;
-			else if(agility <= 179)
-				return 28;
-			else if(agility == 180)
-				return 29;
-			else if(agility <= 185)
-				return 30;
-			else if(agility <= 190)
-				return 31;
-			else if(agility <= 195)
-				return 31;
-			else if(agility <= 199)
-				return 32;
-			else if(agility <= 219)
-				return 33;
-			else if(agility <= 239)
-				return 34;
-			else
-				return 35;
-		} else if(level <= 19) {
-			if(agility <= 139)
-				return 34;
-			else if(agility == 140)
-				return 35;
-			else if(agility <= 145)
-				return 36;
-			else if(agility <= 150)
-				return 37;
-			else if(agility <= 155)
-				return 37;
-			else if(agility <= 159)
-				return 38;
-			else if(agility == 160)
-				return 39;
-			else if(agility <= 165)
-				return 40;
-			else if(agility <= 170)
-				return 40;
-			else if(agility <= 175)
-				return 41;
-			else if(agility <= 179)
-				return 42;
-			else if(agility == 180)
-				return 43;
-			else if(agility <= 185)
-				return 43;
-			else if(agility <= 190)
-				return 44;
-			else if(agility <= 195)
-				return 45;
-			else if(agility <= 199)
-				return 45;
-			else if(agility <= 219)
-				return 46;
-			else if(agility <= 239)
-				return 47;
-			else
-				return 48;
-		} else if(level <= 39) {
-			if(agility <= 139)
-				return 44;
-			else if(agility == 140)
-				return 45;
-			else if(agility <= 145)
-				return 46;
-			else if(agility <= 150)
-				return 47;
-			else if(agility <= 155)
-				return 47;
-			else if(agility <= 159)
-				return 48;
-			else if(agility == 160)
-				return 49;
-			else if(agility <= 165)
-				return 50;
-			else if(agility <= 170)
-				return 50;
-			else if(agility <= 175)
-				return 51;
-			else if(agility <= 179)
-				return 52;
-			else if(agility == 180)
-				return 53;
-			else if(agility <= 185)
-				return 53;
-			else if(agility <= 190)
-				return 54;
-			else if(agility <= 195)
-				return 55;
-			else if(agility <= 199)
-				return 55;
-			else if(agility <= 219)
-				return 56;
-			else if(agility <= 239)
-				return 57;
-			else
-				return 58;
-		} else {	//lvl >= 40
-			if(agility <= 139)
-				return 51;
-			else if(agility == 140)
-				return 52;
-			else if(agility <= 145)
-				return 53;
-			else if(agility <= 150)
-				return 53;
-			else if(agility <= 155)
-				return 54;
-			else if(agility <= 159)
-				return 55;
-			else if(agility == 160)
-				return 56;
-			else if(agility <= 165)
-				return 56;
-			else if(agility <= 170)
-				return 57;
-			else if(agility <= 175)
-				return 58;
-			else if(agility <= 179)
-				return 58;
-			else if(agility == 180)
-				return 59;
-			else if(agility <= 185)
-				return 60;
-			else if(agility <= 190)
-				return 61;
-			else if(agility <= 195)
-				return 61;
-			else if(agility <= 199)
-				return 62;
-			else if(agility <= 219)
-				return 63;
-			else if(agility <= 239)
-				return 64;
-			else
-				return 65;
-		}
-	}
-	else
-		return (65 + ((agility - 300) / 21));
-
-	LogError("Agility [{}] Level [{}]",agility,level);
-	return 0;
 }
 
 uint16 Bot::GetPrimarySkillValue() {
@@ -2249,15 +1894,15 @@ void Bot::AI_Bot_Init()
 	AIautocastspell_timer.reset(nullptr);
 	casting_spell_AIindex = static_cast<uint8>(AIBot_spells.size());
 
-	m_roambox.max_x     = 0;
-	m_roambox.max_y     = 0;
-	m_roambox.min_x     = 0;
-	m_roambox.min_y     = 0;
+	m_roambox.max_x		 = 0;
+	m_roambox.max_y		 = 0;
+	m_roambox.min_x		 = 0;
+	m_roambox.min_y		 = 0;
 	m_roambox.distance  = 0;
-	m_roambox.dest_x    = 0;
-	m_roambox.dest_y    = 0;
-	m_roambox.dest_z    = 0;
-	m_roambox.delay     = 2500;
+	m_roambox.dest_x		= 0;
+	m_roambox.dest_y		= 0;
+	m_roambox.dest_z		= 0;
+	m_roambox.delay		 = 2500;
 	m_roambox.min_delay = 2500;
 }
 
@@ -2390,22 +2035,6 @@ bool Bot::CheckBotDoubleAttack(bool tripleAttack) {
 	return false;
 }
 
-bool Bot::CanDoSpecialAttack(Mob *other) {
-	//Make sure everything is valid before doing any attacks.
-	if (!other) {
-		SetTarget(nullptr);
-		return false;
-	}
-
-	if(!GetTarget())
-		SetTarget(other);
-
-	if ((other == nullptr || ((GetAppearance() == eaDead) || (other->IsClient() && other->CastToClient()->IsDead())) || HasDied() || (!IsAttackAllowed(other))) || other->GetInvul() || other->GetSpecialAbility(IMMUNE_MELEE))
-		return false;
-
-	return true;
-}
-
 void Bot::SetTarget(Mob* mob) {
 	if(mob != this) {
 		if(mob != GetTarget())
@@ -2441,10 +2070,10 @@ void Bot::SetHoldMode() {
 // AI Processing for the Bot object
 
 constexpr float MAX_CASTER_DISTANCE[PLAYER_CLASS_COUNT] = {
-    0, (34 * 34), (24 * 24), (28 * 28), (26 * 26), (42 * 42), 0, (30 * 30), 0, (38 * 38), (54 * 54), (48 * 48), (52 * 52), (50 * 50), (32 * 32), 0
-//  W      C          P          R          S          D      M      B      R      S          N          W          M          E          B      B
-//  A      L          A          N          H          R      N      R      O      H          E          I          A          N          S      E
-//  R      R          L          G          D          U      K      D      G      M          C          Z          G          C          T      R
+		0, (34 * 34), (24 * 24), (28 * 28), (26 * 26), (42 * 42), 0, (30 * 30), 0, (38 * 38), (54 * 54), (48 * 48), (52 * 52), (50 * 50), (32 * 32), 0
+//  W		  C		  P		  R		  S		  D		  M		  B		  R		  S		  N		  W		  M		  E		  B		  B
+//  A		  L		  A		  N		  H		  R		  N		  R		  O		  H		  E		  I		  A		  N		  S		  E
+//  R		  R		  L		  G		  D		  U		  K		  D		  G		  M		  C		  Z		  G		  C		  T		  R
 };
 
 void Bot::AI_Process()
@@ -2720,18 +2349,15 @@ void Bot::AI_Process()
 		if (TryBardMovementCasts()) {
 			return;
 		}
-
 	}
 }
 
 bool Bot::TryBardMovementCasts() {// Basically, bard bots get a chance to cast idle spells while moving
-	if (GetClass() == BARD && IsMoving() && NOT_PASSIVE) {
 
-		if (!spellend_timer.Enabled() && AI_think_timer->Check()) {
+	if (GetClass() == BARD && IsMoving() && NOT_PASSIVE && !spellend_timer.Enabled() && AI_think_timer->Check()) {
 
-			AI_IdleCastCheck();
-			return true;
-		}
+		AI_IdleCastCheck();
+		return true;
 	}
 	return false;
 }
@@ -2785,25 +2411,28 @@ bool Bot::TryNonCombatMovementChecks(Client* bot_owner, const Mob* follow_mob, g
 
 bool Bot::TryIdleChecks(float fm_distance) {
 
-	if ((NOT_GUARDING && fm_distance <= GetFollowDistance()) || (GUARDING && DistanceSquared(GetPosition(), GetGuardPoint()) <= GetFollowDistance())) {
+	if (
+		(
+			(NOT_GUARDING && fm_distance <= GetFollowDistance()) ||
+			(GUARDING && DistanceSquared(GetPosition(), GetGuardPoint()) <= GetFollowDistance())) &&
+			!IsMoving() &&
+			AI_think_timer->Check() &&
+			!spellend_timer.Enabled()
+	) {
 
-		if (!IsMoving() && AI_think_timer->Check() && !spellend_timer.Enabled()) {
+		if (NOT_PASSIVE) {
 
-			if (NOT_PASSIVE) {
-
-				if (!AI_IdleCastCheck() && !IsCasting() && GetClass() != BARD) {
-					BotMeditate(true);
-				}
-			}
-			else {
-
-				if (GetClass() != BARD) {
-					BotMeditate(true);
-				}
+			if (!AI_IdleCastCheck() && !IsCasting() && GetClass() != BARD) {
+				BotMeditate(true);
 			}
 
-			return true;
+		} else {
+			if (GetClass() != BARD) {
+				BotMeditate(true);
+			}
+
 		}
+		return true;
 	}
 	return false;
 }
@@ -2820,40 +2449,39 @@ bool Bot::TryAutoDefend(Client* bot_owner, float leash_distance) {
 			return true;
 		}
 
-		if (m_auto_defend_timer.Check() && bot_owner->GetAggroCount()) {
+		if (
+			m_auto_defend_timer.Check() &&
+			bot_owner->GetAggroCount() &&
+			NOT_HOLDING &&
+			NOT_PASSIVE
+		) {
+			auto xhaters = bot_owner->GetXTargetAutoMgr();
 
-			if (NOT_HOLDING && NOT_PASSIVE) {
+			if (xhaters && !xhaters->empty()) {
+				for (auto hater_iter : xhaters->get_list()) {
+					if (!hater_iter.spawn_id) {
+						continue;
+					}
 
-				auto xhaters = bot_owner->GetXTargetAutoMgr();
-				if (xhaters && !xhaters->empty()) {
+					if (bot_owner->GetBotPulling() && bot_owner->GetTarget() && hater_iter.spawn_id == bot_owner->GetTarget()->GetID()) {
+						continue;
+					}
 
-					for (auto hater_iter : xhaters->get_list()) {
+					auto hater = entity_list.GetMob(hater_iter.spawn_id);
+					if (hater && !hater->IsMezzed() && DistanceSquared(hater->GetPosition(), bot_owner->GetPosition()) <= leash_distance) {
+						// This is roughly equivilent to npc attacking a client pet owner
+						AddToHateList(hater, 1);
+						SetTarget(hater);
+						SetAttackingFlag();
 
-						if (!hater_iter.spawn_id) {
-							continue;
+						if (HasPet() && (GetClass() != ENCHANTER || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 2)) {
+							GetPet()->AddToHateList(hater, 1);
+							GetPet()->SetTarget(hater);
 						}
 
-						if (bot_owner->GetBotPulling() && bot_owner->GetTarget() && hater_iter.spawn_id == bot_owner->GetTarget()->GetID()) {
-							continue;
-						}
+						m_auto_defend_timer.Disable();
 
-						auto hater = entity_list.GetMob(hater_iter.spawn_id);
-						if (hater && !hater->IsMezzed() && DistanceSquared(hater->GetPosition(), bot_owner->GetPosition()) <= leash_distance) {
-
-							// This is roughly equivilent to npc attacking a client pet owner
-							AddToHateList(hater, 1);
-							SetTarget(hater);
-							SetAttackingFlag();
-							if (HasPet() && (GetClass() != ENCHANTER || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 2)) {
-
-								GetPet()->AddToHateList(hater, 1);
-								GetPet()->SetTarget(hater);
-							}
-
-							m_auto_defend_timer.Disable();
-
-							return true;
-						}
+						return true;
 					}
 				}
 			}
@@ -2865,10 +2493,10 @@ bool Bot::TryAutoDefend(Client* bot_owner, float leash_distance) {
 bool Bot::TryMeditate() {
 
 	if (!IsMoving() && !spellend_timer.Enabled()) {
-
 		if (GetTarget() && AI_EngagedCastCheck()) {
 			BotMeditate(false);
 		}
+
 		else if (GetArchetype() == ARCHETYPE_CASTER) {
 			BotMeditate(true);
 		}
@@ -2881,44 +2509,40 @@ bool Bot::TryMeditate() {
 // This code actually gets processed when we are too far away from target and have not engaged yet
 bool Bot::TryPursueTarget(float leash_distance, glm::vec3& Goal) {
 
-	if (AI_movement_timer->Check() && (!spellend_timer.Enabled() || GetClass() == BARD)) { // Pursue processing
+	if (AI_movement_timer->Check() && (!spellend_timer.Enabled() || GetClass() == BARD)) {
 		if (GetTarget() && !IsRooted()) {
-
 			LogAIDetail("Pursuing [{}] while engaged", GetTarget()->GetCleanName());
 			Goal = GetTarget()->GetPosition();
 			if (DistanceSquared(m_Position, Goal) <= leash_distance) {
 				RunTo(Goal.x, Goal.y, Goal.z);
-			}
-			else {
 
+			} else {
 				WipeHateList();
 				SetTarget(nullptr);
-				if (HasPet() && (GetClass() != ENCHANTER || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 2)) {
 
+				if (HasPet() && (GetClass() != ENCHANTER || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 2)) {
 					GetPet()->WipeHateList();
 					GetPet()->SetTarget(nullptr);
 				}
 			}
-
 			return true;
-		}
-		else {
 
+		} else {
 			if (IsMoving()) {
 				StopMoving();
 			}
+
 			return false;
 		}
 	}
 
 	if (GetTarget() && GetTarget()->IsFeared() && !spellend_timer.Enabled() && AI_think_timer->Check()) {
-
 		if (!IsFacingMob(GetTarget())) {
 			FaceTarget(GetTarget());
 		}
 
 		// This is a mob that is fleeing either because it has been feared or is low on hitpoints
-		AI_PursueCastCheck(); // This appears to always return true..can't trust for success/fail
+		AI_PursueCastCheck();
 
 		return true;
 	}
@@ -2948,14 +2572,13 @@ bool Bot::TrySecondaryWeaponAttacks(Mob* tar, const EQ::ItemInstance* s_item) {
 				float DualWieldProbability = 0.0f;
 
 				int32 Ambidexterity = (aabonuses.Ambidexterity + spellbonuses.Ambidexterity + itembonuses.Ambidexterity);
-				DualWieldProbability = ((GetSkill(EQ::skills::SkillDualWield) + GetLevel() + Ambidexterity) / 400.0f); // 78.0 max
+				DualWieldProbability = ((GetSkill(EQ::skills::SkillDualWield) + GetLevel() + Ambidexterity) / 400.0f); // 78.0 max chance
 
 				int32 DWBonus = (spellbonuses.DualWieldChance + itembonuses.DualWieldChance);
 				DualWieldProbability += (DualWieldProbability * float(DWBonus) / 100.0f);
 
 				float random = zone->random.Real(0, 1);
-				if (random < DualWieldProbability) { // Max 78% of DW
-
+				if (random < DualWieldProbability) { // Max 78% for DW chance
 					Attack(tar, EQ::invslot::slotSecondary);	// Single attack with offhand
 
 					TEST_COMBATANTS
@@ -3023,11 +2646,14 @@ bool Bot::TryPrimaryWeaponAttacks(Mob* tar, const EQ::ItemInstance* p_item) {
 		auto ExtraAttackChanceBonus =
 			(spellbonuses.ExtraAttackChance[0] + itembonuses.ExtraAttackChance[0] +
 			 aabonuses.ExtraAttackChance[0]);
-		if (ExtraAttackChanceBonus) {
 
-			if (p_item && p_item->GetItem()->IsType2HWeapon() && zone->random.Int(0, 100) < ExtraAttackChanceBonus) {
-				Attack(tar, EQ::invslot::slotPrimary, false);
-			}
+		if (
+			ExtraAttackChanceBonus &&
+			p_item &&
+			p_item->GetItem()->IsType2HWeapon() &&
+			zone->random.Int(0, 100) < ExtraAttackChanceBonus
+		) {
+			Attack(tar, EQ::invslot::slotPrimary, false);
 		}
 	}
 	return true;
@@ -3065,25 +2691,30 @@ bool Bot::TryFacingTarget(Mob* tar) {
 	return false;
 }
 
+
 bool Bot::TryEvade(Mob* tar) {
 
-	if (!IsRooted()) {
-		if (HasTargetReflection()) {
-			if (!tar->IsFeared() && !tar->IsStunned() && GetClass() == ROGUE && m_evade_timer.Check(false)) { // Attempt to evade
-				int timer_duration = (HideReuseTime - GetSkillReuseTime(EQ::skills::SkillHide)) * 1000;
+	if (
+		!IsRooted() &&
+		HasTargetReflection() &&
+		!tar->IsFeared() &&
+		!tar->IsStunned() &&
+		GetClass() == ROGUE &&
+		m_evade_timer.Check(false)
+	) {
+		int timer_duration = (HideReuseTime - GetSkillReuseTime(EQ::skills::SkillHide)) * 1000;
 
-				if (timer_duration < 0) {
-					timer_duration = 0;
-				}
-				m_evade_timer.Start(timer_duration);
-				if (zone->random.Int(0, 260) < (int) GetSkill(EQ::skills::SkillHide)) {
-					RogueEvade(tar);
-				}
-
-				return true;
-			}
+		if (timer_duration < 0) {
+			timer_duration = 0;
 		}
+
+		m_evade_timer.Start(timer_duration);
+		if (zone->random.Int(0, 260) < (int) GetSkill(EQ::skills::SkillHide)) {
+			RogueEvade(tar);
+		}
+		return true;
 	}
+
 	return false;
 }
 
@@ -3103,119 +2734,15 @@ void Bot::CheckCombatRange(Mob* tar, float tar_distance, bool& atCombatRange, co
 	// Calculate melee distances
 	float melee_distance_max = 0.0f;
 	float melee_distance = 0.0f;
-	{
-		float size_mod = GetSize();
-		float other_size_mod = tar->GetSize();
 
-		if (GetRace() == RT_DRAGON || GetRace() == RT_WURM || GetRace() == RT_DRAGON_7) { // For races with a fixed size
-			size_mod = 60.0f;
-		}
-		else if (size_mod < 6.0f) {
-			size_mod = 8.0f;
-		}
+	CalcMeleeDistances(tar, p_item, s_item, behind_mob, backstab_weapon, melee_distance_max, melee_distance);
 
-		if (tar->GetRace() == RT_DRAGON || tar->GetRace() == RT_WURM || tar->GetRace() == RT_DRAGON_7) { // For races with a fixed size
-			other_size_mod = 60.0f;
-		}
-		else if (other_size_mod < 6.0f) {
-			other_size_mod = 8.0f;
-		}
-
-		if (other_size_mod > size_mod) {
-			size_mod = other_size_mod;
-		}
-
-		if (size_mod > 29.0f) {
-			size_mod *= size_mod;
-		}
-		else if (size_mod > 19.0f) {
-			size_mod *= (size_mod * 2.0f);
-		}
-		else {
-			size_mod *= (size_mod * 4.0f);
-		}
-
-		// Prevention of ridiculously sized hit boxes
-		if (size_mod > 10000.0f) {
-			size_mod = (size_mod / 7.0f);
-		}
-
-		melee_distance_max = size_mod;
-
-		switch (GetClass()) {
-		case WARRIOR:
-		case PALADIN:
-		case SHADOWKNIGHT:
-			if (p_item && p_item->GetItem()->IsType2HWeapon()) {
-				melee_distance = melee_distance_max * 0.45f;
-			}
-			else if ((s_item && s_item->GetItem()->IsTypeShield()) || (!p_item && !s_item)) {
-				melee_distance = melee_distance_max * 0.35f;
-			}
-			else {
-				melee_distance = melee_distance_max * 0.40f;
-			}
-
-			break;
-		case NECROMANCER:
-		case WIZARD:
-		case MAGICIAN:
-		case ENCHANTER:
-			if (p_item && p_item->GetItem()->IsType2HWeapon()) {
-				melee_distance = melee_distance_max * 0.95f;
-			}
-			else {
-				melee_distance = melee_distance_max * 0.75f;
-			}
-
-			break;
-		case ROGUE:
-			if (behind_mob && backstab_weapon) {
-				if (p_item->GetItem()->IsType2HWeapon()) {
-					melee_distance = melee_distance_max * 0.30f;
-				}
-				else {
-					melee_distance = melee_distance_max * 0.25f;
-				}
-
-				break;
-			}
-			// Fall-through
-		default:
-			if (p_item && p_item->GetItem()->IsType2HWeapon()) {
-				melee_distance = melee_distance_max * 0.70f;
-			}
-			else {
-				melee_distance = melee_distance_max * 0.50f;
-			}
-
-			break;
-		}
-	}
-	float melee_distance_min = melee_distance / 2.0f;
 	float caster_distance_max = GetBotCasterMaxRange(melee_distance_max);
 
 	bool atArcheryRange = IsArcheryRange(tar);
 
-	if (GetRangerAutoWeaponSelect()) {
+	SetRangerCombatWeapon(atArcheryRange);
 
-		bool changeWeapons = false;
-
-		if (atArcheryRange && !IsBotArcher()) {
-
-			SetBotArcherySetting(true);
-			changeWeapons = true;
-		}
-		else if (!atArcheryRange && IsBotArcher()) {
-
-			SetBotArcherySetting(false);
-			changeWeapons = true;
-		}
-
-		if (changeWeapons) {
-			ChangeBotArcherWeapons(IsBotArcher());
-		}
-	}
 	bool stop_melee_level = GetLevel() >= GetStopMeleeLevel();
 	if (IsBotArcher() && atArcheryRange) {
 		atCombatRange = true;
@@ -3225,6 +2752,121 @@ void Bot::CheckCombatRange(Mob* tar, float tar_distance, bool& atCombatRange, co
 	}
 	else if (tar_distance <= melee_distance) {
 		atCombatRange = true;
+	}
+}
+
+void Bot::SetRangerCombatWeapon(bool atArcheryRange) {
+
+	if (GetRangerAutoWeaponSelect()) {
+		bool changeWeapons = false;
+
+		if (atArcheryRange && !IsBotArcher()) {
+			SetBotArcherySetting(true);
+			changeWeapons = true;
+		}
+
+		else if (!atArcheryRange && IsBotArcher()) {
+			SetBotArcherySetting(false);
+			changeWeapons = true;
+		}
+
+		if (changeWeapons) {
+			ChangeBotArcherWeapons(IsBotArcher());
+		}
+	}
+}
+
+void Bot::CalcMeleeDistances(const Mob* tar, const EQ::ItemInstance* const& p_item, const EQ::ItemInstance* const& s_item, bool behind_mob, bool backstab_weapon, float& melee_distance_max, float& melee_distance) const {
+
+	float size_mod = GetSize();
+	float other_size_mod = tar->GetSize();
+
+	// For races with a fixed size
+	if (GetRace() == RT_DRAGON || GetRace() == RT_WURM || GetRace() == RT_DRAGON_7) {
+		// size_mod = 60.0f;
+	}
+
+	else if (size_mod < 6.0f) {
+		size_mod = 8.0f;
+	}
+
+	// For races with a fixed size
+	if (tar->GetRace() == RT_DRAGON || tar->GetRace() == RT_WURM || tar->GetRace() == RT_DRAGON_7) {
+		other_size_mod = 60.0f;
+	}
+
+	else if (other_size_mod < 6.0f) {
+		other_size_mod = 8.0f;
+	}
+
+	if (other_size_mod > size_mod) {
+		size_mod = other_size_mod;
+	}
+
+	if (size_mod > 29.0f) {
+		size_mod *= size_mod;
+	}
+
+	else if (size_mod > 19.0f) {
+		size_mod *= (size_mod * 2.0f);
+	}
+
+	else {
+		size_mod *= (size_mod * 4.0f);
+	}
+
+	// Prevention of ridiculously sized hit boxes
+	if (size_mod > 10000.0f) {
+		size_mod = (size_mod / 7.0f);
+	}
+
+	melee_distance_max = size_mod;
+
+	switch (GetClass()) {
+	case WARRIOR:
+	case PALADIN:
+	case SHADOWKNIGHT:
+		if (p_item && p_item->GetItem()->IsType2HWeapon()) {
+			melee_distance = melee_distance_max * 0.45f;
+		}
+		else if ((s_item && s_item->GetItem()->IsTypeShield()) || (!p_item && !s_item)) {
+			melee_distance = melee_distance_max * 0.35f;
+		}
+		else {
+			melee_distance = melee_distance_max * 0.40f;
+		}
+		break;
+	case NECROMANCER:
+	case WIZARD:
+	case MAGICIAN:
+	case ENCHANTER:
+		if (p_item && p_item->GetItem()->IsType2HWeapon()) {
+			melee_distance = melee_distance_max * 0.95f;
+		}
+		else {
+			melee_distance = melee_distance_max * 0.75f;
+		}
+		break;
+	case ROGUE:
+		if (behind_mob && backstab_weapon) {
+			if (p_item->GetItem()->IsType2HWeapon()) {
+				melee_distance = melee_distance_max * 0.30f;
+			}
+			else {
+				melee_distance = melee_distance_max * 0.25f;
+			}
+			break;
+		}
+			// Fall-through
+	default:
+		if (p_item && p_item->GetItem()->IsType2HWeapon()) {
+			melee_distance = melee_distance_max * 0.70f;
+		}
+		else {
+			melee_distance = melee_distance_max * 0.50f;
+		}
+
+		break;
 	}
 }
 
@@ -3689,7 +3331,7 @@ void Bot::BotPullerProcess(Client* bot_owner, Raid* raid) {
 
 void Bot::SetBotGroupTarget(const Client* bot_owner, Client* leash_owner, float lo_distance, float leash_distance, Mob* const& bg_member, Mob* bgm_target) {
 	if (!bgm_target->IsMezzed() &&
-	    ((bot_owner->GetBotOption(Client::booAutoDefend) && bgm_target->GetHateAmount(bg_member)) || leash_owner->AutoAttackEnabled()) &&
+			((bot_owner->GetBotOption(Client::booAutoDefend) && bgm_target->GetHateAmount(bg_member)) || leash_owner->AutoAttackEnabled()) &&
 		lo_distance <= leash_distance &&
 		DistanceSquared(m_Position, bgm_target->GetPosition()) <= leash_distance &&
 		(CheckLosFN(bgm_target) || leash_owner->CheckLosFN(bgm_target)) &&
@@ -3699,219 +3341,6 @@ void Bot::SetBotGroupTarget(const Client* bot_owner, Client* leash_owner, float 
 		if (HasPet() && (GetClass() != ENCHANTER || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 2)) {
 			GetPet()->AddToHateList(bgm_target, 1);
 			GetPet()->SetTarget(bgm_target);
-		}
-	}
-}
-
-// AI Processing for a Bot object's pet
-void Bot::PetAIProcess() {
-	if( !HasPet() || !GetPet() || !GetPet()->IsNPC())
-		return;
-
-	Mob* BotOwner = GetBotOwner();
-	NPC* botPet = GetPet()->CastToNPC();
-	if(!botPet->GetOwner() || !botPet->GetID() || !botPet->GetOwnerID()) {
-		Kill();
-		return;
-	}
-
-	if (!botPet->IsAIControlled() || botPet->GetAttackTimer().Check(false) || botPet->IsCasting() || !botPet->GetOwner()->IsBot())
-		return;
-
-	if (IsEngaged()) {
-		if (botPet->IsRooted())
-			botPet->SetTarget(hate_list.GetClosestEntOnHateList(botPet));
-		else
-			botPet->SetTarget(hate_list.GetEntWithMostHateOnList(botPet));
-
-		// Let's check if we have a los with our target.
-		// If we don't, our hate_list is wiped.
-		// It causes some cpu stress but without it, it was causing the bot/pet to aggro behind wall, floor etc...
-		if(!botPet->CheckLosFN(botPet->GetTarget()) || botPet->GetTarget()->IsMezzed() || !botPet->IsAttackAllowed(GetTarget())) {
-			botPet->WipeHateList();
-			botPet->SetTarget(botPet->GetOwner());
-			return;
-		}
-
-		botPet->FaceTarget(botPet->GetTarget());
-		bool is_combat_range = botPet->CombatRange(botPet->GetTarget());
-		// Ok, we're engaged, each class type has a special AI
-		// Only melee class will go to melee. Casters and healers will stay behind, following the leader by default.
-		// I should probably make the casters staying in place so they can cast..
-
-		// Ok, we 're a melee or any other class lvl<12. Yes, because after it becomes hard to go in melee for casters.. even for bots..
-		if(is_combat_range) {
-			botPet->GetAIMovementTimer()->Check();
-			if(botPet->IsMoving()) {
-				botPet->SetHeading(botPet->GetTarget()->GetHeading());
-				if(moved) {
-					moved = false;
-					botPet->SetRunAnimSpeed(0);
-				}
-			}
-
-			if(!botPet->IsMoving()) {
-				float newX = 0;
-				float newY = 0;
-				float newZ = 0;
-				bool petHasAggro = false;
-				if(botPet->GetTarget() && botPet->GetTarget()->GetHateTop() && botPet->GetTarget()->GetHateTop() == botPet)
-					petHasAggro = true;
-
-				if(botPet->GetClass() == ROGUE && !petHasAggro && !botPet->BehindMob(botPet->GetTarget(), botPet->GetX(), botPet->GetY())) {
-					// Move the rogue to behind the mob
-					if(botPet->PlotPositionAroundTarget(botPet->GetTarget(), newX, newY, newZ)) {
-						botPet->RunTo(newX, newY, newZ);
-						return;
-					}
-				}
-				else if(GetTarget() == botPet->GetTarget() && !petHasAggro && !botPet->BehindMob(botPet->GetTarget(), botPet->GetX(), botPet->GetY())) {
-					// If the bot owner and the bot are fighting the same mob, then move the pet to the rear arc of the mob
-					if(botPet->PlotPositionAroundTarget(botPet->GetTarget(), newX, newY, newZ)) {
-						botPet->RunTo(newX, newY, newZ);
-						return;
-					}
-				}
-				else if(DistanceSquaredNoZ(botPet->GetPosition(), botPet->GetTarget()->GetPosition()) < botPet->GetTarget()->GetSize()) {
-					// Let's try to adjust our melee range so we don't appear to be bunched up
-					bool isBehindMob = false;
-					bool moveBehindMob = false;
-					if(botPet->BehindMob(botPet->GetTarget(), botPet->GetX(), botPet->GetY()))
-						isBehindMob = true;
-
-					if (!isBehindMob && !petHasAggro)
-						moveBehindMob = true;
-
-					if(botPet->PlotPositionAroundTarget(botPet->GetTarget(), newX, newY, newZ, moveBehindMob)) {
-						botPet->RunTo(newX, newY, newZ);
-						return;
-					}
-				}
-			}
-
-			// we can't fight if we don't have a target, are stun/mezzed or dead..
-			if(botPet->GetTarget() && !botPet->IsStunned() && !botPet->IsMezzed() && (botPet->GetAppearance() != eaDead)) {
-				// check the delay on the attack
-				if(botPet->GetAttackTimer().Check()) {
-					// Stop attacking while we are on a front arc and the target is enraged
-					if(!botPet->BehindMob(botPet->GetTarget(), botPet->GetX(), botPet->GetY()) && botPet->GetTarget()->IsEnraged())
-						return;
-
-					if (botPet->Attack(GetTarget(), EQ::invslot::slotPrimary))	// try the main hand
-						if (botPet->GetTarget()) {
-							// We're a pet so we re able to dual attack
-							int32 RandRoll = zone->random.Int(0, 99);
-							if (botPet->CanThisClassDoubleAttack() && (RandRoll < (botPet->GetLevel() + NPCDualAttackModifier))) {
-								if (botPet->Attack(botPet->GetTarget(), EQ::invslot::slotPrimary)) {}
-							}
-						}
-
-						if (botPet->GetOwner()->IsBot()) {
-							int aa_chance = 0;
-							int aa_skill = 0;
-							// Magician AA
-							aa_skill += botPet->GetOwner()->GetAA(aaElementalAlacrity);
-							// Necromancer AA
-							aa_skill += botPet->GetOwner()->GetAA(aaQuickeningofDeath);
-							// Beastlord AA
-							aa_skill += botPet->GetOwner()->GetAA(aaWardersAlacrity);
-							if(aa_skill >= 1)
-								aa_chance += ((aa_skill > 5 ? 5 : aa_skill) * 4);
-
-							if(aa_skill >= 6)
-								aa_chance += ((aa_skill - 5 > 3 ? 3 : aa_skill - 5) * 7);
-
-							if(aa_skill >= 9)
-								aa_chance += ((aa_skill - 8 > 3 ? 3 : aa_skill - 8) * 3);
-
-							if(aa_skill >= 12)
-								aa_chance += ((aa_skill - 11) * 1);
-
-
-							//aa_chance += botPet->GetOwner()->GetAA(aaCompanionsAlacrity) * 3;
-
-							if (zone->random.Int(1, 100) < aa_chance)
-								Flurry(nullptr);
-						}
-
-						// Ok now, let's check pet's offhand.
-						if (botPet->GetAttackDWTimer().Check() && botPet->GetOwnerID() && botPet->GetOwner() && ((botPet->GetOwner()->GetClass() == MAGICIAN) || (botPet->GetOwner()->GetClass() == NECROMANCER) || (botPet->GetOwner()->GetClass() == SHADOWKNIGHT) || (botPet->GetOwner()->GetClass() == BEASTLORD))) {
-							if(botPet->GetOwner()->GetLevel() >= 24) {
-								float DualWieldProbability = ((botPet->GetSkill(EQ::skills::SkillDualWield) + botPet->GetLevel()) / 400.0f);
-								DualWieldProbability -= zone->random.Real(0, 1);
-								if(DualWieldProbability < 0) {
-									botPet->Attack(botPet->GetTarget(), EQ::invslot::slotSecondary);
-									if (botPet->CanThisClassDoubleAttack()) {
-										int32 RandRoll = zone->random.Int(0, 99);
-										if (RandRoll < (botPet->GetLevel() + 20))
-											botPet->Attack(botPet->GetTarget(), EQ::invslot::slotSecondary);
-									}
-								}
-							}
-						}
-						if(!botPet->GetOwner())
-							return;
-
-						// Special attack
-						botPet->DoClassAttacks(botPet->GetTarget());
-				}
-				// See if the pet can cast any spell
-				botPet->AI_EngagedCastCheck();
-			}
-		} else {
-			// Now, if we cannot reach our target
-			if (!botPet->HateSummon()) {
-				if(botPet->GetTarget() && botPet->AI_PursueCastCheck()) {}
-				else if (botPet->GetTarget() && botPet->GetAIMovementTimer()->Check()) {
-					botPet->SetRunAnimSpeed(0);
-					if(!botPet->IsRooted()) {
-						LogAIDetail("Pursuing [{}] while engaged", botPet->GetTarget()->GetCleanName());
-						botPet->RunTo(botPet->GetTarget()->GetX(), botPet->GetTarget()->GetY(), botPet->GetTarget()->GetZ());
-						return;
-					} else {
-						botPet->SetHeading(botPet->GetTarget()->GetHeading());
-						if(moved) {
-							moved = false;
-							StopNavigation();
-							botPet->StopNavigation();
-						}
-					}
-				}
-			}
-		}
-	} else {
-		// Ok if we're not engaged, what's happening..
-		if(botPet->GetTarget() != botPet->GetOwner())
-			botPet->SetTarget(botPet->GetOwner());
-
-		if(!IsMoving())
-			botPet->AI_IdleCastCheck();
-
-		if(botPet->GetAIMovementTimer()->Check()) {
-			switch(pStandingPetOrder) {
-				case SPO_Follow: {
-					float dist = DistanceSquared(botPet->GetPosition(), botPet->GetTarget()->GetPosition());
-					botPet->SetRunAnimSpeed(0);
-					if(dist > 184) {
-						botPet->RunTo(botPet->GetTarget()->GetX(), botPet->GetTarget()->GetY(), botPet->GetTarget()->GetZ());
-						return;
-					} else {
-						botPet->SetHeading(botPet->GetTarget()->GetHeading());
-						if(moved) {
-							moved = false;
-							StopNavigation();
-							botPet->StopNavigation();
-						}
-					}
-					break;
-				}
-				case SPO_Sit:
-					botPet->SetAppearance(eaSitting);
-					break;
-				case SPO_Guard:
-					botPet->NextGuardPosition();
-					break;
-			}
 		}
 	}
 }
@@ -5440,17 +4869,17 @@ int Bot::GetHandToHandDamage(void) {
 	}
 
 	static uint8 mnk_dmg[] = {99,
-				4, 4, 4, 4, 5, 5, 5, 5, 5, 6,           // 1-10
-				6, 6, 6, 6, 7, 7, 7, 7, 7, 8,           // 11-20
-				8, 8, 8, 8, 9, 9, 9, 9, 9, 10,          // 21-30
+				4, 4, 4, 4, 5, 5, 5, 5, 5, 6,		   // 1-10
+				6, 6, 6, 6, 7, 7, 7, 7, 7, 8,		   // 11-20
+				8, 8, 8, 8, 9, 9, 9, 9, 9, 10,		  // 21-30
 				10, 10, 10, 10, 11, 11, 11, 11, 11, 12, // 31-40
 				12, 12, 12, 12, 13, 13, 13, 13, 13, 14, // 41-50
 				14, 14, 14, 14, 14, 14, 14, 14, 14, 14, // 51-60
-				14, 14};                                // 61-62
+				14, 14};								// 61-62
 	static uint8 bst_dmg[] = {99,
-				4, 4, 4, 4, 4, 5, 5, 5, 5, 5,        // 1-10
-				5, 6, 6, 6, 6, 6, 6, 7, 7, 7,        // 11-20
-				7, 7, 7, 8, 8, 8, 8, 8, 8, 9,        // 21-30
+				4, 4, 4, 4, 4, 5, 5, 5, 5, 5,		// 1-10
+				5, 6, 6, 6, 6, 6, 6, 7, 7, 7,		// 11-20
+				7, 7, 7, 8, 8, 8, 8, 8, 8, 9,		// 21-30
 				9, 9, 9, 9, 9, 10, 10, 10, 10, 10,   // 31-40
 				10, 11, 11, 11, 11, 11, 11, 12, 12}; // 41-49
 	if (GetClass() == MONK) {
@@ -6604,52 +6033,59 @@ bool Bot::DoFinishedSpellAETarget(uint16 spell_id, Mob* spellTarget, EQ::spells:
 }
 
 bool Bot::DoFinishedSpellSingleTarget(uint16 spell_id, Mob* spellTarget, EQ::spells::CastingSlot slot, bool& stopLogic) {
-	if(spellTarget) {
-		if(IsGrouped() && (spellTarget->IsBot() || spellTarget->IsClient()) && RuleB(Bots, GroupBuffing)) {
-			bool noGroupSpell = false;
-			uint16 thespell = spell_id;
-			for (int i = 0; i < AIBot_spells.size(); i++) {
-				int j = BotGetSpells(i);
-				int spelltype = BotGetSpellType(i);
-				bool spellequal = (j == thespell);
-				bool spelltypeequal = ((spelltype == 2) || (spelltype == 16) || (spelltype == 32));
-				bool spelltypetargetequal = ((spelltype == 8) && (spells[thespell].target_type == ST_Self));
-				bool spelltypeclassequal = ((spelltype == 1024) && (GetClass() == SHAMAN));
-				bool slotequal = (slot == EQ::spells::CastingSlot::Item);
-				if(spellequal || slotequal) {
-					if((spelltypeequal || spelltypetargetequal) || spelltypeclassequal || slotequal) {
-						if(((spells[thespell].effect_id[0] == 0) && (spells[thespell].base_value[0] < 0)) &&
-							(spellTarget->GetHP() < ((spells[thespell].base_value[0] * (-1)) + 100))) {
-							LogSpells("GroupBuffing failure");
-							return false;
-						}
 
-						SpellOnTarget(thespell, spellTarget);
-						noGroupSpell = true;
-						stopLogic = true;
+	if (
+		spellTarget &&
+		IsGrouped() &&
+		(
+			spellTarget->IsBot() ||
+			spellTarget->IsClient()
+		) &&
+		RuleB(Bots, GroupBuffing)
+	) {
+		bool noGroupSpell = false;
+		uint16 thespell = spell_id;
+		for (int i = 0; i < AIBot_spells.size(); i++) {
+			int j = BotGetSpells(i);
+			int spelltype = BotGetSpellType(i);
+			bool spellequal = (j == thespell);
+			bool spelltypeequal = ((spelltype == 2) || (spelltype == 16) || (spelltype == 32));
+			bool spelltypetargetequal = ((spelltype == 8) && (spells[thespell].target_type == ST_Self));
+			bool spelltypeclassequal = ((spelltype == 1024) && (GetClass() == SHAMAN));
+			bool slotequal = (slot == EQ::spells::CastingSlot::Item);
+			if(spellequal || slotequal) {
+				if((spelltypeequal || spelltypetargetequal) || spelltypeclassequal || slotequal) {
+					if(((spells[thespell].effect_id[0] == 0) && (spells[thespell].base_value[0] < 0)) &&
+						(spellTarget->GetHP() < ((spells[thespell].base_value[0] * (-1)) + 100))) {
+						LogSpells("GroupBuffing failure");
+						return false;
 					}
+
+					SpellOnTarget(thespell, spellTarget);
+					noGroupSpell = true;
+					stopLogic = true;
 				}
 			}
-
-			if(!noGroupSpell) {
-				Group *g = GetGroup();
-				if(g) {
-					for(int i = 0; i < MAX_GROUP_MEMBERS; i++) {
-						if(g->members[i]) {
-							if((g->members[i]->GetClass() == NECROMANCER) && (IsEffectInSpell(thespell, SE_AbsorbMagicAtt) || IsEffectInSpell(thespell, SE_Rune))) {
-							}
-							else
-								SpellOnTarget(thespell, g->members[i]);
-
-							if(g->members[i] && g->members[i]->GetPetID())
-								SpellOnTarget(thespell, g->members[i]->GetPet());
-						}
-					}
-					SetMana(GetMana() - (GetActSpellCost(thespell, spells[thespell].mana) * (g->GroupCount() - 1)));
-				}
-			}
-			stopLogic = true;
 		}
+
+		if(!noGroupSpell) {
+			Group *g = GetGroup();
+			if(g) {
+				for(int i = 0; i < MAX_GROUP_MEMBERS; i++) {
+					if(g->members[i]) {
+						if((g->members[i]->GetClass() == NECROMANCER) && (IsEffectInSpell(thespell, SE_AbsorbMagicAtt) || IsEffectInSpell(thespell, SE_Rune))) {
+						}
+						else
+							SpellOnTarget(thespell, g->members[i]);
+
+						if(g->members[i] && g->members[i]->GetPetID())
+							SpellOnTarget(thespell, g->members[i]->GetPet());
+					}
+				}
+				SetMana(GetMana() - (GetActSpellCost(thespell, spells[thespell].mana) * (g->GroupCount() - 1)));
+			}
+		}
+		stopLogic = true;
 	}
 	return true;
 }
@@ -6672,7 +6108,7 @@ bool Bot::DoFinishedSpellGroupTarget(uint16 spell_id, Mob* spellTarget, EQ::spel
 	else if (raid) 
 	{
 		std::vector<RaidMember> raid_group_members = raid->GetRaidGroupMembers(raid->GetGroup(GetName()));
-		for (std::vector<RaidMember>::iterator iter = raid_group_members.begin(); iter != raid_group_members.end(); ++iter) {
+		for (auto iter = raid_group_members.begin(); iter != raid_group_members.end(); ++iter) {
 			if (iter->member) {
 				SpellOnTarget(spell_id, iter->member);
 				if (iter->member && iter->member->GetPetID())
@@ -6730,7 +6166,6 @@ void Bot::CalcBonuses() {
 }
 
 int64 Bot::CalcHPRegenCap() {
-	int level = GetLevel();
 	int64 hpregen_cap = 0;
 	hpregen_cap = (RuleI(Character, ItemHealthRegenCap) + itembonuses.HeroicSTA / 25);
 	hpregen_cap += (aabonuses.ItemHPRegenCap + spellbonuses.ItemHPRegenCap + itembonuses.ItemHPRegenCap);
@@ -7534,34 +6969,13 @@ void Bot::UpdateGroupCastingRoles(const Group* group, bool disband)
 		doter->CastToBot()->SetGroupDoter();
 }
 
-//void Bot::UpdateRaidCastingRoles(const Raid* raid, bool disband = false) { }
-
-bool Bot::CanHeal() {
-	bool result = false;
-
-	if(!AI_HasSpells())
-		return false;
-
-	BotSpell botSpell;
-	botSpell.SpellId = 0;
-	botSpell.SpellIndex = 0;
-	botSpell.ManaCost = 0;
-
-	botSpell = GetFirstBotSpellBySpellType(this, SpellType_Heal);
-
-	if(botSpell.SpellId != 0)
-		result = true;
-
-	return result;
-}
-
 Bot* Bot::GetBotByBotClientOwnerAndBotName(Client* c, std::string botName) {
 	Bot* Result = nullptr;
-	if(c) {
+	if (c) {
 		std::list<Bot*> BotList = entity_list.GetBotsByBotOwnerCharacterID(c->CharacterID());
-		if(!BotList.empty()) {
-			for(std::list<Bot*>::iterator botListItr = BotList.begin(); botListItr != BotList.end(); ++botListItr) {
-				if(std::string((*botListItr)->GetCleanName()) == botName) {
+		if (!BotList.empty()) {
+			for (auto botListItr = BotList.begin(); botListItr != BotList.end(); ++botListItr) {
+				if (std::string((*botListItr)->GetCleanName()) == botName) {
 					Result = (*botListItr);
 					break;
 				}

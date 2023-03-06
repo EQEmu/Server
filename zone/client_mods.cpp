@@ -51,7 +51,7 @@ int32 Client::GetMaxStat() const
 	else {
 		base = 330;
 	}
-	return (base);
+	return base;
 }
 
 int32 Client::GetMaxResist() const

@@ -389,9 +389,7 @@ void EntityList::GroupProcess()
 	for (auto &group : group_list)
 		group->Process();
 
-#if EQDEBUG >= 5
-	CheckGroupList (__FILE__, __LINE__);
-#endif
+
 }
 
 void EntityList::QueueToGroupsForNPCHealthAA(Mob *sender, const EQApplicationPacket *app)
@@ -609,9 +607,7 @@ void EntityList::AddGroup(Group *group)
 	}
 
 	AddGroup(group, gid);
-#if EQDEBUG >= 5
-	CheckGroupList (__FILE__, __LINE__);
-#endif
+
 }
 
 void EntityList::AddGroup(Group *group, uint32 gid)
@@ -2115,9 +2111,6 @@ Group *EntityList::GetGroupByMob(Mob *mob)
 			return *iterator;
 		++iterator;
 	}
-#if EQDEBUG >= 5
-	CheckGroupList (__FILE__, __LINE__);
-#endif
 	return nullptr;
 }
 
@@ -2132,9 +2125,6 @@ Group *EntityList::GetGroupByLeaderName(const char *leader)
 			return *iterator;
 		++iterator;
 	}
-#if EQDEBUG >= 5
-	CheckGroupList (__FILE__, __LINE__);
-#endif
 	return nullptr;
 }
 
@@ -2149,9 +2139,6 @@ Group *EntityList::GetGroupByID(uint32 group_id)
 			return *iterator;
 		++iterator;
 	}
-#if EQDEBUG >= 5
-	CheckGroupList (__FILE__, __LINE__);
-#endif
 	return nullptr;
 }
 
@@ -2174,9 +2161,7 @@ Group *EntityList::GetGroupByClient(Client *client)
 			return *iterator;
 		++iterator;
 	}
-#if EQDEBUG >= 5
-	CheckGroupList (__FILE__, __LINE__);
-#endif
+
 	return nullptr;
 }
 
@@ -2258,7 +2243,7 @@ Raid* EntityList::GetRaidByBot(Bot* bot)
 {
 	std::list<RaidMember> rm;
 	auto GetMembersWhoAreBots = [&rm](Raid* r) -> std::list<RaidMember> {
-		for (auto m : r->members) {
+		for (auto const& m : r->members) {
 			if (m.IsBot) {
 				rm.push_back(m);
 			}
@@ -2714,9 +2699,7 @@ void EntityList::RemoveAllGroups()
 		group_list.pop_front();
 		safe_delete(group);
 	}
-#if EQDEBUG >= 5
-	CheckGroupList (__FILE__, __LINE__);
-#endif
+
 }
 
 void EntityList::RemoveAllRaids()
