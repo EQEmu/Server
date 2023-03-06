@@ -346,7 +346,7 @@ int command_init(void)
 		command_add("viewpetition", "[petition number] - View a petition", AccountStatus::ApprenticeGuide, command_viewpetition) ||
 		command_add("viewrecipe", "[Recipe ID] - Show a recipe's entries", AccountStatus::GMAdmin, command_viewrecipe) ||
 		command_add("viewzoneloot", "[item id] - Allows you to search a zone's loot for a specific item ID. (0 shows all loot in the zone)", AccountStatus::QuestTroupe, command_viewzoneloot) ||
-		command_add("wc", "[wear slot] [material] - Sends an OP_WearChange for your target", AccountStatus::GMMgmt, command_wc) ||
+		command_add("wc", "[Slot ID] [Material] [Hero Forge Model] [Elite Material] - Sets the specified slot for you or your target to a material, Hero Forge Model and Elite Material are optional", AccountStatus::GMMgmt, command_wc) ||
 		command_add("weather", "[0/1/2/3] (Off/Rain/Snow/Manual) - Change the weather", AccountStatus::QuestTroupe, command_weather) ||
 		command_add("who", "[search]", AccountStatus::ApprenticeGuide, command_who) ||
 		command_add("worldshutdown", "Shut down world and all zones", AccountStatus::GMMgmt, command_worldshutdown) ||
