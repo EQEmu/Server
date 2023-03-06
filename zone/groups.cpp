@@ -1159,8 +1159,8 @@ bool Group::LearnMembers() {
 		return false;
 	}
 	//starts at 1 becasuse leader [0] is done specifically in the next query from group_leaders, which is position 0
-	int memberIndex = 1;	
-    for(auto row = results.begin(); row != results.end(); ++row) {
+	int memberIndex = 1;
+	for(auto row = results.begin(); row != results.end(); ++row) {
 		if(!row[0])
 			continue;
 
