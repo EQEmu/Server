@@ -3233,7 +3233,11 @@ Client* Bot::SetLeashOwner(Client* bot_owner, Group* bot_group, Raid* raid, uint
 
 	Client* leash_owner = nullptr;
 	if (raid && r_group < MAX_RAID_GROUPS && raid->GetGroupLeader(r_group) && raid->GetGroupLeader(r_group)->IsClient()) {
-		leash_owner = raid->GetGroupLeader(r_group);
+		leash_owner =
+			raid->GetGroupLeader(r_group) &&
+			raid->GetGroupLeader(r_group)->IsClient() ?
+				raid->GetGroupLeader(r_group)->CastToClient() : bot_owner;
+
 	} else if (bot_group) {
 		bot_group->VerifyGroup();
 		leash_owner = (bot_group->GetLeader() && bot_group->GetLeader()->IsClient() ? bot_group->GetLeader()->CastToClient() : bot_owner);
