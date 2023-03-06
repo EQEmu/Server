@@ -198,7 +198,7 @@ int command_init(void)
 		command_add("kill", "Kill your target", AccountStatus::GMAdmin, command_kill) ||
 		command_add("killallnpcs", "[npc_name] - Kills all npcs by search name, leave blank for all attackable NPC's", AccountStatus::GMMgmt, command_killallnpcs) ||
 		command_add("lastname", "[Last Name] - Set your or your player target's last name (use \"-1\" to remove last name)", AccountStatus::Guide, command_lastname) ||
-		command_add("level", "[Level] - Set your target's level", AccountStatus::Steward, command_level) ||
+		command_add("level", "[Level] - Set your or your target's level", AccountStatus::Steward, command_level) ||
 		command_add("list", "[npcs|players|corpses|doors|objects] [search] - Search entities", AccountStatus::ApprenticeGuide, command_list) ||
 		command_add("listpetition", "List petitions", AccountStatus::Guide, command_listpetition) ||
 		command_add("lootsim", "[npc_type_id] [loottable_id] [iterations] - Runs benchmark simulations using real loot logic to report numbers and data", AccountStatus::GMImpossible, command_lootsim) ||
