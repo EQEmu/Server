@@ -4219,10 +4219,6 @@ void Client::Handle_OP_Bug(const EQApplicationPacket *app)
 
 void Client::Handle_OP_Camp(const EQApplicationPacket *app)
 {
-	if (RuleB(Bots, Enabled)) {
-		Bot::BotOrderCampAll(this);
-	}
-
 	if (IsLFP())
 		worldserver.StopLFP(CharacterID());
 

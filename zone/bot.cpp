@@ -422,23 +422,27 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 		}
 	}
 
-	if (current_mana > max_mana)
+	if (current_mana > max_mana) {
 		current_mana = max_mana;
+	}
 
 	cur_end = max_end;
+
+	// Safety Check to confirm we have a valid group
+	if (HasGroup() && !GetGroup()->IsGroupMember(GetBotOwner())) {
+		Bot::RemoveBotFromGroup(this, GetGroup());
+	}
+
+	// Safety Check to confirm we have a valid raid
+	if (HasRaid() && !GetRaid()->IsRaidMember(GetBotOwner()->CastToClient())) {
+		Bot::RemoveBotFromRaid(this);
+	}
+
 }
 
 Bot::~Bot() {
 	AI_Stop();
 	LeaveHealRotationMemberPool();
-
-	if (HasGroup()) {
-		Bot::RemoveBotFromGroup(this, GetGroup());
-	}
-
-	if (HasRaid()) {
-		Bot::RemoveBotFromRaid(this);
-	}
 
 	if (HasPet()) {
 		GetPet()->Depop();
@@ -1512,8 +1516,13 @@ bool Bot::DeleteBot()
 		return false;
 	}
 
-	if (GetGroup())
+	if (GetGroup()) {
 		RemoveBotFromGroup(this, GetGroup());
+	}
+
+	if (GetRaid()) {
+		RemoveBotFromRaid(this);
+	}
 
 	std::string error_message;
 
@@ -3361,15 +3370,12 @@ void Bot::Depop() {
 	WipeHateList();
 	entity_list.RemoveFromHateLists(this);
 
-	if (HasGroup()) {
-		Bot::RemoveBotFromGroup(this, GetGroup());
-	}
 	if (HasPet())
 		GetPet()->Depop();
 
-	_botOwner = 0;
+	_botOwner = nullptr;
 	_botOwnerCharacterID = 0;
-	_previousTarget = 0;
+	_previousTarget = nullptr;
 	NPC::Depop(false);
 }
 
@@ -5577,16 +5583,14 @@ void Bot::BotOrderCampAll(Client* c, uint8 class_id) {
 }
 
 void Bot::ProcessBotOwnerRefDelete(Mob* botOwner) {
-	if (botOwner) {
-		if (botOwner->IsClient()) {
-			std::list<Bot*> BotList = entity_list.GetBotsByBotOwnerCharacterID(botOwner->CastToClient()->CharacterID());
-			if (!BotList.empty()) {
-				for (std::list<Bot*>::iterator botListItr = BotList.begin(); botListItr != BotList.end(); ++botListItr) {
-					Bot* tempBot = *botListItr;
-					if (tempBot) {
-						tempBot->SetTarget(0);
-						tempBot->SetBotOwner(0);
-					}
+	if (botOwner && botOwner->IsClient()) {
+		std::list<Bot*> BotList = entity_list.GetBotsByBotOwnerCharacterID(botOwner->CastToClient()->CharacterID());
+		if (!BotList.empty()) {
+			for (std::list<Bot*>::iterator botListItr = BotList.begin(); botListItr != BotList.end(); ++botListItr) {
+				Bot* tempBot = *botListItr;
+				if (tempBot) {
+					tempBot->SetTarget(nullptr);
+					tempBot->SetBotOwner(nullptr);
 				}
 			}
 		}
