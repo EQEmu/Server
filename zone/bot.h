@@ -964,6 +964,30 @@ private:
 
 	void CheckCombatRange(Mob* tar, float tar_distance, bool& atCombatRange, const EQ::ItemInstance*& p_item,
 	                      const EQ::ItemInstance*& s_item);
+
+	bool TryEvade(Mob* tar);
+
+	bool TryFacingTarget(Mob* tar);
+
+	bool TryRangedAttack(Mob* tar);
+
+	bool TryClassAttacks(Mob* tar);
+
+	bool TryPrimaryWeaponAttacks(Mob* tar, const EQ::ItemInstance* p_item);
+
+	bool TrySecondaryWeaponAttacks(Mob* tar, const EQ::ItemInstance* s_item);
+
+	bool TryPursueTarget(float leash_distance, glm::vec3& Goal);
+
+	bool TryMeditate();
+
+	bool TryAutoDefend(Client* bot_owner, float leash_distance);
+
+	bool TryIdleChecks(float fm_distance);
+
+	bool TryNonCombatMovementChecks(Client* bot_owner, const Mob* follow_mob, glm::vec3& Goal);
+
+	bool TryBardMovementCasts();
 };
 
 

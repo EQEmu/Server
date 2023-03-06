@@ -2450,7 +2450,7 @@ constexpr float MAX_CASTER_DISTANCE[PLAYER_CLASS_COUNT] = {
 void Bot::AI_Process()
 {
 
-#define TEST_COMBATANTS if (!GetTarget() || GetAppearance() == eaDead) { return; }
+#define TEST_COMBATANTS ; if (!GetTarget() || GetAppearance() == eaDead) { return false; }
 #define PULLING_BOT (GetPullingFlag() || GetReturningFlag())
 #define NOT_PULLING_BOT (!GetPullingFlag() && !GetReturningFlag())
 #define GUARDING (GetGuardFlag())
@@ -2619,7 +2619,7 @@ void Bot::AI_Process()
 // ENGAGED AT COMBAT RANGE
 
 		// We can fight
-		if (atCombatRange) {
+		if (atCombatRange)  {
 
 			if (IsMoving()) {
 				StopMoving(CalculateHeadingToTarget(tar->GetX(), tar->GetY()));
@@ -2628,39 +2628,12 @@ void Bot::AI_Process()
 
 			if (AI_movement_timer->Check() && (!spellend_timer.Enabled() || GetClass() == BARD)) {
 
-				if (!IsRooted()) {
-
-					if (HasTargetReflection()) {
-
-						if (!tar->IsFeared() && !tar->IsStunned()) {
-
-							if (GetClass() == ROGUE) {
-
-								if (m_evade_timer.Check(false)) { // Attempt to evade
-
-									int timer_duration = (HideReuseTime - GetSkillReuseTime(EQ::skills::SkillHide)) * 1000;
-									if (timer_duration < 0) {
-										timer_duration = 0;
-									}
-
-									m_evade_timer.Start(timer_duration);
-									if (zone->random.Int(0, 260) < (int)GetSkill(EQ::skills::SkillHide)) {
-										RogueEvade(tar);
-									}
-
-									return;
-								}
-							}
-						}
-					}
+				if (TryEvade(tar)) {
+					return;
 				}
-				else {
 
-					if (!IsSitting() && !IsFacingMob(tar)) {
-
-						FaceTarget(tar);
-						return;
-					}
+				if (TryFacingTarget(tar)) {
+					return;
 				}
 			}
 
@@ -2672,136 +2645,21 @@ void Bot::AI_Process()
 			// TEST_COMBATANTS call. Due to the chance of the target dying and our pointer
 			// being nullified, we need to test it before dereferencing to avoid crashes
 
-			if (IsBotArcher() && ranged_timer.Check(false)) { // Can shoot mezzed, stunned and dead!?
-
-				TEST_COMBATANTS;
-				if (GetTarget()->GetHPRatio() <= 99.0f) {
-					BotRangedAttack(tar);
-				}
+			if (!TryRangedAttack(tar)) {
+				return;
 			}
-			else if (!IsBotArcher() && GetLevel() < GetStopMeleeLevel()) {
 
-				// We can't fight if we don't have a target, are stun/mezzed or dead..
-				// Stop attacking if the target is enraged
-				TEST_COMBATANTS;
-				if (tar->IsEnraged() && !BehindMob(tar, GetX(), GetY())) {
+			if (!IsBotArcher() && GetLevel() < GetStopMeleeLevel()) {
+				if (!TryClassAttacks(tar)) {
 					return;
 				}
 
-				// First, special attack per class (kick, backstab etc..)
-				TEST_COMBATANTS;
-				DoClassAttacks(tar);
-
-				TEST_COMBATANTS;
-				if (attack_timer.Check()) { // Process primary weapon attacks
-
-					Attack(tar, EQ::invslot::slotPrimary);
-
-					TEST_COMBATANTS;
-					TriggerDefensiveProcs(tar, EQ::invslot::slotPrimary, false);
-
-					TEST_COMBATANTS;
-					TryCombatProcs(p_item, tar, EQ::invslot::slotPrimary);
-
-					// bool tripleSuccess = false;
-
-					TEST_COMBATANTS;
-					if (CanThisClassDoubleAttack()) {
-
-						if (CheckBotDoubleAttack()) {
-							Attack(tar, EQ::invslot::slotPrimary, true);
-						}
-
-						TEST_COMBATANTS;
-						if (GetSpecialAbility(SPECATK_TRIPLE) && CheckBotDoubleAttack(true)) {
-							// tripleSuccess = true;
-							Attack(tar, EQ::invslot::slotPrimary, true);
-						}
-
-						TEST_COMBATANTS;
-						// quad attack, does this belong here??
-						if (GetSpecialAbility(SPECATK_QUAD) && CheckBotDoubleAttack(true)) {
-							Attack(tar, EQ::invslot::slotPrimary, true);
-						}
-					}
-
-					TEST_COMBATANTS;
-					// Live AA - Flurry, Rapid Strikes ect (Flurry does not require Triple Attack).
-					int32 flurrychance = (aabonuses.FlurryChance + spellbonuses.FlurryChance + itembonuses.FlurryChance);
-					if (flurrychance) {
-
-						if (zone->random.Int(0, 100) < flurrychance) {
-
-							MessageString(Chat::NPCFlurry, YOU_FLURRY);
-							Attack(tar, EQ::invslot::slotPrimary, false);
-
-							TEST_COMBATANTS;
-							Attack(tar, EQ::invslot::slotPrimary, false);
-						}
-					}
-
-					TEST_COMBATANTS;
-					auto ExtraAttackChanceBonus =
-						(spellbonuses.ExtraAttackChance[0] + itembonuses.ExtraAttackChance[0] +
-						aabonuses.ExtraAttackChance[0]);
-					if (ExtraAttackChanceBonus) {
-
-						if (p_item && p_item->GetItem()->IsType2HWeapon()) {
-
-							if (zone->random.Int(0, 100) < ExtraAttackChanceBonus) {
-								Attack(tar, EQ::invslot::slotPrimary, false);
-							}
-						}
-					}
+				if (!TryPrimaryWeaponAttacks(tar, p_item)) {
+					return;
 				}
 
-				TEST_COMBATANTS;
-				if (attack_dw_timer.Check() && CanThisClassDualWield()) { // Process secondary weapon attacks
-
-					const EQ::ItemData* s_itemdata = nullptr;
-					// Can only dual wield without a weapon if you're a monk
-					if (s_item || (GetClass() == MONK)) {
-
-						if (s_item) {
-							s_itemdata = s_item->GetItem();
-						}
-
-						int weapon_type = 0; // No weapon type.
-						bool use_fist = true;
-						if (s_itemdata) {
-
-							weapon_type = s_itemdata->ItemType;
-							use_fist = false;
-						}
-
-						if (use_fist || !s_itemdata->IsType2HWeapon()) {
-
-							float DualWieldProbability = 0.0f;
-
-							int32 Ambidexterity = (aabonuses.Ambidexterity + spellbonuses.Ambidexterity + itembonuses.Ambidexterity);
-							DualWieldProbability = ((GetSkill(EQ::skills::SkillDualWield) + GetLevel() + Ambidexterity) / 400.0f); // 78.0 max
-
-							int32 DWBonus = (spellbonuses.DualWieldChance + itembonuses.DualWieldChance);
-							DualWieldProbability += (DualWieldProbability * float(DWBonus) / 100.0f);
-
-							float random = zone->random.Real(0, 1);
-							if (random < DualWieldProbability) { // Max 78% of DW
-
-								Attack(tar, EQ::invslot::slotSecondary);	// Single attack with offhand
-
-								TEST_COMBATANTS;
-								TryCombatProcs(s_item, tar, EQ::invslot::slotSecondary);
-
-								TEST_COMBATANTS;
-								if (CanThisClassDoubleAttack() && CheckBotDoubleAttack()) {
-
-									if (tar->GetHP() > -10) {
-										Attack(tar, EQ::invslot::slotSecondary);	// Single attack with offhand
-									}
-								}
-							}
-						}
-					}
+				if (!TrySecondaryWeaponAttacks(tar, s_item)) {
+					return;
 				}
 			}
 
@@ -2812,64 +2670,13 @@ void Bot::AI_Process()
 
 // ENGAGED NOT AT COMBAT RANGE
 
-		else { // To far away to fight (GetTarget() validity can be iffy below this point - including outer scopes)
+		else if (!TryPursueTarget(leash_distance, Goal)) {
+			return;
+		}
 
-			// This code actually gets processed when we are too far away from target and have not engaged yet, too
-			if (/*!GetCombatJitterFlag() && */AI_movement_timer->Check() && (!spellend_timer.Enabled() || GetClass() == BARD)) { // Pursue processing
+// End not in combat range
 
-				if (GetTarget() && !IsRooted()) {
-
-					LogAIDetail("Pursuing [{}] while engaged", GetTarget()->GetCleanName());
-					Goal = GetTarget()->GetPosition();
-					if (DistanceSquared(m_Position, Goal) <= leash_distance) {
-						RunTo(Goal.x, Goal.y, Goal.z);
-					}
-					else {
-
-						WipeHateList();
-						SetTarget(nullptr);
-						if (HasPet() && (GetClass() != ENCHANTER || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 2)) {
-
-							GetPet()->WipeHateList();
-							GetPet()->SetTarget(nullptr);
-						}
-					}
-
-					return;
-				}
-				else {
-
-					if (IsMoving()) {
-						StopMoving();
-					}
-					return;
-				}
-			}
-
-			if (GetTarget() && GetTarget()->IsFeared() && !spellend_timer.Enabled() && AI_think_timer->Check()) {
-
-				if (!IsFacingMob(GetTarget())) {
-					FaceTarget(GetTarget());
-				}
-
-				// This is a mob that is fleeing either because it has been feared or is low on hitpoints
-				AI_PursueCastCheck(); // This appears to always return true..can't trust for success/fail
-
-				return;
-			}
-		} // End not in combat range
-
-
-
-		if (!IsMoving() && !spellend_timer.Enabled()) { // This may actually need work...
-
-			if (GetTarget() && AI_EngagedCastCheck()) {
-				BotMeditate(false);
-			}
-			else if (GetArchetype() == ARCHETYPE_CASTER) {
-				BotMeditate(true);
-			}
-
+		if (TryMeditate()) {
 			return;
 		}
 	}
@@ -2885,57 +2692,9 @@ void Bot::AI_Process()
 
 // AUTO DEFEND
 
-		// This is as close as I could get without modifying the aggro mechanics and making it an expensive process...
-		// 'class Client' doesn't make use of hate_list...
-		if (RuleB(Bots, AllowOwnerOptionAutoDefend) && bot_owner->GetBotOption(Client::booAutoDefend)) {
-
-			if (!m_auto_defend_timer.Enabled()) {
-
-				m_auto_defend_timer.Start(zone->random.Int(250, 1250)); // random timer to simulate 'awareness' (cuts down on scanning overhead)
-				return;
-			}
-
-			if (m_auto_defend_timer.Check() && bot_owner->GetAggroCount()) {
-
-				if (NOT_HOLDING && NOT_PASSIVE) {
-
-					auto xhaters = bot_owner->GetXTargetAutoMgr();
-					if (xhaters && !xhaters->empty()) {
-
-						for (auto hater_iter : xhaters->get_list()) {
-
-							if (!hater_iter.spawn_id) {
-								continue;
-							}
-
-							if (bot_owner->GetBotPulling() && bot_owner->GetTarget() && hater_iter.spawn_id == bot_owner->GetTarget()->GetID()) {
-								continue;
-							}
-
-							auto hater = entity_list.GetMob(hater_iter.spawn_id);
-							if (hater && !hater->IsMezzed() && DistanceSquared(hater->GetPosition(), bot_owner->GetPosition()) <= leash_distance) {
-
-								// This is roughly equivilent to npc attacking a client pet owner
-								AddToHateList(hater, 1);
-								SetTarget(hater);
-								SetAttackingFlag();
-								if (HasPet() && (GetClass() != ENCHANTER || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 2)) {
-
-									GetPet()->AddToHateList(hater, 1);
-									GetPet()->SetTarget(hater);
-								}
-
-								m_auto_defend_timer.Disable();
-
-								return;
-							}
-						}
-					}
-				}
-			}
+		if (TryAutoDefend(bot_owner, leash_distance) ) {
+			return;
 		}
-
-
 
 		SetTarget(nullptr);
 
@@ -2952,85 +2711,380 @@ void Bot::AI_Process()
 // OK TO IDLE
 
 		// Ok to idle
-		if ((NOT_GUARDING && fm_distance <= GetFollowDistance()) || (GUARDING && DistanceSquared(GetPosition(), GetGuardPoint()) <= GetFollowDistance())) {
-
-			if (!IsMoving() && AI_think_timer->Check() && !spellend_timer.Enabled()) {
-
-				if (NOT_PASSIVE) {
-
-					if (!AI_IdleCastCheck() && !IsCasting() && GetClass() != BARD) {
-						BotMeditate(true);
-					}
-				}
-				else {
-
-					if (GetClass() != BARD) {
-						BotMeditate(true);
-					}
-				}
-
-				return;
-			}
+		if (TryIdleChecks(fm_distance)) {
+			return;
 		}
-
-		// Non-engaged movement checks
-		if (AI_movement_timer->Check() && (!IsCasting() || GetClass() == BARD)) {
-
-			if (GUARDING) {
-				Goal = GetGuardPoint();
-			}
-			else {
-				Goal = follow_mob->GetPosition();
-			}
-			float destination_distance = DistanceSquared(GetPosition(), Goal);
-
-			if ((!bot_owner->GetBotPulling() || PULLING_BOT) && (destination_distance > GetFollowDistance())) {
-
-				if (!IsRooted()) {
-
-					if (rest_timer.Enabled()) {
-						rest_timer.Disable();
-					}
-
-					bool running = true;
-
-					if (destination_distance < GetFollowDistance() + BOT_FOLLOW_DISTANCE_WALK) {
-						running = false;
-					}
-
-					if (running) {
-						RunTo(Goal.x, Goal.y, Goal.z);
-					}
-					else {
-						WalkTo(Goal.x, Goal.y, Goal.z);
-					}
-
-					return;
-				}
-			}
-			else {
-
-				if (IsMoving()) {
-
-					StopMoving();
-					return;
-				}
-			}
+		if (TryNonCombatMovementChecks(bot_owner, follow_mob, Goal)) {
+			return;
 		}
-
-		// Basically, bard bots get a chance to cast idle spells while moving
-		if (GetClass() == BARD && IsMoving() && NOT_PASSIVE) {
-
-			if (!spellend_timer.Enabled() && AI_think_timer->Check()) {
-
-				AI_IdleCastCheck();
-				return;
-			}
+		if (TryBardMovementCasts()) {
+			return;
 		}
-
-
 
 	}
+}
+
+bool Bot::TryBardMovementCasts() {// Basically, bard bots get a chance to cast idle spells while moving
+	if (GetClass() == BARD && IsMoving() && NOT_PASSIVE) {
+
+		if (!spellend_timer.Enabled() && AI_think_timer->Check()) {
+
+			AI_IdleCastCheck();
+			return true;
+		}
+	}
+	return false;
+}
+
+bool Bot::TryNonCombatMovementChecks(Client* bot_owner, const Mob* follow_mob, glm::vec3& Goal) {// Non-engaged movement checks
+
+	if (AI_movement_timer->Check() && (!IsCasting() || GetClass() == BARD)) {
+		if (GUARDING) {
+			Goal = GetGuardPoint();
+		}
+		else {
+			Goal = follow_mob->GetPosition();
+		}
+		float destination_distance = DistanceSquared(GetPosition(), Goal);
+
+		if ((!bot_owner->GetBotPulling() || PULLING_BOT) && (destination_distance > GetFollowDistance())) {
+
+			if (!IsRooted()) {
+
+				if (rest_timer.Enabled()) {
+					rest_timer.Disable();
+				}
+
+				bool running = true;
+
+				if (destination_distance < GetFollowDistance() + BOT_FOLLOW_DISTANCE_WALK) {
+					running = false;
+				}
+
+				if (running) {
+					RunTo(Goal.x, Goal.y, Goal.z);
+				}
+				else {
+					WalkTo(Goal.x, Goal.y, Goal.z);
+				}
+
+				return true;
+			}
+		}
+		else {
+
+			if (IsMoving()) {
+
+				StopMoving();
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+bool Bot::TryIdleChecks(float fm_distance) {
+
+	if ((NOT_GUARDING && fm_distance <= GetFollowDistance()) || (GUARDING && DistanceSquared(GetPosition(), GetGuardPoint()) <= GetFollowDistance())) {
+
+		if (!IsMoving() && AI_think_timer->Check() && !spellend_timer.Enabled()) {
+
+			if (NOT_PASSIVE) {
+
+				if (!AI_IdleCastCheck() && !IsCasting() && GetClass() != BARD) {
+					BotMeditate(true);
+				}
+			}
+			else {
+
+				if (GetClass() != BARD) {
+					BotMeditate(true);
+				}
+			}
+
+			return true;
+		}
+	}
+	return false;
+}
+
+// This is as close as I could get without modifying the aggro mechanics and making it an expensive process...
+// 'class Client' doesn't make use of hate_list
+bool Bot::TryAutoDefend(Client* bot_owner, float leash_distance) {
+
+	if (RuleB(Bots, AllowOwnerOptionAutoDefend) && bot_owner->GetBotOption(Client::booAutoDefend)) {
+
+		if (!m_auto_defend_timer.Enabled()) {
+
+			m_auto_defend_timer.Start(zone->random.Int(250, 1250)); // random timer to simulate 'awareness' (cuts down on scanning overhead)
+			return true;
+		}
+
+		if (m_auto_defend_timer.Check() && bot_owner->GetAggroCount()) {
+
+			if (NOT_HOLDING && NOT_PASSIVE) {
+
+				auto xhaters = bot_owner->GetXTargetAutoMgr();
+				if (xhaters && !xhaters->empty()) {
+
+					for (auto hater_iter : xhaters->get_list()) {
+
+						if (!hater_iter.spawn_id) {
+							continue;
+						}
+
+						if (bot_owner->GetBotPulling() && bot_owner->GetTarget() && hater_iter.spawn_id == bot_owner->GetTarget()->GetID()) {
+							continue;
+						}
+
+						auto hater = entity_list.GetMob(hater_iter.spawn_id);
+						if (hater && !hater->IsMezzed() && DistanceSquared(hater->GetPosition(), bot_owner->GetPosition()) <= leash_distance) {
+
+							// This is roughly equivilent to npc attacking a client pet owner
+							AddToHateList(hater, 1);
+							SetTarget(hater);
+							SetAttackingFlag();
+							if (HasPet() && (GetClass() != ENCHANTER || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 2)) {
+
+								GetPet()->AddToHateList(hater, 1);
+								GetPet()->SetTarget(hater);
+							}
+
+							m_auto_defend_timer.Disable();
+
+							return true;
+						}
+					}
+				}
+			}
+		}
+	}
+	return false;
+}
+
+bool Bot::TryMeditate() {
+
+	if (!IsMoving() && !spellend_timer.Enabled()) {
+
+		if (GetTarget() && AI_EngagedCastCheck()) {
+			BotMeditate(false);
+		}
+		else if (GetArchetype() == ARCHETYPE_CASTER) {
+			BotMeditate(true);
+		}
+
+		return true;
+	}
+	return false;
+}
+
+// This code actually gets processed when we are too far away from target and have not engaged yet
+bool Bot::TryPursueTarget(float leash_distance, glm::vec3& Goal) {
+
+	if (AI_movement_timer->Check() && (!spellend_timer.Enabled() || GetClass() == BARD)) { // Pursue processing
+		if (GetTarget() && !IsRooted()) {
+
+			LogAIDetail("Pursuing [{}] while engaged", GetTarget()->GetCleanName());
+			Goal = GetTarget()->GetPosition();
+			if (DistanceSquared(m_Position, Goal) <= leash_distance) {
+				RunTo(Goal.x, Goal.y, Goal.z);
+			}
+			else {
+
+				WipeHateList();
+				SetTarget(nullptr);
+				if (HasPet() && (GetClass() != ENCHANTER || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 2)) {
+
+					GetPet()->WipeHateList();
+					GetPet()->SetTarget(nullptr);
+				}
+			}
+
+			return true;
+		}
+		else {
+
+			if (IsMoving()) {
+				StopMoving();
+			}
+			return false;
+		}
+	}
+
+	if (GetTarget() && GetTarget()->IsFeared() && !spellend_timer.Enabled() && AI_think_timer->Check()) {
+
+		if (!IsFacingMob(GetTarget())) {
+			FaceTarget(GetTarget());
+		}
+
+		// This is a mob that is fleeing either because it has been feared or is low on hitpoints
+		AI_PursueCastCheck(); // This appears to always return true..can't trust for success/fail
+
+		return true;
+	}
+	return false;
+}
+
+bool Bot::TrySecondaryWeaponAttacks(Mob* tar, const EQ::ItemInstance* s_item) {
+
+	TEST_COMBATANTS
+	if (attack_dw_timer.Check() && CanThisClassDualWield()) {
+		const EQ::ItemData* s_itemdata = nullptr;
+
+		// Can only dual wield without a weapon if you're a monk
+		if (s_item || (GetClass() == MONK)) {
+
+			if (s_item) {
+				s_itemdata = s_item->GetItem();
+			}
+
+			bool use_fist = true;
+			if (s_itemdata) {
+				use_fist = false;
+			}
+
+			if (use_fist || !s_itemdata->IsType2HWeapon()) {
+
+				float DualWieldProbability = 0.0f;
+
+				int32 Ambidexterity = (aabonuses.Ambidexterity + spellbonuses.Ambidexterity + itembonuses.Ambidexterity);
+				DualWieldProbability = ((GetSkill(EQ::skills::SkillDualWield) + GetLevel() + Ambidexterity) / 400.0f); // 78.0 max
+
+				int32 DWBonus = (spellbonuses.DualWieldChance + itembonuses.DualWieldChance);
+				DualWieldProbability += (DualWieldProbability * float(DWBonus) / 100.0f);
+
+				float random = zone->random.Real(0, 1);
+				if (random < DualWieldProbability) { // Max 78% of DW
+
+					Attack(tar, EQ::invslot::slotSecondary);	// Single attack with offhand
+
+					TEST_COMBATANTS
+					TryCombatProcs(s_item, tar, EQ::invslot::slotSecondary);
+
+					TEST_COMBATANTS
+					if (CanThisClassDoubleAttack() && CheckBotDoubleAttack() && tar->GetHP() > -10) {
+						Attack(tar, EQ::invslot::slotSecondary);	// Single attack with offhand
+					}
+				}
+			}
+		}
+	}
+	return true;
+}
+
+bool Bot::TryPrimaryWeaponAttacks(Mob* tar, const EQ::ItemInstance* p_item) {
+
+	TEST_COMBATANTS
+	if (attack_timer.Check()) { // Process primary weapon attacks
+
+		Attack(tar, EQ::invslot::slotPrimary);
+
+		TEST_COMBATANTS
+		TriggerDefensiveProcs(tar, EQ::invslot::slotPrimary, false);
+
+		TEST_COMBATANTS
+		TryCombatProcs(p_item, tar, EQ::invslot::slotPrimary);
+
+		TEST_COMBATANTS
+		if (CanThisClassDoubleAttack()) {
+
+			if (CheckBotDoubleAttack()) {
+				Attack(tar, EQ::invslot::slotPrimary, true);
+			}
+
+			TEST_COMBATANTS
+			if (GetSpecialAbility(SPECATK_TRIPLE) && CheckBotDoubleAttack(true)) {
+
+				Attack(tar, EQ::invslot::slotPrimary, true);
+			}
+
+			TEST_COMBATANTS
+			// quad attack, does this belong here??
+			if (GetSpecialAbility(SPECATK_QUAD) && CheckBotDoubleAttack(true)) {
+				Attack(tar, EQ::invslot::slotPrimary, true);
+			}
+		}
+
+		TEST_COMBATANTS
+		// Live AA - Flurry, Rapid Strikes ect (Flurry does not require Triple Attack).
+		if (int32 flurrychance = (aabonuses.FlurryChance + spellbonuses.FlurryChance + itembonuses.FlurryChance)) {
+
+			if (zone->random.Int(0, 100) < flurrychance) {
+
+				MessageString(Chat::NPCFlurry, YOU_FLURRY);
+				Attack(tar, EQ::invslot::slotPrimary, false);
+
+				TEST_COMBATANTS
+				Attack(tar, EQ::invslot::slotPrimary, false);
+			}
+		}
+
+		TEST_COMBATANTS
+		auto ExtraAttackChanceBonus =
+			(spellbonuses.ExtraAttackChance[0] + itembonuses.ExtraAttackChance[0] +
+			 aabonuses.ExtraAttackChance[0]);
+		if (ExtraAttackChanceBonus) {
+
+			if (p_item && p_item->GetItem()->IsType2HWeapon() && zone->random.Int(0, 100) < ExtraAttackChanceBonus) {
+				Attack(tar, EQ::invslot::slotPrimary, false);
+			}
+		}
+	}
+	return true;
+}
+
+// We can't fight if we don't have a target, are stun/mezzed or dead..
+bool Bot::TryClassAttacks(Mob* tar) {
+
+// Stop attacking if the target is enraged
+	TEST_COMBATANTS
+	if (tar->IsEnraged() && !BehindMob(tar, GetX(), GetY())) {
+		return false;
+	}
+
+	// First, special attack per class (kick, backstab etc..)
+	DoClassAttacks(tar);
+}
+
+bool Bot::TryRangedAttack(Mob* tar) {
+	if (IsBotArcher() && ranged_timer.Check(false)) {
+
+		TEST_COMBATANTS
+		if (GetTarget()->GetHPRatio() <= 99.0f) {
+			BotRangedAttack(tar);
+		}
+	}
+}
+
+bool Bot::TryFacingTarget(Mob* tar) {
+
+	if (!IsSitting() && !IsFacingMob(tar)) {
+		FaceTarget(tar);
+		return true;
+	}
+	return false;
+}
+
+bool Bot::TryEvade(Mob* tar) {
+
+	if (!IsRooted()) {
+		if (HasTargetReflection()) {
+			if (!tar->IsFeared() && !tar->IsStunned() && GetClass() == ROGUE && m_evade_timer.Check(false)) { // Attempt to evade
+				int timer_duration = (HideReuseTime - GetSkillReuseTime(EQ::skills::SkillHide)) * 1000;
+
+				if (timer_duration < 0) {
+					timer_duration = 0;
+				}
+				m_evade_timer.Start(timer_duration);
+				if (zone->random.Int(0, 260) < (int) GetSkill(EQ::skills::SkillHide)) {
+					RogueEvade(tar);
+				}
+
+				return true;
+			}
+		}
+	}
+	return false;
 }
 
 void Bot::CheckCombatRange(Mob* tar, float tar_distance, bool& atCombatRange, const EQ::ItemInstance*& p_item, const EQ::ItemInstance*& s_item) {
