@@ -2250,7 +2250,7 @@ void Bot::AI_Process()
 // ENGAGED AT COMBAT RANGE
 
 		// We can fight
-		if (atCombatRange)  {
+		if (atCombatRange) {
 
 			if (IsMoving()) {
 				StopMoving(CalculateHeadingToTarget(tar->GetX(), tar->GetY()));
@@ -2276,7 +2276,7 @@ void Bot::AI_Process()
 			// TEST_COMBATANTS call. Due to the chance of the target dying and our pointer
 			// being nullified, we need to test it before dereferencing to avoid crashes
 
-			if (!TryRangedAttack(tar)) {
+			if (IsBotArcher() && TryRangedAttack(tar)) {
 				return;
 			}
 
@@ -2675,13 +2675,16 @@ bool Bot::TryClassAttacks(Mob* tar) {
 }
 
 bool Bot::TryRangedAttack(Mob* tar) {
+
 	if (IsBotArcher() && ranged_timer.Check(false)) {
 
 		TEST_COMBATANTS
 		if (GetTarget()->GetHPRatio() <= 99.0f) {
 			BotRangedAttack(tar);
 		}
+		return true;
 	}
+	return false;
 }
 
 bool Bot::TryFacingTarget(Mob* tar) {
