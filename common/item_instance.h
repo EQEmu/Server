@@ -228,6 +228,9 @@ namespace EQ
 		inline int32 GetSerialNumber() const { return m_SerialNumber; }
 		inline void SetSerialNumber(int32 id) { m_SerialNumber = id; }
 
+		inline std::string GetGUID() const { return m_guid; }
+		inline void SetGUID(const std::string &guid) { m_guid = guid; }
+
 		std::map<std::string, ::Timer>& GetTimers() { return m_timers; }
 		void SetTimer(std::string name, uint32 time);
 		void StopTimer(std::string name);
@@ -313,6 +316,7 @@ namespace EQ
 		bool				m_attuned;
 		int32				m_merchantcount;		//number avaliable on the merchant, -1=unlimited
 		int32				m_SerialNumber;	// Unique identifier for this instance of an item. Needed for Bazaar.
+		std::string         m_guid;
 		uint32				m_exp;
 		int8				m_evolveLvl;
 		bool				m_activated;
