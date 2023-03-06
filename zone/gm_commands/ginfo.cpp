@@ -45,7 +45,7 @@ void command_ginfo(Client *c, const Seperator *sep)
 		if (target_group->membername[group_member][0] == '\0') {
 			continue;
 		}
-		
+
 		bool is_assist = target_group->MemberRoles[group_member] & RoleAssist;
 		bool is_puller = target_group->MemberRoles[group_member] & RolePuller;
 		bool is_tank = target_group->MemberRoles[group_member] & RoleTank;
@@ -61,10 +61,10 @@ void command_ginfo(Client *c, const Seperator *sep)
 					target_group->membername[group_member]
 				)
 			),
-			target_group->members[group_member] ? "<c \"#00FF00\">✔</c>" : "<c \"#F62217\">❌</c>",
-			is_assist ? "<c \"#00FF00\">✔</c>" : "<c \"#F62217\">❌</c>",
-			is_puller ? "<c \"#00FF00\">✔</c>" : "<c \"#F62217\">❌</c>",
-			is_tank ? "<c \"#00FF00\">✔</c>" : "<c \"#F62217\">❌</c>"
+			target_group->members[group_member] ? "<c \"#00FF00\">Y</c>" : "<c \"#F62217\">N</c>",
+			is_assist ? "<c \"#00FF00\">Y</c>" : "<c \"#F62217\">N</c>",
+			is_puller ? "<c \"#00FF00\">Y</c>" : "<c \"#F62217\">N</c>",
+			is_tank ? "<c \"#00FF00\">Y</c>" : "<c \"#F62217\">N</c>"
 		);
 	}
 
