@@ -295,11 +295,11 @@ bool SharedDatabase::UpdateInventorySlot(uint32 char_id, const EQ::ItemInstance*
 
 	// Update/Insert item
 	const std::string query = StringFormat("REPLACE INTO inventory "
-	                                       "(charid, slotid, itemid, charges, instnodrop, custom_data, color, "
+	                                       "(guid, charid, slotid, itemid, charges, instnodrop, custom_data, color, "
 	                                       "augslot1, augslot2, augslot3, augslot4, augslot5, augslot6, ornamenticon, ornamentidfile, ornament_hero_model) "
-	                                       "VALUES( %lu, %lu, %lu, %lu, %lu, '%s', %lu, "
+	                                       "VALUES( '%s', %lu, %lu, %lu, %lu, %lu, '%s', %lu, "
 	                                       "%lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu)",
-	                                       static_cast<unsigned long>(char_id), static_cast<unsigned long>(slot_id), static_cast<unsigned long>(inst->GetItem()->ID),
+	                                       inst->GetGuid().c_str(), static_cast<unsigned long>(char_id), static_cast<unsigned long>(slot_id), static_cast<unsigned long>(inst->GetItem()->ID),
 	                                       static_cast<unsigned long>(charges), static_cast<unsigned long>(inst->IsAttuned() ? 1 : 0),
 	                                       inst->GetCustomDataString().c_str(), static_cast<unsigned long>(inst->GetColor()),
 	                                       static_cast<unsigned long>(augslot[0]), static_cast<unsigned long>(augslot[1]), static_cast<unsigned long>(augslot[2]),
@@ -343,11 +343,11 @@ bool SharedDatabase::UpdateSharedBankSlot(uint32 char_id, const EQ::ItemInstance
         charges = 0x7FFF;
 
 	const std::string query = StringFormat("REPLACE INTO sharedbank "
-	                                       "(acctid, slotid, itemid, charges, custom_data, "
+	                                       "(guid, acctid, slotid, itemid, charges, custom_data, "
 	                                       "augslot1, augslot2, augslot3, augslot4, augslot5, augslot6) "
-	                                       "VALUES( %lu, %lu, %lu, %lu, '%s', "
+	                                       "VALUES( '%s', %lu, %lu, %lu, %lu, '%s', "
 	                                       "%lu, %lu, %lu, %lu, %lu, %lu)",
-	                                       static_cast<unsigned long>(account_id), static_cast<unsigned long>(slot_id), static_cast<unsigned long>(inst->GetItem()->ID),
+	                                       inst->GetGuid().c_str(), static_cast<unsigned long>(account_id), static_cast<unsigned long>(slot_id), static_cast<unsigned long>(inst->GetItem()->ID),
 	                                       static_cast<unsigned long>(charges), inst->GetCustomDataString().c_str(), static_cast<unsigned long>(augslot[0]),
 	                                       static_cast<unsigned long>(augslot[1]), static_cast<unsigned long>(augslot[2]), static_cast<unsigned long>(augslot[3]), static_cast<unsigned long>(augslot[4]),
 	                                       static_cast<unsigned long>(augslot[5]));
@@ -481,7 +481,7 @@ bool SharedDatabase::SetStartingItems(PlayerProfile_Struct* pp, EQ::InventoryPro
 		if(!myitem)
 			continue;
 
-		const EQ::ItemInstance* myinst = CreateBaseItem(myitem, charges);
+		const EQ::ItemInstance* myinst = CreateBaseItem(myitem, "", charges);
 
 		if(slot < 0)
 			slot = inv->FindFreeSlot(0, 0);
@@ -502,14 +502,14 @@ bool SharedDatabase::GetSharedBank(uint32 id, EQ::InventoryProfile *inv, bool is
 	if (is_charid)
 		query = StringFormat("SELECT sb.slotid, sb.itemid, sb.charges, "
 				     "sb.augslot1, sb.augslot2, sb.augslot3, "
-				     "sb.augslot4, sb.augslot5, sb.augslot6, sb.custom_data "
+				     "sb.augslot4, sb.augslot5, sb.augslot6, sb.custom_data, sb.guid "
 				     "FROM sharedbank sb INNER JOIN character_data ch "
 				     "ON ch.account_id=sb.acctid WHERE ch.id = %i ORDER BY sb.slotid",
 				     id);
 	else
 		query = StringFormat("SELECT slotid, itemid, charges, "
 				     "augslot1, augslot2, augslot3, "
-				     "augslot4, augslot5, augslot6, custom_data "
+				     "augslot4, augslot5, augslot6, custom_data, guid "
 				     "FROM sharedbank WHERE acctid=%i ORDER BY slotid",
 				     id);
 	auto results = QueryDatabase(query);
@@ -538,7 +538,9 @@ bool SharedDatabase::GetSharedBank(uint32 id, EQ::InventoryProfile *inv, bool is
 			continue;
 		}
 
-		EQ::ItemInstance *inst = CreateBaseItem(item, charges);
+		std::string guid = row[10];
+
+		EQ::ItemInstance *inst = CreateBaseItem(item, guid, charges);
 		if (inst && item->IsClassCommon()) {
 			for (int i = EQ::invaug::SOCKET_BEGIN; i <= EQ::invaug::SOCKET_END; i++) {
 				if (aug[i])
@@ -598,7 +600,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv)
 	// Retrieve character inventory
 	const std::string query =
 	    StringFormat("SELECT slotid, itemid, charges, color, augslot1, augslot2, augslot3, augslot4, augslot5, "
-			 "augslot6, instnodrop, custom_data, ornamenticon, ornamentidfile, ornament_hero_model FROM "
+			 "augslot6, instnodrop, custom_data, ornamenticon, ornamentidfile, ornament_hero_model, guid FROM "
 			 "inventory WHERE charid = %i ORDER BY slotid",
 			 char_id);
 	auto results = QueryDatabase(query);
@@ -672,7 +674,8 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv)
 			continue;
 		}
 
-		EQ::ItemInstance *inst = CreateBaseItem(item, charges);
+		std::string guid = row[15];
+		EQ::ItemInstance *inst = CreateBaseItem(item, guid, charges);
 
 		if (inst == nullptr)
 			continue;
@@ -781,7 +784,7 @@ bool SharedDatabase::GetInventory(uint32 account_id, char *name, EQ::InventoryPr
 	const std::string query =
 	    StringFormat("SELECT slotid, itemid, charges, color, augslot1, "
 			 "augslot2, augslot3, augslot4, augslot5, augslot6, instnodrop, custom_data, ornamenticon, "
-			 "ornamentidfile, ornament_hero_model "
+			 "ornamentidfile, ornament_hero_model, guid "
 			 "FROM inventory INNER JOIN character_data ch "
 			 "ON ch.id = charid WHERE ch.name = '%s' AND ch.account_id = %i ORDER BY slotid",
 			 name, account_id);
@@ -816,7 +819,9 @@ bool SharedDatabase::GetInventory(uint32 account_id, char *name, EQ::InventoryPr
 		if (!item)
 			continue;
 
-		EQ::ItemInstance *inst = CreateBaseItem(item, charges);
+		std::string guid = row[15];
+
+		EQ::ItemInstance *inst = CreateBaseItem(item, guid, charges);
 
 		if (inst == nullptr)
 			continue;
@@ -1550,7 +1555,7 @@ EQ::ItemInstance* SharedDatabase::CreateItem(
 
 	const EQ::ItemData* item = GetItem(item_id);
 	if (item) {
-		inst = CreateBaseItem(item, charges);
+		inst = CreateBaseItem(item, "", charges);
 
 		if (!inst) {
 			LogError("Error: valid item data returned a null reference for EQ::ItemInstance creation in SharedDatabase::CreateItem()");
@@ -1585,7 +1590,7 @@ EQ::ItemInstance* SharedDatabase::CreateItem(
 ) {
 	EQ::ItemInstance* inst = nullptr;
 	if (item) {
-		inst = CreateBaseItem(item, charges);
+		inst = CreateBaseItem(item, "", charges);
 
 		if (!inst) {
 			LogError("Error: valid item data returned a null reference for EQ::ItemInstance creation in SharedDatabase::CreateItem()");
@@ -1605,7 +1610,7 @@ EQ::ItemInstance* SharedDatabase::CreateItem(
 	return inst;
 }
 
-EQ::ItemInstance* SharedDatabase::CreateBaseItem(const EQ::ItemData* item, int16 charges) {
+EQ::ItemInstance* SharedDatabase::CreateBaseItem(const EQ::ItemData* item, const std::string& guid, int16 charges) {
 	EQ::ItemInstance* inst = nullptr;
 	if (item) {
 		// if maxcharges is -1 that means it is an unlimited use item.
@@ -1616,7 +1621,7 @@ EQ::ItemInstance* SharedDatabase::CreateBaseItem(const EQ::ItemData* item, int16
 		if(charges <= 0 && item->Stackable)
 			charges = 1;
 
-		inst = new EQ::ItemInstance(item, charges);
+		inst = new EQ::ItemInstance(item, guid, charges);
 
 		if (inst == nullptr) {
 			LogError("Error: valid item data returned a null reference for EQ::ItemInstance creation in SharedDatabase::CreateBaseItem()");

@@ -139,7 +139,7 @@ public:
 		uint32 aug6 = 0,
 		bool attuned = 0
 	);
-	EQ::ItemInstance *CreateBaseItem(const EQ::ItemData *item, int16 charges = 0);
+	EQ::ItemInstance *CreateBaseItem(const EQ::ItemData *item, const std::string &guid, int16 charges);
 
 	void GetItemsCount(int32 &item_count, uint32 &max_id);
 	void LoadItems(void *data, uint32 size, int32 items, uint32 max_item_id);

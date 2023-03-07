@@ -876,7 +876,8 @@ bool WorldDatabase::GetCharSelInventory(uint32 account_id, char *name, EQ::Inven
 		" custom_data,"
 		" ornamenticon,"
 		" ornamentidfile,"
-		" ornament_hero_model "
+		" ornament_hero_model, ",
+		" guid "
 		"FROM"
 		" inventory "
 		"INNER JOIN"
@@ -932,12 +933,13 @@ bool WorldDatabase::GetCharSelInventory(uint32 account_id, char *name, EQ::Inven
 		uint32 ornament_icon = (uint32)Strings::ToUnsignedInt(row[12]);
 		uint32 ornament_idfile = (uint32)Strings::ToUnsignedInt(row[13]);
 		uint32 ornament_hero_model = (uint32)Strings::ToUnsignedInt(row[14]);
+		std::string guid = row[15];
 
 		const EQ::ItemData *item = content_db.GetItem(item_id);
 		if (!item)
 			continue;
 
-		EQ::ItemInstance *inst = content_db.CreateBaseItem(item, charges);
+		EQ::ItemInstance *inst = content_db.CreateBaseItem(item, guid, charges);
 
 		if (inst == nullptr)
 			continue;

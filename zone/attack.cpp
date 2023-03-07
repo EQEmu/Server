@@ -2218,7 +2218,7 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 
 	//do attack animation regardless of whether or not we can hit below
 	int16 charges = 0;
-	EQ::ItemInstance weapon_inst(weapon, charges);
+	EQ::ItemInstance weapon_inst(weapon, "", charges);
 	my_hit.skill = AttackAnimation(Hand, &weapon_inst, my_hit.skill);
 
 	//basically "if not immune" then do the attack

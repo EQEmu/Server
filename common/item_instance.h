@@ -69,15 +69,17 @@ namespace EQ
 		/////////////////////////
 
 		// Constructors/Destructor
-		ItemInstance(const ItemData* item = nullptr, int16 charges = 0);
+		ItemInstance(const ItemData* item, const std::string& guid, int16 charges);
 
-		ItemInstance(SharedDatabase *db, uint32 item_id, int16 charges = 0);
+		ItemInstance(SharedDatabase *db, uint32 item_id, const std::string &guid, int16 charges);
 
 		ItemInstance(ItemInstTypes use_type);
 
 		ItemInstance(const ItemInstance& copy);
 
 		~ItemInstance();
+
+		inline std::string GetGuid() const { return m_guid; }
 
 		// Query item type
 		bool IsType(item::ItemClass item_class) const;
@@ -225,11 +227,8 @@ namespace EQ
 		std::string Serialize(int16 slot_id) const { InternalSerializedItem_Struct s; s.slot_id = slot_id; s.inst = (const void*)this; std::string ser; ser.assign((char*)&s, sizeof(InternalSerializedItem_Struct)); return ser; }
 		void Serialize(OutBuffer& ob, int16 slot_id) const { InternalSerializedItem_Struct isi; isi.slot_id = slot_id; isi.inst = (const void*)this; ob.write((const char*)&isi, sizeof(isi)); }
 
-		inline int32 GetSerialNumber() const { return m_SerialNumber; }
-		inline void SetSerialNumber(int32 id) { m_SerialNumber = id; }
-
-		inline std::string GetGUID() const { return m_guid; }
-		inline void SetGUID(const std::string &guid) { m_guid = guid; }
+		inline int32 GetSerialNumber() const { return m_serial_number; }
+		inline void SetSerialNumber(int32 id) { m_serial_number = id; }
 
 		std::map<std::string, ::Timer>& GetTimers() { return m_timers; }
 		void SetTimer(std::string name, uint32 time);
@@ -306,6 +305,7 @@ namespace EQ
 
 		void _PutItem(uint8 index, ItemInstance* inst) { m_contents[index] = inst; }
 
+		std::string         m_guid;
 		ItemInstTypes		m_use_type;	// Usage type for item
 		const ItemData*		m_item;		// Ptr to item data
 		int16				m_charges;	// # of charges for chargeable items
@@ -315,8 +315,7 @@ namespace EQ
 		int16				m_currentslot;
 		bool				m_attuned;
 		int32				m_merchantcount;		//number avaliable on the merchant, -1=unlimited
-		int32				m_SerialNumber;	// Unique identifier for this instance of an item. Needed for Bazaar.
-		std::string         m_guid;
+		uint32				m_serial_number;	// Unique identifier for this instance of an item. Needed for Bazaar.
 		uint32				m_exp;
 		int8				m_evolveLvl;
 		bool				m_activated;

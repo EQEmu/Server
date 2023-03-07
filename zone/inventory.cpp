@@ -2901,7 +2901,7 @@ void Client::DisenchantSummonedBags(bool client_update)
 		if (!new_id) { continue; }
 		auto new_item = database.GetItem(new_id);
 		if (!new_item) { continue; }
-		auto new_inst = database.CreateBaseItem(new_item);
+		auto new_inst = database.CreateBaseItem(new_item, "", 0);
 		if (!new_inst) { continue; }
 
 		if (CopyBagContents(new_inst, inst)) {
@@ -2925,7 +2925,7 @@ void Client::DisenchantSummonedBags(bool client_update)
 		if (!new_id) { continue; }
 		auto new_item = database.GetItem(new_id);
 		if (!new_item) { continue; }
-		auto new_inst = database.CreateBaseItem(new_item);
+		auto new_inst = database.CreateBaseItem(new_item, "", 0);
 		if (!new_inst) { continue; }
 
 		if (CopyBagContents(new_inst, inst)) {
@@ -2946,7 +2946,7 @@ void Client::DisenchantSummonedBags(bool client_update)
 		if (!new_id) { continue; }
 		auto new_item = database.GetItem(new_id);
 		if (!new_item) { continue; }
-		auto new_inst = database.CreateBaseItem(new_item);
+		auto new_inst = database.CreateBaseItem(new_item, "", 0);
 		if (!new_inst) { continue; }
 
 		if (CopyBagContents(new_inst, inst)) {
@@ -2967,7 +2967,7 @@ void Client::DisenchantSummonedBags(bool client_update)
 		if (!new_id) { break; }
 		auto new_item = database.GetItem(new_id);
 		if (!new_item) { break; }
-		auto new_inst = database.CreateBaseItem(new_item);
+		auto new_inst = database.CreateBaseItem(new_item, "", 0);
 		if (!new_inst) { break; }
 
 		if (CopyBagContents(new_inst, inst)) {

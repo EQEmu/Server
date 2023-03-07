@@ -24,16 +24,16 @@
 #include "rulesys.h"
 #include "shareddb.h"
 #include "strings.h"
-
+#include "util/uuid.h"
 //#include "../common/light_source.h"
 
 #include <limits.h>
 
 //#include <iostream>
 
-int32 NextItemInstSerialNumber = 1;
+uint32 NextItemInstSerialNumber = 1;
 
-static inline int32 GetNextItemInstSerialNumber() {
+static inline uint32 GetNextItemInstSerialNumber() {
 
 	// The Bazaar relies on each item a client has up for Trade having a unique
 	// identifier. This 'SerialNumber' is sent in Serialized item packets and
@@ -45,7 +45,7 @@ static inline int32 GetNextItemInstSerialNumber() {
 	// NextItemInstSerialNumber is the next one to hand out.
 	//
 	// It is very unlikely to reach 2,147,483,647. Maybe we should call abort(), rather than wrapping back to 1.
-	if(NextItemInstSerialNumber >= INT_MAX)
+	if(NextItemInstSerialNumber >= UINT_MAX)
 		NextItemInstSerialNumber = 1;
 	else
 		NextItemInstSerialNumber++;
@@ -56,13 +56,21 @@ static inline int32 GetNextItemInstSerialNumber() {
 //
 // class EQ::ItemInstance
 //
-EQ::ItemInstance::ItemInstance(const ItemData* item, int16 charges) {
+EQ::ItemInstance::ItemInstance(const ItemData* item, const std::string& guid, int16 charges) {
 	m_use_type = ItemInstNormal;
 	if(item) {
 		m_item = new ItemData(*item);
 	} else {
 		m_item = nullptr;
 	}
+
+	if (guid.empty()) {
+		m_guid = EQ::Util::UUID::Generate().ToString();
+	}
+	else {
+		m_guid = guid;
+	}
+
 	m_charges = charges;
 	m_price = 0;
 	m_attuned = false;
@@ -72,7 +80,7 @@ EQ::ItemInstance::ItemInstance(const ItemData* item, int16 charges) {
 	else
 		m_color = 0;
 	m_merchantcount = 1;
-	m_SerialNumber = GetNextItemInstSerialNumber();
+	m_serial_number = GetNextItemInstSerialNumber();
 
 	m_exp = 0;
 	m_evolveLvl = 0;
@@ -85,9 +93,10 @@ EQ::ItemInstance::ItemInstance(const ItemData* item, int16 charges) {
 	m_ornament_hero_model = 0;
 	m_recast_timestamp = 0;
 	m_new_id_file = 0;
+	m_currentslot = 0;
 }
 
-EQ::ItemInstance::ItemInstance(SharedDatabase *db, uint32 item_id, int16 charges) {
+EQ::ItemInstance::ItemInstance(SharedDatabase *db, uint32 item_id, const std::string& guid, int16 charges) {
 	m_use_type = ItemInstNormal;
 	m_item = db->GetItem(item_id);
 	if(m_item) {
@@ -95,6 +104,13 @@ EQ::ItemInstance::ItemInstance(SharedDatabase *db, uint32 item_id, int16 charges
 	}
 	else {
 		m_item = nullptr;
+	}
+
+	if (guid.empty()) {
+		m_guid = EQ::Util::UUID::Generate().ToString();
+	}
+	else {
+		m_guid = guid;
 	}
 
 	m_charges = charges;
@@ -106,7 +122,7 @@ EQ::ItemInstance::ItemInstance(SharedDatabase *db, uint32 item_id, int16 charges
 	else
 		m_color = 0;
 	m_merchantcount = 1;
-	m_SerialNumber = GetNextItemInstSerialNumber();
+	m_serial_number = GetNextItemInstSerialNumber();
 
 	m_exp = 0;
 	m_evolveLvl = 0;
@@ -119,17 +135,20 @@ EQ::ItemInstance::ItemInstance(SharedDatabase *db, uint32 item_id, int16 charges
 	m_ornament_hero_model = 0;
 	m_recast_timestamp = 0;
 	m_new_id_file = 0;
+	m_currentslot = 0;
 }
 
 EQ::ItemInstance::ItemInstance(ItemInstTypes use_type) {
 	m_use_type = use_type;
+
+	m_guid = EQ::Util::UUID::Generate().ToString();
 	m_item = nullptr;
 	m_charges = 0;
 	m_price = 0;
 	m_attuned = false;
 	m_merchantslot = 0;
 	m_color = 0;
-
+	m_serial_number = 0;
 	m_exp = 0;
 	m_evolveLvl = 0;
 	m_activated = false;
@@ -141,6 +160,8 @@ EQ::ItemInstance::ItemInstance(ItemInstTypes use_type) {
 	m_ornament_hero_model = 0;
 	m_recast_timestamp = 0;
 	m_new_id_file = 0;
+	m_currentslot = 0;
+	m_merchantcount = 0;
 }
 
 // Make a copy of an EQ::ItemInstance object
@@ -152,6 +173,7 @@ EQ::ItemInstance::ItemInstance(const ItemInstance& copy)
 	else
 		m_item = nullptr;
 
+	m_guid = copy.m_guid;
 	m_charges=copy.m_charges;
 	m_price=copy.m_price;
 	m_color=copy.m_color;
@@ -176,7 +198,7 @@ EQ::ItemInstance::ItemInstance(const ItemInstance& copy)
 	for (iter = copy.m_custom_data.begin(); iter != copy.m_custom_data.end(); ++iter) {
 		m_custom_data[iter->first] = iter->second;
 	}
-	m_SerialNumber = copy.m_SerialNumber;
+	m_serial_number = copy.m_serial_number;
 	m_custom_data = copy.m_custom_data;
 	m_timers = copy.m_timers;
 
