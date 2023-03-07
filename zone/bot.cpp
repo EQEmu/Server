@@ -2104,6 +2104,7 @@ void Bot::AI_Process()
 	auto raid = entity_list.GetRaidByBotName(GetName());
 	uint32 r_group = RAID_GROUPLESS;
 	if (raid) {
+		raid->VerifyRaid();
 		r_group = raid->GetGroup(GetName());
 
 		if (mana_timer.Check(false)) {
@@ -3457,9 +3458,8 @@ bool Bot::Spawn(Client* botCharacterOwner) {
 				}
 			}
 		}
-		Raid* raid = entity_list.GetRaidByBotName(GetName());
 
-		if (raid)
+		if (Raid* raid = entity_list.GetRaidByBotName(GetName()))
 		{
 			raid->VerifyRaid();
 			SetRaidGrouped(true);
@@ -7593,11 +7593,6 @@ bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, fl
 	}
 
 	uint8 botCasterClass = caster->GetClass();
-
-	if (caster->HasRaid()) {
-		Raid* r = caster->GetRaid();
-		r->VerifyRaid();
-	}
 
 	if (iSpellTypes == SpellType_Heal)	{
 		if ( botCasterClass == CLERIC || botCasterClass == DRUID || botCasterClass == SHAMAN) {
