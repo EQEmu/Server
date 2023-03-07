@@ -11785,7 +11785,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 		return;
 	}
 
-	RaidGeneral_Struct* raid_command_packet = (RaidGeneral_Struct*)app->pBuffer;
+	auto raid_command_packet = (RaidGeneral_Struct*)app->pBuffer;
 	switch (raid_command_packet->action)
 	{
 	case RaidCommandInviteIntoExisting:

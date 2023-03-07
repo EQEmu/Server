@@ -3829,11 +3829,11 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 
 		}	//end `if there is some damage being done and theres anattacker person involved`
 
-		Mob* pet = GetPet();
 		// pets that have GHold will never automatically add NPCs
 		// pets that have Hold and no Focus will add NPCs if they're engaged
 		// pets that have Hold and Focus will not add NPCs
 		if (
+			Mob* pet = GetPet();
 			pet &&
 			!pet->IsFamiliar() &&
 			!pet->GetSpecialAbility(IMMUNE_AGGRO) &&
@@ -3844,26 +3844,25 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 			attacker != this &&
 			!attacker->IsCorpse() &&
 			!pet->IsGHeld() &&
-			!attacker->IsTrap()
-			) {
-			if (!pet->IsHeld()) {
-				LogAggro("Sending pet [{}] into battle due to attack", pet->GetName());
-				if (IsClient()) {
-					// if pet was sitting his new mode is follow
-					// following after the battle (live verified)
-					if (pet->GetPetOrder() == SPO_Sit) {
-						pet->SetPetOrder(SPO_Follow);
-					}
-
-					// fix GUI sit button to be unpressed and stop sitting regen
-					CastToClient()->SetPetCommandState(PET_BUTTON_SIT, 0);
-					pet->SetAppearance(eaStanding);
+			!attacker->IsTrap() &&
+			!pet->IsHeld()
+		) {
+			LogAggro("Sending pet [{}] into battle due to attack", pet->GetName());
+			if (IsClient()) {
+				// if pet was sitting his new mode is follow
+				// following after the battle (live verified)
+				if (pet->GetPetOrder() == SPO_Sit) {
+					pet->SetPetOrder(SPO_Follow);
 				}
 
-				pet->AddToHateList(attacker, 1, 0, true, false, false, spell_id);
-				pet->SetTarget(attacker);
-				MessageString(Chat::NPCQuestSay, PET_ATTACKING, pet->GetCleanName(), attacker->GetCleanName());
+				// fix GUI sit button to be unpressed and stop sitting regen
+				CastToClient()->SetPetCommandState(PET_BUTTON_SIT, 0);
+				pet->SetAppearance(eaStanding);
 			}
+
+			pet->AddToHateList(attacker, 1, 0, true, false, false, spell_id);
+			pet->SetTarget(attacker);
+			MessageString(Chat::NPCQuestSay, PET_ATTACKING, pet->GetCleanName(), attacker->GetCleanName());
 		}
 
 		if (GetTempPetCount()) {
@@ -3884,9 +3883,18 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 		else {
 			int64 origdmg = damage;
 			damage = AffectMagicalDamage(damage, spell_id, iBuffTic, attacker);
-			if (origdmg != damage && attacker && attacker->IsClient()) {
-				if (attacker->CastToClient()->GetFilter(FilterDamageShields) != FilterHide)
-					attacker->Message(Chat::Yellow, "The Spellshield absorbed %d of %d points of damage", origdmg - damage, origdmg);
+			if (
+				origdmg != damage &&
+				attacker &&
+				attacker->IsClient() &&
+				attacker->CastToClient()->GetFilter(FilterDamageShields) != FilterHide
+			) {
+				attacker->Message(
+					Chat::Yellow,
+					"The Spellshield absorbed %d of %d points of damage",
+					origdmg - damage,
+					origdmg
+				);
 			}
 			if (damage == 0 && attacker && origdmg != damage && IsClient()) {
 				//Kayen: Probably need to add a filter for this - Not sure if this msg is correct but there should be a message for spell negate/runes.

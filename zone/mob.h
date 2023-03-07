@@ -1838,6 +1838,8 @@ private:
 	EQ::InventoryProfile m_inv;
 	std::shared_ptr<HealRotation> m_target_of_heal_rotation;
 	bool m_manual_follow;
+
+	void DoSpellInterrupt(uint16 spell_id, int32 mana_cost, int my_curmana);
 };
 
 #endif

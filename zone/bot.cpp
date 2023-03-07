@@ -3457,7 +3457,7 @@ bool Bot::Spawn(Client* botCharacterOwner) {
 				}
 			}
 		}
-		Raid* raid = entity_list.GetRaidByBotName(this->GetName());
+		Raid* raid = entity_list.GetRaidByBotName(GetName());
 
 		if (raid)
 		{
@@ -6096,7 +6096,7 @@ bool Bot::DoFinishedSpellSingleTarget(uint16 spell_id, Mob* spellTarget, EQ::spe
 
 bool Bot::DoFinishedSpellGroupTarget(uint16 spell_id, Mob* spellTarget, EQ::spells::CastingSlot slot, bool& stopLogic) {
 	bool isMainGroupMGB = false;
-	Raid* raid = entity_list.GetRaidByBotName(this->GetName());
+	Raid* raid = entity_list.GetRaidByBotName(GetName());
 
 	if (isMainGroupMGB && (GetClass() != BARD)) {
 		BotGroupSay(
@@ -7576,13 +7576,15 @@ bool Bot::CheckLoreConflict(const EQ::ItemData* item) {
 }
 
 bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, float iRange, uint32 iSpellTypes) {
+
 	if ((iSpellTypes & SPELL_TYPES_DETRIMENTAL) != 0) {
 		LogError("[EntityList::Bot_AICheckCloseBeneficialSpells] detrimental spells requested");
 		return false;
 	}
 
-	if (!caster || !caster->AI_HasSpells())
+	if (!caster || !caster->AI_HasSpells()) {
 		return false;
+	}
 
 	if (iChance < 100) {
 		uint8 tmp = zone->random.Int(1, 100);
@@ -7591,6 +7593,11 @@ bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, fl
 	}
 
 	uint8 botCasterClass = caster->GetClass();
+
+	if (caster->HasRaid()) {
+		Raid* r = caster->GetRaid();
+		r->VerifyRaid();
+	}
 
 	if (iSpellTypes == SpellType_Heal)	{
 		if ( botCasterClass == CLERIC || botCasterClass == DRUID || botCasterClass == SHAMAN) {
@@ -9306,7 +9313,7 @@ std::vector<Mob*> Bot::GetApplySpellList(
 
 	if (apply_type == ApplySpellType::Raid && IsRaidGrouped()) {
 		auto* r = GetRaid();
-		auto group_id = r->GetGroup(this->GetCleanName());
+		auto group_id = r->GetGroup(GetCleanName());
 		if (r && EQ::ValueWithin(group_id, 0, (MAX_RAID_GROUPS - 1))) {
 			for (auto i = 0; i < MAX_RAID_MEMBERS; i++) {
 				auto* m = r->members[i].member;

@@ -153,11 +153,18 @@ void Bot::ProcessRaidInvite(Mob* invitee, Client* invitor, bool group_invite) {
 		return;
 	}
 
-	if (invitee->IsBot() && invitee->CastToBot()->GetBotOwnerCharacterID() != invitor->CharacterID()) {
+	if (invitee->IsBot() &&
+		invitor->HasRaid() &&
+		invitee->GetOwner()->HasRaid() &&
+		invitor->GetRaid()->IsRaidMember(invitee->GetOwner()->GetName())
+	) {
+		// If the Bot Owner is in our raid we need to be able to invite their Bots
+	}
+	else if (invitee->IsBot() && (invitee->CastToBot()->GetBotOwnerCharacterID() != invitor->CharacterID())) {
 		invitor->Message(
 			Chat::Red,
 			fmt::format(
-				"{} is not your Bot. You can only invite your Bots, or players grouped with bots.",
+				"{} is not your Bot. You can only invite your own Bots, or Bots that belong to a Raid member.",
 				invitee->GetCleanName()
 			).c_str()
 		);

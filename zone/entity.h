@@ -203,7 +203,7 @@ public:
 	Raid *GetRaidByID(uint32 id);
 	Raid *GetRaidByLeaderName(const char *leader);
 	Raid* GetRaidByBotName(const char* name);
-	Raid* GetRaidByBot(Bot* bot);
+	Raid* GetRaidByBot(const Bot* bot);
 
 	Corpse *GetCorpseByOwner(Client* client);
 	Corpse *GetCorpseByOwnerWithinRange(Client* client, Mob* center, int range);
