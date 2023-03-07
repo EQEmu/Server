@@ -27,6 +27,7 @@
 #include "worldserver.h"
 #include "string_ids.h"
 #include "../common/events/player_event_logs.h"
+#include "../common/repositories/group_id_repository.h"
 
 extern EntityList entity_list;
 extern WorldServer worldserver;
@@ -1139,57 +1140,33 @@ void Group::TeleportGroup(Mob* sender, uint32 zoneID, uint16 instance_id, float 
 }
 
 bool Group::LearnMembers() {
-	std::string query = StringFormat("SELECT name FROM group_id "
-		"WHERE group_id.groupid = %lu AND group_id.name NOT "
-		"IN(SELECT group_leaders.leadername FROM group_leaders WHERE gid = %lu)",
-		GetID(),
-		GetID());
 
-	auto results = database.QueryDatabase(query);
-	if (!results.Success())
-        return false;
+	auto rows = GroupIdRepository::GetWhere(
+		database,
+		fmt::format(
+			"groupid = {}",
+			GetID()
+		)
+	);
 
-	if (results.RowCount() == 0) {
+	if (rows.empty()) {
 		LogError(
-			"Error getting group members for group [{}]: [{}]",
-			(unsigned long) GetID(),
-			results.ErrorMessage().c_str()
+			"Error getting group members for group [{}]",
+			GetID()
 		);
-
 		return false;
 	}
-	//starts at 1 becasuse leader [0] is done specifically in the next query from group_leaders, which is position 0
-	int memberIndex = 1;
-	for(auto row = results.begin(); row != results.end(); ++row) {
-		if(!row[0])
+
+	int memberIndex = 0;
+	for (const auto& member : rows) {
+		if (member.name.empty()) {
 			continue;
-
+		}
 		members[memberIndex] = nullptr;
-		strn0cpy(membername[memberIndex], row[0], 64);
-
+		strn0cpy(membername[memberIndex], member.name.c_str(), 64);
 		memberIndex++;
 	}
-	//position 0
-	query = StringFormat("SELECT leadername FROM group_leaders "
-		"WHERE group_leaders.gid = %lu",
-		GetID());
 
-	auto results2 = database.QueryDatabase(query);
-	if (!results2.Success())
-		return false;
-
-	if (results2.RowCount() == 0) {
-		LogError(
-			"Error getting group leader for group [{}]: [{}]",
-			(unsigned long)GetID(),
-			results2.ErrorMessage().c_str()
-		);
-
-		return false;
-	}
-	auto row2 = results2.begin();
-	members[0] = nullptr;
-	strn0cpy(membername[0], row2[0], 64);
 	return true;
 }
 
