@@ -1559,25 +1559,24 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 			group->SetNPCMarker(NPCMarkerName);
 			group->SetGroupAAs(&GLAA);
 			group->SetGroupMentor(mentor_percent, mentoree_name);
-
-			//group->NotifyMainTank(this, 1);
-			//group->NotifyMainAssist(this, 1);
-			//group->NotifyPuller(this, 1);
-
-			// If we are the leader, force an update of our group AAs to other members in the zone, in case
-			// we purchased a new one while out-of-zone.
-			if (group->IsLeader(this))
-				group->SendLeadershipAAUpdate();
 		}
 		JoinGroupXTargets(group);
 		group->UpdatePlayer(this);
 		LFG = false;
 	}
 
+	/* Load Bots */
 	if (RuleB(Bots, Enabled)) {
 		database.botdb.LoadOwnerOptions(this);
 		// TODO: mod below function for loading spawned botgroups
 		Bot::LoadAndSpawnAllZonedBots(this);
+	}
+
+	// If we are the leader, force an update of our group AAs to other members in the zone, in case
+	// we purchased a new one while out-of-zone.
+	// needs to be done after spawning bots
+	if (group && group->IsLeader(this)) {
+		group->SendLeadershipAAUpdate();
 	}
 
 	m_inv.SetGMInventory((bool)m_pp.gm); // set to current gm state for calc

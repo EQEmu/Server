@@ -496,7 +496,7 @@ void Group::SendEndurancePacketFrom(Mob* member)
 
 //updates a group member's client pointer when they zone in
 //if the group was in the zone already
-bool Group::UpdatePlayer(Mob* update){
+bool Group::UpdatePlayer(Mob* update) {
 
 	if (!update)
 		return false;
