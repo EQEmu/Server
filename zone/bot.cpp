@@ -5743,7 +5743,7 @@ bool Bot::IsImmuneToSpell(uint16 spell_id, Mob *caster) {
 	if (!caster)
 		return false;
 
-	if (!IsSacrificeSpell(spell_id) && zone->GetZoneID() != 202 && this != caster) {
+	if (!IsSacrificeSpell(spell_id) && zone->GetZoneID() != Zones::POKNOWLEDGE && this != caster) {
 		Result = Mob::IsImmuneToSpell(spell_id, caster);
 		if (!Result) {
 			if (caster->IsBot()) {
