@@ -568,8 +568,9 @@ public:
 		for (auto map_iter : bot_command_spells) {
 			if (map_iter.second.empty())
 				continue;
-			for (auto list_iter : map_iter.second)
-				safe_delete(list_iter);
+			for (auto list_iter: map_iter.second) {
+				safe_delete(list_iter)
+			};
 			map_iter.second.clear();
 		}
 		bot_command_spells.clear();
@@ -620,8 +621,10 @@ private:
 				}
 			});
 
-			for (auto del_iter : *removed_spells_list)
-				safe_delete(del_iter);
+			for (auto del_iter: *removed_spells_list)
+			{
+				safe_delete(del_iter)
+			};
 			removed_spells_list->clear();
 
 			if (RuleI(Bots, CommandSpellRank) == 1) {
@@ -645,8 +648,9 @@ private:
 					return false;
 				});
 
-				for (auto del_iter : *removed_spells_list)
-					safe_delete(del_iter);
+				for (auto del_iter: *removed_spells_list) {
+					safe_delete(del_iter)
+				};
 				removed_spells_list->clear();
 			}
 
@@ -669,8 +673,9 @@ private:
 					return false;
 				});
 
-				for (auto del_iter : *removed_spells_list)
-					safe_delete(del_iter);
+				for (auto del_iter: *removed_spells_list) {
+					safe_delete(del_iter)
+				};
 				removed_spells_list->clear();
 			}
 
@@ -696,8 +701,9 @@ private:
 					return false;
 				});
 
-				for (auto del_iter : *removed_spells_list)
-					safe_delete(del_iter);
+				for (auto del_iter: *removed_spells_list) {
+					safe_delete(del_iter)
+				};
 				removed_spells_list->clear();
 			}
 
