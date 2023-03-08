@@ -133,81 +133,83 @@ public:
 			if (
 				spells[spell_id].target_type != ST_Target &&
 				spells[spell_id].cast_restriction != 0
-			) {
+				) {
 				continue;
 			}
 
 			auto target_type = BCEnum::TT_None;
 			switch (spells[spell_id].target_type) {
-			case ST_GroupTeleport:
-				target_type = BCEnum::TT_GroupV1;
-				break;
-			case ST_AECaster:
-				// Disabled until bot code works correctly
-				//target_type = BCEnum::TT_AECaster;
-				break;
-			case ST_AEBard:
-				// Disabled until bot code works correctly
-				//target_type = BCEnum::TT_AEBard;
-				break;
-			case ST_Target:
-				switch (spells[spell_id].cast_restriction) {
-				case 0:
-					target_type = BCEnum::TT_Single;
+				case ST_GroupTeleport:
+					target_type = BCEnum::TT_GroupV1;
 					break;
-				case 104:
+				case ST_AECaster:
+					// Disabled until bot code works correctly
+					//target_type = BCEnum::TT_AECaster;
+					break;
+				case ST_AEBard:
+					// Disabled until bot code works correctly
+					//target_type = BCEnum::TT_AEBard;
+					break;
+				case ST_Target:
+					switch (spells[spell_id].cast_restriction) {
+						case 0:
+							target_type = BCEnum::TT_Single;
+							break;
+						case 104:
+							target_type = BCEnum::TT_Animal;
+							break;
+						case 105:
+							target_type = BCEnum::TT_Plant;
+							break;
+						case 118:
+							target_type = BCEnum::TT_Summoned;
+							break;
+						case 120:
+							target_type = BCEnum::TT_Undead;
+							break;
+						default:
+							break;
+					}
+					break;
+				case ST_Self:
+					target_type = BCEnum::TT_Self;
+					break;
+				case ST_AETarget:
+					// Disabled until bot code works correctly
+					//target_type = BCEnum::TT_AETarget;
+					break;
+				case ST_Animal:
 					target_type = BCEnum::TT_Animal;
 					break;
-				case 105:
-					target_type = BCEnum::TT_Plant;
+				case ST_Undead:
+					target_type = BCEnum::TT_Undead;
 					break;
-				case 118:
+				case ST_Summoned:
 					target_type = BCEnum::TT_Summoned;
 					break;
-				case 120:
-					target_type = BCEnum::TT_Undead;
+				case ST_Corpse:
+					target_type = BCEnum::TT_Corpse;
+					break;
+				case ST_Plant:
+					target_type = BCEnum::TT_Plant;
+					break;
+				case ST_Group:
+					target_type = BCEnum::TT_GroupV2;
 					break;
 				default:
 					break;
-				}
-				break;
-			case ST_Self:
-				target_type = BCEnum::TT_Self;
-				break;
-			case ST_AETarget:
-				// Disabled until bot code works correctly
-				//target_type = BCEnum::TT_AETarget;
-				break;
-			case ST_Animal:
-				target_type = BCEnum::TT_Animal;
-				break;
-			case ST_Undead:
-				target_type = BCEnum::TT_Undead;
-				break;
-			case ST_Summoned:
-				target_type = BCEnum::TT_Summoned;
-				break;
-			case ST_Corpse:
-				target_type = BCEnum::TT_Corpse;
-				break;
-			case ST_Plant:
-				target_type = BCEnum::TT_Plant;
-				break;
-			case ST_Group:
-				target_type = BCEnum::TT_GroupV2;
-				break;
-			default:
-				break;
 			}
 			if (target_type == BCEnum::TT_None)
 				continue;
 
-			uint8 class_levels[16] = { 0 };
+			uint8 class_levels[16] = {0};
 			bool player_spell = false;
 			for (int class_type = WARRIOR; class_type <= BERSERKER; ++class_type) {
 				int class_index = CLASSIDTOINDEX(class_type);
-				if (spells[spell_id].classes[class_index] == 0 || spells[spell_id].classes[class_index] > HARD_LEVEL_CAP)
+				if (spells[spell_id].classes[class_index] == 0 ||
+					spells[spell_id].classes[class_index] > HARD_LEVEL_CAP) {
 					continue;
+					}
 
 				class_levels[class_index] = spells[spell_id].classes[class_index];
 				player_spell = true;
@@ -218,124 +220,122 @@ public:
 			STBaseEntry* entry_prototype = nullptr;
 			while (true) {
 				switch (spells[spell_id].effect_id[EFFECTIDTOINDEX(1)]) {
-				case SE_BindAffinity:
-					entry_prototype = new STBaseEntry(BCEnum::SpT_BindAffinity);
-					break;
-				case SE_Charm:
-					if (spells[spell_id].spell_affect_index != 12)
+					case SE_BindAffinity:
+						entry_prototype = new STBaseEntry(BCEnum::SpT_BindAffinity);
 						break;
-					entry_prototype = new STCharmEntry();
-					if (spells[spell_id].resist_difficulty <= -1000)
-						entry_prototype->SafeCastToCharm()->dire = true;
-					break;
-				case SE_Teleport:
-					entry_prototype = new STDepartEntry;
-					entry_prototype->SafeCastToDepart()->single = !BCSpells::IsGroupType(target_type);
-					break;
-				case SE_Succor:
-					if (!strcmp(spells[spell_id].teleport_zone, "same")) {
-						entry_prototype = new STEscapeEntry;
-					}
-					else {
+					case SE_Charm:
+						if (spells[spell_id].spell_affect_index != 12)
+							break;
+						entry_prototype = new STCharmEntry();
+						if (spells[spell_id].resist_difficulty <= -1000)
+							entry_prototype->SafeCastToCharm()->dire = true;
+						break;
+					case SE_Teleport:
 						entry_prototype = new STDepartEntry;
 						entry_prototype->SafeCastToDepart()->single = !BCSpells::IsGroupType(target_type);
-					}
-					break;
-				case SE_Translocate:
-					if (spells[spell_id].teleport_zone[0] == '\0') {
-						entry_prototype = new STSendHomeEntry();
-						entry_prototype->SafeCastToSendHome()->group = BCSpells::IsGroupType(target_type);
-					}
-					else {
-						entry_prototype = new STDepartEntry;
-						entry_prototype->SafeCastToDepart()->single = !BCSpells::IsGroupType(target_type);
-					}
-					break;
-				case SE_ModelSize:
-					if (spells[spell_id].base_value[EFFECTIDTOINDEX(1)] > 100) {
-						entry_prototype = new STSizeEntry;
-						entry_prototype->SafeCastToSize()->size_type = BCEnum::SzT_Enlarge;
-					}
-					else if (spells[spell_id].base_value[EFFECTIDTOINDEX(1)] > 0 && spells[spell_id].base_value[EFFECTIDTOINDEX(1)] < 100) {
-						entry_prototype = new STSizeEntry;
-						entry_prototype->SafeCastToSize()->size_type = BCEnum::SzT_Reduce;
-					}
-					break;
-				case SE_Identify:
-					entry_prototype = new STBaseEntry(BCEnum::SpT_Identify);
-					break;
-				case SE_Invisibility:
-					if (spells[spell_id].spell_affect_index != 9)
 						break;
-					entry_prototype = new STInvisibilityEntry;
-					entry_prototype->SafeCastToInvisibility()->invis_type = BCEnum::IT_Living;
-					break;
-				case SE_SeeInvis:
-					if (spells[spell_id].spell_affect_index != 5)
+					case SE_Succor:
+						if (!strcmp(spells[spell_id].teleport_zone, "same")) {
+							entry_prototype = new STEscapeEntry;
+						} else {
+							entry_prototype = new STDepartEntry;
+							entry_prototype->SafeCastToDepart()->single = !BCSpells::IsGroupType(target_type);
+						}
 						break;
-					entry_prototype = new STInvisibilityEntry;
-					entry_prototype->SafeCastToInvisibility()->invis_type = BCEnum::IT_See;
-					break;
-				case SE_InvisVsUndead:
-					if (spells[spell_id].spell_affect_index != 9)
+					case SE_Translocate:
+						if (spells[spell_id].teleport_zone[0] == '\0') {
+							entry_prototype = new STSendHomeEntry();
+							entry_prototype->SafeCastToSendHome()->group = BCSpells::IsGroupType(target_type);
+						} else {
+							entry_prototype = new STDepartEntry;
+							entry_prototype->SafeCastToDepart()->single = !BCSpells::IsGroupType(target_type);
+						}
 						break;
-					entry_prototype = new STInvisibilityEntry;
-					entry_prototype->SafeCastToInvisibility()->invis_type = BCEnum::IT_Undead;
-					break;
-				case SE_InvisVsAnimals:
-					if (spells[spell_id].spell_affect_index != 9)
+					case SE_ModelSize:
+						if (spells[spell_id].base_value[EFFECTIDTOINDEX(1)] > 100) {
+							entry_prototype = new STSizeEntry;
+							entry_prototype->SafeCastToSize()->size_type = BCEnum::SzT_Enlarge;
+						} else if (spells[spell_id].base_value[EFFECTIDTOINDEX(1)] > 0 &&
+								   spells[spell_id].base_value[EFFECTIDTOINDEX(1)] < 100) {
+							entry_prototype = new STSizeEntry;
+							entry_prototype->SafeCastToSize()->size_type = BCEnum::SzT_Reduce;
+						}
 						break;
-					entry_prototype = new STInvisibilityEntry;
-					entry_prototype->SafeCastToInvisibility()->invis_type = BCEnum::IT_Animal;
-					break;
-				case SE_Mez:
-					if (spells[spell_id].spell_affect_index != 12)
+					case SE_Identify:
+						entry_prototype = new STBaseEntry(BCEnum::SpT_Identify);
 						break;
-					entry_prototype = new STBaseEntry(BCEnum::SpT_Mesmerize);
-					break;
-				case SE_Revive:
-					if (spells[spell_id].spell_affect_index != 1)
+					case SE_Invisibility:
+						if (spells[spell_id].spell_affect_index != 9)
+							break;
+						entry_prototype = new STInvisibilityEntry;
+						entry_prototype->SafeCastToInvisibility()->invis_type = BCEnum::IT_Living;
 						break;
-					entry_prototype = new STResurrectEntry();
-					entry_prototype->SafeCastToResurrect()->aoe = BCSpells::IsCasterCentered(target_type);
-					break;
-				case SE_Rune:
-					if (spells[spell_id].spell_affect_index != 2)
+					case SE_SeeInvis:
+						if (spells[spell_id].spell_affect_index != 5)
+							break;
+						entry_prototype = new STInvisibilityEntry;
+						entry_prototype->SafeCastToInvisibility()->invis_type = BCEnum::IT_See;
 						break;
-					entry_prototype = new STBaseEntry(BCEnum::SpT_Rune);
-					break;
-				case SE_SummonCorpse:
-					entry_prototype = new STBaseEntry(BCEnum::SpT_SummonCorpse);
-					break;
-				case SE_WaterBreathing:
-					entry_prototype = new STBaseEntry(BCEnum::SpT_WaterBreathing);
-					break;
-				default:
-					break;
+					case SE_InvisVsUndead:
+						if (spells[spell_id].spell_affect_index != 9)
+							break;
+						entry_prototype = new STInvisibilityEntry;
+						entry_prototype->SafeCastToInvisibility()->invis_type = BCEnum::IT_Undead;
+						break;
+					case SE_InvisVsAnimals:
+						if (spells[spell_id].spell_affect_index != 9)
+							break;
+						entry_prototype = new STInvisibilityEntry;
+						entry_prototype->SafeCastToInvisibility()->invis_type = BCEnum::IT_Animal;
+						break;
+					case SE_Mez:
+						if (spells[spell_id].spell_affect_index != 12)
+							break;
+						entry_prototype = new STBaseEntry(BCEnum::SpT_Mesmerize);
+						break;
+					case SE_Revive:
+						if (spells[spell_id].spell_affect_index != 1)
+							break;
+						entry_prototype = new STResurrectEntry();
+						entry_prototype->SafeCastToResurrect()->aoe = BCSpells::IsCasterCentered(target_type);
+						break;
+					case SE_Rune:
+						if (spells[spell_id].spell_affect_index != 2)
+							break;
+						entry_prototype = new STBaseEntry(BCEnum::SpT_Rune);
+						break;
+					case SE_SummonCorpse:
+						entry_prototype = new STBaseEntry(BCEnum::SpT_SummonCorpse);
+						break;
+					case SE_WaterBreathing:
+						entry_prototype = new STBaseEntry(BCEnum::SpT_WaterBreathing);
+						break;
+					default:
+						break;
 				}
 				if (entry_prototype)
 					break;
 
 				switch (spells[spell_id].effect_id[EFFECTIDTOINDEX(2)]) {
-				case SE_Succor:
-					entry_prototype = new STEscapeEntry;
-					std::string is_lesser = spells[spell_id].name;
-					if (is_lesser.find("Lesser") != std::string::npos)
-						entry_prototype->SafeCastToEscape()->lesser = true;
-					break;
+					case SE_Succor:
+						entry_prototype = new STEscapeEntry;
+						std::string is_lesser = spells[spell_id].name;
+						if (is_lesser.find("Lesser") != std::string::npos)
+							entry_prototype->SafeCastToEscape()->lesser = true;
+						break;
 				}
 				if (entry_prototype)
 					break;
 
 				switch (spells[spell_id].effect_id[EFFECTIDTOINDEX(3)]) {
-				case SE_Lull:
-					entry_prototype = new STBaseEntry(BCEnum::SpT_Lull);
-					break;
-				case SE_Levitate: // needs more criteria
-					entry_prototype = new STBaseEntry(BCEnum::SpT_Levitation);
-					break;
-				default:
-					break;
+					case SE_Lull:
+						entry_prototype = new STBaseEntry(BCEnum::SpT_Lull);
+						break;
+					case SE_Levitate: // needs more criteria
+						entry_prototype = new STBaseEntry(BCEnum::SpT_Levitation);
+						break;
+					default:
+						break;
 				}
 				if (entry_prototype)
 					break;
@@ -343,7 +343,8 @@ public:
 				while (spells[spell_id].type_description_id == 27) {
 					if (!spells[spell_id].good_effect)
 						break;
-					if (spells[spell_id].skill != EQ::skills::SkillOffense && spells[spell_id].skill != EQ::skills::SkillDefense)
+					if (spells[spell_id].skill != EQ::skills::SkillOffense &&
+						spells[spell_id].skill != EQ::skills::SkillDefense)
 						break;
 
 					entry_prototype = new STStanceEntry();
@@ -358,98 +359,111 @@ public:
 					break;
 
 				switch (spells[spell_id].spell_affect_index) {
-				case 1: {
-					bool valid_spell = false;
-					entry_prototype = new STCureEntry;
+					case 1: {
+						bool valid_spell = false;
+						entry_prototype = new STCureEntry;
 
-					for (int i = EffectIDFirst; i <= EffectIDLast; ++i) {
-						int effect_index = EFFECTIDTOINDEX(i);
-						if (spells[spell_id].effect_id[effect_index] != SE_Blind && spells[spell_id].base_value[effect_index] >= 0)
-							continue;
-						else if (spells[spell_id].effect_id[effect_index] == SE_Blind && !spells[spell_id].good_effect)
-							continue;
+						for (int i = EffectIDFirst; i <= EffectIDLast; ++i) {
+							int effect_index = EFFECTIDTOINDEX(i);
+							if (spells[spell_id].effect_id[effect_index] != SE_Blind &&
+								spells[spell_id].base_value[effect_index] >= 0)
+								continue;
+							else if (spells[spell_id].effect_id[effect_index] == SE_Blind &&
+									 !spells[spell_id].good_effect)
+								continue;
 
-						switch (spells[spell_id].effect_id[effect_index]) {
-						case SE_Blind:
-							entry_prototype->SafeCastToCure()->cure_value[AILMENTIDTOINDEX(BCEnum::AT_Blindness)] += spells[spell_id].base_value[effect_index];
-							break;
-						case SE_DiseaseCounter:
-							entry_prototype->SafeCastToCure()->cure_value[AILMENTIDTOINDEX(BCEnum::AT_Disease)] += spells[spell_id].base_value[effect_index];
-							break;
-						case SE_PoisonCounter:
-							entry_prototype->SafeCastToCure()->cure_value[AILMENTIDTOINDEX(BCEnum::AT_Poison)] += spells[spell_id].base_value[effect_index];
-							break;
-						case SE_CurseCounter:
-							entry_prototype->SafeCastToCure()->cure_value[AILMENTIDTOINDEX(BCEnum::AT_Curse)] += spells[spell_id].base_value[effect_index];
-							break;
-						case SE_CorruptionCounter:
-							entry_prototype->SafeCastToCure()->cure_value[AILMENTIDTOINDEX(BCEnum::AT_Corruption)] += spells[spell_id].base_value[effect_index];
-							break;
-						default:
-							continue;
+							switch (spells[spell_id].effect_id[effect_index]) {
+								case SE_Blind:
+									entry_prototype->SafeCastToCure()->cure_value[AILMENTIDTOINDEX(
+										BCEnum::AT_Blindness)] += spells[spell_id].base_value[effect_index];
+									break;
+								case SE_DiseaseCounter:
+									entry_prototype->SafeCastToCure()->cure_value[AILMENTIDTOINDEX(
+										BCEnum::AT_Disease)] += spells[spell_id].base_value[effect_index];
+									break;
+								case SE_PoisonCounter:
+									entry_prototype->SafeCastToCure()->cure_value[AILMENTIDTOINDEX(
+										BCEnum::AT_Poison)] += spells[spell_id].base_value[effect_index];
+									break;
+								case SE_CurseCounter:
+									entry_prototype->SafeCastToCure()->cure_value[AILMENTIDTOINDEX(
+										BCEnum::AT_Curse)] += spells[spell_id].base_value[effect_index];
+									break;
+								case SE_CorruptionCounter:
+									entry_prototype->SafeCastToCure()->cure_value[AILMENTIDTOINDEX(
+										BCEnum::AT_Corruption)] += spells[spell_id].base_value[effect_index];
+									break;
+								default:
+									continue;
+							}
+							entry_prototype->SafeCastToCure()->cure_total += spells[spell_id].base_value[effect_index];
+							valid_spell = true;
 						}
-						entry_prototype->SafeCastToCure()->cure_total += spells[spell_id].base_value[effect_index];
-						valid_spell = true;
-					}
-					if (!valid_spell) {
-						safe_delete(entry_prototype);
-						entry_prototype = nullptr;
-					}
-
-					break;
-				}
-				case 2: {
-					bool valid_spell = false;
-					entry_prototype = new STResistanceEntry;
-
-					for (int i = EffectIDFirst; i <= EffectIDLast; ++i) {
-						int effect_index = EFFECTIDTOINDEX(i);
-						if (spells[spell_id].base_value[effect_index] <= 0)
-							continue;
-
-						switch (spells[spell_id].effect_id[effect_index]) {
-						case SE_ResistFire:
-							entry_prototype->SafeCastToResistance()->resist_value[RESISTANCEIDTOINDEX(BCEnum::RT_Fire)] += spells[spell_id].base_value[effect_index];
-							break;
-						case SE_ResistCold:
-							entry_prototype->SafeCastToResistance()->resist_value[RESISTANCEIDTOINDEX(BCEnum::RT_Cold)] += spells[spell_id].base_value[effect_index];
-							break;
-						case SE_ResistPoison:
-							entry_prototype->SafeCastToResistance()->resist_value[RESISTANCEIDTOINDEX(BCEnum::RT_Poison)] += spells[spell_id].base_value[effect_index];
-							break;
-						case SE_ResistDisease:
-							entry_prototype->SafeCastToResistance()->resist_value[RESISTANCEIDTOINDEX(BCEnum::RT_Disease)] += spells[spell_id].base_value[effect_index];
-							break;
-						case SE_ResistMagic:
-							entry_prototype->SafeCastToResistance()->resist_value[RESISTANCEIDTOINDEX(BCEnum::RT_Magic)] += spells[spell_id].base_value[effect_index];
-							break;
-						case SE_ResistCorruption:
-							entry_prototype->SafeCastToResistance()->resist_value[RESISTANCEIDTOINDEX(BCEnum::RT_Corruption)] += spells[spell_id].base_value[effect_index];
-							break;
-						default:
-							continue;
+						if (!valid_spell) {
+							safe_delete(entry_prototype);
+							entry_prototype = nullptr;
 						}
-						entry_prototype->SafeCastToResistance()->resist_total += spells[spell_id].base_value[effect_index];
-						valid_spell = true;
-					}
-					if (!valid_spell) {
-						safe_delete(entry_prototype);
-						entry_prototype = nullptr;
-					}
 
-					break;
-				}
-				case 7:
-				case 10:
-					if (spells[spell_id].effect_description_id != 65)
 						break;
-					if (IsEffectInSpell(spell_id, SE_NegateIfCombat))
+					}
+					case 2: {
+						bool valid_spell = false;
+						entry_prototype = new STResistanceEntry;
+
+						for (int i = EffectIDFirst; i <= EffectIDLast; ++i) {
+							int effect_index = EFFECTIDTOINDEX(i);
+							if (spells[spell_id].base_value[effect_index] <= 0)
+								continue;
+
+							switch (spells[spell_id].effect_id[effect_index]) {
+								case SE_ResistFire:
+									entry_prototype->SafeCastToResistance()->resist_value[RESISTANCEIDTOINDEX(
+										BCEnum::RT_Fire)] += spells[spell_id].base_value[effect_index];
+									break;
+								case SE_ResistCold:
+									entry_prototype->SafeCastToResistance()->resist_value[RESISTANCEIDTOINDEX(
+										BCEnum::RT_Cold)] += spells[spell_id].base_value[effect_index];
+									break;
+								case SE_ResistPoison:
+									entry_prototype->SafeCastToResistance()->resist_value[RESISTANCEIDTOINDEX(
+										BCEnum::RT_Poison)] += spells[spell_id].base_value[effect_index];
+									break;
+								case SE_ResistDisease:
+									entry_prototype->SafeCastToResistance()->resist_value[RESISTANCEIDTOINDEX(
+										BCEnum::RT_Disease)] += spells[spell_id].base_value[effect_index];
+									break;
+								case SE_ResistMagic:
+									entry_prototype->SafeCastToResistance()->resist_value[RESISTANCEIDTOINDEX(
+										BCEnum::RT_Magic)] += spells[spell_id].base_value[effect_index];
+									break;
+								case SE_ResistCorruption:
+									entry_prototype->SafeCastToResistance()->resist_value[RESISTANCEIDTOINDEX(
+										BCEnum::RT_Corruption)] += spells[spell_id].base_value[effect_index];
+									break;
+								default:
+									continue;
+							}
+							entry_prototype->SafeCastToResistance()->resist_total += spells[spell_id].base_value[effect_index];
+							valid_spell = true;
+						}
+						if (!valid_spell) {
+							safe_delete(entry_prototype);
+							entry_prototype = nullptr;
+						}
+
 						break;
-					entry_prototype = new STMovementSpeedEntry();
-					entry_prototype->SafeCastToMovementSpeed()->group = BCSpells::IsGroupType(target_type);
-					break;
-				default:
-					break;
+					}
+					case 7:
+					case 10:
+						if (spells[spell_id].effect_description_id != 65)
+							break;
+						if (IsEffectInSpell(spell_id, SE_NegateIfCombat))
+							break;
+						entry_prototype = new STMovementSpeedEntry();
+						entry_prototype->SafeCastToMovementSpeed()->group = BCSpells::IsGroupType(target_type);
+						break;
+					default:
+						break;
 				}
 				if (entry_prototype)
 					break;
@@ -459,7 +473,8 @@ public:
 			if (!entry_prototype)
 				continue;
 
-			if (target_type == BCEnum::TT_Self && (entry_prototype->BCST() != BCEnum::SpT_Stance && entry_prototype->BCST() != BCEnum::SpT_SummonCorpse)) {
+			if (target_type == BCEnum::TT_Self && (entry_prototype->BCST() != BCEnum::SpT_Stance &&
+												   entry_prototype->BCST() != BCEnum::SpT_SummonCorpse)) {
 #ifdef BCSTSPELLDUMP
 				LogError("DELETING entry_prototype (primary clause) - name: [{}], target_type: [{}], BCST: [{}]",
 					spells[spell_id].name, BCEnum::TargetTypeEnumToString(target_type).c_str(), BCEnum::SpellTypeEnumToString(entry_prototype->BCST()).c_str());
@@ -489,53 +504,53 @@ public:
 
 				STBaseEntry* spell_entry = nullptr;
 				switch (entry_prototype->BCST()) {
-				case BCEnum::SpT_Charm:
-					if (entry_prototype->IsCharm())
-						spell_entry = new STCharmEntry(entry_prototype->SafeCastToCharm());
-					break;
-				case BCEnum::SpT_Cure:
-					if (entry_prototype->IsCure())
-						spell_entry = new STCureEntry(entry_prototype->SafeCastToCure());
-					break;
-				case BCEnum::SpT_Depart:
-					if (entry_prototype->IsDepart())
-						spell_entry = new STDepartEntry(entry_prototype->SafeCastToDepart());
-					break;
-				case BCEnum::SpT_Escape:
-					if (entry_prototype->IsEscape())
-						spell_entry = new STEscapeEntry(entry_prototype->SafeCastToEscape());
-					break;
-				case BCEnum::SpT_Invisibility:
-					if (entry_prototype->IsInvisibility())
-						spell_entry = new STInvisibilityEntry(entry_prototype->SafeCastToInvisibility());
-					break;
-				case BCEnum::SpT_MovementSpeed:
-					if (entry_prototype->IsMovementSpeed())
-						spell_entry = new STMovementSpeedEntry(entry_prototype->SafeCastToMovementSpeed());
-					break;
-				case BCEnum::SpT_Resistance:
-					if (entry_prototype->IsResistance())
-						spell_entry = new STResistanceEntry(entry_prototype->SafeCastToResistance());
-					break;
-				case BCEnum::SpT_Resurrect:
-					if (entry_prototype->IsResurrect())
-						spell_entry = new STResurrectEntry(entry_prototype->SafeCastToResurrect());
-					break;
-				case BCEnum::SpT_SendHome:
-					if (entry_prototype->IsSendHome())
-						spell_entry = new STSendHomeEntry(entry_prototype->SafeCastToSendHome());
-					break;
-				case BCEnum::SpT_Size:
-					if (entry_prototype->IsSize())
-						spell_entry = new STSizeEntry(entry_prototype->SafeCastToSize());
-					break;
-				case BCEnum::SpT_Stance:
-					if (entry_prototype->IsStance())
-						spell_entry = new STStanceEntry(entry_prototype->SafeCastToStance());
-					break;
-				default:
-					spell_entry = new STBaseEntry(entry_prototype);
-					break;
+					case BCEnum::SpT_Charm:
+						if (entry_prototype->IsCharm())
+							spell_entry = new STCharmEntry(entry_prototype->SafeCastToCharm());
+						break;
+					case BCEnum::SpT_Cure:
+						if (entry_prototype->IsCure())
+							spell_entry = new STCureEntry(entry_prototype->SafeCastToCure());
+						break;
+					case BCEnum::SpT_Depart:
+						if (entry_prototype->IsDepart())
+							spell_entry = new STDepartEntry(entry_prototype->SafeCastToDepart());
+						break;
+					case BCEnum::SpT_Escape:
+						if (entry_prototype->IsEscape())
+							spell_entry = new STEscapeEntry(entry_prototype->SafeCastToEscape());
+						break;
+					case BCEnum::SpT_Invisibility:
+						if (entry_prototype->IsInvisibility())
+							spell_entry = new STInvisibilityEntry(entry_prototype->SafeCastToInvisibility());
+						break;
+					case BCEnum::SpT_MovementSpeed:
+						if (entry_prototype->IsMovementSpeed())
+							spell_entry = new STMovementSpeedEntry(entry_prototype->SafeCastToMovementSpeed());
+						break;
+					case BCEnum::SpT_Resistance:
+						if (entry_prototype->IsResistance())
+							spell_entry = new STResistanceEntry(entry_prototype->SafeCastToResistance());
+						break;
+					case BCEnum::SpT_Resurrect:
+						if (entry_prototype->IsResurrect())
+							spell_entry = new STResurrectEntry(entry_prototype->SafeCastToResurrect());
+						break;
+					case BCEnum::SpT_SendHome:
+						if (entry_prototype->IsSendHome())
+							spell_entry = new STSendHomeEntry(entry_prototype->SafeCastToSendHome());
+						break;
+					case BCEnum::SpT_Size:
+						if (entry_prototype->IsSize())
+							spell_entry = new STSizeEntry(entry_prototype->SafeCastToSize());
+						break;
+					case BCEnum::SpT_Stance:
+						if (entry_prototype->IsStance())
+							spell_entry = new STStanceEntry(entry_prototype->SafeCastToStance());
+						break;
+					default:
+						spell_entry = new STBaseEntry(entry_prototype);
+						break;
 				}
 
 				assert(spell_entry);
@@ -545,7 +560,8 @@ public:
 
 				bot_command_spells[spell_entry->BCST()].push_back(spell_entry);
 
-				if (bot_levels.find(class_type) == bot_levels.end() || bot_levels[class_type] > class_levels[class_index])
+				if (bot_levels.find(class_type) == bot_levels.end() ||
+					bot_levels[class_type] > class_levels[class_index])
 					bot_levels[class_type] = class_levels[class_index];
 			}
 
@@ -561,7 +577,6 @@ public:
 #ifdef BCSTSPELLDUMP
 		spell_dump();
 #endif
-
 	}
 
 	static void Unload() {
@@ -569,8 +584,8 @@ public:
 			if (map_iter.second.empty())
 				continue;
 			for (auto list_iter: map_iter.second) {
-				safe_delete(list_iter)
-			};
+			safe_delete(list_iter);
+			}
 			map_iter.second.clear();
 		}
 		bot_command_spells.clear();
@@ -580,24 +595,23 @@ public:
 
 	static bool IsCasterCentered(BCEnum::TType target_type) {
 		switch (target_type) {
-		case BCEnum::TT_AECaster:
-		case BCEnum::TT_AEBard:
-			return true;
-		default:
-			return false;
+			case BCEnum::TT_AECaster:
+			case BCEnum::TT_AEBard:
+				return true;
+			default:
+				return false;
 		}
 	}
 
 	static bool IsGroupType(BCEnum::TType target_type) {
 		switch (target_type) {
-		case BCEnum::TT_GroupV1:
-		case BCEnum::TT_GroupV2:
-			return true;
-		default:
-			return false;
+			case BCEnum::TT_GroupV1:
+			case BCEnum::TT_GroupV2:
+				return true;
+			default:
+				return false;
 		}
 	}
-
 private:
 	static void remove_inactive() {
 		if (bot_command_spells.empty())
@@ -623,8 +637,8 @@ private:
 
 			for (auto del_iter: *removed_spells_list)
 			{
-				safe_delete(del_iter)
-			};
+				safe_delete(del_iter);
+			}
 			removed_spells_list->clear();
 
 			if (RuleI(Bots, CommandSpellRank) == 1) {
@@ -649,8 +663,8 @@ private:
 				});
 
 				for (auto del_iter: *removed_spells_list) {
-					safe_delete(del_iter)
-				};
+					safe_delete(del_iter);
+				}
 				removed_spells_list->clear();
 			}
 
@@ -674,8 +688,8 @@ private:
 				});
 
 				for (auto del_iter: *removed_spells_list) {
-					safe_delete(del_iter)
-				};
+					safe_delete(del_iter);
+				}
 				removed_spells_list->clear();
 			}
 
@@ -702,8 +716,8 @@ private:
 				});
 
 				for (auto del_iter: *removed_spells_list) {
-					safe_delete(del_iter)
-				};
+					safe_delete(del_iter);
+				}
 				removed_spells_list->clear();
 			}
 
@@ -1932,7 +1946,7 @@ namespace MyBots
 		if (!clear_list)
 			UniquifySBL(sbl);
 	}
-};
+}
 
 namespace ActionableTarget
 {
@@ -2126,7 +2140,7 @@ namespace ActionableTarget
 			return target[target_type];
 		}
 	};
-};
+}
 
 namespace ActionableBots
 {
@@ -2467,7 +2481,7 @@ namespace ActionableBots
 
 		ActionableBots::Filter_ByHighestSkill(bot_owner, sbl, EQ::skills::SkillPickLock, pick_lock_value);
 	}
-};
+}
 
 
 /*
@@ -2823,7 +2837,7 @@ void bot_command_bind_affinity(Client *c, const Seperator *sep)
 
 void bot_command_bot(Client *c, const Seperator *sep)
 {
-	/* VS2012 code - begin */
+
 	std::list<const char*> subcommand_list;
 	subcommand_list.push_back("botappearance");
 	subcommand_list.push_back("botcamp");
@@ -2844,14 +2858,6 @@ void bot_command_bot(Client *c, const Seperator *sep)
 	subcommand_list.push_back("bottogglearcher");
 	subcommand_list.push_back("bottogglehelm");
 	subcommand_list.push_back("botupdate");
-	/* VS2012 code - end */
-
-	/* VS2013 code
-	const std::list<const char*> subcommand_list = {
-		"botappearance", "botcamp", "botclone", "botcreate", "botdelete", "botdetails", "botdyearmor", "botinspectmessage", "botfollowdistance",
-		"botlist", "botoutofcombat", "botreport", "botspawn", "botstance", "botsummon", "bottogglearcher", "bottogglehelm", "botupdate"
-	};
-	*/
 
 	if (helper_command_alias_fail(c, "bot_command_bot", sep->arg[0], "bot"))
 		return;
@@ -3358,7 +3364,7 @@ void bot_command_guard(Client *c, const Seperator *sep)
 
 void bot_command_heal_rotation(Client *c, const Seperator *sep)
 {
-	/* VS2012 code - begin */
+
 	std::list<const char*> subcommand_list;
 	subcommand_list.push_back("healrotationadaptivetargeting");
 	subcommand_list.push_back("healrotationaddmember");
@@ -3380,16 +3386,6 @@ void bot_command_heal_rotation(Client *c, const Seperator *sep)
 	subcommand_list.push_back("healrotationsethot");
 	subcommand_list.push_back("healrotationstart");
 	subcommand_list.push_back("healrotationstop");
-	/* VS2012 code - end */
-
-	/* VS2013 code
-	const std::list<const char*> subcommand_list = {
-		"healrotationadaptivetargeting", "healrotationaddmember", "healrotationaddtarget", "healrotationadjustcritical", "healrotationadjustsafe",
-		"healrotationcastoverride", "healrotationchangeinterval", "healrotationclearhot", "healrotationcleartargets", "healrotationcreate",
-		"healrotationdelete", "healrotationfastheals", "healrotationlist", "healrotationremovemember", "healrotationremovetarget", "healrotationsave",
-		"healrotationresetlimits", "healrotationsethot", "healrotationstart", "healrotationstop"
-	};
-	*/
 
 	if (helper_command_alias_fail(c, "bot_command_heal_rotation", sep->arg[0], "healrotation"))
 		return;
@@ -3546,17 +3542,12 @@ void bot_command_identify(Client *c, const Seperator *sep)
 
 void bot_command_inventory(Client *c, const Seperator *sep)
 {
-	/* VS2012 code - begin */
+
 	std::list<const char*> subcommand_list;
 	subcommand_list.push_back("inventorygive");
 	subcommand_list.push_back("inventorylist");
 	subcommand_list.push_back("inventoryremove");
 	subcommand_list.push_back("inventorywindow");
-	/* VS2012 code - end */
-
-	/* VS2013 code
-	const std::list<const char*> subcommand_list = { "inventorygive", "inventorylist", "inventoryremove", "inventorywindow" };
-	*/
 
 	if (helper_command_alias_fail(c, "bot_command_inventory", sep->arg[0], "inventory"))
 		return;
@@ -4021,7 +4012,7 @@ void bot_command_owner_option(Client *c, const Seperator *sep)
 
 		database.botdb.SaveOwnerOption(c->CharacterID(), Client::booDeathMarquee, c->GetBotOption(Client::booDeathMarquee));
 
-		c->Message(Chat::White, "Bot 'death marquee' is now %s.", (c->GetBotOption(Client::booDeathMarquee) == true ? "enabled" : "disabled"));
+		c->Message(Chat::White, "Bot 'death marquee' is now %s.", (c->GetBotOption(Client::booDeathMarquee) ? "enabled" : "disabled"));
 	}
 	else if (!owner_option.compare("statsupdate")) {
 
@@ -4037,7 +4028,7 @@ void bot_command_owner_option(Client *c, const Seperator *sep)
 
 		database.botdb.SaveOwnerOption(c->CharacterID(), Client::booStatsUpdate, c->GetBotOption(Client::booStatsUpdate));
 
-		c->Message(Chat::White, "Bot 'stats update' is now %s.", (c->GetBotOption(Client::booStatsUpdate) == true ? "enabled" : "disabled"));
+		c->Message(Chat::White, "Bot 'stats update' is now %s.", (c->GetBotOption(Client::booStatsUpdate) ? "enabled" : "disabled"));
 	}
 	else if (!owner_option.compare("spawnmessage")) {
 
@@ -4123,7 +4114,7 @@ void bot_command_owner_option(Client *c, const Seperator *sep)
 
 			database.botdb.SaveOwnerOption(c->CharacterID(), Client::booAltCombat, c->GetBotOption(Client::booAltCombat));
 
-			c->Message(Chat::White, "Bot 'alt combat' is now %s.", (c->GetBotOption(Client::booAltCombat) == true ? "enabled" : "disabled"));
+			c->Message(Chat::White, "Bot 'alt combat' is now %s.", (c->GetBotOption(Client::booAltCombat) ? "enabled" : "disabled"));
 		}
 		else {
 			c->Message(Chat::White, "Bot owner option 'altcombat' is not allowed on this server.");
@@ -4145,7 +4136,7 @@ void bot_command_owner_option(Client *c, const Seperator *sep)
 
 			database.botdb.SaveOwnerOption(c->CharacterID(), Client::booAutoDefend, c->GetBotOption(Client::booAutoDefend));
 
-			c->Message(Chat::White, "Bot 'auto defend' is now %s.", (c->GetBotOption(Client::booAutoDefend) == true ? "enabled" : "disabled"));
+			c->Message(Chat::White, "Bot 'auto defend' is now %s.", (c->GetBotOption(Client::booAutoDefend) ? "enabled" : "disabled"));
 		}
 		else {
 			c->Message(Chat::White, "Bot owner option 'autodefend' is not allowed on this server.");
@@ -4165,7 +4156,7 @@ void bot_command_owner_option(Client *c, const Seperator *sep)
 
 		database.botdb.SaveOwnerOption(c->CharacterID(), Client::booBuffCounter, c->GetBotOption(Client::booBuffCounter));
 
-		c->Message(Chat::White, "Bot 'buff counter' is now %s.", (c->GetBotOption(Client::booBuffCounter) == true ? "enabled" : "disabled"));
+		c->Message(Chat::White, "Bot 'buff counter' is now %s.", (c->GetBotOption(Client::booBuffCounter) ? "enabled" : "disabled"));
 	}
 	else if (!owner_option.compare("monkwumessage")) {
 
@@ -4181,7 +4172,11 @@ void bot_command_owner_option(Client *c, const Seperator *sep)
 
 		database.botdb.SaveOwnerOption(c->CharacterID(), Client::booMonkWuMessage, c->GetBotOption(Client::booMonkWuMessage));
 
-		c->Message(Chat::White, "Bot 'monk wu message' is now %s.", (c->GetBotOption(Client::booMonkWuMessage) == true ? "enabled" : "disabled"));
+		c->Message(
+			Chat::White,
+			"Bot 'monk wu message' is now %s.",
+			(c->GetBotOption(Client::booMonkWuMessage) ? "enabled" : "disabled")
+		);
 	}
 	else if (!owner_option.compare("current")) {
 
@@ -4220,16 +4215,11 @@ void bot_command_owner_option(Client *c, const Seperator *sep)
 
 void bot_command_pet(Client *c, const Seperator *sep)
 {
-	/* VS2012 code - begin */
+
 	std::list<const char*> subcommand_list;
 	subcommand_list.push_back("petgetlost");
 	subcommand_list.push_back("petremove");
 	subcommand_list.push_back("petsettype");
-	/* VS2012 code - end */
-
-	/* VS2013 code
-	const std::list<const char*> subcommand_list = { "petgetlost", "petremove", "petsettype" };
-	*/
 
 	if (helper_command_alias_fail(c, "bot_command_pet", sep->arg[0], "pet"))
 		return;
@@ -4323,7 +4313,7 @@ void bot_command_precombat(Client* c, const Seperator* sep)
 		c->SetBotPrecombat(!c->GetBotPrecombat());
 	}
 
-	c->Message(Chat::White, "Precombat flag is now %s.", (c->GetBotPrecombat() == true ? "set" : "clear"));
+	c->Message(Chat::White, "Precombat flag is now %s.", (c->GetBotPrecombat() ? "set" : "clear"));
 }
 
 // TODO: Rework to allow owner specificed criteria for puller
@@ -5020,7 +5010,7 @@ void bot_command_water_breathing(Client *c, const Seperator *sep)
  */
 void bot_subcommand_bot_appearance(Client *c, const Seperator *sep)
 {
-	/* VS2012 code - begin */
+
 	std::list<const char*> subcommand_list;
 	subcommand_list.push_back("botbeardcolor");
 	subcommand_list.push_back("botbeardstyle");
@@ -5032,14 +5022,6 @@ void bot_subcommand_bot_appearance(Client *c, const Seperator *sep)
 	subcommand_list.push_back("botheritage");
 	subcommand_list.push_back("bottattoo");
 	subcommand_list.push_back("botwoad");
-	/* VS2012 code - end */
-
-	/* VS2013 code
-	const std::list<const char*> subcommand_list = {
-		"botbeardcolor", "botbeardstyle", "botdetails", "boteyes", "botface",
-		"bothaircolor", "bothairstyle", "botheritage", "bottattoo", "botwoad"
-	};
-	*/
 
 	if (helper_command_alias_fail(c, "bot_subcommand_bot_appearance", sep->arg[0], "botappearance"))
 		return;
@@ -10118,7 +10100,7 @@ bool helper_cast_standard_spell(Bot* casting_bot, Mob* target_mob, int spell_id,
 
 bool helper_command_disabled(Client* bot_owner, bool rule_value, const char* command)
 {
-	if (rule_value == false) {
+	if (rule_value) {
 		bot_owner->Message(Chat::White, "Bot command %s is not enabled on this server.", command);
 		return true;
 	}
@@ -10636,7 +10618,7 @@ void bot_command_spell_settings_toggle(Client *c, const Seperator *sep)
 
 	bool toggle = (
 		sep->IsNumber(2) ?
-		(Strings::ToInt(sep->arg[2]) ? true : false) :
+		Strings::ToInt(sep->arg[2]) != 0 :
 		atobool(sep->arg[2])
 	);
 

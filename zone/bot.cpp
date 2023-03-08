@@ -1948,7 +1948,6 @@ constexpr float MAX_CASTER_DISTANCE[PLAYER_CLASS_COUNT] = {
 void Bot::AI_Process()
 {
 
-#define TEST_COMBATANTS ; if (!GetTarget() || GetAppearance() == eaDead) { return false; }
 #define PULLING_BOT (GetPullingFlag() || GetReturningFlag())
 #define NOT_PULLING_BOT (!GetPullingFlag() && !GetReturningFlag())
 #define GUARDING (GetGuardFlag())
@@ -2141,7 +2140,7 @@ void Bot::AI_Process()
 			}
 
 			// Up to this point, GetTarget() has been safe to dereference since the initial
-			// TEST_COMBATANTS call. Due to the chance of the target dying and our pointer
+			// if (!GetTarget() || GetAppearance() == eaDead) { return false; } call. Due to the chance of the target dying and our pointer
 			// being nullified, we need to test it before dereferencing to avoid crashes
 
 			if (IsBotArcher() && TryRangedAttack(tar)) {
@@ -2421,7 +2420,7 @@ bool Bot::TryPursueTarget(float leash_distance, glm::vec3& Goal) {
 
 bool Bot::TrySecondaryWeaponAttacks(Mob* tar, const EQ::ItemInstance* s_item) {
 
-	TEST_COMBATANTS
+	if (!GetTarget() || GetAppearance() == eaDead) { return false; }
 	if (attack_dw_timer.Check() && CanThisClassDualWield()) {
 		const EQ::ItemData* s_itemdata = nullptr;
 
@@ -2451,10 +2450,10 @@ bool Bot::TrySecondaryWeaponAttacks(Mob* tar, const EQ::ItemInstance* s_item) {
 				if (random < DualWieldProbability) { // Max 78% for DW chance
 					Attack(tar, EQ::invslot::slotSecondary);	// Single attack with offhand
 
-					TEST_COMBATANTS
+					if (!GetTarget() || GetAppearance() == eaDead) { return false; }
 					TryCombatProcs(s_item, tar, EQ::invslot::slotSecondary);
 
-					TEST_COMBATANTS
+					if (!GetTarget() || GetAppearance() == eaDead) { return false; }
 					if (CanThisClassDoubleAttack() && CheckBotDoubleAttack() && tar->GetHP() > -10) {
 						Attack(tar, EQ::invslot::slotSecondary);	// Single attack with offhand
 					}
@@ -2467,38 +2466,38 @@ bool Bot::TrySecondaryWeaponAttacks(Mob* tar, const EQ::ItemInstance* s_item) {
 
 bool Bot::TryPrimaryWeaponAttacks(Mob* tar, const EQ::ItemInstance* p_item) {
 
-	TEST_COMBATANTS
+	if (!GetTarget() || GetAppearance() == eaDead) { return false; }
 	if (attack_timer.Check()) { // Process primary weapon attacks
 
 		Attack(tar, EQ::invslot::slotPrimary);
 
-		TEST_COMBATANTS
+		if (!GetTarget() || GetAppearance() == eaDead) { return false; }
 		TriggerDefensiveProcs(tar, EQ::invslot::slotPrimary, false);
 
-		TEST_COMBATANTS
+		if (!GetTarget() || GetAppearance() == eaDead) { return false; }
 		TryCombatProcs(p_item, tar, EQ::invslot::slotPrimary);
 
-		TEST_COMBATANTS
+		if (!GetTarget() || GetAppearance() == eaDead) { return false; }
 		if (CanThisClassDoubleAttack()) {
 
 			if (CheckBotDoubleAttack()) {
 				Attack(tar, EQ::invslot::slotPrimary, true);
 			}
 
-			TEST_COMBATANTS
+			if (!GetTarget() || GetAppearance() == eaDead) { return false; }
 			if (GetSpecialAbility(SPECATK_TRIPLE) && CheckBotDoubleAttack(true)) {
 
 				Attack(tar, EQ::invslot::slotPrimary, true);
 			}
 
-			TEST_COMBATANTS
+			if (!GetTarget() || GetAppearance() == eaDead) { return false; }
 			// quad attack, does this belong here??
 			if (GetSpecialAbility(SPECATK_QUAD) && CheckBotDoubleAttack(true)) {
 				Attack(tar, EQ::invslot::slotPrimary, true);
 			}
 		}
 
-		TEST_COMBATANTS
+		if (!GetTarget() || GetAppearance() == eaDead) { return false; }
 		// Live AA - Flurry, Rapid Strikes ect (Flurry does not require Triple Attack).
 		if (int32 flurrychance = (aabonuses.FlurryChance + spellbonuses.FlurryChance + itembonuses.FlurryChance)) {
 
@@ -2507,12 +2506,12 @@ bool Bot::TryPrimaryWeaponAttacks(Mob* tar, const EQ::ItemInstance* p_item) {
 				MessageString(Chat::NPCFlurry, YOU_FLURRY);
 				Attack(tar, EQ::invslot::slotPrimary, false);
 
-				TEST_COMBATANTS
+				if (!GetTarget() || GetAppearance() == eaDead) { return false; }
 				Attack(tar, EQ::invslot::slotPrimary, false);
 			}
 		}
 
-		TEST_COMBATANTS
+		if (!GetTarget() || GetAppearance() == eaDead) { return false; }
 		auto ExtraAttackChanceBonus =
 			(spellbonuses.ExtraAttackChance[0] + itembonuses.ExtraAttackChance[0] +
 			 aabonuses.ExtraAttackChance[0]);
@@ -2533,20 +2532,21 @@ bool Bot::TryPrimaryWeaponAttacks(Mob* tar, const EQ::ItemInstance* p_item) {
 bool Bot::TryClassAttacks(Mob* tar) {
 
 // Stop attacking if the target is enraged
-	TEST_COMBATANTS
+	if (!GetTarget() || GetAppearance() == eaDead) { return false; }
 	if (tar->IsEnraged() && !BehindMob(tar, GetX(), GetY())) {
 		return false;
 	}
 
 	// First, special attack per class (kick, backstab etc..)
 	DoClassAttacks(tar);
+	return true;
 }
 
 bool Bot::TryRangedAttack(Mob* tar) {
 
 	if (IsBotArcher() && ranged_timer.Check(false)) {
 
-		TEST_COMBATANTS
+		if (!GetTarget() || GetAppearance() == eaDead) { return false; }
 		if (GetTarget()->GetHPRatio() <= 99.0f) {
 			BotRangedAttack(tar);
 		}
