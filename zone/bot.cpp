@@ -478,7 +478,7 @@ void Bot::SetSurname(std::string_view bot_surname) {
 		gmn->unknown[3] = 1;
 
 		entity_list.QueueClients(this, outapp);
-		safe_delete(outapp)
+		safe_delete(outapp);
 	}
 }
 
@@ -496,7 +496,7 @@ void Bot::SetTitle(std::string_view bot_title) {
 		strs->entity_id = GetID();
 
 		entity_list.QueueClients(this, outapp, false);
-		safe_delete(outapp)
+		safe_delete(outapp);
 	}
 }
 
@@ -514,7 +514,7 @@ void  Bot::SetSuffix(std::string_view bot_suffix) {
 		strs->entity_id = GetID();
 
 		entity_list.QueueClients(this, outapp, false);
-		safe_delete(outapp)
+		safe_delete(outapp);
 	}
 }
 
@@ -1854,7 +1854,7 @@ void Bot::BotRangedAttack(Mob* other) {
 		sa_out->type = 0x03;
 		sa_out->parameter = 0;
 		entity_list.QueueClients(this, outapp, true);
-		safe_delete(outapp)
+		safe_delete(outapp);
 	}
 }
 
@@ -2070,7 +2070,7 @@ void Bot::AI_Process()
 		if (GetAttackingFlag() && tar->CheckAggro(this)) {
 			SetAttackingFlag(false);
 		}
-		
+
 		float tar_distance = DistanceSquared(m_Position, tar->GetPosition());
 
 // TARGET VALIDATION
@@ -3552,7 +3552,7 @@ void Bot::LoadAndSpawnAllZonedBots(Client* bot_owner) {
 						}
 
 						if (!b->Spawn(bot_owner)) {
-							safe_delete(b)
+							safe_delete(b);
 							continue;
 						}
 
@@ -3644,7 +3644,7 @@ void Bot::SendBotArcheryWearChange(uint8 material_slot, uint32 material, uint32 
 	wc->wear_slot_id = material_slot;
 
 	entity_list.QueueClients(this, outapp);
-	safe_delete(outapp)
+	safe_delete(outapp);
 }
 
 // Returns the item id that is in the bot inventory collection for the specified slot.
@@ -3754,12 +3754,12 @@ void Bot::AddBotItem(
 
 	if (!database.botdb.SaveItemBySlot(this, slot_id, inst)) {
 		LogError("Failed to save item by slot to slot [{}] for [{}].", slot_id, GetCleanName());
-		safe_delete(inst)
+		safe_delete(inst);
 		return;
 	}
 
 	m_inv.PutItem(slot_id, *inst);
-	safe_delete(inst)
+	safe_delete(inst);
 
 	BotAddEquipItem(slot_id, item_id);
 }
@@ -4610,7 +4610,7 @@ bool Bot::Death(Mob *killerMob, int64 damage, uint16 spell_id, EQ::skills::Skill
 								g->members[k]->CastToClient()->QueuePacket(outapp);
 						}
 					}
-					safe_delete(outapp)
+					safe_delete(outapp);
 				}
 			}
 		}
@@ -4623,13 +4623,13 @@ bool Bot::Death(Mob *killerMob, int64 damage, uint16 spell_id, EQ::skills::Skill
 	}
 
 Raid* raid = entity_list.GetRaidByBotName(GetName());
-	
-	if (raid) 
+
+	if (raid)
 	{
- 
+
 		for (int x = 0; x < MAX_RAID_MEMBERS; x++)
 		{
-			if (strcmp(raid->members[x].membername, GetName()) == 0) 
+			if (strcmp(raid->members[x].membername, GetName()) == 0)
 			{
 				raid->members[x].member = nullptr;
 			}
@@ -5968,7 +5968,7 @@ bool Bot::DoFinishedSpellGroupTarget(uint16 spell_id, Mob* spellTarget, EQ::spel
 		SpellOnTarget(spell_id, this);
 		entity_list.AESpell(this, this, spell_id, true);
 	}
-	else if (raid) 
+	else if (raid)
 	{
 		std::vector<RaidMember> raid_group_members = raid->GetRaidGroupMembers(raid->GetGroup(GetName()));
 		for (auto iter = raid_group_members.begin(); iter != raid_group_members.end(); ++iter) {
@@ -6459,7 +6459,7 @@ int64 Bot::CalcManaRegen() {
 		regen += itembonuses.HeroicINT * RuleR(Character, HeroicIntelligenceMultiplier) / 25;
 	else if(GetCasterClass() == 'W')
 		regen += itembonuses.HeroicWIS * RuleR(Character, HeroicWisdomMultiplier) / 25;
-    
+
 	else
 		regen = 0;
 
@@ -6593,7 +6593,7 @@ int64 Bot::CalcBaseEndurance() {
 		int Bonus800plus = 0;
 		int HalfBonus800plus = 0;
 		int BonusUpto800 = int(at_most_800 / 4) ;
-    
+
 		if(stats > 400) {
 			Bonus400to800 = int((at_most_800 - 400) / 4);
 			HalfBonus400to800 = int(std::max((at_most_800 - 400), 0) / 8);
@@ -6678,7 +6678,7 @@ void Bot::Zone() {
 	else if (HasGroup()) {
 		GetGroup()->MemberZoned(this);
 	}
-		
+
 	Save();
 	Depop();
 }
@@ -7009,7 +7009,7 @@ void Bot::ProcessBotInspectionRequest(Bot* inspectedBot, Client* client) {
 		strcpy(insr->text, inspectedBot->GetInspectMessage().text);
 
 		client->QueuePacket(outapp); // Send answer to requester
-		safe_delete(outapp)
+		safe_delete(outapp);
 	}
 }
 
@@ -7522,7 +7522,7 @@ bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, fl
 								return true;
 						}
 					}
-				}	
+				}
 			}
 		}
 
@@ -7871,13 +7871,13 @@ void EntityList::AddBot(Bot *new_bot, bool send_spawn_packet, bool dont_queue) {
 				new_bot->CreateSpawnPacket(outapp);
 				outapp->priority = 6;
 				QueueClients(new_bot, outapp, true);
-				safe_delete(outapp)
+				safe_delete(outapp);
 			} else {
 				NewSpawn_Struct* ns = new NewSpawn_Struct;
 				memset(ns, 0, sizeof(NewSpawn_Struct));
 				new_bot->FillSpawnStruct(ns, new_bot);
 				AddToSpawnQueue(new_bot->GetID(), &ns);
-				safe_delete(ns)
+				safe_delete(ns);
 			}
 		}
 
@@ -8550,7 +8550,7 @@ std::string Bot::CreateSayLink(Client* c, const char* message, const char* name)
 	database.DoEscapeString(escaped_string, message, saylink_size);
 
 	uint32 saylink_id = database.LoadSaylinkID(escaped_string);
-	safe_delete_array(escaped_string)
+	safe_delete_array(escaped_string);
 
 	EQ::SayLinkEngine linker;
 	linker.SetLinkType(EQ::saylink::SayLinkItemData);
@@ -8573,7 +8573,7 @@ void Bot::SpawnBotGroupByName(Client* c, const std::string& botgroup_name, uint3
 				botgroup_name
 			).c_str()
 		);
-		safe_delete(leader)
+		safe_delete(leader);
 		return;
 	}
 
@@ -8586,7 +8586,7 @@ void Bot::SpawnBotGroupByName(Client* c, const std::string& botgroup_name, uint3
 				botgroup_name
 			).c_str()
 		);
-		safe_delete(leader)
+		safe_delete(leader);
 		return;
 	}
 
@@ -8647,7 +8647,7 @@ void Bot::SpawnBotGroupByName(Client* c, const std::string& botgroup_name, uint3
 					member_iter
 				).c_str()
 			);
-			safe_delete(member)
+			safe_delete(member);
 			return;
 		}
 
@@ -8690,7 +8690,7 @@ void Bot::SpawnBotGroupByName(Client* c, const std::string& botgroup_name, uint3
 					member_iter
 				).c_str()
 			);
-			safe_delete(member)
+			safe_delete(member);
 			return;
 		}
 
