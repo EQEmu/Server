@@ -622,7 +622,7 @@ private:
 		bool RemoveBot(uint16 entityID);
 		Mob* GetMobByBotID(uint32 botID);
 		Bot* GetBotByBotID(uint32 botID);
-		Bot* GetBotByBotName(std::string botName);
+		Bot* GetBotByBotName(std::string_view botName);
 		Client* GetBotOwnerByBotEntityID(uint32 entity_id);
 		Client* GetBotOwnerByBotID(const uint32 bot_id);
 		std::list<Bot*> GetBotsByBotOwnerCharacterID(uint32 botOwnerCharacterID);

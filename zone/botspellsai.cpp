@@ -114,7 +114,7 @@ bool Bot::BotCastSong(Mob* tar, uint8 botLevel) {
 			continue;
 		if (!CheckSpellRecastTimers(this, iter.SpellIndex))
 			continue;
-		if (spells[iter.SpellId].zone_type != -1 && zone->GetZoneType() != -1 && spells[iter.SpellId].zone_type != zone->GetZoneType()) // is this bit or index?
+		if (spells[iter.SpellId].zone_type != zone->GetZoneType())
 			continue;
 		switch (spells[iter.SpellId].target_type) {
 		case ST_AEBard:
@@ -148,7 +148,7 @@ bool Bot::BotCastCombatSong(Mob* tar, uint8 botLevel) {
 			continue;
 		if (!CheckSpellRecastTimers(this, iter.SpellIndex))
 			continue;
-		if (spells[iter.SpellId].zone_type != -1 && zone->GetZoneType() != -1 && spells[iter.SpellId].zone_type != zone->GetZoneType()) // is this bit or index?
+		if (spells[iter.SpellId].zone_type != zone->GetZoneType())
 			continue;
 		switch (spells[iter.SpellId].target_type) {
 		case ST_AEBard:
@@ -180,7 +180,7 @@ bool Bot::BotCastHateReduction(Mob* tar, uint8 botLevel, const BotSpell& botSpel
 				continue;
 			if (!CheckSpellRecastTimers(this, iter.SpellIndex))
 				continue;
-			if (spells[iter.SpellId].zone_type != -1 && zone->GetZoneType() != -1 && spells[iter.SpellId].zone_type != zone->GetZoneType()) // is this bit or index?
+			if (spells[iter.SpellId].zone_type != zone->GetZoneType())
 				continue;
 			if (spells[iter.SpellId].target_type != ST_Target)
 				continue;
@@ -320,8 +320,7 @@ bool Bot::BotCastSlow(Mob* tar, uint8 botLevel, uint8 botClass, BotSpell& botSpe
 						continue;
 					}
 
-					if (spells[iter.SpellId].zone_type != -1 && zone->GetZoneType() != -1 &&
-						spells[iter.SpellId].zone_type != zone->GetZoneType()) { // is this bit or index?
+					if (spells[iter.SpellId].zone_type != zone->GetZoneType()) {
 						continue;
 					}
 
@@ -1248,7 +1247,7 @@ bool Bot::BotCastMez(Mob* tar, uint8 botLevel, bool checked_los, BotSpell& botSp
 	return casted_spell;
 }
 
-bool Bot::AIDoSpellCast(uint8 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgainBefore) {
+bool Bot::AIDoSpellCast(int32 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgainBefore) {
 	bool result = false;
 
 	// manacost has special values, -1 is no mana cost, -2 is instant cast (no mana)
@@ -2703,11 +2702,11 @@ BotSpell Bot::GetBestBotSpellForResistDebuff(Bot* botCaster, Mob *tar) {
 	{
 		level_mod = -level_mod;
 	}
-	bool needsMagicResistDebuff = (tar->GetMR() + level_mod) > 100 ? true: false;
-	bool needsColdResistDebuff = (tar->GetCR() + level_mod) > 100 ? true: false;
-	bool needsFireResistDebuff = (tar->GetFR() + level_mod) > 100 ? true: false;
-	bool needsPoisonResistDebuff = (tar->GetPR() + level_mod) > 100 ? true: false;
-	bool needsDiseaseResistDebuff = (tar->GetDR() + level_mod) > 100 ? true: false;
+	bool needsMagicResistDebuff = (tar->GetMR() + level_mod) > 100;
+	bool needsColdResistDebuff = (tar->GetCR() + level_mod) > 100;
+	bool needsFireResistDebuff = (tar->GetFR() + level_mod) > 100;
+	bool needsPoisonResistDebuff = (tar->GetPR() + level_mod) > 100;
+	bool needsDiseaseResistDebuff = (tar->GetDR() + level_mod) > 100;
 
 	if (botCaster && botCaster->AI_HasSpells()) {
 		std::vector<BotSpells_Struct> botSpellList = botCaster->AIBot_spells;

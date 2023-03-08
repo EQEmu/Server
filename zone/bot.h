@@ -220,8 +220,7 @@ public:
 	int GetRunspeed() { return (int)((float)_GetRunSpeed() * 1.785714285f); }
 	void WalkTo(float x, float y, float z) override;
 	void RunTo(float x, float y, float z) override;
-	void StopMoving() override;
-	void StopMoving(float new_heading) override;
+
 	bool GetGuardFlag() const { return m_guard_flag; }
 	void SetGuardFlag(bool flag = true) { m_guard_flag = flag; }
 	bool GetHoldFlag() const { return m_hold_flag; }
@@ -390,7 +389,7 @@ public:
 
 	bool GetBotOwnerDataBuckets();
 	bool GetBotDataBuckets();
-	bool CheckDataBucket(std::string bucket_name, std::string bucket_value, uint8 bucket_comparison);
+	bool CheckDataBucket(const std::string& bucket_name, const std::string& bucket_value, uint8 bucket_comparison);
 
 	// Bot Equipment & Inventory Class Methods
 	void BotTradeAddItem(const EQ::ItemInstance* inst, uint16 slot_id, std::string* error_message, bool save_to_database = true);
@@ -410,9 +409,9 @@ public:
 	static void LevelBotWithClient(Client* client, uint8 level, bool sendlvlapp);
 
 	static bool IsBotAttackAllowed(Mob* attacker, Mob* target, bool& hasRuleDefined);
-	static Bot* GetBotByBotClientOwnerAndBotName(Client* c, std::string botName);
+	static Bot* GetBotByBotClientOwnerAndBotName(Client* c, const std::string& botName);
 	static void ProcessBotGroupInvite(Client* c, std::string const& botName);
-	static void ProcessBotGroupDisband(Client* c, std::string botName);
+	static void ProcessBotGroupDisband(Client* c, const std::string& botName);
 	static void BotOrderCampAll(Client* c, uint8 class_id = NO_CLASS);
 	static void ProcessBotInspectionRequest(Bot* inspectedBot, Client* client);
 	static void LoadAndSpawnAllZonedBots(Client* bot_owner);
@@ -656,7 +655,7 @@ public:
 	void SetBotEnforceSpellSetting(bool enforcespellsettings, bool save = false);
 	bool GetBotEnforceSpellSetting() const { return m_enforce_spell_settings; }
 
-	static void SpawnBotGroupByName(Client* c, std::string botgroup_name, uint32 leader_id);
+	static void SpawnBotGroupByName(Client* c, const std::string& botgroup_name, uint32 leader_id);
 
 	std::string CreateSayLink(Client* botOwner, const char* message, const char* name);
 
@@ -747,7 +746,7 @@ public:
 
 	void Signal(int signal_id);
 	void SendPayload(int payload_id, std::string payload_value = std::string());
-	void OwnerMessage(std::string message);
+	void OwnerMessage(const std::string& message);
 
 	//Raid additions
 	Raid* p_raid_instance;
@@ -830,7 +829,7 @@ protected:
 	void BotMeditate(bool isSitting);
 	bool CheckBotDoubleAttack(bool Triple = false);
 	void PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client* client);
-	bool AIDoSpellCast(uint8 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgainBefore = nullptr) override;
+	bool AIDoSpellCast(int32 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgainBefore = nullptr) override;
 
 	BotCastingRoles& GetCastingRoles() { return m_CastingRoles; }
 	void SetGroupHealer(bool flag = true) { m_CastingRoles.GroupHealer = flag; }

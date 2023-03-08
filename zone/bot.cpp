@@ -634,19 +634,7 @@ NPCType *Bot::FillNPCTypeStruct(
 	n->bodytype = 1;
 	n->deity = EQ::deity::DeityAgnostic;
 	n->level = botLevel;
-	//n->npc_id = 0;
-	//n->texture = 0;
-	//n->helmtexture = 0;
-	//n->herosforgemodel = 0;
-	//n->loottable_id = 0;
 	n->npc_spells_id = botSpellsID;
-	//n->npc_spells_effects_id = 0;
-	//n->npc_faction_id = 0;
-	//n->merchanttype = 0;
-	//n->alt_currency_type = 0;
-	//n->adventure_template = 0;
-	//n->trap_template = 0;
-	//n->light = 0;
 	n->AC = ac;
 	n->Mana = mana;
 	n->ATK = attack;
@@ -663,7 +651,6 @@ NPCType *Bot::FillNPCTypeStruct(
 	n->PR = pr;
 	n->DR = dr;
 	n->Corrup = corrup;
-	//n->PhR = 0;
 	n->haircolor = hairColor;
 	n->beardcolor = beardColor;
 	n->eyecolor1 = eyeColor;
@@ -674,63 +661,12 @@ NPCType *Bot::FillNPCTypeStruct(
 	n->drakkin_heritage = drakkinHeritage;
 	n->drakkin_tattoo = drakkinTattoo;
 	n->drakkin_details = drakkinDetails;
-	//n->armor_tint = { 0 };
-	//n->min_dmg = 0;
-	//n->max_dmg = 0;
-	//n->charm_ac = 0;
-	//n->charm_min_dmg = 0;
-	//n->charm_max_dmg = 0;
-	//n->charm_attack_delay = 0;
-	//n->charm_accuracy_rating = 0;
-	//n->charm_avoidance_rating = 0;
-	//n->charm_atk = 0;
-	//n->attack_count = 0;
-	//*n->special_abilities = { 0 };
-	//n->d_melee_texture1 = 0;
-	//n->d_melee_texture2 = 0;
-	//*n->ammo_idfile = { 0 };
-	//n->prim_melee_type = 0;
-	//n->sec_melee_type = 0;
-	//n->ranged_type = 0;
 	n->hp_regen = 1;
 	n->mana_regen = 1;
-	//n->aggroradius = 0;
-	//n->assistradius = 0;
-	//n->see_invis = 0;
-	//n->see_invis_undead = false;
-	//n->see_hide = false;
-	//n->see_improved_hide = false;
-	//n->qglobal = false;
-	//n->npc_aggro = false;
-	//n->spawn_limit = 0;
-	//n->mount_color = 0;
-	//n->attack_speed = 0.0f;
-	//n->attack_delay = 0;
-	//n->accuracy_rating = 0;
-	//n->avoidance_rating = 0;
-	//n->findable = false;
 	n->trackable = true;
-	//n->slow_mitigation = 0;
 	n->maxlevel = botLevel;
-	//n->scalerate = 0;
-	//n->private_corpse = false;
-	//n->unique_spawn_by_name = false;
-	//n->underwater = false;
-	//n->emoteid = 0;
-	//n->spellscale = 0.0f;
-	//n->healscale = 0.0f;
-	//n->no_target_hotkey = false;
-	//n->raid_target = false;
-	//n->armtexture = 0;
-	//n->bracertexture = 0;
-	//n->handtexture = 0;
-	//n->legtexture = 0;
-	//n->feettexture = 0;
-	//n->ignore_despawn = false;
 	n->show_name = true;
-	//n->untargetable = false;
 	n->skip_global_loot = true;
-	//n->rare_spawn = false;
 	n->stuck_behavior = Ground;
 	n->skip_auto_scale = true;
 
@@ -750,8 +686,6 @@ NPCType *Bot::CreateDefaultNPCTypeStructForBot(
 	strn0cpy(n->name, botName.c_str(), sizeof(n->name));
 	strn0cpy(n->lastname, botLastName.c_str(), sizeof(n->lastname));
 
-	//n->current_hp = 0;
-	//n->max_hp = 0;
 	n->size = 6.0f;
 	n->runspeed = 0.7f;
 	n->gender = gender;
@@ -760,21 +694,7 @@ NPCType *Bot::CreateDefaultNPCTypeStructForBot(
 	n->bodytype = 1;
 	n->deity = EQ::deity::DeityAgnostic;
 	n->level = botLevel;
-	//n->npc_id = 0;
-	//n->texture = 0;
-	//n->helmtexture = 0;
-	//n->herosforgemodel = 0;
-	//n->loottable_id = 0;
-	//n->npc_spells_id = 0;
-	//n->npc_spells_effects_id = 0;
-	//n->npc_faction_id = 0;
-	//n->merchanttype = 0;
-	//n->alt_currency_type = 0;
-	//n->adventure_template = 0;
-	//n->trap_template = 0;
-	//n->light = 0;
 	n->AC = 12;
-	//n->Mana = 0;
 	n->ATK = 75;
 	n->STR = 75;
 	n->STA = 75;
@@ -789,74 +709,12 @@ NPCType *Bot::CreateDefaultNPCTypeStructForBot(
 	n->PR = 15;
 	n->DR = 15;
 	n->Corrup = 15;
-	//n->PhR = 0;
-	//n->haircolor = 0;
-	//n->beardcolor = 0;
-	//n->eyecolor1 = 0;
-	//n->eyecolor2 = 0;
-	//n->hairstyle = 0;
-	//n->luclinface = 0;
-	//n->beard = 0;
-	//n->drakkin_heritage = 0;
-	//n->drakkin_tattoo = 0;
-	//n->drakkin_details = 0;
-	//n->armor_tint = { 0 };
-	//n->min_dmg = 0;
-	//n->max_dmg = 0;
-	//n->charm_ac = 0;
-	//n->charm_min_dmg = 0;
-	//n->charm_max_dmg = 0;
-	//n->charm_attack_delay = 0;
-	//n->charm_accuracy_rating = 0;
-	//n->charm_avoidance_rating = 0;
-	//n->charm_atk = 0;
-	//n->attack_count = 0;
-	//*n->special_abilities = { 0 };
-	//n->d_melee_texture1 = 0;
-	//n->d_melee_texture2 = 0;
-	//*n->ammo_idfile = { 0 };
-	//n->prim_melee_type = 0;
-	//n->sec_melee_type = 0;
-	//n->ranged_type = 0;
 	n->hp_regen = 1;
 	n->mana_regen = 1;
-	//n->aggroradius = 0;
-	//n->assistradius = 0;
-	//n->see_invis = 0;
-	//n->see_invis_undead = false;
-	//n->see_hide = false;
-	//n->see_improved_hide = false;
-	//n->qglobal = false;
-	//n->npc_aggro = false;
-	//n->spawn_limit = 0;
-	//n->mount_color = 0;
-	//n->attack_speed = 0.0f;
-	//n->attack_delay = 0;
-	//n->accuracy_rating = 0;
-	//n->avoidance_rating = 0;
-	//n->findable = false;
 	n->trackable = true;
-	//n->slow_mitigation = 0;
 	n->maxlevel = botLevel;
-	//n->scalerate = 0;
-	//n->private_corpse = false;
-	//n->unique_spawn_by_name = false;
-	//n->underwater = false;
-	//n->emoteid = 0;
-	//n->spellscale = 0.0f;
-	//n->healscale = 0.0f;
-	//n->no_target_hotkey = false;
-	//n->raid_target = false;
-	//n->armtexture = 0;
-	//n->bracertexture = 0;
-	//n->handtexture = 0;
-	//n->legtexture = 0;
-	//n->feettexture = 0;
-	//n->ignore_despawn = false;
 	n->show_name = true;
-	//n->untargetable = false;
 	n->skip_global_loot = true;
-	//n->rare_spawn = false;
 	n->stuck_behavior = Ground;
 
 	return n;
@@ -1943,12 +1801,12 @@ void Bot::BotRangedAttack(Mob* other) {
 		return;
 	}
 
-	EQ::ItemInstance* rangedItem = GetBotItem(EQ::invslot::slotRange);
+	const auto rangedItem = GetBotItem(EQ::invslot::slotRange);
 	const EQ::ItemData* RangeWeapon = nullptr;
 	if (rangedItem)
 		RangeWeapon = rangedItem->GetItem();
 
-	EQ::ItemInstance* ammoItem = GetBotItem(EQ::invslot::slotAmmo);
+	const auto ammoItem = GetBotItem(EQ::invslot::slotAmmo);
 	const EQ::ItemData* Ammo = nullptr;
 	if (ammoItem)
 		Ammo = ammoItem->GetItem();
@@ -1996,7 +1854,7 @@ void Bot::BotRangedAttack(Mob* other) {
 		sa_out->type = 0x03;
 		sa_out->parameter = 0;
 		entity_list.QueueClients(this, outapp, true);
-		safe_delete(outapp);
+		safe_delete(outapp)
 	}
 }
 
@@ -3575,8 +3433,6 @@ void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 		strcpy(ns->spawn.suffix, GetSuffix().c_str());
 		const EQ::ItemData* item = nullptr;
 		const EQ::ItemInstance* inst = nullptr;
-		uint32 spawnedbotid = 0;
-		spawnedbotid = GetBotID();
 		for (int i = EQ::textures::textureBegin; i < EQ::textures::weaponPrimary; i++) {
 			inst = GetBotItem(i);
 			if (inst) {
@@ -3684,16 +3540,19 @@ void Bot::LoadAndSpawnAllZonedBots(Client* bot_owner) {
 						}
 
 						auto spawned_bot_count_class = bot_class_spawned_count[b->GetClass() - 1];
-						auto bot_spawn_limit_class = bot_class_spawn_limits[b->GetClass() - 1];
 
-						if (bot_spawn_limit_class >= 0 && spawned_bot_count_class >= bot_spawn_limit_class) {
+						if (
+							auto bot_spawn_limit_class = bot_class_spawn_limits[b->GetClass() - 1];
+							bot_spawn_limit_class >= 0 &&
+							spawned_bot_count_class >= bot_spawn_limit_class
+						) {
 							database.SetGroupID(b->GetCleanName(), 0, b->GetBotID());
 							g->UpdatePlayer(bot_owner);
 							continue;
 						}
 
 						if (!b->Spawn(bot_owner)) {
-							safe_delete(b);
+							safe_delete(b)
 							continue;
 						}
 
@@ -3785,7 +3644,7 @@ void Bot::SendBotArcheryWearChange(uint8 material_slot, uint32 material, uint32 
 	wc->wear_slot_id = material_slot;
 
 	entity_list.QueueClients(this, outapp);
-	safe_delete(outapp);
+	safe_delete(outapp)
 }
 
 // Returns the item id that is in the bot inventory collection for the specified slot.
@@ -3895,12 +3754,12 @@ void Bot::AddBotItem(
 
 	if (!database.botdb.SaveItemBySlot(this, slot_id, inst)) {
 		LogError("Failed to save item by slot to slot [{}] for [{}].", slot_id, GetCleanName());
-		safe_delete(inst);
+		safe_delete(inst)
 		return;
 	}
 
 	m_inv.PutItem(slot_id, *inst);
-	safe_delete(inst);
+	safe_delete(inst)
 
 	BotAddEquipItem(slot_id, item_id);
 }
@@ -4642,7 +4501,7 @@ void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client*
 		// Accept Items from Cursor to support bot command ^inventorygive
 		if (begin_slot_id == invslot::slotCursor && end_slot_id == invslot::slotCursor) {
 			EQ::ItemInstance* insts[1] = { 0 };
-			EQ::InventoryProfile& user_inv = client->GetInv();
+			user_inv = client->GetInv();
 			insts[0] = user_inv.GetItem(invslot::slotCursor);
 			client->DeleteItemInInventory(invslot::slotCursor);
 
@@ -4659,7 +4518,7 @@ void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client*
 
 		} else {
 			EQ::ItemInstance* insts[8] = { 0 };
-			EQ::InventoryProfile& user_inv = client->GetInv();
+			user_inv = client->GetInv();
 			for (int i = EQ::invslot::TRADE_BEGIN; i <= EQ::invslot::TRADE_END; ++i) {
 				insts[i - EQ::invslot::TRADE_BEGIN] = user_inv.GetItem(i);
 				client->DeleteItemInInventory(i);
@@ -4751,7 +4610,7 @@ bool Bot::Death(Mob *killerMob, int64 damage, uint16 spell_id, EQ::skills::Skill
 								g->members[k]->CastToClient()->QueuePacket(outapp);
 						}
 					}
-					safe_delete(outapp);
+					safe_delete(outapp)
 				}
 			}
 		}
@@ -5301,7 +5160,7 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 			break;
 		}
 		default:
-			break;;
+			break;
 		}
 	}
 
@@ -5884,7 +5743,7 @@ bool Bot::IsImmuneToSpell(uint16 spell_id, Mob *caster) {
 	if (!caster)
 		return false;
 
-	if (!IsSacrificeSpell(spell_id) && !(zone->GetZoneID() == 202) && !(this == caster)) {
+	if (!IsSacrificeSpell(spell_id) && zone->GetZoneID() != 202 && this != caster) {
 		Result = Mob::IsImmuneToSpell(spell_id, caster);
 		if (!Result) {
 			if (caster->IsBot()) {
@@ -6984,7 +6843,7 @@ void Bot::UpdateGroupCastingRoles(const Group* group, bool disband)
 		doter->CastToBot()->SetGroupDoter();
 }
 
-Bot* Bot::GetBotByBotClientOwnerAndBotName(Client* c, std::string botName) {
+Bot* Bot::GetBotByBotClientOwnerAndBotName(Client* c, const std::string& botName) {
 	Bot* Result = nullptr;
 	if (c) {
 		std::list<Bot*> BotList = entity_list.GetBotsByBotOwnerCharacterID(c->CharacterID());
@@ -7006,7 +6865,7 @@ void Bot::ProcessBotGroupInvite(Client* c, std::string const& botName) {
 
 		if (invitedBot && !invitedBot->HasGroup() && !invitedBot->HasRaid()) {
 			if (!c->IsGrouped()) {
-				Group *g = new Group(c);
+				auto g = new Group(c);
 				if (AddBotToGroup(invitedBot, g)) {
 					entity_list.AddGroup(g);
 					database.SetGroupLeaderName(g->GetID(), c->GetName());
@@ -7033,7 +6892,7 @@ void Bot::ProcessBotGroupInvite(Client* c, std::string const& botName) {
 }
 
 // Processes a group disband request from a Client for a Bot.
-void Bot::ProcessBotGroupDisband(Client* c, std::string botName) {
+void Bot::ProcessBotGroupDisband(Client* c, const std::string& botName) {
 	if (c) {
 		Bot* tempBot = nullptr;
 
@@ -7150,7 +7009,7 @@ void Bot::ProcessBotInspectionRequest(Bot* inspectedBot, Client* client) {
 		strcpy(insr->text, inspectedBot->GetInspectMessage().text);
 
 		client->QueuePacket(outapp); // Send answer to requester
-		safe_delete(outapp);
+		safe_delete(outapp)
 	}
 }
 
@@ -7182,7 +7041,7 @@ void Bot::AddItemBonuses(const EQ::ItemInstance *inst, StatBonuses* newbon, bool
 		return;
 	}
 
-	if (inst->GetAugmentType()==0 && isAug == true)
+	if (inst->GetAugmentType()==0 && isAug)
 	{
 		return;
 	}
@@ -7688,7 +7547,7 @@ bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, fl
 			uint32 gid = RAID_GROUPLESS;
 			Raid* raid = entity_list.GetRaidByBotName(caster->GetName());
 			if (raid) {
-				uint32 gid = raid->GetGroup(caster->GetName());
+				gid = raid->GetGroup(caster->GetName());
 			}
 
 			if (g) {
@@ -7874,14 +7733,16 @@ bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, fl
 			if (g < MAX_RAID_GROUPS) {
 				std::vector<RaidMember> raid_group_members = raid->GetRaidGroupMembers(g);
 				for (std::vector<RaidMember>::iterator iter = raid_group_members.begin(); iter != raid_group_members.end(); ++iter) {
-					if (iter->member) {
-						if (caster->AICastSpell(iter->member, iChance, SpellType_PreCombatBuff) || caster->AICastSpell(iter->member->GetPet(), iChance, SpellType_PreCombatBuff))
-							return true;
+					if (iter->member &&
+						(caster->AICastSpell(iter->member, iChance, SpellType_PreCombatBuff) ||
+						caster->AICastSpell(iter->member->GetPet(), iChance, SpellType_PreCombatBuff))
+					) {
+						return true;
 					}
 				}
 			}
 		} else if (caster->HasGroup()) {
-			Group *g = caster->GetGroup();
+			const auto g = caster->GetGroup();
 			if (g) {
 				for (int i = 0; i < MAX_GROUP_MEMBERS; i++) {
 					if (g->members[i]) {
@@ -7924,13 +7785,12 @@ bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, fl
 Mob* EntityList::GetMobByBotID(uint32 botID) {
 	Mob* Result = nullptr;
 	if (botID > 0) {
-		auto it = mob_list.begin();
-		for (auto it = mob_list.begin(); it != mob_list.end(); ++it) {
-			if (!it->second)
+		for (const auto& m: mob_list) {
+			if (!m.second)
 				continue;
 
-			if (it->second->IsBot() && it->second->CastToBot()->GetBotID() == botID) {
-				Result = it->second;
+			if (m.second->IsBot() && m.second->CastToBot()->GetBotID() == botID) {
+				Result = m.second;
 				break;
 			}
 		}
@@ -7952,7 +7812,7 @@ Bot* EntityList::GetBotByBotID(uint32 botID) {
 	return Result;
 }
 
-Bot* EntityList::GetBotByBotName(std::string botName) {
+Bot* EntityList::GetBotByBotName(std::string_view botName) {
 	Bot* Result = nullptr;
 	if (!botName.empty()) {
 		for (std::list<Bot*>::iterator botListItr = bot_list.begin(); botListItr != bot_list.end(); ++botListItr) {
@@ -8011,13 +7871,13 @@ void EntityList::AddBot(Bot *new_bot, bool send_spawn_packet, bool dont_queue) {
 				new_bot->CreateSpawnPacket(outapp);
 				outapp->priority = 6;
 				QueueClients(new_bot, outapp, true);
-				safe_delete(outapp);
+				safe_delete(outapp)
 			} else {
 				NewSpawn_Struct* ns = new NewSpawn_Struct;
 				memset(ns, 0, sizeof(NewSpawn_Struct));
 				new_bot->FillSpawnStruct(ns, new_bot);
 				AddToSpawnQueue(new_bot->GetID(), &ns);
-				safe_delete(ns);
+				safe_delete(ns)
 			}
 		}
 
@@ -8061,9 +7921,9 @@ void EntityList::ShowSpawnWindow(Client* client, int Distance, bool NamedOnly) {
 	int CurrentCon = 0;
 	Mob* curMob = nullptr;
 	uint32 array_counter = 0;
-	auto it = mob_list.begin();
-	for (auto it = mob_list.begin(); it != mob_list.end(); ++it) {
-	curMob = it->second;
+
+	for (const auto& m : mob_list) {
+	curMob = m.second;
 		if (curMob && DistanceNoZ(curMob->GetPosition(), client->GetPosition()) <= Distance) {
 			if (curMob->IsTrackable()) {
 				Mob* cur_entity = curMob;
@@ -8103,7 +7963,7 @@ void EntityList::ShowSpawnWindow(Client* client, int Distance, bool NamedOnly) {
 				for ( MyArraySize = 0; true; MyArraySize++) {
 					if (!(*(MyArray[MyArraySize])))
 						break;
-				};
+				}
 				if (NamedOnly) {
 					bool ContinueFlag = false;
 					const char *CurEntityName = cur_entity->GetName();
@@ -8111,11 +7971,11 @@ void EntityList::ShowSpawnWindow(Client* client, int Distance, bool NamedOnly) {
 						if (!strncasecmp(CurEntityName, MyArray[Index], strlen(MyArray[Index])) || (Extras)) {
 							ContinueFlag = true;
 							break;
-						};
-					};
+						}
+					}
 					if (ContinueFlag)
 						continue;
-				};
+				}
 
 				CurrentCon = client->GetLevelCon(cur_entity->GetLevel());
 				if (CurrentCon != LastCon) {
@@ -8212,10 +8072,8 @@ uint8 Bot::GetNumberNeedingHealedInGroup(uint8 hpr, bool includePets, Raid* raid
 						need_healed++;
 					}
 
-					if (includePets) {
-						if (member->GetPet() && member->GetPet()->GetHPRatio() <= hpr) {
-							need_healed++;
-						}
+					if (includePets && member->GetPet() && member->GetPet()->GetHPRatio() <= hpr) {
+						need_healed++;
 					}
 				}
 			}
@@ -8692,7 +8550,7 @@ std::string Bot::CreateSayLink(Client* c, const char* message, const char* name)
 	database.DoEscapeString(escaped_string, message, saylink_size);
 
 	uint32 saylink_id = database.LoadSaylinkID(escaped_string);
-	safe_delete_array(escaped_string);
+	safe_delete_array(escaped_string)
 
 	EQ::SayLinkEngine linker;
 	linker.SetLinkType(EQ::saylink::SayLinkItemData);
@@ -8704,23 +8562,7 @@ std::string Bot::CreateSayLink(Client* c, const char* message, const char* name)
 	return saylink;
 }
 
-void Bot::StopMoving()
-{
-	//SetCombatJitterFlag(false);
-	//m_combat_jitter_timer.Start(zone->random.Int(BOT_COMBAT_JITTER_INTERVAL_MIN, BOT_COMBAT_JITTER_INTERVAL_MAX));
-
-	Mob::StopMoving();
-}
-
-void Bot::StopMoving(float new_heading)
-{
-	//SetCombatJitterFlag(false);
-	//m_combat_jitter_timer.Start(zone->random.Int(BOT_COMBAT_JITTER_INTERVAL_MIN, BOT_COMBAT_JITTER_INTERVAL_MAX));
-
-	Mob::StopMoving(new_heading);
-}
-
-void Bot::SpawnBotGroupByName(Client* c, std::string botgroup_name, uint32 leader_id)
+void Bot::SpawnBotGroupByName(Client* c, const std::string& botgroup_name, uint32 leader_id)
 {
 	auto leader = Bot::LoadBot(leader_id);
 	if (!leader) {
@@ -8731,7 +8573,7 @@ void Bot::SpawnBotGroupByName(Client* c, std::string botgroup_name, uint32 leade
 				botgroup_name
 			).c_str()
 		);
-		safe_delete(leader);
+		safe_delete(leader)
 		return;
 	}
 
@@ -8744,7 +8586,7 @@ void Bot::SpawnBotGroupByName(Client* c, std::string botgroup_name, uint32 leade
 				botgroup_name
 			).c_str()
 		);
-		safe_delete(leader);
+		safe_delete(leader)
 		return;
 	}
 
@@ -8805,7 +8647,7 @@ void Bot::SpawnBotGroupByName(Client* c, std::string botgroup_name, uint32 leade
 					member_iter
 				).c_str()
 			);
-			safe_delete(member);
+			safe_delete(member)
 			return;
 		}
 
@@ -8848,7 +8690,7 @@ void Bot::SpawnBotGroupByName(Client* c, std::string botgroup_name, uint32 leade
 					member_iter
 				).c_str()
 			);
-			safe_delete(member);
+			safe_delete(member)
 			return;
 		}
 
@@ -8883,7 +8725,7 @@ void Bot::SendPayload(int payload_id, std::string payload_value)
 	}
 }
 
-void Bot::OwnerMessage(std::string message)
+void Bot::OwnerMessage(const std::string& message)
 {
 	if (!GetBotOwner() || !GetBotOwner()->IsClient()) {
 		return;
@@ -8954,7 +8796,7 @@ bool Bot::GetBotDataBuckets()
 	return true;
 }
 
-bool Bot::CheckDataBucket(std::string bucket_name, std::string bucket_value, uint8 bucket_comparison)
+bool Bot::CheckDataBucket(const std::string& bucket_name, const std::string& bucket_value, uint8 bucket_comparison)
 {
 	if (!bucket_name.empty() && !bucket_value.empty()) {
 		auto full_name = fmt::format(
