@@ -54,9 +54,11 @@ public:
 		int    min_dmg;
 		int    max_dmg;
 		int64  hp_regen_rate;
+		int64  hp_regen_per_second;
 		int    attack_delay;
 		int    spell_scale;
 		int    heal_scale;
+		uint32 avoidance;
 		int    heroic_strikethrough;
 
 		std::string special_abilities;
@@ -85,9 +87,12 @@ public:
 		"min_hit",
 		"max_hit",
 		"hp_regen",
+		"hp_regen_per_second",
 		"attack_delay",
 		"spell_scale",
 		"heal_scale",
+		"avoidance",
+		"heroic_strikethrough",
 		"special_abilities"
 	};
 
