@@ -6420,6 +6420,11 @@ int64 Mob::GetHPRegen() const
 	return hp_regen;
 }
 
+int64 Mob::GetHPRegenPerSecond() const
+{
+	return hp_regen_per_second;
+}
+
 int64 Mob::GetManaRegen() const
 {
 	return mana_regen;

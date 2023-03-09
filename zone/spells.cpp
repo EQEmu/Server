@@ -1161,10 +1161,16 @@ void Mob::InterruptSpell(uint16 message, uint16 color, uint16 spellid)
 	uint16 message_other;
 	bool bard_song_mode = false; //has the bard song gone to auto repeat mode
 	if (!IsValidSpell(spellid)) {
-		if(bardsong) {
+		if (bardsong) {
 			spellid = bardsong;
 			bard_song_mode = true;
-		} else {
+		}
+		else {
+			if (IsBot() && !message && !color && !spellid) { // this is to prevent bots from spamming interrupts messages when trying to cast while OOM
+				ZeroCastingVars();	// resets all the state keeping stuff
+				LogSpells("Spell [{}] has been interrupted - Bot [{}] doesn't have enough mana", spellid, GetCleanName());
+				return;
+			}
 			spellid = casting_spell_id;
 		}
 	}

@@ -164,6 +164,10 @@ void NpcScaleManager::ScaleNPC(
 		npc->ModifyNPCStat("hp_regen", std::to_string(scale_data.hp_regen_rate));
 	}
 
+	if (always_scale || (npc->GetHPRegenPerSecond() == 0 && is_auto_scaled)) {
+		npc->ModifyNPCStat("hp_regen_per_second", std::to_string(scale_data.hp_regen_per_second));
+	}
+
 	if (always_scale || npc->GetAttackDelay() == 0) {
 		npc->ModifyNPCStat("attack_delay", std::to_string(scale_data.attack_delay));
 	}
@@ -174,6 +178,10 @@ void NpcScaleManager::ScaleNPC(
 
 	if (always_scale || npc->GetHealScale() == 0) {
 		npc->ModifyNPCStat("heal_scale", std::to_string(scale_data.heal_scale));
+	}
+
+	if (always_scale || npc->GetAvoidanceRating() == 0) {
+		npc->ModifyNPCStat("avoidance", std::to_string(scale_data.avoidance));
 	}
 
 	if (always_scale || npc->GetHeroicStrikethrough() == 0) {
@@ -253,9 +261,11 @@ bool NpcScaleManager::LoadScaleData()
 		scale_data.min_dmg              = s.min_dmg;
 		scale_data.max_dmg              = s.max_dmg;
 		scale_data.hp_regen_rate        = s.hp_regen_rate;
+		scale_data.hp_regen_per_second  = s.hp_regen_per_second;
 		scale_data.attack_delay         = s.attack_delay;
 		scale_data.spell_scale          = s.spell_scale;
 		scale_data.heal_scale           = s.heal_scale;
+		scale_data.avoidance            = s.avoidance;
 		scale_data.heroic_strikethrough = s.heroic_strikethrough;
 
 		if (!s.special_abilities.empty()) {
@@ -664,9 +674,11 @@ bool NpcScaleManager::ApplyGlobalBaseScalingToNPCStatically(NPC *&npc)
 		n.mindmg               = g.min_dmg;
 		n.maxdmg               = g.max_dmg;
 		n.hp_regen_rate        = g.hp_regen_rate;
+		n.hp_regen_per_second  = g.hp_regen_per_second;
 		n.attack_delay         = g.attack_delay;
 		n.spellscale           = static_cast<float>(g.spell_scale);
 		n.healscale            = static_cast<float>(g.heal_scale);
+		n.Avoidance            = g.avoidance;
 		n.heroic_strikethrough = g.heroic_strikethrough;
 		n.special_abilities    = g.special_abilities;
 
@@ -730,9 +742,11 @@ bool NpcScaleManager::ApplyGlobalBaseScalingToNPCDynamically(NPC *&npc)
 		n.mindmg               = 0;
 		n.maxdmg               = 0;
 		n.hp_regen_rate        = 0;
+		n.hp_regen_per_second  = 0;
 		n.attack_delay         = 0;
 		n.spellscale           = 0;
 		n.healscale            = 0;
+		n.Avoidance	           = 0;
 		n.heroic_strikethrough = 0;
 		n.special_abilities    = "";
 

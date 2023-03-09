@@ -25,7 +25,7 @@ public:
 		std::string zone_id_list;
 		std::string instance_version_list;
 		int32_t     ac;
-		int32_t     hp;
+		int64_t     hp;
 		int32_t     accuracy;
 		int32_t     slow_mitigation;
 		int32_t     attack;
@@ -45,12 +45,14 @@ public:
 		int32_t     physical_resist;
 		int32_t     min_dmg;
 		int32_t     max_dmg;
-		int32_t     hp_regen_rate;
+		int64_t     hp_regen_rate;
+		int64_t     hp_regen_per_second;
 		int32_t     attack_delay;
 		int32_t     spell_scale;
 		int32_t     heal_scale;
-		std::string special_abilities;
+		uint32_t    avoidance;
 		int32_t     heroic_strikethrough;
+		std::string special_abilities;
 	};
 
 	static std::string PrimaryKey()
@@ -87,11 +89,13 @@ public:
 			"min_dmg",
 			"max_dmg",
 			"hp_regen_rate",
+			"hp_regen_per_second",
 			"attack_delay",
 			"spell_scale",
 			"heal_scale",
-			"special_abilities",
+			"avoidance",
 			"heroic_strikethrough",
+			"special_abilities",
 		};
 	}
 
@@ -124,11 +128,13 @@ public:
 			"min_dmg",
 			"max_dmg",
 			"hp_regen_rate",
+			"hp_regen_per_second",
 			"attack_delay",
 			"spell_scale",
 			"heal_scale",
-			"special_abilities",
+			"avoidance",
 			"heroic_strikethrough",
+			"special_abilities",
 		};
 	}
 
@@ -195,11 +201,13 @@ public:
 		e.min_dmg               = 0;
 		e.max_dmg               = 0;
 		e.hp_regen_rate         = 0;
+		e.hp_regen_per_second   = 0;
 		e.attack_delay          = 0;
 		e.spell_scale           = 100;
 		e.heal_scale            = 100;
-		e.special_abilities     = "";
+		e.avoidance             = 0;
 		e.heroic_strikethrough  = 0;
+		e.special_abilities     = "";
 
 		return e;
 	}
@@ -241,7 +249,7 @@ public:
 			e.zone_id_list          = row[2] ? row[2] : "";
 			e.instance_version_list = row[3] ? row[3] : "";
 			e.ac                    = static_cast<int32_t>(atoi(row[4]));
-			e.hp                    = static_cast<int32_t>(atoi(row[5]));
+			e.hp                    = strtoll(row[5], nullptr, 10);
 			e.accuracy              = static_cast<int32_t>(atoi(row[6]));
 			e.slow_mitigation       = static_cast<int32_t>(atoi(row[7]));
 			e.attack                = static_cast<int32_t>(atoi(row[8]));
@@ -261,12 +269,14 @@ public:
 			e.physical_resist       = static_cast<int32_t>(atoi(row[22]));
 			e.min_dmg               = static_cast<int32_t>(atoi(row[23]));
 			e.max_dmg               = static_cast<int32_t>(atoi(row[24]));
-			e.hp_regen_rate         = static_cast<int32_t>(atoi(row[25]));
-			e.attack_delay          = static_cast<int32_t>(atoi(row[26]));
-			e.spell_scale           = static_cast<int32_t>(atoi(row[27]));
-			e.heal_scale            = static_cast<int32_t>(atoi(row[28]));
-			e.special_abilities     = row[29] ? row[29] : "";
-			e.heroic_strikethrough  = static_cast<int32_t>(atoi(row[30]));
+			e.hp_regen_rate         = strtoll(row[25], nullptr, 10);
+			e.hp_regen_per_second   = strtoll(row[26], nullptr, 10);
+			e.attack_delay          = static_cast<int32_t>(atoi(row[27]));
+			e.spell_scale           = static_cast<int32_t>(atoi(row[28]));
+			e.heal_scale            = static_cast<int32_t>(atoi(row[29]));
+			e.avoidance             = static_cast<uint32_t>(strtoul(row[30], nullptr, 10));
+			e.heroic_strikethrough  = static_cast<int32_t>(atoi(row[31]));
+			e.special_abilities     = row[32] ? row[32] : "";
 
 			return e;
 		}
@@ -326,11 +336,13 @@ public:
 		v.push_back(columns[23] + " = " + std::to_string(e.min_dmg));
 		v.push_back(columns[24] + " = " + std::to_string(e.max_dmg));
 		v.push_back(columns[25] + " = " + std::to_string(e.hp_regen_rate));
-		v.push_back(columns[26] + " = " + std::to_string(e.attack_delay));
-		v.push_back(columns[27] + " = " + std::to_string(e.spell_scale));
-		v.push_back(columns[28] + " = " + std::to_string(e.heal_scale));
-		v.push_back(columns[29] + " = '" + Strings::Escape(e.special_abilities) + "'");
-		v.push_back(columns[30] + " = " + std::to_string(e.heroic_strikethrough));
+		v.push_back(columns[26] + " = " + std::to_string(e.hp_regen_per_second));
+		v.push_back(columns[27] + " = " + std::to_string(e.attack_delay));
+		v.push_back(columns[28] + " = " + std::to_string(e.spell_scale));
+		v.push_back(columns[29] + " = " + std::to_string(e.heal_scale));
+		v.push_back(columns[30] + " = " + std::to_string(e.avoidance));
+		v.push_back(columns[31] + " = " + std::to_string(e.heroic_strikethrough));
+		v.push_back(columns[32] + " = '" + Strings::Escape(e.special_abilities) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -378,11 +390,13 @@ public:
 		v.push_back(std::to_string(e.min_dmg));
 		v.push_back(std::to_string(e.max_dmg));
 		v.push_back(std::to_string(e.hp_regen_rate));
+		v.push_back(std::to_string(e.hp_regen_per_second));
 		v.push_back(std::to_string(e.attack_delay));
 		v.push_back(std::to_string(e.spell_scale));
 		v.push_back(std::to_string(e.heal_scale));
-		v.push_back("'" + Strings::Escape(e.special_abilities) + "'");
+		v.push_back(std::to_string(e.avoidance));
 		v.push_back(std::to_string(e.heroic_strikethrough));
+		v.push_back("'" + Strings::Escape(e.special_abilities) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -438,11 +452,13 @@ public:
 			v.push_back(std::to_string(e.min_dmg));
 			v.push_back(std::to_string(e.max_dmg));
 			v.push_back(std::to_string(e.hp_regen_rate));
+			v.push_back(std::to_string(e.hp_regen_per_second));
 			v.push_back(std::to_string(e.attack_delay));
 			v.push_back(std::to_string(e.spell_scale));
 			v.push_back(std::to_string(e.heal_scale));
-			v.push_back("'" + Strings::Escape(e.special_abilities) + "'");
+			v.push_back(std::to_string(e.avoidance));
 			v.push_back(std::to_string(e.heroic_strikethrough));
+			v.push_back("'" + Strings::Escape(e.special_abilities) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
@@ -481,7 +497,7 @@ public:
 			e.zone_id_list          = row[2] ? row[2] : "";
 			e.instance_version_list = row[3] ? row[3] : "";
 			e.ac                    = static_cast<int32_t>(atoi(row[4]));
-			e.hp                    = static_cast<int32_t>(atoi(row[5]));
+			e.hp                    = strtoll(row[5], nullptr, 10);
 			e.accuracy              = static_cast<int32_t>(atoi(row[6]));
 			e.slow_mitigation       = static_cast<int32_t>(atoi(row[7]));
 			e.attack                = static_cast<int32_t>(atoi(row[8]));
@@ -501,12 +517,14 @@ public:
 			e.physical_resist       = static_cast<int32_t>(atoi(row[22]));
 			e.min_dmg               = static_cast<int32_t>(atoi(row[23]));
 			e.max_dmg               = static_cast<int32_t>(atoi(row[24]));
-			e.hp_regen_rate         = static_cast<int32_t>(atoi(row[25]));
-			e.attack_delay          = static_cast<int32_t>(atoi(row[26]));
-			e.spell_scale           = static_cast<int32_t>(atoi(row[27]));
-			e.heal_scale            = static_cast<int32_t>(atoi(row[28]));
-			e.special_abilities     = row[29] ? row[29] : "";
-			e.heroic_strikethrough  = static_cast<int32_t>(atoi(row[30]));
+			e.hp_regen_rate         = strtoll(row[25], nullptr, 10);
+			e.hp_regen_per_second   = strtoll(row[26], nullptr, 10);
+			e.attack_delay          = static_cast<int32_t>(atoi(row[27]));
+			e.spell_scale           = static_cast<int32_t>(atoi(row[28]));
+			e.heal_scale            = static_cast<int32_t>(atoi(row[29]));
+			e.avoidance             = static_cast<uint32_t>(strtoul(row[30], nullptr, 10));
+			e.heroic_strikethrough  = static_cast<int32_t>(atoi(row[31]));
+			e.special_abilities     = row[32] ? row[32] : "";
 
 			all_entries.push_back(e);
 		}
@@ -536,7 +554,7 @@ public:
 			e.zone_id_list          = row[2] ? row[2] : "";
 			e.instance_version_list = row[3] ? row[3] : "";
 			e.ac                    = static_cast<int32_t>(atoi(row[4]));
-			e.hp                    = static_cast<int32_t>(atoi(row[5]));
+			e.hp                    = strtoll(row[5], nullptr, 10);
 			e.accuracy              = static_cast<int32_t>(atoi(row[6]));
 			e.slow_mitigation       = static_cast<int32_t>(atoi(row[7]));
 			e.attack                = static_cast<int32_t>(atoi(row[8]));
@@ -556,12 +574,14 @@ public:
 			e.physical_resist       = static_cast<int32_t>(atoi(row[22]));
 			e.min_dmg               = static_cast<int32_t>(atoi(row[23]));
 			e.max_dmg               = static_cast<int32_t>(atoi(row[24]));
-			e.hp_regen_rate         = static_cast<int32_t>(atoi(row[25]));
-			e.attack_delay          = static_cast<int32_t>(atoi(row[26]));
-			e.spell_scale           = static_cast<int32_t>(atoi(row[27]));
-			e.heal_scale            = static_cast<int32_t>(atoi(row[28]));
-			e.special_abilities     = row[29] ? row[29] : "";
-			e.heroic_strikethrough  = static_cast<int32_t>(atoi(row[30]));
+			e.hp_regen_rate         = strtoll(row[25], nullptr, 10);
+			e.hp_regen_per_second   = strtoll(row[26], nullptr, 10);
+			e.attack_delay          = static_cast<int32_t>(atoi(row[27]));
+			e.spell_scale           = static_cast<int32_t>(atoi(row[28]));
+			e.heal_scale            = static_cast<int32_t>(atoi(row[29]));
+			e.avoidance             = static_cast<uint32_t>(strtoul(row[30], nullptr, 10));
+			e.heroic_strikethrough  = static_cast<int32_t>(atoi(row[31]));
+			e.special_abilities     = row[32] ? row[32] : "";
 
 			all_entries.push_back(e);
 		}
