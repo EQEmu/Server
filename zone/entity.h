@@ -307,6 +307,7 @@ public:
 	void	RemoveAllMobs();
 	void	RemoveAllClients();
 	void	RemoveAllNPCs();
+	void	RemoveAllBots();
 	void	RemoveAllMercs();
 	void	RemoveAllGroups();
 	void	RemoveAllCorpses();

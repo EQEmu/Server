@@ -2685,6 +2685,12 @@ void EntityList::RemoveAllNPCs()
 	npc_limit_list.clear();
 }
 
+void EntityList::RemoveAllBots()
+{
+	// doesn't clear the data
+	bot_list.clear();
+}
+
 void EntityList::RemoveAllMercs()
 {
 	// doesn't clear the data
@@ -2698,7 +2704,6 @@ void EntityList::RemoveAllGroups()
 		group_list.pop_front();
 		safe_delete(group);
 	}
-
 }
 
 void EntityList::RemoveAllRaids()
@@ -3106,6 +3111,8 @@ void EntityList::Clear()
 {
 	RemoveAllClients();
 	entity_list.RemoveAllTraps(); //we can have child npcs so we go first
+	entity_list.RemoveAllMercs();
+	entity_list.RemoveAllBots();
 	entity_list.RemoveAllNPCs();
 	entity_list.RemoveAllMobs();
 	entity_list.RemoveAllCorpses();
