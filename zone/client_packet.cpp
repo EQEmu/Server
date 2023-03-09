@@ -12170,6 +12170,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 		Client* c_doing_disband = entity_list.GetClientByName(raid_command_packet->player_name);
 
 		if (raid) {
+			raid->VerifyRaid();
 			uint32 group = raid->GetGroup(raid_command_packet->leader_name);
 
 			if (RuleB(Bots, Enabled)) {
