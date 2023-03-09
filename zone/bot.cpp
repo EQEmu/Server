@@ -6657,7 +6657,17 @@ void Bot::DoEnduranceUpkeep() {
 		SetEndurance(GetEndurance() - upkeep_sum);
 }
 
-void Bot::Camp(bool save_to_database, bool camp_all) {
+void Bot::Camp(bool save_to_database) {
+
+	if (IsEngaged() || GetBotOwner()->IsEngaged()) {
+		GetBotOwner()->Message(
+			Chat::White,
+			fmt::format(
+				"You cannot camp your bots while in combat"
+			).c_str()
+		);
+		return;
+	}
 
 	Sit();
 
@@ -9323,5 +9333,41 @@ float Bot::GetBotCasterMaxRange(float melee_distance_max) {// Calculate caster d
 	}
 	return caster_distance_max;
 }
+
+bool Bot::CheckSpawnConditions(Client* c) {
+
+	if (c->GetFeigned()) {
+		c->Message(Chat::White, "You cannot spawn a bot-group while feigned.");
+		return false;
+	}
+
+	auto* owner_group = c->GetGroup();
+	if (owner_group) {
+		std::list<Client*> member_list;
+		owner_group->GetClientList(member_list);
+		member_list.remove(nullptr);
+
+		for (auto member_iter : member_list) {
+			if (member_iter->IsEngaged() || member_iter->GetAggroCount() > 0) {
+				c->Message(Chat::White, "You cannot spawn bots while your group is engaged,");
+				return false;
+			}
+		}
+	} else {
+		if (c->GetAggroCount() > 0) {
+			c->Message(Chat::White, "You cannot spawn bots while you are engaged,");
+			return false;
+		}
+	}
+
+	Raid* raid = entity_list.GetRaidByClient(c);
+	if (raid && raid->IsEngaged()) {
+		c->Message(Chat::White, "You cannot spawn bots while your raid is engaged.");
+		return false;
+	}
+
+	return true;
+}
+
 
 uint8 Bot::spell_casting_chances[SPELL_TYPE_COUNT][PLAYER_CLASS_COUNT][EQ::constants::STANCE_TYPE_COUNT][cntHSND] = { 0 };

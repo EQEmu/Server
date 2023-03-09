@@ -1275,6 +1275,8 @@ int bot_command_count;					// how many bot commands we have
 // init has been performed to point at the real function
 int (*bot_command_dispatch)(Client *,char const *) = bot_command_not_avail;
 
+
+
 std::map<std::string, BotCommandRecord *> bot_command_list;
 std::map<std::string, std::string> bot_command_aliases;
 
@@ -6527,8 +6529,7 @@ void bot_subcommand_bot_spawn(Client *c, const Seperator *sep)
 		return;
 	}
 
-	if (c->GetFeigned()) {
-		c->Message(Chat::White, "You cannot spawn a bot while feigned.");
+	if (!Bot::CheckSpawnConditions(c)) {
 		return;
 	}
 
@@ -6639,45 +6640,6 @@ void bot_subcommand_bot_spawn(Client *c, const Seperator *sep)
 				bot_name
 			).c_str()
 		);
-		return;
-	}
-
-	// this probably needs work...
-	if (c->GetGroup()) {
-		std::list<Mob*> group_list;
-		c->GetGroup()->GetMemberList(group_list);
-		for (auto member_iter : group_list) {
-			if (!member_iter) {
-				continue;
-			}
-
-			if (member_iter->qglobal) { // what is this?? really should have had a message to describe failure... (can't spawn bots if you are assigned to a task/instance?)
-				return;
-			}
-
-			if (
-				!member_iter->qglobal &&
-				member_iter->GetAppearance() != eaDead &&
-				(
-					member_iter->IsEngaged() ||
-					(
-						member_iter->IsClient() &&
-						member_iter->CastToClient()->GetAggroCount()
-					)
-				)
-			) {
-				c->Message(Chat::White, "You cannot summon bots while you are engaged.");
-				return;
-			}
-		}
-	} else if (c->GetAggroCount()) {
-		c->Message(Chat::White, "You cannot spawn bots while you are engaged.");
-		return;
-	}
-
-	Raid* raid = entity_list.GetRaidByClient(c);
-	if (raid && raid->IsEngaged()) {
-		c->Message(Chat::White, "You cannot spawn bots while your raid is engaged.");
 		return;
 	}
 
@@ -7825,33 +7787,7 @@ void bot_subcommand_botgroup_load(Client *c, const Seperator *sep)
 		return;
 	}
 
-	if (c->GetFeigned()) {
-		c->Message(Chat::White, "You cannot spawn a bot-group while feigned.");
-		return;
-	}
-
-	auto* owner_group = c->GetGroup();
-	if (owner_group) {
-		std::list<Client*> member_list;
-		owner_group->GetClientList(member_list);
-		member_list.remove(nullptr);
-
-		for (auto member_iter : member_list) {
-			if (member_iter->IsEngaged() || member_iter->GetAggroCount() > 0) {
-				c->Message(Chat::White, "You cannot spawn bots while your group is engaged,");
-				return;
-			}
-		}
-	} else {
-		if (c->GetAggroCount() > 0) {
-			c->Message(Chat::White, "You cannot spawn bots while you are engaged,");
-			return;
-		}
-	}
-
-	Raid* raid = entity_list.GetRaidByClient(c);
-	if (raid && raid->IsEngaged()) {
-		c->Message(Chat::White, "You cannot spawn bots while your raid is engaged.");
+	if (!Bot::CheckSpawnConditions(c)) {
 		return;
 	}
 
