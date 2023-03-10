@@ -310,7 +310,7 @@ bool NpcScaleManager::LoadScaleData()
 					)
 				);
 			}
-		} else if (!has_multiple_zones && has_multiple_versions) {
+		} else if (!has_multiple_zones) {
 			scale_data.zone_id = Strings::ToUnsignedInt(s.zone_id_list);
 
 			const auto versions = Strings::Split(s.instance_version_list, "|");
@@ -330,7 +330,7 @@ bool NpcScaleManager::LoadScaleData()
 					)
 				);
 			}
-		} else if (has_multiple_zones && has_multiple_versions) {
+		} else {
 			const auto zones    = Strings::Split(s.zone_id_list, "|");
 			const auto versions = Strings::Split(s.instance_version_list, "|");
 
@@ -579,9 +579,8 @@ int8 NpcScaleManager::GetNPCScalingType(NPC *&npc)
  */
 std::string NpcScaleManager::GetNPCScalingTypeName(NPC *&npc)
 {
-	int8 scaling_type = GetNPCScalingType(npc);
 
-	if (scaling_type == 1) {
+	if (int8 scaling_type = GetNPCScalingType(npc); scaling_type == 1) {
 		return "Named";
 	}
 
