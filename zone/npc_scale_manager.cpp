@@ -137,9 +137,9 @@ void NpcScaleManager::ScaleNPC(
 	}
 
 	if (always_scale || npc->GetMinDMG() == 0) {
-		int min_dmg = scale_data.min_dmg;
+		int64 min_dmg = scale_data.min_dmg;
 		if (RuleB(Combat, UseNPCDamageClassLevelMods)) {
-			int32 class_level_damage_mod = GetClassLevelDamageMod(npc->GetLevel(), npc->GetClass());
+			uint32 class_level_damage_mod = GetClassLevelDamageMod(npc->GetLevel(), npc->GetClass());
 			min_dmg = (min_dmg * class_level_damage_mod) / 220;
 
 			LogNPCScaling("ClassLevelDamageMod::min_dmg base: [{}] calc: [{}]", scale_data.min_dmg, min_dmg);
@@ -149,9 +149,9 @@ void NpcScaleManager::ScaleNPC(
 	}
 
 	if (always_scale || npc->GetMaxDMG() == 0) {
-		int max_dmg = scale_data.max_dmg;
+		int64 max_dmg = scale_data.max_dmg;
 		if (RuleB(Combat, UseNPCDamageClassLevelMods)) {
-			int32 class_level_damage_mod = GetClassLevelDamageMod(npc->GetLevel(), npc->GetClass());
+			uint32 class_level_damage_mod = GetClassLevelDamageMod(npc->GetLevel(), npc->GetClass());
 			max_dmg = (scale_data.max_dmg * class_level_damage_mod) / 220;
 
 			LogNPCScaling("ClassLevelDamageMod::max_dmg base: [{}] calc: [{}]", scale_data.max_dmg, max_dmg);
@@ -310,7 +310,7 @@ bool NpcScaleManager::LoadScaleData()
 					)
 				);
 			}
-		} else if (!has_multiple_zones && has_multiple_versions) {
+		} else if (!has_multiple_zones) {
 			scale_data.zone_id = Strings::ToUnsignedInt(s.zone_id_list);
 
 			const auto versions = Strings::Split(s.instance_version_list, "|");
@@ -330,7 +330,7 @@ bool NpcScaleManager::LoadScaleData()
 					)
 				);
 			}
-		} else if (has_multiple_zones && has_multiple_versions) {
+		} else {
 			const auto zones    = Strings::Split(s.zone_id_list, "|");
 			const auto versions = Strings::Split(s.instance_version_list, "|");
 
@@ -419,7 +419,7 @@ NpcScaleManager::global_npc_scale NpcScaleManager::GetGlobalScaleDataForTypeLeve
  */
 uint32 NpcScaleManager::GetClassLevelDamageMod(uint32 level, uint32 npc_class)
 {
-	uint32 multiplier = 0;
+	uint32 multiplier;
 
 	switch (npc_class) {
 		case WARRIOR: {
@@ -579,9 +579,8 @@ int8 NpcScaleManager::GetNPCScalingType(NPC *&npc)
  */
 std::string NpcScaleManager::GetNPCScalingTypeName(NPC *&npc)
 {
-	int8 scaling_type = GetNPCScalingType(npc);
 
-	if (scaling_type == 1) {
+	if (int8 scaling_type = GetNPCScalingType(npc); scaling_type == 1) {
 		return "Named";
 	}
 
