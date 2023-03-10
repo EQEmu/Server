@@ -3091,7 +3091,7 @@ NPC_Emote_Struct* NPC::GetNPCEmote(uint32 emoteid, uint8 event_) {
 
 void NPC::DoNPCEmote(uint8 event_, uint32 emoteid)
 {
-	if (!this || emoteid == 0)
+	if (emoteid == 0)
 	{
 		return;
 	}
