@@ -173,11 +173,11 @@ void NpcScaleManager::ScaleNPC(
 	}
 
 	if (always_scale || npc->GetSpellScale() == 0) {
-		npc->ModifyNPCStat("spell_scale", std::to_string(scale_data.spell_scale));
+		npc->ModifyNPCStat("spellscale", std::to_string(scale_data.spell_scale));
 	}
 
 	if (always_scale || npc->GetHealScale() == 0) {
-		npc->ModifyNPCStat("heal_scale", std::to_string(scale_data.heal_scale));
+		npc->ModifyNPCStat("healscale", std::to_string(scale_data.heal_scale));
 	}
 
 	if (always_scale || npc->GetAvoidanceRating() == 0) {
