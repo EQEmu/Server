@@ -1509,7 +1509,7 @@ bool Raid::LearnMembers()
 
         members[index].member = nullptr;
         strn0cpy(members[index].membername, row[0], 64);
-        int groupNum = Strings::ToInt(row[1]);
+		uint32 groupNum = Strings::ToUnsignedInt(row[1]);
         if(groupNum > 11)
             members[index].GroupNumber = 0xFFFFFFFF;
         else
