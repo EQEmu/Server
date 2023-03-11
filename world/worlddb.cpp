@@ -120,22 +120,22 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, EQApplicationPacket **o
 		inventory_profile.SetInventoryVersion(client_version);
 		inventory_profile.SetGMInventory(true); // charsel can not interact with items..but, no harm in setting to full expansion support
 
-		uint32 character_id = (uint32) Strings::ToInt(row[0]);
+		uint32 character_id = Strings::ToUnsignedInt(row[0]);
 		uint8 has_home = 0;
 		uint8 has_bind = 0;
 
 		memset(&pp, 0, sizeof(PlayerProfile_Struct));
 		memset(p_character_select_entry_struct->Name, 0, sizeof(p_character_select_entry_struct->Name));
 		strcpy(p_character_select_entry_struct->Name, row[1]);
-		p_character_select_entry_struct->Class = (uint8) Strings::ToInt(row[4]);
-		p_character_select_entry_struct->Race = (uint32) Strings::ToInt(row[3]);
-		p_character_select_entry_struct->Level = (uint8) Strings::ToInt(row[5]);
+		p_character_select_entry_struct->Class = (uint8) Strings::ToUnsignedInt(row[4]);
+		p_character_select_entry_struct->Race = (uint32) Strings::ToUnsignedInt(row[3]);
+		p_character_select_entry_struct->Level = (uint8) Strings::ToUnsignedInt(row[5]);
 		p_character_select_entry_struct->ShroudClass = p_character_select_entry_struct->Class;
 		p_character_select_entry_struct->ShroudRace = p_character_select_entry_struct->Race;
-		p_character_select_entry_struct->Zone = (uint16) Strings::ToInt(row[19]);
+		p_character_select_entry_struct->Zone = (uint16) Strings::ToUnsignedInt(row[19]);
 		p_character_select_entry_struct->Instance = 0;
-		p_character_select_entry_struct->Gender = (uint8) Strings::ToInt(row[2]);
-		p_character_select_entry_struct->Face = (uint8) Strings::ToInt(row[15]);
+		p_character_select_entry_struct->Gender = (uint8) Strings::ToUnsignedInt(row[2]);
+		p_character_select_entry_struct->Face = (uint8) Strings::ToUnsignedInt(row[15]);
 
 		for (uint32 material_slot = 0; material_slot < EQ::textures::materialCount; material_slot++) {
 			p_character_select_entry_struct->Equip[material_slot].Material = 0;
