@@ -491,7 +491,7 @@ uint32 Raid::GetFreeGroup()
 			return x;
 	}
 	//if we get to here then there were no free groups so we added the group as free floating members.
-	return 0xFFFFFFFF;
+	return RAID_GROUPLESS;
 }
 
 uint8 Raid::GroupCount(uint32 gid)
@@ -538,7 +538,7 @@ uint32 Raid::GetGroup(const char *name)
 		if(strcmp(members[x].membername, name) == 0)
 			return members[x].GroupNumber;
 	}
-	return 0xFFFFFFFF;
+	return RAID_GROUPLESS;
 }
 
 uint32 Raid::GetGroup(Client *c)
@@ -548,7 +548,7 @@ uint32 Raid::GetGroup(Client *c)
 		if(members[x].member == c)
 			return members[x].GroupNumber;
 	}
-	return 0xFFFFFFFF;
+	return RAID_GROUPLESS;
 }
 
 void Raid::RaidSay(const char *msg, Client *c, uint8 language, uint8 lang_skill)
@@ -559,7 +559,7 @@ void Raid::RaidSay(const char *msg, Client *c, uint8 language, uint8 lang_skill)
 	auto pack = new ServerPacket(ServerOP_RaidSay, sizeof(ServerRaidMessage_Struct) + strlen(msg) + 1);
 	ServerRaidMessage_Struct *rga = (ServerRaidMessage_Struct*)pack->pBuffer;
 	rga->rid = GetID();
-	rga->gid = 0xFFFFFFFF;
+	rga->gid = RAID_GROUPLESS;
 	rga->language = language;
 	rga->lang_skill = lang_skill;
 	strn0cpy(rga->from, c->GetName(), 64);
@@ -1633,20 +1633,20 @@ bool Raid::LearnMembers()
 
 		members[index].member = nullptr;
 		strn0cpy(members[index].membername, row[0], sizeof(members[index].membername));
-		uint32 group_id = atoi(row[1]);
+		uint32 group_id = Strings::ToUnsignedInt(row[1]);
 
 		if (group_id > 11) {
-			members[index].GroupNumber = 0xFFFFFFFF;
+			members[index].GroupNumber = RAID_GROUPLESS;
 		} else {
 			members[index].GroupNumber = group_id;
 		}
 
-		members[index]._class        = atoi(row[2]);
-		members[index].level         = atoi(row[3]);
-		members[index].IsGroupLeader = atoi(row[4]);
-		members[index].IsRaidLeader  = atoi(row[5]);
-		members[index].IsLooter      = atoi(row[6]);
-		members[index].IsBot         = atoi(row[7]) > 0;
+		members[index]._class        = Strings::ToUnsignedInt(row[2]);
+		members[index].level         = Strings::ToUnsignedInt(row[3]);
+		members[index].IsGroupLeader = Strings::ToBool(row[4]);
+		members[index].IsRaidLeader  = Strings::ToBool(row[5]);
+		members[index].IsLooter      = Strings::ToBool(row[6]);
+		members[index].IsBot         = Strings::ToBool(row[7]) > 0;
 		++index;
 	}
   
@@ -1950,7 +1950,7 @@ void Raid::QueueClients(Mob *sender, const EQApplicationPacket *app, bool ack_re
 		uint32 group_id = GetGroup(sender->CastToClient());
 
 		/* If this is a group only packet and we're not in a group -- return */
-		if (group_id == 0xFFFFFFFF && group_only)
+		if (group_id == RAID_GROUPLESS && group_only)
 			return;
 
 		for (uint32 i = 0; i < MAX_RAID_MEMBERS; i++) {
@@ -2080,7 +2080,7 @@ void Raid::RaidSay(const char* msg, const char* from, uint8 language, uint8 lang
 	auto pack = new ServerPacket(ServerOP_RaidSay, sizeof(ServerRaidMessage_Struct) + strlen(msg) + 1);
 	ServerRaidMessage_Struct* rga = (ServerRaidMessage_Struct*)pack->pBuffer;
 	rga->rid = GetID();
-	rga->gid = 0xFFFFFFFF;
+	rga->gid = RAID_GROUPLESS;
 	rga->language = language;
 	rga->lang_skill = lang_skill;
 	strn0cpy(rga->from, from, 64);

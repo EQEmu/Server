@@ -7041,7 +7041,7 @@ void Client::Handle_OP_GroupDisband(const EQApplicationPacket *app)
 					}
 				}
 			}
-			raid->MoveMember(memberToDisband->GetName(), 0xFFFFFFFF);
+			raid->MoveMember(memberToDisband->GetName(), RAID_GROUPLESS);
 			raid->GroupUpdate(grp);
 
 			if (memberToDisband->IsClient()) {
@@ -12029,7 +12029,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 					}
 					else {
 						raid->SendRaidCreate(player_sending_invite);
-						raid->AddMember(player_sending_invite, 0xFFFFFFFF, true, false, true);
+						raid->AddMember(player_sending_invite, RAID_GROUPLESS, true, false, true);
 					}
 
 					Client* client_to_add = nullptr;
@@ -12151,7 +12151,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 						raid->SetRaidDetails();
 						raid->SendRaidCreate(player_sending_invite);
 						raid->SendRaidCreate(this);
-						raid->AddMember(player_sending_invite, 0xFFFFFFFF, true, false, true);
+						raid->AddMember(player_sending_invite, RAID_GROUPLESS, true, false, true);
 						raid->SendBulkRaid(this);
 						raid->AddMember(this);
 						raid->SendMakeLeaderPacketTo(raid->leadername, this);
@@ -12378,7 +12378,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 						}
 					}
 				}
-				raid->MoveMember(raid_command_packet->leader_name, 0xFFFFFFFF);
+				raid->MoveMember(raid_command_packet->leader_name, RAID_GROUPLESS);
 				if (c) {
 					raid->SendGroupDisband(c);
 				}
