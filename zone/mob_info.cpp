@@ -404,6 +404,10 @@ inline std::string GetMobAttributeByString(Mob *mob, const std::string &attribut
 			return Strings::Commify(std::to_string(npc->GetAvoidanceRating())) + scaling_modified;
 		}
 
+		if (attribute == "heroic_strikethrough") {
+			return Strings::Commify(std::to_string(npc->GetHeroicStrikethrough())) + scaling_modified;
+		}
+
 		npc->GetNPCEmote(npc->GetEmoteID(), 0);
 	}
 
@@ -729,6 +733,7 @@ void Mob::DisplayInfo(Mob *mob)
 				"spell_scale",
 				"heal_scale",
 				"avoidance",
+				"heroic_strikethrough",
 			};
 
 			window_text += WriteDisplayInfoSection(mob, "NPC Stats", npc_stats, 1, true);
