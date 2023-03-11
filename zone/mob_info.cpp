@@ -746,6 +746,7 @@ void Mob::DisplayInfo(Mob *mob)
 				"min_hit",
 				"max_hit",
 				"hp_regen",
+				"hp_regen_per_second",
 				"attack_delay",
 				"spell_scale",
 				"heal_scale",
