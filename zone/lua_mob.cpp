@@ -2839,6 +2839,66 @@ float Lua_Mob::GetDefaultRaceSize() {
 	return self->GetDefaultRaceSize();
 }
 
+float Lua_Mob::GetActSpellRange(uint16 spell_id, float range) {
+	Lua_Safe_Call_Real();
+	return self->GetActSpellRange(spell_id, range);
+}
+
+int64 Lua_Mob::GetActSpellDamage(uint16 spell_id, int64 value) {
+	Lua_Safe_Call_Int();
+	return self->GetActSpellDamage(spell_id, value);
+}
+
+int64 Lua_Mob::GetActSpellDamage(uint16 spell_id, int64 value, Lua_Mob target) {
+	Lua_Safe_Call_Int();
+	return self->GetActSpellDamage(spell_id, value, target);
+}
+
+int64 Lua_Mob::GetActDoTDamage(uint16 spell_id, int64 value, Lua_Mob target) {
+	Lua_Safe_Call_Int();
+	return self->GetActDoTDamage(spell_id, value, target);
+}
+
+int64 Lua_Mob::GetActDoTDamage(uint16 spell_id, int64 value, Lua_Mob target, bool from_buff_tic) {
+	Lua_Safe_Call_Int();
+	return self->GetActDoTDamage(spell_id, value, target, from_buff_tic);
+}
+
+int64 Lua_Mob::GetActSpellHealing(uint16 spell_id, int64 value) {
+	Lua_Safe_Call_Int();
+	return self->GetActSpellHealing(spell_id, value);
+}
+
+int64 Lua_Mob::GetActSpellHealing(uint16 spell_id, int64 value, Lua_Mob target) {
+	Lua_Safe_Call_Int();
+	return self->GetActSpellHealing(spell_id, value, target);
+}
+
+int64 Lua_Mob::GetActSpellHealing(uint16 spell_id, int64 value, Lua_Mob target, bool from_buff_tic) {
+	Lua_Safe_Call_Int();
+	return self->GetActSpellHealing(spell_id, value, target, from_buff_tic);
+}
+
+int Lua_Mob::GetActSpellCost(uint16 spell_id, int cost) {
+	Lua_Safe_Call_Int();
+	return self->GetActSpellCost(spell_id, cost);
+}
+
+int Lua_Mob::GetActSpellDuration(uint16 spell_id, int duration) {
+	Lua_Safe_Call_Int();
+	return self->GetActSpellDuration(spell_id, duration);
+}
+
+int Lua_Mob::GetActSpellCasttime(uint16 spell_id, uint32 cast_time) {
+	Lua_Safe_Call_Int();
+	return self->GetActSpellCasttime(spell_id, cast_time);
+}
+
+int64 Lua_Mob::GetActReflectedSpellDamage(uint16 spell_id, int64 value, int effectiveness) {
+	Lua_Safe_Call_Int();
+	return self->GetActReflectedSpellDamage(spell_id, value, effectiveness);
+}
+
 luabind::scope lua_register_mob() {
 	return luabind::class_<Lua_Mob, Lua_Entity>("Mob")
 	.def(luabind::constructor<>())
@@ -3011,6 +3071,18 @@ luabind::scope lua_register_mob() {
 	.def("GetAC", &Lua_Mob::GetAC)
 	.def("GetAGI", &Lua_Mob::GetAGI)
 	.def("GetATK", &Lua_Mob::GetATK)
+	.def("GetActDoTDamage", (int64(Lua_Mob::*)(uint16,int64,Lua_Mob))&Lua_Mob::GetActDoTDamage)
+	.def("GetActDoTDamage", (int64(Lua_Mob::*)(uint16,int64,Lua_Mob,bool))&Lua_Mob::GetActDoTDamage)
+	.def("GetActReflectedSpellDamage", &Lua_Mob::GetActReflectedSpellDamage)
+	.def("GetActSpellCasttime", &Lua_Mob::GetActSpellCasttime)
+	.def("GetActSpellCost", &Lua_Mob::GetActSpellCost)
+	.def("GetActSpellDuration", &Lua_Mob::GetActSpellDuration)
+	.def("GetActSpellDamage", (int64(Lua_Mob::*)(uint16,int64))&Lua_Mob::GetActSpellDamage)
+	.def("GetActSpellDamage", (int64(Lua_Mob::*)(uint16,int64,Lua_Mob))&Lua_Mob::GetActSpellDamage)
+	.def("GetActSpellHealing", (int64(Lua_Mob::*)(uint16,int64))&Lua_Mob::GetActSpellHealing)
+	.def("GetActSpellHealing", (int64(Lua_Mob::*)(uint16,int64,Lua_Mob))&Lua_Mob::GetActSpellHealing)
+	.def("GetActSpellHealing", (int64(Lua_Mob::*)(uint16,int64,Lua_Mob,bool))&Lua_Mob::GetActSpellHealing)
+	.def("GetActSpellRange", &Lua_Mob::GetActSpellRange)
 	.def("GetAggroRange", (float(Lua_Mob::*)(void))&Lua_Mob::GetAggroRange)
 	.def("GetAllowBeneficial", (bool(Lua_Mob::*)(void))&Lua_Mob::GetAllowBeneficial)
 	.def("GetAppearance", (uint32(Lua_Mob::*)(void))&Lua_Mob::GetAppearance)

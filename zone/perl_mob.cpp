@@ -731,9 +731,34 @@ int64_t Perl_Mob_GetActSpellDamage(Mob* self, uint16 spell_id, int64 value) // @
 	return self->GetActSpellDamage(spell_id, value);
 }
 
+int64_t Perl_Mob_GetActSpellDamage(Mob* self, uint16 spell_id, int64 value, Mob* target) // @categories Spells and Disciplines
+{
+	return self->GetActSpellDamage(spell_id, value, target);
+}
+
+int64_t Perl_Mob_GetActDoTDamage(Mob* self, uint16 spell_id, int64 value, Mob* target) // @categories Spells and Disciplines
+{
+	return self->GetActDoTDamage(spell_id, value, target);
+}
+
+int64_t Perl_Mob_GetActDoTDamage(Mob* self, uint16 spell_id, int64 value, Mob* target, bool from_buff_tic) // @categories Spells and Disciplines
+{
+	return self->GetActDoTDamage(spell_id, value, target, from_buff_tic);
+}
+
 int64_t Perl_Mob_GetActSpellHealing(Mob* self, uint16 spell_id, int64 value) // @categories Spells and Disciplines
 {
 	return self->GetActSpellHealing(spell_id, value);
+}
+
+int64_t Perl_Mob_GetActSpellHealing(Mob* self, uint16 spell_id, int64 value, Mob* target) // @categories Spells and Disciplines
+{
+	return self->GetActSpellHealing(spell_id, value, target);
+}
+
+int64_t Perl_Mob_GetActSpellHealing(Mob* self, uint16 spell_id, int64 value, Mob* target, bool from_buff_tic) // @categories Spells and Disciplines
+{
+	return self->GetActSpellHealing(spell_id, value, target, from_buff_tic);
 }
 
 int Perl_Mob_GetActSpellCost(Mob* self, uint16 spell_id, int32 cost) // @categories Spells and Disciplines
@@ -749,6 +774,11 @@ int Perl_Mob_GetActSpellDuration(Mob* self, uint16 spell_id, int32 duration) // 
 int Perl_Mob_GetActSpellCasttime(Mob* self, uint16 spell_id, uint32 cast_time) // @categories Spells and Disciplines
 {
 	return self->GetActSpellCasttime(spell_id, cast_time);
+}
+
+int64 Perl_Mob_GetActReflectedSpellDamage(Mob* self, uint16 spell_id, int64 value, int effectiveness) // @categories Spells and Disciplines
+{
+	return self->GetActReflectedSpellDamage(spell_id, value, effectiveness);
 }
 
 float Perl_Mob_ResistSpell(Mob* self, uint8 resist_type, uint16 spell_id, Mob* caster) // @categories Spells and Disciplines, Script Utility
@@ -2958,11 +2988,17 @@ void perl_register_mob()
 	package.add("GetAC", &Perl_Mob_GetAC);
 	package.add("GetAGI", &Perl_Mob_GetAGI);
 	package.add("GetATK", &Perl_Mob_GetATK);
+	package.add("GetActDoTDamage", (int64_t(*)(Mob*, uint16, int64, Mob*))&Perl_Mob_GetActDoTDamage);
+	package.add("GetActDoTDamage", (int64_t(*)(Mob*, uint16, int64, Mob*, bool))&Perl_Mob_GetActDoTDamage);
+	package.add("GetActReflectedSpellDamage", &Perl_Mob_GetActReflectedSpellDamage);
 	package.add("GetActSpellCasttime", &Perl_Mob_GetActSpellCasttime);
 	package.add("GetActSpellCost", &Perl_Mob_GetActSpellCost);
-	package.add("GetActSpellDamage", &Perl_Mob_GetActSpellDamage);
+	package.add("GetActSpellDamage", (int64_t(*)(Mob*, uint16, int64))&Perl_Mob_GetActSpellDamage);
+	package.add("GetActSpellDamage", (int64_t(*)(Mob*, uint16, int64, Mob*))&Perl_Mob_GetActSpellDamage);
 	package.add("GetActSpellDuration", &Perl_Mob_GetActSpellDuration);
-	package.add("GetActSpellHealing", &Perl_Mob_GetActSpellHealing);
+	package.add("GetActSpellHealing", (int64_t(*)(Mob*, uint16, int64))&Perl_Mob_GetActSpellHealing);
+	package.add("GetActSpellHealing", (int64_t(*)(Mob*, uint16, int64, Mob*))&Perl_Mob_GetActSpellHealing);
+	package.add("GetActSpellHealing", (int64_t(*)(Mob*, uint16, int64, Mob*, bool))&Perl_Mob_GetActSpellHealing);
 	package.add("GetActSpellRange", &Perl_Mob_GetActSpellRange);
 	package.add("GetAggroRange", &Perl_Mob_GetAggroRange);
 	package.add("GetAllowBeneficial", &Perl_Mob_GetAllowBeneficial);
