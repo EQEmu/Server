@@ -5670,11 +5670,24 @@ void Mob::SetHeroicWisBonuses() {
 		m_heroic_wis_mana_regen = (int32)((float) GetHeroicWIS() * RuleR(Character, HeroicWisdomMultiplier) / 25);
 	}
 	else {
+		m_heroic_wis_max_mana = (int32)((float) GetHeroicWIS() *
+			(CheckHeroicBonusesDataBuckets("heroic_wis_max_mana", bucket_value) ?
+			Strings::ToFloat(bucket_value) : 1.00)
+			* 10
+		);
+
 		m_heroic_wis_mana_regen = (int32)((float) GetHeroicWIS() *
 			(CheckHeroicBonusesDataBuckets("heroic_wis_mana_regen", bucket_value) ?
 			Strings::ToFloat(bucket_value) : 1.00)
 			/ 25
 		);
+
+		m_heroic_wis_heal_amount = (int32)((float) GetHeroicWIS() *
+			(CheckHeroicBonusesDataBuckets("heroic_wis_heal_amount", bucket_value) ?
+			Strings::ToFloat(bucket_value) : 1.00)
+			/ 25
+		);
+
 	}
 }
 
