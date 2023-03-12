@@ -3969,7 +3969,6 @@ bool Bot::Spawn(Client* botCharacterOwner) {
 		m_targetable = true;
 		entity_list.AddBot(this, true, true);
 
-		GetBotOwnerDataBuckets();
 		GetBotDataBuckets();
 		LoadBotSpellSettings();
 		if (!AI_AddBotSpells(GetBotSpellID())) {
@@ -6135,10 +6134,10 @@ int64 Bot::CalcMaxMana() {
 	switch(GetCasterClass()) {
 		case 'I':
 			max_mana = (GenerateBaseManaPoints() + itembonuses.Mana + spellbonuses.Mana + GroupLeadershipAAManaEnhancement());
-			max_mana += (GetHeroicINT() * 10);
+			max_mana += m_heroic_int_max_mana;
 		case 'W': {
 			max_mana = (GenerateBaseManaPoints() + itembonuses.Mana + spellbonuses.Mana + GroupLeadershipAAManaEnhancement());
-			max_mana += (GetHeroicWIS() * 10);
+			max_mana += m_heroic_wis_max_mana;
 			break;
 		}
 		case 'N': {
@@ -6693,10 +6692,10 @@ int64 Bot::CalcManaRegenCap() {
 	int64 cap = RuleI(Character, ItemManaRegenCap) + aabonuses.ItemManaRegenCap;
 	switch(GetCasterClass()) {
 		case 'I':
-			cap += itembonuses.HeroicINT * RuleR(Character, HeroicIntelligenceMultiplier) / 25;
+			cap += m_heroic_int_mana_regen;
 			break;
 		case 'W':
-			cap += itembonuses.HeroicWIS * RuleR(Character, HeroicWisdomMultiplier) / 25;
+			cap += m_heroic_wis_mana_regen;
 			break;
 	}
 	return (cap * RuleI(Character, ManaRegenMultiplier) / 100);
@@ -7088,7 +7087,7 @@ int32 Bot::LevelRegen() {
 
 int64 Bot::CalcHPRegen() {
 	int32 regen = (LevelRegen() + itembonuses.HPRegen + spellbonuses.HPRegen);
-	regen += GetHeroicSTA() * RuleR(Character, HeroicStaminaMultiplier) / 20;
+	regen += m_heroic_sta_hp_regen;
 	regen += (aabonuses.HPRegen + GroupLeadershipAAHealthRegeneration());
 
 	regen = ((regen * RuleI(Character, HPRegenMultiplier)) / 100);
@@ -7110,9 +7109,9 @@ int64 Bot::CalcManaRegen() {
 		regen = (2 + spellbonuses.ManaRegen + itembonuses.ManaRegen);
 
 	if(GetCasterClass() == 'I')
-		regen += itembonuses.HeroicINT * RuleR(Character, HeroicIntelligenceMultiplier) / 25;
+		regen += m_heroic_int_mana_regen;
 	else if(GetCasterClass() == 'W')
-		regen += itembonuses.HeroicWIS * RuleR(Character, HeroicWisdomMultiplier) / 25;
+		regen += m_heroic_wis_mana_regen;
 	else
 		regen = 0;
 
@@ -7161,7 +7160,7 @@ int64 Bot::CalcMaxHP() {
 	int32 bot_hp = 0;
 	uint32 nd = 10000;
 	bot_hp += (GenerateBaseHitPoints() + itembonuses.HP);
-	bot_hp += GetHeroicSTA() * RuleR(Character, HeroicStaminaMultiplier) * 10;
+	bot_hp += m_heroic_sta_max_hp;
 	nd += aabonuses.MaxHP;
 	bot_hp = ((float)bot_hp * (float)nd / (float)10000);
 	bot_hp += (spellbonuses.HP + aabonuses.HP);
@@ -7205,13 +7204,8 @@ int64 Bot::CalcBaseEndurance() {
 	int32 sta_end = 0;
 	int stats = 0;
 	if (GetOwner() && GetOwner()->CastToClient() && GetOwner()->CastToClient()->ClientVersion() >= EQ::versions::ClientVersion::SoD && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
-		double heroic_stats = 0;
 		stats = ((GetSTR() + GetSTA() + GetDEX() + GetAGI()) / 4);
-		double heroic_str = GetHeroicSTR() * RuleR(Character, HeroicStrengthMultiplier);
-		double heroic_sta = GetHeroicSTA() * RuleR(Character, HeroicStaminaMultiplier);
-		double heroic_dex = GetHeroicDEX() * RuleR(Character, HeroicDexterityMultiplier);
-		double heroic_agi = GetHeroicAGI() * RuleR(Character, HeroicAgilityMultiplier);
-		heroic_stats = (heroic_str + heroic_sta + heroic_dex + heroic_agi) / 4;
+		double heroic_stats = m_heroic_str_max_endurance + m_heroic_sta_max_endurance + m_heroic_dex_max_endurance + m_heroic_agi_max_endurance;
 
 		if (stats > 100) {
 			converted_stats = (((stats - 100) * 5 / 2) + 100);
@@ -7232,7 +7226,7 @@ int64 Bot::CalcBaseEndurance() {
 			sta_end = (9 * converted_stats);
 			base_endurance = (1800 + ((GetLevel() - 80) * 18));
 		}
-		base_end = (base_endurance + sta_end + (heroic_stats * 10));
+		base_end = (base_endurance + sta_end + (int32)(heroic_stats * 10));
 	} else {
 		stats = (GetSTR() + GetSTA() + GetDEX() + GetAGI());
 		int level_base = (GetLevel() * 15);
@@ -7244,7 +7238,7 @@ int64 Bot::CalcBaseEndurance() {
 		int HalfBonus400to800 = 0;
 		int Bonus800plus = 0;
 		int HalfBonus800plus = 0;
-		int BonusUpto800 = int(at_most_800 / 4) ;
+		auto BonusUpto800 = int(at_most_800 / 4) ;
 		if(stats > 400) {
 			Bonus400to800 = int((at_most_800 - 400) / 4);
 			HalfBonus400to800 = int(std::max((at_most_800 - 400), 0) / 8);
@@ -7666,6 +7660,8 @@ void Bot::CalcItemBonuses(StatBonuses* newbon)
 			AddItemBonuses(item, newbon);
 		}
 	}
+
+	CalcHeroicBonuses();
 
 	// Caps
 	if(newbon->HPRegen > CalcHPRegenCap())
@@ -9257,36 +9253,6 @@ void Bot::OwnerMessage(std::string message)
 	);
 }
 
-bool Bot::GetBotOwnerDataBuckets()
-{
-	auto bot_owner = GetBotOwner();
-	if (!bot_owner) {
-		return false;
-	}
-
-	const auto query = fmt::format(
-		"SELECT `key`, `value` FROM data_buckets WHERE `key` LIKE '{}-%'",
-		Strings::Escape(bot_owner->GetBucketKey())
-	);
-
-	auto results = database.QueryDatabase(query);
-	if (!results.Success()) {
-		return false;
-	}
-
-	bot_owner_data_buckets.clear();
-
-	if (!results.RowCount()) {
-		return true;
-	}
-
-	for (auto row : results) {
-		bot_owner_data_buckets.insert(std::pair<std::string,std::string>(row[0], row[1]));
-	}
-
-	return true;
-}
-
 bool Bot::GetBotDataBuckets()
 {
 	const auto query = fmt::format(
@@ -9299,20 +9265,20 @@ bool Bot::GetBotDataBuckets()
 		return false;
 	}
 
-	bot_data_buckets.clear();
+	m_bot_data_buckets.clear();
 
 	if (!results.RowCount()) {
 		return true;
 	}
 
 	for (auto row : results) {
-		bot_data_buckets.insert(std::pair<std::string,std::string>(row[0], row[1]));
+		m_bot_data_buckets.insert(std::pair<std::string,std::string>(row[0], row[1]));
 	}
 
 	return true;
 }
 
-bool Bot::CheckDataBucket(std::string bucket_name, std::string bucket_value, uint8 bucket_comparison)
+bool Bot::CheckDataBucket(std::string bucket_name, const std::string& bucket_value, uint8 bucket_comparison)
 {
 	if (!bucket_name.empty() && !bucket_value.empty()) {
 		auto full_name = fmt::format(
@@ -9321,7 +9287,7 @@ bool Bot::CheckDataBucket(std::string bucket_name, std::string bucket_value, uin
 			bucket_name
 		);
 
-		auto player_value = bot_data_buckets[full_name];
+		auto player_value = m_bot_data_buckets[full_name];
 		if (player_value.empty() && GetBotOwner()) {
 			full_name = fmt::format(
 				"{}-{}",
@@ -9329,7 +9295,7 @@ bool Bot::CheckDataBucket(std::string bucket_name, std::string bucket_value, uin
 				bucket_name
 			);
 
-			player_value = bot_owner_data_buckets[full_name];
+			player_value = GetBotOwner()->CastToClient()->m_client_data_buckets[full_name];
 			if (player_value.empty()) {
 				return false;
 			}

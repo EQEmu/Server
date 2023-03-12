@@ -1420,6 +1420,8 @@ public:
 
 	void DrawDebugCoordinateNode(std::string node_name, const glm::vec4 vec);
 
+	void CalcHeroicBonuses();
+
 protected:
 	void CommonDamage(Mob* other, int64 &damage, const uint16 spell_id, const EQ::skills::SkillType attack_skill, bool &avoidable, const int8 buffslot, const bool iBuffTic, eSpecialAttacks specal = eSpecialAttacks::None);
 	static uint16 GetProcID(uint16 spell_id, uint8 effect_index);
@@ -1707,6 +1709,31 @@ protected:
 	bool is_boat;
 
 	CombatRecord m_combat_record{};
+
+	// Heroic Stat Benefits
+	bool CheckHeroicBonusesDataBuckets(std::string bucket_name, std::string& bucket_value);
+	int32 m_heroic_str_shield_ac = 0;
+	int32 m_heroic_str_melee_damage = 0;
+	double m_heroic_str_max_endurance = 0;
+	double m_heroic_str_endurance_regen = 0;
+	int64 m_heroic_sta_max_hp = 0;
+	int32 m_heroic_sta_hp_regen = 0;
+	double m_heroic_sta_max_endurance = 0;
+	double m_heroic_sta_endurance_regen = 0;
+	int32 m_heroic_agi_avoidance = 0;
+	double m_heroic_agi_max_endurance = 0;
+	double m_heroic_agi_endurance_regen = 0;
+	int32 m_heroic_dex_ranged_damage = 0;
+	double m_heroic_dex_max_endurance = 0;
+	double m_heroic_dex_endurance_regen = 0;
+	int32 m_heroic_int_spell_damage = 0;
+	int32 m_heroic_int_max_mana = 0;
+	int32 m_heroic_int_mana_regen = 0;
+	int32 m_heroic_wis_heal_amount = 0;
+	int32 m_heroic_wis_max_mana = 0;
+	int32 m_heroic_wis_mana_regen = 0;
+
+
 public:
 	const CombatRecord &GetCombatRecord() const;
 
@@ -1839,6 +1866,18 @@ private:
 	EQ::InventoryProfile m_inv;
 	std::shared_ptr<HealRotation> m_target_of_heal_rotation;
 	bool m_manual_follow;
+
+	void SetHeroicStrBonuses();
+
+	void SetHeroicStaBonuses();
+
+	void SetHeroicAgiBonuses();
+
+	void SetHeroicDexBonuses();
+
+	void SetHeroicIntBonuses();
+
+	void SetHeroicWisBonuses();
 };
 
 #endif

@@ -393,9 +393,8 @@ public:
 	[[nodiscard]] int GetMaxDiscSlots() const final { return EQ::spells::DISC_BUFFS; }
 	[[nodiscard]] int GetMaxTotalSlots() const final { return EQ::spells::TOTAL_BUFFS; }
 
-	bool GetBotOwnerDataBuckets();
 	bool GetBotDataBuckets();
-	bool CheckDataBucket(std::string bucket_name, std::string bucket_value, uint8 bucket_comparison);
+	bool CheckDataBucket(std::string bucket_name, const std::string& bucket_value, uint8 bucket_comparison);
 
 	// Bot Equipment & Inventory Class Methods
 	void BotTradeAddItem(const EQ::ItemInstance* inst, uint16 slot_id, std::string* error_message, bool save_to_database = true);
@@ -825,8 +824,7 @@ private:
 	eStandingPetOrder m_previous_pet_order;
 	uint32 m_bot_caster_range;
 	BotCastingRoles m_CastingRoles;
-	std::map<std::string,std::string> bot_data_buckets;
-	std::map<std::string,std::string> bot_owner_data_buckets;
+	std::map<std::string,std::string> m_bot_data_buckets;
 
 	std::map<uint16, BotSpellSetting> bot_spell_settings;
 
@@ -882,6 +880,7 @@ private:
 	bool LoadPet();	// Load and spawn bot pet if there is one
 	bool SavePet();	// Save and depop bot pet if there is one
 	bool DeletePet();
+
 
 	public:
 	static uint8 spell_casting_chances[SPELL_TYPE_COUNT][PLAYER_CLASS_COUNT][EQ::constants::STANCE_TYPE_COUNT][cntHSND];

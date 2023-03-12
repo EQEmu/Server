@@ -379,6 +379,8 @@ Client::Client(EQStreamInterface *ieqs) : Mob(
 	SetBotPulling(false);
 	SetBotPrecombat(false);
 
+	GetDataBuckets();
+
 	AI_Init();
 }
 
@@ -6436,7 +6438,7 @@ void Client::SendStatsWindow(Client* client, bool use_window)
 
 				base_regen_field = itoa(LevelRegen());
 				item_regen_field = itoa(
-					itembonuses.HPRegen +(GetHeroicSTA() * RuleR(Character, HeroicStaminaMultiplier) / 20));
+					itembonuses.HPRegen + m_heroic_sta_hp_regen );
 				cap_regen_field = itoa(CalcHPRegenCap());
 				spell_regen_field = itoa(spellbonuses.HPRegen);
 				aa_regen_field = itoa(aabonuses.HPRegen);
@@ -6449,9 +6451,7 @@ void Client::SendStatsWindow(Client* client, bool use_window)
 					regen_row_color = color_blue;
 
 					base_regen_field = itoa(CalcBaseManaRegen());
-					int32 heroic_mana_regen = (GetCasterClass() == 'W') ?
-						GetHeroicWIS() * RuleR(Character, HeroicWisdomMultiplier) / 25 :
-						GetHeroicINT() * RuleR(Character, HeroicIntelligenceMultiplier) / 25;
+					int32 heroic_mana_regen = (GetCasterClass() == 'W') ? m_heroic_wis_mana_regen : m_heroic_int_mana_regen;
 					item_regen_field = itoa(itembonuses.ManaRegen + heroic_mana_regen);
 					cap_regen_field = itoa(CalcManaRegenCap());
 					spell_regen_field = itoa(spellbonuses.ManaRegen);
@@ -6466,11 +6466,7 @@ void Client::SendStatsWindow(Client* client, bool use_window)
 				regen_row_color = color_green;
 
 				base_regen_field = itoa(((GetLevel() * 4 / 10) + 2));
-				double heroic_str = GetHeroicSTR() * RuleR(Character, HeroicStrengthMultiplier);
-				double heroic_sta = GetHeroicSTA() * RuleR(Character, HeroicStaminaMultiplier);
-				double heroic_dex = GetHeroicDEX() * RuleR(Character, HeroicDexterityMultiplier);
-				double heroic_agi = GetHeroicAGI() * RuleR(Character, HeroicAgilityMultiplier);
-				double heroic_stats = (heroic_str + heroic_sta + heroic_dex + heroic_agi) / 4;
+				int heroic_stats = m_heroic_str_endurance_regen + m_heroic_sta_endurance_regen + m_heroic_agi_endurance_regen + m_heroic_dex_endurance_regen;
 				item_regen_field = itoa(itembonuses.EnduranceRegen + heroic_stats);
 				cap_regen_field = itoa(CalcEnduranceRegenCap());
 				spell_regen_field = itoa(spellbonuses.EnduranceRegen);
@@ -12209,4 +12205,30 @@ void Client::PlayerTradeEventLog(Trade *t, Trade *t2)
 
 	RecordPlayerEventLogWithClient(trader, PlayerEvent::TRADE, e);
 	RecordPlayerEventLogWithClient(trader2, PlayerEvent::TRADE, e);
+}
+
+bool Client::GetDataBuckets()
+{
+
+	const auto query = fmt::format(
+		"SELECT `key`, `value` FROM data_buckets WHERE `key` LIKE '{}-%'",
+		Strings::Escape(GetBucketKey())
+	);
+
+	auto results = database.QueryDatabase(query);
+	if (!results.Success()) {
+		return false;
+	}
+
+	m_client_data_buckets.clear();
+
+	if (!results.RowCount()) {
+		return true;
+	}
+
+	for (auto row : results) {
+		m_client_data_buckets.insert(std::pair<std::string,std::string>(row[0], row[1]));
+	}
+
+	return true;
 }

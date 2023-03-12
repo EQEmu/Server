@@ -342,7 +342,7 @@ bool Perl_Bot_ReloadBotDataBuckets(Bot* self)
 
 bool Perl_Bot_ReloadBotOwnerDataBuckets(Bot* self)
 {
-	return self->GetBotOwnerDataBuckets();
+	return self->GetBotOwner()->CastToClient()->GetDataBuckets();
 }
 
 bool Perl_Bot_ReloadBotSpells(Bot* self)

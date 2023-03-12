@@ -21,6 +21,7 @@
 #include "../common/rulesys.h"
 #include "../common/skills.h"
 #include "../common/spdat.h"
+#include "../common/repositories/base/base_data_buckets_repository.h"
 
 #include "client.h"
 #include "entity.h"
@@ -191,6 +192,8 @@ void Client::CalcItemBonuses(StatBonuses* newbon) {
 			continue;
 		AddItemBonuses(inst, newbon, false, true);
 	}
+
+	CalcHeroicBonuses();
 
 	//Optional ability to have worn effects calculate as an addititive bonus instead of highest value
 	if (RuleI(Spells, AdditiveBonusWornType) && RuleI(Spells, AdditiveBonusWornType) != EQ::item::ItemEffectWorn){
@@ -5630,4 +5633,225 @@ void Mob::NegateSpellEffectBonuses(uint16 spell_id)
 			}
 		}
 	}
+}
+
+void Mob::CalcHeroicBonuses()
+{
+	if (GetHeroicSTR()) {
+		SetHeroicStrBonuses();
+	}
+
+	if (GetHeroicSTA()) {
+		SetHeroicStaBonuses();
+	}
+
+	if (GetHeroicAGI()) {
+		SetHeroicAgiBonuses();
+	}
+
+	if (GetHeroicDEX()) {
+		SetHeroicDexBonuses();
+	}
+
+	if (GetHeroicINT()) {
+		SetHeroicIntBonuses();
+	}
+
+	if (GetHeroicWIS()) {
+		SetHeroicWisBonuses();
+	}
+}
+
+void Mob::SetHeroicWisBonuses() {
+
+	std::string bucket_value;
+	if (RuleR(Character, HeroicWisdomMultiplier) != 1.00) {
+		m_heroic_wis_max_mana = (int32)((float) GetHeroicWIS() * RuleR(Character, HeroicWisdomMultiplier) * 10);
+		m_heroic_wis_mana_regen = (int32)((float) GetHeroicWIS() * RuleR(Character, HeroicWisdomMultiplier) / 25);
+	}
+	else {
+		m_heroic_wis_mana_regen = (int32)((float) GetHeroicWIS() *
+			(CheckHeroicBonusesDataBuckets("heroic_wis_mana_regen", bucket_value) ?
+			Strings::ToFloat(bucket_value) : 1.00)
+			/ 25
+		);
+	}
+}
+
+void Mob::SetHeroicIntBonuses() {
+
+	std::string bucket_value;
+	if (RuleR(Character, HeroicIntelligenceMultiplier) != 1.00) {
+		m_heroic_int_max_mana = (int32)((float) GetHeroicINT() * RuleR(Character, HeroicIntelligenceMultiplier) * 10);
+		m_heroic_int_mana_regen = (int32)((float) GetHeroicINT() * RuleR(Character, HeroicIntelligenceMultiplier) / 25);
+	}
+	else {
+		m_heroic_int_max_mana = (int32)((float) GetHeroicINT() *
+			(CheckHeroicBonusesDataBuckets("heroic_int_max_mana", bucket_value) ?
+			Strings::ToFloat(bucket_value) : 1.00) * 10
+		);
+
+		m_heroic_int_mana_regen = (int32)((float) GetHeroicINT() *
+			(CheckHeroicBonusesDataBuckets("heroic_int_mana_regen", bucket_value) ?
+			Strings::ToFloat(bucket_value) : 1.00) / 25
+		);
+
+		m_heroic_int_spell_damage = (int32)((float) GetHeroicINT() *
+			(CheckHeroicBonusesDataBuckets("heroic_int_spell_damage", bucket_value) ?
+			Strings::ToFloat(bucket_value) : 1.00) / 10
+		);
+	}
+}
+
+void Mob::SetHeroicDexBonuses() {
+
+	std::string bucket_value;
+	if (RuleR(Character, HeroicDexterityMultiplier) != 1.00) {
+		m_heroic_dex_ranged_damage = (int32)((float) GetHeroicDEX() * RuleR(Character, HeroicDexterityMultiplier) / 10);
+		m_heroic_dex_max_endurance = ((float) GetHeroicDEX() * RuleR(Character, HeroicDexterityMultiplier) / 4);
+		m_heroic_dex_endurance_regen = ((float) GetHeroicDEX() * RuleR(Character, HeroicDexterityMultiplier) / 4 / 50);
+	}
+	else {
+		m_heroic_dex_ranged_damage = (int32)((float) GetHeroicDEX() *
+			(CheckHeroicBonusesDataBuckets("heroic_dex_ranged_damage", bucket_value) ?
+			Strings::ToFloat(bucket_value) : 1.00)
+			/ 10
+		);
+
+		m_heroic_dex_max_endurance = ((float) GetHeroicDEX() *
+			(CheckHeroicBonusesDataBuckets("heroic_dex_max_endurance", bucket_value) ?
+			Strings::ToFloat(bucket_value) : 1.00)
+			/ 4
+		);
+
+		m_heroic_dex_endurance_regen = ((float) GetHeroicDEX() *
+			(CheckHeroicBonusesDataBuckets("heroic_dex_endurance_regen", bucket_value) ?
+			Strings::ToFloat(bucket_value) : 1.00)
+			/ 4 / 50
+		);
+	}
+}
+
+void Mob::SetHeroicAgiBonuses() {
+
+	std::string bucket_value;
+	if (RuleR(Character, HeroicAgilityMultiplier) != 1.00) {
+		m_heroic_agi_avoidance = (int32)((float) GetHeroicAGI() * RuleR(Character, HeroicAgilityMultiplier) / 10);
+		m_heroic_agi_max_endurance = ((float) GetHeroicAGI() * RuleR(Character, HeroicAgilityMultiplier) / 4);
+		m_heroic_agi_endurance_regen = ((float) GetHeroicAGI() * RuleR(Character, HeroicAgilityMultiplier) / 4 / 50);
+	}
+	else {
+		m_heroic_agi_avoidance = (int32)((float) GetHeroicAGI() *
+			(CheckHeroicBonusesDataBuckets("heroic_agi_avoidance", bucket_value) ?
+			Strings::ToFloat(bucket_value) : 1.00)
+			/ 10
+		);
+
+		m_heroic_agi_max_endurance = ((float) GetHeroicAGI() *
+			(CheckHeroicBonusesDataBuckets("heroic_agi_max_endurance", bucket_value) ?
+			Strings::ToFloat(bucket_value) : 1.00)
+			/ 4
+		);
+
+		m_heroic_agi_endurance_regen = ((float) GetHeroicAGI() *
+			(CheckHeroicBonusesDataBuckets("heroic_agi_endurance_regen", bucket_value) ?
+			Strings::ToFloat(bucket_value) : 1.00)
+			/ 4 / 50
+		);
+	}
+}
+
+void Mob::SetHeroicStaBonuses() {
+
+	std::string bucket_value;
+	if (RuleR(Character, HeroicStaminaMultiplier) != 1.00) {
+		m_heroic_sta_max_hp = (int64)((double) GetHeroicSTA() * RuleR(Character, HeroicStaminaMultiplier) * 10);
+		m_heroic_sta_hp_regen = (int32)((float) GetHeroicSTA() * RuleR(Character, HeroicStaminaMultiplier) / 20);
+		m_heroic_sta_max_endurance = ((float) GetHeroicSTA() * RuleR(Character, HeroicStaminaMultiplier) / 4);
+		m_heroic_sta_endurance_regen = ((float) GetHeroicSTA() * RuleR(Character, HeroicStaminaMultiplier) / 4 / 50);
+	}
+	else {
+		m_heroic_sta_max_hp = (int64)((double) GetHeroicSTA() *
+			(CheckHeroicBonusesDataBuckets("heroic_sta_max_hp", bucket_value) ?
+			Strings::ToFloat(bucket_value) : 1.00)
+			* 10
+		);
+
+		m_heroic_sta_hp_regen = (int32)((float) GetHeroicSTA() *
+			(CheckHeroicBonusesDataBuckets("heroic_sta_hp_regen", bucket_value) ?
+			Strings::ToFloat(bucket_value) : 1.00)
+			/ 20
+		);
+
+		m_heroic_sta_max_endurance = ((float) GetHeroicSTA() *
+			(CheckHeroicBonusesDataBuckets("heroic_sta_max_endurance", bucket_value) ?
+			Strings::ToFloat(bucket_value) : 1.00)
+			/ 4
+		);
+
+		m_heroic_sta_endurance_regen = ((float) GetHeroicSTA() *
+			(CheckHeroicBonusesDataBuckets("heroic_sta_endurance_regen", bucket_value) ?
+			Strings::ToFloat(bucket_value) : 1.00)
+			/ 4 / 50
+		);
+	}
+}
+
+void Mob::SetHeroicStrBonuses() {
+
+	std::string bucket_value;
+	if (RuleR(Character, HeroicStrengthMultiplier) != 1.00) {
+		m_heroic_str_shield_ac = (int32)((float) GetHeroicSTR() * RuleR(Character, HeroicStrengthMultiplier) / 10);
+		m_heroic_str_melee_damage = (int32)((float) GetHeroicSTR() * RuleR(Character, HeroicStrengthMultiplier) / 10);
+		m_heroic_str_max_endurance = ((float) GetHeroicSTR() * RuleR(Character, HeroicStrengthMultiplier) / 4);
+		m_heroic_str_endurance_regen =((float) GetHeroicSTR() * RuleR(Character, HeroicStrengthMultiplier) / 4 / 50);
+	}
+	else {
+		m_heroic_str_shield_ac = (int32)((float) GetHeroicSTR() *
+			(CheckHeroicBonusesDataBuckets("heroic_str_shield_ac", bucket_value) ?
+			Strings::ToFloat(bucket_value) : 1.00)
+			/ 10
+		);
+
+		m_heroic_str_melee_damage = (int32)((float) GetHeroicSTR() *
+			(CheckHeroicBonusesDataBuckets("heroic_str_melee_damage", bucket_value) ?
+			Strings::ToFloat(bucket_value) : 1.00)
+			/ 10
+		);
+
+		m_heroic_str_max_endurance = ((float) GetHeroicSTR() *
+			(CheckHeroicBonusesDataBuckets("heroic_str_max_endurance", bucket_value) ?
+			Strings::ToFloat(bucket_value) : 1.00)
+			/ 4
+		);
+
+		m_heroic_str_endurance_regen = ((float) GetHeroicSTR() *
+			(CheckHeroicBonusesDataBuckets("heroic_str_endurance_regen", bucket_value) ?
+			Strings::ToFloat(bucket_value) : 1.00)
+			/ 4 / 50
+		);
+	}
+}
+
+bool Mob::CheckHeroicBonusesDataBuckets(std::string bucket_name, std::string& bucket_value) {
+
+	if (!bucket_name.empty()) {
+		auto full_name = fmt::format(
+			"{}-{}",
+			GetBucketKey(),
+			bucket_name
+		);
+
+		if (IsOfClientBot()) {
+			bucket_value = (IsClient()) ?
+				CastToClient()->m_client_data_buckets[full_name] :
+				CastToBot()->m_bot_data_buckets[full_name];
+		}
+
+		if (bucket_value.empty()) {
+			return false;
+		}
+	}
+
+	return true;
 }

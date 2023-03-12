@@ -1646,6 +1646,11 @@ public:
 
 	PlayerEvent::PlayerEvent GetPlayerEvent();
 	void RecordKilledNPCEvent(NPC *n);
+
+	bool GetDataBuckets();
+	std::map<std::string,std::string> m_client_data_buckets;
+
+
 protected:
 	friend class Mob;
 	void CalcItemBonuses(StatBonuses* newbon);
@@ -2049,6 +2054,7 @@ private:
 	bool CanTradeFVNoDropItem();
 	void SendMobPositions();
 	void PlayerTradeEventLog(Trade *t, Trade *t2);
+
 };
 
 #endif
