@@ -165,7 +165,7 @@ int64 Mob::GetActSpellDamage(uint16 spell_id, int64 value, Mob* target) {
 	return value;
 }
 
-int64 Mob::GetActReflectedSpellDamage(int32 spell_id, int64 value, int effectiveness) {
+int64 Mob::GetActReflectedSpellDamage(uint16 spell_id, int64 value, int effectiveness) {
 	/*
 		Reflected spells use the spells base damage before any modifiers or formulas applied.
 		That value can then be modifier by the reflect spells 'max' value, defined here as effectiveness
