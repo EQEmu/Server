@@ -377,8 +377,17 @@ inline std::string GetMobAttributeByString(Mob *mob, const std::string &attribut
 				scaling_modified = " *";
 			}
 
-			return Strings::Commify(std::to_string((int) npc->GetHPRegen())) + scaling_modified;
+			return Strings::Commify(std::to_string(npc->GetHPRegen())) + scaling_modified;
 		}
+
+		if (attribute == "hp_regen_per_second") {
+			if (mob->EntityVariableExists("modify_stat_hp_regen_per_second")) {
+				scaling_modified = " *";
+			}
+
+			return Strings::Commify(std::to_string(npc->GetHPRegenPerSecond())) + scaling_modified;
+		}
+
 		if (attribute == "attack_delay") {
 			if (mob->EntityVariableExists("modify_stat_attack_delay")) {
 				scaling_modified = " *";
@@ -401,7 +410,19 @@ inline std::string GetMobAttributeByString(Mob *mob, const std::string &attribut
 			return Strings::Commify(std::to_string((int) npc->GetHealScale())) + scaling_modified;
 		}
 		if (attribute == "avoidance") {
+			if (mob->EntityVariableExists("modify_stat_avoidance")) {
+				scaling_modified = " *";
+			}
+
 			return Strings::Commify(std::to_string(npc->GetAvoidanceRating())) + scaling_modified;
+		}
+
+		if (attribute == "heroic_strikethrough") {
+			if (mob->EntityVariableExists("modify_stat_heroic_strikethrough")) {
+				scaling_modified = " *";
+			}
+
+			return Strings::Commify(std::to_string(npc->GetHeroicStrikethrough())) + scaling_modified;
 		}
 
 		npc->GetNPCEmote(npc->GetEmoteID(), 0);
@@ -725,10 +746,12 @@ void Mob::DisplayInfo(Mob *mob)
 				"min_hit",
 				"max_hit",
 				"hp_regen",
+				"hp_regen_per_second",
 				"attack_delay",
 				"spell_scale",
 				"heal_scale",
 				"avoidance",
+				"heroic_strikethrough",
 			};
 
 			window_text += WriteDisplayInfoSection(mob, "NPC Stats", npc_stats, 1, true);
