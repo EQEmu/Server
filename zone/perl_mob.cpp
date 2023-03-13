@@ -1869,26 +1869,23 @@ void Perl_Mob_SendIllusion(Mob* self, uint16 race, uint8 gender, uint8 texture, 
 void Perl_Mob_SendIllusionPacket(Mob* self, perl::reference table_ref)
 {
 	perl::hash table = table_ref;
-	if (!table.exists("race")) {
-		return;
-	}
 
-	uint16  race             = table["race"];
-	uint8   gender           = table.exists("gender") ? table["gender"] : MALE;
-	uint8   texture          = table.exists("texture") ? table["texture"] : 255;
-	uint8   helmtexture      = table.exists("helmtexture") ? table["helmtexture"] : 255;
-	uint8   haircolor        = table.exists("haircolor") ? table["haircolor"] : 255;
-	uint8   beardcolor       = table.exists("beardcolor") ? table["beardcolor"] : 255;
-	uint8   eyecolor1        = table.exists("eyecolor1") ? table["eyecolor1"] : 255;
-	uint8   eyecolor2        = table.exists("eyecolor2") ? table["eyecolor2"] : 255;
-	uint8   hairstyle        = table.exists("hairstyle") ? table["hairstyle"] : 255;
-	uint8   luclinface       = table.exists("luclinface") ? table["luclinface"] : 255;
-	uint8   beard            = table.exists("beard") ? table["beard"] : 255;
+	uint16  race             = table.exists("race") ? table["race"] : self->GetRace();
+	uint8   gender           = table.exists("gender") ? table["gender"] : self->GetGender();
+	uint8   texture          = table.exists("texture") ? table["texture"] : self->GetTexture();
+	uint8   helmtexture      = table.exists("helmtexture") ? table["helmtexture"] : self->GetHelmTexture();
+	uint8   haircolor        = table.exists("haircolor") ? table["haircolor"] : self->GetHairColor();
+	uint8   beardcolor       = table.exists("beardcolor") ? table["beardcolor"] : self->GetBeardColor();
+	uint8   eyecolor1        = table.exists("eyecolor1") ? table["eyecolor1"] : self->GetEyeColor1();
+	uint8   eyecolor2        = table.exists("eyecolor2") ? table["eyecolor2"] : self->GetEyeColor2();
+	uint8   hairstyle        = table.exists("hairstyle") ? table["hairstyle"] : self->GetHairStyle();
+	uint8   luclinface       = table.exists("luclinface") ? table["luclinface"] : self->GetLuclinFace();
+	uint8   beard            = table.exists("beard") ? table["beard"] : self->GetBeard();
 	uint8   aa_title         = table.exists("aa_title") ? table["aa_title"] : 255;
-	uint32  drakkin_heritage = table.exists("drakkin_heritage") ? table["drakkin_heritage"] : 4294967295;
-	uint32  drakkin_tattoo   = table.exists("drakkin_tattoo") ? table["drakkin_tattoo"] : 4294967295;
-	uint32  drakkin_details  = table.exists("drakkin_details") ? table["drakkin_details"] : 4294967295;
-	float   size             = table.exists("size") ? table["size"] : -1.0f;
+	uint32  drakkin_heritage = table.exists("drakkin_heritage") ? table["drakkin_heritage"] : self->GetDrakkinHeritage();
+	uint32  drakkin_tattoo   = table.exists("drakkin_tattoo") ? table["drakkin_tattoo"] : self->GetDrakkinTattoo();
+	uint32  drakkin_details  = table.exists("drakkin_details") ? table["drakkin_details"] : self->GetDrakkinDetails();
+	float   size             = table.exists("size") ? table["size"] : self->GetSize();
 	Client* target           = table.exists("target") ? static_cast<Client*>(table["target"]) : nullptr;
 
 	if (self->IsClient()) {

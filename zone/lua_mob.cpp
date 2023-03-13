@@ -1567,22 +1567,22 @@ void Lua_Mob::SendIllusionPacket(luabind::adl::object illusion) {
 		return;
 	}
 
-	uint16     race             = RACE_HUMAN_1;
-	uint8      gender           = MALE;
-	uint8      texture          = 255;
-	uint8      helmtexture      = 255;
-	uint8      haircolor        = 255;
-	uint8      beardcolor       = 255;
-	uint8      eyecolor1        = 255;
-	uint8      eyecolor2        = 255;
-	uint8      hairstyle        = 255;
-	uint8      luclinface       = 255;
-	uint8      beard            = 255;
+	uint16     race             = self->GetRace();
+	uint8      gender           = self->GetGender();
+	uint8      texture          = self->GetTexture();
+	uint8      helmtexture      = self->GetHelmTexture();
+	uint8      haircolor        = self->GetHairColor();
+	uint8      beardcolor       = self->GetBeardColor();
+	uint8      eyecolor1        = self->GetEyeColor1();
+	uint8      eyecolor2        = self->GetEyeColor2();
+	uint8      hairstyle        = self->GetHairStyle();
+	uint8      luclinface       = self->GetLuclinFace();
+	uint8      beard            = self->GetBeard();
 	uint8      aa_title         = 255;
-	uint32     drakkin_heritage = 4294967295;
-	uint32     drakkin_tattoo   = 4294967295;
-	uint32     drakkin_details  = 4294967295;
-	float      size             = -1.0f;
+	uint32     drakkin_heritage = self->GetDrakkinHeritage();
+	uint32     drakkin_tattoo   = self->GetDrakkinTattoo();
+	uint32     drakkin_details  = self->GetDrakkinDetails();
+	float      size             = self->GetSize();
 	Lua_Client target           = Lua_Client();
 
 	auto cur = illusion["race"];
