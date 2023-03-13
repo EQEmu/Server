@@ -1888,30 +1888,6 @@ void Perl_Mob_SendIllusionPacket(Mob* self, perl::reference table_ref)
 	float   size             = table.exists("size") ? table["size"] : self->GetSize();
 	Client* target           = table.exists("target") ? static_cast<Client*>(table["target"]) : nullptr;
 
-	if (self->IsClient()) {
-		self->CastToClient()->Message(
-			Chat::White,
-			fmt::format(
-				"Illusion: Race [{}] Gender [{}] Texture [{}] HelmTexture [{}] HairColor [{}] BeardColor [{}] EyeColor1 [{}] EyeColor2 [{}] HairStyle [{}] Face [{}] DrakkinHeritage [{}] DrakkinTattoo [{}] DrakkinDetails [{}] Size [{}] Target [{}]",
-				race,
-				gender,
-				texture,
-				helmtexture,
-				haircolor,
-				beardcolor,
-				eyecolor1,
-				eyecolor2,
-				hairstyle,
-				luclinface,
-				drakkin_heritage,
-				drakkin_tattoo,
-				drakkin_details,
-				size,
-				target ? target->GetCleanName() : "No Target"
-			).c_str()
-		);
-	}
-
 	self->SendIllusionPacket(
 		race,
 		gender,
