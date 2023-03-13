@@ -93,7 +93,7 @@ RULE_INT(Character, ItemEnduranceRegenCap, 15, "Limit on endurance regeneration 
 RULE_INT(Character, ItemExtraDmgCap, 150, "Cap for bonuses to melee skills like Bash, Frenzy, etc.")
 RULE_INT(Character, HasteCap, 100, "Haste cap for non-v3(over haste) haste")
 RULE_INT(Character, Hastev3Cap, 25, "Haste cap for v3(over haste) haste")
-RULE_BOOL(Character, HeroicStatsUseDataBucketsToScale, false, "Allows scaling the benefits a character receives from Heroic Stats using Data Buckets. This will override all other Heroic Multipliers.")
+RULE_BOOL(Character, HeroicStatsUseDataBucketsToScale, false, "Allows scaling the benefits a character receives from Heroic Stats using Data Buckets.")
 RULE_REAL(Character, HeroicIntelligenceIncreaseSpellDmgMultiplier, 0.00, "Allows Heroic Intelligence to increase a Players Worn Spell Damage Stat from Equipment, for example, setting this rule to 1.00 will grant 1 Spell Damage per 25 Heroic Intelligence")
 RULE_REAL(Character, HeroicWisdomIncreaseHealAmtMultiplier, 0.00, "Allows Heroic Wisdom to increase a Players Worn Heal Amount Stat from Equipment, for example, setting this rule to 1.00 will grant 1 Heal Amount per 25 Heroic Wisdom")
 RULE_REAL(Character, HeroicStrengthMultiplier, 1.00, "Multplier scales benefits from Heroic Strength. Grants 25 Base Endurance, 0.05 Endurance Regen, 1 Melee Damage each Hit, and 1 Shield AC per 10 Heroic Strength.")

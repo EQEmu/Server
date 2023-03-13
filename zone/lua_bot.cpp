@@ -117,7 +117,7 @@ bool Lua_Bot::ReloadBotDataBuckets() {
 
 bool Lua_Bot::ReloadBotOwnerDataBuckets() {
 	Lua_Safe_Call_Bool();
-	return self->GetBotOwner()->CastToClient()->GetDataBuckets();
+	return self->HasOwner() && self->GetBotOwner()->CastToClient()->GetDataBuckets();
 }
 
 bool Lua_Bot::ReloadBotSpells() {

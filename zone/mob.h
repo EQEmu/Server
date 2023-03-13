@@ -1711,7 +1711,7 @@ protected:
 	CombatRecord m_combat_record{};
 
 	// Heroic Stat Benefits
-	bool CheckHeroicBonusesDataBuckets(std::string bucket_name, std::string& bucket_value);
+	float CheckHeroicBonusesDataBuckets(std::string bucket_name);
 	int32 m_heroic_str_shield_ac = 0;
 	int32 m_heroic_str_melee_damage = 0;
 	double m_heroic_str_max_endurance = 0;
@@ -1868,15 +1868,10 @@ private:
 	bool m_manual_follow;
 
 	void SetHeroicStrBonuses();
-
 	void SetHeroicStaBonuses();
-
 	void SetHeroicAgiBonuses();
-
 	void SetHeroicDexBonuses();
-
 	void SetHeroicIntBonuses();
-
 	void SetHeroicWisBonuses();
 };
 
