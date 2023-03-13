@@ -899,7 +899,8 @@ public:
 		uint32 in_drakkin_tattoo = 0xFFFFFFFF,
 		uint32 in_drakkin_details = 0xFFFFFFFF,
 		float in_size = -1.0f,
-		bool send_appearance_effects = true
+		bool send_appearance_effects = true,
+		Client* target = nullptr
 	);
 	void CloneAppearance(Mob* other, bool clone_name = false);
 	void SetFaceAppearance(const FaceChange_Struct& face, bool skip_sender = false);

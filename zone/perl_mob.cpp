@@ -1861,6 +1861,82 @@ void Perl_Mob_SendIllusion(Mob* self, uint16 race, uint8 gender, uint8 texture, 
 	self->SendIllusionPacket(race, gender, texture, helmtexture, haircolor, beardcolor, 0xFF, 0xFF, hairstyle, face, beard, 0xFF, drakkin_heritage, drakkin_tattoo, drakkin_details, size);
 }
 
+void Perl_Mob_SendIllusion(Mob* self, uint16 race, uint8 gender, uint8 texture, uint8 helmtexture, uint8 face, uint8 hairstyle, uint8 haircolor, uint8 beard, uint8 beardcolor, uint32 drakkin_heritage, uint32 drakkin_tattoo, uint32 drakkin_details, float size, Client* target) // @categories Script Utility
+{
+	self->SendIllusionPacket(race, gender, texture, helmtexture, haircolor, beardcolor, 0xFF, 0xFF, hairstyle, face, beard, 0xFF, drakkin_heritage, drakkin_tattoo, drakkin_details, size, true, target);
+}
+
+void Perl_Mob_SendIllusionPacket(Mob* self, perl::reference table_ref)
+{
+	perl::hash table = table_ref;
+	if (!table.exists("race")) {
+		return;
+	}
+
+	uint16  race             = table["race"];
+	uint8   gender           = table.exists("gender") ? table["gender"] : MALE;
+	uint8   texture          = table.exists("texture") ? table["texture"] : 255;
+	uint8   helmtexture      = table.exists("helmtexture") ? table["helmtexture"] : 255;
+	uint8   haircolor        = table.exists("haircolor") ? table["haircolor"] : 255;
+	uint8   beardcolor       = table.exists("beardcolor") ? table["beardcolor"] : 255;
+	uint8   eyecolor1        = table.exists("eyecolor1") ? table["eyecolor1"] : 255;
+	uint8   eyecolor2        = table.exists("eyecolor2") ? table["eyecolor2"] : 255;
+	uint8   hairstyle        = table.exists("hairstyle") ? table["hairstyle"] : 255;
+	uint8   luclinface       = table.exists("luclinface") ? table["luclinface"] : 255;
+	uint8   beard            = table.exists("beard") ? table["beard"] : 255;
+	uint8   aa_title         = table.exists("aa_title") ? table["aa_title"] : 255;
+	uint32  drakkin_heritage = table.exists("drakkin_heritage") ? table["drakkin_heritage"] : 4294967295;
+	uint32  drakkin_tattoo   = table.exists("drakkin_tattoo") ? table["drakkin_tattoo"] : 4294967295;
+	uint32  drakkin_details  = table.exists("drakkin_details") ? table["drakkin_details"] : 4294967295;
+	float   size             = table.exists("size") ? table["size"] : -1.0f;
+	Client* target           = table.exists("target") ? static_cast<Client*>(table["target"]) : nullptr;
+
+	if (self->IsClient()) {
+		self->CastToClient()->Message(
+			Chat::White,
+			fmt::format(
+				"Illusion: Race [{}] Gender [{}] Texture [{}] HelmTexture [{}] HairColor [{}] BeardColor [{}] EyeColor1 [{}] EyeColor2 [{}] HairStyle [{}] Face [{}] DrakkinHeritage [{}] DrakkinTattoo [{}] DrakkinDetails [{}] Size [{}] Target [{}]",
+				race,
+				gender,
+				texture,
+				helmtexture,
+				haircolor,
+				beardcolor,
+				eyecolor1,
+				eyecolor2,
+				hairstyle,
+				luclinface,
+				drakkin_heritage,
+				drakkin_tattoo,
+				drakkin_details,
+				size,
+				target ? target->GetCleanName() : "No Target"
+			).c_str()
+		);
+	}
+
+	self->SendIllusionPacket(
+		race,
+		gender,
+		texture,
+		helmtexture,
+		haircolor,
+		beardcolor,
+		eyecolor1,
+		eyecolor2,
+		hairstyle,
+		luclinface,
+		beard,
+		aa_title,
+		drakkin_heritage,
+		drakkin_tattoo,
+		drakkin_details,
+		size,
+		true,
+		target
+	);
+}
+
 void Perl_Mob_CameraEffect(Mob* self, uint32 duration) // @categories Script Utility
 {
 	self->CameraEffect(duration, 0.03125f);
@@ -3292,6 +3368,8 @@ void perl_register_mob()
 	package.add("SendIllusion", (void(*)(Mob*, uint16, uint8, uint8, uint8, uint8, uint8, uint8, uint8, uint8, uint32, uint32))&Perl_Mob_SendIllusion);
 	package.add("SendIllusion", (void(*)(Mob*, uint16, uint8, uint8, uint8, uint8, uint8, uint8, uint8, uint8, uint32, uint32, uint32))&Perl_Mob_SendIllusion);
 	package.add("SendIllusion", (void(*)(Mob*, uint16, uint8, uint8, uint8, uint8, uint8, uint8, uint8, uint8, uint32, uint32, uint32, float))&Perl_Mob_SendIllusion);
+	package.add("SendIllusion", (void(*)(Mob*, uint16, uint8, uint8, uint8, uint8, uint8, uint8, uint8, uint8, uint32, uint32, uint32, float, Client*))&Perl_Mob_SendIllusion);
+	package.add("SendIllusionPacket", (void(*)(Mob*, perl::reference))&Perl_Mob_SendIllusionPacket);
 	package.add("SendTo", &Perl_Mob_SendTo);
 	package.add("SendToFixZ", &Perl_Mob_SendToFixZ);
 	package.add("SendWearChange", &Perl_Mob_SendWearChange);
