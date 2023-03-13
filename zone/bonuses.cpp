@@ -5663,7 +5663,6 @@ void Mob::CalcHeroicBonuses()
 
 void Mob::SetHeroicWisBonuses() {
 
-	std::string bucket_value;
 	if (RuleR(Character, HeroicWisdomMultiplier) != 1.00) {
 		m_heroic_wis_max_mana = (int32)((float)GetHeroicWIS() * RuleR(Character, HeroicWisdomMultiplier) * 10);
 		m_heroic_wis_mana_regen = (int32)((float)GetHeroicWIS() * RuleR(Character, HeroicWisdomMultiplier) / 25);
@@ -5678,7 +5677,6 @@ void Mob::SetHeroicWisBonuses() {
 
 void Mob::SetHeroicIntBonuses() {
 
-	std::string bucket_value;
 	if (RuleR(Character, HeroicIntelligenceMultiplier) != 1.00) {
 		m_heroic_int_max_mana = (int32)((float) GetHeroicINT() * RuleR(Character, HeroicIntelligenceMultiplier) * 10);
 		m_heroic_int_mana_regen = (int32)((float) GetHeroicINT() * RuleR(Character, HeroicIntelligenceMultiplier) / 25);
@@ -5692,14 +5690,13 @@ void Mob::SetHeroicIntBonuses() {
 
 void Mob::SetHeroicDexBonuses() {
 
-	std::string bucket_value;
 	if (RuleR(Character, HeroicDexterityMultiplier) != 1.00) {
 		m_heroic_dex_ranged_damage = (int32)((float) GetHeroicDEX() * RuleR(Character, HeroicDexterityMultiplier) / 10);
 		m_heroic_dex_max_endurance = ((float) GetHeroicDEX() * RuleR(Character, HeroicDexterityMultiplier) / 4);
 		m_heroic_dex_endurance_regen = ((float) GetHeroicDEX() * RuleR(Character, HeroicDexterityMultiplier) / 4 / 50);
 	}
 	else {
-		m_heroic_dex_ranged_damage = (int32)((float) GetHeroicDEX() * (CheckHeroicBonusesDataBuckets("heroic_dex_ranged_damage") ? / 10));
+		m_heroic_dex_ranged_damage = (int32)((float) GetHeroicDEX() * (CheckHeroicBonusesDataBuckets("heroic_dex_ranged_damage") / 10));
 		m_heroic_dex_max_endurance = ((float) GetHeroicDEX() *(CheckHeroicBonusesDataBuckets("heroic_dex_max_endurance") / 4));
 		m_heroic_dex_endurance_regen = ((float) GetHeroicDEX() * (CheckHeroicBonusesDataBuckets("heroic_dex_endurance_regen") / 4 / 50));
 	}
@@ -5707,7 +5704,6 @@ void Mob::SetHeroicDexBonuses() {
 
 void Mob::SetHeroicAgiBonuses() {
 
-	std::string bucket_value;
 	if (RuleR(Character, HeroicAgilityMultiplier) != 1.00) {
 		m_heroic_agi_avoidance = (int32)((float) GetHeroicAGI() * RuleR(Character, HeroicAgilityMultiplier) / 10);
 		m_heroic_agi_max_endurance = ((float) GetHeroicAGI() * RuleR(Character, HeroicAgilityMultiplier) / 4);
@@ -5722,7 +5718,6 @@ void Mob::SetHeroicAgiBonuses() {
 
 void Mob::SetHeroicStaBonuses() {
 
-	std::string bucket_value;
 	if (RuleR(Character, HeroicStaminaMultiplier) != 1.00) {
 		m_heroic_sta_max_hp = (int64)((double) GetHeroicSTA() * RuleR(Character, HeroicStaminaMultiplier) * 10);
 		m_heroic_sta_hp_regen = (int32)((float) GetHeroicSTA() * RuleR(Character, HeroicStaminaMultiplier) / 20);
