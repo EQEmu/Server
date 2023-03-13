@@ -537,8 +537,8 @@ public:
 	inline virtual int32 GetCombatEffects() const { return itembonuses.ProcChance; }
 	inline virtual int32 GetDS() const { return itembonuses.DamageShield; }
 	// Mod3
-	inline virtual int32 GetHealAmt() const { return itembonuses.HealAmt; }
-	inline virtual int32 GetSpellDmg() const { return itembonuses.SpellDmg; }
+	inline int32 GetHealAmt() final { return itembonuses.HealAmt + m_heroic_wis_heal_amount; }
+	inline int32 GetSpellDmg() final { return itembonuses.SpellDmg + m_heroic_int_spell_damage; }
 	inline virtual int32 GetClair() const { return itembonuses.Clairvoyance; }
 	inline virtual int32 GetDSMit() const { return itembonuses.DSMitigation; }
 
