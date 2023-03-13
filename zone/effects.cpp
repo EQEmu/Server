@@ -284,6 +284,12 @@ int64 Mob::GetActDoTDamage(uint16 spell_id, int64 value, Mob* target, bool from_
 
 int64 Mob::GetExtraSpellAmt(uint16 spell_id, int64 extra_spell_amt, int64 base_spell_dmg)
 {
+	if (base_spell_dmg > 0) {
+		extra_spell_amt += m_heroic_wis_heal_amount;
+	} else {
+		extra_spell_amt += m_heroic_int_spell_damage;
+	}
+
 	if (RuleB(Spells, FlatItemExtraSpellAmt)) {
 		if (RuleB(Spells, ItemExtraSpellAmtCalcAsPercent)) {
 			return std::abs(base_spell_dmg) * extra_spell_amt / 100;
