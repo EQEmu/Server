@@ -925,6 +925,5 @@ struct ExpeditionInvite
 	std::string swap_remove_name;
 };
 
-
 #endif
 
