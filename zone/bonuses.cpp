@@ -5666,8 +5666,8 @@ void Mob::CalcHeroicBonuses(StatBonuses* newbon)
 
 void Mob::SetHeroicWisBonuses(StatBonuses* newbon) {
 
-	newbon->heroic_max_mana = (GetCasterClass() == 'W') ? (int64)((float)GetHeroicWIS() * RuleR(Character, HeroicWisdomMultiplier) * 10) : 0;
-	newbon->heroic_mana_regen = (GetCasterClass() == 'W') ? (int64)((float)GetHeroicWIS() * RuleR(Character, HeroicWisdomMultiplier) / 25) : 0;
+	newbon->heroic_max_mana = GetCasterClass() == 'W' ? (int64)((float)GetHeroicWIS() * RuleR(Character, HeroicWisdomMultiplier) * 10) : 0;
+	newbon->heroic_mana_regen = GetCasterClass() == 'W' ? (int64)((float)GetHeroicWIS() * RuleR(Character, HeroicWisdomMultiplier) / 25) : 0;
 	auto heal_amt = (int32)((float)GetHeroicWIS() * RuleR(Character, HeroicWisdomIncreaseHealAmtMultiplier));
 
 	if (RuleB(Character, HeroicStatsUseDataBucketsToScale)) {
@@ -5682,8 +5682,8 @@ void Mob::SetHeroicWisBonuses(StatBonuses* newbon) {
 
 void Mob::SetHeroicIntBonuses(StatBonuses* newbon) {
 
-	newbon->heroic_max_mana = (GetCasterClass() == 'I') ? (int64)((float)GetHeroicINT() * RuleR(Character, HeroicIntelligenceMultiplier) * 10) : 0;
-	newbon->heroic_mana_regen = (GetCasterClass() == 'I') ? (int64)((float)GetHeroicINT() * RuleR(Character, HeroicIntelligenceMultiplier) / 25) : 0;
+	newbon->heroic_max_mana = GetCasterClass() == 'I' ? (int64)((float)GetHeroicINT() * RuleR(Character, HeroicIntelligenceMultiplier) * 10) : 0;
+	newbon->heroic_mana_regen = GetCasterClass() == 'I' ? (int64)((float)GetHeroicINT() * RuleR(Character, HeroicIntelligenceMultiplier) / 25) : 0;
 	auto spell_dmg = (int32)((float)GetHeroicINT() * RuleR(Character, HeroicIntelligenceMultiplier));
 
 	if (RuleB(Character, HeroicStatsUseDataBucketsToScale)) {
