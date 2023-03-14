@@ -6134,10 +6134,10 @@ int64 Bot::CalcMaxMana() {
 	switch(GetCasterClass()) {
 		case 'I':
 			max_mana = (GenerateBaseManaPoints() + itembonuses.Mana + spellbonuses.Mana + GroupLeadershipAAManaEnhancement());
-			max_mana += itembonuses.heroic_int_max_mana;
+			max_mana += itembonuses.heroic_max_mana;
 		case 'W': {
 			max_mana = (GenerateBaseManaPoints() + itembonuses.Mana + spellbonuses.Mana + GroupLeadershipAAManaEnhancement());
-			max_mana += itembonuses.heroic_wis_max_mana;
+			max_mana += itembonuses.heroic_max_mana;
 			break;
 		}
 		case 'N': {
@@ -6658,6 +6658,7 @@ void Bot::CalcBonuses() {
 	SetAttackTimer();
 	CalcSeeInvisibleLevel();
 	CalcInvisibleLevel();
+	ProcessItemCaps();
 	CalcATK();
 	CalcSTR();
 	CalcSTA();
@@ -6690,15 +6691,7 @@ int64 Bot::CalcHPRegenCap() {
 }
 
 int64 Bot::CalcManaRegenCap() {
-	int64 cap = RuleI(Character, ItemManaRegenCap) + aabonuses.ItemManaRegenCap;
-	switch(GetCasterClass()) {
-		case 'I':
-			cap += itembonuses.heroic_int_mana_regen;
-			break;
-		case 'W':
-			cap += itembonuses.heroic_wis_mana_regen;
-			break;
-	}
+	int64 cap = RuleI(Character, ItemManaRegenCap) + aabonuses.ItemManaRegenCap + itembonuses.heroic_mana_regen;
 	return (cap * RuleI(Character, ManaRegenMultiplier) / 100);
 }
 
@@ -7088,7 +7081,7 @@ int32 Bot::LevelRegen() {
 
 int64 Bot::CalcHPRegen() {
 	int32 regen = (LevelRegen() + itembonuses.HPRegen + spellbonuses.HPRegen);
-	regen +=itembonuses.heroic_sta_hp_regen;
+	regen +=itembonuses.heroic_hp_regen;
 	regen += (aabonuses.HPRegen + GroupLeadershipAAHealthRegeneration());
 
 	regen = ((regen * RuleI(Character, HPRegenMultiplier)) / 100);
@@ -7109,14 +7102,7 @@ int64 Bot::CalcManaRegen() {
 	} else
 		regen = (2 + spellbonuses.ManaRegen + itembonuses.ManaRegen);
 
-	if(GetCasterClass() == 'I')
-		regen += itembonuses.heroic_int_mana_regen;
-	else if(GetCasterClass() == 'W')
-		regen += itembonuses.heroic_wis_mana_regen;
-	else
-		regen = 0;
-
-	regen += aabonuses.ManaRegen;
+	regen += aabonuses.ManaRegen + itembonuses.heroic_mana_regen;
 	regen = ((regen * RuleI(Character, ManaRegenMultiplier)) / 100);
 	float mana_regen_rate = RuleR(Bots, ManaRegen);
 	if(mana_regen_rate < 0.0f)
@@ -7161,7 +7147,7 @@ int64 Bot::CalcMaxHP() {
 	int32 bot_hp = 0;
 	uint32 nd = 10000;
 	bot_hp += (GenerateBaseHitPoints() + itembonuses.HP);
-	bot_hp += itembonuses.heroic_sta_max_hp;
+	bot_hp += itembonuses.heroic_max_hp;
 	nd += aabonuses.MaxHP;
 	bot_hp = ((float)bot_hp * (float)nd / (float)10000);
 	bot_hp += (spellbonuses.HP + aabonuses.HP);
@@ -7206,7 +7192,6 @@ int64 Bot::CalcBaseEndurance() {
 	int stats = 0;
 	if (GetOwner() && GetOwner()->CastToClient() && GetOwner()->CastToClient()->ClientVersion() >= EQ::versions::ClientVersion::SoD && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
 		stats = ((GetSTR() + GetSTA() + GetDEX() + GetAGI()) / 4);
-		double heroic_stats = itembonuses.heroic_str_max_endurance + itembonuses.heroic_sta_max_endurance + itembonuses.heroic_dex_max_endurance + itembonuses.heroic_agi_max_endurance;
 
 		if (stats > 100) {
 			converted_stats = (((stats - 100) * 5 / 2) + 100);
@@ -7227,7 +7212,7 @@ int64 Bot::CalcBaseEndurance() {
 			sta_end = (9 * converted_stats);
 			base_endurance = (1800 + ((GetLevel() - 80) * 18));
 		}
-		base_end = (base_endurance + sta_end + (int32)(heroic_stats * 10));
+		base_end = base_endurance + sta_end + itembonuses.heroic_max_end;
 	} else {
 		stats = (GetSTR() + GetSTA() + GetDEX() + GetAGI());
 		int level_base = (GetLevel() * 15);
@@ -9803,6 +9788,12 @@ float Bot::GetBotCasterMaxRange(float melee_distance_max) {// Calculate caster d
 		}
 	}
 	return caster_distance_max;
+}
+
+int32 Bot::CalcItemATKCap()
+{
+	int cap = RuleI(Character, ItemATKCap) + itembonuses.ItemATKCap + spellbonuses.ItemATKCap + aabonuses.ItemATKCap;
+	return cap;
 }
 
 uint8 Bot::spell_casting_chances[SPELL_TYPE_COUNT][PLAYER_CLASS_COUNT][EQ::constants::STANCE_TYPE_COUNT][cntHSND] = { 0 };

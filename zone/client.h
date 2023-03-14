@@ -432,7 +432,7 @@ public:
 	int64 CalcMaxMana();
 	int64 CalcBaseMana();
 	const int64& SetMana(int64 amount);
-	int64 CalcManaRegenCap();
+	int64 CalcManaRegenCap() final;
 
 	// guild pool regen shit. Sends a SpawnAppearance with a value that regens to value * 0.001
 	void EnableAreaHPRegen(int value);
@@ -580,8 +580,8 @@ public:
 	int64 CalcEnduranceRegen(bool bCombat = false); //Calculates endurance regen used in DoEnduranceRegen()
 	int64 GetEndurance() const {return current_endurance;} //This gets our current endurance
 	int64 GetMaxEndurance() const {return max_end;} //This gets our endurance from the last CalcMaxEndurance() call
-	int64 CalcEnduranceRegenCap();
-	int64 CalcHPRegenCap();
+	int64 CalcEnduranceRegenCap() final;
+	int64 CalcHPRegenCap() final;
 	inline uint8 GetEndurancePercent() { return (uint8)((float)current_endurance / (float)max_end * 100.0f); }
 	void SetEndurance(int32 newEnd); //This sets the current endurance to the new value
 	void DoEnduranceRegen(); //This Regenerates endurance
@@ -1657,7 +1657,6 @@ protected:
 	void AddItemBonuses(const EQ::ItemInstance *inst, StatBonuses* newbon, bool isAug = false, bool isTribute = false, int rec_override = 0, bool ammo_slot_item = false);
 	void AdditiveWornBonuses(const EQ::ItemInstance *inst, StatBonuses* newbon, bool isAug = false);
 	void CalcEdibleBonuses(StatBonuses* newbon);
-	void ProcessItemCaps();
 	void MakeBuffFadePacket(uint16 spell_id, int slot_id, bool send_message = true);
 	bool client_data_loaded;
 
@@ -1708,7 +1707,7 @@ private:
 
 	void HandleTraderPriceUpdate(const EQApplicationPacket *app);
 
-	int32 CalcItemATKCap();
+	int32 CalcItemATKCap() final;
 	int32 CalcHaste();
 
 	int32 CalcAlcoholPhysicalEffect();

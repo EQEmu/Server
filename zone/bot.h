@@ -280,8 +280,8 @@ public:
 	int32	CalcPR();
 	int32	CalcCR();
 	int32	CalcCorrup();
-	int64	CalcHPRegenCap();
-	int64	CalcManaRegenCap();
+	int64	CalcHPRegenCap() final;
+	int64	CalcManaRegenCap() final;
 	int32	LevelRegen();
 	int64	CalcHPRegen();
 	int64	CalcManaRegen();
@@ -296,7 +296,7 @@ public:
 	int64	CalcEnduranceRegen();	//Calculates endurance regen used in DoEnduranceRegen()
 	int64	GetEndurance()	const {return cur_end;}	//This gets our current endurance
 	int64	GetMaxEndurance() const {return max_end;}	//This gets our endurance from the last CalcMaxEndurance() call
-	int64	CalcEnduranceRegenCap();
+	int64	CalcEnduranceRegenCap() final;
 	inline uint8 GetEndurancePercent() { return (uint8)((float)cur_end / (float)max_end * 100.0f); }
 	void SetEndurance(int32 newEnd);	//This sets the current endurance to the new value
 	void DoEnduranceRegen();	//This Regenerates endurance
@@ -884,6 +884,8 @@ private:
 
 	public:
 	static uint8 spell_casting_chances[SPELL_TYPE_COUNT][PLAYER_CLASS_COUNT][EQ::constants::STANCE_TYPE_COUNT][cntHSND];
+
+	int32 CalcItemATKCap() final;
 };
 
 bool IsSpellInBotList(DBbotspells_Struct* spell_list, uint16 iSpellID);

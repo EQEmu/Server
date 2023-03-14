@@ -620,10 +620,13 @@ public:
 	inline int64 GetHP() const { return current_hp; }
 	inline int64 GetMaxHP() const { return max_hp; }
 	virtual int64 CalcMaxHP();
+	virtual int64 CalcHPRegenCap() { return 0; }
 	inline int64 GetMaxMana() const { return max_mana; }
+	virtual int64 CalcManaRegenCap() { return 0; }
 	inline int64 GetMana() const { return current_mana; }
 	virtual int64 GetEndurance() const { return 0; }
 	virtual int64 GetMaxEndurance() const { return 0; }
+	virtual int64 CalcEnduranceRegenCap() { return 0; }
 	virtual void SetEndurance(int32 newEnd) { return; }
 	int64 GetItemHPBonuses();
 	int64 GetSpellHPBonuses();
@@ -658,7 +661,8 @@ public:
 	inline void SetKeepsSoldItems(bool in_keeps_sold_items)  { keeps_sold_items = in_keeps_sold_items; }
 	virtual int32 GetHealAmt() { return 0; }
 	virtual int32 GetSpellDmg() { return 0; }
-
+	void ProcessItemCaps();
+	virtual int32 CalcItemATKCap() { return 0; }
 	virtual bool IsSitting() const { return false; }
 
 	int CalcRecommendedLevelBonus(uint8 level, uint8 reclevel, int basestat);

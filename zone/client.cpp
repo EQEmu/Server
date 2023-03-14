@@ -6435,8 +6435,7 @@ void Client::SendStatsWindow(Client* client, bool use_window)
 				regen_row_color = color_red;
 
 				base_regen_field = itoa(LevelRegen());
-				item_regen_field = itoa(
-					itembonuses.HPRegen + itembonuses.heroic_sta_hp_regen );
+				item_regen_field = itoa(itembonuses.HPRegen + itembonuses.heroic_hp_regen);
 				cap_regen_field = itoa(CalcHPRegenCap());
 				spell_regen_field = itoa(spellbonuses.HPRegen);
 				aa_regen_field = itoa(aabonuses.HPRegen);
@@ -6449,7 +6448,7 @@ void Client::SendStatsWindow(Client* client, bool use_window)
 					regen_row_color = color_blue;
 
 					base_regen_field = itoa(CalcBaseManaRegen());
-					int32 heroic_mana_regen = (GetCasterClass() == 'W') ? itembonuses.heroic_wis_mana_regen : itembonuses.heroic_int_mana_regen;
+					int32 heroic_mana_regen = itembonuses.heroic_mana_regen;
 					item_regen_field = itoa(itembonuses.ManaRegen + heroic_mana_regen);
 					cap_regen_field = itoa(CalcManaRegenCap());
 					spell_regen_field = itoa(spellbonuses.ManaRegen);
@@ -6464,8 +6463,7 @@ void Client::SendStatsWindow(Client* client, bool use_window)
 				regen_row_color = color_green;
 
 				base_regen_field = itoa(((GetLevel() * 4 / 10) + 2));
-				int heroic_stats = itembonuses.heroic_str_endurance_regen + itembonuses.heroic_sta_endurance_regen + itembonuses.heroic_agi_endurance_regen + itembonuses.heroic_dex_endurance_regen;
-				item_regen_field = itoa(itembonuses.EnduranceRegen + heroic_stats);
+				item_regen_field = itoa(itembonuses.EnduranceRegen + itembonuses.heroic_end_regen);
 				cap_regen_field = itoa(CalcEnduranceRegenCap());
 				spell_regen_field = itoa(spellbonuses.EnduranceRegen);
 				aa_regen_field = itoa(aabonuses.EnduranceRegen);

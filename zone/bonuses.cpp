@@ -205,7 +205,7 @@ void Client::CalcItemBonuses(StatBonuses* newbon) {
 }
 
 // These item stat caps depend on spells/AAs so we process them after those are processed
-void Client::ProcessItemCaps()
+void Mob::ProcessItemCaps()
 {
 	itembonuses.HPRegen = std::min(itembonuses.HPRegen, CalcHPRegenCap());
 	itembonuses.ManaRegen = std::min(itembonuses.ManaRegen, CalcManaRegenCap());
@@ -220,6 +220,15 @@ void Client::ProcessItemCaps()
 	}
 
 	itembonuses.ATK = std::min(itembonuses.ATK, CalcItemATKCap());
+
+	if (itembonuses.SpellDmg > RuleI(Character, ItemSpellDmgCap)) {
+		itembonuses.SpellDmg = RuleI(Character, ItemSpellDmgCap);
+	}
+
+	if (itembonuses.HealAmt > RuleI(Character, ItemHealAmtCap)) {
+		itembonuses.HealAmt = RuleI(Character, ItemHealAmtCap);
+	}
+
 }
 
 void Client::AddItemBonuses(const EQ::ItemInstance *inst, StatBonuses *newbon, bool isAug, bool isTribute, int rec_override, bool ammo_slot_item)
@@ -5657,87 +5666,75 @@ void Mob::CalcHeroicBonuses(StatBonuses* newbon)
 
 void Mob::SetHeroicWisBonuses(StatBonuses* newbon) {
 
-	newbon->heroic_wis_max_mana = (int32)((float)GetHeroicWIS() * RuleR(Character, HeroicWisdomMultiplier) * 10);
-	newbon->heroic_wis_mana_regen = (int32)((float)GetHeroicWIS() * RuleR(Character, HeroicWisdomMultiplier) / 25);
-
-	if ((bool)RuleR(Character, HeroicWisdomIncreaseHealAmtMultiplier)) {
-		newbon->HealAmt = (int32)((float)GetHeroicWIS() * RuleR(Character, HeroicWisdomIncreaseHealAmtMultiplier));
-	}
+	newbon->heroic_max_mana = (GetCasterClass() == 'W') ? (int64)((float)GetHeroicWIS() * RuleR(Character, HeroicWisdomMultiplier) * 10) : 0;
+	newbon->heroic_mana_regen = (GetCasterClass() == 'W') ? (int64)((float)GetHeroicWIS() * RuleR(Character, HeroicWisdomMultiplier) / 25) : 0;
+	auto heal_amt = (int32)((float)GetHeroicWIS() * RuleR(Character, HeroicWisdomIncreaseHealAmtMultiplier));
 
 	if (RuleB(Character, HeroicStatsUseDataBucketsToScale)) {
-		newbon->heroic_wis_max_mana *= (int32)CheckHeroicBonusesDataBuckets("heroic_wis_max_mana");
-		newbon->heroic_wis_mana_regen *= (int32)CheckHeroicBonusesDataBuckets("heroic_wis_mana_regen");
-		newbon->HealAmt = newbon->HealAmt ?
-			(int32)((float)newbon->HealAmt * CheckHeroicBonusesDataBuckets("heroic_wis_heal_amount")) :
-			(int32)((float) GetHeroicINT() * CheckHeroicBonusesDataBuckets("heroic_wis_heal_amount"));
+		newbon->heroic_max_mana *= (int64)CheckHeroicBonusesDataBuckets("HWIS-MaxMana");
+		newbon->heroic_mana_regen *= (int64)CheckHeroicBonusesDataBuckets("HWIS-ManaRegen");
+		heal_amt = heal_amt ?
+			(int32)((float)heal_amt * CheckHeroicBonusesDataBuckets("HWIS-HealAmt")):
+			(int32)((float)GetHeroicINT() * CheckHeroicBonusesDataBuckets("HWIS-HealAmt"));
 	}
-
-	if (newbon->HealAmt > RuleI(Character, ItemHealAmtCap)) {
-		newbon->HealAmt = RuleI(Character, ItemHealAmtCap);
-	}
+	newbon->HealAmt = heal_amt;
 }
 
 void Mob::SetHeroicIntBonuses(StatBonuses* newbon) {
 
-	newbon->heroic_int_max_mana = (int32)((float) GetHeroicINT() * RuleR(Character, HeroicIntelligenceMultiplier) * 10);
-	newbon->heroic_int_mana_regen = (int32)((float) GetHeroicINT() * RuleR(Character, HeroicIntelligenceMultiplier) / 25);
-
-	if ((bool)RuleR(Character, HeroicIntelligenceIncreaseSpellDmgMultiplier)) {
-		newbon->SpellDmg = (int32)((float) GetHeroicINT() * RuleR(Character, HeroicIntelligenceIncreaseSpellDmgMultiplier));
-	}
+	newbon->heroic_max_mana = (GetCasterClass() == 'I') ? (int64)((float)GetHeroicINT() * RuleR(Character, HeroicIntelligenceMultiplier) * 10) : 0;
+	newbon->heroic_mana_regen = (GetCasterClass() == 'I') ? (int64)((float)GetHeroicINT() * RuleR(Character, HeroicIntelligenceMultiplier) / 25) : 0;
+	auto spell_dmg = (int32)((float)GetHeroicINT() * RuleR(Character, HeroicIntelligenceMultiplier));
 
 	if (RuleB(Character, HeroicStatsUseDataBucketsToScale)) {
-		newbon->heroic_int_max_mana *= (int32)CheckHeroicBonusesDataBuckets("heroic_int_max_mana");
-		newbon->heroic_int_mana_regen *= (int32)CheckHeroicBonusesDataBuckets("heroic_int_mana_regen");
-		newbon->SpellDmg = newbon->SpellDmg ?
-			(int32)((float)newbon->SpellDmg * CheckHeroicBonusesDataBuckets("heroic_int_spell_damage")) :
-			(int32)((float) GetHeroicINT() * CheckHeroicBonusesDataBuckets("heroic_int_spell_damage"));
+		newbon->heroic_max_mana *=  (int64)CheckHeroicBonusesDataBuckets("HINT-MaxMana");
+		newbon->heroic_mana_regen *= (int64)CheckHeroicBonusesDataBuckets("HINT-ManaRegen");
+		spell_dmg = spell_dmg ?
+			(int32)((float)spell_dmg * CheckHeroicBonusesDataBuckets("HINT-SpellDmg")) :
+			(int32)((float)GetHeroicINT() * CheckHeroicBonusesDataBuckets("HINT-SpellDmg"));
 	}
 
-	if (newbon->SpellDmg > RuleI(Character, ItemSpellDmgCap)) {
-		newbon->SpellDmg = RuleI(Character, ItemSpellDmgCap);
-	}
-
+	newbon->SpellDmg = spell_dmg;
 }
 
 void Mob::SetHeroicDexBonuses(StatBonuses* newbon) {
 
 	newbon->heroic_dex_ranged_damage = (int32)((float) GetHeroicDEX() * RuleR(Character, HeroicDexterityMultiplier) / 10);
-	newbon->heroic_dex_max_endurance = ((float) GetHeroicDEX() * RuleR(Character, HeroicDexterityMultiplier) / 4);
-	newbon->heroic_dex_endurance_regen = ((float) GetHeroicDEX() * RuleR(Character, HeroicDexterityMultiplier) / 4 / 50);
+	newbon->heroic_max_end = (int64)(((float) GetHeroicDEX() * RuleR(Character, HeroicDexterityMultiplier) / 4) * 10.0f);
+	newbon->heroic_end_regen = (int64)((float) GetHeroicDEX() * RuleR(Character, HeroicDexterityMultiplier) / 4 / 50);
 
 	if (RuleB(Character, HeroicStatsUseDataBucketsToScale)) {
-		newbon->heroic_dex_ranged_damage *= (int32)CheckHeroicBonusesDataBuckets("heroic_dex_ranged_damage");
-		newbon->heroic_dex_max_endurance *= CheckHeroicBonusesDataBuckets("heroic_dex_max_endurance");
-		newbon->heroic_dex_endurance_regen *= CheckHeroicBonusesDataBuckets("heroic_dex_endurance_regen");
+		newbon->heroic_dex_ranged_damage *= (int32)CheckHeroicBonusesDataBuckets("HDEX-RangedDamage");
+		newbon->heroic_max_end *= (int64)CheckHeroicBonusesDataBuckets("HDEX-MaxEndurance");
+		newbon->heroic_end_regen *= (int64)CheckHeroicBonusesDataBuckets("HDEX-EnduranceRegen");
 	}
 }
 
 void Mob::SetHeroicAgiBonuses(StatBonuses* newbon) {
 
-	newbon->heroic_agi_avoidance = (int32)((float) GetHeroicAGI() * RuleR(Character, HeroicAgilityMultiplier) / 10);
-	newbon->heroic_agi_max_endurance = ((float) GetHeroicAGI() * RuleR(Character, HeroicAgilityMultiplier) / 4);
-	newbon->heroic_agi_endurance_regen = ((float) GetHeroicAGI() * RuleR(Character, HeroicAgilityMultiplier) / 4 / 50);
+	newbon->heroic_agi_avoidance = (int32) ((float) GetHeroicAGI() * RuleR(Character, HeroicAgilityMultiplier) / 10);
+	newbon->heroic_max_end = (int64) (((float) GetHeroicAGI() * RuleR(Character, HeroicAgilityMultiplier) / 4) * 10.0f);
+	newbon->heroic_end_regen = (int64) ((float) GetHeroicAGI() * RuleR(Character, HeroicAgilityMultiplier) / 4 / 50);
 
 	if (RuleB(Character, HeroicStatsUseDataBucketsToScale)) {
-		newbon->heroic_agi_avoidance *= (int32)CheckHeroicBonusesDataBuckets("heroic_agi_avoidance");
-		newbon->heroic_agi_max_endurance *= CheckHeroicBonusesDataBuckets("heroic_agi_max_endurance");
-		newbon->heroic_agi_endurance_regen *= CheckHeroicBonusesDataBuckets("heroic_agi_endurance_regen");
+		newbon->heroic_agi_avoidance *= (int32) CheckHeroicBonusesDataBuckets("HAGI-Avoidance");
+		newbon->heroic_max_end *= (int64) CheckHeroicBonusesDataBuckets("HAGI-MaxEndurance");
+		newbon->heroic_end_regen *= (int64) CheckHeroicBonusesDataBuckets("HAGI-EnduranceRegen");
 	}
 }
 
 void Mob::SetHeroicStaBonuses(StatBonuses* newbon) {
 
-	newbon->heroic_sta_max_hp = (int64)((double) GetHeroicSTA() * RuleR(Character, HeroicStaminaMultiplier) * 10);
-	newbon->heroic_sta_hp_regen = (int32)((float) GetHeroicSTA() * RuleR(Character, HeroicStaminaMultiplier) / 20);
-	newbon->heroic_sta_max_endurance = ((float) GetHeroicSTA() * RuleR(Character, HeroicStaminaMultiplier) / 4);
-	newbon->heroic_sta_endurance_regen = ((float) GetHeroicSTA() * RuleR(Character, HeroicStaminaMultiplier) / 4 / 50);
+	newbon->heroic_max_hp = (int64)((double) GetHeroicSTA() * RuleR(Character, HeroicStaminaMultiplier) * 10);
+	newbon->heroic_hp_regen = (int64)((float) GetHeroicSTA() * RuleR(Character, HeroicStaminaMultiplier) / 20);
+	newbon->heroic_max_end = (int64)(((float) GetHeroicSTA() * RuleR(Character, HeroicStaminaMultiplier) / 4) * 10.0f);
+	newbon->heroic_end_regen = (int64)((float) GetHeroicSTA() * RuleR(Character, HeroicStaminaMultiplier) / 4 / 50);
 
 	if (RuleB(Character, HeroicStatsUseDataBucketsToScale)) {
-		newbon->heroic_sta_max_hp *= (int32)CheckHeroicBonusesDataBuckets("heroic_sta_max_hp");
-		newbon->heroic_sta_hp_regen *= (int32)CheckHeroicBonusesDataBuckets("heroic_sta_hp_regen");
-		newbon->heroic_sta_max_endurance *= CheckHeroicBonusesDataBuckets("heroic_sta_max_endurance");
-		newbon->heroic_sta_endurance_regen *= CheckHeroicBonusesDataBuckets("heroic_sta_endurance_regen");
+		newbon->heroic_max_hp *= (int64)CheckHeroicBonusesDataBuckets("HSTA-MaxHP");
+		newbon->heroic_hp_regen *= (int64)CheckHeroicBonusesDataBuckets("HSTA-HPRegen");
+		newbon->heroic_max_end *= (int64)CheckHeroicBonusesDataBuckets("HSTR-MaxEndurance");
+		newbon->heroic_end_regen *= (int64)CheckHeroicBonusesDataBuckets("HSTA-EnduranceRegen");
 	}
 }
 
@@ -5745,14 +5742,14 @@ void Mob::SetHeroicStrBonuses(StatBonuses* newbon) {
 
 	newbon->heroic_str_shield_ac = (int32)((float) GetHeroicSTR() * RuleR(Character, HeroicStrengthMultiplier) / 10);
 	newbon->heroic_str_melee_damage = (int32)((float) GetHeroicSTR() * RuleR(Character, HeroicStrengthMultiplier) / 10);
-	newbon->heroic_str_max_endurance = ((float) GetHeroicSTR() * RuleR(Character, HeroicStrengthMultiplier) / 4);
-	newbon->heroic_str_endurance_regen =((float) GetHeroicSTR() * RuleR(Character, HeroicStrengthMultiplier) / 4 / 50);
+	newbon->heroic_max_end = (int64)(((float)GetHeroicSTR() * RuleR(Character, HeroicStrengthMultiplier) / 4) * 10.0f);
+	newbon->heroic_end_regen = (int64)((float) GetHeroicSTR() * RuleR(Character, HeroicStrengthMultiplier) / 4 / 50);
 
 	if (RuleB(Character, HeroicStatsUseDataBucketsToScale)) {
-		newbon->heroic_str_shield_ac *= (int32)CheckHeroicBonusesDataBuckets("heroic_str_shield_ac");
-		newbon->heroic_str_melee_damage *= (int32)CheckHeroicBonusesDataBuckets("heroic_str_melee_damage");
-		newbon->heroic_str_max_endurance *= CheckHeroicBonusesDataBuckets("heroic_str_max_endurance") ;
-		newbon->heroic_str_endurance_regen *= CheckHeroicBonusesDataBuckets("heroic_str_endurance_regen");
+		newbon->heroic_str_shield_ac *= (int32)CheckHeroicBonusesDataBuckets("HSTR-ShieldAC");
+		newbon->heroic_str_melee_damage *= (int32)CheckHeroicBonusesDataBuckets("HSTR-MeleeDamage");
+		newbon->heroic_max_end *= (int64)CheckHeroicBonusesDataBuckets("HSTR-MaxEndurance");
+		newbon->heroic_end_regen  *= (int64)CheckHeroicBonusesDataBuckets("HSTR-EnduranceRegen");
 	}
 }
 

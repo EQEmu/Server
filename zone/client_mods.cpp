@@ -234,7 +234,7 @@ int32 Client::LevelRegen()
 int64 Client::CalcHPRegen(bool bCombat)
 {
 	int64 item_regen = itembonuses.HPRegen; // worn spells and +regen, already capped
-	item_regen += itembonuses.heroic_sta_hp_regen;
+	item_regen += itembonuses.heroic_hp_regen;
 
 	item_regen += aabonuses.HPRegen;
 
@@ -491,7 +491,7 @@ int64 Client::CalcBaseHP()
 		auto base_data = database.GetBaseData(GetLevel(), GetClass());
 		if (base_data) {
 			base_hp += base_data->base_hp + (base_data->hp_factor * stats);
-			base_hp += itembonuses.heroic_sta_max_hp;
+			base_hp += itembonuses.heroic_max_hp;
 		}
 	}
 	else {
@@ -624,7 +624,7 @@ int64 Client::CalcBaseMana()
 				auto base_data = database.GetBaseData(GetLevel(), GetClass());
 				if (base_data) {
 					max_m = base_data->base_mana +
-						(ConvertedWisInt * base_data->mana_factor) + itembonuses.heroic_int_max_mana;
+						(ConvertedWisInt * base_data->mana_factor) + itembonuses.heroic_max_mana;
 				}
 			}
 			else {
@@ -657,7 +657,7 @@ int64 Client::CalcBaseMana()
 				auto base_data = database.GetBaseData(GetLevel(), GetClass());
 				if (base_data) {
 					max_m = base_data->base_mana +
-						(ConvertedWisInt * base_data->mana_factor) + itembonuses.heroic_wis_max_mana;
+						(ConvertedWisInt * base_data->mana_factor) + itembonuses.heroic_max_mana;
 				}
 			}
 			else {
@@ -750,18 +750,7 @@ int64 Client::CalcManaRegen(bool bCombat)
 	// add in + 1 bonus for SE_CompleteHeal, but we don't do anything for it yet?
 
 	int item_bonus = itembonuses.ManaRegen; // this is capped already
-	int heroic_bonus = 0;
-
-	switch (GetCasterClass()) {
-	case 'W':
-		heroic_bonus = itembonuses.heroic_wis_mana_regen;
-		break;
-	default:
-		heroic_bonus = itembonuses.heroic_int_mana_regen;
-		break;
-	}
-
-	item_bonus += heroic_bonus;
+	item_bonus += itembonuses.heroic_mana_regen;
 	regen += item_bonus;
 
 	if (level <= 70 && regen > 65)
@@ -1688,7 +1677,6 @@ int64 Client::CalcBaseEndurance()
 {
 	int64 base_end = 0;
 	if (ClientVersion() >= EQ::versions::ClientVersion::SoF && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
-		double heroic_stats = itembonuses.heroic_str_max_endurance + itembonuses.heroic_sta_max_endurance + itembonuses.heroic_dex_max_endurance + itembonuses.heroic_agi_max_endurance;
 		double stats = (GetSTR() + GetSTA() + GetDEX() + GetAGI()) / 4.0f;
 
 		if (stats > 201.0f) {
@@ -1699,7 +1687,7 @@ int64 Client::CalcBaseEndurance()
 		}
 		auto base_data = database.GetBaseData(GetLevel(), GetClass());
 		if (base_data) {
-			base_end = base_data->base_end + (heroic_stats * 10.0f) + (base_data->endurance_factor * static_cast<int>(stats));
+			base_end = base_data->base_end + itembonuses.heroic_max_end + (base_data->endurance_factor * static_cast<int>(stats));
 		}
 	}
 	else {
@@ -1788,9 +1776,7 @@ int64 Client::CalcEnduranceRegen(bool bCombat)
 	if (encumbered)
 		base += level / -15;
 
-
-	auto item_bonus = (int32)(itembonuses.heroic_str_endurance_regen + itembonuses.heroic_sta_endurance_regen + itembonuses.heroic_dex_endurance_regen + itembonuses.heroic_agi_endurance_regen);
-	item_bonus += itembonuses.EnduranceRegen; // this is capped already
+	auto item_bonus = itembonuses.EnduranceRegen + itembonuses.heroic_end_regen; // this is capped already
 	base += item_bonus;
 
 	base = base * AreaEndRegen + 0.5f;
