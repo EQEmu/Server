@@ -6134,10 +6134,10 @@ int64 Bot::CalcMaxMana() {
 	switch(GetCasterClass()) {
 		case 'I':
 			max_mana = (GenerateBaseManaPoints() + itembonuses.Mana + spellbonuses.Mana + GroupLeadershipAAManaEnhancement());
-			max_mana += m_heroic_int_max_mana;
+			max_mana += itembonuses.heroic_int_max_mana;
 		case 'W': {
 			max_mana = (GenerateBaseManaPoints() + itembonuses.Mana + spellbonuses.Mana + GroupLeadershipAAManaEnhancement());
-			max_mana += m_heroic_wis_max_mana;
+			max_mana += itembonuses.heroic_wis_max_mana;
 			break;
 		}
 		case 'N': {
@@ -6652,6 +6652,7 @@ void Bot::CalcBonuses() {
 	memset(&itembonuses, 0, sizeof(StatBonuses));
 	GenerateBaseStats();
 	CalcItemBonuses(&itembonuses);
+	CalcHeroicBonuses(&itembonuses);
 	CalcSpellBonuses(&spellbonuses);
 	CalcAABonuses(&aabonuses);
 	SetAttackTimer();
@@ -6692,10 +6693,10 @@ int64 Bot::CalcManaRegenCap() {
 	int64 cap = RuleI(Character, ItemManaRegenCap) + aabonuses.ItemManaRegenCap;
 	switch(GetCasterClass()) {
 		case 'I':
-			cap += m_heroic_int_mana_regen;
+			cap += itembonuses.heroic_int_mana_regen;
 			break;
 		case 'W':
-			cap += m_heroic_wis_mana_regen;
+			cap += itembonuses.heroic_wis_mana_regen;
 			break;
 	}
 	return (cap * RuleI(Character, ManaRegenMultiplier) / 100);
@@ -7087,7 +7088,7 @@ int32 Bot::LevelRegen() {
 
 int64 Bot::CalcHPRegen() {
 	int32 regen = (LevelRegen() + itembonuses.HPRegen + spellbonuses.HPRegen);
-	regen += m_heroic_sta_hp_regen;
+	regen +=itembonuses.heroic_sta_hp_regen;
 	regen += (aabonuses.HPRegen + GroupLeadershipAAHealthRegeneration());
 
 	regen = ((regen * RuleI(Character, HPRegenMultiplier)) / 100);
@@ -7109,9 +7110,9 @@ int64 Bot::CalcManaRegen() {
 		regen = (2 + spellbonuses.ManaRegen + itembonuses.ManaRegen);
 
 	if(GetCasterClass() == 'I')
-		regen += m_heroic_int_mana_regen;
+		regen += itembonuses.heroic_int_mana_regen;
 	else if(GetCasterClass() == 'W')
-		regen += m_heroic_wis_mana_regen;
+		regen += itembonuses.heroic_wis_mana_regen;
 	else
 		regen = 0;
 
@@ -7160,7 +7161,7 @@ int64 Bot::CalcMaxHP() {
 	int32 bot_hp = 0;
 	uint32 nd = 10000;
 	bot_hp += (GenerateBaseHitPoints() + itembonuses.HP);
-	bot_hp += m_heroic_sta_max_hp;
+	bot_hp += itembonuses.heroic_sta_max_hp;
 	nd += aabonuses.MaxHP;
 	bot_hp = ((float)bot_hp * (float)nd / (float)10000);
 	bot_hp += (spellbonuses.HP + aabonuses.HP);
@@ -7205,7 +7206,7 @@ int64 Bot::CalcBaseEndurance() {
 	int stats = 0;
 	if (GetOwner() && GetOwner()->CastToClient() && GetOwner()->CastToClient()->ClientVersion() >= EQ::versions::ClientVersion::SoD && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
 		stats = ((GetSTR() + GetSTA() + GetDEX() + GetAGI()) / 4);
-		double heroic_stats = m_heroic_str_max_endurance + m_heroic_sta_max_endurance + m_heroic_dex_max_endurance + m_heroic_agi_max_endurance;
+		double heroic_stats = itembonuses.heroic_str_max_endurance + itembonuses.heroic_sta_max_endurance + itembonuses.heroic_dex_max_endurance + itembonuses.heroic_agi_max_endurance;
 
 		if (stats > 100) {
 			converted_stats = (((stats - 100) * 5 / 2) + 100);
@@ -7660,8 +7661,6 @@ void Bot::CalcItemBonuses(StatBonuses* newbon)
 			AddItemBonuses(item, newbon);
 		}
 	}
-
-	CalcHeroicBonuses();
 
 	// Caps
 	if(newbon->HPRegen > CalcHPRegenCap())
