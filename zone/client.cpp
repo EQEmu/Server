@@ -379,8 +379,6 @@ Client::Client(EQStreamInterface *ieqs) : Mob(
 	SetBotPulling(false);
 	SetBotPrecombat(false);
 
-	GetDataBuckets();
-
 	AI_Init();
 }
 

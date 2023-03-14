@@ -653,10 +653,8 @@ struct StatBonuses {
 	int32 heroic_dex_ranged_damage;
 	double heroic_dex_max_endurance;
 	double heroic_dex_endurance_regen;
-	int32 heroic_int_spell_damage;
 	int32 heroic_int_max_mana;
 	int32 heroic_int_mana_regen;
-	int32 heroic_wis_heal_amount;
 	int32 heroic_wis_max_mana;
 	int32 heroic_wis_mana_regen;
 };

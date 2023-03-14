@@ -845,13 +845,13 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 	auto temporary_merchant_list = zone->tmpmerchanttable[npcid];
 	uint32 slot_id = 1;
 	uint8 handy_chance = 0;
-	for (auto ml : merchant_list) {
+	for (const auto& ml : merchant_list) {
 		if (slot_id > merchant_slots) {
 			break;
 		}
 
 		auto bucket_name = ml.bucket_name;
-		auto bucket_value = ml.bucket_value;
+		auto const& bucket_value = ml.bucket_value;
 		if (!bucket_name.empty() && !bucket_value.empty()) {
 			auto full_name = fmt::format(
 				"{}-{}",
@@ -859,7 +859,7 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 				bucket_name
 			);
 
-			auto player_value = client_data_buckets[full_name];
+			auto const& player_value = client_data_buckets[full_name];
 			if (player_value.empty()) {
 				continue;
 			}

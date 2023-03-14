@@ -5661,15 +5661,19 @@ void Mob::SetHeroicWisBonuses(StatBonuses* newbon) {
 	newbon->heroic_wis_mana_regen = (int32)((float)GetHeroicWIS() * RuleR(Character, HeroicWisdomMultiplier) / 25);
 
 	if ((bool)RuleR(Character, HeroicWisdomIncreaseHealAmtMultiplier)) {
-		newbon->heroic_wis_heal_amount = (int32)((float)GetHeroicWIS() * RuleR(Character, HeroicWisdomIncreaseHealAmtMultiplier));
+		newbon->HealAmt = (int32)((float)GetHeroicWIS() * RuleR(Character, HeroicWisdomIncreaseHealAmtMultiplier));
 	}
 
 	if (RuleB(Character, HeroicStatsUseDataBucketsToScale)) {
 		newbon->heroic_wis_max_mana *= (int32)CheckHeroicBonusesDataBuckets("heroic_wis_max_mana");
 		newbon->heroic_wis_mana_regen *= (int32)CheckHeroicBonusesDataBuckets("heroic_wis_mana_regen");
-		newbon->heroic_wis_heal_amount = newbon->heroic_wis_heal_amount ?
-			(int32)((float)newbon->heroic_wis_heal_amount * CheckHeroicBonusesDataBuckets("heroic_wis_heal_amount")) :
+		newbon->HealAmt = newbon->HealAmt ?
+			(int32)((float)newbon->HealAmt * CheckHeroicBonusesDataBuckets("heroic_wis_heal_amount")) :
 			(int32)((float) GetHeroicINT() * CheckHeroicBonusesDataBuckets("heroic_wis_heal_amount"));
+	}
+
+	if (newbon->HealAmt > RuleI(Character, ItemHealAmtCap)) {
+		newbon->HealAmt = RuleI(Character, ItemHealAmtCap);
 	}
 }
 
@@ -5679,16 +5683,21 @@ void Mob::SetHeroicIntBonuses(StatBonuses* newbon) {
 	newbon->heroic_int_mana_regen = (int32)((float) GetHeroicINT() * RuleR(Character, HeroicIntelligenceMultiplier) / 25);
 
 	if ((bool)RuleR(Character, HeroicIntelligenceIncreaseSpellDmgMultiplier)) {
-		newbon->heroic_int_spell_damage = (int32)((float) GetHeroicINT() * RuleR(Character, HeroicIntelligenceIncreaseSpellDmgMultiplier));
+		newbon->SpellDmg = (int32)((float) GetHeroicINT() * RuleR(Character, HeroicIntelligenceIncreaseSpellDmgMultiplier));
 	}
 
 	if (RuleB(Character, HeroicStatsUseDataBucketsToScale)) {
 		newbon->heroic_int_max_mana *= (int32)CheckHeroicBonusesDataBuckets("heroic_int_max_mana");
 		newbon->heroic_int_mana_regen *= (int32)CheckHeroicBonusesDataBuckets("heroic_int_mana_regen");
-		newbon->heroic_int_spell_damage = newbon->heroic_int_spell_damage ?
-			(int32)((float)newbon->heroic_int_spell_damage * CheckHeroicBonusesDataBuckets("heroic_int_spell_damage")) :
+		newbon->SpellDmg = newbon->SpellDmg ?
+			(int32)((float)newbon->SpellDmg * CheckHeroicBonusesDataBuckets("heroic_int_spell_damage")) :
 			(int32)((float) GetHeroicINT() * CheckHeroicBonusesDataBuckets("heroic_int_spell_damage"));
 	}
+
+	if (newbon->SpellDmg > RuleI(Character, ItemSpellDmgCap)) {
+		newbon->SpellDmg = RuleI(Character, ItemSpellDmgCap);
+	}
+
 }
 
 void Mob::SetHeroicDexBonuses(StatBonuses* newbon) {
