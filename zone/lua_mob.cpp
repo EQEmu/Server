@@ -1583,6 +1583,7 @@ void Lua_Mob::SendIllusionPacket(luabind::adl::object illusion) {
 	uint32     drakkin_tattoo   = self->GetDrakkinTattoo();
 	uint32     drakkin_details  = self->GetDrakkinDetails();
 	float      size             = self->GetSize();
+	bool       send_appearances = true;
 	Lua_Client target           = Lua_Client();
 
 	auto cur = illusion["race"];
@@ -1713,6 +1714,14 @@ void Lua_Mob::SendIllusionPacket(luabind::adl::object illusion) {
 		}
 	}
 
+	cur = illusion["send_appearances"];
+	if (luabind::type(cur) != LUA_TNIL) {
+		try {
+			send_appearances = luabind::object_cast<bool>(cur);
+		} catch (luabind::cast_failed &) {
+		}
+	}
+
 	cur = illusion["target"];
 	if (luabind::type(cur) != LUA_TNIL) {
 		try {
@@ -1738,7 +1747,7 @@ void Lua_Mob::SendIllusionPacket(luabind::adl::object illusion) {
 		drakkin_tattoo,
 		drakkin_details,
 		size,
-		true,
+		send_appearances,
 		target
 	);
 }

@@ -1886,31 +1886,8 @@ void Perl_Mob_SendIllusionPacket(Mob* self, perl::reference table_ref)
 	uint32  drakkin_tattoo   = table.exists("drakkin_tattoo") ? table["drakkin_tattoo"] : self->GetDrakkinTattoo();
 	uint32  drakkin_details  = table.exists("drakkin_details") ? table["drakkin_details"] : self->GetDrakkinDetails();
 	float   size             = table.exists("size") ? table["size"] : self->GetSize();
-	Client* target           = table.exists("target") ? static_cast<Client*>(table["target"]) : nullptr;
-
-	if (self->IsClient()) {
-		self->CastToClient()->Message(
-			Chat::White,
-			fmt::format(
-				"Illusion: Race [{}] Gender [{}] Texture [{}] HelmTexture [{}] HairColor [{}] BeardColor [{}] EyeColor1 [{}] EyeColor2 [{}] HairStyle [{}] Face [{}] DrakkinHeritage [{}] DrakkinTattoo [{}] DrakkinDetails [{}] Size [{}] Target [{}]",
-				race,
-				gender,
-				texture,
-				helmtexture,
-				haircolor,
-				beardcolor,
-				eyecolor1,
-				eyecolor2,
-				hairstyle,
-				luclinface,
-				drakkin_heritage,
-				drakkin_tattoo,
-				drakkin_details,
-				size,
-				target ? target->GetCleanName() : "No Target"
-			).c_str()
-		);
-	}
+	bool    send_appearances = table.exists("send_appearances") ? table["send_appearances"] : true;
+	Client* target           = table.exists("target") ? static_cast<Client *>(table["target"]) : nullptr;
 
 	self->SendIllusionPacket(
 		race,
@@ -1929,7 +1906,7 @@ void Perl_Mob_SendIllusionPacket(Mob* self, perl::reference table_ref)
 		drakkin_tattoo,
 		drakkin_details,
 		size,
-		true,
+		send_appearances,
 		target
 	);
 }
