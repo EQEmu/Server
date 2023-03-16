@@ -101,9 +101,7 @@ private:
 
 	ClientListEntry* cle;
 	Timer	connect;
-	bool firstlogin;
 	bool seen_character_select;
-	bool realfirstlogin;
 
 	bool HandlePacket(const EQApplicationPacket *app);
 	bool HandleNameApprovalPacket(const EQApplicationPacket *app);
