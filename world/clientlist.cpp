@@ -1315,29 +1315,6 @@ bool ClientList::SendPacket(const char* to, ServerPacket* pack) {
 	return false;
 }
 
-void ClientList::SendGuildPacket(uint32 guild_id, ServerPacket* pack) {
-	std::set<uint32> zone_ids;
-
-	LinkedListIterator<ClientListEntry*> iterator(clientlist);
-
-	iterator.Reset();
-	while(iterator.MoreElements()) {
-		if (iterator.GetData()->GuildID() == guild_id) {
-			zone_ids.insert(iterator.GetData()->zone());
-		}
-		iterator.Advance();
-	}
-
-	//now we know all the zones, send it to each one... this is kinda a shitty way to do this
-	//since its basically O(n^2)
-	std::set<uint32>::iterator cur, end;
-	cur = zone_ids.begin();
-	end = zone_ids.end();
-	for(; cur != end; cur++) {
-		zoneserver_list.SendPacket(*cur, pack);
-	}
-}
-
 void ClientList::UpdateClientGuild(uint32 char_id, uint32 guild_id) {
 	LinkedListIterator<ClientListEntry*> iterator(clientlist);
 
