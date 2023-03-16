@@ -30,7 +30,6 @@ public:
 	void	Add(Client* client);
 	Client*	Get(uint32 ip, uint16 port);
 	Client* FindByAccountID(uint32 account_id);
-	Client* FindByName(char* charname);
 
 	void	ZoneBootup(ZoneServer* zs);
 	void	RemoveCLEReferances(ClientListEntry* cle);
