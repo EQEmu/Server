@@ -53,7 +53,6 @@ Object::Object(uint32 id, uint32 type, uint32 icon, const Object_Struct& object,
 	m_id = id;
 	m_type = type;
 	m_icon = icon;
-	m_inuse = false;
 	m_inst = nullptr;
 	m_ground_spawn=false;
 	// Copy object data
@@ -90,7 +89,6 @@ Object::Object(const EQ::ItemInstance* inst, char* name,float max_x,float min_x,
 	m_inst	= (inst) ? inst->Clone() : nullptr;
 	m_type	= OT_DROPPEDITEM;
 	m_icon	= 0;
-	m_inuse	= false;
 	m_ground_spawn = true;
 	decay_timer.Disable();
 	// Set as much struct data as we can
@@ -122,7 +120,6 @@ Object::Object(Client* client, const EQ::ItemInstance* inst)
 	m_inst	= (inst) ? inst->Clone() : nullptr;
 	m_type	= OT_DROPPEDITEM;
 	m_icon	= 0;
-	m_inuse	= false;
 	m_ground_spawn = false;
 	// Set as much struct data as we can
 	memset(&m_data, 0, sizeof(Object_Struct));
@@ -186,7 +183,6 @@ Object::Object(const EQ::ItemInstance *inst, float x, float y, float z, float he
 	m_inst	= (inst) ? inst->Clone() : nullptr;
 	m_type	= OT_DROPPEDITEM;
 	m_icon	= 0;
-	m_inuse	= false;
 	m_ground_spawn = false;
 	// Set as much struct data as we can
 	memset(&m_data, 0, sizeof(Object_Struct));
@@ -245,7 +241,6 @@ Object::Object(const char *model, float x, float y, float z, float heading, uint
 	m_inst	= (inst) ? inst->Clone() : nullptr;
 	m_type	= type;
 	m_icon	= 0;
-	m_inuse	= false;
 	m_ground_spawn = false;
 	// Set as much struct data as we can
 	memset(&m_data, 0, sizeof(Object_Struct));
@@ -372,7 +367,6 @@ void Object::PutItem(uint8 index, const EQ::ItemInstance* inst)
 }
 
 void Object::Close() {
-	m_inuse = false;
 	if(user != nullptr)
 	{
 		last_user = user;
@@ -462,7 +456,6 @@ bool Object::Process(){
 	}
 
 	if (user != nullptr && !entity_list.GetClientByCharID(user->CharacterID())) {
-		m_inuse = false;
 		last_user = user;
 		user->SetTradeskillObject(nullptr);
 		user = nullptr;
@@ -643,7 +636,6 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 			return(false);
 
 		// Starting to use this object
-		m_inuse = true;
 		sender->SetTradeskillObject(this);
 
 		user = sender;
