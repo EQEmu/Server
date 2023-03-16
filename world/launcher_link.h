@@ -45,7 +45,6 @@ public:
 	inline uint16 GetPort() const { return tcpc->Handle() ? tcpc->Handle()->RemotePort() : 0; }
 	inline std::string GetUUID() const { return tcpc->GetUUID(); }
 	inline const char * GetName() const		{ return(m_name.c_str()); }
-	inline int CountZones() const	{ return(m_states.size()); }
 
 	bool ContainsZone(const char *short_name) const;
 
