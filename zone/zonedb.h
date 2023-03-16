@@ -285,6 +285,51 @@ struct ClientMercEntry {
 	uint32 npcid;
 };
 
+struct CharacterCorpseItemEntry
+{
+	uint32	item_id;
+	int16	equip_slot;
+	uint16	charges;
+	uint16	lootslot;
+	uint32	aug_1;
+	uint32	aug_2;
+	uint32	aug_3;
+	uint32	aug_4;
+	uint32	aug_5;
+	uint32	aug_6;
+	int8	attuned;
+};
+
+struct CharacterCorpseEntry 
+{
+	bool locked;
+	uint32 exp;
+	float size;
+	uint8 level;
+	uint32 race;
+	uint8 gender;
+	uint8 class_;
+	uint8 deity;
+	uint8 texture;
+	uint8 helmtexture;
+	uint32 copper;
+	uint32 silver;
+	uint32 gold;
+	uint32 plat;
+	EQ::TintProfile item_tint;
+	uint8 haircolor;
+	uint8 beardcolor;
+	uint8 eyecolor1;
+	uint8 eyecolor2;
+	uint8 hairstyle;
+	uint8 face;
+	uint8 beard;
+	uint32 drakkin_heritage;
+	uint32 drakkin_tattoo;
+	uint32 drakkin_details;
+	std::vector<CharacterCorpseItemEntry> items;
+};
+
 namespace BeastlordPetData {
 	struct PetStruct {
 		uint16 race_id = WOLF;
@@ -430,7 +475,7 @@ public:
 	/* Corpses  */
 	bool		DeleteItemOffCharacterCorpse(uint32 db_id, uint32 equip_slot, uint32 item_id);
 	uint32		GetCharacterCorpseItemCount(uint32 corpse_id);
-	bool		LoadCharacterCorpseData(uint32 corpse_id, PlayerCorpse_Struct* pcs);
+	bool		LoadCharacterCorpseData(uint32 corpse_id, CharacterCorpseEntry &corpse);
 	Corpse*		LoadCharacterCorpse(uint32 player_corpse_id);
 	Corpse*		SummonBuriedCharacterCorpses(uint32 char_id, uint32 dest_zoneid, uint16 dest_instanceid, const glm::vec4& position);
 	void		MarkCorpseAsRezzed(uint32 dbid);
