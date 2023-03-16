@@ -145,17 +145,6 @@ SpawnGroup *SpawnGroupList::GetSpawnGroup(uint32 in_id)
 	return (m_spawn_groups[in_id].get());
 }
 
-bool SpawnGroupList::RemoveSpawnGroup(uint32 in_id)
-{
-	if (m_spawn_groups.count(in_id) != 1) {
-		return (false);
-	}
-
-	m_spawn_groups.erase(in_id);
-
-	return (true);
-}
-
 void SpawnGroupList::ReloadSpawnGroups()
 {
 	ClearSpawnGroups();
