@@ -422,8 +422,8 @@ public:
 	void	SetAvoidanceRating(int32 d) { avoidance_rating = d;}
 	int32 GetRawAC() const { return AC; }
 
-	float	GetNPCStat(std::string stat);
-	void	ModifyNPCStat(std::string stat, std::string value);
+	float	GetNPCStat(const std::string& stat);
+	void	ModifyNPCStat(const std::string& stat, const std::string& value);
 	virtual void SetLevel(uint8 in_level, bool command = false);
 
 	bool IsLDoNTrapped() const { return ldon_trapped; }

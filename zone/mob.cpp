@@ -518,7 +518,7 @@ Mob::Mob(
 }
 
 Mob::~Mob()
-{ 
+{
 	quest_manager.stopalltimers(this);
 
 	mMovementManager->RemoveMob(this);
@@ -2418,7 +2418,8 @@ void Mob::SendIllusionPacket(
 	uint32 in_drakkin_tattoo,
 	uint32 in_drakkin_details,
 	float in_size,
-	bool send_appearance_effects
+	bool send_appearance_effects,
+	Client* target
 )
 {
 	uint8  new_texture     = in_texture;
@@ -2521,7 +2522,12 @@ void Mob::SendIllusionPacket(
 	is->drakkin_details  = new_drakkin_details;
 	is->size             = size;
 
-	entity_list.QueueClients(this, outapp);
+	if (!target) {
+		entity_list.QueueClients(this, outapp);
+	} else {
+		target->QueuePacket(outapp, false);
+	}
+
 	safe_delete(outapp);
 
 	/* Refresh armor and tints after send illusion packet */
@@ -2532,7 +2538,7 @@ void Mob::SendIllusionPacket(
 	}
 
 	LogSpells(
-		"Illusion: Race [{}] Gender [{}] Texture [{}] HelmTexture [{}] HairColor [{}] BeardColor [{}] EyeColor1 [{}] EyeColor2 [{}] HairStyle [{}] Face [{}] DrakkinHeritage [{}] DrakkinTattoo [{}] DrakkinDetails [{}] Size [{}]",
+		"Illusion: Race [{}] Gender [{}] Texture [{}] HelmTexture [{}] HairColor [{}] BeardColor [{}] EyeColor1 [{}] EyeColor2 [{}] HairStyle [{}] Face [{}] DrakkinHeritage [{}] DrakkinTattoo [{}] DrakkinDetails [{}] Size [{}] Target [{}]",
 		race,
 		gender,
 		new_texture,
@@ -2546,7 +2552,8 @@ void Mob::SendIllusionPacket(
 		new_drakkin_heritage,
 		new_drakkin_tattoo,
 		new_drakkin_details,
-		size
+		size,
+		target ? target->GetCleanName() : "No Target"
 	);
 }
 

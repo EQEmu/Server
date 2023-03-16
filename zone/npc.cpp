@@ -48,6 +48,7 @@
 #include <cctype>
 #include <stdio.h>
 #include <string>
+#include <utility>
 
 #ifdef _WINDOWS
 #define snprintf	_snprintf
@@ -2471,7 +2472,7 @@ void NPC::SetLevel(uint8 in_level, bool command)
 	SendAppearancePacket(AT_WhoLevel, in_level);
 }
 
-void NPC::ModifyNPCStat(std::string stat, std::string value)
+void NPC::ModifyNPCStat(const std::string& stat, const std::string& value)
 {
 	auto stat_lower = Strings::ToLower(stat);
 
@@ -2485,43 +2486,43 @@ void NPC::ModifyNPCStat(std::string stat, std::string value)
 	LogNPCScaling("NPC::ModifyNPCStat: Key [{}] Value [{}] ", variable_key, value);
 
 	if (stat_lower == "ac") {
-		AC = Strings::ToInt(value.c_str());
+		AC = Strings::ToInt(value);
 		CalcAC();
 		return;
 	}
 	else if (stat_lower == "str") {
-		STR = Strings::ToInt(value.c_str());
+		STR = Strings::ToInt(value);
 		return;
 	}
 	else if (stat_lower == "sta") {
-		STA = Strings::ToInt(value.c_str());
+		STA = Strings::ToInt(value);
 		return;
 	}
 	else if (stat_lower == "agi") {
-		AGI = Strings::ToInt(value.c_str());
+		AGI = Strings::ToInt(value);
 		CalcAC();
 		return;
 	}
 	else if (stat_lower == "dex") {
-		DEX = Strings::ToInt(value.c_str());
+		DEX = Strings::ToInt(value);
 		return;
 	}
 	else if (stat_lower == "wis") {
-		WIS = Strings::ToInt(value.c_str());
+		WIS = Strings::ToInt(value);
 		CalcMaxMana();
 		return;
 	}
 	else if (stat_lower == "int" || stat_lower == "_int") {
-		INT = Strings::ToInt(value.c_str());
+		INT = Strings::ToInt(value);
 		CalcMaxMana();
 		return;
 	}
 	else if (stat_lower == "cha") {
-		CHA = Strings::ToInt(value.c_str());
+		CHA = Strings::ToInt(value);
 		return;
 	}
 	else if (stat_lower == "max_hp") {
-		base_hp = Strings::ToUnsignedBigInt(value.c_str());
+		base_hp = Strings::ToBigInt(value);
 
 		CalcMaxHP();
 		if (current_hp > max_hp) {
@@ -2531,7 +2532,7 @@ void NPC::ModifyNPCStat(std::string stat, std::string value)
 		return;
 	}
 	else if (stat_lower == "max_mana") {
-		npc_mana = Strings::ToUnsignedBigInt(value.c_str());
+		npc_mana = Strings::ToUnsignedBigInt(value);
 		CalcMaxMana();
 		if (current_mana > max_mana) {
 			current_mana = max_mana;
@@ -2539,36 +2540,36 @@ void NPC::ModifyNPCStat(std::string stat, std::string value)
 		return;
 	}
 	else if (stat_lower == "mr") {
-		MR = Strings::ToInt(value.c_str());
+		MR = Strings::ToInt(value);
 		return;
 	}
 	else if (stat_lower == "fr") {
-		FR = Strings::ToInt(value.c_str());
+		FR = Strings::ToInt(value);
 		return;
 	}
 	else if (stat_lower == "cr") {
-		CR = Strings::ToInt(value.c_str());
+		CR = Strings::ToInt(value);
 		return;
 	}
 	else if (stat_lower == "cor") {
-		Corrup = Strings::ToInt(value.c_str());
+		Corrup = Strings::ToInt(value);
 		return;
 	}
 	else if (stat_lower == "pr") {
-		PR = Strings::ToInt(value.c_str());
+		PR = Strings::ToInt(value);
 		return;
 	}
 	else if (stat_lower == "dr") {
-		DR = Strings::ToInt(value.c_str());
+		DR = Strings::ToInt(value);
 		return;
 	}
 	else if (stat_lower == "phr") {
-		PhR = Strings::ToInt(value.c_str());
+		PhR = Strings::ToInt(value);
 		return;
 	}
 	else if (stat_lower == "runspeed") {
-		runspeed       = (float) Strings::ToFloat(value.c_str());
-		base_runspeed  = (int) ((float) runspeed * 40.0f);
+		runspeed       = Strings::ToFloat(value);
+		base_runspeed  = (int) (runspeed * 40.0f);
 		base_walkspeed = base_runspeed * 100 / 265;
 		walkspeed      = ((float) base_walkspeed) * 0.025f;
 		base_fearspeed = base_runspeed * 100 / 127;
@@ -2577,125 +2578,125 @@ void NPC::ModifyNPCStat(std::string stat, std::string value)
 		return;
 	}
 	else if (stat_lower == "special_attacks") {
-		NPCSpecialAttacks(value.c_str(), 0, 1);
+		NPCSpecialAttacks(value.c_str(), 0, true);
 		return;
 	}
 	else if (stat_lower == "special_abilities") {
-		ProcessSpecialAbilities(value.c_str());
+		ProcessSpecialAbilities(value);
 		return;
 	}
 	else if (stat_lower == "attack_speed") {
-		attack_speed = (float) Strings::ToFloat(value.c_str());
+		attack_speed = Strings::ToFloat(value);
 		CalcBonuses();
 		return;
 	}
 	else if (stat_lower == "attack_delay") {
 		/* TODO: fix DB */
-		attack_delay = Strings::ToInt(value.c_str()) * 100;
+		attack_delay = Strings::ToInt(value) * 100;
 		CalcBonuses();
 		return;
 	}
 	else if (stat_lower == "atk") {
-		ATK = Strings::ToInt(value.c_str());
+		ATK = Strings::ToInt(value);
 		return;
 	}
 	else if (stat_lower == "accuracy") {
-		accuracy_rating = Strings::ToInt(value.c_str());
+		accuracy_rating = Strings::ToInt(value);
 		return;
 	}
 	else if (stat_lower == "avoidance") {
-		avoidance_rating = Strings::ToInt(value.c_str());
+		avoidance_rating = Strings::ToInt(value);
 		return;
 	}
 	else if (stat_lower == "trackable") {
-		trackable = Strings::ToInt(value.c_str());
+		trackable = Strings::ToInt(value);
 		return;
 	}
 	else if (stat_lower == "min_hit") {
-		min_dmg     = Strings::ToInt(value.c_str());
+		min_dmg     = Strings::ToInt(value);
 		// TODO: fix DB
 		base_damage = round((max_dmg - min_dmg) / 1.9);
 		min_damage  = min_dmg - round(base_damage / 10.0);
 		return;
 	}
 	else if (stat_lower == "max_hit") {
-		max_dmg     = Strings::ToInt(value.c_str());
+		max_dmg     = Strings::ToInt(value);
 		// TODO: fix DB
 		base_damage = round((max_dmg - min_dmg) / 1.9);
 		min_damage  = min_dmg - round(base_damage / 10.0);
 		return;
 	}
 	else if (stat_lower == "attack_count") {
-		attack_count = Strings::ToInt(value.c_str());
+		attack_count = Strings::ToInt(value);
 		return;
 	}
 	else if (stat_lower == "see_invis") {
-		see_invis = Strings::ToInt(value.c_str());
+		see_invis = Strings::ToInt(value);
 		return;
 	}
 	else if (stat_lower == "see_invis_undead") {
-		see_invis_undead = Strings::ToInt(value.c_str());
+		see_invis_undead = Strings::ToInt(value);
 		return;
 	}
 	else if (stat_lower == "see_hide") {
-		see_hide = Strings::ToInt(value.c_str());
+		see_hide = Strings::ToInt(value);
 		return;
 	}
 	else if (stat_lower == "see_improved_hide") {
-		see_improved_hide = Strings::ToInt(value.c_str());
+		see_improved_hide = Strings::ToInt(value);
 		return;
 	}
 	else if (stat_lower == "hp_regen") {
-		hp_regen = strtoll(value.c_str(), nullptr, 10);
+		hp_regen = Strings::ToBigInt(value);
 		return;
 	}
 	else if (stat_lower == "hp_regen_per_second") {
-		hp_regen_per_second = strtoll(value.c_str(), nullptr, 10);
+		hp_regen_per_second = Strings::ToBigInt(value);
 		return;
 	}
 	else if (stat_lower == "mana_regen") {
-		mana_regen = strtoll(value.c_str(), nullptr, 10);
+		mana_regen = Strings::ToBigInt(value);
 		return;
 	}
 	else if (stat_lower == "level") {
-		SetLevel(Strings::ToInt(value.c_str()));
+		SetLevel(Strings::ToInt(value));
 		return;
 	}
 	else if (stat_lower == "aggro") {
-		pAggroRange = Strings::ToFloat(value.c_str());
+		pAggroRange = Strings::ToFloat(value);
 		return;
 	}
 	else if (stat_lower == "assist") {
-		pAssistRange = Strings::ToFloat(value.c_str());
+		pAssistRange = Strings::ToFloat(value);
 		return;
 	}
 	else if (stat_lower == "slow_mitigation") {
-		slow_mitigation = Strings::ToInt(value.c_str());
+		slow_mitigation = Strings::ToInt(value);
 		return;
 	}
 	else if (stat_lower == "loottable_id") {
-		loottable_id = Strings::ToFloat(value.c_str());
+		loottable_id = Strings::ToFloat(value);
 		return;
 	}
 	else if (stat_lower == "healscale") {
-		healscale = Strings::ToFloat(value.c_str());
+		healscale = Strings::ToFloat(value);
 		return;
 	}
 	else if (stat_lower == "spellscale") {
-		spellscale = Strings::ToFloat(value.c_str());
+		spellscale = Strings::ToFloat(value);
 		return;
 	}
 	else if (stat_lower == "npc_spells_id") {
-		AI_AddNPCSpells(Strings::ToInt(value.c_str()));
+		AI_AddNPCSpells(Strings::ToInt(value));
 		return;
 	}
 	else if (stat_lower == "npc_spells_effects_id") {
-		AI_AddNPCSpellsEffects(Strings::ToInt(value.c_str()));
+		AI_AddNPCSpellsEffects(Strings::ToInt(value));
 		CalcBonuses();
 		return;
 	}
 	else if (stat_lower == "heroic_strikethrough") {
-		heroic_strikethrough = Strings::ToInt(value.c_str());
+		heroic_strikethrough = Strings::ToInt(value);
 		return;
 	}
 	else if (stat_lower == "keeps_sold_items") {
@@ -2704,11 +2705,10 @@ void NPC::ModifyNPCStat(std::string stat, std::string value)
 	}
 }
 
-float NPC::GetNPCStat(std::string stat)
+float NPC::GetNPCStat(const std::string& stat)
 {
-	auto stat_lower = Strings::ToLower(stat);
 
-	if (stat_lower == "ac") {
+	if (auto stat_lower = Strings::ToLower(stat); stat_lower == "ac") {
 		return AC;
 	}
 	else if (stat_lower == "str") {
@@ -2758,9 +2758,6 @@ float NPC::GetNPCStat(std::string stat)
 	}
 	else if (stat_lower == "dr") {
 		return DR;
-	}
-	else if (stat_lower == "phr") {
-		return PhR;
 	}
 	else if (stat_lower == "runspeed") {
 		return runspeed;
@@ -2975,7 +2972,6 @@ void NPC::LevelScale() {
 	}
 	level = random_level;
 
-	return;
 }
 
 uint32 NPC::GetSpawnPointID() const
@@ -3023,7 +3019,6 @@ void NPC::SetSwarmTarget(int target_id)
 	{
 		GetSwarmInfo()->target = target_id;
 	}
-	return;
 }
 
 int64 NPC::CalcMaxMana()
@@ -3036,7 +3031,6 @@ int64 NPC::CalcMaxMana()
 			case 'W':
 				max_mana = (((GetWIS() / 2) + 1) * GetLevel()) + spellbonuses.Mana + itembonuses.Mana;
 				break;
-			case 'N':
 			default:
 				max_mana = 0;
 				break;
@@ -3055,7 +3049,6 @@ int64 NPC::CalcMaxMana()
 			case 'W':
 				max_mana = npc_mana + spellbonuses.Mana + itembonuses.Mana;
 				break;
-			case 'N':
 			default:
 				max_mana = 0;
 				break;
@@ -3089,16 +3082,16 @@ NPC_Emote_Struct* NPC::GetNPCEmote(uint32 emoteid, uint8 event_) {
 	{
 		NPC_Emote_Struct* nes = iterator.GetData();
 		if (emoteid == nes->emoteid && event_ == nes->event_) {
-			return (nes);
+			return nes;
 		}
 		iterator.Advance();
 	}
-	return (nullptr);
+	return nullptr;
 }
 
 void NPC::DoNPCEmote(uint8 event_, uint32 emoteid)
 {
-	if(this == nullptr || emoteid == 0)
+	if (emoteid == 0)
 	{
 		return;
 	}
