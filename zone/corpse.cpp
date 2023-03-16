@@ -688,61 +688,64 @@ void Corpse::CalcCorpseName() {
 bool Corpse::Save() {
 	if (!is_player_corpse)
 		return true;
+
 	if (!is_corpse_changed)
 		return true;
 
-	uint32 tmp = CountItems();
-	uint32 tmpsize = sizeof(PlayerCorpse_Struct) + (tmp * sizeof(player_lootitem::ServerLootItem_Struct));
+	CharacterCorpseEntry corpse_entry;
 
-	PlayerCorpse_Struct* dbpc = (PlayerCorpse_Struct*) new uchar[tmpsize];
-	memset(dbpc, 0, tmpsize);
-	dbpc->itemcount = tmp;
-	dbpc->size = size;
-	dbpc->locked = is_locked;
-	dbpc->copper = copper;
-	dbpc->silver = silver;
-	dbpc->gold = gold;
-	dbpc->plat = platinum;
-	dbpc->race = race;
-	dbpc->class_ = class_;
-	dbpc->gender = gender;
-	dbpc->deity = deity;
-	dbpc->level = level;
-	dbpc->texture = texture;
-	dbpc->helmtexture = helmtexture;
-	dbpc->exp = rez_experience;
+	corpse_entry.size = size;
+	corpse_entry.locked = is_locked;
+	corpse_entry.copper = copper;
+	corpse_entry.silver = silver;
+	corpse_entry.gold = gold;
+	corpse_entry.plat = platinum;
+	corpse_entry.race = race;
+	corpse_entry.class_ = class_;
+	corpse_entry.gender = gender;
+	corpse_entry.deity = deity;
+	corpse_entry.level = level;
+	corpse_entry.texture = texture;
+	corpse_entry.helmtexture = helmtexture;
+	corpse_entry.exp = rez_experience;
+	corpse_entry.item_tint = item_tint;
+	corpse_entry.haircolor = haircolor;
+	corpse_entry.beardcolor = beardcolor;
+	corpse_entry.eyecolor2 = eyecolor1;
+	corpse_entry.hairstyle = hairstyle;
+	corpse_entry.face = luclinface;
+	corpse_entry.beard = beard;
+	corpse_entry.drakkin_heritage = drakkin_heritage;
+	corpse_entry.drakkin_tattoo = drakkin_tattoo;
+	corpse_entry.drakkin_details = drakkin_details;
 
-	memcpy(&dbpc->item_tint.Slot, &item_tint.Slot, sizeof(dbpc->item_tint));
-	dbpc->haircolor = haircolor;
-	dbpc->beardcolor = beardcolor;
-	dbpc->eyecolor2 = eyecolor1;
-	dbpc->hairstyle = hairstyle;
-	dbpc->face = luclinface;
-	dbpc->beard = beard;
-	dbpc->drakkin_heritage = drakkin_heritage;
-	dbpc->drakkin_tattoo = drakkin_tattoo;
-	dbpc->drakkin_details = drakkin_details;
+	for (auto& item : itemlist) {
+		CharacterCorpseItemEntry item_entry;
 
-	uint32 x = 0;
-	ItemList::iterator cur, end;
-	cur = itemlist.begin();
-	end = itemlist.end();
-	for (; cur != end; ++cur) {
-		ServerLootItem_Struct* item = *cur;
-		memcpy((char*)&dbpc->items[x++], (char*)item, sizeof(player_lootitem::ServerLootItem_Struct));
+		item_entry.item_id = item->item_id;
+		item_entry.equip_slot = item->equip_slot;
+		item_entry.charges = item->charges;
+		item_entry.lootslot = item->lootslot;
+		item_entry.aug_1 = item->aug_1;
+		item_entry.aug_2 = item->aug_2;
+		item_entry.aug_3 = item->aug_3;
+		item_entry.aug_4 = item->aug_4;
+		item_entry.aug_5 = item->aug_5;
+		item_entry.aug_6 = item->aug_6;
+		item_entry.attuned = item->attuned;
+
+		corpse_entry.items.push_back(std::move(item_entry));
 	}
 
 	/* Create New Corpse*/
 	if (corpse_db_id == 0) {
-		corpse_db_id = database.SaveCharacterCorpse(char_id, corpse_name, zone->GetZoneID(), zone->GetInstanceID(), dbpc, m_Position, consented_guild_id);
+		corpse_db_id = database.SaveCharacterCorpse(char_id, corpse_name, zone->GetZoneID(), zone->GetInstanceID(), corpse_entry, m_Position, consented_guild_id);
 	}
 	/* Update Corpse Data */
 	else{
-		corpse_db_id = database.UpdateCharacterCorpse(corpse_db_id, char_id, corpse_name, zone->GetZoneID(), zone->GetInstanceID(), dbpc, m_Position, consented_guild_id, IsRezzed());
+		corpse_db_id = database.UpdateCharacterCorpse(corpse_db_id, char_id, corpse_name, zone->GetZoneID(), zone->GetInstanceID(), corpse_entry, m_Position, consented_guild_id, IsRezzed());
 	}
-
-	safe_delete_array(dbpc);
-
+	
 	return true;
 }
 

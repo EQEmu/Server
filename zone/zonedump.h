@@ -155,56 +155,6 @@ struct NPCType
 	bool            keeps_sold_items;
 };
 
-namespace player_lootitem {
-	struct ServerLootItem_Struct {
-		uint32	item_id;
-		int16	equip_slot;
-		uint16	charges;
-		uint16	lootslot;
-		uint32	aug_1;
-		uint32	aug_2;
-		uint32	aug_3;
-		uint32	aug_4;
-		uint32	aug_5;
-		uint32	aug_6;
-		int8	attuned;
-		uint8	min_level;		  //
-		uint8	max_level;		  //
-	};
-}
-
-struct PlayerCorpse_Struct {
-	uint32	crc;
-	bool	locked;
-	uint32	itemcount;
-	uint32	exp;
-	float	size;
-	uint8	level;
-	uint32	race;
-	uint8	gender;
-	uint8	class_;
-	uint8	deity;
-	uint8	texture;
-	uint8	helmtexture;
-	uint32	copper;
-	uint32	silver;
-	uint32	gold;
-	uint32	plat;
-	EQ::TintProfile item_tint;
-	uint8 haircolor;
-	uint8 beardcolor;
-	uint8 eyecolor1;
-	uint8 eyecolor2;
-	uint8 hairstyle;
-	uint8 face;
-	uint8 beard;
-	uint32 drakkin_heritage;
-	uint32 drakkin_tattoo;
-	uint32 drakkin_details;
-	player_lootitem::ServerLootItem_Struct	items[0];
-	//std::list<player_lootitem::ServerLootItem_Struct*> items;
-};
-
 #pragma pack()
 
 #endif

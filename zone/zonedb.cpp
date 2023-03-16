@@ -3780,7 +3780,7 @@ uint32 ZoneDatabase::GetCharacterCorpseDecayTimer(uint32 corpse_db_id){
 	return 0;
 }
 
-uint32 ZoneDatabase::UpdateCharacterCorpse(uint32 db_id, uint32 char_id, const char* char_name, uint32 zone_id, uint16 instance_id, PlayerCorpse_Struct* dbpc, const glm::vec4& position, uint32 guild_id, bool is_rezzed) {
+uint32 ZoneDatabase::UpdateCharacterCorpse(uint32 db_id, uint32 char_id, const char* char_name, uint32 zone_id, uint16 instance_id, const CharacterCorpseEntry& corpse, const glm::vec4& position, uint32 guild_id, bool is_rezzed) {
 	std::string query = StringFormat("UPDATE `character_corpses` "
                                     "SET `charname` = '%s', `zone_id` = %u, `instance_id` = %u, `charid` = %d, "
                                     "`x` = %1.1f,`y` =	%1.1f,`z` = %1.1f, `heading` = %1.1f, `guild_consent_id` = %u, "
@@ -3796,15 +3796,15 @@ uint32 ZoneDatabase::UpdateCharacterCorpse(uint32 db_id, uint32 char_id, const c
                                     "WHERE `id` = %u",
                                     Strings::Escape(char_name).c_str(), zone_id, instance_id, char_id,
                                     position.x, position.y, position.z, position.w, guild_id,
-                                    dbpc->locked, dbpc->exp, dbpc->size, dbpc->level, dbpc->race,
-                                    dbpc->gender, dbpc->class_, dbpc->deity, dbpc->texture,
-                                    dbpc->helmtexture, dbpc->copper, dbpc->silver, dbpc->gold,
-                                    dbpc->plat, dbpc->haircolor, dbpc->beardcolor, dbpc->eyecolor1,
-                                    dbpc->eyecolor2, dbpc->hairstyle, dbpc->face, dbpc->beard,
-                                    dbpc->drakkin_heritage, dbpc->drakkin_tattoo, dbpc->drakkin_details,
-                                    dbpc->item_tint.Head.Color, dbpc->item_tint.Chest.Color, dbpc->item_tint.Arms.Color,
-                                    dbpc->item_tint.Wrist.Color, dbpc->item_tint.Hands.Color, dbpc->item_tint.Legs.Color,
-                                    dbpc->item_tint.Feet.Color, dbpc->item_tint.Primary.Color, dbpc->item_tint.Secondary.Color,
+                                    corpse.locked, corpse.exp, corpse.size, corpse.level, corpse.race,
+                                    corpse.gender, corpse.class_, corpse.deity, corpse.texture,
+                                    corpse.helmtexture, corpse.copper, corpse.silver, corpse.gold,
+                                    corpse.plat, corpse.haircolor, corpse.beardcolor, corpse.eyecolor1,
+                                    corpse.eyecolor2, corpse.hairstyle, corpse.face, corpse.beard,
+                                    corpse.drakkin_heritage, corpse.drakkin_tattoo, corpse.drakkin_details,
+                                    corpse.item_tint.Head.Color, corpse.item_tint.Chest.Color, corpse.item_tint.Arms.Color,
+                                    corpse.item_tint.Wrist.Color, corpse.item_tint.Hands.Color, corpse.item_tint.Legs.Color,
+                                    corpse.item_tint.Feet.Color, corpse.item_tint.Primary.Color, corpse.item_tint.Secondary.Color,
                                     db_id);
 	auto results = QueryDatabase(query);
 
@@ -3823,7 +3823,7 @@ void ZoneDatabase::MarkCorpseAsRezzed(uint32 db_id) {
 	auto results = QueryDatabase(query);
 }
 
-uint32 ZoneDatabase::SaveCharacterCorpse(uint32 charid, const char* charname, uint32 zoneid, uint16 instanceid, PlayerCorpse_Struct* dbpc, const glm::vec4& position, uint32 guildid) {
+uint32 ZoneDatabase::SaveCharacterCorpse(uint32 charid, const char* charname, uint32 zoneid, uint16 instanceid, const CharacterCorpseEntry& corpse, const glm::vec4& position, uint32 guildid) {
 	/* Dump Basic Corpse Data */
 	std::string query = StringFormat(
 		"INSERT INTO `character_corpses` "
@@ -3880,39 +3880,39 @@ uint32 ZoneDatabase::SaveCharacterCorpse(uint32 charid, const char* charname, ui
 		position.z,
 		position.w,
 		guildid,
-		dbpc->locked,
-		dbpc->exp,
-		dbpc->size,
-		dbpc->level,
-		dbpc->race,
-		dbpc->gender,
-		dbpc->class_,
-		dbpc->deity,
-		dbpc->texture,
-		dbpc->helmtexture,
-		dbpc->copper,
-		dbpc->silver,
-		dbpc->gold,
-		dbpc->plat,
-		dbpc->haircolor,
-		dbpc->beardcolor,
-		dbpc->eyecolor1,
-		dbpc->eyecolor2,
-		dbpc->hairstyle,
-		dbpc->face,
-		dbpc->beard,
-		dbpc->drakkin_heritage,
-		dbpc->drakkin_tattoo,
-		dbpc->drakkin_details,
-		dbpc->item_tint.Head.Color,
-		dbpc->item_tint.Chest.Color,
-		dbpc->item_tint.Arms.Color,
-		dbpc->item_tint.Wrist.Color,
-		dbpc->item_tint.Hands.Color,
-		dbpc->item_tint.Legs.Color,
-		dbpc->item_tint.Feet.Color,
-		dbpc->item_tint.Primary.Color,
-		dbpc->item_tint.Secondary.Color
+		corpse.locked,
+		corpse.exp,
+		corpse.size,
+		corpse.level,
+		corpse.race,
+		corpse.gender,
+		corpse.class_,
+		corpse.deity,
+		corpse.texture,
+		corpse.helmtexture,
+		corpse.copper,
+		corpse.silver,
+		corpse.gold,
+		corpse.plat,
+		corpse.haircolor,
+		corpse.beardcolor,
+		corpse.eyecolor1,
+		corpse.eyecolor2,
+		corpse.hairstyle,
+		corpse.face,
+		corpse.beard,
+		corpse.drakkin_heritage,
+		corpse.drakkin_tattoo,
+		corpse.drakkin_details,
+		corpse.item_tint.Head.Color,
+		corpse.item_tint.Chest.Color,
+		corpse.item_tint.Arms.Color,
+		corpse.item_tint.Wrist.Color,
+		corpse.item_tint.Hands.Color,
+		corpse.item_tint.Legs.Color,
+		corpse.item_tint.Feet.Color,
+		corpse.item_tint.Primary.Color,
+		corpse.item_tint.Secondary.Color
 	);
 	auto results = QueryDatabase(query);
 	uint32 last_insert_id = results.LastInsertedID();
@@ -3920,41 +3920,43 @@ uint32 ZoneDatabase::SaveCharacterCorpse(uint32 charid, const char* charname, ui
 	std::string corpse_items_query;
 	/* Dump Items from Inventory */
 	uint8 first_entry = 0;
-	for (unsigned int i = 0; i < dbpc->itemcount; i++) {
+	for(auto &item : corpse.items)
+	{
 		if (first_entry != 1){
 			corpse_items_query = StringFormat("REPLACE INTO `character_corpse_items` \n"
 				" (corpse_id, equip_slot, item_id, charges, aug_1, aug_2, aug_3, aug_4, aug_5, aug_6, attuned) \n"
 				" VALUES (%u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u) \n",
 				last_insert_id,
-				dbpc->items[i].equip_slot,
-				dbpc->items[i].item_id,
-				dbpc->items[i].charges,
-				dbpc->items[i].aug_1,
-				dbpc->items[i].aug_2,
-				dbpc->items[i].aug_3,
-				dbpc->items[i].aug_4,
-				dbpc->items[i].aug_5,
-				dbpc->items[i].aug_6,
-				dbpc->items[i].attuned
+				item.equip_slot,
+				item.item_id,
+				item.charges,
+				item.aug_1,
+				item.aug_2,
+				item.aug_3,
+				item.aug_4,
+				item.aug_5,
+				item.aug_6,
+				item.attuned
 			);
 			first_entry = 1;
 		}
 		else{
 			corpse_items_query = corpse_items_query + StringFormat(", (%u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u) \n",
 				last_insert_id,
-				dbpc->items[i].equip_slot,
-				dbpc->items[i].item_id,
-				dbpc->items[i].charges,
-				dbpc->items[i].aug_1,
-				dbpc->items[i].aug_2,
-				dbpc->items[i].aug_3,
-				dbpc->items[i].aug_4,
-				dbpc->items[i].aug_5,
-				dbpc->items[i].aug_6,
-				dbpc->items[i].attuned
+				item.equip_slot,
+				item.item_id,
+				item.charges,
+				item.aug_1,
+				item.aug_2,
+				item.aug_3,
+				item.aug_4,
+				item.aug_5,
+				item.aug_6,
+				item.attuned
 			);
 		}
 	}
+
 	if (!corpse_items_query.empty())
 		QueryDatabase(corpse_items_query);
 
