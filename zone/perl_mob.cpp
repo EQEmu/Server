@@ -1861,6 +1861,56 @@ void Perl_Mob_SendIllusion(Mob* self, uint16 race, uint8 gender, uint8 texture, 
 	self->SendIllusionPacket(race, gender, texture, helmtexture, haircolor, beardcolor, 0xFF, 0xFF, hairstyle, face, beard, 0xFF, drakkin_heritage, drakkin_tattoo, drakkin_details, size);
 }
 
+void Perl_Mob_SendIllusion(Mob* self, uint16 race, uint8 gender, uint8 texture, uint8 helmtexture, uint8 face, uint8 hairstyle, uint8 haircolor, uint8 beard, uint8 beardcolor, uint32 drakkin_heritage, uint32 drakkin_tattoo, uint32 drakkin_details, float size, Client* target) // @categories Script Utility
+{
+	self->SendIllusionPacket(race, gender, texture, helmtexture, haircolor, beardcolor, 0xFF, 0xFF, hairstyle, face, beard, 0xFF, drakkin_heritage, drakkin_tattoo, drakkin_details, size, true, target);
+}
+
+void Perl_Mob_SendIllusionPacket(Mob* self, perl::reference table_ref)
+{
+	perl::hash table = table_ref;
+
+	uint16  race                    = table.exists("race") ? table["race"] : self->GetRace();
+	uint8   gender                  = table.exists("gender") ? table["gender"] : self->GetGender();
+	uint8   texture                 = table.exists("texture") ? table["texture"] : self->GetTexture();
+	uint8   helmtexture             = table.exists("helmtexture") ? table["helmtexture"] : self->GetHelmTexture();
+	uint8   haircolor               = table.exists("haircolor") ? table["haircolor"] : self->GetHairColor();
+	uint8   beardcolor              = table.exists("beardcolor") ? table["beardcolor"] : self->GetBeardColor();
+	uint8   eyecolor1               = table.exists("eyecolor1") ? table["eyecolor1"] : self->GetEyeColor1();
+	uint8   eyecolor2               = table.exists("eyecolor2") ? table["eyecolor2"] : self->GetEyeColor2();
+	uint8   hairstyle               = table.exists("hairstyle") ? table["hairstyle"] : self->GetHairStyle();
+	uint8   luclinface              = table.exists("luclinface") ? table["luclinface"] : self->GetLuclinFace();
+	uint8   beard                   = table.exists("beard") ? table["beard"] : self->GetBeard();
+	uint8   aa_title                = table.exists("aa_title") ? table["aa_title"] : 255;
+	uint32  drakkin_heritage        = table.exists("drakkin_heritage") ? table["drakkin_heritage"] : self->GetDrakkinHeritage();
+	uint32  drakkin_tattoo          = table.exists("drakkin_tattoo") ? table["drakkin_tattoo"] : self->GetDrakkinTattoo();
+	uint32  drakkin_details         = table.exists("drakkin_details") ? table["drakkin_details"] : self->GetDrakkinDetails();
+	float   size                    = table.exists("size") ? table["size"] : self->GetSize();
+	bool    send_appearance_effects = table.exists("send_appearance_effects") ? table["send_appearance_effects"] : true;
+	Client* target                  = table.exists("target") ? static_cast<Client *>(table["target"]) : nullptr;
+
+	self->SendIllusionPacket(
+		race,
+		gender,
+		texture,
+		helmtexture,
+		haircolor,
+		beardcolor,
+		eyecolor1,
+		eyecolor2,
+		hairstyle,
+		luclinface,
+		beard,
+		aa_title,
+		drakkin_heritage,
+		drakkin_tattoo,
+		drakkin_details,
+		size,
+		send_appearance_effects,
+		target
+	);
+}
+
 void Perl_Mob_CameraEffect(Mob* self, uint32 duration) // @categories Script Utility
 {
 	self->CameraEffect(duration, 0.03125f);
@@ -3292,6 +3342,8 @@ void perl_register_mob()
 	package.add("SendIllusion", (void(*)(Mob*, uint16, uint8, uint8, uint8, uint8, uint8, uint8, uint8, uint8, uint32, uint32))&Perl_Mob_SendIllusion);
 	package.add("SendIllusion", (void(*)(Mob*, uint16, uint8, uint8, uint8, uint8, uint8, uint8, uint8, uint8, uint32, uint32, uint32))&Perl_Mob_SendIllusion);
 	package.add("SendIllusion", (void(*)(Mob*, uint16, uint8, uint8, uint8, uint8, uint8, uint8, uint8, uint8, uint32, uint32, uint32, float))&Perl_Mob_SendIllusion);
+	package.add("SendIllusion", (void(*)(Mob*, uint16, uint8, uint8, uint8, uint8, uint8, uint8, uint8, uint8, uint32, uint32, uint32, float, Client*))&Perl_Mob_SendIllusion);
+	package.add("SendIllusionPacket", (void(*)(Mob*, perl::reference))&Perl_Mob_SendIllusionPacket);
 	package.add("SendTo", &Perl_Mob_SendTo);
 	package.add("SendToFixZ", &Perl_Mob_SendToFixZ);
 	package.add("SendWearChange", &Perl_Mob_SendWearChange);

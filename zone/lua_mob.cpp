@@ -1567,153 +1567,189 @@ void Lua_Mob::SendIllusionPacket(luabind::adl::object illusion) {
 		return;
 	}
 
-	int race = RACE_DOUG_0;
-	int gender = 255;
-	int texture = 255;
-	int helmtexture = 255;
-	int haircolor = 255;
-	int beardcolor = 255;
-	int eyecolor1 = 255;
-	int eyecolor2 = 255;
-	int hairstyle = 255;
-	int luclinface = 255;
-	int beard = 255;
-	int aa_title = 255;
-	uint32 drakkin_heritage = 4294967295;
-	uint32 drakkin_tattoo = 4294967295;
-	uint32 drakkin_details = 4294967295;
-	float size = -1.0f;
+	uint16     race                    = self->GetRace();
+	uint8      gender                  = self->GetGender();
+	uint8      texture                 = self->GetTexture();
+	uint8      helmtexture             = self->GetHelmTexture();
+	uint8      haircolor               = self->GetHairColor();
+	uint8      beardcolor              = self->GetBeardColor();
+	uint8      eyecolor1               = self->GetEyeColor1();
+	uint8      eyecolor2               = self->GetEyeColor2();
+	uint8      hairstyle               = self->GetHairStyle();
+	uint8      luclinface              = self->GetLuclinFace();
+	uint8      beard                   = self->GetBeard();
+	uint8      aa_title                = 255;
+	uint32     drakkin_heritage        = self->GetDrakkinHeritage();
+	uint32     drakkin_tattoo          = self->GetDrakkinTattoo();
+	uint32     drakkin_details         = self->GetDrakkinDetails();
+	float      size                    = self->GetSize();
+	bool       send_appearance_effects = true;
+	Lua_Client target                  = Lua_Client();
 
 	auto cur = illusion["race"];
-	if(luabind::type(cur) != LUA_TNIL) {
+	if (luabind::type(cur) != LUA_TNIL) {
 		try {
-			race = luabind::object_cast<int>(cur);
-		} catch(luabind::cast_failed &) {
+			race = luabind::object_cast<uint16>(cur);
+		} catch (luabind::cast_failed &) {
 		}
 	}
 
 	cur = illusion["gender"];
-	if(luabind::type(cur) != LUA_TNIL) {
+	if (luabind::type(cur) != LUA_TNIL) {
 		try {
-			gender = luabind::object_cast<int>(cur);
-		} catch(luabind::cast_failed &) {
+			gender = luabind::object_cast<uint8>(cur);
+		} catch (luabind::cast_failed &) {
 		}
 	}
 
 	cur = illusion["texture"];
-	if(luabind::type(cur) != LUA_TNIL) {
+	if (luabind::type(cur) != LUA_TNIL) {
 		try {
-			texture = luabind::object_cast<int>(cur);
-		} catch(luabind::cast_failed &) {
+			texture = luabind::object_cast<uint8>(cur);
+		} catch (luabind::cast_failed &) {
 		}
 	}
 
 	cur = illusion["helmtexture"];
-	if(luabind::type(cur) != LUA_TNIL) {
+	if (luabind::type(cur) != LUA_TNIL) {
 		try {
-			helmtexture = luabind::object_cast<int>(cur);
-		} catch(luabind::cast_failed &) {
+			helmtexture = luabind::object_cast<uint8>(cur);
+		} catch (luabind::cast_failed &) {
 		}
 	}
 
 	cur = illusion["haircolor"];
-	if(luabind::type(cur) != LUA_TNIL) {
+	if (luabind::type(cur) != LUA_TNIL) {
 		try {
-			haircolor = luabind::object_cast<int>(cur);
-		} catch(luabind::cast_failed &) {
+			haircolor = luabind::object_cast<uint8>(cur);
+		} catch (luabind::cast_failed &) {
 		}
 	}
 
 	cur = illusion["beardcolor"];
-	if(luabind::type(cur) != LUA_TNIL) {
+	if (luabind::type(cur) != LUA_TNIL) {
 		try {
-			beardcolor = luabind::object_cast<int>(cur);
-		} catch(luabind::cast_failed &) {
+			beardcolor = luabind::object_cast<uint8>(cur);
+		} catch (luabind::cast_failed &) {
 		}
 	}
 
 	cur = illusion["eyecolor1"];
-	if(luabind::type(cur) != LUA_TNIL) {
+	if (luabind::type(cur) != LUA_TNIL) {
 		try {
-			eyecolor1 = luabind::object_cast<int>(cur);
-		} catch(luabind::cast_failed &) {
+			eyecolor1 = luabind::object_cast<uint8>(cur);
+		} catch (luabind::cast_failed &) {
 		}
 	}
 
 	cur = illusion["eyecolor2"];
-	if(luabind::type(cur) != LUA_TNIL) {
+	if (luabind::type(cur) != LUA_TNIL) {
 		try {
-			eyecolor2 = luabind::object_cast<int>(cur);
-		} catch(luabind::cast_failed &) {
+			eyecolor2 = luabind::object_cast<uint8>(cur);
+		} catch (luabind::cast_failed &) {
 		}
 	}
 
 	cur = illusion["hairstyle"];
-	if(luabind::type(cur) != LUA_TNIL) {
+	if (luabind::type(cur) != LUA_TNIL) {
 		try {
-			hairstyle = luabind::object_cast<int>(cur);
-		} catch(luabind::cast_failed &) {
+			hairstyle = luabind::object_cast<uint8>(cur);
+		} catch (luabind::cast_failed &) {
 		}
 	}
 
 	cur = illusion["luclinface"];
-	if(luabind::type(cur) != LUA_TNIL) {
+	if (luabind::type(cur) != LUA_TNIL) {
 		try {
-			luclinface = luabind::object_cast<int>(cur);
-		} catch(luabind::cast_failed &) {
+			luclinface = luabind::object_cast<uint8>(cur);
+		} catch (luabind::cast_failed &) {
 		}
 	}
 
 	cur = illusion["beard"];
-	if(luabind::type(cur) != LUA_TNIL) {
+	if (luabind::type(cur) != LUA_TNIL) {
 		try {
-			beard = luabind::object_cast<int>(cur);
-		} catch(luabind::cast_failed &) {
+			beard = luabind::object_cast<uint8>(cur);
+		} catch (luabind::cast_failed &) {
 		}
 	}
 
 	cur = illusion["aa_title"];
-	if(luabind::type(cur) != LUA_TNIL) {
+	if (luabind::type(cur) != LUA_TNIL) {
 		try {
-			aa_title = luabind::object_cast<int>(cur);
-		} catch(luabind::cast_failed &) {
+			aa_title = luabind::object_cast<uint8>(cur);
+		} catch (luabind::cast_failed &) {
 		}
 	}
 
 	cur = illusion["drakkin_heritage"];
-	if(luabind::type(cur) != LUA_TNIL) {
+	if (luabind::type(cur) != LUA_TNIL) {
 		try {
-			drakkin_heritage = luabind::object_cast<int>(cur);
-		} catch(luabind::cast_failed &) {
+			drakkin_heritage = luabind::object_cast<uint32>(cur);
+		} catch (luabind::cast_failed &) {
 		}
 	}
 
 	cur = illusion["drakkin_tattoo"];
-	if(luabind::type(cur) != LUA_TNIL) {
+	if (luabind::type(cur) != LUA_TNIL) {
 		try {
-			drakkin_tattoo = luabind::object_cast<int>(cur);
-		} catch(luabind::cast_failed &) {
+			drakkin_tattoo = luabind::object_cast<uint32>(cur);
+		} catch (luabind::cast_failed &) {
 		}
 	}
 
 	cur = illusion["drakkin_details"];
-	if(luabind::type(cur) != LUA_TNIL) {
+	if (luabind::type(cur) != LUA_TNIL) {
 		try {
-			drakkin_details = luabind::object_cast<int>(cur);
-		} catch(luabind::cast_failed &) {
+			drakkin_details = luabind::object_cast<uint32>(cur);
+		} catch (luabind::cast_failed &) {
 		}
 	}
 
 	cur = illusion["size"];
-	if(luabind::type(cur) != LUA_TNIL) {
+	if (luabind::type(cur) != LUA_TNIL) {
 		try {
 			size = luabind::object_cast<float>(cur);
-		} catch(luabind::cast_failed &) {
+		} catch (luabind::cast_failed &) {
 		}
 	}
 
-	self->SendIllusionPacket(race, gender, texture, helmtexture, haircolor, beardcolor, eyecolor1, eyecolor2, hairstyle, luclinface,
-		beard, aa_title, drakkin_heritage, drakkin_tattoo, drakkin_details, size);
+	cur = illusion["send_appearance_effects"];
+	if (luabind::type(cur) != LUA_TNIL) {
+		try {
+			send_appearance_effects = luabind::object_cast<bool>(cur);
+		} catch (luabind::cast_failed &) {
+		}
+	}
+
+	cur = illusion["target"];
+	if (luabind::type(cur) != LUA_TNIL) {
+		try {
+			target = luabind::object_cast<Lua_Client>(cur);
+		} catch (luabind::cast_failed &) {
+		}
+	}
+
+	self->SendIllusionPacket(
+		race,
+		gender,
+		texture,
+		helmtexture,
+		haircolor,
+		beardcolor,
+		eyecolor1,
+		eyecolor2,
+		hairstyle,
+		luclinface,
+		beard,
+		aa_title,
+		drakkin_heritage,
+		drakkin_tattoo,
+		drakkin_details,
+		size,
+		send_appearance_effects,
+		target
+	);
 }
 
 void Lua_Mob::ChangeRace(int in) {
