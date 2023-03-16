@@ -1906,7 +1906,7 @@ void Perl_Mob_SendIllusionPacket(Mob* self, perl::reference table_ref)
 		drakkin_tattoo,
 		drakkin_details,
 		size,
-		send_appearances,
+		send_appearance_effects,
 		target
 	);
 }
