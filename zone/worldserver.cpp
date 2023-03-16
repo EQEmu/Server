@@ -3151,7 +3151,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	}
 	case ServerOP_UpdateSchedulerEvents: {
 		LogScheduler("Received signal from world to update");
-		if (m_zone_scheduler) {
+		if (GetScheduler()) {
 			m_zone_scheduler->LoadScheduledEvents();
 		}
 
