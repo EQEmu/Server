@@ -798,7 +798,6 @@ private:
 	bool _rangerAutoWeaponSelect;
 	BotRoleType _botRole;
 	EQ::constants::StanceType _botStance;
-	EQ::constants::StanceType _baseBotStance;
 	unsigned int RestRegenHP;
 	unsigned int RestRegenMana;
 	unsigned int RestRegenEndurance;
