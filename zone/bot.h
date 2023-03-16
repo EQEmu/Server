@@ -787,7 +787,6 @@ private:
 	EQ::InventoryProfile m_inv;
 	double _lastTotalPlayTime;
 	time_t _startTotalPlayTime;
-	Mob* _previousTarget;
 	uint32 _guildId;
 	uint8 _guildRank;
 	std::string _guildName;
