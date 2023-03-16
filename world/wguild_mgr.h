@@ -13,8 +13,6 @@ public:
 	//called by zoneserver when it receives a guild message from zone.
 	void ProcessZonePacket(ServerPacket *pack);
 
-	uint8 *MakeGuildMembers(uint32 guild_id, const char *prefix_name, uint32 &length);	//make a guild member list packet, returns ownership of the buffer.
-
 protected:
 	virtual void SendGuildRefresh(uint32 guild_id, bool name, bool motd, bool rank, bool relation);
 	virtual void SendCharRefresh(uint32 old_guild_id, uint32 guild_id, uint32 charid);
