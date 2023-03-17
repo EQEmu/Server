@@ -659,37 +659,6 @@ void Client::CreateEQEmuAccount(
 }
 
 /**
- * @param connection
- */
-void Client::LoginOnNewConnection(std::shared_ptr<EQ::Net::DaybreakConnection> connection)
-{
-	m_login_connection = connection;
-}
-
-/**
- * @param conn
- * @param from
- * @param to
- */
-void Client::LoginOnStatusChange(
-	std::shared_ptr<EQ::Net::DaybreakConnection> conn,
-	EQ::Net::DbProtocolStatus from,
-	EQ::Net::DbProtocolStatus to
-)
-{
-	if (to == EQ::Net::StatusConnected) {
-		LogDebug("EQ::Net::StatusConnected");
-		LoginSendSessionReady();
-	}
-
-	if (to == EQ::Net::StatusDisconnecting || to == EQ::Net::StatusDisconnected) {
-		LogDebug("EQ::Net::StatusDisconnecting || EQ::Net::StatusDisconnected");
-
-		DoFailedLogin();
-	}
-}
-
-/**
  * @param conn
  * @param from
  * @param to
@@ -700,23 +669,6 @@ void Client::LoginOnStatusChangeIgnored(
 	EQ::Net::DbProtocolStatus to
 )
 {
-}
-
-/**
- * @param conn
- * @param p
- */
-void Client::LoginOnPacketRecv(std::shared_ptr<EQ::Net::DaybreakConnection> conn, const EQ::Net::Packet &p)
-{
-	auto opcode = p.GetUInt16(0);
-	switch (opcode) {
-		case 0x0017: //OP_ChatMessage
-			LoginSendLogin();
-			break;
-		case 0x0018:
-			LoginProcessLoginResponse(p);
-			break;
-	}
 }
 
 void Client::LoginSendSessionReady()
