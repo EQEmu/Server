@@ -114,7 +114,7 @@ bool Bot::BotCastSong(Mob* tar, uint8 botLevel) {
 			continue;
 		if (!CheckSpellRecastTimers(this, iter.SpellIndex))
 			continue;
-		if (spells[iter.SpellId].zone_type != zone->GetZoneType())
+		if (!IsSpellUsableThisZoneType(iter.SpellId, zone->GetZoneType()))
 			continue;
 		switch (spells[iter.SpellId].target_type) {
 		case ST_AEBard:
@@ -148,7 +148,7 @@ bool Bot::BotCastCombatSong(Mob* tar, uint8 botLevel) {
 			continue;
 		if (!CheckSpellRecastTimers(this, iter.SpellIndex))
 			continue;
-		if (spells[iter.SpellId].zone_type != zone->GetZoneType())
+		if (!IsSpellUsableThisZoneType(iter.SpellId, zone->GetZoneType()))
 			continue;
 		switch (spells[iter.SpellId].target_type) {
 		case ST_AEBard:
@@ -180,7 +180,7 @@ bool Bot::BotCastHateReduction(Mob* tar, uint8 botLevel, const BotSpell& botSpel
 				continue;
 			if (!CheckSpellRecastTimers(this, iter.SpellIndex))
 				continue;
-			if (spells[iter.SpellId].zone_type != zone->GetZoneType())
+			if (!IsSpellUsableThisZoneType(iter.SpellId, zone->GetZoneType()))
 				continue;
 			if (spells[iter.SpellId].target_type != ST_Target)
 				continue;
@@ -320,7 +320,7 @@ bool Bot::BotCastSlow(Mob* tar, uint8 botLevel, uint8 botClass, BotSpell& botSpe
 						continue;
 					}
 
-					if (spells[iter.SpellId].zone_type != zone->GetZoneType()) {
+					if (!IsSpellUsableThisZoneType(iter.SpellId, zone->GetZoneType())) {
 						continue;
 					}
 
