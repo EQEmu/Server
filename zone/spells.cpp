@@ -6327,7 +6327,6 @@ void Client::InitializeBuffSlots()
 		buffs[x].spellid = SPELL_UNKNOWN;
 		buffs[x].UpdateClient = false;
 	}
-	current_buff_count = 0;
 }
 
 void Client::UninitializeBuffSlots()
@@ -6343,7 +6342,6 @@ void NPC::InitializeBuffSlots()
 		buffs[x].spellid      = SPELL_UNKNOWN;
 		buffs[x].UpdateClient = false;
 	}
-	current_buff_count = 0;
 }
 
 void NPC::UninitializeBuffSlots()

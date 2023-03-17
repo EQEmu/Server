@@ -433,7 +433,7 @@ public:
 	bool HasDiscBuff();
 	virtual uint32 GetFirstBuffSlot(bool disc, bool song);
 	virtual uint32 GetLastBuffSlot(bool disc, bool song);
-	virtual void InitializeBuffSlots() { buffs = nullptr; current_buff_count = 0; }
+	virtual void InitializeBuffSlots() { buffs = nullptr; }
 	virtual void UninitializeBuffSlots() { }
 	EQApplicationPacket *MakeBuffsPacket(bool for_target = true);
 	void SendBuffsToClient(Client *c);
@@ -1491,7 +1491,6 @@ protected:
 	uint8 maxlevel;
 	uint32 scalerate;
 	Buffs_Struct *buffs;
-	uint32 current_buff_count;
 	StatBonuses itembonuses;
 	StatBonuses spellbonuses;
 	StatBonuses aabonuses;
