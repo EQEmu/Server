@@ -3924,8 +3924,8 @@ uint32 ZoneDatabase::SaveCharacterCorpse(uint32 charid, const char* charname, ui
 	{
 		if (first_entry != 1){
 			corpse_items_query = StringFormat("REPLACE INTO `character_corpse_items` \n"
-				" (corpse_id, equip_slot, item_id, charges, aug_1, aug_2, aug_3, aug_4, aug_5, aug_6, attuned) \n"
-				" VALUES (%u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u) \n",
+				" (corpse_id, equip_slot, item_id, charges, aug_1, aug_2, aug_3, aug_4, aug_5, aug_6, attuned, custom_data, ornamenticon, ornamentidfile, ornament_hero_model) \n"
+				" VALUES (%u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, '%s', %u, %u, %u) \n",
 				last_insert_id,
 				item.equip_slot,
 				item.item_id,
@@ -3936,12 +3936,16 @@ uint32 ZoneDatabase::SaveCharacterCorpse(uint32 charid, const char* charname, ui
 				item.aug_4,
 				item.aug_5,
 				item.aug_6,
-				item.attuned
+				item.attuned,
+				item.custom_data.c_str(),
+				item.ornamenticon,
+				item.ornamentidfile,
+				item.ornament_hero_model
 			);
 			first_entry = 1;
 		}
 		else{
-			corpse_items_query = corpse_items_query + StringFormat(", (%u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u) \n",
+			corpse_items_query = corpse_items_query + StringFormat(", (%u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, '%s', %u, %u, %u) \n",
 				last_insert_id,
 				item.equip_slot,
 				item.item_id,
@@ -3952,7 +3956,11 @@ uint32 ZoneDatabase::SaveCharacterCorpse(uint32 charid, const char* charname, ui
 				item.aug_4,
 				item.aug_5,
 				item.aug_6,
-				item.attuned
+				item.attuned,
+				item.custom_data.c_str(),
+				item.ornamenticon,
+				item.ornamentidfile,
+				item.ornament_hero_model
 			);
 		}
 	}
@@ -3993,18 +4001,6 @@ uint32 ZoneDatabase::GetCharacterCorpseID(uint32 char_id, uint8 corpse) {
 		return Strings::ToUnsignedInt(row[0]);
 	else
 		return 0;
-}
-
-uint32 ZoneDatabase::GetCharacterCorpseItemCount(uint32 corpse_id){
-	std::string query = StringFormat("SELECT COUNT(*) FROM character_corpse_items WHERE `corpse_id` = %u",
-		corpse_id
-	);
-	auto results = QueryDatabase(query);
-	auto& row = results.begin();
-	if (results.Success() && results.RowsAffected() != 0){
-		return Strings::ToInt(row[0]);
-	}
-	return 0;
 }
 
 uint32 ZoneDatabase::GetCharacterCorpseItemAt(uint32 corpse_id, uint16 slotid) {
@@ -4107,7 +4103,11 @@ bool ZoneDatabase::LoadCharacterCorpseData(uint32 corpse_id, CharacterCorpseEntr
 		"aug_4,                       \n"
 		"aug_5,                       \n"
 		"aug_6,                       \n"
-		"attuned                      \n"
+		"attuned,                     \n"
+		"custom_data,                 \n"
+		"ornamenticon,                \n"
+		"ornamentidfile,              \n"
+		"ornament_hero_model          \n"
 		"FROM                         \n"
 		"character_corpse_items       \n"
 		"WHERE `corpse_id` = %u\n"
@@ -4130,6 +4130,18 @@ bool ZoneDatabase::LoadCharacterCorpseData(uint32 corpse_id, CharacterCorpseEntr
 		item.aug_5 = Strings::ToInt(row[r++]); 			// aug_5,
 		item.aug_6 = Strings::ToInt(row[r++]); 			// aug_6,
 		item.attuned = Strings::ToInt(row[r++]); 		// attuned,
+
+		if (row[r]) {
+			item.custom_data = row[r++];
+		}
+		else {
+			r++;
+		}
+
+		item.ornamenticon = Strings::ToUnsignedInt(row[r++]);
+		item.ornamentidfile = Strings::ToUnsignedInt(row[r++]);
+		item.ornament_hero_model = Strings::ToUnsignedInt(row[r++]);
+
 		corpse.items.push_back(std::move(item));
 		r = 0;
 		i++;

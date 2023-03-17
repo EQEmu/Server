@@ -287,17 +287,21 @@ struct ClientMercEntry {
 
 struct CharacterCorpseItemEntry
 {
-	uint32	item_id;
-	int16	equip_slot;
-	uint16	charges;
-	uint16	lootslot;
-	uint32	aug_1;
-	uint32	aug_2;
-	uint32	aug_3;
-	uint32	aug_4;
-	uint32	aug_5;
-	uint32	aug_6;
-	int8	attuned;
+	uint32 item_id;
+	int16 equip_slot;
+	uint16 charges;
+	uint16 lootslot;
+	uint32 aug_1;
+	uint32 aug_2;
+	uint32 aug_3;
+	uint32 aug_4;
+	uint32 aug_5;
+	uint32 aug_6;
+	int8 attuned;
+	std::string custom_data;
+	uint32 ornamenticon;
+	uint32 ornamentidfile;
+	uint32 ornament_hero_model;
 };
 
 struct CharacterCorpseEntry 
@@ -474,7 +478,6 @@ public:
 
 	/* Corpses  */
 	bool		DeleteItemOffCharacterCorpse(uint32 db_id, uint32 equip_slot, uint32 item_id);
-	uint32		GetCharacterCorpseItemCount(uint32 corpse_id);
 	bool		LoadCharacterCorpseData(uint32 corpse_id, CharacterCorpseEntry &corpse);
 	Corpse*		LoadCharacterCorpse(uint32 player_corpse_id);
 	Corpse*		SummonBuriedCharacterCorpses(uint32 char_id, uint32 dest_zoneid, uint16 dest_instanceid, const glm::vec4& position);

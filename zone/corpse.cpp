@@ -743,6 +743,10 @@ bool Corpse::Save() {
 		item_entry.aug_5 = item->aug_5;
 		item_entry.aug_6 = item->aug_6;
 		item_entry.attuned = item->attuned;
+		item_entry.custom_data = item->custom_data;
+		item_entry.ornamenticon = item->ornamenticon;
+		item_entry.ornamentidfile = item->ornamentidfile;
+		item_entry.ornament_hero_model = item->ornament_hero_model;
 
 		corpse_entry.items.push_back(std::move(item_entry));
 	}
@@ -828,7 +832,6 @@ void Corpse::AddItem(uint32 itemnum,
 
 	auto item = new ServerLootItem_Struct;
 
-	memset(item, 0, sizeof(ServerLootItem_Struct));
 	item->item_id = itemnum;
 	item->charges = charges;
 	item->equip_slot = slot;
