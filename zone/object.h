@@ -140,7 +140,6 @@ public:
 	uint32 GetDBID();
 	uint32 GetType();
 	void SetType(uint32 type);
-	void SetDBID(uint32 dbid);
 	uint32 GetIcon();
 	void SetIcon(uint32 icon);
 	uint32 GetItemID();
