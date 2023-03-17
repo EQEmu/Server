@@ -72,7 +72,7 @@ Trap::Trap() :
 	disarmed = false;
 	respawn_time = 0;
 	respawn_var = 0;
-	hiddenTrigger = nullptr;
+	SetHiddenTrigger(nullptr);
 	ownHiddenTrigger = false;
 	chance = 0;
 	triggered_number = 0;
@@ -526,7 +526,7 @@ void Trap::CreateHiddenTrigger()
 	npca->GiveNPCTypeData(make_npc);
 	entity_list.AddNPC(npca);
 
-	hiddenTrigger = npca;
+	SetHiddenTrigger(npca);
 	ownHiddenTrigger = true;
 }
 bool ZoneDatabase::SetTrapData(Trap* trap, bool repopnow) {
@@ -599,7 +599,7 @@ void Trap::UpdateTrap(bool respawn, bool repopnow)
 	if (hiddenTrigger)
 	{
 		hiddenTrigger->Depop();
-		hiddenTrigger = nullptr;
+		SetHiddenTrigger(nullptr);
 	}
 	times_triggered = 0;
 	Client* trigger = entity_list.GetClientByCharID(charid);
