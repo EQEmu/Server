@@ -1683,7 +1683,6 @@ protected:
 	bool rooted;
 	bool silenced;
 	bool amnesiad;
-	bool inWater; // Set to true or false by Water Detection code if enabled by rules
 	bool offhand;
 	bool has_shieldequiped;
 	bool has_twohandbluntequiped;
