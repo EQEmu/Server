@@ -1473,7 +1473,7 @@ void Merc::AI_Process() {
 			return;
 		}
 
-		if (!(m_PlayerState & static_cast<uint32>(PlayerState::Aggressive)))
+		if (!(GetPlayerState() & static_cast<uint32>(PlayerState::Aggressive)))
 			SendAddPlayerState(PlayerState::Aggressive);
 
 		bool atCombatRange = false;
@@ -1716,7 +1716,7 @@ void Merc::AI_Process() {
 		confidence_timer.Disable();
 		_check_confidence = false;
 
-		if (m_PlayerState & static_cast<uint32>(PlayerState::Aggressive))
+		if (GetPlayerState() & static_cast<uint32>(PlayerState::Aggressive))
 			SendRemovePlayerState(PlayerState::Aggressive);
 
 		if(!check_target_timer.Enabled())

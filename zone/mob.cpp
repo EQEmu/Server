@@ -1211,7 +1211,7 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 	ns->spawn.class_	= class_;
 	ns->spawn.gender	= gender;
 	ns->spawn.level		= level;
-	ns->spawn.PlayerState	= m_PlayerState;
+	ns->spawn.PlayerState	= GetPlayerState();
 	ns->spawn.deity		= deity;
 	ns->spawn.animation	= 0;
 	ns->spawn.findable	= findable?1:0;

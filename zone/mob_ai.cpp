@@ -1085,7 +1085,7 @@ void Mob::AI_Process() {
 			}
 		}
 
-		if (!(m_PlayerState & static_cast<uint32>(PlayerState::Aggressive)))
+		if (!(GetPlayerState() & static_cast<uint32>(PlayerState::Aggressive)))
 			SendAddPlayerState(PlayerState::Aggressive);
 
 		// NPCs will forget people after 10 mins of not interacting with them or out of range
@@ -1381,7 +1381,7 @@ void Mob::AI_Process() {
 		}
 	}
 	else {
-		if (m_PlayerState & static_cast<uint32>(PlayerState::Aggressive))
+		if (GetPlayerState() & static_cast<uint32>(PlayerState::Aggressive))
 			SendRemovePlayerState(PlayerState::Aggressive);
 
 		if (IsPetStop()) // pet stop won't be engaged, so we will always get here and we want the above branch to execute
