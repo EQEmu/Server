@@ -72,17 +72,6 @@ public:
 	const std::list<std::unique_ptr<WorldServer>> &getWorldServers() const;
 
 private:
-
-	/**
-	 * Retrieves a server(if exists) by ip address
-	 * Useful utility for the reconnect process
-	 *
-	 * @param ip_address
-	 * @param port
-	 * @return
-	 */
-	WorldServer *GetServerByAddress(const std::string &ip_address, int port);
-
 	std::unique_ptr<EQ::Net::ServertalkServer> m_server_connection;
 	std::list<std::unique_ptr<WorldServer>>    m_world_servers;
 

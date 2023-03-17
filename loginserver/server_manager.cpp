@@ -74,25 +74,6 @@ ServerManager::ServerManager()
 ServerManager::~ServerManager() = default;
 
 /**
- * @param ip_address
- * @param port
- * @return
- */
-WorldServer *ServerManager::GetServerByAddress(const std::string &ip_address, int port)
-{
-	auto iter = m_world_servers.begin();
-	while (iter != m_world_servers.end()) {
-		if ((*iter)->GetConnection()->Handle()->RemoteIP() == ip_address &&
-			(*iter)->GetConnection()->Handle()->RemotePort()) {
-			return (*iter).get();
-		}
-		++iter;
-	}
-
-	return nullptr;
-}
-
-/**
  * @param client
  * @param sequence
  * @return
