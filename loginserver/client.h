@@ -198,14 +198,6 @@ private:
 
 	std::string m_stored_user;
 	std::string m_stored_pass;
-	void LoginOnStatusChangeIgnored(
-		std::shared_ptr<EQ::Net::DaybreakConnection> conn,
-		EQ::Net::DbProtocolStatus from,
-		EQ::Net::DbProtocolStatus to
-	);
-	void LoginSendSessionReady();
-	void LoginSendLogin();
-	void LoginProcessLoginResponse(const EQ::Net::Packet &p);
 	static bool ProcessHealthCheck(std::string username);
 };
 
