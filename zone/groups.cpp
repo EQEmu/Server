@@ -9,7 +9,7 @@
 	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.					
 
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
@@ -26,6 +26,7 @@
 #include "worldserver.h"
 #include "string_ids.h"
 #include "../common/events/player_event_logs.h"
+#include "../common/repositories/group_id_repository.h"
 
 extern EntityList entity_list;
 extern WorldServer worldserver;
@@ -246,7 +247,7 @@ bool Group::AddMember(Mob* newmember, const char *NewMemberName, uint32 Characte
 	uint32 i = 0;
 	for (i = 0; i < MAX_GROUP_MEMBERS; ++i)
 	{
-		if(!strcasecmp(membername[i], NewMemberName))
+		if (!strcasecmp(membername[i], NewMemberName))
 		{
 			return false;
 		}
@@ -495,7 +496,7 @@ void Group::SendEndurancePacketFrom(Mob* member)
 
 //updates a group member's client pointer when they zone in
 //if the group was in the zone already
-bool Group::UpdatePlayer(Mob* update){
+bool Group::UpdatePlayer(Mob* update) {
 
 	if (!update)
 		return false;
@@ -1138,29 +1139,30 @@ void Group::TeleportGroup(Mob* sender, uint32 zoneID, uint16 instance_id, float 
 }
 
 bool Group::LearnMembers() {
-	std::string query = StringFormat("SELECT name FROM group_id WHERE groupid = %lu", (unsigned long)GetID());
-	auto results = database.QueryDatabase(query);
-	if (!results.Success())
-        return false;
 
-	if (results.RowCount() == 0) {
+	auto rows = GroupIdRepository::GetWhere(
+		database,
+		fmt::format(
+			"groupid = {}",
+			GetID()
+		)
+	);
+
+	if (rows.empty()) {
 		LogError(
-			"Error getting group members for group [{}]: [{}]",
-			(unsigned long) GetID(),
-			results.ErrorMessage().c_str()
+			"Error getting group members for group [{}]",
+			GetID()
 		);
-
 		return false;
 	}
 
 	int memberIndex = 0;
-    for(auto row = results.begin(); row != results.end(); ++row) {
-		if(!row[0])
+	for (const auto& member : rows) {
+		if (member.name.empty()) {
 			continue;
-
+		}
 		members[memberIndex] = nullptr;
-		strn0cpy(membername[memberIndex], row[0], 64);
-
+		strn0cpy(membername[memberIndex], member.name.c_str(), 64);
 		memberIndex++;
 	}
 
@@ -1174,36 +1176,23 @@ void Group::VerifyGroup() {
 		Only called every once in a while (on member re-join for now).
 	*/
 
-	uint32 i;
-	for (i = 0; i < MAX_GROUP_MEMBERS; i++) {
+	for (uint32 i = 0; i < MAX_GROUP_MEMBERS; i++) {
 		if (membername[i][0] == '\0') {
-#if EQDEBUG >= 7
-	LogDebug("Group [{}]: Verify [{}]: Empty.\n", (unsigned long)GetID(), i);
-#endif
 			members[i] = nullptr;
 			continue;
 		}
 
 		Mob *them = entity_list.GetMob(membername[i]);
 		if(them == nullptr && members[i] != nullptr) {	//they aren't in zone
-#if EQDEBUG >= 6
-		LogDebug("Member of group [{}] named [{}] has disappeared!!", (unsigned long)GetID(), membername[i]);
-#endif
 			membername[i][0] = '\0';
 			members[i] = nullptr;
 			continue;
 		}
 
 		if(them != nullptr && members[i] != them) {	//our pointer is out of date... not so good.
-#if EQDEBUG >= 5
-		LogDebug("Member of group [{}] named [{}] had an out of date pointer!!", (unsigned long)GetID(), membername[i]);
-#endif
 			members[i] = them;
 			continue;
 		}
-#if EQDEBUG >= 8
-		LogDebug("Member of group [{}] named [{}] is valid", (unsigned long)GetID(), membername[i]);
-#endif
 	}
 }
 

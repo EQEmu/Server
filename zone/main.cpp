@@ -85,6 +85,7 @@ volatile bool RunLoops = true;
 #endif
 
 extern volatile bool is_zone_loaded;
+extern bool Critical = false;
 
 #include "zone_event_scheduler.h"
 #include "../common/file.h"

@@ -389,9 +389,7 @@ void EntityList::GroupProcess()
 	for (auto &group : group_list)
 		group->Process();
 
-#if EQDEBUG >= 5
-	CheckGroupList (__FILE__, __LINE__);
-#endif
+
 }
 
 void EntityList::QueueToGroupsForNPCHealthAA(Mob *sender, const EQApplicationPacket *app)
@@ -609,9 +607,7 @@ void EntityList::AddGroup(Group *group)
 	}
 
 	AddGroup(group, gid);
-#if EQDEBUG >= 5
-	CheckGroupList (__FILE__, __LINE__);
-#endif
+
 }
 
 void EntityList::AddGroup(Group *group, uint32 gid)
@@ -2115,9 +2111,6 @@ Group *EntityList::GetGroupByMob(Mob *mob)
 			return *iterator;
 		++iterator;
 	}
-#if EQDEBUG >= 5
-	CheckGroupList (__FILE__, __LINE__);
-#endif
 	return nullptr;
 }
 
@@ -2132,9 +2125,6 @@ Group *EntityList::GetGroupByLeaderName(const char *leader)
 			return *iterator;
 		++iterator;
 	}
-#if EQDEBUG >= 5
-	CheckGroupList (__FILE__, __LINE__);
-#endif
 	return nullptr;
 }
 
@@ -2149,9 +2139,6 @@ Group *EntityList::GetGroupByID(uint32 group_id)
 			return *iterator;
 		++iterator;
 	}
-#if EQDEBUG >= 5
-	CheckGroupList (__FILE__, __LINE__);
-#endif
 	return nullptr;
 }
 
@@ -2170,13 +2157,12 @@ Group *EntityList::GetGroupByClient(Client *client)
 	iterator = group_list.begin();
 
 	while (iterator != group_list.end()) {
-		if ((*iterator)->IsGroupMember(client->CastToMob()))
+		if ((*iterator)->IsGroupMember(client->CastToMob())) {
 			return *iterator;
+		}
 		++iterator;
 	}
-#if EQDEBUG >= 5
-	CheckGroupList (__FILE__, __LINE__);
-#endif
+
 	return nullptr;
 }
 
@@ -2187,9 +2173,9 @@ Raid *EntityList::GetRaidByLeaderName(const char *leader)
 	iterator = raid_list.begin();
 
 	while (iterator != raid_list.end()) {
-		if ((*iterator)->GetLeader())
-			if(strcmp((*iterator)->GetLeader()->GetName(), leader) == 0)
-				return *iterator;
+		if ((*iterator)->GetLeader() && strcmp((*iterator)->GetLeader()->GetName(), leader) == 0) {
+			return *iterator;
+		}
 		++iterator;
 	}
 	return nullptr;
@@ -2209,22 +2195,20 @@ Raid *EntityList::GetRaidByID(uint32 id)
 	return nullptr;
 }
 
-Raid *EntityList::GetRaidByClient(Client* client)
+Raid* EntityList::GetRaidByClient(Client* client)
 {
 	if (client->p_raid_instance) {
 		return client->p_raid_instance;
 	}
 
-	std::list<Raid *>::iterator iterator;
+	std::list<Raid*>::iterator iterator;
 	iterator = raid_list.begin();
 
 	while (iterator != raid_list.end()) {
-		for (auto &member : (*iterator)->members) {
-			if (member.member) {
-				if (member.member == client) {
-					client->p_raid_instance = *iterator;
-					return *iterator;
-				}
+		for (const auto& member : (*iterator)->members) {
+			if (member.member && member.member == client) {
+				client->p_raid_instance = *iterator;
+				return *iterator;
 			}
 		}
 
@@ -2233,6 +2217,49 @@ Raid *EntityList::GetRaidByClient(Client* client)
 
 	return nullptr;
 }
+Raid* EntityList::GetRaidByBotName(const char* name)
+{
+	std::list<RaidMember> rm;
+	auto GetMembersWithNames = [&rm](Raid const* r) -> std::list<RaidMember> {
+		for (const auto& m : r->members) {
+			if (strlen(m.membername) > 0)
+				rm.push_back(m);
+		}
+		return rm;
+	};
+
+	for (const auto& r : raid_list) {
+		for (const auto& m : GetMembersWithNames(r)) {
+			if (strcmp(m.membername, name) == 0) {
+				return r;
+			}
+		}
+	}
+	return nullptr;
+}
+
+Raid* EntityList::GetRaidByBot(const Bot* bot)
+{
+	std::list<RaidMember> rm;
+	auto GetMembersWhoAreBots = [&rm](Raid* r) -> std::list<RaidMember> {
+		for (auto const& m : r->members) {
+			if (m.IsBot) {
+				rm.push_back(m);
+			}
+		}
+		return rm;
+	};
+
+	for (const auto& r : raid_list) {
+		for (const auto& m : GetMembersWhoAreBots(r)) {
+			if (m.member->CastToBot() == bot) {
+				return r;
+			}
+		}
+	}
+	return nullptr;
+}
+
 
 Raid *EntityList::GetRaidByMob(Mob *mob)
 {
@@ -2658,6 +2685,12 @@ void EntityList::RemoveAllNPCs()
 	npc_limit_list.clear();
 }
 
+void EntityList::RemoveAllBots()
+{
+	// doesn't clear the data
+	bot_list.clear();
+}
+
 void EntityList::RemoveAllMercs()
 {
 	// doesn't clear the data
@@ -2671,9 +2704,6 @@ void EntityList::RemoveAllGroups()
 		group_list.pop_front();
 		safe_delete(group);
 	}
-#if EQDEBUG >= 5
-	CheckGroupList (__FILE__, __LINE__);
-#endif
 }
 
 void EntityList::RemoveAllRaids()
@@ -3081,6 +3111,8 @@ void EntityList::Clear()
 {
 	RemoveAllClients();
 	entity_list.RemoveAllTraps(); //we can have child npcs so we go first
+	entity_list.RemoveAllMercs();
+	entity_list.RemoveAllBots();
 	entity_list.RemoveAllNPCs();
 	entity_list.RemoveAllMobs();
 	entity_list.RemoveAllCorpses();
