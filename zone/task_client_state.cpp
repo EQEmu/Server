@@ -1111,7 +1111,7 @@ void ClientTaskState::RewardTask(Client *c, const TaskInformation *ti, ClientTas
 		if (pos_reward > 100 && pos_reward < 25700) {
 			uint8 max_level   = pos_reward / 100;
 			uint8 exp_percent = pos_reward - (max_level * 100);
-			c->AddLevelBasedExp(exp_percent, max_level);
+			c->AddLevelBasedExp(exp_percent, max_level, RuleB(TaskSystem, ExpRewardsIgnoreLevelBasedEXPMods));
 		}
 	}
 
