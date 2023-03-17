@@ -778,7 +778,6 @@ private:
 	uint32 _botOwnerCharacterID;
 	bool _spawnStatus;
 	Mob* _botOwner;
-	bool _botOrderAttack;
 	bool m_bot_archery_setting;
 	bool _botCharmer;
 	bool _petChooser;
