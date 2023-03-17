@@ -131,13 +131,6 @@ void ClientListEntry::SetChar(uint32 iCharID, const char *iCharName)
 	strn0cpy(pname, iCharName, sizeof(pname));
 }
 
-void ClientListEntry::SetOnline(ZoneServer *iZS, CLE_Status iOnline)
-{
-	if (iZS == Server()) {
-		SetOnline(iOnline);
-	}
-}
-
 void ClientListEntry::SetOnline(CLE_Status iOnline)
 {
 	LogClientLogin(
