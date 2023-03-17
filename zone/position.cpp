@@ -19,10 +19,6 @@ std::string to_string(const glm::vec2 &position){
 	return StringFormat("(%.3f, %.3f)", position.x,position.y);
 }
 
-bool IsOrigin(const glm::vec2 &position) {
-	return glm::dot(position, position) == 0;
-}
-
 bool IsOrigin(const glm::vec3 &position) {
 	return glm::dot(position, position) == 0;
 }
