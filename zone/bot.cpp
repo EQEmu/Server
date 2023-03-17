@@ -1637,7 +1637,6 @@ bool Bot::Process()
 
 		_botOwner = nullptr;
 		_botOwnerCharacterID = 0;
-		_previousTarget = nullptr;
 
 		return false;
 	}
@@ -1892,11 +1891,26 @@ bool Bot::CheckBotDoubleAttack(bool tripleAttack) {
 	return false;
 }
 
-void Bot::SetTarget(Mob* mob) {
-	if (mob != this) {
-		if (mob != GetTarget())
-			_previousTarget = GetTarget();
 
+bool Bot::CanDoSpecialAttack(Mob *other) {
+	//Make sure everything is valid before doing any attacks.
+	if (!other) {
+		SetTarget(nullptr);
+		return false;
+	}
+
+	if(!GetTarget())
+		SetTarget(other);
+
+	if ((other == nullptr || ((GetAppearance() == eaDead) || (other->IsClient() && other->CastToClient()->IsDead())) || HasDied() || (!IsAttackAllowed(other))) || other->GetInvul() || other->GetSpecialAbility(IMMUNE_MELEE))
+		return false;
+
+	return true;
+}
+
+void Bot::SetTarget(Mob *mob)
+{
+	if (mob != this) {
 		NPC::SetTarget(mob);
 	}
 }
@@ -2370,10 +2384,9 @@ bool Bot::TryMeditate() {
 			BotMeditate(true);
 		}
 
-		return true;
-	}
-	return false;
-}
+		if (!(GetPlayerState() & static_cast<uint32>(PlayerState::Aggressive))) {
+			SendAddPlayerState(PlayerState::Aggressive);
+		}
 
 // This code actually gets processed when we are too far away from target and have not engaged yet
 bool Bot::TryPursueTarget(float leash_distance, glm::vec3& Goal) {
@@ -2938,8 +2951,15 @@ bool Bot::PullingFlagChecks(Client* bot_owner) {
 		SetPullingFlag(false);
 		SetReturningFlag();
 
-		return false;
-	}
+		if (HasPet() && (GetClass() != ENCHANTER || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 1)) {
+
+			GetPet()->WipeHateList();
+			GetPet()->SetTarget(nullptr);
+		}
+
+		if (GetPlayerState() & static_cast<uint32>(PlayerState::Aggressive)) {
+			SendRemovePlayerState(PlayerState::Aggressive);
+		}
 
 	return true;
 }
@@ -3234,7 +3254,7 @@ void Bot::Depop() {
 
 	_botOwner = nullptr;
 	_botOwnerCharacterID = 0;
-	_previousTarget = nullptr;
+
 	NPC::Depop(false);
 }
 
@@ -8292,7 +8312,6 @@ void Bot::SetDefaultBotStance() {
 	if (GetClass() == WARRIOR)
 		defaultStance = EQ::constants::stanceAggressive;
 
-	_baseBotStance = EQ::constants::stancePassive;
 	_botStance = defaultStance;
 }
 

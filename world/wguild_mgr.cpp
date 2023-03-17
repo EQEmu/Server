@@ -101,7 +101,6 @@ void WorldGuildManager::ProcessZonePacket(ServerPacket *pack) {
 		client_list.UpdateClientGuild(s->char_id, s->guild_id);
 
 		//broadcast this update to any zone with a member in this guild.
-		//client_list.SendGuildPacket(s->guild_id, pack);
 		//because im sick of this not working, sending it to all zones, just spends a bit more bandwidth.
 		zoneserver_list.SendPacket(pack);
 
