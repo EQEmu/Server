@@ -46,7 +46,6 @@ public:
 	void	SendCLEList(const int16& admin, const char* to, WorldTCPConnection* connection, const char* iName = 0);
 
 	bool	SendPacket(const char* to, ServerPacket* pack);
-	void	SendGuildPacket(uint32 guild_id, ServerPacket* pack);
 
 	void	ClientUpdate(ZoneServer* zoneserver, ServerClientList_Struct* scl);
 	void	CLERemoveZSRef(ZoneServer* iZS);
