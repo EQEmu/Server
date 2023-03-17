@@ -103,12 +103,6 @@ public:
 		BotTradeClientNoDropNoTrade
 	};
 
-	enum BotRoleType {
-		BotRoleMainAssist,
-		BotRoleGroupHealer,
-		BotRoleRaidHealer
-	};
-
 	enum SpellTypeIndex : uint32 {
 		spellTypeIndexNuke,
 		spellTypeIndexHeal,
@@ -488,7 +482,6 @@ public:
 	bool IsOfClientBotMerc() const override { return true; }
 
 	bool GetRangerAutoWeaponSelect() { return _rangerAutoWeaponSelect; }
-	BotRoleType GetBotRole() { return _botRole; }
 	EQ::constants::StanceType GetBotStance() { return _botStance; }
 	uint8 GetChanceToCastBySpellType(uint32 spellType);
 	bool GetBotEnforceSpellSetting() { return m_enforce_spell_settings; }
@@ -618,7 +611,6 @@ public:
 	void SetBotOwner(Mob* botOwner) { this->_botOwner = botOwner; }
 	// void SetBotOwnerCharacterID(uint32 botOwnerCharacterID) { _botOwnerCharacterID = botOwnerCharacterID; }
 	void SetRangerAutoWeaponSelect(bool enable) { GetClass() == RANGER ? _rangerAutoWeaponSelect = enable : _rangerAutoWeaponSelect = false; }
-	void SetBotRole(BotRoleType botRole) { _botRole = botRole; }
 	void SetBotStance(EQ::constants::StanceType botStance) {
 		if (botStance >= EQ::constants::stancePassive && botStance <= EQ::constants::stanceBurnAE)
 			_botStance = botStance;
@@ -778,7 +770,6 @@ private:
 	uint32 _botOwnerCharacterID;
 	bool _spawnStatus;
 	Mob* _botOwner;
-	bool _botOrderAttack;
 	bool m_bot_archery_setting;
 	bool _botCharmer;
 	bool _petChooser;
@@ -787,7 +778,6 @@ private:
 	EQ::InventoryProfile m_inv;
 	double _lastTotalPlayTime;
 	time_t _startTotalPlayTime;
-	Mob* _previousTarget;
 	uint32 _guildId;
 	uint8 _guildRank;
 	std::string _guildName;
@@ -796,9 +786,7 @@ private:
 	std::string _suffix;
 	uint32 _lastZoneId;
 	bool _rangerAutoWeaponSelect;
-	BotRoleType _botRole;
 	EQ::constants::StanceType _botStance;
-	EQ::constants::StanceType _baseBotStance;
 	unsigned int RestRegenHP;
 	unsigned int RestRegenMana;
 	unsigned int RestRegenEndurance;

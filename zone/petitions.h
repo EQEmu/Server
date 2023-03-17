@@ -73,8 +73,7 @@ public:
 	void SetPetID(uint32 id_in)		{ petid = id_in; }
 	void SetCheckouts(uint32 checks_in) { checkouts = checks_in; }
 	void SetUnavails(uint32 unavails_in) { unavailables = unavails_in; }
-	void SetSentTime() { time(&senttime); }
-	void SetSentTime2(time_t senttime_in) { senttime = senttime_in; }
+	void SetSentTime(time_t senttime_in) { senttime = senttime_in; }
 
 protected:
 
@@ -115,7 +114,6 @@ public:
 
 private:
 	LinkedList<Petition*> list;
-	uint32 last_insert_id;
 	Mutex PList_Mutex;
 };
 

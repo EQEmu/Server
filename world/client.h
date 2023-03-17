@@ -28,8 +28,6 @@
 #include "../common/eq_packet_structs.h"
 #include "cliententry.h"
 
-#define CLIENT_TIMEOUT 30000
-
 class EQApplicationPacket;
 class EQStreamInterface;
 
@@ -101,9 +99,7 @@ private:
 
 	ClientListEntry* cle;
 	Timer	connect;
-	bool firstlogin;
 	bool seen_character_select;
-	bool realfirstlogin;
 
 	bool HandlePacket(const EQApplicationPacket *app);
 	bool HandleNameApprovalPacket(const EQApplicationPacket *app);

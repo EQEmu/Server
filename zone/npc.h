@@ -110,12 +110,10 @@ class NPC : public Mob
 public:
 	static NPC* SpawnNPC(const char* spawncommand, const glm::vec4& position, Client* client = nullptr);
 	static bool	SpawnZoneController();
-	static int8 GetAILevel(bool iForceReRead = false);
 
 	// loot recording / simulator
 	bool IsRecordLootStats() const;
 	void SetRecordLootStats(bool record_loot_stats);
-	void FlushLootStats();
 	const std::vector<uint32> &GetRolledItems() const;
 	int GetRolledItemCount(uint32 item_id);
 
