@@ -64,7 +64,6 @@ protected:
 	const int			ID;
 	std::shared_ptr<EQ::Net::ServertalkServerConnection> tcpc;
 	std::unique_ptr<EQ::Timer> m_process_timer;
-	bool				authenticated;
 	std::string			m_name;
 	Timer				m_bootTimer;
 
