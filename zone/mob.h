@@ -1771,7 +1771,6 @@ protected:
 
 	int8 last_hp_percent;
 	int32 last_hp;
-	int32 last_max_hp;
 
 	int cur_wp;
 	glm::vec4 m_CurrentWayPoint;
