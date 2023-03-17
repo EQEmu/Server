@@ -936,7 +936,6 @@ private:
 	bool LoadPet();	// Load and spawn bot pet if there is one
 	bool SavePet();	// Save and depop bot pet if there is one
 	bool DeletePet();
-
 };
 
 bool IsSpellInBotList(DBbotspells_Struct* spell_list, uint16 iSpellID);

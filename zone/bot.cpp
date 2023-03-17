@@ -1891,23 +1891,6 @@ bool Bot::CheckBotDoubleAttack(bool tripleAttack) {
 	return false;
 }
 
-
-bool Bot::CanDoSpecialAttack(Mob *other) {
-	//Make sure everything is valid before doing any attacks.
-	if (!other) {
-		SetTarget(nullptr);
-		return false;
-	}
-
-	if(!GetTarget())
-		SetTarget(other);
-
-	if ((other == nullptr || ((GetAppearance() == eaDead) || (other->IsClient() && other->CastToClient()->IsDead())) || HasDied() || (!IsAttackAllowed(other))) || other->GetInvul() || other->GetSpecialAbility(IMMUNE_MELEE))
-		return false;
-
-	return true;
-}
-
 void Bot::SetTarget(Mob *mob)
 {
 	if (mob != this) {
@@ -2378,15 +2361,17 @@ bool Bot::TryMeditate() {
 	if (!IsMoving() && !spellend_timer.Enabled()) {
 		if (GetTarget() && AI_EngagedCastCheck()) {
 			BotMeditate(false);
-		}
-
-		else if (GetArchetype() == ARCHETYPE_CASTER) {
+		} else if (GetArchetype() == ARCHETYPE_CASTER) {
 			BotMeditate(true);
 		}
 
 		if (!(GetPlayerState() & static_cast<uint32>(PlayerState::Aggressive))) {
 			SendAddPlayerState(PlayerState::Aggressive);
 		}
+		return true;
+	}
+	return false;
+}
 
 // This code actually gets processed when we are too far away from target and have not engaged yet
 bool Bot::TryPursueTarget(float leash_distance, glm::vec3& Goal) {
@@ -2951,7 +2936,8 @@ bool Bot::PullingFlagChecks(Client* bot_owner) {
 		SetPullingFlag(false);
 		SetReturningFlag();
 
-		if (HasPet() && (GetClass() != ENCHANTER || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 1)) {
+		if (HasPet() &&
+			(GetClass() != ENCHANTER || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 1)) {
 
 			GetPet()->WipeHateList();
 			GetPet()->SetTarget(nullptr);
@@ -2960,6 +2946,7 @@ bool Bot::PullingFlagChecks(Client* bot_owner) {
 		if (GetPlayerState() & static_cast<uint32>(PlayerState::Aggressive)) {
 			SendRemovePlayerState(PlayerState::Aggressive);
 		}
+	}
 
 	return true;
 }
