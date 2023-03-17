@@ -787,7 +787,6 @@ private:
 	uint32 _lastZoneId;
 	bool _rangerAutoWeaponSelect;
 	EQ::constants::StanceType _botStance;
-	EQ::constants::StanceType _baseBotStance;
 	unsigned int RestRegenHP;
 	unsigned int RestRegenMana;
 	unsigned int RestRegenEndurance;

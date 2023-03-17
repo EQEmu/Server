@@ -8778,7 +8778,6 @@ void Bot::SetDefaultBotStance() {
 	if (GetClass() == WARRIOR)
 		defaultStance = EQ::constants::stanceAggressive;
 
-	_baseBotStance = EQ::constants::stancePassive;
 	_botStance = defaultStance;
 }
 
