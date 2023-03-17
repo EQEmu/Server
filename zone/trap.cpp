@@ -73,7 +73,6 @@ Trap::Trap() :
 	respawn_time = 0;
 	respawn_var = 0;
 	SetHiddenTrigger(nullptr);
-	ownHiddenTrigger = false;
 	chance = 0;
 	triggered_number = 0;
 	times_triggered = 0;
@@ -527,8 +526,8 @@ void Trap::CreateHiddenTrigger()
 	entity_list.AddNPC(npca);
 
 	SetHiddenTrigger(npca);
-	ownHiddenTrigger = true;
 }
+
 bool ZoneDatabase::SetTrapData(Trap* trap, bool repopnow) {
 
 	uint32 dbid = trap->db_id;
