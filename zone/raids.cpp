@@ -787,8 +787,8 @@ void Raid::BalanceMana(int32 penalty, uint32 gid, float range, Mob* caster, int3
 	int gi = 0;
 	for(; gi < MAX_RAID_MEMBERS; gi++)
 	{
-		if(members[gi].member){
-			if(members[gi].GroupNumber == gid)
+		if (members[gi].member && !members[gi].IsBot) {
+			if (members[gi].GroupNumber == gid)
 			{
 				if (members[gi].member->GetMaxMana() > 0) {
 					distance = DistanceSquared(caster->GetPosition(), members[gi].member->GetPosition());
@@ -811,17 +811,17 @@ void Raid::BalanceMana(int32 penalty, uint32 gid, float range, Mob* caster, int3
 
 	for(gi = 0; gi < MAX_RAID_MEMBERS; gi++)
 	{
-		if(members[gi].member){
-			if(members[gi].GroupNumber == gid)
+		if (members[gi].member) {
+			if (members[gi].GroupNumber == gid)
 			{
 				distance = DistanceSquared(caster->GetPosition(), members[gi].member->GetPosition());
-				if(distance <= range2){
-					if((members[gi].member->GetMaxMana() - manataken) < 1){
+				if (distance <= range2){
+					if ((members[gi].member->GetMaxMana() - manataken) < 1) {
 						members[gi].member->SetMana(1);
 						if (members[gi].member->IsClient())
 							members[gi].member->CastToClient()->SendManaUpdate();
 					}
-					else{
+					else {
 						members[gi].member->SetMana(members[gi].member->GetMaxMana() - manataken);
 						if (members[gi].member->IsClient())
 							members[gi].member->CastToClient()->SendManaUpdate();
@@ -852,7 +852,7 @@ void Raid::SplitMoney(uint32 gid, uint32 copper, uint32 silver, uint32 gold, uin
 
 	uint8 member_count = 0;
 	for (uint32 i = 0; i < MAX_RAID_MEMBERS; i++) {
-		if (members[i].member && members[i].GroupNumber == gid) {
+		if (members[i].member && members[i].GroupNumber == gid && members[i].member->IsClient()) {
 			member_count++;
 		}
 	}
@@ -891,7 +891,7 @@ void Raid::SplitMoney(uint32 gid, uint32 copper, uint32 silver, uint32 gold, uin
 	auto platinum_split = platinum / member_count;
 
 	for (uint32 i = 0; i < MAX_RAID_MEMBERS; i++) {
-		if (members[i].member && members[i].GroupNumber == gid) { // If Group Member is Client
+		if (members[i].member && members[i].GroupNumber == gid && members[i].member->IsClient()) { // If Group Member is Client
 			members[i].member->AddMoneyToPP(
 				copper_split,
 				silver_split,
@@ -928,26 +928,21 @@ void Raid::SplitMoney(uint32 gid, uint32 copper, uint32 silver, uint32 gold, uin
 
 void Raid::TeleportGroup(Mob* sender, uint32 zoneID, uint16 instance_id, float x, float y, float z, float heading, uint32 gid)
 {
-	for(int i = 0; i < MAX_RAID_MEMBERS; i++)
+	for (const auto& m : members)
 	{
-		if(members[i].member)
-		{
-			if(members[i].GroupNumber == gid)
-			{
-				members[i].member->MovePC(zoneID, instance_id, x, y, z, heading, 0, ZoneSolicited);
-			}
+		if (m.member && m.GroupNumber == gid && m.member->IsClient()) {
+			m.member->MovePC(zoneID, instance_id, x, y, z, heading, 0, ZoneSolicited);
 		}
-
 	}
 }
 
 void Raid::TeleportRaid(Mob* sender, uint32 zoneID, uint16 instance_id, float x, float y, float z, float heading)
 {
-	for(int i = 0; i < MAX_RAID_MEMBERS; i++)
+	for (const auto& m : members)
 	{
-		if(members[i].member)
+		if (m.member && m.member->IsClient())
 		{
-			members[i].member->MovePC(zoneID, instance_id, x, y, z, heading, 0, ZoneSolicited);
+			m.member->MovePC(zoneID, instance_id, x, y, z, heading, 0, ZoneSolicited);
 		}
 	}
 }
@@ -1243,9 +1238,9 @@ void Raid::SendBulkRaid(Client *to)
 
 void Raid::QueuePacket(const EQApplicationPacket *app, bool ack_req)
 {
-	for(int x = 0; x < MAX_RAID_MEMBERS; x++)
+	for (int x = 0; x < MAX_RAID_MEMBERS; x++)
 	{
-		if(members[x].member && !members[x].IsBot)
+		if (members[x].member && members[x].member->IsClient())
 		{
 			members[x].member->QueuePacket(app, ack_req);
 		}
@@ -1867,7 +1862,7 @@ const char *Raid::GetClientNameByIndex(uint8 index)
 void Raid::RaidMessageString(Mob* sender, uint32 type, uint32 string_id, const char* message,const char* message2,const char* message3,const char* message4,const char* message5,const char* message6,const char* message7,const char* message8,const char* message9, uint32 distance) {
 	uint32 i;
 	for (i = 0; i < MAX_RAID_MEMBERS; i++) {
-		if(members[i].member) {
+		if(members[i].member && members[i].member->IsClient()) {
 			if(members[i].member != sender)
 				members[i].member->MessageString(type, string_id, message, message2, message3, message4, message5, message6, message7, message8, message9, distance);
 		}
