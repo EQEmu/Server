@@ -85,19 +85,6 @@ void ClientList::CLERemoveZSRef(ZoneServer* iZS) {
 	}
 }
 
-ClientListEntry* ClientList::GetCLE(uint32 iID) {
-	LinkedListIterator<ClientListEntry*> iterator(clientlist);
-
-	iterator.Reset();
-	while(iterator.MoreElements()) {
-		if (iterator.GetData()->GetID() == iID) {
-			return iterator.GetData();
-		}
-		iterator.Advance();
-	}
-	return 0;
-}
-
 //Check current CLE Entry IPs against incoming connection
 
 void ClientList::GetCLEIP(uint32 in_ip) {
@@ -207,31 +194,6 @@ void ClientList::GetCLEIP(uint32 in_ip) {
 	}
 }
 
-uint32 ClientList::GetCLEIPCount(uint32 in_ip) {
-	ClientListEntry* cle = nullptr;
-	LinkedListIterator<ClientListEntry*> iterator(clientlist);
-
-	int count = 0;
-	iterator.Reset();
-
-	while (iterator.MoreElements()) {
-		cle = iterator.GetData();
-		if (
-			cle->GetIP() == in_ip &&
-			(
-				cle->Admin() < RuleI(World, ExemptMaxClientsStatus) ||
-				RuleI(World, ExemptMaxClientsStatus) < 0
-			) &&
-			cle->Online() >= CLE_Status::Online
-		) { // If the IP matches, and the connection admin status is below the exempt status, or exempt status is less than 0 (no-one is exempt)
-			count++; // Increment the occurences of this IP address
-		}
-		iterator.Advance();
-	}
-
-	return count;
-}
-
 void ClientList::DisconnectByIP(uint32 in_ip) {
 	ClientListEntry* cle = nullptr;
 	LinkedListIterator<ClientListEntry*> iterator(clientlist);
@@ -289,19 +251,6 @@ ClientListEntry* ClientList::FindCLEByCharacterID(uint32 iCharID) {
 	iterator.Reset();
 	while(iterator.MoreElements()) {
 		if (iterator.GetData()->CharID() == iCharID) {
-			return iterator.GetData();
-		}
-		iterator.Advance();
-	}
-	return nullptr;
-}
-
-ClientListEntry* ClientList::FindCLEByLSID(uint32 iLSID) {
-	LinkedListIterator<ClientListEntry*> iterator(clientlist);
-
-	iterator.Reset();
-	while (iterator.MoreElements()) {
-		if (iterator.GetData()->LSID() == iLSID) {
 			return iterator.GetData();
 		}
 		iterator.Advance();
@@ -1311,21 +1260,6 @@ void ClientList::UpdateClientGuild(uint32 char_id, uint32 guild_id) {
 			cle->SetGuild(guild_id);
 		}
 		iterator.Advance();
-	}
-}
-
-void ClientList::RemoveCLEByLSID(uint32 iLSID)
-{
-	LinkedListIterator<ClientListEntry *> iterator(clientlist);
-
-	iterator.Reset();
-	while (iterator.MoreElements()) {
-		if (iterator.GetData()->LSAccountID() == iLSID) {
-			iterator.RemoveCurrent();
-		}
-		else {
-			iterator.Advance();
-		}
 	}
 }
 
