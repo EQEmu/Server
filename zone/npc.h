@@ -115,7 +115,6 @@ public:
 	// loot recording / simulator
 	bool IsRecordLootStats() const;
 	void SetRecordLootStats(bool record_loot_stats);
-	void FlushLootStats();
 	const std::vector<uint32> &GetRolledItems() const;
 	int GetRolledItemCount(uint32 item_id);
 
