@@ -20,7 +20,6 @@
 
 class Client;
 class EQApplicationPacket;
-class EQStream;
 class DynamicZone;
 class Expedition;
 class ExpeditionLockoutTimer;
