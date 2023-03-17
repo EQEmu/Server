@@ -114,7 +114,6 @@ public:
 
 private:
 	LinkedList<Petition*> list;
-	uint32 last_insert_id;
 	Mutex PList_Mutex;
 };
 
