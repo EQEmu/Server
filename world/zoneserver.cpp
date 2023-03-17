@@ -74,7 +74,6 @@ ZoneServer::ZoneServer(std::shared_ptr<EQ::Net::ServertalkServerConnection> in_c
 	zone_os_process_id = 0;
 	client_port = 0;
 	is_booting_up = false;
-	is_authenticated = false;
 	is_static_zone = false;
 	zone_player_count = 0;
 
@@ -143,20 +142,6 @@ bool ZoneServer::SetZone(uint32 in_zone_id, uint32 in_instance_id, bool in_is_st
 	return true;
 }
 
-void ZoneServer::LSShutDownUpdate(uint32 zone_id) {
-	if (WorldConfig::get()->UpdateStats) {
-		auto pack = new ServerPacket;
-		pack->opcode = ServerOP_LSZoneShutdown;
-		pack->size = sizeof(ZoneShutdown_Struct);
-		pack->pBuffer = new uchar[pack->size];
-		memset(pack->pBuffer, 0, pack->size);
-		auto zsd = (ZoneShutdown_Struct*) pack->pBuffer;
-		zsd->zone = zone_id ? zone_id : GetPrevZoneID();
-		zsd->zone_wid = GetID();
-		loginserverlist.SendPacket(pack);
-		safe_delete(pack);
-	}
-}
 void ZoneServer::LSBootUpdate(uint32 zone_id, uint32 instanceid, bool startup) {
 	if (WorldConfig::get()->UpdateStats) {
 		auto pack = new ServerPacket;
