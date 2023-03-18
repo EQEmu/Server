@@ -45,7 +45,6 @@ public:
 	bool LoadChatChannels();
 	void LoadReservedNamesFromDB();
 	void LoadFilteredNamesFromDB();
-	bool IsChatChannelInDB(const std::string& channel_name);
 	bool CheckChannelNameFilter(const std::string& channel_name);
 	void SaveChatChannel(const std::string& channel_name, const std::string& channel_owner, const std::string& channel_password, const uint16& min_status);
 	void DeleteChatChannel(const std::string& channel_name);
@@ -62,12 +61,6 @@ public:
 	void AddFriendOrIgnore(const int& char_id, const int& type, const std::string& name);
 	void RemoveFriendOrIgnore(const int& char_id, const int& type, const std::string& name);
 	void GetFriendsAndIgnore(const int& char_id, std::vector<std::string> &Friends, std::vector<std::string> &Ignorees);
-
-protected:
-	void HandleMysqlError(uint32 errnum);
-private:
-	void DBInitVars();
-
 };
 
 #endif

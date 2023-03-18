@@ -37,7 +37,6 @@ extern LauncherList launcher_list;
 LauncherLink::LauncherLink(int id, std::shared_ptr<EQ::Net::ServertalkServerConnection> c)
 	: ID(id),
 	tcpc(c),
-	authenticated(false),
 	m_name(""),
 	m_bootTimer(2000)
 {

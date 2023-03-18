@@ -45,12 +45,6 @@ public:
 	void LogPlayerMove(QSPlayerLogMove_Struct* QS, uint32 Items);
 	void LogMerchantTransaction(QSMerchantLogTransaction_Struct* QS, uint32 Items);
 	void GeneralQueryReceive(ServerPacket *pack);
-
-protected:
-	void HandleMysqlError(uint32 errnum);
-private:
-	void DBInitVars();
-
 };
 
 #endif

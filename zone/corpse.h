@@ -54,8 +54,8 @@ class Corpse : public Mob {
 	virtual bool	Death(Mob* killerMob, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill) { return true; }
 	virtual void	Damage(Mob* from, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill, bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false, eSpecialAttacks special = eSpecialAttacks::None) { return; }
 	bool			Attack(Mob* other, int Hand = EQ::invslot::slotPrimary, bool FromRiposte = false, bool IsStrikethrough = true,
-		bool IsFromSpell = false, ExtraAttackOptions *opts = nullptr) override { 
-		return false; 
+		bool IsFromSpell = false, ExtraAttackOptions *opts = nullptr) override {
+		return false;
 	}
 	virtual bool	HasRaid()			{ return false; }
 	virtual bool	HasGroup()			{ return false; }
@@ -185,7 +185,6 @@ private:
 	uint32		being_looted_by; /* Determines what the corpse is being looted by internally for logic */
 	uint32		rez_experience; /* Amount of experience that the corpse would rez for */
 	bool		rez;
-	bool		can_corpse_be_rezzed; /* Bool declaring whether or not a corpse can be rezzed */
 	bool		become_npc;
 	int			allowed_looters[MAX_LOOTERS]; /* People allowed to loot the corpse, character id */
 	Timer		corpse_decay_timer; /* The amount of time in millseconds in which a corpse will take to decay (Depop/Poof) */

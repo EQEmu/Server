@@ -370,7 +370,6 @@ Corpse::Corpse(Client* client, int32 in_rezexp) : Mob (
 
 	is_corpse_changed    = true;
 	rez_experience       = in_rezexp;
-	can_corpse_be_rezzed = true;
 	is_player_corpse     = true;
 	is_locked            = false;
 	being_looted_by      = 0xFFFFFFFF;

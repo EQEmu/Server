@@ -4244,27 +4244,8 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 			case SE_Illusion:
 			{
 				SendIllusionPacket(0, GetBaseGender());
-				if (GetRace() == OGRE) {
-					SendAppearancePacket(AT_Size, 9);
-				}
-				else if (GetRace() == TROLL) {
-					SendAppearancePacket(AT_Size, 8);
-				}
-				else if (GetRace() == VAHSHIR || GetRace() == FROGLOK || GetRace() == BARBARIAN) {
-					SendAppearancePacket(AT_Size, 7);
-				}
-				else if (GetRace() == HALF_ELF || GetRace() == WOOD_ELF || GetRace() == DARK_ELF) {
-					SendAppearancePacket(AT_Size, 5);
-				}
-				else if (GetRace() == DWARF) {
-					SendAppearancePacket(AT_Size, 4);
-				}
-				else if (GetRace() == HALFLING || GetRace() == GNOME) {
-					SendAppearancePacket(AT_Size, 3);
-				}
-				else {
-					SendAppearancePacket(AT_Size, 6);
-				}
+				// The GetSize below works because the above setting race to zero sets size back.
+				SendAppearancePacket(AT_Size, GetSize());
 
 				for (int x = EQ::textures::textureBegin; x <= EQ::textures::LastTintableTexture; x++) {
 					SendWearChange(x);

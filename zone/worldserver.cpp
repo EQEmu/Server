@@ -1500,7 +1500,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 						if (strcmp(rmsg->from, r->members[x].member->GetName()) != 0)
 						{
 							if (r->members[x].GroupNumber == rmsg->gid) {
-								if (r->members[x].member->GetFilter(FilterGroupChat) != 0)
+								if (!r->members[x].IsBot && r->members[x].member->GetFilter(FilterGroupChat) != 0)
 								{
 									r->members[x].member->ChannelMessageSend(rmsg->from, r->members[x].member->GetName(), ChatChannel_Group, rmsg->language, rmsg->lang_skill, rmsg->message);
 								}
@@ -1524,7 +1524,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 					if (r->members[x].member) {
 						if (strcmp(rmsg->from, r->members[x].member->GetName()) != 0)
 						{
-							if (r->members[x].member->GetFilter(FilterGroupChat) != 0)
+							if (!r->members[x].IsBot && r->members[x].member->GetFilter(FilterGroupChat) != 0)
 							{
 								r->members[x].member->ChannelMessageSend(rmsg->from, r->members[x].member->GetName(), ChatChannel_Raid, rmsg->language, rmsg->lang_skill, rmsg->message);
 							}
@@ -3151,7 +3151,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	}
 	case ServerOP_UpdateSchedulerEvents: {
 		LogScheduler("Received signal from world to update");
-		if (m_zone_scheduler) {
+		if (GetScheduler()) {
 			m_zone_scheduler->LoadScheduledEvents();
 		}
 

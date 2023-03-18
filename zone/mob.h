@@ -416,7 +416,6 @@ public:
 	void BuffFadeBySlot(int slot, bool iRecalcBonuses = true);
 	void BuffFadeDetrimentalByCaster(Mob *caster);
 	void BuffFadeBySitModifier();
-	bool IsAffectedByBuff(uint16 spell_id);
 	bool IsAffectedByBuffByGlobalGroup(GlobalGroup group);
 	void BuffModifyDurationBySpellID(uint16 spell_id, int32 newDuration);
 	int AddBuff(Mob *caster, const uint16 spell_id, int duration = 0, int32 level_override = -1, bool disable_buff_overwrite = false);
@@ -433,7 +432,7 @@ public:
 	bool HasDiscBuff();
 	virtual uint32 GetFirstBuffSlot(bool disc, bool song);
 	virtual uint32 GetLastBuffSlot(bool disc, bool song);
-	virtual void InitializeBuffSlots() { buffs = nullptr; current_buff_count = 0; }
+	virtual void InitializeBuffSlots() { buffs = nullptr; }
 	virtual void UninitializeBuffSlots() { }
 	EQApplicationPacket *MakeBuffsPacket(bool for_target = true);
 	void SendBuffsToClient(Client *c);
@@ -917,7 +916,6 @@ public:
 	bool PassCharismaCheck(Mob* caster, uint16 spell_id);
 	bool TryDeathSave();
 	bool TryDivineSave();
-	void DoBuffWearOffEffect(uint32 index);
 	void TryTriggerOnCastFocusEffect(focusType type, uint16 spell_id);
 	bool TryTriggerOnCastProc(uint16 focusspellid, uint16 spell_id, uint16 proc_spellid);
 	bool TrySpellTrigger(Mob *target, uint32 spell_id, int effect);
@@ -1492,7 +1490,6 @@ protected:
 	uint8 maxlevel;
 	uint32 scalerate;
 	Buffs_Struct *buffs;
-	uint32 current_buff_count;
 	StatBonuses itembonuses;
 	StatBonuses spellbonuses;
 	StatBonuses aabonuses;
@@ -1593,7 +1590,6 @@ protected:
 
 	EQ::LightSourceProfile m_Light;
 
-	float fixedZ;
 	EmuAppearance _appearance;
 	uint8 pRunAnimSpeed;
 	bool m_is_running;
@@ -1644,7 +1640,6 @@ protected:
 	uint32 casting_spell_inventory_slot;
 	uint32 casting_spell_timer;
 	uint32 casting_spell_timer_duration;
-	uint32 casting_spell_type;
 	int16 casting_spell_resist_adjust;
 	uint32 casting_spell_aa_id;
 	uint32 casting_spell_recast_adjust;
@@ -1686,7 +1681,6 @@ protected:
 	bool rooted;
 	bool silenced;
 	bool amnesiad;
-	bool inWater; // Set to true or false by Water Detection code if enabled by rules
 	bool offhand;
 	bool has_shieldequiped;
 	bool has_twohandbluntequiped;
@@ -1772,7 +1766,6 @@ protected:
 
 	int8 last_hp_percent;
 	int32 last_hp;
-	int32 last_max_hp;
 
 	int cur_wp;
 	glm::vec4 m_CurrentWayPoint;
@@ -1840,6 +1833,8 @@ private:
 	EQ::InventoryProfile m_inv;
 	std::shared_ptr<HealRotation> m_target_of_heal_rotation;
 	bool m_manual_follow;
+
+	void DoSpellInterrupt(uint16 spell_id, int32 mana_cost, int my_curmana);
 };
 
 #endif

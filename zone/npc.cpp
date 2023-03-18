@@ -3778,11 +3778,6 @@ void NPC::SetRecordLootStats(bool record_loot_stats)
 	NPC::m_record_loot_stats = record_loot_stats;
 }
 
-void NPC::FlushLootStats()
-{
-	m_rolled_items = {};
-}
-
 const std::vector<uint32> &NPC::GetRolledItems() const
 {
 	return m_rolled_items;

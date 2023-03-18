@@ -283,18 +283,6 @@ void UCSDatabase::LoadFilteredNamesFromDB()
 	LogInfo("Loaded [{}] filtered channel name(s)", names.size());
 }
 
-bool UCSDatabase::IsChatChannelInDB(const std::string& channel_name)
-{
-	auto r = ChatchannelsRepository::Count(
-		*this,
-		fmt::format(
-			"name = {}", Strings::Escape(channel_name)
-		)
-	);
-
-	return r > 0;
-}
-
 void UCSDatabase::SaveChatChannel(
 	const std::string& channel_name,
 	const std::string& channel_owner,

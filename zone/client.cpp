@@ -807,16 +807,17 @@ void Client::QueuePacket(const EQApplicationPacket* app, bool ack_req, CLIENT_CO
 		AddPacket(app, ack_req);
 		return;
 	}
-
+	
 	// if the program doesnt care about the status or if the status isnt what we requested
 	if (required_state != CLIENT_CONNECTINGALL && client_state != required_state)
 	{
 		// todo: save packets for later use
 		AddPacket(app, ack_req);
 	}
-	else
-		if(eqs)
-			eqs->QueuePacket(app, ack_req);
+	else if (eqs) 
+	{
+		eqs->QueuePacket(app, ack_req);
+	}
 }
 
 void Client::FastQueuePacket(EQApplicationPacket** app, bool ack_req, CLIENT_CONN_STATUS required_state) {
@@ -827,7 +828,7 @@ void Client::FastQueuePacket(EQApplicationPacket** app, bool ack_req, CLIENT_CON
 		return;
 	}
 	else {
-		if(eqs)
+		if(eqs) 
 			eqs->FastQueuePacket((EQApplicationPacket **)app, ack_req);
 		else if (app && (*app))
 			delete *app;
@@ -1330,6 +1331,7 @@ void Client::ChannelMessageSend(const char* from, const char* to, uint8 chan_num
 
 	cm->chan_num = chan_num;
 	strcpy(&cm->message[0], buffer);
+	
 	QueuePacket(&app);
 
 	bool senderCanTrainSelf = RuleB(Client, SelfLanguageLearning);

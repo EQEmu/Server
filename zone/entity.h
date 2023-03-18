@@ -192,7 +192,8 @@ public:
 	Client* GetRandomClient(const glm::vec3& location = glm::vec3(0.f), float distance = 0, Client* exclude_client = nullptr);
 	NPC* GetRandomNPC(const glm::vec3& location = glm::vec3(0.f), float distance = 0, NPC* exclude_npc = nullptr);
 	Mob* GetRandomMob(const glm::vec3& location = glm::vec3(0.f), float distance = 0, Mob* exclude_mob = nullptr);
-	Group *GetGroupByMob(Mob* mob);
+	Group* GetGroupByMob(Mob* mob);
+	Group* GetGroupByBot(Bot* bot);
 	bool IsInSameGroupOrRaidGroup(Client *client1, Client *client2);
 	Group *GetGroupByClient(Client* client);
 	Group *GetGroupByID(uint32 id);
@@ -201,6 +202,8 @@ public:
 	Raid *GetRaidByClient(Client* client);
 	Raid *GetRaidByID(uint32 id);
 	Raid *GetRaidByLeaderName(const char *leader);
+	Raid* GetRaidByBotName(const char* name);
+	Raid* GetRaidByBot(const Bot* bot);
 
 	Corpse *GetCorpseByOwner(Client* client);
 	Corpse *GetCorpseByOwnerWithinRange(Client* client, Mob* center, int range);
@@ -304,6 +307,7 @@ public:
 	void	RemoveAllMobs();
 	void	RemoveAllClients();
 	void	RemoveAllNPCs();
+	void	RemoveAllBots();
 	void	RemoveAllMercs();
 	void	RemoveAllGroups();
 	void	RemoveAllCorpses();
@@ -619,7 +623,7 @@ private:
 		bool RemoveBot(uint16 entityID);
 		Mob* GetMobByBotID(uint32 botID);
 		Bot* GetBotByBotID(uint32 botID);
-		Bot* GetBotByBotName(std::string botName);
+		Bot* GetBotByBotName(std::string_view botName);
 		Client* GetBotOwnerByBotEntityID(uint32 entity_id);
 		Client* GetBotOwnerByBotID(const uint32 bot_id);
 		std::list<Bot*> GetBotsByBotOwnerCharacterID(uint32 botOwnerCharacterID);

@@ -29,7 +29,6 @@ public:
 	 * Destructor, frees our database if needed.
 	 */
 	~Database();
-	bool IsConnected() { return (m_database != nullptr); }
 
 	/**
 	 * Retrieves the login data (password hash and account id) from the account name provided needed for client login procedure.

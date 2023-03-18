@@ -11,6 +11,7 @@ SET(zone_sources
     beacon.cpp
     bonuses.cpp
     bot.cpp
+    bot_raid.cpp
     bot_command.cpp
     bot_database.cpp
     botspellsai.cpp
@@ -98,7 +99,6 @@ SET(zone_sources
     mob_movement_manager.cpp
     mob_info.cpp
     npc.cpp
-    npc_ai.cpp
     npc_scale_manager.cpp
     object.cpp
     oriented_bounding_box.cpp
@@ -236,7 +236,6 @@ SET(zone_headers
     mob.h
     mob_movement_manager.h
     npc.h
-    npc_ai.h
     npc_scale_manager.h
     object.h
     oriented_bounding_box.h
