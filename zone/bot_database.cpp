@@ -1074,12 +1074,7 @@ bool BotDatabase::LoadItems(const uint32 bot_id, EQ::InventoryProfile& inventory
 			(uint32)Strings::ToUnsignedInt(row[11]),
 			(uint32)Strings::ToUnsignedInt(row[12]),
 			(uint32)Strings::ToUnsignedInt(row[13]),
-			(uint32)Strings::ToUnsignedInt(row[14]),
-			false,
-			"",
-			0, 
-			0, 
-			0
+			(uint32)Strings::ToUnsignedInt(row[14])
 		);
 		if (!item_inst) {
 			LogError("Warning: bot_id [{}] has an invalid item_id [{}] in inventory slot [{}]", bot_id, item_id, slot_id);

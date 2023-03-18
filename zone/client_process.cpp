@@ -911,7 +911,7 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 
 			int16 charges = item->IsClassCommon() ? item->MaxCharges : 1;
 
-			auto inst = database.CreateItem(item, charges, 0, 0, 0, 0, 0, 0, false, "", 0, 0, 0);
+			auto inst = database.CreateItem(item, charges);
 			if (inst) {
 				auto item_price = static_cast<uint32>(item->Price * RuleR(Merchant, SellCostMod) * item->SellRate);
 				auto item_charges = charges ? charges : 1;
@@ -957,7 +957,7 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 			}
 
 			auto charges = item->MaxCharges;
-			auto inst = database.CreateItem(item, charges, 0, 0, 0, 0, 0, 0, false, "", 0, 0, 0);
+			auto inst = database.CreateItem(item, charges);
 			if (inst) {
 				auto item_price = static_cast<uint32>(item->Price * RuleR(Merchant, SellCostMod) * item->SellRate);
 				auto item_charges = charges ? charges : 1;

@@ -3740,11 +3740,7 @@ void Bot::AddBotItem(
 		augment_four,
 		augment_five,
 		augment_six,
-		attuned,
-		"",
-		0,
-		0,
-		0
+		attuned
 	);
 
 	if (!inst) {

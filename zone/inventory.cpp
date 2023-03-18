@@ -715,7 +715,7 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 
 	// in any other situation just use charges as passed
 
-	EQ::ItemInstance* inst = database.CreateItem(item, charges, 0, 0, 0, 0, 0, 0, false, "", 0, 0, 0);
+	EQ::ItemInstance* inst = database.CreateItem(item, charges);
 	auto timestamps = database.GetItemRecastTimestamps(CharacterID());
 	const auto* d = inst->GetItem();
 	if (d->RecastDelay) {
@@ -2302,7 +2302,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 				// Split into two
 				src_inst->SetCharges(src_inst->GetCharges() - move_in->number_in_stack);
 				LogInventory("Split stack of [{}] ([{}]) from slot [{}] to [{}] with stack size [{}]. Src keeps [{}]", src_inst->GetItem()->Name, src_inst->GetItem()->ID, src_slot_id, dst_slot_id, move_in->number_in_stack, src_inst->GetCharges());
-				EQ::ItemInstance* inst = database.CreateItem(src_inst->GetItem(), move_in->number_in_stack, 0, 0, 0, 0, 0, 0, false, "", 0, 0, 0);
+				EQ::ItemInstance* inst = database.CreateItem(src_inst->GetItem(), move_in->number_in_stack);
 				m_inv.PutItem(dst_slot_id, *inst);
 				safe_delete(inst);
 			}
@@ -2468,7 +2468,7 @@ void Client::SwapItemResync(MoveItem_Struct* move_slots) {
 		if (IsValidSlot(resync_slot) && resync_slot != INVALID_INDEX) {
 			// This prevents the client from crashing when closing any 'phantom' bags
 			const EQ::ItemData* token_struct = database.GetItem(22292); // 'Copper Coin'
-			EQ::ItemInstance* token_inst = database.CreateItem(token_struct, 1, 0, 0, 0, 0, 0, 0, false, "", 0, 0, 0);
+			EQ::ItemInstance* token_inst = database.CreateItem(token_struct, 1);
 
 			SendItemPacket(resync_slot, token_inst, ItemPacketTrade);
 
@@ -2493,7 +2493,7 @@ void Client::SwapItemResync(MoveItem_Struct* move_slots) {
 		if (IsValidSlot(resync_slot) && resync_slot != INVALID_INDEX) {
 			if(m_inv[resync_slot]) {
 				const EQ::ItemData* token_struct = database.GetItem(22292); // 'Copper Coin'
-				EQ::ItemInstance* token_inst = database.CreateItem(token_struct, 1, 0, 0, 0, 0, 0, 0, false, "", 0, 0, 0);
+				EQ::ItemInstance* token_inst = database.CreateItem(token_struct, 1);
 
 				SendItemPacket(resync_slot, token_inst, ItemPacketTrade);
 				SendItemPacket(resync_slot, m_inv[resync_slot], ItemPacketTrade);
@@ -2510,7 +2510,7 @@ void Client::SwapItemResync(MoveItem_Struct* move_slots) {
 		int16 resync_slot = (EQ::InventoryProfile::CalcSlotId(move_slots->to_slot) == INVALID_INDEX) ? move_slots->to_slot : EQ::InventoryProfile::CalcSlotId(move_slots->to_slot);
 		if (IsValidSlot(resync_slot) && resync_slot != INVALID_INDEX) {
 			const EQ::ItemData* token_struct = database.GetItem(22292); // 'Copper Coin'
-			EQ::ItemInstance* token_inst = database.CreateItem(token_struct, 1, 0, 0, 0, 0, 0, 0, false, "", 0, 0, 0);
+			EQ::ItemInstance* token_inst = database.CreateItem(token_struct, 1);
 
 			SendItemPacket(resync_slot, token_inst, ItemPacketTrade);
 
@@ -2535,7 +2535,7 @@ void Client::SwapItemResync(MoveItem_Struct* move_slots) {
 		if (IsValidSlot(resync_slot) && resync_slot != INVALID_INDEX) {
 			if(m_inv[resync_slot]) {
 				const EQ::ItemData* token_struct = database.GetItem(22292); // 'Copper Coin'
-				EQ::ItemInstance* token_inst = database.CreateItem(token_struct, 1, 0, 0, 0, 0, 0, 0, false, "", 0, 0, 0);
+				EQ::ItemInstance* token_inst = database.CreateItem(token_struct, 1);
 
 				SendItemPacket(resync_slot, token_inst, ItemPacketTrade);
 				SendItemPacket(resync_slot, m_inv[resync_slot], ItemPacketTrade);
@@ -4007,7 +4007,7 @@ const int EQ::InventoryProfile::GetItemStatValue(uint32 item_id, const std::stri
 		return 0;
 	}
 
-	const auto* inst = database.CreateItem(item_id, 0, 0, 0, 0, 0, 0, 0, false, "", 0, 0, 0);
+	const auto* inst = database.CreateItem(item_id);
 	if (!inst) {
 		return 0;
 	}

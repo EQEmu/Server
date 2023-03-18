@@ -1215,7 +1215,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 							c->SendItemPacket(EQ::invslot::slotCursor, SummonedItem, ItemPacketLimbo);
 							safe_delete(SummonedItem);
 						}
-						SummonedItem = database.CreateItem(spell.base_value[i], charges, 0, 0, 0, 0,  0, 0, false, "", 0, 0, 0);
+						SummonedItem = database.CreateItem(spell.base_value[i], charges);
 					}
 				}
 
@@ -1252,7 +1252,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						if (charges < 1)
 							charges = 1;
 
-						EQ::ItemInstance *SubItem = database.CreateItem(spell.base_value[i], charges, 0, 0, 0, 0, 0, 0, false, "", 0, 0, 0);
+						EQ::ItemInstance *SubItem = database.CreateItem(spell.base_value[i], charges);
 						if (SubItem != nullptr) {
 							SummonedItem->PutItem(slot, *SubItem);
 							safe_delete(SubItem);

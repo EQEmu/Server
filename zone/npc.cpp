@@ -1934,7 +1934,7 @@ void NPC::PickPocket(Client* thief)
 			break;
 		}
 
-		auto item_inst = database.CreateItem(loot_selection[random].first, loot_selection[random].second, 0, 0, 0, 0, 0, 0, false, "", 0, 0, 0);
+		auto item_inst = database.CreateItem(loot_selection[random].first, loot_selection[random].second);
 		if (item_inst == nullptr) {
 			steal_item = false;
 			break;
@@ -2034,7 +2034,7 @@ void NPC::Disarm(Client* client, int chance) {
 						}
 					}
 					EQ::ItemInstance *inst = NULL;
-					inst = database.CreateItem(weapon->ID, charges, 0, 0, 0, 0, 0, 0, false, "", 0, 0, 0);
+					inst = database.CreateItem(weapon->ID, charges);
 					// Remove item from loot table
 					RemoveItem(weapon->ID);
 					CalcBonuses();

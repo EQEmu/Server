@@ -119,33 +119,33 @@ public:
 	 */
 	EQ::ItemInstance *CreateItem(
 		uint32 item_id,
-		int16 charges,
-		uint32 aug1,
-		uint32 aug2,
-		uint32 aug3,
-		uint32 aug4,
-		uint32 aug5,
-		uint32 aug6,
-		bool attuned,
-		const std::string& custom_data,
-		uint32 ornamenticon,
-		uint32 ornamentidfile,
-		uint32 ornament_hero_model
+		int16 charges = 0,
+		uint32 aug1 = 0,
+		uint32 aug2 = 0,
+		uint32 aug3 = 0,
+		uint32 aug4 = 0,
+		uint32 aug5 = 0,
+		uint32 aug6 = 0,
+		bool attuned = false,
+		const std::string& custom_data = "",
+		uint32 ornamenticon = 0,
+		uint32 ornamentidfile = 0,
+		uint32 ornament_hero_model = 0
 	);
 	EQ::ItemInstance *CreateItem(
 		const EQ::ItemData *item,
-		int16 charges,
-		uint32 aug1,
-		uint32 aug2,
-		uint32 aug3,
-		uint32 aug4,
-		uint32 aug5,
-		uint32 aug6,
-		bool attuned,
-		const std::string &custom_data,
-		uint32 ornamenticon,
-		uint32 ornamentidfile,
-		uint32 ornament_hero_model
+		int16 charges = 0,
+		uint32 aug1 = 0,
+		uint32 aug2 = 0,
+		uint32 aug3 = 0,
+		uint32 aug4 = 0,
+		uint32 aug5 = 0,
+		uint32 aug6 = 0,
+		bool attuned = false,
+		const std::string &custom_data = "",
+		uint32 ornamenticon = 0,
+		uint32 ornamentidfile = 0,
+		uint32 ornament_hero_model = 0
 	);
 	EQ::ItemInstance *CreateBaseItem(const EQ::ItemData *item, int16 charges = 0);
 

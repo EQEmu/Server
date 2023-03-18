@@ -2949,11 +2949,7 @@ std::string QuestManager::varlink(
 		aug4,
 		aug5,
 		aug6,
-		attuned,
-		"",
-		0,
-		0,
-		0
+		attuned
 	);
 	if (!item) {
 		return "INVALID ITEM ID IN VARLINK";
@@ -3621,11 +3617,8 @@ EQ::ItemInstance *QuestManager::CreateItem(uint32 item_id, int16 charges, uint32
 			augment_four, 
 			augment_five, 
 			augment_six, 
-			attuned, 
-			"",
-			0,
-			0,
-			0);
+			attuned
+		);
 	}
 	return nullptr;
 }

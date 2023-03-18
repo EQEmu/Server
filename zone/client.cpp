@@ -4094,7 +4094,7 @@ void Client::DiscoverItem(uint32 item_id) {
 	}
 
 	if (parse->PlayerHasQuestSub(EVENT_DISCOVER_ITEM)) {
-		auto* item = database.CreateItem(item_id, 0, 0, 0, 0, 0, 0, 0, false, "", 0, 0, 0);
+		auto* item = database.CreateItem(item_id);
 		std::vector<std::any> args = { item };
 
 		parse->EventPlayer(EVENT_DISCOVER_ITEM, this, "", item_id, &args);
@@ -5314,7 +5314,7 @@ bool Client::TryReward(uint32 claim_id)
 	}
 
 	auto &ivr = (*iter);
-	EQ::ItemInstance *claim = database.CreateItem(ivr.items[0].item_id, ivr.items[0].charges, 0, 0, 0, 0, 0, 0, false, "", 0, 0, 0);
+	EQ::ItemInstance *claim = database.CreateItem(ivr.items[0].item_id, ivr.items[0].charges);
 	if (!claim) {
 		Save();
 		return true;
@@ -5324,7 +5324,7 @@ bool Client::TryReward(uint32 claim_id)
 
 	for (int y = 1; y < 8; y++)
 		if (ivr.items[y].item_id && claim->GetItem()->ItemClass == 1) {
-			EQ::ItemInstance *item_temp = database.CreateItem(ivr.items[y].item_id, ivr.items[y].charges, 0, 0, 0, 0, 0, 0, false, "", 0, 0, 0);
+			EQ::ItemInstance *item_temp = database.CreateItem(ivr.items[y].item_id, ivr.items[y].charges);
 			if (item_temp) {
 				if (CheckLoreConflict(item_temp->GetItem())) {
 					lore_conflict = true;
@@ -11016,7 +11016,7 @@ void Client::SummonBaggedItems(uint32 bag_item_id, const std::vector<ServerLootI
 	}
 
 	int bag_item_charges = 1; // just summoning a single bag
-	EQ::ItemInstance* summoned_bag = database.CreateItem(bag_item_id, bag_item_charges, 0, 0, 0, 0, 0, 0, false, "", 0, 0, 0);
+	EQ::ItemInstance* summoned_bag = database.CreateItem(bag_item_id, bag_item_charges);
 	if (!summoned_bag || !summoned_bag->IsClassBag())
 	{
 		Message(Chat::Red, fmt::format("Failed to summon bag item [{}]", bag_item_id).c_str());

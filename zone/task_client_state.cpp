@@ -1058,7 +1058,7 @@ void ClientTaskState::RewardTask(Client *c, const TaskInformation *ti, ClientTas
 			}
 
 			if (item_id > 0) {
-				std::unique_ptr<EQ::ItemInstance> inst(database.CreateItem(item_id, charges, 0, 0, 0, 0, 0, 0, false, "", 0, 0, 0));
+				std::unique_ptr<EQ::ItemInstance> inst(database.CreateItem(item_id, charges));
 				if (inst && inst->GetItem()) {
 					bool stacked = c->TryStacking(inst.get());
 					if (!stacked) {

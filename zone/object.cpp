@@ -1025,7 +1025,7 @@ void Object::SetItemID(uint32 itemid)
 
 	if (itemid)
 	{
-		m_inst = database.CreateItem(itemid, 0, 0, 0, 0, 0, 0, 0, false, "", 0, 0, 0);
+		m_inst = database.CreateItem(itemid);
 	}
 }
 

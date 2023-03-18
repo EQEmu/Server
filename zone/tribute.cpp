@@ -161,7 +161,7 @@ void Client::DoTributeUpdate() {
 			uint32 item_id = tier.tribute_item_id;
 
 			//summon the item for them
-			const EQ::ItemInstance* inst = database.CreateItem(item_id, 1, 0, 0, 0, 0, 0, 0, false, "", 0, 0, 0);
+			const EQ::ItemInstance* inst = database.CreateItem(item_id, 1);
 			if(inst == nullptr)
 				continue;
 

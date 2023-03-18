@@ -358,7 +358,7 @@ void Client::GoFish()
 				MessageString(Chat::Skills, FISHING_SUCCESS_FISH_NAME, food_item->Name);
 			}
 
-			EQ::ItemInstance* inst = database.CreateItem(food_item, 1, 0, 0, 0, 0, 0, 0, false, "", 0, 0, 0);
+			EQ::ItemInstance* inst = database.CreateItem(food_item, 1);
 			if (inst != nullptr) {
 				if (CheckLoreConflict(inst->GetItem()))
 				{
@@ -492,7 +492,7 @@ void Client::ForageItem(bool guarantee) {
 		}
 
 		MessageString(Chat::Skills, stringid);
-		EQ::ItemInstance* inst = database.CreateItem(food_item, 1, 0, 0, 0, 0, 0, 0, false, "", 0, 0, 0);
+		EQ::ItemInstance* inst = database.CreateItem(food_item, 1);
 		if (inst != nullptr) {
 			// check to make sure it isn't a foraged lore item
 			if (CheckLoreConflict(inst->GetItem())) {

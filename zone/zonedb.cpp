@@ -212,7 +212,7 @@ void ZoneDatabase::LoadWorldContainer(uint32 parentid, EQ::ItemInstance* contain
         aug[4] = (uint32)Strings::ToInt(row[7]);
 		aug[5] = (uint32)Strings::ToInt(row[8]);
 
-        EQ::ItemInstance* inst = database.CreateItem(item_id, charges, 0, 0, 0, 0, 0, 0, false, "", 0, 0, 0);
+        EQ::ItemInstance* inst = database.CreateItem(item_id, charges);
 		if (inst && inst->GetItem()->IsClassCommon()) {
 			for (int i = EQ::invaug::SOCKET_BEGIN; i <= EQ::invaug::SOCKET_END; i++)
                 if (aug[i])
@@ -367,7 +367,7 @@ EQ::ItemInstance* ZoneDatabase::LoadSingleTraderItem(uint32 CharID, int SerialNu
     if (item->NoDrop == 0)
         return nullptr;
 
-    EQ::ItemInstance* inst = database.CreateItem(item, 0, 0, 0, 0, 0, 0, 0, false, "", 0, 0, 0);
+    EQ::ItemInstance* inst = database.CreateItem(item);
 	if(!inst) {
 		LogTrading("Unable to create item instance\n");
 		fflush(stdout);

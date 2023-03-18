@@ -294,7 +294,7 @@ bool Zone::LoadZoneObjects()
 			inst = new EQ::ItemInstance(ItemInstWorldContainer);
 		} else {
 			// Groundspawn object
-			inst = database.CreateItem(itemid, 0, 0, 0, 0, 0, 0, 0, false, "", 0, 0, 0);
+			inst = database.CreateItem(itemid);
 		}
 
 		// Father Nitwit's fix... not perfect...
@@ -335,7 +335,7 @@ bool Zone::LoadGroundSpawns() {
 	for(gsindex=0;gsindex<50;gsindex++){
 		if(groundspawn.spawn[gsindex].item>0 && groundspawn.spawn[gsindex].item<SAYLINK_ITEM_ID){
 			EQ::ItemInstance* inst = nullptr;
-			inst = database.CreateItem(groundspawn.spawn[gsindex].item, 0, 0, 0, 0, 0, 0, 0, false, "", 0, 0, 0);
+			inst = database.CreateItem(groundspawn.spawn[gsindex].item);
 			gsnumber=groundspawn.spawn[gsindex].max_allowed;
 			ix=0;
 			if(inst){

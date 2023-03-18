@@ -9,12 +9,12 @@
 #include "lua_item.h"
 
 Lua_ItemInst::Lua_ItemInst(int item_id) {
-	SetLuaPtrData(database.CreateItem(item_id, 0, 0, 0, 0, 0, 0, 0, false, "", 0, 0, 0));
+	SetLuaPtrData(database.CreateItem(item_id));
 	cloned_ = true;
 }
 
 Lua_ItemInst::Lua_ItemInst(int item_id, int charges) {
-	SetLuaPtrData(database.CreateItem(item_id, charges, 0, 0, 0, 0, 0, 0, false, "", 0, 0, 0));
+	SetLuaPtrData(database.CreateItem(item_id, charges));
 	cloned_ = true;
 }
 

@@ -2115,7 +2115,7 @@ void Client::Handle_OP_AdventureMerchantPurchase(const EQApplicationPacket *app)
 		DiscoverItem(item->ID);
 	}
 
-	EQ::ItemInstance *inst = database.CreateItem(item, charges, 0, 0, 0, 0, 0, 0, false, "", 0, 0, 0);
+	EQ::ItemInstance *inst = database.CreateItem(item, charges);
 	if (!AutoPutLootInInventory(*inst, true, true))
 	{
 		PutLootInInventory(EQ::invslot::slotCursor, *inst);
@@ -2665,7 +2665,7 @@ void Client::Handle_OP_AltCurrencyPurchase(const EQApplicationPacket *app)
 			DiscoverItem(item->ID);
 		}
 
-		EQ::ItemInstance *inst = database.CreateItem(item, charges, 0, 0, 0, 0, 0, 0, false, "", 0, 0, 0);
+		EQ::ItemInstance *inst = database.CreateItem(item, charges);
 		if (!AutoPutLootInInventory(*inst, true, true))
 		{
 			PutLootInInventory(EQ::invslot::slotCursor, *inst);
@@ -3788,7 +3788,7 @@ void Client::Handle_OP_Barter(const EQApplicationPacket *app)
 			Message(Chat::Red, "Error: This item does not exist!");
 		else
 		{
-			EQ::ItemInstance* inst = database.CreateItem(item, 0, 0, 0, 0, 0, 0, 0, false, "", 0, 0, 0);
+			EQ::ItemInstance* inst = database.CreateItem(item);
 			if (inst)
 			{
 				SendItemPacket(0, inst, ItemPacketViewLink);
@@ -3821,7 +3821,7 @@ void Client::Handle_OP_Barter(const EQApplicationPacket *app)
 			Message(Chat::Red, "Error: This item does not exist!");
 		else
 		{
-			EQ::ItemInstance* inst = database.CreateItem(item, 0, 0, 0, 0, 0, 0, 0, false, "", 0, 0, 0);
+			EQ::ItemInstance* inst = database.CreateItem(item);
 			if (inst)
 			{
 				SendItemPacket(0, inst, ItemPacketViewLink);
@@ -3861,7 +3861,7 @@ void Client::Handle_OP_BazaarInspect(const EQApplicationPacket *app)
 		return;
 	}
 
-	EQ::ItemInstance* inst = database.CreateItem(item, 0, 0, 0, 0, 0, 0, 0, false, "", 0, 0, 0);
+	EQ::ItemInstance* inst = database.CreateItem(item);
 
 	if (inst) {
 		SendItemPacket(0, inst, ItemPacketViewLink);
@@ -8810,7 +8810,7 @@ void Client::Handle_OP_ItemLinkResponse(const EQApplicationPacket *app)
 		return;
 	}
 	LDONItemViewRequest_Struct* item = (LDONItemViewRequest_Struct*)app->pBuffer;
-	EQ::ItemInstance* inst = database.CreateItem(item->item_id, 0, 0, 0, 0, 0, 0, 0, false, "", 0, 0, 0);
+	EQ::ItemInstance* inst = database.CreateItem(item->item_id);
 	if (inst) {
 		SendItemPacket(0, inst, ItemPacketViewLink);
 		safe_delete(inst);
@@ -13556,7 +13556,7 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 	else if ( item->MaxCharges >= 1)
 		charges = item->MaxCharges;
 
-	EQ::ItemInstance* inst = database.CreateItem(item, charges, 0, 0, 0, 0, 0, 0, false, "", 0, 0, 0);
+	EQ::ItemInstance* inst = database.CreateItem(item, charges);
 
 	int SinglePrice = 0;
 	if (RuleB(Merchant, UsePriceMod))

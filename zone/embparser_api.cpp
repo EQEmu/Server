@@ -2280,47 +2280,47 @@ void Perl__remove_all_expedition_lockouts_by_char_id(uint32 char_id, std::string
 
 EQ::ItemInstance* Perl__createitem(uint32 item_id)
 {
-	return database.CreateItem(item_id, 0, 0, 0, 0, 0, 0, 0, false, "", 0, 0, 0);
+	return database.CreateItem(item_id);
 }
 
 EQ::ItemInstance* Perl__createitem(uint32 item_id, int16 charges)
 {
-	return database.CreateItem(item_id, charges, 0, 0, 0, 0, 0, 0, false, "", 0, 0, 0);
+	return database.CreateItem(item_id, charges);
 }
 
 EQ::ItemInstance* Perl__createitem(uint32 item_id, int16 charges, uint32 augment_one)
 {
-	return database.CreateItem(item_id, charges, augment_one, 0, 0, 0, 0, 0, false, "", 0, 0, 0);
+	return database.CreateItem(item_id, charges, augment_one);
 }
 
 EQ::ItemInstance* Perl__createitem(uint32 item_id, int16 charges, uint32 augment_one, uint32 augment_two)
 {
-	return database.CreateItem(item_id, charges, augment_one, augment_two, 0, 0, 0, 0, false, "", 0, 0, 0);
+	return database.CreateItem(item_id, charges, augment_one, augment_two);
 }
 
 EQ::ItemInstance* Perl__createitem(uint32 item_id, int16 charges, uint32 augment_one, uint32 augment_two, uint32 augment_three)
 {
-	return database.CreateItem(item_id, charges, augment_one, augment_two, augment_three, 0, 0, 0, false, "", 0, 0, 0);
+	return database.CreateItem(item_id, charges, augment_one, augment_two, augment_three);
 }
 
 EQ::ItemInstance* Perl__createitem(uint32 item_id, int16 charges, uint32 augment_one, uint32 augment_two, uint32 augment_three, uint32 augment_four)
 {
-	return database.CreateItem(item_id, charges, augment_one, augment_two, augment_three, augment_four, 0, 0, false, "", 0, 0, 0);
+	return database.CreateItem(item_id, charges, augment_one, augment_two, augment_three, augment_four);
 }
 
 EQ::ItemInstance* Perl__createitem(uint32 item_id, int16 charges, uint32 augment_one, uint32 augment_two, uint32 augment_three, uint32 augment_four, uint32 augment_five)
 {
-	return database.CreateItem(item_id, charges, augment_one, augment_two, augment_three, augment_four, augment_five, 0, false, "", 0, 0, 0);
+	return database.CreateItem(item_id, charges, augment_one, augment_two, augment_three, augment_four, augment_five);
 }
 
 EQ::ItemInstance* Perl__createitem(uint32 item_id, int16 charges, uint32 augment_one, uint32 augment_two, uint32 augment_three, uint32 augment_four, uint32 augment_five, uint32 augment_six)
 {
-	return database.CreateItem(item_id, charges, augment_one, augment_two, augment_three, augment_four, augment_five, augment_six, false, "", 0, 0, 0);
+	return database.CreateItem(item_id, charges, augment_one, augment_two, augment_three, augment_four, augment_five, augment_six);
 }
 
 EQ::ItemInstance* Perl__createitem(uint32 item_id, int16 charges, uint32 augment_one, uint32 augment_two, uint32 augment_three, uint32 augment_four, uint32 augment_five, uint32 augment_six, bool attuned)
 {
-	return database.CreateItem(item_id, charges, augment_one, augment_two, augment_three, augment_four, augment_five, augment_six, attuned, "", 0, 0, 0);
+	return database.CreateItem(item_id, charges, augment_one, augment_two, augment_three, augment_four, augment_five, augment_six, attuned);
 }
 
 std::string Perl__secondstotime(int duration)
