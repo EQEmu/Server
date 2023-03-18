@@ -715,7 +715,7 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 
 	// in any other situation just use charges as passed
 
-	EQ::ItemInstance* inst = database.CreateItem(item, charges);
+	EQ::ItemInstance* inst = database.CreateItem(item, charges, 0, 0, 0, 0, 0, 0, false, "", 0, 0, 0);
 	auto timestamps = database.GetItemRecastTimestamps(CharacterID());
 	const auto* d = inst->GetItem();
 	if (d->RecastDelay) {
@@ -1387,7 +1387,11 @@ void Client::PutLootInInventory(int16 slot_id, const EQ::ItemInstance &inst, Ser
 				bag_item_data[index]->aug_4,
 				bag_item_data[index]->aug_5,
 				bag_item_data[index]->aug_6,
-				bag_item_data[index]->attuned
+				bag_item_data[index]->attuned,
+				bag_item_data[index]->custom_data,
+				bag_item_data[index]->ornamenticon,
+				bag_item_data[index]->ornamentidfile,
+				bag_item_data[index]->ornament_hero_model
 				);
 
 			// Dump bag contents to cursor in the event that owning bag is not the first cursor item
@@ -2298,7 +2302,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 				// Split into two
 				src_inst->SetCharges(src_inst->GetCharges() - move_in->number_in_stack);
 				LogInventory("Split stack of [{}] ([{}]) from slot [{}] to [{}] with stack size [{}]. Src keeps [{}]", src_inst->GetItem()->Name, src_inst->GetItem()->ID, src_slot_id, dst_slot_id, move_in->number_in_stack, src_inst->GetCharges());
-				EQ::ItemInstance* inst = database.CreateItem(src_inst->GetItem(), move_in->number_in_stack);
+				EQ::ItemInstance* inst = database.CreateItem(src_inst->GetItem(), move_in->number_in_stack, 0, 0, 0, 0, 0, 0, false, "", 0, 0, 0);
 				m_inv.PutItem(dst_slot_id, *inst);
 				safe_delete(inst);
 			}
@@ -2464,7 +2468,7 @@ void Client::SwapItemResync(MoveItem_Struct* move_slots) {
 		if (IsValidSlot(resync_slot) && resync_slot != INVALID_INDEX) {
 			// This prevents the client from crashing when closing any 'phantom' bags
 			const EQ::ItemData* token_struct = database.GetItem(22292); // 'Copper Coin'
-			EQ::ItemInstance* token_inst = database.CreateItem(token_struct, 1);
+			EQ::ItemInstance* token_inst = database.CreateItem(token_struct, 1, 0, 0, 0, 0, 0, 0, false, "", 0, 0, 0);
 
 			SendItemPacket(resync_slot, token_inst, ItemPacketTrade);
 
@@ -2489,7 +2493,7 @@ void Client::SwapItemResync(MoveItem_Struct* move_slots) {
 		if (IsValidSlot(resync_slot) && resync_slot != INVALID_INDEX) {
 			if(m_inv[resync_slot]) {
 				const EQ::ItemData* token_struct = database.GetItem(22292); // 'Copper Coin'
-				EQ::ItemInstance* token_inst = database.CreateItem(token_struct, 1);
+				EQ::ItemInstance* token_inst = database.CreateItem(token_struct, 1, 0, 0, 0, 0, 0, 0, false, "", 0, 0, 0);
 
 				SendItemPacket(resync_slot, token_inst, ItemPacketTrade);
 				SendItemPacket(resync_slot, m_inv[resync_slot], ItemPacketTrade);
@@ -2506,7 +2510,7 @@ void Client::SwapItemResync(MoveItem_Struct* move_slots) {
 		int16 resync_slot = (EQ::InventoryProfile::CalcSlotId(move_slots->to_slot) == INVALID_INDEX) ? move_slots->to_slot : EQ::InventoryProfile::CalcSlotId(move_slots->to_slot);
 		if (IsValidSlot(resync_slot) && resync_slot != INVALID_INDEX) {
 			const EQ::ItemData* token_struct = database.GetItem(22292); // 'Copper Coin'
-			EQ::ItemInstance* token_inst = database.CreateItem(token_struct, 1);
+			EQ::ItemInstance* token_inst = database.CreateItem(token_struct, 1, 0, 0, 0, 0, 0, 0, false, "", 0, 0, 0);
 
 			SendItemPacket(resync_slot, token_inst, ItemPacketTrade);
 
@@ -2531,7 +2535,7 @@ void Client::SwapItemResync(MoveItem_Struct* move_slots) {
 		if (IsValidSlot(resync_slot) && resync_slot != INVALID_INDEX) {
 			if(m_inv[resync_slot]) {
 				const EQ::ItemData* token_struct = database.GetItem(22292); // 'Copper Coin'
-				EQ::ItemInstance* token_inst = database.CreateItem(token_struct, 1);
+				EQ::ItemInstance* token_inst = database.CreateItem(token_struct, 1, 0, 0, 0, 0, 0, 0, false, "", 0, 0, 0);
 
 				SendItemPacket(resync_slot, token_inst, ItemPacketTrade);
 				SendItemPacket(resync_slot, m_inv[resync_slot], ItemPacketTrade);
@@ -3958,7 +3962,7 @@ bool Client::InterrogateInventory_error(int16 head, int16 index, const EQ::ItemI
 	return false;
 }
 
-void EQ::InventoryProfile::SetCustomItemData(uint32 character_id, int16 slot_id, std::string identifier, std::string value) {
+void EQ::InventoryProfile::SetCustomItemData(uint32 character_id, int16 slot_id, const std::string &identifier, const std::string &value) {
 	EQ::ItemInstance *inst = GetItem(slot_id);
 	if(inst) {
 		inst->SetCustomData(identifier, value);
@@ -3966,7 +3970,7 @@ void EQ::InventoryProfile::SetCustomItemData(uint32 character_id, int16 slot_id,
 	}
 }
 
-void EQ::InventoryProfile::SetCustomItemData(uint32 character_id, int16 slot_id, std::string identifier, int value) {
+void EQ::InventoryProfile::SetCustomItemData(uint32 character_id, int16 slot_id, const std::string &identifier, int value) {
 	EQ::ItemInstance *inst = GetItem(slot_id);
 	if(inst) {
 		inst->SetCustomData(identifier, value);
@@ -3974,7 +3978,7 @@ void EQ::InventoryProfile::SetCustomItemData(uint32 character_id, int16 slot_id,
 	}
 }
 
-void EQ::InventoryProfile::SetCustomItemData(uint32 character_id, int16 slot_id, std::string identifier, float value) {
+void EQ::InventoryProfile::SetCustomItemData(uint32 character_id, int16 slot_id, const std::string &identifier, float value) {
 	EQ::ItemInstance *inst = GetItem(slot_id);
 	if(inst) {
 		inst->SetCustomData(identifier, value);
@@ -3982,7 +3986,7 @@ void EQ::InventoryProfile::SetCustomItemData(uint32 character_id, int16 slot_id,
 	}
 }
 
-void EQ::InventoryProfile::SetCustomItemData(uint32 character_id, int16 slot_id, std::string identifier, bool value) {
+void EQ::InventoryProfile::SetCustomItemData(uint32 character_id, int16 slot_id, const std::string &identifier, bool value) {
 	EQ::ItemInstance *inst = GetItem(slot_id);
 	if(inst) {
 		inst->SetCustomData(identifier, value);
@@ -3990,7 +3994,7 @@ void EQ::InventoryProfile::SetCustomItemData(uint32 character_id, int16 slot_id,
 	}
 }
 
-std::string EQ::InventoryProfile::GetCustomItemData(int16 slot_id, std::string identifier) {
+std::string EQ::InventoryProfile::GetCustomItemData(int16 slot_id, const std::string &identifier) {
 	EQ::ItemInstance *inst = GetItem(slot_id);
 	if(inst) {
 		return inst->GetCustomData(identifier);
@@ -3998,12 +4002,12 @@ std::string EQ::InventoryProfile::GetCustomItemData(int16 slot_id, std::string i
 	return "";
 }
 
-const int EQ::InventoryProfile::GetItemStatValue(uint32 item_id, std::string identifier) {
+const int EQ::InventoryProfile::GetItemStatValue(uint32 item_id, const std::string &identifier) {
 	if (identifier.empty()) {
 		return 0;
 	}
 
-	const auto* inst = database.CreateItem(item_id);
+	const auto* inst = database.CreateItem(item_id, 0, 0, 0, 0, 0, 0, 0, false, "", 0, 0, 0);
 	if (!inst) {
 		return 0;
 	}

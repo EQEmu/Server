@@ -1074,7 +1074,12 @@ bool BotDatabase::LoadItems(const uint32 bot_id, EQ::InventoryProfile& inventory
 			(uint32)Strings::ToUnsignedInt(row[11]),
 			(uint32)Strings::ToUnsignedInt(row[12]),
 			(uint32)Strings::ToUnsignedInt(row[13]),
-			(uint32)Strings::ToUnsignedInt(row[14])
+			(uint32)Strings::ToUnsignedInt(row[14]),
+			false,
+			"",
+			0, 
+			0, 
+			0
 		);
 		if (!item_inst) {
 			LogError("Warning: bot_id [{}] has an invalid item_id [{}] in inventory slot [{}]", bot_id, item_id, slot_id);
@@ -1101,28 +1106,7 @@ bool BotDatabase::LoadItems(const uint32 bot_id, EQ::InventoryProfile& inventory
 
 		if (row[5]) {
 			std::string data_str(row[5]);
-			std::string idAsString;
-			std::string value;
-			bool use_id = true;
-
-			for (int i = 0; i < data_str.length(); ++i) {
-				if (data_str[i] == '^') {
-					if (!use_id) {
-						item_inst->SetCustomData(idAsString, value);
-						idAsString.clear();
-						value.clear();
-					}
-
-					use_id = !use_id;
-					continue;
-				}
-
-				char v = data_str[i];
-				if (use_id)
-					idAsString.push_back(v);
-				else
-					value.push_back(v);
-			}
+			item_inst->SetCustomDataString(data_str);
 		}
 
 		item_inst->SetOrnamentIcon((uint32)Strings::ToUnsignedInt(row[6]));

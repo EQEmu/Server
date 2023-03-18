@@ -1081,7 +1081,7 @@ void Client::SendTraderItem(uint32 ItemID, uint16 Quantity) {
 		return;
 	}
 
-	EQ::ItemInstance* inst = database.CreateItem(item, Quantity);
+	EQ::ItemInstance* inst = database.CreateItem(item, Quantity, 0, 0, 0, 0, 0, 0, false, "", 0, 0, 0);
 
 	if (inst)
 	{
@@ -1120,7 +1120,7 @@ void Client::BulkSendTraderInventory(uint32 char_id) {
 			item=database.GetItem(TraderItems->ItemID[i]);
 
 		if (item && (item->NoDrop!=0)) {
-			EQ::ItemInstance* inst = database.CreateItem(item);
+			EQ::ItemInstance* inst = database.CreateItem(item, 0, 0, 0, 0, 0, 0, 0, false, "", 0, 0, 0);
 			if (inst) {
 				inst->SetSerialNumber(TraderItems->SerialNumber[i]);
 				if(TraderItems->Charges[i] > 0)
@@ -2011,7 +2011,7 @@ static void UpdateTraderCustomerItemsAdded(uint32 CustomerID, TraderCharges_Stru
 
 	if(!item) return;
 
-	EQ::ItemInstance* inst = database.CreateItem(item);
+	EQ::ItemInstance* inst = database.CreateItem(item, 0, 0, 0, 0, 0, 0, 0, false, "", 0, 0, 0);
 
 	if(!inst) return;
 
@@ -2092,7 +2092,7 @@ static void UpdateTraderCustomerPriceChanged(uint32 CustomerID, TraderCharges_St
 
 	LogTrading("Sending price updates to customer [{}]", Customer->GetName());
 
-	EQ::ItemInstance* inst = database.CreateItem(item);
+	EQ::ItemInstance* inst = database.CreateItem(item, 0, 0, 0, 0, 0, 0, 0, false, "", 0, 0, 0);
 
 	if(!inst) return;
 

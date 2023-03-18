@@ -1150,7 +1150,7 @@ EQ::ItemInstance* GuildBankManager::GetItem(uint32 GuildID, uint16 Area, uint16 
 		if((SlotID > (GUILD_BANK_DEPOSIT_AREA_SIZE - 1)))
 			return nullptr;
 
-		inst = database.CreateItem((*Iterator)->Items.DepositArea[SlotID].ItemID);
+		inst = database.CreateItem((*Iterator)->Items.DepositArea[SlotID].ItemID, 0, 0, 0, 0, 0, 0, 0, false, "", 0, 0, 0);
 
 		if(!inst)
 			return nullptr;
@@ -1163,7 +1163,7 @@ EQ::ItemInstance* GuildBankManager::GetItem(uint32 GuildID, uint16 Area, uint16 
 		if((SlotID > (GUILD_BANK_MAIN_AREA_SIZE - 1)))
 			return nullptr;
 
-		inst = database.CreateItem((*Iterator)->Items.MainArea[SlotID].ItemID);
+		inst = database.CreateItem((*Iterator)->Items.MainArea[SlotID].ItemID, 0, 0, 0, 0, 0, 0, 0, false, "", 0, 0, 0);
 
 		if(!inst)
 			return nullptr;

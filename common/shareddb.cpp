@@ -548,27 +548,7 @@ bool SharedDatabase::GetSharedBank(uint32 id, EQ::InventoryProfile *inv, bool is
 
 		if (inst && row[9]) {
 			std::string data_str(row[9]);
-			std::string idAsString;
-			std::string value;
-			bool use_id = true;
-
-			for (int i = 0; i < data_str.length(); ++i) {
-				if (data_str[i] == '^') {
-					if (!use_id) {
-						inst->SetCustomData(idAsString, value);
-						idAsString.clear();
-						value.clear();
-					}
-					use_id = !use_id;
-					continue;
-				}
-
-				const char v = data_str[i];
-				if (use_id)
-					idAsString.push_back(v);
-				else
-					value.push_back(v);
-			}
+			inst->SetCustomDataString(data_str);
 		}
 
 		// theoretically inst can be nullptr ... this would be very bad ...
@@ -679,28 +659,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv)
 
 		if (row[11]) {
 			std::string data_str(row[11]);
-			std::string idAsString;
-			std::string value;
-			bool use_id = true;
-
-			for (int i = 0; i < data_str.length(); ++i) {
-				if (data_str[i] == '^') {
-					if (!use_id) {
-						inst->SetCustomData(idAsString, value);
-						idAsString.clear();
-						value.clear();
-					}
-
-					use_id = !use_id;
-					continue;
-				}
-
-				const char v = data_str[i];
-				if (use_id)
-					idAsString.push_back(v);
-				else
-					value.push_back(v);
-			}
+			inst->SetCustomDataString(data_str);
 		}
 
 		inst->SetOrnamentIcon(ornament_icon);
@@ -825,28 +784,7 @@ bool SharedDatabase::GetInventory(uint32 account_id, char *name, EQ::InventoryPr
 
 		if (row[11]) {
 			std::string data_str(row[11]);
-			std::string idAsString;
-			std::string value;
-			bool use_id = true;
-
-			for (int i = 0; i < data_str.length(); ++i) {
-				if (data_str[i] == '^') {
-					if (!use_id) {
-						inst->SetCustomData(idAsString, value);
-						idAsString.clear();
-						value.clear();
-					}
-
-					use_id = !use_id;
-					continue;
-				}
-
-				const char v = data_str[i];
-				if (use_id)
-					idAsString.push_back(v);
-				else
-					value.push_back(v);
-			}
+			inst->SetCustomDataString(data_str);
 		}
 
 		inst->SetOrnamentIcon(ornament_icon);
@@ -1544,7 +1482,11 @@ EQ::ItemInstance* SharedDatabase::CreateItem(
 	uint32 aug4,
 	uint32 aug5,
 	uint32 aug6,
-	bool attuned
+	bool attuned,
+	const std::string& custom_data,
+	uint32 ornamenticon,
+	uint32 ornamentidfile,
+	uint32 ornament_hero_model
 ) {
 	EQ::ItemInstance* inst = nullptr;
 
@@ -1565,6 +1507,10 @@ EQ::ItemInstance* SharedDatabase::CreateItem(
 		inst->PutAugment(this, 4, aug5);
 		inst->PutAugment(this, 5, aug6);
 		inst->SetAttuned(attuned);
+		inst->SetCustomDataString(custom_data);
+		inst->SetOrnamentIcon(ornamenticon);
+		inst->SetOrnamentationIDFile(ornamentidfile);
+		inst->SetOrnamentHeroModel(ornament_hero_model);
 	}
 
 	return inst;
@@ -1581,7 +1527,11 @@ EQ::ItemInstance* SharedDatabase::CreateItem(
 	uint32 aug4,
 	uint32 aug5,
 	uint32 aug6,
-	bool attuned
+	bool attuned,
+	const std::string& custom_data,
+	uint32 ornamenticon,
+	uint32 ornamentidfile,
+	uint32 ornament_hero_model
 ) {
 	EQ::ItemInstance* inst = nullptr;
 	if (item) {
@@ -1600,6 +1550,10 @@ EQ::ItemInstance* SharedDatabase::CreateItem(
 		inst->PutAugment(this, 4, aug5);
 		inst->PutAugment(this, 5, aug6);
 		inst->SetAttuned(attuned);
+		inst->SetCustomDataString(custom_data);
+		inst->SetOrnamentIcon(ornamenticon);
+		inst->SetOrnamentationIDFile(ornamentidfile);
+		inst->SetOrnamentHeroModel(ornament_hero_model);
 	}
 
 	return inst;

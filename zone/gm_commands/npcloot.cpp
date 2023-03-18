@@ -87,7 +87,12 @@ void command_npcloot(Client *c, const Seperator *sep)
 			augment_three_id,
 			augment_four_id,
 			augment_five_id,
-			augment_six_id
+			augment_six_id, 
+			false,
+			"",
+			0, 
+			0, 
+			0 
 		);
 
 		EQ::SayLinkEngine linker;

@@ -1268,7 +1268,7 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 	if (loot_request_type == LootRequestType::AllowedPVPDefined) {
 		auto pkitemid = GetPlayerKillItem();
 		auto pkitem = database.GetItem(pkitemid);
-		auto pkinst = database.CreateItem(pkitem, pkitem->MaxCharges);
+		auto pkinst = database.CreateItem(pkitem, pkitem->MaxCharges, 0, 0, 0, 0, 0, 0, false, "", 0, 0, 0);
 
 		if (pkinst) {
 			if (pkitem->RecastDelay) {
@@ -1326,7 +1326,11 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 			item_data->aug_4,
 			item_data->aug_5,
 			item_data->aug_6,
-			item_data->attuned
+			item_data->attuned,
+			item_data->custom_data,
+			item_data->ornamenticon,
+			item_data->ornamentidfile,
+			item_data->ornament_hero_model
 		);
 		if (!inst)
 			continue;
@@ -1448,10 +1452,12 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 		if (item_data) {
 			inst = database.CreateItem(item, item_data ? item_data->charges : 0, item_data->aug_1,
 				item_data->aug_2, item_data->aug_3, item_data->aug_4,
-				item_data->aug_5, item_data->aug_6, item_data->attuned);
+				item_data->aug_5, item_data->aug_6, item_data->attuned, 
+				item_data->custom_data, item_data->ornamenticon, 
+				item_data->ornamentidfile, item_data->ornament_hero_model);
 		}
 		else {
-			inst = database.CreateItem(item);
+			inst = database.CreateItem(item, 0, 0, 0, 0, 0, 0, 0, false, "", 0, 0, 0);
 		}
 	}
 

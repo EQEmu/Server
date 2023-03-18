@@ -51,7 +51,7 @@ void command_zopp(Client *c, const Seperator *sep)
 			c->Message(Chat::White, "Processing request..results may cause unpredictable behavior.");
 		}
 
-		EQ::ItemInstance *FakeItemInst = database.CreateItem(FakeItem, charges);
+		EQ::ItemInstance *FakeItemInst = database.CreateItem(FakeItem, charges, 0, 0, 0, 0, 0, 0, false, "", 0, 0, 0);
 		c->SendItemPacket(slotid, FakeItemInst, packettype);
 		c->Message(
 			Chat::White, "Sending zephyr op packet to client - [%s] %s (%u) with %i %s to slot %i.",
