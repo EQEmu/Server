@@ -4395,8 +4395,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 			);
 		}
 	}
-
-} //end packet sending
+}
 
 void Mob::HealDamage(uint64 amount, Mob* caster, uint16 spell_id)
 {

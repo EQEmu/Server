@@ -3221,7 +3221,7 @@ void perl_register_mob()
 	package.add("IsBeneficialAllowed", &Perl_Mob_IsBeneficialAllowed);
 	package.add("IsBerserk", &Perl_Mob_IsBerserk);
 	package.add("IsBlind", &Perl_Mob_IsBlind);
-	package.add("IsBot", &Perl_Mob_IsBot);
+	package.add("is_bot", &Perl_Mob_IsBot);
 	package.add("IsCasting", &Perl_Mob_IsCasting);
 	package.add("IsClient", &Perl_Mob_IsClient);
 	package.add("IsCorpse", &Perl_Mob_IsCorpse);

@@ -27,9 +27,6 @@
 #include "../common/repositories/bot_spell_settings_repository.h"
 #include "../common/data_verification.h"
 
-extern volatile bool is_zone_loaded;
-extern bool Critical;
-
 // This constructor is used during the bot create command
 Bot::Bot(NPCType *npcTypeData, Client* botOwner) : NPC(npcTypeData, nullptr, glm::vec4(), Ground, false), rest_timer(1), ping_timer(1) {
 	GiveNPCTypeData(npcTypeData);
@@ -2822,7 +2819,7 @@ void Bot::AcquireBotTarget(Group* bot_group, Raid* raid, Client* leash_owner, fl
 		assist_mob = entity_list.GetMob(bot_group->GetMainAssistName());
 	}
 	else if (raid) {
-		assist_mob = raid->GetRaidMainAssist();
+		assist_mob = raid->GetRaidMainAssistOne();
 	}
 
 	if (assist_mob) {
@@ -4629,16 +4626,14 @@ bool Bot::Death(Mob *killerMob, int64 damage, uint16 spell_id, EQ::skills::Skill
 		my_owner->CastToClient()->SetBotPulling(false);
 	}
 
-Raid* raid = entity_list.GetRaidByBotName(GetName());
-
-	if (raid)
+	if (auto raid = entity_list.GetRaidByBotName(GetName()); raid)
 	{
 
-		for (int x = 0; x < MAX_RAID_MEMBERS; x++)
+		for (auto& m : raid->members)
 		{
-			if (strcmp(raid->members[x].membername, GetName()) == 0)
+			if (strcmp(m.membername, GetName()) == 0)
 			{
-				raid->members[x].member = nullptr;
+				m.member = nullptr;
 			}
 		}
 	}
@@ -8253,7 +8248,7 @@ bool Bot::GetNeedsHateRedux(Mob *tar) {
 	//		return false;
 	//	}
 	//}
-	//else if (tar->IsBot()) {
+	//else if (tar->is_bot()) {
 	if (tar->IsBot()) {
 		switch (tar->GetClass()) {
 		case ROGUE:

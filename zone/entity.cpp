@@ -2243,7 +2243,7 @@ Raid* EntityList::GetRaidByBot(const Bot* bot)
 	std::list<RaidMember> rm;
 	auto GetMembersWhoAreBots = [&rm](Raid* r) -> std::list<RaidMember> {
 		for (auto const& m : r->members) {
-			if (m.IsBot) {
+			if (m.is_bot) {
 				rm.push_back(m);
 			}
 		}

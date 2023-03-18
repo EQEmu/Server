@@ -23,19 +23,16 @@
 #include "quest_parser_collection.h"
 #include "../common/data_verification.h"
 
-extern volatile bool is_zone_loaded;
-extern bool Critical; 
-
 std::vector<RaidMember> Raid::GetRaidGroupMembers(uint32 gid) 
 {
 	std::vector<RaidMember> raid_group_members;
 	raid_group_members.clear();
 
-	for (int i = 0; i < MAX_RAID_MEMBERS; ++i)
+	for (const auto& m : members)
 	{
-		if (members[i].member && members[i].GroupNumber == gid)
+		if (m.member && m.GroupNumber == gid)
 		{
-			raid_group_members.push_back(members[i]);
+			raid_group_members.push_back(m);
 		}
 	}
 	return raid_group_members;
@@ -48,12 +45,12 @@ std::vector<Bot*> Raid::GetRaidBotMembers(uint32 owner)
 	std::vector<Bot*> raid_members_bots;
 	raid_members_bots.clear();
 
-	for (int i = 0; i < MAX_RAID_MEMBERS; i++) {
+	for (const auto& m : members) {
 		if (
-			members[i].member &&
-			members[i].member->IsBot()
+			m.member &&
+			m.member->IsBot()
 			) {
-			auto b_member = members[i].member->CastToBot();
+			auto b_member = m.member->CastToBot();
 			if (owner && b_member->GetBotOwnerCharacterID() == owner) {
 				raid_members_bots.emplace_back(b_member);
 			} else if (!owner) {
@@ -72,13 +69,13 @@ std::vector<Bot*> Raid::GetRaidGroupBotMembers(uint32 gid)
 	std::vector<Bot*> raid_members_bots;
 	raid_members_bots.clear();
 
-	for (int i = 0; i < MAX_RAID_MEMBERS; i++) {
+	for (const auto& m : members) {
 		if (
-			members[i].member &&
-			members[i].member->IsBot() &&
-			members[i].GroupNumber == gid
+			m.member &&
+			m.member->IsBot() &&
+			m.GroupNumber == gid
 		) {
-			auto b_member = members[i].member->CastToBot();
+			auto b_member = m.member->CastToBot();
 			raid_members_bots.emplace_back(b_member);
 			raid_members_bots.emplace_back(b_member);
 		}
@@ -92,26 +89,21 @@ void Raid::HandleBotGroupDisband(uint32 owner, uint32 gid)
 	auto raid_members_bots = gid != RAID_GROUPLESS ? GetRaidGroupBotMembers(gid) : GetRaidBotMembers(owner);
 
 	// If any of the bots are a group leader then re-create the botgroup on disband, dropping any clients
-	for (auto& bot_iter: raid_members_bots) {
+	for (const auto& b: raid_members_bots) {
 
 		// Remove the entire BOT group in this case
-		if (
-			bot_iter &&
-			gid != RAID_GROUPLESS &&
-			IsRaidMember(bot_iter->GetName()) &&
-			IsGroupLeader(bot_iter->GetName())
-			) {
-			auto r_group_members = GetRaidGroupMembers(GetGroup(bot_iter->GetName()));
-			auto group_inst = new Group(bot_iter);
+		if (b && gid != RAID_GROUPLESS && IsRaidMember(b->GetName()) && IsGroupLeader(b->GetName())) {
+			auto r_group_members = GetRaidGroupMembers(GetGroup(b->GetName()));
+			auto group_inst = new Group(b);
 			entity_list.AddGroup(group_inst);
-			database.SetGroupID(bot_iter->GetCleanName(), group_inst->GetID(), bot_iter->GetBotID());
-			database.SetGroupLeaderName(group_inst->GetID(), bot_iter->GetName());
+			database.SetGroupID(b->GetCleanName(), group_inst->GetID(), b->GetBotID());
+			database.SetGroupLeaderName(group_inst->GetID(), b->GetName());
 
-			for (auto member_iter: r_group_members) {
-				if (member_iter.member->IsBot()) {
-					auto b_member = member_iter.member->CastToBot();
-					if (strcmp(b_member->GetName(), bot_iter->GetName()) == 0) {
-						bot_iter->SetFollowID(owner);
+			for (auto m: r_group_members) {
+				if (m.member->IsBot()) {
+					auto b_member = m.member->CastToBot();
+					if (strcmp(b_member->GetName(), b->GetName()) == 0) {
+						b->SetFollowID(owner);
 					} else {
 						Bot::AddBotToGroup(b_member, group_inst);
 					}
@@ -119,7 +111,7 @@ void Raid::HandleBotGroupDisband(uint32 owner, uint32 gid)
 				}
 			}
 		} else {
-			Bot::RemoveBotFromRaid(bot_iter);
+			Bot::RemoveBotFromRaid(b);
 		}
 	}
 }
@@ -128,18 +120,15 @@ uint8 Bot::GetNumberNeedingHealedInRaidGroup(uint8& need_healed, uint8 hpr, bool
 
 	if (raid) {
 		uint32 r_group = raid->GetGroup(GetName());
-		auto raid_group_members = raid->GetRaidGroupMembers(r_group);
 
-		for (auto& m: raid_group_members) {
+		for (auto& m: raid->GetRaidGroupMembers(r_group)) {
 			if (m.member && !m.member->qglobal) {
 				if (m.member->GetHPRatio() <= hpr) {
 					need_healed++;
 				}
 
-				if (includePets) {
-					if (m.member->GetPet() && m.member->GetPet()->GetHPRatio() <= hpr) {
-						need_healed++;
-					}
+				if (includePets && m.member->GetPet() && m.member->GetPet()->GetHPRatio() <= hpr) {
+					need_healed++;
 				}
 			}
 		}
@@ -246,22 +235,18 @@ void Bot::ProcessBotGroupAdd(Group* group, Raid* raid, Client* client, bool new_
 
 	uint32 raid_free_group_id = raid->GetFreeGroup();
 	if (group) {
-		for (int x = 0; x < MAX_GROUP_MEMBERS; x++) {
-			if (group->members[x]) {
-				Client* c = nullptr;
-				Bot* b = nullptr;
-
-				if (group->members[x] && group->members[x]->IsBot()) {
-					b = group->members[x]->CastToBot();
-					raid->AddBot(b, raid_free_group_id, false, x == 0, false);
-				} else if (group->members[x] && group->members[x]->IsClient()) {
-					c = group->members[x]->CastToClient();
+		for (const auto& m : group->members) {
+			if (m) {
+				if (m && m->IsBot()) {
+					raid->AddBot(m->CastToBot(), raid_free_group_id, false, !raid->GroupCount(raid_free_group_id), false);
+				} else if (m && m->IsClient()) {
+					auto c = m->CastToClient();
 					raid->SendRaidCreate(c);
 					raid->AddMember(
 						c,
 						raid_free_group_id,
 						new_raid,
-						x == 0,
+						!raid->GroupCount(raid_free_group_id),
 						false
 					);
 					raid->SendMakeLeaderPacketTo(raid->leadername, c);
