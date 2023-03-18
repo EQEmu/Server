@@ -2822,7 +2822,7 @@ void Bot::AcquireBotTarget(Group* bot_group, Raid* raid, Client* leash_owner, fl
 		assist_mob = entity_list.GetMob(bot_group->GetMainAssistName());
 	}
 	else if (raid) {
-		assist_mob = raid->GetRaidMainAssistOneByName(GetName());
+		assist_mob = raid->GetRaidMainAssist();
 	}
 
 	if (assist_mob) {
@@ -7798,7 +7798,6 @@ bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, fl
 	return false;
 }
 
-
 Mob* EntityList::GetMobByBotID(uint32 botID) {
 	Mob* Result = nullptr;
 	if (botID > 0) {
@@ -7832,10 +7831,9 @@ Bot* EntityList::GetBotByBotID(uint32 botID) {
 Bot* EntityList::GetBotByBotName(std::string_view botName) {
 	Bot* Result = nullptr;
 	if (!botName.empty()) {
-		for (std::list<Bot*>::iterator botListItr = bot_list.begin(); botListItr != bot_list.end(); ++botListItr) {
-			Bot* tempBot = *botListItr;
-			if (tempBot && std::string(tempBot->GetName()) == botName) {
-				Result = tempBot;
+		for (const auto b : bot_list) {
+			if (b && std::string_view(b->GetName()) == botName) {
+				Result = b;
 				break;
 			}
 		}

@@ -119,7 +119,7 @@ public:
 	void	RaidGroupSay(const char* msg, const char* from, uint8 language, uint8 lang_skill);
 	void	RaidSay(const char* msg, const char* from, uint8 language, uint8 lang_skill);
 	bool	IsEngaged();
-	Mob*	GetRaidMainAssistOneByName(const char* name);
+	Mob* GetRaidMainAssist();
 	void	RemoveMember(const char *c);
 	void	DisbandRaid();
 	void	MoveMember(const char *name, uint32 newGroup);
