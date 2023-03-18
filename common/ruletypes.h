@@ -350,6 +350,7 @@ RULE_REAL(Watermap, FishingLineStepSize, 1, "Basic step size for fishing calc, t
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Spells)
+RULE_BOOL(Spells, AllowExtraDmgSkill, false, "Allow ExtraDmgSkill from Items, Spells, and AAs to apply ExtraDmgAmt when the ExtraDmgSkill matches the casted Spells Skill Type.")
 RULE_INT(Spells, BaseCritChance, 0, "Base percentage chance that everyone has to crit a spell")
 RULE_INT(Spells, BaseCritRatio, 100, "Base percentage bonus to damage on a successful spell crit. 100=2xdamage")
 RULE_INT(Spells, WizCritLevel, 12, "Level wizards first get spell crits")
