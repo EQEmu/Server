@@ -378,7 +378,8 @@ void Raid::SetRaidLeader(const char *wasLead, const char *name)
 	Client *c = entity_list.GetClientByName(name);
 	if (c) {
 		SetLeader(c);
-	} else {
+	}
+	else {
 		SetLeader(nullptr);
 	} //sanity check, should never get hit but we want to prefer to NOT crash if we do VerifyRaid and leader never gets set there (raid without a leader?)
 
