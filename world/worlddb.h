@@ -40,12 +40,6 @@ public:
 	bool LoadCharacterCreateAllocations();
 	bool LoadCharacterCreateCombos();
 
-	bool StoreCharacter(
-		uint32 account_id,
-		PlayerProfile_Struct *p_player_profile_struct,
-		EQ::InventoryProfile *p_inventory_profile
-	);
-
 private:
 	void SetTitaniumDefaultStartZone(PlayerProfile_Struct* in_pp, CharCreate_Struct* in_cc);
 	void SetSoFDefaultStartZone(PlayerProfile_Struct* in_pp, CharCreate_Struct* in_cc);

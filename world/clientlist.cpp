@@ -85,19 +85,6 @@ void ClientList::CLERemoveZSRef(ZoneServer* iZS) {
 	}
 }
 
-ClientListEntry* ClientList::GetCLE(uint32 iID) {
-	LinkedListIterator<ClientListEntry*> iterator(clientlist);
-
-	iterator.Reset();
-	while(iterator.MoreElements()) {
-		if (iterator.GetData()->GetID() == iID) {
-			return iterator.GetData();
-		}
-		iterator.Advance();
-	}
-	return 0;
-}
-
 //Check current CLE Entry IPs against incoming connection
 
 void ClientList::GetCLEIP(uint32 in_ip) {
@@ -207,31 +194,6 @@ void ClientList::GetCLEIP(uint32 in_ip) {
 	}
 }
 
-uint32 ClientList::GetCLEIPCount(uint32 in_ip) {
-	ClientListEntry* cle = nullptr;
-	LinkedListIterator<ClientListEntry*> iterator(clientlist);
-
-	int count = 0;
-	iterator.Reset();
-
-	while (iterator.MoreElements()) {
-		cle = iterator.GetData();
-		if (
-			cle->GetIP() == in_ip &&
-			(
-				cle->Admin() < RuleI(World, ExemptMaxClientsStatus) ||
-				RuleI(World, ExemptMaxClientsStatus) < 0
-			) &&
-			cle->Online() >= CLE_Status::Online
-		) { // If the IP matches, and the connection admin status is below the exempt status, or exempt status is less than 0 (no-one is exempt)
-			count++; // Increment the occurences of this IP address
-		}
-		iterator.Advance();
-	}
-
-	return count;
-}
-
 void ClientList::DisconnectByIP(uint32 in_ip) {
 	ClientListEntry* cle = nullptr;
 	LinkedListIterator<ClientListEntry*> iterator(clientlist);
@@ -289,19 +251,6 @@ ClientListEntry* ClientList::FindCLEByCharacterID(uint32 iCharID) {
 	iterator.Reset();
 	while(iterator.MoreElements()) {
 		if (iterator.GetData()->CharID() == iCharID) {
-			return iterator.GetData();
-		}
-		iterator.Advance();
-	}
-	return nullptr;
-}
-
-ClientListEntry* ClientList::FindCLEByLSID(uint32 iLSID) {
-	LinkedListIterator<ClientListEntry*> iterator(clientlist);
-
-	iterator.Reset();
-	while (iterator.MoreElements()) {
-		if (iterator.GetData()->LSID() == iLSID) {
 			return iterator.GetData();
 		}
 		iterator.Advance();
@@ -1224,20 +1173,6 @@ Client* ClientList::FindByAccountID(uint32 account_id) {
 	return 0;
 }
 
-Client* ClientList::FindByName(char* charname) {
-	LinkedListIterator<Client*> iterator(list);
-
-	iterator.Reset();
-	while(iterator.MoreElements()) {
-		if (iterator.GetData()->GetCharName() == charname) {
-			Client* tmp = iterator.GetData();
-			return tmp;
-		}
-		iterator.Advance();
-	}
-	return 0;
-}
-
 Client* ClientList::Get(uint32 ip, uint16 port) {
 	LinkedListIterator<Client*> iterator(list);
 
@@ -1315,29 +1250,6 @@ bool ClientList::SendPacket(const char* to, ServerPacket* pack) {
 	return false;
 }
 
-void ClientList::SendGuildPacket(uint32 guild_id, ServerPacket* pack) {
-	std::set<uint32> zone_ids;
-
-	LinkedListIterator<ClientListEntry*> iterator(clientlist);
-
-	iterator.Reset();
-	while(iterator.MoreElements()) {
-		if (iterator.GetData()->GuildID() == guild_id) {
-			zone_ids.insert(iterator.GetData()->zone());
-		}
-		iterator.Advance();
-	}
-
-	//now we know all the zones, send it to each one... this is kinda a shitty way to do this
-	//since its basically O(n^2)
-	std::set<uint32>::iterator cur, end;
-	cur = zone_ids.begin();
-	end = zone_ids.end();
-	for(; cur != end; cur++) {
-		zoneserver_list.SendPacket(*cur, pack);
-	}
-}
-
 void ClientList::UpdateClientGuild(uint32 char_id, uint32 guild_id) {
 	LinkedListIterator<ClientListEntry*> iterator(clientlist);
 
@@ -1348,21 +1260,6 @@ void ClientList::UpdateClientGuild(uint32 char_id, uint32 guild_id) {
 			cle->SetGuild(guild_id);
 		}
 		iterator.Advance();
-	}
-}
-
-void ClientList::RemoveCLEByLSID(uint32 iLSID)
-{
-	LinkedListIterator<ClientListEntry *> iterator(clientlist);
-
-	iterator.Reset();
-	while (iterator.MoreElements()) {
-		if (iterator.GetData()->LSAccountID() == iLSID) {
-			iterator.RemoveCurrent();
-		}
-		else {
-			iterator.Advance();
-		}
 	}
 }
 

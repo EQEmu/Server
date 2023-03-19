@@ -204,7 +204,7 @@ void command_pvp(Client *c, const Seperator *sep);
 void command_qglobal(Client *c, const Seperator *sep);
 void command_questerrors(Client *c, const Seperator *sep);
 void command_race(Client *c, const Seperator *sep);
-void command_raidloot(Client *c, const Seperator *sep);
+void command_raidloot(Client* c, const Seperator* sep);
 void command_randomfeatures(Client *c, const Seperator *sep);
 void command_refreshgroup(Client *c, const Seperator *sep);
 void command_reload(Client *c, const Seperator *sep);

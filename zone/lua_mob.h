@@ -516,6 +516,18 @@ public:
 	bool IsFindable();
 	bool IsTrackable();
 	float GetDefaultRaceSize();
+	int64 GetActDoTDamage(uint16 spell_id, int64 value, Lua_Mob target);
+	int64 GetActDoTDamage(uint16 spell_id, int64 value, Lua_Mob target, bool from_buff_tic);
+	int64 GetActReflectedSpellDamage(uint16 spell_id, int64 value, int effectiveness);
+	int GetActSpellCasttime(uint16 spell_id, uint32 cast_time);
+	int GetActSpellCost(uint16 spell_id, int cost);
+	int64 GetActSpellDamage(uint16 spell_id, int64 value);
+	int64 GetActSpellDamage(uint16 spell_id, int64 value, Lua_Mob target);
+	int GetActSpellDuration(uint16 spell_id, int duration);
+	int64 GetActSpellHealing(uint16 spell_id, int64 value);
+	int64 GetActSpellHealing(uint16 spell_id, int64 value, Lua_Mob target);
+	int64 GetActSpellHealing(uint16 spell_id, int64 value, Lua_Mob target, bool from_buff_tic);
+	float GetActSpellRange(uint16 spell_id, float range);
 };
 
 #endif

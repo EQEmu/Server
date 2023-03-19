@@ -327,7 +327,7 @@ public:
 	int32 GetActSpellCost(uint16 spell_id, int32 cost);
 	virtual int32 GetActSpellDuration(uint16 spell_id, int32 duration);
 	int32 GetActSpellCasttime(uint16 spell_id, int32 casttime);
-	virtual int64 GetActReflectedSpellDamage(int32 spell_id, int64 value, int effectiveness);
+	virtual int64 GetActReflectedSpellDamage(uint16 spell_id, int64 value, int effectiveness);
 	float ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use_resist_override = false,
 		int resist_override = 0, bool CharismaCheck = false, bool CharmTick = false, bool IsRoot = false,
 		int level_override = -1);
@@ -417,7 +417,6 @@ public:
 	void BuffFadeBySlot(int slot, bool iRecalcBonuses = true);
 	void BuffFadeDetrimentalByCaster(Mob *caster);
 	void BuffFadeBySitModifier();
-	bool IsAffectedByBuff(uint16 spell_id);
 	bool IsAffectedByBuffByGlobalGroup(GlobalGroup group);
 	void BuffModifyDurationBySpellID(uint16 spell_id, int32 newDuration);
 	int AddBuff(Mob *caster, const uint16 spell_id, int duration = 0, int32 level_override = -1, bool disable_buff_overwrite = false);
@@ -434,7 +433,7 @@ public:
 	bool HasDiscBuff();
 	virtual uint32 GetFirstBuffSlot(bool disc, bool song);
 	virtual uint32 GetLastBuffSlot(bool disc, bool song);
-	virtual void InitializeBuffSlots() { buffs = nullptr; current_buff_count = 0; }
+	virtual void InitializeBuffSlots() { buffs = nullptr; }
 	virtual void UninitializeBuffSlots() { }
 	EQApplicationPacket *MakeBuffsPacket(bool for_target = true);
 	void SendBuffsToClient(Client *c);
@@ -515,7 +514,6 @@ public:
 	virtual void Damage(Mob* from, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill,
 		bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false, eSpecialAttacks special = eSpecialAttacks::None) = 0;
 	void SetHP(int64 hp);
-	bool ChangeHP(Mob* other, int32 amount, uint16 spell_id = 0, int8 buffslot = -1, bool iBuffTic = false);
 	inline void SetOOCRegen(int64 new_ooc_regen) { ooc_regen = new_ooc_regen; }
 	virtual void Heal();
 	virtual void HealDamage(uint64 ammount, Mob* caster = nullptr, uint16 spell_id = SPELL_UNKNOWN);
@@ -906,7 +904,8 @@ public:
 		uint32 in_drakkin_tattoo = 0xFFFFFFFF,
 		uint32 in_drakkin_details = 0xFFFFFFFF,
 		float in_size = -1.0f,
-		bool send_appearance_effects = true
+		bool send_appearance_effects = true,
+		Client* target = nullptr
 	);
 	void CloneAppearance(Mob* other, bool clone_name = false);
 	void SetFaceAppearance(const FaceChange_Struct& face, bool skip_sender = false);
@@ -923,7 +922,6 @@ public:
 	bool PassCharismaCheck(Mob* caster, uint16 spell_id);
 	bool TryDeathSave();
 	bool TryDivineSave();
-	void DoBuffWearOffEffect(uint32 index);
 	void TryTriggerOnCastFocusEffect(focusType type, uint16 spell_id);
 	bool TryTriggerOnCastProc(uint16 focusspellid, uint16 spell_id, uint16 proc_spellid);
 	bool TrySpellTrigger(Mob *target, uint32 spell_id, int effect);
@@ -1506,7 +1504,6 @@ protected:
 	uint8 maxlevel;
 	uint32 scalerate;
 	Buffs_Struct *buffs;
-	uint32 current_buff_count;
 	StatBonuses itembonuses;
 	StatBonuses spellbonuses;
 	StatBonuses aabonuses;
@@ -1607,7 +1604,6 @@ protected:
 
 	EQ::LightSourceProfile m_Light;
 
-	float fixedZ;
 	EmuAppearance _appearance;
 	uint8 pRunAnimSpeed;
 	bool m_is_running;
@@ -1658,7 +1654,6 @@ protected:
 	uint32 casting_spell_inventory_slot;
 	uint32 casting_spell_timer;
 	uint32 casting_spell_timer_duration;
-	uint32 casting_spell_type;
 	int16 casting_spell_resist_adjust;
 	uint32 casting_spell_aa_id;
 	uint32 casting_spell_recast_adjust;
@@ -1700,7 +1695,6 @@ protected:
 	bool rooted;
 	bool silenced;
 	bool amnesiad;
-	bool inWater; // Set to true or false by Water Detection code if enabled by rules
 	bool offhand;
 	bool has_shieldequiped;
 	bool has_twohandbluntequiped;
@@ -1787,7 +1781,6 @@ protected:
 
 	int8 last_hp_percent;
 	int32 last_hp;
-	int32 last_max_hp;
 
 	int cur_wp;
 	glm::vec4 m_CurrentWayPoint;
@@ -1862,6 +1855,8 @@ private:
 	void SetHeroicDexBonuses(StatBonuses* n);
 	void SetHeroicIntBonuses(StatBonuses* n);
 	void SetHeroicWisBonuses(StatBonuses* n);
+
+	void DoSpellInterrupt(uint16 spell_id, int32 mana_cost, int my_curmana);
 };
 
 #endif

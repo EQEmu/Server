@@ -110,12 +110,10 @@ class NPC : public Mob
 public:
 	static NPC* SpawnNPC(const char* spawncommand, const glm::vec4& position, Client* client = nullptr);
 	static bool	SpawnZoneController();
-	static int8 GetAILevel(bool iForceReRead = false);
 
 	// loot recording / simulator
 	bool IsRecordLootStats() const;
 	void SetRecordLootStats(bool record_loot_stats);
-	void FlushLootStats();
 	const std::vector<uint32> &GetRolledItems() const;
 	int GetRolledItemCount(uint32 item_id);
 
@@ -591,7 +589,7 @@ protected:
 	std::vector<AISpells_Struct> AIspells;
 	bool HasAISpell;
 	virtual bool AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes, bool bInnates = false);
-	virtual bool AIDoSpellCast(uint8 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgainBefore = 0);
+	virtual bool AIDoSpellCast(int32 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgainBefore = 0);
 	AISpellsVar_Struct AISpellVar;
 	int64 GetFocusEffect(focusType type, uint16 spell_id, Mob *caster = nullptr, bool from_buff_tic = false) override;
 	uint16 innate_proc_spell_id;

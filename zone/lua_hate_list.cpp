@@ -1,12 +1,9 @@
 #ifdef LUA_EQEMU
 
-#include "lua.hpp"
 #include <luabind/luabind.hpp>
-#include <luabind/object.hpp>
 #include <luabind/iterator_policy.hpp>
 
 #include "masterentity.h"
-#include "hate_list.h"
 #include "lua_mob.h"
 #include "lua_hate_list.h"
 

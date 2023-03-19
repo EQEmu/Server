@@ -31,7 +31,6 @@ std::string to_string(const glm::vec2 &position);
 bool IsWithinAxisAlignedBox(const glm::vec3 &position, const glm::vec3 &minimum, const glm::vec3 &maximum);
 bool IsWithinAxisAlignedBox(const glm::vec2 &position, const glm::vec2 &minimum, const glm::vec2 &maximum);
 
-bool IsOrigin(const glm::vec2 &position);
 bool IsOrigin(const glm::vec3 &position);
 bool IsOrigin(const glm::vec4 &position);
 

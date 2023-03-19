@@ -23,7 +23,6 @@ public:
 	bool Process();
 	bool triggered;
 	char *GetDoorName() { return m_door_name; }
-	const glm::vec4 GetDestination() const { return m_destination; }
 	const glm::vec4 &GetPosition() const { return m_position; }
 	int GetDzSwitchID() const { return m_dz_switch_id; }
 	int GetIncline() { return m_incline; }

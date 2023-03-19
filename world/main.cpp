@@ -18,8 +18,6 @@
  *
  */
 
-#define PLATFORM_WORLD 1
-
 #include "../common/global_define.h"
 
 #include <iostream>
@@ -56,19 +54,8 @@
 #include <conio.h>
 #else
 
-#include "../common/unix.h"
 #include <sys/sem.h>
 #include <thread>
-
-#if not defined (FREEBSD) && not defined (DARWIN)
-union semun {
-	int             val;
-	struct semid_ds *buf;
-	ushort          *array;
-	struct seminfo  *__buf;
-	void            *__pad;
-};
-#endif
 
 #endif
 

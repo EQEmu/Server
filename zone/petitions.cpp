@@ -282,7 +282,7 @@ void ZoneDatabase::RefreshPetitionsFromDB()
         newpet->SetLevel(Strings::ToInt(row[9]));
         newpet->SetCheckouts(Strings::ToInt(row[10]));
         newpet->SetUnavails(Strings::ToInt(row[11]));
-        newpet->SetSentTime2(atol(row[13]));
+        newpet->SetSentTime(atol(row[13]));
         newpet->SetGMText(row[14]);
 
         if (Strings::ToInt(row[12]) == 1)
