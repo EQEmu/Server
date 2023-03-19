@@ -13,7 +13,7 @@
  * @param bucket_value
  * @param expires_time
  */
-void DataBucket::SetData(std::string bucket_key, std::string bucket_value, std::string expires_time) {
+void DataBucket::SetData(const std::string& bucket_key, const std::string& bucket_value, std::string expires_time) {
 	uint64 bucket_id = DataBucket::DoesBucketExist(bucket_key);
 
 	std::string query;
@@ -57,7 +57,7 @@ void DataBucket::SetData(std::string bucket_key, std::string bucket_value, std::
  * @param bucket_key
  * @return
  */
-std::string DataBucket::GetData(std::string bucket_key) {
+std::string DataBucket::GetData(const std::string& bucket_key) {
 	std::string query = StringFormat(
 			"SELECT `value` from `data_buckets` WHERE `key` = '%s' AND (`expires` > %lld OR `expires` = 0)  LIMIT 1",
 			bucket_key.c_str(),
@@ -82,7 +82,7 @@ std::string DataBucket::GetData(std::string bucket_key) {
  * @param bucket_key
  * @return
  */
-std::string DataBucket::GetDataExpires(std::string bucket_key) {
+std::string DataBucket::GetDataExpires(const std::string& bucket_key) {
 	std::string query = StringFormat(
 			"SELECT `expires` from `data_buckets` WHERE `key` = '%s' AND (`expires` > %lld OR `expires` = 0)  LIMIT 1",
 			bucket_key.c_str(),
@@ -102,7 +102,7 @@ std::string DataBucket::GetDataExpires(std::string bucket_key) {
 	return std::string(row[0]);
 }
 
-std::string DataBucket::GetDataRemaining(std::string bucket_key) {
+std::string DataBucket::GetDataRemaining(const std::string& bucket_key) {
 	if (DataBucket::GetDataExpires(bucket_key).empty()) {
 		return "0";
 	}
@@ -130,7 +130,7 @@ std::string DataBucket::GetDataRemaining(std::string bucket_key) {
  * @param bucket_key
  * @return
  */
-uint64 DataBucket::DoesBucketExist(std::string bucket_key) {
+uint64 DataBucket::DoesBucketExist(const std::string& bucket_key) {
 	std::string query = StringFormat(
 			"SELECT `id` from `data_buckets` WHERE `key` = '%s' AND (`expires` > %lld OR `expires` = 0) LIMIT 1",
 			Strings::Escape(bucket_key).c_str(),
@@ -154,7 +154,7 @@ uint64 DataBucket::DoesBucketExist(std::string bucket_key) {
  * @param bucket_key
  * @return
  */
-bool DataBucket::DeleteData(std::string bucket_key) {
+bool DataBucket::DeleteData(const std::string& bucket_key) {
 	std::string query = StringFormat(
 			"DELETE FROM `data_buckets` WHERE `key` = '%s'",
 			Strings::Escape(bucket_key).c_str()
