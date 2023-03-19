@@ -54,6 +54,10 @@ int64 Mob::GetActSpellDamage(uint16 spell_id, int64 value, Mob* target) {
 		}
 	}
 
+	if (RuleB(Spells, AllowExtraDmgSkill) && RuleB(Character, ItemExtraSkillDamageCalcAsPercent) && GetSkillDmgAmt(spells[spell_id].skill) > 0) {
+		value *= std::abs(GetSkillDmgAmt(spells[spell_id].skill) / 100);
+	}
+
 	bool Critical = false;
 	int64 base_value = value;
 	int chance = 0;
@@ -122,7 +126,7 @@ int64 Mob::GetActSpellDamage(uint16 spell_id, int64 value, Mob* target) {
 			value -= GetFocusEffect(focusFcDamageAmt2, spell_id);
 			value -= GetFocusEffect(focusFcAmplifyAmt, spell_id);
 
-			if (RuleB(Spells, AllowExtraDmgSkill)) {
+			if (RuleB(Spells, AllowExtraDmgSkill) && !RuleB(Character, ItemExtraSkillDamageCalcAsPercent)) {
 				value -= GetSkillDmgAmt(spells[spell_id].skill) * ratio / 100;
 			}
 
@@ -164,7 +168,7 @@ int64 Mob::GetActSpellDamage(uint16 spell_id, int64 value, Mob* target) {
 	value -= GetFocusEffect(focusFcDamageAmt2, spell_id);
 	value -= GetFocusEffect(focusFcAmplifyAmt, spell_id);
 
-	if (RuleB(Spells, AllowExtraDmgSkill)) {
+	if (RuleB(Spells, AllowExtraDmgSkill) && !RuleB(Character, ItemExtraSkillDamageCalcAsPercent)) {
 		value -= GetSkillDmgAmt(spells[spell_id].skill);
 	}
 
@@ -193,11 +197,15 @@ int64 Mob::GetActReflectedSpellDamage(uint16 spell_id, int64 value, int effectiv
 		}
 	}
 
+	if (RuleB(Spells, AllowExtraDmgSkill) && RuleB(Character, ItemExtraSkillDamageCalcAsPercent) && GetSkillDmgAmt(spells[spell_id].skill) > 0) {
+		value *= std::abs(GetSkillDmgAmt(spells[spell_id].skill) / 100);
+	}
+
 	int64 base_spell_dmg = value;
 
 	value = value * effectiveness / 100;
 
-	if (RuleB(Spells, AllowExtraDmgSkill)) {
+	if (RuleB(Spells, AllowExtraDmgSkill) && !RuleB(Character, ItemExtraSkillDamageCalcAsPercent)) {
 		value -= GetSkillDmgAmt(spells[spell_id].skill);
 	}
 
@@ -219,6 +227,10 @@ int64 Mob::GetActDoTDamage(uint16 spell_id, int64 value, Mob* target, bool from_
 		if (CastToNPC()->GetSpellScale()) {
 			value = int64(static_cast<float>(value) * CastToNPC()->GetSpellScale() / 100.0f);
 		}
+	}
+
+	if (RuleB(Spells, AllowExtraDmgSkill) && RuleB(Character, ItemExtraSkillDamageCalcAsPercent) && GetSkillDmgAmt(spells[spell_id].skill) > 0) {
+		value *= std::abs(GetSkillDmgAmt(spells[spell_id].skill) / 100);
 	}
 
 	int64 base_value = value;
@@ -256,7 +268,7 @@ int64 Mob::GetActDoTDamage(uint16 spell_id, int64 value, Mob* target, bool from_
 			}
 		}
 
-		if (RuleB(Spells, AllowExtraDmgSkill)) {
+		if (RuleB(Spells, AllowExtraDmgSkill) && !RuleB(Character, ItemExtraSkillDamageCalcAsPercent)) {
 			extra_dmg += GetSkillDmgAmt(spells[spell_id].skill) * ratio / 100;
 		}
 
@@ -291,7 +303,7 @@ int64 Mob::GetActDoTDamage(uint16 spell_id, int64 value, Mob* target, bool from_
 			}
 		}
 
-		if (RuleB(Spells, AllowExtraDmgSkill)) {
+		if (RuleB(Spells, AllowExtraDmgSkill) && !RuleB(Character, ItemExtraSkillDamageCalcAsPercent)) {
 			extra_dmg += GetSkillDmgAmt(spells[spell_id].skill);
 		}
 
@@ -352,6 +364,14 @@ int64 Mob::GetActSpellHealing(uint16 spell_id, int64 value, Mob* target, bool fr
 
 	if (IsNPC()) {
 		value += value * CastToNPC()->GetSpellFocusHeal() / 100;
+
+		if (IsNPC() && CastToNPC()->GetHealScale()) {
+			value = int(static_cast<float>(value) * CastToNPC()->GetHealScale() / 100.0f);
+		}
+	}
+
+	if (RuleB(Spells, AllowExtraDmgSkill) && RuleB(Character, ItemExtraSkillDamageCalcAsPercent) && GetSkillDmgAmt(spells[spell_id].skill) > 0) {
+		value *= std::abs(GetSkillDmgAmt(spells[spell_id].skill) / 100);
 	}
 
 	int64 base_value = value;
@@ -393,7 +413,7 @@ int64 Mob::GetActSpellHealing(uint16 spell_id, int64 value, Mob* target, bool fr
 	// Instant Heals
 	if (spells[spell_id].buff_duration < 1) {
 
-		if (RuleB(Spells, AllowExtraDmgSkill)) {
+		if (RuleB(Spells, AllowExtraDmgSkill) && !RuleB(Character, ItemExtraSkillDamageCalcAsPercent)) {
 			value += GetSkillDmgAmt(spells[spell_id].skill);
 		}
 
@@ -413,7 +433,7 @@ int64 Mob::GetActSpellHealing(uint16 spell_id, int64 value, Mob* target, bool fr
 		}
 
 		if (target) {
-			value += value * target->GetHealRate() / 100;  //SPA 120 modifies value after Focus Applied but before critical
+			value += value * target->GetHealRate() / 100; //SPA 120 modifies value after Focus Applied but before critical
 		}
 
 		/*
@@ -426,10 +446,6 @@ int64 Mob::GetActSpellHealing(uint16 spell_id, int64 value, Mob* target, bool fr
 
 		if (target) {
 			value += target->GetFocusEffect(focusFcHealAmtIncoming, spell_id, this); //SPA 394 Add after critical
-		}
-
-		if (IsNPC() && CastToNPC()->GetHealScale()) {
-			value = int(static_cast<float>(value) * CastToNPC()->GetHealScale() / 100.0f);
 		}
 
 		if (critical_modifier > 1) {
@@ -450,7 +466,7 @@ int64 Mob::GetActSpellHealing(uint16 spell_id, int64 value, Mob* target, bool fr
 		//Using IgnoreSpellDmgLvlRestriction to also allow healing to scale
 		int64 extra_heal = 0;
 
-		if (RuleB(Spells, AllowExtraDmgSkill)) {
+		if (RuleB(Spells, AllowExtraDmgSkill) && !RuleB(Character, ItemExtraSkillDamageCalcAsPercent)) {
 			extra_heal += GetSkillDmgAmt(spells[spell_id].skill);
 		}
 
@@ -472,10 +488,6 @@ int64 Mob::GetActSpellHealing(uint16 spell_id, int64 value, Mob* target, bool fr
 		}
 
 		value *= critical_modifier;
-	}
-
-	if (IsNPC() && CastToNPC()->GetHealScale()) {
-		value = int(static_cast<float>(value) * CastToNPC()->GetHealScale() / 100.0f);
 	}
 
 	return value;
