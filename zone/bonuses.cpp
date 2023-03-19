@@ -5647,25 +5647,30 @@ void Mob::CalcHeroicBonuses(StatBonuses* newbon)
 	if (GetHeroicSTR()) {
 		SetHeroicStrBonuses(newbon);
 	}
+
 	if (GetHeroicSTA()) {
 		SetHeroicStaBonuses(newbon);
 	}
+
 	if (GetHeroicAGI()) {
 		SetHeroicAgiBonuses(newbon);
 	}
+
 	if (GetHeroicDEX()) {
 		SetHeroicDexBonuses(newbon);
 	}
+
 	if (GetHeroicINT()) {
 		SetHeroicIntBonuses(newbon);
 	}
+
 	if (GetHeroicWIS()) {
 		SetHeroicWisBonuses(newbon);
 	}
 }
 
-void Mob::SetHeroicWisBonuses(StatBonuses* n) {
-
+void Mob::SetHeroicWisBonuses(StatBonuses* n)
+{
 	n->heroic_max_mana += IsWISCasterClass(GetClass()) ? GetHeroicWIS() * RuleR(Character, HeroicWisdomMultiplier) * 10 : 0;
 	n->heroic_mana_regen += IsWISCasterClass(GetClass()) ? GetHeroicWIS() * RuleR(Character, HeroicWisdomMultiplier) / 25 : 0;
 	n->HealAmt += GetHeroicWIS() * RuleR(Character, HeroicWisdomIncreaseHealAmtMultiplier);
@@ -5677,8 +5682,8 @@ void Mob::SetHeroicWisBonuses(StatBonuses* n) {
 	}
 }
 
-void Mob::SetHeroicIntBonuses(StatBonuses* n) {
-
+void Mob::SetHeroicIntBonuses(StatBonuses* n)
+{
 	n->heroic_max_mana += IsINTCasterClass(GetClass()) ? GetHeroicINT() * RuleR(Character, HeroicIntelligenceMultiplier) * 10 : 0;
 	n->heroic_mana_regen += IsINTCasterClass(GetClass()) ? GetHeroicINT() * RuleR(Character, HeroicIntelligenceMultiplier) / 25 : 0;
 	n->SpellDmg += GetHeroicINT() * RuleR(Character, HeroicIntelligenceIncreaseSpellDmgMultiplier);
@@ -5690,8 +5695,8 @@ void Mob::SetHeroicIntBonuses(StatBonuses* n) {
 	}
 }
 
-void Mob::SetHeroicDexBonuses(StatBonuses* n) {
-
+void Mob::SetHeroicDexBonuses(StatBonuses* n)
+{
 	n->heroic_dex_ranged_damage += GetHeroicDEX() * RuleR(Character, HeroicDexterityMultiplier) / 10;
 	n->heroic_max_end += GetHeroicDEX() * RuleR(Character, HeroicDexterityMultiplier) / 4 * 10.0f;
 	n->heroic_end_regen += GetHeroicDEX() * RuleR(Character, HeroicDexterityMultiplier) / 4 / 50;
@@ -5703,8 +5708,8 @@ void Mob::SetHeroicDexBonuses(StatBonuses* n) {
 	}
 }
 
-void Mob::SetHeroicAgiBonuses(StatBonuses* n) {
-
+void Mob::SetHeroicAgiBonuses(StatBonuses* n)
+{
 	n->heroic_agi_avoidance += GetHeroicAGI() * RuleR(Character, HeroicAgilityMultiplier) / 10;
 	n->heroic_max_end += GetHeroicAGI() * RuleR(Character, HeroicAgilityMultiplier) / 4 * 10.0f;
 	n->heroic_end_regen += GetHeroicAGI() * RuleR(Character, HeroicAgilityMultiplier) / 4 / 50;
@@ -5716,8 +5721,8 @@ void Mob::SetHeroicAgiBonuses(StatBonuses* n) {
 	}
 }
 
-void Mob::SetHeroicStaBonuses(StatBonuses* n) {
-
+void Mob::SetHeroicStaBonuses(StatBonuses* n)
+{
 	n->heroic_max_hp += GetHeroicSTA() * RuleR(Character, HeroicStaminaMultiplier) * 10;
 	n->heroic_hp_regen += GetHeroicSTA() * RuleR(Character, HeroicStaminaMultiplier) / 20;
 	n->heroic_max_end += GetHeroicSTA() * RuleR(Character, HeroicStaminaMultiplier) / 4 * 10.0f;
@@ -5731,8 +5736,8 @@ void Mob::SetHeroicStaBonuses(StatBonuses* n) {
 	}
 }
 
-void Mob::SetHeroicStrBonuses(StatBonuses* n) {
-
+void Mob::SetHeroicStrBonuses(StatBonuses* n)
+{
 	n->heroic_str_shield_ac += GetHeroicSTR() * RuleR(Character, HeroicStrengthMultiplier) / 10;
 	n->heroic_str_melee_damage += GetHeroicSTR() * RuleR(Character, HeroicStrengthMultiplier) / 10;
 	n->heroic_max_end += GetHeroicSTR() * RuleR(Character, HeroicStrengthMultiplier) / 4 * 10.0f;
@@ -5746,8 +5751,8 @@ void Mob::SetHeroicStrBonuses(StatBonuses* n) {
 	}
 }
 
-float Mob::CheckHeroicBonusesDataBuckets(std::string bucket_name) {
-
+float Mob::CheckHeroicBonusesDataBuckets(std::string bucket_name)
+{
 	std::string bucket_value;
 	if (!bucket_name.empty()) {
 		const auto full_name = fmt::format(
