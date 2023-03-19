@@ -544,7 +544,6 @@ bool Group::UpdatePlayer(Mob* update) {
 	return updateSuccess;
 }
 
-
 void Group::MemberZoned(Mob* removemob) {
 	uint32 i;
 
@@ -554,11 +553,10 @@ void Group::MemberZoned(Mob* removemob) {
 	if(removemob == GetLeader())
 		SetLeader(nullptr);
 
-	for (i = 0; i < MAX_GROUP_MEMBERS; i++) {
-		if (members[i] == removemob) {
-			members[i] = nullptr;
-			//should NOT clear the name, it is used for world communication.
-			break;
+	//should NOT clear the name, it is used for world communication.
+	for (auto & m : members) {
+		if (m && (m == removemob || m->IsBot() && m->CastToBot()->GetBotOwner() == removemob)) {
+			m = nullptr;
 		}
 	}
 
@@ -924,6 +922,7 @@ void Group::DisbandGroup(bool joinraid) {
 	{
 		if (members[i] == nullptr)
 		{
+			membername[i][0] = '\0';
 			continue;
 		}
 
@@ -1166,6 +1165,7 @@ bool Group::LearnMembers() {
 		memberIndex++;
 	}
 
+	VerifyGroup();
 	return true;
 }
 
@@ -2321,7 +2321,6 @@ void Group::UpdateXTargetMarkedNPC(uint32 Number, Mob *m)
 			members[i]->CastToClient()->UpdateXTargetType((Number == 1) ? GroupMarkTarget1 : ((Number == 2) ? GroupMarkTarget2 : GroupMarkTarget3), m);
 		}
 	}
-
 }
 
 void Group::SetDirtyAutoHaters()
