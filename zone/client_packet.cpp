@@ -8423,8 +8423,7 @@ void Client::Handle_OP_GuildStatus(const EQApplicationPacket *app)
 
 	Client *c = entity_list.GetClientByName(gss->Name);
 
-	if (!c)
-	{
+	if (!c) {
 		MessageString(Chat::LightGray, TARGET_PLAYER_FOR_GUILD_STATUS);
 		return;
 	}

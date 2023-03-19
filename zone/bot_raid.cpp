@@ -94,10 +94,10 @@ void Raid::HandleBotGroupDisband(uint32 owner, uint32 gid)
 		// Remove the entire BOT group in this case
 		if (b && gid != RAID_GROUPLESS && IsRaidMember(b->GetName()) && IsGroupLeader(b->GetName())) {
 			auto r_group_members = GetRaidGroupMembers(GetGroup(b->GetName()));
-			auto group_inst = new Group(b);
-			entity_list.AddGroup(group_inst);
-			database.SetGroupID(b->GetCleanName(), group_inst->GetID(), b->GetBotID());
-			database.SetGroupLeaderName(group_inst->GetID(), b->GetName());
+			auto g = new Group(b);
+			entity_list.AddGroup(g);
+			database.SetGroupID(b->GetCleanName(), g->GetID(), b->GetBotID());
+			database.SetGroupLeaderName(g->GetID(), b->GetName());
 
 			for (auto m: r_group_members) {
 				if (m.member->IsBot()) {
@@ -105,7 +105,7 @@ void Raid::HandleBotGroupDisband(uint32 owner, uint32 gid)
 					if (strcmp(b_member->GetName(), b->GetName()) == 0) {
 						b->SetFollowID(owner);
 					} else {
-						Bot::AddBotToGroup(b_member, group_inst);
+						Bot::AddBotToGroup(b_member, g);
 					}
 					Bot::RemoveBotFromRaid(b_member);
 				}

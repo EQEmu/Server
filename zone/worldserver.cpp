@@ -1121,8 +1121,9 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 
 		Client *client = entity_list.GetClientByName(sgfas->Name);
 
-		if (!client)
+		if (!client) {
 			break;
+		}
 
 		uint32 groupid = database.GetGroupID(client->GetName());
 

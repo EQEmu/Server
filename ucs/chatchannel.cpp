@@ -393,13 +393,15 @@ bool ChatChannel::RemoveClient(Client *c) {
 
 void ChatChannel::SendOPList(Client *c)
 {
-	if (!c)
+	if (!c) {
 		return;
+	}
 
 	c->GeneralChannelMessage("Channel " + m_name + " op-list: (Owner=" + m_owner + ")");
 
-	for (auto &&m : m_moderators)
+	for (auto &&m : m_moderators) {
 		c->GeneralChannelMessage(m);
+	}
 }
 
 void ChatChannel::SendChannelMembers(Client *c) {

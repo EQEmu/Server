@@ -75,8 +75,8 @@ enum { //raid command types
 	RaidCommandSetNote = 36,
 };
 
-#define MAX_RAID_GROUPS 12
-#define MAX_RAID_MEMBERS 72
+constexpr uint8_t MAX_RAID_GROUPS = 12;
+constexpr uint8_t MAX_RAID_MEMBERS = 72;
 const uint32 RAID_GROUPLESS = 0xFFFFFFFF;
 
 struct RaidMember{
@@ -119,7 +119,7 @@ public:
 	void	RaidGroupSay(const char* msg, const char* from, uint8 language, uint8 lang_skill);
 	void	RaidSay(const char* msg, const char* from, uint8 language, uint8 lang_skill);
 	bool	IsEngaged();
-	Mob* GetRaidMainAssistOne();
+	Mob*	GetRaidMainAssistOne();
 	void	RemoveMember(const char *character_name);
 	void	DisbandRaid();
 	void	MoveMember(const char *name, uint32 newGroup);
