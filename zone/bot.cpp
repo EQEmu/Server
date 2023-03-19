@@ -7339,11 +7339,15 @@ void Bot::AddItemBonuses(const EQ::ItemInstance *inst, StatBonuses* newbon, bool
 		}
 	}
 
-	if (item->ExtraDmgSkill != 0 && item->ExtraDmgSkill <= EQ::skills::HIGHEST_SKILL) {
-		if ((newbon->SkillDamageAmount[item->ExtraDmgSkill] + item->ExtraDmgAmt) > RuleI(Character, ItemExtraDmgCap))
+	if (item->ExtraDmgAmt != 0 && item->ExtraDmgSkill <= EQ::skills::HIGHEST_SKILL) {
+		if (
+			RuleI(Character, ItemExtraDmgCap) >= 0 &&
+			(newbon->SkillDamageAmount[item->ExtraDmgSkill] + item->ExtraDmgAmt) > RuleI(Character, ItemExtraDmgCap)
+		) {
 			newbon->SkillDamageAmount[item->ExtraDmgSkill] = RuleI(Character, ItemExtraDmgCap);
-		else
+		} else {
 			newbon->SkillDamageAmount[item->ExtraDmgSkill] += item->ExtraDmgAmt;
+		}
 	}
 
 	if (!isAug)
