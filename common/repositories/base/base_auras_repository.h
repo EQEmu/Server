@@ -13,23 +13,23 @@
 #define EQEMU_BASE_AURAS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseAurasRepository {
 public:
 	struct Auras {
-		int         type;
-		int         npc_type;
+		int32_t     type;
+		int32_t     npc_type;
 		std::string name;
-		int         spell_id;
-		int         distance;
-		int         aura_type;
-		int         spawn_type;
-		int         movement;
-		int         duration;
-		int         icon;
-		int         cast_time;
+		int32_t     spell_id;
+		int32_t     distance;
+		int32_t     aura_type;
+		int32_t     spawn_type;
+		int32_t     movement;
+		int32_t     duration;
+		int32_t     icon;
+		int32_t     cast_time;
 	};
 
 	static std::string PrimaryKey()
@@ -73,12 +73,12 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string SelectColumnsRaw()
 	{
-		return std::string(implode(", ", SelectColumns()));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -106,24 +106,24 @@ public:
 
 	static Auras NewEntity()
 	{
-		Auras entry{};
+		Auras e{};
 
-		entry.type       = 0;
-		entry.npc_type   = 0;
-		entry.name       = "";
-		entry.spell_id   = 0;
-		entry.distance   = 60;
-		entry.aura_type  = 1;
-		entry.spawn_type = 0;
-		entry.movement   = 0;
-		entry.duration   = 5400;
-		entry.icon       = -1;
-		entry.cast_time  = 0;
+		e.type       = 0;
+		e.npc_type   = 0;
+		e.name       = "";
+		e.spell_id   = 0;
+		e.distance   = 60;
+		e.aura_type  = 1;
+		e.spawn_type = 0;
+		e.movement   = 0;
+		e.duration   = 5400;
+		e.icon       = -1;
+		e.cast_time  = 0;
 
-		return entry;
+		return e;
 	}
 
-	static Auras GetAurasEntry(
+	static Auras GetAuras(
 		const std::vector<Auras> &aurass,
 		int auras_id
 	)
@@ -152,21 +152,21 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			Auras entry{};
+			Auras e{};
 
-			entry.type       = atoi(row[0]);
-			entry.npc_type   = atoi(row[1]);
-			entry.name       = row[2] ? row[2] : "";
-			entry.spell_id   = atoi(row[3]);
-			entry.distance   = atoi(row[4]);
-			entry.aura_type  = atoi(row[5]);
-			entry.spawn_type = atoi(row[6]);
-			entry.movement   = atoi(row[7]);
-			entry.duration   = atoi(row[8]);
-			entry.icon       = atoi(row[9]);
-			entry.cast_time  = atoi(row[10]);
+			e.type       = static_cast<int32_t>(atoi(row[0]));
+			e.npc_type   = static_cast<int32_t>(atoi(row[1]));
+			e.name       = row[2] ? row[2] : "";
+			e.spell_id   = static_cast<int32_t>(atoi(row[3]));
+			e.distance   = static_cast<int32_t>(atoi(row[4]));
+			e.aura_type  = static_cast<int32_t>(atoi(row[5]));
+			e.spawn_type = static_cast<int32_t>(atoi(row[6]));
+			e.movement   = static_cast<int32_t>(atoi(row[7]));
+			e.duration   = static_cast<int32_t>(atoi(row[8]));
+			e.icon       = static_cast<int32_t>(atoi(row[9]));
+			e.cast_time  = static_cast<int32_t>(atoi(row[10]));
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -191,32 +191,32 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Auras auras_entry
+		const Auras &e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(auras_entry.type));
-		update_values.push_back(columns[1] + " = " + std::to_string(auras_entry.npc_type));
-		update_values.push_back(columns[2] + " = '" + EscapeString(auras_entry.name) + "'");
-		update_values.push_back(columns[3] + " = " + std::to_string(auras_entry.spell_id));
-		update_values.push_back(columns[4] + " = " + std::to_string(auras_entry.distance));
-		update_values.push_back(columns[5] + " = " + std::to_string(auras_entry.aura_type));
-		update_values.push_back(columns[6] + " = " + std::to_string(auras_entry.spawn_type));
-		update_values.push_back(columns[7] + " = " + std::to_string(auras_entry.movement));
-		update_values.push_back(columns[8] + " = " + std::to_string(auras_entry.duration));
-		update_values.push_back(columns[9] + " = " + std::to_string(auras_entry.icon));
-		update_values.push_back(columns[10] + " = " + std::to_string(auras_entry.cast_time));
+		v.push_back(columns[0] + " = " + std::to_string(e.type));
+		v.push_back(columns[1] + " = " + std::to_string(e.npc_type));
+		v.push_back(columns[2] + " = '" + Strings::Escape(e.name) + "'");
+		v.push_back(columns[3] + " = " + std::to_string(e.spell_id));
+		v.push_back(columns[4] + " = " + std::to_string(e.distance));
+		v.push_back(columns[5] + " = " + std::to_string(e.aura_type));
+		v.push_back(columns[6] + " = " + std::to_string(e.spawn_type));
+		v.push_back(columns[7] + " = " + std::to_string(e.movement));
+		v.push_back(columns[8] + " = " + std::to_string(e.duration));
+		v.push_back(columns[9] + " = " + std::to_string(e.icon));
+		v.push_back(columns[10] + " = " + std::to_string(e.cast_time));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
-				auras_entry.type
+				e.type
 			)
 		);
 
@@ -225,73 +225,73 @@ public:
 
 	static Auras InsertOne(
 		Database& db,
-		Auras auras_entry
+		Auras e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(auras_entry.type));
-		insert_values.push_back(std::to_string(auras_entry.npc_type));
-		insert_values.push_back("'" + EscapeString(auras_entry.name) + "'");
-		insert_values.push_back(std::to_string(auras_entry.spell_id));
-		insert_values.push_back(std::to_string(auras_entry.distance));
-		insert_values.push_back(std::to_string(auras_entry.aura_type));
-		insert_values.push_back(std::to_string(auras_entry.spawn_type));
-		insert_values.push_back(std::to_string(auras_entry.movement));
-		insert_values.push_back(std::to_string(auras_entry.duration));
-		insert_values.push_back(std::to_string(auras_entry.icon));
-		insert_values.push_back(std::to_string(auras_entry.cast_time));
+		v.push_back(std::to_string(e.type));
+		v.push_back(std::to_string(e.npc_type));
+		v.push_back("'" + Strings::Escape(e.name) + "'");
+		v.push_back(std::to_string(e.spell_id));
+		v.push_back(std::to_string(e.distance));
+		v.push_back(std::to_string(e.aura_type));
+		v.push_back(std::to_string(e.spawn_type));
+		v.push_back(std::to_string(e.movement));
+		v.push_back(std::to_string(e.duration));
+		v.push_back(std::to_string(e.icon));
+		v.push_back(std::to_string(e.cast_time));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
 		if (results.Success()) {
-			auras_entry.type = results.LastInsertedID();
-			return auras_entry;
+			e.type = results.LastInsertedID();
+			return e;
 		}
 
-		auras_entry = NewEntity();
+		e = NewEntity();
 
-		return auras_entry;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<Auras> auras_entries
+		const std::vector<Auras> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &auras_entry: auras_entries) {
-			std::vector<std::string> insert_values;
+		for (auto &e: entries) {
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(auras_entry.type));
-			insert_values.push_back(std::to_string(auras_entry.npc_type));
-			insert_values.push_back("'" + EscapeString(auras_entry.name) + "'");
-			insert_values.push_back(std::to_string(auras_entry.spell_id));
-			insert_values.push_back(std::to_string(auras_entry.distance));
-			insert_values.push_back(std::to_string(auras_entry.aura_type));
-			insert_values.push_back(std::to_string(auras_entry.spawn_type));
-			insert_values.push_back(std::to_string(auras_entry.movement));
-			insert_values.push_back(std::to_string(auras_entry.duration));
-			insert_values.push_back(std::to_string(auras_entry.icon));
-			insert_values.push_back(std::to_string(auras_entry.cast_time));
+			v.push_back(std::to_string(e.type));
+			v.push_back(std::to_string(e.npc_type));
+			v.push_back("'" + Strings::Escape(e.name) + "'");
+			v.push_back(std::to_string(e.spell_id));
+			v.push_back(std::to_string(e.distance));
+			v.push_back(std::to_string(e.aura_type));
+			v.push_back(std::to_string(e.spawn_type));
+			v.push_back(std::to_string(e.movement));
+			v.push_back(std::to_string(e.duration));
+			v.push_back(std::to_string(e.icon));
+			v.push_back(std::to_string(e.cast_time));
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 
@@ -312,27 +312,27 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Auras entry{};
+			Auras e{};
 
-			entry.type       = atoi(row[0]);
-			entry.npc_type   = atoi(row[1]);
-			entry.name       = row[2] ? row[2] : "";
-			entry.spell_id   = atoi(row[3]);
-			entry.distance   = atoi(row[4]);
-			entry.aura_type  = atoi(row[5]);
-			entry.spawn_type = atoi(row[6]);
-			entry.movement   = atoi(row[7]);
-			entry.duration   = atoi(row[8]);
-			entry.icon       = atoi(row[9]);
-			entry.cast_time  = atoi(row[10]);
+			e.type       = static_cast<int32_t>(atoi(row[0]));
+			e.npc_type   = static_cast<int32_t>(atoi(row[1]));
+			e.name       = row[2] ? row[2] : "";
+			e.spell_id   = static_cast<int32_t>(atoi(row[3]));
+			e.distance   = static_cast<int32_t>(atoi(row[4]));
+			e.aura_type  = static_cast<int32_t>(atoi(row[5]));
+			e.spawn_type = static_cast<int32_t>(atoi(row[6]));
+			e.movement   = static_cast<int32_t>(atoi(row[7]));
+			e.duration   = static_cast<int32_t>(atoi(row[8]));
+			e.icon       = static_cast<int32_t>(atoi(row[9]));
+			e.cast_time  = static_cast<int32_t>(atoi(row[10]));
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static std::vector<Auras> GetWhere(Database& db, std::string where_filter)
+	static std::vector<Auras> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<Auras> all_entries;
 
@@ -347,27 +347,27 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Auras entry{};
+			Auras e{};
 
-			entry.type       = atoi(row[0]);
-			entry.npc_type   = atoi(row[1]);
-			entry.name       = row[2] ? row[2] : "";
-			entry.spell_id   = atoi(row[3]);
-			entry.distance   = atoi(row[4]);
-			entry.aura_type  = atoi(row[5]);
-			entry.spawn_type = atoi(row[6]);
-			entry.movement   = atoi(row[7]);
-			entry.duration   = atoi(row[8]);
-			entry.icon       = atoi(row[9]);
-			entry.cast_time  = atoi(row[10]);
+			e.type       = static_cast<int32_t>(atoi(row[0]));
+			e.npc_type   = static_cast<int32_t>(atoi(row[1]));
+			e.name       = row[2] ? row[2] : "";
+			e.spell_id   = static_cast<int32_t>(atoi(row[3]));
+			e.distance   = static_cast<int32_t>(atoi(row[4]));
+			e.aura_type  = static_cast<int32_t>(atoi(row[5]));
+			e.spawn_type = static_cast<int32_t>(atoi(row[6]));
+			e.movement   = static_cast<int32_t>(atoi(row[7]));
+			e.duration   = static_cast<int32_t>(atoi(row[8]));
+			e.icon       = static_cast<int32_t>(atoi(row[9]));
+			e.cast_time  = static_cast<int32_t>(atoi(row[10]));
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -390,6 +390,32 @@ public:
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int64 GetMaxId(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COALESCE(MAX({}), 0) FROM {}",
+				PrimaryKey(),
+				TableName()
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static int64 Count(Database& db, const std::string &where_filter = "")
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COUNT(*) FROM {} {}",
+				TableName(),
+				(where_filter.empty() ? "" : "WHERE " + where_filter)
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
 };

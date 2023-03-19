@@ -13,17 +13,18 @@
 #define EQEMU_BASE_CHARACTER_TASK_TIMERS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseCharacterTaskTimersRepository {
 public:
 	struct CharacterTaskTimers {
-		int    id;
-		int    character_id;
-		int    task_id;
-		int    timer_type;
-		time_t expire_time;
+		uint32_t id;
+		uint32_t character_id;
+		uint32_t task_id;
+		int32_t  timer_type;
+		int32_t  timer_group;
+		time_t   expire_time;
 	};
 
 	static std::string PrimaryKey()
@@ -38,6 +39,7 @@ public:
 			"character_id",
 			"task_id",
 			"timer_type",
+			"timer_group",
 			"expire_time",
 		};
 	}
@@ -49,18 +51,19 @@ public:
 			"character_id",
 			"task_id",
 			"timer_type",
+			"timer_group",
 			"UNIX_TIMESTAMP(expire_time)",
 		};
 	}
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string SelectColumnsRaw()
 	{
-		return std::string(implode(", ", SelectColumns()));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -88,18 +91,19 @@ public:
 
 	static CharacterTaskTimers NewEntity()
 	{
-		CharacterTaskTimers entry{};
+		CharacterTaskTimers e{};
 
-		entry.id           = 0;
-		entry.character_id = 0;
-		entry.task_id      = 0;
-		entry.timer_type   = 0;
-		entry.expire_time  = std::time(nullptr);
+		e.id           = 0;
+		e.character_id = 0;
+		e.task_id      = 0;
+		e.timer_type   = 0;
+		e.timer_group  = 0;
+		e.expire_time  = std::time(nullptr);
 
-		return entry;
+		return e;
 	}
 
-	static CharacterTaskTimers GetCharacterTaskTimersEntry(
+	static CharacterTaskTimers GetCharacterTaskTimers(
 		const std::vector<CharacterTaskTimers> &character_task_timerss,
 		int character_task_timers_id
 	)
@@ -128,15 +132,16 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			CharacterTaskTimers entry{};
+			CharacterTaskTimers e{};
 
-			entry.id           = atoi(row[0]);
-			entry.character_id = atoi(row[1]);
-			entry.task_id      = atoi(row[2]);
-			entry.timer_type   = atoi(row[3]);
-			entry.expire_time  = strtoll(row[4] ? row[4] : "-1", nullptr, 10);
+			e.id           = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.character_id = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.task_id      = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.timer_type   = static_cast<int32_t>(atoi(row[3]));
+			e.timer_group  = static_cast<int32_t>(atoi(row[4]));
+			e.expire_time  = strtoll(row[5] ? row[5] : "-1", nullptr, 10);
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -161,25 +166,26 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		CharacterTaskTimers character_task_timers_entry
+		const CharacterTaskTimers &e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = " + std::to_string(character_task_timers_entry.character_id));
-		update_values.push_back(columns[2] + " = " + std::to_string(character_task_timers_entry.task_id));
-		update_values.push_back(columns[3] + " = " + std::to_string(character_task_timers_entry.timer_type));
-		update_values.push_back(columns[4] + " = FROM_UNIXTIME(" + (character_task_timers_entry.expire_time > 0 ? std::to_string(character_task_timers_entry.expire_time) : "null") + ")");
+		v.push_back(columns[1] + " = " + std::to_string(e.character_id));
+		v.push_back(columns[2] + " = " + std::to_string(e.task_id));
+		v.push_back(columns[3] + " = " + std::to_string(e.timer_type));
+		v.push_back(columns[4] + " = " + std::to_string(e.timer_group));
+		v.push_back(columns[5] + " = FROM_UNIXTIME(" + (e.expire_time > 0 ? std::to_string(e.expire_time) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
-				character_task_timers_entry.id
+				e.id
 			)
 		);
 
@@ -188,61 +194,63 @@ public:
 
 	static CharacterTaskTimers InsertOne(
 		Database& db,
-		CharacterTaskTimers character_task_timers_entry
+		CharacterTaskTimers e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(character_task_timers_entry.id));
-		insert_values.push_back(std::to_string(character_task_timers_entry.character_id));
-		insert_values.push_back(std::to_string(character_task_timers_entry.task_id));
-		insert_values.push_back(std::to_string(character_task_timers_entry.timer_type));
-		insert_values.push_back("FROM_UNIXTIME(" + (character_task_timers_entry.expire_time > 0 ? std::to_string(character_task_timers_entry.expire_time) : "null") + ")");
+		v.push_back(std::to_string(e.id));
+		v.push_back(std::to_string(e.character_id));
+		v.push_back(std::to_string(e.task_id));
+		v.push_back(std::to_string(e.timer_type));
+		v.push_back(std::to_string(e.timer_group));
+		v.push_back("FROM_UNIXTIME(" + (e.expire_time > 0 ? std::to_string(e.expire_time) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
 		if (results.Success()) {
-			character_task_timers_entry.id = results.LastInsertedID();
-			return character_task_timers_entry;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		character_task_timers_entry = NewEntity();
+		e = NewEntity();
 
-		return character_task_timers_entry;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<CharacterTaskTimers> character_task_timers_entries
+		const std::vector<CharacterTaskTimers> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &character_task_timers_entry: character_task_timers_entries) {
-			std::vector<std::string> insert_values;
+		for (auto &e: entries) {
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(character_task_timers_entry.id));
-			insert_values.push_back(std::to_string(character_task_timers_entry.character_id));
-			insert_values.push_back(std::to_string(character_task_timers_entry.task_id));
-			insert_values.push_back(std::to_string(character_task_timers_entry.timer_type));
-			insert_values.push_back("FROM_UNIXTIME(" + (character_task_timers_entry.expire_time > 0 ? std::to_string(character_task_timers_entry.expire_time) : "null") + ")");
+			v.push_back(std::to_string(e.id));
+			v.push_back(std::to_string(e.character_id));
+			v.push_back(std::to_string(e.task_id));
+			v.push_back(std::to_string(e.timer_type));
+			v.push_back(std::to_string(e.timer_group));
+			v.push_back("FROM_UNIXTIME(" + (e.expire_time > 0 ? std::to_string(e.expire_time) : "null") + ")");
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 
@@ -263,21 +271,22 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharacterTaskTimers entry{};
+			CharacterTaskTimers e{};
 
-			entry.id           = atoi(row[0]);
-			entry.character_id = atoi(row[1]);
-			entry.task_id      = atoi(row[2]);
-			entry.timer_type   = atoi(row[3]);
-			entry.expire_time  = strtoll(row[4] ? row[4] : "-1", nullptr, 10);
+			e.id           = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.character_id = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.task_id      = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.timer_type   = static_cast<int32_t>(atoi(row[3]));
+			e.timer_group  = static_cast<int32_t>(atoi(row[4]));
+			e.expire_time  = strtoll(row[5] ? row[5] : "-1", nullptr, 10);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static std::vector<CharacterTaskTimers> GetWhere(Database& db, std::string where_filter)
+	static std::vector<CharacterTaskTimers> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<CharacterTaskTimers> all_entries;
 
@@ -292,21 +301,22 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharacterTaskTimers entry{};
+			CharacterTaskTimers e{};
 
-			entry.id           = atoi(row[0]);
-			entry.character_id = atoi(row[1]);
-			entry.task_id      = atoi(row[2]);
-			entry.timer_type   = atoi(row[3]);
-			entry.expire_time  = strtoll(row[4] ? row[4] : "-1", nullptr, 10);
+			e.id           = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.character_id = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.task_id      = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.timer_type   = static_cast<int32_t>(atoi(row[3]));
+			e.timer_group  = static_cast<int32_t>(atoi(row[4]));
+			e.expire_time  = strtoll(row[5] ? row[5] : "-1", nullptr, 10);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -329,6 +339,32 @@ public:
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int64 GetMaxId(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COALESCE(MAX({}), 0) FROM {}",
+				PrimaryKey(),
+				TableName()
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static int64 Count(Database& db, const std::string &where_filter = "")
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COUNT(*) FROM {} {}",
+				TableName(),
+				(where_filter.empty() ? "" : "WHERE " + where_filter)
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
 };

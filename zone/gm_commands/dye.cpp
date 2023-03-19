@@ -41,7 +41,7 @@ void command_dye(Client *c, const Seperator *sep)
 			fmt::format(
 				"{} {}",
 				"Slots are as follows:",
-				implode(", ", slot_messages)
+				Strings::Implode(", ", slot_messages)
 			).c_str()
 		);
 		return;

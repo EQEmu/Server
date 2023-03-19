@@ -13,9 +13,8 @@ public:
 	 */
 	Options() :
 		allow_unregistered(true),
-		trace(false),
-		dump_in_packets(false),
-		dump_out_packets(false),
+		display_expansions(false),
+		max_expansions_mask(0),
 		encryption_mode(5),
 		reject_duplicate_servers(false),
 		allow_password_login(true),
@@ -28,49 +27,17 @@ public:
 	inline void AllowUnregistered(bool b) { allow_unregistered = b; }
 
 	/**
+	* Returns the value of expansion display settings.
+	*/
+	inline void DisplayExpansions(bool b) { display_expansions = b; }
+	inline void MaxExpansions(int i) { max_expansions_mask = i; }
+	inline bool IsDisplayExpansions() const { return display_expansions; }
+	inline int GetMaxExpansions() const { return max_expansions_mask; }
+
+	/**
 	* Returns the value of allow_unregistered.
 	*/
 	inline bool IsUnregisteredAllowed() const { return allow_unregistered; }
-
-	/**
-	* Sets trace.
-	*/
-	inline void Trace(bool b) { trace = b; }
-
-	/**
-	* Returns the value of trace.
-	*/
-	inline bool IsTraceOn() const { return trace; }
-
-	/**
-	* Sets trace.
-	*/
-	inline void WorldTrace(bool b) { world_trace = b; }
-
-	/**
-	* Returns the value of trace.
-	*/
-	inline bool IsWorldTraceOn() const { return world_trace; }
-
-	/**
-	* Sets dump_in_packets.
-	*/
-	inline void DumpInPackets(bool b) { dump_in_packets = b; }
-
-	/**
-	* Returns the value of dump_in_packets.
-	*/
-	inline bool IsDumpInPacketsOn() const { return dump_in_packets; }
-
-	/**
-	* Sets dump_out_packets.
-	*/
-	inline void DumpOutPackets(bool b) { dump_out_packets = b; }
-
-	/**
-	* Returns the value of dump_out_packets.
-	*/
-	inline bool IsDumpOutPacketsOn() const { return dump_out_packets; }
 
 	/**
 	* Sets encryption_mode.
@@ -138,10 +105,7 @@ public:
 
 private:
 	bool        allow_unregistered;
-	bool        trace;
-	bool        world_trace;
-	bool        dump_in_packets;
-	bool        dump_out_packets;
+	bool        display_expansions;
 	bool        reject_duplicate_servers;
 	bool        world_dev_test_servers_list_bottom;
 	bool        world_special_character_start_list_bottom;
@@ -152,6 +116,7 @@ private:
 	bool        auto_link_accounts;
 	bool        update_insecure_passwords;
 	int         encryption_mode;
+	int         max_expansions_mask;
 	std::string eqemu_loginserver_address;
 	std::string default_loginserver_name;
 };

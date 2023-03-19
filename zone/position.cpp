@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <string>
 #include <cmath>
-#include "../common/string_util.h"
+#include "../common/strings.h"
 
 static const float position_eps = 0.0001f;
 

@@ -36,7 +36,7 @@ void command_spawnstatus(Client *c, const Seperator *sep)
 		filter_type = "Enabled";
 	}
 
-	uint32 spawn_id = 0;	
+	uint32 spawn_id = 0;
 	if (is_search) {
 		spawn_id = std::stoul(sep->arg[1]);
 	}
@@ -84,7 +84,7 @@ void command_spawnstatus(Client *c, const Seperator *sep)
 					fmt::format(
 						"Spawn {} | Respawn: {} ({} Second{})",
 						spawn_number,
-						ConvertSecondsToTime(seconds_remaining),
+						Strings::SecondsToTime(seconds_remaining),
 						seconds_remaining,
 						seconds_remaining != 1 ? "s" : ""
 					).c_str()
@@ -112,7 +112,7 @@ void command_spawnstatus(Client *c, const Seperator *sep)
 		);
 		return;
 	}
-	
+
 	if (is_all) {
 		c->Message(
 			Chat::White,

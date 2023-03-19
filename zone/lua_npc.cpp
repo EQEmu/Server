@@ -12,9 +12,9 @@ struct Lua_NPC_Loot_List {
 	std::vector<uint32> entries;
 };
 
-void Lua_NPC::Signal(int id) {
+void Lua_NPC::Signal(int signal_id) {
 	Lua_Safe_Call_Void();
-	self->SignalNPC(id);
+	self->SignalNPC(signal_id);
 }
 
 int Lua_NPC::CheckNPCFactionAlly(int faction) {
@@ -318,6 +318,16 @@ void Lua_NPC::NextGuardPosition() {
 	self->NextGuardPosition();
 }
 
+void Lua_NPC::SaveGuardSpot() {
+	Lua_Safe_Call_Void();
+	self->SaveGuardSpot();
+}
+
+void Lua_NPC::SaveGuardSpot(bool clear) {
+	Lua_Safe_Call_Void();
+	self->SaveGuardSpot(clear);
+}
+
 void Lua_NPC::SaveGuardSpot(float x, float y, float z, float heading) {
 	Lua_Safe_Call_Void();
 	self->SaveGuardSpot(glm::vec4(x, y, z, heading));
@@ -448,7 +458,7 @@ void Lua_NPC::SetSwarmTarget(int target) {
 	self->SetSwarmTarget(target);
 }
 
-void Lua_NPC::ModifyNPCStat(const char *stat, const char *value) {
+void Lua_NPC::ModifyNPCStat(std::string stat, std::string value) {
 	Lua_Safe_Call_Void();
 	self->ModifyNPCStat(stat, value);
 }
@@ -575,10 +585,10 @@ bool Lua_NPC::IsRaidTarget()
 	return self->IsRaidTarget();
 }
 
-void Lua_NPC::ChangeLastName(const char *lastname)
+void Lua_NPC::ChangeLastName(std::string last_name)
 {
 	Lua_Safe_Call_Void();
-	self->ChangeLastName(lastname);
+	self->ChangeLastName(last_name);
 }
 
 void Lua_NPC::ClearLastName()
@@ -653,10 +663,42 @@ bool Lua_NPC::HasAISpellEffect(int spell_effect_id)
 	return self->HasAISpellEffect(spell_effect_id);
 }
 
-float Lua_NPC::GetNPCStat(const char* identifier)
+float Lua_NPC::GetNPCStat(std::string stat)
 {
 	Lua_Safe_Call_Real();
-	return self->GetNPCStat(identifier);
+	return self->GetNPCStat(stat);
+}
+
+bool Lua_NPC::IsRareSpawn()
+{
+	Lua_Safe_Call_Bool();
+	return self->IsRareSpawn();
+}
+
+void Lua_NPC::ReloadSpells()
+{
+	Lua_Safe_Call_Void();
+	self->ReloadSpells();
+}
+
+void Lua_NPC::SendPayload(int payload_id) {
+	Lua_Safe_Call_Void();
+	self->SendPayload(payload_id);
+}
+
+void Lua_NPC::SendPayload(int payload_id, std::string payload_value) {
+	Lua_Safe_Call_Void();
+	self->SendPayload(payload_id, payload_value);
+}
+
+bool Lua_NPC::GetKeepsSoldItems() {
+	Lua_Safe_Call_Bool();
+	return self->GetKeepsSoldItems();
+}
+
+void Lua_NPC::SetKeepsSoldItems(bool keeps_sold_items) {
+	Lua_Safe_Call_Void();
+	self->SetKeepsSoldItems(keeps_sold_items);
 }
 
 luabind::scope lua_register_npc() {
@@ -680,7 +722,7 @@ luabind::scope lua_register_npc() {
 	.def("AddLootTable", (void(Lua_NPC::*)(void))&Lua_NPC::AddLootTable)
 	.def("AssignWaypoints", (void(Lua_NPC::*)(int))&Lua_NPC::AssignWaypoints)
 	.def("CalculateNewWaypoint", (void(Lua_NPC::*)(void))&Lua_NPC::CalculateNewWaypoint)
-	.def("ChangeLastName", (void(Lua_NPC::*)(const char*))&Lua_NPC::ChangeLastName)
+	.def("ChangeLastName", (void(Lua_NPC::*)(std::string))&Lua_NPC::ChangeLastName)
 	.def("CheckNPCFactionAlly", (int(Lua_NPC::*)(int))&Lua_NPC::CheckNPCFactionAlly)
 	.def("ClearItemList", (void(Lua_NPC::*)(void))&Lua_NPC::ClearItemList)
 	.def("ClearLastName", (void(Lua_NPC::*)(void))&Lua_NPC::ClearLastName)
@@ -704,6 +746,7 @@ luabind::scope lua_register_npc() {
 	.def("GetGuardPointZ", (float(Lua_NPC::*)(void))&Lua_NPC::GetGuardPointZ)
 	.def("GetHealScale", (float(Lua_NPC::*)(void))&Lua_NPC::GetHealScale)
 	.def("GetItemIDBySlot", (uint32(Lua_NPC::*)(uint16))&Lua_NPC::GetItemIDBySlot)
+	.def("GetKeepsSoldItems", (bool(Lua_NPC::*)(void))&Lua_NPC::GetKeepsSoldItems)
 	.def("GetLootList", (Lua_NPC_Loot_List(Lua_NPC::*)(lua_State* L))&Lua_NPC::GetLootList)
 	.def("GetLoottableID", (int(Lua_NPC::*)(void))&Lua_NPC::GetLoottableID)
 	.def("GetMaxDMG", (uint32(Lua_NPC::*)(void))&Lua_NPC::GetMaxDMG)
@@ -714,7 +757,7 @@ luabind::scope lua_register_npc() {
 	.def("GetNPCHate", (int64(Lua_NPC::*)(Lua_Mob))&Lua_NPC::GetNPCHate)
 	.def("GetNPCSpellsID", (int(Lua_NPC::*)(void))&Lua_NPC::GetNPCSpellsID)
 	.def("GetNPCSpellsID", (int(Lua_NPC::*)(void))&Lua_NPC::GetNPCSpellsID)
-	.def("GetNPCStat", (float(Lua_NPC::*)(const char*))&Lua_NPC::GetNPCStat)
+	.def("GetNPCStat", (float(Lua_NPC::*)(std::string))&Lua_NPC::GetNPCStat)
 	.def("GetPetSpellID", (int(Lua_NPC::*)(void))&Lua_NPC::GetPetSpellID)
 	.def("GetPlatinum", (uint32(Lua_NPC::*)(void))&Lua_NPC::GetPlatinum)
 	.def("GetPrimSkill", (int(Lua_NPC::*)(void))&Lua_NPC::GetPrimSkill)
@@ -743,15 +786,17 @@ luabind::scope lua_register_npc() {
 	.def("IsGuarding", (bool(Lua_NPC::*)(void))&Lua_NPC::IsGuarding)
 	.def("IsOnHatelist", (bool(Lua_NPC::*)(Lua_Mob))&Lua_NPC::IsOnHatelist)
 	.def("IsRaidTarget", (bool(Lua_NPC::*)(void))&Lua_NPC::IsRaidTarget)
+	.def("IsRareSpawn", (bool(Lua_NPC::*)(void))&Lua_NPC::IsRareSpawn)
 	.def("IsTaunting", (bool(Lua_NPC::*)(void))&Lua_NPC::IsTaunting)
 	.def("MerchantCloseShop", (void(Lua_NPC::*)(void))&Lua_NPC::MerchantCloseShop)
 	.def("MerchantOpenShop", (void(Lua_NPC::*)(void))&Lua_NPC::MerchantOpenShop)
-	.def("ModifyNPCStat", (void(Lua_NPC::*)(const char*,const char*))&Lua_NPC::ModifyNPCStat)
+	.def("ModifyNPCStat", (void(Lua_NPC::*)(std::string,std::string))&Lua_NPC::ModifyNPCStat)
 	.def("MoveTo", (void(Lua_NPC::*)(float,float,float,float,bool))&Lua_NPC::MoveTo)
 	.def("NextGuardPosition", (void(Lua_NPC::*)(void))&Lua_NPC::NextGuardPosition)
 	.def("PauseWandering", (void(Lua_NPC::*)(int))&Lua_NPC::PauseWandering)
 	.def("PickPocket", (void(Lua_NPC::*)(Lua_Client))&Lua_NPC::PickPocket)
 	.def("RecalculateSkills", (void(Lua_NPC::*)(void))&Lua_NPC::RecalculateSkills)
+	.def("ReloadSpells", (void(Lua_NPC::*)(void))&Lua_NPC::ReloadSpells)
 	.def("RemoveAISpell", (void(Lua_NPC::*)(int))&Lua_NPC::RemoveAISpell)
 	.def("RemoveAISpellEffect", (void(Lua_NPC::*)(int))&Lua_NPC::RemoveAISpellEffect)
 	.def("RemoveCash", (void(Lua_NPC::*)(void))&Lua_NPC::RemoveCash)
@@ -759,14 +804,19 @@ luabind::scope lua_register_npc() {
 	.def("RemoveItem", (void(Lua_NPC::*)(int,int))&Lua_NPC::RemoveItem)
 	.def("RemoveItem", (void(Lua_NPC::*)(int,int,int))&Lua_NPC::RemoveItem)
 	.def("ResumeWandering", (void(Lua_NPC::*)(void))&Lua_NPC::ResumeWandering)
+	.def("SaveGuardSpot", (void(Lua_NPC::*)(void))&Lua_NPC::SaveGuardSpot)
+	.def("SaveGuardSpot", (void(Lua_NPC::*)(bool))&Lua_NPC::SaveGuardSpot)
 	.def("SaveGuardSpot", (void(Lua_NPC::*)(float,float,float,float))&Lua_NPC::SaveGuardSpot)
 	.def("ScaleNPC", (void(Lua_NPC::*)(uint8))&Lua_NPC::ScaleNPC)
+	.def("SendPayload", (void(Lua_NPC::*)(int))&Lua_NPC::SendPayload)
+	.def("SendPayload", (void(Lua_NPC::*)(int,std::string))&Lua_NPC::SendPayload)
 	.def("SetCopper", (void(Lua_NPC::*)(uint32))&Lua_NPC::SetCopper)
 	.def("SetFollowCanRun", (void(Lua_NPC::*)(bool))&Lua_NPC::SetFollowCanRun)
 	.def("SetFollowDistance", (void(Lua_NPC::*)(int))&Lua_NPC::SetFollowDistance)
 	.def("SetFollowID", (void(Lua_NPC::*)(int))&Lua_NPC::SetFollowID)
 	.def("SetGold", (void(Lua_NPC::*)(uint32))&Lua_NPC::SetGold)
 	.def("SetGrid", (void(Lua_NPC::*)(int))&Lua_NPC::SetGrid)
+	.def("SetKeepsSoldItems", (void(Lua_NPC::*)(bool))&Lua_NPC::SetKeepsSoldItems)
 	.def("SetNPCFactionID", (void(Lua_NPC::*)(int))&Lua_NPC::SetNPCFactionID)
 	.def("SetPetSpellID", (void(Lua_NPC::*)(int))&Lua_NPC::SetPetSpellID)
 	.def("SetPlatinum", (void(Lua_NPC::*)(uint32))&Lua_NPC::SetPlatinum)

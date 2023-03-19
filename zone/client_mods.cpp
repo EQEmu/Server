@@ -27,9 +27,7 @@
 #include "client.h"
 #include "mob.h"
 
-#ifdef BOTS
-	#include "bot.h"
-#endif
+#include "bot.h"
 
 #include <algorithm>
 
@@ -292,7 +290,7 @@ int64 Client::CalcHPRegen(bool bCombat)
 
 	if (!bCombat && CanFastRegen() && (IsSitting() || CanMedOnHorse())) {
 		auto max_hp = GetMaxHP();
-		int fast_regen = 6 * (max_hp / zone->newzone_data.FastRegenHP);
+		int fast_regen = 6 * (max_hp / zone->newzone_data.fast_regen_hp);
 		if (base < fast_regen) // weird, but what the client is doing
 			base = fast_regen;
 	}
@@ -303,12 +301,17 @@ int64 Client::CalcHPRegen(bool bCombat)
 
 int64 Client::CalcHPRegenCap()
 {
-	int cap = RuleI(Character, ItemHealthRegenCap);
-	if (GetLevel() > 60)
-		cap = std::max(cap, GetLevel() - 30); // if the rule is set greater than normal I guess
-	if (GetLevel() > 65)
+	int64 cap = RuleI(Character, ItemHealthRegenCap);
+	if (GetLevel() > 60) {
+		cap = std::max(cap, static_cast<int64>(GetLevel() - 30)); // if the rule is set greater than normal I guess
+	}
+
+	if (GetLevel() > 65) {
 		cap += GetLevel() - 65;
+	}
+
 	cap += aabonuses.ItemHPRegenCap + spellbonuses.ItemHPRegenCap + itembonuses.ItemHPRegenCap;
+
 	return (cap * RuleI(Character, HPRegenMultiplier) / 100);
 }
 
@@ -594,7 +597,7 @@ int64 Client::CalcMaxMana()
 			current_mana = curMana_cap;
 		}
 	}
-	LogSpells("Client::CalcMaxMana() called for [{}] - returning [{}]", GetName(), max_mana);
+	LogSpells("for [{}] returning [{}]", GetName(), max_mana);
 	return max_mana;
 }
 
@@ -766,7 +769,7 @@ int64 Client::CalcManaRegen(bool bCombat)
 
 	if (!bCombat && CanFastRegen() && (IsSitting() || CanMedOnHorse())) {
 		auto max_mana = GetMaxMana();
-		int fast_regen = 6 * (max_mana / zone->newzone_data.FastRegenMana);
+		int fast_regen = 6 * (max_mana / zone->newzone_data.fast_regen_mana);
 		if (regen < fast_regen) // weird, but what the client is doing
 			regen = fast_regen;
 	}
@@ -1658,7 +1661,7 @@ uint32 Mob::GetInstrumentMod(uint16 spell_id)
 		}
 	}
 
-	LogSpells("[{}]::GetInstrumentMod() spell=[{}] mod=[{}] modcap=[{}]\n", GetName(), spell_id, effectmod, effectmodcap);
+	LogSpells("Name [{}] spell [{}] mod [{}] modcap [{}]\n", GetName(), spell_id, effectmod, effectmodcap);
 
 	return effectmod;
 }
@@ -1796,7 +1799,7 @@ int64 Client::CalcEnduranceRegen(bool bCombat)
 	int64 regen = base;
 	if (!bCombat && CanFastRegen() && (IsSitting() || CanMedOnHorse())) {
 		auto max_end = GetMaxEndurance();
-		int fast_regen = 6 * (max_end / zone->newzone_data.FastRegenEndurance);
+		int fast_regen = 6 * (max_end / zone->newzone_data.fast_regen_endurance);
 		if (aa_regen < fast_regen) // weird, but what the client is doing
 			aa_regen = fast_regen;
 	}

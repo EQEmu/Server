@@ -437,6 +437,40 @@
 9181|2022_05_03_task_activity_goal_match_list.sql|SHOW COLUMNS FROM `task_activities` LIKE 'goal_match_list'|empty|
 9182|2022_05_02_npc_types_int64.sql|SHOW COLUMNS FROM `npc_types` LIKE 'hp'|missing|bigint
 9183|2022_05_07_merchant_data_buckets.sql|SHOW COLUMNS FROM `merchantlist` LIKE 'bucket_comparison'|empty
+9184|2022_05_21_schema_consistency.sql|SELECT * FROM db_version WHERE version >= 9184|empty|
+9185|2022_05_07_discord_webhooks.sql|SHOW TABLES LIKE 'discord_webhooks'|empty|
+9186|2022_07_09_zone_expansion_deprecate.sql|SHOW COLUMNS FROM `zone` LIKE 'expansion'|not_empty|
+9187|2022_07_09_task_zone_version_matching.sql|SHOW COLUMNS FROM `task_activities` LIKE 'zone_version'|empty|
+9188|2022_07_14_zone_expansion_revert.sql|SHOW COLUMNS FROM `zone` LIKE 'expansion'|empty|
+9189|2022_07_10_character_task_rewarded.sql|SHOW COLUMNS FROM `character_tasks` LIKE 'was_rewarded'|empty|
+9190|2022_07_13_task_reward_points.sql|SHOW COLUMNS FROM `tasks` LIKE 'reward_points'|empty|
+9191|2022_07_28_gm_state_changes.sql|SHOW COLUMNS FROM `account` LIKE 'invulnerable'|empty|
+9192|2022_07_13_task_lock_activity.sql|SHOW COLUMNS FROM `tasks` LIKE 'lock_activity_id'|empty|
+9193|2022_07_16_task_timer_groups.sql|SHOW COLUMNS FROM `tasks` LIKE 'replay_timer_group'|empty|
+9194|2022_07_23_dz_switch_id.sql|SHOW COLUMNS FROM `doors` LIKE 'dz_switch_id'|empty|
+9195|2022_07_23_dz_templates.sql|SHOW TABLES like 'dynamic_zone_templates'|empty|
+9196|2022_07_30_merchantlist_temp.sql|SHOW COLUMNS FROM `merchantlist_temp` LIKE 'zone_id'|empty|
+9197|2022_08_01_drop_expansion_account.sql|SHOW COLUMNS FROM `account` LIKE 'expansion'|not_empty|
+9198|2022_08_14_exp_modifier_instance_versions.sql|SHOW COLUMNS FROM `character_exp_modifiers` LIKE 'instance_version'|empty|
+9199|2022_08_08_task_req_activity_id.sql|SHOW COLUMNS FROM `task_activities` LIKE 'req_activity_id'|empty|
+9200|2022_08_19_zone_expansion_consistency.sql|SELECT * FROM db_version WHERE version >= 9200|empty|
+9201|2022_08_22_npc_types_heroic_strikethrough.sql|SHOW COLUMNS FROM `npc_types` LIKE 'heroic_strikethrough'|empty|
+9202|2022_08_24_task_activities_step.sql|SHOW COLUMNS FROM `task_activities` LIKE 'step'|contains|unsigned
+9203|2022_08_07_replace_task_goals.sql|SHOW COLUMNS FROM `task_activities` LIKE 'item_id'|empty|
+9204|2022_09_02_faction_association.sql|SHOW TABLES LIKE 'faction_association'|empty|
+9205|2022_09_03_fix_starting_point_heading.sql|SELECT * FROM db_version WHERE version >= 9205|empty|
+9206|2022_09_03_fix_door_destination_headings.sql|SELECT * FROM db_version WHERE version >= 9206|empty|
+9207|2022_09_03_fix_zone_point_heading_data.sql|SELECT * FROM db_version WHERE version >= 9207|empty|
+9208|2022_09_25_task_concat_matchlists.sql|SHOW COLUMNS FROM `task_activities` LIKE 'npc_id'|not_empty|
+9209|2022_09_28_discord_webhooks.sql|SHOW COLUMNS FROM `logsys_categories` LIKE 'log_to_discord'|empty|
+9210|2022_10_11_fix_misty_pok_stone.sql|select * from doors where id = 2040 and `name` = 'POKRVPORT500' and client_version_mask = 4294967232|empty|
+9211|2022_10_14_fix_neriak_pok_stone.sql|select * from doors where id = 2057 and `name` = 'POKNRKPORT500' and client_version_mask = 4294967232|empty|
+9212|2022_10_14_fix_misty_pok_stone.sql|select * from doors where id = 2040 and `name` = 'POKRVPORT500' and dest_zone = 'misty'|empty|
+9213|2022_12_24_npc_keeps_sold_items.sql|SHOW COLUMNS FROM `npc_types` LIKE 'keeps_sold_items'|empty|
+9214|2022_12_24_character_exp_toggle.sql|SHOW COLUMNS FROM `character_data` LIKE 'exp_enabled'|empty|
+9215|2023_01_08_zone_max_level.sql|SHOW COLUMNS FROM `zone` LIKE 'max_level'|empty|
+9216|2023_01_15_merc_data.sql|SHOW TABLES LIKE 'mercs'|empty|
+9217|2023_01_15_chatchannel_reserved_names.sql|SHOW TABLES LIKE 'chatchannel_reserved_names'|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not

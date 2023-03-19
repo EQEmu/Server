@@ -18,22 +18,13 @@ Eglin
 #include <stdio.h>
 #include <string.h>
 
-//headers from the Perl distribution
-#include <EXTERN.h>
-#define WIN32IO_IS_STDIO
+// this option disables distinct int/float/string function argument types for
+// backwards compatibility with current perl api usage
+// e.g. quest::settimer(0, 1) using number for timer name instead of string
+#define PERLBIND_NO_STRICT_SCALAR_TYPES
+#include <perlbind/perlbind.h>
+namespace perl = perlbind;
 
-#ifndef WIN32
-extern "C" {	//the perl headers dont do this for us...
-#endif
-#if _MSC_VER
-#define __inline__ __inline
-#define __builtin_expect 
-#endif
-#include <perl.h>
-#include <XSUB.h>
-#ifndef WIN32
-};
-#endif
 #ifdef WIN32
 #define snprintf _snprintf
 #endif
@@ -137,6 +128,11 @@ public:
 	void setstr(const char *varname, const char *val) const {
 		SV *t = get_sv(varname, true);
 		sv_setpv(t, val);
+	}
+	// put a pointer into a blessed perl variable
+	void setptr(const char* varname, const char* classname, void* val) const {
+		SV* t = get_sv(varname, GV_ADD);
+		sv_setref_pv(t, classname, val);
 	}
 
 	// put key-value pairs in hash

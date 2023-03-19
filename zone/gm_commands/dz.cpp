@@ -42,12 +42,19 @@ void command_dz(Client *c, const Seperator *sep)
 					continue;
 				}
 
-				auto leader_saylink = EQ::SayLinkEngine::GenerateQuestSaylink(
+				auto leader_saylink = Saylink::Silent(
 					fmt::format(
-						"#goto {}", expedition->GetLeaderName()), false, expedition->GetLeaderName());
-				auto zone_saylink   = EQ::SayLinkEngine::GenerateQuestSaylink(
+						"#goto {}",
+						expedition->GetLeaderName()
+					),
+					expedition->GetLeaderName()
+				);
+				auto zone_saylink = Saylink::Silent(
 					fmt::format(
-						"#zoneinstance {}", dz->GetInstanceID()), false, "zone"
+						"#zoneinstance {}",
+						dz->GetInstanceID()
+					),
+					"zone"
 				);
 
 				auto seconds = dz->GetSecondsRemaining();
@@ -123,8 +130,12 @@ void command_dz(Client *c, const Seperator *sep)
 
 		for (const auto &dz : dynamic_zones) {
 			auto seconds      = dz->GetSecondsRemaining();
-			auto zone_saylink = EQ::SayLinkEngine::GenerateQuestSaylink(
-				fmt::format("#zoneinstance {}", dz->GetInstanceID()), false, "zone"
+			auto zone_saylink = Saylink::Silent(
+				fmt::format(
+					"#zoneinstance {}",
+					dz->GetInstanceID()
+				),
+				"zone"
 			);
 
 			std::string aligned_type = fmt::format(
@@ -159,8 +170,12 @@ void command_dz(Client *c, const Seperator *sep)
 			bool is_expired  = now > expire_time;
 
 			if (!is_expired || strcasecmp(sep->arg[2], "all") == 0) {
-				auto zone_saylink = is_expired ? "zone" : EQ::SayLinkEngine::GenerateQuestSaylink(
-					fmt::format("#zoneinstance {}", dz.instance), false, "zone"
+				auto zone_saylink = is_expired ? "zone" : Saylink::Silent(
+					fmt::format(
+						"#zoneinstance {}",
+						dz.instance
+					),
+					"zone"
 				);
 
 				c->Message(

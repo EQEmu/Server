@@ -197,6 +197,17 @@ void DynamicZone::HandleZoneMessage(ServerPacket* pack)
 		zoneserver_list.SendPacket(pack);
 		break;
 	}
+	case ServerOP_DzSetSwitchID:
+	{
+		auto buf = reinterpret_cast<ServerDzSwitchID_Struct*>(pack->pBuffer);
+		auto dz = DynamicZone::FindDynamicZoneByID(buf->dz_id);
+		if (dz)
+		{
+			dz->ProcessSetSwitchID(buf->dz_switch_id);
+		}
+		zoneserver_list.SendPacket(pack);
+		break;
+	}
 	case ServerOP_DzAddRemoveMember:
 	{
 		auto buf = reinterpret_cast<ServerDzMember_Struct*>(pack->pBuffer);
@@ -264,6 +275,16 @@ void DynamicZone::HandleZoneMessage(ServerPacket* pack)
 			dz->ProcessMemberStatusChange(buf->character_id, status);
 		}
 		zoneserver_list.SendPacket(pack);
+		break;
+	}
+	case ServerOP_DzMovePC:
+	{
+		auto buf = reinterpret_cast<ServerDzMovePC_Struct*>(pack->pBuffer);
+		auto dz = DynamicZone::FindDynamicZoneByID(buf->dz_id);
+		if (dz && dz->HasMember(buf->character_id))
+		{
+			zoneserver_list.SendPacket(buf->sender_zone_id, buf->sender_instance_id, pack);
+		}
 		break;
 	}
 	};

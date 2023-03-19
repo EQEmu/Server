@@ -13,15 +13,15 @@
 #define EQEMU_BASE_AA_RANK_PREREQS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseAaRankPrereqsRepository {
 public:
 	struct AaRankPrereqs {
-		int rank_id;
-		int aa_id;
-		int points;
+		uint32_t rank_id;
+		int32_t  aa_id;
+		int32_t  points;
 	};
 
 	static std::string PrimaryKey()
@@ -49,12 +49,12 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string SelectColumnsRaw()
 	{
-		return std::string(implode(", ", SelectColumns()));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -82,16 +82,16 @@ public:
 
 	static AaRankPrereqs NewEntity()
 	{
-		AaRankPrereqs entry{};
+		AaRankPrereqs e{};
 
-		entry.rank_id = 0;
-		entry.aa_id   = 0;
-		entry.points  = 0;
+		e.rank_id = 0;
+		e.aa_id   = 0;
+		e.points  = 0;
 
-		return entry;
+		return e;
 	}
 
-	static AaRankPrereqs GetAaRankPrereqsEntry(
+	static AaRankPrereqs GetAaRankPrereqs(
 		const std::vector<AaRankPrereqs> &aa_rank_prereqss,
 		int aa_rank_prereqs_id
 	)
@@ -120,13 +120,13 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			AaRankPrereqs entry{};
+			AaRankPrereqs e{};
 
-			entry.rank_id = atoi(row[0]);
-			entry.aa_id   = atoi(row[1]);
-			entry.points  = atoi(row[2]);
+			e.rank_id = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.aa_id   = static_cast<int32_t>(atoi(row[1]));
+			e.points  = static_cast<int32_t>(atoi(row[2]));
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -151,24 +151,24 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		AaRankPrereqs aa_rank_prereqs_entry
+		const AaRankPrereqs &e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(aa_rank_prereqs_entry.rank_id));
-		update_values.push_back(columns[1] + " = " + std::to_string(aa_rank_prereqs_entry.aa_id));
-		update_values.push_back(columns[2] + " = " + std::to_string(aa_rank_prereqs_entry.points));
+		v.push_back(columns[0] + " = " + std::to_string(e.rank_id));
+		v.push_back(columns[1] + " = " + std::to_string(e.aa_id));
+		v.push_back(columns[2] + " = " + std::to_string(e.points));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
-				aa_rank_prereqs_entry.rank_id
+				e.rank_id
 			)
 		);
 
@@ -177,57 +177,57 @@ public:
 
 	static AaRankPrereqs InsertOne(
 		Database& db,
-		AaRankPrereqs aa_rank_prereqs_entry
+		AaRankPrereqs e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(aa_rank_prereqs_entry.rank_id));
-		insert_values.push_back(std::to_string(aa_rank_prereqs_entry.aa_id));
-		insert_values.push_back(std::to_string(aa_rank_prereqs_entry.points));
+		v.push_back(std::to_string(e.rank_id));
+		v.push_back(std::to_string(e.aa_id));
+		v.push_back(std::to_string(e.points));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
 		if (results.Success()) {
-			aa_rank_prereqs_entry.rank_id = results.LastInsertedID();
-			return aa_rank_prereqs_entry;
+			e.rank_id = results.LastInsertedID();
+			return e;
 		}
 
-		aa_rank_prereqs_entry = NewEntity();
+		e = NewEntity();
 
-		return aa_rank_prereqs_entry;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<AaRankPrereqs> aa_rank_prereqs_entries
+		const std::vector<AaRankPrereqs> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &aa_rank_prereqs_entry: aa_rank_prereqs_entries) {
-			std::vector<std::string> insert_values;
+		for (auto &e: entries) {
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(aa_rank_prereqs_entry.rank_id));
-			insert_values.push_back(std::to_string(aa_rank_prereqs_entry.aa_id));
-			insert_values.push_back(std::to_string(aa_rank_prereqs_entry.points));
+			v.push_back(std::to_string(e.rank_id));
+			v.push_back(std::to_string(e.aa_id));
+			v.push_back(std::to_string(e.points));
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 
@@ -248,19 +248,19 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			AaRankPrereqs entry{};
+			AaRankPrereqs e{};
 
-			entry.rank_id = atoi(row[0]);
-			entry.aa_id   = atoi(row[1]);
-			entry.points  = atoi(row[2]);
+			e.rank_id = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.aa_id   = static_cast<int32_t>(atoi(row[1]));
+			e.points  = static_cast<int32_t>(atoi(row[2]));
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static std::vector<AaRankPrereqs> GetWhere(Database& db, std::string where_filter)
+	static std::vector<AaRankPrereqs> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<AaRankPrereqs> all_entries;
 
@@ -275,19 +275,19 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			AaRankPrereqs entry{};
+			AaRankPrereqs e{};
 
-			entry.rank_id = atoi(row[0]);
-			entry.aa_id   = atoi(row[1]);
-			entry.points  = atoi(row[2]);
+			e.rank_id = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.aa_id   = static_cast<int32_t>(atoi(row[1]));
+			e.points  = static_cast<int32_t>(atoi(row[2]));
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -310,6 +310,32 @@ public:
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int64 GetMaxId(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COALESCE(MAX({}), 0) FROM {}",
+				PrimaryKey(),
+				TableName()
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static int64 Count(Database& db, const std::string &where_filter = "")
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COUNT(*) FROM {} {}",
+				TableName(),
+				(where_filter.empty() ? "" : "WHERE " + where_filter)
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
 };

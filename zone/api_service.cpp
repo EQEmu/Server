@@ -22,7 +22,7 @@
 #include "../common/net/websocket_server.h"
 #include "../common/eqemu_logsys.h"
 #include "zonedb.h"
-#include "zone_store.h"
+#include "../common/zone_store.h"
 #include "client.h"
 #include "entity.h"
 #include "corpse.h"
@@ -829,7 +829,7 @@ Json::Value ApiGetZoneAttributes(EQ::Net::WebsocketServerConnection *connection,
 
 Json::Value ApiGetLogsysCategories(EQ::Net::WebsocketServerConnection *connection, Json::Value params)
 {
-	if (zone->GetZoneID() == 0) {
+	if (!zone || (zone && zone->GetZoneID() == 0)) {
 		throw EQ::Net::WebsocketException("Zone must be loaded to invoke this call");
 	}
 
@@ -888,9 +888,8 @@ Json::Value ApiSetLoggingLevel(EQ::Net::WebsocketServerConnection *connection, J
 void RegisterApiLogEvent(std::unique_ptr<EQ::Net::WebsocketServer> &server)
 {
 	LogSys.SetConsoleHandler(
-		[&](uint16 debug_level, uint16 log_category, const std::string &msg) {
+		[&](uint16 log_category, const std::string &msg) {
 			Json::Value data;
-			data["debug_level"]  = debug_level;
 			data["log_category"] = log_category;
 			data["msg"]          = msg;
 			server->DispatchEvent(EQ::Net::SubscriptionEventLog, data, 50);

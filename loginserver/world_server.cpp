@@ -2,7 +2,7 @@
 #include "login_server.h"
 #include "login_types.h"
 #include "../common/ip_util.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 
 extern LoginServer server;
 
@@ -63,7 +63,7 @@ WorldServer::~WorldServer() = default;
 
 void WorldServer::Reset()
 {
-	m_server_id;
+	m_server_id            = 0;
 	m_zones_booted         = 0;
 	m_players_online       = 0;
 	m_server_status        = 0;
@@ -79,17 +79,12 @@ void WorldServer::Reset()
  */
 void WorldServer::ProcessNewLSInfo(uint16_t opcode, const EQ::Net::Packet &packet)
 {
-	if (server.options.IsWorldTraceOn()) {
-		LogDebug(
-			"Application packet received from server: [{0}], (size {1})",
-			opcode,
-			packet.Length()
-		);
-	}
-
-	if (server.options.IsDumpInPacketsOn()) {
-		DumpPacket(opcode, packet);
-	}
+	LogNetcode(
+		"Application packet received from server [{:#04x}] [Size: {}]\n{}",
+		opcode,
+		packet.Length(),
+		packet.ToString()
+	);
 
 	if (packet.Length() < sizeof(ServerNewLSInfo_Struct)) {
 		LogError(
@@ -129,17 +124,12 @@ void WorldServer::ProcessNewLSInfo(uint16_t opcode, const EQ::Net::Packet &packe
  */
 void WorldServer::ProcessLSStatus(uint16_t opcode, const EQ::Net::Packet &packet)
 {
-	Log(
-		Logs::Detail,
-		Logs::Netcode,
-		"Application packet received from server: 0x%.4X, (size %u)",
+	LogNetcode(
+		"Application packet received from server [{:#04x}] [Size: {}]\n{}",
 		opcode,
-		packet.Length()
+		packet.Length(),
+		packet.ToString()
 	);
-
-	if (server.options.IsDumpInPacketsOn()) {
-		DumpPacket(opcode, packet);
-	}
 
 	if (packet.Length() < sizeof(ServerLSStatus_Struct)) {
 		LogError(
@@ -151,15 +141,13 @@ void WorldServer::ProcessLSStatus(uint16_t opcode, const EQ::Net::Packet &packet
 
 	auto *ls_status = (ServerLSStatus_Struct *) packet.Data();
 
-	if (server.options.IsWorldTraceOn()) {
-		LogDebug(
-			"World Server Status Update Received | Server [{0}] Status [{1}] Players [{2}] Zones [{3}]",
-			GetServerLongName(),
-			ls_status->status,
-			ls_status->num_players,
-			ls_status->num_zones
-		);
-	}
+	LogDebug(
+		"World Server Status Update Received | Server [{0}] Status [{1}] Players [{2}] Zones [{3}]",
+		GetServerLongName(),
+		ls_status->status,
+		ls_status->num_players,
+		ls_status->num_zones
+	);
 
 	Handle_LSStatus(ls_status);
 }
@@ -170,17 +158,12 @@ void WorldServer::ProcessLSStatus(uint16_t opcode, const EQ::Net::Packet &packet
  */
 void WorldServer::ProcessUserToWorldResponseLegacy(uint16_t opcode, const EQ::Net::Packet &packet)
 {
-	if (server.options.IsWorldTraceOn()) {
-		LogDebug(
-			"Application packet received from server: [{0}], (size {1})",
-			opcode,
-			packet.Length()
-		);
-	}
-
-	if (server.options.IsDumpInPacketsOn()) {
-		DumpPacket(opcode, packet);
-	}
+	LogNetcode(
+		"Application packet received from server [{:#04x}] [Size: {}]\n{}",
+		opcode,
+		packet.Length(),
+		packet.ToString()
+	);
 
 	if (packet.Length() < sizeof(UsertoWorldResponseLegacy_Struct)) {
 		LogError(
@@ -191,19 +174,11 @@ void WorldServer::ProcessUserToWorldResponseLegacy(uint16_t opcode, const EQ::Ne
 		return;
 	}
 
-	//I don't use world trace for this and here is why:
-	//Because this is a part of the client login procedure it makes tracking client errors
-	//While keeping world server spam with multiple servers connected almost impossible.
-	if (server.options.IsTraceOn()) {
-		LogDebug("User-To-World Response received");
-	}
-
 	auto *r = (UsertoWorldResponseLegacy_Struct *) packet.Data();
 
 	LogDebug("Trying to find client with user id of [{0}]", r->lsaccountid);
 	Client *client = server.client_manager->GetClient(r->lsaccountid, "eqemu");
 	if (client) {
-
 		LogDebug(
 			"Found client with user id of [{0}] and account name of [{1}]",
 			r->lsaccountid,
@@ -254,21 +229,13 @@ void WorldServer::ProcessUserToWorldResponseLegacy(uint16_t opcode, const EQ::Ne
 				break;
 		}
 
-		if (server.options.IsWorldTraceOn()) {
-			LogDebug(
-				"Sending play response: allowed [{0}] sequence [{1}] server number [{2}] message [{3}]",
-				per->base_reply.success,
-				per->base_header.sequence,
-				per->server_number,
-				per->base_reply.error_str_id
-			);
-
-			LogDebug("[Size: [{0}]] {1}", outapp->size, DumpPacketToString(outapp));
-		}
-
-		if (server.options.IsDumpOutPacketsOn()) {
-			DumpPacket(outapp);
-		}
+		LogDebug(
+			"Sending play response: allowed [{0}] sequence [{1}] server number [{2}] message [{3}]",
+			per->base_reply.success,
+			per->base_header.sequence,
+			per->server_number,
+			per->base_reply.error_str_id
+		);
 
 		client->SendPlayResponse(outapp);
 		delete outapp;
@@ -287,17 +254,12 @@ void WorldServer::ProcessUserToWorldResponseLegacy(uint16_t opcode, const EQ::Ne
  */
 void WorldServer::ProcessUserToWorldResponse(uint16_t opcode, const EQ::Net::Packet &packet)
 {
-	if (server.options.IsWorldTraceOn()) {
-		LogDebug(
-			"Application packet received from server: 0x%.4X, (size %u)",
-			opcode,
-			packet.Length()
-		);
-	}
-
-	if (server.options.IsDumpInPacketsOn()) {
-		DumpPacket(opcode, packet);
-	}
+	LogNetcode(
+		"Application packet received from server [{:#04x}] [Size: {}]\n{}",
+		opcode,
+		packet.Length(),
+		packet.ToString()
+	);
 
 	if (packet.Length() < sizeof(UsertoWorldResponse_Struct)) {
 		LogError(
@@ -308,25 +270,18 @@ void WorldServer::ProcessUserToWorldResponse(uint16_t opcode, const EQ::Net::Pac
 		return;
 	}
 
-	//I don't use world trace for this and here is why:
-	//Because this is a part of the client login procedure it makes tracking client errors
-	//While keeping world server spam with multiple servers connected almost impossible.
-	if (server.options.IsTraceOn()) {
-		LogDebug("User-To-World Response received");
-	}
-
 	auto user_to_world_response = (UsertoWorldResponse_Struct *) packet.Data();
 	LogDebug("Trying to find client with user id of [{0}]", user_to_world_response->lsaccountid);
 
-	Client *client = server.client_manager->GetClient(
+	Client *c = server.client_manager->GetClient(
 		user_to_world_response->lsaccountid,
 		user_to_world_response->login
 	);
 
-	if (client) {
+	if (c) {
 		LogDebug("Found client with user id of [{0}] and account name of {1}",
 				 user_to_world_response->lsaccountid,
-				 client->GetAccountName().c_str()
+				 c->GetAccountName().c_str()
 		);
 
 		auto *outapp = new EQApplicationPacket(
@@ -334,69 +289,62 @@ void WorldServer::ProcessUserToWorldResponse(uint16_t opcode, const EQ::Net::Pac
 			sizeof(PlayEverquestResponse_Struct)
 		);
 
-		auto *per = (PlayEverquestResponse_Struct *) outapp->pBuffer;
-		per->base_header.sequence = client->GetPlaySequence();
-		per->server_number        = client->GetPlayServerID();
+		auto *r = (PlayEverquestResponse_Struct *) outapp->pBuffer;
+		r->base_header.sequence = c->GetPlaySequence();
+		r->server_number        = c->GetPlayServerID();
 
 		LogDebug(
 			"Found sequence and play of [{0}] [{1}]",
-			client->GetPlaySequence(),
-			client->GetPlayServerID()
+			c->GetPlaySequence(),
+			c->GetPlayServerID()
 		);
 
 		LogDebug("[Size: [{0}]] {1}", outapp->size, DumpPacketToString(outapp));
 
 		if (user_to_world_response->response > 0) {
-			per->base_reply.success = true;
+			r->base_reply.success = true;
 			SendClientAuth(
-				client->GetConnection()->GetRemoteAddr(),
-				client->GetAccountName(),
-				client->GetKey(),
-				client->GetAccountID(),
-				client->GetLoginServerName()
+				c->GetConnection()->GetRemoteAddr(),
+				c->GetAccountName(),
+				c->GetKey(),
+				c->GetAccountID(),
+				c->GetLoginServerName()
 			);
 		}
 
 		switch (user_to_world_response->response) {
 			case UserToWorldStatusSuccess:
-				per->base_reply.error_str_id = LS::ErrStr::ERROR_NONE;
+				r->base_reply.error_str_id = LS::ErrStr::ERROR_NONE;
 				break;
 			case UserToWorldStatusWorldUnavail:
-				per->base_reply.error_str_id = LS::ErrStr::ERROR_SERVER_UNAVAILABLE;
+				r->base_reply.error_str_id = LS::ErrStr::ERROR_SERVER_UNAVAILABLE;
 				break;
 			case UserToWorldStatusSuspended:
-				per->base_reply.error_str_id = LS::ErrStr::ERROR_ACCOUNT_SUSPENDED;
+				r->base_reply.error_str_id = LS::ErrStr::ERROR_ACCOUNT_SUSPENDED;
 				break;
 			case UserToWorldStatusBanned:
-				per->base_reply.error_str_id = LS::ErrStr::ERROR_ACCOUNT_BANNED;
+				r->base_reply.error_str_id = LS::ErrStr::ERROR_ACCOUNT_BANNED;
 				break;
 			case UserToWorldStatusWorldAtCapacity:
-				per->base_reply.error_str_id = LS::ErrStr::ERROR_WORLD_MAX_CAPACITY;
+				r->base_reply.error_str_id = LS::ErrStr::ERROR_WORLD_MAX_CAPACITY;
 				break;
 			case UserToWorldStatusAlreadyOnline:
-				per->base_reply.error_str_id = LS::ErrStr::ERROR_ACTIVE_CHARACTER;
+				r->base_reply.error_str_id = LS::ErrStr::ERROR_ACTIVE_CHARACTER;
 				break;
 			default:
-				per->base_reply.error_str_id = LS::ErrStr::ERROR_UNKNOWN;
+				r->base_reply.error_str_id = LS::ErrStr::ERROR_UNKNOWN;
 				break;
 		}
 
-		if (server.options.IsTraceOn()) {
-			LogDebug(
-				"Sending play response with following data, allowed [{0}], sequence {1}, server number {2}, message {3}",
-				per->base_reply.success,
-				per->base_header.sequence,
-				per->server_number,
-				per->base_reply.error_str_id
-			);
-			LogDebug("[Size: [{0}]] {1}", outapp->size, DumpPacketToString(outapp));
-		}
+		LogDebug(
+			"Sending play response with following data, allowed [{0}], sequence {1}, server number {2}, message {3}",
+			r->base_reply.success,
+			r->base_header.sequence,
+			r->server_number,
+			r->base_reply.error_str_id
+		);
 
-		if (server.options.IsDumpOutPacketsOn()) {
-			DumpPacket(outapp);
-		}
-
-		client->SendPlayResponse(outapp);
+		c->SendPlayResponse(outapp);
 		delete outapp;
 	}
 	else {
@@ -413,17 +361,12 @@ void WorldServer::ProcessUserToWorldResponse(uint16_t opcode, const EQ::Net::Pac
  */
 void WorldServer::ProcessLSAccountUpdate(uint16_t opcode, const EQ::Net::Packet &packet)
 {
-	if (server.options.IsWorldTraceOn()) {
-		LogDebug(
-			"Application packet received from server: [{0}], (size {1})",
-			opcode,
-			packet.Length()
-		);
-	}
-
-	if (server.options.IsDumpInPacketsOn()) {
-		DumpPacket(opcode, packet);
-	}
+	LogNetcode(
+		"Application packet received from server [{:#04x}] [Size: {}]\n{}",
+		opcode,
+		packet.Length(),
+		packet.ToString()
+	);
 
 	if (packet.Length() < sizeof(ServerLSAccountUpdate_Struct)) {
 		LogError(
@@ -434,9 +377,7 @@ void WorldServer::ProcessLSAccountUpdate(uint16_t opcode, const EQ::Net::Packet 
 		return;
 	}
 
-	if (server.options.IsWorldTraceOn()) {
-		LogDebug("ServerOP_LSAccountUpdate packet received from [{0}]", m_short_name);
-	}
+	LogDebug("ServerOP_LSAccountUpdate packet received from [{0}]", m_short_name);
 
 	auto *loginserver_update = (ServerLSAccountUpdate_Struct *) packet.Data();
 	if (IsServerTrusted()) {
@@ -448,7 +389,7 @@ void WorldServer::ProcessLSAccountUpdate(uint16_t opcode, const EQ::Net::Packet 
 		name.assign(loginserver_update->useraccount);
 		password.assign(loginserver_update->userpassword);
 
-		if (loginserver_update->user_email) {
+		if (loginserver_update->user_email[0] != '\0') {
 			email.assign(loginserver_update->user_email);
 		}
 
@@ -517,7 +458,7 @@ void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct *new_world_server_info
 
 		if (login_server_admin.loaded) {
 			LogDebug(
-				"WorldServer::Handle_NewLSInfo | Attempting to authenticate world admin... [{0}] ({1}) against worldserver [{2}]",
+				"Attempting to authenticate world admin... [{0}] ({1}) against worldserver [{2}]",
 				GetAccountName(),
 				login_server_admin.id,
 				GetServerShortName()
@@ -530,7 +471,7 @@ void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct *new_world_server_info
 				login_server_admin.account_password
 			)) {
 				LogDebug(
-					"WorldServer::Handle_NewLSInfo | Authenticating world admin... [{0}] ({1}) success! World ({2})",
+					"Authenticating world admin... [{0}] ({1}) success! World ({2})",
 					GetAccountName(),
 					login_server_admin.id,
 					GetServerShortName()
@@ -607,34 +548,34 @@ void WorldServer::SendClientAuth(
 )
 {
 	EQ::Net::DynamicPacket outapp;
-	ClientAuth_Struct      client_auth{};
+	ClientAuth_Struct      a{};
 
-	client_auth.loginserver_account_id = account_id;
+	a.loginserver_account_id = account_id;
 
-	strncpy(client_auth.account_name, account.c_str(), 30);
-	strncpy(client_auth.key, key.c_str(), 30);
+	strncpy(a.account_name, account.c_str(), 30);
+	strncpy(a.key, key.c_str(), 30);
 
-	client_auth.lsadmin        = 0;
-	client_auth.is_world_admin = 0;
-	client_auth.ip             = inet_addr(ip.c_str());
-	strncpy(client_auth.loginserver_name, &loginserver_name[0], 64);
+	a.lsadmin        = 0;
+	a.is_world_admin = 0;
+	a.ip             = inet_addr(ip.c_str());
+	strncpy(a.loginserver_name, &loginserver_name[0], 64);
 
 	const std::string &client_address(ip);
 	std::string       world_address(m_connection->Handle()->RemoteIP());
 
 	if (client_address == world_address) {
-		client_auth.is_client_from_local_network = 1;
+		a.is_client_from_local_network = 1;
 	}
 	else if (IpUtil::IsIpInPrivateRfc1918(client_address)) {
 		LogInfo("Client is authenticating from a local address [{0}]", client_address);
-		client_auth.is_client_from_local_network = 1;
+		a.is_client_from_local_network = 1;
 	}
 	else {
-		client_auth.is_client_from_local_network = 0;
+		a.is_client_from_local_network = 0;
 	}
 
 	struct in_addr ip_addr{};
-	ip_addr.s_addr = client_auth.ip;
+	ip_addr.s_addr = a.ip;
 
 	LogInfo(
 		"Client authentication response: world_address [{0}] client_address [{1}]",
@@ -645,22 +586,25 @@ void WorldServer::SendClientAuth(
 	LogInfo(
 		"Sending Client Authentication Response ls_account_id [{0}] ls_name [{1}] name [{2}] key [{3}] ls_admin [{4}] "
 		"world_admin [{5}] ip [{6}] local [{7}]",
-		client_auth.loginserver_account_id,
-		client_auth.loginserver_name,
-		client_auth.account_name,
-		client_auth.key,
-		client_auth.lsadmin,
-		client_auth.is_world_admin,
+		a.loginserver_account_id,
+		a.loginserver_name,
+		a.account_name,
+		a.key,
+		a.lsadmin,
+		a.is_world_admin,
 		inet_ntoa(ip_addr),
-		client_auth.is_client_from_local_network
+		a.is_client_from_local_network
 	);
 
-	outapp.PutSerialize(0, client_auth);
+	outapp.PutSerialize(0, a);
 	m_connection->Send(ServerOP_LSClientAuth, outapp);
 
-	if (server.options.IsDumpInPacketsOn()) {
-		DumpPacket(ServerOP_LSClientAuth, outapp);
-	}
+	LogNetcode(
+		"Sending [{:#04x}] [Size: {}]\n{}",
+		ServerOP_LSClientAuth,
+		outapp.Length(),
+		outapp.ToString()
+	);
 }
 
 constexpr static int MAX_ACCOUNT_NAME_LENGTH          = 30;
@@ -1360,12 +1304,12 @@ void WorldServer::OnKeepAlive(EQ::Timer *t)
 void WorldServer::FormatWorldServerName(char *name, int8 server_list_type)
 {
 	std::string server_long_name = name;
-	server_long_name = trim(server_long_name);
+	server_long_name = Strings::Trim(server_long_name);
 
 	bool name_set_to_bottom = false;
 	if (server_list_type == LS::ServerType::Standard) {
 		if (server.options.IsWorldDevTestServersListBottom()) {
-			std::string s = str_tolower(server_long_name);
+			std::string s = Strings::ToLower(server_long_name);
 			if (s.find("dev") != std::string::npos) {
 				server_long_name   = fmt::format("|D| {}", server_long_name);
 				name_set_to_bottom = true;

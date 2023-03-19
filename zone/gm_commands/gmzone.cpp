@@ -9,12 +9,12 @@ void command_gmzone(Client *c, const Seperator *sep)
 		return;
 	}
 
-	std::string zone_short_name = str_tolower(
+	std::string zone_short_name = Strings::ToLower(
 		sep->IsNumber(1) ?
-		ZoneName(std::stoul(sep->arg[1]), true) :
-		sep->arg[1]
+			ZoneName(std::stoul(sep->arg[1]), true) :
+			sep->arg[1]
 	);
-	bool is_unknown_zone = zone_short_name.find("unknown") != std::string::npos;
+	bool        is_unknown_zone = zone_short_name.find("unknown") != std::string::npos;
 	if (is_unknown_zone) {
 		c->Message(
 			Chat::White,
@@ -41,16 +41,16 @@ void command_gmzone(Client *c, const Seperator *sep)
 
 	auto zone_version = (
 		sep->IsNumber(2) ?
-		std::stoul(sep->arg[2]) :
-		0
+			std::stoul(sep->arg[2]) :
+			0
 	);
-	
+
 	std::string instance_identifier = (
 		sep->arg[3] ?
-		sep->arg[3] :
-		"gmzone"
+			sep->arg[3] :
+			"gmzone"
 	);
-	
+
 	auto bucket_key = fmt::format(
 		"{}-{}-{}-instance",
 		zone_short_name,
@@ -58,9 +58,9 @@ void command_gmzone(Client *c, const Seperator *sep)
 		zone_version
 	);
 
-	auto existing_zone_instance = DataBucket::GetData(bucket_key);
-	uint16 instance_id = 0;
-	uint32 duration = 100000000;
+	auto   existing_zone_instance = DataBucket::GetData(bucket_key);
+	uint16 instance_id            = 0;
+	uint32 duration               = 100000000;
 
 	if (!existing_zone_instance.empty()) {
 		instance_id = std::stoi(existing_zone_instance);
@@ -106,21 +106,12 @@ void command_gmzone(Client *c, const Seperator *sep)
 
 	if (instance_id) {
 		float target_x = -1, target_y = -1, target_z = -1, target_heading = -1;
-		int16 min_status = AccountStatus::Player;
-		uint8 min_level = 0;
 
-		if (
-			!content_db.GetSafePoints(
-				zone_short_name.c_str(),
-				zone_version,
-				&target_x,
-				&target_y,
-				&target_z,
-				&target_heading,
-				&min_status,
-				&min_level
-			)
-		) {
+		auto z = GetZoneVersionWithFallback(
+			ZoneID(zone_short_name.c_str()),
+			zone_version
+		);
+		if (!z) {
 			c->Message(
 				Chat::White,
 				fmt::format(
@@ -130,7 +121,13 @@ void command_gmzone(Client *c, const Seperator *sep)
 					zone_short_name
 				).c_str()
 			);
+			return;
 		}
+
+		target_x       = z->safe_x;
+		target_y       = z->safe_y;
+		target_z       = z->safe_z;
+		target_heading = z->safe_heading;
 
 		c->Message(
 			Chat::White,

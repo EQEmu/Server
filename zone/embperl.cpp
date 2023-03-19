@@ -18,32 +18,13 @@ Eglin
 #include "embperl.h"
 #include "embxs.h"
 #include "../common/features.h"
+#include "../common/path_manager.h"
+#include "../common/process/process.h"
+#include "../common/file.h"
+#include "../common/timer.h"
+
 #ifndef GvCV_set
 #define GvCV_set(gv,cv)   (GvCV(gv) = (cv))
-#endif
-
-#ifdef EMBPERL_XS
-EXTERN_C XS(boot_quest);
-#ifdef EMBPERL_XS_CLASSES
-EXTERN_C XS(boot_Mob);
-EXTERN_C XS(boot_NPC);
-EXTERN_C XS(boot_Client);
-EXTERN_C XS(boot_Corpse);
-EXTERN_C XS(boot_EntityList);
-EXTERN_C XS(boot_Group);
-EXTERN_C XS(boot_Raid);
-EXTERN_C XS(boot_Inventory);
-EXTERN_C XS(boot_QuestItem);
-EXTERN_C XS(boot_Spell);
-EXTERN_C XS(boot_HateEntry);
-EXTERN_C XS(boot_Object);
-EXTERN_C XS(boot_Doors);
-EXTERN_C XS(boot_PerlPacket);
-EXTERN_C XS(boot_Expedition);
-#ifdef BOTS
-EXTERN_C XS(boot_Bot);
-#endif
-#endif
 #endif
 
 #ifdef EMBPERL_IO_CAPTURE
@@ -74,36 +55,6 @@ EXTERN_C void xs_init(pTHX)
 	//add the strcpy stuff to get rid of const warnings....
 
 	newXS(strcpy(buf, "DynaLoader::boot_DynaLoader"), boot_DynaLoader, file);
-	newXS(strcpy(buf, "quest::boot_qc"), boot_qc, file);
-#ifdef EMBPERL_XS
-	newXS(strcpy(buf, "quest::boot_quest"), boot_quest, file);
-#ifdef EMBPERL_XS_CLASSES
-	newXS(strcpy(buf, "Mob::boot_Mob"), boot_Mob, file);
-	newXS(strcpy(buf, "NPC::boot_Mob"), boot_Mob, file);
-	newXS(strcpy(buf, "NPC::boot_NPC"), boot_NPC, file);
-	newXS(strcpy(buf, "Corpse::boot_Mob"), boot_Mob, file);
-	newXS(strcpy(buf, "Corpse::boot_Corpse"), boot_Corpse, file);
-	newXS(strcpy(buf, "Client::boot_Mob"), boot_Mob, file);
-	newXS(strcpy(buf, "Client::boot_Client"), boot_Client, file);
-	newXS(strcpy(buf, "EntityList::boot_EntityList"), boot_EntityList, file);
-	newXS(strcpy(buf, "PerlPacket::boot_PerlPacket"), boot_PerlPacket, file);
-	newXS(strcpy(buf, "Group::boot_Group"), boot_Group, file);
-	newXS(strcpy(buf, "Raid::boot_Raid"), boot_Raid, file);
-	newXS(strcpy(buf, "Inventory::boot_Inventory"), boot_Inventory, file);
-	newXS(strcpy(buf, "QuestItem::boot_QuestItem"), boot_QuestItem, file);
-	newXS(strcpy(buf, "Spell::boot_Spell"), boot_Spell, file);
-	newXS(strcpy(buf, "HateEntry::boot_HateEntry"), boot_HateEntry, file);
-	newXS(strcpy(buf, "Object::boot_Object"), boot_Object, file);
-	newXS(strcpy(buf, "Doors::boot_Doors"), boot_Doors, file);
-	newXS(strcpy(buf, "Expedition::boot_Expedition"), boot_Expedition, file);
-#ifdef BOTS
-	newXS(strcpy(buf, "Bot::boot_Mob"), boot_Mob, file);
-	newXS(strcpy(buf, "Bot::boot_NPC"), boot_NPC, file);
-	newXS(strcpy(buf, "Bot::boot_Bot"), boot_Bot, file);
-#endif
-;
-#endif
-#endif
 #ifdef EMBPERL_IO_CAPTURE
 	newXS(strcpy(buf, "EQEmuIO::PRINT"), XS_EQEmuIO_PRINT, file);
 #endif
@@ -133,7 +84,7 @@ void Embperl::DoInit() {
 	perl_run(my_perl);
 
 	//a little routine we use a lot.
-	eval_pv("sub my_eval { eval $_[0];}", TRUE);	//dies on error 
+	eval_pv("sub my_eval { eval $_[0];}", TRUE);	//dies on error
 
 	//ruin the perl exit and command:
 	eval_pv("sub my_exit {}",TRUE);
@@ -200,11 +151,11 @@ void Embperl::DoInit() {
 		//should probably read the directory in c, instead, so that
 		//I can echo filenames as I do it, but c'mon... I'm lazy and this 1 line reads in all the plugins
 		std::string perl_command =
-			"if(opendir(D,'" + Config->PluginDir +"')) { "
+			"if(opendir(D,'" + path.GetPluginsPath() +"')) { "
 			"	my @d = readdir(D);"
 			"	closedir(D);"
 			"	foreach(@d){ "
-			"		main::eval_file('plugin','" + Config->PluginDir + "/'.$_)if/\\.pl$/;"
+			"		main::eval_file('plugin','" + path.GetPluginsPath() + "/'.$_)if/\\.pl$/;"
 			"	}"
 			"}";
 		eval_pv(perl_command.c_str(),FALSE);
@@ -281,21 +232,21 @@ int Embperl::eval_file(const char * packagename, const char * filename)
 	std::vector<std::string> args;
 	args.push_back(packagename);
 	args.push_back(filename);
+
 	return dosub("main::eval_file", &args);
 }
 
 int Embperl::dosub(const char * subname, const std::vector<std::string> * args, int mode)
 {
 	dSP;
-	int ret_value = 0;
-	int count;
+	int         ret_value = 0;
+	int         count;
 	std::string error;
 
 	ENTER;
 	SAVETMPS;
 	PUSHMARK(SP);
-	if(args && !args->empty())
-	{
+	if (args && !args->empty()) {
 		for (auto i = args->begin(); i != args->end(); ++i) {
 			XPUSHs(sv_2mortal(newSVpv(i->c_str(), i->length())));
 		}
@@ -305,16 +256,14 @@ int Embperl::dosub(const char * subname, const std::vector<std::string> * args, 
 	count = call_pv(subname, mode);
 	SPAGAIN;
 
-	if(SvTRUE(ERRSV))
-	{
+	if (SvTRUE(ERRSV)) {
 		error = SvPV_nolen(ERRSV);
 		POPs;
 	}
-	else
-	{
-		if(count == 1) {
+	else {
+		if (count == 1) {
 			SV *ret = POPs;
-			if(SvTYPE(ret) == SVt_IV) {
+			if (SvTYPE(ret) == SVt_IV) {
 				IV v = SvIV(ret);
 				ret_value = v;
 			}
@@ -325,8 +274,26 @@ int Embperl::dosub(const char * subname, const std::vector<std::string> * args, 
 	FREETMPS;
 	LEAVE;
 
-	if(error.length() > 0)
-	{
+	// not sure why we pass this as blind args, strange
+	// check for syntax errors
+	if (args && !args->empty()) {
+		const std::string &filename = args->back();
+		std::string sub = subname;
+		if (sub == "main::eval_file" && !filename.empty() && File::Exists(filename)) {
+			BenchTimer benchmark;
+			std::string syntax_error = Process::execute(
+				fmt::format("perl -c {} 2>&1", filename)
+			);
+			LogQuests("Perl eval [{}] took [{}]", filename, benchmark.elapsed());
+			syntax_error = Strings::Trim(syntax_error);
+			if (!Strings::Contains(syntax_error, "syntax OK")) {
+				syntax_error += SvPVX(ERRSV);
+				throw syntax_error;
+			}
+		}
+	}
+
+	if (error.length() > 0) {
 		std::string errmsg = "Perl runtime error: ";
 		errmsg += SvPVX(ERRSV);
 		throw errmsg;

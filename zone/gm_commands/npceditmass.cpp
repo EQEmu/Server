@@ -72,7 +72,7 @@ void command_npceditmass(Client *c, const Seperator *sep)
 			Chat::Yellow,
 			fmt::format(
 				"Possible columns [{}]",
-				implode(options_glue, possible_column_options)
+				Strings::Implode(options_glue, possible_column_options)
 			).c_str()
 		);
 		return;
@@ -91,7 +91,7 @@ void command_npceditmass(Client *c, const Seperator *sep)
 			Chat::Yellow,
 			fmt::format(
 				"Possible columns [{}]",
-				implode(options_glue, possible_column_options)
+				Strings::Implode(options_glue, possible_column_options)
 			).c_str()
 		);
 		return;
@@ -139,7 +139,7 @@ void command_npceditmass(Client *c, const Seperator *sep)
 	for (auto row : results) {
 		std::string npc_id = row[0];
 		std::string npc_name = row[1];
-		std::string search_column_value = str_tolower(row[2]);
+		std::string search_column_value = Strings::ToLower(row[2]);
 		std::string change_column_current_value = row[3];
 
 		if (exact_match) {
@@ -183,7 +183,7 @@ void command_npceditmass(Client *c, const Seperator *sep)
 	);
 
 	if (strcasecmp(sep->arg[5], "apply") == 0) {
-		std::string npc_ids_string = implode(",", npc_ids);
+		std::string npc_ids_string = Strings::Implode(",", npc_ids);
 		if (npc_ids_string.empty()) {
 			c->Message(Chat::Red, "Error: Ran into an unknown error compiling NPC IDs");
 			return;
@@ -223,7 +223,7 @@ void command_npceditmass(Client *c, const Seperator *sep)
 				Chat::Yellow,
 				fmt::format(
 					"Would you like to {} these changes?",
-					EQ::SayLinkEngine::GenerateQuestSaylink(saylink, false, "apply")
+					Saylink::Silent(saylink, "apply")
 				).c_str()
 			);
 

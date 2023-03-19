@@ -365,7 +365,7 @@ luabind::scope lua_register_packet() {
 luabind::scope lua_register_packet_opcodes() {
 	return luabind::class_<Opcodes>("Opcode")
 	.enum_("constants")
-	[
+	[(
 		luabind::value("ExploreUnknown", static_cast<int>(OP_ExploreUnknown)),
 		luabind::value("Heartbeat", static_cast<int>(OP_Heartbeat)),
 		luabind::value("ReloadUI", static_cast<int>(OP_ReloadUI)),
@@ -911,7 +911,7 @@ luabind::scope lua_register_packet_opcodes() {
 		luabind::value("ClientTimeStamp", static_cast<int>(OP_ClientTimeStamp)),
 		luabind::value("GuildPromote", static_cast<int>(OP_GuildPromote)),
 		luabind::value("Fling", static_cast<int>(OP_Fling))
-	];
+	)];
 }
 
 #endif

@@ -53,6 +53,10 @@ public:
 	void SetDumpDropTableSyntaxOnly(bool dump_drop_table_syntax_only);
 	bool IsDumpStateTables() const;
 	void SetDumpStateTables(bool dump_state_tables);
+	bool IsDumpBotTables() const;
+	void SetDumpBotTables(bool dump_bot_tables);
+	bool IsDumpMercTables() const;
+	void SetDumpMercTables(bool dump_bot_tables);
 
 private:
 	bool        dump_all_tables             = false;
@@ -67,14 +71,17 @@ private:
 	bool        dump_with_compression       = false;
 	bool        dump_output_to_console      = false;
 	bool        dump_drop_table_syntax_only = false;
+	bool        dump_bot_tables             = false;
+	bool        dump_merc_tables            = false;
 	std::string dump_path;
 	std::string dump_file_name;
 
-	std::string execute(const std::string &cmd, bool return_result);
 	bool IsMySQLInstalled();
 	std::string GetMySQLVersion();
 	std::string GetBaseMySQLDumpCommand();
 	std::string GetPlayerTablesList();
+	std::string GetBotTablesList();
+	std::string GetMercTablesList();
 	std::string GetSystemTablesList();
 	std::string GetStateTablesList();
 	std::string GetContentTablesList();

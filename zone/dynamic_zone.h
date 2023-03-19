@@ -32,8 +32,6 @@ class Database;
 class EQApplicationPacket;
 class ServerPacket;
 
-extern const char* const CREATE_NOT_ALL_ADDED;
-
 class DynamicZone : public DynamicZoneBase
 {
 public:
@@ -53,6 +51,7 @@ public:
 	void DoAsyncZoneMemberUpdates();
 	bool CanClientLootCorpse(Client* client, uint32_t npc_type_id, uint32_t entity_id);
 	bool IsCurrentZoneDzInstance() const;
+	void MovePCInto(Client* client, bool world_verify = false) const;
 	void RegisterOnClientAddRemove(std::function<void(Client* client, bool removed, bool silent)> on_client_addremove);
 	void SendClientWindowUpdate(Client* client);
 	void SendLeaderNameToZoneMembers();
@@ -76,6 +75,7 @@ protected:
 	void ProcessMemberAddRemove(const DynamicZoneMember& member, bool removed) override;
 	bool ProcessMemberStatusChange(uint32_t member_id, DynamicZoneMemberStatus status) override;
 	void ProcessRemoveAllMembers(bool silent = false) override;
+	void ProcessSetSwitchID(int dz_switch_id) override;
 	bool SendServerPacket(ServerPacket* packet) override;
 
 private:

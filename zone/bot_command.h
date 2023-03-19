@@ -20,8 +20,6 @@
 #ifndef BOT_COMMAND_H
 #define BOT_COMMAND_H
 
-#ifdef BOTS
-
 class Client;
 class Seperator;
 
@@ -526,7 +524,6 @@ typedef std::map<BCEnum::SpType, std::map<uint8, std::string>> bcst_required_bot
 typedef std::map<uint8, uint8> bcst_levels;
 typedef std::map<BCEnum::SpType, bcst_levels> bcst_levels_map;
 
-
 #define	BOT_COMMAND_CHAR '^'
 
 typedef void (*BotCmdFuncPtr)(Client *,const Seperator *);
@@ -540,8 +537,7 @@ typedef struct {
 extern int (*bot_command_dispatch)(Client *,char const*);
 extern int bot_command_count;	// number of bot commands loaded
 
-
-// the bot command system:
+// Bot Command System:
 int bot_command_init(void);
 void bot_command_deinit(void);
 int bot_command_add(std::string bot_command_name, const char *desc, int access, BotCmdFuncPtr function);
@@ -549,8 +545,7 @@ int bot_command_not_avail(Client *c, const char *message);
 int bot_command_real_dispatch(Client *c, char const *message);
 void bot_command_log_command(Client *c, const char *message);
 
-
-// bot commands
+// Bot Commands
 void bot_command_actionable(Client *c, const Seperator *sep);
 void bot_command_aggressive(Client *c, const Seperator *sep);
 void bot_command_apply_poison(Client *c, const Seperator *sep);
@@ -589,6 +584,14 @@ void bot_command_resurrect(Client *c, const Seperator *sep);
 void bot_command_rune(Client *c, const Seperator *sep);
 void bot_command_send_home(Client *c, const Seperator *sep);
 void bot_command_size(Client *c, const Seperator *sep);
+void bot_command_spell_list(Client* c, const Seperator *sep);
+void bot_command_spell_settings_add(Client* c, const Seperator *sep);
+void bot_command_spell_settings_delete(Client* c, const Seperator *sep);
+void bot_command_spell_settings_list(Client* c, const Seperator *sep);
+void bot_command_spell_settings_toggle(Client* c, const Seperator *sep);
+void bot_command_spell_settings_update(Client* c, const Seperator *sep);
+void bot_spell_info_dialogue_window(Client* c, const Seperator *sep);
+void bot_command_enforce_spell_list(Client* c, const Seperator* sep);
 void bot_command_summon_corpse(Client *c, const Seperator *sep);
 void bot_command_suspend(Client *c, const Seperator *sep);
 void bot_command_taunt(Client *c, const Seperator *sep);
@@ -596,8 +599,7 @@ void bot_command_track(Client *c, const Seperator *sep);
 void bot_command_view_combos(Client *c, const Seperator *sep);
 void bot_command_water_breathing(Client *c, const Seperator *sep);
 
-
-// bot subcommands
+// Bot Subcommands
 void bot_subcommand_bot_appearance(Client *c, const Seperator *sep);
 void bot_subcommand_bot_beard_color(Client *c, const Seperator *sep);
 void bot_subcommand_bot_beard_style(Client *c, const Seperator *sep);
@@ -630,6 +632,7 @@ void bot_subcommand_bot_toggle_helm(Client *c, const Seperator *sep);
 void bot_subcommand_bot_update(Client *c, const Seperator *sep);
 void bot_subcommand_bot_woad(Client *c, const Seperator *sep);
 void bot_subcommand_botgroup_add_member(Client *c, const Seperator *sep);
+void bot_subcommand_botgroup_auto_spawn(Client *c, const Seperator *sep);
 void bot_subcommand_botgroup_create(Client *c, const Seperator *sep);
 void bot_subcommand_botgroup_delete(Client *c, const Seperator *sep);
 void bot_subcommand_botgroup_list(Client *c, const Seperator *sep);
@@ -682,9 +685,7 @@ void helper_command_depart_list(Client* bot_owner, Bot* druid_bot, Bot* wizard_b
 bool helper_is_help_or_usage(const char* arg);
 bool helper_no_available_bots(Client *bot_owner, Bot *my_bot = nullptr);
 void helper_send_available_subcommands(Client *bot_owner, const char* command_simile, const std::list<const char*>& subcommand_list);
-void helper_send_usage_required_bots(Client *bot_owner, BCEnum::SpType spell_type, uint8 bot_class = 0);
+void helper_send_usage_required_bots(Client *bot_owner, BCEnum::SpType spell_type, uint8 bot_class = NO_CLASS);
 bool helper_spell_check_fail(STBaseEntry* local_entry);
 bool helper_spell_list_fail(Client *bot_owner, bcst_list* spell_list, BCEnum::SpType spell_type);
 #endif
-
-#endif // BOTS

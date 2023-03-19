@@ -2,77 +2,141 @@
 
 void command_emotesearch(Client *c, const Seperator *sep)
 {
-	if (sep->arg[1][0] == 0) {
-		c->Message(Chat::White, "Usage: #emotesearch [search string or emoteid]");
+	auto arguments = sep->argnum;
+	if (!arguments) {
+		c->Message(Chat::White, "Usage: #emotesearch [Emote ID]");
+		c->Message(Chat::White, "Usage: #emotesearch [Search Crteria]");
+		return;
 	}
-	else {
-		const char *search_criteria = sep->argplus[1];
-		int        count            = 0;
 
-		if (Seperator::IsNumber(search_criteria)) {
-			uint16                                 emoteid = atoi(search_criteria);
-			LinkedListIterator<NPC_Emote_Struct *> iterator(zone->NPCEmoteList);
-			iterator.Reset();
-			while (iterator.MoreElements()) {
-				NPC_Emote_Struct *nes = iterator.GetData();
-				if (emoteid == nes->emoteid) {
-					c->Message(
-						Chat::White,
-						"EmoteID: %i Event: %i Type: %i Text: %s",
-						nes->emoteid,
-						nes->event_,
-						nes->type,
-						nes->text
-					);
-					count++;
-				}
-				iterator.Advance();
+	auto emote_count = 0;
+	auto emote_number = 1;
+
+	std::string search_criteria = sep->argplus[1];
+	bool found_by_id = false;
+
+	if (!sep->IsNumber(1)) {
+		LinkedListIterator<NPC_Emote_Struct *> iterator(zone->NPCEmoteList);
+		iterator.Reset();
+		while (iterator.MoreElements()) {
+			auto &e = iterator.GetData();
+			auto current_text = Strings::ToLower(e->text);
+			
+			if (Strings::Contains(current_text, Strings::ToLower(search_criteria))) {
+				c->Message(
+					Chat::White,
+					fmt::format(
+						"Emote {} | Emote ID: {}",
+						emote_number,
+						e->emoteid
+					).c_str()
+				);
+
+				c->Message(
+					Chat::White,
+					fmt::format(
+						"Emote {} | Event: {} ({}) Type: {} ({})",
+						emote_number,
+						EQ::constants::GetEmoteEventTypeName(e->event_),
+						e->event_,
+						EQ::constants::GetEmoteTypeName(e->type),
+						e->type
+					).c_str()
+				);
+
+				c->Message(
+					Chat::White,
+					fmt::format(
+						"Emote {} | Text: {}",
+						emote_number,
+						e->text
+					).c_str()
+				);
+
+				emote_count++;
+				emote_number++;
 			}
-			if (count == 0) {
-				c->Message(Chat::White, "No emotes found.");
+
+			if (emote_count == 50) {
+				break;
 			}
-			else {
-				c->Message(Chat::White, "%i emote(s) found", count);
-			}
+
+			iterator.Advance();
 		}
-		else {
-			char sText[64];
-			char sCriteria[515];
-			strn0cpy(sCriteria, search_criteria, sizeof(sCriteria));
-			strupr(sCriteria);
-			char *pdest;
+	} else {
+		auto emote_id = std::stoul(search_criteria);
+		
+		LinkedListIterator<NPC_Emote_Struct *> iterator(zone->NPCEmoteList);
+		iterator.Reset();
+		while (iterator.MoreElements()) {
+			auto &e = iterator.GetData();
+			if (emote_id == e->emoteid) {
+				found_by_id = true;
 
-			LinkedListIterator<NPC_Emote_Struct *> iterator(zone->NPCEmoteList);
-			iterator.Reset();
-			while (iterator.MoreElements()) {
-				NPC_Emote_Struct *nes = iterator.GetData();
-				strn0cpy(sText, nes->text, sizeof(sText));
-				strupr(sText);
-				pdest = strstr(sText, sCriteria);
-				if (pdest != nullptr) {
-					c->Message(
-						Chat::White,
-						"EmoteID: %i Event: %i Type: %i Text: %s",
-						nes->emoteid,
-						nes->event_,
-						nes->type,
-						nes->text
-					);
-					count++;
-				}
-				if (count == 50) {
-					break;
-				}
+				c->Message(
+					Chat::White,
+					fmt::format(
+						"Emote {} | Event: {} ({}) Type: {} ({})",
+						emote_number,
+						EQ::constants::GetEmoteEventTypeName(e->event_),
+						e->event_,
+						EQ::constants::GetEmoteTypeName(e->type),
+						e->type
+					).c_str()
+				);
 
-				iterator.Advance();
+				c->Message(
+					Chat::White,
+					fmt::format(
+						"Emote {} | Text: {}",
+						emote_number,
+						e->text
+					).c_str()
+				);
+
+				emote_count++;
+				emote_number++;
 			}
-			if (count == 50) {
-				c->Message(Chat::White, "50 emotes shown...too many results.");
+
+			if (emote_count == 50) {
+				break;
 			}
-			else {
-				c->Message(Chat::White, "%i emote(s) found", count);
-			}
+
+			iterator.Advance();
 		}
+	}
+
+	auto found_string = (
+		found_by_id ?
+		fmt::format("ID {}", search_criteria) :
+		search_criteria
+	);
+
+	if (!emote_count) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"No Emotes found matching {}.",
+				found_string
+			).c_str()
+		);
+	} else if (emote_count == 50) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"50 Emotes shown matching {}, too many results.",
+				found_string
+			).c_str()
+		);
+	} else {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"{} Emote{} found matching {}.",
+				emote_count,
+				emote_count != 1 ? "s" : "",
+				found_string
+			).c_str()
+		);
 	}
 }
-

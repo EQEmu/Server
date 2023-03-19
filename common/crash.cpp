@@ -1,6 +1,15 @@
 #include "global_define.h"
 #include "eqemu_logsys.h"
 #include "crash.h"
+#include "strings.h"
+#include "process/process.h"
+
+#include <cstdio>
+
+#if WINDOWS
+#define popen _popen
+#endif
+
 
 #if defined(_WINDOWS) && defined(CRASH_LOGGING)
 #include "StackWalker.h"
@@ -125,9 +134,27 @@ void set_exception_handler() {
 
 void print_trace()
 {
-	auto uid = geteuid();
+	bool does_gdb_exist = Strings::Contains(Process::execute("gdb -v"), "GNU");
+	if (!does_gdb_exist) {
+		LogCrash(
+			"[Error] GDB is not installed, if you want crash dumps on Linux to work properly you will need GDB installed"
+		);
+		std::exit(1);
+	}
 
-	std::string temp_output_file = "/tmp/dump-output";
+	auto        uid              = geteuid();
+	std::string temp_output_file = fmt::format("/tmp/dump-output-{}", Strings::Random(10));
+
+	// check for passwordless sudo if not root
+	if (uid != 0) {
+		bool sudo_password_required = Strings::Contains(Process::execute("sudo -n true"), "a password is required");
+		if (sudo_password_required) {
+			LogCrash(
+				"[Error] Current user does not have passwordless sudo installed. It is required to automatically process crash dumps with GDB as non-root."
+			);
+			std::exit(1);
+		}
+	}
 
 	char pid_buf[30];
 	sprintf(pid_buf, "%d", getpid());
@@ -136,7 +163,6 @@ void print_trace()
 	int child_pid = fork();
 	if (!child_pid) {
 		int fd = open(temp_output_file.c_str(), O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
-
 		dup2(fd, 1); // redirect output to stderr
 		fprintf(stdout, "stack trace for %s pid=%s\n", name_buf, pid_buf);
 		if (uid == 0) {
@@ -151,7 +177,7 @@ void print_trace()
 		abort(); /* If gdb failed to start */
 	}
 	else {
-		waitpid(child_pid, NULL, 0);
+		waitpid(child_pid, nullptr, 0);
 	}
 
 	std::ifstream    input(temp_output_file);

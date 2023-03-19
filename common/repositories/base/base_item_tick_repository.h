@@ -13,18 +13,18 @@
 #define EQEMU_BASE_ITEM_TICK_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseItemTickRepository {
 public:
 	struct ItemTick {
-		int         it_itemid;
-		int         it_chance;
-		int         it_level;
-		int         it_id;
+		int32_t     it_itemid;
+		int32_t     it_chance;
+		int32_t     it_level;
+		int32_t     it_id;
 		std::string it_qglobal;
-		int         it_bagslot;
+		int8_t      it_bagslot;
 	};
 
 	static std::string PrimaryKey()
@@ -58,12 +58,12 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string SelectColumnsRaw()
 	{
-		return std::string(implode(", ", SelectColumns()));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -91,19 +91,19 @@ public:
 
 	static ItemTick NewEntity()
 	{
-		ItemTick entry{};
+		ItemTick e{};
 
-		entry.it_itemid  = 0;
-		entry.it_chance  = 0;
-		entry.it_level   = 0;
-		entry.it_id      = 0;
-		entry.it_qglobal = "";
-		entry.it_bagslot = 0;
+		e.it_itemid  = 0;
+		e.it_chance  = 0;
+		e.it_level   = 0;
+		e.it_id      = 0;
+		e.it_qglobal = "";
+		e.it_bagslot = 0;
 
-		return entry;
+		return e;
 	}
 
-	static ItemTick GetItemTickEntry(
+	static ItemTick GetItemTick(
 		const std::vector<ItemTick> &item_ticks,
 		int item_tick_id
 	)
@@ -132,16 +132,16 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			ItemTick entry{};
+			ItemTick e{};
 
-			entry.it_itemid  = atoi(row[0]);
-			entry.it_chance  = atoi(row[1]);
-			entry.it_level   = atoi(row[2]);
-			entry.it_id      = atoi(row[3]);
-			entry.it_qglobal = row[4] ? row[4] : "";
-			entry.it_bagslot = atoi(row[5]);
+			e.it_itemid  = static_cast<int32_t>(atoi(row[0]));
+			e.it_chance  = static_cast<int32_t>(atoi(row[1]));
+			e.it_level   = static_cast<int32_t>(atoi(row[2]));
+			e.it_id      = static_cast<int32_t>(atoi(row[3]));
+			e.it_qglobal = row[4] ? row[4] : "";
+			e.it_bagslot = static_cast<int8_t>(atoi(row[5]));
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -166,26 +166,26 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		ItemTick item_tick_entry
+		const ItemTick &e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(item_tick_entry.it_itemid));
-		update_values.push_back(columns[1] + " = " + std::to_string(item_tick_entry.it_chance));
-		update_values.push_back(columns[2] + " = " + std::to_string(item_tick_entry.it_level));
-		update_values.push_back(columns[4] + " = '" + EscapeString(item_tick_entry.it_qglobal) + "'");
-		update_values.push_back(columns[5] + " = " + std::to_string(item_tick_entry.it_bagslot));
+		v.push_back(columns[0] + " = " + std::to_string(e.it_itemid));
+		v.push_back(columns[1] + " = " + std::to_string(e.it_chance));
+		v.push_back(columns[2] + " = " + std::to_string(e.it_level));
+		v.push_back(columns[4] + " = '" + Strings::Escape(e.it_qglobal) + "'");
+		v.push_back(columns[5] + " = " + std::to_string(e.it_bagslot));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
-				item_tick_entry.it_id
+				e.it_id
 			)
 		);
 
@@ -194,63 +194,63 @@ public:
 
 	static ItemTick InsertOne(
 		Database& db,
-		ItemTick item_tick_entry
+		ItemTick e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(item_tick_entry.it_itemid));
-		insert_values.push_back(std::to_string(item_tick_entry.it_chance));
-		insert_values.push_back(std::to_string(item_tick_entry.it_level));
-		insert_values.push_back(std::to_string(item_tick_entry.it_id));
-		insert_values.push_back("'" + EscapeString(item_tick_entry.it_qglobal) + "'");
-		insert_values.push_back(std::to_string(item_tick_entry.it_bagslot));
+		v.push_back(std::to_string(e.it_itemid));
+		v.push_back(std::to_string(e.it_chance));
+		v.push_back(std::to_string(e.it_level));
+		v.push_back(std::to_string(e.it_id));
+		v.push_back("'" + Strings::Escape(e.it_qglobal) + "'");
+		v.push_back(std::to_string(e.it_bagslot));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
 		if (results.Success()) {
-			item_tick_entry.it_id = results.LastInsertedID();
-			return item_tick_entry;
+			e.it_id = results.LastInsertedID();
+			return e;
 		}
 
-		item_tick_entry = NewEntity();
+		e = NewEntity();
 
-		return item_tick_entry;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<ItemTick> item_tick_entries
+		const std::vector<ItemTick> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &item_tick_entry: item_tick_entries) {
-			std::vector<std::string> insert_values;
+		for (auto &e: entries) {
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(item_tick_entry.it_itemid));
-			insert_values.push_back(std::to_string(item_tick_entry.it_chance));
-			insert_values.push_back(std::to_string(item_tick_entry.it_level));
-			insert_values.push_back(std::to_string(item_tick_entry.it_id));
-			insert_values.push_back("'" + EscapeString(item_tick_entry.it_qglobal) + "'");
-			insert_values.push_back(std::to_string(item_tick_entry.it_bagslot));
+			v.push_back(std::to_string(e.it_itemid));
+			v.push_back(std::to_string(e.it_chance));
+			v.push_back(std::to_string(e.it_level));
+			v.push_back(std::to_string(e.it_id));
+			v.push_back("'" + Strings::Escape(e.it_qglobal) + "'");
+			v.push_back(std::to_string(e.it_bagslot));
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 
@@ -271,22 +271,22 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			ItemTick entry{};
+			ItemTick e{};
 
-			entry.it_itemid  = atoi(row[0]);
-			entry.it_chance  = atoi(row[1]);
-			entry.it_level   = atoi(row[2]);
-			entry.it_id      = atoi(row[3]);
-			entry.it_qglobal = row[4] ? row[4] : "";
-			entry.it_bagslot = atoi(row[5]);
+			e.it_itemid  = static_cast<int32_t>(atoi(row[0]));
+			e.it_chance  = static_cast<int32_t>(atoi(row[1]));
+			e.it_level   = static_cast<int32_t>(atoi(row[2]));
+			e.it_id      = static_cast<int32_t>(atoi(row[3]));
+			e.it_qglobal = row[4] ? row[4] : "";
+			e.it_bagslot = static_cast<int8_t>(atoi(row[5]));
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static std::vector<ItemTick> GetWhere(Database& db, std::string where_filter)
+	static std::vector<ItemTick> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<ItemTick> all_entries;
 
@@ -301,22 +301,22 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			ItemTick entry{};
+			ItemTick e{};
 
-			entry.it_itemid  = atoi(row[0]);
-			entry.it_chance  = atoi(row[1]);
-			entry.it_level   = atoi(row[2]);
-			entry.it_id      = atoi(row[3]);
-			entry.it_qglobal = row[4] ? row[4] : "";
-			entry.it_bagslot = atoi(row[5]);
+			e.it_itemid  = static_cast<int32_t>(atoi(row[0]));
+			e.it_chance  = static_cast<int32_t>(atoi(row[1]));
+			e.it_level   = static_cast<int32_t>(atoi(row[2]));
+			e.it_id      = static_cast<int32_t>(atoi(row[3]));
+			e.it_qglobal = row[4] ? row[4] : "";
+			e.it_bagslot = static_cast<int8_t>(atoi(row[5]));
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -339,6 +339,32 @@ public:
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int64 GetMaxId(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COALESCE(MAX({}), 0) FROM {}",
+				PrimaryKey(),
+				TableName()
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static int64 Count(Database& db, const std::string &where_filter = "")
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COUNT(*) FROM {} {}",
+				TableName(),
+				(where_filter.empty() ? "" : "WHERE " + where_filter)
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
 };

@@ -27,6 +27,14 @@
 9026|2019_09_09_bots_owner_options_rework.sql|SHOW COLUMNS FROM `bot_owner_options` LIKE 'option_type'|empty|
 9027|2020_03_30_bots_view_update.sql|SELECT * FROM db_version WHERE bots_version >= 9027|empty|
 9028|2021_06_04_bot_create_combinations.sql|SHOW TABLES LIKE 'bot_create_combinations'|empty|
+9029|2022_06_21_bot_groups_auto_spawn.sql|SHOW COLUMNS from `bot_groups` LIKE 'auto_spawm'|empty|
+9030|2022_10_27_bot_data_buckets.sql|SHOW COLUMNS FROM `bot_spells_entries` LIKE 'bucket_name'|empty|
+9031|2022_11_13_bot_spells_entries.sql|SELECT * FROM db_version WHERE bots_version >= 9031|empty|
+9032|2022_11_07_bot_expansion_bitmask.sql|SHOW COLUMNS FROM `bot_data` LIKE 'expansion_bitmask'|empty|
+9033|2022_11_19_bot_spell_settings.sql|SHOW TABLES LIKE 'bot_spell_settings'|empty|
+9034|2022_12_02_bot_spell_settings.sql|SHOW COLUMNS FROM `bot_data` LIKE 'enforce_spell_settings'|empty|
+9035|2022_12_04_bot_archery.sql|SHOW COLUMNS FROM `bot_data` LIKE 'archery_setting'|empty|
+9036|2023_01_19_drop_bot_views.sql|SHOW TABLES LIKE 'vw_groups'|not_empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not

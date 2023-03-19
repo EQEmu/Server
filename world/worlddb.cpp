@@ -17,7 +17,7 @@
 */
 
 #include "worlddb.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "../common/eq_packet_structs.h"
 #include "../common/inventory_profile.h"
 #include "../common/rulesys.h"
@@ -27,7 +27,7 @@
 #include "sof_char_create_data.h"
 #include "../common/repositories/character_instance_safereturns_repository.h"
 #include "../common/repositories/criteria/content_filter_criteria.h"
-#include "world_store.h"
+#include "../common/zone_store.h"
 
 WorldDatabase database;
 WorldDatabase content_db;
@@ -113,10 +113,10 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, EQApplicationPacket **o
 	buff_ptr += sizeof(CharacterSelect_Struct);
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		CharacterSelectEntry_Struct *p_character_select_entry_struct = (CharacterSelectEntry_Struct *) buff_ptr;
-		PlayerProfile_Struct player_profile_struct;
-		EQ::InventoryProfile inventory_profile;
+		PlayerProfile_Struct        pp;
+		EQ::InventoryProfile        inventory_profile;
 
-		player_profile_struct.SetPlayerProfileVersion(EQ::versions::ConvertClientVersionToMobVersion(client_version));
+		pp.SetPlayerProfileVersion(EQ::versions::ConvertClientVersionToMobVersion(client_version));
 		inventory_profile.SetInventoryVersion(client_version);
 		inventory_profile.SetGMInventory(true); // charsel can not interact with items..but, no harm in setting to full expansion support
 
@@ -124,7 +124,7 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, EQApplicationPacket **o
 		uint8 has_home = 0;
 		uint8 has_bind = 0;
 
-		memset(&player_profile_struct, 0, sizeof(PlayerProfile_Struct));
+		memset(&pp, 0, sizeof(PlayerProfile_Struct));
 		memset(p_character_select_entry_struct->Name, 0, sizeof(p_character_select_entry_struct->Name));
 		strcpy(p_character_select_entry_struct->Name, row[1]);
 		p_character_select_entry_struct->Class = (uint8) atoi(row[4]);
@@ -198,12 +198,12 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, EQApplicationPacket **o
 				has_home = 1;
 				// If our bind count is less than 5, we need to actually make use of this data so lets parse it
 				if (bind_count < 5) {
-					player_profile_struct.binds[4].zone_id = atoi(row_b[0]);
-					player_profile_struct.binds[4].instance_id = atoi(row_b[1]);
-					player_profile_struct.binds[4].x = atof(row_b[2]);
-					player_profile_struct.binds[4].y = atof(row_b[3]);
-					player_profile_struct.binds[4].z = atof(row_b[4]);
-					player_profile_struct.binds[4].heading = atof(row_b[5]);
+					pp.binds[4].zone_id     = atoi(row_b[0]);
+					pp.binds[4].instance_id = atoi(row_b[1]);
+					pp.binds[4].x           = atof(row_b[2]);
+					pp.binds[4].y           = atof(row_b[3]);
+					pp.binds[4].z           = atof(row_b[4]);
+					pp.binds[4].heading     = atof(row_b[5]);
 				}
 			}
 
@@ -234,40 +234,39 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, EQApplicationPacket **o
 			for (auto row_d = results_bind.begin(); row_d != results_bind.end(); ++row_d) {
 				/* If a bind_id is specified, make them start there */
 				if (atoi(row_d[1]) != 0) {
-					player_profile_struct.binds[4].zone_id = (uint32) atoi(row_d[1]);
-					content_db.GetSafePoints(
-						ZoneName(player_profile_struct.binds[4].zone_id, true),
-						0,
-						&player_profile_struct.binds[4].x,
-						&player_profile_struct.binds[4].y,
-						&player_profile_struct.binds[4].z,
-						&player_profile_struct.binds[4].heading
-					);
+					pp.binds[4].zone_id = (uint32) atoi(row_d[1]);
+
+					auto z = GetZone(pp.binds[4].zone_id);
+					if (z) {
+						pp.binds[4].x       = z->safe_x;
+						pp.binds[4].y       = z->safe_y;
+						pp.binds[4].z       = z->safe_z;
+						pp.binds[4].heading = z->safe_heading;
+					}
 				}
 					/* Otherwise, use the zone and coordinates given */
 				else {
-					player_profile_struct.binds[4].zone_id = (uint32) atoi(row_d[0]);
+					pp.binds[4].zone_id = (uint32) atoi(row_d[0]);
 					float x = atof(row_d[2]);
 					float y = atof(row_d[3]);
 					float z = atof(row_d[4]);
 					float heading = atof(row_d[5]);
 					if (x == 0 && y == 0 && z == 0 && heading == 0) {
-						content_db.GetSafePoints(
-							ZoneName(player_profile_struct.binds[4].zone_id, true),
-							0,
-							&x,
-							&y,
-							&z,
-							&heading
-						);
+						auto zone = GetZone(pp.binds[4].zone_id);
+						if (zone) {
+							x       = zone->safe_x;
+							y       = zone->safe_y;
+							z       = zone->safe_z;
+							heading = zone->safe_heading;
+						}
 					}
-					player_profile_struct.binds[4].x = x;
-					player_profile_struct.binds[4].y = y;
-					player_profile_struct.binds[4].z = z;
-					player_profile_struct.binds[4].heading = heading;
+					pp.binds[4].x       = x;
+					pp.binds[4].y       = y;
+					pp.binds[4].z       = z;
+					pp.binds[4].heading = heading;
 				}
 			}
-			player_profile_struct.binds[0] = player_profile_struct.binds[4];
+			pp.binds[0] = pp.binds[4];
 			/* If no home bind set, set it */
 			if (has_home == 0) {
 				std::string query = fmt::format(
@@ -278,12 +277,12 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, EQApplicationPacket **o
 						VALUES ({}, {}, {}, {}, {}, {}, {}, {})
 					),
 					character_id,
-					player_profile_struct.binds[4].zone_id,
+					pp.binds[4].zone_id,
 					0,
-					player_profile_struct.binds[4].x,
-					player_profile_struct.binds[4].y,
-					player_profile_struct.binds[4].z,
-					player_profile_struct.binds[4].heading,
+					pp.binds[4].x,
+					pp.binds[4].y,
+					pp.binds[4].z,
+					pp.binds[4].heading,
 					4
 				);
 				auto results_bset = QueryDatabase(query);
@@ -298,12 +297,12 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, EQApplicationPacket **o
 						VALUES ({}, {}, {}, {}, {}, {}, {}, {})
 					),
 					character_id,
-					player_profile_struct.binds[0].zone_id,
+					pp.binds[0].zone_id,
 					0,
-					player_profile_struct.binds[0].x,
-					player_profile_struct.binds[0].y,
-					player_profile_struct.binds[0].z,
-					player_profile_struct.binds[0].heading,
+					pp.binds[0].x,
+					pp.binds[0].y,
+					pp.binds[0].z,
+					pp.binds[0].heading,
 					0
 				);
 				auto results_bset = QueryDatabase(query);
@@ -314,7 +313,7 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, EQApplicationPacket **o
 			// we know that home and main bind must be valid here, so we don't check those
 			// we also use home to fill in the null data like live does.
 			for (int i = 1; i < 4; i++) {
-				if (player_profile_struct.binds[i].zone_id != 0) // we assume 0 is the only invalid one ...
+				if (pp.binds[i].zone_id != 0) // we assume 0 is the only invalid one ...
 					continue;
 
 				std::string query = fmt::format(
@@ -325,12 +324,12 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, EQApplicationPacket **o
 						VALUES ({}, {}, {}, {}, {}, {}, {}, {})
 					),
 					character_id,
-					player_profile_struct.binds[4].zone_id,
+					pp.binds[4].zone_id,
 					0,
-					player_profile_struct.binds[4].x,
-					player_profile_struct.binds[4].y,
-					player_profile_struct.binds[4].z,
-					player_profile_struct.binds[4].heading,
+					pp.binds[4].x,
+					pp.binds[4].y,
+					pp.binds[4].z,
+					pp.binds[4].heading,
 					i
 				);
 				auto results_bset = QueryDatabase(query);
@@ -352,10 +351,10 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, EQApplicationPacket **o
 		uint8 slot = 0;
 		for (auto row_b = results_b.begin(); row_b != results_b.end(); ++row_b) {
 			slot = atoi(row_b[0]);
-			player_profile_struct.item_tint.Slot[slot].Red = atoi(row_b[1]);
-			player_profile_struct.item_tint.Slot[slot].Green = atoi(row_b[2]);
-			player_profile_struct.item_tint.Slot[slot].Blue = atoi(row_b[3]);
-			player_profile_struct.item_tint.Slot[slot].UseTint = atoi(row_b[4]);
+			pp.item_tint.Slot[slot].Red     = atoi(row_b[1]);
+			pp.item_tint.Slot[slot].Green   = atoi(row_b[2]);
+			pp.item_tint.Slot[slot].Blue    = atoi(row_b[3]);
+			pp.item_tint.Slot[slot].UseTint = atoi(row_b[4]);
 		}
 
 		if (GetCharSelInventory(account_id, p_character_select_entry_struct->Name, &inventory_profile)) {
@@ -394,8 +393,8 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, EQApplicationPacket **o
 				} else {
 					// Armor Materials/Models
 					uint32 color = (
-						player_profile_struct.item_tint.Slot[matslot].UseTint ?
-						player_profile_struct.item_tint.Slot[matslot].Color :
+						pp.item_tint.Slot[matslot].UseTint ?
+						pp.item_tint.Slot[matslot].Color :
 						inst->GetColor()
 					);
 					p_character_select_entry_struct->Equip[matslot].Material = item->Material;
@@ -527,7 +526,7 @@ int WorldDatabase::MoveCharacterToInstanceSafeReturn(
 }
 
 bool WorldDatabase::GetStartZone(
-	PlayerProfile_Struct *p_player_profile_struct,
+	PlayerProfile_Struct *pp,
 	CharCreate_Struct *p_char_create_struct,
 	bool is_titanium
 )
@@ -539,20 +538,20 @@ bool WorldDatabase::GetStartZone(
 	// For now, if no row matching row is found, send them to Crescent Reach, as that is probably the most likely
 	// reason for no match being found.
 	//
-	if (!p_player_profile_struct || !p_char_create_struct) {
+	if (!pp || !p_char_create_struct) {
 		return false;
 	}
 
-	p_player_profile_struct->x                    = 0;
-	p_player_profile_struct->y                    = 0;
-	p_player_profile_struct->z                    = 0;
-	p_player_profile_struct->heading              = 0;
-	p_player_profile_struct->zone_id              = 0;
-	p_player_profile_struct->binds[0].x           = 0;
-	p_player_profile_struct->binds[0].y           = 0;
-	p_player_profile_struct->binds[0].z           = 0;
-	p_player_profile_struct->binds[0].zone_id      = 0;
-	p_player_profile_struct->binds[0].instance_id = 0;
+	pp->x                    = 0;
+	pp->y                    = 0;
+	pp->z                    = 0;
+	pp->heading              = 0;
+	pp->zone_id              = 0;
+	pp->binds[0].x           = 0;
+	pp->binds[0].y           = 0;
+	pp->binds[0].z           = 0;
+	pp->binds[0].zone_id     = 0;
+	pp->binds[0].instance_id = 0;
 
 	// see if we have an entry for start_zone. We can support both titanium & SOF+ by having two entries per class/race/deity combo with different zone_ids
 	std::string query;
@@ -592,53 +591,51 @@ bool WorldDatabase::GetStartZone(
 
 	if (results.RowCount() == 0) {
 		printf("No start_zones entry in database, using defaults\n");
-		is_titanium ? SetTitaniumDefaultStartZone(p_player_profile_struct, p_char_create_struct) : SetSoFDefaultStartZone(p_player_profile_struct, p_char_create_struct);
+		is_titanium ? SetTitaniumDefaultStartZone(pp, p_char_create_struct) : SetSoFDefaultStartZone(pp, p_char_create_struct);
     }
     else {
 		LogInfo("Found starting location in start_zones");
 		auto row = results.begin();
-		p_player_profile_struct->x = atof(row[0]);
-		p_player_profile_struct->y = atof(row[1]);
-		p_player_profile_struct->z = atof(row[2]);
-		p_player_profile_struct->heading = atof(row[3]);
-		p_player_profile_struct->zone_id = atoi(row[4]);
-		p_player_profile_struct->binds[0].zone_id = atoi(row[5]);
-		p_player_profile_struct->binds[0].x = atof(row[6]);
-		p_player_profile_struct->binds[0].y = atof(row[7]);
-		p_player_profile_struct->binds[0].z = atof(row[8]);
-		p_player_profile_struct->binds[0].heading = atof(row[3]);
+		pp->x                = atof(row[0]);
+		pp->y                = atof(row[1]);
+		pp->z                = atof(row[2]);
+		pp->heading          = atof(row[3]);
+		pp->zone_id          = atoi(row[4]);
+		pp->binds[0].zone_id = atoi(row[5]);
+		pp->binds[0].x       = atof(row[6]);
+		pp->binds[0].y       = atof(row[7]);
+		pp->binds[0].z       = atof(row[8]);
+		pp->binds[0].heading = atof(row[3]);
 	}
 
 	if (
-		p_player_profile_struct->x == 0 &&
-		p_player_profile_struct->y == 0 &&
-		p_player_profile_struct->z == 0 &&
-		p_player_profile_struct->heading == 0
+		pp->x == 0 &&
+		pp->y == 0 &&
+		pp->z == 0 &&
+		pp->heading == 0
 	) {
-		content_db.GetSafePoints(
-			ZoneName(p_player_profile_struct->zone_id, true),
-			0,
-			&p_player_profile_struct->x,
-			&p_player_profile_struct->y,
-			&p_player_profile_struct->z,
-			&p_player_profile_struct->heading
-		);
+		auto zone = GetZone(pp->zone_id);
+		if (zone) {
+			pp->x       = zone->safe_x;
+			pp->y       = zone->safe_y;
+			pp->z       = zone->safe_z;
+			pp->heading = zone->safe_heading;
+		}
 	}
 
 	if (
-		p_player_profile_struct->binds[0].x == 0 &&
-		p_player_profile_struct->binds[0].y == 0 &&
-		p_player_profile_struct->binds[0].z == 0 &&
-		p_player_profile_struct->binds[0].heading == 0
+		pp->binds[0].x == 0 &&
+		pp->binds[0].y == 0 &&
+		pp->binds[0].z == 0 &&
+		pp->binds[0].heading == 0
 	) {
-		content_db.GetSafePoints(
-			ZoneName(p_player_profile_struct->binds[0].zone_id, true),
-			0,
-			&p_player_profile_struct->binds[0].x,
-			&p_player_profile_struct->binds[0].y,
-			&p_player_profile_struct->binds[0].z,
-			&p_player_profile_struct->binds[0].heading
-		);
+		auto zone = GetZone(pp->binds[0].zone_id);
+		if (zone) {
+			pp->binds[0].x       = zone->safe_x;
+			pp->binds[0].y       = zone->safe_y;
+			pp->binds[0].z       = zone->safe_z;
+			pp->binds[0].heading = zone->safe_heading;
+		}
 	}
 
 	return true;

@@ -100,6 +100,10 @@ void EQEmuConfig::parse_config()
 		WorldHTTPEnabled = true;
 	}
 
+	if (_root["server"].get("disable_config_checks", "false").asString() == "true") {
+		DisableConfigChecks = true;
+	}
+
 	/**
 	 * UCS
 	 */

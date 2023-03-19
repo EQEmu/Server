@@ -17,7 +17,7 @@ void command_ai(Client *c, const Seperator *sep)
 		c->Message(Chat::White, "You must target an NPC to use this command.");
 		return;
 	}
-	
+
 	auto target = c->GetTarget()->CastToNPC();
 
 	bool is_consider = !strcasecmp(sep->arg[1], "consider");
@@ -42,7 +42,7 @@ void command_ai(Client *c, const Seperator *sep)
 		return;
 	}
 
-	if (is_consider) {	
+	if (is_consider) {
 		if (arguments == 2) {
 			auto mob_name = sep->arg[2];
 			auto mob_to_consider = entity_list.GetMob(mob_name);
@@ -153,7 +153,7 @@ void command_ai(Client *c, const Seperator *sep)
 							delay ?
 							fmt::format(
 								"a delay of {} ({})",
-								ConvertMillisecondsToTime(delay),
+								Strings::MillisecondsToTime(delay),
 								delay
 							):
 							"no delay"
@@ -162,7 +162,7 @@ void command_ai(Client *c, const Seperator *sep)
 							minimum_delay ?
 							fmt::format(
 								"a minimum delay of {} ({})",
-								ConvertMillisecondsToTime(minimum_delay),
+								Strings::MillisecondsToTime(minimum_delay),
 								minimum_delay
 							):
 							"no minimum delay"
@@ -209,7 +209,7 @@ void command_ai(Client *c, const Seperator *sep)
 							fmt::format(
 								"a delay of {} ({})",
 								delay,
-								ConvertMillisecondsToTime(delay)
+								Strings::MillisecondsToTime(delay)
 							):
 							"no delay"
 						),
@@ -218,7 +218,7 @@ void command_ai(Client *c, const Seperator *sep)
 							fmt::format(
 								"a minimum delay of {} ({})",
 								minimum_delay,
-								ConvertMillisecondsToTime(delay)
+								Strings::MillisecondsToTime(delay)
 							):
 							"no minimum delay"
 						)

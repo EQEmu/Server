@@ -30,10 +30,11 @@ Child of the Mob class.
     #define strcasecmp	_stricmp
 #endif
 
+#include "../common/data_verification.h"
 #include "../common/global_define.h"
 #include "../common/eqemu_logsys.h"
 #include "../common/rulesys.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "../common/say_link.h"
 
 #include "corpse.h"
@@ -43,9 +44,7 @@ Child of the Mob class.
 #include "mob.h"
 #include "raids.h"
 
-#ifdef BOTS
 #include "bot.h"
-#endif
 
 #include "quest_parser_collection.h"
 #include "string_ids.h"
@@ -148,19 +147,75 @@ Corpse* Corpse::LoadCharacterCorpseEntity(uint32 in_dbid, uint32 in_charid, std:
 	return pc;
 }
 
-Corpse::Corpse(NPC* in_npc, ItemList* in_itemlist, uint32 in_npctypeid, const NPCType** in_npctypedata, uint32 in_decaytime)
-// vesuvias - appearence fix
-: Mob("Unnamed_Corpse","",0,0,in_npc->GetGender(),in_npc->GetRace(),in_npc->GetClass(),BT_Humanoid,//bodytype added
-	in_npc->GetDeity(),in_npc->GetLevel(),in_npc->GetNPCTypeID(),in_npc->GetSize(),0,
-	in_npc->GetPosition(), in_npc->GetInnateLightType(), in_npc->GetTexture(),in_npc->GetHelmTexture(),
-	0,0,0,0,0,0,0,0,0,
-	0,0,0,0,0,0,0,0,0,0,EQ::TintProfile(),0xff,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-	(*in_npctypedata)->use_model, false),
-	corpse_decay_timer(in_decaytime),
-	corpse_rez_timer(0),
-	corpse_delay_timer(RuleI(NPC, CorpseUnlockTimer)),
-	corpse_graveyard_timer(0),
-	loot_cooldown_timer(10)
+Corpse::Corpse(
+	NPC *in_npc,
+	ItemList *in_itemlist,
+	uint32 in_npctypeid,
+	const NPCType **in_npctypedata,
+	uint32 in_decaytime
+) : Mob(
+	"Unnamed_Corpse", // in_name
+	"", // in_lastname
+	0, // in_cur_hp
+	0, // in_max_hp
+	in_npc->GetGender(), // in_gender
+	in_npc->GetRace(), // in_race
+	in_npc->GetClass(), // in_class
+	BT_Humanoid, // in_bodytype
+	in_npc->GetDeity(), // in_deity
+	in_npc->GetLevel(), // in_level
+	in_npc->GetNPCTypeID(), // in_npctype_id
+	in_npc->GetSize(), // in_size
+	0.0f, // in_runspeed
+	in_npc->GetPosition(), // position
+	in_npc->GetInnateLightType(), // in_light
+	in_npc->GetTexture(), // in_texture
+	in_npc->GetHelmTexture(), // in_helmtexture
+	0, // in_ac
+	0, // in_atk
+	0, // in_str
+	0, // in_sta
+	0, // in_dex
+	0, // in_agi
+	0, // in_int
+	0, // in_wis
+	0, // in_cha
+	0, // in_haircolor
+	0, // in_beardcolor
+	0, // in_eyecolor1
+	0, // in_eyecolor2
+	0, // in_hairstyle
+	0, // in_luclinface
+	0, // in_beard
+	0, // in_drakkin_heritage
+	0, // in_drakkin_tattoo
+	0, // in_drakkin_details
+	EQ::TintProfile(), // in_armor_tint
+	0xFF, // in_aa_title
+	0, // in_see_invis
+	0, // in_see_invis_undead
+	0, // in_see_hide
+	0, // in_see_improved_hide
+	0, // in_hp_regen
+	0, // in_mana_regen
+	0, // in_qglobal
+	0, // in_maxlevel
+	0, // in_scalerate
+	0, // in_armtexture
+	0, // in_bracertexture
+	0, // in_handtexture
+	0, // in_legtexture
+	0, // in_feettexture
+	(*in_npctypedata)->use_model, // in_usemodel
+	false, // in_always_aggros_foes
+	0, // in_heroic_strikethrough
+	false // in_keeps_sold_items
+),
+	  corpse_decay_timer(in_decaytime),
+	  corpse_rez_timer(0),
+	  corpse_delay_timer(RuleI(NPC, CorpseUnlockTimer)),
+	  corpse_graveyard_timer(0),
+	  loot_cooldown_timer(10)
 {
 	corpse_graveyard_timer.Disable();
 
@@ -184,23 +239,31 @@ Corpse::Corpse(NPC* in_npc, ItemList* in_itemlist, uint32 in_npctypeid, const NP
 	strcpy(name, in_npc->GetName());
 
 	for(int count = 0; count < 100; count++) {
-		if ((level >= npcCorpseDecayTimes[count].minlvl) && (level <= npcCorpseDecayTimes[count].maxlvl)) {
+		if (
+			EQ::ValueWithin(
+				level,
+				npcCorpseDecayTimes[count].minlvl,
+				npcCorpseDecayTimes[count].maxlvl
+			)
+		) {
 			corpse_decay_timer.SetTimer(npcCorpseDecayTimes[count].seconds*1000);
 			break;
 		}
 	}
-	if(IsEmpty()) {
+
+	if (IsEmpty()) {
 		corpse_decay_timer.SetTimer(RuleI(NPC,EmptyNPCCorpseDecayTimeMS)+1000);
 	}
 
 
-	if(in_npc->HasPrivateCorpse()) {
+	if (in_npc->HasPrivateCorpse()) {
 		corpse_delay_timer.SetTimer(corpse_decay_timer.GetRemainingTime() + 1000);
 	}
 
 	for (int i = 0; i < MAX_LOOTERS; i++){
 		allowed_looters[i] = 0;
 	}
+
 	rez_experience = 0;
 
 	UpdateEquipmentLight();
@@ -210,106 +273,105 @@ Corpse::Corpse(NPC* in_npc, ItemList* in_itemlist, uint32 in_npctypeid, const NP
 }
 
 Corpse::Corpse(Client* client, int32 in_rezexp) : Mob (
-	"Unnamed_Corpse",				  // const char*	in_name,
-	"",								  // const char*	in_lastname,
-	0,								  // int32		in_cur_hp,
-	0,								  // int32		in_max_hp,
-	client->GetGender(),			  // uint8		in_gender,
-	client->GetRace(),				  // uint16		in_race,
-	client->GetClass(),				  // uint8		in_class,
-	BT_Humanoid,					  // bodyType	in_bodytype,
-	client->GetDeity(),				  // uint8		in_deity,
-	client->GetLevel(),				  // uint8		in_level,
-	0,								  // uint32		in_npctype_id,
-	client->GetSize(),				  // float		in_size,
-	0,								  // float		in_runspeed,
-	client->GetPosition(),
-	client->GetInnateLightType(),	  // uint8		in_light, - verified for client innate_light value
-	client->GetTexture(),			  // uint8		in_texture,
-	client->GetHelmTexture(),		  // uint8		in_helmtexture,
-	0,								  // uint16		in_ac,
-	0,								  // uint16		in_atk,
-	0,								  // uint16		in_str,
-	0,								  // uint16		in_sta,
-	0,								  // uint16		in_dex,
-	0,								  // uint16		in_agi,
-	0,								  // uint16		in_int,
-	0,								  // uint16		in_wis,
-	0,								  // uint16		in_cha,
-	client->GetPP().haircolor,		  // uint8		in_haircolor,
-	client->GetPP().beardcolor,		  // uint8		in_beardcolor,
-	client->GetPP().eyecolor1,		  // uint8		in_eyecolor1, // the eyecolors always seem to be the same, maybe left and right eye?
-	client->GetPP().eyecolor2,		  // uint8		in_eyecolor2,
-	client->GetPP().hairstyle,		  // uint8		in_hairstyle,
-	client->GetPP().face,			  // uint8		in_luclinface,
-	client->GetPP().beard,			  // uint8		in_beard,
-	client->GetPP().drakkin_heritage, // uint32		in_drakkin_heritage,
-	client->GetPP().drakkin_tattoo,	  // uint32		in_drakkin_tattoo,
-	client->GetPP().drakkin_details,  // uint32		in_drakkin_details,
-	EQ::TintProfile(),			  // uint32		in_armor_tint[_MaterialCount],
-	0xff,							  // uint8		in_aa_title,
-	0,								  // uint8		in_see_invis, // see through invis
-	0,								  // uint8		in_see_invis_undead, // see through invis vs. undead
-	0,								  // uint8		in_see_hide,
-	0,								  // uint8		in_see_improved_hide,
-	0,								  // int32		in_hp_regen,
-	0,								  // int32		in_mana_regen,
-	0,								  // uint8		in_qglobal,
-	0,								  // uint8		in_maxlevel,
-	0,								  // uint32		in_scalerate
-	0,								  // uint8		in_armtexture,
-	0,								  // uint8		in_bracertexture,
-	0,								  // uint8		in_handtexture,
-	0,								  // uint8		in_legtexture,
-	0,								  // uint8		in_feettexture,
-	0,								  // uint8		in_usemodel,
-	0								  // bool		in_always_aggro
-	),
+	"Unnamed_Corpse", // in_name
+	"", // in_lastname
+	0, // in_cur_hp
+	0, // in_max_hp
+	client->GetGender(), // in_gender
+	client->GetRace(), // in_race
+	client->GetClass(), // in_class
+	BT_Humanoid, // in_bodytype
+	client->GetDeity(), // in_deity
+	client->GetLevel(), // in_level
+	0, // in_npctype_id
+	client->GetSize(), // in_size
+	0, // in_runspeed
+	client->GetPosition(), // position
+	client->GetInnateLightType(), // in_light
+	client->GetTexture(), // in_texture
+	client->GetHelmTexture(), // in_helmtexture
+	0, // in_ac
+	0, // in_atk
+	0, // in_str
+	0, // in_sta
+	0, // in_dex
+	0, // in_agi
+	0, // in_int
+	0, // in_wis
+	0, // in_cha
+	client->GetPP().haircolor, // in_haircolor
+	client->GetPP().beardcolor, // in_beardcolor
+	client->GetPP().eyecolor1, // in_eyecolor1
+	client->GetPP().eyecolor2, // in_eyecolor2
+	client->GetPP().hairstyle, // in_hairstyle
+	client->GetPP().face, // in_luclinface
+	client->GetPP().beard, // in_beard
+	client->GetPP().drakkin_heritage, // in_drakkin_heritage
+	client->GetPP().drakkin_tattoo, // in_drakkin_tattoo
+	client->GetPP().drakkin_details, // in_drakkin_details
+	EQ::TintProfile(), // in_armor_tint
+	0xff, // in_aa_title
+	0, // in_see_invis
+	0, // in_see_invis_undead
+	0, // in_see_hide
+	0, // in_see_improved_hide
+	0, // in_hp_regen
+	0, // in_mana_regen
+	0, // in_qglobal
+	0, // in_maxlevel
+	0, // in_scalerate
+	0, // in_armtexture
+	0, // in_bracertexture
+	0, // in_handtexture
+	0, // in_legtexture
+	0, // in_feettexture
+	0, // in_usemodel
+	false, // in_always_aggro
+	0, // in_heroic_strikethrough
+	false // in_keeps_sold_items
+),
 	corpse_decay_timer(RuleI(Character, CorpseDecayTimeMS)),
 	corpse_rez_timer(RuleI(Character, CorpseResTimeMS)),
 	corpse_delay_timer(RuleI(NPC, CorpseUnlockTimer)),
 	corpse_graveyard_timer(RuleI(Zone, GraveyardTimeMS)),
 	loot_cooldown_timer(10)
 {
-	int i;
-
 	PlayerProfile_Struct *pp = &client->GetPP();
 	EQ::ItemInstance *item = nullptr;
 
-	/* Check if Zone has Graveyard First */
-	if(!zone->HasGraveyard()) {
+	if (!zone->HasGraveyard()) {
 		corpse_graveyard_timer.Disable();
 	}
 
-	for (i = 0; i < MAX_LOOTERS; i++){
+	for (int i = 0; i < MAX_LOOTERS; i++){
 		allowed_looters[i] = 0;
 	}
 
 	if (client->AutoConsentGroupEnabled()) {
-		Group* grp = client->GetGroup();
-		consented_group_id = grp ? grp->GetID() : 0;
+		auto* g = client->GetGroup();
+		consented_group_id = g ? g->GetID() : 0;
 	}
 
 	if (client->AutoConsentRaidEnabled()) {
-		Raid* raid = client->GetRaid();
-		consented_raid_id = raid ? raid->GetID() : 0;
+		auto* r = client->GetRaid();
+		consented_raid_id = r ? r->GetID() : 0;
 	}
 
 	consented_guild_id = client->AutoConsentGuildEnabled() ? client->GuildID() : 0;
 
-	is_corpse_changed		= true;
-	rez_experience			= in_rezexp;
-	can_corpse_be_rezzed			= true;
-	is_player_corpse	= true;
-	is_locked			= false;
-	being_looted_by	= 0xFFFFFFFF;
-	char_id			= client->CharacterID();
-	corpse_db_id	= 0;
-	player_corpse_depop			= false;
-	copper			= 0;
-	silver			= 0;
-	gold			= 0;
-	platinum		= 0;
+	is_corpse_changed    = true;
+	rez_experience       = in_rezexp;
+	can_corpse_be_rezzed = true;
+	is_player_corpse     = true;
+	is_locked            = false;
+	being_looted_by      = 0xFFFFFFFF;
+	char_id              = client->CharacterID();
+	corpse_db_id         = 0;
+	player_corpse_depop  = false;
+	copper               = 0;
+	silver               = 0;
+	gold                 = 0;
+	platinum             = 0;
 
 	strcpy(corpse_name, pp->name);
 	strcpy(name, pp->name);
@@ -320,17 +382,22 @@ Corpse::Corpse(Client* client, int32 in_rezexp) : Mob (
 	SetPlayerKillItemID(0);
 
 	/* Check Rule to see if we can leave corpses */
-	if(!RuleB(Character, LeaveNakedCorpses) ||
+	if (
+		!RuleB(Character, LeaveNakedCorpses) ||
 		RuleB(Character, LeaveCorpses) &&
-		GetLevel() >= RuleI(Character, DeathItemLossLevel)) {
+		GetLevel() >= RuleI(Character, DeathItemLossLevel)
+	) {
 		// cash
 		// Let's not move the cash when 'RespawnFromHover = true' && 'client->GetClientVersion() < EQClientSoF' since the client doesn't.
 		// (change to first client that supports 'death hover' mode, if not SoF.)
-		if (!RuleB(Character, RespawnFromHover) || client->ClientVersion() < EQ::versions::ClientVersion::SoF) {
+		if (
+			!RuleB(Character, RespawnFromHover) ||
+			client->ClientVersion() < EQ::versions::ClientVersion::SoF
+		) {
 			SetCash(pp->copper, pp->silver, pp->gold, pp->platinum);
-			pp->copper = 0;
-			pp->silver = 0;
-			pp->gold = 0;
+			pp->copper   = 0;
+			pp->silver   = 0;
+			pp->gold     = 0;
 			pp->platinum = 0;
 		}
 
@@ -345,12 +412,21 @@ Corpse::Corpse(Client* client, int32 in_rezexp) : Mob (
 		// ..then regress and process invslot::EQUIPMENT_BEGIN through invslot::EQUIPMENT_END...
 		// without additional work to database loading of player corpses, this order is not
 		// currently preserved and a re-work of this processing loop is not warranted.
-		for (i = EQ::invslot::POSSESSIONS_BEGIN; i <= EQ::invslot::POSSESSIONS_END; ++i) {
+		for (int i = EQ::invslot::POSSESSIONS_BEGIN; i <= EQ::invslot::POSSESSIONS_END; ++i) {
 			item = client->GetInv().GetItem(i);
-			if (item == nullptr) { continue; }
+			if (!item) {
+				continue;
+			}
 
-			if(!client->IsBecomeNPC() || (client->IsBecomeNPC() && !item->GetItem()->NoRent))
+			if (
+				!client->IsBecomeNPC() ||
+				(
+					client->IsBecomeNPC() &&
+					!item->GetItem()->NoRent
+				)
+			) {
 				MoveItemToCorpse(client, item, i, removed_list);
+			}
 		}
 
 		database.TransactionBegin();
@@ -392,7 +468,7 @@ Corpse::Corpse(Client* client, int32 in_rezexp) : Mob (
 		UpdateActiveLight();
 
 		return;
-	} //end "not leaving naked corpses"
+	}
 
 	UpdateEquipmentLight();
 	UpdateActiveLight();
@@ -449,72 +525,75 @@ void Corpse::MoveItemToCorpse(Client *client, EQ::ItemInstance *inst, int16 equi
 }
 
 // To be called from LoadFromDBData
-Corpse::Corpse(uint32 in_dbid, uint32 in_charid, const char* in_charname, ItemList* in_itemlist, uint32 in_copper, uint32 in_silver, uint32 in_gold, uint32 in_plat, const glm::vec4& position, float in_size, uint8 in_gender, uint16 in_race, uint8 in_class, uint8 in_deity, uint8 in_level, uint8 in_texture, uint8 in_helmtexture,uint32 in_rezexp, bool wasAtGraveyard)
-: Mob("Unnamed_Corpse",
-"",
-0,
-0,
-in_gender,
-in_race,
-in_class,
-BT_Humanoid,
-in_deity,
-in_level,
-0,
-in_size,
-0,
-position,
-0, // verified for client innate_light value
-in_texture,
-in_helmtexture,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-EQ::TintProfile(),
-0xff,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-false),
+Corpse::Corpse(uint32 in_dbid, uint32 in_charid, const char* in_charname, ItemList* in_itemlist, uint32 in_copper, uint32 in_silver, uint32 in_gold, uint32 in_plat, const glm::vec4& position, float in_size, uint8 in_gender, uint16 in_race, uint8 in_class, uint8 in_deity, uint8 in_level, uint8 in_texture, uint8 in_helmtexture,uint32 in_rezexp, bool wasAtGraveyard) : Mob(
+	"Unnamed_Corpse", // in_name
+	"", // in_lastname
+	0, // in_cur_hp
+	0, // in_max_hp
+	in_gender, // in_gender
+	in_race, // in_race
+	in_class, // in_class
+	BT_Humanoid, // in_bodytype
+	in_deity, // in_deity
+	in_level, // in_level
+	0, // in_npctype_id
+	in_size, // in_size
+	0.0f, // in_runspeed
+	position, // position
+	0, // in_light
+	in_texture, // in_texture
+	in_helmtexture, // in_helmtexture
+	0, // in_ac
+	0, // in_atk
+	0, // in_str
+	0, // in_sta
+	0, // in_dex
+	0, // in_agi
+	0, // in_int
+	0, // in_wis
+	0, // in_cha
+	0, // in_haircolor
+	0, // in_beardcolor
+	0, // in_eyecolor1
+	0, // in_eyecolor2
+	0, // in_hairstyle
+	0, // in_luclinface
+	0, // in_beard
+	0, // in_drakkin_heritage
+	0, // in_drakkin_tattoo
+	0, // in_drakkin_details
+	EQ::TintProfile(), // in_armor_tint
+	0xFF, // in_aa_title
+	0, // in_see_invis
+	0, // in_see_invis_undead
+	0, // in_see_hide
+	0, // in_see_improved_hide
+	0, // in_hp_regen
+	0, // in_mana_regen
+	0, // in_qglobal
+	0, // in_maxlevel
+	0, // in_scalerate
+	0, // in_armtexture
+	0, // in_bracertexture
+	0, // in_handtexture
+	0, // in_legtexture
+	0, // in_feettexture
+	0, // in_usemodel
+	false, // in_always_aggros_foes
+	0, // in_heroic_strikethrough
+	false // in_keeps_sold_items
+),
 	corpse_decay_timer(RuleI(Character, CorpseDecayTimeMS)),
 	corpse_rez_timer(RuleI(Character, CorpseResTimeMS)),
 	corpse_delay_timer(RuleI(NPC, CorpseUnlockTimer)),
 	corpse_graveyard_timer(RuleI(Zone, GraveyardTimeMS)),
 	loot_cooldown_timer(10)
 {
-
 	LoadPlayerCorpseDecayTime(in_dbid);
 
-	if (!zone->HasGraveyard() || wasAtGraveyard)
+	if (!zone->HasGraveyard() || wasAtGraveyard) {
 		corpse_graveyard_timer.Disable();
+	}
 
 	is_corpse_changed = false;
 	is_player_corpse = true;
@@ -539,6 +618,7 @@ false),
 	for (int i = 0; i < MAX_LOOTERS; i++){
 		allowed_looters[i] = 0;
 	}
+
 	SetPlayerKillItemID(0);
 
 	UpdateEquipmentLight();
@@ -906,6 +986,33 @@ bool Corpse::Process() {
 	return true;
 }
 
+void Corpse::ResetDecayTimer()
+{
+	int decay_ms = level > 54 ? RuleI(NPC, MajorNPCCorpseDecayTimeMS) : RuleI(NPC, MinorNPCCorpseDecayTimeMS);
+
+	if (IsPlayerCorpse())
+	{
+		decay_ms = RuleI(Character, CorpseDecayTimeMS);
+	}
+	else if (IsEmpty())
+	{
+		decay_ms = RuleI(NPC, EmptyNPCCorpseDecayTimeMS) + 1000;
+	}
+	else
+	{
+		for (const npcDecayTimes_Struct& decay_time : npcCorpseDecayTimes)
+		{
+			if (level >= decay_time.minlvl && level <= decay_time.maxlvl)
+			{
+				decay_ms = decay_time.seconds * 1000;
+				break;
+			}
+		}
+	}
+
+	corpse_decay_timer.SetTimer(decay_ms);
+}
+
 void Corpse::SetDecayTimer(uint32 decaytime) {
 	if (decaytime == 0)
 		corpse_decay_timer.Trigger();
@@ -1019,8 +1126,27 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 		loot_coin = (tmp[0] == 1 && tmp[1] == '\0');
 
 	if (loot_request_type == LootRequestType::GMPeek || loot_request_type == LootRequestType::GMAllowed) {
-		client->Message(Chat::Yellow, "This corpse contains %u platinum, %u gold, %u silver and %u copper.",
-			GetPlatinum(), GetGold(), GetSilver(), GetCopper());
+		if (
+			GetPlatinum() ||
+			GetGold() ||
+			GetSilver() ||
+			GetCopper()
+		) {
+			client->Message(
+				Chat::Yellow,
+				fmt::format(
+					"This corpse Contains {}.",
+					Strings::Money(
+						GetPlatinum(),
+						GetGold(),
+						GetSilver(),
+						GetCopper()
+					)
+				).c_str()
+			);
+		} else {
+			client->Message(Chat::Yellow, "This corpse Contains no money.");
+		}
 
 		auto outapp = new EQApplicationPacket(OP_MoneyOnCorpse, sizeof(moneyOnCorpseStruct));
 		moneyOnCorpseStruct* d = (moneyOnCorpseStruct*)outapp->pBuffer;
@@ -1290,7 +1416,7 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 			EntityList::RemoveNumbers(corpse_name),
 			GetID()
 		);
-		std::vector<EQ::Any> args;
+		std::vector<std::any> args;
 		args.push_back(inst);
 		args.push_back(this);
 		bool prevent_loot = false;
@@ -1349,6 +1475,9 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 			}
 		}
 
+		// get count for task update before it's mutated by AutoPutLootInInventory
+		int count = inst->IsStackable() ? inst->GetCharges() : 1;
+
 		/* First add it to the looter - this will do the bag contents too */
 		if (lootitem->auto_loot > 0) {
 			if (!client->AutoPutLootInInventory(*inst, true, true, bag_item_data))
@@ -1359,8 +1488,9 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 		}
 
 		/* Update any tasks that have an activity to loot this item */
-		if (RuleB(TaskSystem, EnableTaskSystem))
-			client->UpdateTasksForItem(TaskActivityType::Loot, item->ID);
+		if (RuleB(TaskSystem, EnableTaskSystem) && IsNPCCorpse()) {
+			client->UpdateTasksOnLoot(this, item->ID, count);
+		}
 
 		/* Remove it from Corpse */
 		if (item_data) {
@@ -1505,18 +1635,17 @@ void Corpse::QueryLoot(Client* to) {
 		}
 	}
 
-	bool has_money = (
-		platinum > 0 ||
-		gold > 0 ||
-		silver > 0 ||
-		copper > 0
-	);
-	if (has_money) {
+	if (
+		platinum ||
+		gold ||
+		silver ||
+		copper
+	) {
 		to->Message(
 			Chat::White,
 			fmt::format(
 				"Money | {}",
-				ConvertMoneyToString(
+				Strings::Money(
 					platinum,
 					gold,
 					silver,

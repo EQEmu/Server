@@ -2,9 +2,22 @@
 #include "../../common/http/httplib.h"
 #include "../../common/content/world_content_service.h"
 
+#include "../bot.h"
+
 void command_gearup(Client *c, const Seperator *sep)
 {
-	std::string tool_table_name = "tool_gearup_armor_sets";
+	Mob* t = c;
+	if (
+		c->GetTarget() &&
+		(
+			(c->GetTarget()->IsClient() && c->GetGM()) ||
+			c->GetTarget()->IsBot()
+		)
+	) {
+		t = c->GetTarget();
+	}
+
+	const std::string tool_table_name = "tool_gearup_armor_sets";
 	if (!database.DoesTableExist(tool_table_name)) {
 		c->Message(
 			Chat::Yellow,
@@ -25,8 +38,8 @@ void command_gearup(Client *c, const Seperator *sep)
 
 		if (auto res = cli.Get(url.c_str())) {
 			if (res->status == 200) {
-				for (auto &s: SplitString(res->body, ';')) {
-					if (!trim(s).empty()) {
+				for (auto &s: Strings::Split(res->body, ';')) {
+					if (!Strings::Trim(s).empty()) {
 						auto results = database.QueryDatabase(s);
 						if (!results.ErrorMessage().empty()) {
 							c->Message(
@@ -41,8 +54,7 @@ void command_gearup(Client *c, const Seperator *sep)
 					}
 				}
 			}
-		}
-		else {
+		} else {
 			c->Message(
 				Chat::Yellow,
 				fmt::format(
@@ -55,74 +67,89 @@ void command_gearup(Client *c, const Seperator *sep)
 		c->Message(
 			Chat::Yellow,
 			fmt::format(
-				"Table [{}] installed. Sourced [{}] queries",
-				tool_table_name, sourced_queries
+				"Table [{}] installed. Sourced [{}] quer{}",
+				tool_table_name,
+				sourced_queries,
+				sourced_queries != 1 ? "ies" : "y"
 			).c_str()
 		);
 	}
 
-	std::string expansion_arg = sep->arg[1];
+	const std::string expansion_arg = sep->arg[1];
 	std::string expansion_filter;
-	if (expansion_arg.length() > 0) {
-		expansion_filter = fmt::format("and `expansion` = {}", expansion_arg);
+	if (!expansion_arg.empty()) {
+		expansion_filter = fmt::format(" AND `expansion` = {}", expansion_arg);
 	}
 
-	auto results = database.QueryDatabase(
-		fmt::format(
-			SQL (
-				select
-				item_id,
-				slot
-					from
-					{}
-					where
-					`class` = {}
-					and `level` = {}
-				{}
-					order by score desc, expansion desc
-			),
-			tool_table_name,
-			c->GetClass(),
-			c->GetLevel(),
-			expansion_filter
-		)
+	auto query = fmt::format(
+		"SELECT item_id, slot FROM {} WHERE "
+		"`class` = {} AND `level` = {}{} "
+		"ORDER BY score DESC, expansion DESC",
+		tool_table_name,
+		t->GetClass(),
+		t->GetLevel(),
+		expansion_filter
 	);
+	auto results = database.QueryDatabase(query);
 
 	int           items_equipped     = 0;
 	int           items_already_have = 0;
 	std::set<int> equipped;
 
-	for (auto row = results.begin(); row != results.end(); ++row) {
-		int item_id = atoi(row[0]);
-		int slot_id = atoi(row[1]);
+	for (auto row : results) {
+		auto item_id = std::stoul(row[0]);
+		auto slot_id = static_cast<uint16>(std::stoul(row[1]));
 
 		if (equipped.find(slot_id) != equipped.end()) {
 			if (slot_id == EQ::invslot::slotEar1) {
 				slot_id = EQ::invslot::slotEar2;
-			}
-			if (slot_id == EQ::invslot::slotFinger1) {
+			} else if (slot_id == EQ::invslot::slotFinger1) {
 				slot_id = EQ::invslot::slotFinger2;
-			}
-			if (slot_id == EQ::invslot::slotWrist1) {
+			} else if (slot_id == EQ::invslot::slotWrist1) {
 				slot_id = EQ::invslot::slotWrist2;
 			}
 		}
 
 		if (equipped.find(slot_id) == equipped.end()) {
-			const EQ::ItemData *item         = database.GetItem(item_id);
-			bool               has_item      = (c->GetInv().HasItem(item_id, 1, invWhereWorn) != INVALID_INDEX);
-			bool               can_wear_item = !c->CheckLoreConflict(item) && !has_item;
+			const auto *item = database.GetItem(item_id);
+			bool has_item = false;
+			if (t->IsClient()) {
+				has_item = t->CastToClient()->GetInv().HasItem(item_id, 1, invWhereWorn) != INVALID_INDEX;
+			} else if (t->IsBot()) {
+				has_item = t->CastToBot()->HasBotItem(item_id);
+			}
+
+			bool can_wear_item = false;
+			if (t->IsClient()) {
+				can_wear_item = !t->CastToClient()->CheckLoreConflict(item) && !has_item;
+			} else if (t->IsBot()) {
+				can_wear_item = !t->CastToBot()->CheckLoreConflict(item) && !has_item;
+			}
+
 			if (!can_wear_item) {
 				items_already_have++;
 			}
 
-			if (c->CastToMob()->CanClassEquipItem(item_id) && can_wear_item) {
+			if (
+				can_wear_item &&
+				t->CanClassEquipItem(item_id) &&
+				(
+					t->CanRaceEquipItem(item_id) ||
+					(t->IsBot() && !t->CanRaceEquipItem(item_id) && RuleB(Bots, AllowBotEquipAnyRaceGear))
+				)
+			) {
 				equipped.insert(slot_id);
-				c->SummonItem(
-					item_id,
-					0, 0, 0, 0, 0, 0, 0, 0,
-					slot_id
-				);
+
+				if (t->IsClient()) {
+					t->CastToClient()->SummonItem(
+						item_id,
+						0, 0, 0, 0, 0, 0, 0, 0,
+						slot_id
+					);
+				} else if (t->IsBot()) {
+					t->CastToBot()->AddBotItem(slot_id, item_id);
+				}
+
 				items_equipped++;
 			}
 		}
@@ -138,44 +165,36 @@ void command_gearup(Client *c, const Seperator *sep)
 	);
 
 	if (expansion_arg.empty()) {
-		results         = database.QueryDatabase(
-			fmt::format(
-				SQL (
-					select
-						expansion
-					from
-					{}
-					where
-					class = {}
-					and level = {}
-					group by
-					expansion;
-				),
-				tool_table_name,
-				c->GetClass(),
-				c->GetLevel()
-			)
+		query = fmt::format(
+			"SELECT expansion FROM {} WHERE "
+			"class = {} AND level = {} "
+			"GROUP BY expansion",
+			tool_table_name,
+			t->GetClass(),
+			t->GetLevel()
 		);
+		results = database.QueryDatabase(query);
 
-		c->Message(Chat::White, "Choose armor from a specific era");
+		c->Message(Chat::White, "Choose Armor by Expansion:");
 		std::string message;
-		for (auto   row = results.begin(); row != results.end(); ++row) {
-			int expansion = atoi(row[0]);
-			message += "[" + EQ::SayLinkEngine::GenerateQuestSaylink(
-				fmt::format("#gearup {}", expansion),
-				false,
-				Expansion::ExpansionName[expansion]
-			) + "] ";
+		for (auto row : results) {
+			const auto expansion = std::stoi(row[0]);
+			message += fmt::format(
+				"[{}] ",
+				Saylink::Silent(
+					fmt::format("#gearup {}", expansion),
+					Expansion::ExpansionName[expansion]
+				)
+			);
 
 			if (message.length() > 2000) {
 				c->Message(Chat::White, message.c_str());
-				message = "";
+				message = std::string();
 			}
 		}
-		if (message.length() > 0) {
+
+		if (!message.empty()) {
 			c->Message(Chat::White, message.c_str());
 		}
 	}
-
 }
-

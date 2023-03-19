@@ -26,9 +26,7 @@
 #include "entity.h"
 #include "mob.h"
 
-#ifdef BOTS
 #include "bot.h"
-#endif
 
 #include "quest_parser_collection.h"
 
@@ -353,7 +351,7 @@ void Client::AddItemBonuses(const EQ::ItemInstance *inst, StatBonuses *newbon, b
 		}
 
 		// FatherNitwit: New style haste, shields, and regens
-		if (newbon->haste < (int32)item->Haste) {
+		if (newbon->haste < item->Haste) {
 			newbon->haste = item->Haste;
 		}
 		if (item->Regen > 0)
@@ -1932,7 +1930,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 			effect_value = se_base;
 			limit_value = se_limit;
 			max_value = se_max;
-			i = EFFECT_COUNT; //End the loop
+			i = (EFFECT_COUNT - 1); // AISpellEffects do a single pass
 		}
 
 		switch (spell_effect_id)

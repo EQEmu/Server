@@ -4,7 +4,7 @@ void command_killallnpcs(Client *c, const Seperator *sep)
 {
 	std::string search_string;
 	if (sep->arg[1]) {
-		search_string = str_tolower(sep->arg[1]);
+		search_string = Strings::ToLower(sep->arg[1]);
 	}
 
 	int killed_count = 0;
@@ -15,7 +15,7 @@ void command_killallnpcs(Client *c, const Seperator *sep)
 			continue;
 		}
 
-		std::string entity_name = str_tolower(entity->GetName());
+		std::string entity_name = Strings::ToLower(entity->GetName());
 		if ((!search_string.empty() && entity_name.find(search_string) == std::string::npos) ||
 			!entity->IsAttackAllowed(c)) {
 			continue;

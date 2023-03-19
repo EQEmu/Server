@@ -13,22 +13,22 @@
 #define EQEMU_BASE_BASE_DATA_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseBaseDataRepository {
 public:
 	struct BaseData {
-		int   level;
-		int   class_;
-		float hp;
-		float mana;
-		float end;
-		float unk1;
-		float unk2;
-		float hp_fac;
-		float mana_fac;
-		float end_fac;
+		uint32_t level;
+		uint32_t class_;
+		double   hp;
+		double   mana;
+		double   end;
+		double   unk1;
+		double   unk2;
+		double   hp_fac;
+		double   mana_fac;
+		double   end_fac;
 	};
 
 	static std::string PrimaryKey()
@@ -70,12 +70,12 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string SelectColumnsRaw()
 	{
-		return std::string(implode(", ", SelectColumns()));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -103,23 +103,23 @@ public:
 
 	static BaseData NewEntity()
 	{
-		BaseData entry{};
+		BaseData e{};
 
-		entry.level    = 0;
-		entry.class_   = 0;
-		entry.hp       = 0;
-		entry.mana     = 0;
-		entry.end      = 0;
-		entry.unk1     = 0;
-		entry.unk2     = 0;
-		entry.hp_fac   = 0;
-		entry.mana_fac = 0;
-		entry.end_fac  = 0;
+		e.level    = 0;
+		e.class_   = 0;
+		e.hp       = 0;
+		e.mana     = 0;
+		e.end      = 0;
+		e.unk1     = 0;
+		e.unk2     = 0;
+		e.hp_fac   = 0;
+		e.mana_fac = 0;
+		e.end_fac  = 0;
 
-		return entry;
+		return e;
 	}
 
-	static BaseData GetBaseDataEntry(
+	static BaseData GetBaseData(
 		const std::vector<BaseData> &base_datas,
 		int base_data_id
 	)
@@ -148,20 +148,20 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			BaseData entry{};
+			BaseData e{};
 
-			entry.level    = atoi(row[0]);
-			entry.class_   = atoi(row[1]);
-			entry.hp       = static_cast<float>(atof(row[2]));
-			entry.mana     = static_cast<float>(atof(row[3]));
-			entry.end      = static_cast<float>(atof(row[4]));
-			entry.unk1     = static_cast<float>(atof(row[5]));
-			entry.unk2     = static_cast<float>(atof(row[6]));
-			entry.hp_fac   = static_cast<float>(atof(row[7]));
-			entry.mana_fac = static_cast<float>(atof(row[8]));
-			entry.end_fac  = static_cast<float>(atof(row[9]));
+			e.level    = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.class_   = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.hp       = strtod(row[2], nullptr);
+			e.mana     = strtod(row[3], nullptr);
+			e.end      = strtod(row[4], nullptr);
+			e.unk1     = strtod(row[5], nullptr);
+			e.unk2     = strtod(row[6], nullptr);
+			e.hp_fac   = strtod(row[7], nullptr);
+			e.mana_fac = strtod(row[8], nullptr);
+			e.end_fac  = strtod(row[9], nullptr);
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -186,31 +186,31 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		BaseData base_data_entry
+		const BaseData &e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(base_data_entry.level));
-		update_values.push_back(columns[1] + " = " + std::to_string(base_data_entry.class_));
-		update_values.push_back(columns[2] + " = " + std::to_string(base_data_entry.hp));
-		update_values.push_back(columns[3] + " = " + std::to_string(base_data_entry.mana));
-		update_values.push_back(columns[4] + " = " + std::to_string(base_data_entry.end));
-		update_values.push_back(columns[5] + " = " + std::to_string(base_data_entry.unk1));
-		update_values.push_back(columns[6] + " = " + std::to_string(base_data_entry.unk2));
-		update_values.push_back(columns[7] + " = " + std::to_string(base_data_entry.hp_fac));
-		update_values.push_back(columns[8] + " = " + std::to_string(base_data_entry.mana_fac));
-		update_values.push_back(columns[9] + " = " + std::to_string(base_data_entry.end_fac));
+		v.push_back(columns[0] + " = " + std::to_string(e.level));
+		v.push_back(columns[1] + " = " + std::to_string(e.class_));
+		v.push_back(columns[2] + " = " + std::to_string(e.hp));
+		v.push_back(columns[3] + " = " + std::to_string(e.mana));
+		v.push_back(columns[4] + " = " + std::to_string(e.end));
+		v.push_back(columns[5] + " = " + std::to_string(e.unk1));
+		v.push_back(columns[6] + " = " + std::to_string(e.unk2));
+		v.push_back(columns[7] + " = " + std::to_string(e.hp_fac));
+		v.push_back(columns[8] + " = " + std::to_string(e.mana_fac));
+		v.push_back(columns[9] + " = " + std::to_string(e.end_fac));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
-				base_data_entry.level
+				e.level
 			)
 		);
 
@@ -219,71 +219,71 @@ public:
 
 	static BaseData InsertOne(
 		Database& db,
-		BaseData base_data_entry
+		BaseData e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(base_data_entry.level));
-		insert_values.push_back(std::to_string(base_data_entry.class_));
-		insert_values.push_back(std::to_string(base_data_entry.hp));
-		insert_values.push_back(std::to_string(base_data_entry.mana));
-		insert_values.push_back(std::to_string(base_data_entry.end));
-		insert_values.push_back(std::to_string(base_data_entry.unk1));
-		insert_values.push_back(std::to_string(base_data_entry.unk2));
-		insert_values.push_back(std::to_string(base_data_entry.hp_fac));
-		insert_values.push_back(std::to_string(base_data_entry.mana_fac));
-		insert_values.push_back(std::to_string(base_data_entry.end_fac));
+		v.push_back(std::to_string(e.level));
+		v.push_back(std::to_string(e.class_));
+		v.push_back(std::to_string(e.hp));
+		v.push_back(std::to_string(e.mana));
+		v.push_back(std::to_string(e.end));
+		v.push_back(std::to_string(e.unk1));
+		v.push_back(std::to_string(e.unk2));
+		v.push_back(std::to_string(e.hp_fac));
+		v.push_back(std::to_string(e.mana_fac));
+		v.push_back(std::to_string(e.end_fac));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
 		if (results.Success()) {
-			base_data_entry.level = results.LastInsertedID();
-			return base_data_entry;
+			e.level = results.LastInsertedID();
+			return e;
 		}
 
-		base_data_entry = NewEntity();
+		e = NewEntity();
 
-		return base_data_entry;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<BaseData> base_data_entries
+		const std::vector<BaseData> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &base_data_entry: base_data_entries) {
-			std::vector<std::string> insert_values;
+		for (auto &e: entries) {
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(base_data_entry.level));
-			insert_values.push_back(std::to_string(base_data_entry.class_));
-			insert_values.push_back(std::to_string(base_data_entry.hp));
-			insert_values.push_back(std::to_string(base_data_entry.mana));
-			insert_values.push_back(std::to_string(base_data_entry.end));
-			insert_values.push_back(std::to_string(base_data_entry.unk1));
-			insert_values.push_back(std::to_string(base_data_entry.unk2));
-			insert_values.push_back(std::to_string(base_data_entry.hp_fac));
-			insert_values.push_back(std::to_string(base_data_entry.mana_fac));
-			insert_values.push_back(std::to_string(base_data_entry.end_fac));
+			v.push_back(std::to_string(e.level));
+			v.push_back(std::to_string(e.class_));
+			v.push_back(std::to_string(e.hp));
+			v.push_back(std::to_string(e.mana));
+			v.push_back(std::to_string(e.end));
+			v.push_back(std::to_string(e.unk1));
+			v.push_back(std::to_string(e.unk2));
+			v.push_back(std::to_string(e.hp_fac));
+			v.push_back(std::to_string(e.mana_fac));
+			v.push_back(std::to_string(e.end_fac));
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 
@@ -304,26 +304,26 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			BaseData entry{};
+			BaseData e{};
 
-			entry.level    = atoi(row[0]);
-			entry.class_   = atoi(row[1]);
-			entry.hp       = static_cast<float>(atof(row[2]));
-			entry.mana     = static_cast<float>(atof(row[3]));
-			entry.end      = static_cast<float>(atof(row[4]));
-			entry.unk1     = static_cast<float>(atof(row[5]));
-			entry.unk2     = static_cast<float>(atof(row[6]));
-			entry.hp_fac   = static_cast<float>(atof(row[7]));
-			entry.mana_fac = static_cast<float>(atof(row[8]));
-			entry.end_fac  = static_cast<float>(atof(row[9]));
+			e.level    = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.class_   = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.hp       = strtod(row[2], nullptr);
+			e.mana     = strtod(row[3], nullptr);
+			e.end      = strtod(row[4], nullptr);
+			e.unk1     = strtod(row[5], nullptr);
+			e.unk2     = strtod(row[6], nullptr);
+			e.hp_fac   = strtod(row[7], nullptr);
+			e.mana_fac = strtod(row[8], nullptr);
+			e.end_fac  = strtod(row[9], nullptr);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static std::vector<BaseData> GetWhere(Database& db, std::string where_filter)
+	static std::vector<BaseData> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<BaseData> all_entries;
 
@@ -338,26 +338,26 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			BaseData entry{};
+			BaseData e{};
 
-			entry.level    = atoi(row[0]);
-			entry.class_   = atoi(row[1]);
-			entry.hp       = static_cast<float>(atof(row[2]));
-			entry.mana     = static_cast<float>(atof(row[3]));
-			entry.end      = static_cast<float>(atof(row[4]));
-			entry.unk1     = static_cast<float>(atof(row[5]));
-			entry.unk2     = static_cast<float>(atof(row[6]));
-			entry.hp_fac   = static_cast<float>(atof(row[7]));
-			entry.mana_fac = static_cast<float>(atof(row[8]));
-			entry.end_fac  = static_cast<float>(atof(row[9]));
+			e.level    = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.class_   = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.hp       = strtod(row[2], nullptr);
+			e.mana     = strtod(row[3], nullptr);
+			e.end      = strtod(row[4], nullptr);
+			e.unk1     = strtod(row[5], nullptr);
+			e.unk2     = strtod(row[6], nullptr);
+			e.hp_fac   = strtod(row[7], nullptr);
+			e.mana_fac = strtod(row[8], nullptr);
+			e.end_fac  = strtod(row[9], nullptr);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -380,6 +380,32 @@ public:
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int64 GetMaxId(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COALESCE(MAX({}), 0) FROM {}",
+				PrimaryKey(),
+				TableName()
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static int64 Count(Database& db, const std::string &where_filter = "")
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COUNT(*) FROM {} {}",
+				TableName(),
+				(where_filter.empty() ? "" : "WHERE " + where_filter)
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
 };

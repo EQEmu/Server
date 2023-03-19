@@ -29,7 +29,7 @@ void command_qglobal(Client *c, const Seperator *sep)
 		c->Message(Chat::White, "Usage: #qglobal on - Enables target NPC's ability to view quest globals");
 		c->Message(Chat::White, "Usage: #qglobal off - Disables target NPC's ability to view quest globals");
 		c->Message(Chat::White, "Usage: #qglobal view - View target NPC's ability to view quest globals");
-		return;		
+		return;
 	}
 
 	if (is_off) {
@@ -50,11 +50,7 @@ void command_qglobal(Client *c, const Seperator *sep)
 			return;
 		}
 
-		auto repop_link = EQ::SayLinkEngine::GenerateQuestSaylink(
-			"#repop",
-			false,
-			"repop"
-		);
+		auto repop_link = Saylink::Silent("#repop", "repop");
 
 		c->Message(
 			Chat::White,
@@ -83,11 +79,7 @@ void command_qglobal(Client *c, const Seperator *sep)
 			return;
 		}
 
-		auto repop_link = EQ::SayLinkEngine::GenerateQuestSaylink(
-			"#repop",
-			false,
-			"repop"
-		);
+		auto repop_link = Saylink::Silent("#repop", "repop");
 
 		c->Message(
 			Chat::White,

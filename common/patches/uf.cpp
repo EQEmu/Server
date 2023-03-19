@@ -1,5 +1,5 @@
 /*	EQEMu: Everquest Server Emulator
-	
+
 	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 
 	This program is free software; you can redistribute it and/or modify
@@ -28,10 +28,13 @@
 
 #include "../eq_packet_structs.h"
 #include "../misc_functions.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "../item_instance.h"
 #include "uf_structs.h"
 #include "../rulesys.h"
+#include "../path_manager.h"
+#include "../classes.h"
+#include "../races.h"
 
 #include <iostream>
 #include <sstream>
@@ -69,12 +72,7 @@ namespace UF
 	{
 		//create our opcode manager if we havent already
 		if (opcodes == nullptr) {
-			//TODO: get this file name from the config file
-			auto Config = EQEmuConfig::get();
-			std::string opfile = Config->PatchDir;
-			opfile += "patch_";
-			opfile += name;
-			opfile += ".conf";
+			std::string opfile = fmt::format("{}/patch_{}.conf", path.GetPatchPath(), name);
 			//load up the opcode manager.
 			//TODO: figure out how to support shared memory with multiple patches...
 			opcodes = new RegularOpcodeManager();
@@ -115,12 +113,7 @@ namespace UF
 		//we need to go to every stream and replace it's manager.
 
 		if (opcodes != nullptr) {
-			//TODO: get this file name from the config file
-			auto Config = EQEmuConfig::get();
-			std::string opfile = Config->PatchDir;
-			opfile += "patch_";
-			opfile += name;
-			opfile += ".conf";
+			std::string opfile = fmt::format("{}/patch_{}.conf", path.GetPatchPath(), name);
 			if (!opcodes->ReloadOpcodes(opfile.c_str())) {
 				LogNetcode("[OPCODES] Error reloading opcodes file [{}] for patch [{}]", opfile.c_str(), name);
 				return;
@@ -527,7 +520,7 @@ namespace UF
 
 		in->size = ob.size();
 		in->pBuffer = ob.detach();
-		
+
 		delete[] __emu_buffer;
 
 		dest->FastQueuePacket(&in, ack_req);
@@ -586,7 +579,7 @@ namespace UF
 
 	ENCODE(OP_DeleteCharge)
 	{
-		Log(Logs::Moderate, Logs::Netcode, "UF::ENCODE(OP_DeleteCharge)");
+		Log(Logs::Detail, Logs::Netcode, "UF::ENCODE(OP_DeleteCharge)");
 
 		ENCODE_FORWARD(OP_MoveItem);
 	}
@@ -635,30 +628,6 @@ namespace UF
 		__packet->size = buf.size();
 		__packet->pBuffer = new unsigned char[__packet->size];
 		memcpy(__packet->pBuffer, buf.buffer(), __packet->size);
-
-		FINISH_ENCODE();
-	}
-
-	ENCODE(OP_DzCompass)
-	{
-		SETUP_VAR_ENCODE(DynamicZoneCompass_Struct);
-		ALLOC_VAR_ENCODE(structs::DynamicZoneCompass_Struct,
-			sizeof(structs::DynamicZoneCompass_Struct) +
-			sizeof(structs::DynamicZoneCompassEntry_Struct) * emu->count
-		);
-
-		OUT(client_id);
-		OUT(count);
-
-		for (uint32 i = 0; i < emu->count; ++i)
-		{
-			OUT(entries[i].dz_zone_id);
-			OUT(entries[i].dz_instance_id);
-			OUT(entries[i].dz_type);
-			OUT(entries[i].x);
-			OUT(entries[i].y);
-			OUT(entries[i].z);
-		}
 
 		FINISH_ENCODE();
 	}
@@ -1314,7 +1283,7 @@ namespace UF
 
 		in->size = ob.size();
 		in->pBuffer = ob.detach();
-		
+
 		delete[] __emu_buffer;
 
 		dest->FastQueuePacket(&in, ack_req);
@@ -1380,7 +1349,7 @@ namespace UF
 		ENCODE_LENGTH_EXACT(LootingItem_Struct);
 		SETUP_DIRECT_ENCODE(LootingItem_Struct, structs::LootingItem_Struct);
 
-		Log(Logs::Moderate, Logs::Netcode, "UF::ENCODE(OP_LootItem)");
+		Log(Logs::Detail, Logs::Netcode, "UF::ENCODE(OP_LootItem)");
 
 		OUT(lootee);
 		OUT(looter);
@@ -1533,7 +1502,7 @@ namespace UF
 		ENCODE_LENGTH_EXACT(MoveItem_Struct);
 		SETUP_DIRECT_ENCODE(MoveItem_Struct, structs::MoveItem_Struct);
 
-		Log(Logs::Moderate, Logs::Netcode, "UF::ENCODE(OP_MoveItem)");
+		Log(Logs::Detail, Logs::Netcode, "UF::ENCODE(OP_MoveItem)");
 
 		eq->from_slot = ServerToUFSlot(emu->from_slot);
 		eq->to_slot = ServerToUFSlot(emu->to_slot);
@@ -1589,19 +1558,19 @@ namespace UF
 		OUT_str(zone_short_name2);
 		OUT(zone_id);
 		OUT(zone_instance);
-		OUT(SuspendBuffs);
-		OUT(FastRegenHP);
-		OUT(FastRegenMana);
-		OUT(FastRegenEndurance);
+		OUT(suspend_buffs);
+		OUT(fast_regen_hp);
+		OUT(fast_regen_mana);
+		OUT(fast_regen_endurance);
 		OUT(underworld_teleport_index);
 
-		eq->FogDensity = emu->fog_density;
+		eq->fog_density = emu->fog_density;
 
 		/*fill in some unknowns with observed values, hopefully it will help */
 		eq->unknown800 = -1;
 		eq->unknown844 = 600;
-		OUT(LavaDamage);
-		OUT(MinLavaDamage);
+		OUT(lava_damage);
+		OUT(min_lava_damage);
 		eq->unknown888 = 1;
 		eq->unknown889 = 0;
 		eq->unknown890 = 1;
@@ -1741,7 +1710,7 @@ namespace UF
 		OUT(WIS);
 		OUT(face);
 		//	OUT(unknown02264[47]);
-		
+
 		if (spells::SPELLBOOK_SIZE <= EQ::spells::SPELLBOOK_SIZE) {
 			for (uint32 r = 0; r < spells::SPELLBOOK_SIZE; r++) {
 				if (emu->spell_book[r] <= spells::SPELL_ID_MAX)
@@ -2122,7 +2091,7 @@ namespace UF
 		eq->aa_expansion = emu->expansion;
 		eq->special_category = emu->category;
 		eq->total_abilities = emu->total_effects;
-		
+
 		for(auto i = 0; i < eq->total_abilities; ++i) {
 			eq->abilities[i].skill_id = inapp->ReadUInt32();
 			eq->abilities[i].base_value = inapp->ReadUInt32();
@@ -2749,7 +2718,7 @@ namespace UF
 			if (strlen(emu->suffix))
 				PacketSize += strlen(emu->suffix) + 1;
 
-			if (emu->DestructibleObject || emu->class_ == 62)
+			if (emu->DestructibleObject || emu->class_ == LDON_TREASURE)
 			{
 				if (emu->DestructibleObject)
 					PacketSize = PacketSize - 4;	// No bodytype
@@ -2770,7 +2739,9 @@ namespace UF
 			}
 
 			float SpawnSize = emu->size;
-			if (!((emu->NPC == 0) || (emu->race <= 12) || (emu->race == 128) || (emu->race == 130) || (emu->race == 330) || (emu->race == 522)))
+			if (!((emu->NPC == 0) || (emu->race <= RACE_GNOME_12) || (emu->race == RACE_IKSAR_128) ||
+					(emu->race == RACE_VAH_SHIR_130) || (emu->race == RACE_FROGLOK_330) || (emu->race == RACE_DRAKKIN_522))
+				)
 			{
 				PacketSize -= (sizeof(structs::Texture_Struct) * EQ::textures::materialCount);
 
@@ -2836,18 +2807,20 @@ namespace UF
 
 			uint8 OtherData = 0;
 
-			if (emu->class_ == 62) //Ldon chest
+			if (emu->class_ == LDON_TREASURE) //Ldon chest
+			{
 				OtherData = OtherData | 0x01;
+			}
 
-			if (strlen(emu->title))
+			if (strlen(emu->title)) {
 				OtherData = OtherData | 0x04;
-
-			if (strlen(emu->suffix))
+			}
+			if (strlen(emu->suffix)) {
 				OtherData = OtherData | 0x08;
-
-			if (emu->DestructibleObject)
+			}
+			if (emu->DestructibleObject) {
 				OtherData = OtherData | 0xd1;	// Live has 0xe1 for OtherData
-
+			}
 			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, OtherData);
 
 			if (emu->DestructibleObject)
@@ -2860,7 +2833,7 @@ namespace UF
 			}
 			VARSTRUCT_ENCODE_TYPE(float, Buffer, 0);	// unknown4
 
-			if (emu->DestructibleObject || emu->class_ == 62)
+			if (emu->DestructibleObject || emu->class_ == LDON_TREASURE)
 			{
 				VARSTRUCT_ENCODE_STRING(Buffer, emu->DestructibleModel);
 				VARSTRUCT_ENCODE_STRING(Buffer, emu->DestructibleName2);
@@ -2969,7 +2942,9 @@ namespace UF
 
 			Buffer += sizeof(structs::Spawn_Struct_Position);
 
-			if ((emu->NPC == 0) || (emu->race <= 12) || (emu->race == 128) || (emu->race == 130) || (emu->race == 330) || (emu->race == 522))
+			if ((emu->NPC == 0) || (emu->race <= RACE_GNOME_12) || (emu->race == RACE_IKSAR_128) ||
+					(emu->race == RACE_VAH_SHIR_130) || (emu->race == RACE_FROGLOK_330) || (emu->race == RACE_DRAKKIN_522)
+				)
 			{
 				for (k = EQ::textures::textureBegin; k < EQ::textures::materialCount; ++k)
 				{
@@ -3003,7 +2978,9 @@ namespace UF
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 			}
 
-			if ((emu->NPC == 0) || (emu->race <= 12) || (emu->race == 128) || (emu->race == 130) || (emu->race == 330) || (emu->race == 522))
+			if ((emu->NPC == 0) || (emu->race <= RACE_GNOME_12) || (emu->race == RACE_IKSAR_128) ||
+					(emu->race == RACE_VAH_SHIR_130) || (emu->race == RACE_FROGLOK_330) || (emu->race == RACE_DRAKKIN_522)
+				)
 			{
 				structs::Texture_Struct *Equipment = (structs::Texture_Struct *)Buffer;
 
@@ -3607,7 +3584,7 @@ namespace UF
 		DECODE_LENGTH_EXACT(structs::LootingItem_Struct);
 		SETUP_DIRECT_DECODE(LootingItem_Struct, structs::LootingItem_Struct);
 
-		Log(Logs::Moderate, Logs::Netcode, "UF::DECODE(OP_LootItem)");
+		Log(Logs::Detail, Logs::Netcode, "UF::DECODE(OP_LootItem)");
 
 		IN(lootee);
 		IN(looter);
@@ -3622,7 +3599,7 @@ namespace UF
 		DECODE_LENGTH_EXACT(structs::MoveItem_Struct);
 		SETUP_DIRECT_DECODE(MoveItem_Struct, structs::MoveItem_Struct);
 
-		Log(Logs::Moderate, Logs::Netcode, "UF::DECODE(OP_MoveItem)");
+		Log(Logs::Detail, Logs::Netcode, "UF::DECODE(OP_MoveItem)");
 
 		emu->from_slot = UFToServerSlot(eq->from_slot);
 		emu->to_slot = UFToServerSlot(eq->to_slot);
@@ -3835,7 +3812,7 @@ namespace UF
 	void SerializeItem(EQ::OutBuffer& ob, const EQ::ItemInstance *inst, int16 slot_id_in, uint8 depth)
 	{
 		const EQ::ItemData *item = inst->GetUnscaledItem();
-		
+
 		UF::structs::ItemSerializationHeader hdr;
 
 		hdr.stacksize = (inst->IsStackable() ? ((inst->GetCharges() > 1000) ? 0xFFFFFFFF : inst->GetCharges()) : 1);
@@ -4420,7 +4397,7 @@ namespace UF
 			return;
 		}
 
-		auto segments = SplitString(serverSayLink, '\x12');
+		auto segments = Strings::Split(serverSayLink, '\x12');
 
 		for (size_t segment_iter = 0; segment_iter < segments.size(); ++segment_iter) {
 			if (segment_iter & 1) {
@@ -4460,7 +4437,7 @@ namespace UF
 			return;
 		}
 
-		auto segments = SplitString(ufSayLink, '\x12');
+		auto segments = Strings::Split(ufSayLink, '\x12');
 
 		for (size_t segment_iter = 0; segment_iter < segments.size(); ++segment_iter) {
 			if (segment_iter & 1) {

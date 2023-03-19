@@ -374,18 +374,18 @@ struct NewZone_Struct {
 /*0684*/	uint16	zone_id;
 /*0686*/	uint16	zone_instance;
 /*0688*/	uint32	unknown688;
-/*0692*/	uint8	unknown692[8];
+/*0692*/	uint8  unknown692[8];
 // Titanium doesn't have a translator, but we can still safely add stuff under here without issues since client memcpy's only what it knows
 // Just wastes some bandwidth sending to tit clients /shrug
-/*0700*/	float	fog_density;
-/*0704*/	uint32	SuspendBuffs;
-/*0708*/	uint32	FastRegenHP;
-/*0712*/	uint32	FastRegenMana;
-/*0716*/	uint32	FastRegenEndurance;
-/*0720*/	uint32	NPCAggroMaxDist;
-/*0724*/	uint32	underworld_teleport_index; // > 0 teleports w/ zone point index, invalid succors, if this value is 0, it prevents you from running off edges that would end up underworld
-/*0728*/	uint32	LavaDamage; // Seen 50
-/*0732*/	uint32	MinLavaDamage; // Seen 10
+/*0700*/	float  fog_density;
+/*0704*/	uint32 suspend_buffs;
+/*0708*/	uint32 fast_regen_hp;
+/*0712*/	uint32 fast_regen_mana;
+/*0716*/	uint32 fast_regen_endurance;
+/*0720*/	uint32 npc_aggro_max_dist;
+/*0724*/	uint32 underworld_teleport_index; // > 0 teleports w/ zone point index, invalid succors, if this value is 0, it prevents you from running off edges that would end up underworld
+/*0728*/	uint32 lava_damage; // Seen 50
+/*0732*/	uint32 min_lava_damage; // Seen 10
 /*0736*/
 };
 
@@ -2192,11 +2192,19 @@ struct QuestReward_Struct
 	/*068*/
 };
 
+struct CashReward_Struct
+{
+	/*000*/ uint32 copper;
+	/*004*/ uint32 silver;
+	/*008*/ uint32 gold;
+	/*012*/ uint32 platinum;
+};
+
 // Size: 8
 struct Camera_Struct
 {
 	uint32	duration;	// Duration in ms
-	uint32	intensity;	// Between 1023410176 and 1090519040
+	float intensity;
 };
 
 struct ZonePoint_Entry {
@@ -3634,7 +3642,7 @@ struct MerchantList {
 	uint8 probability;
 	std::string bucket_name;
 	std::string bucket_value;
-	uint8 bucket_comparison; 
+	uint8 bucket_comparison;
 };
 
 struct TempMerchantList {
@@ -4998,7 +5006,7 @@ struct DynamicZoneCompassEntry_Struct
 /*000*/ uint16 dz_zone_id;      // target dz id pair
 /*002*/ uint16 dz_instance_id;
 /*004*/ uint32 dz_type;         // 1: Expedition, 2: Tutorial (purple), 3: Task, 4: Mission, 5: Quest (green)
-/*008*/ uint32 unknown008;
+/*008*/ uint32 dz_switch_id;
 /*012*/ float y;
 /*016*/ float x;
 /*020*/ float z;
@@ -5155,10 +5163,10 @@ struct AltCurrencySelectItemReply_Struct {
 /*000*/ uint32	unknown000;
 /*004*/ uint8	unknown004; //0xff
 /*005*/ uint8	unknown005; //0xff
-/*006*/ uint8	unknown006; //0xff
-/*007*/ uint8	unknown007; //0xff
-/*008*/ char	item_name[64];
-/*072*/ uint32	unknown074;
+/*006*/ uint16	unknown006; //0xffff
+/*008*/ uint16	unknown008; //0xffff
+/*010*/ char	item_name[64];
+/*074*/ uint16	unknown074;
 /*076*/ uint32	cost;
 /*080*/ uint32	unknown080;
 /*084*/ uint32	unknown084;

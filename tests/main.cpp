@@ -20,6 +20,8 @@
 #include <iostream>
 #include <fstream>
 #include <memory>
+#include "../common/platform.h"
+#include "../common/path_manager.h"
 #include "memory_mapped_file_test.h"
 #include "ipc_mutex_test.h"
 #include "fixed_memory_test.h"
@@ -29,17 +31,24 @@
 #include "string_util_test.h"
 #include "data_verification_test.h"
 #include "skills_util_test.h"
-#include "../common/eqemu_config.h"
+#include "task_state_test.h"
 
 const EQEmuConfig *Config;
+EQEmuLogSys       LogSys;
+PathManager       path;
 
-int main() {
+int main()
+{
+	RegisterExecutablePlatform(ExePlatformClientImport);
+	LogSys.LoadLogSettingsDefaults();
+	path.LoadPaths();
+
 	auto ConfigLoadResult = EQEmuConfig::LoadConfig();
-        Config = EQEmuConfig::get();
+	Config = EQEmuConfig::get();
 	try {
-		std::ofstream outfile("test_output.txt");
+		std::ofstream                 outfile("test_output.txt");
 		std::unique_ptr<Test::Output> output(new Test::TextOutput(Test::TextOutput::Verbose, outfile));
-		Test::Suite tests;
+		Test::Suite                   tests;
 		tests.add(new MemoryMappedFileTest());
 		tests.add(new IPCMutexTest());
 		tests.add(new FixedMemoryHashTest());
@@ -49,8 +58,9 @@ int main() {
 		tests.add(new StringUtilTest());
 		tests.add(new DataVerificationTest());
 		tests.add(new SkillsUtilsTest());
+		tests.add(new TaskStateTest());
 		tests.run(*output, true);
-	} catch(...) {
+	} catch (...) {
 		return -1;
 	}
 	return 0;

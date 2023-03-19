@@ -1,6 +1,6 @@
 #include "../common/global_define.h"
 #include "../common/misc_functions.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "../common/servertalk.h"
 #include "../common/rulesys.h"
 #include "../common/random.h"
@@ -10,7 +10,7 @@
 #include "zonelist.h"
 #include "clientlist.h"
 #include "cliententry.h"
-#include "world_store.h"
+#include "../common/zone_store.h"
 #include <sstream>
 #include <stdio.h>
 

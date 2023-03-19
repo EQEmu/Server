@@ -55,7 +55,7 @@ void command_showskills(Client *c, const Seperator *sep)
 		popup_title.c_str(),
 		popup_text.c_str()
 	);
-	
+
 
 	c->Message(
 		Chat::White,
@@ -76,22 +76,14 @@ void command_showskills(Client *c, const Seperator *sep)
 			next_skill_id
 		);
 
-		auto next_list_link = EQ::SayLinkEngine::GenerateQuestSaylink(
-			next_list_string,
-			false,
-			next_list_string
-		);
+		auto next_list_link = Saylink::Silent(next_list_string, next_list_string);
 
 		auto next_list_all_string = fmt::format(
 			"#showskills {} all",
 			next_skill_id
 		);
 
-		auto next_list_all_link = EQ::SayLinkEngine::GenerateQuestSaylink(
-			next_list_all_string,
-			false,
-			next_list_all_string
-		);
+		auto next_list_all_link = Saylink::Silent(next_list_all_string, next_list_all_string);
 
 		c->Message(
 			Chat::White,

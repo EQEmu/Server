@@ -65,6 +65,15 @@ EQ::Net::EQStream::~EQStream()
 }
 
 void EQ::Net::EQStream::QueuePacket(const EQApplicationPacket *p, bool ack_req) {
+
+	LogPacketServerClient(
+		"[{}] [{:#06x}] Size [{}] {}",
+		OpcodeManager::EmuToName(p->GetOpcode()),
+		(*m_opcode_manager)->EmuToEQ(p->GetOpcode()),
+		p->Size(),
+		(LogSys.IsLogEnabled(Logs::Detail, Logs::PacketServerClient) ? DumpPacketToString(p) : "")
+	);
+
 	if (m_opcode_manager && *m_opcode_manager) {
 		uint16 opcode = 0;
 		if (p->GetOpcodeBypass() != 0) {

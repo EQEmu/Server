@@ -23,7 +23,7 @@
 #include "op_codes.h"
 #include "crc16.h"
 #include "platform.h"
-#include "string_util.h"
+#include "strings.h"
 
 #include <string>
 #include <iomanip>
@@ -406,7 +406,7 @@ void EQStream::ProcessPacket(EQProtocolPacket *p)
 			if(uint16(SequencedBase + SequencedQueue.size()) != NextOutSeq) {
 				LogNetcode(_L "Pre-OOA Invalid Sequenced queue: BS [{}] + SQ [{}] != NOS [{}]" __L, SequencedBase, SequencedQueue.size(), NextOutSeq);
 			}
-			
+
 			//if the packet they got out of order is between our last acked packet and the last sent packet, then its valid.
 			if (CompareSequence(SequencedBase,seq) != SeqPast && CompareSequence(NextOutSeq,seq) == SeqPast) {
 				Log(Logs::Detail, Logs::Netcode, _L "Received OP_OutOfOrderAck for sequence %d, starting retransmit at the start of our unacked buffer (seq %d, was %d)." __L,
@@ -453,7 +453,7 @@ void EQStream::ProcessPacket(EQProtocolPacket *p)
 				(unsigned long)ntohl(ClientStats->packets_received), (unsigned long)ntohl(ClientStats->packets_sent), (unsigned long)ntohl(ClientStats->last_local_delta),
 				(unsigned long)ntohl(ClientStats->low_delta), (unsigned long)ntohl(ClientStats->average_delta),
 				(unsigned long)ntohl(ClientStats->high_delta), (unsigned long)ntohl(ClientStats->last_remote_delta));
-			
+
 			AdjustRates(ntohl(ClientStats->average_delta));
 
 			if(GetExecutablePlatform() == ExePlatformWorld || GetExecutablePlatform() == ExePlatformZone) {
@@ -951,7 +951,7 @@ EQRawApplicationPacket *p=nullptr;
 			EmuOpcode emu_op = (*OpMgr)->EQToEmu(p->opcode);
 			if (emu_op == OP_Unknown) {
 				// Log(Logs::General, Logs::Client_Server_Packet_Unhandled, "Unknown :: [%s - 0x%04x] [Size: %u] %s", OpcodeManager::EmuToName(p->GetOpcode()), p->opcode, p->Size(), DumpPacketToString(p).c_str());
-			} 
+			}
 			p->SetOpcode(emu_op);
 		}
 	}
@@ -1359,11 +1359,11 @@ void EQStream::AdjustRates(uint32 average_delta)
 			DecayRate=DECAYBASE/average_delta;
 			if (BytesWritten > RateThreshold)
 				BytesWritten = RateThreshold + DecayRate;
-			Log(Logs::Detail, Logs::Netcode, _L "Adjusting data rate to thresh %d, decay %d based on avg delta %d" __L, 
+			Log(Logs::Detail, Logs::Netcode, _L "Adjusting data rate to thresh %d, decay %d based on avg delta %d" __L,
 				RateThreshold, DecayRate, average_delta);
 			MRate.unlock();
 		} else {
-			Log(Logs::Detail, Logs::Netcode, _L "Not adjusting data rate because avg delta over max (%d > %d)" __L, 
+			Log(Logs::Detail, Logs::Netcode, _L "Not adjusting data rate because avg delta over max (%d > %d)" __L,
 				average_delta, AVERAGE_DELTA_MAX);
 			AverageDelta = AVERAGE_DELTA_MAX;
 		}
@@ -1374,7 +1374,7 @@ void EQStream::AdjustRates(uint32 average_delta)
 			BytesWritten = 0;
 			RateThreshold=RATEBASE/average_delta;
 			DecayRate=DECAYBASE/average_delta;
-			Log(Logs::Detail, Logs::Netcode, _L "Adjusting data rate to thresh %d, decay %d based on avg delta %d" __L, 
+			Log(Logs::Detail, Logs::Netcode, _L "Adjusting data rate to thresh %d, decay %d based on avg delta %d" __L,
 				RateThreshold, DecayRate, average_delta);
 			MRate.unlock();
 		}

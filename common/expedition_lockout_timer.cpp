@@ -19,7 +19,7 @@
  */
 
 #include "expedition_lockout_timer.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "../common/rulesys.h"
 #include "../common/util/uuid.h"
 #include <fmt/format.h>

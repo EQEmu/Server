@@ -1,28 +1,8 @@
-/**
- * EQEmulator: Everquest Server Emulator
- * Copyright (C) 2001-2020 EQEmulator Development Team (https://github.com/EQEmu/Server)
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; version 2 of the License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY except by those people which sell it, which
- * are required to give you total support for your newly bought product;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR
- * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- */
-
 #ifndef EQEMU_RULE_VALUES_REPOSITORY_H
 #define EQEMU_RULE_VALUES_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_rule_values_repository.h"
 
 class RuleValuesRepository: public BaseRuleValuesRepository {
@@ -64,6 +44,87 @@ public:
      */
 
 	// Custom extended repository methods here
+	static std::vector<std::string> GetRuleNames(Database &db, int rule_set_id)
+	{
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT rule_name FROM {} WHERE ruleset_id = {}",
+				TableName(),
+				rule_set_id
+			)
+		);
+		if (!results.Success() || !results.RowCount()) {
+			return v;
+		}
+
+		for (auto row : results) {
+			v.push_back(row[0]);
+		}
+
+		return v;
+	}
+
+	static std::vector<std::string> GetGroupedRules(Database &db)
+	{
+		std::vector <std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT rule_name FROM {} GROUP BY rule_name",
+				TableName()
+			)
+		);
+		if (!results.Success() || !results.RowCount()) {
+			return v;
+		}
+
+		for (auto row : results) {
+			v.push_back(row[0]);
+		}
+
+		return v;
+	}
+
+	static bool DeleteOrphanedRules(Database& db, std::vector<std::string>& v)
+	{
+		const auto query = fmt::format(
+			"DELETE FROM {} WHERE rule_name IN ({})",
+			TableName(),
+			Strings::ImplodePair(",", std::pair<char, char>('\'', '\''), v)
+		);
+
+		return db.QueryDatabase(query).Success();
+	}
+
+	static bool InjectRules(Database& db, std::vector<std::tuple<int, std::string, std::string, std::string>>& v)
+	{
+		const auto query = fmt::format(
+			"REPLACE INTO {} (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES {}",
+			TableName(),
+			Strings::ImplodePair(
+				",",
+				std::pair<char, char>('(', ')'),
+				join_tuple(",", std::pair<char, char>('\'', '\''), v)
+			)
+		);
+
+		return db.QueryDatabase(query).Success();
+	}
+
+	static bool UpdateRuleNote(Database& db, int rule_set_id, std::string rule_name, std::string notes)
+	{
+		const auto query = fmt::format(
+			"UPDATE {} SET notes = '{}' WHERE ruleset_id = {} AND rule_name = '{}'",
+			TableName(),
+			Strings::Escape(notes),
+			rule_set_id,
+			rule_name
+		);
+
+		return db.QueryDatabase(query).Success();
+	}
 
 };
 

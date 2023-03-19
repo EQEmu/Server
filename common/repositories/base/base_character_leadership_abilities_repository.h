@@ -13,15 +13,15 @@
 #define EQEMU_BASE_CHARACTER_LEADERSHIP_ABILITIES_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseCharacterLeadershipAbilitiesRepository {
 public:
 	struct CharacterLeadershipAbilities {
-		int id;
-		int slot;
-		int rank;
+		uint32_t id;
+		uint16_t slot;
+		uint16_t rank;
 	};
 
 	static std::string PrimaryKey()
@@ -49,12 +49,12 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string SelectColumnsRaw()
 	{
-		return std::string(implode(", ", SelectColumns()));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -82,16 +82,16 @@ public:
 
 	static CharacterLeadershipAbilities NewEntity()
 	{
-		CharacterLeadershipAbilities entry{};
+		CharacterLeadershipAbilities e{};
 
-		entry.id   = 0;
-		entry.slot = 0;
-		entry.rank = 0;
+		e.id   = 0;
+		e.slot = 0;
+		e.rank = 0;
 
-		return entry;
+		return e;
 	}
 
-	static CharacterLeadershipAbilities GetCharacterLeadershipAbilitiesEntry(
+	static CharacterLeadershipAbilities GetCharacterLeadershipAbilities(
 		const std::vector<CharacterLeadershipAbilities> &character_leadership_abilitiess,
 		int character_leadership_abilities_id
 	)
@@ -120,13 +120,13 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			CharacterLeadershipAbilities entry{};
+			CharacterLeadershipAbilities e{};
 
-			entry.id   = atoi(row[0]);
-			entry.slot = atoi(row[1]);
-			entry.rank = atoi(row[2]);
+			e.id   = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.slot = static_cast<uint16_t>(strtoul(row[1], nullptr, 10));
+			e.rank = static_cast<uint16_t>(strtoul(row[2], nullptr, 10));
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -151,24 +151,24 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		CharacterLeadershipAbilities character_leadership_abilities_entry
+		const CharacterLeadershipAbilities &e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(character_leadership_abilities_entry.id));
-		update_values.push_back(columns[1] + " = " + std::to_string(character_leadership_abilities_entry.slot));
-		update_values.push_back(columns[2] + " = " + std::to_string(character_leadership_abilities_entry.rank));
+		v.push_back(columns[0] + " = " + std::to_string(e.id));
+		v.push_back(columns[1] + " = " + std::to_string(e.slot));
+		v.push_back(columns[2] + " = " + std::to_string(e.rank));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
-				character_leadership_abilities_entry.id
+				e.id
 			)
 		);
 
@@ -177,57 +177,57 @@ public:
 
 	static CharacterLeadershipAbilities InsertOne(
 		Database& db,
-		CharacterLeadershipAbilities character_leadership_abilities_entry
+		CharacterLeadershipAbilities e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(character_leadership_abilities_entry.id));
-		insert_values.push_back(std::to_string(character_leadership_abilities_entry.slot));
-		insert_values.push_back(std::to_string(character_leadership_abilities_entry.rank));
+		v.push_back(std::to_string(e.id));
+		v.push_back(std::to_string(e.slot));
+		v.push_back(std::to_string(e.rank));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
 		if (results.Success()) {
-			character_leadership_abilities_entry.id = results.LastInsertedID();
-			return character_leadership_abilities_entry;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		character_leadership_abilities_entry = NewEntity();
+		e = NewEntity();
 
-		return character_leadership_abilities_entry;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<CharacterLeadershipAbilities> character_leadership_abilities_entries
+		const std::vector<CharacterLeadershipAbilities> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &character_leadership_abilities_entry: character_leadership_abilities_entries) {
-			std::vector<std::string> insert_values;
+		for (auto &e: entries) {
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(character_leadership_abilities_entry.id));
-			insert_values.push_back(std::to_string(character_leadership_abilities_entry.slot));
-			insert_values.push_back(std::to_string(character_leadership_abilities_entry.rank));
+			v.push_back(std::to_string(e.id));
+			v.push_back(std::to_string(e.slot));
+			v.push_back(std::to_string(e.rank));
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 
@@ -248,19 +248,19 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharacterLeadershipAbilities entry{};
+			CharacterLeadershipAbilities e{};
 
-			entry.id   = atoi(row[0]);
-			entry.slot = atoi(row[1]);
-			entry.rank = atoi(row[2]);
+			e.id   = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.slot = static_cast<uint16_t>(strtoul(row[1], nullptr, 10));
+			e.rank = static_cast<uint16_t>(strtoul(row[2], nullptr, 10));
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static std::vector<CharacterLeadershipAbilities> GetWhere(Database& db, std::string where_filter)
+	static std::vector<CharacterLeadershipAbilities> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<CharacterLeadershipAbilities> all_entries;
 
@@ -275,19 +275,19 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharacterLeadershipAbilities entry{};
+			CharacterLeadershipAbilities e{};
 
-			entry.id   = atoi(row[0]);
-			entry.slot = atoi(row[1]);
-			entry.rank = atoi(row[2]);
+			e.id   = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.slot = static_cast<uint16_t>(strtoul(row[1], nullptr, 10));
+			e.rank = static_cast<uint16_t>(strtoul(row[2], nullptr, 10));
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -310,6 +310,32 @@ public:
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int64 GetMaxId(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COALESCE(MAX({}), 0) FROM {}",
+				PrimaryKey(),
+				TableName()
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static int64 Count(Database& db, const std::string &where_filter = "")
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COUNT(*) FROM {} {}",
+				TableName(),
+				(where_filter.empty() ? "" : "WHERE " + where_filter)
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
 };

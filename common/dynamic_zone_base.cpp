@@ -79,6 +79,7 @@ void DynamicZoneBase::LoadRepositoryResult(DynamicZonesRepository::DynamicZoneIn
 	m_max_players        = dz_entry.max_players;
 	m_instance_id        = dz_entry.instance_id;
 	m_type               = static_cast<DynamicZoneType>(dz_entry.type);
+	m_dz_switch_id       = dz_entry.dz_switch_id;
 	m_compass.zone_id    = dz_entry.compass_zone_id;
 	m_compass.x          = dz_entry.compass_x;
 	m_compass.y          = dz_entry.compass_y;
@@ -129,6 +130,7 @@ uint32_t DynamicZoneBase::SaveToDatabase()
 		insert_dz.max_players         = m_max_players;
 		insert_dz.instance_id         = m_instance_id,
 		insert_dz.type                = static_cast<int>(m_type);
+		insert_dz.dz_switch_id        = m_dz_switch_id;
 		insert_dz.compass_zone_id     = m_compass.zone_id;
 		insert_dz.compass_x           = m_compass.x;
 		insert_dz.compass_y           = m_compass.y;
@@ -316,6 +318,17 @@ void DynamicZoneBase::SetZoneInLocation(float x, float y, float z, float heading
 	SetZoneInLocation({ 0, x, y, z, heading }, update_db);
 }
 
+void DynamicZoneBase::SetSwitchID(int dz_switch_id, bool update_db)
+{
+	m_dz_switch_id = dz_switch_id;
+
+	if (update_db)
+	{
+		DynamicZonesRepository::UpdateSwitchID(GetDatabase(), m_id, dz_switch_id);
+		SendServerPacket(CreateServerDzSwitchIDPacket().get());
+	}
+}
+
 void DynamicZoneBase::SetLeader(const DynamicZoneMember& new_leader, bool update_db)
 {
 	m_leader = new_leader;
@@ -399,6 +412,17 @@ std::unique_ptr<ServerPacket> DynamicZoneBase::CreateServerDzLocationPacket(
 	buf->y = location.y;
 	buf->z = location.z;
 	buf->heading = location.heading;
+
+	return pack;
+}
+
+std::unique_ptr<ServerPacket> DynamicZoneBase::CreateServerDzSwitchIDPacket()
+{
+	constexpr uint32_t pack_size = sizeof(ServerDzSwitchID_Struct);
+	auto pack = std::make_unique<ServerPacket>(ServerOP_DzSetSwitchID, pack_size);
+	auto buf = reinterpret_cast<ServerDzSwitchID_Struct*>(pack->pBuffer);
+	buf->dz_id = GetID();
+	buf->dz_switch_id = GetSwitchID();
 
 	return pack;
 }
@@ -597,4 +621,29 @@ void DynamicZoneBase::LoadSerializedDzPacket(char* cereal_data, uint32_t cereal_
 	EQ::Util::MemoryStreamReader ss(cereal_data, cereal_size);
 	cereal::BinaryInputArchive archive(ss);
 	archive(*this);
+}
+
+void DynamicZoneBase::LoadTemplate(const DynamicZoneTemplatesRepository::DynamicZoneTemplates& dz_template)
+{
+	m_zone_id            = dz_template.zone_id;
+	m_zone_version       = dz_template.zone_version;
+	m_name               = dz_template.name;
+	m_min_players        = dz_template.min_players;
+	m_max_players        = dz_template.max_players;
+	m_duration           = std::chrono::seconds(dz_template.duration_seconds);
+	m_dz_switch_id       = dz_template.dz_switch_id;
+	m_compass.zone_id    = dz_template.compass_zone_id;
+	m_compass.x          = dz_template.compass_x;
+	m_compass.y          = dz_template.compass_y;
+	m_compass.z          = dz_template.compass_z;
+	m_safereturn.zone_id = dz_template.return_zone_id;
+	m_safereturn.x       = dz_template.return_x;
+	m_safereturn.y       = dz_template.return_y;
+	m_safereturn.z       = dz_template.return_z;
+	m_safereturn.heading = dz_template.return_h;
+	m_has_zonein         = dz_template.override_zone_in;
+	m_zonein.x           = dz_template.zone_in_x;
+	m_zonein.y           = dz_template.zone_in_y;
+	m_zonein.z           = dz_template.zone_in_z;
+	m_zonein.heading     = dz_template.zone_in_h;
 }

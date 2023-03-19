@@ -20,7 +20,7 @@
 #define __EQEMU_TESTS_STRING_UTIL_H
 
 #include "cppunit/cpptest.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 
 class StringUtilTest : public Test::Suite {
 	typedef void(StringUtilTest::*TestFunction)(void);
@@ -28,9 +28,9 @@ public:
 	StringUtilTest() {
 		TEST_ADD(StringUtilTest::StringFormatTest);
 		TEST_ADD(StringUtilTest::EscapeStringTest);
-		TEST_ADD(StringUtilTest::EscapeStringMemoryTest);
 		TEST_ADD(StringUtilTest::SearchDeliminatedStringTest);
 		TEST_ADD(StringUtilTest::SplitStringTest);
+		TEST_ADD(StringUtilTest::FromCharsTest);
 	}
 
 	~StringUtilTest() {
@@ -42,7 +42,7 @@ public:
 		char c = 'a';
 		int i = 2014;
 		float f = 3.1416;
-		
+
 		auto s = StringFormat(fmt, c, i, f);
 		TEST_ASSERT_EQUALS(s.length(), 17);
 		TEST_ASSERT(s.compare("Test: a 2014 3.14") == 0);
@@ -62,61 +62,59 @@ public:
 		t[8] = '\"';
 		t[9] = '\x1a';
 
-		auto s = EscapeString(t);
-		TEST_ASSERT(s.compare("abc\\x00\\n\\r\\\\\\'\\\"\\x1a") == 0);
-	}
-
-	void EscapeStringMemoryTest() {
-		char t[10] = { 0 };
-		t[0] = 'a';
-		t[1] = 'b';
-		t[2] = 'c';
-		t[3] = '\x00';
-		t[4] = '\n';
-		t[5] = '\r';
-		t[6] = '\\';
-		t[7] = '\'';
-		t[8] = '\"';
-		t[9] = '\x1a';
-
-		auto s = EscapeString(t, 10);
+		auto s = Strings::Escape(t);
 		TEST_ASSERT(s.compare("abc\\x00\\n\\r\\\\\\'\\\"\\x1a") == 0);
 	}
 
 	void SearchDeliminatedStringTest() {
 		std::string h =
 		    "befallen,charasis,dalnir,frontiermtns,gukbottom,iceclad,lakeofillomen,northkarana,qey2hh1,soldunga,southro,wakening,podisease,velketor,akheva,riwwi,bothunder,poair";
-		TEST_ASSERT(search_deliminated_string(h, "befallen") == 0);
-		TEST_ASSERT(search_deliminated_string(h, "charasis") == 9);
-		TEST_ASSERT(search_deliminated_string(h, "dalnir") == 18);
-		TEST_ASSERT(search_deliminated_string(h, "frontiermtns") == 25);
-		TEST_ASSERT(search_deliminated_string(h, "gukbottom") == 38);
-		TEST_ASSERT(search_deliminated_string(h, "iceclad") == 48);
-		TEST_ASSERT(search_deliminated_string(h, "lakeofillomen") == 56);
-		TEST_ASSERT(search_deliminated_string(h, "northkarana") == 70);
-		TEST_ASSERT(search_deliminated_string(h, "qey2hh1") == 82);
-		TEST_ASSERT(search_deliminated_string(h, "soldunga") == 90);
-		TEST_ASSERT(search_deliminated_string(h, "southro") == 99);
-		TEST_ASSERT(search_deliminated_string(h, "wakening") == 107);
-		TEST_ASSERT(search_deliminated_string(h, "podisease") == 116);
-		TEST_ASSERT(search_deliminated_string(h, "velketor") == 126);
-		TEST_ASSERT(search_deliminated_string(h, "akheva") == 135);
-		TEST_ASSERT(search_deliminated_string(h, "riwwi") == 142);
-		TEST_ASSERT(search_deliminated_string(h, "bothunder") == 148);
-		TEST_ASSERT(search_deliminated_string(h, "poair") == 158);
-		TEST_ASSERT(search_deliminated_string(h, "pod") == std::string::npos);
-		TEST_ASSERT(search_deliminated_string(h, "air") == std::string::npos);
-		TEST_ASSERT(search_deliminated_string(h, "bef") == std::string::npos);
-		TEST_ASSERT(search_deliminated_string(h, "wwi") == std::string::npos);
+		TEST_ASSERT(Strings::SearchDelim(h, "befallen") == 0);
+		TEST_ASSERT(Strings::SearchDelim(h, "charasis") == 9);
+		TEST_ASSERT(Strings::SearchDelim(h, "dalnir") == 18);
+		TEST_ASSERT(Strings::SearchDelim(h, "frontiermtns") == 25);
+		TEST_ASSERT(Strings::SearchDelim(h, "gukbottom") == 38);
+		TEST_ASSERT(Strings::SearchDelim(h, "iceclad") == 48);
+		TEST_ASSERT(Strings::SearchDelim(h, "lakeofillomen") == 56);
+		TEST_ASSERT(Strings::SearchDelim(h, "northkarana") == 70);
+		TEST_ASSERT(Strings::SearchDelim(h, "qey2hh1") == 82);
+		TEST_ASSERT(Strings::SearchDelim(h, "soldunga") == 90);
+		TEST_ASSERT(Strings::SearchDelim(h, "southro") == 99);
+		TEST_ASSERT(Strings::SearchDelim(h, "wakening") == 107);
+		TEST_ASSERT(Strings::SearchDelim(h, "podisease") == 116);
+		TEST_ASSERT(Strings::SearchDelim(h, "velketor") == 126);
+		TEST_ASSERT(Strings::SearchDelim(h, "akheva") == 135);
+		TEST_ASSERT(Strings::SearchDelim(h, "riwwi") == 142);
+		TEST_ASSERT(Strings::SearchDelim(h, "bothunder") == 148);
+		TEST_ASSERT(Strings::SearchDelim(h, "poair") == 158);
+		TEST_ASSERT(Strings::SearchDelim(h, "pod") == std::string::npos);
+		TEST_ASSERT(Strings::SearchDelim(h, "air") == std::string::npos);
+		TEST_ASSERT(Strings::SearchDelim(h, "bef") == std::string::npos);
+		TEST_ASSERT(Strings::SearchDelim(h, "wwi") == std::string::npos);
 	}
 
 	void SplitStringTest() {
 		std::string s = "123,456,789,";
-		auto v = SplitString(s, ',');
+		auto v = Strings::Split(s, ',');
 		TEST_ASSERT(v.size() == 3);
 		TEST_ASSERT(v[0] == "123");
 		TEST_ASSERT(v[1] == "456");
 		TEST_ASSERT(v[2] == "789");
+	}
+
+	void FromCharsTest() {
+		char int_chars[] = "123";
+		int int_value = 0;
+
+		char float_chars[] = "3.14";
+		float float_value = 0.0f;
+
+		Strings::from_chars(int_chars, int_value);
+		TEST_ASSERT(int_value == 123);
+
+		Strings::from_chars(float_chars, float_value);
+		TEST_ASSERT(float_value == 3.14f);
+
 	}
 };
 

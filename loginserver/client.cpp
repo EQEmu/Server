@@ -2,7 +2,7 @@
 #include "login_server.h"
 #include "../common/misc_functions.h"
 #include "../common/eqemu_logsys.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "encryption.h"
 #include "account_management.h"
 
@@ -26,13 +26,13 @@ bool Client::Process()
 {
 	EQApplicationPacket *app = m_connection->PopPacket();
 	while (app) {
-		if (server.options.IsTraceOn()) {
-			LogDebug("Application packet received from client (size {0})", app->Size());
-		}
-
-		if (server.options.IsDumpInPacketsOn()) {
-			DumpPacket(app);
-		}
+		LogPacketClientServer(
+			"[{}] [{:#06x}] Size [{}] {}",
+			OpcodeManager::EmuToName(app->GetOpcode()),
+			m_connection->GetOpcodeManager()->EmuToEQ(app->GetOpcode()),
+			app->Size(),
+			(LogSys.IsLogEnabled(Logs::Detail, Logs::PacketClientServer) ? DumpPacketToString(app) : "")
+		);
 
 		if (m_client_status == cs_failed_to_login) {
 			delete app;
@@ -42,9 +42,7 @@ bool Client::Process()
 
 		switch (app->GetOpcode()) {
 			case OP_SessionReady: {
-				if (server.options.IsTraceOn()) {
-					LogInfo("Session ready received from client");
-				}
+				LogInfo("Session ready received from client account {}", GetClientDescription());
 				Handle_SessionReady((const char *) app->pBuffer, app->Size());
 				break;
 			}
@@ -54,9 +52,7 @@ bool Client::Process()
 					break;
 				}
 
-				if (server.options.IsTraceOn()) {
-					LogInfo("Login received from client");
-				}
+				LogInfo("Login received from client {}", GetClientDescription());
 
 				Handle_Login((const char *) app->pBuffer, app->Size());
 				break;
@@ -67,9 +63,7 @@ bool Client::Process()
 					break;
 				}
 
-				if (server.options.IsTraceOn()) {
-					LogDebug("Server list request received from client");
-				}
+				LogInfo("Server list request received from client {}", GetClientDescription());
 
 				SendServerListPacket(*(uint32_t *) app->pBuffer);
 				break;
@@ -82,13 +76,6 @@ bool Client::Process()
 
 				Handle_Play((const char *) app->pBuffer);
 				break;
-			}
-			default: {
-				if (LogSys.log_settings[Logs::PacketClientServerUnhandled].is_category_enabled == 1) {
-					char dump[64];
-					app->build_header_dump(dump);
-					LogError("Recieved unhandled application packet from the client: [{}]", dump);
-				}
 			}
 		}
 
@@ -127,10 +114,6 @@ void Client::Handle_SessionReady(const char *data, unsigned int size)
 	buf->base_header.sequence    = 0x02;
 	buf->base_reply.success      = true;
 	buf->base_reply.error_str_id = 0x65; // 101 "No Error"
-
-	if (server.options.IsDumpOutPacketsOn()) {
-		DumpPacket(outapp);
-	}
 
 	m_connection->QueuePacket(outapp);
 	delete outapp;
@@ -217,7 +200,7 @@ void Client::Handle_Login(const char *data, unsigned int size)
 	else {
 		if (server.options.IsPasswordLoginAllowed()) {
 			cred            = (&outbuffer[1 + user.length()]);
-			auto components = SplitString(user, ':');
+			auto components = Strings::Split(user, ':');
 			if (components.size() == 2) {
 				db_loginserver = components[0];
 				user           = components[1];
@@ -240,7 +223,7 @@ void Client::Handle_Login(const char *data, unsigned int size)
 			if (server.db->GetLoginDataFromAccountInfo(user, db_loginserver, db_account_password_hash, db_account_id)) {
 				result = VerifyLoginHash(user, db_loginserver, cred, db_account_password_hash);
 
-				LogDebug("[VerifyLoginHash] Success [{0}]", (result ? "true" : "false"));
+				LogDebug("Success [{0}]", (result ? "true" : "false"));
 			}
 			else {
 				m_client_status = cs_creating_account;
@@ -290,14 +273,12 @@ void Client::Handle_Play(const char *data)
 	auto       server_id_in = (unsigned int) play->server_number;
 	auto       sequence_in  = (unsigned int) play->base_header.sequence;
 
-	if (server.options.IsTraceOn()) {
-		LogInfo(
-			"Play received from client [{0}] server number {1} sequence {2}",
-			GetAccountName(),
-			server_id_in,
-			sequence_in
-		);
-	}
+	LogInfo(
+		"[Handle_Play] Play received from client [{}] server number [{}] sequence [{}]",
+		GetAccountName(),
+		server_id_in,
+		sequence_in
+	);
 
 	m_play_server_id   = (unsigned int) play->server_number;
 	m_play_sequence_id = sequence_in;
@@ -310,21 +291,14 @@ void Client::Handle_Play(const char *data)
  */
 void Client::SendServerListPacket(uint32 seq)
 {
-	auto outapp = server.server_manager->CreateServerListPacket(this, seq);
+	auto app = server.server_manager->CreateServerListPacket(this, seq);
 
-	if (server.options.IsDumpOutPacketsOn()) {
-		DumpPacket(outapp.get());
-	}
-
-	m_connection->QueuePacket(outapp.get());
+	m_connection->QueuePacket(app.get());
 }
 
 void Client::SendPlayResponse(EQApplicationPacket *outapp)
 {
-	if (server.options.IsTraceOn()) {
-		LogDebug("Sending play response for {0}", GetAccountName());
-		// server_log->LogPacket(log_network_trace, (const char*)outapp->pBuffer, outapp->size);
-	}
+	LogInfo("Sending play response for {}", GetClientDescription());
 	m_connection->QueuePacket(outapp);
 }
 
@@ -358,7 +332,7 @@ void Client::AttemptLoginAccountCreation(
 	const std::string &loginserver
 )
 {
-	LogInfo("[AttemptLoginAccountCreation] user [{}] loginserver [{}]", user, loginserver);
+	LogInfo("user [{}] loginserver [{}]", user, loginserver);
 
 #ifdef LSPX
 	if (loginserver == "eqemu") {
@@ -377,7 +351,7 @@ void Client::AttemptLoginAccountCreation(
 		);
 
 		if (account_id > 0) {
-			LogInfo("[AttemptLoginAccountCreation] Found and creating eqemu account [{}]", account_id);
+			LogInfo("Found and creating eqemu account [{}]", account_id);
 			CreateEQEmuAccount(user, pass, account_id);
 			return;
 		}
@@ -421,10 +395,6 @@ void Client::DoFailedLogin()
 	EQApplicationPacket outapp(OP_LoginAccepted, outsize);
 	outapp.WriteData(&base_header, sizeof(base_header));
 	outapp.WriteData(&encrypted_buffer, sizeof(encrypted_buffer));
-
-	if (server.options.IsDumpOutPacketsOn()) {
-		DumpPacket(&outapp);
-	}
 
 	m_connection->QueuePacket(&outapp);
 	m_client_status = cs_failed_to_login;
@@ -563,6 +533,8 @@ void Client::DoSuccessfulLogin(
 	login_reply.web_offer_cooldown_minutes = 0;
 	memcpy(login_reply.key, m_key.c_str(), m_key.size());
 
+	SendExpansionPacketData(login_reply);
+
 	char encrypted_buffer[80] = {0};
 	auto rc = eqcrypt_block((const char*)&login_reply, sizeof(login_reply), encrypted_buffer, 1);
 	if (rc == nullptr) {
@@ -574,13 +546,71 @@ void Client::DoSuccessfulLogin(
 	outapp->WriteData(&base_header, sizeof(base_header));
 	outapp->WriteData(&encrypted_buffer, sizeof(encrypted_buffer));
 
-	if (server.options.IsDumpOutPacketsOn()) {
-		DumpPacket(outapp.get());
-	}
-
 	m_connection->QueuePacket(outapp.get());
 
 	m_client_status = cs_logged_in;
+}
+
+void Client::SendExpansionPacketData(PlayerLoginReply_Struct& plrs)
+{
+	SerializeBuffer buf;
+	//from eqlsstr_us.txt id of each expansion, excluding 'Everquest'
+	int ExpansionLookup[20] = { 3007, 3008, 3009, 3010,	3012,
+								3014, 3031, 3033, 3036, 3040,
+								3045, 3046, 3047, 3514, 3516,
+								3518, 3520, 3522, 3524 };
+
+
+	if (server.options.IsDisplayExpansions()) {
+
+		int32_t expansion = server.options.GetMaxExpansions();
+		int32_t owned_expansion = (expansion << 1) | 1;
+
+		if (m_client_version == cv_sod) {
+
+			// header info of packet.  Requires OP_LoginExpansionPacketData=0x0031 to be in login_opcodes_sod.conf
+			buf.WriteInt32(0x00);
+			buf.WriteInt32(0x01);
+			buf.WriteInt16(0x00);
+			buf.WriteInt32(19); //number of expansions to include in packet
+
+			//generate expansion data
+			for (int i = 0; i < 19; i++)
+			{
+				buf.WriteInt32(i);													//sequenctial number
+				buf.WriteInt32((expansion & (1 << i)) == (1 << i) ? 0x01 : 0x00);	//1 own 0 not own
+				buf.WriteInt8(0x00);
+				buf.WriteInt32(ExpansionLookup[i]);									//from eqlsstr_us.txt
+				buf.WriteInt32(0x179E);												//from eqlsstr_us.txt for buttons/order
+				buf.WriteInt32(0xFFFFFFFF);											//end identification
+				buf.WriteInt8(0x0);													//force order window to appear 1 appear 0 not appear
+				buf.WriteInt8(0x0);
+				buf.WriteInt32(0x0000);
+				buf.WriteInt32(0x0000);
+				buf.WriteInt32(0xFFFFFFFF);
+			}
+
+			auto out = std::make_unique<EQApplicationPacket>(OP_LoginExpansionPacketData, buf);
+			m_connection->QueuePacket(out.get());
+
+		}
+		else if (m_client_version == cv_titanium)
+		{
+			if (expansion >= EQ::expansions::bitPoR)
+			{
+				// Titanium shipped with 10 expansions.  Set owned expansions to be max 10.
+				plrs.offer_min_days = ((EQ::expansions::bitDoD << 2) | 1) - 2;
+			}
+			else
+			{
+				plrs.offer_min_days = owned_expansion;
+			}
+			// Titanium shipped with 10 expansions.  Set owned expansions to be max 10.
+			plrs.web_offer_min_views = ((EQ::expansions::bitDoD << 2) | 1) - 2;
+		}
+
+	}
+
 }
 
 /**
@@ -774,4 +804,18 @@ bool Client::ProcessHealthCheck(std::string username)
 	}
 
 	return false;
+}
+
+std::string Client::GetClientDescription()
+{
+	in_addr in{};
+	in.s_addr = GetConnection()->GetRemoteIP();
+	std::string client_ip = inet_ntoa(in);
+
+	return fmt::format(
+		"account_name [{}] account_id ({}) ip_address [{}]",
+		GetAccountName(),
+		GetAccountID(),
+		client_ip
+	);
 }

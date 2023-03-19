@@ -64,11 +64,10 @@ if [ ! -f ./install_variables.txt ]; then
 	echo ""
 	echo ""
 	groupadd eqemu
-	useradd -g eqemu -d $eqemu_server_directory eqemu
+	useradd -g eqemu -m -d $eqemu_server_directory eqemu
 	passwd eqemu
 
-	#::: Make server directory and go to it
-	mkdir $eqemu_server_directory
+	#::: Go to server directory
 	cd $eqemu_server_directory
 
 	#::: Setup MySQL root user PW

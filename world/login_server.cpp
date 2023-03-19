@@ -26,7 +26,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/misc_functions.h"
 #include "../common/eq_packet_structs.h"
 #include "../common/packet_dump.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "../common/eqemu_logsys.h"
 #include "login_server.h"
 #include "login_server_list.h"
@@ -62,14 +62,14 @@ LoginServer::~LoginServer()
 void LoginServer::ProcessUsertoWorldReqLeg(uint16_t opcode, EQ::Net::Packet &p)
 {
 	const WorldConfig *Config = WorldConfig::get();
-	LogNetcode("[ProcessUsertoWorldReqLeg] Received ServerPacket from LS OpCode {:#04x}", opcode);
+	LogNetcode("Received ServerPacket from LS OpCode {:#04x}", opcode);
 
 	UsertoWorldRequestLegacy_Struct *utwr  = (UsertoWorldRequestLegacy_Struct *) p.Data();
 	uint32                          id     = database.GetAccountIDFromLSID("eqemu", utwr->lsaccountid);
 	int16                           status = database.CheckStatus(id);
 
 	LogDebug(
-		"[ProcessUsertoWorldReqLeg] id [{}] status [{}] account_id [{}] world_id [{}] from_id [{}] to_id [{}] ip [{}]",
+		"id [{}] status [{}] account_id [{}] world_id [{}] from_id [{}] to_id [{}] ip [{}]",
 		id,
 		status,
 		utwr->lsaccountid,
@@ -94,7 +94,7 @@ void LoginServer::ProcessUsertoWorldReqLeg(uint16_t opcode, EQ::Net::Packet &p)
 	if (Config->Locked) {
 		if (status < (RuleI(GM, MinStatusToBypassLockedServer))) {
 			LogDebug(
-				"[ProcessUsertoWorldReqLeg] Server locked and status is not high enough for account_id [{0}]",
+				"Server locked and status is not high enough for account_id [{0}]",
 				utwr->lsaccountid
 			);
 			utwrs->response = UserToWorldStatusWorldUnavail;
@@ -105,21 +105,21 @@ void LoginServer::ProcessUsertoWorldReqLeg(uint16_t opcode, EQ::Net::Packet &p)
 
 	int32 x = Config->MaxClients;
 	if ((int32) numplayers >= x && x != -1 && x != 255 && status < (RuleI(GM, MinStatusToBypassLockedServer))) {
-		LogDebug("[ProcessUsertoWorldReqLeg] World at capacity account_id [{0}]", utwr->lsaccountid);
+		LogDebug("World at capacity account_id [{0}]", utwr->lsaccountid);
 		utwrs->response = UserToWorldStatusWorldAtCapacity;
 		SendPacket(&outpack);
 		return;
 	}
 
 	if (status == -1) {
-		LogDebug("[ProcessUsertoWorldReqLeg] User suspended account_id [{0}]", utwr->lsaccountid);
+		LogDebug("User suspended account_id [{0}]", utwr->lsaccountid);
 		utwrs->response = UserToWorldStatusSuspended;
 		SendPacket(&outpack);
 		return;
 	}
 
 	if (status == -2) {
-		LogDebug("[ProcessUsertoWorldReqLeg] User banned account_id [{0}]", utwr->lsaccountid);
+		LogDebug("User banned account_id [{0}]", utwr->lsaccountid);
 		utwrs->response = UserToWorldStatusBanned;
 		SendPacket(&outpack);
 		return;
@@ -127,14 +127,14 @@ void LoginServer::ProcessUsertoWorldReqLeg(uint16_t opcode, EQ::Net::Packet &p)
 
 	if (RuleB(World, EnforceCharacterLimitAtLogin)) {
 		if (client_list.IsAccountInGame(utwr->lsaccountid)) {
-			LogDebug("[ProcessUsertoWorldReqLeg] User already online account_id [{0}]", utwr->lsaccountid);
+			LogDebug("User already online account_id [{0}]", utwr->lsaccountid);
 			utwrs->response = UserToWorldStatusAlreadyOnline;
 			SendPacket(&outpack);
 			return;
 		}
 	}
 
-	LogDebug("[ProcessUsertoWorldReqLeg] Sent response to account_id [{0}]", utwr->lsaccountid);
+	LogDebug("Sent response to account_id [{0}]", utwr->lsaccountid);
 
 	SendPacket(&outpack);
 }
@@ -142,14 +142,14 @@ void LoginServer::ProcessUsertoWorldReqLeg(uint16_t opcode, EQ::Net::Packet &p)
 void LoginServer::ProcessUsertoWorldReq(uint16_t opcode, EQ::Net::Packet &p)
 {
 	const WorldConfig *Config = WorldConfig::get();
-	LogNetcode("[ProcessUsertoWorldReq] Received ServerPacket from LS OpCode {:#04x}", opcode);
+	LogNetcode("Received ServerPacket from LS OpCode {:#04x}", opcode);
 
 	UsertoWorldRequest_Struct *utwr  = (UsertoWorldRequest_Struct *) p.Data();
 	uint32                    id     = database.GetAccountIDFromLSID(utwr->login, utwr->lsaccountid);
 	int16                     status = database.CheckStatus(id);
 
 	LogDebug(
-		"[ProcessUsertoWorldReq] id [{}] status [{}] account_id [{}] world_id [{}] from_id [{}] to_id [{}] ip [{}]",
+		"id [{}] status [{}] account_id [{}] world_id [{}] from_id [{}] to_id [{}] ip [{}]",
 		id,
 		status,
 		utwr->lsaccountid,
@@ -175,7 +175,7 @@ void LoginServer::ProcessUsertoWorldReq(uint16_t opcode, EQ::Net::Packet &p)
 	if (Config->Locked == true) {
 		if (status < (RuleI(GM, MinStatusToBypassLockedServer))) {
 			LogDebug(
-				"[ProcessUsertoWorldReq] Server locked and status is not high enough for account_id [{0}]",
+				"Server locked and status is not high enough for account_id [{0}]",
 				utwr->lsaccountid
 			);
 			utwrs->response = UserToWorldStatusWorldUnavail;
@@ -186,21 +186,21 @@ void LoginServer::ProcessUsertoWorldReq(uint16_t opcode, EQ::Net::Packet &p)
 
 	int32 x = Config->MaxClients;
 	if ((int32) numplayers >= x && x != -1 && x != 255 && status < (RuleI(GM, MinStatusToBypassLockedServer))) {
-		LogDebug("[ProcessUsertoWorldReq] World at capacity account_id [{0}]", utwr->lsaccountid);
+		LogDebug("World at capacity account_id [{0}]", utwr->lsaccountid);
 		utwrs->response = UserToWorldStatusWorldAtCapacity;
 		SendPacket(&outpack);
 		return;
 	}
 
 	if (status == -1) {
-		LogDebug("[ProcessUsertoWorldReq] User suspended account_id [{0}]", utwr->lsaccountid);
+		LogDebug("User suspended account_id [{0}]", utwr->lsaccountid);
 		utwrs->response = UserToWorldStatusSuspended;
 		SendPacket(&outpack);
 		return;
 	}
 
 	if (status == -2) {
-		LogDebug("[ProcessUsertoWorldReq] User banned account_id [{0}]", utwr->lsaccountid);
+		LogDebug("User banned account_id [{0}]", utwr->lsaccountid);
 		utwrs->response = UserToWorldStatusBanned;
 		SendPacket(&outpack);
 		return;
@@ -208,14 +208,14 @@ void LoginServer::ProcessUsertoWorldReq(uint16_t opcode, EQ::Net::Packet &p)
 
 	if (RuleB(World, EnforceCharacterLimitAtLogin)) {
 		if (client_list.IsAccountInGame(utwr->lsaccountid)) {
-			LogDebug("[ProcessUsertoWorldReq] User already online account_id [{0}]", utwr->lsaccountid);
+			LogDebug("User already online account_id [{0}]", utwr->lsaccountid);
 			utwrs->response = UserToWorldStatusAlreadyOnline;
 			SendPacket(&outpack);
 			return;
 		}
 	}
 
-	LogDebug("[ProcessUsertoWorldReq] Sent response to account_id [{0}]", utwr->lsaccountid);
+	LogDebug("Sent response to account_id [{0}]", utwr->lsaccountid);
 
 	SendPacket(&outpack);
 }
@@ -294,10 +294,27 @@ void LoginServer::ProcessLSFatalError(uint16_t opcode, EQ::Net::Packet &p)
 	const WorldConfig *Config = WorldConfig::get();
 	LogNetcode("Received ServerPacket from LS OpCode {:#04x}", opcode);
 
-	LogInfo("Login server responded with FatalError");
+	std::string error;
+	std::string reason;
+
 	if (p.Length() > 1) {
-		LogError("Error [{}]", (const char *) p.Data());
+		error = fmt::format("{}", (const char *) p.Data());
 	}
+
+	if (error.find("Worldserver Account / Password INVALID") != std::string::npos) {
+		reason = "Usually this indicates you do not have a valid [account] and [password] (worldserver) account associated with your loginserver configuration. ";
+		if (fmt::format("{}", m_loginserver_address).find("login.eqemulator.net") != std::string::npos) {
+			reason += "For Legacy EQEmulator connections, you need to register your server @ http://www.eqemulator.org/account/?LS";
+		}
+	}
+
+	LogInfo(
+		"Login server [{}:{}] responded with fatal error [{}] {}\n",
+		m_loginserver_address,
+		m_loginserver_port,
+		error,
+		reason
+	);
 }
 
 void LoginServer::ProcessSystemwideMessage(uint16_t opcode, EQ::Net::Packet &p)
@@ -473,7 +490,7 @@ bool LoginServer::Connect()
 			[this](EQ::Net::ServertalkClient *client) {
 				if (client) {
 					LogInfo(
-						"Connected to Loginserver: [{0}:{1}]",
+						"Connected to Loginserver [{0}:{1}]",
 						m_loginserver_address,
 						m_loginserver_port
 					);
@@ -482,7 +499,6 @@ bool LoginServer::Connect()
 					zoneserver_list.SendLSZones();
 
 					m_statusupdate_timer = std::make_unique<EQ::Timer>(
-
 						LoginServer_StatusUpdateInterval, true, [this](EQ::Timer *t) {
 							SendStatus();
 						}
@@ -610,7 +626,7 @@ void LoginServer::SendInfo()
 	}
 
 	LogInfo(
-		"[LoginServer::SendInfo] protocol_version [{}] server_version [{}] long_name [{}] short_name [{}] account_name [{}] remote_ip_address [{}] local_ip [{}]",
+		"protocol_version [{}] server_version [{}] long_name [{}] short_name [{}] account_name [{}] remote_ip_address [{}] local_ip [{}]",
 		l->protocol_version,
 		l->server_version,
 		l->server_long_name,

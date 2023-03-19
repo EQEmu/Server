@@ -2,6 +2,8 @@
 #define EQEMU_SHARED_TASKS_H
 
 #include "database.h"
+#include "timer.h"
+#include "tasks.h"
 #include "types.h"
 #include "repositories/character_data_repository.h"
 #include "repositories/tasks_repository.h"
@@ -16,7 +18,7 @@
 #define ServerOP_SharedTaskAddPlayer                0x0301 // bidirectional. /taskaddplayer request zone -> world. success world -> zone
 #define ServerOP_SharedTaskMakeLeader               0x0302 // zone -> world -> zone
 #define ServerOP_SharedTaskRemovePlayer             0x0303 // zone -> world -> zone
-#define ServerOP_SharedTaskAttemptRemove            0x0304 // zone -> world. Player trying to delete task
+#define ServerOP_SharedTaskQuit                     0x0304 // zone -> world. Player trying to delete task
 #define ServerOP_SharedTaskUpdate                   0x0305 // zone -> world. Client sending task update to world. Relayed world -> zone on confirmation
 #define ServerOP_SharedTaskMemberlist               0x0306 // world -> zone. Send shared task memberlist
 #define ServerOP_SharedTaskRequestMemberlist        0x0307 // zone -> world. Send shared task memberlist (zone in initial for now, could change)
@@ -28,6 +30,10 @@
 #define ServerOP_SharedTaskPlayerList               0x0313 // zone -> world /taskplayerlist command
 #define ServerOP_SharedTaskMemberChange             0x0314 // world -> zone. Send shared task single member added/removed (client also handles message)
 #define ServerOP_SharedTaskKickPlayers              0x0315 // zone -> world /kickplayers task
+#define ServerOP_SharedTaskLock                     0x0316 // zone -> world
+#define ServerOP_SharedTaskEnd                      0x0317 // zone -> world
+#define ServerOP_SharedTaskEndByDz                  0x0318 // zone -> world
+#define ServerOP_SharedTaskFailed                   0x0319 // world -> zone. Sends red text task failed banner to client
 
 enum class SharedTaskRequestGroupType {
 	Solo = 0,
@@ -54,11 +60,11 @@ struct ServerSharedTaskInvitePlayer_Struct {
 	char   inviter_name[64];
 };
 
-// ServerOP_SharedTaskAttemptRemove
+// ServerOP_SharedTaskQuit
 // gets re-used when sent back to clients
-struct ServerSharedTaskAttemptRemove_Struct {
+struct ServerSharedTaskQuit_Struct {
 	uint32 requested_character_id;
-	uint32 requested_task_id;
+	uint32 task_id;
 	bool   remove_from_db;
 };
 
@@ -76,12 +82,13 @@ struct SharedTaskMember {
 };
 
 // used in shared task requests to validate group/raid members
-struct SharedTaskRequestCharacters {
-	int  lowest_level;
-	int  highest_level;
+struct SharedTaskRequest {
+	uint32_t lowest_level;
+	uint32_t highest_level;
+	uint32_t leader_id;
 	SharedTaskRequestGroupType group_type;
 	std::vector<uint32_t> character_ids;
-	std::vector<CharacterDataRepository::CharacterData> characters;
+	std::vector<SharedTaskMember> members;
 };
 
 // ServerOP_SharedTaskMemberlist
@@ -105,6 +112,10 @@ struct SharedTaskActivityStateEntry {
 	uint32 max_done_count; // goalcount
 	uint32 updated_time;
 	uint32 completed_time;
+	int    req_activity_id;
+	int    step;
+	bool   optional;
+	ActivityState activity_state; // world only uses Hidden and Completed states
 };
 
 struct ServerSharedTaskActivityUpdate_Struct {
@@ -162,17 +173,36 @@ struct ServerSharedTaskKickPlayers_Struct {
 	uint32 task_id;
 };
 
+struct ServerSharedTaskLock_Struct {
+	uint32 source_character_id;
+	uint32 task_id;
+	bool   lock;
+};
+
+struct ServerSharedTaskCharacterTask_Struct {
+	uint32 character_id;
+	uint32 task_id;
+};
+
+struct ServerSharedTaskEnd_Struct {
+	uint32 character_id;
+	uint32 task_id;
+	uint32 dz_id;
+	bool   send_fail; // if true members receive red text failure banner
+};
+
 class SharedTask {
 public:
 	// used in both zone and world validation
-	static SharedTaskRequestCharacters GetRequestCharacters(Database& db, uint32_t requested_character_id);
+	static SharedTaskRequest GetRequestCharacters(Database& db, uint32_t requested_character_id);
 
 	void AddCharacterToMemberHistory(uint32_t character_id);
 	SharedTaskMember FindMemberFromCharacterID(uint32_t character_id) const;
 	SharedTaskMember FindMemberFromCharacterName(const std::string& character_name) const;
 	SharedTaskMember GetLeader() const;
 	std::vector<SharedTaskActivityStateEntry> GetActivityState() const;
-	std::vector<SharedTaskMember> GetMembers() const;
+	const std::vector<SharedTaskMember>& GetMembers() const;
+	bool IsExpired() const;
 
 	// getters
 	const std::vector<TaskActivitiesRepository::TaskActivities> &GetTaskActivityData() const;
@@ -192,6 +222,8 @@ public:
 	std::vector<SharedTaskMember>             m_members;
 	std::vector<uint32_t>                     member_id_history; // past and present members for replay timers
 	std::vector<uint32_t>                     dynamic_zone_ids;
+
+	Timer terminate_timer;
 
 protected:
 	SharedTasksRepository::SharedTasks m_db_shared_task;

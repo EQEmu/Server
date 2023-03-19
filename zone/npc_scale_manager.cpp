@@ -19,7 +19,7 @@
  */
 
 #include "npc_scale_manager.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "../common/repositories/npc_scale_global_base_repository.h"
 #include "../common/repositories/npc_types_repository.h"
 
@@ -28,7 +28,7 @@
  */
 void NpcScaleManager::ScaleNPC(NPC *npc)
 {
-	if (npc->IsSkipAutoScale()) {
+	if (npc->IsSkipAutoScale() || npc->GetNPCTypeID() == 0) {
 		return;
 	}
 
@@ -149,9 +149,9 @@ void NpcScaleManager::ScaleNPC(NPC *npc)
 		std::string scale_log;
 
 		for (const auto &stat : scaling_stats) {
-			std::string variable = StringFormat("modify_stat_%s", stat.c_str());
-			if (npc->EntityVariableExists(variable.c_str())) {
-				scale_log += stat + ": " + npc->GetEntityVariable(variable.c_str()) + " ";
+			auto v = fmt::format("modify_stat_{}", stat);
+			if (npc->EntityVariableExists(v)) {
+				scale_log += fmt::format("{}: {} ", stat, npc->GetEntityVariable(v));
 			}
 		}
 
@@ -169,9 +169,9 @@ void NpcScaleManager::ScaleNPC(NPC *npc)
 void NpcScaleManager::ResetNPCScaling(NPC *npc)
 {
 	for (const auto &scaling_stat : scaling_stats) {
-		std::string stat_name   = fmt::format("modify_stat_{}", scaling_stat);
-		std::string reset_value = "0";
-		if (npc->EntityVariableExists(stat_name.c_str())) {
+		auto stat_name   = fmt::format("modify_stat_{}", scaling_stat);
+		auto reset_value = std::to_string(0);
+		if (npc->EntityVariableExists(stat_name)) {
 			npc->ModifyNPCStat(scaling_stat.c_str(), reset_value.c_str());
 		}
 	}
@@ -179,7 +179,8 @@ void NpcScaleManager::ResetNPCScaling(NPC *npc)
 
 bool NpcScaleManager::LoadScaleData()
 {
-	for (auto &s: NpcScaleGlobalBaseRepository::All(content_db)) {
+	auto rows = NpcScaleGlobalBaseRepository::All(content_db);
+	for (auto &s: rows) {
 		global_npc_scale scale_data;
 
 		scale_data.type              = s.type;
@@ -222,7 +223,7 @@ bool NpcScaleManager::LoadScaleData()
 		);
 	}
 
-	LogNPCScaling("Global Base Scaling Data Loaded");
+	LogInfo("Loaded [{}] global scaling data entries", Strings::Commify(rows.size()));
 
 	return true;
 }
@@ -463,7 +464,7 @@ bool NpcScaleManager::ApplyGlobalBaseScalingToNPCStatically(NPC *&npc)
 
 	if (!g.level) {
 		LogNPCScaling(
-			"NpcScaleManager::ApplyGlobalBaseScalingToNPCStatically NPC: [{}] - scaling data not found for type: [{}] level: [{}]",
+			"NPC: [{}] - scaling data not found for type: [{}] level: [{}]",
 			npc->GetCleanName(),
 			npc_type,
 			npc_level
@@ -521,7 +522,7 @@ bool NpcScaleManager::ApplyGlobalBaseScalingToNPCDynamically(NPC *&npc)
 
 	if (!d.level) {
 		LogNPCScaling(
-			"NpcScaleManager::ApplyGlobalBaseScalingToNPCDynamically NPC: [{}] - scaling data not found for type: [{}] level: [{}]",
+			"NPC: [{}] - scaling data not found for type: [{}] level: [{}]",
 			npc->GetCleanName(),
 			npc_type,
 			npc_level

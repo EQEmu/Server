@@ -4,6740 +4,3399 @@
 
 #include "../common/global_define.h"
 #include "embperl.h"
-
-#ifdef seed
-#undef seed
-#endif
-
 #include "client.h"
 #include "expedition.h"
 #include "titles.h"
 #include "dialogue_window.h"
 
-#ifdef THIS        /* this macro seems to leak out on some systems */
-#undef THIS
-#endif
-
-#define VALIDATE_THIS_IS_CLIENT \
-	do { \
-		if (sv_derived_from(ST(0), "Client")) { \
-			IV tmp = SvIV((SV*)SvRV(ST(0))); \
-			THIS = INT2PTR(Client*, tmp); \
-		} else { \
-			Perl_croak(aTHX_ "THIS is not of type Client"); \
-		} \
-		if (THIS == nullptr) { \
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash."); \
-		} \
-	} while (0);
-
-XS(XS_Client_SendSound); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_SendSound) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::SendSound(THIS)"); // @categories Script Utility
-	{
-		Client *THIS;
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->SendSound();
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Client_Save); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_Save) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::Save(THIS, uint8 commit_now)"); // @categories Script Utility
-	{
-		Client *THIS;
-		bool  RETVAL;
-		uint8 iCommitNow = (uint8) SvUV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->Save(iCommitNow);
-		ST(0) = boolSV(RETVAL);
-		sv_2mortal(ST(0));
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Client_SaveBackup); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_SaveBackup) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::SaveBackup(THIS)"); // @categories Script Utility
-	{
-		Client *THIS;
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->SaveBackup();
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Client_Connected); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_Connected) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::Connected(THIS)"); // @categories Script Utility
-	{
-		Client *THIS;
-		bool RETVAL;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->Connected();
-		ST(0) = boolSV(RETVAL);
-		sv_2mortal(ST(0));
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Client_InZone); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_InZone) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::InZone(THIS)"); // @categories Script Utility
-	{
-		Client *THIS;
-		bool RETVAL;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->InZone();
-		ST(0) = boolSV(RETVAL);
-		sv_2mortal(ST(0));
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Client_Kick); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_Kick) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::Kick(THIS)"); // @categories Script Utility
-	{
-		Client *THIS;
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->Kick("Perl Quest");
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Client_Disconnect); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_Disconnect) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::Disconnect(THIS)"); // @categories Script Utility
-	{
-		Client *THIS;
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->Disconnect();
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Client_IsLD); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_IsLD) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::IsLD(THIS)"); // @categories Account and Character
-	{
-		Client *THIS;
-		bool RETVAL;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->IsLD();
-		ST(0) = boolSV(RETVAL);
-		sv_2mortal(ST(0));
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Client_WorldKick); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_WorldKick) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::WorldKick(THIS)"); // @categories Script Utility
-	{
-		Client *THIS;
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->WorldKick();
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Client_SendToGuildHall); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_SendToGuildHall) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::SendToGuildHall(THIS)"); // @categories Script Utility, Guild
-	{
-		Client *THIS;
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->SendToGuildHall();
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Client_GetAnon); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetAnon) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetAnon(THIS)"); // @categories Account and Character, Stats and Attributes
-	{
-		Client *THIS;
-		uint8 RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetAnon();
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Client_SetAnon); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_SetAnon) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SetAnon(THIS, uint8 anon_flag)"); // @categories Account and Character, Stats and Attributes
-	{
-		Client *THIS;
-		uint8 anon_flag = (uint8) SvUV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->SetAnon(anon_flag);
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Client_GetAFK); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetAFK) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetAFK(THIS)"); // @categories Account and Character, Stats and Attributes
-	{
-		Client *THIS;
-		uint8 RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetAFK();
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Client_SetAFK); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_SetAFK) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SetAFK(THIS, uint8 afk_flag)"); // @categories Account and Character, Stats and Attributes
-	{
-		Client *THIS;
-		uint8 afk_flag = (uint8) SvUV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->SetAFK(afk_flag);
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Client_Duck); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_Duck) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::Duck(THIS)"); // @categories Account and Character
-	{
-		Client *THIS;
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->Duck();
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Client_DyeArmorBySlot); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_DyeArmorBySlot) {
-	dXSARGS;
-	if (items != 5 && items != 6)
-		Perl_croak(aTHX_ "Usage: Client::DyeArmorBySlot(THIS, uint8 slot, uint8 red, uint8 green, uint8 blue, [uint8 use_tint = 0x00])"); // @categories Account and Character, Inventory and Items
-	{
-		Client *THIS;
-		uint8 slot = (uint8) SvUV(ST(1));
-		uint8 red = (uint8) SvUV(ST(2));
-		uint8 green = (uint8) SvUV(ST(3));
-		uint8 blue = (uint8) SvUV(ST(4));
-		uint8 use_tint = 0x00;
-		if (items == 6) {
-			use_tint = (uint8) SvUV(ST(5));
-		}
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->DyeArmorBySlot(slot, red, green, blue, use_tint);
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Client_Stand); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_Stand) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::Stand(THIS)"); // @categories Script Utility
-	{
-		Client *THIS;
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->Stand();
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Client_SetGM); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_SetGM) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SetGM(THIS, bool toggle)"); // @categories Account and Character
-	{
-		Client *THIS;
-		bool toggle = (bool) SvTRUE(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->SetGM(toggle);
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Client_SetPVP); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_SetPVP) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SetPVP(THIS, bool toggle)"); // @categories Account and Character
-	{
-		Client *THIS;
-		bool toggle = (bool) SvTRUE(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->SetPVP(toggle);
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Client_GetPVP); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetPVP) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetPVP(THIS)"); // @categories Account and Character, Stats and Attributes
-	{
-		Client *THIS;
-		bool RETVAL;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetPVP();
-		ST(0) = boolSV(RETVAL);
-		sv_2mortal(ST(0));
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Client_GetGM); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetGM) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetGM(THIS)"); // @categories Account and Character
-	{
-		Client *THIS;
-		bool RETVAL;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetGM();
-		ST(0) = boolSV(RETVAL);
-		sv_2mortal(ST(0));
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Client_SetBaseClass); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_SetBaseClass) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SetBaseClass(THIS, uint32 class_id)"); // @categories Account and Character, Stats and Attributes
-	{
-		Client *THIS;
-		uint32 i = (uint32) SvUV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->SetBaseClass(i);
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Client_SetBaseRace); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_SetBaseRace) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SetBaseRace(THIS, uint32 race_id)"); // @categories Account and Character, Stats and Attributes
-	{
-		Client *THIS;
-		uint32 i = (uint32) SvUV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->SetBaseRace(i);
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Client_SetBaseGender); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_SetBaseGender) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SetBaseGender(THIS, uint32 gender_id)"); // @categories Account and Character, Stats and Attributes
-	{
-		Client *THIS;
-		uint32 i = (uint32) SvUV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->SetBaseGender(i);
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Client_GetBaseFace); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetBaseFace) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetBaseFace(THIS)"); // @categories Stats and Attributes
-	{
-		Client *THIS;
-		uint8 RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetBaseFace();
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Client_GetLanguageSkill); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetLanguageSkill) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::GetLanguageSkill(THIS, uint16 lanuage_id)"); // @categories Account and Character, Stats and Attributes
-	{
-		Client *THIS;
-		uint8  RETVAL;
-		dXSTARG;
-		uint16 n = (uint16) SvUV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetLanguageSkill(n);
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Client_GetLDoNPointsTheme); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetLDoNPointsTheme) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::GetLDoNPointsTheme(THIS, int32 theme)"); // @categories Currency and Points
-	{
-		Client *THIS;
-		uint32 RETVAL;
-		dXSTARG;
-		int32  theme_out = (int32) SvIV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetLDoNPointsTheme(theme_out);
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Client_GetBaseSTR); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetBaseSTR) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetBaseSTR(THIS)"); // @categories Stats and Attributes
-	{
-		Client *THIS;
-		uint8 RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetBaseSTR();
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Client_GetBaseSTA); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetBaseSTA) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetBaseSTA(THIS)"); // @categories Stats and Attributes
-	{
-		Client *THIS;
-		uint8 RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetBaseSTA();
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Client_GetBaseCHA); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetBaseCHA) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetBaseCHA(THIS)"); // @categories Stats and Attributes
-	{
-		Client *THIS;
-		uint8 RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetBaseCHA();
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Client_GetBaseDEX); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetBaseDEX) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetBaseDEX(THIS)"); // @categories Stats and Attributes
-	{
-		Client *THIS;
-		uint8 RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetBaseDEX();
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Client_GetBaseINT); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetBaseINT) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetBaseINT(THIS)"); // @categories Stats and Attributes
-	{
-		Client *THIS;
-		uint8 RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetBaseINT();
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Client_GetBaseAGI); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetBaseAGI) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetBaseAGI(THIS)"); // @categories Stats and Attributes
-	{
-		Client *THIS;
-		uint8 RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetBaseAGI();
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Client_GetBaseWIS); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetBaseWIS) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetBaseWIS(THIS)"); // @categories Stats and Attributes
-	{
-		Client *THIS;
-		uint8 RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetBaseWIS();
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Client_GetWeight); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetWeight) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetWeight(THIS)"); // @categories Account and Character, Stats and Attributes
-	{
-		Client *THIS;
-		uint16 RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetWeight();
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Client_GetEXP); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetEXP) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetEXP(THIS)"); // @categories Experience and Level
-	{
-		Client *THIS;
-		uint32 RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetEXP();
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Client_GetAAExp); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetAAExp) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetAAExp(THIS)"); // @categories Alternative Advancement, Experience and Level
-	{
-		Client *THIS;
-		uint32 RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetAAXP();
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Client_GetAAPercent);
-XS(XS_Client_GetAAPercent) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetAAPercent(THIS)"); // @categories Alternative Advancement, Experience and Level
-	{
-		Client *THIS;
-		uint32 RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetAAPercent();
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Client_GetTotalSecondsPlayed); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetTotalSecondsPlayed) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetTotalSecondsPlayed(THIS)"); // @categories Account and Character, Stats and Attributes
-	{
-		Client *THIS;
-		uint32 RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetTotalSecondsPlayed();
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Client_UpdateLDoNPoints); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_UpdateLDoNPoints) {
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::UpdateLDoNPoints(THIS, uint32 theme_id, int points)"); // @categories Currency and Points
-	{
-		Client *THIS;
-		bool RETVAL;
-		uint32 theme_id = (uint32) SvUV(ST(1));
-		int points = (int) SvIV(ST(2));
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->UpdateLDoNPoints(theme_id, points);
-		ST(0) = boolSV(RETVAL);
-		sv_2mortal(ST(0));
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Client_SetDeity); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_SetDeity) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SetDeity(THIS, uint32 deity_id)"); // @categories Account and Character, Stats and Attributes
-	{
-		Client *THIS;
-		uint32 i = (uint32) SvUV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->SetDeity(i);
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Client_AddEXP); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_AddEXP) {
-	dXSARGS;
-	if (items < 2 || items > 4)
-		Perl_croak(aTHX_ "Usage: Client::AddEXP(THIS, uint32 experience_points)"); // @categories Experience and Level
-	{
-		Client *THIS;
-		uint32 add_exp = (uint32) SvUV(ST(1));
-		uint8  conlevel;
-		bool   resexp;
-		VALIDATE_THIS_IS_CLIENT;
-		if (items < 3)
-			conlevel = 0xFF;
-		else {
-			conlevel = (uint8) SvUV(ST(2));
-		}
-
-		if (items < 4)
-			resexp = false;
-		else {
-			resexp = (bool) SvTRUE(ST(3));
-		}
-
-		THIS->AddEXP(add_exp, conlevel, resexp);
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Client_SetEXP); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_SetEXP) {
-	dXSARGS;
-	if (items < 3 || items > 4)
-		Perl_croak(aTHX_ "Usage: Client::SetEXP(THIS, uint32 experience_points, uint32 aa_experience_points, [bool resexp=false])"); // @categories Experience and Level
-	{
-		Client *THIS;
-		uint32 set_exp  = (uint32) SvUV(ST(1));
-		uint32 set_aaxp = (uint32) SvUV(ST(2));
-		bool   resexp;
-		VALIDATE_THIS_IS_CLIENT;
-		if (items < 4)
-			resexp = false;
-		else {
-			resexp = (bool) SvTRUE(ST(3));
-		}
-
-		THIS->SetEXP(set_exp, set_aaxp, resexp);
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Client_SetBindPoint); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_SetBindPoint) {
-	dXSARGS;
-	if (items < 1 || items > 7)
-		Perl_croak(aTHX_ "Usage: Client::SetBindPoint(THIS, [int to_zone = -1, int to_instance = 0, float new_x = 0.0f, float new_y = 0.0f, float new_z = 0.0f, float new_heading = 0.0f])"); // @categories Account and Character, Stats and Attributes
-	{
-		Client *THIS;
-		int   to_zone = -1;
-		int   to_instance = 0;
-		float new_x = 0.0f, new_y = 0.0f, new_z = 0.0f, new_heading = 0.0f;
-		VALIDATE_THIS_IS_CLIENT;
-		if (items > 1)
-			to_zone = (int) SvIV(ST(1));
-		if (items > 2)
-			to_instance = (int) SvIV(ST(2));
-		if (items > 3)
-			new_x = (float) SvNV(ST(3));
-		if (items > 4)
-			new_y = (float) SvNV(ST(4));
-		if (items > 5)
-			new_z = (float) SvNV(ST(5));
-		if (items > 6)
-			new_heading = (float) SvNV(ST(6));
-
-		THIS->SetBindPoint2(0, to_zone, to_instance, glm::vec4(new_x, new_y, new_z, new_heading));
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Client_GetBindX); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetBindX) {
-	dXSARGS;
-	if (items < 1 || items > 2)
-		Perl_croak(aTHX_ "Usage: Client::GetBindX(int index = 0)"); // @categories Account and Character
-	{
-		Client *THIS;
-		int   index = 0;
-		float RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		if (items == 1)
-			index = 0;
-		else if (items == 2) {
-			index = (uint32) SvUV(ST(1));
-		}
-
-		RETVAL = THIS->GetBindX(index);
-		XSprePUSH;
-		PUSHn((double) RETVAL);
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Client_GetBindY); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetBindY) {
-	dXSARGS;
-	if (items < 1 || items > 2)
-		Perl_croak(aTHX_ "Usage: Client::GetBindY(int index = 0)"); // @categories Account and Character
-	{
-		Client *THIS;
-		int   index = 0;
-		float RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		if (items == 1)
-			index = 0;
-		else if (items == 2) {
-			index = (uint32) SvUV(ST(1));;
-		}
-
-		RETVAL = THIS->GetBindY(index);
-		XSprePUSH;
-		PUSHn((double) RETVAL);
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Client_GetBindZ); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetBindZ) {
-	dXSARGS;
-	if (items < 1 || items > 2)
-		Perl_croak(aTHX_ "Usage: Client::GetBindZ(int index = 0)"); // @categories Account and Character
-	{
-		Client *THIS;
-		int   index = 0;
-		float RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		if (items == 1)
-			index = 0;
-		else if (items == 2) {
-			index = (uint32) SvUV(ST(1));
-		}
-
-		RETVAL = THIS->GetBindZ(index);
-		XSprePUSH;
-		PUSHn((double) RETVAL);
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Client_GetBindHeading); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetBindHeading) {
-	dXSARGS;
-	if (items < 1 || items > 2)
-		Perl_croak(aTHX_ "Usage: Client::GetBindHeading(int index = 0)"); // @categories Account and Character
-	{
-		Client *THIS;
-		int   index = 0;
-		float RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		if (items == 1)
-			index = 0;
-		else if (items == 2) {
-			index = (uint32) SvUV(ST(1));
-		}
-
-		RETVAL = THIS->GetBindHeading(index);
-		XSprePUSH;
-		PUSHn((double) RETVAL);
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Client_GetBindZoneID); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetBindZoneID) {
-	dXSARGS;
-	if (items < 1 || items > 2)
-		Perl_croak(aTHX_ "Usage: Client::GetBindZoneID(int index = 0)"); // @categories Account and Character
-	{
-		Client *THIS;
-		uint32 index = 0;
-		uint32 RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		if (items == 1)
-			index = 0;
-		else if (items == 2) {
-			index = (uint32) SvUV(ST(1));
-		}
-
-		RETVAL = THIS->GetBindZoneID(index);
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
-}
-
-
-XS(XS_Client_MovePC); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_MovePC) {
-	dXSARGS;
-	if (items != 6)
-		Perl_croak(aTHX_ "Usage: Client::MovePC(THIS, uint32 zone_id, float x, float y, float z, float heading)"); // @categories Script Utility
-	{
-		Client *THIS;
-		uint32 zoneID  = (uint32) SvUV(ST(1));
-		float  x       = (float) SvNV(ST(2));
-		float  y       = (float) SvNV(ST(3));
-		float  z       = (float) SvNV(ST(4));
-		float  heading = (float) SvNV(ST(5));
-		VALIDATE_THIS_IS_CLIENT;
-		if (THIS->IsClient()) {
-			THIS->MovePC(zoneID, x, y, z, heading);
-		} else {
-			if (THIS->IsMerc()) {
-				LogDebug("[CLIENT] Perl(XS_Client_MovePC) attempted to process a type Merc reference");
-			}
-#ifdef BOTS
-			else if (THIS->IsBot()) {
-				LogDebug("[CLIENT] Perl(XS_Client_MovePC) attempted to process a type Bot reference");
-			}
-#endif
-			else if (THIS->IsNPC()) {
-				LogDebug("[CLIENT] Perl(XS_Client_MovePC) attempted to process a type NPC reference");
-			}
-			else {
-				LogDebug("[CLIENT] Perl(XS_Client_MovePC) attempted to process an Unknown type reference");
-			}
-
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		}
-
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Client_MovePCInstance); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_MovePCInstance) {
-	dXSARGS;
-	if (items != 7)
-		Perl_croak(aTHX_ "Usage: Client::MovePCInstance(THIS, uint32 zone_id, uint32 instance_id, float x, float y, float z, float heading)"); // @categories Adventures and Expeditions, Script Utility
-	{
-		Client *THIS;
-		uint32 zoneID     = (uint32) SvUV(ST(1));
-		uint32 instanceID = (uint32) SvUV(ST(2));
-		float  x          = (float) SvNV(ST(3));
-		float  y          = (float) SvNV(ST(4));
-		float  z          = (float) SvNV(ST(5));
-		float  heading    = (float) SvNV(ST(6));
-		VALIDATE_THIS_IS_CLIENT;
-		if (THIS->IsClient()) {
-			THIS->MovePC(zoneID, instanceID, x, y, z, heading);
-		} else {
-			if (THIS->IsMerc()) {
-				LogDebug("[CLIENT] Perl(XS_Client_MovePCInstance) attempted to process a type Merc reference");
-			}
-#ifdef BOTS
-			else if (THIS->IsBot()) {
-				LogDebug("[CLIENT] Perl(XS_Client_MovePCInstance) attempted to process a type Bot reference");
-			}
-#endif
-			else if (THIS->IsNPC()) {
-				LogDebug("[CLIENT] Perl(XS_Client_MovePCInstance) attempted to process a type NPC reference");
-			}
-			else {
-				LogDebug("[CLIENT] Perl(XS_Client_MovePCInstance) attempted to process an Unknown type reference");
-			}
-
-			Perl_croak(aTHX_ "THIS is not of type Client");
-
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		}
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Client_MoveZone); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_MoveZone) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::MoveZone(THIS, string zone_short_name)"); // @categories Script Utility
-	{
-		Client *THIS;
-		const char *zone_short_name  = (const char *) SvPV_nolen(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		if (THIS->IsClient()) {
-			THIS->MoveZone(zone_short_name);
-		} else {
-			if (THIS->IsMerc()) {
-				LogDebug("[CLIENT] Perl(XS_Client_MoveZone) attempted to process a type Merc reference");
-			}
-#ifdef BOTS
-			else if (THIS->IsBot()) {
-				LogDebug("[CLIENT] Perl(XS_Client_MoveZone) attempted to process a type Bot reference");
-			}
-#endif
-			else if (THIS->IsNPC()) {
-				LogDebug("[CLIENT] Perl(XS_Client_MoveZone) attempted to process a type NPC reference");
-			}
-			else {
-				LogDebug("[CLIENT] Perl(XS_Client_MoveZone) attempted to process an Unknown type reference");
-			}
-
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		}
-
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Client_MoveZoneGroup); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_MoveZoneGroup) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::MoveZoneGroup(THIS, string zone_short_name)"); // @categories Script Utility, Group
-	{
-		Client *THIS;
-		const char *zone_short_name  = (const char *) SvPV_nolen(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		if (THIS->IsClient()) {
-			THIS->MoveZoneGroup(zone_short_name);
-		} else {
-			if (THIS->IsMerc()) {
-				LogDebug("[CLIENT] Perl(XS_Client_MoveZoneGroup) attempted to process a type Merc reference");
-			}
-#ifdef BOTS
-			else if (THIS->IsBot()) {
-				LogDebug("[CLIENT] Perl(XS_Client_MoveZoneGroup) attempted to process a type Bot reference");
-			}
-#endif
-			else if (THIS->IsNPC()) {
-				LogDebug("[CLIENT] Perl(XS_Client_MoveZoneGroup) attempted to process a type NPC reference");
-			}
-			else {
-				LogDebug("[CLIENT] Perl(XS_Client_MoveZoneGroup) attempted to process an Unknown type reference");
-			}
-
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		}
-
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Client_MoveZoneRaid); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_MoveZoneRaid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::MoveZoneRaid(THIS, string zone_short_name)"); // @categories Script Utility, Raid
-	{
-		Client *THIS;
-		const char *zone_short_name  = (const char *) SvPV_nolen(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		if (THIS->IsClient()) {
-			THIS->MoveZoneRaid(zone_short_name);
-		} else {
-			if (THIS->IsMerc()) {
-				LogDebug("[CLIENT] Perl(XS_Client_MoveZoneRaid) attempted to process a type Merc reference");
-			}
-#ifdef BOTS
-			else if (THIS->IsBot()) {
-				LogDebug("[CLIENT] Perl(XS_Client_MoveZoneRaid) attempted to process a type Bot reference");
-			}
-#endif
-			else if (THIS->IsNPC()) {
-				LogDebug("[CLIENT] Perl(XS_Client_MoveZoneRaid) attempted to process a type NPC reference");
-			}
-			else {
-				LogDebug("[CLIENT] Perl(XS_Client_MoveZoneRaid) attempted to process an Unknown type reference");
-			}
-
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		}
-
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Client_MoveZoneInstance); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_MoveZoneInstance) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::MoveZoneInstance(THIS, uint16 instance_id)"); // @categories Adventures and Expeditions, Script Utility
-	{
-		Client *THIS;
-		uint16 instance_id  = (uint16) SvUV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		if (THIS->IsClient()) {
-			THIS->MoveZoneInstance(instance_id);
-		} else {
-			if (THIS->IsMerc()) {
-				LogDebug("[CLIENT] Perl(XS_Client_MoveZoneInstance) attempted to process a type Merc reference");
-			}
-#ifdef BOTS
-			else if (THIS->IsBot()) {
-				LogDebug("[CLIENT] Perl(XS_Client_MoveZoneInstance) attempted to process a type Bot reference");
-			}
-#endif
-			else if (THIS->IsNPC()) {
-				LogDebug("[CLIENT] Perl(XS_Client_MoveZoneInstance) attempted to process a type NPC reference");
-			}
-			else {
-				LogDebug("[CLIENT] Perl(XS_Client_MoveZoneInstance) attempted to process an Unknown type reference");
-			}
-
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		}
-
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Client_MoveZoneInstanceGroup); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_MoveZoneInstanceGroup) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::MoveZoneInstanceGroup(THIS, uint16 instance_id)"); // @categories Adventures and Expeditions, Script Utility, Group
-	{
-		Client *THIS;
-		uint16 instance_id  = (uint16) SvUV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		if (THIS->IsClient()) {
-			THIS->MoveZoneInstanceGroup(instance_id);
-		} else {
-			if (THIS->IsMerc()) {
-				LogDebug("[CLIENT] Perl(XS_Client_MoveZoneInstanceGroup) attempted to process a type Merc reference");
-			}
-#ifdef BOTS
-			else if (THIS->IsBot()) {
-				LogDebug("[CLIENT] Perl(XS_Client_MoveZoneInstanceGroup) attempted to process a type Bot reference");
-			}
-#endif
-			else if (THIS->IsNPC()) {
-				LogDebug("[CLIENT] Perl(XS_Client_MoveZoneInstanceGroup) attempted to process a type NPC reference");
-			}
-			else {
-				LogDebug("[CLIENT] Perl(XS_Client_MoveZoneInstanceGroup) attempted to process an Unknown type reference");
-			}
-
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		}
-
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Client_MoveZoneInstanceRaid); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_MoveZoneInstanceRaid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::MoveZoneInstanceRaid(THIS, uint16 instance_id)"); // @categories Adventures and Expeditions, Script Utility, Raid
-	{
-		Client *THIS;
-		uint16 instance_id  = (uint16) SvUV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		if (THIS->IsClient()) {
-			THIS->MoveZoneInstanceRaid(instance_id);
-		} else {
-			if (THIS->IsMerc()) {
-				LogDebug("[CLIENT] Perl(XS_Client_MoveZoneInstanceRaid) attempted to process a type Merc reference");
-			}
-#ifdef BOTS
-			else if (THIS->IsBot()) {
-				LogDebug("[CLIENT] Perl(XS_Client_MoveZoneInstanceRaid) attempted to process a type Bot reference");
-			}
-#endif
-			else if (THIS->IsNPC()) {
-				LogDebug("[CLIENT] Perl(XS_Client_MoveZoneInstanceRaid) attempted to process a type NPC reference");
-			}
-			else {
-				LogDebug("[CLIENT] Perl(XS_Client_MoveZoneInstanceRaid) attempted to process an Unknown type reference");
-			}
-
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		}
-
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Client_ChangeLastName); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_ChangeLastName) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::ChangeLastName(THIS, string last_name)"); // @categories Account and Character
-	{
-		Client *THIS;
-		char   *in_lastname = (char *) SvPV_nolen(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->ChangeLastName(in_lastname);
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Client_GetFactionLevel); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetFactionLevel) {
-	dXSARGS;
-	if (items != 8)
-		Perl_croak(aTHX_ "Usage: Client::GetFactionLevel(THIS, uint32 character_id, uint32 npc_id, uint32 player_race_id, uint32 player_class_id, uint32 player_deity_id, uint32 player_faction_id, Mob*)"); // @categories Faction
-	{
-		Client *THIS;
-		FACTION_VALUE RETVAL;
-		dXSTARG;
-		uint32        char_id  = (uint32) SvUV(ST(1));
-		uint32        npc_id   = (uint32) SvUV(ST(2));
-		uint32        p_race   = (uint32) SvUV(ST(3));
-		uint32        p_class  = (uint32) SvUV(ST(4));
-		uint32        p_deity  = (uint32) SvUV(ST(5));
-		int32         pFaction = (int32) SvIV(ST(6));
-		Mob *tnpc;
-		VALIDATE_THIS_IS_CLIENT;
-		if (sv_derived_from(ST(7), "Mob")) {
-			IV tmp = SvIV((SV *) SvRV(ST(7)));
-			tnpc = INT2PTR(Mob *, tmp);
-		} else
-			Perl_croak(aTHX_ "tnpc is not of type Mob");
-		if (tnpc == nullptr)
-			Perl_croak(aTHX_ "tnpc is nullptr, avoiding crash.");
-
-		RETVAL = THIS->GetFactionLevel(char_id, npc_id, p_race, p_class, p_deity, pFaction, tnpc);
-		XSprePUSH;
-		PUSHi((IV) RETVAL);
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Client_SetFactionLevel); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_SetFactionLevel) {
-	dXSARGS;
-	if (items != 6)
-		Perl_croak(aTHX_ "Usage: Client::SetFactionLevel(THIS, uint32 character_id, uint32 npc_id, uint8 character_class, uint8 character_race, uint8 character_deity)"); // @categories Faction
-	{
-		Client *THIS;
-		uint32 char_id    = (uint32) SvUV(ST(1));
-		uint32 npc_id     = (uint32) SvUV(ST(2));
-		uint8  char_class = (uint8) SvUV(ST(3));
-		uint8  char_race  = (uint8) SvUV(ST(4));
-		uint8  char_deity = (uint8) SvUV(ST(5));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->SetFactionLevel(char_id, npc_id, char_class, char_race, char_deity);
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Client_SetFactionLevel2); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_SetFactionLevel2) {
-	dXSARGS;
-	if (items < 7 || items > 8)
-		Perl_croak(aTHX_ "Usage: Client::SetFactionLevel2(THIS, uint32 character_id, int32 faction_id, uint8 character_class, uint8 character_race, uint8 character_deity, int32 value, uint8 temp)"); // @categories Faction
-	{
-		Client *THIS;
-		uint32 char_id    = (uint32) SvUV(ST(1));
-		int32  faction_id = (int32) SvIV(ST(2));
-		uint8  char_class = (uint8) SvUV(ST(3));
-		uint8  char_race  = (uint8) SvUV(ST(4));
-		uint8  char_deity = (uint8) SvUV(ST(5));
-		int32  value      = (int32) SvIV(ST(6));
-		uint8  temp;
-		VALIDATE_THIS_IS_CLIENT;
-		if (items == 7)
-			temp = 0;
-		else {
-			temp = (uint8) SvUV(ST(7));
-		}
-
-		THIS->SetFactionLevel2(char_id, faction_id, char_class, char_race, char_deity, value, temp);
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Client_GetRawItemAC); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetRawItemAC) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetRawItemAC(THIS)"); // @categories Inventory and Items
-	{
-		Client *THIS;
-		int16 RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetRawItemAC();
-		XSprePUSH;
-		PUSHi((IV) RETVAL);
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Client_AccountID); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_AccountID) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::AccountID(THIS)"); // @categories Account and Character
-	{
-		Client *THIS;
-		uint32 RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->AccountID();
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Client_AccountName); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_AccountName) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::AccountName(THIS)"); // @categories Account and Character
-	{
-		Client     *THIS;
-		Const_char *RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->AccountName();
-		sv_setpv(TARG, RETVAL);
-		XSprePUSH;
-		PUSHTARG;
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Client_Admin); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_Admin) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::Admin(THIS)"); // @categories Account and Character
-	{
-		Client *THIS;
-		int16 RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->Admin();
-		XSprePUSH;
-		PUSHi((IV) RETVAL);
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Client_CharacterID); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_CharacterID) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::CharacterID(THIS)"); // @categories Account and Character
-	{
-		Client *THIS;
-		uint32 RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->CharacterID();
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Client_UpdateAdmin); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_UpdateAdmin) {
-	dXSARGS;
-	if (items < 1 || items > 2)
-		Perl_croak(aTHX_ "Usage: Client::UpdateAdmin(THIS, bool from_db = true)"); // @categories Account and Character
-	{
-		Client *THIS;
-		bool iFromDB;
-		VALIDATE_THIS_IS_CLIENT;
-		if (items < 2)
-			iFromDB = true;
-		else {
-			iFromDB = (bool) SvTRUE(ST(1));
-		}
-
-		THIS->UpdateAdmin(iFromDB);
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Client_UpdateWho); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_UpdateWho) {
-	dXSARGS;
-	if (items < 1 || items > 2)
-		Perl_croak(aTHX_ "Usage: Client::UpdateWho(THIS, uint8 remove = 0)"); // @categories Script Utility
-	{
-		Client *THIS;
-		uint8  remove;
-		VALIDATE_THIS_IS_CLIENT;
-		if (items < 2)
-			remove = 0;
-		else {
-			remove = (uint8) SvUV(ST(1));
-		}
-
-		THIS->UpdateWho(remove);
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Client_GuildRank); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GuildRank) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GuildRank(THIS)"); // @categories Account and Character, Guild
-	{
-		Client *THIS;
-		uint8 RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GuildRank();
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Client_GuildID); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GuildID) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GuildID(THIS)"); // @categories Account and Character, Guild
-	{
-		Client *THIS;
-		uint32 RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GuildID();
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Client_GetFace); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetFace) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetFace(THIS)"); // @categories Account and Character, Stats and Attributes
-	{
-		Client *THIS;
-		uint8 RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetFace();
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Client_TakeMoneyFromPP); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_TakeMoneyFromPP) {
-	dXSARGS;
-	if (items < 2 || items > 3)
-		Perl_croak(aTHX_ "Usage: Client::TakeMoneyFromPP(THIS, uint32 copper, [bool update_client = false])"); // @categories Currency and Points
-	{
-		Client *THIS;
-		bool has_money;
-		bool update_client = false;
-		uint64 copper = (uint64) SvUV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-
-		if (items == 3) {
-			update_client = (bool) SvTRUE(ST(2));
-		}
-
-		has_money = THIS->TakeMoneyFromPP(copper, update_client);
-		ST(0) = boolSV(has_money);
-		sv_2mortal(ST(0));
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Client_AddMoneyToPP); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_AddMoneyToPP) {
-	dXSARGS;
-	if (items < 5 || items > 6)
-		Perl_croak(aTHX_ "Usage: Client::AddMoneyToPP(THIS, uint32 copper, uint32 silver, uint32 gold, uint32 platinum, [bool update_client = false])"); // @categories Currency and Points
-	{
-		Client *THIS;
-		uint32 copper = (uint32) SvUV(ST(1));
-		uint32 silver = (uint32) SvUV(ST(2));
-		uint32 gold = (uint32) SvUV(ST(3));
-		uint32 platinum = (uint32) SvUV(ST(4));
-		bool update_client = false;
-		VALIDATE_THIS_IS_CLIENT;
-
-		if (items == 6) {
-			update_client = (bool) SvTRUE(ST(5));
-		}
-
-		THIS->AddMoneyToPP(copper, silver, gold, platinum, update_client);
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Client_TGB); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_TGB) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::TGB(THIS)"); // @categories Spells and Disciplines
-	{
-		Client *THIS;
-		bool RETVAL;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->TGB();
-		ST(0) = boolSV(RETVAL);
-		sv_2mortal(ST(0));
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Client_GetSkillPoints); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetSkillPoints) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetSkillPoints(THIS)"); // @categories Skills and Recipes
-	{
-		Client *THIS;
-		uint16 RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetSkillPoints();
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Client_SetSkillPoints); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_SetSkillPoints) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SetSkillPoints(THIS, inp)"); // @categories Skills and Recipes
-	{
-		Client *THIS;
-		int inp = (int) SvIV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->SetSkillPoints(inp);
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Client_IncreaseSkill); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_IncreaseSkill) {
-	dXSARGS;
-	if (items < 2 || items > 3)
-		Perl_croak(aTHX_ "Usage: Client::IncreaseSkill(THIS, int skill_id, int value = 1)"); // @categories Skills and Recipes
-	{
-		Client *THIS;
-		int skill_id = (int) SvIV(ST(1));
-		int value;
-		VALIDATE_THIS_IS_CLIENT;
-		if (items < 3)
-			value = 1;
-		else {
-			value = (int) SvIV(ST(2));
-		}
-
-		THIS->IncreaseSkill(skill_id, value);
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Client_IncreaseLanguageSkill); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_IncreaseLanguageSkill) {
-	dXSARGS;
-	if (items < 2 || items > 3)
-		Perl_croak(aTHX_ "Usage: Client::IncreaseLanguageSkill(THIS, int skill_id, int value = 1)"); // @categories Skills and Recipes
-	{
-		Client *THIS;
-		int skill_id = (int) SvIV(ST(1));
-		int value;
-		VALIDATE_THIS_IS_CLIENT;
-		if (items < 3)
-			value = 1;
-		else {
-			value = (int) SvIV(ST(2));
-		}
-
-		THIS->IncreaseLanguageSkill(skill_id, value);
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Client_GetRawSkill); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetRawSkill) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::GetRawSkill(THIS, int skill_id)"); // @categories Skills and Recipes
-	{
-		Client *THIS;
-		uint32                   RETVAL;
-		dXSTARG;
-		EQ::skills::SkillType skill_id = (EQ::skills::SkillType) SvUV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetRawSkill(skill_id);
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Client_HasSkill); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_HasSkill) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::HasSkill(THIS, int skill_id)"); // @categories Skills and Recipes
-	{
-		Client *THIS;
-		bool                     RETVAL;
-		EQ::skills::SkillType skill_id = (EQ::skills::SkillType) SvUV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->HasSkill(skill_id);
-		ST(0)                             = boolSV(RETVAL);
-		sv_2mortal(ST(0));
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Client_CanHaveSkill); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_CanHaveSkill) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::CanHaveSkill(THIS, int skill_id)"); // @categories Skills and Recipes
-	{
-		Client *THIS;
-		bool                     RETVAL;
-		EQ::skills::SkillType skill_id = (EQ::skills::SkillType) SvUV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->CanHaveSkill(skill_id);
-		ST(0)                             = boolSV(RETVAL);
-		sv_2mortal(ST(0));
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Client_SetSkill); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_SetSkill) {
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::SetSkill(THIS, int skill_id, uint16 value)"); // @categories Skills and Recipes
-	{
-		Client *THIS;
-		EQ::skills::SkillType skill_num = (EQ::skills::SkillType) SvUV(ST(1));
-		uint16                   value     = (uint16) SvUV(ST(2));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->SetSkill(skill_num, value);
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Client_AddSkill); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_AddSkill) {
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::AddSkill(THIS, int skill_id, uint16 value)"); // @categories Skills and Recipes
-	{
-		Client                   *THIS;
-		EQ::skills::SkillType skillid = (EQ::skills::SkillType) SvUV(ST(1));
-		uint16                   value   = (uint16) SvUV(ST(2));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->AddSkill(skillid, value);
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Client_CheckSpecializeIncrease); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_CheckSpecializeIncrease) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::CheckSpecializeIncrease(THIS, uint16 spell_id)"); // @categories Spells and Disciplines
-	{
-		Client *THIS;
-		uint16 spell_id = (uint16) SvUV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->CheckSpecializeIncrease(spell_id);
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Client_CheckIncreaseSkill); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_CheckIncreaseSkill) {
-	dXSARGS;
-	if (items < 2 || items > 3)
-		Perl_croak(aTHX_ "Usage: Client::CheckIncreaseSkill(THIS, int skill_id, int chance_modifier = 0)"); // @categories Skills and Recipes
-	{
-		Client *THIS;
-		bool                     RETVAL;
-		EQ::skills::SkillType skillid = (EQ::skills::SkillType) SvUV(ST(1));
-		int                      chancemodi;
-		VALIDATE_THIS_IS_CLIENT;
-		if (items < 3)
-			chancemodi = 0;
-		else {
-			chancemodi = (int) SvIV(ST(2));
-		}
-
-		RETVAL = THIS->CheckIncreaseSkill(skillid, nullptr, chancemodi);
-		ST(0)                            = boolSV(RETVAL);
-		sv_2mortal(ST(0));
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Client_SetLanguageSkill); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_SetLanguageSkill) {
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::SetLanguageSkill(THIS, int language_id, int value)"); // @categories Account and Character, Skills and Recipes, Stats and Attributes
-	{
-		Client *THIS;
-		int    langid = (int) SvIV(ST(1));
-		int    value  = (int) SvIV(ST(2));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->SetLanguageSkill(langid, value);
-	}
-	XSRETURN_EMPTY;
-
-}
-
-XS(XS_Client_MaxSkill); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_MaxSkill) {
-	dXSARGS;
-	if (items < 2 || items > 4)
-		Perl_croak(aTHX_ "Usage: Client::MaxSkill(THIS, uint16 skill_id, uint16 class_id, uint16 level)"); // @categories Skills and Recipes
-	{
-		Client                   *THIS;
-		uint16                   RETVAL;
-		EQ::skills::SkillType skillid = (EQ::skills::SkillType) SvUV(ST(1));
-		uint16                   class_  = 0;
-		uint16                   level   = 0;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		if (items > 2)
-			class_ = (uint16) SvUV(ST(2));
-		else
-			class_ = THIS->GetClass();
-
-		if (items > 3)
-			level = (uint16) SvUV(ST(3));
-		else
-			level = THIS->GetLevel();
-
-		RETVAL = THIS->MaxSkill(skillid, class_, level);
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Client_GMKill); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GMKill) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GMKill(THIS)"); // @categories Script Utility
-	{
-		Client *THIS;
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->GMKill();
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Client_IsMedding); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_IsMedding) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::IsMedding(THIS)"); // @categories Account and Character
-	{
-		Client *THIS;
-		bool RETVAL;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->IsMedding();
-		ST(0) = boolSV(RETVAL);
-		sv_2mortal(ST(0));
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Client_GetDuelTarget); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetDuelTarget) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetDuelTarget(THIS)"); // @categories Account and Character, Script Utility
-	{
-		Client *THIS;
-		uint32 RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetDuelTarget();
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Client_IsDueling); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_IsDueling) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::IsDueling(THIS)"); // @categories Account and Character
-	{
-		Client *THIS;
-		bool RETVAL;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->IsDueling();
-		ST(0) = boolSV(RETVAL);
-		sv_2mortal(ST(0));
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Client_SetDuelTarget); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_SetDuelTarget) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SetDuelTarget(THIS, set_id)"); // @categories Account and Character
-	{
-		Client *THIS;
-		uint32 set_id = (uint32) SvUV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->SetDuelTarget(set_id);
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Client_SetDueling); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_SetDueling) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SetDueling(THIS, duel)"); // @categories Account and Character, Script Utility
-	{
-		Client *THIS;
-		bool duel = (bool) SvTRUE(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->SetDueling(duel);
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Client_ResetAA); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_ResetAA) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::ResetAA(THIS)"); // @categories Alternative Advancement
-	{
-		Client *THIS;
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->ResetAA();
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Client_MemSpell); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_MemSpell) {
-	dXSARGS;
-	if (items < 3 || items > 4)
-		Perl_croak(aTHX_ "Usage: Client::MemSpell(THIS, uint16 spell_id, int slot, [bool update_client = true])"); // @categories Spells and Disciplines
-	{
-		Client *THIS;
-		uint16 spell_id = (uint16) SvUV(ST(1));
-		int    slot     = (int) SvIV(ST(2));
-		bool   update_client;
-		VALIDATE_THIS_IS_CLIENT;
-		if (items < 4)
-			update_client = true;
-		else {
-			update_client = (bool) SvTRUE(ST(3));
-		}
-
-		THIS->MemSpell(spell_id, slot, update_client);
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Client_UnmemSpell); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_UnmemSpell) {
-	dXSARGS;
-	if (items < 2 || items > 3)
-		Perl_croak(aTHX_ "Usage: Client::UnmemSpell(THIS, int slot, [bool update_client = true])"); // @categories Spells and Disciplines
-	{
-		Client *THIS;
-		int    slot = (int) SvIV(ST(1));
-		bool   update_client;
-		VALIDATE_THIS_IS_CLIENT;
-		if (items < 3)
-			update_client = true;
-		else {
-			update_client = (bool) SvTRUE(ST(2));
-		}
-
-		THIS->UnmemSpell(slot, update_client);
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Client_UnmemSpellBySpellID); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_UnmemSpellBySpellID) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::UnmemSpellBySpellID(THIS, int32 spell_id)"); // @categories Spells and Disciplines
-	{
-		Client *THIS;
-		int32  spell_id = (int32) SvIV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->UnmemSpellBySpellID(spell_id);
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Client_UnmemSpellAll); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_UnmemSpellAll) {
-	dXSARGS;
-	if (items < 1 || items > 2)
-		Perl_croak(aTHX_ "Usage: Client::UnmemSpellAll(THIS, [bool update_client = true])"); // @categories Spells and Disciplines
-	{
-		Client *THIS;
-		bool   update_client;
-		VALIDATE_THIS_IS_CLIENT;
-		if (items < 2)
-			update_client = true;
-		else {
-			update_client = (bool) SvTRUE(ST(1));
-		}
-
-		THIS->UnmemSpellAll(update_client);
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Client_FindEmptyMemSlot); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_FindEmptyMemSlot) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::FindEmptyMemSlot(THIS)"); // @categories Account and Character, Spells and Disciplines
-	{
-		Client *THIS;
-		int RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->FindEmptyMemSlot();
-		XSprePUSH;
-		PUSHi((IV) RETVAL);
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Client_FindMemmedSpellBySlot); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_FindMemmedSpellBySlot) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::FindMemmedSpellBySlot(THIS, int slot)"); // @categories Account and Character, Spells and Disciplines
-	{
-		Client *THIS;
-		uint16 RETVAL;
-		dXSTARG;
-		int slot = SvIV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->FindMemmedSpellBySlot(slot);
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Client_FindMemmedSpellBySpellID); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_FindMemmedSpellBySpellID) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::FindMemmedSpellBySpellID(THIS, uint16 spell_id)"); // @categories Account and Character, Spells and Disciplines
-	{
-		Client *THIS;
-		int RETVAL;
-		dXSTARG;
-		uint16 spell_id = (uint16) SvUV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->FindMemmedSpellBySpellID(spell_id);
-		XSprePUSH;
-		PUSHi((IV) RETVAL);
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Client_MemmedCount); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_MemmedCount) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::MemmedCount(THIS)"); // @categories Spells and Disciplines
-	{
-		Client *THIS;
-		uint32  RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->MemmedCount();
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Client_ScribeSpell); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_ScribeSpell) {
-	dXSARGS;
-	if (items < 3 || items > 4)
-		Perl_croak(aTHX_ "Usage: Client::ScribeSpell(THIS, uint16 spell_id, int slot, [bool update_client = true])"); // @categories Spells and Disciplines
-	{
-		Client *THIS;
-		uint16 spell_id = (uint16) SvUV(ST(1));
-		int    slot     = (int) SvIV(ST(2));
-		bool   update_client;
-		VALIDATE_THIS_IS_CLIENT;
-		if (items < 4)
-			update_client = true;
-		else {
-			update_client = (bool) SvTRUE(ST(3));
-		}
-
-		THIS->ScribeSpell(spell_id, slot, update_client);
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Client_UnscribeSpell); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_UnscribeSpell) {
-	dXSARGS;
-	if (items < 2 || items > 3)
-		Perl_croak(aTHX_ "Usage: Client::UnscribeSpell(THIS, int slot, [bool update_client = true])"); // @categories Spells and Disciplines
-	{
-		Client *THIS;
-		int    slot = (int) SvIV(ST(1));
-		bool   update_client;
-		VALIDATE_THIS_IS_CLIENT;
-		if (items < 3)
-			update_client = true;
-		else {
-			update_client = (bool) SvTRUE(ST(2));
-		}
-
-		THIS->UnscribeSpell(slot, update_client);
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Client_UnscribeSpellAll); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_UnscribeSpellAll) {
-	dXSARGS;
-	if (items < 1 || items > 2)
-		Perl_croak(aTHX_ "Usage: Client::UnscribeSpellAll(THIS, [bool update_client = true])");
-	{
-		Client *THIS;
-		bool update_client;
-		VALIDATE_THIS_IS_CLIENT;
-		if (items < 2)
-			update_client = true;
-		else {
-			update_client = (bool) SvTRUE(ST(1));
-		}
-
-		THIS->UnscribeSpellAll(update_client);
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Client_TrainDiscBySpellID); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_TrainDiscBySpellID) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::TrainDiscBySpellID(THIS, int32 spell_id)"); // @categories Spells and Disciplines
-	{
-		Client *THIS;
-		int32 spell_id = (int32) SvIV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->TrainDiscBySpellID(spell_id);
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Client_GetDiscSlotBySpellID); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetDiscSlotBySpellID) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::GetDiscSlotBySpellID(THIS, int32 spell_id)"); // @categories Spells and Disciplines
-	{
-		Client *THIS;
-		int   RETVAL;
-		int32 spell_id = (int32) SvIV(ST(1));
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetDiscSlotBySpellID(spell_id);
-		XSprePUSH;
-		PUSHi((IV) RETVAL);
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Client_UntrainDisc); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_UntrainDisc) {
-	dXSARGS;
-	if (items < 2 || items > 3)
-		Perl_croak(aTHX_ "Usage: Client::UntrainDisc(THIS, int slot, [bool update_client = true])"); // @categories Spells and Disciplines
-	{
-		Client *THIS;
-		int    slot = (int) SvIV(ST(1));
-		bool   update_client;
-		VALIDATE_THIS_IS_CLIENT;
-		if (items < 3)
-			update_client = true;
-		else {
-			update_client = (bool) SvTRUE(ST(2));
-		}
-
-		THIS->UntrainDisc(slot, update_client);
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Client_UntrainDiscAll); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_UntrainDiscAll) {
-	dXSARGS;
-	if (items < 1 || items > 2)
-		Perl_croak(aTHX_ "Usage: Client::UntrainDiscAll(THIS, [update_client = true])"); // @categories Spells and Disciplines
-	{
-		Client *THIS;
-		bool   update_client;
-		VALIDATE_THIS_IS_CLIENT;
-		if (items < 2)
-			update_client = true;
-		else {
-			update_client = (bool) SvTRUE(ST(1));
-		}
-
-		THIS->UntrainDiscAll(update_client);
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Client_IsStanding); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_IsStanding)
+void Perl_Client_SendSound(Client* self) // @categories Script Utility
 {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::IsStanding(THIS)"); // @categories Account and Character
-	{
-		Client *		THIS;
-		bool		RETVAL;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->IsStanding();
-		ST(0) = boolSV(RETVAL);
-		sv_2mortal(ST(0));
-	}
-	XSRETURN(1);
+	self->SendSound();
 }
 
-XS(XS_Client_Sit);
-XS(XS_Client_Sit) {
-    dXSARGS;
-    if (items != 1)
-        Perl_croak(aTHX_ "Usage: Client::Sit(THIS)");
-    {
-        Client *THIS;
-        VALIDATE_THIS_IS_CLIENT;
-        THIS->Sit();
-    }
-    XSRETURN_EMPTY;
-}
-
-XS(XS_Client_IsSitting); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_IsSitting) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::IsSitting(THIS)"); // @categories Account and Character
-	{
-		Client *THIS;
-		bool RETVAL;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->IsSitting();
-		ST(0) = boolSV(RETVAL);
-		sv_2mortal(ST(0));
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Client_IsCrouching); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_IsCrouching)
+bool Perl_Client_Save(Client* self, uint8 commit_now) // @categories Script Utility
 {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::IsCrouching(THIS)"); // @categories Account and Character
-	{
-		Client *		THIS;
-		bool		RETVAL;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->IsCrouching();
-		ST(0) = boolSV(RETVAL);
-		sv_2mortal(ST(0));
-	}
-	XSRETURN(1);
+	return self->Save(commit_now);
 }
 
-XS(XS_Client_IsBecomeNPC); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_IsBecomeNPC) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::IsBecomeNPC(THIS)"); // @categories Account and Character
-	{
-		Client *THIS;
-		bool RETVAL;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->IsBecomeNPC();
-		ST(0) = boolSV(RETVAL);
-		sv_2mortal(ST(0));
-	}
-	XSRETURN(1);
+void Perl_Client_SaveBackup(Client* self) // @categories Script Utility
+{
+	self->SaveBackup();
+}
+
+bool Perl_Client_Connected(Client* self) // @categories Script Utility
+{
+	return self->Connected();
+}
+
+bool Perl_Client_InZone(Client* self) // @categories Script Utility
+{
+	return self->InZone();
+}
+
+void Perl_Client_Kick(Client* self) // @categories Script Utility
+{
+	self->Kick("Perl Quest");
+}
+
+void Perl_Client_Disconnect(Client* self) // @categories Script Utility
+{
+	self->Disconnect();
+}
+
+bool Perl_Client_IsLD(Client* self) // @categories Account and Character
+{
+	return self->IsLD();
+}
+
+void Perl_Client_WorldKick(Client* self) // @categories Script Utility
+{
+	self->WorldKick();
+}
+
+void Perl_Client_SendToGuildHall(Client* self) // @categories Script Utility, Guild
+{
+	self->SendToGuildHall();
+}
+
+int Perl_Client_GetAnon(Client* self) // @categories Account and Character, Stats and Attributes
+{
+	return self->GetAnon();
+}
+
+void Perl_Client_SetAnon(Client* self, uint8 anon_flag) // @categories Account and Character, Stats and Attributes
+{
+	self->SetAnon(anon_flag);
+}
+
+int Perl_Client_GetAFK(Client* self) // @categories Account and Character, Stats and Attributes
+{
+	return self->GetAFK();
+}
+
+void Perl_Client_SetAFK(Client* self, uint8 afk_flag) // @categories Account and Character, Stats and Attributes
+{
+	self->SetAFK(afk_flag);
+}
+
+void Perl_Client_Duck(Client* self) // @categories Account and Character
+{
+	self->Duck();
+}
+
+void Perl_Client_DyeArmorBySlot(Client* self, uint8 slot, uint8 red, uint8 green, uint8 blue) // @categories Account and Character, Inventory and Items
+{
+	self->DyeArmorBySlot(slot, red, green, blue);
+}
+
+void Perl_Client_DyeArmorBySlot(Client* self, uint8 slot, uint8 red, uint8 green, uint8 blue, uint8 use_tint) // @categories Account and Character, Inventory and Items
+{
+	self->DyeArmorBySlot(slot, red, green, blue, use_tint);
+}
+
+void Perl_Client_Stand(Client* self) // @categories Script Utility
+{
+	self->Stand();
+}
+
+void Perl_Client_SetGM(Client* self, bool on) // @categories Account and Character
+{
+	self->SetGM(on);
+}
+
+void Perl_Client_SetPVP(Client* self, bool on) // @categories Account and Character
+{
+	self->SetPVP(on);
+}
+
+bool Perl_Client_GetPVP(Client* self) // @categories Account and Character, Stats and Attributes
+{
+	return self->GetPVP();
+}
+
+bool Perl_Client_GetGM(Client* self) // @categories Account and Character
+{
+	return self->GetGM();
+}
+
+void Perl_Client_SetBaseClass(Client* self, uint32 class_id) // @categories Account and Character, Stats and Attributes
+{
+	self->SetBaseClass(class_id);
+}
+
+void Perl_Client_SetBaseRace(Client* self, uint32 race_id) // @categories Account and Character, Stats and Attributes
+{
+	self->SetBaseRace(race_id);
+}
+
+void Perl_Client_SetBaseGender(Client* self, uint32 gender_id) // @categories Account and Character, Stats and Attributes
+{
+	self->SetBaseGender(gender_id);
+}
+
+int Perl_Client_GetBaseFace(Client* self) // @categories Stats and Attributes
+{
+	return self->GetBaseFace();
+}
+
+int Perl_Client_GetLanguageSkill(Client* self, uint16 lanuage_id) // @categories Account and Character, Stats and Attributes
+{
+	return self->GetLanguageSkill(lanuage_id);
+}
+
+uint32_t Perl_Client_GetLDoNPointsTheme(Client* self, int theme) // @categories Currency and Points
+{
+	return self->GetLDoNPointsTheme(theme);
+}
+
+int Perl_Client_GetBaseSTR(Client* self) // @categories Stats and Attributes
+{
+	return self->GetBaseSTR();
+}
+
+int Perl_Client_GetBaseSTA(Client* self) // @categories Stats and Attributes
+{
+	return self->GetBaseSTA();
+}
+
+int Perl_Client_GetBaseCHA(Client* self) // @categories Stats and Attributes
+{
+	return self->GetBaseCHA();
+}
+
+int Perl_Client_GetBaseDEX(Client* self) // @categories Stats and Attributes
+{
+	return self->GetBaseDEX();
+}
+
+int Perl_Client_GetBaseINT(Client* self) // @categories Stats and Attributes
+{
+	return self->GetBaseINT();
+}
+
+int Perl_Client_GetBaseAGI(Client* self) // @categories Stats and Attributes
+{
+	return self->GetBaseAGI();
+}
+
+int Perl_Client_GetBaseWIS(Client* self) // @categories Stats and Attributes
+{
+	return self->GetBaseWIS();
+}
+
+int Perl_Client_GetWeight(Client* self) // @categories Account and Character, Stats and Attributes
+{
+	return self->GetWeight();
+}
+
+uint32_t Perl_Client_GetEXP(Client* self) // @categories Experience and Level
+{
+	return self->GetEXP();
+}
+
+uint32_t Perl_Client_GetAAExp(Client* self) // @categories Alternative Advancement, Experience and Level
+{
+	return self->GetAAXP();
+}
+
+uint32_t Perl_Client_GetAAPercent(Client* self) // @categories Alternative Advancement, Experience and Level
+{
+	return self->GetAAPercent();
+}
+
+uint32_t Perl_Client_GetTotalSecondsPlayed(Client* self) // @categories Account and Character, Stats and Attributes
+{
+	return self->GetTotalSecondsPlayed();
+}
+
+bool Perl_Client_UpdateLDoNPoints(Client* self, uint32 theme_id, int points) // @categories Currency and Points
+{
+	return self->UpdateLDoNPoints(theme_id, points);
+}
+
+void Perl_Client_SetDeity(Client* self, uint32 deity_id) // @categories Account and Character, Stats and Attributes
+{
+	self->SetDeity(deity_id);
+}
+
+void Perl_Client_AddEXP(Client* self, uint32 add_exp) // @categories Experience and Level
+{
+	self->AddEXP(add_exp);
+}
+
+void Perl_Client_AddEXP(Client* self, uint32 add_exp, uint8 conlevel) // @categories Experience and Level
+{
+	self->AddEXP(add_exp, conlevel);
+}
+
+void Perl_Client_AddEXP(Client* self, uint32 add_exp, uint8 conlevel, bool resexp) // @categories Experience and Level
+{
+	self->AddEXP(add_exp, conlevel, resexp);
+}
+
+void Perl_Client_SetEXP(Client* self, uint64 set_exp, uint64 set_aaxp) // @categories Experience and Level
+{
+	self->SetEXP(set_exp, set_aaxp);
+}
+
+void Perl_Client_SetEXP(Client* self, uint64 set_exp, uint64 set_aaxp, bool resexp) // @categories Experience and Level
+{
+	self->SetEXP(set_exp, set_aaxp, resexp);
+}
+
+void Perl_Client_SetBindPoint(Client* self) // @categories Account and Character, Stats and Attributes
+{
+	self->SetBindPoint2(0);
+}
+
+void Perl_Client_SetBindPoint(Client* self, int to_zone) // @categories Account and Character, Stats and Attributes
+{
+	self->SetBindPoint2(0, to_zone);
+}
+
+void Perl_Client_SetBindPoint(Client* self, int to_zone, int to_instance) // @categories Account and Character, Stats and Attributes
+{
+	self->SetBindPoint2(0, to_zone, to_instance);
+}
+
+void Perl_Client_SetBindPoint(Client* self, int to_zone, int to_instance, float new_x) // @categories Account and Character, Stats and Attributes
+{
+	self->SetBindPoint2(0, to_zone, to_instance, glm::vec4(new_x, 0.0f, 0.0f, 0.0f));
+}
+
+void Perl_Client_SetBindPoint(Client* self, int to_zone, int to_instance, float new_x, float new_y) // @categories Account and Character, Stats and Attributes
+{
+	self->SetBindPoint2(0, to_zone, to_instance, glm::vec4(new_x, new_y, 0.0f, 0.0f));
+}
+
+void Perl_Client_SetBindPoint(Client* self, int to_zone, int to_instance, float new_x, float new_y, float new_z) // @categories Account and Character, Stats and Attributes
+{
+	self->SetBindPoint2(0, to_zone, to_instance, glm::vec4(new_x, new_y, new_z, 0.0f));
+}
+
+void Perl_Client_SetBindPoint(Client* self, int to_zone, int to_instance, float new_x, float new_y, float new_z, float new_heading) // @categories Account and Character, Stats and Attributes
+{
+	self->SetBindPoint2(0, to_zone, to_instance, glm::vec4(new_x, new_y, new_z, new_heading));
+}
+
+float Perl_Client_GetBindX(Client* self) // @categories Account and Character
+{
+	return self->GetBindX();
+}
+
+float Perl_Client_GetBindX(Client* self, int index) // @categories Account and Character
+{
+	return self->GetBindX(index);
+}
+
+float Perl_Client_GetBindY(Client* self) // @categories Account and Character
+{
+	return self->GetBindY();
+}
+
+float Perl_Client_GetBindY(Client* self, int index) // @categories Account and Character
+{
+	return self->GetBindY(index);
+}
+
+float Perl_Client_GetBindZ(Client* self) // @categories Account and Character
+{
+	return self->GetBindZ();
+}
+
+float Perl_Client_GetBindZ(Client* self, int index) // @categories Account and Character
+{
+	return self->GetBindZ(index);
+}
+
+float Perl_Client_GetBindHeading(Client* self) // @categories Account and Character
+{
+	return self->GetBindHeading();
+}
+
+float Perl_Client_GetBindHeading(Client* self, int index) // @categories Account and Character
+{
+	return self->GetBindHeading(index);
+}
+
+uint32_t Perl_Client_GetBindZoneID(Client* self) // @categories Account and Character
+{
+	return self->GetBindZoneID();
+}
+
+uint32_t Perl_Client_GetBindZoneID(Client* self, int index) // @categories Account and Character
+{
+	return self->GetBindZoneID(index);
+}
+
+void Perl_Client_MovePC(Client* self, uint32 zone_id, float x, float y, float z, float heading) // @categories Script Utility
+{
+	self->MovePC(zone_id, x, y, z, heading);
+}
+
+void Perl_Client_MovePCInstance(Client* self, uint32 zone_id, uint32 instance_id, float x, float y, float z, float heading) // @categories Adventures and Expeditions, Script Utility
+{
+	self->MovePC(zone_id, instance_id, x, y, z, heading);
+}
+
+void Perl_Client_ChangeLastName(Client* self, std::string last_name) // @categories Account and Character
+{
+	self->ChangeLastName(last_name);
+}
+
+int Perl_Client_GetFactionLevel(Client* self, uint32 char_id, uint32 npc_id, uint32 race_id, uint32 class_id, uint32 deity_id, uint32 faction_id, Mob* tnpc) // @categories Faction
+{
+	return self->GetFactionLevel(char_id, npc_id, race_id, class_id, deity_id, faction_id, tnpc);
+}
+
+void Perl_Client_SetFactionLevel(Client* self, uint32 char_id, uint32 npc_id, uint8 char_class, uint8 char_race, uint8 char_deity) // @categories Faction
+{
+	self->SetFactionLevel(char_id, npc_id, char_class, char_race, char_deity);
+}
+
+void Perl_Client_SetFactionLevel2(Client* self, uint32 char_id, int32 faction_id, uint8 char_class, uint8 char_race, uint8 char_deity, int32 value) // @categories Faction
+{
+	self->SetFactionLevel2(char_id, faction_id, char_class, char_race, char_deity, value, 0);
+}
+
+void Perl_Client_SetFactionLevel2(Client* self, uint32 char_id, int32 faction_id, uint8 char_class, uint8 char_race, uint8 char_deity, int32 value, uint8 temp) // @categories Faction
+{
+	self->SetFactionLevel2(char_id, faction_id, char_class, char_race, char_deity, value, temp);
+}
+
+int Perl_Client_GetRawItemAC(Client* self) // @categories Inventory and Items
+{
+	return self->GetRawItemAC();
+}
+
+uint32_t Perl_Client_AccountID(Client* self) // @categories Account and Character
+{
+	return self->AccountID();
+}
+
+std::string Perl_Client_AccountName(Client* self) // @categories Account and Character
+{
+	return self->AccountName();
+}
+
+int16 Perl_Client_Admin(Client* self) // @categories Account and Character
+{
+	return self->Admin();
+}
+
+uint32_t Perl_Client_CharacterID(Client* self) // @categories Account and Character
+{
+	return self->CharacterID();
+}
+
+void Perl_Client_UpdateAdmin(Client* self) // @categories Account and Character
+{
+	self->UpdateAdmin();
+}
+
+void Perl_Client_UpdateAdmin(Client* self, bool from_database) // @categories Account and Character
+{
+	self->UpdateAdmin(from_database);
+}
+
+void Perl_Client_UpdateWho(Client* self) // @categories Script Utility
+{
+	self->UpdateWho();
+}
+
+void Perl_Client_UpdateWho(Client* self, uint8 remove) // @categories Script Utility
+{
+	self->UpdateWho(remove);
+}
+
+int Perl_Client_GuildRank(Client* self) // @categories Account and Character, Guild
+{
+	return self->GuildRank();
+}
+
+uint32_t Perl_Client_GuildID(Client* self) // @categories Account and Character, Guild
+{
+	return self->GuildID();
+}
+
+int Perl_Client_GetFace(Client* self) // @categories Account and Character, Stats and Attributes
+{
+	return self->GetFace();
+}
+
+bool Perl_Client_TakeMoneyFromPP(Client* self, uint64 copper) // @categories Currency and Points
+{
+	return self->TakeMoneyFromPP(copper);
+}
+
+bool Perl_Client_TakeMoneyFromPP(Client* self, uint64 copper, bool update_client) // @categories Currency and Points
+{
+	return self->TakeMoneyFromPP(copper, update_client);
+}
+
+void Perl_Client_AddMoneyToPP(Client* self, uint32 copper, uint32 silver, uint32 gold, uint32 platinum) // @categories Currency and Points
+{
+	self->AddMoneyToPP(copper, silver, gold, platinum);
+}
+
+void Perl_Client_AddMoneyToPP(Client* self, uint32 copper, uint32 silver, uint32 gold, uint32 platinum, bool update_client) // @categories Currency and Points
+{
+	self->AddMoneyToPP(copper, silver, gold, platinum, update_client);
+}
+
+bool Perl_Client_TGB(Client* self) // @categories Spells and Disciplines
+{
+	return self->TGB();
+}
+
+int Perl_Client_GetSkillPoints(Client* self) // @categories Skills and Recipes
+{
+	return self->GetSkillPoints();
+}
+
+void Perl_Client_SetSkillPoints(Client* self, int points) // @categories Skills and Recipes
+{
+	self->SetSkillPoints(points);
+}
+
+void Perl_Client_IncreaseSkill(Client* self, int skill_id) // @categories Skills and Recipes
+{
+	self->IncreaseSkill(skill_id);
+}
+
+void Perl_Client_IncreaseSkill(Client* self, int skill_id, int value) // @categories Skills and Recipes
+{
+	self->IncreaseSkill(skill_id, value);
+}
+
+void Perl_Client_IncreaseLanguageSkill(Client* self, int skill_id) // @categories Skills and Recipes
+{
+	self->IncreaseLanguageSkill(skill_id);
+}
+
+void Perl_Client_IncreaseLanguageSkill(Client* self, int skill_id, int value) // @categories Skills and Recipes
+{
+	self->IncreaseLanguageSkill(skill_id, value);
+}
+
+uint32_t Perl_Client_GetRawSkill(Client* self, int skill_id) // @categories Skills and Recipes
+{
+	return self->GetRawSkill(static_cast<EQ::skills::SkillType>(skill_id));
+}
+
+bool Perl_Client_HasSkill(Client* self, int skill_id) // @categories Skills and Recipes
+{
+	return self->HasSkill(static_cast<EQ::skills::SkillType>(skill_id));
+}
+
+bool Perl_Client_CanHaveSkill(Client* self, int skill_id) // @categories Skills and Recipes
+{
+	return self->CanHaveSkill(static_cast<EQ::skills::SkillType>(skill_id));
+}
+
+void Perl_Client_SetSkill(Client* self, int skill_id, uint16 value) // @categories Skills and Recipes
+{
+	self->SetSkill(static_cast<EQ::skills::SkillType>(skill_id), value);
+}
+
+void Perl_Client_AddSkill(Client* self, int skill_id, uint16 value) // @categories Skills and Recipes
+{
+	self->AddSkill(static_cast<EQ::skills::SkillType>(skill_id), value);
+}
+
+void Perl_Client_CheckSpecializeIncrease(Client* self, uint16 spell_id) // @categories Spells and Disciplines
+{
+	self->CheckSpecializeIncrease(spell_id);
+}
+
+bool Perl_Client_CheckIncreaseSkill(Client* self, int skill_id) // @categories Skills and Recipes
+{
+	return self->CheckIncreaseSkill(static_cast<EQ::skills::SkillType>(skill_id), nullptr);
+}
+
+bool Perl_Client_CheckIncreaseSkill(Client* self, int skill_id, int chance_modifier) // @categories Skills and Recipes
+{
+	return self->CheckIncreaseSkill(static_cast<EQ::skills::SkillType>(skill_id), nullptr, chance_modifier);
+}
+
+void Perl_Client_SetLanguageSkill(Client* self, int language_id, int value) // @categories Account and Character, Skills and Recipes, Stats and Attributes
+{
+	self->SetLanguageSkill(language_id, value);
+}
+
+int Perl_Client_MaxSkill(Client* self, uint16 skill_id) // @categories Skills and Recipes
+{
+	return self->MaxSkill(static_cast<EQ::skills::SkillType>(skill_id), self->GetClass(), self->GetLevel());
+}
+
+int Perl_Client_MaxSkill(Client* self, uint16 skill_id, uint16 class_id) // @categories Skills and Recipes
+{
+	return self->MaxSkill(static_cast<EQ::skills::SkillType>(skill_id), class_id, self->GetLevel());
+}
+
+int Perl_Client_MaxSkill(Client* self, uint16 skill_id, uint16 class_id, uint16 level) // @categories Skills and Recipes
+{
+	return self->MaxSkill(static_cast<EQ::skills::SkillType>(skill_id), class_id, level);
+}
+
+void Perl_Client_GMKill(Client* self) // @categories Script Utility
+{
+	self->GMKill();
+}
+
+bool Perl_Client_IsMedding(Client* self) // @categories Account and Character
+{
+	return self->IsMedding();
+}
+
+uint32_t Perl_Client_GetDuelTarget(Client* self) // @categories Account and Character, Script Utility
+{
+	return self->GetDuelTarget();
+}
+
+bool Perl_Client_IsDueling(Client* self) // @categories Account and Character
+{
+	return self->IsDueling();
+}
+
+void Perl_Client_SetDuelTarget(Client* self, uint32_t set_id) // @categories Account and Character
+{
+	self->SetDuelTarget(set_id);
+}
+
+void Perl_Client_SetDueling(Client* self, bool duel) // @categories Account and Character, Script Utility
+{
+	self->SetDueling(duel);
+}
+
+void Perl_Client_ResetAA(Client* self) // @categories Alternative Advancement
+{
+	self->ResetAA();
+}
+
+void Perl_Client_MemSpell(Client* self, uint16 spell_id, int slot) // @categories Spells and Disciplines
+{
+	self->MemSpell(spell_id, slot);
+}
+
+void Perl_Client_MemSpell(Client* self, uint16 spell_id, int slot, bool update_client) // @categories Spells and Disciplines
+{
+	self->MemSpell(spell_id, slot, update_client);
+}
+
+void Perl_Client_UnmemSpell(Client* self, int slot) // @categories Spells and Disciplines
+{
+	self->UnmemSpell(slot);
+}
+
+void Perl_Client_UnmemSpell(Client* self, int slot, bool update_client) // @categories Spells and Disciplines
+{
+	self->UnmemSpell(slot, update_client);
+}
+
+void Perl_Client_UnmemSpellBySpellID(Client* self, int spell_id) // @categories Spells and Disciplines
+{
+	self->UnmemSpellBySpellID(spell_id);
+}
+
+void Perl_Client_UnmemSpellAll(Client* self) // @categories Spells and Disciplines
+{
+	self->UnmemSpellAll();
+}
+
+void Perl_Client_UnmemSpellAll(Client* self, bool update_client) // @categories Spells and Disciplines
+{
+	self->UnmemSpellAll(update_client);
+}
+
+int Perl_Client_FindEmptyMemSlot(Client* self) // @categories Account and Character, Spells and Disciplines
+{
+	return self->FindEmptyMemSlot();
+}
+
+int Perl_Client_FindMemmedSpellBySlot(Client* self, int slot) // @categories Account and Character, Spells and Disciplines
+{
+	return self->FindMemmedSpellBySlot(slot);
+}
+
+int Perl_Client_FindMemmedSpellBySpellID(Client* self, uint16 spell_id) // @categories Account and Character, Spells and Disciplines
+{
+	return self->FindMemmedSpellBySpellID(spell_id);
+}
+
+int Perl_Client_MemmedCount(Client* self) // @categories Spells and Disciplines
+{
+	return self->MemmedCount();
+}
+
+void Perl_Client_ScribeSpell(Client* self, uint16 spell_id, int slot) // @categories Spells and Disciplines
+{
+	self->ScribeSpell(spell_id, slot);
+}
+
+void Perl_Client_ScribeSpell(Client* self, uint16 spell_id, int slot, bool update_client) // @categories Spells and Disciplines
+{
+	self->ScribeSpell(spell_id, slot, update_client);
+}
+
+void Perl_Client_UnscribeSpell(Client* self, int slot) // @categories Spells and Disciplines
+{
+	self->UnscribeSpell(slot);
+}
+
+void Perl_Client_UnscribeSpell(Client* self, int slot, bool update_client) // @categories Spells and Disciplines
+{
+	self->UnscribeSpell(slot, update_client);
+}
+
+void Perl_Client_UnscribeSpellAll(Client* self)
+{
+	self->UnscribeSpellAll();
+}
+
+void Perl_Client_UnscribeSpellAll(Client* self, bool update_client)
+{
+	self->UnscribeSpellAll(update_client);
+}
+
+void Perl_Client_TrainDiscBySpellID(Client* self, int spell_id) // @categories Spells and Disciplines
+{
+	self->TrainDiscBySpellID(spell_id);
+}
+
+int Perl_Client_GetDiscSlotBySpellID(Client* self, int spell_id) // @categories Spells and Disciplines
+{
+	return self->GetDiscSlotBySpellID(spell_id);
+}
+
+void Perl_Client_UntrainDisc(Client* self, int slot) // @categories Spells and Disciplines
+{
+	self->UntrainDisc(slot);
+}
+
+void Perl_Client_UntrainDisc(Client* self, int slot, bool update_client) // @categories Spells and Disciplines
+{
+	self->UntrainDisc(slot, update_client);
+}
+
+void Perl_Client_UntrainDiscAll(Client* self) // @categories Spells and Disciplines
+{
+	self->UntrainDiscAll();
+}
+
+void Perl_Client_UntrainDiscAll(Client* self, bool update_client) // @categories Spells and Disciplines
+{
+	self->UntrainDiscAll(update_client);
+}
+
+bool Perl_Client_IsStanding(Client* self) // @categories Account and Character
+{
+	return self->IsStanding();
+}
+
+void Perl_Client_Sit(Client* self)
+{
+	self->Sit();
+}
+
+bool Perl_Client_IsSitting(Client* self) // @categories Account and Character
+{
+	return self->IsSitting();
+}
+
+bool Perl_Client_IsCrouching(Client* self) // @categories Account and Character
+{
+	return self->IsCrouching();
+}
+
+bool Perl_Client_IsBecomeNPC(Client* self) // @categories Account and Character
+{
+	return self->IsBecomeNPC();
+}
+
+int Perl_Client_GetBecomeNPCLevel(Client* self) // @categories Experience and Level
+{
+	return self->GetBecomeNPCLevel();
+}
+
+void Perl_Client_SetBecomeNPC(Client* self, bool flag) // @categories Account and Character, Stats and Attributes
+{
+	self->SetBecomeNPC(flag);
+}
+
+void Perl_Client_SetBecomeNPCLevel(Client* self, uint8 level) // @categories Account and Character, Stats and Attributes
+{
+	self->SetBecomeNPCLevel(level);
+}
+
+void Perl_Client_SetFeigned(Client* self, bool feigned) // @categories Script Utility
+{
+	self->SetFeigned(feigned);
+}
+
+bool Perl_Client_GetFeigned(Client* self) // @categories Script Utility
+{
+	return self->GetFeigned();
+}
+
+bool Perl_Client_AutoSplitEnabled(Client* self) // @categories Currency and Points
+{
+	return self->AutoSplitEnabled();
+}
+
+void Perl_Client_SetHorseId(Client* self, uint16_t horseid) // @categories Script Utility
+{
+	self->SetHorseId(horseid);
+}
+
+int Perl_Client_GetHorseId(Client* self) // @categories Account and Character, Script Utility
+{
+	return self->GetHorseId();
+}
+
+uint32 Perl_Client_NukeItem(Client* self, uint32 item_id) // @categories Inventory and Items
+{
+	return self->NukeItem(item_id, 0xFF);
+}
+
+uint32 Perl_Client_NukeItem(Client* self, uint32 item_id, uint8 slot_to_check) // @categories Inventory and Items
+{
+	return self->NukeItem(item_id, slot_to_check);
+}
+
+void Perl_Client_SetTint(Client* self, int16 slot_id, uint32 color) // @categories Inventory and Items
+{
+	self->SetTint(slot_id, color);
+}
+
+void Perl_Client_SetMaterial(Client* self, int16 slot_id, uint32 item_id) // @categories Inventory and Items
+{
+	self->SetMaterial(slot_id, item_id);
+}
+
+void Perl_Client_Undye(Client* self) // @categories Script Utility
+{
+	self->Undye();
+}
+
+int Perl_Client_GetItemIDAt(Client* self, int16 slot_id) // @categories Inventory and Items
+{
+	return self->GetItemIDAt(slot_id);
+}
+
+int Perl_Client_GetAugmentIDAt(Client* self, int16 slot_id, uint8 aug_slot) // @categories Inventory and Items
+{
+	return self->GetAugmentIDAt(slot_id, aug_slot);
+}
+
+void Perl_Client_DeleteItemInInventory(Client* self, int16 slot_id) // @categories Inventory and Items
+{
+	self->DeleteItemInInventory(slot_id);
+}
+
+void Perl_Client_DeleteItemInInventory(Client* self, int16 slot_id, int16 quantity) // @categories Inventory and Items
+{
+	self->DeleteItemInInventory(slot_id, quantity);
+}
+
+void Perl_Client_DeleteItemInInventory(Client* self, int16 slot_id, int16 quantity, bool client_update) // @categories Inventory and Items
+{
+	self->DeleteItemInInventory(slot_id, quantity, client_update);
+}
+
+void Perl_Client_SummonItem(Client* self, uint32 item_id) // @categories Inventory and Items, Script Utility
+{
+	self->SummonItem(item_id);
+}
+
+void Perl_Client_SummonItem(Client* self, uint32 item_id, int16 charges) // @categories Inventory and Items, Script Utility
+{
+	self->SummonItem(item_id, charges);
+}
+
+void Perl_Client_SummonItem(Client* self, uint32 item_id, int16 charges, bool attune) // @categories Inventory and Items, Script Utility
+{
+	self->SummonItem(item_id, charges, 0, 0, 0, 0, 0, 0, attune);
+}
+
+void Perl_Client_SummonItem(Client* self, uint32 item_id, int16 charges, bool attune, uint32 aug1) // @categories Inventory and Items, Script Utility
+{
+	self->SummonItem(item_id, charges, aug1, 0, 0, 0, 0, 0, attune);
+}
+
+void Perl_Client_SummonItem(Client* self, uint32 item_id, int16 charges, bool attune, uint32 aug1, uint32 aug2) // @categories Inventory and Items, Script Utility
+{
+	self->SummonItem(item_id, charges, aug1, aug2, 0, 0, 0, 0, attune);
+}
+
+void Perl_Client_SummonItem(Client* self, uint32 item_id, int16 charges, bool attune, uint32 aug1, uint32 aug2, uint32 aug3) // @categories Inventory and Items, Script Utility
+{
+	self->SummonItem(item_id, charges, aug1, aug2, aug3, 0, 0, 0, attune);
+}
+
+void Perl_Client_SummonItem(Client* self, uint32 item_id, int16 charges, bool attune, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4) // @categories Inventory and Items, Script Utility
+{
+	self->SummonItem(item_id, charges, aug1, aug2, aug3, aug4, 0, 0, attune);
+}
+
+void Perl_Client_SummonItem(Client* self, uint32 item_id, int16 charges, bool attune, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5) // @categories Inventory and Items, Script Utility
+{
+	self->SummonItem(item_id, charges, aug1, aug2, aug3, aug4, aug5, 0, attune);
+}
+
+void Perl_Client_SummonItem(Client* self, uint32 item_id, int16 charges, bool attune, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, uint16 slot_id) // @categories Inventory and Items, Script Utility
+{
+	self->SummonItem(item_id, charges, aug1, aug2, aug3, aug4, aug5, 0, attune, slot_id);
+}
+
+void Perl_Client_SetStats(Client* self, uint8 type, uint16 increase_val) // @categories Account and Character, Stats and Attributes
+{
+	self->SetStats(type, increase_val);
+}
+
+void Perl_Client_IncStats(Client* self, uint8 type, uint16 increase_val) // @categories Account and Character, Stats and Attributes
+{
+	self->IncStats(type, increase_val);
+}
+
+void Perl_Client_DropItem(Client* self, int16 slot_id) // @categories Inventory and Items
+{
+	self->DropItem(slot_id);
 }
 
-XS(XS_Client_GetBecomeNPCLevel); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetBecomeNPCLevel) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetBecomeNPCLevel(THIS)"); // @categories Experience and Level
-	{
-		Client *THIS;
-		uint8 RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetBecomeNPCLevel();
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
+void Perl_Client_BreakInvis(Client* self) // @categories Spells and Disciplines, Script Utility
+{
+	self->BreakInvis();
 }
 
-XS(XS_Client_SetBecomeNPC); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_SetBecomeNPC) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SetBecomeNPC(THIS, flag)"); // @categories Account and Character, Stats and Attributes
-	{
-		Client *THIS;
-		bool flag = (bool) SvTRUE(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->SetBecomeNPC(flag);
-	}
-	XSRETURN_EMPTY;
+Group* Perl_Client_GetGroup(Client* self) // @categories Account and Character, Group
+{
+	return self->GetGroup();
 }
 
-XS(XS_Client_SetBecomeNPCLevel); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_SetBecomeNPCLevel) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SetBecomeNPCLevel(THIS, level)"); // @categories Account and Character, Stats and Attributes
-	{
-		Client *THIS;
-		uint8 level = (uint8) SvUV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->SetBecomeNPCLevel(level);
-	}
-	XSRETURN_EMPTY;
+void Perl_Client_LeaveGroup(Client* self) // @categories Account and Character, Group
+{
+	self->LeaveGroup();
 }
 
-XS(XS_Client_SetFeigned); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_SetFeigned) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SetFeigned(THIS, in_feigned)"); // @categories Script Utility
-	{
-		Client *THIS;
-		bool in_feigned = (bool) SvTRUE(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->SetFeigned(in_feigned);
-	}
-	XSRETURN_EMPTY;
+Raid* Perl_Client_GetRaid(Client* self) // @categories Account and Character, Raid
+{
+	return self->GetRaid();
 }
 
-XS(XS_Client_GetFeigned); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetFeigned) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetFeigned(THIS)"); // @categories Script Utility
-	{
-		Client *THIS;
-		bool RETVAL;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetFeigned();
-		ST(0) = boolSV(RETVAL);
-		sv_2mortal(ST(0));
-	}
-	XSRETURN(1);
+bool Perl_Client_IsGrouped(Client* self) // @categories Account and Character, Group
+{
+	return self->IsGrouped();
 }
 
-XS(XS_Client_AutoSplitEnabled); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_AutoSplitEnabled) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::AutoSplitEnabled(THIS)"); // @categories Currency and Points
-	{
-		Client *THIS;
-		bool RETVAL;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->AutoSplitEnabled();
-		ST(0) = boolSV(RETVAL);
-		sv_2mortal(ST(0));
-	}
-	XSRETURN(1);
+bool Perl_Client_IsRaidGrouped(Client* self) // @categories Account and Character, Group, Raid
+{
+	return self->IsRaidGrouped();
 }
 
-XS(XS_Client_SetHorseId); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_SetHorseId) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SetHorseId(THIS, horseid_in)"); // @categories Script Utility
-	{
-		Client *THIS;
-		uint16 horseid_in = (uint16) SvUV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->SetHorseId(horseid_in);
-	}
-	XSRETURN_EMPTY;
+bool Perl_Client_Hungry(Client* self) // @categories Account and Character, Stats and Attributes
+{
+	return self->Hungry();
 }
 
-XS(XS_Client_GetHorseId); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetHorseId) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetHorseId(THIS)"); // @categories Account and Character, Script Utility
-	{
-		Client *THIS;
-		uint16 RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetHorseId();
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
+bool Perl_Client_Thirsty(Client* self) // @categories Script Utility
+{
+	return self->Thirsty();
 }
 
-XS(XS_Client_NukeItem); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_NukeItem) {
-	dXSARGS;
-	if (items != 3 && items != 2)
-		Perl_croak(aTHX_ "Usage: Client::NukeItem(THIS, uint32 item_id, [uint8 slot_to_check])"); // @categories Inventory and Items
-	{
-		Client *THIS;
-		uint32 RETVAL;
-		dXSTARG;
-		uint32 itemnum = (uint32) SvUV(ST(1));
-		uint8  where_to_check;
-		VALIDATE_THIS_IS_CLIENT;
-		if (items < 3) {
-			where_to_check = 0xFF;
-		}
-		if (items == 3) {
-			where_to_check = (uint8) SvUV(ST(2));
-		}
-
-		RETVAL = THIS->NukeItem(itemnum, where_to_check);
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
+int Perl_Client_GetInstrumentMod(Client* self, uint16 spell_id) // @categories Spells and Disciplines
+{
+	return self->GetInstrumentMod(spell_id);
 }
 
-XS(XS_Client_SetTint); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_SetTint) {
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::SetTint(THIS, int16 slot_id, uint32 color)"); // @categories Inventory and Items
-	{
-		Client *THIS;
-		int16  slot_id = (int16) SvIV(ST(1));
-		uint32 color   = (uint32) SvUV(ST(2));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->SetTint(slot_id, color);
-	}
-	XSRETURN_EMPTY;
+bool Perl_Client_DecreaseByID(Client* self, uint32 type, int16 quantity) // @categories Script Utility
+{
+	return self->DecreaseByID(type, quantity);
 }
 
-XS(XS_Client_SetMaterial); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_SetMaterial) {
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::SetMaterial(THIS, int16 slot_id, uint32 item_id)"); // @categories Inventory and Items
-	{
-		Client *THIS;
-		int16  slot_id = (int16) SvIV(ST(1));
-		uint32 item_id = (uint32) SvUV(ST(2));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->SetMaterial(slot_id, item_id);
-	}
-	XSRETURN_EMPTY;
+int Perl_Client_SlotConvert2(Client* self, uint8 slot) // @categories Inventory and Items
+{
+	return self->SlotConvert2(slot);
 }
 
-XS(XS_Client_Undye); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_Undye) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::Undye(THIS)"); // @categories Script Utility
-	{
-		Client *THIS;
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->Undye();
-	}
-	XSRETURN_EMPTY;
+void Perl_Client_Escape(Client* self) // @categories Account and Character, Skills and Recipes
+{
+	self->Escape();
 }
 
-XS(XS_Client_GetItemIDAt); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetItemIDAt) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::GetItemIDAt(THIS, int16 slot_id)"); // @categories Inventory and Items
-	{
-		Client *THIS;
-		int32 RETVAL;
-		dXSTARG;
-		int16 slot_id = (int16) SvIV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetItemIDAt(slot_id);
-		XSprePUSH;
-		PUSHi((IV) RETVAL);
-	}
-	XSRETURN(1);
+void Perl_Client_RemoveNoRent(Client* self) // @categories Inventory and Items
+{
+	self->RemoveNoRent();
 }
 
-XS(XS_Client_GetAugmentIDAt); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetAugmentIDAt) {
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::GetAugmentIDAt(THIS, int16 slot_id, int16 aug_slot)"); // @categories Inventory and Items
-	{
-		Client *THIS;
-		int32 RETVAL;
-		dXSTARG;
-		int16 slot_id = (int16) SvIV(ST(1));
-		int16 augslot = (uint8) SvIV(ST(2));
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetAugmentIDAt(slot_id, augslot);
-		XSprePUSH;
-		PUSHi((IV) RETVAL);
-	}
-	XSRETURN(1);
+void Perl_Client_GoFish(Client* self) // @categories Skills and Recipes
+{
+	self->GoFish();
 }
 
-XS(XS_Client_DeleteItemInInventory); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_DeleteItemInInventory) {
-	dXSARGS;
-	if (items < 2 || items > 4)
-		Perl_croak(aTHX_ "Usage: Client::DeleteItemInInventory(THIS, int16 slot_id, [int16 quantity = 0], [bool client_update = false])"); // @categories Inventory and Items
-	{
-		Client *THIS;
-		int16  slot_id = (int16) SvIV(ST(1));
-		int16   quantity;
-		bool   client_update;
-		VALIDATE_THIS_IS_CLIENT;
-		if (items < 3)
-			quantity = 0;
-		else {
-			quantity = (int16) SvIV(ST(2));
-		}
-
-		if (items < 4)
-			client_update = false;
-		else {
-			client_update = (bool) SvTRUE(ST(3));
-		}
-
-		THIS->DeleteItemInInventory(slot_id, quantity, client_update);
-	}
-	XSRETURN_EMPTY;
+void Perl_Client_ForageItem(Client* self) // @categories Skills and Recipes
+{
+	self->ForageItem();
 }
 
-XS(XS_Client_SummonItem); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_SummonItem) {
-	dXSARGS;
-	if (items < 2 || items > 10)
-		Perl_croak(aTHX_ "Usage: Client::SummonItem(THIS, uint32 item_id, [int16 charges = -1], [bool attune = false], [uint32 aug1 = 0], [uint32 aug2 = 0], [uint32 aug3 = 0], [uint32 aug4 = 0], [uint32 aug5 = 0], [uint16 slot_id = cursor])"); // @categories Inventory and Items, Script Utility
-	{
-		Client *THIS;
-		uint32 item_id = (uint32) SvUV(ST(1));
-		int16  charges = -1;
-		bool   attune  = false;
-		uint32 aug1    = 0;
-		uint32 aug2    = 0;
-		uint32 aug3    = 0;
-		uint32 aug4    = 0;
-		uint32 aug5    = 0;
-		uint16 slot_id = EQ::invslot::slotCursor;
-		VALIDATE_THIS_IS_CLIENT;
-		if (items > 2) {
-			charges = (int16) SvIV(ST(2));
-		}
-		if (items > 3) {
-			attune = (bool) SvTRUE(ST(3));
-		}
-		if (items > 4) {
-			aug1 = (uint32) SvUV(ST(4));
-		}
-		if (items > 5) {
-			aug2 = (uint32) SvUV(ST(5));
-		}
-		if (items > 6) {
-			aug3 = (uint32) SvUV(ST(6));
-		}
-		if (items > 7) {
-			aug4 = (uint32) SvUV(ST(7));
-		}
-		if (items > 8) {
-			aug5 = (uint32) SvUV(ST(8));
-		}
-		if (items > 9) {
-			slot_id = (uint16) SvUV(ST(9));
-		}
-
-		THIS->SummonItem(item_id, charges, aug1, aug2, aug3, aug4, aug5, 0, attune, slot_id);
-	}
-	XSRETURN_EMPTY;
+float Perl_Client_CalcPriceMod(Client* self) // @categories Currency and Points
+{
+	return self->CalcPriceMod();
 }
 
-XS(XS_Client_SetStats); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_SetStats) {
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::SetStats(THIS, uint8 type, uint16 increase_val)"); // @categories Account and Character, Stats and Attributes
-	{
-		Client *THIS;
-		uint8 type         = (uint8) SvUV(ST(1));
-		int16 increase_val = (int16) SvIV(ST(2));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->SetStats(type, increase_val);
-	}
-	XSRETURN_EMPTY;
+float Perl_Client_CalcPriceMod(Client* self, Mob* other) // @categories Currency and Points
+{
+	return self->CalcPriceMod(other);
 }
 
-XS(XS_Client_IncStats); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_IncStats) {
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::IncStats(THIS, uint8 type, uint16 increase_val)"); // @categories Account and Character, Stats and Attributes
-	{
-		Client *THIS;
-		uint8 type         = (uint8) SvUV(ST(1));
-		int16 increase_val = (int16) SvIV(ST(2));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->IncStats(type, increase_val);
-	}
-	XSRETURN_EMPTY;
+float Perl_Client_CalcPriceMod(Client* self, Mob* other, bool reverse) // @categories Currency and Points
+{
+	return self->CalcPriceMod(other, reverse);
 }
 
-XS(XS_Client_DropItem); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_DropItem) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::DropItem(THIS, int16 slot_id)"); // @categories Inventory and Items
-	{
-		Client *THIS;
-		int16 slot_id = (int16) SvIV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->DropItem(slot_id);
-	}
-	XSRETURN_EMPTY;
+void Perl_Client_ResetTrade(Client* self) // @categories Script Utility
+{
+	self->ResetTrade();
 }
 
-XS(XS_Client_BreakInvis); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_BreakInvis) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::BreakInvis(THIS)"); // @categories Spells and Disciplines, Script Utility
-	{
-		Client *THIS;
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->BreakInvis();
-	}
-	XSRETURN_EMPTY;
+bool Perl_Client_UseDiscipline(Client* self, uint32 spell_id, uint32 target) // @categories Spells and Disciplines
+{
+	return self->UseDiscipline(spell_id, target);
 }
 
-XS(XS_Client_GetGroup); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetGroup) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetGroup(THIS)"); // @categories Account and Character, Group
-	{
-		Client *THIS;
-		Group  *RETVAL;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetGroup();
-		ST(0) = sv_newmortal();
-		sv_setref_pv(ST(0), "Group", (void *) RETVAL);
-	}
-	XSRETURN(1);
+uint32_t Perl_Client_GetDisciplineTimer(Client* self, uint32 timer_id) // @categories Spells and Disciplines
+{
+	return self->GetDisciplineTimer(timer_id);
 }
 
-XS(XS_Client_LeaveGroup); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_LeaveGroup) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::LeaveGroup(THIS)"); // @categories Account and Character, Group
-	{
-		Client *THIS;
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->LeaveGroup();
-	}
-	XSRETURN_EMPTY;
+void Perl_Client_ResetDisciplineTimer(Client* self, uint32_t timer_id) // @categories Spells and Disciplines
+{
+	self->ResetDisciplineTimer(timer_id);
 }
 
-XS(XS_Client_GetRaid); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetRaid) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetRaid(THIS)"); // @categories Account and Character, Raid
-	{
-		Client *THIS;
-		Raid   *RETVAL;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetRaid();
-		ST(0) = sv_newmortal();
-		sv_setref_pv(ST(0), "Raid", (void *) RETVAL);
-	}
-	XSRETURN(1);
+int Perl_Client_GetCharacterFactionLevel(Client* self, int faction_id) // @categories Faction
+{
+	return self->GetCharacterFactionLevel(faction_id);
 }
 
-XS(XS_Client_IsGrouped); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_IsGrouped) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::IsGrouped(THIS)"); // @categories Account and Character, Group
-	{
-		Client *THIS;
-		bool RETVAL;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->IsGrouped();
-		ST(0) = boolSV(RETVAL);
-		sv_2mortal(ST(0));
-	}
-	XSRETURN(1);
+void Perl_Client_SetZoneFlag(Client* self, uint32 zone_id) // @categories Account and Character, Zones
+{
+	self->SetZoneFlag(zone_id);
 }
 
-XS(XS_Client_IsRaidGrouped); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_IsRaidGrouped) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::IsRaidGrouped(THIS)"); // @categories Account and Character, Group, Raid
-	{
-		Client *THIS;
-		bool RETVAL;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->IsRaidGrouped();
-		ST(0) = boolSV(RETVAL);
-		sv_2mortal(ST(0));
-	}
-	XSRETURN(1);
+void Perl_Client_ClearZoneFlag(Client* self, uint32 zone_id) // @categories Script Utility
+{
+	self->ClearZoneFlag(zone_id);
 }
 
-XS(XS_Client_Hungry); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_Hungry) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::Hungry(THIS)"); // @categories Account and Character, Stats and Attributes
-	{
-		Client *THIS;
-		bool RETVAL;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->Hungry();
-		ST(0) = boolSV(RETVAL);
-		sv_2mortal(ST(0));
-	}
-	XSRETURN(1);
+bool Perl_Client_HasZoneFlag(Client* self, uint32 zone_id) // @categories Account and Character
+{
+	return self->HasZoneFlag(zone_id);
 }
 
-XS(XS_Client_Thirsty); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_Thirsty) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::Thirsty(THIS)"); // @categories Script Utility
-	{
-		Client *THIS;
-		bool RETVAL;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->Thirsty();
-		ST(0) = boolSV(RETVAL);
-		sv_2mortal(ST(0));
-	}
-	XSRETURN(1);
+void Perl_Client_SendZoneFlagInfo(Client* self, Client* to) // @categories Account and Character, Zones
+{
+	self->SendZoneFlagInfo(to);
 }
 
-XS(XS_Client_GetInstrumentMod); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetInstrumentMod) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::GetInstrumentMod(THIS, uint16 spell_id)"); // @categories Spells and Disciplines
-	{
-		Client *THIS;
-		uint16 RETVAL;
-		dXSTARG;
-		uint16 spell_id = (uint16) SvUV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetInstrumentMod(spell_id);
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
+void Perl_Client_LoadZoneFlags(Client* self) // @categories Zones
+{
+	self->LoadZoneFlags();
 }
 
-XS(XS_Client_DecreaseByID); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_DecreaseByID) {
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::DecreaseByID(THIS, uint32 type, int16 quantity)"); // @categories Script Utility
+void Perl_Client_SetAATitle(Client* self, std::string title) // @categories Alternative Advancement
+{
+	if (title.size() > 31)
 	{
-		Client *THIS;
-		bool   RETVAL;
-		uint32 type = (uint32) SvUV(ST(1));
-		int16  quantity  = (int16) SvIV(ST(2));
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->DecreaseByID(type, quantity);
-		ST(0) = boolSV(RETVAL);
-		sv_2mortal(ST(0));
+		throw std::runtime_error("Title must be 31 characters or less.");
 	}
-	XSRETURN(1);
+
+	self->SetAATitle(title);
 }
 
-XS(XS_Client_SlotConvert2); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_SlotConvert2) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SlotConvert2(THIS, uint8 slot)"); // @categories Inventory and Items
+void Perl_Client_SetAATitle(Client* self, std::string title, bool save) // @categories Alternative Advancement
+{
+	if (title.size() > 31)
 	{
-		Client *THIS;
-		uint8 RETVAL;
-		dXSTARG;
-		uint8 slot = (uint8) SvUV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->SlotConvert2(slot);
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
+		throw std::runtime_error("Title must be 31 characters or less.");
 	}
-	XSRETURN(1);
-}
 
-XS(XS_Client_Escape); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_Escape) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::Escape(THIS)"); // @categories Account and Character, Skills and Recipes
-	{
-		Client *THIS;
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->Escape();
+	if (!save) {
+		self->SetAATitle(title);
+	} else {
+		title_manager.CreateNewPlayerTitle(self, title);
 	}
-	XSRETURN_EMPTY;
 }
 
-XS(XS_Client_RemoveNoRent); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_RemoveNoRent) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::RemoveNoRent(THIS)"); // @categories Inventory and Items
-	{
-		Client *THIS;
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->RemoveNoRent();
-	}
-	XSRETURN_EMPTY;
+uint32_t Perl_Client_GetClientVersion(Client* self) // @categories Script Utility
+{
+	return static_cast<uint32_t>(self->ClientVersion());
 }
 
-XS(XS_Client_GoFish); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GoFish) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GoFish(THIS)"); // @categories Skills and Recipes
-	{
-		Client *THIS;
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->GoFish();
-	}
-	XSRETURN_EMPTY;
+uint32_t Perl_Client_GetClientVersionBit(Client* self) // @categories Script Utility
+{
+	return self->ClientVersionBit();
 }
 
-XS(XS_Client_ForageItem); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_ForageItem) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::ForageItem(THIS)"); // @categories Skills and Recipes
+void Perl_Client_SetTitleSuffix(Client* self, std::string suffix) // @categories Account and Character
+{
+	if (suffix.size() > 31)
 	{
-		Client *THIS;
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->ForageItem();
+		throw std::runtime_error("Suffix must be 31 characters or less.");
 	}
-	XSRETURN_EMPTY;
+
+	self->SetTitleSuffix(suffix);
 }
 
-XS(XS_Client_CalcPriceMod); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_CalcPriceMod) {
-	dXSARGS;
-	if (items < 1 || items > 3)
-		Perl_croak(aTHX_ "Usage: Client::CalcPriceMod(THIS, Mob*, [bool reverse = false])"); // @categories Currency and Points
+void Perl_Client_SetTitleSuffix(Client* self, std::string suffix, bool save) // @categories Account and Character
+{
+	if (suffix.size() > 31)
 	{
-		Client *THIS;
-		float  RETVAL;
-		dXSTARG;
-		Mob    *other;
-		bool   reverse;
-		VALIDATE_THIS_IS_CLIENT;
-		if (items < 2)
-			other = 0;
-		else {
-			if (sv_derived_from(ST(1), "Mob")) {
-				IV tmp = SvIV((SV *) SvRV(ST(1)));
-				other = INT2PTR(Mob *, tmp);
-			} else
-				Perl_croak(aTHX_ "other is not of type Mob");
-			if (other == nullptr)
-				Perl_croak(aTHX_ "other is nullptr, avoiding crash.");
-		}
-
-		if (items < 3)
-			reverse = false;
-		else {
-			reverse = (bool) SvTRUE(ST(2));
-		}
-
-		RETVAL = THIS->CalcPriceMod(other, reverse);
-		XSprePUSH;
-		PUSHn((double) RETVAL);
+		throw std::runtime_error("Suffix must be 31 characters or less.");
 	}
-	XSRETURN(1);
-}
 
-XS(XS_Client_ResetTrade); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_ResetTrade) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::ResetTrade(THIS)"); // @categories Script Utility
-	{
-		Client *THIS;
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->ResetTrade();
+	if (!save) {
+		self->SetTitleSuffix(suffix);
+	} else {
+		title_manager.CreateNewPlayerSuffix(self, suffix);
 	}
-	XSRETURN_EMPTY;
 }
 
-XS(XS_Client_UseDiscipline); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_UseDiscipline) {
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::UseDiscipline(THIS, int32 spell_id, int32 target)"); // @categories Spells and Disciplines
-	{
-		Client *THIS;
-		bool   RETVAL;
-		uint32 spell_id = (uint32) SvUV(ST(1));
-		uint32 target   = (uint32) SvUV(ST(2));
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->UseDiscipline(spell_id, target);
-		ST(0) = boolSV(RETVAL);
-		sv_2mortal(ST(0));
-	}
-	XSRETURN(1);
+void Perl_Client_SetAAPoints(Client* self, uint32 points) // @categories Alternative Advancement
+{
+	return self->SetAAPoints(points);
 }
 
-XS(XS_Client_GetDisciplineTimer); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetDisciplineTimer) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::GetDisciplineTimer(THIS, uint32 timer_id)"); // @categories Spells and Disciplines
-	{
-		Client *THIS;
-		uint32 RETVAL;
-		dXSTARG;
-		uint32 timer_id = (uint32) SvUV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetDisciplineTimer(timer_id);
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
+uint32_t Perl_Client_GetAAPoints(Client* self) // @categories Alternative Advancement, Experience and Level
+{
+	return self->GetAAPoints();
 }
 
-XS(XS_Client_ResetDisciplineTimer); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_ResetDisciplineTimer) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::ResetDisciplineTimer(THIS, uint32 timer_id)"); // @categories Spells and Disciplines
-	{
-		Client *THIS;
-		uint32 timer_id = (uint32) SvUV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->ResetDisciplineTimer(timer_id);
-	}
-	XSRETURN_EMPTY;
+uint32_t Perl_Client_GetSpentAA(Client* self) // @categories Alternative Advancement
+{
+	return self->GetSpentAA();
 }
 
-XS(XS_Client_GetCharacterFactionLevel); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetCharacterFactionLevel) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::GetCharacterFactionLevel(THIS, int32 faction_id)"); // @categories Faction
-	{
-		Client *THIS;
-		int32  RETVAL;
-		dXSTARG;
-		int32  faction_id = (int32) SvIV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetCharacterFactionLevel(faction_id);
-		XSprePUSH;
-		PUSHi((IV) RETVAL);
-	}
-	XSRETURN(1);
+void Perl_Client_AddAAPoints(Client* self, uint32 points) // @categories Alternative Advancement
+{
+	self->AddAAPoints(points);
 }
 
-XS(XS_Client_SetZoneFlag); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_SetZoneFlag) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SetZoneFlag(THIS, uint32 zone_id)"); // @categories Account and Character, Zones
-	{
-		Client *THIS;
-		uint32 zone_id = (uint32) SvUV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->SetZoneFlag(zone_id);
-	}
-	XSRETURN_EMPTY;
+void Perl_Client_RefundAA(Client* self) // @categories Alternative Advancement
+{
+	self->RefundAA();
 }
 
-XS(XS_Client_ClearZoneFlag); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_ClearZoneFlag) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::ClearZoneFlag(THIS, uint32 zone_id)"); // @categories Script Utility
-	{
-		Client *THIS;
-		uint32 zone_id = (uint32) SvUV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->ClearZoneFlag(zone_id);
-	}
-	XSRETURN_EMPTY;
+int Perl_Client_GetModCharacterFactionLevel(Client* self, int faction_id) // @categories Faction
+{
+	return self->GetModCharacterFactionLevel(faction_id);
 }
 
-XS(XS_Client_HasZoneFlag); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_HasZoneFlag) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::HasZoneFlag(THIS, uint32 zone_id)"); // @categories Account and Character
-	{
-		Client *THIS;
-		bool   RETVAL;
-		uint32 zone_id = (uint32) SvUV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->HasZoneFlag(zone_id);
-		ST(0) = boolSV(RETVAL);
-		sv_2mortal(ST(0));
-	}
-	XSRETURN(1);
+uint32_t Perl_Client_GetLDoNWins(Client* self) // @categories Currency and Points
+{
+	return self->GetLDoNWins();
 }
 
-XS(XS_Client_SendZoneFlagInfo); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_SendZoneFlagInfo) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SendZoneFlagInfo(THIS, Client* to)"); // @categories Account and Character, Zones
-	{
-		Client *THIS;
-		Client *to;
-		VALIDATE_THIS_IS_CLIENT;
-		if (sv_derived_from(ST(1), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(1)));
-			to = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "to is not of type Client");
-		if (to == nullptr)
-			Perl_croak(aTHX_ "to is nullptr, avoiding crash.");
-
-		THIS->SendZoneFlagInfo(to);
-	}
-	XSRETURN_EMPTY;
+uint32_t Perl_Client_GetLDoNLosses(Client* self) // @categories Currency and Points
+{
+	return self->GetLDoNLosses();
 }
 
-XS(XS_Client_LoadZoneFlags); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_LoadZoneFlags) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::LoadZoneFlags(THIS)"); // @categories Zones
-	{
-		Client *THIS;
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->LoadZoneFlags();
-	}
-	XSRETURN_EMPTY;
+uint32_t Perl_Client_GetLDoNWinsTheme(Client* self, uint32_t theme) // @categories Currency and Points
+{
+	return self->GetLDoNWinsTheme(theme);
 }
 
-XS(XS_Client_SetAATitle); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_SetAATitle) {
-	dXSARGS;
-	if ((items < 2) || (items > 3))
-		Perl_croak(aTHX_ "Usage: Client::SetAATitle(THIS, string text, [bool save = false])"); // @categories Alternative Advancement
-	{
-		Client *THIS;
-		char   *txt = (char *) SvPV_nolen(ST(1));
-		bool SaveTitle = false;
-		VALIDATE_THIS_IS_CLIENT;
-		if (strlen(txt) > 31)
-			Perl_croak(aTHX_ "Title must be 31 characters or less");
-
-		if (items == 3)
-			SaveTitle = (SvIV(ST(2)) != 0);
-
-		if (!SaveTitle)
-			THIS->SetAATitle(txt);
-		else
-			title_manager.CreateNewPlayerTitle(THIS, txt);
-	}
-	XSRETURN_EMPTY;
+uint32_t Perl_Client_GetLDoNLossesTheme(Client* self, uint32_t theme) // @categories Currency and Points
+{
+	return self->GetLDoNLossesTheme(theme);
 }
 
-XS(XS_Client_GetClientVersion); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetClientVersion) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetClientVersion(THIS)"); // @categories Script Utility
-	{
-		Client *THIS;
-		uint32 RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = static_cast<unsigned int>(THIS->ClientVersion());
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
+EQ::ItemInstance* Perl_Client_GetItemAt(Client* self, uint32 slot) // @categories Inventory and Items
+{
+	return self->GetInv().GetItem(slot);
 }
 
-XS(XS_Client_GetClientVersionBit); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetClientVersionBit) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetClientVersionBit(THIS)"); // @categories Script Utility
+EQ::ItemInstance* Perl_Client_GetAugmentAt(Client* self, uint32 slot, uint32 aug_slot) // @categories Inventory and Items
+{
+	EQ::ItemInstance* inst = self->GetInv().GetItem(slot);
+	if (inst)
 	{
-		Client *THIS;
-		uint32 RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->ClientVersionBit();
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
+		return inst->GetAugment(aug_slot);
 	}
-	XSRETURN(1);
+	return nullptr;
 }
 
-XS(XS_Client_SetTitleSuffix);
-XS(XS_Client_SetTitleSuffix) {
-	dXSARGS;
-	if ((items < 2) || (items > 3))
-		Perl_croak(aTHX_ "Usage: Client::SetTitleSuffix(THIS, string text, [bool save = false])"); // @categories Account and Character
-	{
-		Client *THIS;
-		char   *txt = (char *) SvPV_nolen(ST(1));
-		bool SaveSuffix = false;
-		VALIDATE_THIS_IS_CLIENT;
-		if (strlen(txt) > 31)
-			Perl_croak(aTHX_ "Title must be 31 characters or less");
-
-		if (items == 3)
-			SaveSuffix = (SvIV(ST(2)) != 0);
-
-		if (!SaveSuffix)
-			THIS->SetTitleSuffix(txt);
-		else
-			title_manager.CreateNewPlayerSuffix(THIS, txt);
-	}
-	XSRETURN_EMPTY;
+uint32_t Perl_Client_GetStartZone(Client* self) // @categories Account and Character
+{
+	return self->GetStartZone();
 }
 
-XS(XS_Client_SetAAPoints);
-XS(XS_Client_SetAAPoints) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SetAAPoints(THIS, uint32 points)"); // @categories Alternative Advancement
-	{
-		Client *THIS;
-		uint32 points = SvUV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->SetAAPoints(points);
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Client_GetAAPoints);
-XS(XS_Client_GetAAPoints) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetAAPoints(THIS)"); // @categories Alternative Advancement, Experience and Level
-	dXSTARG;
-	{
-		Client *THIS;
-		uint32 RETVAL;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetAAPoints();
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Client_GetSpentAA);
-XS(XS_Client_GetSpentAA) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetSpentAA(THIS)"); // @categories Alternative Advancement
-	dXSTARG;
-	{
-		Client *THIS;
-		uint32 RETVAL;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetSpentAA();
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
+void Perl_Client_SetStartZone(Client* self, uint32 zone_id)
+{
+	self->SetStartZone(zone_id);
 }
 
-XS(XS_Client_AddAAPoints);
-XS(XS_Client_AddAAPoints) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::AddAAPoints(THIS, uint32 points)"); // @categories Alternative Advancement
-	{
-		Client *THIS;
-		uint32 points = SvUV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->AddAAPoints(points);
-	}
-	XSRETURN_EMPTY;
+void Perl_Client_SetStartZone(Client* self, uint32 zone_id, float x, float y, float z)
+{
+	self->SetStartZone(zone_id, x, y, z);
 }
 
-XS(XS_Client_RefundAA);
-XS(XS_Client_RefundAA) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::RefundAA(THIS)"); // @categories Alternative Advancement
-	{
-		Client *THIS;
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->RefundAA();
-	}
-	XSRETURN_EMPTY;
+void Perl_Client_SetStartZone(Client* self, uint32 zone_id, float x, float y, float z, float heading)
+{
+	self->SetStartZone(zone_id, x, y, z, heading);
 }
 
-XS(XS_Client_GetModCharacterFactionLevel); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetModCharacterFactionLevel) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::GetModCharacterFactionLevel(THIS, int32 faction_id)"); // @categories Faction
-	{
-		Client *THIS;
-		int32 RETVAL;
-		dXSTARG;
-		int32 faction_id = (int32) SvIV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetModCharacterFactionLevel(faction_id);
-		XSprePUSH;
-		PUSHi((IV) RETVAL);
-	}
-	XSRETURN(1);
+void Perl_Client_KeyRingAdd(Client* self, uint32 item_id) // @categories Account and Character, Inventory and Items
+{
+	self->KeyRingAdd(item_id);;
 }
 
-XS(XS_Client_GetLDoNWins); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetLDoNWins) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetLDoNWins(THIS)"); // @categories Currency and Points
-	{
-		Client *THIS;
-		uint32 RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetLDoNWins();
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
+bool Perl_Client_KeyRingCheck(Client* self, uint32 item_id) // @categories Account and Character, Inventory and Items
+{
+	return self->KeyRingCheck(item_id);
 }
 
-XS(XS_Client_GetLDoNLosses); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetLDoNLosses) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetLDoNLosses(THIS)"); // @categories Currency and Points
-	{
-		Client *THIS;
-		uint32 RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetLDoNLosses();
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
+void Perl_Client_AddPVPPoints(Client* self, uint32 points) // @categories Currency and Points
+{
+	self->AddPVPPoints(points);;
 }
 
-XS(XS_Client_GetLDoNWinsTheme); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetLDoNWinsTheme) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::GetLDoNWinsTheme(THIS, int32 theme)"); // @categories Currency and Points
-	{
-		Client *THIS;
-		uint32 RETVAL;
-		dXSTARG;
-		int32  theme_out = (int32) SvIV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetLDoNWinsTheme(theme_out);
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
+void Perl_Client_AddCrystals(Client* self, uint32 radiant_count, uint32 ebon_count) // @categories Currency and Points
+{
+	self->AddCrystals(radiant_count, ebon_count);
 }
 
-XS(XS_Client_GetLDoNLossesTheme); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetLDoNLossesTheme) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::GetLDoNLossesTheme(THIS, int32 theme)"); // @categories Currency and Points
-	{
-		Client *THIS;
-		uint32 RETVAL;
-		dXSTARG;
-		int32  theme_out = (int32) SvIV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetLDoNLossesTheme(theme_out);
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
+void Perl_Client_SetEbonCrystals(Client* self, uint32 value)
+{
+	self->SetEbonCrystals(value);
 }
 
-XS(XS_Client_GetItemAt); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetItemAt) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::GetItemAt(THIS, uint32 slot)"); // @categories Inventory and Items
-	{
-		Client              *THIS;
-		EQ::ItemInstance *RETVAL;
-		uint32 slot = (int32) SvIV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetInv().GetItem(slot);
-		ST(0) = sv_newmortal();
-		sv_setref_pv(ST(0), "QuestItem", (void *) RETVAL);
-	}
-	XSRETURN(1);
+void Perl_Client_SetRadiantCrystals(Client* self, uint32 value)
+{
+	self->SetRadiantCrystals(value);
 }
 
-XS(XS_Client_GetAugmentAt); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetAugmentAt) {
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::GetAugmentAt(THIS, uint32 slot, uint32 aug_slot)"); // @categories Inventory and Items
-	{
-		Client              *THIS;
-		EQ::ItemInstance *RETVAL;
-		uint32 slot     = (int32) SvIV(ST(1));
-		uint32 aug_slot = (int32) SvIV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		EQ::ItemInstance *inst = THIS->GetInv().GetItem(slot);
-		if (inst) {
-			RETVAL = inst->GetAugment(aug_slot);
-		} else {
-			RETVAL = nullptr;
-		}
-
-		ST(0) = sv_newmortal();
-		sv_setref_pv(ST(0), "QuestItem", (void *) RETVAL);
-	}
-	XSRETURN(1);
+uint32_t Perl_Client_GetPVPPoints(Client* self) // @categories Currency and Points
+{
+	return self->GetPVPPoints();
 }
 
-XS(XS_Client_GetStartZone);
-XS(XS_Client_GetStartZone) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetStartZone(THIS)"); // @categories Account and Character
-	{
-		Client *THIS;
-		uint32 RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetStartZone();
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
+uint32_t Perl_Client_GetRadiantCrystals(Client* self) // @categories Currency and Points
+{
+	return self->GetRadiantCrystals();
 }
 
-XS(XS_Client_SetStartZone);
-XS(XS_Client_SetStartZone) {
-	dXSARGS;
-	if (items != 2 && items != 5 && items != 6)
-		Perl_croak(aTHX_ "Usage: Client::SetStartZone(THIS, uint32 zone_id, [float x = 0, float y = 0, float z = 0, [float heading = 0]])");
-	{
-		Client *THIS;
-		uint32 zoneid = (uint32) SvUV(ST(1));
-		float  x = 0.0f, y = 0.0f, z = 0.0f, heading = 0.0f;
-		VALIDATE_THIS_IS_CLIENT;
-		if (items == 5) {
-			x = (float) SvNV(ST(2));
-			y = (float) SvNV(ST(3));
-			z = (float) SvNV(ST(4));
-		}
-		if (items == 6)
-			heading = (float) SvNV(ST(5));
-
-		THIS->SetStartZone(zoneid, x, y, z, heading);
-	}
-	XSRETURN_EMPTY;
+uint32_t Perl_Client_GetEbonCrystals(Client* self) // @categories Currency and Points
+{
+	return self->GetEbonCrystals();
 }
 
-XS(XS_Client_KeyRingAdd);
-XS(XS_Client_KeyRingAdd) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::KeyRingAdd(THIS, uint32 item_id)"); // @categories Account and Character, Inventory and Items
-	{
-		Client *THIS;
-		uint32 item_id = (uint32) SvUV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->KeyRingAdd(item_id);;
-	}
-	XSRETURN_EMPTY;
+void Perl_Client_ReadBook(Client* self, const char* book_text, uint8 type) // @categories Script Utility
+{
+	self->QuestReadBook(book_text, type);
 }
 
-XS(XS_Client_KeyRingCheck);
-XS(XS_Client_KeyRingCheck) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::KeyRingCheck(THIS, uint32 item_id)"); // @categories Account and Character, Inventory and Items
-	{
-		Client *THIS;
-		bool   RETVAL;
-		uint32 item_id = (uint32) SvUV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->KeyRingCheck(item_id);;
-		ST(0) = boolSV(RETVAL);
-		sv_2mortal(ST(0));
-	}
-	XSRETURN(1);
+void Perl_Client_SetGMStatus(Client* self, int16 new_status) // @categories Script Utility
+{
+	self->SetGMStatus(new_status);
 }
 
-XS(XS_Client_AddPVPPoints);
-XS(XS_Client_AddPVPPoints) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::AddPVPPoints(THIS, uint32 points)"); // @categories Currency and Points
-	{
-		Client *THIS;
-		uint32 Points = (uint32) SvUV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->AddPVPPoints(Points);
-	}
-	XSRETURN_EMPTY;
+int16 Perl_Client_GetGMStatus(Client* self) // @categories Account and Character
+{
+	return self->Admin();
 }
 
-XS(XS_Client_AddCrystals);
-XS(XS_Client_AddCrystals) {
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::AddCrystals(THIS, uint32 radiant_count, uint32 ebon_count)"); // @categories Currency and Points
-	{
-		Client *THIS;
-		uint32 Radiant = (uint32) SvUV(ST(1));
-		uint32 Ebon    = (uint32) SvUV(ST(2));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->AddCrystals(Radiant, Ebon);
-	}
-	XSRETURN_EMPTY;
+void Perl_Client_UpdateGroupAAs(Client* self, int points, uint32 type) // @categories Alternative Advancement, Group
+{
+	self->UpdateGroupAAs(points, type);
 }
 
-XS(XS_Client_SetEbonCrystals);
-XS(XS_Client_SetEbonCrystals) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SetEbonCrystals(THIS, uint32 value)");
-	{
-		Client *THIS;
-		uint32 value = (uint32) SvUV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->SetEbonCrystals(value);
-	}
-	XSRETURN_EMPTY;
+uint32_t Perl_Client_GetGroupPoints(Client* self) // @categories Account and Character, Group
+{
+	return self->GetGroupPoints();
 }
 
-XS(XS_Client_SetRadiantCrystals);
-XS(XS_Client_SetRadiantCrystals) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SetRadiantCrystals(THIS, uint32 value)");
-	{
-		Client *THIS;
-		uint32 value = (uint32) SvUV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->SetRadiantCrystals(value);
-	}
-	XSRETURN_EMPTY;
+uint32_t Perl_Client_GetRaidPoints(Client* self) // @categories Account and Character, Raid
+{
+	return self->GetRaidPoints();
 }
 
-XS(XS_Client_GetPVPPoints); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetPVPPoints) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetPVPPoints(THIS)"); // @categories Currency and Points
-	{
-		Client *THIS;
-		uint32 RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetPVPPoints();
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
+void Perl_Client_LearnRecipe(Client* self, uint32 recipe_id) // @categories Skills and Recipes
+{
+	self->LearnRecipe(recipe_id);
 }
 
-XS(XS_Client_GetRadiantCrystals); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetRadiantCrystals) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetRadiantCrystals(THIS)"); // @categories Currency and Points
-	{
-		Client *THIS;
-		uint32 RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetRadiantCrystals();
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
+int64_t Perl_Client_GetEndurance(Client* self) // @categories Stats and Attributes
+{
+	return self->GetEndurance();
 }
 
-XS(XS_Client_GetEbonCrystals); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetEbonCrystals) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetEbonCrystals(THIS)"); // @categories Currency and Points
-	{
-		Client *THIS;
-		uint32 RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetEbonCrystals();
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
+int64_t Perl_Client_GetMaxEndurance(Client* self) // @categories Account and Character, Stats and Attributes
+{
+	return self->GetMaxEndurance();
 }
 
-XS(XS_Client_ReadBook); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_ReadBook) {
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::ReadBook(THIS, char* book_test, uint8 type)"); // @categories Script Utility
-	{
-		Client *THIS;
-		char   *in_txt = (char *) SvPV_nolen(ST(1));
-		uint8 type = (uint8) SvUV(ST(2));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->QuestReadBook(in_txt, type);
-	}
-	XSRETURN_EMPTY;
+int Perl_Client_GetEnduranceRatio(Client* self) // @categories Stats and Attributes
+{
+	return self->GetEndurancePercent();
 }
 
-XS(XS_Client_SetGMStatus); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_SetGMStatus) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SetGMStatus(THIS, int newStatus)"); // @categories Script Utility
-	{
-		Client *THIS;
-		int newStatus = (int)SvIV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->SetGMStatus(newStatus);
-		THIS->UpdateAdmin(true);
-	}
-	XSRETURN_EMPTY;
+void Perl_Client_SetEndurance(Client* self, int endurance) // @categories Account and Character, Stats and Attributes
+{
+	self->SetEndurance(endurance);
 }
 
-XS(XS_Client_UpdateGroupAAs); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_UpdateGroupAAs) {
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::UpdateGroupAAs(THIS, int32 points, uint32 type)"); // @categories Alternative Advancement, Group
-	{
-		Client *THIS;
-		int32  points = (int32) SvIV(ST(1));
-		uint32 type   = (uint32) SvUV(ST(2));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->UpdateGroupAAs(points, type);
-	}
-	XSRETURN(1);
+void Perl_Client_SendOPTranslocateConfirm(Client* self, Mob* caster, uint16 spell_id) // @categories Script Utility
+{
+	self->SendOPTranslocateConfirm(caster, spell_id);
 }
 
-XS(XS_Client_GetGroupPoints); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetGroupPoints) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetGroupPoints(THIS)"); // @categories Account and Character, Group
-	{
-		Client *THIS;
-		uint32 RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetGroupPoints();
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
+void Perl_Client_NPCSpawn(Client* self, NPC* target_npc, const char* option) // @categories Script Utility, Spawns
+{
+	return self->NPCSpawn(target_npc, option, 1200);
 }
 
-XS(XS_Client_GetRaidPoints); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetRaidPoints) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetRaidPoints(THIS)"); // @categories Account and Character, Raid
-	{
-		Client *THIS;
-		uint32 RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetRaidPoints();
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
+void Perl_Client_NPCSpawn(Client* self, NPC* target_npc, const char* option, uint32 respawn_time) // @categories Script Utility, Spawns
+{
+	return self->NPCSpawn(target_npc, option, respawn_time);
 }
 
-XS(XS_Client_LearnRecipe);
-XS(XS_Client_LearnRecipe) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::LearnRecipe(THIS, uint32 recipe_id)"); // @categories Skills and Recipes
-	{
-		Client *THIS;
-		uint32 recipe_id = (uint32) SvUV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->LearnRecipe(recipe_id);;
-	}
-	XSRETURN_EMPTY;
+uint32_t Perl_Client_GetIP(Client* self) // @categories Script Utility
+{
+	return self->GetIP();
 }
 
-XS(XS_Client_GetEndurance); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetEndurance) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetEndurance(THIS)"); // @categories Stats and Attributes
-	{
-		Client *THIS;
-		uint32 RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetEndurance();
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
+void Perl_Client_AddLevelBasedExp(Client* self, uint8 exp_percentage) // @categories Experience and Level
+{
+	self->AddLevelBasedExp(exp_percentage);
 }
 
-XS(XS_Client_GetMaxEndurance); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetMaxEndurance) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetMaxEndurance(THIS)"); // @categories Account and Character, Stats and Attributes
-	{
-		Client *THIS;
-		uint32 RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetMaxEndurance();
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
+void Perl_Client_AddLevelBasedExp(Client* self, uint8 exp_percentage, uint8 max_level) // @categories Experience and Level
+{
+	self->AddLevelBasedExp(exp_percentage, max_level);
 }
 
-XS(XS_Client_GetEnduranceRatio); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetEnduranceRatio) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetEnduranceRatio(THIS)"); // @categories Stats and Attributes
-	{
-		Client *THIS;
-		uint8 RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetEndurancePercent();
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
+void Perl_Client_AddLevelBasedExp(Client* self, uint8 exp_percentage, uint8 max_level, bool ignore_mods) // @categories Experience and Level
+{
+	self->AddLevelBasedExp(exp_percentage, max_level, ignore_mods);
 }
 
-XS(XS_Client_SetEndurance);
-XS(XS_Client_SetEndurance) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SetEndurance(THIS, Endurance)"); // @categories Account and Character, Stats and Attributes
-	{
-		Client *THIS;
-		int32 Endurance = (int32) SvUV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->SetEndurance(Endurance);
-	}
-	XSRETURN_EMPTY;
+void Perl_Client_IncrementAA(Client* self, uint32 aa_skill_id) // @categories Alternative Advancement
+{
+	self->IncrementAlternateAdvancementRank(aa_skill_id);
 }
 
-XS(XS_Client_SendOPTranslocateConfirm);
-XS(XS_Client_SendOPTranslocateConfirm) {
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::SendOPTranslocateConfirm(THIS, Mob* caster, int32 spell_id)"); // @categories Script Utility
-	{
-		Client *THIS;
-		Mob    *caster = nullptr;
-		int32 spell_id = (int32) SvUV(ST(2));
-		VALIDATE_THIS_IS_CLIENT;
-		if (sv_derived_from(ST(1), "Mob")) {
-			IV tmp = SvIV((SV *) SvRV(ST(1)));
-			caster = INT2PTR(Mob *, tmp);
-		} else
-			Perl_croak(aTHX_ "caster is not of type Mob");
-		if (caster == nullptr)
-			Perl_croak(aTHX_ "caster is nullptr, avoiding crash.");
-
-		THIS->SendOPTranslocateConfirm(caster, spell_id);
-	}
-	XSRETURN_EMPTY;
+bool Perl_Client_GrantAlternateAdvancementAbility(Client* self, int aa_id, int points) // @categories Alternative Advancement
+{
+	return self->GrantAlternateAdvancementAbility(aa_id, points);
 }
 
-XS(XS_Client_NPCSpawn); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_NPCSpawn) {
-	dXSARGS;
-	if (items < 3 || items > 4)
-		Perl_croak(aTHX_ "Usage: Client::NPCSpawn(THIS, NPC*, string option, uint32 respawn_time=1200)"); // @categories Script Utility, Spawns
-	{
-		Client     *THIS;
-		NPC        *target_npc = nullptr;
-		Const_char *option     = (Const_char *) SvPV_nolen(ST(2));
-		uint32 respawntime = 1200;
-		VALIDATE_THIS_IS_CLIENT;
-		if (sv_derived_from(ST(1), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(1)));
-			target_npc = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (target_npc == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
-		if (items > 3)
-			respawntime = (uint32) SvUV(ST(3));
-
-		THIS->NPCSpawn(target_npc, option, respawntime);
-	}
-	XSRETURN_EMPTY;
+bool Perl_Client_GrantAlternateAdvancementAbility(Client* self, int aa_id, int points, bool ignore_cost) // @categories Alternative Advancement
+{
+	return self->GrantAlternateAdvancementAbility(aa_id, points, ignore_cost);
 }
 
-XS(XS_Client_GetIP); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetIP) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetIP(THIS)"); // @categories Script Utility
-	{
-		Client *THIS;
-		uint32 RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetIP();
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
+void Perl_Client_ResetAlternateAdvancementRank(Client* self, int aa_id) // @categories Alternative Advancement
+{
+	return self->ResetAlternateAdvancementRank(aa_id);
 }
 
-XS(XS_Client_AddLevelBasedExp);
-XS(XS_Client_AddLevelBasedExp) {
-	dXSARGS;
-	if (items < 2 || items > 4)
-		Perl_croak(aTHX_ "Usage: Client::AddLevelBasedExp(THIS, uint8 exp_percentage, uint8 max_level = 0, bool ignore_mods = false)"); // @categories Experience and Level
-	{
-		Client *THIS;
-		uint8 exp_percentage = (uint8) SvUV(ST(1));
-		uint8 max_level      = 0;
-		bool ignore_mods	 = false;
-		VALIDATE_THIS_IS_CLIENT;
-		if (items > 2)
-			max_level = (uint8) SvUV(ST(2));
-
-		if (items > 3)
-			ignore_mods = (bool) SvTRUE(ST(3));
-
-		THIS->AddLevelBasedExp(exp_percentage, max_level, ignore_mods);
-	}
-	XSRETURN_EMPTY;
+uint32_t Perl_Client_GetAALevel(Client* self, uint32 aa_skill_id) // @categories Alternative Advancement, Experience and Level
+{
+	return self->GetAA(aa_skill_id);
 }
 
-XS(XS_Client_IncrementAA);
-XS(XS_Client_IncrementAA) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::IncrementAA(THIS, uint32 aa_skill_id)"); // @categories Alternative Advancement
-	{
-		Client *THIS;
-		uint32 aaskillid = SvUV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->IncrementAlternateAdvancementRank(aaskillid);
-	}
-	XSRETURN_EMPTY;
+void Perl_Client_MarkCompassLoc(Client* self, float x, float y, float z) // @categories Adventures and Expeditions
+{
+	self->MarkSingleCompassLoc(x, y, z);
 }
 
-XS(XS_Client_GrantAlternateAdvancementAbility); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GrantAlternateAdvancementAbility) {
-	dXSARGS;
-	if (items < 3 || items > 4)
-		Perl_croak(aTHX_ "Usage: Client::GrantAlternateAdvancementAbility(THIS, int aa_id, int points, [bool ignore_cost = false])"); // @categories Alternative Advancement
-	{
-		Client *THIS;
-		bool RETVAL;
-		int  aa_id       = (int) SvIV(ST(1));
-		int  points      = (int) SvIV(ST(2));
-		bool ignore_cost = false;
-		VALIDATE_THIS_IS_CLIENT;
-		if (items > 3) {
-			ignore_cost = (bool) SvTRUE(ST(3));
-		}
-
-		RETVAL = THIS->GrantAlternateAdvancementAbility(aa_id, points, ignore_cost);
-		ST(0) = boolSV(RETVAL);
-		sv_2mortal(ST(0));
-	}
-	XSRETURN(1);
+void Perl_Client_ClearCompassMark(Client* self) // @categories Adventures and Expeditions
+{
+	self->MarkSingleCompassLoc(0, 0, 0, 0);
 }
 
-XS(XS_Client_GetAALevel);
-XS(XS_Client_GetAALevel) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::GetAALevel(THIS, uint32 aa_skill_id)"); // @categories Alternative Advancement, Experience and Level
-	{
-		Client *THIS;
-		uint32 RETVAL;
-		dXSTARG;
-		uint32 aaskillid = SvUV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetAA(aaskillid);
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
+int Perl_Client_GetFreeSpellBookSlot(Client* self) // @categories Spells and Disciplines
+{
+	return self->GetNextAvailableSpellBookSlot();
 }
 
-XS(XS_Client_MarkCompassLoc);
-XS(XS_Client_MarkCompassLoc) {
-	dXSARGS;
-	if (items != 4)
-		Perl_croak(aTHX_ "Usage: Client::MarkCompassLoc(THIS, float x, float y, float z)"); // @categories Adventures and Expeditions
-	{
-		Client *THIS;
-		float x = SvNV(ST(1));
-		float y = SvNV(ST(2));
-		float z = SvNV(ST(3));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->MarkSingleCompassLoc(x, y, z);
-	}
-	XSRETURN_EMPTY;
+int Perl_Client_GetFreeSpellBookSlot(Client* self, uint32 start_slot) // @categories Spells and Disciplines
+{
+	return self->GetNextAvailableSpellBookSlot(start_slot);
 }
 
-XS(XS_Client_ClearCompassMark);
-XS(XS_Client_ClearCompassMark) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::ClearCompassMark(THIS)"); // @categories Adventures and Expeditions
-	{
-		Client *THIS;
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->MarkSingleCompassLoc(0, 0, 0, 0);
-	}
-	XSRETURN_EMPTY;
+int Perl_Client_GetSpellBookSlotBySpellID(Client* self, uint32 spell_id) // @categories Spells and Disciplines
+{
+	return self->FindSpellBookSlotBySpellID(spell_id);
 }
 
-XS(XS_Client_GetFreeSpellBookSlot); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetFreeSpellBookSlot) {
-	dXSARGS;
-	if (items < 1 || items > 2)
-		Perl_croak(aTHX_ "Usage: Client::GetFreeSpellBookSlot(THIS, uint32 start_slot = 0)"); // @categories Spells and Disciplines
-	{
-		Client *THIS;
-		int    RETVAL;
-		uint32 start_slot = 0;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		if (items > 1)
-			start_slot = SvUV(ST(1));
-
-		RETVAL = THIS->GetNextAvailableSpellBookSlot(start_slot);
-		XSprePUSH;
-		PUSHi((IV) RETVAL);
-	}
-	XSRETURN(1);
+uint32_t Perl_Client_GetSpellIDByBookSlot(Client* self, int slot_id)
+{
+	return self->GetSpellIDByBookSlot(slot_id);
 }
 
-XS(XS_Client_GetSpellBookSlotBySpellID); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetSpellBookSlotBySpellID) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::GetSpellBookSlotBySpellID(THIS, uint32 spell_id)"); // @categories Spells and Disciplines
-	{
-		Client *THIS;
-		int    RETVAL;
-		uint32 spell_id = SvUV(ST(1));
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->FindSpellBookSlotBySpellID(spell_id);
-		XSprePUSH;
-		PUSHi((IV) RETVAL);
-	}
-	XSRETURN(1);
+void Perl_Client_UpdateTaskActivity(Client* self, int task_id, int activity_id, int count) // @categories Tasks and Activities
+{
+	self->UpdateTaskActivity(task_id, activity_id, count);
 }
 
-XS(XS_Client_GetSpellIDByBookSlot); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetSpellIDByBookSlot) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::GetSpellIDByBookSlot(THIS, int slot_id)");
-	{
-		Client* THIS;
-		int    RETVAL;
-		int	   slot_id = SvUV(ST(1));
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetSpellIDByBookSlot(slot_id);
-		XSprePUSH;
-		PUSHi((IV) RETVAL);
-	}
-	XSRETURN(1);
+void Perl_Client_UpdateTaskActivity(Client* self, int task_id, int activity_id, int count, bool ignore_quest_update) // @categories Tasks and Activities
+{
+	self->UpdateTaskActivity(task_id, activity_id, count, ignore_quest_update);
 }
 
-XS(XS_Client_UpdateTaskActivity); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_UpdateTaskActivity) {
-	dXSARGS;
-	if (items < 4)
-		Perl_croak(aTHX_ "Usage: Client::UpdateTaskActivity(THIS, int task_id, int activity_id, int count, [bool ignore_quest_update = false])"); // @categories Tasks and Activities
-	{
-		bool ignore_quest_update = false;
-
-		Client *THIS;
-
-		int TaskID     = (int) SvIV(ST(1));
-		int ActivityID = (int) SvIV(ST(2));
-		int Count      = (int) SvUV(ST(3));
-
-		if (items == 5) {
-			ignore_quest_update = (bool) SvTRUE(ST(4));
-		}
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->UpdateTaskActivity(TaskID, ActivityID, Count, ignore_quest_update);
-	}
-	XSRETURN_EMPTY;
+int Perl_Client_GetTaskActivityDoneCount(Client* self, int task_id, int activity_id) // @categories Tasks and Activities
+{
+	return self->GetTaskActivityDoneCountFromTaskID(task_id, activity_id);
 }
 
-XS(XS_Client_GetTaskActivityDoneCount); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetTaskActivityDoneCount) {
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::GetTaskActivityDoneCount(THIS, int task_id, int activity_id)"); // @categories Tasks and Activities
-	{
-		Client *THIS;
-		int RETVAL;
-		int TaskID     = (int) SvIV(ST(1));
-		int ActivityID = (int) SvIV(ST(2));
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-
-		RETVAL = THIS->GetTaskActivityDoneCountFromTaskID(TaskID, ActivityID);
-		XSprePUSH;
-		PUSHi((IV) RETVAL);
-	}
-	XSRETURN(1);
+void Perl_Client_AssignTask(Client* self, int task_id) // @categories Tasks and Activities
+{
+	self->AssignTask(task_id);
 }
 
-XS(XS_Client_AssignTask); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_AssignTask) {
-	dXSARGS;
-	if (items < 2 || items > 4)
-		Perl_croak(aTHX_ "Usage: Client::AssignTask(THIS, int task_id, [int npc_id = 0, bool enforce_level_requirement = false])"); // @categories Tasks and Activities
-	{
-		Client *THIS;
-		int task_id = (int) SvIV(ST(1));
-		int npc_id = 0;
-		bool enforce_level_requirement = false;
-		VALIDATE_THIS_IS_CLIENT;
-
-		if (items > 2) {
-			npc_id = (int) SvIV(ST(2));
-		}
-
-		if (items > 3) {
-			enforce_level_requirement = SvTRUE(ST(3));
-		}
-
-		THIS->AssignTask(task_id, npc_id, enforce_level_requirement);
-	}
-	XSRETURN_EMPTY;
+void Perl_Client_AssignTask(Client* self, int task_id, int npc_id) // @categories Tasks and Activities
+{
+	self->AssignTask(task_id, npc_id);
 }
 
-XS(XS_Client_FailTask); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_FailTask) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::FailTask(THIS, int task_id)"); // @categories Tasks and Activities
-	{
-		Client *THIS;
-		int TaskID = (int) SvIV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->FailTask(TaskID);
-	}
-	XSRETURN_EMPTY;
+void Perl_Client_AssignTask(Client* self, int task_id, int npc_id, bool enforce_level_requirement) // @categories Tasks and Activities
+{
+	self->AssignTask(task_id, npc_id, enforce_level_requirement);
 }
 
-XS(XS_Client_IsTaskCompleted); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_IsTaskCompleted) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::IsTaskCompleted(THIS, int task_id)"); // @categories Tasks and Activities
-	{
-		Client *THIS;
-		int RETVAL;
-		int TaskID = (int) SvIV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->IsTaskCompleted(TaskID);
-		ST(0) = boolSV(RETVAL);
-		sv_2mortal(ST(0));
-	}
-	XSRETURN(1);
+void Perl_Client_FailTask(Client* self, int task_id) // @categories Tasks and Activities
+{
+	self->FailTask(task_id);
 }
 
-XS(XS_Client_IsTaskActive); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_IsTaskActive) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::IsTaskActive(THIS, int task_id)"); // @categories Tasks and Activities
-	{
-		Client *THIS;
-		bool RETVAL;
-		int  TaskID = (int) SvIV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->IsTaskActive(TaskID);
-		ST(0) = boolSV(RETVAL);
-		sv_2mortal(ST(0));
-	}
-	XSRETURN(1);
+bool Perl_Client_IsTaskCompleted(Client* self, int task_id) // @categories Tasks and Activities
+{
+	return self->IsTaskCompleted(task_id);
 }
 
-XS(XS_Client_IsTaskActivityActive); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_IsTaskActivityActive) {
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::IsTaskActivityActive(THIS, int task_id, int activity_id)"); // @categories Tasks and Activities
-	{
-		Client *THIS;
-		bool RETVAL;
-		int  TaskID     = (int) SvIV(ST(1));
-		int  ActivityID = (int) SvIV(ST(2));
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->IsTaskActivityActive(TaskID, ActivityID);
-		ST(0) = boolSV(RETVAL);
-		sv_2mortal(ST(0));
-	}
-	XSRETURN(1);
+bool Perl_Client_IsTaskActive(Client* self, int task_id) // @categories Tasks and Activities
+{
+	return self->IsTaskActive(task_id);
 }
 
-XS(XS_Client_GetCorpseCount); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetCorpseCount) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetCorpseCount(THIS)"); // @categories Account and Character, Corpse
-	{
-		Client *THIS;
-		uint32 RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetCorpseCount();
-		XSprePUSH;
-		PUSHi((IV) RETVAL);
-	}
-	XSRETURN(1);
+bool Perl_Client_IsTaskActivityActive(Client* self, int task_id, int activity_id) // @categories Tasks and Activities
+{
+	return self->IsTaskActivityActive(task_id, activity_id);
 }
 
-XS(XS_Client_GetCorpseID); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetCorpseID) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::GetCorpseID(THIS, uint8 corpse)"); // @categories Account and Character, Corpse
-	{
-		Client *THIS;
-		uint8  corpse = (uint8) SvIV(ST(1));
-		uint32 RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetCorpseID(corpse);
-		XSprePUSH;
-		PUSHi((IV) RETVAL);
-	}
-	XSRETURN(1);
+void Perl_Client_LockSharedTask(Client* self, bool lock)
+{
+	return self->LockSharedTask(lock);
 }
 
-XS(XS_Client_GetCorpseItemAt); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetCorpseItemAt) {
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::GetCorpseItemAt(THIS, uint32 corpse_id, uint16 slot_id)"); // @categories Inventory and Items, Corpse
-	{
-		Client *THIS;
-		uint32 corpse_id = (uint32) SvIV(ST(1));
-		uint16 slotid    = (uint16) SvIV(ST(2));
-		uint32 RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetCorpseItemAt(corpse_id, slotid);
-		XSprePUSH;
-		PUSHi((IV) RETVAL);
-	}
-	XSRETURN(1);
+void Perl_Client_EndSharedTask(Client* self)
+{
+	return self->EndSharedTask();
 }
 
-XS(XS_Client_AssignToInstance); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_AssignToInstance) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::AssignToInstance(THIS, uint16 instance_id)"); // @categories Adventures and Expeditions
-	{
-		Client *THIS;
-		uint16 instance_id = (uint16) SvUV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->AssignToInstance(instance_id);
-	}
-	XSRETURN_EMPTY;
+void Perl_Client_EndSharedTask(Client* self, bool send_fail)
+{
+	return self->EndSharedTask(send_fail);
 }
 
-XS(XS_Client_RemoveFromInstance); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_RemoveFromInstance) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::RemoveFromInstance(THIS, uint16 instance_id)"); // @categories Adventures and Expeditions
-	{
-		Client *THIS;
-		uint16 instance_id = (uint16) SvUV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->RemoveFromInstance(instance_id);
-	}
-	XSRETURN_EMPTY;
+uint32_t Perl_Client_GetCorpseCount(Client* self) // @categories Account and Character, Corpse
+{
+	return self->GetCorpseCount();
 }
 
-XS(XS_Client_Freeze);
-XS(XS_Client_Freeze) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::Freeze(THIS)");
-	{
-		Client *THIS;
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->SendAppearancePacket(AT_Anim, ANIM_FREEZE);
-	}
-	XSRETURN_EMPTY;
+uint32_t Perl_Client_GetCorpseID(Client* self, uint8 corpse) // @categories Account and Character, Corpse
+{
+	return self->GetCorpseID(corpse);
 }
 
-XS(XS_Client_UnFreeze);
-XS(XS_Client_UnFreeze) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::UnFreeze(THIS)");
-	{
-		Client *THIS;
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->SendAppearancePacket(AT_Anim, ANIM_STAND);
-	}
-	XSRETURN_EMPTY;
+uint32_t Perl_Client_GetCorpseItemAt(Client* self, uint32 corpse_id, uint16 slot_id) // @categories Inventory and Items, Corpse
+{
+	return self->GetCorpseItemAt(corpse_id, slot_id);
 }
 
+void Perl_Client_AssignToInstance(Client* self, uint16 instance_id) // @categories Adventures and Expeditions
+{
+	self->AssignToInstance(instance_id);
+}
 
-XS(XS_Client_GetAggroCount); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetAggroCount) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetAggroCount(THIS)"); // @categories Script Utility, Hate and Aggro
-	{
-		Client *THIS;
-		int RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetAggroCount();
-		XSprePUSH;
-		PUSHi((IV) RETVAL);
-	}
-	XSRETURN(1);
+void Perl_Client_RemoveFromInstance(Client* self, uint16 instance_id) // @categories Adventures and Expeditions
+{
+	self->RemoveFromInstance(instance_id);
 }
 
+void Perl_Client_Freeze(Client* self)
+{
+	self->SendAppearancePacket(AT_Anim, ANIM_FREEZE);
+}
 
-XS(XS_Client_GetCarriedMoney); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetCarriedMoney) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetCarriedMoney(THIS)"); // @categories Currency and Points
-	{
-		Client *THIS;
-		uint64 RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetCarriedMoney();
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
+void Perl_Client_UnFreeze(Client* self)
+{
+	self->SendAppearancePacket(AT_Anim, ANIM_STAND);
 }
 
+int Perl_Client_GetAggroCount(Client* self) // @categories Script Utility, Hate and Aggro
+{
+	return self->GetAggroCount();
+}
 
-XS(XS_Client_GetAllMoney); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetAllMoney) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetAllMoney(THIS)"); // @categories Currency and Points
-	{
-		Client *THIS;
-		uint64 RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetAllMoney();
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
+uint64_t Perl_Client_GetCarriedMoney(Client* self) // @categories Currency and Points
+{
+	return self->GetCarriedMoney();
 }
 
+uint64_t Perl_Client_GetAllMoney(Client* self) // @categories Currency and Points
+{
+	return self->GetAllMoney();
+}
 
-XS(XS_Client_GetItemInInventory); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetItemInInventory) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::GetItemInInventory(THIS, int16 slot_id)"); // @categories Inventory and Items
-	{
-		Client *THIS;
-		int16               slot_id = (int16) SvIV(ST(1));
-		EQ::ItemInstance *RETVAL = nullptr;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetInv().GetItem(slot_id);
-		ST(0) = sv_newmortal();
-		sv_setref_pv(ST(0), "QuestItem", (void *) RETVAL);
-	}
-	XSRETURN(1);
+EQ::ItemInstance* Perl_Client_GetItemInInventory(Client* self, int16 slot_id) // @categories Inventory and Items
+{
+	return self->GetInv().GetItem(slot_id);
 }
 
-XS(XS_Client_SetCustomItemData); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_SetCustomItemData) {
-	dXSARGS;
-	if (items != 4)
-		Perl_croak(aTHX_ "Usage: Client::SetCustomItemData(THIS, int16 slot_id, string identifier, string value)"); // @categories Inventory and Items
-	{
-		Client *THIS;
-		int16 slot_id = (int16) SvIV(ST(1));
-		Const_char *identifier = SvPV_nolen(ST(2));
-		Const_char *value      = SvPV_nolen(ST(3));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->GetInv().SetCustomItemData(THIS->CharacterID(), slot_id, std::string(identifier), std::string(value));
-	}
-	XSRETURN_EMPTY;
+void Perl_Client_SetCustomItemData(Client* self, int16 slot_id, std::string identifier, std::string value) // @categories Inventory and Items
+{
+	self->GetInv().SetCustomItemData(self->CharacterID(), slot_id, identifier, value);
 }
 
-XS(XS_Client_GetCustomItemData); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetCustomItemData) {
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::GetCustomItemData(THIS, int16 slot_id, string identifier)"); // @categories Inventory and Items, Corpse
-	{
-		Client *THIS;
-		int16 slot_id = (int16) SvIV(ST(1));
-		Const_char *identifier = SvPV_nolen(ST(2));
-		Const_char *RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		std::string ret_val = THIS->GetInv().GetCustomItemData(slot_id, std::string(identifier));
-		RETVAL = ret_val.c_str();
-		sv_setpv(TARG, RETVAL);
-		XSprePUSH;
-		PUSHTARG;
-	}
-	XSRETURN(1);
+std::string Perl_Client_GetCustomItemData(Client* self, int16 slot_id, std::string identifier) // @categories Inventory and Items, Corpse
+{
+	return self->GetInv().GetCustomItemData(slot_id, identifier);
 }
 
-XS(XS_Client_OpenLFGuildWindow); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_OpenLFGuildWindow) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::OpenLFGuildWindow(THIS)"); // @categories Script Utility, Guild
-	{
-		Client *THIS;
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->OpenLFGuildWindow();
-	}
-	XSRETURN_EMPTY;
+void Perl_Client_OpenLFGuildWindow(Client* self) // @categories Script Utility, Guild
+{
+	self->OpenLFGuildWindow();
 }
 
-XS(XS_Client_NotifyNewTitlesAvailable); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_NotifyNewTitlesAvailable) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::NotifyNewTitlesAvailable(THIS)"); // @categories Account and Character
-	{
-		Client *THIS;
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->NotifyNewTitlesAvailable();
-	}
-	XSRETURN_EMPTY;
+void Perl_Client_NotifyNewTitlesAvailable(Client* self) // @categories Account and Character
+{
+	self->NotifyNewTitlesAvailable();
 }
 
-XS(XS_Client_AddAlternateCurrencyValue); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_AddAlternateCurrencyValue) {
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::AddAlternateCurrencyValue(THIS, uint32 currency_id, int32 amount)"); // @categories Currency and Points
-	{
-		Client *THIS;
-		uint32 currency_id = (uint32) SvUV(ST(1));
-		int32  amount      = (int32) SvUV(ST(2));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->AddAlternateCurrencyValue(currency_id, amount);
-	}
-	XSRETURN_EMPTY;
+void Perl_Client_AddAlternateCurrencyValue(Client* self, uint32 currency_id, int32 amount) // @categories Currency and Points
+{
+	self->AddAlternateCurrencyValue(currency_id, amount);
 }
 
-XS(XS_Client_SetAlternateCurrencyValue); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_SetAlternateCurrencyValue) {
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::SetAlternateCurrencyValue(THIS, uint32 currency_id, int32 amount)"); // @categories Currency and Points
-	{
-		Client *THIS;
-		uint32 currency_id = (uint32) SvUV(ST(1));
-		int32  amount      = (int32) SvUV(ST(2));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->SetAlternateCurrencyValue(currency_id, amount);
-	}
-	XSRETURN_EMPTY;
+void Perl_Client_SetAlternateCurrencyValue(Client* self, uint32 currency_id, int32 amount) // @categories Currency and Points
+{
+	self->SetAlternateCurrencyValue(currency_id, amount);
 }
 
-XS(XS_Client_GetAlternateCurrencyValue); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetAlternateCurrencyValue) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::GetAlternateCurrencyValue(THIS, uint32 currency_id)"); // @categories Currency and Points
-	{
-		Client *THIS;
-		uint32 currency_id = (uint32) SvUV(ST(1));
-		int32  RETVAL 	   = 0;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetAlternateCurrencyValue(currency_id);
-		XSprePUSH;
-		PUSHi((IV) RETVAL);
-	}
-	XSRETURN(1);
+uint32 Perl_Client_GetAlternateCurrencyValue(Client* self, uint32_t currency_id) // @categories Currency and Points
+{
+	return self->GetAlternateCurrencyValue(currency_id);
 }
 
-XS(XS_Client_SendWebLink); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_SendWebLink) {
-	dXSARGS;
-	if (items < 1 || items > 2)
-		Perl_croak(aTHX_ "Usage: Client::SendWebLink(THIS, string website_url)"); // @categories Script Utility
-	{
-		Client *THIS;
-		char   *website = nullptr;
-		VALIDATE_THIS_IS_CLIENT;
-		if (items > 1) { website = (char *) SvPV_nolen(ST(1)); }
-
-		THIS->SendWebLink(website);
-	}
-	XSRETURN_EMPTY;
+void Perl_Client_SendWebLink(Client* self, const char* url) // @categories Script Utility
+{
+	self->SendWebLink(url);
 }
 
-XS(XS_Client_GetInstanceID); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetInstanceID) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetInstanceID(THIS)"); // @categories Adventures and Expeditions
-	{
-		Client *THIS;
-		int8 RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetInstanceID();
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
+int Perl_Client_GetInstanceID(Client* self) // @categories Adventures and Expeditions
+{
+	return self->GetInstanceID();
 }
 
-XS(XS_Client_HasSpellScribed); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_HasSpellScribed) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::HasSpellScribed(THIS, int spell_id)"); // @categories Spells and Disciplines
-	{
-		Client *THIS;
-		bool RETVAL;
-		int  spell_id = (int) SvUV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->HasSpellScribed(spell_id);
-		ST(0) = boolSV(RETVAL);
-		sv_2mortal(ST(0));
-	}
-	XSRETURN(1);
+bool Perl_Client_HasSpellScribed(Client* self, int spell_id) // @categories Spells and Disciplines
+{
+	return self->HasSpellScribed(spell_id);
 }
 
-XS(XS_Client_SetAccountFlag); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_SetAccountFlag) {
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::SetAccountFlag(THIS, string flag, string value)"); // @categories Account and Character
-	{
-		Client *THIS;
-		//char*     flag = (char *)SvPV_nolen(ST(1));
-		//char*       value = (char *)SvTRUE(ST(2));
-
-		std::string flag((char *) SvPV_nolen(ST(1)));
-		std::string value((char *) SvTRUE(ST(2)));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->SetAccountFlag(flag, value);
-	}
-	XSRETURN_EMPTY;
+void Perl_Client_SetAccountFlag(Client* self, std::string flag, std::string value) // @categories Account and Character
+{
+	self->SetAccountFlag(flag, value);
 }
 
-XS(XS_Client_GetAccountFlag); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetAccountFlag) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::GetAccountFlag(THIS, string flag)"); // @categories Account and Character
-	{
-		Client *THIS;
-		//char*     flag = (char *)SvPV_nolen(ST(1));
-		//char*       value = (char *)SvTRUE(ST(2));
-
-		std::string flag((char *) SvPV_nolen(ST(1)));
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		std::string value = THIS->GetAccountFlag(flag);
-
-		sv_setpv(TARG, value.c_str());
-		XSprePUSH;
-		PUSHTARG;
-	}
-	XSRETURN(1);
+std::string Perl_Client_GetAccountFlag(Client* self, std::string flag) // @categories Account and Character
+{
+	return self->GetAccountFlag(flag);
 }
 
-XS(XS_Client_GetHunger); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetHunger) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetHunger(THIS)"); // @categories Account and Character, Stats and Attributes
-	{
-		Client *THIS;
-		int32 RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetHunger();
-		XSprePUSH;
-		PUSHi((IV) RETVAL);
-	}
-	XSRETURN(1);
+int Perl_Client_GetHunger(Client* self) // @categories Account and Character, Stats and Attributes
+{
+	return self->GetHunger();
 }
 
-XS(XS_Client_GetThirst); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetThirst) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetThirst(THIS)"); // @categories Account and Character, Stats and Attributes
-	{
-		Client *THIS;
-		int32 RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetThirst();
-		XSprePUSH;
-		PUSHi((IV) RETVAL);
-	}
-	XSRETURN(1);
+int Perl_Client_GetThirst(Client* self) // @categories Account and Character, Stats and Attributes
+{
+	return self->GetThirst();
 }
 
-XS(XS_Client_SetHunger); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_SetHunger) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SetHunger(THIS, in_hunger)"); // @categories Script Utility, Stats and Attributes
-	{
-		Client *THIS;
-		int32 in_hunger = (uint32) SvUV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->SetHunger(in_hunger);
-	}
-	XSRETURN_EMPTY;
+void Perl_Client_SetHunger(Client* self, int in_hunger) // @categories Script Utility, Stats and Attributes
+{
+	self->SetHunger(in_hunger);
 }
 
-XS(XS_Client_SetThirst); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_SetThirst) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SetThirst(THIS, int32 in_thirst)"); // @categories Account and Character, Stats and Attributes
-	{
-		Client *THIS;
-		int32 in_thirst = (uint32) SvUV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->SetThirst(in_thirst);
-	}
-	XSRETURN_EMPTY;
+void Perl_Client_SetThirst(Client* self, int in_thirst) // @categories Account and Character, Stats and Attributes
+{
+	self->SetThirst(in_thirst);
 }
 
-XS(XS_Client_SendTargetCommand); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_SendTargetCommand) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SendTargetCommand(THIS, int32 entity_id)"); // @categories Script Utility
-	{
-		Client *THIS;
-		int32 in_entid = (uint32) SvUV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->SendTargetCommand(in_entid);
-	}
-	XSRETURN_EMPTY;
+void Perl_Client_SendTargetCommand(Client* self, uint32 entity_id) // @categories Script Utility
+{
+	self->SendTargetCommand(entity_id);
 }
 
-XS(XS_Client_SetConsumption); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_SetConsumption) {
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::SetHunger(THIS, int32 hunger_amount, int32 thirst_amount)"); // @categories Script Utility, Stats and Attributes
-	{
-		Client *THIS;
-		int32 in_hunger = (uint32) SvUV(ST(1));
-		int32 in_thirst = (uint32) SvUV(ST(2));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->SetConsumption(in_hunger, in_thirst);
-	}
-	XSRETURN_EMPTY;
+void Perl_Client_SetConsumption(Client* self, int hunger_amount, int thirst_amount) // @categories Script Utility, Stats and Attributes
+{
+	self->SetConsumption(hunger_amount, thirst_amount);
 }
 
-XS(XS_Client_SilentMessage); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_SilentMessage) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SilentMessage(THIS, string message)"); // @categories Script Utility
-	{
-		Client *THIS;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		if (THIS->GetTarget() != NULL) {
-			if (THIS->GetTarget()->IsNPC()) {
-				if (DistanceSquaredNoZ(THIS->GetPosition(), THIS->GetTarget()->GetPosition()) <= 200) {
-					if (THIS->GetTarget()->CastToNPC()->IsMoving() &&
-					    !THIS->GetTarget()->CastToNPC()->IsOnHatelist(THIS->GetTarget()))
-						THIS->GetTarget()->CastToNPC()->PauseWandering(RuleI(NPC, SayPauseTimeInSec));
-					THIS->ChannelMessageReceived(8, 0, 100, SvPV_nolen(ST(1)));
-				}
+void Perl_Client_SilentMessage(Client* self, const char* message) // @categories Script Utility
+{
+	if (self->GetTarget() != NULL) {
+		if (self->GetTarget()->IsNPC()) {
+			if (DistanceSquaredNoZ(self->GetPosition(), self->GetTarget()->GetPosition()) <= 200) {
+				if (self->GetTarget()->CastToNPC()->IsMoving() &&
+					  !self->GetTarget()->CastToNPC()->IsOnHatelist(self->GetTarget()))
+					self->GetTarget()->CastToNPC()->PauseWandering(RuleI(NPC, SayPauseTimeInSec));
+				self->ChannelMessageReceived(8, 0, 100, message, nullptr, true);
 			}
 		}
 	}
-	XSRETURN_EMPTY;
 }
 
-XS(XS_Client_PlayMP3); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_PlayMP3) {
-	dXSARGS;
-	if (items < 1 || items > 2)
-		Perl_croak(aTHX_ "Usage: Client::PlayMP3(THIS, string file)"); // @categories Script Utility
-	{
-		Client *THIS;
-		char   *fname = nullptr;
-		VALIDATE_THIS_IS_CLIENT;
-		if (items > 1) { fname = (char *) SvPV_nolen(ST(1)); }
-
-		THIS->PlayMP3(fname);
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Client_ExpeditionMessage); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_ExpeditionMessage) {
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::ExpeditionMessage(THIS, int expedition_id, string message)"); // @categories Adventures and Expeditions
-	{
-		Client *THIS;
-		int ExpdID = (int) SvUV(ST(1));
-		const char *Message = (const char *) SvPV_nolen(ST(2));
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->ExpeditionSay(Message, ExpdID);
-	}
-	XSRETURN_EMPTY;
-}
-
-//Client::SendMarqueeMessage(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, std::string msg)
-
-XS(XS_Client_SendMarqueeMessage); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_SendMarqueeMessage) {
-	dXSARGS;
-	if (items != 7)
-		Perl_croak(aTHX_ "Usage: Client::SendMarqueeMessage(THIS, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, string msg)"); // @categories Script Utility
-	{
-		Client *THIS;
-		uint32      type     = (uint32) SvUV(ST(1));
-		uint32      priority = (uint32) SvUV(ST(2));
-		uint32      fade_in  = (uint32) SvUV(ST(3));
-		uint32      fade_out = (uint32) SvUV(ST(4));
-		uint32      duration = (uint32) SvUV(ST(5));
-		std::string msg      = (std::string) SvPV_nolen(ST(6));
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->SendMarqueeMessage(type, priority, fade_in, fade_out, duration, msg);
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Client_SendColoredText); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_SendColoredText) {
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::SendColoredText(uint32 color, string message)"); // @categories Script Utility
-	{
-		Client *THIS;
-		uint32      color = (uint32) SvUV(ST(1));
-		std::string msg   = (std::string) SvPV_nolen(ST(2));
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->SendColoredText(color, msg);
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Client_SendSpellAnim); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_SendSpellAnim) {
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: SendSpellAnim(uint16 target_id, uint32 spell_animation_id)");
-	{
-		Client *THIS;
-		uint16 targetid = (uint16) SvUV(ST(1));
-		uint16 spell_id = (uint16) SvUV(ST(2));
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->SendSpellAnim(targetid, spell_id);
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Client_GetTargetRingX); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetTargetRingX) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetTargetRingX(THIS)"); // @categories Script Utility
-	{
-		Client *THIS;
-		float RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetTargetRingX();
-		XSprePUSH;
-		PUSHn((double) RETVAL);
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Client_GetTargetRingY); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetTargetRingY) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetTargetRingY(THIS)"); // @categories Script Utility
-	{
-		Client *THIS;
-		float RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetTargetRingY();
-		XSprePUSH;
-		PUSHn((double) RETVAL);
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Client_GetTargetRingZ); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetTargetRingZ) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetTargetRingZ(THIS)"); // @categories Script Utility
-	{
-		Client *THIS;
-		float RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetTargetRingZ();
-		XSprePUSH;
-		PUSHn((double) RETVAL);
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Client_CalcEXP); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_CalcEXP) {
-	dXSARGS;
-	if (items < 1 || items > 2)
-		Perl_croak(aTHX_ "Usage: CalcEXP(THIS, uint8 conlevel)");
-	{
-		Client *THIS;
-		uint8  conlevel = 0xFF;
-		uint32 RETVAL;
-		if (items == 2)
-			conlevel = (uint16) SvUV(ST(1));
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->CalcEXP(conlevel);
-		XSprePUSH;
-		PUSHi((IV) RETVAL);
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Client_QuestReward); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_QuestReward) {
-	dXSARGS;
-	if (items < 1 || items > 9)
-		Perl_croak(aTHX_ "Usage: Client::QuestReward(THIS, int32 mob, int32 copper, int32 silver, int32 gold, int32 platinum, int32 item_id, int32 exp, [bool faction = false])"); // @categories Currency and Points, Experience and Level, Inventory and Items, Faction
-	{
-		Client *THIS;
-		Mob    *mob = nullptr;
-		int32 copper   = 0;
-		int32 silver   = 0;
-		int32 gold     = 0;
-		int32 platinum = 0;
-		int32 itemid   = 0;
-		int32 exp      = 0;
-		bool  faction  = false;
-
-		if (sv_derived_from(ST(0), "THIS")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
-		if (items > 1) {
-			if (sv_derived_from(ST(1), "mob")) {
-				IV tmp = SvIV((SV *) SvRV(ST(1)));
-				mob = INT2PTR(Mob *, tmp);
-			} else
-				Perl_croak(aTHX_ "mob is not of type Mob");
-			if (mob == nullptr)
-				Perl_croak(aTHX_ "mob is nullptr, avoiding crash.");
-		}
-		if (items > 2) { copper = (int32) SvIV(ST(2)); }
-		if (items > 3) { silver = (int32) SvIV(ST(3)); }
-		if (items > 4) { gold = (int32) SvIV(ST(4)); }
-		if (items > 5) { platinum = (int32) SvIV(ST(5)); }
-		if (items > 6) { itemid = (int32) SvIV(ST(6)); }
-		if (items > 7) { exp = (int32) SvIV(ST(7)); }
-		if (items > 8) { faction = (bool) SvIV(ST(8)); }
-
-		THIS->QuestReward(mob, copper, silver, gold, platinum, itemid, exp, faction);
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Client_GetMoney);
-XS(XS_Client_GetMoney) {
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: GetMoney(THIS, int8 type, int8 subtype)");
-	{
-		Client *THIS;
-		uint32 RETVAL;
-		uint8  type    = (uint8) SvUV(ST(1));
-		uint8  subtype = (uint8) SvUV(ST(2));
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetMoney(type, subtype);
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Client_GetAccountAge);
-XS(XS_Client_GetAccountAge) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: GetAccountAge(THIS)");
-	{
-		Client *THIS;
-		int RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetAccountAge();
-		XSprePUSH;
-		PUSHi((IV) RETVAL);
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Client_Popup2); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_Popup2) {
-	dXSARGS;
-	if (items < 3 || items > 10)
-		Perl_croak(aTHX_ "Usage: Client::Popup2(THIS, string title, string text, uint32 popup_id, uint32 negative_id, uint32 buttons, uint32 duration, string button_name_0, string button_name_1, uint32 sound_controls)"); // @categories Script Utility
-	{
-		Client *THIS;
-		char   *Title = (char *) SvPV_nolen(ST(1));
-		char   *Text  = (char *) SvPV_nolen(ST(2));
-		uint32 PopupID    = 0;
-		uint32 NegativeID = 0;
-		uint32 Buttons    = 0;
-		uint32 Duration   = 0;
-		char *ButtonName0 = 0;
-		char *ButtonName1 = 0;
-		uint32 SoundControls = 0;
-		VALIDATE_THIS_IS_CLIENT;
-		if (items > 3) { PopupID = (uint32) SvUV(ST(3)); }
-		if (items > 4) { NegativeID = (uint32) SvUV(ST(4)); }
-		if (items > 5) { Buttons = (uint32) SvUV(ST(5)); }
-		if (items > 6) { Duration = (uint32) SvUV(ST(6)); }
-		if (items > 7) { ButtonName0 = (char *) SvPV_nolen(ST(7)); }
-		if (items > 8) { ButtonName1 = (char *) SvPV_nolen(ST(8)); }
-		if (items > 9) { SoundControls = (uint32) SvUV(ST(9)); }
-
-
-		THIS->SendFullPopup(Title, Text, PopupID, NegativeID, Buttons, Duration, ButtonName0, ButtonName1,
-		                    SoundControls);
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Client_SetPrimaryWeaponOrnamentation); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_SetPrimaryWeaponOrnamentation)
+void Perl_Client_PlayMP3(Client* self, const char* file) // @categories Script Utility
 {
-	dXSARGS;
-	if (items != 2) {
-		Perl_croak(aTHX_ "Usage: Client::SetPrimaryWeaponOrnamentation(THIS, model_id)"); // @categories Account and Character, Inventory and Items
-	}
-	{
-		Client *THIS;
-		uint32 model_id = (uint32) SvUV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->SetPrimaryWeaponOrnamentation(model_id);
-	}
-	XSRETURN_EMPTY;
+	self->PlayMP3(file);
 }
 
-XS(XS_Client_SetSecondaryWeaponOrnamentation); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_SetSecondaryWeaponOrnamentation)
+// todo: this is some legacy api for 'cust_inst_players' and can possibly be removed (not related to current expeditions)
+void Perl_Client_ExpeditionMessage(Client* self, int expedition_id, const char* message) // @categories Adventures and Expeditions
 {
-	dXSARGS;
-	if (items != 2) {
-		Perl_croak(aTHX_ "Usage: Client::SetSecondaryWeaponOrnamentation(THIS, model_id)"); // @categories Account and Character, Inventory and Items
-	}
-	{
-		Client *THIS;
-		uint32 model_id = (uint32) SvUV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->SetSecondaryWeaponOrnamentation(model_id);
-	}
-	XSRETURN_EMPTY;
+	self->ExpeditionSay(message, expedition_id);
 }
 
-XS(XS_Client_SetClientMaxLevel); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_SetClientMaxLevel) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SetClientMaxLevel(THIS, int in_level)");
-	{
-		Client* THIS;
-		int in_level = (int)SvUV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->SetClientMaxLevel(in_level);
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Client_GetClientMaxLevel); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetClientMaxLevel) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetClientMaxLevel(THIS)");
-	{
-		Client* THIS;
-		int RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetClientMaxLevel();
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
-}
-
-DynamicZoneLocation GetDynamicZoneLocationFromHash(HV* hash)
+void Perl_Client_SendColoredText(Client* self, uint32 color, std::string msg) // @categories Script Utility
 {
-	// dynamic zone helper method (caller must validate hash)
-	SV** zone_ptr = hv_fetchs(hash, "zone", false);
-	SV** x_ptr    = hv_fetchs(hash, "x", false);
-	SV** y_ptr    = hv_fetchs(hash, "y", false);
-	SV** z_ptr    = hv_fetchs(hash, "z", false);
-	SV** h_ptr    = hv_fetchs(hash, "h", false);
+	self->SendColoredText(color, std::move(msg));
+}
 
-	uint32_t zone_id = 0;
-	if (zone_ptr && SvIOK(*zone_ptr))
-	{
-		zone_id = static_cast<uint32_t>(SvIV(*zone_ptr));
-	}
-	else if (zone_ptr && SvPOK(*zone_ptr))
-	{
-		zone_id = ZoneID(SvPV_nolen(*zone_ptr));
-	}
+void Perl_Client_SendSpellAnim(Client* self, uint16 targetid, uint16 spell_id)
+{
+	self->SendSpellAnim(targetid, spell_id);
+}
 
-	// SvNIOK checks for number, integer or double
-	float x = (x_ptr && SvNIOK(*x_ptr)) ? static_cast<float>(SvNV(*x_ptr)) : 0.0f;
-	float y = (y_ptr && SvNIOK(*y_ptr)) ? static_cast<float>(SvNV(*y_ptr)) : 0.0f;
-	float z = (z_ptr && SvNIOK(*z_ptr)) ? static_cast<float>(SvNV(*z_ptr)) : 0.0f;
-	float h = (h_ptr && SvNIOK(*h_ptr)) ? static_cast<float>(SvNV(*h_ptr)) : 0.0f;
+float Perl_Client_GetTargetRingX(Client* self) // @categories Script Utility
+{
+	return self->GetTargetRingX();
+}
+
+float Perl_Client_GetTargetRingY(Client* self) // @categories Script Utility
+{
+	return self->GetTargetRingY();
+}
+
+float Perl_Client_GetTargetRingZ(Client* self) // @categories Script Utility
+{
+	return self->GetTargetRingZ();
+}
+
+uint64_t Perl_Client_CalcEXP(Client* self, uint8 consider_level)
+{
+	return self->CalcEXP(consider_level);
+}
+
+uint64_t Perl_Client_CalcEXP(Client* self, uint8 consider_level, bool ignore_modifiers)
+{
+	return self->CalcEXP(consider_level, ignore_modifiers);
+}
+
+void Perl_Client_QuestReward(Client* self, Mob* mob) // @categories Currency and Points, Experience and Level, Inventory and Items, Faction
+{
+	self->QuestReward(mob);
+}
+
+void Perl_Client_QuestReward(Client* self, Mob* mob, uint32 copper) // @categories Currency and Points, Experience and Level, Inventory and Items, Faction
+{
+	self->QuestReward(mob, copper);
+}
+
+void Perl_Client_QuestReward(Client* self, Mob* mob, uint32 copper, uint32 silver) // @categories Currency and Points, Experience and Level, Inventory and Items, Faction
+{
+	self->QuestReward(mob, copper, silver);
+}
+
+void Perl_Client_QuestReward(Client* self, Mob* mob, uint32 copper, uint32 silver, uint32 gold) // @categories Currency and Points, Experience and Level, Inventory and Items, Faction
+{
+	self->QuestReward(mob, copper, silver, gold);
+}
+
+void Perl_Client_QuestReward(Client* self, Mob* mob, uint32 copper, uint32 silver, uint32 gold, uint32 platinum) // @categories Currency and Points, Experience and Level, Inventory and Items, Faction
+{
+	self->QuestReward(mob, copper, silver, gold, platinum);
+}
+
+void Perl_Client_QuestReward(Client* self, Mob* mob, uint32 copper, uint32 silver, uint32 gold, uint32 platinum, uint32 item_id) // @categories Currency and Points, Experience and Level, Inventory and Items, Faction
+{
+	self->QuestReward(mob, copper, silver, gold, platinum, item_id);
+}
+
+void Perl_Client_QuestReward(Client* self, Mob* mob, uint32 copper, uint32 silver, uint32 gold, uint32 platinum, uint32 item_id, uint32 exp) // @categories Currency and Points, Experience and Level, Inventory and Items, Faction
+{
+	self->QuestReward(mob, copper, silver, gold, platinum, item_id, exp);
+}
+
+void Perl_Client_QuestReward(Client* self, Mob* mob, uint32 copper, uint32 silver, uint32 gold, uint32 platinum, uint32 item_id, uint32 exp, bool faction) // @categories Currency and Points, Experience and Level, Inventory and Items, Faction
+{
+	self->QuestReward(mob, copper, silver, gold, platinum, item_id, exp, faction);
+}
+
+void Perl_Client_CashReward(Client* self, uint32 copper, uint32 silver, uint32 gold, uint32 platinum)
+{
+	self->CashReward(copper, silver, gold, platinum);
+}
+
+uint32_t Perl_Client_GetMoney(Client* self, int8 type, int8 subtype)
+{
+	return self->GetMoney(type, subtype);
+}
+
+int Perl_Client_GetAccountAge(Client* self)
+{
+	return self->GetAccountAge();
+}
+
+void Perl_Client_Popup2(Client* self, const char* title, const char* text) // @categories Script Utility
+{
+	self->SendFullPopup(title, text);
+}
+
+void Perl_Client_Popup2(Client* self, const char* title, const char* text, uint32 popup_id) // @categories Script Utility
+{
+	self->SendFullPopup(title, text, popup_id);
+}
+
+void Perl_Client_Popup2(Client* self, const char* title, const char* text, uint32 popup_id, uint32 negative_id) // @categories Script Utility
+{
+	self->SendFullPopup(title, text, popup_id, negative_id);
+}
+
+void Perl_Client_Popup2(Client* self, const char* title, const char* text, uint32 popup_id, uint32 negative_id, uint32 buttons) // @categories Script Utility
+{
+	self->SendFullPopup(title, text, popup_id, negative_id, buttons);
+}
+
+void Perl_Client_Popup2(Client* self, const char* title, const char* text, uint32 popup_id, uint32 negative_id, uint32 buttons, uint32 duration) // @categories Script Utility
+{
+	self->SendFullPopup(title, text, popup_id, negative_id, buttons, duration);
+}
+
+void Perl_Client_Popup2(Client* self, const char* title, const char* text, uint32 popup_id, uint32 negative_id, uint32 buttons, uint32 duration, const char* button_name_0) // @categories Script Utility
+{
+	self->SendFullPopup(title, text, popup_id, negative_id, buttons, duration, button_name_0);
+}
+
+void Perl_Client_Popup2(Client* self, const char* title, const char* text, uint32 popup_id, uint32 negative_id, uint32 buttons, uint32 duration, const char* button_name_0, const char* button_name_1) // @categories Script Utility
+{
+	self->SendFullPopup(title, text, popup_id, negative_id, buttons, duration, button_name_0, button_name_1);
+}
+
+void Perl_Client_Popup2(Client* self, const char* title, const char* text, uint32 popup_id, uint32 negative_id, uint32 buttons, uint32 duration, const char* button_name_0, const char* button_name_1, uint32 sound_controls) // @categories Script Utility
+{
+	self->SendFullPopup(title, text, popup_id, negative_id, buttons, duration, button_name_0, button_name_1, sound_controls);
+}
+
+void Perl_Client_SetPrimaryWeaponOrnamentation(Client* self, int model_id) // @categories Account and Character, Inventory and Items
+{
+	self->SetPrimaryWeaponOrnamentation(model_id);
+}
+
+void Perl_Client_SetSecondaryWeaponOrnamentation(Client* self, int model_id) // @categories Account and Character, Inventory and Items
+{
+	self->SetSecondaryWeaponOrnamentation(model_id);
+}
+
+void Perl_Client_SetClientMaxLevel(Client* self, uint8 max_level)
+{
+	self->SetClientMaxLevel(max_level);
+}
+
+int Perl_Client_GetClientMaxLevel(Client* self)
+{
+	return self->GetClientMaxLevel();
+}
+
+DynamicZoneLocation GetDynamicZoneLocationFromHash(perl::hash table)
+{
+	// dynamic zone helper method, defaults invalid/missing keys to 0
+	perl::scalar zone = table["zone"];
+	uint32_t zone_id = zone.is_string() ? ZoneID(zone.c_str()) : zone.as<uint32_t>();
+
+	float x = table.exists("x") ? table["x"] : 0.0f;
+	float y = table.exists("y") ? table["y"] : 0.0f;
+	float z = table.exists("z") ? table["z"] : 0.0f;
+	float h = table.exists("h") ? table["h"] : 0.0f;
 
 	return { zone_id, x, y, z, h };
 }
 
-Expedition* CreateExpeditionFromHash(Client* client, SV* hash_ref)
+Expedition* Perl_Client_CreateExpedition(Client* self, perl::reference table_ref)
 {
-	if (!hash_ref || !SvROK(hash_ref)) // verify valid reference type
+	perl::hash table      = table_ref;
+	perl::hash expedition = table["expedition"];
+	perl::hash instance   = table["instance"];
+
+	perl::scalar zone = instance["zone"];
+	uint32_t version  = instance["version"];
+	uint32_t duration = instance["duration"];
+	uint32_t zone_id  = zone.is_string() ? ZoneID(zone.c_str()) : zone.as<uint32_t>();
+
+	DynamicZone dz{ zone_id, version, duration, DynamicZoneType::Expedition };
+	dz.SetName(expedition["name"]);
+	dz.SetMinPlayers(expedition["min_players"]);
+	dz.SetMaxPlayers(expedition["max_players"]);
+
+	if (table.exists("compass"))
 	{
-		Perl_croak(aTHX_ "Client::CreateExpedition argument is not a reference type");
+		auto compass = GetDynamicZoneLocationFromHash(table["compass"]);
+		dz.SetCompass(compass);
 	}
 
-	HV* hash = (HV*)SvRV(hash_ref); // dereference and verify type is hash
-	if (SvTYPE(hash) != SVt_PVHV)
+	if (table.exists("safereturn"))
 	{
-		Perl_croak(aTHX_ "Client::CreateExpedition reference argument is not to a hash type");
+		auto safereturn = GetDynamicZoneLocationFromHash(table["safereturn"]);
+		dz.SetSafeReturn(safereturn);
 	}
 
-	SV** expedition_info_ptr = hv_fetchs(hash, "expedition", false);
-	if (!expedition_info_ptr)
+	if (table.exists("zonein"))
 	{
-		Perl_croak(aTHX_ "Client::CreateExpedition required 'expedition' key missing from hash");
+		auto zonein = GetDynamicZoneLocationFromHash(table["zonein"]);
+		dz.SetZoneInLocation(zonein);
 	}
 
-	if (!SvROK(*expedition_info_ptr) || SvTYPE(SvRV(*expedition_info_ptr)) != SVt_PVHV)
+	if (table.exists("switchid"))
 	{
-		Perl_croak(aTHX_ "Client::CreateExpedition 'expedition' entry must have a hash table value");
+		dz.SetSwitchID(table["switchid"].as<int>());
 	}
 
-	SV** instance_info_ptr = hv_fetchs(hash, "instance", false);
-	if (!instance_info_ptr)
+	if (expedition.exists("disable_messages"))
 	{
-		Perl_croak(aTHX_ "Client::CreateExpedition required 'instance' key missing from hash");
+		return self->CreateExpedition(dz, expedition["disable_messages"].as<bool>());
 	}
 
-	if (!SvROK(*instance_info_ptr) || SvTYPE(SvRV(*instance_info_ptr)) != SVt_PVHV)
-	{
-		Perl_croak(aTHX_ "Client::CreateExpedition 'instance' entry must have a hash table value");
-	}
-
-	// dereference the nested hash tables and validate required keys
-	HV* expedition_hash  = (HV*)SvRV(*expedition_info_ptr);
-	SV** name_ptr        = hv_fetchs(expedition_hash, "name", false);
-	SV** min_players_ptr = hv_fetchs(expedition_hash, "min_players", false);
-	SV** max_players_ptr = hv_fetchs(expedition_hash, "max_players", false);
-	SV** disable_msg_ptr = hv_fetchs(expedition_hash, "disable_messages", false);
-	if (!name_ptr || !min_players_ptr || !max_players_ptr)
-	{
-		Perl_croak(aTHX_ "Client::CreateExpedition 'expedition' hash table missing required keys (name, min_players, max_players)");
-	}
-
-	HV* instance_hash      = (HV*)SvRV(*instance_info_ptr);
-	SV** instance_zone_ptr = hv_fetchs(instance_hash, "zone", false);
-	SV** version_ptr       = hv_fetchs(instance_hash, "version", false);
-	SV** duration_ptr      = hv_fetchs(instance_hash, "duration", false);
-	if (!instance_zone_ptr || !version_ptr || !duration_ptr)
-	{
-		Perl_croak(aTHX_ "Client::CreateExpedition 'instance' hash table missing required keys (zone, version, duration)");
-	}
-
-	uint32_t zone_id = 0;
-	if (SvIOK(*instance_zone_ptr))
-	{
-		zone_id = static_cast<uint32_t>(SvIV(*instance_zone_ptr));
-	}
-	else if (SvPOK(*instance_zone_ptr))
-	{
-		zone_id = ZoneID(SvPV_nolen(*instance_zone_ptr));
-	}
-	else
-	{
-		Perl_croak(aTHX_ "Client::CreateExpedition zone value in 'instance' table must be int or string");
-	}
-
-	uint32_t zone_version  = SvIOK(*version_ptr) ? static_cast<uint32_t>(SvIV(*version_ptr)) : 0;
-	uint32_t zone_duration = SvIOK(*duration_ptr) ? static_cast<uint32_t>(SvIV(*duration_ptr)) : 0;
-
-	DynamicZone dz{ zone_id, zone_version, zone_duration, DynamicZoneType::Expedition };
-	dz.SetName(SvPOK(*name_ptr) ? SvPV_nolen(*name_ptr) : "");
-	dz.SetMinPlayers(SvIOK(*min_players_ptr) ? static_cast<uint32_t>(SvIV(*min_players_ptr)) : 0);
-	dz.SetMaxPlayers(SvIOK(*max_players_ptr) ? static_cast<uint32_t>(SvIV(*max_players_ptr)) : 0);
-
-	SV** compass_ptr = hv_fetchs(hash, "compass", false);
-	if (compass_ptr && SvROK(*compass_ptr) && SvTYPE(SvRV(*compass_ptr)) == SVt_PVHV)
-	{
-		auto compass_loc = GetDynamicZoneLocationFromHash((HV*)SvRV(*compass_ptr));
-		dz.SetCompass(compass_loc);
-	}
-
-	SV** safereturn_ptr = hv_fetchs(hash, "safereturn", false);
-	if (safereturn_ptr && SvROK(*safereturn_ptr) && SvTYPE(SvRV(*safereturn_ptr)) == SVt_PVHV)
-	{
-		auto safereturn_loc = GetDynamicZoneLocationFromHash((HV*)SvRV(*safereturn_ptr));
-		dz.SetSafeReturn(safereturn_loc);
-	}
-
-	SV** zonein_ptr = hv_fetchs(hash, "zonein", false);
-	if (zonein_ptr && SvROK(*zonein_ptr) && SvTYPE(SvRV(*zonein_ptr)) == SVt_PVHV)
-	{
-		auto zonein_loc = GetDynamicZoneLocationFromHash((HV*)SvRV(*zonein_ptr));
-		dz.SetZoneInLocation(zonein_loc);
-	}
-
-	bool disable_messages = (disable_msg_ptr && SvIOK(*disable_msg_ptr)) ? SvTRUE(*disable_msg_ptr) : false;
-
-	return client->CreateExpedition(dz, disable_messages);
+	return self->CreateExpedition(dz);
 }
 
-XS(XS_Client_CreateExpedition);
-XS(XS_Client_CreateExpedition) {
-	dXSARGS;
-	if (items != 2 && items != 7 && items != 8) {
-		Perl_croak(aTHX_ "Usage: Client::CreateExpedition(THIS, HASHREF expedition_info | string zone_name, uint32 zone_version, uint32 duration, string expedition_name, uint32 min_players, uint32 max_players, [bool disable_messages = false])");
-	}
-
-	Client* THIS = nullptr;
-	VALIDATE_THIS_IS_CLIENT;
-
-	Expedition* RETVAL = nullptr;
-	if (items == 2)
-	{
-		RETVAL = CreateExpeditionFromHash(THIS, ST(1));
-	}
-	else
-	{
-		std::string zone_name(SvPV_nolen(ST(1)));
-		uint32 zone_version = (uint32)SvUV(ST(2));
-		uint32 duration = (uint32)SvUV(ST(3));
-		std::string expedition_name(SvPV_nolen(ST(4)));
-		uint32 min_players = (uint32)SvUV(ST(5));
-		uint32 max_players = (uint32)SvUV(ST(6));
-		bool disable_messages = (items > 7) ? (bool)SvTRUE(ST(7)) : false;
-
-		RETVAL = THIS->CreateExpedition(zone_name, zone_version, duration,
-			expedition_name, min_players, max_players, disable_messages);
-	}
-
-	ST(0) = sv_newmortal();
-	sv_setref_pv(ST(0), "Expedition", (void*)RETVAL);
-
-	XSRETURN(1);
+Expedition* Perl_Client_CreateExpedition(Client* self, std::string zone_name, uint32 version, uint32 duration, std::string expedition_name, uint32 min_players, uint32 max_players)
+{
+	return self->CreateExpedition(zone_name, version, duration, expedition_name, min_players, max_players);
 }
 
-XS(XS_Client_CreateTaskDynamicZone);
-XS(XS_Client_CreateTaskDynamicZone) {
-	dXSARGS;
-	if (items != 3) {
-		Perl_croak(aTHX_ "Usage: Client::CreateTaskDynamicZone(THIS, int task_id, HASHREF dz_info)");
-	}
+Expedition* Perl_Client_CreateExpedition(Client* self, std::string zone_name, uint32 version, uint32 duration, std::string expedition_name, uint32 min_players, uint32 max_players, bool disable_messages)
+{
+	return self->CreateExpedition(zone_name, version, duration, expedition_name, min_players, max_players, disable_messages);
+}
 
-	Client* THIS = nullptr;
-	VALIDATE_THIS_IS_CLIENT;
+Expedition* Perl_Client_CreateExpeditionFromTemplate(Client* self, uint32_t dz_template_id)
+{
+	return self->CreateExpeditionFromTemplate(dz_template_id);
+}
 
-	SV* hash_ref = ST(2);
-	if (!hash_ref || !SvROK(hash_ref))
-	{
-		Perl_croak(aTHX_ "Client::CreateTaskDynamicZone argument is not a reference type");
-	}
+void Perl_Client_CreateTaskDynamicZone(Client* self, int task_id, perl::reference table_ref)
+{
+	perl::hash table = table_ref;
+	perl::hash instance = table["instance"];
 
-	HV* hash = (HV*)SvRV(hash_ref); // dereference into hash
-	if (SvTYPE(hash) != SVt_PVHV)
-	{
-		Perl_croak(aTHX_ "Client::CreateTaskDynamicZone reference argument is not to a hash type");
-	}
-
-	SV** instance_info_ptr = hv_fetchs(hash, "instance", false);
-	if (!instance_info_ptr)
-	{
-		Perl_croak(aTHX_ "Client::CreateTaskDynamicZone required 'instance' key missing from hash");
-	}
-
-	if (!SvROK(*instance_info_ptr) || SvTYPE(SvRV(*instance_info_ptr)) != SVt_PVHV)
-	{
-		Perl_croak(aTHX_ "Client::CreateTaskDynamicZone 'instance' entry must have a hash table value");
-	}
-
-	HV* instance_hash      = (HV*)SvRV(*instance_info_ptr);
-	SV** instance_zone_ptr = hv_fetchs(instance_hash, "zone", false);
-	SV** version_ptr       = hv_fetchs(instance_hash, "version", false);
-	SV** duration_ptr      = hv_fetchs(instance_hash, "duration", false);
-	if (!instance_zone_ptr || !version_ptr)
-	{
-		Perl_croak(aTHX_ "Client::CreateTaskDynamicZone 'instance' hash table missing required keys (zone, version, duration)");
-	}
-
-	uint32_t zone_id = 0;
-	SV* instance_zone = *instance_zone_ptr;
-	if (SvIOK(instance_zone))
-	{
-		zone_id = static_cast<uint32_t>(SvIV(instance_zone));
-	}
-	else if (SvPOK(instance_zone))
-	{
-		zone_id = ZoneID(SvPV_nolen(instance_zone));
-	}
-	else
-	{
-		Perl_croak(aTHX_ "Client::CreateTaskDynamicZone zone value in 'instance' table must be int or string");
-	}
-
-	uint32_t zone_version  = SvIOK(*version_ptr) ? static_cast<uint32_t>(SvIV(*version_ptr)) : 0;
+	perl::scalar zone = instance["zone"];
+	uint32_t version  = instance["version"];
+	uint32_t zone_id  = zone.is_string() ? ZoneID(zone.c_str()) : zone.as<uint32_t>();
 
 	// tasks override dz duration so duration is ignored here
-	DynamicZone dz{ zone_id, zone_version, 0, DynamicZoneType::None };
+	DynamicZone dz{ zone_id, version, 0, DynamicZoneType::None };
 
-	SV** compass_ptr = hv_fetchs(hash, "compass", false);
-	if (compass_ptr && SvROK(*compass_ptr) && SvTYPE(SvRV(*compass_ptr)) == SVt_PVHV)
+	if (table.exists("compass"))
 	{
-		auto compass_loc = GetDynamicZoneLocationFromHash((HV*)SvRV(*compass_ptr));
-		dz.SetCompass(compass_loc);
+		auto compass = GetDynamicZoneLocationFromHash(table["compass"]);
+		dz.SetCompass(compass);
 	}
 
-	SV** safereturn_ptr = hv_fetchs(hash, "safereturn", false);
-	if (safereturn_ptr && SvROK(*safereturn_ptr) && SvTYPE(SvRV(*safereturn_ptr)) == SVt_PVHV)
+	if (table.exists("safereturn"))
 	{
-		auto safereturn_loc = GetDynamicZoneLocationFromHash((HV*)SvRV(*safereturn_ptr));
-		dz.SetSafeReturn(safereturn_loc);
+		auto safereturn = GetDynamicZoneLocationFromHash(table["safereturn"]);
+		dz.SetSafeReturn(safereturn);
 	}
 
-	SV** zonein_ptr = hv_fetchs(hash, "zonein", false);
-	if (zonein_ptr && SvROK(*zonein_ptr) && SvTYPE(SvRV(*zonein_ptr)) == SVt_PVHV)
+	if (table.exists("zonein"))
 	{
-		auto zonein_loc = GetDynamicZoneLocationFromHash((HV*)SvRV(*zonein_ptr));
-		dz.SetZoneInLocation(zonein_loc);
+		auto zonein = GetDynamicZoneLocationFromHash(table["zonein"]);
+		dz.SetZoneInLocation(zonein);
 	}
 
-	uint32_t task_id = static_cast<uint32_t>(SvUV(ST(1)));
+	if (table.exists("switchid"))
+	{
+		dz.SetSwitchID(table["switchid"].as<int>());
+	}
 
-	THIS->CreateTaskDynamicZone(task_id, dz);
+	self->CreateTaskDynamicZone(task_id, dz);
 }
 
-XS(XS_Client_GetExpedition);
-XS(XS_Client_GetExpedition) {
-	dXSARGS;
-	if (items != 1) {
-		Perl_croak(aTHX_ "Usage: Client::GetExpedition(THIS)");
-	}
-	Client* THIS = nullptr;
-	VALIDATE_THIS_IS_CLIENT;
-
-	Expedition* RETVAL = THIS->GetExpedition();
-
-	ST(0) = sv_newmortal();
-	sv_setref_pv(ST(0), "Expedition", (void*)RETVAL);
-
-	XSRETURN(1);
+Expedition* Perl_Client_GetExpedition(Client* self)
+{
+	return self->GetExpedition();
 }
 
-XS(XS_Client_GetExpeditionLockouts);
-XS(XS_Client_GetExpeditionLockouts) {
-	dXSARGS;
-	if (items != 1 && items != 2) {
-		Perl_croak(aTHX_ "Usage: Client::GetExpeditionLockouts(THIS, [string expedition_name])");
-	}
+perl::reference Perl_Client_GetExpeditionLockouts(Client* self)
+{
+	perl::hash lockout_hash;
 
-	Client* THIS = nullptr;
-	VALIDATE_THIS_IS_CLIENT;
-
-	HV* hash = newHV();
-	SV* hash_ref = nullptr; // for expedition event hash if filtering on expedition
-
-	std::string expedition_name;
-	if (items == 2)
-	{
-		expedition_name = SvPV_nolen(ST(1));
-	}
-
-	auto lockouts = THIS->GetExpeditionLockouts();
-
+	auto lockouts = self->GetExpeditionLockouts();
 	for (const auto& lockout : lockouts)
 	{
-		uint32_t name_len = static_cast<uint32_t>(lockout.GetExpeditionName().size());
-		uint32_t event_len = static_cast<uint32_t>(lockout.GetEventName().size());
-
-		SV** entry = hv_fetch(hash, lockout.GetExpeditionName().c_str(), name_len, false);
-		if (!entry)
+		if (!lockout_hash.exists(lockout.GetExpeditionName()))
 		{
-			SV* event_hash_ref = newRV_noinc((SV*)newHV()); // takes ownership of hash
-			if (!expedition_name.empty() && lockout.GetExpeditionName() == expedition_name)
-			{
-				hash_ref = event_hash_ref; // save ref to event hash for return
-			}
-			entry = hv_store(hash, lockout.GetExpeditionName().c_str(), name_len, event_hash_ref, 0);
+			lockout_hash[lockout.GetExpeditionName()] = perl::reference(perl::hash());
 		}
-
-		if (entry && SvROK(*entry) && SvTYPE(SvRV(*entry)) == SVt_PVHV)
-		{
-			HV* event_hash = (HV*)SvRV(*entry);
-			hv_store(event_hash, lockout.GetEventName().c_str(), event_len,
-				newSVuv(lockout.GetSecondsRemaining()), 0);
-		}
+		perl::hash events = lockout_hash[lockout.GetExpeditionName()]; // nested
+		events[lockout.GetEventName()] = lockout.GetSecondsRemaining();
 	}
 
-	SV* rv = &PL_sv_undef;
+	return perl::reference(lockout_hash);
+}
 
-	if (!expedition_name.empty())
+perl::reference Perl_Client_GetExpeditionLockouts(Client* self, std::string expedition_name)
+{
+	perl::hash event_hash;
+
+	auto lockouts = self->GetExpeditionLockouts(expedition_name);
+	for (const auto& lockout : lockouts)
 	{
-		rv = hash_ref ? sv_2mortal(hash_ref) : &PL_sv_undef; // ref that owns event hash for expedition
+		event_hash[lockout.GetEventName()] = lockout.GetSecondsRemaining();
 	}
-	else
+
+	return perl::reference(event_hash);
+}
+
+std::string Perl_Client_GetLockoutExpeditionUUID(Client* self, std::string expedition_name, std::string event_name)
+{
+	auto lockout = self->GetExpeditionLockout(expedition_name, event_name);
+	return lockout ? lockout->GetExpeditionUUID() : std::string{};
+}
+
+void Perl_Client_AddExpeditionLockout(Client* self, std::string expedition_name, std::string event_name, uint32 seconds)
+{
+	self->AddNewExpeditionLockout(expedition_name, event_name, seconds);
+}
+
+void Perl_Client_AddExpeditionLockout(Client* self, std::string expedition_name, std::string event_name, uint32 seconds, std::string uuid)
+{
+	self->AddNewExpeditionLockout(expedition_name, event_name, seconds, uuid);
+}
+
+void Perl_Client_AddExpeditionLockoutDuration(Client* self, std::string expedition_name, std::string event_name, int seconds)
+{
+	self->AddExpeditionLockoutDuration(expedition_name, event_name, seconds, {}, true);
+}
+
+void Perl_Client_AddExpeditionLockoutDuration(Client* self, std::string expedition_name, std::string event_name, int seconds, std::string uuid)
+{
+	self->AddExpeditionLockoutDuration(expedition_name, event_name, seconds, uuid, true);
+}
+
+void Perl_Client_RemoveAllExpeditionLockouts(Client* self)
+{
+	self->RemoveAllExpeditionLockouts({}, true);
+}
+
+void Perl_Client_RemoveAllExpeditionLockouts(Client* self, std::string expedition_name)
+{
+	self->RemoveAllExpeditionLockouts(expedition_name, true);
+}
+
+void Perl_Client_RemoveExpeditionLockout(Client* self, std::string expedition_name, std::string event_name)
+{
+	self->RemoveExpeditionLockout(expedition_name, event_name, true);
+}
+
+bool Perl_Client_HasExpeditionLockout(Client* self, std::string expedition_name, std::string event_name)
+{
+	return self->HasExpeditionLockout(expedition_name, event_name);
+}
+
+void Perl_Client_MovePCDynamicZone(Client* self, perl::scalar zone)
+{
+	uint32_t zone_id = zone.is_string() ? ZoneID(zone.c_str()) : zone.as<uint32_t>();
+	self->MovePCDynamicZone(zone_id);
+}
+
+void Perl_Client_MovePCDynamicZone(Client* self, perl::scalar zone, int zone_version)
+{
+	uint32_t zone_id = zone.is_string() ? ZoneID(zone.c_str()) : zone.as<uint32_t>();
+	self->MovePCDynamicZone(zone_id, zone_version);
+}
+
+void Perl_Client_MovePCDynamicZone(Client* self, perl::scalar zone, int zone_version, bool msg_if_invalid)
+{
+	uint32_t zone_id = zone.is_string() ? ZoneID(zone.c_str()) : zone.as<uint32_t>();
+	self->MovePCDynamicZone(zone_id, zone_version, msg_if_invalid);
+}
+
+void Perl_Client_Fling(Client* self, float target_x, float target_y, float target_z)
+{
+	self->Fling(0, target_x, target_y, target_z, false, false, true);
+}
+
+void Perl_Client_Fling(Client* self, float target_x, float target_y, float target_z, bool ignore_los)
+{
+	self->Fling(0, target_x, target_y, target_z, ignore_los, false, true);
+}
+
+void Perl_Client_Fling(Client* self, float target_x, float target_y, float target_z, bool ignore_los, bool clip_through_walls)
+{
+	self->Fling(0, target_x, target_y, target_z, ignore_los, clip_through_walls, true);
+}
+
+void Perl_Client_Fling(Client* self, float value, float target_x, float target_y, float target_z)
+{
+	self->Fling(value, target_x, target_y, target_z);
+}
+
+void Perl_Client_Fling(Client* self, float value, float target_x, float target_y, float target_z, bool ignore_los)
+{
+	self->Fling(value, target_x, target_y, target_z, ignore_los);
+}
+
+void Perl_Client_Fling(Client* self, float value, float target_x, float target_y, float target_z, bool ignore_los, bool clip_through_walls)
+{
+	self->Fling(value, target_x, target_y, target_z, ignore_los, clip_through_walls);
+}
+
+bool Perl_Client_HasDisciplineLearned(Client* self, uint16 spell_id)
+{
+	return self->HasDisciplineLearned(spell_id);
+}
+
+uint32_t Perl_Client_GetClassBitmask(Client* self)
+{
+	return GetPlayerClassBit(self->GetClass());
+}
+
+uint32_t Perl_Client_GetRaceBitmask(Client* self) // @categories Stats and Attributes
+{
+	return GetPlayerRaceBit(self->GetBaseRace());
+}
+
+perl::array Perl_Client_GetLearnableDisciplines(Client* self)
+{
+	perl::array result;
+	auto learnable_disciplines = self->GetLearnableDisciplines();
+	for (int i = 0; i < learnable_disciplines.size(); ++i)
 	{
-		rv = sv_2mortal(newRV_noinc((SV*)hash)); // owns expedition hash
+		result.push_back(learnable_disciplines[i]);
 	}
-
-	ST(0) = rv;
-	XSRETURN(1);
+	return result;
 }
 
-XS(XS_Client_GetLockoutExpeditionUUID);
-XS(XS_Client_GetLockoutExpeditionUUID) {
-	dXSARGS;
-	if (items != 3) {
-		Perl_croak(aTHX_ "Usage: Client::GetLockoutExpeditionUUID(THIS, string expedition_name, string event_name)");
-	}
-
-	Client* THIS = nullptr;
-	VALIDATE_THIS_IS_CLIENT;
-
-	std::string expedition_name = SvPV_nolen(ST(1));
-	std::string event_name = SvPV_nolen(ST(2));
-
-	auto lockout = THIS->GetExpeditionLockout(expedition_name, event_name);
-	if (lockout)
+perl::array Perl_Client_GetLearnableDisciplines(Client* self, uint8 min_level)
+{
+	perl::array result;
+	auto learnable_disciplines = self->GetLearnableDisciplines(min_level);
+	for (int i = 0; i < learnable_disciplines.size(); ++i)
 	{
-		XSRETURN_PV(lockout->GetExpeditionUUID().c_str());
+		result.push_back(learnable_disciplines[i]);
 	}
-
-	XSRETURN_UNDEF;
+	return result;
 }
 
-XS(XS_Client_AddExpeditionLockout);
-XS(XS_Client_AddExpeditionLockout) {
-	dXSARGS;
-	if (items != 4 && items != 5) {
-		Perl_croak(aTHX_ "Usage: Client::AddExpeditionLockout(THIS, string expedition_name, string event_name, uint32 seconds, [string uuid])");
-	}
-
-	Client* THIS = nullptr;
-	VALIDATE_THIS_IS_CLIENT;
-
-	std::string expedition_name(SvPV_nolen(ST(1)));
-	std::string event_name(SvPV_nolen(ST(2)));
-	uint32 seconds = (uint32)SvUV(ST(3));
-	std::string uuid;
-
-	if (items == 5)
+perl::array Perl_Client_GetLearnableDisciplines(Client* self, uint8 min_level, uint8 max_level)
+{
+	perl::array result;
+	auto learnable_disciplines = self->GetLearnableDisciplines(min_level, max_level);
+	for (int i = 0; i < learnable_disciplines.size(); ++i)
 	{
-		uuid = SvPV_nolen(ST(4));
+		result.push_back(learnable_disciplines[i]);
 	}
-
-	THIS->AddNewExpeditionLockout(expedition_name, event_name, seconds, uuid);
-
-	XSRETURN_EMPTY;
+	return result;
 }
 
-XS(XS_Client_AddExpeditionLockoutDuration);
-XS(XS_Client_AddExpeditionLockoutDuration) {
-	dXSARGS;
-	if (items != 4 && items != 5) {
-		Perl_croak(aTHX_ "Usage: Client::AddExpeditionLockoutDuration(THIS, string expedition_name, string event_name, int seconds, [string uuid])");
-	}
-
-	Client* THIS = nullptr;
-	VALIDATE_THIS_IS_CLIENT;
-
-	std::string expedition_name(SvPV_nolen(ST(1)));
-	std::string event_name(SvPV_nolen(ST(2)));
-	int seconds = static_cast<int>(SvUV(ST(3)));
-	std::string uuid;
-
-	if (items == 5)
+perl::array Perl_Client_GetLearnedDisciplines(Client* self)
+{
+	perl::array result;
+	auto learned_disciplines = self->GetLearnedDisciplines();
+	for (int i = 0; i < learned_disciplines.size(); ++i)
 	{
-		uuid = SvPV_nolen(ST(4));
+		result.push_back(learned_disciplines[i]);
 	}
-
-	THIS->AddExpeditionLockoutDuration(expedition_name, event_name, seconds, uuid, true);
-
-	XSRETURN_EMPTY;
+	return result;
 }
 
-XS(XS_Client_RemoveAllExpeditionLockouts);
-XS(XS_Client_RemoveAllExpeditionLockouts) {
-	dXSARGS;
-	if (items != 1 && items != 2) {
-		Perl_croak(aTHX_ "Usage: Client::RemoveAllExpeditionLockouts(THIS, [string expedition_name])");
-	}
-
-	Client* THIS = nullptr;
-	VALIDATE_THIS_IS_CLIENT;
-
-	std::string expedition_name;
-	if (items == 2)
+perl::array Perl_Client_GetMemmedSpells(Client* self)
+{
+	perl::array result;
+	auto memmed_spells = self->GetMemmedSpells();
+	for (int i = 0; i < memmed_spells.size(); ++i)
 	{
-		expedition_name = SvPV_nolen(ST(1));
+		result.push_back(memmed_spells[i]);
 	}
-
-	THIS->RemoveAllExpeditionLockouts(expedition_name, true);
-
-	XSRETURN_EMPTY;
+	return result;
 }
 
-XS(XS_Client_RemoveExpeditionLockout);
-XS(XS_Client_RemoveExpeditionLockout) {
-	dXSARGS;
-	if (items != 3) {
-		Perl_croak(aTHX_ "Usage: Client::RemoveExpeditionLockout(THIS, string expedition_name, string event_name)");
-	}
-
-	Client* THIS = nullptr;
-	VALIDATE_THIS_IS_CLIENT;
-
-	std::string expedition_name(SvPV_nolen(ST(1)));
-	std::string event_name(SvPV_nolen(ST(2)));
-
-	THIS->RemoveExpeditionLockout(expedition_name, event_name, true);
-
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Client_HasExpeditionLockout);
-XS(XS_Client_HasExpeditionLockout) {
-	dXSARGS;
-	if (items != 3) {
-		Perl_croak(aTHX_ "Usage: Client::HasExpeditionLockout(THIS, string expedition_name, string event_name)");
-	}
-
-	Client* THIS = nullptr;
-	VALIDATE_THIS_IS_CLIENT;
-
-	std::string expedition_name(SvPV_nolen(ST(1)));
-	std::string event_name(SvPV_nolen(ST(2)));
-
-	bool result = THIS->HasExpeditionLockout(expedition_name, event_name);
-	ST(0) = boolSV(result);
-
-	XSRETURN(1);
-}
-
-XS(XS_Client_MovePCDynamicZone);
-XS(XS_Client_MovePCDynamicZone) {
-	dXSARGS;
-	if (items != 2 && items != 3 && items != 4) {
-		Perl_croak(aTHX_ "Usage: Client::MovePCDynamicZone(THIS, uint32 zone_id | string zone_name, [int zone_version = -1], [bool message_if_invalid = true])");
-	}
-
-	Client* THIS = nullptr;
-	VALIDATE_THIS_IS_CLIENT;
-
-	if (SvTYPE(ST(1)) == SVt_PV)
+perl::array Perl_Client_GetScribeableSpells(Client* self)
+{
+	perl::array result;
+	auto scribeable_spells = self->GetScribeableSpells();
+	for (int i = 0; i < scribeable_spells.size(); ++i)
 	{
-		std::string zone_name(SvPV_nolen(ST(1)));
-		int zone_version = (items >= 3) ? static_cast<int>(SvIV(ST(2))) : -1;
-		if (items == 4)
-		{
-			THIS->MovePCDynamicZone(zone_name, zone_version, (bool)SvTRUE(ST(3)));
-		}
-		else
-		{
-			THIS->MovePCDynamicZone(zone_name, zone_version);
-		}
+		result.push_back(scribeable_spells[i]);
 	}
-	else if (SvTYPE(ST(1)) == SVt_IV)
+	return result;
+}
+
+perl::array Perl_Client_GetScribeableSpells(Client* self, uint8 min_level)
+{
+	perl::array result;
+	auto scribeable_spells = self->GetScribeableSpells(min_level);
+	for (int i = 0; i < scribeable_spells.size(); ++i)
 	{
-		uint32 zone_id = (uint32)SvUV(ST(1));
-		int zone_version = (items >= 3) ? static_cast<int>(SvIV(ST(2))) : -1;
-		if (items == 3)
-		{
-			THIS->MovePCDynamicZone(zone_id, zone_version, (bool)SvTRUE(ST(2)));
-		}
-		else
-		{
-			THIS->MovePCDynamicZone(zone_id, zone_version);
-		}
+		result.push_back(scribeable_spells[i]);
 	}
-	else
+	return result;
+}
+
+perl::array Perl_Client_GetScribeableSpells(Client* self, uint8 min_level, uint8 max_level)
+{
+	perl::array result;
+	auto scribeable_spells = self->GetScribeableSpells(min_level, max_level);
+	for (int i = 0; i < scribeable_spells.size(); ++i)
 	{
-		Perl_croak(aTHX_ "Client::MovePCDynamicZone expected an integer or string");
+		result.push_back(scribeable_spells[i]);
 	}
-
-	XSRETURN_EMPTY;
+	return result;
 }
 
-XS(XS_Client_Fling); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_Fling) {
-	dXSARGS;
-	if (items < 5 || items > 7)
-		Perl_croak(aTHX_ "Usage: Client::Fling(THIS, value, target_x, target_y, target_z, ignore_los, clipping)");
+perl::array Perl_Client_GetScribedSpells(Client* self)
+{
+	perl::array result;
+	auto scribed_spells = self->GetScribedSpells();
+	for (int i = 0; i < scribed_spells.size(); ++i)
 	{
-		Client*		THIS;
-		float value = (float) SvNV(ST(1));
-		float target_x = (float) SvNV(ST(2));
-		float target_y = (float) SvNV(ST(3));
-		float target_z = (float) SvNV(ST(4));
-		bool ignore_los = false;
-		bool clipping = false;
-		VALIDATE_THIS_IS_CLIENT;
-		if (items > 5)
-			ignore_los = (bool) SvTRUE(ST(5));
-
-		if (items > 6)
-			clipping = (bool) SvTRUE(ST(6));
-
-		THIS->Fling(value, target_x, target_y, target_z, ignore_los, clipping);
+		result.push_back(scribed_spells[i]);
 	}
-	XSRETURN_EMPTY;
+	return result;
 }
 
-XS(XS_Client_HasDisciplineLearned); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_HasDisciplineLearned) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::HasDisciplineLearned(THIS, uint16 spell_id)");
-	{
-		Client *THIS;
-		bool has_learned;
-		uint16 spell_id = (uint16) SvUV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		has_learned = THIS->HasDisciplineLearned(spell_id);
-		ST(0) = boolSV(has_learned);
-		sv_2mortal(ST(0));
-	}
-	XSRETURN(1);
+EQ::InventoryProfile* Perl_Client_GetInventory(Client* self)
+{
+	return &self->GetInv();
 }
 
-XS(XS_Client_GetClassBitmask);
-XS(XS_Client_GetClassBitmask) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetClassBitmask(THIS)");
-	{
-		Client* THIS;
-		int client_bitmask = 0;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		client_bitmask = GetPlayerClassBit(THIS->GetClass());
-		XSprePUSH;
-		PUSHu((UV) client_bitmask);
-	}
-	XSRETURN(1);
+double Perl_Client_GetAAEXPModifier(Client* self, uint32 zone_id)
+{
+	return self->GetAAEXPModifier(zone_id);
 }
 
-XS(XS_Client_GetRaceBitmask);
-XS(XS_Client_GetRaceBitmask) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetRaceBitmask(THIS)"); // @categories Stats and Attributes
-	{
-		Client* THIS;
-		int client_bitmask = 0;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		client_bitmask = GetPlayerRaceBit(THIS->GetBaseRace());
-		XSprePUSH;
-		PUSHu((UV) client_bitmask);
-	}
-	XSRETURN(1);
+double Perl_Client_GetAAEXPModifier(Client* self, uint32 zone_id, int16 instance_version)
+{
+	return self->GetAAEXPModifier(zone_id, instance_version);
 }
 
-XS(XS_Client_GetLearnableDisciplines);
-XS(XS_Client_GetLearnableDisciplines) {
-	dXSARGS;
-	if (items < 1 || items > 3)
-		Perl_croak(aTHX_ "Usage: Client::GetLearnableDisciplines(THIS, [uint8 min_level, uint8 max_level])");
-
-	uint8 min_level = 1;
-	uint8 max_level = 0;
-	if (items > 1)
-		min_level = (uint8)SvUV(ST(1));
-	if (items > 2)
-		max_level = (uint8)SvUV(ST(2));
-
-	Client* THIS;
-	VALIDATE_THIS_IS_CLIENT;
-	auto learnable_disciplines = THIS->GetLearnableDisciplines(min_level, max_level);
-	auto learnable_size = learnable_disciplines.size();
-	if (learnable_size > 0) {
-		EXTEND(sp, learnable_size);
-		for (int index = 0; index < learnable_size; ++index) {
-			ST(index) = sv_2mortal(newSVuv(learnable_disciplines[index]));
-		}
-		XSRETURN(learnable_size);
-	}
-	SV* return_value = &PL_sv_undef;
-	ST(0) = return_value;
-	XSRETURN(1);
+double Perl_Client_GetEXPModifier(Client* self, uint32 zone_id)
+{
+	return self->GetEXPModifier(zone_id);
 }
 
-XS(XS_Client_GetLearnedDisciplines);
-XS(XS_Client_GetLearnedDisciplines) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetLearnedDisciplines(THIS)");
-
-	Client* THIS;
-	VALIDATE_THIS_IS_CLIENT;
-	auto learned_disciplines = THIS->GetLearnedDisciplines();
-	auto learned_size = learned_disciplines.size();
-	if (learned_size > 0) {
-		EXTEND(sp, learned_size);
-		for (int index = 0; index < learned_size; ++index) {
-			ST(index) = sv_2mortal(newSVuv(learned_disciplines[index]));
-		}
-		XSRETURN(learned_size);
-	}
-	SV* return_value = &PL_sv_undef;
-	ST(0) = return_value;
-	XSRETURN(1);
+double Perl_Client_GetEXPModifier(Client* self, uint32 zone_id, int16 instance_version)
+{
+	return self->GetEXPModifier(zone_id, instance_version);
 }
 
-XS(XS_Client_GetMemmedSpells);
-XS(XS_Client_GetMemmedSpells) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetMemmedSpells(THIS)");
-
-	Client* THIS;
-	VALIDATE_THIS_IS_CLIENT;
-	auto memmed_spells = THIS->GetMemmedSpells();
-	auto memmed_size = memmed_spells.size();
-	if (memmed_size > 0) {
-		EXTEND(sp, memmed_size);
-		for (int index = 0; index < memmed_size; ++index) {
-			ST(index) = sv_2mortal(newSVuv(memmed_spells[index]));
-		}
-		XSRETURN(memmed_size);
-	}
-	SV* return_value = &PL_sv_undef;
-	ST(0) = return_value;
-	XSRETURN(1);
+void Perl_Client_SetAAEXPModifier(Client* self, uint32 zone_id, double aa_modifier)
+{
+	self->SetAAEXPModifier(zone_id, aa_modifier);
 }
 
-XS(XS_Client_GetScribeableSpells);
-XS(XS_Client_GetScribeableSpells) {
-	dXSARGS;
-	if (items < 1 || items > 3)
-		Perl_croak(aTHX_ "Usage: Client::GetScribeableSpells(THIS, [uint8 min_level, uint8 max_level])");
-
-	uint8 min_level = 1;
-	uint8 max_level = 0;
-	if (items > 1)
-		min_level = (uint8)SvUV(ST(1));
-	if (items > 2)
-		max_level = (uint8)SvUV(ST(2));
-
-	Client* THIS;
-	VALIDATE_THIS_IS_CLIENT;
-	auto scribeable_spells = THIS->GetScribeableSpells(min_level, max_level);
-	auto scribeable_size = scribeable_spells.size();
-	if (scribeable_size > 0) {
-		EXTEND(sp, scribeable_size);
-		for (int index = 0; index < scribeable_size; ++index) {
-			ST(index) = sv_2mortal(newSVuv(scribeable_spells[index]));
-		}
-		XSRETURN(scribeable_size);
-	}
-	SV* return_value = &PL_sv_undef;
-	ST(0) = return_value;
-	XSRETURN(1);
+void Perl_Client_SetAAEXPModifier(Client* self, uint32 zone_id, double aa_modifier, int16 instance_version)
+{
+	self->SetAAEXPModifier(zone_id, aa_modifier, instance_version);
 }
 
-XS(XS_Client_GetScribedSpells);
-XS(XS_Client_GetScribedSpells) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetScribedSpells(THIS)");
-
-	Client* THIS;
-	VALIDATE_THIS_IS_CLIENT;
-	auto scribed_spells = THIS->GetScribedSpells();
-	auto scribed_size = scribed_spells.size();
-	if (scribed_size > 0) {
-		EXTEND(sp, scribed_size);
-		for (int index = 0; index < scribed_size; ++index) {
-			ST(index) = sv_2mortal(newSVuv(scribed_spells[index]));
-		}
-		XSRETURN(scribed_size);
-	}
-	SV* return_value = &PL_sv_undef;
-	ST(0) = return_value;
-	XSRETURN(1);
+void Perl_Client_SetEXPModifier(Client* self, uint32 zone_id, double exp_modifier)
+{
+	self->SetEXPModifier(zone_id, exp_modifier);
 }
 
-XS(XS_Client_GetInventory);
-XS(XS_Client_GetInventory) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetInventory(THIS)");
-	{
-		Client* THIS;
-		EQ::InventoryProfile* RETVAL;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = &THIS->GetInv();
-		ST(0) = sv_newmortal();
-		sv_setref_pv(ST(0), "Inventory", (void *) RETVAL);
-	}
-	XSRETURN(1);
+void Perl_Client_SetEXPModifier(Client* self, uint32 zone_id, double exp_modifier, int16 instance_version)
+{
+	self->SetEXPModifier(zone_id, exp_modifier, instance_version);
 }
 
-XS(XS_Client_GetAAEXPModifier);
-XS(XS_Client_GetAAEXPModifier) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::GetAAEXPModifier(THIS, uint32 zone_id)");
-	{
-		Client* THIS;
-		double aa_modifier = 1.0f;
-		uint32 zone_id = (uint32)SvUV(ST(1));
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		aa_modifier = THIS->GetAAEXPModifier(zone_id);
-		XSprePUSH;
-		PUSHn((double) aa_modifier);
-	}
-	XSRETURN(1);
+void Perl_Client_AddLDoNLoss(Client* self, uint32 theme_id)
+{
+	self->UpdateLDoNWinLoss(theme_id);
 }
 
-XS(XS_Client_GetEXPModifier);
-XS(XS_Client_GetEXPModifier) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::GetEXPModifier(THIS, uint32 zone_id)");
-	{
-		Client* THIS;
-		double exp_modifier = 1.0f;
-		uint32 zone_id = (uint32)SvUV(ST(1));
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		exp_modifier = THIS->GetEXPModifier(zone_id);
-		XSprePUSH;
-		PUSHn((double) exp_modifier);
-	}
-	XSRETURN(1);
+void Perl_Client_AddLDoNWin(Client* self, uint32 theme_id)
+{
+	self->UpdateLDoNWinLoss(theme_id, true);
 }
 
-XS(XS_Client_SetAAEXPModifier);
-XS(XS_Client_SetAAEXPModifier) {
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::SetAAEXPModifier(THIS, uint32 zone_id, float aa_modifier)");
-	{
-		Client* THIS;
-		uint32 zone_id = (uint32)SvUV(ST(1));
-		double aa_modifier = (double) SvNV(ST(2));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->SetAAEXPModifier(zone_id, aa_modifier);
-	}
-	XSRETURN_EMPTY;
+void Perl_Client_SetHideMe(Client* self, bool hide_me_state)
+{
+	self->SetHideMe(hide_me_state);
 }
 
-XS(XS_Client_SetEXPModifier);
-XS(XS_Client_SetEXPModifier) {
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::SetEXPModifier(THIS, uint32 zone_id, float exp_modifier)");
-	{
-		Client* THIS;
-		uint32 zone_id = (uint32)SvUV(ST(1));
-		double exp_modifier = (double) SvNV(ST(2));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->SetEXPModifier(zone_id, exp_modifier);
-	}
-	XSRETURN_EMPTY;
+void Perl_Client_ResetAllDisciplineTimers(Client* self) // @categories Spells and Disciplines
+{
+	self->ResetAllDisciplineTimers();
 }
 
-XS(XS_Client_AddLDoNLoss);
-XS(XS_Client_AddLDoNLoss) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::AddLDoNLoss(THIS, uint32 theme_id)");
-	{
-		Client* THIS;
-		uint32 theme_id = (uint32) SvUV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->UpdateLDoNWinLoss(theme_id);
-	}
-	XSRETURN_EMPTY;
+void Perl_Client_SendToInstance(Client* self, std::string instance_type, std::string zone_short_name, uint32 instance_version, float x, float y, float z, float heading, std::string instance_identifier, uint32 duration)
+{
+	self->SendToInstance(instance_type, zone_short_name, instance_version, x, y, z, heading, instance_identifier, duration);
 }
 
-XS(XS_Client_AddLDoNWin);
-XS(XS_Client_AddLDoNWin) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::AddLDoNWin(THIS, uint32 theme_id)");
-	{
-		Client* THIS;
-		uint32 theme_id = (uint32) SvUV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->UpdateLDoNWinLoss(theme_id, true);
-	}
-	XSRETURN_EMPTY;
+int Perl_Client_CountItem(Client* self, uint32 item_id)
+{
+	return self->CountItem(item_id);
 }
 
-XS(XS_Client_SetHideMe);
-XS(XS_Client_SetHideMe) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SetHideMe(THIS, bool hide_me_state)");
-	{
-		Client* THIS;
-		bool hide_me_state = (bool) SvTRUE(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->SetHideMe(hide_me_state);
-	}
-	XSRETURN_EMPTY;
+void Perl_Client_RemoveItem(Client* self, uint32 item_id) // @categories Spells and Disciplines
+{
+	self->RemoveItem(item_id);
 }
 
-XS(XS_Client_ResetAllDisciplineTimers);
-XS(XS_Client_ResetAllDisciplineTimers) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::ResetAllDisciplineTimers(THIS)"); // @categories Spells and Disciplines
-	{
-		Client *THIS;
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->ResetAllDisciplineTimers();
-	}
-	XSRETURN_EMPTY;
+void Perl_Client_RemoveItem(Client* self, uint32 item_id, uint32 quantity) // @categories Spells and Disciplines
+{
+	self->RemoveItem(item_id, quantity);
 }
 
-XS(XS_Client_SendToInstance);
-XS(XS_Client_SendToInstance) {
-	dXSARGS;
-	if (items != 10)
-		Perl_croak(aTHX_ "Usage: Client::SendToInstance(THIS, string instance_type, string zone_short_name, uint32 instance_version, float x, float y, float z, float heading, string instance_identifier, uint32 duration)");
-	{
-		Client* THIS;
-		std::string instance_type = (std::string) SvPV_nolen(ST(1));
-		std::string zone_short_name = (std::string) SvPV_nolen(ST(2));
-		uint32 instance_version = (uint32) SvUV(ST(3));
-		float x = (float) SvNV(ST(4));
-		float y = (float) SvNV(ST(5));
-		float z = (float) SvNV(ST(6));
-		float heading = (float) SvNV(ST(7));
-		std::string instance_identifier = (std::string) SvPV_nolen(ST(8));
-		uint32 duration = (uint32) SvUV(ST(9));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->SendToInstance(instance_type, zone_short_name, instance_version, x, y, z, heading, instance_identifier, duration);
-  }
-  XSRETURN_EMPTY;
+void Perl_Client_DialogueWindow(Client* self, std::string window_markdown) // @categories Script Utility
+{
+	DialogueWindow::Render(self, std::move(window_markdown));
 }
 
-XS(XS_Client_CountItem);
-XS(XS_Client_CountItem) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::CountItem(THIS, uint32 item_id)");
-	{
-		Client* THIS;
-		int item_count = 0;
-		uint32 item_id = (uint32) SvUV(ST(1));
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		item_count = THIS->CountItem(item_id);
-		XSprePUSH;
-		PUSHu((UV) item_count);
-	}
-	XSRETURN(1);
+void Perl_Client_DiaWind(Client* self, std::string window_markdown) // @categories Script Utility
+{
+	DialogueWindow::Render(self, std::move(window_markdown));
 }
 
-XS(XS_Client_RemoveItem);
-XS(XS_Client_RemoveItem) {
-	dXSARGS;
-	if (items != 2 && items != 3)
-		Perl_croak(aTHX_ "Usage: Client::RemoveItem(THIS, uint32 item_id, [uint32 quantity = 1])"); // @categories Spells and Disciplines
-	{
-		Client *THIS;
-		uint32 item_id = (uint32) SvUV(ST(1));
-		uint32 quantity = 1;
-		VALIDATE_THIS_IS_CLIENT;
-		if (items == 3) {
-			quantity = (uint32) SvUV(ST(2));
-		}
-
-		THIS->RemoveItem(item_id, quantity);
-	}
-	XSRETURN_EMPTY;
+int Perl_Client_GetIPExemption(Client* self) // @categories Account and Character
+{
+	return self->GetIPExemption();
 }
 
-XS(XS_Client_DialogueWindow); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_DialogueWindow) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::DialogueWindow(THIS, string window_markdown)"); // @categories Script Utility
-		{
-			Client *THIS;
-			dXSTARG;
-			VALIDATE_THIS_IS_CLIENT;
-
-			std::string window_markdown(SvPV_nolen(ST(1)));
-			DialogueWindow::Render(THIS, window_markdown);
-		}
-		XSRETURN_EMPTY;
+std::string Perl_Client_GetIPString(Client* self) // @categories Account and Character
+{
+	return self->GetIPString();
 }
 
-XS(XS_Client_DiaWind); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_DiaWind) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::DiaWind(THIS, string window_markdown)"); // @categories Script Utility
-		{
-			Client *THIS;
-			dXSTARG;
-			VALIDATE_THIS_IS_CLIENT;
-
-			std::string window_markdown(SvPV_nolen(ST(1)));
-			DialogueWindow::Render(THIS, window_markdown);
-
-		}
-		XSRETURN_EMPTY;
+void Perl_Client_SetIPExemption(Client* self, int exemption_amount) // @categories Account and Character
+{
+	self->SetIPExemption(exemption_amount);
 }
 
-XS(XS_Client_GetIPExemption);
-XS(XS_Client_GetIPExemption) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetIPExemption(THIS)"); // @categories Account and Character
-	{
-		Client* THIS;
-		int exemption_amount = 0;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		exemption_amount = THIS->GetIPExemption();
-		XSprePUSH;
-		PUSHi((IV) exemption_amount);
-	}
-	XSRETURN(1);	
+void Perl_Client_ReadBookByName(Client* self, std::string book_name, uint8 book_type) // @categories Script Utility
+{
+	self->ReadBookByName(book_name, book_type);
 }
 
-XS(XS_Client_GetIPString);
-XS(XS_Client_GetIPString) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetIPString(THIS)"); // @categories Account and Character
-	{
-		Client *THIS;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		std::string ip_string = THIS->GetIPString();
-		sv_setpv(TARG, ip_string.c_str());
-		XSprePUSH;
-		PUSHTARG;
-	}
-	XSRETURN(1);
+void Perl_Client_UntrainDiscBySpellID(Client* self, uint16 spell_id) // @categories Spells and Disciplines
+{
+	self->UntrainDiscBySpellID(spell_id);
 }
 
-XS(XS_Client_SetIPExemption); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_SetIPExemption) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SetIPExemption(THIS, int exemption_amount)"); // @categories Account and Character
-	{
-		Client *THIS;
-		int exemption_amount = (int) SvIV(ST(1));
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->SetIPExemption(exemption_amount);
-  }
-	XSRETURN_EMPTY;
+void Perl_Client_UntrainDiscBySpellID(Client* self, uint16 spell_id, bool update_client) // @categories Spells and Disciplines
+{
+	self->UntrainDiscBySpellID(spell_id, update_client);
 }
 
-XS(XS_Client_ReadBookByName);
-XS(XS_Client_ReadBookByName) {
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::ReadBookByName(THIS, string book_name, uint8 book_type)"); // @categories Script Utility
-	{
-		Client *THIS;
-		std::string book_name(SvPV_nolen(ST(1)));
-		uint8 book_type = (uint8) SvUV(ST(2));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->ReadBookByName(book_name, book_type);
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Client_UntrainDiscBySpellID); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_UntrainDiscBySpellID) {
-	dXSARGS;
-	if (items < 2 || items > 3)
-		Perl_croak(aTHX_ "Usage: Client::UntrainDiscBySpellID(THIS, uint16 spell_id, [bool update_client = true])"); // @categories Spells and Disciplines
-	{
-		Client *THIS;
-		uint16 spell_id = (uint16) SvUV(ST(1));
-		bool update_client = true;
-		VALIDATE_THIS_IS_CLIENT;
-		if (items == 3) {
-			update_client = (bool) SvTRUE(ST(2));
-		}
-
-		THIS->UntrainDiscBySpellID(spell_id, update_client);
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Client_SummonBaggedItems); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_SummonBaggedItems) {
-	dXSARGS;
-	if (items != 3) {
-		Perl_croak(aTHX_ "Usage: Client::SummonBaggedItems(THIS, uint32 bag_item_id, ARRAYREF bag_items_array)"); // @categories Inventory and Items, Script Utility
-	}
-
-	Client* THIS;
-	VALIDATE_THIS_IS_CLIENT;
-
-	uint32 bag_item_id = (uint32) SvUV(ST(1));
-
-	// verify we're receiving a reference to an array type
-	SV* bag_items_avref = ST(2);
-	if (!bag_items_avref || !SvROK(bag_items_avref) || SvTYPE(SvRV(bag_items_avref)) != SVt_PVAV) {
-		Perl_croak(aTHX_ "Client::SummonBaggedItems second argument is not a reference to an array");
-	}
-
-	// dereference into the array
-	AV* bag_items_av = (AV*)SvRV(bag_items_avref);
-
+void Perl_Client_SummonBaggedItems(Client* self, uint32 bag_item_id, perl::reference bag_items_ref) // @categories Inventory and Items, Script Utility
+{
 	std::vector<ServerLootItem_Struct> bagged_items;
 
-	auto count = av_len(bag_items_av) + 1;
-	for (int i = 0; i < count; ++i) {
-		SV** element = av_fetch(bag_items_av, i, 0);
-
-		// verify array element is a hash reference containing item details
-		if (element && SvROK(*element) && SvTYPE(SvRV(*element)) == SVt_PVHV) {
-			HV* hash = (HV*)SvRV(*element); // dereference
-
-			SV** item_id_ptr = hv_fetchs(hash, "item_id", false);
-			SV** item_charges_ptr = hv_fetchs(hash, "charges", false);
-			SV** attuned_ptr = hv_fetchs(hash, "attuned", false);
-			SV** augment_one_ptr = hv_fetchs(hash, "augment_one", false);
-			SV** augment_two_ptr = hv_fetchs(hash, "augment_two", false);
-			SV** augment_three_ptr = hv_fetchs(hash, "augment_three", false);
-			SV** augment_four_ptr = hv_fetchs(hash, "augment_four", false);
-			SV** augment_five_ptr = hv_fetchs(hash, "augment_five", false);
-			SV** augment_six_ptr = hv_fetchs(hash, "augment_six", false);			
-			if (item_id_ptr && item_charges_ptr) {
-				ServerLootItem_Struct item{};
-				item.item_id = static_cast<uint32>(SvUV(*item_id_ptr));
-				item.charges = static_cast<int16>(SvIV(*item_charges_ptr));
-				item.attuned = attuned_ptr ? static_cast<uint8>(SvUV(*attuned_ptr)) : 0;
-				item.aug_1 = augment_one_ptr ? static_cast<uint32>(SvUV(*augment_one_ptr)) : 0;
-				item.aug_2 = augment_two_ptr ? static_cast<uint32>(SvUV(*augment_two_ptr)) : 0;
-				item.aug_3 = augment_three_ptr ? static_cast<uint32>(SvUV(*augment_three_ptr)) : 0;
-				item.aug_4 = augment_four_ptr ? static_cast<uint32>(SvUV(*augment_four_ptr)) : 0;
-				item.aug_5 = augment_five_ptr ? static_cast<uint32>(SvUV(*augment_five_ptr)) : 0;
-				item.aug_6 = augment_six_ptr ? static_cast<uint32>(SvUV(*augment_six_ptr)) : 0;
-				bagged_items.emplace_back(item);
-			}
+	perl::array bag_items = bag_items_ref;
+	for (perl::hash bag_item : bag_items) // only works if all elements are hashrefs
+	{
+		if (bag_item.exists("item_id") && bag_item.exists("charges"))
+		{
+			ServerLootItem_Struct item{};
+			item.item_id = bag_item["item_id"];
+			item.charges = bag_item["charges"];
+			item.attuned = bag_item.exists("attuned") ? bag_item["attuned"] : 0;
+			item.aug_1 = bag_item.exists("augment_one") ? bag_item["augment_one"] : 0;
+			item.aug_2 = bag_item.exists("augment_two") ? bag_item["augment_two"] : 0;
+			item.aug_3 = bag_item.exists("augment_three") ? bag_item["augment_three"] : 0;
+			item.aug_4 = bag_item.exists("augment_four") ? bag_item["augment_four"] : 0;
+			item.aug_5 = bag_item.exists("augment_five") ? bag_item["augment_five"] : 0;
+			item.aug_6 = bag_item.exists("augment_six") ? bag_item["augment_six"] : 0;
+			bagged_items.emplace_back(item);
 		}
 	}
 
-	THIS->SummonBaggedItems(bag_item_id, bagged_items);
-
-	XSRETURN_EMPTY;
+	self->SummonBaggedItems(bag_item_id, bagged_items);
 }
 
-XS(XS_Client_RemoveLDoNLoss);
-XS(XS_Client_RemoveLDoNLoss) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::RemoveLDoNLoss(THIS, uint32 theme_id)");
+void Perl_Client_RemoveLDoNLoss(Client* self, uint32 theme_id)
+{
+	self->UpdateLDoNWinLoss(theme_id, false, true);
+}
+
+void Perl_Client_RemoveLDoNWin(Client* self, uint32 theme_id)
+{
+	self->UpdateLDoNWinLoss(theme_id, true, true);
+}
+
+int Perl_Client_GetFreeDisciplineSlot(Client* self) // @categories Spells and Disciplines
+{
+	return self->GetNextAvailableDisciplineSlot();
+}
+
+int Perl_Client_GetFreeDisciplineSlot(Client* self, int starting_slot) // @categories Spells and Disciplines
+{
+	return self->GetNextAvailableDisciplineSlot(starting_slot);
+}
+
+int Perl_Client_ScribeSpells(Client* self, uint8 min_level, uint8 max_level) // @categories Spells and Disciplines
+{
+	return self->ScribeSpells(min_level, max_level);
+}
+
+int Perl_Client_LearnDisciplines(Client* self, uint8 min_level, uint8 max_level) // @categories Spells and Disciplines
+{
+	return self->LearnDisciplines(min_level, max_level);
+}
+
+void Perl_Client_ResetCastbarCooldownBySlot(Client* self, int slot)
+{
+	self->ResetCastbarCooldownBySlot(slot);
+}
+
+void Perl_Client_ResetAllCastbarCooldowns(Client* self)
+{
+	self->ResetAllCastbarCooldowns();
+}
+
+void Perl_Client_ResetCastbarCooldownBySpellID(Client* self, uint32 spell_id)
+{
+	self->ResetCastbarCooldownBySpellID(spell_id);
+}
+
+void Perl_Client_UnscribeSpellBySpellID(Client* self, uint16 spell_id)
+{
+	self->UnscribeSpellBySpellID(spell_id);
+}
+
+void Perl_Client_UnscribeSpellBySpellID(Client* self, uint16 spell_id, bool update_client)
+{
+	self->UnscribeSpellBySpellID(spell_id, update_client);
+}
+
+int Perl_Client_GetEnvironmentDamageModifier(Client* self) // @categories Script Utility
+{
+	return self->GetEnvironmentDamageModifier();
+}
+
+void Perl_Client_SetEnvironmentDamageModifier(Client* self, int modifier) // @categories Script Utility
+{
+	self->SetEnvironmentDamageModifier(modifier);
+}
+
+bool Perl_Client_GetInvulnerableEnvironmentDamage(Client* self) // @categories Script Utility
+{
+	return self->GetInvulnerableEnvironmentDamage();
+}
+
+void Perl_Client_SetInvulnerableEnvironmentDamage(Client* self, bool invul) // @categories Script Utility
+{
+	self->SetInvulnerableEnvironmentDamage(invul);
+}
+
+void Perl_Client_AddItem(Client* self, perl::reference table_ref)
+{
+	perl::hash table = table_ref;
+	if (!table.exists("item_id") || !table.exists("charges"))
 	{
-		Client* THIS;
-		uint32 theme_id = (uint32) SvUV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->UpdateLDoNWinLoss(theme_id, false, true);
+		return;
 	}
-	XSRETURN_EMPTY;
+
+	uint32 item_id       = table["item_id"];
+	int16 charges        = table["charges"];
+	uint32 augment_one   = table.exists("augment_one") ? table["augment_one"] : 0;
+	uint32 augment_two   = table.exists("augment_two") ? table["augment_two"] : 0;
+	uint32 augment_three = table.exists("augment_three") ? table["augment_three"] : 0;
+	uint32 augment_four  = table.exists("augment_four") ? table["augment_four"] : 0;
+	uint32 augment_five  = table.exists("augment_five") ? table["augment_five"] : 0;
+	uint32 augment_six   = table.exists("augment_six") ? table["augment_six"] : 0;
+	bool attuned         = table.exists("attuned") ? table["attuned"] : false;
+	uint16 slot_id       = table.exists("slot_id") ? table["slot_id"] : EQ::invslot::slotCursor;
+
+	self->SummonItem(item_id, charges, augment_one, augment_two, augment_three,
+		augment_four, augment_five, augment_six, attuned, slot_id);
 }
 
-XS(XS_Client_RemoveLDoNWin);
-XS(XS_Client_RemoveLDoNWin) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::RemoveLDoNWin(THIS, uint32 theme_id)");
+int Perl_Client_CountAugmentEquippedByID(Client* self, uint32 item_id)
+{
+	return self->GetInv().CountAugmentEquippedByID(item_id);
+}
+
+bool Perl_Client_HasAugmentEquippedByID(Client* self, uint32 item_id)
+{
+	return self->GetInv().HasAugmentEquippedByID(item_id);
+}
+
+int Perl_Client_CountItemEquippedByID(Client* self, uint32 item_id)
+{
+	return self->GetInv().CountItemEquippedByID(item_id);
+}
+
+bool Perl_Client_HasItemEquippedByID(Client* self, uint32 item_id)
+{
+	return self->GetInv().HasItemEquippedByID(item_id);
+}
+
+void Perl_Client_AddPlatinum(Client* self, uint32 platinum)
+{
+	self->AddPlatinum(platinum);
+}
+
+void Perl_Client_AddPlatinum(Client* self, uint32 platinum, bool update_client)
+{
+	self->AddPlatinum(platinum, update_client);
+}
+
+uint32 Perl_Client_GetCarriedPlatinum(Client* self)
+{
+	return self->GetCarriedPlatinum();
+}
+
+bool Perl_Client_TakePlatinum(Client* self, uint32 platinum)
+{
+	return self->TakePlatinum(platinum);
+}
+
+bool Perl_Client_TakePlatinum(Client* self, uint32 platinum, bool update_client)
+{
+	return self->TakePlatinum(platinum, update_client);
+}
+
+void Perl_Client_ClearPEQZoneFlag(Client* self, uint32 zone_id)
+{
+	self->ClearPEQZoneFlag(zone_id);
+}
+
+bool Perl_Client_HasPEQZoneFlag(Client* self, uint32 zone_id)
+{
+	return self->HasPEQZoneFlag(zone_id);
+}
+
+void Perl_Client_LoadPEQZoneFlags(Client* self)
+{
+	self->LoadPEQZoneFlags();
+}
+
+void Perl_Client_SendPEQZoneFlagInfo(Client* self, Client* to)
+{
+	self->SendPEQZoneFlagInfo(to);
+}
+
+void Perl_Client_SetPEQZoneFlag(Client* self, uint32 zone_id)
+{
+	self->SetPEQZoneFlag(zone_id);
+}
+
+int Perl_Client_GetHealAmount(Client* self)
+{
+	return self->GetHealAmt();
+}
+
+int Perl_Client_GetSpellDamage(Client* self)
+{
+	return self->GetSpellDmg();
+}
+
+void Perl_Client_TaskSelector(Client* self, perl::array task_ids)
+{
+	std::vector<int> tasks;
+	for (int i = 0; i < task_ids.size() && i < MAXCHOOSERENTRIES; ++i)
 	{
-		Client* THIS;
-		uint32 theme_id = (uint32) SvUV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->UpdateLDoNWinLoss(theme_id, true, true);
+		tasks.push_back(task_ids[i]);
 	}
-	XSRETURN_EMPTY;
+
+	self->TaskQuestSetSelector(self, tasks, false);
 }
 
-XS(XS_Client_GetFreeDisciplineSlot); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetFreeDisciplineSlot) {
-	dXSARGS;
-	if (items != 1 || items != 2)
-		Perl_croak(aTHX_ "Usage: Client::GetFreeDisciplineSlot(THIS, [int starting_slot = 0])"); // @categories Spells and Disciplines
+void Perl_Client_TaskSelectorNoCooldown(Client* self, perl::array task_ids)
+{
+	std::vector<int> tasks;
+	for (int i = 0; i < task_ids.size() && i < MAXCHOOSERENTRIES; ++i)
 	{
-		Client *THIS;
-		int free_discipline_slot;
-		int starting_slot = 0;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		if (items == 2) {
-			starting_slot = SvIV(ST(1));
-		}
-
-		free_discipline_slot = THIS->GetNextAvailableDisciplineSlot(starting_slot);
-		XSprePUSH;
-		PUSHi((IV) free_discipline_slot);
+		tasks.push_back(task_ids[i]);
 	}
-	XSRETURN(1);
+
+	self->TaskQuestSetSelector(self, tasks, true);
 }
 
-XS(XS_Client_ScribeSpells); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_ScribeSpells) {
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::ScribeSpells(THIS, uint8 min_level, uint8 max_level)"); // @categories Spells and Disciplines
-	{
-		Client *THIS;
-		uint8 min_level = (uint8) SvUV(ST(1));
-		uint8 max_level = (uint8) SvUV(ST(2));
-		uint16 scribed_spells = 0;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-
-		scribed_spells = THIS->ScribeSpells(min_level, max_level);
-		XSprePUSH;
-		PUSHu((UV) scribed_spells);
-	}
-	XSRETURN(1);
+bool Perl_Client_TeleportToPlayerByCharacterID(Client* self, uint32 character_id)
+{
+	return self->GotoPlayer(database.GetCharNameByID(character_id));
 }
 
-XS(XS_Client_LearnDisciplines); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_LearnDisciplines) {
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::LearnDisciplines(THIS, uint8 min_level, uint8 max_level)"); // @categories Spells and Disciplines
-	{
-		Client *THIS;
-		uint8 min_level = (uint8) SvUV(ST(1));
-		uint8 max_level = (uint8) SvUV(ST(2));
-		uint16 learned_disciplines = 0;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-
-		learned_disciplines = THIS->LearnDisciplines(min_level, max_level);
-		XSprePUSH;
-		PUSHu((UV) learned_disciplines);
-	}
-	XSRETURN(1);
+bool Perl_Client_TeleportToPlayerByName(Client* self, std::string player_name)
+{
+	return self->GotoPlayer(player_name);
 }
 
-XS(XS_Client_ResetCastbarCooldownBySlot);
-XS(XS_Client_ResetCastbarCooldownBySlot) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::ResetCastbarCooldownBySlot(THIS, int slot)");
-	{
-		Client* THIS;
-		int slot = (int) SvIV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->ResetCastbarCooldownBySlot(slot);
-	}
-	XSRETURN_EMPTY;
+bool Perl_Client_TeleportGroupToPlayerByCharacterID(Client* self, uint32 character_id)
+{
+	return self->GotoPlayerGroup(database.GetCharNameByID(character_id));
 }
 
-XS(XS_Client_ResetAllCastbarCooldowns);
-XS(XS_Client_ResetAllCastbarCooldowns) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::ResetAllCastbarCooldowns(THIS)");
-	{
-		Client* THIS;
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->ResetAllCastbarCooldowns();
-	}
-	XSRETURN_EMPTY;
+bool Perl_Client_TeleportGroupToPlayerByName(Client* self, std::string player_name)
+{
+	return self->GotoPlayerGroup(player_name);
 }
 
-XS(XS_Client_ResetCastbarCooldownBySpellID);
-XS(XS_Client_ResetCastbarCooldownBySpellID) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::ResetCastbarCooldownBySpellID(THIS, uint32 spell_id)");
-	{
-		Client* THIS;
-		uint32 spell_id = (uint32) SvUV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->ResetCastbarCooldownBySpellID(spell_id);
-	}
-	XSRETURN_EMPTY;
+bool Perl_Client_TeleportRaidToPlayerByCharacterID(Client* self, uint32 character_id)
+{
+	return self->GotoPlayerRaid(database.GetCharNameByID(character_id));
 }
 
-XS(XS_Client_UnscribeSpellBySpellID);
-XS(XS_Client_UnscribeSpellBySpellID) {
-	dXSARGS;
-	if (items != 2 && items != 3)
-		Perl_croak(aTHX_ "Usage: Client::UnscribeSpellBySpellID(THIS, uint16 spell_id, [bool update_client = true])");
-	{
-		Client* THIS;
-		uint16 spell_id = (uint16) SvUV(ST(1));
-		bool update_client = true;
-		VALIDATE_THIS_IS_CLIENT;
-
-		if (items == 3) {
-			update_client = (bool) SvTRUE(ST(2));
-		}
-
-		THIS->UnscribeSpellBySpellID(spell_id, update_client);
-	}
-	XSRETURN_EMPTY;
+bool Perl_Client_TeleportRaidToPlayerByName(Client* self, std::string player_name)
+{
+	return self->GotoPlayerRaid(player_name);
 }
 
-XS(XS_Client_GetEnvironmentDamageModifier); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetEnvironmentDamageModifier) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetEnvironmentDamageModifier(THIS)"); // @categories Script Utility
-	{
-		Client* THIS;
-		int32 RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetEnvironmentDamageModifier();
-		XSprePUSH;
-		PUSHi((IV) RETVAL);
-	}
-	XSRETURN(1);
+int Perl_Client_GetRecipeMadeCount(Client* self, uint32 recipe_id) // @categories Skills and Recipes
+{
+	return self->GetRecipeMadeCount(recipe_id);
 }
 
-XS(XS_Client_SetEnvironmentDamageModifier); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_SetEnvironmentDamageModifier) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SetEnvironmentDamageModifier(THIS, int32 modifier)"); //  @categories Script Utility
-	{
-		Client* THIS;
-		int32 modifier = (int32)SvIV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->SetEnvironmentDamageModifier(modifier);
-	}
-	XSRETURN_EMPTY;
+bool Perl_Client_HasRecipeLearned(Client* self, uint32 recipe_id) // @categories Skills and Recipes
+{
+	return self->HasRecipeLearned(recipe_id);
 }
 
-XS(XS_Client_GetInvulnerableEnvironmentDamage); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetInvulnerableEnvironmentDamage) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::InvulnerableEnvironmentDamage(THIS)"); // @categories Script Utility
-	{
-		Client* THIS;
-		bool RETVAL;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetInvulnerableEnvironmentDamage();
-		ST(0) = boolSV(RETVAL);
-		sv_2mortal(ST(0));
-	}
-	XSRETURN(1);
+bool Perl_Client_SendGMCommand(Client* self, std::string message) // @categories Script Utility
+{
+	return self->SendGMCommand(message);
 }
 
-XS(XS_Client_SetInvulnerableEnvironmentDamage); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_SetInvulnerableEnvironmentDamage) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage:Client::SetInvulnerableEnvironmentDamage(THIS, bool invulnerable)"); //  @categories Script Utility
-	{
-		Client *THIS;
-		bool invul = (bool)SvTRUE(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->SetInvulnerableEnvironmentDamage(invul);
-	}
-	XSRETURN_EMPTY;
+bool Perl_Client_SendGMCommand(Client* self, std::string message, bool ignore_status) // @categories Script Utility
+{
+	return self->SendGMCommand(message, ignore_status);
 }
 
-XS(XS_Client_AddItem);
-XS(XS_Client_AddItem) {
-	dXSARGS;
-	if (items != 2) {
-		Perl_croak(aTHX_ "Usage: Client::AddItem(THIS, HASHREF item_table)");
-	}
-
-	Client *THIS;
-	VALIDATE_THIS_IS_CLIENT;
-
-	SV* item_table = ST(1);
-	if (!item_table || !SvROK(item_table)) {
-		Perl_croak(aTHX_ "Client::AddItem argument is not a reference type");
-	}
-
-	HV* item_table_hash = (HV*)SvRV(item_table);
-	if (SvTYPE(item_table_hash) != SVt_PVHV) {
-		Perl_croak(aTHX_ "Client::AddItem reference argument is not to a hash type");
-	}
-
-	SV** item_id_ptr = hv_fetchs(item_table_hash, "item_id", false);
-	SV** item_charges_ptr = hv_fetchs(item_table_hash, "charges", false);
-	SV** augment_one_ptr = hv_fetchs(item_table_hash, "augment_one", false);
-	SV** augment_two_ptr = hv_fetchs(item_table_hash, "augment_two", false);
-	SV** augment_three_ptr = hv_fetchs(item_table_hash, "augment_three", false);
-	SV** augment_four_ptr = hv_fetchs(item_table_hash, "augment_four", false);
-	SV** augment_five_ptr = hv_fetchs(item_table_hash, "augment_five", false);
-	SV** augment_six_ptr = hv_fetchs(item_table_hash, "augment_six", false);
-	SV** attuned_ptr = hv_fetchs(item_table_hash, "attuned", false);
-	SV** slot_id_ptr = hv_fetchs(item_table_hash, "slot_id", false);
-	if (item_id_ptr && item_charges_ptr) {
-		uint32 item_id = static_cast<uint32>(SvUV(*item_id_ptr));
-		int16 charges = static_cast<int16>(SvIV(*item_charges_ptr));
-		uint32 augment_one = augment_one_ptr ? static_cast<uint32>(SvUV(*augment_one_ptr)) : 0;
-		uint32 augment_two = augment_two_ptr ? static_cast<uint32>(SvUV(*augment_two_ptr)) : 0;
-		uint32 augment_three = augment_three_ptr ? static_cast<uint32>(SvUV(*augment_three_ptr)) : 0;
-		uint32 augment_four = augment_four_ptr ? static_cast<uint32>(SvUV(*augment_four_ptr)) : 0;
-		uint32 augment_five = augment_five_ptr ? static_cast<uint32>(SvUV(*augment_five_ptr)) : 0;
-		uint32 augment_six = augment_six_ptr ? static_cast<uint32>(SvUV(*augment_six_ptr)) : 0;
-		bool attuned = attuned_ptr ? static_cast<bool>(SvTRUE(*attuned_ptr)) : false;
-		uint16 slot_id = slot_id_ptr ? static_cast<uint16>(SvUV(*slot_id_ptr)) : EQ::invslot::slotCursor;
-		THIS->SummonItem(
-			item_id,
-			charges,
-			augment_one,
-			augment_two,
-			augment_three,
-			augment_four,
-			augment_five,
-			augment_six,
-			attuned,
-			slot_id
-		);
-	}
-	
-	XSRETURN_EMPTY;
+void Perl_Client_SendMarqueeMessage(Client* self, uint32 type, std::string message) // @categories Script Utility
+{
+	self->SendMarqueeMessage(type, message);
 }
 
-XS(XS_Client_HasAugmentEquippedByID);
-XS(XS_Client_HasAugmentEquippedByID) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::HasAugmentEquippedByID(THIS, uint32 item_id)");
-	{
-		Client *THIS;
-		bool has_equipped = false;
-		uint32 item_id = (uint32) SvUV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		has_equipped = THIS->GetInv().HasAugmentEquippedByID(item_id);
-		ST(0) = boolSV(has_equipped);
-		sv_2mortal(ST(0));
-	}
-	XSRETURN(1);
+void Perl_Client_SendMarqueeMessage(Client* self, uint32 type, std::string message, uint32 duration) // @categories Script Utility
+{
+	self->SendMarqueeMessage(type, message, duration);
 }
 
-XS(XS_Client_CountAugmentEquippedByID);
-XS(XS_Client_CountAugmentEquippedByID) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::CountAugmentEquippedByID(THIS, uint32 item_id)");
-	{
-		Client *THIS;
-		int quantity = 0;
-		uint32 item_id = (uint32) SvUV(ST(1));
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		quantity = THIS->GetInv().CountAugmentEquippedByID(item_id);
-		XSprePUSH;
-		PUSHi((IV) quantity);
-	}
-	XSRETURN(1);
+void Perl_Client_SendMarqueeMessage(Client* self, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, std::string message) // @categories Script Utility
+{
+	self->SendMarqueeMessage(type, priority, fade_in, fade_out, duration, message);
 }
 
-XS(XS_Client_AddPlatinum); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_AddPlatinum) {
-	dXSARGS;
-	if (items < 2 || items > 3)
-		Perl_croak(aTHX_ "Usage: Client::AddPlatinum(THIS, uint32 platinum, [bool update_client = false])"); // @categories Currency and Points
-	{
-		Client *THIS;
-		uint32 platinum = (uint32) SvUV(ST(1));
-		bool update_client = false;
-		VALIDATE_THIS_IS_CLIENT;
-
-		if (items == 3) {
-			update_client = (bool) SvTRUE(ST(2));
-		}
-
-		THIS->AddPlatinum(platinum, update_client);
-	}
-	XSRETURN_EMPTY;
+void Perl_Client_MoveZone(Client* self, const char* zone_short_name) // @categories Script Utility
+{
+	self->MoveZone(zone_short_name);
 }
 
-XS(XS_Client_GetCarriedPlatinum); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetCarriedPlatinum) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetCarriedPlatinum(THIS)"); // @categories Currency and Points
-	{
-		Client *THIS;
-		int RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetCarriedPlatinum();
-		XSprePUSH;
-		PUSHi((IV) RETVAL);
-	}
-	XSRETURN(1);
+void Perl_Client_MoveZone(Client* self, const char* zone_short_name, float x, float y, float z) // @categories Script Utility
+{
+	self->MoveZone(zone_short_name, glm::vec4(x, y, z, 0.0f));
 }
 
-XS(XS_Client_HasItemEquippedByID);
-XS(XS_Client_HasItemEquippedByID) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::HasItemEquippedByID(THIS, uint32 item_id)");
-	{
-		Client *THIS;
-		bool has_equipped = false;
-		uint32 item_id = (uint32) SvUV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		has_equipped = THIS->GetInv().HasItemEquippedByID(item_id);
-		ST(0) = boolSV(has_equipped);
-		sv_2mortal(ST(0));
-	}
-	XSRETURN(1);
+void Perl_Client_MoveZone(Client* self, const char* zone_short_name, float x, float y, float z, float heading) // @categories Script Utility
+{
+	self->MoveZone(zone_short_name, glm::vec4(x, y, z, heading));
 }
 
-XS(XS_Client_CountItemEquippedByID);
-XS(XS_Client_CountItemEquippedByID) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::CountItemEquippedByID(THIS, uint32 item_id)");
-	{
-		Client *THIS;
-		int quantity = 0;
-		uint32 item_id = (uint32) SvUV(ST(1));
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		quantity = THIS->GetInv().CountItemEquippedByID(item_id);
-		XSprePUSH;
-		PUSHi((IV) quantity);
-	}
-	XSRETURN(1);
+void Perl_Client_MoveZoneGroup(Client* self, const char* zone_short_name) // @categories Script Utility, Group
+{
+	self->MoveZoneGroup(zone_short_name);
 }
 
-XS(XS_Client_TakePlatinum); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_TakePlatinum) {
-	dXSARGS;
-	if (items < 2 || items > 3)
-		Perl_croak(aTHX_ "Usage: Client::TakePlatinum(THIS, uint32 platinum, [bool update_client = false])"); // @categories Currency and Points
-	{
-		Client *THIS;
-		uint32 platinum = (uint32) SvUV(ST(1));
-		bool has_money = false;
-		bool update_client = false;
-		VALIDATE_THIS_IS_CLIENT;
-
-		if (items == 3) {
-			update_client = (bool) SvTRUE(ST(2));
-		}
-
-		has_money = THIS->TakePlatinum(platinum, update_client);
-		ST(0) = boolSV(has_money);
-		sv_2mortal(ST(0));
-	}
-	XSRETURN(1);
+void Perl_Client_MoveZoneGroup(Client* self, const char* zone_short_name, float x, float y, float z) // @categories Script Utility
+{
+	self->MoveZoneGroup(zone_short_name, glm::vec4(x, y, z, 0.0f));
 }
 
-XS(XS_Client_ClearPEQZoneFlag); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_ClearPEQZoneFlag) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::ClearPEQZoneFlag(THIS, uint32 zone_id)"); // @categories Script Utility
-	{
-		Client *THIS;
-		uint32 zone_id = (uint32) SvUV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->ClearPEQZoneFlag(zone_id);
-	}
-	XSRETURN_EMPTY;
+void Perl_Client_MoveZoneGroup(Client* self, const char* zone_short_name, float x, float y, float z, float heading) // @categories Script Utility
+{
+	self->MoveZoneGroup(zone_short_name, glm::vec4(x, y, z, heading));
 }
 
-XS(XS_Client_HasPEQZoneFlag); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_HasPEQZoneFlag) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::HasPEQZoneFlag(THIS, uint32 zone_id)"); // @categories Account and Character
-	{
-		Client *THIS;
-		bool RETVAL;
-		uint32 zone_id = (uint32) SvUV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->HasPEQZoneFlag(zone_id);
-		ST(0) = boolSV(RETVAL);
-		sv_2mortal(ST(0));
-	}
-	XSRETURN(1);
+void Perl_Client_MoveZoneRaid(Client* self, const char* zone_short_name) // @categories Script Utility, Raid
+{
+	self->MoveZoneRaid(zone_short_name);
 }
 
-XS(XS_Client_LoadPEQZoneFlags); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_LoadPEQZoneFlags) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::LoadPEQZoneFlags(THIS)"); // @categories Zones
-	{
-		Client *THIS;
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->LoadPEQZoneFlags();
-	}
-	XSRETURN_EMPTY;
+void Perl_Client_MoveZoneRaid(Client* self, const char* zone_short_name, float x, float y, float z) // @categories Script Utility
+{
+	self->MoveZoneRaid(zone_short_name, glm::vec4(x, y, z, 0.0f));
 }
 
-XS(XS_Client_SendPEQZoneFlagInfo); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_SendPEQZoneFlagInfo) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SendPEQZoneFlagInfo(THIS, Client* to)"); // @categories Account and Character, Zones
-	{
-		Client *THIS;
-		Client *to;
-		VALIDATE_THIS_IS_CLIENT;
-		if (sv_derived_from(ST(1), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(1)));
-			to = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "to is not of type Client");
-		if (to == nullptr)
-			Perl_croak(aTHX_ "to is nullptr, avoiding crash.");
-
-		THIS->SendPEQZoneFlagInfo(to);
-	}
-	XSRETURN_EMPTY;
+void Perl_Client_MoveZoneRaid(Client* self, const char* zone_short_name, float x, float y, float z, float heading) // @categories Script Utility
+{
+	self->MoveZoneRaid(zone_short_name, glm::vec4(x, y, z, heading));
 }
 
-XS(XS_Client_SetPEQZoneFlag); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_SetPEQZoneFlag) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SetPEQZoneFlag(THIS, uint32 zone_id)"); // @categories Account and Character, PEQZones
-	{
-		Client *THIS;
-		uint32 zone_id = (uint32) SvUV(ST(1));
-		VALIDATE_THIS_IS_CLIENT;
-		THIS->SetPEQZoneFlag(zone_id);
-	}
-	XSRETURN_EMPTY;
+void Perl_Client_MoveZoneInstance(Client* self, uint16 instance_id) // @categories Adventures and Expeditions, Script Utility
+{
+	self->MoveZoneInstance(instance_id);
 }
 
-XS(XS_Client_GetHealAmount);
-XS(XS_Client_GetHealAmount) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetHealAmount(THIS)"); // @categories Stats and Attributes, Scriot Utility
-	{
-		Client *THIS;
-		int RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetHealAmt();
-		XSprePUSH;
-		PUSHi((IV) RETVAL);
-	}
-	XSRETURN(1);
+void Perl_Client_MoveZoneInstance(Client* self, uint16 instance_id, float x, float y, float z) // @categories Adventures and Expeditions, Script Utility
+{
+	self->MoveZoneInstance(instance_id, glm::vec4(x, y, z, 0.0f));
 }
 
-XS(XS_Client_GetSpellDamage);
-XS(XS_Client_GetSpellDamage) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetSpellDamage(THIS)"); // @categories Stats and Attributes, Scriot Utility
-	{
-		Client *THIS;
-		int RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetSpellDmg();
-		XSprePUSH;
-		PUSHi((IV) RETVAL);
-	}
-	XSRETURN(1);
+void Perl_Client_MoveZoneInstance(Client* self, uint16 instance_id, float x, float y, float z, float heading) // @categories Adventures and Expeditions, Script Utility
+{
+	self->MoveZoneInstance(instance_id, glm::vec4(x, y, z, heading));
 }
 
-XS(XS_Client_TaskSelector); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_TaskSelector) {
-	dXSARGS;
-	if (items < 2 || items > 41) {
-		Perl_croak(aTHX_ "Usage: Client::TaskSelector(THIS, int task_id, 2, 3, 4, 5 [up to 40])");
-	}
-
-	Client *THIS;
-	VALIDATE_THIS_IS_CLIENT;
-
-	int tasks[MAXCHOOSERENTRIES];
-	int task_count = (items - 1);
-	for (int i = 1; i <= task_count; i++) {
-		tasks[i] = (int) SvIV(ST(i));
-	}
-
-	THIS->TaskQuestSetSelector(THIS, task_count, tasks);
-	XSRETURN_EMPTY;
+void Perl_Client_MoveZoneInstanceGroup(Client* self, uint16 instance_id) // @categories Adventures and Expeditions, Script Utility, Group
+{
+	self->MoveZoneInstanceGroup(instance_id);
 }
 
-#ifdef __cplusplus
-extern "C"
-#endif
-XS(boot_Client); /* prototype to pass -Wmissing-prototypes */
-XS(boot_Client) {
-	dXSARGS;
-	char file[256];
-	strncpy(file, __FILE__, 256);
-	file[255] = 0;
+void Perl_Client_MoveZoneInstanceGroup(Client* self, uint16 instance_id, float x, float y, float z) // @categories Adventures and Expeditions, Script Utility
+{
+	self->MoveZoneInstanceGroup(instance_id, glm::vec4(x, y, z, 0.0f));
+}
 
-	if (items != 1)
-		fprintf(stderr, "boot_quest does not take any arguments.");
-	char buf[128];
+void Perl_Client_MoveZoneInstanceGroup(Client* self, uint16 instance_id, float x, float y, float z, float heading) // @categories Adventures and Expeditions, Script Utility
+{
+	self->MoveZoneInstanceGroup(instance_id, glm::vec4(x, y, z, heading));
+}
 
-	//add the strcpy stuff to get rid of const warnings....
+void Perl_Client_MoveZoneInstanceRaid(Client* self, uint16 instance_id) // @categories Adventures and Expeditions, Script Utility, Raid
+{
+	self->MoveZoneInstanceRaid(instance_id);
+}
 
-	XS_VERSION_BOOTCHECK;
-	newXSproto(strcpy(buf, "AccountID"), XS_Client_AccountID, file, "$");
-	newXSproto(strcpy(buf, "AccountName"), XS_Client_AccountName, file, "$");
-	newXSproto(strcpy(buf, "AddAAPoints"), XS_Client_AddAAPoints, file, "$$");
-	newXSproto(strcpy(buf, "AddAlternateCurrencyValue"), XS_Client_AddAlternateCurrencyValue, file, "$$$");
-	newXSproto(strcpy(buf, "AddCrystals"), XS_Client_AddCrystals, file, "$$");
-	newXSproto(strcpy(buf, "AddEXP"), XS_Client_AddEXP, file, "$$;$$");
-	newXSproto(strcpy(buf, "AddExpeditionLockout"), XS_Client_AddExpeditionLockout, file, "$$$$;$");
-	newXSproto(strcpy(buf, "AddExpeditionLockoutDuration"), XS_Client_AddExpeditionLockoutDuration, file, "$$$$;$");
-	newXSproto(strcpy(buf, "AddItem"), XS_Client_AddItem, file, "$$");
-	newXSproto(strcpy(buf, "AddLDoNLoss"), XS_Client_AddLDoNLoss, file, "$$");
-	newXSproto(strcpy(buf, "AddLDoNWin"), XS_Client_AddLDoNWin, file, "$$");
-	newXSproto(strcpy(buf, "AddLevelBasedExp"), XS_Client_AddLevelBasedExp, file, "$$;$$");
-	newXSproto(strcpy(buf, "AddMoneyToPP"), XS_Client_AddMoneyToPP, file, "$$$$$;$");
-	newXSproto(strcpy(buf, "AddPlatinum"), XS_Client_AddPlatinum, file, "$$;$");
-	newXSproto(strcpy(buf, "AddPVPPoints"), XS_Client_AddPVPPoints, file, "$$");
-	newXSproto(strcpy(buf, "AddSkill"), XS_Client_AddSkill, file, "$$$");
-	newXSproto(strcpy(buf, "Admin"), XS_Client_Admin, file, "$");
-	newXSproto(strcpy(buf, "AssignTask"), XS_Client_AssignTask, file, "$$;$$");
-	newXSproto(strcpy(buf, "AssignToInstance"), XS_Client_AssignToInstance, file, "$$");
-	newXSproto(strcpy(buf, "AutoSplitEnabled"), XS_Client_AutoSplitEnabled, file, "$");
-	newXSproto(strcpy(buf, "BreakInvis"), XS_Client_BreakInvis, file, "$");
-	newXSproto(strcpy(buf, "CalcEXP"), XS_Client_CalcEXP, file, "$");
-	newXSproto(strcpy(buf, "CalcPriceMod"), XS_Client_CalcPriceMod, file, "$;$$");
-	newXSproto(strcpy(buf, "CanHaveSkill"), XS_Client_CanHaveSkill, file, "$$");
-	newXSproto(strcpy(buf, "ChangeLastName"), XS_Client_ChangeLastName, file, "$$");
-	newXSproto(strcpy(buf, "CharacterID"), XS_Client_CharacterID, file, "$");
-	newXSproto(strcpy(buf, "CheckIncreaseSkill"), XS_Client_CheckIncreaseSkill, file, "$$;$");
-	newXSproto(strcpy(buf, "CheckSpecializeIncrease"), XS_Client_CheckSpecializeIncrease, file, "$$");
-	newXSproto(strcpy(buf, "ClearCompassMark"), XS_Client_ClearCompassMark, file, "$");
-	newXSproto(strcpy(buf, "ClearPEQZoneFlag"), XS_Client_ClearPEQZoneFlag, file, "$$");
-	newXSproto(strcpy(buf, "ClearZoneFlag"), XS_Client_ClearZoneFlag, file, "$$");
-	newXSproto(strcpy(buf, "Connected"), XS_Client_Connected, file, "$");
-	newXSproto(strcpy(buf, "CountAugmentEquippedByID"), XS_Client_CountAugmentEquippedByID, file, "$$");
-	newXSproto(strcpy(buf, "CountItem"), XS_Client_CountItem, file, "$$");
-	newXSproto(strcpy(buf, "CountItemEquippedByID"), XS_Client_CountItemEquippedByID, file, "$$");
-	newXSproto(strcpy(buf, "CreateExpedition"), XS_Client_CreateExpedition, file, "$$$$$$$;$");
-	newXSproto(strcpy(buf, "CreateTaskDynamicZone"), XS_Client_CreateTaskDynamicZone, file, "$$");
-	newXSproto(strcpy(buf, "DecreaseByID"), XS_Client_DecreaseByID, file, "$$$");
-	newXSproto(strcpy(buf, "DeleteItemInInventory"), XS_Client_DeleteItemInInventory, file, "$$;$$");
-	newXSproto(strcpy(buf, "DiaWind"), XS_Client_DiaWind, file, "$$");
-	newXSproto(strcpy(buf, "DialogueWindow"), XS_Client_DialogueWindow, file, "$$");
-	newXSproto(strcpy(buf, "Disconnect"), XS_Client_Disconnect, file, "$");
-	newXSproto(strcpy(buf, "DropItem"), XS_Client_DropItem, file, "$$");
-	newXSproto(strcpy(buf, "Duck"), XS_Client_Duck, file, "$");
-	newXSproto(strcpy(buf, "DyeArmorBySlot"), XS_Client_DyeArmorBySlot, file, "$$$$$;$");
-	newXSproto(strcpy(buf, "Escape"), XS_Client_Escape, file, "$");
-	newXSproto(strcpy(buf, "ExpeditionMessage"), XS_Client_ExpeditionMessage, file, "$$$");
-	newXSproto(strcpy(buf, "FailTask"), XS_Client_FailTask, file, "$$");
-	newXSproto(strcpy(buf, "FindEmptyMemSlot"), XS_Client_FindEmptyMemSlot, file, "$");
-	newXSproto(strcpy(buf, "FindMemmedSpellBySlot"), XS_Client_FindMemmedSpellBySlot, file, "$$");
-	newXSproto(strcpy(buf, "FindMemmedSpellBySpellID"), XS_Client_FindMemmedSpellBySpellID, file, "$$");
-	newXSproto(strcpy(buf, "Fling"), XS_Client_Fling, file, "$$$$$;$$");
-	newXSproto(strcpy(buf, "ForageItem"), XS_Client_ForageItem, file, "$");
-	newXSproto(strcpy(buf, "Freeze"), XS_Client_Freeze, file, "$");
-	newXSproto(strcpy(buf, "GMKill"), XS_Client_GMKill, file, "$");
-	newXSproto(strcpy(buf, "GetAAEXPModifier"), XS_Client_GetAAEXPModifier, file, "$$");
-	newXSproto(strcpy(buf, "GetAAExp"), XS_Client_GetAAExp, file, "$");
-	newXSproto(strcpy(buf, "GetAALevel"), XS_Client_GetAALevel, file, "$$");
-	newXSproto(strcpy(buf, "GetAAPercent"), XS_Client_GetAAPercent, file, "$");
-	newXSproto(strcpy(buf, "GetAAPoints"), XS_Client_GetAAPoints, file, "$$");
-	newXSproto(strcpy(buf, "GetAFK"), XS_Client_GetAFK, file, "$");
-	newXSproto(strcpy(buf, "GetAccountAge"), XS_Client_GetAccountAge, file, "$");
-	newXSproto(strcpy(buf, "GetAccountFlag"), XS_Client_GetAccountFlag, file, "$$");
-	newXSproto(strcpy(buf, "GetAggroCount"), XS_Client_GetAggroCount, file, "$");
-	newXSproto(strcpy(buf, "GetAllMoney"), XS_Client_GetAllMoney, file, "$");
-	newXSproto(strcpy(buf, "GetAlternateCurrencyValue"), XS_Client_GetAlternateCurrencyValue, file, "$$");
-	newXSproto(strcpy(buf, "GetAnon"), XS_Client_GetAnon, file, "$");
-	newXSproto(strcpy(buf, "GetAugmentAt"), XS_Client_GetAugmentAt, file, "$$$");
-	newXSproto(strcpy(buf, "GetAugmentIDAt"), XS_Client_GetAugmentIDAt, file, "$$$");
-	newXSproto(strcpy(buf, "GetBaseAGI"), XS_Client_GetBaseAGI, file, "$");
-	newXSproto(strcpy(buf, "GetBaseCHA"), XS_Client_GetBaseCHA, file, "$");
-	newXSproto(strcpy(buf, "GetBaseDEX"), XS_Client_GetBaseDEX, file, "$");
-	newXSproto(strcpy(buf, "GetBaseFace"), XS_Client_GetBaseFace, file, "$");
-	newXSproto(strcpy(buf, "GetBaseINT"), XS_Client_GetBaseINT, file, "$");
-	newXSproto(strcpy(buf, "GetBaseSTA"), XS_Client_GetBaseSTA, file, "$");
-	newXSproto(strcpy(buf, "GetBaseSTR"), XS_Client_GetBaseSTR, file, "$");
-	newXSproto(strcpy(buf, "GetBaseWIS"), XS_Client_GetBaseWIS, file, "$");
-	newXSproto(strcpy(buf, "GetBecomeNPCLevel"), XS_Client_GetBecomeNPCLevel, file, "$");
-	newXSproto(strcpy(buf, "GetBindHeading"), XS_Client_GetBindHeading, file, "$$");
-	newXSproto(strcpy(buf, "GetBindX"), XS_Client_GetBindX, file, "$$");
-	newXSproto(strcpy(buf, "GetBindY"), XS_Client_GetBindY, file, "$$");
-	newXSproto(strcpy(buf, "GetBindZ"), XS_Client_GetBindZ, file, "$$");
-	newXSproto(strcpy(buf, "GetBindZoneID"), XS_Client_GetBindZoneID, file, "$$");
-	newXSproto(strcpy(buf, "GetCarriedMoney"), XS_Client_GetCarriedMoney, file, "$");
-	newXSproto(strcpy(buf, "GetCarriedPlatinum"), XS_Client_GetCarriedPlatinum, file, "$");
-	newXSproto(strcpy(buf, "GetCharacterFactionLevel"), XS_Client_GetCharacterFactionLevel, file, "$$");
-	newXSproto(strcpy(buf, "GetClassBitmask"), XS_Client_GetClassBitmask, file, "$");
-	newXSproto(strcpy(buf, "GetClientMaxLevel"), XS_Client_GetClientMaxLevel, file, "$");
-	newXSproto(strcpy(buf, "GetClientVersion"), XS_Client_GetClientVersion, file, "$");
-	newXSproto(strcpy(buf, "GetClientVersionBit"), XS_Client_GetClientVersionBit, file, "$");
-	newXSproto(strcpy(buf, "GetCorpseCount"), XS_Client_GetCorpseCount, file, "$");
-	newXSproto(strcpy(buf, "GetCorpseID"), XS_Client_GetCorpseID, file, "$$");
-	newXSproto(strcpy(buf, "GetCorpseItemAt"), XS_Client_GetCorpseItemAt, file, "$$$");
-	newXSproto(strcpy(buf, "GetCustomItemData"), XS_Client_GetCustomItemData, file, "$$$");
-	newXSproto(strcpy(buf, "GetDiscSlotBySpellID"), XS_Client_GetDiscSlotBySpellID, file, "$$");
-	newXSproto(strcpy(buf, "GetDisciplineTimer"), XS_Client_GetDisciplineTimer, file, "$$");
-	newXSproto(strcpy(buf, "GetDuelTarget"), XS_Client_GetDuelTarget, file, "$");
-	newXSproto(strcpy(buf, "GetEnvironmentDamageModifier"), XS_Client_GetEnvironmentDamageModifier, file, "$");
-	newXSproto(strcpy(buf, "GetEXP"), XS_Client_GetEXP, file, "$");
-	newXSproto(strcpy(buf, "GetEXPModifier"), XS_Client_GetEXPModifier, file, "$$");
-	newXSproto(strcpy(buf, "GetEbonCrystals"), XS_Client_GetEbonCrystals, file, "$");
-	newXSproto(strcpy(buf, "GetEndurance"), XS_Client_GetEndurance, file, "$");
-	newXSproto(strcpy(buf, "GetEnduranceRatio"), XS_Client_GetEnduranceRatio, file, "$");
-	newXSproto(strcpy(buf, "GetExpedition"), XS_Client_GetExpedition, file, "$");
-	newXSproto(strcpy(buf, "GetExpeditionLockouts"), XS_Client_GetExpeditionLockouts, file, "$;$");
-	newXSproto(strcpy(buf, "GetFace"), XS_Client_GetFace, file, "$");
-	newXSproto(strcpy(buf, "GetFactionLevel"), XS_Client_GetFactionLevel, file, "$$$$$$$$");
-	newXSproto(strcpy(buf, "GetFeigned"), XS_Client_GetFeigned, file, "$");
-	newXSproto(strcpy(buf, "GetFreeDisciplineSlot"), XS_Client_GetFreeDisciplineSlot, file, "$;$");
-	newXSproto(strcpy(buf, "GetFreeSpellBookSlot"), XS_Client_GetFreeSpellBookSlot, file, "$;$");
-	newXSproto(strcpy(buf, "GetGM"), XS_Client_GetGM, file, "$");
-	newXSproto(strcpy(buf, "GetGroup"), XS_Client_GetGroup, file, "$");
-	newXSproto(strcpy(buf, "GetGroupPoints"), XS_Client_GetGroupPoints, file, "$");
-	newXSproto(strcpy(buf, "GetHealAmount"), XS_Client_GetHealAmount, file, "$");
-	newXSproto(strcpy(buf, "GetHorseId"), XS_Client_GetHorseId, file, "$");
-	newXSproto(strcpy(buf, "GetHunger"), XS_Client_GetHunger, file, "$$");
-	newXSproto(strcpy(buf, "GetIP"), XS_Client_GetIP, file, "$");
-	newXSproto(strcpy(buf, "GetIPExemption"), XS_Client_GetIPExemption, file, "$");
-	newXSproto(strcpy(buf, "GetIPString"), XS_Client_GetIPString, file, "$");
-	newXSproto(strcpy(buf, "GetInstanceID"), XS_Client_GetInstanceID, file, "$$");
-	newXSproto(strcpy(buf, "GetInstrumentMod"), XS_Client_GetInstrumentMod, file, "$$");
-	newXSproto(strcpy(buf, "GetInventory"), XS_Client_GetInventory, file, "$");
-	newXSproto(strcpy(buf, "GetInvulnerableEnvironmentDamage"), XS_Client_GetInvulnerableEnvironmentDamage, file, "$");
-	newXSproto(strcpy(buf, "GetItemAt"), XS_Client_GetItemAt, file, "$$");
-	newXSproto(strcpy(buf, "GetItemIDAt"), XS_Client_GetItemIDAt, file, "$$");
-	newXSproto(strcpy(buf, "GetItemInInventory"), XS_Client_GetItemInInventory, file, "$$");
-	newXSproto(strcpy(buf, "GetLDoNLosses"), XS_Client_GetLDoNLosses, file, "$");
-	newXSproto(strcpy(buf, "GetLDoNLossesTheme"), XS_Client_GetLDoNLossesTheme, file, "$$");
-	newXSproto(strcpy(buf, "GetLDoNPointsTheme"), XS_Client_GetLDoNPointsTheme, file, "$");
-	newXSproto(strcpy(buf, "GetLDoNWins"), XS_Client_GetLDoNWins, file, "$");
-	newXSproto(strcpy(buf, "GetLDoNWinsTheme"), XS_Client_GetLDoNWinsTheme, file, "$$");
-	newXSproto(strcpy(buf, "GetLanguageSkill"), XS_Client_GetLanguageSkill, file, "$$");
-	newXSproto(strcpy(buf, "GetLearnableDisciplines"), XS_Client_GetLearnableDisciplines, file, "$;$$");
-	newXSproto(strcpy(buf, "GetLearnedDisciplines"), XS_Client_GetLearnedDisciplines, file, "$");
-	newXSproto(strcpy(buf, "GetLockoutExpeditionUUID"), XS_Client_GetLockoutExpeditionUUID, file, "$$$");
-	newXSproto(strcpy(buf, "GetMaxEndurance"), XS_Client_GetMaxEndurance, file, "$");
-	newXSproto(strcpy(buf, "GetMemmedSpells"), XS_Client_GetMemmedSpells, file, "$");
-	newXSproto(strcpy(buf, "GetModCharacterFactionLevel"), XS_Client_GetModCharacterFactionLevel, file, "$$");
-	newXSproto(strcpy(buf, "GetMoney"), XS_Client_GetMoney, file, "$$$");
-	newXSproto(strcpy(buf, "GetPVP"), XS_Client_GetPVP, file, "$");
-	newXSproto(strcpy(buf, "GetPVPPoints"), XS_Client_GetPVPPoints, file, "$");
-	newXSproto(strcpy(buf, "GetRaceBitmask"), XS_Client_GetRaceBitmask, file, "$");
-	newXSproto(strcpy(buf, "GetRadiantCrystals"), XS_Client_GetRadiantCrystals, file, "$");
-	newXSproto(strcpy(buf, "GetRaid"), XS_Client_GetRaid, file, "$");
-	newXSproto(strcpy(buf, "GetRaidPoints"), XS_Client_GetRaidPoints, file, "$");
-	newXSproto(strcpy(buf, "GetRawItemAC"), XS_Client_GetRawItemAC, file, "$");
-	newXSproto(strcpy(buf, "GetRawSkill"), XS_Client_GetRawSkill, file, "$$");
-	newXSproto(strcpy(buf, "GetScribeableSpells"), XS_Client_GetScribeableSpells, file, "$;$$");
-	newXSproto(strcpy(buf, "GetScribedSpells"), XS_Client_GetScribedSpells, file, "$");
-	newXSproto(strcpy(buf, "GetSkillPoints"), XS_Client_GetSkillPoints, file, "$");
-	newXSproto(strcpy(buf, "GetSpellBookSlotBySpellID"), XS_Client_GetSpellBookSlotBySpellID, file, "$$");
-	newXSproto(strcpy(buf, "GetSpellDamage"), XS_Client_GetSpellDamage, file, "$");
-	newXSproto(strcpy(buf, "GetSpellIDByBookSlot"), XS_Client_GetSpellIDByBookSlot, file, "$$");
-	newXSproto(strcpy(buf, "GetSpentAA"), XS_Client_GetSpentAA, file, "$$");
-	newXSproto(strcpy(buf, "GetStartZone"), XS_Client_GetStartZone, file, "$");
-	newXSproto(strcpy(buf, "GetTargetRingX"), XS_Client_GetTargetRingX, file, "$");
-	newXSproto(strcpy(buf, "GetTargetRingY"), XS_Client_GetTargetRingY, file, "$");
-	newXSproto(strcpy(buf, "GetTargetRingZ"), XS_Client_GetTargetRingZ, file, "$");
-	newXSproto(strcpy(buf, "GetTaskActivityDoneCount"), XS_Client_GetTaskActivityDoneCount, file, "$$$");
-	newXSproto(strcpy(buf, "GetThirst"), XS_Client_GetThirst, file, "$$");
-	newXSproto(strcpy(buf, "GetTotalSecondsPlayed"), XS_Client_GetTotalSecondsPlayed, file, "$");
-	newXSproto(strcpy(buf, "GetWeight"), XS_Client_GetWeight, file, "$");
-	newXSproto(strcpy(buf, "GoFish"), XS_Client_GoFish, file, "$");
-	newXSproto(strcpy(buf, "GrantAlternateAdvancementAbility"), XS_Client_GrantAlternateAdvancementAbility, file, "$$$;$");
-	newXSproto(strcpy(buf, "GuildID"), XS_Client_GuildID, file, "$");
-	newXSproto(strcpy(buf, "GuildRank"), XS_Client_GuildRank, file, "$");
-	newXSproto(strcpy(buf, "HasAugmentEquippedByID"), XS_Client_HasAugmentEquippedByID, file, "$$");
-	newXSproto(strcpy(buf, "HasDisciplineLearned"), XS_Client_HasDisciplineLearned, file, "$$");
-	newXSproto(strcpy(buf, "HasExpeditionLockout"), XS_Client_HasExpeditionLockout, file, "$$$");
-	newXSproto(strcpy(buf, "HasItemEquippedByID"), XS_Client_HasItemEquippedByID, file, "$$");
-	newXSproto(strcpy(buf, "HasPEQZoneFlag"), XS_Client_HasPEQZoneFlag, file, "$$");
-	newXSproto(strcpy(buf, "HasSkill"), XS_Client_HasSkill, file, "$$");
-	newXSproto(strcpy(buf, "HasSpellScribed"), XS_Client_HasSkill, file, "$$");
-	newXSproto(strcpy(buf, "HasZoneFlag"), XS_Client_HasZoneFlag, file, "$$");
-	newXSproto(strcpy(buf, "Hungry"), XS_Client_Hungry, file, "$");
-	newXSproto(strcpy(buf, "InZone"), XS_Client_InZone, file, "$");
-	newXSproto(strcpy(buf, "IncStats"), XS_Client_IncStats, file, "$$$");
-	newXSproto(strcpy(buf, "IncreaseLanguageSkill"), XS_Client_IncreaseLanguageSkill, file, "$$;$");
-	newXSproto(strcpy(buf, "IncreaseSkill"), XS_Client_IncreaseSkill, file, "$$;$");
-	newXSproto(strcpy(buf, "IncrementAA"), XS_Client_IncrementAA, file, "$$");
-	newXSproto(strcpy(buf, "IsBecomeNPC"), XS_Client_IsBecomeNPC, file, "$");
-	newXSproto(strcpy(buf, "IsCrouching"), XS_Client_IsCrouching, file, "$");
-	newXSproto(strcpy(buf, "IsDueling"), XS_Client_IsDueling, file, "$");
-	newXSproto(strcpy(buf, "IsGrouped"), XS_Client_IsGrouped, file, "$");
-	newXSproto(strcpy(buf, "IsLD"), XS_Client_IsLD, file, "$");
-	newXSproto(strcpy(buf, "IsMedding"), XS_Client_IsMedding, file, "$");
-	newXSproto(strcpy(buf, "IsRaidGrouped"), XS_Client_IsRaidGrouped, file, "$");
-	newXSproto(strcpy(buf, "IsSitting"), XS_Client_IsSitting, file, "$");
-	newXSproto(strcpy(buf, "IsStanding"), XS_Client_IsStanding, file, "$");
-	newXSproto(strcpy(buf, "IsTaskActive"), XS_Client_IsTaskActive, file, "$$");
-	newXSproto(strcpy(buf, "IsTaskActivityActive"), XS_Client_IsTaskActivityActive, file, "$$$");
-	newXSproto(strcpy(buf, "IsTaskCompleted"), XS_Client_IsTaskCompleted, file, "$$");
-	newXSproto(strcpy(buf, "KeyRingAdd"), XS_Client_KeyRingAdd, file, "$$");
-	newXSproto(strcpy(buf, "KeyRingCheck"), XS_Client_KeyRingCheck, file, "$$");
-	newXSproto(strcpy(buf, "Kick"), XS_Client_Kick, file, "$");
-	newXSproto(strcpy(buf, "LearnDisciplines"), XS_Client_LearnDisciplines, file, "$$$");
-	newXSproto(strcpy(buf, "LearnRecipe"), XS_Client_LearnRecipe, file, "$$");
-	newXSproto(strcpy(buf, "LeaveGroup"), XS_Client_LeaveGroup, file, "$");
-	newXSproto(strcpy(buf, "LoadPEQZoneFlags"), XS_Client_LoadPEQZoneFlags, file, "$");
-	newXSproto(strcpy(buf, "LoadZoneFlags"), XS_Client_LoadZoneFlags, file, "$");
-	newXSproto(strcpy(buf, "MarkCompassLoc"), XS_Client_MarkCompassLoc, file, "$$$$");
-	newXSproto(strcpy(buf, "MaxSkill"), XS_Client_MaxSkill, file, "$$;$$");
-	newXSproto(strcpy(buf, "MemSpell"), XS_Client_MemSpell, file, "$$$;$");
-	newXSproto(strcpy(buf, "MemmedCount"), XS_Client_MemmedCount, file, "$");
-	newXSproto(strcpy(buf, "MovePC"), XS_Client_MovePC, file, "$$$$$$");
-	newXSproto(strcpy(buf, "MovePCDynamicZone"), XS_Client_MovePCDynamicZone, file, "$$;$$");
-	newXSproto(strcpy(buf, "MovePCInstance"), XS_Client_MovePCInstance, file, "$$$$$$$");
-	newXSproto(strcpy(buf, "MoveZone"), XS_Client_MoveZone, file, "$$");
-	newXSproto(strcpy(buf, "MoveZoneGroup"), XS_Client_MoveZoneGroup, file, "$$");
-	newXSproto(strcpy(buf, "MoveZoneInstance"), XS_Client_MoveZoneInstance, file, "$$");
-	newXSproto(strcpy(buf, "MoveZoneInstanceGroup"), XS_Client_MoveZoneInstanceGroup, file, "$$");
-	newXSproto(strcpy(buf, "MoveZoneInstanceRaid"), XS_Client_MoveZoneInstanceRaid, file, "$$");
-	newXSproto(strcpy(buf, "MoveZoneRaid"), XS_Client_MoveZoneRaid, file, "$$");
-	newXSproto(strcpy(buf, "NPCSpawn"), XS_Client_NPCSpawn, file, "$$$;$");
-	newXSproto(strcpy(buf, "NotifyNewTitlesAvailable"), XS_Client_NotifyNewTitlesAvailable, file, "$");
-	newXSproto(strcpy(buf, "NukeItem"), XS_Client_NukeItem, file, "$$;$");
-	newXSproto(strcpy(buf, "OpenLFGuildWindow"), XS_Client_OpenLFGuildWindow, file, "$");
-	newXSproto(strcpy(buf, "PlayMP3"), XS_Client_PlayMP3, file, "$;$");
-	newXSproto(strcpy(buf, "Popup2"), XS_Client_Popup2, file, "$$$;$$$$$$$");
-	newXSproto(strcpy(buf, "QuestReward"), XS_Client_QuestReward, file, "$$;$$$$$$$");
-	newXSproto(strcpy(buf, "ReadBook"), XS_Client_ReadBook, file, "$$$");
-	newXSproto(strcpy(buf, "ReadBookByName"), XS_Client_ReadBookByName, file, "$$$");
-	newXSproto(strcpy(buf, "RefundAA"), XS_Client_RefundAA, file, "$$");
-	newXSproto(strcpy(buf, "RemoveAllExpeditionLockouts"), XS_Client_RemoveAllExpeditionLockouts, file, "$;$");
-	newXSproto(strcpy(buf, "RemoveExpeditionLockout"), XS_Client_RemoveExpeditionLockout, file, "$$$");
-	newXSproto(strcpy(buf, "RemoveItem"), XS_Client_RemoveItem, file, "$$;$");
-	newXSproto(strcpy(buf, "RemoveLDoNLoss"), XS_Client_RemoveLDoNLoss, file, "$$");
-	newXSproto(strcpy(buf, "RemoveLDoNWin"), XS_Client_RemoveLDoNWin, file, "$$");
-	newXSproto(strcpy(buf, "RemoveNoRent"), XS_Client_RemoveNoRent, file, "$");
-	newXSproto(strcpy(buf, "ResetAA"), XS_Client_ResetAA, file, "$");
-	newXSproto(strcpy(buf, "ResetAllDisciplineTimers"), XS_Client_ResetAllDisciplineTimers, file, "$");
-	newXSproto(strcpy(buf, "ResetAllCastbarCooldowns"), XS_Client_ResetAllCastbarCooldowns, file, "$");
-	newXSproto(strcpy(buf, "ResetCastbarCooldownBySlot"), XS_Client_ResetCastbarCooldownBySlot, file, "$$");
-	newXSproto(strcpy(buf, "ResetCastbarCooldownBySpellID"), XS_Client_ResetCastbarCooldownBySpellID, file, "$$");
-	newXSproto(strcpy(buf, "ResetDisciplineTimer"), XS_Client_ResetDisciplineTimer, file, "$$");
-	newXSproto(strcpy(buf, "ResetTrade"), XS_Client_ResetTrade, file, "$");
-	newXSproto(strcpy(buf, "Save"), XS_Client_Save, file, "$$");
-	newXSproto(strcpy(buf, "SaveBackup"), XS_Client_SaveBackup, file, "$");
-	newXSproto(strcpy(buf, "ScribeSpell"), XS_Client_ScribeSpell, file, "$$$;$");
-	newXSproto(strcpy(buf, "ScribeSpells"), XS_Client_ScribeSpells, file, "$$$");
-	newXSproto(strcpy(buf, "SendColoredText"), XS_Client_SendColoredText, file, "$$$");
-	newXSproto(strcpy(buf, "SendMarqueeMessage"), XS_Client_SendMarqueeMessage, file, "$$$$$$$");
-	newXSproto(strcpy(buf, "SendOPTranslocateConfirm"), XS_Client_SendOPTranslocateConfirm, file, "$$$");
-	newXSproto(strcpy(buf, "SendPEQZoneFlagInfo"), XS_Client_SendPEQZoneFlagInfo, file, "$$");
-	newXSproto(strcpy(buf, "SendSound"), XS_Client_SendSound, file, "$");
-	newXSproto(strcpy(buf, "SendSpellAnim"), XS_Client_SendSpellAnim, file, "$$$");
-	newXSproto(strcpy(buf, "SendTargetCommand"), XS_Client_SendTargetCommand, file, "$$");
-	newXSproto(strcpy(buf, "SendToGuildHall"), XS_Client_SendToGuildHall, file, "$");
-	newXSproto(strcpy(buf, "SendToInstance"), XS_Client_SendToInstance, file, "$$$$$$$$$$");
-	newXSproto(strcpy(buf, "SendWebLink"), XS_Client_SendWebLink, file, "$:$");
-	newXSproto(strcpy(buf, "SendZoneFlagInfo"), XS_Client_SendZoneFlagInfo, file, "$$");
-	newXSproto(strcpy(buf, "SetAAEXPModifier"), XS_Client_SetAAEXPModifier, file, "$$$");
-	newXSproto(strcpy(buf, "SetAAPoints"), XS_Client_SetAAPoints, file, "$$");
-	newXSproto(strcpy(buf, "SetAATitle"), XS_Client_SetAATitle, file, "$$;$");
-	newXSproto(strcpy(buf, "SetAFK"), XS_Client_SetAFK, file, "$$");
-	newXSproto(strcpy(buf, "SetAccountFlag"), XS_Client_SetAccountFlag, file, "$$");
-	newXSproto(strcpy(buf, "SetAlternateCurrencyValue"), XS_Client_SetAlternateCurrencyValue, file, "$$$");
-	newXSproto(strcpy(buf, "SetAnon"), XS_Client_SetAnon, file, "$$");
-	newXSproto(strcpy(buf, "SetBaseClass"), XS_Client_SetBaseClass, file, "$$");
-	newXSproto(strcpy(buf, "SetBaseGender"), XS_Client_SetBaseGender, file, "$$");
-	newXSproto(strcpy(buf, "SetBaseRace"), XS_Client_SetBaseRace, file, "$$");
-	newXSproto(strcpy(buf, "SetBecomeNPC"), XS_Client_SetBecomeNPC, file, "$$");
-	newXSproto(strcpy(buf, "SetBecomeNPCLevel"), XS_Client_SetBecomeNPCLevel, file, "$$");
-	newXSproto(strcpy(buf, "SetBindPoint"), XS_Client_SetBindPoint, file, "$;$$$$$$");
-	newXSproto(strcpy(buf, "SetClientMaxLevel"), XS_Client_SetClientMaxLevel, file, "$$");
-	newXSproto(strcpy(buf, "SetConsumption"), XS_Client_SetConsumption, file, "$$$");
-	newXSproto(strcpy(buf, "SetCustomItemData"), XS_Client_SetCustomItemData, file, "$$$$");
-	newXSproto(strcpy(buf, "SetDeity"), XS_Client_SetDeity, file, "$$");
-	newXSproto(strcpy(buf, "SetDuelTarget"), XS_Client_SetDuelTarget, file, "$$");
-	newXSproto(strcpy(buf, "SetDueling"), XS_Client_SetDueling, file, "$$");
-	newXSproto(strcpy(buf, "SetEXP"), XS_Client_SetEXP, file, "$$$;$");
-	newXSproto(strcpy(buf, "SetEXPModifier"), XS_Client_SetEXPModifier, file, "$$$");
-	newXSproto(strcpy(buf, "SetEbonCrystals"), XS_Client_SetEbonCrystals, file, "$$");
-	newXSproto(strcpy(buf, "SetEndurance"), XS_Client_SetEndurance, file, "$$");
-	newXSproto(strcpy(buf, "SetEnvironmentDamageModifier"), XS_Client_SetEnvironmentDamageModifier, file, "$$");
-	newXSproto(strcpy(buf, "SetFactionLevel"), XS_Client_SetFactionLevel, file, "$$$$$$");
-	newXSproto(strcpy(buf, "SetFactionLevel2"), XS_Client_SetFactionLevel2, file, "$$$$$$$");
-	newXSproto(strcpy(buf, "SetFeigned"), XS_Client_SetFeigned, file, "$$");
-	newXSproto(strcpy(buf, "SetGM"), XS_Client_SetGM, file, "$$");
-	newXSproto(strcpy(buf, "SetGMStatus"), XS_Client_SetGMStatus, file, "$$");
-	newXSproto(strcpy(buf, "SetHideMe"), XS_Client_SetHideMe, file, "$$");
-	newXSproto(strcpy(buf, "SetHorseId"), XS_Client_SetHorseId, file, "$$");
-	newXSproto(strcpy(buf, "SetHunger"), XS_Client_SetHunger, file, "$$");
-	newXSproto(strcpy(buf, "SetIPExemption"), XS_Client_SetIPExemption, file, "$$");
-	newXSproto(strcpy(buf, "SetInvulnerableEnvironmentDamage"), XS_Client_SetInvulnerableEnvironmentDamage, file, "$$");
-	newXSproto(strcpy(buf, "SetLanguageSkill"), XS_Client_SetLanguageSkill, file, "$$$");
-	newXSproto(strcpy(buf, "SetMaterial"), XS_Client_SetMaterial, file, "$$$");
-	newXSproto(strcpy(buf, "SetPEQZoneFlag"), XS_Client_SetPEQZoneFlag, file, "$$");
-	newXSproto(strcpy(buf, "SetPVP"), XS_Client_SetPVP, file, "$$");
-	newXSproto(strcpy(buf, "SetPrimaryWeaponOrnamentation"), XS_Client_SetPrimaryWeaponOrnamentation, file, "$$");
-	newXSproto(strcpy(buf, "SetRadiantCrystals"), XS_Client_SetRadiantCrystals, file, "$$");
-	newXSproto(strcpy(buf, "SetSecondaryWeaponOrnamentation"), XS_Client_SetSecondaryWeaponOrnamentation, file, "$$");
-	newXSproto(strcpy(buf, "SetSkill"), XS_Client_SetSkill, file, "$$$");
-	newXSproto(strcpy(buf, "SetSkillPoints"), XS_Client_SetSkillPoints, file, "$$");
-	newXSproto(strcpy(buf, "SetStartZone"), XS_Client_SetStartZone, file, "$$;$$$$");
-	newXSproto(strcpy(buf, "SetStats"), XS_Client_SetStats, file, "$$$");
-	newXSproto(strcpy(buf, "SetThirst"), XS_Client_SetThirst, file, "$$");
-	newXSproto(strcpy(buf, "SetTint"), XS_Client_SetTint, file, "$$$");
-	newXSproto(strcpy(buf, "SetTitleSuffix"), XS_Client_SetTitleSuffix, file, "$$;$");
-	newXSproto(strcpy(buf, "SetZoneFlag"), XS_Client_SetZoneFlag, file, "$$");
-	newXSproto(strcpy(buf, "SilentMessage"), XS_Client_SilentMessage, file, "$$");
-	newXSproto(strcpy(buf, "Sit"), XS_Client_Sit, file, "$");
-	newXSproto(strcpy(buf, "SlotConvert2"), XS_Client_SlotConvert2, file, "$$");
-	newXSproto(strcpy(buf, "Stand"), XS_Client_Stand, file, "$");
-	newXSproto(strcpy(buf, "SummonBaggedItems"), XS_Client_SummonBaggedItems, file, "$$$");
-	newXSproto(strcpy(buf, "SummonItem"), XS_Client_SummonItem, file, "$$;$$$$$$$$");
-	newXSproto(strcpy(buf, "TGB"), XS_Client_TGB, file, "$");
-	newXSproto(strcpy(buf, "TakeMoneyFromPP"), XS_Client_TakeMoneyFromPP, file, "$$;$");
-	newXSproto(strcpy(buf, "TakePlatinum"), XS_Client_TakePlatinum, file, "$$;$");
-	newXSproto(strcpy(buf, "TaskSelector"), XS_Client_TaskSelector, file, "$$;$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
-	newXSproto(strcpy(buf, "Thirsty"), XS_Client_Thirsty, file, "$");
-	newXSproto(strcpy(buf, "TrainDiscBySpellID"), XS_Client_TrainDiscBySpellID, file, "$$");
-	newXSproto(strcpy(buf, "UnFreeze"), XS_Client_UnFreeze, file, "$");
-	newXSproto(strcpy(buf, "Undye"), XS_Client_Undye, file, "$");
-	newXSproto(strcpy(buf, "UnmemSpell"), XS_Client_UnmemSpell, file, "$$;$");
-	newXSproto(strcpy(buf, "UnmemSpellAll"), XS_Client_UnmemSpellAll, file, "$;$");
-	newXSproto(strcpy(buf, "UnmemSpellBySpellID"), XS_Client_UnmemSpellBySpellID, file, "$$");
-	newXSproto(strcpy(buf, "UnscribeSpell"), XS_Client_UnscribeSpell, file, "$$;$");
-	newXSproto(strcpy(buf, "UnscribeSpellAll"), XS_Client_UnscribeSpellAll, file, "$;$");
-	newXSproto(strcpy(buf, "UnscribeSpellBySpellID"), XS_Client_UnscribeSpellBySpellID, file, "$$;$");
-	newXSproto(strcpy(buf, "UntrainDisc"), XS_Client_UntrainDisc, file, "$$;$");
-	newXSproto(strcpy(buf, "UntrainDiscAll"), XS_Client_UntrainDiscAll, file, "$;$");
-	newXSproto(strcpy(buf, "UntrainDiscBySpellID"), XS_Client_UntrainDiscBySpellID, file, "$$;$");
-	newXSproto(strcpy(buf, "UpdateAdmin"), XS_Client_UpdateAdmin, file, "$;$");
-	newXSproto(strcpy(buf, "UpdateGroupAAs"), XS_Client_UpdateGroupAAs, file, "$$$");
-	newXSproto(strcpy(buf, "UpdateLDoNPoints"), XS_Client_UpdateLDoNPoints, file, "$$$");
-	newXSproto(strcpy(buf, "UpdateTaskActivity"), XS_Client_UpdateTaskActivity, file, "$$$$;$");
-	newXSproto(strcpy(buf, "UpdateWho"), XS_Client_UpdateWho, file, "$;$");
-	newXSproto(strcpy(buf, "UseDiscipline"), XS_Client_UseDiscipline, file, "$$$");
-	newXSproto(strcpy(buf, "WorldKick"), XS_Client_WorldKick, file, "$");
-	XSRETURN_YES;
+void Perl_Client_MoveZoneInstanceRaid(Client* self, uint16 instance_id, float x, float y, float z) // @categories Adventures and Expeditions, Script Utility
+{
+	self->MoveZoneInstanceRaid(instance_id, glm::vec4(x, y, z, 0.0f));
+}
+
+void Perl_Client_MoveZoneInstanceRaid(Client* self, uint16 instance_id, float x, float y, float z, float heading) // @categories Adventures and Expeditions, Script Utility
+{
+	self->MoveZoneInstanceRaid(instance_id, glm::vec4(x, y, z, heading));
+}
+
+void Perl_Client_ApplySpell(Client* self, int spell_id)
+{
+	self->ApplySpell(spell_id);
+}
+
+void Perl_Client_ApplySpell(Client* self, int spell_id, int duration)
+{
+	self->ApplySpell(spell_id, duration);
+}
+
+void Perl_Client_ApplySpell(Client* self, int spell_id, int duration, bool allow_pets)
+{
+	self->ApplySpell(spell_id, duration, ApplySpellType::Solo, allow_pets);
+}
+
+void Perl_Client_ApplySpell(Client* self, int spell_id, int duration, bool allow_pets, bool allow_bots)
+{
+	self->ApplySpell(spell_id, duration, ApplySpellType::Solo, allow_pets, true, allow_bots);
+}
+
+void Perl_Client_ApplySpellGroup(Client* self, int spell_id)
+{
+	self->ApplySpell(spell_id, 0, ApplySpellType::Group);
+}
+
+void Perl_Client_ApplySpellGroup(Client* self, int spell_id, int duration)
+{
+	self->ApplySpell(spell_id, duration, ApplySpellType::Group);
+}
+
+void Perl_Client_ApplySpellGroup(Client* self, int spell_id, int duration, bool allow_pets)
+{
+	self->ApplySpell(spell_id, duration, ApplySpellType::Group, allow_pets);
+}
+
+void Perl_Client_ApplySpellGroup(Client* self, int spell_id, int duration, bool allow_pets, bool allow_bots)
+{
+	self->ApplySpell(spell_id, duration, ApplySpellType::Group, allow_pets, true, allow_bots);
+}
+
+void Perl_Client_ApplySpellRaid(Client* self, int spell_id)
+{
+	self->ApplySpell(spell_id, 0, ApplySpellType::Raid);
+}
+
+void Perl_Client_ApplySpellRaid(Client* self, int spell_id, int duration)
+{
+	self->ApplySpell(spell_id, duration, ApplySpellType::Raid);
+}
+
+void Perl_Client_ApplySpellRaid(Client* self, int spell_id, int duration, bool allow_pets)
+{
+	self->ApplySpell(spell_id, duration, ApplySpellType::Raid, allow_pets);
+}
+
+void Perl_Client_ApplySpellRaid(Client* self, int spell_id, int duration, bool allow_pets, bool is_raid_group_only)
+{
+	self->ApplySpell(spell_id, duration, ApplySpellType::Raid, allow_pets, is_raid_group_only);
+}
+
+void Perl_Client_ApplySpellRaid(Client* self, int spell_id, int duration, bool allow_pets, bool is_raid_group_only, bool allow_bots)
+{
+	self->ApplySpell(spell_id, duration, ApplySpellType::Raid, allow_pets, is_raid_group_only, allow_bots);
+}
+
+void Perl_Client_SetSpellDuration(Client* self, int spell_id)
+{
+	self->SetSpellDuration(spell_id);
+}
+
+void Perl_Client_SetSpellDuration(Client* self, int spell_id, int duration)
+{
+	self->SetSpellDuration(spell_id, duration);
+}
+
+void Perl_Client_SetSpellDuration(Client* self, int spell_id, int duration, bool allow_pets)
+{
+	self->SetSpellDuration(spell_id, duration, ApplySpellType::Solo, allow_pets);
+}
+
+void Perl_Client_SetSpellDuration(Client* self, int spell_id, int duration, bool allow_pets, bool allow_bots)
+{
+	self->SetSpellDuration(spell_id, duration, ApplySpellType::Solo, allow_pets, true, allow_bots);
+}
+
+void Perl_Client_SetSpellDurationGroup(Client* self, int spell_id)
+{
+	self->SetSpellDuration(spell_id, 0, ApplySpellType::Group);
+}
+
+void Perl_Client_SetSpellDurationGroup(Client* self, int spell_id, int duration)
+{
+	self->SetSpellDuration(spell_id, duration, ApplySpellType::Group);
+}
+
+void Perl_Client_SetSpellDurationGroup(Client* self, int spell_id, int duration, bool allow_pets)
+{
+	self->SetSpellDuration(spell_id, duration, ApplySpellType::Group, allow_pets);
+}
+
+void Perl_Client_SetSpellDurationGroup(Client* self, int spell_id, int duration, bool allow_pets, bool allow_bots)
+{
+	self->SetSpellDuration(spell_id, duration, ApplySpellType::Group, allow_pets, true, allow_bots);
+}
+
+void Perl_Client_SetSpellDurationRaid(Client* self, int spell_id)
+{
+	self->ApplySpell(spell_id, 0, ApplySpellType::Raid);
+}
+
+void Perl_Client_SetSpellDurationRaid(Client* self, int spell_id, int duration)
+{
+	self->ApplySpell(spell_id, duration, ApplySpellType::Raid);
+}
+
+void Perl_Client_SetSpellDurationRaid(Client* self, int spell_id, int duration, bool allow_pets)
+{
+	self->SetSpellDuration(spell_id, duration, ApplySpellType::Raid, allow_pets);
+}
+
+void Perl_Client_SetSpellDurationRaid(Client* self, int spell_id, int duration, bool allow_pets, bool is_raid_group_only)
+{
+	self->SetSpellDuration(spell_id, duration, ApplySpellType::Raid, allow_pets, is_raid_group_only);
+}
+
+void Perl_Client_SetSpellDurationRaid(Client* self, int spell_id, int duration, bool allow_pets, bool is_raid_group_only, bool allow_bots)
+{
+	self->SetSpellDuration(spell_id, duration, ApplySpellType::Raid, allow_pets, is_raid_group_only, allow_bots);
+}
+
+perl::array Perl_Client_GetPEQZoneFlags(Client* self)
+{
+	perl::array a;
+
+	auto l = self->GetPEQZoneFlags();
+	for (const auto& f : l) {
+		a.push_back(f);
+	}
+
+	return a;
+}
+
+perl::array Perl_Client_GetZoneFlags(Client* self)
+{
+	perl::array a;
+
+	auto l = self->GetZoneFlags();
+	for (const auto& f : l) {
+		a.push_back(f);
+	}
+
+	return a;
+}
+
+void Perl_Client_SendPayload(Client* self, int payload_id) // @categories Script Utility
+{
+	self->SendPayload(payload_id);
+}
+
+void Perl_Client_SendPayload(Client* self, int payload_id, std::string payload_value) // @categories Script Utility
+{
+	self->SendPayload(payload_id, payload_value);
+}
+
+void Perl_Client_Signal(Client* self, int signal_id)
+{
+	self->Signal(signal_id);
+}
+
+std::string Perl_Client_GetGuildPublicNote(Client* self)
+{
+	return self->GetGuildPublicNote();
+}
+
+void Perl_Client_MaxSkills(Client* self)
+{
+	self->MaxSkills();
+}
+
+perl::array Perl_Client_GetAugmentIDsBySlotID(Client* self, int16 slot_id)
+{
+	perl::array result;
+	auto augments = self->GetInv().GetAugmentIDsBySlotID(slot_id);
+
+	for (int i = 0; i < augments.size(); ++i) {
+		result.push_back(augments[i]);
+	}
+
+	return result;
+}
+
+bool Perl_Client_IsEXPEnabled(Client* self)
+{
+	return self->IsEXPEnabled();
+}
+
+void Perl_Client_SetEXPEnabled(Client* self, bool is_exp_enabled)
+{
+	self->SetEXPEnabled(is_exp_enabled);
+}
+
+bool Perl_Client_CanEnterZone(Client* self, std::string zone_short_name)
+{
+	return self->CanEnterZone(zone_short_name);
+}
+
+bool Perl_Client_CanEnterZone(Client* self, std::string zone_short_name, int16 instance_version)
+{
+	return self->CanEnterZone(zone_short_name, instance_version);
+}
+
+void Perl_Client_SendPath(Client* self, Mob* target)
+{
+	self->SendPath(target);
+}
+
+int Perl_Client_GetBotRequiredLevel(Client* self)
+{
+	return self->GetBotRequiredLevel();
+}
+
+int Perl_Client_GetBotRequiredLevel(Client* self, uint8 class_id)
+{
+	return self->GetBotRequiredLevel(class_id);
+}
+
+uint32 Perl_Client_GetBotCreationLimit(Client* self)
+{
+	return self->GetBotCreationLimit();
+}
+
+uint32 Perl_Client_GetBotCreationLimit(Client* self, uint8 class_id)
+{
+	return self->GetBotCreationLimit(class_id);
+}
+
+int Perl_Client_GetBotSpawnLimit(Client* self)
+{
+	return self->GetBotSpawnLimit();
+}
+
+int Perl_Client_GetBotSpawnLimit(Client* self, uint8 class_id)
+{
+	return self->GetBotSpawnLimit(class_id);
+}
+
+void Perl_Client_SetBotRequiredLevel(Client* self, int new_required_level)
+{
+	self->SetBotRequiredLevel(new_required_level);
+}
+
+void Perl_Client_SetBotRequiredLevel(Client* self, int new_required_level, uint8 class_id)
+{
+	self->SetBotRequiredLevel(new_required_level, class_id);
+}
+
+void Perl_Client_SetBotCreationLimit(Client* self, uint32 new_creation_limit)
+{
+	self->SetBotCreationLimit(new_creation_limit);
+}
+
+void Perl_Client_SetBotCreationLimit(Client* self, uint32 new_creation_limit, uint8 class_id)
+{
+	self->SetBotCreationLimit(new_creation_limit, class_id);
+}
+
+void Perl_Client_SetBotSpawnLimit(Client* self, int new_spawn_limit)
+{
+	self->SetBotSpawnLimit(new_spawn_limit);
+}
+
+void Perl_Client_SetBotSpawnLimit(Client* self, int new_spawn_limit, uint8 class_id)
+{
+	self->SetBotSpawnLimit(new_spawn_limit, class_id);
+}
+
+void Perl_Client_CampAllBots(Client* self)
+{
+	self->CampAllBots();
+}
+
+void Perl_Client_CampAllBots(Client* self, uint8 class_id)
+{
+	self->CampAllBots(class_id);
+}
+
+void perl_register_client()
+{
+	perl::interpreter perl(PERL_GET_THX);
+
+	auto package = perl.new_class<Client>("Client");
+	package.add_base_class("Mob");
+	package.add("AccountID", &Perl_Client_AccountID);
+	package.add("AccountName", &Perl_Client_AccountName);
+	package.add("AddAAPoints", &Perl_Client_AddAAPoints);
+	package.add("AddAlternateCurrencyValue", &Perl_Client_AddAlternateCurrencyValue);
+	package.add("AddCrystals", &Perl_Client_AddCrystals);
+	package.add("AddEXP", (void(*)(Client*, uint32))&Perl_Client_AddEXP);
+	package.add("AddEXP", (void(*)(Client*, uint32, uint8))&Perl_Client_AddEXP);
+	package.add("AddEXP", (void(*)(Client*, uint32, uint8, bool))&Perl_Client_AddEXP);
+	package.add("AddExpeditionLockout", (void(*)(Client*, std::string, std::string, uint32))&Perl_Client_AddExpeditionLockout);
+	package.add("AddExpeditionLockout", (void(*)(Client*, std::string, std::string, uint32, std::string))&Perl_Client_AddExpeditionLockout);
+	package.add("AddExpeditionLockoutDuration", (void(*)(Client*, std::string, std::string, int))&Perl_Client_AddExpeditionLockoutDuration);
+	package.add("AddExpeditionLockoutDuration", (void(*)(Client*, std::string, std::string, int, std::string))&Perl_Client_AddExpeditionLockoutDuration);
+	package.add("AddItem", &Perl_Client_AddItem);
+	package.add("AddLDoNLoss", &Perl_Client_AddLDoNLoss);
+	package.add("AddLDoNWin", &Perl_Client_AddLDoNWin);
+	package.add("AddLevelBasedExp", (void(*)(Client*, uint8))&Perl_Client_AddLevelBasedExp);
+	package.add("AddLevelBasedExp", (void(*)(Client*, uint8, uint8))&Perl_Client_AddLevelBasedExp);
+	package.add("AddLevelBasedExp", (void(*)(Client*, uint8, uint8, bool))&Perl_Client_AddLevelBasedExp);
+	package.add("AddMoneyToPP", (void(*)(Client*, uint32, uint32, uint32, uint32))&Perl_Client_AddMoneyToPP);
+	package.add("AddMoneyToPP", (void(*)(Client*, uint32, uint32, uint32, uint32, bool))&Perl_Client_AddMoneyToPP);
+	package.add("AddPlatinum", (void(*)(Client*, uint32))&Perl_Client_AddPlatinum);
+	package.add("AddPlatinum", (void(*)(Client*, uint32, bool))&Perl_Client_AddPlatinum);
+	package.add("AddPVPPoints", &Perl_Client_AddPVPPoints);
+	package.add("AddSkill", &Perl_Client_AddSkill);
+	package.add("Admin", &Perl_Client_Admin);
+	package.add("ApplySpell", (void(*)(Client*, int))&Perl_Client_ApplySpell);
+	package.add("ApplySpell", (void(*)(Client*, int, int))&Perl_Client_ApplySpell);
+	package.add("ApplySpell", (void(*)(Client*, int, int, bool))&Perl_Client_ApplySpell);
+	package.add("ApplySpell", (void(*)(Client*, int, int, bool, bool))&Perl_Client_ApplySpell);
+	package.add("ApplySpellGroup", (void(*)(Client*, int))&Perl_Client_ApplySpellGroup);
+	package.add("ApplySpellGroup", (void(*)(Client*, int, int))&Perl_Client_ApplySpellGroup);
+	package.add("ApplySpellGroup", (void(*)(Client*, int, int, bool))&Perl_Client_ApplySpellGroup);
+	package.add("ApplySpellGroup", (void(*)(Client*, int, int, bool, bool))&Perl_Client_ApplySpellGroup);
+	package.add("ApplySpellRaid", (void(*)(Client*, int))&Perl_Client_ApplySpellRaid);
+	package.add("ApplySpellRaid", (void(*)(Client*, int, int))&Perl_Client_ApplySpellRaid);
+	package.add("ApplySpellRaid", (void(*)(Client*, int, int, bool))&Perl_Client_ApplySpellRaid);
+	package.add("ApplySpellRaid", (void(*)(Client*, int, int, bool, bool))&Perl_Client_ApplySpellRaid);
+	package.add("ApplySpellRaid", (void(*)(Client*, int, int, bool, bool, bool))&Perl_Client_ApplySpellRaid);
+	package.add("AssignTask", (void(*)(Client*, int))&Perl_Client_AssignTask);
+	package.add("AssignTask", (void(*)(Client*, int, int))&Perl_Client_AssignTask);
+	package.add("AssignTask", (void(*)(Client*, int, int, bool))&Perl_Client_AssignTask);
+	package.add("AssignToInstance", &Perl_Client_AssignToInstance);
+	package.add("AutoSplitEnabled", &Perl_Client_AutoSplitEnabled);
+	package.add("BreakInvis", &Perl_Client_BreakInvis);
+	package.add("CalcEXP", (uint64(*)(Client*, uint8))&Perl_Client_CalcEXP);
+	package.add("CalcEXP", (uint64(*)(Client*, uint8, bool))&Perl_Client_CalcEXP);
+	package.add("CalcPriceMod", (float(*)(Client*))&Perl_Client_CalcPriceMod);
+	package.add("CalcPriceMod", (float(*)(Client*, Mob*))&Perl_Client_CalcPriceMod);
+	package.add("CalcPriceMod", (float(*)(Client*, Mob*, bool))&Perl_Client_CalcPriceMod);
+	package.add("CampAllBots", (void(*)(Client*))&Perl_Client_CampAllBots);
+	package.add("CampAllBots", (void(*)(Client*, uint8))&Perl_Client_CampAllBots);
+	package.add("CanEnterZone", (bool(*)(Client*, std::string))&Perl_Client_CanEnterZone);
+	package.add("CanEnterZone", (bool(*)(Client*, std::string, int16))&Perl_Client_CanEnterZone);
+	package.add("CanHaveSkill", &Perl_Client_CanHaveSkill);
+	package.add("CashReward", &Perl_Client_CashReward);
+	package.add("ChangeLastName", &Perl_Client_ChangeLastName);
+	package.add("CharacterID", &Perl_Client_CharacterID);
+	package.add("CheckIncreaseSkill", (bool(*)(Client*, int))&Perl_Client_CheckIncreaseSkill);
+	package.add("CheckIncreaseSkill", (bool(*)(Client*, int, int))&Perl_Client_CheckIncreaseSkill);
+	package.add("CheckSpecializeIncrease", &Perl_Client_CheckSpecializeIncrease);
+	package.add("ClearCompassMark", &Perl_Client_ClearCompassMark);
+	package.add("ClearPEQZoneFlag", &Perl_Client_ClearPEQZoneFlag);
+	package.add("ClearZoneFlag", &Perl_Client_ClearZoneFlag);
+	package.add("Connected", &Perl_Client_Connected);
+	package.add("CountAugmentEquippedByID", &Perl_Client_CountAugmentEquippedByID);
+	package.add("CountItem", &Perl_Client_CountItem);
+	package.add("CountItemEquippedByID", &Perl_Client_CountItemEquippedByID);
+	package.add("CreateExpedition", (Expedition*(*)(Client*, perl::reference))&Perl_Client_CreateExpedition);
+	package.add("CreateExpedition", (Expedition*(*)(Client*, std::string, uint32, uint32, std::string, uint32, uint32))&Perl_Client_CreateExpedition);
+	package.add("CreateExpedition", (Expedition*(*)(Client*, std::string, uint32, uint32, std::string, uint32, uint32, bool))&Perl_Client_CreateExpedition);
+	package.add("CreateExpeditionFromTemplate", &Perl_Client_CreateExpeditionFromTemplate);
+	package.add("CreateTaskDynamicZone", &Perl_Client_CreateTaskDynamicZone);
+	package.add("DecreaseByID", &Perl_Client_DecreaseByID);
+	package.add("DeleteItemInInventory", (void(*)(Client*, int16))&Perl_Client_DeleteItemInInventory);
+	package.add("DeleteItemInInventory", (void(*)(Client*, int16, int16))&Perl_Client_DeleteItemInInventory);
+	package.add("DeleteItemInInventory", (void(*)(Client*, int16, int16, bool))&Perl_Client_DeleteItemInInventory);
+	package.add("DiaWind", &Perl_Client_DiaWind);
+	package.add("DialogueWindow", &Perl_Client_DialogueWindow);
+	package.add("Disconnect", &Perl_Client_Disconnect);
+	package.add("DropItem", &Perl_Client_DropItem);
+	package.add("Duck", &Perl_Client_Duck);
+	package.add("DyeArmorBySlot", (void(*)(Client*, uint8, uint8, uint8, uint8))&Perl_Client_DyeArmorBySlot);
+	package.add("DyeArmorBySlot", (void(*)(Client*, uint8, uint8, uint8, uint8, uint8))&Perl_Client_DyeArmorBySlot);
+	package.add("EndSharedTask", (void(*)(Client*))&Perl_Client_EndSharedTask);
+	package.add("EndSharedTask", (void(*)(Client*, bool))&Perl_Client_EndSharedTask);
+	package.add("Escape", &Perl_Client_Escape);
+	package.add("ExpeditionMessage", &Perl_Client_ExpeditionMessage);
+	package.add("FailTask", &Perl_Client_FailTask);
+	package.add("FindEmptyMemSlot", &Perl_Client_FindEmptyMemSlot);
+	package.add("FindMemmedSpellBySlot", &Perl_Client_FindMemmedSpellBySlot);
+	package.add("FindMemmedSpellBySpellID", &Perl_Client_FindMemmedSpellBySpellID);
+	package.add("Fling", (void(*)(Client*, float, float, float))&Perl_Client_Fling);
+	package.add("Fling", (void(*)(Client*, float, float, float, bool))&Perl_Client_Fling);
+	package.add("Fling", (void(*)(Client*, float, float, float, bool, bool))&Perl_Client_Fling);
+	package.add("Fling", (void(*)(Client*, float, float, float, float))&Perl_Client_Fling);
+	package.add("Fling", (void(*)(Client*, float, float, float, float, bool))&Perl_Client_Fling);
+	package.add("Fling", (void(*)(Client*, float, float, float, float, bool, bool))&Perl_Client_Fling);
+	package.add("ForageItem", &Perl_Client_ForageItem);
+	package.add("Freeze", &Perl_Client_Freeze);
+	package.add("GMKill", &Perl_Client_GMKill);
+	package.add("GetAAEXPModifier", (double(*)(Client*, uint32))&Perl_Client_GetAAEXPModifier);
+	package.add("GetAAEXPModifier", (double(*)(Client*, uint32, int16))&Perl_Client_GetAAEXPModifier);
+	package.add("GetAAExp", &Perl_Client_GetAAExp);
+	package.add("GetAALevel", &Perl_Client_GetAALevel);
+	package.add("GetAAPercent", &Perl_Client_GetAAPercent);
+	package.add("GetAAPoints", &Perl_Client_GetAAPoints);
+	package.add("GetAFK", &Perl_Client_GetAFK);
+	package.add("GetAccountAge", &Perl_Client_GetAccountAge);
+	package.add("GetAccountFlag", &Perl_Client_GetAccountFlag);
+	package.add("GetAggroCount", &Perl_Client_GetAggroCount);
+	package.add("GetAllMoney", &Perl_Client_GetAllMoney);
+	package.add("GetAlternateCurrencyValue", &Perl_Client_GetAlternateCurrencyValue);
+	package.add("GetAnon", &Perl_Client_GetAnon);
+	package.add("GetAugmentAt", &Perl_Client_GetAugmentAt);
+	package.add("GetAugmentIDAt", &Perl_Client_GetAugmentIDAt);
+	package.add("GetAugmentIDsBySlotID", &Perl_Client_GetAugmentIDsBySlotID);
+	package.add("GetBaseAGI", &Perl_Client_GetBaseAGI);
+	package.add("GetBaseCHA", &Perl_Client_GetBaseCHA);
+	package.add("GetBaseDEX", &Perl_Client_GetBaseDEX);
+	package.add("GetBaseFace", &Perl_Client_GetBaseFace);
+	package.add("GetBaseINT", &Perl_Client_GetBaseINT);
+	package.add("GetBaseSTA", &Perl_Client_GetBaseSTA);
+	package.add("GetBaseSTR", &Perl_Client_GetBaseSTR);
+	package.add("GetBaseWIS", &Perl_Client_GetBaseWIS);
+	package.add("GetBecomeNPCLevel", &Perl_Client_GetBecomeNPCLevel);
+	package.add("GetBindHeading", (float(*)(Client*))&Perl_Client_GetBindHeading);
+	package.add("GetBindHeading", (float(*)(Client*, int))&Perl_Client_GetBindHeading);
+	package.add("GetBindX", (float(*)(Client*))&Perl_Client_GetBindX);
+	package.add("GetBindX", (float(*)(Client*, int))&Perl_Client_GetBindX);
+	package.add("GetBindY", (float(*)(Client*))&Perl_Client_GetBindY);
+	package.add("GetBindY", (float(*)(Client*, int))&Perl_Client_GetBindY);
+	package.add("GetBindZ", (float(*)(Client*))&Perl_Client_GetBindZ);
+	package.add("GetBindZ", (float(*)(Client*, int))&Perl_Client_GetBindZ);
+	package.add("GetBindZoneID", (uint32_t(*)(Client*))&Perl_Client_GetBindZoneID);
+	package.add("GetBindZoneID", (uint32_t(*)(Client*, int))&Perl_Client_GetBindZoneID);
+	package.add("GetBotCreationLimit", (uint32(*)(Client*))&Perl_Client_GetBotCreationLimit);
+	package.add("GetBotCreationLimit", (uint32(*)(Client*, uint8))&Perl_Client_GetBotCreationLimit);
+	package.add("GetBotRequiredLevel", (int(*)(Client*))&Perl_Client_GetBotRequiredLevel);
+	package.add("GetBotRequiredLevel", (int(*)(Client*, uint8))&Perl_Client_GetBotRequiredLevel);
+	package.add("GetBotSpawnLimit", (int(*)(Client*))&Perl_Client_GetBotSpawnLimit);
+	package.add("GetBotSpawnLimit", (int(*)(Client*, uint8))&Perl_Client_GetBotSpawnLimit);
+	package.add("GetCarriedMoney", &Perl_Client_GetCarriedMoney);
+	package.add("GetCarriedPlatinum", &Perl_Client_GetCarriedPlatinum);
+	package.add("GetCharacterFactionLevel", &Perl_Client_GetCharacterFactionLevel);
+	package.add("GetClassBitmask", &Perl_Client_GetClassBitmask);
+	package.add("GetClientMaxLevel", &Perl_Client_GetClientMaxLevel);
+	package.add("GetClientVersion", &Perl_Client_GetClientVersion);
+	package.add("GetClientVersionBit", &Perl_Client_GetClientVersionBit);
+	package.add("GetCorpseCount", &Perl_Client_GetCorpseCount);
+	package.add("GetCorpseID", &Perl_Client_GetCorpseID);
+	package.add("GetCorpseItemAt", &Perl_Client_GetCorpseItemAt);
+	package.add("GetCustomItemData", &Perl_Client_GetCustomItemData);
+	package.add("GetDiscSlotBySpellID", &Perl_Client_GetDiscSlotBySpellID);
+	package.add("GetDisciplineTimer", &Perl_Client_GetDisciplineTimer);
+	package.add("GetDuelTarget", &Perl_Client_GetDuelTarget);
+	package.add("GetEnvironmentDamageModifier", &Perl_Client_GetEnvironmentDamageModifier);
+	package.add("GetEXP", &Perl_Client_GetEXP);
+	package.add("GetEXPModifier", (double(*)(Client*, uint32))&Perl_Client_GetEXPModifier);
+	package.add("GetEXPModifier", (double(*)(Client*, uint32, int16))&Perl_Client_GetEXPModifier);
+	package.add("GetEbonCrystals", &Perl_Client_GetEbonCrystals);
+	package.add("GetEndurance", &Perl_Client_GetEndurance);
+	package.add("GetEnduranceRatio", &Perl_Client_GetEnduranceRatio);
+	package.add("GetExpedition", &Perl_Client_GetExpedition);
+	package.add("GetExpeditionLockouts", (perl::reference(*)(Client*))&Perl_Client_GetExpeditionLockouts);
+	package.add("GetExpeditionLockouts", (perl::reference(*)(Client*, std::string))&Perl_Client_GetExpeditionLockouts);
+	package.add("GetFace", &Perl_Client_GetFace);
+	package.add("GetFactionLevel", &Perl_Client_GetFactionLevel);
+	package.add("GetFeigned", &Perl_Client_GetFeigned);
+	package.add("GetFreeDisciplineSlot", (int(*)(Client*))&Perl_Client_GetFreeDisciplineSlot);
+	package.add("GetFreeDisciplineSlot", (int(*)(Client*, int))&Perl_Client_GetFreeDisciplineSlot);
+	package.add("GetFreeSpellBookSlot", (int(*)(Client*))&Perl_Client_GetFreeSpellBookSlot);
+	package.add("GetFreeSpellBookSlot", (int(*)(Client*, uint32))&Perl_Client_GetFreeSpellBookSlot);
+	package.add("GetGM", &Perl_Client_GetGM);
+	package.add("GetGMStatus", &Perl_Client_GetGMStatus);
+	package.add("GetGroup", &Perl_Client_GetGroup);
+	package.add("GetGroupPoints", &Perl_Client_GetGroupPoints);
+	package.add("GetGuildPublicNote", &Perl_Client_GetGuildPublicNote);
+	package.add("GetHorseId", &Perl_Client_GetHorseId);
+	package.add("GetHealAmount", &Perl_Client_GetHealAmount);
+	package.add("GetHunger", &Perl_Client_GetHunger);
+	package.add("GetIP", &Perl_Client_GetIP);
+	package.add("GetIPExemption", &Perl_Client_GetIPExemption);
+	package.add("GetIPString", &Perl_Client_GetIPString);
+	package.add("GetInstanceID", &Perl_Client_GetInstanceID);
+	package.add("GetInstrumentMod", &Perl_Client_GetInstrumentMod);
+	package.add("GetInventory", &Perl_Client_GetInventory);
+	package.add("GetInvulnerableEnvironmentDamage", &Perl_Client_GetInvulnerableEnvironmentDamage);
+	package.add("GetItemAt", &Perl_Client_GetItemAt);
+	package.add("GetItemIDAt", &Perl_Client_GetItemIDAt);
+	package.add("GetItemInInventory", &Perl_Client_GetItemInInventory);
+	package.add("GetLDoNLosses", &Perl_Client_GetLDoNLosses);
+	package.add("GetLDoNLossesTheme", &Perl_Client_GetLDoNLossesTheme);
+	package.add("GetLDoNPointsTheme", &Perl_Client_GetLDoNPointsTheme);
+	package.add("GetLDoNWins", &Perl_Client_GetLDoNWins);
+	package.add("GetLDoNWinsTheme", &Perl_Client_GetLDoNWinsTheme);
+	package.add("GetLanguageSkill", &Perl_Client_GetLanguageSkill);
+	package.add("GetLearnableDisciplines", (perl::array(*)(Client*))&Perl_Client_GetLearnableDisciplines);
+	package.add("GetLearnableDisciplines", (perl::array(*)(Client*, uint8))&Perl_Client_GetLearnableDisciplines);
+	package.add("GetLearnableDisciplines", (perl::array(*)(Client*, uint8, uint8))&Perl_Client_GetLearnableDisciplines);
+	package.add("GetLearnedDisciplines", &Perl_Client_GetLearnedDisciplines);
+	package.add("GetLockoutExpeditionUUID", &Perl_Client_GetLockoutExpeditionUUID);
+	package.add("GetMaxEndurance", &Perl_Client_GetMaxEndurance);
+	package.add("GetMemmedSpells", &Perl_Client_GetMemmedSpells);
+	package.add("GetModCharacterFactionLevel", &Perl_Client_GetModCharacterFactionLevel);
+	package.add("GetMoney", &Perl_Client_GetMoney);
+	package.add("GetPVP", &Perl_Client_GetPVP);
+	package.add("GetPVPPoints", &Perl_Client_GetPVPPoints);
+	package.add("GetRaceBitmask", &Perl_Client_GetRaceBitmask);
+	package.add("GetRadiantCrystals", &Perl_Client_GetRadiantCrystals);
+	package.add("GetRaid", &Perl_Client_GetRaid);
+	package.add("GetRaidPoints", &Perl_Client_GetRaidPoints);
+	package.add("GetRawItemAC", &Perl_Client_GetRawItemAC);
+	package.add("GetRawSkill", &Perl_Client_GetRawSkill);
+	package.add("GetRecipeMadeCount", &Perl_Client_GetRecipeMadeCount);
+	package.add("GetScribeableSpells", (perl::array(*)(Client*))&Perl_Client_GetScribeableSpells);
+	package.add("GetScribeableSpells", (perl::array(*)(Client*, uint8))&Perl_Client_GetScribeableSpells);
+	package.add("GetScribeableSpells", (perl::array(*)(Client*, uint8, uint8))&Perl_Client_GetScribeableSpells);
+	package.add("GetScribedSpells", &Perl_Client_GetScribedSpells);
+	package.add("GetSkillPoints", &Perl_Client_GetSkillPoints);
+	package.add("GetSpellDamage", &Perl_Client_GetSpellDamage);
+	package.add("GetSpellBookSlotBySpellID", &Perl_Client_GetSpellBookSlotBySpellID);
+	package.add("GetSpellIDByBookSlot", &Perl_Client_GetSpellIDByBookSlot);
+	package.add("GetSpentAA", &Perl_Client_GetSpentAA);
+	package.add("GetStartZone", &Perl_Client_GetStartZone);
+	package.add("GetTargetRingX", &Perl_Client_GetTargetRingX);
+	package.add("GetTargetRingY", &Perl_Client_GetTargetRingY);
+	package.add("GetTargetRingZ", &Perl_Client_GetTargetRingZ);
+	package.add("GetTaskActivityDoneCount", &Perl_Client_GetTaskActivityDoneCount);
+	package.add("GetThirst", &Perl_Client_GetThirst);
+	package.add("GetTotalSecondsPlayed", &Perl_Client_GetTotalSecondsPlayed);
+	package.add("GetWeight", &Perl_Client_GetWeight);
+	package.add("GetPEQZoneFlags", &Perl_Client_GetPEQZoneFlags);
+	package.add("GetZoneFlags", &Perl_Client_GetZoneFlags);
+	package.add("GoFish", &Perl_Client_GoFish);
+	package.add("GrantAlternateAdvancementAbility", (bool(*)(Client*, int, int))&Perl_Client_GrantAlternateAdvancementAbility);
+	package.add("GrantAlternateAdvancementAbility", (bool(*)(Client*, int, int, bool))&Perl_Client_GrantAlternateAdvancementAbility);
+	package.add("GuildID", &Perl_Client_GuildID);
+	package.add("GuildRank", &Perl_Client_GuildRank);
+	package.add("HasAugmentEquippedByID", &Perl_Client_HasAugmentEquippedByID);
+	package.add("HasDisciplineLearned", &Perl_Client_HasDisciplineLearned);
+	package.add("HasExpeditionLockout", &Perl_Client_HasExpeditionLockout);
+	package.add("HasItemEquippedByID", &Perl_Client_HasItemEquippedByID);
+	package.add("HasPEQZoneFlag", &Perl_Client_HasPEQZoneFlag);
+	package.add("HasRecipeLearned", &Perl_Client_HasRecipeLearned);
+	package.add("HasSkill", &Perl_Client_HasSkill);
+	package.add("HasSpellScribed", &Perl_Client_HasSpellScribed);
+	package.add("HasZoneFlag", &Perl_Client_HasZoneFlag);
+	package.add("Hungry", &Perl_Client_Hungry);
+	package.add("InZone", &Perl_Client_InZone);
+	package.add("IncStats", &Perl_Client_IncStats);
+	package.add("IncreaseLanguageSkill", (void(*)(Client*, int))&Perl_Client_IncreaseLanguageSkill);
+	package.add("IncreaseLanguageSkill", (void(*)(Client*, int, int))&Perl_Client_IncreaseLanguageSkill);
+	package.add("IncreaseSkill", (void(*)(Client*, int))&Perl_Client_IncreaseSkill);
+	package.add("IncreaseSkill", (void(*)(Client*, int, int))&Perl_Client_IncreaseSkill);
+	package.add("IncrementAA", &Perl_Client_IncrementAA);
+	package.add("IsBecomeNPC", &Perl_Client_IsBecomeNPC);
+	package.add("IsCrouching", &Perl_Client_IsCrouching);
+	package.add("IsDueling", &Perl_Client_IsDueling);
+	package.add("IsEXPEnabled", &Perl_Client_IsEXPEnabled);
+	package.add("IsGrouped", &Perl_Client_IsGrouped);
+	package.add("IsLD", &Perl_Client_IsLD);
+	package.add("IsMedding", &Perl_Client_IsMedding);
+	package.add("IsRaidGrouped", &Perl_Client_IsRaidGrouped);
+	package.add("IsSitting", &Perl_Client_IsSitting);
+	package.add("IsStanding", &Perl_Client_IsStanding);
+	package.add("IsTaskActive", &Perl_Client_IsTaskActive);
+	package.add("IsTaskActivityActive", &Perl_Client_IsTaskActivityActive);
+	package.add("IsTaskCompleted", &Perl_Client_IsTaskCompleted);
+	package.add("KeyRingAdd", &Perl_Client_KeyRingAdd);
+	package.add("KeyRingCheck", &Perl_Client_KeyRingCheck);
+	package.add("Kick", &Perl_Client_Kick);
+	package.add("LearnDisciplines", &Perl_Client_LearnDisciplines);
+	package.add("LearnRecipe", &Perl_Client_LearnRecipe);
+	package.add("LeaveGroup", &Perl_Client_LeaveGroup);
+	package.add("LoadPEQZoneFlags", &Perl_Client_LoadPEQZoneFlags);
+	package.add("LoadZoneFlags", &Perl_Client_LoadZoneFlags);
+	package.add("LockSharedTask", &Perl_Client_LockSharedTask);
+	package.add("MarkCompassLoc", &Perl_Client_MarkCompassLoc);
+	package.add("Marquee", (void(*)(Client*, uint32, std::string))&Perl_Client_SendMarqueeMessage);
+	package.add("Marquee", (void(*)(Client*, uint32, std::string, uint32))&Perl_Client_SendMarqueeMessage);
+	package.add("Marquee", (void(*)(Client*, uint32, uint32, uint32, uint32, uint32, std::string))&Perl_Client_SendMarqueeMessage);
+	package.add("MaxSkill", (int(*)(Client*, uint16))&Perl_Client_MaxSkill);
+	package.add("MaxSkill", (int(*)(Client*, uint16, uint16))&Perl_Client_MaxSkill);
+	package.add("MaxSkill", (int(*)(Client*, uint16, uint16, uint16))&Perl_Client_MaxSkill);
+	package.add("MaxSkills", &Perl_Client_MaxSkills);
+	package.add("MemSpell", (void(*)(Client*, uint16, int))&Perl_Client_MemSpell);
+	package.add("MemSpell", (void(*)(Client*, uint16, int, bool))&Perl_Client_MemSpell);
+	package.add("MemmedCount", &Perl_Client_MemmedCount);
+	package.add("MovePC", &Perl_Client_MovePC);
+	package.add("MovePCDynamicZone", (void(*)(Client*, perl::scalar))&Perl_Client_MovePCDynamicZone);
+	package.add("MovePCDynamicZone", (void(*)(Client*, perl::scalar, int))&Perl_Client_MovePCDynamicZone);
+	package.add("MovePCDynamicZone", (void(*)(Client*, perl::scalar, int, bool))&Perl_Client_MovePCDynamicZone);
+	package.add("MovePCInstance", &Perl_Client_MovePCInstance);
+	package.add("MoveZone", (void(*)(Client*, const char*))&Perl_Client_MoveZone);
+	package.add("MoveZone", (void(*)(Client*, const char*, float, float, float))&Perl_Client_MoveZone);
+	package.add("MoveZone", (void(*)(Client*, const char*, float, float, float, float))&Perl_Client_MoveZone);
+	package.add("MoveZoneGroup", (void(*)(Client*, const char*))&Perl_Client_MoveZoneGroup);
+	package.add("MoveZoneGroup", (void(*)(Client*, const char*, float, float, float))&Perl_Client_MoveZoneGroup);
+	package.add("MoveZoneGroup", (void(*)(Client*, const char*, float, float, float, float))&Perl_Client_MoveZoneGroup);
+	package.add("MoveZoneInstance", (void(*)(Client*, uint16))&Perl_Client_MoveZoneInstance);
+	package.add("MoveZoneInstance", (void(*)(Client*, uint16, float, float, float))&Perl_Client_MoveZoneInstance);
+	package.add("MoveZoneInstance", (void(*)(Client*, uint16, float, float, float, float))&Perl_Client_MoveZoneInstance);
+	package.add("MoveZoneInstanceGroup", (void(*)(Client*, uint16))&Perl_Client_MoveZoneInstanceGroup);
+	package.add("MoveZoneInstanceGroup", (void(*)(Client*, uint16, float, float, float))&Perl_Client_MoveZoneInstanceGroup);
+	package.add("MoveZoneInstanceGroup", (void(*)(Client*, uint16, float, float, float, float))&Perl_Client_MoveZoneInstanceGroup);
+	package.add("MoveZoneInstanceRaid", (void(*)(Client*, uint16))&Perl_Client_MoveZoneInstanceRaid);
+	package.add("MoveZoneInstanceRaid", (void(*)(Client*, uint16, float, float, float))&Perl_Client_MoveZoneInstanceRaid);
+	package.add("MoveZoneInstanceRaid", (void(*)(Client*, uint16, float, float, float, float))&Perl_Client_MoveZoneInstanceRaid);
+	package.add("MoveZoneRaid", (void(*)(Client*, const char*))&Perl_Client_MoveZoneRaid);
+	package.add("MoveZoneRaid", (void(*)(Client*, const char*, float, float, float))&Perl_Client_MoveZoneRaid);
+	package.add("MoveZoneRaid", (void(*)(Client*, const char*, float, float, float, float))&Perl_Client_MoveZoneRaid);
+	package.add("NPCSpawn", (void(*)(Client*, NPC*, const char*))&Perl_Client_NPCSpawn);
+	package.add("NPCSpawn", (void(*)(Client*, NPC*, const char*, uint32))&Perl_Client_NPCSpawn);
+	package.add("NotifyNewTitlesAvailable", &Perl_Client_NotifyNewTitlesAvailable);
+	package.add("NukeItem", (uint32_t(*)(Client*, uint32))&Perl_Client_NukeItem);
+	package.add("NukeItem", (uint32_t(*)(Client*, uint32, uint8))&Perl_Client_NukeItem);
+	package.add("OpenLFGuildWindow", &Perl_Client_OpenLFGuildWindow);
+	package.add("PlayMP3", &Perl_Client_PlayMP3);
+	package.add("Popup2", (void(*)(Client*, const char*, const char*))&Perl_Client_Popup2);
+	package.add("Popup2", (void(*)(Client*, const char*, const char*, uint32))&Perl_Client_Popup2);
+	package.add("Popup2", (void(*)(Client*, const char*, const char*, uint32, uint32))&Perl_Client_Popup2);
+	package.add("Popup2", (void(*)(Client*, const char*, const char*, uint32, uint32, uint32))&Perl_Client_Popup2);
+	package.add("Popup2", (void(*)(Client*, const char*, const char*, uint32, uint32, uint32, uint32))&Perl_Client_Popup2);
+	package.add("Popup2", (void(*)(Client*, const char*, const char*, uint32, uint32, uint32, uint32, const char*))&Perl_Client_Popup2);
+	package.add("Popup2", (void(*)(Client*, const char*, const char*, uint32, uint32, uint32, uint32, const char*, const char*))&Perl_Client_Popup2);
+	package.add("Popup2", (void(*)(Client*, const char*, const char*, uint32, uint32, uint32, uint32, const char*, const char*, uint32))&Perl_Client_Popup2);
+	package.add("QuestReward", (void(*)(Client*, Mob*))&Perl_Client_QuestReward);
+	package.add("QuestReward", (void(*)(Client*, Mob*, uint32))&Perl_Client_QuestReward);
+	package.add("QuestReward", (void(*)(Client*, Mob*, uint32, uint32))&Perl_Client_QuestReward);
+	package.add("QuestReward", (void(*)(Client*, Mob*, uint32, uint32, uint32))&Perl_Client_QuestReward);
+	package.add("QuestReward", (void(*)(Client*, Mob*, uint32, uint32, uint32, uint32))&Perl_Client_QuestReward);
+	package.add("QuestReward", (void(*)(Client*, Mob*, uint32, uint32, uint32, uint32, uint32))&Perl_Client_QuestReward);
+	package.add("QuestReward", (void(*)(Client*, Mob*, uint32, uint32, uint32, uint32, uint32, uint32))&Perl_Client_QuestReward);
+	package.add("QuestReward", (void(*)(Client*, Mob*, uint32, uint32, uint32, uint32, uint32, uint32, bool))&Perl_Client_QuestReward);
+	package.add("ReadBook", &Perl_Client_ReadBook);
+	package.add("ReadBookByName", &Perl_Client_ReadBookByName);
+	package.add("RefundAA", &Perl_Client_RefundAA);
+	package.add("RemoveAllExpeditionLockouts", (void(*)(Client*))&Perl_Client_RemoveAllExpeditionLockouts);
+	package.add("RemoveAllExpeditionLockouts", (void(*)(Client*, std::string))&Perl_Client_RemoveAllExpeditionLockouts);
+	package.add("RemoveExpeditionLockout", &Perl_Client_RemoveExpeditionLockout);
+	package.add("RemoveFromInstance", &Perl_Client_RemoveFromInstance);
+	package.add("RemoveItem", (void(*)(Client*, uint32))&Perl_Client_RemoveItem);
+	package.add("RemoveItem", (void(*)(Client*, uint32, uint32))&Perl_Client_RemoveItem);
+	package.add("RemoveLDoNLoss", &Perl_Client_RemoveLDoNLoss);
+	package.add("RemoveLDoNWin", &Perl_Client_RemoveLDoNWin);
+	package.add("RemoveNoRent", &Perl_Client_RemoveNoRent);
+	package.add("ResetAA", &Perl_Client_ResetAA);
+	package.add("ResetAllDisciplineTimers", &Perl_Client_ResetAllDisciplineTimers);
+	package.add("ResetAllCastbarCooldowns", &Perl_Client_ResetAllCastbarCooldowns);
+	package.add("ResetAlternateAdvancementRank", &Perl_Client_ResetAlternateAdvancementRank);
+	package.add("ResetCastbarCooldownBySlot", &Perl_Client_ResetCastbarCooldownBySlot);
+	package.add("ResetCastbarCooldownBySpellID", &Perl_Client_ResetCastbarCooldownBySpellID);
+	package.add("ResetDisciplineTimer", &Perl_Client_ResetDisciplineTimer);
+	package.add("ResetTrade", &Perl_Client_ResetTrade);
+	package.add("Save", &Perl_Client_Save);
+	package.add("SaveBackup", &Perl_Client_SaveBackup);
+	package.add("ScribeSpell", (void(*)(Client*, uint16, int))&Perl_Client_ScribeSpell);
+	package.add("ScribeSpell", (void(*)(Client*, uint16, int, bool))&Perl_Client_ScribeSpell);
+	package.add("ScribeSpells", &Perl_Client_ScribeSpells);
+	package.add("SendColoredText", &Perl_Client_SendColoredText);
+	package.add("SendGMCommand", (bool(*)(Client*, std::string))&Perl_Client_SendGMCommand);
+	package.add("SendGMCommand", (bool(*)(Client*, std::string, bool))&Perl_Client_SendGMCommand);
+	package.add("SendMarqueeMessage", (void(*)(Client*, uint32, std::string))&Perl_Client_SendMarqueeMessage);
+	package.add("SendMarqueeMessage", (void(*)(Client*, uint32, std::string, uint32))&Perl_Client_SendMarqueeMessage);
+	package.add("SendMarqueeMessage", (void(*)(Client*, uint32, uint32, uint32, uint32, uint32, std::string))&Perl_Client_SendMarqueeMessage);
+	package.add("SendOPTranslocateConfirm", &Perl_Client_SendOPTranslocateConfirm);
+	package.add("SendPayload", (void(*)(Client*, int))&Perl_Client_SendPayload);
+	package.add("SendPayload", (void(*)(Client*, int, std::string))&Perl_Client_SendPayload);
+	package.add("SendPath", &Perl_Client_SendPath);
+	package.add("SendPEQZoneFlagInfo", &Perl_Client_SendPEQZoneFlagInfo);
+	package.add("SendSound", &Perl_Client_SendSound);
+	package.add("SendSpellAnim", &Perl_Client_SendSpellAnim);
+	package.add("SendTargetCommand", &Perl_Client_SendTargetCommand);
+	package.add("SendToGuildHall", &Perl_Client_SendToGuildHall);
+	package.add("SendToInstance", &Perl_Client_SendToInstance);
+	package.add("SendWebLink", &Perl_Client_SendWebLink);
+	package.add("SendZoneFlagInfo", &Perl_Client_SendZoneFlagInfo);
+	package.add("SetAAEXPModifier", (void(*)(Client*, uint32, double))&Perl_Client_SetAAEXPModifier);
+	package.add("SetAAEXPModifier", (void(*)(Client*, uint32, double, int16))&Perl_Client_SetAAEXPModifier);
+	package.add("SetAAPoints", &Perl_Client_SetAAPoints);
+	package.add("SetAATitle", (void(*)(Client*, std::string))&Perl_Client_SetAATitle);
+	package.add("SetAATitle", (void(*)(Client*, std::string, bool))&Perl_Client_SetAATitle);
+	package.add("SetAFK", &Perl_Client_SetAFK);
+	package.add("SetAccountFlag", &Perl_Client_SetAccountFlag);
+	package.add("SetAlternateCurrencyValue", &Perl_Client_SetAlternateCurrencyValue);
+	package.add("SetAnon", &Perl_Client_SetAnon);
+	package.add("SetBaseClass", &Perl_Client_SetBaseClass);
+	package.add("SetBaseGender", &Perl_Client_SetBaseGender);
+	package.add("SetBaseRace", &Perl_Client_SetBaseRace);
+	package.add("SetBecomeNPC", &Perl_Client_SetBecomeNPC);
+	package.add("SetBecomeNPCLevel", &Perl_Client_SetBecomeNPCLevel);
+	package.add("SetBindPoint", (void(*)(Client*))&Perl_Client_SetBindPoint);
+	package.add("SetBindPoint", (void(*)(Client*, int))&Perl_Client_SetBindPoint);
+	package.add("SetBindPoint", (void(*)(Client*, int, int))&Perl_Client_SetBindPoint);
+	package.add("SetBindPoint", (void(*)(Client*, int, int, float))&Perl_Client_SetBindPoint);
+	package.add("SetBindPoint", (void(*)(Client*, int, int, float, float))&Perl_Client_SetBindPoint);
+	package.add("SetBindPoint", (void(*)(Client*, int, int, float, float, float))&Perl_Client_SetBindPoint);
+	package.add("SetBindPoint", (void(*)(Client*, int, int, float, float, float, float))&Perl_Client_SetBindPoint);
+	package.add("SetBotCreationLimit", (void(*)(Client*, uint32))&Perl_Client_SetBotCreationLimit);
+	package.add("SetBotCreationLimit", (void(*)(Client*, uint32, uint8))&Perl_Client_SetBotCreationLimit);
+	package.add("SetBotRequiredLevel", (void(*)(Client*, int))&Perl_Client_SetBotRequiredLevel);
+	package.add("SetBotRequiredLevel", (void(*)(Client*, int, uint8))&Perl_Client_SetBotRequiredLevel);
+	package.add("SetBotSpawnLimit", (void(*)(Client*, int))&Perl_Client_SetBotSpawnLimit);
+	package.add("SetBotSpawnLimit", (void(*)(Client*, int, uint8))&Perl_Client_SetBotSpawnLimit);
+	package.add("SetClientMaxLevel", &Perl_Client_SetClientMaxLevel);
+	package.add("SetConsumption", &Perl_Client_SetConsumption);
+	package.add("SetCustomItemData", &Perl_Client_SetCustomItemData);
+	package.add("SetDeity", &Perl_Client_SetDeity);
+	package.add("SetDuelTarget", &Perl_Client_SetDuelTarget);
+	package.add("SetDueling", &Perl_Client_SetDueling);
+	package.add("SetEXP", (void(*)(Client*, uint64, uint64))&Perl_Client_SetEXP);
+	package.add("SetEXP", (void(*)(Client*, uint64, uint64, bool))&Perl_Client_SetEXP);
+	package.add("SetEXPModifier", (void(*)(Client*, uint32, double))&Perl_Client_SetEXPModifier);
+	package.add("SetEXPModifier", (void(*)(Client*, uint32, double, int16))&Perl_Client_SetEXPModifier);
+	package.add("SetEbonCrystals", &Perl_Client_SetEbonCrystals);
+	package.add("SetEndurance", &Perl_Client_SetEndurance);
+	package.add("SetEnvironmentDamageModifier", &Perl_Client_SetEnvironmentDamageModifier);
+	package.add("SetEXPEnabled", &Perl_Client_SetEXPEnabled);
+	package.add("SetFactionLevel", &Perl_Client_SetFactionLevel);
+	package.add("SetFactionLevel2", (void(*)(Client*, uint32, int32, uint8, uint8, uint8, int32))&Perl_Client_SetFactionLevel2);
+	package.add("SetFactionLevel2", (void(*)(Client*, uint32, int32, uint8, uint8, uint8, int32, uint8))&Perl_Client_SetFactionLevel2);
+	package.add("SetFeigned", &Perl_Client_SetFeigned);
+	package.add("SetGM", &Perl_Client_SetGM);
+	package.add("SetGMStatus", &Perl_Client_SetGMStatus);
+	package.add("SetHideMe", &Perl_Client_SetHideMe);
+	package.add("SetHorseId", &Perl_Client_SetHorseId);
+	package.add("SetHunger", &Perl_Client_SetHunger);
+	package.add("SetIPExemption", &Perl_Client_SetIPExemption);
+	package.add("SetInvulnerableEnvironmentDamage", &Perl_Client_SetInvulnerableEnvironmentDamage);
+	package.add("SetLanguageSkill", &Perl_Client_SetLanguageSkill);
+	package.add("SetMaterial", &Perl_Client_SetMaterial);
+	package.add("SetPEQZoneFlag", &Perl_Client_SetPEQZoneFlag);
+	package.add("SetPVP", &Perl_Client_SetPVP);
+	package.add("SetPrimaryWeaponOrnamentation", &Perl_Client_SetPrimaryWeaponOrnamentation);
+	package.add("SetRadiantCrystals", &Perl_Client_SetRadiantCrystals);
+	package.add("SetSecondaryWeaponOrnamentation", &Perl_Client_SetSecondaryWeaponOrnamentation);
+	package.add("SetSkill", &Perl_Client_SetSkill);
+	package.add("SetSkillPoints", &Perl_Client_SetSkillPoints);
+	package.add("SetSpellDuration", (void(*)(Client*, int))&Perl_Client_SetSpellDuration);
+	package.add("SetSpellDuration", (void(*)(Client*, int, int))&Perl_Client_SetSpellDuration);
+	package.add("SetSpellDuration", (void(*)(Client*, int, int, bool))&Perl_Client_SetSpellDuration);
+	package.add("SetSpellDuration", (void(*)(Client*, int, int, bool, bool))&Perl_Client_SetSpellDuration);
+	package.add("SetSpellDurationGroup", (void(*)(Client*, int))&Perl_Client_SetSpellDurationGroup);
+	package.add("SetSpellDurationGroup", (void(*)(Client*, int, int))&Perl_Client_SetSpellDurationGroup);
+	package.add("SetSpellDurationGroup", (void(*)(Client*, int, int, bool))&Perl_Client_SetSpellDurationGroup);
+	package.add("SetSpellDurationGroup", (void(*)(Client*, int, int, bool, bool))&Perl_Client_SetSpellDurationGroup);
+	package.add("SetSpellDurationRaid", (void(*)(Client*, int))&Perl_Client_SetSpellDurationRaid);
+	package.add("SetSpellDurationRaid", (void(*)(Client*, int, int))&Perl_Client_SetSpellDurationRaid);
+	package.add("SetSpellDurationRaid", (void(*)(Client*, int, int, bool))&Perl_Client_SetSpellDurationRaid);
+	package.add("SetSpellDurationRaid", (void(*)(Client*, int, int, bool, bool))&Perl_Client_SetSpellDurationRaid);
+	package.add("SetSpellDurationRaid", (void(*)(Client*, int, int, bool, bool, bool))&Perl_Client_SetSpellDurationRaid);
+	package.add("SetStartZone", (void(*)(Client*, uint32))&Perl_Client_SetStartZone);
+	package.add("SetStartZone", (void(*)(Client*, uint32, float, float, float))&Perl_Client_SetStartZone);
+	package.add("SetStartZone", (void(*)(Client*, uint32, float, float, float, float))&Perl_Client_SetStartZone);
+	package.add("SetStats", &Perl_Client_SetStats);
+	package.add("SetThirst", &Perl_Client_SetThirst);
+	package.add("SetTint", &Perl_Client_SetTint);
+	package.add("SetTitleSuffix", (void(*)(Client*, std::string))&Perl_Client_SetTitleSuffix);
+	package.add("SetTitleSuffix", (void(*)(Client*, std::string, bool))&Perl_Client_SetTitleSuffix);
+	package.add("SetZoneFlag", &Perl_Client_SetZoneFlag);
+	package.add("Signal", &Perl_Client_Signal);
+	package.add("SilentMessage", &Perl_Client_SilentMessage);
+	package.add("Sit", &Perl_Client_Sit);
+	package.add("SlotConvert2", &Perl_Client_SlotConvert2);
+	package.add("Stand", &Perl_Client_Stand);
+	package.add("SummonBaggedItems", &Perl_Client_SummonBaggedItems);
+	package.add("SummonItem", (void(*)(Client*, uint32))&Perl_Client_SummonItem);
+	package.add("SummonItem", (void(*)(Client*, uint32, int16))&Perl_Client_SummonItem);
+	package.add("SummonItem", (void(*)(Client*, uint32, int16, bool))&Perl_Client_SummonItem);
+	package.add("SummonItem", (void(*)(Client*, uint32, int16, bool, uint32))&Perl_Client_SummonItem);
+	package.add("SummonItem", (void(*)(Client*, uint32, int16, bool, uint32, uint32))&Perl_Client_SummonItem);
+	package.add("SummonItem", (void(*)(Client*, uint32, int16, bool, uint32, uint32, uint32))&Perl_Client_SummonItem);
+	package.add("SummonItem", (void(*)(Client*, uint32, int16, bool, uint32, uint32, uint32, uint32))&Perl_Client_SummonItem);
+	package.add("SummonItem", (void(*)(Client*, uint32, int16, bool, uint32, uint32, uint32, uint32, uint32))&Perl_Client_SummonItem);
+	package.add("SummonItem", (void(*)(Client*, uint32, int16, bool, uint32, uint32, uint32, uint32, uint32, uint16))&Perl_Client_SummonItem);
+	package.add("TGB", &Perl_Client_TGB);
+	package.add("TakeMoneyFromPP", (bool(*)(Client*, uint64_t))&Perl_Client_TakeMoneyFromPP);
+	package.add("TakeMoneyFromPP", (bool(*)(Client*, uint64_t, bool))&Perl_Client_TakeMoneyFromPP);
+	package.add("TakePlatinum", (bool(*)(Client*, uint32))&Perl_Client_TakePlatinum);
+	package.add("TakePlatinum", (bool(*)(Client*, uint32, bool))&Perl_Client_TakePlatinum);
+	package.add("TeleportToPlayerByCharID", &Perl_Client_TeleportToPlayerByCharacterID);
+	package.add("TeleportToPlayerByName", &Perl_Client_TeleportToPlayerByName);
+	package.add("TeleportGroupToPlayerByCharID", &Perl_Client_TeleportGroupToPlayerByCharacterID);
+	package.add("TeleportGroupToPlayerByName", &Perl_Client_TeleportGroupToPlayerByName);
+	package.add("TeleportRaidToPlayerByCharID", &Perl_Client_TeleportRaidToPlayerByCharacterID);
+	package.add("TeleportRaidToPlayerByName", &Perl_Client_TeleportRaidToPlayerByName);
+	package.add("TaskSelector", &Perl_Client_TaskSelector);
+	package.add("TaskSelectorNoCooldown", &Perl_Client_TaskSelectorNoCooldown);
+	package.add("Thirsty", &Perl_Client_Thirsty);
+	package.add("TrainDiscBySpellID", &Perl_Client_TrainDiscBySpellID);
+	package.add("UnFreeze", &Perl_Client_UnFreeze);
+	package.add("Undye", &Perl_Client_Undye);
+	package.add("UnmemSpell", (void(*)(Client*, int))&Perl_Client_UnmemSpell);
+	package.add("UnmemSpell", (void(*)(Client*, int, bool))&Perl_Client_UnmemSpell);
+	package.add("UnmemSpellAll", (void(*)(Client*))&Perl_Client_UnmemSpellAll);
+	package.add("UnmemSpellAll", (void(*)(Client*, bool))&Perl_Client_UnmemSpellAll);
+	package.add("UnmemSpellBySpellID", &Perl_Client_UnmemSpellBySpellID);
+	package.add("UnscribeSpell", (void(*)(Client*, int))&Perl_Client_UnscribeSpell);
+	package.add("UnscribeSpell", (void(*)(Client*, int, bool))&Perl_Client_UnscribeSpell);
+	package.add("UnscribeSpellAll", (void(*)(Client*))&Perl_Client_UnscribeSpellAll);
+	package.add("UnscribeSpellAll", (void(*)(Client*, bool))&Perl_Client_UnscribeSpellAll);
+	package.add("UnscribeSpellBySpellID", (void(*)(Client*, uint16))&Perl_Client_UnscribeSpellBySpellID);
+	package.add("UnscribeSpellBySpellID", (void(*)(Client*, uint16, bool))&Perl_Client_UnscribeSpellBySpellID);
+	package.add("UntrainDisc", (void(*)(Client*, int))&Perl_Client_UntrainDisc);
+	package.add("UntrainDisc", (void(*)(Client*, int, bool))&Perl_Client_UntrainDisc);
+	package.add("UntrainDiscAll", (void(*)(Client*))&Perl_Client_UntrainDiscAll);
+	package.add("UntrainDiscAll", (void(*)(Client*, bool))&Perl_Client_UntrainDiscAll);
+	package.add("UntrainDiscBySpellID", (void(*)(Client*, uint16))&Perl_Client_UntrainDiscBySpellID);
+	package.add("UntrainDiscBySpellID", (void(*)(Client*, uint16, bool))&Perl_Client_UntrainDiscBySpellID);
+	package.add("UpdateAdmin", (void(*)(Client*))&Perl_Client_UpdateAdmin);
+	package.add("UpdateAdmin", (void(*)(Client*, bool))&Perl_Client_UpdateAdmin);
+	package.add("UpdateGroupAAs", &Perl_Client_UpdateGroupAAs);
+	package.add("UpdateLDoNPoints", &Perl_Client_UpdateLDoNPoints);
+	package.add("UpdateTaskActivity", (void(*)(Client*, int, int, int))&Perl_Client_UpdateTaskActivity);
+	package.add("UpdateTaskActivity", (void(*)(Client*, int, int, int, bool))&Perl_Client_UpdateTaskActivity);
+	package.add("UpdateWho", (void(*)(Client*))&Perl_Client_UpdateWho);
+	package.add("UpdateWho", (void(*)(Client*, uint8))&Perl_Client_UpdateWho);
+	package.add("UseDiscipline", &Perl_Client_UseDiscipline);
+	package.add("WorldKick", &Perl_Client_WorldKick);
 }
 
 #endif //EMBPERL_XS_CLASSES

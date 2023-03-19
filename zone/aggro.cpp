@@ -27,9 +27,7 @@
 #include "entity.h"
 #include "mob.h"
 
-#ifdef BOTS
 #include "bot.h"
-#endif
 
 #include "map.h"
 #include "water_map.h"
@@ -43,7 +41,7 @@ void EntityList::DescribeAggro(Client *to_who, NPC *from_who, float d, bool verb
 	to_who->Message(
 		Chat::White,
 		fmt::format(
-			"Describing aggro for {} ({}).",
+			"Describing aggro for {}.",
 			to_who->GetTargetDescription(from_who)
 		).c_str()
 	);
@@ -818,14 +816,15 @@ type', in which case, the answer is yes.
 			}
 		}
 
-#ifdef BOTS
-		// this is HIGHLY inefficient
-		bool HasRuleDefined = false;
-		bool IsBotAttackAllowed = false;
-		IsBotAttackAllowed = Bot::IsBotAttackAllowed(mob1, mob2, HasRuleDefined);
-		if(HasRuleDefined)
-			return IsBotAttackAllowed;
-#endif //BOTS
+		if (RuleB(Bots, Enabled)) {
+			// this is HIGHLY inefficient
+			bool HasRuleDefined     = false;
+			bool IsBotAttackAllowed = false;
+			IsBotAttackAllowed = Bot::IsBotAttackAllowed(mob1, mob2, HasRuleDefined);
+			if (HasRuleDefined) {
+				return IsBotAttackAllowed;
+			}
+		}
 
 		// we fell through, now we swap the 2 mobs and run through again once more
 		tempmob = mob1;
@@ -905,10 +904,8 @@ bool Mob::IsBeneficialAllowed(Mob *target)
 			{
 				return false;
 			}
-#ifdef BOTS
 			else if(mob2->IsBot())
 				return true;
-#endif
 		}
 		else if(_NPC(mob1))
 		{
@@ -980,24 +977,28 @@ bool Mob::IsBeneficialAllowed(Mob *target)
 
 bool Mob::CombatRange(Mob* other, float fixed_size_mod, bool aeRampage)
 {
-	if(!other)
+	if (!other) {
 		return(false);
+	}
 
 	float size_mod = GetSize();
 	float other_size_mod = other->GetSize();
 
-	if(GetRace() == 49 || GetRace() == 158 || GetRace() == 196) //For races with a fixed size
+	if (GetRace() == RACE_LAVA_DRAGON_49 || GetRace() == RACE_WURM_158 || GetRace() == RACE_GHOST_DRAGON_196) { //For races with a fixed size
 		size_mod = 60.0f;
-	else if (size_mod < 6.0)
+	}
+	else if (size_mod < 6.0) {
 		size_mod = 8.0f;
+	}
 
-	if(other->GetRace() == 49 || other->GetRace() == 158 || other->GetRace() == 196) //For races with a fixed size
+	if (other->GetRace() == RACE_LAVA_DRAGON_49 || other->GetRace() == RACE_WURM_158 || other->GetRace() == RACE_GHOST_DRAGON_196) { //For races with a fixed size
 		other_size_mod = 60.0f;
-	else if (other_size_mod < 6.0)
+	}
+	else if (other_size_mod < 6.0) {
 		other_size_mod = 8.0f;
+	}
 
-	if (other_size_mod > size_mod)
-	{
+	if (other_size_mod > size_mod) {
 		size_mod = other_size_mod;
 	}
 
@@ -1011,11 +1012,11 @@ bool Mob::CombatRange(Mob* other, float fixed_size_mod, bool aeRampage)
 		size_mod *= size_mod * 4;
 	}
 
-	if (other->GetRace() == 184)		// Lord Vyemm and other velious dragons
+	if (other->GetRace() == RACE_VELIOUS_DRAGON_184)		// Lord Vyemm and other velious dragons
 	{
 		size_mod *= 1.75;
 	}
-	if (other->GetRace() == 122)		// Dracoliche in Fear.  Skeletal Dragon
+	if (other->GetRace() == RACE_DRAGON_SKELETON_122)		// Dracoliche in Fear.  Skeletal Dragon
 	{
 		size_mod *= 2.25;
 	}
@@ -1029,44 +1030,48 @@ bool Mob::CombatRange(Mob* other, float fixed_size_mod, bool aeRampage)
 	// improved playability and "you are too far away" while chasing
 	// a fleeing mob.  The Blind check is to make sure that this does not
 	// apply to disoriented fleeing mobs who need proximity to turn and fight.
-	if  (other->currently_fleeing && !other->IsBlind())
-	{
+	if  (other->currently_fleeing && !other->IsBlind()) {
 		size_mod *= 3;
 	}
 
 	// prevention of ridiculously sized hit boxes
-	if (size_mod > 10000)
+	if (size_mod > 10000) {
 		size_mod = size_mod / 7;
+	}
 
 	float _DistNoRoot = DistanceSquaredNoZ(m_Position, other->GetPosition());
 	float _zDist = m_Position.z - other->GetZ();
 	_zDist *= _zDist;
 
-	if (GetSpecialAbility(NPC_CHASE_DISTANCE)){
+	if (GetSpecialAbility(NPC_CHASE_DISTANCE)) {
 
 		bool DoLoSCheck = true;
 		float max_dist = static_cast<float>(GetSpecialAbilityParam(NPC_CHASE_DISTANCE, 0));
 		float min_distance = static_cast<float>(GetSpecialAbilityParam(NPC_CHASE_DISTANCE, 1));
 
-		if (GetSpecialAbilityParam(NPC_CHASE_DISTANCE, 2))
+		if (GetSpecialAbilityParam(NPC_CHASE_DISTANCE, 2)) {
 			DoLoSCheck = false; //Ignore line of sight check
+		}
 
-		if (max_dist == 1)
+		if (max_dist == 1) {
 			max_dist = 250.0f; //Default it to 250 if you forget to put a value
+		}
 
 		max_dist = max_dist * max_dist;
 
-		if (!min_distance)
+		if (!min_distance) {
 			min_distance = size_mod; //Default to melee range
-		else
+		} else {
 			min_distance = min_distance * min_distance;
+		}
 
-		if ((DoLoSCheck && CheckLastLosState()) && (_DistNoRoot >= min_distance && _DistNoRoot <= max_dist))
+		if ((DoLoSCheck && CheckLastLosState()) && (_DistNoRoot >= min_distance && _DistNoRoot <= max_dist)) {
 			SetPseudoRoot(true);
-		else
+		} else {
 			SetPseudoRoot(false);
+		}
 	}
-	if(aeRampage) {
+	if (aeRampage) {
 		float multiplyer = GetSize() * RuleR(Combat, AERampageSafeZone);
 		float ramp_range = (size_mod * multiplyer);
 		if (_DistNoRoot <= ramp_range) {
@@ -1372,11 +1377,19 @@ int32 Mob::CheckHealAggroAmount(uint16 spell_id, Mob *target, uint32 heal_possib
 			break;
 		}
 	}
-	if (GetOwner() && IsPet())
-		AggroAmount = AggroAmount * RuleI(Aggro, PetSpellAggroMod) / 100;
 
-	if (!ignore_default_buff && IsBuffSpell(spell_id) && IsBeneficialSpell(spell_id))
+	if (GetOwner() && IsPet()) {
+		AggroAmount = AggroAmount * RuleI(Aggro, PetSpellAggroMod) / 100;
+	}
+
+	if (!ignore_default_buff && IsBuffSpell(spell_id) && IsBeneficialSpell(spell_id)) {
 		AggroAmount = IsBardSong(spell_id) ? 2 : 9;
+	}
+
+	// overrides the hate (ex. Healing Splash), can be negative (but function will return 0).
+	if (spells[spell_id].hate_added != 0) {
+		AggroAmount = spells[spell_id].hate_added;
+	}
 
 	if (AggroAmount > 0) {
 		int HateMod = RuleI(Aggro, SpellAggroMod);
@@ -1385,7 +1398,7 @@ int32 Mob::CheckHealAggroAmount(uint16 spell_id, Mob *target, uint32 heal_possib
 		AggroAmount = (AggroAmount * HateMod) / 100;
 	}
 
-	return std::max(0, AggroAmount);
+	return std::max(0, AggroAmount + spells[spell_id].bonus_hate); //Bonus Hate from spells like Aurora of Morrow
 }
 
 void Mob::AddFeignMemory(Mob* attacker) {
@@ -1510,7 +1523,7 @@ bool Mob::PassCharismaCheck(Mob* caster, uint16 spell_id) {
 void Mob::RogueEvade(Mob *other)
 {
 	int64 amount = other->GetHateAmount(this) * zone->random.Int(40, 70) / 100;
-	other->SetHateAmountOnEnt(this, std::max((int64)100, amount));
+	other->SetHateAmountOnEnt(this, std::max(static_cast<int64>(100), amount));
 
 	return;
 }

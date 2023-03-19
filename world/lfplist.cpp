@@ -23,6 +23,7 @@
 #include "zonelist.h"
 
 #include "../common/misc_functions.h"
+#include "../common/classes.h"
 
 extern ClientList client_list;
 extern ZSList zoneserver_list;
@@ -32,7 +33,7 @@ GroupLFP::GroupLFP(uint32 inLeaderID) {
 	LeaderID = inLeaderID;
 	for (auto &member : Members) {
 		member.Name[0] = '\0';
-		member.Class = 0;
+		member.Class = NO_CLASS;
 		member.Level = 0;
 		member.Zone = 0;
 	}
@@ -76,7 +77,7 @@ void GroupLFP::SetDetails(ServerLFPUpdate_Struct *Update) {
 				Members[i].GuildID = CLE->GuildID();
 			}
 			else {
-				Members[i].Class = 0;
+				Members[i].Class = NO_CLASS;
 				Members[i].Level = 0;
 				Members[i].Zone = 0;
 				Members[i].GuildID = 0xFFFF;

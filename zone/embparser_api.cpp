@@ -26,7 +26,8 @@
 #include "../common/misc_functions.h"
 #include "../common/eqemu_logsys.h"
 
-#include "embparser.h"
+#include "dialogue_window.h"
+#include "embperl.h"
 #include "embxs.h"
 #include "entity.h"
 #include "expedition.h"
@@ -40,3233 +41,1485 @@
 extern Zone      *zone;
 extern QueryServ *QServ;
 
-/*
-
-Some useful perl API info:
-
-SvUV == string to unsigned value (char->ulong)
-SvIV == string to signed value (char->long)
-SvNV == string to real value (float,double)
-SvPV_nolen == string with no length restriction
-
-*/
-
 #ifdef EMBPERL_XS_CLASSES
 
 //Any creation of new Client objects gets the current quest Client
-XS(XS_Client_new);
-XS(XS_Client_new) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::Client::new()");
-	{
-		Client *RETVAL;
-
-		RETVAL = quest_manager.GetInitiator();
-		ST(0) = sv_newmortal();
-		if (RETVAL)
-			sv_setref_pv(ST(0), "Client", (void *) RETVAL);
-	}
-	XSRETURN(1);
+Client* Perl__Client_new()
+{
+	return quest_manager.GetInitiator();
 }
 
 //Any creation of new NPC objects gets the current quest NPC
-XS(XS_NPC_new);
-XS(XS_NPC_new) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::NPC::new()");
-	{
-		NPC *RETVAL;
-
-		RETVAL = quest_manager.GetNPC();
-		ST(0) = sv_newmortal();
-		if (RETVAL)
-			sv_setref_pv(ST(0), "NPC", (void *) RETVAL);
-	}
-	XSRETURN(1);
+NPC* Perl__NPC_new()
+{
+	return quest_manager.GetNPC();
 }
 
 //Any creation of new NPC objects gets the current quest NPC
-XS(XS_EntityList_new);
-XS(XS_EntityList_new) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::EntityList::new()");
-	{
-		EntityList *RETVAL;
-
-		RETVAL = &entity_list;
-		ST(0) = sv_newmortal();
-		if (RETVAL)
-			sv_setref_pv(ST(0), "EntityList", (void *) RETVAL);
-	}
-	XSRETURN(1);
+EntityList* Perl__EntityList_new()
+{
+	return &entity_list;
 }
 
 //Any creation of new inventory gets the curreny inventory
-XS(XS_Inventory_new);
-XS(XS_Inventory_new) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::Inventory::new()");
-
-	EQ::InventoryProfile* RETVAL;
-
-	RETVAL = quest_manager.GetInventory();
-	ST(0) = sv_newmortal();
-	if (RETVAL)
-		sv_setref_pv(ST(0), "Inventory", (void *) RETVAL);
-
-	XSRETURN(1);
+EQ::InventoryProfile* Perl__Inventory_new()
+{
+	return quest_manager.GetInventory();
 }
 
 //Any creation of new quest items gets the current quest item
-XS(XS_QuestItem_new);
-XS(XS_QuestItem_new) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::QuestItem::new()");
-
-	EQ::ItemInstance *RETVAL;
-
-	RETVAL = quest_manager.GetQuestItem();
-	ST(0) = sv_newmortal();
-	if (RETVAL)
-		sv_setref_pv(ST(0), "QuestItem", (void *) RETVAL);
-
-	XSRETURN(1);
+EQ::ItemInstance* Perl__QuestItem_new()
+{
+	return quest_manager.GetQuestItem();
 }
 
 //Any creation of new Spells gets the current Spell
-XS(XS_Spell_new);
-XS(XS_Spell_new) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::Spell::new()");
-
-	const SPDat_Spell_Struct* spell = quest_manager.GetQuestSpell();
-	ST(0) = sv_newmortal();
-	if (spell)
-		sv_setref_pv(ST(0), "Spell", (void *) spell);
-
-	XSRETURN(1);
-}
-
-//Any creation of new quest items gets the current quest item
-XS(XS_MobList_new);
-XS(XS_MobList_new) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::MobList::new()");
-
-	ListElement<Mob *> *RETVAL;
-
-	RETVAL = nullptr;
-	ST(0) = sv_newmortal();
-	if (RETVAL)
-		sv_setref_pv(ST(0), "MobList", (void *) RETVAL);
-
-	XSRETURN(1);
+SPDat_Spell_Struct* Perl__Spell_new()
+{
+	// should be safe, it's read only in perl (could also use proxy lika lua)
+	return const_cast<SPDat_Spell_Struct*>(quest_manager.GetQuestSpell());
 }
 
 #endif //EMBPERL_XS_CLASSES
 
 
-XS(XS__echo); // prototype to pass -Wmissing-prototypes
-XS(XS__echo) {
-	dXSARGS;
-
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::echo(int emote_color_id, string message)");
-
-	quest_manager.echo(SvUV(ST(0)), SvPV_nolen(ST(1)));
-
-	XSRETURN_EMPTY;
+void Perl__echo(int emote_color_id, const char* message)
+{
+	quest_manager.echo(emote_color_id, message);
 }
 
-XS(XS__say); // prototype to pass -Wmissing-prototypes
-XS(XS__say) {
-	dXSARGS;
-
+void Perl__say(const char* message)
+{
 	Journal::Options opts;
 	// we currently default to these
-	opts.speak_mode = Journal::SpeakMode::Say;
+	opts.speak_mode   = Journal::SpeakMode::Say;
 	opts.journal_mode = Journal::Mode::Log2;
-	opts.language = 0;
+	opts.language     = 0;
 	opts.message_type = Chat::NPCQuestSay;
-	if (items == 0 || items > 5) {
-		Perl_croak(aTHX_ "Usage: quest::say(string message, [int language_id], [int message_type], [int speak_mode], [int journal_mode])");
-	} else if (items == 2) {
-		opts.language = (int)SvIV(ST(1));
-	} else if (items == 3) {
-		opts.language = (int)SvIV(ST(1));
-		opts.message_type = (int)SvIV(ST(2));
-	} else if (items == 4) {
-		opts.language = (int)SvIV(ST(1));
-		opts.message_type = (int)SvIV(ST(2));
-		opts.speak_mode = (Journal::SpeakMode)SvIV(ST(3));
-	} else if (items == 5) {
-		opts.language = (int)SvIV(ST(1));
-		opts.message_type = (int)SvIV(ST(2));
-		opts.speak_mode = (Journal::SpeakMode)SvIV(ST(3));
-		opts.journal_mode = (Journal::Mode)SvIV(ST(4));
-	}
 
-	quest_manager.say(SvPV_nolen(ST(0)), opts);
-
-	XSRETURN_EMPTY;
+	quest_manager.say(message, opts);
 }
 
-XS(XS__me); // prototype to pass -Wmissing-prototypes
-XS(XS__me) {
-	dXSARGS;
+void Perl__say(const char* message, int language_id)
+{
+	Journal::Options opts;
+	opts.speak_mode   = Journal::SpeakMode::Say;
+	opts.journal_mode = Journal::Mode::Log2;
+	opts.language     = language_id;
+	opts.message_type = Chat::NPCQuestSay;
 
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::me(string message)");
-
-	quest_manager.me(SvPV_nolen(ST(0)));
-
-	XSRETURN_EMPTY;
+	quest_manager.say(message, opts);
 }
 
-XS(XS__summonitem); // prototype to pass -Wmissing-prototypes
-XS(XS__summonitem) {
-	dXSARGS;
-	if (items == 1)
-		quest_manager.summonitem(SvUV(ST(0)));
-	else if (items == 2)
-		quest_manager.summonitem(SvUV(ST(0)), SvUV(ST(1)));
-	else
-		Perl_croak(aTHX_ "Usage: quest::summonitem(int item_id, [int charges])");
-	XSRETURN_EMPTY;
+void Perl__say(const char* message, int language_id, int message_type)
+{
+	Journal::Options opts;
+	opts.speak_mode   = Journal::SpeakMode::Say;
+	opts.journal_mode = Journal::Mode::Log2;
+	opts.language     = language_id;
+	opts.message_type = message_type;
+
+	quest_manager.say(message, opts);
 }
 
-XS(XS__write);
-XS(XS__write) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::write(string file_name, string message)");
+void Perl__say(const char* message, int language_id, int message_type, int speak_mode)
+{
+	Journal::Options opts;
+	opts.speak_mode   = static_cast<Journal::SpeakMode>(speak_mode);
+	opts.journal_mode = Journal::Mode::Log2;
+	opts.language     = language_id;
+	opts.message_type = message_type;
 
-	char *file    = (char *) SvPV_nolen(ST(0));
-	char *message = (char *) SvPV_nolen(ST(1));
+	quest_manager.say(message, opts);
+}
 
+void Perl__say(const char* message, int language_id, int message_type, int speak_mode, int journal_mode)
+{
+	Journal::Options opts;
+	opts.speak_mode   = static_cast<Journal::SpeakMode>(speak_mode);
+	opts.journal_mode = static_cast<Journal::Mode>(journal_mode);
+	opts.language     = language_id;
+	opts.message_type = message_type;
+
+	quest_manager.say(message, opts);
+}
+
+void Perl__me(const char* message)
+{
+	quest_manager.me(message);
+}
+
+void Perl__summonitem(int item_id)
+{
+	quest_manager.summonitem(item_id);
+}
+
+void Perl__summonitem(int item_id, int charges)
+{
+	quest_manager.summonitem(item_id, charges);
+}
+
+void Perl__write(const char* file, const char* message)
+{
 	quest_manager.write(file, message);
-
-	XSRETURN_EMPTY;
 }
 
-XS(XS__spawn);
-XS(XS__spawn) {
-	dXSARGS;
-	if (items != 6)
-		Perl_croak(aTHX_ "Usage: quest::spawn(int npc_type_id, int grid_id, int int_unused, float x, float y, float z)");
-
-	uint16 RETVAL;
-	dXSTARG;
-
-	int  npc_type_id = (int) SvIV(ST(0));
-	int  grid_id     = (int) SvIV(ST(1));
-	int  int_unused  = (int) SvIV(ST(2));
-	auto position    = glm::vec4((float) SvNV(ST(3)), (float) SvNV(ST(4)), (float) SvNV(ST(5)), 0.0f);
-
-	Mob *r = quest_manager.spawn2(npc_type_id, grid_id, int_unused, position);
-	RETVAL = (r != nullptr) ? r->GetID() : 0;
-	XSprePUSH;
-	PUSHu((UV) RETVAL);
-
-	XSRETURN(1);
+int Perl__spawn(int npc_type_id, int grid_id, int unused, float x, float y, float z)
+{
+	auto position = glm::vec4(x, y, z, 0.0f);
+	Mob* mob = quest_manager.spawn2(npc_type_id, grid_id, unused, position);
+	return mob ? mob->GetID() : 0;
 }
 
-XS(XS__spawn2);
-XS(XS__spawn2) {
-	dXSARGS;
-	if (items != 7)
-		Perl_croak(aTHX_ "Usage: quest::spawn2(int npc_type_id, int grid_id, int int_unused, float x, float y, float z, float heading)");
-
-	uint16 RETVAL;
-	dXSTARG;
-
-	int  npc_type_id = (int) SvIV(ST(0));
-	int  grid_id     = (int) SvIV(ST(1));
-	int  int_unused  = (int) SvIV(ST(2));
-	auto position    = glm::vec4((float) SvNV(ST(3)), (float) SvNV(ST(4)), (float) SvNV(ST(5)), (float) SvNV(ST(6)));
-
-	Mob *r = quest_manager.spawn2(npc_type_id, grid_id, int_unused, position);
-	RETVAL = (r != nullptr) ? r->GetID() : 0;
-	XSprePUSH;
-	PUSHu((UV) RETVAL);
-
-	XSRETURN(1);
+int Perl__spawn2(int npc_type_id, int grid_id, int unused, float x, float y, float z, float heading)
+{
+	auto position = glm::vec4(x, y, z, heading);
+	Mob* mob = quest_manager.spawn2(npc_type_id, grid_id, unused, position);
+	return mob ? mob->GetID() : 0;
 }
 
-XS(XS__unique_spawn);
-XS(XS__unique_spawn) {
-	dXSARGS;
-	if (items != 6 && items != 7)
-		Perl_croak(aTHX_ "Usage: quest::unique_spawn(int npc_type_id, int grid_id, int int_unused, float x, float y, float z, [float heading])");
-
-	uint16 RETVAL;
-	dXSTARG;
-
-	int   npc_type_id = (int) SvIV(ST(0));
-	int   grid_id     = (int) SvIV(ST(1));
-	int   int_unused  = (int) SvIV(ST(2));
-	float x           = (float) SvNV(ST(3));
-	float y           = (float) SvNV(ST(4));
-	float z           = (float) SvNV(ST(5));
-	float heading     = 0;
-	if (items == 7)
-		heading = (float) SvNV(ST(6));
-
-	Mob *r = quest_manager.unique_spawn(npc_type_id, grid_id, int_unused, glm::vec4(x, y, z, heading));
-	RETVAL = (r != nullptr) ? r->GetID() : 0;
-
-	XSprePUSH;
-	PUSHu((UV) RETVAL);
-
-	XSRETURN(1);
+int Perl__unique_spawn(int npc_type_id, int grid_id, int unused, float x, float y, float z)
+{
+	auto position = glm::vec4(x, y, z, 0.0f);
+	Mob* mob = quest_manager.unique_spawn(npc_type_id, grid_id, unused, position);
+	return mob ? mob->GetID() : 0;
 }
 
-XS(XS__spawn_from_spawn2);
-XS(XS__spawn_from_spawn2) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::spawn_from_spawn2(int spawn2_id)");
-
-	uint16 RETVAL;
-	dXSTARG;
-
-	int spawn2_id = (int) SvIV(ST(0));
-
-	Mob *r = quest_manager.spawn_from_spawn2(spawn2_id);
-	RETVAL = (r != nullptr) ? r->GetID() : 0;
-
-	XSprePUSH;
-	PUSHu((UV) RETVAL);
-
-	XSRETURN(1);
+int Perl__unique_spawn(int npc_type_id, int grid_id, int unused, float x, float y, float z, float heading)
+{
+	auto position = glm::vec4(x, y, z, heading);
+	Mob* mob = quest_manager.unique_spawn(npc_type_id, grid_id, unused, position);
+	return mob ? mob->GetID() : 0;
 }
 
-XS(XS__enable_spawn2);
-XS(XS__enable_spawn2) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::enable_spawn2(int spawn2_id)");
+int Perl__spawn_from_spawn2(uint32_t spawn2_id)
+{
+	Mob* mob = quest_manager.spawn_from_spawn2(spawn2_id);
+	return mob ? mob->GetID() : 0;
+}
 
-	int spawn2_id = (int) SvIV(ST(0));
-
+void Perl__enable_spawn2(uint32_t spawn2_id)
+{
 	quest_manager.enable_spawn2(spawn2_id);
-	XSRETURN_EMPTY;
 }
 
-XS(XS__disable_spawn2);
-XS(XS__disable_spawn2) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::disable_spawn2(int spawn2_id)");
-
-	int spawn2_id = (int) SvIV(ST(0));
-
+void Perl__disable_spawn2(uint32_t spawn2_id)
+{
 	quest_manager.disable_spawn2(spawn2_id);
-	XSRETURN_EMPTY;
 }
 
-XS(XS__setstat);
-XS(XS__setstat) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::setstat(stat_id, int_value)");
-
-	int stat_id   = (int) SvIV(ST(0));
-	int int_value = (int) SvIV(ST(1));
-
+void Perl__setstat(int stat_id, int int_value)
+{
 	quest_manager.setstat(stat_id, int_value);
-
-	XSRETURN_EMPTY;
 }
 
-XS(XS__incstat);  //old setstat command aza
-XS(XS__incstat) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::incstat(int stat_id, int value)");
-
-	int stat_id   = (int) SvIV(ST(0));
-	int int_value = (int) SvIV(ST(1));
-
+void Perl__incstat(int stat_id, int int_value)
+{
 	quest_manager.incstat(stat_id, int_value);
-
-	XSRETURN_EMPTY;
 }
 
-XS(XS__getinventoryslotid);
-XS(XS__getinventoryslotid) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::getinventoryslotid(string identifier)");
+int Perl__getinventoryslotid(std::string identifier)
+{
+	int result = EQ::invslot::SLOT_INVALID;
 
-	int16 RETVAL = EQ::invslot::SLOT_INVALID;
-	dXSTARG;
-
-	std::string identifier = (Const_char *)SvPV_nolen(ST(0));
-	for (std::string::size_type i = 0; i < identifier.length(); ++i)
+	for (std::string::size_type i = 0; i < identifier.size(); ++i)
 		identifier[i] = std::tolower(identifier[i]);
 
 	if (identifier.find('.') == std::string::npos) {
-		if (identifier == "invalid")                    RETVAL = EQ::invslot::SLOT_INVALID;
-		else if (identifier == "charm")                 RETVAL = EQ::invslot::slotCharm;
-		else if (identifier == "ear1")                  RETVAL = EQ::invslot::slotEar1;
-		else if (identifier == "head")                  RETVAL = EQ::invslot::slotHead;
-		else if (identifier == "face")                  RETVAL = EQ::invslot::slotFace;
-		else if (identifier == "ear2")                  RETVAL = EQ::invslot::slotEar2;
-		else if (identifier == "neck")                  RETVAL = EQ::invslot::slotNeck;
-		else if (identifier == "shoulders")             RETVAL = EQ::invslot::slotShoulders;
-		else if (identifier == "arms")                  RETVAL = EQ::invslot::slotArms;
-		else if (identifier == "back")                  RETVAL = EQ::invslot::slotBack;
-		else if (identifier == "wrist1")                RETVAL = EQ::invslot::slotWrist1;
-		else if (identifier == "wrist2")                RETVAL = EQ::invslot::slotWrist2;
-		else if (identifier == "range")                 RETVAL = EQ::invslot::slotRange;
-		else if (identifier == "hands")                 RETVAL = EQ::invslot::slotHands;
-		else if (identifier == "primary")               RETVAL = EQ::invslot::slotPrimary;
-		else if (identifier == "secondary")             RETVAL = EQ::invslot::slotSecondary;
-		else if (identifier == "finger1")               RETVAL = EQ::invslot::slotFinger1;
-		else if (identifier == "finger2")               RETVAL = EQ::invslot::slotFinger2;
-		else if (identifier == "chest")                 RETVAL = EQ::invslot::slotChest;
-		else if (identifier == "legs")                  RETVAL = EQ::invslot::slotLegs;
-		else if (identifier == "feet")                  RETVAL = EQ::invslot::slotFeet;
-		else if (identifier == "waist")                 RETVAL = EQ::invslot::slotWaist;
-		else if (identifier == "powersource")           RETVAL = EQ::invslot::slotPowerSource;
-		else if (identifier == "ammo")                  RETVAL = EQ::invslot::slotAmmo;
-		else if (identifier == "general1")              RETVAL = EQ::invslot::slotGeneral1;
-		else if (identifier == "general2")              RETVAL = EQ::invslot::slotGeneral2;
-		else if (identifier == "general3")              RETVAL = EQ::invslot::slotGeneral3;
-		else if (identifier == "general4")              RETVAL = EQ::invslot::slotGeneral4;
-		else if (identifier == "general5")              RETVAL = EQ::invslot::slotGeneral5;
-		else if (identifier == "general6")              RETVAL = EQ::invslot::slotGeneral6;
-		else if (identifier == "general7")              RETVAL = EQ::invslot::slotGeneral7;
-		else if (identifier == "general8")              RETVAL = EQ::invslot::slotGeneral8;
-		else if (identifier == "general9")              RETVAL = EQ::invslot::slotGeneral9;
-		else if (identifier == "general10")             RETVAL = EQ::invslot::slotGeneral10;
-		else if (identifier == "cursor")                RETVAL = EQ::invslot::slotCursor;
-		else if (identifier == "tradeskill")            RETVAL = EQ::invslot::SLOT_TRADESKILL_EXPERIMENT_COMBINE;
-		else if (identifier == "augment")               RETVAL = EQ::invslot::SLOT_AUGMENT_GENERIC_RETURN;
+		if (identifier == "invalid")                    result = EQ::invslot::SLOT_INVALID;
+		else if (identifier == "charm")                 result = EQ::invslot::slotCharm;
+		else if (identifier == "ear1")                  result = EQ::invslot::slotEar1;
+		else if (identifier == "head")                  result = EQ::invslot::slotHead;
+		else if (identifier == "face")                  result = EQ::invslot::slotFace;
+		else if (identifier == "ear2")                  result = EQ::invslot::slotEar2;
+		else if (identifier == "neck")                  result = EQ::invslot::slotNeck;
+		else if (identifier == "shoulders")             result = EQ::invslot::slotShoulders;
+		else if (identifier == "arms")                  result = EQ::invslot::slotArms;
+		else if (identifier == "back")                  result = EQ::invslot::slotBack;
+		else if (identifier == "wrist1")                result = EQ::invslot::slotWrist1;
+		else if (identifier == "wrist2")                result = EQ::invslot::slotWrist2;
+		else if (identifier == "range")                 result = EQ::invslot::slotRange;
+		else if (identifier == "hands")                 result = EQ::invslot::slotHands;
+		else if (identifier == "primary")               result = EQ::invslot::slotPrimary;
+		else if (identifier == "secondary")             result = EQ::invslot::slotSecondary;
+		else if (identifier == "finger1")               result = EQ::invslot::slotFinger1;
+		else if (identifier == "finger2")               result = EQ::invslot::slotFinger2;
+		else if (identifier == "chest")                 result = EQ::invslot::slotChest;
+		else if (identifier == "legs")                  result = EQ::invslot::slotLegs;
+		else if (identifier == "feet")                  result = EQ::invslot::slotFeet;
+		else if (identifier == "waist")                 result = EQ::invslot::slotWaist;
+		else if (identifier == "powersource")           result = EQ::invslot::slotPowerSource;
+		else if (identifier == "ammo")                  result = EQ::invslot::slotAmmo;
+		else if (identifier == "general1")              result = EQ::invslot::slotGeneral1;
+		else if (identifier == "general2")              result = EQ::invslot::slotGeneral2;
+		else if (identifier == "general3")              result = EQ::invslot::slotGeneral3;
+		else if (identifier == "general4")              result = EQ::invslot::slotGeneral4;
+		else if (identifier == "general5")              result = EQ::invslot::slotGeneral5;
+		else if (identifier == "general6")              result = EQ::invslot::slotGeneral6;
+		else if (identifier == "general7")              result = EQ::invslot::slotGeneral7;
+		else if (identifier == "general8")              result = EQ::invslot::slotGeneral8;
+		else if (identifier == "general9")              result = EQ::invslot::slotGeneral9;
+		else if (identifier == "general10")             result = EQ::invslot::slotGeneral10;
+		else if (identifier == "cursor")                result = EQ::invslot::slotCursor;
+		else if (identifier == "tradeskill")            result = EQ::invslot::SLOT_TRADESKILL_EXPERIMENT_COMBINE;
+		else if (identifier == "augment")               result = EQ::invslot::SLOT_AUGMENT_GENERIC_RETURN;
 	}
 	else {
-		if (identifier == "possessions.begin")          RETVAL = EQ::invslot::POSSESSIONS_BEGIN;
-		else if (identifier == "possessions.end")       RETVAL = EQ::invslot::POSSESSIONS_END;
-		else if (identifier == "equipment.begin")       RETVAL = EQ::invslot::EQUIPMENT_BEGIN;
-		else if (identifier == "equipment.end")         RETVAL = EQ::invslot::EQUIPMENT_END;
-		else if (identifier == "general.begin")         RETVAL = EQ::invslot::GENERAL_BEGIN;
-		else if (identifier == "general.end")           RETVAL = EQ::invslot::GENERAL_END;
-		else if (identifier == "possessionsbags.begin") RETVAL = EQ::invbag::GENERAL_BAGS_BEGIN;
-		else if (identifier == "possessionsbags.end")   RETVAL = EQ::invbag::CURSOR_BAG_END;
-		else if (identifier == "generalbags.begin")     RETVAL = EQ::invbag::GENERAL_BAGS_BEGIN;
-		else if (identifier == "generalbags.end")       RETVAL = EQ::invbag::GENERAL_BAGS_END;
-		else if (identifier == "general1bag.begin")     RETVAL = EQ::invbag::GENERAL_BAGS_BEGIN;
-		else if (identifier == "general1bag.end")       RETVAL = EQ::invbag::GENERAL_BAGS_BEGIN + 9;
-		else if (identifier == "general2bag.begin")     RETVAL = EQ::invbag::GENERAL_BAGS_BEGIN + 10;
-		else if (identifier == "general2bag.end")       RETVAL = EQ::invbag::GENERAL_BAGS_BEGIN + 19;
-		else if (identifier == "general3bag.begin")     RETVAL = EQ::invbag::GENERAL_BAGS_BEGIN + 20;
-		else if (identifier == "general3bag.end")       RETVAL = EQ::invbag::GENERAL_BAGS_BEGIN + 29;
-		else if (identifier == "general4bag.begin")     RETVAL = EQ::invbag::GENERAL_BAGS_BEGIN + 30;
-		else if (identifier == "general4bag.end")       RETVAL = EQ::invbag::GENERAL_BAGS_BEGIN + 39;
-		else if (identifier == "general5bag.begin")     RETVAL = EQ::invbag::GENERAL_BAGS_BEGIN + 40;
-		else if (identifier == "general5bag.end")       RETVAL = EQ::invbag::GENERAL_BAGS_BEGIN + 49;
-		else if (identifier == "general6bag.begin")     RETVAL = EQ::invbag::GENERAL_BAGS_BEGIN + 50;
-		else if (identifier == "general6bag.end")       RETVAL = EQ::invbag::GENERAL_BAGS_BEGIN + 59;
-		else if (identifier == "general7bag.begin")     RETVAL = EQ::invbag::GENERAL_BAGS_BEGIN + 60;
-		else if (identifier == "general7bag.end")       RETVAL = EQ::invbag::GENERAL_BAGS_BEGIN + 69;
-		else if (identifier == "general8bag.begin")     RETVAL = EQ::invbag::GENERAL_BAGS_BEGIN + 70;
-		else if (identifier == "general8bag.end")       RETVAL = EQ::invbag::GENERAL_BAGS_BEGIN + 79;
-		else if (identifier == "general9bag.begin")     RETVAL = EQ::invbag::GENERAL_BAGS_BEGIN + 80;
-		else if (identifier == "general9bag.end")       RETVAL = EQ::invbag::GENERAL_BAGS_BEGIN + 89;
-		else if (identifier == "general10bag.begin")    RETVAL = EQ::invbag::GENERAL_BAGS_BEGIN + 90;
-		else if (identifier == "general10bag.end")      RETVAL = EQ::invbag::GENERAL_BAGS_BEGIN + 99;
-		else if (identifier == "cursorbag.begin")       RETVAL = EQ::invbag::CURSOR_BAG_BEGIN;
-		else if (identifier == "cursorbag.end")         RETVAL = EQ::invbag::CURSOR_BAG_END;
-		else if (identifier == "bank.begin")            RETVAL = EQ::invslot::BANK_BEGIN;
-		else if (identifier == "bank.end")              RETVAL = EQ::invslot::BANK_END;
-		else if (identifier == "bankbags.begin")        RETVAL = EQ::invbag::BANK_BAGS_BEGIN;
-		else if (identifier == "bankbags.end")          RETVAL = EQ::invbag::BANK_BAGS_END;
-		else if (identifier == "sharedbank.begin")      RETVAL = EQ::invslot::SHARED_BANK_BEGIN;
-		else if (identifier == "sharedbank.end")        RETVAL = EQ::invslot::SHARED_BANK_END;
-		else if (identifier == "sharedbankbags.begin")  RETVAL = EQ::invbag::SHARED_BANK_BAGS_BEGIN;
-		else if (identifier == "sharedbankbags.end")    RETVAL = EQ::invbag::SHARED_BANK_BAGS_END;
-		else if (identifier == "bagslot.begin")         RETVAL = EQ::invbag::SLOT_BEGIN;
-		else if (identifier == "bagslot.end")           RETVAL = EQ::invbag::SLOT_END;
-		else if (identifier == "augsocket.begin")       RETVAL = EQ::invaug::SOCKET_BEGIN;
-		else if (identifier == "augsocket.end")         RETVAL = EQ::invaug::SOCKET_END;
+		if (identifier == "possessions.begin")          result = EQ::invslot::POSSESSIONS_BEGIN;
+		else if (identifier == "possessions.end")       result = EQ::invslot::POSSESSIONS_END;
+		else if (identifier == "equipment.begin")       result = EQ::invslot::EQUIPMENT_BEGIN;
+		else if (identifier == "equipment.end")         result = EQ::invslot::EQUIPMENT_END;
+		else if (identifier == "general.begin")         result = EQ::invslot::GENERAL_BEGIN;
+		else if (identifier == "general.end")           result = EQ::invslot::GENERAL_END;
+		else if (identifier == "possessionsbags.begin") result = EQ::invbag::GENERAL_BAGS_BEGIN;
+		else if (identifier == "possessionsbags.end")   result = EQ::invbag::CURSOR_BAG_END;
+		else if (identifier == "generalbags.begin")     result = EQ::invbag::GENERAL_BAGS_BEGIN;
+		else if (identifier == "generalbags.end")       result = EQ::invbag::GENERAL_BAGS_END;
+		else if (identifier == "general1bag.begin")     result = EQ::invbag::GENERAL_BAGS_BEGIN;
+		else if (identifier == "general1bag.end")       result = EQ::invbag::GENERAL_BAGS_BEGIN + 9;
+		else if (identifier == "general2bag.begin")     result = EQ::invbag::GENERAL_BAGS_BEGIN + 10;
+		else if (identifier == "general2bag.end")       result = EQ::invbag::GENERAL_BAGS_BEGIN + 19;
+		else if (identifier == "general3bag.begin")     result = EQ::invbag::GENERAL_BAGS_BEGIN + 20;
+		else if (identifier == "general3bag.end")       result = EQ::invbag::GENERAL_BAGS_BEGIN + 29;
+		else if (identifier == "general4bag.begin")     result = EQ::invbag::GENERAL_BAGS_BEGIN + 30;
+		else if (identifier == "general4bag.end")       result = EQ::invbag::GENERAL_BAGS_BEGIN + 39;
+		else if (identifier == "general5bag.begin")     result = EQ::invbag::GENERAL_BAGS_BEGIN + 40;
+		else if (identifier == "general5bag.end")       result = EQ::invbag::GENERAL_BAGS_BEGIN + 49;
+		else if (identifier == "general6bag.begin")     result = EQ::invbag::GENERAL_BAGS_BEGIN + 50;
+		else if (identifier == "general6bag.end")       result = EQ::invbag::GENERAL_BAGS_BEGIN + 59;
+		else if (identifier == "general7bag.begin")     result = EQ::invbag::GENERAL_BAGS_BEGIN + 60;
+		else if (identifier == "general7bag.end")       result = EQ::invbag::GENERAL_BAGS_BEGIN + 69;
+		else if (identifier == "general8bag.begin")     result = EQ::invbag::GENERAL_BAGS_BEGIN + 70;
+		else if (identifier == "general8bag.end")       result = EQ::invbag::GENERAL_BAGS_BEGIN + 79;
+		else if (identifier == "general9bag.begin")     result = EQ::invbag::GENERAL_BAGS_BEGIN + 80;
+		else if (identifier == "general9bag.end")       result = EQ::invbag::GENERAL_BAGS_BEGIN + 89;
+		else if (identifier == "general10bag.begin")    result = EQ::invbag::GENERAL_BAGS_BEGIN + 90;
+		else if (identifier == "general10bag.end")      result = EQ::invbag::GENERAL_BAGS_BEGIN + 99;
+		else if (identifier == "cursorbag.begin")       result = EQ::invbag::CURSOR_BAG_BEGIN;
+		else if (identifier == "cursorbag.end")         result = EQ::invbag::CURSOR_BAG_END;
+		else if (identifier == "bank.begin")            result = EQ::invslot::BANK_BEGIN;
+		else if (identifier == "bank.end")              result = EQ::invslot::BANK_END;
+		else if (identifier == "bankbags.begin")        result = EQ::invbag::BANK_BAGS_BEGIN;
+		else if (identifier == "bankbags.end")          result = EQ::invbag::BANK_BAGS_END;
+		else if (identifier == "sharedbank.begin")      result = EQ::invslot::SHARED_BANK_BEGIN;
+		else if (identifier == "sharedbank.end")        result = EQ::invslot::SHARED_BANK_END;
+		else if (identifier == "sharedbankbags.begin")  result = EQ::invbag::SHARED_BANK_BAGS_BEGIN;
+		else if (identifier == "sharedbankbags.end")    result = EQ::invbag::SHARED_BANK_BAGS_END;
+		else if (identifier == "bagslot.begin")         result = EQ::invbag::SLOT_BEGIN;
+		else if (identifier == "bagslot.end")           result = EQ::invbag::SLOT_END;
+		else if (identifier == "augsocket.begin")       result = EQ::invaug::SOCKET_BEGIN;
+		else if (identifier == "augsocket.end")         result = EQ::invaug::SOCKET_END;
 	}
 
-	XSprePUSH;
-	PUSHi((IV) RETVAL);
-	XSRETURN(1);
+	return result;
 }
 
-XS(XS__castspell);
-XS(XS__castspell) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::castspell(int spell_id, int target_id)");
-
-	int spell_id  = (int) SvIV(ST(0));
-	int target_id = (int) SvIV(ST(1));
-
+void Perl__castspell(int spell_id, int target_id)
+{
 	quest_manager.castspell(spell_id, target_id);
-
-	XSRETURN_EMPTY;
 }
 
-XS(XS__selfcast);
-XS(XS__selfcast) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::selfcast(int spell_id)");
-
-	int spell_id = (int) SvIV(ST(0));
-
+void Perl__selfcast(int spell_id)
+{
 	quest_manager.selfcast(spell_id);
-
-	XSRETURN_EMPTY;
 }
 
-XS(XS__addloot);
-XS(XS__addloot) {
-	dXSARGS;
-	if (items < 1 || items > 3)
-		Perl_croak(aTHX_ "Usage: quest::addloot(uint32 item_id, uint16 charges = 0, [bool equip_item = true])");
-
-	uint32 item_id   = (uint32) SvUV(ST(0));
-	uint16 charges   = 0;
-	bool   equipitem = true;
-
-	if (items > 1)
-		charges   = (uint16) SvUV(ST(1));
-	if (items > 2)
-		equipitem = (bool) SvTRUE(ST(2));
-
-	quest_manager.addloot(item_id, charges, equipitem);
-
-	XSRETURN_EMPTY;
+void Perl__addloot(int item_id)
+{
+	quest_manager.addloot(item_id);
 }
 
-XS(XS__zone);
-XS(XS__zone) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::zone(string zone_name)");
+void Perl__addloot(int item_id, int charges)
+{
+	quest_manager.addloot(item_id, charges);
+}
 
-	char *zone_name = (char *) SvPV_nolen(ST(0));
+void Perl__addloot(int item_id, int charges, bool equip_item)
+{
+	quest_manager.addloot(item_id, charges, equip_item);
+}
 
+void Perl__zone(const char* zone_name)
+{
 	quest_manager.Zone(zone_name);
-
-	XSRETURN_EMPTY;
 }
 
-XS(XS__zonegroup);
-XS(XS__zonegroup) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::zonegroup(string zone_name)");
-
-	char *zone_name = (char *) SvPV_nolen(ST(0));
-
+void Perl__zonegroup(const char* zone_name)
+{
 	quest_manager.ZoneGroup(zone_name);
-
-	XSRETURN_EMPTY;
 }
 
-XS(XS__zoneraid);
-XS(XS__zoneraid) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::zoneraid(string zone_name)");
-
-	char *zone_name = (char *) SvPV_nolen(ST(0));
-
+void Perl__zoneraid(const char* zone_name)
+{
 	quest_manager.ZoneRaid(zone_name);
-
-	XSRETURN_EMPTY;
 }
 
-XS(XS__hastimer);
-XS(XS__hastimer) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::hastimer(string timer_name)");
-
-	bool RETVAL;
-	char *timer_name = (char *)SvPV_nolen(ST(0));
-
-	RETVAL = quest_manager.hastimer(timer_name);
-	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
+bool Perl__hastimer(const char* timer_name)
+{
+	return quest_manager.hastimer(timer_name);
 }
 
-XS(XS__getremainingtimeMS);
-XS(XS__getremainingtimeMS) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::getremainingtimeMS(string timer_name)");
-
-	uint32 RETVAL;
-	dXSTARG;
-	char *timer_name = (char *)SvPV_nolen(ST(0));
-
-	RETVAL = quest_manager.getremainingtimeMS(timer_name);
-
-	XSprePUSH;
-	PUSHu((UV) RETVAL);
-	XSRETURN(1);
+uint32_t Perl__getremainingtimeMS(const char* timer_name)
+{
+	return quest_manager.getremainingtimeMS(timer_name);
 }
 
-XS(XS__gettimerdurationMS);
-XS(XS__gettimerdurationMS) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::gettimerdurationMS(string timer_name)");
-
-	uint32 RETVAL;
-	dXSTARG;
-	char *timer_name = (char *)SvPV_nolen(ST(0));
-
-	RETVAL = quest_manager.gettimerdurationMS(timer_name);
-
-	XSprePUSH;
-	PUSHu((UV) RETVAL);
-	XSRETURN(1);
+uint32_t Perl__gettimerdurationMS(const char* timer_name)
+{
+	return quest_manager.gettimerdurationMS(timer_name);
 }
 
-XS(XS__settimer);
-XS(XS__settimer) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::settimer(string timer_name, int seconds)");
-
-	char *timer_name = (char *) SvPV_nolen(ST(0));
-	int  seconds     = (int) SvIV(ST(1));
-
+void Perl__settimer(const char* timer_name, int seconds)
+{
 	quest_manager.settimer(timer_name, seconds);
-
-	XSRETURN_EMPTY;
 }
 
-XS(XS__settimerMS);
-XS(XS__settimerMS) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::settimerMS(string timer_name, int milliseconds)");
-
-	char *timer_name  = (char *) SvPV_nolen(ST(0));
-	int  milliseconds = (int) SvIV(ST(1));
-
+void Perl__settimerMS(const char* timer_name, int milliseconds)
+{
 	quest_manager.settimerMS(timer_name, milliseconds);
-
-	XSRETURN_EMPTY;
 }
 
-XS(XS__stoptimer);
-XS(XS__stoptimer) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::stoptimer(string timer_name)");
-
-	char *timer_name = (char *) SvPV_nolen(ST(0));
-
+void Perl__stoptimer(const char* timer_name)
+{
 	quest_manager.stoptimer(timer_name);
-
-	XSRETURN_EMPTY;
 }
 
-XS(XS__stopalltimers);
-XS(XS__stopalltimers) {
-	dXSARGS;
-	if (items != 0)
-		Perl_croak(aTHX_ "Usage: quest::stopalltimers()");
-
+void Perl__stopalltimers()
+{
 	quest_manager.stopalltimers();
-
-	XSRETURN_EMPTY;
 }
 
-XS(XS__emote);
-XS(XS__emote) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::emote(string message)");
-
-	char *message = (char *) SvPV_nolen(ST(0));
-
+void Perl__emote(const char* message)
+{
 	quest_manager.emote(message);
-
-	XSRETURN_EMPTY;
 }
 
-XS(XS__shout);
-XS(XS__shout) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::shout(string message)");
-
-	char *message = (char *) SvPV_nolen(ST(0));
-
+void Perl__shout(const char* message)
+{
 	quest_manager.shout(message);
-
-	XSRETURN_EMPTY;
 }
 
-XS(XS__shout2);
-XS(XS__shout2) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::shout2(string message)");
-
-	char *message = (char *) SvPV_nolen(ST(0));
-
+void Perl__shout2(const char* message)
+{
 	quest_manager.shout2(message);
-
-	XSRETURN_EMPTY;
 }
 
-XS(XS__gmsay);
-XS(XS__gmsay) {
-	dXSARGS;
-	if ((items < 1) || (items > 5))
-		Perl_croak(aTHX_ "Usage: quest::gmsay(string message, [int color_id], [bool send_to_world = 0])");
+void Perl__gmsay(const char* message)
+{
+	quest_manager.gmsay(message, Chat::LightGray, false, 0, AccountStatus::QuestTroupe);
+}
 
-	char   *message      = (char *) SvPV_nolen(ST(0));
-	int    color_id      = 7;
-	bool   send_to_world = 0;
-	uint32 to_guilddbid  = 0;
-	uint16 to_minstatus  = 80;
+void Perl__gmsay(const char* message, int color_id)
+{
+	quest_manager.gmsay(message, color_id, false, 0, AccountStatus::QuestTroupe);
+}
 
-	if (items > 1) {
-		color_id = (int) SvIV(ST(1));
-	}
+void Perl__gmsay(const char* message, int color_id, bool send_to_world)
+{
+	quest_manager.gmsay(message, color_id, send_to_world, 0, AccountStatus::QuestTroupe);
+}
 
-	if (items > 2) {
-		send_to_world = ((int) SvIV(ST(2))) == 0 ? false : true;
-	}
+void Perl__gmsay(const char* message, int color_id, bool send_to_world, int to_guilddbid)
+{
+	quest_manager.gmsay(message, color_id, send_to_world, to_guilddbid, AccountStatus::QuestTroupe);
+}
 
-	if (items > 3)
-		to_guilddbid = (int) SvUV(ST(3));
-
-	if (items > 4)
-		to_minstatus = (int) SvUV(ST(4));
-
+void Perl__gmsay(const char* message, int color_id, bool send_to_world, int to_guilddbid, int to_minstatus)
+{
 	quest_manager.gmsay(message, color_id, send_to_world, to_guilddbid, to_minstatus);
-
-	XSRETURN_EMPTY;
 }
 
-XS(XS__depop);
-XS(XS__depop) {
-	dXSARGS;
-	if (items < 0 || items > 1)
-		Perl_croak(aTHX_ "Usage: quest::depop(int npc_type_id = 0)");
+void Perl__depop()
+{
+	quest_manager.depop();
+}
 
-	int npc_type_id;
-
-	if (items < 1)
-		npc_type_id = 0;
-	else
-		npc_type_id = (int) SvIV(ST(0));
-
-
+void Perl__depop(int npc_type_id)
+{
 	quest_manager.depop(npc_type_id);
-
-	XSRETURN_EMPTY;
 }
 
-XS(XS__depop_withtimer);
-XS(XS__depop_withtimer) {
-	dXSARGS;
-	if (items < 0 || items > 1)
-		Perl_croak(aTHX_ "Usage: quest::depop_withtimer(int npc_type_id = 0)");
+void Perl__depop_withtimer()
+{
+	quest_manager.depop_withtimer();
+}
 
-	int npc_type_id;
-
-	if (items < 1)
-		npc_type_id = 0;
-	else
-		npc_type_id = (int) SvIV(ST(0));
-
-
+void Perl__depop_withtimer(int npc_type_id)
+{
 	quest_manager.depop_withtimer(npc_type_id);
-
-	XSRETURN_EMPTY;
 }
 
-XS(XS__depopall);
-XS(XS__depopall) {
-	dXSARGS;
-	if (items < 0 || items > 1)
-		Perl_croak(aTHX_ "Usage: quest::depopall(int npc_type_id = 0)");
+void Perl__depopall()
+{
+	quest_manager.depopall();
+}
 
-	int npc_type_id;
-
-	if (items < 1)
-		npc_type_id = 0;
-	else
-		npc_type_id = (int) SvIV(ST(0));
-
-
+void Perl__depopall(int npc_type_id)
+{
 	quest_manager.depopall(npc_type_id);
-
-	XSRETURN_EMPTY;
 }
 
-XS(XS__settarget);
-XS(XS__settarget) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::settarget(string target_enum ['npc_type', 'entity'], int target_id)");
-
-	char *target_enum = (char *) SvPV_nolen(ST(0));
-	int  target_id    = (int) SvIV(ST(1));
-
+void Perl__settarget(const char* target_enum, int target_id)
+{
 	quest_manager.settarget(target_enum, target_id);
-
-	XSRETURN_EMPTY;
 }
 
-XS(XS__follow);
-XS(XS__follow) {
-	dXSARGS;
-	if (items != 1 && items != 2)
-		Perl_croak(aTHX_ "Usage: quest::follow(int entity_id, [int distance = 10])");
+void Perl__follow(int entity_id)
+{
+	quest_manager.follow(entity_id, 10);
+}
 
-	int entity_id = (int) SvIV(ST(0));
-	int distance;
-
-	if (items == 2)
-		distance = (int) SvIV(ST(1));
-	else
-		distance = 10;
-
+void Perl__follow(int entity_id, int distance)
+{
 	quest_manager.follow(entity_id, distance);
-
-	XSRETURN_EMPTY;
 }
 
-XS(XS__sfollow);
-XS(XS__sfollow) {
-	dXSARGS;
-	if (items != 0)
-		Perl_croak(aTHX_ "Usage: quest::sfollow()");
-
-
+void Perl__sfollow()
+{
 	quest_manager.sfollow();
-
-	XSRETURN_EMPTY;
 }
 
-XS(XS__changedeity);
-XS(XS__changedeity) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::changedeity(int deity_id)");
-
-	int deity_id = (int) SvIV(ST(0));
-
+void Perl__changedeity(int deity_id)
+{
 	quest_manager.changedeity(deity_id);
-
-	XSRETURN_EMPTY;
 }
 
-XS(XS__exp);
-XS(XS__exp) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::exp(int amount)");
-
-	int amt = (int) SvIV(ST(0));
-
-	quest_manager.exp(amt);
-
-	XSRETURN_EMPTY;
+void Perl__exp(int amount)
+{
+	quest_manager.exp(amount);
 }
 
-XS(XS__level);
-XS(XS__level) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::level(int new_level)");
-
-	int newlevel = (int) SvIV(ST(0));
-
-	quest_manager.level(newlevel);
-
-	XSRETURN_EMPTY;
+void Perl__level(int new_level)
+{
+	quest_manager.level(new_level);
 }
 
-XS(XS__traindisc);
-XS(XS__traindisc) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::traindisc(int tome_item_id)");
-
-	int discipline_tome_item_id = (int) SvIV(ST(0));
-
-	quest_manager.traindisc(discipline_tome_item_id);
-
-	XSRETURN_EMPTY;
+void Perl__traindisc(int tome_item_id)
+{
+	quest_manager.traindisc(tome_item_id);
 }
 
-XS(XS__isdisctome);
-XS(XS__isdisctome) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::isdisctome(int item_id)");
-
-	bool RETVAL;
-	int  item_id = (int) SvIV(ST(0));
-
-	RETVAL = quest_manager.isdisctome(item_id);
-	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
+bool Perl__isdisctome(int item_id)
+{
+	return quest_manager.isdisctome(item_id);
 }
 
-XS(XS__getracename);
-XS(XS__getracename) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::getracename(uint16 race_id)");
-
-	dXSTARG;
-	uint16 race_id = (int) SvIV(ST(0));
-	std::string race_name = quest_manager.getracename(race_id);
-
-	sv_setpv(TARG, race_name.c_str());
-	XSprePUSH;
-	PUSHTARG;
-	XSRETURN(1);
+std::string Perl__getracename(uint16 race_id)
+{
+	return quest_manager.getracename(race_id);
 }
 
-XS(XS__getspellname);
-XS(XS__getspellname) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::getspellname(uint32 spell_id)");
-
-	dXSTARG;
-	uint32 spell_id = (int) SvIV(ST(0));
-	std::string spell_name = quest_manager.getspellname(spell_id);
-
-	sv_setpv(TARG, spell_name.c_str());
-	XSprePUSH;
-	PUSHTARG;
-	XSRETURN(1);
+std::string Perl__getspellname(uint32 spell_id)
+{
+	return quest_manager.getspellname(spell_id);
 }
 
-XS(XS__get_spell_level);
-XS(XS__get_spell_level) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::get_spell_level(uint16 spell_id, uint8 class_id)");
-
-	dXSTARG;
-	uint16 spell_id = (int)SvIV(ST(0));
-	uint8 class_id = (int)SvIV(ST(1));
-	uint8 spell_level = IsValidSpell(spell_id) ? GetSpellLevel(spell_id, class_id) : 0;
-	uint8 server_max_level = RuleI(Character, MaxLevel);
-
-	if (spell_level && spell_level > server_max_level)
-		spell_level = 0;
-
-	XSprePUSH;
-	PUSHu((UV)spell_level);
-
-	XSRETURN(1);
+int Perl__get_spell_level(uint32_t spell_id, int class_id)
+{
+	int spell_level = IsValidSpell(spell_id) ? GetSpellLevel(spell_id, class_id) : 0;
+	return (spell_level > RuleI(Character, MaxLevel)) ? 0 : spell_level;
 }
 
-XS(XS__getskillname);
-XS(XS__getskillname) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::getskillname(int skill_id)");
-
-	dXSTARG;
-	int skill_id = (int) SvIV(ST(0));
-	std::string skill_name = quest_manager.getskillname(skill_id);
-
-	sv_setpv(TARG, skill_name.c_str());
-	XSprePUSH;
-	PUSHTARG;
-	XSRETURN(1);
+std::string Perl__getskillname(int skill_id)
+{
+	return quest_manager.getskillname(skill_id);
 }
 
-XS(XS__safemove);
-XS(XS__safemove) {
-	dXSARGS;
-	if (items != 0)
-		Perl_croak(aTHX_ "Usage: quest::safemove()");
-
-
+void Perl__safemove()
+{
 	quest_manager.safemove();
-
-	XSRETURN_EMPTY;
 }
 
-XS(XS__rain);
-XS(XS__rain) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::rain(int weather)");
-
-	int weather = (int) SvIV(ST(0));
-
+void Perl__rain(int weather)
+{
 	quest_manager.rain(weather);
-
-	XSRETURN_EMPTY;
 }
 
-XS(XS__snow);
-XS(XS__snow) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::snow(int weather)");
-
-	int weather = (int) SvIV(ST(0));
-
+void Perl__snow(int weather)
+{
 	quest_manager.snow(weather);
-
-	XSRETURN_EMPTY;
 }
 
-XS(XS__surname);
-XS(XS__surname) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::surname(string name)");
-
-	char *name = (char *) SvPV_nolen(ST(0));
-
-	quest_manager.surname(name);
-
-	XSRETURN_EMPTY;
+void Perl__surname(std::string last_name)
+{
+	quest_manager.surname(last_name);
 }
 
-XS(XS__permaclass);
-XS(XS__permaclass) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::permaclass(int class_id)");
-
-	int class_id = (int) SvIV(ST(0));
-
+void Perl__permaclass(int class_id)
+{
 	quest_manager.permaclass(class_id);
-
-	XSRETURN_EMPTY;
 }
 
-XS(XS__permarace);
-XS(XS__permarace) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::permarace(int race_id)");
-
-	int race_id = (int) SvIV(ST(0));
-
+void Perl__permarace(int race_id)
+{
 	quest_manager.permarace(race_id);
-
-	XSRETURN_EMPTY;
 }
 
-XS(XS__permagender);
-XS(XS__permagender) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::permagender(int gender_id)");
-
-	int gender_id = (int) SvIV(ST(0));
-
+void Perl__permagender(int gender_id)
+{
 	quest_manager.permagender(gender_id);
-
-	XSRETURN_EMPTY;
 }
 
-XS(XS__scribespells);
-XS(XS__scribespells) {
-	dXSARGS;
-	if (items < 1)
-		Perl_croak(aTHX_ "Usage: quest::scribespells(int max_level, [int min_level = 1])");
-
-	uint16 RETVAL;
-	dXSTARG;
-
-	uint8 max_level = (uint8) SvIV(ST(0));
-	uint8 min_level = (uint8) SvIV(ST(1));
-
-	if (min_level)
-		RETVAL = quest_manager.scribespells(max_level, min_level);
-	else
-		RETVAL = quest_manager.scribespells(max_level);
-
-	XSprePUSH;
-	PUSHu((UV) RETVAL);
-	XSRETURN(1);
+int Perl__scribespells(int max_level)
+{
+	return quest_manager.scribespells(max_level);
 }
 
-XS(XS__traindiscs);
-XS(XS__traindiscs) {
-	dXSARGS;
-	if (items < 1)
-		Perl_croak(aTHX_ "Usage: quest::traindiscs(int max_level, [int min_level = 1])");
-
-	uint16 RETVAL;
-	dXSTARG;
-
-	uint8 max_level = (uint8) SvIV(ST(0));
-	uint8 min_level = (uint8) SvIV(ST(1));
-
-	if (min_level)
-		RETVAL = quest_manager.traindiscs(max_level, min_level);
-	else
-		RETVAL = quest_manager.traindiscs(max_level);
-
-	XSprePUSH;
-	PUSHu((UV) RETVAL);
-	XSRETURN(1);
+int Perl__scribespells(int max_level, int min_level)
+{
+	return quest_manager.scribespells(max_level, min_level);
 }
 
-XS(XS__unscribespells);
-XS(XS__unscribespells) {
-	dXSARGS;
-	if (items != 0)
-		Perl_croak(aTHX_ "Usage: quest::unscribespells()");
+int Perl__traindiscs(int max_level)
+{
+	return quest_manager.traindiscs(max_level);
+}
 
+int Perl__traindiscs(int max_level, int min_level)
+{
+	return quest_manager.traindiscs(max_level, min_level);
+}
 
+void Perl__unscribespells()
+{
 	quest_manager.unscribespells();
-
-	XSRETURN_EMPTY;
 }
 
-XS(XS__untraindiscs);
-XS(XS__untraindiscs) {
-	dXSARGS;
-	if (items != 0)
-		Perl_croak(aTHX_ "Usage: quest::untraindiscs()");
-
-
+void Perl__untraindiscs()
+{
 	quest_manager.untraindiscs();
-
-	XSRETURN_EMPTY;
 }
 
-XS(XS__givecash);
-XS(XS__givecash) {
-	dXSARGS;
-	if (items != 4)
-		Perl_croak(aTHX_ "Usage: quest::givecash(int copper, int silver, int gold, int platinum)");
+void Perl__givecash(uint32 copper)
+{
+	quest_manager.givecash(copper);
+}
 
-	int copper   = (int) SvIV(ST(0));
-	int silver   = (int) SvIV(ST(1));
-	int gold     = (int) SvIV(ST(2));
-	int platinum = (int) SvIV(ST(3));
+void Perl__givecash(uint32 copper, uint32 silver)
+{
+	quest_manager.givecash(copper, silver);
+}
 
+void Perl__givecash(uint32 copper, uint32 silver, uint32 gold)
+{
+	quest_manager.givecash(copper, silver, gold);
+}
+
+void Perl__givecash(uint32 copper, uint32 silver, uint32 gold, uint32 platinum)
+{
 	quest_manager.givecash(copper, silver, gold, platinum);
-
-	XSRETURN_EMPTY;
 }
 
-XS(XS__pvp);
-XS(XS__pvp) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::pvp(string mode [on|off])");
-
-	char *mode = (char *) SvPV_nolen(ST(0));
-
+void Perl__pvp(const char* mode)
+{
 	quest_manager.pvp(mode);
-
-	XSRETURN_EMPTY;
 }
 
-XS(XS__movepc);
-XS(XS__movepc) {
-	dXSARGS;
-	if (items != 4 && items != 5)
-		Perl_croak(aTHX_ "Usage: quest::movepc(int zone_id, float x, float y, float z [float heading])");
-
-	int   zone_id = (int) SvIV(ST(0));
-	float x       = (float) SvNV(ST(1));
-	float y       = (float) SvNV(ST(2));
-	float z       = (float) SvNV(ST(3));
-
-	if (items == 4)
-
-		quest_manager.movepc(zone_id, x, y, z, 0.0f);
-
-	else {
-		float heading = (float) SvNV(ST(4));
-		quest_manager.movepc(zone_id, x, y, z, heading);
-	}
-
-	XSRETURN_EMPTY;
+void Perl__movepc(int zone_id, float x, float y, float z)
+{
+	quest_manager.movepc(zone_id, x, y, z, 0.0f);
 }
 
-XS(XS__gmmove);
-XS(XS__gmmove) {
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: quest::gmmove(float x, float y, float z)");
+void Perl__movepc(int zone_id, float x, float y, float z, float heading)
+{
+	quest_manager.movepc(zone_id, x, y, z, heading);
+}
 
-	float x = (float) SvNV(ST(0));
-	float y = (float) SvNV(ST(1));
-	float z = (float) SvNV(ST(2));
-
+void Perl__gmmove(float x, float y, float z)
+{
 	quest_manager.gmmove(x, y, z);
-
-	XSRETURN_EMPTY;
 }
 
-XS(XS__movegrp);
-XS(XS__movegrp) {
-	dXSARGS;
-	if (items != 4)
-		Perl_croak(aTHX_ "Usage: quest::movegrp(int zone_id, float x, float y, float z)");
-
-	int   zone_id = (int) SvIV(ST(0));
-	float x       = (float) SvNV(ST(1));
-	float y       = (float) SvNV(ST(2));
-	float z       = (float) SvNV(ST(3));
-
+void Perl__movegrp(int zone_id, float x, float y, float z)
+{
 	quest_manager.movegrp(zone_id, x, y, z);
-
-	XSRETURN_EMPTY;
 }
 
-XS(XS__doanim);
-XS(XS__doanim) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::doanim(int animation_id)");
-
-	int anim_id = (int) SvIV(ST(0));
-
-	quest_manager.doanim(anim_id);
-
-	XSRETURN_EMPTY;
+void Perl__doanim(int animation_id)
+{
+	quest_manager.doanim(animation_id);
 }
 
-XS(XS__addskill);
-XS(XS__addskill) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::addskill(int skill_id, int value)");
-
-	int skill_id  = (int) SvIV(ST(0));
-	int int_value = (int) SvIV(ST(1));
-
-	quest_manager.addskill(skill_id, int_value);
-
-	XSRETURN_EMPTY;
+void Perl__doanim(int animation_id, int animation_speed)
+{
+	quest_manager.doanim(animation_id, animation_speed);
 }
 
-XS(XS__setlanguage);
-XS(XS__setlanguage) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::setlanguage(int skill_id, int value)");
-
-	int skill_id  = (int) SvIV(ST(0));
-	int int_value = (int) SvIV(ST(1));
-
-	quest_manager.setlanguage(skill_id, int_value);
-
-	XSRETURN_EMPTY;
+void Perl__doanim(int animation_id, int animation_speed, bool ackreq)
+{
+	quest_manager.doanim(animation_id, animation_speed, ackreq);
 }
 
-XS(XS__setskill);
-XS(XS__setskill) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::setskill(int skill_id, int value)");
-
-	int skill_id  = (int) SvIV(ST(0));
-	int int_value = (int) SvIV(ST(1));
-
-	quest_manager.setskill(skill_id, int_value);
-
-	XSRETURN_EMPTY;
+void Perl__doanim(int animation_id, int animation_speed, bool ackreq, int filter)
+{
+	quest_manager.doanim(animation_id, animation_speed, ackreq, static_cast<eqFilterType>(filter));
 }
 
-XS(XS__setallskill);
-XS(XS__setallskill) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::setallskill(int value)");
-
-	int int_value = (int) SvIV(ST(0));
-
-	quest_manager.setallskill(int_value);
-
-	XSRETURN_EMPTY;
+void Perl__addskill(int skill_id, int value)
+{
+	quest_manager.addskill(skill_id, value);
 }
 
-XS(XS__attack);
-XS(XS__attack) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::attack(string client_name)");
+void Perl__setlanguage(int skill_id, int value)
+{
+	quest_manager.setlanguage(skill_id, value);
+}
 
-	char *client_name = (char *) SvPV_nolen(ST(0));
+void Perl__setskill(int skill_id, int value)
+{
+	quest_manager.setskill(skill_id, value);
+}
 
+void Perl__setallskill(int value)
+{
+	quest_manager.setallskill(value);
+}
+
+void Perl__attack(const char* client_name)
+{
 	quest_manager.attack(client_name);
-
-	XSRETURN_EMPTY;
 }
 
-XS(XS__attacknpc);
-XS(XS__attacknpc) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::attacknpc(int npc_entity_id)");
-
-	int npc_entity_id = (int) SvIV(ST(0));
-
+void Perl__attacknpc(int npc_entity_id)
+{
 	quest_manager.attacknpc(npc_entity_id);
-
-	XSRETURN_EMPTY;
 }
 
-XS(XS__attacknpctype);
-XS(XS__attacknpctype) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::attacknpctype(int npc_type_id)");
-
-	int npc_type_id = (int) SvIV(ST(0));
-
+void Perl__attacknpctype(int npc_type_id)
+{
 	quest_manager.attacknpctype(npc_type_id);
-
-	XSRETURN_EMPTY;
 }
 
-XS(XS__save);
-XS(XS__save) {
-	dXSARGS;
-	if (items != 0)
-		Perl_croak(aTHX_ "Usage: quest::save()");
-
-
+void Perl__save()
+{
 	quest_manager.save();
-
-	XSRETURN_EMPTY;
 }
 
-XS(XS__faction);
-XS(XS__faction) {
-	dXSARGS;
-	if (items < 2 || items > 3)
-		Perl_croak(aTHX_ "Usage: quest::faction(int faction_id, int value, [int temp = 0])");
-
-	int faction_id = (int) SvIV(ST(0));
-	int int_value  = (int) SvIV(ST(1));
-	int temp;
-
-	if (items == 2)
-		temp = 0;
-	else
-		temp = (int) SvIV(ST(2));
-
-	quest_manager.faction(faction_id, int_value, temp);
-
-	XSRETURN_EMPTY;
+void Perl__faction(int faction_id, int value)
+{
+	quest_manager.faction(faction_id, value, 0);
 }
 
-XS(XS__setsky);
-XS(XS__setsky) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::setsky(uint8 sky)");
+void Perl__faction(int faction_id, int value, int temp)
+{
+	quest_manager.faction(faction_id, value, temp);
+}
 
-	unsigned char new_sky = (unsigned char) SvUV(ST(0));
+void Perl__rewardfaction(int faction_id, int value)
+{
+	quest_manager.rewardfaction(faction_id, value);
+}
 
+void Perl__setsky(uint8 new_sky)
+{
 	quest_manager.setsky(new_sky);
-
-	XSRETURN_EMPTY;
 }
 
-XS(XS__setguild);
-XS(XS__setguild) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::setguild(int guild_id, int guild_rank_id)");
-
-	unsigned long new_guild_id  = (unsigned long) SvUV(ST(0));
-	int           guild_rank_id = (int) SvIV(ST(1));
-
-	quest_manager.setguild(new_guild_id, guild_rank_id);
-
-	XSRETURN_EMPTY;
+void Perl__setguild(uint32_t guild_id, uint8_t guild_rank_id)
+{
+	quest_manager.setguild(guild_id, guild_rank_id);
 }
 
-XS(XS__createguild);
-XS(XS__createguild) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::createguild(string guild_name, string leader_name)");
-
-	char *guild_name  = (char *) SvPV_nolen(ST(0));
-	char *leader_name = (char *) SvPV_nolen(ST(1));
-
+void Perl__createguild(const char* guild_name, const char* leader_name)
+{
 	quest_manager.CreateGuild(guild_name, leader_name);
-
-	XSRETURN_EMPTY;
 }
 
-XS(XS__settime);
-XS(XS__settime) {
-	dXSARGS;
-	if (items < 2)
-		Perl_croak(aTHX_ "Usage: quest::settime(int new_hour, int new_min, [bool update_world = true])");
-
-	if (items == 2) {
-		int new_hour = (int) SvIV(ST(0));
-		int new_min  = (int) SvIV(ST(1));
-		quest_manager.settime(new_hour, new_min, true);
-	} else if (items == 3) {
-		int new_hour = (int) SvIV(ST(0));
-		int new_min  = (int) SvIV(ST(1));
-
-		int update_world = (int) SvIV(ST(2));
-		if (update_world == 1) {
-			quest_manager.settime(new_hour, new_min, true);
-		} else {
-			quest_manager.settime(new_hour, new_min, false);
-		}
-	}
-
-	XSRETURN_EMPTY;
+void Perl__settime(int new_hour, int new_min)
+{
+	quest_manager.settime(new_hour, new_min);
 }
 
-XS(XS__itemlink);
-XS(XS__itemlink) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::itemlink(int item_id)");
+void Perl__settime(int new_hour, int new_min, bool update_world)
+{
+	quest_manager.settime(new_hour, new_min, update_world);
+}
 
-	int item_id = (int) SvIV(ST(0));
-
+void Perl__itemlink(int item_id)
+{
 	quest_manager.itemlink(item_id);
-
-	XSRETURN_EMPTY;
 }
 
-XS(XS__signalwith);
-XS(XS__signalwith) {
-	dXSARGS;
-
-	if (items == 2) {
-		int npc_id    = (int) SvIV(ST(0));
-		int signal_id = (int) SvIV(ST(1));
-		quest_manager.signalwith(npc_id, signal_id);
-	} else if (items == 3) {
-		int npc_id    = (int) SvIV(ST(0));
-		int signal_id = (int) SvIV(ST(1));
-		int wait      = (int) SvIV(ST(2));
-		quest_manager.signalwith(npc_id, signal_id, wait);
-	} else {
-		Perl_croak(aTHX_ "Usage: quest::signalwith(int npc_id, int signal_id, [int wait_ms])");
-	}
-
-	XSRETURN_EMPTY;
+void Perl__signalwith(int npc_id, int signal_id)
+{
+	quest_manager.signalwith(npc_id, signal_id);
 }
 
-XS(XS__signal);
-XS(XS__signal) {
-	dXSARGS;
-
-	if (items == 1) {
-		int npc_id = (int) SvIV(ST(0));
-		quest_manager.signal(npc_id);
-	} else if (items == 2) {
-		int npc_id = (int) SvIV(ST(0));
-		int wait   = (int) SvIV(ST(1));
-		quest_manager.signal(npc_id, wait);
-	} else {
-		Perl_croak(aTHX_ "Usage: quest::signal(int npc_id, [int wait_ms])");
-	}
-
-	XSRETURN_EMPTY;
+void Perl__signalwith(int npc_id, int signal_id, int wait_ms)
+{
+	quest_manager.signalwith(npc_id, signal_id, wait_ms);
 }
 
-XS(XS__setglobal);
-XS(XS__setglobal) {
-	dXSARGS;
-	if (items != 4)
-		Perl_croak(aTHX_ "Usage: quest::setglobal(stirng key, string value, int options, string duration)");
-
-	char *key       = (char *) SvPV_nolen(ST(0));
-	char *str_value = (char *) SvPV_nolen(ST(1));
-	int  options    = (int) SvIV(ST(2));
-	char *duration  = (char *) SvPV_nolen(ST(3));
-
-	quest_manager.setglobal(key, str_value, options, duration);
-
-	XSRETURN_EMPTY;
+void Perl__signal(int npc_id)
+{
+	quest_manager.signal(npc_id);
 }
 
-XS(XS__targlobal);
-XS(XS__targlobal) {
-	dXSARGS;
-	if (items != 6)
-		Perl_croak(aTHX_ "Usage: quest::targlobal(stirng key, string value, string duration, int npc_id, int chararacter_id, int zone_id)");
-
-	char *key       = (char *) SvPV_nolen(ST(0));
-	char *str_value = (char *) SvPV_nolen(ST(1));
-	char *duration  = (char *) SvPV_nolen(ST(2));
-	int  npc_id     = (int) SvIV(ST(3));
-	int  char_id    = (int) SvIV(ST(4));
-	int  zone_id    = (int) SvIV(ST(5));
-
-	quest_manager.targlobal(key, str_value, duration, npc_id, char_id, zone_id);
-
-	XSRETURN_EMPTY;
+void Perl__signal(int npc_id, int wait_ms)
+{
+	quest_manager.signal(npc_id, wait_ms);
 }
 
-XS(XS__delglobal);
-XS(XS__delglobal) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::delglobal(string key)");
+void Perl__setglobal(const char* key, const char* value, int options, const char* duration)
+{
+	quest_manager.setglobal(key, value, options, duration);
+}
 
-	char *key = (char *) SvPV_nolen(ST(0));
+void Perl__targlobal(const char* key, const char* value, const char* duration, int npc_id, int char_id, int zone_id)
+{
+	quest_manager.targlobal(key, value, duration, npc_id, char_id, zone_id);
+}
 
+void Perl__delglobal(const char* key)
+{
 	quest_manager.delglobal(key);
-
-	XSRETURN_EMPTY;
 }
 
-XS(XS__ding);
-XS(XS__ding) {
-	dXSARGS;
-	if (items != 0)
-		Perl_croak(aTHX_ "Usage: quest::ding()");
-
-
+void Perl__ding()
+{
 	quest_manager.ding();
-
-	XSRETURN_EMPTY;
 }
 
-XS(XS__rebind);
-XS(XS__rebind) {
-	dXSARGS;
-	if (items < 4 || items > 5)
-		Perl_croak(aTHX_ "Usage: quest::rebind(int zone_id, float x, float y, float z, [float heading])");
-
-	int zone_id = (int) SvIV(ST(0));
-	float target_x = (float) SvNV(ST(1));
-	float target_y = (float) SvNV(ST(2));
-	float target_z = (float) SvNV(ST(3));
-	if (items > 4) {
-		float target_heading = (float) SvNV(ST(4));
-		quest_manager.rebind(zone_id, glm::vec4(target_x, target_y, target_z, target_heading));
-	} else {
-		quest_manager.rebind(zone_id, glm::vec3(target_x, target_y, target_z));
-	}
-	XSRETURN_EMPTY;
+void Perl__rebind(int zone_id, float x, float y, float z)
+{
+	quest_manager.rebind(zone_id, glm::vec3(x, y, z));
 }
 
-XS(XS__start);
-XS(XS__start) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::start(int waypoint)");
-
-	int wp = (int) SvIV(ST(0));
-
-	quest_manager.start(wp);
-
-	XSRETURN_EMPTY;
+void Perl__rebind(int zone_id, float x, float y, float z, float heading)
+{
+	quest_manager.rebind(zone_id, glm::vec4(x, y, z, heading));
 }
 
-XS(XS__stop);
-XS(XS__stop) {
-	dXSARGS;
-	if (items != 0)
-		Perl_croak(aTHX_ "Usage: quest::stop()");
+void Perl__start(int waypoint)
+{
+	quest_manager.start(waypoint);
+}
 
-
+void Perl__stop()
+{
 	quest_manager.stop();
-
-	XSRETURN_EMPTY;
 }
 
-XS(XS__pause);
-XS(XS__pause) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::pause(int duration-ms)");
-
-	int duration = (int) SvIV(ST(0));
-
-	quest_manager.pause(duration);
-
-	XSRETURN_EMPTY;
+void Perl__pause(int duration_ms)
+{
+	quest_manager.pause(duration_ms);
 }
 
-XS(XS__moveto);
-XS(XS__moveto) {
-	dXSARGS;
-	if (items != 3 && items != 4 && items != 5)
-		Perl_croak(aTHX_ "Usage: quest::moveto(float x, float y, float z, [float heading], [bool save_guard_location])");
-
-	float x = (float) SvNV(ST(0));
-	float y = (float) SvNV(ST(1));
-	float z = (float) SvNV(ST(2));
-	float h;
-	bool  saveguard;
-
-	if (items > 3)
-		h = (float) SvNV(ST(3));
-	else
-		h = 0;
-
-	if (items > 4)
-		saveguard = (bool) SvTRUE(ST(4));
-	else
-		saveguard = false;
-
-	quest_manager.moveto(glm::vec4(x, y, z, h), saveguard);
-
-	XSRETURN_EMPTY;
+void Perl__moveto(float x, float y, float z)
+{
+	quest_manager.moveto(glm::vec4(x, y, z, 0.0f), false);
 }
 
-XS(XS__resume);
-XS(XS__resume) {
-	dXSARGS;
-	if (items != 0)
-		Perl_croak(aTHX_ "Usage: quest::resume()");
+void Perl__moveto(float x, float y, float z, float h)
+{
+	quest_manager.moveto(glm::vec4(x, y, z, h), false);
+}
 
+void Perl__moveto(float x, float y, float z, float h, bool save_guard_location)
+{
+	quest_manager.moveto(glm::vec4(x, y, z, h), save_guard_location);
+}
 
+void Perl__resume()
+{
 	quest_manager.resume();
-
-	XSRETURN_EMPTY;
 }
 
-XS(XS__addldonpoints);
-XS(XS__addldonpoints) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::addldonpoints(uint32 theme_id, int points)");
-
-	uint32 theme_id = (uint32) SvUV(ST(0));
-	int points = (int) SvIV(ST(1));
+void Perl__addldonpoints(uint32 theme_id, int points)
+{
 	quest_manager.addldonpoints(theme_id, points);
-	XSRETURN_EMPTY;
 }
 
-XS(XS__addldonwin);
-XS(XS__addldonwin) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::addldonwin(uint32 theme_id)");
-
-	uint32 theme_id = (uint32) SvUV(ST(0));
+void Perl__addldonwin(uint32 theme_id)
+{
 	quest_manager.addldonwin(theme_id);
-	XSRETURN_EMPTY;
 }
 
-XS(XS__addldonloss);
-XS(XS__addldonloss) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::addldonloss(uint32 theme_id)");
-
-	uint32 theme_id = (uint32) SvUV(ST(0));
+void Perl__addldonloss(uint32 theme_id)
+{
 	quest_manager.addldonloss(theme_id);
-	XSRETURN_EMPTY;
 }
 
-XS(XS__setnexthpevent);
-XS(XS__setnexthpevent) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::setnexthpevent(int at_mob_percentage)");
-
-	int at = (int)SvIV(ST(0));
-
-	quest_manager.setnexthpevent(at);
-
-	XSRETURN_EMPTY;
+void Perl__setnexthpevent(int at_mob_percentage)
+{
+	quest_manager.setnexthpevent(at_mob_percentage);
 }
 
-XS(XS__setnextinchpevent);
-XS(XS__setnextinchpevent) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::setnextinchpevent(int at_mob_percentage)");
-
-	int at = (int)SvIV(ST(0));
-
-	quest_manager.setnextinchpevent(at);
-
-	XSRETURN_EMPTY;
+void Perl__setnextinchpevent(int at_mob_percentage)
+{
+	quest_manager.setnextinchpevent(at_mob_percentage);
 }
 
-XS(XS__sethp);
-XS(XS__sethp) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::sethp(int mob_health_percentage [0-100])");
-
-	int hpperc = (int)SvIV(ST(0));
-
-	quest_manager.sethp(hpperc);
-
-	XSRETURN_EMPTY;
+void Perl__sethp(int mob_health_percentage)
+{
+	quest_manager.sethp(mob_health_percentage);
 }
 
-XS(XS__respawn);
-XS(XS__respawn) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::respawn(int npc_type_id, int grid_id)");
-
-	int npc_type_id = (int)SvIV(ST(0));
-	int grid_id = (int)SvIV(ST(1));
-
+void Perl__respawn(int npc_type_id, int grid_id)
+{
 	quest_manager.respawn(npc_type_id, grid_id);
-
-	XSRETURN_EMPTY;
 }
 
-//64 bit windows seems to optimize something poorly here causing access violations.
-//If you don't do anything with index before passing it to perl it gets optimized out
-//Disabling optimization right now for msvc on this function is the best solution.
-#ifdef _MSC_VER
-#pragma optimize( "", off )
-#endif
-
-XS(XS__ChooseRandom);
-XS(XS__ChooseRandom) {
-	dXSARGS;
-	if (items < 1)
-		Perl_croak(aTHX_ "Usage: quest::ChooseRandom(option1, option2, option3, option4, option5...[no limit])");
-
-	dXSTARG;
-	int index = zone->random.Int(0, items - 1);
-	SV* RETVAL = ST(index);
-
-	XSprePUSH;
-	PUSHs(RETVAL);
-
-	XSRETURN(1);    //return 1 element from the stack (ST(0))
+perl::scalar Perl__ChooseRandom(perl::array options)
+{
+	int index = zone->random.Int(0, static_cast<int>(options.size()) - 1);
+	return options[index];
 }
 
-#ifdef _MSC_VER
-#pragma optimize( "", on )
-#endif
-
-XS(XS__set_proximity);
-XS(XS__set_proximity) {
-	dXSARGS;
-	if (items != 4 && items != 6 && items != 7)
-		Perl_croak(aTHX_ "Usage: quest::set_proximity(float min_x, float max_x, float min_y, float max_y, [float min_z], [float max_z], [say])");
-
-	float min_x = (float) SvNV(ST(0));
-	float max_x = (float) SvNV(ST(1));
-	float min_y = (float) SvNV(ST(2));
-	float max_y = (float) SvNV(ST(3));
-
-	if (items == 4)
-		quest_manager.set_proximity(min_x, max_x, min_y, max_y);
-	else {
-		float min_z = (float) SvNV(ST(4));
-		float max_z = (float) SvNV(ST(5));
-		bool  bSay  = false;
-		if (items == 7)
-			bSay = (bool) SvTRUE(ST(6));
-		quest_manager.set_proximity(min_x, max_x, min_y, max_y, min_z, max_z, bSay);
-	}
-
-	XSRETURN_EMPTY;
+void Perl__set_proximity(float min_x, float max_x, float min_y, float max_y)
+{
+	quest_manager.set_proximity(min_x, max_x, min_y, max_y);
 }
 
-XS(XS__clear_proximity);
-XS(XS__clear_proximity) {
-	dXSARGS;
-	if (items != 0)
-		Perl_croak(aTHX_ "Usage: quest::clear_proximity()");
+void Perl__set_proximity(float min_x, float max_x, float min_y, float max_y, float min_z, float max_z)
+{
+	quest_manager.set_proximity(min_x, max_x, min_y, max_y, min_z, max_z);
+}
 
+void Perl__set_proximity(float min_x, float max_x, float min_y, float max_y, float min_z, float max_z, bool enable_say)
+{
+	quest_manager.set_proximity(min_x, max_x, min_y, max_y, min_z, max_z, enable_say);
+}
+
+void Perl__clear_proximity()
+{
 	quest_manager.clear_proximity();
-
-	XSRETURN_EMPTY;
 }
 
-XS(XS__enable_proximity_say);
-XS(XS__enable_proximity_say) {
-	dXSARGS;
-	if (items != 0)
-		Perl_croak(aTHX_ "Usage: quest::enable_proximity_say()");
-
+void Perl__enable_proximity_say()
+{
 	quest_manager.enable_proximity_say();
-
-	XSRETURN_EMPTY;
 }
 
-XS(XS__disable_proximity_say);
-XS(XS__disable_proximity_say) {
-	dXSARGS;
-	if (items != 0)
-		Perl_croak(aTHX_ "Usage: quest::disable_proximity_say()");
-
+void Perl__disable_proximity_say()
+{
 	quest_manager.disable_proximity_say();
-
-	XSRETURN_EMPTY;
 }
 
-XS(XS__setanim);
-XS(XS__setanim) //Cisyouc: mob->setappearance() addition
+void Perl__setanim(int npc_type_id, int appearance_number)
 {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::setanim(int npc_type_id, int appearance_number[0-4]);");
-
-	quest_manager.setanim(SvUV(ST(0)), SvUV(ST(1)));
-
-	XSRETURN_EMPTY;
+	quest_manager.setanim(npc_type_id, appearance_number);
 }
 
-XS(XS__showgrid);
-XS(XS__showgrid) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::showgrid(int grid_id);");
-
-	quest_manager.showgrid(SvUV(ST(0)));
-
-	XSRETURN_EMPTY;
+void Perl__showgrid(int grid_id)
+{
+	quest_manager.showgrid(grid_id);
 }
 
-XS(XS__spawn_condition);
-XS(XS__spawn_condition) {
-	dXSARGS;
-	if (items < 3 || items > 4)
-		Perl_croak(aTHX_ "Usage: quest::spawn_condition(string zone_short, [int instance_id], uint16 condition_id, int16 value)");
-
-	if (items == 3) {
-		char   *zone_short  = (char *) SvPV_nolen(ST(0));
-		uint16 condition_id = (int) SvUV(ST(1));
-		int16  int_value    = (int) SvIV(ST(2));
-
-		quest_manager.spawn_condition(zone_short, zone->GetInstanceID(), condition_id, int_value);
-	} else {
-		char   *zone_short  = (char *) SvPV_nolen(ST(0));
-		uint32 instance_id  = (int) SvUV(ST(1));
-		uint16 condition_id = (int) SvUV(ST(2));
-		int16  int_value    = (int) SvIV(ST(3));
-
-		quest_manager.spawn_condition(zone_short, instance_id, condition_id, int_value);
-	}
-	XSRETURN_EMPTY;
+void Perl__spawn_condition(const char* zone_short, uint16 condition_id, int16 value)
+{
+	quest_manager.spawn_condition(zone_short, zone->GetInstanceID(), condition_id, value);
 }
 
-XS(XS__get_spawn_condition);
-XS(XS__get_spawn_condition) {
-	dXSARGS;
-	if (items < 2 || items > 3)
-		Perl_croak(aTHX_ "Usage: quest::get_spawn_condition(string zone_short, [int instance_id], int condition_id)");
-
-	if (items == 2) {
-		int16 RETVAL;
-		dXSTARG;
-
-		char   *zone_short = (char *) SvPV_nolen(ST(0));
-		uint16 cond_id     = (int) SvIV(ST(1));
-
-		RETVAL = quest_manager.get_spawn_condition(zone_short, zone->GetInstanceID(), cond_id);
-		XSprePUSH;
-		PUSHi((IV) RETVAL);
-
-		XSRETURN(1);
-	} else {
-		int16 RETVAL;
-		dXSTARG;
-
-		char   *zone_short = (char *) SvPV_nolen(ST(0));
-		uint16 instance_id = (int) SvIV(ST(1));
-		uint16 cond_id     = (int) SvIV(ST(2));
-
-		RETVAL = quest_manager.get_spawn_condition(zone_short, instance_id, cond_id);
-		XSprePUSH;
-		PUSHi((IV) RETVAL);
-
-		XSRETURN(1);
-	}
+void Perl__spawn_condition(const char* zone_short, uint32_t instance_id, uint16 condition_id, int16 value)
+{
+	quest_manager.spawn_condition(zone_short, instance_id, condition_id, value);
 }
 
-XS(XS__toggle_spawn_event);
-XS(XS__toggle_spawn_event) {
-	dXSARGS;
-	if (items != 4)
-		Perl_croak(aTHX_ "Usage: quest::toggle_spawn_event(uint32 event_id, [bool is_enabled = false], [bool is_strict = false], [bool reset_base = false])");
+int Perl__get_spawn_condition(const char* zone_short, uint16 condition_id)
+{
+	return quest_manager.get_spawn_condition(zone_short, zone->GetInstanceID(), condition_id);
+}
 
-	uint32 event_id   = (int) SvIV(ST(0));
-	bool   is_enabled = ((int) SvIV(ST(1))) == 0 ? false : true;
-	bool   is_strict  = ((int) SvIV(ST(2))) == 0 ? false : true;
-	bool   reset_base = ((int) SvIV(ST(3))) == 0 ? false : true;
+int Perl__get_spawn_condition(const char* zone_short, uint32 instance_id, uint16 condition_id)
+{
+	return quest_manager.get_spawn_condition(zone_short, instance_id, condition_id);
+}
 
+void Perl__toggle_spawn_event(int event_id, bool is_enabled, bool is_strict, bool reset_base)
+{
 	quest_manager.toggle_spawn_event(event_id, is_enabled, is_strict, reset_base);
-
-	XSRETURN_EMPTY;
 }
 
-XS(XS__has_zone_flag);
-XS(XS__has_zone_flag) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::has_zone_flag(uint32 zone_id)");
-
-	int16 RETVAL;
-	dXSTARG;
-
-	uint32 zone_id = (int) SvIV(ST(0));
-
-	RETVAL = quest_manager.has_zone_flag(zone_id);
-	XSprePUSH;
-	PUSHi((IV) RETVAL);
-
-	XSRETURN(1);
-
+bool Perl__has_zone_flag(int zone_id)
+{
+	return quest_manager.has_zone_flag(zone_id);
 }
 
-XS(XS__set_zone_flag);
-XS(XS__set_zone_flag) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::set_zone_flag(uint32 zone_id)");
-
-	uint32 zone_id = (int) SvIV(ST(0));
-
+void Perl__set_zone_flag(int zone_id)
+{
 	quest_manager.set_zone_flag(zone_id);
-
-	XSRETURN_EMPTY;
 }
 
-XS(XS__clear_zone_flag);
-XS(XS__clear_zone_flag) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::clear_zone_flag(uint32 zone_id)");
-
-	uint32 zone_id = (int) SvIV(ST(0));
-
+void Perl__clear_zone_flag(int zone_id)
+{
 	quest_manager.clear_zone_flag(zone_id);
-
-	XSRETURN_EMPTY;
 }
 
-XS(XS__summonburiedplayercorpse);
-XS(XS__summonburiedplayercorpse) {
-	dXSARGS;
-	if (items != 5)
-		Perl_croak(aTHX_ "Usage: quest::summonburiedplayercorpse(uint32 char_id, float dest_x, float dest_y, float dest_z, float dest_heading)");
-
-	bool   RETVAL;
-	uint32 char_id  = (int) SvIV(ST(0));
-	auto   position = glm::vec4((float) SvIV(ST(1)), (float) SvIV(ST(2)), (float) SvIV(ST(3)), (float) SvIV(ST(4)));
-
-	RETVAL = quest_manager.summonburiedplayercorpse(char_id, position);
-	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
+bool Perl__summonburiedplayercorpse(uint32 char_id, float dest_x, float dest_y, float dest_z, float dest_heading)
+{
+	auto position = glm::vec4(dest_x, dest_y, dest_z, dest_heading);
+	return quest_manager.summonburiedplayercorpse(char_id, position);
 }
 
-XS(XS__summonallplayercorpses);
-XS(XS__summonallplayercorpses) {
-	dXSARGS;
-	if (items != 5)
-		Perl_croak(aTHX_ "Usage: quest::summonallplayercorpses(int char_id, float dest_x, float dest_y, float dest_z, float dest_heading)");
-
-	bool   RETVAL;
-	uint32 char_id  = (int) SvIV(ST(0));
-	auto   position = glm::vec4((float) SvIV(ST(1)), (float) SvIV(ST(2)), (float) SvIV(ST(3)), (float) SvIV(ST(4)));
-
-	RETVAL = quest_manager.summonallplayercorpses(char_id, position);
-	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
+bool Perl__summonallplayercorpses(uint32 char_id, float dest_x, float dest_y, float dest_z, float dest_heading)
+{
+	auto position = glm::vec4(dest_x, dest_y, dest_z, dest_heading);
+	return quest_manager.summonallplayercorpses(char_id, position);
 }
 
-XS(XS__getplayercorpsecount);
-XS(XS__getplayercorpsecount) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::getplayercorpsecount(uint32 char_id)");
-
-	uint32 RETVAL;
-	dXSTARG;
-
-	uint32 char_id = (int) SvIV(ST(0));
-
-	RETVAL = quest_manager.getplayercorpsecount(char_id);
-	XSprePUSH;
-	PUSHu((UV) RETVAL);
-
-	XSRETURN(1);
+int Perl__getplayercorpsecount(uint32 char_id)
+{
+	return quest_manager.getplayercorpsecount(char_id);
 }
 
-XS(XS__getplayercorpsecountbyzoneid);
-XS(XS__getplayercorpsecountbyzoneid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::getplayercorpsecountbyzoneid(uint32 char_id, uint32 zone_id)");
-
-	uint32 RETVAL;
-	dXSTARG;
-
-	uint32 char_id = (int) SvIV(ST(0));
-	uint32 zone_id = (int)SvIV(ST(1));
-
-	RETVAL = quest_manager.getplayercorpsecountbyzoneid(char_id, zone_id);
-	XSprePUSH;
-	PUSHu((UV) RETVAL);
-
-	XSRETURN(1);
+int Perl__getplayercorpsecountbyzoneid(uint32 char_id, uint32 zone_id)
+{
+	return quest_manager.getplayercorpsecountbyzoneid(char_id, zone_id);
 }
 
-XS(XS__getplayerburiedcorpsecount);
-XS(XS__getplayerburiedcorpsecount) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::getplayerburiedcorpsecount(int character_id)");
-
-	uint32 RETVAL;
-	dXSTARG;
-
-	uint32 char_id = (int) SvIV(ST(0));
-
-	RETVAL = quest_manager.getplayerburiedcorpsecount(char_id);
-	XSprePUSH;
-	PUSHu((UV) RETVAL);
-
-	XSRETURN(1);
+int Perl__getplayerburiedcorpsecount(uint32 char_id)
+{
+	return quest_manager.getplayerburiedcorpsecount(char_id);
 }
 
-XS(XS__buryplayercorpse);
-XS(XS__buryplayercorpse) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::buryplayercorpse(int character_id)");
-
-	uint32 RETVAL;
-	dXSTARG;
-
-	uint32 char_id = (int) SvIV(ST(0));
-
-	RETVAL = quest_manager.buryplayercorpse(char_id);
-	XSprePUSH;
-	PUSHu((UV) RETVAL);
-
-	XSRETURN(1);
+bool Perl__buryplayercorpse(uint32 char_id)
+{
+	return quest_manager.buryplayercorpse(char_id);
 }
 
-XS(XS__forcedooropen);
-XS(XS__forcedooropen) {
-	dXSARGS;
-	if (items < 1 || items > 2)
-		Perl_croak(aTHX_ "Usage: quest::forcedooropen(int door_id, [int alt_mode=0])");
-
-	if (items == 1) {
-		uint32 door_id = (int) SvIV(ST(0));
-
-		quest_manager.forcedooropen(door_id, false);
-
-		XSRETURN_EMPTY;
-	} else {
-		uint32 door_id  = (int) SvIV(ST(0));
-		bool   alt_mode = (int) SvIV(ST(1)) == 0 ? false : true;
-
-		quest_manager.forcedooropen(door_id, alt_mode);
-
-		XSRETURN_EMPTY;
-	}
+void Perl__forcedooropen(uint32 door_id)
+{
+	quest_manager.forcedooropen(door_id, false);
 }
 
-XS(XS__forcedoorclose);
-XS(XS__forcedoorclose) {
-	dXSARGS;
-	if (items < 1 || items > 2)
-		Perl_croak(aTHX_ "Usage: quest::forcedoorclose(int door_id, [bool alt_mode = 0])");
-
-	if (items == 1) {
-		uint32 door_id = (int) SvIV(ST(0));
-
-		quest_manager.forcedoorclose(door_id, false);
-
-		XSRETURN_EMPTY;
-	} else {
-		uint32 door_id  = (int) SvIV(ST(0));
-		bool   alt_mode = (int) SvIV(ST(1)) == 0 ? false : true;
-
-		quest_manager.forcedoorclose(door_id, alt_mode);
-
-		XSRETURN_EMPTY;
-	}
+void Perl__forcedooropen(uint32 door_id, bool alt_mode)
+{
+	quest_manager.forcedooropen(door_id, alt_mode);
 }
 
-XS(XS__toggledoorstate);
-XS(XS__toggledoorstate) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::toggledoorstate(int door_id)");
+void Perl__forcedoorclose(uint32 door_id)
+{
+	quest_manager.forcedoorclose(door_id, false);
+}
 
-	uint32 door_id = (int) SvIV(ST(0));
+void Perl__forcedoorclose(uint32 door_id, bool alt_mode)
+{
+	quest_manager.forcedoorclose(door_id, alt_mode);
+}
 
+void Perl__toggledoorstate(uint32 door_id)
+{
 	quest_manager.toggledoorstate(door_id);
-
-	XSRETURN_EMPTY;
 }
 
-XS(XS__isdooropen);
-XS(XS__isdooropen) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::isdooropen(int door_id)");
-
-	bool RETVAL;
-	dXSTARG;
-
-	uint32 door_id = (int) SvIV(ST(0));
-
-	RETVAL = quest_manager.isdooropen(door_id);
-	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
+bool Perl__isdooropen(uint32 door_id)
+{
+	return quest_manager.isdooropen(door_id);
 }
 
-XS(XS__depopzone);
-XS(XS__depopzone) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::depopzone([bool start_spawn_status = false])");
-
-	bool StartSpawnStatus = ((int) SvIV(ST(0))) == 0 ? false : true;
-
-	quest_manager.depopzone(StartSpawnStatus);
-
-	XSRETURN_EMPTY;
+void Perl__depopzone(bool start_spawn_status)
+{
+	quest_manager.depopzone(start_spawn_status);
 }
 
-XS(XS__repopzone);
-XS(XS__repopzone) {
-	dXSARGS;
-	if (items != 0)
-		Perl_croak(aTHX_ "Usage: quest::repopzone()");
-
+void Perl__repopzone()
+{
 	quest_manager.repopzone();
-
-	XSRETURN_EMPTY;
 }
 
-XS(XS__processmobswhilezoneempty);
-XS(XS__processmobswhilezoneempty) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::processmobswhilezoneempty(bool on)");
-
-	bool ProcessingOn = ((int) SvIV(ST(0))) == 0 ? false : true;
-
-	quest_manager.processmobswhilezoneempty(ProcessingOn);
-
-	XSRETURN_EMPTY;
+void Perl__processmobswhilezoneempty(bool on)
+{
+	quest_manager.processmobswhilezoneempty(on);
 }
 
-XS(XS__npcrace);
-XS(XS__npcrace) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::npcrace(int race_id)");
-
-	int race_id = (int) SvIV(ST(0));
-
+void Perl__npcrace(int race_id)
+{
 	quest_manager.npcrace(race_id);
-
-	XSRETURN_EMPTY;
 }
 
-XS(XS__npcgender);
-XS(XS__npcgender) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::npcgender(int gender_id)");
-
-	int gender_id = (int) SvIV(ST(0));
-
+void Perl__npcgender(int gender_id)
+{
 	quest_manager.npcgender(gender_id);
-
-	XSRETURN_EMPTY;
 }
 
-XS(XS__npcsize);
-XS(XS__npcsize) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::npcsize(int size)");
-
-	int size = (int) SvIV(ST(0));
-
+void Perl__npcsize(int size)
+{
 	quest_manager.npcsize(size);
-
-	XSRETURN_EMPTY;
 }
 
-XS(XS__npctexture);
-XS(XS__npctexture) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::npctexture(int texture_id)");
-
-	int texture_id = (int) SvIV(ST(0));
-
+void Perl__npctexture(int texture_id)
+{
 	quest_manager.npctexture(texture_id);
-
-	XSRETURN_EMPTY;
 }
 
-XS(XS__playerrace);
-XS(XS__playerrace) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::playerrace(int race_id)");
-
-	int race_id = (int) SvIV(ST(0));
-
+void Perl__playerrace(int race_id)
+{
 	quest_manager.playerrace(race_id);
-
-	XSRETURN_EMPTY;
 }
 
-XS(XS__playergender);
-XS(XS__playergender) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::playergender(int gender_id)");
-
-	int gender_id = (int) SvIV(ST(0));
-
+void Perl__playergender(int gender_id)
+{
 	quest_manager.playergender(gender_id);
-
-	XSRETURN_EMPTY;
 }
 
-XS(XS__playersize);
-XS(XS__playersize) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::playersize(int newsize)");
-
-	int newsize = (int) SvIV(ST(0));
-
+void Perl__playersize(int newsize)
+{
 	quest_manager.playersize(newsize);
-
-	XSRETURN_EMPTY;
 }
 
-XS(XS__playertexture);
-XS(XS__playertexture) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::playertexture(int texture_id)");
-
-	int texture_id = (int) SvIV(ST(0));
-
+void Perl__playertexture(int texture_id)
+{
 	quest_manager.playertexture(texture_id);
-
-	XSRETURN_EMPTY;
 }
 
-XS(XS__playerfeature);
-XS(XS__playerfeature) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::playerfeature(string feature [race|gender|texture|helm|haircolor|beardcolor|eyecolor1|eyecolor2|hair|face|beard|heritage|tatoo|details|size], int setting)");
-
-	char *str_value = (char *) SvPV_nolen(ST(0));
-	int  int_value  = (int) SvIV(ST(1));
-
-	quest_manager.playerfeature(str_value, int_value);
-
-	XSRETURN_EMPTY;
-}
-
-XS(XS__npcfeature);
-XS(XS__npcfeature) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::npcfeature(string feature [race|gender|texture|helm|haircolor|beardcolor|eyecolor1|eyecolor2|hair|face|beard|heritage|tatoo|details|size], int value)");
-
-	char *str_value = (char *) SvPV_nolen(ST(0));
-	int  int_value  = (int) SvIV(ST(1));
-
-	quest_manager.npcfeature(str_value, int_value);
-
-	XSRETURN_EMPTY;
-}
-
-#ifdef BOTS
-
-XS(XS__createbotcount);
-XS(XS__createbotcount)
+void Perl__playerfeature(char* feature, int value)
 {
-	dXSARGS;
-	int		RETVAL;
-	dXSTARG;
-
-	RETVAL = quest_manager.createbotcount();
-	XSprePUSH;
-	PUSHi((IV) RETVAL);
-
-	XSRETURN(1);
+	quest_manager.playerfeature(feature, value);
 }
 
-XS(XS__spawnbotcount);
-XS(XS__spawnbotcount)
+void Perl__npcfeature(char* feature, int value)
 {
-	dXSARGS;
-	int		RETVAL;
-	dXSTARG;
-
-	RETVAL = quest_manager.spawnbotcount();
-	XSprePUSH;
-	PUSHi((IV) RETVAL);
-
-	XSRETURN(1);
+	quest_manager.npcfeature(feature, value);
 }
 
-XS(XS__botquest);
-XS(XS__botquest)
+int Perl__createbotcount()
 {
-	dXSARGS;
-	bool		RETVAL;
-	dXSTARG;
-
-	RETVAL = quest_manager.botquest();
-	XSprePUSH;
-	PUSHi((IV) RETVAL);
-	XSRETURN(1);
+	return quest_manager.createbotcount();
 }
 
-XS(XS__createBot);
-XS(XS__createBot)
+int Perl__createbotcount(uint8 class_id)
 {
-	dXSARGS;
-	bool		RETVAL;
-	dXSTARG;
+	return quest_manager.createbotcount(class_id);
+}
 
-	if(items != 6)
+int Perl__spawnbotcount()
+{
+	return quest_manager.spawnbotcount();
+}
+
+int Perl__spawnbotcount(uint8 class_id)
+{
+	return quest_manager.spawnbotcount(class_id);
+}
+
+bool Perl__botquest()
+{
+	return quest_manager.botquest();
+}
+
+bool Perl__createBot(const char* firstname, const char* lastname, int level, int race_id, int class_id, int gender_id)
+{
+	return quest_manager.createBot(firstname, lastname, level, race_id, class_id, gender_id);
+}
+
+void Perl__taskselector(perl::array task_ids)
+{
+	if (task_ids.size() > MAXCHOOSERENTRIES)
 	{
-		Perl_croak(aTHX_ "Usage: quest::createBot(string first_name, string last_name, int level, int race_id, int class_id, int gender_id)");
+		throw std::runtime_error(fmt::format("Exceeded max number of task offers [{}]", MAXCHOOSERENTRIES));
 	}
 
-	char *firstname = (char *)SvPV_nolen(ST(0));
-	char *lastname = (char *)SvPV_nolen(ST(1));
-	int level = (int) SvIV(ST(2));
-	int race_id = (int) SvIV(ST(3));
-	int class_id = (int) SvIV(ST(4));
-	int gender_id = (int) SvIV(ST(5));
-
-	RETVAL = quest_manager.createBot(firstname, lastname, level, race_id, class_id, gender_id);
-	XSprePUSH;
-	PUSHi((IV) RETVAL);
-	XSRETURN(1);
+	std::vector<int> tasks;
+	for (int i = 0; i < task_ids.size(); ++i)
+	{
+		tasks.push_back(task_ids[i]);
+	}
+	quest_manager.taskselector(tasks);
 }
 
-#endif //BOTS
+void Perl__taskselector_nocooldown(perl::array task_ids)
+{
+	std::vector<int> tasks;
+	for (int i = 0; i < task_ids.size() && i < MAXCHOOSERENTRIES; ++i)
+	{
+		tasks.push_back(task_ids[i]);
+	}
+	quest_manager.taskselector(tasks, true);
+}
 
-XS(XS__taskselector);
-XS(XS__taskselector) {
-	dXSARGS;
-	if ((items >= 1) && (items <= MAXCHOOSERENTRIES)) {
-		int      tasks[MAXCHOOSERENTRIES];
-		for (int i = 0; i < items; i++) {
-			tasks[i] = (int) SvIV(ST(i));
-		}
-		quest_manager.taskselector(items, tasks);
-	} else {
-		Perl_croak(aTHX_ "Usage: quest::taskselector(int task_id, 2, 3, 4, 5 [up to 40])");
+void Perl__task_setselector(int task_set_id)
+{
+	quest_manager.tasksetselector(task_set_id);
+}
+
+void Perl__task_setselector(int task_set_id, bool ignore_cooldown)
+{
+	quest_manager.tasksetselector(task_set_id, ignore_cooldown);
+}
+
+void Perl__enabletask(perl::array task_ids)
+{
+	int count = 0;
+	int tasks[MAXCHOOSERENTRIES];
+	for (int i = 0; i < task_ids.size() && i < MAXCHOOSERENTRIES; ++i)
+	{
+		tasks[i] = task_ids[i];
+		++count;
 	}
 
-	XSRETURN_EMPTY;
+	quest_manager.enabletask(count, tasks);
 }
-XS(XS__task_setselector);
-XS(XS__task_setselector) {
-	dXSARGS;
-	if (items == 1) {
-		int task_setid = (int) SvIV(ST(0));
-		quest_manager.tasksetselector(task_setid);
-	} else {
-		Perl_croak(aTHX_ "Usage: quest::task_setselector(int task_set_id)");
+
+void Perl__disabletask(perl::array task_ids)
+{
+	int count = 0;
+	int tasks[MAXCHOOSERENTRIES];
+	for (int i = 0; i < task_ids.size() && i < MAXCHOOSERENTRIES; ++i)
+	{
+		tasks[i] = task_ids[i];
+		++count;
 	}
 
-	XSRETURN_EMPTY;
-}
-XS(XS__enabletask);
-XS(XS__enabletask) {
-	dXSARGS;
-	if ((items >= 1) && (items <= 10)) {
-		int      tasks[10];
-		for (int i = 0; i < items; i++) {
-			tasks[i] = (int) SvIV(ST(i));
-		}
-		quest_manager.enabletask(items, tasks);
-	} else {
-		Perl_croak(aTHX_ "Usage: quest::enabletask(int task_id, 2, 3, [up to 10])");
-	}
-
-	XSRETURN_EMPTY;
-}
-XS(XS__disabletask);
-XS(XS__disabletask) {
-	dXSARGS;
-	if ((items >= 1) && (items <= 10)) {
-		int      tasks[10];
-		for (int i = 0; i < items; i++) {
-			tasks[i] = (int) SvIV(ST(i));
-		}
-		quest_manager.disabletask(items, tasks);
-	} else {
-		Perl_croak(aTHX_ "Usage: quest::disabletask(int task_id, 2, 3, [up to 10])");
-	}
-
-	XSRETURN_EMPTY;
+	quest_manager.disabletask(count, tasks);
 }
 
-XS(XS__istaskenabled);
-XS(XS__istaskenabled) {
-	dXSARGS;
-	bool RETVAL;
-	dXSTARG;
-
-	if (items == 1) {
-		unsigned int task_id = (int) SvIV(ST(0));
-		RETVAL = quest_manager.istaskenabled(task_id);
-	} else {
-		Perl_croak(aTHX_ "Usage: quest::istaskenabled(int task_id)");
-	}
-	
-	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
+bool Perl__istaskenabled(int task_id)
+{
+	return quest_manager.istaskenabled(task_id);
 }
 
-XS(XS__istaskactive);
-XS(XS__istaskactive) {
-	dXSARGS;
-	bool RETVAL;
-	dXSTARG;
-
-	if (items == 1) {
-		unsigned int task_id = (int) SvIV(ST(0));
-		RETVAL = quest_manager.istaskactive(task_id);
-	} else {
-		Perl_croak(aTHX_ "Usage: quest::istaskactive(int task_id)");
-	}
-	
-	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
+bool Perl__istaskactive(int task_id)
+{
+	return quest_manager.istaskactive(task_id);
 }
 
-XS(XS__istaskactivityactive);
-XS(XS__istaskactivityactive) {
-	dXSARGS;
-	bool RETVAL;
-	dXSTARG;
-
-	if (items == 2) {
-		unsigned int task_id     = (int) SvIV(ST(0));
-		unsigned int activity_id = (int) SvIV(ST(1));
-		RETVAL = quest_manager.istaskactivityactive(task_id, activity_id);
-	} else {
-		Perl_croak(aTHX_ "Usage: quest::istaskactivityactive(int task_id, int activity_id)");
-	}
-	
-	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
+bool Perl__istaskactivityactive(int task_id, int activity_id)
+{
+	return quest_manager.istaskactivityactive(task_id, activity_id);
 }
 
-XS(XS__gettaskactivitydonecount);
-XS(XS__gettaskactivitydonecount) {
-	dXSARGS;
-	uint32 RETVAL;
-	dXSTARG;
-
-	if (items == 2) {
-		unsigned int task_id     = (int) SvIV(ST(0));
-		unsigned int activity_id = (int) SvIV(ST(1));
-		RETVAL = quest_manager.gettaskactivitydonecount(task_id, activity_id);
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	} else {
-		Perl_croak(aTHX_ "Usage: quest::gettaskactivitydonecount(int task_id, int activity_id)");
-	}
-
-	XSRETURN(1);
+int Perl__gettaskactivitydonecount(int task_id, int activity_id)
+{
+	return quest_manager.gettaskactivitydonecount(task_id, activity_id);
 }
 
-XS(XS__updatetaskactivity);
-XS(XS__updatetaskactivity) {
-	dXSARGS;
-	unsigned int task_id, activity_id;
-	int          count               = 1;
-	bool         ignore_quest_update = false;
-	if (items == 2) {
-		task_id     = (int) SvIV(ST(0));
-		activity_id = (int) SvIV(ST(1));
-		quest_manager.updatetaskactivity(task_id, activity_id, count, false);
-	} else if (items == 3 || items == 4) {
-		task_id     = (int) SvIV(ST(0));
-		activity_id = (int) SvIV(ST(1));
-		count       = (int) SvIV(ST(2));
-		if (items == 4) {
-			bool ignore_quest_update = (bool) SvTRUE(ST(3));
-		}
-		quest_manager.updatetaskactivity(task_id, activity_id, count, ignore_quest_update);
-	} else {
-		Perl_croak(aTHX_ "Usage: quest::updatetaskactivity(int task_id, int activity_id, [int count], [bool ignore_quest_update = false])");
-	}
-
-	XSRETURN_EMPTY;
+void Perl__updatetaskactivity(int task_id, int activity_id)
+{
+	quest_manager.updatetaskactivity(task_id, activity_id, 1);
 }
 
-XS(XS__resettaskactivity);
-XS(XS__resettaskactivity) {
-	dXSARGS;
-	if (items == 2) {
-		int task_id     = (int) SvIV(ST(0));
-		int activity_id = (int) SvIV(ST(1));
-
-		quest_manager.resettaskactivity(task_id, activity_id);
-
-	} else {
-		Perl_croak(aTHX_ "Usage: quest::resettaskactivity(int task_id, int activity_id)");
-	}
-
-	XSRETURN_EMPTY;
+void Perl__updatetaskactivity(int task_id, int activity_id, int count)
+{
+	quest_manager.updatetaskactivity(task_id, activity_id, count);
 }
 
-XS(XS__taskexploredarea);
-XS(XS__taskexploredarea) {
-	dXSARGS;
-	unsigned int explore_id;
-	if (items == 1) {
-		explore_id = (int) SvIV(ST(0));
-		quest_manager.taskexploredarea(explore_id);
-	} else {
-		Perl_croak(aTHX_ "Usage: quest::taskexplorearea(int explore_id)");
-	}
-
-	XSRETURN_EMPTY;
+void Perl__updatetaskactivity(int task_id, int activity_id, int count, bool ignore_quest_update)
+{
+	quest_manager.updatetaskactivity(task_id, activity_id, count, ignore_quest_update);
 }
 
-XS(XS__assigntask);
-XS(XS__assigntask) {
-	dXSARGS;
-	unsigned int task_id;
-	bool         enforce_level_requirement = false;
-	if (items == 1 || items == 2) {
-		task_id = (int) SvIV(ST(0));
-		if (items == 2) {
-			if ((int) SvIV(ST(1)) == 1) {
-				enforce_level_requirement = true;
-			}
-		}
-		quest_manager.assigntask(task_id, enforce_level_requirement);
-	} else {
-		Perl_croak(aTHX_ "Usage: quest::assigntask(int task_id, [bool enforce_level_requirement = false])");
-	}
-
-	XSRETURN_EMPTY;
+void Perl__resettaskactivity(int task_id, int activity_id)
+{
+	quest_manager.resettaskactivity(task_id, activity_id);
 }
 
-XS(XS__failtask);
-XS(XS__failtask) {
-	dXSARGS;
-	unsigned int task_id;
-	if (items == 1) {
-		task_id = (int) SvIV(ST(0));
-		quest_manager.failtask(task_id);
-	} else {
-		Perl_croak(aTHX_ "Usage: quest::failtask(int task_id)");
-	}
-
-	XSRETURN_EMPTY;
+void Perl__assigntask(int task_id)
+{
+	quest_manager.assigntask(task_id);
 }
 
-XS(XS__tasktimeleft);
-XS(XS__tasktimeleft) {
-	dXSARGS;
-	int RETVAL;
-	dXSTARG;
-
-	if (items == 1) {
-		unsigned int task_id = (int) SvIV(ST(0));
-		RETVAL = quest_manager.tasktimeleft(task_id);
-	} else {
-		Perl_croak(aTHX_ "Usage: quest::tasktimeleft(int task_id)");
-	}
-
-	XSprePUSH;
-	PUSHi((IV) RETVAL);
-
-	XSRETURN(1);
+void Perl__assigntask(int task_id, bool enforce_level_requirement)
+{
+	quest_manager.assigntask(task_id, enforce_level_requirement);
 }
 
-XS(XS__istaskcompleted);
-XS(XS__istaskcompleted) {
-	dXSARGS;
-	int RETVAL;
-	dXSTARG;
-
-	if (items == 1) {
-		unsigned int task_id = (int) SvIV(ST(0));
-		RETVAL = quest_manager.istaskcompleted(task_id);
-	} else {
-		Perl_croak(aTHX_ "Usage: quest::istaskcompleted(int task_id)");
-	}
-
-	XSprePUSH;
-	PUSHi((IV) RETVAL);
-
-	XSRETURN(1);
+void Perl__failtask(int task_id)
+{
+	quest_manager.failtask(task_id);
 }
 
-XS(XS__enabledtaskcount);
-XS(XS__enabledtaskcount) {
-	dXSARGS;
-	int RETVAL;
-	dXSTARG;
-
-	if (items == 1) {
-		unsigned int task_set = (int) SvIV(ST(0));
-		RETVAL = quest_manager.enabledtaskcount(task_set);
-	} else {
-		Perl_croak(aTHX_ "Usage: quest::enabledtaskcount(int task_set)");
-	}
-
-	XSprePUSH;
-	PUSHi((IV) RETVAL);
-
-	XSRETURN(1);
+int Perl__tasktimeleft(int task_id)
+{
+	return quest_manager.tasktimeleft(task_id);
 }
 
-XS(XS__firsttaskinset);
-XS(XS__firsttaskinset) {
-	dXSARGS;
-	int RETVAL;
-	dXSTARG;
-
-	if (items == 1) {
-		unsigned int task_set = (int) SvIV(ST(0));
-		RETVAL = quest_manager.firsttaskinset(task_set);
-	} else {
-		Perl_croak(aTHX_ "Usage: quest::firsttaskinset(int task_set)");
-	}
-
-	XSprePUSH;
-	PUSHi((IV) RETVAL);
-
-	XSRETURN(1);
+int Perl__istaskcompleted(int task_id)
+{
+	return quest_manager.istaskcompleted(task_id);
 }
 
-XS(XS__lasttaskinset);
-XS(XS__lasttaskinset) {
-	dXSARGS;
-	int RETVAL;
-	dXSTARG;
-
-	if (items == 1) {
-		unsigned int task_set = (int) SvIV(ST(0));
-		RETVAL = quest_manager.lasttaskinset(task_set);
-	} else {
-		Perl_croak(aTHX_ "Usage: quest::lasttaskinset(int task_set)");
-	}
-
-	XSprePUSH;
-	PUSHi((IV) RETVAL);
-
-	XSRETURN(1);
+int Perl__enabledtaskcount(int task_set)
+{
+	return quest_manager.enabledtaskcount(task_set);
 }
 
-XS(XS__nexttaskinset);
-XS(XS__nexttaskinset) {
-	dXSARGS;
-	int RETVAL;
-	dXSTARG;
-
-	if (items == 2) {
-		unsigned int task_set = (int) SvIV(ST(0));
-		unsigned int task_id  = (int) SvIV(ST(1));
-		RETVAL = quest_manager.nexttaskinset(task_set, task_id);
-	} else {
-		Perl_croak(aTHX_ "Usage: quest::nexttaskinset(int task_set, int task_id)");
-	}
-
-	XSprePUSH;
-	PUSHi((IV) RETVAL);
-
-	XSRETURN(1);
-}
-XS(XS__activespeaktask);
-XS(XS__activespeaktask) {
-	dXSARGS;
-	int RETVAL;
-	dXSTARG;
-
-	if (items == 0) {
-		RETVAL = quest_manager.activespeaktask();
-	} else {
-		Perl_croak(aTHX_ "Usage: quest::activespeaktask()");
-	}
-
-	XSprePUSH;
-	PUSHi((IV) RETVAL);
-
-	XSRETURN(1);
+int Perl__firsttaskinset(int task_set)
+{
+	return quest_manager.firsttaskinset(task_set);
 }
 
-XS(XS__activespeakactivity);
-XS(XS__activespeakactivity) {
-	dXSARGS;
-	int RETVAL;
-	dXSTARG;
-
-	if (items == 1) {
-		unsigned int task_id = (int) SvIV(ST(0));
-		RETVAL = quest_manager.activespeakactivity(task_id);
-	} else {
-		Perl_croak(aTHX_ "Usage: quest::activespeakactivity(int task_id)");
-	}
-
-	XSprePUSH;
-	PUSHi((IV) RETVAL);
-
-	XSRETURN(1);
+int Perl__lasttaskinset(int task_set)
+{
+	return quest_manager.lasttaskinset(task_set);
 }
 
-XS(XS__activetasksinset);
-XS(XS__activetasksinset) {
-	dXSARGS;
-	int RETVAL;
-	dXSTARG;
-
-	if (items == 1) {
-		unsigned int task_set = (int) SvIV(ST(0));
-		RETVAL = quest_manager.activetasksinset(task_set);
-	} else {
-		Perl_croak(aTHX_ "Usage: quest::activetasksinset(int task_set)");
-	}
-
-	XSprePUSH;
-	PUSHi((IV) RETVAL);
-
-	XSRETURN(1);
+int Perl__nexttaskinset(int task_set, int task_id)
+{
+	return quest_manager.nexttaskinset(task_set, task_id);
 }
 
-XS(XS__completedtasksinset);
-XS(XS__completedtasksinset) {
-	dXSARGS;
-	int RETVAL;
-	dXSTARG;
-
-	if (items == 1) {
-		unsigned int task_set = (int) SvIV(ST(0));
-		RETVAL = quest_manager.completedtasksinset(task_set);
-	} else {
-		Perl_croak(aTHX_ "Usage: quest::completedtasksinset(int task_set)");
-	}
-
-	XSprePUSH;
-	PUSHi((IV) RETVAL);
-
-	XSRETURN(1);
+int Perl__activespeaktask()
+{
+	return quest_manager.activespeaktask();
 }
 
-
-XS(XS__istaskappropriate);
-XS(XS__istaskappropriate) {
-	dXSARGS;
-	bool RETVAL;
-	dXSTARG;
-
-	if (items == 1) {
-		unsigned int task = (int) SvIV(ST(0));
-		RETVAL = quest_manager.istaskappropriate(task);
-	} else {
-		Perl_croak(aTHX_ "Usage: quest::istaskaappropriate(int task_id)");
-	}
-	
-	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
+int Perl__activespeakactivity(int task_id)
+{
+	return quest_manager.activespeakactivity(task_id);
 }
 
-XS(XS__gettaskname);
-XS(XS__gettaskname) {
-	dXSARGS;
-	if (items != 1) {
-		Perl_croak(aTHX_ "Usage: quest::gettaskname(uint32 task_id)");
-	}
-
-	dXSTARG;
-	uint32 task_id = (int) SvIV(ST(0));
-	std::string task_name = quest_manager.gettaskname(task_id);
-
-	sv_setpv(TARG, task_name.c_str());
-	XSprePUSH;
-	PUSHTARG;
-	XSRETURN(1);
+int Perl__activetasksinset(int task_set)
+{
+	return quest_manager.activetasksinset(task_set);
 }
 
-XS(XS__popup); // prototype to pass -Wmissing-prototypes
-XS(XS__popup) {
-	dXSARGS;
-	int popup_id = 0;
-	int buttons  = 0;
-	int duration = 0;
-
-	if ((items < 2) || (items > 5))
-		Perl_croak(aTHX_ "Usage: quest::popup(string window_title, string message, int popup_id, int buttons, int duration)");
-
-	if (items >= 3)
-		popup_id = (int) SvIV(ST(2));
-
-	if (items >= 4)
-		buttons = (int) SvIV(ST(3));
-
-	if (items == 5)
-		duration = (int) SvIV(ST(4));
-
-	quest_manager.popup(SvPV_nolen(ST(0)), SvPV_nolen(ST(1)), popup_id, buttons, duration);
-
-	XSRETURN_EMPTY;
+int Perl__completedtasksinset(int task_set)
+{
+	return quest_manager.completedtasksinset(task_set);
 }
 
-XS(XS__clearspawntimers);
-XS(XS__clearspawntimers) {
-	dXSARGS;
-	if (items != 0)
-		Perl_croak(aTHX_ "Usage: quest::clearspawntimers()");
+bool Perl__istaskappropriate(int task_id)
+{
+	return quest_manager.istaskappropriate(task_id);
+}
 
+std::string Perl__gettaskname(uint32 task_id)
+{
+	return quest_manager.gettaskname(task_id);
+}
+
+int Perl__get_dz_task_id()
+{
+	return quest_manager.GetCurrentDzTaskID();
+}
+
+void Perl__end_dz_task()
+{
+	quest_manager.EndCurrentDzTask();
+}
+
+void Perl__end_dz_task(bool send_fail)
+{
+	quest_manager.EndCurrentDzTask(send_fail);
+}
+
+void Perl__popup(const char* window_title, const char* message)
+{
+	quest_manager.popup(window_title, message, 0, 0, 0);
+}
+
+void Perl__popup(const char* window_title, const char* message, int popup_id)
+{
+	quest_manager.popup(window_title, message, popup_id, 0, 0);
+}
+
+void Perl__popup(const char* window_title, const char* message, int popup_id, int buttons)
+{
+	quest_manager.popup(window_title, message, popup_id, buttons, 0);
+}
+
+void Perl__popup(const char* window_title, const char* message, int popup_id, int buttons, int duration)
+{
+	quest_manager.popup(window_title, message, popup_id, buttons, duration);
+}
+
+void Perl__clearspawntimers()
+{
 	quest_manager.clearspawntimers();
-
-	XSRETURN_EMPTY;
 }
 
-XS(XS__ze);
-XS(XS__ze) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::ze(int emote_color_id, string message)");
-
-	int  channel_id = (int) SvIV(ST(0));
-	char *message   = (char *) SvPV_nolen(ST(1));
-
-	quest_manager.ze(channel_id, message);
-
-	XSRETURN_EMPTY;
+void Perl__ze(int emote_color_id, const char* message)
+{
+	return quest_manager.ze(emote_color_id, message);
 }
 
-XS(XS__we);
-XS(XS__we) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::we(int emote_color_id, string message)");
-
-	int  channel_id = (int) SvIV(ST(0));
-	char *message   = (char *) SvPV_nolen(ST(1));
-
-	quest_manager.we(channel_id, message);
-
-	XSRETURN_EMPTY;
+void Perl__we(int emote_color_id, const char* message)
+{
+	quest_manager.we(emote_color_id, message);
 }
 
-XS(XS__message);
-XS(XS__message) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::message(int color, string message)");
-
-	int color = (int) SvIV(ST(0));
-	char *message = (char *) SvPV_nolen(ST(1));
+void Perl__message(int color, const char* message)
+{
 	quest_manager.message(color, message);
-	XSRETURN_EMPTY;
 }
 
-XS(XS__whisper);
-XS(XS__whisper) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::whisper(string message)");
-
-	char *message = (char *) SvPV_nolen(ST(0));
+void Perl__whisper(const char* message)
+{
 	quest_manager.whisper(message);
-	XSRETURN_EMPTY;
 }
 
-XS(XS__getlevel);
-XS(XS__getlevel) {
-	dXSARGS;
-	if (items > 1)
-		Perl_croak(aTHX_ "Usage: quest::getlevel(int type)");
-
-	int RETVAL;
-	dXSTARG;
-
-	int type;
-	if (items == 1)
-		type = (int) SvIV(ST(0));
-	else
-		type = 0;
-
-	RETVAL = quest_manager.getlevel(type);
-	XSprePUSH;
-	PUSHi((IV) RETVAL);
-
-	XSRETURN(1);
+int Perl__getlevel(uint8 type)
+{
+	return quest_manager.getlevel(type);
 }
 
-XS(XS__CreateGroundObject);
-XS(XS__CreateGroundObject) {
-	dXSARGS;
-	if (items != 5 && items != 6)
-		Perl_croak(aTHX_ "Usage: quest::creategroundobject(int item_id, float x, float y, float z, float heading, [uint32 decay_time-ms = 300000])");
+uint16 Perl__CreateGroundObject(uint32_t item_id, float x, float y, float z, float heading)
+{
+	return quest_manager.CreateGroundObject(item_id, glm::vec4(x, y, z, heading));
+}
 
-	int    item_id = (int) SvIV(ST(0));
-	float  x       = (float) SvNV(ST(1));
-	float  y       = (float) SvNV(ST(2));
-	float  z       = (float) SvNV(ST(3));
-	float  heading = (float) SvNV(ST(4));
-	uint16 id      = 0;
+uint16 Perl__CreateGroundObject(uint32_t item_id, float x, float y, float z, float heading, uint32_t decay_time_ms)
+{
+	return quest_manager.CreateGroundObject(item_id, glm::vec4(x, y, z, heading), decay_time_ms);
+}
 
-	if (items == 5)
-		id = quest_manager.CreateGroundObject(item_id, glm::vec4(x, y, z, heading));
-	else {
-		uint32 decay_time = (uint32) SvIV(ST(5));
-		id = quest_manager.CreateGroundObject(item_id, glm::vec4(x, y, z, heading), decay_time);
+uint16 Perl__CreateGroundObjectFromModel(const char* modelname, float x, float y, float z, float heading)
+{
+	return quest_manager.CreateGroundObjectFromModel(modelname, glm::vec4(x, y, z, heading));
+}
+
+uint16 Perl__CreateGroundObjectFromModel(const char* modelname, float x, float y, float z, float heading, uint8_t object_type)
+{
+	return quest_manager.CreateGroundObjectFromModel(modelname, glm::vec4(x, y, z, heading), object_type);
+}
+
+uint16 Perl__CreateGroundObjectFromModel(const char* modelname, float x, float y, float z, float heading, uint8_t object_type, uint32_t decay_time_ms)
+{
+	return quest_manager.CreateGroundObjectFromModel(modelname, glm::vec4(x, y, z, heading), object_type, decay_time_ms);
+}
+
+uint16 Perl__CreateDoor(const char* modelname, float x, float y, float z, float heading)
+{
+	return quest_manager.CreateDoor(modelname, x, y, z, heading, 58, 100);
+}
+
+uint16 Perl__CreateDoor(const char* modelname, float x, float y, float z, float heading, uint8_t object_type)
+{
+	return quest_manager.CreateDoor(modelname, x, y, z, heading, object_type, 100);
+}
+
+uint16 Perl__CreateDoor(const char* modelname, float x, float y, float z, float heading, uint8_t object_type, uint16_t size)
+{
+	return quest_manager.CreateDoor(modelname, x, y, z, heading, object_type, size);
+}
+
+void Perl__ModifyNPCStat(const char* key, const char* value)
+{
+	quest_manager.ModifyNPCStat(key, value);
+}
+
+int Perl__collectitems(uint32_t item_id, bool remove_item)
+{
+	return quest_manager.collectitems(item_id, remove_item);
+}
+
+int Perl__countitem(uint32_t item_id)
+{
+	return quest_manager.countitem(item_id);
+}
+
+void Perl__removeitem(uint32_t item_id)
+{
+	quest_manager.removeitem(item_id);
+}
+
+void Perl__removeitem(uint32_t item_id, int quantity)
+{
+	quest_manager.removeitem(item_id, quantity);
+}
+
+std::string Perl__getitemname(uint32 item_id)
+{
+	return quest_manager.getitemname(item_id);
+}
+
+std::string Perl__getnpcnamebyid(uint32 npc_id)
+{
+	return quest_manager.getnpcnamebyid(npc_id);
+}
+
+void Perl__UpdateSpawnTimer(uint32 id, uint32 new_time)
+{
+	quest_manager.UpdateSpawnTimer(id, new_time);
+}
+
+void Perl__MerchantSetItem(uint32 npc_id, uint32 item_id)
+{
+	quest_manager.MerchantSetItem(npc_id, item_id);
+}
+
+void Perl__MerchantSetItem(uint32 npc_id, uint32 item_id, uint32 quantity)
+{
+	quest_manager.MerchantSetItem(npc_id, item_id, quantity);
+}
+
+uint32_t Perl__MerchantCountItem(uint32 npc_id, uint32 item_id)
+{
+	return quest_manager.MerchantCountItem(npc_id, item_id);
+}
+
+int Perl__CreateInstance(const char* zone_name, int16 version, int32 duration)
+{
+	return quest_manager.CreateInstance(zone_name, version, duration);
+}
+
+void Perl__DestroyInstance(uint16 id)
+{
+	quest_manager.DestroyInstance(id);
+}
+
+void Perl__UpdateInstanceTimer(int16 instance_id, uint32 duration)
+{
+	quest_manager.UpdateInstanceTimer(instance_id, duration);
+}
+
+uint32_t Perl__GetInstanceTimer()
+{
+	return quest_manager.GetInstanceTimer();
+}
+
+uint32_t Perl__GetInstanceTimerByID(uint16 instance_id)
+{
+	return quest_manager.GetInstanceTimerByID(instance_id);
+}
+
+int Perl__GetInstanceID(const char* zone_name, uint16 version)
+{
+	return quest_manager.GetInstanceID(zone_name, version);
+}
+
+uint8 Perl__GetInstanceVersionByID(uint16 instance_id)
+{
+	return database.GetInstanceVersion(instance_id);
+}
+
+uint32 Perl__GetInstanceZoneIDByID(uint16 instance_id)
+{
+	return database.GetInstanceZoneID(instance_id);
+}
+
+perl::array Perl__GetInstanceIDs(std::string zone_name)
+{
+	perl::array result;
+
+	const auto instance_ids = quest_manager.GetInstanceIDs(zone_name);
+	for (int i = 0; i < instance_ids.size(); i++) {
+		result.push_back(instance_ids[i]);
 	}
 
-	XSRETURN_IV(id);
+	return result;
 }
 
-XS(XS__CreateGroundObjectFromModel);
-XS(XS__CreateGroundObjectFromModel) {
-	dXSARGS;
-	if (items < 5 || items > 7)
-		Perl_croak(aTHX_ "Usage: quest::creategroundobjectfrommodel(string model_name, float x, float y, float z, float heading, [int object_type], [uint32 decay_time-ms = 300000])");
-
-	char   *modelname  = (char *) SvPV_nolen(ST(0));
-	float  x           = (float) SvNV(ST(1));
-	float  y           = (float) SvNV(ST(2));
-	float  z           = (float) SvNV(ST(3));
-	float  heading     = (float) SvNV(ST(4));
-	uint32 object_type = 0;
-	uint32 decay_time  = 0;
-	uint16 id          = 0;
-
-	if (items > 5)
-		object_type = (uint32) SvIV(ST(5));
-
-	if (items > 6)
-		decay_time = (uint32) SvIV(ST(6));
-
-	id = quest_manager.CreateGroundObjectFromModel(modelname, glm::vec4(x, y, z, heading), object_type, decay_time);
-	XSRETURN_IV(id);
+int Perl__GetInstanceIDByCharID(const char* zone_name, int16 version, uint32 character_id)
+{
+	return quest_manager.GetInstanceIDByCharID(zone_name, version, character_id);
 }
 
-XS(XS__CreateDoor);
-XS(XS__CreateDoor) {
-	dXSARGS;
-	if (items < 5 || items > 7)
-		Perl_croak(aTHX_ "Usage: quest::createdoor(string model_name, float x, float y, float z, float heading, [int object_type = 58], [int size = 100])");
+perl::array Perl__GetInstanceIDsByCharID(std::string zone_name, uint32 character_id)
+{
+	perl::array result;
 
-	char   *modelname  = (char *) SvPV_nolen(ST(0));
-	float  x           = (float) SvNV(ST(1));
-	float  y           = (float) SvNV(ST(2));
-	float  z           = (float) SvNV(ST(3));
-	float  heading     = (float) SvNV(ST(4));
-	uint32 object_type = 58;
-	uint32 size        = 100;
-	uint16 id          = 0;
+	const auto instance_ids = quest_manager.GetInstanceIDs(zone_name, character_id);
+	for (int i = 0; i < instance_ids.size(); i++) {
+		result.push_back(instance_ids[i]);
+	}
 
-	if (items > 5)
-		object_type = (uint32) SvIV(ST(5));
-
-	if (items > 6)
-		size = (uint32) SvIV(ST(6));
-
-	id = quest_manager.CreateDoor(modelname, x, y, z, heading, object_type, size);
-	XSRETURN_IV(id);
+	return result;
 }
 
-XS(XS__ModifyNPCStat);
-XS(XS__ModifyNPCStat) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::modifynpcstat(string key, string value)");
+std::string Perl__GetCharactersInInstance(uint16 instance_id)
+{
+	std::list<uint32> character_ids;
+	std::string char_id_string = "No players in that instance.";
 
-	quest_manager.ModifyNPCStat(SvPV_nolen(ST(0)), SvPV_nolen(ST(1)));
+	database.GetCharactersInInstance(instance_id, character_ids);
 
-	XSRETURN_EMPTY;
-}
-
-XS(XS__collectitems);
-XS(XS__collectitems) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::collectitems(int item_id, [bool remove_item = true])");
-
-	uint32 item_id     = (int) SvIV(ST(0));
-	bool   remove_item = ((int) SvIV(ST(1))) == 0 ? false : true;
-
-	int quantity =
-			    quest_manager.collectitems(item_id, remove_item);
-
-	XSRETURN_IV(quantity);
-}
-
-XS(XS__countitem);
-XS(XS__countitem) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::countitem(int item_id)");
-
-	uint32 item_id = (int) SvIV(ST(0));
-
-	int quantity = quest_manager.countitem(item_id);
-
-	XSRETURN_IV(quantity);
-}
-
-XS(XS__removeitem);
-XS(XS__removeitem) {
-	dXSARGS;
-	if (items < 1 || items > 2)
-		Perl_croak(aTHX_ "Usage: quest::removeitem(int item_id, [int quantity = 1])");
-
-	uint32 item_id = (int) SvIV(ST(0));
-	uint32 quantity = 1;
-	if (items > 1)
-		quantity = (int) SvIV(ST(1));
-
-	quest_manager.removeitem(item_id, quantity);
-
-	XSRETURN_EMPTY;
-}
-
-XS(XS__getitemname);
-XS(XS__getitemname) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::getitemname(uint32 item_id)");
-
-	dXSTARG;
-	uint32 item_id = (int) SvIV(ST(0));
-	std::string item_name = quest_manager.getitemname(item_id);
-
-	sv_setpv(TARG, item_name.c_str());
-	XSprePUSH;
-	PUSHTARG;
-	XSRETURN(1);
-}
-
-XS(XS__getnpcnamebyid);
-XS(XS__getnpcnamebyid) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::getnpcnamebyid(uint32 npc_id)");
-
-	dXSTARG;
-	uint32 npc_id = (int) SvIV(ST(0));
-	auto npc_name = quest_manager.getnpcnamebyid(npc_id);
-	sv_setpv(TARG, npc_name.c_str());
-	XSprePUSH;
-	PUSHTARG;
-	XSRETURN(1);
-}
-
-XS(XS__UpdateSpawnTimer);
-XS(XS__UpdateSpawnTimer) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::updatespawntimer(uint32 spawn2_id, uint32 updated_time_till_repop)");
-
-	uint32 spawn2_id               = (int) SvIV(ST(0));
-	uint32 updated_time_till_repop = (int) SvIV(ST(1));
-
-	quest_manager.UpdateSpawnTimer(spawn2_id, updated_time_till_repop);
-
-	XSRETURN_EMPTY;
-}
-
-XS(XS__MerchantSetItem);
-XS(XS__MerchantSetItem) {
-	dXSARGS;
-	if (items != 2 && items != 3)
-		Perl_croak(aTHX_ "Usage: quest::MerchantSetItem(uint32 npc_id, uint32 item_id, [uint32 quantity])");
-
-	uint32 npc_id   = (int) SvUV(ST(0));
-	uint32 item_id  = (int) SvUV(ST(1));
-	uint32 quantity = 0;
-	if (items == 3)
-		quantity = (int) SvUV(ST(2));
-
-	quest_manager.MerchantSetItem(npc_id, item_id, quantity);
-
-	XSRETURN_EMPTY;
-}
-
-XS(XS__MerchantCountItem);
-XS(XS__MerchantCountItem) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::MerchantCountItem(uint32 npc_id, uint32 item_id)");
-
-	uint32 npc_id   = (int) SvUV(ST(0));
-	uint32 item_id  = (int) SvUV(ST(1));
-	uint32 quantity = quest_manager.MerchantCountItem(npc_id, item_id);
-
-	XSRETURN_UV(quantity);
-}
-
-XS(XS__varlink);
-XS(XS__varlink) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::varlink(uint32 item_id)");
-	dXSTARG;
-
-	Const_char *RETVAL;
-	char       text[250];
-	uint32     item_id;
-	item_id = (int) SvUV(ST(0));
-
-	RETVAL = quest_manager.varlink(text, item_id);
-
-	sv_setpv(TARG, RETVAL);
-	XSprePUSH;
-	PUSHTARG;
-	XSRETURN(1);
-}
-
-XS(XS__CreateInstance);
-XS(XS__CreateInstance) {
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: quest::CreateInstance(string zone_name, uint16 version, uint32 duration)");
-
-	char   *zone    = (char *) SvPV_nolen(ST(0));
-	uint16 version  = (int) SvUV(ST(1));
-	uint32 duration = (int) SvUV(ST(2));
-	uint32 id       = quest_manager.CreateInstance(zone, version, duration);
-
-	XSRETURN_UV(id);
-}
-
-XS(XS__DestroyInstance);
-XS(XS__DestroyInstance) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::DestroyInstance(int id)");
-
-	uint16 id = (int) SvUV(ST(0));
-	quest_manager.DestroyInstance(id);
-
-	XSRETURN_EMPTY;
-}
-
-XS(XS__UpdateInstanceTimer);
-XS(XS__UpdateInstanceTimer) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::UpdateInstanceTimer(int16 instance_id, uint32 duration)");
-
-	uint16 instance_id = (uint16) SvUV(ST(0));
-	uint32 duration    = (uint32) SvUV(ST(1));
-	quest_manager.UpdateInstanceTimer(instance_id, duration);
-
-	XSRETURN_EMPTY;
-}
-
-XS(XS__GetInstanceTimer);
-XS(XS__GetInstanceTimer) {
-	dXSARGS;
-	if (items != 0)
-		Perl_croak(aTHX_ "Usage: quest::GetInstanceTimer()");
-
-	uint32 timer = quest_manager.GetInstanceTimer();
-
-	XSRETURN_UV(timer);
-}
-
-XS(XS__GetInstanceTimerByID);
-XS(XS__GetInstanceTimerByID) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::GetInstanceTimerByID(uint16 instance_id)");
-
-	uint16 instance_id = (uint16) SvUV(ST(0));
-	uint32 timer       = quest_manager.GetInstanceTimerByID(instance_id);
-
-	XSRETURN_UV(timer);
-}
-
-XS(XS__GetInstanceID);
-XS(XS__GetInstanceID) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::GetInstanceID(string zone_name, uint16 version)");
-
-	char   *zone   = (char *) SvPV_nolen(ST(0));
-	uint16 version = (int) SvUV(ST(1));
-	uint16 id      = quest_manager.GetInstanceID(zone, version);
-
-	XSRETURN_UV(id);
-}
-
-XS(XS__GetInstanceIDByCharID);
-XS(XS__GetInstanceIDByCharID) {
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: quest::GetInstanceIDByCharID(string zone_name, uint16 version, uint32 char_id)");
-
-	char   *zone   = (char *) SvPV_nolen(ST(0));
-	uint16 version = (int) SvUV(ST(1));
-	uint32 char_id = (int) SvUV(ST(2));
-	uint16 id      = quest_manager.GetInstanceIDByCharID(zone, version, char_id);
-
-	XSRETURN_UV(id);
-}
-
-XS(XS__GetCharactersInInstance);
-XS(XS__GetCharactersInInstance) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::GetCharactersInInstance(uint16 instance_id)");
-	dXSTARG;
-
-	Const_char        *RETVAL;
-	uint16            instance_id = (int) SvUV(ST(0));
-	std::list<uint32> char_id_list;
-	std::string       char_id_string;
-
-	database.GetCharactersInInstance(instance_id, char_id_list);
-
-	if (char_id_list.size() > 0) {
-		char_id_string = itoa(char_id_list.size());
-		char_id_string += " player(s) in instance: ";
-		auto iter = char_id_list.begin();
-		while (iter != char_id_list.end()) {
+	if (character_ids.size() > 0)
+	{
+		char_id_string = fmt::format("{} player(s) in instance: ", character_ids.size());
+		auto iter = character_ids.begin();
+		while (iter != character_ids.end()) {
 			char char_name[64];
 			database.GetCharName(*iter, char_name);
 			char_id_string += char_name;
@@ -3274,5600 +1527,3152 @@ XS(XS__GetCharactersInInstance) {
 			char_id_string += itoa(*iter);
 			char_id_string += ")";
 			++iter;
-			if (iter != char_id_list.end())
+			if (iter != character_ids.end())
 				char_id_string += ", ";
 		}
-		RETVAL    = char_id_string.c_str();
-	} else
-		RETVAL = "No players in that instance.";
-
-	sv_setpv(TARG, RETVAL);
-	XSprePUSH;
-	PUSHTARG;
-	XSRETURN(1);
-}
-
-XS(XS__AssignToInstance);
-XS(XS__AssignToInstance) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::AssignToInstance(uint16 instance_id)");
-
-	uint16 instance_id = (int) SvUV(ST(0));
-	quest_manager.AssignToInstance(instance_id);
-
-	XSRETURN_EMPTY;
-}
-
-XS(XS__AssignToInstanceByCharID);
-XS(XS__AssignToInstanceByCharID) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::AssignToInstanceByCharID(uint16 instance_id, uint32 char_id)");
-
-	uint16 instance_id = (int) SvUV(ST(0));
-	uint32 char_id = (int) SvUV(ST(1));
-	quest_manager.AssignToInstanceByCharID(instance_id, char_id);
-
-	XSRETURN_EMPTY;
-}
-
-XS(XS__AssignGroupToInstance);
-XS(XS__AssignGroupToInstance) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::AssignGroupToInstance(uint16 instance_id)");
-
-	uint16 instance_id = (int) SvUV(ST(0));
-	quest_manager.AssignGroupToInstance(instance_id);
-
-	XSRETURN_EMPTY;
-}
-
-XS(XS__AssignRaidToInstance);
-XS(XS__AssignRaidToInstance) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::AssignRaidToInstance(uint16 instance_id)");
-
-	uint16 instance_id = (int) SvUV(ST(0));
-	quest_manager.AssignRaidToInstance(instance_id);
-
-	XSRETURN_EMPTY;
-}
-
-XS(XS__RemoveFromInstance);
-XS(XS__RemoveFromInstance) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::RemoveFromInstance(uint16 instance_id)");
-
-	uint16 instance_id = (int) SvUV(ST(0));
-	quest_manager.RemoveFromInstance(instance_id);
-
-	XSRETURN_EMPTY;
-}
-
-XS(XS__RemoveFromInstanceByCharID);
-XS(XS__RemoveFromInstanceByCharID) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::RemoveFromInstanceByCharID(uint16 instance_id, uint32 char_id)");
-
-	uint16 instance_id = (int) SvUV(ST(0));
-	uint32 char_id = (int) SvUV(ST(1));
-	quest_manager.RemoveFromInstanceByCharID(instance_id, char_id);
-
-	XSRETURN_EMPTY;
-}
-
-XS(XS__CheckInstanceByCharID);
-XS(XS__CheckInstanceByCharID) {
-	dXSARGS;
-	if (items != 2) {
-		Perl_croak(aTHX_ "Usage: quest::CheckInstanceByCharID(uint16 instance_id, uint32 char_id)");
-	}
-
-	bool RETVAL;
-	dXSTARG;
-
-	uint16 instance_id = (int) SvUV(ST(0));
-	uint32 char_id = (int) SvUV(ST(1));
-	RETVAL = quest_manager.CheckInstanceByCharID(instance_id, char_id);	
-	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
-}
-
-XS(XS__RemoveAllFromInstance);
-XS(XS__RemoveAllFromInstance) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::RemoveAllFromInstance(uint16 instance_id)");
-
-	uint16 instance_id = (int) SvUV(ST(0));
-	quest_manager.RemoveAllFromInstance(instance_id);
-
-	XSRETURN_EMPTY;
-}
-
-XS(XS__MovePCInstance);
-XS(XS__MovePCInstance) {
-	dXSARGS;
-	if (items != 5 && items != 6)
-		Perl_croak(aTHX_ "Usage: quest::MovePCInstance(int zone_id, int instance_id, float x, float y, float z, [float heading])");
-
-	int zone_id = (int) SvIV(ST(0));
-	int instance_id = (int) SvIV(ST(1));
-	float x = (float) SvNV(ST(2));
-	float y = (float) SvNV(ST(3));
-	float z = (float) SvNV(ST(4));
-	float heading = 0.0f;
-
-	if (items == 6) {
-		heading = (float) SvNV(ST(5));
-	}
-
-	quest_manager.MovePCInstance(zone_id, instance_id, glm::vec4(x, y, z, heading));
-
-	XSRETURN_EMPTY;
-}
-
-XS(XS__FlagInstanceByGroupLeader);
-XS(XS__FlagInstanceByGroupLeader) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::FlagInstanceByGroupLeader(uint32 zone, uint16 version)");
-
-	uint32 zone    = (int) SvUV(ST(0));
-	uint16 version = (int) SvUV(ST(1));
-	quest_manager.FlagInstanceByGroupLeader(zone, version);
-
-	XSRETURN_EMPTY;
-}
-
-XS(XS__FlagInstanceByRaidLeader);
-XS(XS__FlagInstanceByRaidLeader) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::FlagInstanceByRaidLeader(uint32 zone, uint16 version)");
-
-	uint32 zone    = (int) SvUV(ST(0));
-	uint16 version = (int) SvUV(ST(1));
-	quest_manager.FlagInstanceByRaidLeader(zone, version);
-
-	XSRETURN_EMPTY;
-}
-
-XS(XS__saylink);
-XS(XS__saylink) {
-	dXSARGS;
-	if (items < 1 || items > 3)
-		Perl_croak(aTHX_ "Usage: quest::saylink(string message, [bool silent = false], [link_name = message])");
-	dXSTARG;
-
-	std::string RETVAL;
-	char message[250];
-	char link_name[250];
-	bool silent = false;
-	strcpy(message, (char *) SvPV_nolen(ST(0)));
-	if (items >= 2) {
-		silent = ((int) SvIV(ST(1))) == 0 ? false : true;
-	}
-	if (items == 3)
-		strcpy(link_name, (char *) SvPV_nolen(ST(2)));
-	else
-		strcpy(link_name, message);
-
-	RETVAL = quest_manager.saylink(message, silent, link_name);
-
-	sv_setpv(TARG, RETVAL.c_str());
-	XSprePUSH;
-	PUSHTARG;
-	XSRETURN(1);
-}
-
-XS(XS__getcharnamebyid);
-XS(XS__getcharnamebyid) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::getcharnamebyid(uint32 char_id)");
-	dXSTARG;
-
-	Const_char *RETVAL;
-	uint32     char_id = (int) SvUV(ST(0));
-	auto       name    = quest_manager.getcharnamebyid(char_id);
-
-	RETVAL = name.c_str();
-
-	sv_setpv(TARG, RETVAL);
-	XSprePUSH;
-	PUSHTARG;
-}
-
-XS(XS__getcharidbyname);
-XS(XS__getcharidbyname) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::getcharidbyname(string name)");
-	dXSTARG;
-
-	uint32 		RETVAL;
-	const char *name = (const char *) SvPV_nolen(ST(0));
-
-	RETVAL = quest_manager.getcharidbyname(name);
-	XSprePUSH;
-	PUSHu((UV) RETVAL);
-
-	XSRETURN(1);
-}
-
-XS(XS__getclassname);
-XS(XS__getclassname) {
-	dXSARGS;
-	if (items < 1 || items > 2)
-		Perl_croak(aTHX_ "Usage: quest::getclassname(uint8 class_id, [uint8 level = 0])");
-	dXSTARG;
-
-	std::string RETVAL;
-	uint8  class_id = (int) SvUV(ST(0));
-	uint8  level = 0;
-	if (items > 1)
-		level = (int) SvUV(ST(1));
-
-	RETVAL = quest_manager.getclassname(class_id, level);
-	sv_setpv(TARG, RETVAL.c_str());
-	XSprePUSH;
-	PUSHTARG;
-  XSRETURN(1);
-}
-
-XS(XS__getcurrencyitemid);
-XS(XS__getcurrencyitemid) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::getcurrencyitemid(int currency_id)");
-	dXSTARG;
-
-	int RETVAL;
-	uint32 currency_id = (uint32) SvUV(ST(0));
-
-	RETVAL = quest_manager.getcurrencyitemid(currency_id);
-
-	XSprePUSH;
-	PUSHi((IV) RETVAL);
-  	XSRETURN(1);
-}
-
-XS(XS__getcurrencyid);
-XS(XS__getcurrencyid) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::getcurrencyid(uint32 item_id)");
-	dXSTARG;
-
-	uint32 RETVAL;
-	uint32 item_id = (uint32) SvUV(ST(0));
-
-	RETVAL = quest_manager.getcurrencyid(item_id);
-	XSprePUSH;
-	PUSHi((IV) RETVAL);
-	XSRETURN(1);
-}
-
-XS(XS__getguildnamebyid);
-XS(XS__getguildnamebyid) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::getguildnamebyid(uint32 guild_id)");
-	dXSTARG;
-
-	Const_char *RETVAL;
-	uint32     guild_id = (int) SvUV(ST(0));
-
-	RETVAL = quest_manager.getguildnamebyid(guild_id);
-
-	sv_setpv(TARG, RETVAL);
-	XSprePUSH;
-	PUSHTARG;
-	XSRETURN(1);
-}
-
-XS(XS__getguildidbycharid);
-XS(XS__getguildidbycharid) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::getguildidbycharid(uint32 char_id)");
-	dXSTARG;
-
-	int     RETVAL;
-	uint32  char_id = (int) SvUV(ST(0));
-
-	RETVAL = quest_manager.getguildidbycharid(char_id);
-
-	XSprePUSH;
-	PUSHi((IV) RETVAL);
-
-	XSRETURN(1);
-}
-
-XS(XS__getgroupidbycharid);
-XS(XS__getgroupidbycharid) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::getgroupidbycharid(uint32 char_id)");
-	dXSTARG;
-
-	int     RETVAL;
-	uint32  char_id = (int) SvUV(ST(0));
-
-	RETVAL = quest_manager.getgroupidbycharid(char_id);
-	XSprePUSH;
-	PUSHi((IV) RETVAL);
-
-	XSRETURN(1);
-}
-
-XS(XS__getraididbycharid);
-XS(XS__getraididbycharid) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::getraididbycharid(uint32 char_id)");
-	dXSTARG;
-
-	int     RETVAL;
-	uint32  char_id = (int) SvUV(ST(0));
-
-	RETVAL = quest_manager.getraididbycharid(char_id);
-	XSprePUSH;
-	PUSHi((IV) RETVAL);
-
-	XSRETURN(1);
-}
-
-XS(XS__SetRunning);
-XS(XS__SetRunning) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::SetRunning(bool is_running)");
-
-	bool val = ((int) SvIV(ST(0))) == 0 ? false : true;
-
-	quest_manager.SetRunning(val);
-
-	XSRETURN_EMPTY;
-}
-
-XS(XS__IsRunning);
-XS(XS__IsRunning) {
-	dXSARGS;
-	if (items >= 1)
-		Perl_croak(aTHX_ "Usage: quest::IsRunning()");
-
-	bool RETVAL;
-	dXSTARG;
-
-	RETVAL = quest_manager.IsRunning();	
-	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
-}
-
-XS(XS__IsEffectInSpell);
-XS(XS__IsEffectInSpell) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::IsEffectInSpell(uint32 spell_id, uint32 effect_id)");
-
-	uint32 spell_id  = (uint32) SvUV(ST(0));
-	uint32 effect_id = (uint32) SvUV(ST(1));
-	bool   RETVAL;
-	dXSTARG;
-
-	RETVAL = IsEffectInSpell(spell_id, effect_id);
-	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
-}
-
-XS(XS__IsBeneficialSpell);
-XS(XS__IsBeneficialSpell) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::IsBeneficialSpell(uint32 spell_id)");
-
-	uint32 spell_id = (uint32) SvUV(ST(0));
-	bool   RETVAL;
-	dXSTARG;
-
-	RETVAL = BeneficialSpell(spell_id);
-	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
-}
-
-XS(XS__GetSpellResistType);
-XS(XS__GetSpellResistType) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::GetSpellResistType(uint32 spell_id)");
-
-	uint32 spell_id  = (uint32) SvUV(ST(0));
-	int32  spell_val = 0;
-	dXSTARG;
-
-	spell_val = GetSpellResistType(spell_id);
-	XSRETURN_UV(spell_val);
-}
-
-XS(XS__GetSpellTargetType);
-XS(XS__GetSpellTargetType) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::GetSpellTargetType(uint32 spell_id)");
-
-	uint32 spell_id  = (uint32) SvUV(ST(0));
-	int32  spell_val = 0;
-	dXSTARG;
-
-	spell_val = GetSpellTargetType(spell_id);
-	XSRETURN_UV(spell_val);
-}
-
-XS(XS__FlyMode);
-XS(XS__FlyMode) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::FlyMode(uint8 mode [0-5])");
-
-	GravityBehavior flymode = (GravityBehavior) SvUV(ST(0));
-	quest_manager.FlyMode(flymode);
-
-	XSRETURN_EMPTY;
-}
-
-XS(XS_FactionValue);
-XS(XS_FactionValue) {
-	dXSARGS;
-	if (items != 0)
-		Perl_croak(aTHX_ "Usage: quest::factionvalue()");
-
-	uint8 fac = quest_manager.FactionValue();
-	XSRETURN_UV(fac);
-}
-
-XS(XS__enabletitle);
-XS(XS__enabletitle) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::enabletitle(int title_set_id)");
-
-	int titleset = (int) SvIV(ST(0));
-
-	quest_manager.enabletitle(titleset);
-
-	XSRETURN_EMPTY;
-}
-
-XS(XS__checktitle);
-XS(XS__checktitle) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::checktitle(int title_set_id)");
-
-	bool RETVAL;
-	int  titleset = (int) SvIV(ST(0));
-
-	RETVAL = quest_manager.checktitle(titleset);
-
-	ST(0)         = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
-}
-
-XS(XS__removetitle);
-XS(XS__removetitle) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::removetitle(int title_set_id)");
-
-	int titleset = (int) SvIV(ST(0));
-
-	quest_manager.removetitle(titleset);
-
-	XSRETURN_EMPTY;
-}
-
-XS(XS__wearchange);
-XS(XS__wearchange) {
-	dXSARGS;
-	if (items < 2)
-		Perl_croak(aTHX_ "Usage: quest::wearchange(uint8 slot, uint16 texture_id, [uint32 hero_forge_model_id = 0], [uint32 elite_material_id = 0])");
-
-	uint8  slot       = (int) SvUV(ST(0));
-	uint16 texture_id = (int) SvUV(ST(1));
-
-	uint32 hero_forge_model_id = 0;
-	uint32 elite_material_id   = 0;
-
-	if (items > 2)
-		hero_forge_model_id = (int) SvUV(ST(2));
-
-	if (items > 3)
-		elite_material_id = (int) SvUV(ST(3));
-
-	quest_manager.wearchange(slot, texture_id, hero_forge_model_id, elite_material_id);
-
-	XSRETURN_EMPTY;
-}
-
-XS(XS__voicetell);
-XS(XS__voicetell) {
-	dXSARGS;
-	if (items != 4)
-		Perl_croak(aTHX_ "Usage: quest::voicetell(string client_name, int macro_id, int ace_id, int gender_id)");
-
-	char *client_name = (char *) SvPV_nolen(ST(0));
-	int  macro_id     = (int) SvIV(ST(1));
-	int  race_id      = (int) SvIV(ST(2));
-	int  gender_id    = (int) SvIV(ST(3));
-
-	quest_manager.voicetell(client_name, macro_id, race_id, gender_id);
-
-	XSRETURN_EMPTY;
-}
-
-XS(XS__LearnRecipe);
-XS(XS__LearnRecipe) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::LearnRecipe(int recipe_id)");
-
-	uint32 recipe_id = (uint32) SvIV(ST(0));
-
-	quest_manager.LearnRecipe(recipe_id);
-
-	XSRETURN_EMPTY;
-}
-
-XS(XS__SendMail);
-XS(XS__SendMail) {
-	dXSARGS;
-	if (items != 4)
-		Perl_croak(aTHX_ "Usage: quest::SendMail(stirng to, string from, string subject, string message)");
-
-	char *to      = (char *) SvPV_nolen(ST(0));
-	char *from    = (char *) SvPV_nolen(ST(1));
-	char *subject = (char *) SvPV_nolen(ST(2));
-	char *message = (char *) SvPV_nolen(ST(3));
-
-	quest_manager.SendMail(to, from, subject, message);
-
-	XSRETURN_EMPTY;
-}
-
-XS(XS__GetZoneID);
-XS(XS__GetZoneID) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::GetZoneID(string zone)");
-
-	char  *zone = (char *) SvPV_nolen(ST(0));
-	int32 id    = quest_manager.GetZoneID(zone);
-
-	XSRETURN_IV(id);
-}
-
-XS(XS__GetZoneLongName);
-XS(XS__GetZoneLongName) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::GetZoneLongName(string zone)");
-	dXSTARG;
-
-	std::string zone = (std::string) SvPV_nolen(ST(0));
-	std::string RETVAL = quest_manager.GetZoneLongName(zone);
-
-	sv_setpv(TARG, RETVAL.c_str());
-	XSprePUSH;
-	PUSHTARG;
-	XSRETURN(1);
-}
-
-XS(XS__GetZoneLongNameByID);
-XS(XS__GetZoneLongNameByID) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::GetZoneLongNameByID(uint32 zone_id)");
-
-	dXSTARG;
-	uint32 zone_id = (uint32) SvUV(ST(0));
-	std::string zone_long_name = quest_manager.GetZoneLongNameByID(zone_id);
-	sv_setpv(TARG, zone_long_name.c_str());
-	XSprePUSH;
-	PUSHTARG;
-	XSRETURN(1);
-}
-
-XS(XS__GetZoneShortName);
-XS(XS__GetZoneShortName) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::GetZoneShortName(uint32 zone_id)");
-
-	dXSTARG;
-	uint32 zone_id = (uint32) SvUV(ST(0));
-	std::string zone_short_name = quest_manager.GetZoneShortName(zone_id);
-	sv_setpv(TARG, zone_short_name.c_str());
-	XSprePUSH;
-	PUSHTARG;
-	XSRETURN(1);
-}
-
-XS(XS__GetTimeSeconds);
-XS(XS__GetTimeSeconds) {
-	dXSARGS;
-	if (items != 0)
-		Perl_croak(aTHX_ "Usage: quest::GetTimeSeconds()");
-
-	uint32 seconds = 0;
-	dXSTARG;
-
-	seconds = Timer::GetTimeSeconds();
-	XSRETURN_UV(seconds);
-}
-
-XS(XS__enablerecipe);
-XS(XS__enablerecipe) {
-	dXSARGS;
-	bool success = false;
-
-	if (items != 1) {
-		Perl_croak(aTHX_ "Usage: quest::enablerecipe(int recipe_id)");
-	} else {
-		uint32 recipe_id = (uint32) SvIV(ST(0));
-		success = quest_manager.EnableRecipe(recipe_id);
-	}
-	if (!success) {
-		XSRETURN_NO;
-	}
-
-	XSRETURN_YES;
-}
-
-XS(XS__disablerecipe);
-XS(XS__disablerecipe) {
-	dXSARGS;
-	bool success = false;
-
-	if (items != 1) {
-		Perl_croak(aTHX_ "Usage: quest::disablerecipe(int recipe_id)");
-	} else {
-		uint32 recipe_id = (uint32) SvIV(ST(0));
-		success = quest_manager.DisableRecipe(recipe_id);
-	}
-	if (!success) {
-		XSRETURN_NO;
-	}
-
-	XSRETURN_YES;
-}
-
-XS(XS__clear_npctype_cache);
-XS(XS__clear_npctype_cache) {
-	dXSARGS;
-
-	if (items != 1) {
-		Perl_croak(aTHX_ "Usage: quest::clear_npctype_cache(int npc_type_id)");
-	} else {
-		int32 npc_type_id = (int32) SvIV(ST(0));
-		quest_manager.ClearNPCTypeCache(npc_type_id);
-	}
-
-	XSRETURN_EMPTY;
-}
-
-XS(XS__reloadzonestaticdata);
-XS(XS__reloadzonestaticdata) {
-	dXSARGS;
-
-	quest_manager.ReloadZoneStaticData();
-
-	XSRETURN_EMPTY;
-}
-
-XS(XS__qs_send_query);
-XS(XS__qs_send_query) {
-	dXSARGS;
-	if (items != 1) {
-		Perl_croak(aTHX_ "Usage: quest::qs_send_query(string query)");
-	} else {
-		// char *Query = (char *)SvPV_nolen(ST(0));
-		std::string Query = (std::string) SvPV_nolen(ST(0));
-		QServ->SendQuery(Query);
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS__qs_player_event);
-XS(XS__qs_player_event) {
-	dXSARGS;
-	if (items != 2) {
-		Perl_croak(aTHX_ "Usage: quest::qs_player_event(int character_id, string message)");
-	} else {
-		int         char_id = (int) SvIV(ST(0));
-		std::string message = (std::string) SvPV_nolen(ST(1));
-		QServ->PlayerLogEvent(Player_Log_Quest, char_id, message);
-	}
-	XSRETURN_EMPTY;
-}
-
-
-
-XS(XS__log);
-XS(XS__log) {
-	dXSARGS;
-	if (items != 1 && items != 2) {
-		Perl_croak(aTHX_ "Usage: quest::log(uint8 log_category, string message)");
-	}
-	else {
-		uint8       log_category = (uint8)SvIV(ST(0));
-		std::string log_message = (std::string) SvPV_nolen(ST(1));
-
-		if (log_category >= Logs::MaxCategoryID) {
-			return;
-		}
-
-		Log(Logs::General, log_category, log_message.c_str());
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS__debug);
-XS(XS__debug) {
-	dXSARGS;
-	if (items != 1 && items != 2) {
-		Perl_croak(aTHX_ "Usage: quest::debug(string message, [uint8 debug_level = 1 [1-3]])");
-	} else {
-		std::string log_message = (std::string) SvPV_nolen(ST(0));
-		uint8       debug_level = 1;
-
-		if (items == 2)
-			debug_level = (uint8) SvIV(ST(1));
-
-		if (debug_level > Logs::Detail)
-			return;
-
-		if (debug_level == Logs::General) {
-			Log(Logs::General, Logs::QuestDebug, log_message.c_str());
-		} else if (debug_level == Logs::Moderate) {
-			Log(Logs::Moderate, Logs::QuestDebug, log_message.c_str());
-		} else if (debug_level == Logs::Detail) {
-			Log(Logs::Detail, Logs::QuestDebug, log_message.c_str());
-		}
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS__log_combat);
-XS(XS__log_combat) {
-	dXSARGS;
-	if (items != 1) {
-		Perl_croak(aTHX_ "Usage: quest::log_combat(string message)");
-	}
-	else {
-
-		std::string log_message = (std::string) SvPV_nolen(ST(0));
-		Log(Logs::General, Logs::Combat, log_message.c_str());
-	}
-	XSRETURN_EMPTY;
-}
-
-
-XS(XS__UpdateZoneHeader);
-XS(XS__UpdateZoneHeader) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::UpdateZoneHeader(string key, string value)");
-
-	std::string key       = (std::string) SvPV_nolen(ST(0));
-	std::string str_value = (std::string) SvPV_nolen(ST(1));
-	quest_manager.UpdateZoneHeader(key, str_value);
-
-	XSRETURN_EMPTY;
-}
-
-XS(XS__set_rule);
-XS(XS__set_rule) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::set_rule(string rule_name, string rule_value)");
-
-	std::string rule_name = (std::string) SvPV_nolen(ST(0));
-	std::string rule_value = (std::string) SvPV_nolen(ST(1));
-	RuleManager::Instance()->SetRule(rule_name.c_str(), rule_value.c_str());
-
-	XSRETURN_EMPTY;
-}
-
-XS(XS__get_rule);
-XS(XS__get_rule) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::get_rule(string rule_name)");
-
-	dXSTARG;
-	std::string rule_name = (std::string) SvPV_nolen(ST(0));
-	std::string rule_value;
-	RuleManager::Instance()->GetRule(rule_name.c_str(), rule_value);
-
-	sv_setpv(TARG, rule_value.c_str());
-	XSprePUSH;
-	PUSHTARG;
-	XSRETURN(1);
-}
-
-XS(XS__get_data);
-XS(XS__get_data) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::get_data(string bucket_key)");
-
-	dXSTARG;
-	std::string key = (std::string) SvPV_nolen(ST(0));
-
-	sv_setpv(TARG, DataBucket::GetData(key).c_str());
-	XSprePUSH;
-	PUSHTARG;
-	XSRETURN(1);
-}
-
-XS(XS__get_data_expires);
-XS(XS__get_data_expires) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::get_data_expires(string bucket_key)");
-
-	dXSTARG;
-	std::string key = (std::string) SvPV_nolen(ST(0));
-
-	sv_setpv(TARG, DataBucket::GetDataExpires(key).c_str());
-	XSprePUSH;
-	PUSHTARG;
-	XSRETURN(1);
-}
-
-XS(XS__set_data);
-XS(XS__set_data) {
-	dXSARGS;
-	if (items != 2 && items != 3) {
-		Perl_croak(aTHX_ "Usage: quest::set_data(string key, string value, [string expires_at = 0])");
-	} else {
-		std::string key   = (std::string) SvPV_nolen(ST(0));
-		std::string value = (std::string) SvPV_nolen(ST(1));
-
-		std::string expires_at;
-		if (items == 3)
-			expires_at = (std::string) SvPV_nolen(ST(2));
-
-		DataBucket::SetData(key, value, expires_at);
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS__delete_data);
-XS(XS__delete_data) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::delete_data(string bucket_key)");
-
-	dXSTARG;
-	std::string key = (std::string) SvPV_nolen(ST(0));
-
-	XSprePUSH;
-	PUSHi((IV) DataBucket::DeleteData(key));
-
-	XSRETURN(1);
-}
-
-
-XS(XS__IsClassicEnabled);
-XS(XS__IsClassicEnabled) {
-	dXSARGS;
-	if (items >= 1) {
-		Perl_croak(aTHX_ "Usage: quest::is_classic_enabled()");
-	}
-
-	bool RETVAL;
-	dXSTARG;
-	RETVAL = content_service.IsClassicEnabled();
-	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
-}
-
-XS(XS__IsTheRuinsOfKunarkEnabled);
-XS(XS__IsTheRuinsOfKunarkEnabled) {
-	dXSARGS;
-	if (items >= 1) {
-		Perl_croak(aTHX_ "Usage: quest::is_the_ruins_of_kunark_enabled()");
-	}
-
-	bool RETVAL;
-	dXSTARG;
-	RETVAL = content_service.IsTheRuinsOfKunarkEnabled();
-	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
-}
-
-XS(XS__IsTheScarsOfVeliousEnabled);
-XS(XS__IsTheScarsOfVeliousEnabled) {
-	dXSARGS;
-	if (items >= 1) {
-		Perl_croak(aTHX_ "Usage: quest::is_the_scars_of_velious_enabled()");
-	}
-
-	bool RETVAL;
-	dXSTARG;
-	RETVAL = content_service.IsTheScarsOfVeliousEnabled();
-	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
-}
-
-XS(XS__IsTheShadowsOfLuclinEnabled);
-XS(XS__IsTheShadowsOfLuclinEnabled) {
-	dXSARGS;
-	if (items >= 1) {
-		Perl_croak(aTHX_ "Usage: quest::is_the_shadows_of_luclin_enabled()");
-	}
-
-	bool RETVAL;
-	dXSTARG;
-	RETVAL = content_service.IsTheShadowsOfLuclinEnabled();
-	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
-}
-
-XS(XS__IsThePlanesOfPowerEnabled);
-XS(XS__IsThePlanesOfPowerEnabled) {
-	dXSARGS;
-	if (items >= 1) {
-		Perl_croak(aTHX_ "Usage: quest::is_the_planes_of_power_enabled()");
-	}
-
-	bool RETVAL;
-	dXSTARG;
-	RETVAL = content_service.IsThePlanesOfPowerEnabled();
-	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
-}
-
-XS(XS__IsTheLegacyOfYkeshaEnabled);
-XS(XS__IsTheLegacyOfYkeshaEnabled) {
-	dXSARGS;
-	if (items >= 1) {
-		Perl_croak(aTHX_ "Usage: quest::is_the_legacy_of_ykesha_enabled()");
-	}
-
-	bool RETVAL;
-	dXSTARG;
-	RETVAL = content_service.IsTheLegacyOfYkeshaEnabled();
-	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
-}
-
-XS(XS__IsLostDungeonsOfNorrathEnabled);
-XS(XS__IsLostDungeonsOfNorrathEnabled) {
-	dXSARGS;
-	if (items >= 1) {
-		Perl_croak(aTHX_ "Usage: quest::is_lost_dungeons_of_norrath_enabled()");
-	}
-
-	bool RETVAL;
-	dXSTARG;
-	RETVAL = content_service.IsLostDungeonsOfNorrathEnabled();
-	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
-}
-
-XS(XS__IsGatesOfDiscordEnabled);
-XS(XS__IsGatesOfDiscordEnabled) {
-	dXSARGS;
-	if (items >= 1) {
-		Perl_croak(aTHX_ "Usage: quest::is_gates_of_discord_enabled()");
-	}
-
-	bool RETVAL;
-	dXSTARG;
-	RETVAL = content_service.IsGatesOfDiscordEnabled();
-	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
-}
-
-XS(XS__IsOmensOfWarEnabled);
-XS(XS__IsOmensOfWarEnabled) {
-	dXSARGS;
-	if (items >= 1) {
-		Perl_croak(aTHX_ "Usage: quest::is_omens_of_war_enabled()");
-	}
-
-	bool RETVAL;
-	dXSTARG;
-	RETVAL = content_service.IsOmensOfWarEnabled();
-	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
-}
-
-XS(XS__IsDragonsOfNorrathEnabled);
-XS(XS__IsDragonsOfNorrathEnabled) {
-	dXSARGS;
-	if (items >= 1) {
-		Perl_croak(aTHX_ "Usage: quest::is_dragons_of_norrath_enabled()");
-	}
-
-	bool RETVAL;
-	dXSTARG;
-	RETVAL = content_service.IsDragonsOfNorrathEnabled();
-	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
-}
-
-XS(XS__IsDepthsOfDarkhollowEnabled);
-XS(XS__IsDepthsOfDarkhollowEnabled) {
-	dXSARGS;
-	if (items >= 1) {
-		Perl_croak(aTHX_ "Usage: quest::is_depths_of_darkhollow_enabled()");
-	}
-
-	bool RETVAL;
-	dXSTARG;
-	RETVAL = content_service.IsDepthsOfDarkhollowEnabled();
-	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
-}
-
-XS(XS__IsProphecyOfRoEnabled);
-XS(XS__IsProphecyOfRoEnabled) {
-	dXSARGS;
-	if (items >= 1) {
-		Perl_croak(aTHX_ "Usage: quest::is_prophecy_of_ro_enabled()");
-	}
-
-	bool RETVAL;
-	dXSTARG;
-	RETVAL = content_service.IsProphecyOfRoEnabled();
-	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
-}
-
-XS(XS__IsTheSerpentsSpineEnabled);
-XS(XS__IsTheSerpentsSpineEnabled) {
-	dXSARGS;
-	if (items >= 1) {
-		Perl_croak(aTHX_ "Usage: quest::is_the_serpents_spine_enabled()");
-	}
-
-	bool RETVAL;
-	dXSTARG;
-	RETVAL = content_service.IsTheSerpentsSpineEnabled();
-	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
-}
-
-XS(XS__IsTheBuriedSeaEnabled);
-XS(XS__IsTheBuriedSeaEnabled) {
-	dXSARGS;
-	if (items >= 1) {
-		Perl_croak(aTHX_ "Usage: quest::is_the_buried_sea_enabled()");
-	}
-
-	bool RETVAL;
-	dXSTARG;
-	RETVAL = content_service.IsTheBuriedSeaEnabled();
-	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
-}
-
-XS(XS__IsSecretsOfFaydwerEnabled);
-XS(XS__IsSecretsOfFaydwerEnabled) {
-	dXSARGS;
-	if (items >= 1) {
-		Perl_croak(aTHX_ "Usage: quest::is_secrets_of_faydwer_enabled()");
-	}
-
-	bool RETVAL;
-	dXSTARG;
-	RETVAL = content_service.IsSecretsOfFaydwerEnabled();
-	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
-}
-
-XS(XS__IsSeedsOfDestructionEnabled);
-XS(XS__IsSeedsOfDestructionEnabled) {
-	dXSARGS;
-	if (items >= 1) {
-		Perl_croak(aTHX_ "Usage: quest::is_seeds_of_destruction_enabled()");
-	}
-
-	bool RETVAL;
-	dXSTARG;
-	RETVAL = content_service.IsSeedsOfDestructionEnabled();
-	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
-}
-
-XS(XS__IsUnderfootEnabled);
-XS(XS__IsUnderfootEnabled) {
-	dXSARGS;
-	if (items >= 1) {
-		Perl_croak(aTHX_ "Usage: quest::is_underfoot_enabled()");
-	}
-
-	bool RETVAL;
-	dXSTARG;
-	RETVAL = content_service.IsUnderfootEnabled();
-	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
-}
-
-XS(XS__IsHouseOfThuleEnabled);
-XS(XS__IsHouseOfThuleEnabled) {
-	dXSARGS;
-	if (items >= 1) {
-		Perl_croak(aTHX_ "Usage: quest::is_house_of_thule_enabled()");
-	}
-
-	bool RETVAL;
-	dXSTARG;
-	RETVAL = content_service.IsHouseOfThuleEnabled();
-	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
-}
-
-XS(XS__IsVeilOfAlarisEnabled);
-XS(XS__IsVeilOfAlarisEnabled) {
-	dXSARGS;
-	if (items >= 1) {
-		Perl_croak(aTHX_ "Usage: quest::is_veil_of_alaris_enabled()");
-	}
-
-	bool RETVAL;
-	dXSTARG;
-	RETVAL = content_service.IsVeilOfAlarisEnabled();
-	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
-}
-
-XS(XS__IsRainOfFearEnabled);
-XS(XS__IsRainOfFearEnabled) {
-	dXSARGS;
-	if (items >= 1) {
-		Perl_croak(aTHX_ "Usage: quest::is_rain_of_fear_enabled()");
-	}
-
-	bool RETVAL;
-	dXSTARG;
-	RETVAL = content_service.IsRainOfFearEnabled();
-	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
-}
-
-XS(XS__IsCallOfTheForsakenEnabled);
-XS(XS__IsCallOfTheForsakenEnabled) {
-	dXSARGS;
-	if (items >= 1) {
-		Perl_croak(aTHX_ "Usage: quest::is_call_of_the_forsaken_enabled()");
-	}
-
-	bool RETVAL;
-	dXSTARG;
-	RETVAL = content_service.IsCallOfTheForsakenEnabled();
-	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
-}
-
-XS(XS__IsTheDarkenedSeaEnabled);
-XS(XS__IsTheDarkenedSeaEnabled) {
-	dXSARGS;
-	if (items >= 1) {
-		Perl_croak(aTHX_ "Usage: quest::is_the_darkened_sea_enabled()");
-	}
-
-	bool RETVAL;
-	dXSTARG;
-	RETVAL = content_service.IsTheDarkenedSeaEnabled();
-	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
-}
-
-XS(XS__IsTheBrokenMirrorEnabled);
-XS(XS__IsTheBrokenMirrorEnabled) {
-	dXSARGS;
-	if (items >= 1) {
-		Perl_croak(aTHX_ "Usage: quest::is_the_broken_mirror_enabled()");
-	}
-
-	bool RETVAL;
-	dXSTARG;
-	RETVAL = content_service.IsTheBrokenMirrorEnabled();
-	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
-}
-
-XS(XS__IsEmpiresOfKunarkEnabled);
-XS(XS__IsEmpiresOfKunarkEnabled) {
-	dXSARGS;
-	if (items >= 1) {
-		Perl_croak(aTHX_ "Usage: quest::is_empires_of_kunark_enabled()");
-	}
-
-	bool RETVAL;
-	dXSTARG;
-	RETVAL = content_service.IsEmpiresOfKunarkEnabled();
-	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
-}
-
-XS(XS__IsRingOfScaleEnabled);
-XS(XS__IsRingOfScaleEnabled) {
-	dXSARGS;
-	if (items >= 1) {
-		Perl_croak(aTHX_ "Usage: quest::is_ring_of_scale_enabled()");
 	}
-
-	bool RETVAL;
-	dXSTARG;
-	RETVAL = content_service.IsRingOfScaleEnabled();
-	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
-}
-
-XS(XS__IsTheBurningLandsEnabled);
-XS(XS__IsTheBurningLandsEnabled) {
-	dXSARGS;
-	if (items >= 1) {
-		Perl_croak(aTHX_ "Usage: quest::is_the_burning_lands_enabled()");
-	}
-
-	bool RETVAL;
-	dXSTARG;
-	RETVAL = content_service.IsTheBurningLandsEnabled();
-	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
-}
-
-XS(XS__IsTormentOfVeliousEnabled);
-XS(XS__IsTormentOfVeliousEnabled) {
-	dXSARGS;
-	if (items >= 1) {
-		Perl_croak(aTHX_ "Usage: quest::is_torment_of_velious_enabled()");
-	}
-
-	bool RETVAL;
-	dXSTARG;
-	RETVAL = content_service.IsTormentOfVeliousEnabled();
-	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
-}
-
-XS(XS__IsCurrentExpansionClassic);
-XS(XS__IsCurrentExpansionClassic) {
-	dXSARGS;
-	if (items >= 1) {
-		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_classic()");
-	}
-
-	bool RETVAL;
-	dXSTARG;
-	RETVAL = content_service.IsCurrentExpansionClassic();
-	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
-}
-
-XS(XS__IsCurrentExpansionTheRuinsOfKunark);
-XS(XS__IsCurrentExpansionTheRuinsOfKunark) {
-	dXSARGS;
-	if (items >= 1) {
-		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_the_ruins_of_kunark()");
-	}
-
-	bool RETVAL;
-	dXSTARG;
-	RETVAL = content_service.IsCurrentExpansionTheRuinsOfKunark();
-	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
-}
-
-XS(XS__IsCurrentExpansionTheScarsOfVelious);
-XS(XS__IsCurrentExpansionTheScarsOfVelious) {
-	dXSARGS;
-	if (items >= 1) {
-		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_the_scars_of_velious()");
-	}
-
-	bool RETVAL;
-	dXSTARG;
-	RETVAL = content_service.IsCurrentExpansionTheScarsOfVelious();
-	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
-}
-
-XS(XS__IsCurrentExpansionTheShadowsOfLuclin);
-XS(XS__IsCurrentExpansionTheShadowsOfLuclin) {
-	dXSARGS;
-	if (items >= 1) {
-		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_the_shadows_of_luclin()");
-	}
-
-	bool RETVAL;
-	dXSTARG;
-	RETVAL = content_service.IsCurrentExpansionTheShadowsOfLuclin();
-	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
-}
-
-XS(XS__IsCurrentExpansionThePlanesOfPower);
-XS(XS__IsCurrentExpansionThePlanesOfPower) {
-	dXSARGS;
-	if (items >= 1) {
-		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_the_planes_of_power()");
-	}
-
-	bool RETVAL;
-	dXSTARG;
-	RETVAL = content_service.IsCurrentExpansionThePlanesOfPower();
-	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
-}
-
-XS(XS__IsCurrentExpansionTheLegacyOfYkesha);
-XS(XS__IsCurrentExpansionTheLegacyOfYkesha) {
-	dXSARGS;
-	if (items >= 1) {
-		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_the_legacy_of_ykesha()");
-	}
-
-	bool RETVAL;
-	dXSTARG;
-	RETVAL = content_service.IsCurrentExpansionTheLegacyOfYkesha();
-	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
-}
-
-XS(XS__IsCurrentExpansionLostDungeonsOfNorrath);
-XS(XS__IsCurrentExpansionLostDungeonsOfNorrath) {
-	dXSARGS;
-	if (items >= 1) {
-		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_lost_dungeons_of_norrath()");
-	}
-
-	bool RETVAL;
-	dXSTARG;
-	RETVAL = content_service.IsCurrentExpansionLostDungeonsOfNorrath();
-	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
-}
-
-XS(XS__IsCurrentExpansionGatesOfDiscord);
-XS(XS__IsCurrentExpansionGatesOfDiscord) {
-	dXSARGS;
-	if (items >= 1) {
-		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_gates_of_discord()");
-	}
-
-	bool RETVAL;
-	dXSTARG;
-	RETVAL = content_service.IsCurrentExpansionGatesOfDiscord();
-	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
-}
-
-XS(XS__IsCurrentExpansionOmensOfWar);
-XS(XS__IsCurrentExpansionOmensOfWar) {
-	dXSARGS;
-	if (items >= 1) {
-		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_omens_of_war()");
-	}
-
-	bool RETVAL;
-	dXSTARG;
-	RETVAL = content_service.IsCurrentExpansionOmensOfWar();
-	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
-}
-
-XS(XS__IsCurrentExpansionDragonsOfNorrath);
-XS(XS__IsCurrentExpansionDragonsOfNorrath) {
-	dXSARGS;
-	if (items >= 1) {
-		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_dragons_of_norrath()");
-	}
-
-	bool RETVAL;
-	dXSTARG;
-	RETVAL = content_service.IsCurrentExpansionDragonsOfNorrath();
-	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
-}
-
-XS(XS__IsCurrentExpansionDepthsOfDarkhollow);
-XS(XS__IsCurrentExpansionDepthsOfDarkhollow) {
-	dXSARGS;
-	if (items >= 1) {
-		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_depths_of_darkhollow()");
-	}
-
-	bool RETVAL;
-	dXSTARG;
-	RETVAL = content_service.IsCurrentExpansionDepthsOfDarkhollow();
-	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
-}
-
-XS(XS__IsCurrentExpansionProphecyOfRo);
-XS(XS__IsCurrentExpansionProphecyOfRo) {
-	dXSARGS;
-	if (items >= 1) {
-		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_prophecy_of_ro()");
-	}
-
-	bool RETVAL;
-	dXSTARG;
-	RETVAL = content_service.IsCurrentExpansionProphecyOfRo();
-	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
-}
-
-XS(XS__IsCurrentExpansionTheSerpentsSpine);
-XS(XS__IsCurrentExpansionTheSerpentsSpine) {
-	dXSARGS;
-	if (items >= 1) {
-		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_the_serpents_spine()");
-	}
-
-	bool RETVAL;
-	dXSTARG;
-	RETVAL = content_service.IsCurrentExpansionTheSerpentsSpine();
-	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
-}
-
-XS(XS__IsCurrentExpansionTheBuriedSea);
-XS(XS__IsCurrentExpansionTheBuriedSea) {
-	dXSARGS;
-	if (items >= 1) {
-		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_the_buried_sea()");
-	}
-
-	bool RETVAL;
-	dXSTARG;
-	RETVAL = content_service.IsCurrentExpansionTheBuriedSea();
-	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
-}
-
-XS(XS__IsCurrentExpansionSecretsOfFaydwer);
-XS(XS__IsCurrentExpansionSecretsOfFaydwer) {
-	dXSARGS;
-	if (items >= 1) {
-		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_secrets_of_faydwer()");
-	}
-
-	bool RETVAL;
-	dXSTARG;
-	RETVAL = content_service.IsCurrentExpansionSecretsOfFaydwer();
-	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
-}
-
-XS(XS__IsCurrentExpansionSeedsOfDestruction);
-XS(XS__IsCurrentExpansionSeedsOfDestruction) {
-	dXSARGS;
-	if (items >= 1) {
-		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_seeds_of_destruction()");
-	}
-
-	bool RETVAL;
-	dXSTARG;
-	RETVAL = content_service.IsCurrentExpansionSeedsOfDestruction();
-	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
-}
-
-XS(XS__IsCurrentExpansionUnderfoot);
-XS(XS__IsCurrentExpansionUnderfoot) {
-	dXSARGS;
-	if (items >= 1) {
-		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_underfoot()");
-	}
-
-	bool RETVAL;
-	dXSTARG;
-	RETVAL = content_service.IsCurrentExpansionUnderfoot();
-	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
-}
-
-XS(XS__IsCurrentExpansionHouseOfThule);
-XS(XS__IsCurrentExpansionHouseOfThule) {
-	dXSARGS;
-	if (items >= 1) {
-		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_house_of_thule()");
-	}
-
-	bool RETVAL;
-	dXSTARG;
-	RETVAL = content_service.IsCurrentExpansionHouseOfThule();
-	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
-}
-
-XS(XS__IsCurrentExpansionVeilOfAlaris);
-XS(XS__IsCurrentExpansionVeilOfAlaris) {
-	dXSARGS;
-	if (items >= 1) {
-		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_veil_of_alaris()");
-	}
-
-	bool RETVAL;
-	dXSTARG;
-	RETVAL = content_service.IsCurrentExpansionVeilOfAlaris();
-	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
-}
-
-XS(XS__IsCurrentExpansionRainOfFear);
-XS(XS__IsCurrentExpansionRainOfFear) {
-	dXSARGS;
-	if (items >= 1) {
-		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_rain_of_fear()");
-	}
-
-	bool RETVAL;
-	dXSTARG;
-	RETVAL = content_service.IsCurrentExpansionRainOfFear();
-	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
-}
-
-XS(XS__IsCurrentExpansionCallOfTheForsaken);
-XS(XS__IsCurrentExpansionCallOfTheForsaken) {
-	dXSARGS;
-	if (items >= 1) {
-		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_call_of_the_forsaken()");
-	}
-
-	bool RETVAL;
-	dXSTARG;
-	RETVAL = content_service.IsCurrentExpansionCallOfTheForsaken();
-	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
-}
-
-XS(XS__IsCurrentExpansionTheDarkenedSea);
-XS(XS__IsCurrentExpansionTheDarkenedSea) {
-	dXSARGS;
-	if (items >= 1) {
-		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_the_darkened_sea()");
-	}
-
-	bool RETVAL;
-	dXSTARG;
-	RETVAL = content_service.IsCurrentExpansionTheDarkenedSea();
-	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
-}
-
-XS(XS__IsCurrentExpansionTheBrokenMirror);
-XS(XS__IsCurrentExpansionTheBrokenMirror) {
-	dXSARGS;
-	if (items >= 1) {
-		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_the_broken_mirror()");
-	}
-
-	bool RETVAL;
-	dXSTARG;
-	RETVAL = content_service.IsCurrentExpansionTheBrokenMirror();
-	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
-}
-
-XS(XS__IsCurrentExpansionEmpiresOfKunark);
-XS(XS__IsCurrentExpansionEmpiresOfKunark) {
-	dXSARGS;
-	if (items >= 1) {
-		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_empires_of_kunark()");
-	}
-
-	bool RETVAL;
-	dXSTARG;
-	RETVAL = content_service.IsCurrentExpansionEmpiresOfKunark();
-	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
-}
-
-XS(XS__IsCurrentExpansionRingOfScale);
-XS(XS__IsCurrentExpansionRingOfScale) {
-	dXSARGS;
-	if (items >= 1) {
-		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_ring_of_scale()");
-	}
-
-	bool RETVAL;
-	dXSTARG;
-	RETVAL = content_service.IsCurrentExpansionRingOfScale();
-	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
-}
-
-XS(XS__IsCurrentExpansionTheBurningLands);
-XS(XS__IsCurrentExpansionTheBurningLands) {
-	dXSARGS;
-	if (items >= 1) {
-		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_the_burning_lands()");
-	}
-
-	bool RETVAL;
-	dXSTARG;
-	RETVAL = content_service.IsCurrentExpansionTheBurningLands();
-	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
-}
-
-XS(XS__IsCurrentExpansionTormentOfVelious);
-XS(XS__IsCurrentExpansionTormentOfVelious) {
-	dXSARGS;
-	if (items >= 1) {
-		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_torment_of_velious()");
-	}
-
-	bool RETVAL;
-	dXSTARG;
-	RETVAL = content_service.IsCurrentExpansionTormentOfVelious();
-	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
-}
-
-XS(XS__IsContentFlagEnabled);
-XS(XS__IsContentFlagEnabled) {
-	dXSARGS;
-	if (items != 1) {
-		Perl_croak(aTHX_ "Usage: quest::is_content_flag_enabled(string flag_name)");
-	}
-
-	std::string flag_name = (std::string) SvPV_nolen(ST(0));
 
-	bool RETVAL;
-	dXSTARG;
-	RETVAL = content_service.IsContentFlagEnabled(flag_name);
-	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
+	return char_id_string;
 }
 
-XS(XS__SetContentFlag);
-XS(XS__SetContentFlag)
+void Perl__AssignToInstance(uint16 instance_id)
 {
-	dXSARGS;
-	if (items != 2) {
-		Perl_croak(aTHX_ "Usage: quest::set_content_flag(string flag_name, enabled)");
-	}
-
-	std::string flag_name = (std::string) SvPV_nolen(ST(0));
-	bool        enabled   = (int) SvIV(ST(1)) != 0;
-
-	content_service.SetContentFlag(flag_name, enabled);
-	XSRETURN_EMPTY;
+	quest_manager.AssignToInstance(instance_id);
 }
 
-XS(XS__get_expedition);
-XS(XS__get_expedition) {
-	dXSARGS;
-	if (items != 0) {
-		Perl_croak(aTHX_ "Usage: quest::get_expedition()");
-	}
+void Perl__AssignToInstanceByCharID(uint16 instance_id, uint32 character_id)
+{
+	quest_manager.AssignToInstanceByCharID(instance_id, character_id);
+}
 
-	Expedition* RETVAL = nullptr;
+void Perl__AssignGroupToInstance(uint16 instance_id)
+{
+	quest_manager.AssignGroupToInstance(instance_id);
+}
+
+void Perl__AssignRaidToInstance(uint16 instance_id)
+{
+	quest_manager.AssignRaidToInstance(instance_id);
+}
+
+void Perl__RemoveFromInstance(uint16 instance_id)
+{
+	quest_manager.RemoveFromInstance(instance_id);
+}
+
+void Perl__RemoveFromInstanceByCharID(uint16 instance_id, uint32 character_id)
+{
+	quest_manager.RemoveFromInstanceByCharID(instance_id, character_id);
+}
+
+bool Perl__CheckInstanceByCharID(uint16 instance_id, uint32 character_id)
+{
+	return quest_manager.CheckInstanceByCharID(instance_id, character_id);
+}
+
+void Perl__RemoveAllFromInstance(uint16 instance_id)
+{
+	quest_manager.RemoveAllFromInstance(instance_id);
+}
+
+void Perl__MovePCInstance(int zone_id, int instance_id, float x, float y, float z)
+{
+	quest_manager.MovePCInstance(zone_id, instance_id, glm::vec4(x, y, z, 0.0f));
+}
+
+void Perl__MovePCInstance(int zone_id, int instance_id, float x, float y, float z, float heading)
+{
+	quest_manager.MovePCInstance(zone_id, instance_id, glm::vec4(x, y, z, heading));
+}
+
+void Perl__FlagInstanceByGroupLeader(uint32 zone, uint16 version)
+{
+	quest_manager.FlagInstanceByGroupLeader(zone, version);
+}
+
+void Perl__FlagInstanceByRaidLeader(uint32 zone, uint16 version)
+{
+	quest_manager.FlagInstanceByRaidLeader(zone, version);
+}
+
+std::string Perl__saylink(const char* text)
+{
+	// const cast is safe since, target api doesn't modify it
+	return quest_manager.saylink(const_cast<char*>(text), false, text);
+}
+
+std::string Perl__saylink(const char* text, bool silent)
+{
+	return quest_manager.saylink(const_cast<char*>(text), silent, text);
+}
+
+std::string Perl__saylink(const char* text, bool silent, const char* link_name)
+{
+	return quest_manager.saylink(const_cast<char*>(text), silent, link_name);
+}
+
+std::string Perl__getcharnamebyid(uint32 char_id)
+{
+	return quest_manager.getcharnamebyid(char_id);
+}
+
+uint32_t Perl__getcharidbyname(const char* name)
+{
+	return quest_manager.getcharidbyname(name);
+}
+
+std::string Perl__getclassname(uint8 class_id)
+{
+	return quest_manager.getclassname(class_id);
+}
+
+std::string Perl__getclassname(uint8 class_id, uint8 level)
+{
+	return quest_manager.getclassname(class_id, level);
+}
+
+uint32 Perl__getcurrencyitemid(uint32 currency_id)
+{
+	return quest_manager.getcurrencyitemid(currency_id);
+}
+
+uint32 Perl__getcurrencyid(uint32 item_id)
+{
+	return quest_manager.getcurrencyid(item_id);
+}
+
+std::string Perl__getguildnamebyid(int guild_id)
+{
+	return quest_manager.getguildnamebyid(guild_id);
+}
+
+int Perl__getguildidbycharid(uint32 char_id)
+{
+	return quest_manager.getguildidbycharid(char_id);
+}
+
+int Perl__getgroupidbycharid(uint32 char_id)
+{
+	return quest_manager.getgroupidbycharid(char_id);
+}
+
+int Perl__getraididbycharid(uint32 char_id)
+{
+	return quest_manager.getraididbycharid(char_id);
+}
+
+void Perl__SetRunning(bool is_running)
+{
+	quest_manager.SetRunning(is_running);
+}
+
+bool Perl__IsRunning()
+{
+	return quest_manager.IsRunning();
+}
+
+bool Perl__IsEffectInSpell(uint32 spell_id, uint32 effect_id)
+{
+	return IsEffectInSpell(spell_id, effect_id);
+}
+
+bool Perl__IsBeneficialSpell(uint16 spell_id)
+{
+	return BeneficialSpell(spell_id);
+}
+
+int Perl__GetSpellResistType(uint16 spell_id)
+{
+	return GetSpellResistType(spell_id);
+}
+
+int Perl__GetSpellTargetType(uint16 spell_id)
+{
+	return GetSpellTargetType(spell_id);
+}
+
+void Perl__FlyMode(GravityBehavior flymode)
+{
+	quest_manager.FlyMode(flymode);
+}
+
+int Perl__FactionValue()
+{
+	return quest_manager.FactionValue();
+}
+
+void Perl__enabletitle(int title_set)
+{
+	quest_manager.enabletitle(title_set);
+}
+
+bool Perl__checktitle(int title_set)
+{
+	return quest_manager.checktitle(title_set);
+}
+
+void Perl__removetitle(int title_set)
+{
+	quest_manager.removetitle(title_set);
+}
+
+void Perl__wearchange(uint8 slot, uint16 texture_id)
+{
+	quest_manager.wearchange(slot, texture_id);
+}
+
+void Perl__wearchange(uint8 slot, uint16 texture_id, uint32 hero_forge_model_id)
+{
+	quest_manager.wearchange(slot, texture_id, hero_forge_model_id);
+}
+
+void Perl__wearchange(uint8 slot, uint16 texture_id, uint32 hero_forge_model_id, uint32 elite_material_id)
+{
+	quest_manager.wearchange(slot, texture_id, hero_forge_model_id, elite_material_id);
+}
+
+void Perl__voicetell(const char* client_name, int macro_id, int race_id, int gender_id)
+{
+	quest_manager.voicetell(client_name, macro_id, race_id, gender_id);
+}
+
+void Perl__LearnRecipe(int recipe_id)
+{
+	quest_manager.LearnRecipe(recipe_id);
+}
+
+void Perl__SendMail(const char* to, const char* from, const char* subject, const char* message)
+{
+	quest_manager.SendMail(to, from, subject, message);
+}
+
+int Perl__GetZoneID(const char* zone)
+{
+	return quest_manager.GetZoneID(zone);
+}
+
+std::string Perl__GetZoneLongName(std::string zone)
+{
+	return quest_manager.GetZoneLongName(zone);
+}
+
+std::string Perl__GetZoneLongNameByID(uint32 zone_id)
+{
+	return quest_manager.GetZoneLongNameByID(zone_id);
+}
+
+std::string Perl__GetZoneShortName(uint32 zone_id)
+{
+	return quest_manager.GetZoneShortName(zone_id);
+}
+
+uint32 Perl__GetTimeSeconds()
+{
+	return Timer::GetTimeSeconds();
+}
+
+bool Perl__enablerecipe(uint32 recipe_id)
+{
+	return quest_manager.EnableRecipe(recipe_id);
+}
+
+bool Perl__disablerecipe(uint32 recipe_id)
+{
+	return quest_manager.DisableRecipe(recipe_id);
+}
+
+void Perl__clear_npctype_cache(int npc_type_id)
+{
+	quest_manager.ClearNPCTypeCache(npc_type_id);
+}
+
+void Perl__reloadzonestaticdata()
+{
+	quest_manager.ReloadZoneStaticData();
+}
+
+void Perl__qs_send_query(std::string query)
+{
+	QServ->SendQuery(std::move(query));
+}
+
+void Perl__qs_player_event(int char_id, std::string message)
+{
+	QServ->PlayerLogEvent(Player_Log_Quest, char_id, message);
+}
+
+void Perl__log(int category, const char* message)
+{
+	if (category < Logs::None || category >= Logs::MaxCategoryID)
+		return;
+
+	Log(Logs::General, static_cast<Logs::LogCategory>(category), message);
+}
+
+void Perl__debug(const char* message)
+{
+	Log(Logs::General, Logs::QuestDebug, message);
+}
+
+void Perl__debug(const char* message, int level)
+{
+	if (level < Logs::General || level > Logs::Detail)
+		return;
+
+	Log(static_cast<Logs::DebugLevel>(level), Logs::QuestDebug, message);
+}
+
+void Perl__log_combat(const char* message)
+{
+	Log(Logs::General, Logs::Combat, message);
+}
+
+void Perl__UpdateZoneHeader(std::string key, std::string value)
+{
+	quest_manager.UpdateZoneHeader(key, value);
+}
+
+void Perl__set_rule(const char* rule_name, const char* rule_value)
+{
+	RuleManager::Instance()->SetRule(rule_name, rule_value);
+}
+
+std::string Perl__get_rule(const char* rule_name)
+{
+	std::string rule_value;
+	RuleManager::Instance()->GetRule(rule_name, rule_value);
+	return rule_value;
+}
+
+std::string Perl__get_data(std::string bucket_key)
+{
+	return DataBucket::GetData(bucket_key);
+}
+
+std::string Perl__get_data_expires(std::string bucket_key)
+{
+	return DataBucket::GetDataExpires(bucket_key);
+}
+
+void Perl__set_data(std::string key, std::string value)
+{
+	DataBucket::SetData(key, value);
+}
+
+void Perl__set_data(std::string key, std::string value, std::string expires_at)
+{
+	DataBucket::SetData(key, value, expires_at);
+}
+
+bool Perl__delete_data(std::string bucket_key)
+{
+	return DataBucket::DeleteData(bucket_key);
+}
+
+bool Perl__IsClassicEnabled()
+{
+	return content_service.IsClassicEnabled();
+}
+
+bool Perl__IsTheRuinsOfKunarkEnabled()
+{
+	return content_service.IsTheRuinsOfKunarkEnabled();
+}
+
+bool Perl__IsTheScarsOfVeliousEnabled()
+{
+	return content_service.IsTheScarsOfVeliousEnabled();
+}
+
+bool Perl__IsTheShadowsOfLuclinEnabled()
+{
+	return content_service.IsTheShadowsOfLuclinEnabled();
+}
+
+bool Perl__IsThePlanesOfPowerEnabled()
+{
+	return content_service.IsThePlanesOfPowerEnabled();
+}
+
+bool Perl__IsTheLegacyOfYkeshaEnabled()
+{
+	return content_service.IsTheLegacyOfYkeshaEnabled();
+}
+
+bool Perl__IsLostDungeonsOfNorrathEnabled()
+{
+	return content_service.IsLostDungeonsOfNorrathEnabled();
+}
+
+bool Perl__IsGatesOfDiscordEnabled()
+{
+	return content_service.IsGatesOfDiscordEnabled();
+}
+
+bool Perl__IsOmensOfWarEnabled()
+{
+	return content_service.IsOmensOfWarEnabled();
+}
+
+bool Perl__IsDragonsOfNorrathEnabled()
+{
+	return content_service.IsDragonsOfNorrathEnabled();
+}
+
+bool Perl__IsDepthsOfDarkhollowEnabled()
+{
+	return content_service.IsDepthsOfDarkhollowEnabled();
+}
+
+bool Perl__IsProphecyOfRoEnabled()
+{
+	return content_service.IsProphecyOfRoEnabled();
+}
+
+bool Perl__IsTheSerpentsSpineEnabled()
+{
+	return content_service.IsTheSerpentsSpineEnabled();
+}
+
+bool Perl__IsTheBuriedSeaEnabled()
+{
+	return content_service.IsTheBuriedSeaEnabled();
+}
+
+bool Perl__IsSecretsOfFaydwerEnabled()
+{
+	return content_service.IsSecretsOfFaydwerEnabled();
+}
+
+bool Perl__IsSeedsOfDestructionEnabled()
+{
+	return content_service.IsSeedsOfDestructionEnabled();
+}
+
+bool Perl__IsUnderfootEnabled()
+{
+	return content_service.IsUnderfootEnabled();
+}
+
+bool Perl__IsHouseOfThuleEnabled()
+{
+	return content_service.IsHouseOfThuleEnabled();
+}
+
+bool Perl__IsVeilOfAlarisEnabled()
+{
+	return content_service.IsVeilOfAlarisEnabled();
+}
+
+bool Perl__IsRainOfFearEnabled()
+{
+	return content_service.IsRainOfFearEnabled();
+}
+
+bool Perl__IsCallOfTheForsakenEnabled()
+{
+	return content_service.IsCallOfTheForsakenEnabled();
+}
+
+bool Perl__IsTheDarkenedSeaEnabled()
+{
+	return content_service.IsTheDarkenedSeaEnabled();
+}
+
+bool Perl__IsTheBrokenMirrorEnabled()
+{
+	return content_service.IsTheBrokenMirrorEnabled();
+}
+
+bool Perl__IsEmpiresOfKunarkEnabled()
+{
+	return content_service.IsEmpiresOfKunarkEnabled();
+}
+
+bool Perl__IsRingOfScaleEnabled()
+{
+	return content_service.IsRingOfScaleEnabled();
+}
+
+bool Perl__IsTheBurningLandsEnabled()
+{
+	return content_service.IsTheBurningLandsEnabled();
+}
+
+bool Perl__IsTormentOfVeliousEnabled()
+{
+	return content_service.IsTormentOfVeliousEnabled();
+}
+
+bool Perl__IsCurrentExpansionClassic()
+{
+	return content_service.IsCurrentExpansionClassic();
+}
+
+bool Perl__IsCurrentExpansionTheRuinsOfKunark()
+{
+	return content_service.IsCurrentExpansionTheRuinsOfKunark();
+}
+
+bool Perl__IsCurrentExpansionTheScarsOfVelious()
+{
+	return content_service.IsCurrentExpansionTheScarsOfVelious();
+}
+
+bool Perl__IsCurrentExpansionTheShadowsOfLuclin()
+{
+	return content_service.IsCurrentExpansionTheShadowsOfLuclin();
+}
+
+bool Perl__IsCurrentExpansionThePlanesOfPower()
+{
+	return content_service.IsCurrentExpansionThePlanesOfPower();
+}
+
+bool Perl__IsCurrentExpansionTheLegacyOfYkesha()
+{
+	return content_service.IsCurrentExpansionTheLegacyOfYkesha();
+}
+
+bool Perl__IsCurrentExpansionLostDungeonsOfNorrath()
+{
+	return content_service.IsCurrentExpansionLostDungeonsOfNorrath();
+}
+
+bool Perl__IsCurrentExpansionGatesOfDiscord()
+{
+	return content_service.IsCurrentExpansionGatesOfDiscord();
+}
+
+bool Perl__IsCurrentExpansionOmensOfWar()
+{
+	return content_service.IsCurrentExpansionOmensOfWar();
+}
+
+bool Perl__IsCurrentExpansionDragonsOfNorrath()
+{
+	return content_service.IsCurrentExpansionDragonsOfNorrath();
+}
+
+bool Perl__IsCurrentExpansionDepthsOfDarkhollow()
+{
+	return content_service.IsCurrentExpansionDepthsOfDarkhollow();
+}
+
+bool Perl__IsCurrentExpansionProphecyOfRo()
+{
+	return content_service.IsCurrentExpansionProphecyOfRo();
+}
+
+bool Perl__IsCurrentExpansionTheSerpentsSpine()
+{
+	return content_service.IsCurrentExpansionTheSerpentsSpine();
+}
+
+bool Perl__IsCurrentExpansionTheBuriedSea()
+{
+	return content_service.IsCurrentExpansionTheBuriedSea();
+}
+
+bool Perl__IsCurrentExpansionSecretsOfFaydwer()
+{
+	return content_service.IsCurrentExpansionSecretsOfFaydwer();
+}
+
+bool Perl__IsCurrentExpansionSeedsOfDestruction()
+{
+	return content_service.IsCurrentExpansionSeedsOfDestruction();
+}
+
+bool Perl__IsCurrentExpansionUnderfoot()
+{
+	return content_service.IsCurrentExpansionUnderfoot();
+}
+
+bool Perl__IsCurrentExpansionHouseOfThule()
+{
+	return content_service.IsCurrentExpansionHouseOfThule();
+}
+
+bool Perl__IsCurrentExpansionVeilOfAlaris()
+{
+	return content_service.IsCurrentExpansionVeilOfAlaris();
+}
+
+bool Perl__IsCurrentExpansionRainOfFear()
+{
+	return content_service.IsCurrentExpansionRainOfFear();
+}
+
+bool Perl__IsCurrentExpansionCallOfTheForsaken()
+{
+	return content_service.IsCurrentExpansionCallOfTheForsaken();
+}
+
+bool Perl__IsCurrentExpansionTheDarkenedSea()
+{
+	return content_service.IsCurrentExpansionTheDarkenedSea();
+}
+
+bool Perl__IsCurrentExpansionTheBrokenMirror()
+{
+	return content_service.IsCurrentExpansionTheBrokenMirror();
+}
+
+bool Perl__IsCurrentExpansionEmpiresOfKunark()
+{
+	return content_service.IsCurrentExpansionEmpiresOfKunark();
+}
+
+bool Perl__IsCurrentExpansionRingOfScale()
+{
+	return content_service.IsCurrentExpansionRingOfScale();
+}
+
+bool Perl__IsCurrentExpansionTheBurningLands()
+{
+	return content_service.IsCurrentExpansionTheBurningLands();
+}
+
+bool Perl__IsCurrentExpansionTormentOfVelious()
+{
+	return content_service.IsCurrentExpansionTormentOfVelious();
+}
+
+bool Perl__IsContentFlagEnabled(std::string flag_name)
+{
+	return content_service.IsContentFlagEnabled(flag_name);
+}
+
+void Perl__SetContentFlag(std::string flag_name, bool enabled)
+{
+	content_service.SetContentFlag(flag_name, enabled);
+}
+
+Expedition* Perl__get_expedition()
+{
 	if (zone && zone->GetInstanceID() != 0)
 	{
-		RETVAL = Expedition::FindCachedExpeditionByZoneInstance(zone->GetZoneID(), zone->GetInstanceID());
+		return Expedition::FindCachedExpeditionByZoneInstance(zone->GetZoneID(), zone->GetInstanceID());
 	}
 
-	EXTEND(sp, 1); // grow stack, function had 0 arguments
-	ST(0) = sv_newmortal(); // PUSHs(sv_newmortal());
-	if (RETVAL) {
-		sv_setref_pv(ST(0), "Expedition", (void*)RETVAL);
-	}
-
-	XSRETURN(1);
+	return nullptr;
 }
 
-XS(XS__get_expedition_by_char_id);
-XS(XS__get_expedition_by_char_id) {
-	dXSARGS;
-	if (items != 1) {
-		Perl_croak(aTHX_ "Usage: quest::get_expedition_by_char_id(uint32 character_id)");
-	}
-
-	uint32 character_id = (int)SvUV(ST(0));
-
-	Expedition* RETVAL = Expedition::FindCachedExpeditionByCharacterID(character_id);
-
-	ST(0) = sv_newmortal();
-	if (RETVAL) {
-		sv_setref_pv(ST(0), "Expedition", (void*)RETVAL);
-	}
-
-	XSRETURN(1);
+Expedition* Perl__get_expedition_by_char_id(uint32 char_id)
+{
+	return Expedition::FindCachedExpeditionByCharacterID(char_id);
 }
 
-XS(XS__get_expedition_by_dz_id);
-XS(XS__get_expedition_by_dz_id) {
-	dXSARGS;
-	if (items != 1) {
-		Perl_croak(aTHX_ "Usage: quest::get_expedition_by_dz_id(uint32 dynamic_zone_id)");
-	}
-
-	uint32 dz_id = (int)SvUV(ST(0));
-
-	Expedition* RETVAL = Expedition::FindCachedExpeditionByDynamicZoneID(dz_id);
-
-	ST(0) = sv_newmortal();
-	if (RETVAL) {
-		sv_setref_pv(ST(0), "Expedition", (void*)RETVAL);
-	}
-
-	XSRETURN(1);
+Expedition* Perl__get_expedition_by_dz_id(uint32 dz_id)
+{
+	return Expedition::FindCachedExpeditionByDynamicZoneID(dz_id);
 }
 
-XS(XS__get_expedition_by_zone_instance);
-XS(XS__get_expedition_by_zone_instance) {
-	dXSARGS;
-	if (items != 2) {
-		Perl_croak(aTHX_ "Usage: quest::GetExpeditionByZoneInstance(uint16 zone_id, uint16 instance_id)");
-	}
-
-	uint16 zone_id = (uint16)SvUV(ST(0));
-	uint16 instance_id = (uint16)SvUV(ST(1));
-
-	Expedition* RETVAL = Expedition::FindCachedExpeditionByZoneInstance(zone_id, instance_id);
-
-	ST(0) = sv_newmortal();
-	if (RETVAL) {
-		sv_setref_pv(ST(0), "Expedition", (void*)RETVAL);
-	}
-
-	XSRETURN(1);
+Expedition* Perl__get_expedition_by_zone_instance(uint32 zone_id, uint32 instance_id)
+{
+	return Expedition::FindCachedExpeditionByZoneInstance(zone_id, instance_id);
 }
 
-XS(XS__get_expedition_lockout_by_char_id);
-XS(XS__get_expedition_lockout_by_char_id) {
-	dXSARGS;
-	if (items != 3) {
-		Perl_croak(aTHX_ "Usage: quest::get_expedition_lockout_by_char_id(uint32 character_id, string expedition_name, string event_name)");
-	}
+perl::reference Perl__get_expedition_lockout_by_char_id(uint32 char_id, std::string expedition_name, std::string event_name)
+{
+	perl::hash table;
 
-	uint32_t character_id = static_cast<uint32_t>(SvUV(ST(0)));
-	std::string expedition_name = SvPV_nolen(ST(1));
-	std::string event_name = SvPV_nolen(ST(2));
+	auto lockouts = Expedition::GetExpeditionLockoutsByCharacterID(char_id);
 
-	auto lockouts = Expedition::GetExpeditionLockoutsByCharacterID(character_id);
 	auto it = std::find_if(lockouts.begin(), lockouts.end(), [&](const ExpeditionLockoutTimer& lockout) {
 		return lockout.IsSameLockout(expedition_name, event_name);
 	});
 
-	// mortalize so its refcnt is auto decremented on function exit to avoid leak
-	HV* hash = (HV*)sv_2mortal((SV*)newHV()); // hash refcnt +1 (mortal -1)
-
 	if (it != lockouts.end())
 	{
-		hv_store(hash, "remaining", strlen("remaining"), newSVuv(it->GetSecondsRemaining()), 0);
-		hv_store(hash, "uuid", strlen("uuid"), newSVpv(it->GetExpeditionUUID().c_str(), 0), 0);
+		table["remaining"] = it->GetSecondsRemaining();
+		table["uuid"] = it->GetExpeditionUUID();
 	}
 
-	ST(0) = sv_2mortal(newRV((SV*)hash)); // hash refcnt: 2 (-1 mortal), reference: 1 (-1 mortal)
-	XSRETURN(1);
+	return perl::reference(table);
 }
 
-XS(XS__get_expedition_lockouts_by_char_id);
-XS(XS__get_expedition_lockouts_by_char_id) {
-	dXSARGS;
-	if (items != 1 && items != 2) {
-		Perl_croak(aTHX_ "Usage: quest::get_expedition_lockouts_by_char_id(uint32 character_id, [string expedition_name])");
-	}
+perl::reference Perl__get_expedition_lockouts_by_char_id(uint32 char_id)
+{
+	perl::hash table;
 
-	HV* hash = newHV(); // hash refcnt +1 (non-mortal, newRV_noinc to not inc)
-	SV* hash_ref = nullptr; // for expedition event hash if filtering on expedition
-
-	uint32_t character_id = static_cast<uint32_t>(SvUV(ST(0)));
-	std::string expedition_name;
-	if (items == 2)
-	{
-		expedition_name = SvPV_nolen(ST(1));
-	}
-
-	auto lockouts = Expedition::GetExpeditionLockoutsByCharacterID(character_id);
-
+	auto lockouts = Expedition::GetExpeditionLockoutsByCharacterID(char_id);
 	for (const auto& lockout : lockouts)
 	{
-		uint32_t name_len = static_cast<uint32_t>(lockout.GetExpeditionName().size());
-		uint32_t event_len = static_cast<uint32_t>(lockout.GetEventName().size());
-
-		// hashes are stored through references inside other hashes/arrays. we need
-		// to wrap newHV in newRV references when inserting nested hash values.
-		// we use newRV_noinc to not increment the hash's ref count; rv will own it
-
-		SV** entry = hv_fetch(hash, lockout.GetExpeditionName().c_str(), name_len, false);
-		if (!entry)
+		if (!table.exists(lockout.GetExpeditionName()))
 		{
-			// create expedition entry in hash with its value as ref to event hash
-			SV* event_hash_ref = newRV_noinc((SV*)newHV()); // ref takes ownership
-			if (!expedition_name.empty() && lockout.GetExpeditionName() == expedition_name)
-			{
-				hash_ref = event_hash_ref; // save ref for filtered expedition return
-			}
-			entry = hv_store(hash, lockout.GetExpeditionName().c_str(), name_len, event_hash_ref, 0);
+			table[lockout.GetExpeditionName()] = perl::reference(perl::hash());
 		}
 
-		// *entry is a reference to expedition's event hash (which it owns). the
-		// event entry in the hash will contain ref to a lockout detail hash
-		if (entry && SvROK(*entry) && SvTYPE(SvRV(*entry)) == SVt_PVHV) // is ref to hash type
+		perl::hash expedition_table = table[lockout.GetExpeditionName()];
+		if (!expedition_table.exists(lockout.GetEventName()))
 		{
-			HV* details_hash = newHV(); // refcnt +1, reference will take ownership
-			hv_store(details_hash, "remaining", strlen("remaining"), newSVuv(lockout.GetSecondsRemaining()), 0);
-			hv_store(details_hash, "uuid", strlen("uuid"), newSVpv(lockout.GetExpeditionUUID().c_str(), 0), 0);
-
-			HV* event_hash = (HV*)SvRV(*entry);
-			hv_store(event_hash, lockout.GetEventName().c_str(), event_len,
-				(SV*)newRV_noinc((SV*)details_hash), 0);
+			expedition_table[lockout.GetEventName()] = perl::reference(perl::hash());
 		}
+
+		perl::hash event_table = expedition_table[lockout.GetEventName()];
+		event_table["remaining"] = lockout.GetSecondsRemaining();
+		event_table["uuid"] = lockout.GetExpeditionUUID();
 	}
 
-	SV* rv = &PL_sv_undef;
-
-	if (!expedition_name.empty())
-	{
-		rv = hash_ref ? sv_2mortal(hash_ref) : &PL_sv_undef; // ref that owns event hash for expedition
-	}
-	else
-	{
-		rv = sv_2mortal(newRV_noinc((SV*)hash)); // takes ownership of expedition hash
-	}
-
-	ST(0) = rv;
-	XSRETURN(1);
+	return perl::reference(table);
 }
 
-XS(XS__add_expedition_lockout_all_clients);
-XS(XS__add_expedition_lockout_all_clients) {
-	dXSARGS;
-	if (items != 3 && items != 4) {
-		Perl_croak(aTHX_ "Usage: quest::add_expedition_lockout_all_clients(string expedition_name, string event_name, uint32 seconds, [string uuid])");
-	}
+perl::reference Perl__get_expedition_lockouts_by_char_id(uint32 char_id, std::string expedition_name)
+{
+	perl::hash table;
 
-	std::string expedition_name = SvPV_nolen(ST(0));
-	std::string event_name = SvPV_nolen(ST(1));
-	uint32_t seconds = static_cast<uint32_t>(SvUV(ST(2)));
-	std::string uuid;
-
-	if (items == 4)
+	auto lockouts = Expedition::GetExpeditionLockoutsByCharacterID(char_id);
+	for (const auto& lockout : lockouts)
 	{
-		uuid = SvPV_nolen(ST(3));
+		if (lockout.GetExpeditionName() == expedition_name)
+		{
+			if (!table.exists(lockout.GetEventName()))
+			{
+				table[lockout.GetEventName()] = perl::reference(perl::hash());
+			}
+			perl::hash event_table = table[lockout.GetEventName()];
+			event_table["remaining"] = lockout.GetSecondsRemaining();
+			event_table["uuid"] = lockout.GetExpeditionUUID();
+		}
 	}
 
+	return perl::reference(table);
+}
+
+void Perl__add_expedition_lockout_all_clients(std::string expedition_name, std::string event_name, uint32 seconds)
+{
+	auto lockout = ExpeditionLockoutTimer::CreateLockout(expedition_name, event_name, seconds);
+	Expedition::AddLockoutClients(lockout);
+}
+
+void Perl__add_expedition_lockout_all_clients(std::string expedition_name, std::string event_name, uint32 seconds, std::string uuid)
+{
 	auto lockout = ExpeditionLockoutTimer::CreateLockout(expedition_name, event_name, seconds, uuid);
 	Expedition::AddLockoutClients(lockout);
-
-	XSRETURN_EMPTY;
 }
 
-XS(XS__add_expedition_lockout_by_char_id);
-XS(XS__add_expedition_lockout_by_char_id) {
-	dXSARGS;
-	if (items != 4 && items != 5) {
-		Perl_croak(aTHX_ "Usage: quest::add_expedition_lockout_by_char_id(uint32 character_id, string expedition_name, string event_name, uint32 seconds, [string uuid])");
-	}
-
-	std::string uuid;
-	if (items == 5)
-	{
-		uuid = SvPV_nolen(ST(4));
-	}
-
-	uint32_t character_id = static_cast<uint32_t>(SvUV(ST(0)));
-	std::string expedition_name = SvPV_nolen(ST(1));
-	std::string event_name = SvPV_nolen(ST(2));
-	uint32_t seconds = static_cast<uint32_t>(SvUV(ST(3)));
-
-	Expedition::AddLockoutByCharacterID(character_id, expedition_name, event_name, seconds, uuid);
-
-	XSRETURN_EMPTY;
+void Perl__add_expedition_lockout_by_char_id(uint32 char_id, std::string expedition_name, std::string event_name, uint32 seconds)
+{
+	Expedition::AddLockoutByCharacterID(char_id, expedition_name, event_name, seconds);
 }
 
-XS(XS__remove_expedition_lockout_by_char_id);
-XS(XS__remove_expedition_lockout_by_char_id) {
-	dXSARGS;
-	if (items != 3) {
-		Perl_croak(aTHX_ "Usage: quest::remove_expedition_lockout_by_char_id(uint32 character_id, string expedition_name, string event_name)");
-	}
-
-	uint32_t character_id = static_cast<uint32_t>(SvUV(ST(0)));
-	std::string expedition_name = SvPV_nolen(ST(1));
-	std::string event_name = SvPV_nolen(ST(2));
-
-	Expedition::RemoveLockoutsByCharacterID(character_id, expedition_name, event_name);
-
-	XSRETURN_EMPTY;
+void Perl__add_expedition_lockout_by_char_id(uint32 char_id, std::string expedition_name, std::string event_name, uint32 seconds, std::string uuid)
+{
+	Expedition::AddLockoutByCharacterID(char_id, expedition_name, event_name, seconds, uuid);
 }
 
-XS(XS__remove_all_expedition_lockouts_by_char_id);
-XS(XS__remove_all_expedition_lockouts_by_char_id) {
-	dXSARGS;
-	if (items != 1 && items != 2) {
-		Perl_croak(aTHX_ "Usage: quest::remove_expedition_lockout_by_char_id(uint32 character_id, [string expedition_name])");
-	}
-
-	std::string expedition_name;
-	if (items == 2)
-	{
-		expedition_name = SvPV_nolen(ST(1));
-	}
-
-	uint32_t character_id = static_cast<uint32_t>(SvUV(ST(0)));
-	Expedition::RemoveLockoutsByCharacterID(character_id, expedition_name);
-
-	XSRETURN_EMPTY;
+void Perl__remove_expedition_lockout_by_char_id(uint32 char_id, std::string expedition_name, std::string event_name)
+{
+	Expedition::RemoveLockoutsByCharacterID(char_id, expedition_name, event_name);
 }
 
-XS(XS__createitem);
-XS(XS__createitem) {
-	dXSARGS;
-	if (items < 1 || items > 9) {
-		Perl_croak(aTHX_ "Usage: quest::createitem(uint32 item_id, [int16 charges = 0, uint32 augment_one = 0, uint32 augment_two = 0, uint32 augment_three = 0, uint32 augment_four = 0, uint32 augment_five = 0, uint32 augment_six = 0, bool attuned = false])");
-	}
-
-	EQ::ItemInstance* RETVAL = nullptr;
-	uint32 item_id = (uint32)SvUV(ST(0));
-	int16 charges = 0;
-	uint32 augment_one = 0;
-	uint32 augment_two = 0;
-	uint32 augment_three = 0;
-	uint32 augment_four = 0;
-	uint32 augment_five = 0;
-	uint32 augment_six = 0;
-	bool attuned = false;
-	if (items > 1)
-		charges = (int16)SvIV(ST(1));
-	if (items > 2)
-		augment_one = (uint32)SvUV(ST(2));
-	if (items > 3)
-		augment_two = (uint32)SvUV(ST(3));
-	if (items > 4)
-		augment_three = (uint32)SvUV(ST(4));
-	if (items > 5)
-		augment_four = (uint32)SvUV(ST(5));
-	if (items > 6)
-		augment_five = (uint32)SvUV(ST(6));
-	if (items > 7)
-		augment_six = (uint32)SvUV(ST(7));
-	if (items > 8)
-		attuned = (bool)SvNV(ST(8));
-
-	if (database.GetItem(item_id)) {
-		RETVAL = database.CreateItem(item_id, charges, augment_one, augment_two, augment_three, augment_four, augment_five, augment_six, attuned);
-	}
-
-	ST(0) = sv_newmortal();
-	if (RETVAL) {
-		sv_setref_pv(ST(0), "QuestItem", (void*)RETVAL);
-	}
-	XSRETURN(1);
+void Perl__remove_all_expedition_lockouts_by_char_id(uint32 char_id)
+{
+	Expedition::RemoveLockoutsByCharacterID(char_id);
 }
 
-XS(XS__secondstotime);
-XS(XS__secondstotime) {
-	dXSARGS;
-	if (items != 1) {
-		Perl_croak(aTHX_ "Usage: quest::secondstotime(int duration)");
-	}
-
-	dXSTARG;
-	std::string time_string;
-	int duration = (int) SvIV(ST(0));
-	time_string = quest_manager.secondstotime(duration);
-	sv_setpv(TARG, time_string.c_str());
-	XSprePUSH;
-	PUSHTARG;
-	XSRETURN(1);
+void Perl__remove_all_expedition_lockouts_by_char_id(uint32 char_id, std::string expedition_name)
+{
+	Expedition::RemoveLockoutsByCharacterID(char_id, expedition_name);
 }
 
-XS(XS__gethexcolorcode);
-XS(XS__gethexcolorcode) {
-	dXSARGS;
-	if (items != 1) {
-		Perl_croak(aTHX_ "Usage: quest::gethexcolorcode(string color_name)");
-	}
-
-	dXSTARG;
-	std::string hex_color_code;
-	std::string color_name = SvPV_nolen(ST(0));
-	hex_color_code = quest_manager.gethexcolorcode(color_name);
-	sv_setpv(TARG, hex_color_code.c_str());
-	XSprePUSH;
-	PUSHTARG;
-	XSRETURN(1);
+EQ::ItemInstance* Perl__createitem(uint32 item_id)
+{
+	return database.CreateItem(item_id);
 }
 
-XS(XS__getaaexpmodifierbycharid);
-XS(XS__getaaexpmodifierbycharid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::getaaexpmodifierbycharid(uint32 character_id, uint32 zone_id)");
-
-	dXSTARG;
-	double aa_modifier;
-	uint32 character_id = (uint32) SvUV(ST(0));
-	uint32 zone_id = (uint32) SvUV(ST(1));
-	aa_modifier = quest_manager.GetAAEXPModifierByCharID(character_id, zone_id);
-	XSprePUSH;
-	PUSHn((double) aa_modifier);
-	XSRETURN(1);
+EQ::ItemInstance* Perl__createitem(uint32 item_id, int16 charges)
+{
+	return database.CreateItem(item_id, charges);
 }
 
-XS(XS__getexpmodifierbycharid);
-XS(XS__getexpmodifierbycharid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::getexpmodifierbycharid(uint32 character_id, uint32 zone_id)");
-
-	dXSTARG;
-	double exp_modifier;
-	uint32 character_id = (uint32) SvUV(ST(0));
-	uint32 zone_id = (uint32) SvUV(ST(1));
-	exp_modifier = quest_manager.GetEXPModifierByCharID(character_id, zone_id);
-	XSprePUSH;
-	PUSHn((double) exp_modifier);
-	XSRETURN(1);
+EQ::ItemInstance* Perl__createitem(uint32 item_id, int16 charges, uint32 augment_one)
+{
+	return database.CreateItem(item_id, charges, augment_one);
 }
 
-XS(XS__setaaexpmodifierbycharid);
-XS(XS__setaaexpmodifierbycharid) {
-	dXSARGS;
-	if (items != 3) {
-		Perl_croak(aTHX_ "Usage: quest::setaaexpmodifierbycharid(uint32 character_id, uint32 zone_id, float aa_modifier)");
-	}
-	uint32 character_id = (uint32) SvUV(ST(0));
-	uint32 zone_id = (uint32) SvUV(ST(1));
-	double aa_modifier = (double) SvNV(ST(2));
+EQ::ItemInstance* Perl__createitem(uint32 item_id, int16 charges, uint32 augment_one, uint32 augment_two)
+{
+	return database.CreateItem(item_id, charges, augment_one, augment_two);
+}
+
+EQ::ItemInstance* Perl__createitem(uint32 item_id, int16 charges, uint32 augment_one, uint32 augment_two, uint32 augment_three)
+{
+	return database.CreateItem(item_id, charges, augment_one, augment_two, augment_three);
+}
+
+EQ::ItemInstance* Perl__createitem(uint32 item_id, int16 charges, uint32 augment_one, uint32 augment_two, uint32 augment_three, uint32 augment_four)
+{
+	return database.CreateItem(item_id, charges, augment_one, augment_two, augment_three, augment_four);
+}
+
+EQ::ItemInstance* Perl__createitem(uint32 item_id, int16 charges, uint32 augment_one, uint32 augment_two, uint32 augment_three, uint32 augment_four, uint32 augment_five)
+{
+	return database.CreateItem(item_id, charges, augment_one, augment_two, augment_three, augment_four, augment_five);
+}
+
+EQ::ItemInstance* Perl__createitem(uint32 item_id, int16 charges, uint32 augment_one, uint32 augment_two, uint32 augment_three, uint32 augment_four, uint32 augment_five, uint32 augment_six)
+{
+	return database.CreateItem(item_id, charges, augment_one, augment_two, augment_three, augment_four, augment_five, augment_six);
+}
+
+EQ::ItemInstance* Perl__createitem(uint32 item_id, int16 charges, uint32 augment_one, uint32 augment_two, uint32 augment_three, uint32 augment_four, uint32 augment_five, uint32 augment_six, bool attuned)
+{
+	return database.CreateItem(item_id, charges, augment_one, augment_two, augment_three, augment_four, augment_five, augment_six, attuned);
+}
+
+std::string Perl__secondstotime(int duration)
+{
+	return Strings::SecondsToTime(duration);
+}
+
+uint32 Perl__timetoseconds(std::string time_string)
+{
+	return Strings::TimeToSeconds(time_string);
+}
+
+std::string Perl__gethexcolorcode(std::string color_name)
+{
+	return quest_manager.gethexcolorcode(color_name);
+}
+
+double Perl__getaaexpmodifierbycharid(uint32 character_id, uint32 zone_id)
+{
+	return quest_manager.GetAAEXPModifierByCharID(character_id, zone_id);
+}
+
+double Perl__getaaexpmodifierbycharid(uint32 character_id, uint32 zone_id, int16 instance_version)
+{
+	return quest_manager.GetAAEXPModifierByCharID(character_id, zone_id, instance_version);
+}
+
+double Perl__getexpmodifierbycharid(uint32 character_id, uint32 zone_id)
+{
+	return quest_manager.GetEXPModifierByCharID(character_id, zone_id);
+}
+
+double Perl__getexpmodifierbycharid(uint32 character_id, uint32 zone_id, int16 instance_version)
+{
+	return quest_manager.GetEXPModifierByCharID(character_id, zone_id, instance_version);
+}
+
+void Perl__setaaexpmodifierbycharid(uint32 character_id, uint32 zone_id, double aa_modifier)
+{
 	quest_manager.SetAAEXPModifierByCharID(character_id, zone_id, aa_modifier);
-	XSRETURN_EMPTY;
 }
 
-XS(XS__setexpmodifierbycharid);
-XS(XS__setexpmodifierbycharid) {
-	dXSARGS;
-	if (items != 3) {
-		Perl_croak(aTHX_ "Usage: quest::setexpmodifierbycharid(uint32 character_id, uint32 zone_id, float exp_modifier)");
-	}
-	uint32 character_id = (uint32) SvUV(ST(0));
-	uint32 zone_id = (uint32) SvUV(ST(1));
-	double exp_modifier = (double) SvNV(ST(2));
+void Perl__setaaexpmodifierbycharid(uint32 character_id, uint32 zone_id, double aa_modifier, int16 instance_version)
+{
+	quest_manager.SetAAEXPModifierByCharID(character_id, zone_id, aa_modifier, instance_version);
+}
+
+void Perl__setexpmodifierbycharid(uint32 character_id, uint32 zone_id, double exp_modifier)
+{
 	quest_manager.SetEXPModifierByCharID(character_id, zone_id, exp_modifier);
-	XSRETURN_EMPTY;
 }
 
-XS(XS__getcleannpcnamebyid);
-XS(XS__getcleannpcnamebyid) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::getcleannpcnamebyid(uint32 npc_id)");
-
-	dXSTARG;
-	uint32 npc_id = (uint32) SvUV(ST(0));
-	auto npc_name = quest_manager.getcleannpcnamebyid(npc_id);
-	sv_setpv(TARG, npc_name.c_str());
-	XSprePUSH;
-	PUSHTARG;
-	XSRETURN(1);
+void Perl__setexpmodifierbycharid(uint32 character_id, uint32 zone_id, double exp_modifier, int16 instance_version)
+{
+	quest_manager.SetEXPModifierByCharID(character_id, zone_id, exp_modifier, instance_version);
 }
 
-XS(XS__getgendername);
-XS(XS__getgendername) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::getgendername(uint32 gender_id)");
-
-	dXSTARG;
-	uint32 gender_id = (uint32) SvUV(ST(0));
-	auto gender_name = quest_manager.getgendername(gender_id);
-	sv_setpv(TARG, gender_name.c_str());
+std::string Perl__getcleannpcnamebyid(uint32 npc_id)
+{
+	return quest_manager.getcleannpcnamebyid(npc_id);
 }
 
-XS(XS__getdeityname);
-XS(XS__getdeityname) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::getdeityname(uint32 deity_id)");
-
-	dXSTARG;
-	uint32 deity_id = (uint32) SvUV(ST(0));
-	auto deity_name = quest_manager.getdeityname(deity_id);
-	sv_setpv(TARG, deity_name.c_str());
+std::string Perl__getgendername(uint32 gender_id)
+{
+	return quest_manager.getgendername(gender_id);
 }
 
-XS(XS__getinventoryslotname);
-XS(XS__getinventoryslotname) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::getinventoryslotname(int16 slot_id)");
-
-	dXSTARG;
-	int16 slot_id = (int16) SvIV(ST(0));
-	auto slot_name = quest_manager.getinventoryslotname(slot_id);
-	sv_setpv(TARG, slot_name.c_str());
-	XSprePUSH;
-	PUSHTARG;
-	XSRETURN(1);
+std::string Perl__getdeityname(uint32 deity_id)
+{
+	return quest_manager.getdeityname(deity_id);
 }
 
-XS(XS__rename);
-XS(XS__rename) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::rename(string name)");
+std::string Perl__getinventoryslotname(int16 slot_id)
+{
+	return quest_manager.getinventoryslotname(slot_id);
+}
 
-	std::string name = (std::string) SvPV_nolen(ST(0));
+void Perl__rename(std::string name)
+{
 	quest_manager.rename(name);
-	XSRETURN_EMPTY;
 }
 
-XS(XS__get_data_remaining);
-XS(XS__get_data_remaining) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::get_data_remaining(string bucket_name)");
+std::string Perl__get_data_remaining(std::string bucket_name)
+{
+	return DataBucket::GetDataRemaining(bucket_name);
+}
 
-	dXSTARG;
-	std::string bucket_name = (std::string) SvPV_nolen(ST(0));
+const int Perl__getitemstat(uint32 item_id, std::string identifier)
+{
+	return quest_manager.getitemstat(item_id, identifier);
+}
 
-	sv_setpv(TARG, DataBucket::GetDataRemaining(bucket_name).c_str());
-	XSprePUSH;
-	PUSHTARG;
-	XSRETURN(1);
+int Perl__getspellstat(uint32 spell_id, std::string stat_identifier)
+{
+	return quest_manager.getspellstat(spell_id, stat_identifier);
 }
 
-XS(XS__getitemstat);
-XS(XS__getitemstat) {
-	dXSARGS;
-	int stat_value;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::getitemstat(uint32 item_id, string stat_identifier)");
+int Perl__getspellstat(uint32 spell_id, std::string stat_identifier, uint8 slot)
+{
+	return quest_manager.getspellstat(spell_id, stat_identifier, slot);
+}
 
-	dXSTARG;
-	uint32 item_id = (uint32) SvUV(ST(0));
-	std::string stat_identifier = (std::string) SvPV_nolen(ST(1));
-	stat_value = quest_manager.getitemstat(item_id, stat_identifier);
+void Perl__crosszoneaddldonlossbycharid(int character_id, uint32 theme_id)
+{
+	quest_manager.CrossZoneLDoNUpdate(CZUpdateType_Character, CZLDoNUpdateSubtype_AddLoss, character_id, theme_id);
+}
 
-	XSprePUSH;
-	PUSHi((IV) stat_value);
+void Perl__crosszoneaddldonlossbygroupid(int group_id, uint32 theme_id)
+{
+	quest_manager.CrossZoneLDoNUpdate(CZUpdateType_Group, CZLDoNUpdateSubtype_AddLoss, group_id, theme_id);
+}
 
-	XSRETURN(1);
+void Perl__crosszoneaddldonlossbyraidid(int raid_id, uint32 theme_id)
+{
+	quest_manager.CrossZoneLDoNUpdate(CZUpdateType_Raid, CZLDoNUpdateSubtype_AddLoss, raid_id, theme_id);
 }
 
-XS(XS__getspellstat);
-XS(XS__getspellstat) {
-	dXSARGS;
-	int stat_value;
-	if (items != 2 && items != 3)
-		Perl_croak(aTHX_ "Usage: quest::getspellstat(uint32 spell_id, string stat_identifier, uint8 slot)");
+void Perl__crosszoneaddldonlossbyguildid(int guild_id, uint32 theme_id)
+{
+	quest_manager.CrossZoneLDoNUpdate(CZUpdateType_Guild, CZLDoNUpdateSubtype_AddLoss, guild_id, theme_id);
+}
 
-	dXSTARG;
-	uint32 spell_id = (uint32) SvUV(ST(0));
-	std::string stat_identifier = (std::string) SvPV_nolen(ST(1));
-	uint8 slot = 0;
-	if (items == 3)
-		slot = (uint8) SvUV(ST(2));
+void Perl__crosszoneaddldonlossbyexpeditionid(uint32 expedition_id, uint32 theme_id)
+{
+	quest_manager.CrossZoneLDoNUpdate(CZUpdateType_Expedition, CZLDoNUpdateSubtype_AddLoss, expedition_id, theme_id);
+}
 
-	stat_value = quest_manager.getspellstat(spell_id, stat_identifier, slot);
+void Perl__crosszoneaddldonlossbyclientname(const char* client_name, uint32 theme_id)
+{
+	int update_identifier = 0;
+	int points = 1;
+	quest_manager.CrossZoneLDoNUpdate(CZUpdateType_ClientName, CZLDoNUpdateSubtype_AddLoss, update_identifier, theme_id, points, client_name);
+}
 
-	XSprePUSH;
-	PUSHi((IV) stat_value);
+void Perl__crosszoneaddldonpointsbycharid(int character_id, uint32 theme_id, int points)
+{
+	quest_manager.CrossZoneLDoNUpdate(CZUpdateType_Character, CZLDoNUpdateSubtype_AddPoints, character_id, theme_id, points);
+}
 
-	XSRETURN(1);
+void Perl__crosszoneaddldonpointsbygroupid(int group_id, uint32 theme_id, int points)
+{
+	quest_manager.CrossZoneLDoNUpdate(CZUpdateType_Group, CZLDoNUpdateSubtype_AddPoints, group_id, theme_id, points);
 }
 
-XS(XS__crosszoneaddldonlossbycharid);
-XS(XS__crosszoneaddldonlossbycharid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszoneaddldonlossbycharid(int character_id, uint32 theme_id)");
-	{
-		uint8 update_type = CZUpdateType_Character;
-		uint8 update_subtype = CZLDoNUpdateSubtype_AddLoss;
-		int character_id = (int) SvIV(ST(0));
-		uint32 theme_id = (uint32) SvUV(ST(1));
-		quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, character_id, theme_id);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneaddldonpointsbyraidid(int raid_id, uint32 theme_id, int points)
+{
+	quest_manager.CrossZoneLDoNUpdate(CZUpdateType_Raid, CZLDoNUpdateSubtype_AddPoints, raid_id, theme_id, points);
 }
 
-XS(XS__crosszoneaddldonlossbygroupid);
-XS(XS__crosszoneaddldonlossbygroupid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszoneaddldonlossbygroupid(int group_id, uint32 theme_id)");
-	{
-		uint8 update_type = CZUpdateType_Group;
-		uint8 update_subtype = CZLDoNUpdateSubtype_AddLoss;
-		int group_id = (int) SvIV(ST(0));
-		uint32 theme_id = (uint32) SvUV(ST(1));
-		quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, group_id, theme_id);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneaddldonpointsbyguildid(int guild_id, uint32 theme_id, int points)
+{
+	quest_manager.CrossZoneLDoNUpdate(CZUpdateType_Guild, CZLDoNUpdateSubtype_AddPoints, guild_id, theme_id, points);
 }
 
-XS(XS__crosszoneaddldonlossbyraidid);
-XS(XS__crosszoneaddldonlossbyraidid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszoneaddldonlossbyraidid(int raid_id, uint32 theme_id)");
-	{
-		uint8 update_type = CZUpdateType_Raid;
-		uint8 update_subtype = CZLDoNUpdateSubtype_AddLoss;
-		int raid_id = (int) SvIV(ST(0));
-		uint32 theme_id = (uint32) SvUV(ST(1));
-		quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, raid_id, theme_id);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneaddldonpointsbyexpeditionid(uint32 expedition_id, uint32 theme_id, int points)
+{
+	quest_manager.CrossZoneLDoNUpdate(CZUpdateType_Expedition, CZLDoNUpdateSubtype_AddPoints, expedition_id, theme_id, points);
 }
 
-XS(XS__crosszoneaddldonlossbyguildid);
-XS(XS__crosszoneaddldonlossbyguildid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszoneaddldonlossbyguildid(int guild_id, uint32 theme_id)");
-	{
-		uint8 update_type = CZUpdateType_Guild;
-		uint8 update_subtype = CZLDoNUpdateSubtype_AddLoss;
-		int guild_id = (int) SvIV(ST(0));
-		uint32 theme_id = (uint32) SvUV(ST(1));
-		quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, guild_id, theme_id);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneaddldonpointsbyclientname(const char* client_name, uint32 theme_id, int points)
+{
+	int update_identifier = 0;
+	quest_manager.CrossZoneLDoNUpdate(CZUpdateType_ClientName, CZLDoNUpdateSubtype_AddPoints, update_identifier, theme_id, points, client_name);
 }
 
-XS(XS__crosszoneaddldonlossbyexpeditionid);
-XS(XS__crosszoneaddldonlossbyexpeditionid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszoneaddldonlossbyexpeditionid(uint32 expedition_id, uint32 theme_id)");
-	{
-		uint8 update_type = CZUpdateType_Expedition;
-		uint8 update_subtype = CZLDoNUpdateSubtype_AddLoss;
-		uint32 expedition_id = (uint32) SvUV(ST(0));
-		uint32 theme_id = (uint32) SvUV(ST(1));
-		quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, expedition_id, theme_id);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneaddldonwinbycharid(int character_id, uint32 theme_id)
+{
+	quest_manager.CrossZoneLDoNUpdate(CZUpdateType_Character, CZLDoNUpdateSubtype_AddWin, character_id, theme_id);
 }
 
-XS(XS__crosszoneaddldonlossbyclientname);
-XS(XS__crosszoneaddldonlossbyclientname) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszoneaddldonlossbyclientname(const char* client_name, uint32 theme_id)");
-	{
-		uint8 update_type = CZUpdateType_ClientName;
-		uint8 update_subtype = CZLDoNUpdateSubtype_AddLoss;
-		int update_identifier = 0;
-		int points = 1;
-		const char* client_name = (const char*) SvPV_nolen(ST(0));
-		uint32 theme_id = (uint32) SvUV(ST(1));
-		quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, update_identifier, theme_id, points, client_name);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneaddldonwinbygroupid(int group_id, uint32 theme_id)
+{
+	quest_manager.CrossZoneLDoNUpdate(CZUpdateType_Group, CZLDoNUpdateSubtype_AddWin, group_id, theme_id);
 }
 
-XS(XS__crosszoneaddldonpointsbycharid);
-XS(XS__crosszoneaddldonpointsbycharid) {
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: quest::crosszoneaddldonpointsbycharid(int character_id, uint32 theme_id, int points)");
-	{
-		uint8 update_type = CZUpdateType_Character;
-		uint8 update_subtype = CZLDoNUpdateSubtype_AddPoints;
-		int character_id = (int) SvIV(ST(0));
-		uint32 theme_id = (uint32) SvUV(ST(1));
-		int points = (int) SvIV(ST(2));
-		quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, character_id, theme_id, points);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneaddldonwinbyraidid(int raid_id, uint32 theme_id)
+{
+	quest_manager.CrossZoneLDoNUpdate(CZUpdateType_Raid, CZLDoNUpdateSubtype_AddWin, raid_id, theme_id);
 }
 
-XS(XS__crosszoneaddldonpointsbygroupid);
-XS(XS__crosszoneaddldonpointsbygroupid) {
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: quest::crosszoneaddldonpointsbygroupid(int group_id, uint32 theme_id, int points)");
-	{
-		uint8 update_type = CZUpdateType_Group;
-		uint8 update_subtype = CZLDoNUpdateSubtype_AddPoints;
-		int group_id = (int) SvIV(ST(0));
-		uint32 theme_id = (uint32) SvUV(ST(1));
-		int points = (int) SvIV(ST(2));
-		quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, group_id, theme_id, points);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneaddldonwinbyguildid(int guild_id, uint32 theme_id)
+{
+	quest_manager.CrossZoneLDoNUpdate(CZUpdateType_Guild, CZLDoNUpdateSubtype_AddWin, guild_id, theme_id);
 }
 
-XS(XS__crosszoneaddldonpointsbyraidid);
-XS(XS__crosszoneaddldonpointsbyraidid) {
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: quest::crosszoneaddldonpointsbyraidid(int raid_id, uint32 theme_id, int points)");
-	{
-		uint8 update_type = CZUpdateType_Raid;
-		uint8 update_subtype = CZLDoNUpdateSubtype_AddPoints;
-		int raid_id = (int) SvIV(ST(0));
-		uint32 theme_id = (uint32) SvUV(ST(1));
-		int points = (int) SvIV(ST(2));
-		quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, raid_id, theme_id, points);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneaddldonwinbyexpeditionid(uint32 expedition_id, uint32 theme_id)
+{
+	quest_manager.CrossZoneLDoNUpdate(CZUpdateType_Expedition, CZLDoNUpdateSubtype_AddWin, expedition_id, theme_id);
 }
 
-XS(XS__crosszoneaddldonpointsbyguildid);
-XS(XS__crosszoneaddldonpointsbyguildid) {
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: quest::crosszoneaddldonpointsbyguildid(int guild_id, uint32 theme_id, int points)");
-	{
-		uint8 update_type = CZUpdateType_Guild;
-		uint8 update_subtype = CZLDoNUpdateSubtype_AddPoints;
-		int guild_id = (int) SvIV(ST(0));
-		uint32 theme_id = (uint32) SvUV(ST(1));
-		int points = (int) SvIV(ST(2));
-		quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, guild_id, theme_id, points);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneaddldonwinbyclientname(const char* client_name, uint32 theme_id)
+{
+	int update_identifier = 0;
+	int points = 1;
+	quest_manager.CrossZoneLDoNUpdate(CZUpdateType_ClientName, CZLDoNUpdateSubtype_AddWin, update_identifier, theme_id, points, client_name);
 }
 
-XS(XS__crosszoneaddldonpointsbyexpeditionid);
-XS(XS__crosszoneaddldonpointsbyexpeditionid) {
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: quest::crosszoneaddldonpointsbyexpeditionid(uint32 expedition_id, uint32 theme_id, int points)");
-	{
-		uint8 update_type = CZUpdateType_Expedition;
-		uint8 update_subtype = CZLDoNUpdateSubtype_AddPoints;
-		uint32 expedition_id = (uint32) SvUV(ST(0));
-		uint32 theme_id = (uint32) SvUV(ST(1));
-		int points = (int) SvIV(ST(2));
-		quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, expedition_id, theme_id, points);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneassigntaskbycharid(int character_id, uint32 task_id)
+{
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(CZUpdateType_Character, CZTaskUpdateSubtype_AssignTask, character_id, task_id, task_subidentifier, update_count, enforce_level_requirement);
 }
 
-XS(XS__crosszoneaddldonpointsbyclientname);
-XS(XS__crosszoneaddldonpointsbyclientname) {
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: quest::crosszoneaddldonpointsbyclientname(const char* client_name, uint32 theme_id, int points)");
-	{
-		uint8 update_type = CZUpdateType_ClientName;
-		uint8 update_subtype = CZLDoNUpdateSubtype_AddPoints;
-		int update_identifier = 0;
-		const char* client_name = (const char*) SvPV_nolen(ST(0));
-		uint32 theme_id = (uint32) SvUV(ST(1));
-		int points = (int) SvIV(ST(2));
-		quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, update_identifier, theme_id, points, client_name);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneassigntaskbycharid(int character_id, uint32 task_id, bool enforce_level_requirement)
+{
+	int task_subidentifier = -1;
+	int update_count = 1;
+	quest_manager.CrossZoneTaskUpdate(CZUpdateType_Character, CZTaskUpdateSubtype_AssignTask, character_id, task_id, task_subidentifier, update_count, enforce_level_requirement);
 }
 
-XS(XS__crosszoneaddldonwinbycharid);
-XS(XS__crosszoneaddldonwinbycharid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszoneaddldonwinbycharid(int character_id, uint32 theme_id)");
-	{
-		uint8 update_type = CZUpdateType_Character;
-		uint8 update_subtype = CZLDoNUpdateSubtype_AddWin;
-		int character_id = (int) SvIV(ST(0));
-		uint32 theme_id = (uint32) SvUV(ST(1));
-		quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, character_id, theme_id);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneassigntaskbygroupid(int group_id, uint32 task_id)
+{
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(CZUpdateType_Group, CZTaskUpdateSubtype_AssignTask, group_id, task_id, task_subidentifier, update_count, enforce_level_requirement);
 }
 
-XS(XS__crosszoneaddldonwinbygroupid);
-XS(XS__crosszoneaddldonwinbygroupid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszoneaddldonwinbygroupid(int group_id, uint32 theme_id)");
-	{
-		uint8 update_type = CZUpdateType_Group;
-		uint8 update_subtype = CZLDoNUpdateSubtype_AddWin;
-		int group_id = (int) SvIV(ST(0));
-		uint32 theme_id = (uint32) SvUV(ST(1));
-		quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, group_id, theme_id);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneassigntaskbygroupid(int group_id, uint32 task_id, bool enforce_level_requirement)
+{
+	int task_subidentifier = -1;
+	int update_count = 1;
+	quest_manager.CrossZoneTaskUpdate(CZUpdateType_Group, CZTaskUpdateSubtype_AssignTask, group_id, task_id, task_subidentifier, update_count, enforce_level_requirement);
 }
 
-XS(XS__crosszoneaddldonwinbyraidid);
-XS(XS__crosszoneaddldonwinbyraidid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszoneaddldonwinbyraidid(int raid_id, uint32 theme_id)");
-	{
-		uint8 update_type = CZUpdateType_Raid;
-		uint8 update_subtype = CZLDoNUpdateSubtype_AddWin;
-		int raid_id = (int) SvIV(ST(0));
-		uint32 theme_id = (uint32) SvUV(ST(1));
-		quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, raid_id, theme_id);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneassigntaskbyraidid(int raid_id, uint32 task_id)
+{
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(CZUpdateType_Raid, CZTaskUpdateSubtype_AssignTask, raid_id, task_id, task_subidentifier, update_count, enforce_level_requirement);
 }
 
-XS(XS__crosszoneaddldonwinbyguildid);
-XS(XS__crosszoneaddldonwinbyguildid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszoneaddldonwinbyguildid(int guild_id, uint32 theme_id)");
-	{
-		uint8 update_type = CZUpdateType_Guild;
-		uint8 update_subtype = CZLDoNUpdateSubtype_AddWin;
-		int guild_id = (int) SvIV(ST(0));
-		uint32 theme_id = (uint32) SvUV(ST(1));
-		quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, guild_id, theme_id);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneassigntaskbyraidid(int raid_id, uint32 task_id, bool enforce_level_requirement)
+{
+	int task_subidentifier = -1;
+	int update_count = 1;
+	quest_manager.CrossZoneTaskUpdate(CZUpdateType_Raid, CZTaskUpdateSubtype_AssignTask, raid_id, task_id, task_subidentifier, update_count, enforce_level_requirement);
 }
 
-XS(XS__crosszoneaddldonwinbyexpeditionid);
-XS(XS__crosszoneaddldonwinbyexpeditionid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszoneaddldonwinbyexpeditionid(uint32 expedition_id, uint32 theme_id)");
-	{
-		uint8 update_type = CZUpdateType_Expedition;
-		uint8 update_subtype = CZLDoNUpdateSubtype_AddWin;
-		uint32 expedition_id = (uint32) SvUV(ST(0));
-		uint32 theme_id = (uint32) SvUV(ST(1));
-		quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, expedition_id, theme_id);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneassigntaskbyguildid(int guild_id, uint32 task_id)
+{
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(CZUpdateType_Guild, CZTaskUpdateSubtype_AssignTask, guild_id, task_id, task_subidentifier, update_count, enforce_level_requirement);
 }
 
-XS(XS__crosszoneaddldonwinbyclientname);
-XS(XS__crosszoneaddldonwinbyclientname) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszoneaddldonwinbyclientname(const char* client_name, uint32 theme_id)");
-	{
-		uint8 update_type = CZUpdateType_ClientName;
-		uint8 update_subtype = CZLDoNUpdateSubtype_AddWin;
-		int update_identifier = 0;
-		int points = 1;
-		const char* client_name = (const char*) SvPV_nolen(ST(0));
-		uint32 theme_id = (uint32) SvUV(ST(1));
-		quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, update_identifier, theme_id, points, client_name);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneassigntaskbyguildid(int guild_id, uint32 task_id, bool enforce_level_requirement)
+{
+	int task_subidentifier = -1;
+	int update_count = 1;
+	quest_manager.CrossZoneTaskUpdate(CZUpdateType_Guild, CZTaskUpdateSubtype_AssignTask, guild_id, task_id, task_subidentifier, update_count, enforce_level_requirement);
 }
 
-XS(XS__crosszoneassigntaskbycharid);
-XS(XS__crosszoneassigntaskbycharid) {
-	dXSARGS;
-	if (items < 2 || items > 3)
-		Perl_croak(aTHX_ "Usage: quest::crosszoneassigntaskbycharid(int character_id, uint32 task_identifier, [bool enforce_level_requirement = false])");
-	{
-		uint8 update_type = CZUpdateType_Character;
-		uint8 update_subtype = CZTaskUpdateSubtype_AssignTask;
-		int character_id = (int) SvIV(ST(0));
-		uint32 task_identifier = (uint32) SvIV(ST(1));
-		int task_subidentifier = -1;
-		int update_count = 1;
-		bool enforce_level_requirement = false;
-		if (items == 3)
-			enforce_level_requirement = (bool) SvTRUE(ST(2));
-
-		quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, character_id, task_identifier, task_subidentifier, update_count, enforce_level_requirement);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneassigntaskbyexpeditionid(uint32 expedition_id, uint32 task_id)
+{
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(CZUpdateType_Expedition, CZTaskUpdateSubtype_AssignTask, expedition_id, task_id, task_subidentifier, update_count, enforce_level_requirement);
 }
 
-XS(XS__crosszoneassigntaskbygroupid);
-XS(XS__crosszoneassigntaskbygroupid) {
-	dXSARGS;
-	if (items < 2 || items > 3)
-		Perl_croak(aTHX_ "Usage: quest::crosszoneassigntaskbygroupid(int group_id, uint32 task_identifier, [bool enforce_level_requirement = false])");
-	{
-		uint8 update_type = CZUpdateType_Group;
-		uint8 update_subtype = CZTaskUpdateSubtype_AssignTask;
-		int group_id = (int) SvIV(ST(0));
-		uint32 task_identifier = (uint32) SvIV(ST(1));
-		int task_subidentifier = -1;
-		int update_count = 1;
-		bool enforce_level_requirement = false;
-		if (items == 3)
-			enforce_level_requirement = (bool) SvTRUE(ST(2));
-
-		quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, group_id, task_identifier, task_subidentifier, update_count, enforce_level_requirement);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneassigntaskbyexpeditionid(uint32 expedition_id, uint32 task_id, bool enforce_level_requirement)
+{
+	int task_subidentifier = -1;
+	int update_count = 1;
+	quest_manager.CrossZoneTaskUpdate(CZUpdateType_Expedition, CZTaskUpdateSubtype_AssignTask, expedition_id, task_id, task_subidentifier, update_count, enforce_level_requirement);
 }
 
-XS(XS__crosszoneassigntaskbyraidid);
-XS(XS__crosszoneassigntaskbyraidid) {
-	dXSARGS;
-	if (items < 2 || items > 3)
-		Perl_croak(aTHX_ "Usage: quest::crosszoneassigntaskbyraidid(int raid_id, uint32 task_identifier, [bool enforce_level_requirement = false])");
-	{
-		uint8 update_type = CZUpdateType_Raid;
-		uint8 update_subtype = CZTaskUpdateSubtype_AssignTask;
-		int raid_id = (int) SvIV(ST(0));
-		uint32 task_identifier = (uint32) SvIV(ST(1));
-		int task_subidentifier = -1;
-		int update_count = 1;
-		bool enforce_level_requirement = false;
-		if (items == 3)
-			enforce_level_requirement = (bool) SvTRUE(ST(2));
-
-		quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, raid_id, task_identifier, task_subidentifier, update_count, enforce_level_requirement);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneassigntaskbyclientname(const char* client_name, uint32 task_id)
+{
+	int update_identifier = 0;
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(CZUpdateType_ClientName, CZTaskUpdateSubtype_AssignTask, update_identifier, task_id, task_subidentifier, update_count, enforce_level_requirement, client_name);
 }
 
-XS(XS__crosszoneassigntaskbyguildid);
-XS(XS__crosszoneassigntaskbyguildid) {
-	dXSARGS;
-	if (items < 2 || items > 3)
-		Perl_croak(aTHX_ "Usage: quest::crosszoneassigntaskbyguildid(int guild_id, uint32 task_identifier, [bool enforce_level_requirement = false])");
-	{
-		uint8 update_type = CZUpdateType_Guild;
-		uint8 update_subtype = CZTaskUpdateSubtype_AssignTask;
-		int guild_id = (int) SvIV(ST(0));
-		uint32 task_identifier = (uint32) SvIV(ST(1));
-		int task_subidentifier = -1;
-		int update_count = 1;
-		bool enforce_level_requirement = false;
-		if (items == 3)
-			enforce_level_requirement = (bool) SvTRUE(ST(2));
-
-		quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, guild_id, task_identifier, task_subidentifier, update_count, enforce_level_requirement);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneassigntaskbyclientname(const char* client_name, uint32 task_id, bool enforce_level_requirement)
+{
+	int update_identifier = 0;
+	int task_subidentifier = -1;
+	int update_count = 1;
+	quest_manager.CrossZoneTaskUpdate(CZUpdateType_ClientName, CZTaskUpdateSubtype_AssignTask, update_identifier, task_id, task_subidentifier, update_count, enforce_level_requirement, client_name);
 }
 
-XS(XS__crosszoneassigntaskbyexpeditionid);
-XS(XS__crosszoneassigntaskbyexpeditionid) {
-	dXSARGS;
-	if (items < 2 || items > 3)
-		Perl_croak(aTHX_ "Usage: quest::crosszoneassigntaskbyexpeditionid(uint32 expedition_id, uint32 task_identifier, [bool enforce_level_requirement = false])");
-	{
-		uint8 update_type = CZUpdateType_Expedition;
-		uint8 update_subtype = CZTaskUpdateSubtype_AssignTask;
-		uint32 expedition_id = (uint32) SvUV(ST(0));
-		uint32 task_identifier = (uint32) SvIV(ST(1));
-		int task_subidentifier = -1;
-		int update_count = 1;
-		bool enforce_level_requirement = false;
-		if (items == 3)
-			enforce_level_requirement = (bool) SvTRUE(ST(2));
-
-		quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, expedition_id, task_identifier, task_subidentifier, update_count, enforce_level_requirement);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszonecastspellbycharid(int character_id, uint32 spell_id)
+{
+	quest_manager.CrossZoneSpell(CZUpdateType_Character, CZSpellUpdateSubtype_Cast, character_id, spell_id);
 }
 
-XS(XS__crosszoneassigntaskbyclientname);
-XS(XS__crosszoneassigntaskbyclientname) {
-	dXSARGS;
-	if (items < 2 || items > 3)
-		Perl_croak(aTHX_ "Usage: quest::crosszoneassigntaskbyclientname(const char* client_name, uint32 task_identifier, [bool enforce_level_requirement = false])");
-	{
-		uint8 update_type = CZUpdateType_ClientName;
-		uint8 update_subtype = CZTaskUpdateSubtype_AssignTask;
-		int update_identifier = 0;
-		const char* client_name = (const char*) SvPV_nolen(ST(0));
-		uint32 task_identifier = (uint32) SvIV(ST(1));
-		int task_subidentifier = -1;
-		int update_count = 1;
-		bool enforce_level_requirement = false;
-		if (items == 3)
-			enforce_level_requirement = (bool) SvTRUE(ST(2));
-
-		quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, update_identifier, task_identifier, task_subidentifier, update_count, enforce_level_requirement, client_name);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszonecastspellbygroupid(int group_id, uint32 spell_id)
+{
+	quest_manager.CrossZoneSpell(CZUpdateType_Group, CZSpellUpdateSubtype_Cast, group_id, spell_id);
 }
 
-XS(XS__crosszonecastspellbycharid);
-XS(XS__crosszonecastspellbycharid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszonecastspellbycharid(int character_id, uint32 spell_id)");
-	{
-		uint8 update_type = CZUpdateType_Character;
-		uint8 update_subtype = CZSpellUpdateSubtype_Cast;
-		int character_id = (int) SvIV(ST(0));
-		uint32 spell_id = (uint32) SvIV(ST(1));
-		quest_manager.CrossZoneSpell(update_type, update_subtype, character_id, spell_id);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszonecastspellbyraidid(int raid_id, uint32 spell_id)
+{
+	quest_manager.CrossZoneSpell(CZUpdateType_Raid, CZSpellUpdateSubtype_Cast, raid_id, spell_id);
 }
 
-XS(XS__crosszonecastspellbygroupid);
-XS(XS__crosszonecastspellbygroupid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszonecastspellbygroupid(int group_id, uint32 spell_id)");
-	{
-		uint8 update_type = CZUpdateType_Group;
-		uint8 update_subtype = CZSpellUpdateSubtype_Cast;
-		int group_id = (int) SvIV(ST(0));
-		uint32 spell_id = (uint32) SvIV(ST(1));
-		quest_manager.CrossZoneSpell(update_type, update_subtype, group_id, spell_id);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszonecastspellbyguildid(int guild_id, uint32 spell_id)
+{
+	quest_manager.CrossZoneSpell(CZUpdateType_Guild, CZSpellUpdateSubtype_Cast, guild_id, spell_id);
 }
 
-XS(XS__crosszonecastspellbyraidid);
-XS(XS__crosszonecastspellbyraidid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszonecastspellbyraidid(int raid_id, uint32 spell_id)");
-	{
-		uint8 update_type = CZUpdateType_Raid;
-		uint8 update_subtype = CZSpellUpdateSubtype_Cast;
-		int raid_id = (int) SvIV(ST(0));
-		uint32 spell_id = (uint32) SvIV(ST(1));
-		quest_manager.CrossZoneSpell(update_type, update_subtype, raid_id, spell_id);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszonecastspellbyexpeditionid(uint32 expedition_id, uint32 spell_id)
+{
+	quest_manager.CrossZoneSpell(CZUpdateType_Expedition, CZSpellUpdateSubtype_Cast, expedition_id, spell_id);
 }
 
-XS(XS__crosszonecastspellbyguildid);
-XS(XS__crosszonecastspellbyguildid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszonecastspellbyguildid(int guild_id, uint32 spell_id)");
-	{
-		uint8 update_type = CZUpdateType_Guild;
-		uint8 update_subtype = CZSpellUpdateSubtype_Cast;
-		int guild_id = (int) SvIV(ST(0));
-		uint32 spell_id = (uint32) SvUV(ST(1));
-		quest_manager.CrossZoneSpell(update_type, update_subtype, guild_id, spell_id);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszonecastspellbyclientname(const char* client_name, uint32 spell_id)
+{
+	int update_identifier = 0;
+	quest_manager.CrossZoneSpell(CZUpdateType_ClientName, CZSpellUpdateSubtype_Cast, update_identifier, spell_id, client_name);
 }
 
-XS(XS__crosszonecastspellbyexpeditionid);
-XS(XS__crosszonecastspellbyexpeditionid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszonecastspellbyexpeditionid(uint32 expedition_id, uint32 spell_id)");
-	{
-		uint8 update_type = CZUpdateType_Expedition;
-		uint8 update_subtype = CZSpellUpdateSubtype_Cast;
-		uint32 expedition_id = (uint32) SvUV(ST(0));
-		uint32 spell_id = (uint32) SvUV(ST(1));
-		quest_manager.CrossZoneSpell(update_type, update_subtype, expedition_id, spell_id);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszonedialoguewindowbycharid(int character_id, const char* message)
+{
+	quest_manager.CrossZoneDialogueWindow(CZUpdateType_Character, character_id, message);
 }
 
-XS(XS__crosszonecastspellbyclientname);
-XS(XS__crosszonecastspellbyclientname) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszonecastspellbyclientname(const char* client_name, uint32 spell_id)");
-	{
-		uint8 update_type = CZUpdateType_ClientName;
-		uint8 update_subtype = CZSpellUpdateSubtype_Cast;
-		int update_identifier = 0;
-		const char* client_name = (const char*) SvPV_nolen(ST(0));
-		uint32 spell_id = (uint32) SvUV(ST(1));
-		quest_manager.CrossZoneSpell(update_type, update_subtype, update_identifier, spell_id, client_name);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszonedialoguewindowbygroupid(int group_id, const char* message)
+{
+	quest_manager.CrossZoneDialogueWindow(CZUpdateType_Group, group_id, message);
 }
 
-XS(XS__crosszonedialoguewindowbycharid);
-XS(XS__crosszonedialoguewindowbycharid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszonedialoguewindowbycharid(int character_id, string message)");
-	{
-		uint8 update_type = CZUpdateType_Character;
-		int character_id = (int) SvIV(ST(0));
-		const char* message = (const char*) SvPV_nolen(ST(1));
-		quest_manager.CrossZoneDialogueWindow(update_type, character_id, message);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszonedialoguewindowbyraidid(int raid_id, const char* message)
+{
+	quest_manager.CrossZoneDialogueWindow(CZUpdateType_Raid, raid_id, message);
 }
 
-XS(XS__crosszonedialoguewindowbygroupid);
-XS(XS__crosszonedialoguewindowbygroupid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszonedialoguewindowbygroupid(int group_id, string message)");
-	{
-		uint8 update_type = CZUpdateType_Group;
-		int group_id = (int) SvIV(ST(0));
-		const char* message = (const char*) SvPV_nolen(ST(1));
-		quest_manager.CrossZoneDialogueWindow(update_type, group_id, message);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszonedialoguewindowbyguildid(int guild_id, const char* message)
+{
+	quest_manager.CrossZoneDialogueWindow(CZUpdateType_Guild, guild_id, message);
 }
 
-XS(XS__crosszonedialoguewindowbyraidid);
-XS(XS__crosszonedialoguewindowbyraidid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszonedialoguewindowbyraidid(int raid_id, string message)");
-	{
-		uint8 update_type = CZUpdateType_Raid;
-		int raid_id = (int) SvIV(ST(0));
-		const char* message = (const char*) SvPV_nolen(ST(1));
-		quest_manager.CrossZoneDialogueWindow(update_type, raid_id, message);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszonedialoguewindowbyexpeditionid(uint32 expedition_id, const char* message)
+{
+	quest_manager.CrossZoneDialogueWindow(CZUpdateType_Expedition, expedition_id, message);
 }
 
-XS(XS__crosszonedialoguewindowbyguildid);
-XS(XS__crosszonedialoguewindowbyguildid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszonedialoguewindowbyguildid(int guild_id, string message)");
-	{
-		uint8 update_type = CZUpdateType_Guild;
-		int guild_id = (int) SvIV(ST(0));
-		const char* message = (const char*) SvPV_nolen(ST(1));
-		quest_manager.CrossZoneDialogueWindow(update_type, guild_id, message);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszonedialoguewindowbyclientname(const char* client_name, const char* message)
+{
+	int update_identifier = 0;
+	quest_manager.CrossZoneDialogueWindow(CZUpdateType_ClientName, update_identifier, message, client_name);
 }
 
-XS(XS__crosszonedialoguewindowbyexpeditionid);
-XS(XS__crosszonedialoguewindowbyexpeditionid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszonedialoguewindowbyexpeditionid(uint32 expedition_id, string message)");
-	{
-		uint8 update_type = CZUpdateType_Expedition;
-		uint32 expedition_id = (uint32) SvUV(ST(0));
-		const char* message = (const char*) SvPV_nolen(ST(1));
-		quest_manager.CrossZoneDialogueWindow(update_type, expedition_id, message);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszonedisabletaskbycharid(int character_id, uint32 task_id)
+{
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(CZUpdateType_Character, CZTaskUpdateSubtype_DisableTask, character_id, task_id, task_subidentifier, update_count, enforce_level_requirement);
 }
 
-XS(XS__crosszonedialoguewindowbyclientname);
-XS(XS__crosszonedialoguewindowbyclientname) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszonedialoguewindowbyclientname(const char* client_name, string message)");
-	{
-		uint8 update_type = CZUpdateType_ClientName;
-		int update_identifier = 0;
-		const char* client_name = (const char*) SvPV_nolen(ST(0));
-		const char* message = (const char*) SvPV_nolen(ST(1));
-		quest_manager.CrossZoneDialogueWindow(update_type, update_identifier, message, client_name);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszonedisabletaskbygroupid(int group_id, uint32 task_id)
+{
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(CZUpdateType_Group, CZTaskUpdateSubtype_DisableTask, group_id, task_id, task_subidentifier, update_count, enforce_level_requirement);
 }
 
-XS(XS__crosszonedisabletaskbycharid);
-XS(XS__crosszonedisabletaskbycharid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszonedisabletaskbycharid(int character_id, uint32 task_identifier)");
-	{
-		uint8 update_type = CZUpdateType_Character;
-		uint8 update_subtype = CZTaskUpdateSubtype_DisableTask;
-		int character_id = (int) SvIV(ST(0));
-		uint32 task_identifier = (uint32) SvUV(ST(1));
-		int task_subidentifier = -1;
-		int update_count = 1;
-		bool enforce_level_requirement = false;
-		quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, character_id, task_identifier, task_subidentifier, update_count, enforce_level_requirement);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszonedisabletaskbyraidid(int raid_id, uint32 task_id)
+{
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(CZUpdateType_Raid, CZTaskUpdateSubtype_DisableTask, raid_id, task_id, task_subidentifier, update_count, enforce_level_requirement);
 }
 
-XS(XS__crosszonedisabletaskbygroupid);
-XS(XS__crosszonedisabletaskbygroupid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszonedisabletaskbygroupid(int group_id, uint32 task_identifier)");
-	{
-		uint8 update_type = CZUpdateType_Group;
-		uint8 update_subtype = CZTaskUpdateSubtype_DisableTask;
-		int group_id = (int) SvIV(ST(0));
-		uint32 task_identifier = (uint32) SvUV(ST(1));
-		int task_subidentifier = -1;
-		int update_count = 1;
-		bool enforce_level_requirement = false;
-		quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, group_id, task_identifier, task_subidentifier, update_count, enforce_level_requirement);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszonedisabletaskbyguildid(int guild_id, uint32 task_id)
+{
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(CZUpdateType_Guild, CZTaskUpdateSubtype_DisableTask, guild_id, task_id, task_subidentifier, update_count, enforce_level_requirement);
 }
 
-XS(XS__crosszonedisabletaskbyraidid);
-XS(XS__crosszonedisabletaskbyraidid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszonedisabletaskbyraidid(int raid_id, uint32 task_identifier)");
-	{
-		uint8 update_type = CZUpdateType_Raid;
-		uint8 update_subtype = CZTaskUpdateSubtype_DisableTask;
-		int raid_id = (int) SvIV(ST(0));
-		uint32 task_identifier = (uint32) SvUV(ST(1));
-		int task_subidentifier = -1;
-		int update_count = 1;
-		bool enforce_level_requirement = false;
-		quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, raid_id, task_identifier, task_subidentifier, update_count, enforce_level_requirement);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszonedisabletaskbyexpeditionid(uint32 expedition_id, uint32 task_id)
+{
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(CZUpdateType_Expedition, CZTaskUpdateSubtype_DisableTask, expedition_id, task_id, task_subidentifier, update_count, enforce_level_requirement);
 }
 
-XS(XS__crosszonedisabletaskbyguildid);
-XS(XS__crosszonedisabletaskbyguildid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszonedisabletaskbyguildid(int guild_id, uint32 task_identifier)");
-	{
-		uint8 update_type = CZUpdateType_Guild;
-		uint8 update_subtype = CZTaskUpdateSubtype_DisableTask;
-		int guild_id = (int) SvIV(ST(0));
-		uint32 task_identifier = (uint32) SvUV(ST(1));
-		int task_subidentifier = -1;
-		int update_count = 1;
-		bool enforce_level_requirement = false;
-		quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, guild_id, task_identifier, task_subidentifier, update_count, enforce_level_requirement);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszonedisabletaskbyclientname(const char* client_name, uint32 task_id)
+{
+	int update_identifier = 0;
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(CZUpdateType_ClientName, CZTaskUpdateSubtype_DisableTask, update_identifier, task_id, task_subidentifier, update_count, enforce_level_requirement, client_name);
 }
 
-XS(XS__crosszonedisabletaskbyexpeditionid);
-XS(XS__crosszonedisabletaskbyexpeditionid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszonedisabletaskbyexpeditionid(uint32 expedition_id, uint32 task_identifier)");
-	{
-		uint8 update_type = CZUpdateType_Expedition;
-		uint8 update_subtype = CZTaskUpdateSubtype_DisableTask;
-		uint32 expedition_id = (uint32) SvUV(ST(0));
-		uint32 task_identifier = (uint32) SvUV(ST(1));
-		int task_subidentifier = -1;
-		int update_count = 1;
-		bool enforce_level_requirement = false;
-		quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, expedition_id, task_identifier, task_subidentifier, update_count, enforce_level_requirement);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneenabletaskbycharid(int character_id, uint32 task_id)
+{
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(CZUpdateType_Character, CZTaskUpdateSubtype_EnableTask, character_id, task_id, task_subidentifier, update_count, enforce_level_requirement);
 }
 
-XS(XS__crosszonedisabletaskbyclientname);
-XS(XS__crosszonedisabletaskbyclientname) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszonedisabletaskbyclientname(const char* client_name, uint32 task_identifier)");
-	{
-		uint8 update_type = CZUpdateType_ClientName;
-		uint8 update_subtype = CZTaskUpdateSubtype_DisableTask;
-		int update_identifier = 0;
-		const char* client_name = (const char*) SvPV_nolen(ST(0));
-		uint32 task_identifier = (uint32) SvUV(ST(1));
-		int task_subidentifier = -1;
-		int update_count = 1;
-		bool enforce_level_requirement = false;
-		quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, update_identifier, task_identifier, task_subidentifier, update_count, enforce_level_requirement, client_name);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneenabletaskbygroupid(int group_id, uint32 task_id)
+{
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(CZUpdateType_Group, CZTaskUpdateSubtype_EnableTask, group_id, task_id, task_subidentifier, update_count, enforce_level_requirement);
 }
 
-XS(XS__crosszoneenabletaskbycharid);
-XS(XS__crosszoneenabletaskbycharid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszoneenabletaskbycharid(int character_id, uint32 task_identifier)");
-	{
-		uint8 update_type = CZUpdateType_Character;
-		uint8 update_subtype = CZTaskUpdateSubtype_EnableTask;
-		int character_id = (int) SvIV(ST(0));
-		uint32 task_identifier = (uint32) SvUV(ST(1));
-		int task_subidentifier = -1;
-		int update_count = 1;
-		bool enforce_level_requirement = false;
-		quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, character_id, task_identifier, task_subidentifier, update_count, enforce_level_requirement);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneenabletaskbyraidid(int raid_id, uint32 task_id)
+{
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(CZUpdateType_Raid, CZTaskUpdateSubtype_EnableTask, raid_id, task_id, task_subidentifier, update_count, enforce_level_requirement);
 }
 
-XS(XS__crosszoneenabletaskbygroupid);
-XS(XS__crosszoneenabletaskbygroupid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszoneenabletaskbygroupid(int group_id, uint32 task_identifier)");
-	{
-		uint8 update_type = CZUpdateType_Group;
-		uint8 update_subtype = CZTaskUpdateSubtype_EnableTask;
-		int group_id = (int) SvIV(ST(0));
-		uint32 task_identifier = (uint32) SvUV(ST(1));
-		int task_subidentifier = -1;
-		int update_count = 1;
-		bool enforce_level_requirement = false;
-		quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, group_id, task_identifier, task_subidentifier, update_count, enforce_level_requirement);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneenabletaskbyguildid(int guild_id, uint32 task_id)
+{
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(CZUpdateType_Guild, CZTaskUpdateSubtype_EnableTask, guild_id, task_id, task_subidentifier, update_count, enforce_level_requirement);
 }
 
-XS(XS__crosszoneenabletaskbyraidid);
-XS(XS__crosszoneenabletaskbyraidid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszoneenabletaskbyraidid(int raid_id, uint32 task_identifier)");
-	{
-		uint8 update_type = CZUpdateType_Raid;
-		uint8 update_subtype = CZTaskUpdateSubtype_EnableTask;
-		int raid_id = (int) SvIV(ST(0));
-		uint32 task_identifier = (uint32) SvUV(ST(1));
-		int task_subidentifier = -1;
-		int update_count = 1;
-		bool enforce_level_requirement = false;
-		quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, raid_id, task_identifier, task_subidentifier, update_count, enforce_level_requirement);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneenabletaskbyexpeditionid(uint32 expedition_id, uint32 task_id)
+{
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(CZUpdateType_Expedition, CZTaskUpdateSubtype_EnableTask, expedition_id, task_id, task_subidentifier, update_count, enforce_level_requirement);
 }
 
-XS(XS__crosszoneenabletaskbyguildid);
-XS(XS__crosszoneenabletaskbyguildid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszoneenabletaskbyguildid(int guild_id, uint32 task_identifier)");
-	{
-		uint8 update_type = CZUpdateType_Guild;
-		uint8 update_subtype = CZTaskUpdateSubtype_EnableTask;
-		int guild_id = (int) SvIV(ST(0));
-		uint32 task_identifier = (uint32) SvUV(ST(1));
-		int task_subidentifier = -1;
-		int update_count = 1;
-		bool enforce_level_requirement = false;
-		quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, guild_id, task_identifier, task_subidentifier, update_count, enforce_level_requirement);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneenabletaskbyclientname(const char* client_name, uint32 task_id)
+{
+	int update_identifier = 0;
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(CZUpdateType_ClientName, CZTaskUpdateSubtype_EnableTask, update_identifier, task_id, task_subidentifier, update_count, enforce_level_requirement, client_name);
 }
 
-XS(XS__crosszoneenabletaskbyexpeditionid);
-XS(XS__crosszoneenabletaskbyexpeditionid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszoneenabletaskbyexpeditionid(uint32 expedition_id, uint32 task_identifier)");
-	{
-		uint8 update_type = CZUpdateType_Expedition;
-		uint8 update_subtype = CZTaskUpdateSubtype_EnableTask;
-		uint32 expedition_id = (uint32) SvUV(ST(0));
-		uint32 task_identifier = (uint32) SvUV(ST(1));
-		int task_subidentifier = -1;
-		int update_count = 1;
-		bool enforce_level_requirement = false;
-		quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, expedition_id, task_identifier, task_subidentifier, update_count, enforce_level_requirement);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszonefailtaskbycharid(int character_id, uint32 task_id)
+{
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(CZUpdateType_Character, CZTaskUpdateSubtype_FailTask, character_id, task_id, task_subidentifier, update_count, enforce_level_requirement);
 }
 
-XS(XS__crosszoneenabletaskbyclientname);
-XS(XS__crosszoneenabletaskbyclientname) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszoneenabletaskbyclientname(const char* client_name, uint32 task_identifier)");
-	{
-		uint8 update_type = CZUpdateType_ClientName;
-		uint8 update_subtype = CZTaskUpdateSubtype_EnableTask;
-		int update_identifier = 0;
-		const char* client_name = (const char*) SvPV_nolen(ST(0));
-		uint32 task_identifier = (uint32) SvUV(ST(1));
-		int task_subidentifier = -1;
-		int update_count = 1;
-		bool enforce_level_requirement = false;
-		quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, update_identifier, task_identifier, task_subidentifier, update_count, enforce_level_requirement, client_name);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszonefailtaskbygroupid(int group_id, uint32 task_id)
+{
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(CZUpdateType_Group, CZTaskUpdateSubtype_FailTask, group_id, task_id, task_subidentifier, update_count, enforce_level_requirement);
 }
 
-XS(XS__crosszonefailtaskbycharid);
-XS(XS__crosszonefailtaskbycharid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszonefailtaskbycharid(int character_id, uint32 task_identifier)");
-	{
-		uint8 update_type = CZUpdateType_Character;
-		uint8 update_subtype = CZTaskUpdateSubtype_FailTask;
-		int character_id = (int) SvIV(ST(0));
-		uint32 task_identifier = (uint32) SvUV(ST(1));
-		int task_subidentifier = -1;
-		int update_count = 1;
-		bool enforce_level_requirement = false;
-		quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, character_id, task_identifier, task_subidentifier, update_count, enforce_level_requirement);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszonefailtaskbyraidid(int raid_id, uint32 task_id)
+{
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(CZUpdateType_Raid, CZTaskUpdateSubtype_FailTask, raid_id, task_id, task_subidentifier, update_count, enforce_level_requirement);
 }
 
-XS(XS__crosszonefailtaskbygroupid);
-XS(XS__crosszonefailtaskbygroupid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszonefailtaskbygroupid(int group_id, uint32 task_identifier)");
-	{
-		uint8 update_type = CZUpdateType_Group;
-		uint8 update_subtype = CZTaskUpdateSubtype_FailTask;
-		int group_id = (int) SvIV(ST(0));
-		uint32 task_identifier = (uint32) SvUV(ST(1));
-		int task_subidentifier = -1;
-		int update_count = 1;
-		bool enforce_level_requirement = false;
-		quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, group_id, task_identifier, task_subidentifier, update_count, enforce_level_requirement);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszonefailtaskbyguildid(int guild_id, uint32 task_id)
+{
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(CZUpdateType_Guild, CZTaskUpdateSubtype_FailTask, guild_id, task_id, task_subidentifier, update_count, enforce_level_requirement);
 }
 
-XS(XS__crosszonefailtaskbyraidid);
-XS(XS__crosszonefailtaskbyraidid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszonefailtaskbyraidid(int raid_id, uint32 task_identifier)");
-	{
-		uint8 update_type = CZUpdateType_Raid;
-		uint8 update_subtype = CZTaskUpdateSubtype_FailTask;
-		int raid_id = (int) SvIV(ST(0));
-		uint32 task_identifier = (uint32) SvUV(ST(1));
-		int task_subidentifier = -1;
-		int update_count = 1;
-		bool enforce_level_requirement = false;
-		quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, raid_id, task_identifier, task_subidentifier, update_count, enforce_level_requirement);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszonefailtaskbyexpeditionid(uint32 expedition_id, uint32 task_id)
+{
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(CZUpdateType_Expedition, CZTaskUpdateSubtype_FailTask, expedition_id, task_id, task_subidentifier, update_count, enforce_level_requirement);
 }
 
-XS(XS__crosszonefailtaskbyguildid);
-XS(XS__crosszonefailtaskbyguildid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszonefailtaskbyguildid(int guild_id, uint32 task_identifier)");
-	{
-		uint8 update_type = CZUpdateType_Guild;
-		uint8 update_subtype = CZTaskUpdateSubtype_FailTask;
-		int guild_id = (int) SvIV(ST(0));
-		uint32 task_identifier = (uint32) SvUV(ST(1));
-		int task_subidentifier = -1;
-		int update_count = 1;
-		bool enforce_level_requirement = false;
-		quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, guild_id, task_identifier, task_subidentifier, update_count, enforce_level_requirement);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszonefailtaskbyclientname(const char* client_name, uint32 task_id)
+{
+	int update_identifier = 0;
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(CZUpdateType_ClientName, CZTaskUpdateSubtype_FailTask, update_identifier, task_id, task_subidentifier, update_count, enforce_level_requirement, client_name);
 }
 
-XS(XS__crosszonefailtaskbyexpeditionid);
-XS(XS__crosszonefailtaskbyexpeditionid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszonefailtaskbyexpeditionid(uint32 expedition_id, uint32 task_identifier)");
-	{
-		uint8 update_type = CZUpdateType_Expedition;
-		uint8 update_subtype = CZTaskUpdateSubtype_FailTask;
-		uint32 expedition_id = (uint32) SvUV(ST(0));
-		uint32 task_identifier = (uint32) SvUV(ST(1));
-		int task_subidentifier = -1;
-		int update_count = 1;
-		bool enforce_level_requirement = false;
-		quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, expedition_id, task_identifier, task_subidentifier, update_count, enforce_level_requirement);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszonemarqueebycharid(int character_id, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char* message)
+{
+	quest_manager.CrossZoneMarquee(CZUpdateType_Character, character_id, type, priority, fade_in, fade_out, duration, message);
 }
 
-XS(XS__crosszonefailtaskbyclientname);
-XS(XS__crosszonefailtaskbyclientname) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszonefailtaskbyclientname(const char* client_name, uint32 task_identifier)");
-	{
-		uint8 update_type = CZUpdateType_ClientName;
-		uint8 update_subtype = CZTaskUpdateSubtype_FailTask;
-		int update_identifier = 0;
-		const char* client_name = (const char*) SvPV_nolen(ST(0));
-		uint32 task_identifier = (uint32) SvUV(ST(1));
-		int task_subidentifier = -1;
-		int update_count = 1;
-		bool enforce_level_requirement = false;
-		quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, update_identifier, task_identifier, task_subidentifier, update_count, enforce_level_requirement, client_name);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszonemarqueebygroupid(int group_id, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char* message)
+{
+	quest_manager.CrossZoneMarquee(CZUpdateType_Group, group_id, type, priority, fade_in, fade_out, duration, message);
 }
 
-XS(XS__crosszonemarqueebycharid);
-XS(XS__crosszonemarqueebycharid) {
-	dXSARGS;
-	if (items != 7)
-		Perl_croak(aTHX_ "Usage: quest::crosszonemarqueebycharid(int character_id, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char *message)");
-	{
-		uint8 update_type = CZUpdateType_Character;
-		int character_id = (int) SvIV(ST(0));
-		uint32 type = (uint32) SvUV(ST(1));
-		int priority = (int) SvIV(ST(2));
-		int fade_in = (int) SvIV(ST(3));
-		int fade_out = (int) SvIV(ST(4));
-		int duration = (int) SvIV(ST(5));
-		char *message = (char *) SvPV_nolen(ST(6));
-		quest_manager.CrossZoneMarquee(update_type, character_id, type, priority, fade_in, fade_out, duration, message);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszonemarqueebyraidid(int raid_id, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char* message)
+{
+	quest_manager.CrossZoneMarquee(CZUpdateType_Raid, raid_id, type, priority, fade_in, fade_out, duration, message);
 }
 
-XS(XS__crosszonemarqueebygroupid);
-XS(XS__crosszonemarqueebygroupid) {
-	dXSARGS;
-	if (items != 7)
-		Perl_croak(aTHX_ "Usage: quest::crosszonemarqueebygroupid(int group_id, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char *message)");
-	{
-		uint8 update_type = CZUpdateType_Group;
-		int group_id = (int) SvIV(ST(0));
-		uint32 type = (uint32) SvUV(ST(1));
-		int priority = (int) SvIV(ST(2));
-		int fade_in = (int) SvIV(ST(3));
-		int fade_out = (int) SvIV(ST(4));
-		int duration = (int) SvIV(ST(5));
-		char *message = (char *) SvPV_nolen(ST(6));
-		quest_manager.CrossZoneMarquee(update_type, group_id, type, priority, fade_in, fade_out, duration, message);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszonemarqueebyguildid(int guild_id, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char* message)
+{
+	quest_manager.CrossZoneMarquee(CZUpdateType_Guild, guild_id, type, priority, fade_in, fade_out, duration, message);
 }
 
-XS(XS__crosszonemarqueebyraidid);
-XS(XS__crosszonemarqueebyraidid) {
-	dXSARGS;
-	if (items != 7)
-		Perl_croak(aTHX_ "Usage: quest::crosszonemarqueebyraidid(int raid_id, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char *message)");
-	{
-		uint8 update_type = CZUpdateType_Raid;
-		int raid_id = (int) SvIV(ST(0));
-		uint32 type = (uint32) SvUV(ST(1));
-		int priority = (int) SvIV(ST(2));
-		int fade_in = (int) SvIV(ST(3));
-		int fade_out = (int) SvIV(ST(4));
-		int duration = (int) SvIV(ST(5));
-		char *message = (char *) SvPV_nolen(ST(6));
-		quest_manager.CrossZoneMarquee(update_type, raid_id, type, priority, fade_in, fade_out, duration, message);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszonemarqueebyexpeditionid(uint32 expedition_id, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char* message)
+{
+	quest_manager.CrossZoneMarquee(CZUpdateType_Expedition, expedition_id, type, priority, fade_in, fade_out, duration, message);
 }
 
-XS(XS__crosszonemarqueebyguildid);
-XS(XS__crosszonemarqueebyguildid) {
-	dXSARGS;
-	if (items != 7)
-		Perl_croak(aTHX_ "Usage: quest::crosszonemarqueebyguildid(int guild_id, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char *message)");
-	{
-		uint8 update_type = CZUpdateType_Guild;
-		int guild_id = (int) SvIV(ST(0));
-		uint32 type = (uint32) SvUV(ST(1));
-		int priority = (int) SvIV(ST(2));
-		int fade_in = (int) SvIV(ST(3));
-		int fade_out = (int) SvIV(ST(4));
-		int duration = (int) SvIV(ST(5));
-		char *message = (char *) SvPV_nolen(ST(6));
-		quest_manager.CrossZoneMarquee(update_type, guild_id, type, priority, fade_in, fade_out, duration, message);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszonemarqueebyclientname(const char* client_name, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char* message)
+{
+	int update_identifier = 0;
+	quest_manager.CrossZoneMarquee(CZUpdateType_ClientName, update_identifier, type, priority, fade_in, fade_out, duration, message, client_name);
 }
 
-XS(XS__crosszonemarqueebyexpeditionid);
-XS(XS__crosszonemarqueebyexpeditionid) {
-	dXSARGS;
-	if (items != 7)
-		Perl_croak(aTHX_ "Usage: quest::crosszonemarqueebyexpeditionid(uint32 expedition_id, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char *message)");
-	{
-		uint8 update_type = CZUpdateType_Expedition;
-		uint32 expedition_id = (uint32) SvUV(ST(0));
-		uint32 type = (uint32) SvUV(ST(1));
-		int priority = (int) SvIV(ST(2));
-		int fade_in = (int) SvIV(ST(3));
-		int fade_out = (int) SvIV(ST(4));
-		int duration = (int) SvIV(ST(5));
-		char *message = (char *) SvPV_nolen(ST(6));
-		quest_manager.CrossZoneMarquee(update_type, expedition_id, type, priority, fade_in, fade_out, duration, message);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszonemessageplayerbycharid(int character_id, uint32 type, const char* message)
+{
+	quest_manager.CrossZoneMessage(CZUpdateType_Character, character_id, type, message);
 }
 
-XS(XS__crosszonemarqueebyclientname);
-XS(XS__crosszonemarqueebyclientname) {
-	dXSARGS;
-	if (items != 7)
-		Perl_croak(aTHX_ "Usage: quest::crosszonemarqueebyclientname(const char* client_name, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char *message)");
-	{
-		uint8 update_type = CZUpdateType_ClientName;
-		int update_identifier = 0;
-		const char* client_name = (const char*) SvPV_nolen(ST(0));
-		uint32 type = (uint32) SvUV(ST(1));
-		int priority = (int) SvIV(ST(2));
-		int fade_in = (int) SvIV(ST(3));
-		int fade_out = (int) SvIV(ST(4));
-		int duration = (int) SvIV(ST(5));
-		char *message = (char *) SvPV_nolen(ST(6));
-		quest_manager.CrossZoneMarquee(update_type, update_identifier, type, priority, fade_in, fade_out, duration, message, client_name);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszonemessageplayerbygroupid(int group_id, uint32 type, const char* message)
+{
+	quest_manager.CrossZoneMessage(CZUpdateType_Group, group_id, type, message);
 }
 
-XS(XS__crosszonemessageplayerbycharid);
-XS(XS__crosszonemessageplayerbycharid) {
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: quest::crosszonemessageplayerbycharid(int character_id, uint32 type, const char* message)");
-	{
-		uint8 update_type = CZUpdateType_Character;
-		int character_id = (int) SvIV(ST(0));
-		uint32 type = (uint32) SvUV(ST(1));
-		const char* message = (const char*) SvPV_nolen(ST(2));
-		quest_manager.CrossZoneMessage(update_type, character_id, type, message);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszonemessageplayerbyraidid(int raid_id, uint32 type, const char* message)
+{
+	quest_manager.CrossZoneMessage(CZUpdateType_Raid, raid_id, type, message);
 }
 
-XS(XS__crosszonemessageplayerbygroupid);
-XS(XS__crosszonemessageplayerbygroupid) {
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: quest::crosszonemessageplayerbygroupid(int group_id, uint32 type, const char* message)");
-	{
-		uint8 update_type = CZUpdateType_Group;
-		int group_id = (int) SvIV(ST(0));
-		uint32 type = (uint32) SvUV(ST(1));
-		const char* message = (const char*) SvPV_nolen(ST(2));
-		quest_manager.CrossZoneMessage(update_type, group_id, type, message);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszonemessageplayerbyguildid(int guild_id, uint32 type, const char* message)
+{
+	quest_manager.CrossZoneMessage(CZUpdateType_Guild, guild_id, type, message);
 }
 
-XS(XS__crosszonemessageplayerbyraidid);
-XS(XS__crosszonemessageplayerbyraidid) {
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: quest::crosszonemessageplayerbyraidid(int raid_id, uint32 type, const char* message)");
-	{
-		uint8 update_type = CZUpdateType_Raid;
-		int raid_id = (int) SvIV(ST(0));
-		uint32 type = (uint32) SvUV(ST(1));
-		const char* message = (const char*) SvPV_nolen(ST(2));
-		quest_manager.CrossZoneMessage(update_type, raid_id, type, message);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszonemessageplayerbyexpeditionid(uint32 expedition_id, uint32 type, const char* message)
+{
+	quest_manager.CrossZoneMessage(CZUpdateType_Expedition, expedition_id, type, message);
 }
 
-XS(XS__crosszonemessageplayerbyguildid);
-XS(XS__crosszonemessageplayerbyguildid) {
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: quest::crosszonemessageplayerbyguildid(int guild_id, uint32 type, const char* message)");
-	{
-		uint8 update_type = CZUpdateType_Guild;
-		int guild_id = (int) SvIV(ST(0));
-		uint32 type = (uint32) SvUV(ST(1));
-		const char* message = (const char*) SvPV_nolen(ST(2));
-		quest_manager.CrossZoneMessage(update_type, guild_id, type, message);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszonemessageplayerbyname(const char* client_name, uint32 type, const char* message)
+{
+	int update_identifier = 0;
+	quest_manager.CrossZoneMessage(CZUpdateType_ClientName, update_identifier, type, message, client_name);
 }
 
-XS(XS__crosszonemessageplayerbyexpeditionid);
-XS(XS__crosszonemessageplayerbyexpeditionid) {
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: quest::crosszonemessageplayerbyexpeditionid(uint32 expedition_id, uint32 type, const char* message)");
-	{
-		uint8 update_type = CZUpdateType_Expedition;
-		uint32 expedition_id = (uint32) SvUV(ST(0));
-		uint32 type = (uint32) SvUV(ST(1));
-		const char* message = (const char*) SvPV_nolen(ST(2));
-		quest_manager.CrossZoneMessage(update_type, expedition_id, type, message);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszonemoveplayerbycharid(int character_id, const char* zone_short_name)
+{
+	uint16 instance_id = 0;
+	quest_manager.CrossZoneMove(CZUpdateType_Character, CZMoveUpdateSubtype_MoveZone, character_id, zone_short_name, instance_id);
 }
 
-XS(XS__crosszonemessageplayerbyname);
-XS(XS__crosszonemessageplayerbyname) {
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: quest::crosszonemessageplayerbyname(const char* client_name, uint32 type, const char* message)");
-	{
-		uint8 update_type = CZUpdateType_ClientName;
-		int update_identifier = 0;
-		const char* client_name = (const char*) SvPV_nolen(ST(0));
-		uint32 type = (uint32) SvUV(ST(1));
-		const char* message = (const char*) SvPV_nolen(ST(2));
-		quest_manager.CrossZoneMessage(update_type, update_identifier, type, message, client_name);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszonemoveplayerbygroupid(int group_id, const char* zone_short_name)
+{
+	uint16 instance_id = 0;
+	quest_manager.CrossZoneMove(CZUpdateType_Group, CZMoveUpdateSubtype_MoveZone, group_id, zone_short_name, instance_id);
 }
 
-XS(XS__crosszonemoveplayerbycharid);
-XS(XS__crosszonemoveplayerbycharid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszonemoveplayerbycharid(int character_id, string zone_short_name)");
-	{
-		uint8 update_type = CZUpdateType_Character;
-		uint8 update_subtype = CZMoveUpdateSubtype_MoveZone;
-		int character_id = (int) SvIV(ST(0));
-		const char* zone_short_name = (const char*) SvPV_nolen(ST(1));
-		uint16 instance_id = 0;
-		quest_manager.CrossZoneMove(update_type, update_subtype, character_id, zone_short_name, instance_id);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszonemoveplayerbyraidid(int raid_id, const char* zone_short_name)
+{
+	uint16 instance_id = 0;
+	quest_manager.CrossZoneMove(CZUpdateType_Raid, CZMoveUpdateSubtype_MoveZone, raid_id, zone_short_name, instance_id);
 }
 
-XS(XS__crosszonemoveplayerbygroupid);
-XS(XS__crosszonemoveplayerbygroupid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszonemoveplayerbygroupid(int group_id, string zone_short_name)");
-	{
-		uint8 update_type = CZUpdateType_Group;
-		uint8 update_subtype = CZMoveUpdateSubtype_MoveZone;
-		int group_id = (int) SvIV(ST(0));
-		const char* zone_short_name = (const char*) SvPV_nolen(ST(1));
-		uint16 instance_id = 0;
-		quest_manager.CrossZoneMove(update_type, update_subtype, group_id, zone_short_name, instance_id);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszonemoveplayerbyguildid(int guild_id, const char* zone_short_name)
+{
+	uint16 instance_id = 0;
+	quest_manager.CrossZoneMove(CZUpdateType_Guild, CZMoveUpdateSubtype_MoveZone, guild_id, zone_short_name, instance_id);
 }
 
-XS(XS__crosszonemoveplayerbyraidid);
-XS(XS__crosszonemoveplayerbyraidid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszonemoveplayerbyraidid(int raid_id, string zone_short_name)");
-	{
-		uint8 update_type = CZUpdateType_Raid;
-		uint8 update_subtype = CZMoveUpdateSubtype_MoveZone;
-		int raid_id = (int) SvIV(ST(0));
-		const char* zone_short_name = (const char*) SvPV_nolen(ST(1));
-		uint16 instance_id = 0;
-		quest_manager.CrossZoneMove(update_type, update_subtype, raid_id, zone_short_name, instance_id);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszonemoveplayerbyexpeditionid(uint32 expedition_id, const char* zone_short_name)
+{
+	uint16 instance_id = 0;
+	quest_manager.CrossZoneMove(CZUpdateType_Expedition, CZMoveUpdateSubtype_MoveZone, expedition_id, zone_short_name, instance_id);
 }
 
-XS(XS__crosszonemoveplayerbyguildid);
-XS(XS__crosszonemoveplayerbyguildid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszonemoveplayerbyguildid(int guild_id, string zone_short_name)");
-	{
-		uint8 update_type = CZUpdateType_Guild;
-		uint8 update_subtype = CZMoveUpdateSubtype_MoveZone;
-		int guild_id = (int) SvIV(ST(0));
-		const char* zone_short_name = (const char*) SvPV_nolen(ST(1));
-		uint16 instance_id = 0;
-		quest_manager.CrossZoneMove(update_type, update_subtype, guild_id, zone_short_name, instance_id);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszonemoveplayerbyname(const char* client_name, const char* zone_short_name)
+{
+	int update_identifier = 0;
+	uint16 instance_id = 0;
+	quest_manager.CrossZoneMove(CZUpdateType_ClientName, CZMoveUpdateSubtype_MoveZone, update_identifier, zone_short_name, instance_id, client_name);
 }
 
-XS(XS__crosszonemoveplayerbyexpeditionid);
-XS(XS__crosszonemoveplayerbyexpeditionid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszonemoveplayerbyexpeditionid(uint32 expedition_id, string zone_short_name)");
-	{
-		uint8 update_type = CZUpdateType_Expedition;
-		uint8 update_subtype = CZMoveUpdateSubtype_MoveZone;
-		uint32 expedition_id = (uint32) SvUV(ST(0));
-		const char* zone_short_name = (const char*) SvPV_nolen(ST(1));
-		uint16 instance_id = 0;
-		quest_manager.CrossZoneMove(update_type, update_subtype, expedition_id, zone_short_name, instance_id);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszonemoveinstancebycharid(int character_id, uint16 instance_id)
+{
+	const char* zone_short_name = "";
+	quest_manager.CrossZoneMove(CZUpdateType_Character, CZMoveUpdateSubtype_MoveZoneInstance, character_id, zone_short_name, instance_id);
 }
 
-XS(XS__crosszonemoveplayerbyname);
-XS(XS__crosszonemoveplayerbyname) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszonemoveplayerbyname(const char* client_name, string zone_short_name)");
-	{
-		uint8 update_type = CZUpdateType_ClientName;
-		uint8 update_subtype = CZMoveUpdateSubtype_MoveZone;
-		int update_identifier = 0;
-		const char* client_name = (const char*) SvPV_nolen(ST(0));
-		const char* zone_short_name = (const char*) SvPV_nolen(ST(1));
-		uint16 instance_id = 0;
-		quest_manager.CrossZoneMove(update_type, update_subtype, update_identifier, zone_short_name, instance_id, client_name);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszonemoveinstancebygroupid(int group_id, uint16 instance_id)
+{
+	const char* zone_short_name = "";
+	quest_manager.CrossZoneMove(CZUpdateType_Group, CZMoveUpdateSubtype_MoveZoneInstance, group_id, zone_short_name, instance_id);
 }
 
-XS(XS__crosszonemoveinstancebycharid);
-XS(XS__crosszonemoveinstancebycharid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszonemoveinstancebycharid(int character_id, uint16 instance_id)");
-	{
-		uint8 update_type = CZUpdateType_Character;
-		uint8 update_subtype = CZMoveUpdateSubtype_MoveZoneInstance;
-		const char* zone_short_name = "";
-		int character_id = (int) SvIV(ST(0));
-		uint16 instance_id = (uint16) SvUV(ST(1));
-		quest_manager.CrossZoneMove(update_type, update_subtype, character_id, zone_short_name, instance_id);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszonemoveinstancebyraidid(int raid_id, uint16 instance_id)
+{
+	const char* zone_short_name = "";
+	quest_manager.CrossZoneMove(CZUpdateType_Raid, CZMoveUpdateSubtype_MoveZoneInstance, raid_id, zone_short_name, instance_id);
 }
 
-XS(XS__crosszonemoveinstancebygroupid);
-XS(XS__crosszonemoveinstancebygroupid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszonemoveinstancebygroupid(int group_id, uint16 instance_id)");
-	{
-		uint8 update_type = CZUpdateType_Group;
-		uint8 update_subtype = CZMoveUpdateSubtype_MoveZoneInstance;
-		const char* zone_short_name = "";
-		int group_id = (int) SvIV(ST(0));
-		uint16 instance_id = (uint16) SvUV(ST(1));
-		quest_manager.CrossZoneMove(update_type, update_subtype, group_id, zone_short_name, instance_id);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszonemoveinstancebyguildid(int guild_id, uint16 instance_id)
+{
+	const char* zone_short_name = "";
+	quest_manager.CrossZoneMove(CZUpdateType_Guild, CZMoveUpdateSubtype_MoveZoneInstance, guild_id, zone_short_name, instance_id);
 }
 
-XS(XS__crosszonemoveinstancebyraidid);
-XS(XS__crosszonemoveinstancebyraidid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszonemoveinstancebyraidid(int raid_id, uint16 instance_id)");
-	{
-		uint8 update_type = CZUpdateType_Raid;
-		uint8 update_subtype = CZMoveUpdateSubtype_MoveZoneInstance;
-		const char* zone_short_name = "";
-		int raid_id = (int) SvIV(ST(0));
-		uint16 instance_id = (uint16) SvUV(ST(1));
-		quest_manager.CrossZoneMove(update_type, update_subtype, raid_id, zone_short_name, instance_id);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszonemoveinstancebyexpeditionid(uint32 expedition_id, uint16 instance_id)
+{
+	const char* zone_short_name = "";
+	quest_manager.CrossZoneMove(CZUpdateType_Expedition, CZMoveUpdateSubtype_MoveZoneInstance, expedition_id, zone_short_name, instance_id);
 }
 
-XS(XS__crosszonemoveinstancebyguildid);
-XS(XS__crosszonemoveinstancebyguildid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszonemoveinstancebyguildid(int guild_id, uint16 instance_id)");
-	{
-		uint8 update_type = CZUpdateType_Guild;
-		uint8 update_subtype = CZMoveUpdateSubtype_MoveZoneInstance;
-		const char* zone_short_name = "";
-		int guild_id = (int) SvIV(ST(0));
-		uint16 instance_id = (uint16) SvUV(ST(1));
-		quest_manager.CrossZoneMove(update_type, update_subtype, guild_id, zone_short_name, instance_id);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszonemoveinstancebyclientname(const char* client_name, uint16 instance_id)
+{
+	int update_identifier = 0;
+	const char* zone_short_name = "";
+	quest_manager.CrossZoneMove(CZUpdateType_ClientName, CZMoveUpdateSubtype_MoveZoneInstance, update_identifier, zone_short_name, instance_id, client_name);
 }
 
-XS(XS__crosszonemoveinstancebyexpeditionid);
-XS(XS__crosszonemoveinstancebyexpeditionid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszonemoveinstancebyexpeditionid(uint32 expedition_id, uint16 instance_id)");
-	{
-		uint8 update_type = CZUpdateType_Expedition;
-		uint8 update_subtype = CZMoveUpdateSubtype_MoveZoneInstance;
-		const char* zone_short_name = "";
-		uint32 expedition_id = (uint32) SvUV(ST(0));
-		uint16 instance_id = (uint16) SvUV(ST(1));
-		quest_manager.CrossZoneMove(update_type, update_subtype, expedition_id, zone_short_name, instance_id);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneremoveldonlossbycharid(int character_id, uint32 theme_id)
+{
+	quest_manager.CrossZoneLDoNUpdate(CZUpdateType_Character, CZLDoNUpdateSubtype_RemoveLoss, character_id, theme_id);
 }
 
-XS(XS__crosszonemoveinstancebyclientname);
-XS(XS__crosszonemoveinstancebyclientname) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszonemoveinstancebyclientname(const char* client_name, uint16 instance_id)");
-	{
-		uint8 update_type = CZUpdateType_ClientName;
-		uint8 update_subtype = CZMoveUpdateSubtype_MoveZoneInstance;
-		const char* zone_short_name = "";
-		int update_identifier = 0;
-		const char* client_name = (const char*) SvPV_nolen(ST(0));
-		uint16 instance_id = (uint16) SvUV(ST(1));
-		quest_manager.CrossZoneMove(update_type, update_subtype, update_identifier, zone_short_name, instance_id, client_name);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneremoveldonlossbygroupid(int group_id, uint32 theme_id)
+{
+	quest_manager.CrossZoneLDoNUpdate(CZUpdateType_Group, CZLDoNUpdateSubtype_RemoveLoss, group_id, theme_id);
 }
 
-XS(XS__crosszoneremoveldonlossbycharid);
-XS(XS__crosszoneremoveldonlossbycharid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszoneremoveldonlossbycharid(int character_id, uint32 theme_id)");
-	{
-		uint8 update_type = CZUpdateType_Character;
-		uint8 update_subtype = CZLDoNUpdateSubtype_RemoveLoss;
-		int character_id = (int) SvIV(ST(0));
-		uint32 theme_id = (uint32) SvUV(ST(1));
-		quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, character_id, theme_id);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneremoveldonlossbyraidid(int raid_id, uint32 theme_id)
+{
+	quest_manager.CrossZoneLDoNUpdate(CZUpdateType_Raid, CZLDoNUpdateSubtype_RemoveLoss, raid_id, theme_id);
 }
 
-XS(XS__crosszoneremoveldonlossbygroupid);
-XS(XS__crosszoneremoveldonlossbygroupid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszoneremoveldonlossbygroupid(int group_id, uint32 theme_id)");
-	{
-		uint8 update_type = CZUpdateType_Group;
-		uint8 update_subtype = CZLDoNUpdateSubtype_RemoveLoss;
-		int group_id = (int) SvIV(ST(0));
-		uint32 theme_id = (uint32) SvUV(ST(1));
-		quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, group_id, theme_id);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneremoveldonlossbyguildid(int guild_id, uint32 theme_id)
+{
+	quest_manager.CrossZoneLDoNUpdate(CZUpdateType_Guild, CZLDoNUpdateSubtype_RemoveLoss, guild_id, theme_id);
 }
 
-XS(XS__crosszoneremoveldonlossbyraidid);
-XS(XS__crosszoneremoveldonlossbyraidid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszoneremoveldonlossbyraidid(int raid_id, uint32 theme_id)");
-	{
-		uint8 update_type = CZUpdateType_Raid;
-		uint8 update_subtype = CZLDoNUpdateSubtype_RemoveLoss;
-		int raid_id = (int) SvIV(ST(0));
-		uint32 theme_id = (uint32) SvUV(ST(1));
-		quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, raid_id, theme_id);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneremoveldonlossbyexpeditionid(uint32 expedition_id, uint32 theme_id)
+{
+	quest_manager.CrossZoneLDoNUpdate(CZUpdateType_Expedition, CZLDoNUpdateSubtype_RemoveLoss, expedition_id, theme_id);
 }
 
-XS(XS__crosszoneremoveldonlossbyguildid);
-XS(XS__crosszoneremoveldonlossbyguildid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszoneremoveldonlossbyguildid(int guild_id, uint32 theme_id)");
-	{
-		uint8 update_type = CZUpdateType_Guild;
-		uint8 update_subtype = CZLDoNUpdateSubtype_RemoveLoss;
-		int guild_id = (int) SvIV(ST(0));
-		uint32 theme_id = (uint32) SvUV(ST(1));
-		quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, guild_id, theme_id);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneremoveldonlossbyclientname(const char* client_name, uint32 theme_id)
+{
+	int update_identifier = 0;
+	int points = 1;
+	quest_manager.CrossZoneLDoNUpdate(CZUpdateType_ClientName, CZLDoNUpdateSubtype_RemoveLoss, update_identifier, theme_id, points, client_name);
 }
 
-XS(XS__crosszoneremoveldonlossbyexpeditionid);
-XS(XS__crosszoneremoveldonlossbyexpeditionid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszoneremoveldonlossbyexpeditionid(uint32 expedition_id, uint32 theme_id)");
-	{
-		uint8 update_type = CZUpdateType_Expedition;
-		uint8 update_subtype = CZLDoNUpdateSubtype_RemoveLoss;
-		uint32 expedition_id = (uint32) SvUV(ST(0));
-		uint32 theme_id = (uint32) SvUV(ST(1));
-		quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, expedition_id, theme_id);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneremoveldonwinbycharid(int character_id, uint32 theme_id)
+{
+	quest_manager.CrossZoneLDoNUpdate(CZUpdateType_Character, CZLDoNUpdateSubtype_RemoveWin, character_id, theme_id);
 }
 
-XS(XS__crosszoneremoveldonlossbyclientname);
-XS(XS__crosszoneremoveldonlossbyclientname) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszoneremoveldonlossbyclientname(const char* client_name, uint32 theme_id)");
-	{
-		uint8 update_type = CZUpdateType_ClientName;
-		uint8 update_subtype = CZLDoNUpdateSubtype_RemoveLoss;
-		int update_identifier = 0;
-		int points = 1;
-		const char* client_name = (const char*) SvPV_nolen(ST(0));
-		uint32 theme_id = (uint32) SvUV(ST(1));
-		quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, update_identifier, theme_id, points, client_name);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneremoveldonwinbygroupid(int group_id, uint32 theme_id)
+{
+	quest_manager.CrossZoneLDoNUpdate(CZUpdateType_Group, CZLDoNUpdateSubtype_RemoveWin, group_id, theme_id);
 }
 
-XS(XS__crosszoneremoveldonwinbycharid);
-XS(XS__crosszoneremoveldonwinbycharid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszoneremoveldonwinbycharid(int character_id, uint32 theme_id)");
-	{
-		uint8 update_type = CZUpdateType_Character;
-		uint8 update_subtype = CZLDoNUpdateSubtype_RemoveWin;
-		int character_id = (int) SvIV(ST(0));
-		uint32 theme_id = (uint32) SvUV(ST(1));
-		quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, character_id, theme_id);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneremoveldonwinbyraidid(int raid_id, uint32 theme_id)
+{
+	quest_manager.CrossZoneLDoNUpdate(CZUpdateType_Raid, CZLDoNUpdateSubtype_RemoveWin, raid_id, theme_id);
 }
 
-XS(XS__crosszoneremoveldonwinbygroupid);
-XS(XS__crosszoneremoveldonwinbygroupid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszoneremoveldonwinbygroupid(int group_id, uint32 theme_id)");
-	{
-		uint8 update_type = CZUpdateType_Group;
-		uint8 update_subtype = CZLDoNUpdateSubtype_RemoveWin;
-		int group_id = (int) SvIV(ST(0));
-		uint32 theme_id = (uint32) SvUV(ST(1));
-		quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, group_id, theme_id);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneremoveldonwinbyguildid(int guild_id, uint32 theme_id)
+{
+	quest_manager.CrossZoneLDoNUpdate(CZUpdateType_Guild, CZLDoNUpdateSubtype_RemoveWin, guild_id, theme_id);
 }
 
-XS(XS__crosszoneremoveldonwinbyraidid);
-XS(XS__crosszoneremoveldonwinbyraidid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszoneremoveldonwinbyraidid(int raid_id, uint32 theme_id)");
-	{
-		uint8 update_type = CZUpdateType_Raid;
-		uint8 update_subtype = CZLDoNUpdateSubtype_RemoveWin;
-		int raid_id = (int) SvIV(ST(0));
-		uint32 theme_id = (uint32) SvUV(ST(1));
-		quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, raid_id, theme_id);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneremoveldonwinbyexpeditionid(uint32 expedition_id, uint32 theme_id)
+{
+	quest_manager.CrossZoneLDoNUpdate(CZUpdateType_Expedition, CZLDoNUpdateSubtype_RemoveWin, expedition_id, theme_id);
 }
 
-XS(XS__crosszoneremoveldonwinbyguildid);
-XS(XS__crosszoneremoveldonwinbyguildid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszoneremoveldonwinbyguildid(int guild_id, uint32 theme_id)");
-	{
-		uint8 update_type = CZUpdateType_Guild;
-		uint8 update_subtype = CZLDoNUpdateSubtype_RemoveWin;
-		int guild_id = (int) SvIV(ST(0));
-		uint32 theme_id = (uint32) SvUV(ST(1));
-		quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, guild_id, theme_id);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneremoveldonwinbyclientname(const char* client_name, uint32 theme_id)
+{
+	int update_identifier = 0;
+	int points = 1;
+	quest_manager.CrossZoneLDoNUpdate(CZUpdateType_ClientName, CZLDoNUpdateSubtype_RemoveWin, update_identifier, theme_id, points, client_name);
 }
 
-XS(XS__crosszoneremoveldonwinbyexpeditionid);
-XS(XS__crosszoneremoveldonwinbyexpeditionid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszoneremoveldonwinbyexpeditionid(uint32 expedition_id, uint32 theme_id)");
-	{
-		uint8 update_type = CZUpdateType_Expedition;
-		uint8 update_subtype = CZLDoNUpdateSubtype_RemoveWin;
-		uint32 expedition_id = (uint32) SvUV(ST(0));
-		uint32 theme_id = (uint32) SvUV(ST(1));
-		quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, expedition_id, theme_id);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneremovespellbycharid(int character_id, uint32 spell_id)
+{
+	quest_manager.CrossZoneSpell(CZUpdateType_Character, CZSpellUpdateSubtype_Remove, character_id, spell_id);
 }
 
-XS(XS__crosszoneremoveldonwinbyclientname);
-XS(XS__crosszoneremoveldonwinbyclientname) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszoneremoveldonwinbyclientname(const char* client_name, uint32 theme_id)");
-	{
-		uint8 update_type = CZUpdateType_ClientName;
-		uint8 update_subtype = CZLDoNUpdateSubtype_RemoveWin;
-		int update_identifier = 0;
-		int points = 1;
-		const char* client_name = (const char*) SvPV_nolen(ST(0));
-		uint32 theme_id = (uint32) SvUV(ST(1));
-		quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, update_identifier, theme_id, points, client_name);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneremovespellbygroupid(int group_id, uint32 spell_id)
+{
+	quest_manager.CrossZoneSpell(CZUpdateType_Group, CZSpellUpdateSubtype_Remove, group_id, spell_id);
 }
 
-XS(XS__crosszoneremovespellbycharid);
-XS(XS__crosszoneremovespellbycharid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszoneremovespellbycharid(int character_id, uint32 spell_id)");
-	{
-		uint8 update_type = CZUpdateType_Character;
-		uint8 update_subtype = CZSpellUpdateSubtype_Remove;
-		int character_id = (int) SvIV(ST(0));
-		uint32 spell_id = (uint32) SvUV(ST(1));
-		quest_manager.CrossZoneSpell(update_type, update_subtype, character_id, spell_id);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneremovespellbyraidid(int raid_id, uint32 spell_id)
+{
+	quest_manager.CrossZoneSpell(CZUpdateType_Raid, CZSpellUpdateSubtype_Remove, raid_id, spell_id);
 }
 
-XS(XS__crosszoneremovespellbygroupid);
-XS(XS__crosszoneremovespellbygroupid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszoneremovespellbygroupid(int group_id, uint32 spell_id)");
-	{
-		uint8 update_type = CZUpdateType_Group;
-		uint8 update_subtype = CZSpellUpdateSubtype_Remove;
-		int group_id = (int) SvIV(ST(0));
-		uint32 spell_id = (uint32) SvUV(ST(1));
-		quest_manager.CrossZoneSpell(update_type, update_subtype, group_id, spell_id);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneremovespellbyguildid(int guild_id, uint32 spell_id)
+{
+	quest_manager.CrossZoneSpell(CZUpdateType_Guild, CZSpellUpdateSubtype_Remove, guild_id, spell_id);
 }
 
-XS(XS__crosszoneremovespellbyraidid);
-XS(XS__crosszoneremovespellbyraidid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszoneremovespellbyraidid(int raid_id, uint32 spell_id)");
-	{
-		uint8 update_type = CZUpdateType_Raid;
-		uint8 update_subtype = CZSpellUpdateSubtype_Remove;
-		int raid_id = (int) SvIV(ST(0));
-		uint32 spell_id = (uint32) SvUV(ST(1));
-		quest_manager.CrossZoneSpell(update_type, update_subtype, raid_id, spell_id);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneremovespellbyexpeditionid(uint32 expedition_id, uint32 spell_id)
+{
+	quest_manager.CrossZoneSpell(CZUpdateType_Expedition, CZSpellUpdateSubtype_Remove, expedition_id, spell_id);
 }
 
-XS(XS__crosszoneremovespellbyguildid);
-XS(XS__crosszoneremovespellbyguildid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszoneremovespellbyguildid(int guild_id, uint32 spell_id)");
-	{
-		uint8 update_type = CZUpdateType_Guild;
-		uint8 update_subtype = CZSpellUpdateSubtype_Remove;
-		int guild_id = (int) SvIV(ST(0));
-		uint32 spell_id = (uint32) SvUV(ST(1));
-		quest_manager.CrossZoneSpell(update_type, update_subtype, guild_id, spell_id);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneremovespellbyclientname(const char* client_name, uint32 spell_id)
+{
+	int update_identifier = 0;
+	quest_manager.CrossZoneSpell(CZUpdateType_ClientName, CZSpellUpdateSubtype_Remove, update_identifier, spell_id, client_name);
 }
 
-XS(XS__crosszoneremovespellbyexpeditionid);
-XS(XS__crosszoneremovespellbyexpeditionid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszoneremovespellbyexpeditionid(uint32 expedition_id, uint32 spell_id)");
-	{
-		uint8 update_type = CZUpdateType_Expedition;
-		uint8 update_subtype = CZSpellUpdateSubtype_Remove;
-		uint32 expedition_id = (uint32) SvUV(ST(0));
-		uint32 spell_id = (uint32) SvUV(ST(1));
-		quest_manager.CrossZoneSpell(update_type, update_subtype, expedition_id, spell_id);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneremovetaskbycharid(int character_id, uint32 task_id)
+{
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(CZUpdateType_Character, CZTaskUpdateSubtype_RemoveTask, character_id, task_id, task_subidentifier, update_count, enforce_level_requirement);
 }
 
-XS(XS__crosszoneremovespellbyclientname);
-XS(XS__crosszoneremovespellbyclientname) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszoneremovespellbyclientname(const char* client_name, uint32 spell_id)");
-	{
-		uint8 update_type = CZUpdateType_ClientName;
-		uint8 update_subtype = CZSpellUpdateSubtype_Remove;
-		int update_identifier = 0;
-		const char* client_name = (const char*) SvPV_nolen(ST(0));
-		uint32 spell_id = (uint32) SvUV(ST(1));
-		quest_manager.CrossZoneSpell(update_type, update_subtype, update_identifier, spell_id, client_name);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneremovetaskbygroupid(int group_id, uint32 task_id)
+{
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(CZUpdateType_Group, CZTaskUpdateSubtype_RemoveTask, group_id, task_id, task_subidentifier, update_count, enforce_level_requirement);
 }
 
-XS(XS__crosszoneremovetaskbycharid);
-XS(XS__crosszoneremovetaskbycharid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszoneremovetaskbycharid(int character_id, uint32 task_identifier)");
-	{
-		uint8 update_type = CZUpdateType_Character;
-		uint8 update_subtype = CZTaskUpdateSubtype_RemoveTask;
-		int character_id = (int) SvIV(ST(0));
-		uint32 task_identifier = (uint32) SvUV(ST(1));
-		int task_subidentifier = -1;
-		int update_count = 1;
-		bool enforce_level_requirement = false;
-		quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, character_id, task_identifier, task_subidentifier, update_count, enforce_level_requirement);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneremovetaskbyraidid(int raid_id, uint32 task_id)
+{
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(CZUpdateType_Raid, CZTaskUpdateSubtype_RemoveTask, raid_id, task_id, task_subidentifier, update_count, enforce_level_requirement);
 }
 
-XS(XS__crosszoneremovetaskbygroupid);
-XS(XS__crosszoneremovetaskbygroupid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszoneremovetaskbygroupid(int group_id, uint32 task_identifier)");
-	{
-		uint8 update_type = CZUpdateType_Group;
-		uint8 update_subtype = CZTaskUpdateSubtype_RemoveTask;
-		int group_id = (int) SvIV(ST(0));
-		uint32 task_identifier = (uint32) SvUV(ST(1));
-		int task_subidentifier = -1;
-		int update_count = 1;
-		bool enforce_level_requirement = false;
-		quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, group_id, task_identifier, task_subidentifier, update_count, enforce_level_requirement);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneremovetaskbyguildid(int guild_id, uint32 task_id)
+{
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(CZUpdateType_Guild, CZTaskUpdateSubtype_RemoveTask, guild_id, task_id, task_subidentifier, update_count, enforce_level_requirement);
 }
 
-XS(XS__crosszoneremovetaskbyraidid);
-XS(XS__crosszoneremovetaskbyraidid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszoneremovetaskbyraidid(int raid_id, uint32 task_identifier)");
-	{
-		uint8 update_type = CZUpdateType_Raid;
-		uint8 update_subtype = CZTaskUpdateSubtype_RemoveTask;
-		int raid_id = (int) SvIV(ST(0));
-		uint32 task_identifier = (uint32) SvUV(ST(1));
-		int task_subidentifier = -1;
-		int update_count = 1;
-		bool enforce_level_requirement = false;
-		quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, raid_id, task_identifier, task_subidentifier, update_count, enforce_level_requirement);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneremovetaskbyexpeditionid(uint32 expedition_id, uint32 task_id)
+{
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(CZUpdateType_Expedition, CZTaskUpdateSubtype_RemoveTask, expedition_id, task_id, task_subidentifier, update_count, enforce_level_requirement);
 }
 
-XS(XS__crosszoneremovetaskbyguildid);
-XS(XS__crosszoneremovetaskbyguildid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszoneremovetaskbyguildid(int guild_id, uint32 task_identifier)");
-	{
-		uint8 update_type = CZUpdateType_Guild;
-		uint8 update_subtype = CZTaskUpdateSubtype_RemoveTask;
-		int guild_id = (int) SvIV(ST(0));
-		uint32 task_identifier = (uint32) SvUV(ST(1));
-		int task_subidentifier = -1;
-		int update_count = 1;
-		bool enforce_level_requirement = false;
-		quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, guild_id, task_identifier, task_subidentifier, update_count, enforce_level_requirement);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneremovetaskbyclientname(const char* client_name, uint32 task_id)
+{
+	int update_identifier = 0;
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(CZUpdateType_ClientName, CZTaskUpdateSubtype_RemoveTask, update_identifier, task_id, task_subidentifier, update_count, enforce_level_requirement, client_name);
 }
 
-XS(XS__crosszoneremovetaskbyexpeditionid);
-XS(XS__crosszoneremovetaskbyexpeditionid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszoneremovetaskbyexpeditionid(uint32 expedition_id, uint32 task_identifier)");
-	{
-		uint8 update_type = CZUpdateType_Expedition;
-		uint8 update_subtype = CZTaskUpdateSubtype_RemoveTask;
-		uint32 expedition_id = (uint32) SvUV(ST(0));
-		uint32 task_identifier = (uint32) SvUV(ST(1));
-		int task_subidentifier = -1;
-		int update_count = 1;
-		bool enforce_level_requirement = false;
-		quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, expedition_id, task_identifier, task_subidentifier, update_count, enforce_level_requirement);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneresetactivitybycharid(int character_id, uint32 task_id, int activity_id)
+{
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(CZUpdateType_Character, CZTaskUpdateSubtype_ActivityReset, character_id, task_id, activity_id, update_count, enforce_level_requirement);
 }
 
-XS(XS__crosszoneremovetaskbyclientname);
-XS(XS__crosszoneremovetaskbyclientname) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszoneremovetaskbyclientname(const char* client_name, uint32 task_identifier)");
-	{
-		uint8 update_type = CZUpdateType_ClientName;
-		uint8 update_subtype = CZTaskUpdateSubtype_RemoveTask;
-		int update_identifier = 0;
-		const char* client_name = (const char*) SvPV_nolen(ST(0));
-		uint32 task_identifier = (uint32) SvUV(ST(1));
-		int task_subidentifier = -1;
-		int update_count = 1;
-		bool enforce_level_requirement = false;
-		quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, update_identifier, task_identifier, task_subidentifier, update_count, enforce_level_requirement, client_name);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneresetactivitybygroupid(int group_id, uint32 task_id, int activity_id)
+{
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(CZUpdateType_Group, CZTaskUpdateSubtype_ActivityReset, group_id, task_id, activity_id, update_count, enforce_level_requirement);
 }
 
-XS(XS__crosszoneresetactivitybycharid);
-XS(XS__crosszoneresetactivitybycharid) {
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: quest::crosszoneresetactivitybycharid(int character_id, uint32 task_identifier, int activity_id)");
-	{
-		uint8 update_type = CZUpdateType_Character;
-		uint8 update_subtype = CZTaskUpdateSubtype_ActivityReset;
-		int character_id = (int) SvIV(ST(0));
-		uint32 task_identifier = (uint32) SvUV(ST(1));
-		int activity_id = (int) SvIV(ST(2));
-		int task_subidentifier = -1;
-		int update_count = 1;
-		bool enforce_level_requirement = false;
-		quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, character_id, task_identifier, task_subidentifier, update_count, enforce_level_requirement);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneresetactivitybyraidid(int raid_id, uint32 task_id, int activity_id)
+{
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(CZUpdateType_Raid, CZTaskUpdateSubtype_ActivityReset, raid_id, task_id, activity_id, update_count, enforce_level_requirement);
 }
 
-XS(XS__crosszoneresetactivitybygroupid);
-XS(XS__crosszoneresetactivitybygroupid) {
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: quest::crosszoneresetactivitybygroupid(int group_id, uint32 task_identifier, int activity_id)");
-	{
-		uint8 update_type = CZUpdateType_Group;
-		uint8 update_subtype = CZTaskUpdateSubtype_ActivityReset;
-		int group_id = (int) SvIV(ST(0));
-		uint32 task_identifier = (uint32) SvUV(ST(1));
-		int activity_id = (int) SvIV(ST(2));
-		int task_subidentifier = -1;
-		int update_count = 1;
-		bool enforce_level_requirement = false;
-		quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, group_id, task_identifier, task_subidentifier, update_count, enforce_level_requirement);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneresetactivitybyguildid(int guild_id, uint32 task_id, int activity_id)
+{
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(CZUpdateType_Guild, CZTaskUpdateSubtype_ActivityReset, guild_id, task_id, activity_id, update_count, enforce_level_requirement);
 }
 
-XS(XS__crosszoneresetactivitybyraidid);
-XS(XS__crosszoneresetactivitybyraidid) {
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: quest::crosszoneresetactivitybyraidid(int raid_id, uint32 task_identifier, int activity_id)");
-	{
-		uint8 update_type = CZUpdateType_Raid;
-		uint8 update_subtype = CZTaskUpdateSubtype_ActivityReset;
-		int raid_id = (int) SvIV(ST(0));
-		uint32 task_identifier = (uint32) SvUV(ST(1));
-		int activity_id = (int) SvIV(ST(2));
-		int task_subidentifier = -1;
-		int update_count = 1;
-		bool enforce_level_requirement = false;
-		quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, raid_id, task_identifier, task_subidentifier, update_count, enforce_level_requirement);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneresetactivitybyexpeditionid(uint32 expedition_id, uint32 task_id, int activity_id)
+{
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(CZUpdateType_Expedition, CZTaskUpdateSubtype_ActivityReset, expedition_id, task_id, activity_id, update_count, enforce_level_requirement);
 }
 
-XS(XS__crosszoneresetactivitybyguildid);
-XS(XS__crosszoneresetactivitybyguildid) {
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: quest::crosszoneresetactivitybyguildid(int guild_id, uint32 task_identifier, int activity_id)");
-	{
-		uint8 update_type = CZUpdateType_Guild;
-		uint8 update_subtype = CZTaskUpdateSubtype_ActivityReset;
-		int guild_id = (int) SvIV(ST(0));
-		uint32 task_identifier = (uint32) SvUV(ST(1));
-		int activity_id = (int) SvIV(ST(2));
-		int task_subidentifier = -1;
-		int update_count = 1;
-		bool enforce_level_requirement = false;
-		quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, guild_id, task_identifier, task_subidentifier, update_count, enforce_level_requirement);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneresetactivitybyclientname(const char* client_name, uint32 task_id, int activity_id)
+{
+	int update_identifier = 0;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(CZUpdateType_ClientName, CZTaskUpdateSubtype_ActivityReset, update_identifier, task_id, activity_id, update_count, enforce_level_requirement, client_name);
 }
 
-XS(XS__crosszoneresetactivitybyexpeditionid);
-XS(XS__crosszoneresetactivitybyexpeditionid) {
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: quest::crosszoneresetactivitybyexpeditionid(uint32 expedition_id, uint32 task_identifier, int activity_id)");
-	{
-		uint8 update_type = CZUpdateType_Expedition;
-		uint8 update_subtype = CZTaskUpdateSubtype_ActivityReset;
-		uint32 expedition_id = (uint32) SvUV(ST(0));
-		uint32 task_identifier = (uint32) SvUV(ST(1));
-		int activity_id = (int) SvIV(ST(2));
-		int task_subidentifier = -1;
-		int update_count = 1;
-		bool enforce_level_requirement = false;
-		quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, expedition_id, task_identifier, task_subidentifier, update_count, enforce_level_requirement);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszonesetentityvariablebycharid(int character_id, const char* variable_name, const char* variable_value)
+{
+	quest_manager.CrossZoneSetEntityVariable(CZUpdateType_Character, character_id, variable_name, variable_value);
 }
 
-XS(XS__crosszoneresetactivitybyclientname);
-XS(XS__crosszoneresetactivitybyclientname) {
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: quest::crosszoneresetactivitybyclientname(const char* client_name, uint32 task_identifier, int activity_id)");
-	{
-		uint8 update_type = CZUpdateType_ClientName;
-		uint8 update_subtype = CZTaskUpdateSubtype_ActivityReset;
-		int update_identifier = 0;
-		const char* client_name = (const char*) SvPV_nolen(ST(0));
-		uint32 task_identifier = (uint32) SvUV(ST(1));
-		int activity_id = (int) SvIV(ST(2));
-		int task_subidentifier = -1;
-		int update_count = 1;
-		bool enforce_level_requirement = false;
-		quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, update_identifier, task_identifier, task_subidentifier, update_count, enforce_level_requirement, client_name);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszonesetentityvariablebygroupid(int group_id, const char* variable_name, const char* variable_value)
+{
+	quest_manager.CrossZoneSetEntityVariable(CZUpdateType_Group, group_id, variable_name, variable_value);
 }
 
-XS(XS__crosszonesetentityvariablebycharid);
-XS(XS__crosszonesetentityvariablebycharid) {
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: quest::crosszonesetentityvariablebycharid(int character_id, const char* variable_name, const char* variable_value)");
-	{
-		uint8 update_type = CZUpdateType_Character;
-		int character_id = (int) SvIV(ST(0));
-		const char* variable_name = (const char*) SvPV_nolen(ST(1));
-		const char* variable_value = (const char*) SvPV_nolen(ST(2));
-		quest_manager.CrossZoneSetEntityVariable(update_type, character_id, variable_name, variable_value);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszonesetentityvariablebyraidid(int raid_id, const char* variable_name, const char* variable_value)
+{
+	quest_manager.CrossZoneSetEntityVariable(CZUpdateType_Raid, raid_id, variable_name, variable_value);
 }
 
-XS(XS__crosszonesetentityvariablebygroupid);
-XS(XS__crosszonesetentityvariablebygroupid) {
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: quest::crosszonesetentityvariablebygroupid(int group_id, const char* variable_name, const char* variable_value)");
-	{
-		uint8 update_type = CZUpdateType_Group;
-		int group_id = (int) SvIV(ST(0));
-		const char* variable_name = (const char*) SvPV_nolen(ST(1));
-		const char* variable_value = (const char*) SvPV_nolen(ST(2));
-		quest_manager.CrossZoneSetEntityVariable(update_type, group_id, variable_name, variable_value);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszonesetentityvariablebyguildid(int guild_id, const char* variable_name, const char* variable_value)
+{
+	quest_manager.CrossZoneSetEntityVariable(CZUpdateType_Guild, guild_id, variable_name, variable_value);
 }
 
-XS(XS__crosszonesetentityvariablebyraidid);
-XS(XS__crosszonesetentityvariablebyraidid) {
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: quest::crosszonesetentityvariablebyraidid(int raid_id, const char* variable_name, const char* variable_value)");
-	{
-		uint8 update_type = CZUpdateType_Raid;
-		int raid_id = (int) SvIV(ST(0));
-		const char* variable_name = (const char*) SvPV_nolen(ST(1));
-		const char* variable_value = (const char*) SvPV_nolen(ST(2));
-		quest_manager.CrossZoneSetEntityVariable(update_type, raid_id, variable_name, variable_value);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszonesetentityvariablebyexpeditionid(uint32 expedition_id, const char* variable_name, const char* variable_value)
+{
+	quest_manager.CrossZoneSetEntityVariable(CZUpdateType_Expedition, expedition_id, variable_name, variable_value);
 }
 
-XS(XS__crosszonesetentityvariablebyguildid);
-XS(XS__crosszonesetentityvariablebyguildid) {
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: quest::crosszonesetentityvariablebyguildid(int guild_id, const char* variable_name, const char* variable_value)");
-	{
-		uint8 update_type = CZUpdateType_Guild;
-		int guild_id = (int) SvIV(ST(0));
-		const char* variable_name = (const char*) SvPV_nolen(ST(1));
-		const char* variable_value = (const char*) SvPV_nolen(ST(2));
-		quest_manager.CrossZoneSetEntityVariable(update_type, guild_id, variable_name, variable_value);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszonesetentityvariablebyclientname(const char* client_name, const char* variable_name, const char* variable_value)
+{
+	int update_identifier = 0;
+	quest_manager.CrossZoneSetEntityVariable(CZUpdateType_ClientName, update_identifier, variable_name, variable_value, client_name);
 }
 
-XS(XS__crosszonesetentityvariablebyexpeditionid);
-XS(XS__crosszonesetentityvariablebyexpeditionid) {
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: quest::crosszonesetentityvariablebyexpeditionid(uint32 expedition_id, const char* variable_name, const char* variable_value)");
-	{
-		uint8 update_type = CZUpdateType_Expedition;
-		uint32 expedition_id = (uint32) SvUV(ST(0));
-		const char* variable_name = (const char*) SvPV_nolen(ST(1));
-		const char* variable_value = (const char*) SvPV_nolen(ST(2));
-		quest_manager.CrossZoneSetEntityVariable(update_type, expedition_id, variable_name, variable_value);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszonesetentityvariablebynpctypeid(int npc_id, const char* variable_name, const char* variable_value)
+{
+	quest_manager.CrossZoneSetEntityVariable(CZUpdateType_NPC, npc_id, variable_name, variable_value);
 }
 
-XS(XS__crosszonesetentityvariablebyclientname);
-XS(XS__crosszonesetentityvariablebyclientname) {
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: quest::crosszonesetentityvariablebyclientname(const char* client_name, const char* variable_name, const char* variable_value)");
-	{
-		uint8 update_type = CZUpdateType_ClientName;
-		int update_identifier = 0;
-		const char* client_name = (const char*) SvPV_nolen(ST(0));
-		const char* variable_name = (const char*) SvPV_nolen(ST(1));
-		const char* variable_value = (const char*) SvPV_nolen(ST(2));
-		quest_manager.CrossZoneSetEntityVariable(update_type, update_identifier, variable_name, variable_value, client_name);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszonesignalclientbycharid(int character_id, int signal_id)
+{
+	quest_manager.CrossZoneSignal(CZUpdateType_Character, character_id, signal_id);
 }
 
-XS(XS__crosszonesetentityvariablebynpctypeid);
-XS(XS__crosszonesetentityvariablebynpctypeid) {
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: quest::crosszonesetentityvariablebynpctypeid(int npc_id, const char* variable_name, const char* variable_value)");
-	{
-		uint8 update_type = CZUpdateType_NPC;
-		int npc_id = (int) SvIV(ST(0));
-		const char* variable_name = (const char*) SvPV_nolen(ST(1));
-		const char* variable_value = (const char*) SvPV_nolen(ST(2));
-		quest_manager.CrossZoneSetEntityVariable(update_type, npc_id, variable_name, variable_value);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszonesignalclientbygroupid(int group_id, int signal_id)
+{
+	quest_manager.CrossZoneSignal(CZUpdateType_Group, group_id, signal_id);
 }
 
-XS(XS__crosszonesignalclientbycharid);
-XS(XS__crosszonesignalclientbycharid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszonesignalclientbycharid(int character_id, uint32 signal)");
-	{
-		uint8 update_type = CZUpdateType_Character;
-		int character_id = (int) SvIV(ST(0));
-		uint32 signal = (uint32) SvUV(ST(1));
-		quest_manager.CrossZoneSignal(update_type, character_id, signal);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszonesignalclientbyraidid(int raid_id, int signal_id)
+{
+	quest_manager.CrossZoneSignal(CZUpdateType_Raid, raid_id, signal_id);
 }
 
-XS(XS__crosszonesignalclientbygroupid);
-XS(XS__crosszonesignalclientbygroupid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszonesignalclientbygroupid(int group_id, uint32 signal)");
-	{
-		uint8 update_type = CZUpdateType_Group;
-		int group_id = (int) SvIV(ST(0));
-		uint32 signal = (uint32) SvUV(ST(1));
-		quest_manager.CrossZoneSignal(update_type, group_id, signal);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszonesignalclientbyguildid(int guild_id, int signal_id)
+{
+	quest_manager.CrossZoneSignal(CZUpdateType_Guild, guild_id, signal_id);
 }
 
-XS(XS__crosszonesignalclientbyraidid);
-XS(XS__crosszonesignalclientbyraidid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszonesignalclientbyraidid(int raid_id, uint32 signal)");
-	{
-		uint8 update_type = CZUpdateType_Raid;
-		int raid_id = (int) SvIV(ST(0));
-		uint32 signal = (uint32) SvUV(ST(1));
-		quest_manager.CrossZoneSignal(update_type, raid_id, signal);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszonesignalclientbyexpeditionid(uint32 expedition_id, int signal_id)
+{
+	quest_manager.CrossZoneSignal(CZUpdateType_Expedition, expedition_id, signal_id);
 }
 
-XS(XS__crosszonesignalclientbyguildid);
-XS(XS__crosszonesignalclientbyguildid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszonesignalclientbyguildid(int guild_id, uint32 signal)");
-	{
-		uint8 update_type = CZUpdateType_Guild;
-		int guild_id = (int) SvIV(ST(0));
-		uint32 signal = (uint32) SvUV(ST(1));
-		quest_manager.CrossZoneSignal(update_type, guild_id, signal);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszonesignalclientbyname(const char* client_name, int signal_id)
+{
+	int update_identifier = 0;
+	quest_manager.CrossZoneSignal(CZUpdateType_Expedition, update_identifier, signal_id, client_name);
 }
 
-XS(XS__crosszonesignalclientbyexpeditionid);
-XS(XS__crosszonesignalclientbyexpeditionid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszonesignalclientbyexpeditionid(uint32 expedition_id, uint32 signal)");
-	{
-		uint8 update_type = CZUpdateType_Expedition;
-		uint32 expedition_id = (uint32) SvUV(ST(0));
-		uint32 signal = (uint32) SvUV(ST(1));
-		quest_manager.CrossZoneSignal(update_type, expedition_id, signal);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszonesignalnpcbynpctypeid(uint32 npc_id, int signal_id)
+{
+	quest_manager.CrossZoneSignal(CZUpdateType_NPC, npc_id, signal_id);
 }
 
-XS(XS__crosszonesignalclientbyname);
-XS(XS__crosszonesignalclientbyname) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszonesignalclientbyname(const char* client_name, uint32 signal)");
-	{
-		uint8 update_type = CZUpdateType_Expedition;
-		int update_identifier = 0;
-		const char* client_name = (const char*) SvPV_nolen(ST(0));
-		uint32 signal = (uint32) SvUV(ST(1));
-		quest_manager.CrossZoneSignal(update_type, update_identifier, signal, client_name);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneupdateactivitybycharid(int character_id, uint32 task_id, int activity_id)
+{
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(CZUpdateType_Character, CZTaskUpdateSubtype_ActivityUpdate, character_id, task_id, activity_id, update_count, enforce_level_requirement);
 }
 
-XS(XS__crosszonesignalnpcbynpctypeid);
-XS(XS__crosszonesignalnpcbynpctypeid) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszonesignalnpcbynpctypeid(uint32 npc_id, uint32 signal)");
-	{
-		uint8 update_type = CZUpdateType_NPC;
-		uint32 npc_id = (uint32) SvUV(ST(0));
-		uint32 signal = (uint32) SvUV(ST(1));
-		quest_manager.CrossZoneSignal(update_type, npc_id, signal);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneupdateactivitybycharid(int character_id, uint32 task_id, int activity_id, int update_count)
+{
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(CZUpdateType_Character, CZTaskUpdateSubtype_ActivityUpdate, character_id, task_id, activity_id, update_count, enforce_level_requirement);
 }
 
-XS(XS__crosszoneupdateactivitybycharid);
-XS(XS__crosszoneupdateactivitybycharid) {
-	dXSARGS;
-	if (items < 3 || items > 4)
-		Perl_croak(aTHX_ "Usage: quest::crosszoneupdateactivitybycharid(int character_id, uint32 task_identifier, int activity_id, [int update_count = 1])");
-	{
-		uint8 update_type = CZUpdateType_Character;
-		uint8 update_subtype = CZTaskUpdateSubtype_ActivityUpdate;
-		int character_id = (int) SvIV(ST(0));
-		uint32 task_identifier = (uint32) SvUV(ST(1));
-		int task_subidentifier = (int) SvIV(ST(2));
-		int update_count = 1;
-		bool enforce_level_requirement = false;
-		if (items == 4)
-			update_count = (int) SvIV(ST(3));
-
-		quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, character_id, task_identifier, task_subidentifier, update_count, enforce_level_requirement);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneupdateactivitybygroupid(int group_id, uint32 task_id, int activity_id)
+{
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(CZUpdateType_Group, CZTaskUpdateSubtype_ActivityUpdate, group_id, task_id, activity_id, update_count, enforce_level_requirement);
 }
 
-XS(XS__crosszoneupdateactivitybygroupid);
-XS(XS__crosszoneupdateactivitybygroupid) {
-	dXSARGS;
-	if (items < 3 || items > 4)
-		Perl_croak(aTHX_ "Usage: quest::crosszoneupdateactivitybygroupid(int group_id, uint32 task_identifier, int activity_id, [int update_count = 1])");
-	{
-		uint8 update_type = CZUpdateType_Group;
-		uint8 update_subtype = CZTaskUpdateSubtype_ActivityUpdate;
-		int group_id = (int) SvIV(ST(0));
-		uint32 task_identifier = (uint32) SvUV(ST(1));
-		int task_subidentifier = (int) SvIV(ST(2));
-		int update_count = 1;
-		bool enforce_level_requirement = false;
-		if (items == 4)
-			update_count = (int) SvIV(ST(3));
-
-		quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, group_id, task_identifier, task_subidentifier, update_count, enforce_level_requirement);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneupdateactivitybygroupid(int group_id, uint32 task_id, int activity_id, int update_count)
+{
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(CZUpdateType_Group, CZTaskUpdateSubtype_ActivityUpdate, group_id, task_id, activity_id, update_count, enforce_level_requirement);
 }
 
-XS(XS__crosszoneupdateactivitybyraidid);
-XS(XS__crosszoneupdateactivitybyraidid) {
-	dXSARGS;
-	if (items < 3 || items > 4)
-		Perl_croak(aTHX_ "Usage: quest::crosszoneupdateactivitybyraidid(int raid_id, uint32 task_identifier, int activity_id, [int update_count = 1])");
-	{
-		uint8 update_type = CZUpdateType_Raid;
-		uint8 update_subtype = CZTaskUpdateSubtype_ActivityUpdate;
-		int raid_id = (int) SvIV(ST(0));
-		uint32 task_identifier = (uint32) SvUV(ST(1));
-		int task_subidentifier = (int) SvIV(ST(2));
-		int update_count = 1;
-		bool enforce_level_requirement = false;
-		if (items == 4)
-			update_count = (int) SvIV(ST(3));
-
-		quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, raid_id, task_identifier, task_subidentifier, update_count, enforce_level_requirement);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneupdateactivitybyraidid(int raid_id, uint32 task_id, int activity_id)
+{
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(CZUpdateType_Raid, CZTaskUpdateSubtype_ActivityUpdate, raid_id, task_id, activity_id, update_count, enforce_level_requirement);
 }
 
-XS(XS__crosszoneupdateactivitybyguildid);
-XS(XS__crosszoneupdateactivitybyguildid) {
-	dXSARGS;
-	if (items < 3 || items > 4)
-		Perl_croak(aTHX_ "Usage: quest::crosszoneupdateactivitybyguildid(int guild_id, uint32 task_identifier, int activity_id, [int update_count = 1])");
-	{
-		uint8 update_type = CZUpdateType_Guild;
-		uint8 update_subtype = CZTaskUpdateSubtype_ActivityUpdate;
-		int guild_id = (int) SvIV(ST(0));
-		uint32 task_identifier = (uint32) SvUV(ST(1));
-		int task_subidentifier = (int) SvIV(ST(2));
-		int update_count = 1;
-		bool enforce_level_requirement = false;
-		if (items == 4)
-			update_count = (int) SvIV(ST(3));
-
-		quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, guild_id, task_identifier, task_subidentifier, update_count, enforce_level_requirement);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneupdateactivitybyraidid(int raid_id, uint32 task_id, int activity_id, int update_count)
+{
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(CZUpdateType_Raid, CZTaskUpdateSubtype_ActivityUpdate, raid_id, task_id, activity_id, update_count, enforce_level_requirement);
 }
 
-XS(XS__crosszoneupdateactivitybyexpeditionid);
-XS(XS__crosszoneupdateactivitybyexpeditionid) {
-	dXSARGS;
-	if (items < 3 || items > 4)
-		Perl_croak(aTHX_ "Usage: quest::crosszoneupdateactivitybyexpeditionid(uint32 expedition_id, uint32 task_identifier, int activity_id, [int update_count = 1])");
-	{
-		uint8 update_type = CZUpdateType_Expedition;
-		uint8 update_subtype = CZTaskUpdateSubtype_ActivityUpdate;
-		uint32 expedition_id = (uint32) SvUV(ST(0));
-		uint32 task_identifier = (uint32) SvUV(ST(1));
-		int task_subidentifier = (int) SvIV(ST(2));
-		int update_count = 1;
-		bool enforce_level_requirement = false;
-		if (items == 4)
-			update_count = (int) SvIV(ST(3));
-
-		quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, expedition_id, task_identifier, task_subidentifier, update_count, enforce_level_requirement);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneupdateactivitybyguildid(int guild_id, uint32 task_id, int activity_id)
+{
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(CZUpdateType_Guild, CZTaskUpdateSubtype_ActivityUpdate, guild_id, task_id, activity_id, update_count, enforce_level_requirement);
 }
 
-XS(XS__crosszoneupdateactivitybyclientname);
-XS(XS__crosszoneupdateactivitybyclientname) {
-	dXSARGS;
-	if (items < 3 || items > 4)
-		Perl_croak(aTHX_ "Usage: quest::crosszoneupdateactivitybyclientname(const char* client_name, uint32 task_identifier, int activity_id, [int update_count = 1])");
-	{
-		uint8 update_type = CZUpdateType_ClientName;
-		uint8 update_subtype = CZTaskUpdateSubtype_ActivityUpdate;
-		int update_identifier = 0;
-		const char* client_name = (const char*) SvPV_nolen(ST(0));
-		uint32 task_identifier = (uint32) SvUV(ST(1));
-		int task_subidentifier = (int) SvIV(ST(2));
-		int update_count = 1;
-		bool enforce_level_requirement = false;
-		if (items == 4)
-			update_count = (int) SvIV(ST(3));
-
-		quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, update_identifier, task_identifier, task_subidentifier, update_count, enforce_level_requirement, client_name);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneupdateactivitybyguildid(int guild_id, uint32 task_id, int activity_id, int update_count)
+{
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(CZUpdateType_Guild, CZTaskUpdateSubtype_ActivityUpdate, guild_id, task_id, activity_id, update_count, enforce_level_requirement);
 }
 
-XS(XS__worldwideaddldonloss);
-XS(XS__worldwideaddldonloss) {
-	dXSARGS;
-	if (items < 1 || items > 3)
-		Perl_croak(aTHX_ "Usage: quest::worldwideaddldonloss(uint32 theme_id, [min_status = 0, max_status = 0])");
-	{
-		uint8 update_type = CZLDoNUpdateSubtype_AddLoss;
-		uint32 theme_id = (uint32)SvUV(ST(0));
-		int points = 1;
-		uint8 min_status = AccountStatus::Player;
-		uint8 max_status = AccountStatus::Player;
-		if (items == 2)
-			min_status = (uint8)SvUV(ST(1));
-
-		if (items == 3)
-			max_status = (uint8)SvUV(ST(2));
-
-		quest_manager.WorldWideLDoNUpdate(update_type, theme_id, points, min_status, max_status);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneupdateactivitybyexpeditionid(uint32 expedition_id, uint32 task_id, int activity_id)
+{
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(CZUpdateType_Expedition, CZTaskUpdateSubtype_ActivityUpdate, expedition_id, task_id, activity_id, update_count, enforce_level_requirement);
 }
 
-XS(XS__worldwideaddldonpoints);
-XS(XS__worldwideaddldonpoints) {
-	dXSARGS;
-	if (items < 1 || items > 4)
-		Perl_croak(aTHX_ "Usage: quest::worldwideaddldonpoints(uint32 theme_id. [int points = 1, min_status = 0, max_status = 0])");
-	{
-		uint8 update_type = CZLDoNUpdateSubtype_AddPoints;
-		uint32 theme_id = (uint32)SvUV(ST(0));
-		int points = 1;
-		uint8 min_status = AccountStatus::Player;
-		uint8 max_status = AccountStatus::Player;
-		if (items == 2)
-			points = (int)SvIV(ST(1));
-
-		if (items == 3)
-			min_status = (uint8)SvUV(ST(2));
-
-		if (items == 4)
-			max_status = (uint8)SvUV(ST(3));
-
-		quest_manager.WorldWideLDoNUpdate(update_type, theme_id, points, min_status, max_status);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneupdateactivitybyexpeditionid(uint32 expedition_id, uint32 task_id, int activity_id, int update_count)
+{
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(CZUpdateType_Expedition, CZTaskUpdateSubtype_ActivityUpdate, expedition_id, task_id, activity_id, update_count, enforce_level_requirement);
 }
 
-XS(XS__worldwideaddldonwin);
-XS(XS__worldwideaddldonwin) {
-	dXSARGS;
-	if (items < 1 || items > 3)
-		Perl_croak(aTHX_ "Usage: quest::worldwideaddldonwin(uint32 theme_id, [min_status = 0, max_status = 0])");
-	{
-		uint8 update_type = CZLDoNUpdateSubtype_AddWin;
-		uint32 theme_id = (uint32)SvUV(ST(0));
-		int points = 1;
-		uint8 min_status = AccountStatus::Player;
-		uint8 max_status = AccountStatus::Player;
-		if (items == 2)
-			min_status = (uint8)SvUV(ST(1));
-
-		if (items == 3)
-			max_status = (uint8)SvUV(ST(2));
-
-		quest_manager.WorldWideLDoNUpdate(update_type, theme_id, points, min_status, max_status);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneupdateactivitybyclientname(const char* client_name, uint32 task_id, int activity_id)
+{
+	int update_identifier = 0;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(CZUpdateType_ClientName, CZTaskUpdateSubtype_ActivityUpdate, update_identifier, task_id, activity_id, update_count, enforce_level_requirement, client_name);
 }
 
-XS(XS__worldwideassigntask);
-XS(XS__worldwideassigntask) {
-	dXSARGS;
-	if (items < 1 || items > 3)
-		Perl_croak(aTHX_ "Usage: quest::worldwideassigntask(uint32 task_identifier, [uint8 min_status = 0, uint8 max_status = 0])");
-	{
-		uint8 update_type = WWTaskUpdateType_AssignTask;
-		uint32 task_identifier = (uint32) SvUV(ST(0));
-		uint8 min_status = AccountStatus::Player;
-		uint8 max_status = AccountStatus::Player;
-		int task_subidentifier = -1;
-		int update_count = 1;
-		bool enforce_level_requirement = false;
-		if (items == 2)
-			min_status = (uint8) SvUV(ST(1));
-
-		if (items == 3)
-			max_status = (uint8) SvUV(ST(2));
-
-		quest_manager.WorldWideTaskUpdate(update_type, task_identifier, task_subidentifier, update_count, enforce_level_requirement, min_status, max_status);
-	}
-	XSRETURN_EMPTY;
+void Perl__crosszoneupdateactivitybyclientname(const char* client_name, uint32 task_id, int activity_id, int update_count)
+{
+	int update_identifier = 0;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(CZUpdateType_ClientName, CZTaskUpdateSubtype_ActivityUpdate, update_identifier, task_id, activity_id, update_count, enforce_level_requirement, client_name);
 }
 
-XS(XS__worldwidecastspell);
-XS(XS__worldwidecastspell) {
-	dXSARGS;
-	if (items < 1 || items > 3)
-		Perl_croak(aTHX_ "Usage: quest::worldwidecastspell(uint32 spell_id, [uint8 min_status = 0, uint8 max_status = 0])");
-	{
-		uint8 update_type = WWSpellUpdateType_Cast;
-		uint32 spell_id = (uint32) SvUV(ST(0));
-		uint8 min_status = AccountStatus::Player;
-		uint8 max_status = AccountStatus::Player;
-		if (items == 2)
-			min_status = (uint8) SvUV(ST(1));
-
-		if (items == 3)
-			max_status = (uint8) SvUV(ST(2));
-
-		quest_manager.WorldWideSpell(update_type, spell_id, min_status, max_status);
-	}
-	XSRETURN_EMPTY;
+void Perl__worldwideaddldonloss(uint32 theme_id)
+{
+	quest_manager.WorldWideLDoNUpdate(CZLDoNUpdateSubtype_AddLoss, theme_id);
 }
 
-XS(XS__worldwidedialoguewindow);
-XS(XS__worldwidedialoguewindow) {
-	dXSARGS;
-	if (items < 1 || items > 3)
-		Perl_croak(aTHX_ "Usage: quest::worldwidedialoguewindow(string message, [uint8 min_status = 0, uint8 max_status = 0])");
-	{
-		const char* message = (const char*) SvPV_nolen(ST(0));
-		uint8 min_status = AccountStatus::Player;
-		uint8 max_status = AccountStatus::Player;
-		if (items == 2)
-			min_status = (uint8)SvUV(ST(1));
-
-		if (items == 3)
-			max_status = (uint8)SvUV(ST(2));
-
-		quest_manager.WorldWideDialogueWindow(message, min_status, max_status);
-	}
-	XSRETURN_EMPTY;
+void Perl__worldwideaddldonloss(uint32 theme_id, uint8 min_status)
+{
+	int points = 1;
+	quest_manager.WorldWideLDoNUpdate(CZLDoNUpdateSubtype_AddLoss, theme_id, points, min_status);
 }
 
-XS(XS__worldwidedisabletask);
-XS(XS__worldwidedisabletask) {
-	dXSARGS;
-	if (items < 1 || items > 3)
-		Perl_croak(aTHX_ "Usage: quest::worldwidedisabletask(uint32 task_id, [uint8 min_status = 0, uint8 max_status = 0])");
-	{
-		uint8 update_type = WWTaskUpdateType_DisableTask;
-		uint32 task_identifier = (uint32) SvUV(ST(0));
-		uint8 min_status = AccountStatus::Player;
-		uint8 max_status = AccountStatus::Player;
-		int task_subidentifier = -1;
-		int update_count = 1;
-		bool enforce_level_requirement = false;
-		if (items == 2)
-			min_status = (uint8) SvUV(ST(1));
-
-		if (items == 3)
-			max_status = (uint8) SvUV(ST(2));
-
-		quest_manager.WorldWideTaskUpdate(update_type, task_identifier, task_subidentifier, update_count, enforce_level_requirement, min_status, max_status);
-	}
-	XSRETURN_EMPTY;
+void Perl__worldwideaddldonloss(uint32 theme_id, uint8 min_status, uint8 max_status)
+{
+	int points = 1;
+	quest_manager.WorldWideLDoNUpdate(CZLDoNUpdateSubtype_AddLoss, theme_id, points, min_status, max_status);
 }
 
-XS(XS__worldwideenabletask);
-XS(XS__worldwideenabletask) {
-	dXSARGS;
-	if (items < 1 || items > 3)
-		Perl_croak(aTHX_ "Usage: quest::worldwideenabletask(uint32 task_id, [uint8 min_status = 0, uint8 max_status = 0])");
-	{
-		uint8 update_type = WWTaskUpdateType_EnableTask;
-		uint32 task_identifier = (uint32) SvUV(ST(0));
-		uint8 min_status = AccountStatus::Player;
-		uint8 max_status = AccountStatus::Player;
-		int task_subidentifier = -1;
-		int update_count = 1;
-		bool enforce_level_requirement = false;
-		if (items == 2)
-			min_status = (uint8) SvUV(ST(1));
-
-		if (items == 3)
-			max_status = (uint8) SvUV(ST(2));
-
-		quest_manager.WorldWideTaskUpdate(update_type, task_identifier, task_subidentifier, update_count, enforce_level_requirement, min_status, max_status);
-	}
-	XSRETURN_EMPTY;
+void Perl__worldwideaddldonpoints(uint32 theme_id)
+{
+	int points = 1;
+	quest_manager.WorldWideLDoNUpdate(CZLDoNUpdateSubtype_AddPoints, theme_id, points);
 }
 
-XS(XS__worldwidefailtask);
-XS(XS__worldwidefailtask) {
-	dXSARGS;
-	if (items < 1 || items > 3)
-		Perl_croak(aTHX_ "Usage: quest::worldwidefailtask(uint32 task_id, [uint8 min_status = 0, uint8 max_status = 0])");
-	{
-		uint8 update_type = WWTaskUpdateType_FailTask;
-		uint32 task_identifier = (uint32) SvUV(ST(0));
-		uint8 min_status = AccountStatus::Player;
-		uint8 max_status = AccountStatus::Player;
-		int task_subidentifier = -1;
-		int update_count = 1;
-		bool enforce_level_requirement = false;
-		if (items == 2)
-			min_status = (uint8) SvUV(ST(1));
-
-		if (items == 3)
-			max_status = (uint8) SvUV(ST(2));
-
-		quest_manager.WorldWideTaskUpdate(update_type, task_identifier, task_subidentifier, update_count, enforce_level_requirement, min_status, max_status);
-	}
-	XSRETURN_EMPTY;
+void Perl__worldwideaddldonpoints(uint32 theme_id, int points)
+{
+	quest_manager.WorldWideLDoNUpdate(CZLDoNUpdateSubtype_AddPoints, theme_id, points);
 }
 
-XS(XS__worldwidemarquee);
-XS(XS__worldwidemarquee) {
-	dXSARGS;
-	if (items < 6 || items > 8)
-		Perl_croak(aTHX_ "Usage: quest::worldwidemarquee(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char* message, [uint8 min_status = 0, uint8 max_status = 0])");
-	{
-		uint32 type = (uint32) SvUV(ST(0));
-		uint32 priority = (uint32) SvUV(ST(1));
-		uint32 fade_in  = (uint32) SvUV(ST(2));
-		uint32 fade_out = (uint32) SvUV(ST(3));
-		uint32 duration = (uint32) SvUV(ST(4));
-		const char* message = (const char*) SvPV_nolen(ST(5));
-		uint8 min_status = AccountStatus::Player;
-		uint8 max_status = AccountStatus::Player;
-		if (items == 7)
-			min_status = (uint8) SvUV(ST(6));
-
-		if (items == 8)
-			max_status = (uint8) SvUV(ST(7));
-
-		quest_manager.WorldWideMarquee(type, priority, fade_in, fade_out, duration, message, min_status, max_status);
-	}
-	XSRETURN_EMPTY;
+void Perl__worldwideaddldonpoints(uint32 theme_id, int points, uint8 min_status)
+{
+	quest_manager.WorldWideLDoNUpdate(CZLDoNUpdateSubtype_AddPoints, theme_id, points, min_status);
 }
 
-XS(XS__worldwidemessage);
-XS(XS__worldwidemessage) {
-	dXSARGS;
-	if (items < 2 || items > 4)
-		Perl_croak(aTHX_ "Usage: quest::worldwidemessage(uint32 type, const char* message, [uint8 min_status = 0, uint8 max_status = 0])");
-	{
-		uint32 type = (uint32) SvUV(ST(0));
-		const char* message = (const char*) SvPV_nolen(ST(1));
-		uint8 min_status = AccountStatus::Player;
-		uint8 max_status = AccountStatus::Player;
-		if (items == 3)
-			min_status = (uint8) SvUV(ST(2));
-
-		if (items == 4)
-			max_status = (uint8) SvUV(ST(3));
-
-		quest_manager.WorldWideMessage(type, message, min_status, max_status);
-	}
-	XSRETURN_EMPTY;
+void Perl__worldwideaddldonpoints(uint32 theme_id, int points, uint8 min_status, uint8 max_status)
+{
+	quest_manager.WorldWideLDoNUpdate(CZLDoNUpdateSubtype_AddPoints, theme_id, points, min_status, max_status);
 }
 
-XS(XS__worldwidemove);
-XS(XS__worldwidemove) {
-	dXSARGS;
-	if (items < 1 || items > 3)
-		Perl_croak(aTHX_ "Usage: quest::worldwidemove(const char* zone_short_name, [uint8 min_status = 0, uint8 max_status = 0])");
-	{
-		uint8 update_type = WWMoveUpdateType_MoveZone;
-		const char* zone_short_name = (const char*) SvPV_nolen(ST(0));
-		uint16 instance_id = 0;
-		uint8 min_status = AccountStatus::Player;
-		uint8 max_status = AccountStatus::Player;
-		if (items == 2)
-			min_status = (uint8) SvUV(ST(1));
-
-		if (items == 3)
-			max_status = (uint8) SvUV(ST(2));
-
-		quest_manager.WorldWideMove(update_type, zone_short_name, instance_id, min_status, max_status);
-	}
-	XSRETURN_EMPTY;
+void Perl__worldwideaddldonwin(uint32 theme_id)
+{
+	int points = 1;
+	quest_manager.WorldWideLDoNUpdate(CZLDoNUpdateSubtype_AddWin, theme_id, points);
 }
 
-XS(XS__worldwidemoveinstance);
-XS(XS__worldwidemoveinstance) {
-	dXSARGS;
-	if (items < 1 || items > 3)
-		Perl_croak(aTHX_ "Usage: quest::worldwidemoveinstance(uint16 instance_id, [uint8 min_status = 0, uint max_status = 0])");
-	{
-		uint8 update_type = WWMoveUpdateType_MoveZoneInstance;
-		const char* zone_short_name = "";
-		uint16 instance_id = (uint16) SvUV(ST(0));
-		uint8 min_status = AccountStatus::Player;
-		uint8 max_status = AccountStatus::Player;
-		if (items == 2)
-			min_status = (uint8) SvUV(ST(1));
-
-		if (items == 3)
-			max_status = (uint8) SvUV(ST(2));
-
-		quest_manager.WorldWideMove(update_type, zone_short_name, instance_id, min_status, max_status);
-	}
-	XSRETURN_EMPTY;
+void Perl__worldwideaddldonwin(uint32 theme_id, uint8 min_status)
+{
+	int points = 1;
+	quest_manager.WorldWideLDoNUpdate(CZLDoNUpdateSubtype_AddWin, theme_id, points, min_status);
 }
 
-XS(XS__worldwideremoveldonloss);
-XS(XS__worldwideremoveldonloss) {
-	dXSARGS;
-	if (items < 1 || items > 3)
-		Perl_croak(aTHX_ "Usage: quest::worldwideremoveldonloss(uint32 theme_id, [min_status = 0, max_status = 0])");
-	{
-		uint8 update_type = CZLDoNUpdateSubtype_RemoveLoss;
-		uint32 theme_id = (uint32)SvUV(ST(0));
-		int points = 1;
-		uint8 min_status = AccountStatus::Player;
-		uint8 max_status = AccountStatus::Player;
-		if (items == 2)
-			min_status = (uint8)SvUV(ST(1));
-
-		if (items == 3)
-			max_status = (uint8)SvUV(ST(2));
-
-		quest_manager.WorldWideLDoNUpdate(update_type, theme_id, points, min_status, max_status);
-	}
-	XSRETURN_EMPTY;
+void Perl__worldwideaddldonwin(uint32 theme_id, uint8 min_status, uint8 max_status)
+{
+	int points = 1;
+	quest_manager.WorldWideLDoNUpdate(CZLDoNUpdateSubtype_AddWin, theme_id, points, min_status, max_status);
 }
 
-XS(XS__worldwideremoveldonwin);
-XS(XS__worldwideremoveldonwin) {
-	dXSARGS;
-	if (items < 1 || items > 3)
-		Perl_croak(aTHX_ "Usage: quest::worldwideremoveldonwin(uint32 theme_id, [min_status = 0, max_status = 0])");
-	{
-		uint8 update_type = CZLDoNUpdateSubtype_RemoveWin;
-		uint32 theme_id = (uint32)SvUV(ST(0));
-		int points = 1;
-		uint8 min_status = AccountStatus::Player;
-		uint8 max_status = AccountStatus::Player;
-		if (items == 2)
-			min_status = (uint8)SvUV(ST(1));
-
-		if (items == 3)
-			max_status = (uint8)SvUV(ST(2));
-
-		quest_manager.WorldWideLDoNUpdate(update_type, theme_id, points, min_status, max_status);
-	}
-	XSRETURN_EMPTY;
+void Perl__worldwideassigntask(uint32 task_id)
+{
+	quest_manager.WorldWideTaskUpdate(WWTaskUpdateType_AssignTask, task_id);
 }
 
-XS(XS__worldwideremovespell);
-XS(XS__worldwideremovespell) {
-	dXSARGS;
-	if (items < 1 || items > 3)
-		Perl_croak(aTHX_ "Usage: quest::worldwideremovespell(uint32 spell_id, [uint8 min_status = 0, uint max_status = 0])");
-	{
-		uint8 update_type = WWSpellUpdateType_Remove;
-		uint32 spell_id = (uint32) SvUV(ST(0));
-		uint8 min_status = AccountStatus::Player;
-		uint8 max_status = AccountStatus::Player;
-		if (items == 2)
-			min_status = (uint8) SvUV(ST(1));
-
-		if (items == 3)
-			max_status = (uint8) SvUV(ST(2));
-
-		quest_manager.WorldWideSpell(update_type, spell_id, min_status, max_status);
-	}
-	XSRETURN_EMPTY;
+void Perl__worldwideassigntask(uint32 task_id, bool enforce_level_requirement)
+{
+	int task_subidentifier = -1;
+	int update_count = 1;
+	quest_manager.WorldWideTaskUpdate(WWTaskUpdateType_AssignTask, task_id, task_subidentifier, update_count, enforce_level_requirement);
 }
 
-XS(XS__worldwideremovetask);
-XS(XS__worldwideremovetask) {
-	dXSARGS;
-	if (items < 1 || items > 3)
-		Perl_croak(aTHX_ "Usage: quest::worldwideremovetask(uint32 task_identifier, [uint8 min_status = 0, uint max_status = 0])");
-	{
-		uint8 update_type = WWTaskUpdateType_RemoveTask;
-		uint32 task_identifier = (uint32) SvUV(ST(0));
-		uint8 min_status = AccountStatus::Player;
-		uint8 max_status = AccountStatus::Player;
-		int task_subidentifier = -1;
-		int update_count = 1;
-		bool enforce_level_requirement = false;
-		if (items == 2)
-			min_status = (uint8) SvUV(ST(1));
-
-		if (items == 3)
-			max_status = (uint8) SvUV(ST(2));
-
-		quest_manager.WorldWideTaskUpdate(update_type, task_identifier, task_subidentifier, update_count, enforce_level_requirement, min_status, max_status);
-	}
+void Perl__worldwideassigntask(uint32 task_id, bool enforce_level_requirement, uint8 min_status)
+{
+	int task_subidentifier = -1;
+	int update_count = 1;
+	quest_manager.WorldWideTaskUpdate(WWTaskUpdateType_AssignTask, task_id, task_subidentifier, update_count, enforce_level_requirement, min_status);
+}
 
-	XSRETURN_EMPTY;
+void Perl__worldwideassigntask(uint32 task_id, bool enforce_level_requirement, uint8 min_status, uint8 max_status)
+{
+	int task_subidentifier = -1;
+	int update_count = 1;
+	quest_manager.WorldWideTaskUpdate(WWTaskUpdateType_AssignTask, task_id, task_subidentifier, update_count, enforce_level_requirement, min_status, max_status);
 }
 
-XS(XS__worldwideresetactivity);
-XS(XS__worldwideresetactivity) {
-	dXSARGS;
-	if (items < 2 || items > 4)
-		Perl_croak(aTHX_ "Usage: quest::worldwideresetactivity(uint32 task_identifier, int activity_id, [uint8 min_status = 0, uint max_status = 0])");
-	{
-		uint8 update_type = WWTaskUpdateType_ActivityReset;
-		uint32 task_identifier = (uint32) SvUV(ST(0));
-		int task_subidentifier = (int) SvIV(ST(1));
-		uint8 min_status = AccountStatus::Player;
-		uint8 max_status = AccountStatus::Player;
-		int update_count = 1;
-		bool enforce_level_requirement = false;
-		if (items == 3)
-			min_status = (uint8) SvUV(ST(2));
-
-		if (items == 4)
-			max_status = (uint8) SvUV(ST(3));
-
-		quest_manager.WorldWideTaskUpdate(update_type, task_identifier, task_subidentifier, update_count, enforce_level_requirement, min_status, max_status);
-	}
-	XSRETURN_EMPTY;
+void Perl__worldwidecastspell(uint32 spell_id)
+{
+	quest_manager.WorldWideSpell(WWSpellUpdateType_Cast, spell_id);
 }
 
-XS(XS__worldwidesetentityvariableclient);
-XS(XS__worldwidesetentityvariableclient) {
-	dXSARGS;
-	if (items < 2 || items > 4)
-		Perl_croak(aTHX_ "Usage: quest::worldwidesetentityvariableclient(const char* variable_name, const char* variable_value, [uint8 min_status = 0, uint max_status = 0])");
-	{
-		uint8 update_type = WWSetEntityVariableUpdateType_Character;
-		const char* variable_name = (const char*) SvPV_nolen(ST(0));
-		const char* variable_value = (const char*) SvPV_nolen(ST(1));
-		uint8 min_status = AccountStatus::Player;
-		uint8 max_status = AccountStatus::Player;
-		if (items == 3)
-			min_status = (uint8) SvUV(ST(2));
-
-		if (items == 4)
-			max_status = (uint8) SvUV(ST(3));
-
-		quest_manager.WorldWideSetEntityVariable(update_type, variable_name, variable_value, min_status, max_status);
-	}
-	XSRETURN_EMPTY;
+void Perl__worldwidecastspell(uint32 spell_id, uint8 min_status)
+{
+	quest_manager.WorldWideSpell(WWSpellUpdateType_Cast, spell_id, min_status);
 }
 
-XS(XS__worldwidesetentityvariablenpc);
-XS(XS__worldwidesetentityvariablenpc) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::worldwidesetentityvariablenpc(const char* variable_name, const char* variable_value)");
-	{
-		uint8 update_type = WWSetEntityVariableUpdateType_NPC;
-		const char* variable_name = (const char*) SvPV_nolen(ST(0));
-		const char* variable_value = (const char*) SvPV_nolen(ST(1));
-		quest_manager.WorldWideSetEntityVariable(update_type, variable_name, variable_value);
-	}
-	XSRETURN_EMPTY;
+void Perl__worldwidecastspell(uint32 spell_id, uint8 min_status, uint8 max_status)
+{
+	quest_manager.WorldWideSpell(WWSpellUpdateType_Cast, spell_id, min_status, max_status);
+}
+
+void Perl__worldwidedialoguewindow(const char* message)
+{
+	quest_manager.WorldWideDialogueWindow(message);
+}
+
+void Perl__worldwidedialoguewindow(const char* message, uint8 min_status)
+{
+	quest_manager.WorldWideDialogueWindow(message, min_status);
+}
+
+void Perl__worldwidedialoguewindow(const char* message, uint8 min_status, uint8 max_status)
+{
+	quest_manager.WorldWideDialogueWindow(message, min_status, max_status);
+}
+
+void Perl__worldwidedisabletask(uint32 task_id)
+{
+	quest_manager.WorldWideTaskUpdate(WWTaskUpdateType_DisableTask, task_id);
+}
+
+void Perl__worldwidedisabletask(uint32 task_id, uint8 min_status)
+{
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.WorldWideTaskUpdate(WWTaskUpdateType_DisableTask, task_id, task_subidentifier, update_count, enforce_level_requirement, min_status);
+}
+
+void Perl__worldwidedisabletask(uint32 task_id, uint8 min_status, uint8 max_status)
+{
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.WorldWideTaskUpdate(WWTaskUpdateType_DisableTask, task_id, task_subidentifier, update_count, enforce_level_requirement, min_status, max_status);
+}
+
+void Perl__worldwideenabletask(uint32 task_id)
+{
+	quest_manager.WorldWideTaskUpdate(WWTaskUpdateType_EnableTask, task_id);
+}
+
+void Perl__worldwideenabletask(uint32 task_id, uint8 min_status)
+{
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.WorldWideTaskUpdate(WWTaskUpdateType_EnableTask, task_id, task_subidentifier, update_count, enforce_level_requirement, min_status);
+}
+
+void Perl__worldwideenabletask(uint32 task_id, uint8 min_status, uint8 max_status)
+{
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.WorldWideTaskUpdate(WWTaskUpdateType_EnableTask, task_id, task_subidentifier, update_count, enforce_level_requirement, min_status, max_status);
+}
+
+void Perl__worldwidefailtask(uint32 task_id)
+{
+	quest_manager.WorldWideTaskUpdate(WWTaskUpdateType_FailTask, task_id);
+}
+
+void Perl__worldwidefailtask(uint32 task_id, uint8 min_status)
+{
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.WorldWideTaskUpdate(WWTaskUpdateType_FailTask, task_id, task_subidentifier, update_count, enforce_level_requirement, min_status);
+}
+
+void Perl__worldwidefailtask(uint32 task_id, uint8 min_status, uint8 max_status)
+{
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.WorldWideTaskUpdate(WWTaskUpdateType_FailTask, task_id, task_subidentifier, update_count, enforce_level_requirement, min_status, max_status);
+}
+
+void Perl__worldwidemarquee(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char* message)
+{
+	quest_manager.WorldWideMarquee(type, priority, fade_in, fade_out, duration, message);
+}
+
+void Perl__worldwidemarquee(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char* message, uint8 min_status)
+{
+	quest_manager.WorldWideMarquee(type, priority, fade_in, fade_out, duration, message, min_status);
+}
+
+void Perl__worldwidemarquee(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char* message, uint8 min_status, uint8 max_status)
+{
+	quest_manager.WorldWideMarquee(type, priority, fade_in, fade_out, duration, message, min_status, max_status);
+}
+
+void Perl__worldwidemessage(uint32 type, const char* message)
+{
+	quest_manager.WorldWideMessage(type, message);
+}
+
+void Perl__worldwidemessage(uint32 type, const char* message, uint8 min_status)
+{
+	quest_manager.WorldWideMessage(type, message, min_status);
+}
+
+void Perl__worldwidemessage(uint32 type, const char* message, uint8 min_status, uint8 max_status)
+{
+	quest_manager.WorldWideMessage(type, message, min_status, max_status);
+}
+
+void Perl__worldwidemove(const char* zone_short_name)
+{
+	quest_manager.WorldWideMove(WWMoveUpdateType_MoveZone, zone_short_name);
+}
+
+void Perl__worldwidemove(const char* zone_short_name, uint8 min_status)
+{
+	uint16 instance_id = 0;
+	quest_manager.WorldWideMove(WWMoveUpdateType_MoveZone, zone_short_name, instance_id, min_status);
+}
+
+void Perl__worldwidemove(const char* zone_short_name, uint8 min_status, uint8 max_status)
+{
+	uint16 instance_id = 0;
+	quest_manager.WorldWideMove(WWMoveUpdateType_MoveZone, zone_short_name, instance_id, min_status, max_status);
+}
+
+void Perl__worldwidemoveinstance(uint16 instance_id)
+{
+	const char* zone_short_name = "";
+	quest_manager.WorldWideMove(WWMoveUpdateType_MoveZoneInstance, zone_short_name, instance_id);
+}
+
+void Perl__worldwidemoveinstance(uint16 instance_id, uint8 min_status)
+{
+	const char* zone_short_name = "";
+	quest_manager.WorldWideMove(WWMoveUpdateType_MoveZoneInstance, zone_short_name, instance_id, min_status);
+}
+
+void Perl__worldwidemoveinstance(uint16 instance_id, uint8 min_status, uint8 max_status)
+{
+	const char* zone_short_name = "";
+	quest_manager.WorldWideMove(WWMoveUpdateType_MoveZoneInstance, zone_short_name, instance_id, min_status, max_status);
+}
+
+void Perl__worldwideremoveldonloss(uint32 theme_id)
+{
+	quest_manager.WorldWideLDoNUpdate(CZLDoNUpdateSubtype_RemoveLoss, theme_id);
+}
+
+void Perl__worldwideremoveldonloss(uint32 theme_id, uint8 min_status)
+{
+	int points = 1;
+	quest_manager.WorldWideLDoNUpdate(CZLDoNUpdateSubtype_RemoveLoss, theme_id, points, min_status);
+}
+
+void Perl__worldwideremoveldonloss(uint32 theme_id, uint8 min_status, uint8 max_status)
+{
+	int points = 1;
+	quest_manager.WorldWideLDoNUpdate(CZLDoNUpdateSubtype_RemoveLoss, theme_id, points, min_status, max_status);
+}
+
+void Perl__worldwideremoveldonwin(uint32 theme_id)
+{
+	quest_manager.WorldWideLDoNUpdate(CZLDoNUpdateSubtype_RemoveWin, theme_id);
+}
+
+void Perl__worldwideremoveldonwin(uint32 theme_id, uint8 min_status)
+{
+	int points = 1;
+	quest_manager.WorldWideLDoNUpdate(CZLDoNUpdateSubtype_RemoveWin, theme_id, points, min_status);
+}
+
+void Perl__worldwideremoveldonwin(uint32 theme_id, uint8 min_status, uint8 max_status)
+{
+	int points = 1;
+	quest_manager.WorldWideLDoNUpdate(CZLDoNUpdateSubtype_RemoveWin, theme_id, points, min_status, max_status);
+}
+
+void Perl__worldwideremovespell(uint32 spell_id)
+{
+	quest_manager.WorldWideSpell(WWSpellUpdateType_Remove, spell_id);
+}
+
+void Perl__worldwideremovespell(uint32 spell_id, uint8 min_status)
+{
+	quest_manager.WorldWideSpell(WWSpellUpdateType_Remove, spell_id, min_status);
+}
+
+void Perl__worldwideremovespell(uint32 spell_id, uint8 min_status, uint8 max_status)
+{
+	quest_manager.WorldWideSpell(WWSpellUpdateType_Remove, spell_id, min_status, max_status);
+}
+
+void Perl__worldwideremovetask(uint32 task_id)
+{
+	quest_manager.WorldWideTaskUpdate(WWTaskUpdateType_RemoveTask, task_id);
+}
+
+void Perl__worldwideremovetask(uint32 task_id, uint8 min_status)
+{
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.WorldWideTaskUpdate(WWTaskUpdateType_RemoveTask, task_id, task_subidentifier, update_count, enforce_level_requirement, min_status);
+}
+
+void Perl__worldwideremovetask(uint32 task_id, uint8 min_status, uint8 max_status)
+{
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.WorldWideTaskUpdate(WWTaskUpdateType_RemoveTask, task_id, task_subidentifier, update_count, enforce_level_requirement, min_status, max_status);
+}
+
+void Perl__worldwideresetactivity(uint32 task_id, int activity_id)
+{
+	quest_manager.WorldWideTaskUpdate(WWTaskUpdateType_ActivityReset, task_id);
+}
+
+void Perl__worldwideresetactivity(uint32 task_id, int activity_id, uint8 min_status)
+{
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.WorldWideTaskUpdate(WWTaskUpdateType_ActivityReset, task_id, activity_id, update_count, enforce_level_requirement, min_status);
+}
+
+void Perl__worldwideresetactivity(uint32 task_id, int activity_id, uint8 min_status, uint8 max_status)
+{
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.WorldWideTaskUpdate(WWTaskUpdateType_ActivityReset, task_id, activity_id, update_count, enforce_level_requirement, min_status, max_status);
 }
 
-XS(XS__worldwidesignalnpc);
-XS(XS__worldwidesignalnpc) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::worldwidesignalnpc(uint32 signal)");
+void Perl__worldwidesetentityvariableclient(const char* variable_name, const char* variable_value)
+{
+	quest_manager.WorldWideSetEntityVariable(WWSetEntityVariableUpdateType_Character, variable_name, variable_value);
+}
+
+void Perl__worldwidesetentityvariableclient(const char* variable_name, const char* variable_value, uint8 min_status)
+{
+	quest_manager.WorldWideSetEntityVariable(WWSetEntityVariableUpdateType_Character, variable_name, variable_value, min_status);
+}
+
+void Perl__worldwidesetentityvariableclient(const char* variable_name, const char* variable_value, uint8 min_status, uint8 max_status)
+{
+	quest_manager.WorldWideSetEntityVariable(WWSetEntityVariableUpdateType_Character, variable_name, variable_value, min_status, max_status);
+}
+
+void Perl__worldwidesetentityvariablenpc(const char* variable_name, const char* variable_value)
+{
+	quest_manager.WorldWideSetEntityVariable(WWSetEntityVariableUpdateType_NPC, variable_name, variable_value);
+}
+
+void Perl__worldwidesignalnpc(int signal_id)
+{
+	quest_manager.WorldWideSignal(WWSignalUpdateType_NPC, signal_id);
+}
+
+void Perl__worldwidesignalclient(int signal_id)
+{
+	quest_manager.WorldWideSignal(WWSignalUpdateType_Character, signal_id);
+}
+
+void Perl__worldwidesignalclient(int signal_id, uint8 min_status)
+{
+	quest_manager.WorldWideSignal(WWSignalUpdateType_Character, signal_id, min_status);
+}
+
+void Perl__worldwidesignalclient(int signal_id, uint8 min_status, uint8 max_status)
+{
+	quest_manager.WorldWideSignal(WWSignalUpdateType_Character, signal_id, min_status, max_status);
+}
+
+void Perl__worldwideupdateactivity(uint32 task_id, int activity_id)
+{
+	quest_manager.WorldWideTaskUpdate(WWTaskUpdateType_ActivityUpdate, task_id, activity_id);
+}
+
+void Perl__worldwideupdateactivity(uint32 task_id, int activity_id, int update_count)
+{
+	quest_manager.WorldWideTaskUpdate(WWTaskUpdateType_ActivityUpdate, task_id, activity_id, update_count);
+}
+
+void Perl__worldwideupdateactivity(uint32 task_id, int activity_id, int update_count, uint8 min_status)
+{
+	bool enforce_level_requirement = false;
+	quest_manager.WorldWideTaskUpdate(WWTaskUpdateType_ActivityUpdate, task_id, activity_id, update_count, enforce_level_requirement, min_status);
+}
+
+void Perl__worldwideupdateactivity(uint32 task_id, int activity_id, int update_count, uint8 min_status, uint8 max_status)
+{
+	bool enforce_level_requirement = false;
+	quest_manager.WorldWideTaskUpdate(WWTaskUpdateType_ActivityUpdate, task_id, activity_id, update_count, enforce_level_requirement, min_status, max_status);
+}
+
+bool Perl__isnpcspawned(perl::array npc_id_array)
+{
+	std::vector<uint32> npc_ids;
+	for (int i = 0; i < npc_id_array.size(); ++i)
 	{
-		uint8 update_type = WWSignalUpdateType_NPC;
-		uint32 signal = (uint32) SvUV(ST(0));
-		quest_manager.WorldWideSignal(update_type, signal);
+		npc_ids.push_back(static_cast<uint32_t>(npc_id_array[i]));
 	}
-	XSRETURN_EMPTY;
+	return entity_list.IsNPCSpawned(npc_ids);
 }
 
-XS(XS__worldwidesignalclient);
-XS(XS__worldwidesignalclient) {
-	dXSARGS;
-	if (items < 1 || items > 3)
-		Perl_croak(aTHX_ "Usage: quest::worldwidesignalclient(uint32 signal, [uint8 min_status = 0, uint max_status = 0])");
+uint32_t Perl__countspawnednpcs(perl::array npc_id_array)
+{
+	std::vector<uint32> npc_ids;
+	for (int i = 0; i < npc_id_array.size(); ++i)
 	{
-		uint8 update_type = WWSignalUpdateType_Character;
-		uint32 signal = (uint32) SvUV(ST(0));
-		uint8 min_status = AccountStatus::Player;
-		uint8 max_status = AccountStatus::Player;
-		if (items == 2)
-			min_status = (uint8) SvUV(ST(1));
-
-		if (items == 3)
-			max_status = (uint8) SvUV(ST(2));
-
-		quest_manager.WorldWideSignal(update_type, signal, min_status, max_status);
+		npc_ids.push_back(static_cast<uint32_t>(npc_id_array[i]));
 	}
-	XSRETURN_EMPTY;
+	return entity_list.CountSpawnedNPCs(npc_ids);
 }
 
-XS(XS__worldwideupdateactivity);
-XS(XS__worldwideupdateactivity) {
-	dXSARGS;
-	if (items < 2 || items > 5)
-		Perl_croak(aTHX_ "Usage: quest::worldwideupdateactivity(uint32 task_identifier, int activity_id, [int update_count = 1, uint8 min_status = 0, uint max_status = 0])");
-	{
-		uint8 update_type = WWTaskUpdateType_ActivityUpdate;
-		uint32 task_identifier = (uint32) SvUV(ST(0));
-		int task_subidentifier = (int) SvIV(ST(1));
-		uint8 min_status = AccountStatus::Player;
-		uint8 max_status = AccountStatus::Player;
-		int update_count = 1;
-		bool enforce_level_requirement = false;
-		if (items == 3)
-			update_count = (int) SvIV(ST(2));
-
-		if (items == 4)
-			min_status = (uint8) SvUV(ST(3));
-
-		if (items == 5)
-			max_status = (uint8) SvUV(ST(4));
-
-		quest_manager.WorldWideTaskUpdate(update_type, task_identifier, task_subidentifier, update_count, enforce_level_requirement, min_status, max_status);
+SPDat_Spell_Struct* Perl__getspell(uint32 spell_id)
+{
+	// should be safe, it's read only in perl (could also use proxy lika lua)
+	return const_cast<SPDat_Spell_Struct*>(quest_manager.getspell(spell_id));
+}
+
+std::string Perl__getldonthemename(uint32 theme_id)
+{
+	return quest_manager.getldonthemename(theme_id);
+}
+
+std::string Perl__getfactionname(int faction_id)
+{
+	return quest_manager.getfactionname(faction_id);
+}
+
+std::string Perl__getlanguagename(int language_id)
+{
+	return quest_manager.getlanguagename(language_id);
+}
+
+std::string Perl__getbodytypename(uint32 bodytype_id)
+{
+	return quest_manager.getbodytypename(bodytype_id);
+}
+
+std::string Perl__getconsiderlevelname(uint8 consider_level)
+{
+	return quest_manager.getconsiderlevelname(consider_level);
+}
+
+std::string Perl__getenvironmentaldamagename(uint8 damage_type)
+{
+	return quest_manager.getenvironmentaldamagename(damage_type);
+}
+
+std::string Perl__commify(perl::scalar number)
+{
+	return Strings::Commify(number.c_str());
+}
+
+bool Perl__checknamefilter(std::string name)
+{
+	return database.CheckNameFilter(name);
+}
+
+void Perl__discordsend(std::string webhook_name, std::string message)
+{
+	zone->SendDiscordMessage(webhook_name, message);
+}
+
+void Perl__tracknpc(uint32 entity_id)
+{
+	quest_manager.TrackNPC(entity_id);
+}
+
+int Perl__getrecipemadecount(uint32 recipe_id)
+{
+	return quest_manager.GetRecipeMadeCount(recipe_id);
+}
+
+std::string Perl__getrecipename(uint32 recipe_id)
+{
+	return quest_manager.GetRecipeName(recipe_id);
+}
+
+bool Perl__hasrecipelearned(uint32 recipe_id)
+{
+	return quest_manager.HasRecipeLearned(recipe_id);
+}
+
+bool Perl__IsRaining()
+{
+	if (!zone) {
+		return false;
 	}
-	XSRETURN_EMPTY;
+
+	return zone->IsRaining();
 }
 
-XS(XS__isnpcspawned);
-XS(XS__isnpcspawned) {
-	dXSARGS;
-	if (items < 1)
-		Perl_croak(aTHX_ "Usage: quest::isnpcspawned(npc_id_one, npc_id_two, npc_idthree, npc_id_four, npc_id_five...[no limit])");
-	{
-		std::vector<uint32> npc_ids;
-		bool is_spawned = false;
-		for (int index = 0; index < items; index++) {
-			npc_ids.push_back((uint32)SvUV(ST(index)));
-		}
-		is_spawned = entity_list.IsNPCSpawned(npc_ids);
-		ST(0) = boolSV(is_spawned);
-		sv_2mortal(ST(0));
-		XSRETURN(1);
+bool Perl__IsSnowing()
+{
+	if (!zone) {
+		return false;
 	}
+
+	return zone->IsSnowing();
 }
 
-XS(XS__countspawnednpcs);
-XS(XS__countspawnednpcs) {
-	dXSARGS;
-	if (items < 1)
-		Perl_croak(aTHX_ "Usage: quest::countspawnednpcs(npc_id_one, npc_id_two, npc_idthree, npc_id_four, npc_id_five...[no limit])");
-	{
-		dXSTARG;
-		std::vector<uint32> npc_ids;
-		uint32 npc_count = 0;
-		for (int index = 0; index < items; index++) {
-			npc_ids.push_back((uint32)SvUV(ST(index)));
-		}
-		npc_count = entity_list.CountSpawnedNPCs(npc_ids);
-		XSprePUSH;
-		PUSHu((UV) npc_count);
-		XSRETURN(1);
+std::string Perl__getaaname(int aa_id)
+{
+	if (!zone) {
+		return std::string();
 	}
+
+	return zone->GetAAName(aa_id);
 }
 
-XS(XS__getspell);
-XS(XS__getspell) {
-    dXSARGS;
-    if (items != 1)
-        Perl_croak(aTHX_ "Usage: quest::getspell(uint32 spell_id)");
-    {
-        dXSTARG;
-        uint32 spell_id = (uint32) SvUV(ST(0));
-        const SPDat_Spell_Struct* spell = quest_manager.getspell(spell_id);
-        ST(0) = sv_newmortal();
-        sv_setref_pv(ST(0), "Spell", (void *) spell);
-        XSRETURN(1);
-    }
-}
-
-XS(XS__getldonthemename);
-XS(XS__getldonthemename) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::getldonthemename(uint32 theme_id)");
-	{
-		dXSTARG;
-		uint32 theme_id = (uint32) SvUV(ST(0));
-		std::string theme_name = quest_manager.getldonthemename(theme_id);
-
-		sv_setpv(TARG, theme_name.c_str());
-		XSprePUSH;
-		PUSHTARG;
-		XSRETURN(1);
+std::string Perl__popupbreak() {
+	return DialogueWindow::Break();
+}
+
+std::string Perl__popupbreak(uint32 break_count) {
+	return DialogueWindow::Break(break_count);
+}
+
+std::string Perl__popupcentermessage(std::string message) {
+	return DialogueWindow::CenterMessage(message);
+}
+
+std::string Perl__popupcolormessage(std::string color, std::string message) {
+	return DialogueWindow::ColorMessage(color, message);
+}
+
+std::string Perl__popupindent() {
+	return DialogueWindow::Indent();
+}
+
+std::string Perl__popupindent(uint32 indent_count) {
+	return DialogueWindow::Indent(indent_count);
+}
+
+std::string Perl__popuplink(std::string link) {
+	return DialogueWindow::Link(link);
+}
+
+std::string Perl__popuplink(std::string link, std::string message) {
+	return DialogueWindow::Link(link, message);
+}
+
+std::string Perl__popuptable(std::string message) {
+	return DialogueWindow::Table(message);
+}
+
+std::string Perl__popuptablecell() {
+	return DialogueWindow::TableCell();
+}
+
+std::string Perl__popuptablecell(std::string message) {
+	return DialogueWindow::TableCell(message);
+}
+
+std::string Perl__popuptablerow(std::string message) {
+	return DialogueWindow::TableRow(message);
+}
+
+void Perl__marquee(uint32 type, std::string message)
+{
+	quest_manager.marquee(type, message);
+}
+
+void Perl__marquee(uint32 type, std::string message, uint32 duration)
+{
+	quest_manager.marquee(type, message, duration);
+}
+
+void Perl__marquee(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, std::string message)
+{
+	quest_manager.marquee(type, priority, fade_in, fade_out, duration, message);
+}
+
+void Perl__zonemarquee(uint32 type, std::string message)
+{
+	if (!zone) {
+		return;
 	}
+
+	entity_list.Marquee(type, message);
 }
 
-XS(XS__getfactionname);
-XS(XS__getfactionname) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::getfactionname(int faction_id)");
-	{
-		dXSTARG;
-		int faction_id = (int) SvIV(ST(0));
-		std::string faction_name = quest_manager.getfactionname(faction_id);
-
-		sv_setpv(TARG, faction_name.c_str());
-		XSprePUSH;
-		PUSHTARG;
-		XSRETURN(1);
+void Perl__zonemarquee(uint32 type, std::string message, uint32 duration)
+{
+	if (!zone) {
+		return;
 	}
+
+	entity_list.Marquee(type, message, duration);
 }
 
-XS(XS__getlanguagename);
-XS(XS__getlanguagename) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::getlanguagename(int language_id)");
-	{
-		dXSTARG;
-		int language_id = (int) SvIV(ST(0));
-		std::string language_name = quest_manager.getlanguagename(language_id);
-
-		sv_setpv(TARG, language_name.c_str());
-		XSprePUSH;
-		PUSHTARG;
-		XSRETURN(1);
+void Perl__zonemarquee(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, std::string message)
+{
+	if (!zone) {
+		return;
 	}
+
+	entity_list.Marquee(type, priority, fade_in, fade_out, duration, message);
 }
 
-XS(XS__getbodytypename);
-XS(XS__getbodytypename) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::getbodytypename(uint32 bodytype_id)");
-	{
-		dXSTARG;
-		uint32 bodytype_id = (uint32) SvUV(ST(0));
-		std::string bodytype_name = quest_manager.getbodytypename(bodytype_id);
-
-		sv_setpv(TARG, bodytype_name.c_str());
-		XSprePUSH;
-		PUSHTARG;
-		XSRETURN(1);
+bool Perl__ishotzone()
+{
+	if (!zone) {
+		return false;
 	}
+
+	return zone->IsHotzone();
 }
 
-XS(XS__getconsiderlevelname);
-XS(XS__getconsiderlevelname) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::getconsiderlevelname(uint8 consider_level)");
-	{
-		dXSTARG;
-		uint8 consider_level = (uint8) SvUV(ST(0));
-		std::string consider_level_name = quest_manager.getconsiderlevelname(consider_level);
-
-		sv_setpv(TARG, consider_level_name.c_str());
-		XSprePUSH;
-		PUSHTARG;
-		XSRETURN(1);
+void Perl__sethotzone(bool is_hotzone)
+{
+	if (!zone) {
+		return;
 	}
+
+	zone->SetIsHotzone(is_hotzone);
+}
+
+void Perl__set_proximity_range(float x_range, float y_range)
+{
+	quest_manager.set_proximity_range(x_range, y_range);
+}
+
+void Perl__set_proximity_range(float x_range, float y_range, float z_range)
+{
+	quest_manager.set_proximity_range(x_range, y_range, z_range);
+}
+
+void Perl__set_proximity_range(float x_range, float y_range, float z_range, bool enable_say)
+{
+	quest_manager.set_proximity_range(x_range, y_range, z_range, enable_say);
+}
+
+std::string Perl__varlink(uint32 item_id)
+{
+	return quest_manager.varlink(item_id);
+}
+
+std::string Perl__varlink(uint32 item_id, int16 charges)
+{
+	return quest_manager.varlink(item_id, charges);
+}
+
+std::string Perl__varlink(uint32 item_id, int16 charges, uint32 aug1)
+{
+	return quest_manager.varlink(item_id, charges, aug1);
+}
+
+std::string Perl__varlink(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2)
+{
+	return quest_manager.varlink(item_id, charges, aug1, aug2);
 }
+
+std::string Perl__varlink(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2, uint32 aug3)
+{
+	return quest_manager.varlink(item_id, charges, aug1, aug2, aug3);
+}
+
+std::string Perl__varlink(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4)
+{
+	return quest_manager.varlink(item_id, charges, aug1, aug2, aug3, aug4);
+}
+
+std::string Perl__varlink(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5)
+{
+	return quest_manager.varlink(item_id, charges, aug1, aug2, aug3, aug4, aug5);
+}
+
+std::string Perl__varlink(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, uint32 aug6)
+{
+	return quest_manager.varlink(item_id, charges, aug1, aug2, aug3, aug4, aug5, aug6);
+}
+
+std::string Perl__varlink(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, uint32 aug6, bool attuned)
+{
+	return quest_manager.varlink(item_id, charges, aug1, aug2, aug3, aug4, aug5, aug6, attuned);
+}
+
+bool Perl__do_augment_slots_match(uint32 item_one, uint32 item_two)
+{
+	return quest_manager.DoAugmentSlotsMatch(item_one, item_two);
+}
+
+int8 Perl__does_augment_fit(EQ::ItemInstance* inst, uint32 augment_id)
+{
+	return quest_manager.DoesAugmentFit(inst, augment_id);
+}
+
+void perl_register_quest()
+{
+	perl::interpreter perl(PERL_GET_THX);
+
+	auto package = perl.new_package("quest");
+
+	package.add("botquest", &Perl__botquest);
+	package.add("spawnbotcount", (int(*)())&Perl__spawnbotcount);
+	package.add("spawnbotcount", (int(*)(uint8))&Perl__spawnbotcount);
+	package.add("createbotcount", (int(*)())&Perl__createbotcount);
+	package.add("createbotcount", (int(*)(uint8))&Perl__createbotcount);
+	package.add("createBot", &Perl__createBot);
 
-XS(XS__getenvironmentaldamagename);
-XS(XS__getenvironmentaldamagename) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::getenvironmentaldamagename(uint8 damage_type)");
-
-	dXSTARG;
-	uint8 damage_type = (uint8) SvIV(ST(0));
-	std::string environmental_damage_name = quest_manager.getenvironmentaldamagename(damage_type);
-
-	sv_setpv(TARG, environmental_damage_name.c_str());
-	XSprePUSH;
-	PUSHTARG;
-	XSRETURN(1);
-}
-
-XS(XS__commify);
-XS(XS__commify) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::commify(string number)");
-
-	dXSTARG;
-	std::string number = (std::string) SvPV_nolen(ST(0));
-	std::string commified_number = commify(number);
-
-	sv_setpv(TARG, commified_number.c_str());
-	XSprePUSH;
-	PUSHTARG;
-	XSRETURN(1);
-}
-
-/*
-This is the callback perl will look for to setup the
-quest package's XSUBs
-*/
-EXTERN_C XS(boot_quest); // prototype to pass -Wmissing-prototypes
-EXTERN_C XS(boot_quest) {
-	dXSARGS;
-	char file[256];
-	strncpy(file, __FILE__, 256);
-	file[255] = '\0';
-
-	if (items != 1)
-		LogError("boot_quest does not take any arguments");
-
-	char buf[128];    //shouldent have any function names longer than this.
-
-	//add the strcpy stuff to get rid of const warnings....
-
-	XS_VERSION_BOOTCHECK;
-
-#ifdef BOTS
-	newXS(strcpy(buf, "botquest"), XS__botquest, file);
-	newXS(strcpy(buf, "spawnbotcount"), XS__spawnbotcount, file);
-	newXS(strcpy(buf, "createbotcount"), XS__createbotcount, file);
-	newXS(strcpy(buf, "createBot"), XS__createBot, file);
-#endif //BOTS
-
-	newXS(strcpy(buf, "AssignGroupToInstance"), XS__AssignGroupToInstance, file);
-	newXS(strcpy(buf, "AssignRaidToInstance"), XS__AssignRaidToInstance, file);
-	newXS(strcpy(buf, "AssignToInstance"), XS__AssignToInstance, file);
-	newXS(strcpy(buf, "AssignToInstanceByCharID"), XS__AssignToInstanceByCharID, file);
-	newXS(strcpy(buf, "ChooseRandom"), XS__ChooseRandom, file);
-	newXS(strcpy(buf, "CreateInstance"), XS__CreateInstance, file);
-	newXS(strcpy(buf, "DestroyInstance"), XS__DestroyInstance, file);
-	newXS(strcpy(buf, "UpdateInstanceTimer"), XS__UpdateInstanceTimer, file);
-	newXS(strcpy(buf, "GetInstanceTimer"), XS__GetInstanceTimer, file);
-	newXS(strcpy(buf, "GetInstanceTimerByID"), XS__GetInstanceTimerByID, file);
-	newXS(strcpy(buf, "FlagInstanceByGroupLeader"), XS__FlagInstanceByGroupLeader, file);
-	newXS(strcpy(buf, "FlagInstanceByRaidLeader"), XS__FlagInstanceByRaidLeader, file);
-	newXS(strcpy(buf, "FlyMode"), XS__FlyMode, file);
-	newXS(strcpy(buf, "GetCharactersInInstance"), XS__GetCharactersInInstance, file);
-	newXS(strcpy(buf, "GetInstanceID"), XS__GetInstanceID, file);
-	newXS(strcpy(buf, "GetInstanceIDByCharID"), XS__GetInstanceIDByCharID, file);
-	newXS(strcpy(buf, "GetSpellResistType"), XS__GetSpellResistType, file);
-	newXS(strcpy(buf, "GetSpellTargetType"), XS__GetSpellTargetType, file);
-	newXS(strcpy(buf, "GetTimeSeconds"), XS__GetTimeSeconds, file);
-	newXS(strcpy(buf, "GetZoneID"), XS__GetZoneID, file);
-	newXS(strcpy(buf, "GetZoneLongName"), XS__GetZoneLongName, file);
-	newXS(strcpy(buf, "GetZoneLongNameByID"), XS__GetZoneLongNameByID, file);
-	newXS(strcpy(buf, "GetZoneShortName"), XS__GetZoneShortName, file);
-	newXS(strcpy(buf, "set_rule"), XS__set_rule, file);
-	newXS(strcpy(buf, "get_rule"), XS__get_rule, file);
-	newXS(strcpy(buf, "get_data"), XS__get_data, file);
-	newXS(strcpy(buf, "get_data_expires"), XS__get_data_expires, file);
-	newXS(strcpy(buf, "get_data_remaining"), XS__get_data_remaining, file);
-	newXS(strcpy(buf, "set_data"), XS__set_data, file);
-	newXS(strcpy(buf, "delete_data"), XS__delete_data, file);
-	newXS(strcpy(buf, "IsBeneficialSpell"), XS__IsBeneficialSpell, file);
-	newXS(strcpy(buf, "IsEffectInSpell"), XS__IsEffectInSpell, file);
-	newXS(strcpy(buf, "IsRunning"), XS__IsRunning, file);
-	newXS(strcpy(buf, "LearnRecipe"), XS__LearnRecipe, file);
-	newXS(strcpy(buf, "MerchantCountItem"), XS__MerchantCountItem, file);
-	newXS(strcpy(buf, "MerchantSetItem"), XS__MerchantSetItem, file);
-	newXS(strcpy(buf, "MovePCInstance"), XS__MovePCInstance, file);
-	newXS(strcpy(buf, "RemoveAllFromInstance"), XS__RemoveAllFromInstance, file);
-	newXS(strcpy(buf, "RemoveFromInstance"), XS__RemoveFromInstance, file);
-	newXS(strcpy(buf, "RemoveFromInstanceByCharID"), XS__RemoveFromInstanceByCharID, file);
-	newXS(strcpy(buf, "CheckInstanceByCharID"), XS__CheckInstanceByCharID, file);
-	newXS(strcpy(buf, "SendMail"), XS__SendMail, file);
-	newXS(strcpy(buf, "SetRunning"), XS__SetRunning, file);
-	newXS(strcpy(buf, "activespeakactivity"), XS__activespeakactivity, file);
-	newXS(strcpy(buf, "activespeaktask"), XS__activespeaktask, file);
-	newXS(strcpy(buf, "activetasksinset"), XS__activetasksinset, file);
-	newXS(strcpy(buf, "add_expedition_lockout_all_clients"), XS__add_expedition_lockout_all_clients, file);
-	newXS(strcpy(buf, "add_expedition_lockout_by_char_id"), XS__add_expedition_lockout_by_char_id, file);
-	newXS(strcpy(buf, "addldonloss"), XS__addldonloss, file);
-	newXS(strcpy(buf, "addldonpoints"), XS__addldonpoints, file);
-	newXS(strcpy(buf, "addldonwin"), XS__addldonwin, file);
-	newXS(strcpy(buf, "addloot"), XS__addloot, file);
-	newXS(strcpy(buf, "addskill"), XS__addskill, file);
-	newXS(strcpy(buf, "assigntask"), XS__assigntask, file);
-	newXS(strcpy(buf, "attack"), XS__attack, file);
-	newXS(strcpy(buf, "attacknpc"), XS__attacknpc, file);
-	newXS(strcpy(buf, "attacknpctype"), XS__attacknpctype, file);
-	newXS(strcpy(buf, "buryplayercorpse"), XS__buryplayercorpse, file);
-	newXS(strcpy(buf, "castspell"), XS__castspell, file);
-	newXS(strcpy(buf, "changedeity"), XS__changedeity, file);
-	newXS(strcpy(buf, "checktitle"), XS__checktitle, file);
-	newXS(strcpy(buf, "clear_npctype_cache"), XS__clear_npctype_cache, file);
-	newXS(strcpy(buf, "clear_proximity"), XS__clear_proximity, file);
-	newXS(strcpy(buf, "clear_zone_flag"), XS__clear_zone_flag, file);
-	newXS(strcpy(buf, "clearspawntimers"), XS__clearspawntimers, file);
-	newXS(strcpy(buf, "collectitems"), XS__collectitems, file);
-	newXS(strcpy(buf, "commify"), XS__commify, file);
-	newXS(strcpy(buf, "completedtasksinset"), XS__completedtasksinset, file);
-	newXS(strcpy(buf, "countitem"), XS__countitem, file);
-	newXS(strcpy(buf, "countspawnednpcs"), XS__countspawnednpcs, file);
-	newXS(strcpy(buf, "createdoor"), XS__CreateDoor, file);
-	newXS(strcpy(buf, "creategroundobject"), XS__CreateGroundObject, file);
-	newXS(strcpy(buf, "creategroundobjectfrommodel"), XS__CreateGroundObjectFromModel, file);
-	newXS(strcpy(buf, "createguild"), XS__createguild, file);
-	newXS(strcpy(buf, "createitem"), XS__createitem, file);
-	newXS(strcpy(buf, "crosszoneaddldonlossbycharid"), XS__crosszoneaddldonlossbycharid, file);
-	newXS(strcpy(buf, "crosszoneaddldonlossbygroupid"), XS__crosszoneaddldonlossbygroupid, file);
-	newXS(strcpy(buf, "crosszoneaddldonlossbyraidid"), XS__crosszoneaddldonlossbyraidid, file);
-	newXS(strcpy(buf, "crosszoneaddldonlossbyguildid"), XS__crosszoneaddldonlossbyguildid, file);
-	newXS(strcpy(buf, "crosszoneaddldonlossbyexpeditionid"), XS__crosszoneaddldonlossbyexpeditionid, file);
-	newXS(strcpy(buf, "crosszoneaddldonlossbyclientname"), XS__crosszoneaddldonlossbyclientname, file);
-	newXS(strcpy(buf, "crosszoneaddldonpointsbycharid"), XS__crosszoneaddldonpointsbycharid, file);
-	newXS(strcpy(buf, "crosszoneaddldonpointsbygroupid"), XS__crosszoneaddldonpointsbygroupid, file);
-	newXS(strcpy(buf, "crosszoneaddldonpointsbyraidid"), XS__crosszoneaddldonpointsbyraidid, file);
-	newXS(strcpy(buf, "crosszoneaddldonpointsbyguildid"), XS__crosszoneaddldonpointsbyguildid, file);
-	newXS(strcpy(buf, "crosszoneaddldonpointsbyexpeditionid"), XS__crosszoneaddldonpointsbyexpeditionid, file);
-	newXS(strcpy(buf, "crosszoneaddldonpointsbyclientname"), XS__crosszoneaddldonpointsbyclientname, file);
-	newXS(strcpy(buf, "crosszoneaddldonwinbycharid"), XS__crosszoneaddldonwinbycharid, file);
-	newXS(strcpy(buf, "crosszoneaddldonwinbygroupid"), XS__crosszoneaddldonwinbygroupid, file);
-	newXS(strcpy(buf, "crosszoneaddldonwinbyraidid"), XS__crosszoneaddldonwinbyraidid, file);
-	newXS(strcpy(buf, "crosszoneaddldonwinbyguildid"), XS__crosszoneaddldonwinbyguildid, file);
-	newXS(strcpy(buf, "crosszoneaddldonwinbyexpeditionid"), XS__crosszoneaddldonwinbyexpeditionid, file);
-	newXS(strcpy(buf, "crosszoneaddldonwinbyclientname"), XS__crosszoneaddldonwinbyclientname, file);
-	newXS(strcpy(buf, "crosszoneassigntaskbycharid"), XS__crosszoneassigntaskbycharid, file);
-	newXS(strcpy(buf, "crosszoneassigntaskbygroupid"), XS__crosszoneassigntaskbygroupid, file);
-	newXS(strcpy(buf, "crosszoneassigntaskbyraidid"), XS__crosszoneassigntaskbyraidid, file);
-	newXS(strcpy(buf, "crosszoneassigntaskbyguildid"), XS__crosszoneassigntaskbyguildid, file);
-	newXS(strcpy(buf, "crosszoneassigntaskbyexpeditionid"), XS__crosszoneassigntaskbyexpeditionid, file);
-	newXS(strcpy(buf, "crosszoneassigntaskbyclientname"), XS__crosszoneassigntaskbyclientname, file);
-	newXS(strcpy(buf, "crosszonecastspellbycharid"), XS__crosszonecastspellbycharid, file);
-	newXS(strcpy(buf, "crosszonecastspellbygroupid"), XS__crosszonecastspellbygroupid, file);
-	newXS(strcpy(buf, "crosszonecastspellbyraidid"), XS__crosszonecastspellbyraidid, file);
-	newXS(strcpy(buf, "crosszonecastspellbyguildid"), XS__crosszonecastspellbyguildid, file);
-	newXS(strcpy(buf, "crosszonecastspellbyexpeditionid"), XS__crosszonecastspellbyexpeditionid, file);
-	newXS(strcpy(buf, "crosszonecastspellbyclientname"), XS__crosszonecastspellbyclientname, file);
-	newXS(strcpy(buf, "crosszonedialoguewindowbycharid"), XS__crosszonedialoguewindowbycharid, file);
-	newXS(strcpy(buf, "crosszonedialoguewindowbygroupid"), XS__crosszonedialoguewindowbygroupid, file);
-	newXS(strcpy(buf, "crosszonedialoguewindowbyraidid"), XS__crosszonedialoguewindowbyraidid, file);
-	newXS(strcpy(buf, "crosszonedialoguewindowbyguildid"), XS__crosszonedialoguewindowbyguildid, file);
-	newXS(strcpy(buf, "crosszonedialoguewindowbyexpeditionid"), XS__crosszonedialoguewindowbyexpeditionid, file);
-	newXS(strcpy(buf, "crosszonedialoguewindowbyclientname"), XS__crosszonedialoguewindowbyclientname, file);
-	newXS(strcpy(buf, "crosszonedisabletaskbycharid"), XS__crosszonedisabletaskbycharid, file);
-	newXS(strcpy(buf, "crosszonedisabletaskbygroupid"), XS__crosszonedisabletaskbygroupid, file);
-	newXS(strcpy(buf, "crosszonedisabletaskbyraidid"), XS__crosszonedisabletaskbyraidid, file);
-	newXS(strcpy(buf, "crosszonedisabletaskbyguildid"), XS__crosszonedisabletaskbyguildid, file);
-	newXS(strcpy(buf, "crosszonedisabletaskbyexpeditionid"), XS__crosszonedisabletaskbyexpeditionid, file);
-	newXS(strcpy(buf, "crosszonedisabletaskbyclientname"), XS__crosszonedisabletaskbyclientname, file);
-	newXS(strcpy(buf, "crosszoneenabletaskbycharid"), XS__crosszoneenabletaskbycharid, file);
-	newXS(strcpy(buf, "crosszoneenabletaskbygroupid"), XS__crosszoneenabletaskbygroupid, file);
-	newXS(strcpy(buf, "crosszoneenabletaskbyraidid"), XS__crosszoneenabletaskbyraidid, file);
-	newXS(strcpy(buf, "crosszoneenabletaskbyguildid"), XS__crosszoneenabletaskbyguildid, file);
-	newXS(strcpy(buf, "crosszoneenabletaskbyexpeditionid"), XS__crosszoneenabletaskbyexpeditionid, file);
-	newXS(strcpy(buf, "crosszoneenabletaskbyclientname"), XS__crosszoneenabletaskbyclientname, file);
-	newXS(strcpy(buf, "crosszonefailtaskbycharid"), XS__crosszonefailtaskbycharid, file);
-	newXS(strcpy(buf, "crosszonefailtaskbygroupid"), XS__crosszonefailtaskbygroupid, file);
-	newXS(strcpy(buf, "crosszonefailtaskbyraidid"), XS__crosszonefailtaskbyraidid, file);
-	newXS(strcpy(buf, "crosszonefailtaskbyguildid"), XS__crosszonefailtaskbyguildid, file);
-	newXS(strcpy(buf, "crosszonefailtaskbyexpeditionid"), XS__crosszonefailtaskbyexpeditionid, file);
-	newXS(strcpy(buf, "crosszonefailtaskbyclientname"), XS__crosszonefailtaskbyclientname, file);
-	newXS(strcpy(buf, "crosszonemarqueebycharid"), XS__crosszonemarqueebycharid, file);
-	newXS(strcpy(buf, "crosszonemarqueebygroupid"), XS__crosszonemarqueebygroupid, file);
-	newXS(strcpy(buf, "crosszonemarqueebyraidid"), XS__crosszonemarqueebyraidid, file);
-	newXS(strcpy(buf, "crosszonemarqueebyguildid"), XS__crosszonemarqueebyguildid, file);
-	newXS(strcpy(buf, "crosszonemarqueebyexpeditionid"), XS__crosszonemarqueebyexpeditionid, file);
-	newXS(strcpy(buf, "crosszonemarqueebyclientname"), XS__crosszonemarqueebyclientname, file);
-	newXS(strcpy(buf, "crosszonemessageplayerbycharid"), XS__crosszonemessageplayerbycharid, file);
-	newXS(strcpy(buf, "crosszonemessageplayerbygroupid"), XS__crosszonemessageplayerbygroupid, file);
-	newXS(strcpy(buf, "crosszonemessageplayerbyraidid"), XS__crosszonemessageplayerbyraidid, file);
-	newXS(strcpy(buf, "crosszonemessageplayerbyguildid"), XS__crosszonemessageplayerbyguildid, file);
-	newXS(strcpy(buf, "crosszonemessageplayerbyexpeditionid"), XS__crosszonemessageplayerbyexpeditionid, file);
-	newXS(strcpy(buf, "crosszonemessageplayerbyname"), XS__crosszonemessageplayerbyname, file);
-	newXS(strcpy(buf, "crosszonemoveplayerbycharid"), XS__crosszonemoveplayerbycharid, file);
-	newXS(strcpy(buf, "crosszonemoveplayerbygroupid"), XS__crosszonemoveplayerbygroupid, file);
-	newXS(strcpy(buf, "crosszonemoveplayerbyraidid"), XS__crosszonemoveplayerbyraidid, file);
-	newXS(strcpy(buf, "crosszonemoveplayerbyguildid"), XS__crosszonemoveplayerbyguildid, file);
-	newXS(strcpy(buf, "crosszonemoveplayerbyexpeditionid"), XS__crosszonemoveplayerbyexpeditionid, file);
-	newXS(strcpy(buf, "crosszonemoveplayerbyname"), XS__crosszonemoveplayerbyname, file);
-	newXS(strcpy(buf, "crosszonemoveinstancebycharid"), XS__crosszonemoveinstancebycharid, file);
-	newXS(strcpy(buf, "crosszonemoveinstancebygroupid"), XS__crosszonemoveinstancebygroupid, file);
-	newXS(strcpy(buf, "crosszonemoveinstancebyraidid"), XS__crosszonemoveinstancebyraidid, file);
-	newXS(strcpy(buf, "crosszonemoveinstancebyguildid"), XS__crosszonemoveinstancebyguildid, file);
-	newXS(strcpy(buf, "crosszonemoveinstancebyexpeditionid"), XS__crosszonemoveinstancebyexpeditionid, file);
-	newXS(strcpy(buf, "crosszonemoveinstancebyclientname"), XS__crosszonemoveinstancebyclientname, file);
-	newXS(strcpy(buf, "crosszoneremoveldonlossbycharid"), XS__crosszoneremoveldonlossbycharid, file);
-	newXS(strcpy(buf, "crosszoneremoveldonlossbygroupid"), XS__crosszoneremoveldonlossbygroupid, file);
-	newXS(strcpy(buf, "crosszoneremoveldonlossbyraidid"), XS__crosszoneremoveldonlossbyraidid, file);
-	newXS(strcpy(buf, "crosszoneremoveldonlossbyguildid"), XS__crosszoneremoveldonlossbyguildid, file);
-	newXS(strcpy(buf, "crosszoneremoveldonlossbyexpeditionid"), XS__crosszoneremoveldonlossbyexpeditionid, file);
-	newXS(strcpy(buf, "crosszoneremoveldonlossbyclientname"), XS__crosszoneremoveldonlossbyclientname, file);
-	newXS(strcpy(buf, "crosszoneremoveldonwinbycharid"), XS__crosszoneremoveldonwinbycharid, file);
-	newXS(strcpy(buf, "crosszoneremoveldonwinbygroupid"), XS__crosszoneremoveldonwinbygroupid, file);
-	newXS(strcpy(buf, "crosszoneremoveldonwinbyraidid"), XS__crosszoneremoveldonwinbyraidid, file);
-	newXS(strcpy(buf, "crosszoneremoveldonwinbyguildid"), XS__crosszoneremoveldonwinbyguildid, file);
-	newXS(strcpy(buf, "crosszoneremoveldonwinbyexpeditionid"), XS__crosszoneremoveldonwinbyexpeditionid, file);
-	newXS(strcpy(buf, "crosszoneremoveldonwinbyclientname"), XS__crosszoneremoveldonwinbyclientname, file);
-	newXS(strcpy(buf, "crosszoneremovespellbycharid"), XS__crosszoneremovespellbycharid, file);
-	newXS(strcpy(buf, "crosszoneremovespellbygroupid"), XS__crosszoneremovespellbygroupid, file);
-	newXS(strcpy(buf, "crosszoneremovespellbyraidid"), XS__crosszoneremovespellbyraidid, file);
-	newXS(strcpy(buf, "crosszoneremovespellbyguildid"), XS__crosszoneremovespellbyguildid, file);
-	newXS(strcpy(buf, "crosszoneremovespellbyexpeditionid"), XS__crosszoneremovespellbyexpeditionid, file);
-	newXS(strcpy(buf, "crosszoneremovespellbyclientname"), XS__crosszoneremovespellbyclientname, file);
-	newXS(strcpy(buf, "crosszoneremovetaskbycharid"), XS__crosszoneremovetaskbycharid, file);
-	newXS(strcpy(buf, "crosszoneremovetaskbygroupid"), XS__crosszoneremovetaskbygroupid, file);
-	newXS(strcpy(buf, "crosszoneremovetaskbyraidid"), XS__crosszoneremovetaskbyraidid, file);
-	newXS(strcpy(buf, "crosszoneremovetaskbyguildid"), XS__crosszoneremovetaskbyguildid, file);
-	newXS(strcpy(buf, "crosszoneremovetaskbyexpeditionid"), XS__crosszoneremovetaskbyexpeditionid, file);
-	newXS(strcpy(buf, "crosszoneremovetaskbyclientname"), XS__crosszoneremovetaskbyclientname, file);
-	newXS(strcpy(buf, "crosszoneresetactivitybycharid"), XS__crosszoneresetactivitybycharid, file);
-	newXS(strcpy(buf, "crosszoneresetactivitybygroupid"), XS__crosszoneresetactivitybygroupid, file);
-	newXS(strcpy(buf, "crosszoneresetactivitybyraidid"), XS__crosszoneresetactivitybyraidid, file);
-	newXS(strcpy(buf, "crosszoneresetactivitybyguildid"), XS__crosszoneresetactivitybyguildid, file);
-	newXS(strcpy(buf, "crosszoneresetactivitybyexpeditionid"), XS__crosszoneresetactivitybyexpeditionid, file);
-	newXS(strcpy(buf, "crosszoneresetactivitybyclientname"), XS__crosszoneresetactivitybyclientname, file);
-	newXS(strcpy(buf, "crosszonesetentityvariablebycharid"), XS__crosszonesetentityvariablebycharid, file);
-	newXS(strcpy(buf, "crosszonesetentityvariablebygroupid"), XS__crosszonesetentityvariablebygroupid, file);
-	newXS(strcpy(buf, "crosszonesetentityvariablebyraidid"), XS__crosszonesetentityvariablebyraidid, file);
-	newXS(strcpy(buf, "crosszonesetentityvariablebyguildid"), XS__crosszonesetentityvariablebyguildid, file);
-	newXS(strcpy(buf, "crosszonesetentityvariablebyexpeditionid"), XS__crosszonesetentityvariablebyexpeditionid, file);
-	newXS(strcpy(buf, "crosszonesetentityvariablebyclientname"), XS__crosszonesetentityvariablebyclientname, file);
-	newXS(strcpy(buf, "crosszonesetentityvariablebynpctypeid"), XS__crosszonesetentityvariablebynpctypeid, file);
-	newXS(strcpy(buf, "crosszonesignalclientbycharid"), XS__crosszonesignalclientbycharid, file);
-	newXS(strcpy(buf, "crosszonesignalclientbygroupid"), XS__crosszonesignalclientbygroupid, file);
-	newXS(strcpy(buf, "crosszonesignalclientbyraidid"), XS__crosszonesignalclientbyraidid, file);
-	newXS(strcpy(buf, "crosszonesignalclientbyguildid"), XS__crosszonesignalclientbyguildid, file);
-	newXS(strcpy(buf, "crosszonesignalclientbyexpeditionid"), XS__crosszonesignalclientbyexpeditionid, file);
-	newXS(strcpy(buf, "crosszonesignalclientbyname"), XS__crosszonesignalclientbyname, file);
-	newXS(strcpy(buf, "crosszonesignalnpcbynpctypeid"), XS__crosszonesignalnpcbynpctypeid, file);
-	newXS(strcpy(buf, "crosszoneupdateactivitybycharid"), XS__crosszoneupdateactivitybycharid, file);
-	newXS(strcpy(buf, "crosszoneupdateactivitybygroupid"), XS__crosszoneupdateactivitybygroupid, file);
-	newXS(strcpy(buf, "crosszoneupdateactivitybyraidid"), XS__crosszoneupdateactivitybyraidid, file);
-	newXS(strcpy(buf, "crosszoneupdateactivitybyguildid"), XS__crosszoneupdateactivitybyguildid, file);
-	newXS(strcpy(buf, "crosszoneupdateactivitybyexpeditionid"), XS__crosszoneupdateactivitybyexpeditionid, file);
-	newXS(strcpy(buf, "crosszoneupdateactivitybyclientname"), XS__crosszoneupdateactivitybyclientname, file);
-	newXS(strcpy(buf, "worldwideaddldonloss"), XS__worldwideaddldonloss, file);
-	newXS(strcpy(buf, "worldwideaddldonpoints"), XS__worldwideaddldonpoints, file);
-	newXS(strcpy(buf, "worldwideaddldonwin"), XS__worldwideaddldonwin, file);
-	newXS(strcpy(buf, "worldwidecastspell"), XS__worldwidecastspell, file);
-	newXS(strcpy(buf, "worldwidedialoguewindow"), XS__worldwidedialoguewindow, file);
-	newXS(strcpy(buf, "worldwidedisabletask"), XS__worldwidedisabletask, file);
-	newXS(strcpy(buf, "worldwideenabletask"), XS__worldwideenabletask, file);
-	newXS(strcpy(buf, "worldwidefailtask"), XS__worldwidefailtask, file);
-	newXS(strcpy(buf, "worldwidemarquee"), XS__worldwidemarquee, file);
-	newXS(strcpy(buf, "worldwidemessage"), XS__worldwidemessage, file);
-	newXS(strcpy(buf, "worldwidemove"), XS__worldwidemove, file);
-	newXS(strcpy(buf, "worldwidemoveinstance"), XS__worldwidemoveinstance, file);
-	newXS(strcpy(buf, "worldwideremoveldonloss"), XS__worldwideremoveldonloss, file);
-	newXS(strcpy(buf, "worldwideremoveldonwin"), XS__worldwideremoveldonwin, file);
-	newXS(strcpy(buf, "worldwideremovespell"), XS__worldwideremovespell, file);
-	newXS(strcpy(buf, "worldwideremovetask"), XS__worldwideremovetask, file);
-	newXS(strcpy(buf, "worldwideresetactivity"), XS__worldwideresetactivity, file);
-	newXS(strcpy(buf, "worldwidesetentityvariableclient"), XS__worldwidesetentityvariableclient, file);
-	newXS(strcpy(buf, "worldwidesetentityvariablenpc"), XS__worldwidesetentityvariablenpc, file);
-	newXS(strcpy(buf, "worldwidesignalclient"), XS__worldwidesignalclient, file);
-	newXS(strcpy(buf, "worldwidesignalnpc"), XS__worldwidesignalnpc, file);
-	newXS(strcpy(buf, "worldwideupdateactivity"), XS__worldwideupdateactivity, file);
-	newXS(strcpy(buf, "debug"), XS__debug, file);
-	newXS(strcpy(buf, "delglobal"), XS__delglobal, file);
-	newXS(strcpy(buf, "depop"), XS__depop, file);
-	newXS(strcpy(buf, "depop_withtimer"), XS__depop_withtimer, file);
-	newXS(strcpy(buf, "depopall"), XS__depopall, file);
-	newXS(strcpy(buf, "depopzone"), XS__depopzone, file);
-	newXS(strcpy(buf, "ding"), XS__ding, file);
-	newXS(strcpy(buf, "disable_proximity_say"), XS__disable_proximity_say, file);
-	newXS(strcpy(buf, "disable_spawn2"), XS__disable_spawn2, file);
-	newXS(strcpy(buf, "disablerecipe"), XS__disablerecipe, file);
-	newXS(strcpy(buf, "disabletask"), XS__disabletask, file);
-	newXS(strcpy(buf, "doanim"), XS__doanim, file);
-	newXS(strcpy(buf, "echo"), XS__echo, file);
-	newXS(strcpy(buf, "emote"), XS__emote, file);
-	newXS(strcpy(buf, "enable_proximity_say"), XS__enable_proximity_say, file);
-	newXS(strcpy(buf, "enable_spawn2"), XS__enable_spawn2, file);
-	newXS(strcpy(buf, "enabledtaskcount"), XS__enabledtaskcount, file);
-	newXS(strcpy(buf, "enablerecipe"), XS__enablerecipe, file);
-	newXS(strcpy(buf, "enabletask"), XS__enabletask, file);
-	newXS(strcpy(buf, "enabletitle"), XS__enabletitle, file);
-	newXS(strcpy(buf, "exp"), XS__exp, file);
-	newXS(strcpy(buf, "faction"), XS__faction, file);
-	newXS(strcpy(buf, "factionvalue"), XS_FactionValue, file);
-	newXS(strcpy(buf, "failtask"), XS__failtask, file);
-	newXS(strcpy(buf, "firsttaskinset"), XS__firsttaskinset, file);
-	newXS(strcpy(buf, "follow"), XS__follow, file);
-	newXS(strcpy(buf, "forcedoorclose"), XS__forcedoorclose, file);
-	newXS(strcpy(buf, "forcedooropen"), XS__forcedooropen, file);
-	newXS(strcpy(buf, "getaaexpmodifierbycharid"), XS__getaaexpmodifierbycharid, file);
-	newXS(strcpy(buf, "getbodytypename"), XS__getbodytypename, file);
-	newXS(strcpy(buf, "getcharidbyname"), XS__getcharidbyname, file);
-	newXS(strcpy(buf, "getclassname"), XS__getclassname, file);
-	newXS(strcpy(buf, "getcleannpcnamebyid"), XS__getcleannpcnamebyid, file);
-	newXS(strcpy(buf, "getconsiderlevelname"), XS__getconsiderlevelname, file);
-	newXS(strcpy(buf, "gethexcolorcode"), XS__gethexcolorcode, file);
-	newXS(strcpy(buf, "getcurrencyid"), XS__getcurrencyid, file);
-	newXS(strcpy(buf, "getexpmodifierbycharid"), XS__getexpmodifierbycharid, file);
-	newXS(strcpy(buf, "get_expedition"), XS__get_expedition, file);
-	newXS(strcpy(buf, "get_expedition_by_char_id"), XS__get_expedition_by_char_id, file);
-	newXS(strcpy(buf, "get_expedition_by_dz_id"), XS__get_expedition_by_dz_id, file);
-	newXS(strcpy(buf, "get_expedition_by_zone_instance"), XS__get_expedition_by_zone_instance, file);
-	newXS(strcpy(buf, "get_expedition_lockout_by_char_id"), XS__get_expedition_lockout_by_char_id, file);
-	newXS(strcpy(buf, "get_expedition_lockouts_by_char_id"), XS__get_expedition_lockouts_by_char_id, file);
-	newXS(strcpy(buf, "getfactionname"), XS__getfactionname, file);
-	newXS(strcpy(buf, "getinventoryslotid"), XS__getinventoryslotid, file);
-	newXS(strcpy(buf, "getitemname"), XS__getitemname, file);
-	newXS(strcpy(buf, "getItemName"), XS_qc_getItemName, file);
-	newXS(strcpy(buf, "getitemstat"), XS__getitemstat, file);
-	newXS(strcpy(buf, "getlanguagename"), XS__getlanguagename, file);
-	newXS(strcpy(buf, "getldonthemename"), XS__getldonthemename, file);
-	newXS(strcpy(buf, "getnpcnamebyid"), XS__getnpcnamebyid, file);
-	newXS(strcpy(buf, "get_spawn_condition"), XS__get_spawn_condition, file);
-	newXS(strcpy(buf, "getcharnamebyid"), XS__getcharnamebyid, file);
-	newXS(strcpy(buf, "getcurrencyitemid"), XS__getcurrencyitemid, file);
-	newXS(strcpy(buf, "getgendername"), XS__getgendername, file);
-	newXS(strcpy(buf, "getdeityname"), XS__getdeityname, file);
-	newXS(strcpy(buf, "getenvironmentaldamagename"), XS__getenvironmentaldamagename, file);
-	newXS(strcpy(buf, "getguildnamebyid"), XS__getguildnamebyid, file);
-	newXS(strcpy(buf, "getguildidbycharid"), XS__getguildidbycharid, file);
-	newXS(strcpy(buf, "getgroupidbycharid"), XS__getgroupidbycharid, file);
-	newXS(strcpy(buf, "getinventoryslotname"), XS__getinventoryslotname, file);
-	newXS(strcpy(buf, "getraididbycharid"), XS__getraididbycharid, file);
-	newXS(strcpy(buf, "getracename"), XS__getracename, file);
-	newXS(strcpy(buf, "getremainingtimeMS"), XS__getremainingtimeMS, file);
-	newXS(strcpy(buf, "getspell"), XS__getspell, file);
-	newXS(strcpy(buf, "getspellname"), XS__getspellname, file);
-	newXS(strcpy(buf, "get_spell_level"), XS__get_spell_level, file);
-	newXS(strcpy(buf, "getspellstat"), XS__getspellstat, file);
-	newXS(strcpy(buf, "getskillname"), XS__getskillname, file);
-	newXS(strcpy(buf, "getlevel"), XS__getlevel, file);
-	newXS(strcpy(buf, "getplayerburiedcorpsecount"), XS__getplayerburiedcorpsecount, file);
-	newXS(strcpy(buf, "getplayercorpsecount"), XS__getplayercorpsecount, file);
-	newXS(strcpy(buf, "getplayercorpsecountbyzoneid"), XS__getplayercorpsecountbyzoneid, file);
-	newXS(strcpy(buf, "gettaskactivitydonecount"), XS__gettaskactivitydonecount, file);
-	newXS(strcpy(buf, "gettaskname"), XS__gettaskname, file);
-	newXS(strcpy(buf, "gettimerdurationMS"), XS__gettimerdurationMS, file);
-	newXS(strcpy(buf, "givecash"), XS__givecash, file);
-	newXS(strcpy(buf, "gmmove"), XS__gmmove, file);
-	newXS(strcpy(buf, "gmsay"), XS__gmsay, file);
-	newXS(strcpy(buf, "has_zone_flag"), XS__has_zone_flag, file);
-	newXS(strcpy(buf, "hastimer"), XS__hastimer, file);
-	newXS(strcpy(buf, "incstat"), XS__incstat, file);
-	newXS(strcpy(buf, "isdisctome"), XS__isdisctome, file);
-	newXS(strcpy(buf, "isdooropen"), XS__isdooropen, file);
-	newXS(strcpy(buf, "isnpcspawned"), XS__isnpcspawned, file);
-	newXS(strcpy(buf, "istaskactive"), XS__istaskactive, file);
-	newXS(strcpy(buf, "istaskactivityactive"), XS__istaskactivityactive, file);
-	newXS(strcpy(buf, "istaskappropriate"), XS__istaskappropriate, file);
-	newXS(strcpy(buf, "istaskcompleted"), XS__istaskcompleted, file);
-	newXS(strcpy(buf, "istaskenabled"), XS__istaskenabled, file);
-	newXS(strcpy(buf, "itemlink"), XS__itemlink, file);
-	newXS(strcpy(buf, "lasttaskinset"), XS__lasttaskinset, file);
-	newXS(strcpy(buf, "level"), XS__level, file);
-	newXS(strcpy(buf, "log"), XS__log, file);
-	newXS(strcpy(buf, "log_combat"), XS__log_combat, file);
-	newXS(strcpy(buf, "me"), XS__me, file);
-	newXS(strcpy(buf, "message"), XS__message, file);
-	newXS(strcpy(buf, "modifynpcstat"), XS__ModifyNPCStat, file);
-	newXS(strcpy(buf, "movegrp"), XS__movegrp, file);
-	newXS(strcpy(buf, "movepc"), XS__movepc, file);
-	newXS(strcpy(buf, "moveto"), XS__moveto, file);
-	newXS(strcpy(buf, "nexttaskinset"), XS__nexttaskinset, file);
-	newXS(strcpy(buf, "npcfeature"), XS__npcfeature, file);
-	newXS(strcpy(buf, "npcgender"), XS__npcgender, file);
-	newXS(strcpy(buf, "npcrace"), XS__npcrace, file);
-	newXS(strcpy(buf, "npcsize"), XS__npcsize, file);
-	newXS(strcpy(buf, "npctexture"), XS__npctexture, file);
-	newXS(strcpy(buf, "pause"), XS__pause, file);
-	newXS(strcpy(buf, "permaclass"), XS__permaclass, file);
-	newXS(strcpy(buf, "permagender"), XS__permagender, file);
-	newXS(strcpy(buf, "permarace"), XS__permarace, file);
-	newXS(strcpy(buf, "playerfeature"), XS__playerfeature, file);
-	newXS(strcpy(buf, "playergender"), XS__playergender, file);
-	newXS(strcpy(buf, "playerrace"), XS__playerrace, file);
-	newXS(strcpy(buf, "playersize"), XS__playersize, file);
-	newXS(strcpy(buf, "playertexture"), XS__playertexture, file);
-	newXS(strcpy(buf, "popup"), XS__popup, file);
-	newXS(strcpy(buf, "processmobswhilezoneempty"), XS__processmobswhilezoneempty, file);
-	newXS(strcpy(buf, "pvp"), XS__pvp, file);
-	newXS(strcpy(buf, "qs_player_event"), XS__qs_player_event, file);
-	newXS(strcpy(buf, "qs_send_query"), XS__qs_send_query, file);
-	newXS(strcpy(buf, "rain"), XS__rain, file);
-	newXS(strcpy(buf, "rebind"), XS__rebind, file);
-	newXS(strcpy(buf, "reloadzonestaticdata"), XS__reloadzonestaticdata, file);
-	newXS(strcpy(buf, "remove_all_expedition_lockouts_by_char_id"), XS__remove_all_expedition_lockouts_by_char_id, file);
-	newXS(strcpy(buf, "remove_expedition_lockout_by_char_id"), XS__remove_expedition_lockout_by_char_id, file);
-	newXS(strcpy(buf, "removeitem"), XS__removeitem, file);
-	newXS(strcpy(buf, "removetitle"), XS__removetitle, file);
-	newXS(strcpy(buf, "rename"), XS__rename, file);
-	newXS(strcpy(buf, "repopzone"), XS__repopzone, file);
-	newXS(strcpy(buf, "resettaskactivity"), XS__resettaskactivity, file);
-	newXS(strcpy(buf, "respawn"), XS__respawn, file);
-	newXS(strcpy(buf, "resume"), XS__resume, file);
-	newXS(strcpy(buf, "safemove"), XS__safemove, file);
-	newXS(strcpy(buf, "save"), XS__save, file);
-	newXS(strcpy(buf, "say"), XS__say, file);
-	newXS(strcpy(buf, "saylink"), XS__saylink, file);
-	newXS(strcpy(buf, "scribespells"), XS__scribespells, file);
-	newXS(strcpy(buf, "secondstotime"), XS__secondstotime, file);
-	newXS(strcpy(buf, "selfcast"), XS__selfcast, file);
-	newXS(strcpy(buf, "setaaexpmodifierbycharid"), XS__setaaexpmodifierbycharid, file);
-	newXS(strcpy(buf, "set_proximity"), XS__set_proximity, file);
-	newXS(strcpy(buf, "set_zone_flag"), XS__set_zone_flag, file);
-	newXS(strcpy(buf, "setallskill"), XS__setallskill, file);
-	newXS(strcpy(buf, "setanim"), XS__setanim, file);
-	newXS(strcpy(buf, "setexpmodifierbycharid"), XS__setexpmodifierbycharid, file);
-	newXS(strcpy(buf, "setglobal"), XS__setglobal, file);
-	newXS(strcpy(buf, "setguild"), XS__setguild, file);
-	newXS(strcpy(buf, "sethp"), XS__sethp, file);
-	newXS(strcpy(buf, "setlanguage"), XS__setlanguage, file);
-	newXS(strcpy(buf, "setnexthpevent"), XS__setnexthpevent, file);
-	newXS(strcpy(buf, "setnextinchpevent"), XS__setnextinchpevent, file);
-	newXS(strcpy(buf, "setskill"), XS__setskill, file);
-	newXS(strcpy(buf, "setsky"), XS__setsky, file);
-	newXS(strcpy(buf, "setstat"), XS__setstat, file);
-	newXS(strcpy(buf, "settarget"), XS__settarget, file);
-	newXS(strcpy(buf, "settime"), XS__settime, file);
-	newXS(strcpy(buf, "settimer"), XS__settimer, file);
-	newXS(strcpy(buf, "settimerMS"), XS__settimerMS, file);
-	newXS(strcpy(buf, "sfollow"), XS__sfollow, file);
-	newXS(strcpy(buf, "shout"), XS__shout, file);
-	newXS(strcpy(buf, "shout2"), XS__shout2, file);
-	newXS(strcpy(buf, "showgrid"), XS__showgrid, file);
-	newXS(strcpy(buf, "signal"), XS__signal, file);
-	newXS(strcpy(buf, "signalwith"), XS__signalwith, file);
-	newXS(strcpy(buf, "snow"), XS__snow, file);
-	newXS(strcpy(buf, "spawn"), XS__spawn, file);
-	newXS(strcpy(buf, "spawn2"), XS__spawn2, file);
-	newXS(strcpy(buf, "spawn_condition"), XS__spawn_condition, file);
-	newXS(strcpy(buf, "spawn_from_spawn2"), XS__spawn_from_spawn2, file);
-	newXS(strcpy(buf, "start"), XS__start, file);
-	newXS(strcpy(buf, "stop"), XS__stop, file);
-	newXS(strcpy(buf, "stopalltimers"), XS__stopalltimers, file);
-	newXS(strcpy(buf, "stoptimer"), XS__stoptimer, file);
-	newXS(strcpy(buf, "summonallplayercorpses"), XS__summonallplayercorpses, file);
-	newXS(strcpy(buf, "summonburiedplayercorpse"), XS__summonburiedplayercorpse, file);
-	newXS(strcpy(buf, "summonitem"), XS__summonitem, file);
-	newXS(strcpy(buf, "surname"), XS__surname, file);
-	newXS(strcpy(buf, "targlobal"), XS__targlobal, file);
-	newXS(strcpy(buf, "taskexploredarea"), XS__taskexploredarea, file);
-	newXS(strcpy(buf, "taskselector"), XS__taskselector, file);
-	newXS(strcpy(buf, "task_setselector"), XS__task_setselector, file);
-	newXS(strcpy(buf, "tasktimeleft"), XS__tasktimeleft, file);
-	newXS(strcpy(buf, "toggle_spawn_event"), XS__toggle_spawn_event, file);
-	newXS(strcpy(buf, "toggledoorstate"), XS__toggledoorstate, file);
-	newXS(strcpy(buf, "traindisc"), XS__traindisc, file);
-	newXS(strcpy(buf, "traindiscs"), XS__traindiscs, file);
-	newXS(strcpy(buf, "unique_spawn"), XS__unique_spawn, file);
-	newXS(strcpy(buf, "unscribespells"), XS__unscribespells, file);
-	newXS(strcpy(buf, "untraindiscs"), XS__untraindiscs, file);
-	newXS(strcpy(buf, "updatespawntimer"), XS__UpdateSpawnTimer, file);
-	newXS(strcpy(buf, "updatetaskactivity"), XS__updatetaskactivity, file);
-	newXS(strcpy(buf, "UpdateZoneHeader"), XS__UpdateZoneHeader, file);
-	newXS(strcpy(buf, "varlink"), XS__varlink, file);
-	newXS(strcpy(buf, "voicetell"), XS__voicetell, file);
-	newXS(strcpy(buf, "we"), XS__we, file);
-	newXS(strcpy(buf, "wearchange"), XS__wearchange, file);
-	newXS(strcpy(buf, "whisper"), XS__whisper, file);
-	newXS(strcpy(buf, "write"), XS__write, file);
-	newXS(strcpy(buf, "ze"), XS__ze, file);
-	newXS(strcpy(buf, "zone"), XS__zone, file);
-	newXS(strcpy(buf, "zonegroup"), XS__zonegroup, file);
-	newXS(strcpy(buf, "zoneraid"), XS__zoneraid, file);
+	package.add("AssignGroupToInstance", &Perl__AssignGroupToInstance);
+	package.add("AssignRaidToInstance", &Perl__AssignRaidToInstance);
+	package.add("AssignToInstance", &Perl__AssignToInstance);
+	package.add("AssignToInstanceByCharID", &Perl__AssignToInstanceByCharID);
+	package.add("ChooseRandom", &Perl__ChooseRandom);
+	package.add("CreateInstance", &Perl__CreateInstance);
+	package.add("DestroyInstance", &Perl__DestroyInstance);
+	package.add("UpdateInstanceTimer", &Perl__UpdateInstanceTimer);
+	package.add("GetInstanceTimer", &Perl__GetInstanceTimer);
+	package.add("GetInstanceTimerByID", &Perl__GetInstanceTimerByID);
+	package.add("FlagInstanceByGroupLeader", &Perl__FlagInstanceByGroupLeader);
+	package.add("FlagInstanceByRaidLeader", &Perl__FlagInstanceByRaidLeader);
+	package.add("FlyMode", &Perl__FlyMode);
+	package.add("GetCharactersInInstance", &Perl__GetCharactersInInstance);
+	package.add("GetInstanceID", &Perl__GetInstanceID);
+	package.add("GetInstanceIDByCharID", &Perl__GetInstanceIDByCharID);
+	package.add("GetInstanceIDs", &Perl__GetInstanceIDs);
+	package.add("GetInstanceIDsByCharID", &Perl__GetInstanceIDsByCharID);
+	package.add("GetInstanceVersionByID", &Perl__GetInstanceVersionByID);
+	package.add("GetInstanceZoneIDByID", &Perl__GetInstanceZoneIDByID);
+	package.add("GetSpellResistType", &Perl__GetSpellResistType);
+	package.add("GetSpellTargetType", &Perl__GetSpellTargetType);
+	package.add("GetTimeSeconds", &Perl__GetTimeSeconds);
+	package.add("GetZoneID", &Perl__GetZoneID);
+	package.add("GetZoneLongName", &Perl__GetZoneLongName);
+	package.add("GetZoneLongNameByID", &Perl__GetZoneLongNameByID);
+	package.add("GetZoneShortName", &Perl__GetZoneShortName);
+	package.add("set_rule", &Perl__set_rule);
+	package.add("get_rule", &Perl__get_rule);
+	package.add("get_data", &Perl__get_data);
+	package.add("get_data_expires", &Perl__get_data_expires);
+	package.add("get_data_remaining", &Perl__get_data_remaining);
+	package.add("set_data", (void(*)(std::string, std::string))&Perl__set_data);
+	package.add("set_data", (void(*)(std::string, std::string, std::string))&Perl__set_data);
+	package.add("delete_data", &Perl__delete_data);
+	package.add("IsBeneficialSpell", &Perl__IsBeneficialSpell);
+	package.add("IsEffectInSpell", &Perl__IsEffectInSpell);
+	package.add("IsRaining", &Perl__IsRaining);
+	package.add("IsSnowing", &Perl__IsSnowing);
+	package.add("IsRunning", &Perl__IsRunning);
+	package.add("LearnRecipe", &Perl__LearnRecipe);
+	package.add("MerchantCountItem", &Perl__MerchantCountItem);
+	package.add("MerchantSetItem", (void(*)(uint32, uint32))&Perl__MerchantSetItem);
+	package.add("MerchantSetItem", (void(*)(uint32, uint32, uint32))&Perl__MerchantSetItem);
+	package.add("MovePCInstance", (void(*)(int, int, float, float, float))&Perl__MovePCInstance);
+	package.add("MovePCInstance", (void(*)(int, int, float, float, float, float))&Perl__MovePCInstance);
+	package.add("RemoveAllFromInstance", &Perl__RemoveAllFromInstance);
+	package.add("RemoveFromInstance", &Perl__RemoveFromInstance);
+	package.add("RemoveFromInstanceByCharID", &Perl__RemoveFromInstanceByCharID);
+	package.add("CheckInstanceByCharID", &Perl__CheckInstanceByCharID);
+	package.add("SendMail", &Perl__SendMail);
+	package.add("SetRunning", &Perl__SetRunning);
+	package.add("activespeakactivity", &Perl__activespeakactivity);
+	package.add("activespeaktask", &Perl__activespeaktask);
+	package.add("activetasksinset", &Perl__activetasksinset);
+	package.add("add_expedition_lockout_all_clients", (void(*)(std::string, std::string, uint32))&Perl__add_expedition_lockout_all_clients);
+	package.add("add_expedition_lockout_all_clients", (void(*)(std::string, std::string, uint32, std::string))&Perl__add_expedition_lockout_all_clients);
+	package.add("add_expedition_lockout_by_char_id", (void(*)(uint32, std::string, std::string, uint32))&Perl__add_expedition_lockout_by_char_id);
+	package.add("add_expedition_lockout_by_char_id", (void(*)(uint32, std::string, std::string, uint32, std::string))&Perl__add_expedition_lockout_by_char_id);
+	package.add("addldonloss", &Perl__addldonloss);
+	package.add("addldonpoints", &Perl__addldonpoints);
+	package.add("addldonwin", &Perl__addldonwin);
+	package.add("addloot", (void(*)(int))&Perl__addloot);
+	package.add("addloot", (void(*)(int, int))&Perl__addloot);
+	package.add("addloot", (void(*)(int, int, bool))&Perl__addloot);
+	package.add("addskill", &Perl__addskill);
+	package.add("assigntask", (void(*)(int))&Perl__assigntask);
+	package.add("assigntask", (void(*)(int, bool))&Perl__assigntask);
+	package.add("attack", &Perl__attack);
+	package.add("attacknpc", &Perl__attacknpc);
+	package.add("attacknpctype", &Perl__attacknpctype);
+	package.add("buryplayercorpse", &Perl__buryplayercorpse);
+	package.add("castspell", &Perl__castspell);
+	package.add("changedeity", &Perl__changedeity);
+	package.add("checknamefilter", &Perl__checknamefilter),
+	package.add("checktitle", &Perl__checktitle);
+	package.add("clear_npctype_cache", &Perl__clear_npctype_cache);
+	package.add("clear_proximity", &Perl__clear_proximity);
+	package.add("clear_zone_flag", &Perl__clear_zone_flag);
+	package.add("clearspawntimers", &Perl__clearspawntimers);
+	package.add("collectitems", &Perl__collectitems);
+	package.add("commify", &Perl__commify);
+	package.add("completedtasksinset", &Perl__completedtasksinset);
+	package.add("countitem", &Perl__countitem);
+	package.add("countspawnednpcs", &Perl__countspawnednpcs);
+	package.add("createdoor", (uint16(*)(const char*, float, float, float, float))&Perl__CreateDoor);
+	package.add("createdoor", (uint16(*)(const char*, float, float, float, float, uint8_t))&Perl__CreateDoor);
+	package.add("createdoor", (uint16(*)(const char*, float, float, float, float, uint8_t, uint16_t))&Perl__CreateDoor);
+	package.add("creategroundobject", (uint16(*)(uint32_t, float, float, float, float))&Perl__CreateGroundObject);
+	package.add("creategroundobject", (uint16(*)(uint32_t, float, float, float, float, uint32_t))&Perl__CreateGroundObject);
+	package.add("creategroundobjectfrommodel", (uint16(*)(const char*, float, float, float, float))&Perl__CreateGroundObjectFromModel);
+	package.add("creategroundobjectfrommodel", (uint16(*)(const char*, float, float, float, float, uint8_t))&Perl__CreateGroundObjectFromModel);
+	package.add("creategroundobjectfrommodel", (uint16(*)(const char*, float, float, float, float, uint8_t, uint32_t))&Perl__CreateGroundObjectFromModel);
+	package.add("createguild", &Perl__createguild);
+	package.add("createitem", (EQ::ItemInstance*(*)(uint32))&Perl__createitem);
+	package.add("createitem", (EQ::ItemInstance*(*)(uint32, int16))&Perl__createitem);
+	package.add("createitem", (EQ::ItemInstance*(*)(uint32, int16, uint32))&Perl__createitem);
+	package.add("createitem", (EQ::ItemInstance*(*)(uint32, int16, uint32, uint32))&Perl__createitem);
+	package.add("createitem", (EQ::ItemInstance*(*)(uint32, int16, uint32, uint32, uint32))&Perl__createitem);
+	package.add("createitem", (EQ::ItemInstance*(*)(uint32, int16, uint32, uint32, uint32, uint32))&Perl__createitem);
+	package.add("createitem", (EQ::ItemInstance*(*)(uint32, int16, uint32, uint32, uint32, uint32, uint32))&Perl__createitem);
+	package.add("createitem", (EQ::ItemInstance*(*)(uint32, int16, uint32, uint32, uint32, uint32, uint32, uint32))&Perl__createitem);
+	package.add("createitem", (EQ::ItemInstance*(*)(uint32, int16, uint32, uint32, uint32, uint32, uint32, uint32, bool))&Perl__createitem);
+	package.add("crosszoneaddldonlossbycharid", &Perl__crosszoneaddldonlossbycharid);
+	package.add("crosszoneaddldonlossbygroupid", &Perl__crosszoneaddldonlossbygroupid);
+	package.add("crosszoneaddldonlossbyraidid", &Perl__crosszoneaddldonlossbyraidid);
+	package.add("crosszoneaddldonlossbyguildid", &Perl__crosszoneaddldonlossbyguildid);
+	package.add("crosszoneaddldonlossbyexpeditionid", &Perl__crosszoneaddldonlossbyexpeditionid);
+	package.add("crosszoneaddldonlossbyclientname", &Perl__crosszoneaddldonlossbyclientname);
+	package.add("crosszoneaddldonpointsbycharid", &Perl__crosszoneaddldonpointsbycharid);
+	package.add("crosszoneaddldonpointsbygroupid", &Perl__crosszoneaddldonpointsbygroupid);
+	package.add("crosszoneaddldonpointsbyraidid", &Perl__crosszoneaddldonpointsbyraidid);
+	package.add("crosszoneaddldonpointsbyguildid", &Perl__crosszoneaddldonpointsbyguildid);
+	package.add("crosszoneaddldonpointsbyexpeditionid", &Perl__crosszoneaddldonpointsbyexpeditionid);
+	package.add("crosszoneaddldonpointsbyclientname", &Perl__crosszoneaddldonpointsbyclientname);
+	package.add("crosszoneaddldonwinbycharid", &Perl__crosszoneaddldonwinbycharid);
+	package.add("crosszoneaddldonwinbygroupid", &Perl__crosszoneaddldonwinbygroupid);
+	package.add("crosszoneaddldonwinbyraidid", &Perl__crosszoneaddldonwinbyraidid);
+	package.add("crosszoneaddldonwinbyguildid", &Perl__crosszoneaddldonwinbyguildid);
+	package.add("crosszoneaddldonwinbyexpeditionid", &Perl__crosszoneaddldonwinbyexpeditionid);
+	package.add("crosszoneaddldonwinbyclientname", &Perl__crosszoneaddldonwinbyclientname);
+	package.add("crosszoneassigntaskbycharid", (void(*)(int, uint32))&Perl__crosszoneassigntaskbycharid);
+	package.add("crosszoneassigntaskbycharid", (void(*)(int, uint32, bool))&Perl__crosszoneassigntaskbycharid);
+	package.add("crosszoneassigntaskbygroupid", (void(*)(int, uint32))&Perl__crosszoneassigntaskbygroupid);
+	package.add("crosszoneassigntaskbygroupid", (void(*)(int, uint32, bool))&Perl__crosszoneassigntaskbygroupid);
+	package.add("crosszoneassigntaskbyraidid", (void(*)(int, uint32))&Perl__crosszoneassigntaskbyraidid);
+	package.add("crosszoneassigntaskbyraidid", (void(*)(int, uint32, bool))&Perl__crosszoneassigntaskbyraidid);
+	package.add("crosszoneassigntaskbyguildid", (void(*)(int, uint32))&Perl__crosszoneassigntaskbyguildid);
+	package.add("crosszoneassigntaskbyguildid", (void(*)(int, uint32, bool))&Perl__crosszoneassigntaskbyguildid);
+	package.add("crosszoneassigntaskbyexpeditionid", (void(*)(uint32, uint32))&Perl__crosszoneassigntaskbyexpeditionid);
+	package.add("crosszoneassigntaskbyexpeditionid", (void(*)(uint32, uint32, bool))&Perl__crosszoneassigntaskbyexpeditionid);
+	package.add("crosszoneassigntaskbyclientname", (void(*)(const char*, uint32))&Perl__crosszoneassigntaskbyclientname);
+	package.add("crosszoneassigntaskbyclientname", (void(*)(const char*, uint32, bool))&Perl__crosszoneassigntaskbyclientname);
+	package.add("crosszonecastspellbycharid", &Perl__crosszonecastspellbycharid);
+	package.add("crosszonecastspellbygroupid", &Perl__crosszonecastspellbygroupid);
+	package.add("crosszonecastspellbyraidid", &Perl__crosszonecastspellbyraidid);
+	package.add("crosszonecastspellbyguildid", &Perl__crosszonecastspellbyguildid);
+	package.add("crosszonecastspellbyexpeditionid", &Perl__crosszonecastspellbyexpeditionid);
+	package.add("crosszonecastspellbyclientname", &Perl__crosszonecastspellbyclientname);
+	package.add("crosszonedialoguewindowbycharid", &Perl__crosszonedialoguewindowbycharid);
+	package.add("crosszonedialoguewindowbygroupid", &Perl__crosszonedialoguewindowbygroupid);
+	package.add("crosszonedialoguewindowbyraidid", &Perl__crosszonedialoguewindowbyraidid);
+	package.add("crosszonedialoguewindowbyguildid", &Perl__crosszonedialoguewindowbyguildid);
+	package.add("crosszonedialoguewindowbyexpeditionid", &Perl__crosszonedialoguewindowbyexpeditionid);
+	package.add("crosszonedialoguewindowbyclientname", &Perl__crosszonedialoguewindowbyclientname);
+	package.add("crosszonedisabletaskbycharid", &Perl__crosszonedisabletaskbycharid);
+	package.add("crosszonedisabletaskbygroupid", &Perl__crosszonedisabletaskbygroupid);
+	package.add("crosszonedisabletaskbyraidid", &Perl__crosszonedisabletaskbyraidid);
+	package.add("crosszonedisabletaskbyguildid", &Perl__crosszonedisabletaskbyguildid);
+	package.add("crosszonedisabletaskbyexpeditionid", &Perl__crosszonedisabletaskbyexpeditionid);
+	package.add("crosszonedisabletaskbyclientname", &Perl__crosszonedisabletaskbyclientname);
+	package.add("crosszoneenabletaskbycharid", &Perl__crosszoneenabletaskbycharid);
+	package.add("crosszoneenabletaskbygroupid", &Perl__crosszoneenabletaskbygroupid);
+	package.add("crosszoneenabletaskbyraidid", &Perl__crosszoneenabletaskbyraidid);
+	package.add("crosszoneenabletaskbyguildid", &Perl__crosszoneenabletaskbyguildid);
+	package.add("crosszoneenabletaskbyexpeditionid", &Perl__crosszoneenabletaskbyexpeditionid);
+	package.add("crosszoneenabletaskbyclientname", &Perl__crosszoneenabletaskbyclientname);
+	package.add("crosszonefailtaskbycharid", &Perl__crosszonefailtaskbycharid);
+	package.add("crosszonefailtaskbygroupid", &Perl__crosszonefailtaskbygroupid);
+	package.add("crosszonefailtaskbyraidid", &Perl__crosszonefailtaskbyraidid);
+	package.add("crosszonefailtaskbyguildid", &Perl__crosszonefailtaskbyguildid);
+	package.add("crosszonefailtaskbyexpeditionid", &Perl__crosszonefailtaskbyexpeditionid);
+	package.add("crosszonefailtaskbyclientname", &Perl__crosszonefailtaskbyclientname);
+	package.add("crosszonemarqueebycharid", &Perl__crosszonemarqueebycharid);
+	package.add("crosszonemarqueebygroupid", &Perl__crosszonemarqueebygroupid);
+	package.add("crosszonemarqueebyraidid", &Perl__crosszonemarqueebyraidid);
+	package.add("crosszonemarqueebyguildid", &Perl__crosszonemarqueebyguildid);
+	package.add("crosszonemarqueebyexpeditionid", &Perl__crosszonemarqueebyexpeditionid);
+	package.add("crosszonemarqueebyclientname", &Perl__crosszonemarqueebyclientname);
+	package.add("crosszonemessageplayerbycharid", &Perl__crosszonemessageplayerbycharid);
+	package.add("crosszonemessageplayerbygroupid", &Perl__crosszonemessageplayerbygroupid);
+	package.add("crosszonemessageplayerbyraidid", &Perl__crosszonemessageplayerbyraidid);
+	package.add("crosszonemessageplayerbyguildid", &Perl__crosszonemessageplayerbyguildid);
+	package.add("crosszonemessageplayerbyexpeditionid", &Perl__crosszonemessageplayerbyexpeditionid);
+	package.add("crosszonemessageplayerbyname", &Perl__crosszonemessageplayerbyname);
+	package.add("crosszonemoveplayerbycharid", &Perl__crosszonemoveplayerbycharid);
+	package.add("crosszonemoveplayerbygroupid", &Perl__crosszonemoveplayerbygroupid);
+	package.add("crosszonemoveplayerbyraidid", &Perl__crosszonemoveplayerbyraidid);
+	package.add("crosszonemoveplayerbyguildid", &Perl__crosszonemoveplayerbyguildid);
+	package.add("crosszonemoveplayerbyexpeditionid", &Perl__crosszonemoveplayerbyexpeditionid);
+	package.add("crosszonemoveplayerbyname", &Perl__crosszonemoveplayerbyname);
+	package.add("crosszonemoveinstancebycharid", &Perl__crosszonemoveinstancebycharid);
+	package.add("crosszonemoveinstancebygroupid", &Perl__crosszonemoveinstancebygroupid);
+	package.add("crosszonemoveinstancebyraidid", &Perl__crosszonemoveinstancebyraidid);
+	package.add("crosszonemoveinstancebyguildid", &Perl__crosszonemoveinstancebyguildid);
+	package.add("crosszonemoveinstancebyexpeditionid", &Perl__crosszonemoveinstancebyexpeditionid);
+	package.add("crosszonemoveinstancebyclientname", &Perl__crosszonemoveinstancebyclientname);
+	package.add("crosszoneremoveldonlossbycharid", &Perl__crosszoneremoveldonlossbycharid);
+	package.add("crosszoneremoveldonlossbygroupid", &Perl__crosszoneremoveldonlossbygroupid);
+	package.add("crosszoneremoveldonlossbyraidid", &Perl__crosszoneremoveldonlossbyraidid);
+	package.add("crosszoneremoveldonlossbyguildid", &Perl__crosszoneremoveldonlossbyguildid);
+	package.add("crosszoneremoveldonlossbyexpeditionid", &Perl__crosszoneremoveldonlossbyexpeditionid);
+	package.add("crosszoneremoveldonlossbyclientname", &Perl__crosszoneremoveldonlossbyclientname);
+	package.add("crosszoneremoveldonwinbycharid", &Perl__crosszoneremoveldonwinbycharid);
+	package.add("crosszoneremoveldonwinbygroupid", &Perl__crosszoneremoveldonwinbygroupid);
+	package.add("crosszoneremoveldonwinbyraidid", &Perl__crosszoneremoveldonwinbyraidid);
+	package.add("crosszoneremoveldonwinbyguildid", &Perl__crosszoneremoveldonwinbyguildid);
+	package.add("crosszoneremoveldonwinbyexpeditionid", &Perl__crosszoneremoveldonwinbyexpeditionid);
+	package.add("crosszoneremoveldonwinbyclientname", &Perl__crosszoneremoveldonwinbyclientname);
+	package.add("crosszoneremovespellbycharid", &Perl__crosszoneremovespellbycharid);
+	package.add("crosszoneremovespellbygroupid", &Perl__crosszoneremovespellbygroupid);
+	package.add("crosszoneremovespellbyraidid", &Perl__crosszoneremovespellbyraidid);
+	package.add("crosszoneremovespellbyguildid", &Perl__crosszoneremovespellbyguildid);
+	package.add("crosszoneremovespellbyexpeditionid", &Perl__crosszoneremovespellbyexpeditionid);
+	package.add("crosszoneremovespellbyclientname", &Perl__crosszoneremovespellbyclientname);
+	package.add("crosszoneremovetaskbycharid", &Perl__crosszoneremovetaskbycharid);
+	package.add("crosszoneremovetaskbygroupid", &Perl__crosszoneremovetaskbygroupid);
+	package.add("crosszoneremovetaskbyraidid", &Perl__crosszoneremovetaskbyraidid);
+	package.add("crosszoneremovetaskbyguildid", &Perl__crosszoneremovetaskbyguildid);
+	package.add("crosszoneremovetaskbyexpeditionid", &Perl__crosszoneremovetaskbyexpeditionid);
+	package.add("crosszoneremovetaskbyclientname", &Perl__crosszoneremovetaskbyclientname);
+	package.add("crosszoneresetactivitybycharid", &Perl__crosszoneresetactivitybycharid);
+	package.add("crosszoneresetactivitybygroupid", &Perl__crosszoneresetactivitybygroupid);
+	package.add("crosszoneresetactivitybyraidid", &Perl__crosszoneresetactivitybyraidid);
+	package.add("crosszoneresetactivitybyguildid", &Perl__crosszoneresetactivitybyguildid);
+	package.add("crosszoneresetactivitybyexpeditionid", &Perl__crosszoneresetactivitybyexpeditionid);
+	package.add("crosszoneresetactivitybyclientname", &Perl__crosszoneresetactivitybyclientname);
+	package.add("crosszonesetentityvariablebycharid", &Perl__crosszonesetentityvariablebycharid);
+	package.add("crosszonesetentityvariablebygroupid", &Perl__crosszonesetentityvariablebygroupid);
+	package.add("crosszonesetentityvariablebyraidid", &Perl__crosszonesetentityvariablebyraidid);
+	package.add("crosszonesetentityvariablebyguildid", &Perl__crosszonesetentityvariablebyguildid);
+	package.add("crosszonesetentityvariablebyexpeditionid", &Perl__crosszonesetentityvariablebyexpeditionid);
+	package.add("crosszonesetentityvariablebyclientname", &Perl__crosszonesetentityvariablebyclientname);
+	package.add("crosszonesetentityvariablebynpctypeid", &Perl__crosszonesetentityvariablebynpctypeid);
+	package.add("crosszonesignalclientbycharid", &Perl__crosszonesignalclientbycharid);
+	package.add("crosszonesignalclientbygroupid", &Perl__crosszonesignalclientbygroupid);
+	package.add("crosszonesignalclientbyraidid", &Perl__crosszonesignalclientbyraidid);
+	package.add("crosszonesignalclientbyguildid", &Perl__crosszonesignalclientbyguildid);
+	package.add("crosszonesignalclientbyexpeditionid", &Perl__crosszonesignalclientbyexpeditionid);
+	package.add("crosszonesignalclientbyname", &Perl__crosszonesignalclientbyname);
+	package.add("crosszonesignalnpcbynpctypeid", &Perl__crosszonesignalnpcbynpctypeid);
+	package.add("crosszoneupdateactivitybycharid", (void(*)(int, uint32, int))&Perl__crosszoneupdateactivitybycharid);
+	package.add("crosszoneupdateactivitybycharid", (void(*)(int, uint32, int, int))&Perl__crosszoneupdateactivitybycharid);
+	package.add("crosszoneupdateactivitybygroupid", (void(*)(int, uint32, int))&Perl__crosszoneupdateactivitybygroupid);
+	package.add("crosszoneupdateactivitybygroupid", (void(*)(int, uint32, int, int))&Perl__crosszoneupdateactivitybygroupid);
+	package.add("crosszoneupdateactivitybyraidid", (void(*)(int, uint32, int))&Perl__crosszoneupdateactivitybyraidid);
+	package.add("crosszoneupdateactivitybyraidid", (void(*)(int, uint32, int, int))&Perl__crosszoneupdateactivitybyraidid);
+	package.add("crosszoneupdateactivitybyguildid", (void(*)(int, uint32, int))&Perl__crosszoneupdateactivitybyguildid);
+	package.add("crosszoneupdateactivitybyguildid", (void(*)(int, uint32, int, int))&Perl__crosszoneupdateactivitybyguildid);
+	package.add("crosszoneupdateactivitybyexpeditionid", (void(*)(uint32, uint32, int))&Perl__crosszoneupdateactivitybyexpeditionid);
+	package.add("crosszoneupdateactivitybyexpeditionid", (void(*)(uint32, uint32, int, int))&Perl__crosszoneupdateactivitybyexpeditionid);
+	package.add("crosszoneupdateactivitybyclientname", (void(*)(const char*, uint32, int))&Perl__crosszoneupdateactivitybyclientname);
+	package.add("crosszoneupdateactivitybyclientname", (void(*)(const char*, uint32, int, int))&Perl__crosszoneupdateactivitybyclientname);
+	package.add("worldwideaddldonloss", (void(*)(uint32))&Perl__worldwideaddldonloss);
+	package.add("worldwideaddldonloss", (void(*)(uint32, uint8))&Perl__worldwideaddldonloss);
+	package.add("worldwideaddldonloss", (void(*)(uint32, uint8, uint8))&Perl__worldwideaddldonloss);
+	package.add("worldwideaddldonpoints", (void(*)(uint32))&Perl__worldwideaddldonpoints);
+	package.add("worldwideaddldonpoints", (void(*)(uint32, int))&Perl__worldwideaddldonpoints);
+	package.add("worldwideaddldonpoints", (void(*)(uint32, int, uint8))&Perl__worldwideaddldonpoints);
+	package.add("worldwideaddldonpoints", (void(*)(uint32, int, uint8, uint8))&Perl__worldwideaddldonpoints);
+	package.add("worldwideaddldonwin", (void(*)(uint32))&Perl__worldwideaddldonwin);
+	package.add("worldwideaddldonwin", (void(*)(uint32, uint8))&Perl__worldwideaddldonwin);
+	package.add("worldwideaddldonwin", (void(*)(uint32, uint8, uint8))&Perl__worldwideaddldonwin);
+	package.add("worldwideassigntask", (void(*)(uint32))&Perl__worldwideassigntask);
+	package.add("worldwideassigntask", (void(*)(uint32, bool))&Perl__worldwideassigntask);
+	package.add("worldwideassigntask", (void(*)(uint32, bool, uint8))&Perl__worldwideassigntask);
+	package.add("worldwideassigntask", (void(*)(uint32, bool, uint8, uint8))&Perl__worldwideassigntask);
+	package.add("worldwidecastspell", (void(*)(uint32))&Perl__worldwidecastspell);
+	package.add("worldwidecastspell", (void(*)(uint32, uint8))&Perl__worldwidecastspell);
+	package.add("worldwidecastspell", (void(*)(uint32, uint8, uint8 max_status))&Perl__worldwidecastspell);
+	package.add("worldwidedialoguewindow", (void(*)(const char*))&Perl__worldwidedialoguewindow);
+	package.add("worldwidedialoguewindow", (void(*)(const char*, uint8))&Perl__worldwidedialoguewindow);
+	package.add("worldwidedialoguewindow", (void(*)(const char*, uint8, uint8))&Perl__worldwidedialoguewindow);
+	package.add("worldwidedisabletask", (void(*)(uint32))&Perl__worldwidedisabletask);
+	package.add("worldwidedisabletask", (void(*)(uint32, uint8))&Perl__worldwidedisabletask);
+	package.add("worldwidedisabletask", (void(*)(uint32, uint8, uint8))&Perl__worldwidedisabletask);
+	package.add("worldwideenabletask", (void(*)(uint32))&Perl__worldwideenabletask);
+	package.add("worldwideenabletask", (void(*)(uint32, uint8))&Perl__worldwideenabletask);
+	package.add("worldwideenabletask", (void(*)(uint32, uint8, uint8))&Perl__worldwideenabletask);
+	package.add("worldwidefailtask", (void(*)(uint32))&Perl__worldwidefailtask);
+	package.add("worldwidefailtask", (void(*)(uint32, uint8))&Perl__worldwidefailtask);
+	package.add("worldwidefailtask", (void(*)(uint32, uint8, uint8))&Perl__worldwidefailtask);
+	package.add("worldwidemarquee", (void(*)(uint32, uint32, uint32, uint32, uint32, const char*))&Perl__worldwidemarquee);
+	package.add("worldwidemarquee", (void(*)(uint32, uint32, uint32, uint32, uint32, const char*, uint8))&Perl__worldwidemarquee);
+	package.add("worldwidemarquee", (void(*)(uint32, uint32, uint32, uint32, uint32, const char*, uint8, uint8))&Perl__worldwidemarquee);
+	package.add("worldwidemessage", (void(*)(uint32, const char*))&Perl__worldwidemessage);
+	package.add("worldwidemessage", (void(*)(uint32, const char*, uint8))&Perl__worldwidemessage);
+	package.add("worldwidemessage", (void(*)(uint32, const char*, uint8, uint8))&Perl__worldwidemessage);
+	package.add("worldwidemove", (void(*)(const char*))&Perl__worldwidemove);
+	package.add("worldwidemove", (void(*)(const char*, uint8))&Perl__worldwidemove);
+	package.add("worldwidemove", (void(*)(const char*, uint8, uint8))&Perl__worldwidemove);
+	package.add("worldwidemoveinstance", (void(*)(uint16))&Perl__worldwidemoveinstance);
+	package.add("worldwidemoveinstance", (void(*)(uint16, uint8))&Perl__worldwidemoveinstance);
+	package.add("worldwidemoveinstance", (void(*)(uint16, uint8, uint8))&Perl__worldwidemoveinstance);
+	package.add("worldwideremoveldonloss", (void(*)(uint32))&Perl__worldwideremoveldonloss);
+	package.add("worldwideremoveldonloss", (void(*)(uint32, uint8))&Perl__worldwideremoveldonloss);
+	package.add("worldwideremoveldonloss", (void(*)(uint32, uint8, uint8))&Perl__worldwideremoveldonloss);
+	package.add("worldwideremoveldonwin", (void(*)(uint32))&Perl__worldwideremoveldonwin);
+	package.add("worldwideremoveldonwin", (void(*)(uint32, uint8))&Perl__worldwideremoveldonwin);
+	package.add("worldwideremoveldonwin", (void(*)(uint32, uint8, uint8))&Perl__worldwideremoveldonwin);
+	package.add("worldwideremovespell", (void(*)(uint32))&Perl__worldwideremovespell);
+	package.add("worldwideremovespell", (void(*)(uint32, uint8))&Perl__worldwideremovespell);
+	package.add("worldwideremovespell", (void(*)(uint32, uint8, uint8))&Perl__worldwideremovespell);
+	package.add("worldwideremovetask", (void(*)(uint32))&Perl__worldwideremovetask);
+	package.add("worldwideremovetask", (void(*)(uint32, uint8, uint8))&Perl__worldwideremovetask);
+	package.add("worldwideremovetask", (void(*)(uint32, uint8, uint8))&Perl__worldwideremovetask);
+	package.add("worldwideresetactivity", (void(*)(uint32, int))&Perl__worldwideresetactivity);
+	package.add("worldwideresetactivity", (void(*)(uint32, int, uint8))&Perl__worldwideresetactivity);
+	package.add("worldwideresetactivity", (void(*)(uint32, int, uint8, uint8))&Perl__worldwideresetactivity);
+	package.add("worldwidesetentityvariableclient", (void(*)(const char*, const char*))&Perl__worldwidesetentityvariableclient);
+	package.add("worldwidesetentityvariableclient", (void(*)(const char*, const char*, uint8))&Perl__worldwidesetentityvariableclient);
+	package.add("worldwidesetentityvariableclient", (void(*)(const char*, const char*, uint8, uint8))&Perl__worldwidesetentityvariableclient);
+	package.add("worldwidesetentityvariablenpc", &Perl__worldwidesetentityvariablenpc);
+	package.add("worldwidesignalclient", (void(*)(int))&Perl__worldwidesignalclient);
+	package.add("worldwidesignalclient", (void(*)(int, uint8))&Perl__worldwidesignalclient);
+	package.add("worldwidesignalclient", (void(*)(int, uint8, uint8))&Perl__worldwidesignalclient);
+	package.add("worldwidesignalnpc", &Perl__worldwidesignalnpc);
+	package.add("worldwideupdateactivity", (void(*)(uint32, int))&Perl__worldwideupdateactivity);
+	package.add("worldwideupdateactivity", (void(*)(uint32, int, int))&Perl__worldwideupdateactivity);
+	package.add("worldwideupdateactivity", (void(*)(uint32, int, int, uint8))&Perl__worldwideupdateactivity);
+	package.add("worldwideupdateactivity", (void(*)(uint32, int, int, uint8, uint8))&Perl__worldwideupdateactivity);
+	package.add("debug", (void(*)(const char*))&Perl__debug);
+	package.add("debug", (void(*)(const char*, int))&Perl__debug);
+	package.add("delglobal", &Perl__delglobal);
+	package.add("depop", (void(*)())&Perl__depop);
+	package.add("depop", (void(*)(int))&Perl__depop);
+	package.add("depop_withtimer", (void(*)())&Perl__depop_withtimer);
+	package.add("depop_withtimer", (void(*)(int))&Perl__depop_withtimer);
+	package.add("depopall", (void(*)())&Perl__depopall);
+	package.add("depopall", (void(*)(int))&Perl__depopall);
+	package.add("depopzone", &Perl__depopzone);
+	package.add("ding", &Perl__ding);
+	package.add("disable_proximity_say", &Perl__disable_proximity_say);
+	package.add("disable_spawn2", &Perl__disable_spawn2);
+	package.add("disablerecipe", &Perl__disablerecipe);
+	package.add("disabletask", &Perl__disabletask);
+	package.add("discordsend", &Perl__discordsend);
+	package.add("doanim", (void(*)(int))&Perl__doanim);
+	package.add("doanim", (void(*)(int, int))&Perl__doanim);
+	package.add("doanim", (void(*)(int, int, bool))&Perl__doanim);
+	package.add("doanim", (void(*)(int, int, bool, int))&Perl__doanim);
+	package.add("do_augment_slots_match", &Perl__do_augment_slots_match);
+	package.add("does_augment_fit", &Perl__does_augment_fit);
+	package.add("echo", &Perl__echo);
+	package.add("emote", &Perl__emote);
+	package.add("enable_proximity_say", &Perl__enable_proximity_say);
+	package.add("enable_spawn2", &Perl__enable_spawn2);
+	package.add("enabledtaskcount", &Perl__enabledtaskcount);
+	package.add("enablerecipe", &Perl__enablerecipe);
+	package.add("enabletask", &Perl__enabletask);
+	package.add("enabletitle", &Perl__enabletitle);
+	package.add("end_dz_task", (void(*)())&Perl__end_dz_task);
+	package.add("end_dz_task", (void(*)(bool))&Perl__end_dz_task);
+	package.add("exp", &Perl__exp);
+	package.add("faction", (void(*)(int, int))&Perl__faction);
+	package.add("faction", (void(*)(int, int, int))&Perl__faction);
+	package.add("factionvalue", &Perl__FactionValue);
+	package.add("failtask", &Perl__failtask);
+	package.add("firsttaskinset", &Perl__firsttaskinset);
+	package.add("follow", (void(*)(int))&Perl__follow);
+	package.add("follow", (void(*)(int, int))&Perl__follow);
+	package.add("forcedoorclose", (void(*)(uint32))&Perl__forcedoorclose);
+	package.add("forcedoorclose", (void(*)(uint32, bool))&Perl__forcedoorclose);
+	package.add("forcedooropen", (void(*)(uint32))&Perl__forcedooropen);
+	package.add("forcedooropen", (void(*)(uint32, bool))&Perl__forcedooropen);
+	package.add("getaaexpmodifierbycharid", (double(*)(uint32, uint32))&Perl__getaaexpmodifierbycharid);
+	package.add("getaaexpmodifierbycharid", (double(*)(uint32, uint32, int16))&Perl__getaaexpmodifierbycharid);
+	package.add("getaaname", (std::string(*)(int))&Perl__getaaname);
+	package.add("getbodytypename", &Perl__getbodytypename);
+	package.add("getcharidbyname", &Perl__getcharidbyname);
+	package.add("getclassname", (std::string(*)(uint8))&Perl__getclassname);
+	package.add("getclassname", (std::string(*)(uint8, uint8))&Perl__getclassname);
+	package.add("getcleannpcnamebyid", &Perl__getcleannpcnamebyid);
+	package.add("getconsiderlevelname", &Perl__getconsiderlevelname);
+	package.add("gethexcolorcode", &Perl__gethexcolorcode);
+	package.add("getcurrencyid", &Perl__getcurrencyid);
+	package.add("get_dz_task_id", &Perl__get_dz_task_id);
+	package.add("getexpmodifierbycharid", (double(*)(uint32, uint32))&Perl__getexpmodifierbycharid);
+	package.add("getexpmodifierbycharid", (double(*)(uint32, uint32, int16))&Perl__getexpmodifierbycharid);
+	package.add("get_expedition", &Perl__get_expedition);
+	package.add("get_expedition_by_char_id", &Perl__get_expedition_by_char_id);
+	package.add("get_expedition_by_dz_id", &Perl__get_expedition_by_dz_id);
+	package.add("get_expedition_by_zone_instance", &Perl__get_expedition_by_zone_instance);
+	package.add("get_expedition_lockout_by_char_id", &Perl__get_expedition_lockout_by_char_id);
+	package.add("get_expedition_lockouts_by_char_id", (perl::reference(*)(uint32))&Perl__get_expedition_lockouts_by_char_id);
+	package.add("get_expedition_lockouts_by_char_id", (perl::reference(*)(uint32, std::string))&Perl__get_expedition_lockouts_by_char_id);
+	package.add("getfactionname", &Perl__getfactionname);
+	package.add("getinventoryslotid", &Perl__getinventoryslotid);
+	package.add("getitemname", &Perl__getitemname);
+	package.add("getItemName", &Perl__qc_getItemName);
+	package.add("getitemstat", &Perl__getitemstat);
+	package.add("getlanguagename", &Perl__getlanguagename);
+	package.add("getldonthemename", &Perl__getldonthemename);
+	package.add("getnpcnamebyid", &Perl__getnpcnamebyid);
+	package.add("get_spawn_condition", (int(*)(const char*, uint16))&Perl__get_spawn_condition);
+	package.add("get_spawn_condition", (int(*)(const char*, uint32, uint16))&Perl__get_spawn_condition);
+	package.add("getcharnamebyid", &Perl__getcharnamebyid);
+	package.add("getcurrencyitemid", &Perl__getcurrencyitemid);
+	package.add("getgendername", &Perl__getgendername);
+	package.add("getdeityname", &Perl__getdeityname);
+	package.add("getenvironmentaldamagename", &Perl__getenvironmentaldamagename);
+	package.add("getguildnamebyid", &Perl__getguildnamebyid);
+	package.add("getguildidbycharid", &Perl__getguildidbycharid);
+	package.add("getgroupidbycharid", &Perl__getgroupidbycharid);
+	package.add("getinventoryslotname", &Perl__getinventoryslotname);
+	package.add("getraididbycharid", &Perl__getraididbycharid);
+	package.add("getracename", &Perl__getracename);
+	package.add("getremainingtimeMS", &Perl__getremainingtimeMS);
+	package.add("getspell", &Perl__getspell);
+	package.add("getspellname", &Perl__getspellname);
+	package.add("get_spell_level", &Perl__get_spell_level);
+	package.add("getspellstat", (int(*)(uint32, std::string))&Perl__getspellstat);
+	package.add("getspellstat", (int(*)(uint32, std::string, uint8))&Perl__getspellstat);
+	package.add("getskillname", &Perl__getskillname);
+	package.add("getlevel", &Perl__getlevel);
+	package.add("getplayerburiedcorpsecount", &Perl__getplayerburiedcorpsecount);
+	package.add("getplayercorpsecount", &Perl__getplayercorpsecount);
+	package.add("getplayercorpsecountbyzoneid", &Perl__getplayercorpsecountbyzoneid);
+	package.add("getrecipemadecount", &Perl__getrecipemadecount);
+	package.add("getrecipename", &Perl__getrecipename);
+	package.add("gettaskactivitydonecount", &Perl__gettaskactivitydonecount);
+	package.add("gettaskname", &Perl__gettaskname);
+	package.add("gettimerdurationMS", &Perl__gettimerdurationMS);
+	package.add("givecash", (void(*)(uint32))&Perl__givecash);
+	package.add("givecash", (void(*)(uint32, uint32))&Perl__givecash);
+	package.add("givecash", (void(*)(uint32, uint32, uint32))&Perl__givecash);
+	package.add("givecash", (void(*)(uint32, uint32, uint32, uint32))&Perl__givecash);
+	package.add("gmmove", &Perl__gmmove);
+	package.add("gmsay", (void(*)(const char*))&Perl__gmsay);
+	package.add("gmsay", (void(*)(const char*, int))&Perl__gmsay);
+	package.add("gmsay", (void(*)(const char*, int, bool))&Perl__gmsay);
+	package.add("gmsay", (void(*)(const char*, int, bool, int))&Perl__gmsay);
+	package.add("gmsay", (void(*)(const char*, int, bool, int, int))&Perl__gmsay);
+	package.add("has_zone_flag", &Perl__has_zone_flag);
+	package.add("hasrecipelearned", &Perl__hasrecipelearned);
+	package.add("hastimer", &Perl__hastimer);
+	package.add("incstat", &Perl__incstat);
+	package.add("isdisctome", &Perl__isdisctome);
+	package.add("isdooropen", &Perl__isdooropen);
+	package.add("ishotzone", &Perl__ishotzone);
+	package.add("isnpcspawned", &Perl__isnpcspawned);
+	package.add("istaskactive", &Perl__istaskactive);
+	package.add("istaskactivityactive", &Perl__istaskactivityactive);
+	package.add("istaskappropriate", &Perl__istaskappropriate);
+	package.add("istaskcompleted", &Perl__istaskcompleted);
+	package.add("istaskenabled", &Perl__istaskenabled);
+	package.add("itemlink", &Perl__itemlink);
+	package.add("lasttaskinset", &Perl__lasttaskinset);
+	package.add("level", &Perl__level);
+	package.add("log", &Perl__log);
+	package.add("log_combat", &Perl__log_combat);
+	package.add("marquee", (void(*)(uint32, std::string))&Perl__marquee);
+	package.add("marquee", (void(*)(uint32, std::string, uint32))&Perl__marquee);
+	package.add("marquee", (void(*)(uint32, uint32, uint32, uint32, uint32, std::string))&Perl__marquee);
+	package.add("me", &Perl__me);
+	package.add("message", &Perl__message);
+	package.add("modifynpcstat", &Perl__ModifyNPCStat);
+	package.add("movegrp", &Perl__movegrp);
+	package.add("movepc",(void(*)(int, float, float, float))&Perl__movepc);
+	package.add("movepc",(void(*)(int, float, float, float, float))&Perl__movepc);
+	package.add("moveto", (void(*)(float, float, float))&Perl__moveto);
+	package.add("moveto", (void(*)(float, float, float, float))&Perl__moveto);
+	package.add("moveto", (void(*)(float, float, float, float, bool))&Perl__moveto);
+	package.add("nexttaskinset", &Perl__nexttaskinset);
+	package.add("npcfeature", &Perl__npcfeature);
+	package.add("npcgender", &Perl__npcgender);
+	package.add("npcrace", &Perl__npcrace);
+	package.add("npcsize", &Perl__npcsize);
+	package.add("npctexture", &Perl__npctexture);
+	package.add("pause", &Perl__pause);
+	package.add("permaclass", &Perl__permaclass);
+	package.add("permagender", &Perl__permagender);
+	package.add("permarace", &Perl__permarace);
+	package.add("playerfeature", &Perl__playerfeature);
+	package.add("playergender", &Perl__playergender);
+	package.add("playerrace", &Perl__playerrace);
+	package.add("playersize", &Perl__playersize);
+	package.add("playertexture", &Perl__playertexture);
+	package.add("popup", (void(*)(const char*, const char*))&Perl__popup);
+	package.add("popup", (void(*)(const char*, const char*, int))&Perl__popup);
+	package.add("popup", (void(*)(const char*, const char*, int, int))&Perl__popup);
+	package.add("popup", (void(*)(const char*, const char*, int, int, int))&Perl__popup);
+	package.add("popupbreak", (std::string(*)())&Perl__popupbreak);
+	package.add("popupbreak", (std::string(*)(uint32))&Perl__popupbreak);
+	package.add("popupcentermessage", &Perl__popupcentermessage);
+	package.add("popupcolormessage", &Perl__popupcolormessage);
+	package.add("popupindent", (std::string(*)())&Perl__popupindent);
+	package.add("popupindent", (std::string(*)(uint32))&Perl__popupindent);
+	package.add("popuplink", (std::string(*)(std::string))&Perl__popuplink);
+	package.add("popuplink", (std::string(*)(std::string, std::string))&Perl__popuplink);
+	package.add("popuptable", &Perl__popuptable);
+	package.add("popuptablecell", (std::string(*)())&Perl__popuptablecell);
+	package.add("popuptablecell", (std::string(*)(std::string))&Perl__popuptablecell);
+	package.add("popuptablerow", &Perl__popuptablerow);
+	package.add("processmobswhilezoneempty", &Perl__processmobswhilezoneempty);
+	package.add("pvp", &Perl__pvp);
+	package.add("qs_player_event", &Perl__qs_player_event);
+	package.add("qs_send_query", &Perl__qs_send_query);
+	package.add("rain", &Perl__rain);
+	package.add("rebind", (void(*)(int, float, float, float))&Perl__rebind);
+	package.add("rebind", (void(*)(int, float, float, float, float))&Perl__rebind);
+	package.add("reloadzonestaticdata", &Perl__reloadzonestaticdata);
+	package.add("remove_all_expedition_lockouts_by_char_id", (void(*)(uint32))&Perl__remove_all_expedition_lockouts_by_char_id);
+	package.add("remove_all_expedition_lockouts_by_char_id", (void(*)(uint32, std::string))&Perl__remove_all_expedition_lockouts_by_char_id);
+	package.add("remove_expedition_lockout_by_char_id", &Perl__remove_expedition_lockout_by_char_id);
+	package.add("removeitem", (void(*)(uint32_t))&Perl__removeitem);
+	package.add("removeitem", (void(*)(uint32_t, int))&Perl__removeitem);
+	package.add("removetitle", &Perl__removetitle);
+	package.add("rename", &Perl__rename);
+	package.add("repopzone", &Perl__repopzone);
+	package.add("resettaskactivity", &Perl__resettaskactivity);
+	package.add("respawn", &Perl__respawn);
+	package.add("resume", &Perl__resume);
+	package.add("rewardfaction", &Perl__rewardfaction);
+	package.add("safemove", &Perl__safemove);
+	package.add("save", &Perl__save);
+	package.add("say", (void(*)(const char*))&Perl__say);
+	package.add("say", (void(*)(const char*, int))&Perl__say);
+	package.add("say", (void(*)(const char*, int, int))&Perl__say);
+	package.add("say", (void(*)(const char*, int, int, int))&Perl__say);
+	package.add("say", (void(*)(const char*, int, int, int, int))&Perl__say);
+	package.add("saylink", (std::string(*)(const char*))&Perl__saylink);
+	package.add("saylink", (std::string(*)(const char*, bool))&Perl__saylink);
+	package.add("saylink", (std::string(*)(const char*, bool, const char*))&Perl__saylink);
+	package.add("scribespells", (int(*)(int))&Perl__scribespells);
+	package.add("scribespells", (int(*)(int, int))&Perl__scribespells);
+	package.add("secondstotime", &Perl__secondstotime);
+	package.add("selfcast", &Perl__selfcast);
+	package.add("setaaexpmodifierbycharid", (void(*)(uint32, uint32, double))&Perl__setaaexpmodifierbycharid);
+	package.add("setaaexpmodifierbycharid", (void(*)(uint32, uint32, double, int16))&Perl__setaaexpmodifierbycharid);
+	package.add("set_proximity", (void(*)(float, float, float, float))&Perl__set_proximity);
+	package.add("set_proximity", (void(*)(float, float, float, float, float, float))&Perl__set_proximity);
+	package.add("set_proximity", (void(*)(float, float, float, float, float, float, bool))&Perl__set_proximity);
+	package.add("set_proximity_range", (void(*)(float, float))&Perl__set_proximity_range);
+	package.add("set_proximity_range", (void(*)(float, float, float))&Perl__set_proximity_range);
+	package.add("set_proximity_range", (void(*)(float, float, float, bool))&Perl__set_proximity_range);
+	package.add("set_zone_flag", &Perl__set_zone_flag);
+	package.add("setallskill", &Perl__setallskill);
+	package.add("setanim", &Perl__setanim);
+	package.add("setexpmodifierbycharid", (void(*)(uint32, uint32, double))&Perl__setexpmodifierbycharid);
+	package.add("setexpmodifierbycharid", (void(*)(uint32, uint32, double, int16))&Perl__setexpmodifierbycharid);
+	package.add("setglobal", &Perl__setglobal);
+	package.add("setguild", &Perl__setguild);
+	package.add("sethp", &Perl__sethp);
+	package.add("sethotzone", &Perl__sethotzone);
+	package.add("setlanguage", &Perl__setlanguage);
+	package.add("setnexthpevent", &Perl__setnexthpevent);
+	package.add("setnextinchpevent", &Perl__setnextinchpevent);
+	package.add("setskill", &Perl__setskill);
+	package.add("setsky", &Perl__setsky);
+	package.add("setstat", &Perl__setstat);
+	package.add("settarget", &Perl__settarget);
+	package.add("settime", (void(*)(int, int))&Perl__settime);
+	package.add("settime", (void(*)(int, int, bool))&Perl__settime);
+	package.add("settimer", &Perl__settimer);
+	package.add("settimerMS", &Perl__settimerMS);
+	package.add("sfollow", &Perl__sfollow);
+	package.add("shout", &Perl__shout);
+	package.add("shout2", &Perl__shout2);
+	package.add("showgrid", &Perl__showgrid);
+	package.add("signal", (void(*)(int))&Perl__signal);
+	package.add("signal", (void(*)(int, int))&Perl__signal);
+	package.add("signalwith", (void(*)(int, int))&Perl__signalwith);
+	package.add("signalwith", (void(*)(int, int, int))&Perl__signalwith);
+	package.add("snow", &Perl__snow);
+	package.add("spawn", &Perl__spawn);
+	package.add("spawn2", &Perl__spawn2);
+	package.add("spawn_condition", (void(*)(const char*, uint16, int16))&Perl__spawn_condition);
+	package.add("spawn_condition", (void(*)(const char*, uint32_t, uint16, int16))&Perl__spawn_condition);
+	package.add("spawn_from_spawn2", &Perl__spawn_from_spawn2);
+	package.add("start", &Perl__start);
+	package.add("stop", &Perl__stop);
+	package.add("stopalltimers", &Perl__stopalltimers);
+	package.add("stoptimer", &Perl__stoptimer);
+	package.add("summonallplayercorpses", &Perl__summonallplayercorpses);
+	package.add("summonburiedplayercorpse", &Perl__summonburiedplayercorpse);
+	package.add("summonitem", (void(*)(int))&Perl__summonitem);
+	package.add("summonitem", (void(*)(int, int))&Perl__summonitem);
+	package.add("surname", &Perl__surname);
+	package.add("targlobal", &Perl__targlobal);
+	package.add("taskselector", &Perl__taskselector);
+	package.add("taskselector_nocooldown", &Perl__taskselector_nocooldown);
+	package.add("task_setselector", (void(*)(int))&Perl__task_setselector);
+	package.add("task_setselector", (void(*)(int, bool))&Perl__task_setselector);
+	package.add("tasktimeleft", &Perl__tasktimeleft);
+	package.add("timetoseconds", &Perl__timetoseconds);
+	package.add("toggle_spawn_event", &Perl__toggle_spawn_event);
+	package.add("toggledoorstate", &Perl__toggledoorstate);
+	package.add("tracknpc", &Perl__tracknpc);
+	package.add("traindisc", &Perl__traindisc);
+	package.add("traindiscs", (int(*)(int))&Perl__traindiscs);
+	package.add("traindiscs", (int(*)(int, int))&Perl__traindiscs);
+	package.add("unique_spawn", (int(*)(int, int, int, float, float, float))&Perl__unique_spawn);
+	package.add("unique_spawn", (int(*)(int, int, int, float, float, float, float))&Perl__unique_spawn);
+	package.add("unscribespells", &Perl__unscribespells);
+	package.add("untraindiscs", &Perl__untraindiscs);
+	package.add("updatespawntimer", &Perl__UpdateSpawnTimer);
+	package.add("updatetaskactivity", (void(*)(int, int))&Perl__updatetaskactivity);
+	package.add("updatetaskactivity", (void(*)(int, int, int))&Perl__updatetaskactivity);
+	package.add("updatetaskactivity", (void(*)(int, int, int, bool))&Perl__updatetaskactivity);
+	package.add("UpdateZoneHeader", &Perl__UpdateZoneHeader);
+	package.add("varlink", (std::string(*)(uint32))&Perl__varlink);
+	package.add("varlink", (std::string(*)(uint32, int16))&Perl__varlink);
+	package.add("varlink", (std::string(*)(uint32, int16, uint32))&Perl__varlink);
+	package.add("varlink", (std::string(*)(uint32, int16, uint32, uint32))&Perl__varlink);
+	package.add("varlink", (std::string(*)(uint32, int16, uint32, uint32, uint32))&Perl__varlink);
+	package.add("varlink", (std::string(*)(uint32, int16, uint32, uint32, uint32, uint32))&Perl__varlink);
+	package.add("varlink", (std::string(*)(uint32, int16, uint32, uint32, uint32, uint32, uint32))&Perl__varlink);
+	package.add("varlink", (std::string(*)(uint32, int16, uint32, uint32, uint32, uint32, uint32, uint32))&Perl__varlink);
+	package.add("varlink", (std::string(*)(uint32, int16, uint32, uint32, uint32, uint32, uint32, uint32, bool))&Perl__varlink);
+	package.add("voicetell", &Perl__voicetell);
+	package.add("we", &Perl__we);
+	package.add("wearchange", (void(*)(uint8, uint16))&Perl__wearchange);
+	package.add("wearchange", (void(*)(uint8, uint16, uint32))&Perl__wearchange);
+	package.add("wearchange", (void(*)(uint8, uint16, uint32, uint32))&Perl__wearchange);
+	package.add("whisper", &Perl__whisper);
+	package.add("write", &Perl__write);
+	package.add("ze", &Perl__ze);
+	package.add("zone", &Perl__zone);
+	package.add("zonemarquee", (void(*)(uint32, std::string))&Perl__zonemarquee);
+	package.add("zonemarquee", (void(*)(uint32, std::string, uint32))&Perl__zonemarquee);
+	package.add("zonemarquee", (void(*)(uint32, uint32, uint32, uint32, uint32, std::string))&Perl__zonemarquee);
+	package.add("zonegroup", &Perl__zonegroup);
+	package.add("zoneraid", &Perl__zoneraid);
 
 	/**
 	 * Expansions
 	 */
-	newXS(strcpy(buf, "is_classic_enabled"), XS__IsClassicEnabled, file);
-	newXS(strcpy(buf, "is_the_ruins_of_kunark_enabled"), XS__IsTheRuinsOfKunarkEnabled, file);
-	newXS(strcpy(buf, "is_the_scars_of_velious_enabled"), XS__IsTheScarsOfVeliousEnabled, file);
-	newXS(strcpy(buf, "is_the_shadows_of_luclin_enabled"), XS__IsTheShadowsOfLuclinEnabled, file);
-	newXS(strcpy(buf, "is_the_planes_of_power_enabled"), XS__IsThePlanesOfPowerEnabled, file);
-	newXS(strcpy(buf, "is_the_legacy_of_ykesha_enabled"), XS__IsTheLegacyOfYkeshaEnabled, file);
-	newXS(strcpy(buf, "is_lost_dungeons_of_norrath_enabled"), XS__IsLostDungeonsOfNorrathEnabled, file);
-	newXS(strcpy(buf, "is_gates_of_discord_enabled"), XS__IsGatesOfDiscordEnabled, file);
-	newXS(strcpy(buf, "is_omens_of_war_enabled"), XS__IsOmensOfWarEnabled, file);
-	newXS(strcpy(buf, "is_dragons_of_norrath_enabled"), XS__IsDragonsOfNorrathEnabled, file);
-	newXS(strcpy(buf, "is_depths_of_darkhollow_enabled"), XS__IsDepthsOfDarkhollowEnabled, file);
-	newXS(strcpy(buf, "is_prophecy_of_ro_enabled"), XS__IsProphecyOfRoEnabled, file);
-	newXS(strcpy(buf, "is_the_serpents_spine_enabled"), XS__IsTheSerpentsSpineEnabled, file);
-	newXS(strcpy(buf, "is_the_buried_sea_enabled"), XS__IsTheBuriedSeaEnabled, file);
-	newXS(strcpy(buf, "is_secrets_of_faydwer_enabled"), XS__IsSecretsOfFaydwerEnabled, file);
-	newXS(strcpy(buf, "is_seeds_of_destruction_enabled"), XS__IsSeedsOfDestructionEnabled, file);
-	newXS(strcpy(buf, "is_underfoot_enabled"), XS__IsUnderfootEnabled, file);
-	newXS(strcpy(buf, "is_house_of_thule_enabled"), XS__IsHouseOfThuleEnabled, file);
-	newXS(strcpy(buf, "is_veil_of_alaris_enabled"), XS__IsVeilOfAlarisEnabled, file);
-	newXS(strcpy(buf, "is_rain_of_fear_enabled"), XS__IsRainOfFearEnabled, file);
-	newXS(strcpy(buf, "is_call_of_the_forsaken_enabled"), XS__IsCallOfTheForsakenEnabled, file);
-	newXS(strcpy(buf, "is_the_darkened_sea_enabled"), XS__IsTheDarkenedSeaEnabled, file);
-	newXS(strcpy(buf, "is_the_broken_mirror_enabled"), XS__IsTheBrokenMirrorEnabled, file);
-	newXS(strcpy(buf, "is_empires_of_kunark_enabled"), XS__IsEmpiresOfKunarkEnabled, file);
-	newXS(strcpy(buf, "is_ring_of_scale_enabled"), XS__IsRingOfScaleEnabled, file);
-	newXS(strcpy(buf, "is_the_burning_lands_enabled"), XS__IsTheBurningLandsEnabled, file);
-	newXS(strcpy(buf, "is_torment_of_velious_enabled"), XS__IsTormentOfVeliousEnabled, file);
-	newXS(strcpy(buf, "is_current_expansion_classic"), XS__IsCurrentExpansionClassic, file);
-	newXS(strcpy(buf, "is_current_expansion_the_ruins_of_kunark"), XS__IsCurrentExpansionTheRuinsOfKunark, file);
-	newXS(strcpy(buf, "is_current_expansion_the_scars_of_velious"), XS__IsCurrentExpansionTheScarsOfVelious, file);
-	newXS(strcpy(buf, "is_current_expansion_the_shadows_of_luclin"), XS__IsCurrentExpansionTheShadowsOfLuclin, file);
-	newXS(strcpy(buf, "is_current_expansion_the_planes_of_power"), XS__IsCurrentExpansionThePlanesOfPower, file);
-	newXS(strcpy(buf, "is_current_expansion_the_legacy_of_ykesha"), XS__IsCurrentExpansionTheLegacyOfYkesha, file);
-	newXS(strcpy(buf, "is_current_expansion_lost_dungeons_of_norrath"), XS__IsCurrentExpansionLostDungeonsOfNorrath, file);
-	newXS(strcpy(buf, "is_current_expansion_gates_of_discord"), XS__IsCurrentExpansionGatesOfDiscord, file);
-	newXS(strcpy(buf, "is_current_expansion_omens_of_war"), XS__IsCurrentExpansionOmensOfWar, file);
-	newXS(strcpy(buf, "is_current_expansion_dragons_of_norrath"), XS__IsCurrentExpansionDragonsOfNorrath, file);
-	newXS(strcpy(buf, "is_current_expansion_depths_of_darkhollow"), XS__IsCurrentExpansionDepthsOfDarkhollow, file);
-	newXS(strcpy(buf, "is_current_expansion_prophecy_of_ro"), XS__IsCurrentExpansionProphecyOfRo, file);
-	newXS(strcpy(buf, "is_current_expansion_the_serpents_spine"), XS__IsCurrentExpansionTheSerpentsSpine, file);
-	newXS(strcpy(buf, "is_current_expansion_the_buried_sea"), XS__IsCurrentExpansionTheBuriedSea, file);
-	newXS(strcpy(buf, "is_current_expansion_secrets_of_faydwer"), XS__IsCurrentExpansionSecretsOfFaydwer, file);
-	newXS(strcpy(buf, "is_current_expansion_seeds_of_destruction"), XS__IsCurrentExpansionSeedsOfDestruction, file);
-	newXS(strcpy(buf, "is_current_expansion_underfoot"), XS__IsCurrentExpansionUnderfoot, file);
-	newXS(strcpy(buf, "is_current_expansion_house_of_thule"), XS__IsCurrentExpansionHouseOfThule, file);
-	newXS(strcpy(buf, "is_current_expansion_veil_of_alaris"), XS__IsCurrentExpansionVeilOfAlaris, file);
-	newXS(strcpy(buf, "is_current_expansion_rain_of_fear"), XS__IsCurrentExpansionRainOfFear, file);
-	newXS(strcpy(buf, "is_current_expansion_call_of_the_forsaken"), XS__IsCurrentExpansionCallOfTheForsaken, file);
-	newXS(strcpy(buf, "is_current_expansion_the_darkened_sea"), XS__IsCurrentExpansionTheDarkenedSea, file);
-	newXS(strcpy(buf, "is_current_expansion_the_broken_mirror"), XS__IsCurrentExpansionTheBrokenMirror, file);
-	newXS(strcpy(buf, "is_current_expansion_empires_of_kunark"), XS__IsCurrentExpansionEmpiresOfKunark, file);
-	newXS(strcpy(buf, "is_current_expansion_ring_of_scale"), XS__IsCurrentExpansionRingOfScale, file);
-	newXS(strcpy(buf, "is_current_expansion_the_burning_lands"), XS__IsCurrentExpansionTheBurningLands, file);
-	newXS(strcpy(buf, "is_current_expansion_torment_of_velious"), XS__IsCurrentExpansionTormentOfVelious, file);
+	package.add("is_classic_enabled", &Perl__IsClassicEnabled);
+	package.add("is_the_ruins_of_kunark_enabled", &Perl__IsTheRuinsOfKunarkEnabled);
+	package.add("is_the_scars_of_velious_enabled", &Perl__IsTheScarsOfVeliousEnabled);
+	package.add("is_the_shadows_of_luclin_enabled", &Perl__IsTheShadowsOfLuclinEnabled);
+	package.add("is_the_planes_of_power_enabled", &Perl__IsThePlanesOfPowerEnabled);
+	package.add("is_the_legacy_of_ykesha_enabled", &Perl__IsTheLegacyOfYkeshaEnabled);
+	package.add("is_lost_dungeons_of_norrath_enabled", &Perl__IsLostDungeonsOfNorrathEnabled);
+	package.add("is_gates_of_discord_enabled", &Perl__IsGatesOfDiscordEnabled);
+	package.add("is_omens_of_war_enabled", &Perl__IsOmensOfWarEnabled);
+	package.add("is_dragons_of_norrath_enabled", &Perl__IsDragonsOfNorrathEnabled);
+	package.add("is_depths_of_darkhollow_enabled", &Perl__IsDepthsOfDarkhollowEnabled);
+	package.add("is_prophecy_of_ro_enabled", &Perl__IsProphecyOfRoEnabled);
+	package.add("is_the_serpents_spine_enabled", &Perl__IsTheSerpentsSpineEnabled);
+	package.add("is_the_buried_sea_enabled", &Perl__IsTheBuriedSeaEnabled);
+	package.add("is_secrets_of_faydwer_enabled", &Perl__IsSecretsOfFaydwerEnabled);
+	package.add("is_seeds_of_destruction_enabled", &Perl__IsSeedsOfDestructionEnabled);
+	package.add("is_underfoot_enabled", &Perl__IsUnderfootEnabled);
+	package.add("is_house_of_thule_enabled", &Perl__IsHouseOfThuleEnabled);
+	package.add("is_veil_of_alaris_enabled", &Perl__IsVeilOfAlarisEnabled);
+	package.add("is_rain_of_fear_enabled", &Perl__IsRainOfFearEnabled);
+	package.add("is_call_of_the_forsaken_enabled", &Perl__IsCallOfTheForsakenEnabled);
+	package.add("is_the_darkend_sea_enabled", &Perl__IsTheDarkenedSeaEnabled);
+	package.add("is_the_broken_mirror_enabled", &Perl__IsTheBrokenMirrorEnabled);
+	package.add("is_empires_of_kunark_enabled", &Perl__IsEmpiresOfKunarkEnabled);
+	package.add("is_ring_of_scale_enabled", &Perl__IsRingOfScaleEnabled);
+	package.add("is_the_burning_lands_enabled", &Perl__IsTheBurningLandsEnabled);
+	package.add("is_torment_of_velious_enabled", &Perl__IsTormentOfVeliousEnabled);
+	package.add("is_current_expansion_classic", &Perl__IsCurrentExpansionClassic);
+	package.add("is_current_expansion_the_ruins_of_kunark", &Perl__IsCurrentExpansionTheRuinsOfKunark);
+	package.add("is_current_expansion_the_scars_of_velious", &Perl__IsCurrentExpansionTheScarsOfVelious);
+	package.add("is_current_expansion_the_shadows_of_luclin", &Perl__IsCurrentExpansionTheShadowsOfLuclin);
+	package.add("is_current_expansion_the_planes_of_power", &Perl__IsCurrentExpansionThePlanesOfPower);
+	package.add("is_current_expansion_the_legacy_of_ykesha", &Perl__IsCurrentExpansionTheLegacyOfYkesha);
+	package.add("is_current_expansion_lost_dungeons_of_norrath", &Perl__IsCurrentExpansionLostDungeonsOfNorrath);
+	package.add("is_current_expansion_gates_of_discord", &Perl__IsCurrentExpansionGatesOfDiscord);
+	package.add("is_current_expansion_omens_of_war", &Perl__IsCurrentExpansionOmensOfWar);
+	package.add("is_current_expansion_dragons_of_norrath", &Perl__IsCurrentExpansionDragonsOfNorrath);
+	package.add("is_current_expansion_depths_of_darkhollow", &Perl__IsCurrentExpansionDepthsOfDarkhollow);
+	package.add("is_current_expansion_prophecy_of_ro", &Perl__IsCurrentExpansionProphecyOfRo);
+	package.add("is_current_expansion_the_serpents_spine", &Perl__IsCurrentExpansionTheSerpentsSpine);
+	package.add("is_current_expansion_the_buried_sea", &Perl__IsCurrentExpansionTheBuriedSea);
+	package.add("is_current_expansion_secrets_of_faydwer", &Perl__IsCurrentExpansionSecretsOfFaydwer);
+	package.add("is_current_expansion_seeds_of_destruction", &Perl__IsCurrentExpansionSeedsOfDestruction);
+	package.add("is_current_expansion_underfoot", &Perl__IsCurrentExpansionUnderfoot);
+	package.add("is_current_expansion_house_of_thule", &Perl__IsCurrentExpansionHouseOfThule);
+	package.add("is_current_expansion_veil_of_alaris", &Perl__IsCurrentExpansionVeilOfAlaris);
+	package.add("is_current_expansion_rain_of_fear", &Perl__IsCurrentExpansionRainOfFear);
+	package.add("is_current_expansion_call_of_the_forsaken", &Perl__IsCurrentExpansionCallOfTheForsaken);
+	package.add("is_current_expansion_the_darkend_sea", &Perl__IsCurrentExpansionTheDarkenedSea);
+	package.add("is_current_expansion_the_broken_mirror", &Perl__IsCurrentExpansionTheBrokenMirror);
+	package.add("is_current_expansion_empires_of_kunark", &Perl__IsCurrentExpansionEmpiresOfKunark);
+	package.add("is_current_expansion_ring_of_scale", &Perl__IsCurrentExpansionRingOfScale);
+	package.add("is_current_expansion_the_burning_lands", &Perl__IsCurrentExpansionTheBurningLands);
+	package.add("is_current_expansion_torment_of_velious", &Perl__IsCurrentExpansionTormentOfVelious);
 
 	/**
 	 * Content flags
 	 */
-	newXS(strcpy(buf, "is_content_flag_enabled"), XS__IsContentFlagEnabled, file);
-	newXS(strcpy(buf, "set_content_flag"), XS__SetContentFlag, file);
+	package.add("is_content_flag_enabled", &Perl__IsContentFlagEnabled);
+	package.add("set_content_flag", &Perl__SetContentFlag);
 
-	XSRETURN_YES;
 }
 
 #endif

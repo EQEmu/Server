@@ -76,7 +76,7 @@ uint32 Lua_Item::GetIcon() {
 	return self->Icon;
 }
 
-uint32 Lua_Item::GetLoreGroup() {
+int32 Lua_Item::GetLoreGroup() {
 	Lua_Safe_Call_Int();
 	return self->LoreGroup;
 }
@@ -531,42 +531,42 @@ uint32 Lua_Item::GetAugRestrict() {
 	return self->AugRestrict;
 }
 
-uint32 Lua_Item::GetEndur() {
+int32 Lua_Item::GetEndur() {
 	Lua_Safe_Call_Int();
 	return self->Endur;
 }
 
-uint32 Lua_Item::GetDotShielding() {
+int32 Lua_Item::GetDotShielding() {
 	Lua_Safe_Call_Int();
 	return self->DotShielding;
 }
 
-uint32 Lua_Item::GetAttack() {
+int32 Lua_Item::GetAttack() {
 	Lua_Safe_Call_Int();
 	return self->Attack;
 }
 
-uint32 Lua_Item::GetRegen() {
+int32 Lua_Item::GetRegen() {
 	Lua_Safe_Call_Int();
 	return self->Regen;
 }
 
-uint32 Lua_Item::GetManaRegen() {
+int32 Lua_Item::GetManaRegen() {
 	Lua_Safe_Call_Int();
 	return self->ManaRegen;
 }
 
-uint32 Lua_Item::GetEnduranceRegen() {
+int32 Lua_Item::GetEnduranceRegen() {
 	Lua_Safe_Call_Int();
 	return self->EnduranceRegen;
 }
 
-uint32 Lua_Item::GetHaste() {
+int32 Lua_Item::GetHaste() {
 	Lua_Safe_Call_Int();
 	return self->Haste;
 }
 
-uint32 Lua_Item::GetDamageShield() {
+int32 Lua_Item::GetDamageShield() {
 	Lua_Safe_Call_Int();
 	return self->DamageShield;
 }

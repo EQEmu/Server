@@ -35,8 +35,6 @@ extern Zone* zone;
 
 // message string 8271 (not in emu clients)
 const char* const DZ_YOU_NOT_ASSIGNED        = "You could not use this command because you are not currently assigned to a dynamic zone.";
-// message string 9265 (not in emu clients)
-const char* const EXPEDITION_OTHER_BELONGS   = "{} attempted to create an expedition but {} already belongs to one.";
 // lockout warnings were added to live in March 11 2020 patch
 const char* const DZADD_INVITE_WARNING       = "Warning! You will be given replay timers for the following events if you enter %s:";
 const char* const DZADD_INVITE_WARNING_TIMER = "%s - %sD:%sH:%sM";
@@ -46,6 +44,12 @@ constexpr char LOCK_BEGIN[]                  = "The trial has begun. You cannot 
 
 const int32_t Expedition::REPLAY_TIMER_ID = -1;
 const int32_t Expedition::EVENT_TIMER_ID  = 1;
+
+Expedition::Expedition(DynamicZone* dz) :
+	m_dynamic_zone(dz)
+{
+	assert(m_dynamic_zone != nullptr);
+}
 
 Expedition::Expedition(DynamicZone* dz, uint32_t id, uint32_t dz_id) :
 	m_dynamic_zone(dz),
@@ -88,7 +92,7 @@ Expedition* Expedition::TryCreate(Client* requester, DynamicZone& dz_request, bo
 	// request parses leader, members list, and lockouts while validating
 	if (!request.Validate(requester))
 	{
-		LogExpeditionsModerate("[{}] request by [{}] denied", request.GetExpeditionName(), requester->GetName());
+		LogExpeditionsDetail("[{}] request by [{}] denied", request.GetExpeditionName(), requester->GetName());
 		return nullptr;
 	}
 
@@ -226,6 +230,8 @@ bool Expedition::CacheAllFromDatabase()
 	zone->expedition_cache.reserve(expeditions.size());
 
 	CacheExpeditions(std::move(expeditions));
+
+	LogInfo("Loaded [{}] expedition(s)", Strings::Commify(zone->expedition_cache.size()));
 
 	LogExpeditions("Caching [{}] expedition(s) took [{}s]", zone->expedition_cache.size(), benchmark.elapsed());
 
@@ -426,7 +432,7 @@ void Expedition::SendClientExpeditionInvite(
 		return;
 	}
 
-	LogExpeditionsModerate(
+	LogExpeditionsDetail(
 		"Sending expedition [{}] invite to player [{}] inviter [{}] swap name [{}]",
 		m_id, client->GetName(), inviter_name, swap_remove_name
 	);
@@ -571,7 +577,7 @@ void Expedition::DzInviteResponse(Client* add_client, bool accepted, const std::
 		return;
 	}
 
-	LogExpeditionsModerate("Invite response by [{}] accepted [{}] swap_name [{}]",
+	LogExpeditionsDetail("Invite response by [{}] accepted [{}] swap_name [{}]",
 		add_client->GetName(), accepted, swap_remove_name);
 
 	// a null leader_client is handled by SendLeaderMessage fallbacks
@@ -677,7 +683,7 @@ void Expedition::TryAddClient(
 		return;
 	}
 
-	LogExpeditionsModerate(
+	LogExpeditionsDetail(
 		"Add player request for expedition [{}] by inviter [{}] add name [{}] swap name [{}]",
 		m_id, inviter_name, add_client->GetName(), swap_remove_name
 	);

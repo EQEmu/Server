@@ -5,9 +5,8 @@
 
 #include "client.h"
 #include "npc.h"
-#ifdef BOTS
+#include "bot.h"
 #include "lua_bot.h"
-#endif
 #include "lua_item.h"
 #include "lua_iteminst.h"
 #include "lua_mob.h"
@@ -64,7 +63,7 @@ void Lua_Mob::SetLevel(int level, bool command) {
 	self->SetLevel(level, command);
 }
 
-void Lua_Mob::SendWearChange(int material_slot) {
+void Lua_Mob::SendWearChange(uint8 material_slot) {
 	Lua_Safe_Call_Void();
 	self->SendWearChange(material_slot);
 }
@@ -242,24 +241,24 @@ void Lua_Mob::SetHP(int64 hp) {
 	self->SetHP(hp);
 }
 
-void Lua_Mob::DoAnim(int anim_num) {
+void Lua_Mob::DoAnim(int animation_id) {
 	Lua_Safe_Call_Void();
-	self->DoAnim(anim_num);
+	self->DoAnim(animation_id);
 }
 
-void Lua_Mob::DoAnim(int anim_num, int type) {
+void Lua_Mob::DoAnim(int animation_id, int animation_speed) {
 	Lua_Safe_Call_Void();
-	self->DoAnim(anim_num, type);
+	self->DoAnim(animation_id, animation_speed);
 }
 
-void Lua_Mob::DoAnim(int anim_num, int type, bool ackreq) {
+void Lua_Mob::DoAnim(int animation_id, int animation_speed, bool ackreq) {
 	Lua_Safe_Call_Void();
-	self->DoAnim(anim_num, type, ackreq);
+	self->DoAnim(animation_id, animation_speed, ackreq);
 }
 
-void Lua_Mob::DoAnim(int anim_num, int type, bool ackreq, int filter) {
+void Lua_Mob::DoAnim(int animation_id, int animation_speed, bool ackreq, int filter) {
 	Lua_Safe_Call_Void();
-	self->DoAnim(anim_num, type, ackreq, static_cast<eqFilterType>(filter));
+	self->DoAnim(animation_id, animation_speed, ackreq, static_cast<eqFilterType>(filter));
 }
 
 void Lua_Mob::ChangeSize(double in_size) {
@@ -270,11 +269,6 @@ void Lua_Mob::ChangeSize(double in_size) {
 void Lua_Mob::ChangeSize(double in_size, bool no_restriction) {
 	Lua_Safe_Call_Void();
 	self->ChangeSize(static_cast<float>(in_size), no_restriction);
-}
-
-void Lua_Mob::RandomizeFeatures(bool send_illusion, bool save_variables) {
-       Lua_Safe_Call_Void();
-       self->RandomizeFeatures(send_illusion, save_variables);
 }
 
 void Lua_Mob::GMMove(double x, double y, double z) {
@@ -325,11 +319,6 @@ bool Lua_Mob::FindBuff(int spell_id) {
 uint16 Lua_Mob::FindBuffBySlot(int slot) {
 	Lua_Safe_Call_Int();
 	return self->FindBuffBySlot(slot);
-}
-
-uint32 Lua_Mob::BuffCount() {
-	Lua_Safe_Call_Int();
-	return self->BuffCount();
 }
 
 bool Lua_Mob::FindType(int type) {
@@ -482,22 +471,22 @@ bool Lua_Mob::IsWarriorClass() {
 	return self->IsWarriorClass();
 }
 
-int Lua_Mob::GetHP() {
+int64 Lua_Mob::GetHP() {
 	Lua_Safe_Call_Int();
 	return self->GetHP();
 }
 
-int Lua_Mob::GetMaxHP() {
+int64 Lua_Mob::GetMaxHP() {
 	Lua_Safe_Call_Int();
 	return self->GetMaxHP();
 }
 
-int Lua_Mob::GetItemHPBonuses() {
+int64 Lua_Mob::GetItemHPBonuses() {
 	Lua_Safe_Call_Int();
 	return self->GetItemHPBonuses();
 }
 
-int Lua_Mob::GetSpellHPBonuses() {
+int64 Lua_Mob::GetSpellHPBonuses() {
 	Lua_Safe_Call_Int();
 	return self->GetSpellHPBonuses();
 }
@@ -753,7 +742,7 @@ double Lua_Mob::GetSize() {
 	return self->GetSize();
 }
 
-void Lua_Mob::Message(int type, const char *message) {
+void Lua_Mob::Message(uint32 type, const char *message) {
 	Lua_Safe_Call_Void();
 
 	// auto inject saylinks
@@ -770,7 +759,7 @@ void Lua_Mob::Message(int type, const char *message) {
 	}
 }
 
-void Lua_Mob::MessageString(int type, int string_id, uint32 distance) {
+void Lua_Mob::MessageString(uint32 type, uint32 string_id, uint32 distance) {
 	Lua_Safe_Call_Void();
 	self->MessageString(type, string_id, distance);
 }
@@ -1356,33 +1345,20 @@ bool Lua_Mob::DivineAura() {
 	return self->DivineAura();
 }
 
-void Lua_Mob::SetOOCRegen(int regen) {
+void Lua_Mob::SetOOCRegen(int64 new_ooc_regen) {
 	Lua_Safe_Call_Void();
-	self->SetOOCRegen(regen);
+	self->SetOOCRegen(new_ooc_regen);
 }
 
-const char* Lua_Mob::GetEntityVariable(const char *name) {
-	Lua_Safe_Call_String();
-	return self->GetEntityVariable(name);
-}
-
-void Lua_Mob::SetEntityVariable(const char *name, const char *value) {
-	Lua_Safe_Call_Void();
-	self->SetEntityVariable(name, value);
-}
-
-bool Lua_Mob::EntityVariableExists(const char *name) {
-	Lua_Safe_Call_Bool();
-	return self->EntityVariableExists(name);
-}
-
-void Lua_Mob::Signal(uint32 id) {
+void Lua_Mob::Signal(int signal_id) {
 	Lua_Safe_Call_Void();
 
-	if(self->IsClient()) {
-		self->CastToClient()->Signal(id);
-	} else if(self->IsNPC()) {
-		self->CastToNPC()->SignalNPC(id);
+	if (self->IsClient()) {
+		self->CastToClient()->Signal(signal_id);
+	} else if (self->IsNPC()) {
+		self->CastToNPC()->SignalNPC(signal_id);
+	} else if (self->IsBot()) {
+		self->CastToBot()->Signal(signal_id);
 	}
 }
 
@@ -1591,7 +1567,7 @@ void Lua_Mob::SendIllusionPacket(luabind::adl::object illusion) {
 		return;
 	}
 
-	int race = 0;
+	int race = RACE_DOUG_0;
 	int gender = 255;
 	int texture = 255;
 	int helmtexture = 255;
@@ -1810,17 +1786,17 @@ void Lua_Mob::ChangeDrakkinDetails(int in) {
 	self->ChangeDrakkinDetails(in);
 }
 
-void Lua_Mob::CameraEffect(uint32 duration, uint32 intensity) {
+void Lua_Mob::CameraEffect(uint32 duration, float intensity) {
 	Lua_Safe_Call_Void();
 	self->CameraEffect(duration, intensity);
 }
 
-void Lua_Mob::CameraEffect(uint32 duration, uint32 intensity, Lua_Client c) {
+void Lua_Mob::CameraEffect(uint32 duration, float intensity, Lua_Client c) {
 	Lua_Safe_Call_Void();
 	self->CameraEffect(duration, intensity, c);
 }
 
-void Lua_Mob::CameraEffect(uint32 duration, uint32 intensity, Lua_Client c, bool global) {
+void Lua_Mob::CameraEffect(uint32 duration, float intensity, Lua_Client c, bool global) {
 	Lua_Safe_Call_Void();
 	self->CameraEffect(duration, intensity, c, global);
 }
@@ -1881,9 +1857,19 @@ void Lua_Mob::SetSlotTint(int material_slot, int red_tint, int green_tint, int b
 	self->SetSlotTint(material_slot, red_tint, green_tint, blue_tint);
 }
 
-void Lua_Mob::WearChange(int material_slot, int texture, uint32 color) {
+void Lua_Mob::WearChange(uint8 material_slot, uint16 texture) {
+	Lua_Safe_Call_Void();
+	self->WearChange(material_slot, texture);
+}
+
+void Lua_Mob::WearChange(uint8 material_slot, uint16 texture, uint32 color) {
 	Lua_Safe_Call_Void();
 	self->WearChange(material_slot, texture, color);
+}
+
+void Lua_Mob::WearChange(uint8 material_slot, uint16 texture, uint32 color, uint32 heros_forge_model) {
+	Lua_Safe_Call_Void();
+	self->WearChange(material_slot, texture, color, heros_forge_model);
 }
 
 void Lua_Mob::DoKnockback(Lua_Mob caster, uint32 push_back, uint32 push_up) {
@@ -2223,9 +2209,9 @@ int Lua_Mob::GetWeaponDamageBonus(Lua_Item weapon, bool offhand) {
 	return self->GetWeaponDamageBonus(weapon, offhand);
 }
 
-int Lua_Mob::GetItemStat(uint32 itemid, const char* identifier) {
+const int Lua_Mob::GetItemStat(uint32 item_id, std::string identifier) {
 	Lua_Safe_Call_Int();
-	return self->GetItemStat(itemid, identifier);
+	return self->GetItemStat(item_id, identifier);
 }
 
 Lua_StatBonuses Lua_Mob::GetItemBonuses()
@@ -2256,11 +2242,6 @@ int16 Lua_Mob::GetMeleeMinDamageMod_SE(uint16 skill)
 {
 	Lua_Safe_Call_Int();
 	return self->GetMeleeMinDamageMod_SE(skill);
-}
-
-bool Lua_Mob::IsAttackAllowed(Lua_Mob target, bool isSpellAttack) {
-	Lua_Safe_Call_Bool();
-	return self->IsAttackAllowed(target, isSpellAttack);
 }
 
 bool Lua_Mob::IsCasting() {
@@ -2362,22 +2343,26 @@ Lua_Mob Lua_Mob::GetHateClosest() {
 Lua_HateList Lua_Mob::GetHateListByDistance() {
 	Lua_Safe_Call_Class(Lua_HateList);
 	Lua_HateList ret;
-	auto list = self->GetHateListByDistance();
-	for (auto hate_entry : list) {
-		Lua_HateEntry entry(hate_entry);
-		ret.entries.push_back(entry);
+
+	auto h_list = self->GetFilteredHateList();
+	for (auto h : h_list) {
+		Lua_HateEntry e(h);
+		ret.entries.push_back(e);
 	}
+
 	return ret;
 }
 
-Lua_HateList Lua_Mob::GetHateListByDistance(int distance) {
+Lua_HateList Lua_Mob::GetHateListByDistance(uint32 distance) {
 	Lua_Safe_Call_Class(Lua_HateList);
 	Lua_HateList ret;
-	auto list = self->GetHateListByDistance(distance);
-	for (auto hate_entry : list) {
-		Lua_HateEntry entry(hate_entry);
-		ret.entries.push_back(entry);
+
+	auto h_list = self->GetFilteredHateList(EntityFilterType::All, distance);
+	for (auto h : h_list) {
+		Lua_HateEntry e(h);
+		ret.entries.push_back(e);
 	}
+
 	return ret;
 }
 
@@ -2401,12 +2386,10 @@ void Lua_Mob::RemoveAllNimbusEffects() {
 	self->RemoveAllNimbusEffects();
 }
 
-#ifdef BOTS
 Lua_Bot Lua_Mob::GetHateRandomBot() {
 	Lua_Safe_Call_Class(Lua_Bot);
 	return Lua_Bot(self->GetHateRandomBot());
 }
-#endif
 
 Lua_Client Lua_Mob::GetHateRandomClient() {
 	Lua_Safe_Call_Class(Lua_Client);
@@ -2473,6 +2456,373 @@ void Lua_Mob::SetBuffDuration(int spell_id, int duration) {
 	self->SetBuffDuration(spell_id, duration);
 }
 
+Lua_Mob Lua_Mob::GetUltimateOwner() {
+	Lua_Safe_Call_Class(Lua_Mob);
+	return Lua_Mob(self->GetUltimateOwner());
+}
+
+bool Lua_Mob::RandomizeFeatures() {
+	Lua_Safe_Call_Bool();
+	return self->RandomizeFeatures();
+}
+
+bool Lua_Mob::RandomizeFeatures(bool send_illusion) {
+	Lua_Safe_Call_Bool();
+	return self->RandomizeFeatures(send_illusion);
+}
+
+bool Lua_Mob::RandomizeFeatures(bool send_illusion, bool save_variables) {
+	Lua_Safe_Call_Bool();
+	return self->RandomizeFeatures(send_illusion, save_variables);
+}
+
+void Lua_Mob::CloneAppearance(Lua_Mob other) {
+	Lua_Safe_Call_Void();
+	self->CloneAppearance(other);
+}
+
+void Lua_Mob::CloneAppearance(Lua_Mob other, bool clone_name) {
+	Lua_Safe_Call_Void();
+	self->CloneAppearance(other, clone_name);
+}
+
+uint16 Lua_Mob::GetOwnerID() {
+	Lua_Safe_Call_Int();
+	return self->GetOwnerID();
+}
+
+void Lua_Mob::DamageHateList(int64 damage) {
+	Lua_Safe_Call_Void();
+	self->DamageHateList(damage);
+}
+
+void Lua_Mob::DamageHateList(int64 damage, uint32 distance) {
+	Lua_Safe_Call_Void();
+	self->DamageHateList(damage, distance);
+}
+
+void Lua_Mob::DamageHateListClients(int64 damage) {
+	Lua_Safe_Call_Void();
+	self->DamageHateList(damage, 0, EntityFilterType::Clients);
+}
+
+void Lua_Mob::DamageHateListClients(int64 damage, uint32 distance) {
+	Lua_Safe_Call_Void();
+	self->DamageHateList(damage, distance, EntityFilterType::Clients);
+}
+
+void Lua_Mob::DamageHateListNPCs(int64 damage) {
+	Lua_Safe_Call_Void();
+	self->DamageHateList(damage, 0, EntityFilterType::NPCs);
+}
+
+void Lua_Mob::DamageHateListNPCs(int64 damage, uint32 distance) {
+	Lua_Safe_Call_Void();
+	self->DamageHateList(damage, distance, EntityFilterType::NPCs);
+}
+
+void Lua_Mob::DamageHateListPercentage(int64 damage) {
+	Lua_Safe_Call_Void();
+	self->DamageHateList(damage, 0, EntityFilterType::All, true);
+}
+
+void Lua_Mob::DamageHateListPercentage(int64 damage, uint32 distance) {
+	Lua_Safe_Call_Void();
+	self->DamageHateList(damage, distance, EntityFilterType::All, true);
+}
+
+void Lua_Mob::DamageHateListClientsPercentage(int64 damage) {
+	Lua_Safe_Call_Void();
+	self->DamageHateList(damage, 0, EntityFilterType::Clients, true);
+}
+
+void Lua_Mob::DamageHateListClientsPercentage(int64 damage, uint32 distance) {
+	Lua_Safe_Call_Void();
+	self->DamageHateList(damage, distance, EntityFilterType::Clients, true);
+}
+
+void Lua_Mob::DamageHateListNPCsPercentage(int64 damage) {
+	Lua_Safe_Call_Void();
+	self->DamageHateList(damage, 0, EntityFilterType::NPCs, true);
+}
+
+void Lua_Mob::DamageHateListNPCsPercentage(int64 damage, uint32 distance) {
+	Lua_Safe_Call_Void();
+	self->DamageHateList(damage, distance, EntityFilterType::NPCs, true);
+}
+
+Lua_HateList Lua_Mob::GetHateListClients() {
+	Lua_Safe_Call_Class(Lua_HateList);
+	Lua_HateList ret;
+
+	auto h_list = self->GetFilteredHateList(EntityFilterType::Clients);
+	for (auto h : h_list) {
+		Lua_HateEntry e(h);
+		ret.entries.push_back(e);
+	}
+
+	return ret;
+}
+
+Lua_HateList Lua_Mob::GetHateListClients(uint32 distance) {
+	Lua_Safe_Call_Class(Lua_HateList);
+	Lua_HateList ret;
+
+	auto h_list = self->GetFilteredHateList(EntityFilterType::Clients, distance);
+	for (auto h : h_list) {
+		Lua_HateEntry e(h);
+		ret.entries.push_back(e);
+	}
+
+	return ret;
+}
+
+Lua_HateList Lua_Mob::GetHateListNPCs() {
+	Lua_Safe_Call_Class(Lua_HateList);
+	Lua_HateList ret;
+
+	auto h_list = self->GetFilteredHateList(EntityFilterType::NPCs);
+	for (auto h : h_list) {
+		Lua_HateEntry e(h);
+		ret.entries.push_back(e);
+	}
+
+	return ret;
+}
+
+Lua_HateList Lua_Mob::GetHateListNPCs(uint32 distance) {
+	Lua_Safe_Call_Class(Lua_HateList);
+	Lua_HateList ret;
+
+	auto h_list = self->GetFilteredHateList(EntityFilterType::NPCs, distance);
+	for (auto h : h_list) {
+		Lua_HateEntry e(h);
+		ret.entries.push_back(e);
+	}
+
+	return ret;
+}
+
+void Lua_Mob::DamageArea(int64 damage) {
+	Lua_Safe_Call_Void();
+	self->DamageArea(damage);
+}
+
+void Lua_Mob::DamageArea(int64 damage, uint32 distance) {
+	Lua_Safe_Call_Void();
+	self->DamageArea(damage, distance);
+}
+
+void Lua_Mob::DamageAreaPercentage(int64 damage) {
+	Lua_Safe_Call_Void();
+	self->DamageArea(damage, 0, EntityFilterType::All, true);
+}
+
+void Lua_Mob::DamageAreaPercentage(int64 damage, uint32 distance) {
+	Lua_Safe_Call_Void();
+	self->DamageArea(damage, distance, EntityFilterType::All, true);
+}
+
+void Lua_Mob::DamageAreaClients(int64 damage) {
+	Lua_Safe_Call_Void();
+	self->DamageArea(damage, 0, EntityFilterType::Clients);
+}
+
+void Lua_Mob::DamageAreaClients(int64 damage, uint32 distance) {
+	Lua_Safe_Call_Void();
+	self->DamageArea(damage, distance, EntityFilterType::Clients);
+}
+
+void Lua_Mob::DamageAreaClientsPercentage(int64 damage) {
+	Lua_Safe_Call_Void();
+	self->DamageArea(damage, 0, EntityFilterType::Clients, true);
+}
+
+void Lua_Mob::DamageAreaClientsPercentage(int64 damage, uint32 distance) {
+	Lua_Safe_Call_Void();
+	self->DamageArea(damage, distance, EntityFilterType::Clients, true);
+}
+
+void Lua_Mob::DamageAreaNPCs(int64 damage) {
+	Lua_Safe_Call_Void();
+	self->DamageArea(damage, 0, EntityFilterType::NPCs);
+}
+
+void Lua_Mob::DamageAreaNPCs(int64 damage, uint32 distance) {
+	Lua_Safe_Call_Void();
+	self->DamageArea(damage, distance, EntityFilterType::NPCs);
+}
+
+void Lua_Mob::DamageAreaNPCsPercentage(int64 damage) {
+	Lua_Safe_Call_Void();
+	self->DamageArea(damage, 0, EntityFilterType::NPCs, true);
+}
+
+void Lua_Mob::DamageAreaNPCsPercentage(int64 damage, uint32 distance) {
+	Lua_Safe_Call_Void();
+	self->DamageArea(damage, distance, EntityFilterType::NPCs, true);
+}
+
+std::string Lua_Mob::GetEntityVariable(std::string variable_name) {
+	Lua_Safe_Call_String();
+	return self->GetEntityVariable(variable_name);
+}
+
+luabind::object Lua_Mob::GetEntityVariables(lua_State* L) {
+	auto t = luabind::newtable(L);
+	if (d_) {
+		auto self = reinterpret_cast<NativeType*>(d_);
+		auto l = self->GetEntityVariables();
+		auto i = 0;
+		for (const auto& v : l) {
+			t[i] = v;
+			i++;
+		}
+	}
+
+	return t;
+}
+
+bool Lua_Mob::ClearEntityVariables() {
+	Lua_Safe_Call_Bool();
+	return self->ClearEntityVariables();
+}
+
+bool Lua_Mob::DeleteEntityVariable(std::string variable_name) {
+	Lua_Safe_Call_Bool();
+	return self->DeleteEntityVariable(variable_name);
+}
+
+void Lua_Mob::SetEntityVariable(std::string variable_name, std::string variable_value) {
+	Lua_Safe_Call_Void();
+	self->SetEntityVariable(variable_name, variable_value);
+}
+
+bool Lua_Mob::EntityVariableExists(std::string variable_name) {
+	Lua_Safe_Call_Bool();
+	return self->EntityVariableExists(variable_name);
+}
+
+void Lua_Mob::SendPayload(int payload_id) {
+	Lua_Safe_Call_Void();
+
+	if (self->IsClient()) {
+		self->CastToClient()->SendPayload(payload_id);
+	} else if (self->IsNPC()) {
+		self->CastToNPC()->SendPayload(payload_id);
+	} else if (self->IsBot()) {
+		self->CastToBot()->SendPayload(payload_id);
+	}
+}
+
+void Lua_Mob::SendPayload(int payload_id, std::string payload_value) {
+	Lua_Safe_Call_Void();
+
+	if (self->IsClient()) {
+		self->CastToClient()->SendPayload(payload_id, payload_value);
+	} else if (self->IsNPC()) {
+		self->CastToNPC()->SendPayload(payload_id, payload_value);
+	} else if (self->IsBot()) {
+		self->CastToBot()->SendPayload(payload_id, payload_value);
+	}
+}
+
+void Lua_Mob::CopyHateList(Lua_Mob to) {
+	Lua_Safe_Call_Void();
+	self->CopyHateList(to);
+}
+
+bool Lua_Mob::IsAttackAllowed(Lua_Mob target) {
+	Lua_Safe_Call_Bool();
+	return self->IsAttackAllowed(target);
+}
+
+bool Lua_Mob::IsAttackAllowed(Lua_Mob target, bool is_spell_attack) {
+	Lua_Safe_Call_Bool();
+	return self->IsAttackAllowed(target, is_spell_attack);
+}
+
+uint32 Lua_Mob::BuffCount() {
+	Lua_Safe_Call_Int();
+	return self->BuffCount();
+}
+
+uint32 Lua_Mob::BuffCount(bool is_beneficial) {
+	Lua_Safe_Call_Int();
+	return self->BuffCount(is_beneficial);
+}
+
+uint32 Lua_Mob::BuffCount(bool is_beneficial, bool is_detrimental) {
+	Lua_Safe_Call_Int();
+	return self->BuffCount(is_beneficial, is_detrimental);
+}
+
+void Lua_Mob::DamageAreaBots(int64 damage) {
+	Lua_Safe_Call_Void();
+	self->DamageArea(damage, 0, EntityFilterType::Bots);
+}
+
+void Lua_Mob::DamageAreaBots(int64 damage, uint32 distance) {
+	Lua_Safe_Call_Void();
+	self->DamageArea(damage, distance, EntityFilterType::Bots);
+}
+
+void Lua_Mob::DamageAreaBotsPercentage(int64 damage) {
+	Lua_Safe_Call_Void();
+	self->DamageArea(damage, 0, EntityFilterType::Bots, true);
+}
+
+void Lua_Mob::DamageAreaBotsPercentage(int64 damage, uint32 distance) {
+	Lua_Safe_Call_Void();
+	self->DamageArea(damage, distance, EntityFilterType::Bots, true);
+}
+
+void Lua_Mob::DamageHateListBots(int64 damage) {
+	Lua_Safe_Call_Void();
+	self->DamageHateList(damage, 0, EntityFilterType::Bots);
+}
+
+void Lua_Mob::DamageHateListBots(int64 damage, uint32 distance) {
+	Lua_Safe_Call_Void();
+	self->DamageHateList(damage, distance, EntityFilterType::Bots);
+}
+
+void Lua_Mob::DamageHateListBotsPercentage(int64 damage) {
+	Lua_Safe_Call_Void();
+	self->DamageHateList(damage, 0, EntityFilterType::Bots, true);
+}
+
+void Lua_Mob::DamageHateListBotsPercentage(int64 damage, uint32 distance) {
+	Lua_Safe_Call_Void();
+	self->DamageHateList(damage, distance, EntityFilterType::Bots, true);
+}
+
+Lua_HateList Lua_Mob::GetHateListBots() {
+	Lua_Safe_Call_Class(Lua_HateList);
+	Lua_HateList ret;
+
+	auto h_list = self->GetFilteredHateList(EntityFilterType::Bots);
+	for (auto h : h_list) {
+		Lua_HateEntry e(h);
+		ret.entries.push_back(e);
+	}
+
+	return ret;
+}
+
+Lua_HateList Lua_Mob::GetHateListBots(uint32 distance) {
+	Lua_Safe_Call_Class(Lua_HateList);
+	Lua_HateList ret;
+
+	auto h_list = self->GetFilteredHateList(EntityFilterType::Bots, distance);
+	for (auto h : h_list) {
+		Lua_HateEntry e(h);
+		ret.entries.push_back(e);
+	}
+
+	return ret;
+}
+
 luabind::scope lua_register_mob() {
 	return luabind::class_<Lua_Mob, Lua_Entity>("Mob")
 	.def(luabind::constructor<>())
@@ -2496,7 +2846,9 @@ luabind::scope lua_register_mob() {
 	.def("BehindMob", (bool(Lua_Mob::*)(Lua_Mob,float))&Lua_Mob::BehindMob)
 	.def("BehindMob", (bool(Lua_Mob::*)(Lua_Mob,float,float))&Lua_Mob::BehindMob)
 	.def("BehindMob", (bool(Lua_Mob::*)(void))&Lua_Mob::BehindMob)
-	.def("BuffCount", &Lua_Mob::BuffCount)
+	.def("BuffCount", (uint32(Lua_Mob::*)(void))&Lua_Mob::BuffCount)
+	.def("BuffCount", (uint32(Lua_Mob::*)(bool))&Lua_Mob::BuffCount)
+	.def("BuffCount", (uint32(Lua_Mob::*)(bool,bool))&Lua_Mob::BuffCount)
 	.def("BuffFadeAll", (void(Lua_Mob::*)(void))&Lua_Mob::BuffFadeAll)
 	.def("BuffFadeByEffect", (void(Lua_Mob::*)(int))&Lua_Mob::BuffFadeByEffect)
 	.def("BuffFadeByEffect", (void(Lua_Mob::*)(int,int))&Lua_Mob::BuffFadeByEffect)
@@ -2505,9 +2857,9 @@ luabind::scope lua_register_mob() {
 	.def("BuffFadeBySpellID", (void(Lua_Mob::*)(int))&Lua_Mob::BuffFadeBySpellID)
 	.def("CalculateDistance", (float(Lua_Mob::*)(double,double,double))&Lua_Mob::CalculateDistance)
 	.def("CalculateHeadingToTarget", (double(Lua_Mob::*)(double,double))&Lua_Mob::CalculateHeadingToTarget)
-	.def("CameraEffect", (void(Lua_Mob::*)(uint32,uint32))&Lua_Mob::CameraEffect)
-	.def("CameraEffect", (void(Lua_Mob::*)(uint32,uint32,Lua_Client))&Lua_Mob::CameraEffect)
-	.def("CameraEffect", (void(Lua_Mob::*)(uint32,uint32,Lua_Client,bool))&Lua_Mob::CameraEffect)
+	.def("CameraEffect", (void(Lua_Mob::*)(uint32,float))&Lua_Mob::CameraEffect)
+	.def("CameraEffect", (void(Lua_Mob::*)(uint32,float,Lua_Client))&Lua_Mob::CameraEffect)
+	.def("CameraEffect", (void(Lua_Mob::*)(uint32,float,Lua_Client,bool))&Lua_Mob::CameraEffect)
 	.def("CanBuffStack", (int(Lua_Mob::*)(int,int))&Lua_Mob::CanBuffStack)
 	.def("CanBuffStack", (int(Lua_Mob::*)(int,int,bool))&Lua_Mob::CanBuffStack)
 	.def("CanClassEquipItem", &Lua_Mob::CanClassEquipItem)
@@ -2551,14 +2903,51 @@ luabind::scope lua_register_mob() {
 	.def("CheckLoSToLoc", (bool(Lua_Mob::*)(double,double,double))&Lua_Mob::CheckLoSToLoc)
 	.def("CheckLoSToLoc", (bool(Lua_Mob::*)(double,double,double,double))&Lua_Mob::CheckLoSToLoc)
 	.def("CheckNumHitsRemaining", &Lua_Mob::CheckNumHitsRemaining)
+	.def("ClearEntityVariables", (bool(Lua_Mob::*)(void))&Lua_Mob::ClearEntityVariables)
 	.def("ClearSpecialAbilities", (void(Lua_Mob::*)(void))&Lua_Mob::ClearSpecialAbilities)
+	.def("CloneAppearance", (void(Lua_Mob::*)(Lua_Mob))&Lua_Mob::CloneAppearance)
+	.def("CloneAppearance", (void(Lua_Mob::*)(Lua_Mob,bool))&Lua_Mob::CloneAppearance)
 	.def("CombatRange", (bool(Lua_Mob::*)(Lua_Mob))&Lua_Mob::CombatRange)
+	.def("CopyHateList", (void(Lua_Mob::*)(Lua_Mob))&Lua_Mob::CopyHateList)
 	.def("Damage", (void(Lua_Mob::*)(Lua_Mob,int64,int,int))&Lua_Mob::Damage)
 	.def("Damage", (void(Lua_Mob::*)(Lua_Mob,int64,int,int,bool))&Lua_Mob::Damage)
 	.def("Damage", (void(Lua_Mob::*)(Lua_Mob,int64,int,int,bool,int))&Lua_Mob::Damage)
 	.def("Damage", (void(Lua_Mob::*)(Lua_Mob,int64,int,int,bool,int,bool))&Lua_Mob::Damage)
+	.def("DamageArea", (void(Lua_Mob::*)(int64))&Lua_Mob::DamageArea)
+	.def("DamageArea", (void(Lua_Mob::*)(int64,uint32))&Lua_Mob::DamageArea)
+	.def("DamageAreaPercentage", (void(Lua_Mob::*)(int64))&Lua_Mob::DamageAreaPercentage)
+	.def("DamageAreaPercentage", (void(Lua_Mob::*)(int64,uint32))&Lua_Mob::DamageAreaPercentage)
+	.def("DamageAreaBots", (void(Lua_Mob::*)(int64))&Lua_Mob::DamageAreaBots)
+	.def("DamageAreaBots", (void(Lua_Mob::*)(int64,uint32))&Lua_Mob::DamageAreaBots)
+	.def("DamageAreaBotsPercentage", (void(Lua_Mob::*)(int64))&Lua_Mob::DamageAreaBotsPercentage)
+	.def("DamageAreaBotsPercentage", (void(Lua_Mob::*)(int64,uint32))&Lua_Mob::DamageAreaBotsPercentage)
+	.def("DamageAreaClients", (void(Lua_Mob::*)(int64))&Lua_Mob::DamageAreaClients)
+	.def("DamageAreaClients", (void(Lua_Mob::*)(int64,uint32))&Lua_Mob::DamageAreaClients)
+	.def("DamageAreaClientsPercentage", (void(Lua_Mob::*)(int64))&Lua_Mob::DamageAreaClientsPercentage)
+	.def("DamageAreaClientsPercentage", (void(Lua_Mob::*)(int64,uint32))&Lua_Mob::DamageAreaClientsPercentage)
+	.def("DamageAreaNPCs", (void(Lua_Mob::*)(int64))&Lua_Mob::DamageAreaNPCs)
+	.def("DamageAreaNPCs", (void(Lua_Mob::*)(int64,uint32))&Lua_Mob::DamageAreaNPCs)
+	.def("DamageAreaNPCsPercentage", (void(Lua_Mob::*)(int64))&Lua_Mob::DamageAreaNPCsPercentage)
+	.def("DamageAreaNPCsPercentage", (void(Lua_Mob::*)(int64,uint32))&Lua_Mob::DamageAreaNPCsPercentage)
+	.def("DamageHateList", (void(Lua_Mob::*)(int64))&Lua_Mob::DamageHateList)
+	.def("DamageHateList", (void(Lua_Mob::*)(int64,uint32))&Lua_Mob::DamageHateList)
+	.def("DamageHateListBots", (void(Lua_Mob::*)(int64))&Lua_Mob::DamageHateListBots)
+	.def("DamageHateListBots", (void(Lua_Mob::*)(int64,uint32))&Lua_Mob::DamageHateListBots)
+	.def("DamageHateListBotsPercentage", (void(Lua_Mob::*)(int64))&Lua_Mob::DamageHateListBots)
+	.def("DamageHateListBotsPercentage", (void(Lua_Mob::*)(int64,uint32))&Lua_Mob::DamageHateListBots)
+	.def("DamageHateListClients", (void(Lua_Mob::*)(int64))&Lua_Mob::DamageHateListClients)
+	.def("DamageHateListClients", (void(Lua_Mob::*)(int64,uint32))&Lua_Mob::DamageHateListClients)
+	.def("DamageHateListClientsPercentage", (void(Lua_Mob::*)(int64))&Lua_Mob::DamageHateListClientsPercentage)
+	.def("DamageHateListClientsPercentage", (void(Lua_Mob::*)(int64,uint32))&Lua_Mob::DamageHateListClientsPercentage)
+	.def("DamageHateListNPCs", (void(Lua_Mob::*)(int64))&Lua_Mob::DamageHateListNPCs)
+	.def("DamageHateListNPCs", (void(Lua_Mob::*)(int64,uint32))&Lua_Mob::DamageHateListNPCs)
+	.def("DamageHateListNPCsPercentage", (void(Lua_Mob::*)(int64))&Lua_Mob::DamageHateListNPCsPercentage)
+	.def("DamageHateListNPCsPercentage", (void(Lua_Mob::*)(int64,uint32))&Lua_Mob::DamageHateListNPCsPercentage)
+	.def("DamageHateListPercentage", (void(Lua_Mob::*)(int64))&Lua_Mob::DamageHateListPercentage)
+	.def("DamageHateListPercentage", (void(Lua_Mob::*)(int64,uint32))&Lua_Mob::DamageHateListPercentage)
 	.def("DelGlobal", (void(Lua_Mob::*)(const char*))&Lua_Mob::DelGlobal)
 	.def("DeleteBucket", (void(Lua_Mob::*)(std::string))&Lua_Mob::DeleteBucket)
+	.def("DeleteEntityVariable", (bool(Lua_Mob::*)(std::string))&Lua_Mob::DeleteEntityVariable)
 	.def("Depop", (void(Lua_Mob::*)(bool))&Lua_Mob::Depop)
 	.def("Depop", (void(Lua_Mob::*)(void))&Lua_Mob::Depop)
 	.def("DivineAura", (bool(Lua_Mob::*)(void))&Lua_Mob::DivineAura)
@@ -2589,7 +2978,7 @@ luabind::scope lua_register_mob() {
 	.def("DoThrowingAttackDmg", (void(Lua_Mob::*)(Lua_Mob,Lua_ItemInst,Lua_Item,int,int,int))&Lua_Mob::DoThrowingAttackDmg)
 	.def("DoubleAggro", &Lua_Mob::DoubleAggro)
 	.def("Emote", &Lua_Mob::Emote)
-	.def("EntityVariableExists", (bool(Lua_Mob::*)(const char*))&Lua_Mob::EntityVariableExists)
+	.def("EntityVariableExists", &Lua_Mob::EntityVariableExists)
 	.def("FaceTarget", (void(Lua_Mob::*)(Lua_Mob))&Lua_Mob::FaceTarget)
 	.def("FindBuff", &Lua_Mob::FindBuff)
 	.def("FindBuffBySlot", (uint16(Lua_Mob::*)(int))&Lua_Mob::FindBuffBySlot)
@@ -2638,7 +3027,8 @@ luabind::scope lua_register_mob() {
 	.def("GetDrakkinDetails", &Lua_Mob::GetDrakkinDetails)
 	.def("GetDrakkinHeritage", &Lua_Mob::GetDrakkinHeritage)
 	.def("GetDrakkinTattoo", &Lua_Mob::GetDrakkinTattoo)
-	.def("GetEntityVariable", (const char*(Lua_Mob::*)(const char*))&Lua_Mob::GetEntityVariable)
+	.def("GetEntityVariable", &Lua_Mob::GetEntityVariable)
+	.def("GetEntityVariables",&Lua_Mob::GetEntityVariables)
 	.def("GetEyeColor1", &Lua_Mob::GetEyeColor1)
 	.def("GetEyeColor2", &Lua_Mob::GetEyeColor2)
 	.def("GetFR", &Lua_Mob::GetFR)
@@ -2658,12 +3048,16 @@ luabind::scope lua_register_mob() {
 	.def("GetHateClosest", &Lua_Mob::GetHateClosest)
 	.def("GetHateDamageTop", (Lua_Mob(Lua_Mob::*)(Lua_Mob))&Lua_Mob::GetHateDamageTop)
 	.def("GetHateList", &Lua_Mob::GetHateList)
-	.def("GetHateListByDistance", (Lua_HateList(Lua_Mob::*)(int))&Lua_Mob::GetHateListByDistance)
+	.def("GetHateListBots", (Lua_HateList(Lua_Mob::*)(void))&Lua_Mob::GetHateListBots)
+	.def("GetHateListBots", (Lua_HateList(Lua_Mob::*)(uint32))&Lua_Mob::GetHateListBots)
+	.def("GetHateListClients", (Lua_HateList(Lua_Mob::*)(void))&Lua_Mob::GetHateListClients)
+	.def("GetHateListClients", (Lua_HateList(Lua_Mob::*)(uint32))&Lua_Mob::GetHateListClients)
+	.def("GetHateListNPCs", (Lua_HateList(Lua_Mob::*)(void))&Lua_Mob::GetHateListNPCs)
+	.def("GetHateListNPCs", (Lua_HateList(Lua_Mob::*)(uint32))&Lua_Mob::GetHateListNPCs)
 	.def("GetHateListByDistance", (Lua_HateList(Lua_Mob::*)(void))&Lua_Mob::GetHateListByDistance)
+	.def("GetHateListByDistance", (Lua_HateList(Lua_Mob::*)(uint32))&Lua_Mob::GetHateListByDistance)
 	.def("GetHateRandom", (Lua_Mob(Lua_Mob::*)(void))&Lua_Mob::GetHateRandom)
-#ifdef BOTS
 	.def("GetHateRandomBot", (Lua_Bot(Lua_Mob::*)(void))&Lua_Mob::GetHateRandomBot)
-#endif
 	.def("GetHateRandomClient", (Lua_Client(Lua_Mob::*)(void))&Lua_Mob::GetHateRandomClient)
 	.def("GetHateRandomNPC", (Lua_NPC(Lua_Mob::*)(void))&Lua_Mob::GetHateRandomNPC)
 	.def("GetHateTop", (Lua_Mob(Lua_Mob::*)(void))&Lua_Mob::GetHateTop)
@@ -2676,7 +3070,7 @@ luabind::scope lua_register_mob() {
 	.def("GetInvul", (bool(Lua_Mob::*)(void))&Lua_Mob::GetInvul)
 	.def("GetItemBonuses", &Lua_Mob::GetItemBonuses)
 	.def("GetItemHPBonuses", &Lua_Mob::GetItemHPBonuses)
-	.def("GetItemStat", (int(Lua_Mob::*)(uint32,const char*))&Lua_Mob::GetItemStat)
+	.def("GetItemStat", &Lua_Mob::GetItemStat)
 	.def("GetLastName", &Lua_Mob::GetLastName)
 	.def("GetLevel", &Lua_Mob::GetLevel)
 	.def("GetLevelCon", (uint32(Lua_Mob::*)(int))&Lua_Mob::GetLevelCon)
@@ -2706,6 +3100,7 @@ luabind::scope lua_register_mob() {
 	.def("GetNimbusEffect3", (uint8(Lua_Mob::*)(void))&Lua_Mob::GetNimbusEffect3)
 	.def("GetOrigBodyType", &Lua_Mob::GetOrigBodyType)
 	.def("GetOwner", &Lua_Mob::GetOwner)
+	.def("GetOwnerID", &Lua_Mob::GetOwnerID)
 	.def("GetPR", &Lua_Mob::GetPR)
 	.def("GetPet", &Lua_Mob::GetPet)
 	.def("GetPetOrder", (int(Lua_Mob::*)(void))&Lua_Mob::GetPetOrder)
@@ -2729,6 +3124,7 @@ luabind::scope lua_register_mob() {
 	.def("GetSpellHPBonuses", &Lua_Mob::GetSpellHPBonuses)
 	.def("GetTarget", &Lua_Mob::GetTarget)
 	.def("GetTexture", &Lua_Mob::GetTexture)
+	.def("GetUltimateOwner", &Lua_Mob::GetUltimateOwner)
 	.def("GetWIS", &Lua_Mob::GetWIS)
 	.def("GetWalkspeed", &Lua_Mob::GetWalkspeed)
 	.def("GetWaypointH", &Lua_Mob::GetWaypointH)
@@ -2758,7 +3154,8 @@ luabind::scope lua_register_mob() {
 	.def("InterruptSpell", (void(Lua_Mob::*)(void))&Lua_Mob::InterruptSpell)
 	.def("IsAIControlled", (bool(Lua_Mob::*)(void))&Lua_Mob::IsAIControlled)
 	.def("IsAmnesiad", (bool(Lua_Mob::*)(void))&Lua_Mob::IsAmnesiad)
-	.def("IsAttackAllowed", &Lua_Mob::IsAttackAllowed)
+	.def("IsAttackAllowed", (bool(Lua_Mob::*)(Lua_Mob))&Lua_Mob::IsAttackAllowed)
+	.def("IsAttackAllowed", (bool(Lua_Mob::*)(Lua_Mob,bool))&Lua_Mob::IsAttackAllowed)
 	.def("IsBeneficialAllowed", (bool(Lua_Mob::*)(Lua_Mob))&Lua_Mob::IsBeneficialAllowed)
 	.def("IsBerserk", &Lua_Mob::IsBerserk)
 	.def("IsBlind", (bool(Lua_Mob::*)(void))&Lua_Mob::IsBlind)
@@ -2803,7 +3200,9 @@ luabind::scope lua_register_mob() {
 	.def("ProjectileAnimation", (void(Lua_Mob::*)(Lua_Mob,int,bool,double,double,double,double))&Lua_Mob::ProjectileAnimation)
 	.def("QuestSay", (void(Lua_Mob::*)(Lua_Client,const char *))&Lua_Mob::QuestSay)
 	.def("QuestSay", (void(Lua_Mob::*)(Lua_Client,const char *,luabind::adl::object))&Lua_Mob::QuestSay)
-	.def("RandomizeFeatures", (void(Lua_Mob::*)(bool,bool))&Lua_Mob::RandomizeFeatures)
+	.def("RandomizeFeatures", (bool(Lua_Mob::*)(void))&Lua_Mob::RandomizeFeatures)
+	.def("RandomizeFeatures", (bool(Lua_Mob::*)(bool))&Lua_Mob::RandomizeFeatures)
+	.def("RandomizeFeatures", (bool(Lua_Mob::*)(bool,bool))&Lua_Mob::RandomizeFeatures)
 	.def("RangedAttack", &Lua_Mob::RangedAttack)
 	.def("RemoveAllNimbusEffects", &Lua_Mob::RemoveAllNimbusEffects)
 	.def("RemoveNimbusEffect", (void(Lua_Mob::*)(int))&Lua_Mob::RemoveNimbusEffect)
@@ -2823,8 +3222,11 @@ luabind::scope lua_register_mob() {
 	.def("SetSeeInvisibleUndeadLevel", (void(Lua_Mob::*)(uint8))&Lua_Mob::SetSeeInvisibleUndeadLevel)
 	.def("SendAppearanceEffect", (void(Lua_Mob::*)(uint32,uint32,uint32,uint32,uint32))&Lua_Mob::SendAppearanceEffect)
 	.def("SendAppearanceEffect", (void(Lua_Mob::*)(uint32,uint32,uint32,uint32,uint32,Lua_Client))&Lua_Mob::SendAppearanceEffect)
+	.def("SendWearChange", (void(Lua_Mob::*)(uint8))&Lua_Mob::SendWearChange)
 	.def("SendBeginCast", &Lua_Mob::SendBeginCast)
 	.def("SendIllusionPacket", (void(Lua_Mob::*)(luabind::adl::object))&Lua_Mob::SendIllusionPacket)
+	.def("SendPayload", (void(Lua_Mob::*)(int))&Lua_Mob::SendPayload)
+	.def("SendPayload", (void(Lua_Mob::*)(int,std::string))&Lua_Mob::SendPayload)
 	.def("SendSpellEffect", (void(Lua_Mob::*)(uint32,uint32,uint32,bool,uint32))&Lua_Mob::SendSpellEffect)
 	.def("SendSpellEffect", (void(Lua_Mob::*)(uint32,uint32,uint32,bool,uint32,bool))&Lua_Mob::SendSpellEffect)
 	.def("SendSpellEffect", (void(Lua_Mob::*)(uint32,uint32,uint32,bool,uint32,bool,Lua_Client))&Lua_Mob::SendSpellEffect)
@@ -2843,7 +3245,7 @@ luabind::scope lua_register_mob() {
 	.def("SetCurrentWP", &Lua_Mob::SetCurrentWP)
 	.def("SetDestructibleObject", (void(Lua_Mob::*)(bool))&Lua_Mob::SetDestructibleObject)
 	.def("SetDisableMelee", (void(Lua_Mob::*)(bool))&Lua_Mob::SetDisableMelee)
-	.def("SetEntityVariable", (void(Lua_Mob::*)(const char*,const char*))&Lua_Mob::SetEntityVariable)
+	.def("SetEntityVariable", &Lua_Mob::SetEntityVariable)
 	.def("SetExtraHaste", (void(Lua_Mob::*)(int))&Lua_Mob::SetExtraHaste)
 	.def("SetFlurryChance", (void(Lua_Mob::*)(int))&Lua_Mob::SetFlurryChance)
 	.def("SetFlyMode", (void(Lua_Mob::*)(int))&Lua_Mob::SetFlyMode)
@@ -2860,7 +3262,7 @@ luabind::scope lua_register_mob() {
 	.def("SetLevel", (void(Lua_Mob::*)(int))&Lua_Mob::SetLevel)
 	.def("SetLevel", (void(Lua_Mob::*)(int,bool))&Lua_Mob::SetLevel)
 	.def("SetMana", &Lua_Mob::SetMana)
-	.def("SetOOCRegen", (void(Lua_Mob::*)(int))&Lua_Mob::SetOOCRegen)
+	.def("SetOOCRegen", (void(Lua_Mob::*)(int64))&Lua_Mob::SetOOCRegen)
 	.def("SetPet", &Lua_Mob::SetPet)
 	.def("SetPetOrder", (void(Lua_Mob::*)(int))&Lua_Mob::SetPetOrder)
 	.def("SetPseudoRoot", (void(Lua_Mob::*)(bool))&Lua_Mob::SetPseudoRoot)
@@ -2874,7 +3276,7 @@ luabind::scope lua_register_mob() {
 	.def("SetTexture", (void(Lua_Mob::*)(int))&Lua_Mob::SetTexture)
 	.def("Shout", (void(Lua_Mob::*)(const char*))& Lua_Mob::Shout)
 	.def("Shout", (void(Lua_Mob::*)(const char*, int))& Lua_Mob::Shout)
-	.def("Signal", (void(Lua_Mob::*)(uint32))&Lua_Mob::Signal)
+	.def("Signal", (void(Lua_Mob::*)(int))&Lua_Mob::Signal)
 	.def("SpellEffect", &Lua_Mob::SpellEffect)
 	.def("SpellFinished", (bool(Lua_Mob::*)(int,Lua_Mob))&Lua_Mob::SpellFinished)
 	.def("SpellFinished", (bool(Lua_Mob::*)(int,Lua_Mob,int))&Lua_Mob::SpellFinished)
@@ -2894,7 +3296,9 @@ luabind::scope lua_register_mob() {
 	.def("TryMoveAlong", (void(Lua_Mob::*)(float,float,bool))&Lua_Mob::TryMoveAlong)
 	.def("UnStun", (void(Lua_Mob::*)(void))&Lua_Mob::UnStun)
 	.def("WalkTo", (void(Lua_Mob::*)(double, double, double))&Lua_Mob::WalkTo)
-	.def("WearChange", (void(Lua_Mob::*)(int,int,uint32))&Lua_Mob::WearChange)
+	.def("WearChange", (void(Lua_Mob::*)(uint8,uint16))&Lua_Mob::WearChange)
+	.def("WearChange", (void(Lua_Mob::*)(uint8,uint16,uint32))&Lua_Mob::WearChange)
+	.def("WearChange", (void(Lua_Mob::*)(uint8,uint16,uint32,uint32))&Lua_Mob::WearChange)
 	.def("WipeHateList", (void(Lua_Mob::*)(void))&Lua_Mob::WipeHateList);
 }
 
@@ -2902,7 +3306,7 @@ luabind::scope lua_register_special_abilities() {
 	return luabind::class_<SpecialAbilities>("SpecialAbility")
 
 		.enum_("constants")
-		[
+		[(
 				luabind::value("summon", static_cast<int>(SPECATK_SUMMON)),
 				luabind::value("enrage", static_cast<int>(SPECATK_ENRAGE)),
 				luabind::value("rampage", static_cast<int>(SPECATK_RAMPAGE)),
@@ -2952,8 +3356,9 @@ luabind::scope lua_register_special_abilities() {
 				luabind::value("immune_damage_npc", static_cast<int>(IMMUNE_DAMAGE_NPC)),
 				luabind::value("immune_aggro_client", static_cast<int>(IMMUNE_AGGRO_CLIENT)),
 				luabind::value("immune_aggro_npc", static_cast<int>(IMMUNE_AGGRO_NPC)),
-				luabind::value("modify_avoid_damage", static_cast<int>(MODIFY_AVOID_DAMAGE))
-		];
+				luabind::value("modify_avoid_damage", static_cast<int>(MODIFY_AVOID_DAMAGE)),
+				luabind::value("immune_open", static_cast<int>(IMMUNE_OPEN))
+		)];
 }
 
 #endif

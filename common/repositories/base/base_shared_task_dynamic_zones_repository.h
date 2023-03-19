@@ -13,14 +13,14 @@
 #define EQEMU_BASE_SHARED_TASK_DYNAMIC_ZONES_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseSharedTaskDynamicZonesRepository {
 public:
 	struct SharedTaskDynamicZones {
-		int64 shared_task_id;
-		int   dynamic_zone_id;
+		int64_t  shared_task_id;
+		uint32_t dynamic_zone_id;
 	};
 
 	static std::string PrimaryKey()
@@ -46,12 +46,12 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string SelectColumnsRaw()
 	{
-		return std::string(implode(", ", SelectColumns()));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -79,15 +79,15 @@ public:
 
 	static SharedTaskDynamicZones NewEntity()
 	{
-		SharedTaskDynamicZones entry{};
+		SharedTaskDynamicZones e{};
 
-		entry.shared_task_id  = 0;
-		entry.dynamic_zone_id = 0;
+		e.shared_task_id  = 0;
+		e.dynamic_zone_id = 0;
 
-		return entry;
+		return e;
 	}
 
-	static SharedTaskDynamicZones GetSharedTaskDynamicZonesEntry(
+	static SharedTaskDynamicZones GetSharedTaskDynamicZones(
 		const std::vector<SharedTaskDynamicZones> &shared_task_dynamic_zoness,
 		int shared_task_dynamic_zones_id
 	)
@@ -116,12 +116,12 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			SharedTaskDynamicZones entry{};
+			SharedTaskDynamicZones e{};
 
-			entry.shared_task_id  = strtoll(row[0], nullptr, 10);
-			entry.dynamic_zone_id = atoi(row[1]);
+			e.shared_task_id  = strtoll(row[0], nullptr, 10);
+			e.dynamic_zone_id = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -146,23 +146,23 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		SharedTaskDynamicZones shared_task_dynamic_zones_entry
+		const SharedTaskDynamicZones &e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(shared_task_dynamic_zones_entry.shared_task_id));
-		update_values.push_back(columns[1] + " = " + std::to_string(shared_task_dynamic_zones_entry.dynamic_zone_id));
+		v.push_back(columns[0] + " = " + std::to_string(e.shared_task_id));
+		v.push_back(columns[1] + " = " + std::to_string(e.dynamic_zone_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
-				shared_task_dynamic_zones_entry.shared_task_id
+				e.shared_task_id
 			)
 		);
 
@@ -171,55 +171,55 @@ public:
 
 	static SharedTaskDynamicZones InsertOne(
 		Database& db,
-		SharedTaskDynamicZones shared_task_dynamic_zones_entry
+		SharedTaskDynamicZones e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(shared_task_dynamic_zones_entry.shared_task_id));
-		insert_values.push_back(std::to_string(shared_task_dynamic_zones_entry.dynamic_zone_id));
+		v.push_back(std::to_string(e.shared_task_id));
+		v.push_back(std::to_string(e.dynamic_zone_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
 		if (results.Success()) {
-			shared_task_dynamic_zones_entry.shared_task_id = results.LastInsertedID();
-			return shared_task_dynamic_zones_entry;
+			e.shared_task_id = results.LastInsertedID();
+			return e;
 		}
 
-		shared_task_dynamic_zones_entry = NewEntity();
+		e = NewEntity();
 
-		return shared_task_dynamic_zones_entry;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<SharedTaskDynamicZones> shared_task_dynamic_zones_entries
+		const std::vector<SharedTaskDynamicZones> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &shared_task_dynamic_zones_entry: shared_task_dynamic_zones_entries) {
-			std::vector<std::string> insert_values;
+		for (auto &e: entries) {
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(shared_task_dynamic_zones_entry.shared_task_id));
-			insert_values.push_back(std::to_string(shared_task_dynamic_zones_entry.dynamic_zone_id));
+			v.push_back(std::to_string(e.shared_task_id));
+			v.push_back(std::to_string(e.dynamic_zone_id));
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 
@@ -240,18 +240,18 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			SharedTaskDynamicZones entry{};
+			SharedTaskDynamicZones e{};
 
-			entry.shared_task_id  = strtoll(row[0], nullptr, 10);
-			entry.dynamic_zone_id = atoi(row[1]);
+			e.shared_task_id  = strtoll(row[0], nullptr, 10);
+			e.dynamic_zone_id = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static std::vector<SharedTaskDynamicZones> GetWhere(Database& db, std::string where_filter)
+	static std::vector<SharedTaskDynamicZones> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<SharedTaskDynamicZones> all_entries;
 
@@ -266,18 +266,18 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			SharedTaskDynamicZones entry{};
+			SharedTaskDynamicZones e{};
 
-			entry.shared_task_id  = strtoll(row[0], nullptr, 10);
-			entry.dynamic_zone_id = atoi(row[1]);
+			e.shared_task_id  = strtoll(row[0], nullptr, 10);
+			e.dynamic_zone_id = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -300,6 +300,32 @@ public:
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int64 GetMaxId(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COALESCE(MAX({}), 0) FROM {}",
+				PrimaryKey(),
+				TableName()
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static int64 Count(Database& db, const std::string &where_filter = "")
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COUNT(*) FROM {} {}",
+				TableName(),
+				(where_filter.empty() ? "" : "WHERE " + where_filter)
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
 };

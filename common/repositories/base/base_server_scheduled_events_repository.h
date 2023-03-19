@@ -13,26 +13,26 @@
 #define EQEMU_BASE_SERVER_SCHEDULED_EVENTS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseServerScheduledEventsRepository {
 public:
 	struct ServerScheduledEvents {
-		int         id;
+		int32_t     id;
 		std::string description;
 		std::string event_type;
 		std::string event_data;
-		int         minute_start;
-		int         hour_start;
-		int         day_start;
-		int         month_start;
-		int         year_start;
-		int         minute_end;
-		int         hour_end;
-		int         day_end;
-		int         month_end;
-		int         year_end;
+		int32_t     minute_start;
+		int32_t     hour_start;
+		int32_t     day_start;
+		int32_t     month_start;
+		int32_t     year_start;
+		int32_t     minute_end;
+		int32_t     hour_end;
+		int32_t     day_end;
+		int32_t     month_end;
+		int32_t     year_end;
 		std::string cron_expression;
 		time_t      created_at;
 		time_t      deleted_at;
@@ -91,12 +91,12 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string SelectColumnsRaw()
 	{
-		return std::string(implode(", ", SelectColumns()));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -124,30 +124,30 @@ public:
 
 	static ServerScheduledEvents NewEntity()
 	{
-		ServerScheduledEvents entry{};
+		ServerScheduledEvents e{};
 
-		entry.id              = 0;
-		entry.description     = "";
-		entry.event_type      = "";
-		entry.event_data      = "";
-		entry.minute_start    = 0;
-		entry.hour_start      = 0;
-		entry.day_start       = 0;
-		entry.month_start     = 0;
-		entry.year_start      = 0;
-		entry.minute_end      = 0;
-		entry.hour_end        = 0;
-		entry.day_end         = 0;
-		entry.month_end       = 0;
-		entry.year_end        = 0;
-		entry.cron_expression = "";
-		entry.created_at      = 0;
-		entry.deleted_at      = 0;
+		e.id              = 0;
+		e.description     = "";
+		e.event_type      = "";
+		e.event_data      = "";
+		e.minute_start    = 0;
+		e.hour_start      = 0;
+		e.day_start       = 0;
+		e.month_start     = 0;
+		e.year_start      = 0;
+		e.minute_end      = 0;
+		e.hour_end        = 0;
+		e.day_end         = 0;
+		e.month_end       = 0;
+		e.year_end        = 0;
+		e.cron_expression = "";
+		e.created_at      = 0;
+		e.deleted_at      = 0;
 
-		return entry;
+		return e;
 	}
 
-	static ServerScheduledEvents GetServerScheduledEventsEntry(
+	static ServerScheduledEvents GetServerScheduledEvents(
 		const std::vector<ServerScheduledEvents> &server_scheduled_eventss,
 		int server_scheduled_events_id
 	)
@@ -176,27 +176,27 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			ServerScheduledEvents entry{};
+			ServerScheduledEvents e{};
 
-			entry.id              = atoi(row[0]);
-			entry.description     = row[1] ? row[1] : "";
-			entry.event_type      = row[2] ? row[2] : "";
-			entry.event_data      = row[3] ? row[3] : "";
-			entry.minute_start    = atoi(row[4]);
-			entry.hour_start      = atoi(row[5]);
-			entry.day_start       = atoi(row[6]);
-			entry.month_start     = atoi(row[7]);
-			entry.year_start      = atoi(row[8]);
-			entry.minute_end      = atoi(row[9]);
-			entry.hour_end        = atoi(row[10]);
-			entry.day_end         = atoi(row[11]);
-			entry.month_end       = atoi(row[12]);
-			entry.year_end        = atoi(row[13]);
-			entry.cron_expression = row[14] ? row[14] : "";
-			entry.created_at      = strtoll(row[15] ? row[15] : "-1", nullptr, 10);
-			entry.deleted_at      = strtoll(row[16] ? row[16] : "-1", nullptr, 10);
+			e.id              = static_cast<int32_t>(atoi(row[0]));
+			e.description     = row[1] ? row[1] : "";
+			e.event_type      = row[2] ? row[2] : "";
+			e.event_data      = row[3] ? row[3] : "";
+			e.minute_start    = static_cast<int32_t>(atoi(row[4]));
+			e.hour_start      = static_cast<int32_t>(atoi(row[5]));
+			e.day_start       = static_cast<int32_t>(atoi(row[6]));
+			e.month_start     = static_cast<int32_t>(atoi(row[7]));
+			e.year_start      = static_cast<int32_t>(atoi(row[8]));
+			e.minute_end      = static_cast<int32_t>(atoi(row[9]));
+			e.hour_end        = static_cast<int32_t>(atoi(row[10]));
+			e.day_end         = static_cast<int32_t>(atoi(row[11]));
+			e.month_end       = static_cast<int32_t>(atoi(row[12]));
+			e.year_end        = static_cast<int32_t>(atoi(row[13]));
+			e.cron_expression = row[14] ? row[14] : "";
+			e.created_at      = strtoll(row[15] ? row[15] : "-1", nullptr, 10);
+			e.deleted_at      = strtoll(row[16] ? row[16] : "-1", nullptr, 10);
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -221,37 +221,37 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		ServerScheduledEvents server_scheduled_events_entry
+		const ServerScheduledEvents &e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + EscapeString(server_scheduled_events_entry.description) + "'");
-		update_values.push_back(columns[2] + " = '" + EscapeString(server_scheduled_events_entry.event_type) + "'");
-		update_values.push_back(columns[3] + " = '" + EscapeString(server_scheduled_events_entry.event_data) + "'");
-		update_values.push_back(columns[4] + " = " + std::to_string(server_scheduled_events_entry.minute_start));
-		update_values.push_back(columns[5] + " = " + std::to_string(server_scheduled_events_entry.hour_start));
-		update_values.push_back(columns[6] + " = " + std::to_string(server_scheduled_events_entry.day_start));
-		update_values.push_back(columns[7] + " = " + std::to_string(server_scheduled_events_entry.month_start));
-		update_values.push_back(columns[8] + " = " + std::to_string(server_scheduled_events_entry.year_start));
-		update_values.push_back(columns[9] + " = " + std::to_string(server_scheduled_events_entry.minute_end));
-		update_values.push_back(columns[10] + " = " + std::to_string(server_scheduled_events_entry.hour_end));
-		update_values.push_back(columns[11] + " = " + std::to_string(server_scheduled_events_entry.day_end));
-		update_values.push_back(columns[12] + " = " + std::to_string(server_scheduled_events_entry.month_end));
-		update_values.push_back(columns[13] + " = " + std::to_string(server_scheduled_events_entry.year_end));
-		update_values.push_back(columns[14] + " = '" + EscapeString(server_scheduled_events_entry.cron_expression) + "'");
-		update_values.push_back(columns[15] + " = FROM_UNIXTIME(" + (server_scheduled_events_entry.created_at > 0 ? std::to_string(server_scheduled_events_entry.created_at) : "null") + ")");
-		update_values.push_back(columns[16] + " = FROM_UNIXTIME(" + (server_scheduled_events_entry.deleted_at > 0 ? std::to_string(server_scheduled_events_entry.deleted_at) : "null") + ")");
+		v.push_back(columns[1] + " = '" + Strings::Escape(e.description) + "'");
+		v.push_back(columns[2] + " = '" + Strings::Escape(e.event_type) + "'");
+		v.push_back(columns[3] + " = '" + Strings::Escape(e.event_data) + "'");
+		v.push_back(columns[4] + " = " + std::to_string(e.minute_start));
+		v.push_back(columns[5] + " = " + std::to_string(e.hour_start));
+		v.push_back(columns[6] + " = " + std::to_string(e.day_start));
+		v.push_back(columns[7] + " = " + std::to_string(e.month_start));
+		v.push_back(columns[8] + " = " + std::to_string(e.year_start));
+		v.push_back(columns[9] + " = " + std::to_string(e.minute_end));
+		v.push_back(columns[10] + " = " + std::to_string(e.hour_end));
+		v.push_back(columns[11] + " = " + std::to_string(e.day_end));
+		v.push_back(columns[12] + " = " + std::to_string(e.month_end));
+		v.push_back(columns[13] + " = " + std::to_string(e.year_end));
+		v.push_back(columns[14] + " = '" + Strings::Escape(e.cron_expression) + "'");
+		v.push_back(columns[15] + " = FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
+		v.push_back(columns[16] + " = FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
-				server_scheduled_events_entry.id
+				e.id
 			)
 		);
 
@@ -260,85 +260,85 @@ public:
 
 	static ServerScheduledEvents InsertOne(
 		Database& db,
-		ServerScheduledEvents server_scheduled_events_entry
+		ServerScheduledEvents e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(server_scheduled_events_entry.id));
-		insert_values.push_back("'" + EscapeString(server_scheduled_events_entry.description) + "'");
-		insert_values.push_back("'" + EscapeString(server_scheduled_events_entry.event_type) + "'");
-		insert_values.push_back("'" + EscapeString(server_scheduled_events_entry.event_data) + "'");
-		insert_values.push_back(std::to_string(server_scheduled_events_entry.minute_start));
-		insert_values.push_back(std::to_string(server_scheduled_events_entry.hour_start));
-		insert_values.push_back(std::to_string(server_scheduled_events_entry.day_start));
-		insert_values.push_back(std::to_string(server_scheduled_events_entry.month_start));
-		insert_values.push_back(std::to_string(server_scheduled_events_entry.year_start));
-		insert_values.push_back(std::to_string(server_scheduled_events_entry.minute_end));
-		insert_values.push_back(std::to_string(server_scheduled_events_entry.hour_end));
-		insert_values.push_back(std::to_string(server_scheduled_events_entry.day_end));
-		insert_values.push_back(std::to_string(server_scheduled_events_entry.month_end));
-		insert_values.push_back(std::to_string(server_scheduled_events_entry.year_end));
-		insert_values.push_back("'" + EscapeString(server_scheduled_events_entry.cron_expression) + "'");
-		insert_values.push_back("FROM_UNIXTIME(" + (server_scheduled_events_entry.created_at > 0 ? std::to_string(server_scheduled_events_entry.created_at) : "null") + ")");
-		insert_values.push_back("FROM_UNIXTIME(" + (server_scheduled_events_entry.deleted_at > 0 ? std::to_string(server_scheduled_events_entry.deleted_at) : "null") + ")");
+		v.push_back(std::to_string(e.id));
+		v.push_back("'" + Strings::Escape(e.description) + "'");
+		v.push_back("'" + Strings::Escape(e.event_type) + "'");
+		v.push_back("'" + Strings::Escape(e.event_data) + "'");
+		v.push_back(std::to_string(e.minute_start));
+		v.push_back(std::to_string(e.hour_start));
+		v.push_back(std::to_string(e.day_start));
+		v.push_back(std::to_string(e.month_start));
+		v.push_back(std::to_string(e.year_start));
+		v.push_back(std::to_string(e.minute_end));
+		v.push_back(std::to_string(e.hour_end));
+		v.push_back(std::to_string(e.day_end));
+		v.push_back(std::to_string(e.month_end));
+		v.push_back(std::to_string(e.year_end));
+		v.push_back("'" + Strings::Escape(e.cron_expression) + "'");
+		v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
 		if (results.Success()) {
-			server_scheduled_events_entry.id = results.LastInsertedID();
-			return server_scheduled_events_entry;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		server_scheduled_events_entry = NewEntity();
+		e = NewEntity();
 
-		return server_scheduled_events_entry;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<ServerScheduledEvents> server_scheduled_events_entries
+		const std::vector<ServerScheduledEvents> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &server_scheduled_events_entry: server_scheduled_events_entries) {
-			std::vector<std::string> insert_values;
+		for (auto &e: entries) {
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(server_scheduled_events_entry.id));
-			insert_values.push_back("'" + EscapeString(server_scheduled_events_entry.description) + "'");
-			insert_values.push_back("'" + EscapeString(server_scheduled_events_entry.event_type) + "'");
-			insert_values.push_back("'" + EscapeString(server_scheduled_events_entry.event_data) + "'");
-			insert_values.push_back(std::to_string(server_scheduled_events_entry.minute_start));
-			insert_values.push_back(std::to_string(server_scheduled_events_entry.hour_start));
-			insert_values.push_back(std::to_string(server_scheduled_events_entry.day_start));
-			insert_values.push_back(std::to_string(server_scheduled_events_entry.month_start));
-			insert_values.push_back(std::to_string(server_scheduled_events_entry.year_start));
-			insert_values.push_back(std::to_string(server_scheduled_events_entry.minute_end));
-			insert_values.push_back(std::to_string(server_scheduled_events_entry.hour_end));
-			insert_values.push_back(std::to_string(server_scheduled_events_entry.day_end));
-			insert_values.push_back(std::to_string(server_scheduled_events_entry.month_end));
-			insert_values.push_back(std::to_string(server_scheduled_events_entry.year_end));
-			insert_values.push_back("'" + EscapeString(server_scheduled_events_entry.cron_expression) + "'");
-			insert_values.push_back("FROM_UNIXTIME(" + (server_scheduled_events_entry.created_at > 0 ? std::to_string(server_scheduled_events_entry.created_at) : "null") + ")");
-			insert_values.push_back("FROM_UNIXTIME(" + (server_scheduled_events_entry.deleted_at > 0 ? std::to_string(server_scheduled_events_entry.deleted_at) : "null") + ")");
+			v.push_back(std::to_string(e.id));
+			v.push_back("'" + Strings::Escape(e.description) + "'");
+			v.push_back("'" + Strings::Escape(e.event_type) + "'");
+			v.push_back("'" + Strings::Escape(e.event_data) + "'");
+			v.push_back(std::to_string(e.minute_start));
+			v.push_back(std::to_string(e.hour_start));
+			v.push_back(std::to_string(e.day_start));
+			v.push_back(std::to_string(e.month_start));
+			v.push_back(std::to_string(e.year_start));
+			v.push_back(std::to_string(e.minute_end));
+			v.push_back(std::to_string(e.hour_end));
+			v.push_back(std::to_string(e.day_end));
+			v.push_back(std::to_string(e.month_end));
+			v.push_back(std::to_string(e.year_end));
+			v.push_back("'" + Strings::Escape(e.cron_expression) + "'");
+			v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "null") + ")");
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 
@@ -359,33 +359,33 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			ServerScheduledEvents entry{};
+			ServerScheduledEvents e{};
 
-			entry.id              = atoi(row[0]);
-			entry.description     = row[1] ? row[1] : "";
-			entry.event_type      = row[2] ? row[2] : "";
-			entry.event_data      = row[3] ? row[3] : "";
-			entry.minute_start    = atoi(row[4]);
-			entry.hour_start      = atoi(row[5]);
-			entry.day_start       = atoi(row[6]);
-			entry.month_start     = atoi(row[7]);
-			entry.year_start      = atoi(row[8]);
-			entry.minute_end      = atoi(row[9]);
-			entry.hour_end        = atoi(row[10]);
-			entry.day_end         = atoi(row[11]);
-			entry.month_end       = atoi(row[12]);
-			entry.year_end        = atoi(row[13]);
-			entry.cron_expression = row[14] ? row[14] : "";
-			entry.created_at      = strtoll(row[15] ? row[15] : "-1", nullptr, 10);
-			entry.deleted_at      = strtoll(row[16] ? row[16] : "-1", nullptr, 10);
+			e.id              = static_cast<int32_t>(atoi(row[0]));
+			e.description     = row[1] ? row[1] : "";
+			e.event_type      = row[2] ? row[2] : "";
+			e.event_data      = row[3] ? row[3] : "";
+			e.minute_start    = static_cast<int32_t>(atoi(row[4]));
+			e.hour_start      = static_cast<int32_t>(atoi(row[5]));
+			e.day_start       = static_cast<int32_t>(atoi(row[6]));
+			e.month_start     = static_cast<int32_t>(atoi(row[7]));
+			e.year_start      = static_cast<int32_t>(atoi(row[8]));
+			e.minute_end      = static_cast<int32_t>(atoi(row[9]));
+			e.hour_end        = static_cast<int32_t>(atoi(row[10]));
+			e.day_end         = static_cast<int32_t>(atoi(row[11]));
+			e.month_end       = static_cast<int32_t>(atoi(row[12]));
+			e.year_end        = static_cast<int32_t>(atoi(row[13]));
+			e.cron_expression = row[14] ? row[14] : "";
+			e.created_at      = strtoll(row[15] ? row[15] : "-1", nullptr, 10);
+			e.deleted_at      = strtoll(row[16] ? row[16] : "-1", nullptr, 10);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static std::vector<ServerScheduledEvents> GetWhere(Database& db, std::string where_filter)
+	static std::vector<ServerScheduledEvents> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<ServerScheduledEvents> all_entries;
 
@@ -400,33 +400,33 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			ServerScheduledEvents entry{};
+			ServerScheduledEvents e{};
 
-			entry.id              = atoi(row[0]);
-			entry.description     = row[1] ? row[1] : "";
-			entry.event_type      = row[2] ? row[2] : "";
-			entry.event_data      = row[3] ? row[3] : "";
-			entry.minute_start    = atoi(row[4]);
-			entry.hour_start      = atoi(row[5]);
-			entry.day_start       = atoi(row[6]);
-			entry.month_start     = atoi(row[7]);
-			entry.year_start      = atoi(row[8]);
-			entry.minute_end      = atoi(row[9]);
-			entry.hour_end        = atoi(row[10]);
-			entry.day_end         = atoi(row[11]);
-			entry.month_end       = atoi(row[12]);
-			entry.year_end        = atoi(row[13]);
-			entry.cron_expression = row[14] ? row[14] : "";
-			entry.created_at      = strtoll(row[15] ? row[15] : "-1", nullptr, 10);
-			entry.deleted_at      = strtoll(row[16] ? row[16] : "-1", nullptr, 10);
+			e.id              = static_cast<int32_t>(atoi(row[0]));
+			e.description     = row[1] ? row[1] : "";
+			e.event_type      = row[2] ? row[2] : "";
+			e.event_data      = row[3] ? row[3] : "";
+			e.minute_start    = static_cast<int32_t>(atoi(row[4]));
+			e.hour_start      = static_cast<int32_t>(atoi(row[5]));
+			e.day_start       = static_cast<int32_t>(atoi(row[6]));
+			e.month_start     = static_cast<int32_t>(atoi(row[7]));
+			e.year_start      = static_cast<int32_t>(atoi(row[8]));
+			e.minute_end      = static_cast<int32_t>(atoi(row[9]));
+			e.hour_end        = static_cast<int32_t>(atoi(row[10]));
+			e.day_end         = static_cast<int32_t>(atoi(row[11]));
+			e.month_end       = static_cast<int32_t>(atoi(row[12]));
+			e.year_end        = static_cast<int32_t>(atoi(row[13]));
+			e.cron_expression = row[14] ? row[14] : "";
+			e.created_at      = strtoll(row[15] ? row[15] : "-1", nullptr, 10);
+			e.deleted_at      = strtoll(row[16] ? row[16] : "-1", nullptr, 10);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -449,6 +449,32 @@ public:
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int64 GetMaxId(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COALESCE(MAX({}), 0) FROM {}",
+				PrimaryKey(),
+				TableName()
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static int64 Count(Database& db, const std::string &where_filter = "")
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COUNT(*) FROM {} {}",
+				TableName(),
+				(where_filter.empty() ? "" : "WHERE " + where_filter)
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
 };

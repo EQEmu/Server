@@ -16,15 +16,17 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-#ifdef BOTS
-
+#include "../common/data_verification.h"
 #include "../common/global_define.h"
 #include "../common/rulesys.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "../common/eqemu_logsys.h"
 
+#include "../common/repositories/bot_data_repository.h"
+#include "../common/repositories/bot_inventories_repository.h"
+
 #include "zonedb.h"
-#include "zone_store.h"
+#include "../common/zone_store.h"
 #include "bot.h"
 #include "client.h"
 
@@ -45,7 +47,7 @@ bool BotDatabase::LoadBotCommandSettings(std::map<std::string, std::pair<uint8, 
 		if (row[2][0] == 0)
 			continue;
 
-		auto aliases = SplitString(row[2], '|');
+		auto aliases = Strings::Split(row[2], '|');
 		for (auto iter : aliases) {
 			if (!iter.empty())
 				bot_command_settings[row[0]].second.push_back(iter);
@@ -61,7 +63,7 @@ bool BotDatabase::UpdateInjectedBotCommandSettings(const std::vector<std::pair<s
 
 		query = fmt::format(
 			"REPLACE INTO `bot_command_settings`(`bot_command`, `access`) VALUES {}",
-			implode(
+			Strings::ImplodePair(
 				",",
 				std::pair<char, char>('(', ')'),
 				join_pair(",", std::pair<char, char>('\'', '\''), injected)
@@ -72,9 +74,8 @@ bool BotDatabase::UpdateInjectedBotCommandSettings(const std::vector<std::pair<s
 			return false;
 		}
 
-		Log(Logs::General,
-			Logs::Status,
-			"%u New Bot Command%s Added",
+		LogInfo(
+			"[{}] New Bot Command{} Added",
 			injected.size(),
 			(injected.size() == 1 ? "" : "s")
 		);
@@ -89,16 +90,15 @@ bool BotDatabase::UpdateOrphanedBotCommandSettings(const std::vector<std::string
 
 		query = fmt::format(
 			"DELETE FROM `bot_command_settings` WHERE `bot_command` IN ({})",
-			implode(",", std::pair<char, char>('\'', '\''), orphaned)
+			Strings::ImplodePair(",", std::pair<char, char>('\'', '\''), orphaned)
 		);
 
 		if (!database.QueryDatabase(query).Success()) {
 			return false;
 		}
 
-		Log(Logs::General,
-			Logs::Status,
-			"%u Orphaned Bot Command%s Deleted",
+		LogInfo(
+			"[{}] Orphaned Bot Command{} Deleted",
 			orphaned.size(),
 			(orphaned.size() == 1 ? "" : "s")
 		);
@@ -167,53 +167,72 @@ bool BotDatabase::LoadBotSpellCastingChances()
 /* Bot functions   */
 bool BotDatabase::QueryNameAvailablity(const std::string& bot_name, bool& available_flag)
 {
-	if (bot_name.empty() || bot_name.size() > 60 || !database.CheckUsedName(bot_name.c_str()))
+	if (bot_name.empty() || bot_name.size() > 60 || !database.CheckUsedName(bot_name)) {
 		return false;
+	}
 
-	query = StringFormat("SELECT `id` FROM `vw_bot_character_mobs` WHERE `name` LIKE '%s' LIMIT 1", bot_name.c_str());
+	query = fmt::format(
+		"SELECT b.bot_id FROM bot_data b "
+		"INNER JOIN character_data c ON b.`name` = c.`name` "
+		"WHERE b.`name` LIKE '{0}' OR c.`name` LIKE '{0}' "
+		"LIMIT 1",
+		bot_name
+	);
+
 	auto results = database.QueryDatabase(query);
-	if (!results.Success())
+	if (!results.Success()) {
 		return false;
-	if (results.RowCount())
+	}
+
+	if (results.RowCount()) {
 		return true;
+	}
 
 	available_flag = true;
 
 	return true;
 }
 
-bool BotDatabase::QueryBotCount(const uint32 owner_id, uint32& bot_count)
+bool BotDatabase::QueryBotCount(const uint32 owner_id, int class_id, uint32& bot_count, uint32& bot_class_count)
 {
-	if (!owner_id)
+	if (!owner_id) {
 		return false;
+	}
 
-	query = StringFormat("SELECT COUNT(`bot_id`) FROM `bot_data` WHERE `owner_id` = '%i'", owner_id);
+	query = fmt::format(
+		"SELECT COUNT(`bot_id`) FROM `bot_data` WHERE `owner_id` = {}",
+		owner_id
+	);
 	auto results = database.QueryDatabase(query);
-	if (!results.Success())
+	if (!results.Success()) {
 		return false;
-	if (!results.RowCount())
+	}
+
+	if (!results.RowCount()) {
 		return true;
+	}
 
 	auto row = results.begin();
-	bot_count = atoi(row[0]);
+	bot_count = std::stoul(row[0]);
 
-	return true;
-}
+	if (EQ::ValueWithin(class_id, WARRIOR, BERSERKER)) {
+		query = fmt::format(
+			"SELECT COUNT(`bot_id`) FROM `bot_data` WHERE `owner_id` = {} AND `class` = {}",
+			owner_id,
+			class_id
+		);
+		auto results = database.QueryDatabase(query);
+		if (!results.Success()) {
+			return false;
+		}
 
-bool BotDatabase::LoadQuestableSpawnCount(const uint32 owner_id, int& spawn_count)
-{
-	if (!owner_id)
-		return false;
+		if (!results.RowCount()) {
+			return true;
+		}
 
-	query = StringFormat("SELECT `value` FROM `quest_globals` WHERE `name` = 'bot_spawn_limit' AND `charid` = '%i' LIMIT 1", owner_id);
-	auto results = database.QueryDatabase(query); // use 'database' for non-bot table calls
-	if (!results.Success())
-		return false;
-	if (!results.RowCount())
-		return true;
-
-	auto row = results.begin();
-	spawn_count = atoi(row[0]);
+		auto row = results.begin();
+		bot_class_count = std::stoul(row[0]);
+	}
 
 	return true;
 }
@@ -301,148 +320,161 @@ bool BotDatabase::LoadOwnerID(const uint32 bot_id, uint32& owner_id)
 	return true;
 }
 
+uint32 BotDatabase::GetOwnerID(const uint32 bot_id)
+{
+	if (!bot_id) {
+		return 0;
+	}
+
+	const auto& l = BotDataRepository::FindOne(database, bot_id);
+	if (!l.bot_id) {
+		return 0;
+	}
+
+	return l.owner_id;
+}
+
 bool BotDatabase::LoadBotID(const uint32 owner_id, const std::string& bot_name, uint32& bot_id)
 {
-	if (!owner_id || bot_name.empty())
+	if (!owner_id || bot_name.empty()) {
 		return false;
+	}
 
-	query = StringFormat(
-		"SELECT `bot_id` FROM `bot_data` WHERE `owner_id` = '%u' AND `name` = '%s' LIMIT 1",
-		owner_id, bot_name.c_str()
+	query = fmt::format(
+		"SELECT `bot_id` FROM `bot_data` WHERE `owner_id` = {} AND `name` = '{}' LIMIT 1",
+		owner_id,
+		bot_name
 	);
+
 	auto results = database.QueryDatabase(query);
-	if (!results.Success())
+	if (!results.Success()) {
 		return false;
-	if (!results.RowCount())
+	}
+
+	if (!results.RowCount()) {
 		return true;
+	}
 
 	auto row = results.begin();
-	bot_id = atoi(row[0]);
+	bot_id = std::stoul(row[0]);
+
+	return true;
+}
+
+bool BotDatabase::LoadBotID(const uint32 owner_id, const std::string& bot_name, uint32& bot_id, uint8& bot_class_id)
+{
+	if (!owner_id || bot_name.empty()) {
+		return false;
+	}
+
+	query = fmt::format(
+		"SELECT `bot_id`, `class` FROM `bot_data` WHERE `owner_id` = {} AND `name` = '{}' LIMIT 1",
+		owner_id,
+		bot_name
+	);
+
+	auto results = database.QueryDatabase(query);
+	if (!results.Success()) {
+		return false;
+	}
+
+	if (!results.RowCount()) {
+		return true;
+	}
+
+	auto row = results.begin();
+	bot_id = std::stoul(row[0]);
+	bot_class_id = static_cast<uint8>(std::stoul(row[1]));
 
 	return true;
 }
 
 bool BotDatabase::LoadBot(const uint32 bot_id, Bot*& loaded_bot)
 {
-	if (!bot_id || loaded_bot)
+	if (!bot_id || loaded_bot) {
 		return false;
+	}
 
-	query = StringFormat(
-		"SELECT"
-		" `owner_id`,"
-		" `spells_id`,"
-		" `name`,"
-		" `last_name`,"
-		" `title`,"
-		" `suffix`,"
-		" `zone_id`,"
-		" `gender`,"
-		" `race`,"
-		" `class`,"
-		" `level`,"
-		" `deity`,"				/* planned use[11] */
-		" `creation_day`,"		/* not in-use[12] */
-		" `last_spawn`,"		/* not in-use[13] */
-		" `time_spawned`,"
-		" `size`,"
-		" `face`,"
-		" `hair_color`,"
-		" `hair_style`,"
-		" `beard`,"
-		" `beard_color`,"
-		" `eye_color_1`,"
-		" `eye_color_2`,"
-		" `drakkin_heritage`,"
-		" `drakkin_tattoo`,"
-		" `drakkin_details`,"
-		" `ac`,"				/* not in-use[26] */
-		" `atk`,"				/* not in-use[27] */
-		" `hp`,"
-		" `mana`,"
-		" `str`,"				/* not in-use[30] */
-		" `sta`,"				/* not in-use[31] */
-		" `cha`,"				/* not in-use[32] */
-		" `dex`,"				/* not in-use[33] */
-		" `int`,"				/* not in-use[34] */
-		" `agi`,"				/* not in-use[35] */
-		" `wis`,"				/* not in-use[36] */
-		" `fire`,"				/* not in-use[37] */
-		" `cold`,"				/* not in-use[38] */
-		" `magic`,"				/* not in-use[39] */
-		" `poison`,"			/* not in-use[40] */
-		" `disease`,"			/* not in-use[41] */
-		" `corruption`,"		/* not in-use[42] */
-		" `show_helm`," // 43
-		" `follow_distance`," // 44
-		" `stop_melee_level`" // 45
-		" FROM `bot_data`"
-		" WHERE `bot_id` = '%u'"
-		" LIMIT 1",
-		bot_id
+	const auto& l = BotDataRepository::FindOne(database, bot_id);
+	if (!l.bot_id) {
+		return false;
+	}
+
+	auto d = Bot::CreateDefaultNPCTypeStructForBot(
+		l.name,
+		l.last_name,
+		l.level,
+		l.race,
+		l.class_,
+		l.gender
 	);
 
-	auto results = database.QueryDatabase(query);
-	if (!results.Success())
-		return false;
-	if (!results.RowCount())
-		return true;
-
-	// TODO: Consider removing resists and basic attributes from the load query above since we're using defaultNPCType values instead
-	auto row = results.begin();
-	auto defaultNPCTypeStruct = Bot::CreateDefaultNPCTypeStructForBot(std::string(row[2]), std::string(row[3]), atoi(row[10]), atoi(row[8]), atoi(row[9]), atoi(row[7]));
-	auto tempNPCStruct = Bot::FillNPCTypeStruct(
-		atoi(row[1]),
-		std::string(row[2]),
-		std::string(row[3]),
-		atoi(row[10]),
-		atoi(row[8]),
-		atoi(row[9]),
-		atoi(row[7]),
-		atof(row[15]),
-		atoi(row[16]),
-		atoi(row[18]),
-		atoi(row[17]),
-		atoi(row[21]),
-		atoi(row[22]),
-		atoi(row[20]),
-		atoi(row[19]),
-		atoi(row[23]),
-		atoi(row[24]),
-		atoi(row[25]),
-		atoi(row[28]),
-		atoi(row[29]),
-		defaultNPCTypeStruct->MR,
-		defaultNPCTypeStruct->CR,
-		defaultNPCTypeStruct->DR,
-		defaultNPCTypeStruct->FR,
-		defaultNPCTypeStruct->PR,
-		defaultNPCTypeStruct->Corrup,
-		defaultNPCTypeStruct->AC,
-		defaultNPCTypeStruct->STR,
-		defaultNPCTypeStruct->STA,
-		defaultNPCTypeStruct->DEX,
-		defaultNPCTypeStruct->AGI,
-		defaultNPCTypeStruct->INT,
-		defaultNPCTypeStruct->WIS,
-		defaultNPCTypeStruct->CHA,
-		defaultNPCTypeStruct->ATK
+	auto t = Bot::FillNPCTypeStruct(
+		l.spells_id,
+		l.name,
+		l.last_name,
+		l.level,
+		l.race,
+		l.class_,
+		l.gender,
+		l.size,
+		l.face,
+		l.hair_style,
+		l.hair_color,
+		l.eye_color_1,
+		l.eye_color_2,
+		l.beard,
+		l.beard_color,
+		l.drakkin_heritage,
+		l.drakkin_tattoo,
+		l.drakkin_details,
+		l.hp,
+		l.mana,
+		d->MR,
+		d->CR,
+		d->DR,
+		d->FR,
+		d->PR,
+		d->Corrup,
+		d->AC,
+		d->STR,
+		d->STA,
+		d->DEX,
+		d->AGI,
+		d->INT,
+		d->WIS,
+		d->CHA,
+		d->ATK
 	);
 
-	loaded_bot = new Bot(bot_id, atoi(row[0]), atoi(row[1]), atof(row[14]), atoi(row[6]), tempNPCStruct);
+	safe_delete(d);
+
+	loaded_bot = new Bot(
+		bot_id,
+		l.owner_id,
+		l.spells_id,
+		l.time_spawned,
+		l.zone_id,
+		t
+	);
+
 	if (loaded_bot) {
-		loaded_bot->SetShowHelm((atoi(row[43]) > 0 ? true : false));
-		loaded_bot->SetSurname(row[3]);//maintaining outside mob::lastname to cater to spaces
-		loaded_bot->SetTitle(row[4]);
-		loaded_bot->SetSuffix(row[5]);
-		uint32 bfd = atoi(row[44]);
-		if (bfd < 1)
-			bfd = 1;
-		if (bfd > BOT_FOLLOW_DISTANCE_DEFAULT_MAX)
-			bfd = BOT_FOLLOW_DISTANCE_DEFAULT_MAX;
+		loaded_bot->SetSurname(l.last_name);
+		loaded_bot->SetTitle(l.title);
+		loaded_bot->SetSuffix(l.suffix);
+
+		loaded_bot->SetShowHelm((l.show_helm ? true : false));
+
+		auto bfd = EQ::Clamp(l.follow_distance, static_cast<uint32>(1), BOT_FOLLOW_DISTANCE_DEFAULT_MAX);
 		loaded_bot->SetFollowDistance(bfd);
 
-		uint8 sml = atoi(row[45]);
-		loaded_bot->SetStopMeleeLevel(sml);
+		loaded_bot->SetStopMeleeLevel(l.stop_melee_level);
+
+		loaded_bot->SetExpansionBitmask(l.expansion_bitmask, false);
+
+		loaded_bot->SetBotEnforceSpellSetting((l.enforce_spell_settings ? true : false));
+
+		loaded_bot->SetBotArcherySetting((l.archery_setting ? true : false));
 	}
 
 	return true;
@@ -450,263 +482,147 @@ bool BotDatabase::LoadBot(const uint32 bot_id, Bot*& loaded_bot)
 
 bool BotDatabase::SaveNewBot(Bot* bot_inst, uint32& bot_id)
 {
-	if (!bot_inst)
+	if (!bot_inst) {
 		return false;
+	}
 
-	query = StringFormat(
-		"INSERT INTO `bot_data` ("
-		" `owner_id`,"
-		" `spells_id`,"
-		" `name`,"
-		" `last_name`,"
-		" `zone_id`,"
-		" `gender`,"
-		" `race`,"
-		" `class`,"
-		" `level`,"
-		" `creation_day`,"
-		" `last_spawn`,"
-		" `time_spawned`,"
-		" `size`,"
-		" `face`,"
-		" `hair_color`,"
-		" `hair_style`,"
-		" `beard`,"
-		" `beard_color`,"
-		" `eye_color_1`,"
-		" `eye_color_2`,"
-		" `drakkin_heritage`,"
-		" `drakkin_tattoo`,"
-		" `drakkin_details`,"
-		" `ac`,"
-		" `atk`,"
-		" `hp`,"
-		" `mana`,"
-		" `str`,"
-		" `sta`,"
-		" `cha`,"
-		" `dex`,"
-		" `int`,"
-		" `agi`,"
-		" `wis`,"
-		" `fire`,"
-		" `cold`,"
-		" `magic`,"
-		" `poison`,"
-		" `disease`,"
-		" `corruption`,"
-		" `show_helm`,"
-		" `follow_distance`,"
-		" `stop_melee_level`"
-		")"
-		" VALUES ("
-		"'%u',"					/* owner_id */
-		" '%u',"				/* spells_id */
-		" '%s',"				/* name */
-		" '%s',"				/* last_name */
-		" '%i',"				/* zone_id */
-		" '%i',"				/* gender */
-		" '%i',"				/* race */
-		" '%i',"				/* class */
-		" '%u',"				/* level */
-		" UNIX_TIMESTAMP(),"	/* creation_day */
-		" UNIX_TIMESTAMP(),"	/* last_spawn */
-		" 0,"					/* time_spawned */
-		" '%f',"				/* size */
-		" '%i',"				/* face */
-		" '%i',"				/* hair_color */
-		" '%i',"				/* hair_style */
-		" '%i',"				/* beard */
-		" '%i',"				/* beard_color */
-		" '%i',"				/* eye_color_1 */
-		" '%i',"				/* eye_color_2 */
-		" '%i',"				/* drakkin_heritage */
-		" '%i',"				/* drakkin_tattoo */
-		" '%i',"				/* drakkin_details */
-		" '%i',"				/* ac */
-		" '%i',"				/* atk */
-		" '%i',"				/* hp */
-		" '%i',"				/* mana */
-		" '%i',"				/* str */
-		" '%i',"				/* sta */
-		" '%i',"				/* cha */
-		" '%i',"				/* dex */
-		" '%i',"				/* int */
-		" '%i',"				/* agi */
-		" '%i',"				/* wis */
-		" '%i',"				/* fire */
-		" '%i',"				/* cold */
-		" '%i',"				/* magic */
-		" '%i',"				/* poison */
-		" '%i',"				/* disease */
-		" '%i',"				/* corruption */
-		" '1',"					/* show_helm */
-		" '%i',"				/* follow_distance */
-		" '%u'"					/* stop_melee_level */
-		")",
-		bot_inst->GetBotOwnerCharacterID(),
-		bot_inst->GetBotSpellID(),
-		bot_inst->GetCleanName(),
-		bot_inst->GetLastName(),
-		bot_inst->GetLastZoneID(),
-		bot_inst->GetGender(),
-		bot_inst->GetRace(),
-		bot_inst->GetClass(),
-		bot_inst->GetLevel(),
-		bot_inst->GetSize(),
-		bot_inst->GetLuclinFace(),
-		bot_inst->GetHairColor(),
-		bot_inst->GetHairStyle(),
-		bot_inst->GetBeard(),
-		bot_inst->GetBeardColor(),
-		bot_inst->GetEyeColor1(),
-		bot_inst->GetEyeColor2(),
-		bot_inst->GetDrakkinHeritage(),
-		bot_inst->GetDrakkinTattoo(),
-		bot_inst->GetDrakkinDetails(),
-		bot_inst->GetAC(),
-		bot_inst->GetATK(),
-		bot_inst->GetHP(),
-		bot_inst->GetMana(),
-		bot_inst->GetSTR(),
-		bot_inst->GetSTA(),
-		bot_inst->GetCHA(),
-		bot_inst->GetDEX(),
-		bot_inst->GetINT(),
-		bot_inst->GetAGI(),
-		bot_inst->GetWIS(),
-		bot_inst->GetFR(),
-		bot_inst->GetCR(),
-		bot_inst->GetMR(),
-		bot_inst->GetPR(),
-		bot_inst->GetDR(),
-		bot_inst->GetCorrup(),
-		(uint32)BOT_FOLLOW_DISTANCE_DEFAULT,
-		(IsCasterClass(bot_inst->GetClass()) ? (uint8)RuleI(Bots, CasterStopMeleeLevel) : 255)
-	);
-	auto results = database.QueryDatabase(query);
-	if (!results.Success())
+	auto e = BotDataRepository::NewEntity();
+
+	e.owner_id               = bot_inst->GetBotOwnerCharacterID();
+	e.spells_id              = bot_inst->GetBotSpellID();
+	e.name                   = bot_inst->GetCleanName();
+	e.last_name              = bot_inst->GetLastName();
+	e.title                  = bot_inst->GetTitle();
+	e.suffix                 = bot_inst->GetSuffix();
+	e.zone_id                = bot_inst->GetLastZoneID();
+	e.gender                 = bot_inst->GetGender();
+	e.race                   = bot_inst->GetBaseRace();
+	e.class_                 = bot_inst->GetClass();
+	e.level                  = bot_inst->GetLevel();
+	e.creation_day           = std::time(nullptr);
+	e.last_spawn             = std::time(nullptr);
+	e.size                   = bot_inst->GetSize();
+	e.face                   = bot_inst->GetLuclinFace();
+	e.hair_color             = bot_inst->GetHairColor();
+	e.hair_style             = bot_inst->GetHairStyle();
+	e.beard                  = bot_inst->GetBeard();
+	e.beard_color            = bot_inst->GetBeardColor();
+	e.eye_color_1            = bot_inst->GetEyeColor1();
+	e.eye_color_2            = bot_inst->GetEyeColor2();
+	e.drakkin_heritage       = bot_inst->GetDrakkinHeritage();
+	e.drakkin_tattoo         = bot_inst->GetDrakkinTattoo();
+	e.drakkin_details        = bot_inst->GetDrakkinDetails();
+	e.ac                     = bot_inst->GetBaseAC();
+	e.atk                    = bot_inst->GetBaseATK();
+	e.hp                     = bot_inst->GetHP();
+	e.mana                   = bot_inst->GetMana();
+	e.str                    = bot_inst->GetBaseSTR();
+	e.sta                    = bot_inst->GetBaseSTA();
+	e.cha                    = bot_inst->GetBaseCHA();
+	e.dex                    = bot_inst->GetBaseDEX();
+	e.int_                   = bot_inst->GetBaseINT();
+	e.agi                    = bot_inst->GetBaseAGI();
+	e.wis                    = bot_inst->GetBaseWIS();
+	e.fire                   = bot_inst->GetBaseFR();
+	e.cold                   = bot_inst->GetBaseCR();
+	e.magic                  = bot_inst->GetBaseMR();
+	e.poison                 = bot_inst->GetBasePR();
+	e.disease                = bot_inst->GetBaseDR();
+	e.corruption             = bot_inst->GetBaseCorrup();
+	e.show_helm              = bot_inst->GetShowHelm() ? 1 : 0;
+	e.follow_distance        = bot_inst->GetFollowDistance();
+	e.stop_melee_level       = bot_inst->GetStopMeleeLevel();
+	e.expansion_bitmask      = bot_inst->GetExpansionBitmask();
+	e.enforce_spell_settings = bot_inst->GetBotEnforceSpellSetting();
+	e.archery_setting        = bot_inst->IsBotArcher() ? 1 : 0;
+
+	auto b = BotDataRepository::InsertOne(database, e);
+	if (!b.bot_id) {
 		return false;
+	}
 
-	bot_id = results.LastInsertedID();
+	bot_id = b.bot_id;
 
 	return true;
 }
 
 bool BotDatabase::SaveBot(Bot* bot_inst)
 {
-	if (!bot_inst)
+	if (!bot_inst) {
 		return false;
+	}
 
-	query = StringFormat(
-		"UPDATE `bot_data`"
-		" SET"
-		" `owner_id` = '%u',"
-		" `spells_id` = '%u',"
-		" `name` = '%s',"
-		" `last_name` = '%s',"
-		" `zone_id` = '%i',"
-		" `gender` = '%i',"
-		" `race` = '%i',"
-		" `class` = '%i',"
-		" `level` = '%u',"
-		" `last_spawn` = UNIX_TIMESTAMP(),"
-		" `time_spawned` = '%u',"
-		" `size` = '%f',"
-		" `face` = '%i',"
-		" `hair_color` = '%i',"
-		" `hair_style` = '%i',"
-		" `beard` = '%i',"
-		" `beard_color` = '%i',"
-		" `eye_color_1` = '%i',"
-		" `eye_color_2` = '%i',"
-		" `drakkin_heritage` = '%i',"
-		" `drakkin_tattoo` = '%i',"
-		" `drakkin_details` = '%i',"
-		" `ac` = '%i',"
-		" `atk` = '%i',"
-		" `hp` = '%i',"
-		" `mana` = '%i',"
-		" `str` = '%i',"
-		" `sta` = '%i',"
-		" `cha` = '%i',"
-		" `dex` = '%i',"
-		" `int` = '%i',"
-		" `agi` = '%i',"
-		" `wis` = '%i',"
-		" `fire` = '%i',"
-		" `cold` = '%i',"
-		" `magic` = '%i',"
-		" `poison` = '%i',"
-		" `disease` = '%i',"
-		" `corruption` = '%i',"
-		" `show_helm` = '%i',"
-		" `follow_distance` = '%i',"
-		" `stop_melee_level` = '%u',"
-		" `title` = '%s',"
-		" `suffix` = '%s'"
-		" WHERE `bot_id` = '%u'",
-		bot_inst->GetBotOwnerCharacterID(),
-		bot_inst->GetBotSpellID(),
-		bot_inst->GetCleanName(),
-		bot_inst->GetSurname().c_str(),
-		bot_inst->GetLastZoneID(),
-		bot_inst->GetBaseGender(),
-		bot_inst->GetBaseRace(),
-		bot_inst->GetClass(),
-		bot_inst->GetLevel(),
-		bot_inst->GetTotalPlayTime(),
-		bot_inst->GetBaseSize(),
-		bot_inst->GetLuclinFace(),
-		bot_inst->GetHairColor(),
-		bot_inst->GetHairStyle(),
-		bot_inst->GetBeard(),
-		bot_inst->GetBeardColor(),
-		bot_inst->GetEyeColor1(),
-		bot_inst->GetEyeColor2(),
-		bot_inst->GetDrakkinHeritage(),
-		bot_inst->GetDrakkinTattoo(),
-		bot_inst->GetDrakkinDetails(),
-		bot_inst->GetBaseAC(),
-		bot_inst->GetBaseATK(),
-		bot_inst->GetHP(),
-		bot_inst->GetMana(),
-		bot_inst->GetBaseSTR(),
-		bot_inst->GetBaseSTA(),
-		bot_inst->GetBaseCHA(),
-		bot_inst->GetBaseDEX(),
-		bot_inst->GetBaseINT(),
-		bot_inst->GetBaseAGI(),
-		bot_inst->GetBaseWIS(),
-		bot_inst->GetBaseFR(),
-		bot_inst->GetBaseCR(),
-		bot_inst->GetBaseMR(),
-		bot_inst->GetBasePR(),
-		bot_inst->GetBaseDR(),
-		bot_inst->GetBaseCorrup(),
-		((bot_inst->GetShowHelm()) ? (1) : (0)),
-		bot_inst->GetFollowDistance(),
-		bot_inst->GetStopMeleeLevel(),
-		bot_inst->GetTitle().c_str(),
-		bot_inst->GetSuffix().c_str(),
-		bot_inst->GetBotID()
-	);
-	auto results = database.QueryDatabase(query);
-	if (!results.Success())
+	auto l = BotDataRepository::FindOne(database, bot_inst->GetBotID());
+	if (!l.bot_id) {
 		return false;
+	}
+
+	l.owner_id               = bot_inst->GetBotOwnerCharacterID();
+	l.spells_id              = bot_inst->GetBotSpellID();
+	l.name                   = bot_inst->GetCleanName();
+	l.last_name              = bot_inst->GetLastName();
+	l.title                  = bot_inst->GetTitle();
+	l.suffix                 = bot_inst->GetSuffix();
+	l.zone_id                = bot_inst->GetLastZoneID();
+	l.gender                 = bot_inst->GetBaseGender();
+	l.race                   = bot_inst->GetBaseRace();
+	l.class_                 = bot_inst->GetClass();
+	l.level                  = bot_inst->GetLevel();
+	l.last_spawn             = std::time(nullptr);
+	l.time_spawned           = bot_inst->GetTotalPlayTime();
+	l.size                   = bot_inst->GetSize();
+	l.face                   = bot_inst->GetLuclinFace();
+	l.hair_color             = bot_inst->GetHairColor();
+	l.hair_style             = bot_inst->GetHairStyle();
+	l.beard                  = bot_inst->GetBeard();
+	l.beard_color            = bot_inst->GetBeardColor();
+	l.eye_color_1            = bot_inst->GetEyeColor1();
+	l.eye_color_2            = bot_inst->GetEyeColor2();
+	l.drakkin_heritage       = bot_inst->GetDrakkinHeritage();
+	l.drakkin_tattoo         = bot_inst->GetDrakkinTattoo();
+	l.drakkin_details        = bot_inst->GetDrakkinDetails();
+	l.ac                     = bot_inst->GetBaseAC();
+	l.atk                    = bot_inst->GetBaseATK();
+	l.hp                     = bot_inst->GetHP();
+	l.mana                   = bot_inst->GetMana();
+	l.str                    = bot_inst->GetBaseSTR();
+	l.sta                    = bot_inst->GetBaseSTA();
+	l.cha                    = bot_inst->GetBaseCHA();
+	l.dex                    = bot_inst->GetBaseDEX();
+	l.int_                   = bot_inst->GetBaseINT();
+	l.agi                    = bot_inst->GetBaseAGI();
+	l.wis                    = bot_inst->GetBaseWIS();
+	l.fire                   = bot_inst->GetBaseFR();
+	l.cold                   = bot_inst->GetBaseCR();
+	l.magic                  = bot_inst->GetBaseMR();
+	l.poison                 = bot_inst->GetBasePR();
+	l.disease                = bot_inst->GetBaseDR();
+	l.corruption             = bot_inst->GetBaseCorrup();
+	l.show_helm              = bot_inst->GetShowHelm() ? 1 : 0;
+	l.follow_distance        = bot_inst->GetFollowDistance();
+	l.stop_melee_level       = bot_inst->GetStopMeleeLevel();
+	l.expansion_bitmask      = bot_inst->GetExpansionBitmask();
+	l.enforce_spell_settings = bot_inst->GetBotEnforceSpellSetting();
+	l.archery_setting        = bot_inst->IsBotArcher() ? 1 : 0;
+
+	const auto updated = BotDataRepository::UpdateOne(database, l);
+	if (!updated) {
+		return false;
+	}
 
 	return true;
 }
 
 bool BotDatabase::DeleteBot(const uint32 bot_id)
 {
-	if (!bot_id)
+	if (!bot_id) {
 		return false;
+	}
 
-	query = StringFormat("DELETE FROM `bot_data` WHERE `bot_id` = '%u'", bot_id);
-	auto results = database.QueryDatabase(query);
-	if (!results.Success())
+	const auto deleted = BotDataRepository::DeleteOne(database, bot_id);
+	if (!deleted) {
 		return false;
+	}
 
 	return true;
 }
@@ -796,8 +712,9 @@ bool BotDatabase::SaveBuffs(Bot* bot_inst)
 		return false;
 
 	for (int buff_index = 0; buff_index < BUFF_COUNT; ++buff_index) {
-		if (bot_buffs[buff_index].spellid <= 0 || bot_buffs[buff_index].spellid == SPELL_UNKNOWN)
+		if (!IsValidSpell(bot_buffs[buff_index].spellid)) {
 			continue;
+		}
 
 		query = StringFormat(
 			"INSERT INTO `bot_buffs` ("
@@ -1059,70 +976,6 @@ bool BotDatabase::DeleteTimers(const uint32 bot_id)
 	return true;
 }
 
-bool BotDatabase::LoadGuildMembership(const uint32 bot_id, uint32& guild_id, uint8& guild_rank, std::string& guild_name)
-{
-	if (!bot_id)
-		return false;
-
-	query = StringFormat(
-		"SELECT"
-		" gm.`guild_id`,"
-		" gm.`rank`,"
-		" g.`name`"
-		" FROM `vw_guild_members` AS gm"
-		" JOIN `guilds` AS g"
-		" ON gm.`guild_id` = g.`id`"
-		" WHERE gm.`char_id` = '%u'"
-		" AND gm.`mob_type` = 'B'"
-		" LIMIT 1",
-		bot_id
-	);
-	auto results = database.QueryDatabase(query);
-	if (!results.Success())
-		return false;
-	if (!results.RowCount())
-		return true;
-
-	auto row = results.begin();
-	guild_id = atoi(row[0]);
-	guild_rank = atoi(row[1]);
-	guild_name = row[2];
-
-	return true;
-}
-
-bool BotDatabase::SaveGuildMembership(const uint32 bot_id, const uint32 guild_id, const uint8 guild_rank)
-{
-	if (!bot_id || !guild_id)
-		return false;
-
-	if (!DeleteGuildMembership(bot_id))
-		return false;
-
-	query = StringFormat("INSERT INTO `bot_guild_members` SET `bot_id` = '%u', `guild_id` = '%u', `rank` = '%u'", bot_id, guild_id, guild_rank);
-	auto results = database.QueryDatabase(query);
-	if (!results.Success()) {
-		DeleteGuildMembership(bot_id);
-		return false;
-	}
-
-	return true;
-}
-
-bool BotDatabase::DeleteGuildMembership(const uint32 bot_id)
-{
-	if (!bot_id)
-		return false;
-
-	query = StringFormat("DELETE FROM `bot_guild_members` WHERE `bot_id` = '%u'", bot_id);
-	auto results = database.QueryDatabase(query);
-	if (!results.Success())
-		return false;
-
-	return true;
-}
-
-
 /* Bot inventory functions   */
 bool BotDatabase::QueryInventoryCount(const uint32 bot_id, uint32& item_count)
 {
@@ -1292,6 +1145,29 @@ bool BotDatabase::LoadItemBySlot(const uint32 bot_id, const uint32 slot_id, uint
 
 	auto row = results.begin();
 	item_id = atoi(row[0]);
+
+	return true;
+}
+
+bool BotDatabase::LoadItemSlots(const uint32 bot_id, std::map<uint16, uint32>& m)
+{
+	if (!bot_id) {
+		return false;
+	}
+
+	const auto& l = BotInventoriesRepository::GetWhere(
+		database,
+		fmt::format(
+			"bot_id = {}",
+			bot_id
+		)
+	);
+
+	if (!l.empty()) {
+		for (const auto& e : l) {
+			m.insert(std::pair<uint16, uint32>(e.slot_id, e.item_id));
+		}
+	}
 
 	return true;
 }
@@ -2320,124 +2196,174 @@ bool BotDatabase::SaveOwnerOption(const uint32 owner_id, const std::pair<size_t,
 
 
 /* Bot bot-group functions   */
-bool BotDatabase::QueryBotGroupExistence(const std::string& group_name, bool& extant_flag)
+bool BotDatabase::QueryBotGroupExistence(const std::string& group_name)
 {
-	if (group_name.empty())
+	if (group_name.empty()) {
 		return false;
+	}
 
-	query = StringFormat("SELECT `group_name` FROM `vw_bot_groups` WHERE `group_name` LIKE '%s' LIMIT 1", group_name.c_str());
+	query = fmt::format(
+		"SELECT `group_name` FROM `bot_groups` WHERE `group_name` = '{}' LIMIT 1",
+		group_name
+	);
+
 	auto results = database.QueryDatabase(query);
-	if (!results.Success())
+	if (!results.Success() || !results.RowCount()) {
 		return false;
-	if (!results.RowCount())
-		return true;
-
-	extant_flag = true;
+	}
 
 	return true;
 }
 
 bool BotDatabase::LoadBotGroupIDByBotGroupName(const std::string& group_name, uint32& botgroup_id)
 {
-	if (group_name.empty())
+	if (group_name.empty()) {
 		return false;
+	}
 
-	query = StringFormat("SELECT `groups_index` FROM `bot_groups` WHERE `group_name` = '%s' LIMIT 1", group_name.c_str());
+	query = fmt::format(
+		"SELECT `groups_index` FROM `bot_groups` WHERE `group_name` = '{}' LIMIT 1",
+		Strings::Escape(group_name)
+	);
+
 	auto results = database.QueryDatabase(query);
-	if (!results.Success())
+	if (!results.Success()) {
 		return false;
-	if (!results.RowCount())
+	}
+
+	if (!results.RowCount()) {
 		return true;
+	}
 
 	auto row = results.begin();
-	botgroup_id = atoi(row[0]);
+	botgroup_id = std::stoul(row[0]);
 
 	return true;
 }
 
 bool BotDatabase::LoadBotGroupIDByLeaderID(const uint32 leader_id, uint32& botgroup_id)
 {
-	if (!leader_id)
+	if (!leader_id) {
 		return false;
+	}
 
-	query = StringFormat("SELECT `groups_index` FROM `bot_groups` WHERE `group_leader_id` = '%u' LIMIT 1", leader_id);
+	query = fmt::format(
+		"SELECT `groups_index` FROM `bot_groups` WHERE `group_leader_id` = {} LIMIT 1",
+		leader_id
+	);
+
 	auto results = database.QueryDatabase(query);
-	if (!results.Success())
+	if (!results.Success()) {
 		return false;
-	if (!results.RowCount())
+	}
+
+	if (!results.RowCount()) {
 		return true;
+	}
 
 	auto row = results.begin();
-	botgroup_id = atoi(row[0]);
+	botgroup_id = std::stoul(row[0]);
 
 	return true;
 }
 
 bool BotDatabase::LoadBotGroupIDByMemberID(const uint32 member_id, uint32& botgroup_id)
 {
-	if (!member_id)
+	if (!member_id) {
 		return false;
+	}
 
-	query = StringFormat("SELECT `groups_index` FROM `bot_group_members` WHERE `bot_id` = '%u' LIMIT 1", member_id);
+	query = fmt::format(
+		"SELECT `groups_index` FROM `bot_group_members` WHERE `bot_id` = {} LIMIT 1",
+		member_id
+	);
+
 	auto results = database.QueryDatabase(query);
-	if (!results.Success())
+	if (!results.Success()) {
 		return false;
-	if (!results.RowCount())
+	}
+
+	if (!results.RowCount()) {
 		return true;
+	}
 
 	auto row = results.begin();
-	botgroup_id = atoi(row[0]);
+	botgroup_id = std::stoul(row[0]);
 
 	return true;
 }
 
 bool BotDatabase::LoadLeaderIDByBotGroupName(const std::string& group_name, uint32& leader_id)
 {
-	if (group_name.empty())
+	if (group_name.empty()) {
 		return false;
+	}
 
-	query = StringFormat("SELECT `group_leader_id` FROM `bot_groups` WHERE `group_name` = '%s' LIMIT 1", group_name.c_str());
+	query = fmt::format(
+		"SELECT `group_leader_id` FROM `bot_groups` WHERE `group_name` = '{}' LIMIT 1",
+		group_name
+	);
+
 	auto results = database.QueryDatabase(query);
-	if (!results.Success())
+	if (!results.Success()) {
 		return false;
-	if (!results.RowCount())
+	}
+
+	if (!results.RowCount()) {
 		return true;
+	}
 
 	auto row = results.begin();
-	leader_id = atoi(row[0]);
+	leader_id = std::stoul(row[0]);
 
 	return true;
 }
 
 bool BotDatabase::LoadLeaderIDByBotGroupID(const uint32 group_id, uint32& leader_id)
 {
-	if (!group_id)
+	if (!group_id) {
 		return false;
+	}
 
-	query = StringFormat("SELECT `group_leader_id` FROM `bot_groups` WHERE `groups_index` = '%u' LIMIT 1", group_id);
+	query = fmt::format(
+		"SELECT `group_leader_id` FROM `bot_groups` WHERE `groups_index` = {} LIMIT 1",
+		group_id
+	);
+
 	auto results = database.QueryDatabase(query);
-	if (!results.Success())
+	if (!results.Success()) {
 		return false;
-	if (!results.RowCount())
+	}
+
+	if (!results.RowCount()) {
 		return true;
+	}
 
 	auto row = results.begin();
-	leader_id = atoi(row[0]);
+	leader_id = std::stoul(row[0]);
 
 	return true;
 }
 
 bool BotDatabase::LoadBotGroupNameByBotGroupID(const uint32 group_id, std::string& botgroup_name)
 {
-	if (!group_id)
+	if (!group_id) {
 		false;
+	}
 
-	query = StringFormat("SELECT `group_name` FROM `bot_groups` WHERE `groups_index` = '%u' LIMIT 1", group_id);
+	query = fmt::format(
+		"SELECT `group_name` FROM `bot_groups` WHERE `groups_index` = {} LIMIT 1",
+		group_id
+	);
+
 	auto results = database.QueryDatabase(query);
-	if (!results.Success())
+	if (!results.Success()) {
 		return false;
-	if (!results.RowCount())
+	}
+
+	if (!results.RowCount()) {
 		return true;
+	}
 
 	auto row = results.begin();
 	botgroup_name = row[0];
@@ -2447,15 +2373,23 @@ bool BotDatabase::LoadBotGroupNameByBotGroupID(const uint32 group_id, std::strin
 
 bool BotDatabase::LoadBotGroupNameByLeaderID(const uint32 leader_id, std::string& botgroup_name)
 {
-	if (!leader_id)
+	if (!leader_id) {
 		return false;
+	}
 
-	query = StringFormat("SELECT `group_name` FROM `bot_groups` WHERE `group_leader_id` = '%u' LIMIT 1", leader_id);
+	query = fmt::format(
+		"SELECT `group_name` FROM `bot_groups` WHERE `group_leader_id` = {} LIMIT 1",
+		leader_id
+	);
+
 	auto results = database.QueryDatabase(query);
-	if (!results.Success())
+	if (!results.Success()) {
 		return false;
-	if (!results.RowCount())
+	}
+
+	if (!results.RowCount()) {
 		return true;
+	}
 
 	auto row = results.begin();
 	botgroup_name = row[0];
@@ -2465,16 +2399,20 @@ bool BotDatabase::LoadBotGroupNameByLeaderID(const uint32 leader_id, std::string
 
 bool BotDatabase::CreateBotGroup(const std::string& group_name, const uint32 leader_id)
 {
-	if (group_name.empty() || !leader_id)
+	if (group_name.empty() || !leader_id) {
 		return false;
+	}
 
-	bool extant_flag = false;
-	if (!QueryBotGroupExistence(group_name, extant_flag))
+	if (QueryBotGroupExistence(group_name)) {
 		return false;
-	if (extant_flag)
-		return true;
+	}
 
-	query = StringFormat("INSERT INTO `bot_groups` (`group_leader_id`, `group_name`) VALUES ('%u', '%s')", leader_id, group_name.c_str());
+	query = fmt::format(
+		"INSERT INTO `bot_groups` (`group_leader_id`, `group_name`) VALUES ({}, '{}')",
+		leader_id,
+		group_name
+	);
+
 	auto results = database.QueryDatabase(query);
 	if (!results.Success()) {
 		DeleteBotGroup(leader_id);
@@ -2487,7 +2425,12 @@ bool BotDatabase::CreateBotGroup(const std::string& group_name, const uint32 lea
 		return false;
 	}
 
-	query = StringFormat("INSERT INTO `bot_group_members` (`groups_index`, `bot_id`) VALUES ('%u', '%u')", botgroup_id, leader_id);
+	query = fmt::format(
+		"INSERT INTO `bot_group_members` (`groups_index`, `bot_id`) VALUES ({}, {})",
+		botgroup_id,
+		leader_id
+	);
+
 	results = database.QueryDatabase(query);
 	if (!results.Success()) {
 		RemoveMemberFromBotGroup(leader_id);
@@ -2499,40 +2442,63 @@ bool BotDatabase::CreateBotGroup(const std::string& group_name, const uint32 lea
 
 bool BotDatabase::DeleteBotGroup(const uint32 leader_id)
 {
-	if (!leader_id)
+	if (!leader_id) {
 		return false;
+	}
 
 	uint32 botgroup_id = 0;
-	if (!LoadBotGroupIDByLeaderID(leader_id, botgroup_id))
+	if (!LoadBotGroupIDByLeaderID(leader_id, botgroup_id)) {
 		return false;
-	if (!botgroup_id)
+	}
+
+	if (!botgroup_id) {
 		return true;
+	}
 
-	query = StringFormat("DELETE FROM `bot_group_members` WHERE `groups_index` = '%u'", botgroup_id);
+	query = fmt::format(
+		"DELETE FROM `bot_group_members` WHERE `groups_index` = {}",
+		botgroup_id
+	);
+
 	auto results = database.QueryDatabase(query);
-	if (!results.Success())
+	if (!results.Success() || !results.RowsAffected()) {
 		return false;
+	}
 
-	query = StringFormat("DELETE FROM `bot_groups` WHERE `groups_index` = '%u'", botgroup_id);
+	query = fmt::format(
+		"DELETE FROM `bot_groups` WHERE `groups_index` = {}",
+		botgroup_id
+	);
+
 	results = database.QueryDatabase(query);
-	if (!results.Success())
+	if (!results.Success() || !results.RowsAffected()) {
 		return false;
+	}
 
 	return true;
 }
 
 bool BotDatabase::AddMemberToBotGroup(const uint32 leader_id, const uint32 member_id)
 {
-	if (!leader_id || !member_id)
+	if (!leader_id || !member_id) {
 		return false;
+	}
 
 	uint32 botgroup_id = 0;
-	if (!LoadBotGroupIDByLeaderID(leader_id, botgroup_id))
+	if (!LoadBotGroupIDByLeaderID(leader_id, botgroup_id)) {
 		return false;
-	if (!botgroup_id)
-		return true;
+	}
 
-	query = StringFormat("INSERT INTO `bot_group_members` (`groups_index`, `bot_id`) VALUES ('%u', '%u')", botgroup_id, member_id);
+	if (!botgroup_id) {
+		return true;
+	}
+
+	query = fmt::format(
+		"INSERT INTO `bot_group_members` (`groups_index`, `bot_id`) VALUES ({}, {})",
+		botgroup_id,
+		member_id
+	);
+
 	auto results = database.QueryDatabase(query);
 	if (!results.Success()) {
 		RemoveMemberFromBotGroup(member_id);
@@ -2544,38 +2510,59 @@ bool BotDatabase::AddMemberToBotGroup(const uint32 leader_id, const uint32 membe
 
 bool BotDatabase::RemoveMemberFromBotGroup(const uint32 member_id)
 {
-	if (!member_id)
+	if (!member_id) {
 		return false;
+	}
 
 	uint32 botgroup_id = 0;
-	if (!LoadBotGroupIDByLeaderID(member_id, botgroup_id))
+	if (!LoadBotGroupIDByLeaderID(member_id, botgroup_id)) {
 		return false;
-	if (botgroup_id)
-		return DeleteBotGroup(member_id);
+	}
 
-	query = StringFormat("DELETE FROM `bot_group_members` WHERE `bot_id` = '%u'", member_id);
+	if (botgroup_id) {
+		return DeleteBotGroup(member_id);
+	}
+
+	query = fmt::format(
+		"DELETE FROM `bot_group_members` WHERE `bot_id` = {}",
+		member_id
+	);
+
 	auto results = database.QueryDatabase(query);
-	if (!results.Success())
+	if (!results.Success()) {
 		return false;
+	}
 
 	return true;
 }
 
 bool BotDatabase::LoadBotGroupIDForLoadBotGroup(const uint32 owner_id, const std::string& group_name, uint32& botgroup_id)
 {
-	if (!owner_id || group_name.empty())
+	if (!owner_id || group_name.empty()) {
 		return false;
+	}
 
-	query = StringFormat("SELECT `groups_index`, `group_name` FROM `vw_bot_groups` WHERE `owner_id` = '%u'", owner_id);
+	query = fmt::format(
+		"SELECT groups_index, group_name FROM "
+		"bot_groups bg INNER JOIN bot_group_members bgm "
+		"ON bg.groups_index = bgm.groups_index "
+		"WHERE bgm.bot_id IN "
+		"(SELECT bot_id FROM bot_data WHERE WHERE owner_id = {})",
+		owner_id
+	);
+
 	auto results = database.QueryDatabase(query);
-	if (!results.Success())
+	if (!results.Success()) {
 		return false;
-	if (!results.RowCount())
-		return true;
+	}
 
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	if (!results.RowCount()) {
+		return true;
+	}
+
+	for (auto row : results) {
 		if (!group_name.compare(row[1])) {
-			botgroup_id = atoi(row[0]);
+			botgroup_id = std::stoul(row[0]);
 			break;
 		}
 	}
@@ -2585,75 +2572,172 @@ bool BotDatabase::LoadBotGroupIDForLoadBotGroup(const uint32 owner_id, const std
 
 bool BotDatabase::LoadBotGroup(const std::string& group_name, std::map<uint32, std::list<uint32>>& member_list)
 {
-	if (group_name.empty())
+	if (group_name.empty()) {
 		return false;
+	}
 
 	uint32 botgroup_id = 0;
-	if (!LoadBotGroupIDByBotGroupName(group_name, botgroup_id))
+	if (!LoadBotGroupIDByBotGroupName(group_name, botgroup_id)) {
 		return false;
-	if (!botgroup_id)
-		return true;
+	}
 
-	query = StringFormat("SELECT `bot_id` FROM `bot_group_members` WHERE `groups_index` = '%u' LIMIT 6", botgroup_id);
+	if (!botgroup_id) {
+		return true;
+	}
+
+	query = fmt::format(
+		"SELECT `bot_id` FROM `bot_group_members` WHERE `groups_index` = {} LIMIT 6",
+		botgroup_id
+	);
+
 	auto results = database.QueryDatabase(query);
-	if (!results.Success())
+	if (!results.Success()) {
 		return false;
-	if (!results.RowCount())
-		return true;
+	}
 
-	for (auto row = results.begin(); row != results.end(); ++row)
-		member_list[botgroup_id].push_back(atoi(row[0]));
+	if (!results.RowCount()) {
+		return true;
+	}
+
+	for (auto row : results) {
+		member_list[botgroup_id].push_back(std::stoul(row[0]));
+	}
 
 	return true;
 }
 
 bool BotDatabase::LoadBotGroupsListByOwnerID(const uint32 owner_id, std::list<std::pair<std::string, std::string>>& botgroups_list)
 {
-	if (!owner_id)
+	if (!owner_id) {
 		return false;
+	}
 
-	query = StringFormat("SELECT `group_name`, `group_leader_name` FROM `vw_bot_groups` WHERE `owner_id` = '%u'", owner_id);
+
+	query = fmt::format(
+		"SELECT group_name, group_leader_name FROM "
+		"bot_groups bg INNER JOIN bot_group_members bgm "
+		"ON bg.groups_index = bgm.groups_index "
+		"WHERE bgm.bot_id IN "
+		"(SELECT bot_id FROM bot_data WHERE WHERE owner_id = {})",
+		owner_id
+	);
+
 	auto results = database.QueryDatabase(query);
-	if (!results.Success())
+	if (!results.Success()) {
 		return false;
-	if (!results.RowCount())
-		return true;
+	}
 
-	for (auto row = results.begin(); row != results.end(); ++row)
+	if (!results.RowCount()) {
+		return true;
+	}
+
+	for (auto row : results) {
 		botgroups_list.push_back(std::pair<std::string, std::string>(row[0], row[1]));
+	}
 
 	return true;
 }
 
+bool BotDatabase::IsBotGroupAutoSpawn(const std::string& botgroup_name)
+{
+	if (botgroup_name.empty()) {
+		return false;
+	}
+
+	query = fmt::format(
+		"SELECT group_name FROM bot_groups WHERE group_name = '{}' AND auto_spawn = 1",
+		botgroup_name
+	);
+
+	auto results = database.QueryDatabase(query);
+	if (!results.RowCount() || !results.Success()) {
+		return false;
+	}
+
+	return true;
+}
+
+bool BotDatabase::ToggleBotGroupAutoSpawn(const uint32 group_id)
+{
+	if (!group_id) {
+		return false;
+	}
+
+	query = fmt::format(
+		"UPDATE bot_groups SET auto_spawn = 1 - auto_spawn WHERE groups_index = {}",
+		group_id
+	);
+
+	auto results = database.QueryDatabase(query);
+	if (!results.Success() || !results.RowsAffected()) {
+		return false;
+	}
+
+	return true;
+}
+
+bool BotDatabase::LoadAutoSpawnBotGroupsByOwnerID(const uint32 owner_id, std::list<std::pair<uint32,std::string>>& group_list)
+{
+	if (!owner_id) {
+		return false;
+	}
+
+	query = fmt::format(
+		SQL(
+			SELECT group_leader_id, group_name FROM bot_groups WHERE groups_index IN (
+				SELECT groups_index FROM bot_group_members WHERE bot_id IN (
+					SELECT bot_id FROM bot_data WHERE owner_id = {}
+				)
+			) AND auto_spawn = 1
+		),
+		owner_id
+	);
+
+	auto results = database.QueryDatabase(query);
+	if (!results.Success()) {
+		return false;
+	}
+
+	if (!results.RowCount()) {
+		return true;
+	}
+
+	for (auto row : results) {
+		group_list.push_back(
+			std::pair<uint32,std::string>(std::stoul(row[0]), row[1])
+		);
+	}
+
+	return true;
+}
 
 /* Bot owner group functions   */
 // added owner ID to this function to fix groups with mulitple players grouped with bots.
 bool BotDatabase::LoadGroupedBotsByGroupID(const uint32 owner_id, const uint32 group_id, std::list<uint32>& group_list)
 {
-	if (!group_id || !owner_id)
+	if (!group_id || !owner_id) {
 		return false;
+	}
 
-	query = StringFormat(
-		"SELECT `charid`"
-		" FROM `group_id`"
-		" WHERE `groupid` = '%u'"
-		" AND `name` IN ("
-		"  SELECT `name`"
-		"  FROM `bot_data`"
-		"  WHERE `owner_id` = '%u'"
-		"  )",
+	query = fmt::format(
+		"SELECT `charid` FROM `group_id` WHERE `groupid` = {} AND `name` IN "
+		"(SELECT `name` FROM `bot_data` WHERE `owner_id` = {})",
 		group_id,
 		owner_id
 	);
 
 	auto results = database.QueryDatabase(query);
-	if (!results.Success())
+	if (!results.Success()) {
 		return false;
-	if (!results.RowCount())
-		return true;
+	}
 
-	for (auto row = results.begin(); row != results.end(); ++row)
-		group_list.push_back(atoi(row[0]));
+	if (!results.RowCount()) {
+		return true;
+	}
+
+	for (auto row : results) {
+		group_list.push_back(std::stoul(row[0]));
+	}
 
 	return true;
 }
@@ -2967,13 +3051,72 @@ uint16 BotDatabase::GetRaceClassBitmask(uint16 bot_race)
 	return classes;
 }
 
+bool BotDatabase::SaveExpansionBitmask(const uint32 bot_id, const int expansion_bitmask)
+{
+	if (!bot_id) {
+		return false;
+	}
+
+	query = fmt::format(
+		"UPDATE `bot_data` "
+		"SET `expansion_bitmask` = {} "
+		"WHERE `bot_id` = {}",
+		expansion_bitmask,
+		bot_id
+	);
+
+	auto results = database.QueryDatabase(query);
+	if (!results.Success()) {
+		return false;
+	}
+
+	return true;
+}
+
+bool BotDatabase::SaveEnforceSpellSetting(const uint32 bot_id, const bool enforce_spell_setting)
+{
+	if (!bot_id) {
+		return false;
+	}
+
+	query = fmt::format(
+		"UPDATE `bot_data`"
+		"SET `enforce_spell_settings` = {} "
+		"WHERE `bot_id` = {}",
+		(enforce_spell_setting ? 1 : 0),
+		bot_id
+	);
+	auto results = database.QueryDatabase(query);
+	if (!results.Success()) {
+		return false;
+	}
+
+	return true;
+}
+
+bool BotDatabase::SaveBotArcherSetting(const uint32 bot_id, const bool bot_archer_setting)
+{
+	if (!bot_id) {
+		return false;
+	}
+	query = fmt::format(
+		"UPDATE `bot_data`"
+		"SET `archery_setting` = {} "
+		"WHERE `bot_id` = {}",
+		(bot_archer_setting ? 1 : 0),
+		bot_id
+	);
+	auto results = database.QueryDatabase(query);
+	if (!results.Success()) {
+		return false;
+	}
+	return true;
+}
+
 /* fail::Bot functions   */
-const char* BotDatabase::fail::QueryNameAvailablity() { return "Failed to query name availability"; }
-const char* BotDatabase::fail::QueryBotCount() { return "Failed to query bot count"; }
-const char* BotDatabase::fail::LoadQuestableSpawnCount() { return "Failed to load questable spawn count"; }
 const char* BotDatabase::fail::LoadBotsList() { return "Failed to bots list"; }
-const char* BotDatabase::fail::LoadOwnerID() { return "Failed to load owner id"; }
-const char* BotDatabase::fail::LoadBotID() { return "Failed to load bot id"; }
+const char* BotDatabase::fail::LoadOwnerID() { return "Failed to load owner ID"; }
+const char* BotDatabase::fail::LoadBotID() { return "Failed to load bot ID"; }
 const char* BotDatabase::fail::LoadBot() { return "Failed to load bot"; }
 const char* BotDatabase::fail::SaveNewBot() { return "Failed to save new bot"; }
 const char* BotDatabase::fail::SaveBot() { return "Failed to save bot"; }
@@ -2981,22 +3124,16 @@ const char* BotDatabase::fail::DeleteBot() { return "Failed to delete bot"; }
 const char* BotDatabase::fail::LoadBuffs() { return "Failed to load buffs"; }
 const char* BotDatabase::fail::SaveBuffs() { return "Failed to save buffs"; }
 const char* BotDatabase::fail::DeleteBuffs() { return "Failed to delete buffs"; }
-const char* BotDatabase::fail::LoadStance() { return "Failed to load stance"; }
-const char* BotDatabase::fail::SaveStance() { return "Failed to save stance"; }
 const char* BotDatabase::fail::DeleteStance() { return "Failed to delete stance"; }
 const char* BotDatabase::fail::LoadTimers() { return "Failed to load timers"; }
 const char* BotDatabase::fail::SaveTimers() { return "Failed to save timers"; }
 const char* BotDatabase::fail::DeleteTimers() { return "Failed to delete timers"; }
-const char* BotDatabase::fail::LoadGuildMembership() { return "Failed to load guild membership"; }
-const char* BotDatabase::fail::SaveGuildMembership() { return "Failed to save guild membership"; }
-const char* BotDatabase::fail::DeleteGuildMembership() { return "Failed to delete guild membership"; }
 
 /* fail::Bot inventory functions   */
 const char* BotDatabase::fail::QueryInventoryCount() { return "Failed to query inventory count"; }
 const char* BotDatabase::fail::LoadItems() { return "Failed to load items"; }
 const char* BotDatabase::fail::SaveItems() { return "Failed to save items"; }
 const char* BotDatabase::fail::DeleteItems() { return "Failed to delete items"; }
-const char* BotDatabase::fail::LoadItemBySlot() { return "Failed to load item by slot"; }
 const char* BotDatabase::fail::SaveItemBySlot() { return "Failed to save item by slot"; }
 const char* BotDatabase::fail::DeleteItemBySlot() { return "Failed to delete item by slot"; }
 const char* BotDatabase::fail::LoadEquipmentColor() { return "Failed to load equipment color"; }
@@ -3004,7 +3141,7 @@ const char* BotDatabase::fail::SaveEquipmentColor() { return "Failed to save equ
 
 /* fail::Bot pet functions   */
 const char* BotDatabase::fail::LoadPetIndex() { return "Failed to load pet index"; }
-const char* BotDatabase::fail::LoadPetSpellID() { return "Failed to load pet spell id"; }
+const char* BotDatabase::fail::LoadPetSpellID() { return "Failed to load pet spell ID"; }
 const char* BotDatabase::fail::LoadPetStats() { return "Failed to load pet stats"; }
 const char* BotDatabase::fail::SavePetStats() { return "Failed to save pet stats"; }
 const char* BotDatabase::fail::DeletePetStats() { return "Failed to delete pet stats"; }
@@ -3029,32 +3166,10 @@ const char* BotDatabase::fail::ToggleHelmAppearance() { return "Failed to save t
 const char* BotDatabase::fail::ToggleAllHelmAppearances() { return "Failed to save toggle all helm appearance"; }
 const char* BotDatabase::fail::SaveFollowDistance() { return "Failed to save follow distance"; }
 const char* BotDatabase::fail::SaveAllFollowDistances() { return "Failed to save all follow distances"; }
-const char* BotDatabase::fail::CreateCloneBot() { return "Failed to create clone bot"; }
-const char* BotDatabase::fail::CreateCloneBotInventory() { return "Failed to create clone bot inventory"; }
 const char* BotDatabase::fail::SaveStopMeleeLevel() { return "Failed to save stop melee level"; }
 
-/* fail::Bot bot-group functions   */
-const char* BotDatabase::fail::QueryBotGroupExistence() { return "Failed to query bot-group existence"; }
-const char* BotDatabase::fail::LoadBotGroupIDByBotGroupName() { return "Failed to load bot-group id by bot-group name"; }
-const char* BotDatabase::fail::LoadBotGroupIDByLeaderID() { return "Failed to load bot-group id by leader id"; }
-const char* BotDatabase::fail::LoadBotGroupIDByMemberID() { return "Failed to load bot-group id by member id"; }
-const char* BotDatabase::fail::LoadLeaderIDByBotGroupName() { return "Failed to load leader id by bot-group name"; }
-const char* BotDatabase::fail::LoadLeaderIDByBotGroupID() { return "Failed to load leader id by bot-group id"; }
-const char* BotDatabase::fail::LoadBotGroupNameByBotGroupID() { return "Failed to load bot-group name by bot-group id"; }
-const char* BotDatabase::fail::LoadBotGroupNameByLeaderID() { return "Failed to load bot-group name by leader id"; }
-const char* BotDatabase::fail::CreateBotGroup() { return "Failed to create bot-group"; }
-const char* BotDatabase::fail::DeleteBotGroup() { return "Failed to delete bot-group"; }
-const char* BotDatabase::fail::AddMemberToBotGroup() { return "Failed to add member to bot-group"; }
-const char* BotDatabase::fail::RemoveMemberFromBotGroup() { return "Failed to remove member from bot-group"; }
-const char* BotDatabase::fail::LoadBotGroupIDForLoadBotGroup() { return "Failed to load bot-group id for load bot-group"; }
-const char* BotDatabase::fail::LoadBotGroup() { return "Failed to load bot-group"; }
-const char* BotDatabase::fail::LoadBotGroupsListByOwnerID() { return "Failed to load bot-groups list by owner id"; }
-
-/* fail::Bot group functions   */
-const char* BotDatabase::fail::LoadGroupedBotsByGroupID() { return "Failed to load grouped bots by group id"; }
-
 /* fail::Bot heal rotation functions   */
-const char* BotDatabase::fail::LoadHealRotationIDByBotID() { return "Failed to load heal rotation id by bot id"; }
+const char* BotDatabase::fail::LoadHealRotationIDByBotID() { return "Failed to load heal rotation ID by bot ID"; }
 const char* BotDatabase::fail::LoadHealRotation() { return "Failed to load heal rotation"; }
 const char* BotDatabase::fail::LoadHealRotationMembers() { return "Failed to load heal rotation members"; }
 const char* BotDatabase::fail::LoadHealRotationTargets() { return "Failed to load heal rotation targets"; }
@@ -3063,5 +3178,3 @@ const char* BotDatabase::fail::DeleteHealRotation() { return "Failed to delete h
 const char* BotDatabase::fail::DeleteAllHealRotations() { return "Failed to delete all heal rotations"; }
 
 /* fail::Bot miscellaneous functions   */
-
-#endif // BOTS

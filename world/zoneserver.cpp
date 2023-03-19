@@ -28,15 +28,16 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/guilds.h"
 #include "../common/packet_dump.h"
 #include "../common/misc.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "cliententry.h"
 #include "wguild_mgr.h"
 #include "lfplist.h"
 #include "adventure_manager.h"
 #include "ucs.h"
 #include "queryserv.h"
-#include "world_store.h"
+#include "../common/zone_store.h"
 #include "dynamic_zone.h"
+#include "dynamic_zone_manager.h"
 #include "expedition_message.h"
 #include "shared_task_world_messaging.h"
 #include "../common/shared_tasks.h"
@@ -93,7 +94,7 @@ ZoneServer::~ZoneServer() {
 	}
 }
 
-bool ZoneServer::SetZone(uint32 in_zone_id, uint32 in_instance_id, bool is_static_zone) {
+bool ZoneServer::SetZone(uint32 in_zone_id, uint32 in_instance_id, bool in_is_static_zone) {
 	is_booting_up = false;
 
 	std::string zone_short_name = ZoneName(in_zone_id, true);
@@ -101,7 +102,7 @@ bool ZoneServer::SetZone(uint32 in_zone_id, uint32 in_instance_id, bool is_stati
 
 	if (in_zone_id) {
 		LogInfo(
-			"Setting zone process to Zone: {} ({}) ID: {}{}{}",
+			"Setting zone process to Zone [{}] [{}] zone_id [{}] {}{}",
 			zone_long_name,
 			zone_short_name,
 			in_zone_id,
@@ -113,7 +114,7 @@ bool ZoneServer::SetZone(uint32 in_zone_id, uint32 in_instance_id, bool is_stati
 				) :
 				""
 			),
-			is_static_zone ? " (Static)" : ""
+			in_is_static_zone ? " (Static)" : ""
 		);
 	}
 
@@ -129,7 +130,7 @@ bool ZoneServer::SetZone(uint32 in_zone_id, uint32 in_instance_id, bool is_stati
 		LSSleepUpdate(GetPrevZoneID());
 	}
 
-	is_static_zone = is_static_zone;
+	is_static_zone = in_is_static_zone;
 
 	strn0cpy(zone_name, zone_short_name.c_str(), sizeof(zone_name));
 	strn0cpy(long_name, zone_long_name.c_str(), sizeof(long_name));
@@ -457,27 +458,25 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 					(
 						cle->TellsOff() &&
 						(
-							(
-								cle->Anon() == 1 &&
-								scm->fromadmin < cle->Admin()
-							) ||
-							scm->fromadmin < AccountStatus::QuestTroupe
+							scm->fromadmin < cle->Admin()
+							|| scm->fromadmin < AccountStatus::QuestTroupe
 						)
 					)
-				) {
+					) {
 					if (!scm->noreply) {
 						auto sender = client_list.FindCharacter(scm->from);
 						if (!sender || !sender->Server()) {
 							break;
 						}
 
-						scm->noreply = true;
-						scm->queued = 3; // offline
+						scm->noreply  = true;
+						scm->queued   = 3; // offline
 						scm->chan_num = ChatChannel_TellEcho;
 						strcpy(scm->deliverto, scm->from);
 						sender->Server()->SendPacket(pack);
 					}
-				} else if (cle->Online() == CLE_Status::Zoning) {
+				}
+				else if (cle->Online() == CLE_Status::Zoning) {
 					if (!scm->noreply) {
 						auto sender = client_list.FindCharacter(scm->from);
 						if (cle->TellQueueFull()) {
@@ -527,6 +526,8 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 				}
 			} else {
 				if (
+					scm->chan_num == ChatChannel_Guild ||
+					scm->chan_num == ChatChannel_Auction ||
 					scm->chan_num == ChatChannel_OOC ||
 					scm->chan_num == ChatChannel_Broadcast ||
 					scm->chan_num == ChatChannel_GMSAY
@@ -818,7 +819,12 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 					ingress_server->SendPacket(pack);	// inform target server
 				}
 			} else {
-				LogInfo("Processing ZTZ for ingress to zone for client [{}]", ztz->name);
+				LogInfo(
+					"Processing ZTZ for ingress to zone for client [{}] instance_id [{}] zone_id [{}]",
+					ztz->name,
+					ztz->current_instance_id,
+					ztz->current_zone_id
+				);
 				auto egress_server = (
 					ztz->current_instance_id ?
 					zoneserver_list.FindByInstanceID(ztz->current_instance_id) :
@@ -826,6 +832,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 				);
 
 				if (egress_server) {
+					LogInfo("Found egress server, forwarding client");
 					egress_server->SendPacket(pack);
 				}
 			}
@@ -972,8 +979,8 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 				break;
 			}
 
-			auto slock = (ServerLock_Struct*) pack->pBuffer;
-			if (slock->mode >= 1) {
+			auto l = (ServerLock_Struct*) pack->pBuffer;
+			if (l->is_locked) {
 				WorldConfig::LockWorld();
 			} else {
 				WorldConfig::UnlockWorld();
@@ -982,24 +989,24 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			if (loginserverlist.Connected()) {
 				loginserverlist.SendStatus();
 				SendEmoteMessage(
-					slock->myname,
+					l->character_name,
 					0,
 					AccountStatus::Player,
-					Chat::Red,
+					Chat::Yellow,
 					fmt::format(
 						"World {}.",
-						slock->mode ? "locked" : "unlocked"
+						l->is_locked ? "locked" : "unlocked"
 					).c_str()
 				);
 			} else {
 				SendEmoteMessage(
-					slock->myname,
+					l->character_name,
 					0,
 					AccountStatus::Player,
-					Chat::Red,
+					Chat::Yellow,
 					fmt::format(
 						"World {}, but login server not connected.",
-						slock->mode ? "locked" : "unlocked"
+						l->is_locked ? "locked" : "unlocked"
 					).c_str()
 				);
 			}
@@ -1245,6 +1252,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			loginserverlist.SendAccountUpdate(pack);
 			break;
 		}
+		case ServerOP_DiscordWebhookMessage:
 		case ServerOP_UCSMailMessage: {
 			UCSLink.SendPacket(pack);
 			break;
@@ -1306,6 +1314,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		case ServerOP_ReloadAAData:
 		case ServerOP_ReloadAlternateCurrencies:
 		case ServerOP_ReloadBlockedSpells:
+		case ServerOP_ReloadCommands:
 		case ServerOP_ReloadDoors:
 		case ServerOP_ReloadGroundSpawns:
 		case ServerOP_ReloadLevelEXPMods:
@@ -1321,6 +1330,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		case ServerOP_ReloadVeteranRewards:
 		case ServerOP_ReloadWorld:
 		case ServerOP_ReloadZonePoints:
+		case ServerOP_ReloadZoneData:
 		case ServerOP_RezzPlayerAccept:
 		case ServerOP_SpawnStatusChange:
 		case ServerOP_UpdateSpawn:
@@ -1341,14 +1351,20 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			zoneserver_list.SendPacket(pack);
 			content_service.SetExpansionContext()->ReloadContentFlags();
 			break;
-		}	
+		}
 		case ServerOP_ReloadLogs: {
 			zoneserver_list.SendPacket(pack);
+			UCSLink.SendPacket(pack);
 			LogSys.LoadLogDatabaseSettings();
 			break;
 		}
 		case ServerOP_ReloadTasks: {
 			shared_task_manager.LoadTaskData();
+			zoneserver_list.SendPacket(pack);
+			break;
+		}
+		case ServerOP_ReloadDzTemplates: {
+			dynamic_zone_manager.LoadTemplates();
 			zoneserver_list.SendPacket(pack);
 			break;
 		}
@@ -1385,7 +1401,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		}
 		case ServerOP_SharedTaskRequest:
 		case ServerOP_SharedTaskAddPlayer:
-		case ServerOP_SharedTaskAttemptRemove:
+		case ServerOP_SharedTaskQuit:
 		case ServerOP_SharedTaskUpdate:
 		case ServerOP_SharedTaskRequestMemberlist:
 		case ServerOP_SharedTaskRemovePlayer:
@@ -1394,6 +1410,9 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		case ServerOP_SharedTaskCreateDynamicZone:
 		case ServerOP_SharedTaskPurgeAllCommand:
 		case ServerOP_SharedTaskPlayerList:
+		case ServerOP_SharedTaskLock:
+		case ServerOP_SharedTaskEndByDz:
+		case ServerOP_SharedTaskEnd:
 		case ServerOP_SharedTaskKickPlayers: {
 			SharedTaskWorldMessaging::HandleZoneMessage(pack);
 			break;
@@ -1416,6 +1435,8 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		case ServerOP_DzSetCompass:
 		case ServerOP_DzSetSafeReturn:
 		case ServerOP_DzSetZoneIn:
+		case ServerOP_DzSetSwitchID:
+		case ServerOP_DzMovePC:
 		case ServerOP_DzUpdateMemberStatus: {
 			DynamicZone::HandleZoneMessage(pack);
 			break;

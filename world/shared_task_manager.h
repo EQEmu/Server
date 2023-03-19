@@ -3,6 +3,8 @@
 
 #include "../common/database.h"
 #include "../common/shared_tasks.h"
+#include "../common/timer.h"
+#include "../common/repositories/character_task_timers_repository.h"
 
 class DynamicZone;
 
@@ -19,6 +21,8 @@ struct SharedTaskActiveInvitation {
 
 class SharedTaskManager {
 public:
+	SharedTaskManager();
+
 	SharedTaskManager *SetDatabase(Database *db);
 	SharedTaskManager *SetContentDatabase(Database *db);
 
@@ -32,15 +36,8 @@ public:
 	TasksRepository::Tasks GetSharedTaskDataByTaskId(uint32 task_id);
 	std::vector<TaskActivitiesRepository::TaskActivities> GetSharedTaskActivityDataByTaskId(uint32 task_id);
 
-	// gets group / raid members belonging to requested character
-	std::vector<SharedTaskMember> GetRequestMembers(
-		uint32 requestor_character_id,
-		const std::vector<CharacterDataRepository::CharacterData> &characters
-	);
-
 	// client attempting to create a shared task
 	void AttemptSharedTaskCreation(uint32 requested_task_id, uint32 requested_character_id, uint32 npc_type_id);
-	void AttemptSharedTaskRemoval(uint32 requested_task_id, uint32 requested_character_id, bool remove_from_db);
 
 	// shared task activity update middleware
 	void SharedTaskActivityUpdate(
@@ -53,13 +50,16 @@ public:
 
 	SharedTask *FindSharedTaskByTaskIdAndCharacterId(uint32 task_id, uint32 character_id);
 	SharedTask *FindSharedTaskById(int64 shared_task_id);
+	SharedTask* FindSharedTaskByDzId(uint32_t dz_id);
 
 	void DeleteSharedTask(int64 shared_task_id);
 	void SaveSharedTaskActivityState(int64 shared_task_id, std::vector<SharedTaskActivityStateEntry> activity_state);
 
 	bool IsSharedTaskLeader(SharedTask *s, uint32 character_id);
+	void LockTask(SharedTask* s, bool lock);
 	void SendAcceptNewSharedTaskPacket(uint32 character_id, uint32 task_id, uint32_t npc_context_id, int accept_time);
 	void SendRemovePlayerFromSharedTaskPacket(uint32 character_id, uint32 task_id, bool remove_from_db);
+	void SendSharedTaskFailed(uint32_t character_id, uint32_t task_id);
 	void SendSharedTaskMemberList(uint32 character_id, const std::vector<SharedTaskMember> &members);
 	void SendSharedTaskMemberList(uint32 character_id, const EQ::Net::DynamicPacket &serialized_members);
 	void SendSharedTaskMemberChange(
@@ -70,8 +70,12 @@ public:
 	);
 	void RemovePlayerFromSharedTask(SharedTask *s, uint32 character_id);
 	void PrintSharedTaskState();
-	void RemovePlayerFromSharedTaskByPlayerName(SharedTask *s, const std::string &character_name);
+	void Process();
+	void RemoveMember(SharedTask* s, const SharedTaskMember& member, bool remove_from_db);
 	void RemoveEveryoneFromSharedTask(SharedTask *s, uint32 requested_character_id);
+
+	// caller is responsible for removing from db/cache if erase is false
+	void Terminate(SharedTask& s, bool send_fail, bool erase);
 
 	void MakeLeaderByPlayerName(SharedTask *s, const std::string &character_name);
 	void AddPlayerByCharacterIdAndName(SharedTask *s, int64 character_id, const std::string &character_name);
@@ -113,10 +117,18 @@ protected:
 	// store a reference of active invitations that have been sent to players
 	std::vector<SharedTaskActiveInvitation> m_active_invitations{};
 
+	Timer m_process_timer;
+
+	std::vector<CharacterTaskTimersRepository::CharacterTaskTimers> GetCharacterTimers(
+		const std::vector<uint32_t>& character_ids, const TasksRepository::Tasks& task);
+
 	void AddReplayTimers(SharedTask *s);
 	bool CanAddPlayer(SharedTask *s, uint32_t character_id, std::string player_name, bool accepted);
-	bool CanRequestSharedTask(uint32_t task_id, uint32_t character_id, const SharedTaskRequestCharacters &request);
+	bool CanRequestSharedTask(uint32_t task_id, const SharedTaskRequest& request);
 	void ChooseNewLeader(SharedTask *s);
+	bool HandleCompletedActivities(SharedTask* s);
+	void HandleCompletedTask(SharedTask* s);
+	void LoadDynamicZoneTemplate(SharedTask* s);
 	void SendSharedTaskMemberListToAllMembers(SharedTask *s);
 	void SendSharedTaskMemberAddedToAllMembers(SharedTask *s, const std::string &player_name);
 	void SendSharedTaskMemberRemovedToAllMembers(SharedTask *s, const std::string &player_name);
@@ -124,9 +136,10 @@ protected:
 	void SendSharedTaskInvitePacket(SharedTask *s, int64 invited_character_id);
 	void RecordSharedTaskCompletion(SharedTask *s);
 	void RemoveAllMembersFromDynamicZones(SharedTask *s);
+	void StartTerminateTimer(SharedTask* s);
 
 	// memory search
-	std::vector<uint32_t> FindCharactersInSharedTasks(const std::vector<uint32_t> &find_characters);
+	std::vector<SharedTaskMember> FindCharactersInSharedTasks(const std::vector<uint32_t> &find_characters);
 };
 
 #endif //EQEMU_SHARED_TASK_MANAGER_H

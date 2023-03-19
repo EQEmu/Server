@@ -1,28 +1,8 @@
-/**
- * EQEmulator: Everquest Server Emulator
- * Copyright (C) 2001-2020 EQEmulator Development Team (https://github.com/EQEmu/Server)
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; version 2 of the License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY except by those people which sell it, which
- * are required to give you total support for your newly bought product;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR
- * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- */
-
 #ifndef EQEMU_CHARACTER_CORPSES_REPOSITORY_H
 #define EQEMU_CHARACTER_CORPSES_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_character_corpses_repository.h"
 
 class CharacterCorpsesRepository: public BaseCharacterCorpsesRepository {
@@ -64,7 +44,30 @@ public:
      */
 
 	// Custom extended repository methods here
+	static int BuryInstance(Database& db, uint16 instance_id) {
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"UPDATE {} SET is_buried = 1, instance_id = 0 WHERE instance_id = {}",
+				TableName(),
+				instance_id
+			)
+		);
 
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int BuryInstances(Database& db, const std::string& joined_instance_ids)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"UPDATE {} SET is_buried = 1, instance_id = 0 WHERE instance_id IN ({})",
+				TableName(),
+				joined_instance_ids
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_CHARACTER_CORPSES_REPOSITORY_H

@@ -15,7 +15,7 @@
 #include "zone.h"
 #include "string_ids.h"
 
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "../common/rulesys.h"
 
 extern volatile bool is_zone_loaded;
@@ -351,7 +351,7 @@ void Merc::AddItemBonuses(const EQ::ItemData *item, StatBonuses* newbon) {
 	}
 
 	//FatherNitwit: New style haste, shields, and regens
-	if(newbon->haste < (int16)item->Haste) {
+	if(newbon->haste < item->Haste) {
 		newbon->haste = item->Haste;
 	}
 	if(item->Regen > 0)
@@ -911,9 +911,6 @@ int64 Merc::CalcMaxMana()
 			current_mana = curMana_cap;
 	}
 
-#if EQDEBUG >= 11
-	LogDebug("Merc::CalcMaxMana() called for [{}] - returning [{}]", GetName(), max_mana);
-#endif
 	return max_mana;
 }
 
@@ -1168,11 +1165,11 @@ void Merc::CalcRestState() {
 		}
 	}
 
-	RestRegenHP = 6 * (GetMaxHP() / zone->newzone_data.FastRegenHP);
+	RestRegenHP = 6 * (GetMaxHP() / zone->newzone_data.fast_regen_hp);
 
-	RestRegenMana = 6 * (GetMaxMana() / zone->newzone_data.FastRegenMana);
+	RestRegenMana = 6 * (GetMaxMana() / zone->newzone_data.fast_regen_mana);
 
-	RestRegenEndurance = 6 * (GetMaxEndurance() / zone->newzone_data.FastRegenEndurance);
+	RestRegenEndurance = 6 * (GetMaxEndurance() / zone->newzone_data.fast_regen_endurance);
 }
 
 bool Merc::HasSkill(EQ::skills::SkillType skill_id) const {
@@ -1269,13 +1266,11 @@ bool Merc::Process()
 	if(tic_timer.Check())
 	{
 		//6 seconds, or whatever the rule is set to has passed, send this position to everyone to avoid ghosting
-		if(!IsMoving() && !IsEngaged())
+		if (!IsEngaged())
 		{
 			SentPositionPacket(0.0f, 0.0f, 0.0f, 0.0f, 0);
-			if(IsSitting()) {
-				if(!rest_timer.Enabled()) {
-					rest_timer.Start(RuleI(Character, RestRegenTimeToActivate) * 1000);
-				}
+			if (!rest_timer.Enabled()) {
+				rest_timer.Start(RuleI(Character, RestRegenTimeToActivate) * 1000);
 			}
 		}
 
@@ -1688,7 +1683,7 @@ void Merc::AI_Process() {
 			if (AI_movement_timer->Check())
 			{
 				if(!IsRooted()) {
-					LogAI("Pursuing [{}] while engaged", GetTarget()->GetCleanName());
+					LogAIDetail("Pursuing [{}] while engaged", GetTarget()->GetCleanName());
 					RunTo(GetTarget()->GetX(), GetTarget()->GetY(), GetTarget()->GetZ());
 					return;
 				}
@@ -1807,7 +1802,7 @@ bool Merc::AI_EngagedCastCheck() {
 	{
 		AIautocastspell_timer->Disable();       //prevent the timer from going off AGAIN while we are casting.
 
-		LogAI("Merc Engaged autocast check triggered");
+		LogAIDetail("Merc Engaged autocast check triggered");
 
 		int8 mercClass = GetClass();
 
@@ -1862,7 +1857,7 @@ bool Merc::AI_IdleCastCheck() {
 
 	if (AIautocastspell_timer->Check(false)) {
 #if MercAI_DEBUG_Spells >= 25
-		LogAI("Merc Non-Engaged autocast check triggered: [{}]", GetCleanName());
+		LogAIDetail("Merc Non-Engaged autocast check triggered: [{}]", GetCleanName());
 #endif
 		AIautocastspell_timer->Disable();       //prevent the timer from going off AGAIN while we are casting.
 
@@ -2138,11 +2133,11 @@ bool Merc::AICastSpell(int8 iChance, uint32 iSpellTypes) {
 									}
 									else {
 										//check for heal over time. if not present, try it first
-										if(!tar->FindType(SE_HealOverTime)) {
+										if (!tar->FindType(SE_HealOverTime)) {
 											selectedMercSpell = GetBestMercSpellForHealOverTime(this);
 
 											//get regular heal
-											if(selectedMercSpell.spellid == 0) {
+											if (selectedMercSpell.spellid == 0) {
 												selectedMercSpell = GetBestMercSpellForRegularSingleTargetHeal(this);
 											}
 										}
@@ -2616,7 +2611,7 @@ int64 Merc::GetFocusEffect(focusType type, uint16 spell_id, bool from_buff_tic) 
 			realTotal = CalcFocusEffect(type, UsedFocusID, spell_id);
 
 		if (realTotal != 0 && UsedItem)
-			MessageString(Chat::Spells, BEGINS_TO_GLOW, UsedItem->Name);
+			MessageString(Chat::FocusEffect, BEGINS_TO_GLOW, UsedItem->Name);
 	}
 
 	//Check if spell focus effect exists for the client.
@@ -2706,53 +2701,6 @@ int64 Merc::GetFocusEffect(focusType type, uint16 spell_id, bool from_buff_tic) 
 	//by reagent conservation for obvious reasons.
 
 	return realTotal + realTotal2 + realTotal3;
-}
-
-int32 Merc::GetActSpellCost(uint16 spell_id, int32 cost)
-{
-	// Formula = Unknown exact, based off a random percent chance up to mana cost(after focuses) of the cast spell
-	if(itembonuses.Clairvoyance && spells[spell_id].classes[(GetClass()%17) - 1] >= GetLevel() - 5)
-	{
-		int16 mana_back = itembonuses.Clairvoyance * zone->random.Int(1, 100) / 100;
-		// Doesnt generate mana, so best case is a free spell
-		if(mana_back > cost)
-			mana_back = cost;
-
-		cost -= mana_back;
-	}
-
-	// This formula was derived from the following resource:
-	// http://www.eqsummoners.com/eq1/specialization-library.html
-	// WildcardX
-	float PercentManaReduction = 0;
-
-	int16 focus_redux = GetFocusEffect(focusManaCost, spell_id);
-
-	if(focus_redux > 0)
-	{
-		PercentManaReduction += zone->random.Real(1, (double)focus_redux);
-	}
-
-	cost -= (cost * (PercentManaReduction / 100));
-
-	// Gift of Mana - reduces spell cost to 1 mana
-	if(focus_redux >= 100) {
-		uint32 buff_max = GetMaxTotalSlots();
-		for (int buffSlot = 0; buffSlot < buff_max; buffSlot++) {
-			if (buffs[buffSlot].spellid == 0 || buffs[buffSlot].spellid >= SPDAT_RECORDS)
-				continue;
-
-			if(IsEffectInSpell(buffs[buffSlot].spellid, SE_ReduceManaCost)) {
-				if(CalcFocusEffect(focusManaCost, buffs[buffSlot].spellid, spell_id) == 100)
-					cost = 1;
-			}
-		}
-	}
-
-	if(cost < 0)
-		cost = 0;
-
-	return cost;
 }
 
 int8 Merc::GetChanceToCastBySpellType(uint32 spellType) {
@@ -2904,7 +2852,7 @@ std::list<MercSpell> Merc::GetMercSpellsBySpellType(Merc* caster, uint32 spellTy
 		std::vector<MercSpell> mercSpellList = caster->GetMercSpells();
 
 		for (int i = mercSpellList.size() - 1; i >= 0; i--) {
-			if (mercSpellList[i].spellid <= 0 || mercSpellList[i].spellid >= SPDAT_RECORDS) {
+			if (!IsValidSpell(mercSpellList[i].spellid)) {
 				// this is both to quit early to save cpu and to avoid casting bad spells
 				// Bad info from database can trigger this incorrectly, but that should be fixed in DB, not here
 				continue;
@@ -2941,7 +2889,7 @@ MercSpell Merc::GetFirstMercSpellBySpellType(Merc* caster, uint32 spellType) {
 		std::vector<MercSpell> mercSpellList = caster->GetMercSpells();
 
 		for (int i = mercSpellList.size() - 1; i >= 0; i--) {
-			if (mercSpellList[i].spellid <= 0 || mercSpellList[i].spellid >= SPDAT_RECORDS) {
+			if (!IsValidSpell(mercSpellList[i].spellid)) {
 				// this is both to quit early to save cpu and to avoid casting bad spells
 				// Bad info from database can trigger this incorrectly, but that should be fixed in DB, not here
 				continue;
@@ -2979,7 +2927,7 @@ MercSpell Merc::GetMercSpellBySpellID(Merc* caster, uint16 spellid) {
 		std::vector<MercSpell> mercSpellList = caster->GetMercSpells();
 
 		for (int i = mercSpellList.size() - 1; i >= 0; i--) {
-			if (mercSpellList[i].spellid <= 0 || mercSpellList[i].spellid >= SPDAT_RECORDS) {
+			if (!IsValidSpell(mercSpellList[i].spellid)) {
 				// this is both to quit early to save cpu and to avoid casting bad spells
 				// Bad info from database can trigger this incorrectly, but that should be fixed in DB, not here
 				continue;
@@ -3009,7 +2957,7 @@ std::list<MercSpell> Merc::GetMercSpellsForSpellEffect(Merc* caster, int spellEf
 		std::vector<MercSpell> mercSpellList = caster->GetMercSpells();
 
 		for (int i = mercSpellList.size() - 1; i >= 0; i--) {
-			if (mercSpellList[i].spellid <= 0 || mercSpellList[i].spellid >= SPDAT_RECORDS) {
+			if (!IsValidSpell(mercSpellList[i].spellid)) {
 				// this is both to quit early to save cpu and to avoid casting bad spells
 				// Bad info from database can trigger this incorrectly, but that should be fixed in DB, not here
 				continue;
@@ -3039,7 +2987,7 @@ std::list<MercSpell> Merc::GetMercSpellsForSpellEffectAndTargetType(Merc* caster
 		std::vector<MercSpell> mercSpellList = caster->GetMercSpells();
 
 		for (int i = mercSpellList.size() - 1; i >= 0; i--) {
-			if (mercSpellList[i].spellid <= 0 || mercSpellList[i].spellid >= SPDAT_RECORDS) {
+			if (!IsValidSpell(mercSpellList[i].spellid)) {
 				// this is both to quit early to save cpu and to avoid casting bad spells
 				// Bad info from database can trigger this incorrectly, but that should be fixed in DB, not here
 				continue;
@@ -4305,32 +4253,26 @@ void Merc::MercMeditate(bool isSitting) {
 	{
 		return;
 	}
-	if(isSitting) {
+	if (isSitting) {
 		// If the merc is a caster and has less than 99% mana while its not engaged, he needs to sit to meditate
-		if(GetManaRatio() < 99.0f)
+		if (GetManaRatio() < 99.0f)
 		{
-			if(!IsSitting())
+			if(!IsSitting()) {
 				Sit();
+			}
 		}
 		else
 		{
-			if(IsSitting())
+			if (IsSitting()) {
 				Stand();
+			}
 		}
 	}
 	else
 	{
-		if(IsSitting())
+		if (IsSitting()) {
 			Stand();
-	}
-
-	if(IsSitting()) {
-		if(!rest_timer.Enabled()) {
-			rest_timer.Start(RuleI(Character, RestRegenTimeToActivate) * 1000);
 		}
-	}
-	else {
-		rest_timer.Disable();
 	}
 }
 
@@ -4371,19 +4313,23 @@ bool Merc::IsStanding() {
 float Merc::GetMaxMeleeRangeToTarget(Mob* target) {
 	float result = 0;
 
-	if(target) {
+	if (target) {
 		float size_mod = GetSize();
 		float other_size_mod = target->GetSize();
 
-		if(GetRace() == 49 || GetRace() == 158 || GetRace() == 196) //For races with a fixed size
+		if (GetRace() == RACE_LAVA_DRAGON_49 || GetRace() == RACE_WURM_158 || GetRace() == RACE_GHOST_DRAGON_196) //For races with a fixed size
+		{
 			size_mod = 60.0f;
-		else if (size_mod < 6.0)
+		} else if (size_mod < 6.0) {
 			size_mod = 8.0f;
+		}
 
-		if(target->GetRace() == 49 || target->GetRace() == 158 || target->GetRace() == 196) //For races with a fixed size
+		if (target->GetRace() == RACE_LAVA_DRAGON_49 || target->GetRace() == RACE_WURM_158 || target->GetRace() == RACE_GHOST_DRAGON_196) //For races with a fixed size
+		{
 			other_size_mod = 60.0f;
-		else if (other_size_mod < 6.0)
+		} else if (other_size_mod < 6.0) {
 			other_size_mod = 8.0f;
+		}
 
 		if (other_size_mod > size_mod) {
 			size_mod = other_size_mod;
@@ -4391,12 +4337,13 @@ float Merc::GetMaxMeleeRangeToTarget(Mob* target) {
 
 		// this could still use some work, but for now it's an improvement....
 
-		if (size_mod > 29)
+		if (size_mod > 29) {
 			size_mod *= size_mod;
-		else if (size_mod > 19)
+		} else if (size_mod > 19) {
 			size_mod *= size_mod * 2;
-		else
+		} else {
 			size_mod *= size_mod * 4;
+		}
 
 		// prevention of ridiculously sized hit boxes
 		if (size_mod > 10000)
@@ -6097,7 +6044,7 @@ void Client::SendMercMerchantResponsePacket(int32 response_type) {
 		MercenaryMerchantResponse_Struct* mmr = (MercenaryMerchantResponse_Struct*)outapp->pBuffer;
 		mmr->ResponseType = response_type;              // send specified response type
 		FastQueuePacket(&outapp);
-		Log(Logs::Moderate, Logs::Mercenaries, "Sent SendMercMerchantResponsePacket ResponseType: %i, Client: %s.", response_type, GetName());
+		Log(Logs::Detail, Logs::Mercenaries, "Sent SendMercMerchantResponsePacket ResponseType: %i, Client: %s.", response_type, GetName());
 	}
 }
 
@@ -6106,7 +6053,7 @@ void Client::SendMercenaryUnknownPacket(uint8 type) {
 	auto outapp = new EQApplicationPacket(OP_MercenaryUnknown1, 1);
 	outapp->WriteUInt8(type);
 	FastQueuePacket(&outapp);
-	Log(Logs::Moderate, Logs::Mercenaries, "Sent SendMercenaryUnknownPacket Type: %i, Client: %s.", type, GetName());
+	Log(Logs::Detail, Logs::Mercenaries, "Sent SendMercenaryUnknownPacket Type: %i, Client: %s.", type, GetName());
 
 }
 
@@ -6115,7 +6062,7 @@ void Client::SendMercenaryUnsuspendPacket(uint8 type) {
 	auto outapp = new EQApplicationPacket(OP_MercenaryUnsuspendResponse, 1);
 	outapp->WriteUInt8(type);
 	FastQueuePacket(&outapp);
-	Log(Logs::Moderate, Logs::Mercenaries, "Sent SendMercenaryUnsuspendPacket Type: %i, Client: %s.", type, GetName());
+	Log(Logs::Detail, Logs::Mercenaries, "Sent SendMercenaryUnsuspendPacket Type: %i, Client: %s.", type, GetName());
 
 }
 
@@ -6125,7 +6072,7 @@ void Client::SendMercSuspendResponsePacket(uint32 suspended_time) {
 	SuspendMercenaryResponse_Struct* smr = (SuspendMercenaryResponse_Struct*)outapp->pBuffer;
 	smr->SuspendTime = suspended_time;              // Seen 0 (not suspended) or c9 c2 64 4f (suspended on Sat Mar 17 11:58:49 2012) - Unix Timestamp
 	FastQueuePacket(&outapp);
-	Log(Logs::Moderate, Logs::Mercenaries, "Sent SendMercSuspendResponsePacket Time: %i, Client: %s.", suspended_time, GetName());
+	Log(Logs::Detail, Logs::Mercenaries, "Sent SendMercSuspendResponsePacket Time: %i, Client: %s.", suspended_time, GetName());
 
 }
 
@@ -6140,7 +6087,7 @@ void Client::SendMercTimerPacket(int32 entity_id, int32 merc_state, int32 suspen
 	mss->UpdateInterval = update_interval; // Seen 900000 - 15 minutes in ms
 	mss->MercUnk01 = unk01; // Seen 180000 - 3 minutes in ms - Used for the unsuspend button refresh timer
 	FastQueuePacket(&outapp);
-	Log(Logs::Moderate, Logs::Mercenaries, "Sent SendMercTimerPacket EndID: %i, State: %i, SuspendTime: %i, Interval: %i, Unk1: %i, Client: %s.", entity_id, merc_state, suspended_time, update_interval, unk01, GetName());
+	Log(Logs::Detail, Logs::Mercenaries, "Sent SendMercTimerPacket EndID: %i, State: %i, SuspendTime: %i, Interval: %i, Unk1: %i, Client: %s.", entity_id, merc_state, suspended_time, update_interval, unk01, GetName());
 
 }
 
@@ -6151,7 +6098,7 @@ void Client::SendMercAssignPacket(uint32 entityID, uint32 unk01, uint32 unk02) {
 	mas->MercUnk01 = unk01;
 	mas->MercUnk02 = unk02;
 	FastQueuePacket(&outapp);
-	Log(Logs::Moderate, Logs::Mercenaries, "Sent SendMercAssignPacket EndID: %i, Unk1: %i, Unk2: %i, Client: %s.", entityID, unk01, unk02, GetName());
+	Log(Logs::Detail, Logs::Mercenaries, "Sent SendMercAssignPacket EndID: %i, Unk1: %i, Unk2: %i, Client: %s.", entityID, unk01, unk02, GetName());
 }
 
 void NPC::LoadMercTypes() {

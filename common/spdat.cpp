@@ -76,6 +76,7 @@
 
 #include "classes.h"
 #include "spdat.h"
+#include "../common/rulesys.h"
 
 #ifndef WIN32
 #include <stdlib.h>
@@ -101,14 +102,18 @@ bool IsSacrificeSpell(uint16 spell_id)
 
 bool IsLifetapSpell(uint16 spell_id)
 {
-	// Ancient Lifebane: 2115
-	if (IsValidSpell(spell_id) &&
-			(spells[spell_id].target_type == ST_Tap ||
-			 spells[spell_id].target_type == ST_TargetAETap ||
-			 spell_id == 2115))
-		return true;
+    if (
+        IsValidSpell(spell_id) &&
+        (
+            spells[spell_id].target_type == ST_Tap ||
+            spells[spell_id].target_type == ST_TargetAETap ||
+            spell_id == SPELL_ANCIENT_LIFEBANE
+        )
+    ) {
+        return true;
+    }
 
-	return false;
+    return false;
 }
 
 bool IsMezSpell(uint16 spell_id)
@@ -139,7 +144,7 @@ bool IsEvacSpell(uint16 spellid)
 
 bool IsDamageSpell(uint16 spellid)
 {
-	if (spells[spellid].target_type == ST_Tap)
+	if (IsLifetapSpell(spellid))
 		return false;
 
 	for (int o = 0; o < EFFECT_COUNT; o++) {
@@ -370,13 +375,16 @@ bool IsAEDurationSpell(uint16 spell_id)
 		There are plenty of spells with aoe_duration set at single digit numbers, but these
 		do not act as duration effects.
 	*/
-	if (IsValidSpell(spell_id) && 
+	if (
+		IsValidSpell(spell_id) &&
 		spells[spell_id].aoe_duration >= 2500 &&
-		(	spells[spell_id].target_type == ST_AETarget || 
+		(
+			spells[spell_id].target_type == ST_AETarget ||
 			spells[spell_id].target_type == ST_UndeadAE ||
 			spells[spell_id].target_type == ST_AECaster ||
-			spells[spell_id].target_type == ST_Ring)
-		) {
+			spells[spell_id].target_type == ST_Ring
+		)
+	) {
 		return true;
 	}
 
@@ -503,6 +511,27 @@ bool IsEffectInSpell(uint16 spellid, int effect)
 			return true;
 
 	return false;
+}
+
+
+uint16 GetTriggerSpellID(uint16 spell_id, uint32 effect) {
+
+	for (int index = 0; index < EFFECT_COUNT; index++) {
+		if (
+			spells[spell_id].effect_id[index] == SE_TriggerOnCast ||
+			spells[spell_id].effect_id[index] == SE_SpellTrigger ||
+			spells[spell_id].effect_id[index] == SE_ApplyEffect ||
+			spells[spell_id].effect_id[index] == SE_Trigger_Spell_Non_Item
+		) {
+			int apply_effect_spell_id = spells[spell_id].limit_value[index];
+			if (IsEffectInSpell(apply_effect_spell_id, effect)) {
+				if (IsValidSpell(apply_effect_spell_id)) {
+					return apply_effect_spell_id;
+				}
+			}
+		}
+	}
+	return 0;
 }
 
 // arguments are spell id and the index of the effect to check.
@@ -740,8 +769,9 @@ bool IsCombatSkill(uint16 spell_id)
 bool IsResurrectionEffects(uint16 spell_id)
 {
 	// spell id 756 is Resurrection Effects spell
-	if(IsValidSpell(spell_id) && (spell_id == 756 || spell_id == 757))
+	if (IsValidSpell(spell_id) && (spell_id == RuleI(Character, ResurrectionSicknessSpellID) || spell_id == RuleI(Character, OldResurrectionSicknessSpellID))) {
 		return true;
+	}
 
 	return false;
 }
@@ -929,18 +959,32 @@ int32 GetSpellTargetType(uint16 spell_id)
 
 bool IsHealOverTimeSpell(uint16 spell_id)
 {
-	if (IsEffectInSpell(spell_id, SE_HealOverTime) && !IsGroupSpell(spell_id))
+	if (
+		(
+			IsEffectInSpell(spell_id, SE_HealOverTime) ||
+			GetTriggerSpellID(spell_id, SE_HealOverTime)
+		) &&
+		!IsGroupSpell(spell_id)
+	) {
 		return true;
+	}
 
 	return false;
 }
 
 bool IsCompleteHealSpell(uint16 spell_id)
 {
-	if (spell_id == 13 || IsEffectInSpell(spell_id, SE_CompleteHeal) ||
-			(IsPercentalHealSpell(spell_id) && !IsGroupSpell(spell_id)))
+	if (
+		(
+			spell_id == SPELL_COMPLETE_HEAL ||
+			IsEffectInSpell(spell_id, SE_CompleteHeal) ||
+			IsPercentalHealSpell(spell_id) ||
+			GetTriggerSpellID(spell_id, SE_CompleteHeal)
+		) &&
+		!IsGroupSpell(spell_id)
+	) {
 		return true;
-
+	}
 	return false;
 }
 
@@ -948,11 +992,25 @@ bool IsFastHealSpell(uint16 spell_id)
 {
 	const int MaxFastHealCastingTime = 2000;
 
-	if (spells[spell_id].cast_time <= MaxFastHealCastingTime &&
-			spells[spell_id].effect_id[0] == 0 && spells[spell_id].base_value[0] > 0 &&
-			!IsGroupSpell(spell_id))
-		return true;
-
+	spell_id = (IsEffectInSpell(spell_id, SE_CurrentHP)) ? spell_id : GetTriggerSpellID(spell_id, SE_CurrentHP);
+	if (!spell_id) {
+		spell_id = (IsEffectInSpell(spell_id, SE_CurrentHPOnce)) ? spell_id : GetTriggerSpellID(spell_id, SE_CurrentHPOnce);
+	}
+	if (spell_id) {
+		if (spells[spell_id].cast_time <= MaxFastHealCastingTime && spells[spell_id].good_effect && !IsGroupSpell(spell_id)) {
+			for (int i = 0; i < EFFECT_COUNT; i++) {
+				if (
+					(
+						spells[spell_id].effect_id[i] == SE_CurrentHP ||
+						spells[spell_id].effect_id[i] == SE_CurrentHPOnce
+					) && 
+					spells[spell_id].base_value[i] > 0
+				) {
+					return true;
+				}
+			}
+		}
+	}
 	return false;
 }
 
@@ -960,30 +1018,77 @@ bool IsVeryFastHealSpell(uint16 spell_id)
 {
 	const int MaxFastHealCastingTime = 1000;
 
-	if (spells[spell_id].cast_time <= MaxFastHealCastingTime &&
-			spells[spell_id].effect_id[0] == 0 && spells[spell_id].base_value[0] > 0 &&
-			!IsGroupSpell(spell_id))
-		return true;
+	spell_id = (IsEffectInSpell(spell_id, SE_CurrentHP)) ? spell_id : GetTriggerSpellID(spell_id, SE_CurrentHP);
+	if (!spell_id) {
+		spell_id = (IsEffectInSpell(spell_id, SE_CurrentHPOnce)) ? spell_id : GetTriggerSpellID(spell_id, SE_CurrentHPOnce);
+	}
+	if (spell_id) {
+		if (spells[spell_id].cast_time <= MaxFastHealCastingTime && spells[spell_id].good_effect && !IsGroupSpell(spell_id)) {
+			for (int i = 0; i < EFFECT_COUNT; i++) {
+				if (
+					(
+						spells[spell_id].effect_id[i] == SE_CurrentHP ||
+						spells[spell_id].effect_id[i] == SE_CurrentHPOnce
+					) && 
+					spells[spell_id].base_value[i] > 0
+				) {
+					return true;
+				}
+			}
+		}
+	}
 
 	return false;
 }
 
 bool IsRegularSingleTargetHealSpell(uint16 spell_id)
 {
-	if(spells[spell_id].effect_id[0] == 0 && spells[spell_id].base_value[0] > 0 &&
-			spells[spell_id].target_type == ST_Target && spells[spell_id].buff_duration == 0 &&
-			!IsCompleteHealSpell(spell_id) &&
-			!IsHealOverTimeSpell(spell_id) && !IsGroupSpell(spell_id))
-		return true;
+	spell_id = (IsEffectInSpell(spell_id, SE_CurrentHP)) ? spell_id : GetTriggerSpellID(spell_id, SE_CurrentHP);
+	if (!spell_id) {
+		spell_id = (IsEffectInSpell(spell_id, SE_CurrentHPOnce)) ? spell_id : GetTriggerSpellID(spell_id, SE_CurrentHPOnce);
+	}
+	if (spell_id) {
+		if (spells[spell_id].target_type == ST_Target && !IsCompleteHealSpell(spell_id) && !IsHealOverTimeSpell(spell_id) && !IsGroupSpell(spell_id)) {
+			for (int i = 0; i < EFFECT_COUNT; i++) {
+				if (
+					(
+						spells[spell_id].effect_id[i] == SE_CurrentHP ||
+						spells[spell_id].effect_id[i] == SE_CurrentHPOnce
+					) && 
+					spells[spell_id].base_value[i] > 0 && 
+					spells[spell_id].buff_duration == 0
+				) {
+					return true;
+				}
+			}
+		}
+	}
 
 	return false;
 }
 
 bool IsRegularGroupHealSpell(uint16 spell_id)
 {
-	if (IsGroupSpell(spell_id) && !IsCompleteHealSpell(spell_id) && !IsHealOverTimeSpell(spell_id))
-		return true;
-
+	spell_id = (IsEffectInSpell(spell_id, SE_CurrentHP)) ? spell_id : GetTriggerSpellID(spell_id, SE_CurrentHP);
+	if (!spell_id) {
+		spell_id = (IsEffectInSpell(spell_id, SE_CurrentHPOnce)) ? spell_id : GetTriggerSpellID(spell_id, SE_CurrentHPOnce);
+	}
+	if (spell_id) {
+		if (IsGroupSpell(spell_id) && !IsCompleteHealSpell(spell_id) && !IsHealOverTimeSpell(spell_id)) {
+			for (int i = 0; i < EFFECT_COUNT; i++) {
+				if (
+					(
+						spells[spell_id].effect_id[i] == SE_CurrentHP ||
+						spells[spell_id].effect_id[i] == SE_CurrentHPOnce
+					) && 
+					spells[spell_id].base_value[i] > 0 && 
+					spells[spell_id].buff_duration == 0
+				) {
+					return true;
+				}
+			}
+		}
+	}
 	return false;
 }
 
@@ -1478,6 +1583,7 @@ bool IsInstrumentModAppliedToSpellEffect(int32 spell_id, int effect)
 		case SE_WaterBreathing:
 		case SE_ModelSize:
 		case SE_ChangeHeight:
+		case SE_MakeDrunk:
 			return false;
 		default:
 			return true;
@@ -1490,15 +1596,17 @@ bool IsPulsingBardSong(int32 spell_id)
 	if (!IsValidSpell(spell_id)) {
 		return false;
 	}
-	
-	if (spells[spell_id].buff_duration == 0xFFFF ||
-		spells[spell_id].recast_time> 0 ||
-		spells[spell_id].mana > 0 || 
-		IsEffectInSpell(spell_id, SE_TemporaryPets) || 
-		IsEffectInSpell(spell_id, SE_Familiar)) {
+
+	if (
+		spells[spell_id].buff_duration == 0xFFFF ||
+		spells[spell_id].recast_time > 0 ||
+		spells[spell_id].mana > 0 ||
+		IsEffectInSpell(spell_id, SE_TemporaryPets) ||
+		IsEffectInSpell(spell_id, SE_Familiar)
+	) {
 		return false;
 	}
-	
+
 	return true;
 }
 

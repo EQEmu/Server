@@ -3,7 +3,7 @@
 #include "../common/extprofile.h"
 #include "../common/rulesys.h"
 #include "../common/misc_functions.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "../common/random.h"
 #include "adventure.h"
 #include "adventure_manager.h"
@@ -11,7 +11,7 @@
 #include "zonelist.h"
 #include "clientlist.h"
 #include "cliententry.h"
-#include "world_store.h"
+#include "../common/zone_store.h"
 
 extern ZSList zoneserver_list;
 extern ClientList client_list;

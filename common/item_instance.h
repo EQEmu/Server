@@ -92,6 +92,8 @@ namespace EQ
 
 		// Can item be equipped by/at?
 		bool IsEquipable(uint16 race, uint16 class_) const;
+		bool IsClassEquipable(uint16 class_) const;
+		bool IsRaceEquipable(uint16 race) const;
 		bool IsEquipable(int16 slot_id) const;
 
 		//
@@ -125,8 +127,8 @@ namespace EQ
 		//
 		// Augments
 		//
-		ItemInstance* GetAugment(uint8 slot) const;
-		uint32 GetAugmentItemID(uint8 slot) const;
+		ItemInstance* GetAugment(uint8 augment_index) const;
+		uint32 GetAugmentItemID(uint8 augment_index) const;
 		void PutAugment(uint8 slot, const ItemInstance& inst);
 		void PutAugment(SharedDatabase *db, uint8 slot, uint32 item_id);
 		void DeleteAugment(uint8 slot);
@@ -147,6 +149,8 @@ namespace EQ
 		const uint32 GetItemScriptID() const { return ((m_item) ? m_item->ScriptFileID : 0); }
 		const ItemData* GetItem() const;
 		const ItemData* GetUnscaledItem() const;
+
+		const uint8 GetItemType() const { return m_item ? m_item->ItemType : 255; } // Return 255 so you know there's no valid item
 
 		int16 GetCharges() const				{ return m_charges; }
 		void SetCharges(int16 charges)			{ m_charges = charges; }
@@ -228,6 +232,13 @@ namespace EQ
 		void SetTimer(std::string name, uint32 time);
 		void StopTimer(std::string name);
 		void ClearTimers();
+
+		int GetTaskDeliveredCount() const { return m_task_delivered_count; }
+		void SetTaskDeliveredCount(int count) { m_task_delivered_count = count; }
+		// This function should only be used by trade return apis
+		// Removes delivered task items from stack count and returns remaining count
+		// Return value should be used to determine if an item still exists (for stackable and non-stackable)
+		int RemoveTaskDeliveredItems();
 
 		// Get a total of a stat, including augs
 		// These functions should be used in place of other code manually totaling
@@ -313,6 +324,7 @@ namespace EQ
 		uint32				m_new_id_file;
 		uint32				m_ornament_hero_model;
 		uint32				m_recast_timestamp;
+		int                 m_task_delivered_count = 0;
 
 		//
 		// Items inside of this item (augs or contents);

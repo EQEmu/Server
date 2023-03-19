@@ -12,9 +12,7 @@
 #include "event_codes.h"
 #include "../common/repositories/doors_repository.h"
 
-#ifdef BOTS
 #include "bot_database.h"
-#endif
 
 #define WOLF 42
 
@@ -105,6 +103,47 @@ struct DBnpcspellseffects_Struct {
 	uint32	parent_list;
 	uint32	numentries;
 	DBnpcspellseffects_entries_Struct entries[0];
+};
+
+#pragma pack(1)
+struct DBbotspells_entries_Struct {
+	uint16		spellid;
+	uint8		minlevel;
+	uint8		maxlevel;
+	uint32		type;
+	int16		manacost;
+	int16		priority;
+	int32		recast_delay;
+	int16		resist_adjust;
+	int8		min_hp;
+	int8		max_hp;
+	std::string	bucket_name;
+	std::string	bucket_value;
+	uint8		bucket_comparison;
+};
+#pragma pack()
+
+struct DBbotspells_Struct {
+	uint32	parent_list;
+	uint16	attack_proc;
+	uint8	proc_chance;
+	uint16	range_proc;
+	int16	rproc_chance;
+	uint16	defensive_proc;
+	int16	dproc_chance;
+	uint32	fail_recast;
+	uint32	engaged_no_sp_recast_min;
+	uint32	engaged_no_sp_recast_max;
+	uint8	engaged_beneficial_self_chance;
+	uint8	engaged_beneficial_other_chance;
+	uint8	engaged_detrimental_chance;
+	uint32	pursue_no_sp_recast_min;
+	uint32	pursue_no_sp_recast_max;
+	uint8	pursue_detrimental_chance;
+	uint32	idle_no_sp_recast_min;
+	uint32	idle_no_sp_recast_max;
+	uint8	idle_beneficial_chance;
+	std::vector<DBbotspells_entries_Struct> entries;
 };
 
 struct DBTradeskillRecipe_Struct {
@@ -246,7 +285,7 @@ struct ClientMercEntry {
 	uint32 npcid;
 };
 
-namespace BeastlordPetData {	
+namespace BeastlordPetData {
 	struct PetStruct {
 		uint16 race_id = WOLF;
 		uint8 texture = 0;
@@ -359,7 +398,7 @@ public:
 	bool SaveCharacterBandolier(uint32 character_id, uint8 bandolier_id, uint8 bandolier_slot, uint32 item_id, uint32 icon, const char* bandolier_name);
 	bool SaveCharacterBindPoint(uint32 character_id, const BindStruct &bind, uint32 bind_number);
 	bool SaveCharacterCurrency(uint32 character_id, PlayerProfile_Struct* pp);
-	bool SaveCharacterData(uint32 character_id, uint32 account_id, PlayerProfile_Struct* pp, ExtendedProfile_Struct* m_epp);
+	bool SaveCharacterData(Client* c, PlayerProfile_Struct* pp, ExtendedProfile_Struct* m_epp);
 	bool SaveCharacterDisc(uint32 character_id, uint32 slot_id, uint32 disc_id);
 	bool SaveCharacterLanguage(uint32 character_id, uint32 lang_id, uint32 value);
 	bool SaveCharacterLeadershipAA(uint32 character_id, PlayerProfile_Struct* pp);
@@ -369,11 +408,11 @@ public:
 	bool SaveCharacterSkill(uint32 character_id, uint32 skill_id, uint32 value);
 	bool SaveCharacterSpell(uint32 character_id, uint32 spell_id, uint32 slot_id);
 	bool SaveCharacterTribute(uint32 character_id, PlayerProfile_Struct* pp);
-	
-	double GetAAEXPModifier(uint32 character_id, uint32 zone_id) const;
-	double GetEXPModifier(uint32 character_id, uint32 zone_id) const;
-	void SetAAEXPModifier(uint32 character_id, uint32 zone_id, double aa_modifier);
-	void SetEXPModifier(uint32 character_id, uint32 zone_id, double exp_modifier);
+
+	double GetAAEXPModifier(uint32 character_id, uint32 zone_id, int16 instance_version = -1) const;
+	double GetEXPModifier(uint32 character_id, uint32 zone_id, int16 instance_version = -1) const;
+	void SetAAEXPModifier(uint32 character_id, uint32 zone_id, double aa_modifier, int16 instance_version = -1);
+	void SetEXPModifier(uint32 character_id, uint32 zone_id, double exp_modifier, int16 instance_version = -1);
 
 	/* Character Inventory  */
 	bool	NoRentExpired(const char* name);
@@ -386,7 +425,7 @@ public:
 	void	DivergeCharacterInvSnapshotFromInventory(uint32 character_id, uint32 timestamp, std::list<std::pair<int16, uint32>> &compare_list);
 	void	DivergeCharacterInventoryFromInvSnapshot(uint32 character_id, uint32 timestamp, std::list<std::pair<int16, uint32>> &compare_list);
 	bool	RestoreCharacterInvSnapshot(uint32 character_id, uint32 timestamp);
-	
+
 	/* Corpses  */
 	bool		DeleteItemOffCharacterCorpse(uint32 db_id, uint32 equip_slot, uint32 item_id);
 	uint32		GetCharacterCorpseItemCount(uint32 corpse_id);
@@ -399,17 +438,13 @@ public:
 	bool		BuryAllCharacterCorpses(uint32 charid);
 	bool		DeleteCharacterCorpse(uint32 dbid);
 	bool		SummonAllCharacterCorpses(uint32 char_id, uint32 dest_zoneid, uint16 dest_instanceid, const glm::vec4& position);
-	bool		SummonAllGraveyardCorpses(uint32 cur_zoneid, uint32 dest_zoneid, uint16 dest_instanceid, const glm::vec4& position);
 	int			CountCharacterCorpses(uint32 char_id);
 	int			CountCharacterCorpsesByZoneID(uint32 char_id, uint32 zone_id);
 	bool		UnburyCharacterCorpse(uint32 dbid, uint32 new_zoneid, uint16 dest_instanceid, const glm::vec4& position);
 	bool		LoadCharacterCorpses(uint32 iZoneID, uint16 iInstanceID);
-	bool		DeleteGraveyard(uint32 zone_id, uint32 graveyard_id);
 	uint32		GetCharacterCorpseDecayTimer(uint32 corpse_db_id);
 	uint32		GetCharacterBuriedCorpseCount(uint32 char_id);
 	uint32		SendCharacterCorpseToGraveyard(uint32 dbid, uint32 zoneid, uint16 instanceid, const glm::vec4& position);
-	uint32		CreateGraveyardRecord(uint32 graveyard_zoneid, const glm::vec4& position);
-	uint32		AddGraveyardIDToZone(uint32 zone_id, uint32 graveyard_id);
 	uint32		SaveCharacterCorpse(uint32 charid, const char* charname, uint32 zoneid, uint16 instanceid, PlayerCorpse_Struct* dbpc, const glm::vec4& position, uint32 guildid);
 	uint32		UpdateCharacterCorpse(uint32 dbid, uint32 charid, const char* charname, uint32 zoneid, uint16 instanceid, PlayerCorpse_Struct* dbpc, const glm::vec4& position, uint32 guildid, bool rezzed = false);
 	uint32		UpdateCharacterCorpseConsent(uint32 charid, uint32 guildid);
@@ -436,21 +471,6 @@ public:
 	bool	LoadAlternateAdvancement(Client *c);
 
 	/* Zone related   */
-	bool		GetZoneCFG(
-		uint32 zoneid, 
-		uint16 instance_version, 
-		NewZone_Struct *data, 
-		bool &can_bind, 
-		bool &can_combat, 
-		bool &can_levitate, 
-		bool &can_castoutdoor, 
-		bool &is_city, 
-		bool &is_hotzone, 
-		bool &allow_mercs, 
-		double &max_movement_update_range, 
-		uint8 &zone_type, 
-		int &ruleset, 
-		char **map_filename);
 	bool		SaveZoneCFG(uint32 zoneid, uint16 instance_version, NewZone_Struct* zd);
 	bool		LoadStaticZonePoints(LinkedList<ZonePoint*>* zone_point_list,const char* zonename, uint32 version);
 	int			getZoneShutDownDelay(uint32 zoneID, uint32 version);
@@ -510,6 +530,10 @@ public:
 	void ClearNPCSpells() { npc_spells_cache.clear(); npc_spells_loadtried.clear(); }
 	const NPCType* LoadNPCTypesData(uint32 id, bool bulk_load = false);
 
+	/*Bots	*/
+	DBbotspells_Struct*	GetBotSpells(uint32 bot_spell_id);
+	void ClearBotSpells() { bot_spells_cache.clear(); bot_spells_loadtried.clear(); }
+
 	/* Mercs   */
 	const	NPCType*	GetMercType(uint32 id, uint16 raceid, uint32 clientlevel);
 	void	LoadMercEquipment(Merc *merc);
@@ -521,17 +545,14 @@ public:
 	bool	DeleteMerc(uint32 merc_id);
 
 	/* Petitions   */
-	void	RegisterBug(BugReport_Struct* bug_report); // old method
-	void	RegisterBug(Client* client, BugReport_Struct* bug_report); // new method
-	//void	UpdateBug(PetitionBug_Struct* bug);
 	void	DeletePetitionFromDB(Petition* wpet);
 	void	UpdatePetitionToDB(Petition* wpet);
 	void	InsertPetitionToDB(Petition* wpet);
 	void	RefreshPetitionsFromDB();
 
 	/* Merchants  */
-	void	SaveMerchantTemp(uint32 npcid, uint32 slot, uint32 item, uint32 charges);
-	void	DeleteMerchantTemp(uint32 npcid, uint32 slot);
+	void	SaveMerchantTemp(uint32 npcid, uint32 slot, uint32 zone_id, uint32 instance_id, uint32 item, uint32 charges);
+	void	DeleteMerchantTemp(uint32 npcid, uint32 slot, uint32 zone_id, uint32 instance_id);
 
 	/* Tradeskills  */
 	bool	GetTradeRecipe(const EQ::ItemInstance* container, uint8 c_type, uint32 some_id, uint32 char_id, DBTradeskillRecipe_Struct *spec);
@@ -547,12 +568,23 @@ public:
 
 	/* Doors   */
 	std::vector<DoorsRepository::Doors> LoadDoors(const std::string& zone_name, int16 version);
-	uint32	GetGuildEQID(uint32 guilddbid);
-	void	UpdateDoorGuildID(int doorid, int guild_id);
-	int32	GetDoorsCount(uint32* oMaxID, const char *zone_name, int16 version);
-	int32	GetDoorsCountPlusOne(const char *zone_name, int16 version);
-	int32	GetDoorsDBCountPlusOne(const char *zone_name, int16 version);
-	void	InsertDoor(uint32 did, uint16 ddoorid, const char* ddoor_name, const glm::vec4& position, uint8 dopentype, uint16 dguildid, uint32 dlockpick, uint32 dkeyitem, uint8 ddoor_param, uint8 dinvert, int dincline, uint16 dsize, bool ddisabletimer = false);
+	uint32 GetDoorsCountPlusOne();
+	int GetDoorsDBCountPlusOne(std::string zone_short_name, int16 version);
+	void InsertDoor(
+		uint32 database_id,
+		uint8 id,
+		std::string name,
+		const glm::vec4 &position,
+		uint8 open_type,
+		uint16 guild_id,
+		uint32 ockpick,
+		uint32 key_item_id,
+		uint8 door_param,
+		uint8 invert,
+		int incline,
+		uint16 size,
+		bool disable_timer = false
+	);
 
 	/* Blocked Spells   */
 	int32	GetBlockedSpellsCount(uint32 zoneid);
@@ -599,10 +631,8 @@ public:
 	/* Things which really dont belong here... */
 	int16	CommandRequirement(const char* commandname);
 
-#ifdef BOTS
 	// bot database add-on to eliminate the need for a second database connection
 	BotDatabase botdb;
-#endif
 
 protected:
 	void ZDBInitVars();
@@ -614,6 +644,9 @@ protected:
 	std::unordered_set<uint32> npc_spells_loadtried;
 	DBnpcspellseffects_Struct** npc_spellseffects_cache;
 	bool*				npc_spellseffects_loadtried;
+	std::unordered_map<uint32, DBbotspells_Struct> bot_spells_cache;
+	std::unordered_set<uint32> bot_spells_loadtried;
+
 };
 
 extern ZoneDatabase database;

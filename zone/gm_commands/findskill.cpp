@@ -38,11 +38,11 @@ void command_findskill(Client *c, const Seperator *sep)
 		}
 	}
 	else {
-		std::string search_criteria = str_tolower(sep->argplus[1]);
+		std::string search_criteria = Strings::ToLower(sep->argplus[1]);
 		if (!search_criteria.empty()) {
 			int       found_count = 0;
 			for (auto skill : skills) {
-				std::string skill_name_lower = str_tolower(skill.second);
+				std::string skill_name_lower = Strings::ToLower(skill.second);
 				if (skill_name_lower.find(search_criteria) == std::string::npos) {
 					continue;
 				}

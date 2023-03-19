@@ -17,6 +17,7 @@ void command_kick(Client *c, const Seperator *sep)
 		if (client->Admin() <= c->Admin()) {
 			auto outapp = new EQApplicationPacket(OP_GMKick, 0);
 			client->QueuePacket(outapp);
+			safe_delete(outapp);
 			client->Kick("Ordered kicked by command");
 			c->Message(
 				Chat::White,

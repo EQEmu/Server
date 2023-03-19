@@ -18,20 +18,19 @@
  *
  */
 
+#include "../common/data_verification.h"
 #include "../common/eqemu_logsys.h"
-
+#include "../common/item_data.h"
 #include "../common/misc_functions.h"
 #include "../common/spdat.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 
 #include "mob.h"
 #include "quest_parser_collection.h"
 #include "zonedb.h"
-#include "zone_store.h"
+#include "../common/zone_store.h"
 
-#ifdef BOTS
 #include "bot.h"
-#endif
 
 /**
  * Stores internal representation of mob texture by material slot
@@ -44,7 +43,7 @@
 void Mob::SetMobTextureProfile(uint8 material_slot, uint16 texture, uint32 color, uint32 hero_forge_model)
 {
 	Log(Logs::Detail, Logs::MobAppearance,
-		"Mob::SetMobTextureProfile [%s] material_slot: %u texture: %u color: %u hero_forge_model: %u",
+		"[%s] material_slot: %u texture: %u color: %u hero_forge_model: %u",
 		GetCleanName(),
 		material_slot,
 		texture,
@@ -213,7 +212,7 @@ int32 Mob::GetEquipmentMaterial(uint8 material_slot) const
 	int32 texture_profile_material = GetTextureProfileMaterial(material_slot);
 
 	Log(Logs::Detail, Logs::MobAppearance,
-		"Mob::GetEquipmentMaterial [%s] material_slot: %u texture_profile_material: %i",
+		"[%s] material_slot: %u texture_profile_material: %i",
 		clean_name,
 		material_slot,
 		texture_profile_material
@@ -225,39 +224,31 @@ int32 Mob::GetEquipmentMaterial(uint8 material_slot) const
 
 	auto item = database.GetItem(GetEquippedItemFromTextureSlot(material_slot));
 
-	if (item != nullptr) {
+	if (item) {
+		const auto is_equipped_weapon = EQ::ValueWithin(material_slot, EQ::textures::weaponPrimary, EQ::textures::weaponSecondary);
 
-		/**
-		 * Handle primary / secondary texture
-		 */
-		bool is_primary_or_secondary_weapon =
-				 material_slot == EQ::textures::weaponPrimary ||
-				 material_slot == EQ::textures::weaponSecondary;
-
-		if (is_primary_or_secondary_weapon) {
+		if (is_equipped_weapon) {
 			if (IsClient()) {
-
-				int16 inventory_slot = EQ::InventoryProfile::CalcSlotFromMaterial(material_slot);
+				const auto inventory_slot = EQ::InventoryProfile::CalcSlotFromMaterial(material_slot);
 				if (inventory_slot == INVALID_INDEX) {
 					return 0;
 				}
 
-				const EQ::ItemInstance *item_instance = CastToClient()->m_inv[inventory_slot];
-				if (item_instance) {
-					if (item_instance->GetOrnamentationAug(ornamentation_augment_type)) {
-						item = item_instance->GetOrnamentationAug(ornamentation_augment_type)->GetItem();
-						if (item && strlen(item->IDFile) > 2) {
-							equipment_material = atoi(&item->IDFile[2]);
+				const auto* inst = CastToClient()->m_inv[inventory_slot];
+				if (inst) {
+					if (inst->GetOrnamentationAug(ornamentation_augment_type)) {
+						item = inst->GetOrnamentationAug(ornamentation_augment_type)->GetItem();
+						if (item && strlen(item->IDFile) > 2 && Strings::IsNumber(&item->IDFile[2])) {
+							equipment_material = std::stoi(&item->IDFile[2]);
 						}
-					}
-					else if (item_instance->GetOrnamentationIDFile()) {
-						equipment_material = item_instance->GetOrnamentationIDFile();
+					} else if (inst->GetOrnamentationIDFile()) {
+						equipment_material = inst->GetOrnamentationIDFile();
 					}
 				}
 			}
 
-			if (equipment_material == 0 && strlen(item->IDFile) > 2) {
-				equipment_material = atoi(&item->IDFile[2]);
+			if (!equipment_material && strlen(item->IDFile) > 2 && Strings::IsNumber(&item->IDFile[2])) {
+				equipment_material = std::stoi(&item->IDFile[2]);
 			}
 		}
 		else {
@@ -266,6 +257,32 @@ int32 Mob::GetEquipmentMaterial(uint8 material_slot) const
 	}
 
 	return equipment_material;
+}
+
+uint8 Mob::GetEquipmentType(uint8 material_slot) const
+{
+	auto item_type = static_cast<uint8>(EQ::item::ItemType2HBlunt);
+	auto item = database.GetItem(GetEquippedItemFromTextureSlot(material_slot));
+
+	if (item) {
+		const auto is_equipped_weapon = EQ::ValueWithin(material_slot, EQ::textures::weaponPrimary, EQ::textures::weaponSecondary);
+
+		if (is_equipped_weapon) {
+			if (IsClient()) {
+				const auto inventory_slot = EQ::InventoryProfile::CalcSlotFromMaterial(material_slot);
+				if (inventory_slot == INVALID_INDEX) {
+					return item_type;
+				}
+
+				const auto* inst = CastToClient()->m_inv[inventory_slot];
+				if (inst) {
+					item_type = inst->GetItemType();
+				}
+			}
+		}
+	}
+
+	return item_type;
 }
 
 /**
@@ -378,7 +395,7 @@ void Mob::SendArmorAppearance(Client *one_client)
 	 * The other packets work for primary/secondary.
 	 */
 
-	LogMobAppearance("[SendArmorAppearance] [{}]", GetCleanName());
+	LogMobAppearance("[{}]", GetCleanName());
 
 	if (IsPlayerRace(race)) {
 		if (!IsClient()) {
@@ -407,7 +424,7 @@ void Mob::SendWearChange(uint8 material_slot, Client *one_client)
 	auto packet       = new EQApplicationPacket(OP_WearChange, sizeof(WearChange_Struct));
 	auto *wear_change = (WearChange_Struct *) packet->pBuffer;
 
-	Log(Logs::Detail, Logs::MobAppearance, "Mob::SendWearChange [%s]",
+	Log(Logs::Detail, Logs::MobAppearance, "[%s]",
 		GetCleanName()
 	);
 
@@ -416,7 +433,6 @@ void Mob::SendWearChange(uint8 material_slot, Client *one_client)
 	wear_change->elite_material   = IsEliteMaterialItem(material_slot);
 	wear_change->hero_forge_model = static_cast<uint32>(GetHerosForgeModel(material_slot));
 
-#ifdef BOTS
 	if (IsBot()) {
 		auto item_inst = CastToBot()->GetBotItem(EQ::InventoryProfile::CalcSlotFromMaterial(material_slot));
 		if (item_inst)
@@ -427,9 +443,6 @@ void Mob::SendWearChange(uint8 material_slot, Client *one_client)
 	else {
 		wear_change->color.Color = GetEquipmentColor(material_slot);
 	}
-#else
-	wear_change->color.Color = GetEquipmentColor(material_slot);
-#endif
 
 	wear_change->wear_slot_id = material_slot;
 

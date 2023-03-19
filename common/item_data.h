@@ -370,7 +370,7 @@ namespace EQ
 		uint32	Slots;			// Bitfield for which slots this item can be used in
 		uint32	Price;			// Item cost (?)
 		uint32	Icon;			// Icon Number
-		uint32	LoreGroup;		// Later items use LoreGroup instead of LoreFlag. we might want to see about changing this to int32 since it is commonly -1 and is constantly being cast from signed (-1) to unsigned (4294967295)
+		int32	LoreGroup;		// Later items use LoreGroup instead of LoreFlag. we might want to see about changing this to int32 since it is commonly -1 and is constantly being cast from signed (-1) to unsigned (4294967295)
 		bool	LoreFlag;		// This will be true if LoreGroup is non-zero
 		bool	PendingLoreFlag;
 		bool	ArtifactFlag;
@@ -473,14 +473,14 @@ namespace EQ
 		uint32	LDoNSold;
 		uint32	BaneDmgRaceAmt;
 		uint32	AugRestrict;
-		uint32	Endur;
-		uint32	DotShielding;
-		uint32	Attack;
-		uint32	Regen;
-		uint32	ManaRegen;
-		uint32	EnduranceRegen;
-		uint32	Haste;
-		uint32	DamageShield;
+		int32	Endur;
+		int32	DotShielding;
+		int32	Attack;
+		int32	Regen;
+		int32	ManaRegen;
+		int32	EnduranceRegen;
+		int32	Haste;
+		int32	DamageShield;
 		uint32	RecastDelay;
 		int	RecastType;
 		uint32	AugDistiller;
@@ -533,6 +533,8 @@ namespace EQ
 		//BardName
 
 		bool IsEquipable(uint16 Race, uint16 Class) const;
+		bool IsClassEquipable(uint16 Class) const;
+		bool IsRaceEquipable(uint16 Race) const;
 		bool IsClassCommon() const;
 		bool IsClassBag() const;
 		bool IsClassBook() const;

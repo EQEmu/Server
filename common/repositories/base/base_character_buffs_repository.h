@@ -13,29 +13,29 @@
 #define EQEMU_BASE_CHARACTER_BUFFS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseCharacterBuffsRepository {
 public:
 	struct CharacterBuffs {
-		int         character_id;
-		int         slot_id;
-		int         spell_id;
-		int         caster_level;
+		uint32_t    character_id;
+		uint8_t     slot_id;
+		uint16_t    spell_id;
+		uint8_t     caster_level;
 		std::string caster_name;
-		int         ticsremaining;
-		int         counters;
-		int         numhits;
-		int         melee_rune;
-		int         magic_rune;
-		int         persistent;
-		int         dot_rune;
-		int         caston_x;
-		int         caston_y;
-		int         caston_z;
-		int         ExtraDIChance;
-		int         instrument_mod;
+		int32_t     ticsremaining;
+		uint32_t    counters;
+		uint32_t    numhits;
+		uint32_t    melee_rune;
+		uint32_t    magic_rune;
+		uint8_t     persistent;
+		int32_t     dot_rune;
+		int32_t     caston_x;
+		int32_t     caston_y;
+		int32_t     caston_z;
+		int32_t     ExtraDIChance;
+		int32_t     instrument_mod;
 	};
 
 	static std::string PrimaryKey()
@@ -91,12 +91,12 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string SelectColumnsRaw()
 	{
-		return std::string(implode(", ", SelectColumns()));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -124,30 +124,30 @@ public:
 
 	static CharacterBuffs NewEntity()
 	{
-		CharacterBuffs entry{};
+		CharacterBuffs e{};
 
-		entry.character_id   = 0;
-		entry.slot_id        = 0;
-		entry.spell_id       = 0;
-		entry.caster_level   = 0;
-		entry.caster_name    = "";
-		entry.ticsremaining  = 0;
-		entry.counters       = 0;
-		entry.numhits        = 0;
-		entry.melee_rune     = 0;
-		entry.magic_rune     = 0;
-		entry.persistent     = 0;
-		entry.dot_rune       = 0;
-		entry.caston_x       = 0;
-		entry.caston_y       = 0;
-		entry.caston_z       = 0;
-		entry.ExtraDIChance  = 0;
-		entry.instrument_mod = 10;
+		e.character_id   = 0;
+		e.slot_id        = 0;
+		e.spell_id       = 0;
+		e.caster_level   = 0;
+		e.caster_name    = "";
+		e.ticsremaining  = 0;
+		e.counters       = 0;
+		e.numhits        = 0;
+		e.melee_rune     = 0;
+		e.magic_rune     = 0;
+		e.persistent     = 0;
+		e.dot_rune       = 0;
+		e.caston_x       = 0;
+		e.caston_y       = 0;
+		e.caston_z       = 0;
+		e.ExtraDIChance  = 0;
+		e.instrument_mod = 10;
 
-		return entry;
+		return e;
 	}
 
-	static CharacterBuffs GetCharacterBuffsEntry(
+	static CharacterBuffs GetCharacterBuffs(
 		const std::vector<CharacterBuffs> &character_buffss,
 		int character_buffs_id
 	)
@@ -176,27 +176,27 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			CharacterBuffs entry{};
+			CharacterBuffs e{};
 
-			entry.character_id   = atoi(row[0]);
-			entry.slot_id        = atoi(row[1]);
-			entry.spell_id       = atoi(row[2]);
-			entry.caster_level   = atoi(row[3]);
-			entry.caster_name    = row[4] ? row[4] : "";
-			entry.ticsremaining  = atoi(row[5]);
-			entry.counters       = atoi(row[6]);
-			entry.numhits        = atoi(row[7]);
-			entry.melee_rune     = atoi(row[8]);
-			entry.magic_rune     = atoi(row[9]);
-			entry.persistent     = atoi(row[10]);
-			entry.dot_rune       = atoi(row[11]);
-			entry.caston_x       = atoi(row[12]);
-			entry.caston_y       = atoi(row[13]);
-			entry.caston_z       = atoi(row[14]);
-			entry.ExtraDIChance  = atoi(row[15]);
-			entry.instrument_mod = atoi(row[16]);
+			e.character_id   = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.slot_id        = static_cast<uint8_t>(strtoul(row[1], nullptr, 10));
+			e.spell_id       = static_cast<uint16_t>(strtoul(row[2], nullptr, 10));
+			e.caster_level   = static_cast<uint8_t>(strtoul(row[3], nullptr, 10));
+			e.caster_name    = row[4] ? row[4] : "";
+			e.ticsremaining  = static_cast<int32_t>(atoi(row[5]));
+			e.counters       = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
+			e.numhits        = static_cast<uint32_t>(strtoul(row[7], nullptr, 10));
+			e.melee_rune     = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
+			e.magic_rune     = static_cast<uint32_t>(strtoul(row[9], nullptr, 10));
+			e.persistent     = static_cast<uint8_t>(strtoul(row[10], nullptr, 10));
+			e.dot_rune       = static_cast<int32_t>(atoi(row[11]));
+			e.caston_x       = static_cast<int32_t>(atoi(row[12]));
+			e.caston_y       = static_cast<int32_t>(atoi(row[13]));
+			e.caston_z       = static_cast<int32_t>(atoi(row[14]));
+			e.ExtraDIChance  = static_cast<int32_t>(atoi(row[15]));
+			e.instrument_mod = static_cast<int32_t>(atoi(row[16]));
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -221,38 +221,38 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		CharacterBuffs character_buffs_entry
+		const CharacterBuffs &e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(character_buffs_entry.character_id));
-		update_values.push_back(columns[1] + " = " + std::to_string(character_buffs_entry.slot_id));
-		update_values.push_back(columns[2] + " = " + std::to_string(character_buffs_entry.spell_id));
-		update_values.push_back(columns[3] + " = " + std::to_string(character_buffs_entry.caster_level));
-		update_values.push_back(columns[4] + " = '" + EscapeString(character_buffs_entry.caster_name) + "'");
-		update_values.push_back(columns[5] + " = " + std::to_string(character_buffs_entry.ticsremaining));
-		update_values.push_back(columns[6] + " = " + std::to_string(character_buffs_entry.counters));
-		update_values.push_back(columns[7] + " = " + std::to_string(character_buffs_entry.numhits));
-		update_values.push_back(columns[8] + " = " + std::to_string(character_buffs_entry.melee_rune));
-		update_values.push_back(columns[9] + " = " + std::to_string(character_buffs_entry.magic_rune));
-		update_values.push_back(columns[10] + " = " + std::to_string(character_buffs_entry.persistent));
-		update_values.push_back(columns[11] + " = " + std::to_string(character_buffs_entry.dot_rune));
-		update_values.push_back(columns[12] + " = " + std::to_string(character_buffs_entry.caston_x));
-		update_values.push_back(columns[13] + " = " + std::to_string(character_buffs_entry.caston_y));
-		update_values.push_back(columns[14] + " = " + std::to_string(character_buffs_entry.caston_z));
-		update_values.push_back(columns[15] + " = " + std::to_string(character_buffs_entry.ExtraDIChance));
-		update_values.push_back(columns[16] + " = " + std::to_string(character_buffs_entry.instrument_mod));
+		v.push_back(columns[0] + " = " + std::to_string(e.character_id));
+		v.push_back(columns[1] + " = " + std::to_string(e.slot_id));
+		v.push_back(columns[2] + " = " + std::to_string(e.spell_id));
+		v.push_back(columns[3] + " = " + std::to_string(e.caster_level));
+		v.push_back(columns[4] + " = '" + Strings::Escape(e.caster_name) + "'");
+		v.push_back(columns[5] + " = " + std::to_string(e.ticsremaining));
+		v.push_back(columns[6] + " = " + std::to_string(e.counters));
+		v.push_back(columns[7] + " = " + std::to_string(e.numhits));
+		v.push_back(columns[8] + " = " + std::to_string(e.melee_rune));
+		v.push_back(columns[9] + " = " + std::to_string(e.magic_rune));
+		v.push_back(columns[10] + " = " + std::to_string(e.persistent));
+		v.push_back(columns[11] + " = " + std::to_string(e.dot_rune));
+		v.push_back(columns[12] + " = " + std::to_string(e.caston_x));
+		v.push_back(columns[13] + " = " + std::to_string(e.caston_y));
+		v.push_back(columns[14] + " = " + std::to_string(e.caston_z));
+		v.push_back(columns[15] + " = " + std::to_string(e.ExtraDIChance));
+		v.push_back(columns[16] + " = " + std::to_string(e.instrument_mod));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
-				character_buffs_entry.character_id
+				e.character_id
 			)
 		);
 
@@ -261,85 +261,85 @@ public:
 
 	static CharacterBuffs InsertOne(
 		Database& db,
-		CharacterBuffs character_buffs_entry
+		CharacterBuffs e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(character_buffs_entry.character_id));
-		insert_values.push_back(std::to_string(character_buffs_entry.slot_id));
-		insert_values.push_back(std::to_string(character_buffs_entry.spell_id));
-		insert_values.push_back(std::to_string(character_buffs_entry.caster_level));
-		insert_values.push_back("'" + EscapeString(character_buffs_entry.caster_name) + "'");
-		insert_values.push_back(std::to_string(character_buffs_entry.ticsremaining));
-		insert_values.push_back(std::to_string(character_buffs_entry.counters));
-		insert_values.push_back(std::to_string(character_buffs_entry.numhits));
-		insert_values.push_back(std::to_string(character_buffs_entry.melee_rune));
-		insert_values.push_back(std::to_string(character_buffs_entry.magic_rune));
-		insert_values.push_back(std::to_string(character_buffs_entry.persistent));
-		insert_values.push_back(std::to_string(character_buffs_entry.dot_rune));
-		insert_values.push_back(std::to_string(character_buffs_entry.caston_x));
-		insert_values.push_back(std::to_string(character_buffs_entry.caston_y));
-		insert_values.push_back(std::to_string(character_buffs_entry.caston_z));
-		insert_values.push_back(std::to_string(character_buffs_entry.ExtraDIChance));
-		insert_values.push_back(std::to_string(character_buffs_entry.instrument_mod));
+		v.push_back(std::to_string(e.character_id));
+		v.push_back(std::to_string(e.slot_id));
+		v.push_back(std::to_string(e.spell_id));
+		v.push_back(std::to_string(e.caster_level));
+		v.push_back("'" + Strings::Escape(e.caster_name) + "'");
+		v.push_back(std::to_string(e.ticsremaining));
+		v.push_back(std::to_string(e.counters));
+		v.push_back(std::to_string(e.numhits));
+		v.push_back(std::to_string(e.melee_rune));
+		v.push_back(std::to_string(e.magic_rune));
+		v.push_back(std::to_string(e.persistent));
+		v.push_back(std::to_string(e.dot_rune));
+		v.push_back(std::to_string(e.caston_x));
+		v.push_back(std::to_string(e.caston_y));
+		v.push_back(std::to_string(e.caston_z));
+		v.push_back(std::to_string(e.ExtraDIChance));
+		v.push_back(std::to_string(e.instrument_mod));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
 		if (results.Success()) {
-			character_buffs_entry.character_id = results.LastInsertedID();
-			return character_buffs_entry;
+			e.character_id = results.LastInsertedID();
+			return e;
 		}
 
-		character_buffs_entry = NewEntity();
+		e = NewEntity();
 
-		return character_buffs_entry;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<CharacterBuffs> character_buffs_entries
+		const std::vector<CharacterBuffs> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &character_buffs_entry: character_buffs_entries) {
-			std::vector<std::string> insert_values;
+		for (auto &e: entries) {
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(character_buffs_entry.character_id));
-			insert_values.push_back(std::to_string(character_buffs_entry.slot_id));
-			insert_values.push_back(std::to_string(character_buffs_entry.spell_id));
-			insert_values.push_back(std::to_string(character_buffs_entry.caster_level));
-			insert_values.push_back("'" + EscapeString(character_buffs_entry.caster_name) + "'");
-			insert_values.push_back(std::to_string(character_buffs_entry.ticsremaining));
-			insert_values.push_back(std::to_string(character_buffs_entry.counters));
-			insert_values.push_back(std::to_string(character_buffs_entry.numhits));
-			insert_values.push_back(std::to_string(character_buffs_entry.melee_rune));
-			insert_values.push_back(std::to_string(character_buffs_entry.magic_rune));
-			insert_values.push_back(std::to_string(character_buffs_entry.persistent));
-			insert_values.push_back(std::to_string(character_buffs_entry.dot_rune));
-			insert_values.push_back(std::to_string(character_buffs_entry.caston_x));
-			insert_values.push_back(std::to_string(character_buffs_entry.caston_y));
-			insert_values.push_back(std::to_string(character_buffs_entry.caston_z));
-			insert_values.push_back(std::to_string(character_buffs_entry.ExtraDIChance));
-			insert_values.push_back(std::to_string(character_buffs_entry.instrument_mod));
+			v.push_back(std::to_string(e.character_id));
+			v.push_back(std::to_string(e.slot_id));
+			v.push_back(std::to_string(e.spell_id));
+			v.push_back(std::to_string(e.caster_level));
+			v.push_back("'" + Strings::Escape(e.caster_name) + "'");
+			v.push_back(std::to_string(e.ticsremaining));
+			v.push_back(std::to_string(e.counters));
+			v.push_back(std::to_string(e.numhits));
+			v.push_back(std::to_string(e.melee_rune));
+			v.push_back(std::to_string(e.magic_rune));
+			v.push_back(std::to_string(e.persistent));
+			v.push_back(std::to_string(e.dot_rune));
+			v.push_back(std::to_string(e.caston_x));
+			v.push_back(std::to_string(e.caston_y));
+			v.push_back(std::to_string(e.caston_z));
+			v.push_back(std::to_string(e.ExtraDIChance));
+			v.push_back(std::to_string(e.instrument_mod));
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 
@@ -360,33 +360,33 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharacterBuffs entry{};
+			CharacterBuffs e{};
 
-			entry.character_id   = atoi(row[0]);
-			entry.slot_id        = atoi(row[1]);
-			entry.spell_id       = atoi(row[2]);
-			entry.caster_level   = atoi(row[3]);
-			entry.caster_name    = row[4] ? row[4] : "";
-			entry.ticsremaining  = atoi(row[5]);
-			entry.counters       = atoi(row[6]);
-			entry.numhits        = atoi(row[7]);
-			entry.melee_rune     = atoi(row[8]);
-			entry.magic_rune     = atoi(row[9]);
-			entry.persistent     = atoi(row[10]);
-			entry.dot_rune       = atoi(row[11]);
-			entry.caston_x       = atoi(row[12]);
-			entry.caston_y       = atoi(row[13]);
-			entry.caston_z       = atoi(row[14]);
-			entry.ExtraDIChance  = atoi(row[15]);
-			entry.instrument_mod = atoi(row[16]);
+			e.character_id   = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.slot_id        = static_cast<uint8_t>(strtoul(row[1], nullptr, 10));
+			e.spell_id       = static_cast<uint16_t>(strtoul(row[2], nullptr, 10));
+			e.caster_level   = static_cast<uint8_t>(strtoul(row[3], nullptr, 10));
+			e.caster_name    = row[4] ? row[4] : "";
+			e.ticsremaining  = static_cast<int32_t>(atoi(row[5]));
+			e.counters       = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
+			e.numhits        = static_cast<uint32_t>(strtoul(row[7], nullptr, 10));
+			e.melee_rune     = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
+			e.magic_rune     = static_cast<uint32_t>(strtoul(row[9], nullptr, 10));
+			e.persistent     = static_cast<uint8_t>(strtoul(row[10], nullptr, 10));
+			e.dot_rune       = static_cast<int32_t>(atoi(row[11]));
+			e.caston_x       = static_cast<int32_t>(atoi(row[12]));
+			e.caston_y       = static_cast<int32_t>(atoi(row[13]));
+			e.caston_z       = static_cast<int32_t>(atoi(row[14]));
+			e.ExtraDIChance  = static_cast<int32_t>(atoi(row[15]));
+			e.instrument_mod = static_cast<int32_t>(atoi(row[16]));
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static std::vector<CharacterBuffs> GetWhere(Database& db, std::string where_filter)
+	static std::vector<CharacterBuffs> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<CharacterBuffs> all_entries;
 
@@ -401,33 +401,33 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharacterBuffs entry{};
+			CharacterBuffs e{};
 
-			entry.character_id   = atoi(row[0]);
-			entry.slot_id        = atoi(row[1]);
-			entry.spell_id       = atoi(row[2]);
-			entry.caster_level   = atoi(row[3]);
-			entry.caster_name    = row[4] ? row[4] : "";
-			entry.ticsremaining  = atoi(row[5]);
-			entry.counters       = atoi(row[6]);
-			entry.numhits        = atoi(row[7]);
-			entry.melee_rune     = atoi(row[8]);
-			entry.magic_rune     = atoi(row[9]);
-			entry.persistent     = atoi(row[10]);
-			entry.dot_rune       = atoi(row[11]);
-			entry.caston_x       = atoi(row[12]);
-			entry.caston_y       = atoi(row[13]);
-			entry.caston_z       = atoi(row[14]);
-			entry.ExtraDIChance  = atoi(row[15]);
-			entry.instrument_mod = atoi(row[16]);
+			e.character_id   = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.slot_id        = static_cast<uint8_t>(strtoul(row[1], nullptr, 10));
+			e.spell_id       = static_cast<uint16_t>(strtoul(row[2], nullptr, 10));
+			e.caster_level   = static_cast<uint8_t>(strtoul(row[3], nullptr, 10));
+			e.caster_name    = row[4] ? row[4] : "";
+			e.ticsremaining  = static_cast<int32_t>(atoi(row[5]));
+			e.counters       = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
+			e.numhits        = static_cast<uint32_t>(strtoul(row[7], nullptr, 10));
+			e.melee_rune     = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
+			e.magic_rune     = static_cast<uint32_t>(strtoul(row[9], nullptr, 10));
+			e.persistent     = static_cast<uint8_t>(strtoul(row[10], nullptr, 10));
+			e.dot_rune       = static_cast<int32_t>(atoi(row[11]));
+			e.caston_x       = static_cast<int32_t>(atoi(row[12]));
+			e.caston_y       = static_cast<int32_t>(atoi(row[13]));
+			e.caston_z       = static_cast<int32_t>(atoi(row[14]));
+			e.ExtraDIChance  = static_cast<int32_t>(atoi(row[15]));
+			e.instrument_mod = static_cast<int32_t>(atoi(row[16]));
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -450,6 +450,32 @@ public:
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int64 GetMaxId(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COALESCE(MAX({}), 0) FROM {}",
+				PrimaryKey(),
+				TableName()
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static int64 Count(Database& db, const std::string &where_filter = "")
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COUNT(*) FROM {} {}",
+				TableName(),
+				(where_filter.empty() ? "" : "WHERE " + where_filter)
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
 };

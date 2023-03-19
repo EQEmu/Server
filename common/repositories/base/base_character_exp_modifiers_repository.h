@@ -13,16 +13,17 @@
 #define EQEMU_BASE_CHARACTER_EXP_MODIFIERS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseCharacterExpModifiersRepository {
 public:
 	struct CharacterExpModifiers {
-		int   character_id;
-		int   zone_id;
-		float aa_modifier;
-		float exp_modifier;
+		int32_t character_id;
+		int32_t zone_id;
+		int32_t instance_version;
+		float   aa_modifier;
+		float   exp_modifier;
 	};
 
 	static std::string PrimaryKey()
@@ -35,6 +36,7 @@ public:
 		return {
 			"character_id",
 			"zone_id",
+			"instance_version",
 			"aa_modifier",
 			"exp_modifier",
 		};
@@ -45,6 +47,7 @@ public:
 		return {
 			"character_id",
 			"zone_id",
+			"instance_version",
 			"aa_modifier",
 			"exp_modifier",
 		};
@@ -52,12 +55,12 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string SelectColumnsRaw()
 	{
-		return std::string(implode(", ", SelectColumns()));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -85,17 +88,18 @@ public:
 
 	static CharacterExpModifiers NewEntity()
 	{
-		CharacterExpModifiers entry{};
+		CharacterExpModifiers e{};
 
-		entry.character_id = 0;
-		entry.zone_id      = 0;
-		entry.aa_modifier  = 0;
-		entry.exp_modifier = 0;
+		e.character_id     = 0;
+		e.zone_id          = 0;
+		e.instance_version = -1;
+		e.aa_modifier      = 0;
+		e.exp_modifier     = 0;
 
-		return entry;
+		return e;
 	}
 
-	static CharacterExpModifiers GetCharacterExpModifiersEntry(
+	static CharacterExpModifiers GetCharacterExpModifiers(
 		const std::vector<CharacterExpModifiers> &character_exp_modifierss,
 		int character_exp_modifiers_id
 	)
@@ -124,14 +128,15 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			CharacterExpModifiers entry{};
+			CharacterExpModifiers e{};
 
-			entry.character_id = atoi(row[0]);
-			entry.zone_id      = atoi(row[1]);
-			entry.aa_modifier  = static_cast<float>(atof(row[2]));
-			entry.exp_modifier = static_cast<float>(atof(row[3]));
+			e.character_id     = static_cast<int32_t>(atoi(row[0]));
+			e.zone_id          = static_cast<int32_t>(atoi(row[1]));
+			e.instance_version = static_cast<int32_t>(atoi(row[2]));
+			e.aa_modifier      = strtof(row[3], nullptr);
+			e.exp_modifier     = strtof(row[4], nullptr);
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -156,25 +161,26 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		CharacterExpModifiers character_exp_modifiers_entry
+		const CharacterExpModifiers &e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(character_exp_modifiers_entry.character_id));
-		update_values.push_back(columns[1] + " = " + std::to_string(character_exp_modifiers_entry.zone_id));
-		update_values.push_back(columns[2] + " = " + std::to_string(character_exp_modifiers_entry.aa_modifier));
-		update_values.push_back(columns[3] + " = " + std::to_string(character_exp_modifiers_entry.exp_modifier));
+		v.push_back(columns[0] + " = " + std::to_string(e.character_id));
+		v.push_back(columns[1] + " = " + std::to_string(e.zone_id));
+		v.push_back(columns[2] + " = " + std::to_string(e.instance_version));
+		v.push_back(columns[3] + " = " + std::to_string(e.aa_modifier));
+		v.push_back(columns[4] + " = " + std::to_string(e.exp_modifier));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
-				character_exp_modifiers_entry.character_id
+				e.character_id
 			)
 		);
 
@@ -183,59 +189,61 @@ public:
 
 	static CharacterExpModifiers InsertOne(
 		Database& db,
-		CharacterExpModifiers character_exp_modifiers_entry
+		CharacterExpModifiers e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(character_exp_modifiers_entry.character_id));
-		insert_values.push_back(std::to_string(character_exp_modifiers_entry.zone_id));
-		insert_values.push_back(std::to_string(character_exp_modifiers_entry.aa_modifier));
-		insert_values.push_back(std::to_string(character_exp_modifiers_entry.exp_modifier));
+		v.push_back(std::to_string(e.character_id));
+		v.push_back(std::to_string(e.zone_id));
+		v.push_back(std::to_string(e.instance_version));
+		v.push_back(std::to_string(e.aa_modifier));
+		v.push_back(std::to_string(e.exp_modifier));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
 		if (results.Success()) {
-			character_exp_modifiers_entry.character_id = results.LastInsertedID();
-			return character_exp_modifiers_entry;
+			e.character_id = results.LastInsertedID();
+			return e;
 		}
 
-		character_exp_modifiers_entry = NewEntity();
+		e = NewEntity();
 
-		return character_exp_modifiers_entry;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<CharacterExpModifiers> character_exp_modifiers_entries
+		const std::vector<CharacterExpModifiers> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &character_exp_modifiers_entry: character_exp_modifiers_entries) {
-			std::vector<std::string> insert_values;
+		for (auto &e: entries) {
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(character_exp_modifiers_entry.character_id));
-			insert_values.push_back(std::to_string(character_exp_modifiers_entry.zone_id));
-			insert_values.push_back(std::to_string(character_exp_modifiers_entry.aa_modifier));
-			insert_values.push_back(std::to_string(character_exp_modifiers_entry.exp_modifier));
+			v.push_back(std::to_string(e.character_id));
+			v.push_back(std::to_string(e.zone_id));
+			v.push_back(std::to_string(e.instance_version));
+			v.push_back(std::to_string(e.aa_modifier));
+			v.push_back(std::to_string(e.exp_modifier));
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 
@@ -256,20 +264,21 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharacterExpModifiers entry{};
+			CharacterExpModifiers e{};
 
-			entry.character_id = atoi(row[0]);
-			entry.zone_id      = atoi(row[1]);
-			entry.aa_modifier  = static_cast<float>(atof(row[2]));
-			entry.exp_modifier = static_cast<float>(atof(row[3]));
+			e.character_id     = static_cast<int32_t>(atoi(row[0]));
+			e.zone_id          = static_cast<int32_t>(atoi(row[1]));
+			e.instance_version = static_cast<int32_t>(atoi(row[2]));
+			e.aa_modifier      = strtof(row[3], nullptr);
+			e.exp_modifier     = strtof(row[4], nullptr);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static std::vector<CharacterExpModifiers> GetWhere(Database& db, std::string where_filter)
+	static std::vector<CharacterExpModifiers> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<CharacterExpModifiers> all_entries;
 
@@ -284,20 +293,21 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharacterExpModifiers entry{};
+			CharacterExpModifiers e{};
 
-			entry.character_id = atoi(row[0]);
-			entry.zone_id      = atoi(row[1]);
-			entry.aa_modifier  = static_cast<float>(atof(row[2]));
-			entry.exp_modifier = static_cast<float>(atof(row[3]));
+			e.character_id     = static_cast<int32_t>(atoi(row[0]));
+			e.zone_id          = static_cast<int32_t>(atoi(row[1]));
+			e.instance_version = static_cast<int32_t>(atoi(row[2]));
+			e.aa_modifier      = strtof(row[3], nullptr);
+			e.exp_modifier     = strtof(row[4], nullptr);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -320,6 +330,32 @@ public:
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int64 GetMaxId(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COALESCE(MAX({}), 0) FROM {}",
+				PrimaryKey(),
+				TableName()
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static int64 Count(Database& db, const std::string &where_filter = "")
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COUNT(*) FROM {} {}",
+				TableName(),
+				(where_filter.empty() ? "" : "WHERE " + where_filter)
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
 };

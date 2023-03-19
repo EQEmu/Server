@@ -25,7 +25,7 @@
 #include "../common/races.h"
 #include "../common/classes.h"
 #include "../common/misc.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "zoneserver.h"
 #include "zonelist.h"
 #include "clientlist.h"

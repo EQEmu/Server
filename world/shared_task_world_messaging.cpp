@@ -38,21 +38,22 @@ void SharedTaskWorldMessaging::HandleZoneMessage(ServerPacket *pack)
 
 			break;
 		}
-		case ServerOP_SharedTaskAttemptRemove: {
-			auto *r = (ServerSharedTaskAttemptRemove_Struct *) pack->pBuffer;
+		case ServerOP_SharedTaskQuit: {
+			auto *r = (ServerSharedTaskQuit_Struct *) pack->pBuffer;
 			LogTasksDetail(
-				"[ServerOP_SharedTaskAttemptRemove] Received request from character [{}] task_id [{}] remove_from_db [{}]",
+				"[ServerOP_SharedTaskQuit] Received request from character [{}] task_id [{}] remove_from_db [{}]",
 				r->requested_character_id,
-				r->requested_task_id,
+				r->task_id,
 				r->remove_from_db
 			);
 
-			shared_task_manager.AttemptSharedTaskRemoval(
-				r->requested_task_id,
-				r->requested_character_id,
-				r->remove_from_db
-			);
-
+			auto s = shared_task_manager.FindSharedTaskByTaskIdAndCharacterId(r->task_id, r->requested_character_id);
+			if (s) {
+				auto member = s->FindMemberFromCharacterID(r->requested_character_id);
+				if (member.character_id != 0) {
+					shared_task_manager.RemoveMember(s, member, r->remove_from_db);
+				}
+			}
 			break;
 		}
 		case ServerOP_SharedTaskKickPlayers: {
@@ -67,10 +68,7 @@ void SharedTaskWorldMessaging::HandleZoneMessage(ServerPacket *pack)
 			if (t) {
 				auto leader = t->GetLeader();
 				if (leader.character_id != r->source_character_id) {
-					client_list.SendCharacterMessageID(
-						r->source_character_id, Chat::Red,
-						SharedTaskMessage::YOU_ARE_NOT_LEADER_COMMAND_ISSUE, {leader.character_name}
-					);
+					client_list.SendCharacterMessageID(r->source_character_id, Chat::Red, TaskStr::NOT_LEADER, {leader.character_name});
 				}
 				else {
 					shared_task_manager.RemoveEveryoneFromSharedTask(t, r->source_character_id);
@@ -146,10 +144,7 @@ void SharedTaskWorldMessaging::HandleZoneMessage(ServerPacket *pack)
 
 				auto leader = t->GetLeader();
 				if (leader.character_id != r->source_character_id) {
-					client_list.SendCharacterMessageID(
-						r->source_character_id, Chat::Red,
-						SharedTaskMessage::YOU_ARE_NOT_LEADER_COMMAND_ISSUE, {leader.character_name}
-					);
+					client_list.SendCharacterMessageID(r->source_character_id, Chat::Red, TaskStr::NOT_LEADER, {leader.character_name});
 				}
 				else {
 					LogTasksDetail(
@@ -158,8 +153,14 @@ void SharedTaskWorldMessaging::HandleZoneMessage(ServerPacket *pack)
 						t->GetDbSharedTask().id
 					);
 
-					std::string character_name = r->player_name;
-					shared_task_manager.RemovePlayerFromSharedTaskByPlayerName(t, character_name);
+					auto member = t->FindMemberFromCharacterName(r->player_name);
+					if (member.character_id == 0) {
+						shared_task_manager.SendLeaderMessageID(t, Chat::Red, TaskStr::IS_NOT_MEMBER, {r->player_name});
+					}
+					else {
+						shared_task_manager.RemoveMember(t, member, true);
+						shared_task_manager.SendLeaderMessageID(t, Chat::Yellow, TaskStr::PLAYER_REMOVED, {member.character_name, t->GetTaskData().title});
+					}
 				}
 			}
 
@@ -185,17 +186,10 @@ void SharedTaskWorldMessaging::HandleZoneMessage(ServerPacket *pack)
 
 				auto leader = t->GetLeader();
 				if (leader.character_id != r->source_character_id) {
-					client_list.SendCharacterMessageID(
-						r->source_character_id, Chat::Red,
-						SharedTaskMessage::YOU_ARE_NOT_LEADER_COMMAND_ISSUE, {leader.character_name}
-					);
+					client_list.SendCharacterMessageID(r->source_character_id, Chat::Red, TaskStr::NOT_LEADER, {leader.character_name});
 				}
 				else if (strcasecmp(leader.character_name.c_str(), r->player_name) == 0) {
-					client_list.SendCharacterMessageID(
-						r->source_character_id,
-						Chat::Red,
-						SharedTaskMessage::YOU_ALREADY_LEADER
-					);
+					client_list.SendCharacterMessageID(r->source_character_id, Chat::Red, TaskStr::YOU_ALREADY_LEADER);
 				}
 				else {
 					LogTasksDetail(
@@ -232,10 +226,7 @@ void SharedTaskWorldMessaging::HandleZoneMessage(ServerPacket *pack)
 				auto leader = t->GetLeader();
 				if (leader.character_id != r->source_character_id) {
 					// taskadd is client sided with System color in newer clients, server side might still be red
-					client_list.SendCharacterMessageID(
-						r->source_character_id, Chat::Red,
-						SharedTaskMessage::YOU_ARE_NOT_LEADER_COMMAND_ISSUE, {leader.character_name}
-					);
+					client_list.SendCharacterMessageID(r->source_character_id, Chat::Red, TaskStr::NOT_LEADER, {leader.character_name});
 				}
 				else {
 					LogTasksDetail(
@@ -275,12 +266,7 @@ void SharedTaskWorldMessaging::HandleZoneMessage(ServerPacket *pack)
 					shared_task_manager.AddPlayerByCharacterIdAndName(t, r->source_character_id, r->player_name);
 				}
 				else {
-					shared_task_manager.SendLeaderMessageID(
-						t,
-						Chat::Red,
-						SharedTaskMessage::PLAYER_DECLINED_OFFER,
-						{r->player_name}
-					);
+					shared_task_manager.SendLeaderMessageID(t, Chat::Red, TaskStr::PLAYER_DECLINED_OFFER, {r->player_name});
 				}
 			}
 			break;
@@ -333,20 +319,41 @@ void SharedTaskWorldMessaging::HandleZoneMessage(ServerPacket *pack)
 					player_names.emplace_back(member.character_name);
 
 					if (member.is_leader) {
-						client_list.SendCharacterMessageID(
-							buf->source_character_id, Chat::Yellow,
-							SharedTaskMessage::LEADER_PRINT, {member.character_name}
-						);
+						client_list.SendCharacterMessageID(buf->source_character_id, Chat::Yellow, TaskStr::LEADER_PRINT, {member.character_name});
 					}
 				}
 
 				std::string player_list = fmt::format("{}", fmt::join(player_names, ", "));
-				client_list.SendCharacterMessageID(
-					buf->source_character_id, Chat::Yellow,
-					SharedTaskMessage::MEMBERS_PRINT, {player_list}
-				);
+				client_list.SendCharacterMessageID(buf->source_character_id, Chat::Yellow, TaskStr::MEMBERS_PRINT, {player_list});
 			}
 
+			break;
+		}
+		case ServerOP_SharedTaskLock: {
+			auto buf = reinterpret_cast<ServerSharedTaskLock_Struct*>(pack->pBuffer);
+			auto shared_task = shared_task_manager.FindSharedTaskByTaskIdAndCharacterId(buf->task_id, buf->source_character_id);
+			if (shared_task)
+			{
+				shared_task_manager.LockTask(shared_task, buf->lock);
+			}
+			break;
+		}
+		case ServerOP_SharedTaskEndByDz: {
+			auto buf = reinterpret_cast<ServerSharedTaskEnd_Struct*>(pack->pBuffer);
+			auto shared_task = shared_task_manager.FindSharedTaskByDzId(buf->dz_id);
+			if (shared_task)
+			{
+				shared_task_manager.Terminate(*shared_task, buf->send_fail, true);
+			}
+			break;
+		}
+		case ServerOP_SharedTaskEnd: {
+			auto buf = reinterpret_cast<ServerSharedTaskEnd_Struct*>(pack->pBuffer);
+			auto shared_task = shared_task_manager.FindSharedTaskByTaskIdAndCharacterId(buf->task_id, buf->character_id);
+			if (shared_task)
+			{
+				shared_task_manager.Terminate(*shared_task, buf->send_fail, true);
+			}
 			break;
 		}
 		default:

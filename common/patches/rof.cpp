@@ -11,7 +11,7 @@
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
 	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
-	
+
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -28,10 +28,12 @@
 
 #include "../eq_packet_structs.h"
 #include "../misc_functions.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "../inventory_profile.h"
 #include "rof_structs.h"
 #include "../rulesys.h"
+#include "../path_manager.h"
+#include "../races.h"
 
 #include <iostream>
 #include <sstream>
@@ -52,13 +54,13 @@ namespace RoF
 	static inline structs::InventorySlot_Struct ServerToRoFCorpseSlot(uint32 server_corpse_slot);
 	static inline uint32 ServerToRoFCorpseMainSlot(uint32 server_corpse_slot);
 	static inline structs::TypelessInventorySlot_Struct ServerToRoFTypelessSlot(uint32 server_slot, int16 server_type);
-	
+
 	// client to server inventory location converters
 	static inline uint32 RoFToServerSlot(structs::InventorySlot_Struct rof_slot);
 	static inline uint32 RoFToServerCorpseSlot(structs::InventorySlot_Struct rof_corpse_slot);
 	static inline uint32 RoFToServerCorpseMainSlot(uint32 rof_corpse_slot);
 	static inline uint32 RoFToServerTypelessSlot(structs::TypelessInventorySlot_Struct rof_slot, int16 rof_type);
-	
+
 	// server to client say link converter
 	static inline void ServerToRoFSayLink(std::string& rofSayLink, const std::string& serverSayLink);
 
@@ -75,12 +77,8 @@ namespace RoF
 	{
 		//create our opcode manager if we havent already
 		if (opcodes == nullptr) {
-			//TODO: get this file name from the config file
-			auto Config = EQEmuConfig::get();
-			std::string opfile = Config->PatchDir;
-			opfile += "patch_";
-			opfile += name;
-			opfile += ".conf";
+			std::string opfile = fmt::format("{}/patch_{}.conf", path.GetPatchPath(), name);
+
 			//load up the opcode manager.
 			//TODO: figure out how to support shared memory with multiple patches...
 			opcodes = new RegularOpcodeManager();
@@ -118,12 +116,7 @@ namespace RoF
 		//we need to go to every stream and replace it's manager.
 
 		if (opcodes != nullptr) {
-			//TODO: get this file name from the config file
-			auto Config = EQEmuConfig::get();
-			std::string opfile = Config->PatchDir;
-			opfile += "patch_";
-			opfile += name;
-			opfile += ".conf";
+			std::string opfile = fmt::format("{}/patch_{}.conf", path.GetPatchPath(), name);
 			if (!opcodes->ReloadOpcodes(opfile.c_str())) {
 				LogNetcode("[OPCODES] Error reloading opcodes file [{}] for patch [{}]", opfile.c_str(), name);
 				return;
@@ -672,7 +665,7 @@ namespace RoF
 
 	ENCODE(OP_DeleteCharge)
 	{
-		Log(Logs::Moderate, Logs::Netcode, "RoF::ENCODE(OP_DeleteCharge)");
+		Log(Logs::Detail, Logs::Netcode, "RoF::ENCODE(OP_DeleteCharge)");
 
 		ENCODE_FORWARD(OP_MoveItem);
 	}
@@ -732,30 +725,6 @@ namespace RoF
 		__packet->size = buf.size();
 		__packet->pBuffer = new unsigned char[__packet->size];
 		memcpy(__packet->pBuffer, buf.buffer(), __packet->size);
-
-		FINISH_ENCODE();
-	}
-
-	ENCODE(OP_DzCompass)
-	{
-		SETUP_VAR_ENCODE(DynamicZoneCompass_Struct);
-		ALLOC_VAR_ENCODE(structs::DynamicZoneCompass_Struct,
-			sizeof(structs::DynamicZoneCompass_Struct) +
-			sizeof(structs::DynamicZoneCompassEntry_Struct) * emu->count
-		);
-
-		OUT(client_id);
-		OUT(count);
-
-		for (uint32 i = 0; i < emu->count; ++i)
-		{
-			OUT(entries[i].dz_zone_id);
-			OUT(entries[i].dz_instance_id);
-			OUT(entries[i].dz_type);
-			OUT(entries[i].x);
-			OUT(entries[i].y);
-			OUT(entries[i].z);
-		}
 
 		FINISH_ENCODE();
 	}
@@ -1558,7 +1527,7 @@ namespace RoF
 
 		in->size = ob.size();
 		in->pBuffer = ob.detach();
-		
+
 		delete[] __emu_buffer;
 
 		dest->FastQueuePacket(&in, ack_req);
@@ -1624,7 +1593,7 @@ namespace RoF
 		ENCODE_LENGTH_EXACT(LootingItem_Struct);
 		SETUP_DIRECT_ENCODE(LootingItem_Struct, structs::LootingItem_Struct);
 
-		Log(Logs::Moderate, Logs::Netcode, "RoF::ENCODE(OP_LootItem)");
+		Log(Logs::Detail, Logs::Netcode, "RoF::ENCODE(OP_LootItem)");
 
 		OUT(lootee);
 		OUT(looter);
@@ -1782,7 +1751,7 @@ namespace RoF
 		ENCODE_LENGTH_EXACT(MoveItem_Struct);
 		SETUP_DIRECT_ENCODE(MoveItem_Struct, structs::MoveItem_Struct);
 
-		Log(Logs::Moderate, Logs::Netcode, "RoF::ENCODE(OP_MoveItem)");
+		Log(Logs::Detail, Logs::Netcode, "RoF::ENCODE(OP_MoveItem)");
 
 		eq->from_slot = ServerToRoFSlot(emu->from_slot);
 		eq->to_slot = ServerToRoFSlot(emu->to_slot);
@@ -1838,10 +1807,10 @@ namespace RoF
 		OUT_str(zone_short_name2);
 		OUT(zone_id);
 		OUT(zone_instance);
-		OUT(SuspendBuffs);
-		OUT(FastRegenHP);
-		OUT(FastRegenMana);
-		OUT(FastRegenEndurance);
+		OUT(suspend_buffs);
+		OUT(fast_regen_hp);
+		OUT(fast_regen_mana);
+		OUT(fast_regen_endurance);
 		OUT(underworld_teleport_index);
 
 		eq->FogDensity = emu->fog_density;
@@ -1849,8 +1818,8 @@ namespace RoF
 		/*fill in some unknowns with observed values, hopefully it will help */
 		eq->unknown800 = -1;
 		eq->unknown844 = 600;
-		OUT(LavaDamage);
-		OUT(MinLavaDamage);
+		OUT(lava_damage);
+		OUT(min_lava_damage);
 		eq->unknown888 = 1;
 		eq->unknown889 = 0;
 		eq->unknown890 = 1;
@@ -3862,7 +3831,9 @@ namespace RoF
 			}
 
 			float SpawnSize = emu->size;
-			if (!((emu->NPC == 0) || (emu->race <= 12) || (emu->race == 128) || (emu->race == 130) || (emu->race == 330) || (emu->race == 522)))
+			if (!((emu->NPC == 0) || (emu->race <= RACE_GNOME_12) || (emu->race == RACE_IKSAR_128) ||
+					(emu->race == RACE_VAH_SHIR_130) || (emu->race == RACE_FROGLOK_330) || (emu->race == RACE_DRAKKIN_522))
+				)
 			{
 				PacketSize += 60;
 
@@ -3994,7 +3965,9 @@ namespace RoF
 			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0xffffffff); // unknown18
 			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0xffffffff); // unknown19
 
-			if ((emu->NPC == 0) || (emu->race <= 12) || (emu->race == 128) || (emu->race == 130) || (emu->race == 330) || (emu->race == 522))
+			if ((emu->NPC == 0) || (emu->race <= RACE_GNOME_12) || (emu->race == RACE_IKSAR_128) ||
+					(emu->race == RACE_VAH_SHIR_130) || (emu->race == RACE_FROGLOK_330) || (emu->race == RACE_DRAKKIN_522)
+				)
 			{
 				for (k = EQ::textures::textureBegin; k < EQ::textures::materialCount; ++k)
 				{
@@ -4849,7 +4822,7 @@ namespace RoF
 		DECODE_LENGTH_EXACT(structs::LootingItem_Struct);
 		SETUP_DIRECT_DECODE(LootingItem_Struct, structs::LootingItem_Struct);
 
-		Log(Logs::Moderate, Logs::Netcode, "RoF::DECODE(OP_LootItem)");
+		Log(Logs::Detail, Logs::Netcode, "RoF::DECODE(OP_LootItem)");
 
 		IN(lootee);
 		IN(looter);
@@ -4864,7 +4837,7 @@ namespace RoF
 		DECODE_LENGTH_EXACT(structs::MoveItem_Struct);
 		SETUP_DIRECT_DECODE(MoveItem_Struct, structs::MoveItem_Struct);
 
-		Log(Logs::Moderate, Logs::Netcode, "RoF::DECODE(OP_MoveItem)");
+		Log(Logs::Detail, Logs::Netcode, "RoF::DECODE(OP_MoveItem)");
 
 		emu->from_slot = RoFToServerSlot(eq->from_slot);
 		emu->to_slot = RoFToServerSlot(eq->to_slot);
@@ -5188,7 +5161,7 @@ namespace RoF
 	void SerializeItem(EQ::OutBuffer& ob, const EQ::ItemInstance *inst, int16 slot_id_in, uint8 depth, ItemPacketType packet_type)
 	{
 		const EQ::ItemData *item = inst->GetUnscaledItem();
-		
+
 		RoF::structs::ItemSerializationHeader hdr;
 
 		//sprintf(hdr.unknown000, "06e0002Y1W00");
@@ -5207,7 +5180,7 @@ namespace RoF
 			slot_id = ServerToRoFSlot(slot_id_in);
 			break;
 		}
-		
+
 		hdr.slot_type = (inst->GetMerchantSlot() ? invtype::typeMerchant : slot_id.Type);
 		hdr.main_slot = (inst->GetMerchantSlot() ? inst->GetMerchantSlot() : slot_id.Slot);
 		hdr.sub_slot = (inst->GetMerchantSlot() ? 0xffff : slot_id.SubIndex);
@@ -5295,7 +5268,7 @@ namespace RoF
 		ob.write("\0", 1);
 
 		ob.write("\0", 1);
-		
+
 		RoF::structs::ItemBodyStruct ibs;
 		memset(&ibs, 0, sizeof(RoF::structs::ItemBodyStruct));
 
@@ -5608,7 +5581,7 @@ namespace RoF
 		iqbs.unknown28 = 0;
 		iqbs.unknown30 = 0;
 		iqbs.unknown39 = 1;
-		
+
 		ob.write((const char*)&iqbs, sizeof(RoF::structs::ItemQuaternaryBodyStruct));
 
 		EQ::OutBuffer::pos_type count_pos = ob.tellp();
@@ -5776,7 +5749,7 @@ namespace RoF
 	static inline uint32 ServerToRoFCorpseMainSlot(uint32 server_corpse_slot)
 	{
 		uint32 RoFSlot = invslot::SLOT_INVALID;
-		
+
 		if (server_corpse_slot <= EQ::invslot::CORPSE_END && server_corpse_slot >= EQ::invslot::CORPSE_BEGIN) {
 			RoFSlot = server_corpse_slot;
 		}
@@ -6123,7 +6096,7 @@ namespace RoF
 			return;
 		}
 
-		auto segments = SplitString(serverSayLink, '\x12');
+		auto segments = Strings::Split(serverSayLink, '\x12');
 
 		for (size_t segment_iter = 0; segment_iter < segments.size(); ++segment_iter) {
 			if (segment_iter & 1) {
@@ -6162,7 +6135,7 @@ namespace RoF
 			return;
 		}
 
-		auto segments = SplitString(rofSayLink, '\x12');
+		auto segments = Strings::Split(rofSayLink, '\x12');
 
 		for (size_t segment_iter = 0; segment_iter < segments.size(); ++segment_iter) {
 			if (segment_iter & 1) {

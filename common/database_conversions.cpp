@@ -18,11 +18,12 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 #include "../common/global_define.h"
 #include "../common/rulesys.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "../common/timer.h"
 
 #include "database.h"
 #include "extprofile.h"
+#include "path_manager.h"
 
 #include <iomanip>
 #include <iostream>
@@ -475,8 +476,16 @@ bool Database::CheckDatabaseConversions() {
 	CheckDatabaseConvertPPDeblob();
 	CheckDatabaseConvertCorpseDeblob();
 
+	RuleManager::Instance()->LoadRules(this, "default", false);
+	if (!RuleB(Bots, Enabled) && DoesTableExist("bot_data")) {
+		LogInfo("Bot tables found but rule not enabled, enabling");
+		RuleManager::Instance()->SetRule("Bots:Enabled", "true", this, true, true);
+	}
+
 	/* Run EQEmu Server script (Checks for database updates) */
-	system("perl eqemu_server.pl ran_from_world");
+
+	const std::string file = fmt::format("{}/eqemu_server.pl", path.GetServerPath());
+	system(fmt::format("perl {} ran_from_world", file).c_str());
 
 	return true;
 }
@@ -961,7 +970,7 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 					std::string rquery = StringFormat("REPLACE INTO `character_inspect_messages` (id, inspect_message)"
 						"VALUES (%u, '%s')",
 						character_id,
-						EscapeString(inspectmessage).c_str()
+						Strings::Escape(inspectmessage).c_str()
 						);
 					auto results = QueryDatabase(rquery);
 				}
@@ -1097,95 +1106,95 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 					"e_expended_aa_spent"
 					")"
 					"VALUES ("
-					"%u,"		// id														
-					"%u,"		// account_id												
-					"'%s',"		// `name`					  
-					"'%s',"		// last_name					
-					"%u,"		// gender					  
-					"%u,"		// race						  
-					"%u,"		// class							
-					"%u,"		// `level`					  
-					"%u,"		// deity							
-					"%u,"		// birthday					  
-					"%u,"		// last_login				  
-					"%u,"		// time_played				  
-					"%u,"		// pvp_status				  
-					"%u,"		// level2					  
-					"%u,"		// anon						  
-					"%u,"		// gm						  
-					"%u,"		// intoxication				  
-					"%u,"		// hair_color				  
-					"%u,"		// beard_color				  
-					"%u,"		// eye_color_1				  
-					"%u,"		// eye_color_2				  
-					"%u,"		// hair_style				  
-					"%u,"		// beard							
-					"%u,"		// ability_time_seconds		  
-					"%u,"		// ability_number			  
-					"%u,"		// ability_time_minutes		  
-					"%u,"		// ability_time_hours		  
-					"'%s',"		// title						
-					"'%s',"		// suffix					  
-					"%u,"		// exp						  
-					"%u,"		// points					  
-					"%u,"		// mana						  
-					"%u,"		// cur_hp					  
-					"%u,"		// str						  
-					"%u,"		// sta						  
-					"%u,"		// cha						  
-					"%u,"		// dex						  
-					"%u,"		// `int`							
-					"%u,"		// agi						  
-					"%u,"		// wis						  
-					"%u,"		// face						  
-					"%f,"		// y								
-					"%f,"		// x								
-					"%f,"		// z								
-					"%f,"		// heading					  
-					"%u,"		// pvp2						  
-					"%u,"		// pvp_type					  
-					"%u,"		// autosplit_enabled				
-					"%u,"		// zone_change_count				
-					"%u,"		// drakkin_heritage			  
-					"%u,"		// drakkin_tattoo			  
-					"%u,"		// drakkin_details			  
-					"%i,"		// toxicity	 				  
-					"%u,"		// hunger_level				  
-					"%u,"		// thirst_level				  
-					"%u,"		// ability_up				  
-					"%u,"		// zone_id					  
-					"%u,"		// zone_instance					
-					"%u,"		// leadership_exp_on				
-					"%u,"		// ldon_points_guk			  
-					"%u,"		// ldon_points_mir			  
-					"%u,"		// ldon_points_mmc			  
-					"%u,"		// ldon_points_ruj			  
-					"%u,"		// ldon_points_tak			  
-					"%u,"		// ldon_points_available			
-					"%u,"		// tribute_time_remaining	  
-					"%u,"		// show_helm						
-					"%u,"		// career_tribute_points			
-					"%u,"		// tribute_points			  
-					"%u,"		// tribute_active			  
-					"%u,"		// endurance						
-					"%u,"		// group_leadership_exp		  
-					"%u,"		// raid_leadership_exp		  
-					"%u,"		// group_leadership_points	  
-					"%u,"		// raid_leadership_points	  
-					"%u,"		// air_remaining					
-					"%u,"		// pvp_kills						
-					"%u,"		// pvp_deaths				  
-					"%u,"		// pvp_current_points		  
-					"%u,"		// pvp_career_points				
-					"%u,"		// pvp_best_kill_streak		  
-					"%u,"		// pvp_worst_death_streak	  
-					"%u,"		// pvp_current_kill_streak	  
-					"%u,"		// aa_points_spent			  
-					"%u,"		// aa_exp					  
-					"%u,"		// aa_points						
-					"%u,"		// group_auto_consent		  
-					"%u,"		// raid_auto_consent				
-					"%u,"		// guild_auto_consent		  
+					"%u,"		// id
+					"%u,"		// account_id
+					"'%s',"		// `name`
+					"'%s',"		// last_name
+					"%u,"		// gender
+					"%u,"		// race
+					"%u,"		// class
+					"%u,"		// `level`
+					"%u,"		// deity
+					"%u,"		// birthday
+					"%u,"		// last_login
+					"%u,"		// time_played
+					"%u,"		// pvp_status
+					"%u,"		// level2
+					"%u,"		// anon
+					"%u,"		// gm
+					"%u,"		// intoxication
+					"%u,"		// hair_color
+					"%u,"		// beard_color
+					"%u,"		// eye_color_1
+					"%u,"		// eye_color_2
+					"%u,"		// hair_style
+					"%u,"		// beard
+					"%u,"		// ability_time_seconds
+					"%u,"		// ability_number
+					"%u,"		// ability_time_minutes
+					"%u,"		// ability_time_hours
+					"'%s',"		// title
+					"'%s',"		// suffix
+					"%u,"		// exp
+					"%u,"		// points
+					"%u,"		// mana
+					"%u,"		// cur_hp
+					"%u,"		// str
+					"%u,"		// sta
+					"%u,"		// cha
+					"%u,"		// dex
+					"%u,"		// `int`
+					"%u,"		// agi
+					"%u,"		// wis
+					"%u,"		// face
+					"%f,"		// y
+					"%f,"		// x
+					"%f,"		// z
+					"%f,"		// heading
+					"%u,"		// pvp2
+					"%u,"		// pvp_type
+					"%u,"		// autosplit_enabled
+					"%u,"		// zone_change_count
+					"%u,"		// drakkin_heritage
+					"%u,"		// drakkin_tattoo
+					"%u,"		// drakkin_details
+					"%i,"		// toxicity
+					"%u,"		// hunger_level
+					"%u,"		// thirst_level
+					"%u,"		// ability_up
+					"%u,"		// zone_id
+					"%u,"		// zone_instance
+					"%u,"		// leadership_exp_on
+					"%u,"		// ldon_points_guk
+					"%u,"		// ldon_points_mir
+					"%u,"		// ldon_points_mmc
+					"%u,"		// ldon_points_ruj
+					"%u,"		// ldon_points_tak
+					"%u,"		// ldon_points_available
+					"%u,"		// tribute_time_remaining
+					"%u,"		// show_helm
+					"%u,"		// career_tribute_points
+					"%u,"		// tribute_points
+					"%u,"		// tribute_active
+					"%u,"		// endurance
+					"%u,"		// group_leadership_exp
+					"%u,"		// raid_leadership_exp
+					"%u,"		// group_leadership_points
+					"%u,"		// raid_leadership_points
+					"%u,"		// air_remaining
+					"%u,"		// pvp_kills
+					"%u,"		// pvp_deaths
+					"%u,"		// pvp_current_points
+					"%u,"		// pvp_career_points
+					"%u,"		// pvp_best_kill_streak
+					"%u,"		// pvp_worst_death_streak
+					"%u,"		// pvp_current_kill_streak
+					"%u,"		// aa_points_spent
+					"%u,"		// aa_exp
+					"%u,"		// aa_points
+					"%u,"		// group_auto_consent
+					"%u,"		// raid_auto_consent
+					"%u,"		// guild_auto_consent
 					"%u," 		// RestTimer
 					"%u,"		// First Logon - References online status for EVENT_CONNECT/EVENT_DISCONNECt
 					"%u,"		// Looking for Group
@@ -1198,8 +1207,8 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 					")",
 					character_id,
 					account_id,
-					EscapeString(pp->name).c_str(),
-					EscapeString(pp->last_name).c_str(),
+					Strings::Escape(pp->name).c_str(),
+					Strings::Escape(pp->last_name).c_str(),
 					pp->gender,
 					pp->race,
 					pp->class_,
@@ -1223,8 +1232,8 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 					pp->ability_number,
 					pp->ability_time_minutes,
 					pp->ability_time_hours,
-					EscapeString(pp->title).c_str(),
-					EscapeString(pp->suffix).c_str(),
+					Strings::Escape(pp->title).c_str(),
+					Strings::Escape(pp->suffix).c_str(),
 					pp->exp,
 					pp->points,
 					pp->mana,

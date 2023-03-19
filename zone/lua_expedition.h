@@ -90,6 +90,7 @@ public:
 	void            SetSafeReturn(uint32_t zone_id, float x, float y, float z, float heading);
 	void            SetSafeReturn(std::string zone_name, float x, float y, float z, float heading);
 	void            SetSecondsRemaining(uint32_t seconds_remaining);
+	void            SetSwitchID(int dz_switch_id);
 	void            SetZoneInLocation(float x, float y, float z, float heading);
 	void            UpdateLockoutDuration(std::string event_name, uint32_t duration);
 	void            UpdateLockoutDuration(std::string event_name, uint32_t duration, bool members_only);

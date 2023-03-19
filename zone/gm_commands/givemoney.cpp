@@ -8,7 +8,7 @@ void command_givemoney(Client *c, const Seperator *sep)
 		return;
 	}
 
-	
+
 	Client *target = c;
 	if (c->GetTarget() && c->GetTarget()->IsClient()) {
 		target = c->GetTarget()->CastToClient();
@@ -30,12 +30,17 @@ void command_givemoney(Client *c, const Seperator *sep)
 		platinum,
 		true
 	);
-	
+
 	c->Message(
 		Chat::White,
 		fmt::format(
 			"Added {} to {}.",
-			ConvertMoneyToString(platinum, gold, silver, copper),
+			Strings::Money(
+				platinum,
+				gold,
+				silver,
+				copper
+			),
 			c->GetTargetDescription(target)
 		).c_str()
 	);

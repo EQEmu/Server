@@ -88,7 +88,6 @@ public:
 
 	/* Character Creation */
 
-	bool AddToNameFilter(const char *name);
 	bool CreateCharacter(
 		uint32 account_id,
 		char *name,
@@ -114,24 +113,25 @@ public:
 	bool SetMQDetectionFlag(const char *accountname, const char *charactername, const std::string &hacked, const char *zone);
 	bool UpdateName(const char *oldname, const char *newname);
 	bool CopyCharacter(
-		std::string source_character_name,
-		std::string destination_character_name,
-		std::string destination_account_name
+		const std::string& source_character_name,
+		const std::string& destination_character_name,
+		const std::string& destination_account_name
 	);
 
 	/* General Information Queries */
 
 	bool	AddBannedIP(std::string banned_ip, std::string notes); //Add IP address to the banned_ips table.
+	bool	AddToNameFilter(std::string name);
 	bool	CheckBannedIPs(std::string login_ip); //Check incoming connection against banned IP table.
 	bool	CheckGMIPs(std::string login_ip, uint32 account_id);
-	bool	CheckNameFilter(const char* name, bool surname = false);
-	bool	CheckUsedName(const char* name);
+	bool	CheckNameFilter(std::string name, bool surname = false);
+	bool	CheckUsedName(std::string name);
 
 	uint32	GetAccountIDByChar(const char* charname, uint32* oCharID = 0);
 	uint32	GetAccountIDByChar(uint32 char_id);
 	uint32	GetAccountIDByName(std::string account_name, std::string loginserver, int16* status = 0, uint32* lsid = 0);
 	uint32	GetCharacterID(const char *name);
-	uint32	GetCharacterInfo(const char* iName, uint32* oAccID = 0, uint32* oZoneID = 0, uint32* oInstanceID = 0, float* oX = 0, float* oY = 0, float* oZ = 0);
+	uint32	GetCharacterInfo(std::string character_name, uint32 *account_id, uint32 *zone_id, uint32 *instance_id);
 	uint32	GetGuildIDByCharID(uint32 char_id);
 	uint32  GetGroupIDByCharID(uint32 char_id);
 	uint32  GetRaidIDByCharID(uint32 char_id);
@@ -145,31 +145,30 @@ public:
 
 	/* Instancing */
 
-	bool AddClientToInstance(uint16 instance_id, uint32 char_id);
-	bool CharacterInInstanceGroup(uint16 instance_id, uint32 char_id);
+	bool AddClientToInstance(uint16 instance_id, uint32 character_id);
+	bool CheckInstanceByCharID(uint16 instance_id, uint32 character_id);
 	bool CheckInstanceExists(uint16 instance_id);
 	bool CheckInstanceExpired(uint16 instance_id);
 	bool CreateInstance(uint16 instance_id, uint32 zone_id, uint32 version, uint32 duration);
 	bool GetUnusedInstanceID(uint16 &instance_id);
-	bool GlobalInstance(uint16 instance_id);
+	bool IsGlobalInstance(uint16 instance_id);
 	bool RemoveClientFromInstance(uint16 instance_id, uint32 char_id);
 	bool RemoveClientsFromInstance(uint16 instance_id);
-	bool VerifyInstanceAlive(uint16 instance_id, uint32 char_id);
+	bool VerifyInstanceAlive(uint16 instance_id, uint32 character_id);
 	bool VerifyZoneInstance(uint32 zone_id, uint16 instance_id);
 
 	uint16 GetInstanceID(uint32 zone, uint32 charid, int16 version);
-	uint16 GetInstanceVersion(uint16 instance_id);
+	std::vector<uint16> GetInstanceIDs(uint32 zone_id, uint32 character_id);
+	uint8_t GetInstanceVersion(uint16 instance_id);
 	uint32 GetTimeRemainingInstance(uint16 instance_id, bool &is_perma);
-	uint32 VersionFromInstanceID(uint16 instance_id);
-	uint32 ZoneIDFromInstanceID(uint16 instance_id);
+	uint32 GetInstanceZoneID(uint16 instance_id);
 
 	void AssignGroupToInstance(uint32 gid, uint32 instance_id);
 	void AssignRaidToInstance(uint32 rid, uint32 instance_id);
-	void BuryCorpsesInInstance(uint16 instance_id);
 	void DeleteInstance(uint16 instance_id);
-	void FlagInstanceByGroupLeader(uint32 zone, int16 version, uint32 charid, uint32 gid);
-	void FlagInstanceByRaidLeader(uint32 zone, int16 version, uint32 charid, uint32 rid);
-	void GetCharactersInInstance(uint16 instance_id, std::list<uint32> &charid_list);
+	void FlagInstanceByGroupLeader(uint32 zone_id, int16 version, uint32 charid, uint32 group_id);
+	void FlagInstanceByRaidLeader(uint32 zone_id, int16 version, uint32 charid, uint32 raid_id);
+	void GetCharactersInInstance(uint16 instance_id, std::list<uint32> &character_ids);
 	void PurgeExpiredInstances();
 	void SetInstanceDuration(uint16 instance_id, uint32 new_duration);
 
@@ -207,8 +206,8 @@ public:
 
 	/* Groups */
 
-	char*	GetGroupLeaderForLogin(const char* name,char* leaderbuf);
-	char*	GetGroupLeadershipInfo(uint32 gid, char* leaderbuf, char* maintank = nullptr, char* assist = nullptr, char* puller = nullptr, char *marknpc = nullptr, char *mentoree = nullptr, int *mentor_percent = nullptr, GroupLeadershipAA_Struct* GLAA = nullptr);
+	std::string GetGroupLeaderForLogin(std::string character_name);
+	char* GetGroupLeadershipInfo(uint32 gid, char* leaderbuf, char* maintank = nullptr, char* assist = nullptr, char* puller = nullptr, char *marknpc = nullptr, char *mentoree = nullptr, int *mentor_percent = nullptr, GroupLeadershipAA_Struct* GLAA = nullptr);
 
 	uint32	GetGroupID(const char* name);
 
@@ -246,14 +245,11 @@ public:
 
 	/* General Queries */
 
-	bool	GetSafePoints(const char* zone_short_name, uint32 instance_version, float* safe_x = 0, float* safe_y = 0, float* safe_z = 0, float* safe_heading = 0, int16* minstatus = 0, uint8* minlevel = 0, char *flag_needed = nullptr);
 	bool	GetZoneGraveyard(const uint32 graveyard_id, uint32* graveyard_zoneid = 0, float* graveyard_x = 0, float* graveyard_y = 0, float* graveyard_z = 0, float* graveyard_heading = 0);
-	bool	GetZoneLongName(const char* short_name, char** long_name, char* file_name = 0, float* safe_x = 0, float* safe_y = 0, float* safe_z = 0, uint32* graveyard_id = 0, uint32* maxclients = 0);
 	bool	LoadPTimers(uint32 charid, PTimerList &into);
 
-	uint32	GetZoneGraveyardID(uint32 zone_id, uint32 version);
-
 	uint8	GetPEQZone(uint32 zone_id, uint32 version);
+	uint8	GetMinStatus(uint32 zone_id, uint32 instance_version);
 	uint8	GetRaceSkill(uint8 skillid, uint8 in_race);
 	uint8	GetServerType();
 	uint8	GetSkillCap(uint8 skillid, uint8 in_race, uint8 in_class, uint16 in_level);

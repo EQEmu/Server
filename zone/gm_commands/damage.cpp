@@ -8,9 +8,10 @@ void command_damage(Client *c, const Seperator *sep)
 		return;
 	}
 
-	Mob* target = c;
-	if (c->GetTarget()) {
-		target = c->GetTarget();
+	Mob* target = c->GetTarget();
+	if (!target) {
+		c->Message(Chat::White, "You must have a target to use #damage.");
+		return;
 	}
 
 	int64 damage = std::stoll(sep->arg[1], nullptr, 10);

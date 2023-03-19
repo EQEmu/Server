@@ -26,8 +26,11 @@
 
 
 #include "item_instance.h"
+#include "classes.h"
+#include "races.h"
 
 #include <list>
+#include <vector>
 
 
 //FatherNitwit: location bits for searching specific
@@ -129,7 +132,7 @@ namespace EQ
 
 		// Swap items in inventory
 		enum SwapItemFailState : int8 { swapInvalid = -1, swapPass = 0, swapNotAllowed, swapNullData, swapRaceClass, swapDeity, swapLevel };
-		bool SwapItem(int16 source_slot, int16 destination_slot, SwapItemFailState& fail_state, uint16 race_id = 0, uint8 class_id = 0, uint16 deity_id = 0, uint8 level = 0);
+		bool SwapItem(int16 source_slot, int16 destination_slot, SwapItemFailState& fail_state, uint16 race_id = RACE_DOUG_0, uint8 class_id = NO_CLASS, uint16 deity_id = deity::DeityType::DeityUnknown, uint8 level = 0);
 
 		// Remove item from inventory
 		bool DeleteItem(int16 slot_id, int16 quantity = 0);
@@ -151,6 +154,9 @@ namespace EQ
 
 		// Check how many of a specific augment the player has equipped by Item ID
 		int CountAugmentEquippedByID(uint32 item_id);
+
+		// Get a list of augments from a specific slot ID
+		std::vector<uint32> GetAugmentIDsBySlotID(int16 slot_id);
 
 		// Check whether there is space for the specified number of the specified item.
 		bool HasSpaceForItem(const ItemData *ItemToTry, int16 Quantity);
@@ -202,7 +208,7 @@ namespace EQ
 		void SetCustomItemData(uint32 character_id, int16 slot_id, std::string identifier, float value);
 		void SetCustomItemData(uint32 character_id, int16 slot_id, std::string identifier, bool value);
 		std::string GetCustomItemData(int16 slot_id, std::string identifier);
-		static int GetItemStatValue(uint32 item_id, const char* identifier);
+		static const int GetItemStatValue(uint32 item_id, std::string identifier);
 	protected:
 		///////////////////////////////
 		// Protected Methods

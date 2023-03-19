@@ -19,6 +19,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #ifndef HATELIST_H
 #define HATELIST_H
 
+#include "../common/emu_constants.h"
+
 class Client;
 class Group;
 class Mob;
@@ -47,9 +49,7 @@ public:
 	Mob *GetEscapingEntOnHateList(); // returns first eligble entity
 	Mob *GetEscapingEntOnHateList(Mob *center, float range = 0.0f, bool first = false);
 
-#ifdef BOTS
 	Bot* GetRandomBotOnHateList(bool skip_mezzed = false);
-#endif
 	Client *GetRandomClientOnHateList(bool skip_mezzed = false);
 	NPC *GetRandomNPCOnHateList(bool skip_mezzed = false);
 
@@ -64,7 +64,18 @@ public:
 	int64 GetEntHateAmount(Mob *ent, bool in_damage = false);
 
 	std::list<struct_HateList *> &GetHateList() { return list; }
-	std::list<struct_HateList *> GetHateListByDistance(int distance = 0);
+
+	std::list<struct_HateList *> GetFilteredHateList(
+		EntityFilterType filter_type = EntityFilterType::All,
+		uint32 distance = 0
+	);
+
+	void DamageHateList(
+		int64 damage,
+		uint32 distance = 0,
+		EntityFilterType filter_type = EntityFilterType::All,
+		bool is_percentage = false
+	);
 
 	void AddEntToHateList(
 		Mob *ent,
@@ -73,7 +84,7 @@ public:
 		bool in_is_frenzied = false,
 		bool add_to_hate_list_if_not_exist = true
 	);
-	void DoFactionHits(int64 npc_faction_level_id);
+	void DoFactionHits(int64 npc_faction_level_id, int32 faction_id, int32 faction_value);
 	void IsEntityInFrenzyMode();
 	void PrintHateListToClient(Client *c);
 	void SetHateAmountOnEnt(Mob *other, int64 in_hate, uint64 in_damage);

@@ -18,6 +18,7 @@ void command_setlsinfo(Client *c, const Seperator *sep)
 	strn0cpy(s->user_email, sep->arg[1], 100);
 	strn0cpy(s->userpassword, sep->arg[2], 50);
 	worldserver.SendPacket(pack);
+	safe_delete(pack);
 	c->Message(Chat::White, "Your email and local loginserver password have been set.");
 }
 

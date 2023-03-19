@@ -13,7 +13,7 @@ void command_setcrystals(Client *c, const Seperator *sep)
 		target = c->GetTarget()->CastToClient();
 	}
 
-	std::string crystal_type = str_tolower(sep->arg[1]);
+	std::string crystal_type = Strings::ToLower(sep->arg[1]);
 	uint32 crystal_amount = static_cast<uint32>(std::min(
 		std::stoull(sep->arg[2]),
 		(unsigned long long) 2000000000

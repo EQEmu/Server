@@ -13,13 +13,13 @@
 #define EQEMU_BASE_ADVENTURE_TEMPLATE_ENTRY_FLAVOR_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseAdventureTemplateEntryFlavorRepository {
 public:
 	struct AdventureTemplateEntryFlavor {
-		int         id;
+		uint32_t    id;
 		std::string text;
 	};
 
@@ -46,12 +46,12 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string SelectColumnsRaw()
 	{
-		return std::string(implode(", ", SelectColumns()));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -79,15 +79,15 @@ public:
 
 	static AdventureTemplateEntryFlavor NewEntity()
 	{
-		AdventureTemplateEntryFlavor entry{};
+		AdventureTemplateEntryFlavor e{};
 
-		entry.id   = 0;
-		entry.text = "";
+		e.id   = 0;
+		e.text = "";
 
-		return entry;
+		return e;
 	}
 
-	static AdventureTemplateEntryFlavor GetAdventureTemplateEntryFlavorEntry(
+	static AdventureTemplateEntryFlavor GetAdventureTemplateEntryFlavor(
 		const std::vector<AdventureTemplateEntryFlavor> &adventure_template_entry_flavors,
 		int adventure_template_entry_flavor_id
 	)
@@ -116,12 +116,12 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			AdventureTemplateEntryFlavor entry{};
+			AdventureTemplateEntryFlavor e{};
 
-			entry.id   = atoi(row[0]);
-			entry.text = row[1] ? row[1] : "";
+			e.id   = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.text = row[1] ? row[1] : "";
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -146,23 +146,23 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		AdventureTemplateEntryFlavor adventure_template_entry_flavor_entry
+		const AdventureTemplateEntryFlavor &e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(adventure_template_entry_flavor_entry.id));
-		update_values.push_back(columns[1] + " = '" + EscapeString(adventure_template_entry_flavor_entry.text) + "'");
+		v.push_back(columns[0] + " = " + std::to_string(e.id));
+		v.push_back(columns[1] + " = '" + Strings::Escape(e.text) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
-				adventure_template_entry_flavor_entry.id
+				e.id
 			)
 		);
 
@@ -171,55 +171,55 @@ public:
 
 	static AdventureTemplateEntryFlavor InsertOne(
 		Database& db,
-		AdventureTemplateEntryFlavor adventure_template_entry_flavor_entry
+		AdventureTemplateEntryFlavor e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(adventure_template_entry_flavor_entry.id));
-		insert_values.push_back("'" + EscapeString(adventure_template_entry_flavor_entry.text) + "'");
+		v.push_back(std::to_string(e.id));
+		v.push_back("'" + Strings::Escape(e.text) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
 		if (results.Success()) {
-			adventure_template_entry_flavor_entry.id = results.LastInsertedID();
-			return adventure_template_entry_flavor_entry;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		adventure_template_entry_flavor_entry = NewEntity();
+		e = NewEntity();
 
-		return adventure_template_entry_flavor_entry;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<AdventureTemplateEntryFlavor> adventure_template_entry_flavor_entries
+		const std::vector<AdventureTemplateEntryFlavor> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &adventure_template_entry_flavor_entry: adventure_template_entry_flavor_entries) {
-			std::vector<std::string> insert_values;
+		for (auto &e: entries) {
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(adventure_template_entry_flavor_entry.id));
-			insert_values.push_back("'" + EscapeString(adventure_template_entry_flavor_entry.text) + "'");
+			v.push_back(std::to_string(e.id));
+			v.push_back("'" + Strings::Escape(e.text) + "'");
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 
@@ -240,18 +240,18 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			AdventureTemplateEntryFlavor entry{};
+			AdventureTemplateEntryFlavor e{};
 
-			entry.id   = atoi(row[0]);
-			entry.text = row[1] ? row[1] : "";
+			e.id   = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.text = row[1] ? row[1] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static std::vector<AdventureTemplateEntryFlavor> GetWhere(Database& db, std::string where_filter)
+	static std::vector<AdventureTemplateEntryFlavor> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<AdventureTemplateEntryFlavor> all_entries;
 
@@ -266,18 +266,18 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			AdventureTemplateEntryFlavor entry{};
+			AdventureTemplateEntryFlavor e{};
 
-			entry.id   = atoi(row[0]);
-			entry.text = row[1] ? row[1] : "";
+			e.id   = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.text = row[1] ? row[1] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -300,6 +300,32 @@ public:
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int64 GetMaxId(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COALESCE(MAX({}), 0) FROM {}",
+				PrimaryKey(),
+				TableName()
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static int64 Count(Database& db, const std::string &where_filter = "")
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COUNT(*) FROM {} {}",
+				TableName(),
+				(where_filter.empty() ? "" : "WHERE " + where_filter)
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
 };

@@ -13,6 +13,7 @@ void command_viewnpctype(Client *c, const Seperator *sep)
 				GravityBehavior::Water
 			);
 			npc->ShowStats(c);
+			safe_delete(npc);
 		}
 		else {
 			c->Message(

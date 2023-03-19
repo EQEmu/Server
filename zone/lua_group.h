@@ -7,6 +7,7 @@
 class Group;
 class Lua_Mob;
 class Lua_Client;
+class Lua_Bot;
 
 namespace luabind {
 	struct scope;
@@ -27,23 +28,27 @@ public:
 	}
 
 	void DisbandGroup();
-	bool IsGroupMember(Lua_Mob mob);
+	bool IsGroupMember(const char* name);
+	bool IsGroupMember(Lua_Mob c);
 	void CastGroupSpell(Lua_Mob caster, int spell_id);
-	void SplitExp(uint32 exp, Lua_Mob other);
-	void GroupMessage(Lua_Mob sender, int language, const char *message);
+	void SplitExp(uint64 exp, Lua_Mob other);
+	void GroupMessage(Lua_Mob sender, const char* message);
+	void GroupMessage(Lua_Mob sender, int language, const char* message);
 	uint32 GetTotalGroupDamage(Lua_Mob other);
 	void SplitMoney(uint32 copper, uint32 silver, uint32 gold, uint32 platinum);
 	void SplitMoney(uint32 copper, uint32 silver, uint32 gold, uint32 platinum, Lua_Client splitter);
-	void SetLeader(Lua_Mob leader);
+	void SetLeader(Lua_Mob c);
 	Lua_Mob GetLeader();
 	const char *GetLeaderName();
-	bool IsLeader(Lua_Mob leader);
+	bool IsLeader(const char* name);
+	bool IsLeader(Lua_Mob c);
 	int GroupCount();
-	int GetHighestLevel();
-	int GetLowestLevel();
+	uint32 GetAverageLevel();
+	uint32 GetHighestLevel();
+	uint32 GetLowestLevel();
 	void TeleportGroup(Lua_Mob sender, uint32 zone_id, uint32 instance_id, float x, float y, float z, float h);
 	int GetID();
-	Lua_Mob GetMember(int index);
+	Lua_Mob GetMember(int member_index);
 	bool DoesAnyMemberHaveExpeditionLockout(std::string expedition_name, std::string event_name);
 	bool DoesAnyMemberHaveExpeditionLockout(std::string expedition_name, std::string event_name, int max_check_count);
 };

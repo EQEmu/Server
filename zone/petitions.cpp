@@ -33,7 +33,7 @@ Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 
 #include "../common/eq_packet_structs.h"
 #include "../common/servertalk.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 
 #include "entity.h"
 #include "petitions.h"
@@ -71,8 +71,8 @@ void Petition::SendPetitionToPlayer(Client* clientto) {
 Petition::Petition(uint32 id)
 {
 	petid = id;
-	charclass = 0;
-	charrace = 0;
+	charclass = NO_CLASS;
+	charrace = RACE_DOUG_0;
 	charlevel = 0;
 	checkouts = 0;
 	unavailables = 0;

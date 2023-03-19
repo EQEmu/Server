@@ -1,5 +1,5 @@
 /*	EQEMu: Everquest Server Emulator
-	
+
 	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 
 	This program is free software; you can redistribute it and/or modify
@@ -444,31 +444,31 @@ struct NewZone_Struct {
 /*0700*/	char	zone_short_name2[96];	//zone file name? excludes instance number which can be in previous version.
 /*0796*/	int32	unknown796;	//seen -1
 /*0800*/	char	unknown800[40]; //
-/*0840*/	int32	unknown840;	//seen 600
-/*0844*/	int32	unknown844;
-/*0848*/	uint16	zone_id;
-/*0850*/	uint16	zone_instance;
-/*0852*/	uint32	scriptNPCReceivedanItem;
-/*0856*/	uint32	bCheck;					// padded bool
-/*0860*/	uint32	scriptIDSomething;
-/*0864*/	uint32	underworld_teleport_index; // > 0 teleports w/ zone point index, invalid succors, -1 affects some collisions
-/*0868*/	uint32	scriptIDSomething3;
-/*0872*/	uint32	SuspendBuffs;
-/*0876*/	uint32	LavaDamage;	//seen 50
-/*0880*/	uint32	MinLavaDamage;	//seen 10
-/*0884*/	uint8	unknown884;	//seen 1
-/*0885*/	uint8	unknown885;	//seen 0 (POK) or 1 (rujj)
-/*0886*/	uint8	unknown886;	//seen 1
-/*0887*/	uint8	unknown887;	//seen 0
-/*0888*/	uint8	unknown888;	//seen 0
-/*0893*/	uint8	unknown889;	//seen 0 - 00
-/*0894*/	uint8	fall_damage;	// 0 = Fall Damage on, 1 = Fall Damage off
-/*0895*/	uint8	unknown891;	//seen 0 - 00
-/*0892*/	uint32	FastRegenHP;	//seen 180
-/*0896*/	uint32	FastRegenMana;	//seen 180
-/*0900*/	uint32	FastRegenEndurance;	//seen 180
-/*0904*/	uint32	unknown904;	//seen 2
-/*0908*/	uint32	unknown908;	//seen 2
+/*0840*/	int32  unknown840;	//seen 600
+/*0844*/	int32  unknown844;
+/*0848*/	uint16 zone_id;
+/*0850*/	uint16 zone_instance;
+/*0852*/	uint32 scriptNPCReceivedanItem;
+/*0856*/	uint32 bCheck;					// padded bool
+/*0860*/	uint32 scriptIDSomething;
+/*0864*/	uint32 underworld_teleport_index; // > 0 teleports w/ zone point index, invalid succors, -1 affects some collisions
+/*0868*/	uint32 scriptIDSomething3;
+/*0872*/	uint32 suspend_buffs;
+/*0876*/	uint32 lava_damage;	//seen 50
+/*0880*/	uint32 min_lava_damage;	//seen 10
+/*0884*/	uint8  unknown884;	//seen 1
+/*0885*/	uint8  unknown885;	//seen 0 (POK) or 1 (rujj)
+/*0886*/	uint8  unknown886;	//seen 1
+/*0887*/	uint8  unknown887;	//seen 0
+/*0888*/	uint8  unknown888;	//seen 0
+/*0893*/	uint8  unknown889;	//seen 0 - 00
+/*0894*/	uint8  fall_damage;	// 0 = Fall Damage on, 1 = Fall Damage off
+/*0895*/	uint8  unknown891;	//seen 0 - 00
+/*0892*/	uint32 fast_regen_hp;	//seen 180
+/*0896*/	uint32 fast_regen_mana;	//seen 180
+/*0900*/	uint32 fast_regen_endurance;	//seen 180
+/*0904*/	uint32 unknown904;	//seen 2
+/*0908*/	uint32 unknown908;	//seen 2
 /*0912*/
 };
 
@@ -4186,7 +4186,7 @@ struct DynamicZoneCompassEntry_Struct
 /*000*/ uint16 dz_zone_id;      // target dz id pair
 /*002*/ uint16 dz_instance_id;
 /*004*/ uint32 dz_type;         // 1: Expedition, 2: Tutorial (purple), 3: Task, 4: Mission, 5: Quest (green)
-/*008*/ uint32 unknown008;
+/*008*/ uint32 dz_switch_id;
 /*012*/ float y;
 /*016*/ float x;
 /*020*/ float z;

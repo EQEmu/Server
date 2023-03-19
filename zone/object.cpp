@@ -17,7 +17,7 @@
 */
 
 #include "../common/global_define.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 
 #include "client.h"
 #include "entity.h"
@@ -26,7 +26,7 @@
 
 #include "quest_parser_collection.h"
 #include "zonedb.h"
-#include "zone_store.h"
+#include "../common/zone_store.h"
 #include "../common/repositories/criteria/content_filter_criteria.h"
 
 #include <iostream>
@@ -144,8 +144,8 @@ Object::Object(Client* client, const EQ::ItemInstance* inst)
 	// Set object name
 	if (inst) {
 		const EQ::ItemData* item = inst->GetItem();
-		if (item && item->IDFile) {
-			if (strlen(item->IDFile) == 0) {
+		if (item) {
+			if (item->IDFile[0] == '\0') {
 				strcpy(m_data.object_name, DEFAULT_OBJECT_NAME);
 			}
 			else {
@@ -200,8 +200,8 @@ Object::Object(const EQ::ItemInstance *inst, float x, float y, float z, float he
 	// Set object name
 	if (inst) {
 		const EQ::ItemData* item = inst->GetItem();
-		if (item && item->IDFile) {
-			if (strlen(item->IDFile) == 0) {
+		if (item) {
+			if (item->IDFile[0] == '\0') {
 				strcpy(m_data.object_name, DEFAULT_OBJECT_NAME);
 			}
 			else {
@@ -341,7 +341,7 @@ const EQ::ItemInstance* Object::GetItem(uint8 index) {
 void Object::PutItem(uint8 index, const EQ::ItemInstance* inst)
 {
 	if (index > 9) {
-		LogError("Object::PutItem: Invalid index specified ([{}])", index);
+		LogError("Invalid index specified ([{}])", index);
 		return;
 	}
 
@@ -412,6 +412,7 @@ EQ::ItemInstance* Object::PopItem(uint8 index)
 void Object::CreateSpawnPacket(EQApplicationPacket* app)
 {
 	app->SetOpcode(OP_GroundSpawn);
+	safe_delete_array(app->pBuffer);
 	app->pBuffer = new uchar[sizeof(Object_Struct)];
 	app->size = sizeof(Object_Struct);
 	memcpy(app->pBuffer, &m_data, sizeof(Object_Struct));
@@ -420,6 +421,7 @@ void Object::CreateSpawnPacket(EQApplicationPacket* app)
 void Object::CreateDeSpawnPacket(EQApplicationPacket* app)
 {
 	app->SetOpcode(OP_ClickObject);
+	safe_delete_array(app->pBuffer);
 	app->pBuffer = new uchar[sizeof(ClickObject_Struct)];
 	app->size = sizeof(ClickObject_Struct);
 	memset(app->pBuffer, 0, sizeof(ClickObject_Struct));
@@ -475,7 +477,7 @@ void Object::RandomSpawn(bool send_packet) {
 		}
 	}
 
-	LogInfo("Object::RandomSpawn([{}]): [{}] ([{}], [{}], [{}])", m_data.object_name, m_inst->GetID(), m_data.x, m_data.y, m_data.z);
+	LogInfo("[{}] [{}] ([{}] [{}] [{}])", m_data.object_name, m_inst->GetID(), m_data.x, m_data.y, m_data.z);
 
 	respawn_timer.Disable();
 
@@ -510,7 +512,7 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 				    database.GetItemRecastTimestamp(sender->CharacterID(), item->RecastType));
 
 			std::string export_string = fmt::format("{}", item->ID);
-			std::vector<EQ::Any> args;
+			std::vector<std::any> args;
 			args.push_back(m_inst);
 			if(parse->EventPlayer(EVENT_PLAYER_PICKUP, sender, export_string, GetID(), &args))
 			{
@@ -532,6 +534,15 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 			// Transfer item to client
 			sender->PutItemInInventory(EQ::invslot::slotCursor, *m_inst, false);
 			sender->SendItemPacket(EQ::invslot::slotCursor, m_inst, ItemPacketTrade);
+
+			// Could be an undiscovered ground_spawn
+			if (m_ground_spawn && (RuleB(Character, EnableDiscoveredItems)))
+			{
+				if (!sender->GetGM() && !sender->IsDiscovered(item->ID))
+				{
+					sender->DiscoverItem(item->ID);
+				}
+			}
 
 			if(cursordelete)	// delete the item if it's a duplicate lore. We have to do this because the client expects the item packet
 				sender->DeleteItemInInventory(EQ::invslot::slotCursor);
@@ -1055,34 +1066,78 @@ void Object::SetHeading(float heading)
 	safe_delete(app2);
 }
 
-void Object::SetEntityVariable(const char *id, const char *m_var)
+bool Object::ClearEntityVariables()
 {
-	std::string n_m_var = m_var;
-	o_EntityVariables[id] = n_m_var;
-}
-
-const char* Object::GetEntityVariable(const char *id)
-{
-	if(!id)
-		return nullptr;
-
-	auto iter = o_EntityVariables.find(id);
-	if(iter != o_EntityVariables.end())
-	{
-		return iter->second.c_str();
-	}
-	return nullptr;
-}
-
-bool Object::EntityVariableExists(const char * id)
-{
-	if(!id)
+	if (o_EntityVariables.empty()) {
 		return false;
+	}
 
-	auto iter = o_EntityVariables.find(id);
-	if(iter != o_EntityVariables.end())
-	{
+	o_EntityVariables.clear();
+	return true;
+}
+
+bool Object::DeleteEntityVariable(std::string variable_name)
+{
+	if (o_EntityVariables.empty() || variable_name.empty()) {
+		return false;
+	}
+
+	auto v = o_EntityVariables.find(variable_name);
+	if (v == o_EntityVariables.end()) {
+		return false;
+	}
+
+	o_EntityVariables.erase(v);
+	return true;
+}
+
+std::string Object::GetEntityVariable(std::string variable_name)
+{
+	if (o_EntityVariables.empty() || variable_name.empty()) {
+		return std::string();
+	}
+
+	const auto& v = o_EntityVariables.find(variable_name);
+	if (v != o_EntityVariables.end()) {
+		return v->second;
+	}
+
+	return std::string();
+}
+
+std::vector<std::string> Object::GetEntityVariables()
+{
+	std::vector<std::string> l;
+	if (o_EntityVariables.empty()) {
+		return l;
+	}
+
+	for (const auto& v : o_EntityVariables) {
+		l.push_back(v.first);
+	}
+
+	return l;
+}
+
+bool Object::EntityVariableExists(std::string variable_name)
+{
+	if (o_EntityVariables.empty() || variable_name.empty()) {
+		return false;
+	}
+
+	const auto& v = o_EntityVariables.find(variable_name);
+	if (v != o_EntityVariables.end()) {
 		return true;
 	}
+
 	return false;
+}
+
+void Object::SetEntityVariable(std::string variable_name, std::string variable_value)
+{
+	if (variable_name.empty()) {
+		return;
+	}
+
+	o_EntityVariables[variable_name] = variable_value;
 }

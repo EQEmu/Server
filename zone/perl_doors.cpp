@@ -4,504 +4,219 @@
 
 #include "../common/global_define.h"
 #include "embperl.h"
-
-#ifdef seed
-#undef seed
-#endif
-
 #include "doors.h"
 
-#ifdef THIS /* this macro seems to leak out on some systems */
-#undef THIS
-#endif
-
-#define VALIDATE_THIS_IS_DOOR \
-	do { \
-		if (sv_derived_from(ST(0), "Doors")) { \
-			IV tmp = SvIV((SV*)SvRV(ST(0))); \
-			THIS = INT2PTR(Doors*, tmp); \
-		} else { \
-			Perl_croak(aTHX_ "THIS is not of type Doors"); \
-		} \
-		if (THIS == nullptr) { \
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash."); \
-		} \
-	} while (0);
-
-XS(XS_Doors_GetDoorDBID); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Doors_GetDoorDBID) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Doors::GetDoorDBID(THIS)"); // @categories Doors
-	{
-		Doors *THIS;
-		uint32 RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_DOOR;
-		RETVAL = THIS->GetDoorDBID();
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
+uint32_t Perl_Doors_GetDoorDBID(Doors* self) // @categories Doors
+{
+	return self->GetDoorDBID();
 }
 
-XS(XS_Doors_GetDoorID); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Doors_GetDoorID) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Doors::GetDoorID(THIS)"); // @categories Doors
-	{
-		Doors *THIS;
-		uint32 RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_DOOR;
-		RETVAL = THIS->GetDoorID();
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
+uint32_t Perl_Doors_GetDoorID(Doors* self) // @categories Doors
+{
+	return self->GetDoorID();
 }
 
-XS(XS_Doors_GetID); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Doors_GetID) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Doors::GetID(THIS)"); // @categories Doors
-	{
-		Doors *THIS;
-		uint16 RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_DOOR;
-		RETVAL = THIS->GetEntityID();
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
+uint32_t Perl_Doors_GetID(Doors* self) // @categories Doors
+{
+	return self->GetEntityID();
 }
 
-XS(XS_Doors_GetX); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Doors_GetX) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Doors::GetX(THIS)"); // @categories Doors
-	{
-		Doors *THIS;
-		float RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_DOOR;
-		RETVAL = THIS->GetPosition().x;
-		XSprePUSH;
-		PUSHn((double) RETVAL);
-	}
-	XSRETURN(1);
+float Perl_Doors_GetX(Doors* self) // @categories Doors
+{
+	return self->GetPosition().x;
 }
 
-XS(XS_Doors_GetY); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Doors_GetY) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Doors::GetY(THIS)"); // @categories Doors
-	{
-		Doors *THIS;
-		float RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_DOOR;
-		RETVAL = THIS->GetPosition().y;
-		XSprePUSH;
-		PUSHn((double) RETVAL);
-	}
-	XSRETURN(1);
+float Perl_Doors_GetY(Doors* self) // @categories Doors
+{
+	return self->GetPosition().y;
 }
 
-XS(XS_Doors_GetZ); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Doors_GetZ) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Doors::GetZ(THIS)"); // @categories Doors
-	{
-		Doors *THIS;
-		float RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_DOOR;
-		RETVAL = THIS->GetPosition().z;
-		XSprePUSH;
-		PUSHn((double) RETVAL);
-	}
-	XSRETURN(1);
+float Perl_Doors_GetZ(Doors* self) // @categories Doors
+{
+	return self->GetPosition().z;
 }
 
-XS(XS_Doors_GetHeading); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Doors_GetHeading) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Doors::GetHeading(THIS)"); // @categories Doors
-	{
-		Doors *THIS;
-		float RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_DOOR;
-		RETVAL = THIS->GetPosition().w;
-		XSprePUSH;
-		PUSHn((double) RETVAL);
-	}
-	XSRETURN(1);
+float Perl_Doors_GetHeading(Doors* self) // @categories Doors
+{
+	return self->GetPosition().w;
 }
 
-XS(XS_Doors_GetOpenType); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Doors_GetOpenType) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Doors::GetOpenType(THIS)"); // @categories Doors
-	{
-		Doors *THIS;
-		uint32 RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_DOOR;
-		RETVAL = THIS->GetOpenType();
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
+uint32_t Perl_Doors_GetOpenType(Doors* self)  // @categories Doors
+{
+	return self->GetOpenType();
 }
 
-XS(XS_Doors_GetLockpick); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Doors_GetLockpick) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Doors::GetLockpick(THIS)"); // @categories Doors, Skills and Recipes
-	{
-		Doors *THIS;
-		uint32 RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_DOOR;
-		RETVAL = THIS->GetLockpick();
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
+uint32_t Perl_Doors_GetLockPick(Doors* self) // @categories Doors, Skills and Recipes
+{
+	return self->GetLockpick();
 }
 
-XS(XS_Doors_GetKeyItem); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Doors_GetKeyItem) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Doors::GetKeyItem(THIS)"); // @categories Doors
-	{
-		Doors *THIS;
-		uint32 RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_DOOR;
-		RETVAL = THIS->GetKeyItem();
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
+uint32_t Perl_Doors_GetKeyItem(Doors* self) // @categories Doors
+{
+	return self->GetKeyItem();
 }
 
-XS(XS_Doors_GetNoKeyring); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Doors_GetNoKeyring) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Doors::GetNoKeyring(THIS, uint8 type)"); // @categories Doors
-	{
-		Doors *THIS;
-		uint8 type = (uint8) SvUV(ST(1));
-		VALIDATE_THIS_IS_DOOR;
-		THIS->GetNoKeyring();
-	}
-	XSRETURN_EMPTY;
+uint8_t Perl_Doors_GetNoKeyring(Doors* self) // @categories Doors
+{
+	return self->GetNoKeyring();
 }
 
-XS(XS_Doors_GetIncline); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Doors_GetIncline) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Doors::GetIncline(THIS)"); // @categories Doors
-	{
-		Doors *THIS;
-		uint32 RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_DOOR;
-		RETVAL = THIS->GetIncline();
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
+int Perl_Doors_GetIncline(Doors* self) // @categories Doors
+{
+	return self->GetIncline();
 }
 
-XS(XS_Doors_GetSize); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Doors_GetSize) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Doors::GetSize(THIS)"); // @categories Doors
-	{
-		Doors *THIS;
-		uint32 RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_DOOR;
-		RETVAL = THIS->GetSize();
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
+uint32_t Perl_Doors_GetSize(Doors* self) // @categories Doors
+{
+	return self->GetSize();
 }
 
-
-XS(XS_Doors_SetOpenType); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Doors_SetOpenType) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Doors::SetOpenType(THIS, uint32 open_type)"); // @categories Doors
-	{
-		Doors *THIS;
-		uint32 type = (uint32) SvUV(ST(1));
-		VALIDATE_THIS_IS_DOOR;
-		THIS->SetOpenType(type);
-	}
-	XSRETURN_EMPTY;
+void Perl_Doors_SetOpenType(Doors* self, uint32_t open_type) // @categories Doors
+{
+	self->SetOpenType(open_type);
 }
 
-XS(XS_Doors_SetLockpick); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Doors_SetLockpick) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Doors::SetLockpick(THIS, uint32 lockpick_type)"); // @categories Doors
-	{
-		Doors *THIS;
-		uint32 type = (uint32) SvUV(ST(1));
-		VALIDATE_THIS_IS_DOOR;
-		THIS->SetLockpick(type);
-	}
-	XSRETURN_EMPTY;
+void Perl_Doors_SetLockPick(Doors* self, uint32_t lockpick_type) // @categories Doors
+{
+	self->SetLockpick(lockpick_type);
 }
 
-XS(XS_Doors_SetKeyItem); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Doors_SetKeyItem) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Doors::SetKeyItem(THIS, uint32 key_item_id)"); // @categories Doors
-	{
-		Doors *THIS;
-		uint32 type = (uint32) SvUV(ST(1));
-		VALIDATE_THIS_IS_DOOR;
-		THIS->SetKeyItem(type);
-	}
-	XSRETURN_EMPTY;
+void Perl_Doors_SetKeyItem(Doors* self, uint32_t key_item_id) // @categories Doors
+{
+	self->SetKeyItem(key_item_id);
 }
 
-XS(XS_Doors_SetNoKeyring); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Doors_SetNoKeyring) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Doors::SetNoKeyring(THIS, uint8 no_key_ring)"); // @categories Doors
-	{
-		Doors *THIS;
-		uint8 type = (uint8) SvUV(ST(1));
-		VALIDATE_THIS_IS_DOOR;
-		THIS->SetNoKeyring(type);
-	}
-	XSRETURN_EMPTY;
+void Perl_Doors_SetNoKeyring(Doors* self, uint8_t no_key_ring) // @categories Doors
+{
+	self->SetNoKeyring(no_key_ring);
 }
 
-XS(XS_Doors_SetIncline); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Doors_SetIncline) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Doors::SetIncline(THIS, uint32 incline)"); // @categories Doors
-	{
-		Doors *THIS;
-		uint32 type = (uint32) SvUV(ST(1));
-		VALIDATE_THIS_IS_DOOR;
-		THIS->SetIncline(type);
-	}
-	XSRETURN_EMPTY;
+void Perl_Doors_SetIncline(Doors* self, uint32_t incline) // @categories Doors
+{
+	self->SetIncline(incline);
 }
 
-XS(XS_Doors_SetSize); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Doors_SetSize) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Doors::SetSize(THIS, uint32 size)"); // @categories Doors
-	{
-		Doors *THIS;
-		uint32 type = (uint32) SvUV(ST(1));
-		VALIDATE_THIS_IS_DOOR;
-		THIS->SetSize(type);
-	}
-	XSRETURN_EMPTY;
+void Perl_Doors_SetSize(Doors* self, uint32_t size) // @categories Doors
+{
+	self->SetSize(size);
 }
 
-XS(XS_Doors_SetLocation); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Doors_SetLocation) {
-	dXSARGS;
-	if (items != 4)
-		Perl_croak(aTHX_ "Usage: Doors::SetLocation(THIS, float x, float y, float z)"); // @categories Doors
-	{
-		Doors *THIS;
-		float x = (float) SvNV(ST(1));
-		float y = (float) SvNV(ST(2));
-		float z = (float) SvNV(ST(3));
-		VALIDATE_THIS_IS_DOOR;
-		THIS->SetLocation(x, y, z);
-	}
-	XSRETURN_EMPTY;
+void Perl_Doors_SetLocation(Doors* self, float x, float y, float z) // @categories Doors
+{
+	self->SetLocation(x, y, z);
 }
 
-XS(XS_Doors_SetX); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Doors_SetX) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Doors::SetX(THIS, float x)"); // @categories Doors
-	{
-		Doors *THIS;
-		float x = (float) SvNV(ST(1));
-		VALIDATE_THIS_IS_DOOR;
-		auto position = THIS->GetPosition();
-		position.x = x;
-		THIS->SetPosition(position);
-	}
-	XSRETURN_EMPTY;
+void Perl_Doors_SetX(Doors* self, float x) // @categories Doors
+{
+	auto position = self->GetPosition();
+	position.x = x;
+	self->SetPosition(position);
 }
 
-XS(XS_Doors_SetY); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Doors_SetY) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Doors::SetY(THIS, float y)"); // @categories Doors
-	{
-		Doors *THIS;
-		float y = (float) SvNV(ST(1));
-		VALIDATE_THIS_IS_DOOR;
-		auto position = THIS->GetPosition();
-		position.y = y;
-		THIS->SetPosition(position);
-	}
-	XSRETURN_EMPTY;
+void Perl_Doors_SetY(Doors* self, float y) // @categories Doors
+{
+	auto position = self->GetPosition();
+	position.y = y;
+	self->SetPosition(position);
 }
 
-XS(XS_Doors_SetZ); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Doors_SetZ) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Doors::SetZ(THIS, float z)"); // @categories Doors
-	{
-		Doors *THIS;
-		float z = (float) SvNV(ST(1));
-		VALIDATE_THIS_IS_DOOR;
-		auto position = THIS->GetPosition();
-		position.z = z;
-		THIS->SetPosition(position);
-	}
-	XSRETURN_EMPTY;
+void Perl_Doors_SetZ(Doors* self, float z) // @categories Doors
+{
+	auto position = self->GetPosition();
+	position.z = z;
+	self->SetPosition(position);
 }
 
-XS(XS_Doors_SetHeading); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Doors_SetHeading) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Doors::SetHeading(THIS, float heading)"); // @categories Doors
-	{
-		Doors *THIS;
-		float heading = (float) SvNV(ST(1));
-		VALIDATE_THIS_IS_DOOR;
-		auto position = THIS->GetPosition();
-		position.w = heading;
-		THIS->SetPosition(position);
-	}
-	XSRETURN_EMPTY;
+void Perl_Doors_SetHeading(Doors* self, float heading) // @categories Doors
+{
+	auto position = self->GetPosition();
+	position.w = heading;
+	self->SetPosition(position);
 }
 
-XS(XS_Doors_SetModelName); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Doors_SetModelName) {
-	dXSARGS;
-	if (items < 1 || items > 2)
-		Perl_croak(aTHX_ "Usage: Doors::SetModelName(THIS, string name)"); // @categories Doors
-	{
-		Doors *THIS;
-		char  *name = nullptr;
-		VALIDATE_THIS_IS_DOOR;
-		if (items > 1) { name = (char *) SvPV_nolen(ST(1)); }
-
-		THIS->SetDoorName(name);
-	}
-	XSRETURN_EMPTY;
-}
-XS(XS_Doors_GetModelName); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Doors_GetModelName) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Doors::GetModelName(THIS)"); // @categories Doors
-	{
-		Doors      *THIS;
-		Const_char *RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_DOOR;
-		RETVAL = THIS->GetDoorName();
-		sv_setpv(TARG, RETVAL);
-		XSprePUSH;
-		PUSHTARG;
-	}
-	XSRETURN(1);
+void Perl_Doors_SetModelName(Doors* self, const char* name) // @categories Doors
+{
+	self->SetDoorName(name);
 }
 
-XS(XS_Doors_CreateDatabaseEntry); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Doors_CreateDatabaseEntry) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Doors::InsertDoor(THIS)"); // @categories Doors
-	{
-		Doors *THIS;
-		VALIDATE_THIS_IS_DOOR;
-		THIS->CreateDatabaseEntry();
-	}
-	XSRETURN_EMPTY;
+std::string Perl_Doors_GetModelName(Doors* self) // @categories Doors
+{
+	return self->GetDoorName();
 }
 
-
-#ifdef __cplusplus
-extern "C"
-#endif
-XS(boot_Doors); /* prototype to pass -Wmissing-prototypes */
-XS(boot_Doors) {
-	dXSARGS;
-	char file[256];
-	strncpy(file, __FILE__, 256);
-	file[255] = 0;
-
-	if (items != 1)
-		fprintf(stderr, "boot_quest does not take any arguments.");
-	char buf[128];
-
-	//add the strcpy stuff to get rid of const warnings....
-
-	XS_VERSION_BOOTCHECK;
-	newXSproto(strcpy(buf, "CreateDatabaseEntry"), XS_Doors_CreateDatabaseEntry, file, "$");
-	newXSproto(strcpy(buf, "GetDoorDBID"), XS_Doors_GetDoorDBID, file, "$");
-	newXSproto(strcpy(buf, "GetDoorID"), XS_Doors_GetDoorID, file, "$");
-	newXSproto(strcpy(buf, "GetHeading"), XS_Doors_GetHeading, file, "$");
-	newXSproto(strcpy(buf, "GetID"), XS_Doors_GetID, file, "$");
-	newXSproto(strcpy(buf, "GetIncline"), XS_Doors_GetIncline, file, "$");
-	newXSproto(strcpy(buf, "GetKeyItem"), XS_Doors_GetKeyItem, file, "$");
-	newXSproto(strcpy(buf, "GetLockPick"), XS_Doors_GetLockpick, file, "$");
-	newXSproto(strcpy(buf, "GetModelName"), XS_Doors_GetModelName, file, "$");
-	newXSproto(strcpy(buf, "GetNoKeyring"), XS_Doors_GetNoKeyring, file, "$");
-	newXSproto(strcpy(buf, "GetOpenType"), XS_Doors_GetOpenType, file, "$");
-	newXSproto(strcpy(buf, "GetSize"), XS_Doors_GetSize, file, "$");
-	newXSproto(strcpy(buf, "GetX"), XS_Doors_GetX, file, "$");
-	newXSproto(strcpy(buf, "GetY"), XS_Doors_GetY, file, "$");
-	newXSproto(strcpy(buf, "GetZ"), XS_Doors_GetZ, file, "$");
-	newXSproto(strcpy(buf, "SetHeading"), XS_Doors_SetHeading, file, "$$");
-	newXSproto(strcpy(buf, "SetIncline"), XS_Doors_SetIncline, file, "$$");
-	newXSproto(strcpy(buf, "SetKeyItem"), XS_Doors_SetKeyItem, file, "$$");
-	newXSproto(strcpy(buf, "SetLocation"), XS_Doors_SetLocation, file, "$$$$");
-	newXSproto(strcpy(buf, "SetLockPick"), XS_Doors_SetLockpick, file, "$$");
-	newXSproto(strcpy(buf, "SetModelName"), XS_Doors_SetModelName, file, "$$");
-	newXSproto(strcpy(buf, "SetNoKeyring"), XS_Doors_SetNoKeyring, file, "$$");
-	newXSproto(strcpy(buf, "SetOpenType"), XS_Doors_SetOpenType, file, "$$");
-	newXSproto(strcpy(buf, "SetSize"), XS_Doors_SetSize, file, "$$");
-	newXSproto(strcpy(buf, "SetX"), XS_Doors_SetX, file, "$$");
-	newXSproto(strcpy(buf, "SetY"), XS_Doors_SetY, file, "$$");
-	newXSproto(strcpy(buf, "SetZ"), XS_Doors_SetZ, file, "$$");
-	XSRETURN_YES;
+void Perl_Doors_CreateDatabaseEntry(Doors* self) // @categories Doors
+{
+	self->CreateDatabaseEntry();
 }
+
+void Perl_Doors_ForceClose(Doors* self, Mob* sender)
+{
+	self->ForceClose(sender);
+}
+
+void Perl_Doors_ForceClose(Doors* self, Mob* sender, bool alt_mode)
+{
+	self->ForceClose(sender, alt_mode);
+}
+
+void Perl_Doors_ForceOpen(Doors* self, Mob* sender)
+{
+	self->ForceOpen(sender);
+}
+
+void Perl_Doors_ForceOpen(Doors* self, Mob* sender, bool alt_mode)
+{
+	self->ForceOpen(sender, alt_mode);
+}
+
+bool Perl_Doors_GetDisableTimer(Doors* self)
+{
+	return self->GetDisableTimer();
+}
+
+void Perl_Doors_SetDisableTimer(Doors* self, bool disable_timer)
+{
+	self->SetDisableTimer(disable_timer);
+}
+
+void perl_register_doors()
+{
+	perl::interpreter perl(PERL_GET_THX);
+
+	auto package = perl.new_class<Doors>("Doors");
+	package.add("CreateDatabaseEntry", &Perl_Doors_CreateDatabaseEntry);
+	package.add("ForceClose", (void(*)(Doors*, Mob*))&Perl_Doors_ForceClose);
+	package.add("ForceClose", (void(*)(Doors*, Mob*, bool))&Perl_Doors_ForceClose);
+	package.add("ForceOpen", (void(*)(Doors*, Mob*))&Perl_Doors_ForceOpen);
+	package.add("ForceOpen", (void(*)(Doors*, Mob*, bool))&Perl_Doors_ForceOpen);
+	package.add("GetDisableTimer", &Perl_Doors_GetDisableTimer);
+	package.add("GetDoorDBID", &Perl_Doors_GetDoorDBID);
+	package.add("GetDoorID", &Perl_Doors_GetDoorID);
+	package.add("GetHeading", &Perl_Doors_GetHeading);
+	package.add("GetID", &Perl_Doors_GetID);
+	package.add("GetIncline", &Perl_Doors_GetIncline);
+	package.add("GetKeyItem", &Perl_Doors_GetKeyItem);
+	package.add("GetLockPick", &Perl_Doors_GetLockPick);
+	package.add("GetModelName", &Perl_Doors_GetModelName);
+	package.add("GetNoKeyring", &Perl_Doors_GetNoKeyring);
+	package.add("GetOpenType", &Perl_Doors_GetOpenType);
+	package.add("GetSize", &Perl_Doors_GetSize);
+	package.add("GetX", &Perl_Doors_GetX);
+	package.add("GetY", &Perl_Doors_GetY);
+	package.add("GetZ", &Perl_Doors_GetZ);
+	package.add("SetDisableTimer", &Perl_Doors_SetDisableTimer);
+	package.add("SetHeading", &Perl_Doors_SetHeading);
+	package.add("SetIncline", &Perl_Doors_SetIncline);
+	package.add("SetKeyItem", &Perl_Doors_SetKeyItem);
+	package.add("SetLocation", &Perl_Doors_SetLocation);
+	package.add("SetLockPick", &Perl_Doors_SetLockPick);
+	package.add("SetModelName", &Perl_Doors_SetModelName);
+	package.add("SetNoKeyring", &Perl_Doors_SetNoKeyring);
+	package.add("SetOpenType", &Perl_Doors_SetOpenType);
+	package.add("SetSize", &Perl_Doors_SetSize);
+	package.add("SetX", &Perl_Doors_SetX);
+	package.add("SetY", &Perl_Doors_SetY);
+	package.add("SetZ", &Perl_Doors_SetZ);
+}
+
 #endif //EMBPERL_XS_CLASSES

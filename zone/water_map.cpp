@@ -4,20 +4,13 @@
 #include "water_map_v1.h"
 #include "water_map_v2.h"
 #include "../common/eqemu_logsys.h"
+#include "../common/file.h"
+#include "../common/path_manager.h"
 
 #include <algorithm>
 #include <cctype>
 #include <stdio.h>
 #include <string.h>
-
-/**
- * @param name
- * @return
- */
-inline bool file_exists(const std::string& name) {
-	std::ifstream f(name.c_str());
-	return f.good();
-}
 
 /**
  * @param zone_name
@@ -26,18 +19,7 @@ inline bool file_exists(const std::string& name) {
 WaterMap* WaterMap::LoadWaterMapfile(std::string zone_name) {
 	std::transform(zone_name.begin(), zone_name.end(), zone_name.begin(), ::tolower);
 
-	std::string filename;
-	if (file_exists("maps")) {
-		filename = "maps";
-	}
-	else if (file_exists("Maps")) {
-		filename = "Maps";
-	}
-	else {
-		filename = Config->MapDir;
-	}
-
-	std::string file_path = filename + "/water/" + zone_name + std::string(".wtr");
+	std::string file_path = fmt::format("{}/water/{}.wtr", path.GetMapsPath(), zone_name);
 	LogDebug("Attempting to load water map with path [{}]", file_path.c_str());
 	FILE *f = fopen(file_path.c_str(), "rb");
 	if(f) {
@@ -48,19 +30,19 @@ WaterMap* WaterMap::LoadWaterMapfile(std::string zone_name) {
 			fclose(f);
 			return nullptr;
 		}
-		
+
 		if(strncmp(magic, "EQEMUWATER", 10)) {
 			LogDebug("Failed to load water map, bad magic string in header");
 			fclose(f);
 			return nullptr;
 		}
-		
+
 		if(fread(&version, sizeof(version), 1, f) != 1) {
 			LogDebug("Failed to load water map, error reading version");
 			fclose(f);
 			return nullptr;
 		}
-		
+
 		LogDebug("Attempting to V[{}] load water map [{}]", version, file_path.c_str());
 		if(version == 1) {
 			auto wm = new WaterMapV1();
@@ -90,7 +72,7 @@ WaterMap* WaterMap::LoadWaterMapfile(std::string zone_name) {
 			return nullptr;
 		}
 	}
-	
+
 	LogDebug("Failed to load water map, could not open file for reading [{}]", file_path.c_str());
 	return nullptr;
 }

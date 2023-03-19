@@ -22,7 +22,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 #include "../common/features.h"
 #include "../common/rulesys.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "../common/misc_functions.h"
 #include "../common/eqemu_logsys.h"
 
@@ -116,7 +116,7 @@ void NPC::DisplayWaypointInfo(Client *client) {
 					current_waypoint.pause ?
 					fmt::format(
 						"{} ({})",
-						ConvertSecondsToTime(current_waypoint.pause),
+						Strings::SecondsToTime(current_waypoint.pause),
 						current_waypoint.pause
 					) :
 					""
@@ -205,14 +205,14 @@ void NPC::MoveTo(const glm::vec4 &position, bool saveguardspot)
 	if (IsNPC() && GetGrid() != 0) {    // he is on a grid
 		if (GetGrid() < 0) {    // currently stopped by a quest command
 			SetGrid(0 - GetGrid());    // get him moving again
-			LogAI("MoveTo during quest wandering. Canceling quest wandering and going back to grid [{}] when MoveTo is done", GetGrid());
+			LogAIDetail("MoveTo during quest wandering. Canceling quest wandering and going back to grid [{}] when MoveTo is done", GetGrid());
 		}
 		AI_walking_timer->Disable();    // disable timer in case he is paused at a wp
 		if (cur_wp >= 0) {    // we've not already done a MoveTo()
 			save_wp = cur_wp;    // save the current waypoint
 			cur_wp  = EQ::WaypointStatus::QuestControlGrid;
 		}
-		LogAI("MoveTo [{}], pausing regular grid wandering. Grid [{}], save_wp [{}]",
+		LogAIDetail("MoveTo [{}], pausing regular grid wandering. Grid [{}], save_wp [{}]",
 			to_string(static_cast<glm::vec3>(position)).c_str(),
 			-GetGrid(),
 			save_wp);
@@ -221,7 +221,7 @@ void NPC::MoveTo(const glm::vec4 &position, bool saveguardspot)
 		roamer  = true;
 		save_wp = 0;
 		cur_wp  = EQ::WaypointStatus::QuestControlNoGrid;
-		LogAI("MoveTo [{}] without a grid", to_string(static_cast<glm::vec3>(position)).c_str());
+		LogAIDetail("MoveTo [{}] without a grid", to_string(static_cast<glm::vec3>(position)).c_str());
 	}
 
 	glm::vec3 dest(position);
@@ -239,7 +239,7 @@ void NPC::MoveTo(const glm::vec4 &position, bool saveguardspot)
 		if (m_GuardPoint.w == -1)
 			m_GuardPoint.w = CalculateHeadingToTarget(position.x, position.y);
 
-		LogAI("Setting guard position to [{}]", to_string(static_cast<glm::vec3>(m_GuardPoint)).c_str());
+		LogAIDetail("Setting guard position to [{}]", to_string(static_cast<glm::vec3>(m_GuardPoint)).c_str());
 	}
 
 	cur_wp_pause        = 0;
@@ -252,7 +252,7 @@ void NPC::MoveTo(const glm::vec4 &position, bool saveguardspot)
 void NPC::UpdateWaypoint(int wp_index)
 {
 	if (wp_index >= static_cast<int>(Waypoints.size())) {
-		LogAI("Update to waypoint [{}] failed. Not found", wp_index);
+		LogAIDetail("Update to waypoint [{}] failed. Not found", wp_index);
 		return;
 	}
 	std::vector<wplist>::iterator cur;
@@ -261,7 +261,7 @@ void NPC::UpdateWaypoint(int wp_index)
 
 	m_CurrentWayPoint = glm::vec4(cur->x, cur->y, cur->z, cur->heading);
 	cur_wp_pause = cur->pause;
-	LogAI("Next waypoint [{}]: ({}, {}, {}, {})", wp_index, m_CurrentWayPoint.x, m_CurrentWayPoint.y, m_CurrentWayPoint.z, m_CurrentWayPoint.w);
+	LogAIDetail("Next waypoint [{}]: ({}, {}, {}, {})", wp_index, m_CurrentWayPoint.x, m_CurrentWayPoint.y, m_CurrentWayPoint.z, m_CurrentWayPoint.w);
 
 }
 
@@ -557,13 +557,27 @@ void NPC::SetWaypointPause()
 	}
 }
 
+void NPC::SaveGuardSpot(bool ClearGuardSpot) {
+	if (ClearGuardSpot) {
+		LogAIDetail("Clearing guard order.");
+		m_GuardPoint = glm::vec4();
+	} else {
+		m_GuardPoint = m_Position;
+
+		if (m_GuardPoint.w == 0) {
+			m_GuardPoint.w = 0.0001; //hack to make IsGuarding simpler
+		}
+		LogAIDetail("Setting guard position to [{}]", to_string(static_cast<glm::vec3>(m_GuardPoint)));
+	}
+}
+
 void NPC::SaveGuardSpot(const glm::vec4 &pos)
 {
 	m_GuardPoint = pos;
 
 	if (m_GuardPoint.w == 0)
 		m_GuardPoint.w = 0.0001;		//hack to make IsGuarding simpler
-	LogAI("Setting guard position to {0}", to_string(static_cast<glm::vec3>(m_GuardPoint)));
+	LogAIDetail("Setting guard position to [{}]", to_string(static_cast<glm::vec3>(m_GuardPoint)));
 }
 
 void NPC::NextGuardPosition() {
@@ -698,7 +712,7 @@ void Mob::SendTo(float new_x, float new_y, float new_z) {
 	m_Position.x = new_x;
 	m_Position.y = new_y;
 	m_Position.z = new_z;
-	LogAI("Sent To ({}, {}, {})", new_x, new_y, new_z);
+	LogAIDetail("Sent To ({}, {}, {})", new_x, new_y, new_z);
 
 	if (flymode == GravityBehavior::Flying)
 		return;
@@ -714,7 +728,7 @@ void Mob::SendTo(float new_x, float new_y, float new_z) {
 
 			float newz = zone->zonemap->FindBestZ(dest, nullptr);
 
-			LogAI("BestZ returned {} at {}, {}, {}", newz, m_Position.x, m_Position.y, m_Position.z);
+			LogAIDetail("BestZ returned {} at {}, {}, {}", newz, m_Position.x, m_Position.y, m_Position.z);
 
 			if ((newz > -2000) && std::abs(newz - dest.z) < RuleR(Map, FixPathingZMaxDeltaSendTo)) // Sanity check.
 				m_Position.z = newz + 1;
@@ -778,7 +792,7 @@ float Mob::GetFixedZ(const glm::vec3 &destination, int32 z_find_offset) {
 
 		auto duration = timer.elapsed();
 
-		LogFixZ("Mob::GetFixedZ() ([{}]) returned [{}] at [{}], [{}], [{}] - Took [{}]",
+		LogFixZ("[{}] returned [{}] at [{}] [{}] [{}] - Took [{}]",
 			GetCleanName(),
 			new_z,
 			destination.x,
@@ -792,6 +806,10 @@ float Mob::GetFixedZ(const glm::vec3 &destination, int32 z_find_offset) {
 
 void Mob::FixZ(int32 z_find_offset /*= 5*/, bool fix_client_z /*= false*/) {
 	if (IsClient() && !fix_client_z) {
+		return;
+	}
+
+	if (GetIsBoat()) {
 		return;
 	}
 
@@ -860,8 +878,6 @@ float Mob::GetZOffset() const {
 			offset = 1.0f;
 			break;
 		case RACE_DRAGON_438:
-			offset = 0.776f;
-			break;
 		case RACE_DRAGON_452:
 			offset = 0.776f;
 			break;
@@ -871,9 +887,8 @@ float Mob::GetZOffset() const {
 		case RACE_SPIDER_440:
 			offset = 0.938f;
 			break;
+		case RACE_IMP_46:
 		case RACE_SNAKE_468:
-			offset = 1.0f;
-			break;
 		case RACE_CORATHUS_459:
 			offset = 1.0f;
 			break;
@@ -884,8 +899,6 @@ float Mob::GetZOffset() const {
 			offset = 1.2f;
 			break;
 		case RACE_GOO_549:
-			offset = 0.5f;
-			break;
 		case RACE_GOO_548:
 			offset = 0.5f;
 			break;
@@ -902,14 +915,13 @@ float Mob::GetZOffset() const {
 			offset = 4.0f;
 			break;
 		case RACE_ARMOR_OF_MARR_323:
-			offset = 5.0f;
-			break;
 		case RACE_AMYGDALAN_663:
 			offset = 5.0f;
 			break;
 		case RACE_SANDMAN_664:
 			offset = 4.0f;
 			break;
+		case RACE_LAVA_DRAGON_49:
 		case RACE_ALARAN_SENTRY_STONE_703:
 			offset = 9.0f;
 			break;
@@ -919,9 +931,31 @@ float Mob::GetZOffset() const {
 		case RACE_BLIND_DREAMER_669:
 			offset = 7.0f;
 			break;
-		case RACE_GORAL_687:
-			offset = 2.0f;
+		case RACE_SIREN_187:
+		case RACE_HALAS_CITIZEN_90:
+		case RACE_OTTERMAN_190:
+			offset = .5f;
 			break;
+		case RACE_COLDAIN_183:
+			offset = .6f;
+			break;
+		case RACE_WEREWOLF_14:
+			offset = 1.2f;
+			break;
+		case RACE_DWARF_8:
+			offset = .7f;
+			break;
+		case RACE_HORSE_216:
+			offset = 1.4f;
+			break;
+		case RACE_ENCHANTED_ARMOR_175:
+		case RACE_TIGER_63:
+			offset = 1.75f;
+			break;
+		case RACE_STATUE_OF_RALLOS_ZEK_66:
+			offset = 1.0f;
+			break;
+		case RACE_GORAL_687:
 		case RACE_SELYRAH_686:
 			offset = 2.0f;
 			break;
@@ -1138,7 +1172,7 @@ void ZoneDatabase::AddWP(Client *client, uint32 gridid, uint32 wpnum, const glm:
 * DeleteWaypoint - Removes a specific waypoint from the grid
 *	grid_id:	The ID number of the grid whose wp is being deleted
 *	wp_num:		The number of the waypoint being deleted
-*	zoneid:		The ID number of the zone that contains the waypoint being deleted
+*	zoneid:		The ID number of the zone that Contains the waypoint being deleted
 */
 void ZoneDatabase::DeleteWaypoint(Client *client, uint32 grid_num, uint32 wp_num, uint16 zoneid)
 {
@@ -1296,7 +1330,6 @@ void NPC::RestoreGuardSpotCharm()
 /******************
 * Bot-specific overloads to make them play nice with the new movement system
 */
-#ifdef BOTS
 #include "bot.h"
 
 void Bot::WalkTo(float x, float y, float z)
@@ -1314,4 +1347,3 @@ void Bot::RunTo(float x, float y, float z)
 
 	Mob::RunTo(x, y, z);
 }
-#endif

@@ -27,10 +27,10 @@
 #include "worlddb.h"
 #include "zonelist.h"
 #include "zoneserver.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "../common/md5.h"
 #include "eqemu_api_world_data_service.h"
-#include "world_store.h"
+#include "../common/zone_store.h"
 #include <fmt/format.h>
 
 extern ClientList      client_list;
@@ -164,7 +164,7 @@ void ConsoleWho(
 		if (strcasecmp(arg.c_str(), "gm") == 0) {
 			whom.gmlookup = 1;
 		}
-		else if (StringIsNumber(arg)) {
+		else if (Strings::IsNumber(arg)) {
 			if (whom.lvllow == 0xFFFF) {
 				whom.lvllow  = atoi(arg.c_str());
 				whom.lvlhigh = whom.lvllow;
@@ -200,7 +200,7 @@ void ConsoleUptime(
 		return;
 	}
 
-	if (StringIsNumber(args[0]) && atoi(args[0].c_str()) > 0) {
+	if (Strings::IsNumber(args[0]) && atoi(args[0].c_str()) > 0) {
 		auto                pack = new ServerPacket(ServerOP_Uptime, sizeof(ServerUptime_Struct));
 		ServerUptime_Struct *sus = (ServerUptime_Struct *) pack->pBuffer;
 		snprintf(sus->adminname, sizeof(sus->adminname), "*%s", connection->UserName().c_str());
@@ -285,7 +285,7 @@ void ConsoleEmote(
 			0,
 			AccountStatus::Player,
 			atoi(args[1].c_str()),
-			JoinString(join_args, " ").c_str()
+			Strings::Join(join_args, " ").c_str()
 		);
 	}
 	else {
@@ -296,7 +296,7 @@ void ConsoleEmote(
 				0,
 				AccountStatus::Player,
 				atoi(args[1].c_str()),
-				JoinString(join_args, " ").c_str()
+				Strings::Join(join_args, " ").c_str()
 			);
 		}
 		else {
@@ -305,7 +305,7 @@ void ConsoleEmote(
 				0,
 				AccountStatus::Player,
 				atoi(args[1].c_str()),
-				JoinString(join_args, " ").c_str()
+				Strings::Join(join_args, " ").c_str()
 			);
 		}
 	}
@@ -361,7 +361,7 @@ void ConsoleTell(
 	auto join_args = args;
 	join_args.erase(join_args.begin(), join_args.begin() + 1);
 
-	zoneserver_list.SendChannelMessage(tmpname, to.c_str(), 7, 0, JoinString(join_args, " ").c_str());
+	zoneserver_list.SendChannelMessage(tmpname, to.c_str(), 7, 0, Strings::Join(join_args, " ").c_str());
 }
 
 /**
@@ -382,7 +382,7 @@ void ConsoleBroadcast(
 	char tmpname[64];
 	tmpname[0] = '*';
 	strcpy(&tmpname[1], connection->UserName().c_str());
-	zoneserver_list.SendChannelMessage(tmpname, 0, 6, 0, JoinString(args, " ").c_str());
+	zoneserver_list.SendChannelMessage(tmpname, 0, 6, 0, Strings::Join(args, " ").c_str());
 }
 
 /**
@@ -403,7 +403,40 @@ void ConsoleGMSay(
 	char tmpname[64];
 	tmpname[0] = '*';
 	strcpy(&tmpname[1], connection->UserName().c_str());
-	zoneserver_list.SendChannelMessage(tmpname, 0, 11, 0, JoinString(args, " ").c_str());
+	zoneserver_list.SendChannelMessage(tmpname, 0, 11, 0, Strings::Join(args, " ").c_str());
+}
+
+/**
+ * @param connection
+ * @param command
+ * @param args
+ */
+void ConsoleGuildSay(
+	EQ::Net::ConsoleServerConnection *connection,
+	const std::string &command,
+	const std::vector<std::string> &args
+)
+{
+	if (args.size() < 1) {
+		return;
+	}
+
+	auto from = args[0];
+	auto guild_id = Strings::IsNumber(args[1]) ? std::stoul(args[1]) : 0;
+	if (!guild_id) {
+		return;
+	}
+
+	auto join_args = args;
+	join_args.erase(join_args.begin(), join_args.begin() + 2);
+
+	auto message = fmt::format(
+		"{} tells the guild, '{}'",
+		from,
+		Strings::Join(join_args, " ")
+	);
+
+	zoneserver_list.SendEmoteMessage(0, guild_id, AccountStatus::Player, Chat::Guild, message.c_str());
 }
 
 /**
@@ -424,7 +457,7 @@ void ConsoleOOC(
 	char tmpname[64];
 	tmpname[0] = '*';
 	strcpy(&tmpname[1], connection->UserName().c_str());
-	zoneserver_list.SendChannelMessage(tmpname, 0, 5, 0, JoinString(args, " ").c_str());
+	zoneserver_list.SendChannelMessage(tmpname, 0, 5, 0, Strings::Join(args, " ").c_str());
 }
 
 /**
@@ -445,7 +478,7 @@ void ConsoleAuction(
 	char tmpname[64];
 	tmpname[0] = '*';
 	strcpy(&tmpname[1], connection->UserName().c_str());
-	zoneserver_list.SendChannelMessage(tmpname, 0, 4, 0, JoinString(args, " ").c_str());
+	zoneserver_list.SendChannelMessage(tmpname, 0, 4, 0, Strings::Join(args, " ").c_str());
 }
 
 /**
@@ -551,7 +584,7 @@ void ConsoleZoneShutdown(
 		ServerZoneStateChange_struct *s = (ServerZoneStateChange_struct *) pack->pBuffer;
 		pack->opcode = ServerOP_ZoneShutdown;
 		strcpy(s->adminname, tmpname);
-		if (StringIsNumber(args[0])) {
+		if (Strings::IsNumber(args[0])) {
 			s->ZoneServerID = atoi(args[0].c_str());
 		}
 		else {
@@ -595,20 +628,13 @@ void ConsoleZoneBootup(
 		return;
 	}
 
-	if (args[1].length() == 0 || !StringIsNumber(args[0])) {
+	if (args[1].length() == 0 || !Strings::IsNumber(args[0])) {
 		connection->SendLine("Usage: zonebootup ZoneServerID# zoneshortname");
 	}
 	else {
 		char tmpname[64];
 		tmpname[0] = '*';
 		strcpy(&tmpname[1], connection->UserName().c_str());
-
-		Log(Logs::Detail,
-			Logs::WorldServer,
-			"Console ZoneBootup: %s, %s, %s",
-			tmpname,
-			args[1].c_str(),
-			args[0].c_str());
 
 		if (args.size() > 2) {
 			zoneserver_list.SOPZoneBootup(
@@ -721,7 +747,7 @@ void ConsoleFlag(
 		return;
 	}
 
-	if (args[1].length() == 0 || !StringIsNumber(args[0])) {
+	if (args[1].length() == 0 || !Strings::IsNumber(args[0])) {
 		connection->SendLine("Usage: flag [status] [accountname]");
 	}
 	else {
@@ -795,7 +821,7 @@ void ConsoleWorldShutdown(
 {
 	if (args.size() == 2) {
 		int32 time, interval;
-		if (StringIsNumber(args[0]) && StringIsNumber(args[1]) && ((time = atoi(args[0].c_str())) > 0) &&
+		if (Strings::IsNumber(args[0]) && Strings::IsNumber(args[1]) && ((time = atoi(args[0].c_str())) > 0) &&
 			((interval = atoi(args[1].c_str())) > 0)) {
 			zoneserver_list.WorldShutDown(time, interval);
 		}
@@ -868,7 +894,7 @@ void ConsoleSignalCharByName(
 	int update_identifier = 0;
 	CZS->update_type = update_type;
 	CZS->update_identifier = update_identifier;
-	CZS->signal = atoi(args[1].c_str());
+	CZS->signal_id = atoi(args[1].c_str());
 	strn0cpy(CZS->client_name, (char *) args[0].c_str(), 64);
 	zoneserver_list.SendPacket(pack);
 	safe_delete(pack);
@@ -951,6 +977,7 @@ void RegisterConsoleFunctions(std::unique_ptr<EQ::Net::ConsoleServer>& console)
 	console->RegisterCall("emote", 50, "emote [zonename or charname or world] [type] [message]", std::bind(ConsoleEmote, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	console->RegisterCall("flag", 200, "flag [status] [accountname]", std::bind(ConsoleFlag, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	console->RegisterCall("gmsay", 50, "gmsay [message]", std::bind(ConsoleGMSay, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+	console->RegisterCall("guildsay", 50, "guildsay [Character Name] [Guild ID] [Message]", std::bind(ConsoleGuildSay, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	console->RegisterCall("iplookup", 50, "IPLookup [name]", std::bind(ConsoleIpLookup, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	console->RegisterCall("kick", 150, "kick [charname]", std::bind(ConsoleKick, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	console->RegisterCall("lock", 150, "lock", std::bind(ConsoleLock, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));

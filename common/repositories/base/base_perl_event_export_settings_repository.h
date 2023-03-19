@@ -13,19 +13,19 @@
 #define EQEMU_BASE_PERL_EVENT_EXPORT_SETTINGS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BasePerlEventExportSettingsRepository {
 public:
 	struct PerlEventExportSettings {
-		int         event_id;
+		int32_t     event_id;
 		std::string event_description;
-		int         export_qglobals;
-		int         export_mob;
-		int         export_zone;
-		int         export_item;
-		int         export_event;
+		int16_t     export_qglobals;
+		int16_t     export_mob;
+		int16_t     export_zone;
+		int16_t     export_item;
+		int16_t     export_event;
 	};
 
 	static std::string PrimaryKey()
@@ -61,12 +61,12 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string SelectColumnsRaw()
 	{
-		return std::string(implode(", ", SelectColumns()));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -94,20 +94,20 @@ public:
 
 	static PerlEventExportSettings NewEntity()
 	{
-		PerlEventExportSettings entry{};
+		PerlEventExportSettings e{};
 
-		entry.event_id          = 0;
-		entry.event_description = "";
-		entry.export_qglobals   = 0;
-		entry.export_mob        = 0;
-		entry.export_zone       = 0;
-		entry.export_item       = 0;
-		entry.export_event      = 0;
+		e.event_id          = 0;
+		e.event_description = "";
+		e.export_qglobals   = 0;
+		e.export_mob        = 0;
+		e.export_zone       = 0;
+		e.export_item       = 0;
+		e.export_event      = 0;
 
-		return entry;
+		return e;
 	}
 
-	static PerlEventExportSettings GetPerlEventExportSettingsEntry(
+	static PerlEventExportSettings GetPerlEventExportSettings(
 		const std::vector<PerlEventExportSettings> &perl_event_export_settingss,
 		int perl_event_export_settings_id
 	)
@@ -136,17 +136,17 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			PerlEventExportSettings entry{};
+			PerlEventExportSettings e{};
 
-			entry.event_id          = atoi(row[0]);
-			entry.event_description = row[1] ? row[1] : "";
-			entry.export_qglobals   = atoi(row[2]);
-			entry.export_mob        = atoi(row[3]);
-			entry.export_zone       = atoi(row[4]);
-			entry.export_item       = atoi(row[5]);
-			entry.export_event      = atoi(row[6]);
+			e.event_id          = static_cast<int32_t>(atoi(row[0]));
+			e.event_description = row[1] ? row[1] : "";
+			e.export_qglobals   = static_cast<int16_t>(atoi(row[2]));
+			e.export_mob        = static_cast<int16_t>(atoi(row[3]));
+			e.export_zone       = static_cast<int16_t>(atoi(row[4]));
+			e.export_item       = static_cast<int16_t>(atoi(row[5]));
+			e.export_event      = static_cast<int16_t>(atoi(row[6]));
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -171,28 +171,28 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		PerlEventExportSettings perl_event_export_settings_entry
+		const PerlEventExportSettings &e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(perl_event_export_settings_entry.event_id));
-		update_values.push_back(columns[1] + " = '" + EscapeString(perl_event_export_settings_entry.event_description) + "'");
-		update_values.push_back(columns[2] + " = " + std::to_string(perl_event_export_settings_entry.export_qglobals));
-		update_values.push_back(columns[3] + " = " + std::to_string(perl_event_export_settings_entry.export_mob));
-		update_values.push_back(columns[4] + " = " + std::to_string(perl_event_export_settings_entry.export_zone));
-		update_values.push_back(columns[5] + " = " + std::to_string(perl_event_export_settings_entry.export_item));
-		update_values.push_back(columns[6] + " = " + std::to_string(perl_event_export_settings_entry.export_event));
+		v.push_back(columns[0] + " = " + std::to_string(e.event_id));
+		v.push_back(columns[1] + " = '" + Strings::Escape(e.event_description) + "'");
+		v.push_back(columns[2] + " = " + std::to_string(e.export_qglobals));
+		v.push_back(columns[3] + " = " + std::to_string(e.export_mob));
+		v.push_back(columns[4] + " = " + std::to_string(e.export_zone));
+		v.push_back(columns[5] + " = " + std::to_string(e.export_item));
+		v.push_back(columns[6] + " = " + std::to_string(e.export_event));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
-				perl_event_export_settings_entry.event_id
+				e.event_id
 			)
 		);
 
@@ -201,65 +201,65 @@ public:
 
 	static PerlEventExportSettings InsertOne(
 		Database& db,
-		PerlEventExportSettings perl_event_export_settings_entry
+		PerlEventExportSettings e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(perl_event_export_settings_entry.event_id));
-		insert_values.push_back("'" + EscapeString(perl_event_export_settings_entry.event_description) + "'");
-		insert_values.push_back(std::to_string(perl_event_export_settings_entry.export_qglobals));
-		insert_values.push_back(std::to_string(perl_event_export_settings_entry.export_mob));
-		insert_values.push_back(std::to_string(perl_event_export_settings_entry.export_zone));
-		insert_values.push_back(std::to_string(perl_event_export_settings_entry.export_item));
-		insert_values.push_back(std::to_string(perl_event_export_settings_entry.export_event));
+		v.push_back(std::to_string(e.event_id));
+		v.push_back("'" + Strings::Escape(e.event_description) + "'");
+		v.push_back(std::to_string(e.export_qglobals));
+		v.push_back(std::to_string(e.export_mob));
+		v.push_back(std::to_string(e.export_zone));
+		v.push_back(std::to_string(e.export_item));
+		v.push_back(std::to_string(e.export_event));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
 		if (results.Success()) {
-			perl_event_export_settings_entry.event_id = results.LastInsertedID();
-			return perl_event_export_settings_entry;
+			e.event_id = results.LastInsertedID();
+			return e;
 		}
 
-		perl_event_export_settings_entry = NewEntity();
+		e = NewEntity();
 
-		return perl_event_export_settings_entry;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<PerlEventExportSettings> perl_event_export_settings_entries
+		const std::vector<PerlEventExportSettings> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &perl_event_export_settings_entry: perl_event_export_settings_entries) {
-			std::vector<std::string> insert_values;
+		for (auto &e: entries) {
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(perl_event_export_settings_entry.event_id));
-			insert_values.push_back("'" + EscapeString(perl_event_export_settings_entry.event_description) + "'");
-			insert_values.push_back(std::to_string(perl_event_export_settings_entry.export_qglobals));
-			insert_values.push_back(std::to_string(perl_event_export_settings_entry.export_mob));
-			insert_values.push_back(std::to_string(perl_event_export_settings_entry.export_zone));
-			insert_values.push_back(std::to_string(perl_event_export_settings_entry.export_item));
-			insert_values.push_back(std::to_string(perl_event_export_settings_entry.export_event));
+			v.push_back(std::to_string(e.event_id));
+			v.push_back("'" + Strings::Escape(e.event_description) + "'");
+			v.push_back(std::to_string(e.export_qglobals));
+			v.push_back(std::to_string(e.export_mob));
+			v.push_back(std::to_string(e.export_zone));
+			v.push_back(std::to_string(e.export_item));
+			v.push_back(std::to_string(e.export_event));
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 
@@ -280,23 +280,23 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			PerlEventExportSettings entry{};
+			PerlEventExportSettings e{};
 
-			entry.event_id          = atoi(row[0]);
-			entry.event_description = row[1] ? row[1] : "";
-			entry.export_qglobals   = atoi(row[2]);
-			entry.export_mob        = atoi(row[3]);
-			entry.export_zone       = atoi(row[4]);
-			entry.export_item       = atoi(row[5]);
-			entry.export_event      = atoi(row[6]);
+			e.event_id          = static_cast<int32_t>(atoi(row[0]));
+			e.event_description = row[1] ? row[1] : "";
+			e.export_qglobals   = static_cast<int16_t>(atoi(row[2]));
+			e.export_mob        = static_cast<int16_t>(atoi(row[3]));
+			e.export_zone       = static_cast<int16_t>(atoi(row[4]));
+			e.export_item       = static_cast<int16_t>(atoi(row[5]));
+			e.export_event      = static_cast<int16_t>(atoi(row[6]));
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static std::vector<PerlEventExportSettings> GetWhere(Database& db, std::string where_filter)
+	static std::vector<PerlEventExportSettings> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<PerlEventExportSettings> all_entries;
 
@@ -311,23 +311,23 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			PerlEventExportSettings entry{};
+			PerlEventExportSettings e{};
 
-			entry.event_id          = atoi(row[0]);
-			entry.event_description = row[1] ? row[1] : "";
-			entry.export_qglobals   = atoi(row[2]);
-			entry.export_mob        = atoi(row[3]);
-			entry.export_zone       = atoi(row[4]);
-			entry.export_item       = atoi(row[5]);
-			entry.export_event      = atoi(row[6]);
+			e.event_id          = static_cast<int32_t>(atoi(row[0]));
+			e.event_description = row[1] ? row[1] : "";
+			e.export_qglobals   = static_cast<int16_t>(atoi(row[2]));
+			e.export_mob        = static_cast<int16_t>(atoi(row[3]));
+			e.export_zone       = static_cast<int16_t>(atoi(row[4]));
+			e.export_item       = static_cast<int16_t>(atoi(row[5]));
+			e.export_event      = static_cast<int16_t>(atoi(row[6]));
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -350,6 +350,32 @@ public:
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int64 GetMaxId(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COALESCE(MAX({}), 0) FROM {}",
+				PrimaryKey(),
+				TableName()
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static int64 Count(Database& db, const std::string &where_filter = "")
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COUNT(*) FROM {} {}",
+				TableName(),
+				(where_filter.empty() ? "" : "WHERE " + where_filter)
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
 };

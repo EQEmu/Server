@@ -18,7 +18,7 @@
 
 #include "../common/database.h"
 #include "../common/guilds.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 
 #include "guild_mgr.h"
 #include "worldserver.h"
@@ -175,6 +175,7 @@ void Client::SendGuildList() {
 	outapp->pBuffer = guild_mgr.MakeGuildList(/*GetName()*/"", outapp->size);
 	if(outapp->pBuffer == nullptr) {
 		LogGuilds("Unable to make guild list!");
+		safe_delete(outapp);
 		return;
 	}
 

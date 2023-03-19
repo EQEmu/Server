@@ -19,7 +19,7 @@
 #include "../common/global_define.h"
 #include "../common/eqemu_logsys.h"
 #include "../common/rulesys.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "../common/misc_functions.h"
 
 #include "client.h"
@@ -499,7 +499,11 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 					LogTrading("Giving container [{}] ([{}]) in slot [{}] to [{}]", inst->GetItem()->Name, inst->GetItem()->ID, trade_slot, other->GetName());
 
 					// TODO: need to check bag items/augments for no drop..everything for attuned...
-					if (inst->GetItem()->NoDrop != 0 || Admin() >= RuleI(Character, MinStatusForNoDropExemptions) || RuleI(World, FVNoDropFlag) == 1 || other == this) {
+					if (
+						inst->GetItem()->NoDrop != 0 ||
+						CanTradeFVNoDropItem() ||
+						other == this
+					) {
 						int16 free_slot = other->GetInv().FindFreeSlotForTradeItem(inst);
 
 						if (free_slot != INVALID_INDEX) {
@@ -717,7 +721,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 					LogTrading("Giving item [{}] ([{}]) in slot [{}] to [{}]", inst->GetItem()->Name, inst->GetItem()->ID, trade_slot, other->GetName());
 
 					// TODO: need to check bag items/augments for no drop..everything for attuned...
-					if (inst->GetItem()->NoDrop != 0 || Admin() >= RuleI(Character, MinStatusForNoDropExemptions) || RuleI(World, FVNoDropFlag) == 1 || other == this) {
+					if (inst->GetItem()->NoDrop != 0 || CanTradeFVNoDropItem() || other == this) {
 						int16 free_slot = other->GetInv().FindFreeSlotForTradeItem(inst);
 
 						if (free_slot != INVALID_INDEX) {
@@ -871,25 +875,50 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 		}
 
 		bool quest_npc = false;
-		if(parse->HasQuestSub(tradingWith->GetNPCTypeID(), EVENT_TRADE)) {
+		if (parse->HasQuestSub(tradingWith->GetNPCTypeID(), EVENT_TRADE, true)) {
 			// This is a quest NPC
 			quest_npc = true;
 		}
 
-		std::vector<EQ::Any> item_list;
-		std::list<EQ::ItemInstance*> items;
+		// take ownership of all trade slot items
+		EQ::ItemInstance* insts[4] = { 0 };
 		for (int i = EQ::invslot::TRADE_BEGIN; i <= EQ::invslot::TRADE_NPC_END; ++i) {
-			EQ::ItemInstance *inst = m_inv.GetItem(i);
-			if(inst) {
-				items.push_back(inst);
-				item_list.push_back(inst);
-			} else {
-				item_list.push_back((EQ::ItemInstance*)nullptr);
-				continue;
-			}
+			insts[i - EQ::invslot::TRADE_BEGIN] = m_inv.PopItem(i);
+			database.SaveInventory(CharacterID(), nullptr, i);
+		}
 
-			const EQ::ItemData* item = inst->GetItem();
-			if(item && quest_npc == false) {
+		// copy to be filtered by task updates, null trade slots preserved for quest event arg
+		std::vector<EQ::ItemInstance*> items(insts, insts + std::size(insts));
+
+		if (RuleB(TaskSystem, EnableTaskSystem)) {
+			if (UpdateTasksOnDeliver(items, *trade, tradingWith->CastToNPC())) {
+				if (!tradingWith->IsMoving())
+					tradingWith->FaceTarget(this);
+
+				EVENT_ITEM_ScriptStopReturn();
+
+			}
+		}
+
+		// todo: rule or npc field to auto return normal items also
+		if (!quest_npc)
+		{
+			for (EQ::ItemInstance* inst : items) {
+				if (!inst || !inst->GetItem()) {
+					continue;
+				}
+
+				// remove delivered task items
+				if (RuleB(TaskSystem, EnableTaskSystem) && inst->GetTaskDeliveredCount() > 0) {
+					int remaining = inst->RemoveTaskDeliveredItems();
+					if (remaining <= 0) {
+						inst = nullptr;
+						continue; // all items in trade slot consumed by task update
+					}
+				}
+
+				const EQ::ItemData* item = inst->GetItem();
+
 				bool isPetAndCanHaveNoDrop = (RuleB(Pets, CanTakeNoDrop) &&
 					_CLIENTPET(tradingWith) &&
 					tradingWith->GetPetType()<=petOther);
@@ -916,6 +945,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 									);
 								}
 								else if (RuleB(NPC, ReturnNonQuestNoDropItems)) {
+									tradingWith->SayString(TRADE_BACK, GetCleanName());
 									PushItemOnCursor(*baginst, true);
 								}
 							}
@@ -935,20 +965,9 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 				}
 				// Return NO DROP and Attuned items being handed into a non-quest NPC if the rule is true
 				else if (RuleB(NPC, ReturnNonQuestNoDropItems)) {
+					tradingWith->SayString(TRADE_BACK, GetCleanName());
 					PushItemOnCursor(*inst, true);
-					DeleteItemInInventory(i);
 				}
-			}
-		}
-
-		if(RuleB(TaskSystem, EnableTaskSystem)) {
-			int Cash = trade->cp + (trade->sp * 10) + (trade->gp * 100) + (trade->pp * 1000);
-			if(UpdateTasksOnDeliver(items, Cash, tradingWith->GetNPCTypeID())) {
-				if(!tradingWith->IsMoving())
-					tradingWith->FaceTarget(this);
-
-				EVENT_ITEM_ScriptStopReturn();
-
 			}
 		}
 
@@ -971,12 +990,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 			tradingWith->FaceTarget(this);
 		}
 
-		EQ::ItemInstance *insts[4] = { 0 };
-		for (int i = EQ::invslot::TRADE_BEGIN; i <= EQ::invslot::TRADE_NPC_END; ++i) {
-			insts[i - EQ::invslot::TRADE_BEGIN] = m_inv.PopItem(i);
-			database.SaveInventory(CharacterID(), nullptr, i);
-		}
-
+		std::vector<std::any> item_list(items.begin(), items.end());
 		parse->EventNPC(EVENT_TRADE, tradingWith->CastToNPC(), this, "", 0, &item_list);
 
 		for(int i = 0; i < 4; ++i) {
@@ -1078,6 +1092,7 @@ void Client::Trader_CustomerBrowsing(Client *Customer) {
 	sis->TraderID = Customer->GetID();
 
 	QueuePacket(outapp);
+	safe_delete(outapp);
 }
 
 
@@ -1151,8 +1166,8 @@ void Client::Trader_EndTrader() {
 			}
 
 			safe_delete(outapp);
-			safe_delete(gis);
 		}
+		safe_delete(gis);
 	}
 
 	database.DeleteTraderItem(CharacterID());
@@ -1506,6 +1521,8 @@ void Client::FindAndNukeTraderItem(int32 SerialNumber, int16 Quantity, Client* C
 				Trader_EndTrader();
 			}
 
+			safe_delete(TraderItems);
+
 			return;
 		}
 		else
@@ -1836,13 +1853,13 @@ void Client::SendBazaarResults(
 			search_criteria.append(" AND items.itemclass = 2");
 			break;
 		case 46:
-			search_criteria.append(" AND items.spellid > 0 AND items.spellid < 65000");
+			search_criteria.append(" AND items.scrolleffect > 0 AND items.scrolleffect < 65000");
 			break;
 		case 47:
-			search_criteria.append(" AND items.spellid = 998");
+			search_criteria.append(" AND items.worneffect = 998");
 			break;
 		case 48:
-			search_criteria.append(" AND items.spellid >= 1298 AND items.spellid <= 1307");
+			search_criteria.append(" AND items.worneffect >= 1298 AND items.worneffect <= 1307");
 			break;
 		case 49:
 			search_criteria.append(" AND items.focuseffect > 0");
@@ -2582,6 +2599,7 @@ void Client::ShowBuyLines(const EQApplicationPacket *app) {
 		VARSTRUCT_ENCODE_STRING(Buf, Buyer->GetName());
 
 		QueuePacket(outapp);
+		safe_delete(outapp);
     }
 }
 

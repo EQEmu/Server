@@ -4,234 +4,106 @@
 #ifdef EMBPERL_XS_CLASSES
 
 #include "../common/global_define.h"
+#include "../common/item_instance.h"
 #include "embperl.h"
 
-#ifdef seed
-#undef seed
-#endif
-
-#include "../common/item_instance.h"
-
-#ifdef THIS        /* this macro seems to leak out on some systems */
-#undef THIS
-#endif
-
-#define VALIDATE_THIS_IS_ITEM \
-	do { \
-		if (sv_derived_from(ST(0), "QuestItem")) { \
-			IV tmp = SvIV((SV*)SvRV(ST(0))); \
-			THIS = INT2PTR(EQ::ItemInstance*, tmp); \
-		} else { \
-			Perl_croak(aTHX_ "THIS is not of type EQ::ItemInstance"); \
-		} \
-		if (THIS == nullptr) { \
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash."); \
-		} \
-	} while (0);
-
-XS(XS_QuestItem_GetName);
-XS(XS_QuestItem_GetName) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: QuestItem::GetName(THIS)"); // @categories Inventory and Items
-	{
-		EQ::ItemInstance *THIS;
-		Const_char          *RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_ITEM;
-		RETVAL = THIS->GetItem()->Name;
-		sv_setpv(TARG, RETVAL);
-		XSprePUSH;
-		PUSHTARG;
-	}
-	XSRETURN(1);
+std::string Perl_QuestItem_GetName(EQ::ItemInstance* self) // @categories Inventory and Items
+{
+	return self->GetItem()->Name;
 }
 
-XS(XS_QuestItem_SetScale);
-XS(XS_QuestItem_SetScale) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: QuestItem::SetScale(THIS, float scale_multiplier)"); // @categories Inventory and Items
-	{
-		EQ::ItemInstance *THIS;
-		float Mult;
-		VALIDATE_THIS_IS_ITEM;
-		Mult = (float) SvNV(ST(1));
-
-		if (THIS->IsScaling()) {
-			THIS->SetExp((int) (Mult * 10000 + .5));
-		}
+void Perl_QuestItem_SetScale(EQ::ItemInstance* self, float scale_multiplier) // @categories Inventory and Items
+{
+	if (self->IsScaling()) {
+		self->SetExp((int) (scale_multiplier * 10000 + .5));
 	}
-	XSRETURN_EMPTY;
 }
 
-XS(XS_QuestItem_ItemSay);
-XS(XS_QuestItem_ItemSay) {
-	dXSARGS;
-	if (items != 2 && items != 3)
-		Perl_croak(aTHX_ "Usage: QuestItem::ItemSay(THIS, string text [int language_id])"); // @categories Inventory and Items
-	{
-		EQ::ItemInstance *THIS;
-		Const_char          *text;
-		int lang = 0;
-		VALIDATE_THIS_IS_ITEM;
-		text     = SvPV_nolen(ST(1));
-		if (items == 3)
-			lang = (int) SvUV(ST(2));
-
-		quest_manager.GetInitiator()->ChannelMessageSend(THIS->GetItem()->Name, 0, 8, lang, 100, text);
-	}
-	XSRETURN_EMPTY;
+void Perl_QuestItem_ItemSay(EQ::ItemInstance* self, const char* text) // @categories Inventory and Items
+{
+	quest_manager.GetInitiator()->ChannelMessageSend(self->GetItem()->Name, 0, 8, 0, 100, text);
 }
 
-XS(XS_QuestItem_IsType); /* prototype to pass -Wmissing-prototypes */
-XS(XS_QuestItem_IsType) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: QuestItem::IsType(THIS, type)"); // @categories Inventory and Items
-	{
-		EQ::ItemInstance *THIS;
-		bool   RETVAL;
-		uint32 type = (int32) SvIV(ST(1));
-		VALIDATE_THIS_IS_ITEM;
-		RETVAL = THIS->IsType((EQ::item::ItemClass) type);
-		ST(0) = boolSV(RETVAL);
-		sv_2mortal(ST(0));
-	}
-	XSRETURN(1);
+void Perl_QuestItem_ItemSay(EQ::ItemInstance* self, const char* text, int language_id) // @categories Inventory and Items
+{
+	quest_manager.GetInitiator()->ChannelMessageSend(self->GetItem()->Name, 0, 8, language_id, 100, text);
 }
 
-XS(XS_QuestItem_IsAttuned); /* prototype to pass -Wmissing-prototypes */
-XS(XS_QuestItem_IsAttuned) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: QuestItem::IsAttuned(THIS)"); // @categories Inventory and Items
-	{
-		EQ::ItemInstance *THIS;
-		bool RETVAL;
-		VALIDATE_THIS_IS_ITEM;
-		RETVAL = THIS->IsAttuned();
-		ST(0) = boolSV(RETVAL);
-		sv_2mortal(ST(0));
-	}
-	XSRETURN(1);
+bool Perl_QuestItem_IsType(EQ::ItemInstance* self, int type) // @categories Inventory and Items
+{
+	return self->IsType(static_cast<EQ::item::ItemClass>(type));
 }
 
-XS(XS_QuestItem_GetCharges); /* prototype to pass -Wmissing-prototypes */
-XS(XS_QuestItem_GetCharges) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: QuestItem::GetCharges(THIS)"); // @categories Inventory and Items
-	{
-		EQ::ItemInstance *THIS;
-		int16 RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_ITEM;
-		RETVAL = THIS->GetCharges();
-		XSprePUSH;
-		PUSHi((IV) RETVAL);
-	}
-	XSRETURN(1);
+bool Perl_QuestItem_IsAttuned(EQ::ItemInstance* self) // @categories Inventory and Items
+{
+	return self->IsAttuned();
 }
 
-XS(XS_QuestItem_GetAugment); /* prototype to pass -Wmissing-prototypes */
-XS(XS_QuestItem_GetAugment) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: QuestItem::GetAugment(THIS, int16 slot_id)"); // @categories Inventory and Items
-	{
-		EQ::ItemInstance *THIS;
-		int16 slot_id = (int16) SvIV(ST(1));
-		EQ::ItemInstance *RETVAL;
-		VALIDATE_THIS_IS_ITEM;
-		RETVAL = THIS->GetAugment(slot_id);
-		ST(0) = sv_newmortal();
-		sv_setref_pv(ST(0), "QuestItem", (void *) RETVAL);
-	}
-	XSRETURN(1);
+int Perl_QuestItem_GetCharges(EQ::ItemInstance* self) // @categories Inventory and Items
+{
+	return self->GetCharges();
 }
 
-XS(XS_QuestItem_GetID); /* prototype to pass -Wmissing-prototypes */
-XS(XS_QuestItem_GetID) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: QuestItem::GetID(THIS)"); // @categories Inventory and Items
-	{
-		EQ::ItemInstance *THIS;
-		uint32 RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_ITEM;
-		RETVAL = THIS->GetItem()->ID;
-		XSprePUSH;
-		PUSHi((IV) RETVAL);
-	}
-	XSRETURN(1);
+EQ::ItemInstance* Perl_QuestItem_GetAugment(EQ::ItemInstance* self, int slot_id) // @categories Inventory and Items
+{
+	return self->GetAugment(slot_id);
 }
 
-XS(XS_QuestItem_ContainsAugmentByID); /* prototype to pass -Wmissing-prototypes */
-XS(XS_QuestItem_ContainsAugmentByID) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: QuestItem::ContainsAugmentByID(THIS, uint32 item_id)"); // @categories Inventory and Items
-	{
-		EQ::ItemInstance *THIS;
-		uint32 item_id = (uint32) SvUV(ST(1));
-		bool contains_augment = false;
-		VALIDATE_THIS_IS_ITEM;
-		contains_augment = THIS->ContainsAugmentByID(item_id);
-		ST(0) = boolSV(contains_augment);
-		sv_2mortal(ST(0));
-	}
-	XSRETURN(1);
+uint32_t Perl_QuestItem_GetID(EQ::ItemInstance* self) // @categories Inventory and Items
+{
+	return self->GetItem()->ID;
 }
 
-XS(XS_QuestItem_CountAugmentByID); /* prototype to pass -Wmissing-prototypes */
-XS(XS_QuestItem_CountAugmentByID) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: QuestItem::CountAugmentByID(THIS, uint32 item_id)"); // @categories Inventory and Items
-	{
-		EQ::ItemInstance *THIS;
-		int quantity = 0;
-		uint32 item_id = (uint32) SvUV(ST(1));
-		dXSTARG;
-		VALIDATE_THIS_IS_ITEM;
-		quantity = THIS->CountAugmentByID(item_id);
-		XSprePUSH;
-		PUSHi((IV) quantity);
-	}
-	XSRETURN(1);
+bool Perl_QuestItem_ContainsAugmentByID(EQ::ItemInstance* self, uint32_t item_id) // @categories Inventory and Items
+{
+	return self->ContainsAugmentByID(item_id);
 }
 
-#ifdef __cplusplus
-extern "C"
-#endif
+int Perl_QuestItem_CountAugmentByID(EQ::ItemInstance* self, uint32_t item_id) // @categories Inventory and Items
+{
+	return self->CountAugmentByID(item_id);
+}
 
-XS(boot_QuestItem);
-XS(boot_QuestItem) {
-	dXSARGS;
-	char file[256];
-	strncpy(file, __FILE__, 256);
-	file[255] = 0;
+bool Perl_QuestItem_IsStackable(EQ::ItemInstance* self)
+{
+	return self->IsStackable();
+}
 
-	if (items != 1)
-		fprintf(stderr, "boot_quest does not take any arguments.");
-	char buf[128];
+void Perl_QuestItem_SetCharges(EQ::ItemInstance* self, int16_t charges)
+{
+	self->SetCharges(charges);
+}
 
-	//add the strcpy stuff to get rid of const warnings....
+int Perl_QuestItem_GetTaskDeliveredCount(EQ::ItemInstance* self)
+{
+	return self->GetTaskDeliveredCount();
+}
 
-	XS_VERSION_BOOTCHECK;
-	newXSproto(strcpy(buf, "ContainsAugmentByID"), XS_QuestItem_ContainsAugmentByID, file, "$$");
-	newXSproto(strcpy(buf, "CountAugmentByID"), XS_QuestItem_CountAugmentByID, file, "$$");
-	newXSproto(strcpy(buf, "GetAugment"), XS_QuestItem_GetAugment, file, "$$");
-	newXSproto(strcpy(buf, "GetCharges"), XS_QuestItem_GetCharges, file, "$");
-	newXSproto(strcpy(buf, "GetID"), XS_QuestItem_GetID, file, "$");
-	newXSproto(strcpy(buf, "GetName"), XS_QuestItem_GetName, file, "$");
-	newXSproto(strcpy(buf, "IsAttuned"), XS_QuestItem_IsAttuned, file, "$");
-	newXSproto(strcpy(buf, "IsType"), XS_QuestItem_IsType, file, "$$");
-	newXSproto(strcpy(buf, "ItemSay"), XS_QuestItem_ItemSay, file, "$");
-	newXSproto(strcpy(buf, "SetScale"), XS_QuestItem_SetScale, file, "$");
-	XSRETURN_YES;
+int Perl_QuestItem_RemoveTaskDeliveredItems(EQ::ItemInstance* self)
+{
+	return self->RemoveTaskDeliveredItems();
+}
+
+void perl_register_questitem()
+{
+	perl::interpreter perl(PERL_GET_THX);
+
+	auto package = perl.new_class<EQ::ItemInstance>("QuestItem");
+	package.add("ContainsAugmentByID", &Perl_QuestItem_ContainsAugmentByID);
+	package.add("CountAugmentByID", &Perl_QuestItem_CountAugmentByID);
+	package.add("GetAugment", &Perl_QuestItem_GetAugment);
+	package.add("GetCharges", &Perl_QuestItem_GetCharges);
+	package.add("GetID", &Perl_QuestItem_GetID);
+	package.add("GetName", &Perl_QuestItem_GetName);
+	package.add("GetTaskDeliveredCount", &Perl_QuestItem_GetTaskDeliveredCount);
+	package.add("IsAttuned", &Perl_QuestItem_IsAttuned);
+	package.add("IsStackable", &Perl_QuestItem_IsStackable);
+	package.add("IsType", &Perl_QuestItem_IsType);
+	package.add("ItemSay", (void(*)(EQ::ItemInstance*, const char*))&Perl_QuestItem_ItemSay);
+	package.add("ItemSay", (void(*)(EQ::ItemInstance*, const char*, int))&Perl_QuestItem_ItemSay);
+	package.add("RemoveTaskDeliveredItems", &Perl_QuestItem_RemoveTaskDeliveredItems);
+	package.add("SetCharges", &Perl_QuestItem_SetCharges);
+	package.add("SetScale", &Perl_QuestItem_SetScale);
 }
 
 #endif //EMBPERL_XS_CLASSES

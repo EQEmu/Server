@@ -13,23 +13,23 @@
 #define EQEMU_BASE_GUILD_RANKS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseGuildRanksRepository {
 public:
 	struct GuildRanks {
-		int         guild_id;
-		int         rank;
+		uint32_t    guild_id;
+		uint8_t     rank;
 		std::string title;
-		int         can_hear;
-		int         can_speak;
-		int         can_invite;
-		int         can_remove;
-		int         can_promote;
-		int         can_demote;
-		int         can_motd;
-		int         can_warpeace;
+		uint8_t     can_hear;
+		uint8_t     can_speak;
+		uint8_t     can_invite;
+		uint8_t     can_remove;
+		uint8_t     can_promote;
+		uint8_t     can_demote;
+		uint8_t     can_motd;
+		uint8_t     can_warpeace;
 	};
 
 	static std::string PrimaryKey()
@@ -73,12 +73,12 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string SelectColumnsRaw()
 	{
-		return std::string(implode(", ", SelectColumns()));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -106,24 +106,24 @@ public:
 
 	static GuildRanks NewEntity()
 	{
-		GuildRanks entry{};
+		GuildRanks e{};
 
-		entry.guild_id     = 0;
-		entry.rank         = 0;
-		entry.title        = "";
-		entry.can_hear     = 0;
-		entry.can_speak    = 0;
-		entry.can_invite   = 0;
-		entry.can_remove   = 0;
-		entry.can_promote  = 0;
-		entry.can_demote   = 0;
-		entry.can_motd     = 0;
-		entry.can_warpeace = 0;
+		e.guild_id     = 0;
+		e.rank         = 0;
+		e.title        = "";
+		e.can_hear     = 0;
+		e.can_speak    = 0;
+		e.can_invite   = 0;
+		e.can_remove   = 0;
+		e.can_promote  = 0;
+		e.can_demote   = 0;
+		e.can_motd     = 0;
+		e.can_warpeace = 0;
 
-		return entry;
+		return e;
 	}
 
-	static GuildRanks GetGuildRanksEntry(
+	static GuildRanks GetGuildRanks(
 		const std::vector<GuildRanks> &guild_rankss,
 		int guild_ranks_id
 	)
@@ -152,21 +152,21 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			GuildRanks entry{};
+			GuildRanks e{};
 
-			entry.guild_id     = atoi(row[0]);
-			entry.rank         = atoi(row[1]);
-			entry.title        = row[2] ? row[2] : "";
-			entry.can_hear     = atoi(row[3]);
-			entry.can_speak    = atoi(row[4]);
-			entry.can_invite   = atoi(row[5]);
-			entry.can_remove   = atoi(row[6]);
-			entry.can_promote  = atoi(row[7]);
-			entry.can_demote   = atoi(row[8]);
-			entry.can_motd     = atoi(row[9]);
-			entry.can_warpeace = atoi(row[10]);
+			e.guild_id     = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.rank         = static_cast<uint8_t>(strtoul(row[1], nullptr, 10));
+			e.title        = row[2] ? row[2] : "";
+			e.can_hear     = static_cast<uint8_t>(strtoul(row[3], nullptr, 10));
+			e.can_speak    = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
+			e.can_invite   = static_cast<uint8_t>(strtoul(row[5], nullptr, 10));
+			e.can_remove   = static_cast<uint8_t>(strtoul(row[6], nullptr, 10));
+			e.can_promote  = static_cast<uint8_t>(strtoul(row[7], nullptr, 10));
+			e.can_demote   = static_cast<uint8_t>(strtoul(row[8], nullptr, 10));
+			e.can_motd     = static_cast<uint8_t>(strtoul(row[9], nullptr, 10));
+			e.can_warpeace = static_cast<uint8_t>(strtoul(row[10], nullptr, 10));
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -191,32 +191,32 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		GuildRanks guild_ranks_entry
+		const GuildRanks &e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(guild_ranks_entry.guild_id));
-		update_values.push_back(columns[1] + " = " + std::to_string(guild_ranks_entry.rank));
-		update_values.push_back(columns[2] + " = '" + EscapeString(guild_ranks_entry.title) + "'");
-		update_values.push_back(columns[3] + " = " + std::to_string(guild_ranks_entry.can_hear));
-		update_values.push_back(columns[4] + " = " + std::to_string(guild_ranks_entry.can_speak));
-		update_values.push_back(columns[5] + " = " + std::to_string(guild_ranks_entry.can_invite));
-		update_values.push_back(columns[6] + " = " + std::to_string(guild_ranks_entry.can_remove));
-		update_values.push_back(columns[7] + " = " + std::to_string(guild_ranks_entry.can_promote));
-		update_values.push_back(columns[8] + " = " + std::to_string(guild_ranks_entry.can_demote));
-		update_values.push_back(columns[9] + " = " + std::to_string(guild_ranks_entry.can_motd));
-		update_values.push_back(columns[10] + " = " + std::to_string(guild_ranks_entry.can_warpeace));
+		v.push_back(columns[0] + " = " + std::to_string(e.guild_id));
+		v.push_back(columns[1] + " = " + std::to_string(e.rank));
+		v.push_back(columns[2] + " = '" + Strings::Escape(e.title) + "'");
+		v.push_back(columns[3] + " = " + std::to_string(e.can_hear));
+		v.push_back(columns[4] + " = " + std::to_string(e.can_speak));
+		v.push_back(columns[5] + " = " + std::to_string(e.can_invite));
+		v.push_back(columns[6] + " = " + std::to_string(e.can_remove));
+		v.push_back(columns[7] + " = " + std::to_string(e.can_promote));
+		v.push_back(columns[8] + " = " + std::to_string(e.can_demote));
+		v.push_back(columns[9] + " = " + std::to_string(e.can_motd));
+		v.push_back(columns[10] + " = " + std::to_string(e.can_warpeace));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
-				guild_ranks_entry.guild_id
+				e.guild_id
 			)
 		);
 
@@ -225,73 +225,73 @@ public:
 
 	static GuildRanks InsertOne(
 		Database& db,
-		GuildRanks guild_ranks_entry
+		GuildRanks e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(guild_ranks_entry.guild_id));
-		insert_values.push_back(std::to_string(guild_ranks_entry.rank));
-		insert_values.push_back("'" + EscapeString(guild_ranks_entry.title) + "'");
-		insert_values.push_back(std::to_string(guild_ranks_entry.can_hear));
-		insert_values.push_back(std::to_string(guild_ranks_entry.can_speak));
-		insert_values.push_back(std::to_string(guild_ranks_entry.can_invite));
-		insert_values.push_back(std::to_string(guild_ranks_entry.can_remove));
-		insert_values.push_back(std::to_string(guild_ranks_entry.can_promote));
-		insert_values.push_back(std::to_string(guild_ranks_entry.can_demote));
-		insert_values.push_back(std::to_string(guild_ranks_entry.can_motd));
-		insert_values.push_back(std::to_string(guild_ranks_entry.can_warpeace));
+		v.push_back(std::to_string(e.guild_id));
+		v.push_back(std::to_string(e.rank));
+		v.push_back("'" + Strings::Escape(e.title) + "'");
+		v.push_back(std::to_string(e.can_hear));
+		v.push_back(std::to_string(e.can_speak));
+		v.push_back(std::to_string(e.can_invite));
+		v.push_back(std::to_string(e.can_remove));
+		v.push_back(std::to_string(e.can_promote));
+		v.push_back(std::to_string(e.can_demote));
+		v.push_back(std::to_string(e.can_motd));
+		v.push_back(std::to_string(e.can_warpeace));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
 		if (results.Success()) {
-			guild_ranks_entry.guild_id = results.LastInsertedID();
-			return guild_ranks_entry;
+			e.guild_id = results.LastInsertedID();
+			return e;
 		}
 
-		guild_ranks_entry = NewEntity();
+		e = NewEntity();
 
-		return guild_ranks_entry;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<GuildRanks> guild_ranks_entries
+		const std::vector<GuildRanks> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &guild_ranks_entry: guild_ranks_entries) {
-			std::vector<std::string> insert_values;
+		for (auto &e: entries) {
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(guild_ranks_entry.guild_id));
-			insert_values.push_back(std::to_string(guild_ranks_entry.rank));
-			insert_values.push_back("'" + EscapeString(guild_ranks_entry.title) + "'");
-			insert_values.push_back(std::to_string(guild_ranks_entry.can_hear));
-			insert_values.push_back(std::to_string(guild_ranks_entry.can_speak));
-			insert_values.push_back(std::to_string(guild_ranks_entry.can_invite));
-			insert_values.push_back(std::to_string(guild_ranks_entry.can_remove));
-			insert_values.push_back(std::to_string(guild_ranks_entry.can_promote));
-			insert_values.push_back(std::to_string(guild_ranks_entry.can_demote));
-			insert_values.push_back(std::to_string(guild_ranks_entry.can_motd));
-			insert_values.push_back(std::to_string(guild_ranks_entry.can_warpeace));
+			v.push_back(std::to_string(e.guild_id));
+			v.push_back(std::to_string(e.rank));
+			v.push_back("'" + Strings::Escape(e.title) + "'");
+			v.push_back(std::to_string(e.can_hear));
+			v.push_back(std::to_string(e.can_speak));
+			v.push_back(std::to_string(e.can_invite));
+			v.push_back(std::to_string(e.can_remove));
+			v.push_back(std::to_string(e.can_promote));
+			v.push_back(std::to_string(e.can_demote));
+			v.push_back(std::to_string(e.can_motd));
+			v.push_back(std::to_string(e.can_warpeace));
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 
@@ -312,27 +312,27 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			GuildRanks entry{};
+			GuildRanks e{};
 
-			entry.guild_id     = atoi(row[0]);
-			entry.rank         = atoi(row[1]);
-			entry.title        = row[2] ? row[2] : "";
-			entry.can_hear     = atoi(row[3]);
-			entry.can_speak    = atoi(row[4]);
-			entry.can_invite   = atoi(row[5]);
-			entry.can_remove   = atoi(row[6]);
-			entry.can_promote  = atoi(row[7]);
-			entry.can_demote   = atoi(row[8]);
-			entry.can_motd     = atoi(row[9]);
-			entry.can_warpeace = atoi(row[10]);
+			e.guild_id     = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.rank         = static_cast<uint8_t>(strtoul(row[1], nullptr, 10));
+			e.title        = row[2] ? row[2] : "";
+			e.can_hear     = static_cast<uint8_t>(strtoul(row[3], nullptr, 10));
+			e.can_speak    = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
+			e.can_invite   = static_cast<uint8_t>(strtoul(row[5], nullptr, 10));
+			e.can_remove   = static_cast<uint8_t>(strtoul(row[6], nullptr, 10));
+			e.can_promote  = static_cast<uint8_t>(strtoul(row[7], nullptr, 10));
+			e.can_demote   = static_cast<uint8_t>(strtoul(row[8], nullptr, 10));
+			e.can_motd     = static_cast<uint8_t>(strtoul(row[9], nullptr, 10));
+			e.can_warpeace = static_cast<uint8_t>(strtoul(row[10], nullptr, 10));
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static std::vector<GuildRanks> GetWhere(Database& db, std::string where_filter)
+	static std::vector<GuildRanks> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<GuildRanks> all_entries;
 
@@ -347,27 +347,27 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			GuildRanks entry{};
+			GuildRanks e{};
 
-			entry.guild_id     = atoi(row[0]);
-			entry.rank         = atoi(row[1]);
-			entry.title        = row[2] ? row[2] : "";
-			entry.can_hear     = atoi(row[3]);
-			entry.can_speak    = atoi(row[4]);
-			entry.can_invite   = atoi(row[5]);
-			entry.can_remove   = atoi(row[6]);
-			entry.can_promote  = atoi(row[7]);
-			entry.can_demote   = atoi(row[8]);
-			entry.can_motd     = atoi(row[9]);
-			entry.can_warpeace = atoi(row[10]);
+			e.guild_id     = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.rank         = static_cast<uint8_t>(strtoul(row[1], nullptr, 10));
+			e.title        = row[2] ? row[2] : "";
+			e.can_hear     = static_cast<uint8_t>(strtoul(row[3], nullptr, 10));
+			e.can_speak    = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
+			e.can_invite   = static_cast<uint8_t>(strtoul(row[5], nullptr, 10));
+			e.can_remove   = static_cast<uint8_t>(strtoul(row[6], nullptr, 10));
+			e.can_promote  = static_cast<uint8_t>(strtoul(row[7], nullptr, 10));
+			e.can_demote   = static_cast<uint8_t>(strtoul(row[8], nullptr, 10));
+			e.can_motd     = static_cast<uint8_t>(strtoul(row[9], nullptr, 10));
+			e.can_warpeace = static_cast<uint8_t>(strtoul(row[10], nullptr, 10));
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -390,6 +390,32 @@ public:
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int64 GetMaxId(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COALESCE(MAX({}), 0) FROM {}",
+				PrimaryKey(),
+				TableName()
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static int64 Count(Database& db, const std::string &where_filter = "")
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COUNT(*) FROM {} {}",
+				TableName(),
+				(where_filter.empty() ? "" : "WHERE " + where_filter)
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
 };

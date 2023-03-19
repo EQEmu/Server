@@ -257,8 +257,9 @@ bool HateList::RemoveEntFromHateList(Mob *in_entity)
 	return is_found;
 }
 
-void HateList::DoFactionHits(int64 npc_faction_level_id) {
-	if (npc_faction_level_id <= 0)
+// so if faction_id and faction_value are set, we do RewardFaction, otherwise old stuff
+void HateList::DoFactionHits(int64 npc_faction_level_id, int32 faction_id, int32 faction_value) {
+	if (npc_faction_level_id <= 0 && faction_id <= 0 && faction_value == 0)
 		return;
 	auto iterator = list.begin();
 	while (iterator != list.end())
@@ -270,8 +271,13 @@ void HateList::DoFactionHits(int64 npc_faction_level_id) {
 		else
 			client = nullptr;
 
-		if (client)
-			client->SetFactionLevel(client->CharacterID(), npc_faction_level_id, client->GetBaseClass(), client->GetBaseRace(), client->GetDeity());
+		if (client) {
+			if (faction_id != 0 && faction_value != 0) {
+				client->RewardFaction(faction_id, faction_value);
+			} else {
+				client->SetFactionLevel(client->CharacterID(), npc_faction_level_id, client->GetBaseClass(), client->GetBaseRace(), client->GetDeity());
+			}
+		}
 		++iterator;
 	}
 }
@@ -377,19 +383,10 @@ Mob *HateList::GetEntWithMostHateOnList(Mob *center, Mob *skip, bool skip_mezzed
 
 			int64 current_hate = cur->stored_hate_amount;
 
-#ifdef BOTS
 			if (cur->entity_on_hatelist->IsClient() || cur->entity_on_hatelist->IsBot()){
-
 				if (cur->entity_on_hatelist->IsClient() && cur->entity_on_hatelist->CastToClient()->IsSitting()){
 					aggro_mod += RuleI(Aggro, SittingAggroMod);
 				}
-#else
-			if (cur->entity_on_hatelist->IsClient()){
-
-				if (cur->entity_on_hatelist->CastToClient()->IsSitting()){
-					aggro_mod += RuleI(Aggro, SittingAggroMod);
-				}
-#endif
 
 				if (center){
 					if (center->GetTarget() == cur->entity_on_hatelist)
@@ -439,14 +436,12 @@ Mob *HateList::GetEntWithMostHateOnList(Mob *center, Mob *skip, bool skip_mezzed
 
 		if (top_client_type_in_range != nullptr && top_hate != nullptr) {
 			bool isTopClientType = top_hate->IsClient();
-#ifdef BOTS
 			if (!isTopClientType) {
 				if (top_hate->IsBot()) {
 					isTopClientType = true;
 					top_client_type_in_range = top_hate;
 				}
 			}
-#endif //BOTS
 
 			if (!isTopClientType) {
 				if (top_hate->IsMerc()) {
@@ -844,20 +839,6 @@ void HateList::RemoveStaleEntries(int time_ms, float dist)
 	}
 }
 
-std::list<struct_HateList*> HateList::GetHateListByDistance(int distance)
-{
-	std::list<struct_HateList*> hate_list;
-	int squared_distance = (distance * distance);
-	for (auto hate_iterator : list) {
-		auto hate_entry = hate_iterator->entity_on_hatelist;
-		if (distance == 0 || (distance > 0 && DistanceSquaredNoZ(hate_owner->GetPosition(), hate_entry->GetPosition()) <= squared_distance)) {
-			hate_list.push_back(hate_iterator);
-		}
-	}
-	return hate_list;
-}
-
-#ifdef BOTS
 Bot* HateList::GetRandomBotOnHateList(bool skip_mezzed)
 {
 	int count = list.size();
@@ -906,7 +887,6 @@ Bot* HateList::GetRandomBotOnHateList(bool skip_mezzed)
 
 	return nullptr;
 }
-#endif
 
 Client* HateList::GetRandomClientOnHateList(bool skip_mezzed)
 {
@@ -1004,4 +984,57 @@ NPC* HateList::GetRandomNPCOnHateList(bool skip_mezzed)
 	}
 
 	return nullptr;
+}
+
+void HateList::DamageHateList(int64 damage, uint32 distance, EntityFilterType filter_type, bool is_percentage)
+{
+	if (damage <= 0) {
+		return;
+	}
+
+	const auto& l = GetFilteredHateList(filter_type, distance);
+	for (const auto& h : l) {
+		auto e = h->entity_on_hatelist;
+		if (is_percentage) {
+			const auto damage_percentage = EQ::Clamp(damage, static_cast<int64>(1), static_cast<int64>(100));
+			const auto total_damage = (e->GetMaxHP() / 100) * damage_percentage;
+			e->Damage(hate_owner, total_damage, SPELL_UNKNOWN, EQ::skills::SkillEagleStrike);
+		} else {
+			e->Damage(hate_owner, damage, SPELL_UNKNOWN, EQ::skills::SkillEagleStrike);
+		}
+	}
+}
+
+std::list<struct_HateList*> HateList::GetFilteredHateList(EntityFilterType filter_type, uint32 distance)
+{
+	std::list<struct_HateList*> l;
+	const auto squared_distance = (distance * distance);
+	for (auto h : list) {
+		auto e = h->entity_on_hatelist;
+		if (!e) {
+			continue;
+		}
+
+		if (
+			distance &&
+			DistanceSquaredNoZ(
+				hate_owner->GetPosition(),
+				e->GetPosition()
+			) > squared_distance
+		) {
+			continue;
+		}
+
+		if (
+			(filter_type == EntityFilterType::Bots && !e->IsBot()) ||
+			(filter_type == EntityFilterType::Clients && !e->IsClient()) ||
+			(filter_type == EntityFilterType::NPCs && !e->IsNPC())
+		) {
+			continue;
+		}
+
+		l.push_back(h);
+	}
+
+	return l;
 }

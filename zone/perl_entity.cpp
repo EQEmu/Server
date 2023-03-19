@@ -2,1681 +2,721 @@
 
 #ifdef EMBPERL_XS_CLASSES
 
-#include "../common/global_define.h"
-#include <list>
 #include "embperl.h"
-
-#ifdef seed
-#undef seed
-#endif
-
 #include "entity.h"
+#include "../common/global_define.h"
+#include "../common/rulesys.h"
+#include "../common/say_link.h"
+#include "../common/strings.h"
+#include <list>
 
-#ifdef THIS /* this macro seems to leak out on some systems */
-#undef THIS
-#endif
-
-#define VALIDATE_THIS_IS_ENTITY \
-	do { \
-		if (sv_derived_from(ST(0), "EntityList")) { \
-			IV tmp = SvIV((SV*)SvRV(ST(0))); \
-			THIS = INT2PTR(EntityList*, tmp); \
-		} else { \
-			Perl_croak(aTHX_ "THIS is not of type EntityList"); \
-		} \
-		if (THIS == nullptr) { \
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash."); \
-		} \
-	} while (0);
-
-XS(XS_EntityList_GetMobID); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_GetMobID) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::GetMobID(THIS, id)"); // @categories Script Utility
-	{
-		EntityList *THIS;
-		Mob        *RETVAL;
-		uint16     id = (uint16) SvUV(ST(1));
-		VALIDATE_THIS_IS_ENTITY;
-		RETVAL = THIS->GetMobID(id);
-		ST(0) = sv_newmortal();
-		sv_setref_pv(ST(0), "Mob", (void *) RETVAL);
-	}
-	XSRETURN(1);
+Mob* Perl_EntityList_GetMobID(EntityList* self, uint16_t mob_id) // @categories Script Utility
+{
+	return self->GetMobID(mob_id);
 }
 
-XS(XS_EntityList_GetMob); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_GetMob) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::GetMob(THIS, name)");
-	{
-		EntityList *THIS;
-		Mob        *RETVAL;
-		char       *name = (char *) SvPV_nolen(ST(1));
-		VALIDATE_THIS_IS_ENTITY;
-		RETVAL = THIS->GetMob(name);
-		ST(0) = sv_newmortal();
-		sv_setref_pv(ST(0), "Mob", (void *) RETVAL);
-	}
-	XSRETURN(1);
+Mob* Perl_EntityList_GetMob(EntityList* self, const char* name)
+{
+	return self->GetMob(name);
 }
 
-XS(XS_EntityList_GetMobByID); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_GetMobByID) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::GetMobByID(THIS, id)"); // @categories Script Utility
-	{
-		EntityList *THIS;
-		Mob        *RETVAL;
-		uint16     id = (uint16) SvUV(ST(1));
-		VALIDATE_THIS_IS_ENTITY;
-		RETVAL = THIS->GetMob(id);
-		ST(0) = sv_newmortal();
-		sv_setref_pv(ST(0), "Mob", (void *) RETVAL);
-	}
-	XSRETURN(1);
+Mob* Perl_EntityList_GetMobByID(EntityList* self, uint16_t mob_id) // @categories Script Utility
+{
+	return self->GetMob(mob_id);
 }
 
-XS(XS_EntityList_GetMobByNpcTypeID); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_GetMobByNpcTypeID) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::GetMobByNpcTypeID(THIS, get_id)"); // @categories Script Utility
-	{
-		EntityList *THIS;
-		Mob        *RETVAL;
-		uint32     get_id = (uint32) SvUV(ST(1));
-		VALIDATE_THIS_IS_ENTITY;
-		RETVAL = THIS->GetMobByNpcTypeID(get_id);
-		ST(0) = sv_newmortal();
-		sv_setref_pv(ST(0), "Mob", (void *) RETVAL);
-	}
-	XSRETURN(1);
+Mob* Perl_EntityList_GetMobByNpcTypeID(EntityList* self, uint32_t npc_type_id) // @categories Script Utility
+{
+	return self->GetMobByNpcTypeID(npc_type_id);
 }
 
-XS(XS_EntityList_IsMobSpawnedByNpcTypeID); /* prototype pass -Wmissing-prototypes */
-XS(XS_EntityList_IsMobSpawnedByNpcTypeID) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::IsMobSpawnedByNpcTypeID(THIS, get_id)"); // @categories Script Utility
-	{
-		EntityList *THIS;
-		bool       RETVAL;
-		uint32     get_id = (uint32) SvUV(ST(1));
-		VALIDATE_THIS_IS_ENTITY;
-		RETVAL = THIS->IsMobSpawnedByNpcTypeID(get_id);
-		ST(0) = boolSV(RETVAL);
-		sv_2mortal(ST(0));
-	}
-	XSRETURN(1);
+bool Perl_EntityList_IsMobSpawnedByNpcTypeID(EntityList* self, uint32_t npc_type_id) // @categories Script Utility
+{
+	return self->IsMobSpawnedByNpcTypeID(npc_type_id);
 }
 
-XS(XS_EntityList_GetNPCByID); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_GetNPCByID) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::GetNPCByID(THIS, id)"); // @categories Script Utility
-	{
-		EntityList *THIS;
-		NPC        *RETVAL;
-		uint16     id = (uint16) SvUV(ST(1));
-		VALIDATE_THIS_IS_ENTITY;
-		RETVAL = THIS->GetNPCByID(id);
-		ST(0) = sv_newmortal();
-		sv_setref_pv(ST(0), "NPC", (void *) RETVAL);
-	}
-	XSRETURN(1);
+NPC* Perl_EntityList_GetNPCByID(EntityList* self, uint16_t id) // @categories Script Utility
+{
+	return self->GetNPCByID(id);
 }
 
-XS(XS_EntityList_GetNPCByNPCTypeID); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_GetNPCByNPCTypeID) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::GetNPCByNPCTypeID(THIS, npc_id)"); // @categories Script Utility
-	{
-		EntityList *THIS;
-		NPC        *RETVAL;
-		uint32     npc_id = (uint32) SvUV(ST(1));
-		VALIDATE_THIS_IS_ENTITY;
-		RETVAL = THIS->GetNPCByNPCTypeID(npc_id);
-		ST(0) = sv_newmortal();
-		sv_setref_pv(ST(0), "NPC", (void *) RETVAL);
-	}
-	XSRETURN(1);
+NPC* Perl_EntityList_GetNPCByNPCTypeID(EntityList* self, uint32_t npc_id) // @categories Script Utility
+{
+	return self->GetNPCByNPCTypeID(npc_id);
 }
 
-XS(XS_EntityList_GetNPCBySpawnID); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_GetNPCBySpawnID) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::GetNPCBySpawnID(THIS, spawn_id)"); // @categories Script Utility, Spawns
-	{
-		EntityList *THIS;
-		NPC 	   *RETVAL;
-		uint32	   spawn_id = (uint32) SvUV(ST(1));
-		VALIDATE_THIS_IS_ENTITY;
-		RETVAL = THIS->GetNPCBySpawnID(spawn_id);
-		ST(0) = sv_newmortal();
-		sv_setref_pv(ST(0), "NPC", (void *) RETVAL);
-	}
-	XSRETURN(1);
+NPC* Perl_EntityList_GetNPCBySpawnID(EntityList* self, uint32_t spawn_id) // @categories Script Utility, Spawns
+{
+	return self->GetNPCBySpawnID(spawn_id);
 }
 
-XS(XS_EntityList_GetClientByName); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_GetClientByName) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::GetClientByName(THIS, name)"); // @categories Account and Character, Script Utility
-	{
-		EntityList *THIS;
-		Client     *RETVAL;
-		char       *name = (char *) SvPV_nolen(ST(1));
-		VALIDATE_THIS_IS_ENTITY;
-		RETVAL = THIS->GetClientByName(name);
-		ST(0) = sv_newmortal();
-		sv_setref_pv(ST(0), "Client", (void *) RETVAL);
-	}
-	XSRETURN(1);
+Client* Perl_EntityList_GetClientByName(EntityList* self, const char* name) // @categories Account and Character, Script Utility
+{
+	return self->GetClientByName(name);
 }
 
-XS(XS_EntityList_GetClientByAccID); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_GetClientByAccID) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::GetClientByAccID(THIS, uint32 account_id)"); // @categories Account and Character, Script Utility
-	{
-		EntityList *THIS;
-		Client     *RETVAL;
-		uint32     accid = (uint32) SvUV(ST(1));
-		VALIDATE_THIS_IS_ENTITY;
-		RETVAL = THIS->GetClientByAccID(accid);
-		ST(0) = sv_newmortal();
-		sv_setref_pv(ST(0), "Client", (void *) RETVAL);
-	}
-	XSRETURN(1);
+Client* Perl_EntityList_GetClientByAccID(EntityList* self, uint32_t account_id) // @categories Account and Character, Script Utility
+{
+	return self->GetClientByAccID(account_id);
 }
 
-XS(XS_EntityList_GetClientByID); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_GetClientByID) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::GetClientByID(THIS, uint16 client_id)"); // @categories Account and Character, Script Utility
-	{
-		EntityList *THIS;
-		Client     *RETVAL;
-		uint16     id = (uint16) SvUV(ST(1));
-		VALIDATE_THIS_IS_ENTITY;
-		RETVAL = THIS->GetClientByID(id);
-		ST(0) = sv_newmortal();
-		sv_setref_pv(ST(0), "Client", (void *) RETVAL);
-	}
-	XSRETURN(1);
+Client* Perl_EntityList_GetClientByID(EntityList* self, uint16_t client_id) // @categories Account and Character, Script Utility
+{
+	return self->GetClientByID(client_id);
 }
 
-XS(XS_EntityList_GetClientByCharID); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_GetClientByCharID) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::GetClientByCharID(THIS, uint32 character_id)"); // @categories Account and Character, Script Utility
-	{
-		EntityList *THIS;
-		Client     *RETVAL;
-		uint32     iCharID = (uint32) SvUV(ST(1));
-		VALIDATE_THIS_IS_ENTITY;
-		RETVAL = THIS->GetClientByCharID(iCharID);
-		ST(0) = sv_newmortal();
-		sv_setref_pv(ST(0), "Client", (void *) RETVAL);
-	}
-	XSRETURN(1);
+Client* Perl_EntityList_GetClientByCharID(EntityList* self, uint32_t character_id) // @categories Account and Character, Script Utility
+{
+	return self->GetClientByCharID(character_id);
 }
 
-XS(XS_EntityList_GetClientByWID); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_GetClientByWID) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::GetClientByWID(THIS, uint32 wid)"); // @categories Account and Character, Script Utility
-	{
-		EntityList *THIS;
-		Client     *RETVAL;
-		uint32     iWID = (uint32) SvUV(ST(1));
-		VALIDATE_THIS_IS_ENTITY;
-		RETVAL = THIS->GetClientByWID(iWID);
-		ST(0) = sv_newmortal();
-		sv_setref_pv(ST(0), "Client", (void *) RETVAL);
-	}
-	XSRETURN(1);
+Client* Perl_EntityList_GetClientByWID(EntityList* self, uint32_t wid) // @categories Account and Character, Script Utility
+{
+	return self->GetClientByWID(wid);
 }
 
-XS(XS_EntityList_GetObjectByDBID); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_GetObjectByDBID) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::GetObjectByDBID(THIS, uint32 database_id)"); // @categories Script Utility, Objects
-	{
-		EntityList *THIS;
-		Object     *RETVAL;
-		uint32     id = (uint32) SvUV(ST(1));
-		VALIDATE_THIS_IS_ENTITY;
-		RETVAL = THIS->GetObjectByDBID(id);
-		ST(0) = sv_newmortal();
-		sv_setref_pv(ST(0), "Object", (void *) RETVAL);
-	}
-	XSRETURN(1);
+Object* Perl_EntityList_GetObjectByDBID(EntityList* self, uint32_t database_id) // @categories Script Utility, Objects
+{
+	return self->GetObjectByDBID(database_id);
 }
 
-XS(XS_EntityList_GetObjectByID); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_GetObjectByID) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::GetObjectByID(THIS, uint32 entity_id)"); // @categories Script Utility, Objects
-	{
-		EntityList *THIS;
-		Object     *RETVAL;
-		uint32     id = (uint32) SvUV(ST(1));
-		VALIDATE_THIS_IS_ENTITY;
-		RETVAL = THIS->GetObjectByID(id);
-		ST(0) = sv_newmortal();
-		sv_setref_pv(ST(0), "Object", (void *) RETVAL);
-	}
-	XSRETURN(1);
+Object* Perl_EntityList_GetObjectByID(EntityList* self, uint32_t entity_id) // @categories Script Utility, Objects
+{
+	return self->GetObjectByID(entity_id);
 }
 
-XS(XS_EntityList_GetDoorsByDBID); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_GetDoorsByDBID) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::GetDoorsByDBID(THIS, uint32 database_id)"); // @categories Script Utility, Doors
-	{
-		EntityList *THIS;
-		Doors      *RETVAL;
-		uint32     id = (uint32) SvUV(ST(1));
-		VALIDATE_THIS_IS_ENTITY;
-		RETVAL = THIS->GetDoorsByDBID(id);
-		ST(0) = sv_newmortal();
-		sv_setref_pv(ST(0), "Doors", (void *) RETVAL);
-	}
-	XSRETURN(1);
+Doors* Perl_EntityList_GetDoorsByDBID(EntityList* self, uint32_t database_id) // @categories Script Utility, Doors
+{
+	return self->GetDoorsByDBID(database_id);
 }
 
-XS(XS_EntityList_GetDoorsByDoorID); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_GetDoorsByDoorID) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::GetDoorsByDoorID(THIS, uint32 door_id)"); // @categories Script Utility, Doors
-	{
-		EntityList *THIS;
-		Doors      *RETVAL;
-		uint32     id = (uint32) SvUV(ST(1));
-		VALIDATE_THIS_IS_ENTITY;
-		RETVAL = THIS->GetDoorsByDoorID(id);
-		ST(0) = sv_newmortal();
-		sv_setref_pv(ST(0), "Doors", (void *) RETVAL);
-	}
-	XSRETURN(1);
+Doors* Perl_EntityList_GetDoorsByDoorID(EntityList* self, uint32_t door_id) // @categories Script Utility, Doors
+{
+	return self->GetDoorsByDoorID(door_id);
 }
 
-XS(XS_EntityList_GetDoorsByID); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_GetDoorsByID) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::GetDoorsByID(THIS, uint32 entity_id)"); // @categories Script Utility, Doors
-	{
-		EntityList *THIS;
-		Doors      *RETVAL;
-		uint32     id = (uint32) SvUV(ST(1));
-		VALIDATE_THIS_IS_ENTITY;
-		RETVAL = THIS->GetDoorsByID(id);
-		ST(0) = sv_newmortal();
-		sv_setref_pv(ST(0), "Doors", (void *) RETVAL);
-	}
-	XSRETURN(1);
+Doors* Perl_EntityList_GetDoorsByID(EntityList* self, uint32_t entity_id) // @categories Script Utility, Doors
+{
+	return self->GetDoorsByID(entity_id);
 }
 
-XS(XS_EntityList_FindDoor); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_FindDoor) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::FindDoor(THIS, uint32 door_id)"); // @categories Script Utility, Doors
-	{
-		EntityList *THIS;
-		Doors      *RETVAL;
-		uint32     id = (uint32) SvUV(ST(1));
-		VALIDATE_THIS_IS_ENTITY;
-		RETVAL = THIS->FindDoor(id);
-		ST(0) = sv_newmortal();
-		sv_setref_pv(ST(0), "Doors", (void *) RETVAL);
-	}
-	XSRETURN(1);
+Doors* Perl_EntityList_FindDoor(EntityList* self, uint32_t door_id) // @categories Script Utility, Doors
+{
+	return self->FindDoor(door_id);
 }
 
-XS(XS_EntityList_GetGroupByMob); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_GetGroupByMob) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::GetGroupByMob(THIS, Mob* mob)"); // @categories Account and Character, Script Utility, Group
-	{
-		EntityList *THIS;
-		Group      *RETVAL;
-		Mob        *mob;
-		VALIDATE_THIS_IS_ENTITY;
-		if (sv_derived_from(ST(1), "Mob")) {
-			IV tmp = SvIV((SV *) SvRV(ST(1)));
-			mob = INT2PTR(Mob *, tmp);
-		} else
-			Perl_croak(aTHX_ "mob is not of type Mob");
-		if (mob == nullptr)
-			Perl_croak(aTHX_ "mob is nullptr, avoiding crash.");
-
-		RETVAL = THIS->GetGroupByMob(mob);
-		ST(0) = sv_newmortal();
-		sv_setref_pv(ST(0), "Group", (void *) RETVAL);
-	}
-	XSRETURN(1);
+Group* Perl_EntityList_GetGroupByMob(EntityList* self, Mob* mob) // @categories Account and Character, Script Utility, Group
+{
+	return self->GetGroupByMob(mob);
 }
 
-XS(XS_EntityList_GetGroupByClient); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_GetGroupByClient) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::GetGroupByClient(THIS, Client* client)"); // @categories Account and Character, Script Utility, Group
-	{
-		EntityList *THIS;
-		Group      *RETVAL;
-		Client     *client;
-		VALIDATE_THIS_IS_ENTITY;
-		if (sv_derived_from(ST(1), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(1)));
-			client = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "client is not of type Client");
-		if (client == nullptr)
-			Perl_croak(aTHX_ "client is nullptr, avoiding crash.");
-
-		RETVAL = THIS->GetGroupByClient(client);
-		ST(0) = sv_newmortal();
-		sv_setref_pv(ST(0), "Group", (void *) RETVAL);
-	}
-	XSRETURN(1);
+Group* Perl_EntityList_GetGroupByClient(EntityList* self, Client* client) // @categories Account and Character, Script Utility, Group
+{
+	return self->GetGroupByClient(client);
 }
 
-XS(XS_EntityList_GetGroupByID); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_GetGroupByID) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::GetGroupByID(THIS, id)"); // @categories Account and Character, Script Utility, Group
-	{
-		EntityList *THIS;
-		Group      *RETVAL;
-		uint32     id = (uint32) SvUV(ST(1));
-		VALIDATE_THIS_IS_ENTITY;
-		RETVAL = THIS->GetGroupByID(id);
-		ST(0) = sv_newmortal();
-		sv_setref_pv(ST(0), "Group", (void *) RETVAL);
-	}
-	XSRETURN(1);
+Group* Perl_EntityList_GetGroupByID(EntityList* self, uint32_t id) // @categories Account and Character, Script Utility, Group
+{
+	return self->GetGroupByID(id);
 }
 
-XS(XS_EntityList_GetGroupByLeaderName); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_GetGroupByLeaderName) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::GetGroupByLeaderName(THIS, leader)"); // @categories Account and Character, Script Utility, Group
-	{
-		EntityList *THIS;
-		Group      *RETVAL;
-		char       *leader = (char *) SvPV_nolen(ST(1));
-		VALIDATE_THIS_IS_ENTITY;
-		RETVAL = THIS->GetGroupByLeaderName(leader);
-		ST(0) = sv_newmortal();
-		sv_setref_pv(ST(0), "Group", (void *) RETVAL);
-	}
-	XSRETURN(1);
+Group* Perl_EntityList_GetGroupByLeaderName(EntityList* self, const char* leader_name) // @categories Account and Character, Script Utility, Group
+{
+	return self->GetGroupByLeaderName(leader_name);
 }
 
-XS(XS_EntityList_GetRaidByID); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_GetRaidByID) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::GetRaidByID(THIS, id)"); // @categories Script Utility, Raid
-	{
-		EntityList *THIS;
-		Raid       *RETVAL;
-		uint32     id = (uint32) SvUV(ST(1));
-		VALIDATE_THIS_IS_ENTITY;
-		RETVAL = THIS->GetRaidByID(id);
-		ST(0) = sv_newmortal();
-		sv_setref_pv(ST(0), "Raid", (void *) RETVAL);
-	}
-	XSRETURN(1);
+Raid* Perl_EntityList_GetRaidByID(EntityList* self, uint32_t id) // @categories Script Utility, Raid
+{
+	return self->GetRaidByID(id);
 }
 
-XS(XS_EntityList_GetRaidByClient); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_GetRaidByClient) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::GetRaidByClient(THIS, client)"); // @categories Account and Character, Script Utility, Raid
-	{
-		EntityList *THIS;
-		Raid       *RETVAL;
-		Client     *client;
-		VALIDATE_THIS_IS_ENTITY;
-		if (sv_derived_from(ST(1), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(1)));
-			client = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "client is not of type Client");
-		if (client == nullptr)
-			Perl_croak(aTHX_ "client is nullptr, avoiding crash.");
-
-		RETVAL = THIS->GetRaidByClient(client);
-		ST(0) = sv_newmortal();
-		sv_setref_pv(ST(0), "Raid", (void *) RETVAL);
-	}
-	XSRETURN(1);
+Raid* Perl_EntityList_GetRaidByClient(EntityList* self, Client* client) // @categories Account and Character, Script Utility, Raid
+{
+	return self->GetRaidByClient(client);
 }
 
-XS(XS_EntityList_GetCorpseByOwner); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_GetCorpseByOwner) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::GetCorpseByOwner(THIS, client)"); // @categories Script Utility, Corpse
-	{
-		EntityList *THIS;
-		Corpse     *RETVAL;
-		Client     *client;
-		VALIDATE_THIS_IS_ENTITY;
-		if (sv_derived_from(ST(1), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(1)));
-			client = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "client is not of type Client");
-		if (client == nullptr)
-			Perl_croak(aTHX_ "client is nullptr, avoiding crash.");
-
-		RETVAL = THIS->GetCorpseByOwner(client);
-		ST(0) = sv_newmortal();
-		sv_setref_pv(ST(0), "Corpse", (void *) RETVAL);
-	}
-	XSRETURN(1);
+Corpse* Perl_EntityList_GetCorpseByOwner(EntityList* self, Client* client) // @categories Script Utility, Corpse
+{
+	return self->GetCorpseByOwner(client);
 }
 
-XS(XS_EntityList_GetCorpseByID); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_GetCorpseByID) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::GetCorpseByID(THIS, id)"); // @categories Script Utility, Corpse
-	{
-		EntityList *THIS;
-		Corpse     *RETVAL;
-		uint16     id = (uint16) SvUV(ST(1));
-		VALIDATE_THIS_IS_ENTITY;
-		RETVAL = THIS->GetCorpseByID(id);
-		ST(0) = sv_newmortal();
-		sv_setref_pv(ST(0), "Corpse", (void *) RETVAL);
-	}
-	XSRETURN(1);
+Corpse* Perl_EntityList_GetCorpseByID(EntityList* self, uint16_t id) // @categories Script Utility, Corpse
+{
+	return self->GetCorpseByID(id);
 }
 
-XS(XS_EntityList_GetCorpseByName); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_GetCorpseByName) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::GetCorpseByName(THIS, name)"); // @categories Script Utility, Corpse
-	{
-		EntityList *THIS;
-		Corpse     *RETVAL;
-		char       *name = (char *) SvPV_nolen(ST(1));
-		VALIDATE_THIS_IS_ENTITY;
-		RETVAL = THIS->GetCorpseByName(name);
-		ST(0) = sv_newmortal();
-		sv_setref_pv(ST(0), "Corpse", (void *) RETVAL);
-	}
-	XSRETURN(1);
+Corpse* Perl_EntityList_GetCorpseByName(EntityList* self, const char* name) // @categories Script Utility, Corpse
+{
+	return self->GetCorpseByName(name);
 }
 
-XS(XS_EntityList_ClearClientPetitionQueue); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_ClearClientPetitionQueue) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: EntityList::ClearClientPetitionQueue(THIS)"); // @categories Script Utility
-	{
-		EntityList *THIS;
-		VALIDATE_THIS_IS_ENTITY;
-		THIS->ClearClientPetitionQueue();
-	}
-	XSRETURN_EMPTY;
+void Perl_EntityList_ClearClientPetitionQueue(EntityList* self) // @categories Script Utility
+{
+	self->ClearClientPetitionQueue();
 }
 
-XS(XS_EntityList_CanAddHateForMob); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_CanAddHateForMob) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::CanAddHateForMob(THIS, Mob* target)"); // @categories Script Utility, Hate and Aggro
-	{
-		EntityList *THIS;
-		bool       RETVAL;
-		Mob        *p;
-		VALIDATE_THIS_IS_ENTITY;
-		if (sv_derived_from(ST(1), "Mob")) {
-			IV tmp = SvIV((SV *) SvRV(ST(1)));
-			p = INT2PTR(Mob *, tmp);
-		} else
-			Perl_croak(aTHX_ "p is not of type Mob");
-		if (p == nullptr)
-			Perl_croak(aTHX_ "p is nullptr, avoiding crash.");
-
-		RETVAL = THIS->CanAddHateForMob(p);
-		ST(0) = boolSV(RETVAL);
-		sv_2mortal(ST(0));
-	}
-	XSRETURN(1);
+bool Perl_EntityList_CanAddHateForMob(EntityList* self, Mob* target) // @categories Script Utility, Hate and Aggro
+{
+	return self->CanAddHateForMob(target);
 }
 
-XS(XS_EntityList_Clear); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_Clear) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: EntityList::Clear(THIS)"); // @categories Script Utility
-	{
-		EntityList *THIS;
-		VALIDATE_THIS_IS_ENTITY;
-		THIS->Clear();
-	}
-	XSRETURN_EMPTY;
+void Perl_EntityList_Clear(EntityList* self) // @categories Script Utility
+{
+	self->Clear();
 }
 
-XS(XS_EntityList_RemoveMob); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_RemoveMob) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::RemoveMob(THIS, delete_id)"); // @categories Script Utility
-	{
-		EntityList *THIS;
-		bool       RETVAL;
-		uint16     delete_id = (uint16) SvUV(ST(1));
-		VALIDATE_THIS_IS_ENTITY;
-		RETVAL = THIS->RemoveMob(delete_id);
-		ST(0)                = boolSV(RETVAL);
-		sv_2mortal(ST(0));
-	}
-	XSRETURN(1);
+bool Perl_EntityList_RemoveMob(EntityList* self, uint16_t delete_id) // @categories Script Utility
+{
+	return self->RemoveMob(delete_id);
 }
 
-XS(XS_EntityList_RemoveClient); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_RemoveClient) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::RemoveClient(THIS, delete_id)"); // @categories Account and Character, Script Utility
-	{
-		EntityList *THIS;
-		bool       RETVAL;
-		uint16     delete_id = (uint16) SvUV(ST(1));
-		VALIDATE_THIS_IS_ENTITY;
-		RETVAL = THIS->RemoveClient(delete_id);
-		ST(0)                = boolSV(RETVAL);
-		sv_2mortal(ST(0));
-	}
-	XSRETURN(1);
+bool Perl_EntityList_RemoveClient(EntityList* self, uint16_t delete_id) // @categories Account and Character, Script Utility
+{
+	return self->RemoveClient(delete_id);
 }
 
-XS(XS_EntityList_RemoveNPC); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_RemoveNPC) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::RemoveNPC(THIS, delete_id)"); // @categories Script Utility
-	{
-		EntityList *THIS;
-		bool       RETVAL;
-		uint16     delete_id = (uint16) SvUV(ST(1));
-		VALIDATE_THIS_IS_ENTITY;
-		RETVAL = THIS->RemoveNPC(delete_id);
-		ST(0)                = boolSV(RETVAL);
-		sv_2mortal(ST(0));
-	}
-	XSRETURN(1);
+bool Perl_EntityList_RemoveNPC(EntityList* self, uint16_t delete_id) // @categories Script Utility
+{
+	return self->RemoveNPC(delete_id);
 }
 
-XS(XS_EntityList_RemoveGroup); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_RemoveGroup) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::RemoveGroup(THIS, delete_id)"); // @categories Script Utility, Group
-	{
-		EntityList *THIS;
-		bool       RETVAL;
-		uint32     delete_id = (uint32) SvUV(ST(1));
-		VALIDATE_THIS_IS_ENTITY;
-		RETVAL = THIS->RemoveGroup(delete_id);
-		ST(0)                = boolSV(RETVAL);
-		sv_2mortal(ST(0));
-	}
-	XSRETURN(1);
+bool Perl_EntityList_RemoveGroup(EntityList* self, uint32_t delete_id) // @categories Script Utility, Group
+{
+	return self->RemoveGroup(delete_id);
 }
 
-XS(XS_EntityList_RemoveCorpse); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_RemoveCorpse) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::RemoveCorpse(THIS, delete_id)"); // @categories Corpse
-	{
-		EntityList *THIS;
-		bool       RETVAL;
-		uint16     delete_id = (uint16) SvUV(ST(1));
-		VALIDATE_THIS_IS_ENTITY;
-		RETVAL = THIS->RemoveCorpse(delete_id);
-		ST(0)                = boolSV(RETVAL);
-		sv_2mortal(ST(0));
-	}
-	XSRETURN(1);
+bool Perl_EntityList_RemoveCorpse(EntityList* self, uint16_t delete_id) // @categories Corpse
+{
+	return self->RemoveCorpse(delete_id);
 }
 
-XS(XS_EntityList_RemoveDoor); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_RemoveDoor) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::RemoveDoor(THIS, delete_id)"); // @categories Doors
-	{
-		EntityList *THIS;
-		bool       RETVAL;
-		uint16     delete_id = (uint16) SvUV(ST(1));
-		VALIDATE_THIS_IS_ENTITY;
-		RETVAL = THIS->RemoveDoor(delete_id);
-		ST(0)                = boolSV(RETVAL);
-		sv_2mortal(ST(0));
-	}
-	XSRETURN(1);
+bool Perl_EntityList_RemoveDoor(EntityList* self, uint16_t delete_id) // @categories Doors
+{
+	return self->RemoveDoor(delete_id);
 }
 
-XS(XS_EntityList_RemoveTrap); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_RemoveTrap) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::RemoveTrap(THIS, delete_id)"); // @categories Script Utility
-	{
-		EntityList *THIS;
-		bool       RETVAL;
-		uint16     delete_id = (uint16) SvUV(ST(1));
-		VALIDATE_THIS_IS_ENTITY;
-		RETVAL = THIS->RemoveTrap(delete_id);
-		ST(0)                = boolSV(RETVAL);
-		sv_2mortal(ST(0));
-	}
-	XSRETURN(1);
+bool Perl_EntityList_RemoveTrap(EntityList* self, uint16_t delete_id) // @categories Script Utility
+{
+	return self->RemoveTrap(delete_id);
 }
 
-XS(XS_EntityList_RemoveObject); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_RemoveObject) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::RemoveObject(THIS, delete_id)"); // @categories Script Utility, Objects
-	{
-		EntityList *THIS;
-		bool       RETVAL;
-		uint16     delete_id = (uint16) SvUV(ST(1));
-		VALIDATE_THIS_IS_ENTITY;
-		RETVAL = THIS->RemoveObject(delete_id);
-		ST(0)                = boolSV(RETVAL);
-		sv_2mortal(ST(0));
-	}
-	XSRETURN(1);
+bool Perl_EntityList_RemoveObject(EntityList* self, uint16_t delete_id) // @categories Script Utility, Objects
+{
+	return self->RemoveObject(delete_id);
 }
 
-XS(XS_EntityList_RemoveAllMobs); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_RemoveAllMobs) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: EntityList::RemoveAllMobs(THIS)"); // @categories Script Utility
-	{
-		EntityList *THIS;
-		VALIDATE_THIS_IS_ENTITY;
-		THIS->RemoveAllMobs();
-	}
-	XSRETURN_EMPTY;
+void Perl_EntityList_RemoveAllMobs(EntityList* self) // @categories Script Utility
+{
+	self->RemoveAllMobs();
 }
 
-XS(XS_EntityList_RemoveAllClients); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_RemoveAllClients) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: EntityList::RemoveAllClients(THIS)"); // @categories Script Utility
-	{
-		EntityList *THIS;
-		VALIDATE_THIS_IS_ENTITY;
-		THIS->RemoveAllClients();
-	}
-	XSRETURN_EMPTY;
+void Perl_EntityList_RemoveAllClients(EntityList* self) // @categories Script Utility
+{
+	self->RemoveAllClients();
 }
 
-XS(XS_EntityList_RemoveAllNPCs); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_RemoveAllNPCs) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: EntityList::RemoveAllNPCs(THIS)"); // @categories Script Utility
-	{
-		EntityList *THIS;
-		VALIDATE_THIS_IS_ENTITY;
-		THIS->RemoveAllNPCs();
-	}
-	XSRETURN_EMPTY;
+void Perl_EntityList_RemoveAllNPCs(EntityList* self) // @categories Script Utility
+{
+	self->RemoveAllNPCs();
 }
 
-XS(XS_EntityList_RemoveAllGroups); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_RemoveAllGroups) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: EntityList::RemoveAllGroups(THIS)"); // @categories Group
-	{
-		EntityList *THIS;
-		VALIDATE_THIS_IS_ENTITY;
-		THIS->RemoveAllGroups();
-	}
-	XSRETURN_EMPTY;
+void Perl_EntityList_RemoveAllGroups(EntityList* self) // @categories Group
+{
+	self->RemoveAllGroups();
 }
 
-XS(XS_EntityList_RemoveAllCorpses); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_RemoveAllCorpses) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: EntityList::RemoveAllCorpses(THIS)"); // @categories Corpse
-	{
-		EntityList *THIS;
-		VALIDATE_THIS_IS_ENTITY;
-		THIS->RemoveAllCorpses();
-	}
-	XSRETURN_EMPTY;
+void Perl_EntityList_RemoveAllCorpses(EntityList* self) // @categories Corpse
+{
+	self->RemoveAllCorpses();
 }
 
-XS(XS_EntityList_RemoveAllDoors); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_RemoveAllDoors) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: EntityList::RemoveAllDoors(THIS)"); // @categories Doors
-	{
-		EntityList *THIS;
-		VALIDATE_THIS_IS_ENTITY;
-		THIS->RemoveAllDoors();
-	}
-	XSRETURN_EMPTY;
+void Perl_EntityList_RemoveAllDoors(EntityList* self) // @categories Doors
+{
+	self->RemoveAllDoors();
 }
 
-XS(XS_EntityList_RemoveAllTraps); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_RemoveAllTraps) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: EntityList::RemoveAllTraps(THIS)"); // @categories Script Utility
-	{
-		EntityList *THIS;
-		VALIDATE_THIS_IS_ENTITY;
-		THIS->RemoveAllTraps();
-	}
-	XSRETURN_EMPTY;
+void Perl_EntityList_RemoveAllTraps(EntityList* self) // @categories Script Utility
+{
+	self->RemoveAllTraps();
 }
 
-XS(XS_EntityList_RemoveAllObjects); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_RemoveAllObjects) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: EntityList::RemoveAllObjects(THIS)"); // @categories Objects
-	{
-		EntityList *THIS;
-		VALIDATE_THIS_IS_ENTITY;
-		THIS->RemoveAllObjects();
-	}
-	XSRETURN_EMPTY;
+void Perl_EntityList_RemoveAllObjects(EntityList* self) // @categories Objects
+{
+	self->RemoveAllObjects();
 }
 
-XS(XS_EntityList_Message); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_Message) {
-	dXSARGS;
-	if (items < 4)
-		Perl_croak(aTHX_ "Usage: EntityList::Message(THIS, uint32 guild_id, uint32 emote_color_type, string message)"); // @categories Script Utility
-	{
-		EntityList *THIS;
-		uint32     to_guilddbid = (uint32) SvUV(ST(1));
-		uint32     type         = (uint32) SvUV(ST(2));
-		char       *message     = (char *) SvPV_nolen(ST(3));
-		VALIDATE_THIS_IS_ENTITY;
-		THIS->Message(to_guilddbid, type, message);
-	}
-	XSRETURN_EMPTY;
+void Perl_EntityList_Message(EntityList* self, uint32 guild_id, uint32 color_type, const char* message) // @categories Script Utility
+{
+	self->Message(guild_id, color_type, message);
 }
 
-XS(XS_EntityList_MessageStatus); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_MessageStatus) {
-	dXSARGS;
-	if (items < 5)
-		Perl_croak(aTHX_ "Usage: EntityList::MessageStatus(THIS, uint32 guild_id, uint32 emote_color_type, string message)"); // @categories Script Utility
-	{
-		EntityList *THIS;
-		uint32     to_guilddbid = (uint32) SvUV(ST(1));
-		int        to_minstatus = (int) SvIV(ST(2));
-		uint32     type         = (uint32) SvUV(ST(3));
-		char       *message     = (char *) SvPV_nolen(ST(4));
-		VALIDATE_THIS_IS_ENTITY;
-		THIS->MessageStatus(
-			to_guilddbid,
-			to_minstatus,
-			type,
-			message
-		);
-	}
-	XSRETURN_EMPTY;
+void Perl_EntityList_MessageStatus(EntityList* self, uint32 guild_id, int to_minstatus, uint32 color_type, const char* message) // @categories Script Utility
+{
+	self->MessageStatus(guild_id, to_minstatus, color_type, message);
 }
 
-XS(XS_EntityList_MessageClose); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_MessageClose) {
-	dXSARGS;
-	if (items < 6)
-		Perl_croak(aTHX_ "Usage: EntityList::MessageClose(THIS, Mob* sender, bool skip_sender, float distance, uint32 emote_color_type, string message)");
+void Perl_EntityList_MessageClose(EntityList* self, Mob* sender, bool skip_sender, float distance, uint32 color_type, const char* message)
+{
+	if (RuleB(Chat, AutoInjectSaylinksToClientMessage))
 	{
-		EntityList *THIS;
-		Mob        *sender;
-		bool       skipsender = (bool) SvTRUE(ST(2));
-		float      dist       = (float) SvNV(ST(3));
-		uint32     type       = (uint32) SvUV(ST(4));
-		char       *message   = (char *) SvPV_nolen(ST(5));
-		VALIDATE_THIS_IS_ENTITY;
-		if (sv_derived_from(ST(1), "Mob")) {
-			IV tmp = SvIV((SV *) SvRV(ST(1)));
-			sender = INT2PTR(Mob *, tmp);
-		} else
-			Perl_croak(aTHX_ "sender is not of type Mob");
-		if (sender == nullptr)
-			Perl_croak(aTHX_ "sender is nullptr, avoiding crash.");
-
-		THIS->MessageClose(sender, skipsender, dist, type, message);
+		std::string new_message = EQ::SayLinkEngine::InjectSaylinksIfNotExist(message);
+		self->MessageClose(sender, skip_sender, distance, color_type, new_message.c_str());
 	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_EntityList_RemoveFromTargets); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_RemoveFromTargets) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::RemoveFromTargets(THIS, Mob* target)"); // @categories Script Utility
+	else
 	{
-		EntityList *THIS;
-		Mob        *mob;
-		VALIDATE_THIS_IS_ENTITY;
-		if (sv_derived_from(ST(1), "Mob")) {
-			IV tmp = SvIV((SV *) SvRV(ST(1)));
-			mob = INT2PTR(Mob *, tmp);
-		} else
-			Perl_croak(aTHX_ "mob is not of type Mob");
-		if (mob == nullptr)
-			Perl_croak(aTHX_ "mob is nullptr, avoiding crash.");
-
-		THIS->RemoveFromTargets(mob);
+		self->MessageClose(sender, skip_sender, distance, color_type, message);
 	}
-	XSRETURN_EMPTY;
 }
 
-XS(XS_EntityList_ReplaceWithTarget); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_ReplaceWithTarget) {
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: EntityList::ReplaceWithTarget(THIS, Mob* old_mob, Mob* new_target)"); // @categories Script Utility
-	{
-		EntityList *THIS;
-		Mob        *pOldMob;
-		Mob        *pNewTarget;
-		VALIDATE_THIS_IS_ENTITY;
-		if (sv_derived_from(ST(1), "Mob")) {
-			IV tmp = SvIV((SV *) SvRV(ST(1)));
-			pOldMob = INT2PTR(Mob *, tmp);
-		} else
-			Perl_croak(aTHX_ "pOldMob is not of type Mob");
-		if (pOldMob == nullptr)
-			Perl_croak(aTHX_ "pOldMob is nullptr, avoiding crash.");
-
-		if (sv_derived_from(ST(2), "Mob")) {
-			IV tmp = SvIV((SV *) SvRV(ST(2)));
-			pNewTarget = INT2PTR(Mob *, tmp);
-		} else
-			Perl_croak(aTHX_ "pNewTarget is not of type Mob");
-		if (pNewTarget == nullptr)
-			Perl_croak(aTHX_ "pNewTarget is nullptr, avoiding crash.");
-
-		THIS->ReplaceWithTarget(pOldMob, pNewTarget);
-	}
-	XSRETURN_EMPTY;
+void Perl_EntityList_RemoveFromTargets(EntityList* self, Mob* mob) // @categories Script Utility
+{
+	self->RemoveFromTargets(mob);
 }
 
-XS(XS_EntityList_OpenDoorsNear); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_OpenDoorsNear) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::OpenDoorsNear(THIS, NPC* opener)"); // @categories Script Utility, Doors
-	{
-		EntityList *THIS;
-		Mob        *opener;
-		VALIDATE_THIS_IS_ENTITY;
-		if (sv_derived_from(ST(1), "Mob")) {
-			IV tmp = SvIV((SV *) SvRV(ST(1)));
-			opener = INT2PTR(Mob *, tmp);
-		} else
-			Perl_croak(aTHX_ "opener is not of type Mob");
-		if (opener == nullptr)
-			Perl_croak(aTHX_ "opener is nullptr, avoiding crash.");
-
-		THIS->OpenDoorsNear(opener);
-	}
-	XSRETURN_EMPTY;
+void Perl_EntityList_ReplaceWithTarget(EntityList* self, Mob* old_mob, Mob* new_target) // @categories Script Utility
+{
+	self->ReplaceWithTarget(old_mob, new_target);
 }
 
-XS(XS_EntityList_MakeNameUnique); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_MakeNameUnique) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::MakeNameUnique(THIS, string name)"); // @categories Script Utility
-	{
-		EntityList *THIS;
-		char       *RETVAL;
-		dXSTARG;
-		char       *name = (char *) SvPV_nolen(ST(1));
-		VALIDATE_THIS_IS_ENTITY;
-		RETVAL = THIS->MakeNameUnique(name);
-		sv_setpv(TARG, RETVAL);
-		XSprePUSH;
-		PUSHTARG;
-	}
-	XSRETURN(1);
+void Perl_EntityList_OpenDoorsNear(EntityList* self, Mob* opener) // @categories Script Utility, Doors
+{
+	self->OpenDoorsNear(opener);
 }
 
-XS(XS_EntityList_RemoveNumbers); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_RemoveNumbers) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityListDeprecated::RemoveNumbers(CLASS, name)");
-	{
-		char *RETVAL;
-		dXSTARG;
-		char *name = (char *) SvPV_nolen(ST(1));
-
-		RETVAL = EntityList::RemoveNumbers(name);
-		sv_setpv(TARG, RETVAL);
-		XSprePUSH;
-		PUSHTARG;
-	}
-	XSRETURN(1);
+std::string Perl_EntityList_MakeNameUnique(EntityList* self, char* name) // @categories Script Utility
+{
+	char buf[64] = {0};
+	strn0cpy(buf, name, sizeof(buf));
+	return self->MakeNameUnique(buf); // todo: this function is unsafe
 }
 
-XS(XS_EntityList_SignalMobsByNPCID); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_SignalMobsByNPCID) {
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: EntityList::SignalMobsByNPCID(THIS, uint32 npc_type_id, int signal_id)"); // @categories Script Utility
-	{
-		EntityList *THIS;
-		uint32     npc_type  = (uint32) SvUV(ST(1));
-		int        signal_id = (int) SvIV(ST(2));
-		VALIDATE_THIS_IS_ENTITY;
-		THIS->SignalMobsByNPCID(npc_type, signal_id);
-	}
-	XSRETURN_EMPTY;
+std::string Perl_EntityList_RemoveNumbers(EntityList* self, char* name)
+{
+	char buf[64] = {0};
+	strn0cpy(buf, name, sizeof(buf));
+	return EntityList::RemoveNumbers(buf); // todo: this function is unsafe
 }
 
-XS(XS_EntityList_RemoveEntity); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_RemoveEntity) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::RemoveEntity(THIS, uint16 id)"); // @categories Script Utility
-	{
-		EntityList *THIS;
-		uint16     id = (uint16) SvUV(ST(1));
-		VALIDATE_THIS_IS_ENTITY;
-		THIS->RemoveEntity(id);
-	}
-	XSRETURN_EMPTY;
+void Perl_EntityList_SignalMobsByNPCID(EntityList* self, uint32 npc_type_id, int signal_id) // @categories Script Utility
+{
+	self->SignalMobsByNPCID(npc_type_id, signal_id);
 }
 
-XS(XS_EntityList_DeleteNPCCorpses); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_DeleteNPCCorpses) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: EntityList::DeleteNPCCorpses(THIS)"); // @categories Corpse
-	{
-		EntityList *THIS;
-		uint32      RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_ENTITY;
-		RETVAL = THIS->DeleteNPCCorpses();
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
+void Perl_EntityList_RemoveEntity(EntityList* self, uint16_t id) // @categories Script Utility
+{
+	self->RemoveEntity(id);
 }
 
-XS(XS_EntityList_DeletePlayerCorpses); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_DeletePlayerCorpses) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: EntityList::DeletePlayerCorpses(THIS)"); // @categories Account and Character, Corpse
-	{
-		EntityList *THIS;
-		uint32      RETVAL;
-		dXSTARG;
-		VALIDATE_THIS_IS_ENTITY;
-		RETVAL = THIS->DeletePlayerCorpses();
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
+uint32_t Perl_EntityList_DeleteNPCCorpses(EntityList* self) // @categories Corpse
+{
+	return self->DeleteNPCCorpses();
 }
 
-XS(XS_EntityList_HalveAggro); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_HalveAggro) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::HalveAggro(THIS, Mob* target)"); // @categories Script Utility, Hate and Aggro
-	{
-		EntityList *THIS;
-		Mob        *who;
-		VALIDATE_THIS_IS_ENTITY;
-		if (sv_derived_from(ST(1), "Mob")) {
-			IV tmp = SvIV((SV *) SvRV(ST(1)));
-			who = INT2PTR(Mob *, tmp);
-		} else
-			Perl_croak(aTHX_ "who is not of type Mob");
-		if (who == nullptr)
-			Perl_croak(aTHX_ "who is nullptr, avoiding crash.");
-
-		THIS->HalveAggro(who);
-	}
-	XSRETURN_EMPTY;
+uint32_t Perl_EntityList_DeletePlayerCorpses(EntityList* self) // @categories Account and Character, Corpse
+{
+	return self->DeletePlayerCorpses();
 }
 
-XS(XS_EntityList_DoubleAggro); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_DoubleAggro) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::DoubleAggro(THIS, *Mob target)"); // @categories Script Utility
-	{
-		EntityList *THIS;
-		Mob        *who;
-		VALIDATE_THIS_IS_ENTITY;
-		if (sv_derived_from(ST(1), "Mob")) {
-			IV tmp = SvIV((SV *) SvRV(ST(1)));
-			who = INT2PTR(Mob *, tmp);
-		} else
-			Perl_croak(aTHX_ "who is not of type Mob");
-		if (who == nullptr)
-			Perl_croak(aTHX_ "who is nullptr, avoiding crash.");
-
-		THIS->DoubleAggro(who);
-	}
-	XSRETURN_EMPTY;
+void Perl_EntityList_HalveAggro(EntityList* self, Mob* who) // @categories Script Utility, Hate and Aggro
+{
+	self->HalveAggro(who);
 }
 
-XS(XS_EntityList_ClearFeignAggro); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_ClearFeignAggro) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::ClearFeignAggro(THIS, Mob* target)"); // @categories Script Utility
-	{
-		EntityList *THIS;
-		Mob        *targ;
-		VALIDATE_THIS_IS_ENTITY;
-		if (sv_derived_from(ST(1), "Mob")) {
-			IV tmp = SvIV((SV *) SvRV(ST(1)));
-			targ = INT2PTR(Mob *, tmp);
-		} else
-			Perl_croak(aTHX_ "targ is not of type Mob");
-		if (targ == nullptr)
-			Perl_croak(aTHX_ "targ is nullptr, avoiding crash.");
-
-		THIS->ClearFeignAggro(targ);
-	}
-	XSRETURN_EMPTY;
+void Perl_EntityList_DoubleAggro(EntityList* self, Mob* who) // @categories Script Utility
+{
+	self->DoubleAggro(who);
 }
 
-XS(XS_EntityList_Fighting); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_Fighting) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::Fighting(THIS, Mob* target)"); // @categories Script Utility
-	{
-		EntityList *THIS;
-		bool       RETVAL;
-		Mob        *targ;
-		VALIDATE_THIS_IS_ENTITY;
-		if (sv_derived_from(ST(1), "Mob")) {
-			IV tmp = SvIV((SV *) SvRV(ST(1)));
-			targ = INT2PTR(Mob *, tmp);
-		} else
-			Perl_croak(aTHX_ "targ is not of type Mob");
-		if (targ == nullptr)
-			Perl_croak(aTHX_ "targ is nullptr, avoiding crash.");
-
-		RETVAL = THIS->Fighting(targ);
-		ST(0) = boolSV(RETVAL);
-		sv_2mortal(ST(0));
-	}
-	XSRETURN(1);
+void Perl_EntityList_ClearFeignAggro(EntityList* self, Mob* target) // @categories Script Utility
+{
+	self->ClearFeignAggro(target);
 }
 
-XS(XS_EntityList_RemoveFromHateLists); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_RemoveFromHateLists) {
-	dXSARGS;
-	if (items < 2 || items > 3)
-		Perl_croak(aTHX_ "Usage: EntityList::RemoveFromHateLists(THIS, Mob* mob, [bool set_to_one = false])"); // @categories Script Utility, Hate and Aggro
-	{
-		EntityList *THIS;
-		Mob        *mob;
-		bool       settoone;
-		VALIDATE_THIS_IS_ENTITY;
-		if (sv_derived_from(ST(1), "Mob")) {
-			IV tmp = SvIV((SV *) SvRV(ST(1)));
-			mob = INT2PTR(Mob *, tmp);
-		} else
-			Perl_croak(aTHX_ "mob is not of type Mob");
-		if (mob == nullptr)
-			Perl_croak(aTHX_ "mob is nullptr, avoiding crash.");
-
-		if (items < 3)
-			settoone = false;
-		else {
-			settoone = (bool) SvTRUE(ST(2));
-		}
-
-		THIS->RemoveFromHateLists(mob, settoone);
-	}
-	XSRETURN_EMPTY;
+bool Perl_EntityList_Fighting(EntityList* self, Mob* target) // @categories Script Utility
+{
+	return self->Fighting(target);
+}
+
+void Perl_EntityList_RemoveFromHateLists(EntityList* self, Mob* mob) // @categories Script Utility, Hate and Aggro
+{
+	self->RemoveFromHateLists(mob);
+}
+
+void Perl_EntityList_RemoveFromHateLists(EntityList* self, Mob* mob, bool set_to_one) // @categories Script Utility, Hate and Aggro
+{
+	self->RemoveFromHateLists(mob, set_to_one);
+}
+
+void Perl_EntityList_MessageGroup(EntityList* self, Mob* sender, bool skip_close, uint32_t emote_color_type, const char* message) // @categories Script Utility, Group
+{
+	self->MessageGroup(sender, skip_close, emote_color_type, message);
+}
+
+Client* Perl_EntityList_GetRandomClient(EntityList* self) // @categories Account and Character, Script Utility
+{
+	return self->GetRandomClient();
+}
+
+Client* Perl_EntityList_GetRandomClient(EntityList* self, float x, float y, float z, float distance) // @categories Account and Character, Script Utility
+{
+	return self->GetRandomClient(glm::vec3(x, y, z), distance);
+}
+
+Client* Perl_EntityList_GetRandomClient(EntityList* self, float x, float y, float z, float distance, Client* exclude_client) // @categories Account and Character, Script Utility
+{
+	return self->GetRandomClient(glm::vec3(x, y, z), distance, exclude_client);
 }
 
-XS(XS_EntityList_MessageGroup); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_MessageGroup) {
-	dXSARGS;
-	if (items < 5)
-		Perl_croak(aTHX_ "Usage: EntityList::MessageGroup(THIS, Mob* sender, bool skip_close, uint32 emote_color_type, string message)"); // @categories Script Utility, Group
+perl::array Perl_EntityList_GetMobList(EntityList* self) // @categories Script Utility
+{
+	perl::array result;
+
+	std::list<Mob*> mob_list;
+	entity_list.GetMobList(mob_list);
+	for (Mob* entry : mob_list)
 	{
-		EntityList *THIS;
-		Mob        *sender;
-		bool       skipclose = (bool) SvTRUE(ST(2));
-		uint32     type      = (uint32) SvUV(ST(3));
-		char       *message  = (char *) SvPV_nolen(ST(4));
-		VALIDATE_THIS_IS_ENTITY;
-		if (sv_derived_from(ST(1), "Mob")) {
-			IV tmp = SvIV((SV *) SvRV(ST(1)));
-			sender = INT2PTR(Mob *, tmp);
-		} else
-			Perl_croak(aTHX_ "sender is not of type Mob");
-		if (sender == nullptr)
-			Perl_croak(aTHX_ "sender is nullptr, avoiding crash.");
-
-		THIS->MessageGroup(sender, skipclose, type, message);
+		result.push_back(entry);
 	}
-	XSRETURN_EMPTY;
+
+	return result;
 }
 
-XS(XS_EntityList_GetRandomClient); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_GetRandomClient) {
-	dXSARGS;
-	if (items < 5 || items > 6)
-		Perl_croak(aTHX_ "Usage: EntityList::GetRandomClient(THIS, float x, float y, float z, float distance, [Client* exclude_client = nullptr])"); // @categories Account and Character, Script Utility
+perl::array Perl_EntityList_GetClientList(EntityList* self) // @categories Account and Character, Script Utility
+{
+	perl::array result;
+
+	std::list<Client*> client_list;
+	entity_list.GetClientList(client_list);
+	for (Client* entry : client_list)
 	{
-		EntityList *THIS;
-		Client *RETVAL, *exclude_client = nullptr;
-		float x = (float) SvNV(ST(1));
-		float y = (float) SvNV(ST(2));
-		float z = (float) SvNV(ST(3));
-		float distance = (float) SvNV(ST(4));
-		VALIDATE_THIS_IS_ENTITY;
-
-		if (items == 6) {
-			if (sv_derived_from(ST(5), "Client")) {
-				IV tmp = SvIV((SV *) SvRV(ST(5)));
-				exclude_client = INT2PTR(Client *, tmp);
-			}
-		}
-		
-		RETVAL = entity_list.GetRandomClient(glm::vec3(x, y, z), (distance * distance), exclude_client);
-		ST(0) = sv_newmortal();
-		sv_setref_pv(ST(0), "Client", (void *) RETVAL);
+		result.push_back(entry);
 	}
-	XSRETURN(1);
-}
-
-XS(XS_EntityList_GetMobList); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_GetMobList) {
-	dXSARGS;
-	int num_mobs = 0;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: EntityList::GetMobList(THIS)"); // @categories Script Utility
+
+	return result;
+}
+
+Bot* Perl_EntityList_GetBotByID(EntityList* self, uint32_t bot_id) // @categories Script Utility, Bot
+{
+	return self->GetBotByBotID(bot_id);
+}
+
+Bot* Perl_EntityList_GetBotByName(EntityList* self, std::string bot_name) // @categories Script Utility, Bot
+{
+	return self->GetBotByBotName(bot_name);
+}
+
+Client* Perl_EntityList_GetBotOwnerByBotEntityID(EntityList* self, uint32_t entity_id) // @categories Script Utility, Bot
+{
+	return self->GetBotOwnerByBotEntityID(entity_id);
+}
+
+Client* Perl_EntityList_GetBotOwnerByBotID(EntityList* self, uint32_t bot_id) // @categories Script Utility, Bot
+{
+	return self->GetBotOwnerByBotID(bot_id);
+}
+
+perl::array Perl_EntityList_GetBotList(EntityList* self) // @categories Script Utility, Bot
+{
+	perl::array result;
+	auto current_bot_list = self->GetBotList();
+	for (Bot* bot_iterator : current_bot_list)
 	{
-		EntityList *THIS;
-		VALIDATE_THIS_IS_ENTITY;
-		std::list<Mob *> mob_list;
-		entity_list.GetMobList(mob_list);
-		auto iter = mob_list.begin();
-
-		while (iter != mob_list.end()) {
-			Mob *entry = (*iter);
-			ST(0) = sv_newmortal();
-			sv_setref_pv(ST(0), "Mob", (void *) entry);
-			XPUSHs(ST(0));
-			num_mobs++;
-			iter++;
-		}
+		result.push_back(bot_iterator);
 	}
-	XSRETURN(num_mobs);
-}
-
-XS(XS_EntityList_GetClientList); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_GetClientList) {
-	dXSARGS;
-	int num_clients = 0;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: EntityList::GetClientList(THIS)"); // @categories Account and Character, Script Utility
+	return result;
+}
+
+perl::array Perl_EntityList_GetBotListByCharacterID(EntityList* self, uint32_t character_id) // @categories Script Utility, Bot
+{
+	perl::array result;
+	auto current_bot_list = self->GetBotListByCharacterID(character_id);
+	for (int i = 0; i < current_bot_list.size(); ++i)
 	{
-		EntityList *THIS;
-		VALIDATE_THIS_IS_ENTITY;
-		std::list<Client *> client_list;
-		entity_list.GetClientList(client_list);
-		auto iter = client_list.begin();
-
-		while (iter != client_list.end()) {
-			Client *entry = (*iter);
-			ST(0) = sv_newmortal();
-			sv_setref_pv(ST(0), "Client", (void *) entry);
-			XPUSHs(ST(0));
-			num_clients++;
-			iter++;
-		}
+		result.push_back(current_bot_list[i]);
 	}
-	XSRETURN(num_clients);
-}
-
-#ifdef BOTS
-XS(XS_EntityList_GetBotByID);
-XS(XS_EntityList_GetBotByID) {
-	dXSARGS;
-	int bot_count = 0;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::GetBotByID(THIS, uint32 bot_id)"); // @categories Script Utility, Bot
+	return result;
+}
+
+perl::array Perl_EntityList_GetBotListByCharacterID(EntityList* self, uint32_t character_id, uint8_t class_id) // @categories Script Utility, Bot
+{
+	perl::array result;
+	auto current_bot_list = self->GetBotListByCharacterID(character_id, class_id);
+	for (int i = 0; i < current_bot_list.size(); ++i)
 	{
-		EntityList* THIS;
-		Bot* RETVAL;
-		uint32 bot_id = (uint32) SvUV(ST(1));
-		VALIDATE_THIS_IS_ENTITY;
-		RETVAL = THIS->GetBotByBotID(bot_id);
-		ST(0) = sv_newmortal();
-		sv_setref_pv(ST(0), "Bot", (void *) RETVAL);
+		result.push_back(current_bot_list[i]);
 	}
-	XSRETURN(1);
-}
-
-XS(XS_EntityList_GetBotByName);
-XS(XS_EntityList_GetBotByName) {
-	dXSARGS;
-	int bot_count = 0;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::GetBotByName(THIS, string bot_name)"); // @categories Script Utility, Bot
+	return result;
+}
+
+perl::array Perl_EntityList_GetBotListByClientName(EntityList* self, std::string client_name) // @categories Script Utility, Bot
+{
+	perl::array result;
+	auto current_bot_list = self->GetBotListByClientName(client_name);
+	for (int i = 0; i < current_bot_list.size(); ++i)
 	{
-		EntityList* THIS;
-		Bot* RETVAL;
-		std::string bot_name = (std::string) SvPV_nolen(ST(1));
-		VALIDATE_THIS_IS_ENTITY;
-		RETVAL = THIS->GetBotByBotName(bot_name);
-		ST(0) = sv_newmortal();
-		sv_setref_pv(ST(0), "Bot", (void *) RETVAL);
+		result.push_back(current_bot_list[i]);
 	}
-	XSRETURN(1);
-}
-
-XS(XS_EntityList_GetBotList);
-XS(XS_EntityList_GetBotList) {
-	dXSARGS;
-	int bot_count = 0;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: EntityList::GetBotList(THIS)"); // @categories Script Utility, Bot
+	return result;
+}
+
+perl::array Perl_EntityList_GetBotListByClientName(EntityList* self, std::string client_name, uint8 class_id) // @categories Script Utility, Bot
+{
+	perl::array result;
+	auto current_bot_list = self->GetBotListByClientName(client_name, class_id);
+	for (int i = 0; i < current_bot_list.size(); ++i)
 	{
-		EntityList *THIS;
-		VALIDATE_THIS_IS_ENTITY;
-		auto current_bot_list = THIS->GetBotList();
-		for (auto bot_iterator : current_bot_list) {
-			ST(0) = sv_newmortal();
-			sv_setref_pv(ST(0), "Bot", (void *)bot_iterator);
-			XPUSHs(ST(0));
-			bot_count++;
-		}
+		result.push_back(current_bot_list[i]);
 	}
-	XSRETURN(bot_count);
+	return result;
 }
 
-XS(XS_EntityList_GetBotListByCharacterID);
-XS(XS_EntityList_GetBotListByCharacterID) {
-	dXSARGS;
-	if (items != 2) {
-		Perl_croak(aTHX_ "Usage: EntityList::GetBotListByCharacterID(THIS, uint32 character_id)"); // @categories Script Utility, Bot
-	}
+void Perl_EntityList_SignalAllBotsByOwnerCharacterID(EntityList* self, uint32_t character_id, int signal_id) // @categories Script Utility
+{
+	entity_list.SignalAllBotsByOwnerCharacterID(character_id, signal_id);
+}
 
-	EntityList *THIS;
-	uint32 character_id = (uint32) SvUV(ST(1));
-	VALIDATE_THIS_IS_ENTITY;
-
-	auto current_bot_list = THIS->GetBotListByCharacterID(character_id);
-	auto bot_count = current_bot_list.size();
-
-    if (bot_count) {
-        EXTEND(sp, bot_count);
-        for (int index = 0; index < bot_count; ++index) {
-            ST(index) = sv_newmortal();
-			sv_setref_pv(ST(index), "Bot", (void *) current_bot_list[index]);
-			XPUSHs(ST(index));
-        }
-        XSRETURN(bot_count);
-    }
-
-    SV* return_value = &PL_sv_undef;
-    ST(0) = return_value;
-    XSRETURN(1);
-}
-
-XS(XS_EntityList_GetBotListByClientName);
-XS(XS_EntityList_GetBotListByClientName) {
-	dXSARGS;
-	if (items != 2) {
-		Perl_croak(aTHX_ "Usage: EntityList::GetBotListByClientName(THIS, string client_name)"); // @categories Script Utility, Bot
-	}
+void Perl_EntityList_SignalAllBotsByOwnerName(EntityList* self, std::string owner_name, int signal_id) // @categories Script Utility
+{
+	entity_list.SignalAllBotsByOwnerName(owner_name, signal_id);
+}
 
-	EntityList *THIS;
-	std::string client_name = (std::string) SvPV_nolen(ST(1));
-	VALIDATE_THIS_IS_ENTITY;
-
-	auto current_bot_list = THIS->GetBotListByClientName(client_name);
-	auto bot_count = current_bot_list.size();
-
-    if (bot_count) {
-        EXTEND(sp, bot_count);
-        for (int index = 0; index < bot_count; ++index) {
-            ST(index) = sv_newmortal();
-			sv_setref_pv(ST(index), "Bot", (void *) current_bot_list[index]);
-			XPUSHs(ST(index));
-        }
-        XSRETURN(bot_count);
-    }
-
-    SV* return_value = &PL_sv_undef;
-    ST(0) = return_value;
-    XSRETURN(1);
-}
-#endif
-
-XS(XS_EntityList_GetNPCList); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_GetNPCList) {
-	dXSARGS;
-	int num_npcs = 0;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: EntityList::GetNPCList(THIS)"); // @categories Script Utility
-	{
-		EntityList *THIS;
-		VALIDATE_THIS_IS_ENTITY;
-		std::list<NPC *> npc_list;
-		entity_list.GetNPCList(npc_list);
-		auto iter = npc_list.begin();
-
-		while (iter != npc_list.end()) {
-			NPC *entry = (*iter);
-			ST(0) = sv_newmortal();
-			sv_setref_pv(ST(0), "NPC", (void *) entry);
-			XPUSHs(ST(0));
-			num_npcs++;
-			iter++;
-		}
-	}
-	XSRETURN(num_npcs);
-}
-
-XS(XS_EntityList_GetCorpseList); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_GetCorpseList) {
-	dXSARGS;
-	int num_corpses = 0;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: EntityList::GetCorpseList(THIS)"); // @categories Script Utility, Corpse
-	{
-		EntityList *THIS;
-		VALIDATE_THIS_IS_ENTITY;
-		std::list<Corpse *> corpse_list;
-		entity_list.GetCorpseList(corpse_list);
-		auto iter = corpse_list.begin();
-
-		while (iter != corpse_list.end()) {
-			Corpse *entry = (*iter);
-			ST(0) = sv_newmortal();
-			sv_setref_pv(ST(0), "Corpse", (void *) entry);
-			XPUSHs(ST(0));
-			num_corpses++;
-			iter++;
-		}
-	}
-	XSRETURN(num_corpses);
-}
-
-XS(XS_EntityList_GetObjectList); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_GetObjectList) {
-	dXSARGS;
-	int num_objects = 0;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: EntityList::GetObjectList(THIS)"); // @categories Script Utility, Objects
-	{
-		EntityList *THIS;
-		VALIDATE_THIS_IS_ENTITY;
-		std::list<Object *> object_list;
-		entity_list.GetObjectList(object_list);
-		auto iter = object_list.begin();
-
-		while (iter != object_list.end()) {
-			Object *entry = (*iter);
-			ST(0) = sv_newmortal();
-			sv_setref_pv(ST(0), "Object", (void *) entry);
-			XPUSHs(ST(0));
-			num_objects++;
-			iter++;
-		}
-	}
-	XSRETURN(num_objects);
-}
-
-XS(XS_EntityList_GetDoorsList); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_GetDoorsList) {
-	dXSARGS;
-	int num_objects = 0;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: EntityList::GetDoorsList(THIS)"); // @categories Script Utility, Doors
+void Perl_EntityList_SignalBotByBotID(EntityList* self, uint32_t bot_id, int signal_id) // @categories Script Utility
+{
+	entity_list.SignalBotByBotID(bot_id, signal_id);
+}
+
+void Perl_EntityList_SignalBotByBotName(EntityList* self, std::string bot_name, int signal_id) // @categories Script Utility
+{
+	entity_list.SignalBotByBotName(bot_name, signal_id);
+}
+
+perl::array Perl_EntityList_GetNPCList(EntityList* self) // @categories Script Utility
+{
+	perl::array result;
+
+	std::list<NPC*> npc_list;
+	entity_list.GetNPCList(npc_list);
+	for (NPC* entry : npc_list)
 	{
-		EntityList *THIS;
-		VALIDATE_THIS_IS_ENTITY;
-		std::list<Doors *> door_list;
-		entity_list.GetDoorsList(door_list);
-		auto iter = door_list.begin();
-
-		while (iter != door_list.end()) {
-			Doors *entry = (*iter);
-			ST(0) = sv_newmortal();
-			sv_setref_pv(ST(0), "Doors", (void *) entry);
-			XPUSHs(ST(0));
-			num_objects++;
-			iter++;
-		}
+		result.push_back(entry);
 	}
-	XSRETURN(num_objects);
+
+	return result;
 }
+
+perl::array Perl_EntityList_GetCorpseList(EntityList* self) // @categories Script Utility, Corpse
+{
+	perl::array result;
 
-XS(XS_EntityList_SignalAllClients); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_SignalAllClients) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::SignalAllClients(THIS, uint32 data)"); // @categories Script Utility
+	std::list<Corpse*> corpse_list;
+	entity_list.GetCorpseList(corpse_list);
+	for (Corpse* entry : corpse_list)
 	{
-		EntityList *THIS;
-		uint32     data = (uint32) SvUV(ST(1));
-		VALIDATE_THIS_IS_ENTITY;
-		entity_list.SignalAllClients(data);
+		result.push_back(entry);
 	}
-	XSRETURN_EMPTY;
+
+	return result;
 }
 
-XS(XS_EntityList_GetRandomMob); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_GetRandomMob) {
-	dXSARGS;
-	if (items < 5 || items > 6)
-		Perl_croak(aTHX_ "Usage: EntityList::GetRandomMob(THIS, float x, float y, float z, float distance, [Mob* exclude_mob = nullptr])"); // @categories Account and Character, Script Utility
+perl::array Perl_EntityList_GetObjectList(EntityList* self) // @categories Script Utility, Objects
+{
+	perl::array result;
+
+	std::list<Object*> object_list;
+	entity_list.GetObjectList(object_list);
+	for (Object* entry : object_list)
 	{
-		EntityList *THIS;
-		Mob *RETVAL, *exclude_mob = nullptr;
-		float x = (float) SvNV(ST(1));
-		float y = (float) SvNV(ST(2));
-		float z = (float) SvNV(ST(3));
-		float distance = (float) SvNV(ST(4));
-		VALIDATE_THIS_IS_ENTITY;
-
-		if (items == 6) {
-			if (sv_derived_from(ST(5), "Mob")) {
-				IV tmp = SvIV((SV *) SvRV(ST(5)));
-				exclude_mob = INT2PTR(Mob*, tmp);
-			}
-		}
-
-		RETVAL = entity_list.GetRandomMob(glm::vec3(x, y, z), (distance * distance), exclude_mob);
-		ST(0) = sv_newmortal();
-		sv_setref_pv(ST(0), "Mob", (void *) RETVAL);
+		result.push_back(entry);
 	}
-	XSRETURN(1);
+
+	return result;
 }
 
-XS(XS_EntityList_GetRandomNPC); /* prototype to pass -Wmissing-prototypes */
-XS(XS_EntityList_GetRandomNPC) {
-	dXSARGS;
-	if (items < 5 || items > 6)
-		Perl_croak(aTHX_ "Usage: EntityList::GetRandomNPC(THIS, float x, float y, float z, float distance, [NPC* exclude_npc = nullptr])"); // @categories Account and Character, Script Utility
+perl::array Perl_EntityList_GetDoorsList(EntityList* self) // @categories Script Utility, Doors
+{
+	perl::array result;
+
+	std::list<Doors*> door_list;
+	entity_list.GetDoorsList(door_list);
+	for (Doors* entry : door_list)
 	{
-		EntityList *THIS;
-		NPC *RETVAL, *exclude_npc = nullptr;
-		float x = (float) SvNV(ST(1));
-		float y = (float) SvNV(ST(2));
-		float z = (float) SvNV(ST(3));
-		float distance = (float) SvNV(ST(4));
-		VALIDATE_THIS_IS_ENTITY;
-
-		if (items == 6) {
-			if (sv_derived_from(ST(5), "NPC")) {
-				IV tmp = SvIV((SV *) SvRV(ST(5)));
-				exclude_npc = INT2PTR(NPC*, tmp);
-			}
-		}
-
-		RETVAL = entity_list.GetRandomNPC(glm::vec3(x, y, z), (distance * distance), exclude_npc);
-		ST(0) = sv_newmortal();
-		sv_setref_pv(ST(0), "NPC", (void *) RETVAL);
+		result.push_back(entry);
 	}
-	XSRETURN(1);
-}
-
-#ifdef __cplusplus
-extern "C"
-#endif
-XS(boot_EntityList); /* prototype to pass -Wmissing-prototypes */
-XS(boot_EntityList) {
-	dXSARGS;
-	char file[256];
-	strncpy(file, __FILE__, 256);
-	file[255] = 0;
-
-	if (items != 1)
-		fprintf(stderr, "boot_quest does not take any arguments.");
-	char buf[128];
-
-	//add the strcpy stuff to get rid of const warnings....
-
-	XS_VERSION_BOOTCHECK;
-	newXSproto(strcpy(buf, "CanAddHateForMob"), XS_EntityList_CanAddHateForMob, file, "$$");
-	newXSproto(strcpy(buf, "Clear"), XS_EntityList_Clear, file, "$");
-	newXSproto(strcpy(buf, "ClearClientPetitionQueue"), XS_EntityList_ClearClientPetitionQueue, file, "$");
-	newXSproto(strcpy(buf, "ClearFeignAggro"), XS_EntityList_ClearFeignAggro, file, "$$");
-	newXSproto(strcpy(buf, "DeleteNPCCorpses"), XS_EntityList_DeleteNPCCorpses, file, "$");
-	newXSproto(strcpy(buf, "DeletePlayerCorpses"), XS_EntityList_DeletePlayerCorpses, file, "$");
-	newXSproto(strcpy(buf, "DoubleAggro"), XS_EntityList_DoubleAggro, file, "$$");
-	newXSproto(strcpy(buf, "Fighting"), XS_EntityList_Fighting, file, "$$");
-	newXSproto(strcpy(buf, "FindDoor"), XS_EntityList_FindDoor, file, "$$");
-#ifdef BOTS
-	newXSproto(strcpy(buf, "GetBotByID"), XS_EntityList_GetBotByID, file, "$$");
-	newXSproto(strcpy(buf, "GetBotByName"), XS_EntityList_GetBotByName, file, "$$");
-	newXSproto(strcpy(buf, "GetBotList"), XS_EntityList_GetBotList, file, "$");
-	newXSproto(strcpy(buf, "GetBotListByCharacterID"), XS_EntityList_GetBotListByCharacterID, file, "$$");
-	newXSproto(strcpy(buf, "GetBotListByClientName"), XS_EntityList_GetBotListByClientName, file, "$$");
-#endif
-	newXSproto(strcpy(buf, "GetClientByAccID"), XS_EntityList_GetClientByAccID, file, "$$");
-	newXSproto(strcpy(buf, "GetClientByCharID"), XS_EntityList_GetClientByCharID, file, "$$");
-	newXSproto(strcpy(buf, "GetClientByID"), XS_EntityList_GetClientByID, file, "$$");
-	newXSproto(strcpy(buf, "GetClientByName"), XS_EntityList_GetClientByName, file, "$$");
-	newXSproto(strcpy(buf, "GetClientByWID"), XS_EntityList_GetClientByWID, file, "$$");
-	newXSproto(strcpy(buf, "GetClientList"), XS_EntityList_GetClientList, file, "$");
-	newXSproto(strcpy(buf, "GetCorpseByID"), XS_EntityList_GetCorpseByID, file, "$$");
-	newXSproto(strcpy(buf, "GetCorpseByName"), XS_EntityList_GetCorpseByName, file, "$$");
-	newXSproto(strcpy(buf, "GetCorpseByOwner"), XS_EntityList_GetCorpseByOwner, file, "$$");
-	newXSproto(strcpy(buf, "GetCorpseList"), XS_EntityList_GetCorpseList, file, "$");
-	newXSproto(strcpy(buf, "GetDoorsByDBID"), XS_EntityList_GetDoorsByDBID, file, "$$");
-	newXSproto(strcpy(buf, "GetDoorsByDoorID"), XS_EntityList_GetDoorsByDoorID, file, "$$");
-	newXSproto(strcpy(buf, "GetDoorsByID"), XS_EntityList_GetDoorsByID, file, "$$");
-	newXSproto(strcpy(buf, "GetDoorsList"), XS_EntityList_GetDoorsList, file, "$");
-	newXSproto(strcpy(buf, "GetGroupByClient"), XS_EntityList_GetGroupByClient, file, "$$");
-	newXSproto(strcpy(buf, "GetGroupByID"), XS_EntityList_GetGroupByID, file, "$$");
-	newXSproto(strcpy(buf, "GetGroupByLeaderName"), XS_EntityList_GetGroupByLeaderName, file, "$$");
-	newXSproto(strcpy(buf, "GetGroupByMob"), XS_EntityList_GetGroupByMob, file, "$$");
-	newXSproto(strcpy(buf, "GetMob"), XS_EntityList_GetMob, file, "$$");
-	newXSproto(strcpy(buf, "GetMobByID"), XS_EntityList_GetMobByID, file, "$$");
-	newXSproto(strcpy(buf, "GetMobByNpcTypeID"), XS_EntityList_GetMobByNpcTypeID, file, "$$");
-	newXSproto(strcpy(buf, "GetMobID"), XS_EntityList_GetMobID, file, "$$");
-	newXSproto(strcpy(buf, "GetMobList"), XS_EntityList_GetMobList, file, "$");
-	newXSproto(strcpy(buf, "GetNPCByID"), XS_EntityList_GetNPCByID, file, "$$");
-	newXSproto(strcpy(buf, "GetNPCByNPCTypeID"), XS_EntityList_GetNPCByNPCTypeID, file, "$$");
-	newXSproto(strcpy(buf, "GetNPCBySpawnID"), XS_EntityList_GetNPCBySpawnID, file, "$$");
-	newXSproto(strcpy(buf, "GetNPCList"), XS_EntityList_GetNPCList, file, "$");
-	newXSproto(strcpy(buf, "GetObjectByDBID"), XS_EntityList_GetObjectByDBID, file, "$");
-	newXSproto(strcpy(buf, "GetObjectByID"), XS_EntityList_GetObjectByID, file, "$");
-	newXSproto(strcpy(buf, "GetObjectList"), XS_EntityList_GetObjectList, file, "$");
-	newXSproto(strcpy(buf, "GetRaidByClient"), XS_EntityList_GetRaidByClient, file, "$$");
-	newXSproto(strcpy(buf, "GetRaidByID"), XS_EntityList_GetRaidByID, file, "$$");
-	newXSproto(strcpy(buf, "GetRandomClient"), XS_EntityList_GetRandomClient, file, "$$$$$;$");
-	newXSproto(strcpy(buf, "GetRandomMob"), XS_EntityList_GetRandomMob, file, "$$$$$;$");
-	newXSproto(strcpy(buf, "GetRandomNPC"), XS_EntityList_GetRandomNPC, file, "$$$$$;$");
-	newXSproto(strcpy(buf, "HalveAggro"), XS_EntityList_HalveAggro, file, "$$");
-	newXSproto(strcpy(buf, "IsMobSpawnedByNpcTypeID"), XS_EntityList_IsMobSpawnedByNpcTypeID, file, "$$");
-	newXSproto(strcpy(buf, "MakeNameUnique"), XS_EntityList_MakeNameUnique, file, "$$");
-	newXSproto(strcpy(buf, "Message"), XS_EntityList_Message, file, "$$$$;@");
-	newXSproto(strcpy(buf, "MessageClose"), XS_EntityList_MessageClose, file, "$$$$$$;@");
-	newXSproto(strcpy(buf, "MessageGroup"), XS_EntityList_MessageGroup, file, "$$$$$;@");
-	newXSproto(strcpy(buf, "MessageStatus"), XS_EntityList_MessageStatus, file, "$$$$$;@");
-	newXSproto(strcpy(buf, "OpenDoorsNear"), XS_EntityList_OpenDoorsNear, file, "$$");
-	newXSproto(strcpy(buf, "RemoveAllClients"), XS_EntityList_RemoveAllClients, file, "$");
-	newXSproto(strcpy(buf, "RemoveAllCorpses"), XS_EntityList_RemoveAllCorpses, file, "$");
-	newXSproto(strcpy(buf, "RemoveAllDoors"), XS_EntityList_RemoveAllDoors, file, "$");
-	newXSproto(strcpy(buf, "RemoveAllGroups"), XS_EntityList_RemoveAllGroups, file, "$");
-	newXSproto(strcpy(buf, "RemoveAllMobs"), XS_EntityList_RemoveAllMobs, file, "$");
-	newXSproto(strcpy(buf, "RemoveAllNPCs"), XS_EntityList_RemoveAllNPCs, file, "$");
-	newXSproto(strcpy(buf, "RemoveAllObjects"), XS_EntityList_RemoveAllObjects, file, "$");
-	newXSproto(strcpy(buf, "RemoveAllTraps"), XS_EntityList_RemoveAllTraps, file, "$");
-	newXSproto(strcpy(buf, "RemoveClient"), XS_EntityList_RemoveClient, file, "$$");
-	newXSproto(strcpy(buf, "RemoveCorpse"), XS_EntityList_RemoveCorpse, file, "$$");
-	newXSproto(strcpy(buf, "RemoveDoor"), XS_EntityList_RemoveDoor, file, "$$");
-	newXSproto(strcpy(buf, "RemoveEntity"), XS_EntityList_RemoveEntity, file, "$$");
-	newXSproto(strcpy(buf, "RemoveFromHateLists"), XS_EntityList_RemoveFromHateLists, file, "$$;$");
-	newXSproto(strcpy(buf, "RemoveFromTargets"), XS_EntityList_RemoveFromTargets, file, "$$");
-	newXSproto(strcpy(buf, "RemoveGroup"), XS_EntityList_RemoveGroup, file, "$$");
-	newXSproto(strcpy(buf, "RemoveMob"), XS_EntityList_RemoveMob, file, "$$");
-	newXSproto(strcpy(buf, "RemoveNPC"), XS_EntityList_RemoveNPC, file, "$$");
-	newXSproto(strcpy(buf, "RemoveNumbers"), XS_EntityList_RemoveNumbers, file, "$$");
-	newXSproto(strcpy(buf, "RemoveObject"), XS_EntityList_RemoveObject, file, "$$");
-	newXSproto(strcpy(buf, "RemoveTrap"), XS_EntityList_RemoveTrap, file, "$$");
-	newXSproto(strcpy(buf, "ReplaceWithTarget"), XS_EntityList_ReplaceWithTarget, file, "$$$");
-	newXSproto(strcpy(buf, "SignalAllClients"), XS_EntityList_SignalAllClients, file, "$$");
-	newXSproto(strcpy(buf, "SignalMobsByNPCID"), XS_EntityList_SignalMobsByNPCID, file, "$$$");
-	XSRETURN_YES;
+
+	return result;
+}
+
+void Perl_EntityList_SignalAllClients(EntityList* self, int signal_id) // @categories Script Utility
+{
+	entity_list.SignalAllClients(signal_id);
+}
+
+Mob* Perl_EntityList_GetRandomMob(EntityList* self) // @categories Account and Character, Script Utility
+{
+	return self->GetRandomMob();
+}
+
+Mob* Perl_EntityList_GetRandomMob(EntityList* self, float x, float y, float z, float distance) // @categories Account and Character, Script Utility
+{
+	return self->GetRandomMob(glm::vec3(x, y, z), distance);
+}
+
+Mob* Perl_EntityList_GetRandomMob(EntityList* self, float x, float y, float z, float distance, Mob* exclude_mob) // @categories Account and Character, Script Utility
+{
+	return self->GetRandomMob(glm::vec3(x, y, z), distance, exclude_mob);
+}
+
+NPC* Perl_EntityList_GetRandomNPC(EntityList* self) // @categories Account and Character, Script Utility
+{
+	return self->GetRandomNPC();
+}
+
+NPC* Perl_EntityList_GetRandomNPC(EntityList* self, float x, float y, float z, float distance) // @categories Account and Character, Script Utility
+{
+	return self->GetRandomNPC(glm::vec3(x, y, z), distance);
+}
+
+NPC* Perl_EntityList_GetRandomNPC(EntityList* self, float x, float y, float z, float distance, NPC* exclude_npc) // @categories Account and Character, Script Utility
+{
+	return self->GetRandomNPC(glm::vec3(x, y, z), distance, exclude_npc);
+}
+
+void Perl_EntityList_Marquee(EntityList* self, uint32 type, std::string message)
+{
+	self->Marquee(type, message);
+}
+
+void Perl_EntityList_Marquee(EntityList* self, uint32 type, std::string message, uint32 duration)
+{
+	self->Marquee(type, message, duration);
+}
+
+void Perl_EntityList_Marquee(EntityList* self, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, std::string message)
+{
+	self->Marquee(type, priority, fade_in, fade_out, duration, message);
+}
+
+Bot* Perl_EntityList_GetRandomBot(EntityList* self) // @categories Bots, Script Utility
+{
+	return self->GetRandomBot();
+}
+
+Bot* Perl_EntityList_GetRandomBot(EntityList* self, float x, float y, float z, float distance) // @categories Bot, Script Utility
+{
+	return self->GetRandomBot(glm::vec3(x, y, z), distance);
+}
+
+Bot* Perl_EntityList_GetRandomBot(EntityList* self, float x, float y, float z, float distance, Bot* exclude_bot) // @categories Bot, Script Utility
+{
+	return self->GetRandomBot(glm::vec3(x, y, z), distance, exclude_bot);
+}
+
+void perl_register_entitylist()
+{
+	perl::interpreter perl(PERL_GET_THX);
+
+	auto package = perl.new_class<EntityList>("EntityList");
+	package.add("CanAddHateForMob", &Perl_EntityList_CanAddHateForMob);
+	package.add("Clear", &Perl_EntityList_Clear);
+	package.add("ClearClientPetitionQueue", &Perl_EntityList_ClearClientPetitionQueue);
+	package.add("ClearFeignAggro", &Perl_EntityList_ClearFeignAggro);
+	package.add("DeleteNPCCorpses", &Perl_EntityList_DeleteNPCCorpses);
+	package.add("DeletePlayerCorpses", &Perl_EntityList_DeletePlayerCorpses);
+	package.add("DoubleAggro", &Perl_EntityList_DoubleAggro);
+	package.add("Fighting", &Perl_EntityList_Fighting);
+	package.add("FindDoor", &Perl_EntityList_FindDoor);
+	package.add("GetBotByID", &Perl_EntityList_GetBotByID);
+	package.add("GetBotByName", &Perl_EntityList_GetBotByName);
+	package.add("GetBotList", &Perl_EntityList_GetBotList);
+	package.add("GetBotOwnerByBotEntityID", (Client*(*)(EntityList*, uint32))&Perl_EntityList_GetBotOwnerByBotEntityID);
+	package.add("GetBotOwnerByBotID", (Client*(*)(EntityList*, uint32))&Perl_EntityList_GetBotOwnerByBotID);
+	package.add("GetBotListByCharacterID", (perl::array(*)(EntityList*, uint32))&Perl_EntityList_GetBotListByCharacterID);
+	package.add("GetBotListByCharacterID", (perl::array(*)(EntityList*, uint32, uint8))&Perl_EntityList_GetBotListByCharacterID);
+	package.add("GetBotListByClientName", (perl::array(*)(EntityList*, std::string))&Perl_EntityList_GetBotListByClientName);
+	package.add("GetBotListByClientName", (perl::array(*)(EntityList*, std::string, uint8))&Perl_EntityList_GetBotListByClientName);
+	package.add("GetClientByAccID", &Perl_EntityList_GetClientByAccID);
+	package.add("GetClientByCharID", &Perl_EntityList_GetClientByCharID);
+	package.add("GetClientByID", &Perl_EntityList_GetClientByID);
+	package.add("GetClientByName", &Perl_EntityList_GetClientByName);
+	package.add("GetClientByWID", &Perl_EntityList_GetClientByWID);
+	package.add("GetClientList", &Perl_EntityList_GetClientList);
+	package.add("GetCorpseByID", &Perl_EntityList_GetCorpseByID);
+	package.add("GetCorpseByName", &Perl_EntityList_GetCorpseByName);
+	package.add("GetCorpseByOwner", &Perl_EntityList_GetCorpseByOwner);
+	package.add("GetCorpseList", &Perl_EntityList_GetCorpseList);
+	package.add("GetDoorsByDBID", &Perl_EntityList_GetDoorsByDBID);
+	package.add("GetDoorsByDoorID", &Perl_EntityList_GetDoorsByDoorID);
+	package.add("GetDoorsByID", &Perl_EntityList_GetDoorsByID);
+	package.add("GetDoorsList", &Perl_EntityList_GetDoorsList);
+	package.add("GetGroupByClient", &Perl_EntityList_GetGroupByClient);
+	package.add("GetGroupByID", &Perl_EntityList_GetGroupByID);
+	package.add("GetGroupByLeaderName", &Perl_EntityList_GetGroupByLeaderName);
+	package.add("GetGroupByMob", &Perl_EntityList_GetGroupByMob);
+	package.add("GetMob", &Perl_EntityList_GetMob);
+	package.add("GetMobByID", &Perl_EntityList_GetMobByID);
+	package.add("GetMobByNpcTypeID", &Perl_EntityList_GetMobByNpcTypeID);
+	package.add("GetMobID", &Perl_EntityList_GetMobID);
+	package.add("GetMobList", &Perl_EntityList_GetMobList);
+	package.add("GetNPCByID", &Perl_EntityList_GetNPCByID);
+	package.add("GetNPCByNPCTypeID", &Perl_EntityList_GetNPCByNPCTypeID);
+	package.add("GetNPCBySpawnID", &Perl_EntityList_GetNPCBySpawnID);
+	package.add("GetNPCList", &Perl_EntityList_GetNPCList);
+	package.add("GetObjectByDBID", &Perl_EntityList_GetObjectByDBID);
+	package.add("GetObjectByID", &Perl_EntityList_GetObjectByID);
+	package.add("GetObjectList", &Perl_EntityList_GetObjectList);
+	package.add("GetRaidByClient", &Perl_EntityList_GetRaidByClient);
+	package.add("GetRaidByID", &Perl_EntityList_GetRaidByID);
+	package.add("GetRandomBot", (Bot*(*)(EntityList*))&Perl_EntityList_GetRandomBot);
+	package.add("GetRandomBot", (Bot*(*)(EntityList*, float, float, float, float))&Perl_EntityList_GetRandomBot);
+	package.add("GetRandomBot", (Bot*(*)(EntityList*, float, float, float, float, Bot*))&Perl_EntityList_GetRandomBot);
+	package.add("GetRandomClient", (Client*(*)(EntityList*))&Perl_EntityList_GetRandomClient);
+	package.add("GetRandomClient", (Client*(*)(EntityList*, float, float, float, float))&Perl_EntityList_GetRandomClient);
+	package.add("GetRandomClient", (Client*(*)(EntityList*, float, float, float, float, Client*))&Perl_EntityList_GetRandomClient);
+	package.add("GetRandomMob", (Mob*(*)(EntityList*))&Perl_EntityList_GetRandomMob);
+	package.add("GetRandomMob", (Mob*(*)(EntityList*, float, float, float, float))&Perl_EntityList_GetRandomMob);
+	package.add("GetRandomMob", (Mob*(*)(EntityList*, float, float, float, float, Mob*))&Perl_EntityList_GetRandomMob);
+	package.add("GetRandomNPC", (NPC*(*)(EntityList*))&Perl_EntityList_GetRandomNPC);
+	package.add("GetRandomNPC", (NPC*(*)(EntityList*, float, float, float, float))&Perl_EntityList_GetRandomNPC);
+	package.add("GetRandomNPC", (NPC*(*)(EntityList*, float, float, float, float, NPC*))&Perl_EntityList_GetRandomNPC);
+	package.add("HalveAggro", &Perl_EntityList_HalveAggro);
+	package.add("IsMobSpawnedByNpcTypeID", &Perl_EntityList_IsMobSpawnedByNpcTypeID);
+	package.add("MakeNameUnique", &Perl_EntityList_MakeNameUnique);
+	package.add("Marquee", (void(*)(EntityList*, uint32, std::string))&Perl_EntityList_Marquee);
+	package.add("Marquee", (void(*)(EntityList*, uint32, std::string, uint32))&Perl_EntityList_Marquee);
+	package.add("Marquee", (void(*)(EntityList*, uint32, uint32, uint32, uint32, uint32, std::string))&Perl_EntityList_Marquee);
+	package.add("Message", &Perl_EntityList_Message);
+	package.add("MessageClose", &Perl_EntityList_MessageClose);
+	package.add("MessageGroup", &Perl_EntityList_MessageGroup);
+	package.add("MessageStatus", &Perl_EntityList_MessageStatus);
+	package.add("OpenDoorsNear", &Perl_EntityList_OpenDoorsNear);
+	package.add("RemoveAllClients", &Perl_EntityList_RemoveAllClients);
+	package.add("RemoveAllCorpses", &Perl_EntityList_RemoveAllCorpses);
+	package.add("RemoveAllDoors", &Perl_EntityList_RemoveAllDoors);
+	package.add("RemoveAllGroups", &Perl_EntityList_RemoveAllGroups);
+	package.add("RemoveAllMobs", &Perl_EntityList_RemoveAllMobs);
+	package.add("RemoveAllNPCs", &Perl_EntityList_RemoveAllNPCs);
+	package.add("RemoveAllObjects", &Perl_EntityList_RemoveAllObjects);
+	package.add("RemoveAllTraps", &Perl_EntityList_RemoveAllTraps);
+	package.add("RemoveClient", &Perl_EntityList_RemoveClient);
+	package.add("RemoveCorpse", &Perl_EntityList_RemoveCorpse);
+	package.add("RemoveDoor", &Perl_EntityList_RemoveDoor);
+	package.add("RemoveEntity", &Perl_EntityList_RemoveEntity);
+	package.add("RemoveFromHateLists", (void(*)(EntityList*, Mob*))&Perl_EntityList_RemoveFromHateLists);
+	package.add("RemoveFromHateLists", (void(*)(EntityList*, Mob*, bool))&Perl_EntityList_RemoveFromHateLists);
+	package.add("RemoveFromTargets", &Perl_EntityList_RemoveFromTargets);
+	package.add("RemoveGroup", &Perl_EntityList_RemoveGroup);
+	package.add("RemoveMob", &Perl_EntityList_RemoveMob);
+	package.add("RemoveNPC", &Perl_EntityList_RemoveNPC);
+	package.add("RemoveNumbers", &Perl_EntityList_RemoveNumbers);
+	package.add("RemoveObject", &Perl_EntityList_RemoveObject);
+	package.add("RemoveTrap", &Perl_EntityList_RemoveTrap);
+	package.add("ReplaceWithTarget", &Perl_EntityList_ReplaceWithTarget);
+	package.add("SignalAllBotsByOwnerCharacterID", &Perl_EntityList_SignalAllBotsByOwnerCharacterID);
+	package.add("SignalAllBotsByOwnerName", &Perl_EntityList_SignalAllBotsByOwnerName);
+	package.add("SignalAllClients", &Perl_EntityList_SignalAllClients);
+	package.add("SignalBotByBotID", &Perl_EntityList_SignalBotByBotID);
+	package.add("SignalBotByBotName", &Perl_EntityList_SignalBotByBotName);
+	package.add("SignalMobsByNPCID", &Perl_EntityList_SignalMobsByNPCID);
 }
 
 #endif //EMBPERL_XS_CLASSES
-

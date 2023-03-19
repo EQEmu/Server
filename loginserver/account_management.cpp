@@ -3,7 +3,7 @@
 #include "../common/event/task_scheduler.h"
 #include "../common/event/event_loop.h"
 #include "../common/net/dns.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 
 extern LoginServer       server;
 EQ::Event::TaskScheduler task_runner;
@@ -150,7 +150,7 @@ uint32 AccountManagement::CheckLoginserverUserCredentials(
 
 	if (!login_server_admin.loaded) {
 		LogError(
-			"CheckLoginUserCredentials account [{0}] source_loginserver [{1}] not found!",
+			"account [{0}] source_loginserver [{1}] not found!",
 			in_account_username,
 			source_loginserver
 		);
@@ -167,7 +167,7 @@ uint32 AccountManagement::CheckLoginserverUserCredentials(
 
 	if (!validated_credentials) {
 		LogError(
-			"CheckLoginUserCredentials account [{0}] source_loginserver [{1}] invalid credentials!",
+			"account [{0}] source_loginserver [{1}] invalid credentials!",
 			in_account_username,
 			source_loginserver
 		);
@@ -176,7 +176,7 @@ uint32 AccountManagement::CheckLoginserverUserCredentials(
 	}
 
 	LogInfo(
-		"CheckLoginUserCredentials account [{0}] source_loginserver [{1}] credentials validated success!",
+		"account [{0}] source_loginserver [{1}] credentials validated success!",
 		in_account_username,
 		source_loginserver
 	);
@@ -206,7 +206,7 @@ bool AccountManagement::UpdateLoginserverUserCredentials(
 
 	if (!login_server_account.loaded) {
 		LogError(
-			"ChangeLoginserverUserCredentials account [{0}] source_loginserver [{1}] not found!",
+			"account [{0}] source_loginserver [{1}] not found!",
 			in_account_username,
 			source_loginserver
 		);
@@ -225,7 +225,7 @@ bool AccountManagement::UpdateLoginserverUserCredentials(
 	);
 
 	LogInfo(
-		"ChangeLoginserverUserCredentials account [{0}] source_loginserver [{1}] credentials updated!",
+		"account [{0}] source_loginserver [{1}] credentials updated!",
 		in_account_username,
 		source_loginserver
 	);
@@ -378,7 +378,7 @@ uint32 AccountManagement::CheckExternalLoginserverUserCredentials(
 				}
 			);
 
-			auto s = SplitString(server.options.GetEQEmuLoginServerAddress(), ':');
+			auto s = Strings::Split(server.options.GetEQEmuLoginServerAddress(), ':');
 			if (s.size() == 2) {
 				auto address = s[0];
 				auto port    = std::stoi(s[1]);
@@ -401,7 +401,7 @@ uint32 AccountManagement::CheckExternalLoginserverUserCredentials(
 			while (running) {
 				std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 				if (std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() > REQUEST_TIMEOUT_MS) {
-					LogInfo("[CheckExternalLoginserverUserCredentials] Deadline exceeded [{}]", REQUEST_TIMEOUT_MS);
+					LogInfo("Deadline exceeded [{}]", REQUEST_TIMEOUT_MS);
 					running = false;
 				}
 

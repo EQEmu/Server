@@ -20,7 +20,7 @@
 #include "say_link.h"
 #include "emu_constants.h"
 
-#include "string_util.h"
+#include "strings.h"
 #include "item_instance.h"
 #include "item_data.h"
 #include "../zone/zonedb.h"
@@ -322,145 +322,54 @@ std::string EQ::SayLinkEngine::GenerateQuestSaylink(std::string saylink_text, bo
 
 std::string EQ::SayLinkEngine::InjectSaylinksIfNotExist(const char *message)
 {
-	std::string              new_message       = message;
-	int                      link_index        = 0;
-	int                      saylink_index     = 0;
-	std::vector<std::string> links             = {};
-	std::vector<std::string> saylinks          = {};
-	int                      saylink_length    = 50;
-	std::string              saylink_separator = "\u0012";
-	std::string              saylink_partial   = "00000";
+	LogSaylinkDetail("message [{}]", message);
 
-	LogSaylinkDetail("new_message pre pass 1 [{}]", new_message);
+	std::string new_message;
+	new_message.reserve(strlen(message));
 
-	// first pass - strip existing saylinks by putting placeholder anchors on them
-	for (auto &saylink: split_string(new_message, saylink_separator)) {
-		if (!saylink.empty() && saylink.length() > saylink_length &&
-			saylink.find(saylink_partial) != std::string::npos) {
-			saylinks.emplace_back(saylink);
+	bool in_bracket_state = false;
+	bool in_link_state = false;
 
-			LogSaylinkDetail("Found saylink [{}]", saylink);
+	const char* ch = message;
+	const char* startpos = message;
+	for (; *ch != '\0'; ++ch)
+	{
+		// saylinks not added if spaces touch brackets
+		bool abort_space = in_bracket_state && *ch == ' ' && (*(ch-1) == '[' || *(ch+1) == ']');
 
-			// replace with anchor
-			find_replace(
-				new_message,
-				fmt::format("{}", saylink),
-				fmt::format("<saylink:{}>", saylink_index)
-			);
-
-			saylink_index++;
+		if (in_bracket_state && (*ch == '[' || *ch == '\x12' || abort_space))
+		{
+			// abort due to nested bracket (which starts another) or existing saylink
+			new_message.append(startpos, ch - startpos);
+			in_bracket_state = false;
 		}
-	}
-
-	LogSaylinkDetail("new_message post pass 1 [{}]", new_message);
-
-	LogSaylinkDetail("saylink separator count [{}]", std::count(new_message.begin(), new_message.end(), '\u0012'));
-
-	// loop through brackets until none exist
-	if (new_message.find('[') != std::string::npos) {
-		for (auto &b: split_string(new_message, "[")) {
-			if (!b.empty() && b.find(']') != std::string::npos) {
-				std::vector<std::string> right_split = split_string(b, "]");
-				if (!right_split.empty()) {
-					std::string bracket_message = trim(right_split[0]);
-
-					// we shouldn't see a saylink fragment here, ignore this bracket
-					if (bracket_message.find(saylink_partial) != std::string::npos) {
-						continue;
-					}
-
-					// skip where multiple saylinks are within brackets
-					if (bracket_message.find(saylink_separator) != std::string::npos &&
-						std::count(bracket_message.begin(), bracket_message.end(), '\u0012') > 1) {
-						continue;
-					}
-
-					// if non empty bracket contents
-					if (!bracket_message.empty()) {
-						LogSaylinkDetail("Found bracket_message [{}]", bracket_message);
-
-						// already a saylink
-						// todo: improve this later
-						if (!bracket_message.empty() &&
-							(bracket_message.length() > saylink_length ||
-							 bracket_message.find(saylink_separator) != std::string::npos)) {
-							links.emplace_back(bracket_message);
-						}
-						else {
-							links.emplace_back(
-								EQ::SayLinkEngine::GenerateQuestSaylink(
-									bracket_message,
-									false,
-									bracket_message
-								)
-							);
-						}
-
-						// replace with anchor
-						find_replace(
-							new_message,
-							fmt::format("[{}]", bracket_message),
-							fmt::format("<prelink:{}>", link_index)
-						);
-
-						link_index++;
-					}
-				}
+		else if (in_bracket_state && *ch == ']')
+		{
+			if (ch != startpos)
+			{
+				std::string str(startpos, ch - startpos);
+				new_message += EQ::SayLinkEngine::GenerateQuestSaylink(str, false, str);
 			}
+			in_bracket_state = false;
+		}
+
+		if (!in_bracket_state)
+		{
+			new_message.push_back(*ch);
+		}
+
+		if (*ch == '[' && !in_link_state)
+		{
+			startpos = ch + 1;
+			in_bracket_state = true;
+		}
+		else if (*ch == '\x12')
+		{
+			in_link_state = !in_link_state;
 		}
 	}
 
-	LogSaylinkDetail("new_message post pass 2 (post brackets) [{}]", new_message);
-
-	// strip any current delimiters of saylinks
-	find_replace(new_message, saylink_separator, "");
-
-	// pop links onto anchors
-	link_index = 0;
-	for (auto &link: links) {
-
-		// strip any current delimiters of saylinks
-		find_replace(link, saylink_separator, "");
-
-		find_replace(
-			new_message,
-			fmt::format("<prelink:{}>", link_index),
-			fmt::format("[\u0012{}\u0012]", link)
-		);
-		link_index++;
-	}
-
-	LogSaylinkDetail("new_message post pass 3 (post prelink anchor pop) [{}]", new_message);
-
-	// pop links onto anchors
-	saylink_index = 0;
-	for (auto &link: saylinks) {
-		// strip any current delimiters of saylinks
-		find_replace(link, saylink_separator, "");
-
-		// check to see if we did a double anchor pass (existing saylink that was also inside brackets)
-		// this means we found a saylink and we're checking to see if we're already encoded before double encoding
-		if (new_message.find(fmt::format("\u0012<saylink:{}>\u0012", saylink_index)) != std::string::npos) {
-			LogSaylinkDetail("Found encoded saylink at index [{}]", saylink_index);
-
-			find_replace(
-				new_message,
-				fmt::format("\u0012<saylink:{}>\u0012", saylink_index),
-				fmt::format("\u0012{}\u0012", link)
-			);
-			saylink_index++;
-			continue;
-		}
-
-		find_replace(
-			new_message,
-			fmt::format("<saylink:{}>", saylink_index),
-			fmt::format("\u0012{}\u0012", link)
-		);
-		saylink_index++;
-	}
-
-	LogSaylinkDetail("new_message post pass 4 (post saylink anchor pop) [{}]", new_message);
+	LogSaylinkDetail("new_message [{}]", new_message);
 
 	return new_message;
 }
@@ -485,7 +394,7 @@ SaylinkRepository::Saylink EQ::SayLinkEngine::GetOrSaveSaylink(std::string sayli
 
 	auto saylinks = SaylinkRepository::GetWhere(
 		database,
-		fmt::format("phrase = '{}'", EscapeString(saylink_text))
+		fmt::format("phrase = '{}'", Strings::Escape(saylink_text))
 	);
 
 	// return if found from the database
@@ -507,4 +416,13 @@ SaylinkRepository::Saylink EQ::SayLinkEngine::GetOrSaveSaylink(std::string sayli
 	}
 
 	return {};
+}
+
+std::string Saylink::Create(const std::string &saylink_text, bool silent, const std::string &link_name)
+{
+	return EQ::SayLinkEngine::GenerateQuestSaylink(saylink_text, silent, (link_name.empty() ? saylink_text : link_name));
+}
+
+std::string Saylink::Silent(const std::string &saylink_text, const std::string &link_name) {
+	return EQ::SayLinkEngine::GenerateQuestSaylink(saylink_text, true, (link_name.empty() ? saylink_text : link_name));
 }

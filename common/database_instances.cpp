@@ -18,10 +18,18 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 #include "../common/global_define.h"
 #include "../common/rulesys.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "../common/timer.h"
+#include "../common/repositories/character_corpses_repository.h"
 #include "../common/repositories/dynamic_zone_members_repository.h"
 #include "../common/repositories/dynamic_zones_repository.h"
+#include "../common/repositories/group_id_repository.h"
+#include "../common/repositories/instance_list_repository.h"
+#include "../common/repositories/instance_list_player_repository.h"
+#include "../common/repositories/raid_members_repository.h"
+#include "../common/repositories/respawn_times_repository.h"
+#include "../common/repositories/spawn_condition_values_repository.h"
+
 
 #include "database.h"
 
@@ -41,115 +49,83 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include <sys/time.h>
 #endif
 
-/**
- * @param instance_id
- * @param char_id
- * @return
- */
-bool Database::AddClientToInstance(uint16 instance_id, uint32 char_id)
+bool Database::AddClientToInstance(uint16 instance_id, uint32 character_id)
 {
-	std::string query = StringFormat(
-		"REPLACE INTO `instance_list_player` (id, charid) "
-		"VALUES "
-		"(%lu, %lu)",
-		(unsigned long) instance_id,
-		(unsigned long) char_id
-	);
+	auto e = InstanceListPlayerRepository::NewEntity();
 
-	auto results = QueryDatabase(query);
+	e.id = instance_id;
+	e.charid = character_id;
 
-	return results.Success();
+	return InstanceListPlayerRepository::ReplaceOne(*this, e);
 }
 
-bool Database::CharacterInInstanceGroup(uint16 instance_id, uint32 char_id)
+bool Database::CheckInstanceByCharID(uint16 instance_id, uint32 character_id)
 {
-
-	std::string query = StringFormat("SELECT charid FROM instance_list_player where id=%u AND charid=%u", instance_id, char_id);
-	auto results = QueryDatabase(query);
-
-	if (!results.Success())
+	if (!instance_id) {
 		return false;
+	}
 
-	if (results.RowCount() != 1)
+	auto l = InstanceListPlayerRepository::GetWhere(
+		*this,
+		fmt::format(
+			"id = {} AND charid = {}",
+			instance_id,
+			character_id
+		)
+	);
+	if (l.empty()) {
 		return false;
+	}
 
 	return true;
 }
 
-bool Database::CheckInstanceExists(uint16 instance_id) {
-	std::string query = StringFormat(
-		"SELECT "
-		"`id`  "
-		"FROM  "
-		"`instance_list`  "
-		"WHERE  "
-		"`id` = %u",
-		instance_id
-		);
-	auto results = QueryDatabase(query);
-
-	if (!results.Success())
+bool Database::CheckInstanceExists(uint16 instance_id)
+{
+	if (!instance_id) {
 		return false;
+	}
 
-	if (results.RowCount() == 0)
+	auto i = InstanceListRepository::FindOne(*this, instance_id);
+	if (!i.id) {
 		return false;
+	}
 
 	return true;
 }
 
 bool Database::CheckInstanceExpired(uint16 instance_id)
 {
-
-	int32  start_time    = 0;
-	int32  duration      = 0;
-	uint32 never_expires = 0;
-
-	std::string query = StringFormat(
-		"SELECT start_time, duration, never_expires FROM instance_list WHERE id=%u",
-		instance_id
-	);
-
-	auto results = QueryDatabase(query);
-
-	if (!results.Success()) {
+	if (!instance_id) {
 		return true;
 	}
 
-	if (results.RowCount() == 0) {
+	auto i = InstanceListRepository::FindOne(*this, instance_id);
+	if (!i.id) {
 		return true;
 	}
 
-	auto row = results.begin();
-
-	start_time    = atoi(row[0]);
-	duration      = atoi(row[1]);
-	never_expires = atoi(row[2]);
-
-	if (never_expires == 1) {
+	if (i.never_expires) {
 		return false;
 	}
 
 	timeval tv{};
 	gettimeofday(&tv, nullptr);
 
-	return (start_time + duration) <= tv.tv_sec;
-
+	return (i.start_time + i.duration) <= tv.tv_sec;
 }
 
 bool Database::CreateInstance(uint16 instance_id, uint32 zone_id, uint32 version, uint32 duration)
 {
-	std::string query = StringFormat(
-		"INSERT INTO instance_list (id, zone, version, start_time, duration)"
-		" values (%u, %u, %u, UNIX_TIMESTAMP(), %u)",
-		instance_id,
-		zone_id,
-		version,
-		duration
-	);
+	auto e = InstanceListRepository::NewEntity();
 
-	auto results = QueryDatabase(query);
+	e.id = instance_id;
+	e.zone = zone_id;
+	e.version = version;
+	e.start_time = std::time(nullptr);
+	e.duration = duration;
 
-	return results.Success();
+	return InstanceListRepository::InsertOne(*this, e).id;
 }
 
 bool Database::GetUnusedInstanceID(uint16 &instance_id)
@@ -157,8 +133,8 @@ bool Database::GetUnusedInstanceID(uint16 &instance_id)
 	uint32 max_reserved_instance_id = RuleI(Instances, ReservedInstances);
 	uint32 max                      = 32000;
 
-	std::string query = StringFormat(
-		"SELECT IFNULL(MAX(id),%u)+1 FROM instance_list WHERE id > %u",
+	auto query = fmt::format(
+		"SELECT IFNULL(MAX(id), {}) + 1 FROM instance_list WHERE id > {}",
 		max_reserved_instance_id,
 		max_reserved_instance_id
 	);
@@ -202,7 +178,7 @@ bool Database::GetUnusedInstanceID(uint16 &instance_id)
 		return true;
 	}
 
-	query   = StringFormat("SELECT id FROM instance_list where id > %u ORDER BY id", max_reserved_instance_id);
+	query   = fmt::format("SELECT id FROM instance_list where id > {} ORDER BY id", max_reserved_instance_id);
 	results = QueryDatabase(query);
 
 	if (!results.Success()) {
@@ -216,8 +192,9 @@ bool Database::GetUnusedInstanceID(uint16 &instance_id)
 	}
 
 	max_reserved_instance_id++;
-	for (auto row = results.begin(); row != results.end(); ++row) {
-		if (max_reserved_instance_id < atoi(row[0])) {
+
+	for (auto row : results) {
+		if (max_reserved_instance_id < std::stoul(row[0])) {
 			instance_id = max_reserved_instance_id;
 			return true;
 		}
@@ -235,57 +212,45 @@ bool Database::GetUnusedInstanceID(uint16 &instance_id)
 	return true;
 }
 
-bool Database::GlobalInstance(uint16 instance_id)
+bool Database::IsGlobalInstance(uint16 instance_id)
 {
-	std::string query = StringFormat(
-		"SELECT "
-		"is_global "
-		"FROM "
-		"instance_list "
-		"WHERE "
-		"id = %u "
-		"LIMIT 1 ",
-		instance_id
-		);
-	auto results = QueryDatabase(query);
-
-	if (!results.Success())
+	if (!instance_id) {
 		return false;
+	}
 
-	if (results.RowCount() == 0)
+	auto i = InstanceListRepository::FindOne(*this, instance_id);
+	if (!i.id) {
 		return false;
+	}
 
-	auto row = results.begin();
-
-	return (atoi(row[0]) == 1) ? true : false;
+	return i.is_global;
 }
 
 bool Database::RemoveClientFromInstance(uint16 instance_id, uint32 char_id)
 {
-	std::string query = StringFormat("DELETE FROM instance_list_player WHERE id=%lu AND charid=%lu",
-		(unsigned long)instance_id, (unsigned long)char_id);
-	auto results = QueryDatabase(query);
-
-	return results.Success();
+	return InstanceListPlayerRepository::DeleteWhere(
+		*this,
+		fmt::format(
+			"id = {} AND charid = {}",
+			instance_id,
+			char_id
+		)
+	);
 }
-
 
 bool Database::RemoveClientsFromInstance(uint16 instance_id)
 {
-	std::string query = StringFormat("DELETE FROM instance_list_player WHERE id=%lu", (unsigned long)instance_id);
-	auto results = QueryDatabase(query);
-
-	return results.Success();
+	return InstanceListPlayerRepository::DeleteOne(*this, instance_id);
 }
 
-bool Database::VerifyInstanceAlive(uint16 instance_id, uint32 char_id)
+bool Database::VerifyInstanceAlive(uint16 instance_id, uint32 character_id)
 {
 	//we are not saved to this instance so set our instance to 0
-	if (!GlobalInstance(instance_id) && !CharacterInInstanceGroup(instance_id, char_id))
+	if (!IsGlobalInstance(instance_id) && !CheckInstanceByCharID(instance_id, character_id)) {
 		return false;
+	}
 
-	if (CheckInstanceExpired(instance_id))
-	{
+	if (CheckInstanceExpired(instance_id)) {
 		DeleteInstance(instance_id);
 		return false;
 	}
@@ -295,99 +260,102 @@ bool Database::VerifyInstanceAlive(uint16 instance_id, uint32 char_id)
 
 bool Database::VerifyZoneInstance(uint32 zone_id, uint16 instance_id)
 {
-
-	std::string query = StringFormat("SELECT id FROM instance_list where id=%u AND zone=%u", instance_id, zone_id);
-	auto results = QueryDatabase(query);
-
-	if (!results.Success())
+	auto l = InstanceListRepository::GetWhere(
+		*this,
+		fmt::format(
+			"id = {} AND zone = {}",
+			instance_id,
+			zone_id
+		)
+	);
+	if (l.empty()) {
 		return false;
-
-	if (results.RowCount() == 0)
-		return false;
+	}
 
 	return true;
 }
 
-uint16 Database::GetInstanceID(uint32 zone, uint32 character_id, int16 version)
+uint16 Database::GetInstanceID(uint32 zone_id, uint32 character_id, int16 version)
 {
-	if (!zone)
+	if (!zone_id) {
 		return 0;
+	}
 
-	std::string query = StringFormat(
-		"SELECT "
-		"instance_list.id "
-		"FROM "
-		"instance_list, "
-		"instance_list_player "
-		"WHERE "
-		"instance_list.zone = %u "
-		"AND instance_list.version = %u "
-		"AND instance_list.id = instance_list_player.id "
-		"AND instance_list_player.charid = %u "
-		"LIMIT 1; ",
-		zone,
+	const auto query = fmt::format(
+		"SELECT instance_list.id FROM "
+		"instance_list, instance_list_player WHERE "
+		"instance_list.zone = {} AND "
+		"instance_list.version = {} AND "
+		"instance_list.id = instance_list_player.id AND "
+		"instance_list_player.charid = {} "
+		"LIMIT 1;",
+		zone_id,
 		version,
 		character_id
-		);
+	);
 	auto results = QueryDatabase(query);
 
-	if (!results.Success())
+	if (!results.Success() || !results.RowCount()) {
 		return 0;
-
-	if (results.RowCount() == 0)
-		return 0;
+	}
 
 	auto row = results.begin();
 
-	return atoi(row[0]);
+	return static_cast<uint16>(std::stoul(row[0]));
 }
 
-uint16 Database::GetInstanceVersion(uint16 instance_id) {
-	if (instance_id == 0)
-		return 0;
+std::vector<uint16> Database::GetInstanceIDs(uint32 zone_id, uint32 character_id)
+{
+	std::vector<uint16> l;
 
-	std::string query = StringFormat("SELECT version FROM instance_list where id=%u", instance_id);
+	if (!zone_id) {
+		return l;
+	}
+
+	const auto query = fmt::format(
+		"SELECT instance_list.id FROM "
+		"instance_list, instance_list_player WHERE "
+		"instance_list.zone = {} AND "
+		"instance_list.id = instance_list_player.id AND "
+		"instance_list_player.charid = {}",
+		zone_id,
+		character_id
+	);
 	auto results = QueryDatabase(query);
 
-	if (!results.Success())
-		return 0;
+	if (!results.Success() || !results.RowCount()) {
+		return l;
+	}
 
-	if (results.RowCount() == 0)
-		return 0;
+	for (auto row : results) {
+		l.push_back(static_cast<uint16>(std::stoul(row[0])));
+	}
 
-	auto row = results.begin();
-	return atoi(row[0]);
+	return l;
+}
+
+uint8_t Database::GetInstanceVersion(uint16 instance_id) {
+	if (!instance_id) {
+		return 0;
+	}
+
+	auto i = InstanceListRepository::FindOne(*this, instance_id);
+	if (!i.id) {
+		return 0;
+	}
+
+	return i.version;
 }
 
 uint32 Database::GetTimeRemainingInstance(uint16 instance_id, bool &is_perma)
 {
-	uint32 start_time = 0;
-	uint32 duration = 0;
-	uint32 never_expires = 0;
-
-	std::string query = StringFormat("SELECT start_time, duration, never_expires FROM instance_list WHERE id=%u", instance_id);
-	auto results = QueryDatabase(query);
-
-	if (!results.Success())
-	{
+	auto i = InstanceListRepository::FindOne(*this, instance_id);
+	if (!i.id) {
 		is_perma = false;
 		return 0;
 	}
 
-	if (results.RowCount() == 0)
-	{
-		is_perma = false;
-		return 0;
-	}
-
-	auto row = results.begin();
-
-	start_time = atoi(row[0]);
-	duration = atoi(row[1]);
-	never_expires = atoi(row[2]);
-
-	if (never_expires == 1)
-	{
+	if (i.never_expires) {
 		is_perma = true;
 		return 0;
 	}
@@ -396,204 +364,175 @@ uint32 Database::GetTimeRemainingInstance(uint16 instance_id, bool &is_perma)
 
 	timeval tv;
 	gettimeofday(&tv, nullptr);
-	return ((start_time + duration) - tv.tv_sec);
+	return ((i.start_time + i.duration) - tv.tv_sec);
 }
 
-uint32 Database::VersionFromInstanceID(uint16 instance_id)
+uint32 Database::GetInstanceZoneID(uint16 instance_id)
 {
-
-	std::string query = StringFormat("SELECT version FROM instance_list where id=%u", instance_id);
-	auto results = QueryDatabase(query);
-
-	if (!results.Success())
+	if (!instance_id) {
 		return 0;
+	}
 
-	if (results.RowCount() == 0)
+	auto i = InstanceListRepository::FindOne(*this, instance_id);
+	if (!i.id) {
 		return 0;
+	}
 
-	auto row = results.begin();
-
-	return atoi(row[0]);
-}
-
-uint32 Database::ZoneIDFromInstanceID(uint16 instance_id)
-{
-
-	std::string query = StringFormat("SELECT zone FROM instance_list where id=%u", instance_id);
-	auto results = QueryDatabase(query);
-
-	if (!results.Success())
-		return 0;
-
-	if (results.RowCount() == 0)
-		return 0;
-
-	auto row = results.begin();
-
-	return atoi(row[0]);
+	return i.zone;
 }
 
 void Database::AssignGroupToInstance(uint32 group_id, uint32 instance_id)
 {
+	auto zone_id = GetInstanceZoneID(instance_id);
+	auto version = GetInstanceVersion(instance_id);
 
-	uint32 zone_id = ZoneIDFromInstanceID(instance_id);
-	uint16 version = VersionFromInstanceID(instance_id);
-
-	std::string query = StringFormat("SELECT `charid` FROM `group_id` WHERE `groupid` = %u", group_id);
-	auto results = QueryDatabase(query);
-
-	if (!results.Success())
+	auto l = GroupIdRepository::GetWhere(
+		*this,
+		fmt::format(
+			"groupid = {}",
+			group_id
+		)
+	);
+	if (l.empty()) {
 		return;
+	}
 
-	for (auto row = results.begin(); row != results.end(); ++row)
-	{
-		uint32 charid = atoi(row[0]);
-		if (GetInstanceID(zone_id, charid, version) == 0)
-			AddClientToInstance(instance_id, charid);
+	for (const auto& e : l) {
+		if (!GetInstanceID(zone_id, e.charid, version)) {
+			AddClientToInstance(instance_id, e.charid);
+		}
 	}
 }
 
 void Database::AssignRaidToInstance(uint32 raid_id, uint32 instance_id)
 {
+	auto zone_id = GetInstanceZoneID(instance_id);
+	auto version = GetInstanceVersion(instance_id);
 
-	uint32 zone_id = ZoneIDFromInstanceID(instance_id);
-	uint16 version = VersionFromInstanceID(instance_id);
-
-	std::string query = StringFormat("SELECT `charid` FROM `raid_members` WHERE `raidid` = %u", raid_id);
-	auto results = QueryDatabase(query);
-
-	if (!results.Success())
-		return;
-
-	for (auto row = results.begin(); row != results.end(); ++row)
-	{
-		uint32 charid = atoi(row[0]);
-		if (GetInstanceID(zone_id, charid, version) == 0)
-			AddClientToInstance(instance_id, charid);
-	}
-}
-
-void Database::BuryCorpsesInInstance(uint16 instance_id) {
-	QueryDatabase(
+	auto l = GroupIdRepository::GetWhere(
+		*this,
 		fmt::format(
-			"UPDATE character_corpses SET is_buried = 1, instance_id = 0 WHERE instance_id = {}",
-			instance_id
+			"raidid = {}",
+			raid_id
 		)
 	);
+	if (l.empty()) {
+		return;
+	}
+
+	for (const auto& e : l) {
+		if (!GetInstanceID(zone_id, e.charid, version)) {
+			AddClientToInstance(instance_id, e.charid);
+		}
+	}
 }
 
 void Database::DeleteInstance(uint16 instance_id)
 {
 	std::string query;
-	
-	query = StringFormat("DELETE FROM instance_list_player WHERE id=%u", instance_id);
-	QueryDatabase(query);
 
-	query = StringFormat("DELETE FROM respawn_times WHERE instance_id=%u", instance_id);
-	QueryDatabase(query);
+	InstanceListPlayerRepository::DeleteWhere(*this, fmt::format("id = {}", instance_id));
 
-	query = StringFormat("DELETE FROM spawn_condition_values WHERE instance_id=%u", instance_id);
-	QueryDatabase(query);
+	RespawnTimesRepository::DeleteWhere(*this, fmt::format("instance_id = {}", instance_id));
+
+	SpawnConditionValuesRepository::DeleteWhere(*this, fmt::format("instance_id = {}", instance_id));
 
 	DynamicZoneMembersRepository::DeleteByInstance(*this, instance_id);
 	DynamicZonesRepository::DeleteWhere(*this, fmt::format("instance_id = {}", instance_id));
 
-	BuryCorpsesInInstance(instance_id);
+	CharacterCorpsesRepository::BuryInstance(*this, instance_id);
 }
 
-void Database::FlagInstanceByGroupLeader(uint32 zone, int16 version, uint32 charid, uint32 gid)
+void Database::FlagInstanceByGroupLeader(uint32 zone_id, int16 version, uint32 character_id, uint32 group_id)
 {
-	uint16 id = GetInstanceID(zone, charid, version);
-	if (id != 0)
+	auto instance_id = GetInstanceID(zone_id, character_id, version);
+	if (instance_id) {
 		return;
+	}
 
 	char ln[128];
 	memset(ln, 0, 128);
-	GetGroupLeadershipInfo(gid, ln);
-	uint32 l_charid = GetCharacterID((const char*)ln);
-	uint16 l_id = GetInstanceID(zone, l_charid, version);
+	GetGroupLeadershipInfo(group_id, ln);
 
-	if (l_id == 0)
+	auto group_leader_id = GetCharacterID((const char*)ln);
+	auto group_leader_instance_id = GetInstanceID(zone_id, group_leader_id, version);
+
+	if (!group_leader_instance_id) {
 		return;
+	}
 
-	AddClientToInstance(l_id, charid);
+	AddClientToInstance(group_leader_instance_id, character_id);
 }
 
-void Database::FlagInstanceByRaidLeader(uint32 zone, int16 version, uint32 charid, uint32 rid)
+void Database::FlagInstanceByRaidLeader(uint32 zone_id, int16 version, uint32 character_id, uint32 raid_id)
 {
-	uint16 id = GetInstanceID(zone, charid, version);
-	if (id != 0)
+	uint16 instance_id = GetInstanceID(zone_id, character_id, version);
+	if (instance_id) {
 		return;
+	}
 
-	uint32 l_charid = GetCharacterID(GetRaidLeaderName(rid));
-	uint16 l_id = GetInstanceID(zone, l_charid, version);
+	auto raid_leader_id = GetCharacterID(GetRaidLeaderName(raid_id));
+	auto raid_leader_instance_id = GetInstanceID(zone_id, raid_leader_id, version);
 
-	if (l_id == 0)
+	if (!raid_leader_instance_id) {
 		return;
+	}
 
-	AddClientToInstance(l_id, charid);
+	AddClientToInstance(raid_leader_instance_id, character_id);
 }
 
-void Database::GetCharactersInInstance(uint16 instance_id, std::list<uint32> &charid_list) {
-
-	std::string query = StringFormat("SELECT `charid` FROM `instance_list_player` WHERE `id` = %u", instance_id);
-	auto results = QueryDatabase(query);
-
-	if (!results.Success())
+void Database::GetCharactersInInstance(uint16 instance_id, std::list<uint32> &character_ids)
+{
+	auto l = InstanceListPlayerRepository::GetWhere(*this, fmt::format("id = {}", instance_id));
+	if (l.empty()) {
 		return;
+	}
 
-	for (auto row = results.begin(); row != results.end(); ++row)
-		charid_list.push_back(atoi(row[0]));
+	for (const auto& e : l) {
+		character_ids.push_back(e.charid);
+	}
 }
 
 void Database::PurgeExpiredInstances()
 {
-
 	/**
 	 * Delay purging by a day so that we can continue using adjacent free instance id's
 	 * from the table without risking the chance we immediately re-allocate a zone that freshly expired but
 	 * has not been fully de-allocated
 	 */
-	std::string query =
-		SQL(
-			SELECT
-				id
-			FROM
-				instance_list
-			where
-			(start_time + duration) <= (UNIX_TIMESTAMP() - 86400)
-			and never_expires = 0
-		);
-
-	auto results = QueryDatabase(query);
-
-	if (!results.Success()) {
-		return;
-	}
-
-	if (results.RowCount() == 0) {
+	auto l = InstanceListRepository::GetWhere(
+		*this,
+		"(start_time + duration) <= (UNIX_TIMESTAMP() - 86400) AND never_expires = 0"
+	);
+	if (l.empty()) {
 		return;
 	}
 
 	std::vector<std::string> instance_ids;
-	for (auto row = results.begin(); row != results.end(); ++row) {
-		instance_ids.emplace_back(row[0]);
+	for (const auto& e : l) {
+		instance_ids.emplace_back(std::to_string(e.id));
 	}
 
-	std::string imploded_instance_ids = implode(",", instance_ids);
+	const auto imploded_instance_ids = Strings::Implode(",", instance_ids);
 
-	QueryDatabase(fmt::format("DELETE FROM instance_list WHERE id IN ({})", imploded_instance_ids));
-	QueryDatabase(fmt::format("DELETE FROM instance_list_player WHERE id IN ({})", imploded_instance_ids));
-	QueryDatabase(fmt::format("DELETE FROM respawn_times WHERE instance_id IN ({})", imploded_instance_ids));
-	QueryDatabase(fmt::format("DELETE FROM spawn_condition_values WHERE instance_id IN ({})", imploded_instance_ids));
-	QueryDatabase(fmt::format("UPDATE character_corpses SET is_buried = 1, instance_id = 0 WHERE instance_id IN ({})", imploded_instance_ids));
+	InstanceListRepository::DeleteWhere(*this, fmt::format("id IN ({})", imploded_instance_ids));
+	InstanceListPlayerRepository::DeleteWhere(*this, fmt::format("id IN ({})", imploded_instance_ids));
+	RespawnTimesRepository::DeleteWhere(*this, fmt::format("instance_id IN ({})", imploded_instance_ids));
+	SpawnConditionValuesRepository::DeleteWhere(*this, fmt::format("instance_id IN ({})", imploded_instance_ids));
+	CharacterCorpsesRepository::BuryInstances(*this, imploded_instance_ids);
 	DynamicZoneMembersRepository::DeleteByManyInstances(*this, imploded_instance_ids);
 	DynamicZonesRepository::DeleteWhere(*this, fmt::format("instance_id IN ({})", imploded_instance_ids));
 }
 
 void Database::SetInstanceDuration(uint16 instance_id, uint32 new_duration)
 {
-	std::string query = StringFormat("UPDATE `instance_list` SET start_time=UNIX_TIMESTAMP(), "
-		"duration=%u WHERE id=%u", new_duration, instance_id);
-	auto results = QueryDatabase(query);
+	auto i = InstanceListRepository::FindOne(*this, instance_id);
+	if (!i.id) {
+		return;
+	}
+
+	i.start_time = std::time(nullptr);
+	i.duration = new_duration;
+
+	InstanceListRepository::UpdateOne(*this, i);
 }

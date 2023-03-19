@@ -39,27 +39,71 @@ class Zone;
 #include "entity.h"
 #include "mob.h"
 
-
-#ifdef BOTS
-#include "bot.h"
-#endif
-
-
-#include "../common/spdat.h"
-
 extern EntityList entity_list;
 extern Zone* zone;
 
 // if lifetime is 0 this is a permanent beacon.. not sure if that'll be
 // useful for anything
-Beacon::Beacon(const glm::vec4 &in_pos, int lifetime)
-:Mob
-(
-	nullptr, nullptr, 0, 0, 0, INVISIBLE_MAN, 0, BT_NoTarget, 0, 0, 0, 0, 0, in_pos, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, EQ::TintProfile(), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false
+Beacon::Beacon(const glm::vec4 &in_pos, int lifetime) : Mob(
+	nullptr, // in_name
+	nullptr, // in_lastname
+	0, // in_cur_hp
+	0, // in_max_hp
+	MALE, // in_gender
+	INVISIBLE_MAN, // in_race
+	0, // in_class
+	BT_NoTarget, // in_bodytype
+	0, // in_deity
+	0, // in_level
+	0, // in_npctype_id
+	0.0f, // in_size
+	0.0f, // in_runspeed
+	in_pos, // position
+	0, // in_light
+	0, // in_texture
+	0, // in_helmtexture
+	0, // in_ac
+	0, // in_atk
+	0, // in_str
+	0, // in_sta
+	0, // in_dex
+	0, // in_agi
+	0, // in_int
+	0, // in_wis
+	0, // in_cha
+	0, // in_haircolor
+	0, // in_beardcolor
+	0, // in_eyecolor1
+	0, // in_eyecolor2
+	0, // in_hairstyle
+	0, // in_luclinface
+	0, // in_beard
+	0, // in_drakkin_heritage
+	0, // in_drakkin_tattoo
+	0, // in_drakkin_details
+	EQ::TintProfile(), // in_armor_tint
+	0, // in_aa_title
+	0, // in_see_invis
+	0, // in_see_invis_undead
+	0, // in_see_hide
+	0, // in_see_improved_hide
+	0, // in_hp_regen
+	0, // in_mana_regen
+	0, // in_qglobal
+	0, // in_maxlevel
+	0, // in_scalerate
+	0, // in_armtexture
+	0, // in_bracertexture
+	0, // in_handtexture
+	0, // in_legtexture
+	0, // in_feettexture
+	0, // in_usemodel
+	false, // in_always_aggros_foes
+	0, //in_heroic_strikethrough
+	false // in_keeps_sold_items
 ),
-		remove_timer(lifetime),
-		spell_timer(0)
+	  remove_timer(lifetime),
+	  spell_timer(0)
 {
 	remove_timer.Disable();
 	spell_timer.Disable();

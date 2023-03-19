@@ -50,6 +50,11 @@ if ($Config{osname} =~ /Win|MS/i) {
     $OS = "Windows";
 }
 
+if (-e "../eqemu_config.json") {
+    print "[Info] Config is up one level, let's set current directory up one level...\n";
+    chdir("../");
+}
+
 #############################################
 # internet check
 #############################################
@@ -82,6 +87,8 @@ if (-e "eqemu_server_skip_maps_update.txt" || defined($ENV{'EQEMU_SERVER_SKIP_MA
 if (-d "bin") {
     $bin_dir = "bin/";
 }
+
+my $world_path = get_world_path();
 
 #############################################
 # run routines
@@ -255,7 +262,7 @@ sub show_install_summary_info
 sub new_server
 {
     $build_options = $_[0];
-    $file_count = 0;
+    $file_count    = 0;
     opendir(DIR, ".") or die $!;
     while (my $file = readdir(DIR)) {
         next if ($file =~ m/^\./);
@@ -299,9 +306,9 @@ sub new_server
             open(MYSQL_CHECK, "mysqlcheck.txt");
             while (<MYSQL_CHECK>) {
                 chomp;
-                $o                                          = $_;
-                if ($o =~ /Error/i) {$mysql_pass            = 0;}
-                if ($o =~ /SHOW PROCESSLIST/i) {$mysql_pass = 1;}
+                $o                                           = $_;
+                if ($o =~ /Error/i) { $mysql_pass            = 0; }
+                if ($o =~ /SHOW PROCESSLIST/i) { $mysql_pass = 1; }
             }
             close(MYSQL_CHECK);
             unlink("mysqlcheck.txt");
@@ -423,11 +430,6 @@ sub build_linux_source
     $cmake_options          = "";
     $source_folder_post_fix = "";
 
-    if ($build_options =~ /bots/i) {
-        $cmake_options          .= " -DEQEMU_ENABLE_BOTS=ON";
-        $source_folder_post_fix = "_bots";
-    }
-
     $current_directory = `pwd`;
     @directories       = split('/', $current_directory);
     foreach my $val (@directories) {
@@ -437,8 +439,8 @@ sub build_linux_source
     }
     my $eqemu_server_directory = "/home/eqemu";
     # source between bots and not is the same, just different build results, so use the same source folder, different build folders
-    my $source_dir             = $eqemu_server_directory . '/' . $last_directory . '_source';
-    my $build_dir              = $eqemu_server_directory . '/' . $last_directory . '_build' . $source_folder_post_fix;
+    my $source_dir = $eqemu_server_directory . '/' . $last_directory . '_source';
+    my $build_dir  = $eqemu_server_directory . '/' . $last_directory . '_build' . $source_folder_post_fix;
 
     $current_directory = trim($current_directory);
 
@@ -522,32 +524,22 @@ sub do_installer_routines
     fetch_utility_scripts();
 
     #::: Database Routines
-    $root_user = $user;
+    $root_user     = $user;
     $root_password = $pass;
     print "[Database] Creating Database '" . $db_name . "'\n";
-    if (defined($ENV{'MYSQL_ROOT_PASSWORD'}))
-    {
+    if (defined($ENV{'MYSQL_ROOT_PASSWORD'})) {
         # In the case that the user doesn't have privileges to create databases, support passing in the root password during setup
         print "[Database] Using 'root' for database management.\n";
-        $root_user = "root";
+        $root_user     = "root";
         $root_password = $ENV{'MYSQL_ROOT_PASSWORD'};
     }
     print `"$path" --host $host --user $root_user --password="$root_password" -N -B -e "DROP DATABASE IF EXISTS $db_name;"`;
     print `"$path" --host $host --user $root_user --password="$root_password" -N -B -e "CREATE DATABASE $db_name"`;
-    if (defined($ENV{'MYSQL_ROOT_PASSWORD'}))
-    {
+    if (defined($ENV{'MYSQL_ROOT_PASSWORD'})) {
         # If we used root, make sure $user has permissions on db
         print "[Database] Assigning ALL PRIVILEGES to $user on $db_name.\n";
         print `"$path" --host $host --user $root_user --password="$root_password" -N -B -e "GRANT ALL PRIVILEGES ON $db_name.* TO '$user.%'"`;
         print `"$path" --host $host --user $root_user --password="$root_password" -N -B -e "FLUSH PRIVILEGES"`;
-    }
-
-    my $world_path = "world";
-    if (-e "bin/world") {
-        $world_path = "bin/world";
-    }
-    elsif (-e "bin/world.exe") {
-        $world_path = "bin/world.exe";
     }
 
     #::: Get Binary DB version
@@ -568,11 +560,7 @@ sub do_installer_routines
     fetch_peq_db_full();
     print "[Database] Fetching and Applying Latest Database Updates...\n";
     main_db_management();
-
-    # if bots
-    if ($build_options =~ /bots/i) {
-        bots_db_management();
-    }
+    bots_db_management();
 
     remove_duplicate_rule_values();
 
@@ -594,15 +582,6 @@ sub check_for_input
 
 sub check_for_world_bootup_database_update
 {
-
-    my $world_path = "world";
-    if (-e "bin/world") {
-        $world_path = "bin/world";
-    }
-    elsif (-e "bin/world.exe") {
-        $world_path = "bin/world.exe";
-    }
-
     $binary_database_version = 0;
     $local_database_version  = 0;
 
@@ -647,7 +626,7 @@ sub check_for_world_bootup_database_update
                 print "[Update] Database version is ahead of current binaries...\n";
             }
 
-            if (!$db) {print "[eqemu_server.pl] No database connection found... Running without\n";}
+            if (!$db) { print "[eqemu_server.pl] No database connection found... Running without\n"; }
             show_menu_prompt();
         }
     }
@@ -682,7 +661,7 @@ sub check_for_world_bootup_database_update
                     print "[Update] Bots database version is ahead of current binaries...\n";
                 }
 
-                if (!$db) {print "[eqemu_server.pl] No database connection found... Running without\n";}
+                if (!$db) { print "[eqemu_server.pl] No database connection found... Running without\n"; }
                 show_menu_prompt();
             }
         }
@@ -726,7 +705,8 @@ sub get_perl_version
     no warnings;
 }
 
-sub get_windows_wget {
+sub get_windows_wget
+{
     if (!-e "bin/wget.exe" && $OS eq "Windows") {
         if (!-d "bin") {
             mkdir("bin");
@@ -764,7 +744,7 @@ sub do_self_update_check_routine
             my @files;
             my $start_dir = "updates_staged/";
             find(
-                sub {push @files, $File::Find::name unless -d;},
+                sub { push @files, $File::Find::name unless -d; },
                 $start_dir
             );
             for my $file (@files) {
@@ -802,9 +782,9 @@ sub do_self_update_check_routine
 sub get_installation_variables
 {
     # Read installation variables from the ENV if set, but override them with install_variables.txt
-    if ($ENV{"MYSQL_HOST"}) { $installation_variables{"mysql_host"} = $ENV{"MYSQL_HOST"}; }
-    if ($ENV{"MYSQL_DATABASE"}) { $installation_variables{"mysql_eqemu_db_name"} = $ENV{"MYSQL_DATABASE"}; }
-    if ($ENV{"MYSQL_USER"}) { $installation_variables{"mysql_eqemu_user"} = $ENV{"MYSQL_USER"} }
+    if ($ENV{"MYSQL_HOST"}) { $installation_variables{"mysql_host"}               = $ENV{"MYSQL_HOST"}; }
+    if ($ENV{"MYSQL_DATABASE"}) { $installation_variables{"mysql_eqemu_db_name"}  = $ENV{"MYSQL_DATABASE"}; }
+    if ($ENV{"MYSQL_USER"}) { $installation_variables{"mysql_eqemu_user"}         = $ENV{"MYSQL_USER"} }
     if ($ENV{"MYSQL_PASSWORD"}) { $installation_variables{"mysql_eqemu_password"} = $ENV{"MYSQL_PASSWORD"} }
 
     #::: Fetch installation variables before building the config
@@ -840,9 +820,9 @@ sub do_install_config_json
 
     my $content;
     open(my $fh, '<', "eqemu_config_template.json") or die "cannot open file $filename"; {
-        local $/;
-        $content = <$fh>;
-    }
+    local $/;
+    $content = <$fh>;
+}
     close($fh);
 
     $config = $json->decode($content);
@@ -865,11 +845,11 @@ sub do_install_config_json
         $host = "127.0.0.1";
     }
 
-    $config->{"server"}{"database"}{"host"}         = $host;
+    $config->{"server"}{"database"}{"host"}       = $host;
     $config->{"server"}{"database"}{"username"}   = $installation_variables{"mysql_eqemu_user"};
     $config->{"server"}{"database"}{"password"}   = $installation_variables{"mysql_eqemu_password"};
     $config->{"server"}{"database"}{"db"}         = $db_name;
-    $config->{"server"}{"qsdatabase"}{"host"}       = $host;
+    $config->{"server"}{"qsdatabase"}{"host"}     = $host;
     $config->{"server"}{"qsdatabase"}{"username"} = $installation_variables{"mysql_eqemu_user"};
     $config->{"server"}{"qsdatabase"}{"password"} = $installation_variables{"mysql_eqemu_password"};
     $config->{"server"}{"qsdatabase"}{"db"}       = $db_name;
@@ -895,9 +875,9 @@ sub do_install_config_login_json
 
     my $content;
     open(my $fh, '<', "login_template.json") or die "cannot open file $filename"; {
-        local $/;
-        $content = <$fh>;
-    }
+    local $/;
+    $content = <$fh>;
+}
     close($fh);
 
     $config = $json->decode($content);
@@ -943,7 +923,7 @@ sub fetch_utility_scripts
         foreach my $file (@files) {
             my $full_file = "bin/" . $file;
 
-            if ($file=~/test|launch/i) {
+            if ($file =~ /test|launch/i) {
                 next;
             }
 
@@ -983,9 +963,6 @@ sub fetch_utility_scripts
 
 sub setup_bots
 {
-    if ($OS eq "Windows") {
-        fetch_latest_windows_appveyor_bots();
-    }
     if ($OS eq "Linux") {
         build_linux_source("bots");
     }
@@ -1046,8 +1023,6 @@ sub show_menu_prompt
                 print ">>> Windows\n";
                 print " [windows_server_download]	Updates server via latest 'stable' code\n";
                 print " [windows_server_latest]	Updates server via latest commit 'unstable'\n";
-                print " [windows_server_download_bots]	Updates server (bots) via latest 'stable'\n";
-                print " [windows_server_latest_bots]	Updates server (bots) via latest commit 'unstable'\n";
                 print " [fetch_dlls]			Grabs dll's needed to run windows binaries\n";
                 print " [setup_loginserver]		Sets up loginserver for Windows\n";
             }
@@ -1100,15 +1075,11 @@ sub show_menu_prompt
             $dc = 1;
         }
         elsif ($input eq "windows_server_download") {
-            fetch_latest_windows_binaries();
+            fetch_latest_windows_appveyor();
             $dc = 1;
         }
         elsif ($input eq "windows_server_latest") {
             fetch_latest_windows_appveyor();
-            $dc = 1;
-        }
-        elsif ($input eq "windows_server_latest_bots") {
-            fetch_latest_windows_appveyor_bots();
             $dc = 1;
         }
         elsif ($input eq "fetch_dlls") {
@@ -1133,10 +1104,6 @@ sub show_menu_prompt
         }
         elsif ($input eq "new_server") {
             new_server();
-            $dc = 1;
-        }
-        elsif ($input eq "new_server_with_bots") {
-            new_server("bots");
             $dc = 1;
         }
         elsif ($input eq "setup_bots") {
@@ -1248,97 +1215,55 @@ sub get_mysql_path
     }
 }
 
-sub check_for_database_dump_script
+sub get_world_path
 {
-    #::: Check for internet connection before updating
-    if (!$has_internet_connection) {
-        print "[Update] Cannot check update without internet connection...\n";
-        return;
+    if (-e "world") {
+        return "world";
+    }
+    elsif (-e "world.exe") {
+        return "world.exe";
+    }
+    elsif (-e "bin/world") {
+        return "bin/world";
+    }
+    elsif (-e "bin/world.exe") {
+        return "bin/world.exe";
+    }
+}
+
+sub get_world_command
+{
+    my $command    = "";
+    my $world_path = get_world_path();
+    if ($OS eq "Windows") {
+        $command = "\"$world_path\"";
+    }
+    if ($OS eq "Linux") {
+        $command = "./$world_path";
     }
 
-    #::: Check for script changes :: database_dumper.pl
-    get_remote_file($eqemu_repository_request_url . "utils/scripts/database_dumper.pl",
-        "updates_staged/database_dumper.pl",
-        0,
-        1,
-        1);
-
-    if (-e "updates_staged/database_dumper.pl") {
-
-        my $remote_script_size = -s "updates_staged/database_dumper.pl";
-        my $local_script_size  = -s "database_dumper.pl";
-
-        if ($remote_script_size != $local_script_size) {
-            print "[Update] Script has been updated, updating...\n";
-
-            my @files;
-            my $start_dir = "updates_staged/";
-            find(
-                sub {push @files, $File::Find::name unless -d;},
-                $start_dir
-            );
-            for my $file (@files) {
-                if ($file =~ /database_dumper/i) {
-                    $destination_file = $file;
-                    $destination_file =~ s/updates_staged\///g;
-                    print "[Install] Installing [" . $destination_file . "]\n";
-                    unlink($destination_file);
-                    copy_file($file, $destination_file);
-                    if ($OS eq "Linux") {
-                        system("chmod 755 database_dumper.pl");
-                    }
-                }
-            }
-            print "[Install] Done\n";
-        }
-        else {
-            print "[Update] No script update necessary...\n";
-        }
-
-        unlink("updates_staged/database_dumper.pl");
-    }
-
-    return;
-
+    return $command;
 }
 
 sub database_dump
 {
-    check_for_database_dump_script();
     print "[Database] Performing database backup....\n";
-    print `perl database_dumper.pl database="$db" loc="backups"`;
+    my $command = get_world_command();
+    print `$command database:dump --all`;
 }
 
 sub database_dump_player_tables
 {
-    check_for_database_dump_script();
     print "[Database] Performing database backup of player tables....\n";
-    get_remote_file($eqemu_repository_request_url . "utils/sql/character_table_list.txt",
-        "backups/character_table_list.txt");
-
-    $tables = "";
-    open(FILE, "backups/character_table_list.txt");
-    $i = 0;
-    while (<FILE>) {
-        chomp;
-        $o      = $_;
-        $tables .= $o . ",";
-    }
-    $tables = substr($tables, 0, -1);
-
-    print `perl database_dumper.pl database="$db" loc="backups" tables="$tables" backup_name="player_tables_export" nolock`;
-
-    print "[Database] Press any key to continue...\n";
-
-    <>; #Read from STDIN
-
+    my $command = get_world_command();
+    print `$command database:dump --player-tables`;
 }
 
 sub database_dump_compress
 {
-    check_for_database_dump_script();
     print "[Database] Performing database backup....\n";
-    print `perl database_dumper.pl database="$db"  loc="backups" compress`;
+    my $command = get_world_command();
+    print `$command database:dump --all --compress`;
 }
 
 sub script_exit
@@ -1364,8 +1289,8 @@ sub check_db_version_table
 sub get_mysql_result
 {
     my $run_query = $_[0];
-    if (!$db) {return;}
-    if ($OS eq "Windows") {return `"$path" --host $host --user $user --password="$pass" $db -N -B -e "$run_query"`;}
+    if (!$db) { return; }
+    if ($OS eq "Windows") { return `"$path" --host $host --user $user --password="$pass" $db -N -B -e "$run_query"`; }
     if ($OS eq "Linux") {
         $run_query =~ s/`//g;
         return `$path --user="$user" --host $host --password="$pass" $db -N -B -e "$run_query"`;
@@ -1505,9 +1430,9 @@ sub read_eqemu_config_json
 
     my $content;
     open(my $fh, '<', "eqemu_config.json") or die "cannot open file $filename"; {
-        local $/;
-        $content = <$fh>;
-    }
+    local $/;
+    $content = <$fh>;
+}
     close($fh);
 
     $config = $json->decode($content);
@@ -1631,76 +1556,22 @@ sub copy_file
 sub fetch_latest_windows_appveyor
 {
     print "[Update] Fetching Latest Windows Binaries (unstable) from Appveyor... \n";
-    get_remote_file("https://ci.appveyor.com/api/projects/KimLS/server-pglwk/artifacts/build_x64.zip",
-        "updates_staged/build_x64.zip",
+    get_remote_file("https://github.com/eqemu/server/releases/latest/download/eqemu-server-windows-x64.zip",
+        "updates_staged/eqemu-server-windows-x64.zip",
         1
     );
 
     print "[Update] Fetched Latest Windows Binaries (unstable) from Appveyor... \n";
     print "[Update] Extracting... --- \n";
-    unzip('updates_staged/build_x64.zip', 'updates_staged/binaries/');
+    unzip('updates_staged/eqemu-server-windows-x64.zip', 'updates_staged/binaries/');
     my @files;
     my $start_dir = "updates_staged/binaries";
     find(
-        sub {push @files, $File::Find::name unless -d;},
+        sub { push @files, $File::Find::name unless -d; },
         $start_dir
     );
     for my $file (@files) {
         my $destination_file = $file;
-        $destination_file =~ s/updates_staged\/binaries\///g;
-        print "[Update] Installing [" . $bin_dir . $destination_file . "]\n";
-        copy_file($file, $bin_dir . $destination_file);
-    }
-    print "[Update] Done\n";
-
-    rmtree('updates_staged');
-}
-
-sub fetch_latest_windows_binaries
-{
-    print "[Update] Fetching Latest Windows Binaries... \n";
-    get_remote_file($install_repository_request_url . "master_windows_build.zip",
-        "updates_staged/master_windows_build.zip",
-        1
-    );
-    print "[Update] Fetched Latest Windows Binaries... \n";
-    print "[Update] Extracting... --- \n";
-    unzip('updates_staged/master_windows_build.zip', 'updates_staged/binaries/');
-    my @files;
-    my $start_dir = "updates_staged/binaries";
-    find(
-        sub {push @files, $File::Find::name unless -d;},
-        $start_dir
-    );
-    for my $file (@files) {
-        my $destination_file = $file;
-        $destination_file =~ s/updates_staged\/binaries\///g;
-        print "[Update] Installing [" . $bin_dir . $destination_file . "]\n";
-        copy_file($file, $bin_dir . $destination_file);
-    }
-    print "[Update] Done\n";
-
-    rmtree('updates_staged');
-}
-
-sub fetch_latest_windows_appveyor_bots
-{
-    print "[Update] Fetching Latest Windows Binaries with Bots (unstable) from Appveyor... \n";
-    get_remote_file("https://ci.appveyor.com/api/projects/KimLS/server-87crp/artifacts/build_x64.zip",
-        "updates_staged/eqemu-x64-bots.zip",
-        1);
-
-    print "[Update] Fetched Latest Windows Binaries (unstable) from Appveyor... \n";
-    print "[Update] Extracting... --- \n";
-    unzip('updates_staged/eqemu-x64-bots.zip', 'updates_staged/binaries/');
-    my @files;
-    my $start_dir = "updates_staged/binaries";
-    find(
-        sub {push @files, $File::Find::name unless -d;},
-        $start_dir
-    );
-    for my $file (@files) {
-        $destination_file = $file;
         $destination_file =~ s/updates_staged\/binaries\///g;
         print "[Update] Installing [" . $bin_dir . $destination_file . "]\n";
         copy_file($file, $bin_dir . $destination_file);
@@ -1895,7 +1766,7 @@ sub fetch_peq_db_full
     unzip('updates_staged/peq-latest.zip', 'updates_staged/peq_db/');
     my $start_dir = "updates_staged/peq_db/peq-dump";
     find(
-        sub {push @files, $File::Find::name unless -d;},
+        sub { push @files, $File::Find::name unless -d; },
         $start_dir
     );
     for my $file (@files) {
@@ -1916,7 +1787,7 @@ sub map_files_fetch_bulk
     my @files;
     my $start_dir = "maps/EQEmuMaps-master/";
     find(
-        sub {push @files, $File::Find::name unless -d;},
+        sub { push @files, $File::Find::name unless -d; },
         $start_dir
     );
     for my $file (@files) {
@@ -1929,45 +1800,6 @@ sub map_files_fetch_bulk
 
     rmtree('maps/EQEmuMaps-master');
     unlink('maps/maps.zip');
-}
-
-sub map_files_fetch
-{
-    print "[Install] Fetching Latest Maps --- \n";
-
-    get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuMaps/master/!eqemu_maps_manifest.txt",
-        "updates_staged/eqemu_maps_manifest.txt");
-
-    #::: Get Data from manifest
-    open(FILE, "updates_staged/eqemu_maps_manifest.txt");
-    $i = 0;
-    while (<FILE>) {
-        chomp;
-        $o                 = $_;
-        @manifest_map_data = split(',', $o);
-        if ($manifest_map_data[0] ne "") {
-            $maps_manifest[$i] = [ $manifest_map_data[0], $manifest_map_data[1] ];
-            $i++;
-        }
-    }
-
-    #::: Download
-    $fc                        = 0;
-    for ($m                    = 0; $m <= $i; $m++) {
-        my $file_existing      = $maps_manifest[$m][0];
-        my $file_existing_size = (stat $file_existing)[7];
-        if ($file_existing_size != $maps_manifest[$m][1]) {
-            print "[Install] Updating: '" . $maps_manifest[$m][0] . "'\n";
-            get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuMaps/master/" . $maps_manifest[$m][0],
-                $maps_manifest[$m][0],
-                1);
-            $fc++;
-        }
-    }
-
-    if ($fc == 0) {
-        print "[Install] No Map Updates found... \n\n";
-    }
 }
 
 sub quest_files_fetch
@@ -1989,7 +1821,7 @@ sub quest_files_fetch
     my @files;
     my $start_dir = "updates_staged/projecteqquests-master/";
     find(
-        sub {push @files, $File::Find::name unless -d;},
+        sub { push @files, $File::Find::name unless -d; },
         $start_dir
     );
     for my $file (@files) {
@@ -2054,7 +1886,7 @@ sub lua_modules_fetch
     my @files;
     my $start_dir = "updates_staged/projecteqquests-master/lua_modules/";
     find(
-        sub {push @files, $File::Find::name unless -d;},
+        sub { push @files, $File::Find::name unless -d; },
         $start_dir
     );
     for my $file (@files) {
@@ -2116,7 +1948,7 @@ sub plugins_fetch
     my @files;
     my $start_dir = "updates_staged/projecteqquests-master/plugins/";
     find(
-        sub {push @files, $File::Find::name unless -d;},
+        sub { push @files, $File::Find::name unless -d; },
         $start_dir
     );
     for my $file (@files) {
@@ -2603,7 +2435,7 @@ sub fetch_missing_db_update
 
 sub print_match_debug
 {
-    if (!$debug) {return;}
+    if (!$debug) { return; }
     print "	Match Type: '" . $match_type . "'\n";
     print "	Match Text: '" . $match_text . "'\n";
     print "	Query Check: '" . $query_check . "'\n";
@@ -2612,7 +2444,7 @@ sub print_match_debug
 
 sub print_break
 {
-    if (!$debug) {return;}
+    if (!$debug) { return; }
     print "\n==============================================\n";
 }
 
@@ -2652,13 +2484,13 @@ sub quest_heading_convert
     my @files;
     my $start_dir = "quests/.";
     find(
-        sub {push @files, $File::Find::name unless -d;},
+        sub { push @files, $File::Find::name unless -d; },
         $start_dir
     );
     for my $file (@files) {
 
         #::: Skip non script files
-        if ($file !~ /lua|pl/i) {next;}
+        if ($file !~ /lua|pl/i) { next; }
 
         if ($file =~ /lua|pl/i) {
             $print_buffer = "";
@@ -2672,7 +2504,7 @@ sub quest_heading_convert
                 $line = $_;
 
                 #::: Loop through matches
-                foreach my $key (sort (keys %matches)) {
+                foreach my $key (sort(keys %matches)) {
                     $argument_position = $matches{$key}[1];
                     $match             = $matches{$key}[0];
 
@@ -2783,7 +2615,7 @@ sub quest_faction_convert
     my @files;
     my $start_dir = "quests/.";
     find(
-        sub {push @files, $File::Find::name unless -d;},
+        sub { push @files, $File::Find::name unless -d; },
         $start_dir
     );
     for my $file (@files) {
@@ -2804,7 +2636,7 @@ sub quest_faction_convert
                 $line = $_;
 
                 #::: Loop through matches
-                foreach my $key (sort (keys %matches)) {
+                foreach my $key (sort(keys %matches)) {
                     $argument_position = $matches{$key}[1];
                     $match             = $matches{$key}[0];
 
@@ -2870,7 +2702,7 @@ sub fix_quest_factions
     my @files;
     my $start_dir = "quests/";
     find(
-        sub {push @files, $File::Find::name unless -d;},
+        sub { push @files, $File::Find::name unless -d; },
         $start_dir
     );
     for my $file (@files) {

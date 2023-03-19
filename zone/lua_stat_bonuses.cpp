@@ -380,7 +380,7 @@ uint32 Lua_StatBonuses::GetsongModCap() const {
 	return self->songModCap;
 }
 
-int8 Lua_StatBonuses::Gethatemod() const {
+int32 Lua_StatBonuses::Gethatemod() const {
 	Lua_Safe_Call_Int();
 	return self->hatemod;
 }

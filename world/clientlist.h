@@ -57,9 +57,9 @@ public:
 	ClientListEntry* FindCLEByCharacterID(uint32 iCharID);
 	ClientListEntry* FindCLEByLSID(uint32 iLSID);
 	ClientListEntry* GetCLE(uint32 iID);
-	void	GetCLEIP(uint32 iIP);
+	void	GetCLEIP(uint32 in_ip);
 	uint32	GetCLEIPCount(uint32 iLSAccountID);
-	void	DisconnectByIP(uint32 iIP);
+	void	DisconnectByIP(uint32 in_ip);
 	void	CLCheckStale();
 	void	CLEKeepAlive(uint32 numupdates, uint32* wid);
 	void	CLEAdd(uint32 iLSID, const char* iLoginServerName, const char* iLoginName, const char* iLoginKey, int16 iWorldAdmin = AccountStatus::Player, uint32 ip = 0, uint8 local=0);

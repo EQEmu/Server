@@ -17,7 +17,7 @@
 */
 
 #include "../common/spdat.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "../common/types.h"
 
 #include "client.h"
@@ -494,6 +494,8 @@ bool ZoneDatabase::LoadTraps(const char* zonename, int16 version) {
 		trap->CreateHiddenTrigger();
 		Log(Logs::General, Logs::Traps, "Trap %d successfully loaded.", trap->trap_id);
 	}
+
+	LogInfo("Loaded [{}] trap(s)", Strings::Commify(results.RowCount()));
 
 	return true;
 }

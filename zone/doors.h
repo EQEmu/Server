@@ -17,30 +17,31 @@ public:
 	Doors(const char *model, const glm::vec4& position, uint8 open_type = 58, uint16 size = 100);
 	Doors(const DoorsRepository::Doors& door);
 
-	bool GetDisableTimer() { return disable_timer; }
+	bool GetDisableTimer() { return m_disable_timer; }
 	bool IsDoor() const { return true; }
-	bool IsDoorOpen() { return is_open; }
+	bool IsDoorOpen() { return m_is_open; }
 	bool Process();
 	bool triggered;
-	char *GetDoorName() { return door_name; }
-	const glm::vec4 GetDestination() const { return m_Destination; }
-	const glm::vec4 &GetPosition() const { return m_Position; }
-	int GetIncline() { return incline; }
-	int GetInvertState() { return invert_state; }
-	uint8 GetDoorID() { return door_id; }
-	uint8 GetNoKeyring() { return no_key_ring; }
-	uint8 GetOpenType() { return open_type; }
-	uint8 GetTriggerDoorID() { return trigger_door; }
-	uint8 GetTriggerType() { return trigger_type; }
-	uint8 IsLDoNDoor() { return is_ldon_door; }
-	uint16 GetLockpick() { return lockpick; }
-	uint16 GetSize() { return size; }
-	uint32 GetClientVersionMask() { return client_version_mask; }
-	uint32 GetDoorDBID() { return database_id; }
-	uint32 GetDoorParam() { return door_param; }
-	uint32 GetEntityID() { return entity_id; }
-	uint32 GetGuildID() { return guild_id; }
-	uint32 GetKeyItem() { return key_item_id; }
+	char *GetDoorName() { return m_door_name; }
+	const glm::vec4 GetDestination() const { return m_destination; }
+	const glm::vec4 &GetPosition() const { return m_position; }
+	int GetDzSwitchID() const { return m_dz_switch_id; }
+	int GetIncline() { return m_incline; }
+	int GetInvertState() { return m_invert_state; }
+	uint8 GetDoorID() { return m_door_id; }
+	uint8 GetNoKeyring() { return m_no_key_ring; }
+	uint8 GetOpenType() { return m_open_type; }
+	uint8 GetTriggerDoorID() { return m_trigger_door; }
+	uint8 GetTriggerType() { return m_trigger_type; }
+	uint8 IsLDoNDoor() { return m_is_ldon_door; }
+	uint16 GetLockpick() { return m_lockpick; }
+	uint16 GetSize() { return m_size; }
+	uint32 GetClientVersionMask() { return m_client_version_mask; }
+	uint32 GetDoorDBID() { return m_database_id; }
+	uint32 GetDoorParam() { return m_door_param; }
+	uint32 GetEntityID() { return m_entity_id; }
+	uint32 GetGuildID() { return m_guild_id; }
+	uint32 GetKeyItem() { return m_key_item_id; }
 	void CreateDatabaseEntry();
 	void ForceClose(Mob *sender, bool alt_mode = false);
 	void ForceOpen(Mob *sender, bool alt_mode = false);
@@ -48,14 +49,14 @@ public:
 	void Open(Mob *sender, bool alt_mode = false);
 	void SetDisableTimer(bool flag);
 	void SetDoorName(const char *name);
-	void SetEntityID(uint32 entity) { entity_id = entity; }
+	void SetEntityID(uint32 entity) { m_entity_id = entity; }
 	void SetIncline(int in);
 	void SetInvertState(int in);
-	void SetKeyItem(uint32 in) { key_item_id = in; }
+	void SetKeyItem(uint32 in) { m_key_item_id = in; }
 	void SetLocation(float x, float y, float z);
-	void SetLockpick(uint16 in) { lockpick = in; }
-	void SetNoKeyring(uint8 in) { no_key_ring = in; }
-	void SetOpenState(bool st) { is_open = st; }
+	void SetLockpick(uint16 in) { m_lockpick = in; }
+	void SetNoKeyring(uint8 in) { m_no_key_ring = in; }
+	void SetOpenState(bool st) { m_is_open = st; }
 	void SetOpenType(uint8 in);
 	void SetPosition(const glm::vec4 &position);
 	void SetSize(uint16 size);
@@ -67,30 +68,31 @@ public:
 
 private:
 
-	uint32    database_id;
-	uint8     door_id;
-	char      zone_name[32];
-	char      door_name[32];
-	glm::vec4 m_Position;
-	int       incline;
-	uint8     open_type;
-	uint32    guild_id;
-	uint16    lockpick;
-	uint32    key_item_id;
-	uint8     no_key_ring;
-	uint8     trigger_door;
-	uint8     trigger_type;
-	uint32    door_param;
-	uint16    size;
-	int       invert_state;
-	uint32    entity_id;
-	bool      disable_timer;
-	bool      is_open;
-	Timer     close_timer;
-	char      destination_zone_name[16];
-	int       destination_instance_id;
-	glm::vec4 m_Destination;
-	uint8     is_ldon_door;
-	uint32    client_version_mask;
+	uint32    m_database_id;
+	uint8     m_door_id;
+	char      m_zone_name[32];
+	char      m_door_name[32];
+	glm::vec4 m_position;
+	int       m_incline;
+	uint8     m_open_type;
+	uint32    m_guild_id;
+	uint16    m_lockpick;
+	uint32    m_key_item_id;
+	uint8     m_no_key_ring;
+	uint8     m_trigger_door;
+	uint8     m_trigger_type;
+	uint32    m_door_param;
+	uint16    m_size;
+	int       m_invert_state;
+	uint32    m_entity_id;
+	bool      m_disable_timer;
+	bool      m_is_open;
+	Timer     m_close_timer;
+	char      m_destination_zone_name[16];
+	int       m_destination_instance_id;
+	glm::vec4 m_destination;
+	uint8     m_is_ldon_door;
+	int       m_dz_switch_id = 0;
+	uint32    m_client_version_mask;
 };
 #endif

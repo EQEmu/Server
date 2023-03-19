@@ -21,7 +21,7 @@ void command_databuckets(Client *c, const Seperator *sep)
 			}
 		}
 		if (sep->arg[2]) {
-			key_filter = str_tolower(sep->arg[2]);
+			key_filter = Strings::ToLower(sep->arg[2]);
 		}
 		std::string query = "SELECT `id`, `key`, `value`, `expires` FROM data_buckets";
 		if (!key_filter.empty()) { query += StringFormat(" WHERE `key` LIKE '%%%s%%'", key_filter.c_str()); }
@@ -68,7 +68,7 @@ void command_databuckets(Client *c, const Seperator *sep)
 			c->Message(
 				Chat::White,
 				"%s : %s",
-				EQ::SayLinkEngine::GenerateQuestSaylink(del_saylink, false, "Delete").c_str(),
+				Saylink::Silent(del_saylink, "Delete").c_str(),
 				key.c_str(),
 				"  Value:  ",
 				value.c_str());

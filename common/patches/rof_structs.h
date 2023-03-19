@@ -1,5 +1,5 @@
 /*	EQEMu: Everquest Server Emulator
-	
+
 	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 
 	This program is free software; you can redistribute it and/or modify
@@ -571,39 +571,39 @@ struct NewZone_Struct {
 /*0704*/	char	zone_short_name2[96];	//zone file name? excludes instance number which can be in previous version.
 /*0800*/	int32	unknown800;	//seen -1
 /*0804*/	char	unknown804[40]; //
-/*0844*/	int32	unknown844;	//seen 600
-/*0848*/	int32	unknown848;
-/*0852*/	uint16	zone_id;
-/*0854*/	uint16	zone_instance;
-/*0856*/	uint32	scriptNPCReceivedanItem;
-/*0860*/	uint32	bCheck;					// padded bool
-/*0864*/	uint32	scriptIDSomething;
-/*0868*/	uint32	underworld_teleport_index; // > 0 teleports w/ zone point index, invalid succors, -1 affects some collisions
-/*0872*/	uint32	scriptIDSomething3;
-/*0876*/	uint32	SuspendBuffs;
-/*0880*/	uint32	LavaDamage;		// Seen 50
-/*0884*/	uint32	MinLavaDamage;		// Seen 10
-/*0888*/	uint8	unknown888;		// Seen 1
-/*0889*/	uint8	unknown889;		// Seen 0 (POK) or 1 (rujj)
-/*0890*/	uint8	unknown890;		// Seen 1
-/*0891*/	uint8	unknown891;		// Seen 0
-/*0892*/	uint8	unknown892;		// Seen 0
-/*0893*/	uint8	unknown893;		// Seen 0 - 00
-/*0894*/	uint8	fall_damage;	// 0 = Fall Damage on, 1 = Fall Damage off
-/*0895*/	uint8	unknown895;		// Seen 0 - 00
-/*0896*/	uint32	FastRegenHP;		// Seen 180
-/*0900*/	uint32	FastRegenMana;		// Seen 180
-/*0904*/	uint32	FastRegenEndurance;		// Seen 180
-/*0908*/	uint32	unknown908;		// Seen 2
-/*0912*/	uint32	unknown912;		// Seen 2
-/*0916*/	float	FogDensity;		// Most zones have this set to 0.33 Blightfire had 0.16
-/*0920*/	uint32	unknown920;		// Seen 0
-/*0924*/	uint32	unknown924;		// Seen 0
-/*0928*/	uint32	unknown928;		// Seen 0
+/*0844*/	int32  unknown844;	//seen 600
+/*0848*/	int32  unknown848;
+/*0852*/	uint16 zone_id;
+/*0854*/	uint16 zone_instance;
+/*0856*/	uint32 scriptNPCReceivedanItem;
+/*0860*/	uint32 bCheck;					// padded bool
+/*0864*/	uint32 scriptIDSomething;
+/*0868*/	uint32 underworld_teleport_index; // > 0 teleports w/ zone point index, invalid succors, -1 affects some collisions
+/*0872*/	uint32 scriptIDSomething3;
+/*0876*/	uint32 suspend_buffs;
+/*0880*/	uint32 lava_damage;		// Seen 50
+/*0884*/	uint32 min_lava_damage;		// Seen 10
+/*0888*/	uint8  unknown888;		// Seen 1
+/*0889*/	uint8  unknown889;		// Seen 0 (POK) or 1 (rujj)
+/*0890*/	uint8  unknown890;		// Seen 1
+/*0891*/	uint8  unknown891;		// Seen 0
+/*0892*/	uint8  unknown892;		// Seen 0
+/*0893*/	uint8  unknown893;		// Seen 0 - 00
+/*0894*/	uint8  fall_damage;	// 0 = Fall Damage on, 1 = Fall Damage off
+/*0895*/	uint8  unknown895;		// Seen 0 - 00
+/*0896*/	uint32 fast_regen_hp;		// Seen 180
+/*0900*/	uint32 fast_regen_mana;		// Seen 180
+/*0904*/	uint32 fast_regen_endurance;		// Seen 180
+/*0908*/	uint32 unknown908;		// Seen 2
+/*0912*/	uint32 unknown912;		// Seen 2
+/*0916*/	float  FogDensity;		// Most zones have this set to 0.33 Blightfire had 0.16
+/*0920*/	uint32 unknown920;		// Seen 0
+/*0924*/	uint32 unknown924;		// Seen 0
+/*0928*/	uint32 unknown928;		// Seen 0
 /*0932*/	int32  unknown932;		// Seen -1
 /*0936*/	int32  unknown936;		// Seen -1
-/*0940*/	uint32  unknown940;		// Seen 0
-/*0944*/	float   unknown944;		// Seen 1.0
+/*0940*/	uint32 unknown940;		// Seen 0
+/*0944*/	float  unknown944;		// Seen 1.0
 /*0948*/
 };
 
@@ -4921,7 +4921,7 @@ struct DynamicZoneCompassEntry_Struct
 /*000*/ uint16 dz_zone_id;      // target dz id pair
 /*002*/ uint16 dz_instance_id;
 /*004*/ uint32 dz_type;         // 1: Expedition, 2: Tutorial (purple), 3: Task, 4: Mission, 5: Quest (green)
-/*008*/ uint32 unknown008;
+/*008*/ uint32 dz_switch_id;
 /*012*/ float y;
 /*016*/ float x;
 /*020*/ float z;

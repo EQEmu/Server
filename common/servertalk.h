@@ -169,6 +169,8 @@
 #define ServerOP_DzExpireWarning              0x045b
 #define ServerOP_DzCreated                    0x045c
 #define ServerOP_DzDeleted                    0x045d
+#define ServerOP_DzSetSwitchID                0x045e
+#define ServerOP_DzMovePC                     0x045f
 
 #define ServerOP_LSInfo				0x1000
 #define ServerOP_LSStatus			0x1001
@@ -219,28 +221,32 @@
 #define ServerOP_UCSServerStatusReply 0x4005
 #define ServerOP_UCSServerStatusRequest 0x4006
 #define ServerOP_UpdateSchedulerEvents 0x4007
+#define ServerOP_DiscordWebhookMessage 0x4008
 
 #define ServerOP_ReloadAAData 0x4100
 #define ServerOP_ReloadAlternateCurrencies 0x4101
 #define ServerOP_ReloadBlockedSpells 0x4102
-#define ServerOP_ReloadContentFlags 0x4103
-#define ServerOP_ReloadDoors 0x4104
-#define ServerOP_ReloadGroundSpawns 0x4105
-#define ServerOP_ReloadLevelEXPMods 0x4106
-#define ServerOP_ReloadLogs 0x4107
-#define ServerOP_ReloadMerchants 0x4108
-#define ServerOP_ReloadNPCEmotes 0x4109
-#define ServerOP_ReloadObjects 0x4110
-#define ServerOP_ReloadPerlExportSettings 0x4111
-#define ServerOP_ReloadRules 0x4112
-#define ServerOP_ReloadStaticZoneData 0x4113
-#define ServerOP_ReloadTasks 0x4114
-#define ServerOP_ReloadTitles 0x4115
-#define ServerOP_ReloadTraps 0x4116
-#define ServerOP_ReloadVariables 0x4117
-#define ServerOP_ReloadVeteranRewards 0x4118
-#define ServerOP_ReloadWorld 0x4119
-#define ServerOP_ReloadZonePoints 0x4120
+#define ServerOP_ReloadCommands 0x4103
+#define ServerOP_ReloadContentFlags 0x4104
+#define ServerOP_ReloadDoors 0x4105
+#define ServerOP_ReloadGroundSpawns 0x4106
+#define ServerOP_ReloadLevelEXPMods 0x4107
+#define ServerOP_ReloadLogs 0x4108
+#define ServerOP_ReloadMerchants 0x4109
+#define ServerOP_ReloadNPCEmotes 0x4110
+#define ServerOP_ReloadObjects 0x4111
+#define ServerOP_ReloadPerlExportSettings 0x4112
+#define ServerOP_ReloadRules 0x4113
+#define ServerOP_ReloadStaticZoneData 0x4114
+#define ServerOP_ReloadTasks 0x4115
+#define ServerOP_ReloadTitles 0x4116
+#define ServerOP_ReloadTraps 0x4117
+#define ServerOP_ReloadVariables 0x4118
+#define ServerOP_ReloadVeteranRewards 0x4119
+#define ServerOP_ReloadWorld 0x4120
+#define ServerOP_ReloadZonePoints 0x4121
+#define ServerOP_ReloadDzTemplates 0x4122
+#define ServerOP_ReloadZoneData 0x4123
 
 #define ServerOP_CZDialogueWindow 0x4500
 #define ServerOP_CZLDoNUpdate 0x4501
@@ -599,7 +605,7 @@ struct ServerKickPlayer_Struct {
 	char adminname[64];
 	int16 adminrank;
 	char name[64];
-	uint32 AccountID;
+	uint32 account_id;
 };
 
 struct ServerLSInfo_Struct {
@@ -740,8 +746,8 @@ struct ServerMultiLineMsg_Struct {
 };
 
 struct ServerLock_Struct {
-	char	myname[64]; // User that did it
-	uint8	mode; // 0 = Unlocked ; 1 = Locked
+	char character_name[64];
+	bool is_locked;
 };
 
 struct ServerMotd_Struct {
@@ -1283,7 +1289,7 @@ struct ServerLeaderboardRequest_Struct
 struct ServerCameraShake_Struct
 {
 	uint32 duration; // milliseconds
-	uint32 intensity; // number from 1-10
+	float intensity;
 };
 
 struct ServerMailMessageHeader_Struct {
@@ -1449,6 +1455,11 @@ struct QSMerchantLogTransaction_Struct {
 	QSTransactionItems_Struct items[0];
 };
 
+struct DiscordWebhookMessage_Struct {
+	uint32 webhook_id;
+	char message[2000];
+};
+
 struct QSGeneralQuery_Struct {
 	char QueryString[0];
 };
@@ -1517,7 +1528,7 @@ struct CZSetEntityVariable_Struct {
 struct CZSignal_Struct {
 	uint8 update_type; // 0 - Character, 1 - Group, 2 - Raid, 3 - Guild, 4 - Expedition, 5 - Character Name, 6 - NPC
 	int update_identifier; // Character ID, Group ID, Raid ID, Guild ID, Expedition ID, or NPC ID based on update type, 0 for Character Name
-	uint32 signal;
+	int signal_id;
 	char client_name[64]; // Only used by Character Name Type, else empty
 };
 
@@ -1590,7 +1601,7 @@ struct WWSetEntityVariable_Struct {
 
 struct WWSignal_Struct {
 	uint8 update_type; // 0 - Character, 1 - NPC
-	uint32 signal;
+	int signal_id;
 	uint8 min_status;
 	uint8 max_status;
 };
@@ -1663,6 +1674,13 @@ struct ServerDzMemberStatuses_Struct {
 	uint32 dz_id;
 	uint32 count;
 	ServerDzMemberStatusEntry_Struct entries[0];
+};
+
+struct ServerDzMovePC_Struct {
+	uint32 dz_id;
+	uint16 sender_zone_id;
+	uint16 sender_instance_id;
+	uint32 character_id;
 };
 
 struct ServerExpeditionLockout_Struct {
@@ -1746,6 +1764,11 @@ struct ServerDzLocation_Struct {
 	float  heading;
 };
 
+struct ServerDzSwitchID_Struct {
+	uint32 dz_id;
+	int    dz_switch_id;
+};
+
 struct ServerDzMember_Struct {
 	uint32 dz_id;
 	uint16 dz_zone_id;
@@ -1786,6 +1809,10 @@ struct ServerDzCreateSerialized_Struct {
 struct ServerFlagUpdate_Struct {
 	uint32 account_id;
 	int16 admin;
+};
+
+struct ServerOOCMute_Struct {
+	bool is_muted;
 };
 
 #pragma pack()

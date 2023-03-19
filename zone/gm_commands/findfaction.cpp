@@ -33,12 +33,12 @@ void command_findfaction(Client *c, const Seperator *sep)
 		}
 	}
 	else {
-		std::string search_criteria = str_tolower(sep->argplus[1]);
+		std::string search_criteria = Strings::ToLower(sep->argplus[1]);
 		int         found_count     = 0;
 		int         max_faction_id  = content_db.GetMaxFaction();
 		for (int    faction_id      = 0; faction_id < max_faction_id; faction_id++) {
 			std::string faction_name       = content_db.GetFactionName(faction_id);
-			std::string faction_name_lower = str_tolower(faction_name);
+			std::string faction_name_lower = Strings::ToLower(faction_name);
 			if (faction_name.empty()) {
 				continue;
 			}

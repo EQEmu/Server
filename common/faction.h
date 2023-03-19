@@ -75,6 +75,23 @@ struct NPCFaction
 	uint8 temp;
 };
 
+// Faction Associations give a much more live like faction system
+// Basically the primary faction and magnitude of a faction hit will generate the rest of them
+
+// Largest faction I could find quickly was Lord Inquisitor Seru with 9 total hits (8 associations) so 8 + 2 for max for now
+#define MAX_FACTION_ASSOC 10
+
+// this is the ID of a faction association and it's multiplier
+struct FactionAssociationHit {
+	int id;
+	float multiplier;
+};
+
+struct FactionAssociations {
+	// maybe there should be more data here, fine for now
+	FactionAssociationHit hits[MAX_FACTION_ASSOC];
+};
+
 const char *FactionValueToString(FACTION_VALUE faction_value);
 FACTION_VALUE CalculateFaction(FactionMods* fm, int32 tmpCharacter_value);
 #endif

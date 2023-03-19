@@ -25,7 +25,7 @@
 //#include "races.h"
 //#include "rulesys.h"
 //#include "shareddb.h"
-#include "string_util.h"
+#include "strings.h"
 
 #include "../common/light_source.h"
 
@@ -245,7 +245,7 @@ int16 EQ::InventoryProfile::PutItem(int16 slot_id, const ItemInstance& inst)
 		if (temp_slot >= m_lookup->InventoryTypeSize.Bank)
 			return EQ::invslot::SLOT_INVALID;
 	}
-	
+
 	// Clean up item already in slot (if exists)
 	DeleteItem(slot_id);
 
@@ -617,7 +617,7 @@ int EQ::InventoryProfile::CountAugmentEquippedByID(uint32 item_id)
 			quantity += item->CountAugmentByID(item_id);
 		}
 	}
-	
+
 	return quantity;
 }
 
@@ -648,7 +648,7 @@ int EQ::InventoryProfile::CountItemEquippedByID(uint32 item_id)
 			quantity += item->IsStackable() ? item->GetCharges() : 1;
 		}
 	}
-	
+
 	return quantity;
 }
 
@@ -993,7 +993,7 @@ int16 EQ::InventoryProfile::CalcSlotId(int16 slot_id) {
 	//else if (slot_id >= EmuConstants::BANK_BEGIN && slot_id <= EmuConstants::BANK_END)
 	//	parent_slot_id = EmuConstants::BANK_BEGIN + (slot_id - EmuConstants::BANK_BEGIN) / EmuConstants::ITEM_CONTAINER_SIZE;
 	//else if (slot_id >= 3100 && slot_id <= 3179) should be {3031..3110}..where did this range come from!!? (verified db save range)
-	
+
 	if (slot_id >= invbag::GENERAL_BAGS_BEGIN && slot_id <= invbag::GENERAL_BAGS_END) {
 		parent_slot_id = invslot::GENERAL_BEGIN + (slot_id - invbag::GENERAL_BAGS_BEGIN) / invbag::SLOT_COUNT;
 	}
@@ -1231,7 +1231,7 @@ uint8 EQ::InventoryProfile::FindBrightestLightType()
 	for (auto iter = m_worn.begin(); iter != m_worn.end(); ++iter) {
 		if ((iter->first < invslot::EQUIPMENT_BEGIN || iter->first > invslot::EQUIPMENT_END))
 			continue;
-		
+
 		if (iter->first == invslot::slotAmmo)
 			continue;
 
@@ -1369,7 +1369,7 @@ EQ::ItemInstance* EQ::InventoryProfile::_GetItem(const std::map<int16, ItemInsta
 		if (slot_id - EQ::invslot::BANK_BEGIN >= m_lookup->InventoryTypeSize.Bank)
 			return nullptr;
 	}
-	
+
 	auto it = bucket.find(slot_id);
 	if (it != bucket.end()) {
 		return it->second;
@@ -1441,7 +1441,7 @@ int16 EQ::InventoryProfile::_PutItem(int16 slot_id, ItemInstance* inst)
 			result = slot_id;
 		}
 	}
-	
+
 	if (result == INVALID_INDEX) {
 		LogError("InventoryProfile::_PutItem: Invalid slot_id specified ({}) with parent slot id ({})", slot_id, parentSlot);
 		InventoryProfile::MarkDirty(inst); // Slot not found, clean up
@@ -1478,7 +1478,7 @@ int16 EQ::InventoryProfile::_HasItem(std::map<int16, ItemInstance*>& bucket, uin
 			if (inst->GetAugmentItemID(index) == item_id && quantity <= 1)
 				return invslot::SLOT_AUGMENT_GENERIC_RETURN;
 		}
-		
+
 		if (!inst->IsClassBag()) { continue; }
 
 		for (auto bag_iter = inst->_cbegin(); bag_iter != inst->_cend(); ++bag_iter) {
@@ -1509,7 +1509,7 @@ int16 EQ::InventoryProfile::_HasItem(ItemInstQueue& iqueue, uint32 item_id, uint
 	// is sufficient. However, in cases where referential criteria is considered, this can lead
 	// to unintended results. Funtionality should be observed when referencing the return value
 	// of this query
-	
+
 	uint32 quantity_found = 0;
 
 	for (auto iter = iqueue.cbegin(); iter != iqueue.cend(); ++iter) {
@@ -1715,6 +1715,20 @@ int16 EQ::InventoryProfile::_HasItemByLoreGroup(ItemInstQueue& iqueue, uint32 lo
 		// We only check the visible cursor due to lack of queue processing ability (client allows duplicate in limbo)
 		break;
 	}
-	
+
 	return EQ::invslot::SLOT_INVALID;
+}
+
+std::vector<uint32> EQ::InventoryProfile::GetAugmentIDsBySlotID(int16 slot_id)
+{
+	std::vector<uint32> augments;
+	const auto* item = GetItem(slot_id);
+
+	if (item) {
+		for (uint8 i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; i++) {
+			augments.push_back(item->GetAugment(i) ? item->GetAugmentItemID(i) : 0);
+		}
+	}
+
+	return augments;
 }

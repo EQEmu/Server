@@ -8,6 +8,28 @@
 #include <string>
 #include <algorithm>
 
+constexpr float MAX_TASK_SELECT_DISTANCE = 60.0f; // client closes window at this distance
+
+struct TaskOffer
+{
+	int task_id;
+	uint16_t npc_entity_id;
+};
+
+struct TaskUpdateFilter
+{
+	int task_id           = 0;
+	int dz_switch_id      = 0;
+	uint32_t item_id      = 0;
+	glm::vec4 pos;
+	bool use_pos          = false; // if true uses pos instead of client position for area filters
+	bool ignore_area      = false; // if true, area check is disabled
+	Mob* mob              = nullptr;
+	Client* exp_client    = nullptr; // used by Kill tasks to filter shared task updates
+	TaskActivityType type = TaskActivityType::None;
+	TaskMethodType method = TaskMethodType::METHODSINGLEID;
+};
+
 class ClientTaskState {
 
 public:
@@ -33,29 +55,35 @@ public:
 	void CancelAllTasks(Client *client);
 	void RemoveTask(Client *client, int sequence_number, TaskType task_type);
 	void RemoveTaskByTaskID(Client *client, uint32 task_id);
-	bool UpdateTasksByNPC(Client *client, TaskActivityType activity_type, int npc_type_id);
-	void UpdateTasksForItem(Client *client, TaskActivityType activity_type, int item_id, int count = 1);
-	void UpdateTasksOnExplore(Client *client, int explore_id);
-	bool UpdateTasksOnSpeakWith(Client *client, int npc_type_id);
-	bool UpdateTasksOnDeliver(Client *client, std::list<EQ::ItemInstance *> &items, int cash, int npc_type_id);
-	void UpdateTasksOnTouch(Client *client, int zone_id);
+	bool UpdateTasksByNPC(Client* client, TaskActivityType type, NPC* npc);
+	void UpdateTasksForItem(Client* client, TaskActivityType type, int item_id, int count = 1);
+	void UpdateTasksOnLoot(Client* client, Corpse* corpse, int item_id, int count = 1);
+	void UpdateTasksOnExplore(Client* client, const glm::vec4& loc);
+	bool UpdateTasksOnSpeakWith(Client* client, NPC* npc);
+	bool UpdateTasksOnDeliver(Client* client, std::vector<EQ::ItemInstance*>& items, Trade& trade, NPC* npc);
+	void UpdateTasksOnTouch(Client *client, int dz_switch_id);
 	void ProcessTaskProximities(Client *client, float x, float y, float z);
 	bool TaskOutOfTime(TaskType task_type, int index);
 	void TaskPeriodicChecks(Client *client);
 	void SendTaskHistory(Client *client, int task_index);
-	void RewardTask(Client *client, TaskInformation *task_information);
+	void RewardTask(Client* c, const TaskInformation* ti, ClientTaskInformation& client_task);
 	void EnableTask(int character_id, int task_count, int *task_list);
 	void DisableTask(int character_id, int task_count, int *task_list);
 	bool IsTaskEnabled(int task_id);
 	int EnabledTaskCount(int task_set_id);
-	int ActiveSpeakTask(int npc_type_id);
-	int ActiveSpeakActivity(int npc_type_id, int task_id);
+	int ActiveSpeakTask(Client* client, NPC* npc);
+	int ActiveSpeakActivity(Client* client, NPC* npc, int task_id);
 	int ActiveTasksInSet(int task_set_id);
 	int CompletedTasksInSet(int task_set_id);
-	bool HasSlotForTask(TaskInformation *task);
+	bool HasSlotForTask(const TaskInformation* task);
 	void CreateTaskDynamicZone(Client* client, int task_id, DynamicZone& dz);
 	void ListTaskTimers(Client* client);
 	void KickPlayersSharedTask(Client* client);
+	void LockSharedTask(Client* client, bool lock);
+	void ClearLastOffers() { m_last_offers.clear(); }
+	bool CanAcceptNewTask(Client* client, int task_id, int npc_entity_id) const;
+	bool HasExploreTask(Client* client) const;
+	void EndSharedTask(Client* client, bool send_fail);
 
 	inline bool HasFreeTaskSlot() { return m_active_task.task_id == TASKSLOTEMPTY; }
 
@@ -74,18 +102,28 @@ public:
 	bool HasActiveSharedTask();
 
 private:
-	void AddReplayTimer(Client *client, ClientTaskInformation& client_task, TaskInformation& task);
+	const TaskInformation* GetTaskData(const ClientTaskInformation& client_task) const;
 
-	void IncrementDoneCount(
+	void AddOffer(int task_id, uint16_t npc_entity_id) { m_last_offers.push_back({task_id, npc_entity_id}); };
+	void AddReplayTimer(Client *client, ClientTaskInformation& client_task, const TaskInformation& task);
+	bool CanUpdate(Client* client, const TaskUpdateFilter& filter, int task_id,
+		const ActivityInformation& activity, const ClientActivityInformation& client_activity) const;
+	int DispatchEventTaskComplete(Client* client, ClientTaskInformation& client_task, int activity_id);
+	std::pair<int, int> FindTask(Client* client, const TaskUpdateFilter& filter) const;
+	void RecordCompletedTask(uint32_t character_id, const TaskInformation& task, const ClientTaskInformation& client_task);
+	void UpdateTasksOnKill(Client* client, Client* exp_client, NPC* npc);
+	int UpdateTasks(Client* client, const TaskUpdateFilter& filter, int count = 1);
+
+	int IncrementDoneCount(
 		Client *client,
-		TaskInformation *task_information,
+		const TaskInformation* task_data,
 		int task_index,
 		int activity_id,
 		int count = 1,
 		bool ignore_quest_update = false
 	);
 
-	bool UnlockActivities(int character_id, ClientTaskInformation &task_info);
+	bool UnlockActivities(Client* client, ClientTaskInformation& task_info);
 
 	inline ClientTaskInformation *GetClientTaskInfo(TaskType task_type, int index)
 	{
@@ -128,19 +166,19 @@ private:
 	std::vector<int>                      m_enabled_tasks;
 	std::vector<CompletedTaskInformation> m_completed_tasks;
 	int                                   m_last_completed_task_loaded;
-	bool                                  m_checked_touch_activities;
+	std::vector<TaskOffer>                m_last_offers;
+	bool                                  m_has_explore_task = false;
 
 	static void ShowClientTaskInfoMessage(ClientTaskInformation *task, Client *c);
 
 	void SyncSharedTaskZoneClientDoneCountState(
 		Client *p_client,
-		TaskInformation *p_information,
+		TaskType type,
 		int task_index,
 		int activity_id,
 		uint32 done_count
 	);
 	bool HasActiveTasks();
 };
-
 
 #endif //EQEMU_TASK_CLIENT_STATE_H

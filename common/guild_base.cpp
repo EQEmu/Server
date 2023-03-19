@@ -20,7 +20,7 @@
 #include "database.h"
 
 //#include "misc_functions.h"
-#include "string_util.h"
+#include "strings.h"
 #include <cstdlib>
 #include <cstring>
 
@@ -63,7 +63,9 @@ bool BaseGuildManager::LoadGuilds() {
 	for (auto row=results.begin();row!=results.end();++row)
 		_CreateGuild(atoi(row[0]), row[1], atoi(row[2]), atoi(row[3]), row[4], row[5], row[6], row[7]);
 
-    query = "SELECT guild_id,`rank`,title,can_hear,can_speak,can_invite,can_remove,can_promote,can_demote,can_motd,can_warpeace FROM guild_ranks";
+	LogInfo("Loaded [{}] Guilds", Strings::Commify(std::to_string(results.RowCount())));
+
+	query = "SELECT guild_id,`rank`,title,can_hear,can_speak,can_invite,can_remove,can_promote,can_demote,can_motd,can_warpeace FROM guild_ranks";
 	results = m_db->QueryDatabase(query);
 
 	if (!results.Success())
@@ -864,20 +866,11 @@ bool BaseGuildManager::QueryWithLogging(std::string query, const char *errmsg) {
 	return(true);
 }
 
-//factored out so I dont have to copy this crap.
-#ifdef BOTS
-#define GuildMemberBaseQuery \
-"SELECT c.`id`, c.`name`, c.`class`, c.`level`, c.`last_login`, c.`zone_id`," \
-" g.`guild_id`, g.`rank`, g.`tribute_enable`, g.`total_tribute`, g.`last_tribute`," \
-" g.`banker`, g.`public_note`, g.`alt`" \
-" FROM `vw_bot_character_mobs` AS c LEFT JOIN `vw_guild_members` AS g ON c.`id` = g.`char_id` AND c.`mob_type` = g.`mob_type` "
-#else
 #define GuildMemberBaseQuery \
 "SELECT c.`id`, c.`name`, c.`class`, c.`level`, c.`last_login`, c.`zone_id`," \
 " g.`guild_id`, g.`rank`, g.`tribute_enable`, g.`total_tribute`, g.`last_tribute`," \
 " g.`banker`, g.`public_note`, g.`alt` " \
 " FROM `character_data` AS c LEFT JOIN `guild_members` AS g ON c.`id` = g.`char_id` "
-#endif
 static void ProcessGuildMember(MySQLRequestRow row, CharGuildInfo &into) {
 	//fields from `characer_`
 	into.char_id		= atoi(row[0]);
@@ -967,13 +960,8 @@ bool BaseGuildManager::GetCharInfo(uint32 char_id, CharGuildInfo &into) {
 	}
 
 	//load up the rank info for each guild.
-	std::string query;
-#ifdef BOTS
-    query = StringFormat(GuildMemberBaseQuery " WHERE c.id=%d AND c.mob_type = 'C' AND c.deleted_at IS NULL", char_id);
-#else
-    query = StringFormat(GuildMemberBaseQuery " WHERE c.id=%d AND c.deleted_at IS NULL", char_id);
-#endif
-    auto results = m_db->QueryDatabase(query);
+	std::string query   = StringFormat(GuildMemberBaseQuery " WHERE c.id=%d AND c.deleted_at IS NULL", char_id);
+	auto        results = m_db->QueryDatabase(query);
 	if (!results.Success()) {
 		return false;
 	}
@@ -1281,7 +1269,7 @@ bool BaseGuildManager::IsCharacterInGuild(uint32 character_id, uint32 guild_id)
 	if (current_guild_id == GUILD_NONE) {
 		return false;
 	}
-	
+
 	if (guild_id && current_guild_id != guild_id) {
 		return false;
 	}

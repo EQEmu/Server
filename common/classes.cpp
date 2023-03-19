@@ -380,12 +380,12 @@ const char *GetClassIDName(uint8 class_id, uint8 level)
 			return "Merchant";
 		case DISCORD_MERCHANT:
 			return "Discord Merchant";
-		case ADVENTURERECRUITER:
+		case ADVENTURE_RECRUITER:
 			return "Adventure Recruiter";
-		case ADVENTUREMERCHANT:
+		case ADVENTURE_MERCHANT:
 			return "Adventure Merchant";
-		case CORPSE_CLASS:
-			return "Corpse Class";
+		case LDON_TREASURE:
+			return "LDoN Treasure";
 		case TRIBUTE_MASTER:
 			return "Tribute Master";
 		case GUILD_TRIBUTE_MASTER:
@@ -400,7 +400,7 @@ const char *GetClassIDName(uint8 class_id, uint8 level)
 			return "Fellowship Master";
 		case ALT_CURRENCY_MERCHANT:
 			return "Alternate Currency Merchant";
-		case MERCERNARY_MASTER:
+		case MERCENARY_MASTER:
 			return "Mercenary Liaison";
 		default:
 			return "Unknown";

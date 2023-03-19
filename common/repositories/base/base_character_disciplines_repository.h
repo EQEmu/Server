@@ -13,15 +13,15 @@
 #define EQEMU_BASE_CHARACTER_DISCIPLINES_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseCharacterDisciplinesRepository {
 public:
 	struct CharacterDisciplines {
-		int id;
-		int slot_id;
-		int disc_id;
+		uint32_t id;
+		uint16_t slot_id;
+		uint16_t disc_id;
 	};
 
 	static std::string PrimaryKey()
@@ -49,12 +49,12 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string SelectColumnsRaw()
 	{
-		return std::string(implode(", ", SelectColumns()));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -82,16 +82,16 @@ public:
 
 	static CharacterDisciplines NewEntity()
 	{
-		CharacterDisciplines entry{};
+		CharacterDisciplines e{};
 
-		entry.id      = 0;
-		entry.slot_id = 0;
-		entry.disc_id = 0;
+		e.id      = 0;
+		e.slot_id = 0;
+		e.disc_id = 0;
 
-		return entry;
+		return e;
 	}
 
-	static CharacterDisciplines GetCharacterDisciplinesEntry(
+	static CharacterDisciplines GetCharacterDisciplines(
 		const std::vector<CharacterDisciplines> &character_discipliness,
 		int character_disciplines_id
 	)
@@ -120,13 +120,13 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			CharacterDisciplines entry{};
+			CharacterDisciplines e{};
 
-			entry.id      = atoi(row[0]);
-			entry.slot_id = atoi(row[1]);
-			entry.disc_id = atoi(row[2]);
+			e.id      = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.slot_id = static_cast<uint16_t>(strtoul(row[1], nullptr, 10));
+			e.disc_id = static_cast<uint16_t>(strtoul(row[2], nullptr, 10));
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -151,24 +151,24 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		CharacterDisciplines character_disciplines_entry
+		const CharacterDisciplines &e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(character_disciplines_entry.id));
-		update_values.push_back(columns[1] + " = " + std::to_string(character_disciplines_entry.slot_id));
-		update_values.push_back(columns[2] + " = " + std::to_string(character_disciplines_entry.disc_id));
+		v.push_back(columns[0] + " = " + std::to_string(e.id));
+		v.push_back(columns[1] + " = " + std::to_string(e.slot_id));
+		v.push_back(columns[2] + " = " + std::to_string(e.disc_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
-				character_disciplines_entry.id
+				e.id
 			)
 		);
 
@@ -177,57 +177,57 @@ public:
 
 	static CharacterDisciplines InsertOne(
 		Database& db,
-		CharacterDisciplines character_disciplines_entry
+		CharacterDisciplines e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(character_disciplines_entry.id));
-		insert_values.push_back(std::to_string(character_disciplines_entry.slot_id));
-		insert_values.push_back(std::to_string(character_disciplines_entry.disc_id));
+		v.push_back(std::to_string(e.id));
+		v.push_back(std::to_string(e.slot_id));
+		v.push_back(std::to_string(e.disc_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
 		if (results.Success()) {
-			character_disciplines_entry.id = results.LastInsertedID();
-			return character_disciplines_entry;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		character_disciplines_entry = NewEntity();
+		e = NewEntity();
 
-		return character_disciplines_entry;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<CharacterDisciplines> character_disciplines_entries
+		const std::vector<CharacterDisciplines> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &character_disciplines_entry: character_disciplines_entries) {
-			std::vector<std::string> insert_values;
+		for (auto &e: entries) {
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(character_disciplines_entry.id));
-			insert_values.push_back(std::to_string(character_disciplines_entry.slot_id));
-			insert_values.push_back(std::to_string(character_disciplines_entry.disc_id));
+			v.push_back(std::to_string(e.id));
+			v.push_back(std::to_string(e.slot_id));
+			v.push_back(std::to_string(e.disc_id));
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 
@@ -248,19 +248,19 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharacterDisciplines entry{};
+			CharacterDisciplines e{};
 
-			entry.id      = atoi(row[0]);
-			entry.slot_id = atoi(row[1]);
-			entry.disc_id = atoi(row[2]);
+			e.id      = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.slot_id = static_cast<uint16_t>(strtoul(row[1], nullptr, 10));
+			e.disc_id = static_cast<uint16_t>(strtoul(row[2], nullptr, 10));
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static std::vector<CharacterDisciplines> GetWhere(Database& db, std::string where_filter)
+	static std::vector<CharacterDisciplines> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<CharacterDisciplines> all_entries;
 
@@ -275,19 +275,19 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharacterDisciplines entry{};
+			CharacterDisciplines e{};
 
-			entry.id      = atoi(row[0]);
-			entry.slot_id = atoi(row[1]);
-			entry.disc_id = atoi(row[2]);
+			e.id      = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.slot_id = static_cast<uint16_t>(strtoul(row[1], nullptr, 10));
+			e.disc_id = static_cast<uint16_t>(strtoul(row[2], nullptr, 10));
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -310,6 +310,32 @@ public:
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int64 GetMaxId(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COALESCE(MAX({}), 0) FROM {}",
+				PrimaryKey(),
+				TableName()
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static int64 Count(Database& db, const std::string &where_filter = "")
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COUNT(*) FROM {} {}",
+				TableName(),
+				(where_filter.empty() ? "" : "WHERE " + where_filter)
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
 };

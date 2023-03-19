@@ -23,11 +23,15 @@
 #include "../../common/platform.h"
 #include "../../common/crash.h"
 #include "../../common/rulesys.h"
-#include "../../common/string_util.h"
+#include "../../common/strings.h"
 #include "../../common/content/world_content_service.h"
+#include "../../common/zone_store.h"
+#include "../../common/path_manager.h"
 
 EQEmuLogSys LogSys;
 WorldContentService content_service;
+ZoneStore zone_store;
+PathManager path;
 
 void ImportSpells(SharedDatabase *db);
 void ImportSkillCaps(SharedDatabase *db);
@@ -38,6 +42,8 @@ int main(int argc, char **argv) {
 	RegisterExecutablePlatform(ExePlatformClientImport);
 	LogSys.LoadLogSettingsDefaults();
 	set_exception_handler();
+
+	path.LoadPaths();
 
 	LogInfo("Client Files Import Utility");
 	if(!EQEmuConfig::LoadConfig()) {
@@ -81,6 +87,7 @@ int main(int argc, char **argv) {
 	}
 
 	LogSys.SetDatabase(&database)
+		->SetLogPath(path.GetLogPath())
 		->LoadLogDatabaseSettings()
 		->StartFileLogs();
 
@@ -125,9 +132,10 @@ bool IsStringField(int i) {
 
 void ImportSpells(SharedDatabase *db) {
 	LogInfo("Importing Spells");
-	FILE *f = fopen("import/spells_us.txt", "r");
+	std::string file = fmt::format("{}/import/spells_us.txt", path.GetServerPath());
+	FILE *f = fopen(file.c_str(), "r");
 	if(!f) {
-		LogError("Unable to open import/spells_us.txt to read, skipping.");
+		LogError("Unable to open {} to read, skipping.", file);
 		return;
 	}
 
@@ -146,8 +154,8 @@ void ImportSpells(SharedDatabase *db) {
 			}
 		}
 
-		std::string escaped = ::EscapeString(buffer);
-		auto split = SplitString(escaped, '^');
+		std::string escaped = ::Strings::Escape(buffer);
+		auto split = Strings::Split(escaped, '^');
 		int line_columns = (int)split.size();
 
 		std::string sql;
@@ -214,9 +222,10 @@ void ImportSpells(SharedDatabase *db) {
 void ImportSkillCaps(SharedDatabase *db) {
 	LogInfo("Importing Skill Caps");
 
-	FILE *f = fopen("import/SkillCaps.txt", "r");
+	std::string file = fmt::format("{}/import/SkillCaps.txt", path.GetServerPath());
+	FILE *f = fopen(file.c_str(), "r");
 	if(!f) {
-		LogError("Unable to open import/SkillCaps.txt to read, skipping.");
+		LogError("Unable to open {} to read, skipping.", file);
 		return;
 	}
 
@@ -225,7 +234,7 @@ void ImportSkillCaps(SharedDatabase *db) {
 
 	char buffer[2048];
 	while(fgets(buffer, 2048, f)) {
-		auto split = SplitString(buffer, '^');
+		auto split = Strings::Split(buffer, '^');
 
 		if(split.size() < 4) {
 			continue;
@@ -249,9 +258,10 @@ void ImportSkillCaps(SharedDatabase *db) {
 void ImportBaseData(SharedDatabase *db) {
 	LogInfo("Importing Base Data");
 
-	FILE *f = fopen("import/BaseData.txt", "r");
+	std::string file = fmt::format("{}/import/BaseData.txt", path.GetServerPath());
+	FILE *f = fopen(file.c_str(), "r");
 	if(!f) {
-		LogError("Unable to open import/BaseData.txt to read, skipping.");
+		LogError("Unable to open {} to read, skipping.", file);
 		return;
 	}
 
@@ -260,7 +270,7 @@ void ImportBaseData(SharedDatabase *db) {
 
 	char buffer[2048];
 	while(fgets(buffer, 2048, f)) {
-		auto split = SplitString(buffer, '^');
+		auto split = Strings::Split(buffer, '^');
 
 		if(split.size() < 10) {
 			continue;
@@ -294,9 +304,10 @@ void ImportBaseData(SharedDatabase *db) {
 void ImportDBStrings(SharedDatabase *db) {
 	LogInfo("Importing DB Strings");
 
-	FILE *f = fopen("import/dbstr_us.txt", "r");
+	std::string file = fmt::format("{}/import/dbstr_us.txt", path.GetServerPath());
+	FILE *f = fopen(file.c_str(), "r");
 	if(!f) {
-		LogError("Unable to open import/dbstr_us.txt to read, skipping.");
+		LogError("Unable to open {} to read, skipping.", file);
 		return;
 	}
 
@@ -318,7 +329,7 @@ void ImportDBStrings(SharedDatabase *db) {
 			}
 		}
 
-		auto split = SplitString(buffer, '^');
+		auto split = Strings::Split(buffer, '^');
 
 		if(split.size() < 2) {
 			continue;
@@ -332,7 +343,7 @@ void ImportDBStrings(SharedDatabase *db) {
 		type = atoi(split[1].c_str());
 
 		if(split.size() >= 3) {
-			value = ::EscapeString(split[2]);
+			value = ::Strings::Escape(split[2]);
 		}
 
 		sql = StringFormat("INSERT INTO db_str(id, type, value) VALUES(%u, %u, '%s')",

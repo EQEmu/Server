@@ -22,18 +22,21 @@ Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 #include "../common/eq_packet_structs.h"
 #include "../common/races.h"
 #include "../common/spdat.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "aa.h"
 #include "client.h"
 #include "corpse.h"
 #include "groups.h"
 #include "mob.h"
 #include "queryserv.h"
+#include "quest_parser_collection.h"
 #include "raids.h"
 #include "string_ids.h"
 #include "titles.h"
 #include "zonedb.h"
-#include "zone_store.h"
+#include "../common/zone_store.h"
+
+#include "bot.h"
 
 extern QueryServ* QServ;
 
@@ -310,7 +313,7 @@ void Mob::WakeTheDead(uint16 spell_id, Corpse *corpse_to_use, Mob *target, uint3
 	//pet.duration += GetFocusEffect(focusSwarmPetDuration, spell_id) / 1000; //TODO: Does WTD use pet focus?
 
 	pet.npc_id = WAKE_THE_DEAD_NPCTYPEID;
-	
+
 	NPCType *made_npc = nullptr;
 
 	const NPCType *npc_type = content_db.LoadNPCTypesData(WAKE_THE_DEAD_NPCTYPEID);
@@ -545,7 +548,7 @@ void Client::ResetAA() {
 	m_pp.raid_leadership_points = 0;
 	m_pp.group_leadership_exp = 0;
 	m_pp.raid_leadership_exp = 0;
-	
+
 	database.DeleteCharacterAAs(CharacterID());
 	database.DeleteCharacterLeadershipAAs(CharacterID());
 }
@@ -1147,65 +1150,95 @@ bool Client::GrantAlternateAdvancementAbility(int aa_id, int points, bool ignore
 }
 
 void Client::FinishAlternateAdvancementPurchase(AA::Rank *rank, bool ignore_cost) {
-	int rank_id = rank->base_ability->first_rank_id;
+	auto rank_id = rank->base_ability->first_rank_id;
 
-	if(rank->base_ability->charges > 0) {
+	if (rank->base_ability->charges) {
 		uint32 charges = 0;
 		GetAA(rank_id, &charges);
 
-		if(charges > 0) {
+		if (charges) {
 			return;
 		}
 
 		SetAA(rank_id, rank->current_value, rank->base_ability->charges);
-	}
-	else {
+	} else {
 		SetAA(rank_id, rank->current_value, 0);
 
 		//if not max then send next aa
-		if(rank->next) {
+		if (rank->next) {
 			SendAlternateAdvancementRank(rank->base_ability->id, rank->next->current_value);
 		}
 	}
 
-	int cost = !ignore_cost ? rank->cost : 0;
+	auto cost = !ignore_cost ? rank->cost : 0;
 
-	m_pp.aapoints -= cost ;
+	m_pp.aapoints -= static_cast<uint32>(cost);
 	SaveAA();
 
 	SendAlternateAdvancementPoints();
 	SendAlternateAdvancementStats();
 
-	if(rank->prev) {
-		MessageString(Chat::Yellow, AA_IMPROVE,
-						 std::to_string(rank->title_sid).c_str(),
-						 std::to_string(rank->prev->current_value).c_str(),
-						 std::to_string(cost).c_str(),
-						 cost == 1 ? std::to_string(AA_POINT).c_str() : std::to_string(AA_POINTS).c_str());
+	if (rank->prev) {
+		MessageString(
+			Chat::Yellow,
+			AA_IMPROVE,
+			std::to_string(rank->title_sid).c_str(),
+			std::to_string(rank->prev->current_value).c_str(),
+			std::to_string(cost).c_str(),
+			cost == 1 ? std::to_string(AA_POINT).c_str() : std::to_string(AA_POINTS).c_str()
+		);
 
 		/* QS: Player_Log_AA_Purchases */
-		if(RuleB(QueryServ, PlayerLogAAPurchases)) {
-			std::string event_desc = StringFormat("Ranked AA Purchase :: aa_id:%i at cost:%i in zoneid:%i instid:%i", rank->id, cost, GetZoneID(), GetInstanceID());
+		if (RuleB(QueryServ, PlayerLogAAPurchases)) {
+			const auto event_desc = fmt::format(
+				"Ranked AA Purchase :: aa_id:{} at cost:{} in zoneid:{} instid:{}",
+				rank->id,
+				cost,
+				GetZoneID(),
+				GetInstanceID()
+			);
+
 			QServ->PlayerLogEvent(Player_Log_AA_Purchases, CharacterID(), event_desc);
 		}
-	}
-	else {
-		MessageString(Chat::Yellow, AA_GAIN_ABILITY,
-						 std::to_string(rank->title_sid).c_str(),
-						 std::to_string(cost).c_str(),
-						 cost == 1 ? std::to_string(AA_POINT).c_str() : std::to_string(AA_POINTS).c_str());
+	} else {
+		MessageString(
+			Chat::Yellow,
+			AA_GAIN_ABILITY,
+			std::to_string(rank->title_sid).c_str(),
+			std::to_string(cost).c_str(),
+			cost == 1 ? std::to_string(AA_POINT).c_str() : std::to_string(AA_POINTS).c_str()
+		);
+
 		/* QS: Player_Log_AA_Purchases */
-		if(RuleB(QueryServ, PlayerLogAAPurchases)) {
-			std::string event_desc = StringFormat("Initial AA Purchase :: aa_id:%i at cost:%i in zoneid:%i instid:%i", rank->id, cost, GetZoneID(), GetInstanceID());
+		if (RuleB(QueryServ, PlayerLogAAPurchases)) {
+			const auto event_desc = fmt::format(
+				"Initial AA Purchase :: aa_id:{} at cost:{} in zoneid:{} instid:{}",
+				rank->id,
+				cost,
+				GetZoneID(),
+				GetInstanceID()
+			);
+
 			QServ->PlayerLogEvent(Player_Log_AA_Purchases, CharacterID(), event_desc);
 		}
 	}
+
+	const auto export_string = fmt::format(
+		"{} {} {} {}",
+		cost,
+		rank->id,
+		rank->prev_id,
+		rank->next_id
+	);
+
+	parse->EventPlayer(EVENT_AA_BUY, this, export_string, 0);
 
 	CalcBonuses();
 
-	if(cost > 0) {
-		if(title_manager.IsNewAATitleAvailable(m_pp.aapoints_spent, GetBaseClass()))
+	if (cost) {
+		if (title_manager.IsNewAATitleAvailable(m_pp.aapoints_spent, GetBaseClass())) {
 			NotifyNewTitlesAvailable();
+		}
 	}
 }
 
@@ -1561,13 +1594,11 @@ bool Mob::CanUseAlternateAdvancementRank(AA::Rank *rank) {
 			return false;
 		}
 	}
-#ifdef BOTS
 	else if (IsBot()) {
-		if (rank->expansion && !(RuleI(Bots, BotExpansionSettings) & (1 << (rank->expansion - 1)))) {
+		if (rank->expansion && !(CastToBot()->GetExpansionBitmask() & (1 << (rank->expansion - 1)))) {
 			return false;
 		}
 	}
-#endif
 	else {
 		if (rank->expansion && !(RuleI(World, ExpansionSettings) & (1 << (rank->expansion - 1)))) {
 			return false;
@@ -1665,7 +1696,6 @@ bool Mob::CanPurchaseAlternateAdvancementRank(AA::Rank *rank, bool check_price, 
 }
 
 void Zone::LoadAlternateAdvancement() {
-	LogInfo("Loading Alternate Advancement Data");
 	if(!content_db.LoadAlternateAdvancementAbilities(aa_abilities,
 		aa_ranks))
 	{
@@ -1675,7 +1705,6 @@ void Zone::LoadAlternateAdvancement() {
 		return;
 	}
 
-	LogInfo("Processing Alternate Advancement Data");
 	for(const auto &ability : aa_abilities) {
 		ability.second->first = GetAlternateAdvancementRank(ability.second->first_rank_id);
 
@@ -1725,14 +1754,11 @@ void Zone::LoadAlternateAdvancement() {
 			current = current->next;
 		}
 	}
-
-	LogInfo("Loaded Alternate Advancement Data");
 }
 
 bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std::unique_ptr<AA::Ability>> &abilities,
 													std::unordered_map<int, std::unique_ptr<AA::Rank>> &ranks)
 {
-	LogInfo("Loading Alternate Advancement Abilities");
 	abilities.clear();
 	std::string query = "SELECT id, name, category, classes, races, deities, drakkin_heritage, status, type, charges, "
 		"grant_only, reset_on_death, first_rank_id FROM aa_ability WHERE enabled = 1";
@@ -1763,11 +1789,10 @@ bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std
 		return false;
 	}
 
-	LogInfo("Loaded [{}] Alternate Advancement Abilities", (int)abilities.size());
+	LogInfo("Loaded [{}] Alternate Advancement Abilities", Strings::Commify((int)abilities.size()));
 	int expansion = RuleI(Expansion, CurrentExpansion);
 	bool use_expansion_aa = RuleB(Expansion, UseCurrentExpansionAAOnly);
-	
-	LogInfo("Loading Alternate Advancement Ability Ranks");
+
 	ranks.clear();
 	if (use_expansion_aa && expansion >= 0) {
 		query = fmt::format("SELECT id, upper_hotkey_sid, lower_hotkey_sid, title_sid, desc_sid, cost, level_req, spell, spell_type, recast_time, "
@@ -1805,9 +1830,8 @@ bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std
 		return false;
 	}
 
-	LogInfo("Loaded [{}] Alternate Advancement Ability Ranks", (int)ranks.size());
+	LogInfo("Loaded [{}] Alternate Advancement Ability Ranks", Strings::Commify((int)ranks.size()));
 
-	LogInfo("Loading Alternate Advancement Ability Rank Effects");
 	query = "SELECT rank_id, slot, effect_id, base1, base2 FROM aa_rank_effects";
 	results = QueryDatabase(query);
 	if(results.Success()) {
@@ -1832,9 +1856,8 @@ bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std
 		return false;
 	}
 
-	LogInfo("Loaded Alternate Advancement Ability Rank Effects");
+	LogInfo("Loaded [{}] Alternate Advancement Ability Rank Effects", Strings::Commify(results.RowCount()));
 
-	LogInfo("Loading Alternate Advancement Ability Rank Prereqs");
 	query = "SELECT rank_id, aa_id, points FROM aa_rank_prereqs";
 	results = QueryDatabase(query);
 	if(results.Success()) {
@@ -1857,7 +1880,7 @@ bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std
 		return false;
 	}
 
-	LogInfo("Loaded Alternate Advancement Ability Rank Prereqs");
+	LogInfo("Loaded [{}] Alternate Advancement Ability Rank Prereqs", Strings::Commify(results.RowCount()));
 
 	return true;
 }
@@ -1927,9 +1950,9 @@ void Client::TogglePassiveAlternativeAdvancement(const AA::Rank &rank, uint32 ab
 		//Enable
 		TogglePurchaseAlternativeAdvancementRank(rank.next_id);
 		Message(Chat::Spells, "You enable an ability."); //Message live gives you. Should come from spell.
-		
+
 		AA::Rank *rank_next = zone->GetAlternateAdvancementRank(rank.next_id);
-		
+
 		//Add checks for any special cases for toggle.
 		if (IsEffectinAlternateAdvancementRankEffects(*rank_next, SE_Weapon_Stance)) {
 			weaponstance.aabonus_enabled = true;
@@ -1990,7 +2013,7 @@ bool Client::IsEffectinAlternateAdvancementRankEffects(const AA::Rank &rank, int
 }
 
 void Client::ResetAlternateAdvancementRank(uint32 aa_id) {
-	
+
 	/*
 		Resets your AA to baseline
 	*/
@@ -2010,7 +2033,7 @@ void Client::ResetAlternateAdvancementRank(uint32 aa_id) {
 }
 
 void Client::TogglePurchaseAlternativeAdvancementRank(int rank_id){
-	
+
 	/*
 		Stripped down version of purchasing AA. Will give no messages.
 		Used with toggle hotkey functions.

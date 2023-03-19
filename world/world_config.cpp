@@ -16,39 +16,19 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/global_define.h"
+#include "../common/eqemu_logsys.h"
 #include "world_config.h"
 
 WorldConfig *WorldConfig::_world_config = nullptr;
 
-
-std::string WorldConfig::GetByName(const std::string &var_name) const {
-	if(var_name == "UpdateStats")
-		return(UpdateStats?"true":"false");
-	if(var_name == "LoginDisabled")
-		return(LoginDisabled?"true":"false");
-	return(EQEmuConfig::GetByName(var_name));
+std::string WorldConfig::GetByName(const std::string &var_name) const
+{
+	if (var_name == "UpdateStats") {
+		return (UpdateStats ? "true" : "false");
+	}
+	if (var_name == "LoginDisabled") {
+		return (LoginDisabled ? "true" : "false");
+	}
+	return (EQEmuConfig::GetByName(var_name));
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

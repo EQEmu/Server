@@ -13,17 +13,17 @@
 #define EQEMU_BASE_COMPLETED_SHARED_TASK_ACTIVITY_STATE_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseCompletedSharedTaskActivityStateRepository {
 public:
 	struct CompletedSharedTaskActivityState {
-		int64  shared_task_id;
-		int    activity_id;
-		int    done_count;
-		time_t updated_time;
-		time_t completed_time;
+		int64_t shared_task_id;
+		int32_t activity_id;
+		int32_t done_count;
+		time_t  updated_time;
+		time_t  completed_time;
 	};
 
 	static std::string PrimaryKey()
@@ -55,12 +55,12 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string SelectColumnsRaw()
 	{
-		return std::string(implode(", ", SelectColumns()));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -88,18 +88,18 @@ public:
 
 	static CompletedSharedTaskActivityState NewEntity()
 	{
-		CompletedSharedTaskActivityState entry{};
+		CompletedSharedTaskActivityState e{};
 
-		entry.shared_task_id = 0;
-		entry.activity_id    = 0;
-		entry.done_count     = 0;
-		entry.updated_time   = 0;
-		entry.completed_time = 0;
+		e.shared_task_id = 0;
+		e.activity_id    = 0;
+		e.done_count     = 0;
+		e.updated_time   = 0;
+		e.completed_time = 0;
 
-		return entry;
+		return e;
 	}
 
-	static CompletedSharedTaskActivityState GetCompletedSharedTaskActivityStateEntry(
+	static CompletedSharedTaskActivityState GetCompletedSharedTaskActivityState(
 		const std::vector<CompletedSharedTaskActivityState> &completed_shared_task_activity_states,
 		int completed_shared_task_activity_state_id
 	)
@@ -128,15 +128,15 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			CompletedSharedTaskActivityState entry{};
+			CompletedSharedTaskActivityState e{};
 
-			entry.shared_task_id = strtoll(row[0], nullptr, 10);
-			entry.activity_id    = atoi(row[1]);
-			entry.done_count     = atoi(row[2]);
-			entry.updated_time   = strtoll(row[3] ? row[3] : "-1", nullptr, 10);
-			entry.completed_time = strtoll(row[4] ? row[4] : "-1", nullptr, 10);
+			e.shared_task_id = strtoll(row[0], nullptr, 10);
+			e.activity_id    = static_cast<int32_t>(atoi(row[1]));
+			e.done_count     = static_cast<int32_t>(atoi(row[2]));
+			e.updated_time   = strtoll(row[3] ? row[3] : "-1", nullptr, 10);
+			e.completed_time = strtoll(row[4] ? row[4] : "-1", nullptr, 10);
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -161,26 +161,26 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		CompletedSharedTaskActivityState completed_shared_task_activity_state_entry
+		const CompletedSharedTaskActivityState &e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(completed_shared_task_activity_state_entry.shared_task_id));
-		update_values.push_back(columns[1] + " = " + std::to_string(completed_shared_task_activity_state_entry.activity_id));
-		update_values.push_back(columns[2] + " = " + std::to_string(completed_shared_task_activity_state_entry.done_count));
-		update_values.push_back(columns[3] + " = FROM_UNIXTIME(" + (completed_shared_task_activity_state_entry.updated_time > 0 ? std::to_string(completed_shared_task_activity_state_entry.updated_time) : "null") + ")");
-		update_values.push_back(columns[4] + " = FROM_UNIXTIME(" + (completed_shared_task_activity_state_entry.completed_time > 0 ? std::to_string(completed_shared_task_activity_state_entry.completed_time) : "null") + ")");
+		v.push_back(columns[0] + " = " + std::to_string(e.shared_task_id));
+		v.push_back(columns[1] + " = " + std::to_string(e.activity_id));
+		v.push_back(columns[2] + " = " + std::to_string(e.done_count));
+		v.push_back(columns[3] + " = FROM_UNIXTIME(" + (e.updated_time > 0 ? std::to_string(e.updated_time) : "null") + ")");
+		v.push_back(columns[4] + " = FROM_UNIXTIME(" + (e.completed_time > 0 ? std::to_string(e.completed_time) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
-				completed_shared_task_activity_state_entry.shared_task_id
+				e.shared_task_id
 			)
 		);
 
@@ -189,61 +189,61 @@ public:
 
 	static CompletedSharedTaskActivityState InsertOne(
 		Database& db,
-		CompletedSharedTaskActivityState completed_shared_task_activity_state_entry
+		CompletedSharedTaskActivityState e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(completed_shared_task_activity_state_entry.shared_task_id));
-		insert_values.push_back(std::to_string(completed_shared_task_activity_state_entry.activity_id));
-		insert_values.push_back(std::to_string(completed_shared_task_activity_state_entry.done_count));
-		insert_values.push_back("FROM_UNIXTIME(" + (completed_shared_task_activity_state_entry.updated_time > 0 ? std::to_string(completed_shared_task_activity_state_entry.updated_time) : "null") + ")");
-		insert_values.push_back("FROM_UNIXTIME(" + (completed_shared_task_activity_state_entry.completed_time > 0 ? std::to_string(completed_shared_task_activity_state_entry.completed_time) : "null") + ")");
+		v.push_back(std::to_string(e.shared_task_id));
+		v.push_back(std::to_string(e.activity_id));
+		v.push_back(std::to_string(e.done_count));
+		v.push_back("FROM_UNIXTIME(" + (e.updated_time > 0 ? std::to_string(e.updated_time) : "null") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.completed_time > 0 ? std::to_string(e.completed_time) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
 		if (results.Success()) {
-			completed_shared_task_activity_state_entry.shared_task_id = results.LastInsertedID();
-			return completed_shared_task_activity_state_entry;
+			e.shared_task_id = results.LastInsertedID();
+			return e;
 		}
 
-		completed_shared_task_activity_state_entry = NewEntity();
+		e = NewEntity();
 
-		return completed_shared_task_activity_state_entry;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<CompletedSharedTaskActivityState> completed_shared_task_activity_state_entries
+		const std::vector<CompletedSharedTaskActivityState> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &completed_shared_task_activity_state_entry: completed_shared_task_activity_state_entries) {
-			std::vector<std::string> insert_values;
+		for (auto &e: entries) {
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(completed_shared_task_activity_state_entry.shared_task_id));
-			insert_values.push_back(std::to_string(completed_shared_task_activity_state_entry.activity_id));
-			insert_values.push_back(std::to_string(completed_shared_task_activity_state_entry.done_count));
-			insert_values.push_back("FROM_UNIXTIME(" + (completed_shared_task_activity_state_entry.updated_time > 0 ? std::to_string(completed_shared_task_activity_state_entry.updated_time) : "null") + ")");
-			insert_values.push_back("FROM_UNIXTIME(" + (completed_shared_task_activity_state_entry.completed_time > 0 ? std::to_string(completed_shared_task_activity_state_entry.completed_time) : "null") + ")");
+			v.push_back(std::to_string(e.shared_task_id));
+			v.push_back(std::to_string(e.activity_id));
+			v.push_back(std::to_string(e.done_count));
+			v.push_back("FROM_UNIXTIME(" + (e.updated_time > 0 ? std::to_string(e.updated_time) : "null") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.completed_time > 0 ? std::to_string(e.completed_time) : "null") + ")");
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 
@@ -264,21 +264,21 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CompletedSharedTaskActivityState entry{};
+			CompletedSharedTaskActivityState e{};
 
-			entry.shared_task_id = strtoll(row[0], nullptr, 10);
-			entry.activity_id    = atoi(row[1]);
-			entry.done_count     = atoi(row[2]);
-			entry.updated_time   = strtoll(row[3] ? row[3] : "-1", nullptr, 10);
-			entry.completed_time = strtoll(row[4] ? row[4] : "-1", nullptr, 10);
+			e.shared_task_id = strtoll(row[0], nullptr, 10);
+			e.activity_id    = static_cast<int32_t>(atoi(row[1]));
+			e.done_count     = static_cast<int32_t>(atoi(row[2]));
+			e.updated_time   = strtoll(row[3] ? row[3] : "-1", nullptr, 10);
+			e.completed_time = strtoll(row[4] ? row[4] : "-1", nullptr, 10);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static std::vector<CompletedSharedTaskActivityState> GetWhere(Database& db, std::string where_filter)
+	static std::vector<CompletedSharedTaskActivityState> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<CompletedSharedTaskActivityState> all_entries;
 
@@ -293,21 +293,21 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CompletedSharedTaskActivityState entry{};
+			CompletedSharedTaskActivityState e{};
 
-			entry.shared_task_id = strtoll(row[0], nullptr, 10);
-			entry.activity_id    = atoi(row[1]);
-			entry.done_count     = atoi(row[2]);
-			entry.updated_time   = strtoll(row[3] ? row[3] : "-1", nullptr, 10);
-			entry.completed_time = strtoll(row[4] ? row[4] : "-1", nullptr, 10);
+			e.shared_task_id = strtoll(row[0], nullptr, 10);
+			e.activity_id    = static_cast<int32_t>(atoi(row[1]));
+			e.done_count     = static_cast<int32_t>(atoi(row[2]));
+			e.updated_time   = strtoll(row[3] ? row[3] : "-1", nullptr, 10);
+			e.completed_time = strtoll(row[4] ? row[4] : "-1", nullptr, 10);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -330,6 +330,32 @@ public:
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int64 GetMaxId(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COALESCE(MAX({}), 0) FROM {}",
+				PrimaryKey(),
+				TableName()
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static int64 Count(Database& db, const std::string &where_filter = "")
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COUNT(*) FROM {} {}",
+				TableName(),
+				(where_filter.empty() ? "" : "WHERE " + where_filter)
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
 };

@@ -97,10 +97,10 @@ void command_instance(Client *c, const Seperator *sep)
 			return;
 		}
 
-		uint32 zone_id = database.ZoneIDFromInstanceID(instance_id);
-		uint32 version = database.VersionFromInstanceID(instance_id);
-		uint32 current_id  = database.GetInstanceID(zone_id, character_id, version);
-		if (!current_id) {			
+		auto zone_id = database.GetInstanceZoneID(instance_id);
+		auto version = database.GetInstanceVersion(instance_id);
+		auto current_id  = database.GetInstanceID(zone_id, character_id, version);
+		if (!current_id) {
 			c->Message(
 				Chat::White,
 				(
@@ -109,7 +109,7 @@ void command_instance(Client *c, const Seperator *sep)
 						"Added {} to Instance ID {}.",
 						c->GetTargetDescription(target),
 						instance_id
-					) :				
+					) :
 					fmt::format(
 						"Failed to add {} to Instance ID {}.",
 						c->GetTargetDescription(target),
@@ -182,7 +182,7 @@ void command_instance(Client *c, const Seperator *sep)
 				ZoneLongName(zone_id),
 				zone_id,
 				(
-					version ? 
+					version ?
 					fmt::format(
 						" Version: {}",
 						version
@@ -197,7 +197,7 @@ void command_instance(Client *c, const Seperator *sep)
 			fmt::format(
 				"Instance {} Created |  Duration: {} ({})",
 				instance_id,
-				ConvertSecondsToTime(duration),
+				Strings::SecondsToTime(duration),
 				duration
 			).c_str()
 		);
@@ -295,7 +295,7 @@ void command_instance(Client *c, const Seperator *sep)
 					"Removed {} from Instance ID {}.",
 					c->GetTargetDescription(target),
 					instance_id
-				) :				
+				) :
 				fmt::format(
 					"Failed to remove {} from Instance ID {}.",
 					c->GetTargetDescription(target),

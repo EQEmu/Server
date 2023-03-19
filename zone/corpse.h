@@ -53,7 +53,10 @@ class Corpse : public Mob {
 	/* Corpse: General */
 	virtual bool	Death(Mob* killerMob, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill) { return true; }
 	virtual void	Damage(Mob* from, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill, bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false, eSpecialAttacks special = eSpecialAttacks::None) { return; }
-	virtual bool	Attack(Mob* other, int Hand = EQ::invslot::slotPrimary, bool FromRiposte = false, bool IsStrikethrough = true, bool IsFromSpell = false, ExtraAttackOptions *opts = nullptr) { return false; }
+	bool			Attack(Mob* other, int Hand = EQ::invslot::slotPrimary, bool FromRiposte = false, bool IsStrikethrough = true,
+		bool IsFromSpell = false, ExtraAttackOptions *opts = nullptr) override { 
+		return false; 
+	}
 	virtual bool	HasRaid()			{ return false; }
 	virtual bool	HasGroup()			{ return false; }
 	virtual Raid*	GetRaid()			{ return 0; }
@@ -73,6 +76,7 @@ class Corpse : public Mob {
 	uint32			SetCharID(uint32 iCharID)	{ if (IsPlayerCorpse()) { return (char_id = iCharID); } return 0xFFFFFFFF; };
 	uint32			GetDecayTime()				{ if (!corpse_decay_timer.Enabled()) return 0xFFFFFFFF; else return corpse_decay_timer.GetRemainingTime(); }
 	uint32			GetRezTime()				{ if (!corpse_rez_timer.Enabled()) return 0; else return corpse_rez_timer.GetRemainingTime(); }
+	void            ResetDecayTimer();
 	void			SetDecayTimer(uint32 decay_time);
 	void			SetConsentGroupID(uint32 group_id) { if (IsPlayerCorpse()) { consented_group_id = group_id; } }
 	void			SetConsentRaidID(uint32 raid_id)   { if (IsPlayerCorpse()) { consented_raid_id = raid_id; } }

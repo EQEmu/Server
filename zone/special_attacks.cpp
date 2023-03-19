@@ -17,7 +17,7 @@
 	*/
 
 #include "../common/rulesys.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 
 #include "client.h"
 #include "entity.h"
@@ -112,13 +112,18 @@ int Mob::GetBaseSkillDamage(EQ::skills::SkillType skill, Mob *target)
 			auto *inst = CastToClient()->GetInv().GetItem(EQ::invslot::slotPrimary);
 			if (inst && inst->GetItem() && inst->GetItem()->ItemType == EQ::item::ItemType1HPiercing) {
 				base = inst->GetItemBackstabDamage(true);
-				if (!inst->GetItemBackstabDamage())
+				if (!inst->GetItemBackstabDamage()) {
 					base += inst->GetItemWeaponDamage(true);
+				}
+
 				if (target) {
-					if (inst->GetItemElementalFlag(true) && inst->GetItemElementalDamage(true))
+					if (inst->GetItemElementalFlag(true) && inst->GetItemElementalDamage(true) && !RuleB(Combat, BackstabIgnoresElemental)) {
 						base += target->ResistElementalWeaponDmg(inst);
-					if (inst->GetItemBaneDamageBody(true) || inst->GetItemBaneDamageRace(true))
+					}
+
+					if ((inst->GetItemBaneDamageBody(true) || inst->GetItemBaneDamageRace(true)) && !RuleB(Combat, BackstabIgnoresBane)) {
 						base += target->CheckBaneDamage(inst);
+					}
 				}
 			}
 		} else if (IsNPC()) {
@@ -180,7 +185,7 @@ void Mob::DoSpecialAttackDamage(Mob *who, EQ::skills::SkillType skill, int32 bas
 				auto fbash = GetFuriousBash(itm->Focus.Effect);
 				hate = hate * (100 + fbash) / 100;
 				if (fbash)
-					MessageString(Chat::Spells, GLOWS_RED, itm->Name);
+					MessageString(Chat::FocusEffect, GLOWS_RED, itm->Name);
 			}
 		}
 	}
@@ -1153,52 +1158,52 @@ float Mob::GetRangeDistTargetSizeMod(Mob* other)
 	return (mod + 2.0f); //Add 2.0f as buffer to prevent any chance of failures, client enforce range check regardless.
 }
 
-void NPC::RangedAttack(Mob* other)
+void NPC::RangedAttack(Mob *other)
 {
 	if (!other)
 		return;
-	//make sure the attack and ranged timers are up
-	//if the ranged timer is disabled, then they have no ranged weapon and shouldent be attacking anyhow
-	if((attack_timer.Enabled() && !attack_timer.Check(false)) || (ranged_timer.Enabled() && !ranged_timer.Check())){
-		LogCombat("Archery canceled. Timer not up. Attack [{}], ranged [{}]", attack_timer.GetRemainingTime(), ranged_timer.GetRemainingTime());
+	// make sure the attack and ranged timers are up
+	// if the ranged timer is disabled, then they have no ranged weapon and shouldent be attacking anyhow
+	if ((attack_timer.Enabled() && !attack_timer.Check(false)) ||
+	    (ranged_timer.Enabled() && !ranged_timer.Check())) {
+		LogCombat("Archery canceled. Timer not up. Attack [{}], ranged [{}]", attack_timer.GetRemainingTime(),
+			  ranged_timer.GetRemainingTime());
 		return;
 	}
 
-	if(!CheckLosFN(other))
+	if (!HasBowAndArrowEquipped() && !GetSpecialAbility(SPECATK_RANGED_ATK))
 		return;
 
-	int attacks = GetSpecialAbilityParam(SPECATK_RANGED_ATK, 0);
-	attacks = attacks > 0 ? attacks : 1;
-	for(int i = 0; i < attacks; ++i) {
+	if (!CheckLosFN(other))
+		return;
 
-		if(!GetSpecialAbility(SPECATK_RANGED_ATK))
+	int attacks = 1;
+	float min_range = static_cast<float>(RuleI(Combat, MinRangedAttackDist));
+	float max_range = 250.0f; // needs to be longer than 200(most spells)
+
+	if (GetSpecialAbility(SPECATK_RANGED_ATK)) {
+		int temp_attacks = GetSpecialAbilityParam(SPECATK_RANGED_ATK, 0);
+		attacks = temp_attacks > 0 ? temp_attacks : 1;
+
+		int temp_min_range = GetSpecialAbilityParam(SPECATK_RANGED_ATK, 4); // Min Range of NPC attack
+		int temp_max_range = GetSpecialAbilityParam(SPECATK_RANGED_ATK, 1); // Max Range of NPC attack
+		if (temp_max_range)
+			max_range = static_cast<float>(temp_max_range);
+		if (temp_min_range)
+			min_range = static_cast<float>(temp_min_range);
+	}
+
+	max_range *= max_range;
+	min_range *= min_range;
+
+	for (int i = 0; i < attacks; ++i) {
+		if (DistanceSquared(m_Position, other->GetPosition()) > max_range)
+			return;
+		else if (DistanceSquared(m_Position, other->GetPosition()) < min_range)
 			return;
 
-		int sa_min_range = GetSpecialAbilityParam(SPECATK_RANGED_ATK, 4); //Min Range of NPC attack
-		int sa_max_range = GetSpecialAbilityParam(SPECATK_RANGED_ATK, 1); //Max Range of NPC attack
-
-		float min_range = static_cast<float>(RuleI(Combat, MinRangedAttackDist));
-		float max_range = 250; // needs to be longer than 200(most spells)
-
-		if (sa_max_range)
-			max_range = static_cast<float>(sa_max_range);
-
-		if (sa_min_range)
-			min_range = static_cast<float>(sa_min_range);
-
-		max_range *= max_range;
-		if(DistanceSquared(m_Position, other->GetPosition()) > max_range)
-			return;
-		else if(DistanceSquared(m_Position, other->GetPosition()) < (min_range * min_range))
-			return;
-
-		if(!other || !IsAttackAllowed(other) ||
-			IsCasting() ||
-			DivineAura() ||
-			IsStunned() ||
-			IsFeared() ||
-			IsMezzed() ||
-			(GetAppearance() == eaDead)){
+		if (!other || !IsAttackAllowed(other) || IsCasting() || DivineAura() || IsStunned() || IsFeared() ||
+		    IsMezzed() || (GetAppearance() == eaDead)) {
 			return;
 		}
 
@@ -1318,7 +1323,7 @@ void Client::ThrowingAttack(Mob* other, bool CanDoubleAttack) { //old was 51
 
 	const EQ::ItemData* item = RangeWeapon->GetItem();
 	if (item->ItemType != EQ::item::ItemTypeLargeThrowing && item->ItemType != EQ::item::ItemTypeSmallThrowing) {
-		LogCombat("Ranged attack canceled. Ranged item [{}] is not a throwing weapon. type [{}]", item->ItemType);
+		LogCombat("Ranged attack canceled. Ranged item [{}] is not a throwing weapon. type [{}]", item->ID, item->ItemType);
 		Message(0, "Error: Rangeweapon: GetItem(%i)==0, you have nothing useful to throw!", GetItemIDAt(EQ::invslot::slotRange));
 		return;
 	}
@@ -2154,8 +2159,13 @@ void Mob::InstillDoubt(Mob *who) {
 int Mob::TryHeadShot(Mob *defender, EQ::skills::SkillType skillInUse)
 {
 	// Only works on YOUR target.
-	if (defender && defender->GetBodyType() == BT_Humanoid && !defender->IsClient() &&
-	    skillInUse == EQ::skills::SkillArchery && GetTarget() == defender) {
+	if (
+		defender &&
+		!defender->IsClient() &&
+		skillInUse == EQ::skills::SkillArchery &&
+		GetTarget() == defender &&
+		(defender->GetBodyType() == BT_Humanoid || !RuleB(Combat, HeadshotOnlyHumanoids))
+	) {
 		uint32 HeadShot_Dmg = aabonuses.HeadShot[SBIndex::FINISHING_EFFECT_DMG] + spellbonuses.HeadShot[SBIndex::FINISHING_EFFECT_DMG] + itembonuses.HeadShot[SBIndex::FINISHING_EFFECT_DMG];
 		uint8 HeadShot_Level = 0; // Get Highest Headshot Level
 		HeadShot_Level = std::max({aabonuses.HSLevel[SBIndex::FINISHING_EFFECT_LEVEL_MAX], spellbonuses.HSLevel[SBIndex::FINISHING_EFFECT_LEVEL_MAX], itembonuses.HSLevel[SBIndex::FINISHING_EFFECT_LEVEL_MAX]});
@@ -2184,8 +2194,13 @@ int Mob::TryHeadShot(Mob *defender, EQ::skills::SkillType skillInUse)
 
 int Mob::TryAssassinate(Mob *defender, EQ::skills::SkillType skillInUse)
 {
-	if (defender && (defender->GetBodyType() == BT_Humanoid) && !defender->IsClient() && GetLevel() >= 60 &&
-	    (skillInUse == EQ::skills::SkillBackstab || skillInUse == EQ::skills::SkillThrowing)) {
+	if (
+		defender &&
+		!defender->IsClient() &&
+		GetLevel() >= 60 &&
+		(skillInUse == EQ::skills::SkillBackstab || skillInUse == EQ::skills::SkillThrowing) &&
+		(defender->GetBodyType() == BT_Humanoid || !RuleB(Combat, AssassinateOnlyHumanoids))
+	) {
 		int chance = GetDEX();
 		if (skillInUse == EQ::skills::SkillBackstab) {
 			chance = 100 * chance / (chance + 3500);

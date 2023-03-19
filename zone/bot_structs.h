@@ -19,8 +19,6 @@
 #ifndef BOT_STRUCTS
 #define BOT_STRUCTS
 
-#ifdef BOTS
-
 #include "../common/types.h"
 
 #include <sstream>
@@ -79,6 +77,30 @@ struct BotAA {
 	uint8 total_levels;
 };
 
-#endif // BOTS
+struct BotSpellSetting {
+	int16  priority;
+	uint8  min_level;
+	uint8  max_level;
+	int8   min_hp;
+	int8   max_hp;
+	bool   is_enabled = true;
+};
+
+struct BotSpells_Struct {
+	uint32		type;			// 0 = never, must be one (and only one) of the defined values
+	int16		spellid;			// <= 0 = no spell
+	int16		manacost;		// -1 = use spdat, -2 = no cast time
+	uint32		time_cancast;	// when we can cast this spell next
+	int32		recast_delay;
+	int16		priority;
+	int16		resist_adjust;
+	uint8		minlevel;
+	uint8		maxlevel;
+	int16		min_hp;			// >0 won't cast if HP is below
+	int16		max_hp;			// >0 won't cast if HP is above
+	std::string	bucket_name;
+	std::string	bucket_value;
+	uint8		bucket_comparison;
+};
 
 #endif // BOT_STRUCTS

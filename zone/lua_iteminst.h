@@ -82,6 +82,8 @@ public:
 	void ClearTimers();
 	bool ContainsAugmentByID(uint32 item_id);
 	int CountAugmentByID(uint32 item_id);
+	int GetTaskDeliveredCount();
+	int RemoveTaskDeliveredItems();
 
 private:
 	bool cloned_;

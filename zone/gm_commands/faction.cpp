@@ -18,7 +18,7 @@ void command_faction(Client *c, const Seperator *sep)
 
 	std::string faction_filter;
 	if (sep->arg[2]) {
-		faction_filter = str_tolower(sep->arg[2]);
+		faction_filter = Strings::ToLower(sep->arg[2]);
 	}
 
 	if (!strcasecmp(sep->arg[1], "review")) {
@@ -56,9 +56,8 @@ void command_faction(Client *c, const Seperator *sep)
 			auto        faction_id     = std::stoul(row[0]);
 			std::string faction_name   = row[1];
 			std::string faction_value  = row[2];
-			std::string reset_link     = EQ::SayLinkEngine::GenerateQuestSaylink(
+			std::string reset_link     = Saylink::Silent(
 				fmt::format("#faction reset {}", faction_id),
-				false,
 				"Reset"
 			);
 

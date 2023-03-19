@@ -13,21 +13,21 @@
 #define EQEMU_BASE_RAID_MEMBERS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseRaidMembersRepository {
 public:
 	struct RaidMembers {
-		int         raidid;
-		int         charid;
-		int         groupid;
-		int         _class;
-		int         level;
+		int32_t     raidid;
+		int32_t     charid;
+		uint32_t    groupid;
+		int8_t      _class;
+		int8_t      level;
 		std::string name;
-		int         isgroupleader;
-		int         israidleader;
-		int         islooter;
+		int8_t      isgroupleader;
+		int8_t      israidleader;
+		int8_t      islooter;
 	};
 
 	static std::string PrimaryKey()
@@ -67,12 +67,12 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string SelectColumnsRaw()
 	{
-		return std::string(implode(", ", SelectColumns()));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -100,22 +100,22 @@ public:
 
 	static RaidMembers NewEntity()
 	{
-		RaidMembers entry{};
+		RaidMembers e{};
 
-		entry.raidid        = 0;
-		entry.charid        = 0;
-		entry.groupid       = 0;
-		entry._class        = 0;
-		entry.level         = 0;
-		entry.name          = "";
-		entry.isgroupleader = 0;
-		entry.israidleader  = 0;
-		entry.islooter      = 0;
+		e.raidid        = 0;
+		e.charid        = 0;
+		e.groupid       = 0;
+		e._class        = 0;
+		e.level         = 0;
+		e.name          = "";
+		e.isgroupleader = 0;
+		e.israidleader  = 0;
+		e.islooter      = 0;
 
-		return entry;
+		return e;
 	}
 
-	static RaidMembers GetRaidMembersEntry(
+	static RaidMembers GetRaidMembers(
 		const std::vector<RaidMembers> &raid_memberss,
 		int raid_members_id
 	)
@@ -144,19 +144,19 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			RaidMembers entry{};
+			RaidMembers e{};
 
-			entry.raidid        = atoi(row[0]);
-			entry.charid        = atoi(row[1]);
-			entry.groupid       = atoi(row[2]);
-			entry._class        = atoi(row[3]);
-			entry.level         = atoi(row[4]);
-			entry.name          = row[5] ? row[5] : "";
-			entry.isgroupleader = atoi(row[6]);
-			entry.israidleader  = atoi(row[7]);
-			entry.islooter      = atoi(row[8]);
+			e.raidid        = static_cast<int32_t>(atoi(row[0]));
+			e.charid        = static_cast<int32_t>(atoi(row[1]));
+			e.groupid       = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e._class        = static_cast<int8_t>(atoi(row[3]));
+			e.level         = static_cast<int8_t>(atoi(row[4]));
+			e.name          = row[5] ? row[5] : "";
+			e.isgroupleader = static_cast<int8_t>(atoi(row[6]));
+			e.israidleader  = static_cast<int8_t>(atoi(row[7]));
+			e.islooter      = static_cast<int8_t>(atoi(row[8]));
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -181,30 +181,30 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		RaidMembers raid_members_entry
+		const RaidMembers &e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(raid_members_entry.raidid));
-		update_values.push_back(columns[1] + " = " + std::to_string(raid_members_entry.charid));
-		update_values.push_back(columns[2] + " = " + std::to_string(raid_members_entry.groupid));
-		update_values.push_back(columns[3] + " = " + std::to_string(raid_members_entry._class));
-		update_values.push_back(columns[4] + " = " + std::to_string(raid_members_entry.level));
-		update_values.push_back(columns[5] + " = '" + EscapeString(raid_members_entry.name) + "'");
-		update_values.push_back(columns[6] + " = " + std::to_string(raid_members_entry.isgroupleader));
-		update_values.push_back(columns[7] + " = " + std::to_string(raid_members_entry.israidleader));
-		update_values.push_back(columns[8] + " = " + std::to_string(raid_members_entry.islooter));
+		v.push_back(columns[0] + " = " + std::to_string(e.raidid));
+		v.push_back(columns[1] + " = " + std::to_string(e.charid));
+		v.push_back(columns[2] + " = " + std::to_string(e.groupid));
+		v.push_back(columns[3] + " = " + std::to_string(e._class));
+		v.push_back(columns[4] + " = " + std::to_string(e.level));
+		v.push_back(columns[5] + " = '" + Strings::Escape(e.name) + "'");
+		v.push_back(columns[6] + " = " + std::to_string(e.isgroupleader));
+		v.push_back(columns[7] + " = " + std::to_string(e.israidleader));
+		v.push_back(columns[8] + " = " + std::to_string(e.islooter));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
-				raid_members_entry.charid
+				e.charid
 			)
 		);
 
@@ -213,69 +213,69 @@ public:
 
 	static RaidMembers InsertOne(
 		Database& db,
-		RaidMembers raid_members_entry
+		RaidMembers e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(raid_members_entry.raidid));
-		insert_values.push_back(std::to_string(raid_members_entry.charid));
-		insert_values.push_back(std::to_string(raid_members_entry.groupid));
-		insert_values.push_back(std::to_string(raid_members_entry._class));
-		insert_values.push_back(std::to_string(raid_members_entry.level));
-		insert_values.push_back("'" + EscapeString(raid_members_entry.name) + "'");
-		insert_values.push_back(std::to_string(raid_members_entry.isgroupleader));
-		insert_values.push_back(std::to_string(raid_members_entry.israidleader));
-		insert_values.push_back(std::to_string(raid_members_entry.islooter));
+		v.push_back(std::to_string(e.raidid));
+		v.push_back(std::to_string(e.charid));
+		v.push_back(std::to_string(e.groupid));
+		v.push_back(std::to_string(e._class));
+		v.push_back(std::to_string(e.level));
+		v.push_back("'" + Strings::Escape(e.name) + "'");
+		v.push_back(std::to_string(e.isgroupleader));
+		v.push_back(std::to_string(e.israidleader));
+		v.push_back(std::to_string(e.islooter));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
 		if (results.Success()) {
-			raid_members_entry.charid = results.LastInsertedID();
-			return raid_members_entry;
+			e.charid = results.LastInsertedID();
+			return e;
 		}
 
-		raid_members_entry = NewEntity();
+		e = NewEntity();
 
-		return raid_members_entry;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<RaidMembers> raid_members_entries
+		const std::vector<RaidMembers> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &raid_members_entry: raid_members_entries) {
-			std::vector<std::string> insert_values;
+		for (auto &e: entries) {
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(raid_members_entry.raidid));
-			insert_values.push_back(std::to_string(raid_members_entry.charid));
-			insert_values.push_back(std::to_string(raid_members_entry.groupid));
-			insert_values.push_back(std::to_string(raid_members_entry._class));
-			insert_values.push_back(std::to_string(raid_members_entry.level));
-			insert_values.push_back("'" + EscapeString(raid_members_entry.name) + "'");
-			insert_values.push_back(std::to_string(raid_members_entry.isgroupleader));
-			insert_values.push_back(std::to_string(raid_members_entry.israidleader));
-			insert_values.push_back(std::to_string(raid_members_entry.islooter));
+			v.push_back(std::to_string(e.raidid));
+			v.push_back(std::to_string(e.charid));
+			v.push_back(std::to_string(e.groupid));
+			v.push_back(std::to_string(e._class));
+			v.push_back(std::to_string(e.level));
+			v.push_back("'" + Strings::Escape(e.name) + "'");
+			v.push_back(std::to_string(e.isgroupleader));
+			v.push_back(std::to_string(e.israidleader));
+			v.push_back(std::to_string(e.islooter));
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 
@@ -296,25 +296,25 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			RaidMembers entry{};
+			RaidMembers e{};
 
-			entry.raidid        = atoi(row[0]);
-			entry.charid        = atoi(row[1]);
-			entry.groupid       = atoi(row[2]);
-			entry._class        = atoi(row[3]);
-			entry.level         = atoi(row[4]);
-			entry.name          = row[5] ? row[5] : "";
-			entry.isgroupleader = atoi(row[6]);
-			entry.israidleader  = atoi(row[7]);
-			entry.islooter      = atoi(row[8]);
+			e.raidid        = static_cast<int32_t>(atoi(row[0]));
+			e.charid        = static_cast<int32_t>(atoi(row[1]));
+			e.groupid       = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e._class        = static_cast<int8_t>(atoi(row[3]));
+			e.level         = static_cast<int8_t>(atoi(row[4]));
+			e.name          = row[5] ? row[5] : "";
+			e.isgroupleader = static_cast<int8_t>(atoi(row[6]));
+			e.israidleader  = static_cast<int8_t>(atoi(row[7]));
+			e.islooter      = static_cast<int8_t>(atoi(row[8]));
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static std::vector<RaidMembers> GetWhere(Database& db, std::string where_filter)
+	static std::vector<RaidMembers> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<RaidMembers> all_entries;
 
@@ -329,25 +329,25 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			RaidMembers entry{};
+			RaidMembers e{};
 
-			entry.raidid        = atoi(row[0]);
-			entry.charid        = atoi(row[1]);
-			entry.groupid       = atoi(row[2]);
-			entry._class        = atoi(row[3]);
-			entry.level         = atoi(row[4]);
-			entry.name          = row[5] ? row[5] : "";
-			entry.isgroupleader = atoi(row[6]);
-			entry.israidleader  = atoi(row[7]);
-			entry.islooter      = atoi(row[8]);
+			e.raidid        = static_cast<int32_t>(atoi(row[0]));
+			e.charid        = static_cast<int32_t>(atoi(row[1]));
+			e.groupid       = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e._class        = static_cast<int8_t>(atoi(row[3]));
+			e.level         = static_cast<int8_t>(atoi(row[4]));
+			e.name          = row[5] ? row[5] : "";
+			e.isgroupleader = static_cast<int8_t>(atoi(row[6]));
+			e.israidleader  = static_cast<int8_t>(atoi(row[7]));
+			e.islooter      = static_cast<int8_t>(atoi(row[8]));
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -370,6 +370,32 @@ public:
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int64 GetMaxId(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COALESCE(MAX({}), 0) FROM {}",
+				PrimaryKey(),
+				TableName()
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static int64 Count(Database& db, const std::string &where_filter = "")
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COUNT(*) FROM {} {}",
+				TableName(),
+				(where_filter.empty() ? "" : "WHERE " + where_filter)
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
 };

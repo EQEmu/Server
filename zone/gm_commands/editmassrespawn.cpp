@@ -126,7 +126,7 @@ void command_editmassrespawn(Client *c, const Seperator *sep)
 
 				c->Message(
 					Chat::Yellow, "To apply these changes, click <%s> or type [%s]",
-					EQ::SayLinkEngine::GenerateQuestSaylink(saylink, false, "Apply").c_str(),
+					Saylink::Silent(saylink, "Apply").c_str(),
 					saylink.c_str()
 				);
 			}

@@ -1,5 +1,5 @@
 /*	EQEMu: Everquest Server Emulator
-	
+
 	Copyright (C) 2001-2019 EQEMu Development Team (http://eqemulator.net)
 
 	This program is free software; you can redistribute it and/or modify
@@ -11,15 +11,16 @@
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
 	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-	
+
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
 #include "profanity_manager.h"
+#include "eqemu_logsys.h"
 #include "dbcore.h"
-#include "string_util.h"
+#include "strings.h"
 
 #include <ctype.h>
 #include <cstring>
@@ -66,7 +67,7 @@ bool EQ::ProfanityManager::AddProfanity(DBcore *db, std::string profanity) {
 		return false;
 	}
 
-	std::string entry = str_tolower(profanity);
+	std::string entry = Strings::ToLower(profanity);
 
 	if (check_for_existing_entry(entry)) {
 		return true;
@@ -98,7 +99,7 @@ bool EQ::ProfanityManager::RemoveProfanity(DBcore *db, std::string profanity) {
 		return false;
 	}
 
-	std::string entry = str_tolower(profanity);
+	std::string entry = Strings::ToLower(profanity);
 
 	if (!check_for_existing_entry(entry)) {
 		return true;
@@ -126,13 +127,13 @@ void EQ::ProfanityManager::RedactMessage(char *message) {
 		return;
 	}
 
-	std::string test_message = str_tolower(message);
+	std::string test_message = Strings::ToLower(message);
 	// hard-coded max length based on channel message buffer size (4096 bytes)..
 	// ..will need to change or remove if other sources are used for redaction
 	if (test_message.length() < REDACTION_LENGTH_MIN || test_message.length() >= 4096) {
 		return;
 	}
-	
+
 	for (const auto &iter : profanity_list) { // consider adding textlink checks if it becomes an issue
 		size_t pos = 0;
 		size_t start_pos = 0;
@@ -162,7 +163,7 @@ void EQ::ProfanityManager::RedactMessage(std::string &message) {
 		return;
 	}
 
-	std::string test_message = str_tolower(message);
+	std::string test_message = Strings::ToLower(message);
 
 	for (const auto &iter : profanity_list) {
 		size_t pos = 0;
@@ -194,7 +195,7 @@ bool EQ::ProfanityManager::ContainsCensoredLanguage(const std::string &message) 
 		return false;
 	}
 
-	std::string test_message = str_tolower(message);
+	std::string test_message = Strings::ToLower(message);
 
 	for (const auto &iter : profanity_list) {
 		if (test_message.find(iter) != std::string::npos) {
@@ -227,13 +228,15 @@ bool EQ::ProfanityManager::load_database_entries(DBcore *db) {
 	}
 
 	for (auto row : results) {
-		std::string entry = str_tolower(row[0]);
-		if (entry.length() >= REDACTION_LENGTH_MIN) {	
+		std::string entry = Strings::ToLower(row[0]);
+		if (entry.length() >= REDACTION_LENGTH_MIN) {
 			if (!check_for_existing_entry(entry)) {
 				profanity_list.push_back(entry);
 			}
 		}
 	}
+
+	LogInfo("Loaded [{}] profanity entries", Strings::Commify(profanity_list.size()));
 
 	return true;
 }
@@ -265,6 +268,6 @@ bool EQ::ProfanityManager::check_for_existing_entry(std::string profanity) {
 			return true;
 		}
 	}
-	
+
 	return false;
 }

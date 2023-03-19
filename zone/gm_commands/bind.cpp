@@ -16,7 +16,7 @@ void command_bind(Client *c, const Seperator *sep)
 	);
 
 	if (!bind_allowed) {
-		c->Message(Chat::White, "Yu cannot bind here.");
+		c->Message(Chat::White, "You cannot bind here.");
 		return;
 	}
 

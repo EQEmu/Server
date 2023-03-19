@@ -8,7 +8,7 @@
 #include "zone.h"
 #include "spawngroup.h"
 #include "zonedb.h"
-#include "zone_store.h"
+#include "../common/zone_store.h"
 #include "npc.h"
 #include "mob.h"
 #include "client.h"
@@ -104,7 +104,7 @@ void Client::mod_client_death_duel(Mob* killerMob) { return; }
 void Client::mod_client_death_env() { return; }
 
 //Calculated xp before consider modifier, called whenever a client gets XP for killing a mob.
-int32 Client::mod_client_xp(int32 in_xp, NPC *npc) { return(in_xp); }
+int64 Client::mod_client_xp(int64 in_xp, NPC *npc) { return(in_xp); }
 
 //Client XP formula.  Changes here will cause clients to change level after gaining or losing xp.
 //Either modify this before your server goes live, or be prepared to write a quest script that fixes levels.
@@ -129,7 +129,6 @@ float Mob::mod_parry_chance(float parrychance, Mob* attacker) { return(parrychan
 //Final dodge chance
 float Mob::mod_dodge_chance(float dodgechance, Mob* attacker) { return(dodgechance); }
 
-//Monk AC Bonus weight cap.  Defined in Combat:MonkACBonusWeight
 //Usually 15, a monk under this weight threshold gets an AC bonus
 float Mob::mod_monk_weight(float monkweight, Mob* attacker) { return(monkweight); }
 

@@ -13,21 +13,21 @@
 #define EQEMU_BASE_PETS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BasePetsRepository {
 public:
 	struct Pets {
-		int         id;
+		int32_t     id;
 		std::string type;
-		int         petpower;
-		int         npcID;
-		int         temp;
-		int         petcontrol;
-		int         petnaming;
-		int         monsterflag;
-		int         equipmentset;
+		int32_t     petpower;
+		int32_t     npcID;
+		int8_t      temp;
+		int8_t      petcontrol;
+		int8_t      petnaming;
+		int8_t      monsterflag;
+		int32_t     equipmentset;
 	};
 
 	static std::string PrimaryKey()
@@ -67,12 +67,12 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string SelectColumnsRaw()
 	{
-		return std::string(implode(", ", SelectColumns()));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -100,22 +100,22 @@ public:
 
 	static Pets NewEntity()
 	{
-		Pets entry{};
+		Pets e{};
 
-		entry.id           = 0;
-		entry.type         = "";
-		entry.petpower     = 0;
-		entry.npcID        = 0;
-		entry.temp         = 0;
-		entry.petcontrol   = 0;
-		entry.petnaming    = 0;
-		entry.monsterflag  = 0;
-		entry.equipmentset = -1;
+		e.id           = 0;
+		e.type         = "";
+		e.petpower     = 0;
+		e.npcID        = 0;
+		e.temp         = 0;
+		e.petcontrol   = 0;
+		e.petnaming    = 0;
+		e.monsterflag  = 0;
+		e.equipmentset = -1;
 
-		return entry;
+		return e;
 	}
 
-	static Pets GetPetsEntry(
+	static Pets GetPets(
 		const std::vector<Pets> &petss,
 		int pets_id
 	)
@@ -144,19 +144,19 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			Pets entry{};
+			Pets e{};
 
-			entry.id           = atoi(row[0]);
-			entry.type         = row[1] ? row[1] : "";
-			entry.petpower     = atoi(row[2]);
-			entry.npcID        = atoi(row[3]);
-			entry.temp         = atoi(row[4]);
-			entry.petcontrol   = atoi(row[5]);
-			entry.petnaming    = atoi(row[6]);
-			entry.monsterflag  = atoi(row[7]);
-			entry.equipmentset = atoi(row[8]);
+			e.id           = static_cast<int32_t>(atoi(row[0]));
+			e.type         = row[1] ? row[1] : "";
+			e.petpower     = static_cast<int32_t>(atoi(row[2]));
+			e.npcID        = static_cast<int32_t>(atoi(row[3]));
+			e.temp         = static_cast<int8_t>(atoi(row[4]));
+			e.petcontrol   = static_cast<int8_t>(atoi(row[5]));
+			e.petnaming    = static_cast<int8_t>(atoi(row[6]));
+			e.monsterflag  = static_cast<int8_t>(atoi(row[7]));
+			e.equipmentset = static_cast<int32_t>(atoi(row[8]));
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -181,29 +181,29 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Pets pets_entry
+		const Pets &e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + EscapeString(pets_entry.type) + "'");
-		update_values.push_back(columns[2] + " = " + std::to_string(pets_entry.petpower));
-		update_values.push_back(columns[3] + " = " + std::to_string(pets_entry.npcID));
-		update_values.push_back(columns[4] + " = " + std::to_string(pets_entry.temp));
-		update_values.push_back(columns[5] + " = " + std::to_string(pets_entry.petcontrol));
-		update_values.push_back(columns[6] + " = " + std::to_string(pets_entry.petnaming));
-		update_values.push_back(columns[7] + " = " + std::to_string(pets_entry.monsterflag));
-		update_values.push_back(columns[8] + " = " + std::to_string(pets_entry.equipmentset));
+		v.push_back(columns[1] + " = '" + Strings::Escape(e.type) + "'");
+		v.push_back(columns[2] + " = " + std::to_string(e.petpower));
+		v.push_back(columns[3] + " = " + std::to_string(e.npcID));
+		v.push_back(columns[4] + " = " + std::to_string(e.temp));
+		v.push_back(columns[5] + " = " + std::to_string(e.petcontrol));
+		v.push_back(columns[6] + " = " + std::to_string(e.petnaming));
+		v.push_back(columns[7] + " = " + std::to_string(e.monsterflag));
+		v.push_back(columns[8] + " = " + std::to_string(e.equipmentset));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
-				pets_entry.id
+				e.id
 			)
 		);
 
@@ -212,69 +212,69 @@ public:
 
 	static Pets InsertOne(
 		Database& db,
-		Pets pets_entry
+		Pets e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(pets_entry.id));
-		insert_values.push_back("'" + EscapeString(pets_entry.type) + "'");
-		insert_values.push_back(std::to_string(pets_entry.petpower));
-		insert_values.push_back(std::to_string(pets_entry.npcID));
-		insert_values.push_back(std::to_string(pets_entry.temp));
-		insert_values.push_back(std::to_string(pets_entry.petcontrol));
-		insert_values.push_back(std::to_string(pets_entry.petnaming));
-		insert_values.push_back(std::to_string(pets_entry.monsterflag));
-		insert_values.push_back(std::to_string(pets_entry.equipmentset));
+		v.push_back(std::to_string(e.id));
+		v.push_back("'" + Strings::Escape(e.type) + "'");
+		v.push_back(std::to_string(e.petpower));
+		v.push_back(std::to_string(e.npcID));
+		v.push_back(std::to_string(e.temp));
+		v.push_back(std::to_string(e.petcontrol));
+		v.push_back(std::to_string(e.petnaming));
+		v.push_back(std::to_string(e.monsterflag));
+		v.push_back(std::to_string(e.equipmentset));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
 		if (results.Success()) {
-			pets_entry.id = results.LastInsertedID();
-			return pets_entry;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		pets_entry = NewEntity();
+		e = NewEntity();
 
-		return pets_entry;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<Pets> pets_entries
+		const std::vector<Pets> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &pets_entry: pets_entries) {
-			std::vector<std::string> insert_values;
+		for (auto &e: entries) {
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(pets_entry.id));
-			insert_values.push_back("'" + EscapeString(pets_entry.type) + "'");
-			insert_values.push_back(std::to_string(pets_entry.petpower));
-			insert_values.push_back(std::to_string(pets_entry.npcID));
-			insert_values.push_back(std::to_string(pets_entry.temp));
-			insert_values.push_back(std::to_string(pets_entry.petcontrol));
-			insert_values.push_back(std::to_string(pets_entry.petnaming));
-			insert_values.push_back(std::to_string(pets_entry.monsterflag));
-			insert_values.push_back(std::to_string(pets_entry.equipmentset));
+			v.push_back(std::to_string(e.id));
+			v.push_back("'" + Strings::Escape(e.type) + "'");
+			v.push_back(std::to_string(e.petpower));
+			v.push_back(std::to_string(e.npcID));
+			v.push_back(std::to_string(e.temp));
+			v.push_back(std::to_string(e.petcontrol));
+			v.push_back(std::to_string(e.petnaming));
+			v.push_back(std::to_string(e.monsterflag));
+			v.push_back(std::to_string(e.equipmentset));
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 
@@ -295,25 +295,25 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Pets entry{};
+			Pets e{};
 
-			entry.id           = atoi(row[0]);
-			entry.type         = row[1] ? row[1] : "";
-			entry.petpower     = atoi(row[2]);
-			entry.npcID        = atoi(row[3]);
-			entry.temp         = atoi(row[4]);
-			entry.petcontrol   = atoi(row[5]);
-			entry.petnaming    = atoi(row[6]);
-			entry.monsterflag  = atoi(row[7]);
-			entry.equipmentset = atoi(row[8]);
+			e.id           = static_cast<int32_t>(atoi(row[0]));
+			e.type         = row[1] ? row[1] : "";
+			e.petpower     = static_cast<int32_t>(atoi(row[2]));
+			e.npcID        = static_cast<int32_t>(atoi(row[3]));
+			e.temp         = static_cast<int8_t>(atoi(row[4]));
+			e.petcontrol   = static_cast<int8_t>(atoi(row[5]));
+			e.petnaming    = static_cast<int8_t>(atoi(row[6]));
+			e.monsterflag  = static_cast<int8_t>(atoi(row[7]));
+			e.equipmentset = static_cast<int32_t>(atoi(row[8]));
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static std::vector<Pets> GetWhere(Database& db, std::string where_filter)
+	static std::vector<Pets> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<Pets> all_entries;
 
@@ -328,25 +328,25 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Pets entry{};
+			Pets e{};
 
-			entry.id           = atoi(row[0]);
-			entry.type         = row[1] ? row[1] : "";
-			entry.petpower     = atoi(row[2]);
-			entry.npcID        = atoi(row[3]);
-			entry.temp         = atoi(row[4]);
-			entry.petcontrol   = atoi(row[5]);
-			entry.petnaming    = atoi(row[6]);
-			entry.monsterflag  = atoi(row[7]);
-			entry.equipmentset = atoi(row[8]);
+			e.id           = static_cast<int32_t>(atoi(row[0]));
+			e.type         = row[1] ? row[1] : "";
+			e.petpower     = static_cast<int32_t>(atoi(row[2]));
+			e.npcID        = static_cast<int32_t>(atoi(row[3]));
+			e.temp         = static_cast<int8_t>(atoi(row[4]));
+			e.petcontrol   = static_cast<int8_t>(atoi(row[5]));
+			e.petnaming    = static_cast<int8_t>(atoi(row[6]));
+			e.monsterflag  = static_cast<int8_t>(atoi(row[7]));
+			e.equipmentset = static_cast<int32_t>(atoi(row[8]));
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -369,6 +369,32 @@ public:
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int64 GetMaxId(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COALESCE(MAX({}), 0) FROM {}",
+				PrimaryKey(),
+				TableName()
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static int64 Count(Database& db, const std::string &where_filter = "")
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COUNT(*) FROM {} {}",
+				TableName(),
+				(where_filter.empty() ? "" : "WHERE " + where_filter)
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
 };

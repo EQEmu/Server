@@ -1,4 +1,5 @@
 #include "../client.h"
+#include "../../common/data_verification.h"
 
 void command_flymode(Client *c, const Seperator *sep)
 {
@@ -13,10 +14,7 @@ void command_flymode(Client *c, const Seperator *sep)
 	}
 
 	auto flymode_id = std::stoul(sep->arg[1]);
-	if (
-		flymode_id < EQ::constants::GravityBehavior::Ground &&
-		flymode_id > EQ::constants::GravityBehavior::LevitateWhileRunning
-	) {		
+	if (!EQ::ValueWithin(flymode_id, EQ::constants::GravityBehavior::Ground, EQ::constants::GravityBehavior::LevitateWhileRunning)) {
 		c->Message(Chat::White, "Usage:: #flymode [Flymode ID]");
 		c->Message(Chat::White, "0 = Ground, 1 = Flying, 2 = Levitating, 3 = Water, 4 = Floating, 5 = Levitating While Running");
 		return;
@@ -24,6 +22,8 @@ void command_flymode(Client *c, const Seperator *sep)
 
 	target->SetFlyMode(static_cast<GravityBehavior>(flymode_id));
 	target->SendAppearancePacket(AT_Levitate, flymode_id);
+	uint32 account = c->AccountID();
+	database.SetGMFlymode(account, flymode_id);
 	c->Message(
 		Chat::White,
 		fmt::format(

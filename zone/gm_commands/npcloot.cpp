@@ -8,7 +8,7 @@ void command_npcloot(Client *c, const Seperator *sep)
 		c->Message(Chat::White, "You must target an NPC or a Corpse to use this command.");
 		return;
 	}
-	
+
 	int arguments = sep->argnum;
 	if (!arguments) {
 		c->Message(Chat::White, "Usage: #npcloot add [Item ID] [Charges] [Equip] [Augment 1 ID] [Augment 2 ID] [Augment 3 ID] [Augment 4 ID] [Augment 5 ID] [Augment 6 ID] - Adds the specified item to an NPC's loot");
@@ -132,12 +132,12 @@ void command_npcloot(Client *c, const Seperator *sep)
 					gold ||
 					platinum
 				) ?
-				ConvertMoneyToString(
-					platinum,
-					gold,
-					silver,
-					copper
-				) :
+					Strings::Money(
+						platinum,
+						gold,
+						silver,
+						copper
+					) :
 				"no money"
 			);
 

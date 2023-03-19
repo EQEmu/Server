@@ -55,7 +55,7 @@ void command_who(Client *c, const Seperator *sep)
 	std::string search_string;
 
 	if (sep->arg[1]) {
-		search_string = str_tolower(sep->arg[1]);
+		search_string = Strings::ToLower(sep->arg[1]);
 	}
 
 	int found_count = 0;
@@ -82,13 +82,13 @@ void command_who(Client *c, const Seperator *sep)
 
 		if (search_string.length()) {
 			bool found_search_term = (
-				str_tolower(player_name).find(search_string) != std::string::npos ||
-				str_tolower(zone_short_name).find(search_string) != std::string::npos ||
-				str_tolower(displayed_race_name).find(search_string) != std::string::npos ||
-				str_tolower(base_class_name).find(search_string) != std::string::npos ||
-				str_tolower(guild_name).find(search_string) != std::string::npos ||
-				str_tolower(account_name).find(search_string) != std::string::npos ||
-				str_tolower(account_ip).find(search_string) != std::string::npos
+				Strings::ToLower(player_name).find(search_string) != std::string::npos ||
+				Strings::ToLower(zone_short_name).find(search_string) != std::string::npos ||
+				Strings::ToLower(displayed_race_name).find(search_string) != std::string::npos ||
+				Strings::ToLower(base_class_name).find(search_string) != std::string::npos ||
+				Strings::ToLower(guild_name).find(search_string) != std::string::npos ||
+				Strings::ToLower(account_name).find(search_string) != std::string::npos ||
+				Strings::ToLower(account_ip).find(search_string) != std::string::npos
 			);
 
 			if (!found_search_term) {
@@ -98,12 +98,11 @@ void command_who(Client *c, const Seperator *sep)
 
 		std::string displayed_guild_name;
 		if (guild_name.length()) {
-			displayed_guild_name = EQ::SayLinkEngine::GenerateQuestSaylink(
+			displayed_guild_name = Saylink::Silent(
 				fmt::format(
 					"#who \"{}\"",
 					guild_name
 				),
-				false,
 				fmt::format(
 					"<{}>",
 					guild_name
@@ -111,21 +110,19 @@ void command_who(Client *c, const Seperator *sep)
 			);
 		}
 
-		auto goto_saylink = EQ::SayLinkEngine::GenerateQuestSaylink(
+		auto goto_saylink = Saylink::Silent(
 			fmt::format(
 				"#goto {}",
 				player_name
 			),
-			false,
 			"Goto"
 		);
 
-		auto summon_saylink = EQ::SayLinkEngine::GenerateQuestSaylink(
+		auto summon_saylink = Saylink::Silent(
 			fmt::format(
 				"#summon {}",
 				player_name
 			),
-			false,
 			"Summon"
 		);
 
@@ -134,48 +131,43 @@ void command_who(Client *c, const Seperator *sep)
 			static_cast<uint8>(player_level)
 		);
 
-		auto class_saylink = EQ::SayLinkEngine::GenerateQuestSaylink(
+		auto class_saylink = Saylink::Silent(
 			fmt::format(
 				"#who {}",
 				base_class_name
 			),
-			false,
 			display_class_name
 		);
 
-		auto race_saylink = EQ::SayLinkEngine::GenerateQuestSaylink(
+		auto race_saylink = Saylink::Silent(
 			fmt::format(
 				"#who %s",
 				displayed_race_name
 			),
-			false,
 			displayed_race_name
 		);
 
-		auto zone_saylink = EQ::SayLinkEngine::GenerateQuestSaylink(
+		auto zone_saylink = Saylink::Silent(
 			fmt::format(
 				"#who {}",
 				zone_short_name
 			),
-			false,
 			zone_long_name
 		);
 
-		auto account_saylink = EQ::SayLinkEngine::GenerateQuestSaylink(
+		auto account_saylink = Saylink::Silent(
 			fmt::format(
 				"#who {}",
 				account_name
 			),
-			false,
 			account_name
 		);
 
-		auto account_ip_saylink = EQ::SayLinkEngine::GenerateQuestSaylink(
+		auto account_ip_saylink = Saylink::Silent(
 			fmt::format(
 				"#who {}",
 				account_ip
 			),
-			false,
 			account_ip
 		);
 

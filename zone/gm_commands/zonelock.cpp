@@ -21,7 +21,7 @@ void command_zonelock(Client *c, const Seperator *sep)
 		return;
 	}
 
-	std::string lock_type = str_tolower(sep->arg[1]);
+	std::string lock_type = Strings::ToLower(sep->arg[1]);
 	bool        is_list   = lock_type.find("list") != std::string::npos;
 	bool        is_lock   = lock_type.find("lock") != std::string::npos;
 	bool        is_unlock = lock_type.find("unlock") != std::string::npos;
@@ -54,7 +54,7 @@ void command_zonelock(Client *c, const Seperator *sep)
 				static_cast<uint16>(std::stoul(sep->arg[2])) :
 				static_cast<uint16>(ZoneID(sep->arg[2]))
 		);
-		std::string zone_short_name = str_tolower(ZoneName(zone_id, true));
+		std::string zone_short_name = Strings::ToLower(ZoneName(zone_id, true));
 		bool        is_unknown_zone = zone_short_name.find("unknown") != std::string::npos;
 		if (zone_id && !is_unknown_zone) {
 			lock_zone->op     = is_lock ? ServerLockType::Lock : ServerLockType::Unlock;
@@ -65,7 +65,7 @@ void command_zonelock(Client *c, const Seperator *sep)
 			c->Message(
 				Chat::White,
 				fmt::format(
-					"Usage: #zonelock {} [Zone ID] or #zonelock {} [Zone Short Name]",
+					"Usage: #zonelock {0} [Zone ID] or #zonelock {0} [Zone Short Name]",
 					is_lock ? "lock" : "unlock"
 				).c_str()
 			);

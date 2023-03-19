@@ -15,6 +15,7 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
+#include "../common/data_verification.h"
 #include "../common/global_define.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -51,9 +52,7 @@
 	#define strcasecmp	_stricmp
 #endif
 
-#ifdef BOTS
 #include "bot.h"
-#endif
 
 extern Zone *zone;
 extern volatile bool is_zone_loaded;
@@ -277,29 +276,15 @@ const Encounter* Entity::CastToEncounter() const
 	return static_cast<const Encounter *>(this);
 }
 
-#ifdef BOTS
 Bot *Entity::CastToBot()
 {
-#ifdef _EQDEBUG
-	if (!IsBot()) {
-		std::cout << "CastToBot error" << std::endl;
-		return 0;
-	}
-#endif
 	return static_cast<Bot *>(this);
 }
 
 const Bot *Entity::CastToBot() const
 {
-#ifdef _EQDEBUG
-	if (!IsBot()) {
-		std::cout << "CastToBot error" << std::endl;
-		return 0;
-	}
-#endif
 	return static_cast<const Bot *>(this);
 }
-#endif
 
 EntityList::EntityList()
 	:
@@ -553,11 +538,9 @@ void EntityList::MobProcess()
 			if(mob->IsMerc()) {
 				entity_list.RemoveMerc(id);
 			}
-#ifdef BOTS
 			else if(mob->IsBot()) {
 				entity_list.RemoveBot(id);
 			}
-#endif
 			else if(mob->IsNPC()) {
 				entity_list.RemoveNPC(id);
 			}
@@ -567,7 +550,6 @@ void EntityList::MobProcess()
 				in.s_addr = mob->CastToClient()->GetIP();
 				LogInfo("Dropping client: Process=false, ip=[{}] port=[{}]", inet_ntoa(in), mob->CastToClient()->GetPort());
 #endif
-				zone->StartShutdownTimer();
 				Group *g = GetGroupByMob(mob);
 				if(g) {
 					LogError("About to delete a client still in a group");
@@ -685,66 +667,61 @@ void EntityList::AddCorpse(Corpse *corpse, uint32 in_id)
 		corpse_timer.Start();
 }
 
-void EntityList::AddNPC(NPC *npc, bool SendSpawnPacket, bool dontqueue)
+void EntityList::AddNPC(NPC *npc, bool send_spawn_packet, bool dont_queue)
 {
 	npc->SetID(GetFreeID());
 
 	//If this is not set here we will despawn pets from new AC changes
 	auto owner_id = npc->GetOwnerID();
-	if(owner_id) {
+	if (owner_id) {
 		auto owner = entity_list.GetMob(owner_id);
 		if (owner) {
 			owner->SetPetID(npc->GetID());
 		}
 	}
-	parse->EventNPC(EVENT_SPAWN, npc, nullptr, "", 0);
-
-	uint16 emoteid = npc->GetEmoteID();
-	if (emoteid != 0)
-		npc->DoNPCEmote(ONSPAWN, emoteid);
-	npc->SetSpawned();
-	if (SendSpawnPacket) {
-		if (dontqueue) { // aka, SEND IT NOW BITCH!
-			auto app = new EQApplicationPacket;
-			npc->CreateSpawnPacket(app, npc);
-			QueueClients(npc, app);
-			npc->SendArmorAppearance();
-			npc->SetAppearance(npc->GetGuardPointAnim(),false);
-			if (!npc->IsTargetable())
-				npc->SendTargetable(false);
-			safe_delete(app);
-		} else {
-			auto ns = new NewSpawn_Struct;
-			memset(ns, 0, sizeof(NewSpawn_Struct));
-			npc->FillSpawnStruct(ns, nullptr);	// Not working on player newspawns, so it's safe to use a ForWho of 0
-			AddToSpawnQueue(npc->GetID(), &ns);
-			safe_delete(ns);
-		}
-		if (npc->IsFindable())
-			UpdateFindableNPCState(npc, false);
-	}
 
 	npc_list.insert(std::pair<uint16, NPC *>(npc->GetID(), npc));
 	mob_list.insert(std::pair<uint16, Mob *>(npc->GetID(), npc));
 
-	entity_list.ScanCloseMobs(npc->close_mobs, npc, true);
+	parse->EventNPC(EVENT_SPAWN, npc, nullptr, "", 0);
 
-	/* Zone controller process EVENT_SPAWN_ZONE */
-	if (RuleB(Zone, UseZoneController)) {
-		auto controller = entity_list.GetNPCByNPCTypeID(ZONE_CONTROLLER_NPC_ID);
-		if (controller && npc->GetNPCTypeID() != ZONE_CONTROLLER_NPC_ID){
-			std::string export_string = fmt::format(
-				"{} {}",
-				npc->GetID(),
-				npc->GetNPCTypeID()
-			);
-			parse->EventNPC(EVENT_SPAWN_ZONE, controller, nullptr, export_string, 0);
+	const auto emote_id = npc->GetEmoteID();
+	if (emote_id != 0) {
+		npc->DoNPCEmote(EQ::constants::EmoteEventTypes::OnSpawn, emote_id);
+	}
+
+	npc->SetSpawned();
+
+	if (send_spawn_packet) {
+		if (dont_queue) {
+			auto app = new EQApplicationPacket;
+			npc->CreateSpawnPacket(app, npc);
+			QueueClients(npc, app);
+			npc->SendArmorAppearance();
+			npc->SetAppearance(npc->GetGuardPointAnim(), false);
+
+			if (!npc->IsTargetable()) {
+				npc->SendTargetable(false);
+			}
+
+			safe_delete(app);
+		} else {
+			auto ns = new NewSpawn_Struct;
+			memset(ns, 0, sizeof(NewSpawn_Struct));
+			npc->FillSpawnStruct(ns, nullptr);
+			AddToSpawnQueue(npc->GetID(), &ns);
+			safe_delete(ns);
+		}
+
+		if (npc->IsFindable()) {
+			UpdateFindableNPCState(npc, false);
 		}
 	}
 
-	/**
-	 * Set whether NPC was spawned in or out of water
-	 */
+	entity_list.ScanCloseMobs(npc->close_mobs, npc, true);
+
+	npc->DispatchZoneControllerEvent(EVENT_SPAWN_ZONE, npc, "", 0, nullptr);
+
 	if (zone->HasMap() && zone->HasWaterMap()) {
 		npc->SetSpawnedInWater(false);
 		if (zone->watermap->InLiquid(npc->GetPosition())) {
@@ -1725,6 +1702,9 @@ void EntityList::QueueCloseClients(
 
 	for (auto &e : GetCloseMobList(sender, distance)) {
 		Mob *mob = e.second;
+		if (!mob) {
+			continue;
+		}
 
 		if (!mob->IsClient()) {
 			continue;
@@ -1803,7 +1783,7 @@ void EntityList::QueueClientsStatus(Mob *sender, const EQApplicationPacket *app,
 void EntityList::DuelMessage(Mob *winner, Mob *loser, bool flee)
 {
 	if (winner->GetLevelCon(winner->GetLevel(), loser->GetLevel()) > 2) {
-		std::vector<EQ::Any> args;
+		std::vector<std::any> args;
 		args.push_back(winner);
 		args.push_back(loser);
 
@@ -1871,14 +1851,55 @@ Client *EntityList::GetClientByLSID(uint32 iLSID)
 	return nullptr;
 }
 
+Bot* EntityList::GetRandomBot(const glm::vec3& location, float distance, Bot* exclude_bot)
+{
+	auto is_whole_zone = false;
+	if (location.x == 0.0f && location.y == 0.0f) {
+		is_whole_zone = true;
+	}
+
+	auto distance_squared = (distance * distance);
+
+	std::vector<Bot*> bots_in_range;
+
+	for (const auto& b : bot_list) {
+		if (
+			b != exclude_bot &&
+			(
+				is_whole_zone ||
+				DistanceSquared(static_cast<glm::vec3>(b->GetPosition()), location) <= distance_squared
+			)
+		) {
+			bots_in_range.push_back(b);
+		}
+	}
+
+	if (bots_in_range.empty()) {
+		return nullptr;
+	}
+
+	return bots_in_range[zone->random.Int(0, bots_in_range.size() - 1)];
+
+}
+
 Client *EntityList::GetRandomClient(const glm::vec3& location, float distance, Client *exclude_client)
 {
+	auto is_whole_zone = false;
+	if (location.x == 0.0f && location.y == 0.0f) {
+		is_whole_zone = true;
+	}
+
+	auto distance_squared = (distance * distance);
+
 	std::vector<Client*> clients_in_range;
 
 	for (const auto& client : client_list) {
 		if (
 			client.second != exclude_client &&
-			DistanceSquared(static_cast<glm::vec3>(client.second->GetPosition()), location) <= distance
+			(
+				is_whole_zone ||
+				DistanceSquared(static_cast<glm::vec3>(client.second->GetPosition()), location) <= distance_squared
+			)
 		) {
 			clients_in_range.push_back(client.second);
 		}
@@ -1893,12 +1914,22 @@ Client *EntityList::GetRandomClient(const glm::vec3& location, float distance, C
 
 NPC* EntityList::GetRandomNPC(const glm::vec3& location, float distance, NPC* exclude_npc)
 {
+	auto is_whole_zone = false;
+	if (location.x == 0.0f && location.y == 0.0f) {
+		is_whole_zone = true;
+	}
+
+	auto distance_squared = (distance * distance);
+
 	std::vector<NPC*> npcs_in_range;
 
 	for (const auto& npc : npc_list) {
 		if (
 			npc.second != exclude_npc &&
-			DistanceSquared(static_cast<glm::vec3>(npc.second->GetPosition()), location) <= distance
+			(
+				is_whole_zone ||
+				DistanceSquared(static_cast<glm::vec3>(npc.second->GetPosition()), location) <= distance_squared
+			)
 		) {
 			npcs_in_range.push_back(npc.second);
 		}
@@ -1913,12 +1944,22 @@ NPC* EntityList::GetRandomNPC(const glm::vec3& location, float distance, NPC* ex
 
 Mob* EntityList::GetRandomMob(const glm::vec3& location, float distance, Mob* exclude_mob)
 {
+	auto is_whole_zone = false;
+	if (location.x == 0.0f && location.y == 0.0f) {
+		is_whole_zone = true;
+	}
+
+	auto distance_squared = (distance * distance);
+
 	std::vector<Mob*> mobs_in_range;
 
 	for (const auto& mob : mob_list) {
 		if (
 			mob.second != exclude_mob &&
-			DistanceSquared(static_cast<glm::vec3>(mob.second->GetPosition()), location) <= distance
+			(
+				is_whole_zone ||
+				DistanceSquared(static_cast<glm::vec3>(mob.second->GetPosition()), location) <= distance_squared
+			)
 		) {
 			mobs_in_range.push_back(mob.second);
 		}
@@ -2089,6 +2130,14 @@ Group *EntityList::GetGroupByID(uint32 group_id)
 	CheckGroupList (__FILE__, __LINE__);
 #endif
 	return nullptr;
+}
+
+bool EntityList::IsInSameGroupOrRaidGroup(Client *client1, Client *client2) {
+	Group* group = entity_list.GetGroupByClient(client1);
+	Raid* raid = entity_list.GetRaidByClient(client1);
+
+	return (group && group->IsGroupMember(client2))
+		   || (raid && raid->IsRaidMember(client2->GetName()) && raid->GetGroup(client1) == raid->GetGroup(client2));
 }
 
 Group *EntityList::GetGroupByClient(Client *client)
@@ -2366,6 +2415,7 @@ void EntityList::FilteredMessageCloseString(
 	uint32 type,
 	eqFilterType filter,
 	uint32 string_id,
+	Mob *skip,
 	const char *message1,
 	const char *message2,
 	const char *message3,
@@ -2382,7 +2432,7 @@ void EntityList::FilteredMessageCloseString(
 
 	for (auto & it : client_list) {
 		c = it.second;
-		if (c && DistanceSquared(c->GetPosition(), sender->GetPosition()) <= dist2 && (!skipsender || c != sender)) {
+		if (c && c != skip && DistanceSquared(c->GetPosition(), sender->GetPosition()) <= dist2 && (!skipsender || c != sender)) {
 			c->FilteredMessageString(
 				sender, type, filter, string_id,
 				message1, message2, message3, message4, message5,
@@ -2857,7 +2907,7 @@ void EntityList::ScanCloseMobs(
 	for (auto &e : mob_list) {
 		auto mob = e.second;
 
-		if (!mob->IsNPC() && !mob->IsClient()) {
+		if (!mob->IsNPC() && !mob->IsClient() && !mob->IsBot() && !mob->IsMerc()) {
 			continue;
 		}
 
@@ -2886,7 +2936,7 @@ void EntityList::ScanCloseMobs(
 		}
 	}
 
-	LogAIScanClose(
+	LogAIScanCloseDetail(
 		"[{}] Scanning Close List | list_size [{}] moving [{}]",
 		scanning_mob->GetCleanName(),
 		close_mobs.size(),
@@ -3075,13 +3125,8 @@ void EntityList::RemoveEntity(uint16 id)
 		return;
 	else if (entity_list.RemoveMerc(id))
 		return;
-
-#ifdef BOTS
-	// This block of code is necessary to clean up bot objects
 	else if (entity_list.RemoveBot(id))
 		return;
-#endif //BOTS
-
 	else
 		entity_list.RemoveObject(id);
 }
@@ -3308,18 +3353,44 @@ uint32 EntityList::DeleteNPCCorpses()
 
 void EntityList::CorpseFix(Client* c)
 {
+	uint32 fixed_count = 0;
+	for (const auto& e : corpse_list) {
+		auto cur = e.second;
+		if (cur->IsNPCCorpse()) {
+			if (DistanceNoZ(c->GetPosition(), cur->GetPosition()) < 100) {
+				c->Message(
+					Chat::White,
+					fmt::format(
+						"Attempting to fix {}.",
+						cur->GetCleanName()
+					).c_str()
+				);
 
-	auto it = corpse_list.begin();
-	while (it != corpse_list.end()) {
-		Corpse* corpse = it->second;
-		if (corpse->IsNPCCorpse()) {
-			if (DistanceNoZ(c->GetPosition(), corpse->GetPosition()) < 100) {
-				c->Message(Chat::Yellow, "Attempting to fix %s", it->second->GetCleanName());
-				corpse->GMMove(corpse->GetX(), corpse->GetY(), c->GetZ() + 2, 0);
+				cur->GMMove(
+					cur->GetX(),
+					cur->GetY(),
+					cur->GetFixedZ(c->GetPosition()),
+					c->GetHeading()
+				);
+
+				fixed_count++;
 			}
 		}
-		++it;
 	}
+
+	if (!fixed_count) {
+		c->Message(Chat::White, "There were no nearby NPC corpses to fix.");
+		return;
+	}
+
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"Fixed {} nearby NPC corpse{}.",
+			fixed_count,
+			fixed_count != 1 ? "s" : ""
+		).c_str()
+	);
 }
 
 // returns the number of corpses deleted. A negative number indicates an error code.
@@ -3570,7 +3641,7 @@ void EntityList::ClearFeignAggro(Mob *targ)
 			}
 
 			if (targ->IsClient()) {
-				std::vector<EQ::Any> args;
+				std::vector<std::any> args;
 				args.push_back(it->second);
 				int i = parse->EventPlayer(EVENT_FEIGN_DEATH, targ->CastToClient(), "", 0, &args);
 				if (i != 0) {
@@ -3642,46 +3713,53 @@ void EntityList::SignalMobsByNPCID(uint32 snpc, int signal_id)
 bool EntityList::MakeTrackPacket(Client *client)
 {
 	std::list<std::pair<Mob *, float> > tracking_list;
-	uint32 distance = 0;
-	float MobDistance;
+	auto distance = static_cast<float>(client->GetSkill(EQ::skills::SkillTracking) * client->GetClassTrackingDistanceMultiplier(client->GetClass()));
 
-	distance = (client->GetSkill(EQ::skills::SkillTracking) * client->GetClassTrackingDistanceMultiplier(client->GetClass()));
-
-	if (distance <= 0)
+	if (distance <= 0.0f) {
 		return false;
-	if (distance < 300)
-		distance = 300;
+	}
+
+	if (distance < 300.0f) {
+		distance = 300.0f;
+	}
 
 	for (auto it = mob_list.cbegin(); it != mob_list.cend(); ++it) {
-		if (!it->second || it->second == client || !it->second->IsTrackable() ||
-				it->second->IsInvisible(client))
+		if (
+			!it->second ||
+			it->second == client ||
+			!it->second->IsTrackable() ||
+			it->second->IsInvisible(client)
+		) {
 			continue;
+		}
 
-		MobDistance = DistanceNoZ(it->second->GetPosition(), client->GetPosition());
-		if (MobDistance > distance)
+		const auto mob_distance = DistanceNoZ(it->second->GetPosition(), client->GetPosition());
+		if (mob_distance > distance) {
 			continue;
+		}
 
-		tracking_list.push_back(std::make_pair(it->second, MobDistance));
+		tracking_list.push_back(std::make_pair(it->second, mob_distance));
 	}
 
 	tracking_list.sort(
 		[](const std::pair<Mob *, float> &a, const std::pair<Mob *, float> &b) {
 			return a.first->GetSpawnTimeStamp() > b.first->GetSpawnTimeStamp();
-		});
+		}
+	);
+
 	auto outapp = new EQApplicationPacket(OP_Track, sizeof(Track_Struct) * tracking_list.size());
-	Tracking_Struct *outtrack = (Tracking_Struct *)outapp->pBuffer;
+	auto pack = (Tracking_Struct *) outapp->pBuffer;
 	outapp->priority = 6;
 
 	int index = 0;
 	for (auto it = tracking_list.cbegin(); it != tracking_list.cend(); ++it, ++index) {
-		Mob *cur_entity = it->first;
-		outtrack->Entrys[index].entityid = (uint32)cur_entity->GetID();
-		outtrack->Entrys[index].distance = it->second;
-		outtrack->Entrys[index].level = cur_entity->GetLevel();
-		outtrack->Entrys[index].is_npc = !cur_entity->IsClient();
-		strn0cpy(outtrack->Entrys[index].name, cur_entity->GetName(), sizeof(outtrack->Entrys[index].name));
-		outtrack->Entrys[index].is_pet = cur_entity->IsPet();
-		outtrack->Entrys[index].is_merc = cur_entity->IsMerc();
+		pack->Entrys[index].entityid = static_cast<uint32>(it->first->GetID());
+		pack->Entrys[index].distance = it->second;
+		pack->Entrys[index].level = it->first->GetLevel();
+		pack->Entrys[index].is_npc = !it->first->IsClient();
+		strn0cpy(pack->Entrys[index].name, it->first->GetName(), sizeof(pack->Entrys[index].name));
+		pack->Entrys[index].is_pet = it->first->IsPet();
+		pack->Entrys[index].is_merc = it->first->IsMerc();
 	}
 
 	client->QueuePacket(outapp);
@@ -3909,14 +3987,31 @@ void EntityList::ProcessMove(Client *c, const glm::vec3& location)
 
 	for (auto iter = events.begin(); iter != events.end(); ++iter) {
 		quest_proximity_event& evt = (*iter);
+
+		std::vector<std::any> args;
+		args.push_back(&evt.area_id);
+		args.push_back(&evt.area_type);
+
 		if (evt.npc) {
-			std::vector<EQ::Any> args;
-			parse->EventNPC(evt.event_id, evt.npc, evt.client, "", 0, &args);
+			if (evt.event_id == EVENT_ENTER) {
+				parse->EventNPC(EVENT_ENTER, evt.npc, evt.client, "", 0);
+			} else if (evt.event_id == EVENT_EXIT) {
+				parse->EventNPC(EVENT_EXIT, evt.npc, evt.client, "", 0);
+			} else if (evt.event_id == EVENT_ENTER_AREA) {
+				parse->EventNPC(EVENT_ENTER_AREA, evt.npc, evt.client, "", 0, &args);
+			} else if (evt.event_id == EVENT_LEAVE_AREA) {
+				parse->EventNPC(EVENT_LEAVE_AREA, evt.npc, evt.client, "", 0, &args);
+			}
 		} else {
-			std::vector<EQ::Any> args;
-			args.push_back(&evt.area_id);
-			args.push_back(&evt.area_type);
-			parse->EventPlayer(evt.event_id, evt.client, "", 0, &args);
+			if (evt.event_id == EVENT_ENTER) {
+				parse->EventPlayer(EVENT_ENTER, evt.client, "", 0);
+			} else if (evt.event_id == EVENT_EXIT) {
+				parse->EventPlayer(EVENT_EXIT, evt.client, "", 0);
+			} else if (evt.event_id == EVENT_ENTER_AREA) {
+				parse->EventPlayer(EVENT_ENTER_AREA, evt.client, "", 0, &args);
+			} else if (evt.event_id == EVENT_LEAVE_AREA) {
+				parse->EventPlayer(EVENT_LEAVE_AREA, evt.client, "", 0, &args);
+			}
 		}
 	}
 }
@@ -3969,10 +4064,20 @@ void EntityList::ProcessMove(NPC *n, float x, float y, float z) {
 
 	for (auto iter = events.begin(); iter != events.end(); ++iter) {
 		quest_proximity_event   &evt = (*iter);
-		std::vector<EQ::Any> args;
+
+		std::vector<std::any> args;
 		args.push_back(&evt.area_id);
 		args.push_back(&evt.area_type);
-		parse->EventNPC(evt.event_id, evt.npc, evt.client, "", 0, &args);
+
+		if (evt.event_id == EVENT_ENTER) {
+			parse->EventNPC(EVENT_ENTER, evt.npc, evt.client, "", 0);
+		} else if (evt.event_id == EVENT_EXIT) {
+			parse->EventNPC(EVENT_EXIT, evt.npc, evt.client, "", 0);
+		} else if (evt.event_id == EVENT_ENTER_AREA) {
+			parse->EventNPC(EVENT_ENTER_AREA, evt.npc, evt.client, "", 0, &args);
+		} else if (evt.event_id == EVENT_LEAVE_AREA) {
+			parse->EventNPC(EVENT_LEAVE_AREA, evt.npc, evt.client, "", 0, &args);
+		}
 	}
 }
 
@@ -4216,10 +4321,12 @@ bool EntityList::LimitCheckName(const char *npc_name)
 {
 	auto it = npc_list.begin();
 	while (it != npc_list.end()) {
-		NPC* npc = it->second;
-		if (npc)
-			if (strcasecmp(npc_name, npc->GetRawNPCTypeName()) == 0)
+		NPC *npc = it->second;
+		if (npc) {
+			if (strcasecmp(npc_name, npc->GetRawNPCTypeName()) == 0) {
 				return false;
+			}
+		}
 		++it;
 	}
 	return true;
@@ -4373,6 +4480,9 @@ void EntityList::QuestJournalledSayClose(
 	if (RuleB(Chat, QuestDialogueUsesDialogueWindow)) {
 		for (auto &e : GetCloseMobList(sender, (dist * dist))) {
 			Mob *mob = e.second;
+			if (!mob) {
+				continue;
+			}
 
 			if (!mob->IsClient()) {
 				continue;
@@ -4892,9 +5002,9 @@ void EntityList::ZoneWho(Client *c, Who_All_Struct *Who)
 				FormatMSGID = 5024; // 5024 %T1[ANONYMOUS] %2 %3
 			else if (ClientEntry->GetAnon() == 2)
 				FormatMSGID = 5023; // 5023 %T1[ANONYMOUS] %2 %3 %4
-			uint32 PlayerClass = 0;
+			uint32 PlayerClass = NO_CLASS;
 			uint32 PlayerLevel = 0;
-			uint32 PlayerRace = 0;
+			uint32 PlayerRace = RACE_DOUG_0;
 			uint32 ZoneMSGID = 0xFFFFFFFF;
 
 			if (ClientEntry->GetAnon()==0) {
@@ -4998,14 +5108,12 @@ void EntityList::GateAllClients()
 	}
 }
 
-void EntityList::SignalAllClients(uint32 data)
+void EntityList::SignalAllClients(int signal_id)
 {
-	auto it = client_list.begin();
-	while (it != client_list.end()) {
-		Client *ent = it->second;
-		if (ent)
-			ent->Signal(data);
-		++it;
+	for (const auto& c : client_list) {
+		if (c.second) {
+			c.second->Signal(signal_id);
+		}
 	}
 }
 
@@ -5053,16 +5161,16 @@ void EntityList::GetClientList(std::list<Client *> &c_list)
 	}
 }
 
-#ifdef BOTS
 void EntityList::GetBotList(std::list<Bot *> &b_list)
 {
 	b_list.clear();
-	for (auto bot : bot_list) {
-		b_list.push_back(bot);
+
+	for (const auto& b : bot_list) {
+		b_list.push_back(b);
 	}
 }
 
-std::vector<Bot *> EntityList::GetBotListByCharacterID(uint32 character_id)
+std::vector<Bot *> EntityList::GetBotListByCharacterID(uint32 character_id, uint8 class_id)
 {
 	std::vector<Bot *> client_bot_list;
 
@@ -5070,16 +5178,20 @@ std::vector<Bot *> EntityList::GetBotListByCharacterID(uint32 character_id)
 		return client_bot_list;
 	}
 
-	for (auto bot : bot_list) {
-		if (bot->GetOwner() && bot->GetBotOwnerCharacterID() == character_id) {
-			client_bot_list.push_back(bot);
+	for (const auto& b : bot_list) {
+		if (
+			b->GetOwner() &&
+			b->GetBotOwnerCharacterID() == character_id &&
+			(!class_id || b->GetClass() == class_id)
+		) {
+			client_bot_list.push_back(b);
 		}
 	}
 
 	return client_bot_list;
 }
 
-std::vector<Bot *> EntityList::GetBotListByClientName(std::string client_name)
+std::vector<Bot *> EntityList::GetBotListByClientName(std::string client_name, uint8 class_id)
 {
 	std::vector<Bot *> client_bot_list;
 
@@ -5087,15 +5199,58 @@ std::vector<Bot *> EntityList::GetBotListByClientName(std::string client_name)
 		return client_bot_list;
 	}
 
-	for (auto bot : bot_list) {
-		if (bot->GetOwner() && str_tolower(bot->GetOwner()->GetCleanName()) == str_tolower(client_name)) {
-			client_bot_list.push_back(bot);
+	for (const auto& b : bot_list) {
+		if (
+			b->GetOwner() &&
+			Strings::ToLower(b->GetOwner()->GetCleanName()) == Strings::ToLower(client_name) &&
+			(!class_id || b->GetClass() == class_id)
+		) {
+			client_bot_list.push_back(b);
 		}
 	}
 
 	return client_bot_list;
 }
-#endif
+
+void EntityList::SignalAllBotsByOwnerCharacterID(uint32 character_id, int signal_id)
+{
+	auto client_bot_list = GetBotListByCharacterID(character_id);
+	if (client_bot_list.empty()) {
+		return;
+	}
+
+	for (const auto& b : client_bot_list) {
+		b->Signal(signal_id);
+	}
+}
+
+void EntityList::SignalAllBotsByOwnerName(std::string owner_name, int signal_id)
+{
+	auto client_bot_list = GetBotListByClientName(owner_name);
+	if (client_bot_list.empty()) {
+		return;
+	}
+
+	for (const auto& b : client_bot_list) {
+		b->Signal(signal_id);
+	}
+}
+
+void EntityList::SignalBotByBotID(uint32 bot_id, int signal_id)
+{
+	auto b = GetBotByBotID(bot_id);
+	if (b) {
+		b->Signal(signal_id);
+	}
+}
+
+void EntityList::SignalBotByBotName(std::string bot_name, int signal_id)
+{
+	auto b = GetBotByBotName(bot_name);
+	if (b) {
+		b->Signal(signal_id);
+	}
+}
 
 void EntityList::GetCorpseList(std::list<Corpse *> &c_list)
 {
@@ -5359,12 +5514,12 @@ void EntityList::AddLootToNPCS(uint32 item_id, uint32 count)
 	safe_delete_array(marked);
 }
 
-void EntityList::CameraEffect(uint32 duration, uint32 intensity)
+void EntityList::CameraEffect(uint32 duration, float intensity)
 {
 	auto outapp = new EQApplicationPacket(OP_CameraEffect, sizeof(Camera_Struct));
 	Camera_Struct* cs = (Camera_Struct*) outapp->pBuffer;
 	cs->duration = duration;	// Duration in milliseconds
-	cs->intensity = ((intensity * 6710886) + 1023410176);	// Intensity ranges from 1023410176 to 1090519040, so simplify it from 0 to 10.
+	cs->intensity = intensity;
 	entity_list.QueueClients(0, outapp);
 	safe_delete(outapp);
 }
@@ -5508,7 +5663,6 @@ std::vector<Mob*> EntityList::GetTargetsForVirusEffect(Mob *spreader, Mob *origi
 	bool               is_detrimental_spell = IsDetrimentalSpell(spell_id);
 	for (auto          &it : entity_list.GetCloseMobList(spreader, range)) {
 		Mob *mob = it.second;
-
 		if (!mob) {
 			continue;
 		}
@@ -5692,10 +5846,107 @@ int EntityList::MovePlayerCorpsesToGraveyard(bool force_move_from_instance)
 }
 
 void EntityList::DespawnGridNodes(int32 grid_id) {
-	for (auto mob_iterator : mob_list) {
-		Mob *mob = mob_iterator.second;
-		if (mob->IsNPC() && mob->GetRace() == 2254 && mob->EntityVariableExists("grid_id") && atoi(mob->GetEntityVariable("grid_id")) == grid_id) {
+	for (auto m : mob_list) {
+		Mob *mob = m.second;
+		if (
+			mob->IsNPC() &&
+			mob->GetRace() == RACE_NODE_2254 &&
+			mob->EntityVariableExists("grid_id") &&
+			std::stoi(mob->GetEntityVariable("grid_id")) == grid_id)
+		{
 			mob->Depop();
+		}
+	}
+}
+
+void EntityList::Marquee(uint32 type, std::string message, uint32 duration) {
+	for (const auto& c : client_list) {
+		if (c.second) {
+			c.second->SendMarqueeMessage(type, message, duration);
+		}
+	}
+}
+
+void EntityList::Marquee(
+	uint32 type,
+	uint32 priority,
+	uint32 fade_in,
+	uint32 fade_out,
+	uint32 duration,
+	std::string message
+) {
+	for (const auto& c : client_list) {
+		if (c.second) {
+			c.second->SendMarqueeMessage(type, priority, fade_in, fade_out, duration, message);
+		}
+	}
+}
+
+std::vector<Mob*> EntityList::GetFilteredEntityList(Mob* sender, uint32 distance, EntityFilterType filter_type)
+{
+	std::vector<Mob*> l;
+	if (!sender) {
+		return l;
+	}
+
+	const auto squared_distance = (distance * distance);
+	const auto position = sender->GetPosition();
+	for (auto &m: mob_list) {
+		if (!m.second) {
+			continue;
+		}
+
+		if (m.second == sender) {
+			continue;
+		}
+
+		if (
+			distance &&
+			DistanceSquaredNoZ(
+				position,
+				m.second->GetPosition()
+			) > squared_distance
+		) {
+			continue;
+		}
+
+		if (
+			(filter_type == EntityFilterType::Bots && !m.second->IsBot()) ||
+			(filter_type == EntityFilterType::Clients && !m.second->IsClient()) ||
+			(filter_type == EntityFilterType::NPCs && !m.second->IsNPC())
+		) {
+			continue;
+		}
+
+		l.push_back(m.second);
+	}
+
+	return l;
+}
+
+void EntityList::DamageArea(
+	Mob* sender,
+	int64 damage,
+	uint32 distance,
+	EntityFilterType filter_type,
+	bool is_percentage
+) {
+	if (!sender) {
+		return;
+	}
+
+	if (damage <= 0) {
+		return;
+	}
+
+	const auto& l = GetFilteredEntityList(sender, distance, filter_type);
+	for (const auto& e : l) {
+		if (is_percentage) {
+			const auto damage_percentage = EQ::Clamp(damage, static_cast<int64>(1), static_cast<int64>(100));
+			const auto total_damage = (e->GetMaxHP() / 100) * damage_percentage;
+			e->Damage(sender, total_damage, SPELL_UNKNOWN, EQ::skills::SkillEagleStrike);
+		} else {
+			e->Damage(sender, damage, SPELL_UNKNOWN, EQ::skills::SkillEagleStrike);
 		}
 	}
 }
