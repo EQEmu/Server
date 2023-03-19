@@ -6778,7 +6778,7 @@ void Client::Handle_OP_GMSearchCorpse(const EQApplicationPacket *app)
 		bool corpseBuried = Strings::ToInt(row[7]);
 
 		popupText += StringFormat("<tr><td>%s</td><td>%s</td><td>%8.0f</td><td>%8.0f</td><td>%8.0f</td><td>%s</td><td>%s</td><td>%s</td></tr>",
-			charName, zone_store.GetZoneName(ZoneID), CorpseX, CorpseY, CorpseZ, time_of_death,
+			charName, zone_store.GetZoneName(ZoneID, true), CorpseX, CorpseY, CorpseZ, time_of_death,
 			corpseRezzed ? "Yes" : "No", corpseBuried ? "Yes" : "No");
 
 		if (popupText.size() > 4000) {
