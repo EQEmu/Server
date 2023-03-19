@@ -840,8 +840,6 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 		}
 	}
 
-	DataBucketCache client_data_buckets;
-
 	auto temporary_merchant_list = zone->tmpmerchanttable[npcid];
 	uint32 slot_id = 1;
 	uint8 handy_chance = 0;
