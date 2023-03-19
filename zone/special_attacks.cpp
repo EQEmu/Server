@@ -34,110 +34,169 @@ int Mob::GetBaseSkillDamage(EQ::skills::SkillType skill, Mob *target)
 	int base = EQ::skills::GetBaseDamage(skill);
 	auto skill_level = GetSkill(skill);
 	switch (skill) {
-	case EQ::skills::SkillDragonPunch:
-	case EQ::skills::SkillEagleStrike:
-	case EQ::skills::SkillTigerClaw:
-	case EQ::skills::SkillRoundKick:
-		if (skill_level >= 25)
-			base++;
-		if (skill_level >= 75)
-			base++;
-		if (skill_level >= 125)
-			base++;
-		if (skill_level >= 175)
-			base++;
-		return base;
-	case EQ::skills::SkillFrenzy:
-		if (IsClient() && CastToClient()->GetInv().GetItem(EQ::invslot::slotPrimary)) {
-			if (GetLevel() > 15)
-				base += GetLevel() - 15;
-			if (base > 23)
-				base = 23;
-			if (GetLevel() > 50)
-				base += 2;
-			if (GetLevel() > 54)
+		case EQ::skills::SkillDragonPunch:
+		case EQ::skills::SkillEagleStrike:
+		case EQ::skills::SkillTigerClaw:
+		case EQ::skills::SkillRoundKick:
+			if (skill_level >= 25) {
 				base++;
-			if (GetLevel() > 59)
+			}
+
+			if (skill_level >= 75) {
 				base++;
-		}
-		return base;
-	case EQ::skills::SkillFlyingKick: {
-		float skill_bonus = skill_level / 9.0f;
-		float ac_bonus = 0.0f;
-		if (IsClient()) {
-			auto inst = CastToClient()->GetInv().GetItem(EQ::invslot::slotFeet);
-			if (inst)
-				ac_bonus = inst->GetItemArmorClass(true) / 25.0f;
-		}
-		if (ac_bonus > skill_bonus)
-			ac_bonus = skill_bonus;
-		return static_cast<int>(ac_bonus + skill_bonus);
-	}
-	case EQ::skills::SkillKick: {
-		// there is some base *= 4 case in here?
-		float skill_bonus = skill_level / 10.0f;
-		float ac_bonus = 0.0f;
-		if (IsClient()) {
-			auto inst = CastToClient()->GetInv().GetItem(EQ::invslot::slotFeet);
-			if (inst)
-				ac_bonus = inst->GetItemArmorClass(true) / 25.0f;
-		}
-		if (ac_bonus > skill_bonus)
-			ac_bonus = skill_bonus;
-		return static_cast<int>(ac_bonus + skill_bonus);
-	}
-	case EQ::skills::SkillBash: {
-		float skill_bonus = skill_level / 10.0f;
-		float ac_bonus = 0.0f;
-		const EQ::ItemInstance *inst = nullptr;
-		if (IsClient()) {
-			if (HasShieldEquiped())
-				inst = CastToClient()->GetInv().GetItem(EQ::invslot::slotSecondary);
-			else if (HasTwoHanderEquipped())
-				inst = CastToClient()->GetInv().GetItem(EQ::invslot::slotPrimary);
-		}
-		if (inst)
-			ac_bonus = inst->GetItemArmorClass(true) / 25.0f;
-		else
-			return 0; // return 0 in cases where we don't have an item
-		if (ac_bonus > skill_bonus)
-			ac_bonus = skill_bonus;
-		return static_cast<int>(ac_bonus + skill_bonus);
-	}
-	case EQ::skills::SkillBackstab: {
-		float skill_bonus = static_cast<float>(skill_level) * 0.02f;
-		base = 3; // There seems to be a base 3 for NPCs or some how BS w/o weapon?
-		// until we get a better inv system for NPCs they get nerfed!
-		if (IsClient()) {
-			auto *inst = CastToClient()->GetInv().GetItem(EQ::invslot::slotPrimary);
-			if (inst && inst->GetItem() && inst->GetItem()->ItemType == EQ::item::ItemType1HPiercing) {
-				base = inst->GetItemBackstabDamage(true);
-				if (!inst->GetItemBackstabDamage()) {
-					base += inst->GetItemWeaponDamage(true);
+			}
+
+			if (skill_level >= 125) {
+				base++;
+			}
+
+			if (skill_level >= 175) {
+				base++;
+			}
+
+			if (RuleB(Character, ItemExtraSkillDamageCalcAsPercent)) {
+				base *= std::abs(GetSkillDmgAmt(skill) / 100);
+			}
+
+			return base;
+		case EQ::skills::SkillFrenzy:
+			if (IsClient() && CastToClient()->GetInv().GetItem(EQ::invslot::slotPrimary)) {
+				if (GetLevel() > 15) {
+					base += GetLevel() - 15;
 				}
 
-				if (target) {
-					if (inst->GetItemElementalFlag(true) && inst->GetItemElementalDamage(true) && !RuleB(Combat, BackstabIgnoresElemental)) {
-						base += target->ResistElementalWeaponDmg(inst);
-					}
+				if (base > 23) {
+					base = 23;
+				}
 
-					if ((inst->GetItemBaneDamageBody(true) || inst->GetItemBaneDamageRace(true)) && !RuleB(Combat, BackstabIgnoresBane)) {
-						base += target->CheckBaneDamage(inst);
-					}
+				if (GetLevel() > 50) {
+					base += 2;
+				}
+
+				if (GetLevel() > 54) {
+					base++;
+				}
+
+				if (GetLevel() > 59) {
+					base++;
 				}
 			}
-		} else if (IsNPC()) {
-			auto *npc = CastToNPC();
-			base = std::max(base, npc->GetBaseDamage());
-			// parses show relatively low BS mods from lots of NPCs, so either their BS skill is super low
-			// or their mod is divided again, this is probably not the right mod, but it's better
-			skill_bonus /= 3.0f;
+
+			if (RuleB(Character, ItemExtraSkillDamageCalcAsPercent)) {
+				base *= std::abs(GetSkillDmgAmt(skill) / 100);
+			}
+
+			return base;
+		case EQ::skills::SkillFlyingKick: {
+			float skill_bonus = skill_level / 9.0f;
+			float ac_bonus    = 0.0f;
+			if (IsClient()) {
+				auto inst = CastToClient()->GetInv().GetItem(EQ::invslot::slotFeet);
+				if (inst) {
+					ac_bonus = inst->GetItemArmorClass(true) / 25.0f;
+				}
+			}
+
+			if (ac_bonus > skill_bonus) {
+				ac_bonus = skill_bonus;
+			}
+
+			if (RuleB(Character, ItemExtraSkillDamageCalcAsPercent)) {
+				return static_cast<int>(ac_bonus + skill_bonus) * std::abs(GetSkillDmgAmt(skill) / 100);
+			}
+
+			return static_cast<int>(ac_bonus + skill_bonus);
 		}
-		// ahh lets make sure everything is casted right :P ugly but w/e
-		return static_cast<int>(static_cast<float>(base) * (skill_bonus + 2.0f));
-	}
-	default:
-		return 0;
+		case EQ::skills::SkillKick: {
+			// there is some base *= 4 case in here?
+			float skill_bonus = skill_level / 10.0f;
+			float ac_bonus    = 0.0f;
+			if (IsClient()) {
+				auto inst = CastToClient()->GetInv().GetItem(EQ::invslot::slotFeet);
+				if (inst) {
+					ac_bonus = inst->GetItemArmorClass(true) / 25.0f;
+				}
+			}
+
+			if (ac_bonus > skill_bonus) {
+				ac_bonus = skill_bonus;
+			}
+
+			if (RuleB(Character, ItemExtraSkillDamageCalcAsPercent)) {
+				return static_cast<int>(ac_bonus + skill_bonus) * std::abs(GetSkillDmgAmt(skill) / 100);
+			}
+
+			return static_cast<int>(ac_bonus + skill_bonus);
+		}
+		case EQ::skills::SkillBash: {
+			float                  skill_bonus = skill_level / 10.0f;
+			float                  ac_bonus    = 0.0f;
+			const EQ::ItemInstance *inst       = nullptr;
+			if (IsClient()) {
+				if (HasShieldEquiped()) {
+					inst = CastToClient()->GetInv().GetItem(EQ::invslot::slotSecondary);
+				} else if (HasTwoHanderEquipped()) {
+					inst = CastToClient()->GetInv().GetItem(EQ::invslot::slotPrimary);
+				}
+			}
+
+			if (inst) {
+				ac_bonus = inst->GetItemArmorClass(true) / 25.0f;
+			} else {
+				return 0;
+			} // return 0 in cases where we don't have an item
+
+			if (ac_bonus > skill_bonus) {
+				ac_bonus = skill_bonus;
+			}
+
+			if (RuleB(Character, ItemExtraSkillDamageCalcAsPercent)) {
+				return static_cast<int>(ac_bonus + skill_bonus) * std::abs(GetSkillDmgAmt(skill) / 100);
+			}
+
+			return static_cast<int>(ac_bonus + skill_bonus);
+		}
+		case EQ::skills::SkillBackstab: {
+			float skill_bonus = static_cast<float>(skill_level) * 0.02f;
+			base              = 3; // There seems to be a base 3 for NPCs or some how BS w/o weapon?
+			// until we get a better inv system for NPCs they get nerfed!
+			if (IsClient()) {
+				auto *inst = CastToClient()->GetInv().GetItem(EQ::invslot::slotPrimary);
+				if (inst && inst->GetItem() && inst->GetItem()->ItemType == EQ::item::ItemType1HPiercing) {
+					base = inst->GetItemBackstabDamage(true);
+					if (!inst->GetItemBackstabDamage()) {
+						base += inst->GetItemWeaponDamage(true);
+					}
+
+					if (target) {
+						if (inst->GetItemElementalFlag(true) && inst->GetItemElementalDamage(true) &&
+							!RuleB(Combat, BackstabIgnoresElemental)) {
+							base += target->ResistElementalWeaponDmg(inst);
+						}
+
+						if ((inst->GetItemBaneDamageBody(true) || inst->GetItemBaneDamageRace(true)) &&
+							!RuleB(Combat, BackstabIgnoresBane)) {
+							base += target->CheckBaneDamage(inst);
+						}
+					}
+				}
+			} else if (IsNPC()) {
+				auto *npc = CastToNPC();
+				base = std::max(base, npc->GetBaseDamage());
+				// parses show relatively low BS mods from lots of NPCs, so either their BS skill is super low
+				// or their mod is divided again, this is probably not the right mod, but it's better
+				skill_bonus /= 3.0f;
+			}
+
+			if (RuleB(Character, ItemExtraSkillDamageCalcAsPercent)) {
+				return static_cast<int>(static_cast<float>(base) * (skill_bonus + 2.0f)) * std::abs(GetSkillDmgAmt(skill) / 100);
+			}
+
+			return static_cast<int>(static_cast<float>(base) * (skill_bonus + 2.0f));
+		}
+		default: {
+			return 0;
+		}
 	}
 }
 
