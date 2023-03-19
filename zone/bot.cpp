@@ -5457,6 +5457,7 @@ void Bot::ProcessBotOwnerRefDelete(Mob* botOwner) {
 				if (tempBot) {
 					tempBot->SetTarget(nullptr);
 					tempBot->SetBotOwner(nullptr);
+					tempBot->Zone();
 				}
 			}
 		}

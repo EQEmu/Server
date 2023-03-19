@@ -1952,10 +1952,10 @@ void Raid::QueueClients(Mob *sender, const EQApplicationPacket *app, bool ack_re
 			if (!members[i].member) {
 				continue;
 			}
-			if (!members[i].member->IsClient()) {
+			if (members[i].IsBot) {
 				continue;
 			}
-			if (members[i].IsBot) {
+			if (!members[i].member->IsClient()) {
 				continue;
 			}
 			if (ignore_sender && members[i].member == sender) {
