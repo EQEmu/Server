@@ -9246,9 +9246,7 @@ bool Bot::CheckDataBucket(std::string bucket_name, const std::string& bucket_val
 			bucket_name
 		);
 
-		std::string player_value;
-		player_value = DataBucket::CheckBucketKey(this, full_name);
-
+		auto player_value = DataBucket::CheckBucketKey(this, full_name);
 		if (player_value.empty() && GetBotOwner()) {
 			full_name = fmt::format(
 				"{}-{}",

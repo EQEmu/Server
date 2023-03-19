@@ -167,7 +167,7 @@ bool DataBucket::DeleteData(const std::string& bucket_key) {
 
 bool DataBucket::GetDataBuckets(Mob* mob)
 {
-	auto results = BaseDataBucketsRepository::GetWhere(
+	auto l = BaseDataBucketsRepository::GetWhere(
 		database,
 		fmt::format(
 			"`key` LIKE '{}-%'",
@@ -175,7 +175,7 @@ bool DataBucket::GetDataBuckets(Mob* mob)
 		)
 	);
 
-	if (results.empty()) {
+	if (l.empty()) {
 		return false;
 	}
 
@@ -183,11 +183,11 @@ bool DataBucket::GetDataBuckets(Mob* mob)
 
 	DataBucketCache d;
 
-	for (const auto& row : results) {
-		d.bucket_id = row.id;
-		d.bucket_key = row.key;
-		d.bucket_value = row.value;
-		d.bucket_expires = row.expires;
+	for (const auto& e : l) {
+		d.bucket_id = e.id;
+		d.bucket_key = e.key;
+		d.bucket_value = e.value;
+		d.bucket_expires = e.expires;
 
 		mob->m_data_bucket_cache.emplace_back(d);
 	}
