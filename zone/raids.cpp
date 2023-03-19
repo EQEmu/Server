@@ -2009,11 +2009,11 @@ void Raid::QueueClients(Mob *sender, const EQApplicationPacket *app, bool ack_re
 				continue;
 			}
 
-			if (members[i].IsBot) {
+			if (m.is_bot) {
 				continue;
 			}
       
-			if (!members[i].member->IsClient()) {
+			if (m.member->IsClient()) {
 				continue;
 			}
 
