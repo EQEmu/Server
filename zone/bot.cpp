@@ -8240,15 +8240,6 @@ bool Bot::GetNeedsHateRedux(Mob *tar) {
 	if (!tar || !tar->IsEngaged() || !tar->HasTargetReflection() || !tar->GetTarget()->IsNPC())
 		return false;
 
-	//if (tar->IsClient()) {
-	//	switch (tar->GetClass()) {
-	//		// TODO: figure out affectable classes..
-	//		// Might need flag to allow player to determine redux req...
-	//	default:
-	//		return false;
-	//	}
-	//}
-	//else if (tar->is_bot()) {
 	if (tar->IsBot()) {
 		switch (tar->GetClass()) {
 		case ROGUE:

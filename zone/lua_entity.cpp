@@ -140,7 +140,7 @@ luabind::scope lua_register_entity() {
 	.def("CastToObject", &Lua_Entity::CastToObject)
 	.def("GetID", &Lua_Entity::GetID)
 	.def("IsBeacon", &Lua_Entity::IsBeacon)
-	.def("is_bot", &Lua_Entity::IsBot)
+	.def("IsBot", &Lua_Entity::IsBot)
 	.def("IsClient", &Lua_Entity::IsClient)
 	.def("IsCorpse", &Lua_Entity::IsCorpse)
 	.def("IsDoor", &Lua_Entity::IsDoor)

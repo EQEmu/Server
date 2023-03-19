@@ -267,7 +267,7 @@ function TryCriticalHit(e)
 		return e;
 	end
 
-	if (self:IsPet() and self:GetOwner().valid and self:GetOwner():is_bot()) then
+	if (self:IsPet() and self:GetOwner().valid and self:GetOwner():IsBot()) then
 		e.hit = TryPetCriticalHit(self, defender, e.hit);
 		return e;
 	end
