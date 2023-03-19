@@ -185,7 +185,7 @@ bool DataBucket::GetDataBuckets(Mob* mob)
 
 	for (const auto& e : l) {
 		d.bucket_id = e.id;
-		d.bucket_key = e.key;
+		d.bucket_key = e.key_;
 		d.bucket_value = e.value;
 		d.bucket_expires = e.expires;
 
