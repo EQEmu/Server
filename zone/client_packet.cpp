@@ -48,7 +48,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/skills.h"
 #include "../common/spdat.h"
 #include "../common/strings.h"
-#include "../common/zone_numbers.h"
 #include "data_bucket.h"
 #include "event_codes.h"
 #include "expedition.h"
