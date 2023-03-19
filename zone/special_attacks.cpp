@@ -54,7 +54,7 @@ int Mob::GetBaseSkillDamage(EQ::skills::SkillType skill, Mob *target)
 				base++;
 			}
 
-			if (RuleB(Character, ItemExtraSkillDamageCalcAsPercent)) {
+			if (RuleB(Character, ItemExtraSkillDamageCalcAsPercent) && GetSkillDmgAmt(skill) > 0) {
 				base *= std::abs(GetSkillDmgAmt(skill) / 100);
 			}
 
@@ -82,7 +82,7 @@ int Mob::GetBaseSkillDamage(EQ::skills::SkillType skill, Mob *target)
 				}
 			}
 
-			if (RuleB(Character, ItemExtraSkillDamageCalcAsPercent)) {
+			if (RuleB(Character, ItemExtraSkillDamageCalcAsPercent) && GetSkillDmgAmt(skill) > 0) {
 				base *= std::abs(GetSkillDmgAmt(skill) / 100);
 			}
 
@@ -101,7 +101,7 @@ int Mob::GetBaseSkillDamage(EQ::skills::SkillType skill, Mob *target)
 				ac_bonus = skill_bonus;
 			}
 
-			if (RuleB(Character, ItemExtraSkillDamageCalcAsPercent)) {
+			if (RuleB(Character, ItemExtraSkillDamageCalcAsPercent) && GetSkillDmgAmt(skill) > 0) {
 				return static_cast<int>(ac_bonus + skill_bonus) * std::abs(GetSkillDmgAmt(skill) / 100);
 			}
 
@@ -122,7 +122,7 @@ int Mob::GetBaseSkillDamage(EQ::skills::SkillType skill, Mob *target)
 				ac_bonus = skill_bonus;
 			}
 
-			if (RuleB(Character, ItemExtraSkillDamageCalcAsPercent)) {
+			if (RuleB(Character, ItemExtraSkillDamageCalcAsPercent) && GetSkillDmgAmt(skill) > 0) {
 				return static_cast<int>(ac_bonus + skill_bonus) * std::abs(GetSkillDmgAmt(skill) / 100);
 			}
 
@@ -150,7 +150,7 @@ int Mob::GetBaseSkillDamage(EQ::skills::SkillType skill, Mob *target)
 				ac_bonus = skill_bonus;
 			}
 
-			if (RuleB(Character, ItemExtraSkillDamageCalcAsPercent)) {
+			if (RuleB(Character, ItemExtraSkillDamageCalcAsPercent) && GetSkillDmgAmt(skill) > 0) {
 				return static_cast<int>(ac_bonus + skill_bonus) * std::abs(GetSkillDmgAmt(skill) / 100);
 			}
 
@@ -188,7 +188,7 @@ int Mob::GetBaseSkillDamage(EQ::skills::SkillType skill, Mob *target)
 				skill_bonus /= 3.0f;
 			}
 
-			if (RuleB(Character, ItemExtraSkillDamageCalcAsPercent)) {
+			if (RuleB(Character, ItemExtraSkillDamageCalcAsPercent) && GetSkillDmgAmt(skill) > 0) {
 				return static_cast<int>(static_cast<float>(base) * (skill_bonus + 2.0f)) * std::abs(GetSkillDmgAmt(skill) / 100);
 			}
 
