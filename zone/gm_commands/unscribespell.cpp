@@ -14,7 +14,7 @@ void command_unscribespell(Client *c, const Seperator *sep)
 		target = c->GetTarget()->CastToClient();
 	}
 
-	uint16 spell_id = EQ::Clamp(std::stoi(sep->arg[1]), 0, 65535);
+	uint16 spell_id = EQ::Clamp(Strings::ToInt(sep->arg[1]), 0, 65535);
 
 	if (!IsValidSpell(spell_id)) {
 		c->Message(
@@ -28,7 +28,7 @@ void command_unscribespell(Client *c, const Seperator *sep)
 	}
 
 	auto spell_name = GetSpellName(spell_id);
-	
+
 	if (target->HasSpellScribed(spell_id)) {
 		target->UnscribeSpellBySpellID(spell_id);
 

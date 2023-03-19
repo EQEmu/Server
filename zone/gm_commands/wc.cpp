@@ -1,44 +1,44 @@
 #include "../client.h"
+#include "../../common/data_verification.h"
 
 void command_wc(Client *c, const Seperator *sep)
 {
-	if (sep->argnum < 2) {
-		c->Message(
-			0,
-			"Usage: #wc [wear slot] [material] [ [hero_forge_model] [elite_material] [unknown06] [unknown18] ]"
-		);
+	const auto arguments = sep->argnum;
+	if (
+		arguments < 2 ||
+		!sep->IsNumber(1) ||
+		!sep->IsNumber(2)
+	) {
+		c->Message(Chat::White, "Usage: #wc [Slot ID] [Material]");
+		c->Message(Chat::White, "Usage: #wc [Slot ID] [Material] [Hero Forge Model] [Elite Material]");
+		return;
 	}
-	else if (c->GetTarget() == nullptr) {
-		c->Message(Chat::Red, "You must have a target to do a wear change.");
+
+	Mob* t = c;
+	if (c->GetTarget()) {
+		t = c->GetTarget();
 	}
-	else {
-		uint32 hero_forge_model = 0;
-		uint32 wearslot         = atoi(sep->arg[1]);
 
-		// Hero Forge
-		if (sep->argnum > 2) {
-			hero_forge_model = atoi(sep->arg[3]);
+	const auto slot_id          = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[1]));
+	const auto texture          = static_cast<uint16>(Strings::ToUnsignedInt(sep->arg[2]));
+	uint32     hero_forge_model = 0;
+	uint32     elite_material   = 0;
 
-			if (hero_forge_model != 0 && hero_forge_model < 1000) {
-				// Shorthand Hero Forge ID. Otherwise use the value the user entered.
-				hero_forge_model = (hero_forge_model * 100) + wearslot;
-			}
+	if (arguments >= 3 && sep->IsNumber(3)) {
+		hero_forge_model = Strings::ToUnsignedInt(sep->arg[3]);
+		if (EQ::ValueWithin(hero_forge_model, 1, 999)) { // Shorthand Hero Forge ID. Otherwise use the value the user entered.
+			hero_forge_model = (hero_forge_model * 100) + slot_id;
 		}
-		/*
-		// Leaving here to add color option to the #wc command eventually
-		uint32 Color;
-		if (c->GetTarget()->IsClient())
-			Color = c->GetTarget()->GetEquipmentColor(atoi(sep->arg[1]));
-		else
-			Color = c->GetTarget()->GetArmorTint(atoi(sep->arg[1]));
-		*/
-		c->GetTarget()->SendTextureWC(
-			wearslot,
-			atoi(sep->arg[2]),
-			hero_forge_model,
-			atoi(sep->arg[4]),
-			atoi(sep->arg[5]),
-			atoi(sep->arg[6]));
 	}
-}
 
+	if (arguments >= 4 && sep->IsNumber(4)) {
+		elite_material = Strings::ToUnsignedInt(sep->arg[4]);
+	}
+
+	c->GetTarget()->SendTextureWC(
+		slot_id,
+		texture,
+		hero_forge_model,
+		elite_material
+	);
+}

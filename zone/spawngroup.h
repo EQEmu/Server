@@ -78,7 +78,6 @@ public:
 
 	void AddSpawnGroup(std::unique_ptr<SpawnGroup> &new_group);
 	SpawnGroup *GetSpawnGroup(uint32 id);
-	bool RemoveSpawnGroup(uint32 in_id);
 	void ClearSpawnGroups();
 	void ReloadSpawnGroups();
 private:

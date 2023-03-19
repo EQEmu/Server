@@ -135,7 +135,7 @@ void command_reload(Client *c, const Seperator *sep)
 		bool stop_timers = false;
 
 		if (sep->IsNumber(2)) {
-			stop_timers = std::stoi(sep->arg[2]) != 0 ? true : false;
+			stop_timers = Strings::ToInt(sep->arg[2]) != 0 ? true : false;
 		}
 
 		std::string stop_timers_message = stop_timers ? " and timers stopped" : "";
@@ -167,7 +167,7 @@ void command_reload(Client *c, const Seperator *sep)
 			pack = new ServerPacket(ServerOP_ReloadTasks, sizeof(ReloadTasks_Struct));
 		}
 		else {
-			task_id = std::stoul(sep->arg[2]);
+			task_id = Strings::ToUnsignedInt(sep->arg[2]);
 		}
 
 		auto rts = (ReloadTasks_Struct *) pack->pBuffer;
@@ -191,7 +191,7 @@ void command_reload(Client *c, const Seperator *sep)
 			return;
 		}
 
-		bool global = std::stoi(sep->arg[2]) ? true : false;
+		bool global = Strings::ToInt(sep->arg[2]) ? true : false;
 
 		if (!global) {
 			entity_list.UpdateAllTraps(true, true);
@@ -220,7 +220,7 @@ void command_reload(Client *c, const Seperator *sep)
 		uint8 global_repop = ReloadWorld::NoRepop;
 
 		if (sep->IsNumber(2)) {
-			global_repop = static_cast<uint8>(std::stoul(sep->arg[2]));
+			global_repop = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[2]));
 
 			if (global_repop > ReloadWorld::ForceRepop) {
 				global_repop = ReloadWorld::ForceRepop;
@@ -268,7 +268,7 @@ void command_reload(Client *c, const Seperator *sep)
 
 		auto zone_id = (
 			sep->IsNumber(2) ?
-				std::stoul(sep->arg[2]) :
+				Strings::ToUnsignedInt(sep->arg[2]) :
 				ZoneID(sep->arg[2])
 		);
 		if (!zone_id) {
@@ -286,7 +286,7 @@ void command_reload(Client *c, const Seperator *sep)
 		auto zone_long_name  = ZoneLongName(zone_id);
 		auto version         = (
 			sep->IsNumber(3) ?
-				std::stoul(sep->arg[3]) :
+				Strings::ToUnsignedInt(sep->arg[3]) :
 				0
 		);
 

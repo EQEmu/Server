@@ -38,6 +38,7 @@ extern Zone* zone;
 
 #include "../common/repositories/character_peqzone_flags_repository.h"
 #include "../common/repositories/zone_repository.h"
+#include "../common/events/player_event_logs.h"
 
 
 void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
@@ -201,19 +202,37 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 	min_status   = zone_data->min_status;
 	min_level    = zone_data->min_level;
 
-	const auto& export_string = fmt::format(
-		"{} {} {} {} {} {}",
-		zone->GetZoneID(),
-		zone->GetInstanceID(),
-		zone->GetInstanceVersion(),
-		target_zone_id,
-		target_instance_id,
-		target_instance_version
-	);
+	if (parse->PlayerHasQuestSub(EVENT_ZONE)) {
+		const auto& export_string = fmt::format(
+			"{} {} {} {} {} {}",
+			zone->GetZoneID(),
+			zone->GetInstanceID(),
+			zone->GetInstanceVersion(),
+			target_zone_id,
+			target_instance_id,
+			target_instance_version
+		);
 
-	if (parse->EventPlayer(EVENT_ZONE, this, export_string, 0) != 0) {
-		SendZoneCancel(zc);
-		return;
+		if (parse->EventPlayer(EVENT_ZONE, this, export_string, 0) != 0) {
+			SendZoneCancel(zc);
+			return;
+		}
+	}
+
+	if (player_event_logs.IsEventEnabled(PlayerEvent::ZONING)) {
+		auto e = PlayerEvent::ZoningEvent{};
+		e.from_zone_long_name   = zone->GetLongName();
+		e.from_zone_short_name  = zone->GetShortName();
+		e.from_zone_id          = zone->GetZoneID();
+		e.from_instance_id      = zone->GetInstanceID();
+		e.from_instance_version = zone->GetInstanceVersion();
+		e.to_zone_long_name     = ZoneLongName(target_zone_id);
+		e.to_zone_short_name    = ZoneName(target_zone_id);
+		e.to_zone_id            = target_zone_id;
+		e.to_instance_id        = target_instance_id;
+		e.to_instance_version   = target_instance_version;
+
+		RecordPlayerEventLog(PlayerEvent::ZONING, e);
 	}
 
 	//handle circumvention of zone restrictions
@@ -999,7 +1018,7 @@ void Client::LoadZoneFlags() {
 	zone_flags.clear();
 
 	for (auto row : results) {
-		zone_flags.insert(std::stoul(row[0]));
+		zone_flags.insert(Strings::ToUnsignedInt(row[0]));
 	}
 }
 
@@ -1243,7 +1262,7 @@ bool Client::CanEnterZone(const std::string& zone_short_name, int16 instance_ver
 		return false;
 	}
 
-	if (!z->flag_needed.empty() && Strings::IsNumber(z->flag_needed) && std::stoi(z->flag_needed) == 1) {
+	if (!z->flag_needed.empty() && Strings::IsNumber(z->flag_needed) && Strings::ToInt(z->flag_needed) == 1) {
 		if (Admin() < minStatusToIgnoreZoneFlags && !HasZoneFlag(z->zoneidnumber)) {
 			LogInfo(
 				"Character [{}] does not have the flag to be in this zone [{}]!",

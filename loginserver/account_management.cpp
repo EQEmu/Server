@@ -260,27 +260,6 @@ bool AccountManagement::UpdateLoginserverWorldAdminAccountPasswordByName(
 	return updated_account;
 }
 
-/**
- * @param in_account_id
- * @param in_account_password_hash
- */
-bool AccountManagement::UpdateLoginserverWorldAdminAccountPasswordById(
-	uint32 in_account_id,
-	const std::string &in_account_password_hash
-)
-{
-	bool updated_account = server.db->UpdateLoginWorldAdminAccountPassword(in_account_id, in_account_password_hash);
-
-	LogInfo(
-		"[{}] account_name [{}] status [{}]",
-		__func__,
-		in_account_id,
-		(updated_account ? "success" : "failed")
-	);
-
-	return updated_account;
-}
-
 constexpr int REQUEST_TIMEOUT_MS = 1500;
 
 /**
@@ -381,7 +360,7 @@ uint32 AccountManagement::CheckExternalLoginserverUserCredentials(
 			auto s = Strings::Split(server.options.GetEQEmuLoginServerAddress(), ':');
 			if (s.size() == 2) {
 				auto address = s[0];
-				auto port    = std::stoi(s[1]);
+				auto port    = Strings::ToInt(s[1]);
 
 				EQ::Net::DNSLookup(
 					address, port, false, [&](const std::string &addr) {

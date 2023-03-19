@@ -86,7 +86,13 @@ class Strings {
 public:
 	static bool Contains(std::vector<std::string> container, std::string element);
 	static bool Contains(const std::string& subject, const std::string& search);
+	static int ToInt(const std::string &s, int fallback = 0);
+	static int64 ToBigInt(const std::string &s, int64 fallback = 0);
+	static uint32 ToUnsignedInt(const std::string &s, uint32 fallback = 0);
+	static uint64 ToUnsignedBigInt(const std::string &s, uint64 fallback = 0);
+	static float ToFloat(const std::string &s, float fallback = 0.0f);
 	static bool IsNumber(const std::string &s);
+	static std::string RemoveNumbers(std::string s);
 	static bool IsFloat(const std::string &s);
 	static const std::string ToLower(std::string s);
 	static const std::string ToUpper(std::string s);
@@ -106,6 +112,7 @@ public:
 	static std::string GetBetween(const std::string &s, std::string start_delim, std::string stop_delim);
 	static std::string Implode(std::string glue, std::vector<std::string> src);
 	static std::string Join(const std::vector<std::string> &ar, const std::string &delim);
+	static std::string Join(const std::vector<uint32_t> &ar, const std::string &delim);
 	static std::string MillisecondsToTime(int duration);
 	static std::string Money(uint32 platinum, uint32 gold = 0, uint32 silver = 0, uint32 copper = 0);
 	static std::string NumberToWords(unsigned long long int n);

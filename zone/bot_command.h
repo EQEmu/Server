@@ -543,7 +543,6 @@ void bot_command_deinit(void);
 int bot_command_add(std::string bot_command_name, const char *desc, int access, BotCmdFuncPtr function);
 int bot_command_not_avail(Client *c, const char *message);
 int bot_command_real_dispatch(Client *c, char const *message);
-void bot_command_log_command(Client *c, const char *message);
 
 // Bot Commands
 void bot_command_actionable(Client *c, const Seperator *sep);
@@ -554,6 +553,7 @@ void bot_command_attack(Client *c, const Seperator *sep);
 void bot_command_bind_affinity(Client *c, const Seperator *sep);
 void bot_command_bot(Client *c, const Seperator *sep);
 void bot_command_botgroup(Client *c, const Seperator *sep);
+void bot_command_caster_range(Client* c, const Seperator* sep);
 void bot_command_charm(Client *c, const Seperator *sep);
 void bot_command_cure(Client *c, const Seperator *sep);
 void bot_command_defensive(Client *c, const Seperator *sep);
@@ -639,7 +639,6 @@ void bot_subcommand_botgroup_list(Client *c, const Seperator *sep);
 void bot_subcommand_botgroup_load(Client *c, const Seperator *sep);
 void bot_subcommand_botgroup_remove_member(Client *c, const Seperator *sep);
 void bot_subcommand_circle(Client *c, const Seperator *sep);
-void bot_subcommand_evacuate(Client *c, const Seperator *sep);
 void bot_subcommand_heal_rotation_adaptive_targeting(Client *c, const Seperator *sep);
 void bot_subcommand_heal_rotation_add_member(Client *c, const Seperator *sep);
 void bot_subcommand_heal_rotation_add_target(Client *c, const Seperator *sep);
@@ -668,7 +667,6 @@ void bot_subcommand_pet_get_lost(Client *c, const Seperator *sep);
 void bot_subcommand_pet_remove(Client *c, const Seperator *sep);
 void bot_subcommand_pet_set_type(Client *c, const Seperator *sep);
 void bot_subcommand_portal(Client *c, const Seperator *sep);
-void bot_subcommand_succor(Client *c, const Seperator *sep);
 
 
 // bot command helpers

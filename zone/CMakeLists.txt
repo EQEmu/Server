@@ -11,6 +11,7 @@ SET(zone_sources
     beacon.cpp
     bonuses.cpp
     bot.cpp
+    bot_raid.cpp
     bot_command.cpp
     bot_database.cpp
     botspellsai.cpp
@@ -97,9 +98,7 @@ SET(zone_sources
     mob_appearance.cpp
     mob_movement_manager.cpp
     mob_info.cpp
-    mod_functions.cpp
     npc.cpp
-    npc_ai.cpp
     npc_scale_manager.cpp
     object.cpp
     oriented_bounding_box.cpp
@@ -237,7 +236,6 @@ SET(zone_headers
     mob.h
     mob_movement_manager.h
     npc.h
-    npc_ai.h
     npc_scale_manager.h
     object.h
     oriented_bounding_box.h
@@ -256,7 +254,6 @@ SET(zone_headers
     quest_parser_collection.h
     raids.h
     raycast_mesh.h
-    skills.h
     shared_task_zone_messaging.h
     spawn2.cpp
     spawn2.h

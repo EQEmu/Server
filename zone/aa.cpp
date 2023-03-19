@@ -23,6 +23,7 @@ Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 #include "../common/races.h"
 #include "../common/spdat.h"
 #include "../common/strings.h"
+#include "../common/events/player_event_logs.h"
 #include "aa.h"
 #include "client.h"
 #include "corpse.h"
@@ -35,9 +36,11 @@ Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 #include "titles.h"
 #include "zonedb.h"
 #include "../common/zone_store.h"
+#include "worldserver.h"
 
 #include "bot.h"
 
+extern WorldServer worldserver;
 extern QueryServ* QServ;
 
 void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, uint32 duration_override, bool followme, bool sticktarg, uint16 *eye_id) {
@@ -53,9 +56,11 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 	// yep, even these need pet power!
 	int act_power = 0;
 
-	if (IsClient()) {
-		act_power = CastToClient()->GetFocusEffect(focusPetPower, spell_id);
-		act_power = CastToClient()->mod_pet_power(act_power, spell_id);
+	if (IsOfClientBot()) {
+		act_power = GetFocusEffect(focusPetPower, spell_id);
+		if (IsClient()) {
+			act_power = CastToClient()->GetFocusEffect(focusPetPower, spell_id);
+		}
 	}
 
 	PetRecord record;
@@ -296,15 +301,6 @@ void Mob::WakeTheDead(uint16 spell_id, Corpse *corpse_to_use, Mob *target, uint3
 	if (!corpse_to_use) {
 		return;
 	}
-
-	/* TODO: Does WTD use pet focus?
-	int act_power = 0;
-
-	if (IsClient()) {
-		act_power = CastToClient()->GetFocusEffect(focusPetPower, spell_id);
-		act_power = CastToClient()->mod_pet_power(act_power, spell_id);
-	}
-	*/
 
 	SwarmPet_Struct pet;
 	pet.count = 1;
@@ -827,7 +823,7 @@ void Client::InspectBuffs(Client* Inspector, int Rank)
 	uint32 buff_count = GetMaxTotalSlots();
 	uint32 packet_index = 0;
 	for (uint32 i = 0; i < buff_count; i++) {
-		if (buffs[i].spellid == SPELL_UNKNOWN)
+		if (!IsValidSpell(buffs[i].spellid))
 			continue;
 		ib->spell_id[packet_index] = buffs[i].spellid;
 		if (Rank > 1)
@@ -1178,6 +1174,17 @@ void Client::FinishAlternateAdvancementPurchase(AA::Rank *rank, bool ignore_cost
 	SendAlternateAdvancementPoints();
 	SendAlternateAdvancementStats();
 
+	if (player_event_logs.IsEventEnabled(PlayerEvent::AA_PURCHASE)) {
+		auto e = PlayerEvent::AAPurchasedEvent{
+			.aa_id = rank->id,
+			.aa_cost = cost,
+			.aa_previous_id = rank->prev_id,
+			.aa_next_id = rank->next_id
+		};
+
+		RecordPlayerEventLog(PlayerEvent::AA_PURCHASE, e);
+	}
+
 	if (rank->prev) {
 		MessageString(
 			Chat::Yellow,
@@ -1223,15 +1230,17 @@ void Client::FinishAlternateAdvancementPurchase(AA::Rank *rank, bool ignore_cost
 		}
 	}
 
-	const auto export_string = fmt::format(
-		"{} {} {} {}",
-		cost,
-		rank->id,
-		rank->prev_id,
-		rank->next_id
-	);
+	if (parse->PlayerHasQuestSub(EVENT_AA_BUY)) {
+		const auto& export_string = fmt::format(
+			"{} {} {} {}",
+			cost,
+			rank->id,
+			rank->prev_id,
+			rank->next_id
+		);
 
-	parse->EventPlayer(EVENT_AA_BUY, this, export_string, 0);
+		parse->EventPlayer(EVENT_AA_BUY, this, export_string, 0);
+	}
 
 	CalcBonuses();
 
@@ -1439,9 +1448,9 @@ bool ZoneDatabase::LoadAlternateAdvancement(Client *c) {
 
 	int i = 0;
 	for(auto row = results.begin(); row != results.end(); ++row) {
-		uint32 aa = atoi(row[0]);
-		uint32 value = atoi(row[1]);
-		uint32 charges = atoi(row[2]);
+		uint32 aa = Strings::ToInt(row[0]);
+		uint32 value = Strings::ToInt(row[1]);
+		uint32 charges = Strings::ToInt(row[2]);
 
 		auto rank = zone->GetAlternateAdvancementRank(aa);
 		if(!rank) {
@@ -1766,20 +1775,20 @@ bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std
 	if(results.Success()) {
 		for(auto row = results.begin(); row != results.end(); ++row) {
 			auto ability = new AA::Ability;
-			ability->id = atoi(row[0]);
+			ability->id = Strings::ToInt(row[0]);
 			ability->name = row[1];
-			ability->category = atoi(row[2]);
+			ability->category = Strings::ToInt(row[2]);
 			//EQ client has classes left shifted by one bit for some odd reason
-			ability->classes = atoi(row[3]) << 1;
-			ability->races = atoi(row[4]);
-			ability->deities = atoi(row[5]);
-			ability->drakkin_heritage = atoi(row[6]);
-			ability->status = atoi(row[7]);
-			ability->type = atoi(row[8]);
-			ability->charges = atoi(row[9]);
-			ability->grant_only = atoi(row[10]) != 0 ? true : false;
-			ability->reset_on_death = atoi(row[11]) != 0 ? true : false;
-			ability->first_rank_id = atoi(row[12]);
+			ability->classes = Strings::ToInt(row[3]) << 1;
+			ability->races = Strings::ToInt(row[4]);
+			ability->deities = Strings::ToInt(row[5]);
+			ability->drakkin_heritage = Strings::ToInt(row[6]);
+			ability->status = Strings::ToInt(row[7]);
+			ability->type = Strings::ToInt(row[8]);
+			ability->charges = Strings::ToInt(row[9]);
+			ability->grant_only = Strings::ToInt(row[10]) != 0 ? true : false;
+			ability->reset_on_death = Strings::ToInt(row[11]) != 0 ? true : false;
+			ability->first_rank_id = Strings::ToInt(row[12]);
 			ability->first = nullptr;
 
 			abilities[ability->id] = std::unique_ptr<AA::Ability>(ability);
@@ -1805,18 +1814,18 @@ bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std
 	if(results.Success()) {
 		for(auto row = results.begin(); row != results.end(); ++row) {
 			auto rank = new AA::Rank;
-			rank->id = atoi(row[0]);
-			rank->upper_hotkey_sid = atoi(row[1]);
-			rank->lower_hotkey_sid = atoi(row[2]);
-			rank->title_sid = atoi(row[3]);
-			rank->desc_sid = atoi(row[4]);
-			rank->cost = atoi(row[5]);
-			rank->level_req = atoi(row[6]);
-			rank->spell = atoi(row[7]);
-			rank->spell_type = atoi(row[8]);
-			rank->recast_time = atoi(row[9]);
-			rank->next_id = atoi(row[10]);
-			rank->expansion = atoi(row[11]);
+			rank->id = Strings::ToInt(row[0]);
+			rank->upper_hotkey_sid = Strings::ToInt(row[1]);
+			rank->lower_hotkey_sid = Strings::ToInt(row[2]);
+			rank->title_sid = Strings::ToInt(row[3]);
+			rank->desc_sid = Strings::ToInt(row[4]);
+			rank->cost = Strings::ToInt(row[5]);
+			rank->level_req = Strings::ToInt(row[6]);
+			rank->spell = Strings::ToInt(row[7]);
+			rank->spell_type = Strings::ToInt(row[8]);
+			rank->recast_time = Strings::ToInt(row[9]);
+			rank->next_id = Strings::ToInt(row[10]);
+			rank->expansion = Strings::ToInt(row[11]);
 			rank->base_ability = nullptr;
 			rank->total_cost = 0;
 			rank->prev_id = -1;
@@ -1837,11 +1846,11 @@ bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std
 	if(results.Success()) {
 		for(auto row = results.begin(); row != results.end(); ++row) {
 			AA::RankEffect effect;
-			int rank_id = atoi(row[0]);
-			effect.slot = atoi(row[1]);
-			effect.effect_id = atoi(row[2]);
-			effect.base_value = atoi(row[3]);
-			effect.limit_value = atoi(row[4]);
+			int rank_id = Strings::ToInt(row[0]);
+			effect.slot = Strings::ToInt(row[1]);
+			effect.effect_id = Strings::ToInt(row[2]);
+			effect.base_value = Strings::ToInt(row[3]);
+			effect.limit_value = Strings::ToInt(row[4]);
 
 			if(effect.slot < 1)
 				continue;
@@ -1862,9 +1871,9 @@ bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std
 	results = QueryDatabase(query);
 	if(results.Success()) {
 		for(auto row = results.begin(); row != results.end(); ++row) {
-			int rank_id = atoi(row[0]);
-			int aa_id = atoi(row[1]);
-			int points = atoi(row[2]);
+			int rank_id = Strings::ToInt(row[0]);
+			int aa_id = Strings::ToInt(row[1]);
+			int points = Strings::ToInt(row[2]);
 
 			if(aa_id <= 0 || points <= 0) {
 				continue;

@@ -34,8 +34,6 @@
 #include <vector>
 #include <map>
 
-//atoi is not uint32 or uint32 safe!!!!
-#define atoul(str) strtoul(str, nullptr, 10)
 
 class MySQLRequestResult;
 class Client;
@@ -108,9 +106,6 @@ public:
 	bool MoveCharacterToZone(uint32 character_id, uint32 zone_id);
 	bool ReserveName(uint32 account_id, char *name);
 	bool SaveCharacterCreate(uint32 character_id, uint32 account_id, PlayerProfile_Struct *pp);
-	bool SetHackerFlag(const char *accountname, const char *charactername, const char *hacked);
-	bool SetMQDetectionFlag(const char *accountname, const char *charactername, const char *hacked, const char *zone);
-	bool SetMQDetectionFlag(const char *accountname, const char *charactername, const std::string &hacked, const char *zone);
 	bool UpdateName(const char *oldname, const char *newname);
 	bool CopyCharacter(
 		const std::string& source_character_name,

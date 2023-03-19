@@ -120,8 +120,9 @@ ClientListEntry::~ClientListEntry()
 		Camp(); // updates zoneserver's numplayers
 		client_list.RemoveCLEReferances(this);
 	}
-	for (auto &elem : tell_queue)
-		safe_delete_array(elem);
+	for (auto& elem: tell_queue) {
+		safe_delete_array(elem)
+	};
 	tell_queue.clear();
 }
 
@@ -129,13 +130,6 @@ void ClientListEntry::SetChar(uint32 iCharID, const char *iCharName)
 {
 	pcharid = iCharID;
 	strn0cpy(pname, iCharName, sizeof(pname));
-}
-
-void ClientListEntry::SetOnline(ZoneServer *iZS, CLE_Status iOnline)
-{
-	if (iZS == Server()) {
-		SetOnline(iOnline);
-	}
 }
 
 void ClientListEntry::SetOnline(CLE_Status iOnline)
@@ -289,8 +283,9 @@ void ClientListEntry::ClearVars(bool iAll)
 	pLFG           = 0;
 	gm             = 0;
 	pClientVersion = 0;
-	for (auto &elem : tell_queue)
-		safe_delete_array(elem);
+	for (auto& elem: tell_queue) {
+		safe_delete_array(elem)
+	};
 	tell_queue.clear();
 }
 
@@ -365,7 +360,7 @@ bool ClientListEntry::CheckAuth(uint32 loginserver_account_id, const char *key_p
 		}
 		std::string lsworldadmin;
 		if (database.GetVariable("honorlsworldadmin", lsworldadmin)) {
-			if (atoi(lsworldadmin.c_str()) == 1 && pworldadmin != 0 && (padmin < pworldadmin || padmin == AccountStatus::Player)) {
+			if (Strings::ToInt(lsworldadmin.c_str()) == 1 && pworldadmin != 0 && (padmin < pworldadmin || padmin == AccountStatus::Player)) {
 				padmin = pworldadmin;
 			}
 		}

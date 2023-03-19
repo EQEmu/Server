@@ -358,15 +358,27 @@ int8 EQ::ItemInstance::AvailableAugmentSlot(int32 augment_type) const
 	return (i <= invaug::SOCKET_END) ? i : INVALID_INDEX;
 }
 
-bool EQ::ItemInstance::IsAugmentSlotAvailable(int32 augtype, uint8 slot) const
+bool EQ::ItemInstance::IsAugmentSlotAvailable(int32 augment_type, uint8 slot) const
 {
-	if (!m_item || !m_item->IsClassCommon())
-		 return false;
+	if (!m_item || !m_item->IsClassCommon()) {
+		return false;
+	}
 
-	if ((!GetItem(slot) && m_item->AugSlotVisible[slot]) && augtype == -1 || (m_item->AugSlotType[slot] && ((1 << (m_item->AugSlotType[slot] - 1)) & augtype))) {
+	if (
+		(
+			!GetItem(slot) &&
+			m_item->AugSlotVisible[slot]
+		) &&
+		augment_type == -1 ||
+		(
+			m_item->AugSlotType[slot] &&
+			((1 << (m_item->AugSlotType[slot] - 1)) & augment_type)
+		)
+	) {
 		return true;
 	}
-		return false;
+
+	return false;
 }
 
 // Retrieve item inside container
@@ -598,7 +610,7 @@ bool EQ::ItemInstance::UpdateOrnamentationInfo() {
 			SetOrnamentHeroModel(ornamentItem->HerosForgeModel);
 			if (strlen(ornamentItem->IDFile) > 2)
 			{
-				SetOrnamentationIDFile(atoi(&ornamentItem->IDFile[2]));
+				SetOrnamentationIDFile(Strings::ToInt(&ornamentItem->IDFile[2]));
 			}
 			else
 			{

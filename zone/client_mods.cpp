@@ -51,7 +51,7 @@ int32 Client::GetMaxStat() const
 	else {
 		base = 330;
 	}
-	return (base);
+	return base;
 }
 
 int32 Client::GetMaxResist() const
@@ -234,7 +234,7 @@ int32 Client::LevelRegen()
 int64 Client::CalcHPRegen(bool bCombat)
 {
 	int64 item_regen = itembonuses.HPRegen; // worn spells and +regen, already capped
-	item_regen += GetHeroicSTA() / 20;
+	item_regen += GetHeroicSTA() * RuleR(Character, HeroicStaminaMultiplier) / 20;
 
 	item_regen += aabonuses.HPRegen;
 
@@ -491,7 +491,7 @@ int64 Client::CalcBaseHP()
 		auto base_data = database.GetBaseData(GetLevel(), GetClass());
 		if (base_data) {
 			base_hp += base_data->base_hp + (base_data->hp_factor * stats);
-			base_hp += (GetHeroicSTA() * 10);
+			base_hp += GetHeroicSTA() * RuleR(Character, HeroicStaminaMultiplier) * 10;
 		}
 	}
 	else {
@@ -623,7 +623,9 @@ int64 Client::CalcBaseMana()
 				}
 				auto base_data = database.GetBaseData(GetLevel(), GetClass());
 				if (base_data) {
-					max_m = base_data->base_mana + (ConvertedWisInt * base_data->mana_factor) + (GetHeroicINT() * 10);
+					max_m = base_data->base_mana +
+						(ConvertedWisInt * base_data->mana_factor) +
+						(GetHeroicINT() * RuleR(Character, HeroicIntelligenceMultiplier) * 10);
 				}
 			}
 			else {
@@ -655,7 +657,9 @@ int64 Client::CalcBaseMana()
 				}
 				auto base_data = database.GetBaseData(GetLevel(), GetClass());
 				if (base_data) {
-					max_m = base_data->base_mana + (ConvertedWisInt * base_data->mana_factor) + (GetHeroicWIS() * 10);
+					max_m = base_data->base_mana +
+						(ConvertedWisInt * base_data->mana_factor) +
+						((GetHeroicWIS() * RuleR(Character, HeroicWisdomMultiplier)) * 10);
 				}
 			}
 			else {
@@ -752,10 +756,10 @@ int64 Client::CalcManaRegen(bool bCombat)
 
 	switch (GetCasterClass()) {
 	case 'W':
-		heroic_bonus = GetHeroicWIS();
+		heroic_bonus = GetHeroicWIS() * RuleR(Character, HeroicWisdomMultiplier);
 		break;
 	default:
-		heroic_bonus = GetHeroicINT();
+		heroic_bonus = GetHeroicINT() * RuleR(Character, HeroicIntelligenceMultiplier);
 		break;
 	}
 
@@ -1031,14 +1035,14 @@ int Client::CalcHaste()
 		h += spellbonuses.hastetype2 > 10 ? 10 : spellbonuses.hastetype2;
 	}
 	// 26+ no cap, 1-25 10
-	if (level > 25) { // 26+
+	if (level > 25 || RuleB(Character, IgnoreLevelBasedHasteCaps)) { // 26+
 		h += itembonuses.haste;
 	}
 	else {   // 1-25
 		h += itembonuses.haste > 10 ? 10 : itembonuses.haste;
 	}
 	// 60+ 100, 51-59 85, 1-50 level+25
-	if (level > 59) { // 60+
+	if (level > 59 || RuleB(Character, IgnoreLevelBasedHasteCaps)) { // 60+
 		cap = RuleI(Character, HasteCap);
 	}
 	else if (level > 50) {  // 51-59
@@ -1047,12 +1051,11 @@ int Client::CalcHaste()
 	else {   // 1-50
 		cap = level + 25;
 	}
-	cap = mod_client_haste_cap(cap);
 	if (h > cap) {
 		h = cap;
 	}
 	// 51+ 25 (despite there being higher spells...), 1-50 10
-	if (level > 50) { // 51+
+	if (level > 50 || RuleB(Character, IgnoreLevelBasedHasteCaps)) { // 51+
 		cap = RuleI(Character, Hastev3Cap);
 		if (spellbonuses.hastetype3 > cap) {
 			h += cap;
@@ -1064,7 +1067,6 @@ int Client::CalcHaste()
 		h += spellbonuses.hastetype3 > 10 ? 10 : spellbonuses.hastetype3;
 	}
 	h += ExtraHaste;	//GM granted haste.
-	h = mod_client_haste(h);
 	Haste = 100 + h;
 	return Haste;
 }
@@ -1688,8 +1690,13 @@ int64 Client::CalcBaseEndurance()
 {
 	int64 base_end = 0;
 	if (ClientVersion() >= EQ::versions::ClientVersion::SoF && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
-		double heroic_stats = (GetHeroicSTR() + GetHeroicSTA() + GetHeroicDEX() + GetHeroicAGI()) / 4.0f;
+		double heroic_str = GetHeroicSTR() * RuleR(Character, HeroicStrengthMultiplier);
+		double heroic_sta = GetHeroicSTA() * RuleR(Character, HeroicStaminaMultiplier);
+		double heroic_dex = GetHeroicDEX() * RuleR(Character, HeroicDexterityMultiplier);
+		double heroic_agi = GetHeroicAGI() * RuleR(Character, HeroicAgilityMultiplier);
+		double heroic_stats = (heroic_str + heroic_sta + heroic_dex + heroic_agi) / 4;
 		double stats = (GetSTR() + GetSTA() + GetDEX() + GetAGI()) / 4.0f;
+
 		if (stats > 201.0f) {
 			stats = 1.25f * (stats - 201.0f) + 352.5f;
 		}
@@ -1787,7 +1794,11 @@ int64 Client::CalcEnduranceRegen(bool bCombat)
 	if (encumbered)
 		base += level / -15;
 
-	auto item_bonus = GetHeroicAGI() + GetHeroicDEX() + GetHeroicSTA() + GetHeroicSTR();
+	double heroic_str = GetHeroicSTR() * RuleR(Character, HeroicStrengthMultiplier);
+	double heroic_sta = GetHeroicSTA() * RuleR(Character, HeroicStaminaMultiplier);
+	double heroic_dex = GetHeroicDEX() * RuleR(Character, HeroicDexterityMultiplier);
+	double heroic_agi = GetHeroicAGI() * RuleR(Character, HeroicAgilityMultiplier);
+	int32 item_bonus = heroic_str + heroic_sta + heroic_dex + heroic_agi;
 	item_bonus = item_bonus / 4 / 50;
 	item_bonus += itembonuses.EnduranceRegen; // this is capped already
 	base += item_bonus;

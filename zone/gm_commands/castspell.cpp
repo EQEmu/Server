@@ -19,7 +19,7 @@ void command_castspell(Client *c, const Seperator *sep)
 		);
 	}
 	else {
-		uint16 spell_id = std::stoul(sep->arg[1]);
+		uint16 spell_id = Strings::ToUnsignedInt(sep->arg[1]);
 
 		if (CastRestrictedSpell(spell_id) && c->Admin() < commandCastSpecials) {
 			c->Message(Chat::Red, "Unable to cast spell.");
@@ -30,8 +30,8 @@ void command_castspell(Client *c, const Seperator *sep)
 		else {
 			bool instant_cast = (c->Admin() >= commandInstacast ? true : false);
 			if (instant_cast && sep->IsNumber(2)) {
-				instant_cast = std::stoi(sep->arg[2]) ? true : false;
-				c->Message(Chat::White, fmt::format("{}", std::stoi(sep->arg[2])).c_str());
+				instant_cast = Strings::ToInt(sep->arg[2]) ? true : false;
+				c->Message(Chat::White, fmt::format("{}", Strings::ToInt(sep->arg[2])).c_str());
 			}
 
 			if (c->Admin() >= commandInstacast && instant_cast) {

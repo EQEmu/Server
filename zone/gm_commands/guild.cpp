@@ -53,7 +53,7 @@ void command_guild(Client *c, const Seperator *sep)
 		} else {
 			auto leader_id = (
 				sep->IsNumber(2) ?
-				std::stoul(sep->arg[2]) :
+				Strings::ToUnsignedInt(sep->arg[2]) :
 				database.GetCharacterID(sep->arg[2])
 			);
 			auto leader_name = database.GetCharNameByID(leader_id);
@@ -132,7 +132,7 @@ void command_guild(Client *c, const Seperator *sep)
 		if (!sep->IsNumber(2)) {
 			c->Message(Chat::White, "Usage: #guild delete [Guild ID]");
 		} else {
-			auto guild_id = std::stoul(sep->arg[2]);
+			auto guild_id = Strings::ToUnsignedInt(sep->arg[2]);
 			if (!guild_mgr.GuildExists(guild_id)) {
 				c->Message(
 					Chat::White,
@@ -185,7 +185,7 @@ void command_guild(Client *c, const Seperator *sep)
 			if (arguments != 2 || !sep->IsNumber(2)) {
 				guild_id = c->GuildID();
 			} else if (c->Admin() >= minStatusToEditOtherGuilds) {
-				guild_id = std::stoul(sep->arg[2]);
+				guild_id = Strings::ToUnsignedInt(sep->arg[2]);
 			}
 
 			if (guild_id != GUILD_NONE) {
@@ -203,7 +203,7 @@ void command_guild(Client *c, const Seperator *sep)
 		if (!sep->IsNumber(2)) {
 			c->Message(Chat::White, "Usage: #guild rename [Guild ID] [New Guild Name]");
 		} else {
-			auto guild_id = std::stoul(sep->arg[2]);
+			auto guild_id = Strings::ToUnsignedInt(sep->arg[2]);
 			if (!guild_mgr.GuildExists(guild_id)) {
 				c->Message(
 					Chat::White,
@@ -246,7 +246,7 @@ void command_guild(Client *c, const Seperator *sep)
 		}
 	} else if (is_search) {
 		if (Strings::IsNumber(sep->arg[2])) {
-			const auto guild_id = std::stoul(sep->arg[2]);
+			const auto guild_id = Strings::ToUnsignedInt(sep->arg[2]);
 
 			guild_mgr.ListGuilds(c, guild_id);
 		} else {
@@ -262,7 +262,7 @@ void command_guild(Client *c, const Seperator *sep)
 			c->Message(Chat::White, "#guild set [Character ID|Character Name] [Guild ID] (Guild ID 0 is Guildless)");
 			return;
 		} else {
-			auto guild_id = std::stoul(sep->arg[3]);
+			auto guild_id = Strings::ToUnsignedInt(sep->arg[3]);
 			if (!guild_id) {
 				guild_id = GUILD_NONE;
 			} else if (!guild_mgr.GuildExists(guild_id)) {
@@ -278,7 +278,7 @@ void command_guild(Client *c, const Seperator *sep)
 
 			auto character_id = (
 				sep->IsNumber(2) ?
-				std::stoul(sep->arg[2]) :
+				Strings::ToUnsignedInt(sep->arg[2]) :
 				database.GetCharacterID(sep->arg[2])
 			);
 			auto character_name = database.GetCharNameByID(character_id);
@@ -348,7 +348,7 @@ void command_guild(Client *c, const Seperator *sep)
 		} else {
 			auto leader_id = (
 				sep->IsNumber(2) ?
-				std::stoul(sep->arg[2]) :
+				Strings::ToUnsignedInt(sep->arg[2]) :
 				database.GetCharacterID(sep->arg[2])
 			);
 			auto leader_name = database.GetCharNameByID(leader_id);
@@ -377,7 +377,7 @@ void command_guild(Client *c, const Seperator *sep)
 				);
 			}
 			else {
-				auto guild_id = std::stoul(sep->arg[2]);
+				auto guild_id = Strings::ToUnsignedInt(sep->arg[2]);
 				if (!guild_mgr.GuildExists(guild_id)) {
 					c->Message(
 						Chat::White,
@@ -419,7 +419,7 @@ void command_guild(Client *c, const Seperator *sep)
 			}
 		}
 	} else if (is_set_rank) {
-		auto rank = static_cast<uint8>(std::stoul(sep->arg[3]));
+		auto rank = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[3]));
 		if (!sep->IsNumber(3)) {
 			c->Message(Chat::White, "#guild setrank [Character ID|Character Name] [Rank]");
 		} else if (rank < 0 || rank > GUILD_MAX_RANK) {
@@ -433,7 +433,7 @@ void command_guild(Client *c, const Seperator *sep)
 		} else {
 			auto character_id = (
 				sep->IsNumber(2) ?
-				std::stoul(sep->arg[2]) :
+				Strings::ToUnsignedInt(sep->arg[2]) :
 				database.GetCharacterID(sep->arg[2])
 			);
 			auto character_name = database.GetCharNameByID(character_id);

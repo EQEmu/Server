@@ -32,6 +32,10 @@
 #include "zonedb.h"
 #include "../common/zone_store.h"
 #include "../common/repositories/criteria/content_filter_criteria.h"
+#include "../common/events/player_event_logs.h"
+#include "worldserver.h"
+
+extern WorldServer worldserver;
 
 #include <iostream>
 
@@ -86,10 +90,9 @@ uint32 ZoneDatabase::GetZoneForage(uint32 ZoneID, uint8 skill) {
 			break;
 		}
 
-		item[index]   = atoi(row[0]);
-		chance[index] = atoi(row[1]) + chancepool;
-		LogError("Possible Forage: [{}] with a [{}] chance", item[index], chance[index]);
-		chancepool = chance[index];
+		item[index]   = Strings::ToInt(row[0]);
+		chance[index] = Strings::ToInt(row[1]) + chancepool;
+		chancepool    = chance[index];
 	}
 
 	if(chancepool == 0 || index < 1)
@@ -155,12 +158,12 @@ uint32 ZoneDatabase::GetZoneFishing(uint32 ZoneID, uint8 skill, uint32 &npc_id, 
         if (index >= 50)
             break;
 
-        item[index] = atoi(row[0]);
-        chance[index] = atoi(row[1])+chancepool;
+        item[index] = Strings::ToInt(row[0]);
+        chance[index] = Strings::ToInt(row[1])+chancepool;
         chancepool = chance[index];
 
-        npc_ids[index] = atoi(row[2]);
-        npc_chances[index] = atoi(row[3]);
+        npc_ids[index] = Strings::ToInt(row[2]);
+        npc_chances[index] = Strings::ToInt(row[3]);
     }
 
 	npc_id = 0;
@@ -374,9 +377,19 @@ void Client::GoFish()
 				}
 
 				if (inst) {
-					std::vector<std::any> args;
-					args.push_back(inst);
-					parse->EventPlayer(EVENT_FISH_SUCCESS, this, "", inst->GetID(), &args);
+					if (player_event_logs.IsEventEnabled(PlayerEvent::FISH_SUCCESS)) {
+						auto e = PlayerEvent::FishSuccessEvent{
+							.item_id = inst->GetItem()->ID,
+							.item_name = inst->GetItem()->Name,
+						};
+
+						RecordPlayerEventLog(PlayerEvent::FISH_SUCCESS, e);
+					}
+
+					if (parse->PlayerHasQuestSub(EVENT_FISH_SUCCESS)) {
+						std::vector<std::any> args = { inst };
+						parse->EventPlayer(EVENT_FISH_SUCCESS, this, "", inst->GetID(), &args);
+					}
 				}
 			}
 		}
@@ -395,7 +408,10 @@ void Client::GoFish()
 				MessageString(Chat::Skills, FISHING_FAILED);	//You didn't catch anything.
 		}
 
-		parse->EventPlayer(EVENT_FISH_FAILURE, this, "", 0);
+		RecordPlayerEventLog(PlayerEvent::FISH_FAILURE, PlayerEvent::EmptyEvent{});
+		if (parse->PlayerHasQuestSub(EVENT_FISH_FAILURE)) {
+			parse->EventPlayer(EVENT_FISH_FAILURE, this, "", 0);
+		}
 	}
 
 	//chance to break fishing pole...
@@ -494,9 +510,18 @@ void Client::ForageItem(bool guarantee) {
 			}
 
 			if (inst) {
-				std::vector<std::any> args;
-				args.push_back(inst);
-				parse->EventPlayer(EVENT_FORAGE_SUCCESS, this, "", inst->GetID(), &args);
+				if (player_event_logs.IsEventEnabled(PlayerEvent::FORAGE_SUCCESS)) {
+					auto e = PlayerEvent::ForageSuccessEvent{
+						.item_id = inst->GetItem()->ID,
+						.item_name = inst->GetItem()->Name
+					};
+					RecordPlayerEventLog(PlayerEvent::FORAGE_SUCCESS, e);
+				}
+
+				if (parse->PlayerHasQuestSub(EVENT_FORAGE_SUCCESS)) {
+					std::vector<std::any> args = { inst };
+					parse->EventPlayer(EVENT_FORAGE_SUCCESS, this, "", inst->GetID(), &args);
+				}
 			}
 		}
 
@@ -507,7 +532,11 @@ void Client::ForageItem(bool guarantee) {
 		}
 	} else {
 		MessageString(Chat::Skills, FORAGE_FAILED);
-		parse->EventPlayer(EVENT_FORAGE_FAILURE, this, "", 0);
+		RecordPlayerEventLog(PlayerEvent::FORAGE_FAILURE, PlayerEvent::EmptyEvent{});
+
+		if (parse->PlayerHasQuestSub(EVENT_FORAGE_FAILURE)) {
+			parse->EventPlayer(EVENT_FORAGE_FAILURE, this, "", 0);
+		}
 	}
 
 	CheckIncreaseSkill(EQ::skills::SkillForage, nullptr, 5);

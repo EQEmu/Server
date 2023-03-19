@@ -6,7 +6,7 @@ void command_spellinfo(Client *c, const Seperator *sep)
 		c->Message(Chat::White, "Usage: #spellinfo [spell_id]");
 	}
 	else {
-		int32_t                     spell_id = atoi(sep->arg[1]);
+		int32_t                     spell_id = Strings::ToInt(sep->arg[1]);
 		const struct SPDat_Spell_Struct *s       = &spells[spell_id];
 		c->Message(Chat::White, "Spell info for spell #%d:", spell_id);
 		c->Message(Chat::White, "  name: %s", s->name);

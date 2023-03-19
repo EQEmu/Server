@@ -9,8 +9,8 @@ void command_serverlock(Client *c, const Seperator *sep)
 		c->Message(Chat::White, "Usage: #serverlock [0|1] - Lock or Unlock the World Server (0 = Unlocked, 1 = Locked)");
 		return;
 	}
-		
-	auto is_locked = std::stoi(sep->arg[1]) ? true : false;
+
+	auto is_locked = Strings::ToInt(sep->arg[1]) ? true : false;
 
 	auto pack = new ServerPacket(ServerOP_Lock, sizeof(ServerLock_Struct));
 	auto l = (ServerLock_Struct *) pack->pBuffer;

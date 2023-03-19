@@ -260,8 +260,6 @@ bool Spawn2::Process() {
 
 		NPC *npc = new NPC(tmp, this, glm::vec4(x, y, z, heading), GravityBehavior::Water);
 
-		npc->mod_prespawn(this);
-
 		npcthis = npc;
 		npc->AddLootTable();
 		if (npc->DropsGlobalLoot()) {
@@ -456,16 +454,16 @@ bool ZoneDatabase::PopulateZoneSpawnListClose(uint32 zoneid, LinkedList<Spawn2*>
 		);
 	auto results = QueryDatabase(spawn_query);
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		uint32 start_duration = atoi(row[1]) > 0 ? atoi(row[1]) : 0;
-		uint32 end_duration = atoi(row[2]) > 0 ? atoi(row[2]) : 0;
+		uint32 start_duration = Strings::ToInt(row[1]) > 0 ? Strings::ToInt(row[1]) : 0;
+		uint32 end_duration = Strings::ToInt(row[2]) > 0 ? Strings::ToInt(row[2]) : 0;
 
 		/* Our current time was expired */
 		if ((start_duration + end_duration) <= tv.tv_sec) {
-			spawn_times[atoi(row[0])] = 0;
+			spawn_times[Strings::ToInt(row[0])] = 0;
 		}
 		/* We still have time left on this timer */
 		else {
-			spawn_times[atoi(row[0])] = ((start_duration + end_duration) - tv.tv_sec) * 1000;
+			spawn_times[Strings::ToInt(row[0])] = ((start_duration + end_duration) - tv.tv_sec) * 1000;
 		}
 	}
 
@@ -502,14 +500,14 @@ bool ZoneDatabase::PopulateZoneSpawnListClose(uint32 zoneid, LinkedList<Spawn2*>
 
 		uint32 spawn_time_left = 0;
 		Spawn2* new_spawn = 0;
-		bool perl_enabled = atoi(row[12]) == 1 ? true : false;
+		bool perl_enabled = Strings::ToInt(row[12]) == 1 ? true : false;
 
-		if (spawn_times.count(atoi(row[0])) != 0)
-			spawn_time_left = spawn_times[atoi(row[0])];
+		if (spawn_times.count(Strings::ToInt(row[0])) != 0)
+			spawn_time_left = spawn_times[Strings::ToInt(row[0])];
 
 		glm::vec4 point;
-		point.x = atof(row[2]);
-		point.y = atof(row[3]);
+		point.x = Strings::ToFloat(row[2]);
+		point.y = Strings::ToFloat(row[3]);
 
 		mob_distance = DistanceNoZ(client_position, point);
 
@@ -517,21 +515,21 @@ bool ZoneDatabase::PopulateZoneSpawnListClose(uint32 zoneid, LinkedList<Spawn2*>
 			continue;
 
 		new_spawn = new Spawn2(
-			atoi(row[0]),					// uint32 in_spawn2_id
-			atoi(row[1]),					// uint32 spawngroup_id
-			atof(row[2]),					// float in_x
-			atof(row[3]),					// float in_y
-			atof(row[4]),					// float in_z
-			atof(row[5]),					// float in_heading
-			atoi(row[6]),					// uint32 respawn
-			atoi(row[7]),					// uint32 variance
+			Strings::ToInt(row[0]),					// uint32 in_spawn2_id
+			Strings::ToInt(row[1]),					// uint32 spawngroup_id
+			Strings::ToFloat(row[2]),					// float in_x
+			Strings::ToFloat(row[3]),					// float in_y
+			Strings::ToFloat(row[4]),					// float in_z
+			Strings::ToFloat(row[5]),					// float in_heading
+			Strings::ToInt(row[6]),					// uint32 respawn
+			Strings::ToInt(row[7]),					// uint32 variance
 			spawn_time_left,				// uint32 timeleft
-			atoi(row[8]),					// uint32 grid
-			(bool)atoi(row[9]),				// bool path_when_zone_idle
-			atoi(row[10]),					// uint16 in_cond_id
-			atoi(row[11]),					// int16 in_min_value
+			Strings::ToInt(row[8]),					// uint32 grid
+			(bool)Strings::ToInt(row[9]),				// bool path_when_zone_idle
+			Strings::ToInt(row[10]),					// uint16 in_cond_id
+			Strings::ToInt(row[11]),					// int16 in_min_value
 			perl_enabled,					// bool in_enabled
-			(EmuAppearance)atoi(row[13])	// EmuAppearance anim
+			(EmuAppearance)Strings::ToInt(row[13])	// EmuAppearance anim
 			);
 
 		spawn2_list.Insert(new_spawn);
@@ -562,16 +560,16 @@ bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spa
 	);
 	auto results = database.QueryDatabase(spawn_query);
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		uint32 start_duration = atoi(row[1]) > 0 ? atoi(row[1]) : 0;
-		uint32 end_duration = atoi(row[2]) > 0 ? atoi(row[2]) : 0;
+		uint32 start_duration = Strings::ToInt(row[1]) > 0 ? Strings::ToInt(row[1]) : 0;
+		uint32 end_duration = Strings::ToInt(row[2]) > 0 ? Strings::ToInt(row[2]) : 0;
 
 		/* Our current time was expired */
 		if ((start_duration + end_duration) <= tv.tv_sec) {
-			spawn_times[atoi(row[0])] = 0;
+			spawn_times[Strings::ToInt(row[0])] = 0;
 		}
 		/* We still have time left on this timer */
 		else {
-			spawn_times[atoi(row[0])] = ((start_duration + end_duration) - tv.tv_sec) * 1000;
+			spawn_times[Strings::ToInt(row[0])] = ((start_duration + end_duration) - tv.tv_sec) * 1000;
 		}
 	}
 
@@ -610,27 +608,27 @@ bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spa
 
 		uint32 spawn_time_left = 0;
 		Spawn2* new_spawn = 0;
-		bool perl_enabled = atoi(row[12]) == 1 ? true : false;
+		bool perl_enabled = Strings::ToInt(row[12]) == 1 ? true : false;
 
-		if (spawn_times.count(atoi(row[0])) != 0)
-			spawn_time_left = spawn_times[atoi(row[0])];
+		if (spawn_times.count(Strings::ToInt(row[0])) != 0)
+			spawn_time_left = spawn_times[Strings::ToInt(row[0])];
 
 		new_spawn = new Spawn2(
-			atoi(row[0]),					// uint32 in_spawn2_id
-			atoi(row[1]),					// uint32 spawngroup_id
-			atof(row[2]),					// float in_x
-			atof(row[3]),					// float in_y
-			atof(row[4]),					// float in_z
-			atof(row[5]),					// float in_heading
-			atoi(row[6]),					// uint32 respawn
-			atoi(row[7]),					// uint32 variance
+			Strings::ToInt(row[0]),					// uint32 in_spawn2_id
+			Strings::ToInt(row[1]),					// uint32 spawngroup_id
+			Strings::ToFloat(row[2]),					// float in_x
+			Strings::ToFloat(row[3]),					// float in_y
+			Strings::ToFloat(row[4]),					// float in_z
+			Strings::ToFloat(row[5]),					// float in_heading
+			Strings::ToInt(row[6]),					// uint32 respawn
+			Strings::ToInt(row[7]),					// uint32 variance
 			spawn_time_left,				// uint32 timeleft
-			atoi(row[8]),					// uint32 grid
-			(bool)atoi(row[9]),				// bool path_when_zone_idle
-			atoi(row[10]),					// uint16 in_cond_id
-			atoi(row[11]),					// int16 in_min_value
+			Strings::ToInt(row[8]),					// uint32 grid
+			(bool)Strings::ToInt(row[9]),				// bool path_when_zone_idle
+			Strings::ToInt(row[10]),					// uint16 in_cond_id
+			Strings::ToInt(row[11]),					// int16 in_min_value
 			perl_enabled,					// bool in_enabled
-			(EmuAppearance)atoi(row[13])	// EmuAppearance anim
+			(EmuAppearance)Strings::ToInt(row[13])	// EmuAppearance anim
 		);
 
 		spawn2_list.Insert(new_spawn);
@@ -662,12 +660,12 @@ Spawn2* ZoneDatabase::LoadSpawn2(LinkedList<Spawn2*> &spawn2_list, uint32 spawn2
 
 	auto row = results.begin();
 
-    bool perl_enabled = atoi(row[12]) == 1 ? true : false;
+    bool perl_enabled = Strings::ToInt(row[12]) == 1 ? true : false;
 
-    auto newSpawn = new Spawn2(atoi(row[0]), atoi(row[1]), atof(row[2]),
-			atof(row[3]), atof(row[4]), atof(row[5]), atoi(row[6]), atoi(row[7]),
-			timeleft, atoi(row[8]), (bool) atoi(row[9]), atoi(row[10]),
-			atoi(row[11]), perl_enabled, (EmuAppearance)atoi(row[13]));
+    auto newSpawn = new Spawn2(Strings::ToInt(row[0]), Strings::ToInt(row[1]), Strings::ToFloat(row[2]),
+			Strings::ToFloat(row[3]), Strings::ToFloat(row[4]), Strings::ToFloat(row[5]), Strings::ToInt(row[6]), Strings::ToInt(row[7]),
+			timeleft, Strings::ToInt(row[8]), (bool) Strings::ToInt(row[9]), Strings::ToInt(row[10]),
+			Strings::ToInt(row[11]), perl_enabled, (EmuAppearance)Strings::ToInt(row[13]));
 
     spawn2_list.Insert(newSpawn);
 
@@ -961,20 +959,20 @@ bool SpawnConditionManager::LoadDBEvent(uint32 event_id, SpawnEvent &event, std:
 
 	auto row = results.begin();
 
-    event.id = atoi(row[0]);
-    event.condition_id = atoi(row[1]);
-    event.period = atoi(row[2]);
+    event.id = Strings::ToInt(row[0]);
+    event.condition_id = Strings::ToInt(row[1]);
+    event.period = Strings::ToInt(row[2]);
 
-    event.next.minute = atoi(row[3]);
-    event.next.hour = atoi(row[4]);
-    event.next.day = atoi(row[5]);
-    event.next.month = atoi(row[6]);
-    event.next.year = atoi(row[7]);
+    event.next.minute = Strings::ToInt(row[3]);
+    event.next.hour = Strings::ToInt(row[4]);
+    event.next.day = Strings::ToInt(row[5]);
+    event.next.month = Strings::ToInt(row[6]);
+    event.next.year = Strings::ToInt(row[7]);
 
-    event.enabled = atoi(row[8]) != 0;
-    event.action = (SpawnEvent::Action) atoi(row[9]);
-    event.argument = atoi(row[10]);
-    event.strict = atoi(row[11]) != 0;
+    event.enabled = Strings::ToInt(row[8]) != 0;
+    event.action = (SpawnEvent::Action) Strings::ToInt(row[9]);
+    event.argument = Strings::ToInt(row[10]);
+    event.strict = Strings::ToInt(row[11]) != 0;
     zone_name = row[12];
 
     std::string timeAsString;
@@ -1002,9 +1000,9 @@ bool SpawnConditionManager::LoadSpawnConditions(const char* zone_name, uint32 in
         //load spawn conditions
         SpawnCondition cond;
 
-        cond.condition_id = atoi(row[0]);
-        cond.value = atoi(row[2]);
-        cond.on_change = (SpawnCondition::OnChange) atoi(row[1]);
+        cond.condition_id = Strings::ToInt(row[0]);
+        cond.value = Strings::ToInt(row[2]);
+        cond.on_change = (SpawnCondition::OnChange) Strings::ToInt(row[1]);
         spawn_conditions[cond.condition_id] = cond;
 
     LogSpawns("Loaded spawn condition [{}] with value [{}] and on_change [{}]", cond.condition_id, cond.value, cond.on_change);
@@ -1023,10 +1021,10 @@ bool SpawnConditionManager::LoadSpawnConditions(const char* zone_name, uint32 in
     }
 
     for (auto row = results.begin(); row != results.end(); ++row) {
-        auto iter = spawn_conditions.find(atoi(row[0]));
+        auto iter = spawn_conditions.find(Strings::ToInt(row[0]));
 
         if(iter != spawn_conditions.end())
-            iter->second.value = atoi(row[1]);
+            iter->second.value = Strings::ToInt(row[1]);
     }
 
 	//load spawn events
@@ -1043,25 +1041,25 @@ bool SpawnConditionManager::LoadSpawnConditions(const char* zone_name, uint32 in
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		SpawnEvent event;
 
-		event.id           = atoi(row[0]);
-		event.condition_id = atoi(row[1]);
-		event.period       = atoi(row[2]);
+		event.id           = Strings::ToInt(row[0]);
+		event.condition_id = Strings::ToInt(row[1]);
+		event.period       = Strings::ToInt(row[2]);
 
 		if (event.period == 0) {
 			LogError("Refusing to load spawn event #[{}] because it has a period of 0\n", event.id);
 			continue;
 		}
 
-		event.next.minute = atoi(row[3]);
-		event.next.hour   = atoi(row[4]);
-		event.next.day    = atoi(row[5]);
-		event.next.month  = atoi(row[6]);
-		event.next.year   = atoi(row[7]);
+		event.next.minute = Strings::ToInt(row[3]);
+		event.next.hour   = Strings::ToInt(row[4]);
+		event.next.day    = Strings::ToInt(row[5]);
+		event.next.month  = Strings::ToInt(row[6]);
+		event.next.year   = Strings::ToInt(row[7]);
 
-		event.enabled  = atoi(row[8]) == 0 ? false : true;
-		event.action   = (SpawnEvent::Action) atoi(row[9]);
-		event.argument = atoi(row[10]);
-		event.strict   = atoi(row[11]) == 0 ? false : true;
+		event.enabled  = Strings::ToInt(row[8]) == 0 ? false : true;
+		event.action   = (SpawnEvent::Action) Strings::ToInt(row[9]);
+		event.argument = Strings::ToInt(row[10]);
+		event.strict   = Strings::ToInt(row[11]) == 0 ? false : true;
 
 		spawn_events.push_back(event);
 
@@ -1418,7 +1416,7 @@ int16 SpawnConditionManager::GetCondition(const char *zone_short, uint32 instanc
 
     auto row = results.begin();
 
-    return atoi(row[0]);
+    return Strings::ToInt(row[0]);
 }
 
 bool SpawnConditionManager::Check(uint16 condition, int16 min_value) {

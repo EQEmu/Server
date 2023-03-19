@@ -9,8 +9,8 @@ void command_setlanguage(Client *c, const Seperator *sep)
 		target = c->GetTarget()->CastToClient();
 	}
 
-	auto language_id = sep->IsNumber(1) ? std::stoi(sep->arg[1]) : -1;
-	auto language_value = sep->IsNumber(2) ? std::stoi(sep->arg[2]) : -1;
+	auto language_id = sep->IsNumber(1) ? Strings::ToInt(sep->arg[1]) : -1;
+	auto language_value = sep->IsNumber(2) ? Strings::ToInt(sep->arg[2]) : -1;
 	if (!strcasecmp(sep->arg[1], "list")) {
 		for (const auto& language : EQ::constants::GetLanguageMap()) {
 			c->Message(

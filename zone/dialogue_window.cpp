@@ -1,6 +1,7 @@
 #include <regex>
 
 #include "dialogue_window.h"
+#include "../common/strings.h"
 
 void DialogueWindow::Render(Client *c, std::string markdown)
 {
@@ -74,7 +75,7 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 		bool found_animation = false;
 		if (Strings::IsNumber(animation)) {
 			LogDiaWindDetail("Client [{}] Animation is a number, firing animation [{}]", c->GetCleanName(), animation);
-			target->DoAnim(std::stoi(animation));
+			target->DoAnim(Strings::ToInt(animation));
 			found_animation = true;
 		}
 		else {
@@ -126,7 +127,7 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 				c->GetCleanName(),
 				expire_time
 			);
-			window_expire_seconds = std::stoi(expire_time);
+			window_expire_seconds = Strings::ToInt(expire_time);
 		}
 	}
 
@@ -198,7 +199,7 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 
 			// set the popup id
 			if (!popupid.empty()) {
-				popup_id = (Strings::IsNumber(popupid) ? std::atoi(popupid.c_str()) : 0);
+				popup_id = (Strings::IsNumber(popupid) ? Strings::ToInt(popupid.c_str()) : 0);
 			}
 		}
 	}
@@ -230,7 +231,7 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 			Strings::FindReplace(output, fmt::format("secondresponseid:{}", secondresponseid), "");
 
 			if (!secondresponseid.empty()) {
-				negative_id = (Strings::IsNumber(secondresponseid) ? std::atoi(secondresponseid.c_str()) : 0);
+				negative_id = (Strings::IsNumber(secondresponseid) ? Strings::ToInt(secondresponseid.c_str()) : 0);
 			}
 		}
 	}
@@ -409,7 +410,7 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 
 	// click response
 	// window type response
-	uint32      window_type           = (Strings::IsNumber(wintype) ? std::atoi(wintype.c_str()) : 0);
+	uint32      window_type           = (Strings::IsNumber(wintype) ? Strings::ToInt(wintype.c_str()) : 0);
 	std::string click_response_button = (window_type == 1 ? "Yes" : "OK");
 	std::string click_response        = fmt::format(
 		"<c \"#F07F00\">Click [{}] to continue...</c>",

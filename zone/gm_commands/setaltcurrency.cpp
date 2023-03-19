@@ -17,8 +17,8 @@ void command_setaltcurrency(Client *c, const Seperator *sep)
 		target = c->GetTarget()->CastToClient();
 	}
 
-	auto currency_id = std::stoul(sep->arg[1]);
-	auto amount = static_cast<int>(std::min(std::stoll(sep->arg[2]), (long long) 2000000000));
+	auto currency_id = Strings::ToUnsignedInt(sep->arg[1]);
+	auto amount = static_cast<int>(std::min(Strings::ToBigInt(sep->arg[2]), (int64) 2000000000));
 	uint32 currency_item_id = zone->GetCurrencyItemID(currency_id);
 	if (!currency_item_id) {
 		c->Message(
@@ -32,7 +32,7 @@ void command_setaltcurrency(Client *c, const Seperator *sep)
 	}
 
 	target->SetAlternateCurrencyValue(currency_id, amount);
-	
+
 	c->Message(
 		Chat::White,
 		fmt::format(

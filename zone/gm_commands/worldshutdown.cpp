@@ -12,8 +12,8 @@ void command_worldshutdown(Client *c, const Seperator *sep)
 		if (
 			sep->IsNumber(1) &&
 			sep->IsNumber(2) &&
-			((time     = std::stoi(sep->arg[1])) > 0) &&
-			((interval = std::stoi(sep->arg[2])) > 0)
+			((time     = Strings::ToInt(sep->arg[1])) > 0) &&
+			((interval = Strings::ToInt(sep->arg[2])) > 0)
 			) {
 			int time_minutes = (time / 60);
 			quest_manager.WorldWideMessage(

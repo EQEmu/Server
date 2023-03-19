@@ -14,10 +14,10 @@ void command_givemoney(Client *c, const Seperator *sep)
 		target = c->GetTarget()->CastToClient();
 	}
 
-	uint32 platinum = std::stoul(sep->arg[1]);
-	uint32 gold = sep->IsNumber(2) ? std::stoul(sep->arg[2]) : 0;
-	uint32 silver = sep->IsNumber(3) ? std::stoul(sep->arg[3]) : 0;
-	uint32 copper = sep->IsNumber(4) ? std::stoul(sep->arg[4]) : 0;
+	uint32 platinum = Strings::ToUnsignedInt(sep->arg[1]);
+	uint32 gold = sep->IsNumber(2) ? Strings::ToUnsignedInt(sep->arg[2]) : 0;
+	uint32 silver = sep->IsNumber(3) ? Strings::ToUnsignedInt(sep->arg[3]) : 0;
+	uint32 copper = sep->IsNumber(4) ? Strings::ToUnsignedInt(sep->arg[4]) : 0;
 	if (!platinum && !gold && !silver && !copper) {
 		c->Message(Chat::Red, "Usage: #Usage: #givemoney [Platinum] [Gold] [Silver] [Copper]");
 		return;

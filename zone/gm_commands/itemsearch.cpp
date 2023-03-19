@@ -13,7 +13,7 @@ void command_itemsearch(Client *c, const Seperator *sep)
 		linker.SetLinkType(EQ::saylink::SayLinkItemData);
 
 		if (Seperator::IsNumber(search_criteria)) {
-			item = database.GetItem(atoi(search_criteria));
+			item = database.GetItem(Strings::ToInt(search_criteria));
 			if (item) {
 				linker.SetItemData(item);
 				std::string item_id          = std::to_string(item->ID);

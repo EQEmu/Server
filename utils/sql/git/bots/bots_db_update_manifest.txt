@@ -35,6 +35,8 @@
 9034|2022_12_02_bot_spell_settings.sql|SHOW COLUMNS FROM `bot_data` LIKE 'enforce_spell_settings'|empty|
 9035|2022_12_04_bot_archery.sql|SHOW COLUMNS FROM `bot_data` LIKE 'archery_setting'|empty|
 9036|2023_01_19_drop_bot_views.sql|SHOW TABLES LIKE 'vw_groups'|not_empty|
+9037|2023_01_22_add_name_index.sql||show index from bot_data WHERE key_name = 'name`|empty|
+9038|2023_02_16_add_caster_range.sql|SHOW COLUMNS FROM `bot_data` LIKE 'caster_range'|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not

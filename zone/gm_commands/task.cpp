@@ -246,7 +246,7 @@ void command_task(Client *c, const Seperator *sep)
 		return;
 	} else if (is_uncomplete) {
 		if (sep->IsNumber(2)) {
-			auto task_id = std::stoul(sep->arg[2]);
+			auto task_id = Strings::ToUnsignedInt(sep->arg[2]);
 			if (!task_id) {
 				c->Message(Chat::White, "Invalid task ID specified.");
 				return;

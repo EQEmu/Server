@@ -19,7 +19,7 @@ void command_doanim(Client *c, const Seperator *sep)
 	auto animation_speed = 0;
 
 	if (sep->IsNumber(1)) {
-		animation_id = std::stoi(sep->arg[1]);
+		animation_id = Strings::ToInt(sep->arg[1]);
 
 		const auto& a = animation_names_map.find(animation_id);
 		if (a != animation_names_map.end()) {
@@ -69,7 +69,7 @@ void command_doanim(Client *c, const Seperator *sep)
 	}
 
 	if (sep->IsNumber(2)) {
-		animation_speed = std::stoi(sep->arg[2]);
+		animation_speed = Strings::ToInt(sep->arg[2]);
 	}
 
 	const auto speed_message = (

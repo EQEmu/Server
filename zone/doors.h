@@ -23,7 +23,6 @@ public:
 	bool Process();
 	bool triggered;
 	char *GetDoorName() { return m_door_name; }
-	const glm::vec4 GetDestination() const { return m_destination; }
 	const glm::vec4 &GetPosition() const { return m_position; }
 	int GetDzSwitchID() const { return m_dz_switch_id; }
 	int GetIncline() { return m_incline; }
@@ -38,7 +37,7 @@ public:
 	uint16 GetSize() { return m_size; }
 	uint32 GetClientVersionMask() { return m_client_version_mask; }
 	uint32 GetDoorDBID() { return m_database_id; }
-	uint32 GetDoorParam() { return m_door_param; }
+	int32 GetDoorParam() { return m_door_param; }
 	uint32 GetEntityID() { return m_entity_id; }
 	uint32 GetGuildID() { return m_guild_id; }
 	uint32 GetKeyItem() { return m_key_item_id; }
@@ -65,9 +64,15 @@ public:
 	float GetX();
 	float GetY();
 	float GetZ();
+	float GetHeading();
+
+	bool HasDestinationZone() const;
+	bool IsDestinationZoneSame() const;
 
 private:
 
+	bool      m_has_destination_zone = false;
+	bool      m_same_destination_zone = false;
 	uint32    m_database_id;
 	uint8     m_door_id;
 	char      m_zone_name[32];
@@ -81,7 +86,7 @@ private:
 	uint8     m_no_key_ring;
 	uint8     m_trigger_door;
 	uint8     m_trigger_type;
-	uint32    m_door_param;
+	int32     m_door_param;
 	uint16    m_size;
 	int       m_invert_state;
 	uint32    m_entity_id;

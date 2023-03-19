@@ -476,10 +476,11 @@ bool Database::CheckDatabaseConversions() {
 	CheckDatabaseConvertPPDeblob();
 	CheckDatabaseConvertCorpseDeblob();
 
-	RuleManager::Instance()->LoadRules(this, "default", false);
+	auto *r = RuleManager::Instance();
+	r->LoadRules(this, "default", false);
 	if (!RuleB(Bots, Enabled) && DoesTableExist("bot_data")) {
 		LogInfo("Bot tables found but rule not enabled, enabling");
-		RuleManager::Instance()->SetRule("Bots:Enabled", "true", this, true, true);
+		r->SetRule("Bots:Enabled", "true", this, true, true);
 	}
 
 	/* Run EQEmu Server script (Checks for database updates) */
@@ -529,7 +530,7 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 		rquery = StringFormat("SELECT COUNT(`id`) FROM `character_`");
 		results = QueryDatabase(rquery);
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			number_of_characters = atoi(row[0]);
+			number_of_characters = Strings::ToInt(row[0]);
 			printf("Number of Characters in Database: %i \n", number_of_characters);
 		}
 
@@ -928,19 +929,19 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			char_iter_count++;
-			squery = StringFormat("SELECT `id`, `profile`, `name`, `level`, `account_id`, `firstlogon`, `lfg`, `lfp`, `mailkey`, `xtargets`, `inspectmessage`, `extprofile` FROM `character_` WHERE `id` = %i", atoi(row[0]));
+			squery = StringFormat("SELECT `id`, `profile`, `name`, `level`, `account_id`, `firstlogon`, `lfg`, `lfp`, `mailkey`, `xtargets`, `inspectmessage`, `extprofile` FROM `character_` WHERE `id` = %i", Strings::ToInt(row[0]));
 			auto results2 = QueryDatabase(squery);
 			auto row2 = results2.begin();
 			pp = (Convert::PlayerProfile_Struct*)row2[1];
 			e_pp = (ExtendedProfile_Struct*)row2[11];
-			character_id = atoi(row[0]);
-			account_id = atoi(row2[4]);
+			character_id = Strings::ToInt(row[0]);
+			account_id = Strings::ToInt(row2[4]);
 			/* Convert some data from the character_ table that is still relevant */
-			firstlogon = atoi(row2[5]);
-			lfg = atoi(row2[6]);
-			lfp = atoi(row2[7]);
+			firstlogon = Strings::ToInt(row2[5]);
+			lfg = Strings::ToInt(row2[6]);
+			lfp = Strings::ToInt(row2[7]);
 			mailkey = row2[8];
-			xtargets = atoi(row2[9]);
+			xtargets = Strings::ToInt(row2[9]);
 			inspectmessage = row2[10];
 
 			/* Verify PP Integrity */
@@ -1566,7 +1567,7 @@ bool Database::CheckDatabaseConvertCorpseDeblob(){
 		rquery = StringFormat("SELECT DISTINCT charid FROM character_corpses");
 		results = QueryDatabase(rquery);
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			std::string squery = StringFormat("SELECT id, charname, data, time_of_death, is_rezzed FROM character_corpses WHERE `charid` = %i", atoi(row[0]));
+			std::string squery = StringFormat("SELECT id, charname, data, time_of_death, is_rezzed FROM character_corpses WHERE `charid` = %i", Strings::ToInt(row[0]));
 			auto results2 = QueryDatabase(squery);
 			for (auto row2 = results2.begin(); row2 != results2.end(); ++row2) {
 				in_datasize = results2.LengthOfColumn(2);
@@ -1598,7 +1599,7 @@ bool Database::CheckDatabaseConvertCorpseDeblob(){
 					c_type = "NULL";
 					continue;
 				}
-				std::cout << "Converting Corpse: [OK] [" << c_type << "]: " << "ID: " << atoi(row2[0]) << std::endl;
+				std::cout << "Converting Corpse: [OK] [" << c_type << "]: " << "ID: " << Strings::ToInt(row2[0]) << std::endl;
 
 				if (is_sof){
 					scquery = StringFormat("UPDATE `character_corpses` SET \n"
@@ -1669,7 +1670,7 @@ bool Database::CheckDatabaseConvertCorpseDeblob(){
 						dbpc->item_tint[6].color,
 						dbpc->item_tint[7].color,
 						dbpc->item_tint[8].color,
-						atoi(row2[0])
+						Strings::ToInt(row2[0])
 						);
 					if (scquery != ""){ auto sc_results = QueryDatabase(scquery); }
 
@@ -1681,7 +1682,7 @@ bool Database::CheckDatabaseConvertCorpseDeblob(){
 							scquery = StringFormat("REPLACE INTO `character_corpse_items` \n"
 								" (corpse_id, equip_slot, item_id, charges, aug_1, aug_2, aug_3, aug_4, aug_5, aug_6, attuned) \n"
 								" VALUES (%u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u) \n",
-								atoi(row2[0]),
+								Strings::ToInt(row2[0]),
 								dbpc->items[i].equipSlot,
 								dbpc->items[i].item_id,
 								dbpc->items[i].charges,
@@ -1697,7 +1698,7 @@ bool Database::CheckDatabaseConvertCorpseDeblob(){
 						}
 						else{
 							scquery = scquery + StringFormat(", (%u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u) \n",
-								atoi(row2[0]),
+								Strings::ToInt(row2[0]),
 								dbpc->items[i].equipSlot,
 								dbpc->items[i].item_id,
 								dbpc->items[i].charges,
@@ -1777,7 +1778,7 @@ bool Database::CheckDatabaseConvertCorpseDeblob(){
 						dbpc_c->item_tint[6].color,
 						dbpc_c->item_tint[7].color,
 						dbpc_c->item_tint[8].color,
-						atoi(row2[0])
+						Strings::ToInt(row2[0])
 						);
 					if (scquery != ""){ auto sc_results = QueryDatabase(scquery); }
 
@@ -1790,7 +1791,7 @@ bool Database::CheckDatabaseConvertCorpseDeblob(){
 							scquery = StringFormat("REPLACE INTO `character_corpse_items` \n"
 								" (corpse_id, equip_slot, item_id, charges, aug_1, aug_2, aug_3, aug_4, aug_5, aug_6, attuned) \n"
 								" VALUES (%u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u) \n",
-								atoi(row2[0]),
+								Strings::ToInt(row2[0]),
 								dbpc_c->items[i].equipSlot,
 								dbpc_c->items[i].item_id,
 								dbpc_c->items[i].charges,
@@ -1806,7 +1807,7 @@ bool Database::CheckDatabaseConvertCorpseDeblob(){
 						}
 						else{
 							scquery = scquery + StringFormat(", (%u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u) \n",
-								atoi(row2[0]),
+								Strings::ToInt(row2[0]),
 								dbpc_c->items[i].equipSlot,
 								dbpc_c->items[i].item_id,
 								dbpc_c->items[i].charges,

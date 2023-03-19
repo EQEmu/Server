@@ -34,6 +34,10 @@
 #include "../common/data_verification.h"
 
 #include "bot.h"
+#include "../common/events/player_event_logs.h"
+#include "worldserver.h"
+
+extern WorldServer worldserver;
 
 extern QueryServ* QServ;
 
@@ -721,12 +725,11 @@ void Client::SetEXP(uint64 set_exp, uint64 set_aaxp, bool isrezzexp) {
 			SendSound();
 		}
 
-		const auto export_string = fmt::format(
-			"{}",
-			gained
-		);
+		if (parse->PlayerHasQuestSub(EVENT_AA_GAIN)) {
+			parse->EventPlayer(EVENT_AA_GAIN, this, std::to_string(gained), 0);
+		}
 
-		parse->EventPlayer(EVENT_AA_GAIN, this, export_string, 0);
+		RecordPlayerEventLog(PlayerEvent::AA_GAIN, PlayerEvent::AAGainedEvent{gained});
 
 		/* QS: PlayerLogAARate */
 		if (RuleB(QueryServ, PlayerLogAARate)){
@@ -801,14 +804,23 @@ void Client::SetEXP(uint64 set_exp, uint64 set_aaxp, bool isrezzexp) {
 		}
 	}
 
+	if (parse->PlayerHasQuestSub(EVENT_EXP_GAIN) && m_pp.exp != set_exp) {
+		parse->EventPlayer(EVENT_EXP_GAIN, this, std::to_string(set_exp - m_pp.exp), 0);
+	}
+
+	if (parse->PlayerHasQuestSub(EVENT_AA_EXP_GAIN) && m_pp.expAA != set_aaxp) {
+		parse->EventPlayer(EVENT_AA_EXP_GAIN, this, std::to_string(set_aaxp - m_pp.expAA), 0);
+	}
+
 	//set the client's EXP and AAEXP
 	m_pp.exp = set_exp;
 	m_pp.expAA = set_aaxp;
 
 	if (GetLevel() < 51) {
 		m_epp.perAA = 0;	// turn off aa exp if they drop below 51
-	} else
-		SendAlternateAdvancementStats();	//otherwise, send them an AA update
+	} else {
+		SendAlternateAdvancementStats();    //otherwise, send them an AA update
+	}
 
 	//send the expdata in any case so the xp bar isnt stuck after leveling
 	uint32 tmpxp1 = GetEXPForLevel(GetLevel()+1);
@@ -867,8 +879,21 @@ void Client::SetLevel(uint8 set_level, bool command)
 	}
 
 	if (set_level > m_pp.level) {
-		const auto export_string = fmt::format("{}", (set_level - m_pp.level));
-		parse->EventPlayer(EVENT_LEVEL_UP, this, export_string, 0);
+		int levels_gained = (set_level - m_pp.level);
+
+		if (parse->PlayerHasQuestSub(EVENT_LEVEL_UP)) {
+			parse->EventPlayer(EVENT_LEVEL_UP, this, std::to_string(levels_gained), 0);
+		}
+
+		if (player_event_logs.IsEventEnabled(PlayerEvent::LEVEL_GAIN)) {
+			auto e = PlayerEvent::LevelGainedEvent{
+				.from_level = m_pp.level,
+				.to_level = set_level,
+				.levels_gained = levels_gained
+			};
+
+			RecordPlayerEventLog(PlayerEvent::LEVEL_GAIN, e);
+		}
 
 		if (RuleB(QueryServ, PlayerLogLevels)) {
 			const auto event_desc = fmt::format(
@@ -881,8 +906,21 @@ void Client::SetLevel(uint8 set_level, bool command)
 			QServ->PlayerLogEvent(Player_Log_Levels, CharacterID(), event_desc);
 		}
 	} else if (set_level < m_pp.level) {
-		const auto export_string = fmt::format("{}", (m_pp.level - set_level));
-		parse->EventPlayer(EVENT_LEVEL_DOWN, this, export_string, 0);
+		int levels_lost = (m_pp.level - set_level);
+
+		if (parse->PlayerHasQuestSub(EVENT_LEVEL_DOWN)) {
+			parse->EventPlayer(EVENT_LEVEL_DOWN, this, std::to_string(levels_lost), 0);
+		}
+
+		if (player_event_logs.IsEventEnabled(PlayerEvent::LEVEL_LOSS)) {
+			auto e = PlayerEvent::LevelLostEvent{
+				.from_level = m_pp.level,
+				.to_level = set_level,
+				.levels_lost = levels_lost
+			};
+
+			RecordPlayerEventLog(PlayerEvent::LEVEL_LOSS, e);
+		}
 
 		if (RuleB(QueryServ, PlayerLogLevels)) {
 			const auto event_desc = fmt::format(
@@ -1028,8 +1066,6 @@ uint32 Client::GetEXPForLevel(uint16 check_level)
 		finalxp = uint64(finalxp * classmod);
 	}
 
-	finalxp = mod_client_xp_for_level(finalxp, check_level);
-
 	return finalxp;
 }
 
@@ -1079,11 +1115,11 @@ void Group::SplitExp(const uint64 exp, Mob* other) {
 		return;
 	}
 
-	auto group_experience = exp;
+	auto       group_experience = exp;
 	const auto highest_level    = GetHighestLevel();
 
 	auto group_modifier = 1.0f;
-	if (RuleB(Character, EnableGroupEXPModifier)) {
+	if (RuleB(Character, EnableGroupMemberEXPModifier)) {
 		if (EQ::ValueWithin(member_count, 2, 5)) {
 			group_modifier = 1 + RuleR(Character, GroupMemberEXPModifier) * (member_count - 1); // 2 = 1.2x, 3 = 1.4x, 4 = 1.6x, 5 = 1.8x
 		} else if (member_count == 6) {
@@ -1092,11 +1128,18 @@ void Group::SplitExp(const uint64 exp, Mob* other) {
 	}
 
 	if (EQ::ValueWithin(member_count, 2, 6)) {
-		group_experience += static_cast<uint64>(
-			static_cast<float>(exp) *
-			group_modifier *
-			RuleR(Character, GroupExpMultiplier)
-		);
+		if (RuleB(Character, EnableGroupEXPModifier)) {
+			group_experience += static_cast<uint64>(
+				static_cast<float>(exp) *
+				group_modifier *
+				RuleR(Character, GroupExpMultiplier)
+			);
+		} else {
+			group_experience += static_cast<uint64>(
+				static_cast<float>(exp) *
+				group_modifier
+			);
+		}
 	}
 
 	const uint8 consider_level = Mob::GetLevelCon(highest_level, other->GetLevel());
@@ -1106,8 +1149,8 @@ void Group::SplitExp(const uint64 exp, Mob* other) {
 
 	for (const auto& m : members) {
 		if (m && m->IsClient()) {
-			const int32 diff = m->GetLevel() - highest_level;
-			int32 max_diff = -(m->GetLevel() * 15 / 10 - m->GetLevel());
+			const int32 diff     = m->GetLevel() - highest_level;
+			int32       max_diff = -(m->GetLevel() * 15 / 10 - m->GetLevel());
 
 			if (max_diff > -5) {
 				max_diff = -5;
@@ -1136,23 +1179,30 @@ void Raid::SplitExp(const uint64 exp, Mob* other) {
 		return;
 	}
 
-	auto raid_experience = exp;
+	auto       raid_experience = exp;
 	const auto highest_level   = GetHighestLevel();
 
-	raid_experience = static_cast<uint64>(
-		static_cast<float>(raid_experience) *
-		(1.0f - RuleR(Character, RaidExpMultiplier))
-	);
+	if (RuleB(Character, EnableRaidEXPModifier)) {
+		raid_experience = static_cast<uint64>(
+			static_cast<float>(raid_experience) *
+			(1.0f - RuleR(Character, RaidExpMultiplier))
+		);
+	}
 
 	const auto consider_level = Mob::GetLevelCon(highest_level, other->GetLevel());
 	if (consider_level == CON_GRAY) {
 		return;
 	}
 
+	uint32 member_modifier = 1;
+	if (RuleB(Character, EnableRaidMemberEXPModifier)) {
+		member_modifier = member_count;
+	}
+
 	for (const auto& m : members) {
-		if (m.member) {
+		if (m.member && !m.IsBot) { 
 			const int32 diff     = m.member->GetLevel() - highest_level;
-			int32 max_diff = -(m.member->GetLevel() * 15 / 10 - m.member->GetLevel());
+			int32       max_diff = -(m.member->GetLevel() * 15 / 10 - m.member->GetLevel());
 
 			if (max_diff > -5) {
 				max_diff = -5;
@@ -1160,7 +1210,7 @@ void Raid::SplitExp(const uint64 exp, Mob* other) {
 
 			if (diff >= max_diff) {
 				const uint64 tmp  = (m.member->GetLevel() + 3) * (m.member->GetLevel() + 3) * 75 * 35 / 10;
-				const uint64 tmp2 = (raid_experience / member_count) + 1;
+				const uint64 tmp2 = (raid_experience / member_modifier) + 1;
 				m.member->AddEXP(tmp < tmp2 ? tmp : tmp2, consider_level);
 			}
 		}
@@ -1213,7 +1263,7 @@ uint8 Client::GetCharMaxLevelFromQGlobal() {
 	for (const auto& global : global_map) {
 		if (global.name == "CharMaxLevel") {
 			if (Strings::IsNumber(global.value)) {
-				return static_cast<uint8>(std::stoul(global.value));
+				return static_cast<uint8>(Strings::ToUnsignedInt(global.value));
 			}
 		}
 	}
@@ -1231,7 +1281,7 @@ uint8 Client::GetCharMaxLevelFromBucket()
 	auto bucket_value = DataBucket::GetData(new_bucket_name);
 	if (!bucket_value.empty()) {
 		if (Strings::IsNumber(bucket_value)) {
-			return static_cast<uint8>(std::stoul(bucket_value));
+			return static_cast<uint8>(Strings::ToUnsignedInt(bucket_value));
 		}
 	}
 
@@ -1243,7 +1293,7 @@ uint8 Client::GetCharMaxLevelFromBucket()
 	bucket_value = DataBucket::GetData(old_bucket_name);
 	if (!bucket_value.empty()) {
 		if (Strings::IsNumber(bucket_value)) {
-			return static_cast<uint8>(std::stoul(bucket_value));
+			return static_cast<uint8>(Strings::ToUnsignedInt(bucket_value));
 		}
 	}
 

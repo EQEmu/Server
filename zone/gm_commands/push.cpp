@@ -17,11 +17,11 @@ void command_push(Client *c, const Seperator *sep)
 	}
 
 	auto target = c->GetTarget();
-	auto back = std::stof(sep->arg[1]);
+	auto back = Strings::ToFloat(sep->arg[1]);
 	auto up = 0.0f;
 
 	if (arguments == 2 && sep->IsNumber(2)) {
-		up = std::stof(sep->arg[2]);
+		up = Strings::ToFloat(sep->arg[2]);
 	}
 
 	c->Message(

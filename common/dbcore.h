@@ -12,6 +12,7 @@
 
 #include <mysql.h>
 #include <string.h>
+#include <mutex>
 
 class DBcore {
 public:
@@ -27,15 +28,21 @@ public:
 	void TransactionBegin();
 	void TransactionCommit();
 	void TransactionRollback();
+	std::string Escape(const std::string& s);
 	uint32 DoEscapeString(char *tobuf, const char *frombuf, uint32 fromlen);
 	void ping();
-	MYSQL *getMySQL() { return &mysql; }
-	void SetMysql(MYSQL *mysql);
 
 	const std::string &GetOriginHost() const;
 	void SetOriginHost(const std::string &origin_host);
 
 	bool DoesTableExist(std::string table_name);
+
+	void SetMySQL(const DBcore &o)
+	{
+		mysql      = o.mysql;
+		mysqlOwner = false;
+	}
+	void SetMutex(Mutex *mutex);
 
 protected:
 	bool Open(
@@ -53,9 +60,12 @@ protected:
 private:
 	bool Open(uint32 *errnum = nullptr, char *errbuf = nullptr);
 
-	MYSQL   mysql;
-	Mutex   MDatabase;
+	MYSQL*  mysql;
+	bool    mysqlOwner;
+	Mutex   *m_mutex;
 	eStatus pStatus;
+
+	std::mutex m_query_lock{};
 
 	std::string origin_host;
 

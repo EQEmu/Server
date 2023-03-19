@@ -16,6 +16,7 @@
 #include "../../strings.h"
 #include <ctime>
 
+
 class BaseMerchantlistRepository {
 public:
 	struct Merchantlist {
@@ -24,6 +25,8 @@ public:
 		int32_t     item;
 		int16_t     faction_required;
 		uint8_t     level_required;
+		uint8_t     min_status;
+		uint8_t     max_status;
 		uint16_t    alt_currency_cost;
 		int32_t     classes_required;
 		int32_t     probability;
@@ -49,6 +52,8 @@ public:
 			"item",
 			"faction_required",
 			"level_required",
+			"min_status",
+			"max_status",
 			"alt_currency_cost",
 			"classes_required",
 			"probability",
@@ -70,6 +75,8 @@ public:
 			"item",
 			"faction_required",
 			"level_required",
+			"min_status",
+			"max_status",
 			"alt_currency_cost",
 			"classes_required",
 			"probability",
@@ -125,6 +132,8 @@ public:
 		e.item                   = 0;
 		e.faction_required       = -100;
 		e.level_required         = 0;
+		e.min_status             = 0;
+		e.max_status             = 255;
 		e.alt_currency_cost      = 0;
 		e.classes_required       = 65535;
 		e.probability            = 100;
@@ -160,8 +169,9 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				merchantlist_id
 			)
 		);
@@ -175,16 +185,18 @@ public:
 			e.item                   = static_cast<int32_t>(atoi(row[2]));
 			e.faction_required       = static_cast<int16_t>(atoi(row[3]));
 			e.level_required         = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
-			e.alt_currency_cost      = static_cast<uint16_t>(strtoul(row[5], nullptr, 10));
-			e.classes_required       = static_cast<int32_t>(atoi(row[6]));
-			e.probability            = static_cast<int32_t>(atoi(row[7]));
-			e.bucket_name            = row[8] ? row[8] : "";
-			e.bucket_value           = row[9] ? row[9] : "";
-			e.bucket_comparison      = static_cast<uint8_t>(strtoul(row[10], nullptr, 10));
-			e.min_expansion          = static_cast<int8_t>(atoi(row[11]));
-			e.max_expansion          = static_cast<int8_t>(atoi(row[12]));
-			e.content_flags          = row[13] ? row[13] : "";
-			e.content_flags_disabled = row[14] ? row[14] : "";
+			e.min_status             = static_cast<uint8_t>(strtoul(row[5], nullptr, 10));
+			e.max_status             = static_cast<uint8_t>(strtoul(row[6], nullptr, 10));
+			e.alt_currency_cost      = static_cast<uint16_t>(strtoul(row[7], nullptr, 10));
+			e.classes_required       = static_cast<int32_t>(atoi(row[8]));
+			e.probability            = static_cast<int32_t>(atoi(row[9]));
+			e.bucket_name            = row[10] ? row[10] : "";
+			e.bucket_value           = row[11] ? row[11] : "";
+			e.bucket_comparison      = static_cast<uint8_t>(strtoul(row[12], nullptr, 10));
+			e.min_expansion          = static_cast<int8_t>(atoi(row[13]));
+			e.max_expansion          = static_cast<int8_t>(atoi(row[14]));
+			e.content_flags          = row[15] ? row[15] : "";
+			e.content_flags_disabled = row[16] ? row[16] : "";
 
 			return e;
 		}
@@ -223,16 +235,18 @@ public:
 		v.push_back(columns[2] + " = " + std::to_string(e.item));
 		v.push_back(columns[3] + " = " + std::to_string(e.faction_required));
 		v.push_back(columns[4] + " = " + std::to_string(e.level_required));
-		v.push_back(columns[5] + " = " + std::to_string(e.alt_currency_cost));
-		v.push_back(columns[6] + " = " + std::to_string(e.classes_required));
-		v.push_back(columns[7] + " = " + std::to_string(e.probability));
-		v.push_back(columns[8] + " = '" + Strings::Escape(e.bucket_name) + "'");
-		v.push_back(columns[9] + " = '" + Strings::Escape(e.bucket_value) + "'");
-		v.push_back(columns[10] + " = " + std::to_string(e.bucket_comparison));
-		v.push_back(columns[11] + " = " + std::to_string(e.min_expansion));
-		v.push_back(columns[12] + " = " + std::to_string(e.max_expansion));
-		v.push_back(columns[13] + " = '" + Strings::Escape(e.content_flags) + "'");
-		v.push_back(columns[14] + " = '" + Strings::Escape(e.content_flags_disabled) + "'");
+		v.push_back(columns[5] + " = " + std::to_string(e.min_status));
+		v.push_back(columns[6] + " = " + std::to_string(e.max_status));
+		v.push_back(columns[7] + " = " + std::to_string(e.alt_currency_cost));
+		v.push_back(columns[8] + " = " + std::to_string(e.classes_required));
+		v.push_back(columns[9] + " = " + std::to_string(e.probability));
+		v.push_back(columns[10] + " = '" + Strings::Escape(e.bucket_name) + "'");
+		v.push_back(columns[11] + " = '" + Strings::Escape(e.bucket_value) + "'");
+		v.push_back(columns[12] + " = " + std::to_string(e.bucket_comparison));
+		v.push_back(columns[13] + " = " + std::to_string(e.min_expansion));
+		v.push_back(columns[14] + " = " + std::to_string(e.max_expansion));
+		v.push_back(columns[15] + " = '" + Strings::Escape(e.content_flags) + "'");
+		v.push_back(columns[16] + " = '" + Strings::Escape(e.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -259,6 +273,8 @@ public:
 		v.push_back(std::to_string(e.item));
 		v.push_back(std::to_string(e.faction_required));
 		v.push_back(std::to_string(e.level_required));
+		v.push_back(std::to_string(e.min_status));
+		v.push_back(std::to_string(e.max_status));
 		v.push_back(std::to_string(e.alt_currency_cost));
 		v.push_back(std::to_string(e.classes_required));
 		v.push_back(std::to_string(e.probability));
@@ -303,6 +319,8 @@ public:
 			v.push_back(std::to_string(e.item));
 			v.push_back(std::to_string(e.faction_required));
 			v.push_back(std::to_string(e.level_required));
+			v.push_back(std::to_string(e.min_status));
+			v.push_back(std::to_string(e.max_status));
 			v.push_back(std::to_string(e.alt_currency_cost));
 			v.push_back(std::to_string(e.classes_required));
 			v.push_back(std::to_string(e.probability));
@@ -351,16 +369,18 @@ public:
 			e.item                   = static_cast<int32_t>(atoi(row[2]));
 			e.faction_required       = static_cast<int16_t>(atoi(row[3]));
 			e.level_required         = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
-			e.alt_currency_cost      = static_cast<uint16_t>(strtoul(row[5], nullptr, 10));
-			e.classes_required       = static_cast<int32_t>(atoi(row[6]));
-			e.probability            = static_cast<int32_t>(atoi(row[7]));
-			e.bucket_name            = row[8] ? row[8] : "";
-			e.bucket_value           = row[9] ? row[9] : "";
-			e.bucket_comparison      = static_cast<uint8_t>(strtoul(row[10], nullptr, 10));
-			e.min_expansion          = static_cast<int8_t>(atoi(row[11]));
-			e.max_expansion          = static_cast<int8_t>(atoi(row[12]));
-			e.content_flags          = row[13] ? row[13] : "";
-			e.content_flags_disabled = row[14] ? row[14] : "";
+			e.min_status             = static_cast<uint8_t>(strtoul(row[5], nullptr, 10));
+			e.max_status             = static_cast<uint8_t>(strtoul(row[6], nullptr, 10));
+			e.alt_currency_cost      = static_cast<uint16_t>(strtoul(row[7], nullptr, 10));
+			e.classes_required       = static_cast<int32_t>(atoi(row[8]));
+			e.probability            = static_cast<int32_t>(atoi(row[9]));
+			e.bucket_name            = row[10] ? row[10] : "";
+			e.bucket_value           = row[11] ? row[11] : "";
+			e.bucket_comparison      = static_cast<uint8_t>(strtoul(row[12], nullptr, 10));
+			e.min_expansion          = static_cast<int8_t>(atoi(row[13]));
+			e.max_expansion          = static_cast<int8_t>(atoi(row[14]));
+			e.content_flags          = row[15] ? row[15] : "";
+			e.content_flags_disabled = row[16] ? row[16] : "";
 
 			all_entries.push_back(e);
 		}
@@ -390,16 +410,18 @@ public:
 			e.item                   = static_cast<int32_t>(atoi(row[2]));
 			e.faction_required       = static_cast<int16_t>(atoi(row[3]));
 			e.level_required         = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
-			e.alt_currency_cost      = static_cast<uint16_t>(strtoul(row[5], nullptr, 10));
-			e.classes_required       = static_cast<int32_t>(atoi(row[6]));
-			e.probability            = static_cast<int32_t>(atoi(row[7]));
-			e.bucket_name            = row[8] ? row[8] : "";
-			e.bucket_value           = row[9] ? row[9] : "";
-			e.bucket_comparison      = static_cast<uint8_t>(strtoul(row[10], nullptr, 10));
-			e.min_expansion          = static_cast<int8_t>(atoi(row[11]));
-			e.max_expansion          = static_cast<int8_t>(atoi(row[12]));
-			e.content_flags          = row[13] ? row[13] : "";
-			e.content_flags_disabled = row[14] ? row[14] : "";
+			e.min_status             = static_cast<uint8_t>(strtoul(row[5], nullptr, 10));
+			e.max_status             = static_cast<uint8_t>(strtoul(row[6], nullptr, 10));
+			e.alt_currency_cost      = static_cast<uint16_t>(strtoul(row[7], nullptr, 10));
+			e.classes_required       = static_cast<int32_t>(atoi(row[8]));
+			e.probability            = static_cast<int32_t>(atoi(row[9]));
+			e.bucket_name            = row[10] ? row[10] : "";
+			e.bucket_value           = row[11] ? row[11] : "";
+			e.bucket_comparison      = static_cast<uint8_t>(strtoul(row[12], nullptr, 10));
+			e.min_expansion          = static_cast<int8_t>(atoi(row[13]));
+			e.max_expansion          = static_cast<int8_t>(atoi(row[14]));
+			e.content_flags          = row[15] ? row[15] : "";
+			e.content_flags_disabled = row[16] ? row[16] : "";
 
 			all_entries.push_back(e);
 		}

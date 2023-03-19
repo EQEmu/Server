@@ -23,13 +23,6 @@ struct LoginHandShakeReply_Struct {
 	char                         unknown[1]; // variable length string
 };
 
-// for reference, login buffer is variable (minimum size 8 due to encryption)
-struct PlayerLogin_Struct {
-	LoginBaseMessage_Struct base_header;
-	char                    username[1];
-	char                    password[1];
-};
-
 // variable length, can use directly if not serializing strings
 struct PlayerLoginReply_Struct {
 	// base header excluded to make struct data easier to encrypt

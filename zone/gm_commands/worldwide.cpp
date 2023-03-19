@@ -11,7 +11,7 @@ void command_worldwide(Client *c, const Seperator *sep)
 		c->Message(Chat::White, "Usage: #worldwide remove [Spell ID] - Remove a spell worldwide");
 		return;
 	}
-	
+
 	bool is_cast = !strcasecmp(sep->arg[1], "cast");
 	bool is_remove = !strcasecmp(sep->arg[1], "remove");
 	bool is_message = !strcasecmp(sep->arg[1], "message");
@@ -36,10 +36,10 @@ void command_worldwide(Client *c, const Seperator *sep)
 	if (is_cast) {
 		if (sep->IsNumber(2)) {
 			uint8 update_type = WWSpellUpdateType_Cast;
-			auto spell_id = std::stoul(sep->arg[2]);
+			auto spell_id = Strings::ToUnsignedInt(sep->arg[2]);
 			bool disable_message = false;
 			if (sep->IsNumber(3)) {
-				disable_message = std::stoi(sep->arg[3]) ? true : false;
+				disable_message = Strings::ToInt(sep->arg[3]) ? true : false;
 			}
 
 			if (!IsValidSpell(spell_id)) {
@@ -93,7 +93,7 @@ void command_worldwide(Client *c, const Seperator *sep)
 		uint8 update_type = WWMoveUpdateType_MoveZone;
 		auto zone_id = (
 			sep->IsNumber(2) ?
-			static_cast<uint16>(std::stoul(sep->arg[2])) :
+			static_cast<uint16>(Strings::ToUnsignedInt(sep->arg[2])) :
 			static_cast<uint16>(ZoneID(sep->arg[2]))
 		);
 		auto zone_short_name = ZoneName(zone_id);
@@ -127,7 +127,7 @@ void command_worldwide(Client *c, const Seperator *sep)
 		if (sep->IsNumber(2)) {
 			uint8 update_type = WWMoveUpdateType_MoveZoneInstance;
 			const char *zone_short_name = "";
-			auto instance_id = static_cast<uint16>(std::stoul(sep->arg[2]));
+			auto instance_id = static_cast<uint16>(Strings::ToUnsignedInt(sep->arg[2]));
 
 			c->Message(
 				Chat::White,
@@ -144,7 +144,7 @@ void command_worldwide(Client *c, const Seperator *sep)
 	} else if (is_remove) {
 		if (sep->IsNumber(2)) {
 			uint8 update_type = WWSpellUpdateType_Remove;
-			auto spell_id = std::stoul(sep->arg[2]);
+			auto spell_id = Strings::ToUnsignedInt(sep->arg[2]);
 
 			if (!IsValidSpell(spell_id)) {
 				c->Message(

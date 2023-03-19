@@ -31,10 +31,13 @@ void WorldserverCLI::CommandHandler(int argc, char **argv)
 	function_map["test:expansion"]              = &WorldserverCLI::ExpansionTestCommand;
 	function_map["test:repository"]             = &WorldserverCLI::TestRepository;
 	function_map["test:repository2"]            = &WorldserverCLI::TestRepository2;
+	function_map["test:db-concurrency"]         = &WorldserverCLI::TestDatabaseConcurrency;
+	function_map["test:string-benchmark"]       = &WorldserverCLI::TestStringBenchmarkCommand;
 
 	EQEmuCommand::HandleMenu(function_map, cmd, argc, argv);
 }
 
+#include "cli/database_concurrency.cpp"
 #include "cli/copy_character.cpp"
 #include "cli/database_dump.cpp"
 #include "cli/database_get_schema.cpp"
@@ -45,4 +48,5 @@ void WorldserverCLI::CommandHandler(int argc, char **argv)
 #include "cli/test_expansion.cpp"
 #include "cli/test_repository.cpp"
 #include "cli/test_repository_2.cpp"
+#include "cli/test_string_benchmark.cpp"
 #include "cli/version.cpp"

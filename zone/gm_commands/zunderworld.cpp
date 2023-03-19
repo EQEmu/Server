@@ -8,7 +8,7 @@ void command_zunderworld(Client *c, const Seperator *sep)
 		return;
 	}
 
-	auto z = std::stof(sep->arg[1]);
+	auto z = Strings::ToFloat(sep->arg[1]);
 	auto permanent = sep->arg[2] ? atobool(sep->arg[2]) : false;
 	if (permanent) {
 		auto query = fmt::format(

@@ -49,6 +49,8 @@
 #include "sof_char_create_data.h"
 #include "../common/zone_store.h"
 #include "../common/repositories/account_repository.h"
+#include "../common/repositories/player_event_logs_repository.h"
+#include "../common/events/player_event_logs.h"
 
 #include <iostream>
 #include <iomanip>
@@ -451,7 +453,7 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app)
 
 	is_player_zoning = (login_info->zoning == 1);
 
-	uint32 id = std::stoi(name);
+	uint32 id = Strings::ToInt(name);
 	if (id == 0) {
 		LogWarning("Receiving Login Info Packet from Client | account_id is 0 - disconnecting");
 		return false;
@@ -806,7 +808,7 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 				if (!strcasecmp(row[1], char_name)) {
 					if (RuleB(World, EnableReturnHomeButton)) {
 						int now = time(nullptr);
-						if ((now - atoi(row[3])) >= RuleI(World, MinOfflineTimeToReturnHome)) {
+						if ((now - Strings::ToInt(row[3])) >= RuleI(World, MinOfflineTimeToReturnHome)) {
 							home_enabled = true;
 							break;
 						}
@@ -818,7 +820,8 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 				zone_id = database.MoveCharacterToBind(charid, 4);
 			} else {
 				LogInfo("[{}] is trying to go home before they're able.", char_name);
-				database.SetHackerFlag(GetAccountName(), char_name, "MQGoHome: player tried to go home before they were able.");
+				RecordPossibleHack("[MQGoHome] player tried to go home before they were able");
+
 				eqs->Close();
 				return true;
 			}
@@ -831,7 +834,7 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 				if (!strcasecmp(row[1], char_name)) {
 					if (
 						RuleB(World, EnableTutorialButton) &&
-						std::stoi(row[2]) <= RuleI(World, MaxLevelForTutorial)
+						Strings::ToInt(row[2]) <= RuleI(World, MaxLevelForTutorial)
 					) {
 						tutorial_enabled = true;
 						break;
@@ -844,7 +847,8 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 				database.MoveCharacterToZone(charid, zone_id);
 			} else {
 				LogInfo("[{}] is trying to go to the Tutorial but they are not allowed.", char_name);
-				database.SetHackerFlag(GetAccountName(), char_name, "MQTutorial: player tried to enter the tutorial without having tutorial enabled for this character.");
+				RecordPossibleHack("[MQTutorial] player tried to enter the tutorial without having tutorial enabled for this character");
+
 				eqs->Close();
 				return true;
 			}
@@ -1010,10 +1014,11 @@ bool Client::HandlePacket(const EQApplicationPacket *app) {
 
 	EmuOpcode opcode = app->GetOpcode();
 
+	auto o = eqs->GetOpcodeManager();
 	LogPacketClientServer(
 		"[{}] [{:#06x}] Size [{}] {}",
 		OpcodeManager::EmuToName(app->GetOpcode()),
-		eqs->GetOpcodeManager()->EmuToEQ(app->GetOpcode()),
+		o->EmuToEQ(app->GetOpcode()) == 0 ? app->GetProtocolOpcode() : o->EmuToEQ(app->GetOpcode()),
 		app->Size(),
 		(LogSys.IsLogEnabled(Logs::Detail, Logs::PacketClientServer) ? DumpPacketToString(app) : "")
 	);
@@ -1253,7 +1258,7 @@ bool Client::ChecksumVerificationCRCEQGame(uint64 checksum)
 	std::string checksumvar;
 	uint64_t    checksumint;
 	if (database.GetVariable("crc_eqgame", checksumvar)) {
-		checksumint = atoll(checksumvar.c_str());
+		checksumint = Strings::ToBigInt(checksumvar.c_str());
 	}
 	else {
 		LogChecksumVerification("variable not set in variables table.");
@@ -1276,7 +1281,7 @@ bool Client::ChecksumVerificationCRCSkillCaps(uint64 checksum)
 	std::string checksumvar;
 	uint64_t    checksumint;
 	if (database.GetVariable("crc_skillcaps", checksumvar)) {
-		checksumint = atoll(checksumvar.c_str());
+		checksumint = Strings::ToBigInt(checksumvar.c_str());
 	}
 	else {
 		LogChecksumVerification("[checksum_crc2_skillcaps] variable not set in variables table.");
@@ -1299,7 +1304,7 @@ bool Client::ChecksumVerificationCRCBaseData(uint64 checksum)
 	std::string checksumvar;
 	uint64_t    checksumint;
 	if (database.GetVariable("crc_basedata", checksumvar)) {
-		checksumint = atoll(checksumvar.c_str());
+		checksumint = Strings::ToBigInt(checksumvar.c_str());
 	}
 	else {
 		LogChecksumVerification("variable not set in variables table.");
@@ -1778,12 +1783,39 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 		pp.binds[0].heading = pp.heading;
 	}
 
-	LogInfo("Current location [{}] [{}] [{}] [{}] [{}] [{}]",
-			ZoneName(pp.zone_id), pp.zone_id, pp.x, pp.y, pp.z, pp.heading);
-	LogInfo("Bind location [{}] [{}] [{}] [{}] [{}]",
-			ZoneName(pp.binds[0].zone_id), pp.binds[0].zone_id, pp.binds[0].x, pp.binds[0].y, pp.binds[0].z);
-	LogInfo("Home location [{}] [{}] [{}] [{}] [{}]",
-			ZoneName(pp.binds[4].zone_id), pp.binds[4].zone_id, pp.binds[4].x, pp.binds[4].y, pp.binds[4].z);
+	if (GetZone(pp.zone_id)) {
+		LogInfo(
+			"Current location [{}] [{}] [{:.2f}] [{:.2f}] [{:.2f}] [{:.2f}]",
+			ZoneName(pp.zone_id),
+			pp.zone_id,
+			pp.x,
+			pp.y,
+			pp.z,
+			pp.heading
+		);
+	}
+
+	if (GetZone(pp.binds[0].zone_id)) {
+		LogInfo(
+			"Bind location [{}] [{}] [{:.2f}] [{:.2f}] [{:.2f}]",
+			ZoneName(pp.binds[0].zone_id),
+			pp.binds[0].zone_id,
+			pp.binds[0].x,
+			pp.binds[0].y,
+			pp.binds[0].z
+		);
+	}
+
+	if (GetZone(pp.binds[4].zone_id)) {
+		LogInfo(
+			"Home location [{}] [{}] [{:.2f}] [{:.2f}] [{:.2f}]",
+			ZoneName(pp.binds[4].zone_id),
+			pp.binds[4].zone_id,
+			pp.binds[4].x,
+			pp.binds[4].y,
+			pp.binds[4].z
+		);
+	}
 
 	/* Starting Items inventory */
 	content_db.SetStartingItems(&pp, &inv, pp.race, pp.class_, pp.deity, pp.zone_id, pp.name, GetAdmin());
@@ -2331,4 +2363,25 @@ bool Client::StoreCharacter(
 	}
 
 	return true;
+}
+
+void Client::RecordPossibleHack(const std::string& message)
+{
+	if (player_event_logs.IsEventEnabled(PlayerEvent::POSSIBLE_HACK)) {
+		auto event = PlayerEvent::PossibleHackEvent{.message = message};
+		std::stringstream ss;
+		{
+			cereal::JSONOutputArchiveSingleLine ar(ss);
+			event.serialize(ar);
+		}
+
+		auto e = PlayerEventLogsRepository::NewEntity();
+		e.character_id    = charid;
+		e.account_id      = GetCLE() ? GetAccountID() : 0;
+		e.event_type_id   = PlayerEvent::POSSIBLE_HACK;
+		e.event_type_name = PlayerEvent::EventName[PlayerEvent::POSSIBLE_HACK];
+		e.event_data      = ss.str();
+		e.created_at      = std::time(nullptr);
+		PlayerEventLogsRepository::InsertOne(database, e);
+	}
 }

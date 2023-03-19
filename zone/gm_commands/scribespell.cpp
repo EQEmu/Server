@@ -13,7 +13,7 @@ void command_scribespell(Client *c, const Seperator *sep)
 		t = c->GetTarget()->CastToClient();
 	}
 
-	const auto spell_id = std::stoul(sep->arg[1]);
+	const auto spell_id = Strings::ToUnsignedInt(sep->arg[1]);
 
 	if (IsValidSpell(spell_id)) {
 		t->Message(

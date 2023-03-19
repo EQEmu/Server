@@ -146,6 +146,8 @@ public:
 	bool SaveOwnerOption(const uint32 owner_id, size_t type, const bool flag);
 	bool SaveOwnerOption(const uint32 owner_id, const std::pair<size_t, size_t> type, const std::pair<bool, bool> flag);
 
+	bool SaveBotCasterRange(const uint32 owner_id, const uint32 bot_id, const uint32 bot_caster_range_value);
+
 	/* Bot bot-group functions   */
 	bool QueryBotGroupExistence(const std::string& botgroup_name);
 
@@ -164,10 +166,10 @@ public:
 	bool AddMemberToBotGroup(const uint32 leader_id, const uint32 member_id);
 	bool RemoveMemberFromBotGroup(const uint32 member_id);
 
-	bool LoadBotGroupIDForLoadBotGroup(const uint32 owner_id, const std::string& botgroup_name, uint32& botgroup_id);
+	bool LoadBotGroupIDForLoadBotGroup(const uint32 owner_id, std::string_view botgroup_name, uint32& botgroup_id);
 	bool LoadBotGroup(const std::string& botgroup_name, std::map<uint32, std::list<uint32>>& member_list);
 
-	bool LoadBotGroupsListByOwnerID(const uint32 owner_id, std::list<std::pair<std::string, std::string>>& botgroups_list);
+	bool LoadBotGroupsListByOwnerID(const uint32 owner_id, std::list<std::pair<std::string, uint32>>& botgroups_list);
 
 
 	/* Bot group functions   */
@@ -190,6 +192,7 @@ public:
 
 	/* Bot miscellaneous functions   */
 	uint8 GetSpellCastingChance(uint8 spell_type_index, uint8 class_index, uint8 stance_index, uint8 conditional_index);
+	std::string GetBotNameByID(const uint32 bot_id); 
 
 	uint16 GetRaceClassBitmask(uint16 bot_race);
 
@@ -249,6 +252,7 @@ public:
 		static const char* SaveFollowDistance();
 		static const char* SaveAllFollowDistances();
 		static const char* SaveStopMeleeLevel();
+		static const char* SaveBotCasterRange();
 
 		/* fail::Bot bot-group functions   */
 		static const char* QueryBotGroupExistence();
@@ -280,6 +284,7 @@ public:
 		static const char* DeleteAllHealRotations();
 
 		/* fail::Bot miscellaneous functions   */
+		static const char* GetBotNameByID();
 	};
 
 	private:

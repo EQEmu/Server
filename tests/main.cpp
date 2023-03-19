@@ -46,8 +46,7 @@ int main()
 	auto ConfigLoadResult = EQEmuConfig::LoadConfig();
 	Config = EQEmuConfig::get();
 	try {
-		std::ofstream                 outfile("test_output.txt");
-		std::unique_ptr<Test::Output> output(new Test::TextOutput(Test::TextOutput::Verbose, outfile));
+		std::unique_ptr<Test::Output> output(new Test::TextOutput(Test::TextOutput::Verbose));
 		Test::Suite                   tests;
 		tests.add(new MemoryMappedFileTest());
 		tests.add(new IPCMutexTest());
@@ -60,7 +59,9 @@ int main()
 		tests.add(new SkillsUtilsTest());
 		tests.add(new TaskStateTest());
 		tests.run(*output, true);
-	} catch (...) {
+	}
+	catch (std::exception &ex) {
+		LogError("Test Failure [{}]", ex.what());
 		return -1;
 	}
 	return 0;

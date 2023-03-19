@@ -66,7 +66,7 @@ void command_spawneditmass(Client *c, const Seperator *sep)
 				Strings::Commify(spawn2_id),
 				Strings::Commify(npc_id),
 				npc_name,
-				Strings::SecondsToTime(std::stoi(respawn_time)),
+				Strings::SecondsToTime(Strings::ToInt(respawn_time)),
 				Strings::Commify(respawn_time)
 			).c_str()
 		);
@@ -131,7 +131,7 @@ void command_spawneditmass(Client *c, const Seperator *sep)
 				SQL(
 					UPDATE spawn2 SET respawntime = {} WHERE id IN ({})
 				),
-				std::stoi(edit_value),
+				Strings::ToInt(edit_value),
 				spawn2_ids_string
 			)
 		);

@@ -434,7 +434,7 @@ void NPC::AddLootDrop(
 				}
 			}
 
-			emat = atoi(newid);
+			emat = Strings::ToInt(newid);
 		} else {
 			emat = item2->Material;
 		}
@@ -485,12 +485,12 @@ void NPC::AddLootDrop(
 		what was this about???
 
 		if (((npc->GetRace()==127) && (npc->CastToMob()->GetOwnerID()!=0)) && (item2->Slots==24576) || (item2->Slots==8192) || (item2->Slots==16384)){
-			npc->d_melee_texture2=atoi(newid);
+			npc->d_melee_texture2=Strings::ToInt(newid);
 			wc->wear_slot_id=8;
 			if (item2->Material >0)
 				wc->material=item2->Material;
 			else
-				wc->material=atoi(newid);
+				wc->material=Strings::ToInt(newid);
 			npc->AC+=item2->AC;
 			npc->STR+=item2->STR;
 			npc->INT+=item2->INT;
@@ -633,52 +633,52 @@ void ZoneDatabase::LoadGlobalLoot()
 			}
 		}
 
-		GlobalLootEntry e(atoi(row[0]), atoi(row[1]), row[2] ? row[2] : "");
+		GlobalLootEntry e(Strings::ToInt(row[0]), Strings::ToInt(row[1]), row[2] ? row[2] : "");
 
-		auto min_level = atoi(row[3]);
+		auto min_level = Strings::ToInt(row[3]);
 		if (min_level) {
 			e.AddRule(GlobalLoot::RuleTypes::LevelMin, min_level);
 		}
 
-		auto max_level = atoi(row[4]);
+		auto max_level = Strings::ToInt(row[4]);
 		if (max_level) {
 			e.AddRule(GlobalLoot::RuleTypes::LevelMax, max_level);
 		}
 
 		// null is not used
 		if (row[5]) {
-			e.AddRule(GlobalLoot::RuleTypes::Rare, atoi(row[5]));
+			e.AddRule(GlobalLoot::RuleTypes::Rare, Strings::ToInt(row[5]));
 		}
 
 		// null is not used
 		if (row[6]) {
-			e.AddRule(GlobalLoot::RuleTypes::Raid, atoi(row[6]));
+			e.AddRule(GlobalLoot::RuleTypes::Raid, Strings::ToInt(row[6]));
 		}
 
 		if (row[7]) {
 			auto races = Strings::Split(row[7], '|');
 
 			for (auto &r : races)
-				e.AddRule(GlobalLoot::RuleTypes::Race, std::stoi(r));
+				e.AddRule(GlobalLoot::RuleTypes::Race, Strings::ToInt(r));
 		}
 
 		if (row[8]) {
 			auto classes = Strings::Split(row[8], '|');
 
 			for (auto &c : classes)
-				e.AddRule(GlobalLoot::RuleTypes::Class, std::stoi(c));
+				e.AddRule(GlobalLoot::RuleTypes::Class, Strings::ToInt(c));
 		}
 
 		if (row[9]) {
 			auto bodytypes = Strings::Split(row[9], '|');
 
 			for (auto &b : bodytypes)
-				e.AddRule(GlobalLoot::RuleTypes::BodyType, std::stoi(b));
+				e.AddRule(GlobalLoot::RuleTypes::BodyType, Strings::ToInt(b));
 		}
 
 		// null is not used
 		if (row[11]) {
-			e.AddRule(GlobalLoot::RuleTypes::HotZone, atoi(row[11]));
+			e.AddRule(GlobalLoot::RuleTypes::HotZone, Strings::ToInt(row[11]));
 		}
 
 		zone->AddGlobalLootEntry(e);

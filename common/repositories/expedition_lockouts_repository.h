@@ -75,7 +75,7 @@ public:
 			FROM expedition_lockouts
 			WHERE expedition_id IN ({})
 		),
-			fmt::join(expedition_ids, ",")
+			Strings::Join(expedition_ids, ",")
 		));
 
 		all_entries.reserve(results.RowCount());

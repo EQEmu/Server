@@ -8,7 +8,7 @@ void command_zsky(Client *c, const Seperator *sep)
 		return;
 	}
 
-	auto sky_type = std::stoul(sep->arg[1]);
+	auto sky_type = Strings::ToUnsignedInt(sep->arg[1]);
 	auto permanent = sep->arg[2] ? atobool(sep->arg[2]) : false;
 	if (sky_type < 0 || sky_type > 255) {
 		c->Message(Chat::White, "Sky Type cannot be less than 0 or greater than 255!");

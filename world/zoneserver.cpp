@@ -43,6 +43,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/shared_tasks.h"
 #include "shared_task_manager.h"
 #include "../common/content/world_content_service.h"
+#include "../common/repositories/player_event_logs_repository.h"
+#include "../common/events/player_event_logs.h"
 
 extern ClientList client_list;
 extern GroupLFPList LFPGroupList;
@@ -72,7 +74,6 @@ ZoneServer::ZoneServer(std::shared_ptr<EQ::Net::ServertalkServerConnection> in_c
 	zone_os_process_id = 0;
 	client_port = 0;
 	is_booting_up = false;
-	is_authenticated = false;
 	is_static_zone = false;
 	zone_player_count = 0;
 
@@ -141,20 +142,6 @@ bool ZoneServer::SetZone(uint32 in_zone_id, uint32 in_instance_id, bool in_is_st
 	return true;
 }
 
-void ZoneServer::LSShutDownUpdate(uint32 zone_id) {
-	if (WorldConfig::get()->UpdateStats) {
-		auto pack = new ServerPacket;
-		pack->opcode = ServerOP_LSZoneShutdown;
-		pack->size = sizeof(ZoneShutdown_Struct);
-		pack->pBuffer = new uchar[pack->size];
-		memset(pack->pBuffer, 0, pack->size);
-		auto zsd = (ZoneShutdown_Struct*) pack->pBuffer;
-		zsd->zone = zone_id ? zone_id : GetPrevZoneID();
-		zsd->zone_wid = GetID();
-		loginserverlist.SendPacket(pack);
-		safe_delete(pack);
-	}
-}
 void ZoneServer::LSBootUpdate(uint32 zone_id, uint32 instanceid, bool startup) {
 	if (WorldConfig::get()->UpdateStats) {
 		auto pack = new ServerPacket;
@@ -367,6 +354,30 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			}
 
 			zoneserver_list.SendPacket(pack);
+			break;
+		}
+		case ServerOP_PlayerEvent: {
+			auto                         n = PlayerEvent::PlayerEventContainer{};
+			auto                         s = (ServerSendPlayerEvent_Struct *) pack->pBuffer;
+			EQ::Util::MemoryStreamReader ss(s->cereal_data, s->cereal_size);
+			cereal::BinaryInputArchive   archive(ss);
+			archive(n);
+
+			// by default process events in world
+			// if set, process events in queryserver
+			// if you want to offload event recording to a dedicated QS instance
+			if (!RuleB(Logging, PlayerEventsQSProcess)) {
+				player_event_logs.AddToQueue(n.player_event_log);
+			}
+			else {
+				QSLink.SendPacket(pack);
+			}
+
+			// if discord enabled for event, ship to UCS to process
+			if (player_event_logs.IsEventDiscordEnabled(n.player_event_log.event_type_id)) {
+				UCSLink.SendPacket(pack);
+			}
+
 			break;
 		}
 		case ServerOP_DetailsChange: {
@@ -1306,6 +1317,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		case ServerOP_ItemStatus:
 		case ServerOP_KickPlayer:
 		case ServerOP_KillPlayer:
+		case ServerOP_OOCMute:
 		case ServerOP_OOZGroupMessage:
 		case ServerOP_Petition:
 		case ServerOP_RaidGroupSay:
@@ -1356,6 +1368,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			zoneserver_list.SendPacket(pack);
 			UCSLink.SendPacket(pack);
 			LogSys.LoadLogDatabaseSettings();
+			player_event_logs.ReloadSettings();
 			break;
 		}
 		case ServerOP_ReloadTasks: {

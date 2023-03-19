@@ -9,7 +9,7 @@ void command_findrace(Client *c, const Seperator *sep)
 	}
 
 	if (sep->IsNumber(1)) {
-		auto race_id = static_cast<uint16>(std::stoul(sep->arg[1]));
+		auto race_id = static_cast<uint16>(Strings::ToUnsignedInt(sep->arg[1]));
 		std::string race_name = GetRaceIDName(race_id);
 		if (
 			race_id >= RACE_HUMAN_1 &&

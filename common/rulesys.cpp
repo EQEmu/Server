@@ -141,11 +141,11 @@ bool RuleManager::SetRule(const std::string &rule_name, const std::string &rule_
 
 	switch (type) {
 		case IntRule:
-			m_RuleIntValues[index] = atoi(rule_value.c_str());
+			m_RuleIntValues[index] = Strings::ToInt(rule_value.c_str());
 			LogRules("Set rule [{}] to value [{}]", rule_name, m_RuleIntValues[index]);
 			break;
 		case RealRule:
-			m_RuleRealValues[index] = atof(rule_value.c_str());
+			m_RuleRealValues[index] = Strings::ToFloat(rule_value.c_str());
 			LogRules("Set rule [{}] to value [{:.2f}]", rule_name, m_RuleRealValues[index]);
 			break;
 		case BoolRule:
@@ -385,7 +385,16 @@ void RuleManager::_SaveRule(Database *db, RuleType type, uint16 index) {
 		e.rule_value = rule_value;
 		e.notes      = rule_notes;
 
-		RuleValuesRepository::UpdateOne(*db, e);
+		db->QueryDatabase(
+			fmt::format(
+				"UPDATE rule_values SET rule_value = '{}', notes = '{}' WHERE ruleset_id = {} AND rule_name = '{}'",
+				rule_value,
+				Strings::Escape(rule_notes),
+				e.ruleset_id,
+				e.rule_name
+			)
+		);
+
 		return;
 	}
 

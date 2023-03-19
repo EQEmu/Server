@@ -85,10 +85,12 @@ volatile bool RunLoops = true;
 #endif
 
 extern volatile bool is_zone_loaded;
+extern bool Critical = false;
 
 #include "zone_event_scheduler.h"
 #include "../common/file.h"
 #include "../common/path_manager.h"
+#include "../common/events/player_event_logs.h"
 
 EntityList  entity_list;
 WorldServer worldserver;
@@ -107,6 +109,7 @@ EQEmuLogSys           LogSys;
 ZoneEventScheduler    event_scheduler;
 WorldContentService   content_service;
 PathManager           path;
+PlayerEventLogs       player_event_logs;
 
 const SPDat_Spell_Struct* spells;
 int32 SPDAT_RECORDS = -1;
@@ -160,7 +163,7 @@ int main(int argc, char** argv) {
 	uint32 instance_id = 0;
 	std::string z_name;
 	if (argc == 4) {
-		instance_id = atoi(argv[3]);
+		instance_id = Strings::ToInt(argv[3]);
 		worldserver.SetLauncherName(argv[2]);
 		auto zone_port = Strings::Split(argv[1], ':');
 
@@ -170,7 +173,7 @@ int main(int argc, char** argv) {
 
 		if (zone_port.size() > 1) {
 			std::string p_name = zone_port[1];
-			Config->SetZonePort(atoi(p_name.c_str()));
+			Config->SetZonePort(Strings::ToInt(p_name.c_str()));
 		}
 
 		worldserver.SetLaunchedName(z_name.c_str());
@@ -191,7 +194,7 @@ int main(int argc, char** argv) {
 
 		if (zone_port.size() > 1) {
 			std::string p_name = zone_port[1];
-			Config->SetZonePort(atoi(p_name.c_str()));
+			Config->SetZonePort(Strings::ToInt(p_name.c_str()));
 		}
 
 		worldserver.SetLaunchedName(z_name.c_str());
@@ -212,7 +215,7 @@ int main(int argc, char** argv) {
 
 		if (zone_port.size() > 1) {
 			std::string p_name = zone_port[1];
-			Config->SetZonePort(atoi(p_name.c_str()));
+			Config->SetZonePort(Strings::ToInt(p_name.c_str()));
 		}
 
 		worldserver.SetLaunchedName(z_name.c_str());
@@ -229,6 +232,8 @@ int main(int argc, char** argv) {
 		worldserver.SetLauncherName("NONE");
 	}
 
+	auto mutex = new Mutex;
+
 	LogInfo("Connecting to MySQL");
 	if (!database.Connect(
 		Config->DatabaseHost.c_str(),
@@ -240,9 +245,7 @@ int main(int argc, char** argv) {
 		return 1;
 	}
 
-	/**
-	 * Multi-tenancy: Content Database
-	 */
+	// Multi-tenancy: Content Database
 	if (!Config->ContentDbHost.empty()) {
 		if (!content_db.Connect(
 			Config->ContentDbHost.c_str() ,
@@ -256,7 +259,12 @@ int main(int argc, char** argv) {
 			return 1;
 		}
 	} else {
-		content_db.SetMysql(database.getMySQL());
+		content_db.SetMySQL(database);
+		// when database and content_db share the same underlying mysql connection
+		// it needs to be protected by a shared mutex otherwise we produce concurrency issues
+		// when database actions are occurring in different threads
+		database.SetMutex(mutex);
+		content_db.SetMutex(mutex);
 	}
 
 	/* Register Log System and Settings */
@@ -265,6 +273,8 @@ int main(int argc, char** argv) {
 		->LoadLogDatabaseSettings()
 		->SetGMSayHandler(&Zone::GMSayHookCallBackProcess)
 		->StartFileLogs();
+
+	player_event_logs.SetDatabase(&database)->Init();
 
 	/* Guilds */
 	guild_mgr.SetDatabase(&database);
@@ -609,6 +619,9 @@ int main(int argc, char** argv) {
 	safe_delete(parse);
 	LogInfo("Proper zone shutdown complete.");
 	LogSys.CloseFileLogs();
+
+	safe_delete(mutex);
+
 	return 0;
 }
 

@@ -19,11 +19,6 @@ bool Perl_Client_Save(Client* self, uint8 commit_now) // @categories Script Util
 	return self->Save(commit_now);
 }
 
-void Perl_Client_SaveBackup(Client* self) // @categories Script Utility
-{
-	self->SaveBackup();
-}
-
 bool Perl_Client_Connected(Client* self) // @categories Script Utility
 {
 	return self->Connected();
@@ -2755,6 +2750,11 @@ void Perl_Client_Signal(Client* self, int signal_id)
 	self->Signal(signal_id);
 }
 
+void Perl_Client_SignalClient(Client* self, int signal_id) // @categories Script Utility
+{
+	self->Signal(signal_id);
+}
+
 std::string Perl_Client_GetGuildPublicNote(Client* self)
 {
 	return self->GetGuildPublicNote();
@@ -2870,6 +2870,36 @@ void Perl_Client_CampAllBots(Client* self)
 void Perl_Client_CampAllBots(Client* self, uint8 class_id)
 {
 	self->CampAllBots(class_id);
+}
+
+void Perl_Client_ResetItemCooldown(Client* self, uint32 item_id)
+{
+	self->ResetItemCooldown(item_id);
+}
+
+void Perl_Client_SetItemCooldown(Client* self, uint32 item_id, uint32 in_time)
+{
+	self->SetItemCooldown(item_id, false, in_time);
+}
+
+uint32 Perl_Client_GetItemCooldown(Client* self, uint32 item_id)
+{
+	return self->GetItemCooldown(item_id);
+}
+
+void Perl_Client_UseAugmentContainer(Client* self, int container_slot)
+{
+	self->UseAugmentContainer(container_slot);
+}
+
+bool Perl_Client_IsAutoAttackEnabled(Client* self)
+{
+	return self->AutoAttackEnabled();
+}
+
+bool Perl_Client_IsAutoFireEnabled(Client* self)
+{
+	return self->AutoFireEnabled();
 }
 
 void perl_register_client()
@@ -3066,6 +3096,7 @@ void perl_register_client()
 	package.add("GetInventory", &Perl_Client_GetInventory);
 	package.add("GetInvulnerableEnvironmentDamage", &Perl_Client_GetInvulnerableEnvironmentDamage);
 	package.add("GetItemAt", &Perl_Client_GetItemAt);
+	package.add("GetItemCooldown", &Perl_Client_GetItemCooldown);
 	package.add("GetItemIDAt", &Perl_Client_GetItemIDAt);
 	package.add("GetItemInInventory", &Perl_Client_GetItemInInventory);
 	package.add("GetLDoNLosses", &Perl_Client_GetLDoNLosses);
@@ -3133,6 +3164,8 @@ void perl_register_client()
 	package.add("IncreaseSkill", (void(*)(Client*, int))&Perl_Client_IncreaseSkill);
 	package.add("IncreaseSkill", (void(*)(Client*, int, int))&Perl_Client_IncreaseSkill);
 	package.add("IncrementAA", &Perl_Client_IncrementAA);
+	package.add("IsAutoAttackEnabled", &Perl_Client_IsAutoAttackEnabled);
+	package.add("IsAutoFireEnabled", &Perl_Client_IsAutoFireEnabled);
 	package.add("IsBecomeNPC", &Perl_Client_IsBecomeNPC);
 	package.add("IsCrouching", &Perl_Client_IsCrouching);
 	package.add("IsDueling", &Perl_Client_IsDueling);
@@ -3231,9 +3264,9 @@ void perl_register_client()
 	package.add("ResetCastbarCooldownBySlot", &Perl_Client_ResetCastbarCooldownBySlot);
 	package.add("ResetCastbarCooldownBySpellID", &Perl_Client_ResetCastbarCooldownBySpellID);
 	package.add("ResetDisciplineTimer", &Perl_Client_ResetDisciplineTimer);
+	package.add("ResetItemCooldown", &Perl_Client_ResetItemCooldown);
 	package.add("ResetTrade", &Perl_Client_ResetTrade);
 	package.add("Save", &Perl_Client_Save);
-	package.add("SaveBackup", &Perl_Client_SaveBackup);
 	package.add("ScribeSpell", (void(*)(Client*, uint16, int))&Perl_Client_ScribeSpell);
 	package.add("ScribeSpell", (void(*)(Client*, uint16, int, bool))&Perl_Client_ScribeSpell);
 	package.add("ScribeSpells", &Perl_Client_ScribeSpells);
@@ -3307,6 +3340,7 @@ void perl_register_client()
 	package.add("SetHunger", &Perl_Client_SetHunger);
 	package.add("SetIPExemption", &Perl_Client_SetIPExemption);
 	package.add("SetInvulnerableEnvironmentDamage", &Perl_Client_SetInvulnerableEnvironmentDamage);
+	package.add("SetItemCooldown", &Perl_Client_SetItemCooldown);
 	package.add("SetLanguageSkill", &Perl_Client_SetLanguageSkill);
 	package.add("SetMaterial", &Perl_Client_SetMaterial);
 	package.add("SetPEQZoneFlag", &Perl_Client_SetPEQZoneFlag);
@@ -3339,6 +3373,7 @@ void perl_register_client()
 	package.add("SetTitleSuffix", (void(*)(Client*, std::string, bool))&Perl_Client_SetTitleSuffix);
 	package.add("SetZoneFlag", &Perl_Client_SetZoneFlag);
 	package.add("Signal", &Perl_Client_Signal);
+	package.add("SignalClient", &Perl_Client_SignalClient);
 	package.add("SilentMessage", &Perl_Client_SilentMessage);
 	package.add("Sit", &Perl_Client_Sit);
 	package.add("SlotConvert2", &Perl_Client_SlotConvert2);
@@ -3396,6 +3431,7 @@ void perl_register_client()
 	package.add("UpdateWho", (void(*)(Client*))&Perl_Client_UpdateWho);
 	package.add("UpdateWho", (void(*)(Client*, uint8))&Perl_Client_UpdateWho);
 	package.add("UseDiscipline", &Perl_Client_UseDiscipline);
+	package.add("UseAugmentContainer", &Perl_Client_UseAugmentContainer);
 	package.add("WorldKick", &Perl_Client_WorldKick);
 }
 

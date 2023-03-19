@@ -395,11 +395,6 @@ public:
 
 	double GetMaxMovementUpdateRange() const { return max_movement_update_range; }
 
-	/**
-	 * Modding hooks
-	 */
-	void mod_init();
-	void mod_repop();
 	void SetIsHotzone(bool is_hotzone);
 
 private:
@@ -420,7 +415,7 @@ private:
 	char      *long_name;
 	char      *map_name;
 	char      *short_name;
-	char      file_name[16];
+	char      file_name[32];
 	glm::vec4 m_safe_points;
 	glm::vec4 m_graveyard;
 	int       default_ruleset;

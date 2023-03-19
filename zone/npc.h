@@ -80,6 +80,19 @@ struct AISpellsVar_Struct {
 	uint8	idle_beneficial_chance;
 };
 
+struct Roambox {
+	float  max_x;
+	float  max_y;
+	float  min_x;
+	float  min_y;
+	float  distance;
+	float  dest_x;
+	float  dest_y;
+	float  dest_z;
+	uint32 delay;
+	uint32 min_delay;
+};
+
 class SwarmPet;
 class Client;
 class Group;
@@ -97,12 +110,10 @@ class NPC : public Mob
 public:
 	static NPC* SpawnNPC(const char* spawncommand, const glm::vec4& position, Client* client = nullptr);
 	static bool	SpawnZoneController();
-	static int8 GetAILevel(bool iForceReRead = false);
 
 	// loot recording / simulator
 	bool IsRecordLootStats() const;
 	void SetRecordLootStats(bool record_loot_stats);
-	void FlushLootStats();
 	const std::vector<uint32> &GetRolledItems() const;
 	int GetRolledItemCount(uint32 item_id);
 
@@ -119,7 +130,7 @@ public:
 	virtual void Damage(Mob* from, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill, bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false, eSpecialAttacks special = eSpecialAttacks::None);
 	bool Attack(Mob* other, int Hand = EQ::invslot::slotPrimary, bool FromRiposte = false, bool IsStrikethrough = false,
 		bool IsFromSpell = false, ExtraAttackOptions *opts = nullptr) override;
-	virtual bool HasRaid() { return false; } 
+	virtual bool HasRaid() { return false; }
 	virtual bool HasGroup() { return false; }
 	virtual Raid* GetRaid() { return 0; }
 	virtual Group* GetGroup() { return 0; }
@@ -297,7 +308,7 @@ public:
 	uint16	GetPetSpellID() const {return pet_spell_id;}
 	void	SetPetSpellID(uint16 amt) {pet_spell_id = amt;}
 	uint32	GetMaxDamage(uint8 tlevel);
-	void	SetTaunting(bool tog) {taunting = tog;}
+	void	SetTaunting(bool is_taunting);
 	bool	IsTaunting() const { return taunting; }
 	void	PickPocket(Client* thief);
 	void	Disarm(Client* client, int chance);
@@ -409,26 +420,26 @@ public:
 	void	SetAvoidanceRating(int32 d) { avoidance_rating = d;}
 	int32 GetRawAC() const { return AC; }
 
-	float	GetNPCStat(std::string stat);
-	void	ModifyNPCStat(std::string stat, std::string value);
+	float	GetNPCStat(const std::string& stat);
+	void	ModifyNPCStat(const std::string& stat, const std::string& value);
 	virtual void SetLevel(uint8 in_level, bool command = false);
 
-	bool IsLDoNTrapped() const { return (ldon_trapped); }
+	bool IsLDoNTrapped() const { return ldon_trapped; }
 	void SetLDoNTrapped(bool n) { ldon_trapped = n; }
 
-	uint8 GetLDoNTrapType() const { return (ldon_trap_type); }
+	uint8 GetLDoNTrapType() const { return ldon_trap_type; }
 	void SetLDoNTrapType(uint8 n) { ldon_trap_type = n; }
 
-	uint16 GetLDoNTrapSpellID() const { return (ldon_spell_id); }
+	uint16 GetLDoNTrapSpellID() const { return ldon_spell_id; }
 	void SetLDoNTrapSpellID(uint16 n) { ldon_spell_id = n; }
 
-	bool IsLDoNLocked() const { return (ldon_locked); }
+	bool IsLDoNLocked() const { return ldon_locked; }
 	void SetLDoNLocked(bool n) { ldon_locked = n; }
 
-	uint16 GetLDoNLockedSkill() const { return (ldon_locked_skill); }
+	uint16 GetLDoNLockedSkill() const { return ldon_locked_skill; }
 	void SetLDoNLockedSkill(uint16 n) { ldon_locked_skill = n; }
 
-	bool IsLDoNTrapDetected() const { return (ldon_trap_detected); }
+	bool IsLDoNTrapDetected() const { return ldon_trap_detected; }
 	void SetLDoNTrapDetected(bool n) { ldon_trap_detected = n; }
 
 	const bool GetCombatEvent() const { return combat_event; }
@@ -437,7 +448,7 @@ public:
 	/* Only allows players that killed corpse to loot */
 	const bool HasPrivateCorpse() const { return NPCTypedata_ours ? NPCTypedata_ours->private_corpse : NPCTypedata->private_corpse; }
 
-	virtual const bool IsUnderwaterOnly() const { return NPCTypedata_ours ? NPCTypedata_ours->underwater : NPCTypedata->underwater; }
+	virtual const bool IsUnderwaterOnly() const { return m_is_underwater_only; }
 	const char* GetRawNPCTypeName() const { return NPCTypedata_ours ? NPCTypedata_ours->name : NPCTypedata->name; }
 
 	virtual int GetKillExpMod() const { return NPCTypedata_ours ? NPCTypedata_ours->exp_mod : NPCTypedata->exp_mod; }
@@ -477,10 +488,6 @@ public:
 
 	uint32	GetSpawnKillCount();
 	int	GetScore();
-	void	mod_prespawn(Spawn2 *sp);
-	int	mod_npc_damage(int64 damage, EQ::skills::SkillType skillinuse, int hand, const EQ::ItemData* weapon, Mob* other);
-	void	mod_npc_killed_merit(Mob* c);
-	void	mod_npc_killed(Mob* oos);
 	void	AISpellsList(Client *c);
 	uint16 GetInnateProcSpellID() const { return innate_proc_spell_id; }
 
@@ -531,14 +538,18 @@ public:
 
 	inline bool IsSkipAutoScale() const { return skip_auto_scale; }
 
-	void ScaleNPC(uint8 npc_level);
+	void ScaleNPC(uint8 npc_level, bool always_scale = false, bool override_special_abilities = false);
 
 	void RecalculateSkills();
 	void ReloadSpells();
 
+	void SendPositionToClients();
+
 	static LootDropEntries_Struct NewLootDropEntry();
 
 protected:
+
+	void HandleRoambox();
 
 	const NPCType*	NPCTypedata;
 	NPCType*	NPCTypedata_ours;	//special case for npcs with uniquely created data.
@@ -578,7 +589,7 @@ protected:
 	std::vector<AISpells_Struct> AIspells;
 	bool HasAISpell;
 	virtual bool AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes, bool bInnates = false);
-	virtual bool AIDoSpellCast(uint8 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgainBefore = 0);
+	virtual bool AIDoSpellCast(int32 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgainBefore = 0);
 	AISpellsVar_Struct AISpellVar;
 	int64 GetFocusEffect(focusType type, uint16 spell_id, Mob *caster = nullptr, bool from_buff_tic = false) override;
 	uint16 innate_proc_spell_id;
@@ -637,16 +648,8 @@ protected:
 	glm::vec4 m_GuardPoint;
 	glm::vec4 m_GuardPointSaved;
 	EmuAppearance guard_anim;
-	float roambox_max_x;
-	float roambox_max_y;
-	float roambox_min_x;
-	float roambox_min_y;
-	float roambox_distance;
-	float roambox_destination_x;
-	float roambox_destination_y;
-	float roambox_destination_z;
-	uint32 roambox_delay;
-	uint32 roambox_min_delay;
+
+	Roambox m_roambox = {};
 
 	uint16	skills[EQ::skills::HIGHEST_SKILL + 1];
 
@@ -671,6 +674,8 @@ protected:
 	bool ldon_trap_detected;
 	QGlobalCache *qGlobals;
 	uint32 adventure_template_id;
+
+	bool m_is_underwater_only = false;
 
 	//mercenary stuff
 	std::list<MercType> mercTypeList;

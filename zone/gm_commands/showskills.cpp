@@ -9,7 +9,7 @@ void command_showskills(Client *c, const Seperator *sep)
 
 	uint32 start_skill_id = 0;
 	if (sep->IsNumber(1)) {
-		start_skill_id = std::stoul(sep->arg[1]);
+		start_skill_id = Strings::ToUnsignedInt(sep->arg[1]);
 	}
 
 	bool show_all = !strcasecmp(sep->arg[2], "all");

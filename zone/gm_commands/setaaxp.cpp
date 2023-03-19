@@ -19,8 +19,8 @@ void command_setaaxp(Client *c, const Seperator *sep)
 	std::string aa_type = Strings::ToLower(sep->arg[1]);
 	std::string group_raid_string;
 	uint32 aa_experience = static_cast<uint32>(std::min(
-		std::stoull(sep->arg[2]),
-		(unsigned long long) 2000000000
+		Strings::ToUnsignedBigInt(sep->arg[2]),
+		(uint64) 2000000000
 	));
 	bool is_aa = aa_type.find("aa") != std::string::npos;
 	bool is_group = aa_type.find("group") != std::string::npos;

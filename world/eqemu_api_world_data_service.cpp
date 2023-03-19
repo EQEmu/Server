@@ -194,7 +194,7 @@ void EQEmuApiWorldDataService::reload(Json::Value &r, const std::vector<std::str
 				uint8 global_repop = ReloadWorld::NoRepop;
 
 				if (Strings::IsNumber(args[2])) {
-					global_repop = static_cast<uint8>(std::stoul(args[2]));
+					global_repop = static_cast<uint8>(Strings::ToUnsignedInt(args[2]));
 
 					if (global_repop > ReloadWorld::ForceRepop) {
 						global_repop = ReloadWorld::ForceRepop;
@@ -224,6 +224,13 @@ void EQEmuApiWorldDataService::reload(Json::Value &r, const std::vector<std::str
 			else {
 				pack = new ServerPacket(c.opcode, 0);
 				message(r, fmt::format("Reloading [{}] globally", c.desc));
+
+				if (c.opcode == ServerOP_ReloadLogs) {
+					LogSys.LoadLogDatabaseSettings();
+				}
+				else if (c.opcode == ServerOP_ReloadRules) {
+					RuleManager::Instance()->LoadRules(&database, RuleManager::Instance()->GetActiveRuleset(), true);
+				}
 			}
 
 			found_command = true;

@@ -369,7 +369,8 @@ public:
 	void LoadPetInfo(Client *c);
 	void SavePetInfo(Client *c);
 	void RemoveTempFactions(Client *c);
-	void UpdateItemRecastTimestamps(uint32 char_id, uint32 recast_type, uint32 timestamp);
+	void UpdateItemRecast(uint32 char_id, uint32 recast_type, uint32 timestamp);
+	void DeleteItemRecast(uint32 char_id, uint32 recast_type);
 
 	bool DeleteCharacterAAs(uint32 character_id);
 	bool DeleteCharacterBandolier(uint32 character_id, uint32 band_id);
@@ -562,6 +563,8 @@ public:
 	void	UpdateRecipeMadecount(uint32 recipe_id, uint32 char_id, uint32 madecount);
 	bool	EnableRecipe(uint32 recipe_id);
 	bool	DisableRecipe(uint32 recipe_id);
+	std::vector<uint32> GetRecipeComponentItemIDs(RecipeCountType count_type, uint32 recipe_id);
+	int8 GetRecipeComponentCount(RecipeCountType count_type, uint32 recipe_id, uint32 item_id);
 
 	/* Tribute  */
 	bool	LoadTributes();
@@ -570,21 +573,6 @@ public:
 	std::vector<DoorsRepository::Doors> LoadDoors(const std::string& zone_name, int16 version);
 	uint32 GetDoorsCountPlusOne();
 	int GetDoorsDBCountPlusOne(std::string zone_short_name, int16 version);
-	void InsertDoor(
-		uint32 database_id,
-		uint8 id,
-		std::string name,
-		const glm::vec4 &position,
-		uint8 open_type,
-		uint16 guild_id,
-		uint32 ockpick,
-		uint32 key_item_id,
-		uint8 door_param,
-		uint8 invert,
-		int incline,
-		uint16 size,
-		bool disable_timer = false
-	);
 
 	/* Blocked Spells   */
 	int32	GetBlockedSpellsCount(uint32 zoneid);
@@ -624,12 +612,8 @@ public:
 		* PLEASE DO NOT ADD TO THIS COLLECTION OF CRAP UNLESS YOUR METHOD
 		* REALLY HAS NO BETTER SECTION
 	*/
-	bool	logevents(const char* accountname,uint32 accountid,uint8 status,const char* charname,const char* target, const char* descriptiontype, const char* description,int event_nid);
 	uint32	GetKarma(uint32 acct_id);
 	void	UpdateKarma(uint32 acct_id, uint32 amount);
-
-	/* Things which really dont belong here... */
-	int16	CommandRequirement(const char* commandname);
 
 	// bot database add-on to eliminate the need for a second database connection
 	BotDatabase botdb;

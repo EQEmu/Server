@@ -288,8 +288,15 @@ int main(int argc, char **argv)
 	LogInfo("[Config] [Security] IsPasswordLoginAllowed [{0}]", server.options.IsPasswordLoginAllowed());
 	LogInfo("[Config] [Security] IsUpdatingInsecurePasswords [{0}]", server.options.IsUpdatingInsecurePasswords());
 
+	Timer keepalive(INTERSERVER_TIMER); // does auto-reconnect
+
 	auto loop_fn = [&](EQ::Timer* t) {
 		Timer::SetCurrentTime();
+
+		if (keepalive.Check()) {
+			keepalive.Start();
+			server.db->ping();
+		}
 
 		if (!run_server) {
 			EQ::EventLoop::Get().Shutdown();

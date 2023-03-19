@@ -27,6 +27,7 @@
 #include "../common/data_verification.h"
 #include "../common/misc_functions.h"
 
+#include "bot.h"
 #include "quest_parser_collection.h"
 #include "lua_parser.h"
 #include "string_ids.h"
@@ -162,28 +163,47 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 		}
 	}
 
-	std::string export_string = fmt::format(
-		"{} {} {} {}",
-		caster ? caster->GetID() : 0,
-		buffslot >= 0 ? buffs[buffslot].ticsremaining : 0,
-		caster ? caster->GetLevel() : 0,
-		buffslot
-	);
-
 	if (IsClient()) {
-		if (parse->EventSpell(EVENT_SPELL_EFFECT_CLIENT, nullptr, CastToClient(), spell_id, export_string, 0) != 0) {
-			CalcBonuses();
-			return true;
+		if (parse->SpellHasQuestSub(spell_id, EVENT_SPELL_EFFECT_CLIENT)) {
+			const auto &export_string = fmt::format(
+				"{} {} {} {}",
+				caster ? caster->GetID() : 0,
+				buffslot >= 0 ? buffs[buffslot].ticsremaining : 0,
+				caster ? caster->GetLevel() : 0,
+				buffslot
+			);
+			if (parse->EventSpell(EVENT_SPELL_EFFECT_CLIENT, nullptr, CastToClient(), spell_id, export_string, 0) != 0) {
+				CalcBonuses();
+				return true;
+			}
 		}
 	} else if (IsNPC()) {
-		if (parse->EventSpell(EVENT_SPELL_EFFECT_NPC, this, nullptr, spell_id, export_string, 0) != 0) {
-			CalcBonuses();
-			return true;
+		if (parse->SpellHasQuestSub(spell_id, EVENT_SPELL_EFFECT_NPC)) {
+			const auto &export_string = fmt::format(
+				"{} {} {} {}",
+				caster ? caster->GetID() : 0,
+				buffslot >= 0 ? buffs[buffslot].ticsremaining : 0,
+				caster ? caster->GetLevel() : 0,
+				buffslot
+			);
+			if (parse->EventSpell(EVENT_SPELL_EFFECT_NPC, this, nullptr, spell_id, export_string, 0) != 0) {
+				CalcBonuses();
+				return true;
+			}
 		}
 	} else if (IsBot()) {
-		if (parse->EventSpell(EVENT_SPELL_EFFECT_BOT, this, nullptr, spell_id, export_string, 0) != 0) {
-			CalcBonuses();
-			return true;
+		if (parse->SpellHasQuestSub(spell_id, EVENT_SPELL_EFFECT_BOT)) {
+			const auto &export_string = fmt::format(
+				"{} {} {} {}",
+				caster ? caster->GetID() : 0,
+				buffslot >= 0 ? buffs[buffslot].ticsremaining : 0,
+				caster ? caster->GetLevel() : 0,
+				buffslot
+			);
+			if (parse->EventSpell(EVENT_SPELL_EFFECT_BOT, this, nullptr, spell_id, export_string, 0) != 0) {
+				CalcBonuses();
+				return true;
+			}
 		}
 	}
 
@@ -1059,7 +1079,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				}
 				int buff_count = GetMaxTotalSlots();
 				for(int slot = 0; slot < buff_count; slot++) {
-					if(	buffs[slot].spellid != SPELL_UNKNOWN &&
+					if(IsValidSpell(buffs[slot].spellid) &&
 						spells[buffs[slot].spellid].dispel_flag == 0 &&
 						!IsDiscipline(buffs[slot].spellid))
 					{
@@ -1090,7 +1110,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				int chance = spells[spell_id].base_value[i];
 				int buff_count = GetMaxTotalSlots();
 				for(int slot = 0; slot < buff_count; slot++) {
-					if (buffs[slot].spellid != SPELL_UNKNOWN &&
+					if (IsValidSpell(buffs[slot].spellid) &&
 						IsDetrimentalSpell(buffs[slot].spellid) &&
 						spells[buffs[slot].spellid].dispel_flag == 0)
 					{
@@ -1117,7 +1137,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				int chance = spells[spell_id].base_value[i];
 				int buff_count = GetMaxTotalSlots();
 				for(int slot = 0; slot < buff_count; slot++) {
-					if (buffs[slot].spellid != SPELL_UNKNOWN &&
+					if (IsValidSpell(buffs[slot].spellid) &&
 						IsBeneficialSpell(buffs[slot].spellid) &&
 						spells[buffs[slot].spellid].dispel_flag == 0)
 					{
@@ -1316,7 +1336,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				if (BeneficialSpell(spell_id) && spells[spell_id].buff_duration == 0) {
 					int buff_count = GetMaxBuffSlots();
 					for (int slot = 0; slot < buff_count; slot++) {
-						if (buffs[slot].spellid != SPELL_UNKNOWN && IsEffectInSpell(buffs[slot].spellid, SE_Blind)) {
+						if (IsValidSpell(buffs[slot].spellid) && IsEffectInSpell(buffs[slot].spellid, SE_Blind)) {
 							if (caster && TryDispel(caster->GetCasterLevel(spell_id), buffs[slot].casterlevel, 1)) {
 								BuffFadeBySlot(slot);
 								slot = buff_count;
@@ -2901,14 +2921,16 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				since effect can potentially kill caster.
 			*/
 			case SE_Health_Transfer: {
-				effect_value = spells[spell_id].limit_value[i];
-				int64 amt = std::abs(caster->GetMaxHP() * effect_value / 1000);
+				if (caster) {
+					effect_value = spells[spell_id].limit_value[i];
+					int64 amt = std::abs(caster->GetMaxHP() * effect_value / 1000);
 
-				if (effect_value < 0) {
-					Damage(caster, amt, spell_id, spell.skill, false, buffslot, false);
-				}
-				else {
-					HealDamage(amt, caster);
+					if (effect_value < 0) {
+						Damage(caster, amt, spell_id, spell.skill, false, buffslot, false);
+					}
+					else {
+						HealDamage(amt, caster);
+					}
 				}
 				break;
 			}
@@ -3406,8 +3428,6 @@ int64 Mob::CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level
 		}
 	}
 
-	effect_value = mod_effect_value(effect_value, spell_id, spells[spell_id].effect_id[effect_id], caster, caster_id);
-
 	return effect_value;
 }
 
@@ -3735,12 +3755,13 @@ void Mob::BuffProcess()
 
 	for (int buffs_i = 0; buffs_i < buff_count; ++buffs_i)
 	{
-		if (buffs[buffs_i].spellid != SPELL_UNKNOWN)
+		if (IsValidSpell(buffs[buffs_i].spellid))
 		{
 			DoBuffTic(buffs[buffs_i], buffs_i, entity_list.GetMob(buffs[buffs_i].casterid));
 			// If the Mob died during DoBuffTic, then the buff we are currently processing will have been removed
-			if(buffs[buffs_i].spellid == SPELL_UNKNOWN)
+			if(!IsValidSpell(buffs[buffs_i].spellid)) {
 				continue;
+			}
 
 			// DF_Permanent uses -1 DF_Aura uses -4 but we need to check negatives for some spells for some reason?
 			if (spells[buffs[buffs_i].spellid].buff_duration_formula != DF_Permanent &&
@@ -3789,7 +3810,7 @@ void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
 
 	const SPDat_Spell_Struct &spell = spells[buff.spellid];
 
-	std::string export_string = fmt::format(
+	const auto& export_string = fmt::format(
 		"{} {} {} {}",
 		caster ? caster->GetID() : 0,
 		buffs[slot].ticsremaining,
@@ -3798,16 +3819,22 @@ void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
 	);
 
 	if (IsClient()) {
-		if (parse->EventSpell(EVENT_SPELL_EFFECT_BUFF_TIC_CLIENT, nullptr, CastToClient(), buff.spellid, export_string, 0) != 0) {
-			return;
+		if (parse->SpellHasQuestSub(buff.spellid, EVENT_SPELL_EFFECT_BUFF_TIC_CLIENT)) {
+			if (parse->EventSpell(EVENT_SPELL_EFFECT_BUFF_TIC_CLIENT, nullptr, CastToClient(), buff.spellid, export_string, 0) != 0) {
+				return;
+			}
 		}
 	} else if (IsNPC()) {
-		if (parse->EventSpell(EVENT_SPELL_EFFECT_BUFF_TIC_NPC, this, nullptr, buff.spellid, export_string, 0) != 0) {
-			return;
+		if (parse->SpellHasQuestSub(buff.spellid, EVENT_SPELL_EFFECT_BUFF_TIC_NPC)) {
+			if (parse->EventSpell(EVENT_SPELL_EFFECT_BUFF_TIC_NPC, this, nullptr, buff.spellid, export_string, 0) != 0) {
+				return;
+			}
 		}
 	} else if (IsBot()) {
-		if (parse->EventSpell(EVENT_SPELL_EFFECT_BUFF_TIC_BOT, this, nullptr, buff.spellid, export_string, 0) != 0) {
-			return;
+		if (parse->SpellHasQuestSub(buff.spellid, EVENT_SPELL_EFFECT_BUFF_TIC_BOT)) {
+			if (parse->EventSpell(EVENT_SPELL_EFFECT_BUFF_TIC_BOT, this, nullptr, buff.spellid, export_string, 0) != 0) {
+				return;
+			}
 		}
 	}
 
@@ -4140,25 +4167,35 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 
 	LogSpells("Fading buff [{}] from slot [{}]", buffs[slot].spellid, slot);
 
-	std::string export_string = fmt::format(
-		"{} {} {} {}",
-		buffs[slot].casterid,
-		buffs[slot].ticsremaining,
-		buffs[slot].casterlevel,
-		slot
-	);
+	const auto has_fade_event = parse->SpellHasQuestSub(buffs[slot].spellid, EVENT_SPELL_FADE);
+	std::string export_string = "";
+	if (has_fade_event) {
+		export_string = fmt::format(
+			"{} {} {} {}",
+			buffs[slot].casterid,
+			buffs[slot].ticsremaining,
+			buffs[slot].casterlevel,
+			slot
+		);
+	}
 
 	if (IsClient()) {
-		if (parse->EventSpell(EVENT_SPELL_FADE, nullptr, CastToClient(), buffs[slot].spellid, export_string, 0) != 0) {
-			return;
+		if (has_fade_event) {
+			if (parse->EventSpell(EVENT_SPELL_FADE, nullptr, CastToClient(), buffs[slot].spellid, export_string, 0) != 0) {
+				return;
+			}
 		}
 	} else if (IsNPC()) {
-		if (parse->EventSpell(EVENT_SPELL_FADE, this, nullptr, buffs[slot].spellid, export_string, 0) != 0) {
-			return;
+		if (has_fade_event) {
+			if (parse->EventSpell(EVENT_SPELL_FADE, this, nullptr, buffs[slot].spellid, export_string, 0) != 0) {
+				return;
+			}
 		}
 	} else if (IsBot()) {
-		if (parse->EventSpell(EVENT_SPELL_FADE, this, nullptr, buffs[slot].spellid, export_string, 0) != 0) {
-			return;
+		if (has_fade_event) {
+			if (parse->EventSpell(EVENT_SPELL_FADE, this, nullptr, buffs[slot].spellid, export_string, 0) != 0) {
+				return;
+			}
 		}
 	}
 
@@ -4207,27 +4244,8 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 			case SE_Illusion:
 			{
 				SendIllusionPacket(0, GetBaseGender());
-				if (GetRace() == OGRE) {
-					SendAppearancePacket(AT_Size, 9);
-				}
-				else if (GetRace() == TROLL) {
-					SendAppearancePacket(AT_Size, 8);
-				}
-				else if (GetRace() == VAHSHIR || GetRace() == FROGLOK || GetRace() == BARBARIAN) {
-					SendAppearancePacket(AT_Size, 7);
-				}
-				else if (GetRace() == HALF_ELF || GetRace() == WOOD_ELF || GetRace() == DARK_ELF) {
-					SendAppearancePacket(AT_Size, 5);
-				}
-				else if (GetRace() == DWARF) {
-					SendAppearancePacket(AT_Size, 4);
-				}
-				else if (GetRace() == HALFLING || GetRace() == GNOME) {
-					SendAppearancePacket(AT_Size, 3);
-				}
-				else {
-					SendAppearancePacket(AT_Size, 6);
-				}
+				// The GetSize below works because the above setting race to zero sets size back.
+				SendAppearancePacket(AT_Size, GetSize());
 
 				for (int x = EQ::textures::textureBegin; x <= EQ::textures::LastTintableTexture; x++) {
 					SendWearChange(x);
@@ -6128,12 +6146,12 @@ void Mob::TryTriggerOnCastFocusEffect(focusType type, uint16 spell_id)
 	int32 proc_spellid   = 0;
 
 	// item focus
-	if (IsClient() && itembonuses.FocusEffects[type]) {
+	if (IsOfClientBot() && itembonuses.FocusEffects[type]) {
 		const EQ::ItemData *temp_item = nullptr;
 
 		for (int x = EQ::invslot::EQUIPMENT_BEGIN; x <= EQ::invslot::EQUIPMENT_END; x++) {
 			temp_item = nullptr;
-			EQ::ItemInstance *ins = CastToClient()->GetInv().GetItem(x);
+			EQ::ItemInstance const *ins = (IsClient()) ? CastToClient()->GetInv().GetItem(x) : CastToBot()->GetBotItem(x);
 			if (!ins) {
 				continue;
 			}
@@ -6193,7 +6211,7 @@ void Mob::TryTriggerOnCastFocusEffect(focusType type, uint16 spell_id)
 	}
 
 	// Only use one of this focus per AA effect.
-	if (IsClient() && aabonuses.FocusEffects[type]) {
+	if (IsOfClientBot() && aabonuses.FocusEffects[type]) {
 		for (const auto &aa : aa_ranks) {
 			auto ability_rank = zone->GetAlternateAdvancementAbilityAndRank(aa.first, aa.second.first);
 			auto ability      = ability_rank.first;
@@ -6207,7 +6225,7 @@ void Mob::TryTriggerOnCastFocusEffect(focusType type, uint16 spell_id)
 				continue;
 			}
 
-			proc_spellid = CastToClient()->CalcAAFocus(type, *rank, spell_id);
+			proc_spellid = CalcAAFocus(type, *rank, spell_id);
 			if (proc_spellid) {
 				TryTriggerOnCastProc(0, spell_id, proc_spellid);
 			}
@@ -6233,7 +6251,7 @@ bool Mob::TryTriggerOnCastProc(uint16 focusspellid, uint16 spell_id, uint16 proc
 	return false;
 }
 
-uint16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
+uint16 Mob::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 
 	if (IsBardSong(spell_id))
 		return 0;
@@ -6244,21 +6262,21 @@ uint16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 	std::vector<int> SympatheticProcList;
 
 	//item focus
-	if (itembonuses.FocusEffects[type]){
+	if (IsOfClientBot() && itembonuses.FocusEffects[type]) {
 
-		const EQ::ItemData* TempItem = nullptr;
 
 		for (int x = EQ::invslot::EQUIPMENT_BEGIN; x <= EQ::invslot::EQUIPMENT_END; x++)
 		{
 			if (SympatheticProcList.size() > MAX_SYMPATHETIC_PROCS)
 				continue;
 
-			TempItem = nullptr;
-			EQ::ItemInstance* ins = GetInv().GetItem(x);
+			EQ::ItemInstance const* ins = GetInv().GetItem(x);
 			if (!ins)
 				continue;
-			TempItem = ins->GetItem();
-			if (TempItem && TempItem->Focus.Effect > 0 && IsValidSpell(TempItem->Focus.Effect)) {
+			if (
+					auto TempItem = ins->GetItem();
+					TempItem && TempItem->Focus.Effect > 0 && IsValidSpell(TempItem->Focus.Effect)
+			) {
 
 				proc_spellid = CalcFocusEffect(type, TempItem->Focus.Effect, spell_id);
 				if (IsValidSpell(proc_spellid)){
@@ -6273,11 +6291,10 @@ uint16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 				if (SympatheticProcList.size() > MAX_SYMPATHETIC_PROCS)
 					continue;
 
-				EQ::ItemInstance *aug = nullptr;
-				aug = ins->GetAugment(y);
-				if(aug)
+				auto aug = ins->GetAugment(y);
+				if (aug)
 				{
-					const EQ::ItemData* TempItemAug = aug->GetItem();
+					auto TempItemAug = aug->GetItem();
 					if (TempItemAug && TempItemAug->Focus.Effect > 0 && IsValidSpell(TempItemAug->Focus.Effect)) {
 						proc_spellid = CalcFocusEffect(type, TempItemAug->Focus.Effect, spell_id);
 						if (IsValidSpell(proc_spellid)){
@@ -6293,52 +6310,56 @@ uint16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 
 	//Spell Focus
 	if (spellbonuses.FocusEffects[type]){
-		int buff_slot = 0;
 		uint16 focusspellid = 0;
 		int buff_max = GetMaxTotalSlots();
-		for (buff_slot = 0; buff_slot < buff_max; buff_slot++) {
+		for (int buff_slot = 0; buff_slot < buff_max; buff_slot++) {
 
-			if (SympatheticProcList.size() > MAX_SYMPATHETIC_PROCS)
+			if (SympatheticProcList.size() > MAX_SYMPATHETIC_PROCS) {
 				continue;
+			}
 
 			focusspellid = buffs[buff_slot].spellid;
-			if (!IsValidSpell(focusspellid))
+			if (!IsValidSpell(focusspellid)) {
 				continue;
+			}
 
 				proc_spellid = CalcFocusEffect(type, focusspellid, spell_id);
 
-			if (IsValidSpell(proc_spellid)){
+			if (IsValidSpell(proc_spellid)) {
 
 				ProcChance = GetSympatheticProcChances(spell_id, GetSympatheticSpellProcRate(proc_spellid));
-				if(zone->random.Roll(ProcChance))
- 					SympatheticProcList.push_back(proc_spellid);
+				if (zone->random.Roll(ProcChance)) {
+					SympatheticProcList.push_back(proc_spellid);
+				}
 			}
 		}
 	}
 
 	/*Note: At present, ff designing custom AA to have a sympathetic proc effect, only use one focus
 	effect within the aa_effects data for each AA*[No live AA's use this effect to my knowledge]*/
-	if (aabonuses.FocusEffects[type]) {
+	if (IsOfClientBot() && aabonuses.FocusEffects[type]) {
 		for (const auto &aa : aa_ranks) {
-			if (SympatheticProcList.size() > MAX_SYMPATHETIC_PROCS)
+			if (SympatheticProcList.size() > MAX_SYMPATHETIC_PROCS) {
 				break;
+			}
 
 			auto ability_rank = zone->GetAlternateAdvancementAbilityAndRank(aa.first, aa.second.first);
 			auto ability = ability_rank.first;
 			auto rank = ability_rank.second;
 
-			if(!ability) {
+			if (!ability) {
 				continue;
 			}
 
-			if (rank->effects.empty())
+			if (rank->effects.empty()) {
 				continue;
-
+			}
 			proc_spellid = CalcAAFocus(type, *rank, spell_id);
 			if (IsValidSpell(proc_spellid)) {
 				ProcChance = GetSympatheticProcChances(spell_id, rank->effects[0].base_value);
-				if (zone->random.Roll(ProcChance))
+				if (zone->random.Roll(ProcChance)) {
 					SympatheticProcList.push_back(proc_spellid);
+				}
 			}
 		}
 	}
@@ -6350,7 +6371,6 @@ uint16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 		SympatheticProcList.clear();
 		return FinalSympatheticProc;
 	}
-
 	return 0;
 }
 
@@ -6391,7 +6411,7 @@ int64 Mob::GetFocusEffect(focusType type, uint16 spell_id, Mob *caster, bool fro
 			}
 
 			TempItem = ins->GetItem();
-			if (TempItem && TempItem->Focus.Effect > 0 && TempItem->Focus.Effect != SPELL_UNKNOWN) {
+			if (TempItem && IsValidSpell(TempItem->Focus.Effect)) {
 				if(rand_effectiveness) {
 					focus_max = CalcFocusEffect(type, TempItem->Focus.Effect, spell_id, true);
 					if (focus_max > 0 && focus_max_real >= 0 && focus_max > focus_max_real) {
@@ -6423,7 +6443,7 @@ int64 Mob::GetFocusEffect(focusType type, uint16 spell_id, Mob *caster, bool fro
 				aug = ins->GetAugment(y);
 				if (aug) {
 					const EQ::ItemData* TempItemAug = aug->GetItem();
-					if (TempItemAug && TempItemAug->Focus.Effect > 0 && TempItemAug->Focus.Effect != SPELL_UNKNOWN) {
+					if (TempItemAug && IsValidSpell(TempItemAug->Focus.Effect)) {
 						if(rand_effectiveness) {
 							focus_max = CalcFocusEffect(type, TempItemAug->Focus.Effect, spell_id, true);
 							if (focus_max > 0 && focus_max_real >= 0 && focus_max > focus_max_real) {
@@ -6463,7 +6483,7 @@ int64 Mob::GetFocusEffect(focusType type, uint16 spell_id, Mob *caster, bool fro
 				}
 
 				TempItem = ins->GetItem();
-				if (TempItem && TempItem->Focus.Effect > 0 && TempItem->Focus.Effect != SPELL_UNKNOWN) {
+				if (TempItem && IsValidSpell(TempItem->Focus.Effect)) {
 					if (rand_effectiveness) {
 						focus_max = CalcFocusEffect(type, TempItem->Focus.Effect, spell_id, true);
 						if (focus_max > 0 && focus_max_real >= 0 && focus_max > focus_max_real) {
@@ -6673,7 +6693,7 @@ int64 NPC::GetFocusEffect(focusType type, uint16 spell_id, Mob* caster, bool fro
 
 			TempItem = cur;
 
-			if (TempItem && TempItem->Focus.Effect > 0 && TempItem->Focus.Effect != SPELL_UNKNOWN) {
+			if (TempItem && IsValidSpell(TempItem->Focus.Effect)) {
 				if(rand_effectiveness) {
 					focus_max = CalcFocusEffect(type, TempItem->Focus.Effect, spell_id, true);
 					if (focus_max > 0 && focus_max_real >= 0 && focus_max > focus_max_real) {
@@ -9716,7 +9736,7 @@ bool Mob::PassLimitToSkill(EQ::skills::SkillType skill, int32 spell_id, int proc
 
 	if (!aa_id && spellbonuses.LimitToSkill[EQ::skills::HIGHEST_SKILL + 2]) {
 
-		if (spell_id == SPELL_UNKNOWN) {
+		if (!IsValidSpell(spell_id)) {
 			return false;
 		}
 
@@ -10323,13 +10343,13 @@ void Mob::SetBuffDuration(int spell_id, int duration) {
 	for (int slot = 0; slot < buff_count; slot++) {
 
 		if (!adjust_all_buffs) {
-			if (buffs[slot].spellid != SPELL_UNKNOWN && buffs[slot].spellid == spell_id) {
+			if (IsValidSpell(buffs[slot].spellid) && buffs[slot].spellid == spell_id) {
 				SpellOnTarget(buffs[slot].spellid, this, 0, false, 0, false, -1, duration, true);
 				return;
 			}
 		}
 		else {
-			if (buffs[slot].spellid != SPELL_UNKNOWN) {
+			if (IsValidSpell(buffs[slot].spellid)) {
 				SpellOnTarget(buffs[slot].spellid, this, 0, false, 0, false, -1, duration, true);
 			}
 		}
@@ -10371,7 +10391,7 @@ int Mob::GetBuffStatValueBySpell(int32 spell_id, const char* stat_identifier)
 
 	int buff_count = GetMaxTotalSlots();
 	for (int slot = 0; slot < buff_count; slot++) {
-		if (buffs[slot].spellid != SPELL_UNKNOWN && buffs[slot].spellid == spell_id) {
+		if (IsValidSpell(buffs[slot].spellid) && buffs[slot].spellid == spell_id) {
 			return GetBuffStatValueBySlot(slot, stat_identifier);
 		}
 	}

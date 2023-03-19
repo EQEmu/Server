@@ -11,10 +11,10 @@ void command_zclip(Client *c, const Seperator *sep)
 		return;
 	}
 
-	auto minimum_clip     = sep->arg[1] ? std::stof(sep->arg[1]) : 0;
-	auto maximum_clip     = sep->arg[2] ? std::stof(sep->arg[2]) : 0;
-	auto minimum_fog_clip = sep->arg[3] ? std::stof(sep->arg[3]) : 0;
-	auto maximum_fog_clip = sep->arg[4] ? std::stof(sep->arg[4]) : 0;
+	auto minimum_clip     = sep->arg[1] ? Strings::ToFloat(sep->arg[1]) : 0;
+	auto maximum_clip     = sep->arg[2] ? Strings::ToFloat(sep->arg[2]) : 0;
+	auto minimum_fog_clip = sep->arg[3] ? Strings::ToFloat(sep->arg[3]) : 0;
+	auto maximum_fog_clip = sep->arg[4] ? Strings::ToFloat(sep->arg[4]) : 0;
 
 	auto permanent = sep->arg[5] ? atobool(sep->arg[5]) : false;
 	if (minimum_clip <= 0 || maximum_clip <= 0) {

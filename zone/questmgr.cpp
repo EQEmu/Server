@@ -23,6 +23,7 @@
 #include "../common/spdat.h"
 #include "../common/strings.h"
 #include "../common/say_link.h"
+#include "../common/events/player_event_logs.h"
 
 #include "entity.h"
 #include "event_codes.h"
@@ -87,28 +88,45 @@ void QuestManager::Process() {
 	end = QTimerList.end();
 	while (cur != end) {
 		if (cur->Timer_.Enabled() && cur->Timer_.Check()) {
-			if(entity_list.IsMobInZone(cur->mob)) {
-				if(cur->mob->IsNPC()) {
-					parse->EventNPC(EVENT_TIMER, cur->mob->CastToNPC(), nullptr, cur->name, 0);
-				} else if (cur->mob->IsEncounter()) {
-					parse->EventEncounter(EVENT_TIMER, cur->mob->CastToEncounter()->GetEncounterName(), cur->name, 0, nullptr);
-				} else if (cur->mob->IsClient()) {
-					//this is inheriently unsafe if we ever make it so more than npc/client start timers
-					parse->EventPlayer(EVENT_TIMER, cur->mob->CastToClient(), cur->name, 0);
+			if (cur->mob) {
+				if (cur->mob->IsNPC()) {
+					if (parse->HasQuestSub(cur->mob->GetNPCTypeID(), EVENT_TIMER)) {
+						parse->EventNPC(EVENT_TIMER, cur->mob->CastToNPC(), nullptr, cur->name, 0);
+					}
+				}
+				else if (cur->mob->IsEncounter()) {
+					parse->EventEncounter(
+						EVENT_TIMER,
+						cur->mob->CastToEncounter()->GetEncounterName(),
+						cur->name,
+						0,
+						nullptr
+					);
+				}
+				else if (cur->mob->IsClient()) {
+					if (parse->PlayerHasQuestSub(EVENT_TIMER)) {
+						//this is inheriently unsafe if we ever make it so more than npc/client start timers
+						parse->EventPlayer(EVENT_TIMER, cur->mob->CastToClient(), cur->name, 0);
+					}
 				}
 				else if (cur->mob->IsBot()) {
-					parse->EventBot(EVENT_TIMER, cur->mob->CastToBot(), nullptr, cur->name, 0);
+					if (parse->BotHasQuestSub(EVENT_TIMER)) {
+						parse->EventBot(EVENT_TIMER, cur->mob->CastToBot(), nullptr, cur->name, 0);
+					}
 				}
 
 				//we MUST reset our iterator since the quest could have removed/added any
 				//number of timers... worst case we have to check a bunch of timers twice
 				cur = QTimerList.begin();
-				end = QTimerList.end();	//dunno if this is needed, cant hurt...
-			} else {
+				end = QTimerList.end();    //dunno if this is needed, cant hurt...
+			}
+			else {
 				cur = QTimerList.erase(cur);
 			}
-		} else
+		}
+		else {
 			++cur;
+		}
 	}
 
 	auto cur_iter = STimerList.begin();
@@ -1642,7 +1660,7 @@ int QuestManager::QGVarDuration(const char *fmt)
 
 	// Set val to value after type character
 	// e.g., for "M3924", set to 3924
-	int val = atoi(&fmt[0] + 1);
+	int val = Strings::ToInt(&fmt[0] + 1);
 
 	switch (fmt[0])
 	{
@@ -1907,9 +1925,9 @@ void QuestManager::showgrid(int grid) {
     }
 
     for(auto row = results.begin(); row != results.end(); ++row) {
-        pt.x = atof(row[0]);
-        pt.y = atof(row[1]);
-        pt.z = atof(row[2]);
+        pt.x = Strings::ToFloat(row[0]);
+        pt.y = Strings::ToFloat(row[1]);
+        pt.z = Strings::ToFloat(row[2]);
 
         pts.push_back(pt);
     }
@@ -2112,7 +2130,7 @@ void QuestManager::playertexture(int newtexture)
 	initiator->SendIllusionPacket(initiator->GetRace(), 0xFF, newtexture);
 }
 
-void QuestManager::playerfeature(char *feature, int setting)
+void QuestManager::playerfeature(const char* feature, int setting)
 {
 	QuestManagerCurrentQuestVars();
 	uint16 Race = initiator->GetRace();
@@ -2169,7 +2187,7 @@ void QuestManager::playerfeature(char *feature, int setting)
 										DrakkinHeritage, DrakkinTattoo, DrakkinDetails, Size);
 }
 
-void QuestManager::npcfeature(char *feature, int setting)
+void QuestManager::npcfeature(const char* feature, int setting)
 {
 	QuestManagerCurrentQuestVars();
 	uint16 Race = owner->GetRace();
@@ -2421,16 +2439,19 @@ bool QuestManager::createBot(const char *name, const char *lastname, uint8 level
 					).c_str()
 				);
 
-				const auto export_string = fmt::format(
-					"{} {} {} {} {}",
-					name,
-					new_bot->GetBotID(),
-					race,
-					botclass,
-					gender
-				);
+				if (parse->PlayerHasQuestSub(EVENT_BOT_CREATE)) {
+					const auto& export_string = fmt::format(
+						"{} {} {} {} {}",
+						name,
+						new_bot->GetBotID(),
+						race,
+						botclass,
+						gender
+					);
 
-				parse->EventPlayer(EVENT_BOT_CREATE, initiator, export_string, 0);
+					parse->EventPlayer(EVENT_BOT_CREATE, initiator, export_string, 0);
+				}
+
 				return true;
 			}
 		}
@@ -2940,7 +2961,6 @@ std::string QuestManager::varlink(
 
 	return linker.GenerateLink();
 }
-
 std::string QuestManager::getitemname(uint32 item_id) {
 	const EQ::ItemData* item_data = database.GetItem(item_id);
 	if (!item_data) {
@@ -3034,7 +3054,7 @@ uint32 QuestManager::GetInstanceTimerByID(uint16 instance_id) {
 
 	if (results.Success()) {
 		auto row = results.begin();
-		uint32 timer = atoi(row[0]);
+		uint32 timer = Strings::ToInt(row[0]);
 		return timer;
 	}
 	return 0;
@@ -3514,71 +3534,71 @@ std::string QuestManager::GetEncounter() const {
 
 void QuestManager::UpdateZoneHeader(std::string type, std::string value) {
 	if (strcasecmp(type.c_str(), "ztype") == 0)
-		zone->newzone_data.ztype = atoi(value.c_str());
+		zone->newzone_data.ztype = Strings::ToInt(value.c_str());
 	else if (strcasecmp(type.c_str(), "fog_red") == 0) {
 		for (int i = 0; i < 4; i++) {
-			zone->newzone_data.fog_red[i] = atoi(value.c_str());
+			zone->newzone_data.fog_red[i] = Strings::ToInt(value.c_str());
 		}
 	} else if (strcasecmp(type.c_str(), "fog_green") == 0) {
 		for (int i = 0; i < 4; i++) {
-			zone->newzone_data.fog_green[i] = atoi(value.c_str());
+			zone->newzone_data.fog_green[i] = Strings::ToInt(value.c_str());
 		}
 	} else if (strcasecmp(type.c_str(), "fog_blue") == 0) {
 		for (int i = 0; i < 4; i++) {
-			zone->newzone_data.fog_blue[i] = atoi(value.c_str());
+			zone->newzone_data.fog_blue[i] = Strings::ToInt(value.c_str());
 		}
 	} else if (strcasecmp(type.c_str(), "fog_minclip") == 0) {
 		for (int i = 0; i < 4; i++) {
-			zone->newzone_data.fog_minclip[i] = atof(value.c_str());
+			zone->newzone_data.fog_minclip[i] = Strings::ToFloat(value.c_str());
 		}
 	} else if (strcasecmp(type.c_str(), "fog_maxclip") == 0) {
 		for (int i = 0; i < 4; i++) {
-			zone->newzone_data.fog_maxclip[i] = atof(value.c_str());
+			zone->newzone_data.fog_maxclip[i] = Strings::ToFloat(value.c_str());
 		}
 	} else if (strcasecmp(type.c_str(), "gravity") == 0) {
-		zone->newzone_data.gravity = atof(value.c_str());
+		zone->newzone_data.gravity = Strings::ToFloat(value.c_str());
 	} else if (strcasecmp(type.c_str(), "time_type") == 0) {
-		zone->newzone_data.time_type = atoi(value.c_str());
+		zone->newzone_data.time_type = Strings::ToInt(value.c_str());
 	} else if (strcasecmp(type.c_str(), "rain_chance") == 0) {
 		for (int i = 0; i < 4; i++) {
-			zone->newzone_data.rain_chance[i] = atoi(value.c_str());
+			zone->newzone_data.rain_chance[i] = Strings::ToInt(value.c_str());
 		}
 	} else if (strcasecmp(type.c_str(), "rain_duration") == 0) {
 		for (int i = 0; i < 4; i++) {
-			zone->newzone_data.rain_duration[i] = atoi(value.c_str());
+			zone->newzone_data.rain_duration[i] = Strings::ToInt(value.c_str());
 		}
 	} else if (strcasecmp(type.c_str(), "snow_chance") == 0) {
 		for (int i = 0; i < 4; i++) {
-			zone->newzone_data.snow_chance[i] = atoi(value.c_str());
+			zone->newzone_data.snow_chance[i] = Strings::ToInt(value.c_str());
 		}
 	} else if (strcasecmp(type.c_str(), "snow_duration") == 0) {
 		for (int i = 0; i < 4; i++) {
-			zone->newzone_data.snow_duration[i] = atoi(value.c_str());
+			zone->newzone_data.snow_duration[i] = Strings::ToInt(value.c_str());
 		}
 	} else if (strcasecmp(type.c_str(), "sky") == 0) {
-		zone->newzone_data.sky = atoi(value.c_str());
+		zone->newzone_data.sky = Strings::ToInt(value.c_str());
 	} else if (strcasecmp(type.c_str(), "safe_x") == 0) {
-		zone->newzone_data.safe_x = atof(value.c_str());
+		zone->newzone_data.safe_x = Strings::ToFloat(value.c_str());
 	} else if (strcasecmp(type.c_str(), "safe_y") == 0) {
-		zone->newzone_data.safe_y = atof(value.c_str());
+		zone->newzone_data.safe_y = Strings::ToFloat(value.c_str());
 	} else if (strcasecmp(type.c_str(), "safe_z") == 0) {
-		zone->newzone_data.safe_z = atof(value.c_str());
+		zone->newzone_data.safe_z = Strings::ToFloat(value.c_str());
 	} else if (strcasecmp(type.c_str(), "max_z") == 0) {
-		zone->newzone_data.max_z = atof(value.c_str());
+		zone->newzone_data.max_z = Strings::ToFloat(value.c_str());
 	} else if (strcasecmp(type.c_str(), "underworld") == 0) {
-		zone->newzone_data.underworld = atof(value.c_str());
+		zone->newzone_data.underworld = Strings::ToFloat(value.c_str());
 	} else if (strcasecmp(type.c_str(), "minclip") == 0) {
-		zone->newzone_data.minclip = atof(value.c_str());
+		zone->newzone_data.minclip = Strings::ToFloat(value.c_str());
 	} else if (strcasecmp(type.c_str(), "maxclip") == 0) {
-		zone->newzone_data.maxclip = atof(value.c_str());
+		zone->newzone_data.maxclip = Strings::ToFloat(value.c_str());
 	} else if (strcasecmp(type.c_str(), "fog_density") == 0) {
-		zone->newzone_data.fog_density = atof(value.c_str());
+		zone->newzone_data.fog_density = Strings::ToFloat(value.c_str());
 	} else if (strcasecmp(type.c_str(), "suspendbuffs") == 0) {
-		zone->newzone_data.suspend_buffs = atoi(value.c_str());
+		zone->newzone_data.suspend_buffs = Strings::ToInt(value.c_str());
 	} else if (strcasecmp(type.c_str(), "lavadamage") == 0) {
-		zone->newzone_data.lava_damage = atoi(value.c_str());
+		zone->newzone_data.lava_damage = Strings::ToInt(value.c_str());
 	} else if (strcasecmp(type.c_str(), "minlavadamage") == 0) {
-		zone->newzone_data.min_lava_damage = atoi(value.c_str());
+		zone->newzone_data.min_lava_damage = Strings::ToInt(value.c_str());
 	}
 
 	auto outapp = new EQApplicationPacket(OP_NewZone, sizeof(NewZone_Struct));
@@ -3969,7 +3989,7 @@ bool QuestManager::DoAugmentSlotsMatch(uint32 item_one, uint32 item_two)
 	return true;
 }
 
-int8 QuestManager::DoesAugmentFit(EQ::ItemInstance* inst, uint32 augment_id)
+int8 QuestManager::DoesAugmentFit(EQ::ItemInstance* inst, uint32 augment_id, uint8 augment_slot)
 {
 	if (!inst) {
 		return INVALID_INDEX;
@@ -3980,5 +4000,185 @@ int8 QuestManager::DoesAugmentFit(EQ::ItemInstance* inst, uint32 augment_id)
 		return INVALID_INDEX;
 	}
 
+	if (augment_slot != 255) {
+		return !inst->IsAugmentSlotAvailable(aug_inst->AugType, augment_slot) ? INVALID_INDEX : augment_slot;
+	}
+
 	return inst->AvailableAugmentSlot(aug_inst->AugType);
+}
+
+void QuestManager::SendPlayerHandinEvent() {
+	QuestManagerCurrentQuestVars();
+	if (!owner || !owner->IsNPC() || !initiator) {
+		return;
+	}
+
+	if (
+		!initiator->EntityVariableExists("HANDIN_ITEMS") &&
+		!initiator->EntityVariableExists("HANDIN_MONEY") &&
+		!initiator->EntityVariableExists("RETURN_ITEMS") &&
+		!initiator->EntityVariableExists("RETURN_MONEY")
+	) {
+		return;
+	}
+
+	auto handin_items = initiator->GetEntityVariable("HANDIN_ITEMS");
+	auto return_items = initiator->GetEntityVariable("RETURN_ITEMS");
+	auto handin_money = initiator->GetEntityVariable("HANDIN_MONEY");
+	auto return_money = initiator->GetEntityVariable("RETURN_MONEY");
+
+	std::vector<PlayerEvent::HandinEntry> hi = {};
+	std::vector<PlayerEvent::HandinEntry> ri = {};
+	PlayerEvent::HandinMoney              hm{};
+	PlayerEvent::HandinMoney              rm{};
+
+	// Handin Items
+	if (!handin_items.empty()) {
+		if (Strings::Contains(handin_items, ",")) {
+			const auto handin_data = Strings::Split(handin_items, ",");
+			for (const auto &h: handin_data) {
+				const auto item_data = Strings::Split(h, "|");
+				if (
+					item_data.size() == 3 &&
+					Strings::IsNumber(item_data[0]) &&
+					Strings::IsNumber(item_data[1]) &&
+					Strings::IsNumber(item_data[2])
+					) {
+					const auto item_id = static_cast<uint32>(Strings::ToUnsignedInt(item_data[0]));
+					if (item_id != 0) {
+						const auto *item = database.GetItem(item_id);
+
+						if (item) {
+							hi.emplace_back(
+								PlayerEvent::HandinEntry{
+									.item_id = item_id,
+									.item_name = item->Name,
+									.charges = static_cast<uint16>(Strings::ToUnsignedInt(item_data[1])),
+									.attuned = Strings::ToInt(item_data[2]) ? true : false
+								}
+							);
+						}
+					}
+				}
+			}
+		}
+		else if (Strings::Contains(handin_items, "|")) {
+			const auto item_data = Strings::Split(handin_items, "|");
+			if (
+				item_data.size() == 3 &&
+				Strings::IsNumber(item_data[0]) &&
+				Strings::IsNumber(item_data[1]) &&
+				Strings::IsNumber(item_data[2])
+				) {
+				const auto item_id = static_cast<uint32>(Strings::ToUnsignedInt(item_data[0]));
+				const auto *item = database.GetItem(item_id);
+
+				if (item) {
+					hi.emplace_back(
+						PlayerEvent::HandinEntry{
+							.item_id = item_id,
+							.item_name = item->Name,
+							.charges = static_cast<uint16>(Strings::ToUnsignedInt(item_data[1])),
+							.attuned = Strings::ToInt(item_data[2]) ? true : false
+						}
+					);
+				}
+			}
+		}
+	}
+
+	// Handin Money
+	if (!handin_money.empty()) {
+		const auto hms = Strings::Split(handin_money, "|");
+		hm.copper   = static_cast<uint32>(Strings::ToUnsignedInt(hms[0]));
+		hm.silver   = static_cast<uint32>(Strings::ToUnsignedInt(hms[1]));
+		hm.gold     = static_cast<uint32>(Strings::ToUnsignedInt(hms[2]));
+		hm.platinum = static_cast<uint32>(Strings::ToUnsignedInt(hms[3]));
+	}
+
+	// Return Items
+	if (!return_items.empty()) {
+		if (Strings::Contains(return_items, ",")) {
+			const auto return_data = Strings::Split(return_items, ",");
+			for (const auto &r: return_data) {
+				const auto item_data = Strings::Split(r, "|");
+				if (
+					item_data.size() == 3 &&
+					Strings::IsNumber(item_data[0]) &&
+					Strings::IsNumber(item_data[1]) &&
+					Strings::IsNumber(item_data[2])
+					) {
+					const auto item_id = static_cast<uint32>(Strings::ToUnsignedInt(item_data[0]));
+					const auto *item   = database.GetItem(item_id);
+
+					if (item) {
+						ri.emplace_back(
+							PlayerEvent::HandinEntry{
+								.item_id = item_id,
+								.item_name = item->Name,
+								.charges = static_cast<uint16>(Strings::ToUnsignedInt(item_data[1])),
+								.attuned = Strings::ToInt(item_data[2]) ? true : false
+							}
+						);
+					}
+				}
+			}
+		}
+		else if (Strings::Contains(return_items, "|")) {
+			const auto item_data = Strings::Split(return_items, "|");
+			if (
+				item_data.size() == 3 &&
+				Strings::IsNumber(item_data[0]) &&
+				Strings::IsNumber(item_data[1]) &&
+				Strings::IsNumber(item_data[2])
+				) {
+				const auto item_id = static_cast<uint32>(Strings::ToUnsignedInt(item_data[0]));
+				const auto *item   = database.GetItem(item_id);
+
+				if (item) {
+					ri.emplace_back(
+						PlayerEvent::HandinEntry{
+							.item_id = item_id,
+							.item_name = item->Name,
+							.charges = static_cast<uint16>(Strings::ToUnsignedInt(item_data[1])),
+							.attuned = Strings::ToInt(item_data[2]) ? true : false
+						}
+					);
+				}
+			}
+		}
+	}
+
+	// Return Money
+	if (!return_money.empty()) {
+		const auto rms = Strings::Split(return_money, "|");
+		rm.copper   = static_cast<uint32>(Strings::ToUnsignedInt(rms[0]));
+		rm.silver   = static_cast<uint32>(Strings::ToUnsignedInt(rms[1]));
+		rm.gold     = static_cast<uint32>(Strings::ToUnsignedInt(rms[2]));
+		rm.platinum = static_cast<uint32>(Strings::ToUnsignedInt(rms[3]));
+	}
+
+	initiator->DeleteEntityVariable("HANDIN_ITEMS");
+	initiator->DeleteEntityVariable("HANDIN_MONEY");
+	initiator->DeleteEntityVariable("RETURN_ITEMS");
+	initiator->DeleteEntityVariable("RETURN_MONEY");
+
+	bool handed_in_money = hm.platinum > 0 || hm.gold > 0 || hm.silver > 0 || hm.copper > 0;
+
+	bool event_has_data_to_record = (
+		!hi.empty() || handed_in_money
+	);
+
+	if (player_event_logs.IsEventEnabled(PlayerEvent::NPC_HANDIN) && event_has_data_to_record) {
+		auto e = PlayerEvent::HandinEvent{
+			.npc_id = owner->CastToNPC()->GetNPCTypeID(),
+			.npc_name = owner->GetCleanName(),
+			.handin_items = hi,
+			.handin_money = hm,
+			.return_items = ri,
+			.return_money = rm
+		};
+
+		RecordPlayerEventLogWithClient(initiator, PlayerEvent::NPC_HANDIN, e);
+	}
 }

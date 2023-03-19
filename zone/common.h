@@ -848,11 +848,6 @@ public:
 	// Add item from cursor slot to trade bucket (automatically does bag data too)
 	void AddEntity(uint16 trade_slot_id, uint32 stack_size);
 
-	// Audit trade
-	void LogTrade();
-
-	void DumpTrade();
-
 
 public:
 	// Object state
@@ -868,6 +863,8 @@ private:
 
 	uint32 with_id;
 	Mob* owner;
+public:
+	Mob *GetOwner() const;
 };
 
 struct ExtraAttackOptions {

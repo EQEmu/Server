@@ -9,7 +9,7 @@ void command_findaa(Client *c, const Seperator *sep)
 	}
 
 	if (sep->IsNumber(1)) {
-		int aa_id = std::stoi(sep->arg[1]);
+		int aa_id = Strings::ToInt(sep->arg[1]);
 		auto aa_name = zone->GetAAName(aa_id);
 		if (!aa_name.empty()) {
 			c->Message(
@@ -35,7 +35,7 @@ void command_findaa(Client *c, const Seperator *sep)
 			std::map<int, std::string> ordered_aas;
 
 			for (const auto& a : zone->aa_abilities) {
-				ordered_aas[a.second.get()->id] = a.second.get()->name;
+				ordered_aas[a.second.get()->first->id] = a.second.get()->name;
 			}
 
 			int found_count = 0;

@@ -30,8 +30,8 @@ void command_flag(Client *c, const Seperator *sep)
 		target->UpdateAdmin();
 		return;
 	}
-	
-	
+
+
 	if (
 		!sep->IsNumber(1) ||
 		strlen(sep->arg[2]) == 0
@@ -40,7 +40,7 @@ void command_flag(Client *c, const Seperator *sep)
 		return;
 	}
 
-	auto status = std::stoi(sep->arg[1]);
+	auto status = Strings::ToInt(sep->arg[1]);
 	if (status < -2 || status > 255) {
 		c->Message(Chat::White, "The lowest a status level can go is -2 and the highest a status level can go is 255.");
 		return;
@@ -48,7 +48,7 @@ void command_flag(Client *c, const Seperator *sep)
 
 	std::string account_name = sep->argplus[2];
 	auto account_id = database.GetAccountIDByChar(account_name.c_str());
-	
+
 	if (c->Admin() < commandChangeFlags) { //this check makes banning players by less than this level impossible, but i'll leave it in anyways
 		c->Message(Chat::White, "You may only refresh your own flag, doing so now.");
 		c->UpdateAdmin();

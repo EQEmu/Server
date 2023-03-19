@@ -18,8 +18,6 @@
  *
  */
 
-#define PLATFORM_WORLD 1
-
 #include "../common/global_define.h"
 
 #include <iostream>
@@ -56,18 +54,8 @@
 #include <conio.h>
 #else
 
-#include "../common/unix.h"
 #include <sys/sem.h>
-
-#if not defined (FREEBSD) && not defined (DARWIN)
-union semun {
-	int             val;
-	struct semid_ds *buf;
-	ushort          *array;
-	struct seminfo  *__buf;
-	void            *__pad;
-};
-#endif
+#include <thread>
 
 #endif
 
@@ -96,6 +84,7 @@ union semun {
 #include "shared_task_manager.h"
 #include "world_boot.h"
 #include "../common/path_manager.h"
+#include "../common/events/player_event_logs.h"
 
 
 ZoneStore           zone_store;
@@ -118,6 +107,7 @@ EQEmuLogSys         LogSys;
 WorldContentService content_service;
 WebInterfaceList    web_interface;
 PathManager         path;
+PlayerEventLogs     player_event_logs;
 
 void CatchSignal(int sig_num);
 
@@ -127,6 +117,7 @@ inline void UpdateWindowTitle(std::string new_title)
 	SetConsoleTitle(new_title.c_str());
 #endif
 }
+
 
 /**
  * World process entrypoint
@@ -371,6 +362,9 @@ int main(int argc, char **argv)
 		}
 	);
 
+	Timer player_event_process_timer(1000);
+	player_event_logs.SetDatabase(&database)->Init();
+
 	auto loop_fn = [&](EQ::Timer* t) {
 		Timer::SetCurrentTime();
 
@@ -417,6 +411,10 @@ int main(int argc, char **argv)
 		event_scheduler.Process(&zoneserver_list);
 
 		client_list.Process();
+
+		if (player_event_process_timer.Check()) {
+			player_event_logs.Process();
+		}
 
 		if (PurgeInstanceTimer.Check()) {
 			database.PurgeExpiredInstances();
@@ -466,6 +464,8 @@ int main(int argc, char **argv)
 	LogInfo("Zone (TCP) listener stopped");
 	LogInfo("Signaling HTTP service to stop");
 	LogSys.CloseFileLogs();
+
+	WorldBoot::Shutdown();
 
 	return 0;
 }
