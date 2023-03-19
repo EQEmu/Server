@@ -4631,7 +4631,7 @@ bool Bot::Death(Mob *killerMob, int64 damage, uint16 spell_id, EQ::skills::Skill
 
 		for (auto& m : raid->members)
 		{
-			if (strcmp(m.membername, GetName()) == 0)
+			if (strcmp(m.member_name, GetName()) == 0)
 			{
 				m.member = nullptr;
 			}

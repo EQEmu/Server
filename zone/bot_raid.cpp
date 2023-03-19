@@ -30,7 +30,7 @@ std::vector<RaidMember> Raid::GetRaidGroupMembers(uint32 gid)
 
 	for (const auto& m : members)
 	{
-		if (m.member && m.GroupNumber == gid)
+		if (m.member && m.group_number == gid)
 		{
 			raid_group_members.push_back(m);
 		}
@@ -73,7 +73,7 @@ std::vector<Bot*> Raid::GetRaidGroupBotMembers(uint32 gid)
 		if (
 			m.member &&
 			m.member->IsBot() &&
-			m.GroupNumber == gid
+			m.group_number == gid
 		) {
 			auto b_member = m.member->CastToBot();
 			raid_members_bots.emplace_back(b_member);

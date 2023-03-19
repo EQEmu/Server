@@ -4163,7 +4163,7 @@ bool Client::GroupFollow(Client* inviter) {
 				{
 					//this assumes the inviter is in the zone
 					if (raid->members[x].member == inviter){
-						groupToUse = raid->members[x].GroupNumber;
+						groupToUse = raid->members[x].group_number;
 						break;
 					}
 				}
@@ -8882,7 +8882,7 @@ void Client::ProcessAggroMeter()
 				if (gid < 12) {
 					int at_id = AggroMeter::AT_Group1;
 					for (int i = 0; i < MAX_RAID_MEMBERS; ++i) {
-						if (raid->members[i].member && raid->members[i].member != this && raid->members[i].GroupNumber == gid) {
+						if (raid->members[i].member && raid->members[i].member != this && raid->members[i].group_number == gid) {
 							if (m_aggrometer.set_pct(static_cast<AggroMeter::AggroTypes>(at_id), cur_tar->GetHateRatio(cur_tar->GetTarget(), raid->members[i].member)))
 								add_entry(static_cast<AggroMeter::AggroTypes>(at_id));
 							at_id++;

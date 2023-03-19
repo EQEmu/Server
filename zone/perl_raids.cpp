@@ -150,12 +150,12 @@ bool Perl_Raid_DoesAnyMemberHaveExpeditionLockout(Raid* self, std::string expedi
 int Perl_Raid_GetGroupNumber(Raid* self, int member_index) {
 	if (
 		!EQ::ValueWithin(member_index, 0, 71) ||
-		self->members[member_index].GroupNumber == RAID_GROUPLESS
+		self->members[member_index].group_number == RAID_GROUPLESS
 	) {
 		return -1;
 	}
 
-	return self->members[member_index].GroupNumber;
+	return self->members[member_index].group_number;
 }
 
 void perl_register_raid()

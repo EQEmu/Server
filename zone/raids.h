@@ -80,14 +80,14 @@ constexpr uint8_t MAX_RAID_MEMBERS = 72;
 const uint32 RAID_GROUPLESS = 0xFFFFFFFF;
 
 struct RaidMember{
-	char membername[64];
+	char member_name[64];
 	Client *member;
-	uint32 GroupNumber;
+	uint32 group_number;
 	uint8 _class;
 	uint8 level;
-	bool IsGroupLeader;
-	bool IsRaidLeader;
-	bool IsLooter;
+	bool is_group_leader;
+	bool is_raid_leader;
+	bool is_looter;
 	bool is_bot = false;
 	bool is_raid_main_assist_one = false;
 };

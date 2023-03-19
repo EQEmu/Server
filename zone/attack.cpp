@@ -2746,23 +2746,23 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 						switch (r->GetLootType()) {
 						case 0:
 						case 1:
-							if (r->members[x].member && r->members[x].IsRaidLeader) {
+							if (r->members[x].member && r->members[x].is_raid_leader) {
 								corpse->AllowPlayerLoot(r->members[x].member, i);
 								i++;
 							}
 							break;
 						case 2:
-							if (r->members[x].member && r->members[x].IsRaidLeader) {
+							if (r->members[x].member && r->members[x].is_raid_leader) {
 								corpse->AllowPlayerLoot(r->members[x].member, i);
 								i++;
 							}
-							else if (r->members[x].member && r->members[x].IsGroupLeader) {
+							else if (r->members[x].member && r->members[x].is_group_leader) {
 								corpse->AllowPlayerLoot(r->members[x].member, i);
 								i++;
 							}
 							break;
 						case 3:
-							if (r->members[x].member && r->members[x].IsLooter) {
+							if (r->members[x].member && r->members[x].is_looter) {
 								corpse->AllowPlayerLoot(r->members[x].member, i);
 								i++;
 							}

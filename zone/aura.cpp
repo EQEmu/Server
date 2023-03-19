@@ -144,8 +144,8 @@ void Aura::ProcessOnAllGroupMembers(Mob *owner)
 			if (c->GetID() == m_owner) {
 				return DistanceSquared(GetPosition(), c->GetPosition()) <= distance;
 			}
-			else if (idx == 0xFFFFFFFF || raid->members[idx].GroupNumber != group_id ||
-					 raid->members[idx].GroupNumber == 0xFFFFFFFF) {
+			else if (idx == 0xFFFFFFFF || raid->members[idx].group_number != group_id ||
+					 raid->members[idx].group_number == 0xFFFFFFFF) {
 				return false;
 			}
 			else if (DistanceSquared(GetPosition(), c->GetPosition()) > distance) {
@@ -159,8 +159,8 @@ void Aura::ProcessOnAllGroupMembers(Mob *owner)
 			if (m->GetOwner()->GetID() == m_owner) {
 				return DistanceSquared(GetPosition(), m->GetPosition()) <= distance;
 			}
-			else if (idx == 0xFFFFFFFF || raid->members[idx].GroupNumber != group_id ||
-					 raid->members[idx].GroupNumber == 0xFFFFFFFF) {
+			else if (idx == 0xFFFFFFFF || raid->members[idx].group_number != group_id ||
+					 raid->members[idx].group_number == 0xFFFFFFFF) {
 				return false;
 			}
 			else if (DistanceSquared(GetPosition(), m->GetPosition()) > distance) {
@@ -178,8 +178,8 @@ void Aura::ProcessOnAllGroupMembers(Mob *owner)
 			if (owner->GetID() == m_owner) {
 				return DistanceSquared(GetPosition(), n->GetPosition()) <= distance;
 			}
-			else if (idx == 0xFFFFFFFF || raid->members[idx].GroupNumber != group_id ||
-					 raid->members[idx].GroupNumber == 0xFFFFFFFF) {
+			else if (idx == 0xFFFFFFFF || raid->members[idx].group_number != group_id ||
+					 raid->members[idx].group_number == 0xFFFFFFFF) {
 				return false;
 			}
 			else if (DistanceSquared(GetPosition(), n->GetPosition()) > distance) {
@@ -389,8 +389,8 @@ void Aura::ProcessOnGroupMembersPets(Mob *owner)
 			if (m->GetOwner()->GetID() == group_member->GetID()) {
 				return DistanceSquared(GetPosition(), m->GetPosition()) <= distance;
 			}
-			else if (idx == 0xFFFFFFFF || raid->members[idx].GroupNumber != group_id ||
-					 raid->members[idx].GroupNumber == 0xFFFFFFFF) {
+			else if (idx == 0xFFFFFFFF || raid->members[idx].group_number != group_id ||
+					 raid->members[idx].group_number == 0xFFFFFFFF) {
 				return false;
 			}
 			else if (DistanceSquared(GetPosition(), m->GetPosition()) > distance) {
@@ -408,8 +408,8 @@ void Aura::ProcessOnGroupMembersPets(Mob *owner)
 			if (owner->GetID() == group_member->GetID()) {
 				return DistanceSquared(GetPosition(), n->GetPosition()) <= distance;
 			}
-			else if (idx == 0xFFFFFFFF || raid->members[idx].GroupNumber != group_id ||
-					 raid->members[idx].GroupNumber == 0xFFFFFFFF) {
+			else if (idx == 0xFFFFFFFF || raid->members[idx].group_number != group_id ||
+					 raid->members[idx].group_number == 0xFFFFFFFF) {
 				return false;
 			}
 			else if (DistanceSquared(GetPosition(), n->GetPosition()) > distance) {
@@ -819,7 +819,7 @@ bool Aura::ShouldISpawnFor(Client *c)
 			return false;
 		}
 
-		if (raid->members[idx].GroupNumber != group_id) { // in our raid, but not our group
+		if (raid->members[idx].group_number != group_id) { // in our raid, but not our group
 			return false;
 		}
 

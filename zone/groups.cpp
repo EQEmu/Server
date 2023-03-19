@@ -35,7 +35,7 @@ extern WorldServer worldserver;
 note about how groups work:
 A group contains 2 list, a list of pointers to members and a
 list of member names. All members of a group should have their
-name in the membername array, whether they are in the zone or not.
+name in the member_name array, whether they are in the zone or not.
 Only members in this zone will have non-null pointers in the
 members array.
 */
