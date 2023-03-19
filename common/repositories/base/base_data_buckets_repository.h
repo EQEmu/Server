@@ -16,11 +16,12 @@
 #include "../../strings.h"
 #include <ctime>
 
+
 class BaseDataBucketsRepository {
 public:
 	struct DataBuckets {
 		uint64_t    id;
-		std::string key;
+		std::string key_;
 		std::string value;
 		uint32_t    expires;
 	};
@@ -34,7 +35,7 @@ public:
 	{
 		return {
 			"id",
-			"key",
+			"`key`",
 			"value",
 			"expires",
 		};
@@ -88,7 +89,7 @@ public:
 		DataBuckets e{};
 
 		e.id      = 0;
-		e.key     = "";
+		e.key_    = "";
 		e.value   = "";
 		e.expires = 0;
 
@@ -116,8 +117,9 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				data_buckets_id
 			)
 		);
@@ -127,7 +129,7 @@ public:
 			DataBuckets e{};
 
 			e.id      = strtoull(row[0], nullptr, 10);
-			e.key     = row[1] ? row[1] : "";
+			e.key_    = row[1] ? row[1] : "";
 			e.value   = row[2] ? row[2] : "";
 			e.expires = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
 
@@ -163,7 +165,7 @@ public:
 
 		auto columns = Columns();
 
-		v.push_back(columns[1] + " = '" + Strings::Escape(e.key) + "'");
+		v.push_back(columns[1] + " = '" + Strings::Escape(e.key_) + "'");
 		v.push_back(columns[2] + " = '" + Strings::Escape(e.value) + "'");
 		v.push_back(columns[3] + " = " + std::to_string(e.expires));
 
@@ -188,7 +190,7 @@ public:
 		std::vector<std::string> v;
 
 		v.push_back(std::to_string(e.id));
-		v.push_back("'" + Strings::Escape(e.key) + "'");
+		v.push_back("'" + Strings::Escape(e.key_) + "'");
 		v.push_back("'" + Strings::Escape(e.value) + "'");
 		v.push_back(std::to_string(e.expires));
 
@@ -221,7 +223,7 @@ public:
 			std::vector<std::string> v;
 
 			v.push_back(std::to_string(e.id));
-			v.push_back("'" + Strings::Escape(e.key) + "'");
+			v.push_back("'" + Strings::Escape(e.key_) + "'");
 			v.push_back("'" + Strings::Escape(e.value) + "'");
 			v.push_back(std::to_string(e.expires));
 
@@ -258,7 +260,7 @@ public:
 			DataBuckets e{};
 
 			e.id      = strtoull(row[0], nullptr, 10);
-			e.key     = row[1] ? row[1] : "";
+			e.key_    = row[1] ? row[1] : "";
 			e.value   = row[2] ? row[2] : "";
 			e.expires = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
 
@@ -286,7 +288,7 @@ public:
 			DataBuckets e{};
 
 			e.id      = strtoull(row[0], nullptr, 10);
-			e.key     = row[1] ? row[1] : "";
+			e.key_    = row[1] ? row[1] : "";
 			e.value   = row[2] ? row[2] : "";
 			e.expires = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
 
