@@ -11570,27 +11570,6 @@ void Client::SendReloadCommandMessages() {
 	SendChatLineBreak();
 }
 
-std::map<std::string,std::string> Client::GetMerchantDataBuckets()
-{
-	std::map<std::string,std::string> merchant_data_buckets;
-
-	auto query = fmt::format(
-		"SELECT `key`, `value` FROM data_buckets WHERE `key` LIKE '{}-%'",
-		Strings::Escape(GetBucketKey())
-	);
-	auto results = database.QueryDatabase(query);
-
-	if (!results.Success() || !results.RowCount()) {
-		return merchant_data_buckets;
-	}
-
-	for (auto row : results) {
-		merchant_data_buckets.insert(std::pair<std::string,std::string>(row[0], row[1]));
-	}
-
-	return merchant_data_buckets;
-}
-
 void Client::Undye()
 {
 	for (uint8 slot = EQ::textures::textureBegin; slot <= EQ::textures::LastTexture; slot++) {
@@ -12201,30 +12180,4 @@ void Client::PlayerTradeEventLog(Trade *t, Trade *t2)
 
 	RecordPlayerEventLogWithClient(trader, PlayerEvent::TRADE, e);
 	RecordPlayerEventLogWithClient(trader2, PlayerEvent::TRADE, e);
-}
-
-bool Client::GetDataBuckets()
-{
-
-	const auto query = fmt::format(
-		"SELECT `key`, `value` FROM data_buckets WHERE `key` LIKE '{}-%'",
-		Strings::Escape(GetBucketKey())
-	);
-
-	auto results = database.QueryDatabase(query);
-	if (!results.Success()) {
-		return false;
-	}
-
-	m_client_data_buckets.clear();
-
-	if (!results.RowCount()) {
-		return true;
-	}
-
-	for (auto row : results) {
-		m_client_data_buckets.insert(std::pair<std::string,std::string>(row[0], row[1]));
-	}
-
-	return true;
 }

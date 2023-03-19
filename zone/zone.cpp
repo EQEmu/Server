@@ -2986,7 +2986,7 @@ std::string Zone::GetAAName(int aa_id)
 	return std::string();
 }
 
-bool Zone::CheckDataBucket(uint8 bucket_comparison, const std::string& bucket_value, const std::string& player_value)
+bool Zone::CompareDataBucket(uint8 bucket_comparison, const std::string& bucket_value, const std::string& player_value)
 {
 	std::vector<std::string> bucket_checks;
 	bool found = false;

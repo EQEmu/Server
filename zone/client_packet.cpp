@@ -1357,7 +1357,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	drakkin_details = m_pp.drakkin_details;
 
 	// Load Data Buckets
-	GetDataBuckets();
+	DataBucket::GetDataBuckets(this);
 
 	// Max Level for Character:PerCharacterQglobalMaxLevel and Character:PerCharacterBucketMaxLevel
 	uint8 client_max_level = 0;

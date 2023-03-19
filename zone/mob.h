@@ -20,6 +20,7 @@
 #define MOB_H
 
 #include "common.h"
+#include "data_bucket.h"
 #include "entity.h"
 #include "hate_list.h"
 #include "pathfinder_interface.h"
@@ -1398,12 +1399,18 @@ public:
 	/// this cures timing issues cuz dead animation isn't done but server side feigning is?
 	inline bool GetFeigned() const { return(feigned); }
 
+	std::vector<DataBucketCache> m_data_bucket_cache;
+
+	// Data Bucket Methods
 	void DeleteBucket(std::string bucket_name);
 	std::string GetBucket(std::string bucket_name);
 	std::string GetBucketExpires(std::string bucket_name);
 	std::string GetBucketKey();
 	std::string GetBucketRemaining(std::string bucket_name);
 	void SetBucket(std::string bucket_name, std::string bucket_value, std::string expiration = "");
+
+	// Heroic Stat Benefits
+	float CheckHeroicBonusesDataBuckets(std::string bucket_name);
 
 	int DispatchZoneControllerEvent(QuestEventID evt, Mob* init, const std::string& data, uint32 extra, std::vector<std::any>* pointers);
 
@@ -1715,9 +1722,6 @@ protected:
 	bool is_boat;
 
 	CombatRecord m_combat_record{};
-
-	// Heroic Stat Benefits
-	float CheckHeroicBonusesDataBuckets(std::string bucket_name);
 
 public:
 	const CombatRecord &GetCombatRecord() const;

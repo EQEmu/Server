@@ -5757,7 +5757,7 @@ float Mob::CheckHeroicBonusesDataBuckets(std::string bucket_name) {
 		);
 
 		if (IsOfClientBot()) {
-			bucket_value = IsClient() ? CastToClient()->m_client_data_buckets[full_name] : CastToBot()->m_bot_data_buckets[full_name];
+			bucket_value = DataBucket::CheckBucketKey(this, full_name);
 		}
 
 		if (bucket_value.empty() || !Strings::IsNumber(bucket_value)) {

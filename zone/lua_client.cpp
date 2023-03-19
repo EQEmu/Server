@@ -3048,7 +3048,7 @@ bool Lua_Client::IsAutoFireEnabled()
 
 bool Lua_Client::ReloadDataBuckets() {
 	Lua_Safe_Call_Bool();
-	return self->GetDataBuckets();
+	return DataBucket::GetDataBuckets(self);
 }
 
 luabind::scope lua_register_client() {

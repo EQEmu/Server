@@ -2904,7 +2904,7 @@ bool Perl_Client_IsAutoFireEnabled(Client* self)
 
 bool Perl_Client_ReloadDataBuckets(Client* self)
 {
-	return self->GetDataBuckets();
+	return DataBucket::GetDataBuckets(self);
 }
 
 void perl_register_client()

@@ -840,7 +840,7 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 		}
 	}
 
-	auto client_data_buckets = GetMerchantDataBuckets();
+	DataBucketCache client_data_buckets;
 
 	auto temporary_merchant_list = zone->tmpmerchanttable[npcid];
 	uint32 slot_id = 1;
@@ -859,12 +859,12 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 				bucket_name
 			);
 
-			auto const& player_value = client_data_buckets[full_name];
+			auto const& player_value = DataBucket::CheckBucketKey(this, full_name);
 			if (player_value.empty()) {
 				continue;
 			}
 
-			if (!zone->CheckDataBucket(ml.bucket_comparison, bucket_value, player_value)) {
+			if (!zone->CompareDataBucket(ml.bucket_comparison, bucket_value, player_value)) {
 				continue;
 			}
 		}

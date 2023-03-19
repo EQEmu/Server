@@ -393,7 +393,6 @@ public:
 	[[nodiscard]] int GetMaxDiscSlots() const final { return EQ::spells::DISC_BUFFS; }
 	[[nodiscard]] int GetMaxTotalSlots() const final { return EQ::spells::TOTAL_BUFFS; }
 
-	bool GetBotDataBuckets();
 	bool CheckDataBucket(std::string bucket_name, const std::string& bucket_value, uint8 bucket_comparison);
 
 	// Bot Equipment & Inventory Class Methods
@@ -824,7 +823,6 @@ private:
 	eStandingPetOrder m_previous_pet_order;
 	uint32 m_bot_caster_range;
 	BotCastingRoles m_CastingRoles;
-	std::map<std::string,std::string> m_bot_data_buckets;
 
 	std::map<uint16, BotSpellSetting> bot_spell_settings;
 

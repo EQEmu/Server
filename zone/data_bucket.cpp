@@ -164,3 +164,46 @@ bool DataBucket::DeleteData(std::string bucket_key) {
 
 	return results.Success();
 }
+
+bool DataBucket::GetDataBuckets(Mob* mob)
+{
+	auto results = BaseDataBucketsRepository::GetWhere(
+		database,
+		fmt::format(
+			"`key` LIKE '{}-%'",
+			Strings::Escape(mob->GetBucketKey())
+		)
+	);
+
+	if (results.empty()) {
+		return false;
+	}
+
+	mob->m_data_bucket_cache.clear();
+
+	DataBucketCache d;
+
+	for (const auto& row : results) {
+		d.bucket_id = row.id;
+		d.bucket_key = row.key;
+		d.bucket_value = row.value;
+		d.bucket_expires = row.expires;
+
+		mob->m_data_bucket_cache.emplace_back(d);
+	}
+
+	return true;
+}
+
+std::string DataBucket::CheckBucketKey(const Mob* mob, std::string_view full_name)
+{
+	std::string bucket_value;
+	for (const auto &d : mob->m_data_bucket_cache) {
+		if (d.bucket_key == full_name) {
+			bucket_value = d.bucket_value;
+			break;
+		}
+	}
+	return bucket_value;
+}
+

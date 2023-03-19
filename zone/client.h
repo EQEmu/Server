@@ -1640,16 +1640,10 @@ public:
 	// rate limit
 	Timer m_list_task_timers_rate_limit = {};
 
-	std::map<std::string,std::string> GetMerchantDataBuckets();
-
 	std::string GetGuildPublicNote();
 
 	PlayerEvent::PlayerEvent GetPlayerEvent();
 	void RecordKilledNPCEvent(NPC *n);
-
-	bool GetDataBuckets();
-	std::map<std::string,std::string> m_client_data_buckets;
-
 
 protected:
 	friend class Mob;
