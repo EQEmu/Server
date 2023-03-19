@@ -253,7 +253,6 @@ int Mob::compute_defense()
 		defense += itembonuses.heroic_agi_avoidance;
 	}
 
-
 	//516 SE_AC_Mitigation_Max_Percent
 	auto ac_bonus = itembonuses.AC_Mitigation_Max_Percent + aabonuses.AC_Mitigation_Max_Percent + spellbonuses.AC_Mitigation_Max_Percent;
 	if (ac_bonus)

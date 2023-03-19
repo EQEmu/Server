@@ -925,5 +925,13 @@ struct ExpeditionInvite
 	std::string swap_remove_name;
 };
 
+struct DataBucketCache
+{
+	uint64_t      bucket_id;
+	std::string   bucket_key;
+	std::string   bucket_value;
+	uint32_t      bucket_expires;
+};
+
 #endif
 

@@ -1852,12 +1852,12 @@ private:
 	std::shared_ptr<HealRotation> m_target_of_heal_rotation;
 	bool m_manual_follow;
 
-	void SetHeroicStrBonuses(StatBonuses* newbon);
-	void SetHeroicStaBonuses(StatBonuses* newbon);
-	void SetHeroicAgiBonuses(StatBonuses* newbon);
-	void SetHeroicDexBonuses(StatBonuses* newbon);
-	void SetHeroicIntBonuses(StatBonuses* newbon);
-	void SetHeroicWisBonuses(StatBonuses* newbon);
+	void SetHeroicStrBonuses(StatBonuses* n);
+	void SetHeroicStaBonuses(StatBonuses* n);
+	void SetHeroicAgiBonuses(StatBonuses* n);
+	void SetHeroicDexBonuses(StatBonuses* n);
+	void SetHeroicIntBonuses(StatBonuses* n);
+	void SetHeroicWisBonuses(StatBonuses* n);
 };
 
 #endif
