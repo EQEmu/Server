@@ -193,6 +193,7 @@ public:
 	NPC* GetRandomNPC(const glm::vec3& location = glm::vec3(0.f), float distance = 0, NPC* exclude_npc = nullptr);
 	Mob* GetRandomMob(const glm::vec3& location = glm::vec3(0.f), float distance = 0, Mob* exclude_mob = nullptr);
 	Group* GetGroupByMob(Mob* mob);
+	Group* GetGroupByMobName(const char* name);
 	Group* GetGroupByBot(Bot* bot);
 	bool IsInSameGroupOrRaidGroup(Client *client1, Client *client2);
 	Group *GetGroupByClient(Client* client);

@@ -547,7 +547,7 @@ bool Group::UpdatePlayer(Mob* update) {
 void Group::MemberZoned(Mob* removemob) {
 	uint32 i;
 
-	if (removemob == nullptr) {
+	if (!removemob) {
 		return;
 	}
 

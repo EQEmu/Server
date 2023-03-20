@@ -3315,15 +3315,17 @@ bool Bot::Spawn(Client* botCharacterOwner) {
 			}
 		}
 
-		if (Raid* raid = entity_list.GetRaidByBotName(GetName())) {
+		Raid* raid = nullptr;
+		Group* group = nullptr;
+
+		if (raid = entity_list.GetRaidByBotName(GetName())) {
 			raid->VerifyRaid();
 			SetRaidGrouped(true);
 		}
-		else if (Group* group = entity_list.GetGroupByMob(this)) {
+		else if (group = entity_list.GetGroupByMobName(GetName())) {
 			group->VerifyGroup();
 			SetGrouped(true);
 		}
-
 
 		return true;
 	}
@@ -8582,17 +8584,19 @@ void Bot::SpawnBotGroupByName(Client* c, const std::string& botgroup_name, uint3
 		return;
 	}
 
-	if (!leader->Spawn(c)) {
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"Could not spawn bot-group leader {} for '{}'.",
-				leader->GetName(),
-				botgroup_name
-			).c_str()
-		);
-		safe_delete(leader);
-		return;
+	if (!leader->spawned) {
+		if (!leader->Spawn(c)) {
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"Could not spawn bot-group leader {} for '{}'.",
+					leader->GetName(),
+					botgroup_name
+				).c_str()
+			);
+			safe_delete(leader);
+			return;
+		}
 	}
 
 	auto group  = leader->GetGroupByLeaderName();
@@ -8694,24 +8698,26 @@ void Bot::SpawnBotGroupByName(Client* c, const std::string& botgroup_name, uint3
 			continue;
 		}
 
-		if (!member->Spawn(c)) {
-			c->Message(
-				Chat::White,
-				fmt::format(
-					"Could not spawn bot '{}' (ID {}).",
-					member->GetName(),
-					member_iter
-				).c_str()
-			);
-			safe_delete(member);
-			return;
-		}
+		if (!member->spawned) {
+			if (!member->Spawn(c)) {
+				c->Message(
+					Chat::White,
+					fmt::format(
+						"Could not spawn bot '{}' (ID {}).",
+						member->GetName(),
+						member_iter
+					).c_str()
+				);
+				safe_delete(member);
+				return;
+			}
 
-		spawned_bot_count++;
-		bot_class_spawned_count[member->GetClass() - 1]++;
+			spawned_bot_count++;
+			bot_class_spawned_count[member->GetClass() - 1]++;
 
-		if (group) {
-			Bot::AddBotToGroup(member, group);
+			if (group) {
+				Bot::AddBotToGroup(member, group);
+			}
 		}
 	}
 

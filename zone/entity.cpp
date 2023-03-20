@@ -2119,6 +2119,18 @@ Group *EntityList::GetGroupByMob(Mob *mob)
 	return nullptr;
 }
 
+Group *EntityList::GetGroupByMobName(const char* name)
+{
+	for (const auto& g : group_list) {
+		for (const auto& m : g->membername) {
+			if (strcmp(m, name) == 0) {
+				return g;
+			}
+		}
+	}
+	return nullptr;
+}
+
 Group *EntityList::GetGroupByLeaderName(const char *leader)
 {
 	std::list<Group *>::iterator iterator;
