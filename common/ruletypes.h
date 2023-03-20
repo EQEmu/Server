@@ -211,6 +211,7 @@ RULE_BOOL(Character, IgnoreLevelBasedHasteCaps, false, "Ignores hard coded level
 RULE_BOOL(Character, EnableRaidEXPModifier, true, "Enable or disable the raid experience modifier, default is true")
 RULE_BOOL(Character, EnableRaidMemberEXPModifier, true, "Enable or disable the raid experience modifier based on members in raid, default is true")
 RULE_BOOL(Character, LeaveCursorMoneyOnCorpse, false, "Enable or disable leaving cursor money on player corpses")
+RULE_BOOL(Character, ItemExtraSkillDamageCalcAsPercent, false, "If enabled, apply Item Extra Skill Damage as Percentage-based modifiers")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Mercs)
@@ -350,6 +351,7 @@ RULE_REAL(Watermap, FishingLineStepSize, 1, "Basic step size for fishing calc, t
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Spells)
+RULE_BOOL(Spells, AllowExtraDmgSkill, false, "Allow ExtraDmgSkill from Items, Spells, and AAs to apply ExtraDmgAmt when the ExtraDmgSkill matches the casted Spells Skill Type.")
 RULE_INT(Spells, BaseCritChance, 0, "Base percentage chance that everyone has to crit a spell")
 RULE_INT(Spells, BaseCritRatio, 100, "Base percentage bonus to damage on a successful spell crit. 100=2xdamage")
 RULE_INT(Spells, WizCritLevel, 12, "Level wizards first get spell crits")
