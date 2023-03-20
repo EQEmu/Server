@@ -2935,6 +2935,51 @@ int64 Lua_Mob::GetActReflectedSpellDamage(uint16 spell_id, int64 value, int effe
 	return self->GetActReflectedSpellDamage(spell_id, value, effectiveness);
 }
 
+uint32 Lua_Mob::GetRemainingTimeMS(const char* timer_name) {
+	Lua_Safe_Call_Int();
+	return quest_manager.getremainingtimeMS(timer_name, self);
+}
+
+uint32 Lua_Mob::GetTimerDurationMS(const char* timer_name) {
+	Lua_Safe_Call_Int();
+	return quest_manager.gettimerdurationMS(timer_name, self);
+}
+
+bool Lua_Mob::HasTimer(const char* timer_name) {
+	Lua_Safe_Call_Bool();
+	return quest_manager.hastimer(timer_name, self);
+}
+
+bool Lua_Mob::IsPausedTimer(const char* timer_name) {
+	Lua_Safe_Call_Bool();
+	return quest_manager.ispausedtimer(timer_name, self);
+}
+
+void Lua_Mob::PauseTimer(const char* timer_name) {
+	Lua_Safe_Call_Void();
+	quest_manager.pausetimer(timer_name, self);
+}
+
+void Lua_Mob::ResumeTimer(const char* timer_name) {
+	Lua_Safe_Call_Void();
+	quest_manager.resumetimer(timer_name, self);
+}
+
+void Lua_Mob::SetTimer(const char* timer_name, int seconds) {
+	Lua_Safe_Call_Void();
+	quest_manager.settimer(timer_name, seconds, self);
+}
+
+void Lua_Mob::SetTimerMS(const char* timer_name, int milliseconds) {
+	Lua_Safe_Call_Void();
+	quest_manager.settimerMS(timer_name, milliseconds, self);
+}
+
+void Lua_Mob::StopTimer(const char* timer_name) {
+	Lua_Safe_Call_Void();
+	quest_manager.stoptimer(timer_name, self);
+}
+
 luabind::scope lua_register_mob() {
 	return luabind::class_<Lua_Mob, Lua_Entity>("Mob")
 	.def(luabind::constructor<>())
@@ -3232,6 +3277,7 @@ luabind::scope lua_register_mob() {
 	.def("GetPhR", &Lua_Mob::GetPhR)
 	.def("GetRace", &Lua_Mob::GetRace)
 	.def("GetRaceName", &Lua_Mob::GetRaceName)
+	.def("GetRemainingTimeMS", &Lua_Mob::GetRemainingTimeMS)
 	.def("GetResist", (int(Lua_Mob::*)(int))&Lua_Mob::GetResist)
 	.def("GetReverseFactionCon", (int(Lua_Mob::*)(Lua_Mob))&Lua_Mob::GetReverseFactionCon)
 	.def("GetRunspeed", &Lua_Mob::GetRunspeed)
@@ -3249,6 +3295,7 @@ luabind::scope lua_register_mob() {
 	.def("GetSpellHPBonuses", &Lua_Mob::GetSpellHPBonuses)
 	.def("GetTarget", &Lua_Mob::GetTarget)
 	.def("GetTexture", &Lua_Mob::GetTexture)
+	.def("GetTimerDurationMS", &Lua_Mob::GetTimerDurationMS)
 	.def("GetUltimateOwner", &Lua_Mob::GetUltimateOwner)
 	.def("GetWIS", &Lua_Mob::GetWIS)
 	.def("GetWalkspeed", &Lua_Mob::GetWalkspeed)
@@ -3270,6 +3317,7 @@ luabind::scope lua_register_mob() {
 	.def("HasPet", (bool(Lua_Mob::*)(void))&Lua_Mob::HasPet)
 	.def("HasProcs", &Lua_Mob::HasProcs)
 	.def("HasShieldEquiped", (bool(Lua_Mob::*)(void))&Lua_Mob::HasShieldEquiped)
+	.def("HasTimer", &Lua_Mob::HasTimer)
 	.def("HasTwoHandBluntEquiped", (bool(Lua_Mob::*)(void))&Lua_Mob::HasTwoHandBluntEquiped)
 	.def("HasTwoHanderEquipped", (bool(Lua_Mob::*)(void))&Lua_Mob::HasTwoHanderEquipped)
 	.def("Heal", &Lua_Mob::Heal)
@@ -3297,6 +3345,7 @@ luabind::scope lua_register_mob() {
 	.def("IsMeleeDisabled", (bool(Lua_Mob::*)(void))&Lua_Mob::IsMeleeDisabled)
 	.def("IsMezzed", (bool(Lua_Mob::*)(void))&Lua_Mob::IsMezzed)
 	.def("IsMoving", &Lua_Mob::IsMoving)
+	.def("IsPausedTimer", &Lua_Mob::IsPausedTimer)
 	.def("IsPet", (bool(Lua_Mob::*)(void))&Lua_Mob::IsPet)
 	.def("IsRoamer", (bool(Lua_Mob::*)(void))&Lua_Mob::IsRoamer)
 	.def("IsRooted", (bool(Lua_Mob::*)(void))&Lua_Mob::IsRooted)
@@ -3318,6 +3367,7 @@ luabind::scope lua_register_mob() {
 	.def("NPCSpecialAttacks", (void(Lua_Mob::*)(const char*,int,bool))&Lua_Mob::NPCSpecialAttacks)
 	.def("NPCSpecialAttacks", (void(Lua_Mob::*)(const char*,int,bool,bool))&Lua_Mob::NPCSpecialAttacks)
 	.def("NavigateTo", (void(Lua_Mob::*)(double,double,double))&Lua_Mob::NavigateTo)
+	.def("PauseTimer", &Lua_Mob::PauseTimer)
 	.def("ProcessSpecialAbilities", (void(Lua_Mob::*)(std::string))&Lua_Mob::ProcessSpecialAbilities)
 	.def("ProjectileAnimation", (void(Lua_Mob::*)(Lua_Mob,int))&Lua_Mob::ProjectileAnimation)
 	.def("ProjectileAnimation", (void(Lua_Mob::*)(Lua_Mob,int,bool))&Lua_Mob::ProjectileAnimation)
@@ -3338,6 +3388,7 @@ luabind::scope lua_register_mob() {
 	.def("ResistSpell", (double(Lua_Mob::*)(int,int,Lua_Mob,bool))&Lua_Mob::ResistSpell)
 	.def("ResistSpell", (double(Lua_Mob::*)(int,int,Lua_Mob,bool,int))&Lua_Mob::ResistSpell)
 	.def("ResistSpell", (double(Lua_Mob::*)(int,int,Lua_Mob,bool,int,bool))&Lua_Mob::ResistSpell)
+	.def("ResumeTimer", &Lua_Mob::ResumeTimer)
 	.def("RunTo", (void(Lua_Mob::*)(double, double, double))&Lua_Mob::RunTo)
 	.def("Say", (void(Lua_Mob::*)(const char*))& Lua_Mob::Say)
 	.def("Say", (void(Lua_Mob::*)(const char*, int))& Lua_Mob::Say)
@@ -3401,6 +3452,9 @@ luabind::scope lua_register_mob() {
 	.def("SetTarget", &Lua_Mob::SetTarget)
 	.def("SetTargetable", (void(Lua_Mob::*)(bool))&Lua_Mob::SetTargetable)
 	.def("SetTexture", (void(Lua_Mob::*)(int))&Lua_Mob::SetTexture)
+	.def("SetTimer", &Lua_Mob::SetTimer)
+	.def("SetTimerMS", &Lua_Mob::SetTimerMS)
+	.def("StopTimer", &Lua_Mob::StopTimer)
 	.def("Shout", (void(Lua_Mob::*)(const char*))& Lua_Mob::Shout)
 	.def("Shout", (void(Lua_Mob::*)(const char*, int))& Lua_Mob::Shout)
 	.def("Signal", (void(Lua_Mob::*)(int))&Lua_Mob::Signal)

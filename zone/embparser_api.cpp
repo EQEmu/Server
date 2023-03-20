@@ -359,6 +359,11 @@ bool Perl__hastimer(const char* timer_name)
 	return quest_manager.hastimer(timer_name);
 }
 
+bool Perl__ispausedtimer(const char* timer_name)
+{
+	return quest_manager.ispausedtimer(timer_name);
+}
+
 uint32_t Perl__getremainingtimeMS(const char* timer_name)
 {
 	return quest_manager.getremainingtimeMS(timer_name);
@@ -377,6 +382,16 @@ void Perl__settimer(const char* timer_name, int seconds)
 void Perl__settimerMS(const char* timer_name, int milliseconds)
 {
 	quest_manager.settimerMS(timer_name, milliseconds);
+}
+
+void Perl__pausetimer(const char* timer_name)
+{
+	quest_manager.pausetimer(timer_name);
+}
+
+void Perl__resumetimer(const char* timer_name)
+{
+	quest_manager.resumetimer(timer_name);
 }
 
 void Perl__stoptimer(const char* timer_name)
@@ -4550,6 +4565,7 @@ void perl_register_quest()
 	package.add("isdooropen", &Perl__isdooropen);
 	package.add("ishotzone", &Perl__ishotzone);
 	package.add("isnpcspawned", &Perl__isnpcspawned);
+	package.add("ispausedtimer", &Perl__ispausedtimer);
 	package.add("istaskactive", &Perl__istaskactive);
 	package.add("istaskactivityactive", &Perl__istaskactivityactive);
 	package.add("istaskappropriate", &Perl__istaskappropriate);
@@ -4579,6 +4595,7 @@ void perl_register_quest()
 	package.add("npcsize", &Perl__npcsize);
 	package.add("npctexture", &Perl__npctexture);
 	package.add("pause", &Perl__pause);
+	package.add("pausetimer", &Perl__pausetimer);
 	package.add("permaclass", &Perl__permaclass);
 	package.add("permagender", &Perl__permagender);
 	package.add("permarace", &Perl__permarace);
@@ -4622,6 +4639,7 @@ void perl_register_quest()
 	package.add("resettaskactivity", &Perl__resettaskactivity);
 	package.add("respawn", &Perl__respawn);
 	package.add("resume", &Perl__resume);
+	package.add("resumetimer", &Perl__resumetimer);
 	package.add("rewardfaction", &Perl__rewardfaction);
 	package.add("safemove", &Perl__safemove);
 	package.add("save", &Perl__save);
