@@ -48,7 +48,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/skills.h"
 #include "../common/spdat.h"
 #include "../common/strings.h"
-#include "../common/zone_numbers.h"
 #include "data_bucket.h"
 #include "event_codes.h"
 #include "expedition.h"
@@ -6779,7 +6778,7 @@ void Client::Handle_OP_GMSearchCorpse(const EQApplicationPacket *app)
 		bool corpseBuried = Strings::ToInt(row[7]);
 
 		popupText += StringFormat("<tr><td>%s</td><td>%s</td><td>%8.0f</td><td>%8.0f</td><td>%8.0f</td><td>%s</td><td>%s</td><td>%s</td></tr>",
-			charName, StaticGetZoneName(ZoneID), CorpseX, CorpseY, CorpseZ, time_of_death,
+			charName, zone_store.GetZoneName(ZoneID, true), CorpseX, CorpseY, CorpseZ, time_of_death,
 			corpseRezzed ? "Yes" : "No", corpseBuried ? "Yes" : "No");
 
 		if (popupText.size() > 4000) {
