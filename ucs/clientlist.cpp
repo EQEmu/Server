@@ -571,7 +571,9 @@ void Clientlist::CheckForStaleConnectionsAll()
 
 void Clientlist::CheckForStaleConnections(Client *c) {
 
-	if (!c) return;
+	if (!c) {
+		return;
+	}
 
 	std::list<Client*>::iterator Iterator;
 

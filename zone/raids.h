@@ -75,21 +75,21 @@ enum { //raid command types
 	RaidCommandSetNote = 36,
 };
 
-#define MAX_RAID_GROUPS 12
-#define MAX_RAID_MEMBERS 72
+constexpr uint8_t MAX_RAID_GROUPS = 12;
+constexpr uint8_t MAX_RAID_MEMBERS = 72;
 const uint32 RAID_GROUPLESS = 0xFFFFFFFF;
 
 struct RaidMember{
-	char membername[64];
+	char member_name[64];
 	Client *member;
-	uint32 GroupNumber;
+	uint32 group_number;
 	uint8 _class;
 	uint8 level;
-	bool IsGroupLeader;
-	bool IsRaidLeader;
-	bool IsLooter;
-	bool IsBot = false;
-	bool IsRaidMainAssistOne = false;
+	bool is_group_leader;
+	bool is_raid_leader;
+	bool is_looter;
+	bool is_bot = false;
+	bool is_raid_main_assist_one = false;
 };
 
 struct GroupMentor {
@@ -115,12 +115,12 @@ public:
 	bool	IsRaid() { return true; }
 
 	void	AddMember(Client *c, uint32 group = 0xFFFFFFFF, bool rleader=false, bool groupleader=false, bool looter=false);
-	void	AddBot(Bot* b, uint32 group = 0xFFFFFFFF, bool rleader=false, bool groupleader=false, bool looter=false); 
+	void	AddBot(Bot* b, uint32 group = 0xFFFFFFFF, bool raid_leader=false, bool group_leader=false, bool looter=false);
 	void	RaidGroupSay(const char* msg, const char* from, uint8 language, uint8 lang_skill);
 	void	RaidSay(const char* msg, const char* from, uint8 language, uint8 lang_skill);
 	bool	IsEngaged();
-	Mob*	GetRaidMainAssistOneByName(const char* name);
-	void	RemoveMember(const char *c);
+	Mob*	GetRaidMainAssistOne();
+	void	RemoveMember(const char *character_name);
 	void	DisbandRaid();
 	void	MoveMember(const char *name, uint32 newGroup);
 	void	SetGroupLeader(const char *who, bool glFlag = true);

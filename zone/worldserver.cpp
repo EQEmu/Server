@@ -1121,8 +1121,9 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 
 		Client *client = entity_list.GetClientByName(sgfas->Name);
 
-		if (!client)
+		if (!client) {
 			break;
+		}
 
 		uint32 groupid = database.GetGroupID(client->GetName());
 
@@ -1445,7 +1446,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 					if (r->members[x].member)
 					{
 						if (strcmp(r->members[x].member->GetName(), rga->membername) != 0) {
-							if ((rga->gid < 12) && rga->gid == r->members[x].GroupNumber)
+							if ((rga->gid < 12) && rga->gid == r->members[x].group_number)
 							{
 								strn0cpy(gj->yourname, r->members[x].member->GetName(), 64);
 								r->members[x].member->QueuePacket(outapp);
@@ -1475,7 +1476,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 					if (r->members[x].member)
 					{
 						if (strcmp(r->members[x].member->GetName(), rga->membername) != 0) {
-							if ((rga->gid < 12) && rga->gid == r->members[x].GroupNumber)
+							if ((rga->gid < 12) && rga->gid == r->members[x].group_number)
 							{
 								strn0cpy(gj->yourname, r->members[x].member->GetName(), 64);
 								r->members[x].member->QueuePacket(outapp);
@@ -1499,8 +1500,8 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 					if (r->members[x].member) {
 						if (strcmp(rmsg->from, r->members[x].member->GetName()) != 0)
 						{
-							if (r->members[x].GroupNumber == rmsg->gid) {
-								if (!r->members[x].IsBot && r->members[x].member->GetFilter(FilterGroupChat) != 0)
+							if (r->members[x].group_number == rmsg->gid) {
+								if (!r->members[x].is_bot && r->members[x].member->GetFilter(FilterGroupChat) != 0)
 								{
 									r->members[x].member->ChannelMessageSend(rmsg->from, r->members[x].member->GetName(), ChatChannel_Group, rmsg->language, rmsg->lang_skill, rmsg->message);
 								}
@@ -1524,7 +1525,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 					if (r->members[x].member) {
 						if (strcmp(rmsg->from, r->members[x].member->GetName()) != 0)
 						{
-							if (!r->members[x].IsBot && r->members[x].member->GetFilter(FilterGroupChat) != 0)
+							if (!r->members[x].is_bot && r->members[x].member->GetFilter(FilterGroupChat) != 0)
 							{
 								r->members[x].member->ChannelMessageSend(rmsg->from, r->members[x].member->GetName(), ChatChannel_Raid, rmsg->language, rmsg->lang_skill, rmsg->message);
 							}

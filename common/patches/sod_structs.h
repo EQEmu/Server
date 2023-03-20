@@ -2085,7 +2085,7 @@ struct GroupUpdate_Struct_SoD {	// New for SoD
 
 struct GroupMembers_Struct {	// New for SoD
 /*0000*/	uint32	membernumber;	// Guess - number of member in the group (0 to 5?)
-/*0000*/	//char	membername[0];	// Member Name Null Terminated
+/*0000*/	//char	member_name[0];	// Member Name Null Terminated
 /*0000*/	uint8	unknown001[3];	// Seen 0
 /*0000*/	uint32	memberlevel;	// Guess
 /*0000*/	uint8	unknown002[11];	// Seen 0
@@ -2095,7 +2095,7 @@ struct GroupJoin_Struct_SoD {	// New for SoD
 /*0000*/	uint32	unknown0000;	// Matches unknown0136 from GroupFollow_Struct
 /*0004*/	uint32	action;
 /*0008*/	uint8	unknown0008[5];	// Seen 0
-/*0013*/	//char	membername[0];	// Null Terminated?
+/*0013*/	//char	member_name[0];	// Null Terminated?
 /*0000*/	uint8	unknown0013[3];	// Seen 0
 /*0000*/	uint32	unknown0016;	// Matches unknown0132 from GroupFollow_Struct
 /*0000*/	uint8	unknown0020[11];	// Seen 0

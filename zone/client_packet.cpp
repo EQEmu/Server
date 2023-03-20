@@ -612,15 +612,15 @@ void Client::CompleteConnect()
 			database.botdb.LoadBotsList(this->CharacterID(), bots_list);
 			std::vector<RaidMember> r_members = raid->GetMembers();
 			for (const RaidMember& iter : r_members) {
-				if (iter.membername) {
+				if (iter.member_name) {
 					for (const BotsAvailableList& b_iter : bots_list)
 					{
-						if (strcmp(iter.membername, b_iter.Name) == 0)
+						if (strcmp(iter.member_name, b_iter.Name) == 0)
 						{
 							char buffer[71] = "^spawn ";
-							strcat(buffer, iter.membername);
+							strcat(buffer, iter.member_name);
 							bot_command_real_dispatch(this, buffer);
-							Bot* b = entity_list.GetBotByBotName(iter.membername);
+							Bot* b = entity_list.GetBotByBotName(iter.member_name);
 							if (b)
 							{
 								b->SetRaidGrouped(true);
@@ -7027,15 +7027,15 @@ void Client::Handle_OP_GroupDisband(const EQApplicationPacket *app)
 		}
 		//we have a raid.. see if we're in a raid group
 		uint32 grp = raid->GetGroup(memberToDisband->GetName());
-		bool wasGrpLdr = raid->members[raid->GetPlayerIndex(memberToDisband->GetName())].IsGroupLeader;
+		bool wasGrpLdr = raid->members[raid->GetPlayerIndex(memberToDisband->GetName())].is_group_leader;
 		if (grp < 12) {
 			if (wasGrpLdr) {
 				raid->SetGroupLeader(memberToDisband->GetName(), false);
 				for (int x = 0; x < MAX_RAID_MEMBERS; x++) {
-					if (raid->members[x].GroupNumber == grp) {
-						if (strlen(raid->members[x].membername) > 0 &&
-						    strcmp(raid->members[x].membername, memberToDisband->GetName()) != 0) {
-							raid->SetGroupLeader(raid->members[x].membername);
+					if (raid->members[x].group_number == grp) {
+						if (strlen(raid->members[x].member_name) > 0 &&
+							strcmp(raid->members[x].member_name, memberToDisband->GetName()) != 0) {
+							raid->SetGroupLeader(raid->members[x].member_name);
 							break;
 						}
 					}
@@ -8423,8 +8423,7 @@ void Client::Handle_OP_GuildStatus(const EQApplicationPacket *app)
 
 	Client *c = entity_list.GetClientByName(gss->Name);
 
-	if (!c)
-	{
+	if (!c) {
 		MessageString(Chat::LightGray, TARGET_PLAYER_FOR_GUILD_STATUS);
 		return;
 	}
@@ -12217,12 +12216,12 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 			}
 			if (group < 12) {
 				uint32 i = raid->GetPlayerIndex(raid_command_packet->leader_name);
-				if (raid->members[i].IsGroupLeader) { //assign group leader to someone else
+				if (raid->members[i].is_group_leader) { //assign group leader to someone else
 					for (int x = 0; x < MAX_RAID_MEMBERS; x++) {
-						if (strlen(raid->members[x].membername) > 0 && i != x) {
-							if (raid->members[x].GroupNumber == group) {
+						if (strlen(raid->members[x].member_name) > 0 && i != x) {
+							if (raid->members[x].group_number == group) {
 								raid->SetGroupLeader(raid_command_packet->leader_name, false);
-								raid->SetGroupLeader(raid->members[x].membername);
+								raid->SetGroupLeader(raid->members[x].member_name);
 								raid->UpdateGroupAAs(group);
 								break;
 							}
@@ -12268,24 +12267,24 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 					if (raid_command_packet->parameter == old_group) //don't rejoin grp if we order to join same group.
 						break;
 
-					if (raid->members[raid->GetPlayerIndex(raid_command_packet->leader_name)].IsGroupLeader) {
+					if (raid->members[raid->GetPlayerIndex(raid_command_packet->leader_name)].is_group_leader) {
 						raid->SetGroupLeader(raid_command_packet->leader_name, false);
 
 						/* We were the leader of our old group */
 						if (old_group < 12) {
 							/* Assign new group leader if we can */
 							for (int x = 0; x < MAX_RAID_MEMBERS; x++) {
-								if (raid->members[x].GroupNumber == old_group) {
-									if (strcmp(raid_command_packet->leader_name, raid->members[x].membername) != 0 && strlen(raid_command_packet->leader_name) > 0) {
-										raid->SetGroupLeader(raid->members[x].membername);
+								if (raid->members[x].group_number == old_group) {
+									if (strcmp(raid_command_packet->leader_name, raid->members[x].member_name) != 0 && strlen(raid_command_packet->leader_name) > 0) {
+										raid->SetGroupLeader(raid->members[x].member_name);
 										raid->UpdateGroupAAs(old_group);
 
-										Client* client_to_update = entity_list.GetClientByName(raid->members[x].membername);
+										Client* client_to_update = entity_list.GetClientByName(raid->members[x].member_name);
 										if (client_to_update) {
-											raid->SendRaidRemove(raid->members[x].membername, client_to_update);
+											raid->SendRaidRemove(raid->members[x].member_name, client_to_update);
 											raid->SendRaidCreate(client_to_update);
 											raid->SendMakeLeaderPacketTo(raid->leadername, client_to_update);
-											raid->SendRaidAdd(raid->members[x].membername, client_to_update);
+											raid->SendRaidAdd(raid->members[x].member_name, client_to_update);
 											raid->SendBulkRaid(client_to_update);
 											if (raid->IsLocked()) {
 												raid->SendRaidLockTo(client_to_update);
@@ -12298,7 +12297,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 											raid_command_packet->rid = raid->GetID();
 											raid_command_packet->zoneid = zone->GetZoneID();
 											raid_command_packet->instance_id = zone->GetInstanceID();
-											strn0cpy(raid_command_packet->playername, raid->members[x].membername, 64);
+											strn0cpy(raid_command_packet->playername, raid->members[x].member_name, 64);
 
 											worldserver.SendPacket(pack);
 
@@ -12343,20 +12342,20 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 			else {
 				Client* c = entity_list.GetClientByName(raid_command_packet->leader_name);
 				uint32 oldgrp = raid->GetGroup(raid_command_packet->leader_name);
-				if (raid->members[raid->GetPlayerIndex(raid_command_packet->leader_name)].IsGroupLeader) {
+				if (raid->members[raid->GetPlayerIndex(raid_command_packet->leader_name)].is_group_leader) {
 					raid->SetGroupLeader(raid_command_packet->leader_name, false);
 					for (int x = 0; x < MAX_RAID_MEMBERS; x++) {
-						if (raid->members[x].GroupNumber == oldgrp && strlen(raid->members[x].membername) > 0 && strcmp(raid->members[x].membername, raid_command_packet->leader_name) != 0) {
+						if (raid->members[x].group_number == oldgrp && strlen(raid->members[x].member_name) > 0 && strcmp(raid->members[x].member_name, raid_command_packet->leader_name) != 0) {
 
-							raid->SetGroupLeader(raid->members[x].membername);
+							raid->SetGroupLeader(raid->members[x].member_name);
 							raid->UpdateGroupAAs(oldgrp);
 
-							Client* client_leaving_group = entity_list.GetClientByName(raid->members[x].membername);
+							Client* client_leaving_group = entity_list.GetClientByName(raid->members[x].member_name);
 							if (client_leaving_group) {
-								raid->SendRaidRemove(raid->members[x].membername, client_leaving_group);
+								raid->SendRaidRemove(raid->members[x].member_name, client_leaving_group);
 								raid->SendRaidCreate(client_leaving_group);
 								raid->SendMakeLeaderPacketTo(raid->leadername, client_leaving_group);
-								raid->SendRaidAdd(raid->members[x].membername, client_leaving_group);
+								raid->SendRaidAdd(raid->members[x].member_name, client_leaving_group);
 								raid->SendBulkRaid(client_leaving_group);
 								if (raid->IsLocked()) {
 									raid->SendRaidLockTo(client_leaving_group);
@@ -12367,7 +12366,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 								ServerRaidGeneralAction_Struct* raid_command = (ServerRaidGeneralAction_Struct*)pack->pBuffer;
 
 								raid_command->rid = raid->GetID();
-								strn0cpy(raid_command->playername, raid->members[x].membername, 64);
+								strn0cpy(raid_command->playername, raid->members[x].member_name, 64);
 								raid_command->zoneid = zone->GetZoneID();
 								raid_command->instance_id = zone->GetInstanceID();
 

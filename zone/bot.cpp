@@ -27,9 +27,6 @@
 #include "../common/repositories/bot_spell_settings_repository.h"
 #include "../common/data_verification.h"
 
-extern volatile bool is_zone_loaded;
-extern bool Critical;
-
 // This constructor is used during the bot create command
 Bot::Bot(NPCType *npcTypeData, Client* botOwner) : NPC(npcTypeData, nullptr, glm::vec4(), Ground, false), rest_timer(1), ping_timer(1) {
 	GiveNPCTypeData(npcTypeData);
@@ -2822,7 +2819,7 @@ void Bot::AcquireBotTarget(Group* bot_group, Raid* raid, Client* leash_owner, fl
 		assist_mob = entity_list.GetMob(bot_group->GetMainAssistName());
 	}
 	else if (raid) {
-		assist_mob = raid->GetRaidMainAssistOneByName(GetName());
+		assist_mob = raid->GetRaidMainAssistOne();
 	}
 
 	if (assist_mob) {
@@ -4629,16 +4626,14 @@ bool Bot::Death(Mob *killerMob, int64 damage, uint16 spell_id, EQ::skills::Skill
 		my_owner->CastToClient()->SetBotPulling(false);
 	}
 
-Raid* raid = entity_list.GetRaidByBotName(GetName());
-
-	if (raid)
+	if (auto raid = entity_list.GetRaidByBotName(GetName()); raid)
 	{
 
-		for (int x = 0; x < MAX_RAID_MEMBERS; x++)
+		for (auto& m : raid->members)
 		{
-			if (strcmp(raid->members[x].membername, GetName()) == 0)
+			if (strcmp(m.member_name, GetName()) == 0)
 			{
-				raid->members[x].member = nullptr;
+				m.member = nullptr;
 			}
 		}
 	}
@@ -7803,7 +7798,6 @@ bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, fl
 	return false;
 }
 
-
 Mob* EntityList::GetMobByBotID(uint32 botID) {
 	Mob* Result = nullptr;
 	if (botID > 0) {
@@ -7837,10 +7831,9 @@ Bot* EntityList::GetBotByBotID(uint32 botID) {
 Bot* EntityList::GetBotByBotName(std::string_view botName) {
 	Bot* Result = nullptr;
 	if (!botName.empty()) {
-		for (std::list<Bot*>::iterator botListItr = bot_list.begin(); botListItr != bot_list.end(); ++botListItr) {
-			Bot* tempBot = *botListItr;
-			if (tempBot && std::string(tempBot->GetName()) == botName) {
-				Result = tempBot;
+		for (const auto b : bot_list) {
+			if (b && std::string_view(b->GetName()) == botName) {
+				Result = b;
 				break;
 			}
 		}
@@ -8252,15 +8245,6 @@ bool Bot::GetNeedsHateRedux(Mob *tar) {
 	if (!tar || !tar->IsEngaged() || !tar->HasTargetReflection() || !tar->GetTarget()->IsNPC())
 		return false;
 
-	//if (tar->IsClient()) {
-	//	switch (tar->GetClass()) {
-	//		// TODO: figure out affectable classes..
-	//		// Might need flag to allow player to determine redux req...
-	//	default:
-	//		return false;
-	//	}
-	//}
-	//else if (tar->IsBot()) {
 	if (tar->IsBot()) {
 		switch (tar->GetClass()) {
 		case ROGUE:
