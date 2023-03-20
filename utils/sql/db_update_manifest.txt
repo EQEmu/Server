@@ -478,7 +478,7 @@
 9222|2023_02_28_npc_scaling_zone_list_version_list.sql|SHOW COLUMNS FROM `npc_scale_global_base` LIKE 'zone_id_list'|empty|
 9223|2023_03_04_npc_scale_global_base_heroic_strikethrough.sql|SHOW COLUMNS FROM `npc_scale_global_base` LIKE 'heroic_strikethrough'|empty|
 9224|2023_03_08_npc_scale_global_base_avoidance.sql|SHOW COLUMNS FROM `npc_scale_global_base` LIKE 'hp_regen_per_second'|empty|
-9225|2023_01_21_bots_raid_members.sql|SHOW COLUMNS FROM `raid_members` LIKE 'botid'|empty|
+9225|2023_01_21_bots_raid_members.sql|SHOW COLUMNS FROM `raid_members` LIKE 'bot_id'|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not
