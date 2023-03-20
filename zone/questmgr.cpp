@@ -619,7 +619,7 @@ void QuestManager::pausetimer(const char* timer_name, Mob* mob) {
 
 	pend = PTimerList.end();
 	while (pcur != pend) {
-		if (pcur->owner && pcur->owner == owner && pcur->name == timer_name) {
+		if (pcur->owner && pcur->owner == m && pcur->name == timer_name) {
 			LogQuests("Timer [{}] is already paused for [{}]. Returning", timer_name, owner->GetName());
 			return;
 		}
