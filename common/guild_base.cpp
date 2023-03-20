@@ -787,9 +787,7 @@ bool BaseGuildManager::GetBankerFlag(uint32 CharID)
 
 	auto row = results.begin();
 
-	bool IsBanker = Strings::ToBool(row[0]);
-
-	return IsBanker;
+	return Strings::ToBool(row[0]);
 }
 
 bool BaseGuildManager::DBSetAltFlag(uint32 charid, bool is_alt)
@@ -817,9 +815,7 @@ bool BaseGuildManager::GetAltFlag(uint32 CharID)
 
 	auto row = results.begin();
 
-	bool IsAlt = Strings::ToBool(row[0]);
-
-	return IsAlt;
+	return Strings::ToBool(row[0]);
 }
 
 bool BaseGuildManager::DBSetTributeFlag(uint32 charid, bool enabled) {
