@@ -2927,6 +2927,11 @@ void Perl_Mob_SetTimerMS(Mob* self, const char* timer_name, int milliseconds)
 	quest_manager.settimerMS(timer_name, milliseconds, self);
 }
 
+void Perl_Mob_StopAllTimers(Mob* self)
+{
+	quest_manager.stopalltimers(self);
+}
+
 void Perl_Mob_StopTimer(Mob* self, const char* timer_name)
 {
 	quest_manager.stoptimer(timer_name, self);
@@ -3451,6 +3456,7 @@ void perl_register_mob()
 	package.add("SetTexture", &Perl_Mob_SetTexture);
 	package.add("SetTimer", &Perl_Mob_SetTimer);
 	package.add("SetTimerMS", &Perl_Mob_SetTimerMS);
+	package.add("StopAllTimers", &Perl_Mob_StopAllTimers);
 	package.add("StopTimer", &Perl_Mob_StopTimer);
 	package.add("ShieldAbility", (void(*)(Mob*, uint32))&Perl_Mob_ShieldAbility);
 	package.add("ShieldAbility", (void(*)(Mob*, uint32, int32))&Perl_Mob_ShieldAbility);

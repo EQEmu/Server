@@ -536,6 +536,7 @@ public:
 	void ResumeTimer(const char* timer_name);
 	void SetTimer(const char* timer_name, int seconds);
 	void SetTimerMS(const char* timer_name, int milliseconds);
+	void StopAllTimers();
 	void StopTimer(const char* timer_name);
 };
 

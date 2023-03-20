@@ -2975,6 +2975,11 @@ void Lua_Mob::SetTimerMS(const char* timer_name, int milliseconds) {
 	quest_manager.settimerMS(timer_name, milliseconds, self);
 }
 
+void Lua_Mob::StopAllTimers() {
+	Lua_Safe_Call_Void();
+	quest_manager.stopalltimers(self);
+}
+
 void Lua_Mob::StopTimer(const char* timer_name) {
 	Lua_Safe_Call_Void();
 	quest_manager.stoptimer(timer_name, self);
@@ -3454,6 +3459,7 @@ luabind::scope lua_register_mob() {
 	.def("SetTexture", (void(Lua_Mob::*)(int))&Lua_Mob::SetTexture)
 	.def("SetTimer", &Lua_Mob::SetTimer)
 	.def("SetTimerMS", &Lua_Mob::SetTimerMS)
+	.def("StopAllTimers", &Lua_Mob::StopAllTimers)
 	.def("StopTimer", &Lua_Mob::StopTimer)
 	.def("Shout", (void(Lua_Mob::*)(const char*))& Lua_Mob::Shout)
 	.def("Shout", (void(Lua_Mob::*)(const char*, int))& Lua_Mob::Shout)
