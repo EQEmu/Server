@@ -425,11 +425,6 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 
 	cur_end = max_end;
 
-	// Safety Check to confirm we have a valid group
-	if (HasGroup() && !GetGroup()->IsGroupMember(GetBotOwner())) {
-		Bot::RemoveBotFromGroup(this, GetGroup());
-	}
-
 	// Safety Check to confirm we have a valid raid
 	if (HasRaid() && !GetRaid()->IsRaidMember(GetBotOwner()->CastToClient())) {
 		Bot::RemoveBotFromRaid(this);
@@ -3111,7 +3106,6 @@ Client* Bot::SetLeashOwner(Client* bot_owner, Group* bot_group, Raid* raid, uint
 				raid->GetGroupLeader(r_group)->CastToClient() : bot_owner;
 
 	} else if (bot_group) {
-		bot_group->VerifyGroup();
 		leash_owner = (bot_group->GetLeader() && bot_group->GetLeader()->IsClient() ? bot_group->GetLeader()->CastToClient() : bot_owner);
 
 	} else {
@@ -3321,11 +3315,18 @@ bool Bot::Spawn(Client* botCharacterOwner) {
 			}
 		}
 
-		if (Raid* raid = entity_list.GetRaidByBotName(GetName()))
-		{
+		Raid* raid = nullptr;
+		Group* group = nullptr;
+
+		if (raid = entity_list.GetRaidByBotName(GetName())) {
 			raid->VerifyRaid();
 			SetRaidGrouped(true);
 		}
+		else if (group = entity_list.GetGroupByMobName(GetName())) {
+			group->VerifyGroup();
+			SetGrouped(true);
+		}
+
 		return true;
 	}
 
@@ -3863,21 +3864,18 @@ bool Bot::RemoveBotFromGroup(Bot* bot, Group* group) {
 
 bool Bot::AddBotToGroup(Bot* bot, Group* group) {
 	bool Result = false;
-	if (bot && group) {
-		// Add bot to this group
-		if (group->AddMember(bot)) {
-			if (group->GetLeader()) {
-				bot->SetFollowID(group->GetLeader()->GetID());
-				// Need to send this only once when a group is formed with a bot so the client knows it is also the group leader
-				if (group->GroupCount() == 2 && group->GetLeader()->IsClient()) {
-					group->UpdateGroupAAs();
-					Mob *TempLeader = group->GetLeader();
-					group->SendUpdate(groupActUpdate, TempLeader);
-				}
+	if (bot && group && group->AddMember(bot)) {
+		if (group->GetLeader()) {
+			bot->SetFollowID(group->GetLeader()->GetID());
+			// Need to send this only once when a group is formed with a bot so the client knows it is also the group leader
+			if (group->GroupCount() == 2 && group->GetLeader()->IsClient()) {
+				group->UpdateGroupAAs();
+				Mob *TempLeader = group->GetLeader();
+				group->SendUpdate(groupActUpdate, TempLeader);
 			}
-			group->VerifyGroup();
-			Result = true;
 		}
+		group->VerifyGroup();
+		Result = true;
 	}
 	return Result;
 }
@@ -6680,7 +6678,11 @@ void Bot::Camp(bool save_to_database) {
 		Save();
 	}
 
-	Depop();
+	if (HasGroup() || HasRaid()) {
+		Zone();
+	} else {
+		Depop();
+	}
 }
 
 void Bot::Zone() {
@@ -8582,24 +8584,34 @@ void Bot::SpawnBotGroupByName(Client* c, const std::string& botgroup_name, uint3
 		return;
 	}
 
-	if (!leader->Spawn(c)) {
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"Could not spawn bot-group leader {} for '{}'.",
-				leader->GetName(),
-				botgroup_name
-			).c_str()
-		);
-		safe_delete(leader);
-		return;
+	if (!leader->spawned) {
+		if (!leader->Spawn(c)) {
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"Could not spawn bot-group leader {} for '{}'.",
+					leader->GetName(),
+					botgroup_name
+				).c_str()
+			);
+			safe_delete(leader);
+			return;
+		}
 	}
 
-	auto* g = new Group(leader);
+	auto group  = leader->GetGroupByLeaderName();
+	auto raid = leader->GetRaid();
 
-	entity_list.AddGroup(g);
-	database.SetGroupID(leader->GetCleanName(), g->GetID(), leader->GetBotID());
-	database.SetGroupLeaderName(g->GetID(), leader->GetCleanName());
+	if (!raid && group) {
+		group->SetLeader(leader);
+	}
+	else if (!raid) {
+		group = new Group(leader);
+		entity_list.AddGroup(group);
+		database.SetGroupID(leader->GetCleanName(), group->GetID(), leader->GetBotID());
+		database.SetGroupLeaderName(group->GetID(), leader->GetCleanName());
+	}
+
 	leader->SetFollowID(c->GetID());
 
 	uint32 botgroup_id = 0;
@@ -8686,23 +8698,33 @@ void Bot::SpawnBotGroupByName(Client* c, const std::string& botgroup_name, uint3
 			continue;
 		}
 
-		if (!member->Spawn(c)) {
-			c->Message(
-				Chat::White,
-				fmt::format(
-					"Could not spawn bot '{}' (ID {}).",
-					member->GetName(),
-					member_iter
-				).c_str()
-			);
-			safe_delete(member);
-			return;
+		if (!member->spawned) {
+			if (!member->Spawn(c)) {
+				c->Message(
+					Chat::White,
+					fmt::format(
+						"Could not spawn bot '{}' (ID {}).",
+						member->GetName(),
+						member_iter
+					).c_str()
+				);
+				safe_delete(member);
+				return;
+			}
+
+			spawned_bot_count++;
+			bot_class_spawned_count[member->GetClass() - 1]++;
+
+			if (group) {
+				Bot::AddBotToGroup(member, group);
+			}
 		}
+	}
 
-		spawned_bot_count++;
-		bot_class_spawned_count[member->GetClass() - 1]++;
-
-		Bot::AddBotToGroup(member, g);
+	if (group) {
+		group->VerifyGroup();
+	} else if (raid) {
+		raid->VerifyRaid();
 	}
 
 	c->Message(

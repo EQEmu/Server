@@ -141,6 +141,7 @@ public:
 	bool HasGroup() final { return GetGroup() != nullptr; }
 	Raid* GetRaid() final { return entity_list.GetRaidByBot(this); }
 	Group* GetGroup() final { return entity_list.GetGroupByMob(this); }
+	Group* GetGroupByLeaderName() { return entity_list.GetGroupByLeaderName(GetName()); }
 
 	// Common, but informal "interfaces" with Client object
 	uint32 CharacterID() const { return GetBotID(); }
