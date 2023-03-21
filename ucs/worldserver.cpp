@@ -120,8 +120,7 @@ void WorldServer::ProcessMessage(uint16 opcode, EQ::Net::Packet &p)
 		if (Message.length() < 2)
 			break;
 
-		if (!c)
-		{
+		if (!c) {
 			LogInfo("Client not found");
 			break;
 		}

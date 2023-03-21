@@ -430,26 +430,16 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	// If you're at full mana, let it cast even if you dont have enough mana
 
 	// we calculated this above, now enforce it
-	if (mana_cost > 0 && slot != CastingSlot::Item) {
+	if (mana_cost > 0 && slot != CastingSlot::Item || (IsBot() && !CastToBot()->IsBotNonSpellFighter())) {
 		int my_curmana = GetMana();
 		int my_maxmana = GetMaxMana();
 		if (my_curmana < mana_cost) {// not enough mana
 			//this is a special case for NPCs with no mana...
-			if (IsNPC() && my_curmana == my_maxmana){
+			if (IsNPC() && my_curmana == my_maxmana) {
 				mana_cost = 0;
-			} else {
-				//The client will prevent spell casting if insufficient mana, this is only for serverside enforcement.
-				LogSpells("Spell Error not enough mana spell=[{}] mymana=[{}] cost=[{}]\n", spell_id, my_curmana, mana_cost);
-				if (IsClient()) {
-					//clients produce messages... npcs should not for this case
-					MessageString(Chat::Red, INSUFFICIENT_MANA);
-					InterruptSpell();
-				} else {
-					InterruptSpell(0, 0, 0);	//the 0 args should cause no messages
-				}
-				ZeroCastingVars();
-				return(false);
 			}
+			DoSpellInterrupt(spell_id, mana_cost, my_curmana);
+			return false;
 		}
 	}
 
@@ -475,7 +465,7 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	// cast time is 0, just finish it right now and be done with it
 	if(cast_time == 0) {
 		CastedSpellFinished(spell_id, target_id, slot, mana_cost, item_slot, resist_adjust); //
-		return(true);
+		return true;
 	}
 
 	// ok we know it has a cast time so we can start the timer now
@@ -501,7 +491,20 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 		}
 	}
 
-	return(true);
+	return true;
+}
+
+void Mob::DoSpellInterrupt(uint16 spell_id, int32 mana_cost, int my_curmana) {
+	//The client will prevent spell casting if insufficient mana, this is only for serverside enforcement.
+	LogSpells("Not enough mana spell [{}] curmana [{}] cost [{}]\n", spell_id, my_curmana, mana_cost);
+	if (IsClient()) {
+		//clients produce messages... npcs should not for this case
+		MessageString(Chat::Red, INSUFFICIENT_MANA);
+		InterruptSpell();
+	} else {
+		InterruptSpell(0, 0, 0);	//the 0 args should cause no messages
+	}
+	ZeroCastingVars();
 }
 
 void Mob::SendBeginCast(uint16 spell_id, uint32 casttime)
@@ -4153,7 +4156,6 @@ bool Mob::SpellOnTarget(
 				return false;
 			}
 		}
-
 		if (spelltar->IsClient()){
 			spelltar->CastToClient()->BreakSneakWhenCastOn(this, false);
 			spelltar->CastToClient()->BreakFeignDeathWhenCastOn(false);
@@ -4607,11 +4609,6 @@ void Mob::BuffFadeByEffect(int effect_id, int slot_to_skip)
 	if (recalc_bonus) {
 		CalcBonuses();
 	}
-}
-
-bool Mob::IsAffectedByBuff(uint16 spell_id)
-{
-	return FindBuff(spell_id);
 }
 
 bool Mob::IsAffectedByBuffByGlobalGroup(GlobalGroup group)
@@ -6327,7 +6324,6 @@ void Client::InitializeBuffSlots()
 		buffs[x].spellid = SPELL_UNKNOWN;
 		buffs[x].UpdateClient = false;
 	}
-	current_buff_count = 0;
 }
 
 void Client::UninitializeBuffSlots()
@@ -6343,7 +6339,6 @@ void NPC::InitializeBuffSlots()
 		buffs[x].spellid      = SPELL_UNKNOWN;
 		buffs[x].UpdateClient = false;
 	}
-	current_buff_count = 0;
 }
 
 void NPC::UninitializeBuffSlots()

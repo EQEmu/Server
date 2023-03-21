@@ -211,6 +211,7 @@ RULE_BOOL(Character, IgnoreLevelBasedHasteCaps, false, "Ignores hard coded level
 RULE_BOOL(Character, EnableRaidEXPModifier, true, "Enable or disable the raid experience modifier, default is true")
 RULE_BOOL(Character, EnableRaidMemberEXPModifier, true, "Enable or disable the raid experience modifier based on members in raid, default is true")
 RULE_BOOL(Character, LeaveCursorMoneyOnCorpse, false, "Enable or disable leaving cursor money on player corpses")
+RULE_BOOL(Character, ItemExtraSkillDamageCalcAsPercent, false, "If enabled, apply Item Extra Skill Damage as Percentage-based modifiers")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Mercs)
@@ -350,6 +351,7 @@ RULE_REAL(Watermap, FishingLineStepSize, 1, "Basic step size for fishing calc, t
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Spells)
+RULE_BOOL(Spells, AllowExtraDmgSkill, false, "Allow ExtraDmgSkill from Items, Spells, and AAs to apply ExtraDmgAmt when the ExtraDmgSkill matches the casted Spells Skill Type.")
 RULE_INT(Spells, BaseCritChance, 0, "Base percentage chance that everyone has to crit a spell")
 RULE_INT(Spells, BaseCritRatio, 100, "Base percentage bonus to damage on a successful spell crit. 100=2xdamage")
 RULE_INT(Spells, WizCritLevel, 12, "Level wizards first get spell crits")
@@ -578,6 +580,7 @@ RULE_BOOL(TaskSystem, RecordCompletedOptionalActivities, false, "Record complete
 RULE_BOOL(TaskSystem, KeepOneRecordPerCompletedTask, true, "Keep only one record per completed task")
 RULE_BOOL(TaskSystem, EnableTaskProximity, true, "Enable task proximity system")
 RULE_INT(TaskSystem, RequestCooldownTimerSeconds, 15, "Seconds between allowing characters to request tasks (live-like default: 15 seconds)")
+RULE_BOOL(TaskSystem, ExpRewardsIgnoreLevelBasedEXPMods, false, "Rewarding Level Based Exp will ignore Rule LevelBasedEXPMods if true")
 RULE_INT(TaskSystem, SharedTasksWorldProcessRate, 6000, "Timer interval (milliseconds) that shared tasks are processed in world")
 RULE_INT(TaskSystem, SharedTasksTerminateTimerMS, 120000, "Delay (milliseconds) until a shared task is terminated if requirements are no longer met after member removal (default: 2 minutes)")
 RULE_BOOL(TaskSystem, UpdateOneElementPerTask, true, "If true (live-like) task updates only increment the first matching activity. If false all matching elements will be incremented.")

@@ -31,7 +31,6 @@ public:
 	* Accesses connection, it is intentional that this is not const (trust me).
 	*/
 	std::shared_ptr<EQ::Net::ServertalkServerConnection> GetConnection() { return m_connection; }
-	void SetConnection(std::shared_ptr<EQ::Net::ServertalkServerConnection> c) { m_connection = c; }
 
 	/**
 	 * @return

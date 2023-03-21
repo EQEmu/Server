@@ -362,6 +362,7 @@
 #define PETITION_NO_DELETE			5053	//You do not have a petition in the queue.
 #define PETITION_DELETED			5054	//Your petition was successfully deleted.
 #define ALREADY_IN_RAID				5060	//%1 is already in a raid.
+#define ALREADY_IN_YOUR_RAID		5077	//%1 is already in your raid.
 #define GAIN_RAIDEXP				5085	//You gained raid experience!
 #define DUNGEON_SEALED				5141	//The gateway to the dungeon is sealed off to you.  Perhaps you would be able to enter if you needed to adventure there.
 #define ADVENTURE_COMPLETE			5147	//You received %1 points for successfully completing the adventure.

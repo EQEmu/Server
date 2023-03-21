@@ -19,7 +19,6 @@
 #define WORLDDB_H_
 
 #include "../common/shareddb.h"
-#include "../common/zone_numbers.h"
 #include "../common/eq_packet.h"
 
 struct PlayerProfile_Struct;
@@ -39,12 +38,6 @@ public:
 
 	bool LoadCharacterCreateAllocations();
 	bool LoadCharacterCreateCombos();
-
-	bool StoreCharacter(
-		uint32 account_id,
-		PlayerProfile_Struct *p_player_profile_struct,
-		EQ::InventoryProfile *p_inventory_profile
-	);
 
 private:
 	void SetTitaniumDefaultStartZone(PlayerProfile_Struct* in_pp, CharCreate_Struct* in_cc);

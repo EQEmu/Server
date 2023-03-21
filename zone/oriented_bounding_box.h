@@ -12,9 +12,6 @@ public:
 	~OrientedBoundingBox() { }
 
 	bool ContainsPoint(const glm::vec3 &p) const;
-	
-	glm::mat4& GetTransformation() { return transformation; }
-	glm::mat4& GetInvertedTransformation() { return inverted_transformation; }
 private:
 	float min_x, max_x;
 	float min_y, max_y;

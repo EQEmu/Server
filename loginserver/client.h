@@ -198,21 +198,6 @@ private:
 
 	std::string m_stored_user;
 	std::string m_stored_pass;
-	void LoginOnNewConnection(std::shared_ptr<EQ::Net::DaybreakConnection> connection);
-	void LoginOnStatusChange(
-		std::shared_ptr<EQ::Net::DaybreakConnection> conn,
-		EQ::Net::DbProtocolStatus from,
-		EQ::Net::DbProtocolStatus to
-	);
-	void LoginOnStatusChangeIgnored(
-		std::shared_ptr<EQ::Net::DaybreakConnection> conn,
-		EQ::Net::DbProtocolStatus from,
-		EQ::Net::DbProtocolStatus to
-	);
-	void LoginOnPacketRecv(std::shared_ptr<EQ::Net::DaybreakConnection> conn, const EQ::Net::Packet &p);
-	void LoginSendSessionReady();
-	void LoginSendLogin();
-	void LoginProcessLoginResponse(const EQ::Net::Packet &p);
 	static bool ProcessHealthCheck(std::string username);
 };
 

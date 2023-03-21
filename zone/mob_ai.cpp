@@ -369,7 +369,7 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes, bool bInnates
 	return false;
 }
 
-bool NPC::AIDoSpellCast(uint8 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgainBefore) {
+bool NPC::AIDoSpellCast(int32 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgainBefore) {
 	LogAI("spellid [{}] tar [{}] mana [{}] Name [{}]", AIspells[i].spellid, tar->GetName(), mana_cost, spells[AIspells[i].spellid].name);
 	casting_spell_AIindex = i;
 
@@ -1085,7 +1085,7 @@ void Mob::AI_Process() {
 			}
 		}
 
-		if (!(m_PlayerState & static_cast<uint32>(PlayerState::Aggressive)))
+		if (!(GetPlayerState() & static_cast<uint32>(PlayerState::Aggressive)))
 			SendAddPlayerState(PlayerState::Aggressive);
 
 		// NPCs will forget people after 10 mins of not interacting with them or out of range
@@ -1381,7 +1381,7 @@ void Mob::AI_Process() {
 		}
 	}
 	else {
-		if (m_PlayerState & static_cast<uint32>(PlayerState::Aggressive))
+		if (GetPlayerState() & static_cast<uint32>(PlayerState::Aggressive))
 			SendRemovePlayerState(PlayerState::Aggressive);
 
 		if (IsPetStop()) // pet stop won't be engaged, so we will always get here and we want the above branch to execute
@@ -2068,16 +2068,19 @@ bool Mob::Flurry(ExtraAttackOptions *opts)
 
 bool Mob::AddRampage(Mob *mob)
 {
-	if (!mob)
+	if (!mob) {
 		return false;
+	}
 
-	if (!GetSpecialAbility(SPECATK_RAMPAGE))
+	if (!GetSpecialAbility(SPECATK_RAMPAGE)) {
 		return false;
+	}
 
 	for (int i = 0; i < RampageArray.size(); i++) {
 		// if Entity ID is already on the list don't add it again
-		if (mob->GetID() == RampageArray[i])
+		if (mob->GetID() == RampageArray[i]) {
 			return false;
+		}
 	}
 	RampageArray.push_back(mob->GetID());
 	return true;

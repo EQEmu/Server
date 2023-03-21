@@ -697,7 +697,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						uint32 gid = raid->GetGroup(caster->CastToClient());
 						if (gid < 12)
 							for (int i = 0; i < MAX_RAID_MEMBERS; ++i)
-								if (raid->members[i].member && raid->members[i].GroupNumber == gid)
+								if (raid->members[i].member && raid->members[i].group_number == gid)
 									raid->members[i].member->aa_timers[aaTimerWarcry].Start(time);
 					}
 				}
@@ -4244,27 +4244,8 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 			case SE_Illusion:
 			{
 				SendIllusionPacket(0, GetBaseGender());
-				if (GetRace() == OGRE) {
-					SendAppearancePacket(AT_Size, 9);
-				}
-				else if (GetRace() == TROLL) {
-					SendAppearancePacket(AT_Size, 8);
-				}
-				else if (GetRace() == VAHSHIR || GetRace() == FROGLOK || GetRace() == BARBARIAN) {
-					SendAppearancePacket(AT_Size, 7);
-				}
-				else if (GetRace() == HALF_ELF || GetRace() == WOOD_ELF || GetRace() == DARK_ELF) {
-					SendAppearancePacket(AT_Size, 5);
-				}
-				else if (GetRace() == DWARF) {
-					SendAppearancePacket(AT_Size, 4);
-				}
-				else if (GetRace() == HALFLING || GetRace() == GNOME) {
-					SendAppearancePacket(AT_Size, 3);
-				}
-				else {
-					SendAppearancePacket(AT_Size, 6);
-				}
+				// The GetSize below works because the above setting race to zero sets size back.
+				SendAppearancePacket(AT_Size, GetSize());
 
 				for (int x = EQ::textures::textureBegin; x <= EQ::textures::LastTintableTexture; x++) {
 					SendWearChange(x);

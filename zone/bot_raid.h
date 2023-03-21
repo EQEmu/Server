@@ -1,5 +1,5 @@
 /*	EQEMu: Everquest Server Emulator
-	Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
+	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.org)
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -16,26 +16,26 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-#ifndef NPCAI_H
-#define NPCAI_H
-#include "../common/types.h"
+#ifndef BOT_RAID_H
+#define BOT_RAID_H
 
 
+#include "bot_structs.h"
+#include "mob.h"
+#include "client.h"
+#include "pets.h"
+#include "heal_rotation.h"
+#include "groups.h"
+#include "corpse.h"
+#include "zonedb.h"
+#include "../common/zone_store.h"
+#include "string_ids.h"
+#include "../common/misc_functions.h"
+#include "../common/global_define.h"
+#include "guild_mgr.h"
+#include "worldserver.h"
+#include "raids.h"
 
-/*
-Even con color is wrong and so is the message but i can't seem to find it with a for loop.
-Seems more like a bitwise comparison client side..
-							con->level = 2; // GREEN
-							con->level = 18; // LIGHT BLUE
-							con->level = 4; // BLUE
-							con->level = 20; // EVEN
-							con->level = 15; // YELLOW
-							con->level = 13; // RED
-*/
-#define DEFAULT_AGGRORADIUS 70
-#define DEFAULT_FRENYRADIUS 70
-#define MAX_SHIELDRADIUS 20
+#include <sstream>
 
-uint32 GetLevelCon(uint8 PlayerLevel, uint8 NPCLevel);
-
-#endif
+#endif // BOT_RAID_H

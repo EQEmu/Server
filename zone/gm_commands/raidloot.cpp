@@ -67,4 +67,3 @@ void command_raidloot(Client *c, const Seperator *sep)
 		).c_str()
 	);
 }
-
