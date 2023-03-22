@@ -4129,7 +4129,7 @@ bool ZoneDatabase::LoadCharacterCorpseData(uint32 corpse_id, CharacterCorpseEntr
 		item.aug_4 = Strings::ToInt(row[r++]); 			// aug_4,
 		item.aug_5 = Strings::ToInt(row[r++]); 			// aug_5,
 		item.aug_6 = Strings::ToInt(row[r++]); 			// aug_6,
-		item.attuned = Strings::ToInt(row[r++]); 		// attuned,
+		item.attuned = Strings::ToInt(row[r++]) > 0 ? true : false; // attuned,
 
 		if (row[r]) {
 			item.custom_data = row[r++];

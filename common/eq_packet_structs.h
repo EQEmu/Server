@@ -5522,7 +5522,7 @@ struct ServerLootItem_Struct {
 	uint32 aug_4;		  // uint32	aug_4;
 	uint32 aug_5;		  // uint32	aug_5;
 	uint32 aug_6;		  // uint32	aug_5;
-	uint8  attuned;
+	bool attuned;
 	std::string custom_data;
 	uint32 ornamenticon;
 	uint32 ornamentidfile;
