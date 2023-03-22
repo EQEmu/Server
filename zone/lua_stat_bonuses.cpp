@@ -1097,7 +1097,7 @@ int32 Lua_StatBonuses::GetSkillReuseTime(int idx) const {
 
 int32 Lua_StatBonuses::GetSkillDamageAmount(int idx) const {
 	Lua_Safe_Call_Int();
-	return self->SkillDamageAmount[idx];
+	return idx == ALL_SKILLS ? self->SkillDamageAmount[EQ::skills::HIGHEST_SKILL + 1] : self->SkillDamageAmount[idx];
 }
 
 int Lua_StatBonuses::GetHPPercCap(int idx) const {

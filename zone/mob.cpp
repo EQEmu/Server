@@ -3999,7 +3999,7 @@ void Mob::QuestJournalledSay(Client *QuestInitiator, const char *str, Journal::O
 
 const char *Mob::GetCleanName()
 {
-	if (!strlen(clean_name)) { 
+	if (!strlen(clean_name)) {
 		CleanMobName(GetName(), clean_name);
 	}
 
@@ -5549,16 +5549,35 @@ int16 Mob::GetSkillReuseTime(uint16 skill)
 	return skill_reduction;
 }
 
-int Mob::GetSkillDmgAmt(uint16 skill)
+int Mob::GetSkillDmgAmt(int skill_id)
 {
 	int skill_dmg = 0;
 
-	// All skill dmg(only spells do this) + Skill specific
-	skill_dmg += spellbonuses.SkillDamageAmount[EQ::skills::HIGHEST_SKILL + 1] + itembonuses.SkillDamageAmount[EQ::skills::HIGHEST_SKILL + 1] + aabonuses.SkillDamageAmount[EQ::skills::HIGHEST_SKILL + 1]
-				+ itembonuses.SkillDamageAmount[skill] + spellbonuses.SkillDamageAmount[skill] + aabonuses.SkillDamageAmount[skill];
+	skill_dmg += (
+		spellbonuses.SkillDamageAmount[EQ::skills::HIGHEST_SKILL + 1] +
+		itembonuses.SkillDamageAmount[EQ::skills::HIGHEST_SKILL + 1] +
+		aabonuses.SkillDamageAmount[EQ::skills::HIGHEST_SKILL + 1]
+	);
 
-	skill_dmg += spellbonuses.SkillDamageAmount2[EQ::skills::HIGHEST_SKILL + 1] + itembonuses.SkillDamageAmount2[EQ::skills::HIGHEST_SKILL + 1]
-				+ itembonuses.SkillDamageAmount2[skill] + spellbonuses.SkillDamageAmount2[skill];
+	if (skill != ALL_SKILLS) {
+		skill_dmg += (
+			itembonuses.SkillDamageAmount[skill_id] +
+			spellbonuses.SkillDamageAmount[skill_id] +
+			aabonuses.SkillDamageAmount[skill_id]
+		);
+	}
+
+	skill_dmg += (
+		spellbonuses.SkillDamageAmount2[EQ::skills::HIGHEST_SKILL + 1] +
+		itembonuses.SkillDamageAmount2[EQ::skills::HIGHEST_SKILL + 1]
+	);
+
+	if (skill_id != ALL_SKILLS) {
+		skill_dmg += (
+			itembonuses.SkillDamageAmount2[skill_id] +
+			spellbonuses.SkillDamageAmount2[skill_id]
+		);
+	}
 
 	return skill_dmg;
 }

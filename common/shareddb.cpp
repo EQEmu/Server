@@ -1107,8 +1107,8 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 		item.SkillModType = Strings::ToUnsignedInt(row[ItemField::skillmodtype]);
 
 		// Extra Damage Skill
-		item.ExtraDmgSkill = Strings::ToUnsignedInt(row[ItemField::extradmgskill]);
-		item.ExtraDmgAmt = Strings::ToUnsignedInt(row[ItemField::extradmgamt]);
+		item.ExtraDmgSkill = Strings::ToInt(row[ItemField::extradmgskill]);
+		item.ExtraDmgAmt = Strings::ToInt(row[ItemField::extradmgamt]);
 
 		// Bard
 		item.BardType = Strings::ToUnsignedInt(row[ItemField::bardtype]);

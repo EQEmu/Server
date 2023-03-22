@@ -184,9 +184,7 @@ public:
 	void RogueAssassinate(Mob* other) override;
 	void DoClassAttacks(Mob *target, bool IsRiposte=false);
 	void CalcBonuses() override;
-	void CalcItemBonuses(StatBonuses* newbon);
-	void AddItemBonuses(const EQ::ItemInstance *inst, StatBonuses* newbon, bool isAug = false, bool isTribute = false, int rec_override = 0);
-	int CalcRecommendedLevelBonus(uint8 level, uint8 reclevel, int basestat);
+
 	void MakePet(uint16 spell_id, const char* pettype, const char *petname = nullptr) override;
 	FACTION_VALUE GetReverseFactionCon(Mob* iOther) override;
 	inline bool IsPet() override { return false; }

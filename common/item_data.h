@@ -131,7 +131,7 @@ namespace EQ
 			Mounts?
 			Ornamentations?
 			GuildBanners?
-			Collectible? 
+			Collectible?
 			Placeable?
 			(others?)
 */
@@ -449,8 +449,8 @@ namespace EQ
 		int8	Shielding;		// PoP: Shielding %
 		int8	StunResist;		// PoP: Stun Resist %
 		int8	StrikeThrough;	// PoP: Strike Through %
-		uint32	ExtraDmgSkill;
-		uint32	ExtraDmgAmt;
+		int32	ExtraDmgSkill;
+		int32	ExtraDmgAmt;
 		int8	SpellShield;	// PoP: Spell Shield %
 		int8	Avoidance;		// PoP: Avoidance +
 		int8	Accuracy;		// PoP: Accuracy +

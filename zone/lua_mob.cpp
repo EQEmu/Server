@@ -1964,10 +1964,10 @@ int Lua_Mob::GetFcDamageAmtIncoming(Lua_Mob caster, int32 spell_id)
 	return self->GetFcDamageAmtIncoming(caster, spell_id);
 }
 
-int Lua_Mob::GetSkillDmgAmt(uint16 skill)
+int Lua_Mob::GetSkillDmgAmt(int skill_id)
 {
 	Lua_Safe_Call_Int();
-	return self->GetSkillDmgAmt(skill);
+	return self->GetSkillDmgAmt(skill_id);
 }
 
 void Lua_Mob::SetAllowBeneficial(bool value) {

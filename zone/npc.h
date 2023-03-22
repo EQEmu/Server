@@ -162,7 +162,6 @@ public:
 	virtual void SetTarget(Mob* mob);
 	virtual uint16 GetSkill(EQ::skills::SkillType skill_num) const { if (skill_num <= EQ::skills::HIGHEST_SKILL) { return skills[skill_num]; } return 0; }
 
-	void CalcItemBonuses(StatBonuses *newbon);
 	virtual void CalcBonuses();
 	virtual int GetCurrentBuffSlots() const { return RuleI(Spells, MaxBuffSlotsNPC); }
 	virtual int GetCurrentSongSlots() const { return RuleI(Spells, MaxSongSlotsNPC); }
