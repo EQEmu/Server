@@ -701,7 +701,19 @@ void Mob::AddItemBonuses(const EQ::ItemInstance* inst, StatBonuses* b, bool is_a
 
 		if (item->ExtraDmgAmt != 0 && item->ExtraDmgSkill <= EQ::skills::HIGHEST_SKILL) {
 			if (item->ExtraDmgSkill == ALL_SKILLS) {
-				for (const auto& skill_id : EQ::skills::GetSecondaryCombatSkillsVector()) {
+				const EQ::skills::SkillType a[9] = {
+					EQ::skills::SkillBackstab,
+					EQ::skills::SkillBash,
+					EQ::skills::SkillDragonPunch, // Same ID as Tail Rake
+					EQ::skills::SkillEagleStrike,
+					EQ::skills::SkillFlyingKick,
+					EQ::skills::SkillKick,
+					EQ::skills::SkillRoundKick,
+					EQ::skills::SkillTigerClaw,
+					EQ::skills::SkillFrenzy
+				};
+
+				for (const auto& skill_id : a) {
 					if (
 						IsOfClientBotMerc() &&
 						RuleI(Character, ItemExtraDmgCap) >= 0 &&

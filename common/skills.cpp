@@ -20,7 +20,6 @@
 #include "skills.h"
 
 #include <string.h>
-#include <vector>
 
 
 bool EQ::skills::IsTradeskill(SkillType skill)
@@ -281,19 +280,4 @@ uint32 EQ::SkillProfile::GetSkill(int skill_id)
 		return 0;
 
 	return Skill[skill_id];
-}
-
-const std::vector<EQ::skills::SkillType> GetSecondaryCombatSkills()
-{
-	return {
-		EQ::skills::SkillBackstab,
-		EQ::skills::SkillBash,
-		EQ::skills::SkillDragonPunch, // Same ID as Tail Rake
-		EQ::skills::SkillEagleStrike,
-		EQ::skills::SkillFlyingKick,
-		EQ::skills::SkillKick,
-		EQ::skills::SkillRoundKick,
-		EQ::skills::SkillTigerClaw,
-		EQ::skills::SkillFrenzy
-	};
 }
