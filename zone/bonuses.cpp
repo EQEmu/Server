@@ -290,18 +290,10 @@ void Mob::AddItemBonuses(const EQ::ItemInstance* inst, StatBonuses* b, bool is_a
 		return;
 	}
 
-	if (IsClient()) {
-		CastToClient()->Message(Chat::Yellow, "We have item data.");
-	}
-
 	if (!is_tribute && !inst->IsEquipable(GetBaseRace(), GetClass())) {
 		if (item->ItemType != EQ::item::ItemTypeFood && item->ItemType != EQ::item::ItemTypeDrink) {
 			return;
 		}
-	}
-
-	if (IsClient()) {
-		CastToClient()->Message(Chat::Yellow, "We can equip the item.");
 	}
 
 	const auto current_level = GetLevel();
@@ -310,22 +302,10 @@ void Mob::AddItemBonuses(const EQ::ItemInstance* inst, StatBonuses* b, bool is_a
 		return;
 	}
 
-	if (IsClient()) {
-		CastToClient()->Message(Chat::Yellow, "We have the required level for item.");
-	}
-
 	if (!is_ammo_item) {
-		if (IsClient()) {
-			CastToClient()->Message(Chat::Yellow, "Not an ammo item.");
-		}
-
 		const auto recommended_level = is_augment ? recommended_level_override : inst->GetItemRecommendedLevel(true);
 
 		if (current_level >= recommended_level) {
-			if (IsClient()) {
-				CastToClient()->Message(Chat::Yellow, "We have the recommended level or higher.");
-			}
-
 			b->HP += item->HP;
 			b->Mana += item->Mana;
 			b->Endurance += item->Endur;
@@ -445,10 +425,6 @@ void Mob::AddItemBonuses(const EQ::ItemInstance* inst, StatBonuses* b, bool is_a
 
 		if (item->EnduranceRegen != 0) {
 			b->EnduranceRegen += item->EnduranceRegen;
-		}
-
-		if (IsClient()) {
-			CastToClient()->Message(Chat::Yellow, "We have passed endurance regen.");
 		}
 
 		if (item->Attack != 0) {
@@ -621,10 +597,6 @@ void Mob::AddItemBonuses(const EQ::ItemInstance* inst, StatBonuses* b, bool is_a
 			}
 		}
 
-		if (IsClient()) {
-			CastToClient()->Message(Chat::Yellow, "We have passed focus effect.");
-		}
-
 		switch (item->BardType) {
 			case EQ::item::ItemTypeAllInstrumentTypes: { // (e.g. Singing Short Sword)
 				if (item->BardValue > b->singingMod) {
@@ -727,35 +699,45 @@ void Mob::AddItemBonuses(const EQ::ItemInstance* inst, StatBonuses* b, bool is_a
 			}
 		}
 
-		if (IsClient()) {
-			CastToClient()->Message(Chat::Yellow, "We are right before extra damage.");
-		}
-
 		if (item->ExtraDmgAmt != 0 && item->ExtraDmgSkill <= EQ::skills::HIGHEST_SKILL) {
-			const auto s = item->ExtraDmgSkill == ALL_SKILLS ? (EQ::skills::HIGHEST_SKILL + 1) : item->ExtraDmgSkill;
-			if (
-				RuleI(Character, ItemExtraDmgCap) >= 0 &&
-				(b->SkillDamageAmount[s] + item->ExtraDmgAmt) > RuleI(Character, ItemExtraDmgCap)
-			) {
-				b->SkillDamageAmount[s] = RuleI(Character, ItemExtraDmgCap);
+			if (item->ExtraDmgSkill == ALL_SKILLS) {
+				std::vector<int> secondary_combat_skills = {
+					EQ::skills::SkillBackstab,
+					EQ::skills::SkillBash,
+					EQ::skills::SkillDragonPunch, // Same ID as Tail Rake
+					EQ::skills::SkillEagleStrike,
+					EQ::skills::SkillFlyingKick,
+					EQ::skills::SkillKick,
+					EQ::skills::SkillRoundKick,
+					EQ::skills::SkillTigerClaw,
+					EQ::skills::SkillFrenzy
+				};
+
+				for (const auto& skill_id : secondary_combat_skills) {
+					if (
+						IsOfClientBotMerc() &&
+						RuleI(Character, ItemExtraDmgCap) >= 0 &&
+						(b->SkillDamageAmount[skill_id] + item->ExtraDmgAmt) > RuleI(Character, ItemExtraDmgCap)
+					) {
+						b->SkillDamageAmount[skill_id] = RuleI(Character, ItemExtraDmgCap);
+					} else {
+						b->SkillDamageAmount[skill_id] += item->ExtraDmgAmt;
+					}
+				}
 			} else {
-				b->SkillDamageAmount[s] += item->ExtraDmgAmt;
+				if (
+					IsOfClientBotMerc() &&
+					RuleI(Character, ItemExtraDmgCap) >= 0 &&
+					(b->SkillDamageAmount[item->ExtraDmgSkill] + item->ExtraDmgAmt) > RuleI(Character, ItemExtraDmgCap)
+				) {
+					b->SkillDamageAmount[item->ExtraDmgSkill] = RuleI(Character, ItemExtraDmgCap);
+				} else {
+					b->SkillDamageAmount[item->ExtraDmgSkill] += item->ExtraDmgAmt;
+				}
 			}
-
-			if (IsClient()) {
-				CastToClient()->Message(Chat::Yellow, fmt::format("Adding item bonuses, got {} more extra damage.", item->ExtraDmgAmt).c_str());
-			}
-		}
-
-		if (IsClient()) {
-			CastToClient()->Message(Chat::Yellow, "We have passed extra damage.");
 		}
 
 		if (!is_augment) {
-			if (IsClient()) {
-				CastToClient()->Message(Chat::Yellow, "We are checking augment slots.");
-			}
-
 			for (int i = EQ::invaug::SOCKET_BEGIN; i <= EQ::invaug::SOCKET_END; i++) {
 				const auto* augment = inst->GetAugment(i);
 				if (!augment) {
