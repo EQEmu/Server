@@ -131,7 +131,7 @@ bool ParseAddress(const char* iAddress, uint32* oIP, uint16* oPort, char* errbuf
 		if (*oIP == 0)
 			return false;
 		if (oPort)
-			*oPort = Strings::ToInt(sep.arg[1]);
+			*oPort = Strings::ToUnsignedInt(sep.arg[1]);
 		return true;
 	}
 	return false;

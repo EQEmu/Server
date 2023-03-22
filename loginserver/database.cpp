@@ -178,7 +178,7 @@ unsigned int Database::GetFreeID(const std::string &loginserver)
 
 	auto row = results.begin();
 
-	return Strings::ToInt(row[0]);
+	return Strings::ToUnsignedInt(row[0]);
 }
 
 /**
@@ -647,7 +647,7 @@ Database::DbLoginServerAdmin Database::GetLoginServerAdmin(const std::string &ac
 	if (results.RowCount() == 1) {
 		auto row = results.begin();
 		r.loaded                  = true;
-		r.id                      = Strings::ToInt(row[0]);
+		r.id                      = Strings::ToUnsignedInt(row[0]);
 		r.account_name            = row[1];
 		r.account_password        = row[2];
 		r.first_name              = row[3];
@@ -683,7 +683,7 @@ Database::DbLoginServerAccount Database::GetLoginServerAccountByAccountName(
 	if (results.RowCount() == 1) {
 		auto row = results.begin();
 		r.loaded             = true;
-		r.id                 = Strings::ToInt(row[0]);
+		r.id                 = Strings::ToUnsignedInt(row[0]);
 		r.account_name       = row[1];
 		r.account_password   = row[2];
 		r.account_email      = row[3];
