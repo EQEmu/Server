@@ -5559,7 +5559,7 @@ int Mob::GetSkillDmgAmt(int skill_id)
 		aabonuses.SkillDamageAmount[EQ::skills::HIGHEST_SKILL + 1]
 	);
 
-	if (skill != ALL_SKILLS) {
+	if (skill_id != ALL_SKILLS) {
 		skill_dmg += (
 			itembonuses.SkillDamageAmount[skill_id] +
 			spellbonuses.SkillDamageAmount[skill_id] +
