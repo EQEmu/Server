@@ -75,82 +75,83 @@ void Corpse::SendLootReqErrorPacket(Client* client, LootResponse response) {
 }
 
 Corpse* Corpse::LoadCharacterCorpseEntity(uint32 in_dbid, uint32 in_charid, std::string in_charname, const glm::vec4& position, std::string time_of_death, bool rezzed, bool was_at_graveyard, uint32 guild_consent_id) {
-	CharacterCorpseEntry corpse_entry;
-	if (!database.LoadCharacterCorpseData(in_dbid, corpse_entry)) {
+	CharacterCorpseEntry ce;
+	if (!database.LoadCharacterCorpseData(in_dbid, ce)) {
 		LogDebug("Unable to create a corpse entity for [{}] [{}] [{}]", in_dbid, in_charid, in_charname);
 		return nullptr;
 	}
 
 	ItemList itemlist;
-	for (auto& item : corpse_entry.items) {
+	for (auto &item: ce.items) {
 		auto tmp = new ServerLootItem_Struct;
 
 		tmp->equip_slot = item.equip_slot;
-		tmp->item_id = item.item_id;
-		tmp->charges = item.charges;
-		tmp->lootslot = item.lootslot;
-		tmp->aug_1 = item.aug_1;
-		tmp->aug_2 = item.aug_2;
-		tmp->aug_3 = item.aug_3;
-		tmp->aug_4 = item.aug_4;
-		tmp->aug_5 = item.aug_5;
-		tmp->aug_6 = item.aug_6;
-		tmp->attuned = item.attuned;
+		tmp->item_id    = item.item_id;
+		tmp->charges    = item.charges;
+		tmp->lootslot   = item.lootslot;
+		tmp->aug_1      = item.aug_1;
+		tmp->aug_2      = item.aug_2;
+		tmp->aug_3      = item.aug_3;
+		tmp->aug_4      = item.aug_4;
+		tmp->aug_5      = item.aug_5;
+		tmp->aug_6      = item.aug_6;
+		tmp->attuned    = item.attuned;
 
 		itemlist.push_back(tmp);
 	}
 
 	/* Create Corpse Entity */
-	auto pc = new Corpse(in_dbid,		  // uint32 in_dbid
-			     in_charid,		  // uint32 in_charid
-			     in_charname.c_str(), // char* in_charname
-			     &itemlist,		  // ItemList* in_itemlist
-			     corpse_entry.copper,	 // uint32 in_copper
-			     corpse_entry.silver,	 // uint32 in_silver
-			     corpse_entry.gold,		  // uint32 in_gold
-			     corpse_entry.plat,		  // uint32 in_plat
-				 position,
-			     corpse_entry.size,	// float in_size
-			     corpse_entry.gender,      // uint8 in_gender
-			     corpse_entry.race,	// uint16 in_race
-			     corpse_entry.class_,      // uint8 in_class
-			     corpse_entry.deity,       // uint8 in_deity
-			     corpse_entry.level,       // uint8 in_level
-			     corpse_entry.texture,     // uint8 in_texture
-			     corpse_entry.helmtexture, // uint8 in_helmtexture
-			     corpse_entry.exp,	 // uint32 in_rezexp
-			     was_at_graveyard  // bool wasAtGraveyard
-			     );
-	
-	if (corpse_entry.locked)
+	auto pc = new Corpse(
+		in_dbid,          // uint32 in_dbid
+		in_charid,          // uint32 in_charid
+		in_charname.c_str(), // char* in_charname
+		&itemlist,          // ItemList* in_itemlist
+		ce.copper,     // uint32 in_copper
+		ce.silver,     // uint32 in_silver
+		ce.gold,          // uint32 in_gold
+		ce.plat,          // uint32 in_plat
+		position,
+		ce.size,    // float in_size
+		ce.gender,      // uint8 in_gender
+		ce.race,    // uint16 in_race
+		ce.class_,      // uint8 in_class
+		ce.deity,       // uint8 in_deity
+		ce.level,       // uint8 in_level
+		ce.texture,     // uint8 in_texture
+		ce.helmtexture, // uint8 in_helmtexture
+		ce.exp,     // uint32 in_rezexp
+		was_at_graveyard  // bool wasAtGraveyard
+	);
+
+	if (ce.locked)
 		pc->Lock();
-	
+
 	/* Load Item Tints */
-	pc->item_tint.Head.Color = corpse_entry.item_tint.Head.Color;
-	pc->item_tint.Chest.Color = corpse_entry.item_tint.Chest.Color;
-	pc->item_tint.Arms.Color = corpse_entry.item_tint.Arms.Color;
-	pc->item_tint.Wrist.Color = corpse_entry.item_tint.Wrist.Color;
-	pc->item_tint.Hands.Color = corpse_entry.item_tint.Hands.Color;
-	pc->item_tint.Legs.Color = corpse_entry.item_tint.Legs.Color;
-	pc->item_tint.Feet.Color = corpse_entry.item_tint.Feet.Color;
-	pc->item_tint.Primary.Color = corpse_entry.item_tint.Primary.Color;
-	pc->item_tint.Secondary.Color = corpse_entry.item_tint.Secondary.Color;
-	
+	pc->item_tint.Head.Color      = ce.item_tint.Head.Color;
+	pc->item_tint.Chest.Color     = ce.item_tint.Chest.Color;
+	pc->item_tint.Arms.Color      = ce.item_tint.Arms.Color;
+	pc->item_tint.Wrist.Color     = ce.item_tint.Wrist.Color;
+	pc->item_tint.Hands.Color     = ce.item_tint.Hands.Color;
+	pc->item_tint.Legs.Color      = ce.item_tint.Legs.Color;
+	pc->item_tint.Feet.Color      = ce.item_tint.Feet.Color;
+	pc->item_tint.Primary.Color   = ce.item_tint.Primary.Color;
+	pc->item_tint.Secondary.Color = ce.item_tint.Secondary.Color;
+
 	/* Load Physical Appearance */
-	pc->haircolor = corpse_entry.haircolor;
-	pc->beardcolor = corpse_entry.beardcolor;
-	pc->eyecolor1 = corpse_entry.eyecolor1;
-	pc->eyecolor2 = corpse_entry.eyecolor2;
-	pc->hairstyle = corpse_entry.hairstyle;
-	pc->luclinface = corpse_entry.face;
-	pc->beard = corpse_entry.beard;
-	pc->drakkin_heritage = corpse_entry.drakkin_heritage;
-	pc->drakkin_tattoo = corpse_entry.drakkin_tattoo;
-	pc->drakkin_details = corpse_entry.drakkin_details;
+	pc->haircolor        = ce.haircolor;
+	pc->beardcolor       = ce.beardcolor;
+	pc->eyecolor1        = ce.eyecolor1;
+	pc->eyecolor2        = ce.eyecolor2;
+	pc->hairstyle        = ce.hairstyle;
+	pc->luclinface       = ce.face;
+	pc->beard            = ce.beard;
+	pc->drakkin_heritage = ce.drakkin_heritage;
+	pc->drakkin_tattoo   = ce.drakkin_tattoo;
+	pc->drakkin_details  = ce.drakkin_details;
 	pc->IsRezzed(rezzed);
-	pc->become_npc = false;
+	pc->become_npc         = false;
 	pc->consented_guild_id = guild_consent_id;
-	
+
 	pc->UpdateEquipmentLight(); // itemlist populated above..need to determine actual values
 
 	return pc;
@@ -695,70 +696,72 @@ void Corpse::CalcCorpseName() {
 }
 
 bool Corpse::Save() {
-	if (!is_player_corpse)
+	if (!is_player_corpse) {
 		return true;
+	}
 
-	if (!is_corpse_changed)
+	if (!is_corpse_changed) {
 		return true;
+	}
 
-	CharacterCorpseEntry corpse_entry;
+	CharacterCorpseEntry ce;
 
-	corpse_entry.size = size;
-	corpse_entry.locked = is_locked;
-	corpse_entry.copper = copper;
-	corpse_entry.silver = silver;
-	corpse_entry.gold = gold;
-	corpse_entry.plat = platinum;
-	corpse_entry.race = race;
-	corpse_entry.class_ = class_;
-	corpse_entry.gender = gender;
-	corpse_entry.deity = deity;
-	corpse_entry.level = level;
-	corpse_entry.texture = texture;
-	corpse_entry.helmtexture = helmtexture;
-	corpse_entry.exp = rez_experience;
-	corpse_entry.item_tint = item_tint;
-	corpse_entry.haircolor = haircolor;
-	corpse_entry.beardcolor = beardcolor;
-	corpse_entry.eyecolor2 = eyecolor1;
-	corpse_entry.hairstyle = hairstyle;
-	corpse_entry.face = luclinface;
-	corpse_entry.beard = beard;
-	corpse_entry.drakkin_heritage = drakkin_heritage;
-	corpse_entry.drakkin_tattoo = drakkin_tattoo;
-	corpse_entry.drakkin_details = drakkin_details;
+	ce.size             = size;
+	ce.locked           = is_locked;
+	ce.copper           = copper;
+	ce.silver           = silver;
+	ce.gold             = gold;
+	ce.plat             = platinum;
+	ce.race             = race;
+	ce.class_           = class_;
+	ce.gender           = gender;
+	ce.deity            = deity;
+	ce.level            = level;
+	ce.texture          = texture;
+	ce.helmtexture      = helmtexture;
+	ce.exp              = rez_experience;
+	ce.item_tint        = item_tint;
+	ce.haircolor        = haircolor;
+	ce.beardcolor       = beardcolor;
+	ce.eyecolor2        = eyecolor1;
+	ce.hairstyle        = hairstyle;
+	ce.face             = luclinface;
+	ce.beard            = beard;
+	ce.drakkin_heritage = drakkin_heritage;
+	ce.drakkin_tattoo   = drakkin_tattoo;
+	ce.drakkin_details  = drakkin_details;
 
-	for (auto& item : itemlist) {
-		CharacterCorpseItemEntry item_entry;
+	for (auto &item: itemlist) {
+		CharacterCorpseItemEntry e;
 
-		item_entry.item_id = item->item_id;
-		item_entry.equip_slot = item->equip_slot;
-		item_entry.charges = item->charges;
-		item_entry.lootslot = item->lootslot;
-		item_entry.aug_1 = item->aug_1;
-		item_entry.aug_2 = item->aug_2;
-		item_entry.aug_3 = item->aug_3;
-		item_entry.aug_4 = item->aug_4;
-		item_entry.aug_5 = item->aug_5;
-		item_entry.aug_6 = item->aug_6;
-		item_entry.attuned = item->attuned;
-		item_entry.custom_data = item->custom_data;
-		item_entry.ornamenticon = item->ornamenticon;
-		item_entry.ornamentidfile = item->ornamentidfile;
-		item_entry.ornament_hero_model = item->ornament_hero_model;
+		e.item_id             = item->item_id;
+		e.equip_slot          = item->equip_slot;
+		e.charges             = item->charges;
+		e.lootslot            = item->lootslot;
+		e.aug_1               = item->aug_1;
+		e.aug_2               = item->aug_2;
+		e.aug_3               = item->aug_3;
+		e.aug_4               = item->aug_4;
+		e.aug_5               = item->aug_5;
+		e.aug_6               = item->aug_6;
+		e.attuned             = item->attuned;
+		e.custom_data         = item->custom_data;
+		e.ornamenticon        = item->ornamenticon;
+		e.ornamentidfile      = item->ornamentidfile;
+		e.ornament_hero_model = item->ornament_hero_model;
 
-		corpse_entry.items.push_back(std::move(item_entry));
+		ce.items.push_back(std::move(e));
 	}
 
 	/* Create New Corpse*/
 	if (corpse_db_id == 0) {
-		corpse_db_id = database.SaveCharacterCorpse(char_id, corpse_name, zone->GetZoneID(), zone->GetInstanceID(), corpse_entry, m_Position, consented_guild_id);
+		corpse_db_id = database.SaveCharacterCorpse(char_id, corpse_name, zone->GetZoneID(), zone->GetInstanceID(), ce, m_Position, consented_guild_id);
 	}
 	/* Update Corpse Data */
 	else{
-		corpse_db_id = database.UpdateCharacterCorpse(corpse_db_id, char_id, corpse_name, zone->GetZoneID(), zone->GetInstanceID(), corpse_entry, m_Position, consented_guild_id, IsRezzed());
+		corpse_db_id = database.UpdateCharacterCorpse(corpse_db_id, char_id, corpse_name, zone->GetZoneID(), zone->GetInstanceID(), ce, m_Position, consented_guild_id, IsRezzed());
 	}
-	
+
 	return true;
 }
 
@@ -809,16 +812,16 @@ uint32 Corpse::CountItems() {
 	return itemlist.size();
 }
 
-void Corpse::AddItem(uint32 itemnum, 
-	uint16 charges, 
-	int16 slot, 
-	uint32 aug1, 
-	uint32 aug2, 
-	uint32 aug3, 
-	uint32 aug4, 
-	uint32 aug5, 
-	uint32 aug6, 
-	bool attuned, 
+void Corpse::AddItem(uint32 itemnum,
+	uint16 charges,
+	int16 slot,
+	uint32 aug1,
+	uint32 aug2,
+	uint32 aug3,
+	uint32 aug4,
+	uint32 aug5,
+	uint32 aug6,
+	bool attuned,
 	const std::string& custom_data,
 	uint32 ornamenticon,
 	uint32 ornamentidfile,
@@ -1451,8 +1454,8 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 		if (item_data) {
 			inst = database.CreateItem(item, item_data ? item_data->charges : 0, item_data->aug_1,
 				item_data->aug_2, item_data->aug_3, item_data->aug_4,
-				item_data->aug_5, item_data->aug_6, item_data->attuned, 
-				item_data->custom_data, item_data->ornamenticon, 
+				item_data->aug_5, item_data->aug_6, item_data->attuned,
+				item_data->custom_data, item_data->ornamenticon,
 				item_data->ornamentidfile, item_data->ornament_hero_model);
 		}
 		else {
