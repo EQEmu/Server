@@ -175,12 +175,13 @@ namespace EQ
 		void SetAttuned(bool flag)				{ m_attuned = flag; }
 
 		std::string GetCustomDataString() const;
-		std::string GetCustomData(std::string identifier);
-		void SetCustomData(std::string identifier, std::string value);
-		void SetCustomData(std::string identifier, int value);
-		void SetCustomData(std::string identifier, float value);
-		void SetCustomData(std::string identifier, bool value);
-		void DeleteCustomData(std::string identifier);
+		std::string GetCustomData(const std::string &identifier);
+		void SetCustomDataString(const std::string& str);
+		void SetCustomData(const std::string &identifier, const std::string& value);
+		void SetCustomData(const std::string &identifier, int value);
+		void SetCustomData(const std::string &identifier, float value);
+		void SetCustomData(const std::string &identifier, bool value);
+		void DeleteCustomData(const std::string& identifier);
 
 		// Allows treatment of this object as though it were a pointer to m_item
 		operator bool() const { return (m_item != nullptr); }

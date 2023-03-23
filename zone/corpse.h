@@ -100,7 +100,20 @@ class Corpse : public Mob {
 	void	RemoveItem(uint16 lootslot);
 	void	RemoveItem(ServerLootItem_Struct* item_data);
 	void	RemoveItemByID(uint32 item_id, int quantity = 1);
-	void	AddItem(uint32 itemnum, uint16 charges, int16 slot = 0, uint32 aug1 = 0, uint32 aug2 = 0, uint32 aug3 = 0, uint32 aug4 = 0, uint32 aug5 = 0, uint32 aug6 = 0, uint8 attuned = 0);
+	void	AddItem(uint32 itemnum, 
+		uint16 charges, 
+		int16 slot = 0, 
+		uint32 aug1 = 0, 
+		uint32 aug2 = 0, 
+		uint32 aug3 = 0, 
+		uint32 aug4 = 0, 
+		uint32 aug5 = 0, 
+		uint32 aug6 = 0, 
+		bool attuned = false, 
+		const std::string &custom_data = std::string(), 
+		uint32 ornamenticon = 0,
+		uint32 ornamentidfile = 0,
+		uint32 ornament_hero_model = 0);
 
 	/* Corpse: Coin */
 	void	SetCash(uint32 in_copper, uint32 in_silver, uint32 in_gold, uint32 in_platinum);

@@ -126,7 +126,11 @@ public:
 		uint32 aug4 = 0,
 		uint32 aug5 = 0,
 		uint32 aug6 = 0,
-		bool attuned = 0
+		bool attuned = false,
+		const std::string& custom_data = "",
+		uint32 ornamenticon = 0,
+		uint32 ornamentidfile = 0,
+		uint32 ornament_hero_model = 0
 	);
 	EQ::ItemInstance *CreateItem(
 		const EQ::ItemData *item,
@@ -137,7 +141,11 @@ public:
 		uint32 aug4 = 0,
 		uint32 aug5 = 0,
 		uint32 aug6 = 0,
-		bool attuned = 0
+		bool attuned = false,
+		const std::string &custom_data = "",
+		uint32 ornamenticon = 0,
+		uint32 ornamentidfile = 0,
+		uint32 ornament_hero_model = 0
 	);
 	EQ::ItemInstance *CreateBaseItem(const EQ::ItemData *item, int16 charges = 0);
 

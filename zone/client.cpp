@@ -11050,7 +11050,11 @@ void Client::SummonBaggedItems(uint32 bag_item_id, const std::vector<ServerLootI
 				item.aug_4,
 				item.aug_5,
 				item.aug_6,
-				item.attuned
+				item.attuned,
+				item.custom_data,
+				item.ornamenticon,
+				item.ornamentidfile,
+				item.ornament_hero_model
 			);
 			if (summoned_bag_item)
 			{

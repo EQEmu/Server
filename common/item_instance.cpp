@@ -840,7 +840,20 @@ std::string EQ::ItemInstance::GetCustomDataString() const {
 	return ret_val;
 }
 
-std::string EQ::ItemInstance::GetCustomData(std::string identifier) {
+void EQ::ItemInstance::SetCustomDataString(const std::string& str)
+{
+	auto components = Strings::Split(str, "^");
+	auto value_count = components.size() / 2;
+
+	for (auto i = 0; i < value_count; i++) {
+		auto identifier = components[i * 2];
+		auto value = components[(i * 2) + 1];
+
+		SetCustomData(identifier, value);
+	}
+}
+
+std::string EQ::ItemInstance::GetCustomData(const std::string& identifier) {
 	std::map<std::string, std::string>::const_iterator iter = m_custom_data.find(identifier);
 	if (iter != m_custom_data.end()) {
 		return iter->second;
@@ -849,33 +862,33 @@ std::string EQ::ItemInstance::GetCustomData(std::string identifier) {
 	return "";
 }
 
-void EQ::ItemInstance::SetCustomData(std::string identifier, std::string value) {
+void EQ::ItemInstance::SetCustomData(const std::string& identifier, const std::string& value) {
 	DeleteCustomData(identifier);
 	m_custom_data[identifier] = value;
 }
 
-void EQ::ItemInstance::SetCustomData(std::string identifier, int value) {
+void EQ::ItemInstance::SetCustomData(const std::string& identifier, int value) {
 	DeleteCustomData(identifier);
 	std::stringstream ss;
 	ss << value;
 	m_custom_data[identifier] = ss.str();
 }
 
-void EQ::ItemInstance::SetCustomData(std::string identifier, float value) {
+void EQ::ItemInstance::SetCustomData(const std::string& identifier, float value) {
 	DeleteCustomData(identifier);
 	std::stringstream ss;
 	ss << value;
 	m_custom_data[identifier] = ss.str();
 }
 
-void EQ::ItemInstance::SetCustomData(std::string identifier, bool value) {
+void EQ::ItemInstance::SetCustomData(const std::string& identifier, bool value) {
 	DeleteCustomData(identifier);
 	std::stringstream ss;
 	ss << value;
 	m_custom_data[identifier] = ss.str();
 }
 
-void EQ::ItemInstance::DeleteCustomData(std::string identifier) {
+void EQ::ItemInstance::DeleteCustomData(const std::string& identifier) {
 	auto iter = m_custom_data.find(identifier);
 	if (iter != m_custom_data.end()) {
 		m_custom_data.erase(iter);

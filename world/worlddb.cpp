@@ -946,28 +946,7 @@ bool WorldDatabase::GetCharSelInventory(uint32 account_id, char *name, EQ::Inven
 
 		if (row[11]) {
 			std::string data_str(row[11]);
-			std::string idAsString;
-			std::string value;
-			bool use_id = true;
-
-			for (int i = 0; i < data_str.length(); ++i) {
-				if (data_str[i] == '^') {
-					if (!use_id) {
-						inst->SetCustomData(idAsString, value);
-						idAsString.clear();
-						value.clear();
-					}
-
-					use_id = !use_id;
-					continue;
-				}
-
-				char v = data_str[i];
-				if (use_id)
-					idAsString.push_back(v);
-				else
-					value.push_back(v);
-			}
+			inst->SetCustomDataString(data_str);
 		}
 
 		inst->SetOrnamentIcon(ornament_icon);

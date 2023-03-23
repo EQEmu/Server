@@ -179,32 +179,32 @@ std::string Lua_ItemInst::GetCustomDataString() {
 	return self->GetCustomDataString();
 }
 
-void Lua_ItemInst::SetCustomData(std::string identifier, std::string value) {
+void Lua_ItemInst::SetCustomData(const std::string &identifier, const std::string& value) {
 	Lua_Safe_Call_Void();
 	self->SetCustomData(identifier, value);
 }
 
-void Lua_ItemInst::SetCustomData(std::string identifier, int value) {
+void Lua_ItemInst::SetCustomData(const std::string& identifier, int value) {
 	Lua_Safe_Call_Void();
 	self->SetCustomData(identifier, value);
 }
 
-void Lua_ItemInst::SetCustomData(std::string identifier, float value) {
+void Lua_ItemInst::SetCustomData(const std::string& identifier, float value) {
 	Lua_Safe_Call_Void();
 	self->SetCustomData(identifier, value);
 }
 
-void Lua_ItemInst::SetCustomData(std::string identifier, bool value) {
+void Lua_ItemInst::SetCustomData(const std::string& identifier, bool value) {
 	Lua_Safe_Call_Void();
 	self->SetCustomData(identifier, value);
 }
 
-std::string Lua_ItemInst::GetCustomData(std::string identifier) {
+std::string Lua_ItemInst::GetCustomData(const std::string& identifier) {
 	Lua_Safe_Call_String();
 	return self->GetCustomData(identifier);
 }
 
-void Lua_ItemInst::DeleteCustomData(std::string identifier) {
+void Lua_ItemInst::DeleteCustomData(const std::string& identifier) {
 	Lua_Safe_Call_Void();
 	self->DeleteCustomData(identifier);
 }
@@ -296,13 +296,13 @@ luabind::scope lua_register_iteminst() {
 	.def("Clone", (Lua_ItemInst(Lua_ItemInst::*)(void))&Lua_ItemInst::Clone)
 	.def("ContainsAugmentByID", (bool(Lua_ItemInst::*)(uint32))&Lua_ItemInst::ContainsAugmentByID)
 	.def("CountAugmentByID", (int(Lua_ItemInst::*)(uint32))&Lua_ItemInst::CountAugmentByID)
-	.def("DeleteCustomData", (void(Lua_ItemInst::*)(std::string))&Lua_ItemInst::DeleteCustomData)
+	.def("DeleteCustomData", (void(Lua_ItemInst::*)(const std::string &))&Lua_ItemInst::DeleteCustomData)
 	.def("GetAugment", (Lua_ItemInst(Lua_ItemInst::*)(int))&Lua_ItemInst::GetAugment)
 	.def("GetAugmentItemID", (uint32(Lua_ItemInst::*)(int))&Lua_ItemInst::GetAugmentItemID)
 	.def("GetAugmentType", (int(Lua_ItemInst::*)(void))&Lua_ItemInst::GetAugmentType)
 	.def("GetCharges", (int(Lua_ItemInst::*)(void))&Lua_ItemInst::GetCharges)
 	.def("GetColor", (uint32(Lua_ItemInst::*)(void))&Lua_ItemInst::GetColor)
-	.def("GetCustomData", (std::string(Lua_ItemInst::*)(std::string))&Lua_ItemInst::GetCustomData)
+	.def("GetCustomData", (std::string(Lua_ItemInst::*)(const std::string &))&Lua_ItemInst::GetCustomData)
 	.def("GetCustomDataString", (std::string(Lua_ItemInst::*)(void))&Lua_ItemInst::GetCustomDataString)
 	.def("GetExp", (uint32(Lua_ItemInst::*)(void))&Lua_ItemInst::GetExp)
 	.def("GetID", (uint32(Lua_ItemInst::*)(void))&Lua_ItemInst::GetID)
@@ -329,10 +329,10 @@ luabind::scope lua_register_iteminst() {
 	.def("RemoveTaskDeliveredItems", &Lua_ItemInst::RemoveTaskDeliveredItems)
 	.def("SetCharges", (void(Lua_ItemInst::*)(int))&Lua_ItemInst::SetCharges)
 	.def("SetColor", (void(Lua_ItemInst::*)(uint32))&Lua_ItemInst::SetColor)
-	.def("SetCustomData", (void(Lua_ItemInst::*)(std::string,bool))&Lua_ItemInst::SetCustomData)
-	.def("SetCustomData", (void(Lua_ItemInst::*)(std::string,float))&Lua_ItemInst::SetCustomData)
-	.def("SetCustomData", (void(Lua_ItemInst::*)(std::string,int))&Lua_ItemInst::SetCustomData)
-	.def("SetCustomData", (void(Lua_ItemInst::*)(std::string,std::string))&Lua_ItemInst::SetCustomData)
+	.def("SetCustomData", (void(Lua_ItemInst::*)(const std::string&,bool))&Lua_ItemInst::SetCustomData)
+	.def("SetCustomData", (void(Lua_ItemInst::*)(const std::string&,float))&Lua_ItemInst::SetCustomData)
+	.def("SetCustomData", (void(Lua_ItemInst::*)(const std::string&,int))&Lua_ItemInst::SetCustomData)
+	.def("SetCustomData", (void(Lua_ItemInst::*)(const std::string&,const std::string&))&Lua_ItemInst::SetCustomData)
 	.def("SetExp", (void(Lua_ItemInst::*)(uint32))&Lua_ItemInst::SetExp)
 	.def("SetInstNoDrop", (void(Lua_ItemInst::*)(bool))&Lua_ItemInst::SetInstNoDrop)
 	.def("SetPrice", (void(Lua_ItemInst::*)(uint32))&Lua_ItemInst::SetPrice)

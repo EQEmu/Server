@@ -5522,7 +5522,11 @@ struct ServerLootItem_Struct {
 	uint32 aug_4;		  // uint32	aug_4;
 	uint32 aug_5;		  // uint32	aug_5;
 	uint32 aug_6;		  // uint32	aug_5;
-	uint8  attuned;
+	bool attuned;
+	std::string custom_data;
+	uint32 ornamenticon;
+	uint32 ornamentidfile;
+	uint32 ornament_hero_model;
 	uint16 trivial_min_level;
 	uint16 trivial_max_level;
 	uint16 npc_min_level;

@@ -1387,7 +1387,11 @@ void Client::PutLootInInventory(int16 slot_id, const EQ::ItemInstance &inst, Ser
 				bag_item_data[index]->aug_4,
 				bag_item_data[index]->aug_5,
 				bag_item_data[index]->aug_6,
-				bag_item_data[index]->attuned
+				bag_item_data[index]->attuned,
+				bag_item_data[index]->custom_data,
+				bag_item_data[index]->ornamenticon,
+				bag_item_data[index]->ornamentidfile,
+				bag_item_data[index]->ornament_hero_model
 				);
 
 			// Dump bag contents to cursor in the event that owning bag is not the first cursor item
@@ -3958,7 +3962,7 @@ bool Client::InterrogateInventory_error(int16 head, int16 index, const EQ::ItemI
 	return false;
 }
 
-void EQ::InventoryProfile::SetCustomItemData(uint32 character_id, int16 slot_id, std::string identifier, std::string value) {
+void EQ::InventoryProfile::SetCustomItemData(uint32 character_id, int16 slot_id, const std::string &identifier, const std::string &value) {
 	EQ::ItemInstance *inst = GetItem(slot_id);
 	if(inst) {
 		inst->SetCustomData(identifier, value);
@@ -3966,7 +3970,7 @@ void EQ::InventoryProfile::SetCustomItemData(uint32 character_id, int16 slot_id,
 	}
 }
 
-void EQ::InventoryProfile::SetCustomItemData(uint32 character_id, int16 slot_id, std::string identifier, int value) {
+void EQ::InventoryProfile::SetCustomItemData(uint32 character_id, int16 slot_id, const std::string &identifier, int value) {
 	EQ::ItemInstance *inst = GetItem(slot_id);
 	if(inst) {
 		inst->SetCustomData(identifier, value);
@@ -3974,7 +3978,7 @@ void EQ::InventoryProfile::SetCustomItemData(uint32 character_id, int16 slot_id,
 	}
 }
 
-void EQ::InventoryProfile::SetCustomItemData(uint32 character_id, int16 slot_id, std::string identifier, float value) {
+void EQ::InventoryProfile::SetCustomItemData(uint32 character_id, int16 slot_id, const std::string &identifier, float value) {
 	EQ::ItemInstance *inst = GetItem(slot_id);
 	if(inst) {
 		inst->SetCustomData(identifier, value);
@@ -3982,7 +3986,7 @@ void EQ::InventoryProfile::SetCustomItemData(uint32 character_id, int16 slot_id,
 	}
 }
 
-void EQ::InventoryProfile::SetCustomItemData(uint32 character_id, int16 slot_id, std::string identifier, bool value) {
+void EQ::InventoryProfile::SetCustomItemData(uint32 character_id, int16 slot_id, const std::string &identifier, bool value) {
 	EQ::ItemInstance *inst = GetItem(slot_id);
 	if(inst) {
 		inst->SetCustomData(identifier, value);
@@ -3990,7 +3994,7 @@ void EQ::InventoryProfile::SetCustomItemData(uint32 character_id, int16 slot_id,
 	}
 }
 
-std::string EQ::InventoryProfile::GetCustomItemData(int16 slot_id, std::string identifier) {
+std::string EQ::InventoryProfile::GetCustomItemData(int16 slot_id, const std::string &identifier) {
 	EQ::ItemInstance *inst = GetItem(slot_id);
 	if(inst) {
 		return inst->GetCustomData(identifier);
@@ -3998,7 +4002,7 @@ std::string EQ::InventoryProfile::GetCustomItemData(int16 slot_id, std::string i
 	return "";
 }
 
-const int EQ::InventoryProfile::GetItemStatValue(uint32 item_id, std::string identifier) {
+const int EQ::InventoryProfile::GetItemStatValue(uint32 item_id, const std::string &identifier) {
 	if (identifier.empty()) {
 		return 0;
 	}
