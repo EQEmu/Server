@@ -1017,10 +1017,10 @@ bool ZoneDatabase::LoadCharacterBindPoint(uint32 character_id, PlayerProfile_Str
 
 		pp->binds[index].zone_id = Strings::ToInt(row[1]);
 		pp->binds[index].instance_id = Strings::ToInt(row[2]);
-		pp->binds[index].x = Strings::ToInt(row[3]);
-		pp->binds[index].y = Strings::ToInt(row[4]);
-		pp->binds[index].z = Strings::ToInt(row[5]);
-		pp->binds[index].heading = Strings::ToInt(row[6]);
+		pp->binds[index].x = Strings::ToFloat(row[3]);
+		pp->binds[index].y = Strings::ToFloat(row[4]);
+		pp->binds[index].z = Strings::ToFloat(row[5]);
+		pp->binds[index].heading = Strings::ToFloat(row[6]);
 	}
 
 	return true;
