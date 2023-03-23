@@ -12177,13 +12177,11 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 				//Added to remove all bots if the Bot_Owner is removed from the Raid
 				//Does not camp the Bots, just removes from the raid
 				if (c_to_disband) {
-					raid->HandleOfflineBots(c_to_disband->CharacterID());
+					uint32 i = raid->GetPlayerIndex(raid_command_packet->leader_name);
+					raid->SetNewRaidLeader(i);
 					raid->HandleBotGroupDisband(c_to_disband->CharacterID());
+          raid->HandleOfflineBots(c_to_disband->CharacterID());
 					raid->RemoveMember(raid_command_packet->leader_name);
-					if (raid->IsLeader(c_to_disband->GetName())) {
-						uint32 i = raid->GetPlayerIndex(raid_command_packet->leader_name);
-						raid->SetNewRaidLeader(i);
-					}
 					raid->SendGroupDisband(c_to_disband);
 					raid->GroupUpdate(group);
 					if (!raid->RaidCount()) {
@@ -12214,8 +12212,8 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 					break;
 				}
 			}
+			uint32 i = raid->GetPlayerIndex(raid_command_packet->leader_name);
 			if (group < 12) {
-				uint32 i = raid->GetPlayerIndex(raid_command_packet->leader_name);
 				if (raid->members[i].is_group_leader) { //assign group leader to someone else
 					for (int x = 0; x < MAX_RAID_MEMBERS; x++) {
 						if (strlen(raid->members[x].member_name) > 0 && i != x) {
@@ -12228,8 +12226,8 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 						}
 					}
 				}
-				raid->SetNewRaidLeader(i);
 			}
+			raid->SetNewRaidLeader(i);
 			raid->RemoveMember(raid_command_packet->leader_name);
 			Client* c = entity_list.GetClientByName(raid_command_packet->leader_name);
 			if (c) {

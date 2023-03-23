@@ -2157,7 +2157,7 @@ void Raid::SetNewRaidLeader(uint32 i)
 				continue;
 			}
 
-			if (m.member && strlen(m.member_name) > 0 && strcmp(m.member_name, m.member_name) != 0) {
+			if (m.member && strlen(m.member_name) > 0 && strcmp(m.member_name, members[i].member_name) != 0) {
 				SetRaidLeader(members[i].member_name, m.member_name);
 				UpdateRaidAAs();
 				SendAllRaidLeadershipAA();
