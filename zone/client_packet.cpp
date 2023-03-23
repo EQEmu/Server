@@ -12177,6 +12177,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 				//Added to remove all bots if the Bot_Owner is removed from the Raid
 				//Does not camp the Bots, just removes from the raid
 				if (c_to_disband) {
+					raid->HandleOfflineBots(c_to_disband->CharacterID());
 					raid->HandleBotGroupDisband(c_to_disband->CharacterID());
 					raid->RemoveMember(raid_command_packet->leader_name);
 					if (raid->IsLeader(c_to_disband->GetName())) {

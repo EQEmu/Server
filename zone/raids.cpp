@@ -1703,11 +1703,10 @@ void Raid::VerifyRaid()
 				//attribute before calling a client function or casting to client.
 				b = entity_list.GetBotByBotName(m.member_name);
 				m.member = b->CastToClient();
-				m.is_bot = true; //Used to identify those members who are Bots
+				m.is_bot = true;
 			}
 			else {
 				m.member = nullptr;
-				m.is_bot = false;
 			}
 		}
 
