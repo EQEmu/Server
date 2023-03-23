@@ -499,7 +499,7 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 	ExtendedProfile_Struct* e_pp;
 	uint32 pplen = 0;
 	uint32 i;
-	int character_id = 0;
+	uint32 character_id = 0;
 	int account_id = 0;
 	int number_of_characters = 0;
 	int printppdebug = 0; /* Prints Player Profile */
@@ -929,12 +929,12 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			char_iter_count++;
-			squery = StringFormat("SELECT `id`, `profile`, `name`, `level`, `account_id`, `firstlogon`, `lfg`, `lfp`, `mailkey`, `xtargets`, `inspectmessage`, `extprofile` FROM `character_` WHERE `id` = %i", Strings::ToInt(row[0]));
+			squery = StringFormat("SELECT `id`, `profile`, `name`, `level`, `account_id`, `firstlogon`, `lfg`, `lfp`, `mailkey`, `xtargets`, `inspectmessage`, `extprofile` FROM `character_` WHERE `id` = %i", Strings::ToUnsignedInt(row[0]));
 			auto results2 = QueryDatabase(squery);
 			auto row2 = results2.begin();
 			pp = (Convert::PlayerProfile_Struct*)row2[1];
 			e_pp = (ExtendedProfile_Struct*)row2[11];
-			character_id = Strings::ToInt(row[0]);
+			character_id = Strings::ToUnsignedInt(row[0]);
 			account_id = Strings::ToInt(row2[4]);
 			/* Convert some data from the character_ table that is still relevant */
 			firstlogon = Strings::ToUnsignedInt(row2[5]);

@@ -1448,9 +1448,9 @@ bool ZoneDatabase::LoadAlternateAdvancement(Client *c) {
 
 	int i = 0;
 	for(auto row = results.begin(); row != results.end(); ++row) {
-		uint32 aa = Strings::ToInt(row[0]);
-		uint32 value = Strings::ToInt(row[1]);
-		uint32 charges = Strings::ToInt(row[2]);
+		uint32 aa = Strings::ToUnsignedInt(row[0]);
+		uint32 value = Strings::ToUnsignedInt(row[1]);
+		uint32 charges = Strings::ToUnsignedInt(row[2]);
 
 		auto rank = zone->GetAlternateAdvancementRank(aa);
 		if(!rank) {
@@ -1775,7 +1775,7 @@ bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std
 	if(results.Success()) {
 		for(auto row = results.begin(); row != results.end(); ++row) {
 			auto ability = new AA::Ability;
-			ability->id = Strings::ToInt(row[0]);
+			ability->id = Strings::ToUnsignedInt(row[0]);
 			ability->name = row[1];
 			ability->category = Strings::ToInt(row[2]);
 			//EQ client has classes left shifted by one bit for some odd reason
@@ -1786,8 +1786,8 @@ bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std
 			ability->status = Strings::ToInt(row[7]);
 			ability->type = Strings::ToInt(row[8]);
 			ability->charges = Strings::ToInt(row[9]);
-			ability->grant_only = Strings::ToInt(row[10]) != 0 ? true : false;
-			ability->reset_on_death = Strings::ToInt(row[11]) != 0 ? true : false;
+			ability->grant_only = Strings::ToBool(row[10]);
+			ability->reset_on_death = Strings::ToBool(row[11]);
 			ability->first_rank_id = Strings::ToInt(row[12]);
 			ability->first = nullptr;
 
@@ -1814,7 +1814,7 @@ bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std
 	if(results.Success()) {
 		for(auto row = results.begin(); row != results.end(); ++row) {
 			auto rank = new AA::Rank;
-			rank->id = Strings::ToInt(row[0]);
+			rank->id = Strings::ToUnsignedInt(row[0]);
 			rank->upper_hotkey_sid = Strings::ToInt(row[1]);
 			rank->lower_hotkey_sid = Strings::ToInt(row[2]);
 			rank->title_sid = Strings::ToInt(row[3]);
@@ -1846,8 +1846,8 @@ bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std
 	if(results.Success()) {
 		for(auto row = results.begin(); row != results.end(); ++row) {
 			AA::RankEffect effect;
-			int rank_id = Strings::ToInt(row[0]);
-			effect.slot = Strings::ToInt(row[1]);
+			uint32 rank_id = Strings::ToUnsignedInt(row[0]);
+			effect.slot = Strings::ToUnsignedInt(row[1]);
 			effect.effect_id = Strings::ToInt(row[2]);
 			effect.base_value = Strings::ToInt(row[3]);
 			effect.limit_value = Strings::ToInt(row[4]);
@@ -1871,7 +1871,7 @@ bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std
 	results = QueryDatabase(query);
 	if(results.Success()) {
 		for(auto row = results.begin(); row != results.end(); ++row) {
-			int rank_id = Strings::ToInt(row[0]);
+			uint32 rank_id = Strings::ToUnsignedInt(row[0]);
 			int aa_id = Strings::ToInt(row[1]);
 			int points = Strings::ToInt(row[2]);
 
