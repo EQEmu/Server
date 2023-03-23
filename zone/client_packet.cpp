@@ -12180,6 +12180,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 					uint32 i = raid->GetPlayerIndex(raid_command_packet->leader_name);
 					raid->SetNewRaidLeader(i);
 					raid->HandleBotGroupDisband(c_to_disband->CharacterID());
+          raid->HandleOfflineBots(c_to_disband->CharacterID());
 					raid->RemoveMember(raid_command_packet->leader_name);
 					raid->SendGroupDisband(c_to_disband);
 					raid->GroupUpdate(group);

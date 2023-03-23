@@ -116,6 +116,30 @@ void Raid::HandleBotGroupDisband(uint32 owner, uint32 gid)
 	}
 }
 
+// we need to cleanup any camped/offline bots when the owner leaves the Raid
+void Raid::HandleOfflineBots(uint32 owner) {
+	std::list<BotsAvailableList> bots_list;
+	if (!database.botdb.LoadBotsList(owner, bots_list)) {
+		return;
+	}
+
+	for (const auto& b: bots_list) {
+		if (IsRaidMember(b.Name)) {
+			for (const auto& m: members) {
+				if (m.is_bot && strcmp(m.member_name, b.Name) == 0) {
+					uint32 gid = GetGroup(m.member_name);
+					SendRaidGroupRemove(m.member_name, gid);
+					RemoveMember(m.member_name);
+					GroupUpdate(gid);
+					if (!RaidCount()) {
+						DisbandRaid();
+					}
+				}
+			}
+		}
+	}
+}
+
 uint8 Bot::GetNumberNeedingHealedInRaidGroup(uint8& need_healed, uint8 hpr, bool includePets, Raid* raid) {
 
 	if (raid) {
@@ -170,8 +194,8 @@ void Bot::CreateBotRaid(Mob* invitee, Client* invitor, bool group_invite, Raid* 
 	Group* g_invitee = invitee->GetGroup();
 	Group* g_invitor = invitor->GetGroup();
 
-	if (g_invitee && invitor->IsClient()) {
-		if (!g_invitee->IsLeader(invitee)) {
+	if (g_invitee && invitor->IsClient() && !g_invitee->IsLeader(invitee)) {
+		if (g_invitee->GetLeader()) {
 			invitor->Message(
 				Chat::Red,
 				fmt::format(
@@ -179,6 +203,9 @@ void Bot::CreateBotRaid(Mob* invitee, Client* invitor, bool group_invite, Raid* 
 					g_invitee->GetLeader()->GetCleanName()
 				).c_str()
 			);
+			return;
+		} else {
+			invitor->Message(Chat::Red, "You can only invite group leaders or ungrouped bots.");
 			return;
 		}
 	}
