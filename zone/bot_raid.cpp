@@ -118,7 +118,6 @@ void Raid::HandleBotGroupDisband(uint32 owner, uint32 gid)
 
 // we need to cleanup any camped/offline bots when the owner leaves the Raid
 void Raid::HandleOfflineBots(uint32 owner) {
-
 	std::list<BotsAvailableList> bots_list;
 	if (!database.botdb.LoadBotsList(owner, bots_list)) {
 		return;
