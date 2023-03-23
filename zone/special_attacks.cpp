@@ -747,11 +747,10 @@ void Client::RangedAttack(Mob* other, bool CanDoubleAttack) {
 	LogCombat("Shooting [{}] with bow [{}] ([{}]) and arrow [{}] ([{}])", other->GetName(), RangeItem->Name, RangeItem->ID, AmmoItem->Name, AmmoItem->ID);
 
 	//look for ammo in inventory if we only have 1 left...
-	if(Ammo->GetCharges() == 1) {
+	if (Ammo->GetCharges() == 1) {
 		//first look for quivers
-		int r;
 		bool found = false;
-		for (r = EQ::invslot::GENERAL_BEGIN; r <= EQ::invslot::GENERAL_END; r++) {
+		for (int r = EQ::invslot::GENERAL_BEGIN; r <= EQ::invslot::GENERAL_END; r++) {
 			const EQ::ItemInstance *pi = m_inv[r];
 			if (pi == nullptr || !pi->IsClassBag())
 				continue;
@@ -760,16 +759,17 @@ void Client::RangedAttack(Mob* other, bool CanDoubleAttack) {
 				continue;
 
 			//we found a quiver, look for the ammo in it
-			int i;
-			for (i = 0; i < bagitem->BagSlots; i++) {
-				EQ::ItemInstance* baginst = pi->GetItem(i);
-				if(!baginst)
-					continue;	//empty
-				if(baginst->GetID() == Ammo->GetID()) {
+			for (int i = 0; i < bagitem->BagSlots; i++) {
+				const EQ::ItemInstance* baginst = pi->GetItem(i);
+				if (!baginst) {
+					continue;
+				}
+
+				if (baginst->GetID() == Ammo->GetID()) {
 					//we found it... use this stack
 					//the item wont change, but the instance does
 					Ammo = baginst;
-					ammo_slot = m_inv.CalcSlotId(r, i);
+					ammo_slot = EQ::InventoryProfile::CalcSlotId(r, i);
 					found = true;
 					LogCombat("Using ammo from quiver stack at slot [{}]. [{}] in stack", ammo_slot, Ammo->GetCharges());
 					break;
@@ -794,18 +794,17 @@ void Client::RangedAttack(Mob* other, bool CanDoubleAttack) {
 	float range = RangeItem->Range + AmmoItem->Range + GetRangeDistTargetSizeMod(GetTarget());
 	LogCombat("Calculated bow range to be [{}]", range);
 	range *= range;
-	float dist = DistanceSquared(m_Position, other->GetPosition());
-	if(dist > range) {
+	if (float dist = DistanceSquared(m_Position, other->GetPosition()); dist > range) {
 		LogCombat("Ranged attack out of range client should catch this. ([{}] > [{}]).\n", dist, range);
 		MessageString(Chat::Red,TARGET_OUT_OF_RANGE);//Client enforces range and sends the message, this is a backup just incase.
 		return;
 	}
-	else if(dist < (RuleI(Combat, MinRangedAttackDist)*RuleI(Combat, MinRangedAttackDist))){
+	else if (dist < (RuleI(Combat, MinRangedAttackDist)*RuleI(Combat, MinRangedAttackDist))){
 		MessageString(Chat::Yellow,RANGED_TOO_CLOSE);//Client enforces range and sends the message, this is a backup just incase.
 		return;
 	}
 
-	if(!IsAttackAllowed(other) ||
+	if (!IsAttackAllowed(other) ||
 		IsCasting() ||
 		IsSitting() ||
 		(DivineAura() && !GetGM()) ||
@@ -845,12 +844,12 @@ void Client::RangedAttack(Mob* other, bool CanDoubleAttack) {
 }
 
 void Mob::DoArcheryAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, const EQ::ItemInstance *Ammo,
-			     uint16 weapon_damage, int16 chance_mod, int16 focus, int ReuseTime, uint32 range_id,
-			     uint32 ammo_id, const EQ::ItemData *AmmoItem, int AmmoSlot, float speed, bool DisableProcs)
+							int32 weapon_damage, int16 chance_mod, int16 focus, int ReuseTime, uint32 range_id,
+							uint32 ammo_id, const EQ::ItemData *AmmoItem, int AmmoSlot, float speed, bool DisableProcs)
 {
 	if ((other == nullptr ||
-	     ((IsClient() && CastToClient()->dead) || (other->IsClient() && other->CastToClient()->dead)) ||
-	     HasDied() || (!IsAttackAllowed(other)) || (other->GetInvul() || other->GetSpecialAbility(IMMUNE_MELEE)))) {
+			((IsClient() && CastToClient()->dead) || (other->IsClient() && other->CastToClient()->dead)) ||
+			HasDied() || (!IsAttackAllowed(other)) || (other->GetInvul() || other->GetSpecialAbility(IMMUNE_MELEE)))) {
 		return;
 	}
 
@@ -911,7 +910,7 @@ void Mob::DoArcheryAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, co
 
 	if (LaunchProjectile) { // 1: Shoot the Projectile once we calculate weapon damage.
 		TryProjectileAttack(other, AmmoItem, EQ::skills::SkillArchery, (WDmg + ADmg), RangeWeapon,
-				    Ammo, AmmoSlot, speed, DisableProcs);
+							Ammo, AmmoSlot, speed, DisableProcs);
 		return;
 	}
 
@@ -920,10 +919,14 @@ void Mob::DoArcheryAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, co
 	}
 
 	if (WDmg > 0 || ADmg > 0) {
-		if (WDmg < 0)
+		if (WDmg < 0) {
 			WDmg = 0;
-		if (ADmg < 0)
+		}
+
+		if (ADmg < 0) {
 			ADmg = 0;
+		}
+
 		int MaxDmg = WDmg + ADmg;
 		hate = ((WDmg + ADmg));
 
@@ -934,10 +937,11 @@ void Mob::DoArcheryAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, co
 			LogCombat("Bow DMG [{}], Arrow DMG [{}], Max Damage [{}]", WDmg, ADmg, MaxDmg);
 		}
 
-		if (MaxDmg == 0)
+		if (MaxDmg == 0) {
 			MaxDmg = 1;
+		}
 
-		DamageHitInfo my_hit;
+		DamageHitInfo my_hit {};
 		my_hit.base_damage = MaxDmg;
 		my_hit.min_damage = 0;
 		my_hit.damage_done = 1;
@@ -953,8 +957,9 @@ void Mob::DoArcheryAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, co
 		TotalDmg = DMG_INVULNERABLE;
 	}
 
-	if (IsClient() && !CastToClient()->GetFeigned())
+	if (IsClient() && !CastToClient()->GetFeigned()) {
 		other->AddToHateList(this, hate, 0);
+	}
 
 	other->Damage(this, TotalDmg, SPELL_UNKNOWN, EQ::skills::SkillArchery);
 
@@ -1443,7 +1448,7 @@ void Client::ThrowingAttack(Mob* other, bool CanDoubleAttack) { //old was 51
 }
 
 void Mob::DoThrowingAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, const EQ::ItemData *AmmoItem,
-	uint16 weapon_damage, int16 chance_mod, int16 focus, int ReuseTime, uint32 range_id,
+	int32 weapon_damage, int16 chance_mod, int16 focus, int ReuseTime, uint32 range_id,
 	int AmmoSlot, float speed, bool DisableProcs)
 {
 	if ((other == nullptr ||
@@ -1490,7 +1495,7 @@ void Mob::DoThrowingAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, c
 	int WDmg = 0;
 
 	if (!weapon_damage) {
-		if (IsClient() && RangeWeapon) {
+		if (IsOfClientBot() && RangeWeapon) {
 			WDmg = GetWeaponDamage(other, RangeWeapon);
 		}
 		else if (AmmoItem) {
@@ -1514,7 +1519,7 @@ void Mob::DoThrowingAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, c
 	int TotalDmg = 0;
 
 	if (WDmg > 0) {
-		DamageHitInfo my_hit;
+		DamageHitInfo my_hit {};
 		my_hit.base_damage = WDmg;
 		my_hit.min_damage = 0;
 		my_hit.damage_done = 1;
@@ -1533,8 +1538,9 @@ void Mob::DoThrowingAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, c
 		TotalDmg = DMG_INVULNERABLE;
 	}
 
-	if (IsClient() && !CastToClient()->GetFeigned())
+	if (IsClient() && !CastToClient()->GetFeigned()) {
 		other->AddToHateList(this, WDmg, 0);
+	}
 
 	other->Damage(this, TotalDmg, SPELL_UNKNOWN, EQ::skills::SkillThrowing);
 
@@ -2299,11 +2305,12 @@ int Mob::TryAssassinate(Mob *defender, EQ::skills::SkillType skillInUse)
 	return 0;
 }
 
-void Mob::DoMeleeSkillAttackDmg(Mob *other, uint16 weapon_damage, EQ::skills::SkillType skillinuse, int16 chance_mod,
+void Mob::DoMeleeSkillAttackDmg(Mob *other, int32 weapon_damage, EQ::skills::SkillType skillinuse, int16 chance_mod,
 				int16 focus, bool CanRiposte, int ReuseTime)
 {
-	if (!CanDoSpecialAttack(other))
+	if (!CanDoSpecialAttack(other)) {
 		return;
+	}
 
 	/*
 		For spells using skill value 98 (feral swipe ect) server sets this to 67 automatically.
@@ -2311,34 +2318,34 @@ void Mob::DoMeleeSkillAttackDmg(Mob *other, uint16 weapon_damage, EQ::skills::Sk
 		TODO: We need to stop moving skill 98, it's suppose to just be a dummy skill AFAIK
 		Spells using offense should use the skill of your primary, if you can use it, otherwise h2h
 	*/
-	if (skillinuse == EQ::skills::SkillBegging)
+	if (skillinuse == EQ::skills::SkillBegging) {
 		skillinuse = EQ::skills::SkillOffense;
+	}
 
 	int64 damage = 0;
 	int64 hate = 0;
-	if (hate == 0 && weapon_damage > 1)
+	if (hate == 0 && weapon_damage > 1) {
 		hate = weapon_damage;
+	}
 
 	if (weapon_damage > 0) {
 		if (focus) {
 			weapon_damage += weapon_damage * focus / 100;
 		}
 
-		if (skillinuse == EQ::skills::SkillBash) {
-			if (IsClient()) {
-				EQ::ItemInstance *item =
-				    CastToClient()->GetInv().GetItem(EQ::invslot::slotSecondary);
-				if (item) {
-					if (item->GetItem()->ItemType == EQ::item::ItemTypeShield) {
-						hate += item->GetItem()->AC;
-					}
-					const EQ::ItemData *itm = item->GetItem();
-					hate = hate * (100 + GetFuriousBash(itm->Focus.Effect)) / 100;
+		if (skillinuse == EQ::skills::SkillBash && IsClient()) {
+			EQ::ItemInstance *item =
+				CastToClient()->GetInv().GetItem(EQ::invslot::slotSecondary);
+			if (item) {
+				if (item->GetItem()->ItemType == EQ::item::ItemTypeShield) {
+					hate += item->GetItem()->AC;
 				}
+				const EQ::ItemData *itm = item->GetItem();
+				hate = hate * (100 + GetFuriousBash(itm->Focus.Effect)) / 100;
 			}
 		}
 
-		DamageHitInfo my_hit;
+		DamageHitInfo my_hit {};
 		my_hit.base_damage = weapon_damage;
 		my_hit.min_damage = 0;
 		my_hit.damage_done = 1;
@@ -2349,8 +2356,9 @@ void Mob::DoMeleeSkillAttackDmg(Mob *other, uint16 weapon_damage, EQ::skills::Sk
 		// slot range exclude ripe etc ...
 		my_hit.hand = CanRiposte ? EQ::invslot::slotRange : EQ::invslot::slotPrimary;
 
-		if (IsNPC())
+		if (IsNPC()) {
 			my_hit.min_damage = CastToNPC()->GetMinDamage();
+		}
 
 		DoAttack(other, my_hit);
 		damage = my_hit.damage_done;
@@ -2365,8 +2373,9 @@ void Mob::DoMeleeSkillAttackDmg(Mob *other, uint16 weapon_damage, EQ::skills::Sk
 	other->AddToHateList(this, hate, 0);
 	other->Damage(this, damage, SPELL_UNKNOWN, skillinuse);
 
-	if (HasDied())
+	if (HasDied()) {
 		return;
+	}
 
 	TryCastOnSkillUse(other, skillinuse);
 }
