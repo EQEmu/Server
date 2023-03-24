@@ -807,6 +807,9 @@ void Raid::BalanceMana(int32 penalty, uint32 gid, float range, Mob* caster, int3
 	int manataken_tmp = 0;
 
 	for (const auto& m : members) {
+		if (m.is_bot) {
+			continue;
+		}
 		if (m.member && m.group_number == gid && m.member->GetMaxMana() > 0) {
 			distance = DistanceSquared(caster->GetPosition(), m.member->GetPosition());
 
@@ -827,6 +830,9 @@ void Raid::BalanceMana(int32 penalty, uint32 gid, float range, Mob* caster, int3
 	manataken /= numMem;
 
 	for (const auto& m : members) {
+		if (m.is_bot) {
+			continue;
+		}
 		if (m.member && m.group_number == gid) {
 			distance = DistanceSquared(caster->GetPosition(), m.member->GetPosition());
 
@@ -834,14 +840,14 @@ void Raid::BalanceMana(int32 penalty, uint32 gid, float range, Mob* caster, int3
 				if ((m.member->GetMaxMana() - manataken) < 1) {
 					m.member->SetMana(1);
 
-					if (!m.is_bot && m.member->IsClient()) {
+					if (m.member->IsClient()) {
 						m.member->CastToClient()->SendManaUpdate();
 					}
 				}
 				else {
 					m.member->SetMana(m.member->GetMaxMana() - manataken);
 
-					if (!m.is_bot && m.member->IsClient()) {
+					if (m.member->IsClient()) {
 						m.member->CastToClient()->SendManaUpdate();
 					}
 				}
