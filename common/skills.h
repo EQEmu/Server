@@ -24,6 +24,7 @@
 
 #include <string>
 #include <map>
+#include <vector>
 
 
 namespace EQ
@@ -170,6 +171,7 @@ namespace EQ
 		bool IsMeleeDmg(SkillType skill);
 
 		extern const std::map<SkillType, std::string>& GetSkillTypeMap();
+		extern std::vector<SkillType> GetExtraDamageSkills();
 
 		std::string GetSkillName(SkillType skill);
 	} /*skills*/

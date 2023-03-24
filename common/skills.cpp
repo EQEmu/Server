@@ -260,13 +260,31 @@ const std::map<EQ::skills::SkillType, std::string>& EQ::skills::GetSkillTypeMap(
 	return skill_type_map;
 }
 
+std::vector<EQ::skills::SkillType> EQ::skills::GetExtraDamageSkills()
+{
+	std::vector<EQ::skills::SkillType> v = {
+		EQ::skills::SkillBackstab,
+		EQ::skills::SkillBash,
+		EQ::skills::SkillDragonPunch, // Same ID as Tail Rake
+		EQ::skills::SkillEagleStrike,
+		EQ::skills::SkillFlyingKick,
+		EQ::skills::SkillKick,
+		EQ::skills::SkillRoundKick,
+		EQ::skills::SkillRoundKick,
+		EQ::skills::SkillTigerClaw,
+		EQ::skills::SkillFrenzy
+	};
+
+	return v;
+}
+
 std::string EQ::skills::GetSkillName(SkillType skill)
 {
 	if (skill >= Skill1HBlunt && skill <= Skill2HPiercing) {
 		auto skills = GetSkillTypeMap();
 		return skills[skill];
 	}
-	return std::string();
+	return {};
 }
 
 EQ::SkillProfile::SkillProfile()
