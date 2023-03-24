@@ -606,7 +606,7 @@ namespace HeroicBonusBucket
 	const std::string StrShieldAC			= "HSTR-ShieldAC";
 	const std::string StrMaxEndurance		= "HSTR-MaxEndurance";
 	const std::string StrEnduranceRegen		= "HSTR-EnduranceRegen";
-	const std::string StaMaxHP				= "HSTA-MaxHP";
+	const std::string StaMaxHP			= "HSTA-MaxHP";
 	const std::string StaHPRegen			= "HSTA-HPRegen";
 	const std::string StaMaxEndurance		= "HSTA-MaxEndurance";
 	const std::string StaEnduranceRegen		= "HSTA-EnduranceRegen";
