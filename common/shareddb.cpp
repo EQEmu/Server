@@ -964,7 +964,7 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 
 		// Flags
 		item.ArtifactFlag = Strings::ToBool(row[ItemField::artifactflag]);
-		item.Attuneable = !disable_attuneable && Strings::ToBool(row[ItemField::attuneable]) != 0;
+		item.Attuneable = !disable_attuneable && Strings::ToBool(row[ItemField::attuneable]);
 		item.BenefitFlag = Strings::ToBool(row[ItemField::benefitflag]) != 0;
 		item.FVNoDrop = Strings::ToInt(row[ItemField::fvnodrop]) != 0;
 		item.Magic = Strings::ToBool(row[ItemField::magic]) != 0;
