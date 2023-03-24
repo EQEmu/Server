@@ -6435,7 +6435,7 @@ int32 Bot::LevelRegen() {
 
 int64 Bot::CalcHPRegen() {
 	int32 regen = (LevelRegen() + itembonuses.HPRegen + spellbonuses.HPRegen);
-	regen +=itembonuses.heroic_hp_regen;
+	regen += itembonuses.heroic_hp_regen;
 	regen += (aabonuses.HPRegen + GroupLeadershipAAHealthRegeneration());
 
 	regen = ((regen * RuleI(Character, HPRegenMultiplier)) / 100);
@@ -9274,8 +9274,7 @@ float Bot::GetBotCasterMaxRange(float melee_distance_max) {// Calculate caster d
 
 int32 Bot::CalcItemATKCap()
 {
-	int cap = RuleI(Character, ItemATKCap) + itembonuses.ItemATKCap + spellbonuses.ItemATKCap + aabonuses.ItemATKCap;
-	return cap;
+	return RuleI(Character, ItemATKCap) + itembonuses.ItemATKCap + spellbonuses.ItemATKCap + aabonuses.ItemATKCap
 }
 
 bool Bot::CheckSpawnConditions(Client* c) {
