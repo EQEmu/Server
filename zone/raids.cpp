@@ -1113,9 +1113,6 @@ void Raid::SendRaidAdd(const char *who, Client *to)
 	std::vector<RaidMember> rm = GetMembers();
 
 	for (const auto& m : rm) {
-		if (m.is_bot) {
-			continue;
-		}
 		if (strcmp(m.member_name, who) == 0) {
 			auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidAddMember_Struct));
 			auto ram = (RaidAddMember_Struct*)outapp->pBuffer;
@@ -1138,9 +1135,6 @@ void Raid::SendRaidAddAll(const char *who)
 	std::vector<RaidMember> rm = GetMembers();
 
 	for (const auto& m : rm) {
-		if (m.is_bot) {
-			continue;
-		}
 		if (strcmp(m.member_name, who) == 0) {
 			auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidAddMember_Struct));
 			auto ram = (RaidAddMember_Struct*)outapp->pBuffer;
@@ -1166,9 +1160,6 @@ void Raid::SendRaidRemove(const char *who, Client *to)
 	}
 
 	for (const auto& m : members) {
-		if (m.is_bot) {
-			continue;
-		}
 		if (strcmp(m.member_name, who) == 0) {
 			auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidGeneral_Struct));
 			auto rg = (RaidGeneral_Struct*)outapp->pBuffer;
@@ -1186,9 +1177,6 @@ void Raid::SendRaidRemove(const char *who, Client *to)
 void Raid::SendRaidRemoveAll(const char *who)
 {
 	for (const auto& m : members) {
-		if (m.is_bot) {
-			continue;
-		}
 		if (strcmp(m.member_name, who) == 0) {
 			auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidGeneral_Struct));
 			auto rg = (RaidGeneral_Struct*)outapp->pBuffer;
@@ -1280,9 +1268,6 @@ void Raid::SendBulkRaid(Client *to)
 	}
 
 	for (const auto& m : members) {
-		if (m.is_bot) {
-			continue;
-		}
 		if (strlen(m.member_name) > 0 && (strcmp(m.member_name, to->GetName()) != 0)) {
 			SendRaidAdd(m.member_name, to);
 		}
