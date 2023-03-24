@@ -132,6 +132,7 @@ int64 Mob::GetActSpellDamage(uint16 spell_id, int64 value, Mob* target) {
 
 			if (RuleB(Spells, IgnoreSpellDmgLvlRestriction) && !spells[spell_id].no_heal_damage_item_mod && itembonuses.SpellDmg) {
 				value -= GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, base_value) * ratio / 100;
+
 			}
 
 			else if (!spells[spell_id].no_heal_damage_item_mod && itembonuses.SpellDmg && spells[spell_id].classes[(GetClass() % 17) - 1] >= GetLevel() - 5) {
@@ -140,7 +141,7 @@ int64 Mob::GetActSpellDamage(uint16 spell_id, int64 value, Mob* target) {
 
 			entity_list.FilteredMessageCloseString(
 				this, true, 100, Chat::SpellCrit, FilterSpellCrits,
-				OTHER_CRIT_BLAST, 0, GetName(), itoa(-value));
+				OTHER_CRIT_BLAST, nullptr, GetName(), itoa(-value));
 
 			if (IsClient())
 				MessageString(Chat::SpellCrit, YOU_CRIT_BLAST, itoa(-value));
@@ -175,8 +176,13 @@ int64 Mob::GetActSpellDamage(uint16 spell_id, int64 value, Mob* target) {
 	if (RuleB(Spells, IgnoreSpellDmgLvlRestriction) && !spells[spell_id].no_heal_damage_item_mod && itembonuses.SpellDmg)
 		value -= GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, base_value);
 
-	else if (!spells[spell_id].no_heal_damage_item_mod && itembonuses.SpellDmg && spells[spell_id].classes[(GetClass() % 17) - 1] >= GetLevel() - 5)
-		 value -= GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, base_value);
+	else if (
+		!spells[spell_id].no_heal_damage_item_mod &&
+		GetSpellDmg() &&
+		spells[spell_id].classes[(GetClass() % 17) - 1] >= GetLevel() - 5
+	) {
+		value -= GetExtraSpellAmt(spell_id, GetSpellDmg(), base_value);
+	}
 
 	return value;
 }
@@ -260,11 +266,19 @@ int64 Mob::GetActDoTDamage(uint16 spell_id, int64 value, Mob* target, bool from_
 					GetFocusEffect(focusFcAmplifyAmt, spell_id, nullptr, from_buff_tic);
 
 		if (RuleB(Spells, DOTsScaleWithSpellDmg)) {
-			if (RuleB(Spells, IgnoreSpellDmgLvlRestriction) && !spells[spell_id].no_heal_damage_item_mod && itembonuses.SpellDmg) {
-				extra_dmg += GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, base_value)*ratio/100;
+			if (
+				RuleB(Spells, IgnoreSpellDmgLvlRestriction) &&
+				!spells[spell_id].no_heal_damage_item_mod &&
+				GetSpellDmg()
+			) {
+				extra_dmg += GetExtraSpellAmt(spell_id, GetSpellDmg(), base_value)*ratio/100;
 			}
-			else if(!spells[spell_id].no_heal_damage_item_mod && itembonuses.SpellDmg && spells[spell_id].classes[(GetClass() % 17) - 1] >= GetLevel() - 5) {
-				extra_dmg += GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, base_value)*ratio/100;
+			else if (
+				!spells[spell_id].no_heal_damage_item_mod &&
+				GetSpellDmg() &&
+				spells[spell_id].classes[(GetClass() % 17) - 1] >= GetLevel() - 5
+			) {
+				extra_dmg += GetExtraSpellAmt(spell_id, GetSpellDmg(), base_value)*ratio/100;
 			}
 		}
 
@@ -295,11 +309,19 @@ int64 Mob::GetActDoTDamage(uint16 spell_id, int64 value, Mob* target, bool from_
 					GetFocusEffect(focusFcAmplifyAmt, spell_id, nullptr, from_buff_tic);
 
 		if (RuleB(Spells, DOTsScaleWithSpellDmg)) {
-			if (RuleB(Spells, IgnoreSpellDmgLvlRestriction) && !spells[spell_id].no_heal_damage_item_mod && itembonuses.SpellDmg) {
-				extra_dmg += GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, base_value);
+			if (
+				RuleB(Spells, IgnoreSpellDmgLvlRestriction) &&
+				!spells[spell_id].no_heal_damage_item_mod &&
+				GetSpellDmg()
+			) {
+				extra_dmg += GetExtraSpellAmt(spell_id, GetSpellDmg(), base_value);
 			}
-			else if(!spells[spell_id].no_heal_damage_item_mod && itembonuses.SpellDmg && spells[spell_id].classes[(GetClass() % 17) - 1] >= GetLevel() - 5) {
-				extra_dmg += GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, base_value);
+			else if (
+				!spells[spell_id].no_heal_damage_item_mod &&
+				GetSpellDmg() &&
+				spells[spell_id].classes[(GetClass() % 17) - 1] >= GetLevel() - 5
+			) {
+				extra_dmg += GetExtraSpellAmt(spell_id, GetSpellDmg(), base_value);
 			}
 		}
 
@@ -321,6 +343,7 @@ int64 Mob::GetActDoTDamage(uint16 spell_id, int64 value, Mob* target, bool from_
 
 int64 Mob::GetExtraSpellAmt(uint16 spell_id, int64 extra_spell_amt, int64 base_spell_dmg)
 {
+
 	if (RuleB(Spells, FlatItemExtraSpellAmt)) {
 		if (RuleB(Spells, ItemExtraSpellAmtCalcAsPercent)) {
 			return std::abs(base_spell_dmg) * extra_spell_amt / 100;
@@ -425,11 +448,19 @@ int64 Mob::GetActSpellHealing(uint16 spell_id, int64 value, Mob* target, bool fr
 		value += GetFocusEffect(focusFcHealAmtCrit, spell_id); //SPA 396 Add before critical
 
 		//Using IgnoreSpellDmgLvlRestriction to also allow healing to scale
-		if (RuleB(Spells, IgnoreSpellDmgLvlRestriction) && !spells[spell_id].no_heal_damage_item_mod && itembonuses.HealAmt) {
-			value += GetExtraSpellAmt(spell_id, itembonuses.HealAmt, base_value);//Item Heal Amt Add before critical
+		if (
+			RuleB(Spells, IgnoreSpellDmgLvlRestriction) &&
+			!spells[spell_id].no_heal_damage_item_mod &&
+			GetHealAmt()
+		) {
+			value += GetExtraSpellAmt(spell_id, GetHealAmt(), base_value); //Item Heal Amt Add before critical
 		}
-		else if (!spells[spell_id].no_heal_damage_item_mod && itembonuses.HealAmt && spells[spell_id].classes[(GetClass() % 17) - 1] >= GetLevel() - 5) {
-			value += GetExtraSpellAmt(spell_id, itembonuses.HealAmt, base_value);//Item Heal Amt Add before critical
+		else if (
+			!spells[spell_id].no_heal_damage_item_mod &&
+			GetHealAmt() &&
+			spells[spell_id].classes[(GetClass() % 17) - 1] >= GetLevel() - 5
+		) {
+			value += GetExtraSpellAmt(spell_id, GetHealAmt(), base_value); //Item Heal Amt Add before critical
 		}
 
 		if (target) {
@@ -471,11 +502,19 @@ int64 Mob::GetActSpellHealing(uint16 spell_id, int64 value, Mob* target, bool fr
 		}
 
 		if (RuleB(Spells, HOTsScaleWithHealAmt)) {
-			if (RuleB(Spells, IgnoreSpellDmgLvlRestriction) && !spells[spell_id].no_heal_damage_item_mod && itembonuses.HealAmt) {
-				extra_heal += GetExtraSpellAmt(spell_id, itembonuses.HealAmt, base_value);
+			if (
+				RuleB(Spells, IgnoreSpellDmgLvlRestriction) &&
+				!spells[spell_id].no_heal_damage_item_mod &&
+				GetHealAmt()
+			) {
+				extra_heal += GetExtraSpellAmt(spell_id, GetHealAmt(), base_value);
 			}
-			else if(!spells[spell_id].no_heal_damage_item_mod && itembonuses.HealAmt && spells[spell_id].classes[(GetClass() % 17) - 1] >= GetLevel() - 5) {
-				extra_heal += GetExtraSpellAmt(spell_id, itembonuses.HealAmt, base_value);
+			else if (
+				!spells[spell_id].no_heal_damage_item_mod &&
+				GetHealAmt() &&
+				spells[spell_id].classes[(GetClass() % 17) - 1] >= GetLevel() - 5
+			) {
+				extra_heal += GetExtraSpellAmt(spell_id, GetHealAmt(), base_value);
 			}
 		}
 

@@ -337,12 +337,12 @@ void Perl_Bot_SetSpellDurationGroup(Bot* self, int spell_id, int duration, bool 
 
 bool Perl_Bot_ReloadBotDataBuckets(Bot* self)
 {
-	return self->GetBotDataBuckets();
+	return DataBucket::GetDataBuckets(self);
 }
 
 bool Perl_Bot_ReloadBotOwnerDataBuckets(Bot* self)
 {
-	return self->GetBotOwnerDataBuckets();
+	return self->HasOwner() && DataBucket::GetDataBuckets(self->GetBotOwner());
 }
 
 bool Perl_Bot_ReloadBotSpells(Bot* self)

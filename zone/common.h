@@ -639,6 +639,16 @@ struct StatBonuses {
 	int aura_slots;
 	int trap_slots;
 	bool hunger; // Song of Sustenance -- min caps to 3500
+	int64 heroic_max_hp;
+	int64 heroic_max_mana;
+	int64 heroic_max_end;
+	int64 heroic_hp_regen;
+	int64 heroic_mana_regen;
+	int64 heroic_end_regen;
+	int32 heroic_str_shield_ac;
+	int32 heroic_str_melee_damage;
+	int32 heroic_agi_avoidance;
+	int32 heroic_dex_ranged_damage;
 };
 
 // StatBonus Indexes
@@ -913,6 +923,14 @@ struct ExpeditionInvite
 	uint32_t    expedition_id;
 	std::string inviter_name;
 	std::string swap_remove_name;
+};
+
+struct DataBucketCache
+{
+	uint64_t      bucket_id;
+	std::string   bucket_key;
+	std::string   bucket_value;
+	uint32_t      bucket_expires;
 };
 
 #endif

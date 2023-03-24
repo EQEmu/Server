@@ -1380,6 +1380,9 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	drakkin_tattoo = m_pp.drakkin_tattoo;
 	drakkin_details = m_pp.drakkin_details;
 
+	// Load Data Buckets
+	DataBucket::GetDataBuckets(this);
+
 	// Max Level for Character:PerCharacterQglobalMaxLevel and Character:PerCharacterBucketMaxLevel
 	uint8 client_max_level = 0;
 	if (RuleB(Character, PerCharacterQglobalMaxLevel)) {

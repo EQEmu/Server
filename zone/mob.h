@@ -20,6 +20,7 @@
 #define MOB_H
 
 #include "common.h"
+#include "data_bucket.h"
 #include "entity.h"
 #include "hate_list.h"
 #include "pathfinder_interface.h"
@@ -618,10 +619,13 @@ public:
 	inline int64 GetHP() const { return current_hp; }
 	inline int64 GetMaxHP() const { return max_hp; }
 	virtual int64 CalcMaxHP();
+	virtual int64 CalcHPRegenCap() { return 0; }
 	inline int64 GetMaxMana() const { return max_mana; }
+	virtual int64 CalcManaRegenCap() { return 0; }
 	inline int64 GetMana() const { return current_mana; }
 	virtual int64 GetEndurance() const { return 0; }
 	virtual int64 GetMaxEndurance() const { return 0; }
+	virtual int64 CalcEnduranceRegenCap() { return 0; }
 	virtual void SetEndurance(int32 newEnd) { return; }
 	int64 GetItemHPBonuses();
 	int64 GetSpellHPBonuses();
@@ -654,7 +658,10 @@ public:
 	inline int32 GetHeroicStrikethrough() const  { return heroic_strikethrough; }
 	inline const bool GetKeepsSoldItems() const { return keeps_sold_items; }
 	inline void SetKeepsSoldItems(bool in_keeps_sold_items)  { keeps_sold_items = in_keeps_sold_items; }
-
+	virtual int32 GetHealAmt() const { return 0; }
+	virtual int32 GetSpellDmg() const { return 0; }
+	void ProcessItemCaps();
+	virtual int32 CalcItemATKCap() { return 0; }
 	virtual bool IsSitting() const { return false; }
 
 	int CalcRecommendedLevelBonus(uint8 level, uint8 reclevel, int basestat);
@@ -1390,12 +1397,18 @@ public:
 	/// this cures timing issues cuz dead animation isn't done but server side feigning is?
 	inline bool GetFeigned() const { return(feigned); }
 
+	std::vector<DataBucketCache> m_data_bucket_cache;
+
+	// Data Bucket Methods
 	void DeleteBucket(std::string bucket_name);
 	std::string GetBucket(std::string bucket_name);
 	std::string GetBucketExpires(std::string bucket_name);
 	std::string GetBucketKey();
 	std::string GetBucketRemaining(std::string bucket_name);
 	void SetBucket(std::string bucket_name, std::string bucket_value, std::string expiration = "");
+
+	// Heroic Stat Benefits
+	float CheckHeroicBonusesDataBuckets(std::string bucket_name);
 
 	int DispatchZoneControllerEvent(QuestEventID evt, Mob* init, const std::string& data, uint32 extra, std::vector<std::any>* pointers);
 
@@ -1417,6 +1430,8 @@ public:
 	bool GetManualFollow() const { return m_manual_follow; }
 
 	void DrawDebugCoordinateNode(std::string node_name, const glm::vec4 vec);
+
+	void CalcHeroicBonuses(StatBonuses* newbon);
 
 protected:
 	void CommonDamage(Mob* other, int64 &damage, const uint16 spell_id, const EQ::skills::SkillType attack_skill, bool &avoidable, const int8 buffslot, const bool iBuffTic, eSpecialAttacks specal = eSpecialAttacks::None);
@@ -1701,6 +1716,7 @@ protected:
 	bool is_boat;
 
 	CombatRecord m_combat_record{};
+
 public:
 	const CombatRecord &GetCombatRecord() const;
 
@@ -1832,6 +1848,13 @@ private:
 	EQ::InventoryProfile m_inv;
 	std::shared_ptr<HealRotation> m_target_of_heal_rotation;
 	bool m_manual_follow;
+
+	void SetHeroicStrBonuses(StatBonuses* n);
+	void SetHeroicStaBonuses(StatBonuses* n);
+	void SetHeroicAgiBonuses(StatBonuses* n);
+	void SetHeroicDexBonuses(StatBonuses* n);
+	void SetHeroicIntBonuses(StatBonuses* n);
+	void SetHeroicWisBonuses(StatBonuses* n);
 
 	void DoSpellInterrupt(uint16 spell_id, int32 mana_cost, int my_curmana);
 };

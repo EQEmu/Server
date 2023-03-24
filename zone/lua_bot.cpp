@@ -112,12 +112,12 @@ void Lua_Bot::SetExpansionBitmask(int expansion_bitmask, bool save) {
 
 bool Lua_Bot::ReloadBotDataBuckets() {
 	Lua_Safe_Call_Bool();
-	return self->GetBotDataBuckets();
+	return DataBucket::GetDataBuckets(self);
 }
 
 bool Lua_Bot::ReloadBotOwnerDataBuckets() {
 	Lua_Safe_Call_Bool();
-	return self->GetBotOwnerDataBuckets();
+	return self->HasOwner() && DataBucket::GetDataBuckets(self->GetBotOwner());
 }
 
 bool Lua_Bot::ReloadBotSpells() {

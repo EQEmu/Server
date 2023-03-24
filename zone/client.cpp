@@ -6437,8 +6437,7 @@ void Client::SendStatsWindow(Client* client, bool use_window)
 				regen_row_color = color_red;
 
 				base_regen_field = itoa(LevelRegen());
-				item_regen_field = itoa(
-					itembonuses.HPRegen +(GetHeroicSTA() * RuleR(Character, HeroicStaminaMultiplier) / 20));
+				item_regen_field = itoa(itembonuses.HPRegen + itembonuses.heroic_hp_regen);
 				cap_regen_field = itoa(CalcHPRegenCap());
 				spell_regen_field = itoa(spellbonuses.HPRegen);
 				aa_regen_field = itoa(aabonuses.HPRegen);
@@ -6451,9 +6450,7 @@ void Client::SendStatsWindow(Client* client, bool use_window)
 					regen_row_color = color_blue;
 
 					base_regen_field = itoa(CalcBaseManaRegen());
-					int32 heroic_mana_regen = (GetCasterClass() == 'W') ?
-						GetHeroicWIS() * RuleR(Character, HeroicWisdomMultiplier) / 25 :
-						GetHeroicINT() * RuleR(Character, HeroicIntelligenceMultiplier) / 25;
+					int32 heroic_mana_regen = itembonuses.heroic_mana_regen;
 					item_regen_field = itoa(itembonuses.ManaRegen + heroic_mana_regen);
 					cap_regen_field = itoa(CalcManaRegenCap());
 					spell_regen_field = itoa(spellbonuses.ManaRegen);
@@ -6468,12 +6465,7 @@ void Client::SendStatsWindow(Client* client, bool use_window)
 				regen_row_color = color_green;
 
 				base_regen_field = itoa(((GetLevel() * 4 / 10) + 2));
-				double heroic_str = GetHeroicSTR() * RuleR(Character, HeroicStrengthMultiplier);
-				double heroic_sta = GetHeroicSTA() * RuleR(Character, HeroicStaminaMultiplier);
-				double heroic_dex = GetHeroicDEX() * RuleR(Character, HeroicDexterityMultiplier);
-				double heroic_agi = GetHeroicAGI() * RuleR(Character, HeroicAgilityMultiplier);
-				double heroic_stats = (heroic_str + heroic_sta + heroic_dex + heroic_agi) / 4;
-				item_regen_field = itoa(itembonuses.EnduranceRegen + heroic_stats);
+				item_regen_field = itoa(itembonuses.EnduranceRegen + itembonuses.heroic_end_regen);
 				cap_regen_field = itoa(CalcEnduranceRegenCap());
 				spell_regen_field = itoa(spellbonuses.EnduranceRegen);
 				aa_regen_field = itoa(aabonuses.EnduranceRegen);
@@ -11582,27 +11574,6 @@ void Client::SendReloadCommandMessages() {
 	);
 
 	SendChatLineBreak();
-}
-
-std::map<std::string,std::string> Client::GetMerchantDataBuckets()
-{
-	std::map<std::string,std::string> merchant_data_buckets;
-
-	auto query = fmt::format(
-		"SELECT `key`, `value` FROM data_buckets WHERE `key` LIKE '{}-%'",
-		Strings::Escape(GetBucketKey())
-	);
-	auto results = database.QueryDatabase(query);
-
-	if (!results.Success() || !results.RowCount()) {
-		return merchant_data_buckets;
-	}
-
-	for (auto row : results) {
-		merchant_data_buckets.insert(std::pair<std::string,std::string>(row[0], row[1]));
-	}
-
-	return merchant_data_buckets;
 }
 
 void Client::Undye()

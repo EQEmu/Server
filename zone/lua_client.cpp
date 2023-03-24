@@ -3046,6 +3046,11 @@ bool Lua_Client::IsAutoFireEnabled()
 	return self->AutoFireEnabled();
 }
 
+bool Lua_Client::ReloadDataBuckets() {
+	Lua_Safe_Call_Bool();
+	return DataBucket::GetDataBuckets(self);
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 	.def(luabind::constructor<>())
@@ -3394,6 +3399,7 @@ luabind::scope lua_register_client() {
 	.def("QueuePacket", (void(Lua_Client::*)(Lua_Packet,bool,int,int))&Lua_Client::QueuePacket)
 	.def("ReadBookByName", (void(Lua_Client::*)(std::string,uint8))&Lua_Client::ReadBookByName)
 	.def("RefundAA", (void(Lua_Client::*)(void))&Lua_Client::RefundAA)
+	.def("ReloadDataBuckets", (bool(Lua_Client::*)(void))&Lua_Client::ReloadDataBuckets)
 	.def("RemoveAllExpeditionLockouts", (void(Lua_Client::*)(std::string))&Lua_Client::RemoveAllExpeditionLockouts)
 	.def("RemoveAllExpeditionLockouts", (void(Lua_Client::*)(void))&Lua_Client::RemoveAllExpeditionLockouts)
 	.def("RemoveExpeditionLockout", (void(Lua_Client::*)(std::string, std::string))&Lua_Client::RemoveExpeditionLockout)
