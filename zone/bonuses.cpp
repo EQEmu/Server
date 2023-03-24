@@ -700,9 +700,10 @@ void Mob::AddItemBonuses(const EQ::ItemInstance* inst, StatBonuses* b, bool is_a
 		}
 
 		if (item->ExtraDmgAmt != 0 && item->ExtraDmgSkill <= EQ::skills::HIGHEST_SKILL) {
+			if (item->ExtraDmgSkill == ALL_SKILLS) {
 				for (const auto& skill_id : EQ::skills::GetExtraDamageSkills()) {
 					if (
-						IsOfClientBotMerc() &&
+						!IsNPC() &&
 						RuleI(Character, ItemExtraDmgCap) >= 0 &&
 						(b->SkillDamageAmount[skill_id] + item->ExtraDmgAmt) > RuleI(Character, ItemExtraDmgCap)
 					) {
@@ -713,7 +714,7 @@ void Mob::AddItemBonuses(const EQ::ItemInstance* inst, StatBonuses* b, bool is_a
 				}
 			} else {
 				if (
-					IsOfClientBotMerc() &&
+					!IsNPC() &&
 					RuleI(Character, ItemExtraDmgCap) >= 0 &&
 					(b->SkillDamageAmount[item->ExtraDmgSkill] + item->ExtraDmgAmt) > RuleI(Character, ItemExtraDmgCap)
 				) {
@@ -722,6 +723,7 @@ void Mob::AddItemBonuses(const EQ::ItemInstance* inst, StatBonuses* b, bool is_a
 					b->SkillDamageAmount[item->ExtraDmgSkill] += item->ExtraDmgAmt;
 				}
 			}
+		}
 
 		if (!is_augment) {
 			for (int i = EQ::invaug::SOCKET_BEGIN; i <= EQ::invaug::SOCKET_END; i++) {

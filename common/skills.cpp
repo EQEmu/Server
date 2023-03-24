@@ -260,9 +260,9 @@ const std::map<EQ::skills::SkillType, std::string>& EQ::skills::GetSkillTypeMap(
 	return skill_type_map;
 }
 
-std::vector<EQ::skills::SkillType> EQ::skills::GetExtraDamageSkills()
+const std::vector<EQ::skills::SkillType>& EQ::skills::GetExtraDamageSkills()
 {
-	std::vector<EQ::skills::SkillType> v = {
+	static const std::vector<EQ::skills::SkillType> v = {
 		EQ::skills::SkillBackstab,
 		EQ::skills::SkillBash,
 		EQ::skills::SkillDragonPunch, // Same ID as Tail Rake
