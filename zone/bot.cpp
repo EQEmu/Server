@@ -9274,7 +9274,7 @@ float Bot::GetBotCasterMaxRange(float melee_distance_max) {// Calculate caster d
 
 int32 Bot::CalcItemATKCap()
 {
-	return RuleI(Character, ItemATKCap) + itembonuses.ItemATKCap + spellbonuses.ItemATKCap + aabonuses.ItemATKCap
+	return RuleI(Character, ItemATKCap) + itembonuses.ItemATKCap + spellbonuses.ItemATKCap + aabonuses.ItemATKCap;
 }
 
 bool Bot::CheckSpawnConditions(Client* c) {
