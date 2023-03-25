@@ -2569,7 +2569,7 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 					continue;
 				}
 
-				if (m.member != nullptr && m.member->IsClient()) { // If Group Member is Client
+				if (m.member && m.member->IsClient()) { // If Group Member is Client
 					Client *c = m.member;
 
 					c->RecordKilledNPCEvent(this);
@@ -2601,7 +2601,7 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 						continue;
 					}
 
-					if (m.member != nullptr && m.member->IsClient()) { // If Group Member is Client
+					if (m.member && m.member->IsClient()) { // If Group Member is Client
 						Client *c = m.member;
 						QS->Chars[PlayerCount].char_id = c->CharacterID();
 						PlayerCount++;
@@ -2760,6 +2760,7 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 						if (m.is_bot) {
 							continue;
 						}
+
 						switch (r->GetLootType()) {
 						case 0:
 						case 1:

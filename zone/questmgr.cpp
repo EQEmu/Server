@@ -452,6 +452,7 @@ void QuestManager::ZoneRaid(const char *zone_name) {
 				if (m.is_bot) {
 					continue;
 				}
+
 				if (m.member && m.member->IsClient()) {
 					auto raid_member = m.member->CastToClient();
 					raid_member->MoveZone(zone_name);
