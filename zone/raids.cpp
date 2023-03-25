@@ -1363,7 +1363,7 @@ void Raid::SendGroupUpdate(Client *to)
 	gu->action = groupActUpdate;
 	int i = 0;
 	uint32 grp = GetGroup(to->GetName());
-	if (grp >= MAX_RAID_MEMBERS) {
+	if (grp >= MAX_RAID_GROUPS) {
 		safe_delete(outapp);
 		return;
 	}
