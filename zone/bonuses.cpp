@@ -76,7 +76,6 @@ void NPC::CalcBonuses()
 
 void Client::CalcBonuses()
 {
-	Message(Chat::Yellow, "Calculating bonuses.");
 	memset(&itembonuses, 0, sizeof(StatBonuses));
 	CalcItemBonuses(&itembonuses);
 	CalcHeroicBonuses(&itembonuses);
