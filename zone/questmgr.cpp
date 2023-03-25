@@ -448,9 +448,13 @@ void QuestManager::ZoneRaid(const char *zone_name) {
 			initiator->MoveZone(zone_name);
 		} else {
 			auto client_raid = initiator->GetRaid();
-			for (int member_index = 0; member_index < MAX_RAID_MEMBERS; member_index++) {
-				if (client_raid->members[member_index].member && client_raid->members[member_index].member->IsClient()) {
-					auto raid_member = client_raid->members[member_index].member->CastToClient();
+			for (const auto& m : client_raid->members) {
+				if (m.is_bot) {
+					continue;
+				}
+
+				if (m.member && m.member->IsClient()) {
+					auto raid_member = m.member->CastToClient();
 					raid_member->MoveZone(zone_name);
 				}
 			}

@@ -9105,16 +9105,18 @@ std::vector<Mob*> Bot::GetApplySpellList(
 		auto* r = GetRaid();
 		auto group_id = r->GetGroup(GetCleanName());
 		if (r && EQ::ValueWithin(group_id, 0, (MAX_RAID_GROUPS - 1))) {
-			for (auto i = 0; i < MAX_RAID_MEMBERS; i++) {
-				auto* m = r->members[i].member;
-				if (m && m->IsClient() && (!is_raid_group_only || r->GetGroup(m) == group_id)) {
-					l.push_back(m);
+			for (const auto& m : r->members) {
+				if (m.is_bot) {
+					continue;
+				}
+				if (m.member && m.member->IsClient() && (!is_raid_group_only || r->GetGroup(m.member) == group_id)) {
+					l.push_back(m.member);
 
-					if (allow_pets && m->HasPet()) {
-						l.push_back(m->GetPet());
+					if (allow_pets && m.member->HasPet()) {
+						l.push_back(m.member->GetPet());
 					}
 
-					const auto& sbl = entity_list.GetBotListByCharacterID(m->CharacterID());
+					const auto& sbl = entity_list.GetBotListByCharacterID(m.member->CharacterID());
 					for (const auto& b : sbl) {
 						l.push_back(b);
 					}
