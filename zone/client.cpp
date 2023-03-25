@@ -4140,42 +4140,32 @@ void Client::UpdateLFP() {
 
 bool Client::GroupFollow(Client* inviter) {
 
-	if (inviter)
-	{
+	if (inviter) {
 		isgrouped = true;
 		Raid* raid = entity_list.GetRaidByClient(inviter);
 		Raid* iraid = entity_list.GetRaidByClient(this);
 
 		//inviter has a raid don't do group stuff instead do raid stuff!
-		if (raid)
-		{
+		if (raid) {
 			// Suspend the merc while in a raid (maybe a rule could be added for this)
-			if (GetMerc())
+			if (GetMerc()) {
 				GetMerc()->Suspend();
+			}
 
 			uint32 groupToUse = 0xFFFFFFFF;
-			for (int x = 0; x < MAX_RAID_MEMBERS; x++)
-			{
-				if (raid->members[x].member)
-				{
-					//this assumes the inviter is in the zone
-					if (raid->members[x].member == inviter){
-						groupToUse = raid->members[x].group_number;
-						break;
-					}
+			for (const auto& m : raid->members) {
+				if (m.member && m.member == inviter) {
+					groupToUse = m.group_number;
+					break;
 				}
 			}
-			if (iraid == raid)
-			{
+			if (iraid == raid) {
 				//both in same raid
 				uint32 ngid = raid->GetGroup(inviter->GetName());
-				if (raid->GroupCount(ngid) < 6)
-				{
+				if (raid->GroupCount(ngid) < 6) {
 					raid->MoveMember(GetName(), ngid);
 					raid->SendGroupDisband(this);
-					//raid->SendRaidGroupAdd(GetName(), ngid);
-					//raid->SendGroupUpdate(this);
-					raid->GroupUpdate(ngid); //break
+					raid->GroupUpdate(ngid);
 				}
 				return false;
 			}
@@ -8863,16 +8853,15 @@ void Client::ProcessAggroMeter()
 		if (m_aggrometer.set_pct(AggroMeter::AT_Secondary, has_aggro ? cur_tar->GetHateRatio(this, secondary) : secondary ? 100 : 0))
 			add_entry(AggroMeter::AT_Secondary);
 
-		// fuuuuuuuuuuuuuuuuuuuuuuuucckkkkkkkkkkkkkkk raids
 		if (IsRaidGrouped()) {
 			auto raid = GetRaid();
 			if (raid) {
 				auto gid = raid->GetGroup(this);
-				if (gid < 12) {
+				if (gid < MAX_RAID_GROUPS) {
 					int at_id = AggroMeter::AT_Group1;
-					for (int i = 0; i < MAX_RAID_MEMBERS; ++i) {
-						if (raid->members[i].member && raid->members[i].member != this && raid->members[i].group_number == gid) {
-							if (m_aggrometer.set_pct(static_cast<AggroMeter::AggroTypes>(at_id), cur_tar->GetHateRatio(cur_tar->GetTarget(), raid->members[i].member)))
+					for (const auto& m : raid->members) {
+						if (m.member && m.member != this && m.group_number == gid) {
+							if (m_aggrometer.set_pct(static_cast<AggroMeter::AggroTypes>(at_id), cur_tar->GetHateRatio(cur_tar->GetTarget(), m.member)))
 								add_entry(static_cast<AggroMeter::AggroTypes>(at_id));
 							at_id++;
 							if (at_id > AggroMeter::AT_Group5)
@@ -11747,17 +11736,16 @@ std::vector<Mob*> Client::GetApplySpellList(
 		auto* r = GetRaid();
 		auto group_id = r->GetGroup(this);
 		if (r && EQ::ValueWithin(group_id, 0, (MAX_RAID_GROUPS - 1))) {
-			for (auto i = 0; i < MAX_RAID_MEMBERS; i++) {
-				auto* m = r->members[i].member;
-				if (m && m->IsClient() && (!is_raid_group_only || r->GetGroup(m) == group_id)) {
-					l.push_back(m);
+			for (const auto& m : r->members) {
+				if (m.member && m.member->IsClient() && (!is_raid_group_only || r->GetGroup(m.member) == group_id)) {
+					l.push_back(m.member);
 
-					if (allow_pets && m->HasPet()) {
-						l.push_back(m->GetPet());
+					if (allow_pets && m.member->HasPet()) {
+						l.push_back(m.member->GetPet());
 					}
 
 					if (allow_bots) {
-						const auto& sbl = entity_list.GetBotListByCharacterID(m->CharacterID());
+						const auto& sbl = entity_list.GetBotListByCharacterID(m.member->CharacterID());
 						for (const auto& b : sbl) {
 							l.push_back(b);
 						}
