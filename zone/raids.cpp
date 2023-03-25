@@ -810,6 +810,7 @@ void Raid::BalanceMana(int32 penalty, uint32 gid, float range, Mob* caster, int3
 		if (m.is_bot) {
 			continue;
 		}
+
 		if (m.member && m.group_number == gid && m.member->GetMaxMana() > 0) {
 			distance = DistanceSquared(caster->GetPosition(), m.member->GetPosition());
 
@@ -833,6 +834,7 @@ void Raid::BalanceMana(int32 penalty, uint32 gid, float range, Mob* caster, int3
 		if (m.is_bot) {
 			continue;
 		}
+
 		if (m.member && m.group_number == gid) {
 			distance = DistanceSquared(caster->GetPosition(), m.member->GetPosition());
 
@@ -879,6 +881,7 @@ void Raid::SplitMoney(uint32 gid, uint32 copper, uint32 silver, uint32 gold, uin
 		if (m.is_bot) {
 			continue;
 		}
+
 		if (m.member && m.group_number == gid && m.member->IsClient()) {
 			member_count++;
 		}
@@ -921,6 +924,7 @@ void Raid::SplitMoney(uint32 gid, uint32 copper, uint32 silver, uint32 gold, uin
 		if (m.is_bot) {
 			continue;
 		}
+
 		if (m.member && m.group_number == gid && m.member->IsClient()) { // If Group Member is Client
 			m.member->AddMoneyToPP(
 				copper_split,
@@ -962,6 +966,7 @@ void Raid::TeleportGroup(Mob* sender, uint32 zoneID, uint16 instance_id, float x
 		if (m.is_bot) {
 			continue;
 		}
+
 		if (m.member && m.group_number == gid && m.member->IsClient()) {
 			m.member->MovePC(zoneID, instance_id, x, y, z, heading, 0, ZoneSolicited);
 		}
@@ -974,6 +979,7 @@ void Raid::TeleportRaid(Mob* sender, uint32 zoneID, uint16 instance_id, float x,
 		if (m.is_bot) {
 			continue;
 		}
+
 		if (m.member && m.member->IsClient()) {
 			m.member->MovePC(zoneID, instance_id, x, y, z, heading, 0, ZoneSolicited);
 		}
@@ -997,6 +1003,7 @@ void Raid::AddRaidLooter(const char* looter)
 		if (m.is_bot) {
 			continue;
 		}
+
 		if (strcmp(looter, m.member_name) == 0) {
 			m.is_looter = true;
 			break;
@@ -1021,6 +1028,7 @@ void Raid::RemoveRaidLooter(const char* looter)
 		if (m.is_bot) {
 			continue;
 		}
+
 		if (strcmp(looter, m.member_name) == 0) {
 			m.is_looter = false;
 			break;
@@ -1280,6 +1288,7 @@ void Raid::QueuePacket(const EQApplicationPacket *app, bool ack_req)
 		if (m.is_bot) {
 			continue;
 		}
+
 		if (m.member && m.member->IsClient()) {
 			m.member->QueuePacket(app, ack_req);
 		}
@@ -1527,6 +1536,7 @@ void Raid::SendRaidMOTD()
 		if (m.is_bot) {
 			continue;
 		}
+
 		if (m.member) {
 			SendRaidMOTD(m.member);
 		}
@@ -1939,6 +1949,7 @@ void Raid::RaidMessageString(Mob* sender, uint32 type, uint32 string_id, const c
 		if (m.is_bot) {
 			continue;
 		}
+
 		if (m.member && m.member->IsClient() && m.member != sender) {
 			m.member->MessageString(type, string_id, message, message2, message3, message4, message5, message6,
 									message7, message8, message9, distance);

@@ -798,24 +798,21 @@ bool Client::SendAllPackets() {
 }
 
 void Client::QueuePacket(const EQApplicationPacket* app, bool ack_req, CLIENT_CONN_STATUS required_state, eqFilterType filter) {
-	if(filter!=FilterNone){
-		//this is incomplete... no support for FilterShowGroupOnly or FilterShowSelfOnly
-		if(GetFilter(filter) == FilterHide)
-			return; //Client has this filter on, no need to send packet
+	if (filter != FilterNone && GetFilter(filter) == FilterHide) {
+		return;
 	}
-	if(client_state != CLIENT_CONNECTED && required_state == CLIENT_CONNECTED){
+
+	if (client_state != CLIENT_CONNECTED && required_state == CLIENT_CONNECTED) {
 		AddPacket(app, ack_req);
 		return;
 	}
 	
 	// if the program doesnt care about the status or if the status isnt what we requested
-	if (required_state != CLIENT_CONNECTINGALL && client_state != required_state)
-	{
+	if (required_state != CLIENT_CONNECTINGALL && client_state != required_state) {
 		// todo: save packets for later use
 		AddPacket(app, ack_req);
 	}
-	else if (eqs) 
-	{
+	else if (eqs) {
 		eqs->QueuePacket(app, ack_req);
 	}
 }
@@ -10956,11 +10953,14 @@ std::vector<Client *> Client::GetPartyMembers()
 	std::vector<Client *> clients_to_update = {};
 
 	// raid
-	Raid *raid = entity_list.GetRaidByClient(this);
-	if (raid) {
-		for (auto &e : raid->members) {
-			if (e.member && e.member->IsClient()) {
-				clients_to_update.push_back(e.member->CastToClient());
+	if (const auto raid = entity_list.GetRaidByClient(this)) {
+		for (auto &m : raid->members) {
+			if (m.is_bot) {
+				continue;
+			}
+
+			if (m.member && m.member->IsClient()) {
+				clients_to_update.push_back(m.member->CastToClient());
 			}
 		}
 	}
