@@ -16,6 +16,7 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
+#include "../common/data_verification.h"
 #include "../common/spdat.h"
 #include "../common/strings.h"
 #include "../common/misc_functions.h"
@@ -5552,6 +5553,10 @@ int16 Mob::GetSkillReuseTime(uint16 skill)
 int Mob::GetSkillDmgAmt(int skill_id)
 {
 	int skill_dmg = 0;
+
+	if (!EQ::ValueWithin(skill_id, ALL_SKILLS, EQ::skills::HIGHEST_SKILL)) {
+		return skill_dmg;
+	}
 
 	skill_dmg += (
 		spellbonuses.SkillDamageAmount[EQ::skills::HIGHEST_SKILL + 1] +
