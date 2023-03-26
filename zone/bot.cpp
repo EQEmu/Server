@@ -3462,7 +3462,7 @@ void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 
 			if(item) {
 				if(strlen(item->IDFile) > 2)
-					ns->spawn.equipment.Primary.Material = Strings::ToInt(&item->IDFile[2]);
+					ns->spawn.equipment.Primary.Material = Strings::ToUnsignedInt(&item->IDFile[2]);
 
 
 				ns->spawn.equipment_tint.Primary.Color = GetEquipmentColor(EQ::textures::weaponPrimary);
@@ -3475,7 +3475,7 @@ void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 
 			if(item) {
 				if(strlen(item->IDFile) > 2)
-					ns->spawn.equipment.Secondary.Material = Strings::ToInt(&item->IDFile[2]);
+					ns->spawn.equipment.Secondary.Material = Strings::ToUnsignedInt(&item->IDFile[2]);
 
 				ns->spawn.equipment_tint.Secondary.Color = GetEquipmentColor(EQ::textures::weaponSecondary);
 			}

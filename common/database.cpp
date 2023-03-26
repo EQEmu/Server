@@ -812,7 +812,7 @@ uint32 Database::GetAccountIDByChar(const char* charname, uint32* oCharID) {
 
 	auto row = results.begin();
 
-	uint32 accountId = Strings::ToInt(row[0]);
+	uint32 accountId = Strings::ToUnsignedInt(row[0]);
 
 	if (oCharID)
 		*oCharID = Strings::ToUnsignedInt(row[1]);

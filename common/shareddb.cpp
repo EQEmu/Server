@@ -964,10 +964,10 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 
 		// Flags
 		item.ArtifactFlag = Strings::ToBool(row[ItemField::artifactflag]);
-		item.Attuneable = !disable_attuneable && Strings::ToInt(row[ItemField::attuneable]) != 0;
-		item.BenefitFlag = Strings::ToBool(row[ItemField::benefitflag]) != 0;
-		item.FVNoDrop = Strings::ToInt(row[ItemField::fvnodrop]) != 0;
-		item.Magic = Strings::ToBool(row[ItemField::magic]) != 0;
+		item.Attuneable = !disable_attuneable && Strings::ToBool(row[ItemField::attuneable]);
+		item.BenefitFlag = Strings::ToBool(row[ItemField::benefitflag]);
+		item.FVNoDrop = Strings::ToBool(row[ItemField::fvnodrop]);
+		item.Magic = Strings::ToBool(row[ItemField::magic]);
 		item.NoDrop = disable_no_drop ? static_cast<uint8>(255) : static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::nodrop]));
 		item.NoPet = !disable_no_pet && Strings::ToBool(row[ItemField::nopet]);
 		item.NoRent = disable_no_rent ? static_cast<uint8>(255) : static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::norent]));
