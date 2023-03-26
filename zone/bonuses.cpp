@@ -143,26 +143,6 @@ int Mob::CalcRecommendedLevelBonus(uint8 current_level, uint8 recommended_level,
 	return 0;
 }
 
-
-
-// These item stat caps depend on spells/AAs so we process them after those are processed
-void Client::ProcessItemCaps()
-{
-	itembonuses.HPRegen = std::min(itembonuses.HPRegen, CalcHPRegenCap());
-	itembonuses.ManaRegen = std::min(itembonuses.ManaRegen, CalcManaRegenCap());
-	itembonuses.EnduranceRegen = std::min(itembonuses.EnduranceRegen, CalcEnduranceRegenCap());
-
-	// The Sleeper Tomb Avatar proc counts towards item ATK
-	// The client uses a 100 here, so using a 100 here the client and server will agree
-	// For example, if you set the effect to be 200 it will get 100 item ATK and 100 spell ATK
-	if (IsValidSpell(SPELL_AVATAR_ST_PROC) && FindBuff(SPELL_AVATAR_ST_PROC)) {
-		itembonuses.ATK += 100;
-		spellbonuses.ATK -= 100;
-	}
-
-	itembonuses.ATK = std::min(itembonuses.ATK, CalcItemATKCap());
-}
-
 void Mob::CalcItemBonuses(StatBonuses* b) {
 	ClearItemFactionBonuses();
 	SetShieldEquiped(false);
@@ -266,11 +246,11 @@ void Mob::ProcessItemCaps()
 
 	itembonuses.ATK = std::min(itembonuses.ATK, CalcItemATKCap());
 
-	if (itembonuses.SpellDmg > RuleI(Character, ItemSpellDmgCap)) {
+	if (IsOfClientBotMerc() && itembonuses.SpellDmg > RuleI(Character, ItemSpellDmgCap)) {
 		itembonuses.SpellDmg = RuleI(Character, ItemSpellDmgCap);
 	}
 
-	if (itembonuses.HealAmt > RuleI(Character, ItemHealAmtCap)) {
+	if (IsOfClientBotMerc() && itembonuses.HealAmt > RuleI(Character, ItemHealAmtCap)) {
 		itembonuses.HealAmt = RuleI(Character, ItemHealAmtCap);
 	}
 }
