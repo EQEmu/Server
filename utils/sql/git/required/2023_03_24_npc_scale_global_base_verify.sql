@@ -27,7 +27,7 @@ UPDATE `npc_scale_global_base` SET heal_scale = 100 WHERE heal_scale IS NULL;
 UPDATE `npc_scale_global_base` SET special_abilities = '' WHERE special_abilities IS NULL;
 ALTER TABLE `npc_scale_global_base`
     MODIFY COLUMN `ac` int(11) NOT NULL DEFAULT 0 AFTER `instance_version_list`,
-    MODIFY COLUMN `hp` int(11) NOT NULL DEFAULT 0 AFTER `ac`,
+    MODIFY COLUMN `hp` bigint(20) NOT NULL DEFAULT 0 AFTER `ac`,
     MODIFY COLUMN `accuracy` int(11) NOT NULL DEFAULT 0 AFTER `hp`,
     MODIFY COLUMN `slow_mitigation` int(11) NOT NULL DEFAULT 0 AFTER `accuracy`,
     MODIFY COLUMN `attack` int(11) NOT NULL DEFAULT 0 AFTER `slow_mitigation`,
@@ -47,9 +47,11 @@ ALTER TABLE `npc_scale_global_base`
     MODIFY COLUMN `physical_resist` int(11) NOT NULL DEFAULT 0 AFTER `corruption_resist`,
     MODIFY COLUMN `min_dmg` int(11) NOT NULL DEFAULT 0 AFTER `physical_resist`,
     MODIFY COLUMN `max_dmg` int(11) NOT NULL DEFAULT 0 AFTER `min_dmg`,
-    MODIFY COLUMN `hp_regen_rate` int(11) NOT NULL DEFAULT 0 AFTER `max_dmg`,
+    MODIFY COLUMN `hp_regen_rate` bigint(20) NOT NULL DEFAULT 0 AFTER `max_dmg`,
     MODIFY COLUMN `attack_delay` int(11) NOT NULL DEFAULT 0 AFTER `hp_regen_rate`,
+    MODIFY COLUMN `hp_regen_per_second` bigint(20) NOT NULL DEFAULT 0 AFTER `hp_regen_rate`,
     MODIFY COLUMN `spell_scale` int(11) NOT NULL DEFAULT 100 AFTER `attack_delay`,
     MODIFY COLUMN `heal_scale` int(11) NOT NULL DEFAULT 100 AFTER `spell_scale`,
-    MODIFY COLUMN special_abilities text CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL AFTER heal_scale,
-    ADD COLUMN `heroic_strikethrough` int(11) NOT NULL DEFAULT 0 AFTER `heal_scale`;
+    MODIFY COLUMN `heroic_strikethrough` int(11) NOT NULL DEFAULT 0 AFTER `avoidance`,
+    MODIFY COLUMN `avoidance` int(11) unsigned NOT NULL DEFAULT 0 AFTER `heal_scale`,
+    MODIFY COLUMN special_abilities text CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL AFTER heroic_strikethrough;
