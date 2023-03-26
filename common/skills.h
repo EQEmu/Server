@@ -1,5 +1,5 @@
 /*	EQEMu: Everquest Server Emulator
-	
+
 	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 
 	This program is free software; you can redistribute it and/or modify
@@ -24,6 +24,7 @@
 
 #include <string>
 #include <map>
+#include <vector>
 
 
 namespace EQ
@@ -170,6 +171,7 @@ namespace EQ
 		bool IsMeleeDmg(SkillType skill);
 
 		extern const std::map<SkillType, std::string>& GetSkillTypeMap();
+		extern const std::vector<SkillType>& GetExtraDamageSkills();
 
 		std::string GetSkillName(SkillType skill);
 	} /*skills*/
@@ -305,7 +307,7 @@ namespace EQ
 
 		uint32 operator[](int skill_id) const { return const_cast<SkillProfile*>(this)->GetSkill(skill_id); }
 	};
-	
+
 } /*EQEmu*/
 
 #endif /*COMMON_SKILLS_H*/

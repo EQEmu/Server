@@ -2517,7 +2517,7 @@ void Perl_Mob_ApplySpellBuff(Mob* self, int spell_id, int duration) // @categori
 	self->ApplySpellBuff(spell_id, duration);
 }
 
-int Perl_Mob_GetSkillDmgAmt(Mob* self, uint16 skill_id)
+int Perl_Mob_GetSkillDmgAmt(Mob* self, int skill_id)
 {
 	return self->GetSkillDmgAmt(skill_id);
 }
