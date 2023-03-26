@@ -1,3 +1,23 @@
+## [22.8.0] - 03/25/2023 
+
+### Code
+
+* Cleanup Strings::ToInt uses. ([#3142](https://github.com/EQEmu/Server/pull/3142)) @Aeadoin 2023-03-26
+* Remove extern bool Critical ([#3146](https://github.com/EQEmu/Server/pull/3146)) @Kinglykrab 2023-03-25
+
+### Crash
+
+* Fix for crash in Raid::QueuePacket ([#3145](https://github.com/EQEmu/Server/pull/3145)) @Aeadoin 2023-03-25
+
+### Feature
+
+* Add support for -1 extradmgskill to allow all skills to be scaled. ([#3136](https://github.com/EQEmu/Server/pull/3136)) @Kinglykrab 2023-03-26
+
+### Fixes
+
+* Fix for Items looted from corpses. ([#3147](https://github.com/EQEmu/Server/pull/3147)) @Aeadoin 2023-03-26
+* Fix for SQL Query in npc_scale_global_base ([#3144](https://github.com/EQEmu/Server/pull/3144)) @Aeadoin 2023-03-26
+
 ## [22.7.0] - 03/24/2023 
 
 ### Bots
