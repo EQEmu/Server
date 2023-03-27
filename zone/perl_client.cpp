@@ -2902,6 +2902,11 @@ bool Perl_Client_IsAutoFireEnabled(Client* self)
 	return self->AutoFireEnabled();
 }
 
+bool Perl_Client_ReloadDataBuckets(Client* self)
+{
+	return DataBucket::GetDataBuckets(self);
+}
+
 void perl_register_client()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -3248,6 +3253,7 @@ void perl_register_client()
 	package.add("ReadBook", &Perl_Client_ReadBook);
 	package.add("ReadBookByName", &Perl_Client_ReadBookByName);
 	package.add("RefundAA", &Perl_Client_RefundAA);
+	package.add("ReloadDataBuckets", &Perl_Client_ReloadDataBuckets);
 	package.add("RemoveAllExpeditionLockouts", (void(*)(Client*))&Perl_Client_RemoveAllExpeditionLockouts);
 	package.add("RemoveAllExpeditionLockouts", (void(*)(Client*, std::string))&Perl_Client_RemoveAllExpeditionLockouts);
 	package.add("RemoveExpeditionLockout", &Perl_Client_RemoveExpeditionLockout);

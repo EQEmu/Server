@@ -63,12 +63,12 @@ public:
 	bool IsInstNoDrop();
 	void SetInstNoDrop(bool flag);
 	std::string GetCustomDataString();
-	void SetCustomData(std::string identifier, std::string value);
-	void SetCustomData(std::string identifier, int value);
-	void SetCustomData(std::string identifier, float value);
-	void SetCustomData(std::string identifier, bool value);
-	std::string GetCustomData(std::string identifier);
-	void DeleteCustomData(std::string identifier);
+	void SetCustomData(const std::string &identifier, const std::string &value);
+	void SetCustomData(const std::string &identifier, int value);
+	void SetCustomData(const std::string &identifier, float value);
+	void SetCustomData(const std::string &identifier, bool value);
+	std::string GetCustomData(const std::string& identifier);
+	void DeleteCustomData(const std::string& identifier);
 	void SetScaling(bool v);
 	void SetScale(double scale_factor);
 	uint32 GetExp();

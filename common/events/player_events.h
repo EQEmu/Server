@@ -384,7 +384,7 @@ namespace PlayerEvent {
 	};
 
 	struct AAPurchasedEvent {
-		int32 aa_id;
+		uint32 aa_id;
 		int32 aa_cost;
 		int32 aa_previous_id;
 		int32 aa_next_id;

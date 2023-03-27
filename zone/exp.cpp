@@ -1200,7 +1200,7 @@ void Raid::SplitExp(const uint64 exp, Mob* other) {
 	}
 
 	for (const auto& m : members) {
-		if (m.member && !m.IsBot) { 
+		if (m.member && !m.is_bot) {
 			const int32 diff     = m.member->GetLevel() - highest_level;
 			int32       max_diff = -(m.member->GetLevel() * 15 / 10 - m.member->GetLevel());
 

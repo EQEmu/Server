@@ -427,8 +427,7 @@ void Expedition::RemoveLockout(const std::string& event_name)
 void Expedition::SendClientExpeditionInvite(
 	Client* client, const std::string& inviter_name, const std::string& swap_remove_name)
 {
-	if (!client)
-	{
+	if (!client) {
 		return;
 	}
 

@@ -608,7 +608,6 @@ SET(common_headers
     unix.h
     useperl.h
     version.h
-    zone_numbers.h
     zone_store.h
     event/event_loop.h
     event/task.h

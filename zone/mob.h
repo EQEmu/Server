@@ -20,6 +20,7 @@
 #define MOB_H
 
 #include "common.h"
+#include "data_bucket.h"
 #include "entity.h"
 #include "hate_list.h"
 #include "pathfinder_interface.h"
@@ -618,10 +619,13 @@ public:
 	inline int64 GetHP() const { return current_hp; }
 	inline int64 GetMaxHP() const { return max_hp; }
 	virtual int64 CalcMaxHP();
+	virtual int64 CalcHPRegenCap() { return 0; }
 	inline int64 GetMaxMana() const { return max_mana; }
+	virtual int64 CalcManaRegenCap() { return 0; }
 	inline int64 GetMana() const { return current_mana; }
 	virtual int64 GetEndurance() const { return 0; }
 	virtual int64 GetMaxEndurance() const { return 0; }
+	virtual int64 CalcEnduranceRegenCap() { return 0; }
 	virtual void SetEndurance(int32 newEnd) { return; }
 	int64 GetItemHPBonuses();
 	int64 GetSpellHPBonuses();
@@ -654,10 +658,11 @@ public:
 	inline int32 GetHeroicStrikethrough() const  { return heroic_strikethrough; }
 	inline const bool GetKeepsSoldItems() const { return keeps_sold_items; }
 	inline void SetKeepsSoldItems(bool in_keeps_sold_items)  { keeps_sold_items = in_keeps_sold_items; }
-
+	virtual int32 GetHealAmt() const { return 0; }
+	virtual int32 GetSpellDmg() const { return 0; }
+	void ProcessItemCaps();
+	virtual int32 CalcItemATKCap() { return 0; }
 	virtual bool IsSitting() const { return false; }
-
-	int CalcRecommendedLevelBonus(uint8 level, uint8 reclevel, int basestat);
 
 	void CopyHateList(Mob* to);
 
@@ -946,7 +951,7 @@ public:
 	int16 GetMeleeDmgPositionMod(Mob* defender);
 	int16 GetSkillReuseTime(uint16 skill);
 	int GetCriticalChanceBonus(uint16 skill);
-	int GetSkillDmgAmt(uint16 skill);
+	int GetSkillDmgAmt(int skill_id);
 	int16 GetPositionalDmgAmt(Mob* defender);
 	inline bool CanBlockSpell() const { return(spellbonuses.FocusEffects[focusBlockNextSpell]); }
 	bool DoHPToManaCovert(int32 mana_cost = 0);
@@ -1107,9 +1112,9 @@ public:
 	int64 ReduceAllDamage(int64 damage);
 
 	void DoSpecialAttackDamage(Mob *who, EQ::skills::SkillType skill, int base_damage, int min_damage = 0, int32 hate_override = -1, int ReuseTime = 10);
-	virtual void DoThrowingAttackDmg(Mob* other, const EQ::ItemInstance* RangeWeapon = nullptr, const EQ::ItemData* AmmoItem = nullptr, uint16 weapon_damage = 0, int16 chance_mod = 0, int16 focus = 0, int ReuseTime = 0, uint32 range_id = 0, int AmmoSlot = 0, float speed = 4.0f, bool DisableProcs = false);
-	void DoMeleeSkillAttackDmg(Mob* other, uint16 weapon_damage, EQ::skills::SkillType skillinuse, int16 chance_mod = 0, int16 focus = 0, bool CanRiposte = false, int ReuseTime = 0);
-	virtual void DoArcheryAttackDmg(Mob* other, const EQ::ItemInstance* RangeWeapon = nullptr, const EQ::ItemInstance* Ammo = nullptr, uint16 weapon_damage = 0, int16 chance_mod = 0, int16 focus = 0, int ReuseTime = 0, uint32 range_id = 0, uint32 ammo_id = 0, const EQ::ItemData *AmmoItem = nullptr, int AmmoSlot = 0, float speed = 4.0f, bool DisableProcs = false);
+	void DoThrowingAttackDmg(Mob* other, const EQ::ItemInstance* RangeWeapon = nullptr, const EQ::ItemData* AmmoItem = nullptr, int32 weapon_damage = 0, int16 chance_mod = 0, int16 focus = 0, int ReuseTime = 0, uint32 range_id = 0, int AmmoSlot = 0, float speed = 4.0f, bool DisableProcs = false);
+	void DoMeleeSkillAttackDmg(Mob* other, int32 weapon_damage, EQ::skills::SkillType skillinuse, int16 chance_mod = 0, int16 focus = 0, bool CanRiposte = false, int ReuseTime = 0);
+	void DoArcheryAttackDmg(Mob* other, const EQ::ItemInstance* RangeWeapon = nullptr, const EQ::ItemInstance* Ammo = nullptr, int32 weapon_damage = 0, int16 chance_mod = 0, int16 focus = 0, int ReuseTime = 0, uint32 range_id = 0, uint32 ammo_id = 0, const EQ::ItemData *AmmoItem = nullptr, int AmmoSlot = 0, float speed = 4.0f, bool DisableProcs = false);
 	bool TryProjectileAttack(Mob* other, const EQ::ItemData *item, EQ::skills::SkillType skillInUse, uint64 weapon_dmg, const EQ::ItemInstance* RangeWeapon, const EQ::ItemInstance* Ammo, int AmmoSlot, float speed, bool DisableProcs = false);
 	void ProjectileAttack();
 	inline bool HasProjectileAttack() const { return ActiveProjectileATK; }
@@ -1371,6 +1376,11 @@ public:
 	void ApplyAABonuses(const AA::Rank &rank, StatBonuses* newbon);
 	bool CheckAATimer(int timer);
 
+	void CalcItemBonuses(StatBonuses* b);
+	void AddItemBonuses(const EQ::ItemInstance* inst, StatBonuses* b, bool is_augment = false, bool is_tribute = false, int recommended_level_override = 0, bool is_ammo_item = false);
+	void AdditiveWornBonuses(const EQ::ItemInstance* inst, StatBonuses* b, bool is_augment = false);
+	int CalcRecommendedLevelBonus(uint8 current_level, uint8 recommended_level, int base_stat);
+
 	int NPCAssistCap() { return npc_assist_cap; }
 	void AddAssistCap() { ++npc_assist_cap; }
 	void DelAssistCap() { --npc_assist_cap; }
@@ -1390,12 +1400,18 @@ public:
 	/// this cures timing issues cuz dead animation isn't done but server side feigning is?
 	inline bool GetFeigned() const { return(feigned); }
 
+	std::vector<DataBucketCache> m_data_bucket_cache;
+
+	// Data Bucket Methods
 	void DeleteBucket(std::string bucket_name);
 	std::string GetBucket(std::string bucket_name);
 	std::string GetBucketExpires(std::string bucket_name);
 	std::string GetBucketKey();
 	std::string GetBucketRemaining(std::string bucket_name);
 	void SetBucket(std::string bucket_name, std::string bucket_value, std::string expiration = "");
+
+	// Heroic Stat Benefits
+	float CheckHeroicBonusesDataBuckets(std::string bucket_name);
 
 	int DispatchZoneControllerEvent(QuestEventID evt, Mob* init, const std::string& data, uint32 extra, std::vector<std::any>* pointers);
 
@@ -1417,6 +1433,8 @@ public:
 	bool GetManualFollow() const { return m_manual_follow; }
 
 	void DrawDebugCoordinateNode(std::string node_name, const glm::vec4 vec);
+
+	void CalcHeroicBonuses(StatBonuses* newbon);
 
 protected:
 	void CommonDamage(Mob* other, int64 &damage, const uint16 spell_id, const EQ::skills::SkillType attack_skill, bool &avoidable, const int8 buffslot, const bool iBuffTic, eSpecialAttacks specal = eSpecialAttacks::None);
@@ -1701,6 +1719,7 @@ protected:
 	bool is_boat;
 
 	CombatRecord m_combat_record{};
+
 public:
 	const CombatRecord &GetCombatRecord() const;
 
@@ -1832,6 +1851,13 @@ private:
 	EQ::InventoryProfile m_inv;
 	std::shared_ptr<HealRotation> m_target_of_heal_rotation;
 	bool m_manual_follow;
+
+	void SetHeroicStrBonuses(StatBonuses* n);
+	void SetHeroicStaBonuses(StatBonuses* n);
+	void SetHeroicAgiBonuses(StatBonuses* n);
+	void SetHeroicDexBonuses(StatBonuses* n);
+	void SetHeroicIntBonuses(StatBonuses* n);
+	void SetHeroicWisBonuses(StatBonuses* n);
 
 	void DoSpellInterrupt(uint16 spell_id, int32 mana_cost, int my_curmana);
 };

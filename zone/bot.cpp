@@ -27,9 +27,6 @@
 #include "../common/repositories/bot_spell_settings_repository.h"
 #include "../common/data_verification.h"
 
-extern volatile bool is_zone_loaded;
-extern bool Critical;
-
 // This constructor is used during the bot create command
 Bot::Bot(NPCType *npcTypeData, Client* botOwner) : NPC(npcTypeData, nullptr, glm::vec4(), Ground, false), rest_timer(1), ping_timer(1) {
 	GiveNPCTypeData(npcTypeData);
@@ -427,11 +424,6 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 	}
 
 	cur_end = max_end;
-
-	// Safety Check to confirm we have a valid group
-	if (HasGroup() && !GetGroup()->IsGroupMember(GetBotOwner())) {
-		Bot::RemoveBotFromGroup(this, GetGroup());
-	}
 
 	// Safety Check to confirm we have a valid raid
 	if (HasRaid() && !GetRaid()->IsRaidMember(GetBotOwner()->CastToClient())) {
@@ -2822,7 +2814,7 @@ void Bot::AcquireBotTarget(Group* bot_group, Raid* raid, Client* leash_owner, fl
 		assist_mob = entity_list.GetMob(bot_group->GetMainAssistName());
 	}
 	else if (raid) {
-		assist_mob = raid->GetRaidMainAssistOneByName(GetName());
+		assist_mob = raid->GetRaidMainAssistOne();
 	}
 
 	if (assist_mob) {
@@ -3114,7 +3106,6 @@ Client* Bot::SetLeashOwner(Client* bot_owner, Group* bot_group, Raid* raid, uint
 				raid->GetGroupLeader(r_group)->CastToClient() : bot_owner;
 
 	} else if (bot_group) {
-		bot_group->VerifyGroup();
 		leash_owner = (bot_group->GetLeader() && bot_group->GetLeader()->IsClient() ? bot_group->GetLeader()->CastToClient() : bot_owner);
 
 	} else {
@@ -3293,8 +3284,7 @@ bool Bot::Spawn(Client* botCharacterOwner) {
 		m_targetable = true;
 		entity_list.AddBot(this, true, true);
 
-		GetBotOwnerDataBuckets();
-		GetBotDataBuckets();
+		DataBucket::GetDataBuckets(this);
 		LoadBotSpellSettings();
 		if (!AI_AddBotSpells(GetBotSpellID())) {
 			GetBotOwner()->CastToClient()->Message(
@@ -3324,11 +3314,18 @@ bool Bot::Spawn(Client* botCharacterOwner) {
 			}
 		}
 
-		if (Raid* raid = entity_list.GetRaidByBotName(GetName()))
-		{
+		Raid* raid = nullptr;
+		Group* group = nullptr;
+
+		if (raid = entity_list.GetRaidByBotName(GetName())) {
 			raid->VerifyRaid();
 			SetRaidGrouped(true);
 		}
+		else if (group = entity_list.GetGroupByMobName(GetName())) {
+			group->VerifyGroup();
+			SetGrouped(true);
+		}
+
 		return true;
 	}
 
@@ -3465,7 +3462,7 @@ void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 
 			if(item) {
 				if(strlen(item->IDFile) > 2)
-					ns->spawn.equipment.Primary.Material = Strings::ToInt(&item->IDFile[2]);
+					ns->spawn.equipment.Primary.Material = Strings::ToUnsignedInt(&item->IDFile[2]);
 
 
 				ns->spawn.equipment_tint.Primary.Color = GetEquipmentColor(EQ::textures::weaponPrimary);
@@ -3478,7 +3475,7 @@ void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 
 			if(item) {
 				if(strlen(item->IDFile) > 2)
-					ns->spawn.equipment.Secondary.Material = Strings::ToInt(&item->IDFile[2]);
+					ns->spawn.equipment.Secondary.Material = Strings::ToUnsignedInt(&item->IDFile[2]);
 
 				ns->spawn.equipment_tint.Secondary.Color = GetEquipmentColor(EQ::textures::weaponSecondary);
 			}
@@ -3866,21 +3863,18 @@ bool Bot::RemoveBotFromGroup(Bot* bot, Group* group) {
 
 bool Bot::AddBotToGroup(Bot* bot, Group* group) {
 	bool Result = false;
-	if (bot && group) {
-		// Add bot to this group
-		if (group->AddMember(bot)) {
-			if (group->GetLeader()) {
-				bot->SetFollowID(group->GetLeader()->GetID());
-				// Need to send this only once when a group is formed with a bot so the client knows it is also the group leader
-				if (group->GroupCount() == 2 && group->GetLeader()->IsClient()) {
-					group->UpdateGroupAAs();
-					Mob *TempLeader = group->GetLeader();
-					group->SendUpdate(groupActUpdate, TempLeader);
-				}
+	if (bot && group && group->AddMember(bot)) {
+		if (group->GetLeader()) {
+			bot->SetFollowID(group->GetLeader()->GetID());
+			// Need to send this only once when a group is formed with a bot so the client knows it is also the group leader
+			if (group->GroupCount() == 2 && group->GetLeader()->IsClient()) {
+				group->UpdateGroupAAs();
+				Mob *TempLeader = group->GetLeader();
+				group->SendUpdate(groupActUpdate, TempLeader);
 			}
-			group->VerifyGroup();
-			Result = true;
 		}
+		group->VerifyGroup();
+		Result = true;
 	}
 	return Result;
 }
@@ -4629,16 +4623,14 @@ bool Bot::Death(Mob *killerMob, int64 damage, uint16 spell_id, EQ::skills::Skill
 		my_owner->CastToClient()->SetBotPulling(false);
 	}
 
-Raid* raid = entity_list.GetRaidByBotName(GetName());
-
-	if (raid)
+	if (auto raid = entity_list.GetRaidByBotName(GetName()); raid)
 	{
 
-		for (int x = 0; x < MAX_RAID_MEMBERS; x++)
+		for (auto& m : raid->members)
 		{
-			if (strcmp(raid->members[x].membername, GetName()) == 0)
+			if (strcmp(m.member_name, GetName()) == 0)
 			{
-				raid->members[x].member = nullptr;
+				m.member = nullptr;
 			}
 		}
 	}
@@ -5468,10 +5460,10 @@ int64 Bot::CalcMaxMana() {
 	switch(GetCasterClass()) {
 		case 'I':
 			max_mana = (GenerateBaseManaPoints() + itembonuses.Mana + spellbonuses.Mana + GroupLeadershipAAManaEnhancement());
-			max_mana += (GetHeroicINT() * 10);
+			max_mana += itembonuses.heroic_max_mana;
 		case 'W': {
 			max_mana = (GenerateBaseManaPoints() + itembonuses.Mana + spellbonuses.Mana + GroupLeadershipAAManaEnhancement());
-			max_mana += (GetHeroicWIS() * 10);
+			max_mana += itembonuses.heroic_max_mana;
 			break;
 		}
 		case 'N': {
@@ -6008,11 +6000,13 @@ void Bot::CalcBonuses() {
 	memset(&itembonuses, 0, sizeof(StatBonuses));
 	GenerateBaseStats();
 	CalcItemBonuses(&itembonuses);
+	CalcHeroicBonuses(&itembonuses);
 	CalcSpellBonuses(&spellbonuses);
 	CalcAABonuses(&aabonuses);
 	SetAttackTimer();
 	CalcSeeInvisibleLevel();
 	CalcInvisibleLevel();
+	ProcessItemCaps();
 	CalcATK();
 	CalcSTR();
 	CalcSTA();
@@ -6044,15 +6038,7 @@ int64 Bot::CalcHPRegenCap() {
 }
 
 int64 Bot::CalcManaRegenCap() {
-	int64 cap = RuleI(Character, ItemManaRegenCap) + aabonuses.ItemManaRegenCap;
-	switch(GetCasterClass()) {
-		case 'I':
-			cap += itembonuses.HeroicINT * RuleR(Character, HeroicIntelligenceMultiplier) / 25;
-			break;
-		case 'W':
-			cap += itembonuses.HeroicWIS * RuleR(Character, HeroicWisdomMultiplier) / 25;
-			break;
-	}
+	int64 cap = RuleI(Character, ItemManaRegenCap) + aabonuses.ItemManaRegenCap + itembonuses.heroic_mana_regen;
 	return (cap * RuleI(Character, ManaRegenMultiplier) / 100);
 }
 
@@ -6442,7 +6428,7 @@ int32 Bot::LevelRegen() {
 
 int64 Bot::CalcHPRegen() {
 	int32 regen = (LevelRegen() + itembonuses.HPRegen + spellbonuses.HPRegen);
-	regen += GetHeroicSTA() * RuleR(Character, HeroicStaminaMultiplier) / 20;
+	regen += itembonuses.heroic_hp_regen;
 	regen += (aabonuses.HPRegen + GroupLeadershipAAHealthRegeneration());
 
 	regen = ((regen * RuleI(Character, HPRegenMultiplier)) / 100);
@@ -6463,15 +6449,8 @@ int64 Bot::CalcManaRegen() {
 	} else
 		regen = (2 + spellbonuses.ManaRegen + itembonuses.ManaRegen);
 
-	if(GetCasterClass() == 'I')
-		regen += itembonuses.HeroicINT * RuleR(Character, HeroicIntelligenceMultiplier) / 25;
-	else if(GetCasterClass() == 'W')
-		regen += itembonuses.HeroicWIS * RuleR(Character, HeroicWisdomMultiplier) / 25;
+	regen += aabonuses.ManaRegen + itembonuses.heroic_mana_regen;
 
-	else
-		regen = 0;
-
-	regen += aabonuses.ManaRegen;
 	regen = ((regen * RuleI(Character, ManaRegenMultiplier)) / 100);
 	float mana_regen_rate = RuleR(Bots, ManaRegen);
 	if (mana_regen_rate < 0.0f)
@@ -6516,7 +6495,7 @@ int64 Bot::CalcMaxHP() {
 	int32 bot_hp = 0;
 	uint32 nd = 10000;
 	bot_hp += (GenerateBaseHitPoints() + itembonuses.HP);
-	bot_hp += GetHeroicSTA() * RuleR(Character, HeroicStaminaMultiplier) * 10;
+	bot_hp += itembonuses.heroic_max_hp;
 	nd += aabonuses.MaxHP;
 	bot_hp = ((float)bot_hp * (float)nd / (float)10000);
 	bot_hp += (spellbonuses.HP + aabonuses.HP);
@@ -6560,13 +6539,7 @@ int64 Bot::CalcBaseEndurance() {
 	int32 sta_end = 0;
 	int stats = 0;
 	if (GetOwner() && GetOwner()->CastToClient() && GetOwner()->CastToClient()->ClientVersion() >= EQ::versions::ClientVersion::SoD && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
-		double heroic_stats = 0;
 		stats = ((GetSTR() + GetSTA() + GetDEX() + GetAGI()) / 4);
-		double heroic_str = GetHeroicSTR() * RuleR(Character, HeroicStrengthMultiplier);
-		double heroic_sta = GetHeroicSTA() * RuleR(Character, HeroicStaminaMultiplier);
-		double heroic_dex = GetHeroicDEX() * RuleR(Character, HeroicDexterityMultiplier);
-		double heroic_agi = GetHeroicAGI() * RuleR(Character, HeroicAgilityMultiplier);
-		heroic_stats = (heroic_str + heroic_sta + heroic_dex + heroic_agi) / 4;
 
 		if (stats > 100) {
 			converted_stats = (((stats - 100) * 5 / 2) + 100);
@@ -6587,7 +6560,7 @@ int64 Bot::CalcBaseEndurance() {
 			sta_end = (9 * converted_stats);
 			base_endurance = (1800 + ((GetLevel() - 80) * 18));
 		}
-		base_end = (base_endurance + sta_end + (heroic_stats * 10));
+		base_end = base_endurance + sta_end + itembonuses.heroic_max_end;
 	} else {
 
 		stats = (GetSTR() + GetSTA() + GetDEX() + GetAGI());
@@ -6600,7 +6573,8 @@ int64 Bot::CalcBaseEndurance() {
 		int HalfBonus400to800 = 0;
 		int Bonus800plus = 0;
 		int HalfBonus800plus = 0;
-		int BonusUpto800 = int(at_most_800 / 4) ;
+
+		auto BonusUpto800 = int(at_most_800 / 4) ;
 
 		if(stats > 400) {
 			Bonus400to800 = int((at_most_800 - 400) / 4);
@@ -6685,7 +6659,11 @@ void Bot::Camp(bool save_to_database) {
 		Save();
 	}
 
-	Depop();
+	if (HasGroup() || HasRaid()) {
+		Zone();
+	} else {
+		Depop();
+	}
 }
 
 void Bot::Zone() {
@@ -7029,354 +7007,6 @@ void Bot::ProcessBotInspectionRequest(Bot* inspectedBot, Client* client) {
 		client->QueuePacket(outapp); // Send answer to requester
 		safe_delete(outapp);
 	}
-}
-
-void Bot::CalcItemBonuses(StatBonuses* newbon)
-{
-	const EQ::ItemData* itemtmp = nullptr;
-
-	for (int i = EQ::invslot::BONUS_BEGIN; i <= EQ::invslot::BONUS_STAT_END; ++i) {
-		const EQ::ItemInstance* item = GetBotItem(i);
-		if (item) {
-			AddItemBonuses(item, newbon);
-		}
-	}
-
-	// Caps
-	if (newbon->HPRegen > CalcHPRegenCap())
-		newbon->HPRegen = CalcHPRegenCap();
-
-	if (newbon->ManaRegen > CalcManaRegenCap())
-		newbon->ManaRegen = CalcManaRegenCap();
-
-	if (newbon->EnduranceRegen > CalcEnduranceRegenCap())
-		newbon->EnduranceRegen = CalcEnduranceRegenCap();
-}
-
-void Bot::AddItemBonuses(const EQ::ItemInstance *inst, StatBonuses* newbon, bool isAug, bool isTribute, int rec_override) {
-	if (!inst || !inst->IsClassCommon())
-	{
-		return;
-	}
-
-	if (inst->GetAugmentType()==0 && isAug)
-	{
-		return;
-	}
-
-	const EQ::ItemData *item = inst->GetItem();
-
-	if (!isTribute && !inst->IsEquipable(GetBaseRace(),GetClass()))
-	{
-		if (item->ItemType != EQ::item::ItemTypeFood && item->ItemType != EQ::item::ItemTypeDrink)
-			return;
-	}
-
-	if (GetLevel() < inst->GetItemRequiredLevel(true))
-	{
-		return;
-	}
-
-	auto rec_level = isAug ? rec_override : inst->GetItemRecommendedLevel(true);
-	if (GetLevel() >= rec_level)
-	{
-		newbon->AC += item->AC;
-		newbon->HP += item->HP;
-		newbon->Mana += item->Mana;
-		newbon->Endurance += item->Endur;
-		newbon->ATK += item->Attack;
-		newbon->STR += (item->AStr + item->HeroicStr);
-		newbon->STA += (item->ASta + item->HeroicSta);
-		newbon->DEX += (item->ADex + item->HeroicDex);
-		newbon->AGI += (item->AAgi + item->HeroicAgi);
-		newbon->INT += (item->AInt + item->HeroicInt);
-		newbon->WIS += (item->AWis + item->HeroicWis);
-		newbon->CHA += (item->ACha + item->HeroicCha);
-
-		newbon->MR += (item->MR + item->HeroicMR);
-		newbon->FR += (item->FR + item->HeroicFR);
-		newbon->CR += (item->CR + item->HeroicCR);
-		newbon->PR += (item->PR + item->HeroicPR);
-		newbon->DR += (item->DR + item->HeroicDR);
-		newbon->Corrup += (item->SVCorruption + item->HeroicSVCorrup);
-
-		newbon->STRCapMod += item->HeroicStr;
-		newbon->STACapMod += item->HeroicSta;
-		newbon->DEXCapMod += item->HeroicDex;
-		newbon->AGICapMod += item->HeroicAgi;
-		newbon->INTCapMod += item->HeroicInt;
-		newbon->WISCapMod += item->HeroicWis;
-		newbon->CHACapMod += item->HeroicCha;
-		newbon->MRCapMod += item->HeroicMR;
-		newbon->CRCapMod += item->HeroicFR;
-		newbon->FRCapMod += item->HeroicCR;
-		newbon->PRCapMod += item->HeroicPR;
-		newbon->DRCapMod += item->HeroicDR;
-		newbon->CorrupCapMod += item->HeroicSVCorrup;
-
-		newbon->HeroicSTR += item->HeroicStr;
-		newbon->HeroicSTA += item->HeroicSta;
-		newbon->HeroicDEX += item->HeroicDex;
-		newbon->HeroicAGI += item->HeroicAgi;
-		newbon->HeroicINT += item->HeroicInt;
-		newbon->HeroicWIS += item->HeroicWis;
-		newbon->HeroicCHA += item->HeroicCha;
-		newbon->HeroicMR += item->HeroicMR;
-		newbon->HeroicFR += item->HeroicFR;
-		newbon->HeroicCR += item->HeroicCR;
-		newbon->HeroicPR += item->HeroicPR;
-		newbon->HeroicDR += item->HeroicDR;
-		newbon->HeroicCorrup += item->HeroicSVCorrup;
-
-	}
-	else
-	{
-		int lvl = GetLevel();
-
-		newbon->AC += CalcRecommendedLevelBonus( lvl, rec_level, item->AC );
-		newbon->HP += CalcRecommendedLevelBonus( lvl, rec_level, item->HP );
-		newbon->Mana += CalcRecommendedLevelBonus( lvl, rec_level, item->Mana );
-		newbon->Endurance += CalcRecommendedLevelBonus( lvl, rec_level, item->Endur );
-		newbon->ATK += CalcRecommendedLevelBonus( lvl, rec_level, item->Attack );
-		newbon->STR += CalcRecommendedLevelBonus( lvl, rec_level, (item->AStr + item->HeroicStr) );
-		newbon->STA += CalcRecommendedLevelBonus( lvl, rec_level, (item->ASta + item->HeroicSta) );
-		newbon->DEX += CalcRecommendedLevelBonus( lvl, rec_level, (item->ADex + item->HeroicDex) );
-		newbon->AGI += CalcRecommendedLevelBonus( lvl, rec_level, (item->AAgi + item->HeroicAgi) );
-		newbon->INT += CalcRecommendedLevelBonus( lvl, rec_level, (item->AInt + item->HeroicInt) );
-		newbon->WIS += CalcRecommendedLevelBonus( lvl, rec_level, (item->AWis + item->HeroicWis) );
-		newbon->CHA += CalcRecommendedLevelBonus( lvl, rec_level, (item->ACha + item->HeroicCha) );
-
-		newbon->MR += CalcRecommendedLevelBonus( lvl, rec_level, (item->MR + item->HeroicMR) );
-		newbon->FR += CalcRecommendedLevelBonus( lvl, rec_level, (item->FR + item->HeroicFR) );
-		newbon->CR += CalcRecommendedLevelBonus( lvl, rec_level, (item->CR + item->HeroicCR) );
-		newbon->PR += CalcRecommendedLevelBonus( lvl, rec_level, (item->PR + item->HeroicPR) );
-		newbon->DR += CalcRecommendedLevelBonus( lvl, rec_level, (item->DR + item->HeroicDR) );
-		newbon->Corrup += CalcRecommendedLevelBonus( lvl, rec_level, (item->SVCorruption + item->HeroicSVCorrup) );
-
-		newbon->STRCapMod += CalcRecommendedLevelBonus( lvl, rec_level, item->HeroicStr );
-		newbon->STACapMod += CalcRecommendedLevelBonus( lvl, rec_level, item->HeroicSta );
-		newbon->DEXCapMod += CalcRecommendedLevelBonus( lvl, rec_level, item->HeroicDex );
-		newbon->AGICapMod += CalcRecommendedLevelBonus( lvl, rec_level, item->HeroicAgi );
-		newbon->INTCapMod += CalcRecommendedLevelBonus( lvl, rec_level, item->HeroicInt );
-		newbon->WISCapMod += CalcRecommendedLevelBonus( lvl, rec_level, item->HeroicWis );
-		newbon->CHACapMod += CalcRecommendedLevelBonus( lvl, rec_level, item->HeroicCha );
-		newbon->MRCapMod += CalcRecommendedLevelBonus( lvl, rec_level, item->HeroicMR );
-		newbon->CRCapMod += CalcRecommendedLevelBonus( lvl, rec_level, item->HeroicFR );
-		newbon->FRCapMod += CalcRecommendedLevelBonus( lvl, rec_level, item->HeroicCR );
-		newbon->PRCapMod += CalcRecommendedLevelBonus( lvl, rec_level, item->HeroicPR );
-		newbon->DRCapMod += CalcRecommendedLevelBonus( lvl, rec_level, item->HeroicDR );
-		newbon->CorrupCapMod += CalcRecommendedLevelBonus( lvl, rec_level, item->HeroicSVCorrup );
-
-		newbon->HeroicSTR += CalcRecommendedLevelBonus( lvl, rec_level, item->HeroicStr );
-		newbon->HeroicSTA += CalcRecommendedLevelBonus( lvl, rec_level, item->HeroicSta );
-		newbon->HeroicDEX += CalcRecommendedLevelBonus( lvl, rec_level, item->HeroicDex );
-		newbon->HeroicAGI += CalcRecommendedLevelBonus( lvl, rec_level, item->HeroicAgi );
-		newbon->HeroicINT += CalcRecommendedLevelBonus( lvl, rec_level, item->HeroicInt );
-		newbon->HeroicWIS += CalcRecommendedLevelBonus( lvl, rec_level, item->HeroicWis );
-		newbon->HeroicCHA += CalcRecommendedLevelBonus( lvl, rec_level, item->HeroicCha );
-		newbon->HeroicMR += CalcRecommendedLevelBonus( lvl, rec_level, item->HeroicMR );
-		newbon->HeroicFR += CalcRecommendedLevelBonus( lvl, rec_level, item->HeroicFR );
-		newbon->HeroicCR += CalcRecommendedLevelBonus( lvl, rec_level, item->HeroicCR );
-		newbon->HeroicPR += CalcRecommendedLevelBonus( lvl, rec_level, item->HeroicPR );
-		newbon->HeroicDR += CalcRecommendedLevelBonus( lvl, rec_level, item->HeroicDR );
-		newbon->HeroicCorrup += CalcRecommendedLevelBonus( lvl, rec_level, item->HeroicSVCorrup );
-	}
-
-	//FatherNitwit: New style haste, shields, and regens
-	if (newbon->haste < (int32)item->Haste) {
-		newbon->haste = item->Haste;
-	}
-	if (item->Regen > 0)
-		newbon->HPRegen += item->Regen;
-
-	if (item->ManaRegen > 0)
-		newbon->ManaRegen += item->ManaRegen;
-
-	if (item->EnduranceRegen > 0)
-		newbon->EnduranceRegen += item->EnduranceRegen;
-
-	if (item->DamageShield > 0) {
-		if ((newbon->DamageShield + item->DamageShield) > RuleI(Character, ItemDamageShieldCap))
-			newbon->DamageShield = RuleI(Character, ItemDamageShieldCap);
-		else
-			newbon->DamageShield += item->DamageShield;
-	}
-	if (item->SpellShield > 0) {
-		if ((newbon->SpellShield + item->SpellShield) > RuleI(Character, ItemSpellShieldingCap))
-			newbon->SpellShield = RuleI(Character, ItemSpellShieldingCap);
-		else
-			newbon->SpellShield += item->SpellShield;
-	}
-	if (item->Shielding > 0) {
-		if ((newbon->MeleeMitigation + item->Shielding) > RuleI(Character, ItemShieldingCap))
-			newbon->MeleeMitigation = RuleI(Character, ItemShieldingCap);
-		else
-			newbon->MeleeMitigation += item->Shielding;
-	}
-	if (item->StunResist > 0) {
-		if ((newbon->StunResist + item->StunResist) > RuleI(Character, ItemStunResistCap))
-			newbon->StunResist = RuleI(Character, ItemStunResistCap);
-		else
-			newbon->StunResist += item->StunResist;
-	}
-	if (item->StrikeThrough > 0) {
-		if ((newbon->StrikeThrough + item->StrikeThrough) > RuleI(Character, ItemStrikethroughCap))
-			newbon->StrikeThrough = RuleI(Character, ItemStrikethroughCap);
-		else
-			newbon->StrikeThrough += item->StrikeThrough;
-	}
-	if (item->Avoidance > 0) {
-		if ((newbon->AvoidMeleeChance + item->Avoidance) > RuleI(Character, ItemAvoidanceCap))
-			newbon->AvoidMeleeChance = RuleI(Character, ItemAvoidanceCap);
-		else
-			newbon->AvoidMeleeChance += item->Avoidance;
-	}
-	if (item->Accuracy > 0) {
-		if ((newbon->HitChance + item->Accuracy) > RuleI(Character, ItemAccuracyCap))
-			newbon->HitChance = RuleI(Character, ItemAccuracyCap);
-		else
-			newbon->HitChance += item->Accuracy;
-	}
-	if (item->CombatEffects > 0) {
-		if ((newbon->ProcChance + item->CombatEffects) > RuleI(Character, ItemCombatEffectsCap))
-			newbon->ProcChance = RuleI(Character, ItemCombatEffectsCap);
-		else
-			newbon->ProcChance += item->CombatEffects;
-	}
-	if (item->DotShielding > 0) {
-		if ((newbon->DoTShielding + item->DotShielding) > RuleI(Character, ItemDoTShieldingCap))
-			newbon->DoTShielding = RuleI(Character, ItemDoTShieldingCap);
-		else
-			newbon->DoTShielding += item->DotShielding;
-	}
-
-	if (item->HealAmt > 0) {
-		if ((newbon->HealAmt + item->HealAmt) > RuleI(Character, ItemHealAmtCap))
-			newbon->HealAmt = RuleI(Character, ItemHealAmtCap);
-		else
-			newbon->HealAmt += item->HealAmt;
-	}
-	if (item->SpellDmg > 0) {
-		if ((newbon->SpellDmg + item->SpellDmg) > RuleI(Character, ItemSpellDmgCap))
-			newbon->SpellDmg = RuleI(Character, ItemSpellDmgCap);
-		else
-			newbon->SpellDmg += item->SpellDmg;
-	}
-	if (item->Clairvoyance > 0) {
-		if ((newbon->Clairvoyance + item->Clairvoyance) > RuleI(Character, ItemClairvoyanceCap))
-			newbon->Clairvoyance = RuleI(Character, ItemClairvoyanceCap);
-		else
-			newbon->Clairvoyance += item->Clairvoyance;
-	}
-
-	if (item->DSMitigation > 0) {
-		if ((newbon->DSMitigation + item->DSMitigation) > RuleI(Character, ItemDSMitigationCap))
-			newbon->DSMitigation = RuleI(Character, ItemDSMitigationCap);
-		else
-			newbon->DSMitigation += item->DSMitigation;
-	}
-	if (item->Worn.Effect > 0 && item->Worn.Type == EQ::item::ItemEffectWorn) {// latent effects
-		ApplySpellsBonuses(item->Worn.Effect, item->Worn.Level, newbon, 0, item->Worn.Type);
-	}
-
-	if (item->Focus.Effect>0 && (item->Focus.Type == EQ::item::ItemEffectFocus)) { // focus effects
-		ApplySpellsBonuses(item->Focus.Effect, item->Focus.Level, newbon, 0);
-	}
-
-	switch(item->BardType)
-	{
-	case EQ::item::ItemTypeAllInstrumentTypes: // (e.g. Singing Short Sword)
-		{
-			if (item->BardValue > newbon->singingMod)
-				newbon->singingMod = item->BardValue;
-			if (item->BardValue > newbon->brassMod)
-				newbon->brassMod = item->BardValue;
-			if (item->BardValue > newbon->stringedMod)
-				newbon->stringedMod = item->BardValue;
-			if (item->BardValue > newbon->percussionMod)
-				newbon->percussionMod = item->BardValue;
-			if (item->BardValue > newbon->windMod)
-				newbon->windMod = item->BardValue;
-			break;
-		}
-	case EQ::item::ItemTypeSinging:
-		{
-			if (item->BardValue > newbon->singingMod)
-				newbon->singingMod = item->BardValue;
-			break;
-		}
-	case EQ::item::ItemTypeWindInstrument:
-		{
-			if (item->BardValue > newbon->windMod)
-				newbon->windMod = item->BardValue;
-			break;
-		}
-	case EQ::item::ItemTypeStringedInstrument:
-		{
-			if (item->BardValue > newbon->stringedMod)
-				newbon->stringedMod = item->BardValue;
-			break;
-		}
-	case EQ::item::ItemTypeBrassInstrument:
-		{
-			if (item->BardValue > newbon->brassMod)
-				newbon->brassMod = item->BardValue;
-			break;
-		}
-	case EQ::item::ItemTypePercussionInstrument:
-		{
-			if (item->BardValue > newbon->percussionMod)
-				newbon->percussionMod = item->BardValue;
-			break;
-		}
-	}
-
-	if (item->SkillModValue != 0 && item->SkillModType <= EQ::skills::HIGHEST_SKILL) {
-		if ((item->SkillModValue > 0 && newbon->skillmod[item->SkillModType] < item->SkillModValue) ||
-			(item->SkillModValue < 0 && newbon->skillmod[item->SkillModType] > item->SkillModValue))
-		{
-			newbon->skillmod[item->SkillModType] = item->SkillModValue;
-		}
-	}
-
-	if (item->ExtraDmgAmt != 0 && item->ExtraDmgSkill <= EQ::skills::HIGHEST_SKILL) {
-		if (
-			RuleI(Character, ItemExtraDmgCap) >= 0 &&
-			(newbon->SkillDamageAmount[item->ExtraDmgSkill] + item->ExtraDmgAmt) > RuleI(Character, ItemExtraDmgCap)
-		) {
-			newbon->SkillDamageAmount[item->ExtraDmgSkill] = RuleI(Character, ItemExtraDmgCap);
-		} else {
-			newbon->SkillDamageAmount[item->ExtraDmgSkill] += item->ExtraDmgAmt;
-		}
-	}
-
-	if (!isAug)
-	{
-		for (int i = EQ::invaug::SOCKET_BEGIN; i <= EQ::invaug::SOCKET_END; i++)
-			AddItemBonuses(inst->GetAugment(i),newbon,true, false, rec_level);
-	}
-
-}
-
-int Bot::CalcRecommendedLevelBonus(uint8 level, uint8 reclevel, int basestat)
-{
-	if ( (reclevel > 0) && (level < reclevel) )
-	{
-		int32 statmod = (level * 10000 / reclevel) * basestat;
-
-		if ( statmod < 0 )
-		{
-			statmod -= 5000;
-			return (statmod/10000);
-		}
-		else
-		{
-			statmod += 5000;
-			return (statmod/10000);
-		}
-	}
-
-	return 0;
 }
 
 // This method is intended to call all necessary methods to do all bot stat calculations, including spell buffs, equipment, AA bonsues, etc.
@@ -7803,7 +7433,6 @@ bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, fl
 	return false;
 }
 
-
 Mob* EntityList::GetMobByBotID(uint32 botID) {
 	Mob* Result = nullptr;
 	if (botID > 0) {
@@ -7837,10 +7466,9 @@ Bot* EntityList::GetBotByBotID(uint32 botID) {
 Bot* EntityList::GetBotByBotName(std::string_view botName) {
 	Bot* Result = nullptr;
 	if (!botName.empty()) {
-		for (std::list<Bot*>::iterator botListItr = bot_list.begin(); botListItr != bot_list.end(); ++botListItr) {
-			Bot* tempBot = *botListItr;
-			if (tempBot && std::string(tempBot->GetName()) == botName) {
-				Result = tempBot;
+		for (const auto b : bot_list) {
+			if (b && std::string_view(b->GetName()) == botName) {
+				Result = b;
 				break;
 			}
 		}
@@ -8252,15 +7880,6 @@ bool Bot::GetNeedsHateRedux(Mob *tar) {
 	if (!tar || !tar->IsEngaged() || !tar->HasTargetReflection() || !tar->GetTarget()->IsNPC())
 		return false;
 
-	//if (tar->IsClient()) {
-	//	switch (tar->GetClass()) {
-	//		// TODO: figure out affectable classes..
-	//		// Might need flag to allow player to determine redux req...
-	//	default:
-	//		return false;
-	//	}
-	//}
-	//else if (tar->IsBot()) {
 	if (tar->IsBot()) {
 		switch (tar->GetClass()) {
 		case ROGUE:
@@ -8598,24 +8217,34 @@ void Bot::SpawnBotGroupByName(Client* c, const std::string& botgroup_name, uint3
 		return;
 	}
 
-	if (!leader->Spawn(c)) {
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"Could not spawn bot-group leader {} for '{}'.",
-				leader->GetName(),
-				botgroup_name
-			).c_str()
-		);
-		safe_delete(leader);
-		return;
+	if (!leader->spawned) {
+		if (!leader->Spawn(c)) {
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"Could not spawn bot-group leader {} for '{}'.",
+					leader->GetName(),
+					botgroup_name
+				).c_str()
+			);
+			safe_delete(leader);
+			return;
+		}
 	}
 
-	auto* g = new Group(leader);
+	auto group  = leader->GetGroupByLeaderName();
+	auto raid = leader->GetRaid();
 
-	entity_list.AddGroup(g);
-	database.SetGroupID(leader->GetCleanName(), g->GetID(), leader->GetBotID());
-	database.SetGroupLeaderName(g->GetID(), leader->GetCleanName());
+	if (!raid && group) {
+		group->SetLeader(leader);
+	}
+	else if (!raid) {
+		group = new Group(leader);
+		entity_list.AddGroup(group);
+		database.SetGroupID(leader->GetCleanName(), group->GetID(), leader->GetBotID());
+		database.SetGroupLeaderName(group->GetID(), leader->GetCleanName());
+	}
+
 	leader->SetFollowID(c->GetID());
 
 	uint32 botgroup_id = 0;
@@ -8702,23 +8331,33 @@ void Bot::SpawnBotGroupByName(Client* c, const std::string& botgroup_name, uint3
 			continue;
 		}
 
-		if (!member->Spawn(c)) {
-			c->Message(
-				Chat::White,
-				fmt::format(
-					"Could not spawn bot '{}' (ID {}).",
-					member->GetName(),
-					member_iter
-				).c_str()
-			);
-			safe_delete(member);
-			return;
+		if (!member->spawned) {
+			if (!member->Spawn(c)) {
+				c->Message(
+					Chat::White,
+					fmt::format(
+						"Could not spawn bot '{}' (ID {}).",
+						member->GetName(),
+						member_iter
+					).c_str()
+				);
+				safe_delete(member);
+				return;
+			}
+
+			spawned_bot_count++;
+			bot_class_spawned_count[member->GetClass() - 1]++;
+
+			if (group) {
+				Bot::AddBotToGroup(member, group);
+			}
 		}
+	}
 
-		spawned_bot_count++;
-		bot_class_spawned_count[member->GetClass() - 1]++;
-
-		Bot::AddBotToGroup(member, g);
+	if (group) {
+		group->VerifyGroup();
+	} else if (raid) {
+		raid->VerifyRaid();
 	}
 
 	c->Message(
@@ -8762,62 +8401,7 @@ void Bot::OwnerMessage(const std::string& message)
 	);
 }
 
-bool Bot::GetBotOwnerDataBuckets()
-{
-	auto bot_owner = GetBotOwner();
-	if (!bot_owner) {
-		return false;
-	}
-
-	const auto query = fmt::format(
-		"SELECT `key`, `value` FROM data_buckets WHERE `key` LIKE '{}-%'",
-		Strings::Escape(bot_owner->GetBucketKey())
-	);
-
-	auto results = database.QueryDatabase(query);
-	if (!results.Success()) {
-		return false;
-	}
-
-	bot_owner_data_buckets.clear();
-
-	if (!results.RowCount()) {
-		return true;
-	}
-
-	for (auto row : results) {
-		bot_owner_data_buckets.insert(std::pair<std::string,std::string>(row[0], row[1]));
-	}
-
-	return true;
-}
-
-bool Bot::GetBotDataBuckets()
-{
-	const auto query = fmt::format(
-		"SELECT `key`, `value` FROM data_buckets WHERE `key` LIKE '{}-%'",
-		Strings::Escape(GetBucketKey())
-	);
-
-	auto results = database.QueryDatabase(query);
-	if (!results.Success()) {
-		return false;
-	}
-
-	bot_data_buckets.clear();
-
-	if (!results.RowCount()) {
-		return true;
-	}
-
-	for (auto row : results) {
-		bot_data_buckets.insert(std::pair<std::string,std::string>(row[0], row[1]));
-	}
-
-	return true;
-}
-
-bool Bot::CheckDataBucket(const std::string& bucket_name, const std::string& bucket_value, uint8 bucket_comparison)
+bool Bot::CheckDataBucket(std::string bucket_name, const std::string& bucket_value, uint8 bucket_comparison)
 {
 	if (!bucket_name.empty() && !bucket_value.empty()) {
 		auto full_name = fmt::format(
@@ -8826,7 +8410,7 @@ bool Bot::CheckDataBucket(const std::string& bucket_name, const std::string& buc
 			bucket_name
 		);
 
-		auto player_value = bot_data_buckets[full_name];
+		auto player_value = DataBucket::CheckBucketKey(this, full_name);
 		if (player_value.empty() && GetBotOwner()) {
 			full_name = fmt::format(
 				"{}-{}",
@@ -8834,13 +8418,13 @@ bool Bot::CheckDataBucket(const std::string& bucket_name, const std::string& buc
 				bucket_name
 			);
 
-			player_value = bot_owner_data_buckets[full_name];
+			player_value = DataBucket::CheckBucketKey(GetBotOwner(), full_name);
 			if (player_value.empty()) {
 				return false;
 			}
 		}
 
-		if (zone->CheckDataBucket(bucket_comparison, bucket_value, player_value)) {
+		if (zone->CompareDataBucket(bucket_comparison, bucket_value, player_value)) {
 			return true;
 		}
 	}
@@ -9173,16 +8757,18 @@ std::vector<Mob*> Bot::GetApplySpellList(
 		auto* r = GetRaid();
 		auto group_id = r->GetGroup(GetCleanName());
 		if (r && EQ::ValueWithin(group_id, 0, (MAX_RAID_GROUPS - 1))) {
-			for (auto i = 0; i < MAX_RAID_MEMBERS; i++) {
-				auto* m = r->members[i].member;
-				if (m && m->IsClient() && (!is_raid_group_only || r->GetGroup(m) == group_id)) {
-					l.push_back(m);
+			for (const auto& m : r->members) {
+				if (m.is_bot) {
+					continue;
+				}
+				if (m.member && m.member->IsClient() && (!is_raid_group_only || r->GetGroup(m.member) == group_id)) {
+					l.push_back(m.member);
 
-					if (allow_pets && m->HasPet()) {
-						l.push_back(m->GetPet());
+					if (allow_pets && m.member->HasPet()) {
+						l.push_back(m.member->GetPet());
 					}
 
-					const auto& sbl = entity_list.GetBotListByCharacterID(m->CharacterID());
+					const auto& sbl = entity_list.GetBotListByCharacterID(m.member->CharacterID());
 					for (const auto& b : sbl) {
 						l.push_back(b);
 					}
@@ -9345,6 +8931,12 @@ float Bot::GetBotCasterMaxRange(float melee_distance_max) {// Calculate caster d
 	return caster_distance_max;
 }
 
+
+int32 Bot::CalcItemATKCap()
+{
+	return RuleI(Character, ItemATKCap) + itembonuses.ItemATKCap + spellbonuses.ItemATKCap + aabonuses.ItemATKCap;
+}
+
 bool Bot::CheckSpawnConditions(Client* c) {
 
 	if (c->GetFeigned()) {
@@ -9379,6 +8971,5 @@ bool Bot::CheckSpawnConditions(Client* c) {
 
 	return true;
 }
-
 
 uint8 Bot::spell_casting_chances[SPELL_TYPE_COUNT][PLAYER_CLASS_COUNT][EQ::constants::STANCE_TYPE_COUNT][cntHSND] = { 0 };

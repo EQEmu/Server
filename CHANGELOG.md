@@ -1,3 +1,180 @@
+## [22.8.0] - 03/25/2023 
+
+### Code
+
+* Cleanup Strings::ToInt uses. ([#3142](https://github.com/EQEmu/Server/pull/3142)) @Aeadoin 2023-03-26
+* Remove extern bool Critical ([#3146](https://github.com/EQEmu/Server/pull/3146)) @Kinglykrab 2023-03-25
+
+### Crash
+
+* Fix for crash in Raid::QueuePacket ([#3145](https://github.com/EQEmu/Server/pull/3145)) @Aeadoin 2023-03-25
+
+### Feature
+
+* Add support for -1 extradmgskill to allow all skills to be scaled. ([#3136](https://github.com/EQEmu/Server/pull/3136)) @Kinglykrab 2023-03-26
+
+### Fixes
+
+* Fix for Items looted from corpses. ([#3147](https://github.com/EQEmu/Server/pull/3147)) @Aeadoin 2023-03-26
+* Fix for SQL Query in npc_scale_global_base ([#3144](https://github.com/EQEmu/Server/pull/3144)) @Aeadoin 2023-03-26
+
+## [22.7.0] - 03/24/2023 
+
+### Bots
+
+* Place BOT_COMMAND_CHAR inside messages ([#3027](https://github.com/EQEmu/Server/pull/3027)) @trentdm 2023-03-05
+* Prevent interrupt spam when OOM ([#3011](https://github.com/EQEmu/Server/pull/3011)) @nytmyr 2023-03-07
+
+### Code
+
+* Cleaning up Raid.cpp ([#3125](https://github.com/EQEmu/Server/pull/3125)) @Aeadoin 2023-03-20
+* Cleanup unused methods and variables in world/main.cpp and world/main.h ([#3105](https://github.com/EQEmu/Server/pull/3105)) @Kinglykrab 2023-03-17
+* Cleanup uses of Strings::ToInt to match correct type. ([#3054](https://github.com/EQEmu/Server/pull/3054)) @Aeadoin 2023-03-22
+* Delete deprecated/perlxs folder ([#3110](https://github.com/EQEmu/Server/pull/3110)) @Kinglykrab 2023-03-17
+* Delete queues.h ([#3089](https://github.com/EQEmu/Server/pull/3089)) @Kinglykrab 2023-03-17
+* Delete world/console.old.cpp ([#3099](https://github.com/EQEmu/Server/pull/3099)) @Kinglykrab 2023-03-17
+* Delete zone_numbers.h ([#3129](https://github.com/EQEmu/Server/pull/3129)) @Kinglykrab 2023-03-20
+* Remove AllConnected(), CanUpdate(), and SendInfo() from login_server_list.cpp and login_server_list.h ([#3104](https://github.com/EQEmu/Server/pull/3104)) @Kinglykrab 2023-03-17
+* Remove CLIENT_TIMEOUT from world/client.h and zone/client.h ([#3071](https://github.com/EQEmu/Server/pull/3071)) @Kinglykrab 2023-03-17
+* Remove ChangeHP() from mob.h ([#3128](https://github.com/EQEmu/Server/pull/3128)) @Kinglykrab 2023-03-19
+* Remove CheckAuth(), SetOnline(), and pMD5Pass from cliententry.h ([#3095](https://github.com/EQEmu/Server/pull/3095)) @Kinglykrab 2023-03-17
+* Remove CommandRequirement() from zonedb.h ([#3094](https://github.com/EQEmu/Server/pull/3094)) @Kinglykrab 2023-03-17
+* Remove CountZones() from launcher_link.h ([#3100](https://github.com/EQEmu/Server/pull/3100)) @Kinglykrab 2023-03-17
+* Remove DBInitVars() and HandleMysqlError() from queryserv/database.h ([#3114](https://github.com/EQEmu/Server/pull/3114)) @Kinglykrab 2023-03-17
+* Remove DBInitVars(), HandleMysqlError(), and IsChatChannelInDB() in ucs/database.h ([#3113](https://github.com/EQEmu/Server/pull/3113)) @Kinglykrab 2023-03-17
+* Remove DisableStats(), EnableStats(), DisableLoginserver(), and EnableLoginserver() from world_config.h ([#3107](https://github.com/EQEmu/Server/pull/3107)) @Kinglykrab 2023-03-17
+* Remove DoBuffWearOffEffect() from mob.h ([#3062](https://github.com/EQEmu/Server/pull/3062)) @Kinglykrab 2023-03-17
+* Remove FindByName(charname) from clientlist.h ([#3096](https://github.com/EQEmu/Server/pull/3096)) @Kinglykrab 2023-03-17
+* Remove FindCLEByLSID(), GetCLE(), GetCLEIPCount(), and RemoveCLEByLSID() from clientlist.h ([#3098](https://github.com/EQEmu/Server/pull/3098)) @Kinglykrab 2023-03-17
+* Remove FindPatch() from struct_category.cpp and struct_category.h ([#3130](https://github.com/EQEmu/Server/pull/3130)) @Kinglykrab 2023-03-20
+* Remove FlushLootStats() from npc.h ([#3079](https://github.com/EQEmu/Server/pull/3079)) @Kinglykrab 2023-03-17
+* Remove GetAILevel() from npc.h ([#3080](https://github.com/EQEmu/Server/pull/3080)) @Kinglykrab 2023-03-17
+* Remove GetDestination() from doors.h ([#3078](https://github.com/EQEmu/Server/pull/3078)) @Kinglykrab 2023-03-17
+* Remove GetServerByAddress() from server_manager.h ([#3119](https://github.com/EQEmu/Server/pull/3119)) @Kinglykrab 2023-03-17
+* Remove GetStartCount() and InitStartTimer() from zone_launch.cpp and zone_launch.h ([#3121](https://github.com/EQEmu/Server/pull/3121)) @Kinglykrab 2023-03-17
+* Remove GetTransformation() and GetInvertedTransformation() from oriented_bounding_box.h ([#3084](https://github.com/EQEmu/Server/pull/3084)) @Kinglykrab 2023-03-17
+* Remove IsAffectedByBuff() ([#3068](https://github.com/EQEmu/Server/pull/3068)) @Kinglykrab 2023-03-17
+* Remove IsConnected() from loginserver/database.h ([#3117](https://github.com/EQEmu/Server/pull/3117)) @Kinglykrab 2023-03-17
+* Remove IsOrigin(glm::vec2) from position.h ([#3088](https://github.com/EQEmu/Server/pull/3088)) @Kinglykrab 2023-03-17
+* Remove MakeGuildMembers() from wguild_mgr.h ([#3106](https://github.com/EQEmu/Server/pull/3106)) @Kinglykrab 2023-03-17
+* Remove PlayerLogin_Struct from login_types.h ([#3118](https://github.com/EQEmu/Server/pull/3118)) @Kinglykrab 2023-03-17
+* Remove RemoveSpawnGroup() from spawngroup.h ([#3090](https://github.com/EQEmu/Server/pull/3090)) @Kinglykrab 2023-03-17
+* Remove SendGuildPacket() from clientlist.cpp, clientlist.h, and wguild_mgr.cpp ([#3097](https://github.com/EQEmu/Server/pull/3097)) @Kinglykrab 2023-03-17
+* Remove SetConnection() from loginserver/world_server.h ([#3120](https://github.com/EQEmu/Server/pull/3120)) @Kinglykrab 2023-03-17
+* Remove SetDBID() from object.h ([#3082](https://github.com/EQEmu/Server/pull/3082)) @Kinglykrab 2023-03-17
+* Remove SetSentTime2 in petitions.h ([#3086](https://github.com/EQEmu/Server/pull/3086)) @Kinglykrab 2023-03-17
+* Remove StoreCharacter() from worlddb.h ([#3108](https://github.com/EQEmu/Server/pull/3108)) @Kinglykrab 2023-03-17
+* Remove UpdateLoginserverWorldAdminAccountPasswordById() from account_management.cpp ([#3115](https://github.com/EQEmu/Server/pull/3115)) @Kinglykrab 2023-03-17
+* Remove _baseBotStance from bot.h ([#3076](https://github.com/EQEmu/Server/pull/3076)) @Kinglykrab 2023-03-17
+* Remove _botRole from bot.h ([#3075](https://github.com/EQEmu/Server/pull/3075)) @Kinglykrab 2023-03-17
+* Remove _previousTarget from bot.h ([#3074](https://github.com/EQEmu/Server/pull/3074)) @Kinglykrab 2023-03-17
+* Remove authenticated from launcher_link.cpp and launcher_link.h ([#3101](https://github.com/EQEmu/Server/pull/3101)) @Kinglykrab 2023-03-17
+* Remove can_corpse_be_rezzed from corpse.h ([#3077](https://github.com/EQEmu/Server/pull/3077)) @Kinglykrab 2023-03-17
+* Remove casting_spell_type from mob.h ([#3064](https://github.com/EQEmu/Server/pull/3064)) @Kinglykrab 2023-03-17
+* Remove class EQStream from client.h ([#3070](https://github.com/EQEmu/Server/pull/3070)) @Kinglykrab 2023-03-17
+* Remove current_buff_count ([#3067](https://github.com/EQEmu/Server/pull/3067)) @Kinglykrab 2023-03-17
+* Remove firstlogin and realfirstlogin from world/client.h ([#3072](https://github.com/EQEmu/Server/pull/3072)) @Kinglykrab 2023-03-17
+* Remove fixedZ from mob.h ([#3065](https://github.com/EQEmu/Server/pull/3065)) @Kinglykrab 2023-03-17
+* Remove inWater from mob.h ([#3069](https://github.com/EQEmu/Server/pull/3069)) @Kinglykrab 2023-03-17
+* Remove is_authenticatd, LSShutDownUpdate(), and SetInstanceID() from zoneserver.h ([#3109](https://github.com/EQEmu/Server/pull/3109)) @Kinglykrab 2023-03-17
+* Remove last_insert_id from petitions.h ([#3087](https://github.com/EQEmu/Server/pull/3087)) @Kinglykrab 2023-03-17
+* Remove last_max_hp from mob.h ([#3063](https://github.com/EQEmu/Server/pull/3063)) @Kinglykrab 2023-03-17
+* Remove m_inuse, m_z, and m_heading from object.h ([#3083](https://github.com/EQEmu/Server/pull/3083)) @Kinglykrab 2023-03-17
+* Remove npc_ai.cpp/npc_ai.cpp ([#3081](https://github.com/EQEmu/Server/pull/3081)) @Kinglykrab 2023-03-17
+* Remove ownHiddenTrigger from trap.cpp and trap.h ([#3092](https://github.com/EQEmu/Server/pull/3092)) @Kinglykrab 2023-03-17
+* Remove perlparser.h ([#3085](https://github.com/EQEmu/Server/pull/3085)) @Kinglykrab 2023-03-17
+* Remove unused AbilityTimer variable in client.h ([#3035](https://github.com/EQEmu/Server/pull/3035)) @Kinglykrab 2023-03-05
+* Remove unused BotAA struct in bot_structs.h ([#3038](https://github.com/EQEmu/Server/pull/3038)) @Kinglykrab 2023-03-05
+* Remove unused HandleUpdateTasksOnKill in client.h ([#3032](https://github.com/EQEmu/Server/pull/3032)) @Kinglykrab 2023-03-05
+* Remove unused SaveBackup in client.h ([#3030](https://github.com/EQEmu/Server/pull/3030)) @Kinglykrab 2023-03-05
+* Remove unused ^evacuate and ^succor subcommands from bot_command.h ([#3039](https://github.com/EQEmu/Server/pull/3039)) @Kinglykrab 2023-03-05
+* Remove unused bot structs in bot_structs.h ([#3037](https://github.com/EQEmu/Server/pull/3037)) @Kinglykrab 2023-03-05
+* Remove unused client queued work variable in client.cpp/client.h ([#3034](https://github.com/EQEmu/Server/pull/3034)) @Kinglykrab 2023-03-05
+* Remove unused command variables in client.cpp ([#3031](https://github.com/EQEmu/Server/pull/3031)) @Kinglykrab 2023-03-05
+* Remove unused lua_hate_entry.cpp ([#3057](https://github.com/EQEmu/Server/pull/3057)) @Kinglykrab 2023-03-12
+* Remove unused methods in eql_config.cpp, eql_config.h, launcher_list.cpp, and launcher_list.h ([#3103](https://github.com/EQEmu/Server/pull/3103)) @Kinglykrab 2023-03-17
+* Remove unused methods in loginserver/client.h ([#3116](https://github.com/EQEmu/Server/pull/3116)) @Kinglykrab 2023-03-17
+* Remove unused player update variables in client.cpp/client.h ([#3033](https://github.com/EQEmu/Server/pull/3033)) @Kinglykrab 2023-03-05
+* Utilize GetPlayerState() in mob methods ([#3066](https://github.com/EQEmu/Server/pull/3066)) @Kinglykrab 2023-03-17
+* Utilize GetScheduler() in zone/worldserver.cpp ([#3093](https://github.com/EQEmu/Server/pull/3093)) @Kinglykrab 2023-03-17
+* Utilize SetFilter in client.cpp ([#3036](https://github.com/EQEmu/Server/pull/3036)) @Kinglykrab 2023-03-05
+* Utilize SetHiddenTrigger in trap.cpp ([#3091](https://github.com/EQEmu/Server/pull/3091)) @Kinglykrab 2023-03-17
+* remove _botOrderAttack from bot.h ([#3073](https://github.com/EQEmu/Server/pull/3073)) @Kinglykrab 2023-03-17
+
+### Commands
+
+* Cleanup #haste Command ([#3042](https://github.com/EQEmu/Server/pull/3042)) @Kinglykrab 2023-03-06
+* Cleanup #hideme Command ([#3043](https://github.com/EQEmu/Server/pull/3043)) @Kinglykrab 2023-03-06
+* Cleanup #interrupt Command ([#3044](https://github.com/EQEmu/Server/pull/3044)) @Kinglykrab 2023-03-06
+* Cleanup #level Command ([#3045](https://github.com/EQEmu/Server/pull/3045)) @Kinglykrab 2023-03-06
+* Cleanup #picklock Command ([#3046](https://github.com/EQEmu/Server/pull/3046)) @Kinglykrab 2023-03-06
+* Cleanup #resetaa and #resetaa_timer ([#3047](https://github.com/EQEmu/Server/pull/3047)) @Kinglykrab 2023-03-06
+* Cleanup #wc Command ([#3049](https://github.com/EQEmu/Server/pull/3049)) @Kinglykrab 2023-03-06
+* Remove #equipitem Command ([#3040](https://github.com/EQEmu/Server/pull/3040)) @Kinglykrab 2023-03-06
+
+### Console
+
+* Add IS_TTY to force terminal coloring output ([#3021](https://github.com/EQEmu/Server/pull/3021)) @Akkadius 2023-03-04
+
+### Crash
+
+* Fix dangling Group member pointers for Bots. ([#3134](https://github.com/EQEmu/Server/pull/3134)) @Aeadoin 2023-03-21
+* Fixes Crash when Zoning with XTarget when Bots are in group. ([#3126](https://github.com/EQEmu/Server/pull/3126)) @Aeadoin 2023-03-19
+
+### Feature
+
+* Add Basic Bot Raiding Functionality ([#2782](https://github.com/EQEmu/Server/pull/2782)) @neckkola 2023-03-17
+* Add Data Bucket support for scaling of Heroic Stats. ([#3058](https://github.com/EQEmu/Server/pull/3058)) @Aeadoin 2023-03-24
+* Add Item Extra Skill Damage Percent Modifier ([#3127](https://github.com/EQEmu/Server/pull/3127)) @Kinglykrab 2023-03-19
+
+### Fixes
+
+* Add Avoidance and HP Regen Per Second too NPC Scaling. ([#3050](https://github.com/EQEmu/Server/pull/3050)) @Aeadoin 2023-03-09
+* Add Heroic Strikethrough & HP Regen Per Second to GM Entity Info ([#3055](https://github.com/EQEmu/Server/pull/3055)) @Aeadoin 2023-03-12
+* Add Heroic Strikethrough to NPC Scaling ([#3028](https://github.com/EQEmu/Server/pull/3028)) @Kinglykrab 2023-03-06
+* Change SPA 193 Weapon Damage to allow values over 65,535 ([#3138](https://github.com/EQEmu/Server/pull/3138)) @Aeadoin 2023-03-23
+* Checkmarks and X characters in popup messages ([#3041](https://github.com/EQEmu/Server/pull/3041)) @Kinglykrab 2023-03-06
+* Cursor Coin Upon Death ([#3020](https://github.com/EQEmu/Server/pull/3020)) @cybernine186 2023-03-04
+* Ensure synchronization of pet taunt state with UI ([#3025](https://github.com/EQEmu/Server/pull/3025)) @catapultam-habeo 2023-03-04
+* Fix Bard Bot Casting ([#3122](https://github.com/EQEmu/Server/pull/3122)) @Aeadoin 2023-03-17
+* Fix Discovered Items with Alternate Currency and LDoN Adventure Merchants ([#3026](https://github.com/EQEmu/Server/pull/3026)) @Kinglykrab 2023-03-04
+* Fix Heal Scale and Spell Scale in NPC Scaling ([#3051](https://github.com/EQEmu/Server/pull/3051)) @Kinglykrab 2023-03-10
+* Fix Raid Invites causing client desync issues ([#3053](https://github.com/EQEmu/Server/pull/3053)) @Aeadoin 2023-03-11
+* Fix Raid methods that could cause crashes with Bots in raid ([#3111](https://github.com/EQEmu/Server/pull/3111)) @Aeadoin 2023-03-17
+* Fix edge cases where camped bots would be left in a raid ([#3139](https://github.com/EQEmu/Server/pull/3139)) @Aeadoin 2023-03-23
+* Fix for Raid Disband if leader not in same zone. ([#3135](https://github.com/EQEmu/Server/pull/3135)) @Aeadoin 2023-03-21
+* Fix for incorrect bindpoint x,y,z,headings ([#3141](https://github.com/EQEmu/Server/pull/3141)) @Aeadoin 2023-03-23
+* Fix for transferring Raid Leader ([#3140](https://github.com/EQEmu/Server/pull/3140)) @Aeadoin 2023-03-23
+* Fix issue with overflow on min/max hit dmg in npc scaling calculations ([#3052](https://github.com/EQEmu/Server/pull/3052)) @Aeadoin 2023-03-10
+* Fix typo for bot_id raid_members column in db_update_manifest.txt ([#3132](https://github.com/EQEmu/Server/pull/3132)) @Kinglykrab 2023-03-20
+* Fixes for corpses not properly saving some item instance data correctly. ([#3123](https://github.com/EQEmu/Server/pull/3123)) @KimLS 2023-03-23
+
+### Illusions
+
+* Fix bug where spells like Ignite Bones left NPC size incorrect. ([#3061](https://github.com/EQEmu/Server/pull/3061)) @noudess 2023-03-16
+
+### Quest API
+
+* Add SendIllusion overloads/parameters to Perl/Lua ([#3059](https://github.com/EQEmu/Server/pull/3059)) @Kinglykrab 2023-03-16
+* Add Spell GetActX methods to Perl/Lua ([#3056](https://github.com/EQEmu/Server/pull/3056)) @Kinglykrab 2023-03-12
+* Add Timer related methods to Mobs in Perl/Lua ([#3133](https://github.com/EQEmu/Server/pull/3133)) @Kinglykrab 2023-03-20
+
+### Rules
+
+* Add Multiplier for Heroic Stats. ([#3014](https://github.com/EQEmu/Server/pull/3014)) @Aeadoin 2023-03-04
+* Add ResurrectionEffectsBlock ([#2990](https://github.com/EQEmu/Server/pull/2990)) @nytmyr 2023-03-04
+* Add Rule to allow ExtraDmgSkill/SPA 220 to effect Spell Skills ([#3124](https://github.com/EQEmu/Server/pull/3124)) @Aeadoin 2023-03-19
+* Add Task System Rule ExpRewardsIgnoreLevelBasedEXPMods ([#3112](https://github.com/EQEmu/Server/pull/3112)) @Aeadoin 2023-03-17
+
+### Scaling
+
+* Add support for pipe-separated zone IDs and versions ([#3015](https://github.com/EQEmu/Server/pull/3015)) @Kinglykrab 2023-03-04
+
+### Strings
+
+* Add exception handling to converters themselves ([#3029](https://github.com/EQEmu/Server/pull/3029)) @Akkadius 2023-03-05
+* Add more number formatters ([#2873](https://github.com/EQEmu/Server/pull/2873)) @Kinglykrab 2023-03-04
+
 ## [22.4.5] - 03/03/2023 
 
 ### Bots

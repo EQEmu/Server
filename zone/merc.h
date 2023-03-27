@@ -226,8 +226,8 @@ public:
 	inline virtual int32 GetCombatEffects() const { return itembonuses.ProcChance; }
 	inline virtual int32 GetDS() const { return itembonuses.DamageShield; }
 	// Mod3
-	inline virtual int32 GetHealAmt() const { return itembonuses.HealAmt; }
-	inline virtual int32 GetSpellDmg() const { return itembonuses.SpellDmg; }
+	inline int32 GetHealAmt() const override { return itembonuses.HealAmt; }
+	inline int32 GetSpellDmg() const override { return itembonuses.SpellDmg; }
 	inline virtual int32 GetClair() const { return itembonuses.Clairvoyance; }
 	inline virtual int32 GetDSMit() const { return itembonuses.DSMitigation; }
 
@@ -268,10 +268,6 @@ public:
 	bool FindTarget();
 
 protected:
-	void CalcItemBonuses(StatBonuses* newbon);
-	void AddItemBonuses(const EQ::ItemData *item, StatBonuses* newbon);
-	int CalcRecommendedLevelBonus(uint8 level, uint8 reclevel, int basestat);
-
 	int64 GetFocusEffect(focusType type, uint16 spell_id, bool from_buff_tic = false);
 
 	std::vector<MercSpell> merc_spells;

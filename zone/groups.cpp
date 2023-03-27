@@ -35,7 +35,7 @@ extern WorldServer worldserver;
 note about how groups work:
 A group contains 2 list, a list of pointers to members and a
 list of member names. All members of a group should have their
-name in the membername array, whether they are in the zone or not.
+name in the member_name array, whether they are in the zone or not.
 Only members in this zone will have non-null pointers in the
 members array.
 */
@@ -547,11 +547,13 @@ bool Group::UpdatePlayer(Mob* update) {
 void Group::MemberZoned(Mob* removemob) {
 	uint32 i;
 
-	if (removemob == nullptr)
+	if (!removemob) {
 		return;
+	}
 
-	if(removemob == GetLeader())
+	if (removemob == GetLeader()) {
 		SetLeader(nullptr);
+	}
 
 	//should NOT clear the name, it is used for world communication.
 	for (auto & m : members) {
@@ -560,17 +562,21 @@ void Group::MemberZoned(Mob* removemob) {
 		}
 	}
 
-	if(removemob->IsClient() && HasRole(removemob, RoleAssist))
+	if (removemob->IsClient() && HasRole(removemob, RoleAssist)) {
 		SetGroupAssistTarget(0);
+	}
 
-	if(removemob->IsClient() && HasRole(removemob, RoleTank))
+	if (removemob->IsClient() && HasRole(removemob, RoleTank)) {
 		SetGroupTankTarget(0);
+	}
 
-	if(removemob->IsClient() && HasRole(removemob, RolePuller))
+	if (removemob->IsClient() && HasRole(removemob, RolePuller)) {
 		SetGroupPullerTarget(0);
+	}
 
-	if (removemob->IsClient() && removemob == mentoree)
+	if (removemob->IsClient() && removemob == mentoree) {
 		mentoree = nullptr;
+	}
 
 	if (RuleB(Bots, Enabled)) {
 		Bot::UpdateGroupCastingRoles(this);

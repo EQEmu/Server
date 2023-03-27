@@ -75,75 +75,84 @@ void Corpse::SendLootReqErrorPacket(Client* client, LootResponse response) {
 }
 
 Corpse* Corpse::LoadCharacterCorpseEntity(uint32 in_dbid, uint32 in_charid, std::string in_charname, const glm::vec4& position, std::string time_of_death, bool rezzed, bool was_at_graveyard, uint32 guild_consent_id) {
-	uint32 item_count = database.GetCharacterCorpseItemCount(in_dbid);
-	auto buffer =
-	    new char[sizeof(PlayerCorpse_Struct) + (item_count * sizeof(player_lootitem::ServerLootItem_Struct))];
-	PlayerCorpse_Struct *pcs = (PlayerCorpse_Struct*)buffer;
-	database.LoadCharacterCorpseData(in_dbid, pcs);
+	CharacterCorpseEntry ce;
+	if (!database.LoadCharacterCorpseData(in_dbid, ce)) {
+		LogDebug("Unable to create a corpse entity for [{}] [{}] [{}]", in_dbid, in_charid, in_charname);
+		return nullptr;
+	}
 
-	/* Load Items */
 	ItemList itemlist;
-	ServerLootItem_Struct* tmp = nullptr;
-	for (unsigned int i = 0; i < pcs->itemcount; i++) {
-		tmp = new ServerLootItem_Struct;
-		memcpy(tmp, &pcs->items[i], sizeof(player_lootitem::ServerLootItem_Struct));
+	for (auto &item: ce.items) {
+		auto tmp = new ServerLootItem_Struct;
+
+		tmp->equip_slot = item.equip_slot;
+		tmp->item_id    = item.item_id;
+		tmp->charges    = item.charges;
+		tmp->lootslot   = item.lootslot;
+		tmp->aug_1      = item.aug_1;
+		tmp->aug_2      = item.aug_2;
+		tmp->aug_3      = item.aug_3;
+		tmp->aug_4      = item.aug_4;
+		tmp->aug_5      = item.aug_5;
+		tmp->aug_6      = item.aug_6;
+		tmp->attuned    = item.attuned;
+
 		itemlist.push_back(tmp);
 	}
 
 	/* Create Corpse Entity */
-	auto pc = new Corpse(in_dbid,		  // uint32 in_dbid
-			     in_charid,		  // uint32 in_charid
-			     in_charname.c_str(), // char* in_charname
-			     &itemlist,		  // ItemList* in_itemlist
-			     pcs->copper,	 // uint32 in_copper
-			     pcs->silver,	 // uint32 in_silver
-			     pcs->gold,		  // uint32 in_gold
-			     pcs->plat,		  // uint32 in_plat
-			     position,
-			     pcs->size,	// float in_size
-			     pcs->gender,      // uint8 in_gender
-			     pcs->race,	// uint16 in_race
-			     pcs->class_,      // uint8 in_class
-			     pcs->deity,       // uint8 in_deity
-			     pcs->level,       // uint8 in_level
-			     pcs->texture,     // uint8 in_texture
-			     pcs->helmtexture, // uint8 in_helmtexture
-			     pcs->exp,	 // uint32 in_rezexp
-			     was_at_graveyard  // bool wasAtGraveyard
-			     );
+	auto pc = new Corpse(
+		in_dbid,          // uint32 in_dbid
+		in_charid,          // uint32 in_charid
+		in_charname.c_str(), // char* in_charname
+		&itemlist,          // ItemList* in_itemlist
+		ce.copper,     // uint32 in_copper
+		ce.silver,     // uint32 in_silver
+		ce.gold,          // uint32 in_gold
+		ce.plat,          // uint32 in_plat
+		position,
+		ce.size,    // float in_size
+		ce.gender,      // uint8 in_gender
+		ce.race,    // uint16 in_race
+		ce.class_,      // uint8 in_class
+		ce.deity,       // uint8 in_deity
+		ce.level,       // uint8 in_level
+		ce.texture,     // uint8 in_texture
+		ce.helmtexture, // uint8 in_helmtexture
+		ce.exp,     // uint32 in_rezexp
+		was_at_graveyard  // bool wasAtGraveyard
+	);
 
-	if (pcs->locked)
+	if (ce.locked)
 		pc->Lock();
 
 	/* Load Item Tints */
-	pc->item_tint.Head.Color = pcs->item_tint.Head.Color;
-	pc->item_tint.Chest.Color = pcs->item_tint.Chest.Color;
-	pc->item_tint.Arms.Color = pcs->item_tint.Arms.Color;
-	pc->item_tint.Wrist.Color = pcs->item_tint.Wrist.Color;
-	pc->item_tint.Hands.Color = pcs->item_tint.Hands.Color;
-	pc->item_tint.Legs.Color = pcs->item_tint.Legs.Color;
-	pc->item_tint.Feet.Color = pcs->item_tint.Feet.Color;
-	pc->item_tint.Primary.Color = pcs->item_tint.Primary.Color;
-	pc->item_tint.Secondary.Color = pcs->item_tint.Secondary.Color;
+	pc->item_tint.Head.Color      = ce.item_tint.Head.Color;
+	pc->item_tint.Chest.Color     = ce.item_tint.Chest.Color;
+	pc->item_tint.Arms.Color      = ce.item_tint.Arms.Color;
+	pc->item_tint.Wrist.Color     = ce.item_tint.Wrist.Color;
+	pc->item_tint.Hands.Color     = ce.item_tint.Hands.Color;
+	pc->item_tint.Legs.Color      = ce.item_tint.Legs.Color;
+	pc->item_tint.Feet.Color      = ce.item_tint.Feet.Color;
+	pc->item_tint.Primary.Color   = ce.item_tint.Primary.Color;
+	pc->item_tint.Secondary.Color = ce.item_tint.Secondary.Color;
 
 	/* Load Physical Appearance */
-	pc->haircolor = pcs->haircolor;
-	pc->beardcolor = pcs->beardcolor;
-	pc->eyecolor1 = pcs->eyecolor1;
-	pc->eyecolor2 = pcs->eyecolor2;
-	pc->hairstyle = pcs->hairstyle;
-	pc->luclinface = pcs->face;
-	pc->beard = pcs->beard;
-	pc->drakkin_heritage = pcs->drakkin_heritage;
-	pc->drakkin_tattoo = pcs->drakkin_tattoo;
-	pc->drakkin_details = pcs->drakkin_details;
+	pc->haircolor        = ce.haircolor;
+	pc->beardcolor       = ce.beardcolor;
+	pc->eyecolor1        = ce.eyecolor1;
+	pc->eyecolor2        = ce.eyecolor2;
+	pc->hairstyle        = ce.hairstyle;
+	pc->luclinface       = ce.face;
+	pc->beard            = ce.beard;
+	pc->drakkin_heritage = ce.drakkin_heritage;
+	pc->drakkin_tattoo   = ce.drakkin_tattoo;
+	pc->drakkin_details  = ce.drakkin_details;
 	pc->IsRezzed(rezzed);
-	pc->become_npc = false;
+	pc->become_npc         = false;
 	pc->consented_guild_id = guild_consent_id;
 
 	pc->UpdateEquipmentLight(); // itemlist populated above..need to determine actual values
-
-	safe_delete_array(pcs);
 
 	return pc;
 }
@@ -509,8 +518,13 @@ void Corpse::MoveItemToCorpse(Client *client, EQ::ItemInstance *inst, int16 equi
 		inst->GetAugmentItemID(3),
 		inst->GetAugmentItemID(4),
 		inst->GetAugmentItemID(5),
-		inst->IsAttuned()
-		);
+		inst->IsAttuned(),
+		inst->GetCustomDataString(),
+		inst->GetOrnamentationIcon(),
+		inst->GetOrnamentationIDFile(),
+		inst->GetOrnamentHeroModel()
+	);
+
 	removedList.push_back(equipSlot);
 
 	while (true) {
@@ -532,8 +546,13 @@ void Corpse::MoveItemToCorpse(Client *client, EQ::ItemInstance *inst, int16 equi
 				bag_inst->GetAugmentItemID(3),
 				bag_inst->GetAugmentItemID(4),
 				bag_inst->GetAugmentItemID(5),
-				bag_inst->IsAttuned()
-				);
+				bag_inst->IsAttuned(),
+				bag_inst->GetCustomDataString(),
+				bag_inst->GetOrnamentationIcon(),
+				bag_inst->GetOrnamentationIDFile(),
+				bag_inst->GetOrnamentHeroModel()
+			);
+
 			removedList.push_back(real_bag_slot);
 			client->DeleteItemInInventory(real_bag_slot, 0, true, false);
 		}
@@ -677,62 +696,71 @@ void Corpse::CalcCorpseName() {
 }
 
 bool Corpse::Save() {
-	if (!is_player_corpse)
+	if (!is_player_corpse) {
 		return true;
-	if (!is_corpse_changed)
+	}
+
+	if (!is_corpse_changed) {
 		return true;
+	}
 
-	uint32 tmp = CountItems();
-	uint32 tmpsize = sizeof(PlayerCorpse_Struct) + (tmp * sizeof(player_lootitem::ServerLootItem_Struct));
+	CharacterCorpseEntry ce;
 
-	PlayerCorpse_Struct* dbpc = (PlayerCorpse_Struct*) new uchar[tmpsize];
-	memset(dbpc, 0, tmpsize);
-	dbpc->itemcount = tmp;
-	dbpc->size = size;
-	dbpc->locked = is_locked;
-	dbpc->copper = copper;
-	dbpc->silver = silver;
-	dbpc->gold = gold;
-	dbpc->plat = platinum;
-	dbpc->race = race;
-	dbpc->class_ = class_;
-	dbpc->gender = gender;
-	dbpc->deity = deity;
-	dbpc->level = level;
-	dbpc->texture = texture;
-	dbpc->helmtexture = helmtexture;
-	dbpc->exp = rez_experience;
+	ce.size             = size;
+	ce.locked           = is_locked;
+	ce.copper           = copper;
+	ce.silver           = silver;
+	ce.gold             = gold;
+	ce.plat             = platinum;
+	ce.race             = race;
+	ce.class_           = class_;
+	ce.gender           = gender;
+	ce.deity            = deity;
+	ce.level            = level;
+	ce.texture          = texture;
+	ce.helmtexture      = helmtexture;
+	ce.exp              = rez_experience;
+	ce.item_tint        = item_tint;
+	ce.haircolor        = haircolor;
+	ce.beardcolor       = beardcolor;
+	ce.eyecolor2        = eyecolor1;
+	ce.hairstyle        = hairstyle;
+	ce.face             = luclinface;
+	ce.beard            = beard;
+	ce.drakkin_heritage = drakkin_heritage;
+	ce.drakkin_tattoo   = drakkin_tattoo;
+	ce.drakkin_details  = drakkin_details;
 
-	memcpy(&dbpc->item_tint.Slot, &item_tint.Slot, sizeof(dbpc->item_tint));
-	dbpc->haircolor = haircolor;
-	dbpc->beardcolor = beardcolor;
-	dbpc->eyecolor2 = eyecolor1;
-	dbpc->hairstyle = hairstyle;
-	dbpc->face = luclinface;
-	dbpc->beard = beard;
-	dbpc->drakkin_heritage = drakkin_heritage;
-	dbpc->drakkin_tattoo = drakkin_tattoo;
-	dbpc->drakkin_details = drakkin_details;
+	for (auto &item: itemlist) {
+		CharacterCorpseItemEntry e;
 
-	uint32 x = 0;
-	ItemList::iterator cur, end;
-	cur = itemlist.begin();
-	end = itemlist.end();
-	for (; cur != end; ++cur) {
-		ServerLootItem_Struct* item = *cur;
-		memcpy((char*)&dbpc->items[x++], (char*)item, sizeof(player_lootitem::ServerLootItem_Struct));
+		e.item_id             = item->item_id;
+		e.equip_slot          = item->equip_slot;
+		e.charges             = item->charges;
+		e.lootslot            = item->lootslot;
+		e.aug_1               = item->aug_1;
+		e.aug_2               = item->aug_2;
+		e.aug_3               = item->aug_3;
+		e.aug_4               = item->aug_4;
+		e.aug_5               = item->aug_5;
+		e.aug_6               = item->aug_6;
+		e.attuned             = item->attuned;
+		e.custom_data         = item->custom_data;
+		e.ornamenticon        = item->ornamenticon;
+		e.ornamentidfile      = item->ornamentidfile;
+		e.ornament_hero_model = item->ornament_hero_model;
+
+		ce.items.push_back(std::move(e));
 	}
 
 	/* Create New Corpse*/
 	if (corpse_db_id == 0) {
-		corpse_db_id = database.SaveCharacterCorpse(char_id, corpse_name, zone->GetZoneID(), zone->GetInstanceID(), dbpc, m_Position, consented_guild_id);
+		corpse_db_id = database.SaveCharacterCorpse(char_id, corpse_name, zone->GetZoneID(), zone->GetInstanceID(), ce, m_Position, consented_guild_id);
 	}
 	/* Update Corpse Data */
 	else{
-		corpse_db_id = database.UpdateCharacterCorpse(corpse_db_id, char_id, corpse_name, zone->GetZoneID(), zone->GetInstanceID(), dbpc, m_Position, consented_guild_id, IsRezzed());
+		corpse_db_id = database.UpdateCharacterCorpse(corpse_db_id, char_id, corpse_name, zone->GetZoneID(), zone->GetInstanceID(), ce, m_Position, consented_guild_id, IsRezzed());
 	}
-
-	safe_delete_array(dbpc);
 
 	return true;
 }
@@ -784,7 +812,21 @@ uint32 Corpse::CountItems() {
 	return itemlist.size();
 }
 
-void Corpse::AddItem(uint32 itemnum, uint16 charges, int16 slot, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, uint32 aug6, uint8 attuned) {
+void Corpse::AddItem(uint32 itemnum,
+	uint16 charges,
+	int16 slot,
+	uint32 aug1,
+	uint32 aug2,
+	uint32 aug3,
+	uint32 aug4,
+	uint32 aug5,
+	uint32 aug6,
+	bool attuned,
+	const std::string& custom_data,
+	uint32 ornamenticon,
+	uint32 ornamentidfile,
+	uint32 ornament_hero_model) {
+
 	if (!database.GetItem(itemnum))
 		return;
 
@@ -792,17 +834,21 @@ void Corpse::AddItem(uint32 itemnum, uint16 charges, int16 slot, uint32 aug1, ui
 
 	auto item = new ServerLootItem_Struct;
 
-	memset(item, 0, sizeof(ServerLootItem_Struct));
 	item->item_id = itemnum;
 	item->charges = charges;
 	item->equip_slot = slot;
-	item->aug_1=aug1;
-	item->aug_2=aug2;
-	item->aug_3=aug3;
-	item->aug_4=aug4;
-	item->aug_5=aug5;
-	item->aug_6=aug6;
-	item->attuned=attuned;
+	item->aug_1 = aug1;
+	item->aug_2 = aug2;
+	item->aug_3 = aug3;
+	item->aug_4 = aug4;
+	item->aug_5 = aug5;
+	item->aug_6 = aug6;
+	item->attuned = attuned;
+	item->custom_data = custom_data;
+	item->ornamenticon = ornamenticon;
+	item->ornamentidfile = ornamentidfile;
+	item->ornament_hero_model = ornament_hero_model;
+
 	itemlist.push_back(item);
 
 	UpdateEquipmentLight();
@@ -1062,30 +1108,32 @@ void Corpse::AllowPlayerLoot(Mob *them, uint8 slot) {
 }
 
 void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* app) {
-	if (!client)
+	if (!client) {
 		return;
+	}
 
 	// Added 12/08. Started compressing loot struct on live.
-	if(player_corpse_depop) {
+	if (player_corpse_depop) {
 		SendLootReqErrorPacket(client, LootResponse::SomeoneElse);
 		return;
 	}
 
-	if(IsPlayerCorpse() && !corpse_db_id) { // really should try to resave in this case
+	if (IsPlayerCorpse() && !corpse_db_id) { // really should try to resave in this case
 		// SendLootReqErrorPacket(client, 0);
 		client->Message(Chat::Red, "Warning: Corpse's dbid = 0! Corpse will not survive zone shutdown!");
 		std::cout << "Error: PlayerCorpse::MakeLootRequestPackets: dbid = 0!" << std::endl;
 		// return;
 	}
 
-	if(is_locked && client->Admin() < AccountStatus::GMAdmin) {
+	if (is_locked && client->Admin() < AccountStatus::GMAdmin) {
 		SendLootReqErrorPacket(client, LootResponse::SomeoneElse);
 		client->Message(Chat::Red, "Error: Corpse locked by GM.");
 		return;
 	}
 
-	if(!being_looted_by || (being_looted_by != 0xFFFFFFFF && !entity_list.GetID(being_looted_by)))
+	if (!being_looted_by || (being_looted_by != 0xFFFFFFFF && !entity_list.GetID(being_looted_by))) {
 		being_looted_by = 0xFFFFFFFF;
+	}
 
 	if (DistanceSquaredNoZ(client->GetPosition(), m_Position) > 625) {
 		SendLootReqErrorPacket(client, LootResponse::TooFar);
@@ -1102,23 +1150,29 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 
 	// loot_request_type is scoped to class Corpse and reset on a per-loot session basis
 	if (client->GetGM()) {
-		if (client->Admin() >= AccountStatus::GMAdmin)
+		if (client->Admin() >= AccountStatus::GMAdmin) {
 			loot_request_type = LootRequestType::GMAllowed;
-		else
+
+		} else {
 			loot_request_type = LootRequestType::GMPeek;
+		}
 	}
 	else {
 		if (IsPlayerCorpse()) {
 			if (char_id == client->CharacterID()) {
 				loot_request_type = LootRequestType::Self;
 			}
+
 			else if (CanPlayerLoot(client->CharacterID())) {
-				if (GetPlayerKillItem() == -1)
+				if (GetPlayerKillItem() == -1) {
 					loot_request_type = LootRequestType::AllowedPVPAll;
-				else if (GetPlayerKillItem() == 1)
+
+				} else if (GetPlayerKillItem() == 1) {
 					loot_request_type = LootRequestType::AllowedPVPSingle;
-				else if (GetPlayerKillItem() > 1)
+
+				} else if (GetPlayerKillItem() > 1) {
 					loot_request_type = LootRequestType::AllowedPVPDefined;
+				}
 			}
 		}
 		else if ((IsNPCCorpse() || become_npc) && CanPlayerLoot(client->CharacterID())) {
@@ -1140,8 +1194,9 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 	// process coin
 	bool loot_coin = false;
 	std::string tmp;
-	if (database.GetVariable("LootCoin", tmp))
+	if (database.GetVariable("LootCoin", tmp)) {
 		loot_coin = (tmp[0] == 1 && tmp[1] == '\0');
+	}
 
 	if (loot_request_type == LootRequestType::GMPeek || loot_request_type == LootRequestType::GMAllowed) {
 		if (
@@ -1282,7 +1337,11 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 			item_data->aug_4,
 			item_data->aug_5,
 			item_data->aug_6,
-			item_data->attuned
+			item_data->attuned,
+			item_data->custom_data,
+			item_data->ornamenticon,
+			item_data->ornamentidfile,
+			item_data->ornament_hero_model
 		);
 		if (!inst)
 			continue;
@@ -1314,8 +1373,9 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 
 void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 {
-	if (!client)
+	if (!client) {
 		return;
+	}
 
 	auto lootitem = (LootingItem_Struct *)app->pBuffer;
 
@@ -1325,8 +1385,10 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 		client->QueuePacket(app);
 		SendEndLootErrorPacket(client);
 		// unlock corpse for others
-		if (IsBeingLootedBy(client))
+
+		if (IsBeingLootedBy(client)) {
 			ResetLooter();
+		}
 		return;
 	}
 
@@ -1334,8 +1396,9 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 		client->QueuePacket(app);
 		SendEndLootErrorPacket(client);
 		// unlock corpse for others
-		if (IsBeingLootedBy(client))
+		if (IsBeingLootedBy(client)) {
 			ResetLooter();
+		}
 		return;
 	}
 
@@ -1345,8 +1408,9 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 		client->QueuePacket(app);
 		SendEndLootErrorPacket(client);
 		/* Unlock corpse for others */
-		if (IsBeingLootedBy(client))
+		if (IsBeingLootedBy(client)) {
 			ResetLooter();
+		}
 		return;
 	}
 
@@ -1404,7 +1468,9 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 		if (item_data) {
 			inst = database.CreateItem(item, item_data ? item_data->charges : 0, item_data->aug_1,
 				item_data->aug_2, item_data->aug_3, item_data->aug_4,
-				item_data->aug_5, item_data->aug_6, item_data->attuned);
+				item_data->aug_5, item_data->aug_6, item_data->attuned,
+				item_data->custom_data, item_data->ornamenticon,
+				item_data->ornamentidfile, item_data->ornament_hero_model);
 		}
 		else {
 			inst = database.CreateItem(item);

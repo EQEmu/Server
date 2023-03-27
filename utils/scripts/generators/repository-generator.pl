@@ -585,7 +585,8 @@ sub translate_mysql_data_type_to_c {
 sub get_reserved_cpp_variable_names {
     return (
         "class",
-        "int"
+        "int",
+        "key"
     );
 }
 

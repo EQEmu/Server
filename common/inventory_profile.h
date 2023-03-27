@@ -203,12 +203,12 @@ namespace EQ
 		void dumpBankItems();
 		void dumpSharedBankItems();
 
-		void SetCustomItemData(uint32 character_id, int16 slot_id, std::string identifier, std::string value);
-		void SetCustomItemData(uint32 character_id, int16 slot_id, std::string identifier, int value);
-		void SetCustomItemData(uint32 character_id, int16 slot_id, std::string identifier, float value);
-		void SetCustomItemData(uint32 character_id, int16 slot_id, std::string identifier, bool value);
-		std::string GetCustomItemData(int16 slot_id, std::string identifier);
-		static const int GetItemStatValue(uint32 item_id, std::string identifier);
+		void SetCustomItemData(uint32 character_id, int16 slot_id, const std::string &identifier, const std::string& value);
+		void SetCustomItemData(uint32 character_id, int16 slot_id, const std::string &identifier, int value);
+		void SetCustomItemData(uint32 character_id, int16 slot_id, const std::string &identifier, float value);
+		void SetCustomItemData(uint32 character_id, int16 slot_id, const std::string &identifier, bool value);
+		std::string GetCustomItemData(int16 slot_id, const std::string& identifier);
+		static const int GetItemStatValue(uint32 item_id, const std::string& identifier);
 	protected:
 		///////////////////////////////
 		// Protected Methods

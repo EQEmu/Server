@@ -250,7 +250,7 @@ int Mob::compute_defense()
 	int defense = GetSkill(EQ::skills::SkillDefense) * 400 / 225;
 	defense += (8000 * (GetAGI() - 40)) / 36000;
 	if (IsOfClientBot()) {
-		defense += GetHeroicAGI() * RuleR(Character, HeroicAgilityMultiplier) / 10;
+		defense += itembonuses.heroic_agi_avoidance;
 	}
 
 	//516 SE_AC_Mitigation_Max_Percent
@@ -883,7 +883,7 @@ int Mob::ACSum(bool skip_caps)
 				shield_ac = CalcRecommendedLevelBonus(GetLevel(), inst->GetItemRecommendedLevel(true), inst->GetItemArmorClass(true));
 			}
 		}
-		shield_ac += GetHeroicSTR() * RuleR(Character, HeroicStrengthMultiplier) / 10;
+		shield_ac += itembonuses.heroic_str_shield_ac;
 	}
 	// EQ math
 	ac = (ac * 4) / 3;
@@ -2505,8 +2505,10 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 		bool ownerInGroup = false;
 		if ((give_exp->HasGroup() && give_exp->GetGroup()->IsGroupMember(give_exp->GetUltimateOwner()))
 			|| (give_exp->IsPet() && (give_exp->GetOwner()->IsClient()
-				|| (give_exp->GetOwner()->HasGroup() && give_exp->GetOwner()->GetGroup()->IsGroupMember(give_exp->GetOwner()->GetUltimateOwner())))))
+				|| (give_exp->GetOwner()->HasGroup() && give_exp->GetOwner()->GetGroup()->IsGroupMember(give_exp->GetOwner()->GetUltimateOwner()))))
+			) {
 			ownerInGroup = true;
+		}
 
 		give_exp = give_exp->GetUltimateOwner();
 
@@ -2518,20 +2520,23 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 	if (give_exp && give_exp->IsTempPet() && give_exp->IsPetOwnerClient()) {
 		if (give_exp->IsNPC() && give_exp->CastToNPC()->GetSwarmOwner()) {
 			Mob* temp_owner = entity_list.GetMobID(give_exp->CastToNPC()->GetSwarmOwner());
-			if (temp_owner)
+			if (temp_owner) {
 				give_exp = temp_owner;
+			}
 		}
 	}
 
 	int PlayerCount = 0; // QueryServ Player Counting
 
 	Client *give_exp_client = nullptr;
-	if (give_exp && give_exp->IsClient())
+	if (give_exp && give_exp->IsClient()) {
 		give_exp_client = give_exp->CastToClient();
+	}
 
 	//do faction hits even if we are a merchant, so long as a player killed us
-	if (!IsCharmed() && give_exp_client && !RuleB(NPC, EnableMeritBasedFaction))
+	if (!IsCharmed() && give_exp_client && !RuleB(NPC, EnableMeritBasedFaction)) {
 		hate_list.DoFactionHits(GetNPCFactionID(), GetPrimaryFaction(), GetFactionAmount());
+	}
 
 	bool IsLdonTreasure = (GetClass() == LDON_TREASURE);
 
@@ -2559,17 +2564,22 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 			}
 
 			/* Send the EVENT_KILLED_MERIT event for all raid members */
-			for (int i = 0; i < MAX_RAID_MEMBERS; i++) {
-				if (kr->members[i].member != nullptr && kr->members[i].member->IsClient()) { // If Group Member is Client
-					Client *c = kr->members[i].member;
+			for (const auto& m : kr->members) {
+				if (m.is_bot) {
+					continue;
+				}
+
+				if (m.member && m.member->IsClient()) { // If Group Member is Client
+					Client *c = m.member;
 
 					c->RecordKilledNPCEvent(this);
 					if (parse->HasQuestSub(GetNPCTypeID(), EVENT_KILLED_MERIT)) {
 						parse->EventNPC(EVENT_KILLED_MERIT, this, c, "killed", 0);
 					}
 
-					if (RuleB(NPC, EnableMeritBasedFaction))
+					if (RuleB(NPC, EnableMeritBasedFaction)) {
 						c->SetFactionLevel(c->CharacterID(), GetNPCFactionID(), c->GetBaseClass(), c->GetBaseRace(), c->GetDeity());
+					}
 
 					PlayerCount++;
 				}
@@ -2586,9 +2596,13 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 				QS->s1.NPCID = GetNPCTypeID();
 				QS->s1.ZoneID = GetZoneID();
 				QS->s1.Type = 2; // Raid Fight
-				for (int i = 0; i < MAX_RAID_MEMBERS; i++) {
-					if (kr->members[i].member != nullptr && kr->members[i].member->IsClient()) { // If Group Member is Client
-						Client *c = kr->members[i].member;
+				for (const auto& m : kr->members) {
+					if (m.is_bot) {
+						continue;
+					}
+
+					if (m.member && m.member->IsClient()) { // If Group Member is Client
+						Client *c = m.member;
 						QS->Chars[PlayerCount].char_id = c->CharacterID();
 						PlayerCount++;
 					}
@@ -2742,34 +2756,34 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 				Raid* r = entity_list.GetRaidByClient(killer->CastToClient());
 				if (r) {
 					int i = 0;
-					for (int x = 0; x < MAX_RAID_MEMBERS; x++) {
+					for (const auto& m : r->members) {
+						if (m.is_bot) {
+							continue;
+						}
+
 						switch (r->GetLootType()) {
 						case 0:
 						case 1:
-							if (r->members[x].member && r->members[x].IsRaidLeader) {
-								corpse->AllowPlayerLoot(r->members[x].member, i);
+							if (m.member && m.is_raid_leader) {
+								corpse->AllowPlayerLoot(m.member, i);
 								i++;
 							}
 							break;
 						case 2:
-							if (r->members[x].member && r->members[x].IsRaidLeader) {
-								corpse->AllowPlayerLoot(r->members[x].member, i);
-								i++;
-							}
-							else if (r->members[x].member && r->members[x].IsGroupLeader) {
-								corpse->AllowPlayerLoot(r->members[x].member, i);
+							if (m.member && (m.is_raid_leader || m.is_group_leader)) {
+								corpse->AllowPlayerLoot(m.member, i);
 								i++;
 							}
 							break;
 						case 3:
-							if (r->members[x].member && r->members[x].IsLooter) {
-								corpse->AllowPlayerLoot(r->members[x].member, i);
+							if (m.member && m.is_looter) {
+								corpse->AllowPlayerLoot(m.member, i);
 								i++;
 							}
 							break;
 						case 4:
-							if (r->members[x].member) {
-								corpse->AllowPlayerLoot(r->members[x].member, i);
+							if (m.member) {
+								corpse->AllowPlayerLoot(m.member, i);
 								i++;
 							}
 							break;
@@ -4395,8 +4409,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 			);
 		}
 	}
-
-} //end packet sending
+}
 
 void Mob::HealDamage(uint64 amount, Mob* caster, uint16 spell_id)
 {
@@ -5910,10 +5923,10 @@ void Mob::CommonOutgoingHitSuccess(Mob* defender, DamageHitInfo &hit, ExtraAttac
 		switch (hit.skill) {
 			case EQ::skills::SkillThrowing:
 			case EQ::skills::SkillArchery:
-				extra = GetHeroicDEX() * RuleR(Character, HeroicDexterityMultiplier) / 10;
+				extra = itembonuses.heroic_dex_ranged_damage;
 				break;
 			default:
-				extra = GetHeroicSTR() * RuleR(Character, HeroicStrengthMultiplier) / 10;
+				extra = itembonuses.heroic_str_melee_damage;
 				break;
 		}
 		hit.damage_done += extra;

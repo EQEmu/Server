@@ -798,24 +798,21 @@ bool Client::SendAllPackets() {
 }
 
 void Client::QueuePacket(const EQApplicationPacket* app, bool ack_req, CLIENT_CONN_STATUS required_state, eqFilterType filter) {
-	if(filter!=FilterNone){
-		//this is incomplete... no support for FilterShowGroupOnly or FilterShowSelfOnly
-		if(GetFilter(filter) == FilterHide)
-			return; //Client has this filter on, no need to send packet
+	if (filter != FilterNone && GetFilter(filter) == FilterHide) {
+		return;
 	}
-	if(client_state != CLIENT_CONNECTED && required_state == CLIENT_CONNECTED){
+
+	if (client_state != CLIENT_CONNECTED && required_state == CLIENT_CONNECTED) {
 		AddPacket(app, ack_req);
 		return;
 	}
 	
 	// if the program doesnt care about the status or if the status isnt what we requested
-	if (required_state != CLIENT_CONNECTINGALL && client_state != required_state)
-	{
+	if (required_state != CLIENT_CONNECTINGALL && client_state != required_state) {
 		// todo: save packets for later use
 		AddPacket(app, ack_req);
 	}
-	else if (eqs) 
-	{
+	else if (eqs) {
 		eqs->QueuePacket(app, ack_req);
 	}
 }
@@ -4143,42 +4140,32 @@ void Client::UpdateLFP() {
 
 bool Client::GroupFollow(Client* inviter) {
 
-	if (inviter)
-	{
+	if (inviter) {
 		isgrouped = true;
 		Raid* raid = entity_list.GetRaidByClient(inviter);
 		Raid* iraid = entity_list.GetRaidByClient(this);
 
 		//inviter has a raid don't do group stuff instead do raid stuff!
-		if (raid)
-		{
+		if (raid) {
 			// Suspend the merc while in a raid (maybe a rule could be added for this)
-			if (GetMerc())
+			if (GetMerc()) {
 				GetMerc()->Suspend();
+			}
 
 			uint32 groupToUse = 0xFFFFFFFF;
-			for (int x = 0; x < MAX_RAID_MEMBERS; x++)
-			{
-				if (raid->members[x].member)
-				{
-					//this assumes the inviter is in the zone
-					if (raid->members[x].member == inviter){
-						groupToUse = raid->members[x].GroupNumber;
-						break;
-					}
+			for (const auto& m : raid->members) {
+				if (m.member && m.member == inviter) {
+					groupToUse = m.group_number;
+					break;
 				}
 			}
-			if (iraid == raid)
-			{
+			if (iraid == raid) {
 				//both in same raid
 				uint32 ngid = raid->GetGroup(inviter->GetName());
-				if (raid->GroupCount(ngid) < 6)
-				{
+				if (raid->GroupCount(ngid) < 6) {
 					raid->MoveMember(GetName(), ngid);
 					raid->SendGroupDisband(this);
-					//raid->SendRaidGroupAdd(GetName(), ngid);
-					//raid->SendGroupUpdate(this);
-					raid->GroupUpdate(ngid); //break
+					raid->GroupUpdate(ngid);
 				}
 				return false;
 			}
@@ -6437,8 +6424,7 @@ void Client::SendStatsWindow(Client* client, bool use_window)
 				regen_row_color = color_red;
 
 				base_regen_field = itoa(LevelRegen());
-				item_regen_field = itoa(
-					itembonuses.HPRegen +(GetHeroicSTA() * RuleR(Character, HeroicStaminaMultiplier) / 20));
+				item_regen_field = itoa(itembonuses.HPRegen + itembonuses.heroic_hp_regen);
 				cap_regen_field = itoa(CalcHPRegenCap());
 				spell_regen_field = itoa(spellbonuses.HPRegen);
 				aa_regen_field = itoa(aabonuses.HPRegen);
@@ -6451,9 +6437,7 @@ void Client::SendStatsWindow(Client* client, bool use_window)
 					regen_row_color = color_blue;
 
 					base_regen_field = itoa(CalcBaseManaRegen());
-					int32 heroic_mana_regen = (GetCasterClass() == 'W') ?
-						GetHeroicWIS() * RuleR(Character, HeroicWisdomMultiplier) / 25 :
-						GetHeroicINT() * RuleR(Character, HeroicIntelligenceMultiplier) / 25;
+					int32 heroic_mana_regen = itembonuses.heroic_mana_regen;
 					item_regen_field = itoa(itembonuses.ManaRegen + heroic_mana_regen);
 					cap_regen_field = itoa(CalcManaRegenCap());
 					spell_regen_field = itoa(spellbonuses.ManaRegen);
@@ -6468,12 +6452,7 @@ void Client::SendStatsWindow(Client* client, bool use_window)
 				regen_row_color = color_green;
 
 				base_regen_field = itoa(((GetLevel() * 4 / 10) + 2));
-				double heroic_str = GetHeroicSTR() * RuleR(Character, HeroicStrengthMultiplier);
-				double heroic_sta = GetHeroicSTA() * RuleR(Character, HeroicStaminaMultiplier);
-				double heroic_dex = GetHeroicDEX() * RuleR(Character, HeroicDexterityMultiplier);
-				double heroic_agi = GetHeroicAGI() * RuleR(Character, HeroicAgilityMultiplier);
-				double heroic_stats = (heroic_str + heroic_sta + heroic_dex + heroic_agi) / 4;
-				item_regen_field = itoa(itembonuses.EnduranceRegen + heroic_stats);
+				item_regen_field = itoa(itembonuses.EnduranceRegen + itembonuses.heroic_end_regen);
 				cap_regen_field = itoa(CalcEnduranceRegenCap());
 				spell_regen_field = itoa(spellbonuses.EnduranceRegen);
 				aa_regen_field = itoa(aabonuses.EnduranceRegen);
@@ -8874,16 +8853,15 @@ void Client::ProcessAggroMeter()
 		if (m_aggrometer.set_pct(AggroMeter::AT_Secondary, has_aggro ? cur_tar->GetHateRatio(this, secondary) : secondary ? 100 : 0))
 			add_entry(AggroMeter::AT_Secondary);
 
-		// fuuuuuuuuuuuuuuuuuuuuuuuucckkkkkkkkkkkkkkk raids
 		if (IsRaidGrouped()) {
 			auto raid = GetRaid();
 			if (raid) {
 				auto gid = raid->GetGroup(this);
-				if (gid < 12) {
+				if (gid < MAX_RAID_GROUPS) {
 					int at_id = AggroMeter::AT_Group1;
-					for (int i = 0; i < MAX_RAID_MEMBERS; ++i) {
-						if (raid->members[i].member && raid->members[i].member != this && raid->members[i].GroupNumber == gid) {
-							if (m_aggrometer.set_pct(static_cast<AggroMeter::AggroTypes>(at_id), cur_tar->GetHateRatio(cur_tar->GetTarget(), raid->members[i].member)))
+					for (const auto& m : raid->members) {
+						if (m.member && m.member != this && m.group_number == gid) {
+							if (m_aggrometer.set_pct(static_cast<AggroMeter::AggroTypes>(at_id), cur_tar->GetHateRatio(cur_tar->GetTarget(), m.member)))
 								add_entry(static_cast<AggroMeter::AggroTypes>(at_id));
 							at_id++;
 							if (at_id > AggroMeter::AT_Group5)
@@ -10964,11 +10942,14 @@ std::vector<Client *> Client::GetPartyMembers()
 	std::vector<Client *> clients_to_update = {};
 
 	// raid
-	Raid *raid = entity_list.GetRaidByClient(this);
-	if (raid) {
-		for (auto &e : raid->members) {
-			if (e.member && e.member->IsClient()) {
-				clients_to_update.push_back(e.member->CastToClient());
+	if (const auto raid = entity_list.GetRaidByClient(this)) {
+		for (auto &m : raid->members) {
+			if (m.is_bot) {
+				continue;
+			}
+
+			if (m.member && m.member->IsClient()) {
+				clients_to_update.push_back(m.member->CastToClient());
 			}
 		}
 	}
@@ -11050,7 +11031,11 @@ void Client::SummonBaggedItems(uint32 bag_item_id, const std::vector<ServerLootI
 				item.aug_4,
 				item.aug_5,
 				item.aug_6,
-				item.attuned
+				item.attuned,
+				item.custom_data,
+				item.ornamenticon,
+				item.ornamentidfile,
+				item.ornament_hero_model
 			);
 			if (summoned_bag_item)
 			{
@@ -11580,27 +11565,6 @@ void Client::SendReloadCommandMessages() {
 	SendChatLineBreak();
 }
 
-std::map<std::string,std::string> Client::GetMerchantDataBuckets()
-{
-	std::map<std::string,std::string> merchant_data_buckets;
-
-	auto query = fmt::format(
-		"SELECT `key`, `value` FROM data_buckets WHERE `key` LIKE '{}-%'",
-		Strings::Escape(GetBucketKey())
-	);
-	auto results = database.QueryDatabase(query);
-
-	if (!results.Success() || !results.RowCount()) {
-		return merchant_data_buckets;
-	}
-
-	for (auto row : results) {
-		merchant_data_buckets.insert(std::pair<std::string,std::string>(row[0], row[1]));
-	}
-
-	return merchant_data_buckets;
-}
-
 void Client::Undye()
 {
 	for (uint8 slot = EQ::textures::textureBegin; slot <= EQ::textures::LastTexture; slot++) {
@@ -11772,17 +11736,16 @@ std::vector<Mob*> Client::GetApplySpellList(
 		auto* r = GetRaid();
 		auto group_id = r->GetGroup(this);
 		if (r && EQ::ValueWithin(group_id, 0, (MAX_RAID_GROUPS - 1))) {
-			for (auto i = 0; i < MAX_RAID_MEMBERS; i++) {
-				auto* m = r->members[i].member;
-				if (m && m->IsClient() && (!is_raid_group_only || r->GetGroup(m) == group_id)) {
-					l.push_back(m);
+			for (const auto& m : r->members) {
+				if (m.member && m.member->IsClient() && (!is_raid_group_only || r->GetGroup(m.member) == group_id)) {
+					l.push_back(m.member);
 
-					if (allow_pets && m->HasPet()) {
-						l.push_back(m->GetPet());
+					if (allow_pets && m.member->HasPet()) {
+						l.push_back(m.member->GetPet());
 					}
 
 					if (allow_bots) {
-						const auto& sbl = entity_list.GetBotListByCharacterID(m->CharacterID());
+						const auto& sbl = entity_list.GetBotListByCharacterID(m.member->CharacterID());
 						for (const auto& b : sbl) {
 							l.push_back(b);
 						}

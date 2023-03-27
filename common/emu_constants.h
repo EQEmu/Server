@@ -593,4 +593,29 @@ enum class ApplySpellType {
 	Raid
 };
 
+
+namespace HeroicBonusBucket
+{
+	const std::string WisMaxMana 			= "HWIS-MaxMana";
+	const std::string WisManaRegen			= "HWIS-ManaRegen";
+	const std::string WisHealAmt			= "HWIS-HealAmt";
+	const std::string IntMaxMana			= "HINT-MaxMana";
+	const std::string IntManaRegen			= "HINT-ManaRegen";
+	const std::string IntSpellDmg			= "HINT-SpellDmg";
+	const std::string StrMeleeDamage		= "HSTR-MeleeDamage";
+	const std::string StrShieldAC			= "HSTR-ShieldAC";
+	const std::string StrMaxEndurance		= "HSTR-MaxEndurance";
+	const std::string StrEnduranceRegen		= "HSTR-EnduranceRegen";
+	const std::string StaMaxHP			= "HSTA-MaxHP";
+	const std::string StaHPRegen			= "HSTA-HPRegen";
+	const std::string StaMaxEndurance		= "HSTA-MaxEndurance";
+	const std::string StaEnduranceRegen		= "HSTA-EnduranceRegen";
+	const std::string AgiAvoidance			= "HAGI-Avoidance";
+	const std::string AgiMaxEndurance		= "HAGI-MaxEndurance";
+	const std::string AgiEnduranceRegen		= "HAGI-EnduranceRegen";
+	const std::string DexRangedDamage		= "HDEX-RangedDamage";
+	const std::string DexMaxEndurance		= "HDEX-MaxEndurance";
+	const std::string DexEnduranceRegen		= "HDEX-EnduranceRegen";
+}
+
 #endif /*COMMON_EMU_CONSTANTS_H*/

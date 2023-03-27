@@ -697,7 +697,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						uint32 gid = raid->GetGroup(caster->CastToClient());
 						if (gid < 12)
 							for (int i = 0; i < MAX_RAID_MEMBERS; ++i)
-								if (raid->members[i].member && raid->members[i].GroupNumber == gid)
+								if (raid->members[i].member && raid->members[i].group_number == gid)
 									raid->members[i].member->aa_timers[aaTimerWarcry].Start(time);
 					}
 				}

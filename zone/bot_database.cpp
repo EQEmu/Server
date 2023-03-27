@@ -1101,28 +1101,7 @@ bool BotDatabase::LoadItems(const uint32 bot_id, EQ::InventoryProfile& inventory
 
 		if (row[5]) {
 			std::string data_str(row[5]);
-			std::string idAsString;
-			std::string value;
-			bool use_id = true;
-
-			for (int i = 0; i < data_str.length(); ++i) {
-				if (data_str[i] == '^') {
-					if (!use_id) {
-						item_inst->SetCustomData(idAsString, value);
-						idAsString.clear();
-						value.clear();
-					}
-
-					use_id = !use_id;
-					continue;
-				}
-
-				char v = data_str[i];
-				if (use_id)
-					idAsString.push_back(v);
-				else
-					value.push_back(v);
-			}
+			item_inst->SetCustomDataString(data_str);
 		}
 
 		item_inst->SetOrnamentIcon((uint32)Strings::ToUnsignedInt(row[6]));

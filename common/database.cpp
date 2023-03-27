@@ -387,7 +387,7 @@ bool Database::DeleteCharacter(char *character_name)
 	std::string query   = StringFormat("SELECT `id` from `character_data` WHERE `name` = '%s'", character_name);
 	auto        results = QueryDatabase(query);
 	for (auto   row     = results.begin(); row != results.end(); ++row) {
-		character_id = Strings::ToInt(row[0]);
+		character_id = Strings::ToUnsignedInt(row[0]);
 	}
 
 	if (character_id <= 0) {
@@ -787,7 +787,7 @@ uint32 Database::GetCharacterID(const char *name) {
 	auto row = results.begin();
 	if (results.RowCount() == 1)
 	{
-		return Strings::ToInt(row[0]);
+		return Strings::ToUnsignedInt(row[0]);
 	}
 	return 0;
 }
@@ -812,10 +812,10 @@ uint32 Database::GetAccountIDByChar(const char* charname, uint32* oCharID) {
 
 	auto row = results.begin();
 
-	uint32 accountId = Strings::ToInt(row[0]);
+	uint32 accountId = Strings::ToUnsignedInt(row[0]);
 
 	if (oCharID)
-		*oCharID = Strings::ToInt(row[1]);
+		*oCharID = Strings::ToUnsignedInt(row[1]);
 
 	return accountId;
 }
@@ -832,7 +832,7 @@ uint32 Database::GetAccountIDByChar(uint32 char_id) {
 		return 0;
 
 	auto row = results.begin();
-	return Strings::ToInt(row[0]);
+	return Strings::ToUnsignedInt(row[0]);
 }
 
 uint32 Database::GetAccountIDByName(std::string account_name, std::string loginserver, int16* status, uint32* lsid) {
@@ -880,7 +880,7 @@ void Database::GetAccountName(uint32 accountid, char* name, uint32* oLSAccountID
 
 	strcpy(name, row[0]);
 	if (row[1] && oLSAccountID) {
-		*oLSAccountID = Strings::ToInt(row[1]);
+		*oLSAccountID = Strings::ToUnsignedInt(row[1]);
 	}
 
 }
@@ -968,7 +968,7 @@ bool Database::LoadVariables() {
 
 	std::string key, value;
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		varcache.last_update = Strings::ToInt(row[2]); // ahh should we be comparing if this is newer?
+		varcache.last_update = Strings::ToUnsignedInt(row[2]); // ahh should we be comparing if this is newer?
 		key = row[0];
 		value = row[1];
 		std::transform(std::begin(key), std::end(key), std::begin(key), ::tolower); // keys are lower case, DB doesn't have to be
@@ -1052,7 +1052,7 @@ bool Database::GetZoneGraveyard(const uint32 graveyard_id, uint32* graveyard_zon
 	auto row = results.begin();
 
 	if(graveyard_zoneid != nullptr)
-		*graveyard_zoneid = Strings::ToInt(row[0]);
+		*graveyard_zoneid = Strings::ToUnsignedInt(row[0]);
 	if(graveyard_x != nullptr)
 		*graveyard_x = Strings::ToFloat(row[1]);
 	if(graveyard_y != nullptr)
@@ -1168,7 +1168,7 @@ uint32 Database::GetAccountIDFromLSID(
 	}
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		account_id = Strings::ToInt(row[0]);
+		account_id = Strings::ToUnsignedInt(row[0]);
 
 		if (in_account_name) {
 			strcpy(in_account_name, row[1]);
@@ -1244,7 +1244,7 @@ uint8 Database::GetServerType() {
 		return 0;
 
 	auto row = results.begin();
-	return Strings::ToInt(row[0]);
+	return Strings::ToUnsignedInt(row[0]);
 }
 
 bool Database::MoveCharacterToZone(uint32 character_id, uint32 zone_id)
@@ -1296,7 +1296,7 @@ uint8 Database::GetRaceSkill(uint8 skillid, uint8 in_race)
 		return 0;
 
 	auto row = results.begin();
-	return Strings::ToInt(row[0]);
+	return Strings::ToUnsignedInt(row[0]);
 }
 
 uint8 Database::GetSkillCap(uint8 skillid, uint8 in_race, uint8 in_class, uint16 in_level)
@@ -1312,12 +1312,12 @@ uint8 Database::GetSkillCap(uint8 skillid, uint8 in_race, uint8 in_class, uint16
 	if (results.Success() && results.RowsAffected() != 0)
 	{
 		auto row = results.begin();
-		skill_level = Strings::ToInt(row[0]);
-		skill_formula = Strings::ToInt(row[1]);
-		skill_cap = Strings::ToInt(row[2]);
-		if (Strings::ToInt(row[3]) > skill_cap)
-			skill_cap2 = (Strings::ToInt(row[3])-skill_cap)/10; //Split the post-50 skill cap into difference between pre-50 cap and post-50 cap / 10 to determine amount of points per level.
-		skill_cap3 = Strings::ToInt(row[4]);
+		skill_level = Strings::ToUnsignedInt(row[0]);
+		skill_formula = Strings::ToUnsignedInt(row[1]);
+		skill_cap = Strings::ToUnsignedInt(row[2]);
+		if (Strings::ToUnsignedInt(row[3]) > skill_cap)
+			skill_cap2 = (Strings::ToUnsignedInt(row[3])-skill_cap)/10; //Split the post-50 skill cap into difference between pre-50 cap and post-50 cap / 10 to determine amount of points per level.
+		skill_cap3 = Strings::ToUnsignedInt(row[4]);
 	}
 
 	int race_skill = GetRaceSkill(skillid,in_race);
@@ -1488,7 +1488,7 @@ uint32 Database::GetGroupID(const char* name){
 
 	auto row = results.begin();
 
-	return Strings::ToInt(row[0]);
+	return Strings::ToUnsignedInt(row[0]);
 }
 
 std::string Database::GetGroupLeaderForLogin(std::string character_name) {
@@ -1638,7 +1638,7 @@ uint8 Database::GetAgreementFlag(uint32 acctid) {
 
 	auto row = results.begin();
 
-	return Strings::ToInt(row[0]);
+	return Strings::ToUnsignedInt(row[0]);
 }
 
 void Database::SetAgreementFlag(uint32 acctid) {
@@ -1724,7 +1724,7 @@ uint32 Database::GetRaidID(const char* name)
 	}
 
 	if (row[0]) // would it ever be possible to have a null here?
-		return Strings::ToInt(row[0]);
+		return Strings::ToUnsignedInt(row[0]);
 
 	return 0;
 }
@@ -1980,16 +1980,16 @@ bool Database::GetAdventureStats(uint32 char_id, AdventureStats_Struct *as)
 
 	auto row = results.begin();
 
-	as->success.guk = Strings::ToInt(row[0]);
-	as->success.mir = Strings::ToInt(row[1]);
-	as->success.mmc = Strings::ToInt(row[2]);
-	as->success.ruj = Strings::ToInt(row[3]);
-	as->success.tak = Strings::ToInt(row[4]);
-	as->failure.guk = Strings::ToInt(row[5]);
-	as->failure.mir = Strings::ToInt(row[6]);
-	as->failure.mmc = Strings::ToInt(row[7]);
-	as->failure.ruj = Strings::ToInt(row[8]);
-	as->failure.tak = Strings::ToInt(row[9]);
+	as->success.guk = Strings::ToUnsignedInt(row[0]);
+	as->success.mir = Strings::ToUnsignedInt(row[1]);
+	as->success.mmc = Strings::ToUnsignedInt(row[2]);
+	as->success.ruj = Strings::ToUnsignedInt(row[3]);
+	as->success.tak = Strings::ToUnsignedInt(row[4]);
+	as->failure.guk = Strings::ToUnsignedInt(row[5]);
+	as->failure.mir = Strings::ToUnsignedInt(row[6]);
+	as->failure.mmc = Strings::ToUnsignedInt(row[7]);
+	as->failure.ruj = Strings::ToUnsignedInt(row[8]);
+	as->failure.tak = Strings::ToUnsignedInt(row[9]);
 	as->failure.total = as->failure.guk + as->failure.mir + as->failure.mmc + as->failure.ruj + as->failure.tak;
 	as->success.total = as->success.guk + as->success.mir + as->success.mmc + as->success.ruj + as->success.tak;
 
@@ -2008,7 +2008,7 @@ uint32 Database::GetGuildIDByCharID(uint32 character_id)
 		return 0;
 
 	auto row = results.begin();
-	return Strings::ToInt(row[0]);
+	return Strings::ToUnsignedInt(row[0]);
 }
 
 uint32 Database::GetGroupIDByCharID(uint32 character_id)
@@ -2030,7 +2030,7 @@ uint32 Database::GetGroupIDByCharID(uint32 character_id)
 		return 0;
 
 	auto row = results.begin();
-	return Strings::ToInt(row[0]);
+	return Strings::ToUnsignedInt(row[0]);
 }
 
 uint32 Database::GetRaidIDByCharID(uint32 character_id) {
@@ -2044,7 +2044,7 @@ uint32 Database::GetRaidIDByCharID(uint32 character_id) {
 	);
 	auto results = QueryDatabase(query);
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		return Strings::ToInt(row[0]);
+		return Strings::ToUnsignedInt(row[0]);
 	}
 	return 0;
 }
@@ -2089,17 +2089,17 @@ struct TimeOfDay_Struct Database::LoadTime(time_t &realtime)
 		eqTime.day = 1;
 		eqTime.month = 1;
 		eqTime.year = 3100;
-		realtime = time(0);
+		realtime = time(nullptr);
 	}
 	else{
 		auto row = results.begin();
 
-		eqTime.minute = Strings::ToInt(row[0]);
-		eqTime.hour = Strings::ToInt(row[1]);
-		eqTime.day = Strings::ToInt(row[2]);
-		eqTime.month = Strings::ToInt(row[3]);
-		eqTime.year = Strings::ToInt(row[4]);
-		realtime = Strings::ToInt(row[5]);
+		eqTime.minute = Strings::ToUnsignedInt(row[0]);
+		eqTime.hour = Strings::ToUnsignedInt(row[1]);
+		eqTime.day = Strings::ToUnsignedInt(row[2]);
+		eqTime.month = Strings::ToUnsignedInt(row[3]);
+		eqTime.year = Strings::ToUnsignedInt(row[4]);
+		realtime = Strings::ToBigInt(row[5]);
 	}
 
 	return eqTime;

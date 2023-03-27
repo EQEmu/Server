@@ -151,7 +151,7 @@ static char *temp=nullptr;
 		return false;
 	}
 	ptr++;
-	uint32 id = Strings::ToInt(field[id_pos].c_str());
+	uint32 id = Strings::ToUnsignedInt(field[id_pos].c_str());
 	items[id]=field;
 
 	for(i=0;i<10;i++) {

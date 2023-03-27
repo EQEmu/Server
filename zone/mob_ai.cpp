@@ -2068,16 +2068,19 @@ bool Mob::Flurry(ExtraAttackOptions *opts)
 
 bool Mob::AddRampage(Mob *mob)
 {
-	if (!mob)
+	if (!mob) {
 		return false;
+	}
 
-	if (!GetSpecialAbility(SPECATK_RAMPAGE))
+	if (!GetSpecialAbility(SPECATK_RAMPAGE)) {
 		return false;
+	}
 
 	for (int i = 0; i < RampageArray.size(); i++) {
 		// if Entity ID is already on the list don't add it again
-		if (mob->GetID() == RampageArray[i])
+		if (mob->GetID() == RampageArray[i]) {
 			return false;
+		}
 	}
 	RampageArray.push_back(mob->GetID());
 	return true;

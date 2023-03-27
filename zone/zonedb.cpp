@@ -1017,10 +1017,10 @@ bool ZoneDatabase::LoadCharacterBindPoint(uint32 character_id, PlayerProfile_Str
 
 		pp->binds[index].zone_id = Strings::ToInt(row[1]);
 		pp->binds[index].instance_id = Strings::ToInt(row[2]);
-		pp->binds[index].x = Strings::ToInt(row[3]);
-		pp->binds[index].y = Strings::ToInt(row[4]);
-		pp->binds[index].z = Strings::ToInt(row[5]);
-		pp->binds[index].heading = Strings::ToInt(row[6]);
+		pp->binds[index].x = Strings::ToFloat(row[3]);
+		pp->binds[index].y = Strings::ToFloat(row[4]);
+		pp->binds[index].z = Strings::ToFloat(row[5]);
+		pp->binds[index].heading = Strings::ToFloat(row[6]);
 	}
 
 	return true;
@@ -3780,7 +3780,7 @@ uint32 ZoneDatabase::GetCharacterCorpseDecayTimer(uint32 corpse_db_id){
 	return 0;
 }
 
-uint32 ZoneDatabase::UpdateCharacterCorpse(uint32 db_id, uint32 char_id, const char* char_name, uint32 zone_id, uint16 instance_id, PlayerCorpse_Struct* dbpc, const glm::vec4& position, uint32 guild_id, bool is_rezzed) {
+uint32 ZoneDatabase::UpdateCharacterCorpse(uint32 db_id, uint32 char_id, const char* char_name, uint32 zone_id, uint16 instance_id, const CharacterCorpseEntry& corpse, const glm::vec4& position, uint32 guild_id, bool is_rezzed) {
 	std::string query = StringFormat("UPDATE `character_corpses` "
                                     "SET `charname` = '%s', `zone_id` = %u, `instance_id` = %u, `charid` = %d, "
                                     "`x` = %1.1f,`y` =	%1.1f,`z` = %1.1f, `heading` = %1.1f, `guild_consent_id` = %u, "
@@ -3796,15 +3796,15 @@ uint32 ZoneDatabase::UpdateCharacterCorpse(uint32 db_id, uint32 char_id, const c
                                     "WHERE `id` = %u",
                                     Strings::Escape(char_name).c_str(), zone_id, instance_id, char_id,
                                     position.x, position.y, position.z, position.w, guild_id,
-                                    dbpc->locked, dbpc->exp, dbpc->size, dbpc->level, dbpc->race,
-                                    dbpc->gender, dbpc->class_, dbpc->deity, dbpc->texture,
-                                    dbpc->helmtexture, dbpc->copper, dbpc->silver, dbpc->gold,
-                                    dbpc->plat, dbpc->haircolor, dbpc->beardcolor, dbpc->eyecolor1,
-                                    dbpc->eyecolor2, dbpc->hairstyle, dbpc->face, dbpc->beard,
-                                    dbpc->drakkin_heritage, dbpc->drakkin_tattoo, dbpc->drakkin_details,
-                                    dbpc->item_tint.Head.Color, dbpc->item_tint.Chest.Color, dbpc->item_tint.Arms.Color,
-                                    dbpc->item_tint.Wrist.Color, dbpc->item_tint.Hands.Color, dbpc->item_tint.Legs.Color,
-                                    dbpc->item_tint.Feet.Color, dbpc->item_tint.Primary.Color, dbpc->item_tint.Secondary.Color,
+                                    corpse.locked, corpse.exp, corpse.size, corpse.level, corpse.race,
+                                    corpse.gender, corpse.class_, corpse.deity, corpse.texture,
+                                    corpse.helmtexture, corpse.copper, corpse.silver, corpse.gold,
+                                    corpse.plat, corpse.haircolor, corpse.beardcolor, corpse.eyecolor1,
+                                    corpse.eyecolor2, corpse.hairstyle, corpse.face, corpse.beard,
+                                    corpse.drakkin_heritage, corpse.drakkin_tattoo, corpse.drakkin_details,
+                                    corpse.item_tint.Head.Color, corpse.item_tint.Chest.Color, corpse.item_tint.Arms.Color,
+                                    corpse.item_tint.Wrist.Color, corpse.item_tint.Hands.Color, corpse.item_tint.Legs.Color,
+                                    corpse.item_tint.Feet.Color, corpse.item_tint.Primary.Color, corpse.item_tint.Secondary.Color,
                                     db_id);
 	auto results = QueryDatabase(query);
 
@@ -3823,7 +3823,7 @@ void ZoneDatabase::MarkCorpseAsRezzed(uint32 db_id) {
 	auto results = QueryDatabase(query);
 }
 
-uint32 ZoneDatabase::SaveCharacterCorpse(uint32 charid, const char* charname, uint32 zoneid, uint16 instanceid, PlayerCorpse_Struct* dbpc, const glm::vec4& position, uint32 guildid) {
+uint32 ZoneDatabase::SaveCharacterCorpse(uint32 charid, const char* charname, uint32 zoneid, uint16 instanceid, const CharacterCorpseEntry& corpse, const glm::vec4& position, uint32 guildid) {
 	/* Dump Basic Corpse Data */
 	std::string query = StringFormat(
 		"INSERT INTO `character_corpses` "
@@ -3880,39 +3880,39 @@ uint32 ZoneDatabase::SaveCharacterCorpse(uint32 charid, const char* charname, ui
 		position.z,
 		position.w,
 		guildid,
-		dbpc->locked,
-		dbpc->exp,
-		dbpc->size,
-		dbpc->level,
-		dbpc->race,
-		dbpc->gender,
-		dbpc->class_,
-		dbpc->deity,
-		dbpc->texture,
-		dbpc->helmtexture,
-		dbpc->copper,
-		dbpc->silver,
-		dbpc->gold,
-		dbpc->plat,
-		dbpc->haircolor,
-		dbpc->beardcolor,
-		dbpc->eyecolor1,
-		dbpc->eyecolor2,
-		dbpc->hairstyle,
-		dbpc->face,
-		dbpc->beard,
-		dbpc->drakkin_heritage,
-		dbpc->drakkin_tattoo,
-		dbpc->drakkin_details,
-		dbpc->item_tint.Head.Color,
-		dbpc->item_tint.Chest.Color,
-		dbpc->item_tint.Arms.Color,
-		dbpc->item_tint.Wrist.Color,
-		dbpc->item_tint.Hands.Color,
-		dbpc->item_tint.Legs.Color,
-		dbpc->item_tint.Feet.Color,
-		dbpc->item_tint.Primary.Color,
-		dbpc->item_tint.Secondary.Color
+		corpse.locked,
+		corpse.exp,
+		corpse.size,
+		corpse.level,
+		corpse.race,
+		corpse.gender,
+		corpse.class_,
+		corpse.deity,
+		corpse.texture,
+		corpse.helmtexture,
+		corpse.copper,
+		corpse.silver,
+		corpse.gold,
+		corpse.plat,
+		corpse.haircolor,
+		corpse.beardcolor,
+		corpse.eyecolor1,
+		corpse.eyecolor2,
+		corpse.hairstyle,
+		corpse.face,
+		corpse.beard,
+		corpse.drakkin_heritage,
+		corpse.drakkin_tattoo,
+		corpse.drakkin_details,
+		corpse.item_tint.Head.Color,
+		corpse.item_tint.Chest.Color,
+		corpse.item_tint.Arms.Color,
+		corpse.item_tint.Wrist.Color,
+		corpse.item_tint.Hands.Color,
+		corpse.item_tint.Legs.Color,
+		corpse.item_tint.Feet.Color,
+		corpse.item_tint.Primary.Color,
+		corpse.item_tint.Secondary.Color
 	);
 	auto results = QueryDatabase(query);
 	uint32 last_insert_id = results.LastInsertedID();
@@ -3920,41 +3920,51 @@ uint32 ZoneDatabase::SaveCharacterCorpse(uint32 charid, const char* charname, ui
 	std::string corpse_items_query;
 	/* Dump Items from Inventory */
 	uint8 first_entry = 0;
-	for (unsigned int i = 0; i < dbpc->itemcount; i++) {
+	for(auto &item : corpse.items)
+	{
 		if (first_entry != 1){
 			corpse_items_query = StringFormat("REPLACE INTO `character_corpse_items` \n"
-				" (corpse_id, equip_slot, item_id, charges, aug_1, aug_2, aug_3, aug_4, aug_5, aug_6, attuned) \n"
-				" VALUES (%u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u) \n",
+				" (corpse_id, equip_slot, item_id, charges, aug_1, aug_2, aug_3, aug_4, aug_5, aug_6, attuned, custom_data, ornamenticon, ornamentidfile, ornament_hero_model) \n"
+				" VALUES (%u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, '%s', %u, %u, %u) \n",
 				last_insert_id,
-				dbpc->items[i].equip_slot,
-				dbpc->items[i].item_id,
-				dbpc->items[i].charges,
-				dbpc->items[i].aug_1,
-				dbpc->items[i].aug_2,
-				dbpc->items[i].aug_3,
-				dbpc->items[i].aug_4,
-				dbpc->items[i].aug_5,
-				dbpc->items[i].aug_6,
-				dbpc->items[i].attuned
+				item.equip_slot,
+				item.item_id,
+				item.charges,
+				item.aug_1,
+				item.aug_2,
+				item.aug_3,
+				item.aug_4,
+				item.aug_5,
+				item.aug_6,
+				item.attuned,
+				item.custom_data.c_str(),
+				item.ornamenticon,
+				item.ornamentidfile,
+				item.ornament_hero_model
 			);
 			first_entry = 1;
 		}
 		else{
-			corpse_items_query = corpse_items_query + StringFormat(", (%u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u) \n",
+			corpse_items_query = corpse_items_query + StringFormat(", (%u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, '%s', %u, %u, %u) \n",
 				last_insert_id,
-				dbpc->items[i].equip_slot,
-				dbpc->items[i].item_id,
-				dbpc->items[i].charges,
-				dbpc->items[i].aug_1,
-				dbpc->items[i].aug_2,
-				dbpc->items[i].aug_3,
-				dbpc->items[i].aug_4,
-				dbpc->items[i].aug_5,
-				dbpc->items[i].aug_6,
-				dbpc->items[i].attuned
+				item.equip_slot,
+				item.item_id,
+				item.charges,
+				item.aug_1,
+				item.aug_2,
+				item.aug_3,
+				item.aug_4,
+				item.aug_5,
+				item.aug_6,
+				item.attuned,
+				item.custom_data.c_str(),
+				item.ornamenticon,
+				item.ornamentidfile,
+				item.ornament_hero_model
 			);
 		}
 	}
+
 	if (!corpse_items_query.empty())
 		QueryDatabase(corpse_items_query);
 
@@ -3993,18 +4003,6 @@ uint32 ZoneDatabase::GetCharacterCorpseID(uint32 char_id, uint8 corpse) {
 		return 0;
 }
 
-uint32 ZoneDatabase::GetCharacterCorpseItemCount(uint32 corpse_id){
-	std::string query = StringFormat("SELECT COUNT(*) FROM character_corpse_items WHERE `corpse_id` = %u",
-		corpse_id
-	);
-	auto results = QueryDatabase(query);
-	auto& row = results.begin();
-	if (results.Success() && results.RowsAffected() != 0){
-		return Strings::ToInt(row[0]);
-	}
-	return 0;
-}
-
 uint32 ZoneDatabase::GetCharacterCorpseItemAt(uint32 corpse_id, uint16 slotid) {
 	Corpse* tmp = LoadCharacterCorpse(corpse_id);
 	uint32 itemid = 0;
@@ -4016,7 +4014,7 @@ uint32 ZoneDatabase::GetCharacterCorpseItemAt(uint32 corpse_id, uint16 slotid) {
 	return itemid;
 }
 
-bool ZoneDatabase::LoadCharacterCorpseData(uint32 corpse_id, PlayerCorpse_Struct* pcs){
+bool ZoneDatabase::LoadCharacterCorpseData(uint32 corpse_id, CharacterCorpseEntry& corpse){
 	std::string query = StringFormat(
 		"SELECT           \n"
 		"is_locked,       \n"
@@ -4060,39 +4058,39 @@ bool ZoneDatabase::LoadCharacterCorpseData(uint32 corpse_id, PlayerCorpse_Struct
 	auto results = QueryDatabase(query);
 	uint16 i = 0;
 	for (auto& row = results.begin(); row != results.end(); ++row) {
-		pcs->locked = Strings::ToInt(row[i++]);						// is_locked,
-		pcs->exp = Strings::ToUnsignedInt(row[i++]);							// exp,
-		pcs->size = Strings::ToInt(row[i++]);							// size,
-		pcs->level = Strings::ToInt(row[i++]);						// `level`,
-		pcs->race = Strings::ToInt(row[i++]);							// race,
-		pcs->gender = Strings::ToInt(row[i++]);						// gender,
-		pcs->class_ = Strings::ToInt(row[i++]);						// class,
-		pcs->deity = Strings::ToInt(row[i++]);						// deity,
-		pcs->texture = Strings::ToInt(row[i++]);						// texture,
-		pcs->helmtexture = Strings::ToInt(row[i++]);					// helm_texture,
-		pcs->copper = Strings::ToUnsignedInt(row[i++]);						// copper,
-		pcs->silver = Strings::ToUnsignedInt(row[i++]);						// silver,
-		pcs->gold = Strings::ToUnsignedInt(row[i++]);						// gold,
-		pcs->plat = Strings::ToUnsignedInt(row[i++]);						// platinum,
-		pcs->haircolor = Strings::ToInt(row[i++]);					// hair_color,
-		pcs->beardcolor = Strings::ToInt(row[i++]);					// beard_color,
-		pcs->eyecolor1 = Strings::ToInt(row[i++]);					// eye_color_1,
-		pcs->eyecolor2 = Strings::ToInt(row[i++]);					// eye_color_2,
-		pcs->hairstyle = Strings::ToInt(row[i++]);					// hair_style,
-		pcs->face = Strings::ToInt(row[i++]);							// face,
-		pcs->beard = Strings::ToInt(row[i++]);						// beard,
-		pcs->drakkin_heritage = Strings::ToUnsignedInt(row[i++]);			// drakkin_heritage,
-		pcs->drakkin_tattoo = Strings::ToUnsignedInt(row[i++]);				// drakkin_tattoo,
-		pcs->drakkin_details = Strings::ToUnsignedInt(row[i++]);				// drakkin_details,
-		pcs->item_tint.Head.Color = Strings::ToUnsignedInt(row[i++]);		// wc_1,
-		pcs->item_tint.Chest.Color = Strings::ToUnsignedInt(row[i++]);		// wc_2,
-		pcs->item_tint.Arms.Color = Strings::ToUnsignedInt(row[i++]);		// wc_3,
-		pcs->item_tint.Wrist.Color = Strings::ToUnsignedInt(row[i++]);		// wc_4,
-		pcs->item_tint.Hands.Color = Strings::ToUnsignedInt(row[i++]);		// wc_5,
-		pcs->item_tint.Legs.Color = Strings::ToUnsignedInt(row[i++]);		// wc_6,
-		pcs->item_tint.Feet.Color = Strings::ToUnsignedInt(row[i++]);		// wc_7,
-		pcs->item_tint.Primary.Color = Strings::ToUnsignedInt(row[i++]);		// wc_8,
-		pcs->item_tint.Secondary.Color = Strings::ToUnsignedInt(row[i++]);	// wc_9
+		corpse.locked = Strings::ToInt(row[i++]);						// is_locked,
+		corpse.exp = Strings::ToUnsignedInt(row[i++]);							// exp,
+		corpse.size = Strings::ToInt(row[i++]);							// size,
+		corpse.level = Strings::ToInt(row[i++]);						// `level`,
+		corpse.race = Strings::ToInt(row[i++]);							// race,
+		corpse.gender = Strings::ToInt(row[i++]);						// gender,
+		corpse.class_ = Strings::ToInt(row[i++]);						// class,
+		corpse.deity = Strings::ToInt(row[i++]);						// deity,
+		corpse.texture = Strings::ToInt(row[i++]);						// texture,
+		corpse.helmtexture = Strings::ToInt(row[i++]);					// helm_texture,
+		corpse.copper = Strings::ToUnsignedInt(row[i++]);						// copper,
+		corpse.silver = Strings::ToUnsignedInt(row[i++]);						// silver,
+		corpse.gold = Strings::ToUnsignedInt(row[i++]);						// gold,
+		corpse.plat = Strings::ToUnsignedInt(row[i++]);						// platinum,
+		corpse.haircolor = Strings::ToInt(row[i++]);					// hair_color,
+		corpse.beardcolor = Strings::ToInt(row[i++]);					// beard_color,
+		corpse.eyecolor1 = Strings::ToInt(row[i++]);					// eye_color_1,
+		corpse.eyecolor2 = Strings::ToInt(row[i++]);					// eye_color_2,
+		corpse.hairstyle = Strings::ToInt(row[i++]);					// hair_style,
+		corpse.face = Strings::ToInt(row[i++]);							// face,
+		corpse.beard = Strings::ToInt(row[i++]);						// beard,
+		corpse.drakkin_heritage = Strings::ToUnsignedInt(row[i++]);			// drakkin_heritage,
+		corpse.drakkin_tattoo = Strings::ToUnsignedInt(row[i++]);				// drakkin_tattoo,
+		corpse.drakkin_details = Strings::ToUnsignedInt(row[i++]);				// drakkin_details,
+		corpse.item_tint.Head.Color = Strings::ToUnsignedInt(row[i++]);		// wc_1,
+		corpse.item_tint.Chest.Color = Strings::ToUnsignedInt(row[i++]);		// wc_2,
+		corpse.item_tint.Arms.Color = Strings::ToUnsignedInt(row[i++]);		// wc_3,
+		corpse.item_tint.Wrist.Color = Strings::ToUnsignedInt(row[i++]);		// wc_4,
+		corpse.item_tint.Hands.Color = Strings::ToUnsignedInt(row[i++]);		// wc_5,
+		corpse.item_tint.Legs.Color = Strings::ToUnsignedInt(row[i++]);		// wc_6,
+		corpse.item_tint.Feet.Color = Strings::ToUnsignedInt(row[i++]);		// wc_7,
+		corpse.item_tint.Primary.Color = Strings::ToUnsignedInt(row[i++]);		// wc_8,
+		corpse.item_tint.Secondary.Color = Strings::ToUnsignedInt(row[i++]);	// wc_9
 	}
 	query = StringFormat(
 		"SELECT                       \n"
@@ -4105,7 +4103,11 @@ bool ZoneDatabase::LoadCharacterCorpseData(uint32 corpse_id, PlayerCorpse_Struct
 		"aug_4,                       \n"
 		"aug_5,                       \n"
 		"aug_6,                       \n"
-		"attuned                      \n"
+		"attuned,                     \n"
+		"custom_data,                 \n"
+		"ornamenticon,                \n"
+		"ornamentidfile,              \n"
+		"ornament_hero_model          \n"
 		"FROM                         \n"
 		"character_corpse_items       \n"
 		"WHERE `corpse_id` = %u\n"
@@ -4115,20 +4117,32 @@ bool ZoneDatabase::LoadCharacterCorpseData(uint32 corpse_id, PlayerCorpse_Struct
 	results = QueryDatabase(query);
 
 	i = 0;
-	pcs->itemcount = results.RowCount();
 	uint16 r = 0;
 	for (auto& row = results.begin(); row != results.end(); ++row) {
-		memset(&pcs->items[i], 0, sizeof (player_lootitem::ServerLootItem_Struct));
-		pcs->items[i].equip_slot = Strings::ToInt(row[r++]);		// equip_slot,
-		pcs->items[i].item_id = Strings::ToUnsignedInt(row[r++]); 		// item_id,
-		pcs->items[i].charges = Strings::ToInt(row[r++]); 		// charges,
-		pcs->items[i].aug_1 = Strings::ToInt(row[r++]); 			// aug_1,
-		pcs->items[i].aug_2 = Strings::ToInt(row[r++]); 			// aug_2,
-		pcs->items[i].aug_3 = Strings::ToInt(row[r++]); 			// aug_3,
-		pcs->items[i].aug_4 = Strings::ToInt(row[r++]); 			// aug_4,
-		pcs->items[i].aug_5 = Strings::ToInt(row[r++]); 			// aug_5,
-		pcs->items[i].aug_6 = Strings::ToInt(row[r++]); 			// aug_6,
-		pcs->items[i].attuned = Strings::ToInt(row[r++]); 		// attuned,
+		CharacterCorpseItemEntry item;
+		item.equip_slot = Strings::ToInt(row[r++]);		// equip_slot,
+		item.item_id = Strings::ToUnsignedInt(row[r++]); 		// item_id,
+		item.charges = Strings::ToInt(row[r++]); 		// charges,
+		item.aug_1 = Strings::ToInt(row[r++]); 			// aug_1,
+		item.aug_2 = Strings::ToInt(row[r++]); 			// aug_2,
+		item.aug_3 = Strings::ToInt(row[r++]); 			// aug_3,
+		item.aug_4 = Strings::ToInt(row[r++]); 			// aug_4,
+		item.aug_5 = Strings::ToInt(row[r++]); 			// aug_5,
+		item.aug_6 = Strings::ToInt(row[r++]); 			// aug_6,
+		item.attuned = Strings::ToInt(row[r++]) > 0 ? true : false; // attuned,
+
+		if (row[r]) {
+			item.custom_data = row[r++];
+		}
+		else {
+			r++;
+		}
+
+		item.ornamenticon = Strings::ToUnsignedInt(row[r++]);
+		item.ornamentidfile = Strings::ToUnsignedInt(row[r++]);
+		item.ornament_hero_model = Strings::ToUnsignedInt(row[r++]);
+
+		corpse.items.push_back(std::move(item));
 		r = 0;
 		i++;
 	}

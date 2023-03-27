@@ -96,12 +96,12 @@ bool ExpeditionRequest::CanRaidRequest(Raid* raid)
 		// stable_sort not needed, order within a raid group may not be what is displayed
 		std::sort(raid_members.begin(), raid_members.end(),
 			[&](const RaidMember& lhs, const RaidMember& rhs) {
-				if (m_leader_name == lhs.membername) { // leader always added first
+				if (m_leader_name == lhs.member_name) { // leader always added first
 					return true;
-				} else if (m_leader_name == rhs.membername) {
+				} else if (m_leader_name == rhs.member_name) {
 					return false;
 				}
-				return lhs.GroupNumber < rhs.GroupNumber;
+				return lhs.group_number < rhs.group_number;
 			});
 
 		m_not_all_added_msg = fmt::format(CREATE_NOT_ALL_ADDED, "raid", SystemName,
@@ -112,7 +112,7 @@ bool ExpeditionRequest::CanRaidRequest(Raid* raid)
 	std::vector<std::string> member_names;
 	for (int i = 0; i < raid_members.size(); ++i)
 	{
-		member_names.emplace_back(raid_members[i].membername);
+		member_names.emplace_back(raid_members[i].member_name);
 	}
 
 	return CanMembersJoin(member_names);

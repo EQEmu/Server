@@ -19,7 +19,6 @@
 #define WORLDDB_H_
 
 #include "../common/shareddb.h"
-#include "../common/zone_numbers.h"
 #include "../common/eq_packet.h"
 
 struct PlayerProfile_Struct;
