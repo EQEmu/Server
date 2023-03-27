@@ -1,3 +1,9 @@
+## [22.8.1] - 03/27/2023 
+
+### Fixes
+
+* Fix for NPCs having spells interrupted. ([#3150](https://github.com/EQEmu/Server/pull/3150)) @Aeadoin 2023-03-27
+
 ## [22.8.0] - 03/25/2023 
 
 ### Code
