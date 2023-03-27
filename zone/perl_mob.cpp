@@ -2273,14 +2273,14 @@ bool Perl_Mob_IsTargetable(Mob* self) // @categories Stats and Attributes
 	return self->IsTargetable();
 }
 
-bool Perl_Mob_HasShieldEquiped(Mob* self) // @categories Stats and Attributes
+bool Perl_Mob_HasShieldEquipped(Mob* self) // @categories Stats and Attributes
 {
-	return self->HasShieldEquiped();
+	return self->HasShieldEquipped();
 }
 
-bool Perl_Mob_HasTwoHandBluntEquiped(Mob* self) // @categories Stats and Attributes
+bool Perl_Mob_HasTwoHandBluntEquipped(Mob* self) // @categories Stats and Attributes
 {
-	return self->HasTwoHandBluntEquiped();
+	return self->HasTwoHandBluntEquipped();
 }
 
 bool Perl_Mob_HasTwoHanderEquipped(Mob* self) // @categories Stats and Attributes
@@ -3257,9 +3257,9 @@ void perl_register_mob()
 	package.add("HasOwner", &Perl_Mob_HasOwner);
 	package.add("HasPet", &Perl_Mob_HasPet);
 	package.add("HasProcs", &Perl_Mob_HasProcs);
-	package.add("HasShieldEquiped", &Perl_Mob_HasShieldEquiped);
+	package.add("HasShieldEquipped", &Perl_Mob_HasShieldEquipped);
 	package.add("HasTimer", &Perl_Mob_HasTimer);
-	package.add("HasTwoHandBluntEquiped", &Perl_Mob_HasTwoHandBluntEquiped);
+	package.add("HasTwoHandBluntEquipped", &Perl_Mob_HasTwoHandBluntEquipped);
 	package.add("HasTwoHanderEquipped", &Perl_Mob_HasTwoHanderEquipped);
 	package.add("HateSummon", &Perl_Mob_HateSummon);
 	package.add("Heal", &Perl_Mob_Heal);

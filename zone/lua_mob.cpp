@@ -2170,14 +2170,14 @@ bool Lua_Mob::IsTargetable() {
 	return self->IsTargetable();
 }
 
-bool Lua_Mob::HasShieldEquiped() {
+bool Lua_Mob::HasShieldEquipped() {
 	Lua_Safe_Call_Bool();
-	return self->HasShieldEquiped();
+	return self->HasShieldEquipped();
 }
 
-bool Lua_Mob::HasTwoHandBluntEquiped() {
+bool Lua_Mob::HasTwoHandBluntEquipped() {
 	Lua_Safe_Call_Bool();
-	return self->HasTwoHandBluntEquiped();
+	return self->HasTwoHandBluntEquipped();
 }
 
 bool Lua_Mob::HasTwoHanderEquipped() {
@@ -3321,9 +3321,9 @@ luabind::scope lua_register_mob() {
 	.def("HasOwner", (bool(Lua_Mob::*)(void))&Lua_Mob::HasOwner)
 	.def("HasPet", (bool(Lua_Mob::*)(void))&Lua_Mob::HasPet)
 	.def("HasProcs", &Lua_Mob::HasProcs)
-	.def("HasShieldEquiped", (bool(Lua_Mob::*)(void))&Lua_Mob::HasShieldEquiped)
+	.def("HasShieldEquipped", (bool(Lua_Mob::*)(void))&Lua_Mob::HasShieldEquipped)
 	.def("HasTimer", &Lua_Mob::HasTimer)
-	.def("HasTwoHandBluntEquiped", (bool(Lua_Mob::*)(void))&Lua_Mob::HasTwoHandBluntEquiped)
+	.def("HasTwoHandBluntEquipped", (bool(Lua_Mob::*)(void))&Lua_Mob::HasTwoHandBluntEquipped)
 	.def("HasTwoHanderEquipped", (bool(Lua_Mob::*)(void))&Lua_Mob::HasTwoHanderEquipped)
 	.def("Heal", &Lua_Mob::Heal)
 	.def("HealDamage", (void(Lua_Mob::*)(uint64))&Lua_Mob::HealDamage)

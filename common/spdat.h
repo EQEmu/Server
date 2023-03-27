@@ -504,7 +504,7 @@ enum SpellRestriction
 	HAS_NO_ILLUSIONS_OF_GRANDEUR_BUFF                                         = 12519, //
 	IS_HP_ABOVE_50_PCT                                                        = 16010, //
 	IS_HP_UNDER_50_PCT                                                        = 16031, //
-	IS_OFF_HAND_EQUIPED                                                       = 27672, // You must be wielding a weapon or shield in your offhand to use this ability.
+	IS_OFF_HAND_EQUIPPED                                                       = 27672, // You must be wielding a weapon or shield in your offhand to use this ability.
 	HAS_NO_PACT_OF_FATE_RECOURSE_BUFF                                         = 29556, // This spell will not work while Pact of Fate Recourse is active. | caster restriction |
 	HAS_NO_SHROUD_OF_PRAYER_BUFF                                              = 32339, // Your target cannot receive another Quiet Prayer this soon.
 	IS_MANA_BELOW_20_PCT                                                      = 38311, // This ability requires you to be at or below 20% of your maximum mana.
@@ -1211,7 +1211,7 @@ typedef enum {
 #define SE_Double_Backstab_Front		473 // implemented - Chance to double backstab from front
 #define SE_Pet_Crit_Melee_Damage_Pct_Owner	474 // implemenetd - Critical damage mod applied to pets from owner
 #define SE_Trigger_Spell_Non_Item		475 // implemented - Trigger spell on cast only if not from item click.
-#define SE_Weapon_Stance				476 // implemented, @Misc, Apply a specific spell buffs automatically depending 2Hander, Shield or Duel Wield is equiped, base: spellid, base: 0=2H 1=Shield 2=DW, max: none
+#define SE_Weapon_Stance				476 // implemented, @Misc, Apply a specific spell buffs automatically depending 2Hander, Shield or Dual Wield is equipped, base: spellid, base: 0=2H 1=Shield 2=DW, max: none
 #define SE_Hatelist_To_Top_Index		477 // Implemented - Chance to be set to top of rampage list
 #define SE_Hatelist_To_Tail_Index		478 // Implemented - Chance to be set to bottom of rampage list
 #define SE_Ff_Value_Min					479 // implemented, @Ff, Minimum base value of a spell that can be focused, base: spells to be focused base1 value

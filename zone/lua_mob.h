@@ -431,8 +431,8 @@ public:
 	uint8 GetNimbusEffect2();
 	uint8 GetNimbusEffect3();
 	bool IsTargetable();
-	bool HasShieldEquiped();
-	bool HasTwoHandBluntEquiped();
+	bool HasShieldEquipped();
+	bool HasTwoHandBluntEquipped();
 	bool HasTwoHanderEquipped();
 	uint32 GetHerosForgeModel(uint8 material_slot);
 	uint32 IsEliteMaterialItem(uint8 material_slot);
