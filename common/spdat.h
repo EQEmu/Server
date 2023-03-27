@@ -504,7 +504,7 @@ enum SpellRestriction
 	HAS_NO_ILLUSIONS_OF_GRANDEUR_BUFF                                         = 12519, //
 	IS_HP_ABOVE_50_PCT                                                        = 16010, //
 	IS_HP_UNDER_50_PCT                                                        = 16031, //
-	IS_OFF_HAND_EQUIPED                                                       = 27672, // You must be wielding a weapon or shield in your offhand to use this ability.
+	IS_OFF_HAND_EQUIPPED                                                       = 27672, // You must be wielding a weapon or shield in your offhand to use this ability.
 	HAS_NO_PACT_OF_FATE_RECOURSE_BUFF                                         = 29556, // This spell will not work while Pact of Fate Recourse is active. | caster restriction |
 	HAS_NO_SHROUD_OF_PRAYER_BUFF                                              = 32339, // Your target cannot receive another Quiet Prayer this soon.
 	IS_MANA_BELOW_20_PCT                                                      = 38311, // This ability requires you to be at or below 20% of your maximum mana.

@@ -8075,7 +8075,7 @@ bool Mob::PassCastRestriction(int value)
 				return true;
 			break;
 
-		case IS_OFF_HAND_EQUIPED:
+		case IS_OFF_HAND_EQUIPPED:
 			if (HasShieldEquipped() || CanThisClassDualWield())
 				return true;
 			break;
@@ -9284,7 +9284,7 @@ void Mob::SendCastRestrictionMessage(int requirement_id, bool target_requirement
 	case IS_HP_UNDER_50_PCT:
 		Message(Chat::Red, fmt::format("{}  This target must be at oe below 50 pct of its maximum hit points.", msg).c_str());
 		break;
-	case IS_OFF_HAND_EQUIPED:
+	case IS_OFF_HAND_EQUIPPED:
 		Message(Chat::Red, fmt::format("{} You must be wielding a weapon or shield in your offhand to use this ability.", msg).c_str());
 		break;
 	case HAS_NO_PACT_OF_FATE_RECOURSE_BUFF:
