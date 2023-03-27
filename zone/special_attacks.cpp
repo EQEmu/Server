@@ -133,7 +133,7 @@ int Mob::GetBaseSkillDamage(EQ::skills::SkillType skill, Mob *target)
 			float                  ac_bonus    = 0.0f;
 			const EQ::ItemInstance *inst       = nullptr;
 			if (IsClient()) {
-				if (HasShieldEquiped()) {
+				if (HasShieldEquipped()) {
 					inst = CastToClient()->GetInv().GetItem(EQ::invslot::slotSecondary);
 				} else if (HasTwoHanderEquipped()) {
 					inst = CastToClient()->GetInv().GetItem(EQ::invslot::slotPrimary);

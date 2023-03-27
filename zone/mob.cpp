@@ -235,10 +235,10 @@ Mob::Mob(
 	slow_mitigation         = 0;
 	findable                = false;
 	trackable               = true;
-	has_shieldequiped       = false;
-	has_twohandbluntequiped = false;
-	has_twohanderequipped   = false;
-	has_duelweaponsequiped  = false;
+	has_shield_equipped       = false;
+	has_two_hand_blunt_equipped = false;
+	has_two_hander_equipped   = false;
+	has_dual_weapons_equipped  = false;
 	can_facestab            = false;
 	has_numhits             = false;
 	has_MGB                 = false;

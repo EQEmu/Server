@@ -484,19 +484,19 @@ public:
 	void TempName(const char *newname = nullptr);
 	void SetTargetable(bool on);
 	bool IsTargetable() const { return m_targetable; }
-	bool HasShieldEquiped() const { return has_shieldequiped; }
-	inline void SetShieldEquiped(bool val) { has_shieldequiped = val; }
-	bool HasTwoHandBluntEquiped() const { return has_twohandbluntequiped; }
-	inline void SetTwoHandBluntEquiped(bool val) { has_twohandbluntequiped = val; }
-	bool HasTwoHanderEquipped() { return has_twohanderequipped; }
-	void SetTwoHanderEquipped(bool val) { has_twohanderequipped = val; }
-	bool HasDualWeaponsEquiped() const { return has_duelweaponsequiped; }
+	bool HasShieldEquipped() const { return has_shield_equipped; }
+	inline void SetShieldEquipped(bool val) { has_shield_equipped = val; }
+	bool HasTwoHandBluntEquipped() const { return has_two_hand_blunt_equipped; }
+	inline void SetTwoHandBluntEquipped(bool val) { has_two_hand_blunt_equipped = val; }
+	bool HasTwoHanderEquipped() { return has_two_hander_equipped; }
+	void SetTwoHanderEquipped(bool val) { has_two_hander_equipped = val; }
+	bool HasDualWeaponsEquipped() const { return has_dual_weapons_equipped; }
 	bool HasBowEquipped() const { return has_bowequipped; }
 	void SetBowEquipped(bool val) { has_bowequipped = val; }
 	bool HasArrowEquipped() const { return has_arrowequipped; }
 	void SetArrowEquipped(bool val) { has_arrowequipped = val; }
 	bool HasBowAndArrowEquipped() const { return HasBowEquipped() && HasArrowEquipped(); }
-	inline void SetDuelWeaponsEquiped(bool val) { has_duelweaponsequiped = val; }
+	inline void SetDualWeaponsEquipped(bool val) { has_dual_weapons_equipped = val; }
 	bool CanFacestab() { return can_facestab; }
 	void SetFacestab(bool val) { can_facestab = val; }
 	virtual uint8 ConvertItemTypeToSkillID(uint8 item_type);
@@ -1699,10 +1699,10 @@ protected:
 	bool silenced;
 	bool amnesiad;
 	bool offhand;
-	bool has_shieldequiped;
-	bool has_twohandbluntequiped;
-	bool has_twohanderequipped;
-	bool has_duelweaponsequiped;
+	bool has_shield_equipped;
+	bool has_two_hand_blunt_equipped;
+	bool has_two_hander_equipped;
+	bool has_dual_weapons_equipped;
 	bool has_bowequipped = false;
 	bool has_arrowequipped = false;
 	bool use_double_melee_round_dmg_bonus;

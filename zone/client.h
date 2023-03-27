@@ -588,7 +588,7 @@ public:
 	//This calculates total Attack Rating to match very close to what the client should show
 	uint32 GetTotalATK();
 	uint32 GetATKRating();
-	//This gets the skill value of the item type equiped in the Primary Slot
+	//This gets the skill value of the item type equipped in the Primary Slot
 	uint16 GetPrimarySkillValue();
 
 	bool Flurry();

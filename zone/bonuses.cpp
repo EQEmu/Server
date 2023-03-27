@@ -145,10 +145,10 @@ int Mob::CalcRecommendedLevelBonus(uint8 current_level, uint8 recommended_level,
 
 void Mob::CalcItemBonuses(StatBonuses* b) {
 	ClearItemFactionBonuses();
-	SetShieldEquiped(false);
-	SetTwoHandBluntEquiped(false);
+	SetShieldEquipped(false);
+	SetTwoHandBluntEquipped(false);
 	SetTwoHanderEquipped(false);
-	SetDuelWeaponsEquiped(false);
+	SetDualWeaponsEquipped(false);
 
 	int16 i;
 
@@ -178,13 +178,13 @@ void Mob::CalcItemBonuses(StatBonuses* b) {
 			item->ItemType == EQ::item::ItemTypeShield &&
 			i == EQ::invslot::slotSecondary
 		) {
-			SetShieldEquiped(true);
+			SetShieldEquipped(true);
 		} else if (
 			item &&
 			item->ItemType == EQ::item::ItemType2HBlunt &&
 			i == EQ::invslot::slotPrimary
 		) {
-			SetTwoHandBluntEquiped(true);
+			SetTwoHandBluntEquipped(true);
 			SetTwoHanderEquipped(true);
 		} else if (
 			item &&
@@ -196,7 +196,7 @@ void Mob::CalcItemBonuses(StatBonuses* b) {
 	}
 
 	if (CanThisClassDualWield()) {
-		SetDuelWeaponsEquiped(true);
+		SetDualWeaponsEquipped(true);
 	}
 
 	if (IsOfClientBot()) {

@@ -8076,7 +8076,7 @@ bool Mob::PassCastRestriction(int value)
 			break;
 
 		case IS_OFF_HAND_EQUIPED:
-			if (HasShieldEquiped() || CanThisClassDualWield())
+			if (HasShieldEquipped() || CanThisClassDualWield())
 				return true;
 			break;
 

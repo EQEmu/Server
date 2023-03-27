@@ -592,7 +592,7 @@ bool Mob::AvoidDamage(Mob *other, DamageHitInfo &hit)
 	}
 
 	// Try Shield Block OR TwoHandBluntBlockCheck
-	if (HasShieldEquiped() && (aabonuses.ShieldBlock || spellbonuses.ShieldBlock || itembonuses.ShieldBlock) && (InFront || bBlockFromRear)) {
+	if (HasShieldEquipped() && (aabonuses.ShieldBlock || spellbonuses.ShieldBlock || itembonuses.ShieldBlock) && (InFront || bBlockFromRear)) {
 		int chance = aabonuses.ShieldBlock + spellbonuses.ShieldBlock + itembonuses.ShieldBlock;
 		if (counter_block || counter_all) {
 			float counter = (counter_block + counter_all) / 100.0f;
@@ -604,7 +604,7 @@ bool Mob::AvoidDamage(Mob *other, DamageHitInfo &hit)
 		}
 	}
 
-	if (HasTwoHandBluntEquiped() && (aabonuses.TwoHandBluntBlock || spellbonuses.TwoHandBluntBlock || itembonuses.TwoHandBluntBlock) && (InFront || bBlockFromRear)) {
+	if (HasTwoHandBluntEquipped() && (aabonuses.TwoHandBluntBlock || spellbonuses.TwoHandBluntBlock || itembonuses.TwoHandBluntBlock) && (InFront || bBlockFromRear)) {
 		int chance = aabonuses.TwoHandBluntBlock + itembonuses.TwoHandBluntBlock + spellbonuses.TwoHandBluntBlock;
 		if (counter_block || counter_all) {
 			float counter = (counter_block + counter_all) / 100.0f;
@@ -874,7 +874,7 @@ int Mob::ACSum(bool skip_caps)
 	int ac = 0; // this should be base AC whenever shrouds come around
 	ac += itembonuses.AC; // items + food + tribute
 	int shield_ac = 0;
-	if (HasShieldEquiped() && IsOfClientBot()) {
+	if (HasShieldEquipped() && IsOfClientBot()) {
 		auto inst = (IsClient()) ? GetInv().GetItem(EQ::invslot::slotSecondary) : CastToBot()->GetBotItem(EQ::invslot::slotSecondary);
 		if (inst) {
 			if (inst->GetItemRecommendedLevel(true) <= GetLevel()) {
@@ -1555,7 +1555,7 @@ bool Mob::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 		if (Hand == EQ::invslot::slotPrimary || Hand == EQ::invslot::slotSecondary)
 			my_hit.base_damage = DoDamageCaps(my_hit.base_damage);
 		auto shield_inc = spellbonuses.ShieldEquipDmgMod + itembonuses.ShieldEquipDmgMod + aabonuses.ShieldEquipDmgMod;
-		if (shield_inc > 0 && HasShieldEquiped() && Hand == EQ::invslot::slotPrimary) {
+		if (shield_inc > 0 && HasShieldEquipped() && Hand == EQ::invslot::slotPrimary) {
 			my_hit.base_damage = my_hit.base_damage * (100 + shield_inc) / 100;
 			hate = hate * (100 + shield_inc) / 100;
 		}
@@ -5995,7 +5995,7 @@ void Mob::DoShieldDamageOnShielder(Mob *shield_target, int64 hit_damage_done, EQ
 	}
 
 	int mitigation = shielder->GetShielderMitigation(); //Default shielder mitigates 25 pct of damage taken, this can be increased up to max 50 by equipping a shield item
-	if (shielder->IsClient() && shielder->HasShieldEquiped()) {
+	if (shielder->IsClient() && shielder->HasShieldEquipped()) {
 		EQ::ItemInstance* inst = shielder->CastToClient()->GetInv().GetItem(EQ::invslot::slotSecondary);
 		if (inst) {
 			const EQ::ItemData* shield = inst->GetItem();

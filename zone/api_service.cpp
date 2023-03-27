@@ -471,11 +471,11 @@ Json::Value ApiGetMobListDetail(EQ::Net::WebsocketServerConnection *connection, 
 		row["has_primary_aggro"]          = mob->HasPrimaryAggro();
 		row["has_project_illusion"]       = mob->HasProjectIllusion();
 		row["has_projectile_attack"]      = mob->HasProjectileAttack();
-		row["has_shield_equiped"]         = mob->HasShieldEquiped();
+		row["has_shield_equipped"]         = mob->HasShieldEquipped();
 		row["has_special_abilities"]      = mob->HasSpecialAbilities();
 		row["has_tar_reflection"]         = mob->HasTargetReflection();
 		row["has_temp_pets_active"]       = mob->HasTempPetsActive();
-		row["has_two_hand_blunt_equiped"] = mob->HasTwoHandBluntEquiped();
+		row["has_two_hand_blunt_equipped"] = mob->HasTwoHandBluntEquipped();
 		row["has_two_hander_equipped"]    = mob->HasTwoHanderEquipped();
 		row["hate_summon"]                = mob->HateSummon();
 		row["helm_texture"]               = mob->GetHelmTexture();
