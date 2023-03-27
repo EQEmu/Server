@@ -437,9 +437,10 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 			//this is a special case for NPCs with no mana...
 			if (IsNPC() && my_curmana == my_maxmana) {
 				mana_cost = 0;
+			} else {
+				DoSpellInterrupt(spell_id, mana_cost, my_curmana);
+				return false;
 			}
-			DoSpellInterrupt(spell_id, mana_cost, my_curmana);
-			return false;
 		}
 	}
 
