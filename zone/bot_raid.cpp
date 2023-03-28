@@ -302,17 +302,19 @@ void Client::SpawnRaidBotsOnConnect(Raid* raid) {
 	std::list<BotsAvailableList> bots_list;
 	database.botdb.LoadBotsList(CharacterID(), bots_list);
 	std::vector<RaidMember> r_members = raid->GetMembers();
-	for (const RaidMember& iter: r_members) {
-		if (strlen(iter.member_name) != 0) {
-			for (const BotsAvailableList& b_iter: bots_list) {
-				if (strcmp(iter.member_name, b_iter.Name) == 0) {
+	for (const auto& m: r_members) {
+		if (strlen(m.member_name) != 0) {
+
+			for (const auto& b: bots_list) {
+				if (strcmp(m.member_name, b.Name) == 0) {
 					std::string buffer = "^spawn ";
-					buffer.append(iter.member_name);
+					buffer.append(m.member_name);
 					bot_command_real_dispatch(this, buffer.c_str());
-					Bot* b = entity_list.GetBotByBotName(iter.member_name);
-					if (b) {
-						b->SetRaidGrouped(true);
-						b->p_raid_instance = raid;
+					auto bot = entity_list.GetBotByBotName(m.member_name);
+
+					if (bot) {
+						bot->SetRaidGrouped(true);
+						bot->p_raid_instance = raid;
 					}
 				}
 			}
