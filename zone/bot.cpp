@@ -2740,8 +2740,8 @@ bool Bot::IsValidTarget(Client* bot_owner, Client* leash_owner, float lo_distanc
 	}
 
 	bool valid_target_state = HOLDING || !tar->IsNPC() || tar->IsMezzed() || lo_distance > leash_distance || tar_distance > leash_distance;
-	bool valid_target = !GetAttackingFlag() && !CheckLosFN(tar) && !leash_owner->CheckLosFN(tar);
-	bool valid_bo_target= !GetAttackingFlag() && NOT_PULLING_BOT && !leash_owner->AutoAttackEnabled() && !tar->GetHateAmount(this) && !tar->GetHateAmount(leash_owner);
+	bool valid_target 		= !GetAttackingFlag() && !CheckLosFN(tar) && !leash_owner->CheckLosFN(tar);
+	bool valid_bo_target	= !GetAttackingFlag() && NOT_PULLING_BOT && !leash_owner->AutoAttackEnabled() && !tar->GetHateAmount(this) && !tar->GetHateAmount(leash_owner);
 
 	if (valid_target_state || valid_target || !IsAttackAllowed(tar) || (bo_alt_combat && valid_bo_target)) {
 		// Normally, we wouldn't want to do this without class checks..but, too many issues can arise if we let enchanter animation pets run rampant
