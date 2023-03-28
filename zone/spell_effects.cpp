@@ -207,11 +207,11 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 		}
 	}
 
-	if(IsVirusSpell(spell_id)) {
-
+	if (IsVirusSpell(spell_id) && buffslot > -1) {
 		if (!viral_timer.Enabled()) {
 			viral_timer.Start(1000);
 		}
+
 		buffs[buffslot].virus_spread_time = zone->random.Int(GetViralMinSpreadTime(spell_id), GetViralMaxSpreadTime(spell_id));
 	}
 
@@ -819,20 +819,20 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 
 				// define spells with fixed duration
 				// charm spells with -1 in field 209 are all of fixed duration, so lets use that instead of spell_ids
-				if(spells[spell_id].no_resist)
+				if (spells[spell_id].no_resist) {
 					bBreak = true;
-
-				if (!bBreak)
-				{
-					int resistMod = static_cast<int>(partial) + (GetCHA()/25);
-					resistMod = resistMod > 100 ? 100 : resistMod;
-					buffs[buffslot].ticsremaining = resistMod * buffs[buffslot].ticsremaining / 100;
 				}
 
-				if (IsClient() || IsBot())
-				{
-					if(buffs[buffslot].ticsremaining > RuleI(Character, MaxCharmDurationForPlayerCharacter))
+				if (buffslot > -1) {
+					if (!bBreak) {
+						int resistMod = static_cast<int>(partial) + (GetCHA() / 25);
+						resistMod = resistMod > 100 ? 100 : resistMod;
+						buffs[buffslot].ticsremaining = resistMod * buffs[buffslot].ticsremaining / 100;
+					}
+
+					if (IsOfClientBot() && buffs[buffslot].ticsremaining > RuleI(Character, MaxCharmDurationForPlayerCharacter)) {
 						buffs[buffslot].ticsremaining = RuleI(Character, MaxCharmDurationForPlayerCharacter);
+					}
 				}
 
 				break;
@@ -887,8 +887,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Fear: %+i", effect_value);
 #endif
-				if (IsClient() || IsBot())
-				{
+				if (IsOfClientBot() && buffslot > -1) {
 					if (buffs[buffslot].ticsremaining > RuleI(Character, MaxFearDurationForPlayerCharacter)) {
 						buffs[buffslot].ticsremaining = RuleI(Character, MaxFearDurationForPlayerCharacter);
 					}
@@ -902,13 +901,11 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					}
 
 					CalculateNewFearpoint();
-					if (currently_fleeing)
-					{
+					if (currently_fleeing) {
 						break;
 					}
 				}
-				else
-				{
+				else if (buffslot > -1) {
 					Stun(buffs[buffslot].ticsremaining * 6000 - (6000 - tic_timer.GetRemainingTime()));
 				}
 				break;
@@ -1307,8 +1304,9 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Invulnerability");
 #endif
-				if(spell_id==4789) // Touch of the Divine - Divine Save
-					buffs[buffslot].ticsremaining = spells[spell_id].buff_duration; // Prevent focus/aa buff extension
+				if (spell_id == 4789 && buffslot > -1) { // Touch of the Divine - Divine Save
+					buffs[buffslot].ticsremaining = spells[spell_id].buff_duration;
+				} // Prevent focus/aa buff extension
 
 				SetInvul(true);
 				break;
@@ -1355,7 +1353,9 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Melee Absorb Rune: %+i", effect_value);
 #endif
-				buffs[buffslot].melee_rune = effect_value;
+				if (buffslot > -1) {
+					buffs[buffslot].melee_rune = effect_value;
+				}
 				break;
 			}
 
@@ -1364,47 +1364,60 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Spell Absorb Rune: %+i", effect_value);
 #endif
-				if(effect_value > 0)
+				if (effect_value > 0 && buffslot > -1) {
 					buffs[buffslot].magic_rune = effect_value;
+				}
 
 				break;
 			}
 
 			case SE_MitigateMeleeDamage:
 			{
-				buffs[buffslot].melee_rune = spells[spell_id].max_value[i];
+				if (buffslot > -1) {
+					buffs[buffslot].melee_rune = spells[spell_id].max_value[i];
+				}
 				break;
 			}
 
 			case SE_MeleeThresholdGuard:
 			{
-				buffs[buffslot].melee_rune = spells[spell_id].max_value[i];
+				if (buffslot > -1) {
+					buffs[buffslot].melee_rune = spells[spell_id].max_value[i];
+				}
 				break;
 			}
 
 			case SE_SpellThresholdGuard:
 			{
-				buffs[buffslot].magic_rune = spells[spell_id].max_value[i];
+				if (buffslot > -1) {
+					buffs[buffslot].magic_rune = spells[spell_id].max_value[i];
+				}
 				break;
 			}
 
 			case SE_MitigateSpellDamage:
 			{
-				buffs[buffslot].magic_rune = spells[spell_id].max_value[i];
+				if (buffslot > -1) {
+					buffs[buffslot].magic_rune = spells[spell_id].max_value[i];
+				}
 				break;
 			}
 
 			case SE_MitigateDotDamage:
 			{
-				buffs[buffslot].dot_rune = spells[spell_id].max_value[i];
+				if (buffslot > -1) {
+					buffs[buffslot].dot_rune = spells[spell_id].max_value[i];
+				}
 				break;
 			}
 
 			case SE_DistanceRemoval:
 			{
-				buffs[buffslot].caston_x = int(GetX());
-				buffs[buffslot].caston_y = int(GetY());
-				buffs[buffslot].caston_z = int(GetZ());
+				if (buffslot > -1) {
+					buffs[buffslot].caston_x = int(GetX());
+					buffs[buffslot].caston_y = int(GetY());
+					buffs[buffslot].caston_z = int(GetZ());
+				}
 				break;
 			}
 
@@ -1434,7 +1447,9 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 							caster->spellbonuses.UnfailingDivinity;
 				}
 
-				buffs[buffslot].ExtraDIChance = mod;
+				if (buffslot > -1) {
+					buffs[buffslot].ExtraDIChance = mod;
+				}
   				break;
  			}
 
@@ -1694,7 +1709,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #endif
 				rooted = true;
 
-				if (caster){
+				if (caster && buffslot > -1) {
 					buffs[buffslot].RootBreakChance = caster->aabonuses.RootBreakChance +
 													caster->itembonuses.RootBreakChance +
 													caster->spellbonuses.RootBreakChance;
