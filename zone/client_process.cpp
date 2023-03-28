@@ -689,8 +689,6 @@ bool Client::Process() {
 
 /* Just a set of actions preformed all over in Client::Process */
 void Client::OnDisconnect(bool hard_disconnect) {
-	auto has_parsed = false;
-
 	if (hard_disconnect) {
 		LeaveGroup();
 
@@ -704,14 +702,6 @@ void Client::OnDisconnect(bool hard_disconnect) {
 		if (r) {
 			r->MemberZoned(this);
 		}
-
-		RecordPlayerEventLog(PlayerEvent::WENT_OFFLINE, PlayerEvent::EmptyEvent{});
-
-		if (parse->PlayerHasQuestSub(EVENT_DISCONNECT)) {
-			parse->EventPlayer(EVENT_DISCONNECT, this, "", 0);
-		}
-
-		has_parsed = true;
 
 		/* QS: PlayerLogConnectDisconnect */
 		if (RuleB(QueryServ, PlayerLogConnectDisconnect)) {
@@ -748,12 +738,10 @@ void Client::OnDisconnect(bool hard_disconnect) {
 	auto outapp = new EQApplicationPacket(OP_LogoutReply);
 	FastQueuePacket(&outapp);
 
-	if (!has_parsed) {
-		RecordPlayerEventLog(PlayerEvent::WENT_OFFLINE, PlayerEvent::EmptyEvent{});
+	RecordPlayerEventLog(PlayerEvent::WENT_OFFLINE, PlayerEvent::EmptyEvent{});
 
-		if (parse->PlayerHasQuestSub(EVENT_DISCONNECT)) {
-			parse->EventPlayer(EVENT_DISCONNECT, this, "", 0);
-		}
+	if (parse->PlayerHasQuestSub(EVENT_DISCONNECT)) {
+		parse->EventPlayer(EVENT_DISCONNECT, this, "", 0);
 	}
 
 	Disconnect();
