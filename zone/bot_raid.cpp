@@ -300,7 +300,10 @@ void Bot::ProcessBotGroupAdd(Group* group, Raid* raid, Client* client, bool new_
 
 void Client::SpawnRaidBotsOnConnect(Raid* raid) {
 	std::list<BotsAvailableList> bots_list;
-	database.botdb.LoadBotsList(CharacterID(), bots_list);
+	if (!database.botdb.LoadBotsList(CharacterID(), bots_list) || bots_list.empty()) {
+		return;
+	}
+
 	std::vector<RaidMember> r_members = raid->GetMembers();
 	for (const auto& m: r_members) {
 		if (strlen(m.member_name) != 0) {
