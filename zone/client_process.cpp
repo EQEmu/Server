@@ -689,18 +689,21 @@ bool Client::Process() {
 
 /* Just a set of actions preformed all over in Client::Process */
 void Client::OnDisconnect(bool hard_disconnect) {
-	if(hard_disconnect)
-	{
+	auto has_parsed = false;
+
+	if (hard_disconnect) {
 		LeaveGroup();
-		if (GetMerc())
-		{
+
+		if (GetMerc()) {
 			GetMerc()->Save();
 			GetMerc()->Depop();
 		}
-		Raid *MyRaid = entity_list.GetRaidByClient(this);
 
-		if (MyRaid)
-			MyRaid->MemberZoned(this);
+		auto* r = entity_list.GetRaidByClient(this);
+
+		if (r) {
+			r->MemberZoned(this);
+		}
 
 		RecordPlayerEventLog(PlayerEvent::WENT_OFFLINE, PlayerEvent::EmptyEvent{});
 
@@ -708,41 +711,50 @@ void Client::OnDisconnect(bool hard_disconnect) {
 			parse->EventPlayer(EVENT_DISCONNECT, this, "", 0);
 		}
 
+		has_parsed = true;
+
 		/* QS: PlayerLogConnectDisconnect */
-		if (RuleB(QueryServ, PlayerLogConnectDisconnect)){
+		if (RuleB(QueryServ, PlayerLogConnectDisconnect)) {
 			std::string event_desc = StringFormat("Disconnect :: in zoneid:%i instid:%i", GetZoneID(), GetInstanceID());
 			QServ->PlayerLogEvent(Player_Log_Connect_State, CharacterID(), event_desc);
 		}
 	}
 
-	if (!bZoning)
-	{
+	if (!bZoning) {
 		SetDynamicZoneMemberStatus(DynamicZoneMemberStatus::Offline);
 	}
 
 	RemoveAllAuras();
 
-	Mob *Other = trade->With();
-	if(Other)
-	{
+	auto* o = trade->With();
+	if (o) {
 		LogTrading("Client disconnected during a trade. Returning their items");
 		FinishTrade(this);
 
-		if(Other->IsClient())
-			Other->CastToClient()->FinishTrade(Other);
+		if (o->IsClient()) {
+			o->CastToClient()->FinishTrade(o);
+		}
 
 		/* Reset both sides of the trade */
 		trade->Reset();
-		Other->trade->Reset();
+		o->trade->Reset();
 	}
 
 	database.SetFirstLogon(CharacterID(), 0); //We change firstlogon status regardless of if a player logs out to zone or not, because we only want to trigger it on their first login from world.
 
-	/* Remove ourself from all proximities */
+	/* Remove from all proximities */
 	ClearAllProximities();
 
 	auto outapp = new EQApplicationPacket(OP_LogoutReply);
 	FastQueuePacket(&outapp);
+
+	if (!has_parsed) {
+		RecordPlayerEventLog(PlayerEvent::WENT_OFFLINE, PlayerEvent::EmptyEvent{});
+
+		if (parse->PlayerHasQuestSub(EVENT_DISCONNECT)) {
+			parse->EventPlayer(EVENT_DISCONNECT, this, "", 0);
+		}
+	}
 
 	Disconnect();
 }
