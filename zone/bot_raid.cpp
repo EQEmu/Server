@@ -17,6 +17,8 @@
 */
 
 #include "bot.h"
+#include "bot_command.h"
+#include "client.h"
 #include "object.h"
 #include "raids.h"
 #include "doors.h"
@@ -296,4 +298,25 @@ void Bot::ProcessBotGroupAdd(Group* group, Raid* raid, Client* client, bool new_
 	raid->GroupUpdate(raid_free_group_id);
 }
 
+void Client::SpawnRaidBotsOnConnect(Raid* raid) {
+	std::list<BotsAvailableList> bots_list;
+	database.botdb.LoadBotsList(CharacterID(), bots_list);
+	std::vector<RaidMember> r_members = raid->GetMembers();
+	for (const RaidMember& iter: r_members) {
+		if (strlen(iter.member_name) != 0) {
+			for (const BotsAvailableList& b_iter: bots_list) {
+				if (strcmp(iter.member_name, b_iter.Name) == 0) {
+					std::string buffer = "^spawn ";
+					buffer.append(iter.member_name);
+					bot_command_real_dispatch(this, buffer.c_str());
+					Bot* b = entity_list.GetBotByBotName(iter.member_name);
+					if (b) {
+						b->SetRaidGrouped(true);
+						b->p_raid_instance = raid;
+					}
+				}
+			}
+		}
+	}
+}
 

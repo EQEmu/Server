@@ -607,28 +607,8 @@ void Client::CompleteConnect()
 		if (raid) {
 			SetRaidGrouped(true);
 			raid->LearnMembers();
-			std::list<BotsAvailableList> bots_list;
-			database.botdb.LoadBotsList(this->CharacterID(), bots_list);
-			std::vector<RaidMember> r_members = raid->GetMembers();
-			for (const RaidMember& iter : r_members) {
-				if (iter.member_name) {
-					for (const BotsAvailableList& b_iter : bots_list)
-					{
-						if (strcmp(iter.member_name, b_iter.Name) == 0)
-						{
-							char buffer[71] = "^spawn ";
-							strcat(buffer, iter.member_name);
-							bot_command_real_dispatch(this, buffer);
-							Bot* b = entity_list.GetBotByBotName(iter.member_name);
-							if (b)
-							{
-								b->SetRaidGrouped(true);
-								b->p_raid_instance = raid;
-								//b->SetFollowID(this->GetID());
-							}
-						}
-					}
-				}
+			if (RuleB(Bots, Enabled)) {
+				SpawnRaidBotsOnConnect(raid);
 			}
 			raid->VerifyRaid();
 			raid->GetRaidDetails();
