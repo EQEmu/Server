@@ -2944,11 +2944,11 @@ void Bot::SetBotTarget(Client* bot_owner, Raid* raid, Group* bot_group, Client* 
 
 	if (bo_alt_combat && m_alt_combat_hate_timer.Check(false)) {
 		// Empty hate list - let's find some aggro
-		if (!IsEngaged() && NOT_HOLDING && NOT_PASSIVE && (!bot_owner->GetBotPulling() || NOT_PULLING_BOT)) {
+		if (bot_owner->IsEngaged() && !IsEngaged() && NOT_HOLDING && NOT_PASSIVE && (!bot_owner->GetBotPulling() || NOT_PULLING_BOT)) {
 			SetLeashOwnerTarget(leash_owner, bot_owner, lo_distance, leash_distance);
 			}
 
-		else if (bot_group) {
+		else if (!IsEngaged() && bot_group) {
 			for (const auto& bg_member: bot_group->members) {
 				if (!bg_member) {
 					continue;
@@ -2961,7 +2961,7 @@ void Bot::SetBotTarget(Client* bot_owner, Raid* raid, Group* bot_group, Client* 
 				SetBotGroupTarget(bot_owner, leash_owner, lo_distance, leash_distance, bg_member, bgm_target);
 			}
 		}
-		else if (raid) {
+		else if (!IsEngaged() && raid) {
 			for (const auto& raid_member : raid->members) {
 				if (!raid_member.member) {
 					continue;
