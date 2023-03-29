@@ -188,6 +188,10 @@ void Bot::ProcessRaidInvite(Mob* invitee, Client* invitor, bool group_invite) {
 
 	Raid* raid = entity_list.GetRaidByClient(invitor);
 
+	if (raid->RaidCount() >= MAX_RAID_MEMBERS) {
+		invitor->MessageString(Chat::Red, RAID_IS_FULL);
+		return;
+	}
 	Bot::CreateBotRaid(invitee, invitor, group_invite, raid);
 }
 
