@@ -2033,6 +2033,7 @@ public:
 	void SetBotSpawnLimit(int new_spawn_limit, uint8 class_id = NO_CLASS);
 
 	void CampAllBots(uint8 class_id = NO_CLASS);
+	void SpawnRaidBotsOnConnect(Raid* raid);
 
 private:
 	bool bot_owner_options[_booCount];
@@ -2042,7 +2043,6 @@ private:
 	bool CanTradeFVNoDropItem();
 	void SendMobPositions();
 	void PlayerTradeEventLog(Trade *t, Trade *t2);
-
 };
 
 #endif
