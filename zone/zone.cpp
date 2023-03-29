@@ -1059,7 +1059,7 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 	did_adventure_actions = false;
 	database.QGlobalPurge();
 
-	if(zoneid == RuleI(World, GuildBankZoneID))
+	if(zoneid == Zones::GUILDHALL)
 		GuildBanks = new GuildBankManager;
 	else
 		GuildBanks = nullptr;
