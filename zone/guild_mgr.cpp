@@ -20,11 +20,9 @@
 #include "../common/strings.h"
 
 #include "client.h"
-#include "entity.h"
 #include "guild_mgr.h"
 #include "worldserver.h"
 #include "zonedb.h"
-#include "../common/zone_store.h"
 
 ZoneGuildManager guild_mgr;
 GuildBankManager *GuildBanks;

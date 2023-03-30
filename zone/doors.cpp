@@ -30,10 +30,8 @@
 #include "string_ids.h"
 #include "worldserver.h"
 #include "zonedb.h"
-#include "../common/zone_store.h"
 #include "../common/repositories/criteria/content_filter_criteria.h"
 
-#include <iostream>
 #include <string.h>
 
 #define OPEN_DOOR 0x02

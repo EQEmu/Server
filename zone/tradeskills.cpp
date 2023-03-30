@@ -19,7 +19,6 @@
 #include "../common/global_define.h"
 #include "../common/events/player_event_logs.h"
 
-#include <stdlib.h>
 #include <list>
 
 #ifndef WIN32
@@ -27,7 +26,6 @@
 #endif
 
 #include "../common/rulesys.h"
-#include "../common/strings.h"
 
 #include "queryserv.h"
 #include "quest_parser_collection.h"
@@ -36,7 +34,6 @@
 #include "zonedb.h"
 #include "worldserver.h"
 #include "../common/repositories/char_recipe_list_repository.h"
-#include "../common/zone_store.h"
 #include "../common/repositories/tradeskill_recipe_repository.h"
 #include "../common/repositories/tradeskill_recipe_entries_repository.h"
 

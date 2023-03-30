@@ -17,7 +17,6 @@
 #include "lua_packet.h"
 #include "dialogue_window.h"
 #include "titles.h"
-#include "../common/expedition_lockout_timer.h"
 
 struct InventoryWhere { };
 

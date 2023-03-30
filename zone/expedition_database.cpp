@@ -21,9 +21,6 @@
 #include "expedition_database.h"
 #include "expedition.h"
 #include "zonedb.h"
-#include "../common/database.h"
-#include "../common/expedition_lockout_timer.h"
-#include "../common/strings.h"
 #include <fmt/core.h>
 
 uint32_t ExpeditionDatabase::InsertExpedition(uint32_t dz_id)

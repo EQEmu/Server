@@ -2,13 +2,8 @@
 #include "../common/shared_tasks.h"
 #include "../common/servertalk.h"
 #include "client.h"
-#include "../common/repositories/character_data_repository.h"
-#include "../common/repositories/shared_task_members_repository.h"
 
-#include <cstdint>
 #include <memory>
-#include <string>
-#include <unordered_map>
 #include <vector>
 
 void SharedTaskZoneMessaging::HandleWorldMessage(ServerPacket *pack)

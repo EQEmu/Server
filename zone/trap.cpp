@@ -18,7 +18,6 @@
 
 #include "../common/spdat.h"
 #include "../common/strings.h"
-#include "../common/types.h"
 
 #include "client.h"
 #include "entity.h"

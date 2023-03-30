@@ -22,8 +22,6 @@
 #include "../common/rulesys.h"
 #include "../common/spdat.h"
 
-#include "../common/data_verification.h"
-
 #include "client.h"
 #include "mob.h"
 

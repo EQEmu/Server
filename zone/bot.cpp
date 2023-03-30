@@ -22,8 +22,6 @@
 #include "doors.h"
 #include "quest_parser_collection.h"
 #include "lua_parser.h"
-#include "../common/strings.h"
-#include "../common/say_link.h"
 #include "../common/repositories/bot_spell_settings_repository.h"
 #include "../common/data_verification.h"
 

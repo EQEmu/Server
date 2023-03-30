@@ -25,9 +25,6 @@
 #include "string_ids.h"
 #include "worldserver.h"
 #include "zonedb.h"
-#include "../common/eqemu_logsys.h"
-#include "../common/expedition_lockout_timer.h"
-#include "../common/repositories/dynamic_zone_members_repository.h"
 #include "../common/repositories/expedition_lockouts_repository.h"
 
 extern WorldServer worldserver;

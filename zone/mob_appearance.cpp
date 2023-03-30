@@ -21,14 +21,12 @@
 #include "../common/data_verification.h"
 #include "../common/eqemu_logsys.h"
 #include "../common/item_data.h"
-#include "../common/misc_functions.h"
 #include "../common/spdat.h"
 #include "../common/strings.h"
 
 #include "mob.h"
 #include "quest_parser_collection.h"
 #include "zonedb.h"
-#include "../common/zone_store.h"
 
 #include "bot.h"
 

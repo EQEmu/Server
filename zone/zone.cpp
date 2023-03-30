@@ -18,7 +18,6 @@
 
 #include <float.h>
 #include <iostream>
-#include <math.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -43,8 +42,6 @@
 #include "npc.h"
 #include "object.h"
 #include "pathfinder_null.h"
-#include "pathfinder_nav_mesh.h"
-#include "pathfinder_waypoint.h"
 #include "petitions.h"
 #include "quest_parser_collection.h"
 #include "spawn2.h"
@@ -58,15 +55,11 @@
 #include "../common/data_verification.h"
 #include "zone_reload.h"
 #include "../common/repositories/criteria/content_filter_criteria.h"
-#include "../common/repositories/content_flags_repository.h"
 #include "../common/repositories/merchantlist_repository.h"
 #include "../common/repositories/rule_sets_repository.h"
-#include "../common/repositories/zone_points_repository.h"
 #include "../common/serverinfo.h"
 
 #include <time.h>
-#include <ctime>
-#include <iostream>
 
 #ifdef _WINDOWS
 #define snprintf	_snprintf

@@ -9,11 +9,8 @@
 #include "quest_interface.h"
 
 #include "masterentity.h"
-#include "../common/seperator.h"
-#include "../common/misc_functions.h"
 #include "lua_item.h"
 #include "lua_iteminst.h"
-#include "lua_entity.h"
 #include "lua_mob.h"
 #include "lua_client.h"
 #include "lua_npc.h"

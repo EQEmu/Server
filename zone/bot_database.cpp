@@ -26,7 +26,6 @@
 #include "../common/repositories/bot_inventories_repository.h"
 
 #include "zonedb.h"
-#include "../common/zone_store.h"
 #include "bot.h"
 #include "client.h"
 

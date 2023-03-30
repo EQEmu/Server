@@ -1,7 +1,6 @@
 #include <regex>
 
 #include "dialogue_window.h"
-#include "../common/strings.h"
 
 void DialogueWindow::Render(Client *c, std::string markdown)
 {

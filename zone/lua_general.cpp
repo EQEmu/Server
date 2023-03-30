@@ -9,10 +9,8 @@
 
 #include "../common/content/world_content_service.h"
 #include "../common/timer.h"
-#include "../common/eqemu_logsys.h"
 #include "../common/classes.h"
 #include "../common/rulesys.h"
-#include "lua_parser.h"
 #include "lua_item.h"
 #include "lua_iteminst.h"
 #include "lua_client.h"

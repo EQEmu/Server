@@ -1,5 +1,4 @@
 #include "zone_event_scheduler.h"
-#include "../common/rulesys.h"
 #include <ctime>
 
 void ZoneEventScheduler::Process(Zone *zone, WorldContentService *content_service)

@@ -16,12 +16,9 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/global_define.h"
-#include <stdlib.h>
 #include "perlpacket.h"
 #include "client.h"
-#include "entity.h"
 #include "../common/opcodemgr.h"
-#include "../common/packet_dump.h"
 #include "../common/misc_functions.h"
 
 PerlPacket::PerlPacket(const char *opcode, uint32 length) {
