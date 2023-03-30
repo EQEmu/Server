@@ -1,3 +1,27 @@
+## [22.8.2] - 03/30/2023 
+
+### Code
+
+* "equipped" not "equiped", "dual" not "duel". ([#3149](https://github.com/EQEmu/Server/pull/3149)) @Kinglykrab 2023-03-27
+
+### Crash
+
+* Add Checks for out of bounds & dereferencing nullptrs ([#3151](https://github.com/EQEmu/Server/pull/3151)) @Aeadoin 2023-03-28
+
+### Fixes
+
+* Check Rule "Bots Enabled" to prevent bot database calls on connect ([#3154](https://github.com/EQEmu/Server/pull/3154)) @Aeadoin 2023-03-29
+* Correct logic checks for Bot rule AllowOwnerOptionAltCombat ([#3158](https://github.com/EQEmu/Server/pull/3158)) @Aeadoin 2023-03-30
+* Fix an issue with EVENT_DISCONNECT not firing on regular /camp ([#3153](https://github.com/EQEmu/Server/pull/3153)) @Kinglykrab 2023-03-28
+* Fix bot_raid_members.sql for MYSQL. ([#3155](https://github.com/EQEmu/Server/pull/3155)) @Aeadoin 2023-03-28
+* Fix for OOZ Group updates when removing/inviting Bots ([#3159](https://github.com/EQEmu/Server/pull/3159)) @Aeadoin 2023-03-30
+* Fix issues with Lua tables not starting at index 1 ([#3160](https://github.com/EQEmu/Server/pull/3160)) @Kinglykrab 2023-03-30
+* Fix strcpy-param-overlap ([#3157](https://github.com/EQEmu/Server/pull/3157)) @Aeadoin 2023-03-29
+
+### Rules
+
+* Remove Guild Bank Zone ID Rule ([#3156](https://github.com/EQEmu/Server/pull/3156)) @Kinglykrab 2023-03-29
+
 ## [22.8.1] - 03/27/2023 
 
 ### Fixes
