@@ -2709,7 +2709,7 @@ luabind::object Lua_Mob::GetEntityVariables(lua_State* L) {
 	if (d_) {
 		auto self = reinterpret_cast<NativeType*>(d_);
 		auto l = self->GetEntityVariables();
-		auto i = 0;
+		auto i = 1;
 		for (const auto& v : l) {
 			t[i] = v;
 			i++;
