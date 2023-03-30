@@ -102,7 +102,7 @@ void Embperl::DoInit() {
 	try {
 		init_eval_file();
 	}
-	catch(std::string e)
+	catch(std::string& e)
 	{
 		//remember... lasterr() is no good if we crap out here, in construction
 		LogQuests("Perl Error [{}]", e);
@@ -142,7 +142,7 @@ void Embperl::DoInit() {
 		perl_command = "main::eval_file('plugin', '" + Config->PluginPlFile + "');";
 		eval_pv(perl_command.c_str(), FALSE);
 	}
-	catch(std::string e)
+	catch(std::string& e)
 	{
 		LogQuests("Warning [{}]: [{}]", Config->PluginPlFile, e);
 	}
@@ -160,7 +160,7 @@ void Embperl::DoInit() {
 			"}";
 		eval_pv(perl_command.c_str(),FALSE);
 	}
-	catch(std::string e)
+	catch(std::string& e)
 	{
 		LogQuests("Warning [{}]", e);
 	}

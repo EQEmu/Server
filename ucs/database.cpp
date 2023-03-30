@@ -142,7 +142,7 @@ int UCSDatabase::FindAccount(const char *characterName, Client *client)
 	return accountID;
 }
 
-bool UCSDatabase::VerifyMailKey(std::string characterName, int IPAddress, std::string MailKey)
+bool UCSDatabase::VerifyMailKey(const std::string& characterName, int IPAddress, const std::string& MailKey)
 {
 
 	std::string query = StringFormat(
