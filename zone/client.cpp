@@ -4162,7 +4162,7 @@ bool Client::GroupFollow(Client* inviter) {
 			if (iraid == raid) {
 				//both in same raid
 				uint32 ngid = raid->GetGroup(inviter->GetName());
-				if (raid->GroupCount(ngid) < 6) {
+				if (raid->GroupCount(ngid) < MAX_GROUP_MEMBERS) {
 					raid->MoveMember(GetName(), ngid);
 					raid->SendGroupDisband(this);
 					raid->GroupUpdate(ngid);
@@ -4183,7 +4183,7 @@ bool Client::GroupFollow(Client* inviter) {
 				if (!GetXTargetAutoMgr()->empty())
 					SetDirtyAutoHaters();
 
-				if (raid->GroupCount(groupToUse) < 6)
+				if (raid->GroupCount(groupToUse) < MAX_GROUP_MEMBERS)
 				{
 					raid->SendRaidCreate(this);
 					raid->SendMakeLeaderPacketTo(raid->leadername, this);
