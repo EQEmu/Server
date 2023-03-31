@@ -2027,13 +2027,12 @@ ZonePoint* Zone::GetClosestZonePoint(const glm::vec3& location, uint32 to, Clien
 
 	// if we have a water map and it says we're in a zoneline, lets assume it's just a really big zone line
 	// this shouldn't open up any exploits since those situations are detected later on
-	if ((zone->HasWaterMap() && !zone->watermap->InZoneLine(glm::vec3(client->GetPosition()))) || (!zone->HasWaterMap() && closest_dist > 400.0f && closest_dist < max_distance2))
+	if ((client && zone->HasWaterMap() && !zone->watermap->InZoneLine(glm::vec3(client->GetPosition()))) || (!zone->HasWaterMap() && closest_dist > 400.0f && closest_dist < max_distance2))
 	{
-		if (client) {
-			if (!client->cheat_manager.GetExemptStatus(Port)) {
-				client->cheat_manager.CheatDetected(MQZoneUnknownDest, location);
-			}
+		if (!client->cheat_manager.GetExemptStatus(Port)) {
+			client->cheat_manager.CheatDetected(MQZoneUnknownDest, location);
 		}
+
 		LogInfo("WARNING: Closest zone point for zone id [{}] is [{}], you might need to update your zone_points table if you dont arrive at the right spot", to, closest_dist);
 		LogInfo("<Real Zone Points>. [{}]", to_string(location).c_str());
 	}

@@ -445,7 +445,7 @@ Pet::Pet(NPCType *type_data, Mob *owner, PetType type, uint16 spell_id, int16 po
 	GiveNPCTypeData(type_data);
 	typeofpet = type;
 	petpower = power;
-	SetOwnerID(owner->GetID());
+	SetOwnerID(owner ? owner->GetID() : 0);
 	SetPetSpellID(spell_id);
 
 	// All pets start at false on newer clients. The client

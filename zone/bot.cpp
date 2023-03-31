@@ -4669,7 +4669,9 @@ void Bot::Damage(Mob *from, int64 damage, uint16 spell_id, EQ::skills::SkillType
 		int64 healed = GetActSpellHealing(spell_id, damage);
 		LogCombatDetail("Applying lifetap heal of [{}] to [{}]", healed, GetCleanName());
 		HealDamage(healed);
-		entity_list.FilteredMessageClose(this, true, RuleI(Range, SpellMessages), Chat::Emote, FilterSocials, "%s beams a smile at %s", GetCleanName(), from->GetCleanName() );
+		if (from) {
+			entity_list.FilteredMessageClose(this, true, RuleI(Range, SpellMessages), Chat::Emote, FilterSocials, "%s beams a smile at %s", GetCleanName(), from->GetCleanName());
+		}
 	}
 
 	CommonDamage(from, damage, spell_id, attack_skill, avoidable, buffslot, iBuffTic, special);
@@ -8752,22 +8754,25 @@ std::vector<Mob*> Bot::GetApplySpellList(
 
 	if (apply_type == ApplySpellType::Raid && IsRaidGrouped()) {
 		auto* r = GetRaid();
-		auto group_id = r->GetGroup(GetCleanName());
-		if (r && EQ::ValueWithin(group_id, 0, (MAX_RAID_GROUPS - 1))) {
-			for (const auto& m : r->members) {
-				if (m.is_bot) {
-					continue;
-				}
-				if (m.member && m.member->IsClient() && (!is_raid_group_only || r->GetGroup(m.member) == group_id)) {
-					l.push_back(m.member);
-
-					if (allow_pets && m.member->HasPet()) {
-						l.push_back(m.member->GetPet());
+		if (r) {
+			auto group_id = r->GetGroup(GetCleanName());
+			if (EQ::ValueWithin(group_id, 0, (MAX_RAID_GROUPS - 1))) {
+				for (const auto& m: r->members) {
+					if (m.is_bot) {
+						continue;
 					}
+					if (m.member && m.member->IsClient() &&
+						(!is_raid_group_only || r->GetGroup(m.member) == group_id)) {
+						l.push_back(m.member);
 
-					const auto& sbl = entity_list.GetBotListByCharacterID(m.member->CharacterID());
-					for (const auto& b : sbl) {
-						l.push_back(b);
+						if (allow_pets && m.member->HasPet()) {
+							l.push_back(m.member->GetPet());
+						}
+
+						const auto& sbl = entity_list.GetBotListByCharacterID(m.member->CharacterID());
+						for (const auto& b: sbl) {
+							l.push_back(b);
+						}
 					}
 				}
 			}

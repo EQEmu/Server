@@ -717,12 +717,15 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 
 	EQ::ItemInstance* inst = database.CreateItem(item, charges);
 	auto timestamps = database.GetItemRecastTimestamps(CharacterID());
-	const auto* d = inst->GetItem();
-	if (d->RecastDelay) {
-		if (d->RecastType != RECAST_TYPE_UNLINKED_ITEM) {
-			inst->SetRecastTimestamp(timestamps.count(d->RecastType) ? timestamps.at(d->RecastType) : 0);
-		} else {
-			inst->SetRecastTimestamp(timestamps.count(d->ID) ? timestamps.at(d->ID) : 0);
+	if (inst) {
+		const auto* d = inst->GetItem();
+		if (d->RecastDelay) {
+			if (d->RecastType != RECAST_TYPE_UNLINKED_ITEM) {
+				inst->SetRecastTimestamp(timestamps.count(d->RecastType) ? timestamps.at(d->RecastType) : 0);
+			}
+			else {
+				inst->SetRecastTimestamp(timestamps.count(d->ID) ? timestamps.at(d->ID) : 0);
+			}
 		}
 	}
 
@@ -2043,8 +2046,8 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 		}
 		if ((srcbagid && srcbag->GetItem()->BagType == EQ::item::BagTypeTradersSatchel) ||
 		    (dstbagid && dstbag->GetItem()->BagType == EQ::item::BagTypeTradersSatchel) ||
-		    (srcitemid && src_inst->GetItem()->BagType == EQ::item::BagTypeTradersSatchel) ||
-		    (dstitemid && dst_inst->GetItem()->BagType == EQ::item::BagTypeTradersSatchel)) {
+		    (srcitemid && src_inst && src_inst->GetItem()->BagType == EQ::item::BagTypeTradersSatchel) ||
+		    (dstitemid && dst_inst && dst_inst->GetItem()->BagType == EQ::item::BagTypeTradersSatchel)) {
 			Trader_EndTrader();
 			Message(Chat::Red,"You cannot move your Trader Satchels, or items inside them, while Trading.");
 		}

@@ -1145,6 +1145,7 @@ void Client::OPMemorizeSpell(const EQApplicationPacket* app)
 				const auto* item = inst->GetItem();
 
 				if (
+					item &&
 					RuleB(Character, RestrictSpellScribing) &&
 					!item->IsEquipable(GetRace(), GetClass())
 				) {
