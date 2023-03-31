@@ -645,8 +645,6 @@ public:
 	void SetBotEnforceSpellSetting(bool enforcespellsettings, bool save = false);
 	bool GetBotEnforceSpellSetting() const { return m_enforce_spell_settings; }
 
-	static void SpawnBotGroupByName(Client* c, const std::string& botgroup_name, uint32 leader_id);
-
 	std::string CreateSayLink(Client* botOwner, const char* message, const char* name);
 
 	// Class Destructors
