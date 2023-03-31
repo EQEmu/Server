@@ -631,7 +631,7 @@ uint32 Raid::GetPlayerIndex(Client *c)
 
 Client *Raid::GetClientByIndex(uint16 index)
 {
-	if (index > MAX_RAID_MEMBERS) {
+	if (index >= MAX_RAID_MEMBERS) {
 		return nullptr;
 	}
 

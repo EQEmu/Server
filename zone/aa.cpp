@@ -1963,7 +1963,7 @@ void Client::TogglePassiveAlternativeAdvancement(const AA::Rank &rank, uint32 ab
 		AA::Rank *rank_next = zone->GetAlternateAdvancementRank(rank.next_id);
 
 		//Add checks for any special cases for toggle.
-		if (IsEffectinAlternateAdvancementRankEffects(*rank_next, SE_Weapon_Stance)) {
+		if (rank_next && IsEffectinAlternateAdvancementRankEffects(*rank_next, SE_Weapon_Stance)) {
 			weaponstance.aabonus_enabled = true;
 			ApplyWeaponsStance();
 		}
@@ -2003,7 +2003,7 @@ bool Client::UseTogglePassiveHotkey(const AA::Rank &rank) {
 	else if (rank.prev_id != -1) {//Check when effect is Enabled.
 		AA::Rank *rank_prev = zone->GetAlternateAdvancementRank(rank.prev_id);
 
-		if (IsEffectInSpell(rank_prev->spell, SE_Buy_AA_Rank)) {
+		if (rank_prev && IsEffectInSpell(rank_prev->spell, SE_Buy_AA_Rank)) {
 			return true;
 		}
 	}
