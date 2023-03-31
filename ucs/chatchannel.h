@@ -76,7 +76,7 @@ class ChatChannelList {
 
 public:
 	ChatChannel* CreateChannel(const std::string& name, const std::string& owner, const std::string& password, bool permanent, int minimum_status, bool save_to_database = false);
-	ChatChannel* FindChannel(const std::string& Name);
+	ChatChannel* FindChannel(const std::string& name);
 	ChatChannel* AddClientToChannel(std::string channel_name, Client* c, bool command_directed = false);
 	ChatChannel* RemoveClientFromChannel(const std::string& in_channel_name, Client* c, bool command_directed = false);
 	void RemoveChannel(ChatChannel *Channel);
