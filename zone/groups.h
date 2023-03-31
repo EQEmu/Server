@@ -153,11 +153,11 @@ public:
 
 	bool DoesAnyMemberHaveExpeditionLockout(const std::string& expedition_name, const std::string& event_name, int max_check_count = 0);
 
-	Mob* members[MAX_GROUP_MEMBERS];
-	char	membername[MAX_GROUP_MEMBERS][64];
-	uint8	MemberRoles[MAX_GROUP_MEMBERS];
-	bool	disbandcheck;
-	bool	castspell;
+	Mob*	members[MAX_GROUP_MEMBERS] {nullptr};
+	char	membername[MAX_GROUP_MEMBERS][64] {""};
+	uint8	MemberRoles[MAX_GROUP_MEMBERS] {0};
+	bool	disbandcheck {false};
+	bool	castspell {false};
 
 private:
 	Mob*	leader;
