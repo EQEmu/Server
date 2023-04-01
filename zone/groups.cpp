@@ -298,7 +298,7 @@ bool Group::AddMember(Mob* newmember, const char *NewMemberName, uint32 Characte
 			}
 
 			//put existing group member(s) into the new member's list
-			if(InZone && newmember->IsClient())
+			if(InZone && newmember && newmember->IsClient())
 			{
 				if(IsLeader(members[i]))
 				{
@@ -307,13 +307,13 @@ bool Group::AddMember(Mob* newmember, const char *NewMemberName, uint32 Characte
 				else
 				{
 					strcpy(newmember->CastToClient()->GetPP().groupMembers[x], members[i]->GetCleanName());
-					x++;
+					++x;
 				}
 			}
 		}
 	}
 
-	if(InZone)
+	if(InZone && newmember)
 	{
 		//put new member in his own list.
 		newmember->SetGrouped(true);

@@ -7470,15 +7470,17 @@ const char* Client::GetClassPlural(Client* client) {
 
 void Client::SendWebLink(const char *website)
 {
-	size_t len = strlen(website) + 1;
-	if(website != 0 && len > 1)
-	{
-		auto outapp = new EQApplicationPacket(OP_Weblink, sizeof(Weblink_Struct) + len);
-		Weblink_Struct *wl = (Weblink_Struct*)outapp->pBuffer;
-		memcpy(wl->weblink, website, len);
-		wl->weblink[len] = '\0';
+	if (website) {
+		size_t len = strlen(website) + 1;
+		if (len > 1)
+		{
+			auto outapp = new EQApplicationPacket(OP_Weblink, sizeof(Weblink_Struct) + len);
+			Weblink_Struct* wl = (Weblink_Struct*)outapp->pBuffer;
+			memcpy(wl->weblink, website, len);
+			wl->weblink[len] = '\0';
 
-		FastQueuePacket(&outapp);
+			FastQueuePacket(&outapp);
+		}
 	}
 }
 
@@ -11734,20 +11736,22 @@ std::vector<Mob*> Client::GetApplySpellList(
 
 	if (apply_type == ApplySpellType::Raid && IsRaidGrouped()) {
 		auto* r = GetRaid();
-		auto group_id = r->GetGroup(this);
-		if (r && EQ::ValueWithin(group_id, 0, (MAX_RAID_GROUPS - 1))) {
-			for (const auto& m : r->members) {
-				if (m.member && m.member->IsClient() && (!is_raid_group_only || r->GetGroup(m.member) == group_id)) {
-					l.push_back(m.member);
+		if (r) {
+			auto group_id = r->GetGroup(this);
+			if (EQ::ValueWithin(group_id, 0, (MAX_RAID_GROUPS - 1))) {
+				for (const auto& m : r->members) {
+					if (m.member && m.member->IsClient() && (!is_raid_group_only || r->GetGroup(m.member) == group_id)) {
+						l.push_back(m.member);
 
-					if (allow_pets && m.member->HasPet()) {
-						l.push_back(m.member->GetPet());
-					}
+						if (allow_pets && m.member->HasPet()) {
+							l.push_back(m.member->GetPet());
+						}
 
-					if (allow_bots) {
-						const auto& sbl = entity_list.GetBotListByCharacterID(m.member->CharacterID());
-						for (const auto& b : sbl) {
-							l.push_back(b);
+						if (allow_bots) {
+							const auto& sbl = entity_list.GetBotListByCharacterID(m.member->CharacterID());
+							for (const auto& b : sbl) {
+								l.push_back(b);
+							}
 						}
 					}
 				}

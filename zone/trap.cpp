@@ -209,8 +209,7 @@ void Trap::Trigger(Mob* trigger)
 			{
 				entity_list.MessageClose(trigger,false,100,13,"%s",message.c_str());
 			}
-			if(trigger->IsClient())
-			{
+			if (trigger && trigger->IsClient()) {
 				auto outapp = new EQApplicationPacket(OP_Damage, sizeof(CombatDamage_Struct));
 				CombatDamage_Struct* a = (CombatDamage_Struct*)outapp->pBuffer;
 				int64 dmg = zone->random.Int(effectvalue, effectvalue2);
@@ -226,8 +225,7 @@ void Trap::Trigger(Mob* trigger)
 			}
 	}
 
-	if (trigger && trigger->IsClient())
-	{
+	if (trigger && trigger->IsClient()) {
 		trigger->CastToClient()->trapid = trap_id;
 		charid = trigger->CastToClient()->CharacterID();
 	}

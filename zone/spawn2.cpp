@@ -150,7 +150,7 @@ bool Spawn2::Process() {
 	//grab our spawn group
 	SpawnGroup *spawn_group = zone->spawn_group_list.GetSpawnGroup(spawngroup_id_);
 
-	if (NPCPointerValid() && (spawn_group->despawn == 0 || condition_id != 0)) {
+	if (NPCPointerValid() && (spawn_group && spawn_group->despawn == 0 || condition_id != 0)) {
 		return true;
 	}
 
