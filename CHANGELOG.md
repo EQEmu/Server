@@ -1,3 +1,27 @@
+## [22.9.0] - 04/01/2023 
+
+### Bots
+
+* Remove Bot Groups Functionality ([#3165](https://github.com/EQEmu/Server/pull/3165)) @Aeadoin 2023-04-01
+
+### Code
+
+* Cleanup excessive type casting: string -> char * -> string ([#3169](https://github.com/EQEmu/Server/pull/3169)) @Aeadoin 2023-04-01
+
+### Crash
+
+* Add Checks for valid pointers or fix existing. ([#3164](https://github.com/EQEmu/Server/pull/3164)) @Aeadoin 2023-04-01
+* Fix out of bound arrays, other potential crashes ([#3166](https://github.com/EQEmu/Server/pull/3166)) @Aeadoin 2023-04-01
+
+### Fixes
+
+* Correct SE_SlayUndead & SE_HeadShotLevel limit Value when applied. ([#3171](https://github.com/EQEmu/Server/pull/3171)) @Aeadoin 2023-04-01
+* Prevent VerifyGroup from setting OOZ membername to Null character. ([#3168](https://github.com/EQEmu/Server/pull/3168)) @Aeadoin 2023-04-01
+
+### Quest API
+
+* Add missing Luabind definitions to lua_general.cpp ([#3167](https://github.com/EQEmu/Server/pull/3167)) @Kinglykrab 2023-04-01
+
 ## [22.8.2] - 03/30/2023 
 
 ### Code
