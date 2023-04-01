@@ -1442,9 +1442,10 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 		}
 
 		case SE_SlayUndead: {
-			if (newbon->SlayUndead[SBIndex::SLAYUNDEAD_DMG_MOD] < base_value)
+			if (newbon->SlayUndead[SBIndex::SLAYUNDEAD_DMG_MOD] < base_value) {
 				newbon->SlayUndead[SBIndex::SLAYUNDEAD_RATE_MOD] = base_value; // Rate
-			newbon->SlayUndead[SBIndex::SLAYUNDEAD_DMG_MOD]      = limit_value;	 // Damage Modifier
+				newbon->SlayUndead[SBIndex::SLAYUNDEAD_DMG_MOD] = limit_value; // Damage Modifier
+			}
 			break;
 		}
 
@@ -1612,9 +1613,10 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 		}
 
 		case SE_HeadShotLevel: {
-			if (newbon->HSLevel[SBIndex::FINISHING_EFFECT_LEVEL_MAX] < base_value)
-				newbon->HSLevel[SBIndex::FINISHING_EFFECT_LEVEL_MAX]          = base_value;
+			if (newbon->HSLevel[SBIndex::FINISHING_EFFECT_LEVEL_MAX] < base_value) {
+				newbon->HSLevel[SBIndex::FINISHING_EFFECT_LEVEL_MAX] = base_value;
 				newbon->HSLevel[SBIndex::FINISHING_EFFECT_LEVEL_CHANCE_BONUS] = limit_value;
+			}
 			break;
 		}
 
@@ -3178,8 +3180,9 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 			case SE_HPToMana:
 			{
 				//Lower the ratio the more favorable
-				if((!new_bonus->HPToManaConvert) || (new_bonus->HPToManaConvert >= effect_value))
-				new_bonus->HPToManaConvert = spells[spell_id].base_value[i];
+				if ((!new_bonus->HPToManaConvert) || (new_bonus->HPToManaConvert >= effect_value)) {
+					new_bonus->HPToManaConvert = spells[spell_id].base_value[i];
+				}
 				break;
 			}
 
@@ -3526,11 +3529,11 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				break;
 			}
 
-			case SE_SlayUndead:
-			{
-				if(new_bonus->SlayUndead[SBIndex::SLAYUNDEAD_DMG_MOD] < effect_value)
+			case SE_SlayUndead: {
+				if (new_bonus->SlayUndead[SBIndex::SLAYUNDEAD_DMG_MOD] < effect_value) {
 					new_bonus->SlayUndead[SBIndex::SLAYUNDEAD_RATE_MOD] = effect_value; // Rate
-					new_bonus->SlayUndead[SBIndex::SLAYUNDEAD_DMG_MOD]  = limit_value; // Damage Modifier
+					new_bonus->SlayUndead[SBIndex::SLAYUNDEAD_DMG_MOD] = limit_value; // Damage Modifier
+				}
 				break;
 			}
 
@@ -3672,9 +3675,8 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				break;
 			}
 
-			case SE_HeadShotLevel:
-			{
-				if(new_bonus->HSLevel[SBIndex::FINISHING_EFFECT_LEVEL_MAX] < effect_value) {
+			case SE_HeadShotLevel: {
+				if (new_bonus->HSLevel[SBIndex::FINISHING_EFFECT_LEVEL_MAX] < effect_value) {
 					new_bonus->HSLevel[SBIndex::FINISHING_EFFECT_LEVEL_MAX]          = effect_value;
 					new_bonus->HSLevel[SBIndex::FINISHING_EFFECT_LEVEL_CHANCE_BONUS] = limit_value;
 				}
