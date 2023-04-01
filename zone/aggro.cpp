@@ -904,8 +904,9 @@ bool Mob::IsBeneficialAllowed(Mob *target)
 			{
 				return false;
 			}
-			else if(mob2->IsBot())
+			else if (mob2 && mob2->IsBot()) {
 				return true;
+			}
 		}
 		else if(_NPC(mob1))
 		{

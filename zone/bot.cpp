@@ -1936,6 +1936,11 @@ void Bot::AI_Process()
 #define NOT_PASSIVE (GetBotStance() != EQ::constants::stancePassive)
 
 	Client* bot_owner = (GetBotOwner() && GetBotOwner()->IsClient() ? GetBotOwner()->CastToClient() : nullptr);
+
+	if (!bot_owner) {
+		return;
+	}
+
 	auto raid = entity_list.GetRaidByBotName(GetName());
 	uint32 r_group = RAID_GROUPLESS;
 	if (raid) {
@@ -2983,7 +2988,7 @@ void Bot::HealRotationChecks() {
 
 bool Bot::IsAIProcessValid(const Client* bot_owner, const Group* bot_group, const Raid* raid) {
 
-	if (!bot_owner || !bot_group && !raid || !IsAIControlled()) {
+	if (!bot_owner || (!bot_group && !raid) || !IsAIControlled()) {
 		return false;
 	}
 

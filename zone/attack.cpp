@@ -1484,7 +1484,6 @@ bool Mob::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 
 	if (
 		(IsCasting() && GetClass() != BARD && !IsFromSpell)
-		|| other == nullptr
 		|| ((IsClient() && CastToClient()->dead) || (other->IsClient() && other->CastToClient()->dead))
 		|| (GetHP() < 0)
 		|| (!IsAttackAllowed(other))
