@@ -279,7 +279,7 @@ bool NpcScaleManager::LoadScaleData()
 			scale_data.zone_id          = Strings::ToUnsignedInt(s.zone_id_list);
 			scale_data.instance_version = static_cast<uint16>(Strings::ToUnsignedInt(s.instance_version_list));
 
-			npc_global_base_scaling_data.insert(
+			npc_global_base_scaling_data.emplace(
 				std::make_pair(
 					std::make_tuple(
 						scale_data.type,
@@ -298,7 +298,7 @@ bool NpcScaleManager::LoadScaleData()
 			for (const auto &z : zones) {
 				scale_data.zone_id = Strings::ToUnsignedInt(z);
 
-				npc_global_base_scaling_data.insert(
+				npc_global_base_scaling_data.emplace(
 					std::make_pair(
 						std::make_tuple(
 							scale_data.type,
@@ -318,7 +318,7 @@ bool NpcScaleManager::LoadScaleData()
 			for (const auto &v : versions) {
 				scale_data.instance_version = static_cast<uint16>(Strings::ToUnsignedInt(v));
 
-				npc_global_base_scaling_data.insert(
+				npc_global_base_scaling_data.emplace(
 					std::make_pair(
 						std::make_tuple(
 							scale_data.type,
@@ -340,7 +340,7 @@ bool NpcScaleManager::LoadScaleData()
 				for (const auto &v : versions) {
 					scale_data.instance_version = static_cast<uint16>(Strings::ToUnsignedInt(v));
 
-					npc_global_base_scaling_data.insert(
+					npc_global_base_scaling_data.emplace(
 						std::make_pair(
 							std::make_tuple(
 								scale_data.type,

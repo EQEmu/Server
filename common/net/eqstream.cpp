@@ -22,7 +22,7 @@ void EQ::Net::EQStreamManager::SetOptions(const EQStreamManagerInterfaceOptions 
 void EQ::Net::EQStreamManager::DaybreakNewConnection(std::shared_ptr<DaybreakConnection> connection)
 {
 	std::shared_ptr<EQStream> stream(new EQStream(this, connection));
-	m_streams.insert(std::make_pair(connection, stream));
+	m_streams.emplace(std::make_pair(connection, stream));
 	if (m_on_new_connection) {
 		m_on_new_connection(stream);
 	}

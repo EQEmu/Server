@@ -401,7 +401,7 @@ int command_init(void)
 	for (const auto& w : working_cl) {
 		auto cs = command_settings.find(w.first);
 		if (cs == command_settings.end()) {
-			injected_command_settings.push_back(std::pair<std::string, uint8>(w.first, w.second->admin));
+			injected_command_settings.emplace_back(std::pair<std::string, uint8>(w.first, w.second->admin));
 			LogInfo(
 				"New Command [{}] found... Adding to `command_settings` table with admin [{}]...",
 				w.first,

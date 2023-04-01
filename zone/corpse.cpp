@@ -750,7 +750,7 @@ bool Corpse::Save() {
 		e.ornamentidfile      = item->ornamentidfile;
 		e.ornament_hero_model = item->ornament_hero_model;
 
-		ce.items.push_back(std::move(e));
+		ce.items.emplace_back(std::move(e));
 	}
 
 	/* Create New Corpse*/

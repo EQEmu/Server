@@ -41,7 +41,7 @@ void EQ::Net::ServertalkLegacyClient::SendPacket(ServerPacket *p)
 
 void EQ::Net::ServertalkLegacyClient::OnMessage(uint16_t opcode, std::function<void(uint16_t, EQ::Net::Packet&)> cb)
 {
-	m_message_callbacks.insert(std::make_pair(opcode, cb));
+	m_message_callbacks.emplace(std::make_pair(opcode, cb));
 }
 
 void EQ::Net::ServertalkLegacyClient::OnMessage(std::function<void(uint16_t, EQ::Net::Packet&)> cb)

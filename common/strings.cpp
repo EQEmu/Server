@@ -76,7 +76,7 @@ std::vector<std::string> Strings::Split(const std::string& s, const std::string&
 		res.push_back(token);
 	}
 
-	res.push_back(s.substr(pos_start));
+	res.emplace_back(s.substr(pos_start));
 	return res;
 }
 

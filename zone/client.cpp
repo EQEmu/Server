@@ -8181,7 +8181,7 @@ void Client::TryItemTimer(int slot)
 			continue;
 		}
 
-		auto item_timers = a_inst->GetTimers();
+		auto& item_timers = a_inst->GetTimers();
 		auto it_iter = item_timers.begin();
 		while(it_iter != item_timers.end()) {
 			if(it_iter->second.Check()) {
@@ -9985,7 +9985,7 @@ void Client::SendDzCompassUpdate()
 
 	for (const auto& client_dz : GetDynamicZones())
 	{
-		auto compass = client_dz->GetCompassLocation();
+		auto& compass = client_dz->GetCompassLocation();
 		if (zone && zone->IsZone(compass.zone_id, 0))
 		{
 			DynamicZoneCompassEntry_Struct entry{};

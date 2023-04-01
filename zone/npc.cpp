@@ -1920,7 +1920,7 @@ void NPC::PickPocket(Client* thief)
 			if (item_test->Magic || !item_test->NoDrop || item_test->IsClassBag() || thief->CheckLoreConflict(item_test) || item_iter->equip_slot != EQ::invslot::SLOT_INVALID)
 				continue;
 
-			loot_selection.push_back(std::make_pair(item_test, ((item_test->Stackable) ? (1) : (item_iter->charges))));
+			loot_selection.emplace_back(std::make_pair(item_test, ((item_test->Stackable) ? (1) : (item_iter->charges))));
 		}
 		if (loot_selection.empty()) {
 			steal_item = false;

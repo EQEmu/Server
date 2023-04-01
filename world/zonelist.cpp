@@ -64,7 +64,7 @@ void ZSList::ShowUpTime(WorldTCPConnection* con, const char* adminname) {
 }
 
 void ZSList::Add(ZoneServer* zoneserver) {
-	zone_server_list.push_back(std::unique_ptr<ZoneServer>(zoneserver));
+	zone_server_list.emplace_back(std::unique_ptr<ZoneServer>(zoneserver));
 	zoneserver->SendGroupIDs();
 }
 

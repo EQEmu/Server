@@ -145,7 +145,7 @@ void EQStreamIdentifier::Process() {
 }
 
 void EQStreamIdentifier::AddStream(std::shared_ptr<EQStreamInterface> eqs) {
-	m_streams.push_back(Record(eqs));
+	m_streams.emplace_back(Record(eqs));
 	eqs = nullptr;
 }
 
