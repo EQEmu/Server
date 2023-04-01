@@ -1998,6 +1998,11 @@ void Zone::SetTime(uint8 hour, uint8 minute, bool update_world /*= true*/)
 ZonePoint* Zone::GetClosestZonePoint(const glm::vec3& location, uint32 to, Client* client, float max_distance) {
 	LinkedListIterator<ZonePoint*> iterator(zone_point_list);
 	ZonePoint* closest_zp = nullptr;
+
+	if (!client) {
+		return closest_zp;
+	}
+
 	float closest_dist = FLT_MAX;
 	float max_distance2 = max_distance * max_distance;
 	iterator.Reset();
