@@ -35,6 +35,7 @@
 #include "../path_manager.h"
 #include "../classes.h"
 #include "../races.h"
+#include "../../zone/raids.h"
 
 #include <iostream>
 #include <sstream>
@@ -2737,7 +2738,7 @@ namespace RoF2
 		{
 			RaidLeadershipUpdate_Struct *inlaa = (RaidLeadershipUpdate_Struct *)__emu_buffer;
 			auto outapp =
-			    new EQApplicationPacket(OP_RaidUpdate, sizeof(structs::RaidLeadershipUpdate_Struct));
+				new EQApplicationPacket(OP_RaidUpdate, sizeof(structs::RaidLeadershipUpdate_Struct));
 			structs::RaidLeadershipUpdate_Struct *outlaa = (structs::RaidLeadershipUpdate_Struct *)outapp->pBuffer;
 
 			outlaa->action = inlaa->action;
@@ -2745,6 +2746,18 @@ namespace RoF2
 			strn0cpy(outlaa->leader_name, inlaa->leader_name, 64);
 			memcpy(&outlaa->raid, &inlaa->raid, sizeof(RaidLeadershipAA_Struct));
 			dest->FastQueuePacket(&outapp);
+		}
+		else if (raid_gen->action == raidSetNote)
+		{
+			auto in_note = (RaidGeneral_Struct*)__emu_buffer;
+			auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidGeneral_Struct));
+			auto note = (RaidGeneral_Struct*)outapp->pBuffer;
+			note->action = raidSetNote;
+			strn0cpy(note->leader_name, in_note->leader_name, 64);
+			strn0cpy(note->player_name, in_note->player_name, 64);
+			strn0cpy(note->note, in_note->note, 64);
+			dest->QueuePacket(outapp);
+			safe_delete(outapp);
 		}
 		else
 		{
