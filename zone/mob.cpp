@@ -6975,9 +6975,9 @@ std::string Mob::GetBucketKey() {
 std::string Mob::GetBucketRemaining(std::string bucket_name) {
 	std::string full_bucket_name = fmt::format("{}-{}", GetBucketKey(), bucket_name);
 	std::string bucket_remaining = DataBucket::GetDataRemaining(full_bucket_name);
-	if (!bucket_remaining.empty() && Strings::ToInt(bucket_remaining.c_str()) > 0) {
+	if (!bucket_remaining.empty() && Strings::ToInt(bucket_remaining) > 0) {
 		return bucket_remaining;
-	} else if (Strings::ToInt(bucket_remaining.c_str()) == 0) {
+	} else if (Strings::ToInt(bucket_remaining) == 0) {
 		return "0";
 	}
 	return std::string();
