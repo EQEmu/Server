@@ -907,12 +907,12 @@ std::string lua_say_link(const char *phrase) {
 }
 
 void lua_set_rule(std::string rule_name, std::string rule_value) {
-	RuleManager::Instance()->SetRule(rule_name.c_str(), rule_value.c_str());
+	RuleManager::Instance()->SetRule(rule_name, rule_value);
 }
 
 std::string lua_get_rule(std::string rule_name) {
 	std::string rule_value;
-	RuleManager::Instance()->GetRule(rule_name.c_str(), rule_value);
+	RuleManager::Instance()->GetRule(rule_name, rule_value);
 	return rule_value;
 }
 

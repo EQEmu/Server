@@ -204,7 +204,7 @@ void WorldBoot::CheckForServerScript(bool force_download)
 		r.set_read_timeout(1, 0);
 		r.set_write_timeout(1, 0);
 
-		if (auto res = r.Get(u.get_path().c_str())) {
+		if (auto res = r.Get(u.get_path())) {
 			if (res->status == 200) {
 				// write file
 
@@ -369,7 +369,7 @@ bool WorldBoot::DatabaseLoadRoutines(int argc, char **argv)
 		if (database.GetVariable("RuleSet", tmp)) {
 			LogInfo("Loading rule set [{}]", tmp.c_str());
 
-			if (!RuleManager::Instance()->LoadRules(&database, tmp.c_str(), false)) {
+			if (!RuleManager::Instance()->LoadRules(&database, tmp, false)) {
 				LogInfo("Failed to load ruleset [{}], falling back to defaults", tmp.c_str());
 			}
 		}

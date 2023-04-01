@@ -116,7 +116,7 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool is_static) {
 	std::string tmp;
 	if (database.GetVariable("loglevel", tmp)) {
 		int log_levels[4];
-		int tmp_i = Strings::ToInt(tmp.c_str());
+		int tmp_i = Strings::ToInt(tmp);
 		if (tmp_i>9){ //Server is using the new code
 			for(int i=0;i<4;i++){
 				if (((int)tmp[i]>=48) && ((int)tmp[i]<=57))
@@ -1113,7 +1113,7 @@ bool Zone::Init(bool is_static) {
 	if (RuleManager::Instance()->GetActiveRulesetID() != default_ruleset) {
 		std::string r_name = RuleSetsRepository::GetRuleSetName(database, default_ruleset);
 		if (r_name.size() > 0) {
-			RuleManager::Instance()->LoadRules(&database, r_name.c_str(), false);
+			RuleManager::Instance()->LoadRules(&database, r_name, false);
 		}
 	}
 
