@@ -2230,10 +2230,9 @@ void Zone::LoadZoneBlockedSpells()
 
 void Zone::ClearBlockedSpells()
 {
-	if (blocked_spells) {
-		safe_delete_array(blocked_spells);
-		zone_total_blocked_spells = 0;
-	}
+	safe_delete_array(blocked_spells);
+
+	zone_total_blocked_spells = 0;
 }
 
 bool Zone::IsSpellBlocked(uint32 spell_id, const glm::vec3 &location)
