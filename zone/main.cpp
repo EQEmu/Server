@@ -172,7 +172,7 @@ int main(int argc, char** argv) {
 
 		if (zone_port.size() > 1) {
 			std::string p_name = zone_port[1];
-			Config->SetZonePort(Strings::ToInt(p_name.c_str()));
+			Config->SetZonePort(Strings::ToInt(p_name));
 		}
 
 		worldserver.SetLaunchedName(z_name.c_str());
@@ -193,7 +193,7 @@ int main(int argc, char** argv) {
 
 		if (zone_port.size() > 1) {
 			std::string p_name = zone_port[1];
-			Config->SetZonePort(Strings::ToInt(p_name.c_str()));
+			Config->SetZonePort(Strings::ToInt(p_name));
 		}
 
 		worldserver.SetLaunchedName(z_name.c_str());
@@ -214,7 +214,7 @@ int main(int argc, char** argv) {
 
 		if (zone_port.size() > 1) {
 			std::string p_name = zone_port[1];
-			Config->SetZonePort(Strings::ToInt(p_name.c_str()));
+			Config->SetZonePort(Strings::ToInt(p_name));
 		}
 
 		worldserver.SetLaunchedName(z_name.c_str());
@@ -380,7 +380,7 @@ int main(int argc, char** argv) {
 		std::string tmp;
 		if (database.GetVariable("RuleSet", tmp)) {
 			LogInfo("Loading rule set [{}]", tmp.c_str());
-			if (!RuleManager::Instance()->LoadRules(&database, tmp.c_str(), false)) {
+			if (!RuleManager::Instance()->LoadRules(&database, tmp, false)) {
 				LogError("Failed to load ruleset [{}], falling back to defaults", tmp.c_str());
 			}
 		}

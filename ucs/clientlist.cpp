@@ -379,14 +379,14 @@ static void ProcessSetMessageStatus(std::string SetMessageCommand) {
 
 		if (NumEnd == std::string::npos) {
 
-			MessageNumber = Strings::ToInt(SetMessageCommand.substr(NumStart).c_str());
+			MessageNumber = Strings::ToInt(SetMessageCommand.substr(NumStart));
 
 			database.SetMessageStatus(MessageNumber, Status);
 
 			break;
 		}
 
-		MessageNumber = Strings::ToInt(SetMessageCommand.substr(NumStart, NumEnd - NumStart).c_str());
+		MessageNumber = Strings::ToInt(SetMessageCommand.substr(NumStart, NumEnd - NumStart));
 
 		database.SetMessageStatus(MessageNumber, Status);
 
@@ -878,7 +878,7 @@ void Clientlist::ProcessOPMailCommand(Client *c, std::string command_string, boo
 		break;
 
 	case CommandGetBody:
-		database.SendBody(c, Strings::ToInt(parameters.c_str()));
+		database.SendBody(c, Strings::ToInt(parameters));
 		break;
 
 	case CommandMailTo:
@@ -893,7 +893,7 @@ void Clientlist::ProcessOPMailCommand(Client *c, std::string command_string, boo
 	case CommandSelectMailBox:
 	{
 		std::string::size_type NumStart = parameters.find_first_of("0123456789");
-		c->ChangeMailBox(Strings::ToInt(parameters.substr(NumStart).c_str()));
+		c->ChangeMailBox(Strings::ToInt(parameters.substr(NumStart)));
 		break;
 	}
 	case CommandSetMailForwarding:
@@ -1255,7 +1255,7 @@ void Client::ProcessChannelList(std::string Input) {
 	std::string ChannelName = Input;
 
 	if (isdigit(ChannelName[0]))
-		ChannelName = ChannelSlotName(Strings::ToInt(ChannelName.c_str()));
+		ChannelName = ChannelSlotName(Strings::ToInt(ChannelName));
 
 	ChatChannel *RequiredChannel = ChannelList->FindChannel(ChannelName);
 
@@ -1416,7 +1416,7 @@ void Client::SendChannelMessageByNumber(std::string Message) {
 	if (MessageStart == std::string::npos)
 		return;
 
-	int ChannelNumber = Strings::ToInt(Message.substr(0, MessageStart).c_str());
+	int ChannelNumber = Strings::ToInt(Message.substr(0, MessageStart));
 
 	if ((ChannelNumber < 1) || (ChannelNumber > MAX_JOINED_CHANNELS)) {
 
@@ -1659,7 +1659,7 @@ void Client::SetChannelPassword(std::string ChannelPassword) {
 	std::string ChannelName = ChannelPassword.substr(ChannelStart);
 
 	if ((ChannelName.length() > 0) && isdigit(ChannelName[0]))
-		ChannelName = ChannelSlotName(Strings::ToInt(ChannelName.c_str()));
+		ChannelName = ChannelSlotName(Strings::ToInt(ChannelName));
 
 	std::string Message;
 
@@ -1724,7 +1724,7 @@ void Client::SetChannelOwner(std::string CommandString) {
 	std::string ChannelName = CapitaliseName(CommandString.substr(ChannelStart));
 
 	if ((ChannelName.length() > 0) && isdigit(ChannelName[0]))
-		ChannelName = ChannelSlotName(Strings::ToInt(ChannelName.c_str()));
+		ChannelName = ChannelSlotName(Strings::ToInt(ChannelName));
 
 	LogInfo("Set owner of channel [[{}]] to [[{}]]", ChannelName.c_str(), NewOwner.c_str());
 
@@ -1770,7 +1770,7 @@ void Client::OPList(std::string CommandString) {
 	std::string ChannelName = CapitaliseName(CommandString.substr(ChannelStart));
 
 	if ((ChannelName.length() > 0) && isdigit(ChannelName[0]))
-		ChannelName = ChannelSlotName(Strings::ToInt(ChannelName.c_str()));
+		ChannelName = ChannelSlotName(Strings::ToInt(ChannelName));
 
 	ChatChannel *RequiredChannel = ChannelList->FindChannel(ChannelName);
 
@@ -1813,7 +1813,7 @@ void Client::ChannelInvite(std::string CommandString) {
 	std::string ChannelName = CapitaliseName(CommandString.substr(ChannelStart));
 
 	if ((ChannelName.length() > 0) && isdigit(ChannelName[0]))
-		ChannelName = ChannelSlotName(Strings::ToInt(ChannelName.c_str()));
+		ChannelName = ChannelSlotName(Strings::ToInt(ChannelName));
 
 	LogInfo("[[{}]] invites [[{}]] to channel [[{}]]", GetName().c_str(), Invitee.c_str(), ChannelName.c_str());
 
@@ -1883,7 +1883,7 @@ void Client::ChannelModerate(std::string CommandString) {
 	std::string ChannelName = CapitaliseName(CommandString.substr(ChannelStart));
 
 	if ((ChannelName.length() > 0) && isdigit(ChannelName[0]))
-		ChannelName = ChannelSlotName(Strings::ToInt(ChannelName.c_str()));
+		ChannelName = ChannelSlotName(Strings::ToInt(ChannelName));
 
 	ChatChannel *RequiredChannel = ChannelList->FindChannel(ChannelName);
 
@@ -1941,7 +1941,7 @@ void Client::ChannelGrantModerator(std::string CommandString) {
 	std::string ChannelName = CapitaliseName(CommandString.substr(ChannelStart));
 
 	if ((ChannelName.length() > 0) && isdigit(ChannelName[0]))
-		ChannelName = ChannelSlotName(Strings::ToInt(ChannelName.c_str()));
+		ChannelName = ChannelSlotName(Strings::ToInt(ChannelName));
 
 	LogInfo("[[{}]] gives [[{}]] moderator rights to channel [[{}]]", GetName().c_str(), Moderator.c_str(), ChannelName.c_str());
 
@@ -2022,7 +2022,7 @@ void Client::ChannelGrantVoice(std::string CommandString) {
 	std::string ChannelName = CapitaliseName(CommandString.substr(ChannelStart));
 
 	if ((ChannelName.length() > 0) && isdigit(ChannelName[0]))
-		ChannelName = ChannelSlotName(Strings::ToInt(ChannelName.c_str()));
+		ChannelName = ChannelSlotName(Strings::ToInt(ChannelName));
 
 	LogInfo("[[{}]] gives [[{}]] voice to channel [[{}]]", GetName().c_str(), Voicee.c_str(), ChannelName.c_str());
 
@@ -2110,7 +2110,7 @@ void Client::ChannelKick(std::string CommandString) {
 	std::string ChannelName = CapitaliseName(CommandString.substr(ChannelStart));
 
 	if ((ChannelName.length() > 0) && isdigit(ChannelName[0]))
-		ChannelName = ChannelSlotName(Strings::ToInt(ChannelName.c_str()));
+		ChannelName = ChannelSlotName(Strings::ToInt(ChannelName));
 
 	LogInfo("[[{}]] kicks [[{}]] from channel [[{}]]", GetName().c_str(), Kickee.c_str(), ChannelName.c_str());
 

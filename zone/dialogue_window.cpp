@@ -199,7 +199,7 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 
 			// set the popup id
 			if (!popupid.empty()) {
-				popup_id = (Strings::IsNumber(popupid) ? Strings::ToInt(popupid.c_str()) : 0);
+				popup_id = (Strings::IsNumber(popupid) ? Strings::ToInt(popupid) : 0);
 			}
 		}
 	}
@@ -231,7 +231,7 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 			Strings::FindReplace(output, fmt::format("secondresponseid:{}", secondresponseid), "");
 
 			if (!secondresponseid.empty()) {
-				negative_id = (Strings::IsNumber(secondresponseid) ? Strings::ToInt(secondresponseid.c_str()) : 0);
+				negative_id = (Strings::IsNumber(secondresponseid) ? Strings::ToInt(secondresponseid) : 0);
 			}
 		}
 	}
@@ -410,7 +410,7 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 
 	// click response
 	// window type response
-	uint32      window_type           = (Strings::IsNumber(wintype) ? Strings::ToInt(wintype.c_str()) : 0);
+	uint32      window_type           = (Strings::IsNumber(wintype) ? Strings::ToInt(wintype) : 0);
 	std::string click_response_button = (window_type == 1 ? "Yes" : "OK");
 	std::string click_response        = fmt::format(
 		"<c \"#F07F00\">Click [{}] to continue...</c>",

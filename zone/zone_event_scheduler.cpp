@@ -103,7 +103,7 @@ void ZoneEventScheduler::Process(Zone *zone, WorldContentService *content_servic
 							rule_key,
 							rule_value
 						);
-						RuleManager::Instance()->SetRule(rule_key.c_str(), rule_value.c_str(), nullptr, false, true);
+						RuleManager::Instance()->SetRule(rule_key, rule_value, nullptr, false, true);
 					}
 					m_active_events.push_back(e);
 				}

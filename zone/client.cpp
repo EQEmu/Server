@@ -10444,7 +10444,7 @@ void Client::SendToInstance(std::string instance_type, std::string zone_short_na
 	uint16 instance_id = 0;
 
 	if (current_bucket_value.length() > 0) {
-		instance_id = Strings::ToInt(current_bucket_value.c_str());
+		instance_id = Strings::ToInt(current_bucket_value);
 	} else {
 		if(!database.GetUnusedInstanceID(instance_id)) {
 			Message(Chat::White, "Server was unable to find a free instance id.");

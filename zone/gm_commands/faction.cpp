@@ -107,7 +107,7 @@ void command_faction(Client *c, const Seperator *sep)
 					)
 					) {
 					uint32 character_id = target->CharacterID();
-					uint32 faction_id   = Strings::ToUnsignedInt(faction_filter.c_str());
+					uint32 faction_id   = Strings::ToUnsignedInt(faction_filter);
 					if (target->ReloadCharacterFaction(target, faction_id, character_id)) {
 						c->Message(
 							Chat::White,

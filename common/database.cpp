@@ -2345,7 +2345,7 @@ void Database::SourceDatabaseTableFromUrl(std::string table_name, std::string ur
 
 			int sourced_queries = 0;
 
-			if (auto res = cli.Get(request_uri.get_path().c_str())) {
+			if (auto res = cli.Get(request_uri.get_path())) {
 				if (res->status == 200) {
 					for (auto &s: Strings::Split(res->body, ';')) {
 						if (!Strings::Trim(s).empty()) {

@@ -55,23 +55,23 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 				float set_size = 0.0f;
 
 				if (arg2 == move_x_action) {
-					x_move = Strings::ToFloat(arg3.c_str());
+					x_move = Strings::ToFloat(arg3);
 				}
 
 				if (arg2 == move_y_action) {
-					y_move = Strings::ToFloat(arg3.c_str());
+					y_move = Strings::ToFloat(arg3);
 				}
 
 				if (arg2 == move_z_action) {
-					z_move = Strings::ToFloat(arg3.c_str());
+					z_move = Strings::ToFloat(arg3);
 				}
 
 				if (arg2 == move_h_action) {
-					h_move = Strings::ToFloat(arg3.c_str());
+					h_move = Strings::ToFloat(arg3);
 				}
 
 				if (arg2 == set_size_action) {
-					set_size = Strings::ToFloat(arg3.c_str());
+					set_size = Strings::ToFloat(arg3);
 				}
 
 				door->SetLocation(
@@ -370,7 +370,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 	if (arg1 == "opentype" && !arg2.empty() && Strings::IsNumber(arg2)) {
 		Doors *door = entity_list.GetDoorsByID(c->GetDoorToolEntityId());
 		if (door) {
-			door->SetOpenType(Strings::ToInt(arg2.c_str()));
+			door->SetOpenType(Strings::ToInt(arg2));
 		}
 	}
 
@@ -378,7 +378,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 	if (arg1 == "setincline" && !arg2.empty() && Strings::IsNumber(arg2)) {
 		Doors *door = entity_list.GetDoorsByID(c->GetDoorToolEntityId());
 		if (door) {
-			door->SetIncline(Strings::ToInt(arg2.c_str()));
+			door->SetIncline(Strings::ToInt(arg2));
 		}
 	}
 
@@ -386,7 +386,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 	if (arg1 == "setinvertstate" && !arg2.empty() && Strings::IsNumber(arg2)) {
 		Doors *door = entity_list.GetDoorsByID(c->GetDoorToolEntityId());
 		if (door) {
-			door->SetInvertState(Strings::ToInt(arg2.c_str()));
+			door->SetInvertState(Strings::ToInt(arg2));
 		}
 	}
 
@@ -403,7 +403,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 	if (arg1 == "setinclineinc" && !arg2.empty() && Strings::IsNumber(arg2)) {
 		Doors *door = entity_list.GetDoorsByID(c->GetDoorToolEntityId());
 		if (door) {
-			door->SetIncline(door->GetIncline() + Strings::ToInt(arg2.c_str()));
+			door->SetIncline(door->GetIncline() + Strings::ToInt(arg2));
 		}
 	}
 
