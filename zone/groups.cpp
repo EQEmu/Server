@@ -1158,17 +1158,26 @@ bool Group::LearnMembers() {
 			"Error getting group members for group [{}]",
 			GetID()
 		);
-		return false;
 	}
 
 	int memberIndex = 0;
 	for (const auto& member : rows) {
-		if (member.name.empty()) {
-			continue;
+		if (memberIndex >= MAX_GROUP_MEMBERS) {
+			LogError(
+				"Too many members in group [{}]",
+				GetID()
+			);
+			break;
 		}
-		members[memberIndex] = nullptr;
-		strn0cpy(membername[memberIndex], member.name.c_str(), 64);
-		memberIndex++;
+
+		if (member.name.empty()) {
+			members[memberIndex] = nullptr;
+			membername[memberIndex][0] = '\0';
+		} else {
+			members[memberIndex] = nullptr;
+			strn0cpy(membername[memberIndex], member.name.c_str(), 64);
+		}
+		++memberIndex;
 	}
 
 	VerifyGroup();
@@ -1189,13 +1198,12 @@ void Group::VerifyGroup() {
 		}
 
 		Mob *them = entity_list.GetMob(membername[i]);
-		if(them == nullptr && members[i] != nullptr) {	//they aren't in zone
-			membername[i][0] = '\0';
+		if (!them && members[i]) {	//they aren't in zone
 			members[i] = nullptr;
 			continue;
 		}
 
-		if(them != nullptr && members[i] != them) {	//our pointer is out of date... not so good.
+		if (them != nullptr && members[i] != them) {	//our pointer is out of date... not so good.
 			members[i] = them;
 			continue;
 		}
