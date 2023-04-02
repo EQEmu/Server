@@ -645,7 +645,7 @@ bool Database::CheckDatabaseConvertPPDeblob()
 				"KEY `account_id` (`account_id`)									"
 				") ENGINE = InnoDB AUTO_INCREMENT = 1 DEFAULT CHARSET = latin1;		"
 			);
-			auto results = QueryDatabase(rquery);
+			results = QueryDatabase(rquery);
 			printf(" done...\n");
 		}
 		/* Check for table `character_currency` */
@@ -676,7 +676,7 @@ bool Database::CheckDatabaseConvertPPDeblob()
 				"   KEY `id` (`id`)                                                    "
 				" ) ENGINE=InnoDB DEFAULT CHARSET=latin1;             "
 			);
-			auto results = QueryDatabase(rquery);
+			results = QueryDatabase(rquery);
 			printf(" done...\n");
 		}
 		/* Check for table `character_alternate_abilities` */
@@ -694,7 +694,7 @@ bool Database::CheckDatabaseConvertPPDeblob()
 				" KEY `id` (`id`)														"
 				" ) ENGINE = InnoDB DEFAULT CHARSET = latin1;		"
 			);
-			auto results = QueryDatabase(rquery);
+			results = QueryDatabase(rquery);
 			printf(" done...\n");
 		}
 		/* Check for table `character_bind` */
@@ -716,7 +716,7 @@ bool Database::CheckDatabaseConvertPPDeblob()
 				"KEY `id` (`id`)											   "
 				") ENGINE = InnoDB DEFAULT CHARSET = latin1;"
 			);
-			auto results = QueryDatabase(rquery);
+			results = QueryDatabase(rquery);
 			printf(" done...\n");
 		}
 		/* Check for table `character_languages` */
@@ -733,7 +733,7 @@ bool Database::CheckDatabaseConvertPPDeblob()
 				"KEY `id` (`id`)											   "
 				") ENGINE = InnoDB DEFAULT CHARSET = latin1;"
 			);
-			auto results = QueryDatabase(rquery);
+			results = QueryDatabase(rquery);
 			printf(" done...\n");
 		}
 		/* Check for table `character_skills` */
@@ -750,7 +750,7 @@ bool Database::CheckDatabaseConvertPPDeblob()
 				"KEY `id` (`id`)											   "
 				") ENGINE = InnoDB DEFAULT CHARSET = latin1;"
 			);
-			auto results = QueryDatabase(rquery);
+			results = QueryDatabase(rquery);
 			printf(" done...\n");
 		}
 		/* Check for table `character_spells` */
@@ -767,7 +767,7 @@ bool Database::CheckDatabaseConvertPPDeblob()
 				"KEY `id` (`id`)											   "
 				") ENGINE = InnoDB DEFAULT CHARSET = latin1;"
 			);
-			auto results = QueryDatabase(rquery);
+			results = QueryDatabase(rquery);
 			printf(" done...\n");
 		}
 		/* Check for table `character_memmed_spells` */
@@ -784,7 +784,7 @@ bool Database::CheckDatabaseConvertPPDeblob()
 				"KEY `id` (`id`)											   "
 				") ENGINE = InnoDB DEFAULT CHARSET = latin1;"
 			);
-			auto results = QueryDatabase(rquery);
+			results = QueryDatabase(rquery);
 			printf(" done...\n");
 		}
 		/* Check for table `character_disciplines` */
@@ -801,7 +801,7 @@ bool Database::CheckDatabaseConvertPPDeblob()
 				" KEY `id` (`id`)												  "
 				" ) ENGINE = InnoDB DEFAULT CHARSET = latin1;  "
 			);
-			auto results = QueryDatabase(rquery);
+			results = QueryDatabase(rquery);
 			printf(" done...\n");
 		}
 		/* Check for table `character_material` */
@@ -822,7 +822,7 @@ bool Database::CheckDatabaseConvertPPDeblob()
 				"KEY `id` (`id`)"
 				") ENGINE = InnoDB AUTO_INCREMENT = 1 DEFAULT CHARSET = latin1;"
 			);
-			auto results = QueryDatabase(rquery);
+			results = QueryDatabase(rquery);
 			printf(" done...\n");
 		}
 		/* Check for table `character_tribute` */
@@ -838,7 +838,7 @@ bool Database::CheckDatabaseConvertPPDeblob()
 				"KEY `id` (`id`)											   "
 				") ENGINE = InnoDB DEFAULT CHARSET = latin1;"
 			);
-			auto results = QueryDatabase(rquery);
+			results = QueryDatabase(rquery);
 			printf(" done...\n");
 		}
 		/* Check for table `character_bandolier` */
@@ -858,7 +858,7 @@ bool Database::CheckDatabaseConvertPPDeblob()
 				"KEY `id` (`id`)												"
 				") ENGINE = InnoDB DEFAULT CHARSET = latin1;	"
 			);
-			auto results = QueryDatabase(rquery);
+			results = QueryDatabase(rquery);
 			printf(" done...\n");
 		}
 		/* Check for table `character_potionbelt` */
@@ -876,7 +876,7 @@ bool Database::CheckDatabaseConvertPPDeblob()
 				"KEY `id` (`id`)												  "
 				") ENGINE = InnoDB DEFAULT CHARSET = latin1;"
 			);
-			auto results = QueryDatabase(rquery);
+			results = QueryDatabase(rquery);
 			printf(" done...\n");
 		}
 		/* Check for table `character_potionbelt` */
@@ -892,7 +892,7 @@ bool Database::CheckDatabaseConvertPPDeblob()
 				"KEY `id` (`id`)												  "
 				") ENGINE = InnoDB DEFAULT CHARSET = latin1;"
 			);
-			auto results = QueryDatabase(rquery);
+			results = QueryDatabase(rquery);
 			printf(" done...\n");
 		}
 		/* Check for table `character_leadership_abilities` */
@@ -909,7 +909,7 @@ bool Database::CheckDatabaseConvertPPDeblob()
 				"KEY `id` (`id`)												  "
 				") ENGINE = InnoDB DEFAULT CHARSET = latin1; "
 			);
-			auto results = QueryDatabase(rquery);
+			results = QueryDatabase(rquery);
 			printf(" done...\n");
 		}
 
