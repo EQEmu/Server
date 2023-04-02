@@ -36,9 +36,7 @@ void WorldserverCLI::DatabaseDump(int argc, char **argv, argh::parser &cmd, std:
 		s->SetDumpPath(cmd("--dump-path").str());
 	}
 
-	/**
-	 * Set Option
-	 */
+	// options
 	s->SetDumpContentTables(cmd[{"--content-tables"}] || dump_all);
 	s->SetDumpLoginServerTables(cmd[{"--login-tables"}] || dump_all);
 	s->SetDumpPlayerTables(cmd[{"--player-tables"}] || dump_all);
@@ -48,15 +46,11 @@ void WorldserverCLI::DatabaseDump(int argc, char **argv, argh::parser &cmd, std:
 	s->SetDumpSystemTables(cmd[{"--system-tables"}] || dump_all);
 	s->SetDumpQueryServerTables(cmd[{"--query-serv-tables"}] || dump_all);
 	s->SetDumpAllTables(dump_all);
-
 	s->SetDumpWithNoData(cmd[{"--table-structure-only"}]);
 	s->SetDumpTableLock(cmd[{"--table-lock"}]);
 	s->SetDumpWithCompression(cmd[{"--compress"}]);
 	s->SetDumpOutputToConsole(cmd[{"--dump-output-to-console"}]);
 	s->SetDumpDropTableSyntaxOnly(cmd[{"--drop-table-syntax-only"}]);
 
-	/**
-	 * Dump
-	 */
-	s->Dump();
+	s->DatabaseDump();
 }

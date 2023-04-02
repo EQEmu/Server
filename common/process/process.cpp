@@ -4,7 +4,8 @@
 
 std::string Process::execute(const std::string &cmd)
 {
-	std::shared_ptr<FILE> pipe(popen(cmd.c_str(), "r"), pclose);
+	std::string           command = fmt::format("{} 2>&1", cmd);
+	std::shared_ptr<FILE> pipe(popen(command.c_str(), "r"), pclose);
 	if (!pipe) { return "ERROR"; }
 	char        buffer[128];
 	std::string result;
