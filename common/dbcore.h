@@ -35,7 +35,7 @@ public:
 	const std::string &GetOriginHost() const;
 	void SetOriginHost(const std::string &origin_host);
 
-	bool DoesTableExist(std::string table_name);
+	bool DoesTableExist(const std::string& table_name);
 
 	void SetMySQL(const DBcore &o)
 	{
