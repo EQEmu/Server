@@ -167,7 +167,7 @@ public:
 	std::vector<std::string> GetContentFlagsDisabled();
 	bool IsContentFlagEnabled(const std::string& content_flag);
 	bool IsContentFlagDisabled(const std::string& content_flag);
-	void SetContentFlags(std::vector<ContentFlagsRepository::ContentFlags> content_flags);
+	void SetContentFlags(const std::vector<ContentFlagsRepository::ContentFlags>& content_flags);
 	void ReloadContentFlags();
 	WorldContentService * SetExpansionContext();
 
