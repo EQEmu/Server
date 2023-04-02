@@ -3708,7 +3708,7 @@ bool Mob::HateSummon() {
 	if(target)
 	{
 		if(summon_level == 1) {
-			if (!RulesB(Combat, SummonMeleeRange) && CombatRange(target)) {
+			if (!RuleB(Combat, SummonMeleeRange) && CombatRange(target)) {
 				return false;
 			}
 
