@@ -967,7 +967,7 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 				loadbar(char_iter_count, number_of_characters, 50);
 
 				/* Run inspect message convert  */
-				if (inspectmessage != ""){
+				if (!inspectmessage.empty()){
 					std::string rquery = StringFormat("REPLACE INTO `character_inspect_messages` (id, inspect_message)"
 						"VALUES (%u, '%s')",
 						character_id,
@@ -1314,7 +1314,7 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 				The speed difference is dramatic
 				*/
 				/* Run AA Convert */
-				int first_entry = 0; rquery = "";
+				int first_entry = 0; rquery.clear();
 				for (i = 0; i < MAX_PP_AA_ARRAY; i++){
 					if (pp->aa_array[i].AA > 0 && pp->aa_array[i].value > 0){
 						if (first_entry != 1){
@@ -1327,14 +1327,14 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 						}
 					}
 				}
-				if (rquery != ""){ results = QueryDatabase(rquery); }
+				if (!rquery.empty()){ results = QueryDatabase(rquery); }
 
 				/* Run Bind Home Convert */
 				if (pp->binds[4].zone_id < 999 && !_ISNAN_(pp->binds[4].x) && !_ISNAN_(pp->binds[4].y) && !_ISNAN_(pp->binds[4].z) && !_ISNAN_(pp->binds[4].heading)) {
 					rquery = StringFormat("REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, is_home)"
 						" VALUES (%u, %u, %u, %f, %f, %f, %f, 1)",
 						character_id, pp->binds[4].zone_id, 0, pp->binds[4].x, pp->binds[4].y, pp->binds[4].z, pp->binds[4].heading);
-					if (rquery != ""){ results = QueryDatabase(rquery); }
+					if (!rquery.empty()){ results = QueryDatabase(rquery); }
 				}
 
 				/* Run Bind Convert */
@@ -1342,10 +1342,10 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 					rquery = StringFormat("REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, is_home)"
 						" VALUES (%u, %u, %u, %f, %f, %f, %f, 0)",
 						character_id, pp->binds[0].zone_id, 0, pp->binds[0].x, pp->binds[0].y, pp->binds[0].z, pp->binds[0].heading);
-					if (rquery != ""){ results = QueryDatabase(rquery); }
+					if (!rquery.empty()){ results = QueryDatabase(rquery); }
 				}
 				/* Run Language Convert */
-				first_entry = 0; rquery = "";
+				first_entry = 0; rquery.clear();
 				for (i = 0; i < MAX_PP_LANGUAGE; i++){
 					if (pp->languages[i] > 0){
 						if (first_entry != 1){
@@ -1355,9 +1355,9 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 						rquery = rquery + StringFormat(", (%u, %u, %u)", character_id, i, pp->languages[i]);
 					}
 				}
-				if (rquery != ""){ results = QueryDatabase(rquery); }
+				if (!rquery.empty()){ results = QueryDatabase(rquery); }
 				/* Run Skill Convert */
-				first_entry = 0; rquery = "";
+				first_entry = 0; rquery.clear();
 				for (i = 0; i < MAX_PP_SKILL; i++){
 					if (pp->skills[i] > 0){
 						if (first_entry != 1){
@@ -1367,9 +1367,9 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 						rquery = rquery + StringFormat(", (%u, %u, %u)", character_id, i, pp->skills[i]);
 					}
 				}
-				if (rquery != ""){ results = QueryDatabase(rquery); }
+				if (!rquery.empty()){ results = QueryDatabase(rquery); }
 				/* Run Spell Convert */
-				first_entry = 0; rquery = "";
+				first_entry = 0; rquery.clear();
 				for (i = 0; i < 480; i++){
 					if (pp->spell_book[i] > 0 && pp->spell_book[i] != 4294967295 && pp->spell_book[i] < 40000 && pp->spell_book[i] != 1){
 						if (first_entry != 1){
@@ -1379,9 +1379,9 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 						rquery = rquery + StringFormat(", (%u, %u, %u)", character_id, i, pp->spell_book[i]);
 					}
 				}
-				if (rquery != ""){ results = QueryDatabase(rquery); }
+				if (!rquery.empty()){ results = QueryDatabase(rquery); }
 				/* Run Max Memmed Spell Convert */
-				first_entry = 0; rquery = "";
+				first_entry = 0; rquery.clear();
 				for (i = 0; i < 9; i++){
 					if (pp->mem_spells[i] > 0 && pp->mem_spells[i] != 65535 && pp->mem_spells[i] != 4294967295){
 						if (first_entry != 1){
@@ -1391,9 +1391,9 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 						rquery = rquery + StringFormat(", (%u, %u, %u)", character_id, i, pp->mem_spells[i]);
 					}
 				}
-				if (rquery != ""){ results = QueryDatabase(rquery); }
+				if (!rquery.empty()){ results = QueryDatabase(rquery); }
 				/* Run Discipline Convert */
-				first_entry = 0; rquery = "";
+				first_entry = 0; rquery.clear();
 				for (i = 0; i < MAX_PP_DISCIPLINES; i++){
 					if (pp->disciplines.values[i] > 0 && pp->disciplines.values[i] < 60000){
 						if (first_entry != 1){
@@ -1403,9 +1403,9 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 						rquery = rquery + StringFormat(", (%u, %u, %u)", character_id, i, pp->disciplines.values[i]);
 					}
 				}
-				if (rquery != ""){ results = QueryDatabase(rquery); }
+				if (!rquery.empty()){ results = QueryDatabase(rquery); }
 				/* Run Material Color Convert */
-				first_entry = 0; rquery = "";
+				first_entry = 0; rquery.clear();
 				for (i = EQ::textures::textureBegin; i < EQ::textures::materialCount; i++){
 					if (pp->item_tint[i].color > 0){
 						if (first_entry != 1){
@@ -1415,9 +1415,9 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 						rquery = rquery + StringFormat(", (%u, %u, %u, %u, %u, %u, %u)", character_id, i, pp->item_tint[i].rgb.blue, pp->item_tint[i].rgb.green, pp->item_tint[i].rgb.red, pp->item_tint[i].rgb.use_tint, pp->item_tint[i].color);
 					}
 				}
-				if (rquery != ""){ results = QueryDatabase(rquery); }
+				if (!rquery.empty()){ results = QueryDatabase(rquery); }
 				/* Run Tribute Convert */
-				first_entry = 0; rquery = "";
+				first_entry = 0; rquery.clear();
 				for (i = 0; i < 5; i++){
 					if (pp->tributes[i].tribute > 0 && pp->tributes[i].tribute != 4294967295){
 						if (first_entry != 1){
@@ -1427,9 +1427,9 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 						rquery = rquery + StringFormat(", (%u, %u, %u)", character_id, pp->tributes[i].tier, pp->tributes[i].tribute);
 					}
 				}
-				if (rquery != ""){ results = QueryDatabase(rquery); }
+				if (!rquery.empty()){ results = QueryDatabase(rquery); }
 				/* Run Bandolier Convert */
-				first_entry = 0; rquery = "";
+				first_entry = 0; rquery.clear();
 				for (i = 0; i < Convert::BANDOLIERS_SIZE; i++){
 					if (strlen(pp->bandoliers[i].Name) < 32) {
 						for (int si = 0; si < Convert::BANDOLIER_ITEM_COUNT; si++){
@@ -1443,9 +1443,9 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 						}
 					}
 				}
-				if (rquery != ""){ results = QueryDatabase(rquery); }
+				if (!rquery.empty()){ results = QueryDatabase(rquery); }
 				/* Run Potion Belt Convert */
-				first_entry = 0; rquery = "";
+				first_entry = 0; rquery.clear();
 				for (i = 0; i < Convert::POTION_BELT_ITEM_COUNT; i++){
 					if (pp->potionbelt.Items[i].ID > 0){
 						if (first_entry != 1){
@@ -1456,9 +1456,9 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 
 					}
 				}
-				if (rquery != ""){ results = QueryDatabase(rquery); }
+				if (!rquery.empty()){ results = QueryDatabase(rquery); }
 				/* Run Leadership AA Convert */
-				first_entry = 0; rquery = "";
+				first_entry = 0; rquery.clear();
 				for (i = 0; i < MAX_LEADERSHIP_AA_ARRAY; i++){
 					if (pp->leader_abilities.ranks[i] > 0 && pp->leader_abilities.ranks[i] < 6){
 						if (first_entry != 1){
@@ -1468,7 +1468,7 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 						rquery = rquery + StringFormat(", (%i, %u, %u)", character_id, i, pp->leader_abilities.ranks[i]);
 					}
 				}
-				if (rquery != ""){ results = QueryDatabase(rquery); }
+				if (!rquery.empty()){ results = QueryDatabase(rquery); }
 			}
 		}
 		if (runconvert == 1){
@@ -1672,10 +1672,10 @@ bool Database::CheckDatabaseConvertCorpseDeblob(){
 						dbpc->item_tint[8].color,
 						Strings::ToUnsignedInt(row2[0])
 						);
-					if (scquery != ""){ auto sc_results = QueryDatabase(scquery); }
+					if (!scquery.empty()){ auto sc_results = QueryDatabase(scquery); }
 
 					first_entry = 0;
-					scquery = "";
+					scquery.clear();
 					/* Print Items */
 					for (unsigned int i = 0; i < dbpc->itemcount; i++) {
 						if (first_entry != 1){
@@ -1712,7 +1712,7 @@ bool Database::CheckDatabaseConvertCorpseDeblob(){
 								);
 						}
 					}
-					if (scquery != ""){ auto sc_results = QueryDatabase(scquery); }
+					if (!scquery.empty()){ auto sc_results = QueryDatabase(scquery); }
 				}
 				else{
 					/* Classic Converter */
@@ -1780,10 +1780,10 @@ bool Database::CheckDatabaseConvertCorpseDeblob(){
 						dbpc_c->item_tint[8].color,
 						Strings::ToUnsignedInt(row2[0])
 						);
-					if (scquery != ""){ auto sc_results = QueryDatabase(scquery); }
+					if (!scquery.empty()){ auto sc_results = QueryDatabase(scquery); }
 
 					first_entry = 0;
-					scquery = "";
+					scquery.clear();
 
 					/* Print Items */
 					for (unsigned int i = 0; i < dbpc_c->itemcount; i++) {
@@ -1821,7 +1821,7 @@ bool Database::CheckDatabaseConvertCorpseDeblob(){
 								);
 						}
 					}
-					if (scquery != ""){ auto sc_results = QueryDatabase(scquery); }
+					if (!scquery.empty()){ auto sc_results = QueryDatabase(scquery); }
 				}
 			}
 		}
