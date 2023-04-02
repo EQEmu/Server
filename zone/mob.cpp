@@ -3708,10 +3708,6 @@ bool Mob::HateSummon() {
 	if(target)
 	{
 		if(summon_level == 1) {
-			if (!RuleB(Combat, SummonMeleeRange) && CombatRange(target)) {
-				return false;
-			}
-
 			entity_list.MessageClose(this, true, 500, Chat::Say, "%s says 'You will not evade me, %s!' ", GetCleanName(), target->GetCleanName() );
 
 			float summoner_zoff = GetZOffset();
