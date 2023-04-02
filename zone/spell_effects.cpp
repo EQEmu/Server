@@ -2189,6 +2189,10 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						if (RuleR(Spells, CallOfTheHeroAggroClearDist) == 0 || caster->CalculateDistance(GetX(), GetY(), GetZ()) >= RuleR(Spells, CallOfTheHeroAggroClearDist)) {
 							entity_list.ClearAggro(this);
 						}
+					} else if (!RulesB(Combat, SummonMeleeRange) &&
+							   caster->GetZoneID() == GetZoneID() && caster->GetInstanceID() == GetInstanceID() &&
+							   caster->CombatRange(this)) {
+						break;
 					}
 
 					CastToClient()->MovePC(zone->GetZoneID(), zone->GetInstanceID(), caster->GetX(),
