@@ -452,7 +452,6 @@ void Mob::WakeTheDead(uint16 spell_id, Corpse *corpse_to_use, Mob *target, uint3
 		break;
 	}
 
-	made_npc->loottable_id = 0;
 	made_npc->merchanttype = 0;
 	made_npc->d_melee_texture1 = 0;
 	made_npc->d_melee_texture2 = 0;
