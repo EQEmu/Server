@@ -37,7 +37,7 @@ void DiscordManager::ProcessMessageQueue()
 					message,
 					webhook.webhook_url
 				);
-				message = "";
+				message.clear();
 			}
 
 			message += m;
@@ -51,7 +51,7 @@ void DiscordManager::ProcessMessageQueue()
 						webhook.webhook_url
 					);
 				}
-				message = "";
+				message.clear();
 			}
 		}
 		// final flush
