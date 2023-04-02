@@ -4211,8 +4211,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 		else
 			a->special = 0;
 		a->hit_heading = attacker ? attacker->GetHeading() : 0.0f;
-		if (RuleB(Combat, MeleePush) && damage > 0 && !IsRooted() &&
-			(IsClient() || zone->random.Roll(RuleI(Combat, MeleePushChance)))) {
+		if (RuleB(Combat, MeleePush) && damage > 0 && !IsRooted() && zone->random.Roll(RuleI(Combat, MeleePushChance))) {
 			a->force = EQ::skills::GetSkillMeleePushForce(skill_used);
 			if (IsNPC()) {
 				if (attacker && attacker->IsNPC()) {
