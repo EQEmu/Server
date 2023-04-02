@@ -6,17 +6,8 @@
 #include "groups.h"
 #include "mob.h"
 
-#include "../common/eqemu_logsys.h"
-#include "../common/eq_packet_structs.h"
-#include "../common/eq_constants.h"
-#include "../common/skills.h"
-#include "../common/spdat.h"
-
 #include "zone.h"
 #include "string_ids.h"
-
-#include "../common/strings.h"
-#include "../common/rulesys.h"
 
 extern volatile bool is_zone_loaded;
 

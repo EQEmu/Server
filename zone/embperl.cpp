@@ -12,13 +12,9 @@ Eglin
 
 #include "../common/global_define.h"
 #include "../common/eqemu_logsys.h"
-#include <cstdio>
-#include <cstdarg>
 #include <vector>
 #include "embperl.h"
-#include "embxs.h"
 #include "../common/features.h"
-#include "../common/path_manager.h"
 #include "../common/process/process.h"
 #include "../common/file.h"
 #include "../common/timer.h"

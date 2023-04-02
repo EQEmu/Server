@@ -23,7 +23,6 @@
 #include "../common/spdat.h"
 
 #include "client.h"
-#include "corpse.h"
 #include "entity.h"
 #include "mob.h"
 

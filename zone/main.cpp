@@ -47,7 +47,6 @@
 #include "command.h"
 #include "bot_command.h"
 #include "zonedb.h"
-#include "../common/zone_store.h"
 #include "titles.h"
 #include "guild_mgr.h"
 #include "task_manager.h"
@@ -58,11 +57,8 @@
 #include "npc_scale_manager.h"
 
 #include "../common/net/eqstream.h"
-#include "../common/content/world_content_service.h"
 
-#include <stdlib.h>
 #include <signal.h>
-#include <time.h>
 #include <chrono>
 
 #ifdef _CRTDBG_MAP_ALLOC
@@ -71,8 +67,6 @@
 #endif
 
 #ifdef _WINDOWS
-#include <conio.h>
-#include <process.h>
 #else
 #include <pthread.h>
 #include "../common/unix.h"
@@ -88,7 +82,6 @@ extern volatile bool is_zone_loaded;
 
 #include "zone_event_scheduler.h"
 #include "../common/file.h"
-#include "../common/path_manager.h"
 #include "../common/events/player_event_logs.h"
 
 EntityList  entity_list;

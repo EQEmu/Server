@@ -27,11 +27,9 @@
 #include "quest_parser_collection.h"
 #include "worldserver.h"
 #include "zonedb.h"
-#include "../common/zone_store.h"
 #include "../common/repositories/criteria/content_filter_criteria.h"
 #include "../common/events/player_event_logs.h"
 
-#include <iostream>
 
 const char DEFAULT_OBJECT_NAME[] = "IT63_ACTORDEF";
 const char DEFAULT_OBJECT_NAME_SUFFIX[] = "_ACTORDEF";

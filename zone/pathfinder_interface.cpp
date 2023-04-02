@@ -2,8 +2,6 @@
 #include "client.h"
 #include "pathfinder_null.h"
 #include "pathfinder_nav_mesh.h"
-#include "pathfinder_waypoint.h"
-#include "../common/path_manager.h"
 #include <fmt/format.h>
 #include <sys/stat.h>
 

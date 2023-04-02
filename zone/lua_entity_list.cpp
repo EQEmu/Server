@@ -1,12 +1,10 @@
 #ifdef LUA_EQEMU
 
-#include "lua.hpp"
 #include <luabind/luabind.hpp>
 #include <luabind/iterator_policy.hpp>
 
 #include "masterentity.h"
 #include "lua_entity_list.h"
-#include "lua_entity.h"
 #include "lua_mob.h"
 #include "lua_client.h"
 #include "lua_npc.h"

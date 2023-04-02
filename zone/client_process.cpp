@@ -22,12 +22,8 @@
 #include "../common/eqemu_logsys.h"
 #include "../common/global_define.h"
 #include <iostream>
-#include <stdio.h>
-#include <zlib.h>
 
 #ifdef _WINDOWS
-	#include <winsock2.h>
-	#include <windows.h>
 	#define snprintf	_snprintf
 	#define strncasecmp	_strnicmp
 	#define strcasecmp	_stricmp
@@ -54,7 +50,6 @@
 #include "worldserver.h"
 #include "zone.h"
 #include "zonedb.h"
-#include "../common/zone_store.h"
 #include "../common/events/player_event_logs.h"
 
 extern QueryServ* QServ;

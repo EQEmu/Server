@@ -24,9 +24,7 @@
 #include "groups.h"
 #include "raids.h"
 #include "string_ids.h"
-#include "../common/expedition_lockout_timer.h"
 #include "../common/repositories/character_expedition_lockouts_repository.h"
-#include "../common/repositories/expeditions_repository.h"
 
 constexpr char SystemName[] = "expedition";
 

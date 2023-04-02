@@ -1,6 +1,5 @@
 #include "position.h"
 
-#include <algorithm>
 #include <string>
 #include <cmath>
 #include "../common/strings.h"

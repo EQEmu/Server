@@ -26,7 +26,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include <string.h>
 #include <zlib.h>
 #include "bot.h"
-#include "bot_command.h"
 
 #ifdef _WINDOWS
 #define snprintf	_snprintf
@@ -39,23 +38,14 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include <unistd.h>
 #endif
 
-#include "../common/crc32.h"
 #include "../common/data_verification.h"
-#include "../common/faction.h"
-#include "../common/guilds.h"
 #include "../common/rdtsc.h"
-#include "../common/rulesys.h"
-#include "../common/skills.h"
-#include "../common/spdat.h"
-#include "../common/strings.h"
 #include "data_bucket.h"
 #include "event_codes.h"
 #include "expedition.h"
-#include "expedition_database.h"
 #include "guild_mgr.h"
 #include "merc.h"
 #include "petitions.h"
-#include "pets.h"
 #include "queryserv.h"
 #include "quest_parser_collection.h"
 #include "string_ids.h"
@@ -71,7 +61,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "client.h"
 #include "../common/repositories/account_repository.h"
 
-#include "bot.h"
 #include "../common/events/player_event_logs.h"
 
 extern QueryServ* QServ;

@@ -36,9 +36,7 @@
 #include "worldserver.h"
 #include "zone.h"
 #include "zonedb.h"
-#include "../common/zone_store.h"
 #include "dialogue_window.h"
-#include "string_ids.h"
 
 #include "../common/repositories/tradeskill_recipe_repository.h"
 

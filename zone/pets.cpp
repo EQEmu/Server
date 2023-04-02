@@ -19,7 +19,6 @@
 #include "../common/global_define.h"
 #include "../common/spdat.h"
 #include "../common/strings.h"
-#include "../common/types.h"
 
 #include "entity.h"
 #include "client.h"
@@ -27,7 +26,6 @@
 
 #include "pets.h"
 #include "zonedb.h"
-#include "../common/zone_store.h"
 
 #include <string>
 

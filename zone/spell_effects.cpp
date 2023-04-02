@@ -22,7 +22,6 @@
 #include "../common/global_define.h"
 #include "../common/item_instance.h"
 #include "../common/rulesys.h"
-#include "../common/skills.h"
 #include "../common/spdat.h"
 #include "../common/data_verification.h"
 #include "../common/misc_functions.h"

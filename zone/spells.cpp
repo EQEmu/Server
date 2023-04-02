@@ -72,7 +72,6 @@ Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 #include "../common/eqemu_logsys.h"
 #include "../common/item_instance.h"
 #include "../common/rulesys.h"
-#include "../common/skills.h"
 #include "../common/spdat.h"
 #include "../common/strings.h"
 #include "../common/data_verification.h"
@@ -86,7 +85,6 @@ Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 #include "fastmath.h"
 
 #include <assert.h>
-#include <math.h>
 #include <algorithm>
 
 #ifndef WIN32

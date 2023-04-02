@@ -46,7 +46,6 @@ extern volatile bool RunLoops;
 #include "position.h"
 #include "worldserver.h"
 #include "zonedb.h"
-#include "../common/zone_store.h"
 #include "petitions.h"
 #include "command.h"
 #include "water_map.h"
@@ -57,8 +56,6 @@ extern volatile bool RunLoops;
 #include "quest_parser_collection.h"
 #include "queryserv.h"
 #include "mob_movement_manager.h"
-#include "../common/content/world_content_service.h"
-#include "../common/expedition_lockout_timer.h"
 #include "cheat_manager.h"
 
 #include "../common/repositories/bug_reports_repository.h"

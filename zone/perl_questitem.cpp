@@ -4,7 +4,6 @@
 #ifdef EMBPERL_XS_CLASSES
 
 #include "../common/global_define.h"
-#include "../common/item_instance.h"
 #include "embperl.h"
 
 std::string Perl_QuestItem_GetName(EQ::ItemInstance* self) // @categories Inventory and Items

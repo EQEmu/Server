@@ -6,7 +6,6 @@
 #include "raycast_mesh.h"
 #include "zone.h"
 #include "../common/file.h"
-#include "../common/path_manager.h"
 
 #include <algorithm>
 #include <map>

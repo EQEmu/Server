@@ -18,7 +18,6 @@
 
 #include "../common/global_define.h"
 #include "../common/loottable.h"
-#include "../common/misc_functions.h"
 #include "../common/data_verification.h"
 
 #include "client.h"
@@ -26,13 +25,8 @@
 #include "mob.h"
 #include "npc.h"
 #include "zonedb.h"
-#include "../common/zone_store.h"
 #include "global_loot_manager.h"
 #include "../common/repositories/criteria/content_filter_criteria.h"
-#include "../common/say_link.h"
-
-#include <iostream>
-#include <stdlib.h>
 
 #ifdef _WINDOWS
 #define snprintf	_snprintf

@@ -22,7 +22,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "mob.h"
 #include "raids.h"
 
-#include "../common/rulesys.h"
 #include "../common/data_verification.h"
 
 #include "hate_list.h"
@@ -30,7 +29,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "zone.h"
 #include "water_map.h"
 
-#include <stdlib.h>
 #include <list>
 
 extern Zone *zone;

@@ -19,7 +19,6 @@ Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 #include "../common/eqemu_logsys.h"
 #include <string.h>
 #ifdef _WINDOWS
-#include <process.h>
 #else
 #include <pthread.h>
 #endif

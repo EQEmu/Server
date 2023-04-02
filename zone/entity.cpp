@@ -17,14 +17,12 @@
 */
 #include "../common/data_verification.h"
 #include "../common/global_define.h"
-#include <stdlib.h>
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
 #include <iostream>
 
 #ifdef _WINDOWS
-#include <process.h>
 #else
 #include <pthread.h>
 #include "../common/unix.h"
@@ -43,7 +41,6 @@
 #include "worldserver.h"
 #include "water_map.h"
 #include "npc_scale_manager.h"
-#include "../common/say_link.h"
 #include "dialogue_window.h"
 
 #ifdef _WINDOWS
