@@ -17,6 +17,13 @@ Lua_ItemInst::Lua_ItemInst(int item_id, int charges) {
 	cloned_ = true;
 }
 
+Lua_ItemInst::~Lua_ItemInst() {
+	if (cloned_) {
+		EQ::ItemInstance *ptr = GetLuaPtrData();
+		delete ptr;
+	}
+}
+
 Lua_ItemInst& Lua_ItemInst::operator=(const Lua_ItemInst& o) {
 	if(o.cloned_) {
 		cloned_ = true;
