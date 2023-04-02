@@ -2043,10 +2043,12 @@ uint32 Database::GetRaidIDByCharID(uint32 character_id) {
 		character_id
 	);
 	auto results = QueryDatabase(query);
-	for (auto row = results.begin(); row != results.end(); ++row) {
-		return Strings::ToUnsignedInt(row[0]);
+	if (!results.Success() || !results.RowCount()) {
+		return 0;
 	}
-	return 0;
+
+	auto row = results.begin();
+	return Strings::ToUnsignedInt(row[0]);
 }
 
 int Database::CountInvSnapshots() {
