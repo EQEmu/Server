@@ -22,7 +22,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "mob.h"
 #include "raids.h"
 
-#include "../common/rulesys.h"
 #include "../common/data_verification.h"
 
 #include "hate_list.h"
@@ -30,7 +29,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "zone.h"
 #include "water_map.h"
 
-#include <stdlib.h>
 #include <list>
 
 extern Zone *zone;
@@ -483,20 +481,22 @@ Mob *HateList::GetEntWithMostHateOnList(Mob *center, Mob *skip, bool skip_mezzed
 		while (iterator != list.end())
 		{
 			struct_HateList *cur = (*iterator);
-			if (cur->entity_on_hatelist == skip) {
-				++iterator;
-				continue;
-			}
+			if (cur) {
+				if (cur->entity_on_hatelist == skip) {
+					++iterator;
+					continue;
+				}
 
-			if (skip_mezzed && cur->entity_on_hatelist->IsMezzed()) {
-				++iterator;
-				continue;
-			}
+				if (skip_mezzed && cur->entity_on_hatelist->IsMezzed()) {
+					++iterator;
+					continue;
+				}
 
-			if (cur->entity_on_hatelist != nullptr && ((cur->stored_hate_amount > hate) || cur->is_entity_frenzy))
-			{
-				top_hate = cur->entity_on_hatelist;
-				hate = cur->stored_hate_amount;
+				if (cur->entity_on_hatelist != nullptr && ((cur->stored_hate_amount > hate) || cur->is_entity_frenzy))
+				{
+					top_hate = cur->entity_on_hatelist;
+					hate = cur->stored_hate_amount;
+				}
 			}
 			++iterator;
 		}
@@ -516,24 +516,27 @@ Mob *HateList::GetEntWithMostHateOnList(bool skip_mezzed){
 	while (iterator != list.end())
 	{
 		struct_HateList *cur = (*iterator);
-		LogHateDetail(
-			"Looping GetEntWithMostHateOnList1 [{}] cur [{}] hate [{}] calc [{}]",
-			cur->entity_on_hatelist->GetMobDescription(),
-			cur->stored_hate_amount,
-			hate,
-			(cur->stored_hate_amount > hate)
-		);
 
-		if (cur && cur->entity_on_hatelist != nullptr && (cur->stored_hate_amount > hate))
-		{
+		if (cur) {
 			LogHateDetail(
-				"Looping GetEntWithMostHateOnList2 [{}]",
-				cur->entity_on_hatelist->GetMobDescription()
+				"Looping GetEntWithMostHateOnList1 [{}] cur [{}] hate [{}] calc [{}]",
+				cur->entity_on_hatelist->GetMobDescription(),
+				cur->stored_hate_amount,
+				hate,
+				(cur->stored_hate_amount > hate)
 			);
 
-			if (!skip_mezzed || !cur->entity_on_hatelist->IsMezzed()) {
-				top = cur->entity_on_hatelist;
-				hate = cur->stored_hate_amount;
+			if (cur->entity_on_hatelist != nullptr && (cur->stored_hate_amount > hate))
+			{
+				LogHateDetail(
+					"Looping GetEntWithMostHateOnList2 [{}]",
+					cur->entity_on_hatelist->GetMobDescription()
+				);
+
+				if (!skip_mezzed || !cur->entity_on_hatelist->IsMezzed()) {
+					top = cur->entity_on_hatelist;
+					hate = cur->stored_hate_amount;
+				}
 			}
 		}
 		++iterator;

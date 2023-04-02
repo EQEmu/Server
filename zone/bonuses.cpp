@@ -20,7 +20,6 @@
 #include "../common/global_define.h"
 #include "../common/item_instance.h"
 #include "../common/rulesys.h"
-#include "../common/skills.h"
 #include "../common/spdat.h"
 
 #include "client.h"
@@ -1442,9 +1441,10 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 		}
 
 		case SE_SlayUndead: {
-			if (newbon->SlayUndead[SBIndex::SLAYUNDEAD_DMG_MOD] < base_value)
+			if (newbon->SlayUndead[SBIndex::SLAYUNDEAD_DMG_MOD] < base_value) {
 				newbon->SlayUndead[SBIndex::SLAYUNDEAD_RATE_MOD] = base_value; // Rate
-			newbon->SlayUndead[SBIndex::SLAYUNDEAD_DMG_MOD]      = limit_value;	 // Damage Modifier
+				newbon->SlayUndead[SBIndex::SLAYUNDEAD_DMG_MOD] = limit_value; // Damage Modifier
+			}
 			break;
 		}
 
@@ -1612,9 +1612,10 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 		}
 
 		case SE_HeadShotLevel: {
-			if (newbon->HSLevel[SBIndex::FINISHING_EFFECT_LEVEL_MAX] < base_value)
-				newbon->HSLevel[SBIndex::FINISHING_EFFECT_LEVEL_MAX]          = base_value;
+			if (newbon->HSLevel[SBIndex::FINISHING_EFFECT_LEVEL_MAX] < base_value) {
+				newbon->HSLevel[SBIndex::FINISHING_EFFECT_LEVEL_MAX] = base_value;
 				newbon->HSLevel[SBIndex::FINISHING_EFFECT_LEVEL_CHANCE_BONUS] = limit_value;
+			}
 			break;
 		}
 
@@ -1802,8 +1803,9 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 		case SE_Damage_Taken_Position_Mod:
 		{
 			//Mitigate if damage taken from behind base2 = 0, from front base2 = 1
-			if (limit_value < 0 || limit_value > 2)
+			if (limit_value < 0 || limit_value >= 2) {
 				break;
+			}
 			else if (base_value < 0 && newbon->Damage_Taken_Position_Mod[limit_value] > base_value)
 				newbon->Damage_Taken_Position_Mod[limit_value] = base_value;
 			else if (base_value > 0 && newbon->Damage_Taken_Position_Mod[limit_value] < base_value)
@@ -1813,8 +1815,9 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 
 		case SE_Melee_Damage_Position_Mod:
 		{
-			if (limit_value < 0 || limit_value > 2)
+			if (limit_value < 0 || limit_value >= 2) {
 				break;
+			}
 			else if (base_value < 0 && newbon->Melee_Damage_Position_Mod[limit_value] > base_value)
 				newbon->Melee_Damage_Position_Mod[limit_value] = base_value;
 			else if (base_value > 0 && newbon->Melee_Damage_Position_Mod[limit_value] < base_value)
@@ -1825,9 +1828,9 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 		case SE_Damage_Taken_Position_Amt:
 		{
 			//Mitigate if damage taken from behind base2 = 0, from front base2 = 1
-			if (limit_value < 0 || limit_value > 2)
+			if (limit_value < 0 || limit_value >= 2) {
 				break;
-
+			}
 			newbon->Damage_Taken_Position_Amt[limit_value] += base_value;
 			break;
 		}
@@ -1835,8 +1838,9 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 		case SE_Melee_Damage_Position_Amt:
 		{
 			//Mitigate if damage taken from behind base2 = 0, from front base2 = 1
-			if (limit_value < 0 || limit_value > 2)
+			if (limit_value < 0 || limit_value >= 2) {
 				break;
+			}
 
 			newbon->Melee_Damage_Position_Amt[limit_value] += base_value;
 			break;
@@ -3175,8 +3179,9 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 			case SE_HPToMana:
 			{
 				//Lower the ratio the more favorable
-				if((!new_bonus->HPToManaConvert) || (new_bonus->HPToManaConvert >= effect_value))
-				new_bonus->HPToManaConvert = spells[spell_id].base_value[i];
+				if ((!new_bonus->HPToManaConvert) || (new_bonus->HPToManaConvert >= effect_value)) {
+					new_bonus->HPToManaConvert = spells[spell_id].base_value[i];
+				}
 				break;
 			}
 
@@ -3523,11 +3528,11 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				break;
 			}
 
-			case SE_SlayUndead:
-			{
-				if(new_bonus->SlayUndead[SBIndex::SLAYUNDEAD_DMG_MOD] < effect_value)
+			case SE_SlayUndead: {
+				if (new_bonus->SlayUndead[SBIndex::SLAYUNDEAD_DMG_MOD] < effect_value) {
 					new_bonus->SlayUndead[SBIndex::SLAYUNDEAD_RATE_MOD] = effect_value; // Rate
-					new_bonus->SlayUndead[SBIndex::SLAYUNDEAD_DMG_MOD]  = limit_value; // Damage Modifier
+					new_bonus->SlayUndead[SBIndex::SLAYUNDEAD_DMG_MOD] = limit_value; // Damage Modifier
+				}
 				break;
 			}
 
@@ -3669,9 +3674,8 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				break;
 			}
 
-			case SE_HeadShotLevel:
-			{
-				if(new_bonus->HSLevel[SBIndex::FINISHING_EFFECT_LEVEL_MAX] < effect_value) {
+			case SE_HeadShotLevel: {
+				if (new_bonus->HSLevel[SBIndex::FINISHING_EFFECT_LEVEL_MAX] < effect_value) {
 					new_bonus->HSLevel[SBIndex::FINISHING_EFFECT_LEVEL_MAX]          = effect_value;
 					new_bonus->HSLevel[SBIndex::FINISHING_EFFECT_LEVEL_CHANCE_BONUS] = limit_value;
 				}
@@ -3884,8 +3888,9 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 			case SE_Damage_Taken_Position_Mod:
 			{
 				//Mitigate if damage taken from behind base2 = 0, from front base2 = 1
-				if (limit_value < 0 || limit_value > 2)
+				if (limit_value < 0 || limit_value >= 2) {
 					break;
+				}
 				if (AdditiveWornBonus)
 					new_bonus->Damage_Taken_Position_Mod[limit_value] += effect_value;
 				else if (effect_value < 0 && new_bonus->Damage_Taken_Position_Mod[limit_value] > effect_value)
@@ -3898,8 +3903,9 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 			case SE_Melee_Damage_Position_Mod:
 			{
 				//Increase damage by percent from behind base2 = 0, from front base2 = 1
-				if (limit_value < 0 || limit_value > 2)
+				if (limit_value < 0 || limit_value >= 2) {
 					break;
+				}
 				if (AdditiveWornBonus)
 					new_bonus->Melee_Damage_Position_Mod[limit_value] += effect_value;
 				else if (effect_value < 0 && new_bonus->Melee_Damage_Position_Mod[limit_value] > effect_value)
@@ -3912,8 +3918,9 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 			case SE_Damage_Taken_Position_Amt:
 			{
 				//Mitigate if damage taken from behind base2 = 0, from front base2 = 1
-				if (limit_value < 0 || limit_value > 2)
+				if (limit_value < 0 || limit_value >= 2) {
 					break;
+				}
 
 				new_bonus->Damage_Taken_Position_Amt[limit_value] += effect_value;
 				break;
@@ -3922,8 +3929,9 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 			case SE_Melee_Damage_Position_Amt:
 			{
 				//Mitigate if damage taken from behind base2 = 0, from front base2 = 1
-				if (limit_value < 0 || limit_value > 2)
+				if (limit_value < 0 || limit_value >= 2) {
 					break;
+				}
 
 				new_bonus->Melee_Damage_Position_Amt[limit_value] += effect_value;
 				break;

@@ -71,10 +71,10 @@ public:
 	inline void AutoLinkAccounts(bool b) { auto_link_accounts = b; }
 	inline bool CanAutoLinkAccounts() const { return auto_link_accounts; }
 
-	inline void EQEmuLoginServerAddress(std::string v) { eqemu_loginserver_address = v; }
+	inline void EQEmuLoginServerAddress(const std::string& v) { eqemu_loginserver_address = v; }
 	inline std::string GetEQEmuLoginServerAddress() const { return eqemu_loginserver_address; }
 
-	inline void DefaultLoginServerName(std::string v) { default_loginserver_name = v; }
+	inline void DefaultLoginServerName(const std::string& v) { default_loginserver_name = v; }
 	inline std::string GetDefaultLoginServerName() const { return default_loginserver_name; }
 
 	inline void UpdateInsecurePasswords(bool b) { update_insecure_passwords = b; }

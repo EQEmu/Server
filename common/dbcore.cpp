@@ -74,7 +74,7 @@ void DBcore::ping()
 	m_mutex->unlock();
 }
 
-MySQLRequestResult DBcore::QueryDatabase(std::string query, bool retryOnFailureOnce)
+MySQLRequestResult DBcore::QueryDatabase(const std::string& query, bool retryOnFailureOnce)
 {
 	auto r = QueryDatabase(query.c_str(), query.length(), retryOnFailureOnce);
 	return r;

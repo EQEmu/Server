@@ -19,7 +19,6 @@
 #include "../common/global_define.h"
 #include "../common/spdat.h"
 #include "../common/strings.h"
-#include "../common/types.h"
 
 #include "entity.h"
 #include "client.h"
@@ -27,7 +26,6 @@
 
 #include "pets.h"
 #include "zonedb.h"
-#include "../common/zone_store.h"
 
 #include <string>
 
@@ -445,7 +443,7 @@ Pet::Pet(NPCType *type_data, Mob *owner, PetType type, uint16 spell_id, int16 po
 	GiveNPCTypeData(type_data);
 	typeofpet = type;
 	petpower = power;
-	SetOwnerID(owner->GetID());
+	SetOwnerID(owner ? owner->GetID() : 0);
 	SetPetSpellID(spell_id);
 
 	// All pets start at false on newer clients. The client

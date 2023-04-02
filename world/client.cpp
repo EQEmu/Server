@@ -1258,7 +1258,7 @@ bool Client::ChecksumVerificationCRCEQGame(uint64 checksum)
 	std::string checksumvar;
 	uint64_t    checksumint;
 	if (database.GetVariable("crc_eqgame", checksumvar)) {
-		checksumint = Strings::ToBigInt(checksumvar.c_str());
+		checksumint = Strings::ToBigInt(checksumvar);
 	}
 	else {
 		LogChecksumVerification("variable not set in variables table.");
@@ -1281,7 +1281,7 @@ bool Client::ChecksumVerificationCRCSkillCaps(uint64 checksum)
 	std::string checksumvar;
 	uint64_t    checksumint;
 	if (database.GetVariable("crc_skillcaps", checksumvar)) {
-		checksumint = Strings::ToBigInt(checksumvar.c_str());
+		checksumint = Strings::ToBigInt(checksumvar);
 	}
 	else {
 		LogChecksumVerification("[checksum_crc2_skillcaps] variable not set in variables table.");
@@ -1304,7 +1304,7 @@ bool Client::ChecksumVerificationCRCBaseData(uint64 checksum)
 	std::string checksumvar;
 	uint64_t    checksumint;
 	if (database.GetVariable("crc_basedata", checksumvar)) {
-		checksumint = Strings::ToBigInt(checksumvar.c_str());
+		checksumint = Strings::ToBigInt(checksumvar);
 	}
 	else {
 		LogChecksumVerification("variable not set in variables table.");

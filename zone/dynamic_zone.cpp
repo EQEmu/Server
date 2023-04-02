@@ -23,7 +23,6 @@
 #include "expedition.h"
 #include "string_ids.h"
 #include "worldserver.h"
-#include "../common/eqemu_logsys.h"
 
 extern WorldServer worldserver;
 

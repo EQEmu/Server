@@ -2,7 +2,7 @@
 #include "../common/eqemu_logsys.h"
 #include "../common/strings.h"
 
-void CombatRecord::Start(std::string in_mob_name)
+void CombatRecord::Start(const std::string& in_mob_name)
 {
 	m_start_time      = std::time(nullptr);
 	m_end_time        = 0;

@@ -6,14 +6,10 @@
 
 #include "../common/spdat.h"
 #include "masterentity.h"
-#include "questmgr.h"
 #include "zone.h"
-#include "zone_config.h"
 
 #include "lua_parser.h"
 #include "lua_mod.h"
-#include "lua_bit.h"
-#include "lua_entity.h"
 #include "lua_item.h"
 #include "lua_iteminst.h"
 #include "lua_mob.h"
@@ -21,17 +17,12 @@
 #include "lua_client.h"
 #include "lua_inventory.h"
 #include "lua_npc.h"
-#include "lua_spell.h"
-#include "lua_entity_list.h"
 #include "lua_group.h"
 #include "lua_raid.h"
 #include "lua_corpse.h"
 #include "lua_object.h"
 #include "lua_door.h"
-#include "lua_spawn.h"
 #include "lua_packet.h"
-#include "lua_general.h"
-#include "lua_encounter.h"
 #include "lua_stat_bonuses.h"
 
 void LuaMod::Init()

@@ -392,8 +392,7 @@ Corpse::Corpse(Client* client, int32 in_rezexp) : Mob (
 
 	/* Check Rule to see if we can leave corpses */
 	if (
-		!RuleB(Character, LeaveNakedCorpses) ||
-		RuleB(Character, LeaveCorpses) &&
+		(!RuleB(Character, LeaveNakedCorpses) || RuleB(Character, LeaveCorpses)) &&
 		GetLevel() >= RuleI(Character, DeathItemLossLevel)
 	) {
 		// cash

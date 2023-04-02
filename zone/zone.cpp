@@ -18,7 +18,6 @@
 
 #include <float.h>
 #include <iostream>
-#include <math.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -43,8 +42,6 @@
 #include "npc.h"
 #include "object.h"
 #include "pathfinder_null.h"
-#include "pathfinder_nav_mesh.h"
-#include "pathfinder_waypoint.h"
 #include "petitions.h"
 #include "quest_parser_collection.h"
 #include "spawn2.h"
@@ -58,15 +55,11 @@
 #include "../common/data_verification.h"
 #include "zone_reload.h"
 #include "../common/repositories/criteria/content_filter_criteria.h"
-#include "../common/repositories/content_flags_repository.h"
 #include "../common/repositories/merchantlist_repository.h"
 #include "../common/repositories/rule_sets_repository.h"
-#include "../common/repositories/zone_points_repository.h"
 #include "../common/serverinfo.h"
 
 #include <time.h>
-#include <ctime>
-#include <iostream>
 
 #ifdef _WINDOWS
 #define snprintf	_snprintf
@@ -116,7 +109,7 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool is_static) {
 	std::string tmp;
 	if (database.GetVariable("loglevel", tmp)) {
 		int log_levels[4];
-		int tmp_i = Strings::ToInt(tmp.c_str());
+		int tmp_i = Strings::ToInt(tmp);
 		if (tmp_i>9){ //Server is using the new code
 			for(int i=0;i<4;i++){
 				if (((int)tmp[i]>=48) && ((int)tmp[i]<=57))
@@ -1113,7 +1106,7 @@ bool Zone::Init(bool is_static) {
 	if (RuleManager::Instance()->GetActiveRulesetID() != default_ruleset) {
 		std::string r_name = RuleSetsRepository::GetRuleSetName(database, default_ruleset);
 		if (r_name.size() > 0) {
-			RuleManager::Instance()->LoadRules(&database, r_name.c_str(), false);
+			RuleManager::Instance()->LoadRules(&database, r_name, false);
 		}
 	}
 
@@ -1998,6 +1991,11 @@ void Zone::SetTime(uint8 hour, uint8 minute, bool update_world /*= true*/)
 ZonePoint* Zone::GetClosestZonePoint(const glm::vec3& location, uint32 to, Client* client, float max_distance) {
 	LinkedListIterator<ZonePoint*> iterator(zone_point_list);
 	ZonePoint* closest_zp = nullptr;
+
+	if (!client) {
+		return closest_zp;
+	}
+
 	float closest_dist = FLT_MAX;
 	float max_distance2 = max_distance * max_distance;
 	iterator.Reset();
@@ -2027,13 +2025,12 @@ ZonePoint* Zone::GetClosestZonePoint(const glm::vec3& location, uint32 to, Clien
 
 	// if we have a water map and it says we're in a zoneline, lets assume it's just a really big zone line
 	// this shouldn't open up any exploits since those situations are detected later on
-	if ((zone->HasWaterMap() && !zone->watermap->InZoneLine(glm::vec3(client->GetPosition()))) || (!zone->HasWaterMap() && closest_dist > 400.0f && closest_dist < max_distance2))
+	if ((client && zone->HasWaterMap() && !zone->watermap->InZoneLine(glm::vec3(client->GetPosition()))) || (!zone->HasWaterMap() && closest_dist > 400.0f && closest_dist < max_distance2))
 	{
-		if (client) {
-			if (!client->cheat_manager.GetExemptStatus(Port)) {
-				client->cheat_manager.CheatDetected(MQZoneUnknownDest, location);
-			}
+		if (!client->cheat_manager.GetExemptStatus(Port)) {
+			client->cheat_manager.CheatDetected(MQZoneUnknownDest, location);
 		}
+
 		LogInfo("WARNING: Closest zone point for zone id [{}] is [{}], you might need to update your zone_points table if you dont arrive at the right spot", to, closest_dist);
 		LogInfo("<Real Zone Points>. [{}]", to_string(location).c_str());
 	}
@@ -2231,10 +2228,9 @@ void Zone::LoadZoneBlockedSpells()
 
 void Zone::ClearBlockedSpells()
 {
-	if (blocked_spells) {
-		safe_delete_array(blocked_spells);
-		zone_total_blocked_spells = 0;
-	}
+	safe_delete_array(blocked_spells);
+
+	zone_total_blocked_spells = 0;
 }
 
 bool Zone::IsSpellBlocked(uint32 spell_id, const glm::vec3 &location)

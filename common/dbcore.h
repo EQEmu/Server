@@ -24,7 +24,7 @@ public:
 	~DBcore();
 	eStatus GetStatus() { return pStatus; }
 	MySQLRequestResult QueryDatabase(const char *query, uint32 querylen, bool retryOnFailureOnce = true);
-	MySQLRequestResult QueryDatabase(std::string query, bool retryOnFailureOnce = true);
+	MySQLRequestResult QueryDatabase(const std::string& query, bool retryOnFailureOnce = true);
 	void TransactionBegin();
 	void TransactionCommit();
 	void TransactionRollback();

@@ -23,7 +23,6 @@
 #include "../common/spdat.h"
 
 #include "client.h"
-#include "corpse.h"
 #include "entity.h"
 #include "mob.h"
 
@@ -904,8 +903,9 @@ bool Mob::IsBeneficialAllowed(Mob *target)
 			{
 				return false;
 			}
-			else if(mob2->IsBot())
+			else if (mob2 && mob2->IsBot()) {
 				return true;
+			}
 		}
 		else if(_NPC(mob1))
 		{
@@ -1436,7 +1436,7 @@ void Mob::ClearFeignMemory() {
 	while (remembered_feigned_mobid != feign_memory_list.end())
 	{
 		Mob* remembered_mob = entity_list.GetMob(*remembered_feigned_mobid);
-		if (remembered_mob->IsClient() && remembered_mob != nullptr) { //Still in zone
+		if (remembered_mob && remembered_mob->IsClient()) { //Still in zone
 			remembered_mob->CastToClient()->RemoveXTarget(this, false);
 		}
 		++remembered_feigned_mobid;

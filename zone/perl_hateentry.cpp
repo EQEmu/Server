@@ -4,7 +4,6 @@
 #ifdef EMBPERL_XS_CLASSES
 
 #include "../common/global_define.h"
-#include "../common/linked_list.h"
 #include "embperl.h"
 #include "hate_list.h"
 

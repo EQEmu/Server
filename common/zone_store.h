@@ -35,7 +35,7 @@ public:
 
 	ZoneRepository::Zone *GetZone(uint32 zone_id, int version = 0);
 	ZoneRepository::Zone *GetZone(const char *in_zone_name);
-	ZoneRepository::Zone *GetZone(std::string in_zone_name);
+	ZoneRepository::Zone *GetZone(const std::string& in_zone_name);
 	uint32 GetZoneID(const char *in_zone_name);
 	uint32 GetZoneID(std::string zone_name);
 	std::string GetZoneName(uint32 zone_id);
@@ -53,7 +53,7 @@ extern ZoneStore zone_store;
  * Global helpers
  */
 inline uint32 ZoneID(const char *in_zone_name) { return zone_store.GetZoneID(in_zone_name); }
-inline uint32 ZoneID(std::string zone_name) { return zone_store.GetZoneID(zone_name); }
+inline uint32 ZoneID(const std::string& zone_name) { return zone_store.GetZoneID(zone_name); }
 inline const char *ZoneName(uint32 zone_id, bool error_unknown = false)
 {
 	return zone_store.GetZoneName(

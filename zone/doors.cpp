@@ -30,10 +30,8 @@
 #include "string_ids.h"
 #include "worldserver.h"
 #include "zonedb.h"
-#include "../common/zone_store.h"
 #include "../common/repositories/criteria/content_filter_criteria.h"
 
-#include <iostream>
 #include <string.h>
 
 #define OPEN_DOOR 0x02
@@ -222,7 +220,7 @@ void Doors::HandleClick(Client *sender, uint8 trigger)
 		}
 	}
 
-	if (m_dz_switch_id != 0) {
+	if (sender && m_dz_switch_id != 0) {
 		sender->UpdateTasksOnTouchSwitch(m_dz_switch_id);
 		if (sender->TryMovePCDynamicZoneSwitch(m_dz_switch_id)) {
 			safe_delete(outapp);

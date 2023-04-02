@@ -1,7 +1,6 @@
 
 #include "../common/eqemu_logsys.h"
 #include "../common/extprofile.h"
-#include "../common/item_instance.h"
 #include "../common/rulesys.h"
 #include "../common/strings.h"
 
@@ -12,7 +11,6 @@
 #include "zone.h"
 #include "zonedb.h"
 #include "aura.h"
-#include "../common/repositories/criteria/content_filter_criteria.h"
 #include "../common/repositories/character_disciplines_repository.h"
 #include "../common/repositories/npc_types_repository.h"
 

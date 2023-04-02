@@ -20,7 +20,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/eq_constants.h"
 #include "../common/eq_packet_structs.h"
 #include "../common/rulesys.h"
-#include "../common/skills.h"
 #include "../common/spdat.h"
 #include "../common/strings.h"
 #include "../common/data_verification.h"
@@ -36,8 +35,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "fastmath.h"
 #include "mob.h"
 #include "npc.h"
-
-#include <stdlib.h>
 
 #include "bot.h"
 
@@ -1484,7 +1481,6 @@ bool Mob::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 
 	if (
 		(IsCasting() && GetClass() != BARD && !IsFromSpell)
-		|| other == nullptr
 		|| ((IsClient() && CastToClient()->dead) || (other->IsClient() && other->CastToClient()->dead))
 		|| (GetHP() < 0)
 		|| (!IsAttackAllowed(other))
@@ -1979,10 +1975,10 @@ bool Client::Death(Mob* killerMob, int64 damage, uint16 spell, EQ::skills::Skill
 			database.GetVariable("ServerType", tmp);
 			if (tmp[0] == '1' && tmp[1] == '\0' && killerMob && killerMob->IsClient()) {
 				database.GetVariable("PvPreward", tmp);
-				auto reward = Strings::ToInt(tmp.c_str());
+				auto reward = Strings::ToInt(tmp);
 				if (reward == 3) {
 					database.GetVariable("PvPitem", tmp);
-					auto pvp_item_id = Strings::ToInt(tmp.c_str());
+					auto pvp_item_id = Strings::ToInt(tmp);
 					const auto* item = database.GetItem(pvp_item_id);
 					if (item) {
 						new_corpse->SetPlayerKillItemID(pvp_item_id);
@@ -2835,8 +2831,9 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 			if (emote_id) {
 				oos->CastToNPC()->DoNPCEmote(EQ::constants::EmoteEventTypes::KilledNPC, emote_id);
 			}
-
-			killer_mob->TrySpellOnKill(killed_level, spell);
+			if (killer_mob) {
+				killer_mob->TrySpellOnKill(killed_level, spell);
+			}
 		}
 	}
 

@@ -38,7 +38,6 @@
 #include <algorithm>
 #include <iostream>
 #include <limits>
-#include <math.h>
 
 extern EntityList entity_list;
 extern FastMath g_Math;

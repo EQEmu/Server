@@ -34,10 +34,7 @@ extern QueryServ* QServ;
 extern WorldServer worldserver;
 extern Zone* zone;
 
-#include "../common/content/world_content_service.h"
-
 #include "../common/repositories/character_peqzone_flags_repository.h"
-#include "../common/repositories/zone_repository.h"
 #include "../common/events/player_event_logs.h"
 
 

@@ -2,7 +2,6 @@
 
 #include "../common/data_verification.h"
 
-#include "lua.hpp"
 #include <luabind/luabind.hpp>
 
 #include "lua_stat_bonuses.h"

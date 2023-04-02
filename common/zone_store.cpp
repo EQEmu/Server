@@ -174,7 +174,7 @@ ZoneRepository::Zone *ZoneStore::GetZone(const char *in_zone_name)
 	return nullptr;
 }
 
-ZoneRepository::Zone *ZoneStore::GetZone(std::string in_zone_name)
+ZoneRepository::Zone *ZoneStore::GetZone(const std::string& in_zone_name)
 {
 	for (auto &z: m_zones) {
 		if (z.short_name == in_zone_name) {

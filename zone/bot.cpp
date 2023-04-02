@@ -22,8 +22,6 @@
 #include "doors.h"
 #include "quest_parser_collection.h"
 #include "lua_parser.h"
-#include "../common/strings.h"
-#include "../common/say_link.h"
 #include "../common/repositories/bot_spell_settings_repository.h"
 #include "../common/data_verification.h"
 
@@ -1936,6 +1934,11 @@ void Bot::AI_Process()
 #define NOT_PASSIVE (GetBotStance() != EQ::constants::stancePassive)
 
 	Client* bot_owner = (GetBotOwner() && GetBotOwner()->IsClient() ? GetBotOwner()->CastToClient() : nullptr);
+
+	if (!bot_owner) {
+		return;
+	}
+
 	auto raid = entity_list.GetRaidByBotName(GetName());
 	uint32 r_group = RAID_GROUPLESS;
 	if (raid) {
@@ -2983,7 +2986,7 @@ void Bot::HealRotationChecks() {
 
 bool Bot::IsAIProcessValid(const Client* bot_owner, const Group* bot_group, const Raid* raid) {
 
-	if (!bot_owner || !bot_group && !raid || !IsAIControlled()) {
+	if (!bot_owner || (!bot_group && !raid) || !IsAIControlled()) {
 		return false;
 	}
 
@@ -4637,7 +4640,9 @@ void Bot::Damage(Mob *from, int64 damage, uint16 spell_id, EQ::skills::SkillType
 		int64 healed = GetActSpellHealing(spell_id, damage);
 		LogCombatDetail("Applying lifetap heal of [{}] to [{}]", healed, GetCleanName());
 		HealDamage(healed);
-		entity_list.FilteredMessageClose(this, true, RuleI(Range, SpellMessages), Chat::Emote, FilterSocials, "%s beams a smile at %s", GetCleanName(), from->GetCleanName() );
+		if (from) {
+			entity_list.FilteredMessageClose(this, true, RuleI(Range, SpellMessages), Chat::Emote, FilterSocials, "%s beams a smile at %s", GetCleanName(), from->GetCleanName());
+		}
 	}
 
 	CommonDamage(from, damage, spell_id, attack_skill, avoidable, buffslot, iBuffTic, special);
@@ -8552,22 +8557,25 @@ std::vector<Mob*> Bot::GetApplySpellList(
 
 	if (apply_type == ApplySpellType::Raid && IsRaidGrouped()) {
 		auto* r = GetRaid();
-		auto group_id = r->GetGroup(GetCleanName());
-		if (r && EQ::ValueWithin(group_id, 0, (MAX_RAID_GROUPS - 1))) {
-			for (const auto& m : r->members) {
-				if (m.is_bot) {
-					continue;
-				}
-				if (m.member && m.member->IsClient() && (!is_raid_group_only || r->GetGroup(m.member) == group_id)) {
-					l.push_back(m.member);
-
-					if (allow_pets && m.member->HasPet()) {
-						l.push_back(m.member->GetPet());
+		if (r) {
+			auto group_id = r->GetGroup(GetCleanName());
+			if (EQ::ValueWithin(group_id, 0, (MAX_RAID_GROUPS - 1))) {
+				for (const auto& m: r->members) {
+					if (m.is_bot) {
+						continue;
 					}
+					if (m.member && m.member->IsClient() &&
+						(!is_raid_group_only || r->GetGroup(m.member) == group_id)) {
+						l.push_back(m.member);
 
-					const auto& sbl = entity_list.GetBotListByCharacterID(m.member->CharacterID());
-					for (const auto& b : sbl) {
-						l.push_back(b);
+						if (allow_pets && m.member->HasPet()) {
+							l.push_back(m.member->GetPet());
+						}
+
+						const auto& sbl = entity_list.GetBotListByCharacterID(m.member->CharacterID());
+						for (const auto& b: sbl) {
+							l.push_back(b);
+						}
 					}
 				}
 			}

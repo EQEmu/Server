@@ -39,7 +39,6 @@
 #include "lua_general.h"
 #include "lua_encounter.h"
 #include "lua_stat_bonuses.h"
-#include "../common/path_manager.h"
 
 #include "lua_bot.h"
 

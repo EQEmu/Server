@@ -963,6 +963,10 @@ bool ZoneDatabase::GetAuraEntry(uint16 spell_id, AuraRecord &record)
 
 void Mob::AddAura(Aura *aura, AuraRecord &record)
 {
+	if (!aura) {
+		return;
+	}
+
 	LogAura(
 		"aura owner [{}] spawn_id [{}] aura_name [{}]",
 		GetCleanName(),
@@ -971,7 +975,6 @@ void Mob::AddAura(Aura *aura, AuraRecord &record)
 	);
 
 	// this is called only when it's safe
-	assert(aura != nullptr);
 	strn0cpy(aura_mgr.auras[aura_mgr.count].name, aura->GetCleanName(), 64);
 	aura_mgr.auras[aura_mgr.count].spawn_id = aura->GetID();
 	aura_mgr.auras[aura_mgr.count].aura     = aura;
@@ -998,6 +1001,10 @@ void Mob::AddAura(Aura *aura, AuraRecord &record)
 
 void Mob::AddTrap(Aura *aura, AuraRecord &record)
 {
+	if (!aura) {
+		return;
+	}
+
 	LogAura(
 		"aura owner [{}] spawn_id [{}] aura_name [{}]",
 		GetCleanName(),
@@ -1006,7 +1013,6 @@ void Mob::AddTrap(Aura *aura, AuraRecord &record)
 	);
 
 	// this is called only when it's safe
-	assert(aura != nullptr);
 	strn0cpy(trap_mgr.auras[trap_mgr.count].name, aura->GetCleanName(), 64);
 	trap_mgr.auras[trap_mgr.count].spawn_id = aura->GetID();
 	trap_mgr.auras[trap_mgr.count].aura     = aura;

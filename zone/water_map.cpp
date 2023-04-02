@@ -4,8 +4,6 @@
 #include "water_map_v1.h"
 #include "water_map_v2.h"
 #include "../common/eqemu_logsys.h"
-#include "../common/file.h"
-#include "../common/path_manager.h"
 
 #include <algorithm>
 #include <cctype>

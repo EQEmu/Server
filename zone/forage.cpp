@@ -30,14 +30,11 @@
 #include "titles.h"
 #include "water_map.h"
 #include "zonedb.h"
-#include "../common/zone_store.h"
 #include "../common/repositories/criteria/content_filter_criteria.h"
 #include "../common/events/player_event_logs.h"
 #include "worldserver.h"
 
 extern WorldServer worldserver;
-
-#include <iostream>
 
 #ifdef _WINDOWS
 #define snprintf	_snprintf

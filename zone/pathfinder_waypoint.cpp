@@ -11,9 +11,6 @@
 #include "pathfinder_waypoint.h"
 #include "zone.h"
 #include "client.h"
-#include "../common/eqemu_logsys.h"
-#include "../common/strings.h"
-#include "../common/rulesys.h"
 
 extern Zone *zone;
 

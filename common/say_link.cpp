@@ -294,7 +294,7 @@ void EQ::SayLinkEngine::generate_text()
 	m_LinkText = "null";
 }
 
-std::string EQ::SayLinkEngine::GenerateQuestSaylink(std::string saylink_text, bool silent, std::string link_name)
+std::string EQ::SayLinkEngine::GenerateQuestSaylink(const std::string& saylink_text, bool silent, const std::string& link_name)
 {
 	uint32 saylink_id = 0;
 

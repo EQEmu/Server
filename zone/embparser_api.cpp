@@ -24,7 +24,6 @@
 
 #include "../common/global_define.h"
 #include "../common/misc_functions.h"
-#include "../common/eqemu_logsys.h"
 
 #include "dialogue_window.h"
 #include "embperl.h"

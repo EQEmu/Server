@@ -34,10 +34,8 @@
 
 #include <string.h>
 #include <stdlib.h>
-#include <sstream>
 #include <algorithm>
 #include <ctime>
-#include <thread>
 
 #ifdef _WINDOWS
 #define strcasecmp _stricmp
@@ -47,21 +45,14 @@
 #include "../common/global_define.h"
 #include "../common/eq_packet.h"
 #include "../common/features.h"
-#include "../common/guilds.h"
-#include "../common/patches/patches.h"
 #include "../common/ptimer.h"
 #include "../common/rulesys.h"
 #include "../common/serverinfo.h"
 #include "../common/strings.h"
 #include "../common/say_link.h"
-#include "../common/eqemu_logsys.h"
-#include "../common/emu_constants.h"
-
 
 #include "bot_command.h"
 #include "zonedb.h"
-#include "../common/zone_store.h"
-#include "guild_mgr.h"
 #include "map.h"
 #include "doors.h"
 #include "qglobals.h"

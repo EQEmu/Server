@@ -24,13 +24,10 @@
 #include "../common/eq_constants.h"
 #include "../common/eq_packet_structs.h"
 #include "../common/rulesys.h"
-#include "../common/skills.h"
 #include "../common/spdat.h"
 #include "../common/strings.h"
 #include "../common/data_verification.h"
-#include "../common/misc_functions.h"
 #include "queryserv.h"
-#include "quest_parser_collection.h"
 #include "string_ids.h"
 #include "water_map.h"
 #include "worldserver.h"
@@ -38,12 +35,6 @@
 #include "lua_parser.h"
 #include "fastmath.h"
 #include "mob.h"
-#include "npc.h"
-
-#include <assert.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <boost/concept_check.hpp>
 
 #include "bot.h"
 

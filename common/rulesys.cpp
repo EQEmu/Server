@@ -141,11 +141,11 @@ bool RuleManager::SetRule(const std::string &rule_name, const std::string &rule_
 
 	switch (type) {
 		case IntRule:
-			m_RuleIntValues[index] = Strings::ToInt(rule_value.c_str());
+			m_RuleIntValues[index] = Strings::ToInt(rule_value);
 			LogRules("Set rule [{}] to value [{}]", rule_name, m_RuleIntValues[index]);
 			break;
 		case RealRule:
-			m_RuleRealValues[index] = Strings::ToFloat(rule_value.c_str());
+			m_RuleRealValues[index] = Strings::ToFloat(rule_value);
 			LogRules("Set rule [{}] to value [{:.2f}]", rule_name, m_RuleRealValues[index]);
 			break;
 		case BoolRule:

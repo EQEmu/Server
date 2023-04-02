@@ -12,13 +12,9 @@ Eglin
 
 #include "../common/global_define.h"
 #include "../common/eqemu_logsys.h"
-#include <cstdio>
-#include <cstdarg>
 #include <vector>
 #include "embperl.h"
-#include "embxs.h"
 #include "../common/features.h"
-#include "../common/path_manager.h"
 #include "../common/process/process.h"
 #include "../common/file.h"
 #include "../common/timer.h"
@@ -102,7 +98,7 @@ void Embperl::DoInit() {
 	try {
 		init_eval_file();
 	}
-	catch(std::string e)
+	catch(std::string& e)
 	{
 		//remember... lasterr() is no good if we crap out here, in construction
 		LogQuests("Perl Error [{}]", e);
@@ -142,7 +138,7 @@ void Embperl::DoInit() {
 		perl_command = "main::eval_file('plugin', '" + Config->PluginPlFile + "');";
 		eval_pv(perl_command.c_str(), FALSE);
 	}
-	catch(std::string e)
+	catch(std::string& e)
 	{
 		LogQuests("Warning [{}]: [{}]", Config->PluginPlFile, e);
 	}
@@ -160,7 +156,7 @@ void Embperl::DoInit() {
 			"}";
 		eval_pv(perl_command.c_str(),FALSE);
 	}
-	catch(std::string e)
+	catch(std::string& e)
 	{
 		LogQuests("Warning [{}]", e);
 	}

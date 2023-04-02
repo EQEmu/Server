@@ -40,7 +40,7 @@ class UCSDatabase : public Database {
 public:
 	int FindAccount(const char *CharacterName, Client *c);
 	int FindCharacter(const char *CharacterName);
-	bool VerifyMailKey(std::string CharacterName, int IPAddress, std::string MailKey);
+	bool VerifyMailKey(const std::string& characterName, int IPAddress, const std::string& MailKey);
 	bool GetVariable(const char* varname, char* varvalue, uint16 varvalue_len);
 	bool LoadChatChannels();
 	void LoadReservedNamesFromDB();

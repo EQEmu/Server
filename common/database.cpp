@@ -999,7 +999,7 @@ bool Database::GetVariable(std::string varname, std::string &varvalue)
 	return false;
 }
 
-bool Database::SetVariable(const std::string varname, const std::string &varvalue)
+bool Database::SetVariable(const std::string& varname, const std::string &varvalue)
 {
 	std::string escaped_name = Strings::Escape(varname);
 	std::string escaped_value = Strings::Escape(varvalue);
@@ -2345,7 +2345,7 @@ void Database::SourceDatabaseTableFromUrl(std::string table_name, std::string ur
 
 			int sourced_queries = 0;
 
-			if (auto res = cli.Get(request_uri.get_path().c_str())) {
+			if (auto res = cli.Get(request_uri.get_path())) {
 				if (res->status == 200) {
 					for (auto &s: Strings::Split(res->body, ';')) {
 						if (!Strings::Trim(s).empty()) {

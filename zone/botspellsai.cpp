@@ -18,7 +18,6 @@
 
 #include "bot.h"
 #include "../common/data_verification.h"
-#include "../common/strings.h"
 #include "../common/repositories/bot_spells_entries_repository.h"
 #include "../common/repositories/npc_spells_repository.h"
 
@@ -1888,11 +1887,15 @@ bool Bot::AIHealRotation(Mob* tar, bool useFastHeals) {
 std::list<BotSpell> Bot::GetBotSpellsForSpellEffect(Bot* botCaster, int spellEffect) {
 	std::list<BotSpell> result;
 
+	if (!botCaster) {
+		return result;
+	}
+
 	if (auto bot_owner = botCaster->GetBotOwner(); !bot_owner) {
 		return result;
 	}
 
-	if (botCaster && botCaster->AI_HasSpells()) {
+	if (botCaster->AI_HasSpells()) {
 		std::vector<BotSpells_Struct> botSpellList = botCaster->AIBot_spells;
 
 		for (int i = botSpellList.size() - 1; i >= 0; i--) {
@@ -1919,11 +1922,15 @@ std::list<BotSpell> Bot::GetBotSpellsForSpellEffect(Bot* botCaster, int spellEff
 std::list<BotSpell> Bot::GetBotSpellsForSpellEffectAndTargetType(Bot* botCaster, int spellEffect, SpellTargetType targetType) {
 	std::list<BotSpell> result;
 
+	if (!botCaster) {
+		return result;
+	}
+
 	if (auto bot_owner = botCaster->GetBotOwner(); !bot_owner) {
 		return result;
 	}
 
-	if (botCaster && botCaster->AI_HasSpells()) {
+	if (botCaster->AI_HasSpells()) {
 		std::vector<BotSpells_Struct> botSpellList = botCaster->AIBot_spells;
 
 		for (int i = botSpellList.size() - 1; i >= 0; i--) {
@@ -1955,11 +1962,15 @@ std::list<BotSpell> Bot::GetBotSpellsForSpellEffectAndTargetType(Bot* botCaster,
 std::list<BotSpell> Bot::GetBotSpellsBySpellType(Bot* botCaster, uint32 spellType) {
 	std::list<BotSpell> result;
 
+	if (!botCaster) {
+		return result;
+	}
+
 	if (auto bot_owner = botCaster->GetBotOwner(); !bot_owner) {
 		return result;
 	}
 
-	if (botCaster && botCaster->AI_HasSpells()) {
+	if (botCaster->AI_HasSpells()) {
 		std::vector<BotSpells_Struct> botSpellList = botCaster->AIBot_spells;
 
 		for (int i = botSpellList.size() - 1; i >= 0; i--) {
@@ -2694,21 +2705,22 @@ BotSpell Bot::GetBestBotSpellForResistDebuff(Bot* botCaster, Mob *tar) {
 	result.SpellIndex = 0;
 	result.ManaCost = 0;
 
-	if (!tar)
+	if (!tar || !botCaster) {
 		return result;
+	}
 
 	int level_mod = (tar->GetLevel() - botCaster->GetLevel())* (tar->GetLevel() - botCaster->GetLevel()) / 2;
-	if (tar->GetLevel() - botCaster->GetLevel() < 0)
-	{
+	if (tar->GetLevel() - botCaster->GetLevel() < 0) {
 		level_mod = -level_mod;
 	}
+
 	bool needsMagicResistDebuff = (tar->GetMR() + level_mod) > 100;
 	bool needsColdResistDebuff = (tar->GetCR() + level_mod) > 100;
 	bool needsFireResistDebuff = (tar->GetFR() + level_mod) > 100;
 	bool needsPoisonResistDebuff = (tar->GetPR() + level_mod) > 100;
 	bool needsDiseaseResistDebuff = (tar->GetDR() + level_mod) > 100;
 
-	if (botCaster && botCaster->AI_HasSpells()) {
+	if (botCaster->AI_HasSpells()) {
 		std::vector<BotSpells_Struct> botSpellList = botCaster->AIBot_spells;
 
 		for (int i = botSpellList.size() - 1; i >= 0; i--) {

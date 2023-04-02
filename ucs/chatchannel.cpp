@@ -32,7 +32,7 @@ void ServerToClient45SayLink(std::string& clientSayLink, const std::string& serv
 void ServerToClient50SayLink(std::string& clientSayLink, const std::string& serverSayLink);
 void ServerToClient55SayLink(std::string& clientSayLink, const std::string& serverSayLink);
 
-ChatChannel::ChatChannel(std::string inName, std::string inOwner, std::string inPassword, bool inPermanent, int inMinimumStatus) :
+ChatChannel::ChatChannel(const std::string& inName, const std::string& inOwner, const std::string& inPassword, bool inPermanent, int inMinimumStatus) :
 	m_delete_timer(0) {
 
 	m_name = inName;
@@ -137,7 +137,7 @@ ChatChannel *ChatChannelList::CreateChannel(
 	return new_channel;
 }
 
-ChatChannel* ChatChannelList::FindChannel(std::string Name) {
+ChatChannel* ChatChannelList::FindChannel(const std::string& Name) {
 
 	std::string normalized_name = CapitaliseName(Name);
 
@@ -283,7 +283,7 @@ void ChatChannel::SetPassword(const std::string& in_password) {
 	}
 }
 
-void ChatChannel::SetOwner(std::string& in_owner) {
+void ChatChannel::SetOwner(const std::string& in_owner) {
 
 	m_owner = in_owner;
 
@@ -659,7 +659,7 @@ ChatChannel *ChatChannelList::RemoveClientFromChannel(const std::string& in_chan
 	std::string channel_name = in_channel_name;
 
 	if (in_channel_name.length() > 0 && isdigit(channel_name[0])) {
-		channel_name = c->ChannelSlotName(Strings::ToInt(in_channel_name.c_str()));
+		channel_name = c->ChannelSlotName(Strings::ToInt(in_channel_name));
 	}
 
 	auto *required_channel = FindChannel(channel_name);
@@ -784,7 +784,7 @@ bool ChatChannel::HasVoice(std::string inVoiced)
 	return std::find(std::begin(m_voiced), std::end(m_voiced), inVoiced) != std::end(m_voiced);
 }
 
-std::string CapitaliseName(std::string inString) {
+std::string CapitaliseName(const std::string& inString) {
 
 	std::string NormalisedName = inString;
 
