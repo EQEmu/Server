@@ -26,7 +26,7 @@ EQStreamIdentifier::~EQStreamIdentifier() {
 	}
 }
 
-void EQStreamIdentifier::RegisterPatch(const EQStreamInterface::Signature &sig, const char *name, OpcodeManager ** opcodes, const StructStrategy *structs) {
+void EQStreamIdentifier::RegisterPatch(EQStreamInterface::Signature sig, const char *name, OpcodeManager ** opcodes, const StructStrategy *structs) {
 	auto p = new Patch;
 	p->signature = sig;
 	p->name = name;
