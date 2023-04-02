@@ -71,7 +71,7 @@ public:
 	bool IsActive();
 	void AddPlayer(std::string character_name, bool add_client_to_instance = true);
 	void RemovePlayer(std::string character_name);
-	bool PlayerExists(std::string character_name);
+	bool PlayerExists(const std::string& character_name);
 	bool CreateInstance();
 	void IncrementCount();
 	void IncrementAssassinationCount();

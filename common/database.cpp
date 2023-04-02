@@ -999,7 +999,7 @@ bool Database::GetVariable(std::string varname, std::string &varvalue)
 	return false;
 }
 
-bool Database::SetVariable(const std::string varname, const std::string &varvalue)
+bool Database::SetVariable(const std::string& varname, const std::string &varvalue)
 {
 	std::string escaped_name = Strings::Escape(varname);
 	std::string escaped_value = Strings::Escape(varvalue);

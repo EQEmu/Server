@@ -7,7 +7,7 @@
 
 class CombatRecord {
 public:
-	void Start(std::string in_mob_name);
+	void Start(const std::string& in_mob_name);
 	void Stop();
 	bool InCombat() const;
 	void ProcessHPEvent(int64 hp, int64 current_hp);

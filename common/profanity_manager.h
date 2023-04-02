@@ -53,7 +53,7 @@ namespace EQ
 	private:
 		static bool load_database_entries(DBcore *db);
 		static bool clear_database_entries(DBcore *db);
-		static bool check_for_existing_entry(std::string profanity);
+		static bool check_for_existing_entry(const std::string& profanity);
 		
 	};
 

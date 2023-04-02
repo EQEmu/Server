@@ -147,7 +147,7 @@ public:
 	void	AddRaidLooter(const char* looter);
 	void	RemoveRaidLooter(const char* looter);
 
-	inline void	SetRaidMOTD(std::string in_motd) { motd = in_motd; };
+	inline void	SetRaidMOTD(const std::string& in_motd) { motd = in_motd; };
 
 	//util func
 	//keeps me from having to keep iterating through the list
