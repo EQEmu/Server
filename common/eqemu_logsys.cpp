@@ -292,7 +292,7 @@ void EQEmuLogSys::ProcessConsoleMessage(
 
 				bool is_upper = false;
 
-				for (int i = 0; i < strlen(e.c_str()); i++) {
+				for (int i = 0; i < e.length(); i++) {
 					if (isupper(e[i])) {
 						is_upper = true;
 					}
@@ -701,7 +701,7 @@ const EQEmuLogSys::DiscordWebhooks *EQEmuLogSys::GetDiscordWebhooks() const
 	return m_discord_webhooks;
 }
 
-EQEmuLogSys::LogEnabled EQEmuLogSys::GetLogsEnabled(const Logs::DebugLevel &debug_level, const uint16 &log_category)
+EQEmuLogSys::LogEnabled EQEmuLogSys::GetLogsEnabled(Logs::DebugLevel debug_level, uint16 log_category)
 {
 	auto e = LogEnabled{};
 
@@ -725,7 +725,7 @@ EQEmuLogSys::LogEnabled EQEmuLogSys::GetLogsEnabled(const Logs::DebugLevel &debu
 	return e;
 }
 
-bool EQEmuLogSys::IsLogEnabled(const Logs::DebugLevel &debug_level, const uint16 &log_category)
+bool EQEmuLogSys::IsLogEnabled(Logs::DebugLevel debug_level, uint16 log_category)
 {
 	return GetLogsEnabled(debug_level, log_category).log_enabled;
 }

@@ -332,8 +332,8 @@ public:
 		bool log_enabled;
 	};
 
-	LogEnabled GetLogsEnabled(const Logs::DebugLevel &debug_level, const uint16 &log_category);
-	bool IsLogEnabled(const Logs::DebugLevel &debug_level, const uint16 &log_category);
+	LogEnabled GetLogsEnabled(Logs::DebugLevel debug_level, uint16 log_category);
+	bool IsLogEnabled(Logs::DebugLevel debug_level, uint16 log_category);
 
 	struct DiscordWebhooks {
 		int         id;
