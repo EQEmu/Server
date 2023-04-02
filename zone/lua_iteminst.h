@@ -4,8 +4,7 @@
 
 #include "lua_ptr.h"
 
-// Forward declarations
-#include "lua_item.h"
+// Forward declaration
 class Lua_Item;
 
 namespace EQ
