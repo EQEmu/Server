@@ -412,11 +412,12 @@ bool EQ::InventoryProfile::DeleteItem(int16 slot_id, int16 quantity) {
 		// If there are no charges left on the item,
 		if (item_to_delete->GetCharges() <= 0) {
 			// If the item is stackable (e.g arrows), or
-			// the item is not stackable, and is not a charged item, or is expendable, delete it
-			if (item_to_delete->IsStackable() ||
-				(!item_to_delete->IsStackable() &&
-				 ((item_to_delete->GetItem()->MaxCharges == 0) || item_to_delete->IsExpendable()))
-				) {
+			// the item is not a charged item, or is expendable, delete it
+			if (
+				item_to_delete->IsStackable() ||
+				item_to_delete->GetItem()->MaxCharges == 0 ||
+				item_to_delete->IsExpendable()
+			) {
 				// Item can now be destroyed
 				InventoryProfile::MarkDirty(item_to_delete);
 				return true;
