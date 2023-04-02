@@ -403,16 +403,14 @@ SaylinkRepository::Saylink EQ::SayLinkEngine::GetOrSaveSaylink(std::string sayli
 	}
 
 	// if not found in database - save
-	if (saylinks.empty()) {
-		auto new_saylink = SaylinkRepository::NewEntity();
-		new_saylink.phrase = saylink_text;
+	auto new_saylink = SaylinkRepository::NewEntity();
+	new_saylink.phrase = saylink_text;
 
-		// persist to database
-		auto link = SaylinkRepository::InsertOne(database, new_saylink);
-		if (link.id > 0) {
-			g_cached_saylinks.emplace_back(link);
-			return link;
-		}
+	// persist to database
+	auto link = SaylinkRepository::InsertOne(database, new_saylink);
+	if (link.id > 0) {
+		g_cached_saylinks.emplace_back(link);
+		return link;
 	}
 
 	return {};
