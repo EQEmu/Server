@@ -491,24 +491,25 @@ bool Database::CheckDatabaseConversions() {
 	return true;
 }
 
-bool Database::CheckDatabaseConvertPPDeblob(){
-	unsigned int lengths;
-	unsigned int lengths_e;
-	std::string squery;
-	Convert::PlayerProfile_Struct* pp;
-	ExtendedProfile_Struct* e_pp;
-	uint32 pplen = 0;
-	uint32 i;
-	uint32 character_id = 0;
-	int account_id = 0;
-	int number_of_characters = 0;
-	int printppdebug = 0; /* Prints Player Profile */
-	int runconvert = 0;
+bool Database::CheckDatabaseConvertPPDeblob()
+{
+	unsigned int                  lengths;
+	unsigned int                  lengths_e;
+	std::string                   squery;
+	Convert::PlayerProfile_Struct *pp;
+	ExtendedProfile_Struct        *e_pp;
+	uint32                        pplen                = 0;
+	uint32                        i;
+	uint32                        character_id         = 0;
+	int                           account_id           = 0;
+	int                           number_of_characters = 0;
+	int                           printppdebug         = 0; /* Prints Player Profile */
+	int                           runconvert           = 0;
 
 	/* Check For Legacy Storage Method */
-	std::string rquery = StringFormat("SHOW TABLES LIKE 'character_'");
-	auto results = QueryDatabase(rquery);
-	if (results.RowCount() == 1){
+	std::string rquery  = StringFormat("SHOW TABLES LIKE 'character_'");
+	auto        results = QueryDatabase(rquery);
+	if (results.RowCount() == 1) {
 		runconvert = 1;
 		printf("\n\n::: Legacy Character Data Binary Blob Storage Detected... \n");
 		printf("----------------------------------------------------------\n\n");
@@ -524,10 +525,10 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 	// runconvert = 0;
 	// printppdebug = 1;
 
-	if (runconvert == 1){
+	if (runconvert == 1) {
 		printf("Running character binary blob to database conversion... \n");
 		/* Get the number of characters */
-		rquery = StringFormat("SELECT COUNT(`id`) FROM `character_`");
+		rquery  = StringFormat("SELECT COUNT(`id`) FROM `character_`");
 		results = QueryDatabase(rquery);
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			number_of_characters = Strings::ToInt(row[0]);
@@ -535,9 +536,9 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 		}
 
 		/* Check for table `character_data` */
-		rquery = StringFormat("SHOW TABLES LIKE 'character_data'");
+		rquery  = StringFormat("SHOW TABLES LIKE 'character_data'");
 		results = QueryDatabase(rquery);
-		if (results.RowCount() == 0){
+		if (results.RowCount() == 0) {
 			printf("Table: `character_data` doesn't exist... creating...");
 			rquery = StringFormat(
 				"CREATE TABLE `character_data` (									"
@@ -643,14 +644,14 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 				"UNIQUE KEY `name` (`name`),										"
 				"KEY `account_id` (`account_id`)									"
 				") ENGINE = InnoDB AUTO_INCREMENT = 1 DEFAULT CHARSET = latin1;		"
-				);
+			);
 			auto results = QueryDatabase(rquery);
 			printf(" done...\n");
 		}
 		/* Check for table `character_currency` */
-		rquery = StringFormat("SHOW TABLES LIKE 'character_currency'");
+		rquery  = StringFormat("SHOW TABLES LIKE 'character_currency'");
 		results = QueryDatabase(rquery);
-		if (results.RowCount() == 0){
+		if (results.RowCount() == 0) {
 			printf("Table: `character_currency` doesn't exist... creating...");
 			rquery = StringFormat(
 				" CREATE TABLE `character_currency` (                                  "
@@ -674,14 +675,14 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 				" 	PRIMARY KEY (`id`),                                                "
 				"   KEY `id` (`id`)                                                    "
 				" ) ENGINE=InnoDB DEFAULT CHARSET=latin1;             "
-				);
+			);
 			auto results = QueryDatabase(rquery);
 			printf(" done...\n");
 		}
 		/* Check for table `character_alternate_abilities` */
-		rquery = StringFormat("SHOW TABLES LIKE 'character_alternate_abilities'");
+		rquery  = StringFormat("SHOW TABLES LIKE 'character_alternate_abilities'");
 		results = QueryDatabase(rquery);
-		if (results.RowCount() == 0){
+		if (results.RowCount() == 0) {
 			printf("Table: `character_alternate_abilities` doesn't exist... creating...");
 			rquery = StringFormat(
 				" CREATE TABLE `character_alternate_abilities` (						"
@@ -692,14 +693,14 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 				" PRIMARY KEY(`id`,`slot`),												"
 				" KEY `id` (`id`)														"
 				" ) ENGINE = InnoDB DEFAULT CHARSET = latin1;		"
-				);
+			);
 			auto results = QueryDatabase(rquery);
 			printf(" done...\n");
 		}
 		/* Check for table `character_bind` */
-		rquery = StringFormat("SHOW TABLES LIKE 'character_bind'");
+		rquery  = StringFormat("SHOW TABLES LIKE 'character_bind'");
 		results = QueryDatabase(rquery);
-		if (results.RowCount() == 0){
+		if (results.RowCount() == 0) {
 			printf("Table: `character_bind` doesn't exist... creating...");
 			rquery = StringFormat(
 				"CREATE TABLE `character_bind` (							   "
@@ -714,14 +715,14 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 				"PRIMARY KEY(`id`, `is_home`),								   "
 				"KEY `id` (`id`)											   "
 				") ENGINE = InnoDB DEFAULT CHARSET = latin1;"
-				);
+			);
 			auto results = QueryDatabase(rquery);
 			printf(" done...\n");
 		}
 		/* Check for table `character_languages` */
-		rquery = StringFormat("SHOW TABLES LIKE 'character_languages'");
+		rquery  = StringFormat("SHOW TABLES LIKE 'character_languages'");
 		results = QueryDatabase(rquery);
-		if (results.RowCount() == 0){
+		if (results.RowCount() == 0) {
 			printf("Table: `character_languages` doesn't exist... creating...");
 			rquery = StringFormat(
 				"CREATE TABLE `character_languages` (						   "
@@ -731,14 +732,14 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 				"PRIMARY KEY(`id`, `lang_id`),								   "
 				"KEY `id` (`id`)											   "
 				") ENGINE = InnoDB DEFAULT CHARSET = latin1;"
-				);
+			);
 			auto results = QueryDatabase(rquery);
 			printf(" done...\n");
 		}
 		/* Check for table `character_skills` */
-		rquery = StringFormat("SHOW TABLES LIKE 'character_skills'");
+		rquery  = StringFormat("SHOW TABLES LIKE 'character_skills'");
 		results = QueryDatabase(rquery);
-		if (results.RowCount() == 0){
+		if (results.RowCount() == 0) {
 			printf("Table: `character_skills` doesn't exist... creating...");
 			rquery = StringFormat(
 				"CREATE TABLE `character_skills` (							   "
@@ -748,14 +749,14 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 				"PRIMARY KEY(`id`, `skill_id`),								   "
 				"KEY `id` (`id`)											   "
 				") ENGINE = InnoDB DEFAULT CHARSET = latin1;"
-				);
+			);
 			auto results = QueryDatabase(rquery);
 			printf(" done...\n");
 		}
 		/* Check for table `character_spells` */
-		rquery = StringFormat("SHOW TABLES LIKE 'character_spells'");
+		rquery  = StringFormat("SHOW TABLES LIKE 'character_spells'");
 		results = QueryDatabase(rquery);
-		if (results.RowCount() == 0){
+		if (results.RowCount() == 0) {
 			printf("Table: `character_spells` doesn't exist... creating...");
 			rquery = StringFormat(
 				"CREATE TABLE `character_spells` (							   "
@@ -765,14 +766,14 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 				"PRIMARY KEY(`id`, `slot_id`),								   "
 				"KEY `id` (`id`)											   "
 				") ENGINE = InnoDB DEFAULT CHARSET = latin1;"
-				);
+			);
 			auto results = QueryDatabase(rquery);
 			printf(" done...\n");
 		}
 		/* Check for table `character_memmed_spells` */
-		rquery = StringFormat("SHOW TABLES LIKE 'character_memmed_spells'");
+		rquery  = StringFormat("SHOW TABLES LIKE 'character_memmed_spells'");
 		results = QueryDatabase(rquery);
-		if (results.RowCount() == 0){
+		if (results.RowCount() == 0) {
 			printf("Table: `character_memmed_spells` doesn't exist... creating...");
 			rquery = StringFormat(
 				"CREATE TABLE `character_memmed_spells` (							   "
@@ -782,14 +783,14 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 				"PRIMARY KEY(`id`, `slot_id`),								   "
 				"KEY `id` (`id`)											   "
 				") ENGINE = InnoDB DEFAULT CHARSET = latin1;"
-				);
+			);
 			auto results = QueryDatabase(rquery);
 			printf(" done...\n");
 		}
 		/* Check for table `character_disciplines` */
-		rquery = StringFormat("SHOW TABLES LIKE 'character_disciplines'");
+		rquery  = StringFormat("SHOW TABLES LIKE 'character_disciplines'");
 		results = QueryDatabase(rquery);
-		if (results.RowCount() == 0){
+		if (results.RowCount() == 0) {
 			printf("Table: `character_disciplines` doesn't exist... creating...");
 			rquery = StringFormat(
 				" CREATE TABLE `character_disciplines` (						  "
@@ -799,14 +800,14 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 				" PRIMARY KEY(`id`, `slot_id`),									  "
 				" KEY `id` (`id`)												  "
 				" ) ENGINE = InnoDB DEFAULT CHARSET = latin1;  "
-				);
+			);
 			auto results = QueryDatabase(rquery);
 			printf(" done...\n");
 		}
 		/* Check for table `character_material` */
-		rquery = StringFormat("SHOW TABLES LIKE 'character_material'");
+		rquery  = StringFormat("SHOW TABLES LIKE 'character_material'");
 		results = QueryDatabase(rquery);
-		if (results.RowCount() == 0){
+		if (results.RowCount() == 0) {
 			printf("Table: `character_material` doesn't exist... creating...");
 			rquery = StringFormat(
 				"CREATE TABLE `character_material` ( "
@@ -820,14 +821,14 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 				"PRIMARY KEY(`id`, `slot`),"
 				"KEY `id` (`id`)"
 				") ENGINE = InnoDB AUTO_INCREMENT = 1 DEFAULT CHARSET = latin1;"
-				);
+			);
 			auto results = QueryDatabase(rquery);
 			printf(" done...\n");
 		}
 		/* Check for table `character_tribute` */
-		rquery = StringFormat("SHOW TABLES LIKE 'character_tribute'");
+		rquery  = StringFormat("SHOW TABLES LIKE 'character_tribute'");
 		results = QueryDatabase(rquery);
-		if (results.RowCount() == 0){
+		if (results.RowCount() == 0) {
 			printf("Table: `character_tribute` doesn't exist... creating...");
 			rquery = StringFormat(
 				"CREATE TABLE `character_tribute` (							   "
@@ -836,14 +837,14 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 				"`tribute` int(11) UNSIGNED NOT NULL DEFAULT '0',			   "
 				"KEY `id` (`id`)											   "
 				") ENGINE = InnoDB DEFAULT CHARSET = latin1;"
-				);
+			);
 			auto results = QueryDatabase(rquery);
 			printf(" done...\n");
 		}
 		/* Check for table `character_bandolier` */
-		rquery = StringFormat("SHOW TABLES LIKE 'character_bandolier'");
+		rquery  = StringFormat("SHOW TABLES LIKE 'character_bandolier'");
 		results = QueryDatabase(rquery);
-		if (results.RowCount() == 0){
+		if (results.RowCount() == 0) {
 			printf("Table: `character_bandolier` doesn't exist... creating...");
 			rquery = StringFormat(
 				"CREATE TABLE `character_bandolier` (							"
@@ -856,14 +857,14 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 				"PRIMARY KEY(`id`,`bandolier_id`, `bandolier_slot`),			"
 				"KEY `id` (`id`)												"
 				") ENGINE = InnoDB DEFAULT CHARSET = latin1;	"
-				);
+			);
 			auto results = QueryDatabase(rquery);
 			printf(" done...\n");
 		}
 		/* Check for table `character_potionbelt` */
-		rquery = StringFormat("SHOW TABLES LIKE 'character_potionbelt'");
+		rquery  = StringFormat("SHOW TABLES LIKE 'character_potionbelt'");
 		results = QueryDatabase(rquery);
-		if (results.RowCount() == 0){
+		if (results.RowCount() == 0) {
 			printf("Table: `character_potionbelt` doesn't exist... creating...");
 			rquery = StringFormat(
 				"CREATE TABLE `character_potionbelt` (						  "
@@ -874,14 +875,14 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 				"PRIMARY KEY(`id`,`potion_id`),								  "
 				"KEY `id` (`id`)												  "
 				") ENGINE = InnoDB DEFAULT CHARSET = latin1;"
-				);
+			);
 			auto results = QueryDatabase(rquery);
 			printf(" done...\n");
 		}
 		/* Check for table `character_potionbelt` */
-		rquery = StringFormat("SHOW TABLES LIKE 'character_inspect_messages'");
+		rquery  = StringFormat("SHOW TABLES LIKE 'character_inspect_messages'");
 		results = QueryDatabase(rquery);
-		if (results.RowCount() == 0){
+		if (results.RowCount() == 0) {
 			printf("Table: `character_inspect_messages` doesn't exist... creating...");
 			rquery = StringFormat(
 				"CREATE TABLE `character_inspect_messages` (					  "
@@ -890,14 +891,14 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 				"PRIMARY KEY(`id`),											  "
 				"KEY `id` (`id`)												  "
 				") ENGINE = InnoDB DEFAULT CHARSET = latin1;"
-				);
+			);
 			auto results = QueryDatabase(rquery);
 			printf(" done...\n");
 		}
 		/* Check for table `character_leadership_abilities` */
-		rquery = StringFormat("SHOW TABLES LIKE 'character_leadership_abilities'");
+		rquery  = StringFormat("SHOW TABLES LIKE 'character_leadership_abilities'");
 		results = QueryDatabase(rquery);
-		if (results.RowCount() == 0){
+		if (results.RowCount() == 0) {
 			printf("Table: `character_leadership_abilities` doesn't exist... creating...");
 			rquery = StringFormat(
 				"CREATE TABLE `character_leadership_abilities` ("
@@ -907,7 +908,7 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 				"PRIMARY KEY(`id`,`slot`), "
 				"KEY `id` (`id`)												  "
 				") ENGINE = InnoDB DEFAULT CHARSET = latin1; "
-				);
+			);
 			auto results = QueryDatabase(rquery);
 			printf(" done...\n");
 		}
@@ -917,31 +918,33 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 
 
 		int char_iter_count = 0;
-		rquery = StringFormat("SELECT `id` FROM `character_`");
+		rquery  = StringFormat("SELECT `id` FROM `character_`");
 		results = QueryDatabase(rquery);
 
-		uint8 firstlogon = 0;
-		uint8 lfg = 0;
-		uint8 lfp = 0;
+		uint8       firstlogon = 0;
+		uint8       lfg        = 0;
+		uint8       lfp        = 0;
 		std::string mailkey;
-		uint8 xtargets = 0;
+		uint8       xtargets   = 0;
 		std::string inspectmessage;
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			char_iter_count++;
-			squery = StringFormat("SELECT `id`, `profile`, `name`, `level`, `account_id`, `firstlogon`, `lfg`, `lfp`, `mailkey`, `xtargets`, `inspectmessage`, `extprofile` FROM `character_` WHERE `id` = %i", Strings::ToUnsignedInt(row[0]));
+			squery = StringFormat(
+				"SELECT `id`, `profile`, `name`, `level`, `account_id`, `firstlogon`, `lfg`, `lfp`, `mailkey`, `xtargets`, `inspectmessage`, `extprofile` FROM `character_` WHERE `id` = %i",
+				Strings::ToUnsignedInt(row[0]));
 			auto results2 = QueryDatabase(squery);
-			auto row2 = results2.begin();
-			pp = (Convert::PlayerProfile_Struct*)row2[1];
-			e_pp = (ExtendedProfile_Struct*)row2[11];
-			character_id = Strings::ToUnsignedInt(row[0]);
-			account_id = Strings::ToInt(row2[4]);
+			auto row2     = results2.begin();
+			pp             = (Convert::PlayerProfile_Struct *) row2[1];
+			e_pp           = (ExtendedProfile_Struct *) row2[11];
+			character_id   = Strings::ToUnsignedInt(row[0]);
+			account_id     = Strings::ToInt(row2[4]);
 			/* Convert some data from the character_ table that is still relevant */
-			firstlogon = Strings::ToUnsignedInt(row2[5]);
-			lfg = Strings::ToUnsignedInt(row2[6]);
-			lfp = Strings::ToUnsignedInt(row2[7]);
-			mailkey = row2[8];
-			xtargets = Strings::ToUnsignedInt(row2[9]);
+			firstlogon     = Strings::ToUnsignedInt(row2[5]);
+			lfg            = Strings::ToUnsignedInt(row2[6]);
+			lfp            = Strings::ToUnsignedInt(row2[7]);
+			mailkey        = row2[8];
+			xtargets       = Strings::ToUnsignedInt(row2[9]);
 			inspectmessage = row2[10];
 
 			/* Verify PP Integrity */
@@ -949,9 +952,11 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 			if (lengths == sizeof(Convert::PlayerProfile_Struct)) { /* If PP is the size it is expected to be */
 				memcpy(pp, row2[1], sizeof(Convert::PlayerProfile_Struct));
 			}
-			/* Continue of PP Size does not match (Usually a created character never logged in) */
+				/* Continue of PP Size does not match (Usually a created character never logged in) */
 			else {
-				std::cout << (row2[2] ? row2[2] : "Unknown") << " ID: " << character_id << " size mismatch. Expected Size: " << sizeof(Convert::PlayerProfile_Struct) << " Seen: " << lengths << std::endl;
+				std::cout << (row2[2] ? row2[2] : "Unknown") << " ID: " << character_id
+						  << " size mismatch. Expected Size: " << sizeof(Convert::PlayerProfile_Struct) << " Seen: "
+						  << lengths << std::endl;
 				continue;
 			}
 
@@ -959,523 +964,468 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 			if (lengths_e == sizeof(ExtendedProfile_Struct)) {
 				memcpy(e_pp, row2[11], sizeof(ExtendedProfile_Struct));
 			}
-			if (e_pp->expended_aa > 4000000){ e_pp->expended_aa = 0; }
+			if (e_pp->expended_aa > 4000000) { e_pp->expended_aa = 0; }
 
 			/* Loading Status on conversion */
-			if (runconvert == 1){
+			if (runconvert == 1) {
 				std::cout << "\r" << char_iter_count << "/" << number_of_characters << " " << std::flush;
 				loadbar(char_iter_count, number_of_characters, 50);
 
 				/* Run inspect message convert  */
-				if (!inspectmessage.empty()){
-					std::string rquery = StringFormat("REPLACE INTO `character_inspect_messages` (id, inspect_message)"
+				if (!inspectmessage.empty()) {
+					std::string rquery = StringFormat(
+						"REPLACE INTO `character_inspect_messages` (id, inspect_message)"
 						"VALUES (%u, '%s')",
 						character_id,
 						Strings::Escape(inspectmessage).c_str()
-						);
-					auto results = QueryDatabase(rquery);
-				}
-
-				/* Run Currency Convert */
-				std::string rquery = StringFormat("REPLACE INTO `character_currency` (id, platinum, gold, silver, copper,"
-					"platinum_bank, gold_bank, silver_bank, copper_bank,"
-					"platinum_cursor, gold_cursor, silver_cursor, copper_cursor, "
-					"radiant_crystals, career_radiant_crystals, ebon_crystals, career_ebon_crystals)"
-					"VALUES (%u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u)",
-					character_id,
-					pp->platinum,
-					pp->gold,
-					pp->silver,
-					pp->copper,
-					pp->platinum_bank,
-					pp->gold_bank,
-					pp->silver_bank,
-					pp->copper_bank,
-					pp->platinum_cursor,
-					pp->gold_cursor,
-					pp->silver_cursor,
-					pp->copper_cursor,
-					pp->currentRadCrystals,
-					pp->careerRadCrystals,
-					pp->currentEbonCrystals,
-					pp->careerEbonCrystals
 					);
-				auto results = QueryDatabase(rquery);
-
-				if (pp->tribute_time_remaining < 0 || pp->tribute_time_remaining == 4294967295){ pp->tribute_time_remaining = 0; }
-
-				/* Run Character Data Convert */
-				rquery = StringFormat(
-					"REPLACE INTO `character_data` ("
-					"id,"
-					"account_id,"
-					"`name`,"
-					"last_name,"
-					"gender,"
-					"race,"
-					"class,"
-					"`level`,"
-					"deity,"
-					"birthday,"
-					"last_login,"
-					"time_played,"
-					"pvp_status,"
-					"level2,"
-					"anon,"
-					"gm,"
-					"intoxication,"
-					"hair_color,"
-					"beard_color,"
-					"eye_color_1,"
-					"eye_color_2,"
-					"hair_style,"
-					"beard,"
-					"ability_time_seconds,"
-					"ability_number,"
-					"ability_time_minutes,"
-					"ability_time_hours,"
-					"title,"
-					"suffix,"
-					"exp,"
-					"points,"
-					"mana,"
-					"cur_hp,"
-					"str,"
-					"sta,"
-					"cha,"
-					"dex,"
-					"`int`,"
-					"agi,"
-					"wis,"
-					"face,"
-					"y,"
-					"x,"
-					"z,"
-					"heading,"
-					"pvp2,"
-					"pvp_type,"
-					"autosplit_enabled,"
-					"zone_change_count,"
-					"drakkin_heritage,"
-					"drakkin_tattoo,"
-					"drakkin_details,"
-					"toxicity,"
-					"hunger_level,"
-					"thirst_level,"
-					"ability_up,"
-					"zone_id,"
-					"zone_instance,"
-					"leadership_exp_on,"
-					"ldon_points_guk,"
-					"ldon_points_mir,"
-					"ldon_points_mmc,"
-					"ldon_points_ruj,"
-					"ldon_points_tak,"
-					"ldon_points_available,"
-					"tribute_time_remaining,"
-					"show_helm,"
-					"career_tribute_points,"
-					"tribute_points,"
-					"tribute_active,"
-					"endurance,"
-					"group_leadership_exp,"
-					"raid_leadership_exp,"
-					"group_leadership_points,"
-					"raid_leadership_points,"
-					"air_remaining,"
-					"pvp_kills,"
-					"pvp_deaths,"
-					"pvp_current_points,"
-					"pvp_career_points,"
-					"pvp_best_kill_streak,"
-					"pvp_worst_death_streak,"
-					"pvp_current_kill_streak,"
-					"aa_points_spent,"
-					"aa_exp,"
-					"aa_points,"
-					"group_auto_consent,"
-					"raid_auto_consent,"
-					"guild_auto_consent,"
-					"RestTimer,"
-					"firstlogon,"
-					"lfg,"
-					"lfp,"
-					"mailkey,"
-					"xtargets,"
-					"e_aa_effects,"
-					"e_percent_to_aa,"
-					"e_expended_aa_spent"
-					")"
-					"VALUES ("
-					"%u,"		// id
-					"%u,"		// account_id
-					"'%s',"		// `name`
-					"'%s',"		// last_name
-					"%u,"		// gender
-					"%u,"		// race
-					"%u,"		// class
-					"%u,"		// `level`
-					"%u,"		// deity
-					"%u,"		// birthday
-					"%u,"		// last_login
-					"%u,"		// time_played
-					"%u,"		// pvp_status
-					"%u,"		// level2
-					"%u,"		// anon
-					"%u,"		// gm
-					"%u,"		// intoxication
-					"%u,"		// hair_color
-					"%u,"		// beard_color
-					"%u,"		// eye_color_1
-					"%u,"		// eye_color_2
-					"%u,"		// hair_style
-					"%u,"		// beard
-					"%u,"		// ability_time_seconds
-					"%u,"		// ability_number
-					"%u,"		// ability_time_minutes
-					"%u,"		// ability_time_hours
-					"'%s',"		// title
-					"'%s',"		// suffix
-					"%u,"		// exp
-					"%u,"		// points
-					"%u,"		// mana
-					"%u,"		// cur_hp
-					"%u,"		// str
-					"%u,"		// sta
-					"%u,"		// cha
-					"%u,"		// dex
-					"%u,"		// `int`
-					"%u,"		// agi
-					"%u,"		// wis
-					"%u,"		// face
-					"%f,"		// y
-					"%f,"		// x
-					"%f,"		// z
-					"%f,"		// heading
-					"%u,"		// pvp2
-					"%u,"		// pvp_type
-					"%u,"		// autosplit_enabled
-					"%u,"		// zone_change_count
-					"%u,"		// drakkin_heritage
-					"%u,"		// drakkin_tattoo
-					"%u,"		// drakkin_details
-					"%i,"		// toxicity
-					"%u,"		// hunger_level
-					"%u,"		// thirst_level
-					"%u,"		// ability_up
-					"%u,"		// zone_id
-					"%u,"		// zone_instance
-					"%u,"		// leadership_exp_on
-					"%u,"		// ldon_points_guk
-					"%u,"		// ldon_points_mir
-					"%u,"		// ldon_points_mmc
-					"%u,"		// ldon_points_ruj
-					"%u,"		// ldon_points_tak
-					"%u,"		// ldon_points_available
-					"%u,"		// tribute_time_remaining
-					"%u,"		// show_helm
-					"%u,"		// career_tribute_points
-					"%u,"		// tribute_points
-					"%u,"		// tribute_active
-					"%u,"		// endurance
-					"%u,"		// group_leadership_exp
-					"%u,"		// raid_leadership_exp
-					"%u,"		// group_leadership_points
-					"%u,"		// raid_leadership_points
-					"%u,"		// air_remaining
-					"%u,"		// pvp_kills
-					"%u,"		// pvp_deaths
-					"%u,"		// pvp_current_points
-					"%u,"		// pvp_career_points
-					"%u,"		// pvp_best_kill_streak
-					"%u,"		// pvp_worst_death_streak
-					"%u,"		// pvp_current_kill_streak
-					"%u,"		// aa_points_spent
-					"%u,"		// aa_exp
-					"%u,"		// aa_points
-					"%u,"		// group_auto_consent
-					"%u,"		// raid_auto_consent
-					"%u,"		// guild_auto_consent
-					"%u," 		// RestTimer
-					"%u,"		// First Logon - References online status for EVENT_CONNECT/EVENT_DISCONNECt
-					"%u,"		// Looking for Group
-					"%u,"		// Looking for P?
-					"'%s',"		// Mailkey
-					"%u,"		// X Targets
-					"%u,"		// AA Effects
-					"%u,"		// Percent to AA
-					"%u"		// e_expended_aa_spent
-					")",
-					character_id,
-					account_id,
-					Strings::Escape(pp->name).c_str(),
-					Strings::Escape(pp->last_name).c_str(),
-					pp->gender,
-					pp->race,
-					pp->class_,
-					pp->level,
-					pp->deity,
-					pp->birthday,
-					pp->lastlogin,
-					pp->timePlayedMin,
-					pp->pvp,
-					pp->level2,
-					pp->anon,
-					pp->gm,
-					pp->intoxication,
-					pp->haircolor,
-					pp->beardcolor,
-					pp->eyecolor1,
-					pp->eyecolor2,
-					pp->hairstyle,
-					pp->beard,
-					pp->ability_time_seconds,
-					pp->ability_number,
-					pp->ability_time_minutes,
-					pp->ability_time_hours,
-					Strings::Escape(pp->title).c_str(),
-					Strings::Escape(pp->suffix).c_str(),
-					pp->exp,
-					pp->points,
-					pp->mana,
-					pp->cur_hp,
-					pp->STR,
-					pp->STA,
-					pp->CHA,
-					pp->DEX,
-					pp->INT,
-					pp->AGI,
-					pp->WIS,
-					pp->face,
-					pp->y,
-					pp->x,
-					pp->z,
-					pp->heading,
-					pp->pvp2,
-					pp->pvptype,
-					pp->autosplit,
-					pp->zone_change_count,
-					pp->drakkin_heritage,
-					pp->drakkin_tattoo,
-					pp->drakkin_details,
-					pp->toxicity,
-					pp->hunger_level,
-					pp->thirst_level,
-					pp->ability_up,
-					pp->zone_id,
-					pp->zoneInstance,
-					pp->leadAAActive == 0 ? 0 : 1,
-					pp->ldon_points_guk,
-					pp->ldon_points_mir,
-					pp->ldon_points_mmc,
-					pp->ldon_points_ruj,
-					pp->ldon_points_tak,
-					pp->ldon_points_available,
-					pp->tribute_time_remaining,
-					pp->showhelm,
-					pp->career_tribute_points,
-					pp->tribute_points,
-					pp->tribute_active,
-					pp->endurance,
-					pp->group_leadership_exp,
-					pp->raid_leadership_exp,
-					pp->group_leadership_points,
-					pp->raid_leadership_points,
-					pp->air_remaining,
-					pp->PVPKills,
-					pp->PVPDeaths,
-					pp->PVPCurrentPoints,
-					pp->PVPCareerPoints,
-					pp->PVPBestKillStreak,
-					pp->PVPWorstDeathStreak,
-					pp->PVPCurrentKillStreak,
-					pp->aapoints_spent,
-					pp->expAA,
-					pp->aapoints,
-					pp->groupAutoconsent,
-					pp->raidAutoconsent,
-					pp->guildAutoconsent,
-					pp->RestTimer,
-					firstlogon,
-					lfg,
-					lfp,
-					mailkey.c_str(),
-					xtargets,
-					e_pp->aa_effects,
-					e_pp->perAA,
-					e_pp->expended_aa
-					);
-				results = QueryDatabase(rquery);
-
-
-				/*
-				We set a first entry variable because we need the first initial piece of the query to be declared
-				This is to speed up the INSERTS and trim down the amount of individual sends during the process.
-				The speed difference is dramatic
-				*/
-				/* Run AA Convert */
-				int first_entry = 0; rquery.clear();
-				for (i = 0; i < MAX_PP_AA_ARRAY; i++){
-					if (pp->aa_array[i].AA > 0 && pp->aa_array[i].value > 0){
-						if (first_entry != 1){
-							rquery = StringFormat("REPLACE INTO `character_alternate_abilities` (id, slot, aa_id, aa_value)"
-								" VALUES (%u, %u, %u, %u)", character_id, i, pp->aa_array[i].AA, pp->aa_array[i].value);
-							first_entry = 1;
-						}
-						else {
-							rquery = rquery + StringFormat(", (%u, %u, %u, %u)", character_id, i, pp->aa_array[i].AA, pp->aa_array[i].value);
-						}
-					}
 				}
-				if (!rquery.empty()){ results = QueryDatabase(rquery); }
-
-				/* Run Bind Home Convert */
-				if (pp->binds[4].zone_id < 999 && !_ISNAN_(pp->binds[4].x) && !_ISNAN_(pp->binds[4].y) && !_ISNAN_(pp->binds[4].z) && !_ISNAN_(pp->binds[4].heading)) {
-					rquery = StringFormat("REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, is_home)"
-						" VALUES (%u, %u, %u, %f, %f, %f, %f, 1)",
-						character_id, pp->binds[4].zone_id, 0, pp->binds[4].x, pp->binds[4].y, pp->binds[4].z, pp->binds[4].heading);
-					if (!rquery.empty()){ results = QueryDatabase(rquery); }
-				}
-
-				/* Run Bind Convert */
-				if (pp->binds[0].zone_id < 999 && !_ISNAN_(pp->binds[0].x) && !_ISNAN_(pp->binds[0].y) && !_ISNAN_(pp->binds[0].z) && !_ISNAN_(pp->binds[0].heading)) {
-					rquery = StringFormat("REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, is_home)"
-						" VALUES (%u, %u, %u, %f, %f, %f, %f, 0)",
-						character_id, pp->binds[0].zone_id, 0, pp->binds[0].x, pp->binds[0].y, pp->binds[0].z, pp->binds[0].heading);
-					if (!rquery.empty()){ results = QueryDatabase(rquery); }
-				}
-				/* Run Language Convert */
-				first_entry = 0; rquery.clear();
-				for (i = 0; i < MAX_PP_LANGUAGE; i++){
-					if (pp->languages[i] > 0){
-						if (first_entry != 1){
-							rquery = StringFormat("REPLACE INTO `character_languages` (id, lang_id, value) VALUES (%u, %u, %u)", character_id, i, pp->languages[i]);
-							first_entry = 1;
-						}
-						rquery = rquery + StringFormat(", (%u, %u, %u)", character_id, i, pp->languages[i]);
-					}
-				}
-				if (!rquery.empty()){ results = QueryDatabase(rquery); }
-				/* Run Skill Convert */
-				first_entry = 0; rquery.clear();
-				for (i = 0; i < MAX_PP_SKILL; i++){
-					if (pp->skills[i] > 0){
-						if (first_entry != 1){
-							rquery = StringFormat("REPLACE INTO `character_skills` (id, skill_id, value) VALUES (%u, %u, %u)", character_id, i, pp->skills[i]);
-							first_entry = 1;
-						}
-						rquery = rquery + StringFormat(", (%u, %u, %u)", character_id, i, pp->skills[i]);
-					}
-				}
-				if (!rquery.empty()){ results = QueryDatabase(rquery); }
-				/* Run Spell Convert */
-				first_entry = 0; rquery.clear();
-				for (i = 0; i < 480; i++){
-					if (pp->spell_book[i] > 0 && pp->spell_book[i] != 4294967295 && pp->spell_book[i] < 40000 && pp->spell_book[i] != 1){
-						if (first_entry != 1){
-							rquery = StringFormat("REPLACE INTO `character_spells` (id, slot_id, spell_id) VALUES (%u, %u, %u)", character_id, i, pp->spell_book[i]);
-							first_entry = 1;
-						}
-						rquery = rquery + StringFormat(", (%u, %u, %u)", character_id, i, pp->spell_book[i]);
-					}
-				}
-				if (!rquery.empty()){ results = QueryDatabase(rquery); }
-				/* Run Max Memmed Spell Convert */
-				first_entry = 0; rquery.clear();
-				for (i = 0; i < 9; i++){
-					if (pp->mem_spells[i] > 0 && pp->mem_spells[i] != 65535 && pp->mem_spells[i] != 4294967295){
-						if (first_entry != 1){
-							rquery = StringFormat("REPLACE INTO `character_memmed_spells` (id, slot_id, spell_id) VALUES (%u, %u, %u)", character_id, i, pp->mem_spells[i]);
-							first_entry = 1;
-						}
-						rquery = rquery + StringFormat(", (%u, %u, %u)", character_id, i, pp->mem_spells[i]);
-					}
-				}
-				if (!rquery.empty()){ results = QueryDatabase(rquery); }
-				/* Run Discipline Convert */
-				first_entry = 0; rquery.clear();
-				for (i = 0; i < MAX_PP_DISCIPLINES; i++){
-					if (pp->disciplines.values[i] > 0 && pp->disciplines.values[i] < 60000){
-						if (first_entry != 1){
-							rquery = StringFormat("REPLACE INTO `character_disciplines` (id, slot_id, disc_id) VALUES (%u, %u, %u)", character_id, i, pp->disciplines.values[i]);
-							first_entry = 1;
-						}
-						rquery = rquery + StringFormat(", (%u, %u, %u)", character_id, i, pp->disciplines.values[i]);
-					}
-				}
-				if (!rquery.empty()){ results = QueryDatabase(rquery); }
-				/* Run Material Color Convert */
-				first_entry = 0; rquery.clear();
-				for (i = EQ::textures::textureBegin; i < EQ::textures::materialCount; i++){
-					if (pp->item_tint[i].color > 0){
-						if (first_entry != 1){
-							rquery = StringFormat("REPLACE INTO `character_material` (id, slot, blue, green, red, use_tint, color) VALUES (%u, %u, %u, %u, %u, %u, %u)", character_id, i, pp->item_tint[i].rgb.blue, pp->item_tint[i].rgb.green, pp->item_tint[i].rgb.red, pp->item_tint[i].rgb.use_tint, pp->item_tint[i].color);
-							first_entry = 1;
-						}
-						rquery = rquery + StringFormat(", (%u, %u, %u, %u, %u, %u, %u)", character_id, i, pp->item_tint[i].rgb.blue, pp->item_tint[i].rgb.green, pp->item_tint[i].rgb.red, pp->item_tint[i].rgb.use_tint, pp->item_tint[i].color);
-					}
-				}
-				if (!rquery.empty()){ results = QueryDatabase(rquery); }
-				/* Run Tribute Convert */
-				first_entry = 0; rquery.clear();
-				for (i = 0; i < 5; i++){
-					if (pp->tributes[i].tribute > 0 && pp->tributes[i].tribute != 4294967295){
-						if (first_entry != 1){
-							rquery = StringFormat("REPLACE INTO `character_tribute` (id, tier, tribute) VALUES (%u, %u, %u)", character_id, pp->tributes[i].tier, pp->tributes[i].tribute);
-							first_entry = 1;
-						}
-						rquery = rquery + StringFormat(", (%u, %u, %u)", character_id, pp->tributes[i].tier, pp->tributes[i].tribute);
-					}
-				}
-				if (!rquery.empty()){ results = QueryDatabase(rquery); }
-				/* Run Bandolier Convert */
-				first_entry = 0; rquery.clear();
-				for (i = 0; i < Convert::BANDOLIERS_SIZE; i++){
-					if (strlen(pp->bandoliers[i].Name) < 32) {
-						for (int si = 0; si < Convert::BANDOLIER_ITEM_COUNT; si++){
-							if (pp->bandoliers[i].Items[si].ID > 0){
-								if (first_entry != 1) {
-									rquery = StringFormat("REPLACE INTO `character_bandolier` (id, bandolier_id, bandolier_slot, item_id, icon, bandolier_name) VALUES (%i, %u, %i, %u, %u, '%s')", character_id, i, si, pp->bandoliers[i].Items[si].ID, pp->bandoliers[i].Items[si].Icon, pp->bandoliers[i].Name);
-									first_entry = 1;
-								}
-								rquery = rquery + StringFormat(", (%i, %u, %i, %u, %u, '%s')", character_id, i, si, pp->bandoliers[i].Items[si].ID, pp->bandoliers[i].Items[si].Icon, pp->bandoliers[i].Name);
-							}
-						}
-					}
-				}
-				if (!rquery.empty()){ results = QueryDatabase(rquery); }
-				/* Run Potion Belt Convert */
-				first_entry = 0; rquery.clear();
-				for (i = 0; i < Convert::POTION_BELT_ITEM_COUNT; i++){
-					if (pp->potionbelt.Items[i].ID > 0){
-						if (first_entry != 1){
-							rquery = StringFormat("REPLACE INTO `character_potionbelt` (id, potion_id, item_id, icon) VALUES (%i, %u, %u, %u)", character_id, i, pp->potionbelt.Items[i].ID, pp->potionbelt.Items[i].Icon);
-							first_entry = 1;
-						}
-						rquery = rquery + StringFormat(", (%i, %u, %u, %u)", character_id, i, pp->potionbelt.Items[i].ID, pp->potionbelt.Items[i].Icon);
-
-					}
-				}
-				if (!rquery.empty()){ results = QueryDatabase(rquery); }
-				/* Run Leadership AA Convert */
-				first_entry = 0; rquery.clear();
-				for (i = 0; i < MAX_LEADERSHIP_AA_ARRAY; i++){
-					if (pp->leader_abilities.ranks[i] > 0 && pp->leader_abilities.ranks[i] < 6){
-						if (first_entry != 1){
-							rquery = StringFormat("REPLACE INTO `character_leadership_abilities` (id, slot, `rank`) VALUES (%i, %u, %u)", character_id, i, pp->leader_abilities.ranks[i]);
-							first_entry = 1;
-						}
-						rquery = rquery + StringFormat(", (%i, %u, %u)", character_id, i, pp->leader_abilities.ranks[i]);
-					}
-				}
-				if (!rquery.empty()){ results = QueryDatabase(rquery); }
 			}
 		}
-		if (runconvert == 1){
-			std::string rquery = StringFormat("RENAME TABLE `character_` TO `character_old`"); QueryDatabase(rquery);
-			printf("\n\nRenaming `character_` table to `character_old`, this is a LARGE table so when you don't need it anymore, I would suggest deleting it yourself...\n");
-			printf("\n\nCharacter blob conversion complete, continuing world bootup...\n");
+		if (!rquery.empty()) { results = QueryDatabase(rquery); }
+
+		/* Run Bind Home Convert */
+		if (pp->binds[4].zone_id < 999 && !_ISNAN_(pp->binds[4].x) && !_ISNAN_(pp->binds[4].y) &&
+			!_ISNAN_(pp->binds[4].z) && !_ISNAN_(pp->binds[4].heading)) {
+			rquery = StringFormat(
+				"REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, is_home)"
+				" VALUES (%u, %u, %u, %f, %f, %f, %f, 1)",
+				character_id,
+				pp->binds[4].zone_id,
+				0,
+				pp->binds[4].x,
+				pp->binds[4].y,
+				pp->binds[4].z,
+				pp->binds[4].heading
+			);
+			if (!rquery.empty()) { results = QueryDatabase(rquery); }
 		}
+
+		/* Run Bind Convert */
+		if (pp->binds[0].zone_id < 999 && !_ISNAN_(pp->binds[0].x) && !_ISNAN_(pp->binds[0].y) &&
+			!_ISNAN_(pp->binds[0].z) && !_ISNAN_(pp->binds[0].heading)) {
+			rquery  = StringFormat(
+				"REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, is_home)"
+				" VALUES (%u, %u, %u, %f, %f, %f, %f, 0)",
+				character_id,
+				account_id,
+				Strings::Escape(pp->name).c_str(),
+				Strings::Escape(pp->last_name).c_str(),
+				pp->gender,
+				pp->race,
+				pp->class_,
+				pp->level,
+				pp->deity,
+				pp->birthday,
+				pp->lastlogin,
+				pp->timePlayedMin,
+				pp->pvp,
+				pp->level2,
+				pp->anon,
+				pp->gm,
+				pp->intoxication,
+				pp->haircolor,
+				pp->beardcolor,
+				pp->eyecolor1,
+				pp->eyecolor2,
+				pp->hairstyle,
+				pp->beard,
+				pp->ability_time_seconds,
+				pp->ability_number,
+				pp->ability_time_minutes,
+				pp->ability_time_hours,
+				Strings::Escape(pp->title).c_str(),
+				Strings::Escape(pp->suffix).c_str(),
+				pp->exp,
+				pp->points,
+				pp->mana,
+				pp->cur_hp,
+				pp->STR,
+				pp->STA,
+				pp->CHA,
+				pp->DEX,
+				pp->INT,
+				pp->AGI,
+				pp->WIS,
+				pp->face,
+				pp->y,
+				pp->x,
+				pp->z,
+				pp->heading,
+				pp->pvp2,
+				pp->pvptype,
+				pp->autosplit,
+				pp->zone_change_count,
+				pp->drakkin_heritage,
+				pp->drakkin_tattoo,
+				pp->drakkin_details,
+				pp->toxicity,
+				pp->hunger_level,
+				pp->thirst_level,
+				pp->ability_up,
+				pp->zone_id,
+				pp->zoneInstance,
+				pp->leadAAActive == 0 ? 0 : 1,
+				pp->ldon_points_guk,
+				pp->ldon_points_mir,
+				pp->ldon_points_mmc,
+				pp->ldon_points_ruj,
+				pp->ldon_points_tak,
+				pp->ldon_points_available,
+				pp->tribute_time_remaining,
+				pp->showhelm,
+				pp->career_tribute_points,
+				pp->tribute_points,
+				pp->tribute_active,
+				pp->endurance,
+				pp->group_leadership_exp,
+				pp->raid_leadership_exp,
+				pp->group_leadership_points,
+				pp->raid_leadership_points,
+				pp->air_remaining,
+				pp->PVPKills,
+				pp->PVPDeaths,
+				pp->PVPCurrentPoints,
+				pp->PVPCareerPoints,
+				pp->PVPBestKillStreak,
+				pp->PVPWorstDeathStreak,
+				pp->PVPCurrentKillStreak,
+				pp->aapoints_spent,
+				pp->expAA,
+				pp->aapoints,
+				pp->groupAutoconsent,
+				pp->raidAutoconsent,
+				pp->guildAutoconsent,
+				pp->RestTimer,
+				firstlogon,
+				lfg,
+				lfp,
+				mailkey.c_str(),
+				xtargets,
+				e_pp->aa_effects,
+				e_pp->perAA,
+				e_pp->expended_aa
+			);
+			results = QueryDatabase(rquery);
+
+
+			/*
+			We set a first entry variable because we need the first initial piece of the query to be declared
+			This is to speed up the INSERTS and trim down the amount of individual sends during the process.
+			The speed difference is dramatic
+			*/
+			/* Run AA Convert */
+			int first_entry = 0;
+			rquery.clear();
+			for (i = 0; i < MAX_PP_AA_ARRAY; i++) {
+				if (pp->aa_array[i].AA > 0 && pp->aa_array[i].value > 0) {
+					if (first_entry != 1) {
+						rquery      = StringFormat(
+							"REPLACE INTO `character_alternate_abilities` (id, slot, aa_id, aa_value)"
+							" VALUES (%u, %u, %u, %u)", character_id, i, pp->aa_array[i].AA, pp->aa_array[i].value
+						);
+						first_entry = 1;
+					} else {
+						rquery = rquery + StringFormat(
+							", (%u, %u, %u, %u)",
+							character_id,
+							i,
+							pp->aa_array[i].AA,
+							pp->aa_array[i].value
+						);
+					}
+				}
+				rquery = rquery + StringFormat(", (%u, %u, %u)", character_id, i, pp->languages[i]);
+			}
+			if (!rquery.empty()) { results = QueryDatabase(rquery); }
+
+			/* Run Bind Home Convert */
+			if (pp->binds[4].zone_id < 999 && !_ISNAN_(pp->binds[4].x) && !_ISNAN_(pp->binds[4].y) &&
+				!_ISNAN_(pp->binds[4].z) && !_ISNAN_(pp->binds[4].heading)) {
+				rquery = StringFormat(
+					"REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, is_home)"
+					" VALUES (%u, %u, %u, %f, %f, %f, %f, 1)",
+					character_id,
+					pp->binds[4].zone_id,
+					0,
+					pp->binds[4].x,
+					pp->binds[4].y,
+					pp->binds[4].z,
+					pp->binds[4].heading
+				);
+				if (!rquery.empty()) { results = QueryDatabase(rquery); }
+			}
+
+			/* Run Bind Convert */
+			if (pp->binds[0].zone_id < 999 && !_ISNAN_(pp->binds[0].x) && !_ISNAN_(pp->binds[0].y) &&
+				!_ISNAN_(pp->binds[0].z) && !_ISNAN_(pp->binds[0].heading)) {
+				rquery = StringFormat(
+					"REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, is_home)"
+					" VALUES (%u, %u, %u, %f, %f, %f, %f, 0)",
+					character_id,
+					pp->binds[0].zone_id,
+					0,
+					pp->binds[0].x,
+					pp->binds[0].y,
+					pp->binds[0].z,
+					pp->binds[0].heading
+				);
+				if (!rquery.empty()) { results = QueryDatabase(rquery); }
+			}
+			/* Run Language Convert */
+			first_entry = 0;
+			rquery.clear();
+			for (i = 0; i < MAX_PP_LANGUAGE; i++) {
+				if (pp->languages[i] > 0) {
+					if (first_entry != 1) {
+						rquery      = StringFormat(
+							"REPLACE INTO `character_languages` (id, lang_id, value) VALUES (%u, %u, %u)",
+							character_id,
+							i,
+							pp->languages[i]
+						);
+						first_entry = 1;
+					}
+					rquery = rquery + StringFormat(", (%u, %u, %u)", character_id, i, pp->languages[i]);
+				}
+				rquery = rquery + StringFormat(", (%u, %u, %u)", character_id, i, pp->skills[i]);
+			}
+			if (!rquery.empty()) { results = QueryDatabase(rquery); }
+			/* Run Skill Convert */
+			first_entry = 0;
+			rquery.clear();
+			for (i = 0; i < MAX_PP_SKILL; i++) {
+				if (pp->skills[i] > 0) {
+					if (first_entry != 1) {
+						rquery      = StringFormat(
+							"REPLACE INTO `character_skills` (id, skill_id, value) VALUES (%u, %u, %u)",
+							character_id,
+							i,
+							pp->skills[i]
+						);
+						first_entry = 1;
+					}
+					rquery = rquery + StringFormat(", (%u, %u, %u)", character_id, i, pp->skills[i]);
+				}
+				rquery = rquery + StringFormat(", (%u, %u, %u)", character_id, i, pp->spell_book[i]);
+			}
+			if (!rquery.empty()) { results = QueryDatabase(rquery); }
+			/* Run Spell Convert */
+			first_entry = 0;
+			rquery.clear();
+			for (i = 0; i < 480; i++) {
+				if (pp->spell_book[i] > 0 && pp->spell_book[i] != 4294967295 && pp->spell_book[i] < 40000 &&
+					pp->spell_book[i] != 1) {
+					if (first_entry != 1) {
+						rquery      = StringFormat(
+							"REPLACE INTO `character_spells` (id, slot_id, spell_id) VALUES (%u, %u, %u)",
+							character_id,
+							i,
+							pp->spell_book[i]
+						);
+						first_entry = 1;
+					}
+					rquery = rquery + StringFormat(", (%u, %u, %u)", character_id, i, pp->spell_book[i]);
+				}
+				rquery = rquery + StringFormat(", (%u, %u, %u)", character_id, i, pp->mem_spells[i]);
+			}
+			if (!rquery.empty()) { results = QueryDatabase(rquery); }
+			/* Run Max Memmed Spell Convert */
+			first_entry = 0;
+			rquery.clear();
+			for (i = 0; i < 9; i++) {
+				if (pp->mem_spells[i] > 0 && pp->mem_spells[i] != 65535 && pp->mem_spells[i] != 4294967295) {
+					if (first_entry != 1) {
+						rquery      = StringFormat(
+							"REPLACE INTO `character_memmed_spells` (id, slot_id, spell_id) VALUES (%u, %u, %u)",
+							character_id,
+							i,
+							pp->mem_spells[i]
+						);
+						first_entry = 1;
+					}
+					rquery = rquery + StringFormat(", (%u, %u, %u)", character_id, i, pp->mem_spells[i]);
+				}
+				rquery = rquery + StringFormat(", (%u, %u, %u)", character_id, i, pp->disciplines.values[i]);
+			}
+			if (!rquery.empty()) { results = QueryDatabase(rquery); }
+			/* Run Discipline Convert */
+			first_entry = 0;
+			rquery.clear();
+			for (i = 0; i < MAX_PP_DISCIPLINES; i++) {
+				if (pp->disciplines.values[i] > 0 && pp->disciplines.values[i] < 60000) {
+					if (first_entry != 1) {
+						rquery      = StringFormat(
+							"REPLACE INTO `character_disciplines` (id, slot_id, disc_id) VALUES (%u, %u, %u)",
+							character_id,
+							i,
+							pp->disciplines.values[i]
+						);
+						first_entry = 1;
+					}
+					rquery = rquery + StringFormat(", (%u, %u, %u)", character_id, i, pp->disciplines.values[i]);
+				}
+				rquery = rquery + StringFormat(
+					", (%u, %u, %u, %u, %u, %u, %u)",
+					character_id,
+					i,
+					pp->item_tint[i].rgb.blue,
+					pp->item_tint[i].rgb.green,
+					pp->item_tint[i].rgb.red,
+					pp->item_tint[i].rgb.use_tint,
+					pp->item_tint[i].color
+				);
+			}
+			if (!rquery.empty()) { results = QueryDatabase(rquery); }
+			/* Run Material Color Convert */
+			first_entry = 0;
+			rquery.clear();
+			for (i = EQ::textures::textureBegin; i < EQ::textures::materialCount; i++) {
+				if (pp->item_tint[i].color > 0) {
+					if (first_entry != 1) {
+						rquery      = StringFormat(
+							"REPLACE INTO `character_material` (id, slot, blue, green, red, use_tint, color) VALUES (%u, %u, %u, %u, %u, %u, %u)",
+							character_id,
+							i,
+							pp->item_tint[i].rgb.blue,
+							pp->item_tint[i].rgb.green,
+							pp->item_tint[i].rgb.red,
+							pp->item_tint[i].rgb.use_tint,
+							pp->item_tint[i].color
+						);
+						first_entry = 1;
+					}
+					rquery = rquery + StringFormat(
+						", (%u, %u, %u, %u, %u, %u, %u)",
+						character_id,
+						i,
+						pp->item_tint[i].rgb.blue,
+						pp->item_tint[i].rgb.green,
+						pp->item_tint[i].rgb.red,
+						pp->item_tint[i].rgb.use_tint,
+						pp->item_tint[i].color
+					);
+				}
+				rquery = rquery + StringFormat(
+					", (%u, %u, %u)",
+					character_id,
+					pp->tributes[i].tier,
+					pp->tributes[i].tribute
+				);
+			}
+			if (!rquery.empty()) { results = QueryDatabase(rquery); }
+			/* Run Tribute Convert */
+			first_entry = 0;
+			rquery.clear();
+			for (i = 0; i < 5; i++) {
+				if (pp->tributes[i].tribute > 0 && pp->tributes[i].tribute != 4294967295) {
+					if (first_entry != 1) {
+						rquery      = StringFormat(
+							"REPLACE INTO `character_tribute` (id, tier, tribute) VALUES (%u, %u, %u)",
+							character_id,
+							pp->tributes[i].tier,
+							pp->tributes[i].tribute
+						);
+						first_entry = 1;
+					}
+					rquery = rquery + StringFormat(
+						", (%i, %u, %i, %u, %u, '%s')",
+						character_id,
+						i,
+						si,
+						pp->bandoliers[i].Items[si].ID,
+						pp->bandoliers[i].Items[si].Icon,
+						pp->bandoliers[i].Name
+					);
+				}
+			}
+			if (!rquery.empty()) { results = QueryDatabase(rquery); }
+			/* Run Bandolier Convert */
+			first_entry = 0;
+			rquery.clear();
+			for (i = 0; i < Convert::BANDOLIERS_SIZE; i++) {
+				if (strlen(pp->bandoliers[i].Name) < 32) {
+					for (int si = 0; si < Convert::BANDOLIER_ITEM_COUNT; si++) {
+						if (pp->bandoliers[i].Items[si].ID > 0) {
+							if (first_entry != 1) {
+								rquery      = StringFormat(
+									"REPLACE INTO `character_bandolier` (id, bandolier_id, bandolier_slot, item_id, icon, bandolier_name) VALUES (%i, %u, %i, %u, %u, '%s')",
+									character_id,
+									i,
+									si,
+									pp->bandoliers[i].Items[si].ID,
+									pp->bandoliers[i].Items[si].Icon,
+									pp->bandoliers[i].Name
+								);
+								first_entry = 1;
+							}
+							rquery = rquery + StringFormat(
+								", (%i, %u, %i, %u, %u, '%s')",
+								character_id,
+								i,
+								si,
+								pp->bandoliers[i].Items[si].ID,
+								pp->bandoliers[i].Items[si].Icon,
+								pp->bandoliers[i].Name
+							);
+						}
+					}
+				}
+			}
+			if (!rquery.empty()) { results = QueryDatabase(rquery); }
+			/* Run Potion Belt Convert */
+			first_entry = 0;
+			rquery.clear();
+			for (i = 0; i < Convert::POTION_BELT_ITEM_COUNT; i++) {
+				if (pp->potionbelt.Items[i].ID > 0) {
+					if (first_entry != 1) {
+						rquery      = StringFormat(
+							"REPLACE INTO `character_potionbelt` (id, potion_id, item_id, icon) VALUES (%i, %u, %u, %u)",
+							character_id,
+							i,
+							pp->potionbelt.Items[i].ID,
+							pp->potionbelt.Items[i].Icon
+						);
+						first_entry = 1;
+					}
+					rquery = rquery + StringFormat(
+						", (%i, %u, %u, %u)",
+						character_id,
+						i,
+						pp->potionbelt.Items[i].ID,
+						pp->potionbelt.Items[i].Icon
+					);
+
+				}
+				if (!rquery.empty()) { results = QueryDatabase(rquery); }
+				/* Run Leadership AA Convert */
+				first_entry = 0;
+				rquery.clear();
+				for (i = 0; i < MAX_LEADERSHIP_AA_ARRAY; i++) {
+					if (pp->leader_abilities.ranks[i] > 0 && pp->leader_abilities.ranks[i] < 6) {
+						if (first_entry != 1) {
+							rquery      = StringFormat(
+								"REPLACE INTO `character_leadership_abilities` (id, slot, `rank`) VALUES (%i, %u, %u)",
+								character_id,
+								i,
+								pp->leader_abilities.ranks[i]
+							);
+							first_entry = 1;
+						}
+						rquery =
+							rquery + StringFormat(", (%i, %u, %u)", character_id, i, pp->leader_abilities.ranks[i]);
+					}
+					rquery = rquery + StringFormat(", (%i, %u, %u)", character_id, i, pp->leader_abilities.ranks[i]);
+				}
+				if (!rquery.empty()) { results = QueryDatabase(rquery); }
+			}
+			if (!rquery.empty()) { results = QueryDatabase(rquery); }
+		}
+
+		rquery = "RENAME TABLE `character_` TO `character_old`";
+		QueryDatabase(rquery);
+		printf("\n\nRenaming `character_` table to `character_old`, this is a LARGE table so when you don't need it anymore, I would suggest deleting it yourself...\n");
+		printf("\n\nCharacter blob conversion complete, continuing world bootup...\n");
 	}
 	return true;
 }
