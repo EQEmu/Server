@@ -4484,12 +4484,9 @@ void Mob::NegateSpellEffectBonuses(uint16 spell_id)
 
 				case SE_AttackSpeed3:
 				{
-					if (effect_value > 0) {
-						if (negate_spellbonus) { spellbonuses.hastetype3 = effect_value; }
-						if (negate_aabonus) { aabonuses.hastetype3 = effect_value; }
-						if (negate_itembonus) { itembonuses.hastetype3 = effect_value; }
-
-					}
+					if (negate_spellbonus) { spellbonuses.hastetype3 = effect_value; }
+					if (negate_aabonus) { aabonuses.hastetype3 = effect_value; }
+					if (negate_itembonus) { itembonuses.hastetype3 = effect_value; }
 					break;
 				}
 
