@@ -1184,9 +1184,9 @@ int32 Bot::GenerateBaseHitPoints() {
 	if (GetOwner() && GetOwner()->CastToClient() && GetOwner()->CastToClient()->ClientVersion() >= EQ::versions::ClientVersion::SoD && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
 		float SoDPost255;
 		if (((NormalSTA - 255) / 2) > 0)
-			SoDPost255 = ((NormalSTA - 255) / 2);
+			SoDPost255 = ((static_cast<float>(NormalSTA) - 255.0f) / 2.0f);
 		else
-			SoDPost255 = 0;
+			SoDPost255 = 0.0f;
 
 		int hp_factor = GetClassHPFactor();
 
