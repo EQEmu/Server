@@ -11098,7 +11098,7 @@ uint16 Client::ScribeSpells(uint8 min_level, uint8 max_level)
 	uint16           scribed_spells      = 0;
 
 	if (!spell_ids.empty()) {
-		for (auto spell_id : spell_ids) {
+		for (const auto& spell_id : spell_ids) {
 			if (available_book_slot == -1) {
 				Message(
 					Chat::Red,
@@ -11144,7 +11144,7 @@ uint16 Client::LearnDisciplines(uint8 min_level, uint8 max_level)
 	uint16           learned_disciplines       = 0;
 
 	if (!spell_ids.empty()) {
-		for (auto spell_id : spell_ids) {
+		for (const auto& spell_id : spell_ids) {
 			if (available_discipline_slot == -1) {
 				Message(
 					Chat::Red,
