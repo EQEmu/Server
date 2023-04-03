@@ -3053,23 +3053,16 @@ bool Bot::AI_AddBotSpells(uint32 bot_spell_id) {
 		GetLevel()
 	);
 
-	if (spell_list) {
-		debug_msg.append(
-			fmt::format(
-				" (found, {})",
-				spell_list->entries.size()
-			)
-		);
+	debug_msg.append(
+		fmt::format(
+			" (found, {})",
+			spell_list->entries.size()
+		)
+	);
 
-		LogAI("[{}]", debug_msg);
-		for (const auto &iter : spell_list->entries) {
-			LogAIDetail("([{}]) [{}]", iter.spellid, spells[iter.spellid].name);
-		}
-	}
-	else
-	{
-		debug_msg.append(" (not found)");
-		LogAI("[{}]", debug_msg);
+	LogAI("[{}]", debug_msg);
+	for (const auto &iter: spell_list->entries) {
+		LogAIDetail("([{}]) [{}]", iter.spellid, spells[iter.spellid].name);
 	}
 
 	LogAI("fin (spell list)");
