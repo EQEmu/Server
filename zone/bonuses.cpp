@@ -5305,11 +5305,6 @@ void Mob::NegateSpellEffectBonuses(uint16 spell_id)
 					break;
 
 				case SE_StrikeThrough:
-					if (negate_spellbonus) { spellbonuses.StrikeThrough = effect_value; }
-					if (negate_aabonus) { aabonuses.StrikeThrough = effect_value; }
-					if (negate_itembonus) { itembonuses.StrikeThrough = effect_value; }
-					break;
-
 				case SE_StrikeThrough2:
 					if (negate_spellbonus) { spellbonuses.StrikeThrough = effect_value; }
 					if (negate_aabonus) { aabonuses.StrikeThrough = effect_value; }
