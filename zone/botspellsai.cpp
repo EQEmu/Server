@@ -1003,7 +1003,7 @@ bool Bot::BotCastHeal(Mob* tar, uint8 botLevel, uint8 botClass, BotSpell& botSpe
 			isPrimaryHealer = IsGroupHealer();
 		}
 
-		if (hpr < 95 || (tar->IsClient() && (hpr < 95)) || (botClass == BARD)) {
+		if (hpr < 95 || tar->IsClient() || botClass == BARD) {
 			if (tar->GetClass() == NECROMANCER && hpr >= 40) {
 				return false;
 			}
@@ -1021,7 +1021,7 @@ bool Bot::BotCastHeal(Mob* tar, uint8 botLevel, uint8 botClass, BotSpell& botSpe
 				if (hpr < 35) {
 					botSpell = GetBestBotSpellForFastHeal(this);
 				}
-				else if (hpr >= 35 && hpr < 70) {
+				else if (hpr < 70) {
 					if (GetNumberNeedingHealedInGroup(60, false, raid) >= 3) {
 						botSpell = GetBestBotSpellForGroupHeal(this);
 					}
@@ -1030,7 +1030,7 @@ bool Bot::BotCastHeal(Mob* tar, uint8 botLevel, uint8 botClass, BotSpell& botSpe
 						botSpell = GetBestBotSpellForPercentageHeal(this);
 					}
 				}
-				else if (hpr >= 70 && hpr < 95) {
+				else if (hpr < 95) {
 					if (GetNumberNeedingHealedInGroup(80, false, raid) >= 3) {
 						botSpell = GetBestBotSpellForGroupHealOverTime(this);
 					}
@@ -1075,7 +1075,7 @@ bool Bot::BotCastHeal(Mob* tar, uint8 botLevel, uint8 botClass, BotSpell& botSpe
 				else if (hpr < 40) {
 					botSpell = GetBestBotSpellForPercentageHeal(this);
 				}
-				else if (hpr >= 40 && hpr < 75) {
+				else if (hpr < 75) {
 					botSpell = GetBestBotSpellForRegularSingleTargetHeal(this);
 				}
 				else {
