@@ -5607,8 +5607,9 @@ void Client::SetRadiantCrystals(uint32 value) {
 void Client::ProcessInspectRequest(Client *requestee, Client *requester)
 {
 	if (requestee && requester) {
-		auto                   outapp = new EQApplicationPacket(OP_InspectAnswer, sizeof(InspectResponse_Struct));
-		InspectResponse_Struct *insr  = (InspectResponse_Struct *) outapp->pBuffer;
+		auto outapp = new EQApplicationPacket(OP_InspectAnswer, sizeof(InspectResponse_Struct));
+		auto insr   = (InspectResponse_Struct *) outapp->pBuffer;
+
 		insr->TargetID = requester->GetID();
 		insr->playerid = requestee->GetID();
 
