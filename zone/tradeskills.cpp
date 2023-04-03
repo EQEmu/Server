@@ -1609,7 +1609,7 @@ bool ZoneDatabase::GetTradeRecipe(
 	for(auto row = results.begin(); row != results.end(); ++row) {
 		uint32 item = (uint32)Strings::ToInt(row[0]);
 		uint8 num = (uint8) Strings::ToInt(row[1]);
-		spec->onsuccess.push_back(std::pair<uint32,uint8>(item, num));
+		spec->onsuccess.emplace_back(std::pair<uint32,uint8>(item, num));
 	}
 
     spec->onfail.clear();
@@ -1623,7 +1623,7 @@ bool ZoneDatabase::GetTradeRecipe(
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			uint32 item = (uint32) Strings::ToInt(row[0]);
 			uint8  num  = (uint8) Strings::ToInt(row[1]);
-			spec->onfail.push_back(std::pair<uint32, uint8>(item, num));
+			spec->onfail.emplace_back(std::pair<uint32, uint8>(item, num));
 		}
 	}
 
@@ -1646,7 +1646,7 @@ bool ZoneDatabase::GetTradeRecipe(
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			uint32 item = (uint32) Strings::ToInt(row[0]);
 			uint8  num  = (uint8) Strings::ToInt(row[1]);
-			spec->salvage.push_back(std::pair<uint32, uint8>(item, num));
+			spec->salvage.emplace_back(std::pair<uint32, uint8>(item, num));
 		}
 	}
 

@@ -1481,7 +1481,7 @@ int bot_command_init(void)
 		auto bcs_iter = bot_command_settings.find(working_bcl_iter.first);
 		if (bcs_iter == bot_command_settings.end()) {
 
-			injected_bot_command_settings.push_back(std::pair<std::string, uint8>(working_bcl_iter.first, working_bcl_iter.second->access));
+			injected_bot_command_settings.emplace_back(std::pair<std::string, uint8>(working_bcl_iter.first, working_bcl_iter.second->access));
 			LogInfo(
 				"New Bot Command [{}] found... Adding to `bot_command_settings` table with access [{}]",
 				working_bcl_iter.first.c_str(),

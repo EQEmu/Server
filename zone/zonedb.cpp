@@ -1684,7 +1684,7 @@ void ZoneDatabase::ListCharacterInvSnapshots(uint32 character_id, std::list<std:
 		return;
 
 	for (auto row : results)
-		is_list.push_back(std::pair<uint32, int>(Strings::ToUnsignedInt(row[0]), Strings::ToInt(row[1])));
+		is_list.emplace_back(std::pair<uint32, int>(Strings::ToUnsignedInt(row[0]), Strings::ToInt(row[1])));
 }
 
 bool ZoneDatabase::ValidateCharacterInvSnapshotTimestamp(uint32 character_id, uint32 timestamp) {
@@ -1734,7 +1734,7 @@ void ZoneDatabase::ParseCharacterInvSnapshot(uint32 character_id, uint32 timesta
 		return;
 
 	for (auto row : results)
-		parse_list.push_back(std::pair<int16, uint32>(Strings::ToInt(row[0]), Strings::ToUnsignedInt(row[1])));
+		parse_list.emplace_back(std::pair<int16, uint32>(Strings::ToInt(row[0]), Strings::ToUnsignedInt(row[1])));
 }
 
 void ZoneDatabase::DivergeCharacterInvSnapshotFromInventory(uint32 character_id, uint32 timestamp, std::list<std::pair<int16, uint32>> &compare_list) {
@@ -1778,7 +1778,7 @@ void ZoneDatabase::DivergeCharacterInvSnapshotFromInventory(uint32 character_id,
 		return;
 
 	for (auto row : results)
-		compare_list.push_back(std::pair<int16, uint32>(Strings::ToInt(row[0]), Strings::ToUnsignedInt(row[1])));
+		compare_list.emplace_back(std::pair<int16, uint32>(Strings::ToInt(row[0]), Strings::ToUnsignedInt(row[1])));
 }
 
 void ZoneDatabase::DivergeCharacterInventoryFromInvSnapshot(uint32 character_id, uint32 timestamp, std::list<std::pair<int16, uint32>> &compare_list) {
@@ -1819,7 +1819,7 @@ void ZoneDatabase::DivergeCharacterInventoryFromInvSnapshot(uint32 character_id,
 		return;
 
 	for (auto row : results)
-		compare_list.push_back(std::pair<int16, uint32>(Strings::ToInt(row[0]), Strings::ToUnsignedInt(row[1])));
+		compare_list.emplace_back(std::pair<int16, uint32>(Strings::ToInt(row[0]), Strings::ToUnsignedInt(row[1])));
 }
 
 bool ZoneDatabase::RestoreCharacterInvSnapshot(uint32 character_id, uint32 timestamp) {
@@ -4140,7 +4140,7 @@ bool ZoneDatabase::LoadCharacterCorpseData(uint32 corpse_id, CharacterCorpseEntr
 		item.ornamentidfile = Strings::ToUnsignedInt(row[r++]);
 		item.ornament_hero_model = Strings::ToUnsignedInt(row[r++]);
 
-		corpse.items.push_back(std::move(item));
+		corpse.items.emplace_back(std::move(item));
 		r = 0;
 		i++;
 	}

@@ -490,7 +490,7 @@ namespace LoginserverWebserver {
 				token_data.can_write
 			);
 
-			server.token_manager->loaded_api_tokens.insert(
+			server.token_manager->loaded_api_tokens.emplace(
 				std::make_pair(
 					token_data.token,
 					token_data

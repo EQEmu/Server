@@ -122,11 +122,11 @@ std::vector<std::string> ParseRecipients(std::string RecipientString) {
 
 		if (Comma == std::string::npos) {
 
-			RecipientList.push_back(RecipientString.substr(CurrentPos));
+			RecipientList.emplace_back(RecipientString.substr(CurrentPos));
 
 			break;
 		}
-		RecipientList.push_back(RecipientString.substr(CurrentPos, Comma - CurrentPos));
+		RecipientList.emplace_back(RecipientString.substr(CurrentPos, Comma - CurrentPos));
 
 		CurrentPos = Comma + 2;
 	}

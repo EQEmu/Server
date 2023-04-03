@@ -1720,7 +1720,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	auto dz = zone->GetDynamicZone();
 	if (dz && dz->GetSafeReturnLocation().zone_id != 0)
 	{
-		auto safereturn = dz->GetSafeReturnLocation();
+		auto& safereturn = dz->GetSafeReturnLocation();
 
 		auto safereturn_entry = CharacterInstanceSafereturnsRepository::NewEntity();
 		safereturn_entry.character_id     = CharacterID();
@@ -5366,7 +5366,7 @@ void Client::Handle_OP_CorpseDrag(const EQApplicationPacket *app)
 	if (!corpse->CastToCorpse()->Summon(this, false, true))
 		return;
 
-	DraggedCorpses.push_back(std::pair<std::string, uint16>(cds->CorpseName, corpse->GetID()));
+	DraggedCorpses.emplace_back(std::pair<std::string, uint16>(cds->CorpseName, corpse->GetID()));
 
 	MessageString(Chat::DefaultText, CORPSEDRAG_BEGIN, cds->CorpseName);
 }

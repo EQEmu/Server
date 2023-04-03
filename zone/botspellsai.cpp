@@ -242,7 +242,7 @@ bool Bot::BotCastCure(Mob* tar, uint8 botClass, BotSpell& botSpell, Raid* raid) 
 					uint32 r_group = raid->GetGroup(GetName());
 					if (r_group) {
 						std::vector<RaidMember> raid_group_members = raid->GetRaidGroupMembers(r_group);
-						for (auto iter: raid_group_members) {
+						for (auto& iter: raid_group_members) {
 							if (
 								iter.member &&
 								!iter.member->qglobal &&
@@ -3433,7 +3433,7 @@ DBbotspells_Struct* ZoneDatabase::GetBotSpells(uint32 bot_spell_id)
 			}
 		}
 
-		bot_spells_cache.insert(std::make_pair(bot_spell_id, spell_set));
+		bot_spells_cache.emplace(std::make_pair(bot_spell_id, spell_set));
 
 		return &bot_spells_cache[bot_spell_id];
 	}
