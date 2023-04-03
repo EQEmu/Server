@@ -7590,9 +7590,6 @@ void Client::SendMercPersonalInfo()
 				return;
 			}
 		}
-		Log(Logs::General, Logs::Mercenaries, "SendMercPersonalInfo Send Successful for %s.", GetName());
-
-		SendMercMerchantResponsePacket(0);
 	}
 	else
 	{
