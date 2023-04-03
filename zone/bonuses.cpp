@@ -1505,12 +1505,14 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 
 		case SE_SpellEffectResistChance: {
 			for (int e = 0; e < MAX_RESISTABLE_EFFECTS * 2; e += 2) {
-				if (newbon->SEResist[e + 1] && (newbon->SEResist[e] == limit_value) &&
-				    (newbon->SEResist[e + 1] < base_value)) {
-					newbon->SEResist[e] = limit_value; // Spell Effect ID
-					newbon->SEResist[e + 1] = base_value; // Resist Chance
-					break;
-				} else if (!newbon->SEResist[e + 1]) {
+				if (
+					!newbon->SEResist[e + 1] ||
+					(
+						newbon->SEResist[e + 1] &&
+						newbon->SEResist[e] == limit_value &&
+						newbon->SEResist[e + 1] < base_value
+					)
+				) {
 					newbon->SEResist[e] = limit_value; // Spell Effect ID
 					newbon->SEResist[e + 1] = base_value; // Resist Chance
 					break;
@@ -3492,14 +3494,16 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 			{
 				for(int e = 0; e < MAX_RESISTABLE_EFFECTS*2; e+=2)
 				{
-					if(new_bonus->SEResist[e+1] && (new_bonus->SEResist[e] == limit_value) && (new_bonus->SEResist[e+1] < effect_value)){
-						new_bonus->SEResist[e] = limit_value; //Spell Effect ID
-						new_bonus->SEResist[e+1] = effect_value; //Resist Chance
-						break;
-					}
-					else if (!new_bonus->SEResist[e+1]){
-						new_bonus->SEResist[e] = limit_value; //Spell Effect ID
-						new_bonus->SEResist[e+1] = effect_value; //Resist Chance
+					if (
+						!new_bonus->SEResist[e + 1] ||
+						(
+							new_bonus->SEResist[e + 1] &&
+							new_bonus->SEResist[e] == limit_value &&
+							new_bonus->SEResist[e + 1] < effect_value
+						)
+					) {
+						new_bonus->SEResist[e]     = limit_value; //Spell Effect ID
+						new_bonus->SEResist[e + 1] = effect_value; //Resist Chance
 						break;
 					}
 				}
