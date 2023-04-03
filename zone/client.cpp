@@ -8643,15 +8643,17 @@ void Client::RewardFaction(int id, int amount)
 }
 
 void Client::SendHPUpdateMarquee(){
-	if (!this || !IsClient() || !current_hp || !max_hp)
+	if (!IsClient() || !current_hp || !max_hp) {
 		return;
+	}
 
 	/* Health Update Marquee Display: Custom*/
-	uint8 health_percentage = (uint8)(current_hp * 100 / max_hp);
-	if (health_percentage >= 100)
+	const auto health_percentage = static_cast<uint8>(current_hp * 100 / max_hp);
+	if (health_percentage >= 100) {
 		return;
+	}
 
-	std::string health_update_notification = StringFormat("Health: %u%%", health_percentage);
+	const auto health_update_notification = fmt::format("Health: {}%%", health_percentage);
 	SendMarqueeMessage(Chat::Yellow, 510, 0, 3000, 3000, health_update_notification);
 }
 
