@@ -2113,10 +2113,17 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 		//Use AISpellEffects
 		else {
 			spell_effect_id = effect_id;
-			effect_value = se_base;
-			limit_value = se_limit;
-			max_value = se_max;
-			i = (EFFECT_COUNT - 1); // AISpellEffects do a single pass
+			effect_value    = se_base;
+			limit_value     = se_limit;
+			max_value       = se_max;
+
+			//Special custom cases for loading effects on to NPC from 'npc_spels_effects' table
+			//Non-Focused Effect to modify incoming spell damage by resist type.
+			if (spell_effect_id ==  SE_FcSpellVulnerability) {
+				ModVulnerability(limit_value, effect_value);
+			}
+
+			break;
 		}
 
 		switch (spell_effect_id)
@@ -4059,15 +4066,6 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 			case SE_TrapCircumvention:
 				new_bonus->TrapCircumvention += effect_value;
 				break;
-
-			//Special custom cases for loading effects on to NPC from 'npc_spels_effects' table
-			if (IsAISpellEffect) {
-
-				//Non-Focused Effect to modify incoming spell damage by resist type.
-				case SE_FcSpellVulnerability:
-					ModVulnerability(limit_value, effect_value);
-				break;
-			}
 		}
 	}
 }
