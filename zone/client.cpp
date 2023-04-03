@@ -6934,15 +6934,17 @@ void Client::SendAlternateCurrencyValues()
 
 void Client::SendAlternateCurrencyValue(uint32 currency_id, bool send_if_null)
 {
-	uint32 value = GetAlternateCurrencyValue(currency_id);
-	if(value > 0 || (value == 0 && send_if_null)) {
+	const auto value = GetAlternateCurrencyValue(currency_id);
+	if (value > 0 || send_if_null) {
 		auto outapp = new EQApplicationPacket(OP_AltCurrency, sizeof(AltCurrencyUpdate_Struct));
-		AltCurrencyUpdate_Struct *update = (AltCurrencyUpdate_Struct*)outapp->pBuffer;
-		update->opcode = 7;
-		strcpy(update->name, GetName());
+		auto update = (AltCurrencyUpdate_Struct *) outapp->pBuffer;
+		update->opcode          = 7;
 		update->currency_number = currency_id;
-		update->amount = value;
-		update->unknown072 = 1;
+		update->amount          = value;
+		update->unknown072      = 1;
+
+		strn0cpy(update->name, GetName(), sizeof(update->name));
+
 		FastQueuePacket(&outapp);
 	}
 }
