@@ -2669,7 +2669,7 @@ BotSpell Bot::GetDebuffBotSpell(Bot* botCaster, Mob *tar) {
 	if (!tar || !botCaster)
 		return result;
 
-	if (botCaster && botCaster->AI_HasSpells()) {
+	if (botCaster->AI_HasSpells()) {
 		std::vector<BotSpells_Struct> botSpellList = botCaster->AIBot_spells;
 
 		for (int i = botSpellList.size() - 1; i >= 0; i--) {
