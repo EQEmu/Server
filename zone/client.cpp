@@ -3299,28 +3299,28 @@ bool Client::FilteredMessageCheck(Mob *sender, eqFilterType filter)
 {
 	eqFilterMode mode = GetFilter(filter);
 	// easy ones first
-	if (mode == FilterShow)
+	if (mode == FilterShow) {
 		return true;
-	else if (mode == FilterHide)
+	} else if (mode == FilterHide) {
 		return false;
+	}
 
-	if (sender != this && (mode == FilterHide || mode == FilterShowSelfOnly)) {
+	if (sender != this && mode == FilterShowSelfOnly) {
 		return false;
 	} else if (sender) {
-		if (this == sender) {
-			if (mode == FilterHide) // don't need to check others
-				return false;
-		} else if (mode == FilterShowGroupOnly) {
-			Group *g = GetGroup();
-			Raid *r = GetRaid();
+		if (mode == FilterShowGroupOnly) {
+			auto g = GetGroup();
+			auto r = GetRaid();
 			if (g) {
-				if (g->IsGroupMember(sender))
+				if (g->IsGroupMember(sender)) {
 					return true;
+				}
 			} else if (r && sender->IsClient()) {
-				uint32 rgid1 = r->GetGroup(this);
-				uint32 rgid2 = r->GetGroup(sender->CastToClient());
-				if (rgid1 != 0xFFFFFFFF && rgid1 == rgid2)
+				auto rgid1 = r->GetGroup(this);
+				auto rgid2 = r->GetGroup(sender->CastToClient());
+				if (rgid1 != RAID_GROUPLESS && rgid1 == rgid2) {
 					return true;
+				}
 			} else {
 				return false;
 			}
