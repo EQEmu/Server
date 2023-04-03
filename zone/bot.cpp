@@ -6686,8 +6686,6 @@ void Bot::UpdateGroupCastingRoles(const Group* group, bool disband)
 
 	Mob* healer = nullptr;
 	Mob* slower = nullptr;
-	/*Mob* nuker = nullptr;
-	Mob* doter = nullptr;*/
 
 	for (auto iter : group->members) {
 		if (!iter)
@@ -6803,10 +6801,6 @@ void Bot::UpdateGroupCastingRoles(const Group* group, bool disband)
 		healer->CastToBot()->SetGroupHealer();
 	if (slower && slower->IsBot())
 		slower->CastToBot()->SetGroupSlower();
-	/*if (nuker && nuker->IsBot())
-		nuker->CastToBot()->SetGroupNuker();
-	if (doter && doter->IsBot())
-		doter->CastToBot()->SetGroupDoter();*/
 }
 
 Bot* Bot::GetBotByBotClientOwnerAndBotName(Client* c, const std::string& botName) {
