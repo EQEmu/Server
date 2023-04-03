@@ -2993,9 +2993,9 @@ uint8 Bot::GetChanceToCastBySpellType(uint32 spellType)
 		spell_type_index = spellTypeIndexPreCombatBuffSong;
 		break;
 	default:
-		spell_type_index = SPELL_TYPE_COUNT;
 		break;
 	}
+
 	if (spell_type_index >= SPELL_TYPE_COUNT)
 		return 0;
 
