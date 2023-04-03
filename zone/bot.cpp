@@ -3145,8 +3145,7 @@ void Bot::SetOwnerTarget(Client* bot_owner) {
 			AddToHateList(attack_target, 1);
 			SetTarget(attack_target);
 			SetAttackingFlag();
-			if (HasPet() && (GetClass() != ENCHANTER || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 2)) {
-
+			if (GetPet() && (GetClass() != ENCHANTER || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 2)) {
 				GetPet()->WipeHateList();
 				GetPet()->AddToHateList(attack_target, 1);
 				GetPet()->SetTarget(attack_target);
@@ -4402,6 +4401,10 @@ void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client*
 	// trades can now go in as empty slot inserts
 	for (auto& trade_iterator : client_trade) {
 		// TODO: code for stackables
+
+		if (!trade_iterator.trade_item_instance) {
+			continue;
+		}
 
 		if (!database.botdb.SaveItemBySlot(this, trade_iterator.to_bot_slot, trade_iterator.trade_item_instance)) {
 			OwnerMessage(
