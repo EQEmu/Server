@@ -7168,8 +7168,7 @@ bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, fl
 			}
 			if (caster->IsRaidGrouped()) {
 				if (auto raid = entity_list.GetRaidByBotName(caster->GetName())) {
-					uint32 gid = RAID_GROUPLESS;
-					gid = raid->GetGroup(caster->GetName());
+					uint32 gid = raid->GetGroup(caster->GetName());
 					if (gid < MAX_RAID_GROUPS) {
 						std::vector<RaidMember> raid_group_members = raid->GetRaidGroupMembers(gid);
 						for (std::vector<RaidMember>::iterator iter = raid_group_members.begin();
