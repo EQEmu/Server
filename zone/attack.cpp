@@ -3024,8 +3024,6 @@ void Mob::AddToHateList(Mob* other, int64 hate /*= 0*/, int64 damage /*= 0*/, bo
 				hate_list.AddEntToHateList(owner_, 0, 0, false, true);
 				owner_->AddAutoXTarget(this); // this was being called on dead/out-of-zone clients
 			}
-
-			break;
 		}
 	}
 
