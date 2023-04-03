@@ -310,8 +310,6 @@ Client::Client(EQStreamInterface *ieqs) : Mob(
 	HideCorpseMode = HideCorpseNone;
 	PendingGuildInvitation = false;
 
-	current_endurance = 0;
-
 	InitializeBuffSlots();
 
 	adventure_request_timer = nullptr;
