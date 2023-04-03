@@ -4635,7 +4635,7 @@ return true;
 
 void Bot::Damage(Mob *from, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill, bool avoidable, int8 buffslot, bool iBuffTic, eSpecialAttacks special) {
 	if (!from) {
-		returne;
+		return;
 	}
 
 	if (spell_id == 0) {
