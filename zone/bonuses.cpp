@@ -1225,6 +1225,7 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 				newbon->HitChanceEffect[EQ::skills::HIGHEST_SKILL + 1] += base_value;
 			else
 				newbon->HitChanceEffect[limit_value] += base_value;
+			break;
 		}
 
 		case SE_ProcOnKillShot:
@@ -1405,6 +1406,7 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 					break;
 				}
 			}
+			break;
 		}
 
 		case SE_DamageModifier: {
@@ -3516,6 +3518,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 			case SE_DoubleRiposte:
 			{
 				new_bonus->DoubleRiposte += effect_value;
+				break;
 			}
 
 			case SE_GiveDoubleRiposte:
@@ -3801,6 +3804,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 						break;
 					}
 				}
+				break;
 			}
 
 			case SE_PC_Pet_Rampage: {
@@ -4313,11 +4317,11 @@ uint8 Mob::IsFocusEffect(uint16 spell_id,int effect_index, bool AA,uint32 aa_eff
 		case SE_SpellResistReduction:
 			return focusResistRate;
 		case SE_Fc_ResistIncoming:
-			focusFcResistIncoming;
+			return focusFcResistIncoming;
 		case SE_Fc_Amplify_Mod:
-			focusFcAmplifyMod;
+			return focusFcAmplifyMod;
 		case SE_Fc_Amplify_Amt:
-			focusFcAmplifyAmt;
+			return focusFcAmplifyAmt;
 		case SE_SpellHateMod:
 			return focusSpellHateMod;
 		case SE_ReduceReuseTimer:
