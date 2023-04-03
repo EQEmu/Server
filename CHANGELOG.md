@@ -1,3 +1,48 @@
+## [22.9.1] - 04/03/2023 
+
+### Code
+
+* Add client pointer validation to Zone::GetClosestZonePoint() ([#3173](https://github.com/EQEmu/Server/pull/3173)) @Kinglykrab 2023-04-01
+* Change level to bot_level in Bot::DoClassAttacks() to not overlap member variable ([#3239](https://github.com/EQEmu/Server/pull/3239)) @Kinglykrab 2023-04-03
+* Cleanup unnecessary string -> char* -> string conversions in eqemu_config.cpp ([#3207](https://github.com/EQEmu/Server/pull/3207)) @Kinglykrab 2023-04-03
+* Cleanup uses of insert/push_back when a temp object is used. ([#3170](https://github.com/EQEmu/Server/pull/3170)) @Aeadoin 2023-04-03
+* Cleanup variable names in Bot::AddSpellToBotList() ([#3248](https://github.com/EQEmu/Server/pull/3248)) @Kinglykrab 2023-04-03
+* Explicitly cast to float for more precision in Bot::GenerateBastHitPoints() ([#3238](https://github.com/EQEmu/Server/pull/3238)) @Kinglykrab 2023-04-03
+* Fix SEResist array settings duplicate code ([#3225](https://github.com/EQEmu/Server/pull/3225)) @Kinglykrab 2023-04-03
+* Fix loop and code duplication for SE_ProcOnKillShot ([#3224](https://github.com/EQEmu/Server/pull/3224)) @Kinglykrab 2023-04-03
+* Fix possible dereferencing of invalid iterator in constants ([#3181](https://github.com/EQEmu/Server/pull/3181)) @Kinglykrab 2023-04-03
+* Fix typo where itembonuses should have been used instead of spellbonuses ([#3221](https://github.com/EQEmu/Server/pull/3221)) @Kinglykrab 2023-04-03
+* Further bot.cpp nullptr checks ([#3240](https://github.com/EQEmu/Server/pull/3240)) @Kinglykrab 2023-04-03
+* Move cases in Bot::AICastSpell() ([#3247](https://github.com/EQEmu/Server/pull/3247)) @Kinglykrab 2023-04-03
+* Multiple cases same outcome and set skip variable to same value ([#3216](https://github.com/EQEmu/Server/pull/3216)) @Kinglykrab 2023-04-03
+* Multiple cases with same outcome in GetGMSayColorFromCategory() ([#3182](https://github.com/EQEmu/Server/pull/3182)) @Kinglykrab 2023-04-03
+* Remove extraneous loottable_id setting in WakeTheDead in aa.cpp ([#3215](https://github.com/EQEmu/Server/pull/3215)) @Kinglykrab 2023-04-03
+* Remove possible dereferenced nullptrs in bot.cpp ([#3241](https://github.com/EQEmu/Server/pull/3241)) @Kinglykrab 2023-04-03
+* Remove unnecessary >= 0 checks for procs in botspellsai.cpp ([#3242](https://github.com/EQEmu/Server/pull/3242)) @Kinglykrab 2023-04-03
+* Remove unnecessary botCaster check in Bot::GetDebuffBotSpell() ([#3246](https://github.com/EQEmu/Server/pull/3246)) @Kinglykrab 2023-04-03
+* Remove unnecessary group validation in Bot::Death() ([#3235](https://github.com/EQEmu/Server/pull/3235)) @Kinglykrab 2023-04-03
+* Remove unnecessary hpr checks in Bot::BotCastHeal() ([#3245](https://github.com/EQEmu/Server/pull/3245)) @Kinglykrab 2023-04-03
+* Remove unnecessary setting of spell_type_index in Bot::GetChanceToCastBySpellType() ([#3243](https://github.com/EQEmu/Server/pull/3243)) @Kinglykrab 2023-04-03
+* Remove unnecessary skill_to_use check in Bot::DoClassAttacks() ([#3236](https://github.com/EQEmu/Server/pull/3236)) @Kinglykrab 2023-04-03
+* Remove unnecessary spell_list validation check in botspellsai.cpp ([#3244](https://github.com/EQEmu/Server/pull/3244)) @Kinglykrab 2023-04-03
+* Remove unnecessary validation check in Zone::ClearBlockedSpells() ([#3172](https://github.com/EQEmu/Server/pull/3172)) @Kinglykrab 2023-04-01
+* Remove unused Includes under zone files ([#3162](https://github.com/EQEmu/Server/pull/3162)) @Aeadoin 2023-04-02
+* Remove unused query variable in Database::DeleteInstance() ([#3202](https://github.com/EQEmu/Server/pull/3202)) @Kinglykrab 2023-04-03
+* Unconditional return in for loop in GetRaidByCharID() ([#3179](https://github.com/EQEmu/Server/pull/3179)) @Kinglykrab 2023-04-03
+* Use a constant reference for content_flags in SetContentFlags() ([#3196](https://github.com/EQEmu/Server/pull/3196)) @Kinglykrab 2023-04-03
+* Wake The Dead argument was named the same as a member variable in Mob ([#3214](https://github.com/EQEmu/Server/pull/3214)) @Kinglykrab 2023-04-03
+* gid is assigned 2 values simultaneously in bot.cpp ([#3234](https://github.com/EQEmu/Server/pull/3234)) @Kinglykrab 2023-04-03
+* summon_count > MAX_SWARM_PETS  is always false in aa.cpp ([#3212](https://github.com/EQEmu/Server/pull/3212)) @Kinglykrab 2023-04-03
+
+### Fixes
+
+* Correct Forward Declaration compilation warning ([#3176](https://github.com/EQEmu/Server/pull/3176)) @Aeadoin 2023-04-02
+* Fix issue with Bot Raid invites not working. ([#3249](https://github.com/EQEmu/Server/pull/3249)) @Aeadoin 2023-04-03
+
+### Performance
+
+* Change to use Pass by reference where valid. ([#3163](https://github.com/EQEmu/Server/pull/3163)) @Aeadoin 2023-04-02
+
 ## [22.9.0] - 04/01/2023 
 
 ### Bots
