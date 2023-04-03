@@ -1649,7 +1649,7 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 		}
 
 		case SE_Illusion:
-			newbon->Illusion = true;
+			newbon->Illusion = rank.spell;
 			break;
 
 		case SE_IllusionPersistence:
