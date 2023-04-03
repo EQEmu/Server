@@ -2413,6 +2413,10 @@ bool Bot::TrySecondaryWeaponAttacks(Mob* tar, const EQ::ItemInstance* s_item) {
 				s_itemdata = s_item->GetItem();
 			}
 
+			if (!s_itemdata) {
+				return false;
+			}
+
 			bool use_fist = true;
 			if (s_itemdata) {
 				use_fist = false;
@@ -3667,6 +3671,10 @@ void Bot::BotRemoveEquipItem(uint16 slot_id)
 
 void Bot::BotTradeAddItem(const EQ::ItemInstance* inst, uint16 slot_id, std::string* error_message, bool save_to_database)
 {
+	if (!inst) {
+		return;
+	}
+
 	if (save_to_database) {
 		if (!database.botdb.SaveItemBySlot(this, slot_id, inst)) {
 			*error_message = BotDatabase::fail::SaveItemBySlot();
@@ -4403,6 +4411,10 @@ void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client*
 	for (auto& trade_iterator : client_trade) {
 		// TODO: code for stackables
 
+		if (!trade_iterator.trade_item_instance) {
+			continue;
+		}
+
 		if (!database.botdb.SaveItemBySlot(this, trade_iterator.to_bot_slot, trade_iterator.trade_item_instance)) {
 			OwnerMessage(
 				fmt::format(
@@ -4622,8 +4634,13 @@ return true;
 }
 
 void Bot::Damage(Mob *from, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill, bool avoidable, int8 buffslot, bool iBuffTic, eSpecialAttacks special) {
-	if (spell_id == 0)
+	if (!from) {
+		returne;
+	}
+
+	if (spell_id == 0) {
 		spell_id = SPELL_UNKNOWN;
+	}
 
 	//handle EVENT_ATTACK. Resets after we have not been attacked for 12 seconds
 	if (attacked_timer.Check()) {
