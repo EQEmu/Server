@@ -4460,8 +4460,10 @@ void Mob::HealDamage(uint64 amount, Mob* caster, uint16 spell_id)
 					caster->FilteredMessageString(caster, Chat::NonMelee, FilterSpellDamage,
 						YOU_HEAL, GetCleanName(), itoa(acthealed));
 			}
-		}
-		else if (CastToClient()->GetFilter(FilterHealOverTime) != (FilterShowSelfOnly || FilterHide)) {
+		} else if (
+			CastToClient()->GetFilter(FilterHealOverTime) != FilterShowSelfOnly ||
+			CastToClient()->GetFilter(FilterHealOverTime) != FilterHide
+		) {
 			Message(Chat::NonMelee, "You have been healed for %d points of damage.", acthealed);
 		}
 	}
