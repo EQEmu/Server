@@ -11760,16 +11760,13 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 	{
 	case RaidCommandInviteIntoExisting:
 	case RaidCommandInvite: {
-
-		Bot* player_to_invite = nullptr;
-
 		if (RuleB(Bots, Enabled) && entity_list.GetBotByBotName(raid_command_packet->player_name)) {
+			auto player_to_invite = entity_list.GetBotByBotName(raid_command_packet->player_name);
+			auto player_to_invite_group = player_to_invite->GetGroup();
+
 			if (!player_to_invite) {
 				break;
 			}
-
-			Bot* player_to_invite = entity_list.GetBotByBotName(raid_command_packet->player_name);
-			Group* player_to_invite_group = player_to_invite->GetGroup();
 
 			if (player_to_invite_group && player_to_invite_group->IsGroupMember(this)) {
 				MessageString(Chat::Red, ALREADY_IN_PARTY);
