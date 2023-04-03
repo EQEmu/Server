@@ -5043,20 +5043,27 @@ void Mob::NegateSpellEffectBonuses(uint16 spell_id)
 
 				case SE_ProcOnKillShot:
 				{
-					for (int e = 0; e < MAX_SPELL_TRIGGER * 3; e = 3)
+					for (int e = 0; e < MAX_SPELL_TRIGGER * 3; e += 3)
 					{
-						if (negate_spellbonus) { spellbonuses.SpellOnKill[e] = effect_value; }
-						if (negate_spellbonus) { spellbonuses.SpellOnKill[e + 1] = effect_value; }
-						if (negate_spellbonus) { spellbonuses.SpellOnKill[e + 2] = effect_value; }
+						if (negate_spellbonus) {
+							spellbonuses.SpellOnKill[e] = effect_value;
+							spellbonuses.SpellOnKill[e + 1] = effect_value;
+							spellbonuses.SpellOnKill[e + 2] = effect_value;
+						}
 
-						if (negate_aabonus) { aabonuses.SpellOnKill[e] = effect_value; }
-						if (negate_aabonus) { aabonuses.SpellOnKill[e + 1] = effect_value; }
-						if (negate_aabonus) { aabonuses.SpellOnKill[e + 2] = effect_value; }
+						if (negate_aabonus) {
+							aabonuses.SpellOnKill[e] = effect_value;
+							aabonuses.SpellOnKill[e + 1] = effect_value;
+							aabonuses.SpellOnKill[e + 2] = effect_value;
+						}
 
-						if (negate_itembonus) { itembonuses.SpellOnKill[e] = effect_value; }
-						if (negate_itembonus) { itembonuses.SpellOnKill[e + 1] = effect_value; }
-						if (negate_itembonus) { itembonuses.SpellOnKill[e + 2] = effect_value; }
+						if (negate_itembonus) {
+							itembonuses.SpellOnKill[e] = effect_value;
+							itembonuses.SpellOnKill[e + 1] = effect_value;
+							itembonuses.SpellOnKill[e + 2] = effect_value;
+						}
 					}
+
 					break;
 				}
 
