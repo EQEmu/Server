@@ -4530,8 +4530,10 @@ bool Bot::Death(Mob *killerMob, int64 damage, uint16 spell_id, EQ::skills::Skill
 		give_exp_client = give_exp->CastToClient();
 
 	bool IsLdonTreasure = (GetClass() == LDON_TREASURE);
-	if (entity_list.GetCorpseByID(GetID()))
-		entity_list.GetCorpseByID(GetID())->Depop();
+	const auto c = entity_list.GetCorpseByID(GetID());
+	if (c) {
+		c->Depop();
+	}
 
 	if (HasRaid()) {
 		if (auto raid = entity_list.GetRaidByBotName(GetName()); raid) {
@@ -6828,8 +6830,11 @@ Bot* Bot::GetBotByBotClientOwnerAndBotName(Client* c, const std::string& botName
 void Bot::ProcessBotGroupInvite(Client* c, std::string const& botName) {
 	if (c && !c->HasRaid()) {
 		Bot* invitedBot = GetBotByBotClientOwnerAndBotName(c, botName);
+		if (!invitedBot) {
+			return;
+		}
 
-		if (invitedBot && !invitedBot->HasGroup() && !invitedBot->HasRaid()) {
+		if (!invitedBot->HasGroup() && !invitedBot->HasRaid()) {
 			if (!c->IsGrouped()) {
 				auto g = new Group(c);
 				if (AddBotToGroup(invitedBot, g)) {
