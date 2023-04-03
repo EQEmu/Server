@@ -197,11 +197,11 @@ const std::map<int, std::string>& EQ::constants::GetLanguageMap()
 
 std::string EQ::constants::GetLanguageName(int language_id)
 {
-	if (EQ::ValueWithin(language_id, LANG_COMMON_TONGUE, LANG_UNKNOWN)) {
-		return EQ::constants::GetLanguageMap().find(language_id)->second;
+	if (!EQ::ValueWithin(language_id, LANG_COMMON_TONGUE, LANG_UNKNOWN)) {
+		return std::string();
 	}
 
-	return std::string();
+	return EQ::constants::GetLanguageMap().find(language_id)->second;
 }
 
 const std::map<uint32, std::string>& EQ::constants::GetLDoNThemeMap()
@@ -220,11 +220,11 @@ const std::map<uint32, std::string>& EQ::constants::GetLDoNThemeMap()
 
 std::string EQ::constants::GetLDoNThemeName(uint32 theme_id)
 {
-	if (EQ::ValueWithin(theme_id, LDoNThemes::Unused, LDoNThemes::TAK)) {
-		return EQ::constants::GetLDoNThemeMap().find(theme_id)->second;
+	if (!EQ::ValueWithin(theme_id, LDoNThemes::Unused, LDoNThemes::TAK)) {
+		return std::string();
 	}
 
-	return std::string();
+	return EQ::constants::GetLDoNThemeMap().find(theme_id)->second;
 }
 
 const std::map<int8, std::string>& EQ::constants::GetFlyModeMap()
@@ -243,11 +243,11 @@ const std::map<int8, std::string>& EQ::constants::GetFlyModeMap()
 
 std::string EQ::constants::GetFlyModeName(int8 flymode_id)
 {
-	if (EQ::ValueWithin(flymode_id, GravityBehavior::Ground, GravityBehavior::LevitateWhileRunning)) {
-		return EQ::constants::GetFlyModeMap().find(flymode_id)->second;
+	if (!EQ::ValueWithin(flymode_id, GravityBehavior::Ground, GravityBehavior::LevitateWhileRunning)) {
+		return std::string();
 	}
 
-	return std::string();
+	return EQ::constants::GetFlyModeMap().find(flymode_id)->second;
 }
 
 const std::map<bodyType, std::string>& EQ::constants::GetBodyTypeMap()
@@ -365,11 +365,11 @@ const std::map<uint8, std::string>& EQ::constants::GetConsiderLevelMap()
 
 std::string EQ::constants::GetConsiderLevelName(uint8 faction_consider_level)
 {
-	if (EQ::constants::GetConsiderLevelMap().find(faction_consider_level) != EQ::constants::GetConsiderLevelMap().end()) {
-		return EQ::constants::GetConsiderLevelMap().find(faction_consider_level)->second;
+	if (!EQ::ValueWithin(faction_consider_level, ConsiderLevel::Ally, ConsiderLevel::Scowls)) {
+		return std::string();;
 	}
 
-	return std::string();
+	return EQ::constants::GetConsiderLevelMap().find(faction_consider_level)->second;
 }
 
 const std::map<uint8, std::string>& EQ::constants::GetEnvironmentalDamageMap()
@@ -386,11 +386,11 @@ const std::map<uint8, std::string>& EQ::constants::GetEnvironmentalDamageMap()
 
 std::string EQ::constants::GetEnvironmentalDamageName(uint8 damage_type)
 {
-	if (EQ::ValueWithin(damage_type, EnvironmentalDamage::Lava, EnvironmentalDamage::Trap)) {
-		return EQ::constants::GetEnvironmentalDamageMap().find(damage_type)->second;
+	if (!EQ::ValueWithin(damage_type, EnvironmentalDamage::Lava, EnvironmentalDamage::Trap)) {
+		return std::string();
 	}
 
-	return std::string();
+	return EQ::constants::GetEnvironmentalDamageMap().find(damage_type)->second;
 }
 
 const std::map<uint8, std::string>& EQ::constants::GetStuckBehaviorMap()
@@ -407,11 +407,11 @@ const std::map<uint8, std::string>& EQ::constants::GetStuckBehaviorMap()
 
 std::string EQ::constants::GetStuckBehaviorName(uint8 behavior_id)
 {
-	if (EQ::ValueWithin(behavior_id, StuckBehavior::RunToTarget, StuckBehavior::EvadeCombat)) {
-		return EQ::constants::GetStuckBehaviorMap().find(behavior_id)->second;
+	if (!EQ::ValueWithin(behavior_id, StuckBehavior::RunToTarget, StuckBehavior::EvadeCombat)) {
+		return std::string();
 	}
 
-	return std::string();
+	return EQ::constants::GetStuckBehaviorMap().find(behavior_id)->second;
 }
 
 const std::map<uint8, std::string>& EQ::constants::GetSpawnAnimationMap()
@@ -429,11 +429,11 @@ const std::map<uint8, std::string>& EQ::constants::GetSpawnAnimationMap()
 
 std::string EQ::constants::GetSpawnAnimationName(uint8 animation_id)
 {
-	if (EQ::ValueWithin(animation_id, SpawnAnimations::Standing, SpawnAnimations::Looting)) {
-		return EQ::constants::GetSpawnAnimationMap().find(animation_id)->second;
+	if (!EQ::ValueWithin(animation_id, SpawnAnimations::Standing, SpawnAnimations::Looting)) {
+		return std::string();
 	}
 
-	return std::string();
+	return EQ::constants::GetSpawnAnimationMap().find(animation_id)->second;
 }
 
 const std::map<int, std::string>& EQ::constants::GetObjectTypeMap()
@@ -507,11 +507,12 @@ const std::map<int, std::string>& EQ::constants::GetObjectTypeMap()
 
 std::string EQ::constants::GetObjectTypeName(int object_type)
 {
-	if (EQ::ValueWithin(object_type, ObjectTypes::SmallBag, ObjectTypes::NoDeposit)) {
-		return EQ::constants::GetObjectTypeMap().find(object_type)->second;
+	if (!EQ::ValueWithin(object_type, ObjectTypes::SmallBag, ObjectTypes::NoDeposit)) {
+		return std::string();
+
 	}
 
-	return std::string();
+	return EQ::constants::GetObjectTypeMap().find(object_type)->second;
 }
 
 const std::map<uint8, std::string> &EQ::constants::GetWeatherTypeMap()
@@ -527,11 +528,11 @@ const std::map<uint8, std::string> &EQ::constants::GetWeatherTypeMap()
 
 std::string EQ::constants::GetWeatherTypeName(uint8 weather_type)
 {
-	if (EQ::ValueWithin(weather_type, WeatherTypes::None, WeatherTypes::Snowing)) {
-		return EQ::constants::GetWeatherTypeMap().find(weather_type)->second;
+	if (!EQ::ValueWithin(weather_type, WeatherTypes::None, WeatherTypes::Snowing)) {
+		return std::string();
 	}
 
-	return std::string();
+	return EQ::constants::GetWeatherTypeMap().find(weather_type)->second;
 }
 
 const std::map<uint8, std::string> &EQ::constants::GetEmoteEventTypeMap()
@@ -553,11 +554,11 @@ const std::map<uint8, std::string> &EQ::constants::GetEmoteEventTypeMap()
 
 std::string EQ::constants::GetEmoteEventTypeName(uint8 emote_event_type)
 {
-	if (EQ::ValueWithin(emote_event_type, EmoteEventTypes::LeaveCombat, EmoteEventTypes::OnDespawn)) {
-		return EQ::constants::GetEmoteEventTypeMap().find(emote_event_type)->second;
+	if (!EQ::ValueWithin(emote_event_type, EmoteEventTypes::LeaveCombat, EmoteEventTypes::OnDespawn)) {
+		return std::string();
 	}
 
-	return std::string();
+	return EQ::constants::GetEmoteEventTypeMap().find(emote_event_type)->second;
 }
 
 const std::map<uint8, std::string> &EQ::constants::GetEmoteTypeMap()
@@ -573,9 +574,9 @@ const std::map<uint8, std::string> &EQ::constants::GetEmoteTypeMap()
 
 std::string EQ::constants::GetEmoteTypeName(uint8 emote_type)
 {
-	if (EQ::ValueWithin(emote_type, EmoteTypes::Emote, EmoteTypes::Proximity)) {
-		return EQ::constants::GetEmoteTypeMap().find(emote_type)->second;
+	if (!EQ::ValueWithin(emote_type, EmoteTypes::Emote, EmoteTypes::Proximity)) {
+		return std::string();
 	}
 
-	return std::string();
+	return EQ::constants::GetEmoteTypeMap().find(emote_type)->second;
 }
