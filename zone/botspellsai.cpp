@@ -83,18 +83,15 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 			return BotCastDebuff(tar, botLevel, botSpell, checked_los);
 		case SpellType_Cure:
 			return BotCastCure(tar, botClass, botSpell, raid);
-		case SpellType_Resurrect:
-			return false;
 		case SpellType_HateRedux:
 			return BotCastHateReduction(tar, botLevel, botSpell);
 		case SpellType_InCombatBuffSong:
 			return BotCastCombatSong(tar, botLevel);
 		case SpellType_OutOfCombatBuffSong:
 			return BotCastSong(tar, botLevel);
+		case SpellType_Resurrect:
 		case SpellType_PreCombatBuff:
-			return false;
 		case SpellType_PreCombatBuffSong:
-			return false;
 		default:
 			return false;
 	}
