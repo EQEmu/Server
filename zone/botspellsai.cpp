@@ -3443,41 +3443,41 @@ DBbotspells_Struct* ZoneDatabase::GetBotSpells(uint32 bot_spell_id)
 
 // adds a spell to the list, taking into account priority and resorting list as needed.
 void Bot::AddSpellToBotList(
-	int16 iPriority,
-	uint16 iSpellID,
-	uint32 iType,
-	int16 iManaCost,
-	int32 iRecastDelay,
-	int16 iResistAdjust,
-	uint8 min_level,
-	uint8 max_level,
-	int8 min_hp,
-	int8 max_hp,
-	std::string bucket_name,
-	std::string bucket_value,
-	uint8 bucket_comparison
+	int16 in_priority,
+	uint16 in_spell_id,
+	uint32 in_type,
+	int16 in_mana_cost,
+	int32 in_recast_delay,
+	int16 in_resist_adjust,
+	uint8 in_min_level,
+	uint8 in_max_level,
+	int8 in_min_hp,
+	int8 in_max_hp,
+	std::string in_bucket_name,
+	std::string in_bucket_value,
+	uint8 in_bucket_comparison
 ) {
-	if (!IsValidSpell(iSpellID)) {
+	if (!IsValidSpell(in_spell_id)) {
 		return;
 	}
 
 	HasAISpell = true;
 	BotSpells_Struct t;
 
-	t.priority = iPriority;
-	t.spellid = iSpellID;
-	t.type = iType;
-	t.manacost = iManaCost;
-	t.recast_delay = iRecastDelay;
-	t.time_cancast = 0;
-	t.resist_adjust = iResistAdjust;
-	t.minlevel = min_level;
-	t.maxlevel = maxlevel;
-	t.min_hp = min_hp;
-	t.max_hp = max_hp;
-	t.bucket_name = bucket_name;
-	t.bucket_value = bucket_value;
-	t.bucket_comparison = bucket_comparison;
+	t.priority          = in_priority;
+	t.spellid           = in_spell_id;
+	t.type              = in_type;
+	t.manacost          = in_mana_cost;
+	t.recast_delay      = in_recast_delay;
+	t.time_cancast      = 0;
+	t.resist_adjust     = in_resist_adjust;
+	t.minlevel          = in_min_level;
+	t.maxlevel          = in_max_level;
+	t.min_hp            = in_min_hp;
+	t.max_hp            = in_max_hp;
+	t.bucket_name       = in_bucket_name;
+	t.bucket_value      = in_bucket_value;
+	t.bucket_comparison = in_bucket_comparison;
 
 	AIBot_spells.push_back(t);
 
