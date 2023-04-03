@@ -3185,20 +3185,14 @@ bool Bot::AI_AddBotSpells(uint32 bot_spell_id) {
 		}
 	}
 
-	if (spell_list->attack_proc >= 0) {
-		attack_proc_spell = spell_list->attack_proc;
-		proc_chance = spell_list->proc_chance;
-	}
+	attack_proc_spell = spell_list->attack_proc;
+	proc_chance = spell_list->proc_chance;
 
-	if (spell_list->range_proc >= 0) {
-		range_proc_spell = spell_list->range_proc;
-		rproc_chance = spell_list->rproc_chance;
-	}
+	range_proc_spell = spell_list->range_proc;
+	rproc_chance = spell_list->rproc_chance;
 
-	if (spell_list->defensive_proc >= 0) {
-		defensive_proc_spell = spell_list->defensive_proc;
-		dproc_chance = spell_list->dproc_chance;
-	}
+	defensive_proc_spell = spell_list->defensive_proc;
+	dproc_chance = spell_list->dproc_chance;
 
 	//If any casting variables are defined in the current list, ignore those in the parent list.
 	if (
