@@ -3952,7 +3952,7 @@ void Client::SendWindow(
 		case 1: {
 			char name[64] = "";
 			strcpy(name, target->GetName());
-			if (target->GetLastName()) {
+			if (strlen(target->GetLastName()) > 0) {
 				char last_name[64] = "";
 				strcpy(last_name, target->GetLastName());
 				strcat(name, " ");
