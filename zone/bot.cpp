@@ -4585,10 +4585,9 @@ bool Bot::Death(Mob *killerMob, int64 damage, uint16 spell_id, EQ::skills::Skill
 						GroupJoin_Struct* gu = (GroupJoin_Struct*) outapp->pBuffer;
 						gu->action = groupActLeave;
 						strcpy(gu->membername, GetCleanName());
-						if (g) {
-							for (int k = 0; k < MAX_GROUP_MEMBERS; k++) {
-								if (g->members[k] && g->members[k]->IsClient())
-									g->members[k]->CastToClient()->QueuePacket(outapp);
+						for (int k = 0; k < MAX_GROUP_MEMBERS; k++) {
+							if (g->members[k] && g->members[k]->IsClient()) {
+								g->members[k]->CastToClient()->QueuePacket(outapp);
 							}
 						}
 						safe_delete(outapp);
