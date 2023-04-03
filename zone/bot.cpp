@@ -5198,9 +5198,6 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 			break;
 	}
 
-	if (skill_to_use == -1)
-		return;
-
 	int64 dmg = GetBaseSkillDamage(static_cast<EQ::skills::SkillType>(skill_to_use), GetTarget());
 
 	if (skill_to_use == EQ::skills::SkillBash) {
