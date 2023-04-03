@@ -5043,7 +5043,7 @@ void Mob::NegateSpellEffectBonuses(uint16 spell_id)
 
 				case SE_ProcOnKillShot:
 				{
-					for (int e = 0; e < MAX_SPELL_TRIGGER * 3; e = 3)
+					for (int e = 0; e < MAX_SPELL_TRIGGER * 3; e += 3)
 					{
 						if (negate_spellbonus) { spellbonuses.SpellOnKill[e] = effect_value; }
 						if (negate_spellbonus) { spellbonuses.SpellOnKill[e + 1] = effect_value; }
