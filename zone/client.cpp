@@ -5604,50 +5604,60 @@ void Client::SetRadiantCrystals(uint32 value) {
 }
 
 // Processes a client request to inspect a SoF+ client's equipment.
-void Client::ProcessInspectRequest(Client* requestee, Client* requester) {
-	if(requestee && requester) {
-		auto outapp = new EQApplicationPacket(OP_InspectAnswer, sizeof(InspectResponse_Struct));
-		InspectResponse_Struct* insr = (InspectResponse_Struct*) outapp->pBuffer;
+void Client::ProcessInspectRequest(Client *requestee, Client *requester)
+{
+	if (requestee && requester) {
+		auto                   outapp = new EQApplicationPacket(OP_InspectAnswer, sizeof(InspectResponse_Struct));
+		InspectResponse_Struct *insr  = (InspectResponse_Struct *) outapp->pBuffer;
 		insr->TargetID = requester->GetID();
 		insr->playerid = requestee->GetID();
 
-		const EQ::ItemData* item = nullptr;
-		const EQ::ItemInstance* inst = nullptr;
-		int ornamentationAugtype = RuleI(Character, OrnamentationAugmentType);
-		for(int16 L = EQ::invslot::EQUIPMENT_BEGIN; L <= EQ::invslot::EQUIPMENT_END; L++) {
+		const EQ::ItemData     *item                      = nullptr;
+		const EQ::ItemInstance *inst                      = nullptr;
+		int                    ornamentation_augment_type = RuleI(Character, OrnamentationAugmentType);
+
+		for (int16 L = EQ::invslot::EQUIPMENT_BEGIN; L <= EQ::invslot::EQUIPMENT_END; L++) {
 			inst = requestee->GetInv().GetItem(L);
 
-			if(inst) {
+			if (inst) {
 				item = inst->GetItem();
-				if(item) {
+				if (item) {
 					strcpy(insr->itemnames[L], item->Name);
 
 					const EQ::ItemData *aug_item = nullptr;
-					if (inst->GetOrnamentationAug(ornamentationAugtype))
-						inst->GetOrnamentationAug(ornamentationAugtype)->GetItem();
+					if (inst->GetOrnamentationAug(ornamentation_augment_type)) {
+						aug_item = inst->GetOrnamentationAug(ornamentation_augment_type)->GetItem();
+					}
 
-					if (aug_item)
+					if (aug_item) {
 						insr->itemicons[L] = aug_item->Icon;
-					else if (inst->GetOrnamentationIcon())
+					} else if (inst->GetOrnamentationIcon()) {
 						insr->itemicons[L] = inst->GetOrnamentationIcon();
-					else
+					} else {
 						insr->itemicons[L] = item->Icon;
-				}
-				else {
+					}
+				} else {
 					insr->itemnames[L][0] = '\0';
-					insr->itemicons[L] = 0xFFFFFFFF;
+					insr->itemicons[L]    = 0xFFFFFFFF;
 				}
-			}
-			else {
+			} else {
 				insr->itemnames[L][0] = '\0';
-				insr->itemicons[L] = 0xFFFFFFFF;
+				insr->itemicons[L]    = 0xFFFFFFFF;
 			}
 		}
 
 		strcpy(insr->text, requestee->GetInspectMessage().text);
 
 		// There could be an OP for this..or not... (Ti clients are not processed here..this message is generated client-side)
-		if(requestee->IsClient() && (requestee != requester)) { requestee->Message(Chat::White, "%s is looking at your equipment...", requester->GetName()); }
+		if (requestee->IsClient() && requestee != requester) {
+			requestee->Message(
+				Chat::White,
+				fmt::format(
+					"{} is looking at your equipment...",
+					requester->GetName()
+				).c_str()
+			);
+		}
 
 		requester->QueuePacket(outapp); // Send answer to requester
 		safe_delete(outapp);
