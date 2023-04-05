@@ -43,9 +43,9 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 #endif
 
-DatabaseUpdate database_update;
-
 #pragma pack(1)
+
+DatabaseUpdate database_update;
 
 // all const/macro reference values should really be converted to a magic number for this
 // process to ensure that the struct sizes and offsets match up to the corresponding blob
