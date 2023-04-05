@@ -4582,29 +4582,36 @@ void Mob::NegateSpellEffectBonuses(uint16 spell_id)
 
 				case SE_AllStats:
 				{
-					if (negate_spellbonus) { spellbonuses.STR = effect_value; }
-					if (negate_spellbonus) { spellbonuses.DEX = effect_value; }
-					if (negate_spellbonus) { spellbonuses.AGI = effect_value; }
-					if (negate_spellbonus) { spellbonuses.STA = effect_value; }
-					if (negate_spellbonus) { spellbonuses.INT = effect_value; }
-					if (negate_spellbonus) { spellbonuses.WIS = effect_value; }
-					if (negate_spellbonus) { spellbonuses.CHA = effect_value; }
+					if (negate_spellbonus) {
+						spellbonuses.STR = effect_value;
+						spellbonuses.DEX = effect_value;
+						spellbonuses.AGI = effect_value;
+						spellbonuses.STA = effect_value;
+						spellbonuses.INT = effect_value;
+						spellbonuses.WIS = effect_value;
+						spellbonuses.CHA = effect_value;
+					}
 
-					if (negate_itembonus) { itembonuses.STR = effect_value; }
-					if (negate_itembonus) { itembonuses.DEX = effect_value; }
-					if (negate_itembonus) { itembonuses.AGI = effect_value; }
-					if (negate_itembonus) { itembonuses.STA = effect_value; }
-					if (negate_itembonus) { itembonuses.INT = effect_value; }
-					if (negate_itembonus) { itembonuses.WIS = effect_value; }
-					if (negate_itembonus) { itembonuses.CHA = effect_value; }
+					if (negate_itembonus) {
+						itembonuses.STR = effect_value;
+						itembonuses.DEX = effect_value;
+						itembonuses.AGI = effect_value;
+						itembonuses.STA = effect_value;
+						itembonuses.INT = effect_value;
+						itembonuses.WIS = effect_value;
+						itembonuses.CHA = effect_value;
+					}
 
-					if (negate_aabonus) { aabonuses.STR = effect_value; }
-					if (negate_aabonus) { aabonuses.DEX = effect_value; }
-					if (negate_aabonus) { aabonuses.AGI = effect_value; }
-					if (negate_aabonus) { aabonuses.STA = effect_value; }
-					if (negate_aabonus) { aabonuses.INT = effect_value; }
-					if (negate_aabonus) { aabonuses.WIS = effect_value; }
-					if (negate_aabonus) { aabonuses.CHA = effect_value; }
+					if (negate_aabonus) {
+						aabonuses.STR = effect_value;
+						aabonuses.DEX = effect_value;
+						aabonuses.AGI = effect_value;
+						aabonuses.STA = effect_value;
+						aabonuses.INT = effect_value;
+						aabonuses.WIS = effect_value;
+						aabonuses.CHA = effect_value;
+					}
+
 					break;
 				}
 
@@ -4640,23 +4647,30 @@ void Mob::NegateSpellEffectBonuses(uint16 spell_id)
 
 				case SE_ResistAll:
 				{
-					if (negate_spellbonus) { spellbonuses.MR = effect_value; }
-					if (negate_spellbonus) { spellbonuses.DR = effect_value; }
-					if (negate_spellbonus) { spellbonuses.PR = effect_value; }
-					if (negate_spellbonus) { spellbonuses.CR = effect_value; }
-					if (negate_spellbonus) { spellbonuses.FR = effect_value; }
+					if (negate_spellbonus) {
+						spellbonuses.MR = effect_value;
+						spellbonuses.DR = effect_value;
+						spellbonuses.PR = effect_value;
+						spellbonuses.CR = effect_value;
+						spellbonuses.FR = effect_value;
+					}
 
-					if (negate_aabonus) { aabonuses.MR = effect_value; }
-					if (negate_aabonus) { aabonuses.DR = effect_value; }
-					if (negate_aabonus) { aabonuses.PR = effect_value; }
-					if (negate_aabonus) { aabonuses.CR = effect_value; }
-					if (negate_aabonus) { aabonuses.FR = effect_value; }
+					if (negate_aabonus) {
+						aabonuses.MR = effect_value;
+						aabonuses.DR = effect_value;
+						aabonuses.PR = effect_value;
+						aabonuses.CR = effect_value;
+						aabonuses.FR = effect_value;
+					}
 
-					if (negate_itembonus) { itembonuses.MR = effect_value; }
-					if (negate_itembonus) { itembonuses.DR = effect_value; }
-					if (negate_itembonus) { itembonuses.PR = effect_value; }
-					if (negate_itembonus) { itembonuses.CR = effect_value; }
-					if (negate_itembonus) { itembonuses.FR = effect_value; }
+					if (negate_itembonus) {
+						itembonuses.MR = effect_value;
+						itembonuses.DR = effect_value;
+						itembonuses.PR = effect_value;
+						itembonuses.CR = effect_value;
+						itembonuses.FR = effect_value;
+					}
+
 					break;
 				}
 
@@ -4793,23 +4807,29 @@ void Mob::NegateSpellEffectBonuses(uint16 spell_id)
 
 				case SE_AllInstrumentMod:
 				{
-					if (negate_spellbonus) { spellbonuses.singingMod = effect_value; }
-					if (negate_spellbonus) { spellbonuses.brassMod = effect_value; }
-					if (negate_spellbonus) { spellbonuses.percussionMod = effect_value; }
-					if (negate_spellbonus) { spellbonuses.windMod = effect_value; }
-					if (negate_spellbonus) { spellbonuses.stringedMod = effect_value; }
+					if (negate_spellbonus) {
+						spellbonuses.singingMod    = effect_value;
+						spellbonuses.brassMod      = effect_value;
+						spellbonuses.percussionMod = effect_value;
+						spellbonuses.windMod       = effect_value;
+						spellbonuses.stringedMod   = effect_value;
+					}
 
-					if (negate_itembonus) { itembonuses.singingMod = effect_value; }
-					if (negate_itembonus) { itembonuses.brassMod = effect_value; }
-					if (negate_itembonus) { itembonuses.percussionMod = effect_value; }
-					if (negate_itembonus) { itembonuses.windMod = effect_value; }
-					if (negate_itembonus) { itembonuses.stringedMod = effect_value; }
+					if (negate_itembonus) {
+						itembonuses.singingMod    = effect_value;
+						itembonuses.brassMod      = effect_value;
+						itembonuses.percussionMod = effect_value;
+						itembonuses.windMod       = effect_value;
+						itembonuses.stringedMod   = effect_value;
+					}
 
-					if (negate_aabonus) { aabonuses.singingMod = effect_value; }
-					if (negate_aabonus) { aabonuses.brassMod = effect_value; }
-					if (negate_aabonus) { aabonuses.percussionMod = effect_value; }
-					if (negate_aabonus) { aabonuses.windMod = effect_value; }
-					if (negate_aabonus) { aabonuses.stringedMod = effect_value; }
+					if (negate_aabonus) {
+						aabonuses.singingMod    = effect_value;
+						aabonuses.brassMod      = effect_value;
+						aabonuses.percussionMod = effect_value;
+						aabonuses.windMod       = effect_value;
+						aabonuses.stringedMod   = effect_value;
+					}
 					break;
 				}
 
@@ -4820,8 +4840,11 @@ void Mob::NegateSpellEffectBonuses(uint16 spell_id)
 					break;
 
 				case SE_ResistFearChance:
-					if (negate_spellbonus) { spellbonuses.Fearless = false; }
-					if (negate_spellbonus) { spellbonuses.ResistFearChance = effect_value; }
+					if (negate_spellbonus) {
+						spellbonuses.Fearless = false;
+						spellbonuses.ResistFearChance = effect_value;
+					}
+
 					if (negate_aabonus) { aabonuses.ResistFearChance = effect_value; }
 					if (negate_itembonus) { itembonuses.ResistFearChance = effect_value; }
 					break;
@@ -4998,12 +5021,21 @@ void Mob::NegateSpellEffectBonuses(uint16 spell_id)
 					break;
 
 				case SE_CriticalSpellChance:
-					if (negate_spellbonus) { spellbonuses.CriticalSpellChance = effect_value; }
-					if (negate_spellbonus) { spellbonuses.SpellCritDmgIncrease = effect_value; }
-					if (negate_aabonus) { aabonuses.CriticalSpellChance = effect_value; }
-					if (negate_aabonus) { aabonuses.SpellCritDmgIncrease = effect_value; }
-					if (negate_itembonus) { itembonuses.CriticalSpellChance = effect_value; }
-					if (negate_itembonus) { itembonuses.SpellCritDmgIncrease = effect_value; }
+					if (negate_spellbonus) {
+						spellbonuses.CriticalSpellChance  = effect_value;
+						spellbonuses.SpellCritDmgIncrease = effect_value;
+					}
+
+					if (negate_aabonus) {
+						aabonuses.CriticalSpellChance  = effect_value;
+						aabonuses.SpellCritDmgIncrease = effect_value;
+					}
+
+					if (negate_itembonus) {
+						itembonuses.CriticalSpellChance  = effect_value;
+						itembonuses.SpellCritDmgIncrease = effect_value;
+					}
+
 					break;
 
 				case SE_SpellCritDmgIncrease:
@@ -5165,35 +5197,53 @@ void Mob::NegateSpellEffectBonuses(uint16 spell_id)
 				}
 
 				case SE_NegateAttacks:
-					if (negate_spellbonus) { spellbonuses.NegateAttacks[SBIndex::NEGATE_ATK_EXISTS] = effect_value; }
-					if (negate_spellbonus) { spellbonuses.NegateAttacks[SBIndex::NEGATE_ATK_BUFFSLOT] = effect_value; }
+					if (negate_spellbonus) {
+						spellbonuses.NegateAttacks[SBIndex::NEGATE_ATK_EXISTS]   = effect_value;
+						spellbonuses.NegateAttacks[SBIndex::NEGATE_ATK_BUFFSLOT] = effect_value;
+					}
+
 					break;
 
 				case SE_MitigateMeleeDamage:
-					if (negate_spellbonus) { spellbonuses.MitigateMeleeRune[SBIndex::MITIGATION_RUNE_PERCENT] = effect_value; }
-					if (negate_spellbonus) { spellbonuses.MitigateMeleeRune[SBIndex::MITIGATION_RUNE_BUFFSLOT] = -1; }
+					if (negate_spellbonus) {
+						spellbonuses.MitigateMeleeRune[SBIndex::MITIGATION_RUNE_PERCENT]  = effect_value;
+						spellbonuses.MitigateMeleeRune[SBIndex::MITIGATION_RUNE_BUFFSLOT] = -1;
+					}
+
 					break;
 
 				case SE_MeleeThresholdGuard:
-					if (negate_spellbonus) { spellbonuses.MeleeThresholdGuard[SBIndex::THRESHOLDGUARD_MITIGATION_PERCENT] = effect_value; }
-					if (negate_spellbonus) { spellbonuses.MeleeThresholdGuard[SBIndex::THRESHOLDGUARD_BUFFSLOT] = -1; }
-					if (negate_spellbonus) { spellbonuses.MeleeThresholdGuard[SBIndex::THRESHOLDGUARD_BUFFSLOT] = effect_value; }
+					if (negate_spellbonus) {
+						spellbonuses.MeleeThresholdGuard[SBIndex::THRESHOLDGUARD_MITIGATION_PERCENT] = effect_value;
+						spellbonuses.MeleeThresholdGuard[SBIndex::THRESHOLDGUARD_BUFFSLOT]           = -1;
+						spellbonuses.MeleeThresholdGuard[SBIndex::THRESHOLDGUARD_BUFFSLOT]           = effect_value;
+					}
+
 					break;
 
 				case SE_SpellThresholdGuard:
-					if (negate_spellbonus) { spellbonuses.SpellThresholdGuard[SBIndex::THRESHOLDGUARD_MITIGATION_PERCENT] = effect_value; }
-					if (negate_spellbonus) { spellbonuses.SpellThresholdGuard[SBIndex::THRESHOLDGUARD_BUFFSLOT] = -1; }
-					if (negate_spellbonus) { spellbonuses.SpellThresholdGuard[SBIndex::THRESHOLDGUARD_BUFFSLOT] = effect_value; }
+					if (negate_spellbonus) {
+						spellbonuses.SpellThresholdGuard[SBIndex::THRESHOLDGUARD_MITIGATION_PERCENT] = effect_value;
+						spellbonuses.SpellThresholdGuard[SBIndex::THRESHOLDGUARD_BUFFSLOT]           = -1;
+						spellbonuses.SpellThresholdGuard[SBIndex::THRESHOLDGUARD_BUFFSLOT]           = effect_value;
+					}
+
 					break;
 
 				case SE_MitigateSpellDamage:
-					if (negate_spellbonus) { spellbonuses.MitigateSpellRune[SBIndex::MITIGATION_RUNE_PERCENT] = effect_value; }
-					if (negate_spellbonus) { spellbonuses.MitigateSpellRune[SBIndex::MITIGATION_RUNE_BUFFSLOT] = -1; }
+					if (negate_spellbonus) {
+						spellbonuses.MitigateSpellRune[SBIndex::MITIGATION_RUNE_PERCENT]  = effect_value;
+						spellbonuses.MitigateSpellRune[SBIndex::MITIGATION_RUNE_BUFFSLOT] = -1;
+					}
+
 					break;
 
 				case SE_MitigateDotDamage:
-					if (negate_spellbonus) { spellbonuses.MitigateDotRune[SBIndex::MITIGATION_RUNE_PERCENT] = effect_value; }
-					if (negate_spellbonus) { spellbonuses.MitigateDotRune[SBIndex::MITIGATION_RUNE_BUFFSLOT] = -1; }
+					if (negate_spellbonus) {
+						spellbonuses.MitigateDotRune[SBIndex::MITIGATION_RUNE_PERCENT]  = effect_value;
+						spellbonuses.MitigateDotRune[SBIndex::MITIGATION_RUNE_BUFFSLOT] = -1;
+					}
+
 					break;
 
 				case SE_ManaAbsorbPercentDamage:
@@ -5201,8 +5251,11 @@ void Mob::NegateSpellEffectBonuses(uint16 spell_id)
 					break;
 
 				case SE_Endurance_Absorb_Pct_Damage:
-					if (negate_spellbonus) { spellbonuses.EnduranceAbsorbPercentDamage[SBIndex::ENDURANCE_ABSORD_MITIGIATION] = effect_value; }
-					if (negate_spellbonus) { spellbonuses.EnduranceAbsorbPercentDamage[SBIndex::ENDURANCE_ABSORD_DRAIN_PER_HP] = effect_value; }
+					if (negate_spellbonus) {
+						spellbonuses.EnduranceAbsorbPercentDamage[SBIndex::ENDURANCE_ABSORD_MITIGIATION]  = effect_value;
+						spellbonuses.EnduranceAbsorbPercentDamage[SBIndex::ENDURANCE_ABSORD_DRAIN_PER_HP] = effect_value;
+					}
+
 					break;
 
 				case SE_ShieldBlock:
@@ -5425,8 +5478,10 @@ void Mob::NegateSpellEffectBonuses(uint16 spell_id)
 				{
 					for (int e = 0; e < MAX_RESISTABLE_EFFECTS * 2; e += 2)
 					{
-						if (negate_spellbonus) { spellbonuses.SEResist[e] = effect_value; }
-						if (negate_spellbonus) { spellbonuses.SEResist[e + 1] = effect_value; }
+						if (negate_spellbonus) {
+							spellbonuses.SEResist[e]     = effect_value;
+							spellbonuses.SEResist[e + 1] = effect_value;
+						}
 					}
 					break;
 				}
@@ -5450,12 +5505,21 @@ void Mob::NegateSpellEffectBonuses(uint16 spell_id)
 					break;
 
 				case SE_SlayUndead:
-					if (negate_spellbonus) { spellbonuses.SlayUndead[SBIndex::SLAYUNDEAD_RATE_MOD] = effect_value; }
-					if (negate_spellbonus) { spellbonuses.SlayUndead[SBIndex::SLAYUNDEAD_DMG_MOD] = effect_value; }
-					if (negate_itembonus) { itembonuses.SlayUndead[SBIndex::SLAYUNDEAD_RATE_MOD] = effect_value; }
-					if (negate_itembonus) { itembonuses.SlayUndead[SBIndex::SLAYUNDEAD_DMG_MOD] = effect_value; }
-					if (negate_aabonus) { aabonuses.SlayUndead[SBIndex::SLAYUNDEAD_RATE_MOD] = effect_value; }
-					if (negate_aabonus) { aabonuses.SlayUndead[SBIndex::SLAYUNDEAD_DMG_MOD] = effect_value; }
+					if (negate_spellbonus) {
+						spellbonuses.SlayUndead[SBIndex::SLAYUNDEAD_RATE_MOD] = effect_value;
+						spellbonuses.SlayUndead[SBIndex::SLAYUNDEAD_DMG_MOD]  = effect_value;
+					}
+
+					if (negate_itembonus) {
+						itembonuses.SlayUndead[SBIndex::SLAYUNDEAD_RATE_MOD] = effect_value;
+						itembonuses.SlayUndead[SBIndex::SLAYUNDEAD_DMG_MOD]  = effect_value;
+					}
+
+					if (negate_aabonus) {
+						aabonuses.SlayUndead[SBIndex::SLAYUNDEAD_RATE_MOD] = effect_value;
+						aabonuses.SlayUndead[SBIndex::SLAYUNDEAD_DMG_MOD]  = effect_value;
+					}
+
 					break;
 
 				case SE_DoubleRangedAttack:
@@ -5505,9 +5569,12 @@ void Mob::NegateSpellEffectBonuses(uint16 spell_id)
 					break;
 
 				case SE_ImprovedTaunt:
-					if (negate_spellbonus) { spellbonuses.ImprovedTaunt[SBIndex::IMPROVED_TAUNT_MAX_LVL] = effect_value; }
-					if (negate_spellbonus) { spellbonuses.ImprovedTaunt[SBIndex::IMPROVED_TAUNT_AGGRO_MOD] = effect_value; }
-					if (negate_spellbonus) { spellbonuses.ImprovedTaunt[SBIndex::IMPROVED_TAUNT_BUFFSLOT] = -1; }
+					if (negate_spellbonus) {
+						spellbonuses.ImprovedTaunt[SBIndex::IMPROVED_TAUNT_MAX_LVL]   = effect_value;
+						spellbonuses.ImprovedTaunt[SBIndex::IMPROVED_TAUNT_AGGRO_MOD] = effect_value;
+						spellbonuses.ImprovedTaunt[SBIndex::IMPROVED_TAUNT_BUFFSLOT]  = -1;
+					}
+
 					break;
 
 				case SE_FrenziedDevastation:
@@ -5517,18 +5584,27 @@ void Mob::NegateSpellEffectBonuses(uint16 spell_id)
 					break;
 
 				case SE_Root:
-					if (negate_spellbonus) { spellbonuses.Root[SBIndex::ROOT_EXISTS] = effect_value; }
-					if (negate_spellbonus) { spellbonuses.Root[SBIndex::ROOT_BUFFSLOT] = -1; }
+					if (negate_spellbonus) {
+						spellbonuses.Root[SBIndex::ROOT_EXISTS]   = effect_value;
+						spellbonuses.Root[SBIndex::ROOT_BUFFSLOT] = -1;
+					}
+
 					break;
 
 				case SE_Rune:
-					if (negate_spellbonus) { spellbonuses.MeleeRune[SBIndex::RUNE_AMOUNT] = effect_value; }
-					if (negate_spellbonus) { spellbonuses.MeleeRune[SBIndex::RUNE_BUFFSLOT] = -1; }
+					if (negate_spellbonus) {
+						spellbonuses.MeleeRune[SBIndex::RUNE_AMOUNT]   = effect_value;
+						spellbonuses.MeleeRune[SBIndex::RUNE_BUFFSLOT] = -1;
+					}
+
 					break;
 
 				case SE_AbsorbMagicAtt:
-					if (negate_spellbonus) { spellbonuses.AbsorbMagicAtt[SBIndex::RUNE_AMOUNT] = effect_value; }
-					if (negate_spellbonus) { spellbonuses.AbsorbMagicAtt[SBIndex::RUNE_BUFFSLOT] = -1; }
+					if (negate_spellbonus) {
+						spellbonuses.AbsorbMagicAtt[SBIndex::RUNE_AMOUNT]   = effect_value;
+						spellbonuses.AbsorbMagicAtt[SBIndex::RUNE_BUFFSLOT] = -1;
+					}
+
 					break;
 
 				case SE_Berserk:
@@ -5556,57 +5632,111 @@ void Mob::NegateSpellEffectBonuses(uint16 spell_id)
 					break;
 
 				case SE_HeadShot:
-					if (negate_spellbonus) { spellbonuses.HeadShot[SBIndex::FINISHING_EFFECT_PROC_CHANCE] = effect_value; }
-					if (negate_aabonus) { aabonuses.HeadShot[SBIndex::FINISHING_EFFECT_PROC_CHANCE] = effect_value; }
-					if (negate_itembonus) { itembonuses.HeadShot[SBIndex::FINISHING_EFFECT_PROC_CHANCE] = effect_value; }
-					if (negate_spellbonus) { spellbonuses.HeadShot[SBIndex::FINISHING_EFFECT_DMG] = effect_value; }
-					if (negate_aabonus) { aabonuses.HeadShot[SBIndex::FINISHING_EFFECT_DMG] = effect_value; }
-					if (negate_itembonus) { itembonuses.HeadShot[SBIndex::FINISHING_EFFECT_DMG] = effect_value; }
+					if (negate_spellbonus) {
+						spellbonuses.HeadShot[SBIndex::FINISHING_EFFECT_PROC_CHANCE] = effect_value;
+						spellbonuses.HeadShot[SBIndex::FINISHING_EFFECT_DMG]         = effect_value;
+					}
+
+					if (negate_aabonus) {
+						aabonuses.HeadShot[SBIndex::FINISHING_EFFECT_PROC_CHANCE] = effect_value;
+						aabonuses.HeadShot[SBIndex::FINISHING_EFFECT_DMG]         = effect_value;
+					}
+
+					if (negate_itembonus) {
+						itembonuses.HeadShot[SBIndex::FINISHING_EFFECT_PROC_CHANCE] = effect_value;
+						itembonuses.HeadShot[SBIndex::FINISHING_EFFECT_DMG]         = effect_value;
+					}
+
 					break;
 
 				case SE_HeadShotLevel:
-					if (negate_spellbonus) { spellbonuses.HSLevel[SBIndex::FINISHING_EFFECT_LEVEL_MAX] = effect_value; }
-					if (negate_aabonus) { aabonuses.HSLevel[SBIndex::FINISHING_EFFECT_LEVEL_MAX] = effect_value; }
-					if (negate_itembonus) { itembonuses.HSLevel[SBIndex::FINISHING_EFFECT_LEVEL_MAX] = effect_value; }
-					if (negate_spellbonus) { spellbonuses.HSLevel[SBIndex::FINISHING_EFFECT_LEVEL_CHANCE_BONUS] = effect_value; }
-					if (negate_aabonus) { aabonuses.HSLevel[SBIndex::FINISHING_EFFECT_LEVEL_CHANCE_BONUS] = effect_value; }
-					if (negate_itembonus) { itembonuses.HSLevel[SBIndex::FINISHING_EFFECT_LEVEL_CHANCE_BONUS] = effect_value; }
+					if (negate_spellbonus) {
+						spellbonuses.HSLevel[SBIndex::FINISHING_EFFECT_LEVEL_MAX]          = effect_value;
+						spellbonuses.HSLevel[SBIndex::FINISHING_EFFECT_LEVEL_CHANCE_BONUS] = effect_value;
+					}
+
+					if (negate_aabonus) {
+						aabonuses.HSLevel[SBIndex::FINISHING_EFFECT_LEVEL_MAX]          = effect_value;
+						aabonuses.HSLevel[SBIndex::FINISHING_EFFECT_LEVEL_CHANCE_BONUS] = effect_value;
+					}
+
+					if (negate_itembonus) {
+						itembonuses.HSLevel[SBIndex::FINISHING_EFFECT_LEVEL_MAX]          = effect_value;
+						itembonuses.HSLevel[SBIndex::FINISHING_EFFECT_LEVEL_CHANCE_BONUS] = effect_value;
+					}
+
 					break;
 
 				case SE_Assassinate:
-					if (negate_spellbonus) { spellbonuses.Assassinate[SBIndex::FINISHING_EFFECT_PROC_CHANCE] = effect_value; }
-					if (negate_aabonus) { aabonuses.Assassinate[SBIndex::FINISHING_EFFECT_PROC_CHANCE] = effect_value; }
-					if (negate_itembonus) { itembonuses.Assassinate[SBIndex::FINISHING_EFFECT_PROC_CHANCE] = effect_value; }
-					if (negate_spellbonus) { spellbonuses.Assassinate[SBIndex::FINISHING_EFFECT_DMG] = effect_value; }
-					if (negate_aabonus) { aabonuses.Assassinate[SBIndex::FINISHING_EFFECT_DMG] = effect_value; }
-					if (negate_itembonus) { itembonuses.Assassinate[SBIndex::FINISHING_EFFECT_DMG] = effect_value; }
+					if (negate_spellbonus) {
+						spellbonuses.Assassinate[SBIndex::FINISHING_EFFECT_PROC_CHANCE] = effect_value;
+						spellbonuses.Assassinate[SBIndex::FINISHING_EFFECT_DMG]         = effect_value;
+					}
+
+					if (negate_aabonus) {
+						aabonuses.Assassinate[SBIndex::FINISHING_EFFECT_PROC_CHANCE] = effect_value;
+						aabonuses.Assassinate[SBIndex::FINISHING_EFFECT_DMG]         = effect_value;
+					}
+
+					if (negate_itembonus) {
+						itembonuses.Assassinate[SBIndex::FINISHING_EFFECT_PROC_CHANCE] = effect_value;
+						itembonuses.Assassinate[SBIndex::FINISHING_EFFECT_DMG]         = effect_value;
+					}
+
 					break;
 
 				case SE_AssassinateLevel:
-					if (negate_spellbonus) { spellbonuses.AssassinateLevel[SBIndex::FINISHING_EFFECT_LEVEL_MAX] = effect_value; }
-					if (negate_aabonus) { aabonuses.AssassinateLevel[SBIndex::FINISHING_EFFECT_LEVEL_MAX] = effect_value; }
-					if (negate_itembonus) { itembonuses.AssassinateLevel[SBIndex::FINISHING_EFFECT_LEVEL_MAX] = effect_value; }
-					if (negate_spellbonus) { spellbonuses.AssassinateLevel[SBIndex::FINISHING_EFFECT_LEVEL_CHANCE_BONUS] = effect_value; }
-					if (negate_aabonus) { aabonuses.AssassinateLevel[SBIndex::FINISHING_EFFECT_LEVEL_CHANCE_BONUS] = effect_value; }
-					if (negate_itembonus) { itembonuses.AssassinateLevel[SBIndex::FINISHING_EFFECT_LEVEL_CHANCE_BONUS] = effect_value; }
+					if (negate_spellbonus) {
+						spellbonuses.AssassinateLevel[SBIndex::FINISHING_EFFECT_LEVEL_MAX]          = effect_value;
+						spellbonuses.AssassinateLevel[SBIndex::FINISHING_EFFECT_LEVEL_CHANCE_BONUS] = effect_value;
+					}
+
+					if (negate_aabonus) {
+						aabonuses.AssassinateLevel[SBIndex::FINISHING_EFFECT_LEVEL_MAX]          = effect_value;
+						aabonuses.AssassinateLevel[SBIndex::FINISHING_EFFECT_LEVEL_CHANCE_BONUS] = effect_value;
+					}
+
+					if (negate_itembonus) {
+						itembonuses.AssassinateLevel[SBIndex::FINISHING_EFFECT_LEVEL_MAX]          = effect_value;
+						itembonuses.AssassinateLevel[SBIndex::FINISHING_EFFECT_LEVEL_CHANCE_BONUS] = effect_value;
+					}
+
 					break;
 
 				case SE_FinishingBlow:
-					if (negate_spellbonus) { spellbonuses.FinishingBlow[SBIndex::FINISHING_EFFECT_PROC_CHANCE] = effect_value; }
-					if (negate_aabonus) { aabonuses.FinishingBlow[SBIndex::FINISHING_EFFECT_PROC_CHANCE] = effect_value; }
-					if (negate_itembonus) { itembonuses.FinishingBlow[SBIndex::FINISHING_EFFECT_PROC_CHANCE] = effect_value; }
-					if (negate_spellbonus) { spellbonuses.FinishingBlow[SBIndex::FINISHING_EFFECT_DMG] = effect_value; }
-					if (negate_aabonus) { aabonuses.FinishingBlow[SBIndex::FINISHING_EFFECT_DMG] = effect_value; }
-					if (negate_itembonus) { itembonuses.FinishingBlow[SBIndex::FINISHING_EFFECT_DMG] = effect_value; }
+					if (negate_spellbonus) {
+						spellbonuses.FinishingBlow[SBIndex::FINISHING_EFFECT_PROC_CHANCE] = effect_value;
+						spellbonuses.FinishingBlow[SBIndex::FINISHING_EFFECT_DMG]         = effect_value;
+					}
+
+					if (negate_aabonus) {
+						aabonuses.FinishingBlow[SBIndex::FINISHING_EFFECT_PROC_CHANCE] = effect_value;
+						aabonuses.FinishingBlow[SBIndex::FINISHING_EFFECT_DMG]         = effect_value;
+					}
+
+					if (negate_itembonus) {
+						itembonuses.FinishingBlow[SBIndex::FINISHING_EFFECT_PROC_CHANCE] = effect_value;
+						itembonuses.FinishingBlow[SBIndex::FINISHING_EFFECT_DMG]         = effect_value;
+					}
+
 					break;
 
 				case SE_FinishingBlowLvl:
-					if (negate_spellbonus) { spellbonuses.FinishingBlowLvl[SBIndex::FINISHING_EFFECT_LEVEL_MAX] = effect_value; }
-					if (negate_aabonus) { aabonuses.FinishingBlowLvl[SBIndex::FINISHING_EFFECT_LEVEL_MAX] = effect_value; }
-					if (negate_itembonus) { itembonuses.FinishingBlowLvl[SBIndex::FINISHING_EFFECT_LEVEL_MAX] = effect_value; }
-					if (negate_spellbonus) { spellbonuses.FinishingBlowLvl[SBIndex::FINISHING_BLOW_LEVEL_HP_RATIO] = effect_value; }
-					if (negate_aabonus) { aabonuses.FinishingBlowLvl[SBIndex::FINISHING_BLOW_LEVEL_HP_RATIO] = effect_value; }
-					if (negate_itembonus) { itembonuses.FinishingBlowLvl[SBIndex::FINISHING_BLOW_LEVEL_HP_RATIO] = effect_value; }
+					if (negate_spellbonus) {
+						spellbonuses.FinishingBlowLvl[SBIndex::FINISHING_EFFECT_LEVEL_MAX]    = effect_value;
+						spellbonuses.FinishingBlowLvl[SBIndex::FINISHING_BLOW_LEVEL_HP_RATIO] = effect_value;
+					}
+
+					if (negate_aabonus) {
+						aabonuses.FinishingBlowLvl[SBIndex::FINISHING_EFFECT_LEVEL_MAX]    = effect_value;
+						aabonuses.FinishingBlowLvl[SBIndex::FINISHING_BLOW_LEVEL_HP_RATIO] = effect_value;
+					}
+
+					if (negate_itembonus) {
+						itembonuses.FinishingBlowLvl[SBIndex::FINISHING_EFFECT_LEVEL_MAX]    = effect_value;
+						itembonuses.FinishingBlowLvl[SBIndex::FINISHING_BLOW_LEVEL_HP_RATIO] = effect_value;
+					}
+
 					break;
 
 				case SE_Sanctuary:
@@ -5645,41 +5775,76 @@ void Mob::NegateSpellEffectBonuses(uint16 spell_id)
 					break;
 
 				case SE_Melee_Damage_Position_Mod:
-					if (negate_spellbonus) { spellbonuses.Melee_Damage_Position_Mod[SBIndex::POSITION_BACK] = effect_value; }
-					if (negate_aabonus) { aabonuses.Melee_Damage_Position_Mod[SBIndex::POSITION_BACK] = effect_value; }
-					if (negate_itembonus) { itembonuses.Melee_Damage_Position_Mod[SBIndex::POSITION_BACK] = effect_value; }
-					if (negate_spellbonus) { spellbonuses.Melee_Damage_Position_Mod[SBIndex::POSITION_FRONT] = effect_value; }
-					if (negate_aabonus) { aabonuses.Melee_Damage_Position_Mod[SBIndex::POSITION_FRONT] = effect_value; }
-					if (negate_itembonus) { itembonuses.Melee_Damage_Position_Mod[SBIndex::POSITION_FRONT] = effect_value; }
+					if (negate_spellbonus) {
+						spellbonuses.Melee_Damage_Position_Mod[SBIndex::POSITION_BACK]  = effect_value;
+						spellbonuses.Melee_Damage_Position_Mod[SBIndex::POSITION_FRONT] = effect_value;
+					}
+
+					if (negate_aabonus) {
+						aabonuses.Melee_Damage_Position_Mod[SBIndex::POSITION_BACK]  = effect_value;
+						aabonuses.Melee_Damage_Position_Mod[SBIndex::POSITION_FRONT] = effect_value;
+					}
+
+					if (negate_itembonus) {
+						itembonuses.Melee_Damage_Position_Mod[SBIndex::POSITION_BACK]  = effect_value;
+						itembonuses.Melee_Damage_Position_Mod[SBIndex::POSITION_FRONT] = effect_value;
+					}
+
 					break;
 
 				case SE_Damage_Taken_Position_Mod:
-					if (negate_spellbonus) { spellbonuses.Damage_Taken_Position_Mod[SBIndex::POSITION_BACK] = effect_value; }
-					if (negate_aabonus) { aabonuses.Damage_Taken_Position_Mod[SBIndex::POSITION_BACK] = effect_value; }
-					if (negate_itembonus) { itembonuses.Damage_Taken_Position_Mod[SBIndex::POSITION_BACK] = effect_value; }
-					if (negate_spellbonus) { spellbonuses.Damage_Taken_Position_Mod[SBIndex::POSITION_FRONT] = effect_value; }
-					if (negate_aabonus) { aabonuses.Damage_Taken_Position_Mod[SBIndex::POSITION_FRONT] = effect_value; }
-					if (negate_itembonus) { itembonuses.Damage_Taken_Position_Mod[SBIndex::POSITION_FRONT] = effect_value; }
+					if (negate_spellbonus) {
+						spellbonuses.Damage_Taken_Position_Mod[SBIndex::POSITION_BACK]  = effect_value;
+						spellbonuses.Damage_Taken_Position_Mod[SBIndex::POSITION_FRONT] = effect_value;
+					}
+
+					if (negate_aabonus) {
+						aabonuses.Damage_Taken_Position_Mod[SBIndex::POSITION_BACK]  = effect_value;
+						aabonuses.Damage_Taken_Position_Mod[SBIndex::POSITION_FRONT] = effect_value;
+					}
+
+					if (negate_itembonus) {
+						itembonuses.Damage_Taken_Position_Mod[SBIndex::POSITION_BACK]  = effect_value;
+						itembonuses.Damage_Taken_Position_Mod[SBIndex::POSITION_FRONT] = effect_value;
+					}
+
 					break;
 
 				case SE_Melee_Damage_Position_Amt:
-					if (negate_spellbonus) { spellbonuses.Melee_Damage_Position_Amt[SBIndex::POSITION_BACK] = effect_value; }
-					if (negate_aabonus) { aabonuses.Melee_Damage_Position_Amt[SBIndex::POSITION_BACK] = effect_value; }
-					if (negate_itembonus) { itembonuses.Melee_Damage_Position_Amt[SBIndex::POSITION_BACK] = effect_value; }
-					if (negate_spellbonus) { spellbonuses.Melee_Damage_Position_Amt[SBIndex::POSITION_FRONT] = effect_value; }
-					if (negate_aabonus) { aabonuses.Melee_Damage_Position_Amt[SBIndex::POSITION_FRONT] = effect_value; }
-					if (negate_itembonus) { itembonuses.Melee_Damage_Position_Amt[SBIndex::POSITION_FRONT] = effect_value; }
+					if (negate_spellbonus) {
+						spellbonuses.Melee_Damage_Position_Amt[SBIndex::POSITION_BACK]  = effect_value;
+						spellbonuses.Melee_Damage_Position_Amt[SBIndex::POSITION_FRONT] = effect_value;
+					}
+
+					if (negate_aabonus) {
+						aabonuses.Melee_Damage_Position_Amt[SBIndex::POSITION_BACK]  = effect_value;
+						aabonuses.Melee_Damage_Position_Amt[SBIndex::POSITION_FRONT] = effect_value;
+					}
+
+					if (negate_itembonus) {
+						itembonuses.Melee_Damage_Position_Amt[SBIndex::POSITION_BACK]  = effect_value;
+						itembonuses.Melee_Damage_Position_Amt[SBIndex::POSITION_FRONT] = effect_value;
+					}
+
 					break;
 
 				case SE_Damage_Taken_Position_Amt:
-					if (negate_spellbonus) { spellbonuses.Damage_Taken_Position_Amt[SBIndex::POSITION_BACK] = effect_value; }
-					if (negate_aabonus) { aabonuses.Damage_Taken_Position_Amt[SBIndex::POSITION_BACK] = effect_value; }
-					if (negate_itembonus) { itembonuses.Damage_Taken_Position_Amt[SBIndex::POSITION_BACK] = effect_value; }
-					if (negate_spellbonus) { spellbonuses.Damage_Taken_Position_Amt[SBIndex::POSITION_FRONT] = effect_value; }
-					if (negate_aabonus) { aabonuses.Damage_Taken_Position_Amt[SBIndex::POSITION_FRONT] = effect_value; }
-					if (negate_itembonus) { itembonuses.Damage_Taken_Position_Amt[SBIndex::POSITION_FRONT] = effect_value; }
-					break;
+					if (negate_spellbonus) {
+						spellbonuses.Damage_Taken_Position_Amt[SBIndex::POSITION_BACK]  = effect_value;
+						spellbonuses.Damage_Taken_Position_Amt[SBIndex::POSITION_FRONT] = effect_value;
+					}
 
+					if (negate_aabonus) {
+						aabonuses.Damage_Taken_Position_Amt[SBIndex::POSITION_BACK]  = effect_value;
+						aabonuses.Damage_Taken_Position_Amt[SBIndex::POSITION_FRONT] = effect_value;
+					}
+
+					if (negate_itembonus) {
+						itembonuses.Damage_Taken_Position_Amt[SBIndex::POSITION_BACK]  = effect_value;
+						itembonuses.Damage_Taken_Position_Amt[SBIndex::POSITION_FRONT] = effect_value;
+					}
+
+					break;
 
 				case SE_DS_Mitigation_Amount:
 					if (negate_spellbonus) { spellbonuses.DS_Mitigation_Amount = effect_value; }
@@ -5706,21 +5871,39 @@ void Mob::NegateSpellEffectBonuses(uint16 spell_id)
 					break;
 
 				case SE_PC_Pet_Rampage:
-					if (negate_spellbonus) { spellbonuses.PC_Pet_Rampage[SBIndex::PET_RAMPAGE_CHANCE] = effect_value; }
-					if (negate_itembonus) { itembonuses.PC_Pet_Rampage[SBIndex::PET_RAMPAGE_CHANCE] = effect_value; }
-					if (negate_aabonus) { aabonuses.PC_Pet_Rampage[SBIndex::PET_RAMPAGE_CHANCE] = effect_value; }
-					if (negate_spellbonus) { spellbonuses.PC_Pet_Rampage[SBIndex::PET_RAMPAGE_DMG_MOD] = effect_value; }
-					if (negate_itembonus) { itembonuses.PC_Pet_Rampage[SBIndex::PET_RAMPAGE_DMG_MOD] = effect_value; }
-					if (negate_aabonus) { aabonuses.PC_Pet_Rampage[SBIndex::PET_RAMPAGE_DMG_MOD] = effect_value; }
+					if (negate_spellbonus) {
+						spellbonuses.PC_Pet_Rampage[SBIndex::PET_RAMPAGE_CHANCE]  = effect_value;
+						spellbonuses.PC_Pet_Rampage[SBIndex::PET_RAMPAGE_DMG_MOD] = effect_value;
+					}
+
+					if (negate_itembonus) {
+						itembonuses.PC_Pet_Rampage[SBIndex::PET_RAMPAGE_CHANCE]  = effect_value;
+						itembonuses.PC_Pet_Rampage[SBIndex::PET_RAMPAGE_DMG_MOD] = effect_value;
+					}
+
+					if (negate_aabonus) {
+						aabonuses.PC_Pet_Rampage[SBIndex::PET_RAMPAGE_CHANCE]  = effect_value;
+						aabonuses.PC_Pet_Rampage[SBIndex::PET_RAMPAGE_DMG_MOD] = effect_value;
+					}
+
 					break;
 
 				case SE_PC_Pet_AE_Rampage:
-					if (negate_spellbonus) { spellbonuses.PC_Pet_AE_Rampage[SBIndex::PET_RAMPAGE_CHANCE] = effect_value; }
-					if (negate_itembonus) { itembonuses.PC_Pet_AE_Rampage[SBIndex::PET_RAMPAGE_CHANCE] = effect_value; }
-					if (negate_aabonus) { aabonuses.PC_Pet_AE_Rampage[SBIndex::PET_RAMPAGE_CHANCE] = effect_value; }
-					if (negate_spellbonus) { spellbonuses.PC_Pet_AE_Rampage[SBIndex::PET_RAMPAGE_DMG_MOD] = effect_value; }
-					if (negate_itembonus) { itembonuses.PC_Pet_AE_Rampage[SBIndex::PET_RAMPAGE_DMG_MOD] = effect_value; }
-					if (negate_aabonus) { aabonuses.PC_Pet_AE_Rampage[SBIndex::PET_RAMPAGE_DMG_MOD] = effect_value; }
+					if (negate_spellbonus) {
+						spellbonuses.PC_Pet_AE_Rampage[SBIndex::PET_RAMPAGE_CHANCE]  = effect_value;
+						spellbonuses.PC_Pet_AE_Rampage[SBIndex::PET_RAMPAGE_DMG_MOD] = effect_value;
+					}
+
+					if (negate_itembonus) {
+						itembonuses.PC_Pet_AE_Rampage[SBIndex::PET_RAMPAGE_CHANCE]  = effect_value;
+						itembonuses.PC_Pet_AE_Rampage[SBIndex::PET_RAMPAGE_DMG_MOD] = effect_value;
+					}
+
+					if (negate_aabonus) {
+						aabonuses.PC_Pet_AE_Rampage[SBIndex::PET_RAMPAGE_CHANCE]  = effect_value;
+						aabonuses.PC_Pet_AE_Rampage[SBIndex::PET_RAMPAGE_DMG_MOD] = effect_value;
+					}
+
 					break;
 
 
