@@ -147,12 +147,6 @@ class EQEmuConfig
 			return (_config);
 		}
 
-		// Allow the use to set the conf file to be used.
-		static void SetConfigFile(std::string file)
-		{
-			EQEmuConfig::ConfigFile = file;
-		}
-
 		// Load the config
 		static bool LoadConfig(const std::string& path = "")
 		{
