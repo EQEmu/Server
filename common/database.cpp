@@ -797,14 +797,17 @@ bool Database::SaveCharacterCreate(uint32 character_id, uint32 account_id, Playe
 }
 
 uint32 Database::GetCharacterID(const char *name) {
-	std::string query = StringFormat("SELECT `id` FROM `character_data` WHERE `name` = '%s'", name);
+	const auto query = fmt::format(
+		"SELECT `id` FROM `character_data` WHERE `name` = '{}'",
+		Strings::Escape(name)
+	);
 	auto results = QueryDatabase(query);
-	auto row = results.begin();
-	if (results.RowCount() == 1)
-	{
-		return Strings::ToUnsignedInt(row[0]);
+	if (!results.Success() || !results.RowCount()) {
+		return 0;
 	}
-	return 0;
+
+	auto row = results.begin();
+	return Strings::ToUnsignedInt(row[0]);
 }
 
 /*
