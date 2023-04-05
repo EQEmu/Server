@@ -3086,9 +3086,6 @@ DROP TABLE `expedition_members`;
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
--- ----------------------------
--- Table structure for pets_beastlord_data
--- ----------------------------
 DROP TABLE IF EXISTS `pets_beastlord_data`;
 CREATE TABLE `pets_beastlord_data`  (
   `player_race` int UNSIGNED NOT NULL DEFAULT 1,
@@ -3101,9 +3098,6 @@ CREATE TABLE `pets_beastlord_data`  (
   PRIMARY KEY (`player_race`) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = latin1 COLLATE = latin1_swedish_ci ROW_FORMAT = Compact;
 
--- ----------------------------
--- Records of pets_beastlord_data
--- ----------------------------
 INSERT INTO `pets_beastlord_data` VALUES (2, 42, 2, 0, 2, 1, 0); -- Barbarian
 INSERT INTO `pets_beastlord_data` VALUES (9, 91, 0, 0, 2, 2.5, 0); -- Troll
 INSERT INTO `pets_beastlord_data` VALUES (10, 43, 3, 0, 2, 1, 0); -- Ogre

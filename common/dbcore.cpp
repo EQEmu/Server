@@ -95,6 +95,8 @@ MySQLRequestResult DBcore::QueryDatabase(const char *query, uint32 querylen, boo
 
 	LockMutex lock(m_mutex);
 
+//	mysql_set_server_option().
+
 	// Reconnect if we are not connected before hand.
 	if (pStatus != Connected) {
 		Open();
