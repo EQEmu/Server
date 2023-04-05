@@ -11092,12 +11092,12 @@ void Client::SaveDisciplines()
 
 uint16 Client::ScribeSpells(uint8 min_level, uint8 max_level)
 {
-	int available_book_slot = GetNextAvailableSpellBookSlot();
-	std::vector<int> spell_ids = GetScribeableSpells(min_level, max_level);
-	uint16 spell_count = spell_ids.size();
-	uint16 scribed_spells = 0;
-	if (spell_count > 0) {
-		for (auto spell_id : spell_ids) {
+	auto             available_book_slot = GetNextAvailableSpellBookSlot();
+	std::vector<int> spell_ids           = GetScribeableSpells(min_level, max_level);
+	uint16           scribed_spells      = 0;
+
+	if (!spell_ids.empty()) {
+		for (const auto& spell_id : spell_ids) {
 			if (available_book_slot == -1) {
 				Message(
 					Chat::Red,
@@ -11137,13 +11137,13 @@ uint16 Client::ScribeSpells(uint8 min_level, uint8 max_level)
 
 uint16 Client::LearnDisciplines(uint8 min_level, uint8 max_level)
 {
-	int available_discipline_slot = GetNextAvailableDisciplineSlot();
-	int character_id = CharacterID();
-	std::vector<int> spell_ids = GetLearnableDisciplines(min_level, max_level);
-	uint16 discipline_count = spell_ids.size();
-	uint16 learned_disciplines = 0;
-	if (discipline_count > 0) {
-		for (auto spell_id : spell_ids) {
+	auto             available_discipline_slot = GetNextAvailableDisciplineSlot();
+	auto             character_id              = CharacterID();
+	std::vector<int> spell_ids                 = GetLearnableDisciplines(min_level, max_level);
+	uint16           learned_disciplines       = 0;
+
+	if (!spell_ids.empty()) {
+		for (const auto& spell_id : spell_ids) {
 			if (available_discipline_slot == -1) {
 				Message(
 					Chat::Red,
