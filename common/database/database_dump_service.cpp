@@ -295,14 +295,6 @@ void DatabaseDumpService::DatabaseDump()
 		pipe_file = fmt::format(" > {}.sql", GetDumpFileNameWithPath());
 	}
 
-	std::string execute_command = fmt::format(
-		"{} {} {} {}",
-		GetBaseMySQLDumpCommand(),
-		options,
-		tables_to_dump,
-		pipe_file
-	);
-
 	if (!File::Exists(GetSetDumpPath()) && !IsDumpOutputToConsole()) {
 		File::Makedir(GetSetDumpPath());
 	}
@@ -319,6 +311,14 @@ void DatabaseDumpService::DatabaseDump()
 		}
 	}
 	else {
+		const auto execute_command = fmt::format(
+			"{} {} {} {}",
+			GetBaseMySQLDumpCommand(),
+			options,
+			tables_to_dump,
+			pipe_file
+		);
+
 		std::string execution_result = Process::execute(execute_command);
 		if (!execution_result.empty() && IsDumpOutputToConsole()) {
 			std::cout << execution_result;
