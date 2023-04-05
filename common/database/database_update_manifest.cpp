@@ -5373,6 +5373,255 @@ ALTER TABLE `character_item_recast`
 ALTER TABLE `merchantlist`
 ADD COLUMN `min_status` tinyint(3) UNSIGNED NOT NULL DEFAULT 0 AFTER `level_required`,
 ADD COLUMN `max_status` tinyint(3) UNSIGNED NOT NULL DEFAULT 255 AFTER `min_status`;
-)",
+)"
 	},
+	ManifestEntry{
+		.version = 9220,
+		.description = "2022_12_19_player_events_tables.sql",
+		.check = "SHOW TABLES LIKE 'player_event_logs'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+CREATE TABLE `player_event_log_settings`
+(
+    `id`                 bigint(20) NOT NULL,
+    `event_name`         varchar(100) DEFAULT NULL,
+    `event_enabled`      tinyint(1) DEFAULT NULL,
+    `retention_days`     int(11) DEFAULT 0,
+    `discord_webhook_id` int(11) DEFAULT 0,
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `player_event_logs`
+(
+    `id`              bigint(20) NOT NULL AUTO_INCREMENT,
+    `account_id`      bigint(20) DEFAULT NULL,
+    `character_id`    bigint(20) DEFAULT NULL,
+    `zone_id`         int(11) DEFAULT NULL,
+    `instance_id`     int(11) DEFAULT NULL,
+    `x`               float        DEFAULT NULL,
+    `y`               float        DEFAULT NULL,
+    `z`               float        DEFAULT NULL,
+    `heading`         float        DEFAULT NULL,
+    `event_type_id`   int(11) DEFAULT NULL,
+    `event_type_name` varchar(255) DEFAULT NULL,
+    `event_data`      longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`event_data`)),
+    `created_at`      datetime     DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    KEY               `event_created_at` (`event_type_id`,`created_at`),
+    KEY               `zone_id` (`zone_id`),
+    KEY               `character_id` (`character_id`,`zone_id`) USING BTREE,
+    KEY               `created_at` (`created_at`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE `hackers`;
+DROP TABLE `eventlog`;
+
+)"
+	},
+	ManifestEntry{
+		.version = 9221,
+		.description = "2023_02_24_npc_scaling_zone_id_instance_version.sql",
+		.check = "SHOW COLUMNS FROM `npc_scale_global_base` LIKE 'zone_id'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `npc_scale_global_base`
+ADD COLUMN `zone_id` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `level`,
+ADD COLUMN `instance_version` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `zone_id`,
+DROP PRIMARY KEY,
+ADD PRIMARY KEY (`type`, `level`, `zone_id`, `instance_version`) USING BTREE;
+)"
+	},
+	ManifestEntry{
+		.version = 9222,
+		.description = "2023_02_28_npc_scaling_zone_list_version_list.sql",
+		.check = "SHOW COLUMNS FROM `npc_scale_global_base` LIKE 'zone_id_list'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `npc_scale_global_base`
+    CHANGE COLUMN `zone_id` `zone_id_list` text CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL AFTER `level`,
+    CHANGE COLUMN `instance_version` `instance_version_list` text CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL AFTER `zone_id_list`,
+    DROP PRIMARY KEY,
+    ADD PRIMARY KEY (`type`, `level`, `zone_id_list`(255), `instance_version_list`(255)) USING BTREE;
+)"
+	}, ManifestEntry{
+		.version = 9223,
+		.description = "2023_03_04_npc_scale_global_base_heroic_strikethrough.sql",
+		.check = "SHOW COLUMNS FROM `npc_scale_global_base` LIKE 'heroic_strikethrough'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+UPDATE `npc_scale_global_base` SET ac = 0 WHERE ac IS NULL;
+UPDATE `npc_scale_global_base` SET hp = 0 WHERE hp IS NULL;
+UPDATE `npc_scale_global_base` SET accuracy = 0 WHERE accuracy IS NULL;
+UPDATE `npc_scale_global_base` SET slow_mitigation = 0 WHERE slow_mitigation IS NULL;
+UPDATE `npc_scale_global_base` SET attack = 0 WHERE attack IS NULL;
+UPDATE `npc_scale_global_base` SET strength = 0 WHERE strength IS NULL;
+UPDATE `npc_scale_global_base` SET stamina = 0 WHERE stamina IS NULL;
+UPDATE `npc_scale_global_base` SET dexterity = 0 WHERE dexterity IS NULL;
+UPDATE `npc_scale_global_base` SET agility = 0 WHERE agility IS NULL;
+UPDATE `npc_scale_global_base` SET intelligence = 0 WHERE intelligence IS NULL;
+UPDATE `npc_scale_global_base` SET wisdom = 0 WHERE wisdom IS NULL;
+UPDATE `npc_scale_global_base` SET charisma = 0 WHERE charisma IS NULL;
+UPDATE `npc_scale_global_base` SET magic_resist = 0 WHERE magic_resist IS NULL;
+UPDATE `npc_scale_global_base` SET cold_resist = 0 WHERE cold_resist IS NULL;
+UPDATE `npc_scale_global_base` SET fire_resist = 0 WHERE fire_resist IS NULL;
+UPDATE `npc_scale_global_base` SET poison_resist = 0 WHERE poison_resist IS NULL;
+UPDATE `npc_scale_global_base` SET disease_resist = 0 WHERE disease_resist IS NULL;
+UPDATE `npc_scale_global_base` SET corruption_resist = 0 WHERE corruption_resist IS NULL;
+UPDATE `npc_scale_global_base` SET physical_resist = 0 WHERE physical_resist IS NULL;
+UPDATE `npc_scale_global_base` SET min_dmg = 0 WHERE min_dmg IS NULL;
+UPDATE `npc_scale_global_base` SET max_dmg = 0 WHERE max_dmg IS NULL;
+UPDATE `npc_scale_global_base` SET hp_regen_rate = 0 WHERE hp_regen_rate IS NULL;
+UPDATE `npc_scale_global_base` SET attack_delay = 0 WHERE attack_delay IS NULL;
+UPDATE `npc_scale_global_base` SET physical_resist = 0 WHERE physical_resist IS NULL;
+UPDATE `npc_scale_global_base` SET spell_scale = 100 WHERE spell_scale IS NULL;
+UPDATE `npc_scale_global_base` SET heal_scale = 100 WHERE heal_scale IS NULL;
+UPDATE `npc_scale_global_base` SET special_abilities = '' WHERE special_abilities IS NULL;
+ALTER TABLE `npc_scale_global_base`
+    MODIFY COLUMN `ac` int(11) NOT NULL DEFAULT 0 AFTER `instance_version_list`,
+    MODIFY COLUMN `hp` int(11) NOT NULL DEFAULT 0 AFTER `ac`,
+    MODIFY COLUMN `accuracy` int(11) NOT NULL DEFAULT 0 AFTER `hp`,
+    MODIFY COLUMN `slow_mitigation` int(11) NOT NULL DEFAULT 0 AFTER `accuracy`,
+    MODIFY COLUMN `attack` int(11) NOT NULL DEFAULT 0 AFTER `slow_mitigation`,
+    MODIFY COLUMN `strength` int(11) NOT NULL DEFAULT 0 AFTER `attack`,
+    MODIFY COLUMN `stamina` int(11) NOT NULL DEFAULT 0 AFTER `strength`,
+    MODIFY COLUMN `dexterity` int(11) NOT NULL DEFAULT 0 AFTER `stamina`,
+    MODIFY COLUMN `agility` int(11) NOT NULL DEFAULT 0 AFTER `dexterity`,
+    MODIFY COLUMN `intelligence` int(11) NOT NULL DEFAULT 0 AFTER `agility`,
+    MODIFY COLUMN `wisdom` int(11) NOT NULL DEFAULT 0 AFTER `intelligence`,
+    MODIFY COLUMN `charisma` int(11) NOT NULL DEFAULT 0 AFTER `wisdom`,
+    MODIFY COLUMN `magic_resist` int(11) NOT NULL DEFAULT 0 AFTER `charisma`,
+    MODIFY COLUMN `cold_resist` int(11) NOT NULL DEFAULT 0 AFTER `magic_resist`,
+    MODIFY COLUMN `fire_resist` int(11) NOT NULL DEFAULT 0 AFTER `cold_resist`,
+    MODIFY COLUMN `poison_resist` int(11) NOT NULL DEFAULT 0 AFTER `fire_resist`,
+    MODIFY COLUMN `disease_resist` int(11) NOT NULL DEFAULT 0 AFTER `poison_resist`,
+    MODIFY COLUMN `corruption_resist` int(11) NOT NULL DEFAULT 0 AFTER `disease_resist`,
+    MODIFY COLUMN `physical_resist` int(11) NOT NULL DEFAULT 0 AFTER `corruption_resist`,
+    MODIFY COLUMN `min_dmg` int(11) NOT NULL DEFAULT 0 AFTER `physical_resist`,
+    MODIFY COLUMN `max_dmg` int(11) NOT NULL DEFAULT 0 AFTER `min_dmg`,
+    MODIFY COLUMN `hp_regen_rate` int(11) NOT NULL DEFAULT 0 AFTER `max_dmg`,
+    MODIFY COLUMN `attack_delay` int(11) NOT NULL DEFAULT 0 AFTER `hp_regen_rate`,
+    MODIFY COLUMN `spell_scale` int(11) NOT NULL DEFAULT 100 AFTER `attack_delay`,
+    MODIFY COLUMN `heal_scale` int(11) NOT NULL DEFAULT 100 AFTER `spell_scale`,
+    MODIFY COLUMN special_abilities text CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL AFTER heal_scale,
+    ADD COLUMN `heroic_strikethrough` int(11) NOT NULL DEFAULT 0 AFTER `heal_scale`;
+
+)"
+	},
+	ManifestEntry{
+		.version = 9224,
+		.description = "2023_03_08_npc_scale_global_base_avoidance.sql",
+		.check = "SHOW COLUMNS FROM `npc_scale_global_base` LIKE 'hp_regen_per_second'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `npc_scale_global_base`
+MODIFY COLUMN `hp` bigint(20) NOT NULL DEFAULT 0 AFTER `ac`,
+MODIFY COLUMN `hp_regen_rate` bigint(20) NOT NULL DEFAULT 0 AFTER `max_dmg`,
+ADD COLUMN `hp_regen_per_second` bigint(20) NOT NULL DEFAULT 0 AFTER `hp_regen_rate`,
+ADD COLUMN `avoidance` int(11) unsigned NOT NULL DEFAULT 0 AFTER `heal_scale`;
+
+)"
+	},
+	ManifestEntry{
+		.version = 9225,
+		.description = "2023_01_21_bots_raid_members.sql",
+		.check = "SHOW COLUMNS FROM `raid_members` LIKE 'bot_id'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `npc_scale_global_base`
+MODIFY COLUMN `hp` bigint(20) NOT NULL DEFAULT 0 AFTER `ac`,
+MODIFY COLUMN `hp_regen_rate` bigint(20) NOT NULL DEFAULT 0 AFTER `max_dmg`,
+ADD COLUMN `hp_regen_per_second` bigint(20) NOT NULL DEFAULT 0 AFTER `hp_regen_rate`,
+ADD COLUMN `avoidance` int(11) unsigned NOT NULL DEFAULT 0 AFTER `heal_scale`;
+
+)"
+	},
+	ManifestEntry{
+		.version = 9226,
+		.description = "2023_03_17_corpse_fields.sql",
+		.check = "SHOW COLUMNS FROM `character_corpse_items` LIKE 'custom_data'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `character_corpse_items`
+	ADD COLUMN `custom_data` TEXT NULL AFTER `attuned`,
+	ADD COLUMN `ornamenticon` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `custom_data`,
+	ADD COLUMN `ornamentidfile` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `ornamenticon`,
+	ADD COLUMN `ornament_hero_model` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `ornamentidfile`;
+
+)"
+	},
+	ManifestEntry{
+		.version = 9227,
+		.description = "2023_03_24_npc_scale_global_base_verify.sql",
+		.check = "SHOW COLUMNS FROM `npc_scale_global_base` LIKE 'heroic_strikethrough'",
+		.condition = "not_empty",
+		.match = "",
+		.sql = R"(
+UPDATE `npc_scale_global_base` SET ac = 0 WHERE ac IS NULL;
+UPDATE `npc_scale_global_base` SET hp = 0 WHERE hp IS NULL;
+UPDATE `npc_scale_global_base` SET accuracy = 0 WHERE accuracy IS NULL;
+UPDATE `npc_scale_global_base` SET slow_mitigation = 0 WHERE slow_mitigation IS NULL;
+UPDATE `npc_scale_global_base` SET attack = 0 WHERE attack IS NULL;
+UPDATE `npc_scale_global_base` SET strength = 0 WHERE strength IS NULL;
+UPDATE `npc_scale_global_base` SET stamina = 0 WHERE stamina IS NULL;
+UPDATE `npc_scale_global_base` SET dexterity = 0 WHERE dexterity IS NULL;
+UPDATE `npc_scale_global_base` SET agility = 0 WHERE agility IS NULL;
+UPDATE `npc_scale_global_base` SET intelligence = 0 WHERE intelligence IS NULL;
+UPDATE `npc_scale_global_base` SET wisdom = 0 WHERE wisdom IS NULL;
+UPDATE `npc_scale_global_base` SET charisma = 0 WHERE charisma IS NULL;
+UPDATE `npc_scale_global_base` SET magic_resist = 0 WHERE magic_resist IS NULL;
+UPDATE `npc_scale_global_base` SET cold_resist = 0 WHERE cold_resist IS NULL;
+UPDATE `npc_scale_global_base` SET fire_resist = 0 WHERE fire_resist IS NULL;
+UPDATE `npc_scale_global_base` SET poison_resist = 0 WHERE poison_resist IS NULL;
+UPDATE `npc_scale_global_base` SET disease_resist = 0 WHERE disease_resist IS NULL;
+UPDATE `npc_scale_global_base` SET corruption_resist = 0 WHERE corruption_resist IS NULL;
+UPDATE `npc_scale_global_base` SET physical_resist = 0 WHERE physical_resist IS NULL;
+UPDATE `npc_scale_global_base` SET min_dmg = 0 WHERE min_dmg IS NULL;
+UPDATE `npc_scale_global_base` SET max_dmg = 0 WHERE max_dmg IS NULL;
+UPDATE `npc_scale_global_base` SET hp_regen_rate = 0 WHERE hp_regen_rate IS NULL;
+UPDATE `npc_scale_global_base` SET attack_delay = 0 WHERE attack_delay IS NULL;
+UPDATE `npc_scale_global_base` SET physical_resist = 0 WHERE physical_resist IS NULL;
+UPDATE `npc_scale_global_base` SET spell_scale = 100 WHERE spell_scale IS NULL;
+UPDATE `npc_scale_global_base` SET heal_scale = 100 WHERE heal_scale IS NULL;
+UPDATE `npc_scale_global_base` SET special_abilities = '' WHERE special_abilities IS NULL;
+ALTER TABLE `npc_scale_global_base`
+    MODIFY COLUMN `ac` int(11) NOT NULL DEFAULT 0 AFTER `instance_version_list`,
+    MODIFY COLUMN `hp` bigint(20) NOT NULL DEFAULT 0 AFTER `ac`,
+    MODIFY COLUMN `accuracy` int(11) NOT NULL DEFAULT 0 AFTER `hp`,
+    MODIFY COLUMN `slow_mitigation` int(11) NOT NULL DEFAULT 0 AFTER `accuracy`,
+    MODIFY COLUMN `attack` int(11) NOT NULL DEFAULT 0 AFTER `slow_mitigation`,
+    MODIFY COLUMN `strength` int(11) NOT NULL DEFAULT 0 AFTER `attack`,
+    MODIFY COLUMN `stamina` int(11) NOT NULL DEFAULT 0 AFTER `strength`,
+    MODIFY COLUMN `dexterity` int(11) NOT NULL DEFAULT 0 AFTER `stamina`,
+    MODIFY COLUMN `agility` int(11) NOT NULL DEFAULT 0 AFTER `dexterity`,
+    MODIFY COLUMN `intelligence` int(11) NOT NULL DEFAULT 0 AFTER `agility`,
+    MODIFY COLUMN `wisdom` int(11) NOT NULL DEFAULT 0 AFTER `intelligence`,
+    MODIFY COLUMN `charisma` int(11) NOT NULL DEFAULT 0 AFTER `wisdom`,
+    MODIFY COLUMN `magic_resist` int(11) NOT NULL DEFAULT 0 AFTER `charisma`,
+    MODIFY COLUMN `cold_resist` int(11) NOT NULL DEFAULT 0 AFTER `magic_resist`,
+    MODIFY COLUMN `fire_resist` int(11) NOT NULL DEFAULT 0 AFTER `cold_resist`,
+    MODIFY COLUMN `poison_resist` int(11) NOT NULL DEFAULT 0 AFTER `fire_resist`,
+    MODIFY COLUMN `disease_resist` int(11) NOT NULL DEFAULT 0 AFTER `poison_resist`,
+    MODIFY COLUMN `corruption_resist` int(11) NOT NULL DEFAULT 0 AFTER `disease_resist`,
+    MODIFY COLUMN `physical_resist` int(11) NOT NULL DEFAULT 0 AFTER `corruption_resist`,
+    MODIFY COLUMN `min_dmg` int(11) NOT NULL DEFAULT 0 AFTER `physical_resist`,
+    MODIFY COLUMN `max_dmg` int(11) NOT NULL DEFAULT 0 AFTER `min_dmg`,
+    MODIFY COLUMN `hp_regen_rate` bigint(20) NOT NULL DEFAULT 0 AFTER `max_dmg`,
+    MODIFY COLUMN `attack_delay` int(11) NOT NULL DEFAULT 0 AFTER `hp_regen_rate`,
+    MODIFY COLUMN `hp_regen_per_second` bigint(20) NOT NULL DEFAULT 0 AFTER `hp_regen_rate`,
+    MODIFY COLUMN `spell_scale` int(11) NOT NULL DEFAULT 100 AFTER `attack_delay`,
+    MODIFY COLUMN `heal_scale` int(11) NOT NULL DEFAULT 100 AFTER `spell_scale`,
+    MODIFY COLUMN `heroic_strikethrough` int(11) NOT NULL DEFAULT 0 AFTER `avoidance`,
+    MODIFY COLUMN `avoidance` int(11) unsigned NOT NULL DEFAULT 0 AFTER `heal_scale`,
+    MODIFY COLUMN special_abilities text CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL AFTER heroic_strikethrough;
+
+)"
+	},
+
 };
