@@ -22,6 +22,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/timer.h"
 
 #include "database.h"
+#include "database/database_update.h"
 #include "extprofile.h"
 #include "path_manager.h"
 
@@ -37,7 +38,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #else
 
 #include "unix.h"
-#include "database/database_update.h"
 #include <netinet/in.h>
 #include <sys/time.h>
 
