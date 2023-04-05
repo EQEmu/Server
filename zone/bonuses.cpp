@@ -3201,8 +3201,13 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 
 			case SE_NegateAttacks:
 			{
-				if (!new_bonus->NegateAttacks[SBIndex::NEGATE_ATK_EXISTS] ||
-					((new_bonus->NegateAttacks[SBIndex::NEGATE_ATK_EXISTS] && new_bonus->NegateAttacks[SBIndex::NEGATE_ATK_MAX_DMG_ABSORB_PER_HIT]) && (new_bonus->NegateAttacks[SBIndex::NEGATE_ATK_MAX_DMG_ABSORB_PER_HIT] < max_value))){
+				if (
+					!new_bonus->NegateAttacks[SBIndex::NEGATE_ATK_EXISTS] ||
+					(
+						new_bonus->NegateAttacks[SBIndex::NEGATE_ATK_MAX_DMG_ABSORB_PER_HIT] &&
+						new_bonus->NegateAttacks[SBIndex::NEGATE_ATK_MAX_DMG_ABSORB_PER_HIT] < max_value
+					)
+				) {
 					new_bonus->NegateAttacks[SBIndex::NEGATE_ATK_EXISTS]                 = 1;
 					new_bonus->NegateAttacks[SBIndex::NEGATE_ATK_BUFFSLOT]               = buffslot;
 					new_bonus->NegateAttacks[SBIndex::NEGATE_ATK_MAX_DMG_ABSORB_PER_HIT] = max_value;
