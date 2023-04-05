@@ -519,11 +519,11 @@ bool SharedDatabase::GetSharedBank(uint32 id, EQ::InventoryProfile *inv, bool is
 	}
 
 	auto results = QueryDatabase(query);
-	if (!results.Success()) {
+	if (!results.Success() || !results.RowCount()) {
 		return false;
 	}
 
-	for (auto& row : results) {
+	for (auto row : results) {
 		int16 slot_id = static_cast<int16>(Strings::ToInt(row[0]));
 		uint32 item_id = Strings::ToUnsignedInt(row[1]);
 		const int16 charges = static_cast<int16>(Strings::ToInt(row[2]));
