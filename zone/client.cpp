@@ -310,8 +310,6 @@ Client::Client(EQStreamInterface *ieqs) : Mob(
 	HideCorpseMode = HideCorpseNone;
 	PendingGuildInvitation = false;
 
-	current_endurance = 0;
-
 	InitializeBuffSlots();
 
 	adventure_request_timer = nullptr;
@@ -1796,83 +1794,90 @@ void Client::SetStats(uint8 type,int16 set_val){
 	safe_delete(outapp);
 }
 
-void Client::IncStats(uint8 type,int16 increase_val){
-	if(type>STAT_DISEASE){
-		printf("Error in Client::IncStats, received invalid type of: %i\n",type);
+void Client::IncStats(uint8 type, int16 increase_val)
+{
+	if (type > STAT_DISEASE) {
+		printf("Error in Client::IncStats, received invalid type of: %i\n", type);
 		return;
 	}
-	auto outapp = new EQApplicationPacket(OP_IncreaseStats, sizeof(IncreaseStat_Struct));
-	IncreaseStat_Struct* iss=(IncreaseStat_Struct*)outapp->pBuffer;
-	switch(type){
+	auto                outapp = new EQApplicationPacket(OP_IncreaseStats, sizeof(IncreaseStat_Struct));
+	IncreaseStat_Struct *iss   = (IncreaseStat_Struct *) outapp->pBuffer;
+	switch (type) {
 		case STAT_STR:
-			if(increase_val>0)
-				iss->str=increase_val;
-			if((m_pp.STR+increase_val*2)<0)
-				m_pp.STR=0;
-			else if((m_pp.STR+increase_val*2)>255)
-				m_pp.STR=255;
-			else
-				m_pp.STR+=increase_val*2;
+			if (increase_val > 0) {
+				iss->str = increase_val;
+			}
+
+			if ((m_pp.STR + increase_val * 2) > 255) {
+				m_pp.STR = 255;
+			} else {
+				m_pp.STR += increase_val * 2;
+			}
 			break;
 		case STAT_STA:
-			if(increase_val>0)
-				iss->sta=increase_val;
-			if((m_pp.STA+increase_val*2)<0)
-				m_pp.STA=0;
-			else if((m_pp.STA+increase_val*2)>255)
-				m_pp.STA=255;
-			else
-				m_pp.STA+=increase_val*2;
+			if (increase_val > 0) {
+				iss->sta = increase_val;
+			}
+
+			if ((m_pp.STA + increase_val * 2) > 255) {
+				m_pp.STA = 255;
+			} else {
+				m_pp.STA += increase_val * 2;
+			}
 			break;
 		case STAT_AGI:
-			if(increase_val>0)
-				iss->agi=increase_val;
-			if((m_pp.AGI+increase_val*2)<0)
-				m_pp.AGI=0;
-			else if((m_pp.AGI+increase_val*2)>255)
-				m_pp.AGI=255;
-			else
-				m_pp.AGI+=increase_val*2;
+			if (increase_val > 0) {
+				iss->agi = increase_val;
+			}
+			if ((m_pp.AGI + increase_val * 2) > 255) {
+				m_pp.AGI = 255;
+			} else {
+				m_pp.AGI += increase_val * 2;
+			}
 			break;
 		case STAT_DEX:
-			if(increase_val>0)
-				iss->dex=increase_val;
-			if((m_pp.DEX+increase_val*2)<0)
-				m_pp.DEX=0;
-			else if((m_pp.DEX+increase_val*2)>255)
-				m_pp.DEX=255;
-			else
-				m_pp.DEX+=increase_val*2;
+			if (increase_val > 0) {
+				iss->dex = increase_val;
+			}
+
+			if ((m_pp.DEX + increase_val * 2) > 255) {
+				m_pp.DEX = 255;
+			} else {
+				m_pp.DEX += increase_val * 2;
+			}
 			break;
 		case STAT_INT:
-			if(increase_val>0)
-				iss->int_=increase_val;
-			if((m_pp.INT+increase_val*2)<0)
-				m_pp.INT=0;
-			else if((m_pp.INT+increase_val*2)>255)
-				m_pp.INT=255;
-			else
-				m_pp.INT+=increase_val*2;
+			if (increase_val > 0) {
+				iss->int_ = increase_val;
+			}
+
+			if ((m_pp.INT + increase_val * 2) > 255) {
+				m_pp.INT = 255;
+			} else {
+				m_pp.INT += increase_val * 2;
+			}
 			break;
 		case STAT_WIS:
-			if(increase_val>0)
-				iss->wis=increase_val;
-			if((m_pp.WIS+increase_val*2)<0)
-				m_pp.WIS=0;
-			else if((m_pp.WIS+increase_val*2)>255)
-				m_pp.WIS=255;
-			else
-				m_pp.WIS+=increase_val*2;
+			if (increase_val > 0) {
+				iss->wis = increase_val;
+			}
+
+			if ((m_pp.WIS + increase_val * 2) > 255) {
+				m_pp.WIS = 255;
+			} else {
+				m_pp.WIS += increase_val * 2;
+			}
 			break;
 		case STAT_CHA:
-			if(increase_val>0)
-				iss->cha=increase_val;
-			if((m_pp.CHA+increase_val*2)<0)
-				m_pp.CHA=0;
-			else if((m_pp.CHA+increase_val*2)>255)
-				m_pp.CHA=255;
-			else
-				m_pp.CHA+=increase_val*2;
+			if (increase_val > 0) {
+				iss->cha = increase_val;
+			}
+
+			if ((m_pp.CHA + increase_val * 2) > 255) {
+				m_pp.CHA = 255;
+			} else {
+				m_pp.CHA += increase_val * 2;
+			}
 			break;
 	}
 	QueuePacket(outapp);
@@ -2222,7 +2227,7 @@ uint32 Client::GetCarriedPlatinum() {
 
 bool Client::TakePlatinum(uint32 platinum, bool update_client) {
 	if (GetCarriedPlatinum() >= platinum) {
-		auto copper = static_cast<uint64>(platinum * 1000);
+		const auto copper = static_cast<uint64>(platinum) * 1000;
 		return TakeMoneyFromPP(copper, update_client);
 	}
 
@@ -2316,7 +2321,7 @@ bool Client::TakeMoneyFromPP(uint64 copper, bool update_client) {
 }
 
 void Client::AddPlatinum(uint32 platinum, bool update_client) {
-	auto copper = static_cast<uint64>(platinum * 1000);
+	const auto copper = static_cast<uint64>(platinum) * 1000;
 	AddMoneyToPP(copper, update_client);
 }
 
@@ -3299,28 +3304,28 @@ bool Client::FilteredMessageCheck(Mob *sender, eqFilterType filter)
 {
 	eqFilterMode mode = GetFilter(filter);
 	// easy ones first
-	if (mode == FilterShow)
+	if (mode == FilterShow) {
 		return true;
-	else if (mode == FilterHide)
+	} else if (mode == FilterHide) {
 		return false;
+	}
 
-	if (sender != this && (mode == FilterHide || mode == FilterShowSelfOnly)) {
+	if (sender != this && mode == FilterShowSelfOnly) {
 		return false;
 	} else if (sender) {
-		if (this == sender) {
-			if (mode == FilterHide) // don't need to check others
-				return false;
-		} else if (mode == FilterShowGroupOnly) {
-			Group *g = GetGroup();
-			Raid *r = GetRaid();
+		if (mode == FilterShowGroupOnly) {
+			auto g = GetGroup();
+			auto r = GetRaid();
 			if (g) {
-				if (g->IsGroupMember(sender))
+				if (g->IsGroupMember(sender)) {
 					return true;
+				}
 			} else if (r && sender->IsClient()) {
-				uint32 rgid1 = r->GetGroup(this);
-				uint32 rgid2 = r->GetGroup(sender->CastToClient());
-				if (rgid1 != 0xFFFFFFFF && rgid1 == rgid2)
+				auto rgid1 = r->GetGroup(this);
+				auto rgid2 = r->GetGroup(sender->CastToClient());
+				if (rgid1 != RAID_GROUPLESS && rgid1 == rgid2) {
 					return true;
+				}
 			} else {
 				return false;
 			}
@@ -3952,7 +3957,7 @@ void Client::SendWindow(
 		case 1: {
 			char name[64] = "";
 			strcpy(name, target->GetName());
-			if (target->GetLastName()) {
+			if (strlen(target->GetLastName()) > 0) {
 				char last_name[64] = "";
 				strcpy(last_name, target->GetLastName());
 				strcat(name, " ");
@@ -6934,15 +6939,17 @@ void Client::SendAlternateCurrencyValues()
 
 void Client::SendAlternateCurrencyValue(uint32 currency_id, bool send_if_null)
 {
-	uint32 value = GetAlternateCurrencyValue(currency_id);
-	if(value > 0 || (value == 0 && send_if_null)) {
+	const auto value = GetAlternateCurrencyValue(currency_id);
+	if (value > 0 || send_if_null) {
 		auto outapp = new EQApplicationPacket(OP_AltCurrency, sizeof(AltCurrencyUpdate_Struct));
-		AltCurrencyUpdate_Struct *update = (AltCurrencyUpdate_Struct*)outapp->pBuffer;
-		update->opcode = 7;
-		strcpy(update->name, GetName());
+		auto update = (AltCurrencyUpdate_Struct *) outapp->pBuffer;
+		update->opcode          = 7;
 		update->currency_number = currency_id;
-		update->amount = value;
-		update->unknown072 = 1;
+		update->amount          = value;
+		update->unknown072      = 1;
+
+		strn0cpy(update->name, GetName(), sizeof(update->name));
+
 		FastQueuePacket(&outapp);
 	}
 }
@@ -7499,106 +7506,96 @@ void Client::SendMercPersonalInfo()
 		return;
 	}
 
-	if(mercData)
-	{
-		if (ClientVersion() >= EQ::versions::ClientVersion::RoF)
-		{
-			if (mercCount > 0)
-			{
-				auto outapp =
-				    new EQApplicationPacket(OP_MercenaryDataUpdate, sizeof(MercenaryDataUpdate_Struct));
-				MercenaryDataUpdate_Struct* mdus = (MercenaryDataUpdate_Struct*)outapp->pBuffer;
-				mdus->MercStatus = 0;
-				mdus->MercCount = mercCount;
-				mdus->MercData[i].MercID = mercData->MercTemplateID;
-				mdus->MercData[i].MercType = mercData->MercType;
-				mdus->MercData[i].MercSubType = mercData->MercSubType;
-				mdus->MercData[i].PurchaseCost = Merc::CalcPurchaseCost(mercData->MercTemplateID, GetLevel(), 0);
-				mdus->MercData[i].UpkeepCost = Merc::CalcUpkeepCost(mercData->MercTemplateID, GetLevel(), 0);
-				mdus->MercData[i].Status = 0;
-				mdus->MercData[i].AltCurrencyCost = Merc::CalcPurchaseCost(mercData->MercTemplateID, GetLevel(), altCurrentType);
-				mdus->MercData[i].AltCurrencyUpkeep = Merc::CalcPurchaseCost(mercData->MercTemplateID, GetLevel(), altCurrentType);
-				mdus->MercData[i].AltCurrencyType = altCurrentType;
-				mdus->MercData[i].MercUnk01 = 0;
-				mdus->MercData[i].TimeLeft = GetMercInfo().MercTimerRemaining;	//GetMercTimer().GetRemainingTime();
-				mdus->MercData[i].MerchantSlot = i + 1;
-				mdus->MercData[i].MercUnk02 = 1;
-				mdus->MercData[i].StanceCount = zone->merc_stance_list[mercData->MercTemplateID].size();
-				mdus->MercData[i].MercUnk03 = 0;
-				mdus->MercData[i].MercUnk04 = 1;
-				strn0cpy(mdus->MercData[i].MercName, GetMercInfo().merc_name , sizeof(mdus->MercData[i].MercName));
-				uint32 stanceindex = 0;
-				if (mdus->MercData[i].StanceCount != 0)
-				{
-					auto iter = zone->merc_stance_list[mercData->MercTemplateID].begin();
-					while(iter != zone->merc_stance_list[mercData->MercTemplateID].end())
-					{
-						mdus->MercData[i].Stances[stanceindex].StanceIndex = stanceindex;
-						mdus->MercData[i].Stances[stanceindex].Stance = (iter->StanceID);
-						stanceindex++;
-						++iter;
-					}
-				}
+	if (ClientVersion() >= EQ::versions::ClientVersion::RoF) {
+		auto outapp = new EQApplicationPacket(OP_MercenaryDataUpdate, sizeof(MercenaryDataUpdate_Struct));
+		auto mdus   = (MercenaryDataUpdate_Struct *) outapp->pBuffer;
 
-				mdus->MercData[i].MercUnk05 = 1;
-				FastQueuePacket(&outapp);
-				safe_delete(outapp);
-				return;
+		mdus->MercStatus                    = 0;
+		mdus->MercCount                     = mercCount;
+		mdus->MercData[i].MercID            = mercData->MercTemplateID;
+		mdus->MercData[i].MercType          = mercData->MercType;
+		mdus->MercData[i].MercSubType       = mercData->MercSubType;
+		mdus->MercData[i].PurchaseCost      = Merc::CalcPurchaseCost(mercData->MercTemplateID, GetLevel(), 0);
+		mdus->MercData[i].UpkeepCost        = Merc::CalcUpkeepCost(mercData->MercTemplateID, GetLevel(), 0);
+		mdus->MercData[i].Status            = 0;
+		mdus->MercData[i].AltCurrencyCost   = Merc::CalcPurchaseCost(
+			mercData->MercTemplateID,
+			GetLevel(),
+			altCurrentType
+		);
+		mdus->MercData[i].AltCurrencyUpkeep = Merc::CalcPurchaseCost(
+			mercData->MercTemplateID,
+			GetLevel(),
+			altCurrentType
+		);
+		mdus->MercData[i].AltCurrencyType   = altCurrentType;
+		mdus->MercData[i].MercUnk01         = 0;
+		mdus->MercData[i].TimeLeft          = GetMercInfo().MercTimerRemaining;    //GetMercTimer().GetRemainingTime();
+		mdus->MercData[i].MerchantSlot      = i + 1;
+		mdus->MercData[i].MercUnk02         = 1;
+		mdus->MercData[i].StanceCount       = zone->merc_stance_list[mercData->MercTemplateID].size();
+		mdus->MercData[i].MercUnk03         = 0;
+		mdus->MercData[i].MercUnk04         = 1;
+
+		strn0cpy(mdus->MercData[i].MercName, GetMercInfo().merc_name, sizeof(mdus->MercData[i].MercName));
+
+		uint32 stanceindex = 0;
+		if (mdus->MercData[i].StanceCount != 0) {
+			auto iter = zone->merc_stance_list[mercData->MercTemplateID].begin();
+			while (iter != zone->merc_stance_list[mercData->MercTemplateID].end()) {
+				mdus->MercData[i].Stances[stanceindex].StanceIndex = stanceindex;
+				mdus->MercData[i].Stances[stanceindex].Stance      = (iter->StanceID);
+				stanceindex++;
+				++iter;
 			}
 		}
-		else
-		{
-			if(mercTypeCount > 0 && mercCount > 0)
-			{
-				auto outapp = new EQApplicationPacket(OP_MercenaryDataResponse,
-								      sizeof(MercenaryMerchantList_Struct));
-				MercenaryMerchantList_Struct* mml = (MercenaryMerchantList_Struct*)outapp->pBuffer;
-				mml->MercTypeCount = mercTypeCount; //We should only have one merc entry.
-				mml->MercGrades[i] = 1;
-				mml->MercCount = mercCount;
-				mml->Mercs[i].MercID = mercData->MercTemplateID;
-				mml->Mercs[i].MercType = mercData->MercType;
-				mml->Mercs[i].MercSubType = mercData->MercSubType;
-				mml->Mercs[i].PurchaseCost = RuleB(Mercs, ChargeMercPurchaseCost) ? Merc::CalcPurchaseCost(mercData->MercTemplateID, GetLevel(), 0): 0;
-				mml->Mercs[i].UpkeepCost = RuleB(Mercs, ChargeMercUpkeepCost) ? Merc::CalcUpkeepCost(mercData->MercTemplateID, GetLevel(), 0): 0;
-				mml->Mercs[i].Status = 0;
-				mml->Mercs[i].AltCurrencyCost = RuleB(Mercs, ChargeMercPurchaseCost) ? Merc::CalcPurchaseCost(mercData->MercTemplateID, GetLevel(), altCurrentType): 0;
-				mml->Mercs[i].AltCurrencyUpkeep = RuleB(Mercs, ChargeMercUpkeepCost) ? Merc::CalcUpkeepCost(mercData->MercTemplateID, GetLevel(), altCurrentType): 0;
-				mml->Mercs[i].AltCurrencyType = altCurrentType;
-				mml->Mercs[i].MercUnk01 = 0;
-				mml->Mercs[i].TimeLeft = GetMercInfo().MercTimerRemaining;
-				mml->Mercs[i].MerchantSlot = i + 1;
-				mml->Mercs[i].MercUnk02 = 1;
-				mml->Mercs[i].StanceCount = zone->merc_stance_list[mercData->MercTemplateID].size();
-				mml->Mercs[i].MercUnk03 = 0;
-				mml->Mercs[i].MercUnk04 = 1;
-				strn0cpy(mml->Mercs[i].MercName, GetMercInfo().merc_name , sizeof(mml->Mercs[i].MercName));
-				int stanceindex = 0;
-				if(mml->Mercs[i].StanceCount != 0)
-				{
-					auto iter = zone->merc_stance_list[mercData->MercTemplateID].begin();
-					while(iter != zone->merc_stance_list[mercData->MercTemplateID].end())
-					{
-						mml->Mercs[i].Stances[stanceindex].StanceIndex = stanceindex;
-						mml->Mercs[i].Stances[stanceindex].Stance = (iter->StanceID);
-						stanceindex++;
-						++iter;
-					}
-				}
-				FastQueuePacket(&outapp);
-				safe_delete(outapp);
-				return;
+
+		mdus->MercData[i].MercUnk05 = 1;
+		FastQueuePacket(&outapp);
+		safe_delete(outapp);
+		return;
+	} else {
+		auto outapp = new EQApplicationPacket(OP_MercenaryDataResponse, sizeof(MercenaryMerchantList_Struct));
+		auto mml    = (MercenaryMerchantList_Struct *) outapp->pBuffer;
+
+		mml->MercTypeCount = mercTypeCount; //We should only have one merc entry.
+		mml->MercGrades[i] = 1;
+
+		mml->MercCount                  = mercCount;
+		mml->Mercs[i].MercID            = mercData->MercTemplateID;
+		mml->Mercs[i].MercType          = mercData->MercType;
+		mml->Mercs[i].MercSubType       = mercData->MercSubType;
+		mml->Mercs[i].PurchaseCost      = RuleB(Mercs, ChargeMercPurchaseCost) ? Merc::CalcPurchaseCost(mercData->MercTemplateID, GetLevel(), 0) : 0;
+		mml->Mercs[i].UpkeepCost        = RuleB(Mercs, ChargeMercUpkeepCost) ? Merc::CalcUpkeepCost(mercData->MercTemplateID, GetLevel(), 0) : 0;
+		mml->Mercs[i].Status            = 0;
+		mml->Mercs[i].AltCurrencyCost   = RuleB(Mercs, ChargeMercPurchaseCost) ? Merc::CalcPurchaseCost(mercData->MercTemplateID, GetLevel(), altCurrentType) : 0;
+		mml->Mercs[i].AltCurrencyUpkeep = RuleB(Mercs, ChargeMercUpkeepCost) ? Merc::CalcUpkeepCost(mercData->MercTemplateID, GetLevel(), altCurrentType) : 0;
+		mml->Mercs[i].AltCurrencyType   = altCurrentType;
+		mml->Mercs[i].MercUnk01         = 0;
+		mml->Mercs[i].TimeLeft          = GetMercInfo().MercTimerRemaining;
+		mml->Mercs[i].MerchantSlot      = i + 1;
+		mml->Mercs[i].MercUnk02         = 1;
+		mml->Mercs[i].StanceCount       = zone->merc_stance_list[mercData->MercTemplateID].size();
+		mml->Mercs[i].MercUnk03         = 0;
+		mml->Mercs[i].MercUnk04         = 1;
+
+		strn0cpy(mml->Mercs[i].MercName, GetMercInfo().merc_name, sizeof(mml->Mercs[i].MercName));
+
+		int stanceindex = 0;
+		if (mml->Mercs[i].StanceCount != 0) {
+			auto iter = zone->merc_stance_list[mercData->MercTemplateID].begin();
+			while (iter != zone->merc_stance_list[mercData->MercTemplateID].end()) {
+				mml->Mercs[i].Stances[stanceindex].StanceIndex = stanceindex;
+				mml->Mercs[i].Stances[stanceindex].Stance      = (iter->StanceID);
+				stanceindex++;
+				++iter;
 			}
 		}
-		Log(Logs::General, Logs::Mercenaries, "SendMercPersonalInfo Send Successful for %s.", GetName());
 
-		SendMercMerchantResponsePacket(0);
+		FastQueuePacket(&outapp);
+		safe_delete(outapp);
+		return;
 	}
-	else
-	{
-		Log(Logs::General, Logs::Mercenaries, "SendMercPersonalInfo Send Failed Due to no MercData (%i) for %s", GetMercInfo().MercTemplateID, GetName());
-	}
-
 }
 
 void Client::SendClearMercInfo()
@@ -8005,7 +8002,7 @@ void Client::MerchantRejectMessage(Mob *merchant, int primaryfaction)
 //o--------------------------------------------------------------
 void Client::SendFactionMessage(int32 tmpvalue, int32 faction_id, int32 faction_before_hit, int32 totalvalue, uint8 temp, int32 this_faction_min, int32 this_faction_max)
 {
-	char name[50];
+	char  name[50];
 	int32 faction_value;
 
 	// If we're dropping from MAX or raising from MIN or repairing,
@@ -8016,30 +8013,37 @@ void Client::SendFactionMessage(int32 tmpvalue, int32 faction_id, int32 faction_
 	// hit.  For example, if we go from 1199 to 1200 which is the MAX
 	// we still want to say faction got better this time around.
 
-	if ( (faction_before_hit >= this_faction_max) ||
-	     (faction_before_hit <= this_faction_min))
+	if (!EQ::ValueWithin(faction_before_hit, this_faction_min, this_faction_max)) {
 		faction_value = totalvalue;
-	else
+	} else {
 		faction_value = faction_before_hit;
+	}
 
 	// default to Faction# if we couldn't get the name from the ID
-	if (content_db.GetFactionName(faction_id, name, sizeof(name)) == false)
+	if (!content_db.GetFactionName(faction_id, name, sizeof(name))) {
 		snprintf(name, sizeof(name), "Faction%i", faction_id);
+	}
 
-	if (tmpvalue == 0 || temp == 1 || temp == 2)
+	if (tmpvalue == 0 || temp == 1 || temp == 2) {
 		return;
-	else if (faction_value >= this_faction_max)
+	} else if (faction_value >= this_faction_max) {
 		MessageString(Chat::Yellow, FACTION_BEST, name);
-	else if (faction_value <= this_faction_min)
+	} else if (faction_value <= this_faction_min) {
 		MessageString(Chat::Yellow, FACTION_WORST, name);
-	else if (tmpvalue > 0 && faction_value < this_faction_max && !RuleB(Client, UseLiveFactionMessage))
+	} else if (tmpvalue > 0 && !RuleB(Client, UseLiveFactionMessage)) {
 		MessageString(Chat::Yellow, FACTION_BETTER, name);
-	else if (tmpvalue < 0 && faction_value > this_faction_min && !RuleB(Client, UseLiveFactionMessage))
+	} else if (tmpvalue < 0 && !RuleB(Client, UseLiveFactionMessage)) {
 		MessageString(Chat::Yellow, FACTION_WORSE, name);
-	else if (RuleB(Client, UseLiveFactionMessage))
-		Message(Chat::Yellow, "Your faction standing with %s has been adjusted by %i.", name, tmpvalue); //New Live faction message (14261)
-
-	return;
+	} else if (RuleB(Client, UseLiveFactionMessage)) {
+		Message(
+			Chat::Yellow,
+			fmt::format(
+				"Your faction standing with {} has been adjusted by {}.",
+				name,
+				tmpvalue
+			).c_str()
+		);
+	} //New Live faction message (14261)
 }
 
 void Client::LoadAccountFlags()
@@ -8180,7 +8184,7 @@ void Client::TryItemTimer(int slot)
 			continue;
 		}
 
-		auto item_timers = a_inst->GetTimers();
+		auto& item_timers = a_inst->GetTimers();
 		auto it_iter = item_timers.begin();
 		while(it_iter != item_timers.end()) {
 			if(it_iter->second.Check()) {
@@ -8360,9 +8364,6 @@ void Client::Consume(const EQ::ItemData *item, uint8 type, int16 slot, bool auto
 		return;
 
 	if (type == EQ::item::ItemTypeFood) {
-		if (increase < 0)
-			return;
-
 		m_pp.hunger_level += increase;
 
 		LogFood("Consuming food, points added to hunger_level: [{}] - current_hunger: [{}]", increase, m_pp.hunger_level);
@@ -8375,9 +8376,6 @@ void Client::Consume(const EQ::ItemData *item, uint8 type, int16 slot, bool auto
 		LogFood("Eating from slot: [{}]", (int)slot);
 
 	} else {
-		if (increase < 0)
-			return;
-
 		m_pp.thirst_level += increase;
 
 		DeleteItemInInventory(slot, 1);
@@ -8643,15 +8641,17 @@ void Client::RewardFaction(int id, int amount)
 }
 
 void Client::SendHPUpdateMarquee(){
-	if (!this || !IsClient() || !current_hp || !max_hp)
+	if (!IsClient() || !current_hp || !max_hp) {
 		return;
+	}
 
 	/* Health Update Marquee Display: Custom*/
-	uint8 health_percentage = (uint8)(current_hp * 100 / max_hp);
-	if (health_percentage >= 100)
+	const auto health_percentage = static_cast<uint8>(current_hp * 100 / max_hp);
+	if (health_percentage >= 100) {
 		return;
+	}
 
-	std::string health_update_notification = StringFormat("Health: %u%%", health_percentage);
+	const auto health_update_notification = fmt::format("Health: {}%%", health_percentage);
 	SendMarqueeMessage(Chat::Yellow, 510, 0, 3000, 3000, health_update_notification);
 }
 
@@ -9010,120 +9010,119 @@ void Client::InitInnates()
 	// The client calls this in a few places. When you remove a vision buff and in SetHeights, which is called in
 	// illusions, mounts, and a bunch of other cases. All of the calls to InitInnates are wrapped in restoring regen
 	// besides the call initializing the first time
-	auto race = GetRace();
+	auto race   = GetRace();
 	auto class_ = GetClass();
 
-	for (int i = 0; i < InnateSkillMax; ++i)
+	for (int i = 0; i < InnateSkillMax; ++i) {
 		m_pp.InnateSkills[i] = InnateDisabled;
+	}
 
 	m_pp.InnateSkills[InnateInspect] = InnateEnabled;
 	m_pp.InnateSkills[InnateOpen] = InnateEnabled;
+
 	if (race >= RT_FROGLOK_3) {
-		if (race == RT_SKELETON_2 || race == RT_FROGLOK_3)
+		if (race == RT_SKELETON_2 || race == RT_FROGLOK_3) {
 			m_pp.InnateSkills[InnateUltraVision] = InnateEnabled;
-		else
+		} else {
 			m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
+		}
 	}
+
 	switch (race) {
-	case RT_BARBARIAN:
-	case RT_BARBARIAN_2:
-		m_pp.InnateSkills[InnateSlam] = InnateEnabled;
-		break;
-	case RT_ERUDITE:
-	case RT_ERUDITE_2:
-		m_pp.InnateSkills[InnateLore] = InnateEnabled;
-		break;
-	case RT_WOOD_ELF:
-	case RT_GUARD_3:
-		m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
-		break;
-	case RT_HIGH_ELF:
-	case RT_GUARD_2:
-		m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
-		m_pp.InnateSkills[InnateLore] = InnateEnabled;
-		break;
-	case RT_DARK_ELF:
-	case RT_DARK_ELF_2:
-	case RT_VAMPIRE_2:
-		m_pp.InnateSkills[InnateUltraVision] = InnateEnabled;
-		break;
-	case RT_TROLL:
-	case RT_TROLL_2:
-		m_pp.InnateSkills[InnateRegen] = InnateEnabled;
-		m_pp.InnateSkills[InnateSlam] = InnateEnabled;
-		m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
-		break;
-	case RT_DWARF:
-	case RT_DWARF_2:
-		m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
-		break;
-	case RT_OGRE:
-	case RT_OGRE_2:
-		m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
-		m_pp.InnateSkills[InnateSlam] = InnateEnabled;
-		m_pp.InnateSkills[InnateNoBash] = InnateEnabled;
-		m_pp.InnateSkills[InnateBashDoor] = InnateEnabled;
-		break;
-	case RT_HALFLING:
-	case RT_HALFLING_2:
-		m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
-		break;
-	case RT_GNOME:
-		m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
-		m_pp.InnateSkills[InnateLore] = InnateEnabled;
-		break;
-	case RT_IKSAR:
-		m_pp.InnateSkills[InnateRegen] = InnateEnabled;
-		m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
-		break;
-	case RT_VAH_SHIR:
-		m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
-		break;
-	case RT_FROGLOK_2:
-	case RT_GHOST:
-	case RT_GHOUL:
-	case RT_SKELETON:
-	case RT_VAMPIRE:
-	case RT_WILL_O_WISP:
-	case RT_ZOMBIE:
-	case RT_SPECTRE:
-	case RT_GHOST_2:
-	case RT_GHOST_3:
-	case RT_DRAGON_2:
-	case RT_INNORUUK:
-		m_pp.InnateSkills[InnateUltraVision] = InnateEnabled;
-		break;
-	case RT_HUMAN:
-	case RT_GUARD:
-	case RT_BEGGAR:
-	case RT_HUMAN_2:
-	case RT_HUMAN_3:
-	case RT_FROGLOK_3: // client does froglok weird, but this should work out fine
-		break;
-	default:
-		m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
-		break;
+		case RT_BARBARIAN:
+		case RT_BARBARIAN_2:
+			m_pp.InnateSkills[InnateSlam] = InnateEnabled;
+			break;
+		case RT_ERUDITE:
+		case RT_ERUDITE_2:
+			m_pp.InnateSkills[InnateLore] = InnateEnabled;
+			break;
+		case RT_WOOD_ELF:
+		case RT_GUARD_3:
+			m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
+			break;
+		case RT_GNOME:
+		case RT_HIGH_ELF:
+		case RT_GUARD_2:
+			m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
+			m_pp.InnateSkills[InnateLore]        = InnateEnabled;
+			break;
+		case RT_TROLL:
+		case RT_TROLL_2:
+			m_pp.InnateSkills[InnateRegen]       = InnateEnabled;
+			m_pp.InnateSkills[InnateSlam]        = InnateEnabled;
+			m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
+			break;
+		case RT_DWARF:
+		case RT_DWARF_2:
+			m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
+			break;
+		case RT_OGRE:
+		case RT_OGRE_2:
+			m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
+			m_pp.InnateSkills[InnateSlam]        = InnateEnabled;
+			m_pp.InnateSkills[InnateNoBash]      = InnateEnabled;
+			m_pp.InnateSkills[InnateBashDoor]    = InnateEnabled;
+			break;
+		case RT_HALFLING:
+		case RT_HALFLING_2:
+			m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
+			break;
+		case RT_IKSAR:
+			m_pp.InnateSkills[InnateRegen]       = InnateEnabled;
+			m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
+			break;
+		case RT_VAH_SHIR:
+			m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
+			break;
+		case RT_DARK_ELF:
+		case RT_DARK_ELF_2:
+		case RT_VAMPIRE_2:
+		case RT_FROGLOK_2:
+		case RT_GHOST:
+		case RT_GHOUL:
+		case RT_SKELETON:
+		case RT_VAMPIRE:
+		case RT_WILL_O_WISP:
+		case RT_ZOMBIE:
+		case RT_SPECTRE:
+		case RT_GHOST_2:
+		case RT_GHOST_3:
+		case RT_DRAGON_2:
+		case RT_INNORUUK:
+			m_pp.InnateSkills[InnateUltraVision] = InnateEnabled;
+			break;
+		case RT_HUMAN:
+		case RT_GUARD:
+		case RT_BEGGAR:
+		case RT_HUMAN_2:
+		case RT_HUMAN_3:
+		case RT_FROGLOK_3: // client does froglok weird, but this should work out fine
+			break;
+		default:
+			m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
+			break;
 	}
 
 	switch (class_) {
-	case DRUID:
-		m_pp.InnateSkills[InnateHarmony] = InnateEnabled;
-		break;
-	case BARD:
-		m_pp.InnateSkills[InnateReveal] = InnateEnabled;
-		break;
-	case ROGUE:
-		m_pp.InnateSkills[InnateSurprise] = InnateEnabled;
-		m_pp.InnateSkills[InnateReveal] = InnateEnabled;
-		break;
-	case RANGER:
-		m_pp.InnateSkills[InnateAwareness] = InnateEnabled;
-		break;
-	case MONK:
-		m_pp.InnateSkills[InnateSurprise] = InnateEnabled;
-		m_pp.InnateSkills[InnateAwareness] = InnateEnabled;
-	default:
-		break;
+		case DRUID:
+			m_pp.InnateSkills[InnateHarmony] = InnateEnabled;
+			break;
+		case BARD:
+			m_pp.InnateSkills[InnateReveal] = InnateEnabled;
+			break;
+		case ROGUE:
+			m_pp.InnateSkills[InnateSurprise] = InnateEnabled;
+			m_pp.InnateSkills[InnateReveal]   = InnateEnabled;
+			break;
+		case RANGER:
+			m_pp.InnateSkills[InnateAwareness] = InnateEnabled;
+			break;
+		case MONK:
+			m_pp.InnateSkills[InnateSurprise]  = InnateEnabled;
+			m_pp.InnateSkills[InnateAwareness] = InnateEnabled;
+		default:
+			break;
 	}
 }
 
@@ -9227,27 +9226,29 @@ void Client::SetSecondaryWeaponOrnamentation(uint32 model_id)
  */
 bool Client::GotoPlayer(std::string player_name)
 {
-	auto characters = CharacterDataRepository::GetWhere(
+	const auto& l = CharacterDataRepository::GetWhere(
 		database,
 		fmt::format("name = '{}' AND last_login > (UNIX_TIMESTAMP() - 600) LIMIT 1", player_name)
 	);
 
-	for (auto &c: characters) {
-		if (c.zone_instance > 0 && !database.CheckInstanceExists(c.zone_instance)) {
-			Message(Chat::Yellow, "Instance no longer exists...");
-			return false;
-		}
-
-		if (c.zone_instance > 0) {
-			database.AddClientToInstance(c.zone_instance, CharacterID());
-		}
-
-		MovePC(c.zone_id, c.zone_instance, c.x, c.y, c.z, c.heading);
-
-		return true;
+	if (l.empty()) {
+		return false;
 	}
 
-	return false;
+	const auto& c = l[0];
+
+	if (c.zone_instance > 0 && !database.CheckInstanceExists(c.zone_instance)) {
+		Message(Chat::Yellow, "Instance no longer exists...");
+		return false;
+	}
+
+	if (c.zone_instance > 0) {
+		database.AddClientToInstance(c.zone_instance, CharacterID());
+	}
+
+	MovePC(c.zone_id, c.zone_instance, c.x, c.y, c.z, c.heading);
+
+	return true;
 }
 
 bool Client::GotoPlayerGroup(const std::string& player_name)
@@ -9984,7 +9985,7 @@ void Client::SendDzCompassUpdate()
 
 	for (const auto& client_dz : GetDynamicZones())
 	{
-		auto compass = client_dz->GetCompassLocation();
+		auto& compass = client_dz->GetCompassLocation();
 		if (zone && zone->IsZone(compass.zone_id, 0))
 		{
 			DynamicZoneCompassEntry_Struct entry{};
@@ -11093,12 +11094,12 @@ void Client::SaveDisciplines()
 
 uint16 Client::ScribeSpells(uint8 min_level, uint8 max_level)
 {
-	int available_book_slot = GetNextAvailableSpellBookSlot();
-	std::vector<int> spell_ids = GetScribeableSpells(min_level, max_level);
-	uint16 spell_count = spell_ids.size();
-	uint16 scribed_spells = 0;
-	if (spell_count > 0) {
-		for (auto spell_id : spell_ids) {
+	auto             available_book_slot = GetNextAvailableSpellBookSlot();
+	std::vector<int> spell_ids           = GetScribeableSpells(min_level, max_level);
+	uint16           scribed_spells      = 0;
+
+	if (!spell_ids.empty()) {
+		for (const auto& spell_id : spell_ids) {
 			if (available_book_slot == -1) {
 				Message(
 					Chat::Red,
@@ -11138,13 +11139,13 @@ uint16 Client::ScribeSpells(uint8 min_level, uint8 max_level)
 
 uint16 Client::LearnDisciplines(uint8 min_level, uint8 max_level)
 {
-	int available_discipline_slot = GetNextAvailableDisciplineSlot();
-	int character_id = CharacterID();
-	std::vector<int> spell_ids = GetLearnableDisciplines(min_level, max_level);
-	uint16 discipline_count = spell_ids.size();
-	uint16 learned_disciplines = 0;
-	if (discipline_count > 0) {
-		for (auto spell_id : spell_ids) {
+	auto             available_discipline_slot = GetNextAvailableDisciplineSlot();
+	auto             character_id              = CharacterID();
+	std::vector<int> spell_ids                 = GetLearnableDisciplines(min_level, max_level);
+	uint16           learned_disciplines       = 0;
+
+	if (!spell_ids.empty()) {
+		for (const auto& spell_id : spell_ids) {
 			if (available_discipline_slot == -1) {
 				Message(
 					Chat::Red,

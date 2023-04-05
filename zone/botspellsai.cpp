@@ -83,18 +83,15 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 			return BotCastDebuff(tar, botLevel, botSpell, checked_los);
 		case SpellType_Cure:
 			return BotCastCure(tar, botClass, botSpell, raid);
-		case SpellType_Resurrect:
-			return false;
 		case SpellType_HateRedux:
 			return BotCastHateReduction(tar, botLevel, botSpell);
 		case SpellType_InCombatBuffSong:
 			return BotCastCombatSong(tar, botLevel);
 		case SpellType_OutOfCombatBuffSong:
 			return BotCastSong(tar, botLevel);
+		case SpellType_Resurrect:
 		case SpellType_PreCombatBuff:
-			return false;
 		case SpellType_PreCombatBuffSong:
-			return false;
 		default:
 			return false;
 	}
@@ -242,7 +239,7 @@ bool Bot::BotCastCure(Mob* tar, uint8 botClass, BotSpell& botSpell, Raid* raid) 
 					uint32 r_group = raid->GetGroup(GetName());
 					if (r_group) {
 						std::vector<RaidMember> raid_group_members = raid->GetRaidGroupMembers(r_group);
-						for (auto iter: raid_group_members) {
+						for (auto& iter: raid_group_members) {
 							if (
 								iter.member &&
 								!iter.member->qglobal &&
@@ -1006,7 +1003,7 @@ bool Bot::BotCastHeal(Mob* tar, uint8 botLevel, uint8 botClass, BotSpell& botSpe
 			isPrimaryHealer = IsGroupHealer();
 		}
 
-		if (hpr < 95 || (tar->IsClient() && (hpr < 95)) || (botClass == BARD)) {
+		if (hpr < 95 || tar->IsClient() || botClass == BARD) {
 			if (tar->GetClass() == NECROMANCER && hpr >= 40) {
 				return false;
 			}
@@ -1024,7 +1021,7 @@ bool Bot::BotCastHeal(Mob* tar, uint8 botLevel, uint8 botClass, BotSpell& botSpe
 				if (hpr < 35) {
 					botSpell = GetBestBotSpellForFastHeal(this);
 				}
-				else if (hpr >= 35 && hpr < 70) {
+				else if (hpr < 70) {
 					if (GetNumberNeedingHealedInGroup(60, false, raid) >= 3) {
 						botSpell = GetBestBotSpellForGroupHeal(this);
 					}
@@ -1033,7 +1030,7 @@ bool Bot::BotCastHeal(Mob* tar, uint8 botLevel, uint8 botClass, BotSpell& botSpe
 						botSpell = GetBestBotSpellForPercentageHeal(this);
 					}
 				}
-				else if (hpr >= 70 && hpr < 95) {
+				else if (hpr < 95) {
 					if (GetNumberNeedingHealedInGroup(80, false, raid) >= 3) {
 						botSpell = GetBestBotSpellForGroupHealOverTime(this);
 					}
@@ -1078,7 +1075,7 @@ bool Bot::BotCastHeal(Mob* tar, uint8 botLevel, uint8 botClass, BotSpell& botSpe
 				else if (hpr < 40) {
 					botSpell = GetBestBotSpellForPercentageHeal(this);
 				}
-				else if (hpr >= 40 && hpr < 75) {
+				else if (hpr < 75) {
 					botSpell = GetBestBotSpellForRegularSingleTargetHeal(this);
 				}
 				else {
@@ -2672,7 +2669,7 @@ BotSpell Bot::GetDebuffBotSpell(Bot* botCaster, Mob *tar) {
 	if (!tar || !botCaster)
 		return result;
 
-	if (botCaster && botCaster->AI_HasSpells()) {
+	if (botCaster->AI_HasSpells()) {
 		std::vector<BotSpells_Struct> botSpellList = botCaster->AIBot_spells;
 
 		for (int i = botSpellList.size() - 1; i >= 0; i--) {
@@ -2996,9 +2993,9 @@ uint8 Bot::GetChanceToCastBySpellType(uint32 spellType)
 		spell_type_index = spellTypeIndexPreCombatBuffSong;
 		break;
 	default:
-		spell_type_index = SPELL_TYPE_COUNT;
 		break;
 	}
+
 	if (spell_type_index >= SPELL_TYPE_COUNT)
 		return 0;
 
@@ -3053,23 +3050,16 @@ bool Bot::AI_AddBotSpells(uint32 bot_spell_id) {
 		GetLevel()
 	);
 
-	if (spell_list) {
-		debug_msg.append(
-			fmt::format(
-				" (found, {})",
-				spell_list->entries.size()
-			)
-		);
+	debug_msg.append(
+		fmt::format(
+			" (found, {})",
+			spell_list->entries.size()
+		)
+	);
 
-		LogAI("[{}]", debug_msg);
-		for (const auto &iter : spell_list->entries) {
-			LogAIDetail("([{}]) [{}]", iter.spellid, spells[iter.spellid].name);
-		}
-	}
-	else
-	{
-		debug_msg.append(" (not found)");
-		LogAI("[{}]", debug_msg);
+	LogAI("[{}]", debug_msg);
+	for (const auto &iter: spell_list->entries) {
+		LogAIDetail("([{}]) [{}]", iter.spellid, spells[iter.spellid].name);
 	}
 
 	LogAI("fin (spell list)");
@@ -3185,20 +3175,14 @@ bool Bot::AI_AddBotSpells(uint32 bot_spell_id) {
 		}
 	}
 
-	if (spell_list->attack_proc >= 0) {
-		attack_proc_spell = spell_list->attack_proc;
-		proc_chance = spell_list->proc_chance;
-	}
+	attack_proc_spell = spell_list->attack_proc;
+	proc_chance = spell_list->proc_chance;
 
-	if (spell_list->range_proc >= 0) {
-		range_proc_spell = spell_list->range_proc;
-		rproc_chance = spell_list->rproc_chance;
-	}
+	range_proc_spell = spell_list->range_proc;
+	rproc_chance = spell_list->rproc_chance;
 
-	if (spell_list->defensive_proc >= 0) {
-		defensive_proc_spell = spell_list->defensive_proc;
-		dproc_chance = spell_list->dproc_chance;
-	}
+	defensive_proc_spell = spell_list->defensive_proc;
+	dproc_chance = spell_list->dproc_chance;
 
 	//If any casting variables are defined in the current list, ignore those in the parent list.
 	if (
@@ -3433,7 +3417,7 @@ DBbotspells_Struct* ZoneDatabase::GetBotSpells(uint32 bot_spell_id)
 			}
 		}
 
-		bot_spells_cache.insert(std::make_pair(bot_spell_id, spell_set));
+		bot_spells_cache.emplace(std::make_pair(bot_spell_id, spell_set));
 
 		return &bot_spells_cache[bot_spell_id];
 	}
@@ -3443,41 +3427,41 @@ DBbotspells_Struct* ZoneDatabase::GetBotSpells(uint32 bot_spell_id)
 
 // adds a spell to the list, taking into account priority and resorting list as needed.
 void Bot::AddSpellToBotList(
-	int16 iPriority,
-	uint16 iSpellID,
-	uint32 iType,
-	int16 iManaCost,
-	int32 iRecastDelay,
-	int16 iResistAdjust,
-	uint8 min_level,
-	uint8 max_level,
-	int8 min_hp,
-	int8 max_hp,
-	std::string bucket_name,
-	std::string bucket_value,
-	uint8 bucket_comparison
+	int16 in_priority,
+	uint16 in_spell_id,
+	uint32 in_type,
+	int16 in_mana_cost,
+	int32 in_recast_delay,
+	int16 in_resist_adjust,
+	uint8 in_min_level,
+	uint8 in_max_level,
+	int8 in_min_hp,
+	int8 in_max_hp,
+	std::string in_bucket_name,
+	std::string in_bucket_value,
+	uint8 in_bucket_comparison
 ) {
-	if (!IsValidSpell(iSpellID)) {
+	if (!IsValidSpell(in_spell_id)) {
 		return;
 	}
 
 	HasAISpell = true;
 	BotSpells_Struct t;
 
-	t.priority = iPriority;
-	t.spellid = iSpellID;
-	t.type = iType;
-	t.manacost = iManaCost;
-	t.recast_delay = iRecastDelay;
-	t.time_cancast = 0;
-	t.resist_adjust = iResistAdjust;
-	t.minlevel = min_level;
-	t.maxlevel = maxlevel;
-	t.min_hp = min_hp;
-	t.max_hp = max_hp;
-	t.bucket_name = bucket_name;
-	t.bucket_value = bucket_value;
-	t.bucket_comparison = bucket_comparison;
+	t.priority          = in_priority;
+	t.spellid           = in_spell_id;
+	t.type              = in_type;
+	t.manacost          = in_mana_cost;
+	t.recast_delay      = in_recast_delay;
+	t.time_cancast      = 0;
+	t.resist_adjust     = in_resist_adjust;
+	t.minlevel          = in_min_level;
+	t.maxlevel          = in_max_level;
+	t.min_hp            = in_min_hp;
+	t.max_hp            = in_max_hp;
+	t.bucket_name       = in_bucket_name;
+	t.bucket_value      = in_bucket_value;
+	t.bucket_comparison = in_bucket_comparison;
 
 	AIBot_spells.push_back(t);
 

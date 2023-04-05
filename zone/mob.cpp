@@ -6052,14 +6052,14 @@ void Mob::AddFactionBonus(uint32 pFactionID,int32 bonus) {
 	faction_bonus = faction_bonuses.find(pFactionID);
 	if(faction_bonus == faction_bonuses.end())
 	{
-		faction_bonuses.insert(NewFactionBonus(pFactionID,bonus));
+		faction_bonuses.emplace(NewFactionBonus(pFactionID,bonus));
 	}
 	else
 	{
 		if(faction_bonus->second<bonus)
 		{
 			faction_bonuses.erase(pFactionID);
-			faction_bonuses.insert(NewFactionBonus(pFactionID,bonus));
+			faction_bonuses.emplace(NewFactionBonus(pFactionID,bonus));
 		}
 	}
 }
@@ -6072,14 +6072,14 @@ void Mob::AddItemFactionBonus(uint32 pFactionID,int32 bonus) {
 	faction_bonus = item_faction_bonuses.find(pFactionID);
 	if(faction_bonus == item_faction_bonuses.end())
 	{
-		item_faction_bonuses.insert(NewFactionBonus(pFactionID,bonus));
+		item_faction_bonuses.emplace(NewFactionBonus(pFactionID,bonus));
 	}
 	else
 	{
 		if((bonus > 0 && faction_bonus->second < bonus) || (bonus < 0 && faction_bonus->second > bonus))
 		{
 			item_faction_bonuses.erase(pFactionID);
-			item_faction_bonuses.insert(NewFactionBonus(pFactionID,bonus));
+			item_faction_bonuses.emplace(NewFactionBonus(pFactionID,bonus));
 		}
 	}
 }

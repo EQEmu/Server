@@ -658,11 +658,11 @@ typedef pdb_symbol current;
 			size_t next = 0;
 			size_t delimiter_size = sizeof(kBackwardPathDelimiter) - 1;
 			while ((next = s.find(kBackwardPathDelimiter, last)) != std::string::npos) {
-				out.push_back(s.substr(last, next - last));
+				out.emplace_back(s.substr(last, next - last));
 				last = next + delimiter_size;
 			}
 			if (last <= s.length()) {
-				out.push_back(s.substr(last));
+				out.emplace_back(s.substr(last));
 			}
 			return out;
 		}
@@ -3760,7 +3760,7 @@ private:
 						continue;
 					started = true;
 				}
-				lines.push_back(make_pair(line_idx, line));
+				lines.emplace_back(make_pair(line_idx, line));
 			}
 
 			lines.erase(

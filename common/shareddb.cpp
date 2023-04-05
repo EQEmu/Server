@@ -425,17 +425,13 @@ bool SharedDatabase::DeleteSharedBankSlot(uint32 char_id, int16 slot_id) {
 
 int32 SharedDatabase::GetSharedPlatinum(uint32 account_id)
 {
-	const std::string query = StringFormat("SELECT sharedplat FROM account WHERE id = '%i'", account_id);
-    auto results = QueryDatabase(query);
-    if (!results.Success()) {
-		return false;
-    }
+	const auto query   = fmt::format("SELECT sharedplat FROM account WHERE id = {}", account_id);
+	auto       results = QueryDatabase(query);
+	if (!results.Success() || !results.RowCount()) {
+		return 0;
+	}
 
-    if (results.RowCount() != 1)
-        return 0;
-
-	auto& row = results.begin();
-
+	auto row = results.begin();
 	return Strings::ToInt(row[0]);
 }
 
@@ -619,7 +615,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv)
 		}
 		else if (slot_id <= EQ::invbag::BANK_BAGS_END && slot_id >= EQ::invbag::BANK_BAGS_BEGIN) { // Titanium check
 			const auto parent_index = ((slot_id - EQ::invbag::BANK_BAGS_BEGIN) / EQ::invbag::SLOT_COUNT);
-			if (parent_index < EQ::invslot::SLOT_BEGIN || parent_index >= bank_size) {
+			if (parent_index >= bank_size) {
 				cv_conflict = true;
 				continue;
 			}
@@ -1564,24 +1560,28 @@ EQ::ItemInstance* SharedDatabase::CreateBaseItem(const EQ::ItemData* item, int16
 	if (item) {
 		// if maxcharges is -1 that means it is an unlimited use item.
 		// set it to 1 charge so that it is usable on creation
-		if (charges == 0 && item->MaxCharges == -1)
+		if (charges == 0 && item->MaxCharges == -1) {
 			charges = 1;
+		}
+
 		// Stackable items need a minimum charge of 1 to remain moveable.
-		if(charges <= 0 && item->Stackable)
+		if (charges <= 0 && item->Stackable) {
 			charges = 1;
+		}
 
 		inst = new EQ::ItemInstance(item, charges);
 
-		if (inst == nullptr) {
+		if (!inst) {
 			LogError("Error: valid item data returned a null reference for EQ::ItemInstance creation in SharedDatabase::CreateBaseItem()");
 			LogError("Item Data = ID: {}, Name: {}, Charges: {}", item->ID, item->Name, charges);
 			return nullptr;
 		}
 
-		if(item->CharmFileID != 0 || (item->LoreGroup >= 1000 && item->LoreGroup != -1)) {
+		if (item->CharmFileID != 0 || item->LoreGroup >= 1000) {
 			inst->Initialize(this);
 		}
 	}
+
 	return inst;
 }
 

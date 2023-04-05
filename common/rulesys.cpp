@@ -369,7 +369,7 @@ void RuleManager::_SaveRule(Database *db, RuleType type, uint16 index) {
 			break;
 	}
 
-	const auto rule_notes = _GetRuleNotes(type, index);
+	const auto& rule_notes = _GetRuleNotes(type, index);
 
 	const auto& l = RuleValuesRepository::GetWhere(
 		*db,

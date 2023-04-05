@@ -47,9 +47,9 @@ const SharedTasksRepository::SharedTasks &SharedTask::GetDbSharedTask() const
 	return m_db_shared_task;
 }
 
-void SharedTask::SetDbSharedTask(const SharedTasksRepository::SharedTasks &m_db_shared_task)
+void SharedTask::SetDbSharedTask(const SharedTasksRepository::SharedTasks &t)
 {
-	SharedTask::m_db_shared_task = m_db_shared_task;
+	SharedTask::m_db_shared_task = t;
 }
 
 SharedTaskRequest SharedTask::GetRequestCharacters(Database &db, uint32_t requested_character_id)

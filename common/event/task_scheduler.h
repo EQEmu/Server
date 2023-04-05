@@ -38,7 +38,7 @@ namespace EQ
 				_running = true;
 
 				for (size_t i = 0; i < threads; ++i) {
-					_threads.push_back(std::thread(std::bind(&TaskScheduler::ProcessWork, this)));
+					_threads.emplace_back(std::thread(std::bind(&TaskScheduler::ProcessWork, this)));
 				}
 			}
 			

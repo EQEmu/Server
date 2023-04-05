@@ -58,107 +58,114 @@ static inline int32 GetNextItemInstSerialNumber() {
 //
 EQ::ItemInstance::ItemInstance(const ItemData* item, int16 charges) {
 	m_use_type = ItemInstNormal;
-	if(item) {
-		m_item = new ItemData(*item);
-	} else {
-		m_item = nullptr;
-	}
-	m_charges = charges;
-	m_price = 0;
-	m_attuned = false;
-	m_merchantslot = 0;
-	if (m_item && m_item->IsClassCommon())
-		m_color = m_item->Color;
-	else
-		m_color = 0;
-	m_merchantcount = 1;
-	m_SerialNumber = GetNextItemInstSerialNumber();
 
-	m_exp = 0;
-	m_evolveLvl = 0;
-	m_activated = false;
-	m_scaledItem = nullptr;
-	m_evolveInfo = nullptr;
-	m_scaling = false;
-	m_ornamenticon = 0;
-	m_ornamentidfile = 0;
+	if (item) {
+		m_item = new ItemData(*item);
+	}
+
+	m_charges      = charges;
+	m_price        = 0;
+	m_attuned      = false;
+	m_merchantslot = 0;
+
+	if (m_item && m_item->IsClassCommon()) {
+		m_color = m_item->Color;
+	} else {
+		m_color = 0;
+	}
+
+	m_merchantcount = 1;
+	m_SerialNumber  = GetNextItemInstSerialNumber();
+
+	m_exp                 = 0;
+	m_evolveLvl           = 0;
+	m_activated           = false;
+	m_scaledItem          = nullptr;
+	m_evolveInfo          = nullptr;
+	m_scaling             = false;
+	m_ornamenticon        = 0;
+	m_ornamentidfile      = 0;
 	m_ornament_hero_model = 0;
-	m_recast_timestamp = 0;
-	m_new_id_file = 0;
+	m_recast_timestamp    = 0;
+	m_new_id_file         = 0;
 }
 
 EQ::ItemInstance::ItemInstance(SharedDatabase *db, uint32 item_id, int16 charges) {
 	m_use_type = ItemInstNormal;
-	m_item = db->GetItem(item_id);
-	if(m_item) {
+	m_item     = db->GetItem(item_id);
+
+	if (m_item) {
 		m_item = new ItemData(*m_item);
 	}
-	else {
-		m_item = nullptr;
+
+	m_charges      = charges;
+	m_price        = 0;
+	m_merchantslot = 0;
+	m_attuned      = false;
+
+	if (m_item && m_item->IsClassCommon()) {
+		m_color = m_item->Color;
+	} else {
+		m_color = 0;
 	}
 
-	m_charges = charges;
-	m_price = 0;
-	m_merchantslot = 0;
-	m_attuned=false;
-	if (m_item && m_item->IsClassCommon())
-		m_color = m_item->Color;
-	else
-		m_color = 0;
 	m_merchantcount = 1;
-	m_SerialNumber = GetNextItemInstSerialNumber();
+	m_SerialNumber  = GetNextItemInstSerialNumber();
 
-	m_exp = 0;
-	m_evolveLvl = 0;
-	m_activated = false;
-	m_scaledItem = nullptr;
-	m_evolveInfo = nullptr;
-	m_scaling = false;
-	m_ornamenticon = 0;
-	m_ornamentidfile = 0;
+	m_exp                 = 0;
+	m_evolveLvl           = 0;
+	m_activated           = false;
+	m_scaledItem          = nullptr;
+	m_evolveInfo          = nullptr;
+	m_scaling             = false;
+	m_ornamenticon        = 0;
+	m_ornamentidfile      = 0;
 	m_ornament_hero_model = 0;
-	m_recast_timestamp = 0;
-	m_new_id_file = 0;
+	m_recast_timestamp    = 0;
+	m_new_id_file         = 0;
 }
 
 EQ::ItemInstance::ItemInstance(ItemInstTypes use_type) {
-	m_use_type = use_type;
-	m_item = nullptr;
-	m_charges = 0;
-	m_price = 0;
-	m_attuned = false;
+	m_use_type     = use_type;
+	m_item         = nullptr;
+	m_charges      = 0;
+	m_price        = 0;
+	m_attuned      = false;
 	m_merchantslot = 0;
-	m_color = 0;
+	m_color        = 0;
 
-	m_exp = 0;
-	m_evolveLvl = 0;
-	m_activated = false;
-	m_scaledItem = nullptr;
-	m_evolveInfo = nullptr;
-	m_scaling = false;
-	m_ornamenticon = 0;
-	m_ornamentidfile = 0;
+	m_exp                 = 0;
+	m_evolveLvl           = 0;
+	m_activated           = false;
+	m_scaledItem          = nullptr;
+	m_evolveInfo          = nullptr;
+	m_scaling             = false;
+	m_ornamenticon        = 0;
+	m_ornamentidfile      = 0;
 	m_ornament_hero_model = 0;
-	m_recast_timestamp = 0;
-	m_new_id_file = 0;
+	m_recast_timestamp    = 0;
+	m_new_id_file         = 0;
 }
 
 // Make a copy of an EQ::ItemInstance object
 EQ::ItemInstance::ItemInstance(const ItemInstance& copy)
 {
-	m_use_type=copy.m_use_type;
-	if(copy.m_item)
-		m_item = new ItemData(*copy.m_item);
-	else
-		m_item = nullptr;
+	m_use_type = copy.m_use_type;
 
-	m_charges=copy.m_charges;
-	m_price=copy.m_price;
-	m_color=copy.m_color;
-	m_merchantslot=copy.m_merchantslot;
-	m_currentslot=copy.m_currentslot;
-	m_attuned=copy.m_attuned;
-	m_merchantcount=copy.m_merchantcount;
+	if (copy.m_item) {
+		m_item = new ItemData(*copy.m_item);
+	} else {
+		m_item = nullptr;
+	}
+
+	m_charges       = copy.m_charges;
+	m_price         = copy.m_price;
+	m_color         = copy.m_color;
+	m_merchantslot  = copy.m_merchantslot;
+	m_currentslot   = copy.m_currentslot;
+	m_attuned       = copy.m_attuned;
+	m_merchantcount = copy.m_merchantcount;
+
 	// Copy container contents
 	for (auto it = copy.m_contents.begin(); it != copy.m_contents.end(); ++it) {
 		ItemInstance* inst_old = it->second;
@@ -168,37 +175,42 @@ EQ::ItemInstance::ItemInstance(const ItemInstance& copy)
 			inst_new = inst_old->Clone();
 		}
 
-		if (inst_new != nullptr) {
+		if (inst_new) {
 			m_contents[it->first] = inst_new;
 		}
 	}
+
 	std::map<std::string, std::string>::const_iterator iter;
 	for (iter = copy.m_custom_data.begin(); iter != copy.m_custom_data.end(); ++iter) {
 		m_custom_data[iter->first] = iter->second;
 	}
-	m_SerialNumber = copy.m_SerialNumber;
-	m_custom_data = copy.m_custom_data;
-	m_timers = copy.m_timers;
 
-	m_exp = copy.m_exp;
+	m_SerialNumber = copy.m_SerialNumber;
+	m_custom_data  = copy.m_custom_data;
+	m_timers       = copy.m_timers;
+
+	m_exp       = copy.m_exp;
 	m_evolveLvl = copy.m_evolveLvl;
 	m_activated = copy.m_activated;
-	if (copy.m_scaledItem)
+
+	if (copy.m_scaledItem) {
 		m_scaledItem = new ItemData(*copy.m_scaledItem);
-	else
+	} else {
 		m_scaledItem = nullptr;
+	}
 
-	if(copy.m_evolveInfo)
+	if (copy.m_evolveInfo) {
 		m_evolveInfo = new EvolveInfo(*copy.m_evolveInfo);
-	else
+	} else {
 		m_evolveInfo = nullptr;
+	}
 
-	m_scaling = copy.m_scaling;
-	m_ornamenticon = copy.m_ornamenticon;
-	m_ornamentidfile = copy.m_ornamentidfile;
+	m_scaling             = copy.m_scaling;
+	m_ornamenticon        = copy.m_ornamenticon;
+	m_ornamentidfile      = copy.m_ornamentidfile;
 	m_ornament_hero_model = copy.m_ornament_hero_model;
-	m_recast_timestamp = copy.m_recast_timestamp;
-	m_new_id_file = copy.m_new_id_file;
+	m_recast_timestamp    = copy.m_recast_timestamp;
+	m_new_id_file         = copy.m_new_id_file;
 }
 
 // Clean up container contents
@@ -216,11 +228,13 @@ bool EQ::ItemInstance::IsType(item::ItemClass item_class) const
 	// IsType(<ItemClassTypes>) does not protect against 'm_item = nullptr'
 
 	// Check usage type
-	if ((m_use_type == ItemInstWorldContainer) && (item_class == item::ItemClassBag))
+	if (m_use_type == ItemInstWorldContainer && item_class == item::ItemClassBag) {
 		return true;
+	}
 
-	if (!m_item)
+	if (!m_item) {
 		return false;
+	}
 
 	return (m_item->ItemClass == item_class);
 }
@@ -243,21 +257,20 @@ bool EQ::ItemInstance::IsClassBook() const
 // Is item stackable?
 bool EQ::ItemInstance::IsStackable() const
 {
-	if (!m_item)
-		return false;
-
-	return m_item->Stackable;
+	return (m_item && m_item->Stackable);
 }
 
 bool EQ::ItemInstance::IsCharged() const
 {
-	if (!m_item)
+	if (!m_item) {
 		return false;
+	}
 
-	if (m_item->MaxCharges > 1)
+	if (m_item->MaxCharges > 1) {
 		return true;
-	else
+	} else {
 		return false;
+	}
 }
 
 // Can item be equipped?
@@ -306,26 +319,30 @@ bool EQ::ItemInstance::IsEquipable(int16 slot_id) const
 
 bool EQ::ItemInstance::IsAugmentable() const
 {
-	if (!m_item)
+	if (!m_item) {
 		return false;
+	}
 
 	for (int index = invaug::SOCKET_BEGIN; index <= invaug::SOCKET_END; ++index) {
-		if (m_item->AugSlotType[index] != 0)
+		if (m_item->AugSlotType[index] != 0) {
 			return true;
+		}
 	}
 
 	return false;
 }
 
 bool EQ::ItemInstance::AvailableWearSlot(uint32 aug_wear_slots) const {
-	if (!m_item || !m_item->IsClassCommon())
+	if (!m_item || !m_item->IsClassCommon()) {
 		return false;
+	}
 
 	int index = invslot::EQUIPMENT_BEGIN;
 	for (; index <= invslot::EQUIPMENT_END; ++index) {
 		if (m_item->Slots & (1 << index)) {
-			if (aug_wear_slots & (1 << index))
+			if (aug_wear_slots & (1 << index)) {
 				break;
+			}
 		}
 	}
 
@@ -394,9 +411,10 @@ EQ::ItemInstance* EQ::ItemInstance::GetItem(uint8 index) const
 
 uint32 EQ::ItemInstance::GetItemID(uint8 slot) const
 {
-	ItemInstance *item = GetItem(slot);
-	if (item)
+	const auto item = GetItem(slot);
+	if (item) {
 		return item->GetID();
+	}
 
 	return 0;
 }
@@ -520,14 +538,21 @@ uint8 EQ::ItemInstance::FirstOpenSlot() const
 
 uint8 EQ::ItemInstance::GetTotalItemCount() const
 {
-	if (!m_item)
+	if (!m_item) {
 		return 0;
+	}
 
 	uint8 item_count = 1;
 
-	if (m_item && !m_item->IsClassBag()) { return item_count; }
+	if (!m_item->IsClassBag()) {
+		return item_count;
+	}
 
-	for (int index = invbag::SLOT_BEGIN; index < m_item->BagSlots; ++index) { if (GetItem(index)) { ++item_count; } }
+	for (int index = invbag::SLOT_BEGIN; index < m_item->BagSlots; ++index) {
+		if (GetItem(index)) {
+			++item_count;
+		}
+	}
 
 	return item_count;
 }
@@ -940,8 +965,9 @@ bool EQ::ItemInstance::IsDroppable(bool recurse) const
 
 void EQ::ItemInstance::Initialize(SharedDatabase *db) {
 	// if there's no actual item, don't do anything
-	if (!m_item)
+	if (!m_item) {
 		return;
+	}
 
 	// initialize scaling items
 	if (m_item->CharmFileID != 0) {
@@ -950,7 +976,7 @@ void EQ::ItemInstance::Initialize(SharedDatabase *db) {
 	}
 
 	// initialize evolving items
-	else if ((db) && m_item->LoreGroup >= 1000 && m_item->LoreGroup != -1) {
+	else if (db && m_item->LoreGroup >= 1000) {
 		// not complete yet
 	}
 }

@@ -284,7 +284,7 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 			size_t link_open  = bracket_message.find('\x12');
 			size_t link_close = bracket_message.find_last_of('\x12');
 			if (link_open != link_close && (bracket_message.length() - link_open) > EQ::constants::SAY_LINK_BODY_SIZE) {
-				replacements.insert(
+				replacements.emplace(
 					std::pair<std::string, std::string>(
 						bracket_message,
 						bracket_message.substr(EQ::constants::SAY_LINK_BODY_SIZE + 1)

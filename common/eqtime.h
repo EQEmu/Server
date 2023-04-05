@@ -18,7 +18,7 @@ public:
 	//Constructor/destructor
 	EQTime(TimeOfDay_Struct start_eq, time_t start_real);
 	EQTime();
-	~EQTime();
+	~EQTime() = default;
 
 	//Get functions
 	int GetCurrentEQTimeOfDay( TimeOfDay_Struct *eqTimeOfDay ) { return(GetCurrentEQTimeOfDay(time(nullptr), eqTimeOfDay)); }

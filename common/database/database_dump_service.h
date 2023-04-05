@@ -24,7 +24,7 @@
 
 class DatabaseDumpService {
 public:
-	void Dump();
+	void DatabaseDump();
 	bool IsDumpAllTables() const;
 	void SetDumpAllTables(bool dump_all_tables);
 	bool IsDumpWithNoData() const;
@@ -92,6 +92,7 @@ private:
 	std::string GetDumpFileNameWithPath();
 	std::string GetSetDumpPath();
 	std::string GetQueryServTables();
+	void RemoveSqlBackup();
 };
 
 

@@ -56,7 +56,7 @@ void command_mysql(Client *c, const Seperator *sep)
 				row_index < results.ColumnCount();
 				row_index++
 			) {
-				lines.push_back(
+				lines.emplace_back(
 					fmt::format(
 						"{} | {} ",
 						results.FieldName(row_index),

@@ -35,7 +35,7 @@ void command_set_adventure_points(Client *c, const Seperator *sep)
 	auto theme_id = Strings::ToUnsignedInt(sep->arg[1]);
 	if (!EQ::ValueWithin(theme_id, LDoNThemes::Unused, LDoNThemes::TAK)) {
 		c->Message(Chat::White, "Valid themes are as follows.");
-		auto theme_map = EQ::constants::GetLDoNThemeMap();
+		auto& theme_map = EQ::constants::GetLDoNThemeMap();
 		for (const auto& theme : theme_map) {
 			c->Message(
 				Chat::White,

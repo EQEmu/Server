@@ -32,7 +32,7 @@ void command_dye(Client *c, const Seperator *sep)
 		c->Message(Chat::White, "Red, Green, and Blue go from 0 to 255.");
 
 		for (const auto &slot : dye_slots) {
-			slot_messages.push_back(fmt::format("({}) {}", slot_id, slot));
+			slot_messages.emplace_back(fmt::format("({}) {}", slot_id, slot));
 			slot_id++;
 		}
 

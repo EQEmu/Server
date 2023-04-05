@@ -2919,7 +2919,7 @@ DBnpcspells_Struct *ZoneDatabase::GetNPCSpells(uint32 iDBSpellsID)
 			spell_set.entries.push_back(entry);
 		}
 
-		npc_spells_cache.insert(std::make_pair(iDBSpellsID, spell_set));
+		npc_spells_cache.emplace(std::make_pair(iDBSpellsID, spell_set));
 
 		return &npc_spells_cache[iDBSpellsID];
     }

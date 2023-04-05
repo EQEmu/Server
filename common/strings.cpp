@@ -76,7 +76,7 @@ std::vector<std::string> Strings::Split(const std::string& s, const std::string&
 		res.push_back(token);
 	}
 
-	res.push_back(s.substr(pos_start));
+	res.emplace_back(s.substr(pos_start));
 	return res;
 }
 
@@ -287,15 +287,12 @@ std::string Strings::Commify(const std::string &number)
 	for (i = string_length - 3; i >= 0; i -= 3) {
 		if (i > 0) {
 			temp_string = "," + number.substr(static_cast<unsigned long>(i), 3) + temp_string;
-		}
-		else {
+		} else {
 			temp_string = number.substr(static_cast<unsigned long>(i), 3) + temp_string;
 		}
 	}
 
-	if (i < 0) {
-		temp_string = number.substr(0, static_cast<unsigned long>(3 + i)) + temp_string;
-	}
+	temp_string = number.substr(0, static_cast<unsigned long>(3 + i)) + temp_string;
 
 	return temp_string;
 }

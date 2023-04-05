@@ -19,12 +19,12 @@ void EQ::Net::ServertalkServer::Listen(const ServertalkServerOptions& opts)
 
 void EQ::Net::ServertalkServer::OnConnectionIdentified(const std::string &type, std::function<void(std::shared_ptr<ServertalkServerConnection>)> cb)
 {
-	m_on_ident.insert(std::make_pair(type, cb));
+	m_on_ident.emplace(std::make_pair(type, cb));
 }
 
 void EQ::Net::ServertalkServer::OnConnectionRemoved(const std::string &type, std::function<void(std::shared_ptr<ServertalkServerConnection>)> cb)
 {
-	m_on_disc.insert(std::make_pair(type, cb));
+	m_on_disc.emplace(std::make_pair(type, cb));
 }
 
 void EQ::Net::ServertalkServer::ConnectionDisconnected(ServertalkServerConnection *conn)
@@ -75,7 +75,7 @@ void EQ::Net::ServertalkServer::ConnectionIdentified(ServertalkServerConnection 
 			else {
 				std::vector<std::shared_ptr<EQ::Net::ServertalkServerConnection>> vec;
 				vec.push_back(*iter);
-				m_ident_connections.insert(std::make_pair(conn->GetIdentifier(), vec));
+				m_ident_connections.emplace(std::make_pair(conn->GetIdentifier(), vec));
 			}
 
 			m_unident_connections.erase(iter);

@@ -160,7 +160,7 @@ namespace EQEmuCommand {
 			 */
 			std::string command_section;
 			for (auto   &it: in_function_map) {
-				description = "";
+				description.clear();
 
 				(it.second)(argc, argv, cmd, description);
 

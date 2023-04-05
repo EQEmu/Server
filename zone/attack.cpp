@@ -101,30 +101,26 @@ EQ::skills::SkillType Mob::AttackAnimation(int Hand, const EQ::ItemInstance* wea
 	}
 	else if (IsNPC()) {
 		switch (skillinuse) {
-		case EQ::skills::Skill1HSlashing: // 1H Slashing
-			type = anim1HWeapon;
-			break;
-		case EQ::skills::Skill2HSlashing: // 2H Slashing
-			type = anim2HSlashing;
-			break;
-		case EQ::skills::Skill1HPiercing: // Piercing
-			type = anim1HPiercing;
-			break;
-		case EQ::skills::Skill1HBlunt: // 1H Blunt
-			type = anim1HWeapon;
-			break;
-		case EQ::skills::Skill2HBlunt: // 2H Blunt
-			type = anim2HSlashing; //anim2HWeapon
-			break;
-		case EQ::skills::Skill2HPiercing: // 2H Piercing
-			type = anim2HWeapon;
-			break;
-		case EQ::skills::SkillHandtoHand:
-			type = animHand2Hand;
-			break;
-		default:
-			type = animHand2Hand;
-			break;
+			case EQ::skills::Skill1HBlunt: // 1H Blunt
+			case EQ::skills::Skill1HSlashing: // 1H Slashing
+				type = anim1HWeapon;
+				break;
+			case EQ::skills::Skill2HBlunt: // 2H Blunt
+			case EQ::skills::Skill2HSlashing: // 2H Slashing
+				type = anim2HSlashing;
+				break;
+			case EQ::skills::Skill1HPiercing: // Piercing
+				type = anim1HPiercing;
+				break;
+			case EQ::skills::Skill2HPiercing: // 2H Piercing
+				type = anim2HWeapon;
+				break;
+			case EQ::skills::SkillHandtoHand:
+				type = animHand2Hand;
+				break;
+			default:
+				type = animHand2Hand;
+				break;
 		}// switch
 	}
 	else {
@@ -1477,7 +1473,7 @@ bool Mob::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 		SetTarget(other);
 	}
 
-	LogCombatDetail("Attacking [{}] with hand [{}] [{}]", other ? other->GetName() : "nullptr", Hand, bRiposte ? "this is a riposte" : "");
+	LogCombatDetail("Attacking [{}] with hand [{}] [{}]", other->GetName(), Hand, bRiposte ? "this is a riposte" : "");
 
 	if (
 		(IsCasting() && GetClass() != BARD && !IsFromSpell)
@@ -2114,14 +2110,16 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 
 	//Check that we can attack before we calc heading and face our target
 	if (!IsAttackAllowed(other)) {
-		if (GetOwnerID())
+		if (GetOwnerID()) {
 			SayString(NOT_LEGAL_TARGET);
-		if (other) {
-			if (other->IsClient())
-				other->CastToClient()->RemoveXTarget(this, false);
-			RemoveFromHateList(other);
-			LogCombat("I am not allowed to attack [{}]", other->GetName());
 		}
+
+		if (other->IsClient()) {
+			other->CastToClient()->RemoveXTarget(this, false);
+		}
+
+		RemoveFromHateList(other);
+		LogCombat("I am not allowed to attack [{}]", other->GetName());
 		return false;
 	}
 
@@ -2135,17 +2133,19 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 		my_hit.skill = static_cast<EQ::skills::SkillType>(GetPrimSkill());
 		OffHandAtk(false);
 	}
+
 	if (Hand == EQ::invslot::slotSecondary) {
 		my_hit.skill = static_cast<EQ::skills::SkillType>(GetSecSkill());
 		OffHandAtk(true);
 	}
 
 	//figure out what weapon they are using, if any
-	const EQ::ItemData* weapon = nullptr;
-	if (Hand == EQ::invslot::slotPrimary && equipment[EQ::invslot::slotPrimary] > 0)
+	const EQ::ItemData *weapon = nullptr;
+	if (Hand == EQ::invslot::slotPrimary && equipment[EQ::invslot::slotPrimary] > 0) {
 		weapon = database.GetItem(equipment[EQ::invslot::slotPrimary]);
-	else if (equipment[EQ::invslot::slotSecondary])
+	} else if (equipment[EQ::invslot::slotSecondary]) {
 		weapon = database.GetItem(equipment[EQ::invslot::slotSecondary]);
+	}
 
 	//We dont factor much from the weapon into the attack.
 	//Just the skill type so it doesn't look silly using punching animations and stuff while wielding weapons
@@ -2158,34 +2158,34 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 		}
 
 		switch (weapon->ItemType) {
-		case EQ::item::ItemType1HSlash:
-			my_hit.skill = EQ::skills::Skill1HSlashing;
-			break;
-		case EQ::item::ItemType2HSlash:
-			my_hit.skill = EQ::skills::Skill2HSlashing;
-			break;
-		case EQ::item::ItemType1HPiercing:
-			my_hit.skill = EQ::skills::Skill1HPiercing;
-			break;
-		case EQ::item::ItemType2HPiercing:
-			my_hit.skill = EQ::skills::Skill2HPiercing;
-			break;
-		case EQ::item::ItemType1HBlunt:
-			my_hit.skill = EQ::skills::Skill1HBlunt;
-			break;
-		case EQ::item::ItemType2HBlunt:
-			my_hit.skill = EQ::skills::Skill2HBlunt;
-			break;
-		case EQ::item::ItemTypeBow:
-			my_hit.skill = EQ::skills::SkillArchery;
-			break;
-		case EQ::item::ItemTypeLargeThrowing:
-		case EQ::item::ItemTypeSmallThrowing:
-			my_hit.skill = EQ::skills::SkillThrowing;
-			break;
-		default:
-			my_hit.skill = EQ::skills::SkillHandtoHand;
-			break;
+			case EQ::item::ItemType1HSlash:
+				my_hit.skill = EQ::skills::Skill1HSlashing;
+				break;
+			case EQ::item::ItemType2HSlash:
+				my_hit.skill = EQ::skills::Skill2HSlashing;
+				break;
+			case EQ::item::ItemType1HPiercing:
+				my_hit.skill = EQ::skills::Skill1HPiercing;
+				break;
+			case EQ::item::ItemType2HPiercing:
+				my_hit.skill = EQ::skills::Skill2HPiercing;
+				break;
+			case EQ::item::ItemType1HBlunt:
+				my_hit.skill = EQ::skills::Skill1HBlunt;
+				break;
+			case EQ::item::ItemType2HBlunt:
+				my_hit.skill = EQ::skills::Skill2HBlunt;
+				break;
+			case EQ::item::ItemTypeBow:
+				my_hit.skill = EQ::skills::SkillArchery;
+				break;
+			case EQ::item::ItemTypeLargeThrowing:
+			case EQ::item::ItemTypeSmallThrowing:
+				my_hit.skill = EQ::skills::SkillThrowing;
+				break;
+			default:
+				my_hit.skill = EQ::skills::SkillHandtoHand;
+				break;
 		}
 	}
 
@@ -2198,6 +2198,7 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 				if (!mob) {
 					continue;
 				}
+
 				if (mob->IsNPC() && mob->CastToNPC()->IsGuard()) {
 					float distance = Distance(other->GetPosition(), mob->GetPosition());
 					if ((mob->CheckLosFN(other) || mob->CheckLosFN(this)) && distance <= 70) {
@@ -2914,19 +2915,17 @@ void Mob::AddToHateList(Mob* other, int64 hate /*= 0*/, int64 damage /*= 0*/, bo
 	Mob* targetmob = GetTarget();
 	bool on_hatelist = CheckAggro(other);
 
-	if (other) {
-		AddRampage(other);
-		if (on_hatelist) { // odd reason, if you're not on the hate list, subtlety etc don't apply!
-						   // Spell Casting Subtlety etc
-			int64 hatemod = 100 + other->spellbonuses.hatemod + other->itembonuses.hatemod + other->aabonuses.hatemod;
+	AddRampage(other);
+	if (on_hatelist) { // odd reason, if you're not on the hate list, subtlety etc don't apply!
+		// Spell Casting Subtlety etc
+		int64 hatemod = 100 + other->spellbonuses.hatemod + other->itembonuses.hatemod + other->aabonuses.hatemod;
 
-			if (hatemod < 1)
-				hatemod = 1;
-			hate = ((hate * (hatemod)) / 100);
-		}
-		else {
-			hate += 100; // 100 bonus initial aggro
-		}
+		if (hatemod < 1)
+			hatemod = 1;
+		hate = ((hate * (hatemod)) / 100);
+	}
+	else {
+		hate += 100; // 100 bonus initial aggro
 	}
 
 	// Pet that is /pet hold on will not add to their hate list if they're not engaged
@@ -3024,8 +3023,6 @@ void Mob::AddToHateList(Mob* other, int64 hate /*= 0*/, int64 damage /*= 0*/, bo
 				hate_list.AddEntToHateList(owner_, 0, 0, false, true);
 				owner_->AddAutoXTarget(this); // this was being called on dead/out-of-zone clients
 			}
-
-			break;
 		}
 	}
 
@@ -3887,9 +3884,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 			damage = ReduceAllDamage(damage);
 			TryTriggerThreshHold(damage, SE_TriggerMeleeThreshold, attacker);
 
-			if (skill_used)
-				CheckNumHitsRemaining(NumHit::IncomingHitSuccess);
-
+			CheckNumHitsRemaining(NumHit::IncomingHitSuccess);
 		}
 		else {
 			int64 origdmg = damage;
@@ -4305,7 +4300,6 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 					attacker->CastToClient()->QueuePacket(outapp, true, CLIENT_CONNECTED, filter);
 				}
 			}
-			skip = attacker;
 		}
 
 		//send damage to all clients around except the specified skip mob (attacker or the attacker's owner) and ourself
@@ -4460,8 +4454,10 @@ void Mob::HealDamage(uint64 amount, Mob* caster, uint16 spell_id)
 					caster->FilteredMessageString(caster, Chat::NonMelee, FilterSpellDamage,
 						YOU_HEAL, GetCleanName(), itoa(acthealed));
 			}
-		}
-		else if (CastToClient()->GetFilter(FilterHealOverTime) != (FilterShowSelfOnly || FilterHide)) {
+		} else if (
+			CastToClient()->GetFilter(FilterHealOverTime) != FilterShowSelfOnly ||
+			CastToClient()->GetFilter(FilterHealOverTime) != FilterHide
+		) {
 			Message(Chat::NonMelee, "You have been healed for %d points of damage.", acthealed);
 		}
 	}
@@ -5703,8 +5699,14 @@ void Mob::TryCastOnSkillUse(Mob *on, EQ::skills::SkillType skill) {
 
 	if (spellbonuses.HasSkillAttackProc[skill]) {
 		for (int i = 0; i < MAX_CAST_ON_SKILL_USE; i += 3) {
-			if (spellbonuses.SkillAttackProc[i + SBIndex::SKILLATK_PROC_SPELL_ID] && skill == spellbonuses.SkillAttackProc[i + SBIndex::SKILLATK_PROC_SKILL]) {
-				if (IsValidSpell(spellbonuses.SkillAttackProc[i + SBIndex::SKILLATK_PROC_SPELL_ID]) && zone->random.Int(1, 1000) <= spellbonuses.SkillAttackProc[i + SBIndex::SKILLATK_PROC_CHANCE]) {
+			if (
+				spellbonuses.SkillAttackProc[i + SBIndex::SKILLATK_PROC_SPELL_ID] &&
+				skill == spellbonuses.SkillAttackProc[i + SBIndex::SKILLATK_PROC_SKILL]
+			) {
+				if (
+					IsValidSpell(spellbonuses.SkillAttackProc[i + SBIndex::SKILLATK_PROC_SPELL_ID]) &&
+					zone->random.Int(1, 1000) <= spellbonuses.SkillAttackProc[i + SBIndex::SKILLATK_PROC_CHANCE]
+				) {
 					SpellFinished(spellbonuses.SkillAttackProc[i + SBIndex::SKILLATK_PROC_SPELL_ID], on, EQ::spells::CastingSlot::Item, 0, -1, spells[spellbonuses.SkillAttackProc[i + SBIndex::SKILLATK_PROC_SPELL_ID]].resist_difficulty);
 				}
 			}
@@ -5713,8 +5715,14 @@ void Mob::TryCastOnSkillUse(Mob *on, EQ::skills::SkillType skill) {
 
 	if (itembonuses.HasSkillAttackProc[skill]) {
 		for (int i = 0; i < MAX_CAST_ON_SKILL_USE; i += 3) {
-			if (itembonuses.SkillAttackProc[i + SBIndex::SKILLATK_PROC_SPELL_ID] && skill == itembonuses.SkillAttackProc[i + SBIndex::SKILLATK_PROC_SKILL]) {
-				if (IsValidSpell(itembonuses.SkillAttackProc[i + SBIndex::SKILLATK_PROC_SPELL_ID]) && zone->random.Int(1, 1000) <= spellbonuses.SkillAttackProc[i + SBIndex::SKILLATK_PROC_CHANCE]) {
+			if (
+				itembonuses.SkillAttackProc[i + SBIndex::SKILLATK_PROC_SPELL_ID] &&
+				skill == itembonuses.SkillAttackProc[i + SBIndex::SKILLATK_PROC_SKILL]
+			) {
+				if (
+					IsValidSpell(itembonuses.SkillAttackProc[i + SBIndex::SKILLATK_PROC_SPELL_ID]) &&
+					zone->random.Int(1, 1000) <= itembonuses.SkillAttackProc[i + SBIndex::SKILLATK_PROC_CHANCE]
+				) {
 					SpellFinished(itembonuses.SkillAttackProc[i + SBIndex::SKILLATK_PROC_SPELL_ID], on, EQ::spells::CastingSlot::Item, 0, -1, spells[itembonuses.SkillAttackProc[i + SBIndex::SKILLATK_PROC_SPELL_ID]].resist_difficulty);
 				}
 			}
@@ -5723,7 +5731,11 @@ void Mob::TryCastOnSkillUse(Mob *on, EQ::skills::SkillType skill) {
 
 	if (aabonuses.HasSkillAttackProc[skill]) {
 		for (int i = 0; i < MAX_CAST_ON_SKILL_USE; i += 3) {
-			if (IsValidSpell(aabonuses.SkillAttackProc[i + SBIndex::SKILLATK_PROC_SPELL_ID]) && aabonuses.SkillAttackProc[i + SBIndex::SKILLATK_PROC_SPELL_ID] && skill == aabonuses.SkillAttackProc[i + SBIndex::SKILLATK_PROC_SKILL]) {
+			if (
+				IsValidSpell(aabonuses.SkillAttackProc[i + SBIndex::SKILLATK_PROC_SPELL_ID]) &&
+				aabonuses.SkillAttackProc[i + SBIndex::SKILLATK_PROC_SPELL_ID] &&
+				skill == aabonuses.SkillAttackProc[i + SBIndex::SKILLATK_PROC_SKILL]
+			) {
 				if (zone->random.Int(1, 1000) <= aabonuses.SkillAttackProc[i + SBIndex::SKILLATK_PROC_CHANCE]) {
 					SpellFinished(aabonuses.SkillAttackProc[i + SBIndex::SKILLATK_PROC_SPELL_ID], on, EQ::spells::CastingSlot::Item, 0, -1, spells[aabonuses.SkillAttackProc[i + SBIndex::SKILLATK_PROC_SPELL_ID]].resist_difficulty);
 				}
