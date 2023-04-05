@@ -3884,9 +3884,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 			damage = ReduceAllDamage(damage);
 			TryTriggerThreshHold(damage, SE_TriggerMeleeThreshold, attacker);
 
-			if (skill_used)
-				CheckNumHitsRemaining(NumHit::IncomingHitSuccess);
-
+			CheckNumHitsRemaining(NumHit::IncomingHitSuccess);
 		}
 		else {
 			int64 origdmg = damage;
