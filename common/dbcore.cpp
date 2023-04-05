@@ -80,7 +80,7 @@ MySQLRequestResult DBcore::QueryDatabase(const std::string& query, bool retryOnF
 	return r;
 }
 
-bool DBcore::DoesTableExist(std::string table_name)
+bool DBcore::DoesTableExist(const std::string& table_name)
 {
 	auto results = QueryDatabase(fmt::format("SHOW TABLES LIKE '{}'", table_name));
 
@@ -136,7 +136,7 @@ MySQLRequestResult DBcore::QueryDatabase(const char *query, uint32 querylen, boo
 		/**
 		 * Error logging
 		 */
-		if (mysql_errno(mysql) > 0 && strlen(query) > 0) {
+		if (mysql_errno(mysql) > 0 && query[0] != '\0') {
 			LogMySQLError("[{}] [{}]\n[{}]", mysql_errno(mysql), mysql_error(mysql), query);
 		}
 
