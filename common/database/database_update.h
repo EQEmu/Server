@@ -31,6 +31,7 @@ public:
 private:
 	Database *m_database;
 	static bool CheckVersions(DatabaseVersion v, DatabaseVersion b);
+	void InjectBotsVersionColumn();
 };
 
 #endif //EQEMU_DATABASE_UPDATE_H

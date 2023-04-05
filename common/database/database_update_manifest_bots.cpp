@@ -60,5 +60,25 @@ DROP TABLE IF EXISTS `bot_groups`;
 DROP TABLE IF EXISTS `bot_group_members`;
 SET FOREIGN_KEY_CHECKS = 1;
 )",
-	}
+	},
+// -- template; copy/paste this when you need to create a new entry
+//	ManifestEntry{
+//		.version = 9228,
+//		.description = "some_new_migration.sql",
+//		.check = "SHOW COLUMNS FROM `table_name` LIKE 'column_name'",
+//		.condition = "empty",
+//		.match = "",
+//		.sql = R"(
+//
+//)"
 };
+
+// see struct definitions for what each field does
+// struct ManifestEntry {
+// 	int         version{};     // database version of the migration
+// 	std::string description{}; // description of the migration ex: "add_new_table" or "add_index_to_table"
+// 	std::string check{};       // query that checks against the condition
+// 	std::string condition{};   // condition or "match_type" - Possible values [contains|match|missing|empty|not_empty]
+// 	std::string match{};       // match field that is not always used, but works in conjunction with "condition" values [missing|match|contains]
+// 	std::string sql{};         // the SQL DDL that gets ran when the condition is true
+// };

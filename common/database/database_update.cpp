@@ -43,6 +43,7 @@ constexpr int LOOK_BACK_AMOUNT = 10;
 // this check will take action
 void DatabaseUpdate::CheckDbUpdates()
 {
+	InjectBotsVersionColumn();
 	auto v = GetDatabaseVersions();
 	auto b = GetBinaryDatabaseVersions();
 	if (CheckVersions(v, b)) {
@@ -180,6 +181,12 @@ bool DatabaseUpdate::UpdateManifest(
 
 					std::string sql = e.sql;
 
+					// mysql_set_server_option
+					// enum enum_mysql_set_option {
+					//   MYSQL_OPTION_MULTI_STATEMENTS_ON,
+					//   MYSQL_OPTION_MULTI_STATEMENTS_OFF
+					// };
+
 					// don't remove these even if you think you know what you're doing
 					sql = Strings::Replace(sql, "; --", ";\n --");
 					sql = Strings::Replace(sql, ";   ", ";\n");
@@ -289,4 +296,12 @@ bool DatabaseUpdate::HasPendingUpdates()
 	auto b = GetBinaryDatabaseVersions();
 
 	return !CheckVersions(v, b);
+}
+
+void DatabaseUpdate::InjectBotsVersionColumn()
+{
+	auto r = m_database->QueryDatabase("show columns from db_version where Field like '%bots_version%'");
+	if (r.RowCount() == 0) {
+		m_database->QueryDatabase("ALTER TABLE db_version ADD bots_version int(11) DEFAULT '0' AFTER version");
+	}
 }
