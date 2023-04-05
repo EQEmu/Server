@@ -5158,7 +5158,7 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 	float HasteModifier = (GetHaste() * 0.01f);
 	uint16 skill_to_use = -1;
 	int bot_level = GetLevel();
-	int reuse = (TauntReuseTime * 1000);
+	int reuse = (TauntReuseTime * 1000); // Same as Bash and Kick
 	bool did_attack = false;
 	switch (GetClass()) {
 		case WARRIOR:
@@ -5218,7 +5218,6 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 			if (GetWeaponDamage(target, GetBotItem(EQ::invslot::slotSecondary)) <= 0 && GetWeaponDamage(target, GetBotItem(EQ::invslot::slotShoulders)) <= 0)
 				dmg = DMG_INVULNERABLE;
 
-			reuse = (BashReuseTime * 1000);
 			DoSpecialAttackDamage(target, EQ::skills::SkillBash, dmg, 0, -1, reuse);
 			did_attack = true;
 		}
@@ -5245,7 +5244,6 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 			if (GetWeaponDamage(target, GetBotItem(EQ::invslot::slotFeet)) <= 0)
 				dmg = DMG_INVULNERABLE;
 
-			reuse = (KickReuseTime * 1000);
 			DoSpecialAttackDamage(target, EQ::skills::SkillKick, dmg, 0, -1, reuse);
 			did_attack = true;
 		}
