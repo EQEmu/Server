@@ -2696,7 +2696,7 @@ void bot_command_attack(Client *c, const Seperator *sep)
 	}
 
 	std::list<Bot*> sbl;
-	if (ActionableBots::PopulateSBL(c, ab_arg.c_str(), sbl, ab_mask, sep->arg[2]) == ActionableBots::ABT_None) {
+	if (ActionableBots::PopulateSBL(c, ab_arg, sbl, ab_mask, sep->arg[2]) == ActionableBots::ABT_None) {
 		return;
 	}
 
@@ -6414,7 +6414,7 @@ void bot_subcommand_bot_report(Client *c, const Seperator *sep)
 	}
 
 	std::list<Bot*> sbl;
-	if (ActionableBots::PopulateSBL(c, ab_type_arg.c_str(), sbl, ab_mask, sep->arg[2]) == ActionableBots::ABT_None)
+	if (ActionableBots::PopulateSBL(c, ab_type_arg, sbl, ab_mask, sep->arg[2]) == ActionableBots::ABT_None)
 		return;
 
 	for (auto bot_iter : sbl) {
@@ -7321,7 +7321,7 @@ void bot_subcommand_heal_rotation_adjust_critical(Client *c, const Seperator *se
 
 	uint8 armor_type_value = 255;
 	if (sep->IsNumber(1))
-		armor_type_value = Strings::ToInt(armor_type_arg.c_str());
+		armor_type_value = Strings::ToInt(armor_type_arg);
 
 	if (armor_type_value > ARMOR_TYPE_LAST) {
 		c->Message(Chat::White, "You must specify a valid [armor_type: %u-%u] to use this command", ARMOR_TYPE_FIRST, ARMOR_TYPE_LAST);
@@ -7350,7 +7350,7 @@ void bot_subcommand_heal_rotation_adjust_critical(Client *c, const Seperator *se
 
 	float critical_ratio = CRITICAL_HP_RATIO_BASE;
 	if (sep->IsNumber(2))
-		critical_ratio = Strings::ToFloat(critical_arg.c_str());
+		critical_ratio = Strings::ToFloat(critical_arg);
 	else if (!critical_arg.compare("+"))
 		critical_ratio = (*current_member->MemberOfHealRotation())->ArmorTypeCriticalHPRatio(armor_type_value) + HP_RATIO_DELTA;
 	else if (!critical_arg.compare("-"))
@@ -7387,7 +7387,7 @@ void bot_subcommand_heal_rotation_adjust_safe(Client *c, const Seperator *sep)
 
 	uint8 armor_type_value = 255;
 	if (sep->IsNumber(1))
-		armor_type_value = Strings::ToInt(armor_type_arg.c_str());
+		armor_type_value = Strings::ToInt(armor_type_arg);
 
 	if (armor_type_value > ARMOR_TYPE_LAST) {
 		c->Message(Chat::White, "You must specify a valid [armor_type: %u-%u] to use this command", ARMOR_TYPE_FIRST, ARMOR_TYPE_LAST);
@@ -7416,7 +7416,7 @@ void bot_subcommand_heal_rotation_adjust_safe(Client *c, const Seperator *sep)
 
 	float safe_ratio = SAFE_HP_RATIO_BASE;
 	if (sep->IsNumber(2))
-		safe_ratio = Strings::ToFloat(safe_arg.c_str());
+		safe_ratio = Strings::ToFloat(safe_arg);
 	else if (!safe_arg.compare("+"))
 		safe_ratio = (*current_member->MemberOfHealRotation())->ArmorTypeSafeHPRatio(armor_type_value) + HP_RATIO_DELTA;
 	else if (!safe_arg.compare("-"))
@@ -7530,7 +7530,7 @@ void bot_subcommand_heal_rotation_change_interval(Client *c, const Seperator *se
 	uint32 hr_change_interval_s = CASTING_CYCLE_DEFAULT_INTERVAL_S;
 
 	if (!change_interval_arg.empty()) {
-		hr_change_interval_s = Strings::ToInt(change_interval_arg.c_str());
+		hr_change_interval_s = Strings::ToInt(change_interval_arg);
 	}
 	else {
 		hr_change_interval_s = (*current_member->MemberOfHealRotation())->IntervalS();
@@ -7678,14 +7678,14 @@ void bot_subcommand_heal_rotation_create(Client *c, const Seperator *sep)
 			hr_adaptive_targeting = true;
 		if (!fast_heals_arg.compare("on"))
 			hr_fast_heals = true;
-		hr_interval_s = Strings::ToInt(interval_arg.c_str());
+		hr_interval_s = Strings::ToInt(interval_arg);
 	}
 	else if (!casting_override_arg.compare("off")) {
 		if (!adaptive_targeting_arg.compare("on"))
 			hr_adaptive_targeting = true;
 		if (!fast_heals_arg.compare("on"))
 			hr_fast_heals = true;
-		hr_interval_s = Strings::ToInt(interval_arg.c_str());
+		hr_interval_s = Strings::ToInt(interval_arg);
 	}
 
 	if (hr_interval_s < CASTING_CYCLE_MINIMUM_INTERVAL_S || hr_interval_s > CASTING_CYCLE_MAXIMUM_INTERVAL_S)
@@ -9003,7 +9003,7 @@ uint32 helper_bot_create(Client *bot_owner, std::string bot_name, uint8 bot_clas
 	}
 
 
-	auto my_bot = new Bot(Bot::CreateDefaultNPCTypeStructForBot(bot_name.c_str(), "", bot_owner->GetLevel(), bot_race, bot_class, bot_gender), bot_owner);
+	auto my_bot = new Bot(Bot::CreateDefaultNPCTypeStructForBot(bot_name, "", bot_owner->GetLevel(), bot_race, bot_class, bot_gender), bot_owner);
 
 	if (!my_bot->Save()) {
 		bot_owner->Message(
@@ -9253,7 +9253,7 @@ void helper_command_depart_list(Client* bot_owner, Bot* druid_bot, Bot* wizard_b
 					destination_number,
 					local_entry->long_name,
 					text_link
-				).c_str()
+				)
 			);
 
 			destination_count++;
@@ -9288,7 +9288,7 @@ void helper_command_depart_list(Client* bot_owner, Bot* druid_bot, Bot* wizard_b
 					destination_number,
 					local_entry->long_name,
 					text_link
-				).c_str()
+				)
 			);
 
 			destination_count++;
