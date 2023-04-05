@@ -2526,9 +2526,17 @@ void bot_command_apply_poison(Client *c, const Seperator *sep)
 	}
 
 	Bot *my_rogue_bot = nullptr;
-	if (c->GetTarget() && c->GetTarget()->IsBot() && c->GetTarget()->CastToBot()->GetBotOwnerCharacterID() == c->CharacterID() && c->GetTarget()->CastToBot()->GetClass() == ROGUE) {
-		my_rogue_bot = c->GetTarget()->CastToBot();
+	auto t = c->GetTarget();
+
+	if (
+		t &&
+		t->IsBot() &&
+		t->CastToBot()->GetBotOwnerCharacterID() == c->CharacterID() &&
+		t->GetClass() == ROGUE
+	) {
+		my_rogue_bot = t->CastToBot();
 	}
+
 	if (!my_rogue_bot) {
 
 		c->Message(Chat::White, "You must target a rogue bot that you own to use this command!");
@@ -6402,13 +6410,14 @@ void bot_subcommand_bot_report(Client *c, const Seperator *sep)
 
 	std::string ab_type_arg = sep->arg[1];
 	if (ab_type_arg.empty()) {
-		if (c->GetTarget()) {
-			if (c->GetTarget()->IsClient() && c->GetTarget()->CastToClient() == c)
+		auto t = c->GetTarget();
+		if (t && t->IsClient()) {
+			if (t->CastToClient() == c) {
 				ab_type_arg = "ownergroup";
-			else if (c->GetTarget()->IsClient() && c->GetTarget()->CastToClient() != c)
+			} else {
 				ab_type_arg = "targetgroup";
-		}
-		else {
+			}
+		} else {
 			ab_type_arg = "spawned";
 		}
 	}
