@@ -973,7 +973,7 @@ bool Database::CheckDatabaseConvertPPDeblob()
 
 				/* Run inspect message convert  */
 				if (!inspectmessage.empty()) {
-					std::string rquery = StringFormat(
+					rquery = StringFormat(
 						"REPLACE INTO `character_inspect_messages` (id, inspect_message)"
 						"VALUES (%u, '%s')",
 						character_id,
@@ -1511,7 +1511,7 @@ bool Database::CheckDatabaseConvertCorpseDeblob(){
 		results = QueryDatabase(query);
 	}
 
-	std::string rquery = StringFormat("SHOW COLUMNS FROM `character_corpses` LIKE 'data'");
+	rquery = StringFormat("SHOW COLUMNS FROM `character_corpses` LIKE 'data'");
 	results = QueryDatabase(rquery);
 	if (results.RowCount() != 0){
 		rquery = StringFormat("SELECT DISTINCT charid FROM character_corpses");
