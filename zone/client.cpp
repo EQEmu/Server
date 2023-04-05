@@ -9009,120 +9009,119 @@ void Client::InitInnates()
 	// The client calls this in a few places. When you remove a vision buff and in SetHeights, which is called in
 	// illusions, mounts, and a bunch of other cases. All of the calls to InitInnates are wrapped in restoring regen
 	// besides the call initializing the first time
-	auto race = GetRace();
+	auto race   = GetRace();
 	auto class_ = GetClass();
 
-	for (int i = 0; i < InnateSkillMax; ++i)
+	for (int i = 0; i < InnateSkillMax; ++i) {
 		m_pp.InnateSkills[i] = InnateDisabled;
+	}
 
 	m_pp.InnateSkills[InnateInspect] = InnateEnabled;
 	m_pp.InnateSkills[InnateOpen] = InnateEnabled;
+
 	if (race >= RT_FROGLOK_3) {
-		if (race == RT_SKELETON_2 || race == RT_FROGLOK_3)
+		if (race == RT_SKELETON_2 || race == RT_FROGLOK_3) {
 			m_pp.InnateSkills[InnateUltraVision] = InnateEnabled;
-		else
+		} else {
 			m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
+		}
 	}
+
 	switch (race) {
-	case RT_BARBARIAN:
-	case RT_BARBARIAN_2:
-		m_pp.InnateSkills[InnateSlam] = InnateEnabled;
-		break;
-	case RT_ERUDITE:
-	case RT_ERUDITE_2:
-		m_pp.InnateSkills[InnateLore] = InnateEnabled;
-		break;
-	case RT_WOOD_ELF:
-	case RT_GUARD_3:
-		m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
-		break;
-	case RT_HIGH_ELF:
-	case RT_GUARD_2:
-		m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
-		m_pp.InnateSkills[InnateLore] = InnateEnabled;
-		break;
-	case RT_DARK_ELF:
-	case RT_DARK_ELF_2:
-	case RT_VAMPIRE_2:
-		m_pp.InnateSkills[InnateUltraVision] = InnateEnabled;
-		break;
-	case RT_TROLL:
-	case RT_TROLL_2:
-		m_pp.InnateSkills[InnateRegen] = InnateEnabled;
-		m_pp.InnateSkills[InnateSlam] = InnateEnabled;
-		m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
-		break;
-	case RT_DWARF:
-	case RT_DWARF_2:
-		m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
-		break;
-	case RT_OGRE:
-	case RT_OGRE_2:
-		m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
-		m_pp.InnateSkills[InnateSlam] = InnateEnabled;
-		m_pp.InnateSkills[InnateNoBash] = InnateEnabled;
-		m_pp.InnateSkills[InnateBashDoor] = InnateEnabled;
-		break;
-	case RT_HALFLING:
-	case RT_HALFLING_2:
-		m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
-		break;
-	case RT_GNOME:
-		m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
-		m_pp.InnateSkills[InnateLore] = InnateEnabled;
-		break;
-	case RT_IKSAR:
-		m_pp.InnateSkills[InnateRegen] = InnateEnabled;
-		m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
-		break;
-	case RT_VAH_SHIR:
-		m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
-		break;
-	case RT_FROGLOK_2:
-	case RT_GHOST:
-	case RT_GHOUL:
-	case RT_SKELETON:
-	case RT_VAMPIRE:
-	case RT_WILL_O_WISP:
-	case RT_ZOMBIE:
-	case RT_SPECTRE:
-	case RT_GHOST_2:
-	case RT_GHOST_3:
-	case RT_DRAGON_2:
-	case RT_INNORUUK:
-		m_pp.InnateSkills[InnateUltraVision] = InnateEnabled;
-		break;
-	case RT_HUMAN:
-	case RT_GUARD:
-	case RT_BEGGAR:
-	case RT_HUMAN_2:
-	case RT_HUMAN_3:
-	case RT_FROGLOK_3: // client does froglok weird, but this should work out fine
-		break;
-	default:
-		m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
-		break;
+		case RT_BARBARIAN:
+		case RT_BARBARIAN_2:
+			m_pp.InnateSkills[InnateSlam] = InnateEnabled;
+			break;
+		case RT_ERUDITE:
+		case RT_ERUDITE_2:
+			m_pp.InnateSkills[InnateLore] = InnateEnabled;
+			break;
+		case RT_WOOD_ELF:
+		case RT_GUARD_3:
+			m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
+			break;
+		case RT_GNOME:
+		case RT_HIGH_ELF:
+		case RT_GUARD_2:
+			m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
+			m_pp.InnateSkills[InnateLore]        = InnateEnabled;
+			break;
+		case RT_TROLL:
+		case RT_TROLL_2:
+			m_pp.InnateSkills[InnateRegen]       = InnateEnabled;
+			m_pp.InnateSkills[InnateSlam]        = InnateEnabled;
+			m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
+			break;
+		case RT_DWARF:
+		case RT_DWARF_2:
+			m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
+			break;
+		case RT_OGRE:
+		case RT_OGRE_2:
+			m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
+			m_pp.InnateSkills[InnateSlam]        = InnateEnabled;
+			m_pp.InnateSkills[InnateNoBash]      = InnateEnabled;
+			m_pp.InnateSkills[InnateBashDoor]    = InnateEnabled;
+			break;
+		case RT_HALFLING:
+		case RT_HALFLING_2:
+			m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
+			break;
+		case RT_IKSAR:
+			m_pp.InnateSkills[InnateRegen]       = InnateEnabled;
+			m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
+			break;
+		case RT_VAH_SHIR:
+			m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
+			break;
+		case RT_DARK_ELF:
+		case RT_DARK_ELF_2:
+		case RT_VAMPIRE_2:
+		case RT_FROGLOK_2:
+		case RT_GHOST:
+		case RT_GHOUL:
+		case RT_SKELETON:
+		case RT_VAMPIRE:
+		case RT_WILL_O_WISP:
+		case RT_ZOMBIE:
+		case RT_SPECTRE:
+		case RT_GHOST_2:
+		case RT_GHOST_3:
+		case RT_DRAGON_2:
+		case RT_INNORUUK:
+			m_pp.InnateSkills[InnateUltraVision] = InnateEnabled;
+			break;
+		case RT_HUMAN:
+		case RT_GUARD:
+		case RT_BEGGAR:
+		case RT_HUMAN_2:
+		case RT_HUMAN_3:
+		case RT_FROGLOK_3: // client does froglok weird, but this should work out fine
+			break;
+		default:
+			m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
+			break;
 	}
 
 	switch (class_) {
-	case DRUID:
-		m_pp.InnateSkills[InnateHarmony] = InnateEnabled;
-		break;
-	case BARD:
-		m_pp.InnateSkills[InnateReveal] = InnateEnabled;
-		break;
-	case ROGUE:
-		m_pp.InnateSkills[InnateSurprise] = InnateEnabled;
-		m_pp.InnateSkills[InnateReveal] = InnateEnabled;
-		break;
-	case RANGER:
-		m_pp.InnateSkills[InnateAwareness] = InnateEnabled;
-		break;
-	case MONK:
-		m_pp.InnateSkills[InnateSurprise] = InnateEnabled;
-		m_pp.InnateSkills[InnateAwareness] = InnateEnabled;
-	default:
-		break;
+		case DRUID:
+			m_pp.InnateSkills[InnateHarmony] = InnateEnabled;
+			break;
+		case BARD:
+			m_pp.InnateSkills[InnateReveal] = InnateEnabled;
+			break;
+		case ROGUE:
+			m_pp.InnateSkills[InnateSurprise] = InnateEnabled;
+			m_pp.InnateSkills[InnateReveal]   = InnateEnabled;
+			break;
+		case RANGER:
+			m_pp.InnateSkills[InnateAwareness] = InnateEnabled;
+			break;
+		case MONK:
+			m_pp.InnateSkills[InnateSurprise]  = InnateEnabled;
+			m_pp.InnateSkills[InnateAwareness] = InnateEnabled;
+		default:
+			break;
 	}
 }
 
