@@ -142,7 +142,7 @@ void EQ::Net::TCPConnection::Write(const char *data, size_t count)
 
 	WriteBaton *baton = new WriteBaton;
 	baton->connection = this;
-	baton->buffer = new char[count];;
+	baton->buffer = new char[count];
 
 	uv_write_t *write_req = new uv_write_t;
 	memset(write_req, 0, sizeof(uv_write_t));
