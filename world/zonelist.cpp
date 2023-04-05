@@ -311,7 +311,7 @@ void ZSList::SendZoneStatus(const char* to, int16 admin, WorldTCPConnection* con
 		strcpy(locked, "No");
 	}
 
-	std::vector<char> out;
+	auto out = fmt::memory_buffer();
 
 	if (connection->IsConsole()) {
 		fmt::format_to(std::back_inserter(out), "World Locked: {}\r\n", locked);
