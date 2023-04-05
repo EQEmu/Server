@@ -9226,27 +9226,29 @@ void Client::SetSecondaryWeaponOrnamentation(uint32 model_id)
  */
 bool Client::GotoPlayer(std::string player_name)
 {
-	auto characters = CharacterDataRepository::GetWhere(
+	const auto& l = CharacterDataRepository::GetWhere(
 		database,
 		fmt::format("name = '{}' AND last_login > (UNIX_TIMESTAMP() - 600) LIMIT 1", player_name)
 	);
 
-	for (auto &c: characters) {
-		if (c.zone_instance > 0 && !database.CheckInstanceExists(c.zone_instance)) {
-			Message(Chat::Yellow, "Instance no longer exists...");
-			return false;
-		}
-
-		if (c.zone_instance > 0) {
-			database.AddClientToInstance(c.zone_instance, CharacterID());
-		}
-
-		MovePC(c.zone_id, c.zone_instance, c.x, c.y, c.z, c.heading);
-
-		return true;
+	if (l.empty()) {
+		return false;
 	}
 
-	return false;
+	const auto& c = l[0];
+
+	if (c.zone_instance > 0 && !database.CheckInstanceExists(c.zone_instance)) {
+		Message(Chat::Yellow, "Instance no longer exists...");
+		return false;
+	}
+
+	if (c.zone_instance > 0) {
+		database.AddClientToInstance(c.zone_instance, CharacterID());
+	}
+
+	MovePC(c.zone_id, c.zone_instance, c.x, c.y, c.z, c.heading);
+
+	return true;
 }
 
 bool Client::GotoPlayerGroup(const std::string& player_name)
