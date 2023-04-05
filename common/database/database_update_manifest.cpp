@@ -1,3 +1,5 @@
+#include "database_update.h"
+
 std::vector <ManifestEntry> manifest_entries = {
 	ManifestEntry{
 		.version = 9000,

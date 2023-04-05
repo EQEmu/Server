@@ -15,6 +15,8 @@ SET(common_sources
     database.cpp
     database_conversions.cpp
     database_instances.cpp
+    database/database_update_manifest.cpp
+    database/database_update_manifest_bots.cpp
     database/database_update.cpp
     dbcore.cpp
     deity.cpp
