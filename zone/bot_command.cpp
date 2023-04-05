@@ -3590,10 +3590,10 @@ void bot_command_item_use(Client* c, const Seperator* sep)
 		return;
 	}
 
-	std::list<int16> equipable_slot_list;
+	std::vector<int16> equipable_slot_list;
 	for (int16 equipable_slot = EQ::invslot::EQUIPMENT_BEGIN; equipable_slot <= EQ::invslot::EQUIPMENT_END; ++equipable_slot) {
 		if (item_data->Slots & (1 << equipable_slot)) {
-			equipable_slot_list.push_back(equipable_slot);
+			equipable_slot_list.emplace_back(equipable_slot);
 		}
 	}
 
@@ -3623,7 +3623,7 @@ void bot_command_item_use(Client* c, const Seperator* sep)
 			bot_iter->GetCleanName()
 		);
 
-		for (auto slot_iter : equipable_slot_list) {
+		for (const auto& slot_iter : equipable_slot_list) {
 			// needs more failure criteria - this should cover the bulk for now
 			if (slot_iter == EQ::invslot::slotSecondary && item_data->Damage && !bot_iter->CanThisClassDualWield()) {
 				continue;
