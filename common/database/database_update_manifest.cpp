@@ -1,4 +1,4 @@
-std::vector<ManifestEntry> manifest_entries = {
+std::vector <ManifestEntry> manifest_entries = {
 	ManifestEntry{
 		.version = 9000,
 		.description = "2013_02_18_merc_rules_and_tables.sql",
@@ -243,7 +243,49 @@ CREATE TABLE IF NOT EXISTS `item_tick` (
 		.check = "SHOW COLUMNS FROM `npc_types` LIKE 'special_abilities'",
 		.condition = "empty",
 		.match = "",
-		.sql = _2013_07_11_npc_special_abilities,
+		.sql =R"(
+ALTER TABLE `npc_types`  ADD COLUMN `special_abilities` TEXT NULL AFTER `npcspecialattks`;
+ALTER TABLE `npc_types` MODIFY COLUMN `special_abilities` text CHARACTER SET latin1 COLLATE latin1_swedish_ci NULL;
+
+UPDATE npc_types SET special_abilities = CONCAT(special_abilities, "1,1^") WHERE npcspecialattks LIKE BINARY '%S%';
+UPDATE npc_types SET special_abilities = CONCAT(special_abilities, "2,1^") WHERE npcspecialattks LIKE BINARY '%E%';
+UPDATE npc_types SET special_abilities = CONCAT(special_abilities, "3,1^") WHERE npcspecialattks LIKE BINARY '%R%';
+UPDATE npc_types SET special_abilities = CONCAT(special_abilities, "4,1^") WHERE npcspecialattks LIKE BINARY '%r%';
+UPDATE npc_types SET special_abilities = CONCAT(special_abilities, "5,1^") WHERE npcspecialattks LIKE BINARY '%F%';
+UPDATE npc_types SET special_abilities = CONCAT(special_abilities, "6,1^") WHERE npcspecialattks LIKE BINARY '%T%';
+UPDATE npc_types SET special_abilities = CONCAT(special_abilities, "7,1^") WHERE npcspecialattks LIKE BINARY '%Q%';
+UPDATE npc_types SET special_abilities = CONCAT(special_abilities, "8,1^") WHERE npcspecialattks LIKE BINARY '%L%';
+UPDATE npc_types SET special_abilities = CONCAT(special_abilities, "9,1^") WHERE npcspecialattks LIKE BINARY '%b%';
+UPDATE npc_types SET special_abilities = CONCAT(special_abilities, "10,1^") WHERE npcspecialattks LIKE BINARY '%m%';
+UPDATE npc_types SET special_abilities = CONCAT(special_abilities, "11,1^") WHERE npcspecialattks LIKE BINARY '%Y%';
+UPDATE npc_types SET special_abilities = CONCAT(special_abilities, "12,1^") WHERE npcspecialattks LIKE BINARY '%U%';
+UPDATE npc_types SET special_abilities = CONCAT(special_abilities, "13,1^") WHERE npcspecialattks LIKE BINARY '%M%';
+UPDATE npc_types SET special_abilities = CONCAT(special_abilities, "14,1^") WHERE npcspecialattks LIKE BINARY '%C%';
+UPDATE npc_types SET special_abilities = CONCAT(special_abilities, "15,1^") WHERE npcspecialattks LIKE BINARY '%N%';
+UPDATE npc_types SET special_abilities = CONCAT(special_abilities, "16,1^") WHERE npcspecialattks LIKE BINARY '%I%';
+UPDATE npc_types SET special_abilities = CONCAT(special_abilities, "17,1^") WHERE npcspecialattks LIKE BINARY '%D%';
+UPDATE npc_types SET special_abilities = CONCAT(special_abilities, "18,1^") WHERE npcspecialattks LIKE BINARY '%K%';
+UPDATE npc_types SET special_abilities = CONCAT(special_abilities, "19,1^") WHERE npcspecialattks LIKE BINARY '%A%';
+UPDATE npc_types SET special_abilities = CONCAT(special_abilities, "20,1^") WHERE npcspecialattks LIKE BINARY '%B%';
+UPDATE npc_types SET special_abilities = CONCAT(special_abilities, "21,1^") WHERE npcspecialattks LIKE BINARY '%f%';
+UPDATE npc_types SET special_abilities = CONCAT(special_abilities, "22,1^") WHERE npcspecialattks LIKE BINARY '%O%';
+UPDATE npc_types SET special_abilities = CONCAT(special_abilities, "23,1^") WHERE npcspecialattks LIKE BINARY '%W%';
+UPDATE npc_types SET special_abilities = CONCAT(special_abilities, "24,1^") WHERE npcspecialattks LIKE BINARY '%H%';
+UPDATE npc_types SET special_abilities = CONCAT(special_abilities, "25,1^") WHERE npcspecialattks LIKE BINARY '%G%';
+UPDATE npc_types SET special_abilities = CONCAT(special_abilities, "26,1^") WHERE npcspecialattks LIKE BINARY '%g%';
+UPDATE npc_types SET special_abilities = CONCAT(special_abilities, "27,1^") WHERE npcspecialattks LIKE BINARY '%d%';
+UPDATE npc_types SET special_abilities = CONCAT(special_abilities, "28,1^") WHERE npcspecialattks LIKE BINARY '%i%';
+UPDATE npc_types SET special_abilities = CONCAT(special_abilities, "29,1^") WHERE npcspecialattks LIKE BINARY '%t%';
+UPDATE npc_types SET special_abilities = CONCAT(special_abilities, "30,1^") WHERE npcspecialattks LIKE BINARY '%n%';
+UPDATE npc_types SET special_abilities = CONCAT(special_abilities, "31,1^") WHERE npcspecialattks LIKE BINARY '%p%';
+UPDATE npc_types SET special_abilities = CONCAT(special_abilities, "32,1^") WHERE npcspecialattks LIKE BINARY '%J%';
+UPDATE npc_types SET special_abilities = CONCAT(special_abilities, "33,1^") WHERE npcspecialattks LIKE BINARY '%j%';
+UPDATE npc_types SET special_abilities = CONCAT(special_abilities, "34,1^") WHERE npcspecialattks LIKE BINARY '%o%';
+UPDATE npc_types SET special_abilities = CONCAT(special_abilities, "35,1^") WHERE npcspecialattks LIKE BINARY '%Z%';
+UPDATE npc_types SET special_abilities = TRIM(TRAILING '^' FROM special_abilities);
+
+ALTER TABLE `npc_types`  DROP COLUMN `npcspecialattks`;
+)",
 	},
 	ManifestEntry{
 		.version = 9009,
@@ -251,7 +293,49 @@ CREATE TABLE IF NOT EXISTS `item_tick` (
 		.check = "SHOW COLUMNS FROM `merc_stats` LIKE 'special_abilities'",
 		.condition = "empty",
 		.match = "",
-		.sql = _2013_10_12_merc_special_abilities,
+		.sql = R"(
+ALTER TABLE `merc_stats`  ADD COLUMN `special_abilities` TEXT NULL AFTER `specialattks`;
+ALTER TABLE `merc_stats` MODIFY COLUMN `special_abilities`  text CHARACTER SET latin1 COLLATE latin1_swedish_ci NULL;
+
+UPDATE merc_stats SET special_abilities = CONCAT(special_abilities, "1,1^") WHERE specialattks LIKE BINARY '%S%';
+UPDATE merc_stats SET special_abilities = CONCAT(special_abilities, "2,1^") WHERE specialattks LIKE BINARY '%E%';
+UPDATE merc_stats SET special_abilities = CONCAT(special_abilities, "3,1^") WHERE specialattks LIKE BINARY '%R%';
+UPDATE merc_stats SET special_abilities = CONCAT(special_abilities, "4,1^") WHERE specialattks LIKE BINARY '%r%';
+UPDATE merc_stats SET special_abilities = CONCAT(special_abilities, "5,1^") WHERE specialattks LIKE BINARY '%F%';
+UPDATE merc_stats SET special_abilities = CONCAT(special_abilities, "6,1^") WHERE specialattks LIKE BINARY '%T%';
+UPDATE merc_stats SET special_abilities = CONCAT(special_abilities, "7,1^") WHERE specialattks LIKE BINARY '%Q%';
+UPDATE merc_stats SET special_abilities = CONCAT(special_abilities, "8,1^") WHERE specialattks LIKE BINARY '%L%';
+UPDATE merc_stats SET special_abilities = CONCAT(special_abilities, "9,1^") WHERE specialattks LIKE BINARY '%b%';
+UPDATE merc_stats SET special_abilities = CONCAT(special_abilities, "10,1^") WHERE specialattks LIKE BINARY '%m%';
+UPDATE merc_stats SET special_abilities = CONCAT(special_abilities, "11,1^") WHERE specialattks LIKE BINARY '%Y%';
+UPDATE merc_stats SET special_abilities = CONCAT(special_abilities, "12,1^") WHERE specialattks LIKE BINARY '%U%';
+UPDATE merc_stats SET special_abilities = CONCAT(special_abilities, "13,1^") WHERE specialattks LIKE BINARY '%M%';
+UPDATE merc_stats SET special_abilities = CONCAT(special_abilities, "14,1^") WHERE specialattks LIKE BINARY '%C%';
+UPDATE merc_stats SET special_abilities = CONCAT(special_abilities, "15,1^") WHERE specialattks LIKE BINARY '%N%';
+UPDATE merc_stats SET special_abilities = CONCAT(special_abilities, "16,1^") WHERE specialattks LIKE BINARY '%I%';
+UPDATE merc_stats SET special_abilities = CONCAT(special_abilities, "17,1^") WHERE specialattks LIKE BINARY '%D%';
+UPDATE merc_stats SET special_abilities = CONCAT(special_abilities, "18,1^") WHERE specialattks LIKE BINARY '%K%';
+UPDATE merc_stats SET special_abilities = CONCAT(special_abilities, "19,1^") WHERE specialattks LIKE BINARY '%A%';
+UPDATE merc_stats SET special_abilities = CONCAT(special_abilities, "20,1^") WHERE specialattks LIKE BINARY '%B%';
+UPDATE merc_stats SET special_abilities = CONCAT(special_abilities, "21,1^") WHERE specialattks LIKE BINARY '%f%';
+UPDATE merc_stats SET special_abilities = CONCAT(special_abilities, "22,1^") WHERE specialattks LIKE BINARY '%O%';
+UPDATE merc_stats SET special_abilities = CONCAT(special_abilities, "23,1^") WHERE specialattks LIKE BINARY '%W%';
+UPDATE merc_stats SET special_abilities = CONCAT(special_abilities, "24,1^") WHERE specialattks LIKE BINARY '%H%';
+UPDATE merc_stats SET special_abilities = CONCAT(special_abilities, "25,1^") WHERE specialattks LIKE BINARY '%G%';
+UPDATE merc_stats SET special_abilities = CONCAT(special_abilities, "26,1^") WHERE specialattks LIKE BINARY '%g%';
+UPDATE merc_stats SET special_abilities = CONCAT(special_abilities, "27,1^") WHERE specialattks LIKE BINARY '%d%';
+UPDATE merc_stats SET special_abilities = CONCAT(special_abilities, "28,1^") WHERE specialattks LIKE BINARY '%i%';
+UPDATE merc_stats SET special_abilities = CONCAT(special_abilities, "29,1^") WHERE specialattks LIKE BINARY '%t%';
+UPDATE merc_stats SET special_abilities = CONCAT(special_abilities, "30,1^") WHERE specialattks LIKE BINARY '%n%';
+UPDATE merc_stats SET special_abilities = CONCAT(special_abilities, "31,1^") WHERE specialattks LIKE BINARY '%p%';
+UPDATE merc_stats SET special_abilities = CONCAT(special_abilities, "32,1^") WHERE specialattks LIKE BINARY '%J%';
+UPDATE merc_stats SET special_abilities = CONCAT(special_abilities, "33,1^") WHERE specialattks LIKE BINARY '%j%';
+UPDATE merc_stats SET special_abilities = CONCAT(special_abilities, "34,1^") WHERE specialattks LIKE BINARY '%o%';
+UPDATE merc_stats SET special_abilities = CONCAT(special_abilities, "35,1^") WHERE specialattks LIKE BINARY '%Z%';
+UPDATE merc_stats SET special_abilities = TRIM(TRAILING '^' FROM special_abilities);
+
+ALTER TABLE `merc_stats`  DROP COLUMN `specialattks`;
+)",
 	},
 	ManifestEntry{
 		.version = 9011,
@@ -263,14 +347,6 @@ CREATE TABLE IF NOT EXISTS `item_tick` (
 ALTER TABLE `tradeskill_recipe` ADD `enabled` tinyint(1) NOT NULL DEFAULT '1';
 
 )",
-	},
-	ManifestEntry{
-		.version = 9012,
-		.description = "2013_11_07_basedata.sql",
-		.check = "SHOW TABLES LIKE 'base_data'",
-		.condition = "empty",
-		.match = "",
-		.sql = _2013_11_07_basedata,
 	},
 	ManifestEntry{
 		.version = 9014,
@@ -301,7 +377,21 @@ ALTER TABLE  `npc_types` ADD  `assistradius` INT( 10 ) UNSIGNED NOT NULL DEFAULT
 		.check = "SHOW COLUMNS FROM `spells_new` LIKE 'persistdeath'",
 		.condition = "empty",
 		.match = "",
-		.sql = _2014_01_08_spellsnewadditions,
+		.sql = R"(
+ALTER TABLE `spells_new` CHANGE `field200` `suspendable` INT(11) DEFAULT '0';
+ALTER TABLE `spells_new` CHANGE `field202` `songcap` INT(11) DEFAULT '0';
+ALTER TABLE `spells_new` ADD `field215` INT(11) DEFAULT '0';
+ALTER TABLE `spells_new` ADD `field216` INT(11) DEFAULT '0';
+ALTER TABLE `spells_new` ADD `field217` INT(11) DEFAULT '0';
+ALTER TABLE `spells_new` ADD `field218` INT(11) DEFAULT '0';
+ALTER TABLE `spells_new` ADD `maxtargets` INT(11) DEFAULT '0';
+ALTER TABLE `spells_new` ADD `field220` INT(11) DEFAULT '0';
+ALTER TABLE `spells_new` ADD `field221` INT(11) DEFAULT '0';
+ALTER TABLE `spells_new` ADD `field222` INT(11) DEFAULT '0';
+ALTER TABLE `spells_new` ADD `field223` INT(11) DEFAULT '0';
+ALTER TABLE `spells_new` ADD `persistdeath` INT(11) DEFAULT '0';
+
+)",
 	},
 	ManifestEntry{
 		.version = 9018,
@@ -331,7 +421,148 @@ ALTER TABLE `spells_new` CHANGE `field197` `not_extendable` INT(11) NOT NULL DEF
 		.check = "SHOW COLUMNS FROM `zone` LIKE 'rain_chance1'",
 		.condition = "empty",
 		.match = "",
-		.sql = _2014_01_20_weather,
+		.sql = R"(
+alter table zone drop column `weather`;
+alter table zone add column `rain_chance1` int(4) not null default 0;
+alter table zone add column `rain_chance2` int(4) not null default 0;
+alter table zone add column `rain_chance3` int(4) not null default 0;
+alter table zone add column `rain_chance4` int(4) not null default 0;
+alter table zone add column `rain_duration1` int(4) not null default 0;
+alter table zone add column `rain_duration2` int(4) not null default 0;
+alter table zone add column `rain_duration3` int(4) not null default 0;
+alter table zone add column `rain_duration4` int(4) not null default 0;
+alter table zone add column `snow_chance1` int(4) not null default 0;
+alter table zone add column `snow_chance2` int(4) not null default 0;
+alter table zone add column `snow_chance3` int(4) not null default 0;
+alter table zone add column `snow_chance4` int(4) not null default 0;
+alter table zone add column `snow_duration1` int(4) not null default 0;
+alter table zone add column `snow_duration2` int(4) not null default 0;
+alter table zone add column `snow_duration3` int(4) not null default 0;
+alter table zone add column `snow_duration4` int(4) not null default 0;
+
+UPDATE `zone` SET `snow_chance1`=25, `snow_chance2`=20, `snow_chance3`=10, `snow_chance4`=20, `snow_duration1`=10, `snow_duration2`=8, `snow_duration3`=5, `snow_duration4`=10 WHERE  `id`=160;
+UPDATE `zone` SET `rain_chance1`=5, `rain_chance2`=5 WHERE  `id`=202;
+UPDATE `zone` SET `rain_chance1`=10, `rain_chance2`=10, `rain_chance3`=10, `rain_chance4`=10, `rain_duration1`=24, `rain_duration2`=6, `rain_duration3`=2, `rain_duration4`=10 WHERE  `id`=306;
+UPDATE `zone` SET `rain_chance1`=10, `rain_chance2`=10, `rain_chance3`=10, `rain_chance4`=10, `rain_duration1`=24, `rain_duration2`=6, `rain_duration3`=2, `rain_duration4`=10 WHERE  `id`=304;
+UPDATE `zone` SET `rain_chance1`=10, `rain_chance2`=10, `rain_chance3`=10, `rain_chance4`=10, `rain_duration1`=24, `rain_duration2`=6, `rain_duration3`=2, `rain_duration4`=10 WHERE  `id`=23;
+UPDATE `zone` SET `snow_chance1`=50, `snow_chance2`=25, `snow_chance3`=10, `snow_chance4`=25, `snow_duration1`=24, `snow_duration2`=24, `snow_duration3`=24, `snow_duration4`=24 WHERE  `id`=112;
+UPDATE `zone` SET `rain_chance1`=10, `rain_chance2`=10, `rain_chance3`=10, `rain_chance4`=10, `rain_duration1`=24, `rain_duration2`=6, `rain_duration3`=2, `rain_duration4`=10 WHERE  `id`=303;
+UPDATE `zone` SET `rain_chance1`=25, `rain_chance2`=25, `rain_chance3`=50, `rain_chance4`=25, `rain_duration1`=24, `rain_duration2`=24, `rain_duration3`=24, `rain_duration4`=24 WHERE  `id`=302;
+UPDATE `zone` SET `rain_chance1`=10, `rain_chance2`=10, `rain_duration1`=10, `rain_duration2`=10 WHERE  `id`=133;
+UPDATE `zone` SET `rain_chance1`=10, `rain_chance2`=10, `rain_duration1`=10, `rain_duration2`=10 WHERE  `id`=132;
+UPDATE `zone` SET `rain_chance1`=10, `rain_chance2`=10, `rain_duration1`=10, `rain_duration2`=10 WHERE  `id`=131;
+UPDATE `zone` SET `rain_chance1`=5, `rain_chance2`=2 WHERE  `id`=257;
+UPDATE `zone` SET `rain_chance1`=10, `rain_chance2`=10, `rain_chance3`=10, `rain_chance4`=10, `rain_duration1`=1, `rain_duration2`=1, `rain_duration3`=1, `rain_duration4`=1 WHERE  `id`=104;
+UPDATE `zone` SET `rain_chance1`=10, `rain_chance2`=10, `rain_chance3`=5, `rain_chance4`=5, `rain_duration1`=2, `rain_duration2`=3, `rain_duration3`=1, `rain_duration4`=2 WHERE  `id`=439;
+UPDATE `zone` SET `rain_chance1`=10, `rain_chance2`=10, `rain_chance3`=10, `rain_chance4`=10, `rain_duration1`=24, `rain_duration2`=6, `rain_duration3`=2, `rain_duration4`=10 WHERE  `id`=365;
+UPDATE `zone` SET `rain_duration1`=1, `rain_duration2`=2, `rain_duration3`=1, `rain_duration4`=1, `snow_duration1`=1 WHERE  `id`=4;
+UPDATE `zone` SET `rain_chance1`=10, `rain_chance2`=10, `rain_chance3`=10, `rain_chance4`=10, `rain_duration1`=1, `rain_duration2`=2, `rain_duration3`=1, `rain_duration4`=1 WHERE  `id`=204;
+UPDATE `zone` SET `rain_chance1`=100, `rain_chance2`=100, `rain_chance3`=100, `rain_chance4`=100, `rain_duration1`=24, `rain_duration2`=24, `rain_duration3`=24, `rain_duration4`=24 WHERE  `id`=224;
+UPDATE `zone` SET `rain_chance1`=10, `rain_chance2`=10, `rain_duration1`=1, `rain_duration2`=2, `rain_duration3`=1, `rain_duration4`=1, `snow_duration1`=1 WHERE  `id`=138;
+UPDATE `zone` SET `rain_chance1`=10, `rain_chance2`=10, `rain_chance3`=10, `rain_chance4`=10, `rain_duration1`=24, `rain_duration2`=6, `rain_duration3`=2, `rain_duration4`=10 WHERE  `id`=56;
+UPDATE `zone` SET `rain_chance1`=10, `rain_chance2`=10, `rain_chance3`=10, `rain_chance4`=10, `rain_duration1`=24, `rain_duration2`=6, `rain_duration3`=2, `rain_duration4`=10 WHERE  `id`=31;
+UPDATE `zone` SET `rain_chance1`=10, `rain_chance2`=10, `rain_chance3`=10, `rain_chance4`=10, `rain_duration1`=24, `rain_duration2`=6, `rain_duration3`=2, `rain_duration4`=10 WHERE  `id`=34;
+UPDATE `zone` SET `rain_chance1`=100, `rain_chance2`=100, `rain_chance3`=100, `rain_chance4`=100, `rain_duration1`=24, `rain_duration2`=24, `rain_duration3`=24, `rain_duration4`=24 WHERE  `id`=419;
+UPDATE `zone` SET `rain_chance1`=15, `rain_chance2`=15, `rain_chance3`=5, `rain_chance4`=5 WHERE  `id`=116;
+UPDATE `zone` SET `rain_chance1`=15, `rain_chance2`=15, `rain_chance3`=5, `rain_chance4`=5 WHERE  `id`=115;
+UPDATE `zone` SET `rain_duration1`=1, `rain_duration2`=2, `rain_duration3`=1, `rain_duration4`=1 WHERE  `id`=188;
+UPDATE `zone` SET `rain_duration1`=1, `rain_duration2`=2, `rain_duration3`=1, `rain_duration4`=1 WHERE  `id`=189;
+UPDATE `zone` SET `rain_chance1`=10, `rain_chance2`=10, `rain_chance3`=10, `rain_chance4`=10, `rain_duration1`=1, `rain_duration2`=2, `rain_duration3`=1, `rain_duration4`=1 WHERE  `id`=410;
+UPDATE `zone` SET `rain_chance1`=25, `rain_chance2`=75, `rain_chance3`=75, `rain_chance4`=25, `rain_duration1`=16, `rain_duration2`=12, `rain_duration3`=12, `rain_duration4`=16 WHERE  `id`=276;
+UPDATE `zone` SET `rain_duration1`=1, `rain_duration2`=1, `rain_duration3`=1, `rain_duration4`=1, `snow_duration1`=1, `snow_duration2`=1, `snow_duration3`=1, `snow_duration4`=1 WHERE  `id`=430;
+UPDATE `zone` SET `rain_chance2`=19, `rain_chance3`=14, `rain_duration1`=1, `rain_duration2`=2, `rain_duration3`=1, `rain_duration4`=1, `snow_chance1`=20, `snow_chance4`=20, `snow_duration1`=2, `snow_duration4`=1 WHERE  `id`=370;
+UPDATE `zone` SET `rain_chance1`=10, `rain_chance2`=10, `rain_chance3`=10, `rain_chance4`=10, `rain_duration1`=24, `rain_duration2`=6, `rain_duration3`=2, `rain_duration4`=10 WHERE  `id`=194;
+UPDATE `zone` SET `rain_chance1`=10, `rain_chance2`=10, `rain_chance3`=10, `rain_chance4`=10, `rain_duration1`=24, `rain_duration2`=6, `rain_duration3`=2, `rain_duration4`=10 WHERE  `id`=108;
+UPDATE `zone` SET `rain_chance1`=25, `rain_chance2`=25, `rain_chance3`=10, `rain_duration1`=24, `rain_duration2`=6, `rain_duration3`=2, `rain_duration4`=10 WHERE  `id`=110;
+UPDATE `zone` SET `rain_chance1`=10, `rain_chance2`=10, `rain_chance3`=10, `rain_chance4`=10, `rain_duration1`=1, `rain_duration2`=1, `rain_duration3`=1, `rain_duration4`=1, `snow_duration1`=1 WHERE  `id`=51;
+UPDATE `zone` SET `rain_chance1`=10, `rain_chance2`=10, `rain_chance3`=10, `rain_chance4`=10, `rain_duration1`=1, `rain_duration2`=2, `rain_duration3`=1, `rain_duration4`=1, `snow_duration1`=1 WHERE  `id`=196;
+UPDATE `zone` SET `rain_chance1`=10, `rain_chance2`=10, `rain_chance3`=5, `rain_chance4`=10 WHERE  `id`=316;
+UPDATE `zone` SET `rain_chance1`=20, `rain_chance3`=10, `rain_chance4`=20, `rain_duration1`=24, `rain_duration2`=6, `rain_duration3`=2, `rain_duration4`=10 WHERE  `id`=166;
+UPDATE `zone` SET `rain_chance1`=20, `rain_chance3`=10, `rain_chance4`=20, `rain_duration1`=24, `rain_duration2`=6, `rain_duration3`=2, `rain_duration4`=10, `snow_duration1`=12 WHERE  `id`=165;
+UPDATE `zone` SET `rain_chance1`=20, `rain_chance2`=20, `rain_chance3`=5, `rain_chance4`=10 WHERE  `id`=225;
+UPDATE `zone` SET `rain_duration1`=24, `rain_duration2`=6, `rain_duration3`=2, `rain_duration4`=10 WHERE  `id`=329;
+UPDATE `zone` SET `rain_chance1`=10, `rain_chance2`=10, `rain_chance3`=10, `rain_chance4`=10, `rain_duration1`=24, `rain_duration2`=6, `rain_duration3`=2, `rain_duration4`=10 WHERE  `id`=21;
+UPDATE `zone` SET `rain_chance1`=25, `rain_chance2`=25, `rain_chance3`=10, `rain_chance4`=25, `rain_duration1`=24, `rain_duration2`=6, `rain_duration3`=2, `rain_duration4`=10 WHERE  `id`=99;
+UPDATE `zone` SET `rain_chance1`=30, `rain_chance2`=30, `rain_chance3`=20, `rain_chance4`=30, `rain_duration1`=24, `rain_duration2`=6, `rain_duration3`=2, `rain_duration4`=10 WHERE  `id`=255;
+UPDATE `zone` SET `rain_chance1`=25, `rain_chance2`=25, `rain_chance3`=10, `rain_chance4`=25, `rain_duration1`=24, `rain_duration2`=6, `rain_duration3`=2, `rain_duration4`=10 WHERE  `id`=301;
+UPDATE `zone` SET `rain_chance1`=25, `rain_chance2`=25, `rain_chance3`=10, `rain_chance4`=25, `rain_duration1`=24, `rain_duration2`=6, `rain_duration3`=2, `rain_duration4`=10 WHERE  `id`=359;
+UPDATE `zone` SET `rain_chance1`=20, `rain_chance2`=20, `rain_chance3`=15, `rain_chance4`=20, `rain_duration1`=1, `rain_duration2`=1, `rain_duration3`=1, `rain_duration4`=1, `snow_duration1`=1 WHERE  `id`=201;
+UPDATE `zone` SET `rain_chance1`=35, `rain_chance2`=45, `rain_chance3`=15, `rain_chance4`=20, `rain_duration1`=1, `rain_duration2`=1, `rain_duration3`=1, `rain_duration4`=1, `snow_duration1`=1 WHERE  `id`=312;
+UPDATE `zone` SET `rain_chance1`=25, `rain_chance2`=75, `rain_chance3`=50, `rain_chance4`=5, `rain_duration1`=1, `rain_duration2`=1, `rain_duration3`=1, `rain_duration4`=1 WHERE  `id`=114;
+UPDATE `zone` SET `rain_chance1`=25, `rain_chance2`=25, `rain_chance3`=10, `rain_chance4`=25, `rain_duration1`=24, `rain_duration2`=6, `rain_duration3`=2, `rain_duration4`=10 WHERE  `id`=263;
+UPDATE `zone` SET `rain_chance1`=25, `rain_chance2`=25, `rain_chance3`=10, `rain_chance4`=25, `rain_duration1`=24, `rain_duration2`=6, `rain_duration3`=2, `rain_duration4`=10 WHERE  `id`=36;
+UPDATE `zone` SET `rain_chance1`=25, `rain_chance2`=25, `rain_chance3`=50, `rain_chance4`=25, `rain_duration1`=1, `rain_duration2`=1, `rain_duration3`=1, `rain_duration4`=1 WHERE  `id`=182;
+UPDATE `zone` SET `rain_chance1`=25, `rain_chance2`=25, `rain_chance3`=10, `rain_chance4`=25, `rain_duration1`=24, `rain_duration2`=6, `rain_duration3`=2, `rain_duration4`=10, `snow_duration1`=12 WHERE  `id`=142;
+UPDATE `zone` SET `rain_chance1`=5, `rain_chance2`=3 WHERE  `id`=361;
+UPDATE `zone` SET `rain_chance1`=8, `rain_chance2`=5 WHERE  `id`=259;
+UPDATE `zone` SET `rain_duration1`=1, `rain_duration2`=2, `rain_duration3`=1, `rain_duration4`=1, `snow_duration1`=1 WHERE  `id`=357;
+UPDATE `zone` SET `rain_duration1`=1, `rain_duration2`=2, `rain_duration3`=1, `rain_duration4`=1, `snow_duration1`=1 WHERE  `id`=156;
+UPDATE `zone` SET `rain_duration1`=1, `rain_duration2`=2, `rain_duration3`=1, `rain_duration4`=1, `snow_duration1`=1 WHERE  `id`=149;
+UPDATE `zone` SET `rain_chance1`=25, `rain_chance2`=25, `rain_chance3`=50, `rain_chance4`=25, `rain_duration1`=24, `rain_duration2`=6, `rain_duration3`=2, `rain_duration4`=10, `snow_chance1`=10, `snow_duration1`=10 WHERE  `id`=406;
+UPDATE `zone` SET `rain_chance1`=30, `rain_chance2`=40, `rain_chance3`=10, `rain_chance4`=10, `rain_duration1`=1, `rain_duration2`=1, `rain_duration3`=1, `rain_duration4`=1 WHERE  `id`=119;
+UPDATE `zone` SET `rain_chance1`=3, `rain_chance2`=3, `rain_chance3`=3, `rain_chance4`=3, `rain_duration1`=24, `rain_duration2`=24, `rain_duration3`=24, `rain_duration4`=24 WHERE  `id`=32;
+UPDATE `zone` SET `rain_chance1`=3, `rain_chance2`=3, `rain_chance3`=3, `rain_chance4`=3, `rain_duration1`=24, `rain_duration2`=24, `rain_duration3`=24, `rain_duration4`=24 WHERE  `id`=33;
+UPDATE `zone` SET `rain_chance1`=25, `rain_chance2`=25, `rain_chance3`=50, `rain_chance4`=25, `rain_duration1`=1, `rain_duration2`=1, `rain_duration3`=1, `rain_duration4`=1 WHERE  `id`=374;
+UPDATE `zone` SET `rain_chance1`=25, `rain_chance2`=25, `rain_chance3`=10, `rain_chance4`=25, `rain_duration1`=24, `rain_duration2`=6, `rain_duration3`=2, `rain_duration4`=10, `snow_duration1`=12 WHERE  `id`=412;
+UPDATE `zone` SET `rain_duration1`=1, `rain_duration2`=2, `rain_duration3`=1, `rain_duration4`=1, `snow_duration1`=1 WHERE  `id`=331;
+UPDATE `zone` SET `rain_chance1`=5, `rain_chance2`=5 WHERE  `id`=345;
+UPDATE `zone` SET `rain_chance1`=25, `rain_chance2`=25, `rain_chance3`=10, `rain_chance4`=25, `rain_duration1`=24, `rain_duration2`=6, `rain_duration3`=2, `rain_duration4`=10, `snow_duration1`=12 WHERE  `id`=30;
+UPDATE `zone` SET `rain_chance1`=35, `rain_chance2`=45, `rain_chance3`=15, `rain_chance4`=20, `rain_duration1`=1, `rain_duration2`=1, `rain_duration3`=1, `rain_duration4`=1, `snow_duration1`=1 WHERE  `id`=107;
+UPDATE `zone` SET `rain_chance1`=70, `rain_chance2`=70, `rain_chance3`=70, `rain_chance4`=70, `rain_duration1`=24, `rain_duration2`=24, `rain_duration3`=24, `rain_duration4`=24 WHERE  `id`=46;
+UPDATE `zone` SET `rain_duration1`=15, `rain_duration2`=6, `rain_duration3`=2, `rain_duration4`=10, `snow_chance1`=25, `snow_chance2`=15, `snow_chance3`=5, `snow_chance4`=15, `snow_duration1`=24, `snow_duration2`=12, `snow_duration3`=6, `snow_duration4`=12 WHERE  `id`=95;
+UPDATE `zone` SET `rain_chance1`=10, `rain_chance2`=10, `rain_chance3`=10, `rain_chance4`=10, `rain_duration1`=24, `rain_duration2`=6, `rain_duration3`=2, `rain_duration4`=10 WHERE  `id`=190;
+UPDATE `zone` SET `rain_chance1`=25, `rain_chance2`=25, `rain_chance3`=10, `rain_chance4`=25, `rain_duration1`=24, `rain_duration2`=6, `rain_duration3`=2, `rain_duration4`=10, `snow_duration1`=12 WHERE  `id`=275;
+UPDATE `zone` SET `rain_duration1`=1, `rain_duration2`=1, `rain_duration3`=1, `rain_duration4`=1, `snow_duration1`=1 WHERE  `id`=43;
+UPDATE `zone` SET `rain_chance1`=35, `rain_chance2`=45, `rain_chance3`=15, `rain_chance4`=20, `rain_duration1`=1, `rain_duration2`=1, `rain_duration3`=1, `rain_duration4`=1, `snow_duration1`=1 WHERE  `id`=134;
+UPDATE `zone` SET `rain_duration1`=1, `rain_duration2`=1, `rain_duration3`=1, `rain_duration4`=1, `snow_duration1`=1, `snow_duration2`=1, `snow_duration3`=1, `snow_duration4`=1 WHERE  `id`=97;
+UPDATE `zone` SET `rain_duration1`=1, `rain_duration2`=1, `rain_duration3`=1, `rain_duration4`=1, `snow_duration1`=1, `snow_duration2`=1, `snow_duration3`=1, `snow_duration4`=1 WHERE  `id`=258;
+UPDATE `zone` SET `rain_duration1`=24, `rain_duration2`=6, `rain_duration3`=2, `rain_duration4`=10 WHERE  `id`=199;
+UPDATE `zone` SET `rain_chance1`=25, `rain_chance2`=25, `rain_chance3`=50, `rain_chance4`=25, `rain_duration1`=1, `rain_duration2`=1, `rain_duration3`=1, `rain_duration4`=1 WHERE  `id`=431;
+UPDATE `zone` SET `rain_chance1`=30, `rain_chance2`=40, `rain_chance3`=10, `rain_chance4`=10, `rain_duration1`=1, `rain_duration2`=1, `rain_duration3`=1, `rain_duration4`=1 WHERE  `id`=200;
+UPDATE `zone` SET `rain_chance4`=25 WHERE  `id`=113;
+UPDATE `zone` SET `rain_duration1`=1, `rain_duration2`=1, `rain_duration3`=1, `rain_duration4`=1, `snow_chance1`=15, `snow_chance2`=15, `snow_chance3`=15, `snow_chance4`=15, `snow_duration1`=24, `snow_duration2`=6, `snow_duration3`=2, `snow_duration4`=10 WHERE  `id`=48;
+UPDATE `zone` SET `rain_duration1`=1, `rain_duration2`=1, `rain_duration3`=1, `rain_duration4`=1, `snow_chance1`=50, `snow_chance2`=40, `snow_chance3`=35, `snow_chance4`=40, `snow_duration1`=15, `snow_duration2`=10, `snow_duration3`=4, `snow_duration4`=12 WHERE  `id`=436;
+UPDATE `zone` SET `rain_duration1`=24, `rain_duration2`=24, `rain_duration3`=24, `rain_duration4`=24 WHERE  `id`=243;
+UPDATE `zone` SET `rain_chance1`=30, `rain_chance2`=30, `rain_chance3`=30, `rain_chance4`=30, `rain_duration1`=24, `rain_duration2`=6, `rain_duration3`=2, `rain_duration4`=10 WHERE  `id`=428;
+UPDATE `zone` SET `rain_duration1`=24, `rain_duration2`=6, `rain_duration3`=2, `rain_duration4`=10, `snow_chance1`=50, `snow_chance2`=15, `snow_chance3`=15, `snow_chance4`=15, `snow_duration1`=24, `snow_duration2`=6, `snow_duration3`=2, `snow_duration4`=10 WHERE  `id`=102;
+UPDATE `zone` SET `rain_duration1`=24, `rain_duration2`=6, `rain_duration3`=2, `rain_duration4`=10, `snow_chance1`=15, `snow_chance2`=15, `snow_chance3`=15, `snow_chance4`=15, `snow_duration1`=24, `snow_duration2`=6, `snow_duration3`=2, `snow_duration4`=10 WHERE  `id`=174;
+UPDATE `zone` SET `rain_duration1`=1, `rain_duration2`=2, `rain_duration3`=1, `rain_duration4`=1, `snow_duration1`=1 WHERE  `id`=136;
+UPDATE `zone` SET `rain_duration1`=1, `rain_duration2`=1, `rain_duration3`=1, `rain_duration4`=1, `snow_chance1`=50, `snow_chance2`=15, `snow_chance3`=15, `snow_chance4`=15, `snow_duration1`=24, `snow_duration2`=6, `snow_duration3`=2, `snow_duration4`=10 WHERE  `id`=139;
+UPDATE `zone` SET `rain_duration1`=24, `rain_duration2`=24, `rain_duration3`=24, `rain_duration4`=24 WHERE  `id`=404;
+UPDATE `zone` SET `rain_duration1`=24, `rain_duration2`=24, `rain_duration3`=24, `rain_duration4`=24 WHERE  `id`=405;
+UPDATE `zone` SET `rain_chance1`=25, `rain_chance2`=25, `rain_chance3`=50, `rain_chance4`=25, `rain_duration1`=1, `rain_duration2`=1, `rain_duration3`=1, `rain_duration4`=1 WHERE  `id`=143;
+UPDATE `zone` SET `rain_duration1`=1, `rain_duration2`=1, `rain_duration3`=1, `rain_duration4`=1 WHERE  `id`=394;
+UPDATE `zone` SET `rain_duration1`=1, `rain_duration2`=1, `rain_duration3`=1, `rain_duration4`=1 WHERE  `id`=416;
+UPDATE `zone` SET `rain_duration1`=24, `rain_duration2`=24, `rain_duration3`=24, `rain_duration4`=24 WHERE  `id`=253;
+UPDATE `zone` SET `rain_duration1`=24, `rain_duration2`=6, `rain_duration3`=2, `rain_duration4`=10 WHERE  `id`=252;
+UPDATE `zone` SET `rain_duration1`=24, `rain_duration2`=6, `rain_duration3`=2, `rain_duration4`=10, `snow_duration1`=12 WHERE  `id`=362;
+UPDATE `zone` SET `rain_duration1`=24, `rain_duration2`=6, `rain_duration3`=2, `rain_duration4`=10 WHERE  `id`=140;
+UPDATE `zone` SET `rain_chance1`=30, `rain_chance2`=30, `rain_chance3`=30, `rain_chance4`=30, `rain_duration1`=1, `rain_duration2`=1, `rain_duration3`=1, `rain_duration4`=1, `snow_chance1`=5, `snow_chance2`=5, `snow_chance3`=5, `snow_duration1`=1, `snow_duration2`=1, `snow_duration3`=1 WHERE  `id`=418;
+UPDATE `zone` SET `rain_duration1`=24, `rain_duration2`=24, `rain_duration3`=24, `rain_duration4`=24 WHERE  `id`=333;
+UPDATE `zone` SET `rain_duration1`=24, `rain_duration2`=6, `rain_duration3`=2, `rain_duration4`=10 WHERE  `id`=140;
+UPDATE `zone` SET `rain_duration1`=24, `rain_duration2`=6, `rain_duration3`=2, `rain_duration4`=10 WHERE  `id`=277;
+UPDATE `zone` SET `rain_duration1`=1, `rain_duration2`=1, `rain_duration3`=1, `rain_duration4`=1, `snow_duration1`=1, `snow_duration2`=1, `snow_duration3`=1, `snow_duration4`=1 WHERE  `id`=103;
+UPDATE `zone` SET `rain_chance1`=2, `rain_chance2`=2, `rain_chance3`=2, `rain_chance4`=2, `rain_duration1`=24, `rain_duration2`=6, `rain_duration3`=2, `rain_duration4`=10 WHERE  `id`=332;
+UPDATE `zone` SET `rain_chance1`=5, `rain_chance2`=5, `rain_chance3`=5, `rain_chance4`=5, `rain_duration1`=10, `rain_duration2`=10, `rain_duration3`=10, `rain_duration4`=10 WHERE  `id`=336;
+UPDATE `zone` SET `rain_chance1`=10, `rain_chance2`=10, `rain_chance3`=10, `rain_chance4`=10, `rain_duration1`=1, `rain_duration2`=1, `rain_duration3`=1, `rain_duration4`=1 WHERE  `id`=173;
+UPDATE `zone` SET `rain_chance1`=2, `rain_chance2`=8, `rain_chance3`=10, `rain_chance4`=3, `rain_duration1`=1, `rain_duration2`=2, `rain_duration3`=1, `rain_duration4`=1 WHERE  `id`=141;
+UPDATE `zone` SET `rain_chance1`=10, `rain_chance2`=10, `rain_chance3`=10, `rain_chance4`=10, `rain_duration1`=24, `rain_duration2`=6, `rain_duration3`=2, `rain_duration4`=10, `snow_chance1`=25, `snow_duration1`=24 WHERE  `id`=389;
+UPDATE `zone` SET `rain_duration1`=24, `rain_duration2`=24, `rain_duration3`=24, `rain_duration4`=24 WHERE  `id`=191;
+UPDATE `zone` SET `rain_chance1`=25, `rain_chance2`=25, `rain_chance3`=50, `rain_chance4`=25, `rain_duration1`=1, `rain_duration2`=1, `rain_duration3`=1, `rain_duration4`=1 WHERE  `id`=223;
+UPDATE `zone` SET `rain_duration1`=1, `rain_duration2`=2, `rain_duration3`=1, `rain_duration4`=1, `snow_duration1`=1 WHERE  `id`=49;
+UPDATE `zone` SET `rain_chance1`=10, `rain_chance2`=10, `rain_chance3`=10, `rain_chance4`=10, `rain_duration1`=24, `rain_duration2`=6, `rain_duration3`=2, `rain_duration4`=10 WHERE  `id`=281;
+UPDATE `zone` SET `rain_chance1`=6, `rain_chance2`=6, `rain_chance3`=6, `rain_chance4`=6, `rain_duration1`=12, `rain_duration2`=6, `rain_duration3`=2, `rain_duration4`=10 WHERE  `id`=288;
+UPDATE `zone` SET `rain_chance1`=10, `rain_chance2`=10, `rain_chance3`=10, `rain_chance4`=10, `rain_duration1`=24, `rain_duration2`=6, `rain_duration3`=2, `rain_duration4`=10 WHERE  `id`=290;
+UPDATE `zone` SET `rain_chance1`=10, `rain_chance2`=10, `rain_chance3`=10, `rain_chance4`=10, `rain_duration1`=24, `rain_duration2`=6, `rain_duration3`=2, `rain_duration4`=10 WHERE  `id`=170;
+UPDATE `zone` SET `rain_chance1`=10, `rain_chance2`=10, `rain_chance3`=10, `rain_chance4`=10, `rain_duration1`=24, `rain_duration2`=6, `rain_duration3`=2, `rain_duration4`=10 WHERE  `id`=27;
+UPDATE `zone` SET `rain_chance2`=100, `rain_chance3`=100, `rain_chance4`=50, `rain_duration2`=24, `rain_duration3`=24, `rain_duration4`=24, `snow_chance1`=100, `snow_chance4`=50, `snow_duration1`=24, `snow_duration4`=24 WHERE  `id`=289;
+UPDATE `zone` SET `rain_chance1`=10, `rain_chance2`=10, `rain_chance3`=10, `rain_chance4`=10, `rain_duration1`=24, `rain_duration2`=6, `rain_duration3`=2, `rain_duration4`=10 WHERE  `id`=285;
+UPDATE `zone` SET `rain_chance1`=10, `rain_chance2`=10, `rain_chance3`=10, `rain_chance4`=10, `rain_duration1`=24, `rain_duration2`=6, `rain_duration3`=2, `rain_duration4`=10 WHERE  `id`=171;
+UPDATE `zone` SET `rain_chance1`=10, `rain_chance2`=10, `rain_chance3`=10, `rain_chance4`=10, `rain_duration1`=24, `rain_duration2`=6, `rain_duration3`=2, `rain_duration4`=10 WHERE  `id`=282;
+UPDATE `zone` SET `rain_chance1`=10, `rain_chance2`=10, `rain_chance3`=10, `rain_chance4`=10, `rain_duration1`=24, `rain_duration2`=6, `rain_duration3`=2, `rain_duration4`=10 WHERE  `id`=283;
+UPDATE `zone` SET `rain_chance1`=10, `rain_chance2`=10, `rain_chance3`=10, `rain_chance4`=10, `rain_duration1`=24, `rain_duration2`=6, `rain_duration3`=2, `rain_duration4`=10 WHERE  `id`=280;
+UPDATE `zone` SET `rain_chance1`=10, `rain_chance2`=10, `rain_chance3`=10, `rain_chance4`=10, `rain_duration1`=12, `rain_duration2`=6, `rain_duration3`=2, `rain_duration4`=10 WHERE  `id`=254;
+)",
 	},
 	ManifestEntry{
 		.version = 9025,
@@ -351,7 +582,26 @@ ALTER TABLE `instance_lockout_player` RENAME TO  `instance_list_player` ;
 		.check = "SHOW COLUMNS FROM `spells_new` LIKE 'ConeStartAngle'",
 		.condition = "empty",
 		.match = "",
-		.sql = _2014_02_13_spells_new_update,
+		.sql = R"(
+ALTER TABLE `spells_new` CHANGE `field161` `not_reflectable` INT(11) NOT NULL DEFAULT '0';
+ALTER TABLE `spells_new` CHANGE `field151` `no_partial_resist` INT(11) NOT NULL DEFAULT '0';
+ALTER TABLE `spells_new` CHANGE `field189` `MinResist` INT(11) NOT NULL DEFAULT '0';
+ALTER TABLE `spells_new` CHANGE `field190` `MaxResist` INT(11) NOT NULL DEFAULT '0';
+ALTER TABLE `spells_new` CHANGE `field194` `ConeStartAngle` INT(11) NOT NULL DEFAULT '0';
+ALTER TABLE `spells_new` CHANGE `field195` `ConeStopAngle` INT(11) NOT NULL DEFAULT '0';
+ALTER TABLE `spells_new` CHANGE `field208` `rank` INT(11) NOT NULL DEFAULT '0';
+ALTER TABLE `spells_new` CHANGE `field159` `npc_no_los` INT(11) NOT NULL DEFAULT '0';
+ALTER TABLE `spells_new` CHANGE `field213` `NotOutofCombat` INT(11) NOT NULL DEFAULT '0';
+ALTER TABLE `spells_new` CHANGE `field214` `NotInCombat` INT(11) NOT NULL DEFAULT '0';
+ALTER TABLE `spells_new` CHANGE `field168` `IsDiscipline` INT(11) NOT NULL DEFAULT '0';
+ALTER TABLE `spells_new` CHANGE `field211` `CastRestriction` INT(11) NOT NULL DEFAULT '0';
+
+UPDATE altadv_vars SET sof_next_id = 8261 WHERE skill_id = 8232;
+UPDATE altadv_vars SET sof_next_id = 0 WHERE skill_id = 8261;
+UPDATE altadv_vars SET sof_current_level = 3 WHERE skill_id = 8261;
+
+
+)",
 	},
 	ManifestEntry{
 		.version = 9027,
@@ -359,7 +609,30 @@ ALTER TABLE `instance_lockout_player` RENAME TO  `instance_list_player` ;
 		.check = "SHOW COLUMNS FROM `character_buffs` LIKE 'caston_y'",
 		.condition = "empty",
 		.match = "",
-		.sql = _2014_02_20_buff_update,
+		.sql = R"(
+-- UPDATE BUFF TABLES
+ALTER TABLE `character_buffs` CHANGE `death_save_chance` `dot_rune` INT(10) NOT NULL DEFAULT '0';
+ALTER TABLE `merc_buffs` CHANGE `DeathSaveSuccessChance` `dot_rune` INT(10) NOT NULL DEFAULT '0';
+ALTER TABLE `botbuffs` CHANGE `DeathSaveSuccessChance` `dot_rune` INT(10) NOT NULL DEFAULT '0';
+
+ALTER TABLE `character_buffs` CHANGE `death_save_aa_chance` `caston_x` INT(10) NOT NULL DEFAULT '0';
+ALTER TABLE `merc_buffs` CHANGE `CasterAARank` `caston_x` INT(10) NOT NULL DEFAULT '0';
+ALTER TABLE `botbuffs` CHANGE `CasterAARank` `caston_x` INT(10) NOT NULL DEFAULT '0';
+
+ALTER TABLE `character_buffs` ADD `caston_y` INT(10) NOT NULL DEFAULT '0';
+ALTER TABLE `merc_buffs` ADD `caston_y` INT(10) NOT NULL DEFAULT '0';
+ALTER TABLE `botbuffs` ADD `caston_y` INT(10) NOT NULL DEFAULT '0';
+
+ALTER TABLE `character_buffs` ADD `caston_z` INT(10) NOT NULL DEFAULT '0';
+ALTER TABLE `merc_buffs` ADD `caston_z` INT(10) NOT NULL DEFAULT '0';
+ALTER TABLE `botbuffs` ADD `caston_z` INT(10) NOT NULL DEFAULT '0';
+
+ALTER TABLE `character_buffs` ADD `ExtraDIChance` INT(10) NOT NULL DEFAULT '0';
+ALTER TABLE `merc_buffs` ADD `ExtraDIChance` INT(10) NOT NULL DEFAULT '0';
+ALTER TABLE `botbuffs` ADD `ExtraDIChance` INT(10) NOT NULL DEFAULT '0';
+
+ALTER TABLE `spells_new` CHANGE `not_reflectable` `reflectable` INT(11) NOT NULL DEFAULT '0';
+)",
 	},
 	ManifestEntry{
 		.version = 9028,
@@ -433,7 +706,112 @@ alter table spawn_events add column `strict` tinyint(4) not null default 0;
 		.check = "SHOW COLUMNS FROM `npc_types` LIKE 'npc_spells_effects_id'",
 		.condition = "empty",
 		.match = "",
-		.sql = _2014_04_27_aispelleffects,
+		.sql = R"(
+-- Note: The data entered into the new table are only examples and can be deleted/modified as needed.
+
+ALTER TABLE  `npc_types` ADD  `npc_spells_effects_id` int( 11 ) UNSIGNED NOT NULL DEFAULT  '0' AFTER `npc_spells_id`;
+
+SET FOREIGN_KEY_CHECKS=0;
+
+-- ----------------------------
+-- Table structure for `npc_spells_effects`
+-- ----------------------------
+DROP TABLE IF EXISTS `npc_spells_effects`;
+CREATE TABLE `npc_spells_effects` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `name` tinytext,
+  `parent_list` int(11) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1080 DEFAULT CHARSET=latin1;
+
+-- ----------------------------
+-- Records of npc_spells_effects
+-- ----------------------------
+INSERT INTO `npc_spells_effects` VALUES ('1', 'Critical Melee [All Skills]', '0');
+INSERT INTO `npc_spells_effects` VALUES ('2', 'Damage Shield', '0');
+INSERT INTO `npc_spells_effects` VALUES ('3', 'Melee Haste', '0');
+INSERT INTO `npc_spells_effects` VALUES ('4', 'Resist Spell Chance', '0');
+INSERT INTO `npc_spells_effects` VALUES ('5', 'Resist Direct Dmg Spell Chance', '0');
+INSERT INTO `npc_spells_effects` VALUES ('6', 'Reflect Spell Chance', '0');
+INSERT INTO `npc_spells_effects` VALUES ('7', 'Spell Damage Shield', '0');
+INSERT INTO `npc_spells_effects` VALUES ('8', 'Melee Mitigation [All]', '0');
+INSERT INTO `npc_spells_effects` VALUES ('9', 'Avoid Melee', '0');
+INSERT INTO `npc_spells_effects` VALUES ('10', 'Riposte Chance', '0');
+INSERT INTO `npc_spells_effects` VALUES ('11', 'Dodge Chance', '0');
+INSERT INTO `npc_spells_effects` VALUES ('12', 'Parry Chance', '0');
+INSERT INTO `npc_spells_effects` VALUES ('13', 'Decrease Dmg Taken [2HS]', '0');
+INSERT INTO `npc_spells_effects` VALUES ('14', 'Increase Dmg Taken [1HS]', '0');
+INSERT INTO `npc_spells_effects` VALUES ('15', 'Block Chance', '0');
+INSERT INTO `npc_spells_effects` VALUES ('16', 'Melee Lifetap', '0');
+INSERT INTO `npc_spells_effects` VALUES ('17', 'Hit Chance', '0');
+INSERT INTO `npc_spells_effects` VALUES ('18', 'Increase Dmg [1HS]', '0');
+INSERT INTO `npc_spells_effects` VALUES ('19', 'Increase Archery Dmg', '0');
+INSERT INTO `npc_spells_effects` VALUES ('20', 'Flurry Chance', '0');
+INSERT INTO `npc_spells_effects` VALUES ('21', 'Add Damage [2HS]', '0');
+INSERT INTO `npc_spells_effects` VALUES ('22', 'Divine Aura', '0');
+INSERT INTO `npc_spells_effects` VALUES ('23', 'Cast CH on Kill', '0');
+INSERT INTO `npc_spells_effects` VALUES ('24', 'Critical Heal', '0');
+INSERT INTO `npc_spells_effects` VALUES ('25', 'Critical Direct Dmg', '0');
+INSERT INTO `npc_spells_effects` VALUES ('26', 'Heal Rate', '0');
+INSERT INTO `npc_spells_effects` VALUES ('27', 'Negate Damage Shield', '0');
+INSERT INTO `npc_spells_effects` VALUES ('28', 'Increase Spell Vulnerability [All]', '0');
+INSERT INTO `npc_spells_effects` VALUES ('29', 'Decrease Spell Vulnerability [FR]', '0');
+INSERT INTO `npc_spells_effects` VALUES ('30', 'Movement Speed', '0');
+
+
+SET FOREIGN_KEY_CHECKS=0;
+
+-- ----------------------------
+-- Table structure for `npc_spells_effects_entries`
+-- ----------------------------
+DROP TABLE IF EXISTS `npc_spells_effects_entries`;
+CREATE TABLE `npc_spells_effects_entries` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `npc_spells_effects_id` int(11) NOT NULL DEFAULT '0',
+  `spell_effect_id` smallint(5) NOT NULL DEFAULT '0',
+  `minlevel` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `maxlevel` tinyint(3) unsigned NOT NULL DEFAULT '255',
+  `se_base` int(11) NOT NULL DEFAULT '0',
+  `se_limit` int(11) NOT NULL DEFAULT '0',
+  `se_max` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `spellsid_spellid` (`npc_spells_effects_id`,`spell_effect_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=18374 DEFAULT CHARSET=latin1;
+
+-- ----------------------------
+-- Records of npc_spells_effects_entries
+-- ----------------------------
+INSERT INTO `npc_spells_effects_entries` VALUES ('1', '1', '169', '0', '255', '10000', '-1', '0');
+INSERT INTO `npc_spells_effects_entries` VALUES ('2', '2', '59', '0', '255', '-60', '0', '0');
+INSERT INTO `npc_spells_effects_entries` VALUES ('3', '3', '11', '0', '255', '150', '0', '0');
+INSERT INTO `npc_spells_effects_entries` VALUES ('4', '4', '180', '0', '255', '50', '0', '0');
+INSERT INTO `npc_spells_effects_entries` VALUES ('5', '5', '378', '0', '255', '85', '0', '0');
+INSERT INTO `npc_spells_effects_entries` VALUES ('6', '6', '158', '0', '255', '50', '0', '0');
+INSERT INTO `npc_spells_effects_entries` VALUES ('7', '7', '157', '0', '255', '-300', '0', '0');
+INSERT INTO `npc_spells_effects_entries` VALUES ('8', '8', '168', '0', '255', '-50', '0', '0');
+INSERT INTO `npc_spells_effects_entries` VALUES ('9', '9', '172', '0', '255', '10000', '0', '0');
+INSERT INTO `npc_spells_effects_entries` VALUES ('10', '10', '173', '0', '255', '10000', '0', '0');
+INSERT INTO `npc_spells_effects_entries` VALUES ('11', '11', '174', '0', '255', '10000', '0', '0');
+INSERT INTO `npc_spells_effects_entries` VALUES ('12', '12', '175', '0', '255', '10000', '0', '0');
+INSERT INTO `npc_spells_effects_entries` VALUES ('13', '13', '197', '0', '255', '-80', '3', '0');
+INSERT INTO `npc_spells_effects_entries` VALUES ('14', '14', '197', '0', '255', '80', '1', '0');
+INSERT INTO `npc_spells_effects_entries` VALUES ('15', '15', '188', '0', '255', '10000', '0', '0');
+INSERT INTO `npc_spells_effects_entries` VALUES ('16', '16', '178', '0', '255', '90', '0', '0');
+INSERT INTO `npc_spells_effects_entries` VALUES ('17', '17', '184', '0', '255', '10000', '-1', '0');
+INSERT INTO `npc_spells_effects_entries` VALUES ('18', '18', '185', '0', '255', '100', '1', '0');
+INSERT INTO `npc_spells_effects_entries` VALUES ('19', '19', '301', '0', '255', '100', '0', '0');
+INSERT INTO `npc_spells_effects_entries` VALUES ('20', '20', '279', '0', '255', '50', '0', '0');
+INSERT INTO `npc_spells_effects_entries` VALUES ('21', '21', '220', '0', '255', '2000', '1', '0');
+INSERT INTO `npc_spells_effects_entries` VALUES ('22', '22', '40', '0', '255', '1', '0', '0');
+INSERT INTO `npc_spells_effects_entries` VALUES ('23', '23', '360', '0', '255', '100', '13', '0');
+INSERT INTO `npc_spells_effects_entries` VALUES ('24', '24', '274', '0', '255', '90', '0', '0');
+INSERT INTO `npc_spells_effects_entries` VALUES ('25', '25', '294', '0', '255', '100', '200', '0');
+INSERT INTO `npc_spells_effects_entries` VALUES ('26', '26', '120', '0', '255', '50', '0', '0');
+INSERT INTO `npc_spells_effects_entries` VALUES ('27', '27', '382', '0', '255', '0', '55', '0');
+INSERT INTO `npc_spells_effects_entries` VALUES ('28', '28', '296', '0', '255', '1000', '-1', '0');
+INSERT INTO `npc_spells_effects_entries` VALUES ('29', '29', '296', '0', '255', '-50', '2', '0');
+INSERT INTO `npc_spells_effects_entries` VALUES ('30', '30', '3', '0', '255', '60', '0', '0');
+)",
 	},
 	ManifestEntry{
 		.version = 9036,
@@ -443,9 +821,6 @@ alter table spawn_events add column `strict` tinyint(4) not null default 0;
 		.match = "float",
 		.sql = R"(
 ALTER TABLE npc_types MODIFY slow_mitigation smallint(4) NOT NULL DEFAULT  '0';
-
-
-
 )",
 	},
 	ManifestEntry{
@@ -454,7 +829,30 @@ ALTER TABLE npc_types MODIFY slow_mitigation smallint(4) NOT NULL DEFAULT  '0';
 		.check = "SHOW COLUMNS FROM `npc_spells` LIKE 'engaged_no_sp_recast_min'",
 		.condition = "empty",
 		.match = "",
-		.sql = _2014_07_10_npc_spells,
+		.sql = R"(
+-- npc_types
+ALTER TABLE  `npc_types` ADD  `ammo_idfile` varchar( 30 ) NOT NULL DEFAULT  'IT10' AFTER `d_meele_texture2`;
+ALTER TABLE  `npc_types` ADD  `ranged_type` tinyint( 4 ) UNSIGNED NOT NULL DEFAULT  '7' AFTER `sec_melee_type`;
+ALTER TABLE  `npc_types` ADD  `Avoidance` mediumint(9) UNSIGNED NOT NULL DEFAULT  '0' AFTER `Accuracy`;
+
+-- npc spells
+ALTER TABLE  `npc_spells` ADD  `range_proc` smallint(5) NOT NULL DEFAULT '-1';
+ALTER TABLE  `npc_spells` ADD  `rproc_chance` smallint(5) NOT NULL DEFAULT '0';
+ALTER TABLE  `npc_spells` ADD  `defensive_proc` smallint(5) NOT NULL DEFAULT '-1';
+ALTER TABLE  `npc_spells` ADD  `dproc_chance` smallint(5) NOT NULL DEFAULT '0';
+ALTER TABLE  `npc_spells` ADD  `fail_recast` int(11) unsigned NOT NULL DEFAULT '0';
+ALTER TABLE  `npc_spells` ADD `engaged_no_sp_recast_min` int(11) unsigned NOT NULL DEFAULT '0';
+ALTER TABLE  `npc_spells` ADD `engaged_no_sp_recast_max` int(11) unsigned NOT NULL DEFAULT '0';
+ALTER TABLE  `npc_spells` ADD `engaged_b_self_chance` tinyint(3) unsigned NOT NULL DEFAULT '0';
+ALTER TABLE  `npc_spells` ADD  `engaged_b_other_chance` tinyint(3) unsigned NOT NULL DEFAULT '0';
+ALTER TABLE  `npc_spells` ADD `engaged_d_chance` tinyint(3) unsigned NOT NULL DEFAULT '0';
+ALTER TABLE  `npc_spells` ADD  `pursue_no_sp_recast_min` int(3) unsigned NOT NULL DEFAULT '0';
+ALTER TABLE  `npc_spells` ADD  `pursue_no_sp_recast_max` int(11) unsigned NOT NULL DEFAULT '0';
+ALTER TABLE  `npc_spells` ADD  `pursue_d_chance` tinyint(3) unsigned NOT NULL DEFAULT '0';
+ALTER TABLE  `npc_spells` ADD  `idle_no_sp_recast_min` int(11) unsigned NOT NULL DEFAULT '0';
+ALTER TABLE  `npc_spells` ADD  `idle_no_sp_recast_max` int(11) unsigned NOT NULL DEFAULT '0';
+ALTER TABLE  `npc_spells` ADD  `idle_b_chance` tinyint(11) unsigned NOT NULL DEFAULT '0';
+)",
 	},
 	ManifestEntry{
 		.version = 9041,
@@ -462,7 +860,25 @@ ALTER TABLE npc_types MODIFY slow_mitigation smallint(4) NOT NULL DEFAULT  '0';
 		.check = "SHOW COLUMNS FROM `spells_new` LIKE 'viral_range'",
 		.condition = "empty",
 		.match = "",
-		.sql = _2014_08_02_spells_new,
+		.sql = R"(
+-- spells new talbe update
+ALTER TABLE `spells_new` CHANGE `NotOutofCombat` `InCombat` INT(11) NOT NULL DEFAULT '0';
+ALTER TABLE `spells_new` CHANGE `NotInCombat` `OutofCombat` INT(11) NOT NULL DEFAULT '0';
+ALTER TABLE `spells_new` CHANGE `field201` `viral_range` INT(11) NOT NULL DEFAULT '0';
+ALTER TABLE `spells_new` CHANGE `field218` `aemaxtargets` INT(11) NOT NULL DEFAULT '0';
+ALTER TABLE  `spells_new` ADD  `field225` int( 11 ) NOT NULL DEFAULT  '0' AFTER `persistdeath`;
+ALTER TABLE  `spells_new` ADD  `field226` int( 11 ) NOT NULL DEFAULT  '0' AFTER `field225`;
+ALTER TABLE  `spells_new` ADD  `min_dist` float( 0 ) NOT NULL DEFAULT  '0' AFTER `field226`;
+ALTER TABLE  `spells_new` ADD  `min_dist_mod` float( 0 ) NOT NULL DEFAULT  '0' AFTER `min_dist`;
+ALTER TABLE  `spells_new` ADD  `max_dist` float( 0 ) NOT NULL DEFAULT  '0' AFTER `min_dist_mod`;
+ALTER TABLE  `spells_new` ADD  `max_dist_mod` float( 0 ) NOT NULL DEFAULT  '0' AFTER `max_dist`;
+ALTER TABLE  `spells_new` ADD  `min_range` int( 11 ) NOT NULL DEFAULT  '0' AFTER `max_dist_mod`;
+ALTER TABLE  `spells_new` ADD  `field232` int( 11 ) NOT NULL DEFAULT  '0' AFTER `min_range`;
+ALTER TABLE  `spells_new` ADD  `field233` int( 11 ) NOT NULL DEFAULT  '0' AFTER `field232`;
+ALTER TABLE  `spells_new` ADD  `field234` int( 11 ) NOT NULL DEFAULT  '0' AFTER `field233`;
+ALTER TABLE  `spells_new` ADD  `field235` int( 11 ) NOT NULL DEFAULT  '0' AFTER `field234`;
+ALTER TABLE  `spells_new` ADD  `field236` int( 11 ) NOT NULL DEFAULT  '0' AFTER `field235`;
+)",
 	},
 	ManifestEntry{
 		.version = 9042,
@@ -502,7 +918,256 @@ ALTER TABLE `merchantlist` ADD `probability` INT(3) NOT NULL DEFAULT '100' AFTER
 		.check = "SHOW TABLES LIKE 'qs_player_aa_rate_hourly'",
 		.condition = "empty",
 		.match = "",
-		.sql = _2014_08_23_complete_queryserv_table_structures,
+		.sql = R"(
+-- QS Table Structures --
+
+SET FOREIGN_KEY_CHECKS=0;
+
+-- ----------------------------
+-- Table structure for qs_merchant_transaction_record
+-- ----------------------------
+DROP TABLE IF EXISTS `qs_merchant_transaction_record`;
+CREATE TABLE `qs_merchant_transaction_record` (
+  `transaction_id` int(11) NOT NULL AUTO_INCREMENT,
+  `time` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `zone_id` int(11) DEFAULT '0',
+  `merchant_id` int(11) DEFAULT '0',
+  `merchant_pp` int(11) DEFAULT '0',
+  `merchant_gp` int(11) DEFAULT '0',
+  `merchant_sp` int(11) DEFAULT '0',
+  `merchant_cp` int(11) DEFAULT '0',
+  `merchant_items` mediumint(7) DEFAULT '0',
+  `char_id` int(11) DEFAULT '0',
+  `char_pp` int(11) DEFAULT '0',
+  `char_gp` int(11) DEFAULT '0',
+  `char_sp` int(11) DEFAULT '0',
+  `char_cp` int(11) DEFAULT '0',
+  `char_items` mediumint(7) DEFAULT '0',
+  PRIMARY KEY (`transaction_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Table structure for qs_merchant_transaction_record_entries
+-- ----------------------------
+DROP TABLE IF EXISTS `qs_merchant_transaction_record_entries`;
+CREATE TABLE `qs_merchant_transaction_record_entries` (
+  `event_id` int(11) DEFAULT '0',
+  `char_slot` mediumint(7) DEFAULT '0',
+  `item_id` int(11) DEFAULT '0',
+  `charges` mediumint(7) DEFAULT '0',
+  `aug_1` int(11) DEFAULT '0',
+  `aug_2` int(11) DEFAULT '0',
+  `aug_3` int(11) DEFAULT '0',
+  `aug_4` int(11) DEFAULT '0',
+  `aug_5` int(11) DEFAULT '0'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Table structure for qs_player_aa_rate_hourly
+-- ----------------------------
+DROP TABLE IF EXISTS `qs_player_aa_rate_hourly`;
+CREATE TABLE `qs_player_aa_rate_hourly` (
+  `char_id` int(11) NOT NULL DEFAULT '0',
+  `hour_time` int(11) NOT NULL,
+  `aa_count` varchar(11) DEFAULT NULL,
+  PRIMARY KEY (`char_id`,`hour_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- ----------------------------
+-- Table structure for qs_player_delete_record
+-- ----------------------------
+DROP TABLE IF EXISTS `qs_player_delete_record`;
+CREATE TABLE `qs_player_delete_record` (
+  `delete_id` int(11) NOT NULL AUTO_INCREMENT,
+  `time` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `char_id` int(11) DEFAULT '0',
+  `stack_size` mediumint(7) DEFAULT '0',
+  `char_items` mediumint(7) DEFAULT '0',
+  PRIMARY KEY (`delete_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Table structure for qs_player_delete_record_entries
+-- ----------------------------
+DROP TABLE IF EXISTS `qs_player_delete_record_entries`;
+CREATE TABLE `qs_player_delete_record_entries` (
+  `event_id` int(11) DEFAULT '0',
+  `char_slot` mediumint(7) DEFAULT '0',
+  `item_id` int(11) DEFAULT '0',
+  `charges` mediumint(7) DEFAULT '0',
+  `aug_1` int(11) DEFAULT '0',
+  `aug_2` int(11) DEFAULT '0',
+  `aug_3` int(11) DEFAULT '0',
+  `aug_4` int(11) DEFAULT '0',
+  `aug_5` int(11) DEFAULT '0'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Table structure for qs_player_events
+-- ----------------------------
+DROP TABLE IF EXISTS `qs_player_events`;
+CREATE TABLE `qs_player_events` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `char_id` int(11) DEFAULT '0',
+  `event` int(11) unsigned DEFAULT '0',
+  `event_desc` varchar(255) DEFAULT NULL,
+  `time` int(11) unsigned DEFAULT '0',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
+
+-- ----------------------------
+-- Table structure for qs_player_handin_record
+-- ----------------------------
+DROP TABLE IF EXISTS `qs_player_handin_record`;
+CREATE TABLE `qs_player_handin_record` (
+  `handin_id` int(11) NOT NULL AUTO_INCREMENT,
+  `time` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `quest_id` int(11) DEFAULT '0',
+  `char_id` int(11) DEFAULT '0',
+  `char_pp` int(11) DEFAULT '0',
+  `char_gp` int(11) DEFAULT '0',
+  `char_sp` int(11) DEFAULT '0',
+  `char_cp` int(11) DEFAULT '0',
+  `char_items` mediumint(7) DEFAULT '0',
+  `npc_id` int(11) DEFAULT '0',
+  `npc_pp` int(11) DEFAULT '0',
+  `npc_gp` int(11) DEFAULT '0',
+  `npc_sp` int(11) DEFAULT '0',
+  `npc_cp` int(11) DEFAULT '0',
+  `npc_items` mediumint(7) DEFAULT '0',
+  PRIMARY KEY (`handin_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Table structure for qs_player_handin_record_entries
+-- ----------------------------
+DROP TABLE IF EXISTS `qs_player_handin_record_entries`;
+CREATE TABLE `qs_player_handin_record_entries` (
+  `event_id` int(11) DEFAULT '0',
+  `action_type` char(6) DEFAULT 'action',
+  `char_slot` mediumint(7) DEFAULT '0',
+  `item_id` int(11) DEFAULT '0',
+  `charges` mediumint(7) DEFAULT '0',
+  `aug_1` int(11) DEFAULT '0',
+  `aug_2` int(11) DEFAULT '0',
+  `aug_3` int(11) DEFAULT '0',
+  `aug_4` int(11) DEFAULT '0',
+  `aug_5` int(11) DEFAULT '0'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Table structure for qs_player_move_record
+-- ----------------------------
+DROP TABLE IF EXISTS `qs_player_move_record`;
+CREATE TABLE `qs_player_move_record` (
+  `move_id` int(11) NOT NULL AUTO_INCREMENT,
+  `time` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `char_id` int(11) DEFAULT '0',
+  `from_slot` mediumint(7) DEFAULT '0',
+  `to_slot` mediumint(7) DEFAULT '0',
+  `stack_size` mediumint(7) DEFAULT '0',
+  `char_items` mediumint(7) DEFAULT '0',
+  `postaction` tinyint(1) DEFAULT '0',
+  PRIMARY KEY (`move_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Table structure for qs_player_move_record_entries
+-- ----------------------------
+DROP TABLE IF EXISTS `qs_player_move_record_entries`;
+CREATE TABLE `qs_player_move_record_entries` (
+  `event_id` int(11) DEFAULT '0',
+  `from_slot` mediumint(7) DEFAULT '0',
+  `to_slot` mediumint(7) DEFAULT '0',
+  `item_id` int(11) DEFAULT '0',
+  `charges` mediumint(7) DEFAULT '0',
+  `aug_1` int(11) DEFAULT '0',
+  `aug_2` int(11) DEFAULT '0',
+  `aug_3` int(11) DEFAULT '0',
+  `aug_4` int(11) DEFAULT '0',
+  `aug_5` int(11) DEFAULT '0'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Table structure for qs_player_npc_kill_record
+-- ----------------------------
+DROP TABLE IF EXISTS `qs_player_npc_kill_record`;
+CREATE TABLE `qs_player_npc_kill_record` (
+  `fight_id` int(11) NOT NULL AUTO_INCREMENT,
+  `npc_id` int(11) DEFAULT NULL,
+  `type` int(11) DEFAULT NULL,
+  `zone_id` int(11) DEFAULT NULL,
+  `time` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`fight_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Table structure for qs_player_npc_kill_record_entries
+-- ----------------------------
+DROP TABLE IF EXISTS `qs_player_npc_kill_record_entries`;
+CREATE TABLE `qs_player_npc_kill_record_entries` (
+  `event_id` int(11) DEFAULT '0',
+  `char_id` int(11) DEFAULT '0'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Table structure for qs_player_speech
+-- ----------------------------
+DROP TABLE IF EXISTS `qs_player_speech`;
+CREATE TABLE `qs_player_speech` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `from` varchar(64) NOT NULL,
+  `to` varchar(64) NOT NULL,
+  `message` varchar(256) NOT NULL,
+  `minstatus` smallint(5) NOT NULL,
+  `guilddbid` int(11) NOT NULL,
+  `type` tinyint(3) NOT NULL,
+  `timerecorded` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Table structure for qs_player_trade_record
+-- ----------------------------
+DROP TABLE IF EXISTS `qs_player_trade_record`;
+CREATE TABLE `qs_player_trade_record` (
+  `trade_id` int(11) NOT NULL AUTO_INCREMENT,
+  `time` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `char1_id` int(11) DEFAULT '0',
+  `char1_pp` int(11) DEFAULT '0',
+  `char1_gp` int(11) DEFAULT '0',
+  `char1_sp` int(11) DEFAULT '0',
+  `char1_cp` int(11) DEFAULT '0',
+  `char1_items` mediumint(7) DEFAULT '0',
+  `char2_id` int(11) DEFAULT '0',
+  `char2_pp` int(11) DEFAULT '0',
+  `char2_gp` int(11) DEFAULT '0',
+  `char2_sp` int(11) DEFAULT '0',
+  `char2_cp` int(11) DEFAULT '0',
+  `char2_items` mediumint(7) DEFAULT '0',
+  PRIMARY KEY (`trade_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Table structure for qs_player_trade_record_entries
+-- ----------------------------
+DROP TABLE IF EXISTS `qs_player_trade_record_entries`;
+CREATE TABLE `qs_player_trade_record_entries` (
+  `event_id` int(11) DEFAULT '0',
+  `from_id` int(11) DEFAULT '0',
+  `from_slot` mediumint(7) DEFAULT '0',
+  `to_id` int(11) DEFAULT '0',
+  `to_slot` mediumint(7) DEFAULT '0',
+  `item_id` int(11) DEFAULT '0',
+  `charges` mediumint(7) DEFAULT '0',
+  `aug_1` int(11) DEFAULT '0',
+  `aug_2` int(11) DEFAULT '0',
+  `aug_3` int(11) DEFAULT '0',
+  `aug_4` int(11) DEFAULT '0',
+  `aug_5` int(11) DEFAULT '0'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+)",
 	},
 	ManifestEntry{
 		.version = 9046,
@@ -781,7 +1446,19 @@ ALTER TABLE `npc_types` ADD `light` tinyint( 2 ) NOT NULL DEFAULT '0';
 		.check = "SHOW TABLES LIKE 'logsys_categories'",
 		.condition = "empty",
 		.match = "",
-		.sql = _2015_01_15_logsys_categories_table,
+		.sql = R"(
+SET FOREIGN_KEY_CHECKS=0;
+
+DROP TABLE IF EXISTS `logsys_categories`;
+CREATE TABLE `logsys_categories` (
+  `log_category_id` int(11) NOT NULL,
+  `log_category_description` varchar(150) DEFAULT NULL,
+  `log_to_console` smallint(11) DEFAULT '0',
+  `log_to_file` smallint(11) DEFAULT '0',
+  `log_to_gmsay` smallint(11) DEFAULT '0',
+  PRIMARY KEY (`log_category_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+)",
 	},
 	ManifestEntry{
 		.version = 9069,
@@ -999,7 +1676,92 @@ INSERT INTO `rule_values` (`rule_name`, `rule_value`, `notes`) VALUES ('Characte
 		.check = "SHOW TABLES LIKE 'aa_ranks'",
 		.condition = "empty",
 		.match = "",
-		.sql = _2015_07_02_aa_rework,
+		.sql = R"(
+DROP TABLE IF EXISTS `aa_ability`;
+CREATE TABLE IF NOT EXISTS `aa_ability` (
+  `id` int(10) unsigned NOT NULL,
+  `name` text NOT NULL,
+  `category` int(10) NOT NULL DEFAULT '-1',
+  `classes` int(10) NOT NULL DEFAULT '65535',
+  `races` int(10) NOT NULL DEFAULT '65535',
+  `drakkin_heritage` int(10) NOT NULL DEFAULT '127',
+  `deities` int(10) NOT NULL DEFAULT '131071',
+  `status` int(10) NOT NULL DEFAULT '0',
+  `type` int(10) NOT NULL DEFAULT '0',
+  `charges` int(11) NOT NULL DEFAULT '0',
+  `grant_only` tinyint(4) NOT NULL DEFAULT '0',
+  `first_rank_id` int(10) NOT NULL DEFAULT '-1',
+  `enabled` tinyint(3) unsigned NOT NULL DEFAULT '1',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+DROP TABLE IF EXISTS `aa_ranks`;
+CREATE TABLE IF NOT EXISTS `aa_ranks` (
+  `id` int(10) unsigned NOT NULL,
+  `upper_hotkey_sid` int(10) NOT NULL DEFAULT '-1',
+  `lower_hotkey_sid` int(10) NOT NULL DEFAULT '-1',
+  `title_sid` int(10) NOT NULL DEFAULT '-1',
+  `desc_sid` int(10) NOT NULL DEFAULT '-1',
+  `cost` int(10) NOT NULL DEFAULT '1',
+  `level_req` int(10) NOT NULL DEFAULT '51',
+  `spell` int(10) NOT NULL DEFAULT '-1',
+  `spell_type` int(10) NOT NULL DEFAULT '0',
+  `recast_time` int(10) NOT NULL DEFAULT '0',
+  `expansion` int(10) NOT NULL DEFAULT '0',
+  `prev_id` int(10) NOT NULL DEFAULT '-1',
+  `next_id` int(10) NOT NULL DEFAULT '-1',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- Dumping structure for table eqdb.aa_rank_effects
+DROP TABLE IF EXISTS `aa_rank_effects`;
+CREATE TABLE IF NOT EXISTS `aa_rank_effects` (
+  `rank_id` int(10) unsigned NOT NULL,
+  `slot` int(10) unsigned NOT NULL DEFAULT '1',
+  `effect_id` int(10) NOT NULL DEFAULT '0',
+  `base1` int(10) NOT NULL DEFAULT '0',
+  `base2` int(10) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`rank_id`,`slot`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+DROP TABLE IF EXISTS `aa_rank_prereqs`;
+CREATE TABLE IF NOT EXISTS `aa_rank_prereqs` (
+  `rank_id` int(10) unsigned NOT NULL,
+  `aa_id` int(10) NOT NULL,
+  `points` int(10) NOT NULL,
+  PRIMARY KEY (`rank_id`,`aa_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+RENAME TABLE `character_alternate_abilities` TO `character_alternate_abilities_old`;
+DROP TABLE IF EXISTS `character_alternate_abilities`;
+CREATE TABLE IF NOT EXISTS `character_alternate_abilities` (
+  `id` int(11) unsigned NOT NULL DEFAULT '0',
+  `aa_id` smallint(11) unsigned NOT NULL DEFAULT '0',
+  `aa_value` smallint(11) unsigned NOT NULL DEFAULT '0',
+  `charges` smallint(11) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`,`aa_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+ALTER TABLE `character_data` ADD COLUMN `aa_points_spent_old` INT(11) UNSIGNED NOT NULL DEFAULT '0' AFTER `aa_points_spent`;
+ALTER TABLE `character_data` ADD COLUMN `aa_points_old` INT(11) UNSIGNED NOT NULL DEFAULT '0' AFTER `aa_points`;
+
+UPDATE `character_data` SET `aa_points_spent_old` = `aa_points_spent`, `aa_points_old` = `aa_points`;
+
+ -- sanity checks since if someone never logged in after the db conversion there is junk data
+ -- I don't have a good way of addressing this so I keep the old data in aa_points_spent_old and aa_points_old and character_alternate_abilities_old
+ -- for anyone who wants to personally polish up their player data
+UPDATE `character_data` SET `aa_points_spent` = 2700 WHERE `aa_points_spent` > 2700;
+UPDATE `character_data` SET `aa_points` = 5000 WHERE `aa_points` > 5000;
+
+ -- another sanity check, give people a few levels below 51 to keep their points
+UPDATE `character_data` SET `aa_points_spent` = 0 WHERE `level` < 48;
+UPDATE `character_data` SET `aa_points` = 0 WHERE `level` < 48;
+
+ -- aa refund here
+UPDATE `character_data` SET `aa_points` = `aa_points_spent` + `aa_points`;
+UPDATE `character_data` SET `aa_points_spent` = 0;
+
+)",
 	},
 	ManifestEntry{
 		.version = 9087,
@@ -1063,7 +1825,103 @@ INSERT INTO `rule_values` VALUES
 		.check = "SHOW TABLES LIKE 'perl_event_export_settings'",
 		.condition = "empty",
 		.match = "",
-		.sql = _2015_11_01_perl_event_export_settings,
+		.sql = R"(
+CREATE TABLE `perl_event_export_settings` (
+  `event_id` int(11) NOT NULL,
+  `event_description` varchar(150) DEFAULT NULL,
+  `export_qglobals` smallint(11) DEFAULT '0',
+  `export_mob` smallint(11) DEFAULT '0',
+  `export_zone` smallint(11) DEFAULT '0',
+  `export_item` smallint(11) DEFAULT '0',
+  `export_event` smallint(11) DEFAULT '0',
+  PRIMARY KEY (`event_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- ----------------------------
+-- Records of perl_event_export_settings
+-- ----------------------------
+INSERT INTO `perl_event_export_settings` VALUES ('0', 'EVENT_SAY', '1', '1', '1', '1', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('1', 'EVENT_ITEM', '1', '1', '1', '1', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('2', 'EVENT_DEATH', '1', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('3', 'EVENT_SPAWN', '1', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('4', 'EVENT_ATTACK', '0', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('5', 'EVENT_COMBAT', '1', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('6', 'EVENT_AGGRO', '0', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('7', 'EVENT_SLAY', '0', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('8', 'EVENT_NPC_SLAY', '0', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('9', 'EVENT_WAYPOINT_ARRIVE', '0', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('10', 'EVENT_WAYPOINT_DEPART', '0', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('11', 'EVENT_TIMER', '0', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('12', 'EVENT_SIGNAL', '1', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('13', 'EVENT_HP', '1', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('14', 'EVENT_ENTER', '1', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('15', 'EVENT_EXIT', '0', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('16', 'EVENT_ENTERZONE', '1', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('17', 'EVENT_CLICKDOOR', '1', '1', '1', '1', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('18', 'EVENT_LOOT', '1', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('19', 'EVENT_ZONE', '0', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('20', 'EVENT_LEVEL_UP', '0', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('21', 'EVENT_KILLED_MERIT', '0', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('22', 'EVENT_CAST_ON', '0', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('23', 'EVENT_TASKACCEPTED', '0', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('24', 'EVENT_TASK_STAGE_COMPLETE', '1', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('25', 'EVENT_TASK_UPDATE', '1', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('26', 'EVENT_TASK_COMPLETE', '1', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('27', 'EVENT_TASK_FAIL', '0', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('28', 'EVENT_AGGRO_SAY', '0', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('29', 'EVENT_PLAYER_PICKUP', '0', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('30', 'EVENT_POPUPRESPONSE', '1', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('31', 'EVENT_ENVIRONMENTAL_DAMAGE', '0', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('32', 'EVENT_PROXIMITY_SAY', '1', '1', '1', '1', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('33', 'EVENT_CAST', '0', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('34', 'EVENT_CAST_BEGIN', '0', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('35', 'EVENT_SCALE_CALC', '0', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('36', 'EVENT_ITEM_ENTER_ZONE', '0', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('37', 'EVENT_TARGET_CHANGE', '0', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('38', 'EVENT_HATE_LIST', '0', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('39', 'EVENT_SPELL_EFFECT_CLIENT', '0', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('40', 'EVENT_SPELL_EFFECT_NPC', '0', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('41', 'EVENT_SPELL_EFFECT_BUFF_TIC_CLIENT', '0', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('42', 'EVENT_SPELL_EFFECT_BUFF_TIC_NPC', '0', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('43', 'EVENT_SPELL_FADE', '0', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('44', 'EVENT_SPELL_EFFECT_TRANSLOCATE_COMPLETE', '0', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('45', 'EVENT_COMBINE_SUCCESS', '0', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('46', 'EVENT_COMBINE_FAILURE', '0', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('47', 'EVENT_ITEM_CLICK', '0', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('48', 'EVENT_ITEM_CLICK_CAST', '0', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('49', 'EVENT_GROUP_CHANGE', '0', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('50', 'EVENT_FORAGE_SUCCESS', '0', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('51', 'EVENT_FORAGE_FAILURE', '0', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('52', 'EVENT_FISH_START', '0', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('53', 'EVENT_FISH_SUCCESS', '0', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('54', 'EVENT_FISH_FAILURE', '0', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('55', 'EVENT_CLICK_OBJECT', '0', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('56', 'EVENT_DISCOVER_ITEM', '0', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('57', 'EVENT_DISCONNECT', '1', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('58', 'EVENT_CONNECT', '1', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('59', 'EVENT_ITEM_TICK', '0', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('60', 'EVENT_DUEL_WIN', '0', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('61', 'EVENT_DUEL_LOSE', '0', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('62', 'EVENT_ENCOUNTER_LOAD', '0', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('63', 'EVENT_ENCOUNTER_UNLOAD', '0', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('64', 'EVENT_SAY', '1', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('65', 'EVENT_DROP_ITEM', '0', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('66', 'EVENT_DESTROY_ITEM', '0', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('67', 'EVENT_FEIGN_DEATH', '0', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('68', 'EVENT_WEAPON_PROC', '0', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('69', 'EVENT_EQUIP_ITEM', '0', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('70', 'EVENT_UNEQUIP_ITEM', '0', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('71', 'EVENT_AUGMENT_ITEM', '0', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('72', 'EVENT_UNAUGMENT_ITEM', '0', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('73', 'EVENT_AUGMENT_INSERT', '0', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('74', 'EVENT_AUGMENT_REMOVE', '0', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('75', 'EVENT_ENTER_AREA', '0', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('76', 'EVENT_LEAVE_AREA', '0', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('77', 'EVENT_RESPAWN', '0', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('78', 'EVENT_DEATH_COMPLETE', '1', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('79', 'EVENT_UNHANDLED_OPCODE', '0', '1', '1', '0', '1');
+INSERT INTO `perl_event_export_settings` VALUES ('80', 'EVENT_TICK', '0', '1', '1', '0', '1');
+)",
 	},
 	ManifestEntry{
 		.version = 9089,
@@ -1359,7 +2217,28 @@ DELETE FROM `npc_spells_entries` WHERE `npc_spells_id` >= '701' AND `npc_spells_
 		.check = "SELECT * FROM `npc_spells` WHERE `id` = '701' AND `name` = 'Cleric Bot'",
 		.condition = "not_empty",
 		.match = "",
-		.sql = _2017_02_26_npc_spells_update_for_bots,
+		.sql = R"(
+-- Re-ordered entries according to actual class values and added melee types (for future expansion)
+DELETE FROM `npc_spells` WHERE `id` >= '701' AND `id` <= '712';
+
+INSERT INTO `npc_spells` VALUES (3001, 'Warrior Bot', 0, -1, 3, -1, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+INSERT INTO `npc_spells` VALUES (3002, 'Cleric Bot', 0, -1, 3, -1, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+INSERT INTO `npc_spells` VALUES (3003, 'Paladin Bot', 0, -1, 3, -1, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+INSERT INTO `npc_spells` VALUES (3004, 'Ranger Bot', 0, -1, 3, -1, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+INSERT INTO `npc_spells` VALUES (3005, 'Shadowknight Bot', 0, -1, 3, -1, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+INSERT INTO `npc_spells` VALUES (3006, 'Druid Bot', 0, -1, 3, -1, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+INSERT INTO `npc_spells` VALUES (3007, 'Monk Bot', 0, -1, 3, -1, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+INSERT INTO `npc_spells` VALUES (3008, 'Bard Bot', 0, -1, 3, -1, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+INSERT INTO `npc_spells` VALUES (3009, 'Rogue Bot', 0, -1, 3, -1, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+INSERT INTO `npc_spells` VALUES (3010, 'Shaman Bot', 0, -1, 3, -1, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+INSERT INTO `npc_spells` VALUES (3011, 'Necromancer Bot', 0, -1, 3, -1, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+INSERT INTO `npc_spells` VALUES (3012, 'Wizard Bot', 0, -1, 3, -1, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+INSERT INTO `npc_spells` VALUES (3013, 'Magician Bot', 0, -1, 3, -1, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+INSERT INTO `npc_spells` VALUES (3014, 'Enchanter Bot', 0, -1, 3, -1, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+INSERT INTO `npc_spells` VALUES (3015, 'Beastlord Bot', 0, -1, 3, -1, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+INSERT INTO `npc_spells` VALUES (3016, 'Berserker Bot', 0, -1, 3, -1, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+
+)",
 	},
 	ManifestEntry{
 		.version = 9107,
@@ -1456,7 +2335,30 @@ UPDATE `npc_types` SET `show_name` = 0, `untargetable` = 1 WHERE `bodytype` >= 6
 		.check = "SHOW TABLES LIKE 'auras'",
 		.condition = "empty",
 		.match = "",
-		.sql = _2017_07_22_aura,
+		.sql = R"(
+CREATE TABLE `auras` (
+	`type` INT(10) NOT NULL,
+	`npc_type` INT(10) NOT NULL,
+	`name` VARCHAR(64) NOT NULL,
+	`spell_id` INT(10) NOT NULL,
+	`distance` INT(10) NOT NULL DEFAULT 60,
+	`aura_type` INT(10) NOT NULL DEFAULT 1,
+	`spawn_type` INT(10) NOT NULL DEFAULT 0,
+	`movement` INT(10) NOT NULL DEFAULT 0,
+	`duration` INT(10) NOT NULL DEFAULT 5400,
+	`icon` INT(10) NOT NULL DEFAULT -1,
+	`cast_time` INT(10) NOT NULL DEFAULT 0,
+	PRIMARY KEY(`type`)
+);
+
+CREATE TABLE `character_auras` (
+	`id` INT(10) NOT NULL,
+	`slot` TINYINT(10) NOT NULL,
+	`spell_id` INT(10) NOT NULL,
+	PRIMARY KEY (`id`, `slot`)
+);
+
+)",
 	},
 	ManifestEntry{
 		.version = 9115,
@@ -1643,7 +2545,30 @@ CREATE TABLE `data_buckets` (
 		.check = "SHOW COLUMNS FROM `tasks` LIKE 'type'",
 		.condition = "empty",
 		.match = "",
-		.sql = _2018_07_09_tasks,
+		.sql = R"(
+ALTER TABLE `tasks` ADD `type` TINYINT NOT NULL DEFAULT '0' AFTER `id`;
+ALTER TABLE `tasks` ADD `duration_code` TINYINT NOT NULL DEFAULT '0' AFTER `duration`;
+UPDATE `tasks` SET `type` = '2'; -- we were treating them all as quests
+ALTER TABLE `character_tasks` ADD `type` TINYINT NOT NULL DEFAULT '0' AFTER `slot`;
+UPDATE `character_tasks` SET `type` = '2'; -- we were treating them all as quests
+ALTER TABLE `activities` ADD `target_name` VARCHAR(64) NOT NULL DEFAULT '' AFTER `activitytype`;
+ALTER TABLE `activities` ADD `item_list` VARCHAR(128) NOT NULL DEFAULT '' AFTER `target_name`;
+ALTER TABLE `activities` ADD `skill_list` VARCHAR(64) NOT NULL DEFAULT '-1' AFTER `item_list`;
+ALTER TABLE `activities` ADD `spell_list` VARCHAR(64) NOT NULL DEFAULT '0' AFTER `skill_list`;
+ALTER TABLE `activities` ADD `description_override` VARCHAR(128) NOT NULL DEFAULT '' AFTER `spell_list`;
+ALTER TABLE `activities` ADD `zones` VARCHAR(64) NOT NULL DEFAULT '' AFTER `zoneid`;
+UPDATE `activities` SET `description_override` = `text3`;
+UPDATE `activities` SET `target_name` = `text1`;
+UPDATE `activities` SET `item_list` = `text2`;
+UPDATE `activities` SET `zones` = `zoneid`; -- should be safe for us ...
+ALTER TABLE `activities` DROP COLUMN `text1`;
+ALTER TABLE `activities` DROP COLUMN `text2`;
+ALTER TABLE `activities` DROP COLUMN `text3`;
+ALTER TABLE `activities` DROP COLUMN `zoneid`;
+ALTER TABLE `tasks` DROP COLUMN `startzone`;
+ALTER TABLE `tasks` ADD `faction_reward` INT(10) NOT NULL DEFAULT '0';
+RENAME TABLE `activities` TO `task_activities`;
+)",
 	},
 	ManifestEntry{
 		.version = 9125,
@@ -1690,14 +2615,6 @@ ALTER TABLE `zone` ADD `npc_max_aggro_dist` INT NOT NULL DEFAULT '600';
 DROP TABLE IF EXISTS `inventory_version`;
 
 )",
-	},
-	ManifestEntry{
-		.version = 9129,
-		.description = "2018_08_13_inventory_update.sql",
-		.check = "SHOW TABLES LIKE 'inventory_versions'",
-		.condition = "empty",
-		.match = "",
-		.sql = _2018_08_13_inventory_update,
 	},
 	ManifestEntry{
 		.version = 9130,
@@ -2386,15 +3303,20 @@ REPLACE INTO `command_settings` VALUES ('profanity', 150, 'prof');
 		.check = "SHOW TABLES LIKE 'faction_base_data'",
 		.condition = "empty",
 		.match = "",
-		.sql = _2018_12_12_client_faction_tables,
-	},
-	ManifestEntry{
-		.version = 9138,
-		.description = "2018_12_12_convert_to_client_functions.sql",
-		.check = "SELECT `id` FROM `faction_list` WHERE `id` > 4999",
-		.condition = "empty",
-		.match = "",
-		.sql = _2018_12_12_convert_to_client_functions,
+		.sql = R"(
+--
+-- Table structure for table `client_faction_associations`
+--
+
+DROP TABLE IF EXISTS `client_faction_associations`;
+
+CREATE TABLE `client_faction_associations` (
+  `faction_id` int(11) NOT NULL,
+  `other_faction_id` int(11) NOT NULL,
+  `mod` int(11) DEFAULT NULL,
+  PRIMARY KEY (`faction_id`,`other_faction_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+)",
 	},
 	ManifestEntry{
 		.version = 9139,
@@ -2404,7 +3326,6 @@ REPLACE INTO `command_settings` VALUES ('profanity', 150, 'prof');
 		.match = "",
 		.sql = R"(
 ALTER TABLE `npc_types` ADD COLUMN `model` SMALLINT(5) NOT NULL DEFAULT '0' AFTER `stuck_behavior`;
-
 )",
 	},
 	ManifestEntry{
@@ -2457,14 +3378,6 @@ ALTER TABLE `account`
 	ADD UNIQUE INDEX `ls_id_lsaccount_id` (`ls_id`, `lsaccount_id`);
 
 )",
-	},
-	ManifestEntry{
-		.version = 9144,
-		.description = "2019_11_09_logsys_description_update.sql",
-		.check = "SELECT * FROM db_version WHERE version >= 9143",
-		.condition = "empty",
-		.match = "",
-		.sql = _2019_11_09_logsys_description_update,
 	},
 	ManifestEntry{
 		.version = 9145,
@@ -2554,7 +3467,103 @@ ALTER TABLE `npc_types` ADD COLUMN `always_aggro` tinyint(1) NOT NULL DEFAULT 0;
 		.check = "SELECT * FROM db_version WHERE version >= 9152",
 		.condition = "empty",
 		.match = "",
-		.sql = _2020_03_09_convert_myisam_to_innodb,
+		.sql = R"(
+ALTER TABLE `account_flags` ENGINE=InnoDB;
+ALTER TABLE `account_ip` ENGINE=InnoDB;
+ALTER TABLE `account` ENGINE=InnoDB;
+ALTER TABLE `adventure_template_entry_flavor` ENGINE=InnoDB;
+ALTER TABLE `adventure_template_entry` ENGINE=InnoDB;
+ALTER TABLE `altadv_vars` ENGINE=InnoDB;
+ALTER TABLE `alternate_currency` ENGINE=InnoDB;
+ALTER TABLE `banned_ips` ENGINE=InnoDB;
+ALTER TABLE `base_data` ENGINE=InnoDB;
+ALTER TABLE `blocked_spells` ENGINE=InnoDB;
+ALTER TABLE `buyer` ENGINE=InnoDB;
+ALTER TABLE `char_create_combinations` ENGINE=InnoDB;
+ALTER TABLE `char_create_point_allocations` ENGINE=InnoDB;
+ALTER TABLE `character_activities` ENGINE=InnoDB;
+ALTER TABLE `character_enabledtasks` ENGINE=InnoDB;
+ALTER TABLE `character_tasks` ENGINE=InnoDB;
+ALTER TABLE `chatchannels` ENGINE=InnoDB;
+ALTER TABLE `completed_tasks` ENGINE=InnoDB;
+ALTER TABLE `damageshieldtypes` ENGINE=InnoDB;
+ALTER TABLE `discovered_items` ENGINE=InnoDB;
+ALTER TABLE `eqtime` ENGINE=InnoDB;
+ALTER TABLE `eventlog` ENGINE=InnoDB;
+ALTER TABLE `faction_list_mod` ENGINE=InnoDB;
+ALTER TABLE `faction_list` ENGINE=InnoDB;
+ALTER TABLE `faction_values` ENGINE=InnoDB;
+ALTER TABLE `friends` ENGINE=InnoDB;
+ALTER TABLE `goallists` ENGINE=InnoDB;
+ALTER TABLE `guild_bank` ENGINE=InnoDB;
+ALTER TABLE `guild_members` ENGINE=InnoDB;
+ALTER TABLE `guild_ranks` ENGINE=InnoDB;
+ALTER TABLE `guild_relations` ENGINE=InnoDB;
+ALTER TABLE `guilds` ENGINE=InnoDB;
+ALTER TABLE `hackers` ENGINE=InnoDB;
+ALTER TABLE `horses` ENGINE=InnoDB;
+ALTER TABLE `inventory_versions` ENGINE=InnoDB;
+ALTER TABLE `item_tick` ENGINE=InnoDB;
+ALTER TABLE `items` ENGINE=InnoDB;
+ALTER TABLE `keyring` ENGINE=InnoDB;
+ALTER TABLE `launcher_zones` ENGINE=InnoDB;
+ALTER TABLE `launcher` ENGINE=InnoDB;
+ALTER TABLE `ldon_trap_entries` ENGINE=InnoDB;
+ALTER TABLE `ldon_trap_templates` ENGINE=InnoDB;
+ALTER TABLE `lfguild` ENGINE=InnoDB;
+ALTER TABLE `lootdrop_entries` ENGINE=InnoDB;
+ALTER TABLE `lootdrop` ENGINE=InnoDB;
+ALTER TABLE `loottable_entries` ENGINE=InnoDB;
+ALTER TABLE `loottable` ENGINE=InnoDB;
+ALTER TABLE `mail` ENGINE=InnoDB;
+ALTER TABLE `merc_armorinfo` ENGINE=InnoDB;
+ALTER TABLE `merc_buffs` ENGINE=InnoDB;
+ALTER TABLE `merc_inventory` ENGINE=InnoDB;
+ALTER TABLE `merc_merchant_entries` ENGINE=InnoDB;
+ALTER TABLE `merc_merchant_template_entries` ENGINE=InnoDB;
+ALTER TABLE `merc_merchant_templates` ENGINE=InnoDB;
+ALTER TABLE `merc_name_types` ENGINE=InnoDB;
+ALTER TABLE `merc_npc_types` ENGINE=InnoDB;
+ALTER TABLE `merc_spell_list_entries` ENGINE=InnoDB;
+ALTER TABLE `merc_spell_lists` ENGINE=InnoDB;
+ALTER TABLE `merc_stance_entries` ENGINE=InnoDB;
+ALTER TABLE `merc_stats` ENGINE=InnoDB;
+ALTER TABLE `merc_subtypes` ENGINE=InnoDB;
+ALTER TABLE `merc_templates` ENGINE=InnoDB;
+ALTER TABLE `merc_types` ENGINE=InnoDB;
+ALTER TABLE `merc_weaponinfo` ENGINE=InnoDB;
+ALTER TABLE `mercs` ENGINE=InnoDB;
+ALTER TABLE `name_filter` ENGINE=InnoDB;
+ALTER TABLE `npc_types` ENGINE=InnoDB;
+ALTER TABLE `object_contents` ENGINE=InnoDB;
+ALTER TABLE `petitions` ENGINE=InnoDB;
+ALTER TABLE `pets_equipmentset_entries` ENGINE=InnoDB;
+ALTER TABLE `pets_equipmentset` ENGINE=InnoDB;
+ALTER TABLE `player_titlesets` ENGINE=InnoDB;
+ALTER TABLE `proximities` ENGINE=InnoDB;
+ALTER TABLE `races` ENGINE=InnoDB;
+ALTER TABLE `raid_details` ENGINE=InnoDB;
+ALTER TABLE `raid_leaders` ENGINE=InnoDB;
+ALTER TABLE `raid_members` ENGINE=InnoDB;
+ALTER TABLE `rule_sets` ENGINE=InnoDB;
+ALTER TABLE `rule_values` ENGINE=InnoDB;
+ALTER TABLE `saylink` ENGINE=InnoDB;
+ALTER TABLE `sharedbank` ENGINE=InnoDB;
+ALTER TABLE `skill_caps` ENGINE=InnoDB;
+ALTER TABLE `spell_globals` ENGINE=InnoDB;
+ALTER TABLE `spells_new` ENGINE=InnoDB;
+ALTER TABLE `task_activities` ENGINE=InnoDB;
+ALTER TABLE `tasks` ENGINE=InnoDB;
+ALTER TABLE `tasksets` ENGINE=InnoDB;
+ALTER TABLE `timers` ENGINE=InnoDB;
+ALTER TABLE `titles` ENGINE=InnoDB;
+ALTER TABLE `trader_audit` ENGINE=InnoDB;
+ALTER TABLE `trader` ENGINE=InnoDB;
+ALTER TABLE `tradeskill_recipe_entries` ENGINE=InnoDB;
+ALTER TABLE `tradeskill_recipe` ENGINE=InnoDB;
+ALTER TABLE `variables` ENGINE=InnoDB;
+ALTER TABLE `veteran_reward_templates` ENGINE=InnoDB;
+)",
 	},
 	ManifestEntry{
 		.version = 9153,
@@ -2573,7 +3582,112 @@ ALTER TABLE `items` CHANGE `UNK219` `subtype` int(11) not null default '0';
 		.check = "SHOW COLUMNS from `zone` LIKE 'min_expansion'",
 		.condition = "empty",
 		.match = "",
-		.sql = _2020_04_11_expansions_content_filters,
+		.sql = R"(
+-- zone
+ALTER TABLE `zone` ADD `min_expansion` TINYINT(4) UNSIGNED NOT NULL DEFAULT '0';
+ALTER TABLE `zone` ADD `max_expansion` TINYINT(4) UNSIGNED NOT NULL DEFAULT '0';
+ALTER TABLE `zone` ADD `content_flags` varchar(100) NULL;
+
+-- doors
+ALTER TABLE `doors` ADD `min_expansion` TINYINT(4) UNSIGNED NOT NULL DEFAULT '0';
+ALTER TABLE `doors` ADD `max_expansion` TINYINT(4) UNSIGNED NOT NULL DEFAULT '0';
+ALTER TABLE `doors` ADD `content_flags` varchar(100) NULL;
+
+-- object
+ALTER TABLE `object` ADD `min_expansion` TINYINT(4) UNSIGNED NOT NULL DEFAULT '0';
+ALTER TABLE `object` ADD `max_expansion` TINYINT(4) UNSIGNED NOT NULL DEFAULT '0';
+ALTER TABLE `object` ADD `content_flags` varchar(100) NULL;
+
+-- spawn2
+ALTER TABLE `spawn2` ADD `min_expansion` TINYINT(4) UNSIGNED NOT NULL DEFAULT '0';
+ALTER TABLE `spawn2` ADD `max_expansion` TINYINT(4) UNSIGNED NOT NULL DEFAULT '0';
+ALTER TABLE `spawn2` ADD `content_flags` varchar(100) NULL;
+
+-- tradeskill_recipe
+ALTER TABLE `tradeskill_recipe` ADD `min_expansion` TINYINT(4) UNSIGNED NOT NULL DEFAULT '0';
+ALTER TABLE `tradeskill_recipe` ADD `max_expansion` TINYINT(4) UNSIGNED NOT NULL DEFAULT '0';
+ALTER TABLE `tradeskill_recipe` ADD `content_flags` varchar(100) NULL;
+
+-- merchantlist
+ALTER TABLE `merchantlist` ADD `min_expansion` TINYINT(4) UNSIGNED NOT NULL DEFAULT '0';
+ALTER TABLE `merchantlist` ADD `max_expansion` TINYINT(4) UNSIGNED NOT NULL DEFAULT '0';
+ALTER TABLE `merchantlist` ADD `content_flags` varchar(100) NULL;
+
+-- global_loot
+ALTER TABLE `global_loot` ADD `min_expansion` TINYINT(4) UNSIGNED NOT NULL DEFAULT '0';
+ALTER TABLE `global_loot` ADD `max_expansion` TINYINT(4) UNSIGNED NOT NULL DEFAULT '0';
+ALTER TABLE `global_loot` ADD `content_flags` varchar(100) NULL;
+
+-- fishing
+ALTER TABLE `fishing` ADD `min_expansion` TINYINT(4) UNSIGNED NOT NULL DEFAULT '0';
+ALTER TABLE `fishing` ADD `max_expansion` TINYINT(4) UNSIGNED NOT NULL DEFAULT '0';
+ALTER TABLE `fishing` ADD `content_flags` varchar(100) NULL;
+
+-- forage
+ALTER TABLE `forage` ADD `min_expansion` TINYINT(4) UNSIGNED NOT NULL DEFAULT '0';
+ALTER TABLE `forage` ADD `max_expansion` TINYINT(4) UNSIGNED NOT NULL DEFAULT '0';
+ALTER TABLE `forage` ADD `content_flags` varchar(100) NULL;
+
+-- ground_spawns
+ALTER TABLE `ground_spawns` ADD `min_expansion` TINYINT(4) UNSIGNED NOT NULL DEFAULT '0';
+ALTER TABLE `ground_spawns` ADD `max_expansion` TINYINT(4) UNSIGNED NOT NULL DEFAULT '0';
+ALTER TABLE `ground_spawns` ADD `content_flags` varchar(100) NULL;
+
+-- loottable
+ALTER TABLE `loottable` ADD `min_expansion` TINYINT(4) UNSIGNED NOT NULL DEFAULT '0';
+ALTER TABLE `loottable` ADD `max_expansion` TINYINT(4) UNSIGNED NOT NULL DEFAULT '0';
+ALTER TABLE `loottable` ADD `content_flags` varchar(100) NULL;
+
+-- lootdrop
+ALTER TABLE `lootdrop` ADD `min_expansion` TINYINT(4) UNSIGNED NOT NULL DEFAULT '0';
+ALTER TABLE `lootdrop` ADD `max_expansion` TINYINT(4) UNSIGNED NOT NULL DEFAULT '0';
+ALTER TABLE `lootdrop` ADD `content_flags` varchar(100) NULL;
+
+-- starting_items
+ALTER TABLE `starting_items` ADD `min_expansion` TINYINT(4) UNSIGNED NOT NULL DEFAULT '0';
+ALTER TABLE `starting_items` ADD `max_expansion` TINYINT(4) UNSIGNED NOT NULL DEFAULT '0';
+ALTER TABLE `starting_items` ADD `content_flags` varchar(100) NULL;
+
+-- start_zones
+ALTER TABLE `start_zones` ADD `min_expansion` TINYINT(4) UNSIGNED NOT NULL DEFAULT '0';
+ALTER TABLE `start_zones` ADD `max_expansion` TINYINT(4) UNSIGNED NOT NULL DEFAULT '0';
+ALTER TABLE `start_zones` ADD `content_flags` varchar(100) NULL;
+
+-- traps
+ALTER TABLE `traps` ADD `min_expansion` TINYINT(4) UNSIGNED NOT NULL DEFAULT '0';
+ALTER TABLE `traps` ADD `max_expansion` TINYINT(4) UNSIGNED NOT NULL DEFAULT '0';
+ALTER TABLE `traps` ADD `content_flags` varchar(100) NULL;
+
+-- zone_points
+ALTER TABLE `zone_points` ADD `min_expansion` TINYINT(4) UNSIGNED NOT NULL DEFAULT '0';
+ALTER TABLE `zone_points` ADD `max_expansion` TINYINT(4) UNSIGNED NOT NULL DEFAULT '0';
+ALTER TABLE `zone_points` ADD `content_flags` varchar(100) NULL;
+
+-- pok books
+update doors set min_expansion = 4 where name like '%POKTELE%';
+
+-- content flags
+CREATE TABLE `content_flags` (`id` int AUTO_INCREMENT,`flag_name` varchar(75),`enabled` tinyint,`notes` text, PRIMARY KEY (id));
+
+-- content flags disabled
+
+ALTER TABLE `doors` ADD `content_flags_disabled` varchar(100) NULL;
+ALTER TABLE `fishing` ADD `content_flags_disabled` varchar(100) NULL;
+ALTER TABLE `forage` ADD `content_flags_disabled` varchar(100) NULL;
+ALTER TABLE `global_loot` ADD `content_flags_disabled` varchar(100) NULL;
+ALTER TABLE `ground_spawns` ADD `content_flags_disabled` varchar(100) NULL;
+ALTER TABLE `lootdrop` ADD `content_flags_disabled` varchar(100) NULL;
+ALTER TABLE `loottable` ADD `content_flags_disabled` varchar(100) NULL;
+ALTER TABLE `merchantlist` ADD `content_flags_disabled` varchar(100) NULL;
+ALTER TABLE `object` ADD `content_flags_disabled` varchar(100) NULL;
+ALTER TABLE `spawn2` ADD `content_flags_disabled` varchar(100) NULL;
+ALTER TABLE `start_zones` ADD `content_flags_disabled` varchar(100) NULL;
+ALTER TABLE `starting_items` ADD `content_flags_disabled` varchar(100) NULL;
+ALTER TABLE `tradeskill_recipe` ADD `content_flags_disabled` varchar(100) NULL;
+ALTER TABLE `traps` ADD `content_flags_disabled` varchar(100) NULL;
+ALTER TABLE `zone` ADD `content_flags_disabled` varchar(100) NULL;
+ALTER TABLE `zone_points` ADD `content_flags_disabled` varchar(100) NULL;
+)",
 	},
 	ManifestEntry{
 		.version = 9155,
@@ -2974,7 +4088,106 @@ ALTER TABLE `dynamic_zone_members`
 		.check = "SHOW TABLES LIKE 'shared_tasks'",
 		.condition = "empty",
 		.match = "",
-		.sql = _2021_05_21_shared_tasks,
+		.sql = R"(
+-- shared task tables
+CREATE TABLE `shared_tasks`
+(
+    `id`              bigint(20) NOT NULL AUTO_INCREMENT,
+    `task_id`         int(11) DEFAULT NULL,
+    `accepted_time`   datetime DEFAULT NULL,
+    `expire_time`     datetime DEFAULT NULL,
+    `completion_time` datetime DEFAULT NULL,
+    `is_locked`       tinyint(1) DEFAULT NULL,
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
+
+CREATE TABLE `shared_task_members`
+(
+    `shared_task_id` bigint(20) NOT NULL,
+    `character_id`   bigint(20) NOT NULL,
+    `is_leader`      tinyint(4) DEFAULT NULL,
+    PRIMARY KEY (`shared_task_id`, `character_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+CREATE TABLE `shared_task_activity_state`
+(
+    `shared_task_id` bigint(20) NOT NULL,
+    `activity_id`    int(11) NOT NULL,
+    `done_count`     int(11) DEFAULT NULL,
+    `updated_time`   datetime DEFAULT NULL,
+    `completed_time` datetime DEFAULT NULL,
+    PRIMARY KEY (`shared_task_id`, `activity_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+CREATE TABLE `shared_task_dynamic_zones`
+(
+    `shared_task_id`  bigint(20) NOT NULL,
+    `dynamic_zone_id` int(10) unsigned NOT NULL,
+    PRIMARY KEY (`shared_task_id`, `dynamic_zone_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- completed shared task tables - simply stores completed for reporting and logging
+
+CREATE TABLE `completed_shared_tasks`
+(
+    `id`              bigint(20) NOT NULL,
+    `task_id`         int(11) DEFAULT NULL,
+    `accepted_time`   datetime DEFAULT NULL,
+    `expire_time`     datetime DEFAULT NULL,
+    `completion_time` datetime DEFAULT NULL,
+    `is_locked`       tinyint(1) DEFAULT NULL,
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+CREATE TABLE `completed_shared_task_members`
+(
+    `shared_task_id` bigint(20) NOT NULL,
+    `character_id`   bigint(20) NOT NULL,
+    `is_leader`      tinyint(4) DEFAULT NULL,
+    PRIMARY KEY (`shared_task_id`, `character_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+CREATE TABLE `completed_shared_task_activity_state`
+(
+    `shared_task_id` bigint(20) NOT NULL,
+    `activity_id`    int(11) NOT NULL,
+    `done_count`     int(11) DEFAULT NULL,
+    `updated_time`   datetime DEFAULT NULL,
+    `completed_time` datetime DEFAULT NULL,
+    PRIMARY KEY (`shared_task_id`, `activity_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- tasks
+
+ALTER TABLE `tasks`
+    ADD COLUMN `level_spread` INT UNSIGNED NOT NULL DEFAULT 0 AFTER `maxlevel`,
+  ADD COLUMN `min_players` INT UNSIGNED NOT NULL DEFAULT 0 AFTER `level_spread`,
+  ADD COLUMN `max_players` INT UNSIGNED NOT NULL DEFAULT 0 AFTER `min_players`,
+  ADD COLUMN `replay_timer_seconds` INT UNSIGNED NOT NULL DEFAULT 0 AFTER `completion_emote`,
+  ADD COLUMN `request_timer_seconds` INT UNSIGNED NOT NULL DEFAULT 0 AFTER `replay_timer_seconds`;
+
+-- character timers
+
+CREATE TABLE `character_task_timers`
+(
+    `id`           int(10) unsigned NOT NULL AUTO_INCREMENT,
+    `character_id` int(10) unsigned NOT NULL DEFAULT 0,
+    `task_id`      int(10) unsigned NOT NULL DEFAULT 0,
+    `timer_type`   int(11) NOT NULL DEFAULT 0,
+    `expire_time`  datetime NOT NULL DEFAULT current_timestamp(),
+    PRIMARY KEY (`id`),
+    KEY            `character_id` (`character_id`),
+    KEY            `task_id` (`task_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+ALTER TABLE `tasks`
+    CHANGE COLUMN `completion_emote` `completion_emote` VARCHAR (512) NOT NULL DEFAULT '' COLLATE 'latin1_swedish_ci' AFTER `faction_reward`;
+
+ALTER TABLE `tasks`
+    ADD COLUMN `reward_radiant_crystals` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `rewardmethod`,
+  ADD COLUMN `reward_ebon_crystals` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `reward_radiant_crystals`;
+
+)",
 	},
 	ManifestEntry{
 		.version = 9173,
@@ -3021,7 +4234,126 @@ ALTER TABLE `doors`
 		.check = "SHOW COLUMNS FROM `forage` LIKE 'min_expansion'",
 		.condition = "contains",
 		.match = "unsigned",
-		.sql = _2022_01_02_expansion_default_value_all,
+		.sql = R"(
+-- forage
+
+ALTER TABLE `forage` CHANGE `max_expansion` `max_expansion` tinyint(4)  NOT NULL DEFAULT -1  COMMENT '';
+ALTER TABLE `forage` CHANGE `min_expansion` `min_expansion` tinyint(4)  NOT NULL DEFAULT -1  COMMENT '';
+UPDATE forage set min_expansion = -1 where min_expansion = 0;
+UPDATE forage set max_expansion = -1 where max_expansion = 0;
+
+-- tradeskill_recipe
+
+ALTER TABLE `tradeskill_recipe` CHANGE `max_expansion` `max_expansion` tinyint(4)  NOT NULL DEFAULT -1  COMMENT '';
+ALTER TABLE `tradeskill_recipe` CHANGE `min_expansion` `min_expansion` tinyint(4)  NOT NULL DEFAULT -1  COMMENT '';
+UPDATE tradeskill_recipe set min_expansion = -1 where min_expansion = 0;
+UPDATE tradeskill_recipe set max_expansion = -1 where max_expansion = 0;
+
+-- fishing
+
+ALTER TABLE `fishing` CHANGE `max_expansion` `max_expansion` tinyint(4)  NOT NULL DEFAULT -1  COMMENT '';
+ALTER TABLE `fishing` CHANGE `min_expansion` `min_expansion` tinyint(4)  NOT NULL DEFAULT -1  COMMENT '';
+UPDATE fishing set min_expansion = -1 where min_expansion = 0;
+UPDATE fishing set max_expansion = -1 where max_expansion = 0;
+
+-- zone
+
+ALTER TABLE `zone` CHANGE `max_expansion` `max_expansion` tinyint(4)  NOT NULL DEFAULT -1  COMMENT '';
+ALTER TABLE `zone` CHANGE `min_expansion` `min_expansion` tinyint(4)  NOT NULL DEFAULT -1  COMMENT '';
+UPDATE zone set min_expansion = -1 where min_expansion = 0;
+UPDATE zone set max_expansion = -1 where max_expansion = 0;
+
+-- traps
+
+ALTER TABLE `traps` CHANGE `max_expansion` `max_expansion` tinyint(4)  NOT NULL DEFAULT -1  COMMENT '';
+ALTER TABLE `traps` CHANGE `min_expansion` `min_expansion` tinyint(4)  NOT NULL DEFAULT -1  COMMENT '';
+UPDATE traps set min_expansion = -1 where min_expansion = 0;
+UPDATE traps set max_expansion = -1 where max_expansion = 0;
+
+-- loottable
+
+ALTER TABLE `loottable` CHANGE `max_expansion` `max_expansion` tinyint(4)  NOT NULL DEFAULT -1  COMMENT '';
+ALTER TABLE `loottable` CHANGE `min_expansion` `min_expansion` tinyint(4)  NOT NULL DEFAULT -1  COMMENT '';
+UPDATE loottable set min_expansion = -1 where min_expansion = 0;
+UPDATE loottable set max_expansion = -1 where max_expansion = 0;
+
+-- ground_spawns
+
+ALTER TABLE `ground_spawns` CHANGE `max_expansion` `max_expansion` tinyint(4)  NOT NULL DEFAULT -1  COMMENT '';
+ALTER TABLE `ground_spawns` CHANGE `min_expansion` `min_expansion` tinyint(4)  NOT NULL DEFAULT -1  COMMENT '';
+UPDATE ground_spawns set min_expansion = -1 where min_expansion = 0;
+UPDATE ground_spawns set max_expansion = -1 where max_expansion = 0;
+
+-- starting_items
+
+ALTER TABLE `starting_items` CHANGE `max_expansion` `max_expansion` tinyint(4)  NOT NULL DEFAULT -1  COMMENT '';
+ALTER TABLE `starting_items` CHANGE `min_expansion` `min_expansion` tinyint(4)  NOT NULL DEFAULT -1  COMMENT '';
+UPDATE starting_items set min_expansion = -1 where min_expansion = 0;
+UPDATE starting_items set max_expansion = -1 where max_expansion = 0;
+
+-- spawn2
+
+ALTER TABLE `spawn2` CHANGE `max_expansion` `max_expansion` tinyint(4)  NOT NULL DEFAULT -1  COMMENT '';
+ALTER TABLE `spawn2` CHANGE `min_expansion` `min_expansion` tinyint(4)  NOT NULL DEFAULT -1  COMMENT '';
+UPDATE spawn2 set min_expansion = -1 where min_expansion = 0;
+UPDATE spawn2 set max_expansion = -1 where max_expansion = 0;
+
+-- zone_points
+
+ALTER TABLE `zone_points` CHANGE `max_expansion` `max_expansion` tinyint(4)  NOT NULL DEFAULT -1  COMMENT '';
+ALTER TABLE `zone_points` CHANGE `min_expansion` `min_expansion` tinyint(4)  NOT NULL DEFAULT -1  COMMENT '';
+UPDATE zone_points set min_expansion = -1 where min_expansion = 0;
+UPDATE zone_points set max_expansion = -1 where max_expansion = 0;
+
+-- lootdrop
+
+ALTER TABLE `lootdrop` CHANGE `max_expansion` `max_expansion` tinyint(4)  NOT NULL DEFAULT -1  COMMENT '';
+ALTER TABLE `lootdrop` CHANGE `min_expansion` `min_expansion` tinyint(4)  NOT NULL DEFAULT -1  COMMENT '';
+UPDATE lootdrop set min_expansion = -1 where min_expansion = 0;
+UPDATE lootdrop set max_expansion = -1 where max_expansion = 0;
+
+-- global_loot
+
+ALTER TABLE `global_loot` CHANGE `max_expansion` `max_expansion` tinyint(4)  NOT NULL DEFAULT -1  COMMENT '';
+ALTER TABLE `global_loot` CHANGE `min_expansion` `min_expansion` tinyint(4)  NOT NULL DEFAULT -1  COMMENT '';
+UPDATE global_loot set min_expansion = -1 where min_expansion = 0;
+UPDATE global_loot set max_expansion = -1 where max_expansion = 0;
+
+-- doors
+
+ALTER TABLE `doors` CHANGE `max_expansion` `max_expansion` tinyint(4)  NOT NULL DEFAULT -1  COMMENT '';
+ALTER TABLE `doors` CHANGE `min_expansion` `min_expansion` tinyint(4)  NOT NULL DEFAULT -1  COMMENT '';
+UPDATE doors set min_expansion = -1 where min_expansion = 0;
+UPDATE doors set max_expansion = -1 where max_expansion = 0;
+
+-- object
+
+ALTER TABLE `object` CHANGE `max_expansion` `max_expansion` tinyint(4)  NOT NULL DEFAULT -1  COMMENT '';
+ALTER TABLE `object` CHANGE `min_expansion` `min_expansion` tinyint(4)  NOT NULL DEFAULT -1  COMMENT '';
+UPDATE object set min_expansion = -1 where min_expansion = 0;
+UPDATE object set max_expansion = -1 where max_expansion = 0;
+
+-- start_zones
+
+ALTER TABLE `start_zones` CHANGE `max_expansion` `max_expansion` tinyint(4)  NOT NULL DEFAULT -1  COMMENT '';
+ALTER TABLE `start_zones` CHANGE `min_expansion` `min_expansion` tinyint(4)  NOT NULL DEFAULT -1  COMMENT '';
+UPDATE start_zones set min_expansion = -1 where min_expansion = 0;
+UPDATE start_zones set max_expansion = -1 where max_expansion = 0;
+
+-- merchantlist
+
+ALTER TABLE `merchantlist` CHANGE `max_expansion` `max_expansion` tinyint(4)  NOT NULL DEFAULT -1  COMMENT '';
+ALTER TABLE `merchantlist` CHANGE `min_expansion` `min_expansion` tinyint(4)  NOT NULL DEFAULT -1  COMMENT '';
+UPDATE merchantlist set min_expansion = -1 where min_expansion = 0;
+UPDATE merchantlist set max_expansion = -1 where max_expansion = 0;
+
+-- spawnentry
+ALTER TABLE `spawnentry` ADD `min_expansion` tinyint(4)  NOT NULL DEFAULT -1;
+ALTER TABLE `spawnentry` ADD `max_expansion` tinyint(4)  NOT NULL DEFAULT -1;
+ALTER TABLE `spawnentry` ADD `content_flags` varchar(100) NULL;
+ALTER TABLE `spawnentry` ADD `content_flags_disabled` varchar(100) NULL;
+
+)",
 	},
 	ManifestEntry{
 		.version = 9176,
@@ -3210,14 +4542,6 @@ ALTER TABLE `task_activities` ADD COLUMN `zone_version` int(11) default -1 AFTER
 )",
 	},
 	ManifestEntry{
-		.version = 9188,
-		.description = "2022_07_14_zone_expansion_revert.sql",
-		.check = "SHOW COLUMNS FROM `zone` LIKE 'expansion'",
-		.condition = "empty",
-		.match = "",
-		.sql = _2022_07_14_zone_expansion_revert,
-	},
-	ManifestEntry{
 		.version = 9189,
 		.description = "2022_07_10_character_task_rewarded.sql",
 		.check = "SHOW COLUMNS FROM `character_tasks` LIKE 'was_rewarded'",
@@ -3402,7 +4726,39 @@ ALTER TABLE `task_activities`
 		.check = "SELECT * FROM db_version WHERE version >= 9200",
 		.condition = "empty",
 		.match = "",
-		.sql = _2022_08_19_zone_expansion_consistency,
+		.sql = R"(
+ALTER TABLE `zone`
+    ADD COLUMN `bypass_expansion_check` tinyint(3) NOT NULL DEFAULT 0 AFTER `expansion`;
+
+UPDATE `zone` SET `bypass_expansion_check` = 1 WHERE `short_name`
+IN (
+    'befallenb',
+    'commonlands',
+    'freeportacademy',
+    'freeportarena',
+    'freeportcityhall',
+    'freeporteast',
+    'freeporthall',
+    'freeportmilitia',
+    'freeportsewers',
+    'freeportwest',
+    'guildhall',
+    'guildlobby',
+    'highpasshold',
+    'highpasskeep',
+    'innothuleb',
+    'kithforest',
+    'mistythicket',
+    'moors',
+    'nektulosa',
+    'northro',
+    'oceanoftears',
+    'southro',
+    'steamfontmts',
+    'toxxulia'
+);
+
+)",
 	},
 	ManifestEntry{
 		.version = 9201,
@@ -3432,7 +4788,104 @@ ALTER TABLE `task_activities` MODIFY `step` INT(11) NOT NULL DEFAULT '0';
 		.check = "SHOW COLUMNS FROM `task_activities` LIKE 'item_id'",
 		.condition = "empty",
 		.match = "",
-		.sql = _2022_08_07_replace_task_goals,
+		.sql = R"(
+-- backup original since this is a complex migration
+CREATE TABLE `task_activities_backup_9203` LIKE `task_activities`;
+INSERT INTO `task_activities_backup_9203` SELECT * FROM `task_activities`;
+
+ALTER TABLE `task_activities`
+  CHANGE COLUMN `description_override` `description_override` VARCHAR(128) NOT NULL DEFAULT '' COLLATE 'latin1_swedish_ci' AFTER `goalcount`,
+  ADD COLUMN `npc_id` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `description_override`,
+  ADD COLUMN `npc_goal_id` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `npc_id`,
+  ADD COLUMN `npc_match_list` TEXT NULL DEFAULT NULL AFTER `npc_goal_id`,
+  ADD COLUMN `item_id` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `npc_match_list`,
+  ADD COLUMN `item_goal_id` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `item_id`,
+  ADD COLUMN `item_id_list` TEXT NULL DEFAULT NULL AFTER `item_goal_id`,
+  CHANGE COLUMN `item_list` `item_list` VARCHAR(128) NOT NULL DEFAULT '' COLLATE 'latin1_swedish_ci' AFTER `item_id_list`,
+  ADD COLUMN `dz_switch_id` INT(11) NOT NULL DEFAULT '0' AFTER `delivertonpc`,
+  ADD COLUMN `min_x` FLOAT NOT NULL DEFAULT 0 AFTER `dz_switch_id`,
+  ADD COLUMN `min_y` FLOAT NOT NULL DEFAULT 0 AFTER `min_x`,
+  ADD COLUMN `min_z` FLOAT NOT NULL DEFAULT 0 AFTER `min_y`,
+  ADD COLUMN `max_x` FLOAT NOT NULL DEFAULT 0 AFTER `min_z`,
+  ADD COLUMN `max_y` FLOAT NOT NULL DEFAULT 0 AFTER `max_x`,
+  ADD COLUMN `max_z` FLOAT NOT NULL DEFAULT 0 AFTER `max_y`,
+  CHANGE COLUMN `skill_list` `skill_list` VARCHAR(64) NOT NULL DEFAULT '-1' COLLATE 'latin1_swedish_ci' AFTER `max_z`,
+  CHANGE COLUMN `spell_list` `spell_list` VARCHAR(64) NOT NULL DEFAULT '0' COLLATE 'latin1_swedish_ci' AFTER `skill_list`;
+
+-- move Explore (5) goalid proximities to the new location fields
+-- does not migrate where zone was different and ignores lists (unsupported)
+UPDATE `task_activities`
+INNER JOIN `proximities`
+  ON `task_activities`.`goalid` = `proximities`.`exploreid`
+  AND CAST(`task_activities`.`zones` AS INT) = `proximities`.`zoneid`
+SET
+  `task_activities`.`goalid` = 0,
+  `task_activities`.`min_x` = `proximities`.`minx`,
+  `task_activities`.`min_y` = `proximities`.`miny`,
+  `task_activities`.`min_z` = `proximities`.`minz`,
+  `task_activities`.`max_x` = `proximities`.`maxx`,
+  `task_activities`.`max_y` = `proximities`.`maxy`,
+  `task_activities`.`max_z` = `proximities`.`maxz`
+WHERE
+  `task_activities`.`goalmethod` = 0
+  AND `task_activities`.`activitytype` = 5;
+
+-- dz_switch_id for Touch (11)
+UPDATE `task_activities`
+SET `task_activities`.`dz_switch_id` = `task_activities`.`goalid`
+WHERE `task_activities`.`goalmethod` = 0
+  AND `task_activities`.`activitytype` = 11;
+
+-- single item ids for Deliver (1), Loot (3), TradeSkill (6), Fish (7), Forage (8)
+UPDATE `task_activities`
+SET `task_activities`.`item_id` = `task_activities`.`goalid`
+WHERE `task_activities`.`goalmethod` = 0
+  AND `task_activities`.`activitytype` IN (1, 3, 6, 7, 8);
+
+-- item goallist id
+UPDATE `task_activities`
+SET `task_activities`.`item_goal_id` = `task_activities`.`goalid`
+WHERE `task_activities`.`goalmethod` = 1
+  AND `task_activities`.`activitytype` IN (1, 3, 6, 7, 8);
+
+-- item id match list
+UPDATE `task_activities`
+SET `task_activities`.`item_id_list` = `task_activities`.`goal_match_list`
+WHERE `task_activities`.`goalmethod` = 1
+  AND `task_activities`.`activitytype` IN (1, 3, 6, 7, 8);
+
+-- single npc ids for Kill (2), SpeakWith (4)
+UPDATE `task_activities`
+SET `task_activities`.`npc_id` = `task_activities`.`goalid`
+WHERE `task_activities`.`goalmethod` = 0
+  AND `task_activities`.`activitytype` IN (2, 4);
+
+-- npc goallist id
+UPDATE `task_activities`
+SET `task_activities`.`npc_goal_id` = `task_activities`.`goalid`
+WHERE `task_activities`.`goalmethod` = 1
+  AND `task_activities`.`activitytype` IN (2, 4);
+
+-- npc match list
+UPDATE `task_activities`
+SET `task_activities`.`npc_match_list` = `task_activities`.`goal_match_list`
+WHERE `task_activities`.`goalmethod` = 1
+  AND `task_activities`.`activitytype` IN (2, 4);
+
+-- delivertonpc npc_ids for Deliver (1), GiveCash (100)
+UPDATE `task_activities`
+SET `task_activities`.`npc_id` = `task_activities`.`delivertonpc`
+WHERE `task_activities`.`activitytype` IN (1, 100);
+
+ALTER TABLE `task_activities`
+  DROP COLUMN `goalid`,
+  DROP COLUMN `goal_match_list`,
+  DROP COLUMN `delivertonpc`;
+
+-- leave proximities table backup in case of regressions
+ALTER TABLE `proximities` RENAME `proximities_backup_9203`;
+
+)",
 	},
 	ManifestEntry{
 		.version = 9204,
@@ -3477,7 +4930,79 @@ ALTER TABLE `tasks` ADD `faction_amount` INT(10) NOT NULL DEFAULT '0';
 		.check = "SHOW COLUMNS FROM `task_activities` LIKE 'npc_id'",
 		.condition = "not_empty",
 		.match = "",
-		.sql = _2022_09_25_task_concat_matchlists,
+		.sql = R"(
+SET SESSION group_concat_max_len = 1048576;
+SET collation_connection = latin1_swedish_ci;
+
+-- backup original(s)
+CREATE TABLE `goallists_backup_9_25_2022` LIKE `goallists`;
+INSERT INTO `goallists_backup_9_25_2022` SELECT * FROM `goallists`;
+CREATE TABLE `tasks_backup_9_25_2022` LIKE `tasks`;
+INSERT INTO `tasks_backup_9_25_2022` SELECT * FROM `tasks`;
+
+-- npc id
+UPDATE `task_activities`
+SET `task_activities`.`npc_match_list` = CONCAT_WS('|', `npc_match_list`, `npc_id`)
+WHERE npc_id != 0;
+
+-- npc_goal_id goallists
+UPDATE `task_activities`
+INNER JOIN
+(
+  SELECT `goallists`.`listid`, GROUP_CONCAT(`goallists`.`entry` ORDER BY `goallists`.`entry` SEPARATOR '|') AS `goallist_ids`
+  FROM `goallists`
+  GROUP BY `goallists`.`listid`
+) AS `goallist_group`
+  ON `task_activities`.`npc_goal_id` = `goallist_group`.`listid`
+SET `task_activities`.`npc_match_list` = CONCAT_WS('|', `npc_match_list`, `goallist_ids`)
+WHERE npc_goal_id != 0;
+
+-- item id
+UPDATE `task_activities`
+SET `task_activities`.`item_id_list` = CONCAT_WS('|', `item_id_list`, `item_id`)
+WHERE item_id != 0;
+
+-- item_goal_id goallists
+UPDATE `task_activities`
+INNER JOIN
+(
+  SELECT `goallists`.`listid`, GROUP_CONCAT(`goallists`.`entry` ORDER BY `goallists`.`entry` SEPARATOR '|') AS `goallist_ids`
+  FROM `goallists`
+  GROUP BY `goallists`.`listid`
+) AS `goallist_group`
+  ON `task_activities`.`item_goal_id` = `goallist_group`.`listid`
+SET `task_activities`.`item_id_list` = CONCAT_WS('|', `item_id_list`, `goallist_ids`)
+WHERE item_goal_id != 0;
+
+ALTER TABLE `task_activities`
+  DROP COLUMN `npc_id`,
+  DROP COLUMN `npc_goal_id`,
+  DROP COLUMN `item_id`,
+  DROP COLUMN `item_goal_id`;
+
+
+-- Reward cleanup and task table cleanup
+
+ALTER TABLE `tasks`
+    CHANGE COLUMN `reward` `reward_text` varchar(64) CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL DEFAULT '' AFTER `description`,
+    CHANGE COLUMN `rewardid` `reward_id_list` text CHARACTER SET latin1 COLLATE latin1_swedish_ci NULL AFTER `reward_text`,
+    CHANGE COLUMN `cashreward` `cash_reward` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `reward_id_list`,
+    CHANGE COLUMN `rewardmethod` `reward_method` tinyint(3) UNSIGNED NOT NULL DEFAULT 0 AFTER `xpreward`,
+    CHANGE COLUMN `minlevel` `min_level` tinyint(3) UNSIGNED NOT NULL DEFAULT 0 AFTER `reward_point_type`,
+    CHANGE COLUMN `maxlevel` `max_level` tinyint(3) UNSIGNED NOT NULL DEFAULT 0 AFTER `min_level`;
+
+ALTER Table `tasks` CHANGE COLUMN `xpreward` `exp_reward` int(10) NOT NULL DEFAULT 0 AFTER `cash_reward`;
+
+UPDATE tasks SET reward_id_list =
+ (
+     SELECT GROUP_CONCAT(`goallists`.`entry` ORDER BY `goallists`.`entry` SEPARATOR '|') AS `goallist_ids` FROM `goallists` WHERE listid = reward_id_list)
+WHERE
+reward_method = 1;
+
+-- deprecated table
+DROP table goallists;
+
+)",
 	},
 	ManifestEntry{
 		.version = 9209,
