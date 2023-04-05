@@ -5058,7 +5058,276 @@ ADD COLUMN `max_level` tinyint(3) UNSIGNED NOT NULL DEFAULT 255 AFTER `min_level
 		.check = "SHOW TABLES LIKE 'mercs'",
 		.condition = "empty",
 		.match = "",
-		.sql = _2023_01_15_merc_data,
+		.sql = R"(
+SET NAMES utf8;
+SET
+FOREIGN_KEY_CHECKS = 0;
+
+DROP TABLE IF EXISTS `merc_armorinfo`;
+CREATE TABLE `merc_armorinfo`
+(
+    `id`               int(11) NOT NULL AUTO_INCREMENT,
+    `merc_npc_type_id` int(11) UNSIGNED NOT NULL,
+    `minlevel`         tinyint(2) UNSIGNED NOT NULL DEFAULT 1,
+    `maxlevel`         tinyint(2) UNSIGNED NOT NULL DEFAULT 255,
+    `texture`          tinyint(2) UNSIGNED NOT NULL DEFAULT 0,
+    `helmtexture`      tinyint(2) UNSIGNED NOT NULL DEFAULT 0,
+    `armortint_id`     int(10) UNSIGNED NOT NULL DEFAULT 0,
+    `armortint_red`    tinyint(3) UNSIGNED NOT NULL DEFAULT 0,
+    `armortint_green`  tinyint(3) UNSIGNED NOT NULL DEFAULT 0,
+    `armortint_blue`   tinyint(3) UNSIGNED NOT NULL DEFAULT 0,
+    PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 41 CHARACTER SET = latin1 COLLATE = latin1_swedish_ci ROW_FORMAT = Compact;
+
+DROP TABLE IF EXISTS `merc_buffs`;
+CREATE TABLE `merc_buffs`
+(
+    `MercBuffId`         int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `MercId`             int(10) UNSIGNED NOT NULL DEFAULT 0,
+    `SpellId`            int(10) UNSIGNED NOT NULL DEFAULT 0,
+    `CasterLevel`        int(10) UNSIGNED NOT NULL DEFAULT 0,
+    `DurationFormula`    int(10) UNSIGNED NOT NULL DEFAULT 0,
+    `TicsRemaining`      int(11) NOT NULL DEFAULT 0,
+    `PoisonCounters`     int(11) UNSIGNED NOT NULL DEFAULT 0,
+    `DiseaseCounters`    int(11) UNSIGNED NOT NULL DEFAULT 0,
+    `CurseCounters`      int(11) UNSIGNED NOT NULL DEFAULT 0,
+    `CorruptionCounters` int(11) UNSIGNED NOT NULL DEFAULT 0,
+    `HitCount`           int(10) UNSIGNED NOT NULL DEFAULT 0,
+    `MeleeRune`          int(10) UNSIGNED NOT NULL DEFAULT 0,
+    `MagicRune`          int(10) UNSIGNED NOT NULL DEFAULT 0,
+    `dot_rune`           int(10) NOT NULL DEFAULT 0,
+    `caston_x`           int(10) NOT NULL DEFAULT 0,
+    `Persistent`         tinyint(1) NOT NULL DEFAULT 0,
+    `caston_y`           int(10) NOT NULL DEFAULT 0,
+    `caston_z`           int(10) NOT NULL DEFAULT 0,
+    `ExtraDIChance`      int(10) NOT NULL DEFAULT 0,
+    PRIMARY KEY (`MercBuffId`) USING BTREE,
+    INDEX                `FK_mercbuff_1`(`MercId`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = latin1 COLLATE = latin1_swedish_ci ROW_FORMAT = Compact;
+
+DROP TABLE IF EXISTS `merc_inventory`;
+CREATE TABLE `merc_inventory`
+(
+    `merc_inventory_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `merc_subtype_id`   int(10) UNSIGNED NOT NULL DEFAULT 0,
+    `item_id`           int(11) UNSIGNED NOT NULL DEFAULT 0,
+    `min_level`         int(10) UNSIGNED NOT NULL DEFAULT 0,
+    `max_level`         int(10) UNSIGNED NOT NULL DEFAULT 0,
+    PRIMARY KEY (`merc_inventory_id`) USING BTREE,
+    INDEX               `FK_merc_inventory_1`(`merc_subtype_id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 42 CHARACTER SET = latin1 COLLATE = latin1_swedish_ci ROW_FORMAT = Compact;
+
+DROP TABLE IF EXISTS `merc_merchant_entries`;
+CREATE TABLE `merc_merchant_entries`
+(
+    `merc_merchant_entry_id`    int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `merc_merchant_template_id` int(10) UNSIGNED NOT NULL,
+    `merchant_id`               int(11) UNSIGNED NOT NULL,
+    PRIMARY KEY (`merc_merchant_entry_id`) USING BTREE,
+    INDEX                       `FK_merc_merchant_entries_1`(`merc_merchant_template_id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 57 CHARACTER SET = latin1 COLLATE = latin1_swedish_ci ROW_FORMAT = Compact;
+
+DROP TABLE IF EXISTS `merc_merchant_template_entries`;
+CREATE TABLE `merc_merchant_template_entries`
+(
+    `merc_merchant_template_entry_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `merc_merchant_template_id`       int(10) UNSIGNED NOT NULL,
+    `merc_template_id`                int(10) UNSIGNED NOT NULL,
+    PRIMARY KEY (`merc_merchant_template_entry_id`) USING BTREE,
+    INDEX                             `FK_merc_merchant_template_entries_1`(`merc_merchant_template_id`) USING BTREE,
+    INDEX                             `FK_merc_merchant_template_entries_2`(`merc_template_id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 554 CHARACTER SET = latin1 COLLATE = latin1_swedish_ci ROW_FORMAT = Compact;
+
+DROP TABLE IF EXISTS `merc_merchant_templates`;
+CREATE TABLE `merc_merchant_templates`
+(
+    `merc_merchant_template_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `name`                      varchar(50) CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL,
+    `qglobal`                   varchar(255) CHARACTER SET latin1 COLLATE latin1_swedish_ci NULL DEFAULT NULL,
+    PRIMARY KEY (`merc_merchant_template_id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 25 CHARACTER SET = latin1 COLLATE = latin1_swedish_ci ROW_FORMAT = Compact;
+
+DROP TABLE IF EXISTS `merc_name_types`;
+CREATE TABLE `merc_name_types`
+(
+    `name_type_id` int(10) UNSIGNED NOT NULL,
+    `class_id`     int(10) UNSIGNED NOT NULL,
+    `prefix`       varchar(25) CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL,
+    `suffix`       varchar(25) CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL,
+    PRIMARY KEY (`name_type_id`, `class_id`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = latin1 COLLATE = latin1_swedish_ci ROW_FORMAT = Compact;
+
+DROP TABLE IF EXISTS `merc_npc_types`;
+CREATE TABLE `merc_npc_types`
+(
+    `merc_npc_type_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `proficiency_id`   tinyint(3) UNSIGNED NOT NULL,
+    `tier_id`          tinyint(3) UNSIGNED NOT NULL,
+    `class_id`         int(10) UNSIGNED NOT NULL,
+    `name`             varchar(255) CHARACTER SET latin1 COLLATE latin1_swedish_ci NULL DEFAULT NULL,
+    PRIMARY KEY (`merc_npc_type_id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 41 CHARACTER SET = latin1 COLLATE = latin1_swedish_ci ROW_FORMAT = Compact;
+
+DROP TABLE IF EXISTS `merc_spell_list_entries`;
+CREATE TABLE `merc_spell_list_entries`
+(
+    `merc_spell_list_entry_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `merc_spell_list_id`       int(10) UNSIGNED NOT NULL,
+    `spell_id`                 int(10) UNSIGNED NOT NULL,
+    `spell_type`               int(10) UNSIGNED NOT NULL DEFAULT 0,
+    `stance_id`                tinyint(3) UNSIGNED NOT NULL DEFAULT 0,
+    `minlevel`                 tinyint(3) UNSIGNED NOT NULL DEFAULT 1,
+    `maxlevel`                 tinyint(3) UNSIGNED NOT NULL DEFAULT 255,
+    `slot`                     tinyint(4) NOT NULL DEFAULT -1,
+    `procChance`               tinyint(3) UNSIGNED NOT NULL DEFAULT 0,
+    PRIMARY KEY (`merc_spell_list_entry_id`) USING BTREE,
+    INDEX                      `FK_merc_spell_lists_1`(`merc_spell_list_id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 730 CHARACTER SET = latin1 COLLATE = latin1_swedish_ci ROW_FORMAT = Compact;
+
+DROP TABLE IF EXISTS `merc_spell_lists`;
+CREATE TABLE `merc_spell_lists`
+(
+    `merc_spell_list_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `class_id`           int(10) UNSIGNED NOT NULL,
+    `proficiency_id`     tinyint(3) UNSIGNED NOT NULL,
+    `name`               varchar(50) CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL,
+    PRIMARY KEY (`merc_spell_list_id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 9 CHARACTER SET = latin1 COLLATE = latin1_swedish_ci ROW_FORMAT = Compact;
+
+DROP TABLE IF EXISTS `merc_stance_entries`;
+CREATE TABLE `merc_stance_entries`
+(
+    `merc_stance_entry_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `class_id`             int(10) UNSIGNED NOT NULL,
+    `proficiency_id`       tinyint(3) UNSIGNED NOT NULL,
+    `stance_id`            tinyint(3) UNSIGNED NOT NULL,
+    `isdefault`            tinyint(1) NOT NULL,
+    PRIMARY KEY (`merc_stance_entry_id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 23 CHARACTER SET = latin1 COLLATE = latin1_swedish_ci ROW_FORMAT = Compact;
+
+DROP TABLE IF EXISTS `merc_stats`;
+CREATE TABLE `merc_stats`
+(
+    `merc_npc_type_id`  int(11) UNSIGNED NOT NULL,
+    `clientlevel`       tinyint(2) UNSIGNED NOT NULL DEFAULT 1,
+    `level`             tinyint(2) UNSIGNED NOT NULL DEFAULT 1,
+    `hp`                int(11) NOT NULL DEFAULT 1,
+    `mana`              int(11) NOT NULL DEFAULT 0,
+    `AC`                smallint(5) NOT NULL DEFAULT 1,
+    `ATK`               mediumint(9) NOT NULL DEFAULT 1,
+    `STR`               mediumint(8) UNSIGNED NOT NULL DEFAULT 75,
+    `STA`               mediumint(8) UNSIGNED NOT NULL DEFAULT 75,
+    `DEX`               mediumint(8) UNSIGNED NOT NULL DEFAULT 75,
+    `AGI`               mediumint(8) UNSIGNED NOT NULL DEFAULT 75,
+    `_INT`              mediumint(8) UNSIGNED NOT NULL DEFAULT 80,
+    `WIS`               mediumint(8) UNSIGNED NOT NULL DEFAULT 80,
+    `CHA`               mediumint(8) UNSIGNED NOT NULL DEFAULT 75,
+    `MR`                smallint(5) NOT NULL DEFAULT 15,
+    `CR`                smallint(5) NOT NULL DEFAULT 15,
+    `DR`                smallint(5) NOT NULL DEFAULT 15,
+    `FR`                smallint(5) NOT NULL DEFAULT 15,
+    `PR`                smallint(5) NOT NULL DEFAULT 15,
+    `Corrup`            smallint(5) NOT NULL DEFAULT 15,
+    `mindmg`            int(10) UNSIGNED NOT NULL DEFAULT 1,
+    `maxdmg`            int(10) UNSIGNED NOT NULL DEFAULT 1,
+    `attack_count`      smallint(6) NOT NULL DEFAULT 0,
+    `attack_speed`      tinyint(3) NOT NULL DEFAULT 0,
+    `attack_delay`      tinyint(3) UNSIGNED NOT NULL DEFAULT 30,
+    `special_abilities` text CHARACTER SET latin1 COLLATE latin1_swedish_ci NULL,
+    `Accuracy`          mediumint(9) NOT NULL DEFAULT 0,
+    `hp_regen_rate`     int(11) UNSIGNED NOT NULL DEFAULT 1,
+    `mana_regen_rate`   int(11) UNSIGNED NOT NULL DEFAULT 1,
+    `runspeed`          float NOT NULL DEFAULT 0,
+    `statscale`         int(11) NOT NULL DEFAULT 100,
+    `spellscale`        float NOT NULL DEFAULT 100,
+    `healscale`         float NOT NULL DEFAULT 100,
+    PRIMARY KEY (`merc_npc_type_id`, `clientlevel`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = latin1 COLLATE = latin1_swedish_ci ROW_FORMAT = Compact;
+
+DROP TABLE IF EXISTS `merc_subtypes`;
+CREATE TABLE `merc_subtypes`
+(
+    `merc_subtype_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `class_id`        int(10) UNSIGNED NOT NULL,
+    `tier_id`         tinyint(3) UNSIGNED NOT NULL,
+    `confidence_id`   tinyint(3) UNSIGNED NOT NULL,
+    PRIMARY KEY (`merc_subtype_id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 21 CHARACTER SET = latin1 COLLATE = latin1_swedish_ci ROW_FORMAT = Compact;
+
+DROP TABLE IF EXISTS `merc_templates`;
+CREATE TABLE `merc_templates`
+(
+    `merc_template_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `merc_type_id`     int(10) UNSIGNED NOT NULL,
+    `merc_subtype_id`  int(10) UNSIGNED NOT NULL,
+    `merc_npc_type_id` int(11) UNSIGNED NOT NULL,
+    `dbstring`         varchar(12) CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL,
+    `name_type_id`     tinyint(4) NOT NULL DEFAULT 0,
+    `clientversion`    int(10) UNSIGNED NOT NULL,
+    PRIMARY KEY (`merc_template_id`) USING BTREE,
+    INDEX              `FK_merc_templates_1`(`merc_type_id`) USING BTREE,
+    INDEX              `FK_merc_templates_2`(`merc_subtype_id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 554 CHARACTER SET = latin1 COLLATE = latin1_swedish_ci ROW_FORMAT = Compact;
+
+DROP TABLE IF EXISTS `merc_types`;
+CREATE TABLE `merc_types`
+(
+    `merc_type_id`   int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `race_id`        int(10) UNSIGNED NOT NULL,
+    `proficiency_id` tinyint(3) UNSIGNED NOT NULL,
+    `dbstring`       varchar(12) CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL,
+    `clientversion`  int(10) UNSIGNED NOT NULL,
+    PRIMARY KEY (`merc_type_id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 49 CHARACTER SET = latin1 COLLATE = latin1_swedish_ci ROW_FORMAT = Compact;
+
+DROP TABLE IF EXISTS `merc_weaponinfo`;
+CREATE TABLE `merc_weaponinfo`
+(
+    `id`               int(11) NOT NULL AUTO_INCREMENT,
+    `merc_npc_type_id` int(11) NOT NULL,
+    `minlevel`         tinyint(2) UNSIGNED NOT NULL DEFAULT 0,
+    `maxlevel`         tinyint(2) UNSIGNED NOT NULL DEFAULT 0,
+    `d_melee_texture1` int(11) NOT NULL DEFAULT 0,
+    `d_melee_texture2` int(11) NOT NULL DEFAULT 0,
+    `prim_melee_type`  tinyint(4) UNSIGNED NOT NULL DEFAULT 28,
+    `sec_melee_type`   tinyint(4) UNSIGNED NOT NULL DEFAULT 28,
+    PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 61 CHARACTER SET = latin1 COLLATE = latin1_swedish_ci ROW_FORMAT = Compact;
+
+DROP TABLE IF EXISTS `mercs`;
+CREATE TABLE `mercs`
+(
+    `MercID`           int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `OwnerCharacterID` int(10) UNSIGNED NOT NULL,
+    `Slot`             tinyint(1) UNSIGNED NOT NULL DEFAULT 0,
+    `Name`             varchar(64) CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL,
+    `TemplateID`       int(10) UNSIGNED NOT NULL DEFAULT 0,
+    `SuspendedTime`    int(11) UNSIGNED NOT NULL DEFAULT 0,
+    `IsSuspended`      tinyint(1) UNSIGNED NOT NULL DEFAULT 0,
+    `TimerRemaining`   int(11) UNSIGNED NOT NULL DEFAULT 0,
+    `Gender`           tinyint(3) UNSIGNED NOT NULL DEFAULT 0,
+    `MercSize`         float NOT NULL DEFAULT 5,
+    `StanceID`         tinyint(3) UNSIGNED NOT NULL DEFAULT 0,
+    `HP`               int(11) UNSIGNED NOT NULL DEFAULT 0,
+    `Mana`             int(11) UNSIGNED NOT NULL DEFAULT 0,
+    `Endurance`        int(11) UNSIGNED NOT NULL DEFAULT 0,
+    `Face`             int(10) UNSIGNED NOT NULL DEFAULT 1,
+    `LuclinHairStyle`  int(10) UNSIGNED NOT NULL DEFAULT 1,
+    `LuclinHairColor`  int(10) UNSIGNED NOT NULL DEFAULT 1,
+    `LuclinEyeColor`   int(10) UNSIGNED NOT NULL DEFAULT 1,
+    `LuclinEyeColor2`  int(10) UNSIGNED NOT NULL DEFAULT 1,
+    `LuclinBeardColor` int(10) UNSIGNED NOT NULL DEFAULT 1,
+    `LuclinBeard`      int(10) UNSIGNED NOT NULL DEFAULT 0,
+    `DrakkinHeritage`  int(10) UNSIGNED NOT NULL DEFAULT 0,
+    `DrakkinTattoo`    int(10) UNSIGNED NOT NULL DEFAULT 0,
+    `DrakkinDetails`   int(10) UNSIGNED NOT NULL DEFAULT 0,
+    PRIMARY KEY (`MercID`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = latin1 COLLATE = latin1_swedish_ci ROW_FORMAT = Compact;
+
+SET
+FOREIGN_KEY_CHECKS = 1;
+
+)",
 	},
 	ManifestEntry{
 		.version = 9217,
