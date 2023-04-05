@@ -8002,7 +8002,7 @@ void Client::MerchantRejectMessage(Mob *merchant, int primaryfaction)
 //o--------------------------------------------------------------
 void Client::SendFactionMessage(int32 tmpvalue, int32 faction_id, int32 faction_before_hit, int32 totalvalue, uint8 temp, int32 this_faction_min, int32 this_faction_max)
 {
-	char name[50];
+	char  name[50];
 	int32 faction_value;
 
 	// If we're dropping from MAX or raising from MIN or repairing,
@@ -8013,30 +8013,37 @@ void Client::SendFactionMessage(int32 tmpvalue, int32 faction_id, int32 faction_
 	// hit.  For example, if we go from 1199 to 1200 which is the MAX
 	// we still want to say faction got better this time around.
 
-	if ( (faction_before_hit >= this_faction_max) ||
-	     (faction_before_hit <= this_faction_min))
+	if (!EQ::ValueWithin(faction_before_hit, this_faction_min, this_faction_max)) {
 		faction_value = totalvalue;
-	else
+	} else {
 		faction_value = faction_before_hit;
+	}
 
 	// default to Faction# if we couldn't get the name from the ID
-	if (content_db.GetFactionName(faction_id, name, sizeof(name)) == false)
+	if (!content_db.GetFactionName(faction_id, name, sizeof(name))) {
 		snprintf(name, sizeof(name), "Faction%i", faction_id);
+	}
 
-	if (tmpvalue == 0 || temp == 1 || temp == 2)
+	if (tmpvalue == 0 || temp == 1 || temp == 2) {
 		return;
-	else if (faction_value >= this_faction_max)
+	} else if (faction_value >= this_faction_max) {
 		MessageString(Chat::Yellow, FACTION_BEST, name);
-	else if (faction_value <= this_faction_min)
+	} else if (faction_value <= this_faction_min) {
 		MessageString(Chat::Yellow, FACTION_WORST, name);
-	else if (tmpvalue > 0 && faction_value < this_faction_max && !RuleB(Client, UseLiveFactionMessage))
+	} else if (tmpvalue > 0 && !RuleB(Client, UseLiveFactionMessage)) {
 		MessageString(Chat::Yellow, FACTION_BETTER, name);
-	else if (tmpvalue < 0 && faction_value > this_faction_min && !RuleB(Client, UseLiveFactionMessage))
+	} else if (tmpvalue < 0 && !RuleB(Client, UseLiveFactionMessage)) {
 		MessageString(Chat::Yellow, FACTION_WORSE, name);
-	else if (RuleB(Client, UseLiveFactionMessage))
-		Message(Chat::Yellow, "Your faction standing with %s has been adjusted by %i.", name, tmpvalue); //New Live faction message (14261)
-
-	return;
+	} else if (RuleB(Client, UseLiveFactionMessage)) {
+		Message(
+			Chat::Yellow,
+			fmt::format(
+				"Your faction standing with {} has been adjusted by {}.",
+				name,
+				tmpvalue
+			).c_str()
+		);
+	} //New Live faction message (14261)
 }
 
 void Client::LoadAccountFlags()
