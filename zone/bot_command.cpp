@@ -3589,7 +3589,6 @@ void bot_command_item_use(Client* c, const Seperator* sep)
 		}
 	}
 
-	std::string msg;
 	std::string text_link;
 
 	EQ::SayLinkEngine linker;
@@ -5124,8 +5123,6 @@ void bot_subcommand_bot_clone(Client *c, const Seperator *sep)
 		return;
 	}
 
-	std::string error_message;
-
 	bool available_flag = false;
 	if (!database.botdb.QueryNameAvailablity(bot_name, available_flag)) {
 		c->Message(
@@ -5558,8 +5555,6 @@ void bot_subcommand_bot_delete(Client *c, const Seperator *sep)
 		c->Message(Chat::White, "You must <target> a bot that you own to use this command");
 		return;
 	}
-
-	std::string error_message;
 
 	if (!my_bot->DeleteBot()) {
 		c->Message(Chat::White, "Failed to delete '%s' due to database error", my_bot->GetCleanName());
@@ -6959,7 +6954,6 @@ void bot_subcommand_bot_toggle_helm(Client *c, const Seperator *sep)
 	}
 
 	if (ab_type == ActionableBots::ABT_All) {
-		std::string query;
 		if (toggle_helm) {
 			if (!database.botdb.ToggleAllHelmAppearances(c->CharacterID()))
 				c->Message(Chat::White, "%s", BotDatabase::fail::ToggleAllHelmAppearances());
