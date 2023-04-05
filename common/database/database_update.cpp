@@ -6,7 +6,6 @@
 #include "../rulesys.h"
 #include "../http/httplib.h"
 
-#include "database_migrations_bots.cpp"
 #include "database_update_manifest.cpp"
 #include "database_update_manifest_bots.cpp"
 #include "database_dump_service.h"

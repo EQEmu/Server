@@ -1,5 +1,0 @@
-#include "./large-migrations-bot/2015_09_30_bots.cpp"
-#include "./large-migrations-bot/2017_02_26_bots_npc_spells_update_for_bots.cpp"
-#include "./large-migrations-bot/2017_02_26_bots_spells_id_update_for_saved_bots.cpp"
-#include "./large-migrations-bot/2017_02_26_bots_spells_id_update_for_bot_spells_entries.cpp"
-#include "./large-migrations-bot/2021_06_04_bot_create_combinations.cpp"
