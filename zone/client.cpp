@@ -1796,83 +1796,90 @@ void Client::SetStats(uint8 type,int16 set_val){
 	safe_delete(outapp);
 }
 
-void Client::IncStats(uint8 type,int16 increase_val){
-	if(type>STAT_DISEASE){
-		printf("Error in Client::IncStats, received invalid type of: %i\n",type);
+void Client::IncStats(uint8 type, int16 increase_val)
+{
+	if (type > STAT_DISEASE) {
+		printf("Error in Client::IncStats, received invalid type of: %i\n", type);
 		return;
 	}
-	auto outapp = new EQApplicationPacket(OP_IncreaseStats, sizeof(IncreaseStat_Struct));
-	IncreaseStat_Struct* iss=(IncreaseStat_Struct*)outapp->pBuffer;
-	switch(type){
+	auto                outapp = new EQApplicationPacket(OP_IncreaseStats, sizeof(IncreaseStat_Struct));
+	IncreaseStat_Struct *iss   = (IncreaseStat_Struct *) outapp->pBuffer;
+	switch (type) {
 		case STAT_STR:
-			if(increase_val>0)
-				iss->str=increase_val;
-			if((m_pp.STR+increase_val*2)<0)
-				m_pp.STR=0;
-			else if((m_pp.STR+increase_val*2)>255)
-				m_pp.STR=255;
-			else
-				m_pp.STR+=increase_val*2;
+			if (increase_val > 0) {
+				iss->str = increase_val;
+			}
+
+			if ((m_pp.STR + increase_val * 2) > 255) {
+				m_pp.STR = 255;
+			} else {
+				m_pp.STR += increase_val * 2;
+			}
 			break;
 		case STAT_STA:
-			if(increase_val>0)
-				iss->sta=increase_val;
-			if((m_pp.STA+increase_val*2)<0)
-				m_pp.STA=0;
-			else if((m_pp.STA+increase_val*2)>255)
-				m_pp.STA=255;
-			else
-				m_pp.STA+=increase_val*2;
+			if (increase_val > 0) {
+				iss->sta = increase_val;
+			}
+
+			if ((m_pp.STA + increase_val * 2) > 255) {
+				m_pp.STA = 255;
+			} else {
+				m_pp.STA += increase_val * 2;
+			}
 			break;
 		case STAT_AGI:
-			if(increase_val>0)
-				iss->agi=increase_val;
-			if((m_pp.AGI+increase_val*2)<0)
-				m_pp.AGI=0;
-			else if((m_pp.AGI+increase_val*2)>255)
-				m_pp.AGI=255;
-			else
-				m_pp.AGI+=increase_val*2;
+			if (increase_val > 0) {
+				iss->agi = increase_val;
+			}
+			if ((m_pp.AGI + increase_val * 2) > 255) {
+				m_pp.AGI = 255;
+			} else {
+				m_pp.AGI += increase_val * 2;
+			}
 			break;
 		case STAT_DEX:
-			if(increase_val>0)
-				iss->dex=increase_val;
-			if((m_pp.DEX+increase_val*2)<0)
-				m_pp.DEX=0;
-			else if((m_pp.DEX+increase_val*2)>255)
-				m_pp.DEX=255;
-			else
-				m_pp.DEX+=increase_val*2;
+			if (increase_val > 0) {
+				iss->dex = increase_val;
+			}
+
+			if ((m_pp.DEX + increase_val * 2) > 255) {
+				m_pp.DEX = 255;
+			} else {
+				m_pp.DEX += increase_val * 2;
+			}
 			break;
 		case STAT_INT:
-			if(increase_val>0)
-				iss->int_=increase_val;
-			if((m_pp.INT+increase_val*2)<0)
-				m_pp.INT=0;
-			else if((m_pp.INT+increase_val*2)>255)
-				m_pp.INT=255;
-			else
-				m_pp.INT+=increase_val*2;
+			if (increase_val > 0) {
+				iss->int_ = increase_val;
+			}
+
+			if ((m_pp.INT + increase_val * 2) > 255) {
+				m_pp.INT = 255;
+			} else {
+				m_pp.INT += increase_val * 2;
+			}
 			break;
 		case STAT_WIS:
-			if(increase_val>0)
-				iss->wis=increase_val;
-			if((m_pp.WIS+increase_val*2)<0)
-				m_pp.WIS=0;
-			else if((m_pp.WIS+increase_val*2)>255)
-				m_pp.WIS=255;
-			else
-				m_pp.WIS+=increase_val*2;
+			if (increase_val > 0) {
+				iss->wis = increase_val;
+			}
+
+			if ((m_pp.WIS + increase_val * 2) > 255) {
+				m_pp.WIS = 255;
+			} else {
+				m_pp.WIS += increase_val * 2;
+			}
 			break;
 		case STAT_CHA:
-			if(increase_val>0)
-				iss->cha=increase_val;
-			if((m_pp.CHA+increase_val*2)<0)
-				m_pp.CHA=0;
-			else if((m_pp.CHA+increase_val*2)>255)
-				m_pp.CHA=255;
-			else
-				m_pp.CHA+=increase_val*2;
+			if (increase_val > 0) {
+				iss->cha = increase_val;
+			}
+
+			if ((m_pp.CHA + increase_val * 2) > 255) {
+				m_pp.CHA = 255;
+			} else {
+				m_pp.CHA += increase_val * 2;
+			}
 			break;
 	}
 	QueuePacket(outapp);
