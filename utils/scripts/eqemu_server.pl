@@ -870,6 +870,10 @@ sub show_menu_prompt
             print " [backup_player_tables]		Back up player tables to backups/ directory\n";
             print " [backup_database_compressed]	Back up database compressed to backups/ directory\n";
             print " \n";
+            print " [check_db_updates]		Checks for database updates manually\n";
+            print " [check_bot_db_updates]		Checks for bot database updates\n";
+            print " \n";
+            print " \n";
             print " [aa_tables]			Downloads and installs clean slate AA data from PEQ\n";
             print " [drop_bots_db_schema]		Removes bot database schema\n";
 
@@ -962,6 +966,14 @@ sub show_menu_prompt
         }
         elsif ($input eq "utility_scripts") {
             fetch_utility_scripts();
+            $dc = 1;
+        }
+        elsif ($input eq "check_db_updates") {
+            db_update_check();
+            $dc = 1;
+        }
+        elsif ($input eq "check_bot_db_updates") {
+            db_update_check();
             $dc = 1;
         }
         elsif ($input eq "setup_loginserver") {
@@ -1134,6 +1146,12 @@ sub database_dump
     print "[Database] Performing database backup....\n";
     my $command = get_world_command();
     print `$command database:dump --all`;
+}
+
+sub db_update_check
+{
+    my $command = get_world_command();
+    print `$command database:updates`;
 }
 
 sub database_dump_player_tables

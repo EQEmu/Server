@@ -30,6 +30,7 @@ void WorldserverCLI::CommandHandler(int argc, char **argv)
 	function_map["database:set-account-status"] = &WorldserverCLI::DatabaseSetAccountStatus;
 	function_map["database:schema"]             = &WorldserverCLI::DatabaseGetSchema;
 	function_map["database:dump"]               = &WorldserverCLI::DatabaseDump;
+	function_map["database:updates"]            = &WorldserverCLI::DatabaseUpdates;
 	function_map["test:test"]                   = &WorldserverCLI::TestCommand;
 	function_map["test:colors"]                 = &WorldserverCLI::TestColors;
 	function_map["test:expansion"]              = &WorldserverCLI::ExpansionTestCommand;
@@ -47,6 +48,7 @@ void WorldserverCLI::CommandHandler(int argc, char **argv)
 #include "cli/mercs_disable.cpp"
 #include "cli/database_concurrency.cpp"
 #include "cli/copy_character.cpp"
+#include "cli/database_updates.cpp"
 #include "cli/database_dump.cpp"
 #include "cli/database_get_schema.cpp"
 #include "cli/database_set_account_status.cpp"
