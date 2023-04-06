@@ -12,14 +12,10 @@ void WorldserverCLI::CommandHandler(int argc, char **argv)
 	cmd.parse(argc, argv, argh::parser::PREFER_PARAM_FOR_UNREG_OPTION);
 	EQEmuCommand::DisplayDebug(cmd);
 
-	/**
-	 * Declare command mapping
-	 */
+	// Declare command mapping
 	auto function_map = EQEmuCommand::function_map;
 
-	/**
-	 * Register commands
-	 */
+	// Register commands
 	function_map["bots:enable"]                 = &WorldserverCLI::BotsEnable;
 	function_map["bots:disable"]                = &WorldserverCLI::BotsDisable;
 	function_map["mercs:enable"]                = &WorldserverCLI::MercsEnable;
@@ -47,6 +43,8 @@ void WorldserverCLI::CommandHandler(int argc, char **argv)
 #include "cli/mercs_enable.cpp"
 #include "cli/mercs_disable.cpp"
 #include "cli/database_concurrency.cpp"
+#include "cli/bots_bootstrap.cpp"
+#include "cli/mercs_bootstrap.cpp"
 #include "cli/copy_character.cpp"
 #include "cli/database_updates.cpp"
 #include "cli/database_dump.cpp"

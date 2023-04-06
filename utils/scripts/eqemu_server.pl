@@ -841,10 +841,8 @@ sub fetch_utility_scripts
 
 sub setup_bots
 {
-    if ($OS eq "Linux") {
-        build_linux_source("bots");
-    }
-    bots_db_management();
+    my $command = get_world_command();
+    print `$command bots:bootstrap`;
 
     print "Bots should be setup, run your server and the bot command should be available in-game (type '^help')\n";
 }
