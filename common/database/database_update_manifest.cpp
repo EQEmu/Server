@@ -4732,6 +4732,31 @@ ALTER TABLE `npc_scale_global_base`
 
 )"
 	},
+	ManifestEntry{
+		.version = 9228,
+		.description = "new_database_check_test",
+		.check = "SHOW TABLES LIKE 'new_table'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+CREATE TABLE `new_table`  (
+  `id` int NOT NULL AUTO_INCREMENT,
+  PRIMARY KEY (`id`)
+);
+CREATE TABLE `new_table1`  (
+  `id` int NOT NULL AUTO_INCREMENT,
+  PRIMARY KEY (`id`)
+);
+CREATE TABLE `new_table2`  (
+  `id` int NOT NULL AUTO_INCREMENT,
+  PRIMARY KEY (`id`)
+);
+CREATE TABLE `new_table3`  (
+  `id` int NOT NULL AUTO_INCREMENT,
+  PRIMARY KEY (`id`)
+);
+)",
+	}
 
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{

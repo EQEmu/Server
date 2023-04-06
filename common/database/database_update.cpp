@@ -132,7 +132,7 @@ bool DatabaseUpdate::UpdateManifest(
 	if (version_low != version_high) {
 
 		LogSys.DisableMySQLErrorLogs();
-		for (int version = version_low; version <= version_high; ++version) {
+		for (int version = version_low + 1; version <= version_high; ++version) {
 			for (auto &e: entries) {
 				if (e.version == version) {
 					bool        has_migration = true;
