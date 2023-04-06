@@ -162,77 +162,66 @@ bool DatabaseUpdate::UpdateManifest(
 		if (!missing_migrations.empty()) {
 			LogInfo("Automatically backing up database before applying updates");
 			LogInfo("{}", Strings::Repeat("-", BREAK_LENGTH));
-			auto s = new DatabaseDumpService();
-			s->SetDumpAllTables(true);
-			s->SetDumpWithCompression(true);
-			s->DatabaseDump();
+			auto s = DatabaseDumpService();
+			s.SetDumpAllTables(true);
+			s.SetDumpWithCompression(true);
+			s.DatabaseDump();
 			LogInfo("{}", Strings::Repeat("-", BREAK_LENGTH));
-			delete s;
+		}
+
+		if (!missing_migrations.empty()) {
+			LogInfo("Running database migrations. Please wait...");
+			LogInfo("{}", Strings::Repeat("-", BREAK_LENGTH));
 		}
 
 		for (auto &m: missing_migrations) {
 			for (auto &e: entries) {
 				if (e.version == m) {
-					LogInfo(
-						"Running [{}] [{}]",
-						e.version,
-						e.description
-					);
+					bool errored_migration = false;
 
-					std::string sql = e.sql;
+					auto r = m_database->QueryDatabaseMulti(e.sql);
 
-					// mysql_set_server_option
-					// enum enum_mysql_set_option {
-					//   MYSQL_OPTION_MULTI_STATEMENTS_ON,
-					//   MYSQL_OPTION_MULTI_STATEMENTS_OFF
-					// };
+					// ignore empty query result "errors"
+					if (r.ErrorNumber() != 1065 && !r.ErrorMessage().empty()) {
+						LogError("[{}]", r.ErrorMessage());
+						errored_migration = true;
 
-					// don't remove these even if you think you know what you're doing
-					sql = Strings::Replace(sql, "; --", ";\n --");
-					sql = Strings::Replace(sql, ";   ", ";\n");
-					sql = Strings::Replace(sql, ";  ", ";\n");
-					sql = Strings::Replace(sql, "; ", ";\n");
-					bool      errored_migration = false;
-					for (auto &s: Strings::Split(sql, ";\n")) {
-						if (Strings::Contains(s, ";")) {
-							LogError("Found [;] in statement [{}] in version [{}]", e.sql, e.version);
-						}
-						else {
-							auto results = m_database->QueryDatabase(s);
-							// ignore empty query result "errors"
-							if (results.ErrorNumber() != 1065 && !results.ErrorMessage().empty()) {
-								LogError("[{}]", results.ErrorMessage());
-								errored_migration = true;
+						LogInfo("Required database update failed. This could be a problem");
+						LogInfo("Would you like to skip this update? [y/n] (Timeout 60s)");
 
-								LogInfo("Required database update failed. This could be a problem");
-								LogInfo("Would you like to skip this update? [y/n] (Timeout 60s)");
+						// user input
+						std::string input;
+						bool        gave_input        = false;
+						time_t      start_time        = time(nullptr);
+						time_t      wait_time_seconds = 60;
 
-								// user input
-								std::string input;
-								bool   gave_input = false;
-								time_t start_time        = time(nullptr);
-								time_t wait_time_seconds = 60;
-
-								// spawn a concurrent thread that waits for input from std::cin
-								std::thread t1([&]() {
-									std::cin >> input;
-									gave_input = true;
-								});
-								t1.detach();
-
-								// check the inputReceived flag once every 50ms for 10 seconds
-								while (time(nullptr) < start_time + wait_time_seconds && !gave_input) {
-									std::this_thread::sleep_for(std::chrono::milliseconds(50));
-								}
-
-								// prompt for user skip
-								if (Strings::Trim(input) == "y") {
-									errored_migration = false;
-									LogInfo("Skipping update [{}] [{}]", e.version, e.description);
-								}
+						// spawn a concurrent thread that waits for input from std::cin
+						std::thread t1(
+							[&]() {
+								std::cin >> input;
+								gave_input = true;
 							}
+						);
+						t1.detach();
+
+						// check the inputReceived flag once every 50ms for 10 seconds
+						while (time(nullptr) < start_time + wait_time_seconds && !gave_input) {
+							std::this_thread::sleep_for(std::chrono::milliseconds(50));
+						}
+
+						// prompt for user skip
+						if (Strings::Trim(input) == "y") {
+							errored_migration = false;
+							LogInfo("Skipping update [{}] [{}]", e.version, e.description);
 						}
 					}
+
+					LogInfo(
+						"[{}] [{}] [{}]",
+						e.version,
+						e.description,
+						(errored_migration ? "error" : "ok")
+					);
 
 					if (errored_migration) {
 						LogError("Fatal | Database migration [{}] failed to run", e.description);

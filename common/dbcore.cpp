@@ -95,8 +95,6 @@ MySQLRequestResult DBcore::QueryDatabase(const char *query, uint32 querylen, boo
 
 	LockMutex lock(m_mutex);
 
-//	mysql_set_server_option().
-
 	// Reconnect if we are not connected before hand.
 	if (pStatus != Connected) {
 		Open();
@@ -339,7 +337,7 @@ MySQLRequestResult DBcore::QueryDatabaseMulti(const std::string &query)
 			std::string error_raw   = fmt::format("{}", mysql_error(mysql));
 			std::string mysql_err   = Strings::Trim(error_raw);
 			std::string clean_query = Strings::Replace(query, "\n", "");
-			LogMySQLQuery("[{}] ({}) query [{}]", mysql_err, mysql_errno(mysql), clean_query);
+			LogMySQLError("[{}] ({}) query [{}]", mysql_err, mysql_errno(mysql), clean_query);
 		}
 	}
 
