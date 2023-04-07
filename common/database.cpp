@@ -2400,7 +2400,7 @@ void Database::SourceSqlFromUrl(std::string url)
 	try {
 		uri request_uri(url);
 
-		LogHTTP(
+		LogHTTPDetail(
 			"parsing url [{}] path [{}] host [{}] query_string [{}] protocol [{}] port [{}]",
 			url,
 			request_uri.get_path(),
@@ -2410,7 +2410,7 @@ void Database::SourceSqlFromUrl(std::string url)
 			request_uri.get_port()
 		);
 
-		LogMySQLQuery("Downloading and installing from [{}]", url);
+		LogInfo("Downloading and installing from [{}]", url);
 
 		// http get request
 		httplib::Client cli(
