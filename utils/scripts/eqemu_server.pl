@@ -891,7 +891,6 @@ sub show_menu_prompt
                 print ">>> Windows\n";
                 print " [windows_server_download]	Updates server via latest 'stable' code\n";
                 print " [windows_server_latest]	Updates server via latest commit 'unstable'\n";
-                print " [fetch_dlls]			Grabs dll's needed to run windows binaries\n";
                 print " [setup_loginserver]		Sets up loginserver for Windows\n";
             }
             print " \n> main - go back to main menu\n";
@@ -948,10 +947,6 @@ sub show_menu_prompt
         }
         elsif ($input eq "windows_server_latest") {
             fetch_latest_windows_appveyor();
-            $dc = 1;
-        }
-        elsif ($input eq "fetch_dlls") {
-            fetch_server_dlls();
             $dc = 1;
         }
         elsif ($input eq "utility_scripts") {
@@ -1628,15 +1623,6 @@ sub check_windows_firewall_rules
     }
 }
 
-sub fetch_server_dlls
-{
-    # print "[Download] Fetching lua51.dll, zlib1.dll, zlib1.pdb, libmysql.dll...\n";
-    # get_remote_file($install_repository_request_url . "lua51.dll", "lua51.dll", 1);
-    # get_remote_file($install_repository_request_url . "zlib1.dll", "zlib1.dll", 1);
-    # get_remote_file($install_repository_request_url . "zlib1.pdb", "zlib1.pdb", 1);
-    # get_remote_file($install_repository_request_url . "libmysql.dll", "libmysql.dll", 1);
-}
-
 sub fetch_peq_db_full
 {
     print "[Install] Downloading latest PEQ Database... Please wait...\n";
@@ -1890,29 +1876,7 @@ sub unzip
 
 sub do_bots_db_schema_drop
 {
-    #"drop_bots.sql" is run before reverting database back to 'normal'
-    print "[Database] Fetching drop_bots.sql...\n";
-    get_remote_file($eqemu_repository_request_url . "utils/sql/git/bots/drop_bots.sql", "db_update/drop_bots.sql");
-    print get_mysql_result_from_file("db_update/drop_bots.sql");
-
-    print "[Database] Removing bot database tables...\n";
-
-    if (get_mysql_result("SHOW KEYS FROM `group_id` WHERE `Key_name` LIKE 'PRIMARY'") ne "" && $db) {
-        print get_mysql_result("ALTER TABLE `group_id` DROP PRIMARY KEY;");
-    }
-    print get_mysql_result("ALTER TABLE `group_id` ADD PRIMARY KEY (`groupid`, `charid`, `ismerc`);");
-
-    if (get_mysql_result("SHOW KEYS FROM `guild_members` WHERE `Key_name` LIKE 'PRIMARY'") ne "" && $db) {
-        print get_mysql_result("ALTER TABLE `guild_members` DROP PRIMARY KEY;");
-    }
-    print get_mysql_result("ALTER TABLE `guild_members` ADD PRIMARY KEY (`char_id`);");
-
-    print get_mysql_result("UPDATE `spawn2` SET `enabled` = 0 WHERE `id` IN (59297,59298);");
-
-    if (get_mysql_result("SHOW COLUMNS FROM `db_version` LIKE 'bots_version'") ne "" && $db) {
-        print get_mysql_result("UPDATE `db_version` SET `bots_version` = 0;");
-    }
-    print "[Database] Done...\n";
+    print `$command bots:disable`;
 }
 
 sub clear_database_runs
