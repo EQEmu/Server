@@ -1,3 +1,5 @@
+SET FOREIGN_KEY_CHECKS = 0;
+
 --
 -- Table structure for table `bot_buffs`
 --
@@ -600,3 +602,5 @@ UNLOCK TABLES;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
 -- Dump completed on 2023-04-06 18:35:53
+
+SET FOREIGN_KEY_CHECKS = 1;
