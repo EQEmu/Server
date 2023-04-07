@@ -1,4 +1,5 @@
 #include "../../common/database/database_update.h"
+#include "../worlddb.h"
 
 void WorldserverCLI::MercsBootstrap(int argc, char **argv, argh::parser &cmd, std::string &description)
 {
@@ -11,5 +12,7 @@ void WorldserverCLI::MercsBootstrap(int argc, char **argv, argh::parser &cmd, st
 		return;
 	}
 
-
+	LogInfo("Bootstrapping mercenaries tables");
+	database.SourceSqlFromUrl("https://raw.githubusercontent.com/EQEmu/Server/akkadius/db-migration-native/utils/sql/merc_tables_bootstrap.sql");
+	LogInfo("Bootstrapping mercenaries tables... done");
 }

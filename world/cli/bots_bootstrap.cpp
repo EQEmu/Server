@@ -1,4 +1,4 @@
-#include "../../common/database/database_update.h"
+#include "../worlddb.h"
 
 void WorldserverCLI::BotsBootstrap(int argc, char **argv, argh::parser &cmd, std::string &description)
 {
@@ -11,5 +11,7 @@ void WorldserverCLI::BotsBootstrap(int argc, char **argv, argh::parser &cmd, std
 		return;
 	}
 
-
+	LogInfo("Bootstrapping bots");
+	database.SourceSqlFromUrl("https://raw.githubusercontent.com/EQEmu/Server/akkadius/db-migration-native/utils/sql/bot_tables_bootstrap.sql");
+	LogInfo("Bootstrapping bots... done");
 }

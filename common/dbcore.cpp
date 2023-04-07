@@ -337,7 +337,7 @@ MySQLRequestResult DBcore::QueryDatabaseMulti(const std::string &query)
 			std::string error_raw   = fmt::format("{}", mysql_error(mysql));
 			std::string mysql_err   = Strings::Trim(error_raw);
 			std::string clean_query = Strings::Replace(query, "\n", "");
-			LogMySQLError("[{}] ({}) query [{}]", mysql_err, mysql_errno(mysql), clean_query);
+			LogMySQLQuery("[{}] ({}) query [{}]", mysql_err, mysql_errno(mysql), clean_query);
 		}
 	}
 
