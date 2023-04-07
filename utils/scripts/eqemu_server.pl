@@ -94,17 +94,12 @@ my $world_path = get_world_path();
 # run routines
 #############################################
 get_windows_wget();
-check_xml_to_json_conversion() if $ARGV[0] eq "convert_xml";
 do_self_update_check_routine() if !$skip_self_update_check;
 get_perl_version();
 if (-e "eqemu_config.json") {
     read_eqemu_config_json();
 }
-else {
-    #::: This will need to stay for servers who simply haven't updated yet
-    # This script can still update without the server bins being updated
-    read_eqemu_config_xml();
-}
+
 get_mysql_path();
 
 #::: Remove old eqemu_update.pl
@@ -349,64 +344,6 @@ sub new_server
             print "[New Server] MySQL authorization failed or no MySQL installed\n";
         }
     }
-}
-
-sub check_xml_to_json_conversion
-{
-    if (-e "eqemu_config.xml" && !-e "eqemu_config.json") {
-
-        if ($OS eq "Windows") {
-            get_remote_file("https://raw.githubusercontent.com/EQEmu/Server/master/utils/xmltojson/xmltojson-windows-x86.exe",
-                "xmltojson.exe");
-            print "Converting eqemu_config.xml to eqemu_config.json\n";
-            print `xmltojson eqemu_config.xml`;
-        }
-        if ($OS eq "Linux") {
-            get_remote_file("https://raw.githubusercontent.com/EQEmu/Server/master/utils/xmltojson/xmltojson-linux-x86",
-                "xmltojson");
-            print "Converting eqemu_config.xml to eqemu_config.json\n";
-            print `chmod 755 xmltojson`;
-            print `./xmltojson eqemu_config.xml`;
-        }
-
-        #::: Prettify and alpha order the config
-        use JSON;
-        my $json = new JSON();
-
-        my $content;
-        open(my $fh, '<', "eqemu_config.json") or die "cannot open file $filename"; {
-            local $/;
-            $content = <$fh>;
-        }
-        close($fh);
-
-        $result = $json->decode($content);
-        $json->canonical(1);
-
-        print $json->pretty->utf8->encode($result), "\n";
-
-        open(my $fh, '>', 'eqemu_config.json');
-        print $fh $json->pretty->utf8->encode($result);
-        close $fh;
-
-        mkdir('backups');
-        copy_file("eqemu_config.xml", "backups/eqemu_config.xml");
-        unlink('eqemu_config.xml');
-        unlink('db_dumper.pl');
-
-        print "[Server Maintenance] eqemu_config.xml is now DEPRECATED \n";
-        print "[Server Maintenance] eqemu_config.json is now the new Server config format \n";
-        print " A backup of this old config is located in the backups folder of your server directory\n";
-        print " --- \n";
-        print " You may have some plugins and/or applications that still require reference of this config file\n";
-        print " Please update these plugins/applications to use the new configuration format if needed\n";
-        print " --- \n";
-        print " Thanks for your understanding\n";
-        print " The EQEmulator Team\n\n";
-
-        exit;
-    }
-
 }
 
 sub build_linux_source
@@ -917,10 +854,6 @@ sub show_menu_prompt
             aa_fetch();
             $dc = 1;
         }
-        elsif ($input eq "remove_duplicate_rules") {
-            remove_duplicate_rule_values();
-            $dc = 1;
-        }
         elsif ($input eq "maps") {
             map_files_fetch_bulk();
             $dc = 1;
@@ -1249,54 +1182,6 @@ sub trim
     return $string;
 }
 
-sub read_eqemu_config_xml
-{
-    open(CONFIG, "eqemu_config.xml");
-    while (<CONFIG>) {
-        chomp;
-        $o = $_;
-
-        if ($o =~ /\<\!--/i) {
-            next;
-        }
-
-        if ($o =~ /database/i && $o =~ /\<\//i) {
-            $in_database_tag = 0;
-        }
-        if ($o =~ /<database>/i) {
-            print "IN DATABASE TAG\n" if $debug;
-            $in_database_tag = 1;
-        }
-        if ($o =~ /<longname>/i) {
-            ($long_name) = $o =~ /<longname>(.*)<\/longname>/;
-            print "Long Name: '" . $long_name . "'\n" if $debug;
-        }
-        if ($in_database_tag == 1) {
-            @left     = split(">", $o);
-            @right    = split("<", $left[1]);
-            $tag_data = trim($right[0]);
-
-            if ($o =~ /<username>/i && $in_database_tag) {
-                $user = $tag_data;
-                print "Database User: '" . $user . "'\n" if $debug;
-            }
-            if ($o =~ /<password>/i && $in_database_tag) {
-                $pass = $tag_data;
-                print "Database Pass: '" . $pass . "'\n" if $debug;
-            }
-            if ($o =~ /<db>/i) {
-                $db = $tag_data;
-                print "Database Name: '" . $db . "'\n" if $debug;
-            }
-            if ($o =~ /<host>/i) {
-                $host = $tag_data;
-                print "Database Host: '" . $host . "'\n" if $debug;
-            }
-        }
-    }
-    close(CONFIG);
-}
-
 sub read_eqemu_config_json
 {
     use JSON;
@@ -1368,36 +1253,6 @@ sub opcodes_fetch
         $loop++;
     }
     print "[Update] Done...\n";
-}
-
-sub remove_duplicate_rule_values
-{
-    $ruleset_id = trim(get_mysql_result("SELECT `ruleset_id` FROM `rule_sets` WHERE `name` = 'default'"));
-    print "[Database] Default Ruleset ID: " . $ruleset_id . "\n";
-
-    $total_removed = 0;
-
-    #::: Store Default values...
-    $mysql_result = get_mysql_result("SELECT * FROM `rule_values` WHERE `ruleset_id` = " . $ruleset_id);
-    my @lines     = split("\n", $mysql_result);
-    foreach my $val (@lines) {
-        my @values                      = split("\t", $val);
-        $rule_set_values{$values[1]}[0] = $values[2];
-    }
-
-    #::: Compare default values against other rulesets to check for duplicates...
-    $mysql_result = get_mysql_result("SELECT * FROM `rule_values` WHERE `ruleset_id` != " . $ruleset_id);
-    my @lines     = split("\n", $mysql_result);
-    foreach my $val (@lines) {
-        my @values = split("\t", $val);
-        if ($values[2] == $rule_set_values{$values[1]}[0]) {
-            print "[Database] Removing duplicate : " . $values[1] . " (Ruleset (" . $values[0] . ")) matches default value of : " . $values[2] . "\n";
-            get_mysql_result("DELETE FROM `rule_values` WHERE `ruleset_id` = " . $values[0] . " AND `rule_name` = '" . $values[1] . "'");
-            $total_removed++;
-        }
-    }
-
-    print "[Database] Total duplicate rules removed... " . $total_removed . "\n";
 }
 
 sub copy_file
