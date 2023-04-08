@@ -1361,27 +1361,25 @@ void Raid::SendGroupUpdate(Client *to)
 	auto outapp = new EQApplicationPacket(OP_GroupUpdate, sizeof(GroupUpdate2_Struct));
 	auto gu = (GroupUpdate2_Struct*)outapp->pBuffer;
 	gu->action = groupActUpdate;
-	int i = 0;
 	uint32 grp = GetGroup(to->GetName());
 	if (grp >= MAX_RAID_GROUPS) {
 		safe_delete(outapp);
 		return;
 	}
 
+	int i = 0;
 	for (const auto& m : members) {
 		if (m.group_number == grp && strlen(m.member_name) > 0) {
 			if (m.is_group_leader) {
 				strn0cpy(gu->leadersname, m.member_name, 64);
 				if (strcmp(to->GetName(), m.member_name) != 0) {
 					strn0cpy(gu->membername[i], m.member_name, 64);
-					i++;
+					++i;
 				}
 			}
-			else {
-				if (strcmp(to->GetName(), m.member_name) != 0) {
-					strn0cpy(gu->membername[i], m.member_name, 64);
-					i++;
-				}
+			else if (strcmp(to->GetName(), m.member_name) != 0) {
+				strn0cpy(gu->membername[i], m.member_name, 64);
+				++i;
 			}
 		}
 	}
@@ -1404,7 +1402,7 @@ void Raid::GroupUpdate(uint32 gid, bool initial)
 	}
 
 	for (const auto& m : members) {
-		if (strlen(m.member_name) > 0 && m.group_number == gid && m.member) {
+		if (m.member && m.group_number == gid && strlen(m.member_name) > 0) {
 			SendGroupUpdate(m.member);
 			SendGroupLeadershipAA(m.member, gid);
 		}
