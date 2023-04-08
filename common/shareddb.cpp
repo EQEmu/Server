@@ -495,25 +495,31 @@ bool SharedDatabase::GetSharedBank(uint32 id, EQ::InventoryProfile *inv, bool is
 {
 	std::string query;
 
-	if (is_charid)
-		query = StringFormat("SELECT sb.slotid, sb.itemid, sb.charges, "
-				     "sb.augslot1, sb.augslot2, sb.augslot3, "
-				     "sb.augslot4, sb.augslot5, sb.augslot6, sb.custom_data "
-				     "FROM sharedbank sb INNER JOIN character_data ch "
-				     "ON ch.account_id=sb.acctid WHERE ch.id = %i ORDER BY sb.slotid",
-				     id);
-	else
-		query = StringFormat("SELECT slotid, itemid, charges, "
-				     "augslot1, augslot2, augslot3, "
-				     "augslot4, augslot5, augslot6, custom_data "
-				     "FROM sharedbank WHERE acctid=%i ORDER BY slotid",
-				     id);
+	if (is_charid) {
+		query = fmt::format(
+			"SELECT sb.slotid, sb.itemid, sb.charges, "
+			"sb.augslot1, sb.augslot2, sb.augslot3, "
+			"sb.augslot4, sb.augslot5, sb.augslot6, sb.custom_data "
+			"FROM sharedbank sb INNER JOIN character_data ch "
+			"ON ch.account_id = sb.acctid WHERE ch.id = {} ORDER BY sb.slotid",
+			id
+		);
+	} else {
+		query = fmt::format(
+			"SELECT slotid, itemid, charges, "
+			"augslot1, augslot2, augslot3, "
+			"augslot4, augslot5, augslot6, custom_data "
+			"FROM sharedbank WHERE acctid = {} ORDER BY slotid",
+			id
+		);
+	}
+
 	auto results = QueryDatabase(query);
-	if (!results.Success()) {
+	if (!results.Success() || !results.RowCount()) {
 		return false;
 	}
 
-	for (auto& row = results.begin(); row != results.end(); ++row) {
+	for (auto row : results) {
 		int16 slot_id = static_cast<int16>(Strings::ToInt(row[0]));
 		uint32 item_id = Strings::ToUnsignedInt(row[1]);
 		const int16 charges = static_cast<int16>(Strings::ToInt(row[2]));
@@ -529,16 +535,26 @@ bool SharedDatabase::GetSharedBank(uint32 id, EQ::InventoryProfile *inv, bool is
 		const EQ::ItemData *item = GetItem(item_id);
 
 		if (!item) {
-			LogError("Warning: [{}] [{}] has an invalid item_id [{}] in inventory slot [{}]",
-				((is_charid == true) ? "charid" : "acctid"), id, item_id, slot_id);
+			LogError(
+				"Warning: [{}] [{}] has an invalid item_id [{}] in inventory slot [{}]",
+				is_charid ? "charid" : "acctid",
+				id,
+				item_id,
+				slot_id
+			);
 			continue;
 		}
 
-		EQ::ItemInstance *inst = CreateBaseItem(item, charges);
+		auto inst = CreateBaseItem(item, charges);
+		if (!inst) {
+			continue;
+		}
+
 		if (inst && item->IsClassCommon()) {
 			for (int i = EQ::invaug::SOCKET_BEGIN; i <= EQ::invaug::SOCKET_END; i++) {
-				if (aug[i])
+				if (aug[i]) {
 					inst->PutAugment(this, i, aug[i]);
+				}
 			}
 		}
 
@@ -552,14 +568,21 @@ bool SharedDatabase::GetSharedBank(uint32 id, EQ::InventoryProfile *inv, bool is
 		safe_delete(inst);
 
 		// Save ptr to item in inventory
-		if (put_slot_id != INVALID_INDEX)
+		if (put_slot_id != INVALID_INDEX) {
 			continue;
+		}
 
-		LogError("Warning: Invalid slot_id for item in shared bank inventory: [{}]=[{}], item_id=[{}], slot_id=[{}]",
-			((is_charid == true) ? "charid" : "acctid"), id, item_id, slot_id);
+		LogError(
+			"Warning: Invalid slot_id for item in shared bank inventory: [{}]=[{}], item_id=[{}], slot_id=[{}]",
+			is_charid ? "charid" : "acctid",
+			id,
+			item_id,
+			slot_id
+		);
 
-		if (is_charid)
+		if (is_charid) {
 			SaveInventory(id, nullptr, slot_id);
+		}
 	}
 
 	return true;
