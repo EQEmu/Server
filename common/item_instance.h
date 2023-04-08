@@ -304,34 +304,33 @@ namespace EQ
 
 		void _PutItem(uint8 index, ItemInstance* inst) { m_contents[index] = inst; }
 
-		ItemInstTypes		m_use_type;	// Usage type for item
-		const ItemData*		m_item;		// Ptr to item data
-		int16				m_charges;	// # of charges for chargeable items
-		uint32				m_price;	// Bazaar /trader price
-		uint32				m_color;
-		uint32				m_merchantslot;
-		int16				m_currentslot;
-		bool				m_attuned;
-		int32				m_merchantcount;		//number avaliable on the merchant, -1=unlimited
-		int32				m_SerialNumber;	// Unique identifier for this instance of an item. Needed for Bazaar.
-		uint32				m_exp;
-		int8				m_evolveLvl;
-		bool				m_activated;
-		ItemData*			m_scaledItem;
-		::EvolveInfo*		m_evolveInfo;
-		bool				m_scaling;
-		uint32				m_ornamenticon;
-		uint32				m_ornamentidfile;
-		uint32				m_new_id_file;
-		uint32				m_ornament_hero_model;
-		uint32				m_recast_timestamp;
-		int                 m_task_delivered_count = 0;
+		ItemInstTypes		m_use_type {};	// Usage type for item
+		const ItemData*		m_item {};		// Ptr to item data
+		int16				m_charges {};	// # of charges for chargeable items
+		uint32				m_price {};	// Bazaar /trader price
+		uint32				m_color {};
+		uint32				m_merchantslot {};
+		int16				m_currentslot {};
+		bool				m_attuned {};
+		int32				m_merchantcount {};		//number avaliable on the merchant, -1=unlimited
+		int32				m_SerialNumber {};	// Unique identifier for this instance of an item. Needed for Bazaar.
+		uint32				m_exp {};
+		int8				m_evolveLvl {};
+		bool				m_activated {};
+		ItemData*			m_scaledItem {};
+		::EvolveInfo*		m_evolveInfo {};
+		bool				m_scaling {};
+		uint32				m_ornamenticon {};
+		uint32				m_ornamentidfile {};
+		uint32				m_new_id_file {};
+		uint32				m_ornament_hero_model {};
+		uint32				m_recast_timestamp {};
+		int                 m_task_delivered_count {};
 
-		//
-		// Items inside of this item (augs or contents);
-		std::map<uint8, ItemInstance*>		m_contents; // Zero-based index: min=0, max=9
-		std::map<std::string, std::string>	m_custom_data;
-		std::map<std::string, ::Timer>		m_timers;
+		// Items inside of this item (augs or contents) {};
+		std::map<uint8, ItemInstance*>		m_contents {}; // Zero-based index: min=0, max=9
+		std::map<std::string, std::string>	m_custom_data {};
+		std::map<std::string, ::Timer>		m_timers {};
 	};
 }
 
