@@ -515,7 +515,8 @@ bool SharedDatabase::GetSharedBank(uint32 id, EQ::InventoryProfile *inv, bool is
 	}
 
 	auto results = QueryDatabase(query);
-	if (!results.Success() || !results.RowCount()) {
+	// If we have no results we still need to return true
+	if (!results.Success()) {
 		return false;
 	}
 
