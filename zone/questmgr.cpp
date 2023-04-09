@@ -74,7 +74,6 @@ QuestManager quest_manager;
 
 QuestManager::QuestManager() {
 	HaveProximitySays = false;
-	item_timers = 0;
 }
 
 QuestManager::~QuestManager() {
@@ -3609,14 +3608,14 @@ void QuestManager::UpdateZoneHeader(std::string type, std::string value) {
 EQ::ItemInstance *QuestManager::CreateItem(uint32 item_id, int16 charges, uint32 augment_one, uint32 augment_two, uint32 augment_three, uint32 augment_four, uint32 augment_five, uint32 augment_six, bool attuned) const {
 	if (database.GetItem(item_id)) {
 		return database.CreateItem(
-			item_id, 
-			charges, 
-			augment_one, 
-			augment_two, 
-			augment_three, 
-			augment_four, 
-			augment_five, 
-			augment_six, 
+			item_id,
+			charges,
+			augment_one,
+			augment_two,
+			augment_three,
+			augment_four,
+			augment_five,
+			augment_six,
 			attuned
 		);
 	}
