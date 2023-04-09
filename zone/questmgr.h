@@ -391,7 +391,6 @@ private:
 	std::list<QuestTimer>	QTimerList;
 	std::list<SignalTimer>	STimerList;
 	std::list<PausedTimer>	PTimerList;
-
 };
 
 extern QuestManager quest_manager;
