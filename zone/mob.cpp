@@ -277,7 +277,6 @@ Mob::Mob(
 	hidden               = false;
 	improved_hidden      = false;
 	invulnerable         = false;
-	IsFullHP             = (current_hp == max_hp);
 	qglobal              = 0;
 	spawned              = false;
 	rare_spawn           = false;
@@ -1364,7 +1363,6 @@ void Mob::CreateDespawnPacket(EQApplicationPacket* app, bool Decay)
 
 void Mob::CreateHPPacket(EQApplicationPacket* app)
 {
-	IsFullHP=(current_hp>=max_hp);
 	app->SetOpcode(OP_MobHealth);
 	app->size = sizeof(SpawnHPUpdate_Struct2);
 	safe_delete_array(app->pBuffer);
