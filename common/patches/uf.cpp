@@ -3851,13 +3851,14 @@ namespace UF
 			ob.write((const char*)&evotop, sizeof(UF::structs::EvolvingItem));
 		}
 
-		uint16 ornament_icon = 0;
-		const auto augment = inst->GetOrnamentationAugment();
-		if (augment) {
-			const auto item = augment->GetItem();
-			ornament_icon = item->Icon;
+		uint16     ornament_icon = 0;
+		const auto augment       = inst->GetOrnamentationAugment();
 
-			ob.write(item->IDFile, strlen(item->IDFile));
+		if (augment) {
+			const auto augment_item = augment->GetItem();
+			ornament_icon = augment_item->Icon;
+
+			ob.write(augment_item->IDFile, strlen(augment_item->IDFile));
 		}
 		else if (inst->GetOrnamentationIDFile() && inst->GetOrnamentationIcon()) {
 			ornament_icon = inst->GetOrnamentationIcon();

@@ -587,7 +587,12 @@ bool EQ::ItemInstance::IsOrnamentationAugment(EQ::ItemInstance* augment) const
 		return false;
 	}
 
-	const std::string idfile = augment->GetItem()->IDFile;
+	const auto augment_item = augment->GetItem();
+	if (!augment_item) {
+		return false;
+	}
+
+	const std::string& idfile = augment_item->IDFile;
 
 	if (
 		EQ::ValueWithin(
@@ -599,7 +604,7 @@ bool EQ::ItemInstance::IsOrnamentationAugment(EQ::ItemInstance* augment) const
 			idfile != "IT63" &&
 			idfile != "IT64"
 		) ||
-		augment->GetItem()->HerosForgeModel
+		augment_item->HerosForgeModel
 	) {
 		return true;
 	}
@@ -616,7 +621,7 @@ EQ::ItemInstance* EQ::ItemInstance::GetOrnamentationAugment() const
 	for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; i++) {
 		const auto augment = GetAugment(i);
 		if (augment && IsOrnamentationAugment(augment)) {
-			return GetAugment(i);
+			return augment;
 		}
 	}
 
@@ -645,14 +650,17 @@ bool EQ::ItemInstance::UpdateOrnamentationInfo()
 		return false;
 	}
 
-	if (GetOrnamentationAugment()) {
-		const auto augment = GetOrnamentationAugment()->GetItem();
-		if (augment) {
-			SetOrnamentIcon(augment->Icon);
-			SetOrnamentHeroModel(augment->HerosForgeModel);
+	const auto augment = GetOrnamentationAugment();
 
-			if (strlen(augment->IDFile) > 2) {
-				SetOrnamentationIDFile(Strings::ToUnsignedInt(&augment->IDFile[2]));
+	if (augment) {
+		const auto augment_item = GetOrnamentationAugment()->GetItem();
+
+		if (augment_item) {
+			SetOrnamentIcon(augment_item->Icon);
+			SetOrnamentHeroModel(augment_item->HerosForgeModel);
+
+			if (strlen(augment_item->IDFile) > 2) {
+				SetOrnamentationIDFile(Strings::ToUnsignedInt(&augment_item->IDFile[2]));
 			} else {
 				SetOrnamentationIDFile(0);
 			}

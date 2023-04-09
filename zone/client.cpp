@@ -5629,14 +5629,15 @@ void Client::ProcessInspectRequest(Client *requestee, Client *requester)
 				if (item) {
 					strcpy(insr->itemnames[L], item->Name);
 
-					const EQ::ItemData *aug_item = nullptr;
-					const auto augment = inst->GetOrnamentationAugment();
+					const EQ::ItemData *augment_item = nullptr;
+					const auto         augment       = inst->GetOrnamentationAugment();
+
 					if (augment) {
-						aug_item = augment->GetItem();
+						augment_item = augment->GetItem();
 					}
 
-					if (aug_item) {
-						insr->itemicons[L] = aug_item->Icon;
+					if (augment_item) {
+						insr->itemicons[L] = augment_item->Icon;
 					} else if (inst->GetOrnamentationIcon()) {
 						insr->itemicons[L] = inst->GetOrnamentationIcon();
 					} else {

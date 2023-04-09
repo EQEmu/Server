@@ -231,8 +231,10 @@ int32 Mob::GetEquipmentMaterial(uint8 material_slot) const
 				}
 
 				const auto* inst = CastToClient()->m_inv[inventory_slot];
+
 				if (inst) {
 					const auto augment = inst->GetOrnamentationAugment();
+
 					if (augment) {
 						item = augment->GetItem();
 						if (item && strlen(item->IDFile) > 2 && Strings::IsNumber(&item->IDFile[2])) {
@@ -318,6 +320,7 @@ int32 Mob::GetHerosForgeModel(uint8 material_slot) const
 				const auto inst = CastToClient()->m_inv[slot];
 				if (inst) {
 					const auto augment = inst->GetOrnamentationAugment();
+
 					if (augment) {
 						item       = augment->GetItem();
 						hero_model = item->HerosForgeModel;
