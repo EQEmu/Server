@@ -8633,8 +8633,7 @@ void Client::Handle_OP_InspectAnswer(const EQApplicationPacket *app)
 			if (inst) {
 				const auto augment = inst->GetOrnamentationAugment();
 				if (augment) {
-					const auto aug_item = augment->GetItem();
-					insr->itemicons[L] = aug_item->Icon;
+					insr->itemicons[L] = augment->GetItem()->Icon;
 				} else if (inst->GetOrnamentationIcon()) {
 					insr->itemicons[L] = inst->GetOrnamentationIcon();
 				}
