@@ -442,7 +442,7 @@ Pet::Pet(NPCType *type_data, Mob *owner, PetType type, uint16 spell_id, int16 po
 {
 	GiveNPCTypeData(type_data);
 	typeofpet = type;
-	petpower = power;
+	SetPetPower(power);
 	SetOwnerID(owner ? owner->GetID() : 0);
 	SetPetSpellID(spell_id);
 
