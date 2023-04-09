@@ -32,7 +32,6 @@ SET(zone_sources
     embparser.cpp
     embparser_api.cpp
     embperl.cpp
-    embxs.cpp
     encounter.cpp
     entity.cpp
     exp.cpp
@@ -77,7 +76,6 @@ SET(zone_sources
     lua_spell.cpp
     lua_stat_bonuses.cpp
     embperl.cpp
-    embxs.cpp
     entity.cpp
     exp.cpp
     fearpath.cpp
@@ -186,7 +184,6 @@ SET(zone_headers
     dynamic_zone.h
     embparser.h
     embperl.h
-    embxs.h
     encounter.h
     entity.h
     errmsg.h
