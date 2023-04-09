@@ -1763,36 +1763,42 @@ void QuestManager::resume() {
 	owner->CastToNPC()->ResumeWandering();
 }
 
-void QuestManager::addldonpoints(uint32 theme_id, int points) {
+void QuestManager::addldonpoints(uint32 theme_id, int points)
+{
 	QuestManagerCurrentQuestVars();
-	if(initiator)
+	if (initiator) {
 		initiator->UpdateLDoNPoints(theme_id, points);
+	}
 }
 
-void QuestManager::addldonloss(uint32 theme_id) {
+void QuestManager::addldonloss(uint32 theme_id)
+{
 	QuestManagerCurrentQuestVars();
-	if(initiator) {
+	if (initiator) {
 		initiator->UpdateLDoNWinLoss(theme_id);
 	}
 }
 
-void QuestManager::addldonwin(uint32 theme_id) {
+void QuestManager::addldonwin(uint32 theme_id)
+{
 	QuestManagerCurrentQuestVars();
-	if(initiator) {
+	if (initiator) {
 		initiator->UpdateLDoNWinLoss(theme_id, true);
 	}
 }
 
-void QuestManager::removeldonloss(uint32 theme_id) {
+void QuestManager::removeldonloss(uint32 theme_id)
+{
 	QuestManagerCurrentQuestVars();
-	if(initiator) {
+	if (initiator) {
 		initiator->UpdateLDoNWinLoss(theme_id, false, true);
 	}
 }
 
-void QuestManager::removeldonwin(uint32 theme_id) {
+void QuestManager::removeldonwin(uint32 theme_id)
+{
 	QuestManagerCurrentQuestVars();
-	if(initiator) {
+	if (initiator) {
 		initiator->UpdateLDoNWinLoss(theme_id, true, true);
 	}
 }
@@ -3609,14 +3615,14 @@ void QuestManager::UpdateZoneHeader(std::string type, std::string value) {
 EQ::ItemInstance *QuestManager::CreateItem(uint32 item_id, int16 charges, uint32 augment_one, uint32 augment_two, uint32 augment_three, uint32 augment_four, uint32 augment_five, uint32 augment_six, bool attuned) const {
 	if (database.GetItem(item_id)) {
 		return database.CreateItem(
-			item_id, 
-			charges, 
-			augment_one, 
-			augment_two, 
-			augment_three, 
-			augment_four, 
-			augment_five, 
-			augment_six, 
+			item_id,
+			charges,
+			augment_one,
+			augment_two,
+			augment_three,
+			augment_four,
+			augment_five,
+			augment_six,
 			attuned
 		);
 	}

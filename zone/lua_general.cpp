@@ -1987,7 +1987,7 @@ void lua_remove_ldon_loss(uint32 theme_id) {
 }
 
 void lua_remove_ldon_win(uint32 theme_id) {
-	quest_manager.addldonwin(theme_id);
+	quest_manager.removeldonwin(theme_id);
 }
 
 std::string lua_get_clean_npc_name_by_id(uint32 npc_id) {

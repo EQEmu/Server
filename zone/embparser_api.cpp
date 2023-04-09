@@ -849,9 +849,19 @@ void Perl__addldonwin(uint32 theme_id)
 	quest_manager.addldonwin(theme_id);
 }
 
+void Perl__removeldonwin(uint32 theme_id)
+{
+	quest_manager.removeldonwin(theme_id);
+}
+
 void Perl__addldonloss(uint32 theme_id)
 {
 	quest_manager.addldonloss(theme_id);
+}
+
+void Perl__removeldonloss(uint32 theme_id)
+{
+	quest_manager.removeldonloss(theme_id);
 }
 
 void Perl__setnexthpevent(int at_mob_percentage)
@@ -4632,6 +4642,8 @@ void perl_register_quest()
 	package.add("remove_expedition_lockout_by_char_id", &Perl__remove_expedition_lockout_by_char_id);
 	package.add("removeitem", (void(*)(uint32_t))&Perl__removeitem);
 	package.add("removeitem", (void(*)(uint32_t, int))&Perl__removeitem);
+	package.add("removeldonloss", &Perl__removeldonloss);
+	package.add("removeldonwin", &Perl__removeldonwin);
 	package.add("removetitle", &Perl__removetitle);
 	package.add("rename", &Perl__rename);
 	package.add("repopzone", &Perl__repopzone);
