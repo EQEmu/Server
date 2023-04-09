@@ -2937,6 +2937,19 @@ void Perl_Mob_StopTimer(Mob* self, const char* timer_name)
 	quest_manager.stoptimer(timer_name, self);
 }
 
+perl::array Perl_Mob_GetBuffSpellIDs(Mob* self)
+{
+	perl::array l;
+
+	const auto& b = self->GetBuffSpellIDs();
+
+	for (const auto& e : b) {
+		l.push_back(e);
+	}
+
+	return l;
+}
+
 void perl_register_mob()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -3117,6 +3130,7 @@ void perl_register_mob()
 	package.add("GetBucketKey", &Perl_Mob_GetBucketKey);
 	package.add("GetBucketRemaining", &Perl_Mob_GetBucketRemaining);
 	package.add("GetBuffSlotFromType", &Perl_Mob_GetBuffSlotFromType);
+	package.add("GetBuffSpellIDs", &Perl_Mob_GetBuffSpellIDs);
 	package.add("GetBuffStatValueBySpell", &Perl_Mob_GetBuffStatValueBySpell);
 	package.add("GetBuffStatValueBySlot", &Perl_Mob_GetBuffStatValueBySlot);
 	package.add("GetCHA", &Perl_Mob_GetCHA);
