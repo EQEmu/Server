@@ -74,6 +74,11 @@ public:
 	void ApplySpellGroup(int spell_id, int duration);
 	void ApplySpellGroup(int spell_id, int duration, bool allow_pets);
 
+	void ApplySpellRaid(int spell_id);
+	void ApplySpellRaid(int spell_id, int duration);
+	void ApplySpellRaid(int spell_id, int duration, bool allow_pets);
+	void ApplySpellRaid(int spell_id, int duration, bool allow_pets, bool is_raid_group_only);
+
 	void SetSpellDuration(int spell_id);
 	void SetSpellDuration(int spell_id, int duration);
 	void SetSpellDuration(int spell_id, int duration, bool allow_pets);
