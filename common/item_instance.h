@@ -51,6 +51,11 @@ typedef enum {
 	byFlagNotSet	//apply action if the flag is NOT set
 } byFlagSetting;
 
+enum OrnamentationAugmentTypes {
+	StandardOrnamentation = 20,
+	SpecialOrnamentation = 21
+};
+
 class SharedDatabase;
 
 // ########################################
@@ -136,7 +141,8 @@ namespace EQ
 		bool IsAugmented();
 		bool ContainsAugmentByID(uint32 item_id);
 		int CountAugmentByID(uint32 item_id);
-		ItemInstance* GetOrnamentationAug(int32 ornamentationAugtype) const;
+		bool IsOrnamentationAugment(EQ::ItemInstance* augment) const;
+		ItemInstance* GetOrnamentationAugment() const;
 		bool UpdateOrnamentationInfo();
 		static bool CanTransform(const ItemData *ItemToTry, const ItemData *Container, bool AllowAll = false);
 
