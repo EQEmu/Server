@@ -659,11 +659,11 @@ bool EQ::ItemInstance::UpdateOrnamentationInfo()
 
 			return true;
 		}
-	} else {
-		SetOrnamentIcon(0);
-		SetOrnamentHeroModel(0);
-		SetOrnamentationIDFile(0);
 	}
+
+	SetOrnamentIcon(0);
+	SetOrnamentHeroModel(0);
+	SetOrnamentationIDFile(0);
 
 	return false;
 }
