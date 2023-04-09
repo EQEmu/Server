@@ -314,14 +314,6 @@ bool Embperl::SubExists(const char *package, const char *sub) {
 	return(hv_exists(stash, sub, len));
 }
 
-bool Embperl::VarExists(const char *package, const char *var) {
-	HV *stash = gv_stashpv(package, false);
-	if(!stash)
-		return(false);
-	int len = strlen(var);
-	return(hv_exists(stash, var, len));
-}
-
 
 #endif //EMBPERL
 
