@@ -1464,7 +1464,6 @@ protected:
 
 	bool isgrouped;
 	bool israidgrouped;
-	bool pendinggroup;
 	uint16 entity_id_being_looted; //the id of the entity being looted, 0 if not looting.
 	uint8 texture;
 	uint8 helmtexture;
