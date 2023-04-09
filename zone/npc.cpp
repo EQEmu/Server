@@ -162,7 +162,7 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 		size = 15;
 	}
 
-	taunting             = false;
+	SetTaunting(false);
 	proximity            = nullptr;
 	copper               = 0;
 	silver               = 0;

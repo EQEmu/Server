@@ -1730,7 +1730,7 @@ void NPC::DoClassAttacks(Mob *target) {
 
 	//general stuff, for all classes....
 	//only gets used when their primary ability get used too
-	if (taunting && HasOwner() && target->IsNPC() && target->GetBodyType() != BT_Undead && taunt_time) {
+	if (IsTaunting() && HasOwner() && target->IsNPC() && target->GetBodyType() != BT_Undead && taunt_time) {
 		GetOwner()->MessageString(Chat::PetResponse, PET_TAUNTING);
 		Taunt(target->CastToNPC(), false);
 	}

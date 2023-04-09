@@ -441,22 +441,24 @@ Pet::Pet(NPCType *type_data, Mob *owner, PetType type, uint16 spell_id, int16 po
 : NPC(type_data, 0, owner->GetPosition() + glm::vec4(2.0f, 2.0f, 0.0f, 0.0f), GravityBehavior::Water)
 {
 	GiveNPCTypeData(type_data);
-	typeofpet = type;
+	SetPetType(type);
 	SetPetPower(power);
 	SetOwnerID(owner ? owner->GetID() : 0);
 	SetPetSpellID(spell_id);
 
 	// All pets start at false on newer clients. The client
 	// turns it on and tracks the state.
-	taunting=false;
+	SetTaunting(false);
 
 	// Older clients didn't track state, and default taunting is on (per @mackal)
 	// Familiar and animation pets don't get taunt until an AA.
 	if (owner && owner->IsClient()) {
 		if (!(owner->CastToClient()->ClientVersionBit() & EQ::versions::maskUFAndLater)) {
-			if ((typeofpet != petFamiliar && typeofpet != petAnimation) ||
-				aabonuses.PetCommands[PET_TAUNT]) {
-				taunting=true;
+			if (
+				(GetPetType() != petFamiliar && GetPetType() != petAnimation) ||
+				aabonuses.PetCommands[PET_TAUNT]
+			) {
+				SetTaunting(true);
 			}
 		}
 	}
