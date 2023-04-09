@@ -538,6 +538,7 @@ public:
 	void SetTimerMS(const char* timer_name, int milliseconds);
 	void StopAllTimers();
 	void StopTimer(const char* timer_name);
+	luabind::object GetBuffSpellIDs(lua_State* L);
 };
 
 #endif

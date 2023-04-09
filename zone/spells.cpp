@@ -4375,6 +4375,20 @@ void Corpse::CastRezz(uint16 spellid, Mob* Caster)
 	safe_delete(outapp);
 }
 
+std::vector<uint16> Mob::GetBuffSpellIDs()
+{
+	std::vector<uint16> l;
+
+	for (int i = 0; i < GetMaxTotalSlots(); i++) {
+		const auto& e = buffs[i].spellid;
+		if (IsValidSpell(e)) {
+			l.emplace_back(e);
+		}
+	}
+
+	return l;
+}
+
 bool Mob::FindBuff(uint16 spell_id)
 {
 	uint32 buff_count = GetMaxTotalSlots();
