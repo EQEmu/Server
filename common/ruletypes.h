@@ -136,7 +136,6 @@ RULE_BOOL(Character, EnableFoodRequirement, true, "If disabled, food is no longe
 RULE_INT(Character, BaseInstrumentSoftCap, 36, "Softcap for instrument mods, 36 commonly referred to as 3.6 as well")
 RULE_BOOL(Character, UseSpellFileSongCap, true, "When they removed the AA that increased the cap they removed the above and just use the spell field")
 RULE_INT(Character, BaseRunSpeedCap, 158, "Base Run Speed Cap, on live it's 158% which will give you a runspeed of 1.580 hard capped to 225")
-RULE_INT(Character, OrnamentationAugmentType, 20, "Ornamentation Augment Type")
 RULE_REAL(Character, EnvironmentDamageMulipliter, 1, "Multiplier for environmental damage like fall damage.")
 RULE_BOOL(Character, UnmemSpellsOnDeath, true, "Setting whether at death all memorized Spells are forgotten")
 RULE_REAL(Character, TradeskillUpAlchemy, 2.0, "Alchemy skillup rate adjustment. Lower is faster")
