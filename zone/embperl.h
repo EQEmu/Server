@@ -73,13 +73,6 @@ class Embperl
 private:
 	//if we fail inside a script evaluation, this will hold the croak msg (not much help if we die during construction, but that's our own fault)
 	mutable std::string errmsg;
-	//kludgy workaround for the fact that we can't directly do something like SvIV(get_sv($big[0]{ass}->{struct}))
-	SV * my_get_sv(const char * varname) {
-		char buffer[256];
-		snprintf(buffer, 256, "if(defined(%s)) { $scratch::temp = %s; } else { $scratch::temp = 'UNDEF'; }", varname, varname);
-		eval(buffer);
-		return get_sv("scratch::temp", false);
-	}
 
 	//install a perl func
 	void init_eval_file(void);
@@ -101,10 +94,6 @@ public:
 	int eval(const char * code);
 	//execute a subroutine. throws lasterr on failure
 	int dosub(const char * subname, const std::vector<std::string> * args = nullptr, int mode = G_SCALAR|G_EVAL);
-
-	//Access to perl variables
-	//all varnames here should be of the form package::name
-	//returns the contents of the perl variable named in varname as a string\
 
 	//put an integer into a perl varable
 	void seti(const char *varname, int val) const {
