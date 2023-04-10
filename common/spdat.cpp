@@ -776,6 +776,19 @@ bool IsResurrectionEffects(uint16 spell_id)
 	return false;
 }
 
+int8 GetResurrectionSicknessCheck(uint16 spell_id1, uint16 spell_id2)
+{
+	if (RuleI(Spells, ResurrectionEffectBlock) == RES_EFFECTS_BLOCK) {
+		LogSpells("ResurrectionEffectBlock triggered -- [{}] is blocked by [{}]", spells[spell_id2].name, spells[spell_id1].name);
+		return -1;	// can't stack
+	}
+	else if (RuleI(Spells, ResurrectionEffectBlock) == RES_EFFECTS_BLOCK_WITH_BUFFS) {
+		LogSpells("ResurrectionEffectBlock triggered -- [{}] is blocked by [{}], moving to empty slot if available", spells[spell_id2].name, spells[spell_id1].name);
+		return MOVE_NEW_SLOT;	// move to empty slot if available
+	}
+	return NO_RES_EFFECTS_BLOCK;
+}
+
 bool IsRuneSpell(uint16 spell_id)
 {
 	if (IsValidSpell(spell_id))

@@ -3037,6 +3037,12 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 
 					if(sp1_value < overwrite_below_value)
 					{
+						if (IsResurrectionEffects(spellid1)) {
+							int8 res_effect_check = GetResurrectionSicknessCheck(spellid1, spellid2);
+							if (res_effect_check != 0) {
+								return res_effect_check;
+							}
+						}
 						LogSpells("Overwrite spell because sp1_value < overwrite_below_value");
 						return 1;			// overwrite spell if its value is less
 					}
@@ -3162,6 +3168,13 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 		if(sp2_value < 0)
 			sp2_value = 0 - sp2_value;
 
+		if (IsResurrectionEffects(spellid1)) {
+			int8 res_effect_check = GetResurrectionSicknessCheck(spellid1, spellid2);
+			if (res_effect_check != 0) {
+				return res_effect_check;
+			}
+		}
+
 		if(sp2_value < sp1_value) {
 			LogSpells("Spell [{}] (value [{}]) is not as good as [{}] (value [{}]). Rejecting [{}]",
 				sp2.name, sp2_value, sp1.name, sp1_value, sp2.name);
@@ -3170,10 +3183,6 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 		if (sp2_value != sp1_value)
 			values_equal = false;
 
-		if (RuleB(Spells, ResurrectionEffectsBlock) && IsResurrectionEffects(spellid1)) {
-			LogSpells("ResurrectionEffectsBlock triggered -- [{}] is blocked by [{}]", sp2.name, sp1.name);
-			return -1;	// can't stack
-		}
 		//we dont return here... a better value on this one effect dosent mean they are
 		//all better...
 
@@ -3364,6 +3373,10 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 				will_overwrite = true;
 				overwrite_slots.push_back(buffslot);
 			}
+			if (ret == 2) { //ResurrectionEffectBlock handling to move potential overwrites to a new buff slock while keeping Res Sickness
+				LogSpells("Adding buff [{}] will overwrite spell [{}] in slot [{}] with caster level [{}], but ResurrectionEffectBlock is set to 2. Attempting to move [{}] to an empty buff slot.",
+					spell_id, curbuf.spellid, buffslot, curbuf.casterlevel, spell_id);
+			}
 		} else {
 			if (emptyslot == -1) {
 				if (buffslot >= start_slot && buffslot < end_slot) {
@@ -3520,6 +3533,19 @@ int Mob::CanBuffStack(uint16 spellid, uint8 caster_level, bool iFailIfOverwrite)
 
 			LogAIDetail("Buff [{}] would conflict with [{}] in slot [{}], reporting stack failure", spellid, curbuf.spellid, i);
 			return -1;	// stop the spell, can't stack it
+		}
+		if (ret == 2) { //ResurrectionEffectBlock handling to move potential overwrites to a new buff slock while keeping Res Sickness
+			LogAIDetail("Adding buff [{}] will overwrite spell [{}] in slot [{}] with caster level [{}], but ResurrectionEffectBlock is set to 2. Attempting to move [{}] to an empty buff slot.",
+				spellid, curbuf.spellid, i, curbuf.casterlevel, spellid);
+			for (int x = 0; x < buff_count; x++) {
+				const Buffs_Struct& curbuf = buffs[x];
+				if (IsValidSpell(curbuf.spellid)) {
+					continue;
+				}
+				else {
+					firstfree = x;
+				}
+			}
 		}
 	}
 
