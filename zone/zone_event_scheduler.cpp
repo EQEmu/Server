@@ -108,7 +108,7 @@ void ZoneEventScheduler::Process(Zone *zone, WorldContentService *content_servic
 				}
 
 				if (e.event_type == ServerEvents::EVENT_TYPE_CONTENT_FLAG_CHANGE) {
-					auto flag_name = x;
+					auto flag_name = e.event_data;
 					if (!flag_name.empty()) {
 						LogScheduler(
 							"Activating Event [{}] scheduled content flag change, setting flag [{}] to enabled",
