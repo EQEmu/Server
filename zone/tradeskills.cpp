@@ -248,8 +248,13 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 // Perform tradeskill combine
 void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Object *worldo)
 {
-	if (!user || !in_combine) {
-		LogError("Client or NewCombine_Struct not set in Object::HandleCombine");
+	if (!user) {
+		LogError("Client not set in Object::HandleCombine");
+		return;
+	}
+
+	if !in_combine) {
+		LogError("NewCombine_Struct not set in Object::HandleCombine");
 		auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
 		user->QueuePacket(outapp);
 		safe_delete(outapp);
@@ -350,7 +355,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 
 		LogTradeskills(
 			"inst_item [{}] container_item [{}]",
-			inst->GetItem()->ID,
+			inst ? inst->GetItem()->ID : "nullptr",
 			container->GetItem()->ID
 		);
 
@@ -361,7 +366,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 		LogTradeskillsDetail("Check 1");
 
 		const EQ::ItemInstance* inst = container->GetItem(0);
-		if (inst && inst->GetOrnamentationIcon() && inst->GetOrnamentationIcon()) {
+		if (inst && inst->GetOrnamentationIcon()) {
 			const EQ::ItemData* new_weapon = inst->GetItem();
 			user->DeleteItemInInventory(EQ::InventoryProfile::CalcSlotId(in_combine->container_slot, 0), 0, true);
 			container->Clear();
@@ -847,11 +852,7 @@ void Client::SendTradeskillSearchResults(
 )
 {
 	auto results = content_db.QueryDatabase(query);
-	if (!results.Success()) {
-		return;
-	}
-
-	if (results.RowCount() < 1) {
+	if (!results.Success() || !results.RowCount()) {
 		return;
 	}
 
@@ -861,14 +862,21 @@ void Client::SendTradeskillSearchResults(
 		fmt::format("char_id = {}", CharacterID())
 	);
 
-	for (auto row = results.begin(); row != results.end(); ++row) {
-		if (row == nullptr || row[0] == nullptr || row[1] == nullptr || row[2] == nullptr || row[3] == nullptr ||
-			row[4] == nullptr || row[5] == nullptr) {
+	for (auto row : results) {
+		if (
+			!row ||
+			!row[0] ||
+			!row[1] ||
+			!row[2] ||
+			!row[3] ||
+			!row[4] ||
+			!row[5]
+			) {
 			continue;
 		}
 
 		uint32     recipe_id  = (uint32) Strings::ToInt(row[0]);
-		const char *name      = row[1];
+		const char *r_name    = row[1];
 		uint32     trivial    = (uint32) Strings::ToInt(row[2]);
 		uint32     comp_count = (uint32) Strings::ToInt(row[3]);
 		uint32     tradeskill = (uint16) Strings::ToInt(row[4]);
@@ -883,11 +891,11 @@ void Client::SendTradeskillSearchResults(
 			recipe_id
 		);
 
-		if (RuleB(Skills, UseLimitTradeskillSearchSkillDiff) &&
-			((int32) trivial - (int32) GetSkill((EQ::skills::SkillType) tradeskill)) >
-			RuleI(Skills, MaxTradeskillSearchSkillDiff)) {
-
-			LogTradeskills("Checking limit recipe_id [{}] name [{}]", recipe_id, name);
+		if (
+			RuleB(Skills, UseLimitTradeskillSearchSkillDiff) &&
+			((int32) trivial - (int32) GetSkill((EQ::skills::SkillType) tradeskill)) > RuleI(Skills, MaxTradeskillSearchSkillDiff)
+		) {
+			LogTradeskills("Checking limit recipe_id [{}] name [{}]", recipe_id, r_name);
 
 			if (character_learned_recipe.madecount == 0) {
 				continue;
@@ -908,7 +916,7 @@ void Client::SendTradeskillSearchResults(
 		reply->component_count = comp_count;
 		reply->recipe_id       = recipe_id;
 		reply->trivial         = trivial;
-		strn0cpy(reply->recipe_name, name, sizeof(reply->recipe_name));
+		strn0cpy(reply->recipe_name, r_name, sizeof(reply->recipe_name));
 		FastQueuePacket(&outapp);
 	}
 }
@@ -973,8 +981,8 @@ void Client::SendTradeskillDetails(uint32 recipe_id) {
 		uint8 num = (uint8) Strings::ToInt(row[1]);
 		uint32 icon = (uint32) Strings::ToInt(row[2]);
 
-		const char *name = row[3];
-		len = strlen(name);
+		const char *r_name = row[3];
+		len = strlen(r_name);
 		if(len > 63)
 			len = 63;
 
@@ -993,7 +1001,7 @@ void Client::SendTradeskillDetails(uint32 recipe_id) {
 
 			*itemptr = item;
 			*iconptr = icon;
-			strncpy(cblock, name, len);
+			strncpy(cblock, r_name, len);
 
 			cblock[len] = '\0';	//just making sure.
 			cblock += len + 1;	//get the null
@@ -1232,7 +1240,7 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 		// Rolls on each item, is possible to return everything
 		int SalvageChance = aabonuses.SalvageChance + itembonuses.SalvageChance + spellbonuses.SalvageChance;
 		// Skip check if not a normal TS or if a quest recipe these should be nofail, but check amyways
-		if(SalvageChance && spec->tradeskill != 75 && !spec->quest) {
+		if (SalvageChance && !spec->quest) {
 			itr = spec->salvage.begin();
 			uint8 sc = 0;
 			while(itr != spec->salvage.end()) {
@@ -1251,17 +1259,17 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 
 void Client::CheckIncreaseTradeskill(int16 bonusstat, int16 stat_modifier, float skillup_modifier, uint16 success_modifier, EQ::skills::SkillType tradeskill)
 {
-	uint16 current_raw_skill = GetRawSkill(tradeskill);
+	const auto current_raw_skill = static_cast<float>(GetRawSkill(tradeskill));
 
-	if(!CanIncreaseTradeskill(tradeskill))
-		return;	//not allowed to go higher.
-	uint16 maxskill = MaxSkill(tradeskill);
+	if (!CanIncreaseTradeskill(tradeskill)) { //not allowed to go higher.
+		return;
+	}
 
-	float chance_stage2 = 0;
+	auto chance_stage2 = 0.0f;
 
-	//A successfull combine doubles the stage1 chance for an skillup
+	//A successfull combine doubles the stage1 chance for and skillup
 	//Some tradeskill are harder than others. See above for more.
-	float chance_stage1 = (bonusstat - stat_modifier) / (skillup_modifier * success_modifier);
+	auto chance_stage1 = static_cast<float>(bonusstat - stat_modifier) / (skillup_modifier * success_modifier);
 
 	//In stage2 the only thing that matters is your current unmodified skill.
 	//If you want to customize here you probbably need to implement your own
@@ -1269,29 +1277,30 @@ void Client::CheckIncreaseTradeskill(int16 bonusstat, int16 stat_modifier, float
 	if (chance_stage1 > zone->random.Real(0, 99)) {
 		if (current_raw_skill < 15) {
 			//Always succeed
-			chance_stage2 = 100;
+			chance_stage2 = 100.0f;
 		} else if (current_raw_skill < 175) {
 			//From skill 16 to 174 your chance of success falls linearly from 92% to 13%.
-			chance_stage2 = (200 - current_raw_skill) / 2;
+			chance_stage2 = (200.0f - current_raw_skill) / 2.0f;
 		} else {
 			//At skill 175, your chance of success falls linearly from 12.5% to 2.5% at skill 300.
-			chance_stage2 = 12.5 - (.08 * (current_raw_skill - 175));
+			chance_stage2 = 12.5f - (.08f * (current_raw_skill - 175.0f));
 		}
 	}
 
 	if (chance_stage2 > zone->random.Real(0, 99)) {
 		//Only if stage1 and stage2 succeeded you get a skillup.
 		SetSkill(tradeskill, current_raw_skill + 1);
-		std::string export_string = fmt::format(
+		const auto export_string = fmt::format(
 			"{} {} {} {}",
 			tradeskill,
 			current_raw_skill + 1,
-			maxskill,
+			MaxSkill(tradeskill),
 			1
 		);
 		parse->EventPlayer(EVENT_SKILL_UP, this, export_string, 0);
-		if(title_manager.IsNewTradeSkillTitleAvailable(tradeskill, current_raw_skill + 1))
+		if (title_manager.IsNewTradeSkillTitleAvailable(tradeskill, current_raw_skill + 1)) {
 			NotifyNewTitlesAvailable();
+		}
 	}
 
 	LogTradeskills("skillup_modifier: [{}] , success_modifier: [{}] , stat modifier: [{}]", skillup_modifier , success_modifier , stat_modifier);
@@ -1894,7 +1903,7 @@ bool Client::CheckTradeskillLoreConflict(int32 recipe_id)
 						// zero out the item_id, this will prevent us from doing a lore check inadvertently where
 						// the item is a component, and returned on success, fail, salvage.
 						// or uses an item that is part of a unique loregroup that returns an item of the same unique loregroup
-						if (ei_is_valid && (tre_update_item.item_id == tre.item_id || unique_lore_group_match) && component_count_is_valid) {
+						if ((tre_update_item.item_id == tre.item_id || unique_lore_group_match) && component_count_is_valid) {
 							tre_update_item.item_id = 0;
 						}
 					}
