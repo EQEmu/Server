@@ -74,7 +74,6 @@ QuestManager quest_manager;
 
 QuestManager::QuestManager() {
 	HaveProximitySays = false;
-	item_timers = 0;
 }
 
 QuestManager::~QuestManager() {
