@@ -322,6 +322,47 @@ bool Embperl::VarExists(const char *package, const char *var) {
 	return(hv_exists(stash, var, len));
 }
 
+#ifdef EMBPERL_IO_CAPTURE
+
+XS(XS_EQEmuIO_PRINT); /* prototype to pass -Wmissing-prototypes */
+XS(XS_EQEmuIO_PRINT)
+{
+	dXSARGS;
+	if (items < 2) {
+		return;
+	}
+
+	for (int r = 1; r < items; r++) {
+		char *str = SvPV_nolen(ST(r));
+		char *cur = str;
+
+		/* Strip newlines from log message 'str' */
+		*std::remove(str, str + strlen(str), '\n') = '\0';
+
+		std::string log_string = str;
+
+		if (
+			log_string.find("did not return a true") != std::string::npos ||
+			log_string.find("is experimental") != std::string::npos
+		) {
+			return;
+		}
+
+		for (int i = 0; *cur != '\0'; i++, cur++) {
+			if (*cur == '\n') {
+				LogQuests("{}", str);
+			}
+		}
+
+		if (!log_string.empty()) {
+			LogQuests("{}", log_string);
+		}
+	}
+
+	XSRETURN_EMPTY;
+}
+
+#endif //EMBPERL_IO_CAPTURE
 
 #endif //EMBPERL
 

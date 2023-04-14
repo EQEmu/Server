@@ -27,7 +27,6 @@
 
 #include "dialogue_window.h"
 #include "embperl.h"
-#include "embxs.h"
 #include "entity.h"
 #include "expedition.h"
 #include "queryserv.h"
@@ -4513,7 +4512,6 @@ void perl_register_quest()
 	package.add("getfactionname", &Perl__getfactionname);
 	package.add("getinventoryslotid", &Perl__getinventoryslotid);
 	package.add("getitemname", &Perl__getitemname);
-	package.add("getItemName", &Perl__qc_getItemName);
 	package.add("getitemstat", &Perl__getitemstat);
 	package.add("getlanguagename", &Perl__getlanguagename);
 	package.add("getldonthemename", &Perl__getldonthemename);
