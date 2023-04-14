@@ -1451,7 +1451,6 @@ protected:
 	virtual bool AI_PursueCastCheck() { return(false); }
 	virtual bool AI_IdleCastCheck() { return(false); }
 
-	bool IsFullHP;
 	bool moved;
 
 	std::vector<uint16> RampageArray;
