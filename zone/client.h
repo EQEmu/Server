@@ -1842,9 +1842,6 @@ private:
 
 	WaterRegionType last_region_type;
 
-	// this is used to try to cut back on position update reflections
-	int position_update_same_count;
-
 	PTimerList p_timers; //persistent timers
 	Timer hpupdate_timer;
 	Timer camp_timer;
