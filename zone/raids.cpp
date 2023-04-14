@@ -1126,8 +1126,8 @@ void Raid::SendRaidAdd(const char *who, Client *to)
 			auto ram = (RaidAddMember_Struct*)outapp->pBuffer;
 			ram->raidGen.action = raidAdd;
 			ram->raidGen.parameter = m.group_number;
-			strn0cpy(ram->raidGen.leader_name, m.member_name, 64);
-			strn0cpy(ram->raidGen.player_name, m.member_name, 64);
+			strn0cpy(ram->raidGen.leader_name, m.member_name, sizeof(ram->raidGen.leader_name));
+			strn0cpy(ram->raidGen.player_name, m.member_name, sizeof(ram->raidGen.player_name));
 			ram->_class = m._class;
 			ram->level = m.level;
 			ram->isGroupLeader = m.is_group_leader;
