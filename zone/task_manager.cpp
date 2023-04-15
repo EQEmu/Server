@@ -44,7 +44,6 @@ bool TaskManager::LoadTaskSets()
 bool TaskManager::LoadTasks(int single_task)
 {
 	std::string task_query_filter = fmt::format("id = {}", single_task);
-	std::string query;
 	if (single_task == 0) {
 		if (!LoadTaskSets()) {
 			LogTasks("LoadTaskSets failed");
@@ -387,11 +386,15 @@ bool TaskManager::SaveClientState(Client *client, ClientTaskState *cts)
 	const char *completed_task_query = "REPLACE INTO completed_tasks (charid, completedtime, taskid, activityid) "
 									   "VALUES (%i, %i, %i, %i)";
 
-	for (unsigned int task_index = cts->m_last_completed_task_loaded;
+	for (
+		unsigned int task_index = cts->m_last_completed_task_loaded;
 		task_index < cts->m_completed_tasks.size();
-		task_index++) {
+		task_index++
+	) {
 
-		int task_id = cts->m_completed_tasks[task_index].task_id;
+		const auto& t = cts->m_completed_tasks[task_index];
+
+		int task_id = t.task_id;
 
 		const auto task_data = GetTaskData(task_id);
 		if (!task_data) {
@@ -410,7 +413,7 @@ bool TaskManager::SaveClientState(Client *client, ClientTaskState *cts)
 		std::string query = StringFormat(
 			completed_task_query,
 			character_id,
-			cts->m_completed_tasks[task_index].completed_time,
+			t.completed_time,
 			task_id,
 			-1
 		);
@@ -429,14 +432,14 @@ bool TaskManager::SaveClientState(Client *client, ClientTaskState *cts)
 		// Insert one record for each completed optional task.
 		for (int activity_id = 0; activity_id < task_data->activity_count; activity_id++) {
 			if (!task_data->activity_information[activity_id].optional ||
-				!cts->m_completed_tasks[task_index].activity_done[activity_id]) {
+				!t.activity_done[activity_id]) {
 				continue;
 			}
 
 			query = StringFormat(
 				completed_task_query,
 				character_id,
-				cts->m_completed_tasks[task_index].completed_time,
+				t.completed_time,
 				task_id, activity_id
 			);
 
@@ -1161,7 +1164,6 @@ void TaskManager::SendActiveTaskDescription(
 	//
 	if (!t->reward_id_list.empty() && t->item_link.empty()) {
 		auto items   = Strings::Split(t->reward_id_list, "|");
-		auto item    = items.front();
 		int  item_id = Strings::IsNumber(items.front()) ? Strings::ToInt(items.front()) : 0;
 
 		if (item_id) {

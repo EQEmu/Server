@@ -314,7 +314,6 @@ bool Embperl::SubExists(const char *package, const char *sub) {
 	return(hv_exists(stash, sub, len));
 }
 
-
 #endif //EMBPERL
 
 #endif //EMBPERL_CPP

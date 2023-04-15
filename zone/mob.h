@@ -1440,7 +1440,6 @@ public:
 protected:
 	void CommonDamage(Mob* other, int64 &damage, const uint16 spell_id, const EQ::skills::SkillType attack_skill, bool &avoidable, const int8 buffslot, const bool iBuffTic, eSpecialAttacks specal = eSpecialAttacks::None);
 	static uint16 GetProcID(uint16 spell_id, uint8 effect_index);
-	float _GetMovementSpeed(int mod) const;
 	int _GetWalkSpeed() const;
 	int _GetRunSpeed() const;
 	int _GetFearSpeed() const;
@@ -1451,7 +1450,6 @@ protected:
 	virtual bool AI_PursueCastCheck() { return(false); }
 	virtual bool AI_IdleCastCheck() { return(false); }
 
-	bool IsFullHP;
 	bool moved;
 
 	std::vector<uint16> RampageArray;
@@ -1464,7 +1462,6 @@ protected:
 
 	bool isgrouped;
 	bool israidgrouped;
-	bool pendinggroup;
 	uint16 entity_id_being_looted; //the id of the entity being looted, 0 if not looting.
 	uint8 texture;
 	uint8 helmtexture;

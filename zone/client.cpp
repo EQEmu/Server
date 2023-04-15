@@ -237,7 +237,6 @@ Client::Client(EQStreamInterface *ieqs) : Mob(
 	casting_spell_id = 0;
 	npcflag = false;
 	npclevel = 0;
-	position_update_same_count = 0;
 	fishing_timer.Disable();
 	dead_timer.Disable();
 	camp_timer.Disable();
