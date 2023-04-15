@@ -253,7 +253,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 		return;
 	}
 
-	if !in_combine) {
+	if (!in_combine) {
 		LogError("NewCombine_Struct not set in Object::HandleCombine");
 		auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
 		user->QueuePacket(outapp);
