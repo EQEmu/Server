@@ -380,8 +380,8 @@ Mob::Mob(
 	spellbonuses.AssistRange = -1;
 	SetPetID(0);
 	SetOwnerID(0);
-	typeofpet         = petNone; // default to not a pet
-	petpower          = 0;
+	SetPetType(petNone); // default to not a pet
+	SetPetPower(0);
 	held              = false;
 	gheld             = false;
 	nocast            = false;
