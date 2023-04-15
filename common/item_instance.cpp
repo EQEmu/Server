@@ -57,51 +57,29 @@ static inline int32 GetNextItemInstSerialNumber() {
 // class EQ::ItemInstance
 //
 EQ::ItemInstance::ItemInstance(const ItemData* item, int16 charges) {
-	m_use_type = ItemInstNormal;
 
 	if (item) {
 		m_item = new ItemData(*item);
 	}
 
-	m_charges      = charges;
-	m_price        = 0;
-	m_attuned      = false;
-	m_merchantslot = 0;
+	m_charges = charges;
 
 	if (m_item && m_item->IsClassCommon()) {
 		m_color = m_item->Color;
-	} else {
-		m_color = 0;
 	}
 
-	m_merchantcount = 1;
 	m_SerialNumber  = GetNextItemInstSerialNumber();
-
-	m_exp                 = 0;
-	m_evolveLvl           = 0;
-	m_activated           = false;
-	m_scaledItem          = nullptr;
-	m_evolveInfo          = nullptr;
-	m_scaling             = false;
-	m_ornamenticon        = 0;
-	m_ornamentidfile      = 0;
-	m_ornament_hero_model = 0;
-	m_recast_timestamp    = 0;
-	m_new_id_file         = 0;
 }
 
 EQ::ItemInstance::ItemInstance(SharedDatabase *db, uint32 item_id, int16 charges) {
-	m_use_type = ItemInstNormal;
+
 	m_item     = db->GetItem(item_id);
 
 	if (m_item) {
 		m_item = new ItemData(*m_item);
 	}
 
-	m_charges      = charges;
-	m_price        = 0;
-	m_merchantslot = 0;
-	m_attuned      = false;
+	m_charges = charges;
 
 	if (m_item && m_item->IsClassCommon()) {
 		m_color = m_item->Color;
@@ -109,42 +87,11 @@ EQ::ItemInstance::ItemInstance(SharedDatabase *db, uint32 item_id, int16 charges
 		m_color = 0;
 	}
 
-	m_merchantcount = 1;
 	m_SerialNumber  = GetNextItemInstSerialNumber();
-
-	m_exp                 = 0;
-	m_evolveLvl           = 0;
-	m_activated           = false;
-	m_scaledItem          = nullptr;
-	m_evolveInfo          = nullptr;
-	m_scaling             = false;
-	m_ornamenticon        = 0;
-	m_ornamentidfile      = 0;
-	m_ornament_hero_model = 0;
-	m_recast_timestamp    = 0;
-	m_new_id_file         = 0;
 }
 
 EQ::ItemInstance::ItemInstance(ItemInstTypes use_type) {
 	m_use_type     = use_type;
-	m_item         = nullptr;
-	m_charges      = 0;
-	m_price        = 0;
-	m_attuned      = false;
-	m_merchantslot = 0;
-	m_color        = 0;
-
-	m_exp                 = 0;
-	m_evolveLvl           = 0;
-	m_activated           = false;
-	m_scaledItem          = nullptr;
-	m_evolveInfo          = nullptr;
-	m_scaling             = false;
-	m_ornamenticon        = 0;
-	m_ornamentidfile      = 0;
-	m_ornament_hero_model = 0;
-	m_recast_timestamp    = 0;
-	m_new_id_file         = 0;
 }
 
 // Make a copy of an EQ::ItemInstance object
