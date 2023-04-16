@@ -5619,7 +5619,6 @@ void Client::ProcessInspectRequest(Client *requestee, Client *requester)
 
 		const EQ::ItemData     *item                      = nullptr;
 		const EQ::ItemInstance *inst                      = nullptr;
-		int                    ornamentation_augment_type = RuleI(Character, OrnamentationAugmentType);
 
 		for (int16 L = EQ::invslot::EQUIPMENT_BEGIN; L <= EQ::invslot::EQUIPMENT_END; L++) {
 			inst = requestee->GetInv().GetItem(L);
@@ -5629,13 +5628,15 @@ void Client::ProcessInspectRequest(Client *requestee, Client *requester)
 				if (item) {
 					strcpy(insr->itemnames[L], item->Name);
 
-					const EQ::ItemData *aug_item = nullptr;
-					if (inst->GetOrnamentationAug(ornamentation_augment_type)) {
-						aug_item = inst->GetOrnamentationAug(ornamentation_augment_type)->GetItem();
+					const EQ::ItemData *augment_item = nullptr;
+					const auto         augment       = inst->GetOrnamentationAugment();
+
+					if (augment) {
+						augment_item = augment->GetItem();
 					}
 
-					if (aug_item) {
-						insr->itemicons[L] = aug_item->Icon;
+					if (augment_item) {
+						insr->itemicons[L] = augment_item->Icon;
 					} else if (inst->GetOrnamentationIcon()) {
 						insr->itemicons[L] = inst->GetOrnamentationIcon();
 					} else {

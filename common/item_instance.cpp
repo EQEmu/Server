@@ -17,6 +17,7 @@
 */
 
 #include "inventory_profile.h"
+#include "../common/data_verification.h"
 //#include "classes.h"
 //#include "global_define.h"
 //#include "item_instance.h"
@@ -527,78 +528,99 @@ EQ::ItemInstance* EQ::ItemInstance::GetAugment(uint8 augment_index) const
 	return nullptr;
 }
 
-EQ::ItemInstance* EQ::ItemInstance::GetOrnamentationAug(int32 ornamentationAugtype) const
+bool EQ::ItemInstance::IsOrnamentationAugment(EQ::ItemInstance* augment) const
 {
-	if (!m_item || !m_item->IsClassCommon()) { return nullptr; }
-	if (ornamentationAugtype == 0) { return nullptr; }
+	if (!m_item || !m_item->IsClassCommon() || !augment) {
+		return false;
+	}
 
-	for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; i++)
-	{
-		if (GetAugment(i) && m_item->AugSlotType[i] == ornamentationAugtype)
-		{
-			const char *item_IDFile = GetAugment(i)->GetItem()->IDFile;
-			if (
-				(strncmp(item_IDFile, "IT64", strlen(item_IDFile)) == 0
-				|| strncmp(item_IDFile, "IT63", strlen(item_IDFile)) == 0)
-				&& GetAugment(i)->GetItem()->HerosForgeModel == 0
-				)
-			{
-				continue;
-			}
-			return GetAugment(i);
+	const auto augment_item = augment->GetItem();
+	if (!augment_item) {
+		return false;
+	}
+
+	const std::string& idfile = augment_item->IDFile;
+
+	if (
+		EQ::ValueWithin(
+			augment->GetAugmentType(),
+			OrnamentationAugmentTypes::StandardOrnamentation,
+			OrnamentationAugmentTypes::SpecialOrnamentation
+		) ||
+		(
+			idfile != "IT63" &&
+			idfile != "IT64"
+		) ||
+		augment_item->HerosForgeModel
+	) {
+		return true;
+	}
+
+	return false;
+}
+
+EQ::ItemInstance* EQ::ItemInstance::GetOrnamentationAugment() const
+{
+	if (!m_item || !m_item->IsClassCommon()) {
+		return nullptr;
+	}
+
+	for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; i++) {
+		const auto augment = GetAugment(i);
+		if (augment && IsOrnamentationAugment(augment)) {
+			return augment;
 		}
 	}
 
 	return nullptr;
 }
 
-uint32 EQ::ItemInstance::GetOrnamentHeroModel(int32 material_slot) const {
+uint32 EQ::ItemInstance::GetOrnamentHeroModel(int32 material_slot) const
+{
 	// Not a Hero Forge item.
-	if (m_ornament_hero_model == 0 || material_slot < 0)
+	if (m_ornament_hero_model == 0 || material_slot < 0) {
 		return 0;
+	}
 
 	// Item is using an explicit Hero Forge ID
-	if (m_ornament_hero_model >= 1000)
+	if (m_ornament_hero_model >= 1000) {
 		return m_ornament_hero_model;
+	}
 
 	// Item is using a shorthand ID
 	return (m_ornament_hero_model * 100) + material_slot;
 }
 
-bool EQ::ItemInstance::UpdateOrnamentationInfo() {
-	if (!m_item || !m_item->IsClassCommon())
+bool EQ::ItemInstance::UpdateOrnamentationInfo()
+{
+	if (!m_item || !m_item->IsClassCommon()) {
 		return false;
+	}
 
-	bool ornamentSet = false;
+	const auto augment = GetOrnamentationAugment();
 
-	int32 ornamentationAugtype = RuleI(Character, OrnamentationAugmentType);
-	if (GetOrnamentationAug(ornamentationAugtype))
-	{
-		const ItemData* ornamentItem;
-		ornamentItem = GetOrnamentationAug(ornamentationAugtype)->GetItem();
-		if (ornamentItem != nullptr)
-		{
-			SetOrnamentIcon(ornamentItem->Icon);
-			SetOrnamentHeroModel(ornamentItem->HerosForgeModel);
-			if (strlen(ornamentItem->IDFile) > 2)
-			{
-				SetOrnamentationIDFile(Strings::ToUnsignedInt(&ornamentItem->IDFile[2]));
-			}
-			else
-			{
+	if (augment) {
+		const auto augment_item = GetOrnamentationAugment()->GetItem();
+
+		if (augment_item) {
+			SetOrnamentIcon(augment_item->Icon);
+			SetOrnamentHeroModel(augment_item->HerosForgeModel);
+
+			if (strlen(augment_item->IDFile) > 2) {
+				SetOrnamentationIDFile(Strings::ToUnsignedInt(&augment_item->IDFile[2]));
+			} else {
 				SetOrnamentationIDFile(0);
 			}
-			ornamentSet = true;
+
+			return true;
 		}
 	}
-	else
-	{
-		SetOrnamentIcon(0);
-		SetOrnamentHeroModel(0);
-		SetOrnamentationIDFile(0);
-	}
 
-	return ornamentSet;
+	SetOrnamentIcon(0);
+	SetOrnamentHeroModel(0);
+	SetOrnamentationIDFile(0);
+
+	return false;
 }
 
 bool EQ::ItemInstance::CanTransform(const ItemData *ItemToTry, const ItemData *Container, bool AllowAll) {
