@@ -809,7 +809,6 @@ sub show_menu_prompt
             print " [check_bot_db_updates]		Checks for bot database updates\n";
             print " \n";
             print " \n";
-            print " [aa_tables]			Downloads and installs clean slate AA data from PEQ\n";
             print " [drop_bots_db_schema]		Removes bot database schema\n";
 
             print " \n> main - go back to main menu\n";
@@ -848,10 +847,6 @@ sub show_menu_prompt
         }
         elsif ($input eq "drop_bots_db_schema") {
             do_bots_db_schema_drop();
-            $dc = 1;
-        }
-        elsif ($input eq "aa_tables") {
-            aa_fetch();
             $dc = 1;
         }
         elsif ($input eq "maps") {
@@ -908,14 +903,6 @@ sub show_menu_prompt
         }
         elsif ($input eq "linux_login_server_setup") {
             do_linux_login_server_setup();
-            $dc = 1;
-        }
-        elsif ($input eq "quest_heading_convert") {
-            quest_heading_convert();
-            $dc = 1;
-        }
-        elsif ($input eq "quest_faction_convert") {
-            quest_faction_convert();
             $dc = 1;
         }
         elsif ($input eq "source_peq_db") {
@@ -1202,22 +1189,6 @@ sub read_eqemu_config_json
     $pass         = $config->{"server"}{"database"}{"password"};
     $opcodes_path = $config->{"server"}{"directories"}{"opcodes"};
     $patches_path = $config->{"server"}{"directories"}{"patches"};
-}
-
-#::: Fetch Latest PEQ AA's
-sub aa_fetch
-{
-    if (!$db) {
-        print "No database present, check your eqemu_config.json for proper MySQL/MariaDB configuration...\n";
-        return;
-    }
-
-    print "[Install] Pulling down PEQ AA Tables...\n";
-    get_remote_file($eqemu_repository_request_url . "utils/sql/peq_aa_tables_post_rework.sql",
-        "db_update/peq_aa_tables_post_rework.sql");
-    print "[Install] Installing AA Tables...\n";
-    print get_mysql_result_from_file("db_update/peq_aa_tables_post_rework.sql");
-    print "[Install] Done...\n\n";
 }
 
 #::: Fetch Latest Opcodes
