@@ -25,7 +25,6 @@ my $eqemu_repository_request_url   = "https://raw.githubusercontent.com/EQEmu/Se
 my $opcodes_path                   = "";
 my $patches_path                   = "";
 my $time_stamp                     = strftime('%m-%d-%Y', gmtime());
-my $db_run_stage                   = 0; #::: Sets database run stage check
 my $bin_dir                        = "";
 
 #############################################
