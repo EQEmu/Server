@@ -1126,8 +1126,8 @@ void Raid::SendRaidAdd(const char *who, Client *to)
 			auto ram = (RaidAddMember_Struct*)outapp->pBuffer;
 			ram->raidGen.action = raidAdd;
 			ram->raidGen.parameter = m.group_number;
-			strn0cpy(ram->raidGen.leader_name, m.member_name, 64);
-			strn0cpy(ram->raidGen.player_name, m.member_name, 64);
+			strn0cpy(ram->raidGen.leader_name, m.member_name, sizeof(ram->raidGen.leader_name));
+			strn0cpy(ram->raidGen.player_name, m.member_name, sizeof(ram->raidGen.player_name));
 			ram->_class = m._class;
 			ram->level = m.level;
 			ram->isGroupLeader = m.is_group_leader;
@@ -1148,8 +1148,8 @@ void Raid::SendRaidAddAll(const char *who)
 			auto ram = (RaidAddMember_Struct*)outapp->pBuffer;
 			ram->raidGen.action = raidAdd;
 			ram->raidGen.parameter = m.group_number;
-			strcpy(ram->raidGen.leader_name, m.member_name);
-			strcpy(ram->raidGen.player_name, m.member_name);
+			strn0cpy(ram->raidGen.leader_name, m.member_name, sizeof(ram->raidGen.leader_name));
+			strn0cpy(ram->raidGen.player_name, m.member_name, sizeof(ram->raidGen.player_name));
 			ram->isGroupLeader = m.is_group_leader;
 			ram->_class = m._class;
 			ram->level = m.level;
@@ -1361,33 +1361,31 @@ void Raid::SendGroupUpdate(Client *to)
 	auto outapp = new EQApplicationPacket(OP_GroupUpdate, sizeof(GroupUpdate2_Struct));
 	auto gu = (GroupUpdate2_Struct*)outapp->pBuffer;
 	gu->action = groupActUpdate;
-	int i = 0;
 	uint32 grp = GetGroup(to->GetName());
 	if (grp >= MAX_RAID_GROUPS) {
 		safe_delete(outapp);
 		return;
 	}
 
+	int i = 0;
 	for (const auto& m : members) {
 		if (m.group_number == grp && strlen(m.member_name) > 0) {
 			if (m.is_group_leader) {
-				strn0cpy(gu->leadersname, m.member_name, 64);
+				strn0cpy(gu->leadersname, m.member_name, sizeof(gu->leadersname));
 				if (strcmp(to->GetName(), m.member_name) != 0) {
-					strn0cpy(gu->membername[i], m.member_name, 64);
-					i++;
+					strn0cpy(gu->membername[i], m.member_name, sizeof(gu->membername[i]));
+					++i;
 				}
 			}
-			else {
-				if (strcmp(to->GetName(), m.member_name) != 0) {
-					strn0cpy(gu->membername[i], m.member_name, 64);
-					i++;
-				}
+			else if (strcmp(to->GetName(), m.member_name) != 0) {
+				strn0cpy(gu->membername[i], m.member_name, sizeof(gu->membername[i]));
+				++i;
 			}
 		}
 	}
 
 	if (strlen(gu->leadersname) < 1) {
-		strn0cpy(gu->leadersname, to->GetName(), 64);
+		strn0cpy(gu->leadersname, to->GetName(), sizeof(gu->leadersname));
 	}
 
 	strn0cpy(gu->yourname, to->GetName(), 64);
@@ -1404,7 +1402,7 @@ void Raid::GroupUpdate(uint32 gid, bool initial)
 	}
 
 	for (const auto& m : members) {
-		if (strlen(m.member_name) > 0 && m.group_number == gid && m.member) {
+		if (m.member && m.group_number == gid && strlen(m.member_name) > 0) {
 			SendGroupUpdate(m.member);
 			SendGroupLeadershipAA(m.member, gid);
 		}

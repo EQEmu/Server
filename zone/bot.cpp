@@ -422,12 +422,6 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 	}
 
 	cur_end = max_end;
-
-	// Safety Check to confirm we have a valid raid
-	if (HasRaid() && !GetRaid()->IsRaidMember(GetBotOwner()->CastToClient())) {
-		Bot::RemoveBotFromRaid(this);
-	}
-
 }
 
 Bot::~Bot() {
@@ -3307,11 +3301,16 @@ bool Bot::Spawn(Client* botCharacterOwner) {
 		}
 
 		if (auto raid = entity_list.GetRaidByBotName(GetName())) {
-			raid->VerifyRaid();
-			SetRaidGrouped(true);
+			// Safety Check to confirm we have a valid raid
+			if (raid->IsRaidMember(GetBotOwner()->CastToClient())) {
+				Bot::RemoveBotFromRaid(this);
+			} else {
+				raid->LearnMembers();
+				SetRaidGrouped(true);
+			}
 		}
 		else if (auto group = entity_list.GetGroupByMobName(GetName())) {
-			group->VerifyGroup();
+			group->LearnMembers();
 			SetGrouped(true);
 		}
 
