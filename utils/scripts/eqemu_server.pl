@@ -10,6 +10,7 @@
 #::: Purpose: To upgrade databases with ease and maintain versioning
 ###########################################################
 
+use strict;
 use Config;
 use File::Copy qw(copy);
 use POSIX qw(strftime);
@@ -86,8 +87,6 @@ if (-e "eqemu_server_skip_maps_update.txt" || defined($ENV{'EQEMU_SERVER_SKIP_MA
 if (-d "bin") {
     $bin_dir = "bin/";
 }
-
-my $world_path = get_world_path();
 
 #############################################
 # run routines
