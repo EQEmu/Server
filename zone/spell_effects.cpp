@@ -3039,7 +3039,6 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						int shield_target_mitigation = spells[spell_id].limit_value[i] ? spells[spell_id].limit_value[i] : 50;
 						int shielder_mitigation      = spells[spell_id].max_value[i] ? spells[spell_id].limit_value[i] : 50;
 						ShieldAbility(petowner->GetID(), 25, shield_duration, shield_target_mitigation, shielder_mitigation);
-
 					}
 				}
 				break;
