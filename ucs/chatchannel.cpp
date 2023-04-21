@@ -701,11 +701,11 @@ void ChatChannelList::Process() {
 			LogDebug("Empty temporary password protected channel [{}] being destroyed",
 				CurrentChannel->GetName().c_str());
 
-			RemoveChannel(CurrentChannel);
+			iterator.RemoveCurrent();
 		}
-
-		iterator.Advance();
-
+		else {
+			iterator.Advance();
+		}
 	}
 }
 
