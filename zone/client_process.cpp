@@ -189,9 +189,10 @@ bool Client::Process() {
 		}
 
 		if (camp_timer.Check()) {
-			Raid* raid = entity_list.GetRaidByClient(this);
-			if (raid)
-				raid->RemoveMember(this->GetName());
+			Raid *myraid = entity_list.GetRaidByClient(this);
+			if (myraid) {
+				myraid->MemberZoned(this);
+			}
 			LeaveGroup();
 			Save();
 			if (GetMerc())
