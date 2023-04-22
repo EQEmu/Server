@@ -1479,6 +1479,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						for (int x = EQ::textures::textureBegin; x <= EQ::textures::LastTintableTexture; x++)
 							caster->SendWearChange(x);
 				}
+				break;
 			}
 
 			case SE_WipeHateList:
@@ -3038,9 +3039,9 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						int shield_target_mitigation = spells[spell_id].limit_value[i] ? spells[spell_id].limit_value[i] : 50;
 						int shielder_mitigation      = spells[spell_id].max_value[i] ? spells[spell_id].limit_value[i] : 50;
 						ShieldAbility(petowner->GetID(), 25, shield_duration, shield_target_mitigation, shielder_mitigation);
-						break;
 					}
 				}
+				break;
 			}
 
 			case SE_Weapon_Stance: {
@@ -4478,9 +4479,9 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 					if (flee_mode) {
 						currently_fleeing = true;
 						CheckFlee();
-						break;
 					}
 				}
+				break;
 			}
 
 			case SE_BindSight:
@@ -4519,6 +4520,7 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 					}
 					CastToClient()->SetControlledMobId(0);
 				}
+				break;
 			}
 
 			case SE_Weapon_Stance:
@@ -5183,8 +5185,8 @@ int64 Mob::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 						value        = 0;
 						LimitFailure = true;
 					}
-					break;
 				}
+				break;
 
 			case SE_FcSpellVulnerability:
 				if (type == focusSpellVulnerability) {
