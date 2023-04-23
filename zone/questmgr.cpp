@@ -2894,47 +2894,40 @@ void QuestManager::whisper(const char *message) {
 int QuestManager::getlevel(uint8 type)
 {
 	QuestManagerCurrentQuestVars();
-	if (type == 0)
-	{
-		return (initiator->GetLevel());
-	}
-	else if(type == 1)
-	{
-		Group *g = entity_list.GetGroupByClient(initiator);
-		if (g != nullptr)
-			return (g->GetAvgLevel());
-		else
-			return 0;
-	}
-	else if(type == 2)
-	{
-		Raid *r = entity_list.GetRaidByClient(initiator);
-		if (r != nullptr)
-			return (r->GetAvgLevel());
-		else
-			return 0;
-	}
-	else if(type == 3)
-	{
-		Raid *r = entity_list.GetRaidByClient(initiator);
-		if(r != nullptr)
-		{
-			return (r->GetAvgLevel());
-		}
-		Group *g = entity_list.GetGroupByClient(initiator);
-		if(g != nullptr)
-		{
-			return (g->GetAvgLevel());
-		}
-		else
-			return (initiator->GetLevel());
-	}
-	else if(type == 4)
-	{
-		return (initiator->CastToClient()->GetLevel2());
-	}
-	else
+
+	if (!initiator) {
 		return 0;
+	}
+
+	if (type == 0) {
+		return initiator->GetLevel();
+	} else if (type == 1) {
+		if (Group *g = entity_list.GetGroupByClient(initiator)) {
+			return g->GetAvgLevel();
+		} else {
+			return 0;
+		}
+	} else if (type == 2) {
+		if (Raid *r = entity_list.GetRaidByClient(initiator)) {
+			return r->GetAvgLevel();
+		} else {
+			return 0;
+		}
+	} else if (type == 3) {
+		if (Raid *r = entity_list.GetRaidByClient(initiator)) {
+			return r->GetAvgLevel();
+		}
+
+		if (Group *g = entity_list.GetGroupByClient(initiator)) {
+			return g->GetAvgLevel();
+		} else {
+			return initiator->GetLevel();
+		}
+	} else if (type == 4) {
+		return initiator->CastToClient()->GetLevel2();
+	} else {
+		return 0;
+	}
 }
 
 uint16 QuestManager::CreateGroundObject(uint32 itemid, const glm::vec4& position, uint32 decay_time)
@@ -2959,36 +2952,33 @@ void QuestManager::ModifyNPCStat(std::string stat, std::string value)
 	}
 }
 
-int QuestManager::collectitems_processSlot(int16 slot_id, uint32 item_id,
-	bool remove)
-{
+int QuestManager::collectitems_processSlot(
+	int16 slot_id,
+	uint32 item_id,
+	bool remove
+) {
 	QuestManagerCurrentQuestVars();
-	EQ::ItemInstance *item = nullptr;
-	int quantity = 0;
 
-	item = initiator->GetInv().GetItem(slot_id);
-
-	// If we have found matching item, add quantity
-	if (item && item->GetID() == item_id)
-	{
-		// If item is stackable, add its charges (quantity)
-		if (item->IsStackable())
-		{
-			quantity = item->GetCharges();
-		}
-		else
-		{
-			quantity = 1;
-		}
-
-		// Remove item from inventory
-		if (remove)
-		{
-			initiator->DeleteItemInInventory(slot_id, 0, true);
-		}
+	if (!initiator) {
+		return 0;
 	}
 
-	return quantity;
+	const auto item = initiator->GetInv().GetItem(slot_id);
+
+	// If we have found matching item, add quantity
+	if (item && item->GetID() == item_id) {
+		// If item is stackable, add its charges (quantity)
+		const auto quantity = item->IsStackable() ? item->GetCharges() : 1;
+
+		// Remove item from inventory
+		if (remove) {
+			initiator->DeleteItemInInventory(slot_id, 0, true);
+		}
+
+		return quantity;
+	}
+
+	return 0;
 }
 
 // Returns number of item_id that exist in inventory
@@ -2998,13 +2988,11 @@ int QuestManager::collectitems(uint32 item_id, bool remove)
 	int quantity = 0;
 	int slot_id;
 
-	for (slot_id = EQ::invslot::GENERAL_BEGIN; slot_id <= EQ::invslot::GENERAL_END; ++slot_id)
-	{
+	for (slot_id = EQ::invslot::GENERAL_BEGIN; slot_id <= EQ::invslot::GENERAL_END; ++slot_id) {
 		quantity += collectitems_processSlot(slot_id, item_id, remove);
 	}
 
-	for (slot_id = EQ::invbag::GENERAL_BAGS_BEGIN; slot_id <= EQ::invbag::GENERAL_BAGS_END; ++slot_id)
-	{
+	for (slot_id = EQ::invbag::GENERAL_BAGS_BEGIN; slot_id <= EQ::invbag::GENERAL_BAGS_END; ++slot_id) {
 		quantity += collectitems_processSlot(slot_id, item_id, remove);
 	}
 
@@ -3013,11 +3001,21 @@ int QuestManager::collectitems(uint32 item_id, bool remove)
 
 int QuestManager::countitem(uint32 item_id) {
 	QuestManagerCurrentQuestVars();
+
+	if (!initiator) {
+		return 0;
+	}
+
 	return initiator->CountItem(item_id);
 }
 
 void QuestManager::removeitem(uint32 item_id, uint32 quantity) {
 	QuestManagerCurrentQuestVars();
+
+	if (!initiator) {
+		return;
+	}
+
 	initiator->RemoveItem(item_id, quantity);
 }
 
@@ -3462,9 +3460,17 @@ uint8 QuestManager::FactionValue()
 {
 	QuestManagerCurrentQuestVars();
 	FACTION_VALUE oldfac;
-	uint8 newfac = 0;
-	if(initiator && owner->IsNPC()) {
-		oldfac = initiator->GetFactionLevel(initiator->GetID(), owner->GetID(), initiator->GetFactionRace(), initiator->GetClass(), initiator->GetDeity(), owner->GetPrimaryFaction(), owner);
+	uint8         newfac = 0;
+	if (initiator && owner && owner->IsNPC()) {
+		oldfac = initiator->GetFactionLevel(
+			initiator->GetID(),
+			owner->GetID(),
+			initiator->GetFactionRace(),
+			initiator->GetClass(),
+			initiator->GetDeity(),
+			owner->GetPrimaryFaction(),
+			owner
+		);
 
 		// now, reorder the faction to have it make sense (higher values are better)
 		switch (oldfac) {
@@ -3503,62 +3509,76 @@ uint8 QuestManager::FactionValue()
 
 void QuestManager::enabletitle(int titleset) {
 	QuestManagerCurrentQuestVars();
+
+	if (!initiator) {
+		return;
+	}
+
 	initiator->EnableTitle(titleset);
 }
 
 bool QuestManager::checktitle(int titleset) {
 	QuestManagerCurrentQuestVars();
-	return initiator ? initiator->CheckTitle(titleset) : false;
+
+	if (!initiator) {
+		return;
+	}
+
+	return initiator->CheckTitle(titleset);
 }
 
 void QuestManager::removetitle(int titleset) {
 	QuestManagerCurrentQuestVars();
+
+	if (!initiator) {
+		return;
+	}
+
 	initiator->RemoveTitle(titleset);
 }
 
 void QuestManager::wearchange(uint8 slot, uint16 texture, uint32 hero_forge_model /*= 0*/, uint32 elite_material /*= 0*/)
 {
 	QuestManagerCurrentQuestVars();
-	if(owner){
-		owner->SendTextureWC(slot, texture, hero_forge_model, elite_material);
-		if(owner->IsNPC()) {
-			owner->CastToNPC()->NPCSlotTexture(slot, texture);
-		}
+
+	if (!owner) {
+		return;
+	}
+
+	owner->SendTextureWC(slot, texture, hero_forge_model, elite_material);
+	if (owner->IsNPC()) {
+		owner->CastToNPC()->NPCSlotTexture(slot, texture);
 	}
 }
 
 void QuestManager::voicetell(const char *str, int macronum, int racenum, int gendernum)
 {
 	QuestManagerCurrentQuestVars();
-	if(owner && str)
-	{
+
+	if (!owner) {
+		return;
+	}
+
+	if (str) {
 		Client *c = entity_list.GetClientByName(str);
 
-		if(c)
-		{
+		if (c) {
 			auto outapp = new EQApplicationPacket(OP_VoiceMacroOut, sizeof(VoiceMacroOut_Struct));
-
-			VoiceMacroOut_Struct* vmo = (VoiceMacroOut_Struct*)outapp->pBuffer;
-
+			auto* vmo = (VoiceMacroOut_Struct *) outapp->pBuffer;
 			strn0cpy(vmo->From, owner->GetCleanName(), sizeof(vmo->From));
-
-			vmo->Type = 1;
-
-			vmo->Voice = (racenum * 2) + gendernum;
-
+			vmo->Type        = 1;
+			vmo->Voice       = (racenum * 2) + gendernum;
 			vmo->MacroNumber = macronum;
-
 			c->QueuePacket(outapp);
-
 			safe_delete(outapp);
-		}
-		else
+		} else {
 			LogQuests("from [{}]. Client [{}] not found", owner->GetName(), str);
+		}
 	}
 }
 
 void QuestManager::SendMail(const char *to, const char *from, const char *subject, const char *message) {
-	if(to == nullptr || from == nullptr || subject == nullptr || message == nullptr) {
+	if (!to || !from || !subject || !message) {
 		return;
 	}
 
