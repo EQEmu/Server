@@ -1275,13 +1275,12 @@ void QuestManager::setskill(int skill_id, int value) {
 
 void QuestManager::setallskill(int value) {
 	QuestManagerCurrentQuestVars();
-	if (!initiator)
+	if (!initiator) {
 		return;
-	if (initiator) {
-		EQ::skills::SkillType sk;
-		for (sk = EQ::skills::Skill1HBlunt; sk <= EQ::skills::HIGHEST_SKILL; sk = (EQ::skills::SkillType)(sk + 1)) {
-			initiator->SetSkill(sk, value);
-		}
+	}
+
+	for (const auto& s : EQ::skills::GetSkillTypeMap()) {
+		initiator->SetSkill(s.first, value);
 	}
 }
 
