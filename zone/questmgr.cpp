@@ -17,6 +17,7 @@
 */
 
 #include "../common/classes.h"
+#include "../common/data_verification.h"
 #include "../common/global_define.h"
 #include "../common/rulesys.h"
 #include "../common/skills.h"
