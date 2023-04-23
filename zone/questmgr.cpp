@@ -1133,7 +1133,11 @@ void QuestManager::surname(std::string last_name) {
 
 void QuestManager::permaclass(int class_id) {
 	QuestManagerCurrentQuestVars();
-	//Makes the client the class specified
+
+	if (!initiator) {
+		return;
+	}
+
 	initiator->SetBaseClass(class_id);
 	initiator->Save(2);
 	initiator->Kick("Base class change by QuestManager");
@@ -1141,7 +1145,11 @@ void QuestManager::permaclass(int class_id) {
 
 void QuestManager::permarace(int race_id) {
 	QuestManagerCurrentQuestVars();
-	//Makes the client the race specified
+
+	if (!initiator) {
+		return;
+	}
+
 	initiator->SetBaseRace(race_id);
 	initiator->Save(2);
 	initiator->Kick("Base race change by QuestManager");
@@ -1149,7 +1157,11 @@ void QuestManager::permarace(int race_id) {
 
 void QuestManager::permagender(int gender_id) {
 	QuestManagerCurrentQuestVars();
-	//Makes the client the gender specified
+
+	if (!initiator) {
+		return;
+	}
+
 	initiator->SetBaseGender(gender_id);
 	initiator->Save(2);
 	initiator->Kick("Base gender change by QuestManager");
@@ -1157,21 +1169,41 @@ void QuestManager::permagender(int gender_id) {
 
 uint16 QuestManager::scribespells(uint8 max_level, uint8 min_level) {
 	QuestManagerCurrentQuestVars();
+
+	if (!initiator) {
+		return;
+	}
+
 	return initiator->ScribeSpells(min_level, max_level);
 }
 
 uint16 QuestManager::traindiscs(uint8 max_level, uint8 min_level) {
 	QuestManagerCurrentQuestVars();
+
+	if (!initiator) {
+		return;
+	}
+
 	return initiator->LearnDisciplines(min_level, max_level);
 }
 
 void QuestManager::unscribespells() {
 	QuestManagerCurrentQuestVars();
+
+	if (!initiator) {
+		return;
+	}
+
 	initiator->UnscribeSpellAll();
 }
 
 void QuestManager::untraindiscs() {
 	QuestManagerCurrentQuestVars();
+
+	if (!initiator) {
+		return;
+	}
+
 	initiator->UntrainDiscAll();
 }
 
@@ -1179,7 +1211,6 @@ void QuestManager::givecash(uint32 copper, uint32 silver, uint32 gold, uint32 pl
 	QuestManagerCurrentQuestVars();
 	if (
 		initiator &&
-		initiator->IsClient() &&
 		(
 			copper ||
 			silver ||
@@ -1198,79 +1229,103 @@ void QuestManager::givecash(uint32 copper, uint32 silver, uint32 gold, uint32 pl
 
 void QuestManager::pvp(const char *mode) {
 	QuestManagerCurrentQuestVars();
-	if (!strcasecmp(mode,"on"))
-	{
-		if (initiator)
-			initiator->SetPVP(true);
+
+	if (!initiator) {
+		return;
 	}
-	else
-		if (initiator)
-			initiator->SetPVP(false);
+
+	initiator->SetPVP(Strings::ToBool(mode));
 }
 
 void QuestManager::movepc(int zone_id, float x, float y, float z, float heading) {
 	QuestManagerCurrentQuestVars();
-	if (initiator)
-		initiator->MovePC(zone_id, x, y, z, heading);
+
+	if (!initiator) {
+		return;
+	}
+
+	initiator->MovePC(zone_id, x, y, z, heading);
 }
 
 void QuestManager::gmmove(float x, float y, float z) {
 	QuestManagerCurrentQuestVars();
-	if (initiator)
-		initiator->GMMove(x, y, z);
+
+	if (!initiator) {
+		return;
+	}
+
+	initiator->GMMove(x, y, z);
 }
 
 void QuestManager::movegrp(int zoneid, float x, float y, float z) {
 	QuestManagerCurrentQuestVars();
-	if (initiator)
-	{
-		Group *g = entity_list.GetGroupByClient(initiator);
-		if (g != nullptr) {
-			g->TeleportGroup(owner, zoneid, 0, x, y, z, 0.0f);
-		}
-		else {
-			Raid *r = entity_list.GetRaidByClient(initiator);
-			if (r != nullptr) {
-				uint32 gid = r->GetGroup(initiator);
-				if (gid >= 0 && gid < 12) {
-					r->TeleportGroup(owner, zoneid, 0, x, y, z, 0.0f, gid);
-				}
-				else {
-					initiator->MovePC(zoneid, x, y, z, 0.0f);
-				}
-			}
-			else {
+
+	if (!initiator) {
+		return;
+	}
+
+	if (Group *g = entity_list.GetGroupByClient(initiator)) {
+		g->TeleportGroup(owner, zoneid, 0, x, y, z, 0.0f);
+	} else {
+		if (Raid *r = entity_list.GetRaidByClient(initiator)) {
+			const auto group_id = r->GetGroup(initiator);
+			if (EQ::ValueWithin(group_idZ, 0, MAX_RAID_GROUPS)) {
+				r->TeleportGroup(owner, zoneid, 0, x, y, z, 0.0f, group_id);
+			} else {
 				initiator->MovePC(zoneid, x, y, z, 0.0f);
 			}
+		} else {
+			initiator->MovePC(zoneid, x, y, z, 0.0f);
 		}
 	}
 }
 
 void QuestManager::doanim(int animation_id, int animation_speed, bool ackreq, eqFilterType filter) {
 	QuestManagerCurrentQuestVars();
+
+	if (!owner) {
+		return;
+	}
+
 	owner->DoAnim(animation_id, animation_speed, ackreq, filter);
 }
 
 void QuestManager::addskill(int skill_id, int value) {
 	QuestManagerCurrentQuestVars();
-	if (skill_id < 0 || skill_id > EQ::skills::HIGHEST_SKILL)
+
+	if (!initiator) {
 		return;
-	if (initiator)
-		initiator->AddSkill((EQ::skills::SkillType) skill_id, value);
+	}
+
+	if (!EQ::ValueWithin(skill_id, EQ::skills::Skill1HBlunt, EQ::skills::HIGHEST_SKILL)) {
+		return;
+	}
+
+	initiator->AddSkill((EQ::skills::SkillType) skill_id, value);
 }
 
 void QuestManager::setlanguage(int skill_id, int value) {
 	QuestManagerCurrentQuestVars();
-	if (initiator)
-		initiator->SetLanguageSkill(skill_id, value);
+
+	if (!initiator) {
+		return;
+	}
+
+	initiator->SetLanguageSkill(skill_id, value);
 }
 
 void QuestManager::setskill(int skill_id, int value) {
 	QuestManagerCurrentQuestVars();
-	if (skill_id < 0 || skill_id > EQ::skills::HIGHEST_SKILL)
+
+	if (!initiator) {
 		return;
-	if (initiator)
-		initiator->SetSkill((EQ::skills::SkillType) skill_id, value);
+	}
+
+	if (!EQ::ValueWithin(skill_id, EQ::skills::Skill1HBlunt, EQ::skills::HIGHEST_SKILL)) {
+		return;
+	}
+
+	initiator->SetSkill((EQ::skills::SkillType) skill_id, value);
 }
 
 void QuestManager::setallskill(int value) {
