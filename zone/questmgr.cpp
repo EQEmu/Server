@@ -667,6 +667,10 @@ void QuestManager::pausetimer(const char* timer_name, Mob* mob) {
 void QuestManager::resumetimer(const char* timer_name, Mob* mob) {
 	QuestManagerCurrentQuestVars();
 
+	if (!mob && !owner) {
+		return;
+	}
+
 	std::list<QuestTimer>::iterator cur = QTimerList.begin(), end;
 	std::list<PausedTimer>::iterator pcur = PTimerList.begin(), pend;
 	PausedTimer pt;
