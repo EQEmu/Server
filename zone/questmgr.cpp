@@ -405,11 +405,26 @@ void QuestManager::selfcast(int spell_id) {
 		initiator->SpellFinished(spell_id, initiator, EQ::spells::CastingSlot::Item, 0, -1, spells[spell_id].resist_difficulty);
 }
 
-void QuestManager::addloot(int item_id, int charges, bool equipitem, int aug1, int aug2, int aug3, int aug4, int aug5, int aug6) {
+void QuestManager::addloot(
+	int item_id,
+	int charges,
+	bool equipitem,
+	int aug1,
+	int aug2,
+	int aug3,
+	int aug4,
+	int aug5,
+	int aug6
+) {
 	QuestManagerCurrentQuestVars();
-	if(item_id != 0){
-		if(owner->IsNPC())
+	if (!owner) {
+		return;
+	}
+
+	if (item_id != 0) {
+		if (owner->IsNPC()) {
 			owner->CastToNPC()->AddItem(item_id, charges, equipitem, aug1, aug2, aug3, aug4, aug5, aug6);
+		}
 	}
 }
 
