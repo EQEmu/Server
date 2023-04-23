@@ -3605,19 +3605,6 @@ void Bot::LevelBotWithClient(Client* client, uint8 level, bool sendlvlapp) {
 	}
 }
 
-void Bot::SendBotArcheryWearChange(uint8 material_slot, uint32 material, uint32 color) {
-	auto outapp = new EQApplicationPacket(OP_WearChange, sizeof(WearChange_Struct));
-	auto wc = (WearChange_Struct*)outapp->pBuffer;
-
-	wc->spawn_id = GetID();
-	wc->material = material;
-	wc->color.Color = color;
-	wc->wear_slot_id = material_slot;
-
-	entity_list.QueueClients(this, outapp);
-	safe_delete(outapp);
-}
-
 // Returns the item id that is in the bot inventory collection for the specified slot.
 EQ::ItemInstance* Bot::GetBotItem(uint16 slot_id) {
 	EQ::ItemInstance* item = m_inv.GetItem(slot_id);
@@ -5865,16 +5852,6 @@ int32 Bot::GenerateBaseManaPoints() {
 void Bot::GenerateSpecialAttacks() {
 	if (((GetClass() == MONK) || (GetClass() == WARRIOR) || (GetClass() == RANGER) || (GetClass() == BERSERKER))	&& (GetLevel() >= 60))
 		SetSpecialAbility(SPECATK_TRIPLE, 1);
-}
-
-bool Bot::DoFinishedSpellAETarget(uint16 spell_id, Mob* spellTarget, EQ::spells::CastingSlot slot, bool& stopLogic) {
-	if (GetClass() == BARD) {
-		if (!ApplyBardPulse(bardsong, this, bardsong_slot))
-			InterruptSpell(SONG_ENDS_ABRUPTLY, 0x121, bardsong);
-
-		stopLogic = true;
-	}
-	return true;
 }
 
 bool Bot::DoFinishedSpellSingleTarget(uint16 spell_id, Mob* spellTarget, EQ::spells::CastingSlot slot, bool& stopLogic) {
