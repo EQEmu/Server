@@ -307,7 +307,6 @@ private:
 	int32 CalcCorrup();
 	int64 CalcMaxHP();
 	int64 CalcBaseHP();
-	int64 GetClassHPFactor();
 	int64 CalcHPRegen();
 	int64 CalcHPRegenCap();
 	int64 CalcMaxMana();
