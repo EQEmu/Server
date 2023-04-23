@@ -379,12 +379,8 @@ public:
 
 	void SetPetCommandState(int button, int state);
 
-	bool CheckAccess(int16 iDBLevel, int16 iDefaultLevel);
-
-	void CheckQuests(const char* zonename, const char* message, uint32 npc_id, uint32 item_id, Mob* other);
 	bool AutoAttackEnabled() const { return auto_attack; }
 	bool AutoFireEnabled() const { return auto_fire; }
-	void MakeCorpse(uint32 exploss);
 
 	bool ChangeFirstName(const char* in_firstname,const char* gmname);
 
@@ -394,7 +390,6 @@ public:
 
 	virtual void SetMaxHP();
 	int32 LevelRegen();
-	void HPTick();
 	void SetGM(bool toggle);
 	void SetPVP(bool toggle, bool message = true);
 
