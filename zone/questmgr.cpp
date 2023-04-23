@@ -2595,57 +2595,55 @@ bool QuestManager::createBot(const char *name, const char *lastname, uint8 level
 
 		Bot* new_bot = new Bot(Bot::CreateDefaultNPCTypeStructForBot(name, lastname, level, race, botclass, gender), initiator);
 
-		if (new_bot) {
-			if (!new_bot->IsValidRaceClassCombo()) {
-				initiator->Message(Chat::White, "That Race/Class combination cannot be created.");
-				return false;
+		if (!new_bot->IsValidRaceClassCombo()) {
+			initiator->Message(Chat::White, "That Race/Class combination cannot be created.");
+			return false;
+		}
+
+		if (!new_bot->IsValidName()) {
+			initiator->Message(
+				Chat::White,
+				fmt::format(
+					"{} has invalid characters. You can use only the A-Z, a-z and _ characters in a bot name.",
+					new_bot->GetCleanName()
+				).c_str()
+			);
+			return false;
+		}
+
+		// Now that all validation is complete, we can save our newly created bot
+		if (!new_bot->Save()) {
+			initiator->Message(
+				Chat::White,
+				fmt::format(
+					"Unable to save {} as a bot.",
+					new_bot->GetCleanName()
+				).c_str()
+			);
+		} else {
+			initiator->Message(
+				Chat::White,
+				fmt::format(
+					"{} saved as bot ID {}.",
+					new_bot->GetCleanName(),
+					new_bot->GetBotID()
+				).c_str()
+			);
+
+			if (parse->PlayerHasQuestSub(EVENT_BOT_CREATE)) {
+				const auto &export_string = fmt::format(
+					"{} {} {} {} {}",
+					name,
+					new_bot->GetBotID(),
+					race,
+					botclass,
+					gender
+				);
+
+				parse->EventPlayer(EVENT_BOT_CREATE, initiator, export_string, 0);
 			}
 
-			if (!new_bot->IsValidName()) {
-				initiator->Message(
-					Chat::White,
-					fmt::format(
-						"{} has invalid characters. You can use only the A-Z, a-z and _ characters in a bot name.",
-						new_bot->GetCleanName()
-					).c_str()
-				);
-				return false;
-			}
-
-			// Now that all validation is complete, we can save our newly created bot
-			if (!new_bot->Save()) {
-				initiator->Message(
-					Chat::White,
-					fmt::format(
-						"Unable to save {} as a bot.",
-						new_bot->GetCleanName()
-					).c_str()
-				);
-			} else {
-				initiator->Message(
-					Chat::White,
-					fmt::format(
-						"{} saved as bot ID {}.",
-						new_bot->GetCleanName(),
-						new_bot->GetBotID()
-					).c_str()
-				);
-
-				if (parse->PlayerHasQuestSub(EVENT_BOT_CREATE)) {
-					const auto& export_string = fmt::format(
-						"{} {} {} {} {}",
-						name,
-						new_bot->GetBotID(),
-						race,
-						botclass,
-						gender
-					);
-
-					parse->EventPlayer(EVENT_BOT_CREATE, initiator, export_string, 0);
-				}
-
-				return true;
-			}
+			return true;
 		}
 	}
 	return false;
