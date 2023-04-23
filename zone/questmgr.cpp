@@ -1172,7 +1172,7 @@ uint16 QuestManager::scribespells(uint8 max_level, uint8 min_level) {
 	QuestManagerCurrentQuestVars();
 
 	if (!initiator) {
-		return;
+		return 0;
 	}
 
 	return initiator->ScribeSpells(min_level, max_level);
@@ -1182,7 +1182,7 @@ uint16 QuestManager::traindiscs(uint8 max_level, uint8 min_level) {
 	QuestManagerCurrentQuestVars();
 
 	if (!initiator) {
-		return;
+		return 0;
 	}
 
 	return initiator->LearnDisciplines(min_level, max_level);
@@ -1270,7 +1270,7 @@ void QuestManager::movegrp(int zoneid, float x, float y, float z) {
 	} else {
 		if (Raid *r = entity_list.GetRaidByClient(initiator)) {
 			const auto group_id = r->GetGroup(initiator);
-			if (EQ::ValueWithin(group_idZ, 0, MAX_RAID_GROUPS)) {
+			if (EQ::ValueWithin(group_id, 0, MAX_RAID_GROUPS)) {
 				r->TeleportGroup(owner, zoneid, 0, x, y, z, 0.0f, group_id);
 			} else {
 				initiator->MovePC(zoneid, x, y, z, 0.0f);
@@ -3522,7 +3522,7 @@ bool QuestManager::checktitle(int titleset) {
 	QuestManagerCurrentQuestVars();
 
 	if (!initiator) {
-		return;
+		return false;
 	}
 
 	return initiator->CheckTitle(titleset);
