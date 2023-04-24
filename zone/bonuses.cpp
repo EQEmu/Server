@@ -58,15 +58,9 @@ void Mob::CalcBonuses()
 void NPC::CalcBonuses()
 {
 	memset(&itembonuses, 0, sizeof(StatBonuses));
-	if (RuleB(NPC, UseItemBonusesForNonPets)) {
+	if (GetOwner() || RuleB(NPC, UseItemBonusesForNonPets)) {
 		memset(&itembonuses, 0, sizeof(StatBonuses));
 		CalcItemBonuses(&itembonuses);
-	}
-	else {
-		if (GetOwner()) {
-			memset(&itembonuses, 0, sizeof(StatBonuses));
-			CalcItemBonuses(&itembonuses);
-		}
 	}
 
 	// This has to happen last, so we actually take the item bonuses into account.
@@ -268,7 +262,7 @@ void Mob::AddItemBonuses(const EQ::ItemInstance* inst, StatBonuses* b, bool is_a
 		return;
 	}
 
-	if (!is_tribute && !inst->IsEquipable(GetBaseRace(), GetClass())) {
+	if (IsClient() && !is_tribute && !inst->IsEquipable(GetBaseRace(), GetClass())) {
 		if (item->ItemType != EQ::item::ItemTypeFood && item->ItemType != EQ::item::ItemTypeDrink) {
 			return;
 		}
@@ -276,14 +270,14 @@ void Mob::AddItemBonuses(const EQ::ItemInstance* inst, StatBonuses* b, bool is_a
 
 	const auto current_level = GetLevel();
 
-	if (current_level < inst->GetItemRequiredLevel(true)) {
+	if (IsClient() && current_level < inst->GetItemRequiredLevel(true)) {
 		return;
 	}
 
 	if (!is_ammo_item) {
 		const auto recommended_level = is_augment ? recommended_level_override : inst->GetItemRecommendedLevel(true);
 
-		if (current_level >= recommended_level) {
+		if (IsNPC() || current_level >= recommended_level) {
 			b->HP += item->HP;
 			b->Mana += item->Mana;
 			b->Endurance += item->Endur;
