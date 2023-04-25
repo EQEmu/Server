@@ -10,7 +10,6 @@
 #::: Purpose: To upgrade databases with ease and maintain versioning
 ###########################################################
 
-use strict;
 use Config;
 use File::Copy qw(copy);
 use POSIX qw(strftime);
