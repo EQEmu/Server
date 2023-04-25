@@ -783,8 +783,6 @@ void Client::SetEXP(uint64 set_exp, uint64 set_aaxp, bool isrezzexp) {
 			if (check_level == RuleI(Character, DeathExpLossLevel))
 				MessageString(Chat::Yellow, CORPSE_EXP_LOST);
 		}
-		else
-			MessageString(Chat::Experience, LOSE_LEVEL, ConvertArray(check_level, val1));
 
 		uint8 myoldlevel = GetLevel();
 
