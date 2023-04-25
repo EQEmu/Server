@@ -300,6 +300,8 @@ bool WorldBoot::DatabaseLoadRoutines(int argc, char **argv)
 		->SetLogPath(path.GetLogPath())
 		->LoadLogDatabaseSettings();
 
+	LogSys.SetDiscordHandler(&WorldBoot::DiscordWebhookMessageHandler);
+
 	if (!ignore_db) {
 		LogInfo("Checking Database Conversions");
 		database.CheckDatabaseConversions();
@@ -660,5 +662,20 @@ void WorldBoot::CheckForPossibleConfigurationIssues()
 void WorldBoot::Shutdown()
 {
 	safe_delete(mutex);
+}
+
+void WorldBoot::SendDiscordMessage(int webhook_id, const std::string &message)
+{
+	if (UCSLink.IsConnected()) {
+		auto pack = new ServerPacket(ServerOP_DiscordWebhookMessage, sizeof(DiscordWebhookMessage_Struct) + 1);
+		auto *q   = (DiscordWebhookMessage_Struct *) pack->pBuffer;
+
+		strn0cpy(q->message, message.c_str(), 2000);
+		q->webhook_id = webhook_id;
+
+		UCSLink.SendPacket(pack);
+
+		safe_delete(pack);
+	}
 }
 
