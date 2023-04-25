@@ -6229,11 +6229,13 @@ bool Mob::HasSpellEffect(int effect_id)
 {
 	const auto buff_count = GetMaxTotalSlots();
 	for (int i = 0; i < buff_count; i++) {
-		if (!IsValidSpell(buffs[i].spellid)) {
+		const auto spell_id = buffs[i].spellid;
+
+		if (!IsValidSpell(spell_id)) {
 			continue;
 		}
 
-		if (IsEffectInSpell(buffs[i].spellid, effect_id)) {
+		if (IsEffectInSpell(spell_id, effect_id)) {
 			return true;
 		}
 	}
