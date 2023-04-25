@@ -2950,6 +2950,11 @@ perl::array Perl_Mob_GetBuffSpellIDs(Mob* self)
 	return l;
 }
 
+bool Perl_Mob_HasSpellEffect(Mob* self, int effect_id)
+{
+	return self->HasSpellEffect(effect_id);
+}
+
 void perl_register_mob()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -3272,6 +3277,7 @@ void perl_register_mob()
 	package.add("HasPet", &Perl_Mob_HasPet);
 	package.add("HasProcs", &Perl_Mob_HasProcs);
 	package.add("HasShieldEquipped", &Perl_Mob_HasShieldEquipped);
+	package.add("HasSpellEffect", &Perl_Mob_HasSpellEffect);
 	package.add("HasTimer", &Perl_Mob_HasTimer);
 	package.add("HasTwoHandBluntEquipped", &Perl_Mob_HasTwoHandBluntEquipped);
 	package.add("HasTwoHanderEquipped", &Perl_Mob_HasTwoHanderEquipped);

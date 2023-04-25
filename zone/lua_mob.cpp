@@ -3000,6 +3000,11 @@ luabind::object Lua_Mob::GetBuffSpellIDs(lua_State* L) {
 	return t;
 }
 
+bool Lua_Mob::HasSpellEffect(int effect_id) {
+	Lua_Safe_Call_Bool();
+	return self->HasSpellEffect(effect_id);
+}
+
 luabind::scope lua_register_mob() {
 	return luabind::class_<Lua_Mob, Lua_Entity>("Mob")
 	.def(luabind::constructor<>())
@@ -3338,6 +3343,7 @@ luabind::scope lua_register_mob() {
 	.def("HasPet", (bool(Lua_Mob::*)(void))&Lua_Mob::HasPet)
 	.def("HasProcs", &Lua_Mob::HasProcs)
 	.def("HasShieldEquipped", (bool(Lua_Mob::*)(void))&Lua_Mob::HasShieldEquipped)
+	.def("HasSpellEffect", &Lua_Mob::HasSpellEffect)
 	.def("HasTimer", &Lua_Mob::HasTimer)
 	.def("HasTwoHandBluntEquipped", (bool(Lua_Mob::*)(void))&Lua_Mob::HasTwoHandBluntEquipped)
 	.def("HasTwoHanderEquipped", (bool(Lua_Mob::*)(void))&Lua_Mob::HasTwoHanderEquipped)
