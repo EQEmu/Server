@@ -1801,23 +1801,9 @@ sub fetch_peq_db_full
 sub map_files_fetch_bulk
 {
     print "[Install] Fetching Latest Maps... (This could take a few minutes...)\n";
-    get_remote_file("http://analytics.akkadius.com/maps.zip", "maps/maps.zip", 1);
+    get_remote_file("https://github.com/Akkadius/eqemu-maps/releases/latest/download/maps.zip", "maps/maps.zip", 1);
     unzip('maps/maps.zip', 'maps/');
-    my @files;
-    my $start_dir = "maps/EQEmuMaps-master/";
-    find(
-        sub { push @files, $File::Find::name unless -d; },
-        $start_dir
-    );
-    for my $file (@files) {
-        $destination_file = $file;
-        $destination_file =~ s/maps\/EQEmuMaps-master\///g;
-        print "[Install] Installing [" . $destination_file . "]\n";
-        copy_file($file, "maps/" . $destination_file);
-    }
     print "[Install] Fetched Latest Maps\n";
-
-    rmtree('maps/EQEmuMaps-master');
     unlink('maps/maps.zip');
 }
 
