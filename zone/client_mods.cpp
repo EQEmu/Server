@@ -506,50 +506,6 @@ int64 Client::CalcBaseHP()
 	return base_hp;
 }
 
-// This is for calculating Base HPs + STA bonus for SoD or later clients.
-uint64 Client::GetClassHPFactor()
-{
-	int factor;
-	// Note: Base HP factor under level 41 is equal to factor / 12, and from level 41 to 80 is factor / 6.
-	// Base HP over level 80 is factor / 10
-	// HP per STA point per level is factor / 30 for level 80+
-	// HP per STA under level 40 is the level 80 HP Per STA / 120, and for over 40 it is / 60.
-	switch (GetClass()) {
-		case DRUID:
-		case ENCHANTER:
-		case NECROMANCER:
-		case MAGICIAN:
-		case WIZARD:
-			factor = 240;
-			break;
-		case BEASTLORD:
-		case BERSERKER:
-		case MONK:
-		case ROGUE:
-		case SHAMAN:
-			factor = 255;
-			break;
-		case BARD:
-		case CLERIC:
-			factor = 264;
-			break;
-		case SHADOWKNIGHT:
-		case PALADIN:
-			factor = 288;
-			break;
-		case RANGER:
-			factor = 276;
-			break;
-		case WARRIOR:
-			factor = 300;
-			break;
-		default:
-			factor = 240;
-			break;
-	}
-	return factor;
-}
-
 // This should return the combined AC of all the items the player is wearing.
 int32 Client::GetRawItemAC()
 {
