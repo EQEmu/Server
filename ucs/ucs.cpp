@@ -144,6 +144,8 @@ int main() {
 		->LoadLogDatabaseSettings()
 		->StartFileLogs();
 
+	player_event_logs.SetDatabase(&database)->Init();
+
 	char tmp[64];
 
 	// ucs has no 'reload rules' handler
