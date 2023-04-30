@@ -2887,6 +2887,16 @@ float Perl_Mob_GetDefaultRaceSize(Mob* self) // @categories Script Utility
 	return self->GetDefaultRaceSize();
 }
 
+float Perl_Mob_GetDefaultRaceSize(Mob* self, int race_id) // @categories Script Utility
+{
+	return self->GetDefaultRaceSize(race_id);
+}
+
+float Perl_Mob_GetDefaultRaceSize(Mob* self, int race_id, int gender_id) // @categories Script Utility
+{
+	return self->GetDefaultRaceSize(race_id, gender_id);
+}
+
 uint32 Perl_Mob_GetRemainingTimeMS(Mob* self, const char* timer_name)
 {
 	return quest_manager.getremainingtimeMS(timer_name, self);
@@ -3141,7 +3151,9 @@ void perl_register_mob()
 	package.add("GetClassName", &Perl_Mob_GetClassName);
 	package.add("GetCleanName", &Perl_Mob_GetCleanName);
 	package.add("GetCorruption", &Perl_Mob_GetCorruption);
-	package.add("GetDefaultRaceSize", &Perl_Mob_GetDefaultRaceSize);
+	package.add("GetDefaultRaceSize", (float(*)(Mob*))&Perl_Mob_GetDefaultRaceSize);
+	package.add("GetDefaultRaceSize", (float(*)(Mob*, int))&Perl_Mob_GetDefaultRaceSize);
+	package.add("GetDefaultRaceSize", (float(*)(Mob*, int, int))&Perl_Mob_GetDefaultRaceSize);
 	package.add("GetDEX", &Perl_Mob_GetDEX);
 	package.add("GetDR", &Perl_Mob_GetDR);
 	package.add("GetDamageAmount", &Perl_Mob_GetDamageAmount);

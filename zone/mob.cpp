@@ -6724,8 +6724,11 @@ void Mob::CommonBreakInvisible()
 	CancelSneakHide();
 }
 
-float Mob::GetDefaultRaceSize() const {
-	return GetRaceGenderDefaultHeight(race, gender);
+float Mob::GetDefaultRaceSize(int race_id, int gender_id) const {
+	return GetRaceGenderDefaultHeight(
+		race_id > 0 ? race_id : race,
+		gender_id >= 0 ? gender_id : gender
+	);
 }
 
 bool Mob::ShieldAbility(uint32 target_id, int shielder_max_distance, int shield_duration, int shield_target_mitigation, int shielder_mitigation, bool use_aa, bool can_shield_npc)
