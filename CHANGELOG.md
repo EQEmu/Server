@@ -1,3 +1,51 @@
+## [22.11.0] - 04/29/2023
+
+### Code
+
+* Add check for owner in quest::pausetimer() ([#3304](https://github.com/EQEmu/Server/pull/3304)) @Kinglykrab 2023-04-23
+* Add check for owner in quest::resumetimer() ([#3305](https://github.com/EQEmu/Server/pull/3305)) @Kinglykrab 2023-04-23
+* Add initiator/owner checks to various methods in questmgr.cpp ([#3306](https://github.com/EQEmu/Server/pull/3306)) @Kinglykrab 2023-04-23
+* Fix possible nullptr in quest::addloot() ([#3303](https://github.com/EQEmu/Server/pull/3303)) @Kinglykrab 2023-04-23
+* Remove GetClassHPFactor() from zone/client_mods.cpp and zone/client.h ([#3313](https://github.com/EQEmu/Server/pull/3313)) @Kinglykrab 2023-04-30
+* Remove GetClassHPFactor() from zone/merc.h ([#3314](https://github.com/EQEmu/Server/pull/3314)) @Kinglykrab 2023-04-30
+* Remove pDontCastBefore_casting_spell from zone/npc.h ([#3311](https://github.com/EQEmu/Server/pull/3311)) @Kinglykrab 2023-04-30
+* Remove unused code in zone/pets.cpp ([#3310](https://github.com/EQEmu/Server/pull/3310)) @Kinglykrab 2023-04-30
+* Remove unused methods in zone/bot.cpp and zone/bot.h ([#3315](https://github.com/EQEmu/Server/pull/3315)) @Kinglykrab 2023-04-30
+* Remove unused methods in zone/client.cpp and zone/client.h ([#3312](https://github.com/EQEmu/Server/pull/3312)) @Kinglykrab 2023-04-30
+* Remove unused variable in common/crash.cpp ([#3308](https://github.com/EQEmu/Server/pull/3308)) @Kinglykrab 2023-04-30
+* Use default ctor/dtor in oriented_bounding_box.h ([#3307](https://github.com/EQEmu/Server/pull/3307)) @Kinglykrab 2023-04-30
+* quest::createBot() unnecessary check against nullptr ([#3302](https://github.com/EQEmu/Server/pull/3302)) @Kinglykrab 2023-04-23
+* quest::setallskill() had always true condition. ([#3301](https://github.com/EQEmu/Server/pull/3301)) @Kinglykrab 2023-04-30
+
+### Crash
+
+* Fix UCS crash that occurs during log reloading ([#3324](https://github.com/EQEmu/Server/pull/3324)) @Akkadius 2023-04-30
+* Fix possible dereference of nullptr in Client::CalcHPRegen ([#3316](https://github.com/EQEmu/Server/pull/3316)) @Aeadoin 2023-04-23
+* Fix possible nullptr in Client::GetCharMaxLevelFromQGlobal() ([#3317](https://github.com/EQEmu/Server/pull/3317)) @Kinglykrab 2023-04-23
+
+### Discord
+
+* Add Discord webhook callback processing to world ([#3322](https://github.com/EQEmu/Server/pull/3322)) @Akkadius 2023-04-30
+
+### Fixes
+
+* Fix issue with NPCs no longer using some armor. ([#3318](https://github.com/EQEmu/Server/pull/3318)) @noudess 2023-04-24
+* Fix issue with spawning Mercs ([#3327](https://github.com/EQEmu/Server/pull/3327)) @Aeadoin 2023-04-29
+* Possible issues with SummonItem in Client::QuestReward() methods ([#3325](https://github.com/EQEmu/Server/pull/3325)) @Kinglykrab 2023-04-27
+
+### Maps
+
+* Update download with faster releases link ([#3321](https://github.com/EQEmu/Server/pull/3321)) @Akkadius 2023-04-30
+
+### Messages
+
+* Remove duplicate you have lost a level message ([#3323](https://github.com/EQEmu/Server/pull/3323)) @noudess 2023-04-25
+
+### Quest API
+
+* Add GetDefaultRaceSize() overloads to Perl/Lua ([#3320](https://github.com/EQEmu/Server/pull/3320)) @Kinglykrab 2023-04-30
+* Add HasSpellEffect() to Perl/Lua ([#3319](https://github.com/EQEmu/Server/pull/3319)) @Kinglykrab 2023-04-30
+
 ## [22.10.0] - 04/22/2023
 
 ### Backups
