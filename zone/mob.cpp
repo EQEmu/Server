@@ -6227,20 +6227,20 @@ FACTION_VALUE Mob::GetSpecialFactionCon(Mob* iOther) {
 
 bool Mob::HasSpellEffect(int effect_id)
 {
-	int i;
+	const auto buff_count = GetMaxTotalSlots();
+	for (int i = 0; i < buff_count; i++) {
+		const auto spell_id = buffs[i].spellid;
 
-	int buff_count = GetMaxTotalSlots();
-	for(i = 0; i < buff_count; i++)
-	{
-		if (!IsValidSpell(buffs[i].spellid)) {
+		if (!IsValidSpell(spell_id)) {
 			continue;
 		}
 
-		if (IsEffectInSpell(buffs[i].spellid, effect_id)) {
-			return(1);
+		if (IsEffectInSpell(spell_id, effect_id)) {
+			return true;
 		}
 	}
-	return(0);
+
+	return false;
 }
 
 int Mob::GetSpecialAbility(int ability)
