@@ -4447,11 +4447,19 @@ void Mob::HealDamage(uint64 amount, Mob* caster, uint16 spell_id)
 				}
 			}
 			else { // normal heals
-				FilteredMessageString(caster, Chat::NonMelee, FilterSpellDamage,
-					YOU_HEALED, caster->GetCleanName(), itoa(acthealed));
+				// Message to caster
+				if (caster->IsClient()) {
+					caster->FilteredMessageString(caster, Chat::NonMelee,
+						FilterSpellDamage, YOU_HEAL, GetCleanName(),
+						itoa(acthealed));
+					}
 
-					caster->FilteredMessageString(caster, Chat::NonMelee, FilterSpellDamage,
-						YOU_HEAL, GetCleanName(), itoa(acthealed));
+				// Message to target
+				if (IsClient() && caster != this) {
+					FilteredMessageString(caster, Chat::NonMelee,
+					FilterSpellDamage, YOU_HEALED, caster->GetCleanName(),
+					itoa(acthealed));
+				}
 			}
 		} else if (
 			CastToClient()->GetFilter(FilterHealOverTime) != FilterShowSelfOnly ||
