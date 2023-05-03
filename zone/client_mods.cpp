@@ -797,10 +797,10 @@ uint32 Client::CalcCurrentWeight()
 
 int32 Client::CalcAlcoholPhysicalEffect()
 {
-	if (m_pp.intoxication <= 55) {
+	if (GetIntoxication() <= 55) {
 		return 0;
 	}
-	return (m_pp.intoxication - 40) / 16;
+	return (GetIntoxication() - 40) / 16;
 }
 
 int32 Client::CalcSTR()
@@ -878,8 +878,8 @@ int32 Client::CalcINT()
 	int32 val = m_pp.INT + itembonuses.INT + spellbonuses.INT;
 	int32 mod = aabonuses.INT;
 	INT = val + mod;
-	if (m_pp.intoxication) {
-		int32 AlcINT = INT - (int32)((float)m_pp.intoxication / 200.0f * (float)INT) - 1;
+	if (GetIntoxication()) {
+		int32 AlcINT = INT - (int32)((float)GetIntoxication() / 200.0f * (float)INT) - 1;
 		if ((AlcINT < (int)(0.2 * INT))) {
 			INT = (int)(0.2f * (float)INT);
 		}
@@ -902,8 +902,8 @@ int32 Client::CalcWIS()
 	int32 val = m_pp.WIS + itembonuses.WIS + spellbonuses.WIS;
 	int32 mod = aabonuses.WIS;
 	WIS = val + mod;
-	if (m_pp.intoxication) {
-		int32 AlcWIS = WIS - (int32)((float)m_pp.intoxication / 200.0f * (float)WIS) - 1;
+	if (GetIntoxication()) {
+		int32 AlcWIS = WIS - (int32)((float)GetIntoxication() / 200.0f * (float)WIS) - 1;
 		if ((AlcWIS < (int)(0.2 * WIS))) {
 			WIS = (int)(0.2f * (float)WIS);
 		}

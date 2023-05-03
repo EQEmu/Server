@@ -395,6 +395,7 @@ public:
 	void QueuePacket(Lua_Packet app, bool ack_req, int client_connection_status, int filter);
 	int GetHunger();
 	int GetThirst();
+	int GetIntoxication();
 	void SetHunger(int in_hunger);
 	void SetThirst(int in_thirst);
 	void SetConsumption(int in_hunger, int in_thirst);

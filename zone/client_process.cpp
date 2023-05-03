@@ -518,9 +518,9 @@ bool Client::Process() {
 				Save(0);
 			}
 
-			if (m_pp.intoxication > 0)
+			if (GetIntoxication() > 0)
 			{
-				--m_pp.intoxication;
+				SetIntoxication(GetIntoxication()-1);
 				CalcBonuses();
 			}
 

@@ -67,6 +67,7 @@ namespace EQ
 #include "task_client_state.h"
 #include "cheat_manager.h"
 #include "../common/events/player_events.h"
+#include "../common/data_verification.h"
 
 #ifdef _WINDOWS
 	// since windows defines these within windef.h (which windows.h include)
@@ -993,6 +994,7 @@ public:
 	void SetThirst(int32 in_thirst);
 	void SetConsumption(int32 in_hunger, int32 in_thirst);
 	bool IsStarved() const { if (GetGM() || !RuleB(Character, EnableFoodRequirement) || !RuleB(Character, EnableHungerPenalties)) return false; return m_pp.hunger_level == 0 || m_pp.thirst_level == 0; }
+	int32 GetIntoxication() const { return m_pp.intoxication; }
 
 	bool CheckTradeLoreConflict(Client* other);
 	bool CheckTradeNonDroppable();
@@ -1582,6 +1584,7 @@ public:
 	void SetEnvironmentDamageModifier(int32 val) { environment_damage_modifier = val; }
 	inline bool GetInvulnerableEnvironmentDamage() const { return invulnerable_environment_damage; }
 	void SetInvulnerableEnvironmentDamage(bool val) { invulnerable_environment_damage = val; }
+	void SetIntoxication(int32 in_intoxication);
 
 	void ShowNumHits(); // work around function for numhits not showing on buffs
 
