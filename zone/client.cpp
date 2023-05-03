@@ -8342,7 +8342,7 @@ void Client::SetThirst(int32 in_thirst)
 
 void Client::SetIntoxication(int32 in_intoxication)
 {
-	m_pp.intoxication = std::min(200,std::max(0,in_intoxication));
+	m_pp.intoxication = EQ::Clamp(in_intoxication, 0, 200);
 }
 
 void Client::SetConsumption(int32 in_hunger, int32 in_thirst)

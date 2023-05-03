@@ -67,6 +67,7 @@ namespace EQ
 #include "task_client_state.h"
 #include "cheat_manager.h"
 #include "../common/events/player_events.h"
+#include "../common/data_verification.h"
 
 #ifdef _WINDOWS
 	// since windows defines these within windef.h (which windows.h include)
