@@ -908,8 +908,8 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 	}
 
 	// Garble the message based on drunkness
-	if (m_pp.intoxication > 0 && !(RuleB(Chat, ServerWideOOC) && chan_num == ChatChannel_OOC) && !GetGM()) {
-		GarbleMessage(message, (int)(m_pp.intoxication / 3));
+	if (GetIntoxication() > 0 && !(RuleB(Chat, ServerWideOOC) && chan_num == ChatChannel_OOC) && !GetGM()) {
+		GarbleMessage(message, (int)(GetIntoxication() / 3));
 		language = 0; // No need for language when drunk
 		lang_skill = 100;
 	}
@@ -8338,6 +8338,11 @@ void Client::SetThirst(int32 in_thirst)
 
 	QueuePacket(outapp);
 	safe_delete(outapp);
+}
+
+void Client::SetIntoxication(int32 in_intoxication)
+{
+	m_pp.intoxication = std::min(200,std::max(0,in_intoxication));
 }
 
 void Client::SetConsumption(int32 in_hunger, int32 in_thirst)

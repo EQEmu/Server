@@ -1309,7 +1309,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 
 	/* If we can maintain intoxication across zones, check for it */
 	if (!RuleB(Character, MaintainIntoxicationAcrossZones))
-		m_pp.intoxication = 0;
+		SetIntoxication(0);
 
 	strcpy(name, m_pp.name);
 	strcpy(lastname, m_pp.last_name);
@@ -5568,10 +5568,8 @@ void Client::Handle_OP_DeleteItem(const EQApplicationPacket *app)
 		if (IntoxicationIncrease < 0)
 			IntoxicationIncrease = 1;
 
-		m_pp.intoxication += IntoxicationIncrease;
+		SetIntoxication(GetIntoxication()+IntoxicationIncrease);
 
-		if (m_pp.intoxication > 200)
-			m_pp.intoxication = 200;
 	}
 	DeleteItemInInventory(alc->from_slot, 1);
 

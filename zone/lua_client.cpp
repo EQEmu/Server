@@ -2504,6 +2504,10 @@ int Lua_Client::GetSpellDamage() {
 	Lua_Safe_Call_Int();
 	return self->GetSpellDmg();
 }
+int Lua_Client::GetIntoxication() {
+	Lua_Safe_Call_Int();
+	return self->GetIntoxication();
+}
 
 void Lua_Client::TaskSelector(luabind::adl::object table) {
 	TaskSelector(table, false);
@@ -3237,6 +3241,7 @@ luabind::scope lua_register_client() {
 	.def("GetIPExemption", (int(Lua_Client::*)(void))&Lua_Client::GetIPExemption)
 	.def("GetIPString", (std::string(Lua_Client::*)(void))&Lua_Client::GetIPString)
 	.def("GetInstrumentMod", (int(Lua_Client::*)(int))&Lua_Client::GetInstrumentMod)
+	.def("GetIntoxication", (int(Lua_Client::*)(void))&Lua_Client::GetIntoxication)
 	.def("GetInventory", (Lua_Inventory(Lua_Client::*)(void))&Lua_Client::GetInventory)
 	.def("GetInvulnerableEnvironmentDamage", (bool(Lua_Client::*)(void))&Lua_Client::GetInvulnerableEnvironmentDamage)
 	.def("GetItemIDAt", (int(Lua_Client::*)(int))&Lua_Client::GetItemIDAt)

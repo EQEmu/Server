@@ -1522,6 +1522,11 @@ int Perl_Client_GetThirst(Client* self) // @categories Account and Character, St
 	return self->GetThirst();
 }
 
+int Perl_Client_GetIntoxication(Client* self) // @categories Account and Character, Stats and Attributes
+{
+	return self->GetIntoxication();
+}
+
 void Perl_Client_SetHunger(Client* self, int in_hunger) // @categories Script Utility, Stats and Attributes
 {
 	self->SetHunger(in_hunger);
@@ -3093,6 +3098,7 @@ void perl_register_client()
 	package.add("GetHorseId", &Perl_Client_GetHorseId);
 	package.add("GetHealAmount", &Perl_Client_GetHealAmount);
 	package.add("GetHunger", &Perl_Client_GetHunger);
+	package.add("GetIntoxication", &Perl_Client_GetIntoxication);
 	package.add("GetIP", &Perl_Client_GetIP);
 	package.add("GetIPExemption", &Perl_Client_GetIPExemption);
 	package.add("GetIPString", &Perl_Client_GetIPString);

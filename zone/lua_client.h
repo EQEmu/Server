@@ -395,9 +395,10 @@ public:
 	void QueuePacket(Lua_Packet app, bool ack_req, int client_connection_status, int filter);
 	int GetHunger();
 	int GetThirst();
+	int GetIntoxication();
 	void SetHunger(int in_hunger);
 	void SetThirst(int in_thirst);
-	void SetConsumption(int in_hunger, int in_thirst);
+	void SetConsumption(int in_hunger, int in_thirst);	
 	void SendMarqueeMessage(uint32 type, std::string message);
 	void SendMarqueeMessage(uint32 type, std::string message, uint32 duration);
 	void SendMarqueeMessage(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, std::string message);
