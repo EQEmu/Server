@@ -146,7 +146,7 @@ void Mob::CalcItemBonuses(StatBonuses* b) {
 	int16 i;
 
 	for (i = EQ::invslot::BONUS_BEGIN; i <= EQ::invslot::BONUS_SKILL_END; i++) {
-		const EQ::ItemInstance* inst = m_inv[i];
+		const EQ::ItemInstance* inst = GetInv().GetItem(i);
 		if (!inst) {
 			continue;
 		}
