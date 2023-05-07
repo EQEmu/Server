@@ -368,6 +368,7 @@
 #define DUNGEON_SEALED				5141	//The gateway to the dungeon is sealed off to you.  Perhaps you would be able to enter if you needed to adventure there.
 #define ADVENTURE_COMPLETE			5147	//You received %1 points for successfully completing the adventure.
 #define SUCCOR_FAIL					5169	//The portal collapes before you can escape!
+#define AUGMENT_RESTRICTED			5480	//The item does not satisfy the augment's restrictions.
 #define PET_ATTACKING				5501	//%1 tells you, 'Attacking %2 Master.'
 #define AVOID_STUNNING_BLOW			5753	//You avoid the stunning blow.
 #define FATAL_BOW_SHOT				5745	//%1 performs a FATAL BOW SHOT!!

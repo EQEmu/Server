@@ -117,7 +117,18 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 		return;
 	}
 
-	if (!RuleB(Inventory, AllowMultipleOfSameAugment) && tobe_auged->ContainsAugmentByID(auged_with->GetID())) {
+	if (
+		RuleB(Inventory, EnforceAugmentRestriction) &&
+		user->IsAugmentRestricted(tobe_auged->GetItemType(), auged_with->GetAugmentRestriction())
+	) {
+		user->MessageString(Chat::Red, AUGMENT_RESTRICTED);
+		return;
+	}
+
+	if (
+		!RuleB(Inventory, AllowMultipleOfSameAugment) &&
+		tobe_auged->ContainsAugmentByID(auged_with->GetID())
+	) {
 		user->Message(Chat::Red, "Error: Cannot put multiple of the same augment in an item.");
 		return;
 	}

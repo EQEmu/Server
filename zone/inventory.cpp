@@ -415,173 +415,10 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 			}
 
 			// check for augment to item restriction
-			if(enforce_restrictions) {
-				bool is_restricted = false;
-				uint8 item_type = item->ItemType;
-				switch (augtest->AugRestrict) {
-					case EQ::item::AugRestrictionAny:
-						break;
-					case EQ::item::AugRestrictionArmor:
-						switch (item_type) {
-							case EQ::item::ItemTypeArmor:
-								break;
-							default:
-								is_restricted = true;
-								break;
-						}
-						break;
-					case EQ::item::AugRestrictionWeapons:
-						switch (item_type) {
-							case EQ::item::ItemType1HSlash:
-							case EQ::item::ItemType1HBlunt:
-							case EQ::item::ItemType1HPiercing:
-							case EQ::item::ItemTypeMartial:
-							case EQ::item::ItemType2HSlash:
-							case EQ::item::ItemType2HBlunt:
-							case EQ::item::ItemType2HPiercing:
-							case EQ::item::ItemTypeBow:
-								break;
-							default:
-								is_restricted = true;
-								break;
-						}
-						break;
-					case EQ::item::AugRestriction1HWeapons:
-						switch (item_type) {
-							case EQ::item::ItemType1HSlash:
-							case EQ::item::ItemType1HBlunt:
-							case EQ::item::ItemType1HPiercing:
-							case EQ::item::ItemTypeMartial:
-								break;
-							default:
-								is_restricted = true;
-								break;
-						}
-						break;
-					case EQ::item::AugRestriction2HWeapons:
-						switch (item_type) {
-							case EQ::item::ItemType2HSlash:
-							case EQ::item::ItemType2HBlunt:
-							case EQ::item::ItemType2HPiercing:
-							case EQ::item::ItemTypeBow:
-								break;
-							default:
-								is_restricted = true;
-								break;
-						}
-						break;
-					case EQ::item::AugRestriction1HSlash:
-						switch (item_type) {
-							case EQ::item::ItemType1HSlash:
-								break;
-							default:
-								is_restricted = true;
-								break;
-						}
-						break;
-					case EQ::item::AugRestriction1HBlunt:
-						switch (item_type) {
-							case EQ::item::ItemType1HBlunt:
-								break;
-							default:
-								is_restricted = true;
-								break;
-						}
-						break;
-					case EQ::item::AugRestrictionPiercing:
-						switch (item_type) {
-							case EQ::item::ItemType1HPiercing:
-								break;
-							default:
-								is_restricted = true;
-								break;
-						}
-						break;
-					case EQ::item::AugRestrictionHandToHand:
-						switch (item_type) {
-							case EQ::item::ItemTypeMartial:
-								break;
-							default:
-								is_restricted = true;
-								break;
-						}
-						break;
-					case EQ::item::AugRestriction2HSlash:
-						switch (item_type) {
-							case EQ::item::ItemType2HSlash:
-								break;
-							default:
-								is_restricted = true;
-								break;
-						}
-						break;
-					case EQ::item::AugRestriction2HBlunt:
-						switch (item_type) {
-							case EQ::item::ItemType2HBlunt:
-								break;
-							default:
-								is_restricted = true;
-								break;
-						}
-						break;
-					case EQ::item::AugRestriction2HPierce:
-						switch (item_type) {
-							case EQ::item::ItemType2HPiercing:
-								break;
-							default:
-								is_restricted = true;
-								break;
-						}
-						break;
-					case EQ::item::AugRestrictionBows:
-						switch (item_type) {
-							case EQ::item::ItemTypeBow:
-								break;
-							default:
-								is_restricted = true;
-								break;
-						}
-						break;
-					case EQ::item::AugRestrictionShields:
-						switch (item_type) {
-							case EQ::item::ItemTypeShield:
-								break;
-							default:
-								is_restricted = true;
-								break;
-						}
-						break;
-					case EQ::item::AugRestriction1HSlash1HBluntOrHandToHand:
-						switch (item_type) {
-							case EQ::item::ItemType1HSlash:
-							case EQ::item::ItemType1HBlunt:
-							case EQ::item::ItemTypeMartial:
-								break;
-							default:
-								is_restricted = true;
-								break;
-						}
-						break;
-					case EQ::item::AugRestriction1HBluntOrHandToHand:
-							switch (item_type) {
-							case EQ::item::ItemType1HBlunt:
-							case EQ::item::ItemTypeMartial:
-								break;
-							default:
-								is_restricted = true;
-								break;
-						}
-						break;
-					// These 3 are in-work
-					case EQ::item::AugRestrictionUnknown1:
-					case EQ::item::AugRestrictionUnknown2:
-					case EQ::item::AugRestrictionUnknown3:
-					default:
-						is_restricted = true;
-						break;
-				}
+			if (enforce_restrictions) {
+				bool is_restricted = IsAugmentRestricted(item->ItemType, augtest->AugRestrict);
 
-				if(is_restricted) {
+				if (is_restricted) {
 					Message(
 						Chat::Red,
 						fmt::format(
@@ -4765,4 +4602,155 @@ int32 Bot::GetAugmentIDAt(int16 slot_id, uint8 augslot) {
 
 	// None found
 	return INVALID_ID;
+}
+
+bool Client::IsAugmentRestricted(uint8 item_type, uint32 augment_restriction)
+{
+	switch (augment_restriction) {
+		case EQ::item::AugRestrictionAny:
+			break;
+		case EQ::item::AugRestrictionArmor:
+			switch (item_type) {
+				case EQ::item::ItemTypeArmor:
+					break;
+				default:
+					return true;
+			}
+			break;
+		case EQ::item::AugRestrictionWeapons:
+			switch (item_type) {
+				case EQ::item::ItemType1HSlash:
+				case EQ::item::ItemType1HBlunt:
+				case EQ::item::ItemType1HPiercing:
+				case EQ::item::ItemTypeMartial:
+				case EQ::item::ItemType2HSlash:
+				case EQ::item::ItemType2HBlunt:
+				case EQ::item::ItemType2HPiercing:
+				case EQ::item::ItemTypeBow:
+					break;
+				default:
+					return true;
+			}
+			break;
+		case EQ::item::AugRestriction1HWeapons:
+			switch (item_type) {
+				case EQ::item::ItemType1HSlash:
+				case EQ::item::ItemType1HBlunt:
+				case EQ::item::ItemType1HPiercing:
+				case EQ::item::ItemTypeMartial:
+					break;
+				default:
+					return true;
+			}
+			break;
+		case EQ::item::AugRestriction2HWeapons:
+			switch (item_type) {
+				case EQ::item::ItemType2HSlash:
+				case EQ::item::ItemType2HBlunt:
+				case EQ::item::ItemType2HPiercing:
+				case EQ::item::ItemTypeBow:
+					break;
+				default:
+					return true;
+			}
+			break;
+		case EQ::item::AugRestriction1HSlash:
+			switch (item_type) {
+				case EQ::item::ItemType1HSlash:
+					break;
+				default:
+					return true;
+			}
+			break;
+		case EQ::item::AugRestriction1HBlunt:
+			switch (item_type) {
+				case EQ::item::ItemType1HBlunt:
+					break;
+				default:
+					return true;
+			}
+			break;
+		case EQ::item::AugRestrictionPiercing:
+			switch (item_type) {
+				case EQ::item::ItemType1HPiercing:
+					break;
+				default:
+					return true;
+			}
+			break;
+		case EQ::item::AugRestrictionHandToHand:
+			switch (item_type) {
+				case EQ::item::ItemTypeMartial:
+					break;
+				default:
+					return true;
+			}
+			break;
+		case EQ::item::AugRestriction2HSlash:
+			switch (item_type) {
+				case EQ::item::ItemType2HSlash:
+					break;
+				default:
+					return true;
+			}
+			break;
+		case EQ::item::AugRestriction2HBlunt:
+			switch (item_type) {
+				case EQ::item::ItemType2HBlunt:
+					break;
+				default:
+					return true;
+			}
+			break;
+		case EQ::item::AugRestriction2HPierce:
+			switch (item_type) {
+				case EQ::item::ItemType2HPiercing:
+					break;
+				default:
+					return true;
+			}
+			break;
+		case EQ::item::AugRestrictionBows:
+			switch (item_type) {
+				case EQ::item::ItemTypeBow:
+					break;
+				default:
+					return true;
+			}
+			break;
+		case EQ::item::AugRestrictionShields:
+			switch (item_type) {
+				case EQ::item::ItemTypeShield:
+					break;
+				default:
+					return true;
+			}
+			break;
+		case EQ::item::AugRestriction1HSlash1HBluntOrHandToHand:
+			switch (item_type) {
+				case EQ::item::ItemType1HSlash:
+				case EQ::item::ItemType1HBlunt:
+				case EQ::item::ItemTypeMartial:
+					break;
+				default:
+					return true;
+			}
+			break;
+		case EQ::item::AugRestriction1HBluntOrHandToHand:
+			switch (item_type) {
+				case EQ::item::ItemType1HBlunt:
+				case EQ::item::ItemTypeMartial:
+					break;
+				default:
+					return true;
+			}
+			break;
+		case EQ::item::AugRestrictionUnknown1:
+		case EQ::item::AugRestrictionUnknown2:
+		case EQ::item::AugRestrictionUnknown3:
+		default:
+			return true;
+	}
+
+	return false;
 }
