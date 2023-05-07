@@ -40,7 +40,7 @@ public:
 	bool IsEquipable(int race, int class_);
 	bool IsEquipable(int slot_id);
 	bool IsAugmentable();
-	int GetAugmentType();
+	uint32 GetAugmentType();
 	bool IsExpendable();
 	Lua_ItemInst GetItem(int slot);
 	Lua_Item GetItem();

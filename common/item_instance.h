@@ -108,7 +108,8 @@ namespace EQ
 		bool AvailableWearSlot(uint32 aug_wear_slots) const;
 		int8 AvailableAugmentSlot(int32 augment_type) const;
 		bool IsAugmentSlotAvailable(int32 augment_type, uint8 slot) const;
-		inline int32 GetAugmentType() const { return ((m_item) ? m_item->AugType : 0); }
+		inline uint32 GetAugmentType() const { return m_item ? m_item->AugType : 0; }
+		inline uint32 GetAugmentRestriction() const { return m_item ? m_item->AugRestrict : 0; }
 
 		inline bool IsExpendable() const { return ((m_item) ? ((m_item->Click.Type == item::ItemEffectExpendable) || (m_item->ItemType == item::ItemTypePotion)) : false); }
 

@@ -70,7 +70,7 @@ bool Lua_ItemInst::IsAugmentable() {
 	return self->IsAugmentable();
 }
 
-int Lua_ItemInst::GetAugmentType() {
+uint32 Lua_ItemInst::GetAugmentType() {
 	Lua_Safe_Call_Int();
 	return self->GetAugmentType();
 }
