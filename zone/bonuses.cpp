@@ -146,18 +146,7 @@ void Mob::CalcItemBonuses(StatBonuses* b) {
 	int16 i;
 
 	for (i = EQ::invslot::BONUS_BEGIN; i <= EQ::invslot::BONUS_SKILL_END; i++) {
-		const EQ::ItemInstance* inst = nullptr;
-		if (IsOfClientBotMerc()) {
-			inst = GetInv().GetItem(i);
-		} else {
-			const auto* item = CastToNPC()->GetItem(i);
-			if (!item) {
-				continue;
-			}
-
-			inst = database.CreateItem(item->item_id);
-		}
-
+		const EQ::ItemInstance* inst = m_inv[i];
 		if (!inst) {
 			continue;
 		}
