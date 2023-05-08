@@ -1267,6 +1267,10 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	database.LoadCharacterLeadershipAA(cid, &m_pp); /* Load Character Leadership AA's */
 	database.LoadCharacterTribute(cid, &m_pp); /* Load CharacterTribute */
 
+	// this pattern is strange
+	m_mail_key_full = database.GetMailKey(CharacterID());
+	m_mail_key      = database.GetMailKey(CharacterID(), true);
+
 	/* Load AdventureStats */
 	AdventureStats_Struct as;
 	if (database.GetAdventureStats(cid, &as))
