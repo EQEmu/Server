@@ -3113,7 +3113,7 @@ void ZoneDatabase::SaveBuffs(Client *client) {
 	}
 
 	// insert the buffs into the database
-	if (character_buffs.size() > 0) {
+	if (!character_buffs.empty()) {
 		CharacterBuffsRepository::InsertMany(database, character_buffs);
 	}
 }
