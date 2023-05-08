@@ -906,7 +906,7 @@ void Client::SetBindPoint(int bind_number, int to_zone, int to_instance, const g
 		m_pp.binds[bind_number].y = location.y;
 		m_pp.binds[bind_number].z = location.z;
 	}
-	database.SaveCharacterBindPoint(CharacterID(), m_pp.binds[bind_number], bind_number);
+	database.SaveCharacterBinds(this);
 }
 
 void Client::SetBindPoint2(int bind_number, int to_zone, int to_instance, const glm::vec4 &location)
@@ -929,7 +929,8 @@ void Client::SetBindPoint2(int bind_number, int to_zone, int to_instance, const 
 		m_pp.binds[bind_number].z = location.z;
 		m_pp.binds[bind_number].heading = location.w;
 	}
-	database.SaveCharacterBindPoint(CharacterID(), m_pp.binds[bind_number], bind_number);
+
+	database.SaveCharacterBinds(this);
 }
 
 void Client::GoToBind(uint8 bind_number) {
