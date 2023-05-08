@@ -3331,10 +3331,11 @@ void ZoneDatabase::SavePetInfo(Client *client)
 
 	// insert pet inventory into database
 	if (!inventory.empty()) {
-		CharacterPetInventoryRepository::InsertMany(database, inventory);
-
 		// Delete existing pet inventory
 		CharacterPetInventoryRepository::DeleteWhere(database, fmt::format("char_id = {}", client->CharacterID()));
+
+		// Insert new pet inventory
+		CharacterPetInventoryRepository::InsertMany(database, inventory);
 	}
 }
 
