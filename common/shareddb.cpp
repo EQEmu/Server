@@ -153,36 +153,34 @@ void SharedDatabase::SetMailKey(int CharID, int IPAddress, int MailKey)
 	}
 }
 
-std::string SharedDatabase::GetMailKey(int CharID, bool key_only)
+SharedDatabase::MailKeys SharedDatabase::GetMailKey(int character_id)
 {
-	const std::string query   = StringFormat("SELECT `mailkey` FROM `character_data` WHERE `id`='%i' LIMIT 1", CharID);
+	const std::string query   = StringFormat("SELECT `mailkey` FROM `character_data` WHERE `id`='%i' LIMIT 1", character_id);
 	auto              results = QueryDatabase(query);
 	if (!results.Success()) {
-		return std::string();
+		return MailKeys{};
 	}
 
 	if (!results.RowCount()) {
-
 		Log(Logs::General,
 			Logs::ClientLogin,
 			"Error: Mailkey for character id [%i] does not exist or could not be found",
-			CharID);
-		return {};
+			character_id
+		);
+		return MailKeys{};
 	}
 
 	auto &row = results.begin();
 	if (row != results.end()) {
 		std::string mail_key = row[0];
 
-		if (mail_key.length() > 8 && key_only) {
-			return mail_key.substr(8);
-		}
-		else {
-			return mail_key;
-		}
+		return MailKeys{
+			.mail_key = mail_key.substr(8),
+			.mail_key_full = mail_key
+		};
 	}
 
-	return {};
+	return MailKeys{};
 }
 
 bool SharedDatabase::SaveCursor(uint32 char_id, std::list<EQ::ItemInstance*>::const_iterator &start, std::list<EQ::ItemInstance*>::const_iterator &end)
