@@ -14,6 +14,9 @@
 #include "../common/repositories/character_disciplines_repository.h"
 #include "../common/repositories/npc_types_repository.h"
 #include "../common/repositories/character_bind_repository.h"
+#include "../common/repositories/character_pet_buffs_repository.h"
+#include "../common/repositories/character_pet_inventory_repository.h"
+#include "../common/repositories/character_pet_info_repository.h"
 
 #include <ctime>
 #include <iostream>
@@ -3213,72 +3216,125 @@ void ZoneDatabase::SavePetInfo(Client *client)
 {
 	PetInfo *petinfo = nullptr;
 
-	std::string query = StringFormat("DELETE FROM `character_pet_buffs` WHERE `char_id` = %u", client->CharacterID());
-	auto results = database.QueryDatabase(query);
-	if (!results.Success())
-		return;
+	// Pet Info
+	std::vector<CharacterPetInfoRepository::CharacterPetInfo> pet_infos = {};
+	CharacterPetInfoRepository::CharacterPetInfo pet_info = {};
 
-	query = StringFormat("DELETE FROM `character_pet_inventory` WHERE `char_id` = %u", client->CharacterID());
-	results = database.QueryDatabase(query);
-	if (!results.Success())
-		return;
+	// Pet buffs
+	std::vector<CharacterPetBuffsRepository::CharacterPetBuffs> pet_buffs = {};
+	CharacterPetBuffsRepository::CharacterPetBuffs pet_buff = {};
 
+	// Pet inventory
+	std::vector<CharacterPetInventoryRepository::CharacterPetInventory> inventory = {};
+	CharacterPetInventoryRepository::CharacterPetInventory item = {};
+
+	// Loop through pet types
 	for (int pet = 0; pet < 2; pet++) {
 		petinfo = client->GetPetInfo(pet);
-		if (!petinfo)
+		if (!petinfo) {
 			continue;
+		}
 
-		query = StringFormat("INSERT INTO `character_pet_info` "
-				"(`char_id`, `pet`, `petname`, `petpower`, `spell_id`, `hp`, `mana`, `size`, `taunting`) "
-				"VALUES (%u, %u, '%s', %i, %u, %u, %u, %f, %u) "
-				"ON DUPLICATE KEY UPDATE `petname` = '%s', `petpower` = %i, `spell_id` = %u, "
-				"`hp` = %u, `mana` = %u, `size` = %f, `taunting` = %u",
-				client->CharacterID(), pet, petinfo->Name, petinfo->petpower, petinfo->SpellID,
-				petinfo->HP, petinfo->Mana, petinfo->size, (petinfo->taunting) ? 1 : 0,
-				// and now the ON DUPLICATE ENTRIES
-				petinfo->Name, petinfo->petpower, petinfo->SpellID, petinfo->HP, petinfo->Mana, petinfo->size, (petinfo->taunting) ? 1 : 0);
-		results = database.QueryDatabase(query);
-		if (!results.Success())
-			return;
-		query.clear();
+		// build pet info into struct
+		pet_info.char_id  = client->CharacterID();
+		pet_info.pet      = pet;
+		pet_info.petname  = petinfo->Name;
+		pet_info.petpower = petinfo->petpower;
+		pet_info.spell_id = petinfo->SpellID;
+		pet_info.hp       = petinfo->HP;
+		pet_info.mana     = petinfo->Mana;
+		pet_info.size     = petinfo->size;
+		pet_info.taunting = (petinfo->taunting) ? 1 : 0;
 
-		// pet buffs!
+		// add pet info to vector
+		pet_infos.push_back(pet_info);
+
+		// build pet buffs into struct
+		int pet_buff_count = 0;
 		int max_slots = RuleI(Spells, MaxTotalSlotsPET);
+
+		// count pet buffs
 		for (int index = 0; index < max_slots; index++) {
 			if (!IsValidSpell(petinfo->Buffs[index].spellid)) {
 				continue;
 			}
-			if (query.length() == 0)
-				query = StringFormat("INSERT INTO `character_pet_buffs` "
-						"(`char_id`, `pet`, `slot`, `spell_id`, `caster_level`, "
-						"`ticsremaining`, `counters`, `instrument_mod`) "
-						"VALUES (%u, %u, %u, %u, %u, %d, %d, %u)",
-						client->CharacterID(), pet, index, petinfo->Buffs[index].spellid,
-						petinfo->Buffs[index].level, petinfo->Buffs[index].duration,
-						petinfo->Buffs[index].counters, petinfo->Buffs[index].bard_modifier);
-			else
-				query += StringFormat(", (%u, %u, %u, %u, %u, %d, %d, %u)",
-						client->CharacterID(), pet, index, petinfo->Buffs[index].spellid,
-						petinfo->Buffs[index].level, petinfo->Buffs[index].duration,
-						petinfo->Buffs[index].counters, petinfo->Buffs[index].bard_modifier);
+			pet_buff_count++;
 		}
-		database.QueryDatabase(query);
-		query.clear();
 
-		// pet inventory!
-		for (int index = EQ::invslot::EQUIPMENT_BEGIN; index <= EQ::invslot::EQUIPMENT_END; index++) {
-			if (!petinfo->Items[index])
+		// reserve space for pet buffs
+		pet_buffs.reserve(pet_buff_count);
+
+		// loop through pet buffs
+		for (int index = 0; index < max_slots; index++) {
+			if (!IsValidSpell(petinfo->Buffs[index].spellid)) {
 				continue;
+			}
 
-			if (query.length() == 0)
-				query = StringFormat("INSERT INTO `character_pet_inventory` "
-						"(`char_id`, `pet`, `slot`, `item_id`) "
-						"VALUES (%u, %u, %u, %u)",
-						client->CharacterID(), pet, index, petinfo->Items[index]);
-			else
-				query += StringFormat(", (%u, %u, %u, %u)", client->CharacterID(), pet, index, petinfo->Items[index]);
+			pet_buff.char_id        = client->CharacterID();
+			pet_buff.pet            = pet;
+			pet_buff.slot           = index;
+			pet_buff.spell_id       = petinfo->Buffs[index].spellid;
+			pet_buff.caster_level   = petinfo->Buffs[index].level;
+			pet_buff.ticsremaining  = petinfo->Buffs[index].duration;
+			pet_buff.counters       = petinfo->Buffs[index].counters;
+			pet_buff.instrument_mod = petinfo->Buffs[index].bard_modifier;
+
+			// add pet buffs to vector
+			pet_buffs.push_back(pet_buff);
 		}
-		database.QueryDatabase(query);
+
+		// build pet inventory into struct
+		int pet_inventory_count = 0;
+		for (int index = EQ::invslot::EQUIPMENT_BEGIN; index <= EQ::invslot::EQUIPMENT_END; index++) {
+			if (!petinfo->Items[index]) {
+				continue;
+			}
+			pet_inventory_count++;
+		}
+
+		// reserve space for pet inventory
+		inventory.reserve(pet_inventory_count);
+
+		// loop through pet inventory
+		for (int index = EQ::invslot::EQUIPMENT_BEGIN; index <= EQ::invslot::EQUIPMENT_END; index++) {
+			if (!petinfo->Items[index]) {
+				continue;
+			}
+
+			item.char_id = client->CharacterID();
+			item.pet     = pet;
+			item.slot    = index;
+			item.item_id = petinfo->Items[index];
+
+			// add pet inventory to vector
+			inventory.push_back(item);
+		}
+	}
+
+	// insert pet info into database
+	if (!pet_infos.empty()) {
+		// Delete existing pet info
+		CharacterPetInfoRepository::DeleteWhere(database, fmt::format("char_id = {}", client->CharacterID()));
+
+		// Insert new pet info
+		CharacterPetInfoRepository::InsertMany(database, pet_infos);
+	}
+
+	// insert pet buffs into database
+	if (!pet_buffs.empty()) {
+		// Delete existing pet buffs
+		CharacterPetBuffsRepository::DeleteWhere(database, fmt::format("char_id = {}", client->CharacterID()));
+
+		// Insert new pet buffs
+		CharacterPetBuffsRepository::InsertMany(database, pet_buffs);
+	}
+
+	// insert pet inventory into database
+	if (!inventory.empty()) {
+		CharacterPetInventoryRepository::InsertMany(database, inventory);
+
+		// Delete existing pet inventory
+		CharacterPetInventoryRepository::DeleteWhere(database, fmt::format("char_id = {}", client->CharacterID()));
 	}
 }
 
