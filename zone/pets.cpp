@@ -406,21 +406,22 @@ bool ZoneDatabase::GetPoweredPetEntry(const char *pet_type, int16 petpower, PetR
 }
 
 Mob* Mob::GetPet() {
-	if(GetPetID() == 0)
-		return(nullptr);
-
-	Mob* tmp = entity_list.GetMob(GetPetID());
-	if(tmp == nullptr) {
-		SetPetID(0);
-		return(nullptr);
+	if (!GetPetID()) {
+		return nullptr;
 	}
 
-	if(tmp->GetOwnerID() != GetID()) {
+	const auto m = entity_list.GetMob(GetPetID());
+	if (!m) {
 		SetPetID(0);
-		return(nullptr);
+		return nullptr;
 	}
 
-	return(tmp);
+	if (m->GetOwnerID() != GetID()) {
+		SetPetID(0);
+		return nullptr;
+	}
+
+	return m;
 }
 
 bool Mob::HasPet() const {
