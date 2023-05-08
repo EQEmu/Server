@@ -890,22 +890,27 @@ void NPC::Gate(uint8 bind_number) {
 
 void Client::SetBindPoint(int bind_number, int to_zone, int to_instance, const glm::vec3 &location)
 {
-	if (bind_number < 0 || bind_number >= 4)
+	if (bind_number < 0 || bind_number >= 4) {
 		bind_number = 0;
+	}
 
 	if (to_zone == -1) {
-		m_pp.binds[bind_number].zone_id = zone->GetZoneID();
-		m_pp.binds[bind_number].instance_id = (zone->GetInstanceID() != 0 && zone->IsInstancePersistent()) ? zone->GetInstanceID() : 0;
-		m_pp.binds[bind_number].x = m_Position.x;
-		m_pp.binds[bind_number].y = m_Position.y;
-		m_pp.binds[bind_number].z = m_Position.z;
-	} else {
-		m_pp.binds[bind_number].zone_id = to_zone;
-		m_pp.binds[bind_number].instance_id = to_instance;
-		m_pp.binds[bind_number].x = location.x;
-		m_pp.binds[bind_number].y = location.y;
-		m_pp.binds[bind_number].z = location.z;
+		m_pp.binds[bind_number].zone_id     = zone->GetZoneID();
+		m_pp.binds[bind_number].instance_id = (zone->GetInstanceID() != 0 && zone->IsInstancePersistent())? zone->GetInstanceID() : 0;
+		m_pp.binds[bind_number].x           = m_Position.x;
+		m_pp.binds[bind_number].y           = m_Position.y;
+		m_pp.binds[bind_number].z           = m_Position.z;
+		m_pp.binds[bind_number].heading     = GetHeading();
 	}
+	else {
+		m_pp.binds[bind_number].zone_id     = to_zone;
+		m_pp.binds[bind_number].instance_id = to_instance;
+		m_pp.binds[bind_number].x           = location.x;
+		m_pp.binds[bind_number].y           = location.y;
+		m_pp.binds[bind_number].z           = location.z;
+		m_pp.binds[bind_number].heading     = GetHeading();
+	}
+
 	database.SaveCharacterBinds(this);
 }
 
