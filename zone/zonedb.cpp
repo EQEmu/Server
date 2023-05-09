@@ -17,6 +17,7 @@
 #include "../common/repositories/character_pet_buffs_repository.h"
 #include "../common/repositories/character_pet_inventory_repository.h"
 #include "../common/repositories/character_pet_info_repository.h"
+#include "../common/repositories/character_buffs_repository.h"
 
 #include <ctime>
 #include <iostream>
@@ -3058,29 +3059,62 @@ void ZoneDatabase::UpdateAltCurrencyValue(uint32 char_id, uint32 currency_id, ui
 
 void ZoneDatabase::SaveBuffs(Client *client) {
 
-	std::string query = StringFormat("DELETE FROM `character_buffs` WHERE `character_id` = '%u'", client->CharacterID());
-	database.QueryDatabase(query);
+	// delete the character buffs
+	CharacterBuffsRepository::DeleteWhere(database, fmt::format("character_id = {}", client->CharacterID()));
 
+	// get the character buffs
 	uint32 buff_count = client->GetMaxBuffSlots();
 	Buffs_Struct *buffs = client->GetBuffs();
+
+	// character buffs struct
+	auto b = CharacterBuffsRepository::NewEntity();
+
+	// vector of character buffs
+	std::vector<CharacterBuffsRepository::CharacterBuffs> character_buffs = {};
+
+	// count the number of buffs that are valid
+	int character_buff_count = 0;
+	for (int index = 0; index < buff_count; index++) {
+		if (!IsValidSpell(buffs[index].spellid)) {
+			continue;
+		}
+		character_buff_count++;
+	}
+
+	// allocate memory for the character buffs
+	character_buffs.reserve(character_buff_count);
 
 	for (int index = 0; index < buff_count; index++) {
 		if (!IsValidSpell(buffs[index].spellid)) {
 			continue;
 		}
 
-		query = StringFormat("INSERT INTO `character_buffs` (character_id, slot_id, spell_id, "
-                            "caster_level, caster_name, ticsremaining, counters, numhits, melee_rune, "
-                            "magic_rune, persistent, dot_rune, caston_x, caston_y, caston_z, ExtraDIChance, "
-							"instrument_mod) "
-                            "VALUES('%u', '%u', '%u', '%u', '%s', '%d', '%u', '%u', '%u', '%u', '%u', '%u', "
-                            "'%i', '%i', '%i', '%i', '%i')", client->CharacterID(), index, buffs[index].spellid,
-                            buffs[index].casterlevel, buffs[index].caster_name, buffs[index].ticsremaining,
-                            buffs[index].counters, buffs[index].hit_number, buffs[index].melee_rune,
-                            buffs[index].magic_rune, buffs[index].persistant_buff, buffs[index].dot_rune,
-                            buffs[index].caston_x, buffs[index].caston_y, buffs[index].caston_z,
-                            buffs[index].ExtraDIChance, buffs[index].instrument_mod);
-       QueryDatabase(query);
+		// fill in the buff struct
+		b.character_id   = client->CharacterID();
+		b.slot_id        = index;
+		b.spell_id       = buffs[index].spellid;
+		b.caster_level   = buffs[index].casterlevel;
+		b.caster_name    = buffs[index].caster_name;
+		b.ticsremaining  = buffs[index].ticsremaining;
+		b.counters       = buffs[index].counters;
+		b.numhits        = buffs[index].hit_number;
+		b.melee_rune     = buffs[index].melee_rune;
+		b.magic_rune     = buffs[index].magic_rune;
+		b.persistent     = buffs[index].persistant_buff;
+		b.dot_rune       = buffs[index].dot_rune;
+		b.caston_x       = buffs[index].caston_x;
+		b.caston_y       = buffs[index].caston_y;
+		b.caston_z       = buffs[index].caston_z;
+		b.ExtraDIChance  = buffs[index].ExtraDIChance;
+		b.instrument_mod = buffs[index].instrument_mod;
+
+		// add the buff to the vector
+		character_buffs.emplace_back(b);
+	}
+
+	// insert the buffs into the database
+	if (!character_buffs.empty()) {
+		CharacterBuffsRepository::InsertMany(database, character_buffs);
 	}
 }
 
