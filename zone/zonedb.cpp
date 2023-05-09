@@ -13,6 +13,7 @@
 #include "aura.h"
 #include "../common/repositories/character_disciplines_repository.h"
 #include "../common/repositories/npc_types_repository.h"
+#include "../common/repositories/character_bind_repository.h"
 
 #include <ctime>
 #include <iostream>
@@ -1027,25 +1028,6 @@ bool ZoneDatabase::LoadCharacterBindPoint(uint32 character_id, PlayerProfile_Str
 bool ZoneDatabase::SaveCharacterLanguage(uint32 character_id, uint32 lang_id, uint32 value){
 	std::string query = StringFormat("REPLACE INTO `character_languages` (id, lang_id, value) VALUES (%u, %u, %u)", character_id, lang_id, value); QueryDatabase(query);
 	LogDebug("ZoneDatabase::SaveCharacterLanguage for character ID: [{}], lang_id:[{}] value:[{}] done", character_id, lang_id, value);
-	return true;
-}
-
-bool ZoneDatabase::SaveCharacterBindPoint(uint32 character_id, const BindStruct &bind, uint32 bind_num)
-{
-	/* Save Home Bind Point */
-	std::string query =
-	    StringFormat("REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, slot) VALUES (%u, "
-			 "%u, %u, %f, %f, %f, %f, %i)",
-			 character_id, bind.zone_id, bind.instance_id, bind.x, bind.y, bind.z, bind.heading, bind_num);
-
-	LogDebug("ZoneDatabase::SaveCharacterBindPoint for character ID: [{}] zone_id: [{}] instance_id: [{}] position: [{}] [{}] [{}] [{}] bind_num: [{}]",
-		character_id, bind.zone_id, bind.instance_id, bind.x, bind.y, bind.z, bind.heading, bind_num);
-
-	auto results = QueryDatabase(query);
-	if (!results.RowsAffected())
-		LogDebug("ERROR Bind Home Save: [{}]. [{}]", results.ErrorMessage().c_str(),
-			query.c_str());
-
 	return true;
 }
 
@@ -4516,5 +4498,54 @@ void ZoneDatabase::UpdateGMStatus(uint32 accID, int newStatus)
 			accID
 		);
 		database.QueryDatabase(query);
+	}
+}
+
+void ZoneDatabase::SaveCharacterBinds(Client *c)
+{
+	// bulk save character binds
+	std::vector<CharacterBindRepository::CharacterBind> binds = {};
+	CharacterBindRepository::CharacterBind bind = {};
+
+	// count character binds
+	int bind_count = 0;
+	for (auto & b : c->GetPP().binds) {
+		if (b.zone_id) {
+			bind_count++;
+		}
+	}
+
+	LogInfo("bind count is [{}]", bind_count);
+
+	// allocate memory for binds
+	binds.reserve(bind_count);
+
+	// copy binds to vector
+	int i = 0;
+	for (auto &b: c->GetPP().binds) {
+		if (b.zone_id) {
+			// copy bind data
+			bind.id          = c->CharacterID();
+			bind.zone_id     = b.zone_id;
+			bind.instance_id = b.instance_id;
+			bind.x           = b.x;
+			bind.y           = b.y;
+			bind.z           = b.z;
+			bind.heading     = b.heading;
+			bind.slot        = i;
+
+			// add bind to vector
+			binds.emplace_back(bind);
+
+			i++;
+		}
+	}
+
+	// save binds
+	if (bind_count > 0) {
+		// delete old binds
+		CharacterBindRepository::DeleteWhere(database, fmt::format("id = {}", c->CharacterID()));
+		// save new binds
+		CharacterBindRepository::InsertMany(database, binds);
 	}
 }
