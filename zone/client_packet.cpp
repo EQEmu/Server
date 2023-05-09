@@ -1267,6 +1267,12 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	database.LoadCharacterLeadershipAA(cid, &m_pp); /* Load Character Leadership AA's */
 	database.LoadCharacterTribute(cid, &m_pp); /* Load CharacterTribute */
 
+	// this pattern is strange
+	// this is remnants of the old way of doing things
+	auto mail_keys = database.GetMailKey(CharacterID());
+	m_mail_key_full = mail_keys.mail_key_full;
+	m_mail_key      = mail_keys.mail_key;
+
 	/* Load AdventureStats */
 	AdventureStats_Struct as;
 	if (database.GetAdventureStats(cid, &as))
@@ -11677,7 +11683,7 @@ void Client::Handle_OP_QueryUCSServerStatus(const EQApplicationPacket *app)
 		EQApplicationPacket* outapp = nullptr;
 		std::string buffer;
 
-		std::string MailKey = database.GetMailKey(CharacterID(), true);
+		std::string MailKey = GetMailKey();
 		EQ::versions::UCSVersion ConnectionType = EQ::versions::ucsUnknown;
 
 		// chat server packet

@@ -133,55 +133,54 @@ uint32 SharedDatabase::GetTotalTimeEntitledOnAccount(uint32 AccountID) {
 
 void SharedDatabase::SetMailKey(int CharID, int IPAddress, int MailKey)
 {
-	char MailKeyString[17];
+	char mail_key[17];
 
-	if (RuleB(Chat, EnableMailKeyIPVerification) == true)
-		sprintf(MailKeyString, "%08X%08X", IPAddress, MailKey);
-	else
-		sprintf(MailKeyString, "%08X", MailKey);
+	if (RuleB(Chat, EnableMailKeyIPVerification) == true) {
+		sprintf(mail_key, "%08X%08X", IPAddress, MailKey);
+	}
+	else {
+		sprintf(mail_key, "%08X", MailKey);
+	}
 
-	const std::string query = StringFormat("UPDATE character_data SET mailkey = '%s' WHERE id = '%i'",
-	                                       MailKeyString, CharID);
-	const auto results = QueryDatabase(query);
-	if (!results.Success())
-		LogError("SharedDatabase::SetMailKey({}, {}) : {}", CharID, MailKeyString, results.ErrorMessage().c_str());
+	const std::string query = StringFormat(
+		"UPDATE character_data SET mailkey = '%s' WHERE id = '%i'",
+		mail_key, CharID
+	);
 
+	const auto        results = QueryDatabase(query);
+	if (!results.Success()) {
+		LogError("SharedDatabase::SetMailKey({}, {}) : {}", CharID, mail_key, results.ErrorMessage().c_str());
+	}
 }
 
-std::string SharedDatabase::GetMailKey(int CharID, bool key_only)
+SharedDatabase::MailKeys SharedDatabase::GetMailKey(int character_id)
 {
-	const std::string query = StringFormat("SELECT `mailkey` FROM `character_data` WHERE `id`='%i' LIMIT 1", CharID);
-	auto results = QueryDatabase(query);
-
+	const std::string query   = StringFormat("SELECT `mailkey` FROM `character_data` WHERE `id`='%i' LIMIT 1", character_id);
+	auto              results = QueryDatabase(query);
 	if (!results.Success()) {
-
-		Log(Logs::Detail, Logs::MySQLError, "Error retrieving mailkey from database: %s", results.ErrorMessage().c_str());
-		return std::string();
+		return MailKeys{};
 	}
 
 	if (!results.RowCount()) {
-
-		Log(Logs::General, Logs::ClientLogin, "Error: Mailkey for character id [%i] does not exist or could not be found", CharID);
-		return std::string();
+		Log(Logs::General,
+			Logs::ClientLogin,
+			"Error: Mailkey for character id [%i] does not exist or could not be found",
+			character_id
+		);
+		return MailKeys{};
 	}
 
-	auto& row = results.begin();
+	auto &row = results.begin();
 	if (row != results.end()) {
-
 		std::string mail_key = row[0];
 
-		if (mail_key.length() > 8 && key_only) {
-			return mail_key.substr(8);
-		}
-		else {
-			return mail_key;
-		}
+		return MailKeys{
+			.mail_key = mail_key.substr(8),
+			.mail_key_full = mail_key
+		};
 	}
-	else {
 
-		Log(Logs::General, Logs::MySQLError, "Internal MySQL error in SharedDatabase::GetMailKey(int, bool)");
-		return std::string();
-	}
+	return MailKeys{};
 }
 
 bool SharedDatabase::SaveCursor(uint32 char_id, std::list<EQ::ItemInstance*>::const_iterator &start, std::list<EQ::ItemInstance*>::const_iterator &end)

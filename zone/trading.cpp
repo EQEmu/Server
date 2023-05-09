@@ -3018,3 +3018,13 @@ void Client::BuyerItemSearch(const EQApplicationPacket *app) {
 	QueuePacket(outapp);
 	safe_delete(outapp);
 }
+
+const std::string &Client::GetMailKeyFull() const
+{
+	return m_mail_key_full;
+}
+
+const std::string &Client::GetMailKey() const
+{
+	return m_mail_key;
+}

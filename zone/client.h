@@ -2038,6 +2038,13 @@ private:
 	bool CanTradeFVNoDropItem();
 	void SendMobPositions();
 	void PlayerTradeEventLog(Trade *t, Trade *t2);
+
+	// full and partial mail key cache
+	std::string m_mail_key_full;
+	std::string m_mail_key;
+public:
+	const std::string &GetMailKeyFull() const;
+	const std::string &GetMailKey() const;
 };
 
 #endif

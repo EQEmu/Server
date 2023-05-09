@@ -11238,7 +11238,7 @@ void Client::ReconnectUCS()
 {
 	EQApplicationPacket      *outapp         = nullptr;
 	std::string              buffer;
-	std::string              mail_key        = database.GetMailKey(CharacterID(), true);
+	std::string              mail_key        = m_mail_key;
 	EQ::versions::UCSVersion connection_type = EQ::versions::ucsUnknown;
 
 	// chat server packet
