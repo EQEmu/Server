@@ -304,7 +304,7 @@ struct CharacterCorpseItemEntry
 	uint32 ornament_hero_model;
 };
 
-struct CharacterCorpseEntry 
+struct CharacterCorpseEntry
 {
 	bool locked;
 	uint32 exp;
@@ -442,7 +442,6 @@ public:
 	bool LoadCharacterPotions(uint32 character_id, PlayerProfile_Struct* pp);
 	bool LoadCharacterSkills(uint32 character_id, PlayerProfile_Struct* pp);
 	bool LoadCharacterSpellBook(uint32 character_id, PlayerProfile_Struct* pp);
-	bool LoadCharacterTribute(uint32 character_id, PlayerProfile_Struct* pp);
 
 	bool SaveCharacterAA(uint32 character_id, uint32 aa_id, uint32 current_level, uint32 charges);
 	bool SaveCharacterBandolier(uint32 character_id, uint8 bandolier_id, uint8 bandolier_slot, uint32 item_id, uint32 icon, const char* bandolier_name);
@@ -457,7 +456,6 @@ public:
 	bool SaveCharacterPotionBelt(uint32 character_id, uint8 potion_id, uint32 item_id, uint32 icon);
 	bool SaveCharacterSkill(uint32 character_id, uint32 skill_id, uint32 value);
 	bool SaveCharacterSpell(uint32 character_id, uint32 spell_id, uint32 slot_id);
-	bool SaveCharacterTribute(uint32 character_id, PlayerProfile_Struct* pp);
 
 	double GetAAEXPModifier(uint32 character_id, uint32 zone_id, int16 instance_version = -1) const;
 	double GetEXPModifier(uint32 character_id, uint32 zone_id, int16 instance_version = -1) const;
@@ -665,6 +663,9 @@ public:
 
 	// bot database add-on to eliminate the need for a second database connection
 	BotDatabase botdb;
+
+	static void LoadCharacterTribute(Client* c);
+	static void SaveCharacterTribute(Client* c);
 
 protected:
 	void ZDBInitVars();

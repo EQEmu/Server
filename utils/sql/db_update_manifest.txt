@@ -481,6 +481,7 @@
 9225|2023_01_21_bots_raid_members.sql|SHOW COLUMNS FROM `raid_members` LIKE 'bot_id'|empty|
 9226|2023_03_17_corpse_fields.sql|SHOW COLUMNS FROM `character_corpse_items` LIKE 'custom_data'|empty|
 9227|2023_03_24_npc_scale_global_base_verify.sql|SHOW COLUMNS FROM `npc_scale_global_base` LIKE 'heroic_strikethrough'|not_empty|
+9228|2023_05_08_character_tribute_primary_key.sql|SHOW COLUMNS FROM `character_tribute` LIKE 'character_id'|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not
