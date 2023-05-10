@@ -445,7 +445,6 @@ public:
 
 	bool SaveCharacterAA(uint32 character_id, uint32 aa_id, uint32 current_level, uint32 charges);
 	bool SaveCharacterBandolier(uint32 character_id, uint8 bandolier_id, uint8 bandolier_slot, uint32 item_id, uint32 icon, const char* bandolier_name);
-	bool SaveCharacterBindPoint(uint32 character_id, const BindStruct &bind, uint32 bind_number);
 	bool SaveCharacterCurrency(uint32 character_id, PlayerProfile_Struct* pp);
 	bool SaveCharacterData(Client* c, PlayerProfile_Struct* pp, ExtendedProfile_Struct* m_epp);
 	bool SaveCharacterDisc(uint32 character_id, uint32 slot_id, uint32 disc_id);
@@ -665,8 +664,9 @@ public:
 	BotDatabase botdb;
 
 	static void LoadCharacterTribute(Client* c);
-	static void SaveCharacterTribute(Client* c);
 
+	static void SaveCharacterBinds(Client *c);
+	static void SaveCharacterTribute(Client* c);
 protected:
 	void ZDBInitVars();
 

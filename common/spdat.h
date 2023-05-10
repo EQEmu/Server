@@ -201,6 +201,11 @@
 #define INSTRUMENT_LUTE 13011
 #define INSTRUMENT_HORN 13012
 
+//option types for the rule Spells:ResurrectionEffectBlock
+#define NO_RES_EFFECTS_BLOCK 0
+#define RES_EFFECTS_BLOCK 1
+#define RES_EFFECTS_BLOCK_WITH_BUFFS 2
+#define MOVE_NEW_SLOT 2
 
 const int Z_AGGRO=10;
 
@@ -1505,6 +1510,7 @@ bool IsDisciplineBuff(uint16 spell_id);
 bool IsDiscipline(uint16 spell_id);
 bool IsCombatSkill(uint16 spell_id);
 bool IsResurrectionEffects(uint16 spell_id);
+int8 GetResurrectionSicknessCheck(uint16 spell_id1, uint16 spell_id2);
 bool IsRuneSpell(uint16 spell_id);
 bool IsMagicRuneSpell(uint16 spell_id);
 bool IsManaTapSpell(uint16 spell_id);
