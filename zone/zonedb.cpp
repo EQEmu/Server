@@ -970,7 +970,7 @@ void ZoneDatabase::LoadCharacterTribute(Client* c){
 	auto i = 0;
 
 	for (const auto& e : l) {
-		if (e.tribute != TRIBUTE_NONE){
+		if (e.tribute != TRIBUTE_NONE) {
 			c->GetPP().tributes[i].tier    = e.tier;
 			c->GetPP().tributes[i].tribute = e.tribute;
 			i++;
