@@ -629,6 +629,7 @@ bool IsINTCasterClass(uint8 class_id)
 			return false;
 	}
 }
+
 bool IsHeroicINTCasterClass(uint8 class_id)
 {
 	switch (class_id) {
@@ -654,6 +655,7 @@ bool IsWISCasterClass(uint8 class_id)
 			return false;
 	}
 }
+
 bool IsHeroicWISCasterClass(uint8 class_id)
 {
 	switch (class_id) {
@@ -668,6 +670,7 @@ bool IsHeroicWISCasterClass(uint8 class_id)
 		return false;
 	}
 }
+
 bool IsPlateClass(uint8 class_id)
 {
 	switch (class_id) {
