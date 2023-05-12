@@ -140,7 +140,8 @@ bool IsHybridClass(uint8 class_id);
 bool IsCasterClass(uint8 class_id);
 bool IsINTCasterClass(uint8 class_id);
 bool IsWISCasterClass(uint8 class_id);
-
+bool IsHeroicINTCasterClass(uint8 class_id);
+bool IsHeroicWISCasterClass(uint8 class_id);
 bool IsPlateClass(uint8 class_id);
 bool IsChainClass(uint8 class_id);
 bool IsLeatherClass(uint8 class_id);
