@@ -633,14 +633,14 @@ bool IsINTCasterClass(uint8 class_id)
 bool IsHeroicINTCasterClass(uint8 class_id)
 {
 	switch (class_id) {
-	case NECROMANCER:
-	case WIZARD:
-	case MAGICIAN:
-	case ENCHANTER:
-	case SHADOWKNIGHT:
-		return true;
-	default:
-		return false;
+		case NECROMANCER:
+		case WIZARD:
+		case MAGICIAN:
+		case ENCHANTER:
+		case SHADOWKNIGHT:
+			return true;
+		default:
+			return false;
 	}
 }
 
@@ -659,15 +659,15 @@ bool IsWISCasterClass(uint8 class_id)
 bool IsHeroicWISCasterClass(uint8 class_id)
 {
 	switch (class_id) {
-	case CLERIC:
-	case DRUID:
-	case SHAMAN:
-	case PALADIN:
-	case BEASTLORD:
-	case RANGER:
-		return true;
-	default:
-		return false;
+		case CLERIC:
+		case DRUID:
+		case SHAMAN:
+		case PALADIN:
+		case BEASTLORD:
+		case RANGER:
+			return true;
+		default:
+			return false;
 	}
 }
 
