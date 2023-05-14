@@ -428,7 +428,6 @@ public:
 
 	void	QueueClientsByXTarget(Mob* sender, const EQApplicationPacket* app, bool iSendToSender = true, EQ::versions::ClientVersionBitmask client_version_bits = EQ::versions::ClientVersionBitmask::maskAllClients);
 	void	QueueToGroupsForNPCHealthAA(Mob* sender, const EQApplicationPacket* app);
-	void	QueueManaged(Mob* sender, const EQApplicationPacket* app, bool ignore_sender=false, bool ackreq = true);
 
 	void AEAttack(
 		Mob *attacker,
@@ -455,13 +454,11 @@ public:
 	Trap*	FindNearbyTrap(Mob* searcher, float max_dist, float &curdist, bool detected = false);
 
 	void	AddHealAggro(Mob* target, Mob* caster, uint16 hate);
-	Mob*	FindDefenseNPC(uint32 npcid);
 	void	OpenDoorsNear(Mob* opener);
 	void	UpdateWho(bool iSendFullUpdate = false);
 	char*	MakeNameUnique(char* name);
 	static char* RemoveNumbers(char* name);
 	void	SignalMobsByNPCID(uint32 npc_type, int signal_id);
-	void	CountNPC(uint32* NPCCount, uint32* NPCLootCount, uint32* gmspawntype_count);
 	void	RemoveEntity(uint16 id);
 	void	SendPetitionToAdmins(Petition* pet);
 	void	SendPetitionToAdmins();
