@@ -228,7 +228,6 @@ SET(zone_headers
     lua_stat_bonuses.h
     map.h
     masterentity.h
-    message.h
     merc.h
     mob.h
     mob_movement_manager.h
