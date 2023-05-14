@@ -126,7 +126,7 @@ public:
 		LogQuestErrors("{}", Strings::Trim(error));
 
 		errors_.push_back(error);
-		if(errors_.size() > 30) {
+		if (errors_.size() > RuleI(World, MaximumQuestErrors)) {
 			errors_.pop_front();
 		}
 	}
