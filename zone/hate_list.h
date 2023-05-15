@@ -85,7 +85,6 @@ public:
 		bool add_to_hate_list_if_not_exist = true
 	);
 	void DoFactionHits(int64 npc_faction_level_id, int32 faction_id, int32 faction_value);
-	void IsEntityInFrenzyMode();
 	void PrintHateListToClient(Client *c);
 	void SetHateAmountOnEnt(Mob *other, int64 in_hate, uint64 in_damage);
 	void SetHateOwner(Mob *new_hate_owner) { hate_owner = new_hate_owner; }
