@@ -71,13 +71,3 @@ float CombatRecord::GetHealedReceivedPerSecond() const
 	double time_in_combat = TimeInCombat();
 	return time_in_combat > 0 ? (m_heal_received / time_in_combat) : m_heal_received;
 }
-
-int64 CombatRecord::GetDamageReceived() const
-{
-	return m_damage_received;
-}
-
-int64 CombatRecord::GetHealReceived() const
-{
-	return m_heal_received;
-}
