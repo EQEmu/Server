@@ -296,7 +296,6 @@ public:
 	void RequestUCSServerStatus();
 	void ResetAuth();
 	void SetDate(uint16 year, uint8 month, uint8 day, uint8 hour, uint8 minute);
-	void SetGraveyard(uint32 zoneid, const glm::vec4 &graveyardPosition);
 	void SetInstanceTimer(uint32 new_duration);
 	void SetStaticZone(bool sz) { staticzone = sz; }
 	void SetTime(uint8 hour, uint8 minute, bool update_world = true);
