@@ -227,6 +227,7 @@ public:
 	Lua_Client GetHateRandomClient();
 	Lua_NPC GetHateRandomNPC();
 	Lua_Mob GetHateClosest();
+	Lua_Mob GetHateClosestClient();
 	void AddToHateList(Lua_Mob other);
 	void AddToHateList(Lua_Mob other, int64 hate);
 	void AddToHateList(Lua_Mob other, int64 hate, int64 damage);

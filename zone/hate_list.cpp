@@ -180,6 +180,34 @@ Mob* HateList::GetClosestEntOnHateList(Mob *hater, bool skip_mezzed) {
 
 	return close_entity;
 }
+Mob* HateList::GetClosestClientOnHateList(Mob* hater, bool skip_mezzed) {
+	Mob* close_entity = nullptr;
+	float close_distance = 99999.9f;
+	float this_distance;
+
+	auto iterator = list.begin();
+	while (iterator != list.end()) {
+		if (skip_mezzed && (*iterator)->entity_on_hatelist->IsMezzed()) {
+			++iterator;
+			continue;
+		}
+		if (!(*iterator)->entity_on_hatelist->IsClient()) {
+			++iterator;
+			continue;
+		}
+		this_distance = DistanceSquaredNoZ((*iterator)->entity_on_hatelist->GetPosition(), hater->GetPosition());
+		if ((*iterator)->entity_on_hatelist != nullptr && this_distance <= close_distance) {
+			close_distance = this_distance;
+			close_entity = (*iterator)->entity_on_hatelist;
+		}
+		++iterator;
+	}
+
+	if ((!close_entity && hater->IsNPC()) || (close_entity && close_entity->DivineAura()))
+		close_entity = hater->CastToNPC()->GetHateTop();
+
+	return close_entity;
+}
 
 void HateList::AddEntToHateList(Mob *in_entity, int64 in_hate, int64 in_damage, bool in_is_entity_frenzied, bool iAddIfNotExist)
 {

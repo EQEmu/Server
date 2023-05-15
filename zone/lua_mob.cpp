@@ -2376,6 +2376,10 @@ Lua_Mob Lua_Mob::GetHateClosest() {
 	return Lua_Mob(self->GetHateClosest());
 }
 
+Lua_Mob Lua_Mob::GetHateClosestClient() {
+	Lua_Safe_Call_Class(Lua_Mob);
+	return Lua_Mob(self->GetHateClosestClient());
+}
 Lua_HateList Lua_Mob::GetHateListByDistance() {
 	Lua_Safe_Call_Class(Lua_HateList);
 	Lua_HateList ret;
@@ -3254,6 +3258,7 @@ luabind::scope lua_register_mob() {
 	.def("GetHateAmount", (int64(Lua_Mob::*)(Lua_Mob))&Lua_Mob::GetHateAmount)
 	.def("GetHateAmount", (int64(Lua_Mob::*)(Lua_Mob,bool))&Lua_Mob::GetHateAmount)
 	.def("GetHateClosest", &Lua_Mob::GetHateClosest)
+	.def("GetHateClosestClient", &Lua_Mob::GetHateClosestClient)
 	.def("GetHateDamageTop", (Lua_Mob(Lua_Mob::*)(Lua_Mob))&Lua_Mob::GetHateDamageTop)
 	.def("GetHateList", &Lua_Mob::GetHateList)
 	.def("GetHateListBots", (Lua_HateList(Lua_Mob::*)(void))&Lua_Mob::GetHateListBots)

@@ -2436,6 +2436,10 @@ Mob* Perl_Mob_GetHateClosest(Mob* self) // @categories Hate and Aggro
 {
 	return self->GetHateClosest();
 }
+Mob* Perl_Mob_GetHateClosestClient(Mob* self) // @categories Hate and Aggro
+{
+	return self->GetHateClosestClient();
+}
 
 std::string Perl_Mob_GetLastName(Mob* self) // @categories Script Utility
 {
@@ -3194,6 +3198,7 @@ void perl_register_mob()
 	package.add("GetHateAmount", (int64_t(*)(Mob*, Mob*))&Perl_Mob_GetHateAmount);
 	package.add("GetHateAmount", (int64_t(*)(Mob*, Mob*, bool))&Perl_Mob_GetHateAmount);
 	package.add("GetHateClosest", &Perl_Mob_GetHateClosest);
+	package.add("GetHateClosestClient", &Perl_Mob_GetHateClosestClient);
 	package.add("GetHateDamageTop", &Perl_Mob_GetHateDamageTop);
 	package.add("GetHateList", &Perl_Mob_GetHateList);
 	package.add("GetHateListBots", (perl::array(*)(Mob*))&Perl_Mob_GetHateListBots);
