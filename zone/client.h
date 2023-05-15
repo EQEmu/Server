@@ -307,7 +307,6 @@ public:
 	void ReturnTraderReq(const EQApplicationPacket* app,int16 traderitemcharges, uint32 itemid = 0);
 	void TradeRequestFailed(const EQApplicationPacket* app);
 	void BuyTraderItem(TraderBuy_Struct* tbs,Client* trader,const EQApplicationPacket* app);
-	void TraderUpdate(uint16 slot_id,uint32 trader_id);
 	void FinishTrade(Mob* with, bool finalizer = false, void* event_entry = nullptr, std::list<void*>* event_details = nullptr);
 	void SendZonePoints();
 
