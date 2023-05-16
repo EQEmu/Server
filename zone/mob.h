@@ -733,9 +733,9 @@ public:
 	Bot* GetHateRandomBot() { return hate_list.GetRandomBotOnHateList(); }
 	Mob* GetHateMost() { return hate_list.GetEntWithMostHateOnList();}
 	Mob* GetHateClosest(bool skip_mezzed = false) { return hate_list.GetClosestEntOnHateList(this); }
-	Bot* GetHateClosestBot(bool skip_mezzed = false) { return hate_list.GetClosestEntOnHateList(this, skip_mezzed, EntityFilterType::Bot)->CastToBot(); }
-	Client* GetHateClosestClient(bool skip_mezzed = false) { return hate_list.GetClosestEntOnHateList(this, skip_mezzed, EntityFilterType::Client)->CastToClient(); }
-	NPC* GetHateClosestNPC(bool skip_mezzed = false) { return hate_list.GetClosestEntOnHateList(this, skip_mezzed, EntityFilterType::NPC)->CastToNPC(); }
+	Bot* GetHateClosestBot(bool skip_mezzed = false) { return hate_list.GetClosestEntOnHateList(this, skip_mezzed, EntityFilterType::Bots)->CastToBot(); }
+	Client* GetHateClosestClient(bool skip_mezzed = false) { return hate_list.GetClosestEntOnHateList(this, skip_mezzed, EntityFilterType::Clients)->CastToClient(); }
+	NPC* GetHateClosestNPC(bool skip_mezzed = false) { return hate_list.GetClosestEntOnHateList(this, skip_mezzed, EntityFilterType::NPCs)->CastToNPC(); }
 	bool IsEngaged() { return(!hate_list.IsHateListEmpty()); }
 	bool HasPrimaryAggro() { return PrimaryAggro; }
 	bool HasAssistAggro() { return AssistAggro; }

@@ -170,17 +170,17 @@ Mob* HateList::GetClosestEntOnHateList(Mob *hater, bool skip_mezzed, EntityFilte
 		}
 
 		switch (entity_type) {
-			case EntityFilterType::Bot:
+			case EntityFilterType::Bots:
 				if (!e->entity_on_hatelist->IsBot()) {
 					continue;
 				}
 				break;
-			case EntityFilterType::Client:
+			case EntityFilterType::Clients:
 				if (!e->entity_on_hatelist->IsClient()) {
 					continue;
 				}
 				break;
-			case EntityFilterType::NPC:
+			case EntityFilterType::NPCs:
 				if (!e->entity_on_hatelist->IsNPC()) {
 					continue;
 				}
