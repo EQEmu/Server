@@ -155,56 +155,54 @@ Mob* HateList::GetDamageTopOnHateList(Mob* hater)
 	return current;
 }
 
-Mob* HateList::GetClosestEntOnHateList(Mob *hater, bool skip_mezzed) {
+Mob* HateList::GetClosestEntOnHateList(Mob *hater, bool skip_mezzed, ClosestEntityType entity_type) {
 	Mob* close_entity = nullptr;
 	float close_distance = 99999.9f;
 	float this_distance;
 
-	auto iterator = list.begin();
-	while (iterator != list.end()) {
-		if (skip_mezzed && (*iterator)->entity_on_hatelist->IsMezzed()) {
-			++iterator;
+	for (const auto& e : list) {
+		if (!e->entity_on_hatelist) {
 			continue;
 		}
 
-		this_distance = DistanceSquaredNoZ((*iterator)->entity_on_hatelist->GetPosition(), hater->GetPosition());
-		if ((*iterator)->entity_on_hatelist != nullptr && this_distance <= close_distance) {
-			close_distance = this_distance;
-			close_entity = (*iterator)->entity_on_hatelist;
+		if (skip_mezzed && e->entity_on_hatelist->IsMezzed()) {
+			continue;
 		}
-		++iterator;
+
+		switch (entity_type) {
+			case ClosestEntityType::Bot:
+				if (!e->entity_on_hatelist->IsBot()) {
+					continue;
+				}
+				break;
+			case ClosestEntityType::Client:
+				if (!e->entity_on_hatelist->IsClient()) {
+					continue;
+				}
+				break;
+			case ClosestEntityType::NPC:
+				if (!e->entity_on_hatelist->IsNPC()) {
+					continue;
+				}
+				break;
+			case ClosestEntityType::Any:
+			default:
+				break;
+		}
+
+		this_distance = DistanceSquaredNoZ(e->entity_on_hatelist->GetPosition(), hater->GetPosition());
+		if (this_distance <= close_distance) {
+			close_distance = this_distance;
+			close_entity   = e->entity_on_hatelist;
+		}
 	}
 
-	if ((!close_entity && hater->IsNPC()) || (close_entity && close_entity->DivineAura()))
+	if (
+		(!close_entity && hater->IsNPC()) ||
+		(close_entity && close_entity->DivineAura())
+	) {
 		close_entity = hater->CastToNPC()->GetHateTop();
-
-	return close_entity;
-}
-Mob* HateList::GetClosestClientOnHateList(Mob* hater, bool skip_mezzed) {
-	Mob* close_entity = nullptr;
-	float close_distance = 99999.9f;
-	float this_distance;
-
-	auto iterator = list.begin();
-	while (iterator != list.end()) {
-		if (skip_mezzed && (*iterator)->entity_on_hatelist->IsMezzed()) {
-			++iterator;
-			continue;
-		}
-		if (!(*iterator)->entity_on_hatelist->IsClient()) {
-			++iterator;
-			continue;
-		}
-		this_distance = DistanceSquaredNoZ((*iterator)->entity_on_hatelist->GetPosition(), hater->GetPosition());
-		if ((*iterator)->entity_on_hatelist != nullptr && this_distance <= close_distance) {
-			close_distance = this_distance;
-			close_entity = (*iterator)->entity_on_hatelist;
-		}
-		++iterator;
 	}
-
-	if ((!close_entity && hater->IsNPC()) || (close_entity && close_entity->DivineAura()))
-		close_entity = hater->CastToNPC()->GetHateTop();
 
 	return close_entity;
 }

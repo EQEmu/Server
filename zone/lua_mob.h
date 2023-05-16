@@ -227,7 +227,13 @@ public:
 	Lua_Client GetHateRandomClient();
 	Lua_NPC GetHateRandomNPC();
 	Lua_Mob GetHateClosest();
-	Lua_Mob GetHateClosestClient();
+	Lua_Mob GetHateClosest(bool skip_mezzed);
+	Lua_Bot GetHateClosestBot();
+	Lua_Bot GetHateClosestBot(bool skip_mezzed);
+	Lua_Client GetHateClosestClient();
+	Lua_Client GetHateClosestClient(bool skip_mezzed);
+	Lua_NPC GetHateClosestNPC();
+	Lua_NPC GetHateClosestNPC(bool skip_mezzed);
 	void AddToHateList(Lua_Mob other);
 	void AddToHateList(Lua_Mob other, int64 hate);
 	void AddToHateList(Lua_Mob other, int64 hate, int64 damage);

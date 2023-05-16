@@ -2436,9 +2436,40 @@ Mob* Perl_Mob_GetHateClosest(Mob* self) // @categories Hate and Aggro
 {
 	return self->GetHateClosest();
 }
-Mob* Perl_Mob_GetHateClosestClient(Mob* self) // @categories Hate and Aggro
+
+Mob* Perl_Mob_GetHateClosest(Mob* self, bool skip_mezzed) // @categories Hate and Aggro
+{
+	return self->GetHateClosest(skip_mezzed);
+}
+
+Bot* Perl_Mob_GetHateClosestBot(Mob* self) // @categories Hate and Aggro
+{
+	return self->GetHateClosestBot();
+}
+
+Bot* Perl_Mob_GetHateClosestBot(Mob* self, bool skip_mezzed) // @categories Hate and Aggro
+{
+	return self->GetHateClosestBot(skip_mezzed);
+}
+
+Client* Perl_Mob_GetHateClosestClient(Mob* self) // @categories Hate and Aggro
 {
 	return self->GetHateClosestClient();
+}
+
+Client* Perl_Mob_GetHateClosestClient(Mob* self, bool skip_mezzed) // @categories Hate and Aggro
+{
+	return self->GetHateClosestClient(skip_mezzed);
+}
+
+NPC* Perl_Mob_GetHateClosestNPC(Mob* self) // @categories Hate and Aggro
+{
+	return self->GetHateClosestNPC();
+}
+
+NPC* Perl_Mob_GetHateClosestNPC(Mob* self, bool skip_mezzed) // @categories Hate and Aggro
+{
+	return self->GetHateClosestNPC(skip_mezzed);
 }
 
 std::string Perl_Mob_GetLastName(Mob* self) // @categories Script Utility
@@ -3197,8 +3228,14 @@ void perl_register_mob()
 	package.add("GetHaste", &Perl_Mob_GetHaste);
 	package.add("GetHateAmount", (int64_t(*)(Mob*, Mob*))&Perl_Mob_GetHateAmount);
 	package.add("GetHateAmount", (int64_t(*)(Mob*, Mob*, bool))&Perl_Mob_GetHateAmount);
-	package.add("GetHateClosest", &Perl_Mob_GetHateClosest);
-	package.add("GetHateClosestClient", &Perl_Mob_GetHateClosestClient);
+	package.add("GetHateClosest", (Mob*(*)(Mob*))&Perl_Mob_GetHateClosest);
+	package.add("GetHateClosest", (Mob*(*)(Mob*, bool))&Perl_Mob_GetHateClosest);
+	package.add("GetHateClosestBot", (Bot*(*)(Mob*))&Perl_Mob_GetHateClosestBot);
+	package.add("GetHateClosestBot", (Bot*(*)(Mob*, bool))&Perl_Mob_GetHateClosestBot);
+	package.add("GetHateClosestClient", (Client*(*)(Mob*))&Perl_Mob_GetHateClosestClient);
+	package.add("GetHateClosestClient", (Client*(*)(Mob*, bool))&Perl_Mob_GetHateClosestClient);
+	package.add("GetHateClosestNPC", (NPC*(*)(Mob*))&Perl_Mob_GetHateClosestNPC);
+	package.add("GetHateClosestNPC", (NPC*(*)(Mob*, bool))&Perl_Mob_GetHateClosestNPC);
 	package.add("GetHateDamageTop", &Perl_Mob_GetHateDamageTop);
 	package.add("GetHateList", &Perl_Mob_GetHateList);
 	package.add("GetHateListBots", (perl::array(*)(Mob*))&Perl_Mob_GetHateListBots);
