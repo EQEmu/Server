@@ -593,13 +593,6 @@ enum class ApplySpellType {
 	Raid
 };
 
-enum class ClosestEntityType {
-	Any,
-	Bot,
-	Client,
-	NPC
-};
-
 
 namespace HeroicBonusBucket
 {

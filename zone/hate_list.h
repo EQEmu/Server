@@ -41,7 +41,7 @@ public:
 	HateList();
 	~HateList();
 
-	Mob *GetClosestEntOnHateList(Mob *hater, bool skip_mezzed = false, ClosestEntityType entity_type = ClosestEntityType::Any);
+	Mob *GetClosestEntOnHateList(Mob *hater, bool skip_mezzed = false, EntityFilterType entity_type = EntityFilterType::Any);
 	Mob *GetDamageTopOnHateList(Mob *hater); // didn't add 'skip_mezzed' due to calls being in ::Death()
 	Mob *GetEntWithMostHateOnList(Mob *center, Mob *skip = nullptr, bool skip_mezzed = false);
 	Mob *GetRandomEntOnHateList(bool skip_mezzed = false);
