@@ -2376,6 +2376,41 @@ Lua_Mob Lua_Mob::GetHateClosest() {
 	return Lua_Mob(self->GetHateClosest());
 }
 
+Lua_Mob Lua_Mob::GetHateClosest(bool skip_mezzed) {
+	Lua_Safe_Call_Class(Lua_Mob);
+	return Lua_Mob(self->GetHateClosest(skip_mezzed));
+}
+
+Lua_Bot Lua_Mob::GetHateClosestBot() {
+	Lua_Safe_Call_Class(Lua_Bot);
+	return Lua_Bot(self->GetHateClosestBot());
+}
+
+Lua_Bot Lua_Mob::GetHateClosestBot(bool skip_mezzed) {
+	Lua_Safe_Call_Class(Lua_Bot);
+	return Lua_Bot(self->GetHateClosestBot());
+}
+
+Lua_Client Lua_Mob::GetHateClosestClient() {
+	Lua_Safe_Call_Class(Lua_Client);
+	return Lua_Client(self->GetHateClosestClient());
+}
+
+Lua_Client Lua_Mob::GetHateClosestClient(bool skip_mezzed) {
+	Lua_Safe_Call_Class(Lua_Client);
+	return Lua_Client(self->GetHateClosestClient(skip_mezzed));
+}
+
+Lua_NPC Lua_Mob::GetHateClosestNPC() {
+	Lua_Safe_Call_Class(Lua_NPC);
+	return Lua_NPC(self->GetHateClosestNPC());
+}
+
+Lua_NPC Lua_Mob::GetHateClosestNPC(bool skip_mezzed) {
+	Lua_Safe_Call_Class(Lua_NPC);
+	return Lua_NPC(self->GetHateClosestNPC(skip_mezzed));
+}
+
 Lua_HateList Lua_Mob::GetHateListByDistance() {
 	Lua_Safe_Call_Class(Lua_HateList);
 	Lua_HateList ret;
@@ -3253,7 +3288,14 @@ luabind::scope lua_register_mob() {
 	.def("GetHaste", (int(Lua_Mob::*)(void))&Lua_Mob::GetHaste)
 	.def("GetHateAmount", (int64(Lua_Mob::*)(Lua_Mob))&Lua_Mob::GetHateAmount)
 	.def("GetHateAmount", (int64(Lua_Mob::*)(Lua_Mob,bool))&Lua_Mob::GetHateAmount)
-	.def("GetHateClosest", &Lua_Mob::GetHateClosest)
+	.def("GetHateClosest", (Lua_Mob(Lua_Mob::*)(void))&Lua_Mob::GetHateClosest)
+	.def("GetHateClosest", (Lua_Mob(Lua_Mob::*)(bool))&Lua_Mob::GetHateClosest)
+	.def("GetHateClosestBot", (Lua_Bot(Lua_Mob::*)(void))&Lua_Mob::GetHateClosestBot)
+	.def("GetHateClosestBot", (Lua_Bot(Lua_Mob::*)(bool))&Lua_Mob::GetHateClosestBot)
+	.def("GetHateClosestClient", (Lua_Client(Lua_Mob::*)(void))&Lua_Mob::GetHateClosestClient)
+	.def("GetHateClosestClient", (Lua_Client(Lua_Mob::*)(bool))&Lua_Mob::GetHateClosestClient)
+	.def("GetHateClosestNPC", (Lua_NPC(Lua_Mob::*)(void))&Lua_Mob::GetHateClosestNPC)
+	.def("GetHateClosestNPC", (Lua_NPC(Lua_Mob::*)(bool))&Lua_Mob::GetHateClosestNPC)
 	.def("GetHateDamageTop", (Lua_Mob(Lua_Mob::*)(Lua_Mob))&Lua_Mob::GetHateDamageTop)
 	.def("GetHateList", &Lua_Mob::GetHateList)
 	.def("GetHateListBots", (Lua_HateList(Lua_Mob::*)(void))&Lua_Mob::GetHateListBots)
