@@ -617,29 +617,6 @@ Mob *HateList::GetRandomEntOnHateList(bool skip_mezzed)
 	return nullptr;
 }
 
-Mob *HateList::GetEscapingEntOnHateList() {
-	// function is still in design stage
-
-	for (auto iter : list) {
-		if (!iter->entity_on_hatelist)
-			continue;
-
-		if (!iter->entity_on_hatelist->IsFeared())
-			continue;
-
-		if (iter->entity_on_hatelist->IsRooted())
-			continue;
-		if (iter->entity_on_hatelist->IsMezzed())
-			continue;
-		if (iter->entity_on_hatelist->IsStunned())
-			continue;
-
-		return iter->entity_on_hatelist;
-	}
-
-	return nullptr;
-}
-
 Mob *HateList::GetEscapingEntOnHateList(Mob *center, float range, bool first) {
 	// function is still in design stage
 
