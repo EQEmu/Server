@@ -12,8 +12,6 @@ public:
 	bool InCombat() const;
 	void ProcessHPEvent(int64 hp, int64 current_hp);
 	double TimeInCombat() const;
-	int64 GetDamageReceived() const;
-	int64 GetHealReceived() const;
 	float GetDamageReceivedPerSecond() const;
 	float GetHealedReceivedPerSecond() const;
 private:
