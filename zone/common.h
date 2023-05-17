@@ -846,7 +846,6 @@ public:
 	virtual ~Trade();
 
 	void Reset();
-	void SetTradeCash(uint32 in_pp, uint32 in_gp, uint32 in_sp, uint32 in_cp);
 
 	// Initiate a trade with another mob
 	// Also puts other mob into trader mode with this mob
