@@ -1045,4 +1045,11 @@ enum ResurrectionActions
 	Accept
 };
 
+enum ScribeSpellActions
+{
+	Scribe,
+	Memorize,
+	Unmemorize
+};
+
 #endif /*COMMON_EQ_CONSTANTS_H*/
