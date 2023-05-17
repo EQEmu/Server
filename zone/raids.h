@@ -263,7 +263,6 @@ public:
 protected:
 	Client *leader;
 	bool locked;
-	uint16 numMembers;
 	uint32 LootType;
 	bool disbandCheck;
 	bool forceDisband;
