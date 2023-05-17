@@ -1756,21 +1756,6 @@ void EntityList::QueueClients(
 	}
 }
 
-void EntityList::QueueManaged(Mob *sender, const EQApplicationPacket *app,
-		bool ignore_sender, bool ackreq)
-{
-	auto it = client_list.begin();
-	while (it != client_list.end()) {
-		Client *ent = it->second;
-
-		if ((!ignore_sender || ent != sender))
-			ent->QueuePacket(app, ackreq, Client::CLIENT_CONNECTED);
-
-		++it;
-	}
-}
-
-
 void EntityList::QueueClientsStatus(Mob *sender, const EQApplicationPacket *app,
 		bool ignore_sender, uint8 minstatus, uint8 maxstatus)
 {
@@ -3203,21 +3188,6 @@ void EntityList::RemoveEntity(uint16 id)
 void EntityList::Process()
 {
 	CheckSpawnQueue();
-}
-
-void EntityList::CountNPC(uint32 *NPCCount, uint32 *NPCLootCount, uint32 *gmspawntype_count)
-{
-	*NPCCount = 0;
-	*NPCLootCount = 0;
-
-	auto it = npc_list.begin();
-	while (it != npc_list.end()) {
-		(*NPCCount)++;
-		(*NPCLootCount) += it->second->CountLoot();
-		if (it->second->GetNPCTypeID() == 0)
-			(*gmspawntype_count)++;
-		++it;
-	}
 }
 
 void EntityList::Depop(bool StartSpawnTimer)
