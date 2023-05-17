@@ -42,19 +42,6 @@ HateList::~HateList()
 {
 }
 
-// added for frenzy support
-// checks if target still is in frenzy mode
-void HateList::IsEntityInFrenzyMode()
-{
-	auto iterator = list.begin();
-	while (iterator != list.end())
-	{
-		if ((*iterator)->entity_on_hatelist->GetHPRatio() >= 20)
-			(*iterator)->is_entity_frenzy = false;
-		++iterator;
-	}
-}
-
 void HateList::WipeHateList()
 {
 	auto iterator = list.begin();
