@@ -353,23 +353,10 @@ bool Zone::LoadGroundSpawns() {
 	return(true);
 }
 
-void Zone::DumpMerchantList(uint32 npcid) {
-	std::list<TempMerchantList> tmp_merlist = tmpmerchanttable[npcid];
-	std::list<TempMerchantList>::const_iterator tmp_itr;
-	TempMerchantList ml;
-
-	for (tmp_itr = tmp_merlist.begin(); tmp_itr != tmp_merlist.end(); ++tmp_itr) {
-		ml = *tmp_itr;
-
-		LogInventory("slot[{}] Orig[{}] Item[{}] Charges[{}]", ml.slot, ml.origslot, ml.item, ml.charges);
-	}
-}
-
 int Zone::SaveTempItem(uint32 merchantid, uint32 npcid, uint32 item, int32 charges, bool sold) {
 
 	LogInventory("[{}] [{}] charges of [{}]", ((sold) ? "Sold" : "Bought"),
 		charges, item);
-	//DumpMerchantList(npcid);
 	// Iterate past main items.
 	// If the item being transacted is in this list, return 0;
 	std::list<MerchantList> merlist = merchanttable[merchantid];
@@ -436,7 +423,6 @@ int Zone::SaveTempItem(uint32 merchantid, uint32 npcid, uint32 item, int32 charg
 		}
 
 		tmpmerchanttable[npcid] = tmp_merlist;
-		//DumpMerchantList(npcid);
 		return ml.slot;
 	}
 	else {
@@ -499,7 +485,6 @@ int Zone::SaveTempItem(uint32 merchantid, uint32 npcid, uint32 item, int32 charg
 		ml2.origslot = first_empty_slot;
 		tmp_merlist.push_back(ml2);
 		tmpmerchanttable[npcid] = tmp_merlist;
-		//DumpMerchantList(npcid);
 		return ml2.slot;
 	}
 }
