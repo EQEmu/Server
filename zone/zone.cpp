@@ -2205,11 +2205,6 @@ bool Zone::HasGraveyard() {
 	return Result;
 }
 
-void Zone::SetGraveyard(uint32 zoneid, const glm::vec4& graveyardPosition) {
-	pgraveyard_zoneid = zoneid;
-	m_graveyard       = graveyardPosition;
-}
-
 void Zone::LoadZoneBlockedSpells()
 {
 	if (!blocked_spells) {
