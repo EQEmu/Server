@@ -112,7 +112,6 @@ public:
 	void SetRaidLeader(const char *wasLead, const char *name);
 
 	bool	Process();
-	bool	IsRaid() { return true; }
 
 	void	AddMember(Client *c, uint32 group = 0xFFFFFFFF, bool rleader=false, bool groupleader=false, bool looter=false);
 	void	AddBot(Bot* b, uint32 group = 0xFFFFFFFF, bool raid_leader=false, bool group_leader=false, bool looter=false);
