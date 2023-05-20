@@ -49,7 +49,7 @@ void command_findcurrency(Client *c, const Seperator *sep)
 				(
 					can_summon_items ?
 						fmt::format(
-							" [{}]",
+							" | {}",
 							Saylink::Silent(
 								fmt::format(
 									"#summonitem {} {}",
@@ -90,7 +90,7 @@ void command_findcurrency(Client *c, const Seperator *sep)
 					(
 						can_summon_items ?
 						fmt::format(
-							" [{}]",
+							" | {}",
 							Saylink::Silent(
 								fmt::format(
 									"#summonitem {} {}",
