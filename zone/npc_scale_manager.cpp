@@ -134,7 +134,9 @@ void NpcScaleManager::ScaleNPC(
 	if (always_scale || (npc->GetPhR() == 0 && is_auto_scaled)) {
 		npc->ModifyNPCStat("phr", std::to_string(scale_data.physical_resist));
 	}
-	bool min_damage_set = false;
+
+	auto min_damage_set = false;
+
 	if (always_scale || npc->GetMinDMG() == 0) {
 		int64 min_dmg = scale_data.min_dmg;
 		if (RuleB(Combat, UseNPCDamageClassLevelMods)) {
