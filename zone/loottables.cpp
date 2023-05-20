@@ -395,9 +395,15 @@ void NPC::AddLootDrop(
 								foundslot = i;
 							}
 							else {
+								// Unequip old item
+								auto* olditem = GetItem(i);
+
+								olditem->equip_slot = EQ::invslot::SLOT_INVALID;
+
 								equipment[i] = item2->ID;
+
 								foundslot = i;
-								found = true;
+								found     = true;
 							}
 						} // end if ac
 					}
