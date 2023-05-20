@@ -396,12 +396,14 @@ void NPC::AddLootDrop(
 							}
 							else {
 								// Unequip old item
-								ServerLootItem_Struct *olditem=GetItem(i);
+								auto* olditem = GetItem(i);
+
 								olditem->equip_slot = EQ::invslot::SLOT_INVALID;
 
 								equipment[i] = item2->ID;
+
 								foundslot = i;
-								found = true;
+								found     = true;
 							}
 						} // end if ac
 					}
