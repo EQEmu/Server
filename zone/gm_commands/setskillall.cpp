@@ -2,45 +2,42 @@
 
 void command_setskillall(Client *c, const Seperator *sep)
 {
-	auto target = c;
-	if (c->GetTarget() && c->GetTarget()->IsClient()) {
-		target = c->GetTarget()->CastToClient();
+	const auto arguments = sep->argnum;
+
+	if (!arguments || !sep->IsNumber(1)) {
+		c->Message(Chat::White, "Usage: #setskillall [Skill Level] - Set all of your or your target's skills to the specified skill level");
+		return;
 	}
 
-	if (!sep->IsNumber(1)) {
-		c->Message(Chat::White, "Usage: #setskillall [Skill Level] - Set all of your or your target's skills to the specified skill level");
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"Note: Skill Level ranges from 0 to {}",
-				HIGHEST_CAN_SET_SKILL
-			).c_str()
-		);
-	} else {
-		if (c->Admin() >= commandSetSkillsOther || c->GetTarget() == c) {
-			LogInfo(
-				"Set ALL skill request from [{}], target:[{}]",
-				c->GetCleanName(),
-				c->GetTargetDescription(target)
-			);
+	auto t = c;
+	if (c->GetTarget() && c->GetTarget()->IsClient()) {
+		t = c->GetTarget()->CastToClient();
+	}
 
-			auto skill_level = static_cast<uint16>(Strings::ToUnsignedInt(sep->arg[1]));
+	if (c->Admin() < commandSetSkillsOther && t != c) {
+		c->Message(Chat::White, "Your status is not high enough to set another player's skills.");
+		return;
+	}
 
+	auto skill_level = static_cast<uint16>(Strings::ToUnsignedInt(sep->arg[1]));
+
+	for (const auto& s : EQ::skills::GetSkillTypeMap()) {
+		if (c != t) {
 			c->Message(
 				Chat::White,
 				fmt::format(
-					"Setting all skills to {} for {}.",
-					skill_level,
-					c->GetTargetDescription(target)
+					"Setting {} ({}) to {} for {}.",
+					s.second,
+					s.first,
+					skill_level > t->MaxSkill(s.first) ? t->MaxSkill(s.first) : skill_level,
+					c->GetTargetDescription(t)
 				).c_str()
 			);
-
-			for (EQ::skills::SkillType skill_num = EQ::skills::Skill1HBlunt; skill_num <= EQ::skills::HIGHEST_SKILL; skill_num = (EQ::skills::SkillType) (skill_num + 1)) {
-				target->SetSkill(skill_num, skill_level);
-			}
-		} else {
-			c->Message(Chat::White, "Your status is not high enough to set another player's skills.");
 		}
+
+		t->SetSkill(
+			s.first,
+			skill_level > t->MaxSkill(s.first) ? t->MaxSkill(s.first) : skill_level
+		);
 	}
 }
-
