@@ -48,18 +48,18 @@ void command_findcurrency(Client *c, const Seperator *sep)
 				item_id,
 				(
 					can_summon_items ?
-						fmt::format(
-							" | {}",
-							Saylink::Silent(
-								fmt::format(
-									"#summonitem {} {}",
-									item_id,
-									item_data->StackSize
-								),
-								"Summon"
-							)
-						) :
-						""
+					fmt::format(
+						" | {}",
+						Saylink::Silent(
+							fmt::format(
+								"#summonitem {} {}",
+								item_id,
+								item_data->StackSize
+							),
+							"Summon"
+						)
+					) :
+					""
 				)
 			).c_str()
 		);
