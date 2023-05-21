@@ -28,7 +28,7 @@ void command_setentityvariable(Client *c, const Seperator *sep)
 			"Set an entity variable named '{}' to a value of '{}' for {}.",
 			variable_name,
 			variable_value,
-			c->GetTargetDescription(t, TargetDescriptionType::LCSelf)
+			c->GetTargetDescription(t)
 		).c_str()
 	);
 }

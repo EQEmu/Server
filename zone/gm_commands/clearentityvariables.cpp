@@ -26,7 +26,7 @@ void command_clearentityvariables(Client *c, const Seperator *sep)
 		Chat::White,
 		fmt::format(
 			"Cleared all entity variables for {}.",
-			c->GetTargetDescription(t, TargetDescriptionType::LCSelf)
+			c->GetTargetDescription(t)
 		).c_str()
 	);
 }

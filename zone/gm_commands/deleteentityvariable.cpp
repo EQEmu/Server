@@ -38,7 +38,7 @@ void command_deleteentityvariable(Client *c, const Seperator *sep)
 		fmt::format(
 			"Deleted an entity variable named '{}' from {}.",
 			variable_name,
-			c->GetTargetDescription(t, TargetDescriptionType::LCSelf)
+			c->GetTargetDescription(t)
 		).c_str()
 	);
 }
