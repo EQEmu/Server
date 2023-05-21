@@ -4786,7 +4786,7 @@ void perl_register_quest()
 	package.add("is_veil_of_alaris_enabled", &Perl__IsVeilOfAlarisEnabled);
 	package.add("is_rain_of_fear_enabled", &Perl__IsRainOfFearEnabled);
 	package.add("is_call_of_the_forsaken_enabled", &Perl__IsCallOfTheForsakenEnabled);
-	package.add("is_the_darkend_sea_enabled", &Perl__IsTheDarkenedSeaEnabled);
+	package.add("is_the_darkened_sea_enabled", &Perl__IsTheDarkenedSeaEnabled);
 	package.add("is_the_broken_mirror_enabled", &Perl__IsTheBrokenMirrorEnabled);
 	package.add("is_empires_of_kunark_enabled", &Perl__IsEmpiresOfKunarkEnabled);
 	package.add("is_ring_of_scale_enabled", &Perl__IsRingOfScaleEnabled);
@@ -4813,7 +4813,7 @@ void perl_register_quest()
 	package.add("is_current_expansion_veil_of_alaris", &Perl__IsCurrentExpansionVeilOfAlaris);
 	package.add("is_current_expansion_rain_of_fear", &Perl__IsCurrentExpansionRainOfFear);
 	package.add("is_current_expansion_call_of_the_forsaken", &Perl__IsCurrentExpansionCallOfTheForsaken);
-	package.add("is_current_expansion_the_darkend_sea", &Perl__IsCurrentExpansionTheDarkenedSea);
+	package.add("is_current_expansion_the_darkened_sea", &Perl__IsCurrentExpansionTheDarkenedSea);
 	package.add("is_current_expansion_the_broken_mirror", &Perl__IsCurrentExpansionTheBrokenMirror);
 	package.add("is_current_expansion_empires_of_kunark", &Perl__IsCurrentExpansionEmpiresOfKunark);
 	package.add("is_current_expansion_ring_of_scale", &Perl__IsCurrentExpansionRingOfScale);
