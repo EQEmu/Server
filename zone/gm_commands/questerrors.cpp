@@ -11,8 +11,15 @@ void command_questerrors(Client *c, const Seperator *sep)
 
 		int error_index = 0;
 		for (auto quest_error : quest_errors) {
-			if (error_index >= 30) {
-				c->Message(Chat::White, "Maximum of 30 errors shown.");
+			if (error_index >= RuleI(World, MaximumQuestErrors)) {
+				c->Message(
+					Chat::White,
+					fmt::format(
+						"Maximum of {} error{} shown.",
+						RuleI(World, MaximumQuestErrors),
+						RuleI(World, MaximumQuestErrors) != 1 ? "s" : ""
+					).c_str()
+				);
 				break;
 			}
 
