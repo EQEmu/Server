@@ -420,24 +420,18 @@ void command_npcedit(Client *c, const Seperator *sep)
 	} else if (!strcasecmp(sep->arg[1], "special_attacks")) {
 		std::string special_attacks = sep->argplus[2];
 		n.npcspecialattks = special_attacks;
-		c->Message(
-			Chat::Yellow,
-			fmt::format(
-				"{} is now using the following Special Attacks '{}'.",
-				npc_id_string,
-				special_attacks
-			).c_str()
+		d =  fmt::format(
+			"{} is now using the following Special Attacks '{}'.",
+			npc_id_string,
+			special_attacks
 		);
 	} else if (!strcasecmp(sep->arg[1], "special_abilities")) {
 		std::string special_abilities = sep->argplus[2];
 		n.special_abilities = special_abilities;
-		c->Message(
-			Chat::Yellow,
-			fmt::format(
-				"{} is now using the following Special Abilities '{}'.",
-				npc_id_string,
-				special_abilities
-			).c_str()
+		d = fmt::format(
+			"{} is now using the following Special Abilities '{}'.",
+			npc_id_string,
+			special_abilities
 		);
 	} else if (!strcasecmp(sep->arg[1], "aggroradius")) {
 		if (sep->IsNumber(2)) {
