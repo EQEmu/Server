@@ -1156,24 +1156,14 @@ bool Group::LearnMembers() {
 		);
 	}
 
-	int memberIndex = 0;
-	for (const auto& member : rows) {
-		if (memberIndex >= MAX_GROUP_MEMBERS) {
-			LogError(
-				"Too many members in group [{}]",
-				GetID()
-			);
-			break;
-		}
-
-		if (member.name.empty()) {
-			members[memberIndex] = nullptr;
-			membername[memberIndex][0] = '\0';
+	for (int i = 0; i < MAX_GROUP_MEMBERS; ++i) {
+		if (rows[i].name.empty()) {
+			members[i] = nullptr;
+			membername[i][0] = '\0';
 		} else {
-			members[memberIndex] = nullptr;
-			strn0cpy(membername[memberIndex], member.name.c_str(), 64);
+			members[i] = nullptr;
+			strn0cpy(membername[i], rows[i].name.c_str(), 64);
 		}
-		++memberIndex;
 	}
 
 	VerifyGroup();
