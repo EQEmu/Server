@@ -1524,6 +1524,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 		GroupLeadershipAA_Struct GLAA;
 		memset(ln, 0, 64);
 		database.GetGroupLeadershipInfo(group->GetID(), ln, MainTankName, AssistName, PullerName, NPCMarkerName, mentoree_name, &mentor_percent, &GLAA);
+		group->LearnMembers();
 
 		if (!group->GetLeader()) {
 			Client *c = entity_list.GetClientByName(ln);
@@ -1538,7 +1539,6 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 		group->SetNPCMarker(NPCMarkerName);
 		group->SetGroupAAs(&GLAA);
 		group->SetGroupMentor(mentor_percent, mentoree_name);
-		group->LearnMembers();
 		JoinGroupXTargets(group);
 		group->UpdatePlayer(this);
 		LFG = false;
