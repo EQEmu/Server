@@ -1156,6 +1156,14 @@ bool Group::LearnMembers() {
 		);
 	}
 
+	memset(members,0,sizeof(Mob*) * MAX_GROUP_MEMBERS);
+
+	for(int i = 0; i < MAX_GROUP_MEMBERS; ++i)
+	{
+		memset(membername[i],0,64);
+		MemberRoles[i] = 0;
+	}
+
 	int memberIndex = 0;
 	for (const auto& member : rows) {
 		if (memberIndex >= MAX_GROUP_MEMBERS) {
