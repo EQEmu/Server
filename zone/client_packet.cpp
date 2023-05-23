@@ -1514,29 +1514,30 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	}
 
 	if (group) {
-		// If the group leader is not set, pull the group leader infomrmation from the database.
-		if (!group->GetLeader()) {
-			char ln[64];
-			char MainTankName[64];
-			char AssistName[64];
-			char PullerName[64];
-			char NPCMarkerName[64];
-			char mentoree_name[64];
-			int mentor_percent;
-			GroupLeadershipAA_Struct GLAA;
-			memset(ln, 0, 64);
-			database.GetGroupLeadershipInfo(group->GetID(), ln, MainTankName, AssistName, PullerName, NPCMarkerName, mentoree_name, &mentor_percent, &GLAA);
-			Client *c = entity_list.GetClientByName(ln);
-			if (c)
-				group->SetLeader(c);
+		char ln[64];
+		char MainTankName[64];
+		char AssistName[64];
+		char PullerName[64];
+		char NPCMarkerName[64];
+		char mentoree_name[64];
+		int mentor_percent;
+		GroupLeadershipAA_Struct GLAA;
+		memset(ln, 0, 64);
+		database.GetGroupLeadershipInfo(group->GetID(), ln, MainTankName, AssistName, PullerName, NPCMarkerName, mentoree_name, &mentor_percent, &GLAA);
 
-			group->SetMainTank(MainTankName);
-			group->SetMainAssist(AssistName);
-			group->SetPuller(PullerName);
-			group->SetNPCMarker(NPCMarkerName);
-			group->SetGroupAAs(&GLAA);
-			group->SetGroupMentor(mentor_percent, mentoree_name);
+		if (!group->GetLeader()) {
+			Client *c = entity_list.GetClientByName(ln);
+			if (c) {
+				group->SetLeader(c);
+			}
 		}
+
+		group->SetMainTank(MainTankName);
+		group->SetMainAssist(AssistName);
+		group->SetPuller(PullerName);
+		group->SetNPCMarker(NPCMarkerName);
+		group->SetGroupAAs(&GLAA);
+		group->SetGroupMentor(mentor_percent, mentoree_name);
 		group->LearnMembers();
 		JoinGroupXTargets(group);
 		group->UpdatePlayer(this);
