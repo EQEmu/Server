@@ -1156,10 +1156,9 @@ bool Group::LearnMembers() {
 		);
 	}
 
-	memset(members,0,sizeof(Mob*) * MAX_GROUP_MEMBERS);
-
 	for(int i = 0; i < MAX_GROUP_MEMBERS; ++i)
 	{
+		members[i] = nullptr;
 		memset(membername[i],0,64);
 		MemberRoles[i] = 0;
 	}
