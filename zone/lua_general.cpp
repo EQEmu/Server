@@ -3806,6 +3806,601 @@ void lua_send_player_handin_event()
 	quest_manager.SendPlayerHandinEvent();
 }
 
+float lua_get_zone_safe_x(uint32 zone_id)
+{
+	return zone_store.GetZoneSafeCoordinates(zone_id).x;
+}
+
+float lua_get_zone_safe_x(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneSafeCoordinates(zone_id, version).x;
+}
+
+float lua_get_zone_safe_y(uint32 zone_id)
+{
+	return zone_store.GetZoneSafeCoordinates(zone_id).y;
+}
+
+float lua_get_zone_safe_y(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneSafeCoordinates(zone_id, version).y;
+}
+
+float lua_get_zone_safe_z(uint32 zone_id)
+{
+	return zone_store.GetZoneSafeCoordinates(zone_id).z;
+}
+
+float lua_get_zone_safe_z(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneSafeCoordinates(zone_id, version).z;
+}
+
+float lua_get_zone_safe_heading(uint32 zone_id)
+{
+	return zone_store.GetZoneSafeCoordinates(zone_id).w;
+}
+
+float lua_get_zone_safe_heading(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneSafeCoordinates(zone_id, version).w;
+}
+
+float lua_get_zone_graveyard_id(uint32 zone_id)
+{
+	return zone_store.GetZoneGraveyardID(zone_id);
+}
+
+float lua_get_zone_graveyard_id(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneGraveyardID(zone_id, version);
+}
+
+uint8 lua_get_zone_minimum_level(uint32 zone_id)
+{
+	return zone_store.GetZoneMinimumLevel(zone_id);
+}
+
+uint8 lua_get_zone_minimum_level(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneMinimumLevel(zone_id, version);
+}
+
+uint8 lua_get_zone_maximum_level(uint32 zone_id)
+{
+	return zone_store.GetZoneMaximumLevel(zone_id);
+}
+
+uint8 lua_get_zone_maximum_level(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneMaximumLevel(zone_id, version);
+}
+
+uint8 lua_get_zone_minimum_status(uint32 zone_id)
+{
+	return zone_store.GetZoneMinimumStatus(zone_id);
+}
+
+uint8 lua_get_zone_minimum_status(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneMinimumStatus(zone_id, version);
+}
+
+int lua_get_zone_time_zone(uint32 zone_id)
+{
+	return zone_store.GetZoneTimeZone(zone_id);
+}
+
+int lua_get_zone_time_zone(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneTimeZone(zone_id, version);
+}
+
+int lua_get_zone_maximum_players(uint32 zone_id)
+{
+	return zone_store.GetZoneMaximumPlayers(zone_id);
+}
+
+int lua_get_zone_maximum_players(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneMaximumPlayers(zone_id, version);
+}
+
+uint32 lua_get_zone_rule_set(uint32 zone_id)
+{
+	return zone_store.GetZoneRuleSet(zone_id);
+}
+
+uint32 lua_get_zone_rule_set(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneRuleSet(zone_id, version);
+}
+
+std::string lua_get_zone_note(uint32 zone_id)
+{
+	return zone_store.GetZoneNote(zone_id);
+}
+
+std::string lua_get_zone_note(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneNote(zone_id, version);
+}
+
+float lua_get_zone_underworld(uint32 zone_id)
+{
+	return zone_store.GetZoneUnderworld(zone_id);
+}
+
+float lua_get_zone_underworld(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneUnderworld(zone_id, version);
+}
+
+float lua_get_zone_minimum_clip(uint32 zone_id)
+{
+	return zone_store.GetZoneMinimumClip(zone_id);
+}
+
+float lua_get_zone_minimum_clip(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneMinimumClip(zone_id, version);
+}
+
+float lua_get_zone_maximum_clip(uint32 zone_id)
+{
+	return zone_store.GetZoneMaximumClip(zone_id);
+}
+
+float lua_get_zone_maximum_clip(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneMaximumClip(zone_id, version);
+}
+
+float lua_get_zone_fog_minimum_clip(uint32 zone_id)
+{
+	return zone_store.GetZoneFogMinimumClip(zone_id);
+}
+
+float lua_get_zone_fog_minimum_clip(uint32 zone_id, uint8 slot)
+{
+	return zone_store.GetZoneFogMinimumClip(zone_id, slot);
+}
+
+float lua_get_zone_fog_minimum_clip(uint32 zone_id, uint8 slot, int version)
+{
+	return zone_store.GetZoneFogMinimumClip(zone_id, slot);
+}
+
+float lua_get_zone_fog_maximum_clip(uint32 zone_id)
+{
+	return zone_store.GetZoneFogMaximumClip(zone_id);
+}
+
+float lua_get_zone_fog_maximum_clip(uint32 zone_id, uint8 slot)
+{
+	return zone_store.GetZoneFogMaximumClip(zone_id, slot);
+}
+
+float lua_get_zone_fog_maximum_clip(uint32 zone_id, uint8 slot, int version)
+{
+	return zone_store.GetZoneFogMaximumClip(zone_id, slot, version);
+}
+
+uint8 lua_get_zone_fog_red(uint32 zone_id)
+{
+	return zone_store.GetZoneFogRed(zone_id);
+}
+
+uint8 lua_get_zone_fog_red(uint32 zone_id, uint8 slot)
+{
+	return zone_store.GetZoneFogRed(zone_id, slot);
+}
+
+uint8 lua_get_zone_fog_red(uint32 zone_id, uint8 slot, int version)
+{
+	return zone_store.GetZoneFogRed(zone_id, slot, version);
+}
+
+uint8 lua_get_zone_fog_green(uint32 zone_id)
+{
+	return zone_store.GetZoneFogGreen(zone_id);
+}
+
+uint8 lua_get_zone_fog_green(uint32 zone_id, uint8 slot)
+{
+	return zone_store.GetZoneFogGreen(zone_id, slot);
+}
+
+uint8 lua_get_zone_fog_green(uint32 zone_id, uint8 slot, int version)
+{
+	return zone_store.GetZoneFogGreen(zone_id, slot, version);
+}
+
+uint8 lua_get_zone_fog_blue(uint32 zone_id)
+{
+	return zone_store.GetZoneFogBlue(zone_id);
+}
+
+uint8 lua_get_zone_fog_blue(uint32 zone_id, uint8 slot)
+{
+	return zone_store.GetZoneFogBlue(zone_id, slot);
+}
+
+uint8 lua_get_zone_fog_blue(uint32 zone_id, uint8 slot, int version)
+{
+	return zone_store.GetZoneFogBlue(zone_id, slot, version);
+}
+
+uint8 lua_get_zone_sky(uint32 zone_id)
+{
+	return zone_store.GetZoneSky(zone_id);
+}
+
+uint8 lua_get_zone_sky(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneSky(zone_id, version);
+}
+
+uint8 lua_get_zone_ztype(uint32 zone_id)
+{
+	return zone_store.GetZoneZType(zone_id);
+}
+
+uint8 lua_get_zone_ztype(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneZType(zone_id, version);
+}
+
+float lua_get_zone_experience_multiplier(uint32 zone_id)
+{
+	return zone_store.GetZoneExperienceMultiplier(zone_id);
+}
+
+float lua_get_zone_experience_multiplier(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneExperienceMultiplier(zone_id, version);
+}
+
+float lua_get_zone_walk_speed(uint32 zone_id)
+{
+	return zone_store.GetZoneWalkSpeed(zone_id);
+}
+
+float lua_get_zone_walk_speed(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneWalkSpeed(zone_id, version);
+}
+
+uint8 lua_get_zone_time_type(uint32 zone_id)
+{
+	return zone_store.GetZoneTimeType(zone_id);
+}
+
+uint8 lua_get_zone_time_type(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneTimeType(zone_id, version);
+}
+
+float lua_get_zone_fog_density(uint32 zone_id)
+{
+	return zone_store.GetZoneFogDensity(zone_id);
+}
+
+float lua_get_zone_fog_density(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneFogDensity(zone_id, version);
+}
+
+std::string lua_get_zone_flag_needed(uint32 zone_id)
+{
+	return zone_store.GetZoneFlagNeeded(zone_id);
+}
+
+std::string lua_get_zone_flag_needed(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneFlagNeeded(zone_id, version);
+}
+
+int8 lua_get_zone_can_bind(uint32 zone_id)
+{
+	return zone_store.GetZoneCanBind(zone_id);
+}
+
+int8 lua_get_zone_can_bind(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneCanBind(zone_id, version);
+}
+
+int8 lua_get_zone_can_combat(uint32 zone_id)
+{
+	return zone_store.GetZoneCanCombat(zone_id);
+}
+
+int8 lua_get_zone_can_combat(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneCanCombat(zone_id, version);
+}
+
+int8 lua_get_zone_can_levitate(uint32 zone_id)
+{
+	return zone_store.GetZoneCanLevitate(zone_id);
+}
+
+int8 lua_get_zone_can_levitate(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneCanLevitate(zone_id, version);
+}
+
+int8 lua_get_zone_cast_outdoor(uint32 zone_id)
+{
+	return zone_store.GetZoneCastOutdoor(zone_id);
+}
+
+int8 lua_get_zone_cast_outdoor(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneCastOutdoor(zone_id, version);
+}
+
+uint8 lua_get_zone_hotzone(uint32 zone_id)
+{
+	return zone_store.GetZoneHotzone(zone_id);
+}
+
+uint8 lua_get_zone_hotzone(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneHotzone(zone_id, version);
+}
+
+uint8 lua_get_zone_instance_type(uint32 zone_id)
+{
+	return zone_store.GetZoneInstanceType(zone_id);
+}
+
+uint8 lua_get_zone_instance_type(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneInstanceType(zone_id, version);
+}
+
+uint64 lua_get_zone_shutdown_delay(uint32 zone_id)
+{
+	return zone_store.GetZoneShutdownDelay(zone_id);
+}
+
+uint64 lua_get_zone_shutdown_delay(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneShutdownDelay(zone_id, version);
+}
+
+int8 lua_get_zone_peqzone(uint32 zone_id)
+{
+	return zone_store.GetZonePEQZone(zone_id);
+}
+
+int8 lua_get_zone_peqzone(uint32 zone_id, int version)
+{
+	return zone_store.GetZonePEQZone(zone_id, version);
+}
+
+int8 lua_get_zone_expansion(uint32 zone_id)
+{
+	return zone_store.GetZoneExpansion(zone_id);
+}
+
+int8 lua_get_zone_expansion(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneExpansion(zone_id, version);
+}
+
+int8 lua_get_zone_bypass_expansion_check(uint32 zone_id)
+{
+	return zone_store.GetZoneBypassExpansionCheck(zone_id);
+}
+
+int8 lua_get_zone_bypass_expansion_check(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneBypassExpansionCheck(zone_id, version);
+}
+
+int8 lua_get_zone_suspend_buffs(uint32 zone_id)
+{
+	return zone_store.GetZoneSuspendBuffs(zone_id);
+}
+
+int8 lua_get_zone_suspend_buffs(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneSuspendBuffs(zone_id, version);
+}
+
+int lua_get_zone_rain_chance(uint32 zone_id)
+{
+	return zone_store.GetZoneRainChance(zone_id);
+}
+
+int lua_get_zone_rain_chance(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneRainChance(zone_id, version);
+}
+
+int lua_get_zone_rain_duration(uint32 zone_id)
+{
+	return zone_store.GetZoneRainDuration(zone_id);
+}
+
+int lua_get_zone_rain_duration(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneRainDuration(zone_id, version);
+}
+
+int lua_get_zone_snow_chance(uint32 zone_id)
+{
+	return zone_store.GetZoneSnowChance(zone_id);
+}
+
+int lua_get_zone_snow_chance(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneSnowChance(zone_id, version);
+}
+
+int lua_get_zone_snow_duration(uint32 zone_id)
+{
+	return zone_store.GetZoneSnowDuration(zone_id);
+}
+
+int lua_get_zone_snow_duration(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneSnowDuration(zone_id, version);
+}
+
+float lua_get_zone_gravity(uint32 zone_id)
+{
+	return zone_store.GetZoneGravity(zone_id);
+}
+
+float lua_get_zone_gravity(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneGravity(zone_id, version);
+}
+
+int lua_get_zone_type(uint32 zone_id)
+{
+	return zone_store.GetZoneType(zone_id);
+}
+
+int lua_get_zone_type(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneType(zone_id, version);
+}
+
+int lua_get_zone_sky_lock(uint32 zone_id)
+{
+	return zone_store.GetZoneSkyLock(zone_id);
+}
+
+int lua_get_zone_sky_lock(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneSkyLock(zone_id, version);
+}
+
+int lua_get_zone_fast_regen_hp(uint32 zone_id)
+{
+	return zone_store.GetZoneFastRegenHP(zone_id);
+}
+
+int lua_get_zone_fast_regen_hp(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneFastRegenHP(zone_id, version);
+}
+
+int lua_get_zone_fast_regen_mana(uint32 zone_id)
+{
+	return zone_store.GetZoneFastRegenMana(zone_id);
+}
+
+int lua_get_zone_fast_regen_mana(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneFastRegenMana(zone_id, version);
+}
+
+int lua_get_zone_fast_regen_endurance(uint32 zone_id)
+{
+	return zone_store.GetZoneFastRegenEndurance(zone_id);
+}
+
+int lua_get_zone_fast_regen_endurance(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneFastRegenEndurance(zone_id, version);
+}
+
+int lua_get_zone_npc_maximum_aggro_distance(uint32 zone_id)
+{
+	return zone_store.GetZoneNPCMaximumAggroDistance(zone_id);
+}
+
+int lua_get_zone_npc_maximum_aggro_distance(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneNPCMaximumAggroDistance(zone_id, version);
+}
+
+uint32 lua_get_zone_maximum_movement_update_range(uint32 zone_id)
+{
+	return zone_store.GetZoneMaximumMovementUpdateRange(zone_id);
+}
+
+uint32 lua_get_zone_maximum_movement_update_range(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneMaximumMovementUpdateRange(zone_id, version);
+}
+
+int8 lua_get_zone_minimum_expansion(uint32 zone_id)
+{
+	return zone_store.GetZoneMinimumExpansion(zone_id);
+}
+
+int8 lua_get_zone_minimum_expansion(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneMinimumExpansion(zone_id, version);
+}
+
+int8 lua_get_zone_maximum_expansion(uint32 zone_id)
+{
+	return zone_store.GetZoneMaximumExpansion(zone_id);
+}
+
+int8 lua_get_zone_maximum_expansion(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneMaximumExpansion(zone_id, version);
+}
+
+std::string lua_get_zone_content_flags(uint32 zone_id)
+{
+	return zone_store.GetZoneContentFlags(zone_id);
+}
+
+std::string lua_get_zone_content_flags(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneContentFlags(zone_id, version);
+}
+
+std::string lua_get_zone_content_flags_disabled(uint32 zone_id)
+{
+	return zone_store.GetZoneContentFlagsDisabled(zone_id);
+}
+
+std::string lua_get_zone_content_flags_disabled(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneContentFlagsDisabled(zone_id, version);
+}
+
+int lua_get_zone_underworld_teleport_index(uint32 zone_id)
+{
+	return zone_store.GetZoneUnderworldTeleportIndex(zone_id);
+}
+
+int lua_get_zone_underworld_teleport_index(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneUnderworldTeleportIndex(zone_id, version);
+}
+
+int lua_get_zone_lava_damage(uint32 zone_id)
+{
+	return zone_store.GetZoneLavaDamage(zone_id);
+}
+
+int lua_get_zone_lava_damage(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneLavaDamage(zone_id, version);
+}
+
+int lua_get_zone_minimum_lava_damage(uint32 zone_id)
+{
+	return zone_store.GetZoneMinimumLavaDamage(zone_id);
+}
+
+int lua_get_zone_minimum_lava_damage(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneMinimumLavaDamage(zone_id, version);
+}
+
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
 	cur = table[#name]; \
 	if(luabind::type(cur) != LUA_TNIL) { \
@@ -4337,6 +4932,125 @@ luabind::scope lua_register_general() {
 		luabind::def("get_recipe_salvage_count", (int8(*)(uint32,uint32))&lua_get_recipe_salvage_count),
 		luabind::def("get_recipe_success_count", (int8(*)(uint32,uint32))&lua_get_recipe_success_count),
 		luabind::def("send_player_handin_event", (void(*)(void))&lua_send_player_handin_event),
+		luabind::def("get_zone_safe_x", (float(*)(uint32))&lua_get_zone_safe_x),
+		luabind::def("get_zone_safe_x", (float(*)(uint32,int))&lua_get_zone_safe_x),
+		luabind::def("get_zone_safe_y", (float(*)(uint32))&lua_get_zone_safe_y),
+		luabind::def("get_zone_safe_y", (float(*)(uint32,int))&lua_get_zone_safe_y),
+		luabind::def("get_zone_safe_z", (float(*)(uint32))&lua_get_zone_safe_z),
+		luabind::def("get_zone_safe_z", (float(*)(uint32,int))&lua_get_zone_safe_z),
+		luabind::def("get_zone_safe_heading", (float(*)(uint32))&lua_get_zone_safe_heading),
+		luabind::def("get_zone_safe_heading", (float(*)(uint32,int))&lua_get_zone_safe_heading),
+		luabind::def("get_zone_graveyard_id", (float(*)(uint32))&lua_get_zone_graveyard_id),
+		luabind::def("get_zone_graveyard_id", (float(*)(uint32,int))&lua_get_zone_graveyard_id),
+		luabind::def("get_zone_minimum_level", (uint8(*)(uint32))&lua_get_zone_minimum_level),
+		luabind::def("get_zone_minimum_level", (uint8(*)(uint32,int))&lua_get_zone_minimum_level),
+		luabind::def("get_zone_maximum_level", (uint8(*)(uint32))&lua_get_zone_maximum_level),
+		luabind::def("get_zone_maximum_level", (uint8(*)(uint32,int))&lua_get_zone_maximum_level),
+		luabind::def("get_zone_minimum_status", (uint8(*)(uint32))&lua_get_zone_minimum_status),
+		luabind::def("get_zone_minimum_status", (uint8(*)(uint32,int))&lua_get_zone_minimum_status),
+		luabind::def("get_zone_time_zone", (int(*)(uint32))&lua_get_zone_time_zone),
+		luabind::def("get_zone_time_zone", (int(*)(uint32,int))&lua_get_zone_time_zone),
+		luabind::def("get_zone_maximum_players", (int(*)(uint32))&lua_get_zone_maximum_players),
+		luabind::def("get_zone_maximum_players", (int(*)(uint32,int))&lua_get_zone_maximum_players),
+		luabind::def("get_zone_rule_set", (uint32(*)(uint32))&lua_get_zone_rule_set),
+		luabind::def("get_zone_rule_set", (uint32(*)(uint32,int))&lua_get_zone_rule_set),
+		luabind::def("get_zone_note", (std::string(*)(uint32))&lua_get_zone_note),
+		luabind::def("get_zone_note", (std::string(*)(uint32,int))&lua_get_zone_note),
+		luabind::def("get_zone_underworld", (float(*)(uint32))&lua_get_zone_underworld),
+		luabind::def("get_zone_underworld", (float(*)(uint32,int))&lua_get_zone_underworld),
+		luabind::def("get_zone_minimum_clip", (float(*)(uint32))&lua_get_zone_minimum_clip),
+		luabind::def("get_zone_minimum_clip", (float(*)(uint32,int))&lua_get_zone_minimum_clip),
+		luabind::def("get_zone_maximum_clip", (float(*)(uint32))&lua_get_zone_maximum_clip),
+		luabind::def("get_zone_maximum_clip", (float(*)(uint32,int))&lua_get_zone_maximum_clip),
+		luabind::def("get_zone_fog_minimum_clip", (float(*)(uint32))&lua_get_zone_fog_minimum_clip),
+		luabind::def("get_zone_fog_minimum_clip", (float(*)(uint32,uint8))&lua_get_zone_fog_minimum_clip),
+		luabind::def("get_zone_fog_minimum_clip", (float(*)(uint32,uint8,int))&lua_get_zone_fog_minimum_clip),
+		luabind::def("get_zone_fog_maximum_clip", (float(*)(uint32))&lua_get_zone_fog_maximum_clip),
+		luabind::def("get_zone_fog_maximum_clip", (float(*)(uint32,uint8))&lua_get_zone_fog_maximum_clip),
+		luabind::def("get_zone_fog_maximum_clip", (float(*)(uint32,uint8,int))&lua_get_zone_fog_maximum_clip),
+		luabind::def("get_zone_fog_red", (uint8(*)(uint32))&lua_get_zone_fog_red),
+		luabind::def("get_zone_fog_red", (uint8(*)(uint32,uint8))&lua_get_zone_fog_red),
+		luabind::def("get_zone_fog_red", (uint8(*)(uint32,uint8,int))&lua_get_zone_fog_red),
+		luabind::def("get_zone_fog_green", (uint8(*)(uint32))&lua_get_zone_fog_green),
+		luabind::def("get_zone_fog_green", (uint8(*)(uint32,uint8))&lua_get_zone_fog_green),
+		luabind::def("get_zone_fog_green", (uint8(*)(uint32,uint8,int))&lua_get_zone_fog_green),
+		luabind::def("get_zone_fog_blue", (uint8(*)(uint32))&lua_get_zone_fog_blue),
+		luabind::def("get_zone_fog_blue", (uint8(*)(uint32,uint8))&lua_get_zone_fog_blue),
+		luabind::def("get_zone_fog_blue", (uint8(*)(uint32,uint8,int))&lua_get_zone_fog_blue),
+		luabind::def("get_zone_sky", (uint8(*)(uint32))&lua_get_zone_sky),
+		luabind::def("get_zone_sky", (uint8(*)(uint32,int))&lua_get_zone_sky),
+		luabind::def("get_zone_ztype", (uint8(*)(uint32))&lua_get_zone_ztype),
+		luabind::def("get_zone_ztype", (uint8(*)(uint32,int))&lua_get_zone_ztype),
+		luabind::def("get_zone_experience_multiplier", (float(*)(uint32))&lua_get_zone_experience_multiplier),
+		luabind::def("get_zone_experience_multiplier", (float(*)(uint32,int))&lua_get_zone_experience_multiplier),
+		luabind::def("get_zone_walk_speed", (float(*)(uint32))&lua_get_zone_walk_speed),
+		luabind::def("get_zone_walk_speed", (float(*)(uint32,int))&lua_get_zone_walk_speed),
+		luabind::def("get_zone_time_type", (uint8(*)(uint32))&lua_get_zone_time_type),
+		luabind::def("get_zone_time_type", (uint8(*)(uint32,int))&lua_get_zone_time_type),
+		luabind::def("get_zone_fog_density", (float(*)(uint32))&lua_get_zone_fog_density),
+		luabind::def("get_zone_fog_density", (float(*)(uint32,int))&lua_get_zone_fog_density),
+		luabind::def("get_zone_flag_needed", (std::string(*)(uint32))&lua_get_zone_flag_needed),
+		luabind::def("get_zone_flag_needed", (std::string(*)(uint32,int))&lua_get_zone_flag_needed),
+		luabind::def("get_zone_can_bind", (int8(*)(uint32))&lua_get_zone_can_bind),
+		luabind::def("get_zone_can_bind", (int8(*)(uint32,int))&lua_get_zone_can_bind),
+		luabind::def("get_zone_can_combat", (int8(*)(uint32))&lua_get_zone_can_combat),
+		luabind::def("get_zone_can_combat", (int8(*)(uint32,int))&lua_get_zone_can_combat),
+		luabind::def("get_zone_can_levitate", (int8(*)(uint32))&lua_get_zone_can_levitate),
+		luabind::def("get_zone_can_levitate", (int8(*)(uint32,int))&lua_get_zone_can_levitate),
+		luabind::def("get_zone_cast_outdoor", (int8(*)(uint32))&lua_get_zone_cast_outdoor),
+		luabind::def("get_zone_cast_outdoor", (int8(*)(uint32,int))&lua_get_zone_cast_outdoor),
+		luabind::def("get_zone_hotzone", (uint8(*)(uint32))&lua_get_zone_hotzone),
+		luabind::def("get_zone_hotzone", (uint8(*)(uint32,int))&lua_get_zone_hotzone),
+		luabind::def("get_zone_instance_type", (uint8(*)(uint32))&lua_get_zone_instance_type),
+		luabind::def("get_zone_instance_type", (uint8(*)(uint32,int))&lua_get_zone_instance_type),
+		luabind::def("get_zone_shutdown_delay", (uint64(*)(uint32))&lua_get_zone_shutdown_delay),
+		luabind::def("get_zone_shutdown_delay", (uint64(*)(uint32,int))&lua_get_zone_shutdown_delay),
+			luabind::def("get_zone_peqzone", (int8(*)(uint32))&lua_get_zone_peqzone),
+			luabind::def("get_zone_peqzone", (int8(*)(uint32,int))&lua_get_zone_peqzone),
+			luabind::def("get_zone_expansion", (int8(*)(uint32))&lua_get_zone_expansion),
+			luabind::def("get_zone_expansion", (int8(*)(uint32,int))&lua_get_zone_expansion),
+			luabind::def("get_zone_bypass_expansion_check", (int8(*)(uint32))&lua_get_zone_bypass_expansion_check),
+			luabind::def("get_zone_bypass_expansion_check", (int8(*)(uint32,int))&lua_get_zone_bypass_expansion_check),
+			luabind::def("get_zone_suspend_buffs", (int8(*)(uint32))&lua_get_zone_suspend_buffs),
+			luabind::def("get_zone_suspend_buffs", (int8(*)(uint32,int))&lua_get_zone_suspend_buffs),
+			luabind::def("get_zone_rain_chance", (int(*)(uint32))&lua_get_zone_rain_chance),
+			luabind::def("get_zone_rain_chance", (int(*)(uint32,int))&lua_get_zone_rain_chance),
+			luabind::def("get_zone_rain_duration", (int(*)(uint32))&lua_get_zone_rain_duration),
+			luabind::def("get_zone_rain_duration", (int(*)(uint32,int))&lua_get_zone_rain_duration),
+			luabind::def("get_zone_snow_chance", (int(*)(uint32))&lua_get_zone_snow_chance),
+			luabind::def("get_zone_snow_chance", (int(*)(uint32,int))&lua_get_zone_snow_chance),
+			luabind::def("get_zone_snow_duration", (int(*)(uint32))&lua_get_zone_snow_duration),
+			luabind::def("get_zone_snow_duration", (int(*)(uint32,int))&lua_get_zone_snow_duration),
+			luabind::def("get_zone_gravity", (float(*)(uint32))&lua_get_zone_gravity),
+			luabind::def("get_zone_gravity", (float(*)(uint32,int))&lua_get_zone_gravity),
+			luabind::def("get_zone_type", (int(*)(uint32))&lua_get_zone_type),
+			luabind::def("get_zone_type", (int(*)(uint32,int))&lua_get_zone_type),
+			luabind::def("get_zone_sky_lock", (int(*)(uint32))&lua_get_zone_sky_lock),
+			luabind::def("get_zone_sky_lock", (int(*)(uint32,int))&lua_get_zone_sky_lock),
+			luabind::def("get_zone_fast_regen_hp", (int(*)(uint32))&lua_get_zone_fast_regen_hp),
+			luabind::def("get_zone_fast_regen_hp", (int(*)(uint32,int))&lua_get_zone_fast_regen_hp),
+			luabind::def("get_zone_fast_regen_mana", (int(*)(uint32))&lua_get_zone_fast_regen_mana),
+			luabind::def("get_zone_fast_regen_mana", (int(*)(uint32,int))&lua_get_zone_fast_regen_mana),
+			luabind::def("get_zone_fast_regen_endurance", (int(*)(uint32))&lua_get_zone_fast_regen_endurance),
+			luabind::def("get_zone_fast_regen_endurance", (int(*)(uint32,int))&lua_get_zone_fast_regen_endurance),
+			luabind::def("get_zone_npc_maximum_aggro_distance", (int(*)(uint32))&lua_get_zone_npc_maximum_aggro_distance),
+			luabind::def("get_zone_npc_maximum_aggro_distance", (int(*)(uint32,int))&lua_get_zone_npc_maximum_aggro_distance),
+			luabind::def("get_zone_npc_maximum_movement_update_range", (uint32(*)(uint32))&lua_get_zone_maximum_movement_update_range),
+			luabind::def("get_zone_npc_maximum_movement_update_range", (uint32(*)(uint32,int))&lua_get_zone_maximum_movement_update_range),
+			luabind::def("get_zone_minimum_expansion", (int8(*)(uint32))&lua_get_zone_minimum_expansion),
+			luabind::def("get_zone_minimum_expansion", (int8(*)(uint32,int))&lua_get_zone_minimum_expansion),
+			luabind::def("get_zone_maximum_expansion", (int8(*)(uint32))&lua_get_zone_maximum_expansion),
+			luabind::def("get_zone_maximum_expansion", (int8(*)(uint32,int))&lua_get_zone_maximum_expansion),
+			luabind::def("get_zone_content_flags", (std::string(*)(uint32))&lua_get_zone_content_flags),
+			luabind::def("get_zone_content_flags", (std::string(*)(uint32,int))&lua_get_zone_content_flags),
+			luabind::def("get_zone_content_flags_disabled", (std::string(*)(uint32))&lua_get_zone_content_flags_disabled),
+			luabind::def("get_zone_content_flags_disabled", (std::string(*)(uint32,int))&lua_get_zone_content_flags_disabled),
+			luabind::def("get_zone_underworld_teleport_index", (int(*)(uint32))&lua_get_zone_underworld_teleport_index),
+			luabind::def("get_zone_underworld_teleport_index", (int(*)(uint32,int))&lua_get_zone_underworld_teleport_index),
+			luabind::def("get_zone_lava_damage", (int(*)(uint32))&lua_get_zone_lava_damage),
+			luabind::def("get_zone_lava_damage", (int(*)(uint32,int))&lua_get_zone_lava_damage),
+			luabind::def("get_zone_minimum_lava_damage", (int(*)(uint32))&lua_get_zone_minimum_lava_damage),
+			luabind::def("get_zone_minimum_lava_damage", (int(*)(uint32,int))&lua_get_zone_minimum_lava_damage),
 		/*
 			Cross Zone
 		*/

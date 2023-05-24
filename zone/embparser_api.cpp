@@ -18,6 +18,7 @@
 
 #include "../common/features.h"
 #include "../common/content/world_content_service.h"
+#include "../common/zone_store.h"
 
 #ifdef EMBPERL
 #ifdef EMBPERL_XS
@@ -4119,6 +4120,621 @@ void Perl__send_player_handin_event()
 	quest_manager.SendPlayerHandinEvent();
 }
 
+float Perl__GetZoneSafeX(uint32 zone_id)
+{
+	return zone_store.GetZoneSafeCoordinates(zone_id).x;
+}
+
+float Perl__GetZoneSafeX(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneSafeCoordinates(zone_id, version).x;
+}
+
+float Perl__GetZoneSafeY(uint32 zone_id)
+{
+	return zone_store.GetZoneSafeCoordinates(zone_id).y;
+}
+
+float Perl__GetZoneSafeY(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneSafeCoordinates(zone_id, version).y;
+}
+
+float Perl__GetZoneSafeZ(uint32 zone_id)
+{
+	return zone_store.GetZoneSafeCoordinates(zone_id).z;
+}
+
+float Perl__GetZoneSafeZ(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneSafeCoordinates(zone_id, version).z;
+}
+
+float Perl__GetZoneSafeHeading(uint32 zone_id)
+{
+	return zone_store.GetZoneSafeCoordinates(zone_id).w;
+}
+
+float Perl__GetZoneSafeHeading(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneSafeCoordinates(zone_id, version).w;
+}
+
+float Perl__GetZoneGraveyardID(uint32 zone_id)
+{
+	return zone_store.GetZoneGraveyardID(zone_id);
+}
+
+float Perl__GetZoneGraveyardID(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneGraveyardID(zone_id, version);
+}
+
+uint8 Perl__GetZoneMinimumLevel(uint32 zone_id)
+{
+	return zone_store.GetZoneMinimumLevel(zone_id);
+}
+
+uint8 Perl__GetZoneMinimumLevel(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneMinimumLevel(zone_id, version);
+}
+
+uint8 Perl__GetZoneMaximumLevel(uint32 zone_id)
+{
+	return zone_store.GetZoneMaximumLevel(zone_id);
+}
+
+uint8 Perl__GetZoneMaximumLevel(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneMaximumLevel(zone_id, version);
+}
+
+uint8 Perl__GetZoneMinimumStatus(uint32 zone_id)
+{
+	return zone_store.GetZoneMinimumStatus(zone_id);
+}
+
+uint8 Perl__GetZoneMinimumStatus(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneMinimumStatus(zone_id, version);
+}
+
+int Perl__GetZoneTimeZone(uint32 zone_id)
+{
+	return zone_store.GetZoneTimeZone(zone_id);
+}
+
+int Perl__GetZoneTimeZone(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneTimeZone(zone_id, version);
+}
+
+int Perl__GetZoneMaximumPlayers(uint32 zone_id)
+{
+	return zone_store.GetZoneMaximumPlayers(zone_id);
+}
+
+int Perl__GetZoneMaximumPlayers(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneMaximumPlayers(zone_id, version);
+}
+
+uint32 Perl__GetZoneRuleSet(uint32 zone_id)
+{
+	return zone_store.GetZoneRuleSet(zone_id);
+}
+
+uint32 Perl__GetZoneRuleSet(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneRuleSet(zone_id, version);
+}
+
+std::string Perl__GetZoneNote(uint32 zone_id)
+{
+	return zone_store.GetZoneNote(zone_id);
+}
+
+std::string Perl__GetZoneNote(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneNote(zone_id, version);
+}
+
+float Perl__GetZoneUnderworld(uint32 zone_id)
+{
+	return zone_store.GetZoneUnderworld(zone_id);
+}
+
+float Perl__GetZoneUnderworld(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneUnderworld(zone_id, version);
+}
+
+float Perl__GetZoneMinimumClip(uint32 zone_id)
+{
+	return zone_store.GetZoneMinimumClip(zone_id);
+}
+
+float Perl__GetZoneMinimumClip(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneMinimumClip(zone_id, version);
+}
+
+float Perl__GetZoneMaximumClip(uint32 zone_id)
+{
+	return zone_store.GetZoneMaximumClip(zone_id);
+}
+
+float Perl__GetZoneMaximumClip(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneMaximumClip(zone_id, version);
+}
+
+float Perl__GetZoneFogMinimumClip(uint32 zone_id)
+{
+	return zone_store.GetZoneFogMinimumClip(zone_id);
+}
+
+float Perl__GetZoneFogMinimumClip(uint32 zone_id, uint8 slot)
+{
+	return zone_store.GetZoneFogMinimumClip(zone_id, slot);
+}
+
+float Perl__GetZoneFogMinimumClip(uint32 zone_id, uint8 slot, int version)
+{
+	return zone_store.GetZoneFogMinimumClip(zone_id, slot, version);
+}
+
+float Perl__GetZoneFogMaximumClip(uint32 zone_id)
+{
+	return zone_store.GetZoneFogMaximumClip(zone_id);
+}
+
+float Perl__GetZoneFogMaximumClip(uint32 zone_id, uint8 slot)
+{
+	return zone_store.GetZoneFogMaximumClip(zone_id, slot);
+}
+
+float Perl__GetZoneFogMaximumClip(uint32 zone_id, uint8 slot, int version)
+{
+	return zone_store.GetZoneFogMaximumClip(zone_id, slot, version);
+}
+
+uint8 Perl__GetZoneFogRed(uint32 zone_id)
+{
+	return zone_store.GetZoneFogRed(zone_id);
+}
+
+uint8 Perl__GetZoneFogRed(uint32 zone_id, uint8 slot)
+{
+	return zone_store.GetZoneFogRed(zone_id, slot);
+}
+
+uint8 Perl__GetZoneFogRed(uint32 zone_id, uint8 slot, int version)
+{
+	return zone_store.GetZoneFogRed(zone_id, slot, version);
+}
+
+uint8 Perl__GetZoneFogGreen(uint32 zone_id)
+{
+	return zone_store.GetZoneFogGreen(zone_id);
+}
+
+uint8 Perl__GetZoneFogGreen(uint32 zone_id, uint8 slot)
+{
+	return zone_store.GetZoneFogGreen(zone_id, slot);
+}
+
+uint8 Perl__GetZoneFogGreen(uint32 zone_id, uint8 slot, int version)
+{
+	return zone_store.GetZoneFogGreen(zone_id, slot, version);
+}
+
+uint8 Perl__GetZoneFogBlue(uint32 zone_id)
+{
+	return zone_store.GetZoneFogBlue(zone_id);
+}
+
+uint8 Perl__GetZoneFogBlue(uint32 zone_id, uint8 slot)
+{
+	return zone_store.GetZoneFogBlue(zone_id, slot);
+}
+
+uint8 Perl__GetZoneFogBlue(uint32 zone_id, uint8 slot, int version)
+{
+	return zone_store.GetZoneFogBlue(zone_id, slot, version);
+}
+
+uint8 Perl__GetZoneSky(uint32 zone_id)
+{
+	return zone_store.GetZoneSky(zone_id);
+}
+
+uint8 Perl__GetZoneSky(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneSky(zone_id, version);
+}
+
+uint8 Perl__GetZoneZType(uint32 zone_id)
+{
+	return zone_store.GetZoneZType(zone_id);
+}
+
+uint8 Perl__GetZoneZType(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneZType(zone_id, version);
+}
+
+float Perl__GetZoneExperienceMultiplier(uint32 zone_id)
+{
+	return zone_store.GetZoneExperienceMultiplier(zone_id);
+}
+
+float Perl__GetZoneExperienceMultiplier(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneExperienceMultiplier(zone_id, version);
+}
+
+float Perl__GetZoneWalkSpeed(uint32 zone_id)
+{
+	return zone_store.GetZoneWalkSpeed(zone_id);
+}
+
+float Perl__GetZoneWalkSpeed(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneWalkSpeed(zone_id, version);
+}
+
+uint8 Perl__GetZoneTimeType(uint32 zone_id)
+{
+	return zone_store.GetZoneTimeType(zone_id);
+}
+
+uint8 Perl__GetZoneTimeType(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneTimeType(zone_id, version);
+}
+
+float Perl__GetZoneFogDensity(uint32 zone_id)
+{
+	return zone_store.GetZoneFogDensity(zone_id);
+}
+
+float Perl__GetZoneFogDensity(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneFogDensity(zone_id, version);
+}
+
+std::string Perl__GetZoneFlagNeeded(uint32 zone_id)
+{
+	return zone_store.GetZoneFlagNeeded(zone_id);
+}
+
+std::string Perl__GetZoneFlagNeeded(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneFlagNeeded(zone_id, version);
+}
+
+int8 Perl__GetZoneCanBind(uint32 zone_id)
+{
+	return zone_store.GetZoneCanBind(zone_id);
+}
+
+int8 Perl__GetZoneCanBind(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneCanBind(zone_id, version);
+}
+
+int8 Perl__GetZoneCanCombat(uint32 zone_id)
+{
+	return zone_store.GetZoneCanCombat(zone_id);
+}
+
+int8 Perl__GetZoneCanCombat(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneCanCombat(zone_id, version);
+}
+
+int8 Perl__GetZoneCanLevitate(uint32 zone_id)
+{
+	return zone_store.GetZoneCanLevitate(zone_id);
+}
+
+int8 Perl__GetZoneCanLevitate(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneCanLevitate(zone_id, version);
+}
+
+int8 Perl__GetZoneCastOutdoor(uint32 zone_id)
+{
+	return zone_store.GetZoneCastOutdoor(zone_id);
+}
+
+int8 Perl__GetZoneCastOutdoor(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneCastOutdoor(zone_id, version);
+}
+
+uint8 Perl__GetZoneHotzone(uint32 zone_id)
+{
+	return zone_store.GetZoneHotzone(zone_id);
+}
+
+uint8 Perl__GetZoneHotzone(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneHotzone(zone_id, version);
+}
+
+uint8 Perl__GetZoneInstanceType(uint32 zone_id)
+{
+	return zone_store.GetZoneInstanceType(zone_id);
+}
+
+uint8 Perl__GetZoneInstanceType(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneInstanceType(zone_id, version);
+}
+
+uint64 Perl__GetZoneShutdownDelay(uint32 zone_id)
+{
+	return zone_store.GetZoneShutdownDelay(zone_id);
+}
+
+uint64 Perl__GetZoneShutdownDelay(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneShutdownDelay(zone_id, version);
+}
+
+int8 Perl__GetZonePEQZone(uint32 zone_id)
+{
+	return zone_store.GetZonePEQZone(zone_id);
+}
+
+int8 Perl__GetZonePEQZone(uint32 zone_id, int version)
+{
+	return zone_store.GetZonePEQZone(zone_id, version);
+}
+
+int8 Perl__GetZoneExpansion(uint32 zone_id)
+{
+	return zone_store.GetZoneExpansion(zone_id);
+}
+
+int8 Perl__GetZoneExpansion(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneExpansion(zone_id, version);
+}
+
+int8 Perl__GetZoneBypassExpansionCheck(uint32 zone_id)
+{
+	return zone_store.GetZoneBypassExpansionCheck(zone_id);
+}
+
+int8 Perl__GetZoneBypassExpansionCheck(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneBypassExpansionCheck(zone_id, version);
+}
+
+uint8 Perl__GetZoneSuspendBuffs(uint32 zone_id)
+{
+	return zone_store.GetZoneSuspendBuffs(zone_id);
+}
+
+uint8 Perl__GetZoneSuspendBuffs(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneSuspendBuffs(zone_id, version);
+}
+
+int Perl__GetZoneRainChance(uint32 zone_id)
+{
+	return zone_store.GetZoneRainChance(zone_id);
+}
+
+int Perl__GetZoneRainChance(uint32 zone_id, uint8 slot)
+{
+	return zone_store.GetZoneRainChance(zone_id, slot);
+}
+
+int Perl__GetZoneRainChance(uint32 zone_id, uint8 slot, int version)
+{
+	return zone_store.GetZoneRainChance(zone_id, slot, version);
+}
+
+int Perl__GetZoneRainDuration(uint32 zone_id)
+{
+	return zone_store.GetZoneRainDuration(zone_id);
+}
+
+int Perl__GetZoneRainDuration(uint32 zone_id, uint8 slot)
+{
+	return zone_store.GetZoneRainDuration(zone_id, slot);
+}
+
+int Perl__GetZoneRainDuration(uint32 zone_id, uint8 slot, int version)
+{
+	return zone_store.GetZoneRainDuration(zone_id, slot, version);
+}
+
+int Perl__GetZoneSnowChance(uint32 zone_id)
+{
+	return zone_store.GetZoneSnowChance(zone_id);
+}
+
+int Perl__GetZoneSnowChance(uint32 zone_id, uint8 slot)
+{
+	return zone_store.GetZoneSnowChance(zone_id, slot);
+}
+
+int Perl__GetZoneSnowChance(uint32 zone_id, uint8 slot, int version)
+{
+	return zone_store.GetZoneSnowChance(zone_id, slot, version);
+}
+
+int Perl__GetZoneSnowDuration(uint32 zone_id)
+{
+	return zone_store.GetZoneSnowDuration(zone_id);
+}
+
+int Perl__GetZoneSnowDuration(uint32 zone_id, uint8 slot)
+{
+	return zone_store.GetZoneSnowDuration(zone_id, slot);
+}
+
+int Perl__GetZoneSnowDuration(uint32 zone_id, uint8 slot, int version)
+{
+	return zone_store.GetZoneSnowDuration(zone_id, slot, version);
+}
+
+float Perl__GetZoneGravity(uint32 zone_id)
+{
+	return zone_store.GetZoneGravity(zone_id);
+}
+
+float Perl__GetZoneGravity(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneGravity(zone_id, version);
+}
+
+int Perl__GetZoneType(uint32 zone_id)
+{
+	return zone_store.GetZoneType(zone_id);
+}
+
+int Perl__GetZoneType(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneType(zone_id, version);
+}
+
+int8 Perl__GetZoneSkyLock(uint32 zone_id)
+{
+	return zone_store.GetZoneSkyLock(zone_id);
+}
+
+int8 Perl__GetZoneSkyLock(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneSkyLock(zone_id, version);
+}
+
+int Perl__GetZoneFastRegenHP(uint32 zone_id)
+{
+	return zone_store.GetZoneFastRegenHP(zone_id);
+}
+
+int Perl__GetZoneFastRegenHP(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneFastRegenHP(zone_id, version);
+}
+
+int Perl__GetZoneFastRegenMana(uint32 zone_id)
+{
+	return zone_store.GetZoneFastRegenMana(zone_id);
+}
+
+int Perl__GetZoneFastRegenMana(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneFastRegenMana(zone_id, version);
+}
+
+int Perl__GetZoneFastRegenEndurance(uint32 zone_id)
+{
+	return zone_store.GetZoneFastRegenEndurance(zone_id);
+}
+
+int Perl__GetZoneFastRegenEndurance(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneFastRegenEndurance(zone_id, version);
+}
+
+int Perl__GetZoneNPCMaximumAggroDistance(uint32 zone_id)
+{
+	return zone_store.GetZoneNPCMaximumAggroDistance(zone_id);
+}
+
+int Perl__GetZoneNPCMaximumAggroDistance(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneNPCMaximumAggroDistance(zone_id, version);
+}
+
+uint32 Perl__GetZoneMaximumMovementUpdateRange(uint32 zone_id)
+{
+	return zone_store.GetZoneMaximumMovementUpdateRange(zone_id);
+}
+
+uint32 Perl__GetZoneMaximumMovementUpdateRange(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneMaximumMovementUpdateRange(zone_id, version);
+}
+
+int8 Perl__GetZoneMinimumExpansion(uint32 zone_id)
+{
+	return zone_store.GetZoneMinimumExpansion(zone_id);
+}
+
+int8 Perl__GetZoneMinimumExpansion(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneMinimumExpansion(zone_id, version);
+}
+
+int8 Perl__GetZoneMaximumExpansion(uint32 zone_id)
+{
+	return zone_store.GetZoneMaximumExpansion(zone_id);
+}
+
+int8 Perl__GetZoneMaximumExpansion(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneMaximumExpansion(zone_id, version);
+}
+
+std::string Perl__GetZoneContentFlags(uint32 zone_id)
+{
+	return zone_store.GetZoneContentFlags(zone_id);
+}
+
+std::string Perl__GetZoneContentFlags(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneContentFlags(zone_id, version);
+}
+
+std::string Perl__GetZoneContentFlagsDisabled(uint32 zone_id)
+{
+	return zone_store.GetZoneContentFlagsDisabled(zone_id);
+}
+
+std::string Perl__GetZoneContentFlagsDisabled(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneContentFlagsDisabled(zone_id, version);
+}
+
+int Perl__GetZoneUnderworldTeleportIndex(uint32 zone_id)
+{
+	return zone_store.GetZoneUnderworldTeleportIndex(zone_id);
+}
+
+int Perl__GetZoneUnderworldTeleportIndex(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneUnderworldTeleportIndex(zone_id, version);
+}
+
+int Perl__GetZoneLavaDamage(uint32 zone_id)
+{
+	return zone_store.GetZoneLavaDamage(zone_id);
+}
+
+int Perl__GetZoneLavaDamage(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneLavaDamage(zone_id, version);
+}
+
+int Perl__GetZoneMinimumLavaDamage(uint32 zone_id)
+{
+	return zone_store.GetZoneMinimumLavaDamage(zone_id);
+}
+
+int Perl__GetZoneMinimumLavaDamage(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneMinimumLavaDamage(zone_id, version);
+}
+
 void perl_register_quest()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -4155,10 +4771,133 @@ void perl_register_quest()
 	package.add("GetSpellResistType", &Perl__GetSpellResistType);
 	package.add("GetSpellTargetType", &Perl__GetSpellTargetType);
 	package.add("GetTimeSeconds", &Perl__GetTimeSeconds);
+	package.add("GetZoneBypassExpansionCheck", (int8(*)(uint32))&Perl__GetZoneBypassExpansionCheck);
+	package.add("GetZoneBypassExpansionCheck", (int8(*)(uint32, int))&Perl__GetZoneBypassExpansionCheck);
+	package.add("GetZoneCanBind", (int8(*)(uint32))&Perl__GetZoneCanBind);
+	package.add("GetZoneCanBind", (int8(*)(uint32, int))&Perl__GetZoneCanBind);
+	package.add("GetZoneCanCombat", (int8(*)(uint32))&Perl__GetZoneCanCombat);
+	package.add("GetZoneCanCombat", (int8(*)(uint32, int))&Perl__GetZoneCanCombat);
+	package.add("GetZoneCanLevitate", (int8(*)(uint32))&Perl__GetZoneCanLevitate);
+	package.add("GetZoneCanLevitate", (int8(*)(uint32, int))&Perl__GetZoneCanLevitate);
+	package.add("GetZoneCastOutdoor", (int8(*)(uint32))&Perl__GetZoneCastOutdoor);
+	package.add("GetZoneCastOutdoor", (int8(*)(uint32, int))&Perl__GetZoneCastOutdoor);
+	package.add("GetZoneContentFlags", (std::string(*)(uint32))&Perl__GetZoneContentFlags);
+	package.add("GetZoneContentFlags", (std::string(*)(uint32, int))&Perl__GetZoneContentFlags);
+	package.add("GetZoneContentFlagsDisabled", (std::string(*)(uint32))&Perl__GetZoneContentFlagsDisabled);
+	package.add("GetZoneContentFlagsDisabled", (std::string(*)(uint32, int))&Perl__GetZoneContentFlagsDisabled);
+	package.add("GetZoneGraveyardID", (float(*)(uint32))&Perl__GetZoneGraveyardID);
+	package.add("GetZoneGraveyardID", (float(*)(uint32, int))&Perl__GetZoneGraveyardID);
+	package.add("GetZoneHotzone", (uint8(*)(uint32))&Perl__GetZoneHotzone);
+	package.add("GetZoneHotzone", (uint8(*)(uint32, int))&Perl__GetZoneHotzone);
+	package.add("GetZoneInstanceType", (uint8(*)(uint32))&Perl__GetZoneInstanceType);
+	package.add("GetZoneInstanceType", (uint8(*)(uint32, int))&Perl__GetZoneInstanceType);
 	package.add("GetZoneID", &Perl__GetZoneID);
+	package.add("GetZoneExpansion", (int8(*)(uint32))&Perl__GetZoneExpansion);
+	package.add("GetZoneExpansion", (int8(*)(uint32, int))&Perl__GetZoneExpansion);
+	package.add("GetZoneExperienceMultiplier", (float(*)(uint32))&Perl__GetZoneExperienceMultiplier);
+	package.add("GetZoneExperienceMultiplier", (float(*)(uint32, int))&Perl__GetZoneExperienceMultiplier);
+	package.add("GetZoneFastRegenHP", (int(*)(uint32))&Perl__GetZoneFastRegenHP);
+	package.add("GetZoneFastRegenHP", (int(*)(uint32, int))&Perl__GetZoneFastRegenHP);
+	package.add("GetZoneFastRegenMana", (int(*)(uint32))&Perl__GetZoneFastRegenMana);
+	package.add("GetZoneFastRegenMana", (int(*)(uint32, int))&Perl__GetZoneFastRegenMana);
+	package.add("GetZoneFastRegenEndurance", (int(*)(uint32))&Perl__GetZoneFastRegenEndurance);
+	package.add("GetZoneFastRegenEndurance", (int(*)(uint32, int))&Perl__GetZoneFastRegenEndurance);
+	package.add("GetZoneFlagNeeded", (std::string(*)(uint32))&Perl__GetZoneFlagNeeded);
+	package.add("GetZoneFlagNeeded", (std::string(*)(uint32, int))&Perl__GetZoneFlagNeeded);
+	package.add("GetZoneFogMaximumClip", (float(*)(uint32))&Perl__GetZoneFogMaximumClip);
+	package.add("GetZoneFogMaximumClip", (float(*)(uint32, uint8))&Perl__GetZoneFogMaximumClip);
+	package.add("GetZoneFogMaximumClip", (float(*)(uint32, uint8, int))&Perl__GetZoneFogMaximumClip);
+	package.add("GetZoneFogMinimumClip", (float(*)(uint32))&Perl__GetZoneFogMinimumClip);
+	package.add("GetZoneFogMinimumClip", (float(*)(uint32, uint8))&Perl__GetZoneFogMinimumClip);
+	package.add("GetZoneFogMinimumClip", (float(*)(uint32, uint8, int))&Perl__GetZoneFogMinimumClip);
+	package.add("GetZoneFogBlue", (uint8(*)(uint32))&Perl__GetZoneFogBlue);
+	package.add("GetZoneFogBlue", (uint8(*)(uint32, uint8))&Perl__GetZoneFogBlue);
+	package.add("GetZoneFogBlue", (uint8(*)(uint32, uint8, int))&Perl__GetZoneFogBlue);
+	package.add("GetZoneFogDensity", (float(*)(uint32))&Perl__GetZoneFogDensity);
+	package.add("GetZoneFogDensity", (float(*)(uint32, int))&Perl__GetZoneFogDensity);
+	package.add("GetZoneFogGreen", (uint8(*)(uint32))&Perl__GetZoneFogGreen);
+	package.add("GetZoneFogGreen", (uint8(*)(uint32, uint8))&Perl__GetZoneFogGreen);
+	package.add("GetZoneFogGreen", (uint8(*)(uint32, uint8, int))&Perl__GetZoneFogGreen);
+	package.add("GetZoneFogRed", (uint8(*)(uint32))&Perl__GetZoneFogRed);
+	package.add("GetZoneFogRed", (uint8(*)(uint32, uint8))&Perl__GetZoneFogRed);
+	package.add("GetZoneFogRed", (uint8(*)(uint32, uint8, int))&Perl__GetZoneFogRed);
+	package.add("GetZoneGravity", (float(*)(uint32))&Perl__GetZoneMaximumClip);
+	package.add("GetZoneGravity", (float(*)(uint32, int))&Perl__GetZoneMaximumClip);
+	package.add("GetZoneMaximumClip", (float(*)(uint32))&Perl__GetZoneMaximumClip);
+	package.add("GetZoneMaximumClip", (float(*)(uint32, int))&Perl__GetZoneMaximumClip);
+	package.add("GetZoneMaximumExpansion", (int8(*)(uint32))&Perl__GetZoneMaximumExpansion);
+	package.add("GetZoneMaximumExpansion", (int8(*)(uint32, int))&Perl__GetZoneMaximumExpansion);
+	package.add("GetZoneMaximumLevel", (uint8(*)(uint32))&Perl__GetZoneMaximumLevel);
+	package.add("GetZoneMaximumLevel", (uint8(*)(uint32, int))&Perl__GetZoneMaximumLevel);
+	package.add("GetZoneMaximumMovementUpdateRange", (uint32(*)(uint32))&Perl__GetZoneMaximumMovementUpdateRange);
+	package.add("GetZoneMaximumMovementUpdateRange", (uint32(*)(uint32, int))&Perl__GetZoneMaximumMovementUpdateRange);
+	package.add("GetZoneMaximumPlayers", (int(*)(uint32))&Perl__GetZoneMaximumPlayers);
+	package.add("GetZoneMaximumPlayers", (int(*)(uint32, int))&Perl__GetZoneMaximumPlayers);
+	package.add("GetZoneMinimumClip", (float(*)(uint32))&Perl__GetZoneMinimumClip);
+	package.add("GetZoneMinimumClip", (float(*)(uint32, int))&Perl__GetZoneMinimumClip);
+	package.add("GetZoneMinimumExpansion", (int8(*)(uint32))&Perl__GetZoneMinimumExpansion);
+	package.add("GetZoneMinimumExpansion", (int8(*)(uint32, int))&Perl__GetZoneMinimumExpansion);
+	package.add("GetZoneMinimumLavaDamage", (int(*)(uint32))&Perl__GetZoneMinimumLavaDamage);
+	package.add("GetZoneMinimumLavaDamage", (int(*)(uint32, int))&Perl__GetZoneMinimumLavaDamage);
+	package.add("GetZoneMinimumLevel", (uint8(*)(uint32))&Perl__GetZoneMinimumLevel);
+	package.add("GetZoneMinimumLevel", (uint8(*)(uint32, int))&Perl__GetZoneMinimumLevel);
+	package.add("GetZoneMinimumStatus", (uint8(*)(uint32))&Perl__GetZoneMinimumStatus);
+	package.add("GetZoneMinimumStatus", (uint8(*)(uint32, int))&Perl__GetZoneMinimumStatus);
+	package.add("GetZoneNote", (std::string(*)(uint32))&Perl__GetZoneNote);
+	package.add("GetZoneNote", (std::string(*)(uint32, int))&Perl__GetZoneNote);
+	package.add("GetZoneNPCMaximumAggroDistance", (int(*)(uint32))&Perl__GetZoneNPCMaximumAggroDistance);
+	package.add("GetZoneNPCMaximumAggroDistance", (int(*)(uint32, int))&Perl__GetZoneNPCMaximumAggroDistance);
+	package.add("GetZoneLavaDamage", (int(*)(uint32))&Perl__GetZoneLavaDamage);
+	package.add("GetZoneLavaDamage", (int(*)(uint32, int))&Perl__GetZoneLavaDamage);
 	package.add("GetZoneLongName", &Perl__GetZoneLongName);
 	package.add("GetZoneLongNameByID", &Perl__GetZoneLongNameByID);
+	package.add("GetZonePEQZone", (int8(*)(uint32))&Perl__GetZonePEQZone);
+	package.add("GetZonePEQZone", (int8(*)(uint32, int))&Perl__GetZonePEQZone);
+	package.add("GetZoneRainChance", (int(*)(uint32))&Perl__GetZoneRainChance);
+	package.add("GetZoneRainChance", (int(*)(uint32, uint8))&Perl__GetZoneRainChance);
+	package.add("GetZoneRainChance", (int(*)(uint32, uint8, int))&Perl__GetZoneRainChance);
+	package.add("GetZoneRainDuration", (int(*)(uint32))&Perl__GetZoneRainDuration);
+	package.add("GetZoneRainDuration", (int(*)(uint32, uint8))&Perl__GetZoneRainDuration);
+	package.add("GetZoneRainDuration", (int(*)(uint32, uint8, int))&Perl__GetZoneRainDuration);
+	package.add("GetZoneRuleSet", (uint32(*)(uint32))&Perl__GetZoneRuleSet);
+	package.add("GetZoneRuleSet", (uint32(*)(uint32, int))&Perl__GetZoneRuleSet);
+	package.add("GetZoneSafeHeading", (float(*)(uint32))&Perl__GetZoneSafeHeading);
+	package.add("GetZoneSafeHeading", (float(*)(uint32, int))&Perl__GetZoneSafeHeading);
+	package.add("GetZoneSafeX", (float(*)(uint32))&Perl__GetZoneSafeX);
+	package.add("GetZoneSafeX", (float(*)(uint32, int))&Perl__GetZoneSafeX);
+	package.add("GetZoneSafeY", (float(*)(uint32))&Perl__GetZoneSafeY);
+	package.add("GetZoneSafeY", (float(*)(uint32, int))&Perl__GetZoneSafeY);
+	package.add("GetZoneSafeZ", (float(*)(uint32))&Perl__GetZoneSafeZ);
+	package.add("GetZoneSafeZ", (float(*)(uint32, int))&Perl__GetZoneSafeZ);
+	package.add("GetZoneShutdownDelay", (uint64(*)(uint32))&Perl__GetZoneShutdownDelay);
+	package.add("GetZoneShutdownDelay", (uint64(*)(uint32, int))&Perl__GetZoneShutdownDelay);
+	package.add("GetZoneSky", (uint8(*)(uint32))&Perl__GetZoneSky);
+	package.add("GetZoneSky", (uint8(*)(uint32, int))&Perl__GetZoneSky);
+	package.add("GetZoneSkyLock", (int8(*)(uint32))&Perl__GetZoneSkyLock);
+	package.add("GetZoneSkyLock", (int8(*)(uint32, int))&Perl__GetZoneSkyLock);
+	package.add("GetZoneSnowChance", (int(*)(uint32))&Perl__GetZoneSnowChance);
+	package.add("GetZoneSnowChance", (int(*)(uint32, uint8))&Perl__GetZoneSnowChance);
+	package.add("GetZoneSnowChance", (int(*)(uint32, uint8, int))&Perl__GetZoneSnowChance);
+	package.add("GetZoneSnowDuration", (int(*)(uint32))&Perl__GetZoneSnowDuration);
+	package.add("GetZoneSnowDuration", (int(*)(uint32, uint8))&Perl__GetZoneSnowDuration);
+	package.add("GetZoneSnowDuration", (int(*)(uint32, uint8, int))&Perl__GetZoneSnowDuration);
+	package.add("GetZoneSuspendBuffs", (uint8(*)(uint32))&Perl__GetZoneSuspendBuffs);
+	package.add("GetZoneSuspendBuffs", (uint8(*)(uint32, int))&Perl__GetZoneSuspendBuffs);
+	package.add("GetZoneZType", (uint8(*)(uint32))&Perl__GetZoneZType);
+	package.add("GetZoneZType", (uint8(*)(uint32, int))&Perl__GetZoneZType);
 	package.add("GetZoneShortName", &Perl__GetZoneShortName);
+	package.add("GetZoneTimeType", (uint8(*)(uint32))&Perl__GetZoneTimeType);
+	package.add("GetZoneTimeType", (uint8(*)(uint32, int))&Perl__GetZoneTimeType);
+	package.add("GetZoneTimeZone", (int(*)(uint32))&Perl__GetZoneTimeZone);
+	package.add("GetZoneTimeZone", (int(*)(uint32, int))&Perl__GetZoneTimeZone);
+	package.add("GetZoneType", (int(*)(uint32))&Perl__GetZoneType);
+	package.add("GetZoneType", (int(*)(uint32, int))&Perl__GetZoneType);
+	package.add("GetZoneUnderworld", (float(*)(uint32))&Perl__GetZoneUnderworld);
+	package.add("GetZoneUnderworld", (float(*)(uint32, int))&Perl__GetZoneUnderworld);
+	package.add("GetZoneUnderworldTeleportIndex", (int(*)(uint32))&Perl__GetZoneUnderworldTeleportIndex);
+	package.add("GetZoneUnderworldTeleportIndex", (int(*)(uint32, int))&Perl__GetZoneUnderworldTeleportIndex);
+	package.add("GetZoneWalkSpeed", (float(*)(uint32))&Perl__GetZoneWalkSpeed);
+	package.add("GetZoneWalkSpeed", (float(*)(uint32, int))&Perl__GetZoneWalkSpeed);
 	package.add("set_rule", &Perl__set_rule);
 	package.add("get_rule", &Perl__get_rule);
 	package.add("get_data", &Perl__get_data);
