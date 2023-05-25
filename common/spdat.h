@@ -207,8 +207,6 @@
 #define RES_EFFECTS_BLOCK_WITH_BUFFS 2
 #define MOVE_NEW_SLOT 2
 
-const int Z_AGGRO=10;
-
 const uint32 MobAISpellRange=100; // max range of buffs
 
 enum FocusLimitIncludes {
