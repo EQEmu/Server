@@ -68,7 +68,7 @@ namespace DatabaseSchema {
 			{"character_spells",               "id"},
 			{"character_task_timers",          "character_id"},
 			{"character_tasks",                "charid"},
-			{"character_tribute",              "id"},
+			{"character_tribute",              "character_id"},
 			{"completed_tasks",                "charid"},
 			{"data_buckets",                   "id"},
 			{"faction_values",                 "char_id"},

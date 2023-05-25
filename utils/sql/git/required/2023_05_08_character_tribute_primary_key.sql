@@ -1,0 +1,4 @@
+ALTER TABLE `character_tribute` 
+CHANGE COLUMN `id` `character_id` int(11) UNSIGNED NOT NULL DEFAULT 0,
+ADD COLUMN `id` int(11) NOT NULL AUTO_INCREMENT FIRST,
+ADD PRIMARY KEY (`id`);

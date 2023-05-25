@@ -11,6 +11,7 @@
 #include "zone.h"
 #include "zonedb.h"
 #include "aura.h"
+#include "../common/repositories/character_tribute_repository.h"
 #include "../common/repositories/character_disciplines_repository.h"
 #include "../common/repositories/npc_types_repository.h"
 #include "../common/repositories/character_bind_repository.h"
@@ -958,23 +959,23 @@ bool ZoneDatabase::LoadCharacterBandolier(uint32 character_id, PlayerProfile_Str
 	return true;
 }
 
-bool ZoneDatabase::LoadCharacterTribute(uint32 character_id, PlayerProfile_Struct* pp){
-	std::string query = StringFormat("SELECT `tier`, `tribute` FROM `character_tribute` WHERE `id` = %u", character_id);
-	auto results = database.QueryDatabase(query);
-	int i = 0;
-	for (i = 0; i < EQ::invtype::TRIBUTE_SIZE; i++){
-		pp->tributes[i].tribute = 0xFFFFFFFF;
-		pp->tributes[i].tier = 0;
+void ZoneDatabase::LoadCharacterTribute(Client* c){
+	const auto& l = CharacterTributeRepository::GetWhere(database, fmt::format("character_id = {}", c->CharacterID()));
+
+	for (auto& t : c->GetPP().tributes) {
+		t.tier    = 0;
+		t.tribute = TRIBUTE_NONE;
 	}
-	i = 0;
-	for (auto& row = results.begin(); row != results.end(); ++row) {
-		if(Strings::ToInt(row[1]) != TRIBUTE_NONE){
-			pp->tributes[i].tier = Strings::ToInt(row[0]);
-			pp->tributes[i].tribute = Strings::ToInt(row[1]);
+
+	auto i = 0;
+
+	for (const auto& e : l) {
+		if (e.tribute != TRIBUTE_NONE) {
+			c->GetPP().tributes[i].tier    = e.tier;
+			c->GetPP().tributes[i].tribute = e.tribute;
 			i++;
 		}
 	}
-	return true;
 }
 
 bool ZoneDatabase::LoadCharacterPotions(uint32 character_id, PlayerProfile_Struct *pp)
@@ -1058,18 +1059,35 @@ bool ZoneDatabase::SaveCharacterDisc(uint32 character_id, uint32 slot_id, uint32
 	return true;
 }
 
-bool ZoneDatabase::SaveCharacterTribute(uint32 character_id, PlayerProfile_Struct* pp){
-	std::string query = StringFormat("DELETE FROM `character_tribute` WHERE `id` = %u", character_id);
-	QueryDatabase(query);
-	/* Save Tributes only if we have values... */
-	for (int i = 0; i < EQ::invtype::TRIBUTE_SIZE; i++){
-		if (pp->tributes[i].tribute >= 0 && pp->tributes[i].tribute != TRIBUTE_NONE){
-			std::string query = StringFormat("REPLACE INTO `character_tribute` (id, tier, tribute) VALUES (%u, %u, %u)", character_id, pp->tributes[i].tier, pp->tributes[i].tribute);
-			QueryDatabase(query);
-			LogDebug("ZoneDatabase::SaveCharacterTribute for character ID: [{}], tier:[{}] tribute:[{}] done", character_id, pp->tributes[i].tier, pp->tributes[i].tribute);
+void ZoneDatabase::SaveCharacterTribute(Client* c)
+{
+	std::vector<CharacterTributeRepository::CharacterTribute> tributes = {};
+	CharacterTributeRepository::CharacterTribute tribute = {};
+
+	uint32 tribute_count = 0;
+	for (auto& t : c->GetPP().tributes) {
+		if (t.tribute != TRIBUTE_NONE) {
+			tribute_count++;
 		}
 	}
-	return true;
+
+	tributes.reserve(tribute_count);
+
+	for (auto& t : c->GetPP().tributes) {
+		if (t.tribute != TRIBUTE_NONE) {
+			tribute.character_id = c->CharacterID();
+			tribute.tier         = t.tier;
+			tribute.tribute      = t.tribute;
+
+			tributes.emplace_back(tribute);
+		}
+	}
+
+	CharacterTributeRepository::DeleteWhere(database, fmt::format("character_id = {}", c->CharacterID()));
+
+	if (tribute_count > 0) {
+		CharacterTributeRepository::InsertMany(database, tributes);
+	}
 }
 
 bool ZoneDatabase::SaveCharacterBandolier(uint32 character_id, uint8 bandolier_id, uint8 bandolier_slot, uint32 item_id, uint32 icon, const char* bandolier_name)

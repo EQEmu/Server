@@ -1265,7 +1265,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	database.LoadCharacterDisciplines(cid, &m_pp); /* Load Character Disciplines */
 	database.LoadCharacterLanguages(cid, &m_pp); /* Load Character Languages */
 	database.LoadCharacterLeadershipAA(cid, &m_pp); /* Load Character Leadership AA's */
-	database.LoadCharacterTribute(cid, &m_pp); /* Load CharacterTribute */
+	database.LoadCharacterTribute(this); /* Load CharacterTribute */
 
 	// this pattern is strange
 	// this is remnants of the old way of doing things
