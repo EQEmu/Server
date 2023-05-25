@@ -65,7 +65,7 @@ void command_entityvariable(Client *c, const Seperator *sep)
 			).c_str()
 		);
 	} else if (is_delete) {
-		const std::string variable_name = sep->argplus[1];
+		const std::string variable_name = sep->argplus[2];
 
 		if (!t->EntityVariableExists(variable_name)) {
 			c->Message(
@@ -94,8 +94,8 @@ void command_entityvariable(Client *c, const Seperator *sep)
 
 		return;
 	} else if (is_set) {
-		const std::string variable_name  = sep->arg[1];
-		const std::string variable_value = sep->arg[2];
+		const std::string variable_name  = sep->arg[2];
+		const std::string variable_value = sep->arg[3];
 
 		t->SetEntityVariable(variable_name, variable_value);
 
@@ -113,7 +113,7 @@ void command_entityvariable(Client *c, const Seperator *sep)
 
 		uint32 variable_count  = 0;
 		uint32 variable_number = 1;
-		const std::string search_criteria = arguments ? sep->argplus[1] : "";
+		const std::string search_criteria = arguments ? sep->argplus[2] : "";
 
 		for (const auto &e: l) {
 			if (
