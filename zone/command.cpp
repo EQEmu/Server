@@ -102,7 +102,6 @@ int command_init(void)
 		command_add("castspell", "[Spell ID] [Instant (0 = False, 1 = True, Default is 1 if Unused)] - Cast a spell", AccountStatus::Guide, command_castspell) ||
 		command_add("chat", "[Channel ID] [Message] - Send a channel message to all zones", AccountStatus::GMMgmt, command_chat) ||
 		command_add("checklos", "Check for line of sight to your target", AccountStatus::Guide, command_checklos) ||
-		command_add("clearentityvariables", "Clear all entity variables from yourself or your target", AccountStatus::GMAdmin, command_clearentityvariables) ||
 		command_add("copycharacter", "[source_char_name] [dest_char_name] [dest_account_name] - Copies character to destination account", AccountStatus::GMImpossible, command_copycharacter) ||
 		command_add("corpse", "Manipulate corpses, use with no arguments for help", AccountStatus::Guide, command_corpse) ||
 		command_add("corpsefix", "Attempts to bring corpses from underneath the ground within close proximity of the player", AccountStatus::Player, command_corpsefix) ||
@@ -113,7 +112,6 @@ int command_init(void)
 		command_add("date", "[Year] [Month] [Day] [Hour] [Minute] - Set EQ time (Hour and Minute are optional)", AccountStatus::EQSupport, command_date) ||
 		command_add("dbspawn2", "[Spawngroup ID] [Respawn] [Variance] [Condition ID] [Condition Minimum] - Spawn an NPC from a predefined row in the spawn2 table, Respawn and Variance are in Seconds (condition is optional)", AccountStatus::GMAdmin, command_dbspawn2) ||
 		command_add("delacct", "[Account ID|Account Name] - Delete an account by ID or Name", AccountStatus::GMLeadAdmin, command_delacct) ||
-		command_add("deleteentityvariable", "[Variable Name] - Delete an entity variable by name from yourself or your target", AccountStatus::GMAdmin, command_deleteentityvariable) ||
 		command_add("delpetition", "[petition number] - Delete a petition", AccountStatus::ApprenticeGuide, command_delpetition) ||
 		command_add("depop", "[Start Spawn Timer] - Depop your NPC target and optionally start their spawn timer (false by default)", AccountStatus::Guide, command_depop) ||
 		command_add("depopzone", "[Start Spawn Timers] - Depop the zone and optionally start spawn timers (false by default)", AccountStatus::GMAdmin, command_depopzone) ||
@@ -133,6 +131,7 @@ int command_init(void)
 		command_add("emptyinventory", "Clears your or your target's entire inventory (Equipment, General, Bank, and Shared Bank)", AccountStatus::GMImpossible, command_emptyinventory) ||
 		command_add("enablerecipe", "[Recipe ID] - Enables a Recipe", AccountStatus::QuestTroupe, command_enablerecipe) ||
 		command_add("endurance", "Restores your or your target's endurance.", AccountStatus::Guide, command_endurance) ||
+		command_add("entityvariable", "[Clear|Delete|Set|View] - Modify entity variables for yourself or your target", AccountStatus::GMAdmin, command_entityvariable) ||
 		command_add("exptoggle", "[Toggle] - Toggle your or your target's experience gain.", AccountStatus::QuestTroupe, command_exptoggle) ||
 		command_add("faction", "[Find (criteria | all ) | Review (criteria | all) | Reset (id)] - Resets Player's Faction", AccountStatus::QuestTroupe, command_faction) ||
 		command_add("factionassociation", "[factionid] [amount] - triggers a faction hits via association", AccountStatus::GMLeadAdmin, command_faction_association) ||
@@ -281,7 +280,6 @@ int command_init(void)
 		command_add("setanon", "[Anonymous Flag] - Set you or your target's Anonymous Flag (0 = Not Anonymous, 1 = Anonymous, 2 = Roleplaying)", AccountStatus::QuestTroupe, command_setanon) ||
 		command_add("setcrystals", "[value] - Set your or your player target's available radiant or ebon crystals", AccountStatus::GMAdmin, command_setcrystals) ||
 		command_add("setendurance", "[Endurance] - Set your or your target's Endurance", AccountStatus::GMAdmin, command_setendurance) ||
-		command_add("setentityvariable", "[Variable Name] [Variable Value] - Set an entity variable for yourself or your target", AccountStatus::GMAdmin, command_setentityvariable) ||
 		command_add("setfaction", "[Faction ID] - Sets targeted NPC's faction in the database", AccountStatus::GMAreas, command_setfaction) ||
 		command_add("sethp", "[Health] - Set your or your target's Health", AccountStatus::GMAdmin, command_sethp) ||
 		command_add("setlanguage", "[Language ID] [Value] - Set your or your target's Language by ID to Value", AccountStatus::Guide, command_setlanguage) ||
@@ -339,7 +337,6 @@ int command_init(void)
 		command_add("uptime", "[zone server id] - Get uptime of worldserver, or zone server if argument provided", AccountStatus::Steward, command_uptime) ||
 		command_add("version", "Display current version of EQEmu server", AccountStatus::Player, command_version) ||
 		command_add("viewcurrencies", "View your or your target's currencies", AccountStatus::GMAdmin, command_viewcurrencies) ||
-		command_add("viewentityvariables", "[Search Criteria] - View your or your target's entity variables (Search Criteria is optional)", AccountStatus::GMAdmin, command_viewentityvariables) ||
 		command_add("viewnpctype", "[NPC ID] - Show stats for an NPC by NPC ID", AccountStatus::GMAdmin, command_viewnpctype) ||
 		command_add("viewpetition", "[petition number] - View a petition", AccountStatus::ApprenticeGuide, command_viewpetition) ||
 		command_add("viewrecipe", "[Recipe ID] - Show a recipe's entries", AccountStatus::GMAdmin, command_viewrecipe) ||
@@ -950,7 +947,6 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/castspell.cpp"
 #include "gm_commands/chat.cpp"
 #include "gm_commands/checklos.cpp"
-#include "gm_commands/clearentityvariables.cpp"
 #include "gm_commands/copycharacter.cpp"
 #include "gm_commands/corpse.cpp"
 #include "gm_commands/corpsefix.cpp"
@@ -961,7 +957,6 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/date.cpp"
 #include "gm_commands/dbspawn2.cpp"
 #include "gm_commands/delacct.cpp"
-#include "gm_commands/deleteentityvariable.cpp"
 #include "gm_commands/delpetition.cpp"
 #include "gm_commands/depop.cpp"
 #include "gm_commands/depopzone.cpp"
@@ -982,6 +977,7 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/emptyinventory.cpp"
 #include "gm_commands/enablerecipe.cpp"
 #include "gm_commands/endurance.cpp"
+#include "gm_commands/entityvariable.cpp"
 #include "gm_commands/exptoggle.cpp"
 #include "gm_commands/faction.cpp"
 #include "gm_commands/feature.cpp"
@@ -1123,7 +1119,6 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/setanon.cpp"
 #include "gm_commands/setcrystals.cpp"
 #include "gm_commands/setendurance.cpp"
-#include "gm_commands/setentityvariable.cpp"
 #include "gm_commands/setfaction.cpp"
 #include "gm_commands/sethp.cpp"
 #include "gm_commands/setlanguage.cpp"
@@ -1181,7 +1176,6 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/uptime.cpp"
 #include "gm_commands/version.cpp"
 #include "gm_commands/viewcurrencies.cpp"
-#include "gm_commands/viewentityvariables.cpp"
 #include "gm_commands/viewnpctype.cpp"
 #include "gm_commands/viewpetition.cpp"
 #include "gm_commands/viewrecipe.cpp"
