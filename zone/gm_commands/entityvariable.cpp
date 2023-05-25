@@ -166,7 +166,7 @@ void command_entityvariable(Client *c, const Seperator *sep)
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"{} {} {} entity variable{}{}, would you like to {} {} all of {} entity variables?",
+				"{} {} {} entity variable{}{}, would you like to {} all of {} entity variables?",
 				c->GetTargetDescription(t, TargetDescriptionType::UCYou),
 				c == t ? "have" : "has",
 				variable_count,
