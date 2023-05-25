@@ -34,7 +34,7 @@ void command_xtargets(Client *c, const Seperator *sep)
 		fmt::format(
 			"Max number of XTargets set to {} for {}.",
 			new_max,
-			c->GetTargetDescription(t, TargetDescriptionType::LCSelf)
+			c->GetTargetDescription(t)
 		).c_str()
 	);
 }
