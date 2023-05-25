@@ -3345,30 +3345,27 @@ void ZoneDatabase::SavePetInfo(Client *client)
 		}
 	}
 
+	// Delete existing pet info
+	CharacterPetInfoRepository::DeleteWhere(database, fmt::format("char_id = {}", client->CharacterID()));
+
 	// insert pet info into database
 	if (!pet_infos.empty()) {
-		// Delete existing pet info
-		CharacterPetInfoRepository::DeleteWhere(database, fmt::format("char_id = {}", client->CharacterID()));
-
-		// Insert new pet info
 		CharacterPetInfoRepository::InsertMany(database, pet_infos);
 	}
 
+	// Delete existing pet buffs
+	CharacterPetBuffsRepository::DeleteWhere(database, fmt::format("char_id = {}", client->CharacterID()));
+
 	// insert pet buffs into database
 	if (!pet_buffs.empty()) {
-		// Delete existing pet buffs
-		CharacterPetBuffsRepository::DeleteWhere(database, fmt::format("char_id = {}", client->CharacterID()));
-
-		// Insert new pet buffs
 		CharacterPetBuffsRepository::InsertMany(database, pet_buffs);
 	}
 
+	// Delete existing pet inventory
+	CharacterPetInventoryRepository::DeleteWhere(database, fmt::format("char_id = {}", client->CharacterID()));
+
 	// insert pet inventory into database
 	if (!inventory.empty()) {
-		// Delete existing pet inventory
-		CharacterPetInventoryRepository::DeleteWhere(database, fmt::format("char_id = {}", client->CharacterID()));
-
-		// Insert new pet inventory
 		CharacterPetInventoryRepository::InsertMany(database, inventory);
 	}
 }
