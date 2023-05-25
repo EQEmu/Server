@@ -1411,6 +1411,35 @@ void handle_player_target_change(
 	}
 }
 
+void handle_player_memorize_scribe_spell(
+	QuestInterface *parse,
+	lua_State* L,
+	Client* client,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+) {
+	Seperator sep(data.c_str());
+
+	lua_pushnumber(L, Strings::ToUnsignedInt(sep.arg[0]));
+	lua_setfield(L, -2, "slot_id");
+
+	lua_pushnumber(L, Strings::ToUnsignedInt(sep.arg[1]));
+	lua_setfield(L, -2, "spell_id");
+
+	if (IsValidSpell(Strings::ToUnsignedInt(sep.arg[1]))) {
+		Lua_Spell l_spell(&spells[Strings::ToUnsignedInt(sep.arg[1])]);
+		luabind::adl::object l_spell_o = luabind::adl::object(L, l_spell);
+		l_spell_o.push(L);
+		lua_setfield(L, -2, "spell");
+	} else {
+		Lua_Spell l_spell(nullptr);
+		luabind::adl::object l_spell_o = luabind::adl::object(L, l_spell);
+		l_spell_o.push(L);
+		lua_setfield(L, -2, "spell");
+	}
+}
+
 // Item
 void handle_item_click(
 	QuestInterface *parse,

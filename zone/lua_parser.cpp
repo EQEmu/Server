@@ -164,7 +164,11 @@ const char *LuaEvents[_LargestEventID] = {
 	"event_item_click_client",
 	"event_item_click_cast_client",
 	"event_destroy_item_client",
-	"event_drop_item_client"
+	"event_drop_item_client",
+	"event_memorize_spell",
+	"event_unmemorize_spell",
+	"event_scribe_spell",
+	"event_unscribe_spell"
 };
 
 extern Zone *zone;
@@ -292,6 +296,10 @@ LuaParser::LuaParser() {
 	PlayerArgumentDispatch[EVENT_DESTROY_ITEM_CLIENT]        = handle_player_destroy_item;
 	PlayerArgumentDispatch[EVENT_TARGET_CHANGE]              = handle_player_target_change;
 	PlayerArgumentDispatch[EVENT_DROP_ITEM_CLIENT]           = handle_player_drop_item;
+	PlayerArgumentDispatch[EVENT_MEMORIZE_SPELL]             = handle_player_memorize_scribe_spell;
+	PlayerArgumentDispatch[EVENT_UNMEMORIZE_SPELL]           = handle_player_memorize_scribe_spell;
+	PlayerArgumentDispatch[EVENT_SCRIBE_SPELL]               = handle_player_memorize_scribe_spell;
+	PlayerArgumentDispatch[EVENT_UNSCRIBE_SPELL]             = handle_player_memorize_scribe_spell;
 
 	ItemArgumentDispatch[EVENT_ITEM_CLICK]      = handle_item_click;
 	ItemArgumentDispatch[EVENT_ITEM_CLICK_CAST] = handle_item_click;

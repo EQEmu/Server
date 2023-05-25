@@ -5521,13 +5521,14 @@ void Client::UnmemSpell(int slot, bool update_client)
 	}
 
 	LogSpells("Spell [{}] forgotten from slot [{}]", m_pp.mem_spells[slot], slot);
-	m_pp.mem_spells[slot] = 0xFFFFFFFF;
 
 	database.DeleteCharacterMemorizedSpell(CharacterID(), m_pp.mem_spells[slot], slot);
 
-	if(update_client) {
+	if (update_client) {
 		MemorizeSpell(slot, m_pp.mem_spells[slot], memSpellForget);
 	}
+
+	m_pp.mem_spells[slot] = UINT32_MAX;
 }
 
 void Client::UnmemSpellBySpellID(int32 spell_id)
@@ -5599,7 +5600,7 @@ void Client::ScribeSpell(uint16 spell_id, int slot, bool update_client, bool def
 	}
 
 	if (update_client) {
-		if (m_pp.spell_book[slot] != 0xFFFFFFFF) {
+		if (m_pp.spell_book[slot] != UINT32_MAX) {
 			UnscribeSpell(slot, update_client, defer_save);
 		}
 	}
@@ -5619,25 +5620,33 @@ void Client::ScribeSpell(uint16 spell_id, int slot, bool update_client, bool def
 
 void Client::UnscribeSpell(int slot, bool update_client, bool defer_save)
 {
-	if (slot >= EQ::spells::SPELLBOOK_SIZE || slot < 0) {
+	if (!EQ::ValueWithin(slot, 0, (EQ::spells::SPELLBOOK_SIZE - 1))) {
 		return;
 	}
 
 	LogSpells("Spell [{}] erased from spell book slot [{}]", m_pp.spell_book[slot], slot);
-	m_pp.spell_book[slot] = 0xFFFFFFFF;
 
 	if (!defer_save) {
 		database.DeleteCharacterSpell(CharacterID(), m_pp.spell_book[slot], slot);
 	}
 
 	if (update_client && slot < EQ::spells::DynamicLookup(ClientVersion(), GetGM())->SpellbookSize) {
-		auto outapp = new EQApplicationPacket(OP_DeleteSpell, sizeof(DeleteSpell_Struct));
-		DeleteSpell_Struct *del = (DeleteSpell_Struct *) outapp->pBuffer;
+		auto  outapp = new EQApplicationPacket(OP_DeleteSpell, sizeof(DeleteSpell_Struct));
+		auto* del = (DeleteSpell_Struct *) outapp->pBuffer;
+
 		del->spell_slot = slot;
-		del->success = 1;
+		del->success    = 1;
+
 		QueuePacket(outapp);
 		safe_delete(outapp);
 	}
+
+	if (parse->PlayerHasQuestSub(EVENT_UNSCRIBE_SPELL)) {
+		const auto export_string = fmt::format("{} {}", slot, m_pp.spell_book[slot]);
+		parse->EventPlayer(EVENT_UNSCRIBE_SPELL, this, export_string, 0);
+	}
+
+	m_pp.spell_book[slot] = UINT32_MAX;
 }
 
 void Client::UnscribeSpellAll(bool update_client)

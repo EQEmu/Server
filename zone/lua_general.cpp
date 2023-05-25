@@ -5474,7 +5474,11 @@ luabind::scope lua_register_events() {
 			luabind::value("item_click_client", static_cast<int>(EVENT_ITEM_CLICK_CLIENT)),
 			luabind::value("item_click_cast_client", static_cast<int>(EVENT_ITEM_CLICK_CAST_CLIENT)),
 			luabind::value("destroy_item_client", static_cast<int>(EVENT_DESTROY_ITEM_CLIENT)),
-			luabind::value("drop_item_client", static_cast<int>(EVENT_DROP_ITEM_CLIENT))
+			luabind::value("drop_item_client", static_cast<int>(EVENT_DROP_ITEM_CLIENT)),
+			luabind::value("memorize_spell", static_cast<int>(EVENT_MEMORIZE_SPELL)),
+			luabind::value("unmemorize_spell", static_cast<int>(EVENT_UNMEMORIZE_SPELL)),
+			luabind::value("scribe_spell", static_cast<int>(EVENT_SCRIBE_SPELL)),
+			luabind::value("unscribe_spell", static_cast<int>(EVENT_UNSCRIBE_SPELL))
 		)];
 }
 

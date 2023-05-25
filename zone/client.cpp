@@ -2783,18 +2783,64 @@ void Client::GMKill() {
 	safe_delete(outapp);
 }
 
-void Client::MemorizeSpell(uint32 slot,uint32 spellid,uint32 scribing, uint32 reduction){
-	if (slot < 0 || slot >= EQ::spells::DynamicLookup(ClientVersion(), GetGM())->SpellbookSize)
+void Client::MemorizeSpell(uint32 slot, uint32 spell_id, uint32 scribing, uint32 reduction){
+	if (
+		!EQ::ValueWithin(
+			slot,
+			0,
+			(EQ::spells::DynamicLookup(ClientVersion(), GetGM())->SpellbookSize - 1)
+		)
+	) {
 		return;
-	if ((spellid < 3 || spellid > EQ::spells::DynamicLookup(ClientVersion(), GetGM())->SpellIdMax) && spellid != 0xFFFFFFFF)
+	}
+
+	if (
+		!EQ::ValueWithin(
+			spell_id,
+			3,
+			EQ::spells::DynamicLookup(ClientVersion(), GetGM())->SpellIdMax
+		) &&
+		spell_id != UINT32_MAX
+	) {
 		return;
+	}
+
 	auto outapp = new EQApplicationPacket(OP_MemorizeSpell, sizeof(MemorizeSpell_Struct));
-	MemorizeSpell_Struct* mss=(MemorizeSpell_Struct*)outapp->pBuffer;
-	mss->scribing=scribing;
-	mss->slot=slot;
-	mss->spell_id=spellid;
+
+	auto* mss = (MemorizeSpell_Struct*) outapp->pBuffer;
+
+	mss->scribing  = scribing;
+	mss->slot      = slot;
+	mss->spell_id  = spell_id;
 	mss->reduction = reduction;
+
 	outapp->priority = 5;
+
+	if (
+		parse->PlayerHasQuestSub(EVENT_SCRIBE_SPELL) ||
+		parse->PlayerHasQuestSub(EVENT_MEMORIZE_SPELL) ||
+		parse->PlayerHasQuestSub(EVENT_UNMEMORIZE_SPELL)
+	) {
+		const auto export_string = fmt::format("{} {}", slot, spell_id);
+
+		if (
+			scribing == ScribeSpellActions::Memorize &&
+			parse->PlayerHasQuestSub(EVENT_MEMORIZE_SPELL)
+		) {
+			parse->EventPlayer(EVENT_MEMORIZE_SPELL, this, export_string, 0);
+		} else if (
+			scribing == ScribeSpellActions::Unmemorize &&
+			parse->PlayerHasQuestSub(EVENT_UNMEMORIZE_SPELL)
+		) {
+			parse->EventPlayer(EVENT_UNMEMORIZE_SPELL, this, export_string, 0);
+		} else if (
+			scribing == ScribeSpellActions::Scribe &&
+			parse->PlayerHasQuestSub(EVENT_SCRIBE_SPELL)
+		) {
+			parse->EventPlayer(EVENT_SCRIBE_SPELL, this, export_string, 0);
+		}
+	}
+
 	QueuePacket(outapp);
 	safe_delete(outapp);
 }
