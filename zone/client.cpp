@@ -2798,7 +2798,7 @@ void Client::MemorizeSpell(uint32 slot, uint32 spell_id, uint32 scribing, uint32
 		!EQ::ValueWithin(
 			spell_id,
 			3,
-			(EQ::spells::DynamicLookup(ClientVersion(), GetGM())->SpellIdMax - 1)
+			EQ::spells::DynamicLookup(ClientVersion(), GetGM())->SpellIdMax
 		) &&
 		spell_id != UINT32_MAX
 	) {
