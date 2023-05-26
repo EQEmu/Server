@@ -1798,7 +1798,7 @@ void Perl_Mob_SetRace(Mob* self, int32 race) // @categories Stats and Attributes
 
 void Perl_Mob_SetGender(Mob* self, int32 gender) // @categories Stats and Attributes
 {
-	self->SendIllusionPacket(self->GetRace(), gender);
+	self->SendIllusionPacket(self->GetRace(), gender, self->GetTexture());
 }
 
 // todo: SendIllusion should be sent in a hash like lua
