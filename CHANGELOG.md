@@ -1,3 +1,83 @@
+## [22.12.0] - 05/29/2023
+
+### Code
+
+* Cleanup #setskill and #setskillall Commands ([#3367](https://github.com/EQEmu/Server/pull/3367)) @Kinglykrab 2023-05-25
+* Delete message.h ([#3348](https://github.com/EQEmu/Server/pull/3348)) @Kinglykrab 2023-05-17
+* Fix #spawn command NPCs having 0 health ([#3371](https://github.com/EQEmu/Server/pull/3371)) @Kinglykrab 2023-05-21
+* Remove CalcPetHp from spdat.h ([#3364](https://github.com/EQEmu/Server/pull/3364)) @Kinglykrab 2023-05-25
+* Remove CountNPC() and QueueManaged() from entity.cpp/entity.h ([#3346](https://github.com/EQEmu/Server/pull/3346)) @Kinglykrab 2023-05-17
+* Remove DumpMerchantList() from zone.cpp/zone.h ([#3343](https://github.com/EQEmu/Server/pull/3343)) @Kinglykrab 2023-05-17
+* Remove GetDamageReceived() and GetHealReceived() from combat_record.cpp/combat_record.h ([#3358](https://github.com/EQEmu/Server/pull/3358)) @Kinglykrab 2023-05-17
+* Remove GetEscapingEntOnHateList() from hate_list.cpp/hate_list.h ([#3353](https://github.com/EQEmu/Server/pull/3353)) @Kinglykrab 2023-05-17
+* Remove GetMaxRank() from aa_ability.cpp/aa_ability.h ([#3347](https://github.com/EQEmu/Server/pull/3347)) @Kinglykrab 2023-05-25
+* Remove IsEntityInFrenzyMode() from hate_list.cpp/hate_list.h ([#3352](https://github.com/EQEmu/Server/pull/3352)) @Kinglykrab 2023-05-17
+* Remove IsRaid() from raids.h ([#3361](https://github.com/EQEmu/Server/pull/3361)) @Kinglykrab 2023-05-25
+* Remove LoadSpawn2() and PopulateZoneSpawnListClose() from spawn2.cpp/zonedb.h ([#3344](https://github.com/EQEmu/Server/pull/3344)) @Kinglykrab 2023-05-25
+* Remove SetGraveyard() from zone.cpp/zone.h ([#3354](https://github.com/EQEmu/Server/pull/3354)) @Kinglykrab 2023-05-17
+* Remove SetTradeCash() from trading.cpp/common.h ([#3356](https://github.com/EQEmu/Server/pull/3356)) @Kinglykrab 2023-05-17
+* Remove TraderUpdate() from trading.cpp/client.h ([#3357](https://github.com/EQEmu/Server/pull/3357)) @Kinglykrab 2023-05-17
+* Remove TypeToSkill() from tradeskills.cpp/object.h ([#3355](https://github.com/EQEmu/Server/pull/3355)) @Kinglykrab 2023-05-17
+* Remove Z_AGGRO from spdat.h ([#3365](https://github.com/EQEmu/Server/pull/3365)) @Kinglykrab 2023-05-25
+* Remove numMembers from raids.h ([#3362](https://github.com/EQEmu/Server/pull/3362)) @Kinglykrab 2023-05-25
+* Set GetAugmentType() to int again ([#3335](https://github.com/EQEmu/Server/pull/3335)) @Kinglykrab 2023-05-08
+
+### Commands
+
+* Add #findcurrency Command ([#3368](https://github.com/EQEmu/Server/pull/3368)) @Kinglykrab 2023-05-25
+* Add entity variable command ([#3345](https://github.com/EQEmu/Server/pull/3345)) @Kinglykrab 2023-05-25
+* Cleanup #setanim ([#3350](https://github.com/EQEmu/Server/pull/3350)) @Kinglykrab 2023-05-25
+
+### Feature
+
+* Intoxication setter/getter for source, getter for Perl/Lua ([#3330](https://github.com/EQEmu/Server/pull/3330)) @JasXSL 2023-05-03
+
+### Fixes
+
+* #augmentitem bypasses augment restrictions ([#3332](https://github.com/EQEmu/Server/pull/3332)) @Kinglykrab 2023-05-07
+* Fix Heroic INT/WIS Bonuses ([#3341](https://github.com/EQEmu/Server/pull/3341)) @RekkasGit 2023-05-15
+* Fix duplicate messages in #npcedit ([#3372](https://github.com/EQEmu/Server/pull/3372)) @Kinglykrab 2023-05-21
+* Fix issue with Group Pointers/Member roles ([#3374](https://github.com/EQEmu/Server/pull/3374)) @Aeadoin 2023-05-25
+* Fix mob item bonus calc ([#3334](https://github.com/EQEmu/Server/pull/3334)) @Akkadius 2023-05-07
+* Fix typos in #zheader ([#3370](https://github.com/EQEmu/Server/pull/3370)) @Kinglykrab 2023-05-21
+* Mob scaling issue with min dmg set to zero while max dmg is not ([#3351](https://github.com/EQEmu/Server/pull/3351)) @RekkasGit 2023-05-20
+* NPC Armor Upgrade to a slot not handled correctly ([#3366](https://github.com/EQEmu/Server/pull/3366)) @noudess 2023-05-20
+* ReloadQuests() on Zone::Init() to avoid cached global quests/plugins ([#3333](https://github.com/EQEmu/Server/pull/3333)) @Kinglykrab 2023-05-07
+* Revert " ReloadQuests() on Zone::Init() to avoid cached global quests/plugins " ([#3333](https://github.com/EQEmu/Server/pull/3333)) @Akkadius 2023-05-08
+
+### Memory Leak
+
+* Fix large memory leak introduced in CalcItemBonuses ([#3331](https://github.com/EQEmu/Server/pull/3331)) @Akkadius 2023-05-07
+
+### Messages
+
+* Remove duplicate heal message for healing yourself ([#3329](https://github.com/EQEmu/Server/pull/3329)) @noudess 2023-05-03
+
+### Performance
+
+* Character bind is now bulk saved ([#3338](https://github.com/EQEmu/Server/pull/3338)) @Akkadius 2023-05-09
+* Character buffs now save in bulk ([#3336](https://github.com/EQEmu/Server/pull/3336)) @Akkadius 2023-05-09
+* Character pet bulk saving ([#3337](https://github.com/EQEmu/Server/pull/3337)) @Akkadius 2023-05-09
+* Character tribute is now bulk saved ([#3340](https://github.com/EQEmu/Server/pull/3340)) @Kinglykrab 2023-05-25
+* Mail key is now cached during player load ([#3339](https://github.com/EQEmu/Server/pull/3339)) @Akkadius 2023-05-09
+
+### Pets
+
+* Fix saving inconsistencies with pets ([#3375](https://github.com/EQEmu/Server/pull/3375)) @Akkadius 2023-05-25
+
+### Quest API
+
+* Add GetHateListClosest(), GetHateListClosestBot(), GetHateListClosestClient(), and GetHateListClosestNPC() methods/overloads to Perl/Lua ([#3359](https://github.com/EQEmu/Server/pull/3359)) @RekkasGit 2023-05-16
+* Add GetPet() to Perl ([#3309](https://github.com/EQEmu/Server/pull/3309)) @Kinglykrab 2023-05-08
+* Add Memorize and Scribe Spell Events to Perl/Lua ([#3363](https://github.com/EQEmu/Server/pull/3363)) @Kinglykrab 2023-05-25
+* Add zone data methods to Perl/Lua ([#3342](https://github.com/EQEmu/Server/pull/3342)) @Kinglykrab 2023-05-24
+* Cleanup The Darkened Sea Quest Methods Names ([#3369](https://github.com/EQEmu/Server/pull/3369)) @Kinglykrab 2023-05-21
+
+### Rules
+
+* Add World:MaximumQuestErrors Rule ([#3349](https://github.com/EQEmu/Server/pull/3349)) @Kinglykrab 2023-05-21
+* ResurrectionEffectBlock to prevent/allow/move buffs. ([#3288](https://github.com/EQEmu/Server/pull/3288)) @nytmyr 2023-05-08
+
 ## [22.11.0] - 04/29/2023
 
 ### Code
