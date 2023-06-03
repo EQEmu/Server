@@ -463,8 +463,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 				}
 
 				auto cle = client_list.FindCharacter(scm->deliverto);
-
-					if (
+				if (
 					!cle ||
 					cle->Online() < CLE_Status::Zoning ||
 					(
