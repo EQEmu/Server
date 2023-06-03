@@ -4401,6 +4401,21 @@ int lua_get_zone_minimum_lava_damage(uint32 zone_id, int version)
 	return zone_store.GetZoneMinimumLavaDamage(zone_id, version);
 }
 
+void lua_send_channel_message(uint8 channel_number, uint32 guild_id, uint8 language_id, uint8 language_skill, const char* message)
+{
+	quest_manager.SendChannelMessage(channel_number, guild_id, language_id, language_skill, message);
+}
+
+void lua_send_channel_message(Lua_Client from, uint8 channel_number, uint32 guild_id, uint8 language_id, uint8 language_skill, const char* message)
+{
+	quest_manager.SendChannelMessage(from, channel_number, guild_id, language_id, language_skill, message);
+}
+
+void lua_send_channel_message(Lua_Client from, const char* to, uint8 channel_number, uint32 guild_id, uint8 language_id, uint8 language_skill, const char* message)
+{
+	quest_manager.SendChannelMessage(from, to, channel_number, guild_id, language, language_skill, message);
+}
+
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
 	cur = table[#name]; \
 	if(luabind::type(cur) != LUA_TNIL) { \
@@ -5005,52 +5020,55 @@ luabind::scope lua_register_general() {
 		luabind::def("get_zone_instance_type", (uint8(*)(uint32,int))&lua_get_zone_instance_type),
 		luabind::def("get_zone_shutdown_delay", (uint64(*)(uint32))&lua_get_zone_shutdown_delay),
 		luabind::def("get_zone_shutdown_delay", (uint64(*)(uint32,int))&lua_get_zone_shutdown_delay),
-			luabind::def("get_zone_peqzone", (int8(*)(uint32))&lua_get_zone_peqzone),
-			luabind::def("get_zone_peqzone", (int8(*)(uint32,int))&lua_get_zone_peqzone),
-			luabind::def("get_zone_expansion", (int8(*)(uint32))&lua_get_zone_expansion),
-			luabind::def("get_zone_expansion", (int8(*)(uint32,int))&lua_get_zone_expansion),
-			luabind::def("get_zone_bypass_expansion_check", (int8(*)(uint32))&lua_get_zone_bypass_expansion_check),
-			luabind::def("get_zone_bypass_expansion_check", (int8(*)(uint32,int))&lua_get_zone_bypass_expansion_check),
-			luabind::def("get_zone_suspend_buffs", (int8(*)(uint32))&lua_get_zone_suspend_buffs),
-			luabind::def("get_zone_suspend_buffs", (int8(*)(uint32,int))&lua_get_zone_suspend_buffs),
-			luabind::def("get_zone_rain_chance", (int(*)(uint32))&lua_get_zone_rain_chance),
-			luabind::def("get_zone_rain_chance", (int(*)(uint32,int))&lua_get_zone_rain_chance),
-			luabind::def("get_zone_rain_duration", (int(*)(uint32))&lua_get_zone_rain_duration),
-			luabind::def("get_zone_rain_duration", (int(*)(uint32,int))&lua_get_zone_rain_duration),
-			luabind::def("get_zone_snow_chance", (int(*)(uint32))&lua_get_zone_snow_chance),
-			luabind::def("get_zone_snow_chance", (int(*)(uint32,int))&lua_get_zone_snow_chance),
-			luabind::def("get_zone_snow_duration", (int(*)(uint32))&lua_get_zone_snow_duration),
-			luabind::def("get_zone_snow_duration", (int(*)(uint32,int))&lua_get_zone_snow_duration),
-			luabind::def("get_zone_gravity", (float(*)(uint32))&lua_get_zone_gravity),
-			luabind::def("get_zone_gravity", (float(*)(uint32,int))&lua_get_zone_gravity),
-			luabind::def("get_zone_type", (int(*)(uint32))&lua_get_zone_type),
-			luabind::def("get_zone_type", (int(*)(uint32,int))&lua_get_zone_type),
-			luabind::def("get_zone_sky_lock", (int(*)(uint32))&lua_get_zone_sky_lock),
-			luabind::def("get_zone_sky_lock", (int(*)(uint32,int))&lua_get_zone_sky_lock),
-			luabind::def("get_zone_fast_regen_hp", (int(*)(uint32))&lua_get_zone_fast_regen_hp),
-			luabind::def("get_zone_fast_regen_hp", (int(*)(uint32,int))&lua_get_zone_fast_regen_hp),
-			luabind::def("get_zone_fast_regen_mana", (int(*)(uint32))&lua_get_zone_fast_regen_mana),
-			luabind::def("get_zone_fast_regen_mana", (int(*)(uint32,int))&lua_get_zone_fast_regen_mana),
-			luabind::def("get_zone_fast_regen_endurance", (int(*)(uint32))&lua_get_zone_fast_regen_endurance),
-			luabind::def("get_zone_fast_regen_endurance", (int(*)(uint32,int))&lua_get_zone_fast_regen_endurance),
-			luabind::def("get_zone_npc_maximum_aggro_distance", (int(*)(uint32))&lua_get_zone_npc_maximum_aggro_distance),
-			luabind::def("get_zone_npc_maximum_aggro_distance", (int(*)(uint32,int))&lua_get_zone_npc_maximum_aggro_distance),
-			luabind::def("get_zone_npc_maximum_movement_update_range", (uint32(*)(uint32))&lua_get_zone_maximum_movement_update_range),
-			luabind::def("get_zone_npc_maximum_movement_update_range", (uint32(*)(uint32,int))&lua_get_zone_maximum_movement_update_range),
-			luabind::def("get_zone_minimum_expansion", (int8(*)(uint32))&lua_get_zone_minimum_expansion),
-			luabind::def("get_zone_minimum_expansion", (int8(*)(uint32,int))&lua_get_zone_minimum_expansion),
-			luabind::def("get_zone_maximum_expansion", (int8(*)(uint32))&lua_get_zone_maximum_expansion),
-			luabind::def("get_zone_maximum_expansion", (int8(*)(uint32,int))&lua_get_zone_maximum_expansion),
-			luabind::def("get_zone_content_flags", (std::string(*)(uint32))&lua_get_zone_content_flags),
-			luabind::def("get_zone_content_flags", (std::string(*)(uint32,int))&lua_get_zone_content_flags),
-			luabind::def("get_zone_content_flags_disabled", (std::string(*)(uint32))&lua_get_zone_content_flags_disabled),
-			luabind::def("get_zone_content_flags_disabled", (std::string(*)(uint32,int))&lua_get_zone_content_flags_disabled),
-			luabind::def("get_zone_underworld_teleport_index", (int(*)(uint32))&lua_get_zone_underworld_teleport_index),
-			luabind::def("get_zone_underworld_teleport_index", (int(*)(uint32,int))&lua_get_zone_underworld_teleport_index),
-			luabind::def("get_zone_lava_damage", (int(*)(uint32))&lua_get_zone_lava_damage),
-			luabind::def("get_zone_lava_damage", (int(*)(uint32,int))&lua_get_zone_lava_damage),
-			luabind::def("get_zone_minimum_lava_damage", (int(*)(uint32))&lua_get_zone_minimum_lava_damage),
-			luabind::def("get_zone_minimum_lava_damage", (int(*)(uint32,int))&lua_get_zone_minimum_lava_damage),
+		luabind::def("get_zone_peqzone", (int8(*)(uint32))&lua_get_zone_peqzone),
+		luabind::def("get_zone_peqzone", (int8(*)(uint32,int))&lua_get_zone_peqzone),
+		luabind::def("get_zone_expansion", (int8(*)(uint32))&lua_get_zone_expansion),
+		luabind::def("get_zone_expansion", (int8(*)(uint32,int))&lua_get_zone_expansion),
+		luabind::def("get_zone_bypass_expansion_check", (int8(*)(uint32))&lua_get_zone_bypass_expansion_check),
+		luabind::def("get_zone_bypass_expansion_check", (int8(*)(uint32,int))&lua_get_zone_bypass_expansion_check),
+		luabind::def("get_zone_suspend_buffs", (int8(*)(uint32))&lua_get_zone_suspend_buffs),
+		luabind::def("get_zone_suspend_buffs", (int8(*)(uint32,int))&lua_get_zone_suspend_buffs),
+		luabind::def("get_zone_rain_chance", (int(*)(uint32))&lua_get_zone_rain_chance),
+		luabind::def("get_zone_rain_chance", (int(*)(uint32,int))&lua_get_zone_rain_chance),
+		luabind::def("get_zone_rain_duration", (int(*)(uint32))&lua_get_zone_rain_duration),
+		luabind::def("get_zone_rain_duration", (int(*)(uint32,int))&lua_get_zone_rain_duration),
+		luabind::def("get_zone_snow_chance", (int(*)(uint32))&lua_get_zone_snow_chance),
+		luabind::def("get_zone_snow_chance", (int(*)(uint32,int))&lua_get_zone_snow_chance),
+		luabind::def("get_zone_snow_duration", (int(*)(uint32))&lua_get_zone_snow_duration),
+		luabind::def("get_zone_snow_duration", (int(*)(uint32,int))&lua_get_zone_snow_duration),
+		luabind::def("get_zone_gravity", (float(*)(uint32))&lua_get_zone_gravity),
+		luabind::def("get_zone_gravity", (float(*)(uint32,int))&lua_get_zone_gravity),
+		luabind::def("get_zone_type", (int(*)(uint32))&lua_get_zone_type),
+		luabind::def("get_zone_type", (int(*)(uint32,int))&lua_get_zone_type),
+		luabind::def("get_zone_sky_lock", (int(*)(uint32))&lua_get_zone_sky_lock),
+		luabind::def("get_zone_sky_lock", (int(*)(uint32,int))&lua_get_zone_sky_lock),
+		luabind::def("get_zone_fast_regen_hp", (int(*)(uint32))&lua_get_zone_fast_regen_hp),
+		luabind::def("get_zone_fast_regen_hp", (int(*)(uint32,int))&lua_get_zone_fast_regen_hp),
+		luabind::def("get_zone_fast_regen_mana", (int(*)(uint32))&lua_get_zone_fast_regen_mana),
+		luabind::def("get_zone_fast_regen_mana", (int(*)(uint32,int))&lua_get_zone_fast_regen_mana),
+		luabind::def("get_zone_fast_regen_endurance", (int(*)(uint32))&lua_get_zone_fast_regen_endurance),
+		luabind::def("get_zone_fast_regen_endurance", (int(*)(uint32,int))&lua_get_zone_fast_regen_endurance),
+		luabind::def("get_zone_npc_maximum_aggro_distance", (int(*)(uint32))&lua_get_zone_npc_maximum_aggro_distance),
+		luabind::def("get_zone_npc_maximum_aggro_distance", (int(*)(uint32,int))&lua_get_zone_npc_maximum_aggro_distance),
+		luabind::def("get_zone_npc_maximum_movement_update_range", (uint32(*)(uint32))&lua_get_zone_maximum_movement_update_range),
+		luabind::def("get_zone_npc_maximum_movement_update_range", (uint32(*)(uint32,int))&lua_get_zone_maximum_movement_update_range),
+		luabind::def("get_zone_minimum_expansion", (int8(*)(uint32))&lua_get_zone_minimum_expansion),
+		luabind::def("get_zone_minimum_expansion", (int8(*)(uint32,int))&lua_get_zone_minimum_expansion),
+		luabind::def("get_zone_maximum_expansion", (int8(*)(uint32))&lua_get_zone_maximum_expansion),
+		luabind::def("get_zone_maximum_expansion", (int8(*)(uint32,int))&lua_get_zone_maximum_expansion),
+		luabind::def("get_zone_content_flags", (std::string(*)(uint32))&lua_get_zone_content_flags),
+		luabind::def("get_zone_content_flags", (std::string(*)(uint32,int))&lua_get_zone_content_flags),
+		luabind::def("get_zone_content_flags_disabled", (std::string(*)(uint32))&lua_get_zone_content_flags_disabled),
+		luabind::def("get_zone_content_flags_disabled", (std::string(*)(uint32,int))&lua_get_zone_content_flags_disabled),
+		luabind::def("get_zone_underworld_teleport_index", (int(*)(uint32))&lua_get_zone_underworld_teleport_index),
+		luabind::def("get_zone_underworld_teleport_index", (int(*)(uint32,int))&lua_get_zone_underworld_teleport_index),
+		luabind::def("get_zone_lava_damage", (int(*)(uint32))&lua_get_zone_lava_damage),
+		luabind::def("get_zone_lava_damage", (int(*)(uint32,int))&lua_get_zone_lava_damage),
+		luabind::def("get_zone_minimum_lava_damage", (int(*)(uint32))&lua_get_zone_minimum_lava_damage),
+		luabind::def("get_zone_minimum_lava_damage", (int(*)(uint32,int))&lua_get_zone_minimum_lava_damage),
+		luabind::def("send_channel_message", (void(*)(uint8,uint32,uint8,uint8,const char*))&lua_send_channel_message),
+		luabind::def("send_channel_message", (void(*)(Lua_Client,uint8,uint32,uint8,uint8,const char*))&lua_send_channel_message),
+		luabind::def("send_channel_message", (void(*)(Lua_Client,const char*,uint8,uint32,uint8,uint8,const char*))&lua_send_channel_message),
 		/*
 			Cross Zone
 		*/

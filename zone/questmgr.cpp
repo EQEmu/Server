@@ -2887,6 +2887,21 @@ void QuestManager::we(int type, const char *str) {
 	);
 }
 
+void QuestManager::SendChannelMessage(uint8 channel_number, uint32 guild_id, uint8 language_id, uint8 language_skill, const char* message)
+{
+	worldserver.SendChannelMessage(0, 0, channel_number, guild_id, language_id, language_skill, message);
+}
+
+void QuestManager::SendChannelMessage(Client* from, uint8 channel_number, uint32 guild_id, uint8 language_id, uint8 language_skill, const char* message)
+{
+	worldserver.SendChannelMessage(from, 0, channel_number, guild_id, language_id, language_skill, message);
+}
+
+void QuestManager::SendChannelMessage(Client* from, const char* to, uint8 channel_number, uint32 guild_id, uint8 language_id, uint8 language_skill, const char* message)
+{
+	worldserver.SendChannelMessage(from, to, channel_number, guild_id, language_id, language_skill, message);
+}
+
 void QuestManager::message(uint32 type, const char *message) {
 	QuestManagerCurrentQuestVars();
 	if (!initiator) {
