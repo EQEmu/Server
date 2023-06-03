@@ -4413,7 +4413,7 @@ void lua_send_channel_message(Lua_Client from, uint8 channel_number, uint32 guil
 
 void lua_send_channel_message(Lua_Client from, const char* to, uint8 channel_number, uint32 guild_id, uint8 language_id, uint8 language_skill, const char* message)
 {
-	quest_manager.SendChannelMessage(from, to, channel_number, guild_id, language, language_skill, message);
+	quest_manager.SendChannelMessage(from, to, channel_number, guild_id, language_id, language_skill, message);
 }
 
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
