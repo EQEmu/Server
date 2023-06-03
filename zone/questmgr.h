@@ -349,7 +349,7 @@ public:
 	int8 DoesAugmentFit(EQ::ItemInstance* inst, uint32 augment_id, uint8 augment_slot = 255);
 	void SendPlayerHandinEvent();
 	void SendChannelMessage(uint8 channel_number, uint32 guild_id, uint8 language_id, uint8 language_skill, const char* message);
-	void SendChannelMessage(Client* from, uint8 channel_number, uint32 guild_id, language_id language, uint8 language_skill, const char* message);
+	void SendChannelMessage(Client* from, uint8 channel_number, uint32 guild_id, uint8 language_id, uint8 language_skill, const char* message);
 	void SendChannelMessage(Client* from, const char* to, uint8 channel_number, uint32 guild_id, uint8 language_id, uint8 language_skill, const char* message);
 
 	Bot *GetBot() const;
