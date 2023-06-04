@@ -1331,7 +1331,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				snprintf(effect_desc, _EDLEN, "Blind: %+i", effect_value);
 #endif
 				// 'cure blind'
-				if (IsDistanceModifierSpell(spell_id) && spells[spell_id].buff_duration == 0) {
+				if (IsBeneficialSpell(spell_id) && spells[spell_id].buff_duration == 0) {
 					int buff_count = GetMaxBuffSlots();
 					for (int slot = 0; slot < buff_count; slot++) {
 						if (IsValidSpell(buffs[slot].spellid) && IsEffectInSpell(buffs[slot].spellid, SE_Blind)) {
