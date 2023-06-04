@@ -259,7 +259,7 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 
 			const SPDat_Spell_Struct& spell = spells[buffs[j1].spellid];
 
-			if (int NimbusEffect = GetNimbusEffect(buffs[j1].spellid); NimbusEffect && !IsNimbusEffectActive(NimbusEffect)) {
+			if (int NimbusEffect = GetSpellNimbusEffect(buffs[j1].spellid); NimbusEffect && !IsNimbusEffectActive(NimbusEffect)) {
 				SendSpellEffect(NimbusEffect, 500, 0, 1, 3000, true);
 			}
 
@@ -4890,7 +4890,7 @@ void Bot::DoSpecialAttackDamage(Mob *who, EQ::skills::SkillType skill, int32 max
 			if (botweapon->ItemType == EQ::item::ItemTypeShield)
 				hate += botweapon->AC;
 
-			hate = (hate * (100 + GetFuriousBash(botweapon->Focus.Effect)) / 100);
+			hate = (hate * (100 + GetSpellFuriousBash(botweapon->Focus.Effect)) / 100);
 		}
 	}
 
@@ -5536,7 +5536,7 @@ int32 Bot::GetActSpellDuration(uint16 spell_id, int32 duration) {
 			increase += 20;
 	}
 
-	if (IsMezSpell(spell_id))
+	if (IsMesmerizeSpell(spell_id))
 		tic_inc += GetAA(aaMesmerizationMastery);
 
 	return (((duration * increase) / 100) + tic_inc);
@@ -6326,7 +6326,7 @@ void Bot::CalcRestState() {
 	for (unsigned int j = 0; j < buff_count; j++) {
 		if (IsValidSpell(buffs[j].spellid)) {
 			if (IsDetrimentalSpell(buffs[j].spellid) && (buffs[j].ticsremaining > 0))
-				if (!DetrimentalSpellAllowsRest(buffs[j].spellid))
+				if (!IsRestAllowedSpell(buffs[j].spellid))
 					return;
 		}
 	}
