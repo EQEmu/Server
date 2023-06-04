@@ -4735,6 +4735,21 @@ int Perl__GetZoneMinimumLavaDamage(uint32 zone_id, int version)
 	return zone_store.GetZoneMinimumLavaDamage(zone_id, version);
 }
 
+void Perl__send_channel_message(uint8 channel_number, uint32 guild_id, uint8 language_id, uint8 language_skill, const char* message)
+{
+	quest_manager.SendChannelMessage(channel_number, guild_id, language_id, language_skill, message);
+}
+
+void Perl__send_channel_message(Client* from, uint8 channel_number, uint32 guild_id, uint8 language_id, uint8 language_skill, const char* message)
+{
+	quest_manager.SendChannelMessage(from, channel_number, guild_id, language_id, language_skill, message);
+}
+
+void Perl__send_channel_message(Client* from, const char* to, uint8 channel_number, uint32 guild_id, uint8 language_id, uint8 language_skill, const char* message)
+{
+	quest_manager.SendChannelMessage(from, to, channel_number, guild_id, language_id, language_skill, message);
+}
+
 void perl_register_quest()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -5404,6 +5419,9 @@ void perl_register_quest()
 	package.add("secondstotime", &Perl__secondstotime);
 	package.add("selfcast", &Perl__selfcast);
 	package.add("send_player_handin_event", &Perl__send_player_handin_event);
+	package.add("send_channel_message", (void(*)(uint8, uint32, uint8, uint8, const char*))&Perl__send_channel_message);
+	package.add("send_channel_message", (void(*)(Client*, uint8, uint32, uint8, uint8, const char*))&Perl__send_channel_message);
+	package.add("send_channel_message", (void(*)(Client*, const char*, uint8, uint32, uint8, uint8, const char*))&Perl__send_channel_message);
 	package.add("setaaexpmodifierbycharid", (void(*)(uint32, uint32, double))&Perl__setaaexpmodifierbycharid);
 	package.add("setaaexpmodifierbycharid", (void(*)(uint32, uint32, double, int16))&Perl__setaaexpmodifierbycharid);
 	package.add("set_proximity", (void(*)(float, float, float, float))&Perl__set_proximity);
