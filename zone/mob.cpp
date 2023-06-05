@@ -2483,8 +2483,12 @@ void Mob::SendIllusionPacket(
 
 	// update internal values for mob
 	size             = (in_size <= 0.0f) ? GetRaceGenderDefaultHeight(race, gender) : in_size;
-	texture          = new_texture;
-	helmtexture      = new_helmtexture;
+	if (new_texture != 0xFF) {
+		texture          = new_texture;
+	}
+	if (new_helmtexture != 0xFF) {
+		helmtexture      = new_helmtexture;
+	}
 	haircolor        = new_haircolor;
 	beardcolor       = new_beardcolor;
 	eyecolor1        = new_eyecolor1;
@@ -2576,7 +2580,7 @@ bool Mob::RandomizeFeatures(bool send_illusion, bool set_variables)
 {
 	if (IsPlayerRace(GetRace())) {
 		uint8 current_gender = GetGender();
-		uint8 new_texture = GetTexture();
+		uint8 new_texture = 0xFF;
 		uint8 new_helm_texture = 0xFF;
 		uint8 new_hair_color = 0xFF;
 		uint8 new_beard_color = 0xFF;
