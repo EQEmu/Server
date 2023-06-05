@@ -208,7 +208,6 @@ public:
 	inline const ItemList &GetItemList() { return itemlist; }
 	ServerLootItem_Struct*	GetItem(int slot_id);
 	void	AddCash(uint16 in_copper, uint16 in_silver, uint16 in_gold, uint16 in_platinum);
-	void	AddCash();
 	void	RemoveCash();
 	void	QueryLoot(Client* to, bool is_pet_query = false);
 	bool	HasItem(uint32 item_id);
