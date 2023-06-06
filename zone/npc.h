@@ -191,8 +191,6 @@ public:
 
 	void	GetPetState(SpellBuff_Struct *buffs, uint32 *items, char *name);
 	void	SetPetState(SpellBuff_Struct *buffs, uint32 *items);
-	void	InteractiveChat(uint8 chan_num, uint8 language, const char * message, const char* targetname,Mob* sender);
-	void	TakenAction(uint8 action,Mob* actiontaker);
 	virtual void SpellProcess();
 	virtual void FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho);
 
