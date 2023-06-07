@@ -623,13 +623,13 @@ void Doors::ForceOpen(Mob *sender, bool alt_mode)
 	if (!alt_mode) { // original function
 		if (!m_is_open) {
 			if (!m_disable_timer) {
-				LogDoorsDetail("door_id [{}] starting timer", md->doorid);
+				LogDoorsDetail("door_id [{}] starting timer", m_door_id);
 				m_close_timer.Start();
 			}
 			m_is_open = true;
 		}
 		else {
-			LogDoorsDetail("door_id [{}] disable timer", md->doorid);
+			LogDoorsDetail("door_id [{}] disable timer", m_door_id);
 			m_close_timer.Disable();
 			if (!m_disable_timer) {
 				m_is_open = false;
@@ -638,7 +638,7 @@ void Doors::ForceOpen(Mob *sender, bool alt_mode)
 	}
 	else { // alternative function
 		if (!m_disable_timer) {
-			LogDoorsDetail("door_id [{}] alt starting timer", md->doorid);
+			LogDoorsDetail("door_id [{}] alt starting timer", m_door_id);
 			m_close_timer.Start();
 		}
 		m_is_open = true;
