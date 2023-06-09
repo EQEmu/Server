@@ -14460,7 +14460,7 @@ void Client::Handle_OP_TargetCommand(const EQApplicationPacket *app)
 		}
 		else
 		{
-			this->MessageString(Chat::Red, DONT_SEE_TARGET);
+			MessageString(Chat::Red, DONT_SEE_TARGET);
 			return;
 		}
 	}
