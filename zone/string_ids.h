@@ -100,6 +100,7 @@
 #define DUP_LORE					290		//Duplicate lore items are not allowed.
 #define TGB_ON						293		//Target other group buff is *ON*.
 #define TGB_OFF						294		//Target other group buff is *OFF*.
+#define DONT_SEE_TARGET				303		//I don't see anyone by that name around here...
 #define DISARMED_TRAP				305		//You have disarmed the trap.
 #define LDON_SENSE_TRAP1			306		//You do not Sense any traps.
 #define TRADESKILL_NOCOMBINE		334		//You cannot combine these items in this container type!
