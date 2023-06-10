@@ -518,7 +518,6 @@ public:
 	void	ZoneWho(Client *c, Who_All_Struct* Who);
 	void	UnMarkNPC(uint16 ID);
 
-	void	GateAllClients();
 	void	SignalAllClients(int signal_id);
 	void	UpdateQGlobal(uint32 qid, QGlobal newGlobal);
 	void	DeleteQGlobal(std::string name, uint32 npcID, uint32 charID, uint32 zoneID);

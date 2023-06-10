@@ -5171,17 +5171,6 @@ uint32 EntityList::CheckNPCsClose(Mob *center)
 	return count;
 }
 
-void EntityList::GateAllClients()
-{
-	auto it = client_list.begin();
-	while (it != client_list.end()) {
-		Client *c = it->second;
-		if (c)
-			c->GoToBind();
-		++it;
-	}
-}
-
 void EntityList::SignalAllClients(int signal_id)
 {
 	for (const auto& c : client_list) {
