@@ -129,7 +129,6 @@ protected:
 			initial_id = set_id;
 		}
 	}
-	uint32 pDBAsyncWorkID;
 private:
 	uint16 id;
 	uint16 initial_id;
