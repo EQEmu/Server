@@ -194,15 +194,12 @@ public:
 	Mob* GetRandomMob(const glm::vec3& location = glm::vec3(0.f), float distance = 0, Mob* exclude_mob = nullptr);
 	Group* GetGroupByMob(Mob* mob);
 	Group* GetGroupByMobName(const char* name);
-	Group* GetGroupByBot(Bot* bot);
 	bool IsInSameGroupOrRaidGroup(Client *client1, Client *client2);
 	Group *GetGroupByClient(Client* client);
 	Group *GetGroupByID(uint32 id);
 	Group *GetGroupByLeaderName(const char* leader);
-	Raid *GetRaidByMob(Mob* mob);
 	Raid *GetRaidByClient(Client* client);
 	Raid *GetRaidByID(uint32 id);
-	Raid *GetRaidByLeaderName(const char *leader);
 	Raid* GetRaidByBotName(const char* name);
 	Raid* GetRaidByBot(const Bot* bot);
 
