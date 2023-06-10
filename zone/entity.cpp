@@ -4433,25 +4433,6 @@ void EntityList::DestroyTempPets(Mob *owner)
 	}
 }
 
-int16 EntityList::CountTempPets(Mob *owner)
-{
-	int16 count = 0;
-	auto it = npc_list.begin();
-	while (it != npc_list.end()) {
-		NPC* n = it->second;
-		if (n->GetSwarmInfo()) {
-			if (n->GetSwarmInfo()->owner_id == owner->GetID()) {
-				count++;
-			}
-		}
-		++it;
-	}
-
-	owner->SetTempPetCount(count);
-
-	return count;
-}
-
 void EntityList::AddTempPetsToHateList(Mob *owner, Mob* other, bool bFrenzy)
 {
 	if (!other || !owner)
