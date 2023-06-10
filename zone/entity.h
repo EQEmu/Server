@@ -50,7 +50,6 @@ class Raid;
 class Spawn2;
 class Trap;
 
-struct DynamicZoneSafeReturn;
 struct GuildBankItemUpdate_Struct;
 struct NewSpawn_Struct;
 struct QGlobal;
