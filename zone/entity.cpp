@@ -4358,35 +4358,6 @@ bool EntityList::LimitCheckGroup(uint32 spawngroup_id, int count)
 	return true;
 }
 
-//check limits on an npc type in a given spawn group, and
-//checks limits on the entire zone in one pass.
-//returns true if neither limit has been reached
-bool EntityList::LimitCheckBoth(uint32 npc_type, uint32 spawngroup_id, int group_count, int type_count)
-{
-	if (group_count < 1 && type_count < 1)
-		return true;
-
-	std::map<uint16, SpawnLimitRecord>::iterator cur,end;
-	cur = npc_limit_list.begin();
-	end = npc_limit_list.end();
-
-	for (; cur != end; ++cur) {
-		if (cur->second.npc_type == npc_type) {
-			type_count--;
-			if (type_count == 0) {
-				return false;
-			}
-		}
-		if (cur->second.spawngroup_id == spawngroup_id) {
-			group_count--;
-			if (group_count == 0) {
-				return false;
-			}
-		}
-	}
-	return true;
-}
-
 bool EntityList::LimitCheckName(const char *npc_name)
 {
 	auto it = npc_list.begin();
