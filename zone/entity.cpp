@@ -3524,15 +3524,6 @@ void EntityList::ClearClientPetitionQueue()
 	return;
 }
 
-void EntityList::WriteEntityIDs()
-{
-	auto it = mob_list.begin();
-	while (it != mob_list.end()) {
-		std::cout << "ID: " << it->first << "  Name: " << it->second->GetName() << std::endl;
-		++it;
-	}
-}
-
 BulkZoneSpawnPacket::BulkZoneSpawnPacket(Client *iSendTo, uint32 iMaxSpawnsPerPacket)
 {
 	data = nullptr;
