@@ -3592,24 +3592,6 @@ void EntityList::HalveAggro(Mob *who)
 	}
 }
 
-void EntityList::Evade(Mob *who)
-{
-	uint32 flatval = who->GetLevel() * 13;
-	int amt = 0;
-	auto it = npc_list.begin();
-	while (it != npc_list.end()) {
-		if (it->second->CastToNPC()->CheckAggro(who)) {
-			amt = it->second->CastToNPC()->GetHateAmount(who);
-			amt -= flatval;
-			if (amt > 0)
-				it->second->CastToNPC()->SetHateAmountOnEnt(who, amt);
-			else
-				it->second->CastToNPC()->SetHateAmountOnEnt(who, 0);
-		}
-		++it;
-	}
-}
-
 //removes "targ" from all hate lists, including feigned, in the zone
 void EntityList::ClearAggro(Mob* targ)
 {
