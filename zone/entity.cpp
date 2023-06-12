@@ -2819,31 +2819,6 @@ bool EntityList::RemoveMob(uint16 delete_id)
 }
 
 /**
- * @param delete_mob
- * @return
- */
-bool EntityList::RemoveMob(Mob *delete_mob)
-{
-	if (delete_mob == 0) {
-		return true;
-	}
-
-	auto it = mob_list.begin();
-	while (it != mob_list.end()) {
-		if (it->second == delete_mob) {
-			safe_delete(it->second);
-			if (!corpse_list.count(it->first)) {
-				free_ids.push(it->first);
-			}
-			mob_list.erase(it);
-			return true;
-		}
-		++it;
-	}
-	return false;
-}
-
-/**
  * @param delete_id
  * @return
  */
@@ -3091,18 +3066,6 @@ bool EntityList::RemoveGroup(uint32 delete_id)
 	auto group = *it;
 	group_list.erase(it);
 	safe_delete(group);
-	return true;
-}
-
-bool EntityList::RemoveRaid(uint32 delete_id)
-{
-	auto it = std::find_if(raid_list.begin(), raid_list.end(),
-			[delete_id](const Raid *a) { return a->GetID() == delete_id; });
-	if (it == raid_list.end())
-		return false;
-	auto raid = *it;
-	raid_list.erase(it);
-	safe_delete(raid);
 	return true;
 }
 

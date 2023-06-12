@@ -290,13 +290,11 @@ public:
 	void	AddProximity(NPC *proximity_for);
 	void	Clear();
 	bool	RemoveMob(uint16 delete_id);
-	bool	RemoveMob(Mob* delete_mob);
 	bool	RemoveClient(uint16 delete_id);
 	bool	RemoveClient(Client* delete_client);
 	bool	RemoveNPC(uint16 delete_id);
 	bool	RemoveMerc(uint16 delete_id);
 	bool	RemoveGroup(uint32 delete_id);
-	bool	RemoveRaid(uint32 delete_id);
 	bool	RemoveCorpse(uint16 delete_id);
 	bool	RemoveDoor(uint16 delete_id);
 	bool	RemoveTrap(uint16 delete_id);
