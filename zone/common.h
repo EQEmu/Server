@@ -228,7 +228,6 @@ enum GravityBehavior {
 	LevitateWhileRunning
 };
 
-struct TradeEntity;
 class Trade;
 enum TradeState {
 	TradeNone,
