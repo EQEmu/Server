@@ -5189,7 +5189,7 @@ void EntityList::SignalAllClients(int signal_id)
 			c.second->Signal(signal_id);
 		}
 	}
-}\
+}
 
 void EntityList::GetMobList(std::list<Mob *> &m_list)
 {
