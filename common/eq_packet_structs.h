@@ -1794,14 +1794,14 @@ struct GMSummon_Struct {
 };
 
 struct GMFind_Struct {
-char	charname[64];
-char	gmname[64];
-uint32	success;
-uint32	zoneID;
-float	x;
-float	y;
-float	z;
-uint32	unknown2;
+	char	charname[64];
+	char	gmname[64];
+	uint32	success;
+	uint32	zoneID;
+	float	x;
+	float	y;
+	float	z;
+	uint32	unknown2;
 };
 
 struct GMGoto_Struct { // x,y is swapped as compared to summon and makes sense as own packet
