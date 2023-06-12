@@ -2165,21 +2165,6 @@ Group *EntityList::GetGroupByClient(Client *client)
 	return nullptr;
 }
 
-Raid *EntityList::GetRaidByLeaderName(const char *leader)
-{
-	std::list<Raid *>::iterator iterator;
-
-	iterator = raid_list.begin();
-
-	while (iterator != raid_list.end()) {
-		if ((*iterator)->GetLeader() && strcmp((*iterator)->GetLeader()->GetName(), leader) == 0) {
-			return *iterator;
-		}
-		++iterator;
-	}
-	return nullptr;
-}
-
 Raid *EntityList::GetRaidByID(uint32 id)
 {
 	std::list<Raid *>::iterator iterator;
@@ -2255,26 +2240,6 @@ Raid* EntityList::GetRaidByBot(const Bot* bot)
 				return r;
 			}
 		}
-	}
-	return nullptr;
-}
-
-
-Raid *EntityList::GetRaidByMob(Mob *mob)
-{
-	std::list<Raid *>::iterator iterator;
-
-	iterator = raid_list.begin();
-
-	while (iterator != raid_list.end()) {
-		for(int x = 0; x < MAX_RAID_MEMBERS; x++) {
-			// TODO: Implement support for Mob objects in Raid class
-			/*if((*iterator)->members[x].member){
-				if((*iterator)->members[x].member == mob)
-					return *iterator;
-			}*/
-		}
-		++iterator;
 	}
 	return nullptr;
 }
