@@ -267,7 +267,6 @@ public:
 	void	ClearAreas();
 	void	ReloadMerchants();
 	void	ProcessProximitySay(const char *message, Client *c, uint8 language = 0);
-	void	SendAATimer(uint32 charid,UseAA_Struct* uaa);
 	Doors *FindDoor(uint8 door_id);
 	Object *FindObject(uint32 object_id);
 	Object*	FindNearbyObject(float x, float y, float z, float radius);
