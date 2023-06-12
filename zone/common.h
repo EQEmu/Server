@@ -18,7 +18,6 @@
 //LOS Parameters:
 #define HEAD_POSITION 0.9f	//ratio of GetSize() where NPCs see from
 #define SEE_POSITION 0.5f	//ratio of GetSize() where NPCs try to see for LOS
-#define CHECK_LOS_STEP 1.0f
 
 #define ARCHETYPE_HYBRID	1
 #define ARCHETYPE_CASTER	2
