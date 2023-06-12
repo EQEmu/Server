@@ -120,7 +120,7 @@ void command_reload(Client *c, const Seperator *sep)
 		pack = new ServerPacket(ServerOP_ReloadObjects, 0);
 	} else if (is_opcodes) {
 		c->Message(Chat::White, "Attempting to reload Opcodes globally.");
-		ReloadAllPatches();
+		pack = new ServerPacket(ServerOP_ReloadOpcodes, 0);
 	} else if (is_perl_export) {
 		c->Message(Chat::White, "Attempting to reload Perl Event Export Settings globally.");
 		pack = new ServerPacket(ServerOP_ReloadPerlExportSettings, 0);
