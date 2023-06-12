@@ -490,7 +490,6 @@ public:
 	void	LimitRemoveNPC(NPC *npc);
 	bool	LimitCheckType(uint32 npc_type, int count);
 	bool	LimitCheckGroup(uint32 spawngroup_id, int count);
-	bool	LimitCheckBoth(uint32 npc_type, uint32 spawngroup_id, int group_count, int type_count);
 	bool	LimitCheckName(const char* npc_name);
 
 	int		GetHatedCount(Mob *attacker, Mob *exclude, bool inc_gray_con);
