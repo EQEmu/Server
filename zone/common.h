@@ -44,7 +44,6 @@
 
 //Spell specialization parameters, not sure of a better place for them
 #define SPECIALIZE_FIZZLE 11		//% fizzle chance reduce at 200 specialized
-#define SPECIALIZE_MANA_REDUCE 12	//% mana cost reduction at 200 specialized
 
 //these are large right now because the x,y,z coords of the zone
 //lines do not make a lot of sense
