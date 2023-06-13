@@ -1,3 +1,9 @@
+## [22.13.1] - 06/13/2023
+
+### Fixes
+
+*Fixes targetting bug that was producting extraneius messages on loss of target
+
 ## [22.13.0] - 06/12/2023
 
 ### Code
