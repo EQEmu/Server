@@ -1,8 +1,8 @@
 ## [22.13.1] - 06/13/2023
 
-### Fixes
+### Targeting
 
-*Fixes targetting bug that was producting extraneius messages on loss of target
+* Revert #3383 ([#3405](https://github.com/EQEmu/Server/pull/3405)) @noudess 2023-06-13
 
 ## [22.13.0] - 06/12/2023
 
