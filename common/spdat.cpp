@@ -1877,7 +1877,7 @@ bool IsSpellUsableInThisZoneType(uint16 spell_id, uint8 zone_type)
 const char* GetSpellName(uint16 spell_id)
 {
 	if (!IsValidSpell(spell_id)) {
-		return "";
+		return "INVALID SPELL ID IN GETSPELLNAME";
 	}
 
 	return spells[spell_id].name;
