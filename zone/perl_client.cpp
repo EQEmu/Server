@@ -2912,6 +2912,11 @@ bool Perl_Client_ReloadDataBuckets(Client* self)
 	return DataBucket::GetDataBuckets(self);
 }
 
+uint32 Perl_Client_GetEXPForLevel(Client* self, uint16 check_level)
+{
+	return self->GetEXPForLevel(check_level);
+}
+
 void perl_register_client()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -3075,6 +3080,7 @@ void perl_register_client()
 	package.add("GetDuelTarget", &Perl_Client_GetDuelTarget);
 	package.add("GetEnvironmentDamageModifier", &Perl_Client_GetEnvironmentDamageModifier);
 	package.add("GetEXP", &Perl_Client_GetEXP);
+	package.add("GetEXPForLevel", &Perl_Client_GetEXPForLevel);
 	package.add("GetEXPModifier", (double(*)(Client*, uint32))&Perl_Client_GetEXPModifier);
 	package.add("GetEXPModifier", (double(*)(Client*, uint32, int16))&Perl_Client_GetEXPModifier);
 	package.add("GetEbonCrystals", &Perl_Client_GetEbonCrystals);

@@ -3054,6 +3054,12 @@ bool Lua_Client::ReloadDataBuckets() {
 	return DataBucket::GetDataBuckets(self);
 }
 
+uint32 Lua_Client::GetEXPForLevel(uint16 check_level)
+{
+	Lua_Safe_Call_Int();
+	return self->GetEXPForLevel(check_level);
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 	.def(luabind::constructor<>())
@@ -3217,6 +3223,7 @@ luabind::scope lua_register_client() {
 	.def("GetDisciplineTimer", (uint32(Lua_Client::*)(uint32))&Lua_Client::GetDisciplineTimer)
 	.def("GetDuelTarget", (int(Lua_Client::*)(void))&Lua_Client::GetDuelTarget)
 	.def("GetEXP", (uint32(Lua_Client::*)(void))&Lua_Client::GetEXP)
+	.def("GetEXPForLevel", (uint32(Lua_Client::*)(uint16))&Lua_Client::GetEXPForLevel)
 	.def("GetEXPModifier", (double(Lua_Client::*)(uint32))&Lua_Client::GetEXPModifier)
 	.def("GetEXPModifier", (double(Lua_Client::*)(uint32,int16))&Lua_Client::GetEXPModifier)
 	.def("GetEbonCrystals", (uint32(Lua_Client::*)(void))&Lua_Client::GetEbonCrystals)
