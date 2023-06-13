@@ -1,3 +1,50 @@
+## [22.13.0] - 06/12/2023
+
+### Code
+
+* Add GMFind_Struct to packet structures ([#3402](https://github.com/EQEmu/Server/pull/3402)) @Kinglykrab 2023-06-12
+* Remove CHECK_LOS_STEP from zone/common.h ([#3398](https://github.com/EQEmu/Server/pull/3398)) @Kinglykrab 2023-06-12
+* Remove CheckCoordLosNoZLeaps() from zone/entity.cpp and zone/entity.h ([#3384](https://github.com/EQEmu/Server/pull/3384)) @Kinglykrab 2023-06-12
+* Remove CountTempPets() from zone/entity.cpp and zone/entity.h ([#3390](https://github.com/EQEmu/Server/pull/3390)) @Kinglykrab 2023-06-12
+* Remove Evade() from zone/entity.cpp and zone/entity.h ([#3394](https://github.com/EQEmu/Server/pull/3394)) @Kinglykrab 2023-06-12
+* Remove GateAllClients() from zone/entity.cpp and zone/entity.h ([#3391](https://github.com/EQEmu/Server/pull/3391)) @Kinglykrab 2023-06-12
+* Remove GetClient(ip, port) from zone/entity.h ([#3386](https://github.com/EQEmu/Server/pull/3386)) @Kinglykrab 2023-06-12
+* Remove GetClientCount() from zone/entity.cpp and zone/entity.h ([#3392](https://github.com/EQEmu/Server/pull/3392)) @Kinglykrab 2023-06-12
+* Remove GetGroupByBot(), GetRaidByMob(), and GetRaidByLeaderName() from zone/entity.cpp and zone/entity.h ([#3387](https://github.com/EQEmu/Server/pull/3387)) @Kinglykrab 2023-06-12
+* Remove InteractiveChat() and TakenAction() from zone/npc.h ([#3382](https://github.com/EQEmu/Server/pull/3382)) @Kinglykrab 2023-06-12
+* Remove LimitCheckBoth() from zone/entity.cpp and zone/entity.h ([#3393](https://github.com/EQEmu/Server/pull/3393)) @Kinglykrab 2023-06-12
+* Remove NPC::AddCash() from npc.cpp/npc.h ([#3380](https://github.com/EQEmu/Server/pull/3380)) @Kinglykrab 2023-06-09
+* Remove RemoveMob() and RemoveRaid() from zone/entity.cpp and zone/entity.h ([#3389](https://github.com/EQEmu/Server/pull/3389)) @Kinglykrab 2023-06-12
+* Remove SPECIALIZE_MANA_REDUCE from zone/common.h ([#3400](https://github.com/EQEmu/Server/pull/3400)) @Kinglykrab 2023-06-12
+* Remove SendAATimer() from zone/entity.h ([#3388](https://github.com/EQEmu/Server/pull/3388)) @Kinglykrab 2023-06-12
+* Remove WriteEntityIDs() from zone/entity.cpp and zone/entity.h ([#3395](https://github.com/EQEmu/Server/pull/3395)) @Kinglykrab 2023-06-12
+* Remove _BECOMENPCPET() and _NPCPET() from zone/common.h ([#3399](https://github.com/EQEmu/Server/pull/3399)) @Kinglykrab 2023-06-12
+* Remove pDBAsyncWorkID from zone/entity.h ([#3385](https://github.com/EQEmu/Server/pull/3385)) @Kinglykrab 2023-06-12
+* Remove struct DynamicZoneSafeReturn from zone/entity.h ([#3396](https://github.com/EQEmu/Server/pull/3396)) @Kinglykrab 2023-06-12
+* Remove struct TradeEntity from zone/common.h ([#3397](https://github.com/EQEmu/Server/pull/3397)) @Kinglykrab 2023-06-12
+
+### Commands
+
+* Assign #opcode to a #reload alias ([#3401](https://github.com/EQEmu/Server/pull/3401)) @Kinglykrab 2023-06-12
+
+### Illusions
+
+* RandomizeFeatures and SetGender were killing db texture ([#3376](https://github.com/EQEmu/Server/pull/3376)) @noudess 2023-06-06
+
+### Logging
+
+* Fixed statements that logged incorrect data ([#3381](https://github.com/EQEmu/Server/pull/3381)) @noudess 2023-06-07
+
+### Quest API
+
+* Add GetEXPForLevel() to Perl/Lua ([#3403](https://github.com/EQEmu/Server/pull/3403)) @Kinglykrab 2023-06-12
+* Add SendChannelMessage() to Perl/Lua ([#3378](https://github.com/EQEmu/Server/pull/3378)) @Kinglykrab 2023-06-04
+* Add several spell methods to Perl/Lua ([#3379](https://github.com/EQEmu/Server/pull/3379)) @Kinglykrab 2023-06-12
+
+### Targeting
+
+* /tar <bad target> should not untarget existing target ([#3383](https://github.com/EQEmu/Server/pull/3383)) @noudess 2023-06-12
+
 ## [22.12.0] - 05/29/2023
 
 ### Code
