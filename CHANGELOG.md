@@ -5,11 +5,11 @@
 * Add GMFind_Struct to packet structures ([#3402](https://github.com/EQEmu/Server/pull/3402)) @Kinglykrab 2023-06-12
 * Remove CHECK_LOS_STEP from zone/common.h ([#3398](https://github.com/EQEmu/Server/pull/3398)) @Kinglykrab 2023-06-12
 * Remove CheckCoordLosNoZLeaps() from zone/entity.cpp and zone/entity.h ([#3384](https://github.com/EQEmu/Server/pull/3384)) @Kinglykrab 2023-06-12
-* Remove CountTempPets() from zone/entity.cpp and zone/entity.h ([#3390](https://github.com/EQEmu/Server/pull/3390)) @Kinglykrab 2023-06-13
+* Remove CountTempPets() from zone/entity.cpp and zone/entity.h ([#3390](https://github.com/EQEmu/Server/pull/3390)) @Kinglykrab 2023-06-12
 * Remove Evade() from zone/entity.cpp and zone/entity.h ([#3394](https://github.com/EQEmu/Server/pull/3394)) @Kinglykrab 2023-06-12
 * Remove GateAllClients() from zone/entity.cpp and zone/entity.h ([#3391](https://github.com/EQEmu/Server/pull/3391)) @Kinglykrab 2023-06-12
 * Remove GetClient(ip, port) from zone/entity.h ([#3386](https://github.com/EQEmu/Server/pull/3386)) @Kinglykrab 2023-06-12
-* Remove GetClientCount() from zone/entity.cpp and zone/entity.h ([#3392](https://github.com/EQEmu/Server/pull/3392)) @Kinglykrab 2023-06-13
+* Remove GetClientCount() from zone/entity.cpp and zone/entity.h ([#3392](https://github.com/EQEmu/Server/pull/3392)) @Kinglykrab 2023-06-12
 * Remove GetGroupByBot(), GetRaidByMob(), and GetRaidByLeaderName() from zone/entity.cpp and zone/entity.h ([#3387](https://github.com/EQEmu/Server/pull/3387)) @Kinglykrab 2023-06-12
 * Remove InteractiveChat() and TakenAction() from zone/npc.h ([#3382](https://github.com/EQEmu/Server/pull/3382)) @Kinglykrab 2023-06-12
 * Remove LimitCheckBoth() from zone/entity.cpp and zone/entity.h ([#3393](https://github.com/EQEmu/Server/pull/3393)) @Kinglykrab 2023-06-12
@@ -37,9 +37,9 @@
 
 ### Quest API
 
-* Add GetEXPForLevel() to Perl/Lua ([#3403](https://github.com/EQEmu/Server/pull/3403)) @Kinglykrab 2023-06-13
+* Add GetEXPForLevel() to Perl/Lua ([#3403](https://github.com/EQEmu/Server/pull/3403)) @Kinglykrab 2023-06-12
 * Add SendChannelMessage() to Perl/Lua ([#3378](https://github.com/EQEmu/Server/pull/3378)) @Kinglykrab 2023-06-04
-* Add several spell methods to Perl/Lua ([#3379](https://github.com/EQEmu/Server/pull/3379)) @Kinglykrab 2023-06-13
+* Add several spell methods to Perl/Lua ([#3379](https://github.com/EQEmu/Server/pull/3379)) @Kinglykrab 2023-06-12
 
 ### Targeting
 
