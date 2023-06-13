@@ -1035,7 +1035,7 @@ void Client::OPRezzAnswer(uint32 Action, uint32 SpellID, uint16 ZoneID, uint16 I
 			BuffFadeNonPersistDeath();
 		}
 
-		int SpellEffectDescNum = GetSpellEffectDescNum(SpellID);
+		int SpellEffectDescNum = GetSpellEffectDescriptionNumber(SpellID);
 		// Rez spells with Rez effects have this DescNum (first is Titanium, second is 6.2 Client)
 		if(RuleB(Character, UseResurrectionSickness) && SpellEffectDescNum == 82 || SpellEffectDescNum == 39067) {
 			SetHP(GetMaxHP() / 5);
@@ -1968,7 +1968,7 @@ void Client::CalcRestState()
 	for (unsigned int j = 0; j < buff_count; j++) {
 		if(IsValidSpell(buffs[j].spellid)) {
 			if(IsDetrimentalSpell(buffs[j].spellid) && (buffs[j].ticsremaining > 0))
-				if(!DetrimentalSpellAllowsRest(buffs[j].spellid))
+				if(!IsRestAllowedSpell(buffs[j].spellid))
 					return;
 		}
 	}

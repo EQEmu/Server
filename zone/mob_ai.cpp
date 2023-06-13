@@ -653,7 +653,7 @@ void Client::AI_SpellCast()
 		slot_to_use = static_cast<EQ::spells::CastingSlot>(slots[idx]);
 	}
 
-	if(IsMezSpell(spell_to_cast) || IsFearSpell(spell_to_cast))
+	if(IsMesmerizeSpell(spell_to_cast) || IsFearSpell(spell_to_cast))
 	{
 		Mob *tar = entity_list.GetTargetForMez(this);
 		if(!tar)

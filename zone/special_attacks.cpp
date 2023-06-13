@@ -241,7 +241,7 @@ void Mob::DoSpecialAttackDamage(Mob *who, EQ::skills::SkillType skill, int32 bas
 					hate += item->GetItem()->AC;
 				}
 				const EQ::ItemData *itm = item->GetItem();
-				auto fbash = GetFuriousBash(itm->Focus.Effect);
+				auto fbash = GetSpellFuriousBash(itm->Focus.Effect);
 				hate = hate * (100 + fbash) / 100;
 				if (fbash)
 					MessageString(Chat::FocusEffect, GLOWS_RED, itm->Name);
@@ -2347,7 +2347,7 @@ void Mob::DoMeleeSkillAttackDmg(Mob *other, int32 weapon_damage, EQ::skills::Ski
 					hate += item->GetItem()->AC;
 				}
 				const EQ::ItemData *itm = item->GetItem();
-				hate = hate * (100 + GetFuriousBash(itm->Focus.Effect)) / 100;
+				hate = hate * (100 + GetSpellFuriousBash(itm->Focus.Effect)) / 100;
 			}
 		}
 

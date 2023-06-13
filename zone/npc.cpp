@@ -1186,7 +1186,7 @@ bool NPC::DatabaseCastAccepted(int spell_id) {
 			break;
 		}
 		default:
-			if(spells[spell_id].good_effect == 1 && !(spells[spell_id].buff_duration == 0 && GetHPRatio() == 100) && !IsEngaged())
+			if(spells[spell_id].good_effect == BENEFICIAL_EFFECT && !(spells[spell_id].buff_duration == 0 && GetHPRatio() == 100) && !IsEngaged())
 				return true;
 			return false;
 		}

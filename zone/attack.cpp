@@ -2958,7 +2958,7 @@ void Mob::AddToHateList(Mob* other, int64 hate /*= 0*/, int64 damage /*= 0*/, bo
 	if (GetSpecialAbility(IMMUNE_AGGRO_CLIENT) && other->IsClient())
 		return;
 
-	if (IsValidSpell(spell_id) && NoDetrimentalSpellAggro(spell_id))
+	if (IsValidSpell(spell_id) && IsNoDetrimentalSpellAggroSpell(spell_id))
 		return;
 
 	if (other == myowner)

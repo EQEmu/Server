@@ -1161,7 +1161,7 @@ bool Mob::CheckLosFN(glm::vec3 posWatcher, float sizeWatcher, glm::vec3 posTarge
 //offensive spell aggro
 int32 Mob::CheckAggroAmount(uint16 spell_id, Mob *target, bool isproc)
 {
-	if (NoDetrimentalSpellAggro(spell_id))
+	if (IsNoDetrimentalSpellAggroSpell(spell_id))
 		return 0;
 
 	int32 AggroAmount = 0;

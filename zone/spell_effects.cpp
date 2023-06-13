@@ -212,11 +212,11 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			viral_timer.Start(1000);
 		}
 
-		buffs[buffslot].virus_spread_time = zone->random.Int(GetViralMinSpreadTime(spell_id), GetViralMaxSpreadTime(spell_id));
+		buffs[buffslot].virus_spread_time = zone->random.Int(GetSpellViralMinimumSpreadTime(spell_id), GetSpellViralMaximumSpreadTime(spell_id));
 	}
 
 
-	if (!IsPowerDistModSpell(spell_id))
+	if (!IsDistanceModifierSpell(spell_id))
 		SetSpellPowerDistanceMod(0);
 
 	bool spell_trigger_cast_complete = false; //Used with SE_Spell_Trigger and SE_Chance_Best_in_Spell_Grp, true when spell has been triggered.
@@ -1331,7 +1331,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				snprintf(effect_desc, _EDLEN, "Blind: %+i", effect_value);
 #endif
 				// 'cure blind'
-				if (BeneficialSpell(spell_id) && spells[spell_id].buff_duration == 0) {
+				if (IsBeneficialSpell(spell_id) && spells[spell_id].buff_duration == 0) {
 					int buff_count = GetMaxBuffSlots();
 					for (int slot = 0; slot < buff_count; slot++) {
 						if (IsValidSpell(buffs[slot].spellid) && IsEffectInSpell(buffs[slot].spellid, SE_Blind)) {
@@ -1873,7 +1873,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Weapon Proc: %s (id %d)", spells[effect_value].name, procid);
 #endif
-				AddProcToWeapon(procid, false, 100 + spells[spell_id].limit_value[i], spell_id, caster_level, GetProcLimitTimer(spell_id, ProcType::MELEE_PROC));
+				AddProcToWeapon(procid, false, 100 + spells[spell_id].limit_value[i], spell_id, caster_level, GetSpellProcLimitTimer(spell_id, ProcType::MELEE_PROC));
 				break;
 			}
 
@@ -1883,7 +1883,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Ranged Proc: %+i", effect_value);
 #endif
-				AddRangedProc(procid, 100 + spells[spell_id].limit_value[i], spell_id, GetProcLimitTimer(spell_id, ProcType::RANGED_PROC));
+				AddRangedProc(procid, 100 + spells[spell_id].limit_value[i], spell_id, GetSpellProcLimitTimer(spell_id, ProcType::RANGED_PROC));
 				break;
 			}
 
@@ -1893,7 +1893,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Defensive Proc: %s (id %d)", spells[effect_value].name, procid);
 #endif
-				AddDefensiveProc(procid, 100 + spells[spell_id].limit_value[i], spell_id, GetProcLimitTimer(spell_id, ProcType::DEFENSIVE_PROC));
+				AddDefensiveProc(procid, 100 + spells[spell_id].limit_value[i], spell_id, GetSpellProcLimitTimer(spell_id, ProcType::DEFENSIVE_PROC));
 				break;
 			}
 
@@ -3400,7 +3400,7 @@ int64 Mob::CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level
 
 	// this doesn't actually need to be a song to get mods, just the right skill
 	if (EQ::skills::IsBardInstrumentSkill(spells[spell_id].skill)
-		&& IsInstrumentModAppliedToSpellEffect(spell_id, spells[spell_id].effect_id[effect_id])) {
+		&& IsInstrumentModifierAppliedToSpellEffect(spell_id, spells[spell_id].effect_id[effect_id])) {
 			oval = effect_value;
 			effect_value = effect_value * static_cast<int>(instrument_mod) / 10;
 			LogSpells("Effect value [{}] altered with bard modifier of [{}] to yeild [{}]",
@@ -3959,7 +3959,7 @@ void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
 		}
 
 		case SE_WipeHateList: {
-			if (IsMezSpell(buff.spellid)) {
+			if (IsMesmerizeSpell(buff.spellid)) {
 				break;
 			}
 
@@ -4054,7 +4054,7 @@ void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
 		case SE_InterruptCasting: {
 			if (IsCasting()) {
 				const auto &spell = spells[casting_spell_id];
-				if (!IgnoreCastingRestriction(spell.id) && zone->random.Roll(spells[buff.spellid].base_value[i])) {
+				if (!IsCastNotStandingSpell(spell.id) && zone->random.Roll(spells[buff.spellid].base_value[i])) {
 					InterruptSpell();
 				}
 			}
@@ -4363,7 +4363,7 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 								for (unsigned int j = 0; j < buff_count; j++) {
 									if (IsValidSpell(tar->GetBuffs()[j].spellid)) {
 										auto spell = spells[tar->GetBuffs()[j].spellid];
-										if (spell.good_effect == 0 && IsEffectInSpell(spell.id, SE_CurrentHP) && tar->GetBuffs()[j].casterid == GetID()) {
+										if (spell.good_effect == DETRIMENTAL_EFFECT && IsEffectInSpell(spell.id, SE_CurrentHP) && tar->GetBuffs()[j].casterid == GetID()) {
 											tar->BuffFadeBySpellID(spell.id);
 										}
 									}
@@ -4377,7 +4377,7 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 						for (unsigned int j = 0; j < buff_count; j++) {
 							if (IsValidSpell(GetBuffs()[j].spellid )) {
 								auto spell = spells[GetBuffs()[j].spellid];
-								if (spell.good_effect == 0 && IsEffectInSpell(spell.id, SE_CurrentHP)) {
+								if (spell.good_effect == DETRIMENTAL_EFFECT && IsEffectInSpell(spell.id, SE_CurrentHP)) {
 									BuffFadeBySpellID(spell.id);
 								}
 							}
@@ -4785,7 +4785,7 @@ int64 Mob::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 					LimitInclude[IncludeExistsSELimitEffect] = true;
 					// they use 33 here for all classes ... unsure if the type check is really needed
 					if (base_value == SE_SummonPet && type == focusReagentCost) {
-						if (IsSummonPetSpell(spell_id) || IsSummonSkeletonSpell(spell_id)) {
+						if (IsPetSpell(spell_id)) {
 							LimitInclude[IncludeFoundSELimitEffect] = true;
 						}
 					}
@@ -6262,7 +6262,7 @@ bool Mob::TryTriggerOnCastProc(uint16 focusspellid, uint16 spell_id, uint16 proc
 			return true;
 		}
 		// Edge cases where proc spell does not require a target such as PBAE, allows proc to still occur even if target potentially dead. Live spells exist with PBAE procs.
-		else if (!SpellRequiresTarget(proc_spellid)) {
+		else if (!IsTargetRequiredForSpell(proc_spellid)) {
 			SpellFinished(proc_spellid, this, EQ::spells::CastingSlot::Item, 0, -1, spells[proc_spellid].resist_difficulty);
 			return true;
 		}
@@ -9608,7 +9608,7 @@ void Mob::CastSpellOnLand(Mob* caster, int32 spell_id)
 
 void Mob::CalcSpellPowerDistanceMod(uint16 spell_id, float range, Mob* caster)
 {
-	if (IsPowerDistModSpell(spell_id)){
+	if (IsDistanceModifierSpell(spell_id)){
 
 		float distance = 0;
 
@@ -9959,7 +9959,7 @@ void Mob::VirusEffectProcess()
 			}
 
 			if (buffs[buffs_i].virus_spread_time <= 0) {
-				buffs[buffs_i].virus_spread_time = zone->random.Int(GetViralMinSpreadTime(buffs[buffs_i].spellid), GetViralMaxSpreadTime(buffs[buffs_i].spellid));
+				buffs[buffs_i].virus_spread_time = zone->random.Int(GetSpellViralMinimumSpreadTime(buffs[buffs_i].spellid), GetSpellViralMaximumSpreadTime(buffs[buffs_i].spellid));
 				SpreadVirusEffect(buffs[buffs_i].spellid, buffs[buffs_i].casterid, buffs[buffs_i].ticsremaining);
 				stop_timer = false;
 			}
@@ -9982,7 +9982,7 @@ void Mob::SpreadVirusEffect(int32 spell_id, uint32 caster_id, int32 buff_tics_re
 	std::vector<Mob *> targets_in_range = entity_list.GetTargetsForVirusEffect(
 		this,
 		caster,
-		GetViralSpreadRange(spell_id),
+		GetSpellViralSpreadRange(spell_id),
 		spells[spell_id].pcnpc_only_flag,
 		spell_id
 	);

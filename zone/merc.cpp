@@ -770,7 +770,7 @@ void Merc::CalcRestState() {
 	for (unsigned int j = 0; j < buff_count; j++) {
 		if(IsValidSpell(buffs[j].spellid)) {
 			if(IsDetrimentalSpell(buffs[j].spellid) && (buffs[j].ticsremaining > 0))
-				if(!DetrimentalSpellAllowsRest(buffs[j].spellid))
+				if(!IsRestAllowedSpell(buffs[j].spellid))
 					return;
 		}
 	}
@@ -4299,7 +4299,7 @@ Merc* Merc::LoadMerc(Client *c, MercTemplate* merc_template, uint32 merchant_id,
 	if(merc_template)
 	{
 		//TODO: Maybe add a way of updating client merc stats in a seperate function? like, for example, on leveling up.
-		
+
 		const NPCType* npc_type_to_copy = nullptr;
 		if (c) {
 			npc_type_to_copy = content_db.GetMercType(merc_template->MercNPCID, merc_template->RaceID, c->GetLevel());

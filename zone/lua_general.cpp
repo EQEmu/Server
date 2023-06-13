@@ -4416,6 +4416,607 @@ void lua_send_channel_message(Lua_Client from, const char* to, uint8 channel_num
 	quest_manager.SendChannelMessage(from, to, channel_number, guild_id, language_id, language_skill, message);
 }
 
+uint8 lua_get_spell_level(uint16 spell_id, uint8 class_id)
+{
+	const auto spell_level = GetSpellLevel(spell_id, class_id);
+	return spell_level > RuleI(Character, MaxLevel) ? UINT8_MAX : spell_level;
+}
+
+bool lua_is_effect_in_spell(uint16 spell_id, int effect_id)
+{
+	return IsEffectInSpell(spell_id, effect_id);
+}
+
+bool lua_is_beneficial_spell(uint16 spell_id)
+{
+	return IsBeneficialSpell(spell_id);
+}
+
+bool lua_is_detrimental_spell(uint16 spell_id)
+{
+	return IsDetrimentalSpell(spell_id);
+}
+
+bool lua_is_targetable_ae_spell(uint16 spell_id)
+{
+	return IsTargetableAESpell(spell_id);
+}
+
+bool lua_is_sacrifice_spell(uint16 spell_id)
+{
+	return IsSacrificeSpell(spell_id);
+}
+
+bool lua_is_lifetap_spell(uint16 spell_id)
+{
+	return IsLifetapSpell(spell_id);
+}
+
+bool lua_is_mesmerize_spell(uint16 spell_id)
+{
+	return IsMesmerizeSpell(spell_id);
+}
+
+bool lua_is_stun_spell(uint16 spell_id)
+{
+	return IsStunSpell(spell_id);
+}
+
+bool lua_is_summon_spell(uint16 spell_id)
+{
+	return IsSummonSpell(spell_id);
+}
+
+bool lua_is_damage_spell(uint16 spell_id)
+{
+	return IsDamageSpell(spell_id);
+}
+
+bool lua_is_fear_spell(uint16 spell_id)
+{
+	return IsFearSpell(spell_id);
+}
+
+bool lua_is_cure_spell(uint16 spell_id)
+{
+	return IsCureSpell(spell_id);
+}
+
+bool lua_is_haste_spell(uint16 spell_id)
+{
+	return IsHasteSpell(spell_id);
+}
+
+bool lua_is_harmony_spell(uint16 spell_id)
+{
+	return IsHarmonySpell(spell_id);
+}
+
+bool lua_is_percental_heal_spell(uint16 spell_id)
+{
+	return IsPercentalHealSpell(spell_id);
+}
+
+bool lua_is_group_only_spell(uint16 spell_id)
+{
+	return IsGroupOnlySpell(spell_id);
+}
+
+bool lua_is_invisible_spell(uint16 spell_id)
+{
+	return IsInvisibleSpell(spell_id);
+}
+
+bool lua_is_invulnerability_spell(uint16 spell_id)
+{
+	return IsInvulnerabilitySpell(spell_id);
+}
+
+bool lua_is_complete_heal_duration_spell(uint16 spell_id)
+{
+	return IsCompleteHealDurationSpell(spell_id);
+}
+
+bool lua_is_poison_counter_spell(uint16 spell_id)
+{
+	return IsPoisonCounterSpell(spell_id);
+}
+
+bool lua_is_disease_counter_spell(uint16 spell_id)
+{
+	return IsDiseaseCounterSpell(spell_id);
+}
+
+bool lua_is_summon_item_spell(uint16 spell_id)
+{
+	return IsSummonItemSpell(spell_id);
+}
+
+bool lua_is_summon_skeleton_spell(uint16 spell_id)
+{
+	return IsSummonSkeletonSpell(spell_id);
+}
+
+bool lua_is_summon_pet_spell(uint16 spell_id)
+{
+	return IsSummonPetSpell(spell_id);
+}
+
+bool lua_is_pet_spell(uint16 spell_id)
+{
+	return IsPetSpell(spell_id);
+}
+
+bool lua_is_summon_pc_spell(uint16 spell_id)
+{
+	return IsSummonPCSpell(spell_id);
+}
+
+bool lua_is_charm_spell(uint16 spell_id)
+{
+	return IsCharmSpell(spell_id);
+}
+
+bool lua_is_blind_spell(uint16 spell_id)
+{
+	return IsBlindSpell(spell_id);
+}
+
+bool lua_is_health_spell(uint16 spell_id)
+{
+	return IsHealthSpell(spell_id);
+}
+
+bool lua_is_cast_time_reduction_spell(uint16 spell_id)
+{
+	return IsCastTimeReductionSpell(spell_id);
+}
+
+bool lua_is_increase_duration_spell(uint16 spell_id)
+{
+	return IsIncreaseDurationSpell(spell_id);
+}
+
+bool lua_is_mana_cost_reduction_spell(uint16 spell_id)
+{
+	return IsManaCostReductionSpell(spell_id);
+}
+
+bool lua_is_increase_range_spell(uint16 spell_id)
+{
+	return IsIncreaseRangeSpell(spell_id);
+}
+
+bool lua_is_improved_healing_spell(uint16 spell_id)
+{
+	return IsImprovedHealingSpell(spell_id);
+}
+
+bool lua_is_improved_damage_spell(uint16 spell_id)
+{
+	return IsImprovedDamageSpell(spell_id);
+}
+
+bool lua_is_ae_duration_spell(uint16 spell_id)
+{
+	return IsAEDurationSpell(spell_id);
+}
+
+bool lua_is_pure_nuke_spell(uint16 spell_id)
+{
+	return IsPureNukeSpell(spell_id);
+}
+
+bool lua_is_ae_nuke_spell(uint16 spell_id)
+{
+	return IsAENukeSpell(spell_id);
+}
+
+bool lua_is_pbae_nuke_spell(uint16 spell_id)
+{
+	return IsPBAENukeSpell(spell_id);
+}
+
+bool lua_is_ae_rain_nuke_spell(uint16 spell_id)
+{
+	return IsAERainNukeSpell(spell_id);
+}
+
+bool lua_is_partial_resistable_spell(uint16 spell_id)
+{
+	return IsPartialResistableSpell(spell_id);
+}
+
+bool lua_is_resistable_spell(uint16 spell_id)
+{
+	return IsResistableSpell(spell_id);
+}
+
+bool lua_is_group_spell(uint16 spell_id)
+{
+	return IsGroupSpell(spell_id);
+}
+
+bool lua_is_tgb_compatible_spell(uint16 spell_id)
+{
+	return IsTGBCompatibleSpell(spell_id);
+}
+
+bool lua_is_bard_song(uint16 spell_id)
+{
+	return IsBardSong(spell_id);
+}
+
+bool lua_is_pulsing_bard_song(uint16 spell_id)
+{
+	return IsPulsingBardSong(spell_id);
+}
+
+bool lua_is_discipline_buff(uint16 spell_id)
+{
+	return IsDisciplineBuff(spell_id);
+}
+
+bool lua_is_discipline(uint16 spell_id)
+{
+	return IsDiscipline(spell_id);
+}
+
+bool lua_is_combat_skill(uint16 spell_id)
+{
+	return IsCombatSkill(spell_id);
+}
+
+bool lua_is_resurrection_effects(uint16 spell_id)
+{
+	return IsResurrectionEffects(spell_id);
+}
+
+bool lua_is_rune_spell(uint16 spell_id)
+{
+	return IsRuneSpell(spell_id);
+}
+
+bool lua_is_magic_rune_spell(uint16 spell_id)
+{
+	return IsMagicRuneSpell(spell_id);
+}
+
+bool lua_is_mana_tap_spell(uint16 spell_id)
+{
+	return IsManaTapSpell(spell_id);
+}
+
+bool lua_is_alliance_spell(uint16 spell_id)
+{
+	return IsAllianceSpell(spell_id);
+}
+
+bool lua_is_death_save_spell(uint16 spell_id)
+{
+	return IsDeathSaveSpell(spell_id);
+}
+
+bool lua_is_partial_death_save_spell(uint16 spell_id)
+{
+	return IsPartialDeathSaveSpell(spell_id);
+}
+
+bool lua_is_full_death_save_spell(uint16 spell_id)
+{
+	return IsFullDeathSaveSpell(spell_id);
+}
+
+bool lua_is_shadow_step_spell(uint16 spell_id)
+{
+	return IsShadowStepSpell(spell_id);
+}
+
+bool lua_is_succor_spell(uint16 spell_id)
+{
+	return IsSuccorSpell(spell_id);
+}
+
+bool lua_is_teleport_spell(uint16 spell_id)
+{
+	return IsTeleportSpell(spell_id);
+}
+
+bool lua_is_translocate_spell(uint16 spell_id)
+{
+	return IsTranslocateSpell(spell_id);
+}
+
+bool lua_is_gate_spell(uint16 spell_id)
+{
+	return IsGateSpell(spell_id);
+}
+
+bool lua_is_illusion_spell(uint16 spell_id)
+{
+	return IsIllusionSpell(spell_id);
+}
+
+bool lua_is_ldon_object_spell(uint16 spell_id)
+{
+	return IsLDoNObjectSpell(spell_id);
+}
+
+bool lua_is_heal_over_time_spell(uint16 spell_id)
+{
+	return IsHealOverTimeSpell(spell_id);
+}
+
+bool lua_is_complete_heal_spell(uint16 spell_id)
+{
+	return IsCompleteHealSpell(spell_id);
+}
+
+bool lua_is_fast_heal_spell(uint16 spell_id)
+{
+	return IsFastHealSpell(spell_id);
+}
+
+bool lua_is_very_fast_heal_spell(uint16 spell_id)
+{
+	return IsVeryFastHealSpell(spell_id);
+}
+
+bool lua_is_regular_single_target_heal_spell(uint16 spell_id)
+{
+	return IsRegularSingleTargetHealSpell(spell_id);
+}
+
+bool lua_is_regular_group_heal_spell(uint16 spell_id)
+{
+	return IsRegularGroupHealSpell(spell_id);
+}
+
+bool lua_is_group_complete_heal_spell(uint16 spell_id)
+{
+	return IsGroupCompleteHealSpell(spell_id);
+}
+
+bool lua_is_group_heal_over_time_spell(uint16 spell_id)
+{
+	return IsGroupHealOverTimeSpell(spell_id);
+}
+
+bool lua_is_debuff_spell(uint16 spell_id)
+{
+	return IsDebuffSpell(spell_id);
+}
+
+bool lua_is_resist_debuff_spell(uint16 spell_id)
+{
+	return IsResistDebuffSpell(spell_id);
+}
+
+bool lua_is_self_conversion_spell(uint16 spell_id)
+{
+	return IsSelfConversionSpell(spell_id);
+}
+
+bool lua_is_buff_spell(uint16 spell_id)
+{
+	return IsBuffSpell(spell_id);
+}
+
+bool lua_is_persist_death_spell(uint16 spell_id)
+{
+	return IsPersistDeathSpell(spell_id);
+}
+
+bool lua_is_suspendable_spell(uint16 spell_id)
+{
+	return IsSuspendableSpell(spell_id);
+}
+
+bool lua_is_cast_on_fade_duration_spell(uint16 spell_id)
+{
+	return IsCastOnFadeDurationSpell(spell_id);
+}
+
+bool lua_is_distance_modifier_spell(uint16 spell_id)
+{
+	return IsDistanceModifierSpell(spell_id);
+}
+
+bool lua_is_rest_allowed_spell(uint16 spell_id)
+{
+	return IsRestAllowedSpell(spell_id);
+}
+
+bool lua_is_no_detrimental_spell_aggro_spell(uint16 spell_id)
+{
+	return IsNoDetrimentalSpellAggroSpell(spell_id);
+}
+
+bool lua_is_stackable_dot(uint16 spell_id)
+{
+	return IsStackableDOT(spell_id);
+}
+
+bool lua_is_short_duration_buff(uint16 spell_id)
+{
+	return IsShortDurationBuff(spell_id);
+}
+
+bool lua_is_target_required_for_spell(uint16 spell_id)
+{
+	return IsTargetRequiredForSpell(spell_id);
+}
+
+bool lua_is_virus_spell(uint16 spell_id)
+{
+	return IsVirusSpell(spell_id);
+}
+
+bool lua_is_valid_spell(uint16 spell_id)
+{
+	return IsValidSpell(spell_id);
+}
+
+bool lua_is_effect_ignored_in_stacking(int effect_id)
+{
+	return IsEffectIgnoredInStacking(effect_id);
+}
+
+bool lua_is_focus_limit(int effect_id)
+{
+	return IsFocusLimit(effect_id);
+}
+
+bool lua_is_bard_only_stack_effect(int effect_id)
+{
+	return IsBardOnlyStackEffect(effect_id);
+}
+
+bool lua_is_cast_while_invisible_spell(uint16 spell_id)
+{
+	return IsCastWhileInvisibleSpell(spell_id);
+}
+
+bool lua_is_cast_restricted_spell(uint16 spell_id)
+{
+	return IsCastRestrictedSpell(spell_id);
+}
+
+bool lua_is_cast_not_standing_spell(uint16 spell_id)
+{
+	return IsCastNotStandingSpell(spell_id);
+}
+
+bool lua_is_instrument_modifier_applied_to_spell_effect(uint16 spell_id, int effect_id)
+{
+	return IsInstrumentModifierAppliedToSpellEffect(spell_id, effect_id);
+}
+
+bool lua_is_blank_spell_effect(uint16 spell_id, int effect_index)
+{
+	return IsBlankSpellEffect(spell_id, effect_index);
+}
+
+uint16 lua_get_spell_trigger_spell_id(uint16 spell_id, int effect_id)
+{
+	return GetSpellTriggerSpellID(spell_id, effect_id);
+}
+
+uint8 lua_get_spell_minimum_level(uint16 spell_id)
+{
+	return GetSpellMinimumLevel(spell_id);
+}
+
+int lua_get_spell_resist_type(uint16 spell_id)
+{
+	return GetSpellResistType(spell_id);
+}
+
+int lua_get_spell_target_type(uint16 spell_id)
+{
+	return GetSpellTargetType(spell_id);
+}
+
+int lua_get_spell_partial_melee_rune_reduction(uint16 spell_id)
+{
+	return GetSpellPartialMeleeRuneReduction(spell_id);
+}
+
+int lua_get_spell_partial_magic_rune_reduction(uint16 spell_id)
+{
+	return GetSpellPartialMagicRuneReduction(spell_id);
+}
+
+int lua_get_spell_partial_melee_rune_amount(uint16 spell_id)
+{
+	return GetSpellPartialMeleeRuneAmount(spell_id);
+}
+
+int lua_get_spell_partial_magic_rune_amount(uint16 spell_id)
+{
+	return GetSpellPartialMagicRuneAmount(spell_id);
+}
+
+int lua_get_spell_viral_minimum_spread_time(uint16 spell_id)
+{
+	return GetSpellViralMinimumSpreadTime(spell_id);
+}
+
+int lua_get_spell_viral_maximum_spread_time(uint16 spell_id)
+{
+	return GetSpellViralMaximumSpreadTime(spell_id);
+}
+
+int lua_get_spell_viral_spread_range(uint16 spell_id)
+{
+	return GetSpellViralSpreadRange(spell_id);
+}
+
+int lua_get_spell_proc_limit_timer(uint16 spell_id, int proc_type)
+{
+	return GetSpellProcLimitTimer(spell_id, proc_type);
+}
+
+int lua_get_spell_effect_description_number(uint16 spell_id)
+{
+	return GetSpellEffectDescriptionNumber(spell_id);
+}
+
+int lua_get_spell_furious_bash(uint16 spell_id)
+{
+	return GetSpellFuriousBash(spell_id);
+}
+
+bool lua_is_spell_usable_in_this_zone_type(uint16 spell_id)
+{
+	return IsSpellUsableInThisZoneType(spell_id, zone->GetZoneType());
+}
+
+bool lua_is_spell_usable_in_this_zone_type(uint16 spell_id, uint8 zone_type)
+{
+	return IsSpellUsableInThisZoneType(spell_id, zone_type);
+}
+
+int lua_get_spell_effect_index(uint16 spell_id, int effect_id)
+{
+	return GetSpellEffectIndex(spell_id, effect_id);
+}
+
+int lua_calculate_poison_counters(uint16 spell_id)
+{
+	return CalculatePoisonCounters(spell_id);
+}
+
+int lua_calculate_disease_counters(uint16 spell_id)
+{
+	return CalculateDiseaseCounters(spell_id);
+}
+
+int lua_calculate_curse_counters(uint16 spell_id)
+{
+	return CalculateCurseCounters(spell_id);
+}
+
+int lua_calculate_corruption_counters(uint16 spell_id)
+{
+	return CalculateCorruptionCounters(spell_id);
+}
+
+int lua_calculate_counters(uint16 spell_id)
+{
+	return CalculateCounters(spell_id);
+}
+
+int8 lua_get_spell_resurrection_sickness_check(uint16 spell_id_one, uint16 spell_id_two)
+{
+	return GetSpellResurrectionSicknessCheck(spell_id_one, spell_id_two);
+}
+
+int lua_get_spell_nimbus_effect(uint16 spell_id)
+{
+	return GetSpellNimbusEffect(spell_id);
+}
+
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
 	cur = table[#name]; \
 	if(luabind::type(cur) != LUA_TNIL) { \
@@ -5069,6 +5670,126 @@ luabind::scope lua_register_general() {
 		luabind::def("send_channel_message", (void(*)(uint8,uint32,uint8,uint8,const char*))&lua_send_channel_message),
 		luabind::def("send_channel_message", (void(*)(Lua_Client,uint8,uint32,uint8,uint8,const char*))&lua_send_channel_message),
 		luabind::def("send_channel_message", (void(*)(Lua_Client,const char*,uint8,uint32,uint8,uint8,const char*))&lua_send_channel_message),
+		luabind::def("get_spell_level", &lua_get_spell_level),
+		luabind::def("is_effect_in_spell", &lua_is_effect_in_spell),
+		luabind::def("is_beneficial_spell", &lua_is_beneficial_spell),
+		luabind::def("is_detrimental_spell", &lua_is_detrimental_spell),
+		luabind::def("is_targetable_ae_spell", &lua_is_targetable_ae_spell),
+		luabind::def("is_sacrifice_spell", &lua_is_sacrifice_spell),
+		luabind::def("is_lifetap_spell", &lua_is_lifetap_spell),
+		luabind::def("is_mesmerize_spell", &lua_is_mesmerize_spell),
+		luabind::def("is_stun_spell", &lua_is_stun_spell),
+		luabind::def("is_summon_spell", &lua_is_summon_spell),
+		luabind::def("is_damage_spell", &lua_is_damage_spell),
+		luabind::def("is_fear_spell", &lua_is_fear_spell),
+		luabind::def("is_cure_spell", &lua_is_cure_spell),
+		luabind::def("is_haste_spell", &lua_is_haste_spell),
+		luabind::def("is_harmony_spell", &lua_is_harmony_spell),
+		luabind::def("is_percental_heal_spell", &lua_is_percental_heal_spell),
+		luabind::def("is_group_only_spell", &lua_is_group_only_spell),
+		luabind::def("is_invisible_spell", &lua_is_invisible_spell),
+		luabind::def("is_invulnerability_spell", &lua_is_invulnerability_spell),
+		luabind::def("is_complete_heal_duration_spell", &lua_is_complete_heal_duration_spell),
+		luabind::def("is_poison_counter_spell", &lua_is_poison_counter_spell),
+		luabind::def("is_disease_counter_spell", &lua_is_disease_counter_spell),
+		luabind::def("is_summon_item_spell", &lua_is_summon_item_spell),
+		luabind::def("is_summon_skeleton_spell", &lua_is_summon_skeleton_spell),
+		luabind::def("is_summon_pet_spell", &lua_is_summon_pet_spell),
+		luabind::def("is_pet_spell", &lua_is_pet_spell),
+		luabind::def("is_summon_pc_spell", &lua_is_summon_pc_spell),
+		luabind::def("is_charm_spell", &lua_is_charm_spell),
+		luabind::def("is_blind_spell", &lua_is_blind_spell),
+		luabind::def("is_health_spell", &lua_is_health_spell),
+		luabind::def("is_cast_time_reduction_spell", &lua_is_cast_time_reduction_spell),
+		luabind::def("is_increase_duration_spell", &lua_is_increase_duration_spell),
+		luabind::def("is_mana_cost_reduction_spell", &lua_is_mana_cost_reduction_spell),
+		luabind::def("is_increase_range_spell", &lua_is_increase_range_spell),
+		luabind::def("is_improved_healing_spell", &lua_is_improved_healing_spell),
+		luabind::def("is_improved_damage_spell", &lua_is_improved_damage_spell),
+		luabind::def("is_ae_duration_spell", &lua_is_ae_duration_spell),
+		luabind::def("is_pure_nuke_spell", &lua_is_pure_nuke_spell),
+		luabind::def("is_ae_nuke_spell", &lua_is_ae_nuke_spell),
+		luabind::def("is_pbae_nuke_spell", &lua_is_pbae_nuke_spell),
+		luabind::def("is_ae_rain_nuke_spell", &lua_is_ae_rain_nuke_spell),
+		luabind::def("is_partial_resistable_spell", &lua_is_partial_resistable_spell),
+		luabind::def("is_resistable_spell", &lua_is_resistable_spell),
+		luabind::def("is_group_spell", &lua_is_group_spell),
+		luabind::def("is_tgb_compatible_spell", &lua_is_tgb_compatible_spell),
+		luabind::def("is_bard_song", &lua_is_bard_song),
+		luabind::def("is_pulsing_bard_song", &lua_is_pulsing_bard_song),
+		luabind::def("is_discipline_buff", &lua_is_discipline_buff),
+		luabind::def("is_discipline", &lua_is_discipline),
+		luabind::def("is_combat_skill", &lua_is_combat_skill),
+		luabind::def("is_resurrection_effects", &lua_is_resurrection_effects),
+		luabind::def("is_rune_spell", &lua_is_rune_spell),
+		luabind::def("is_magic_rune_spell", &lua_is_magic_rune_spell),
+		luabind::def("is_mana_tap_spell", &lua_is_mana_tap_spell),
+		luabind::def("is_alliance_spell", &lua_is_alliance_spell),
+		luabind::def("is_death_save_spell", &lua_is_death_save_spell),
+		luabind::def("is_partial_death_save_spell", &lua_is_partial_death_save_spell),
+		luabind::def("is_full_death_save_spell", &lua_is_full_death_save_spell),
+		luabind::def("is_shadow_step_spell", &lua_is_shadow_step_spell),
+		luabind::def("is_succor_spell", &lua_is_succor_spell),
+		luabind::def("is_teleport_spell", &lua_is_teleport_spell),
+		luabind::def("is_translocate_spell", &lua_is_translocate_spell),
+		luabind::def("is_gate_spell", &lua_is_gate_spell),
+		luabind::def("is_illusion_spell", &lua_is_illusion_spell),
+		luabind::def("is_ldon_object_spell", &lua_is_ldon_object_spell),
+		luabind::def("is_heal_over_time_spell", &lua_is_heal_over_time_spell),
+		luabind::def("is_complete_heal_spell", &lua_is_complete_heal_spell),
+		luabind::def("is_fast_heal_spell", &lua_is_fast_heal_spell),
+		luabind::def("is_very_fast_heal_spell", &lua_is_very_fast_heal_spell),
+		luabind::def("is_regular_single_target_heal_spell", &lua_is_regular_single_target_heal_spell),
+		luabind::def("is_regular_group_heal_spell", &lua_is_regular_group_heal_spell),
+		luabind::def("is_group_complete_heal_spell", &lua_is_group_complete_heal_spell),
+		luabind::def("is_group_heal_over_time_spell", &lua_is_group_heal_over_time_spell),
+		luabind::def("is_debuff_spell", &lua_is_debuff_spell),
+		luabind::def("is_resist_debuff_spell", &lua_is_resist_debuff_spell),
+		luabind::def("is_self_conversion_spell", &lua_is_self_conversion_spell),
+		luabind::def("is_buff_spell", &lua_is_buff_spell),
+		luabind::def("is_persist_death_spell", &lua_is_persist_death_spell),
+		luabind::def("is_suspendable_spell", &lua_is_suspendable_spell),
+		luabind::def("is_cast_on_fade_duration_spell", &lua_is_cast_on_fade_duration_spell),
+		luabind::def("is_distance_modifier_spell", &lua_is_distance_modifier_spell),
+		luabind::def("is_rest_allowed_spell", &lua_is_rest_allowed_spell),
+		luabind::def("is_no_detrimental_spell_aggro_spell", &lua_is_no_detrimental_spell_aggro_spell),
+		luabind::def("is_stackable_dot", &lua_is_stackable_dot),
+		luabind::def("is_short_duration_buff", &lua_is_short_duration_buff),
+		luabind::def("is_target_required_for_spell", &lua_is_target_required_for_spell),
+		luabind::def("is_virus_spell", &lua_is_virus_spell),
+		luabind::def("is_valid_spell", &lua_is_valid_spell),
+		luabind::def("is_effect_ignored_in_stacking", &lua_is_effect_ignored_in_stacking),
+		luabind::def("is_focus_limit", &lua_is_focus_limit),
+		luabind::def("is_bard_only_stack_effect", &lua_is_bard_only_stack_effect),
+		luabind::def("is_cast_while_invisible_spell", &lua_is_cast_while_invisible_spell),
+		luabind::def("is_cast_restricted_spell", &lua_is_cast_restricted_spell),
+		luabind::def("is_cast_not_standing_spell", &lua_is_cast_not_standing_spell),
+		luabind::def("is_instrument_modifier_applied_to_spell_effect", &lua_is_instrument_modifier_applied_to_spell_effect),
+		luabind::def("is_blank_spell_effect", &lua_is_blank_spell_effect),
+		luabind::def("get_spell_trigger_spell_id", &lua_get_spell_trigger_spell_id),
+		luabind::def("get_spell_minimum_level", &lua_get_spell_minimum_level),
+		luabind::def("get_spell_resist_type", &lua_get_spell_resist_type),
+		luabind::def("get_spell_target_type", &lua_get_spell_target_type),
+		luabind::def("get_spell_partial_melee_rune_reduction", &lua_get_spell_partial_melee_rune_reduction),
+		luabind::def("get_spell_partial_magic_rune_reduction", &lua_get_spell_partial_magic_rune_reduction),
+		luabind::def("get_spell_partial_melee_rune_amount", &lua_get_spell_partial_melee_rune_amount),
+		luabind::def("get_spell_partial_magic_rune_amount", &lua_get_spell_partial_magic_rune_amount),
+		luabind::def("get_spell_viral_minimum_spread_time", &lua_get_spell_viral_minimum_spread_time),
+		luabind::def("get_spell_viral_maximum_spread_time", &lua_get_spell_viral_maximum_spread_time),
+		luabind::def("get_spell_viral_spread_range", &lua_get_spell_viral_spread_range),
+		luabind::def("get_spell_proc_limit_timer", &lua_get_spell_proc_limit_timer),
+		luabind::def("get_spell_effect_description_number", &lua_get_spell_effect_description_number),
+		luabind::def("get_spell_furious_bash", &lua_get_spell_furious_bash),
+		luabind::def("is_spell_usable_in_this_zone_type", (bool(*)(uint16))&lua_is_spell_usable_in_this_zone_type),
+		luabind::def("is_spell_usable_in_this_zone_type", (bool(*)(uint16,uint8))&lua_is_spell_usable_in_this_zone_type),
+		luabind::def("get_spell_effect_index", &lua_get_spell_effect_index),
+		luabind::def("calculate_poison_counters", &lua_calculate_poison_counters),
+		luabind::def("calculate_disease_counters", &lua_calculate_disease_counters),
+		luabind::def("calculate_curse_counters", &lua_calculate_curse_counters),
+		luabind::def("calculate_corruption_counters", &lua_calculate_corruption_counters),
+		luabind::def("calculate_counters", &lua_calculate_counters),
+		luabind::def("get_spell_resurrection_sickness_check", &lua_get_spell_resurrection_sickness_check),
+		luabind::def("get_spell_nimbus_effect", &lua_get_spell_nimbus_effect),
 		/*
 			Cross Zone
 		*/
