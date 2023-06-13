@@ -14423,8 +14423,6 @@ void Client::Handle_OP_TargetCommand(const EQApplicationPacket *app)
 	// Locate and cache new target
 	ClientTarget_Struct* ct = (ClientTarget_Struct*)app->pBuffer;
 
-	LogError("Handle_OP_TargetCommand newtar[{}]", ct->new_target);
-
 	bool can_target=false;
 	Mob *nt = entity_list.GetMob(ct->new_target);
 
@@ -14470,7 +14468,6 @@ void Client::Handle_OP_TargetMouse(const EQApplicationPacket *app)
 	// Locate and cache new target
 	ClientTarget_Struct* ct = (ClientTarget_Struct*)app->pBuffer;
 	pClientSideTarget = ct->new_target;
-	LogError("Handle_OP_TargetMouse newtar[{}]", ct->new_target);
 	if (!IsAIControlled())
 	{
 		Mob *nt = entity_list.GetMob(ct->new_target);
