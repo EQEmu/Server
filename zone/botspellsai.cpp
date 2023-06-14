@@ -262,7 +262,7 @@ bool Bot::BotCastDebuff(Mob* tar, uint8 botLevel, BotSpell& botSpell, bool check
 	bool casted_spell = false;
 	if ((tar->GetHPRatio() <= 99.0f) && (tar->GetHPRatio() > 20.0f))
 	{
-		if (!checked_los && !CheckLosFN(tar)) {
+		if (!checked_los && (!CheckLosFN(tar) || !CheckWaterLoS(this, tar))) {
 			return casted_spell;
 		}
 
@@ -296,7 +296,7 @@ bool Bot::BotCastSlow(Mob* tar, uint8 botLevel, uint8 botClass, BotSpell& botSpe
 	bool casted_spell = false;
 	if (tar->GetHPRatio() <= 99.0f) {
 
-		if (!checked_los && !CheckLosFN(tar)) {
+		if (!checked_los && (!CheckLosFN(tar) || !CheckWaterLoS(this, tar))) {
 			return casted_spell;
 		}
 
@@ -387,7 +387,7 @@ bool Bot::BotCastDOT(Mob* tar, uint8 botLevel, const BotSpell& botSpell, const b
 	bool casted_spell = false;
 
 	if ((tar->GetHPRatio() <= 98.0f) && (tar->DontDotMeBefore() < Timer::GetCurrentTime()) && (tar->GetHPRatio() > 15.0f)) {
-		if (!checked_los && !CheckLosFN(tar)) {
+		if (!checked_los && (!CheckLosFN(tar) || !CheckWaterLoS(this, tar))) {
 			return casted_spell;
 		}
 
@@ -470,7 +470,7 @@ bool Bot::BotCastDOT(Mob* tar, uint8 botLevel, const BotSpell& botSpell, const b
 bool Bot::BotCastSnare(Mob* tar, uint8 botLevel, BotSpell& botSpell, const bool& checked_los, uint32 iSpellTypes) {
 	bool casted_spell = false;
 	if (tar->DontSnareMeBefore() < Timer::GetCurrentTime()) {
-		if (!checked_los && !CheckLosFN(tar)) {
+		if (!checked_los && (!CheckLosFN(tar) || !CheckWaterLoS(this, tar))) {
 			return casted_spell;
 		}
 
@@ -501,7 +501,7 @@ bool Bot::BotCastSnare(Mob* tar, uint8 botLevel, BotSpell& botSpell, const bool&
 bool Bot::BotCastLifetap(Mob* tar, uint8 botLevel, BotSpell& botSpell, const bool& checked_los, uint32 iSpellTypes) {
 	bool casted_spell = false;
 	if (GetHPRatio() < 90.0f) {
-		if (!checked_los && !CheckLosFN(tar)) {
+		if (!checked_los && (!CheckLosFN(tar) || !CheckWaterLoS(this, tar))) {
 			return casted_spell;
 		}
 
@@ -714,7 +714,7 @@ bool Bot::BotCastDispel(Mob* tar, BotSpell& botSpell, uint32 iSpellTypes, const 
 
 	bool casted_spell = false;
 	if (tar->GetHPRatio() > 95.0f) {
-		if (!checked_los && !CheckLosFN(tar)) {
+		if (!checked_los && (!CheckLosFN(tar) || !CheckWaterLoS(this, tar))) {
 			return casted_spell;
 		}
 
@@ -737,7 +737,7 @@ bool Bot::BotCastNuke(Mob* tar, uint8 botLevel, uint8 botClass, BotSpell& botSpe
 	bool casted_spell = false;
 	if ((tar->GetHPRatio() <= 95.0f) || ((botClass == BARD) || (botClass == SHAMAN) || (botClass == ENCHANTER) || (botClass == PALADIN) || (botClass == SHADOWKNIGHT) || (botClass == WARRIOR)))
 	{
-		if (!checked_los && !CheckLosFN(tar)) {
+		if (!checked_los && (!CheckLosFN(tar) || !CheckWaterLoS(this, tar))) {
 			return casted_spell;
 		}
 
@@ -965,7 +965,7 @@ bool Bot::BotCastBuff(Mob* tar, uint8 botLevel, uint8 botClass) {
 bool Bot::BotCastRoot(Mob* tar, uint8 botLevel, uint32 iSpellTypes, BotSpell& botSpell, const bool& checked_los) {
 	bool casted_spell = false;
 	if (!tar->IsRooted() && tar->DontRootMeBefore() < Timer::GetCurrentTime()) {
-		if (!checked_los && !CheckLosFN(tar)) {
+		if (!checked_los && (!CheckLosFN(tar) || !CheckWaterLoS(this, tar))) {
 			return casted_spell;
 		}
 
@@ -1189,7 +1189,7 @@ bool Bot::BotCastHeal(Mob* tar, uint8 botLevel, uint8 botClass, BotSpell& botSpe
 
 bool Bot::BotCastMez(Mob* tar, uint8 botLevel, bool checked_los, BotSpell& botSpell, Raid* raid) {
 	bool casted_spell = false;
-	if (!checked_los && !CheckLosFN(tar)) {
+	if (!checked_los && (!CheckLosFN(tar) || !CheckWaterLoS(this, tar))) {
 		return false;
 	}
 

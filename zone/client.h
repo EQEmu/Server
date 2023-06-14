@@ -1503,6 +1503,8 @@ public:
 	bool GroupFollow(Client* inviter);
 	inline bool  GetRunMode() const { return runmode; }
 
+	virtual bool CheckWaterAutoFireLoS(Mob* attacker, Mob* target);
+
 	void SendReloadCommandMessages();
 
 	void SendItemRecastTimer(int32 recast_type, uint32 recast_delay = 0, bool in_ignore_casting_requirement = false);

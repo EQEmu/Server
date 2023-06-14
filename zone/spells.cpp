@@ -101,7 +101,7 @@ Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 #include "mob_movement_manager.h"
 #include "client.h"
 #include "mob.h"
-
+#include "water_map.h"
 
 extern Zone* zone;
 extern volatile bool is_zone_loaded;
@@ -2356,7 +2356,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, in
 	}
 
 	// check line of sight to target if it's a detrimental spell
-	if(!spells[spell_id].npc_no_los && spell_target && IsDetrimentalSpell(spell_id) && !CheckLosFN(spell_target) && !IsHarmonySpell(spell_id) && spells[spell_id].target_type != ST_TargetOptional)
+	if (!spells[spell_id].npc_no_los && spell_target && IsDetrimentalSpell(spell_id) && (!CheckLosFN(spell_target) || !CheckWaterLoS(this, spell_target)) && !IsHarmonySpell(spell_id) && spells[spell_id].target_type != ST_TargetOptional)
 	{
 		LogSpells("Spell [{}]: cannot see target [{}]", spell_id, spell_target->GetName());
 		MessageString(Chat::Red,CANT_SEE_TARGET);
@@ -7099,4 +7099,12 @@ void Mob::DrawDebugCoordinateNode(std::string node_name, const glm::vec4 vec)
 const CombatRecord &Mob::GetCombatRecord() const
 {
 	return m_combat_record;
+}
+
+bool Mob::CheckWaterLoS(Mob* los_attacker, Mob* los_target) // checks if both attacker and target are both in or out of the water
+{
+	if (!RuleB(Spells, WaterMatchRequiredForLoS) || zone->watermap == nullptr) { // if rule is set to false, bypass check
+		return true;
+	}
+	return zone->watermap->InLiquid(los_attacker->GetPosition()) == zone->watermap->InLiquid(los_target->GetPosition());
 }
