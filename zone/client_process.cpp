@@ -2403,7 +2403,7 @@ void Client::SendGuildLFGuildStatus()
 	safe_delete(pack);
 }
 
-bool Client::CheckWaterAutoFireLoS(Mob* m) // checks if both attacker and target are both in or out of the water
+bool Client::CheckWaterAutoFireLoS(Mob* m)
 {
 	if (
 		!RuleB(Combat, WaterMatchRequiredForAutoFireLoS) ||

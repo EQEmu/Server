@@ -7101,7 +7101,7 @@ const CombatRecord &Mob::GetCombatRecord() const
 	return m_combat_record;
 }
 
-bool Mob::CheckWaterLoS(Mob* m) // checks if both attacker and target are both in or out of the water
+bool Mob::CheckWaterLoS(Mob* m)
 {
 	if (
 		!RuleB(Spells, WaterMatchRequiredForLoS) ||
