@@ -1089,18 +1089,18 @@ void ConsoleCrossZoneMove(
 	const std::vector<std::string> &args
 ) {
 	if (args.size() < 3) {
+		connection->SendLine("czmove character [character_id] [instance_id]");
 		connection->SendLine("czmove character [character_id] [zone_short_name]");
-		connection->SendLine("czmove character [character_id] [zone_short_name] [instance_id]");
+		connection->SendLine("czmove expedition [expedition_id] [instance_id]");
 		connection->SendLine("czmove expedition [expedition_id] [zone_short_name]");
-		connection->SendLine("czmove expedition [expedition_id] [zone_short_name] [instance_id]");
+		connection->SendLine("czmove group [group_id] [instance_id]");
 		connection->SendLine("czmove group [group_id] [zone_short_name]");
-		connection->SendLine("czmove group [group_id] [zone_short_name] [instance_id]");
+		connection->SendLine("czmove guild [guild_id] [instance_id]");
 		connection->SendLine("czmove guild [guild_id] [zone_short_name]");
-		connection->SendLine("czmove guild [guild_id] [zone_short_name] [instance_id]");
+		connection->SendLine("czmove name [character_name] [instance_id]");
 		connection->SendLine("czmove name [character_name] [zone_short_name]");
-		connection->SendLine("czmove name [character_name] [zone_short_name] [instance_id]");
+		connection->SendLine("czmove raid [raid_id] [instance_id]");
 		connection->SendLine("czmove raid [raid_id] [zone_short_name]");
-		connection->SendLine("czmove raid [raid_id] [zone_short_name] [instance_id]");
 		return;
 	}
 
@@ -1236,7 +1236,7 @@ void RegisterConsoleFunctions(std::unique_ptr<EQ::Net::ConsoleServer>& console)
 	console->RegisterCall("auction", 50, "auction [message]", std::bind(ConsoleAuction, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	console->RegisterCall("broadcast", 50, "broadcast [message]", std::bind(ConsoleBroadcast, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	console->RegisterCall("czcast", 50, "czcast [type] [identifier] [spell_id]", std::bind(ConsoleCrossZoneCastSpell, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-	console->RegisterCall("czmove", 50, "czcast [type] [identifier] [zone_short_name] [instance_id] - instance_id is optional", std::bind(ConsoleCrossZoneMove, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+	console->RegisterCall("czmove", 50, "czcast [type] [identifier] [instance_id|zone_short_name] - instance_id and zone_short_name are interchangeable", std::bind(ConsoleCrossZoneMove, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	console->RegisterCall("echo", 50, "echo [on/off]", std::bind(ConsoleNull, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	console->RegisterCall("emote", 50, "emote [zonename or charname or world] [type] [message]", std::bind(ConsoleEmote, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	console->RegisterCall("flag", 200, "flag [status] [accountname]", std::bind(ConsoleFlag, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
@@ -1260,7 +1260,7 @@ void RegisterConsoleFunctions(std::unique_ptr<EQ::Net::ConsoleServer>& console)
 	console->RegisterCall("whoami", 50, "whoami", std::bind(ConsoleWhoami, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	console->RegisterCall("worldshutdown", 200, "worldshutdown", std::bind(ConsoleWorldShutdown, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	console->RegisterCall("wwcast", 50, "wwcast [spell_id] [min_status] [max_status] - min_status and max_status are optional", std::bind(ConsoleWorldWideCastSpell, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-	console->RegisterCall("wwmove", 50, "wwmove [zone_short_name] [instance_id] [min_status] [max_status] - instance_id, min_status, and max_status are optional", std::bind(ConsoleWorldWideMove, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+	console->RegisterCall("wwmove", 50, "wwmove [instance_id|zone_short_name] [min_status] [max_status] -  min_status and max_status are optional, instance_id and zone_short_name are interchangeable", std::bind(ConsoleWorldWideMove, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	console->RegisterCall("zonebootup", 150, "zonebootup [zone_server_id] [zone_short_name]", std::bind(ConsoleZoneBootup, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	console->RegisterCall("zonelock", 150, "zonelock [list|lock|unlock] [zone_short_name]", std::bind(ConsoleZoneLock, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	console->RegisterCall("zoneshutdown", 150, "zoneshutdown [zone_short_name or zone_server_id]", std::bind(ConsoleZoneShutdown, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
