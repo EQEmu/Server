@@ -2408,7 +2408,7 @@ bool Client::CheckWaterAutoFireLoS(Mob* m) // checks if both attacker and target
 	if (
 		!RuleB(Combat, WaterMatchRequiredForAutoFireLoS) ||
 		!zone->watermap
-	) { // if rule is set to false, bypass check
+	) {
 		return true;
 	}
 

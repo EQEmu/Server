@@ -7106,7 +7106,7 @@ bool Mob::CheckWaterLoS(Mob* m) // checks if both attacker and target are both i
 	if (
 		!RuleB(Spells, WaterMatchRequiredForLoS) ||
 		!zone->watermap
-	) { // if rule is set to false, bypass check
+	) {
 		return true;
 	}
 
