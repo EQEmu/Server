@@ -962,6 +962,268 @@ void ConsoleQuit(
 	connection->Close();
 }
 
+void ConsoleCrossZoneCastSpell(
+	EQ::Net::ConsoleServerConnection *connection,
+	const std::string &command,
+	const std::vector<std::string> &args
+) {
+	if (args.size() < 3) {
+		connection->SendLine("czcast character [character_id] [spell_id]");
+		connection->SendLine("czcast expedition [expedition_id] [spell_id]");
+		connection->SendLine("czcast group [group_id] [spell_id]");
+		connection->SendLine("czcast guild [guild_id] [spell_id]");
+		connection->SendLine("czcast name [character_name] [spell_id]");
+		connection->SendLine("czcast raid [raid_id] [spell_id]");
+		return;
+	}
+
+	const auto& type = Strings::ToLower(args[0]);
+
+	const auto is_character  = type == "character";
+	const auto is_expedition = type == "expedition";
+	const auto is_group      = type == "group";
+	const auto is_guild      = type == "guild";
+	const auto is_name       = type == "name";
+	const auto is_raid       = type == "raid";
+
+	if (
+		!is_character &&
+		!is_expedition &&
+		!is_group &&
+		!is_guild &&
+		!is_name &
+		!is_raid
+	) {
+		connection->SendLine("czcast character [character_id] [spell_id]");
+		connection->SendLine("czcast expedition [expedition_id] [spell_id]");
+		connection->SendLine("czcast group [group_id] [spell_id]");
+		connection->SendLine("czcast guild [guild_id] [spell_id]");
+		connection->SendLine("czcast name [character_name] [spell_id]");
+		connection->SendLine("czcast raid [raid_id] [spell_id]");
+		return;
+	}
+
+	const auto   update_identifier = !is_name ? Strings::ToInt(args[1]) : 0;
+	const auto&  name              = is_name ? Strings::UcFirst(Strings::ToLower(args[1])) : std::string();
+	const auto   spell_id          = Strings::ToUnsignedInt(args[2]);
+
+	uint8 update_type;
+
+	if (is_character) {
+		update_type = CZUpdateType_Character;
+	} else if (is_expedition) {
+		update_type = CZUpdateType_Expedition;
+	} else if (is_group) {
+		update_type = CZUpdateType_Group;
+	} else if (is_guild) {
+		update_type = CZUpdateType_Guild;
+	} else if (is_name) {
+		update_type = CZUpdateType_ClientName;
+	} else if (is_raid) {
+		update_type = CZUpdateType_Raid;
+	}
+
+	auto pack = new ServerPacket(ServerOP_CZSpell, sizeof(CZSpell_Struct));
+	auto* CZS = (CZSpell_Struct*) pack->pBuffer;
+
+	CZS->update_type       = update_type;
+	CZS->update_subtype    = CZSpellUpdateSubtype_Cast;
+	CZS->update_identifier = update_identifier;
+	CZS->spell_id          = spell_id;
+
+	strn0cpy(CZS->client_name, name.c_str(), sizeof(CZS->client_name));
+
+	zoneserver_list.SendPacket(pack);
+	safe_delete(pack);
+
+	connection->SendLine(
+		fmt::format(
+			"Casting spell ID {} across zones by {} with an identifier of {}.",
+			spell_id,
+			type,
+			!is_name ? std::to_string(update_identifier) : name
+		)
+	);
+}
+
+void ConsoleWorldWideCastSpell(
+	EQ::Net::ConsoleServerConnection *connection,
+	const std::string &command,
+	const std::vector<std::string> &args
+) {
+	if (args.size() < 1) {
+		connection->SendLine("wwcast [spell_id]");
+		connection->SendLine("wwcast [spell_id] [min_status]");
+		connection->SendLine("wwcast [spell_id] [min_status] [max_status]");
+		return;
+	}
+
+	const auto spell_id = Strings::ToUnsignedInt(args[0]);
+	const uint8 min_status = args.size() >= 2 ? static_cast<uint8>(Strings::ToUnsignedInt(args[1])) : 0;
+	const uint8 max_status = args.size() >= 3 ? static_cast<uint8>(Strings::ToUnsignedInt(args[2])) : UINT8_MAX;
+
+	auto pack = new ServerPacket(ServerOP_WWSpell, sizeof(WWSpell_Struct));
+	auto* WWS = (WWSpell_Struct*) pack->pBuffer;
+
+	WWS->update_type = WWSpellUpdateType_Cast;
+	WWS->spell_id    = spell_id;
+	WWS->min_status  = min_status;
+	WWS->max_status  = max_status;
+
+	zoneserver_list.SendPacket(pack);
+	safe_delete(pack);
+
+	connection->SendLine(
+		fmt::format(
+			"Casting spell ID {} world wide for players with a status between {} and {}.",
+			spell_id,
+			min_status,
+			max_status
+		)
+	);
+}
+
+void ConsoleCrossZoneMove(
+	EQ::Net::ConsoleServerConnection *connection,
+	const std::string &command,
+	const std::vector<std::string> &args
+) {
+	if (args.size() < 3) {
+		connection->SendLine("czmove character [character_id] [zone_short_name]");
+		connection->SendLine("czmove character [character_id] [zone_short_name] [instance_id]");
+		connection->SendLine("czmove expedition [expedition_id] [zone_short_name]");
+		connection->SendLine("czmove expedition [expedition_id] [zone_short_name] [instance_id]");
+		connection->SendLine("czmove group [group_id] [zone_short_name]");
+		connection->SendLine("czmove group [group_id] [zone_short_name] [instance_id]");
+		connection->SendLine("czmove guild [guild_id] [zone_short_name]");
+		connection->SendLine("czmove guild [guild_id] [zone_short_name] [instance_id]");
+		connection->SendLine("czmove name [character_name] [zone_short_name]");
+		connection->SendLine("czmove name [character_name] [zone_short_name] [instance_id]");
+		connection->SendLine("czmove raid [raid_id] [zone_short_name]");
+		connection->SendLine("czmove raid [raid_id] [zone_short_name] [instance_id]");
+		return;
+	}
+
+	const auto& type = Strings::ToLower(args[0]);
+
+	const auto is_character  = type == "character";
+	const auto is_expedition = type == "expedition";
+	const auto is_group      = type == "group";
+	const auto is_guild      = type == "guild";
+	const auto is_name       = type == "name";
+	const auto is_raid       = type == "raid";
+
+	if (
+		!is_character &&
+		!is_expedition &&
+		!is_group &&
+		!is_guild &&
+		!is_name &
+		!is_raid
+	) {
+		connection->SendLine("czmove character [character_id] [instance_id]");
+		connection->SendLine("czmove character [character_id] [zone_short_name]");
+		connection->SendLine("czmove expedition [expedition_id] [instance_id]");
+		connection->SendLine("czmove expedition [expedition_id] [zone_short_name]");
+		connection->SendLine("czmove group [group_id] [instance_id]");
+		connection->SendLine("czmove group [group_id] [zone_short_name]");
+		connection->SendLine("czmove guild [guild_id] [instance_id]");
+		connection->SendLine("czmove guild [guild_id] [zone_short_name]");
+		connection->SendLine("czmove name [character_name] [instance_id]");
+		connection->SendLine("czmove name [character_name] [zone_short_name]");
+		connection->SendLine("czmove raid [raid_id] [instance_id]");
+		connection->SendLine("czmove raid [raid_id] [zone_short_name]");
+		return;
+	}
+
+	const auto    update_identifier = !is_name ? Strings::ToInt(args[1]) : 0;
+	const auto&   name              = is_name ? Strings::UcFirst(Strings::ToLower(args[1])) : std::string();
+	const auto&   zone_short_name   = !Strings::IsNumber(args[2]) ? args[2] : "";
+	const uint16  instance_id       = Strings::IsNumber(args[2]) ? static_cast<uint16>(Strings::ToUnsignedInt(args[2])) : 0;
+
+	uint8 update_type;
+
+	if (is_character) {
+		update_type = CZUpdateType_Character;
+	} else if (is_expedition) {
+		update_type = CZUpdateType_Expedition;
+	} else if (is_group) {
+		update_type = CZUpdateType_Group;
+	} else if (is_guild) {
+		update_type = CZUpdateType_Guild;
+	} else if (is_name) {
+		update_type = CZUpdateType_ClientName;
+	} else if (is_raid) {
+		update_type = CZUpdateType_Raid;
+	}
+
+	auto pack = new ServerPacket(ServerOP_CZMove, sizeof(CZMove_Struct));
+	auto* CZM = (CZMove_Struct*) pack->pBuffer;
+
+	CZM->update_type       = update_type;
+	CZM->update_subtype    = !instance_id ? CZMoveUpdateSubtype_MoveZone : CZMoveUpdateSubtype_MoveZoneInstance;
+	CZM->update_identifier = update_identifier;
+	CZM->instance_id       = instance_id;
+
+	strn0cpy(CZM->zone_short_name, zone_short_name.c_str(), sizeof(CZM->zone_short_name));
+	strn0cpy(CZM->client_name, name.c_str(), sizeof(CZM->client_name));
+
+	zoneserver_list.SendPacket(pack);
+	safe_delete(pack);
+
+	connection->SendLine(
+		fmt::format(
+			"Moving player(s) to {} by {} with an identifier of {}.",
+			!instance_id ? zone_store.GetZoneLongName(zone_store.GetZoneID(zone_short_name), true) : fmt::format("Instance ID {}", instance_id),
+			type,
+			!is_name ? std::to_string(update_identifier) : name
+		)
+	);
+}
+
+void ConsoleWorldWideMove(
+	EQ::Net::ConsoleServerConnection *connection,
+	const std::string &command,
+	const std::vector<std::string> &args
+) {
+	if (args.size() < 1) {
+		connection->SendLine("wwmove [instance_id]");
+		connection->SendLine("wwmove [instance_id] [min_status]");
+		connection->SendLine("wwmove [instance_id] [min_status] [max_status]");
+		connection->SendLine("wwmove [zone_short_name]");
+		connection->SendLine("wwmove [zone_short_name] [min_status]");
+		connection->SendLine("wwmove [zone_short_name] [min_status] [max_status]");
+		return;
+	}
+
+	const auto&  zone_short_name  = !Strings::IsNumber(args[0]) ? args[0] : "";
+	const uint16 instance_id      = Strings::IsNumber(args[0]) ? static_cast<uint16>(Strings::ToUnsignedInt(args[0])) : 0;
+	const uint8  min_status       = args.size() >= 2 ? static_cast<uint8>(Strings::ToUnsignedInt(args[1])) : 0;
+	const uint8  max_status       = args.size() >= 3 ? static_cast<uint8>(Strings::ToUnsignedInt(args[2])) : UINT8_MAX;
+
+	auto pack = new ServerPacket(ServerOP_WWMove, sizeof(WWMove_Struct));
+	auto* WWM = (WWMove_Struct*) pack->pBuffer;
+
+	WWM->update_type = !instance_id ? WWMoveUpdateType_MoveZone : WWMoveUpdateType_MoveZoneInstance;
+	WWM->instance_id = instance_id;
+	WWM->min_status  = min_status;
+	WWM->max_status  = max_status;
+
+	strn0cpy(WWM->zone_short_name, zone_short_name.c_str(), sizeof(WWM->zone_short_name));
+
+	zoneserver_list.SendPacket(pack);
+	safe_delete(pack);
+
+	connection->SendLine(
+		fmt::format(
+			"Moving player(s) to {} for players with a status between {} and {}.",
+			!instance_id ? zone_store.GetZoneLongName(zone_store.GetZoneID(zone_short_name), true) : fmt::format("Instance ID {}", instance_id),
+			min_status,
+			max_status
+		)
+	);
+}
+
 
 /**
  * @param console
@@ -973,6 +1235,8 @@ void RegisterConsoleFunctions(std::unique_ptr<EQ::Net::ConsoleServer>& console)
 	console->RegisterCall("api", 200, "api", std::bind(ConsoleApi, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	console->RegisterCall("auction", 50, "auction [message]", std::bind(ConsoleAuction, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	console->RegisterCall("broadcast", 50, "broadcast [message]", std::bind(ConsoleBroadcast, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+	console->RegisterCall("czcast", 50, "czcast [type] [identifier] [spell_id]", std::bind(ConsoleCrossZoneCastSpell, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+	console->RegisterCall("czmove", 50, "czcast [type] [identifier] [zone_short_name] [instance_id] - instance_id is optional", std::bind(ConsoleCrossZoneMove, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	console->RegisterCall("echo", 50, "echo [on/off]", std::bind(ConsoleNull, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	console->RegisterCall("emote", 50, "emote [zonename or charname or world] [type] [message]", std::bind(ConsoleEmote, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	console->RegisterCall("flag", 200, "flag [status] [accountname]", std::bind(ConsoleFlag, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
@@ -995,6 +1259,8 @@ void RegisterConsoleFunctions(std::unique_ptr<EQ::Net::ConsoleServer>& console)
 	console->RegisterCall("who", 50, "who", std::bind(ConsoleWho, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	console->RegisterCall("whoami", 50, "whoami", std::bind(ConsoleWhoami, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	console->RegisterCall("worldshutdown", 200, "worldshutdown", std::bind(ConsoleWorldShutdown, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+	console->RegisterCall("wwcast", 50, "wwcast [spell_id] [min_status] [max_status] - min_status and max_status are optional", std::bind(ConsoleWorldWideCastSpell, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+	console->RegisterCall("wwmove", 50, "wwmove [zone_short_name] [instance_id] [min_status] [max_status] - instance_id, min_status, and max_status are optional", std::bind(ConsoleWorldWideMove, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	console->RegisterCall("zonebootup", 150, "zonebootup [zone_server_id] [zone_short_name]", std::bind(ConsoleZoneBootup, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	console->RegisterCall("zonelock", 150, "zonelock [list|lock|unlock] [zone_short_name]", std::bind(ConsoleZoneLock, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	console->RegisterCall("zoneshutdown", 150, "zoneshutdown [zone_short_name or zone_server_id]", std::bind(ConsoleZoneShutdown, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
