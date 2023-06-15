@@ -1503,7 +1503,7 @@ public:
 	bool GroupFollow(Client* inviter);
 	inline bool  GetRunMode() const { return runmode; }
 
-	virtual bool CheckWaterAutoFireLoS(Mob* attacker, Mob* target);
+	virtual bool CheckWaterAutoFireLoS(Mob* m);
 
 	void SendReloadCommandMessages();
 

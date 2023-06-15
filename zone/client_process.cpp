@@ -337,7 +337,7 @@ bool Client::Process() {
 					if (ranged_timer.Check(false)) {
 						if (GetTarget() && (GetTarget()->IsNPC() || GetTarget()->IsClient()) && IsAttackAllowed(GetTarget())) {
 							if (GetTarget()->InFrontMob(this, GetTarget()->GetX(), GetTarget()->GetY())) {
-								if (CheckLosFN(GetTarget()) && CheckWaterAutoFireLoS(this, GetTarget())) {
+								if (CheckLosFN(GetTarget()) && CheckWaterAutoFireLoS(GetTarget())) {
 									//client has built in los check, but auto fire does not.. done last.
 									RangedAttack(GetTarget());
 									if (CheckDoubleRangedAttack())
@@ -357,7 +357,7 @@ bool Client::Process() {
 					if (ranged_timer.Check(false)) {
 						if (GetTarget() && (GetTarget()->IsNPC() || GetTarget()->IsClient()) && IsAttackAllowed(GetTarget())) {
 							if (GetTarget()->InFrontMob(this, GetTarget()->GetX(), GetTarget()->GetY())) {
-								if (CheckLosFN(GetTarget()) && CheckWaterAutoFireLoS(this, GetTarget())) {
+								if (CheckLosFN(GetTarget()) && CheckWaterAutoFireLoS(GetTarget())) {
 									//client has built in los check, but auto fire does not.. done last.
 									ThrowingAttack(GetTarget());
 								}
@@ -2403,10 +2403,17 @@ void Client::SendGuildLFGuildStatus()
 	safe_delete(pack);
 }
 
-bool Client::CheckWaterAutoFireLoS(Mob* los_attacker, Mob* los_target) // checks if both attacker and target are both in or out of the water
+bool Client::CheckWaterAutoFireLoS(Mob* m) // checks if both attacker and target are both in or out of the water
 {
-	if (!RuleB(Combat, WaterMatchRequiredForAutoFireLoS) || zone->watermap == nullptr) { // if rule is set to false, bypass check
+	if (
+		!RuleB(Combat, WaterMatchRequiredForAutoFireLoS) ||
+		!zone->watermap
+	) { // if rule is set to false, bypass check
 		return true;
 	}
-	return zone->watermap->InLiquid(los_attacker->GetPosition()) == zone->watermap->InLiquid(los_target->GetPosition());
+
+	return (
+		zone->watermap->InLiquid(GetPosition()) &&
+		zone->watermap->InLiquid(m->GetPosition())
+	);
 }
