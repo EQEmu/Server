@@ -77,7 +77,7 @@ namespace EQEmuCommand {
 			index++;
 		}
 
-		if (!arguments_filled || argc == 2 || cmd[{"-h", "--help"}]) {
+		if (!arguments_filled || (argc == 2 && !cmd[{"-h", "--help"}]) || (argc == 3 && cmd[{"-h", "--help"}])) {
 			std::string arguments_string;
 			for (auto &arg : arguments) {
 				arguments_string += " " + arg;
