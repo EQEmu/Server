@@ -9,6 +9,15 @@ void WorldserverCLI::BotsDisable(int argc, char **argv, argh::parser &cmd, std::
 		return;
 	}
 
+	std::string input;
+	std::cout << "Warning! This will drop all bot tables, are you sure? [y/n]";
+	std::getline(std::cin, input);
+
+	if (Strings::ToLower(input) != "y") {
+		LogInfo("Aborting");
+		return;
+	}
+
 	// drop bot tables
 	std::string sql = "SET FOREIGN_KEY_CHECKS = 0;";
 	for (auto &t: DatabaseSchema::GetBotTables()) {
