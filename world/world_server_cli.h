@@ -7,6 +7,8 @@
 class WorldserverCLI {
 public:
 	static void CommandHandler(int argc, char **argv);
+	static void BotsEnable(int argc, char **argv, argh::parser &cmd, std::string &description);
+	static void BotsDisable(int argc, char **argv, argh::parser &cmd, std::string &description);
 	static void Version(int argc, char **argv, argh::parser &cmd, std::string &description);
 	static void CopyCharacter(int argc, char **argv, argh::parser &cmd, std::string &description);
 	static void DatabaseVersion(int argc, char **argv, argh::parser &cmd, std::string &description);
