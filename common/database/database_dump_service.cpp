@@ -309,6 +309,8 @@ void DatabaseDumpService::DatabaseDump()
 		if (tables_to_dump.empty()) {
 			std::cerr << "No tables were specified" << std::endl;
 		}
+
+		return;
 	}
 	else {
 		const auto execute_command = fmt::format(
@@ -325,7 +327,7 @@ void DatabaseDumpService::DatabaseDump()
 		}
 	}
 
-	LogSys.EnableConsoleLogging();
+	LogSys.LoadLogSettingsDefaults();
 
 	if (!pipe_file.empty()) {
 		std::string file = fmt::format("{}.sql", GetDumpFileNameWithPath());
@@ -353,7 +355,7 @@ void DatabaseDumpService::DatabaseDump()
 
 	if (IsDumpWithCompression() && !IsDumpOutputToConsole()) {
 		if (HasCompressionBinary()) {
-			LogInfo("Compression requested... Compressing dump [{}.sql]", GetDumpFileNameWithPath());
+			LogInfo("Compression requested. Compressing dump [{}.sql]", GetDumpFileNameWithPath());
 
 			if (IsTarAvailable()) {
 				Process::execute(
