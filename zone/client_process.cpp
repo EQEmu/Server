@@ -51,6 +51,7 @@
 #include "zone.h"
 #include "zonedb.h"
 #include "../common/events/player_event_logs.h"
+#include "water_map.h"
 
 extern QueryServ* QServ;
 extern Zone* zone;
@@ -336,7 +337,7 @@ bool Client::Process() {
 					if (ranged_timer.Check(false)) {
 						if (GetTarget() && (GetTarget()->IsNPC() || GetTarget()->IsClient()) && IsAttackAllowed(GetTarget())) {
 							if (GetTarget()->InFrontMob(this, GetTarget()->GetX(), GetTarget()->GetY())) {
-								if (CheckLosFN(GetTarget())) {
+								if (CheckLosFN(GetTarget()) && CheckWaterAutoFireLoS(GetTarget())) {
 									//client has built in los check, but auto fire does not.. done last.
 									RangedAttack(GetTarget());
 									if (CheckDoubleRangedAttack())
@@ -356,7 +357,7 @@ bool Client::Process() {
 					if (ranged_timer.Check(false)) {
 						if (GetTarget() && (GetTarget()->IsNPC() || GetTarget()->IsClient()) && IsAttackAllowed(GetTarget())) {
 							if (GetTarget()->InFrontMob(this, GetTarget()->GetX(), GetTarget()->GetY())) {
-								if (CheckLosFN(GetTarget())) {
+								if (CheckLosFN(GetTarget()) && CheckWaterAutoFireLoS(GetTarget())) {
 									//client has built in los check, but auto fire does not.. done last.
 									ThrowingAttack(GetTarget());
 								}
@@ -2400,4 +2401,19 @@ void Client::SendGuildLFGuildStatus()
 
 	worldserver.SendPacket(pack);
 	safe_delete(pack);
+}
+
+bool Client::CheckWaterAutoFireLoS(Mob* m)
+{
+	if (
+		!RuleB(Combat, WaterMatchRequiredForAutoFireLoS) ||
+		!zone->watermap
+	) {
+		return true;
+	}
+
+	return (
+		zone->watermap->InLiquid(GetPosition()) &&
+		zone->watermap->InLiquid(m->GetPosition())
+	);
 }
