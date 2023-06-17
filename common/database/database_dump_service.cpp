@@ -93,6 +93,8 @@ std::string DatabaseDumpService::GetMySQLVersion()
 	return Strings::Trim(version_output);
 }
 
+const std::string CREDENTIALS_FILE = "login.my.cnf";
+
 /**
  * @return
  */
@@ -101,21 +103,15 @@ std::string DatabaseDumpService::GetBaseMySQLDumpCommand()
 	auto config = EQEmuConfig::get();
 	if (IsDumpContentTables() && !config->ContentDbHost.empty()) {
 		return fmt::format(
-			"mysqldump -u {} -p{} -h {} --port={} {}",
-			config->ContentDbUsername,
-			config->ContentDbPassword,
-			config->ContentDbHost,
-			config->ContentDbPort,
+			"mysqldump --defaults-extra-file={} {}",
+			CREDENTIALS_FILE,
 			config->ContentDbName
 		);
 	};
 
 	return fmt::format(
-		"mysqldump -u {} -p{} -h {} --port={} {}",
-		config->DatabaseUsername,
-		config->DatabasePassword,
-		config->DatabaseHost,
-		config->DatabasePort,
+		"mysqldump --defaults-extra-file={} {}",
+		CREDENTIALS_FILE,
 		config->DatabaseDB
 	);
 }
@@ -319,6 +315,7 @@ void DatabaseDumpService::DatabaseDump()
 			pipe_file
 		);
 
+		BuildCredentialsFile();
 		std::string execution_result = Process::execute(execute_command);
 		if (!execution_result.empty() && IsDumpOutputToConsole()) {
 			std::cout << execution_result;
@@ -350,7 +347,6 @@ void DatabaseDumpService::DatabaseDump()
 	}
 
 	LogInfo("Database dump created at [{}.sql]", GetDumpFileNameWithPath());
-
 	if (IsDumpWithCompression() && !IsDumpOutputToConsole()) {
 		if (HasCompressionBinary()) {
 			LogInfo("Compression requested... Compressing dump [{}.sql]", GetDumpFileNameWithPath());
@@ -386,6 +382,8 @@ void DatabaseDumpService::DatabaseDump()
 			LogWarning("Compression requested but binary not found... Skipping...");
 		}
 	}
+
+	RemoveCredentialsFile();
 
 //	LogDebug("[{}] dump-to-console", IsDumpOutputToConsole());
 //	LogDebug("[{}] dump-path", GetSetDumpPath());
@@ -565,5 +563,42 @@ void DatabaseDumpService::RemoveSqlBackup()
 	std::string file = fmt::format("{}.sql", GetDumpFileNameWithPath());
 	if (File::Exists(file)) {
 		std::filesystem::remove(file);
+	}
+
+	RemoveCredentialsFile();
+}
+
+void DatabaseDumpService::BuildCredentialsFile()
+{
+	auto          config = EQEmuConfig::get();
+	std::ofstream out(CREDENTIALS_FILE);
+	if (out.is_open()) {
+		if (IsDumpContentTables() && !config->ContentDbHost.empty()) {
+			out << "[mysqldump]" << std::endl;
+			out << "user=" << config->ContentDbUsername << std::endl;
+			out << "password=" << config->ContentDbPassword << std::endl;
+			out << "host=" << config->ContentDbHost << std::endl;
+			out << "port=" << config->ContentDbPort << std::endl;
+			out << "default-character-set=utf8" << std::endl;
+		}
+		else {
+			out << "[mysqldump]" << std::endl;
+			out << "user=" << config->DatabaseUsername << std::endl;
+			out << "password=" << config->DatabasePassword << std::endl;
+			out << "host=" << config->DatabaseHost << std::endl;
+			out << "port=" << config->DatabasePort << std::endl;
+			out << "default-character-set=utf8" << std::endl;
+		}
+		out.close();
+	}
+	else {
+		LogError("Failed to open credentials file for writing");
+	}
+}
+
+void DatabaseDumpService::RemoveCredentialsFile()
+{
+	if (File::Exists(CREDENTIALS_FILE)) {
+		std::filesystem::remove(CREDENTIALS_FILE);
 	}
 }
