@@ -93,6 +93,10 @@ public:
 		TEST_ASSERT(Strings::SearchDelim(h, "air") == std::string::npos);
 		TEST_ASSERT(Strings::SearchDelim(h, "bef") == std::string::npos);
 		TEST_ASSERT(Strings::SearchDelim(h, "wwi") == std::string::npos);
+		TEST_ASSERT(Strings::SearchDelim(h, "bothunder,") == std::string::npos);
+		TEST_ASSERT(Strings::SearchDelim(h, "poair,") == std::string::npos);
+		TEST_ASSERT(Strings::SearchDelim(h, "befallen,") == std::string::npos);
+		TEST_ASSERT(Strings::SearchDelim(h, "wwi,") == std::string::npos);
 	}
 
 	void SplitStringTest() {
@@ -126,6 +130,11 @@ public:
 		TEST_ASSERT_EQUALS(Strings::IsFloat(".234234"), true);
 		TEST_ASSERT_EQUALS(Strings::IsFloat(".234234f"), false);
 		TEST_ASSERT_EQUALS(Strings::IsFloat("Johnson"), false);
+		TEST_ASSERT_EQUALS(Strings::IsFloat("12312312313f"), false); // character at end
+		TEST_ASSERT_EQUALS(Strings::IsFloat("18446744073709551616"), true);
+		TEST_ASSERT_EQUALS(Strings::IsFloat("-18"), true);
+		TEST_ASSERT_EQUALS(Strings::IsFloat("-f18"), false);
+		TEST_ASSERT_EQUALS(Strings::IsFloat("-18446744073709551616"), true);
 	}
 
 	void TestIsNumber() {
@@ -137,6 +146,9 @@ public:
 		TEST_ASSERT_EQUALS(Strings::IsNumber("-18"), true);
 		TEST_ASSERT_EQUALS(Strings::IsNumber("-f18"), false);
 		TEST_ASSERT_EQUALS(Strings::IsNumber("-18446744073709551616"), true); // 64
+		TEST_ASSERT_EQUALS(Strings::IsNumber("18446744073709551616f"), false); // 64
+		TEST_ASSERT_EQUALS(Strings::IsNumber("18446744073709551616.0"), false); // 64
+		TEST_ASSERT_EQUALS(Strings::IsNumber("18446744073709551616.0f"), false); // 64
 	}
 };
 
