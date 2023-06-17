@@ -1204,7 +1204,7 @@ void ConsoleCrossZoneMove(
 
 	const auto& z = !zone_short_name.empty() ? zone_store.GetZone(zone_short_name) : nullptr;
 
-	if (!zone_short_name.empty() && !z->id) {
+	if (z && !z->id) {
 		connection->SendLine(fmt::format("No zone with the short name '{}' exists.", zone_short_name));
 		return;
 	}
@@ -1269,7 +1269,7 @@ void ConsoleWorldWideMove(
 
 	const auto& z = !zone_short_name.empty() ? zone_store.GetZone(zone_short_name) : nullptr;
 
-	if (!zone_short_name.empty() && !z->id) {
+	if (z && !z->id) {
 		connection->SendLine(fmt::format("No zone with the short name '{}' exists.", zone_short_name));
 		return;
 	}
