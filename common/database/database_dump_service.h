@@ -93,6 +93,8 @@ private:
 	std::string GetSetDumpPath();
 	std::string GetQueryServTables();
 	void RemoveSqlBackup();
+	void BuildCredentialsFile();
+	void RemoveCredentialsFile();
 };
 
 
