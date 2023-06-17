@@ -1003,9 +1003,35 @@ void ConsoleCrossZoneCastSpell(
 		return;
 	}
 
-	const auto   update_identifier = !is_name ? Strings::ToInt(args[1]) : 0;
-	const auto&  name              = is_name ? Strings::UcFirst(Strings::ToLower(args[1])) : std::string();
-	const auto   spell_id          = Strings::ToUnsignedInt(args[2]);
+	std::string name;
+	int         update_identifier = 0;
+
+	if (!is_name) {
+		if (Strings::IsNumber(args[1])) {
+			update_identifier = Strings::ToInt(args[1]);
+		}
+
+		if (!update_identifier) {
+			connection->SendLine(fmt::format("Identifier is invalid for '{}'.", type));
+			return;
+		}
+	} else if (is_name) {
+		if (!Strings::IsNumber(args[1])) {
+			name = Strings::UcFirst(Strings::ToLower(args[1]));
+		}
+
+		if (name.empty()) {
+			connection->SendLine("Empty name is invalid.");
+			return;
+		}
+	}
+
+	const auto spell_id = Strings::IsNumber(args[2]) ? Strings::ToUnsignedInt(args[2]) : 0;
+
+	if (!spell_id) {
+		connection->SendLine("Spell ID is invalid.");
+		return;
+	}
 
 	uint8 update_type;
 
@@ -1058,9 +1084,23 @@ void ConsoleWorldWideCastSpell(
 		return;
 	}
 
-	const auto spell_id = Strings::ToUnsignedInt(args[0]);
-	const uint8 min_status = args.size() >= 2 ? static_cast<uint8>(Strings::ToUnsignedInt(args[1])) : 0;
-	const uint8 max_status = args.size() >= 3 ? static_cast<uint8>(Strings::ToUnsignedInt(args[2])) : UINT8_MAX;
+	const auto spell_id = Strings::IsNumber(args[0]) ? Strings::ToUnsignedInt(args[0]) : 0;
+
+	if (!spell_id) {
+		connection->SendLine("Spell ID 0 is invalid.");
+		return;
+	}
+
+	uint8 min_status = AccountStatus::Player;
+	uint8 max_status = AccountStatus::Player;
+
+	if (args.size() >= 2 && Strings::IsNumber(args[1])) {
+		min_status = static_cast<uint8>(Strings::ToUnsignedInt(args[1]));
+	}
+
+	if (args.size() >= 3 && Strings::IsNumber(args[2])) {
+		max_status = static_cast<uint8>(Strings::ToUnsignedInt(args[2]));
+	}
 
 	auto pack = new ServerPacket(ServerOP_WWSpell, sizeof(WWSpell_Struct));
 	auto* WWS = (WWSpell_Struct*) pack->pBuffer;
@@ -1136,10 +1176,38 @@ void ConsoleCrossZoneMove(
 		return;
 	}
 
-	const auto    update_identifier = !is_name ? Strings::ToInt(args[1]) : 0;
-	const auto&   name              = is_name ? Strings::UcFirst(Strings::ToLower(args[1])) : std::string();
-	const auto&   zone_short_name   = !Strings::IsNumber(args[2]) ? args[2] : "";
-	const uint16  instance_id       = Strings::IsNumber(args[2]) ? static_cast<uint16>(Strings::ToUnsignedInt(args[2])) : 0;
+	std::string name;
+	int         update_identifier = 0;
+
+	if (!is_name) {
+		if (Strings::IsNumber(args[1])) {
+			update_identifier = Strings::ToInt(args[1]);
+		}
+
+		if (!update_identifier) {
+			connection->SendLine(fmt::format("Identifier invalid for '{}'.", type));
+			return;
+		}
+	} else if (is_name) {
+		if (!Strings::IsNumber(args[1])) {
+			name = Strings::UcFirst(Strings::ToLower(args[1]));
+		}
+
+		if (name.empty()) {
+			connection->SendLine("Empty name is invalid.");
+			return;
+		}
+	}
+
+	const auto&  zone_short_name = !Strings::IsNumber(args[2]) ? args[2] : "";
+	const uint16 instance_id     = Strings::IsNumber(args[2]) ? static_cast<uint16>(Strings::ToUnsignedInt(args[2])) : 0;
+
+	const auto& z = !zone_short_name.empty() ? zone_store.GetZone(zone_short_name) : nullptr;
+
+	if (!zone_short_name.empty() && !z->id) {
+		connection->SendLine(fmt::format("No zone with the short name '{}' exists.", zone_short_name));
+		return;
+	}
 
 	uint8 update_type;
 
@@ -1174,7 +1242,7 @@ void ConsoleCrossZoneMove(
 	connection->SendLine(
 		fmt::format(
 			"Moving player(s) to {} by {} with an identifier of {}.",
-			!instance_id ? zone_store.GetZoneLongName(zone_store.GetZoneID(zone_short_name), true) : fmt::format("Instance ID {}", instance_id),
+			!instance_id ? fmt::format("{} ({})", z->long_name, z->short_name) : fmt::format("Instance ID {}", instance_id),
 			type,
 			!is_name ? std::to_string(update_identifier) : name
 		)
@@ -1195,11 +1263,27 @@ void ConsoleWorldWideMove(
 		connection->SendLine("wwmove [zone_short_name] [min_status] [max_status]");
 		return;
 	}
+\
+	const auto&  zone_short_name = !Strings::IsNumber(args[2]) ? args[2] : "";
+	const uint16 instance_id     = Strings::IsNumber(args[2]) ? static_cast<uint16>(Strings::ToUnsignedInt(args[2])) : 0;
 
-	const auto&  zone_short_name  = !Strings::IsNumber(args[0]) ? args[0] : "";
-	const uint16 instance_id      = Strings::IsNumber(args[0]) ? static_cast<uint16>(Strings::ToUnsignedInt(args[0])) : 0;
-	const uint8  min_status       = args.size() >= 2 ? static_cast<uint8>(Strings::ToUnsignedInt(args[1])) : 0;
-	const uint8  max_status       = args.size() >= 3 ? static_cast<uint8>(Strings::ToUnsignedInt(args[2])) : UINT8_MAX;
+	const auto& z = !zone_short_name.empty() ? zone_store.GetZone(zone_short_name) : nullptr;
+
+	if (!zone_short_name.empty() && !z->id) {
+		connection->SendLine(fmt::format("No zone with the short name '{}' exists.", zone_short_name));
+		return;
+	}
+
+	uint8 min_status = AccountStatus::Player;
+	uint8 max_status = AccountStatus::Player;
+
+	if (args.size() >= 2 && Strings::IsNumber(args[1])) {
+		min_status = static_cast<uint8>(Strings::ToUnsignedInt(args[1]));
+	}
+
+	if (args.size() >= 3 && Strings::IsNumber(args[2])) {
+		max_status = static_cast<uint8>(Strings::ToUnsignedInt(args[2]));
+	}
 
 	auto pack = new ServerPacket(ServerOP_WWMove, sizeof(WWMove_Struct));
 	auto* WWM = (WWMove_Struct*) pack->pBuffer;
@@ -1217,7 +1301,7 @@ void ConsoleWorldWideMove(
 	connection->SendLine(
 		fmt::format(
 			"Moving player(s) to {} for players with a status between {} and {}.",
-			!instance_id ? zone_store.GetZoneLongName(zone_store.GetZoneID(zone_short_name), true) : fmt::format("Instance ID {}", instance_id),
+			!instance_id ? fmt::format("{} ({})", z->long_name, z->short_name) : fmt::format("Instance ID {}", instance_id),
 			min_status,
 			max_status
 		)
@@ -1236,7 +1320,7 @@ void RegisterConsoleFunctions(std::unique_ptr<EQ::Net::ConsoleServer>& console)
 	console->RegisterCall("auction", 50, "auction [message]", std::bind(ConsoleAuction, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	console->RegisterCall("broadcast", 50, "broadcast [message]", std::bind(ConsoleBroadcast, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	console->RegisterCall("czcast", 50, "czcast [type] [identifier] [spell_id]", std::bind(ConsoleCrossZoneCastSpell, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-	console->RegisterCall("czmove", 50, "czcast [type] [identifier] [instance_id|zone_short_name] - instance_id and zone_short_name are interchangeable", std::bind(ConsoleCrossZoneMove, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+	console->RegisterCall("czmove", 50, "czmove [type] [identifier] [instance_id|zone_short_name] - instance_id and zone_short_name are interchangeable", std::bind(ConsoleCrossZoneMove, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	console->RegisterCall("echo", 50, "echo [on/off]", std::bind(ConsoleNull, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	console->RegisterCall("emote", 50, "emote [zonename or charname or world] [type] [message]", std::bind(ConsoleEmote, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	console->RegisterCall("flag", 200, "flag [status] [accountname]", std::bind(ConsoleFlag, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
