@@ -1,3 +1,51 @@
+## [22.14.1] - 06/18/2023
+
+### Backups
+
+* Move world database:dump to use MySQL credentials file ([#3410](https://github.com/EQEmu/Server/pull/3410)) @Akkadius 2023-06-17
+
+### Binaries
+
+* Add support for static linking (portable) binaries ([#3417](https://github.com/EQEmu/Server/pull/3417)) @Akkadius 2023-06-18
+
+### CI
+
+* Build static linux binaries ([#3419](https://github.com/EQEmu/Server/pull/3419)) @Akkadius 2023-06-18
+
+### CLI
+
+* Add `bots:enable` and `bots:disable` commands ([#3415](https://github.com/EQEmu/Server/pull/3415)) @Akkadius 2023-06-17
+* Add `mercs:enable` and `mercs:disable` commands ([#3416](https://github.com/EQEmu/Server/pull/3416)) @Akkadius 2023-06-18
+* Console menu validation fixes ([#3413](https://github.com/EQEmu/Server/pull/3413)) @Akkadius 2023-06-17
+
+### Database
+
+* Add query multi statement execution support ([#3414](https://github.com/EQEmu/Server/pull/3414)) @Akkadius 2023-06-17
+
+### Feature
+
+* Add Water Line of Sight Checks ([#3408](https://github.com/EQEmu/Server/pull/3408)) @nytmyr 2023-06-17
+
+### Logging
+
+* Logging improvements, console silencing, terminal coloring ([#3412](https://github.com/EQEmu/Server/pull/3412)) @Akkadius 2023-06-17
+
+### Quest API
+
+* Add convert_money_to_string() to Perl/Lua ([#3418](https://github.com/EQEmu/Server/pull/3418)) @Kinglykrab 2023-06-18
+
+### Strings
+
+* Add more test cases for string utils ([#3411](https://github.com/EQEmu/Server/pull/3411)) @Akkadius 2023-06-17
+
+### Targeting
+
+* Fix bug when using /tar on invalid target ([#3407](https://github.com/EQEmu/Server/pull/3407)) @noudess 2023-06-17
+
+### Telnet
+
+* Add cross zone/world wide cast and move functionality to Telnet ([#3409](https://github.com/EQEmu/Server/pull/3409)) @Kinglykrab 2023-06-17
+
 ## [22.13.1] - 06/13/2023
 
 ### Targeting
