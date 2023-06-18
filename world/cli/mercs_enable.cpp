@@ -3,7 +3,7 @@
 
 void WorldserverCLI::MercsEnable(int argc, char **argv, argh::parser &cmd, std::string &description)
 {
-	description = "Bootstraps merc tables";
+	description = "Enables mercenaries";
 
 	if (cmd[{"-h", "--help"}]) {
 		return;

@@ -3,7 +3,7 @@
 
 void WorldserverCLI::MercsDisable(int argc, char **argv, argh::parser &cmd, std::string &description)
 {
-	description = "Disable mercenaries";
+	description = "Disables mercenaries";
 
 	if (cmd[{"-h", "--help"}]) {
 		return;
