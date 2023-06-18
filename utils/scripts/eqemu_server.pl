@@ -776,7 +776,7 @@ sub fetch_utility_scripts
 sub setup_bots
 {
     my $command = get_world_command();
-    print `$command bots:bootstrap`;
+    print `$command bots:enable`;
 
     print "Bots should be setup, run your server and the bot command should be available in-game (type '^help')\n";
 }
