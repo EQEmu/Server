@@ -5019,7 +5019,7 @@ int lua_get_spell_nimbus_effect(uint16 spell_id)
 
 std::string lua_convert_money_to_string(luabind::adl::object table)
 {
-	if(luabind::type(table) != LUA_TTABLE) {
+	if (luabind::type(table) != LUA_TTABLE) {
 		return std::string();
 	}
 
@@ -5037,7 +5037,7 @@ std::string lua_convert_money_to_string(luabind::adl::object table)
 		return std::string();
 	}
 
-	return Strings::Money(platinum, gold, silver, copper);;
+	return Strings::Money(platinum, gold, silver, copper);
 }
 
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
