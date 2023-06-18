@@ -305,6 +305,7 @@ void DatabaseDumpService::DatabaseDump()
 		if (tables_to_dump.empty()) {
 			std::cerr << "No tables were specified" << std::endl;
 		}
+
 		return;
 	}
 	else {

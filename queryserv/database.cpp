@@ -81,6 +81,8 @@ void QSDatabase::AddSpeech(
 		LogInfo("Failed Speech Entry Insert: [{}]", results.ErrorMessage().c_str());
 		LogInfo("[{}]", query.c_str());
 	}
+
+
 }
 
 void QSDatabase::LogPlayerDropItem(QSPlayerDropItem_Struct *QS)

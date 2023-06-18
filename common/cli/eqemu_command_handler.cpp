@@ -39,15 +39,15 @@ namespace EQEmuCommand {
 	{
 		if (cmd[{"-d", "--debug"}]) {
 			std::cout << "Positional args:\n";
-			for (auto &pos_arg: cmd.pos_args())
+			for (auto &pos_arg : cmd.pos_args())
 				std::cout << '\t' << pos_arg << std::endl;
 
 			std::cout << "\nFlags:\n";
-			for (auto &flag: cmd.flags())
+			for (auto &flag : cmd.flags())
 				std::cout << '\t' << flag << std::endl;
 
 			std::cout << "\nParameters:\n";
-			for (auto &param: cmd.params())
+			for (auto &param : cmd.params())
 				std::cout << '\t' << param.first << " : " << param.second << std::endl;
 		}
 	}
@@ -69,8 +69,8 @@ namespace EQEmuCommand {
 	{
 		bool arguments_filled = true;
 
-		int       index = 2;
-		for (auto &arg: arguments) {
+		int index = 2;
+		for (auto &arg : arguments) {
 			if (cmd(arg).str().empty() && cmd(index).str().empty()) {
 				arguments_filled = false;
 			}
@@ -79,12 +79,12 @@ namespace EQEmuCommand {
 
 		if (!arguments_filled || (argc == 2 && !cmd[{"-h", "--help"}]) || (argc == 3 && cmd[{"-h", "--help"}])) {
 			std::string arguments_string;
-			for (auto   &arg: arguments) {
+			for (auto &arg : arguments) {
 				arguments_string += " " + arg;
 			}
 
 			std::string options_string;
-			for (auto   &opt: options) {
+			for (auto   &opt : options) {
 				options_string += "  " + opt + "\n";
 			}
 
