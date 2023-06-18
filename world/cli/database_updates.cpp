@@ -4,9 +4,6 @@ void WorldserverCLI::DatabaseUpdates(int argc, char **argv, argh::parser &cmd, s
 {
 	description = "Runs database updates manually";
 
-	std::vector<std::string> arguments = {};
-	std::vector<std::string> options   = {};
-
 	if (cmd[{"-h", "--help"}]) {
 		return;
 	}
