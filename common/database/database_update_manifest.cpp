@@ -1,6 +1,6 @@
 #include "database_update.h"
 
-std::vector <ManifestEntry> manifest_entries = {
+std::vector<ManifestEntry> manifest_entries = {
 	ManifestEntry{
 		.version = 9000,
 		.description = "2013_02_18_merc_rules_and_tables.sql",
@@ -4734,29 +4734,17 @@ ALTER TABLE `npc_scale_global_base`
 	},
 	ManifestEntry{
 		.version = 9228,
-		.description = "new_database_check_test",
-		.check = "SHOW TABLES LIKE 'new_table'",
+		.description = "2023_05_08_character_tribute_primary_key.sql",
+		.check = "SHOW COLUMNS FROM `character_tribute` LIKE 'character_id'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
-CREATE TABLE `new_table`  (
-  `id` int NOT NULL AUTO_INCREMENT,
-  PRIMARY KEY (`id`)
-);
-CREATE TABLE `new_table1`  (
-  `id` int NOT NULL AUTO_INCREMENT,
-  PRIMARY KEY (`id`)
-);
-CREATE TABLE `new_table2`  (
-  `id` int NOT NULL AUTO_INCREMENT,
-  PRIMARY KEY (`id`)
-);
-CREATE TABLE `new_table3`  (
-  `id` int NOT NULL AUTO_INCREMENT,
-  PRIMARY KEY (`id`)
-);
+ALTER TABLE `character_tribute`
+CHANGE COLUMN `id` `character_id` int(11) UNSIGNED NOT NULL DEFAULT 0,
+ADD COLUMN `id` int(11) NOT NULL AUTO_INCREMENT FIRST,
+ADD PRIMARY KEY (`id`);
 )",
-	}
+	},
 
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
@@ -4768,6 +4756,33 @@ CREATE TABLE `new_table3`  (
 //		.sql = R"(
 //
 //)"
+
+	// Used for testing
+//	ManifestEntry{
+//		.version = 9229,
+//		.description = "new_database_check_test",
+//		.check = "SHOW TABLES LIKE 'new_table'",
+//		.condition = "empty",
+//		.match = "",
+//		.sql = R"(
+//CREATE TABLE `new_table`  (
+//  `id` int NOT NULL AUTO_INCREMENT,
+//  PRIMARY KEY (`id`)
+//);
+//CREATE TABLE `new_table1`  (
+//  `id` int NOT NULL AUTO_INCREMENT,
+//  PRIMARY KEY (`id`)
+//);
+//CREATE TABLE `new_table2`  (
+//  `id` int NOT NULL AUTO_INCREMENT,
+//  PRIMARY KEY (`id`)
+//);
+//CREATE TABLE `new_table3`  (
+//  `id` int NOT NULL AUTO_INCREMENT,
+//  PRIMARY KEY (`id`)
+//);
+//)",
+//	}
 
 };
 
