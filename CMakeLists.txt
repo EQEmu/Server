@@ -22,6 +22,7 @@ IF (EQEMU_BUILD_STATIC)
 	SET(BUILD_SHARED_LIBS OFF)
 	SET(CMAKE_FIND_LIBRARY_SUFFIXES ".lib" ".a")
 	MESSAGE(STATUS "Building with static linking")
+	SET(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++")
 ENDIF(EQEMU_BUILD_STATIC)
 
 IF(MSVC)
