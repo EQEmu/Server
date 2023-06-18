@@ -2395,55 +2395,6 @@ void Database::SourceDatabaseTableFromUrl(std::string table_name, std::string ur
 	}
 }
 
-void Database::SourceSqlFromUrl(std::string url)
-{
-	try {
-		uri request_uri(url);
-
-		LogHTTPDetail(
-			"parsing url [{}] path [{}] host [{}] query_string [{}] protocol [{}] port [{}]",
-			url,
-			request_uri.get_path(),
-			request_uri.get_host(),
-			request_uri.get_query(),
-			request_uri.get_scheme(),
-			request_uri.get_port()
-		);
-
-		LogInfo("Downloading and installing from [{}]", url);
-
-		// http get request
-		httplib::Client cli(
-			fmt::format(
-				"{}://{}",
-				request_uri.get_scheme(),
-				request_uri.get_host()
-			)
-		);
-
-		cli.set_connection_timeout(0, 60000000); // 60 sec
-		cli.set_read_timeout(60, 0); // 60 seconds
-		cli.set_write_timeout(60, 0); // 60 seconds
-
-		if (auto res = cli.Get(request_uri.get_path())) {
-			if (res->status == 200) {
-				auto results = QueryDatabaseMulti(res->body);
-				if (!results.ErrorMessage().empty()) {
-					LogError("Error sourcing SQL [{}]", results.ErrorMessage());
-					return;
-				}
-			}
-		}
-		else {
-			LogError("Error retrieving URL [{}]", url);
-		}
-
-	}
-	catch (std::invalid_argument iae) {
-		LogError("URI parser error [{}]", iae.what());
-	}
-}
-
 uint8 Database::GetMinStatus(uint32 zone_id, uint32 instance_version)
 {
 	auto zones = ZoneRepository::GetWhere(
