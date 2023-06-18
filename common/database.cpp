@@ -2447,6 +2447,9 @@ void Database::SourceSqlFromUrl(std::string url)
 					return;
 				}
 			}
+			if (res->status == 404) {
+				LogError("Error retrieving URL [{}]", url);
+			}
 		}
 		else {
 			LogError("Error retrieving URL [{}]", url);
