@@ -14,7 +14,7 @@ mkdir -p build && cd build && cmake -DEQEMU_BUILD_TESTS=ON -DEQEMU_BUILD_STATIC=
 curl https://raw.githubusercontent.com/Akkadius/eqemu-install-v2/master/eqemu_config.json --output eqemu_config.json
 ./bin/tests
 
-lld ./bin/zone
+ldd ./bin/zone
 
 # shellcheck disable=SC2164
 cd /drone/src/
