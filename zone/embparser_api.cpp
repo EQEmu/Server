@@ -5325,6 +5325,25 @@ void Perl__send_channel_message(Client* from, const char* to, uint8 channel_numb
 	quest_manager.SendChannelMessage(from, to, channel_number, guild_id, language_id, language_skill, message);
 }
 
+std::string Perl__convert_money_to_string(perl::hash table)
+{
+	uint64 platinum = table.exists("platinum") ? static_cast<uint64>(table["platinum"]) : 0;
+	uint64 gold     = table.exists("gold") ? static_cast<uint64>(table["gold"]) : 0;
+	uint64 silver   = table.exists("silver") ? static_cast<uint64>(table["silver"]) : 0;
+	uint64 copper   = table.exists("copper") ? static_cast<uint64>(table["copper"]) : 0;
+
+	if (
+		!copper &&
+		!silver &&
+		!gold &&
+		!platinum
+	) {
+		return std::string();
+	}
+
+	return Strings::Money(platinum, gold, silver, copper);
+}
+
 void perl_register_quest()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -5649,6 +5668,7 @@ void perl_register_quest()
 	package.add("collectitems", &Perl__collectitems);
 	package.add("commify", &Perl__commify);
 	package.add("completedtasksinset", &Perl__completedtasksinset);
+	package.add("convert_money_to_string", &Perl__convert_money_to_string);
 	package.add("countitem", &Perl__countitem);
 	package.add("countspawnednpcs", &Perl__countspawnednpcs);
 	package.add("createdoor", (uint16(*)(const char*, float, float, float, float))&Perl__CreateDoor);

@@ -5017,6 +5017,29 @@ int lua_get_spell_nimbus_effect(uint16 spell_id)
 	return GetSpellNimbusEffect(spell_id);
 }
 
+std::string lua_convert_money_to_string(luabind::adl::object table)
+{
+	if (luabind::type(table) != LUA_TTABLE) {
+		return std::string();
+	}
+
+	uint64 platinum = luabind::type(table["platinum"]) != LUA_TNIL ? luabind::object_cast<uint64>(table["platinum"]) : 0;
+	uint64 gold     = luabind::type(table["gold"]) != LUA_TNIL ? luabind::object_cast<uint64>(table["gold"]) : 0;
+	uint64 silver   = luabind::type(table["silver"]) != LUA_TNIL ? luabind::object_cast<uint64>(table["silver"]) : 0;
+	uint64 copper   = luabind::type(table["copper"]) != LUA_TNIL ? luabind::object_cast<uint64>(table["copper"]) : 0;
+
+	if (
+		!copper &&
+		!silver &&
+		!gold &&
+		!platinum
+	) {
+		return std::string();
+	}
+
+	return Strings::Money(platinum, gold, silver, copper);
+}
+
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
 	cur = table[#name]; \
 	if(luabind::type(cur) != LUA_TNIL) { \
@@ -5790,6 +5813,7 @@ luabind::scope lua_register_general() {
 		luabind::def("calculate_counters", &lua_calculate_counters),
 		luabind::def("get_spell_resurrection_sickness_check", &lua_get_spell_resurrection_sickness_check),
 		luabind::def("get_spell_nimbus_effect", &lua_get_spell_nimbus_effect),
+		luabind::def("convert_money_to_string", &lua_convert_money_to_string),
 		/*
 			Cross Zone
 		*/
