@@ -323,8 +323,11 @@ MySQLRequestResult DBcore::QueryDatabaseMulti(const std::string &query)
 	if (pStatus != Connected) {
 		Open();
 	}
+	auto r = MySQLRequestResult{};
 
 	int status = mysql_real_query(mysql, query.c_str(), query.length());
+
+	// process single result
 	if (status != 0) {
 		unsigned int error_number = mysql_errno(mysql);
 
@@ -337,11 +340,35 @@ MySQLRequestResult DBcore::QueryDatabaseMulti(const std::string &query)
 			std::string error_raw   = fmt::format("{}", mysql_error(mysql));
 			std::string mysql_err   = Strings::Trim(error_raw);
 			std::string clean_query = Strings::Replace(query, "\n", "");
-			LogMySQLQuery("[{}] ({}) query [{}]", mysql_err, mysql_errno(mysql), clean_query);
+			LogMySQLError("[{}] ({}) query [{}]", mysql_err, mysql_errno(mysql), clean_query);
+
+			MYSQL_RES *res = mysql_store_result(mysql);
+
+			uint32 row_count = 0;
+			if (res) {
+				row_count = (uint32) mysql_num_rows(res);
+			}
+
+			r = MySQLRequestResult(
+				res,
+				(uint32) mysql_affected_rows(mysql),
+				row_count,
+				(uint32) mysql_field_count(mysql),
+				(uint32) mysql_insert_id(mysql)
+			);
+
+			std::string error_message = mysql_error(mysql);
+			r.SetErrorMessage(error_message);
+			r.SetErrorNumber(mysql_errno(mysql));
+
+			if (res) {
+				mysql_free_result(res);
+			}
+
+			return r;
 		}
 	}
 
-	auto result = MySQLRequestResult{};
 
 	int index = 0;
 
@@ -355,7 +382,7 @@ MySQLRequestResult DBcore::QueryDatabaseMulti(const std::string &query)
 		uint32    row_count = 0;
 		MYSQL_RES *res      = mysql_store_result(mysql);
 
-		result = MySQLRequestResult(
+		r = MySQLRequestResult(
 			res,
 			(uint32) mysql_affected_rows(mysql),
 			row_count,
@@ -368,15 +395,14 @@ MySQLRequestResult DBcore::QueryDatabaseMulti(const std::string &query)
 			LogMySQLQuery(
 				"{} -- ({} row{} affected) ({}s)",
 				piece,
-				result.RowsAffected(),
-				result.RowsAffected() == 1 ? "" : "s",
+				r.RowsAffected(),
+				r.RowsAffected() == 1 ? "" : "s",
 				std::to_string(timer.elapsed())
 			);
 		}
 
 		if (res) {
 			row_count = (uint32) mysql_num_rows(res);
-			mysql_free_result(res);
 		}
 
 		// more results? -1 = no, >0 = error, 0 = yes (keep looping)
@@ -385,13 +411,25 @@ MySQLRequestResult DBcore::QueryDatabaseMulti(const std::string &query)
 				LogMySQLError("[{}] [{}]", mysql_errno(mysql), mysql_error(mysql));
 			}
 
+			mysql_free_result(res);
+
+			// error logging
+			std::string error_message = mysql_error(mysql);
+			r.SetErrorMessage(error_message);
+			r.SetErrorNumber(mysql_errno(mysql));
+
 			// we handle errors elsewhere
-			return result;
+			return r;
 		}
+
+		if (res) {
+			mysql_free_result(res);
+		}
+
 		index++;
 	} while (status == 0);
 
 	SetMultiStatementsOff();
 
-	return result;
+	return r;
 }

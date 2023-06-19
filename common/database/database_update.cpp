@@ -183,7 +183,7 @@ bool DatabaseUpdate::UpdateManifest(
 
 					// ignore empty query result "errors"
 					if (r.ErrorNumber() != 1065 && !r.ErrorMessage().empty()) {
-						LogError("[{}]", r.ErrorMessage());
+						LogError("(#{}) [{}]", r.ErrorNumber(), r.ErrorMessage());
 						errored_migration = true;
 
 						LogInfo("Required database update failed. This could be a problem");
