@@ -1,3 +1,17 @@
+## [22.15.0] - 06/19/2023
+
+### Code
+
+* Default skill type to Hand to Hand in #npcedit meleetype ([#3422](https://github.com/EQEmu/Server/pull/3422)) @Kinglykrab 2023-06-19
+
+### Database
+
+* Implement native database migrations in server ([#2857](https://github.com/EQEmu/Server/pull/2857)) @Akkadius 2023-06-19
+
+### Fixes
+
+* Fix possible crash with #npcedit weapon ([#3421](https://github.com/EQEmu/Server/pull/3421)) @Kinglykrab 2023-06-19
+
 ## [22.14.1] - 06/18/2023
 
 ### Backups
