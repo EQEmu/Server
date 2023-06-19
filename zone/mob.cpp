@@ -1651,23 +1651,21 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 	std::string cur_field;
 	std::string total_field;
 	std::string cur_name;
-	std::string cur_spacing;
 	std::string cur_color;
 
-	auto hme_rows          = 3; // Rows in display
-	auto max_HME_value_len = 9; // 9 digits in the displayed value
+	auto hme_rows = 3; // Rows in display
 
 	for (auto hme_row_counter = 0; hme_row_counter < hme_rows; hme_row_counter++) {
 		switch (hme_row_counter) {
 			case 0: {
-				cur_name    = "Health: ";
+				cur_name    = "Health ";
 				cur_field   = Strings::Commify(GetHP());
 				total_field = Strings::Commify(GetMaxHP());
 				break;
 			}
 			case 1: {
 				if (CalcMaxMana()) {
-					cur_name    = "Mana: ";
+					cur_name    = "Mana ";
 					cur_field   = Strings::Commify(GetMana());
 					total_field = Strings::Commify(GetMaxMana());
 				} else {
@@ -1677,7 +1675,7 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 				break;
 			}
 			case 2: {
-				cur_name    = "Endurance: ";
+				cur_name    = "Endurance ";
 				cur_field   = Strings::Commify(GetEndurance());
 				total_field = Strings::Commify(GetMaxEndurance());
 				break;
@@ -1693,19 +1691,18 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 			cur_color = bright_red;
 		}
 
-		cur_spacing.clear();
-
-		for (auto a = cur_field.size(); a < max_HME_value_len; a++) {
-			cur_spacing += "&nbsp;";
-		}
-
-		HME_row += fmt::format(
-			"{}{}{}/{}{}",
-			cur_name,
-			cur_spacing,
-			DialogueWindow::ColorMessage(cur_color, cur_field),
-			DialogueWindow::ColorMessage("green", total_field),
-			DialogueWindow::Break(2)
+		HME_row += DialogueWindow::TableRow(
+			fmt::format(
+				"{}{}",
+				DialogueWindow::TableCell(cur_name),
+				DialogueWindow::TableCell(
+					fmt::format(
+						"{}/{}",
+						DialogueWindow::ColorMessage(cur_color, cur_field),
+						DialogueWindow::ColorMessage("green", total_field)
+					)
+				)
+			)
 		);
 	}
 
@@ -1714,15 +1711,10 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 	std::string regen_row_header;
 	std::string regen_row_color;
 	std::string base_regen_field;
-	std::string base_regen_spacing;
 	std::string item_regen_field;
-	std::string item_regen_spacing;
 	std::string cap_regen_field;
-	std::string cap_regen_spacing;
 	std::string spell_regen_field;
-	std::string spell_regen_spacing;
 	std::string aa_regen_field;
-	std::string aa_regen_spacing;
 	std::string total_regen_field;
 
 	auto regen_rows          = 3; // Number of rows
@@ -1731,7 +1723,7 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 	for (auto regen_row_counter = 0; regen_row_counter < regen_rows; regen_row_counter++) {
 		switch (regen_row_counter) {
 			case 0: {
-				regen_row_header = "H: ";
+				regen_row_header = "Health";
 				regen_row_color = color_red;
 
 				if (IsBot()) {
@@ -1755,7 +1747,7 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 			}
 			case 1: {
 				if (GetMaxMana() > 0) {
-					regen_row_header = "M: ";
+					regen_row_header = "Mana";
 					regen_row_color = color_blue;
 
 					if (IsBot()) {
@@ -1781,7 +1773,7 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 				break;
 			}
 			case 2: {
-				regen_row_header = "E: ";
+				regen_row_header = "Endurance";
 				regen_row_color  = color_green;
 
 				base_regen_field  = Strings::Commify(((GetLevel() * 4 / 10) + 2));
@@ -1803,39 +1795,26 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 			}
 		}
 
-		base_regen_spacing.clear();
-		item_regen_spacing.clear();
-		cap_regen_spacing.clear();
-		spell_regen_spacing.clear();
-		aa_regen_spacing.clear();
+		regen_string += DialogueWindow::TableRow(
+			DialogueWindow::TableCell(regen_row_header)
+		);
 
-		for (auto b = base_regen_field.size(); b < max_regen_value_len; b++) {
-			base_regen_spacing += "&nbsp;";
-		}
+		regen_string += DialogueWindow::TableRow(
+			DialogueWindow::ColorMessage(
+				regen_row_color,
+				fmt::format(
+					"{}{}{}{}{}{}",
+					DialogueWindow::TableCell(base_regen_field),
+					DialogueWindow::TableCell(item_regen_field),
+					DialogueWindow::TableCell(cap_regen_field),
+					DialogueWindow::TableCell(spell_regen_field),
+					DialogueWindow::TableCell(aa_regen_field),
+					DialogueWindow::TableCell(total_regen_field)
+				)
+			)
+		);
 
-		for (auto b = item_regen_field.size(); b < max_regen_value_len; b++) {
-			item_regen_spacing += "&nbsp;";
-		}
-
-		for (auto b = cap_regen_field.size(); b < max_regen_value_len; b++) {
-			cap_regen_spacing += "&nbsp;";
-		}
-
-		for (auto b = spell_regen_field.size(); b < max_regen_value_len; b++) {
-			spell_regen_spacing += "&nbsp;";
-		}
-
-		for (auto b = aa_regen_field.size(); b < max_regen_value_len; b++) {
-			aa_regen_spacing += "&nbsp;";
-		}
-
-		regen_string += fmt::format("{}{}{}{}", indS, regen_row_header, base_regen_spacing, base_regen_field);
-		regen_string += fmt::format(" | {}{} ({})", item_regen_spacing, item_regen_field, cap_regen_field);
-		regen_string += fmt::format("{} | {}{}", cap_regen_spacing, spell_regen_spacing, spell_regen_field);
-		regen_string += fmt::format(" | {}{} | {}", aa_regen_spacing, aa_regen_field, total_regen_field);
 		regen_string += DialogueWindow::Break(1);
-
-		regen_string = DialogueWindow::ColorMessage("forest_green", regen_string);
 	}
 
 	// Stats
@@ -2297,17 +2276,19 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 	std::string final_string;
 
 	// Class, Level, and Race
-	final_string += DialogueWindow::TableRow(
-		fmt::format(
-			"{}{}{}",
-			DialogueWindow::TableCell(
-				fmt::format("Race: {}", GetPlayerRaceAbbreviation(GetBaseRace()))
-			),
-			DialogueWindow::TableCell(
-				fmt::format("Class: {}", GetPlayerClassAbbreviation(GetClass()))
-			),
-			DialogueWindow::TableCell(
-				fmt::format("Level: {}", GetLevel())
+	final_string += DialogueWindow::Table(
+		DialogueWindow::TableRow(
+			fmt::format(
+				"{}{}{}{}{}{}",
+				DialogueWindow::TableCell("Race"),
+				DialogueWindow::TableCell("{}", GetPlayerRaceAbbreviation(GetBaseRace()),
+				DialogueWindow::TableCell("Class"),
+				DialogueWindow::TableCell(
+					fmt::format("Class: {}", GetPlayerClassAbbreviation(GetClass()))
+				),
+				DialogueWindow::TableCell(
+					fmt::format("Level: {}", GetLevel())
+				)
 			)
 		)
 	);
@@ -2316,15 +2297,17 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 
 	// Runes
 	if (rune_number || magic_rune_number) {
-		final_string += DialogueWindow::TableRow(
-			fmt::format(
-				"{}{}{}",
-				DialogueWindow::TableCell(
-					fmt::format("Rune: {}", rune_number)
-				),
-				DialogueWindow::TableCell(""),
-				DialogueWindow::TableCell(
-					fmt::format("Spell Rune: {}", magic_rune_number)
+		final_string += DialogueWindow::Table(
+			DialogueWindow::TableRow(
+				fmt::format(
+					"{}{}{}",
+					DialogueWindow::TableCell(
+						fmt::format("Rune: {}", rune_number)
+					),
+					DialogueWindow::TableCell(""),
+					DialogueWindow::TableCell(
+						fmt::format("Spell Rune: {}", magic_rune_number)
+					)
 				)
 			)
 		);
@@ -2333,39 +2316,57 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 	final_string += DialogueWindow::Break(1);
 
 	// Health, Mana, and Endurance
-	final_string += HME_row;
+	final_string += DialogueWindow::Table(HME_row);
 
 	// Damage Shield
 	if (itembonuses.DamageShield || spellbonuses.DamageShield) {
-		final_string += fmt::format(
-			"Damage Shield: {}{}{}{}",
-			Strings::Commify(itembonuses.DamageShield + spellbonuses.DamageShield * -1),
-			spellbonuses.DamageShield ? fmt::format(" | Spell: {}", Strings::Commify(spellbonuses.DamageShield * -1)) : "",
-			(
-				itembonuses.DamageShield ?
+		final_string += DialogueWindow::Table(
+			DialogueWindow::TableRow(
 				fmt::format(
-					" | Item: {}/{}",
-					Strings::Commify(itembonuses.DamageShield * -1),
-					Strings::Commify(RuleI(Character, ItemDamageShieldCap))
-				) :
-				""
-			),
-			DialogueWindow::Break(1)
+					"{}{}{}{}",
+					DialogueWindow::TableCell("Damage Shield"),
+					DialogueWindow::TableCell(Strings::Commify(itembonuses.DamageShield + spellbonuses.DamageShield)),
+					spellbonuses.DamageShield ? DialogueWindow::TableCell(fmt::format("Spell: {}", Strings::Commify(spellbonuses.DamageShield))) : "",
+					(
+						itembonuses.DamageShield ?
+						fmt::format(
+							"{}{}",
+							DialogueWindow::TableCell("Item"),
+							DialogueWindow::TableCell(
+								fmt::format(
+									"{} / {}",
+									Strings::Commify(itembonuses.DamageShield),
+									Strings::Commify(RuleI(Character, ItemDamageShieldCap))
+								)
+							)
+						) :
+						""
+					)
+				)
+			)
 		);
+
+		final_string += DialogueWindow::Break(1);
 	}
 
 	// Attack
-	final_string += fmt::format(
-		"{}{}",
+	final_string += DialogueWindow::Table(
 		DialogueWindow::ColorMessage(
 			"green_yellow",
-			fmt::format(
-				"To Hit: {}/{}",
-				Strings::Commify(compute_tohit(skill)),
-				Strings::Commify(GetTotalToHit(skill, 0))
+			DialogueWindow::TableRow(
+				fmt::format(
+					"{}{}",
+					DialogueWindow::TableCell("To Hit"),
+					DialogueWindow::TableCell(
+						fmt::format(
+							"{} / {}",
+							Strings::Commify(compute_tohit(skill)),
+							Strings::Commify(GetTotalToHit(skill, 0))
+						)
+					)
+				)
 			)
-		),
-		DialogueWindow::Break(1)
+		)
 	);
 
 	// Attack 2
@@ -2375,7 +2376,7 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 		(
 			itembonuses.ATK ?
 			fmt::format(
-				" | Item: {}/{} | Used: {}",
+				" | Item: {} / {} | Used: {}",
 				Strings::Commify(itembonuses.ATK),
 				Strings::Commify(RuleI(Character, ItemATKCap)),
 				Strings::Commify(static_cast<int>(itembonuses.ATK * 1.342))
@@ -2550,7 +2551,7 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 				1,
 				this,
 				"",
-				DialogueWindow::Table(final_string).c_str()
+				final_string.c_str()
 			);
 
 			goto extra_info;
