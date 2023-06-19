@@ -1,3 +1,9 @@
+## [22.15.2] - 06/19/2023
+
+### Database
+
+* Fix multi-statement error reporting ([#3425](https://github.com/EQEmu/Server/pull/3425)) @Akkadius 2023-06-19
+
 ## [22.15.1] - 06/19/2023
 
 ### Schema
