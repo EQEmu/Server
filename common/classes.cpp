@@ -17,6 +17,7 @@
 	*/
 #include "../common/global_define.h"
 #include "../common/classes.h"
+#include "data_verification.h"
 
 const char *GetClassIDName(uint8 class_id, uint8 level)
 {
@@ -749,4 +750,52 @@ uint8 ClassArmorType(uint8 class_id)
 		default:
 			return ARMOR_TYPE_UNKNOWN;
 	}
+}
+
+const std::string GetPlayerClassAbbreviation(uint16 class_id)
+{
+	if (!EQ::ValueWithin(class_id, WARRIOR, BERSERKER)) {
+		return std::string();
+	}
+
+	switch (class_id) {
+		case WARRIOR:
+			return "WAR";
+		case CLERIC:
+			return "CLR";
+		case PALADIN:
+			return "PAL";
+		case RANGER:
+			return "RNG";
+		case SHADOWKNIGHT:
+			return "SHD";
+		case DRUID:
+			return "DRU";
+		case MONK:
+			return "MNK";
+		case BARD:
+			return "BRD";
+		case ROGUE:
+			return "ROG";
+		case SHAMAN:
+			return "SHM";
+		case NECROMANCER:
+			return "NEC";
+		case WIZARD:
+			return "WIZ";
+		case MAGICIAN:
+			return "MAG";
+		case ENCHANTER:
+			return "ENC";
+		case BEASTLORD:
+			return "BST";
+		case BERSERKER:
+			return "BER";
+	}
+
+	return std::string();
+}
+
+bool IsPlayerClass(uint8 class_id) {
+	return EQ::ValueWithin(class_id, WARRIOR, BERSERKER);
 }

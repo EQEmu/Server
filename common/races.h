@@ -19,6 +19,7 @@
 #ifndef RACES_H
 #define RACES_H
 #include "../common/types.h"
+#include <string>
 
 #define MALE 0
 #define FEMALE 1
@@ -852,6 +853,9 @@
 const char* GetRaceIDName(uint16 race_id);
 const char* GetPlayerRaceName(uint32 player_race_value);
 const char* GetGenderName(uint32 gender_id);
+
+bool IsPlayerRace(uint16 race_id);
+const std::string GetPlayerRaceAbbreviation(uint16 race_id);
 
 uint32 GetPlayerRaceValue(uint16 race_id);
 uint32 GetPlayerRaceBit(uint16 race_id);
