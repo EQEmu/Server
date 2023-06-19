@@ -283,18 +283,6 @@ extern WorldEventScheduler event_scheduler;
 
 bool WorldBoot::DatabaseLoadRoutines(int argc, char **argv)
 {
-	// ignore
-	bool ignore_db = false;
-	if (argc >= 2) {
-		if (strcasecmp(argv[1], "ignore_db") == 0) {
-			ignore_db = true;
-		}
-		else {
-			std::cerr << "Error, unknown command line option" << std::endl;
-			return false;
-		}
-	}
-
 	// logging system init
 	auto logging = LogSys.SetDatabase(&database)
 		->SetLogPath(path.GetLogPath())
@@ -302,7 +290,8 @@ bool WorldBoot::DatabaseLoadRoutines(int argc, char **argv)
 
 	LogSys.SetDiscordHandler(&WorldBoot::DiscordWebhookMessageHandler);
 
-	if (!ignore_db) {
+	const auto c = EQEmuConfig::get();
+	if (c->auto_database_updates) {
 		LogInfo("Checking Database Conversions");
 		database.CheckDatabaseConversions();
 	}

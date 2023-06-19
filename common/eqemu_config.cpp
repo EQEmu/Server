@@ -85,6 +85,12 @@ void EQEmuConfig::parse_config()
 	//The only way to enable locked is by switching to true, meaning this value is always false until manually set true
 	Locked = false;
 	if (_root["server"]["world"].get("locked", "false").asString() == "true") { Locked = true; }
+
+	auto_database_updates = false;
+	if (_root["server"].get("auto_database_updates", "true").asString() == "true") {
+		auto_database_updates = true;
+	}
+
 	WorldIP      = _root["server"]["world"]["tcp"].get("host", "127.0.0.1").asString();
 	WorldTCPPort = Strings::ToUnsignedInt(_root["server"]["world"]["tcp"].get("port", "9000").asString());
 

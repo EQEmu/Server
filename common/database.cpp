@@ -2347,7 +2347,7 @@ void Database::SourceDatabaseTableFromUrl(std::string table_name, std::string ur
 		);
 
 		if (!DoesTableExist(table_name)) {
-			LogMySQLQuery("Table [{}] does not exist. Downloading from Github and installing...", table_name);
+			LogMySQLQuery("Table [{}] does not exist. Downloading and installing...", table_name);
 
 			// http get request
 			httplib::Client cli(
@@ -2355,7 +2355,7 @@ void Database::SourceDatabaseTableFromUrl(std::string table_name, std::string ur
 					"{}://{}",
 					request_uri.get_scheme(),
 					request_uri.get_host()
-				).c_str()
+				)
 			);
 
 			cli.set_connection_timeout(0, 60000000); // 60 sec

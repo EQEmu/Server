@@ -1,1 +1,0 @@
-ALTER TABLE `npc_types` ADD COLUMN `flymode` tinyint(4) NOT NULL DEFAULT -1;
