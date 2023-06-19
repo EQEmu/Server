@@ -256,6 +256,7 @@ namespace DatabaseSchema {
 	{
 		return {
 			"chatchannels",
+			"chatchannel_reserved_names",
 			"command_settings",
 			"content_flags",
 			"db_str",

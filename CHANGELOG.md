@@ -1,3 +1,9 @@
+## [22.15.1] - 06/19/2023
+
+### Schema
+
+* Add `chatchannel_reserved_names` table to `database_schema.h`
+
 ## [22.15.0] - 06/19/2023
 
 ### Code
