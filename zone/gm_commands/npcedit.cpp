@@ -549,7 +549,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 	} else if (!strcasecmp(sep->arg[1], "meleetype")) {
 		if (sep->IsNumber(2)) {
 			auto     primary_type   = Strings::ToUnsignedInt(sep->arg[2]);
-			uint32_t secondary_type = sep->IsNumber(3) ? Strings::ToUnsignedInt(sep->arg[3]) : 0;
+			uint32_t secondary_type = sep->IsNumber(3) ? Strings::ToUnsignedInt(sep->arg[3]) : EQ::skills::SkillHandtoHand;
 
 			auto primary_skill   = EQ::skills::GetSkillName(static_cast<EQ::skills::SkillType>(primary_type));
 			auto secondary_skill = EQ::skills::GetSkillName(static_cast<EQ::skills::SkillType>(secondary_type));
