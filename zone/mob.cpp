@@ -1633,12 +1633,6 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 		return;
 	}
 
-	// Define the types of page breaks we need
-	const std::string& indP = "&nbsp;";
-	const std::string& indS = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-	const std::string& indM = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-	const std::string& indL = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-
 	const std::string& color_red    = "red_1";
 	const std::string& color_blue   = "royal_blue";
 	const std::string& color_green  = "forest_green";
@@ -1920,7 +1914,7 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 					fmt::format(
 						"{} {}",
 						a_stat,
-						DialogueWindow::ColorMessage("gold", fmt::format("+{}", h_stat))
+						DialogueWindow::ColorMessage(heroic_color, fmt::format("+{}", h_stat))
 					)
 				),
 				DialogueWindow::TableCell(a_resist_name),
@@ -1928,7 +1922,7 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 					fmt::format(
 						"{} {}",
 						a_resist,
-						DialogueWindow::ColorMessage("gold", fmt::format("+{}", h_resist_field))
+						DialogueWindow::ColorMessage(heroic_color, fmt::format("+{}", h_resist_field))
 					)
 				)
 			)
