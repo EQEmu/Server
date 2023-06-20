@@ -1,3 +1,9 @@
+## [22.15.3] - 06/19/2023
+
+### Fixes
+
+* Fix improper condition in Water LOS checks ([#3426](https://github.com/EQEmu/Server/pull/3426)) @Kinglykrab 2023-06-19
+
 ## [22.15.2] - 06/19/2023
 
 ### Database
