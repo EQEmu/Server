@@ -30,7 +30,7 @@ public:
 	bool HasPendingUpdates();
 private:
 	Database *m_database;
-	static bool CheckVersions(DatabaseVersion v, DatabaseVersion b);
+	static bool CheckVersionsUpToDate(DatabaseVersion v, DatabaseVersion b);
 	void InjectBotsVersionColumn();
 };
 
