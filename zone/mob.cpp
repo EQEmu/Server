@@ -1697,7 +1697,7 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 					fmt::format(
 						"{} / {}",
 						DialogueWindow::ColorMessage(cur_color, cur_field),
-						DialogueWindow::ColorMessage("green", total_field)
+						DialogueWindow::ColorMessage(bright_green, total_field)
 					)
 				)
 			)
