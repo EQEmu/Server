@@ -9,7 +9,7 @@ void command_mystats(Client *c, const Seperator *sep)
 
 	if (
 		(t->IsPet() && t == c->GetPet()) ||
-		(t->IsBot() && t->CastToBot()->GetOwner() == c)
+		(t->IsBot() && t->CastToBot()->GetOwner() && t->CastToBot()->GetOwner() == c)
 	) {
 		t->ShowStats(c);
 		return;
