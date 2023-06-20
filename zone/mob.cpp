@@ -1648,6 +1648,7 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 
 	// Health, Mana, and Endurance
 	std::string HME_row;
+	std::string hme_color;
 	std::string cur_field;
 	std::string total_field;
 	std::string cur_name;
@@ -1661,6 +1662,7 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 				cur_name    = "Health ";
 				cur_field   = Strings::Commify(GetHP());
 				total_field = Strings::Commify(GetMaxHP());
+				hme_color   = color_red;
 				break;
 			}
 			case 1: {
@@ -1668,6 +1670,7 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 					cur_name    = "Mana ";
 					cur_field   = Strings::Commify(GetMana());
 					total_field = Strings::Commify(GetMaxMana());
+					hme_color   = color_blue;
 				} else {
 					continue;
 				}
@@ -1678,6 +1681,7 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 				cur_name    = "Endurance ";
 				cur_field   = Strings::Commify(GetEndurance());
 				total_field = Strings::Commify(GetMaxEndurance());
+				hme_color   = color_green;
 				break;
 			}
 			default: {
@@ -1694,10 +1698,10 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 		HME_row += DialogueWindow::TableRow(
 			fmt::format(
 				"{}{}",
-				DialogueWindow::TableCell(cur_name),
+				DialogueWindow::TableCell(DialogueWindow::ColorMessage(hme_color, cur_name)),
 				DialogueWindow::TableCell(
 					fmt::format(
-						"{}/{}",
+						"{} / {}",
 						DialogueWindow::ColorMessage(cur_color, cur_field),
 						DialogueWindow::ColorMessage("green", total_field)
 					)
@@ -1717,8 +1721,7 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 	std::string aa_regen_field;
 	std::string total_regen_field;
 
-	auto regen_rows          = 3; // Number of rows
-	auto max_regen_value_len = 5; // 5 digits in the displayed value(larger values will not get cut off, this is just a baseline)
+	auto regen_rows = 3;
 
 	for (auto regen_row_counter = 0; regen_row_counter < regen_rows; regen_row_counter++) {
 		switch (regen_row_counter) {
@@ -1796,100 +1799,47 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 		}
 
 		regen_string += DialogueWindow::TableRow(
-			DialogueWindow::TableCell(regen_row_header)
-		);
-
-		regen_string += DialogueWindow::TableRow(
-			DialogueWindow::ColorMessage(
-				regen_row_color,
-				fmt::format(
-					"{}{}{}{}{}{}",
-					DialogueWindow::TableCell(base_regen_field),
-					DialogueWindow::TableCell(item_regen_field),
-					DialogueWindow::TableCell(cap_regen_field),
-					DialogueWindow::TableCell(spell_regen_field),
-					DialogueWindow::TableCell(aa_regen_field),
-					DialogueWindow::TableCell(total_regen_field)
-				)
+			fmt::format(
+				"{}{}{}{}{}{}",
+				DialogueWindow::TableCell(DialogueWindow::ColorMessage(regen_row_color, regen_row_header)),
+				DialogueWindow::TableCell(DialogueWindow::ColorMessage(regen_row_color, base_regen_field)),
+				DialogueWindow::TableCell(DialogueWindow::ColorMessage(regen_row_color, fmt::format("{} ({})", item_regen_field, cap_regen_field))),
+				DialogueWindow::TableCell(DialogueWindow::ColorMessage(regen_row_color, spell_regen_field)),
+				DialogueWindow::TableCell(DialogueWindow::ColorMessage(regen_row_color, aa_regen_field)),
+				DialogueWindow::TableCell(DialogueWindow::ColorMessage(regen_row_color, total_regen_field))
 			)
 		);
-
-		regen_string += DialogueWindow::Break(1);
 	}
 
 	// Stats
-	std::string stat_field;
+	std::string stat_table;
 	std::string a_stat;
 	std::string a_stat_name;
-	std::string a_stat_spacing;
 	std::string h_stat;
-	std::string h_stat_spacing;
 	std::string a_resist;
 	std::string a_resist_name;
-	std::string a_resist_spacing;
 	std::string h_resist_field;
 
-	auto stat_rows          = 7; // Number of rows
-	auto max_stat_value_len = 3; // 3 digits in the displayed value
+	auto stat_rows = 7;
 
 	for (auto stat_row_counter = 0; stat_row_counter < stat_rows; stat_row_counter++) {
 		switch (stat_row_counter) {
 			case 0: {
-				a_stat_name   = "STR: ";
-				a_resist_name = "Magic: ";
+				a_stat_name   = "Agility";
+				a_resist_name = "Cold";
 
-				a_stat         = Strings::Commify(GetSTR());
-				h_stat         = Strings::Commify(GetHeroicSTR());
-				a_resist       = Strings::Commify(GetMR());
-				h_resist_field = Strings::Commify(GetHeroicMR());
-				break;
-			}
-			case 1: {
-				a_stat_name   = "STA: ";
-				a_resist_name = "Cold: ";
-
-				a_stat         = Strings::Commify(GetSTA());
-				h_stat         = Strings::Commify(GetHeroicSTA());
+				a_stat         = Strings::Commify(GetAGI());
+				h_stat         = Strings::Commify(GetHeroicAGI());
 				a_resist       = Strings::Commify(GetCR());
 				h_resist_field = Strings::Commify(GetHeroicCR());
 				break;
 			}
-			case 2: {
-				a_stat_name   = "AGI: ";
-				a_resist_name = "Fire: ";
+			case 1: {
+				a_stat_name   = "Charisma";
+				a_resist_name = "Corruption";
 
-				a_stat         = Strings::Commify(GetAGI());
-				h_stat         = Strings::Commify(GetHeroicAGI());
-				a_resist       = Strings::Commify(GetFR());
-				h_resist_field = Strings::Commify(GetHeroicFR());
-				break;
-			}
-			case 3: {
-				a_stat_name   = "DEX: ";
-				a_resist_name = "Poison: ";
-
-				a_stat         = Strings::Commify(GetDEX());
-				h_stat         = Strings::Commify(GetHeroicDEX());
-				a_resist       = Strings::Commify(GetPR());
-				h_resist_field = Strings::Commify(GetHeroicPR());
-				break;
-			}
-			case 4: {
-				a_stat_name   = "INT : ";
-				a_resist_name = "Disease: ";
-
-				a_stat         = Strings::Commify(GetINT());
-				h_stat         = Strings::Commify(GetHeroicINT());
-				a_resist       = Strings::Commify(GetDR());
-				h_resist_field = Strings::Commify(GetHeroicDR());
-				break;
-			}
-			case 5: {
-				a_stat_name   = "WIS: ";
-				a_resist_name = "Corruption: ";
-
-				a_stat   = Strings::Commify(GetWIS());
-				h_stat   = Strings::Commify(GetHeroicWIS());
+				a_stat   = Strings::Commify(GetCHA());
+				h_stat   = Strings::Commify(GetHeroicCHA());
 				a_resist = Strings::Commify(GetCorrup());
 
 				if (IsBot()) {
@@ -1900,12 +1850,42 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 
 				break;
 			}
-			case 6: {
-				a_stat_name   = "CHA: ";
-				a_resist_name = "Physical: "; // Not implemented for clients yet
+			case 2: {
+				a_stat_name   = "Dexterity";
+				a_resist_name = "Disease";
 
-				a_stat   = Strings::Commify(GetCHA());
-				h_stat   = Strings::Commify(GetHeroicCHA());
+				a_stat         = Strings::Commify(GetDEX());
+				h_stat         = Strings::Commify(GetHeroicDEX());
+				a_resist       = Strings::Commify(GetDR());
+				h_resist_field = Strings::Commify(GetHeroicDR());
+				break;
+			}
+			case 3: {
+				a_stat_name   = "Intelligence";
+				a_resist_name = "Fire";
+
+				a_stat         = Strings::Commify(GetINT());
+				h_stat         = Strings::Commify(GetHeroicINT());
+				a_resist       = Strings::Commify(GetFR());
+				h_resist_field = Strings::Commify(GetHeroicFR());
+				break;
+			}
+			case 4: {
+				a_stat_name   = "Stamina";
+				a_resist_name = "Magic";
+
+				a_stat         = Strings::Commify(GetSTA());
+				h_stat         = Strings::Commify(GetHeroicSTA());
+				a_resist       = Strings::Commify(GetMR());
+				h_resist_field = Strings::Commify(GetHeroicMR());
+				break;
+			}
+			case 5: {
+				a_stat_name   = "Strength";
+				a_resist_name = "Physical";
+
+				a_stat   = Strings::Commify(GetSTR());
+				h_stat   = Strings::Commify(GetHeroicSTR());
 				a_resist = Strings::Commify(GetPhR());
 
 				if (IsBot()) {
@@ -1916,77 +1896,63 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 
 				break;
 			}
+			case 6: {
+				a_stat_name   = "Wisdom";
+				a_resist_name = "Poison";
+
+				a_stat         = Strings::Commify(GetWIS());
+				h_stat         = Strings::Commify(GetHeroicWIS());
+				a_resist       = Strings::Commify(GetPR());
+				h_resist_field = Strings::Commify(GetHeroicPR());
+
+				break;
+			}
 			default: {
 				break;
 			}
 		}
 
-		a_stat_spacing.clear();
-		h_stat_spacing.clear();
-		a_resist_spacing.clear();
-
-		for (auto a = a_stat.size(); a < max_stat_value_len; a++) {
-			a_stat_spacing += "&nbsp;";
-		}
-
-		for (auto h = h_stat.size(); h < 20; h++) {
-			h_stat_spacing += "&nbsp;";
-		}
-
-		for (auto h = a_resist.size(); h < max_stat_value_len; h++) {
-			a_resist_spacing += "&nbsp;";
-		}
-
-		stat_field += fmt::format(
-			"{}{}{} {}",
-			a_stat_name,
-			a_stat_spacing,
-			a_stat,
-			DialogueWindow::ColorMessage("gold", fmt::format("+{}", h_stat))
+		stat_table += DialogueWindow::TableRow(
+			fmt::format(
+				"{}{}{}{}",
+				DialogueWindow::TableCell(a_stat_name),
+				DialogueWindow::TableCell(
+					fmt::format(
+						"{} {}",
+						a_stat,
+						DialogueWindow::ColorMessage("gold", fmt::format("+{}", h_stat))
+					)
+				),
+				DialogueWindow::TableCell(a_resist_name),
+				DialogueWindow::TableCell(
+					fmt::format(
+						"{} {}",
+						a_resist,
+						DialogueWindow::ColorMessage("gold", fmt::format("+{}", h_resist_field))
+					)
+				)
+			)
 		);
-
-		stat_field += fmt::format(
-			"{}{}{}{} {}",
-			h_stat_spacing,
-			a_resist_name,
-			a_resist_spacing,
-			a_resist,
-			DialogueWindow::ColorMessage("gold", fmt::format("+{}", h_resist_field))
-		);
-
-		if (stat_row_counter < 6) {
-			stat_field += DialogueWindow::Break(1);
-		}
 	}
 
 	// Mod2
-	std::string mod2_field;
+	std::string mod2_table;
 	std::string mod2a;
 	std::string mod2a_name;
-	std::string mod2a_spacing;
 	std::string mod2a_cap;
-	std::string mod_row_spacing;
 	std::string mod2b;
 	std::string mod2b_name;
-	std::string mod2b_spacing;
 	std::string mod2b_cap;
 
-	int mod2a_space_count;
-	int mod2b_space_count;
-
-	int mod2_rows          = 4;
-	int max_mod2_value_len = 3; // 3 digits in the displayed value
+	auto mod2_rows = 4;
 
 	for (auto mod2_row_counter = 0; mod2_row_counter < mod2_rows; mod2_row_counter++) {
 		switch (mod2_row_counter) {
 			case 0: {
-				mod2a_name = "Avoidance: ";
-				mod2b_name = "Combat Effects: ";
+				mod2a_name = "Avoidance";
+				mod2b_name = "Combat Effects";
 				mod2a_cap  = Strings::Commify(RuleI(Character, ItemAvoidanceCap));
 				mod2b_cap  = Strings::Commify(RuleI(Character, ItemCombatEffectsCap));
-
-				mod2a_space_count = 2;
-				mod2b_space_count = 0;
 
 				if (IsBot()) {
 					mod2a = Strings::Commify(CastToBot()->GetAvoidance());
@@ -2003,13 +1969,10 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 				break;
 			}
 			case 1: {
-				mod2a_name = "Accuracy: ";
-				mod2b_name = "Strikethrough: ";
+				mod2a_name = "Accuracy";
+				mod2b_name = "Strikethrough";
 				mod2a_cap  = Strings::Commify(RuleI(Character, ItemAccuracyCap));
 				mod2b_cap  = Strings::Commify(RuleI(Character, ItemStrikethroughCap));
-
-				mod2a_space_count = 3;
-				mod2b_space_count = 1;
 
 				if (IsBot()) {
 					mod2a = Strings::Commify(CastToBot()->GetAccuracy());
@@ -2026,13 +1989,10 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 				break;
 			}
 			case 2: {
-				mod2a_name = "Shielding: ";
-				mod2b_name = "Spell Shielding: ";
+				mod2a_name = "Shielding";
+				mod2b_name = "Spell Shielding";
 				mod2a_cap  = Strings::Commify(RuleI(Character, ItemShieldingCap));
 				mod2b_cap  = Strings::Commify(RuleI(Character, ItemSpellShieldingCap));
-
-				mod2a_space_count = 2;
-				mod2b_space_count = 1;
 
 				if (IsBot()) {
 					mod2a = Strings::Commify(CastToBot()->GetShielding());
@@ -2050,13 +2010,10 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 				break;
 			}
 			case 3: {
-				mod2a_name = "Stun Resist: ";
-				mod2b_name = "DOT Shielding: ";
+				mod2a_name = "Stun Resist";
+				mod2b_name = "DOT Shielding";
 				mod2a_cap  = Strings::Commify(RuleI(Character, ItemStunResistCap));
 				mod2b_cap  = Strings::Commify(RuleI(Character, ItemDoTShieldingCap));
-
-				mod2a_space_count = 0;
-				mod2b_space_count = 2;
 
 				if (IsBot()) {
 					mod2a = Strings::Commify(CastToBot()->GetStunResist());
@@ -2074,39 +2031,26 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 			}
 		}
 
-		mod2a_spacing.clear();
-		mod_row_spacing.clear();
-		mod2b_spacing.clear();
-
-		for (auto a = mod2a.size(); a < (max_mod2_value_len + mod2a_space_count); a++) {
-			mod2a_spacing += "&nbsp;";
-		}
-
-		for (auto a = mod2a_cap.size(); a < 6; a++) {
-			mod_row_spacing += "&nbsp;";
-		}
-
-		for (auto a = mod2b.size(); a < (max_mod2_value_len + mod2b_space_count); a++) {
-			mod2b_spacing += "&nbsp;";
-		}
-
-		mod2_field += fmt::format(
-			"{}{}{}{}/{}{}",
-			indP,
-			mod2a_name,
-			mod2a_spacing,
-			mod2a,
-			mod2a_cap,
-			mod_row_spacing
-		);
-
-		mod2_field += fmt::format(
-			"{}{}{}/{}{}",
-			mod2b_name,
-			mod2b_spacing,
-			mod2b,
-			mod2b_cap,
-			DialogueWindow::Break(1)
+		mod2_table += DialogueWindow::TableRow(
+			fmt::format(
+				"{}{}",
+				DialogueWindow::TableCell(
+					fmt::format(
+						"{}: {} / {}",
+						mod2a_name,
+						Strings::Commify(mod2a),
+						Strings::Commify(mod2a_cap)
+					)
+				),
+				DialogueWindow::TableCell(
+					fmt::format(
+						"{}: {} / {}",
+						mod2b_name,
+						Strings::Commify(mod2b),
+						Strings::Commify(mod2b_cap)
+					)
+				)
+			)
 		);
 	}
 
@@ -2137,11 +2081,10 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 
 	for (auto j = 0; j <= EQ::skills::HIGHEST_SKILL; j++) {
 		if (itembonuses.skillmod[j] != 0) {
-			const std::string& sign = itembonuses.skillmod[j] > 0 ? "+" : "-";
+			const std::string& sign = itembonuses.skillmod[j] >= 0 ? "+" : "-";
 
 			skill_mods += fmt::format(
-				"{}{}: {}{}%%{}",
-				indP,
+				"{}: {}{}%%{}",
 				EQ::skills::GetSkillName(static_cast<EQ::skills::SkillType>(j)),
 				sign,
 				Strings::Commify(itembonuses.skillmod[j]),
@@ -2154,11 +2097,10 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 
 	for (auto j = 0; j <= EQ::skills::HIGHEST_SKILL; j++) {
 		if ((itembonuses.SkillDamageAmount[j] + spellbonuses.SkillDamageAmount[j]) != 0) {
-			const std::string& sign = (itembonuses.SkillDamageAmount[j] + spellbonuses.SkillDamageAmount[j]) > 0 ? "+" : "-";
+			const std::string& sign = (itembonuses.SkillDamageAmount[j] + spellbonuses.SkillDamageAmount[j]) >= 0 ? "+" : "-";
 
 			skill_dmgs += fmt::format(
-				"{}{}: {}{}{}",
-				indP,
+				"{}: {}{}{}",
 				EQ::skills::GetSkillName(static_cast<EQ::skills::SkillType>(j)),
 				sign,
 				Strings::Commify(itembonuses.SkillDamageAmount[j] + spellbonuses.SkillDamageAmount[j]),
@@ -2172,11 +2114,10 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 	for (const auto& f : item_faction_bonuses) {
 		if (f.second != 0) {
 			const auto &faction_name = content_db.GetFactionName(f.first);
-			const std::string& sign  = f.second > 0 ? "+" : "-";
+			const std::string& sign  = f.second >= 0 ? "+" : "-";
 
 			faction_item_string += fmt::format(
-				"{}{}: {}{}{}",
-				indP,
+				"{}: {}{}{}",
 				!faction_name.empty() ? faction_name : "Unknown Faction",
 				sign,
 				Strings::Commify(f.second),
@@ -2196,8 +2137,7 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 
 		if (brass_mod) {
 			bard_info += fmt::format(
-				"{}Brass: {}{}",
-				indP,
+				"Brass: {}{}",
 				Strings::Commify(brass_mod),
 				DialogueWindow::Break(1)
 			);
@@ -2205,8 +2145,7 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 
 		if (perc_mod) {
 			bard_info += fmt::format(
-				"{}Percussion: {}{}",
-				indP,
+				"Percussion: {}{}",
 				Strings::Commify(perc_mod),
 				DialogueWindow::Break(1)
 			);
@@ -2214,8 +2153,7 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 
 		if (sing_mod) {
 			bard_info += fmt::format(
-				"{}Singing: {}{}",
-				indP,
+				"Singing: {}{}",
 				Strings::Commify(sing_mod),
 				DialogueWindow::Break(1)
 			);
@@ -2223,8 +2161,7 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 
 		if (string_mod) {
 			bard_info += fmt::format(
-				"{}String: {}{}",
-				indP,
+				"String: {}{}",
 				Strings::Commify(string_mod),
 				DialogueWindow::Break(1)
 			);
@@ -2232,8 +2169,7 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 
 		if (wind_mod) {
 			bard_info += fmt::format(
-				"{}Wind: {}{}",
-				indP,
+				"Wind: {}{}",
 				Strings::Commify(wind_mod),
 				DialogueWindow::Break(1)
 			);
@@ -2279,21 +2215,13 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 	final_string += DialogueWindow::Table(
 		DialogueWindow::TableRow(
 			fmt::format(
-				"{}{}{}{}{}{}",
-				DialogueWindow::TableCell("Race"),
-				DialogueWindow::TableCell("{}", GetPlayerRaceAbbreviation(GetBaseRace()),
-				DialogueWindow::TableCell("Class"),
-				DialogueWindow::TableCell(
-					fmt::format("Class: {}", GetPlayerClassAbbreviation(GetClass()))
-				),
-				DialogueWindow::TableCell(
-					fmt::format("Level: {}", GetLevel())
-				)
+				"{}{}{}",
+				DialogueWindow::TableCell(fmt::format("Race: {}", GetPlayerRaceAbbreviation(GetBaseRace()))),
+				DialogueWindow::TableCell(fmt::format("Class: {}", GetPlayerClassAbbreviation(GetClass()))),
+				DialogueWindow::TableCell(fmt::format("Level: {}", std::to_string(GetLevel())))
 			)
 		)
 	);
-
-	final_string += DialogueWindow::Break(1);
 
 	// Runes
 	if (rune_number || magic_rune_number) {
@@ -2311,63 +2239,24 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 				)
 			)
 		);
-	}
-
-	final_string += DialogueWindow::Break(1);
-
-	// Health, Mana, and Endurance
-	final_string += DialogueWindow::Table(HME_row);
-
-	// Damage Shield
-	if (itembonuses.DamageShield || spellbonuses.DamageShield) {
-		final_string += DialogueWindow::Table(
-			DialogueWindow::TableRow(
-				fmt::format(
-					"{}{}{}{}",
-					DialogueWindow::TableCell("Damage Shield"),
-					DialogueWindow::TableCell(Strings::Commify(itembonuses.DamageShield + spellbonuses.DamageShield)),
-					spellbonuses.DamageShield ? DialogueWindow::TableCell(fmt::format("Spell: {}", Strings::Commify(spellbonuses.DamageShield))) : "",
-					(
-						itembonuses.DamageShield ?
-						fmt::format(
-							"{}{}",
-							DialogueWindow::TableCell("Item"),
-							DialogueWindow::TableCell(
-								fmt::format(
-									"{} / {}",
-									Strings::Commify(itembonuses.DamageShield),
-									Strings::Commify(RuleI(Character, ItemDamageShieldCap))
-								)
-							)
-						) :
-						""
-					)
-				)
-			)
-		);
 
 		final_string += DialogueWindow::Break(1);
 	}
 
+	// Health, Mana, and Endurance
+	final_string += DialogueWindow::Table(HME_row);
+
 	// Attack
-	final_string += DialogueWindow::Table(
-		DialogueWindow::ColorMessage(
-			"green_yellow",
-			DialogueWindow::TableRow(
-				fmt::format(
-					"{}{}",
-					DialogueWindow::TableCell("To Hit"),
-					DialogueWindow::TableCell(
-						fmt::format(
-							"{} / {}",
-							Strings::Commify(compute_tohit(skill)),
-							Strings::Commify(GetTotalToHit(skill, 0))
-						)
-					)
-				)
-			)
+	final_string += DialogueWindow::ColorMessage(
+		"green_yellow",
+		fmt::format(
+			"To Hit: {} / {}",
+			Strings::Commify(compute_tohit(skill)),
+			Strings::Commify(GetTotalToHit(skill, 0))
 		)
 	);
+
+	final_string += DialogueWindow::Break(1);
 
 	// Attack 2
 	final_string += fmt::format(
@@ -2383,7 +2272,7 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 			) :
 			""
 		),
-		spellbonuses.ATK ? fmt::format("Spell: {}", Strings::Commify(spellbonuses.ATK)) : "",
+		spellbonuses.ATK ? fmt::format(" | Spell: {}", Strings::Commify(spellbonuses.ATK)) : "",
 		DialogueWindow::Break(1)
 	);
 
@@ -2402,45 +2291,13 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 
 	// Armor Class 2
 	final_string += fmt::format(
-		"Defense: {}/{}{}{}{}",
+		"Defense: {} / {}{}{}{}",
 		Strings::Commify(compute_defense()),
 		Strings::Commify(GetTotalDefense()),
 		spellbonuses.AC ? fmt::format(" | Spell: {}", Strings::Commify(spellbonuses.AC)) : "",
 		shield_ac ? fmt::format(" | Shield: {}", Strings::Commify(shield_ac)) : "",
 		DialogueWindow::Break(1)
 	);
-
-	// Haste
-	final_string += fmt::format(
-		"{}{}",
-		DialogueWindow::ColorMessage(
-			"green_yellow",
-			fmt::format(
-				"Haste: {}%% / {}%%",
-				Strings::Commify(GetHaste()),
-				Strings::Commify(RuleI(Character, HasteCap))
-			)
-		),
-		DialogueWindow::Break(1)
-	);
-
-	// Haste 2
-	const auto has_haste = (
-		itembonuses.haste ||
-		spellbonuses.haste ||
-		spellbonuses.hastetype2 ||
-		spellbonuses.hastetype3 ||
-		ExtraHaste
-	);
-	if (has_haste) {
-		final_string += fmt::format(
-			"{}{}{}{}",
-			itembonuses.haste ? fmt::format("Item: {}", Strings::Commify(itembonuses.haste)) : "",
-			spellbonuses.haste + spellbonuses.hastetype2 ? fmt::format(" | Spell: {}", Strings::Commify(spellbonuses.haste + spellbonuses.hastetype2)) : "",
-			spellbonuses.hastetype3 + ExtraHaste ? fmt::format(" | Over: {}", Strings::Commify(spellbonuses.hastetype3 + ExtraHaste)) : "",
-			DialogueWindow::Break(1)
-		);
-	}
 
 	// Run Speed
 	final_string += fmt::format(
@@ -2455,31 +2312,69 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 		DialogueWindow::Break(1)
 	);
 
-	// Regen Labels
-	final_string += fmt::format(
-		"{}{}Regen{}{}{}{} Base | Items (Cap) | Spell | AAs | Total{}",
-		indL,
-		indS,
-		DialogueWindow::Break(1),
-		indS,
-		indP,
-		indP,
-		DialogueWindow::Break(1)
+	final_string += DialogueWindow::CenterMessage("Haste");
+
+	// Haste Table
+	const auto& haste_table = DialogueWindow::Table(
+		fmt::format(
+			"{}{}",
+			DialogueWindow::TableRow(
+				fmt::format(
+					"{}{}{}{}",
+					DialogueWindow::TableCell("Item"),
+					DialogueWindow::TableCell("Spell"),
+					DialogueWindow::TableCell("Over"),
+					DialogueWindow::TableCell("Total (Cap)")
+				)
+			),
+			DialogueWindow::TableRow(
+				fmt::format(
+					"{}{}{}{}",
+					DialogueWindow::TableCell(Strings::Commify(itembonuses.haste)),
+					DialogueWindow::TableCell(Strings::Commify(spellbonuses.haste + spellbonuses.hastetype2)),
+					DialogueWindow::TableCell(Strings::Commify(spellbonuses.hastetype3 + ExtraHaste)),
+					DialogueWindow::TableCell(fmt::format("{} ({})", Strings::Commify(GetHaste()), Strings::Commify(RuleI(Character, HasteCap))))
+				)
+			)
+		)
+	);
+
+	final_string += haste_table;
+
+	// Regen Table
+	final_string += DialogueWindow::CenterMessage("Regen");
+
+	const auto& regen_table = DialogueWindow::Table(
+		fmt::format(
+			"{}{}",
+			DialogueWindow::TableRow(
+				fmt::format(
+					"{}{}{}{}{}{}",
+					DialogueWindow::TableCell("Type"),
+					DialogueWindow::TableCell("Base"),
+					DialogueWindow::TableCell("Items (Cap)"),
+					DialogueWindow::TableCell("Spell"),
+					DialogueWindow::TableCell("AAs"),
+					DialogueWindow::TableCell("Total")
+				)
+			),
+			regen_string
+		)
 	);
 
 	// Regen
-	final_string += regen_string + DialogueWindow::Break(1);
+	final_string += regen_table + DialogueWindow::Break(1);
 
 	// Stats
-	final_string += stat_field + DialogueWindow::Break(2);
+	final_string += DialogueWindow::Table(stat_table) + DialogueWindow::Break(1);
 
 	// Mod 2
-	final_string += mod2_field + DialogueWindow::Break(1);
+	final_string += DialogueWindow::Table(mod2_table) + DialogueWindow::Break(1);
 
 	// Heal Amount
 	if (GetHealAmt()) {
 		final_string += fmt::format(
-			"Heal Amount: {}/{}{}",
+			"Heal Amount: {} / {}{}",
 			Strings::Commify(GetHealAmt()),
 			Strings::Commify(RuleI(Character, ItemHealAmtCap)),
 			DialogueWindow::Break(1)
@@ -2489,10 +2384,33 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 	// Heal Amount
 	if (GetSpellDmg()) {
 		final_string += fmt::format(
-			"Spell Damage: {}/{}{}",
+			"Spell Damage: {} / {}{}",
 			Strings::Commify(GetSpellDmg()),
 			Strings::Commify(RuleI(Character, ItemSpellDmgCap)),
 			DialogueWindow::Break(1)
+		);
+	}
+
+	// Damage Shield
+	if (itembonuses.DamageShield || spellbonuses.DamageShield) {
+		final_string += fmt::format(
+			"Damage Shield: {}{}{}{}",
+			Strings::Commify(itembonuses.DamageShield + spellbonuses.DamageShield),
+			(
+				spellbonuses.DamageShield ?
+				fmt::format(" | Spell: {}", Strings::Commify(spellbonuses.DamageShield)) :
+				""
+			),
+			(
+				itembonuses.DamageShield ?
+				fmt::format(
+					" | Item: {} / {}",
+					Strings::Commify(itembonuses.DamageShield),
+					Strings::Commify(RuleI(Character, ItemDamageShieldCap))
+				) :
+				""
+			),
+			DialogueWindow::Break(2)
 		);
 	}
 
@@ -2500,7 +2418,7 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 	const auto clairvoyance  = IsBot() ? CastToBot()->GetClair() : CastToClient()->GetClair();
 	if (clairvoyance) {
 		final_string += fmt::format(
-			"Clairvoyance: {}/{}{}",
+			"Clairvoyance: {} / {}{}",
 			Strings::Commify(clairvoyance),
 			Strings::Commify(RuleI(Character, ItemClairvoyanceCap)),
 			DialogueWindow::Break(1)
@@ -2511,11 +2429,15 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 	const auto ds_mitigation = IsBot() ? CastToBot()->GetDSMit() : CastToClient()->GetDSMit();
 	if (ds_mitigation) {
 		final_string += fmt::format(
-			"DS Mitigation: {}/{}{}",
+			"DS Mitigation: {} / {}{}",
 			Strings::Commify(ds_mitigation),
 			Strings::Commify(RuleI(Character, ItemDSMitigationCap)),
 			DialogueWindow::Break(1)
 		);
+	}
+
+	if (clairvoyance || ds_mitigation) {
+		final_string += DialogueWindow::Break(1);
 	}
 
 	// Bard Modifiers
@@ -2674,7 +2596,7 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 	c->Message(
 		Chat::White,
 		fmt::format(
-			"Attack: %i  Item and Spell Attack: {}/{} Server Side Attack: {}",
+			"Attack: {} Item and Spell Attack: {}/{} Server Side Attack: {}",
 			IsBot() ? Strings::Commify(CastToBot()->GetTotalATK()) : Strings::Commify(CastToClient()->GetTotalATK()),
 			Strings::Commify(GetATKBonus()),
 			Strings::Commify(RuleI(Character, ItemATKCap)),
@@ -2682,7 +2604,7 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 		).c_str()
 	);
 
-	if (has_haste) {
+	if (GetHaste()) {
 		c->Message(
 			Chat::White,
 			fmt::format(
@@ -2836,13 +2758,15 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 	if (c->Admin() >= AccountStatus::GMAdmin) {
 		c->Message(
 			Chat::White,
-			"ID: {} Entity ID: {} Pet ID: {} Owner ID: {} AI Controlled: {} Targeted: {}",
-			IsBot() ? CastToBot()->GetBotID() : CastToClient()->CharacterID(),
-			GetID(),
-			GetPetID(),
-			GetOwnerID(),
-			IsAIControlled() ? "Yes" : "No",
-			targeted
+			fmt::format(
+				"ID: {} Entity ID: {} Pet ID: {} Owner ID: {} AI Controlled: {} Targeted: {}",
+				IsBot() ? CastToBot()->GetBotID() : CastToClient()->CharacterID(),
+				GetID(),
+				GetPetID(),
+				GetOwnerID(),
+				IsAIControlled() ? "Yes" : "No",
+				targeted
+			).c_str()
 		);
 	}
 }
