@@ -182,11 +182,6 @@ void command_nukebuffs(Client *c, const Seperator *sep);
 void command_nukeitem(Client *c, const Seperator *sep);
 void command_object(Client *c, const Seperator *sep);
 void command_oocmute(Client *c, const Seperator *sep);
-
-#ifdef PACKET_PROFILER
-void command_packetprofile(Client *c, const Seperator *sep);
-#endif
-
 void command_path(Client *c, const Seperator *sep);
 void command_peekinv(Client *c, const Seperator *sep);
 void command_peqzone(Client *c, const Seperator *sep);
