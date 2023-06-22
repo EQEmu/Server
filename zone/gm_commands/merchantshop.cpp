@@ -2,7 +2,7 @@
 
 void command_merchantshop(Client *c, const Seperator *sep)
 {
-	Mob* m = c->GetTarget();
+	const auto m = c->GetTarget();
 	if (
 		!m ||
 		!m->IsNPC() ||
