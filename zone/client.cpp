@@ -12273,6 +12273,7 @@ void Client::ShowSpells(Client* c, ShowSpellType show_spell_type)
 	);
 
 	std::map<int, uint16> m;
+	auto                  spell_count = 0;
 
 	if (show_spell_type == ShowSpellType::Disciplines) {
 		for (auto index = 0; index < MAX_PP_DISCIPLINES; index++) {
@@ -12297,6 +12298,22 @@ void Client::ShowSpells(Client* c, ShowSpellType show_spell_type)
 				DialogueWindow::TableCell(Strings::Commify(s.second))
 			)
 		);
+
+		spell_count++;
+	}
+
+	if (!spell_count) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"{} {} not have any {}s {}.",
+				c->GetTargetDescription(this, TargetDescriptionType::UCYou),
+				c == this ? "do" : "does",
+				Strings::ToLower(spell_string),
+				show_spell_type == ShowSpellType::Disciplines ? "learned" : "memorized"
+			).c_str()
+		);
+		return;
 	}
 
 	if (spell_table.size() >= 4096) {
