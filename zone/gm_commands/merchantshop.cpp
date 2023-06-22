@@ -15,7 +15,7 @@ void command_merchantshop(Client *c, const Seperator *sep)
 			m->GetClass() != ALT_CURRENCY_MERCHANT
 		)
 	) {
-		c->Message(Chat::White, "You must target a merchant to close their shop.");
+		c->Message(Chat::White, "You must target a merchant to close or open their shop.");
 		return;
 	}
 
