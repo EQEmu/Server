@@ -46,7 +46,7 @@ void DatabaseUpdate::CheckDbUpdates()
 	InjectBotsVersionColumn();
 	auto v = GetDatabaseVersions();
 	auto b = GetBinaryDatabaseVersions();
-	if (CheckVersions(v, b)) {
+	if (CheckVersionsUpToDate(v, b)) {
 		return;
 	}
 
@@ -247,7 +247,7 @@ DatabaseUpdate *DatabaseUpdate::SetDatabase(Database *db)
 	return this;
 }
 
-bool DatabaseUpdate::CheckVersions(DatabaseVersion v, DatabaseVersion b)
+bool DatabaseUpdate::CheckVersionsUpToDate(DatabaseVersion v, DatabaseVersion b)
 {
 	LogInfo("{}", Strings::Repeat("-", BREAK_LENGTH));
 
@@ -259,7 +259,7 @@ bool DatabaseUpdate::CheckVersions(DatabaseVersion v, DatabaseVersion b)
 		(v.server_database_version == b.server_database_version) ? "up to date" : "checking updates"
 	);
 
-	if (b.bots_database_version > 0) {
+	if (RuleB(Bots, Enabled) && b.bots_database_version > 0) {
 		LogInfo(
 			"{:>8} | database [{}] binary [{}] {}",
 			"Bots",
@@ -273,8 +273,12 @@ bool DatabaseUpdate::CheckVersions(DatabaseVersion v, DatabaseVersion b)
 
 	LogInfo("{}", Strings::Repeat("-", BREAK_LENGTH));
 
-	return (v.server_database_version == b.server_database_version) &&
-		   (v.bots_database_version == b.bots_database_version);
+	// server database version is required
+	bool server_up_to_date = v.server_database_version == b.server_database_version;
+	// bots database version is optional, if not enabled then it is always up-to-date
+	bool bots_up_to_date   = RuleB(Bots, Enabled) ? v.bots_database_version == b.bots_database_version : true;
+
+	return server_up_to_date && bots_up_to_date;
 }
 
 // checks to see if there are pending updates
@@ -284,7 +288,7 @@ bool DatabaseUpdate::HasPendingUpdates()
 	auto v = GetDatabaseVersions();
 	auto b = GetBinaryDatabaseVersions();
 
-	return !CheckVersions(v, b);
+	return !CheckVersionsUpToDate(v, b);
 }
 
 void DatabaseUpdate::InjectBotsVersionColumn()
