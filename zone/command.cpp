@@ -298,6 +298,7 @@ int command_init(void)
 		command_add("shownumhits", "Shows buffs numhits for yourself.", AccountStatus::Player, command_shownumhits) ||
 		command_add("shownpcgloballoot", "Show global loot entries for your target NPC", AccountStatus::Guide, command_shownpcgloballoot) ||
 		command_add("showskills", "[Start Skill ID] [All] - Show the values of your or your player target's skills in a popup 50 at a time, use 'all' as second argument to show non-usable skill's values", AccountStatus::Guide, command_showskills) ||
+		command_add("showspells", "[disciplines|spells] - Show your or your target's memorized spells or learned disciplines", AccountStatus::GMAdmin, command_showspells) ||
 		command_add("showspellslist", "Shows spell list of targeted NPC", AccountStatus::GMAdmin, command_showspellslist) ||
 		command_add("showstats", "Show details about you or your target", AccountStatus::Guide, command_showstats) ||
 		command_add("showzonegloballoot", "Show global loot entries for your current zone", AccountStatus::Guide, command_showzonegloballoot) ||
@@ -1137,6 +1138,7 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/shownpcgloballoot.cpp"
 #include "gm_commands/shownumhits.cpp"
 #include "gm_commands/showskills.cpp"
+#include "gm_commands/showspells.cpp"
 #include "gm_commands/showspellslist.cpp"
 #include "gm_commands/showstats.cpp"
 #include "gm_commands/showzonegloballoot.cpp"
