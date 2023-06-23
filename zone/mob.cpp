@@ -2362,7 +2362,7 @@ void Mob::ShowBuffs(Client* c) {
 					DialogueWindow::TableCell(Strings::Commify(spell_id)),
 					DialogueWindow::TableCell(buffs[i].caster_name),
 					DialogueWindow::TableCell(buffs[i].client ? "Player" : "NPC"),
-					DialogueWindow::TableCell(hits ? Strings::Commify(hits) : "None")
+					DialogueWindow::TableCell(hits ? Strings::Commify(hits) : "None"),
 					DialogueWindow::TableCell(
 						is_permanent ?
 						"Infinite" :
