@@ -10707,7 +10707,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 	case PET_HEALTHREPORT: {
 		if ((mypet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || mypet->GetPetType() != petAnimation) {
 			MessageString(Chat::PetResponse, PET_REPORT_HP, ConvertArrayF(mypet->GetHPRatio(), val1));
-			mypet->ShowBuffList(this);
+			mypet->ShowBuffs(this);
 		}
 		break;
 	}
@@ -14428,8 +14428,8 @@ void Client::Handle_OP_TargetCommand(const EQApplicationPacket *app)
 
 	if (nt) {
 		if (GetGM() || (!nt->IsInvisible(this) && (DistanceSquared(m_Position, nt->GetPosition()) <= TARGETING_RANGE*TARGETING_RANGE))) {
-			if (nt->GetBodyType() == BT_NoTarget2 || 
-				nt->GetBodyType() == BT_Special || 
+			if (nt->GetBodyType() == BT_NoTarget2 ||
+				nt->GetBodyType() == BT_Special ||
 				nt->GetBodyType() == BT_NoTarget) {
 				can_target = false;
 			}

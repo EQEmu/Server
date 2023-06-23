@@ -2321,54 +2321,57 @@ void Mob::DoAnim(const int animation_id, int animation_speed, bool ackreq, eqFil
 	safe_delete(outapp);
 }
 
-void Mob::ShowBuffs(Client* client) {
-	if(SPDAT_RECORDS <= 0)
+void Mob::ShowBuffs(Client* c) {
+	if (SPDAT_RECORDS <= 0) {
 		return;
-	client->Message(Chat::White, "Buffs on: %s", GetName());
-	uint32 i;
-	uint32 buff_count = GetMaxTotalSlots();
-	for (i=0; i < buff_count; i++) {
-		if (IsValidSpell(buffs[i].spellid)) {
-			if (spells[buffs[i].spellid].buff_duration_formula == DF_Permanent)
-				client->Message(Chat::White, "  %i: %s: Permanent", i, spells[buffs[i].spellid].name);
-			else
-				client->Message(Chat::White, "  %i: %s: %i tics left", i, spells[buffs[i].spellid].name, buffs[i].ticsremaining);
+	}
 
+	std::string buffs_table;
+
+	buffs_table += DialogueWindow::TableRow(
+		fmt::format(
+			"{}{}{}{}{}{}",
+			DialogueWindow::TableCell("Slot"),
+			DialogueWindow::TableCell("Spell"),
+			DialogueWindow::TableCell("Spell ID"),
+			DialogueWindow::TableCell("Caster"),
+			DialogueWindow::TableCell("Caster Type"),
+			DialogueWindow::TableCell("Tics Remaining")
+		)
+	);
+
+	for (auto i = 0; i < GetMaxTotalSlots(); i++) {
+		const auto spell_id              = buffs[i].spellid;
+		const auto buff_duration_formula = spells[spell_id].buff_duration_formula;
+		if (IsValidSpell(spell_id)) {
+			const auto is_permanent = (
+				buff_duration_formula == DF_Aura ||
+				buff_duration_formula == DF_Permanent
+			);
+
+			buffs_table += DialogueWindow::TableRow(
+				fmt::format(
+					"{}{}{}{}{}{}",
+					DialogueWindow::TableCell(std::to_string(i)),
+					DialogueWindow::TableCell(GetSpellName(spell_id)),
+					DialogueWindow::TableCell(Strings::Commify(spell_id)),
+					DialogueWindow::TableCell(buffs[i].caster_name),
+					DialogueWindow::TableCell(buffs[i].client ? "Player" : "NPC"),
+					DialogueWindow::TableCell(is_permanent ? "Infinite" : Strings::Commify((buffs[i].ticsremaining))
+				)
+			);
 		}
 	}
-	if (IsClient()){
-		client->Message(Chat::White, "itembonuses:");
-		client->Message(Chat::White, "Atk:%i Ac:%i HP(%i):%i Mana:%i", itembonuses.ATK, itembonuses.AC, itembonuses.HPRegen, itembonuses.HP, itembonuses.Mana);
-		client->Message(Chat::White, "Str:%i Sta:%i Dex:%i Agi:%i Int:%i Wis:%i Cha:%i",
-			itembonuses.STR,itembonuses.STA,itembonuses.DEX,itembonuses.AGI,itembonuses.INT,itembonuses.WIS,itembonuses.CHA);
-		client->Message(Chat::White, "SvMagic:%i SvFire:%i SvCold:%i SvPoison:%i SvDisease:%i",
-				itembonuses.MR,itembonuses.FR,itembonuses.CR,itembonuses.PR,itembonuses.DR);
-		client->Message(Chat::White, "DmgShield:%i Haste:%i", itembonuses.DamageShield, itembonuses.haste );
-		client->Message(Chat::White, "spellbonuses:");
-		client->Message(Chat::White, "Atk:%i Ac:%i HP(%i):%i Mana:%i", spellbonuses.ATK, spellbonuses.AC, spellbonuses.HPRegen, spellbonuses.HP, spellbonuses.Mana);
-		client->Message(Chat::White, "Str:%i Sta:%i Dex:%i Agi:%i Int:%i Wis:%i Cha:%i",
-			spellbonuses.STR,spellbonuses.STA,spellbonuses.DEX,spellbonuses.AGI,spellbonuses.INT,spellbonuses.WIS,spellbonuses.CHA);
-		client->Message(Chat::White, "SvMagic:%i SvFire:%i SvCold:%i SvPoison:%i SvDisease:%i",
-				spellbonuses.MR,spellbonuses.FR,spellbonuses.CR,spellbonuses.PR,spellbonuses.DR);
-		client->Message(Chat::White, "DmgShield:%i Haste:%i", spellbonuses.DamageShield, spellbonuses.haste );
-	}
-}
 
-void Mob::ShowBuffList(Client* client) {
-	if(SPDAT_RECORDS <= 0)
-		return;
+	buffs_table = DialogueWindow::Table(buffs_table);
 
-	client->Message(Chat::White, "Buffs on: %s", GetCleanName());
-	uint32 i;
-	uint32 buff_count = GetMaxTotalSlots();
-	for (i = 0; i < buff_count; i++) {
-		if (IsValidSpell(buffs[i].spellid)) {
-			if (spells[buffs[i].spellid].buff_duration_formula == DF_Permanent)
-				client->Message(Chat::White, "  %i: %s: Permanent", i, spells[buffs[i].spellid].name);
-			else
-				client->Message(Chat::White, "  %i: %s: %i tics left", i, spells[buffs[i].spellid].name, buffs[i].ticsremaining);
-		}
-	}
+	c->SendPopupToClient(
+		fmt::format(
+			"Buffs on {}",
+			c->GetTargetDescription(this, TargetDescriptionType::UCSelf)
+		).c_str(),
+		buffs_table.c_str()
+	);
 }
 
 void Mob::GMMove(float x, float y, float z, float heading, bool save_guard_spot) {

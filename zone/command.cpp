@@ -294,7 +294,7 @@ int command_init(void)
 		command_add("setstat", "Sets the stats to a specific value.", AccountStatus::Max, command_setstat) ||
 		command_add("setxp", "[value] - Set your or your player target's experience", AccountStatus::GMAdmin, command_setxp) ||
 		command_add("showbonusstats", "[item|spell|all] Shows bonus stats for target from items or spells. Shows both by default.", AccountStatus::Guide, command_showbonusstats) ||
-		command_add("showbuffs", "List buffs active on your target or you if no target", AccountStatus::Guide, command_showbuffs) ||
+		command_add("showbuffs", "List buffs active on your target or yourself", AccountStatus::Guide, command_showbuffs) ||
 		command_add("shownumhits", "Shows buffs numhits for yourself.", AccountStatus::Player, command_shownumhits) ||
 		command_add("shownpcgloballoot", "Show global loot entries for your target NPC", AccountStatus::Guide, command_shownpcgloballoot) ||
 		command_add("showskills", "[Start Skill ID] [All] - Show the values of your or your player target's skills in a popup 50 at a time, use 'all' as second argument to show non-usable skill's values", AccountStatus::Guide, command_showskills) ||
