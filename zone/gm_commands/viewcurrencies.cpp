@@ -2,34 +2,44 @@
 
 void command_viewcurrencies(Client *c, const Seperator *sep)
 {
-	Client *target = c;
+	auto t = c;
 	if (c->GetTarget() && c->GetTarget()->IsClient()) {
-		target = c->GetTarget()->CastToClient();
+		t = c->GetTarget()->CastToClient();
 	}
 
-	auto platinum = (
-		target->GetMoney(3, 0) +
-		target->GetMoney(3, 1) +
-		target->GetMoney(3, 2) +
-		target->GetMoney(3, 3)
+	const auto platinum = (
+		t->GetMoney(3, 0) +
+		t->GetMoney(3, 1) +
+		t->GetMoney(3, 2) +
+		t->GetMoney(3, 3)
 	);
 
-	auto gold = (
-		target->GetMoney(2, 0) +
-		target->GetMoney(2, 1) +
-		target->GetMoney(2, 2)
+	const auto gold = (
+		t->GetMoney(2, 0) +
+		t->GetMoney(2, 1) +
+		t->GetMoney(2, 2)
 	);
 
-	auto silver = (
-		target->GetMoney(1, 0) +
-		target->GetMoney(1, 1) +
-		target->GetMoney(1, 2)
+	const auto silver = (
+		t->GetMoney(1, 0) +
+		t->GetMoney(1, 1) +
+		t->GetMoney(1, 2)
 	);
 
-	auto copper = (
-		target->GetMoney(0, 0) +
-		target->GetMoney(0, 1) +
-		target->GetMoney(0, 2)
+	const auto copper = (
+		t->GetMoney(0, 0) +
+		t->GetMoney(0, 1) +
+		t->GetMoney(0, 2)
+	);
+
+	std::string currency_table;
+
+	currency_table += DialogueWindow::TableRow(
+		fmt::format(
+			"{}{}",
+			DialogueWindow::TableCell("Currency"),
+			DialogueWindow::TableCell("Amount")
+		)
 	);
 
 	if (
@@ -38,90 +48,82 @@ void command_viewcurrencies(Client *c, const Seperator *sep)
 		silver ||
 		copper
 	) {
-		c->Message(
-			Chat::White,
+		currency_table += DialogueWindow::TableRow(
 			fmt::format(
-				"Money for {} | {}",
-				c->GetTargetDescription(target, TargetDescriptionType::UCSelf),
-				Strings::Money(
-					platinum,
-					gold,
-					silver,
-					copper
-				)
-			).c_str()
+				"{}{}",
+				DialogueWindow::TableCell("Money"),
+				DialogueWindow::TableCell(Strings::Money(platinum, gold, silver, copper))
+			)
 		);
 	}
 
-	auto ebon_crystals = target->GetEbonCrystals();
+	const auto ebon_crystals = t->GetEbonCrystals();
 	if (ebon_crystals) {
-		c->Message(
-			Chat::White,
+		currency_table += DialogueWindow::TableRow(
 			fmt::format(
-				"{} for {} | {}",
-				database.CreateItemLink(RuleI(Zone, EbonCrystalItemID)),
-				c->GetTargetDescription(target, TargetDescriptionType::UCSelf),
-				ebon_crystals
-			).c_str()
+				"{}{}",
+				DialogueWindow::TableCell("Ebon Crystals"),
+				DialogueWindow::TableCell(Strings::Commify(ebon_crystals))
+			)
 		);
 	}
 
-	auto radiant_crystals = target->GetRadiantCrystals();
+	const auto radiant_crystals = t->GetRadiantCrystals();
 	if (radiant_crystals) {
-		c->Message(
-			Chat::White,
+		currency_table += DialogueWindow::TableRow(
 			fmt::format(
-				"{} for {} | {}",
-				database.CreateItemLink(RuleI(Zone, RadiantCrystalItemID)),
-				c->GetTargetDescription(target, TargetDescriptionType::UCSelf),
-				radiant_crystals
-			).c_str()
+				"{}{}",
+				DialogueWindow::TableCell("Radiant Crystals"),
+				DialogueWindow::TableCell(Strings::Commify(radiant_crystals))
+			)
 		);
 	}
 
-	for (const auto& ac : zone->AlternateCurrencies) {
-		auto currency_value = target->GetAlternateCurrencyValue(ac.id);
+	for (const auto& a : zone->AlternateCurrencies) {
+		const auto currency_value = t->GetAlternateCurrencyValue(a.id);
 		if (currency_value) {
-			c->Message(
-				Chat::White,
+			const auto* d = database.GetItem(a.item_id);
+			currency_table += DialogueWindow::TableRow(
 				fmt::format(
-					"{} for {} | {}",
-					database.CreateItemLink(ac.item_id),
-					c->GetTargetDescription(target, TargetDescriptionType::UCSelf),
-					currency_value
-				).c_str()
+					"{}{}",
+					DialogueWindow::TableCell(d->Name),
+					DialogueWindow::TableCell(Strings::Commify(currency_value))
+				)
 			);
 		}
 	}
 
-	for (
-		uint32 ldon_currency_id = LDoNThemes::GUK;
-		ldon_currency_id <= LDoNThemes::TAK;
-		ldon_currency_id++
-	) {
-		auto ldon_currency_value = target->GetLDoNPointsTheme(ldon_currency_id);
+	for (const auto& l : EQ::constants::GetLDoNThemeMap()) {
+		const auto ldon_currency_value = t->GetLDoNPointsTheme(l.first);
 		if (ldon_currency_value) {
-			c->Message(
-				Chat::White,
+			currency_table += DialogueWindow::TableRow(
 				fmt::format(
-					"{} for {} | {}",
-					EQ::constants::GetLDoNThemeName(ldon_currency_id),
-					c->GetTargetDescription(target, TargetDescriptionType::UCSelf),
-					ldon_currency_value
-				).c_str()
+					"{}{}",
+					DialogueWindow::TableCell(l.second),
+					DialogueWindow::TableCell(Strings::Commify(ldon_currency_value))
+				)
 			);
 		}
 	}
 
-	auto pvp_points = target->GetPVPPoints();
+	auto pvp_points = t->GetPVPPoints();
 	if (pvp_points) {
-		c->Message(
-			Chat::White,
+		currency_table += DialogueWindow::TableRow(
 			fmt::format(
-				"PVP Points for {} | {}",
-				c->GetTargetDescription(target, TargetDescriptionType::UCSelf),
-				pvp_points
-			).c_str()
+				"{}{}",
+				DialogueWindow::TableCell("PVP Points"),
+				DialogueWindow::TableCell(Strings::Commify(pvp_points))
+			)
 		);
 	}
+
+	currency_table = DialogueWindow::Table(currency_table);
+
+	c->SendPopupToClient(
+		fmt::format(
+			"Currency for {}",
+			c->GetTargetDescription(t, TargetDescriptionType::UCSelf)
+		).c_str(),
+		currency_table.c_str()
+	);
 }
