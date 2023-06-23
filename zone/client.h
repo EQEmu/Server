@@ -1589,8 +1589,6 @@ public:
 	void SetInvulnerableEnvironmentDamage(bool val) { invulnerable_environment_damage = val; }
 	void SetIntoxication(int32 in_intoxication);
 
-	void ShowNumHits(); // work around function for numhits not showing on buffs
-
 	void ApplyWeaponsStance();
 	void TogglePassiveAlternativeAdvancement(const AA::Rank &rank, uint32 ability_id);
 	bool UseTogglePassiveHotkey(const AA::Rank &rank);

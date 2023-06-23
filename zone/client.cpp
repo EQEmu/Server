@@ -8530,17 +8530,6 @@ void Client::ExpeditionSay(const char *str, int ExpID) {
 
 }
 
-void Client::ShowNumHits()
-{
-	uint32 buffcount = GetMaxTotalSlots();
-	for (uint32 buffslot = 0; buffslot < buffcount; buffslot++) {
-		const Buffs_Struct &curbuff = buffs[buffslot];
-		if (IsValidSpell(curbuff.spellid) && curbuff.hit_number)
-			Message(0, "You have %d hits left on %s", curbuff.hit_number, GetSpellName(curbuff.spellid));
-	}
-	return;
-}
-
 int Client::GetQuiverHaste(int delay)
 {
 	const EQ::ItemInstance *pi = nullptr;

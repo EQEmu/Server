@@ -2330,13 +2330,14 @@ void Mob::ShowBuffs(Client* c) {
 
 	buffs_table += DialogueWindow::TableRow(
 		fmt::format(
-			"{}{}{}{}{}{}",
+			"{}{}{}{}{}{}{}",
 			DialogueWindow::TableCell("Slot"),
 			DialogueWindow::TableCell("Spell"),
 			DialogueWindow::TableCell("Spell ID"),
 			DialogueWindow::TableCell("Caster"),
 			DialogueWindow::TableCell("Caster Type"),
-			DialogueWindow::TableCell("Tics Remaining")
+			DialogueWindow::TableCell("Hits"),
+			DialogueWindow::TableCell("Tics (Time)")
 		)
 	);
 
@@ -2349,15 +2350,28 @@ void Mob::ShowBuffs(Client* c) {
 				buff_duration_formula == DF_Permanent
 			);
 
+			const auto hits = buffs[i].hit_number;
+			const auto tics = buffs[i].ticsremaining;
+			const auto time = Strings::SecondsToTime(tics * 6);
+
 			buffs_table += DialogueWindow::TableRow(
 				fmt::format(
-					"{}{}{}{}{}{}",
+					"{}{}{}{}{}{}{}",
 					DialogueWindow::TableCell(std::to_string(i)),
 					DialogueWindow::TableCell(GetSpellName(spell_id)),
 					DialogueWindow::TableCell(Strings::Commify(spell_id)),
 					DialogueWindow::TableCell(buffs[i].caster_name),
 					DialogueWindow::TableCell(buffs[i].client ? "Player" : "NPC"),
-					DialogueWindow::TableCell(is_permanent ? "Infinite" : Strings::Commify(buffs[i].ticsremaining))
+					DialogueWindow::TableCell(hits ? Strings::Commify(hits) : "None")
+					DialogueWindow::TableCell(
+						is_permanent ?
+						"Infinite" :
+						fmt::format(
+							"{} ({})",
+							Strings::Commify(tics),
+							time
+						)
+					)
 				)
 			);
 		}
