@@ -7,17 +7,8 @@ void command_shownpcgloballoot(Client *c, const Seperator *sep)
 		return;
 	}
 
-	auto target = c->GetTarget()->CastToNPC();
+	const auto t = c->GetTarget()->CastToNPC();
 
-	c->Message(
-		Chat::White,
-		fmt::format(
-			"Global loot for {} ({}).",
-			target->GetCleanName(),
-			target->GetNPCTypeID()
-		).c_str()
-	);
-
-	zone->ShowNPCGlobalLoot(c, target);
+	zone->ShowNPCGlobalLoot(c, t);
 }
 
