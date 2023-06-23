@@ -523,7 +523,7 @@ public:
 	virtual inline uint8 GetBaseGender() const { return base_gender; }
 	virtual uint16 GetFactionRace();
 	virtual inline uint16 GetDeity() const { return deity; }
-	virtual EQ::deity::DeityTypeBit GetDeityBit() { return EQ::deity::ConvertDeityTypeToDeityTypeBit((EQ::deity::DeityType)deity); }
+	virtual EQ::deity::DeityTypeBit GetDeityBit() { return EQ::deity::GetDeityBitmask((EQ::deity::DeityType)deity); }
 	inline uint16 GetRace() const { return race; }
 	inline uint16 GetModel() const { return (use_model == 0) ? race : use_model; }
 	inline uint8 GetGender() const { return gender; }

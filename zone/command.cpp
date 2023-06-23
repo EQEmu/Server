@@ -142,6 +142,7 @@ int command_init(void)
 		command_add("findcharacter", "[Search Criteria] - Search for a character", AccountStatus::Guide, command_findcharacter) ||
 		command_add("findclass", "[Search Criteria] - Search for a class", AccountStatus::Guide, command_findclass) ||
 		command_add("findcurrency", "[Search Criteria] - Search for an alternate currency", AccountStatus::Guide, command_findcurrency) ||
+		command_add("finddeity", "[Search Criteria] - Search for a deity", AccountStatus::Guide, command_finddeity) ||
 		command_add("findfaction", "[Search Criteria] - Search for a faction", AccountStatus::Guide, command_findfaction) ||
 		command_add("findnpctype", "[Search Criteria] - Search database NPC types", AccountStatus::GMAdmin, command_findnpctype) ||
 		command_add("findrace", "[Search Criteria] - Search for a race", AccountStatus::Guide, command_findrace) ||
@@ -986,6 +987,7 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/findcharacter.cpp"
 #include "gm_commands/findclass.cpp"
 #include "gm_commands/findcurrency.cpp"
+#include "gm_commands/finddeity.cpp"
 #include "gm_commands/findfaction.cpp"
 #include "gm_commands/findnpctype.cpp"
 #include "gm_commands/findrace.cpp"
