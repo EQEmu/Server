@@ -293,7 +293,6 @@ int command_init(void)
 		command_add("setstartzone", "[Zone ID|Zone Short Name] - Sets your or your target's starting zone (Use '0' or 'Reset' to allow the player use of /setstartcity)", AccountStatus::QuestTroupe, command_setstartzone) ||
 		command_add("setstat", "Sets the stats to a specific value.", AccountStatus::Max, command_setstat) ||
 		command_add("setxp", "[value] - Set your or your player target's experience", AccountStatus::GMAdmin, command_setxp) ||
-		command_add("showbonusstats", "[item|spell|all] Shows bonus stats for target from items or spells. Shows both by default.", AccountStatus::Guide, command_showbonusstats) ||
 		command_add("showbuffs", "List buffs active on your target or you if no target", AccountStatus::Guide, command_showbuffs) ||
 		command_add("shownumhits", "Shows buffs numhits for yourself.", AccountStatus::Player, command_shownumhits) ||
 		command_add("shownpcgloballoot", "Show global loot entries for your target NPC", AccountStatus::Guide, command_shownpcgloballoot) ||
@@ -1131,7 +1130,6 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/setstartzone.cpp"
 #include "gm_commands/setstat.cpp"
 #include "gm_commands/setxp.cpp"
-#include "gm_commands/showbonusstats.cpp"
 #include "gm_commands/showbuffs.cpp"
 #include "gm_commands/shownpcgloballoot.cpp"
 #include "gm_commands/shownumhits.cpp"
