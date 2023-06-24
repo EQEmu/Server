@@ -285,7 +285,6 @@ protected:
 private:
 
 	int32 CalcAC();
-	int32 GetACMit();
 	int32 GetACAvoid();
 	int32 CalcATK();
 	//int CalcHaste();
