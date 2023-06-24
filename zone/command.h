@@ -182,11 +182,6 @@ void command_nukebuffs(Client *c, const Seperator *sep);
 void command_nukeitem(Client *c, const Seperator *sep);
 void command_object(Client *c, const Seperator *sep);
 void command_oocmute(Client *c, const Seperator *sep);
-
-#ifdef PACKET_PROFILER
-void command_packetprofile(Client *c, const Seperator *sep);
-#endif
-
 void command_path(Client *c, const Seperator *sep);
 void command_peekinv(Client *c, const Seperator *sep);
 void command_peqzone(Client *c, const Seperator *sep);
@@ -198,7 +193,6 @@ void command_petitems(Client *c, const Seperator *sep);
 void command_petitioninfo(Client *c, const Seperator *sep);
 void command_picklock(Client *c, const Seperator *sep);
 void command_profanity(Client *c, const Seperator *sep);
-
 void command_proximity(Client *c, const Seperator *sep);
 void command_push(Client *c, const Seperator *sep);
 void command_pvp(Client *c, const Seperator *sep);
