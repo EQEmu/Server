@@ -307,7 +307,6 @@ int command_init(void)
 		command_add("spawneditmass", "[Search Criteria] [Edit Option] [Edit Value] [Apply] Mass editing spawn command (Apply is optional, 0 = False, 1 = True, default is False)", AccountStatus::GMLeadAdmin, command_spawneditmass) ||
 		command_add("spawnfix", "Find targeted NPC in database based on its X/Y/heading and update the database to make it spawn at your current location/heading.", AccountStatus::GMAreas, command_spawnfix) ||
 		command_add("spawnstatus", "[All|Disabled|Enabled|Spawn ID] - Show respawn timer status", AccountStatus::GMAdmin, command_spawnstatus) ||
-		command_add("spellinfo", "[spellid] - Get detailed info about a spell", AccountStatus::Steward, command_spellinfo) ||
 		command_add("stun", "[duration] - Stuns you or your target for duration", AccountStatus::GMAdmin, command_stun) ||
 		command_add("summon", "[Character Name] - Summons your corpse, NPC, or player target, or by character name if specified", AccountStatus::QuestTroupe, command_summon) ||
 		command_add("summonburiedplayercorpse", "Summons the target's oldest buried corpse, if any exist.", AccountStatus::GMAdmin, command_summonburiedplayercorpse) ||
@@ -1146,7 +1145,6 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/spawneditmass.cpp"
 #include "gm_commands/spawnfix.cpp"
 #include "gm_commands/spawnstatus.cpp"
-#include "gm_commands/spellinfo.cpp"
 #include "gm_commands/faction_association.cpp"
 #include "gm_commands/stun.cpp"
 #include "gm_commands/summon.cpp"
