@@ -543,6 +543,8 @@ public:
 
 	static LootDropEntries_Struct NewLootDropEntry();
 
+	inline uint32 GetEquipmentItemID(int16 slot_id) { return equipment[slot_id]; };
+
 protected:
 
 	void HandleRoambox();
@@ -648,7 +650,7 @@ protected:
 
 	uint16	skills[EQ::skills::HIGHEST_SKILL + 1];
 
-	uint32	equipment[EQ::invslot::EQUIPMENT_COUNT];	//this is an array of item IDs
+	uint32 equipment[EQ::invslot::EQUIPMENT_COUNT];	//this is an array of item IDs
 
 	uint32	herosforgemodel;			//this is the Hero Forge Armor Model (i.e 63 or 84 or 203)
 	uint16	d_melee_texture1;

@@ -267,6 +267,8 @@ public:
 	virtual void MercMeditate(bool isSitting);
 	bool FindTarget();
 
+	inline uint32 GetEquipmentItemID(int16 slot_id) { return equipment[slot_id]; }
+
 protected:
 	int64 GetFocusEffect(focusType type, uint16 spell_id, bool from_buff_tic = false);
 
