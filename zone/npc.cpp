@@ -1141,59 +1141,6 @@ void NPC::Depop(bool start_spawn_timer) {
 	}
 }
 
-bool NPC::DatabaseCastAccepted(int spell_id) {
-	for (int i=0; i < EFFECT_COUNT; i++) {
-		switch(spells[spell_id].effect_id[i]) {
-		case SE_Stamina: {
-			if(IsEngaged() && GetHPRatio() < 100)
-				return true;
-			else
-				return false;
-			break;
-		}
-		case SE_CurrentHPOnce:
-		case SE_CurrentHP: {
-			if(GetHPRatio() < 100 && spells[spell_id].buff_duration == 0)
-				return true;
-			else
-				return false;
-			break;
-		}
-
-		case SE_HealOverTime: {
-			if(GetHPRatio() < 100)
-				return true;
-			else
-				return false;
-			break;
-		}
-		case SE_DamageShield: {
-			return true;
-		}
-		case SE_NecPet:
-		case SE_SummonPet: {
-			if(GetPet()){
-#ifdef SPELLQUEUE
-				printf("%s: Attempted to make a second pet, denied.\n",GetName());
-#endif
-				return false;
-			}
-			break;
-		}
-		case SE_LocateCorpse:
-		case SE_SummonCorpse: {
-			return false; //Pfft, npcs don't need to summon corpses/locate corpses!
-			break;
-		}
-		default:
-			if(spells[spell_id].good_effect == BENEFICIAL_EFFECT && !(spells[spell_id].buff_duration == 0 && GetHPRatio() == 100) && !IsEngaged())
-				return true;
-			return false;
-		}
-	}
-	return false;
-}
-
 bool NPC::SpawnZoneController()
 {
 
