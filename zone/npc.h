@@ -637,7 +637,6 @@ protected:
 
 	//waypoint crap:
 	std::vector<wplist> Waypoints;
-	void _ClearWaypints();
 	int max_wp;
 	int save_wp;
 	glm::vec4 m_GuardPoint;
