@@ -61,11 +61,6 @@ void Trade::Reset()
 	pp=0; gp=0; sp=0; cp=0;
 }
 
-void Trade::SetTradeCash(uint32 in_pp, uint32 in_gp, uint32 in_sp, uint32 in_cp)
-{
-	pp=in_pp; gp=in_gp; sp=in_sp; cp=in_cp;
-}
-
 // Initiate a trade with another mob
 // initiate_with specifies whether to start trade with other mob as well
 void Trade::Start(uint32 mob_id, bool initiate_with)
@@ -1314,19 +1309,6 @@ void Client::NukeTraderItem(uint16 Slot,int16 Charges,int16 Quantity,Client* Cus
 	}
 	safe_delete(outapp2);
 
-}
-void Client::TraderUpdate(uint16 SlotID,uint32 TraderID){
-	// This method is no longer used.
-
-	auto outapp = new EQApplicationPacket(OP_TraderItemUpdate, sizeof(TraderItemUpdate_Struct));
-	TraderItemUpdate_Struct* tus=(TraderItemUpdate_Struct*)outapp->pBuffer;
-	tus->Charges = 0xFFFF;
-	tus->FromSlot = SlotID;
-	tus->ToSlot = 0xFF;
-	tus->TraderID = TraderID;
-	tus->Unknown000 = 0;
-	QueuePacket(outapp);
-	safe_delete(outapp);
 }
 
 void Client::FindAndNukeTraderItem(int32 SerialNumber, int16 Quantity, Client* Customer, uint16 TraderSlot){
@@ -3017,4 +2999,14 @@ void Client::BuyerItemSearch(const EQApplicationPacket *app) {
 
 	QueuePacket(outapp);
 	safe_delete(outapp);
+}
+
+const std::string &Client::GetMailKeyFull() const
+{
+	return m_mail_key_full;
+}
+
+const std::string &Client::GetMailKey() const
+{
+	return m_mail_key;
 }

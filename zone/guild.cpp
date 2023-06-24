@@ -236,7 +236,7 @@ void Client::RefreshGuildInfo()
 	guild_id = info.guild_id;
 	GuildBanker = info.banker || guild_mgr.IsGuildLeader(GuildID(), CharacterID());
 
-	if(((int)zone->GetZoneID() == RuleI(World, GuildBankZoneID)))
+	if(zone->GetZoneID() == Zones::GUILDHALL)
 	{
 		if(WasBanker != GuildBanker)
 		{

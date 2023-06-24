@@ -120,6 +120,8 @@ class EQEmuConfig
 		uint16 ZonePortHigh;
 		uint8 DefaultStatus;
 
+		bool auto_database_updates;
+
 //	uint16 DynamicCount;
 
 //	map<string,uint16> StaticZones;
@@ -145,12 +147,6 @@ class EQEmuConfig
 		{
 			LoadConfig();
 			return (_config);
-		}
-
-		// Allow the use to set the conf file to be used.
-		static void SetConfigFile(std::string file)
-		{
-			EQEmuConfig::ConfigFile = file;
 		}
 
 		// Load the config

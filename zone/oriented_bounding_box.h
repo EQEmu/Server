@@ -7,9 +7,9 @@
 class OrientedBoundingBox
 {
 public:
-	OrientedBoundingBox() { }
+	OrientedBoundingBox() = default;
 	OrientedBoundingBox(const glm::vec3 &pos, const glm::vec3 &rot, const glm::vec3 &scale, const glm::vec3 &extents);
-	~OrientedBoundingBox() { }
+	~OrientedBoundingBox() = default;
 
 	bool ContainsPoint(const glm::vec3 &p) const;
 private:

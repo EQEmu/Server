@@ -19,7 +19,6 @@
  */
 
 #include "npc_scale_manager.h"
-#include "../common/strings.h"
 #include "../common/repositories/npc_scale_global_base_repository.h"
 #include "../common/repositories/npc_types_repository.h"
 
@@ -136,6 +135,8 @@ void NpcScaleManager::ScaleNPC(
 		npc->ModifyNPCStat("phr", std::to_string(scale_data.physical_resist));
 	}
 
+	auto min_damage_set = false;
+
 	if (always_scale || npc->GetMinDMG() == 0) {
 		int64 min_dmg = scale_data.min_dmg;
 		if (RuleB(Combat, UseNPCDamageClassLevelMods)) {
@@ -146,9 +147,10 @@ void NpcScaleManager::ScaleNPC(
 		}
 
 		npc->ModifyNPCStat("min_hit", std::to_string(min_dmg));
+		min_damage_set = true;
 	}
 
-	if (always_scale || npc->GetMaxDMG() == 0) {
+	if (always_scale || npc->GetMaxDMG() == 0 || min_damage_set) {
 		int64 max_dmg = scale_data.max_dmg;
 		if (RuleB(Combat, UseNPCDamageClassLevelMods)) {
 			uint32 class_level_damage_mod = GetClassLevelDamageMod(npc->GetLevel(), npc->GetClass());
@@ -279,7 +281,7 @@ bool NpcScaleManager::LoadScaleData()
 			scale_data.zone_id          = Strings::ToUnsignedInt(s.zone_id_list);
 			scale_data.instance_version = static_cast<uint16>(Strings::ToUnsignedInt(s.instance_version_list));
 
-			npc_global_base_scaling_data.insert(
+			npc_global_base_scaling_data.emplace(
 				std::make_pair(
 					std::make_tuple(
 						scale_data.type,
@@ -298,7 +300,7 @@ bool NpcScaleManager::LoadScaleData()
 			for (const auto &z : zones) {
 				scale_data.zone_id = Strings::ToUnsignedInt(z);
 
-				npc_global_base_scaling_data.insert(
+				npc_global_base_scaling_data.emplace(
 					std::make_pair(
 						std::make_tuple(
 							scale_data.type,
@@ -318,7 +320,7 @@ bool NpcScaleManager::LoadScaleData()
 			for (const auto &v : versions) {
 				scale_data.instance_version = static_cast<uint16>(Strings::ToUnsignedInt(v));
 
-				npc_global_base_scaling_data.insert(
+				npc_global_base_scaling_data.emplace(
 					std::make_pair(
 						std::make_tuple(
 							scale_data.type,
@@ -340,7 +342,7 @@ bool NpcScaleManager::LoadScaleData()
 				for (const auto &v : versions) {
 					scale_data.instance_version = static_cast<uint16>(Strings::ToUnsignedInt(v));
 
-					npc_global_base_scaling_data.insert(
+					npc_global_base_scaling_data.emplace(
 						std::make_pair(
 							std::make_tuple(
 								scale_data.type,

@@ -62,7 +62,7 @@ void command_appearanceeffects(Client *c, const Seperator *sep)
 				"Appearance Effect ID {} in slot ID {} has been set for {}.",
 				effect_id,
 				slot_id,
-				c->GetTargetDescription(t, TargetDescriptionType::LCSelf)
+				c->GetTargetDescription(t)
 			).c_str()
 		);
 	} else if (is_remove) {
@@ -90,7 +90,7 @@ void command_appearanceeffects(Client *c, const Seperator *sep)
 			Chat::White,
 			fmt::format(
 				"Appearance Effects have been removed for {}.",
-				c->GetTargetDescription(t, TargetDescriptionType::LCSelf)
+				c->GetTargetDescription(t)
 			).c_str()
 		);
 	} else if (is_view) {

@@ -123,7 +123,7 @@ void WebInterface::SendEvent(const Json::Value &value)
 
 void WebInterface::AddCall(const std::string &method, WebInterfaceCall call)
 {
-	m_calls.insert(std::make_pair(method, call));
+	m_calls.emplace(std::make_pair(method, call));
 }
 
 void WebInterface::SendResponse(const std::string &id, const Json::Value &response)
@@ -146,7 +146,7 @@ WebInterfaceList::~WebInterfaceList()
 
 void WebInterfaceList::AddConnection(std::shared_ptr<EQ::Net::ServertalkServerConnection> connection)
 {
-	m_interfaces.insert(std::make_pair(connection->GetUUID(), std::make_unique<WebInterface>(connection)));
+	m_interfaces.emplace(std::make_pair(connection->GetUUID(), std::make_unique<WebInterface>(connection)));
 }
 
 void WebInterfaceList::RemoveConnection(std::shared_ptr<EQ::Net::ServertalkServerConnection> connection)

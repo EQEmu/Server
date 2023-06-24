@@ -333,7 +333,10 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 			payload = PlayerEventDiscordFormatter::FormatDroppedItemEvent(e, n);
 			break;
 		}
-		case PlayerEvent::FISH_FAILURE: {
+		case PlayerEvent::FISH_FAILURE:
+		case PlayerEvent::FORAGE_FAILURE:
+		case PlayerEvent::WENT_ONLINE:
+		case PlayerEvent::WENT_OFFLINE: {
 			payload = PlayerEventDiscordFormatter::FormatWithNodata(e);
 			break;
 		}
@@ -346,10 +349,6 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 				n.serialize(ar);
 			}
 			payload = PlayerEventDiscordFormatter::FormatFishSuccessEvent(e, n);
-			break;
-		}
-		case PlayerEvent::FORAGE_FAILURE: {
-			payload = PlayerEventDiscordFormatter::FormatWithNodata(e);
 			break;
 		}
 		case PlayerEvent::FORAGE_SUCCESS: {
@@ -548,11 +547,6 @@ std::string PlayerEventLogs::GetDiscordPayloadFromEvent(const PlayerEvent::Playe
 				n.serialize(ar);
 			}
 			payload = PlayerEventDiscordFormatter::FormatResurrectAcceptEvent(e, n);
-			break;
-		}
-		case PlayerEvent::WENT_ONLINE:
-		case PlayerEvent::WENT_OFFLINE: {
-			payload = PlayerEventDiscordFormatter::FormatWithNodata(e);
 			break;
 		}
 		case PlayerEvent::MERCHANT_PURCHASE: {

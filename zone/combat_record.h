@@ -7,13 +7,11 @@
 
 class CombatRecord {
 public:
-	void Start(std::string in_mob_name);
+	void Start(const std::string& in_mob_name);
 	void Stop();
 	bool InCombat() const;
 	void ProcessHPEvent(int64 hp, int64 current_hp);
 	double TimeInCombat() const;
-	int64 GetDamageReceived() const;
-	int64 GetHealReceived() const;
 	float GetDamageReceivedPerSecond() const;
 	float GetHealedReceivedPerSecond() const;
 private:

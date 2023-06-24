@@ -100,6 +100,7 @@
 #define DUP_LORE					290		//Duplicate lore items are not allowed.
 #define TGB_ON						293		//Target other group buff is *ON*.
 #define TGB_OFF						294		//Target other group buff is *OFF*.
+#define DONT_SEE_TARGET				303		//I don't see anyone by that name around here...
 #define DISARMED_TRAP				305		//You have disarmed the trap.
 #define LDON_SENSE_TRAP1			306		//You do not Sense any traps.
 #define TRADESKILL_NOCOMBINE		334		//You cannot combine these items in this container type!
@@ -358,6 +359,7 @@
 #define WHOALL_NO_RESULTS			5029	//There are no players in EverQuest that match those who filters.
 #define TELL_QUEUED_MESSAGE			5045	//You told %1 '%T2. %3'
 #define TOLD_NOT_ONLINE				5046	//%1 is not online at this time.
+#define RAID_IS_FULL				5048	//The raid is full.
 #define ZONING_NO_EXPANSION         5052	//The zone that you are attempting to enter is part of an expansion that you do not yet own.  You may need to return to the Login screen and enter an account key for that expansion.  If you have received this message in error, please /petition or send an email to EQAccounts@soe.sony.com
 #define PETITION_NO_DELETE			5053	//You do not have a petition in the queue.
 #define PETITION_DELETED			5054	//Your petition was successfully deleted.
@@ -368,6 +370,7 @@
 #define DUNGEON_SEALED				5141	//The gateway to the dungeon is sealed off to you.  Perhaps you would be able to enter if you needed to adventure there.
 #define ADVENTURE_COMPLETE			5147	//You received %1 points for successfully completing the adventure.
 #define SUCCOR_FAIL					5169	//The portal collapes before you can escape!
+#define AUGMENT_RESTRICTED			5480	//The item does not satisfy the augment's restrictions.
 #define PET_ATTACKING				5501	//%1 tells you, 'Attacking %2 Master.'
 #define AVOID_STUNNING_BLOW			5753	//You avoid the stunning blow.
 #define FATAL_BOW_SHOT				5745	//%1 performs a FATAL BOW SHOT!!
@@ -465,6 +468,7 @@
 #define NO_ABILITY_OUT_OF_COMBAT	9194	//You can not use this ability while out of combat.
 #define LESSER_SPELL_VERSION        11004   //%1 is a lesser version of %2 and cannot be scribed
 #define AE_RAMPAGE					11015	//%1 goes on a WILD RAMPAGE!
+#define GROUP_IS_FULL				12000	//You cannot join that group, it is full.
 #define FACE_ACCEPTED				12028	//Facial features accepted.
 #define TRACKING_BEGIN				12040   //You begin tracking %1.
 #define SPELL_LEVEL_TO_LOW			12048	//You will have to achieve level %1 before you can scribe the %2.

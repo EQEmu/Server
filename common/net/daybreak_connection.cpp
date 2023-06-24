@@ -97,7 +97,7 @@ void EQ::Net::DaybreakConnectionManager::Connect(const std::string &addr, int po
 		m_on_new_connection(connection);
 	}
 
-	m_connections.insert(std::make_pair(std::make_pair(addr, port), connection));
+	m_connections.emplace(std::make_pair(std::make_pair(addr, port), connection));
 }
 
 void EQ::Net::DaybreakConnectionManager::Process()
@@ -234,7 +234,7 @@ void EQ::Net::DaybreakConnectionManager::ProcessPacket(const std::string &endpoi
 				if (m_on_new_connection) {
 					m_on_new_connection(connection);
 				}
-				m_connections.insert(std::make_pair(std::make_pair(endpoint, port), connection));
+				m_connections.emplace(std::make_pair(std::make_pair(endpoint, port), connection));
 				connection->ProcessPacket(p);
 			}
 			else if (data[1] != OP_OutOfSession) {
@@ -527,7 +527,7 @@ void EQ::Net::DaybreakConnection::AddToQueue(int stream, uint16_t seq, const Pac
 		DynamicPacket *out = new DynamicPacket();
 		out->PutPacket(0, p);
 
-		s->packet_queue.insert(std::make_pair(seq, out));
+		s->packet_queue.emplace(std::make_pair(seq, out));
 	}
 }
 
@@ -1427,7 +1427,7 @@ void EQ::Net::DaybreakConnection::InternalQueuePacket(Packet &p, int stream_id, 
 			static_cast<size_t>((m_rolling_ping * m_owner->m_options.resend_delay_factor) + m_owner->m_options.resend_delay_ms),
 			m_owner->m_options.resend_delay_min,
 			m_owner->m_options.resend_delay_max);
-		stream->sent_packets.insert(std::make_pair(stream->sequence_out, sent));
+		stream->sent_packets.emplace(std::make_pair(stream->sequence_out, sent));
 		stream->sequence_out++;
 
 		InternalBufferedSend(first_packet);
@@ -1459,7 +1459,7 @@ void EQ::Net::DaybreakConnection::InternalQueuePacket(Packet &p, int stream_id, 
 				static_cast<size_t>((m_rolling_ping * m_owner->m_options.resend_delay_factor) + m_owner->m_options.resend_delay_ms),
 				m_owner->m_options.resend_delay_min,
 				m_owner->m_options.resend_delay_max);
-			stream->sent_packets.insert(std::make_pair(stream->sequence_out, sent));
+			stream->sent_packets.emplace(std::make_pair(stream->sequence_out, sent));
 			stream->sequence_out++;
 
 			InternalBufferedSend(packet);
@@ -1483,7 +1483,7 @@ void EQ::Net::DaybreakConnection::InternalQueuePacket(Packet &p, int stream_id, 
 			static_cast<size_t>((m_rolling_ping * m_owner->m_options.resend_delay_factor) + m_owner->m_options.resend_delay_ms),
 			m_owner->m_options.resend_delay_min,
 			m_owner->m_options.resend_delay_max);
-		stream->sent_packets.insert(std::make_pair(stream->sequence_out, sent));
+		stream->sent_packets.emplace(std::make_pair(stream->sequence_out, sent));
 		stream->sequence_out++;
 
 		InternalBufferedSend(packet);

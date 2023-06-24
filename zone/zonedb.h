@@ -304,7 +304,7 @@ struct CharacterCorpseItemEntry
 	uint32 ornament_hero_model;
 };
 
-struct CharacterCorpseEntry 
+struct CharacterCorpseEntry
 {
 	bool locked;
 	uint32 exp;
@@ -442,11 +442,9 @@ public:
 	bool LoadCharacterPotions(uint32 character_id, PlayerProfile_Struct* pp);
 	bool LoadCharacterSkills(uint32 character_id, PlayerProfile_Struct* pp);
 	bool LoadCharacterSpellBook(uint32 character_id, PlayerProfile_Struct* pp);
-	bool LoadCharacterTribute(uint32 character_id, PlayerProfile_Struct* pp);
 
 	bool SaveCharacterAA(uint32 character_id, uint32 aa_id, uint32 current_level, uint32 charges);
 	bool SaveCharacterBandolier(uint32 character_id, uint8 bandolier_id, uint8 bandolier_slot, uint32 item_id, uint32 icon, const char* bandolier_name);
-	bool SaveCharacterBindPoint(uint32 character_id, const BindStruct &bind, uint32 bind_number);
 	bool SaveCharacterCurrency(uint32 character_id, PlayerProfile_Struct* pp);
 	bool SaveCharacterData(Client* c, PlayerProfile_Struct* pp, ExtendedProfile_Struct* m_epp);
 	bool SaveCharacterDisc(uint32 character_id, uint32 slot_id, uint32 disc_id);
@@ -457,7 +455,6 @@ public:
 	bool SaveCharacterPotionBelt(uint32 character_id, uint8 potion_id, uint32 item_id, uint32 icon);
 	bool SaveCharacterSkill(uint32 character_id, uint32 skill_id, uint32 value);
 	bool SaveCharacterSpell(uint32 character_id, uint32 spell_id, uint32 slot_id);
-	bool SaveCharacterTribute(uint32 character_id, PlayerProfile_Struct* pp);
 
 	double GetAAEXPModifier(uint32 character_id, uint32 zone_id, int16 instance_version = -1) const;
 	double GetEXPModifier(uint32 character_id, uint32 zone_id, int16 instance_version = -1) const;
@@ -528,8 +525,6 @@ public:
 	bool		LoadSpawnGroups(const char* zone_name, uint16 version, SpawnGroupList* spawn_group_list);
 	bool		LoadSpawnGroupsByID(int spawn_group_id, SpawnGroupList* spawn_group_list);
 	bool		PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spawn2_list, int16 version);
-	bool		PopulateZoneSpawnListClose(uint32 zoneid, LinkedList<Spawn2*> &spawn2_list, int16 version, const glm::vec4& client_position, uint32 repop_distance);
-	Spawn2*		LoadSpawn2(LinkedList<Spawn2*> &spawn2_list, uint32 spawn2id, uint32 timeleft);
 	bool		CreateSpawn2(Client *c, uint32 spawngroup, const char* zone, const glm::vec4& position, uint32 respawn, uint32 variance, uint16 condition, int16 cond_value);
 	void		UpdateRespawnTime(uint32 id, uint16 instance_id,uint32 timeleft);
 	uint32		GetSpawnTimeLeft(uint32 id, uint16 instance_id);
@@ -666,6 +661,10 @@ public:
 	// bot database add-on to eliminate the need for a second database connection
 	BotDatabase botdb;
 
+	static void LoadCharacterTribute(Client* c);
+
+	static void SaveCharacterBinds(Client *c);
+	static void SaveCharacterTribute(Client* c);
 protected:
 	void ZDBInitVars();
 

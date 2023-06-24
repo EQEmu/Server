@@ -1,9 +1,6 @@
 
 #include <string.h>
-#include <stdlib.h>
-#include <sstream>
 #include <algorithm>
-#include <ctime>
 #include <thread>
 #include <fmt/format.h>
 
@@ -26,8 +23,6 @@
 #include "command.h"
 #include "dynamic_zone.h"
 #include "expedition.h"
-#include "guild_mgr.h"
-#include "qglobals.h"
 #include "queryserv.h"
 #include "quest_parser_collection.h"
 #include "titles.h"
@@ -136,6 +131,7 @@ int command_init(void)
 		command_add("emptyinventory", "Clears your or your target's entire inventory (Equipment, General, Bank, and Shared Bank)", AccountStatus::GMImpossible, command_emptyinventory) ||
 		command_add("enablerecipe", "[Recipe ID] - Enables a Recipe", AccountStatus::QuestTroupe, command_enablerecipe) ||
 		command_add("endurance", "Restores your or your target's endurance.", AccountStatus::Guide, command_endurance) ||
+		command_add("entityvariable", "[clear|delete|set|view] - Modify entity variables for yourself or your target", AccountStatus::GMAdmin, command_entityvariable) ||
 		command_add("exptoggle", "[Toggle] - Toggle your or your target's experience gain.", AccountStatus::QuestTroupe, command_exptoggle) ||
 		command_add("faction", "[Find (criteria | all ) | Review (criteria | all) | Reset (id)] - Resets Player's Faction", AccountStatus::QuestTroupe, command_faction) ||
 		command_add("factionassociation", "[factionid] [amount] - triggers a faction hits via association", AccountStatus::GMLeadAdmin, command_faction_association) ||
@@ -145,6 +141,7 @@ int command_init(void)
 		command_add("findaliases", "[Search Criteria]- Searches for available command aliases, by alias or command", AccountStatus::Player, command_findaliases) ||
 		command_add("findcharacter", "[Search Criteria] - Search for a character", AccountStatus::Guide, command_findcharacter) ||
 		command_add("findclass", "[Search Criteria] - Search for a class", AccountStatus::Guide, command_findclass) ||
+		command_add("findcurrency", "[Search Criteria] - Search for an alternate currency", AccountStatus::Guide, command_findcurrency) ||
 		command_add("findfaction", "[Search Criteria] - Search for a faction", AccountStatus::Guide, command_findfaction) ||
 		command_add("findnpctype", "[Search Criteria] - Search database NPC types", AccountStatus::GMAdmin, command_findnpctype) ||
 		command_add("findrace", "[Search Criteria] - Search for a race", AccountStatus::Guide, command_findrace) ||
@@ -235,7 +232,7 @@ int command_init(void)
 		command_add("nukeitem", "[Item ID] - Removes the specified Item ID from you or your player target's inventory", AccountStatus::GMLeadAdmin, command_nukeitem) ||
 		command_add("object", "List|Add|Edit|Move|Rotate|Copy|Save|Undo|Delete - Manipulate static and tradeskill objects within the zone", AccountStatus::GMAdmin, command_object) ||
 		command_add("oocmute", "[0|1] - Enable or Disable Server OOC", AccountStatus::GMMgmt, command_oocmute) ||
-		command_add("opcode", "Reloads all server patches", AccountStatus::GMImpossible, command_opcode) ||
+		command_add("opcode", "Reloads all opcodes from server patch files", AccountStatus::GMMgmt, command_reload) ||
 		command_add("path", "view and edit pathing", AccountStatus::GMMgmt, command_path) ||
 		command_add("peekinv", "[equip/gen/cursor/poss/limbo/curlim/trib/bank/shbank/allbank/trade/world/all] - Print out contents of your player target's inventory", AccountStatus::GMAdmin, command_peekinv) ||
 		command_add("peqzone", "[Zone ID|Zone Short Name] - Teleports you to the specified zone if you meet the requirements.", AccountStatus::Player, command_peqzone) ||
@@ -401,7 +398,7 @@ int command_init(void)
 	for (const auto& w : working_cl) {
 		auto cs = command_settings.find(w.first);
 		if (cs == command_settings.end()) {
-			injected_command_settings.push_back(std::pair<std::string, uint8>(w.first, w.second->admin));
+			injected_command_settings.emplace_back(std::pair<std::string, uint8>(w.first, w.second->admin));
 			LogInfo(
 				"New Command [{}] found... Adding to `command_settings` table with admin [{}]...",
 				w.first,
@@ -971,7 +968,6 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/doanim.cpp"
 #include "gm_commands/door.cpp"
 #include "gm_commands/door_manipulation.cpp"
-#include "gm_commands/door_manipulation.h"
 #include "gm_commands/dye.cpp"
 #include "gm_commands/dz.cpp"
 #include "gm_commands/dzkickplayers.cpp"
@@ -982,12 +978,14 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/emptyinventory.cpp"
 #include "gm_commands/enablerecipe.cpp"
 #include "gm_commands/endurance.cpp"
+#include "gm_commands/entityvariable.cpp"
 #include "gm_commands/exptoggle.cpp"
 #include "gm_commands/faction.cpp"
 #include "gm_commands/feature.cpp"
 #include "gm_commands/findaa.cpp"
 #include "gm_commands/findcharacter.cpp"
 #include "gm_commands/findclass.cpp"
+#include "gm_commands/findcurrency.cpp"
 #include "gm_commands/findfaction.cpp"
 #include "gm_commands/findnpctype.cpp"
 #include "gm_commands/findrace.cpp"
@@ -1075,7 +1073,6 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/nukeitem.cpp"
 #include "gm_commands/object.cpp"
 #include "gm_commands/oocmute.cpp"
-#include "gm_commands/opcode.cpp"
 #include "gm_commands/path.cpp"
 #include "gm_commands/peekinv.cpp"
 #include "gm_commands/peqzone.cpp"

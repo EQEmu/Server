@@ -34,10 +34,8 @@
 
 #include <string.h>
 #include <stdlib.h>
-#include <sstream>
 #include <algorithm>
 #include <ctime>
-#include <thread>
 
 #ifdef _WINDOWS
 #define strcasecmp _stricmp
@@ -47,21 +45,14 @@
 #include "../common/global_define.h"
 #include "../common/eq_packet.h"
 #include "../common/features.h"
-#include "../common/guilds.h"
-#include "../common/patches/patches.h"
 #include "../common/ptimer.h"
 #include "../common/rulesys.h"
 #include "../common/serverinfo.h"
 #include "../common/strings.h"
 #include "../common/say_link.h"
-#include "../common/eqemu_logsys.h"
-#include "../common/emu_constants.h"
-
 
 #include "bot_command.h"
 #include "zonedb.h"
-#include "../common/zone_store.h"
-#include "guild_mgr.h"
 #include "map.h"
 #include "doors.h"
 #include "qglobals.h"
@@ -1361,14 +1352,6 @@ int bot_command_init(void)
 		bot_command_add("boteyes", "Changes the eye colors of a bot", AccountStatus::Player, bot_subcommand_bot_eyes) ||
 		bot_command_add("botface", "Changes the facial appearance of your bot", AccountStatus::Player, bot_subcommand_bot_face) ||
 		bot_command_add("botfollowdistance", "Changes the follow distance(s) of a bot(s)", AccountStatus::Player, bot_subcommand_bot_follow_distance) ||
-		bot_command_add("botgroup", "Lists the available bot-group [subcommands]", AccountStatus::Player, bot_command_botgroup) ||
-		bot_command_add("botgroupaddmember", "Adds a member to a bot-group", AccountStatus::Player, bot_subcommand_botgroup_add_member) ||
-		bot_command_add("botgroupautospawn", "Toggles auto spawning for a bot-group, spawning the bot group when you zone automatically", AccountStatus::Player, bot_subcommand_botgroup_auto_spawn) ||
-		bot_command_add("botgroupcreate", "Creates a bot-group and designates a leader", AccountStatus::Player, bot_subcommand_botgroup_create) ||
-		bot_command_add("botgroupdelete", "Deletes a bot-group and releases its members", AccountStatus::Player, bot_subcommand_botgroup_delete) ||
-		bot_command_add("botgrouplist", "Lists all of your existing bot-groups", AccountStatus::Player, bot_subcommand_botgroup_list) ||
-		bot_command_add("botgroupload", "Loads all members of a bot-group", AccountStatus::Player, bot_subcommand_botgroup_load) ||
-		bot_command_add("botgroupremovemember", "Removes a bot from its bot-group", AccountStatus::Player, bot_subcommand_botgroup_remove_member) ||
 		bot_command_add("bothaircolor", "Changes the hair color of a bot", AccountStatus::Player, bot_subcommand_bot_hair_color) ||
 		bot_command_add("bothairstyle", "Changes the hairstyle of a bot", AccountStatus::Player, bot_subcommand_bot_hairstyle) ||
 		bot_command_add("botheritage", "Changes the Drakkin heritage of a bot", AccountStatus::Player, bot_subcommand_bot_heritage) ||
@@ -1498,7 +1481,7 @@ int bot_command_init(void)
 		auto bcs_iter = bot_command_settings.find(working_bcl_iter.first);
 		if (bcs_iter == bot_command_settings.end()) {
 
-			injected_bot_command_settings.push_back(std::pair<std::string, uint8>(working_bcl_iter.first, working_bcl_iter.second->access));
+			injected_bot_command_settings.emplace_back(std::pair<std::string, uint8>(working_bcl_iter.first, working_bcl_iter.second->access));
 			LogInfo(
 				"New Bot Command [{}] found... Adding to `bot_command_settings` table with access [{}]",
 				working_bcl_iter.first.c_str(),
@@ -1911,43 +1894,6 @@ namespace MyBots
 		sbl.remove(nullptr);
 	}
 
-	static void PopulateSBL_ByBotGroup(Client *bot_owner, std::list<Bot*> &sbl, const char* name, bool clear_list = true) {
-		if (clear_list)
-			sbl.clear();
-		if (!bot_owner || !name)
-			return;
-
-		std::string group_name = name;
-
-		uint32 botgroup_id = 0;
-		if (!database.botdb.LoadBotGroupIDForLoadBotGroup(bot_owner->CharacterID(), group_name, botgroup_id) || !botgroup_id)
-			return;
-
-		std::map<uint32, std::list<uint32>> botgroup_list;
-		if (!database.botdb.LoadBotGroup(group_name, botgroup_list) || botgroup_list.find(botgroup_id) == botgroup_list.end() || !botgroup_list[botgroup_id].size())
-			return;
-
-		std::list<Bot*> selectable_bot_list;
-		PopulateSBL_BySpawnedBots(bot_owner, selectable_bot_list);
-		if (selectable_bot_list.empty())
-			return;
-
-		selectable_bot_list.remove(nullptr);
-		for (auto group_iter : botgroup_list[botgroup_id]) {
-			for (auto bot_iter : selectable_bot_list) {
-				if (bot_iter->GetBotID() != group_iter)
-					continue;
-
-				if (IsMyBot(bot_owner, bot_iter)) {
-					sbl.push_back(bot_iter);
-					break;
-				}
-			}
-		}
-
-		if (!clear_list)
-			UniquifySBL(sbl);
-	}
 }
 
 namespace ActionableTarget
@@ -2166,7 +2112,6 @@ namespace ActionableBots
 		ABM_Target = (1 << (ABT_Target - 1)),
 		ABM_ByName = (1 << (ABT_ByName - 1)),
 		ABM_OwnerGroup = (1 << (ABT_OwnerGroup - 1)),
-		ABM_BotGroup = (1 << (ABT_BotGroup - 1)),
 		ABM_TargetGroup = (1 << (ABT_TargetGroup - 1)),
 		ABM_NamesGroup = (1 << (ABT_NamesGroup - 1)),
 		ABM_HealRotation = (1 << (ABT_HealRotation - 1)),
@@ -2177,8 +2122,8 @@ namespace ActionableBots
 		ABM_Spawned_All = (3 << (ABT_Spawned - 1)),
 		ABM_NoFilter = ~0,
 		// grouped values
-		ABM_Type1 = (ABM_Target | ABM_ByName | ABM_OwnerGroup | ABM_BotGroup | ABM_TargetGroup | ABM_NamesGroup | ABM_HealRotationTargets | ABM_Spawned),
-		ABM_Type2 = (ABM_ByName | ABM_OwnerGroup | ABM_BotGroup | ABM_NamesGroup | ABM_HealRotation | ABM_Spawned)
+		ABM_Type1 = (ABM_Target | ABM_ByName | ABM_OwnerGroup | ABM_TargetGroup | ABM_NamesGroup | ABM_HealRotationTargets | ABM_Spawned),
+		ABM_Type2 = (ABM_ByName | ABM_OwnerGroup | ABM_NamesGroup | ABM_HealRotation | ABM_Spawned)
 	};
 
 	// Populates 'sbl'
@@ -2195,8 +2140,6 @@ namespace ActionableBots
 			ab_type = ABT_ByName;
 		else if (!ab_type_arg.compare("ownergroup"))
 			ab_type = ABT_OwnerGroup;
-		else if (!ab_type_arg.compare("botgroup"))
-			ab_type = ABT_BotGroup;
 		else if (!ab_type_arg.compare("targetgroup"))
 			ab_type = ABT_TargetGroup;
 		else if (!ab_type_arg.compare("namesgroup"))
@@ -2227,10 +2170,6 @@ namespace ActionableBots
 		case ABT_OwnerGroup:
 			if (ab_mask & ABM_OwnerGroup)
 				MyBots::PopulateSBL_ByMyGroupedBots(bot_owner, sbl, clear_list);
-			break;
-		case ABT_BotGroup:
-			if (ab_mask & ABM_BotGroup)
-				MyBots::PopulateSBL_ByBotGroup(bot_owner, sbl, name, clear_list);
 			break;
 		case ABT_TargetGroup:
 			if (ab_mask & ABM_TargetGroup)
@@ -2587,9 +2526,17 @@ void bot_command_apply_poison(Client *c, const Seperator *sep)
 	}
 
 	Bot *my_rogue_bot = nullptr;
-	if (c->GetTarget() && c->GetTarget()->IsBot() && c->GetTarget()->CastToBot()->GetBotOwnerCharacterID() == c->CharacterID() && c->GetTarget()->CastToBot()->GetClass() == ROGUE) {
-		my_rogue_bot = c->GetTarget()->CastToBot();
+	auto t = c->GetTarget();
+
+	if (
+		t &&
+		t->IsBot() &&
+		t->CastToBot()->GetBotOwnerCharacterID() == c->CharacterID() &&
+		t->GetClass() == ROGUE
+	) {
+		my_rogue_bot = t->CastToBot();
 	}
+
 	if (!my_rogue_bot) {
 
 		c->Message(Chat::White, "You must target a rogue bot that you own to use this command!");
@@ -2757,7 +2704,7 @@ void bot_command_attack(Client *c, const Seperator *sep)
 	}
 
 	std::list<Bot*> sbl;
-	if (ActionableBots::PopulateSBL(c, ab_arg.c_str(), sbl, ab_mask, sep->arg[2]) == ActionableBots::ABT_None) {
+	if (ActionableBots::PopulateSBL(c, ab_arg, sbl, ab_mask, sep->arg[2]) == ActionableBots::ABT_None) {
 		return;
 	}
 
@@ -3643,14 +3590,13 @@ void bot_command_item_use(Client* c, const Seperator* sep)
 		return;
 	}
 
-	std::list<int16> equipable_slot_list;
+	std::vector<int16> equipable_slot_list;
 	for (int16 equipable_slot = EQ::invslot::EQUIPMENT_BEGIN; equipable_slot <= EQ::invslot::EQUIPMENT_END; ++equipable_slot) {
 		if (item_data->Slots & (1 << equipable_slot)) {
-			equipable_slot_list.push_back(equipable_slot);
+			equipable_slot_list.emplace_back(equipable_slot);
 		}
 	}
 
-	std::string msg;
 	std::string text_link;
 
 	EQ::SayLinkEngine linker;
@@ -3677,7 +3623,7 @@ void bot_command_item_use(Client* c, const Seperator* sep)
 			bot_iter->GetCleanName()
 		);
 
-		for (auto slot_iter : equipable_slot_list) {
+		for (const auto& slot_iter : equipable_slot_list) {
 			// needs more failure criteria - this should cover the bulk for now
 			if (slot_iter == EQ::invslot::slotSecondary && item_data->Damage && !bot_iter->CanThisClassDualWield()) {
 				continue;
@@ -5185,8 +5131,6 @@ void bot_subcommand_bot_clone(Client *c, const Seperator *sep)
 		return;
 	}
 
-	std::string error_message;
-
 	bool available_flag = false;
 	if (!database.botdb.QueryNameAvailablity(bot_name, available_flag)) {
 		c->Message(
@@ -5619,8 +5563,6 @@ void bot_subcommand_bot_delete(Client *c, const Seperator *sep)
 		c->Message(Chat::White, "You must <target> a bot that you own to use this command");
 		return;
 	}
-
-	std::string error_message;
 
 	if (!my_bot->DeleteBot()) {
 		c->Message(Chat::White, "Failed to delete '%s' due to database error", my_bot->GetCleanName());
@@ -6468,19 +6410,20 @@ void bot_subcommand_bot_report(Client *c, const Seperator *sep)
 
 	std::string ab_type_arg = sep->arg[1];
 	if (ab_type_arg.empty()) {
-		if (c->GetTarget()) {
-			if (c->GetTarget()->IsClient() && c->GetTarget()->CastToClient() == c)
+		auto t = c->GetTarget();
+		if (t && t->IsClient()) {
+			if (t->CastToClient() == c) {
 				ab_type_arg = "ownergroup";
-			else if (c->GetTarget()->IsClient() && c->GetTarget()->CastToClient() != c)
+			} else {
 				ab_type_arg = "targetgroup";
-		}
-		else {
+			}
+		} else {
 			ab_type_arg = "spawned";
 		}
 	}
 
 	std::list<Bot*> sbl;
-	if (ActionableBots::PopulateSBL(c, ab_type_arg.c_str(), sbl, ab_mask, sep->arg[2]) == ActionableBots::ABT_None)
+	if (ActionableBots::PopulateSBL(c, ab_type_arg, sbl, ab_mask, sep->arg[2]) == ActionableBots::ABT_None)
 		return;
 
 	for (auto bot_iter : sbl) {
@@ -7020,7 +6963,6 @@ void bot_subcommand_bot_toggle_helm(Client *c, const Seperator *sep)
 	}
 
 	if (ab_type == ActionableBots::ABT_All) {
-		std::string query;
 		if (toggle_helm) {
 			if (!database.botdb.ToggleAllHelmAppearances(c->CharacterID()))
 				c->Message(Chat::White, "%s", BotDatabase::fail::ToggleAllHelmAppearances());
@@ -7155,803 +7097,6 @@ void bot_subcommand_bot_woad(Client *c, const Seperator *sep)
 		return;
 
 	helper_bot_appearance_form_final(c, my_bot);
-}
-
-void bot_subcommand_botgroup_add_member(Client *c, const Seperator *sep)
-{
-	if (helper_command_alias_fail(c, "bot_subcommand_botgroup_add_member", sep->arg[0], "botgroupaddmember")) {
-		return;
-	}
-
-	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"Usage: (<target_leader>) {} [member_name] ([leader_name])",
-				sep->arg[0]
-			).c_str()
-		);
-		return;
-	}
-
-	std::list<Bot*> sbl;
-	MyBots::PopulateSBL_ByNamedBot(c, sbl, sep->arg[1]);
-	if (sbl.empty()) {
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"Usage: (<target_leader>) {} [member_name]",
-				sep->arg[0]
-			).c_str()
-		);
-		return;
-	}
-
-	auto new_member = sbl.front();
-	if (!new_member) {
-		c->Message(Chat::White, "Error: New member bot dereferenced to nullptr");
-		return;
-	}
-
-	if (new_member->HasGroup()) {
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"{} is already member of a group.",
-				new_member->GetCleanName()
-			).c_str()
-		);
-		return;
-	}
-
-	uint32 botgroup_id = 0;
-	if (!database.botdb.LoadBotGroupIDByMemberID(new_member->GetBotID(), botgroup_id)) {
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"Failed to load bot-group id by member ID for '{}'.",
-				new_member->GetCleanName()
-			).c_str()
-		);
-		return;
-	}
-
-	if (botgroup_id) {
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"{} is already a member of a bot-group.",
-				new_member->GetCleanName()
-			).c_str()
-		);
-		return;
-	}
-
-	MyBots::PopulateSBL_ByNamedBot(c, sbl, sep->arg[2]);
-
-	if (sbl.empty()) {
-		MyBots::PopulateSBL_ByTargetedBot(c, sbl);
-	}
-
-	if (sbl.empty()) {
-		c->Message(Chat::White, "You must target or name a group leader as a bot that you own to use this command.");
-		return;
-	}
-
-	auto leader = sbl.front();
-	if (!leader) {
-		c->Message(Chat::White, "Error: Group leader bot dereferenced to nullptr.");
-		return;
-	}
-
-	auto* g = leader->GetGroup();
-	if (!g || g->GetLeader() != leader) {
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"{} is not the leader of a group.",
-				leader->GetCleanName()
-			).c_str()
-		);
-		return;
-	}
-
-	botgroup_id = 0;
-	if (!database.botdb.LoadBotGroupIDByLeaderID(leader->GetBotID(), botgroup_id)) {
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"Failed to load bot-group ID by leader ID for '{}'.",
-				leader->GetCleanName()
-			).c_str()
-		);
-		return;
-	}
-
-	if (!botgroup_id) {
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"{} is not the leader of a bot-group.",
-				leader->GetCleanName()
-			).c_str()
-		);
-		return;
-	}
-
-	if (!Bot::AddBotToGroup(new_member, g)) {
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"Could not add {} as a new member to a group with {}.",
-				new_member->GetCleanName(),
-				leader->GetCleanName()
-			).c_str()
-		);
-		return;
-	}
-
-	database.SetGroupID(new_member->GetName(), g->GetID(), new_member->GetBotID());
-
-	if (!database.botdb.AddMemberToBotGroup(leader->GetBotID(), new_member->GetBotID())) {
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"Failed to add member to bot-group, {} could not be added to a group with {}.",
-				new_member->GetCleanName(),
-				leader->GetCleanName()
-			).c_str()
-		);
-		Bot::RemoveBotFromGroup(new_member, leader->GetGroup());
-		return;
-	}
-
-	std::string botgroup_name;
-	if (!database.botdb.LoadBotGroupNameByLeaderID(leader->GetBotID(), botgroup_name)) {
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"Failed to load bot-group name by leader ID for bot ID {}.",
-				leader->GetBotID()
-			).c_str()
-		);
-	}
-
-	c->Message(
-		Chat::White,
-		fmt::format(
-			"Successfully added {} to bot-group {}.",
-			new_member->GetCleanName(),
-			botgroup_name
-		).c_str()
-	);
-}
-
-void bot_subcommand_botgroup_auto_spawn(Client *c, const Seperator *sep)
-{
-	if (helper_command_alias_fail(c, "bot_subcommand_botgroup_auto_spawn", sep->arg[0], "botgroupautospawn")) {
-		return;
-	}
-
-	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"Usage: (<target_leader>) {} ([leader_name])",
-				sep->arg[0]
-			).c_str()
-		);
-		return;
-	}
-
-	std::list<Bot*> sbl;
-
-	if (sbl.empty()) {
-		MyBots::PopulateSBL_ByTargetedBot(c, sbl);
-	}
-
-	if (sbl.empty()) {
-		c->Message(Chat::White, "You must target or name a group leader as a bot that you own to use this command.");
-		return;
-	}
-
-	auto leader = sbl.front();
-	if (!leader) {
-		c->Message(Chat::White, "Error: Group leader bot dereferenced to nullptr.");
-		return;
-	}
-
-	auto* g = leader->GetGroup();
-	if (!g || g->GetLeader() != leader) {
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"{} is not the leader of a group.",
-				leader->GetCleanName()
-			).c_str()
-		);
-		return;
-	}
-
-	uint32 botgroup_id = 0;
-	if (!database.botdb.LoadBotGroupIDByLeaderID(leader->GetBotID(), botgroup_id)) {
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"Failed to load bot-group ID by leader ID for '{}'.",
-				leader->GetCleanName()
-			).c_str()
-		);
-		return;
-	}
-
-	if (!botgroup_id) {
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"{} is not the leader of a bot-group.",
-				leader->GetCleanName()
-			).c_str()
-		);
-		return;
-	}
-
-	std::string botgroup_name;
-	if (!database.botdb.LoadBotGroupNameByLeaderID(leader->GetBotID(), botgroup_name)) {
-		c->Message(Chat::White, "Failed to load bot-group name by leader ID.");
-		return;
-	}
-
-	if (!database.botdb.ToggleBotGroupAutoSpawn(botgroup_id)) {
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"Failed to toggle auto spawn for bot-group '{}'.",
-				botgroup_name
-			).c_str()
-		);
-		return;
-	}
-
-	bool auto_spawn = database.botdb.IsBotGroupAutoSpawn(botgroup_name);
-
-	c->Message(
-		Chat::White,
-		fmt::format(
-			"Auto spawn is now {}active bot-group '{}'.",
-			!auto_spawn ? "in" : "",
-			botgroup_name
-		).c_str()
-	);
-}
-
-void bot_subcommand_botgroup_create(Client *c, const Seperator *sep)
-{
-	if (helper_command_alias_fail(c, "bot_subcommand_botgroup_create", sep->arg[0], "botgroupcreate")) {
-		return;
-	}
-
-	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"Usage: (<target_leader>) {} [group_name] ([leader_name])",
-				sep->arg[0]
-			).c_str()
-		);
-		return;
-	}
-
-	std::string botgroup_name = sep->argplus[1];
-	if (botgroup_name.empty()) {
-		c->Message(Chat::White, "You must specify a name for this bot-group to use this command.");
-		return;
-	}
-
-	if (database.botdb.QueryBotGroupExistence(botgroup_name)) {
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"The name '{}' already exists for a bot-group. Please choose another.",
-				botgroup_name
-			).c_str()
-		);
-		return;
-	}
-
-	std::list<Bot*> sbl;
-	MyBots::PopulateSBL_ByNamedBot(c, sbl, sep->arg[2]);
-
-	if (sbl.empty()) {
-		MyBots::PopulateSBL_ByTargetedBot(c, sbl);
-	}
-
-	if (sbl.empty()) {
-		c->Message(Chat::White, "You must target or name a group leader as a bot that you own to use this command.");
-		return;
-	}
-
-	auto leader = sbl.front();
-	if (!leader) {
-		c->Message(Chat::White, "Error: Group leader bot dereferenced to nullptr.");
-		return;
-	}
-
-	if (leader->HasGroup()) {
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"{} is already a current member of a group.",
-				leader->GetCleanName()
-			).c_str()
-		);
-		return;
-	}
-
-	uint32 botgroup_id = 0;
-	if (!database.botdb.LoadBotGroupIDByLeaderID(leader->GetBotID(), botgroup_id)) {
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"Failed to load bot-group ID by leader ID for '{}'.",
-				leader->GetCleanName()
-			).c_str()
-		);
-		return;
-	}
-
-	if (botgroup_id) {
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"{} is already the current leader of a bot-group.",
-				leader->GetCleanName()
-			).c_str()
-		);
-		return;
-	}
-
-	botgroup_id = 0;
-	if (!database.botdb.LoadBotGroupIDByMemberID(leader->GetBotID(), botgroup_id)) {
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"Failed to load bot-group id by member ID for '{}'.",
-				leader->GetCleanName()
-			).c_str()
-		);
-		return;
-	}
-
-	if (botgroup_id) {
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"{} is already a current member of a bot-group.",
-				leader->GetCleanName()
-			).c_str()
-		);
-		return;
-	}
-
-	auto* g = new Group(leader);
-	if (!g) {
-		c->Message(Chat::White, "Could not create a new group instance.");
-		return;
-	}
-
-	if (!database.botdb.CreateBotGroup(botgroup_name, leader->GetBotID())) {
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"Failed to create bot-group '{}'.",
-				botgroup_name
-			).c_str()
-		);
-		safe_delete(g);
-		return;
-	}
-
-	entity_list.AddGroup(g);
-	database.SetGroupID(leader->GetCleanName(), g->GetID(), leader->GetBotID());
-	database.SetGroupLeaderName(g->GetID(), leader->GetCleanName());
-	leader->SetFollowID(c->GetID());
-
-	c->Message(
-		Chat::White,
-		fmt::format(
-			"Successfully created bot-group '{}' with '{}' as its leader.",
-			botgroup_name,
-			leader->GetCleanName()
-		).c_str()
-	);
-}
-
-void bot_subcommand_botgroup_delete(Client *c, const Seperator *sep)
-{
-	if (helper_command_alias_fail(c, "bot_subcommand_botgroup_delete", sep->arg[0], "botgroupdelete")) {
-		return;
-	}
-
-	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::White, "usage: %s [botgroup_name]", sep->arg[0]);
-		return;
-	}
-
-	std::string botgroup_name = sep->argplus[1];
-	if (botgroup_name.empty()) {
-		c->Message(Chat::White, "You must specify a [name] for this bot-group to use this command");
-		return;
-	}
-
-	uint32 botgroup_id = 0;
-	if (!database.botdb.LoadBotGroupIDForLoadBotGroup(c->CharacterID(), botgroup_name, botgroup_id)) {
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"Failed to load bot-group ID for load bot-group for '{}'.",
-				botgroup_name
-			).c_str()
-		);
-		return;
-	}
-
-	if (!botgroup_id) {
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"Could not locate group ID for '{}'.",
-				botgroup_name
-			).c_str()
-		);
-		return;
-	}
-
-	uint32 leader_id = 0;
-	if (!database.botdb.LoadLeaderIDByBotGroupID(botgroup_id, leader_id)) {
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"Failed to load leader ID by bot-group ID for '{}'.",
-				botgroup_name
-			).c_str()
-		);
-		return;
-	}
-
-	if (!leader_id) {
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"Could not locate leader ID for '{}'.",
-				botgroup_name
-			).c_str()
-		);
-		return;
-	}
-
-	std::list<Bot*> gbl;
-	std::list<Bot*> sbl;
-	MyBots::PopulateSBL_BySpawnedBots(c, sbl);
-
-	std::map<uint32, std::list<uint32>> member_list;
-	if (!database.botdb.LoadBotGroup(botgroup_name, member_list)) {
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"Failed to load bot-group '{}'.",
-				botgroup_name
-			).c_str()
-		);
-		return;
-	}
-
-	if (member_list.find(botgroup_id) == member_list.end() || member_list[botgroup_id].empty()) {
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"Could not locate member list for bot-group '{}'.",
-				botgroup_name
-			).c_str()
-		);
-		return;
-	}
-
-	for (auto bot_iter : sbl) {
-		for (auto group_iter : member_list[botgroup_id]) {
-			if (bot_iter->GetBotID() == group_iter) {
-				gbl.push_back(bot_iter);
-				break;
-			}
-		}
-	}
-
-	gbl.unique();
-
-	for (auto group_member : gbl) {
-		if (group_member->HasGroup()) {
-			Bot::RemoveBotFromGroup(group_member, group_member->GetGroup());
-		}
-	}
-
-	if (!database.botdb.DeleteBotGroup(leader_id)) {
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"Failed to delete bot-group '{}'.",
-				botgroup_name
-			).c_str()
-		);
-		return;
-	}
-
-	c->Message(
-		Chat::White,
-		fmt::format(
-			"Successfully deleted bot-group '{}'.",
-			botgroup_name
-		).c_str()
-	);
-}
-
-void bot_subcommand_botgroup_list(Client *c, const Seperator *sep)
-{
-	if (helper_command_alias_fail(c, "bot_subcommand_botgroup_list", sep->arg[0], "botgrouplist")) {
-		return;
-	}
-
-	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"Usage: {}",
-				sep->arg[0]
-			).c_str()
-		);
-		return;
-	}
-
-	std::list<std::pair<std::string, uint32>> botgroups_list;
-	if (!database.botdb.LoadBotGroupsListByOwnerID(c->CharacterID(), botgroups_list)) {
-		c->Message(Chat::White, "Failed to load bot-group.");
-		return;
-	}
-
-	if (botgroups_list.empty()) {
-		c->Message(Chat::White, "You have no saved bot-groups.");
-		return;
-	}
-
-	uint32 botgroup_count = 0;
-
-	for (const auto& [group_name, group_leader_id] : botgroups_list) {
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"Bot-group {} | Name: {} | Leader: {}{} | {}",
-				(botgroup_count + 1),
-				group_name,
-				database.botdb.GetBotNameByID(group_leader_id),
-				database.botdb.IsBotGroupAutoSpawn(group_name) ? " (Auto Spawn)" : "",
-				Saylink::Silent(
-					fmt::format("^botgroupload {}", group_name),
-					"Load"
-				)
-			).c_str()
-		);
-
-		botgroup_count++;
-	}
-
-	c->Message(
-		Chat::White,
-		fmt::format(
-			"{} Bot-group{} listed.",
-			botgroup_count,
-			botgroup_count != 1 ? "s" : ""
-		).c_str()
-	);
-}
-
-void bot_subcommand_botgroup_load(Client *c, const Seperator *sep)
-{
-	if (helper_command_alias_fail(c, "bot_subcommand_botgroup_load", sep->arg[0], "botgroupload")) {
-		return;
-	}
-
-	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"Usage: {} [botgroup_name]",
-				sep->arg[0]
-			).c_str()
-		);
-		return;
-	}
-
-	std::string botgroup_name = sep->argplus[1];
-	if (botgroup_name.empty()) {
-		c->Message(Chat::White, "You must specify the name of a bot-group to load to use this command.");
-		return;
-	}
-
-	if (!database.botdb.QueryBotGroupExistence(botgroup_name)) {
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"Failed to query bot-group existence for '{}'.",
-				botgroup_name
-			).c_str()
-		);
-		return;
-	}
-
-	if (!Bot::CheckSpawnConditions(c)) {
-		return;
-	}
-
-	uint32 botgroup_id = 0;
-	if (!database.botdb.LoadBotGroupIDForLoadBotGroup(c->CharacterID(), botgroup_name, botgroup_id) || !botgroup_id) {
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"Failed to load bot-group ID for load bot-group for '{}'.",
-				botgroup_name
-			).c_str()
-		);
-		return;
-	}
-
-	std::map<uint32, std::list<uint32>> member_list;
-	if (!database.botdb.LoadBotGroup(botgroup_name, member_list)) {
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"Failed to load bot-group for '{}'.",
-				botgroup_name
-			).c_str()
-		);
-		return;
-	}
-
-	if (member_list.find(botgroup_id) == member_list.end() || member_list[botgroup_id].empty()) {
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"Database returned an empty list for bot-group '{}'.",
-				botgroup_name
-			).c_str()
-		);
-		return;
-	}
-
-	auto spawned_bot_count = Bot::SpawnedBotCount(c->CharacterID());
-
-	auto bot_spawn_limit = c->GetBotSpawnLimit();
-	if (
-		bot_spawn_limit >= 0 &&
-		(
-			spawned_bot_count >= bot_spawn_limit ||
-			(spawned_bot_count + member_list.begin()->second.size()) > bot_spawn_limit
-		)
-	) {
-		std::string message;
-		if (bot_spawn_limit) {
-			message = fmt::format(
-				"You cannot have more than {} spawned bot{}.",
-				bot_spawn_limit,
-				bot_spawn_limit != 1 ? "s" : ""
-			);
-		} else {
-			message = "You are not currently allowed to spawn any bots.";
-		}
-
-		c->Message(Chat::White, message.c_str());
-		return;
-	}
-
-	uint32 leader_id = 0;
-	if (!database.botdb.LoadLeaderIDByBotGroupName(botgroup_name, leader_id)) {
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"Failed to load leader ID by bot-group name for '{}'.",
-				botgroup_name
-			).c_str()
-		);
-		return;
-	}
-
-	if (!leader_id) {
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"Cannot locate bot-group leader ID for '{}'.",
-				botgroup_name
-			).c_str()
-		);
-		return;
-	}
-
-	Bot::SpawnBotGroupByName(c, botgroup_name, leader_id);
-}
-
-void bot_subcommand_botgroup_remove_member(Client *c, const Seperator *sep)
-{
-	if (helper_command_alias_fail(c, "bot_subcommand_botgroup_remove_member", sep->arg[0], "botgroupremovemember")) {
-		return;
-	}
-
-	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"Usage: (<target_member>) {} ([member_name])",
-				sep->arg[0]
-			).c_str()
-		);
-		return;
-	}
-
-	std::list<Bot*> sbl;
-	MyBots::PopulateSBL_ByNamedBot(c, sbl, sep->arg[1]);
-
-	if (sbl.empty()) {
-		MyBots::PopulateSBL_ByTargetedBot(c, sbl);
-	}
-
-	if (sbl.empty()) {
-		c->Message(Chat::White, "You must target or name a group member as a bot that you own to use this command.");
-		return;
-	}
-
-	auto group_member = sbl.front();
-	if (!group_member) {
-		c->Message(Chat::White, "Error: Group member bot dereferenced to nullptr.");
-		return;
-	}
-
-	if (!group_member->HasGroup()) {
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"{} is not a current member of a group.",
-				group_member->GetCleanName()
-			).c_str()
-		);
-		return;
-	}
-
-	if (!Bot::RemoveBotFromGroup(group_member, group_member->GetGroup())) {
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"Could not remove {} from their group.",
-				group_member->GetCleanName()
-			).c_str()
-		);
-		return;
-	}
-
-	if (!database.botdb.RemoveMemberFromBotGroup(group_member->GetBotID())) {
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"Could not remove {} from their bot-group.",
-				group_member->GetCleanName()
-			).c_str()
-		);
-		return;
-	}
-
-	c->Message(
-		Chat::White,
-		fmt::format(
-			"Successfully removed {} from their bot-group.",
-			group_member->GetCleanName()
-		).c_str()
-	);
 }
 
 void bot_subcommand_circle(Client *c, const Seperator *sep)
@@ -8185,7 +7330,7 @@ void bot_subcommand_heal_rotation_adjust_critical(Client *c, const Seperator *se
 
 	uint8 armor_type_value = 255;
 	if (sep->IsNumber(1))
-		armor_type_value = Strings::ToInt(armor_type_arg.c_str());
+		armor_type_value = Strings::ToInt(armor_type_arg);
 
 	if (armor_type_value > ARMOR_TYPE_LAST) {
 		c->Message(Chat::White, "You must specify a valid [armor_type: %u-%u] to use this command", ARMOR_TYPE_FIRST, ARMOR_TYPE_LAST);
@@ -8214,7 +7359,7 @@ void bot_subcommand_heal_rotation_adjust_critical(Client *c, const Seperator *se
 
 	float critical_ratio = CRITICAL_HP_RATIO_BASE;
 	if (sep->IsNumber(2))
-		critical_ratio = Strings::ToFloat(critical_arg.c_str());
+		critical_ratio = Strings::ToFloat(critical_arg);
 	else if (!critical_arg.compare("+"))
 		critical_ratio = (*current_member->MemberOfHealRotation())->ArmorTypeCriticalHPRatio(armor_type_value) + HP_RATIO_DELTA;
 	else if (!critical_arg.compare("-"))
@@ -8251,7 +7396,7 @@ void bot_subcommand_heal_rotation_adjust_safe(Client *c, const Seperator *sep)
 
 	uint8 armor_type_value = 255;
 	if (sep->IsNumber(1))
-		armor_type_value = Strings::ToInt(armor_type_arg.c_str());
+		armor_type_value = Strings::ToInt(armor_type_arg);
 
 	if (armor_type_value > ARMOR_TYPE_LAST) {
 		c->Message(Chat::White, "You must specify a valid [armor_type: %u-%u] to use this command", ARMOR_TYPE_FIRST, ARMOR_TYPE_LAST);
@@ -8280,7 +7425,7 @@ void bot_subcommand_heal_rotation_adjust_safe(Client *c, const Seperator *sep)
 
 	float safe_ratio = SAFE_HP_RATIO_BASE;
 	if (sep->IsNumber(2))
-		safe_ratio = Strings::ToFloat(safe_arg.c_str());
+		safe_ratio = Strings::ToFloat(safe_arg);
 	else if (!safe_arg.compare("+"))
 		safe_ratio = (*current_member->MemberOfHealRotation())->ArmorTypeSafeHPRatio(armor_type_value) + HP_RATIO_DELTA;
 	else if (!safe_arg.compare("-"))
@@ -8394,7 +7539,7 @@ void bot_subcommand_heal_rotation_change_interval(Client *c, const Seperator *se
 	uint32 hr_change_interval_s = CASTING_CYCLE_DEFAULT_INTERVAL_S;
 
 	if (!change_interval_arg.empty()) {
-		hr_change_interval_s = Strings::ToInt(change_interval_arg.c_str());
+		hr_change_interval_s = Strings::ToInt(change_interval_arg);
 	}
 	else {
 		hr_change_interval_s = (*current_member->MemberOfHealRotation())->IntervalS();
@@ -8542,14 +7687,14 @@ void bot_subcommand_heal_rotation_create(Client *c, const Seperator *sep)
 			hr_adaptive_targeting = true;
 		if (!fast_heals_arg.compare("on"))
 			hr_fast_heals = true;
-		hr_interval_s = Strings::ToInt(interval_arg.c_str());
+		hr_interval_s = Strings::ToInt(interval_arg);
 	}
 	else if (!casting_override_arg.compare("off")) {
 		if (!adaptive_targeting_arg.compare("on"))
 			hr_adaptive_targeting = true;
 		if (!fast_heals_arg.compare("on"))
 			hr_fast_heals = true;
-		hr_interval_s = Strings::ToInt(interval_arg.c_str());
+		hr_interval_s = Strings::ToInt(interval_arg);
 	}
 
 	if (hr_interval_s < CASTING_CYCLE_MINIMUM_INTERVAL_S || hr_interval_s > CASTING_CYCLE_MAXIMUM_INTERVAL_S)
@@ -9867,7 +9012,7 @@ uint32 helper_bot_create(Client *bot_owner, std::string bot_name, uint8 bot_clas
 	}
 
 
-	auto my_bot = new Bot(Bot::CreateDefaultNPCTypeStructForBot(bot_name.c_str(), "", bot_owner->GetLevel(), bot_race, bot_class, bot_gender), bot_owner);
+	auto my_bot = new Bot(Bot::CreateDefaultNPCTypeStructForBot(bot_name, "", bot_owner->GetLevel(), bot_race, bot_class, bot_gender), bot_owner);
 
 	if (!my_bot->Save()) {
 		bot_owner->Message(
@@ -10117,7 +9262,7 @@ void helper_command_depart_list(Client* bot_owner, Bot* druid_bot, Bot* wizard_b
 					destination_number,
 					local_entry->long_name,
 					text_link
-				).c_str()
+				)
 			);
 
 			destination_count++;
@@ -10152,7 +9297,7 @@ void helper_command_depart_list(Client* bot_owner, Bot* druid_bot, Bot* wizard_b
 					destination_number,
 					local_entry->long_name,
 					text_link
-				).c_str()
+				)
 			);
 
 			destination_count++;

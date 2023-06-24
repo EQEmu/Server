@@ -24,6 +24,8 @@
 #include "../common/repositories/zone_repository.h"
 #include "../common/repositories/base/base_content_flags_repository.h"
 
+#include <glm/vec4.hpp>
+
 class ZoneStore {
 public:
 	ZoneStore();
@@ -35,7 +37,7 @@ public:
 
 	ZoneRepository::Zone *GetZone(uint32 zone_id, int version = 0);
 	ZoneRepository::Zone *GetZone(const char *in_zone_name);
-	ZoneRepository::Zone *GetZone(std::string in_zone_name);
+	ZoneRepository::Zone *GetZone(const std::string& in_zone_name);
 	uint32 GetZoneID(const char *in_zone_name);
 	uint32 GetZoneID(std::string zone_name);
 	std::string GetZoneName(uint32 zone_id);
@@ -43,6 +45,62 @@ public:
 	const char *GetZoneName(uint32 zone_id, bool error_unknown = false);
 	const char *GetZoneLongName(uint32 zone_id, bool error_unknown = false);
 	ZoneRepository::Zone *GetZoneWithFallback(uint32 zone_id, int version = 0);
+
+	glm::vec4 GetZoneSafeCoordinates(uint32 zone_id, int version = 0);
+	float GetZoneGraveyardID(uint32 zone_id, int version = 0);
+	uint8 GetZoneMinimumLevel(uint32 zone_id, int version = 0);
+	uint8 GetZoneMaximumLevel(uint32 zone_id, int version = 0);
+	uint8 GetZoneMinimumStatus(uint32 zone_id, int version = 0);
+	int GetZoneTimeZone(uint32 zone_id, int version = 0);
+	int GetZoneMaximumPlayers(uint32 zone_id, int version = 0);
+	uint32 GetZoneRuleSet(uint32 zone_id, int version = 0);
+	const std::string& GetZoneNote(uint32 zone_id, int version = 0);
+	float GetZoneUnderworld(uint32 zone_id, int version = 0);
+	float GetZoneMinimumClip(uint32 zone_id, int version = 0);
+	float GetZoneMaximumClip(uint32 zone_id, int version = 0);
+	float GetZoneFogMinimumClip(uint32 zone_id, uint8 slot = 0, int version = 0);
+	float GetZoneFogMaximumClip(uint32 zone_id, uint8 slot = 0, int version = 0);
+	uint8 GetZoneFogRed(uint32 zone_id, uint8 slot = 0, int version = 0);
+	uint8 GetZoneFogGreen(uint32 zone_id, uint8 slot = 0, int version = 0);
+	uint8 GetZoneFogBlue(uint32 zone_id, uint8 slot = 0, int version = 0);
+	uint8 GetZoneSky(uint32 zone_id, int version = 0);
+	uint8 GetZoneZType(uint32 zone_id, int version = 0);
+	float GetZoneExperienceMultiplier(uint32 zone_id, int version = 0);
+	float GetZoneWalkSpeed(uint32 zone_id, int version = 0);
+	uint8 GetZoneTimeType(uint32 zone_id, int version = 0);
+	float GetZoneFogDensity(uint32 zone_id, int version = 0);
+	const std::string& GetZoneFlagNeeded(uint32 zone_id, int version = 0);
+	int8 GetZoneCanBind(uint32 zone_id, int version = 0);
+	int8 GetZoneCanCombat(uint32 zone_id, int version = 0);
+	int8 GetZoneCanLevitate(uint32 zone_id, int version = 0);
+	int8 GetZoneCastOutdoor(uint32 zone_id, int version = 0);
+	uint8 GetZoneHotzone(uint32 zone_id, int version = 0);
+	uint8 GetZoneInstanceType(uint32 zone_id, int version = 0);
+	uint64 GetZoneShutdownDelay(uint32 zone_id, int version = 0);
+	int8 GetZonePEQZone(uint32 zone_id, int version = 0);
+	int8 GetZoneExpansion(uint32 zone_id, int version = 0);
+	int8 GetZoneBypassExpansionCheck(uint32 zone_id, int version = 0);
+	uint8 GetZoneSuspendBuffs(uint32 zone_id, int version = 0);
+	int GetZoneRainChance(uint32 zone_id, uint8 slot = 0, int version = 0);
+	int GetZoneRainDuration(uint32 zone_id, uint8 slot = 0, int version = 0);
+	int GetZoneSnowChance(uint32 zone_id, uint8 slot = 0, int version = 0);
+	int GetZoneSnowDuration(uint32 zone_id, uint8 slot = 0, int version = 0);
+	float GetZoneGravity(uint32 zone_id, int version = 0);
+	int GetZoneType(uint32 zone_id, int version = 0);
+	int8 GetZoneSkyLock(uint32 zone_id, int version = 0);
+	int GetZoneFastRegenHP(uint32 zone_id, int version = 0);
+	int GetZoneFastRegenMana(uint32 zone_id, int version = 0);
+	int GetZoneFastRegenEndurance(uint32 zone_id, int version = 0);
+	int GetZoneNPCMaximumAggroDistance(uint32 zone_id, int version = 0);
+	uint32 GetZoneMaximumMovementUpdateRange(uint32 zone_id, int version = 0);
+	int8 GetZoneMinimumExpansion(uint32 zone_id, int version = 0);
+	int8 GetZoneMaximumExpansion(uint32 zone_id, int version = 0);
+	const std::string& GetZoneContentFlags(uint32 zone_id, int version = 0);
+	const std::string& GetZoneContentFlagsDisabled(uint32 zone_id, int version = 0);
+	int GetZoneUnderworldTeleportIndex(uint32 zone_id, int version = 0);
+	int GetZoneLavaDamage(uint32 zone_id, int version = 0);
+	int GetZoneMinimumLavaDamage(uint32 zone_id, int version = 0);
+
 private:
 	std::vector<ZoneRepository::Zone> m_zones;
 };
@@ -53,7 +111,7 @@ extern ZoneStore zone_store;
  * Global helpers
  */
 inline uint32 ZoneID(const char *in_zone_name) { return zone_store.GetZoneID(in_zone_name); }
-inline uint32 ZoneID(std::string zone_name) { return zone_store.GetZoneID(zone_name); }
+inline uint32 ZoneID(const std::string& zone_name) { return zone_store.GetZoneID(zone_name); }
 inline const char *ZoneName(uint32 zone_id, bool error_unknown = false)
 {
 	return zone_store.GetZoneName(

@@ -1793,6 +1793,17 @@ struct GMSummon_Struct {
 /*104*/	uint32	unknown2; // E0 E0 56 00
 };
 
+struct GMFind_Struct {
+	char	charname[64];
+	char	gmname[64];
+	uint32	success;
+	uint32	zoneID;
+	float	x;
+	float	y;
+	float	z;
+	uint32	unknown2;
+};
+
 struct GMGoto_Struct { // x,y is swapped as compared to summon and makes sense as own packet
 /*  0*/ char	charname[64];
 

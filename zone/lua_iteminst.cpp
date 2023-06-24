@@ -1,6 +1,5 @@
 #ifdef LUA_EQEMU
 
-#include "lua.hpp"
 #include <luabind/luabind.hpp>
 #include <luabind/object.hpp>
 
@@ -16,6 +15,13 @@ Lua_ItemInst::Lua_ItemInst(int item_id) {
 Lua_ItemInst::Lua_ItemInst(int item_id, int charges) {
 	SetLuaPtrData(database.CreateItem(item_id, charges));
 	cloned_ = true;
+}
+
+Lua_ItemInst::~Lua_ItemInst() {
+	if (cloned_) {
+		EQ::ItemInstance *ptr = GetLuaPtrData();
+		delete ptr;
+	}
 }
 
 Lua_ItemInst& Lua_ItemInst::operator=(const Lua_ItemInst& o) {

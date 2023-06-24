@@ -52,7 +52,7 @@ LoginServerList::~LoginServerList() {
 void LoginServerList::Add(const char* iAddress, uint16 iPort, const char* Account, const char* Password, bool Legacy)
 {
 	auto loginserver = new LoginServer(iAddress, iPort, Account, Password, Legacy);
-	m_list.push_back(std::unique_ptr<LoginServer>(loginserver));
+	m_list.emplace_back(std::unique_ptr<LoginServer>(loginserver));
 }
 
 bool LoginServerList::SendStatus() {

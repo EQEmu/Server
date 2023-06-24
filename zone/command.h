@@ -82,6 +82,7 @@ void command_emoteview(Client *c, const Seperator *sep);
 void command_emptyinventory(Client *c, const Seperator *sep);
 void command_enablerecipe(Client *c, const Seperator *sep);
 void command_endurance(Client *c, const Seperator *sep);
+void command_entityvariable(Client *c, const Seperator *sep);
 void command_exptoggle(Client *c, const Seperator *sep);
 void command_faction(Client *c, const Seperator *sep);
 void command_faction_association(Client *c, const Seperator *sep);
@@ -90,6 +91,7 @@ void command_findaa(Client *c, const Seperator *sep);
 void command_findaliases(Client *c, const Seperator *sep);
 void command_findcharacter(Client *c, const Seperator *sep);
 void command_findclass(Client *c, const Seperator *sep);
+void command_findcurrency(Client *c, const Seperator *sep);
 void command_findfaction(Client *c, const Seperator *sep);
 void command_findnpctype(Client *c, const Seperator *sep);
 void command_findrace(Client *c, const Seperator *sep);
@@ -180,7 +182,6 @@ void command_nukebuffs(Client *c, const Seperator *sep);
 void command_nukeitem(Client *c, const Seperator *sep);
 void command_object(Client *c, const Seperator *sep);
 void command_oocmute(Client *c, const Seperator *sep);
-void command_opcode(Client *c, const Seperator *sep);
 
 #ifdef PACKET_PROFILER
 void command_packetprofile(Client *c, const Seperator *sep);

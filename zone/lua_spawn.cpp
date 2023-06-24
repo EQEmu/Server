@@ -1,6 +1,5 @@
 #ifdef LUA_EQEMU
 
-#include "lua.hpp"
 #include <luabind/luabind.hpp>
 
 #include "spawn2.h"

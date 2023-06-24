@@ -17,6 +17,8 @@
 */
 
 #include "bot.h"
+#include "bot_command.h"
+#include "client.h"
 #include "object.h"
 #include "raids.h"
 #include "doors.h"
@@ -186,6 +188,10 @@ void Bot::ProcessRaidInvite(Mob* invitee, Client* invitor, bool group_invite) {
 
 	Raid* raid = entity_list.GetRaidByClient(invitor);
 
+	if (raid && raid->RaidCount() >= MAX_RAID_MEMBERS) {
+		invitor->MessageString(Chat::Red, RAID_IS_FULL);
+		return;
+	}
 	Bot::CreateBotRaid(invitee, invitor, group_invite, raid);
 }
 
@@ -296,4 +302,30 @@ void Bot::ProcessBotGroupAdd(Group* group, Raid* raid, Client* client, bool new_
 	raid->GroupUpdate(raid_free_group_id);
 }
 
+void Client::SpawnRaidBotsOnConnect(Raid* raid) {
+	std::list<BotsAvailableList> bots_list;
+	if (!database.botdb.LoadBotsList(CharacterID(), bots_list) || bots_list.empty()) {
+		return;
+	}
+
+	std::vector<RaidMember> r_members = raid->GetMembers();
+	for (const auto& m: r_members) {
+		if (strlen(m.member_name) != 0) {
+
+			for (const auto& b: bots_list) {
+				if (strcmp(m.member_name, b.Name) == 0) {
+					std::string buffer = "^spawn ";
+					buffer.append(m.member_name);
+					bot_command_real_dispatch(this, buffer.c_str());
+					auto bot = entity_list.GetBotByBotName(m.member_name);
+
+					if (bot) {
+						bot->SetRaidGrouped(true);
+						bot->p_raid_instance = raid;
+					}
+				}
+			}
+		}
+	}
+}
 

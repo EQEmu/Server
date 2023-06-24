@@ -2,7 +2,7 @@
 #include "../common/eqemu_logsys.h"
 #include "../common/strings.h"
 
-void CombatRecord::Start(std::string in_mob_name)
+void CombatRecord::Start(const std::string& in_mob_name)
 {
 	m_start_time      = std::time(nullptr);
 	m_end_time        = 0;
@@ -70,14 +70,4 @@ float CombatRecord::GetHealedReceivedPerSecond() const
 {
 	double time_in_combat = TimeInCombat();
 	return time_in_combat > 0 ? (m_heal_received / time_in_combat) : m_heal_received;
-}
-
-int64 CombatRecord::GetDamageReceived() const
-{
-	return m_damage_received;
-}
-
-int64 CombatRecord::GetHealReceived() const
-{
-	return m_heal_received;
 }

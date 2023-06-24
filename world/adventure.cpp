@@ -82,7 +82,7 @@ void Adventure::RemovePlayer(std::string character_name)
 	}
 }
 
-bool Adventure::PlayerExists(std::string character_name)
+bool Adventure::PlayerExists(const std::string& character_name)
 {
 	auto iter = players.begin();
 	while(iter != players.end())

@@ -20,9 +20,6 @@
 
 #include "client.h"
 #include "mob.h"
-#include "../common/races.h"
-#include "../common/say_link.h"
-#include "../common/strings.h"
 #include "npc_scale_manager.h"
 
 inline std::string GetMobAttributeByString(Mob *mob, const std::string &attribute)

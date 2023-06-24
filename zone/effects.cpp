@@ -28,7 +28,6 @@
 #include "string_ids.h"
 #include "worldserver.h"
 #include "zonedb.h"
-#include "../common/zone_store.h"
 #include "position.h"
 
 float Mob::GetActSpellRange(uint16 spell_id, float range)
@@ -811,9 +810,9 @@ void Client::SendDisciplineUpdate() {
 
 bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 	// Dont let client waste a reuse timer if they can't use the disc
-	if ((IsStunned() && !IgnoreCastingRestriction(spell_id))||
+	if ((IsStunned() && !IsCastNotStandingSpell(spell_id))||
 		IsFeared() ||
-		(IsMezzed() && !IgnoreCastingRestriction(spell_id)) ||
+		(IsMezzed() && !IsCastNotStandingSpell(spell_id)) ||
 		IsAmnesiad() ||
 		IsPet())
 	{
@@ -838,7 +837,7 @@ bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 		return false;
 	}
 
-	if (DivineAura() && !IgnoreCastingRestriction(spell_id)) {
+	if (DivineAura() && !IsCastNotStandingSpell(spell_id)) {
 		return false;
 	}
 

@@ -196,10 +196,8 @@ public:
 	void SetAttackTimer() override;
 	uint64 GetClassHPFactor();
 	int64 CalcMaxHP() override;
-	bool DoFinishedSpellAETarget(uint16 spell_id, Mob* spellTarget, EQ::spells::CastingSlot slot, bool &stopLogic);
 	bool DoFinishedSpellSingleTarget(uint16 spell_id, Mob* spellTarget, EQ::spells::CastingSlot slot, bool &stopLogic);
 	bool DoFinishedSpellGroupTarget(uint16 spell_id, Mob* spellTarget, EQ::spells::CastingSlot slot, bool &stopLogic);
-	void SendBotArcheryWearChange(uint8 material_slot, uint32 material, uint32 color);
 	void Camp(bool save_to_database = true);
 	void SetTarget(Mob* mob) override;
 	void Zone();
@@ -644,8 +642,6 @@ public:
 	bool UpdateBotSpellSetting(uint16 spell_id, BotSpellSetting* bs);
 	void SetBotEnforceSpellSetting(bool enforcespellsettings, bool save = false);
 	bool GetBotEnforceSpellSetting() const { return m_enforce_spell_settings; }
-
-	static void SpawnBotGroupByName(Client* c, const std::string& botgroup_name, uint32 leader_id);
 
 	std::string CreateSayLink(Client* botOwner, const char* message, const char* name);
 

@@ -73,13 +73,6 @@ class Embperl
 private:
 	//if we fail inside a script evaluation, this will hold the croak msg (not much help if we die during construction, but that's our own fault)
 	mutable std::string errmsg;
-	//kludgy workaround for the fact that we can't directly do something like SvIV(get_sv($big[0]{ass}->{struct}))
-	SV * my_get_sv(const char * varname) {
-		char buffer[256];
-		snprintf(buffer, 256, "if(defined(%s)) { $scratch::temp = %s; } else { $scratch::temp = 'UNDEF'; }", varname, varname);
-		eval(buffer);
-		return get_sv("scratch::temp", false);
-	}
 
 	//install a perl func
 	void init_eval_file(void);
@@ -97,24 +90,10 @@ public:
 
 	void Reinit();
 
-	//return the last error msg
-	std::string lasterr(void) const { return errmsg;};
 	//evaluate an expression. throws string errors on fail
 	int eval(const char * code);
 	//execute a subroutine. throws lasterr on failure
 	int dosub(const char * subname, const std::vector<std::string> * args = nullptr, int mode = G_SCALAR|G_EVAL);
-
-	//Access to perl variables
-	//all varnames here should be of the form package::name
-	//returns the contents of the perl variable named in varname as a c int
-	int geti(const char * varname) { return static_cast<int>(SvIV(my_get_sv(varname))); };
-	//returns the contents of the perl variable named in varname as a c float
-	float getd(const char * varname) { return static_cast<float>(SvNV(my_get_sv(varname)));};
-	//returns the contents of the perl variable named in varname as a string
-	std::string getstr(const char * varname) {
-		SV * temp = my_get_sv(varname);
-		return std::string(SvPV_nolen(temp),SvLEN(temp));
-	}
 
 	//put an integer into a perl varable
 	void seti(const char *varname, int val) const {
@@ -163,13 +142,8 @@ public:
 	//idea borrowed from perlembed
 	int eval_file(const char * packagename, const char * filename);
 
-	inline bool InUse() const { return(in_use); }
-
 	//check to see if a sub exists in package
 	bool SubExists(const char *package, const char *sub);
-
-	//check to see if a variable exists in package
-	bool VarExists(const char *package, const char *var);
 };
 #endif //EMBPERL
 

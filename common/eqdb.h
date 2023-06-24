@@ -27,7 +27,7 @@
 
 //this is the main object exported to perl.
 class EQDB {
-	EQDB();
+	EQDB() = default;
 public:
 	static EQDB *Singleton() { return(&s_EQDB); }
 

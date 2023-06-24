@@ -104,9 +104,9 @@ EQEmuLogSys *EQEmuLogSys::LoadLogSettingsDefaults()
 	/**
 	 * RFC 5424
 	 */
-	log_settings[Logs::Error].log_to_console     = static_cast<uint8>(Logs::General);
-	log_settings[Logs::Warning].log_to_console   = static_cast<uint8>(Logs::General);
-	log_settings[Logs::Info].log_to_console      = static_cast<uint8>(Logs::General);
+	log_settings[Logs::Error].log_to_console   = static_cast<uint8>(Logs::General);
+	log_settings[Logs::Warning].log_to_console = static_cast<uint8>(Logs::General);
+	log_settings[Logs::Info].log_to_console    = static_cast<uint8>(Logs::General);
 
 	/**
 	 * Set Category enabled status on defaults
@@ -187,9 +187,10 @@ void EQEmuLogSys::ProcessLogWrite(
 uint16 EQEmuLogSys::GetGMSayColorFromCategory(uint16 log_category)
 {
 	switch (log_category) {
+		case Logs::Crash:
+		case Logs::Error:
 		case Logs::MySQLError:
 		case Logs::QuestErrors:
-		case Logs::Error:
 			return Chat::Red;
 		case Logs::MySQLQuery:
 		case Logs::Debug:
@@ -199,8 +200,6 @@ uint16 EQEmuLogSys::GetGMSayColorFromCategory(uint16 log_category)
 		case Logs::Commands:
 		case Logs::Mercenaries:
 			return Chat::Magenta;
-		case Logs::Crash:
-			return Chat::Red;
 		default:
 			return Chat::Yellow;
 	}
@@ -220,7 +219,7 @@ void EQEmuLogSys::ProcessConsoleMessage(
 	int line
 )
 {
-	bool is_error = (
+	bool is_error   = (
 		log_category == Logs::LogCategory::Error ||
 		log_category == Logs::LogCategory::MySQLError ||
 		log_category == Logs::LogCategory::Crash ||
@@ -262,7 +261,7 @@ void EQEmuLogSys::ProcessConsoleMessage(
 	}
 
 	if (log_category == Logs::LogCategory::MySQLQuery) {
-		auto        s     = Strings::Split(message, "--");
+		auto s = Strings::Split(message, "--");
 		if (s.size() > 1) {
 			std::string query = Strings::Trim(s[0]);
 			std::string meta  = Strings::Trim(s[1]);
@@ -298,19 +297,76 @@ void EQEmuLogSys::ProcessConsoleMessage(
 					}
 				}
 
-				if (!is_upper) {
-					(!is_error ? std::cout : std::cerr)
-						<< rang::fgB::gray
-						<< "["
-						<< rang::style::bold
-						<< rang::fgB::yellow
-						<< e
-						<< rang::fgB::gray
-						<< "] "
-						;
+				// color matching in []
+				// ex: [<red>variable] would produce [variable] with red inside brackets
+				std::map<std::string, rang::fgB> colors = {
+					{"<black>",   rang::fgB::black},
+					{"<green>",   rang::fgB::green},
+					{"<yellow>",  rang::fgB::yellow},
+					{"<blue>",    rang::fgB::blue},
+					{"<magenta>", rang::fgB::magenta},
+					{"<cyan>",    rang::fgB::cyan},
+					{"<gray>",    rang::fgB::gray},
+					{"<red>",     rang::fgB::red},
+				};
+
+				bool      match_color = false;
+				for (auto &c: colors) {
+					if (Strings::Contains(e, c.first)) {
+						e = Strings::Replace(e, c.first, "");
+						(!is_error ? std::cout : std::cerr)
+							<< rang::fgB::gray
+							<< "["
+							<< rang::style::bold
+							<< c.second
+							<< e
+							<< rang::style::reset
+							<< rang::fgB::gray
+							<< "] ";
+						match_color = true;
+					}
 				}
-				else {
-					(!is_error ? std::cout : std::cerr) << rang::fgB::gray << "[" << e << "] ";
+
+				// string match to colors
+				std::map<std::string, rang::fgB> matches = {
+					{"missing", rang::fgB::red},
+					{"error",   rang::fgB::red},
+					{"ok",      rang::fgB::green},
+				};
+
+				for (auto &c: matches) {
+					if (Strings::Contains(e, c.first)) {
+						(!is_error ? std::cout : std::cerr)
+							<< rang::fgB::gray
+							<< "["
+							<< rang::style::bold
+							<< c.second
+							<< e
+							<< rang::style::reset
+							<< rang::fgB::gray
+							<< "] ";
+						match_color = true;
+					}
+				}
+
+				// if we don't match a color in either the string matching or
+				// the color tag matching, we default to yellow inside brackets
+				// if uppercase, does not get colored
+				if (!match_color) {
+					if (!is_upper) {
+						(!is_error ? std::cout : std::cerr)
+							<< rang::fgB::gray
+							<< "["
+							<< rang::style::bold
+							<< rang::fgB::yellow
+							<< e
+							<< rang::style::reset
+							<< rang::fgB::gray
+							<< "] ";
+					}
+					else {
+						(!is_error ? std::cout : std::cerr) << rang::fgB::gray << "[" << e << "] ";
+					}
 				}
 			}
 			else {
@@ -524,6 +580,8 @@ void EQEmuLogSys::StartFileLogs(const std::string &log_name)
  */
 void EQEmuLogSys::SilenceConsoleLogging()
 {
+	std::copy(std::begin(log_settings), std::end(log_settings), std::begin(pre_silence_settings));
+
 	for (int log_index = Logs::AA; log_index != Logs::MaxCategoryID; log_index++) {
 		log_settings[log_index].log_to_console      = 0;
 		log_settings[log_index].is_category_enabled = 0;
@@ -537,10 +595,7 @@ void EQEmuLogSys::SilenceConsoleLogging()
  */
 void EQEmuLogSys::EnableConsoleLogging()
 {
-	for (int log_index = Logs::AA; log_index != Logs::MaxCategoryID; log_index++) {
-		log_settings[log_index].log_to_console      = Logs::General;
-		log_settings[log_index].is_category_enabled = 1;
-	}
+	std::copy(std::begin(pre_silence_settings), std::end(pre_silence_settings), std::begin(log_settings));
 }
 
 EQEmuLogSys *EQEmuLogSys::LoadLogDatabaseSettings()
@@ -742,3 +797,16 @@ EQEmuLogSys *EQEmuLogSys::SetLogPath(const std::string &log_path)
 	return this;
 }
 
+void EQEmuLogSys::DisableMySQLErrorLogs()
+{
+	log_settings[Logs::MySQLError].log_to_file    = 0;
+	log_settings[Logs::MySQLError].log_to_console = 0;
+	log_settings[Logs::MySQLError].log_to_gmsay   = 0;
+}
+
+void EQEmuLogSys::EnableMySQLErrorLogs()
+{
+	log_settings[Logs::MySQLError].log_to_file    = 1;
+	log_settings[Logs::MySQLError].log_to_console = 1;
+	log_settings[Logs::MySQLError].log_to_gmsay   = 1;
+}

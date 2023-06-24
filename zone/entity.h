@@ -50,7 +50,6 @@ class Raid;
 class Spawn2;
 class Trap;
 
-struct DynamicZoneSafeReturn;
 struct GuildBankItemUpdate_Struct;
 struct NewSpawn_Struct;
 struct QGlobal;
@@ -115,7 +114,6 @@ public:
 	inline const time_t& GetSpawnTimeStamp() const { return spawn_timestamp; }
 
 	virtual const char* GetName() { return ""; }
-	bool CheckCoordLosNoZLeaps(float cur_x, float cur_y, float cur_z, float trg_x, float trg_y, float trg_z, float perwalk=1);
 
 	Bot* CastToBot();
 	const Bot* CastToBot() const;
@@ -129,7 +127,6 @@ protected:
 			initial_id = set_id;
 		}
 	}
-	uint32 pDBAsyncWorkID;
 private:
 	uint16 id;
 	uint16 initial_id;
@@ -186,7 +183,6 @@ public:
 	Client *GetClientByCharID(uint32 iCharID);
 	Client *GetClientByWID(uint32 iWID);
 	Client *GetClientByLSID(uint32 iLSID);
-	Client *GetClient(uint32 ip, uint16 port);
 
 	Bot* GetRandomBot(const glm::vec3& location = glm::vec3(0.f), float distance = 0, Bot* exclude_bot = nullptr);
 	Client* GetRandomClient(const glm::vec3& location = glm::vec3(0.f), float distance = 0, Client* exclude_client = nullptr);
@@ -194,15 +190,12 @@ public:
 	Mob* GetRandomMob(const glm::vec3& location = glm::vec3(0.f), float distance = 0, Mob* exclude_mob = nullptr);
 	Group* GetGroupByMob(Mob* mob);
 	Group* GetGroupByMobName(const char* name);
-	Group* GetGroupByBot(Bot* bot);
 	bool IsInSameGroupOrRaidGroup(Client *client1, Client *client2);
 	Group *GetGroupByClient(Client* client);
 	Group *GetGroupByID(uint32 id);
 	Group *GetGroupByLeaderName(const char* leader);
-	Raid *GetRaidByMob(Mob* mob);
 	Raid *GetRaidByClient(Client* client);
 	Raid *GetRaidByID(uint32 id);
-	Raid *GetRaidByLeaderName(const char *leader);
 	Raid* GetRaidByBotName(const char* name);
 	Raid* GetRaidByBot(const Bot* bot);
 	Raid* GetRaidByName(const char* name);
@@ -269,7 +262,6 @@ public:
 	void	ClearAreas();
 	void	ReloadMerchants();
 	void	ProcessProximitySay(const char *message, Client *c, uint8 language = 0);
-	void	SendAATimer(uint32 charid,UseAA_Struct* uaa);
 	Doors *FindDoor(uint8 door_id);
 	Object *FindObject(uint32 object_id);
 	Object*	FindNearbyObject(float x, float y, float z, float radius);
@@ -292,13 +284,11 @@ public:
 	void	AddProximity(NPC *proximity_for);
 	void	Clear();
 	bool	RemoveMob(uint16 delete_id);
-	bool	RemoveMob(Mob* delete_mob);
 	bool	RemoveClient(uint16 delete_id);
 	bool	RemoveClient(Client* delete_client);
 	bool	RemoveNPC(uint16 delete_id);
 	bool	RemoveMerc(uint16 delete_id);
 	bool	RemoveGroup(uint32 delete_id);
-	bool	RemoveRaid(uint32 delete_id);
 	bool	RemoveCorpse(uint16 delete_id);
 	bool	RemoveDoor(uint16 delete_id);
 	bool	RemoveTrap(uint16 delete_id);
@@ -322,7 +312,6 @@ public:
 	void	RemoveAllRaids();
 	void	RemoveAllEncounters();
 	void	DestroyTempPets(Mob *owner);
-	int16	CountTempPets(Mob *owner);
 	void	AddTempPetsToHateList(Mob *owner, Mob* other, bool bFrenzy = false);
 	void	AddTempPetsToHateListOnOwnerDamage(Mob *owner, Mob* attacker, int32 spell_id);
 	Entity *GetEntityMob(uint16 id);
@@ -429,7 +418,6 @@ public:
 
 	void	QueueClientsByXTarget(Mob* sender, const EQApplicationPacket* app, bool iSendToSender = true, EQ::versions::ClientVersionBitmask client_version_bits = EQ::versions::ClientVersionBitmask::maskAllClients);
 	void	QueueToGroupsForNPCHealthAA(Mob* sender, const EQApplicationPacket* app);
-	void	QueueManaged(Mob* sender, const EQApplicationPacket* app, bool ignore_sender=false, bool ackreq = true);
 
 	void AEAttack(
 		Mob *attacker,
@@ -456,13 +444,11 @@ public:
 	Trap*	FindNearbyTrap(Mob* searcher, float max_dist, float &curdist, bool detected = false);
 
 	void	AddHealAggro(Mob* target, Mob* caster, uint16 hate);
-	Mob*	FindDefenseNPC(uint32 npcid);
 	void	OpenDoorsNear(Mob* opener);
 	void	UpdateWho(bool iSendFullUpdate = false);
 	char*	MakeNameUnique(char* name);
 	static char* RemoveNumbers(char* name);
 	void	SignalMobsByNPCID(uint32 npc_type, int signal_id);
-	void	CountNPC(uint32* NPCCount, uint32* NPCLootCount, uint32* gmspawntype_count);
 	void	RemoveEntity(uint16 id);
 	void	SendPetitionToAdmins(Petition* pet);
 	void	SendPetitionToAdmins();
@@ -473,10 +459,8 @@ public:
 	uint32	DeleteNPCCorpses();
 	uint32	DeletePlayerCorpses();
 	void	CorpseFix(Client* c);
-	void	WriteEntityIDs();
 	void	HalveAggro(Mob* who);
 	void	DoubleAggro(Mob* who);
-	void	Evade(Mob *who);
 	void	UpdateHoTT(Mob* target);
 
 	void	Process();
@@ -497,7 +481,6 @@ public:
 	void	LimitRemoveNPC(NPC *npc);
 	bool	LimitCheckType(uint32 npc_type, int count);
 	bool	LimitCheckGroup(uint32 spawngroup_id, int count);
-	bool	LimitCheckBoth(uint32 npc_type, uint32 spawngroup_id, int group_count, int type_count);
 	bool	LimitCheckName(const char* npc_name);
 
 	int		GetHatedCount(Mob *attacker, Mob *exclude, bool inc_gray_con);
@@ -522,7 +505,6 @@ public:
 	void	ZoneWho(Client *c, Who_All_Struct* Who);
 	void	UnMarkNPC(uint16 ID);
 
-	void	GateAllClients();
 	void	SignalAllClients(int signal_id);
 	void	UpdateQGlobal(uint32 qid, QGlobal newGlobal);
 	void	DeleteQGlobal(std::string name, uint32 npcID, uint32 charID, uint32 zoneID);
@@ -532,7 +514,6 @@ public:
 
 	void GateAllClientsToSafeReturn();
 
-	uint16 GetClientCount();
 	void GetMobList(std::list<Mob*> &m_list);
 	void GetNPCList(std::list<NPC*> &n_list);
 	void GetMercList(std::list<Merc*> &n_list);

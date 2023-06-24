@@ -22,7 +22,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "mob.h"
 #include "raids.h"
 
-#include "../common/rulesys.h"
 #include "../common/data_verification.h"
 
 #include "hate_list.h"
@@ -30,7 +29,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "zone.h"
 #include "water_map.h"
 
-#include <stdlib.h>
 #include <list>
 
 extern Zone *zone;
@@ -42,19 +40,6 @@ HateList::HateList()
 
 HateList::~HateList()
 {
-}
-
-// added for frenzy support
-// checks if target still is in frenzy mode
-void HateList::IsEntityInFrenzyMode()
-{
-	auto iterator = list.begin();
-	while (iterator != list.end())
-	{
-		if ((*iterator)->entity_on_hatelist->GetHPRatio() >= 20)
-			(*iterator)->is_entity_frenzy = false;
-		++iterator;
-	}
 }
 
 void HateList::WipeHateList()
@@ -157,28 +142,54 @@ Mob* HateList::GetDamageTopOnHateList(Mob* hater)
 	return current;
 }
 
-Mob* HateList::GetClosestEntOnHateList(Mob *hater, bool skip_mezzed) {
+Mob* HateList::GetClosestEntOnHateList(Mob *hater, bool skip_mezzed, EntityFilterType entity_type) {
 	Mob* close_entity = nullptr;
 	float close_distance = 99999.9f;
 	float this_distance;
 
-	auto iterator = list.begin();
-	while (iterator != list.end()) {
-		if (skip_mezzed && (*iterator)->entity_on_hatelist->IsMezzed()) {
-			++iterator;
+	for (const auto& e : list) {
+		if (!e->entity_on_hatelist) {
 			continue;
 		}
 
-		this_distance = DistanceSquaredNoZ((*iterator)->entity_on_hatelist->GetPosition(), hater->GetPosition());
-		if ((*iterator)->entity_on_hatelist != nullptr && this_distance <= close_distance) {
-			close_distance = this_distance;
-			close_entity = (*iterator)->entity_on_hatelist;
+		if (skip_mezzed && e->entity_on_hatelist->IsMezzed()) {
+			continue;
 		}
-		++iterator;
+
+		switch (entity_type) {
+			case EntityFilterType::Bots:
+				if (!e->entity_on_hatelist->IsBot()) {
+					continue;
+				}
+				break;
+			case EntityFilterType::Clients:
+				if (!e->entity_on_hatelist->IsClient()) {
+					continue;
+				}
+				break;
+			case EntityFilterType::NPCs:
+				if (!e->entity_on_hatelist->IsNPC()) {
+					continue;
+				}
+				break;
+			case EntityFilterType::All:
+			default:
+				break;
+		}
+
+		this_distance = DistanceSquaredNoZ(e->entity_on_hatelist->GetPosition(), hater->GetPosition());
+		if (this_distance <= close_distance) {
+			close_distance = this_distance;
+			close_entity   = e->entity_on_hatelist;
+		}
 	}
 
-	if ((!close_entity && hater->IsNPC()) || (close_entity && close_entity->DivineAura()))
+	if (
+		(!close_entity && hater->IsNPC()) ||
+		(close_entity && close_entity->DivineAura())
+	) {
 		close_entity = hater->CastToNPC()->GetHateTop();
+	}
 
 	return close_entity;
 }
@@ -483,20 +494,22 @@ Mob *HateList::GetEntWithMostHateOnList(Mob *center, Mob *skip, bool skip_mezzed
 		while (iterator != list.end())
 		{
 			struct_HateList *cur = (*iterator);
-			if (cur->entity_on_hatelist == skip) {
-				++iterator;
-				continue;
-			}
+			if (cur) {
+				if (cur->entity_on_hatelist == skip) {
+					++iterator;
+					continue;
+				}
 
-			if (skip_mezzed && cur->entity_on_hatelist->IsMezzed()) {
-				++iterator;
-				continue;
-			}
+				if (skip_mezzed && cur->entity_on_hatelist->IsMezzed()) {
+					++iterator;
+					continue;
+				}
 
-			if (cur->entity_on_hatelist != nullptr && ((cur->stored_hate_amount > hate) || cur->is_entity_frenzy))
-			{
-				top_hate = cur->entity_on_hatelist;
-				hate = cur->stored_hate_amount;
+				if (cur->entity_on_hatelist != nullptr && ((cur->stored_hate_amount > hate) || cur->is_entity_frenzy))
+				{
+					top_hate = cur->entity_on_hatelist;
+					hate = cur->stored_hate_amount;
+				}
 			}
 			++iterator;
 		}
@@ -516,24 +529,27 @@ Mob *HateList::GetEntWithMostHateOnList(bool skip_mezzed){
 	while (iterator != list.end())
 	{
 		struct_HateList *cur = (*iterator);
-		LogHateDetail(
-			"Looping GetEntWithMostHateOnList1 [{}] cur [{}] hate [{}] calc [{}]",
-			cur->entity_on_hatelist->GetMobDescription(),
-			cur->stored_hate_amount,
-			hate,
-			(cur->stored_hate_amount > hate)
-		);
 
-		if (cur && cur->entity_on_hatelist != nullptr && (cur->stored_hate_amount > hate))
-		{
+		if (cur) {
 			LogHateDetail(
-				"Looping GetEntWithMostHateOnList2 [{}]",
-				cur->entity_on_hatelist->GetMobDescription()
+				"Looping GetEntWithMostHateOnList1 [{}] cur [{}] hate [{}] calc [{}]",
+				cur->entity_on_hatelist->GetMobDescription(),
+				cur->stored_hate_amount,
+				hate,
+				(cur->stored_hate_amount > hate)
 			);
 
-			if (!skip_mezzed || !cur->entity_on_hatelist->IsMezzed()) {
-				top = cur->entity_on_hatelist;
-				hate = cur->stored_hate_amount;
+			if (cur->entity_on_hatelist != nullptr && (cur->stored_hate_amount > hate))
+			{
+				LogHateDetail(
+					"Looping GetEntWithMostHateOnList2 [{}]",
+					cur->entity_on_hatelist->GetMobDescription()
+				);
+
+				if (!skip_mezzed || !cur->entity_on_hatelist->IsMezzed()) {
+					top = cur->entity_on_hatelist;
+					hate = cur->stored_hate_amount;
+				}
 			}
 		}
 		++iterator;
@@ -581,29 +597,6 @@ Mob *HateList::GetRandomEntOnHateList(bool skip_mezzed)
 			++counter;
 			continue;
 		}
-
-		return iter->entity_on_hatelist;
-	}
-
-	return nullptr;
-}
-
-Mob *HateList::GetEscapingEntOnHateList() {
-	// function is still in design stage
-
-	for (auto iter : list) {
-		if (!iter->entity_on_hatelist)
-			continue;
-
-		if (!iter->entity_on_hatelist->IsFeared())
-			continue;
-
-		if (iter->entity_on_hatelist->IsRooted())
-			continue;
-		if (iter->entity_on_hatelist->IsMezzed())
-			continue;
-		if (iter->entity_on_hatelist->IsStunned())
-			continue;
 
 		return iter->entity_on_hatelist;
 	}

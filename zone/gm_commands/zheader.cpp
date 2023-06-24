@@ -2,16 +2,16 @@
 
 void command_zheader(Client *c, const Seperator *sep)
 {
-	int arguments = sep->argnum;
+	const auto arguments = sep->argnum;
 	if (!arguments) {
 		c->Message(Chat::White, "Usage: #zheader [Zone ID|Zone Short Name] [Version]");
 		return;
 	}
 
-	auto zone_id = (
-		sep->IsNumber(2) ?
-		Strings::ToUnsignedInt(sep->arg[2]) :
-		ZoneID(sep->arg[2])
+	const auto zone_id = (
+		sep->IsNumber(1) ?
+		Strings::ToUnsignedInt(sep->arg[1]) :
+		ZoneID(sep->arg[1])
 	);
 	if (!zone_id) {
 		c->Message(
@@ -26,9 +26,9 @@ void command_zheader(Client *c, const Seperator *sep)
 
 	auto zone_short_name = ZoneName(zone_id);
 	auto zone_long_name = ZoneLongName(zone_id);
-	auto version = (
-		sep->IsNumber(3) ?
-		Strings::ToUnsignedInt(sep->arg[3]) :
+	const auto version = (
+		sep->IsNumber(2) ?
+		Strings::ToUnsignedInt(sep->arg[2]) :
 		0
 	);
 

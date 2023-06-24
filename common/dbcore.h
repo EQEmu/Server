@@ -24,7 +24,8 @@ public:
 	~DBcore();
 	eStatus GetStatus() { return pStatus; }
 	MySQLRequestResult QueryDatabase(const char *query, uint32 querylen, bool retryOnFailureOnce = true);
-	MySQLRequestResult QueryDatabase(std::string query, bool retryOnFailureOnce = true);
+	MySQLRequestResult QueryDatabase(const std::string& query, bool retryOnFailureOnce = true);
+	MySQLRequestResult QueryDatabaseMulti(const std::string &query);
 	void TransactionBegin();
 	void TransactionCommit();
 	void TransactionRollback();
@@ -35,7 +36,7 @@ public:
 	const std::string &GetOriginHost() const;
 	void SetOriginHost(const std::string &origin_host);
 
-	bool DoesTableExist(std::string table_name);
+	bool DoesTableExist(const std::string& table_name);
 
 	void SetMySQL(const DBcore &o)
 	{
@@ -77,8 +78,20 @@ private:
 	uint32 pPort;
 	bool   pSSL;
 
+	// allows multiple queries to be executed within the same query
+	// do not use this under normal operation
+	// we use this during database migrations only currently
+	void SetMultiStatementsOn()
+	{
+		mysql_set_server_option(mysql, MYSQL_OPTION_MULTI_STATEMENTS_ON);
+	}
+
+	// disables multiple statements to be executed in one query
+	void SetMultiStatementsOff()
+	{
+		mysql_set_server_option(mysql, MYSQL_OPTION_MULTI_STATEMENTS_OFF);
+	}
 };
 
 
 #endif
-

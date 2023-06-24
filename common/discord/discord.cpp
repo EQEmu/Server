@@ -27,9 +27,6 @@ void Discord::SendWebhookMessage(const std::string &message, const std::string &
 	cli.set_connection_timeout(0, 15000000); // 15 sec
 	cli.set_read_timeout(15, 0); // 15 seconds
 	cli.set_write_timeout(15, 0); // 15 seconds
-	httplib::Headers headers = {
-		{"Content-Type", "application/json"}
-	};
 
 	// payload
 	Json::Value p;
@@ -96,9 +93,6 @@ void Discord::SendPlayerEventMessage(
 	cli.set_connection_timeout(0, 15000000); // 15 sec
 	cli.set_read_timeout(15, 0); // 15 seconds
 	cli.set_write_timeout(15, 0); // 15 seconds
-	httplib::Headers headers = {
-		{"Content-Type", "application/json"}
-	};
 
 	std::string payload = PlayerEventLogs::GetDiscordPayloadFromEvent(e);
 	if (payload.empty()) {

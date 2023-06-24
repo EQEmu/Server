@@ -15,8 +15,7 @@ struct HatersCount {
 };
 public:
 	XTargetAutoHaters() : m_client(nullptr), m_group(nullptr), m_raid(nullptr) {}
-	XTargetAutoHaters(Client *co, Group *go, Raid *ro) : m_client(co), m_group(go), m_raid(ro) {}
-	~XTargetAutoHaters() {}
+	~XTargetAutoHaters() = default;
 
 	void merge(XTargetAutoHaters &other);
 	void demerge(XTargetAutoHaters &other);

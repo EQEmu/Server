@@ -392,8 +392,7 @@ Corpse::Corpse(Client* client, int32 in_rezexp) : Mob (
 
 	/* Check Rule to see if we can leave corpses */
 	if (
-		!RuleB(Character, LeaveNakedCorpses) ||
-		RuleB(Character, LeaveCorpses) &&
+		(!RuleB(Character, LeaveNakedCorpses) || RuleB(Character, LeaveCorpses)) &&
 		GetLevel() >= RuleI(Character, DeathItemLossLevel)
 	) {
 		// cash
@@ -750,7 +749,7 @@ bool Corpse::Save() {
 		e.ornamentidfile      = item->ornamentidfile;
 		e.ornament_hero_model = item->ornament_hero_model;
 
-		ce.items.push_back(std::move(e));
+		ce.items.emplace_back(std::move(e));
 	}
 
 	/* Create New Corpse*/

@@ -22,12 +22,8 @@
 #include "../common/eqemu_logsys.h"
 #include "../common/global_define.h"
 #include <iostream>
-#include <stdio.h>
-#include <zlib.h>
 
 #ifdef _WINDOWS
-	#include <winsock2.h>
-	#include <windows.h>
 	#define snprintf	_snprintf
 	#define strncasecmp	_strnicmp
 	#define strcasecmp	_stricmp
@@ -54,8 +50,8 @@
 #include "worldserver.h"
 #include "zone.h"
 #include "zonedb.h"
-#include "../common/zone_store.h"
 #include "../common/events/player_event_logs.h"
+#include "water_map.h"
 
 extern QueryServ* QServ;
 extern Zone* zone;
@@ -194,9 +190,10 @@ bool Client::Process() {
 		}
 
 		if (camp_timer.Check()) {
-			Raid* raid = entity_list.GetRaidByClient(this);
-			if (raid)
-				raid->RemoveMember(this->GetName());
+			Raid *myraid = entity_list.GetRaidByClient(this);
+			if (myraid) {
+				myraid->MemberZoned(this);
+			}
 			LeaveGroup();
 			Save();
 			if (GetMerc())
@@ -340,7 +337,7 @@ bool Client::Process() {
 					if (ranged_timer.Check(false)) {
 						if (GetTarget() && (GetTarget()->IsNPC() || GetTarget()->IsClient()) && IsAttackAllowed(GetTarget())) {
 							if (GetTarget()->InFrontMob(this, GetTarget()->GetX(), GetTarget()->GetY())) {
-								if (CheckLosFN(GetTarget())) {
+								if (CheckLosFN(GetTarget()) && CheckWaterAutoFireLoS(GetTarget())) {
 									//client has built in los check, but auto fire does not.. done last.
 									RangedAttack(GetTarget());
 									if (CheckDoubleRangedAttack())
@@ -360,7 +357,7 @@ bool Client::Process() {
 					if (ranged_timer.Check(false)) {
 						if (GetTarget() && (GetTarget()->IsNPC() || GetTarget()->IsClient()) && IsAttackAllowed(GetTarget())) {
 							if (GetTarget()->InFrontMob(this, GetTarget()->GetX(), GetTarget()->GetY())) {
-								if (CheckLosFN(GetTarget())) {
+								if (CheckLosFN(GetTarget()) && CheckWaterAutoFireLoS(GetTarget())) {
 									//client has built in los check, but auto fire does not.. done last.
 									ThrowingAttack(GetTarget());
 								}
@@ -522,9 +519,9 @@ bool Client::Process() {
 				Save(0);
 			}
 
-			if (m_pp.intoxication > 0)
+			if (GetIntoxication() > 0)
 			{
-				--m_pp.intoxication;
+				SetIntoxication(GetIntoxication()-1);
 				CalcBonuses();
 			}
 
@@ -689,60 +686,60 @@ bool Client::Process() {
 
 /* Just a set of actions preformed all over in Client::Process */
 void Client::OnDisconnect(bool hard_disconnect) {
-	if(hard_disconnect)
-	{
+	if (hard_disconnect) {
 		LeaveGroup();
-		if (GetMerc())
-		{
+
+		if (GetMerc()) {
 			GetMerc()->Save();
 			GetMerc()->Depop();
 		}
-		Raid *MyRaid = entity_list.GetRaidByClient(this);
 
-		if (MyRaid)
-			MyRaid->MemberZoned(this);
+		auto* r = entity_list.GetRaidByClient(this);
 
-		RecordPlayerEventLog(PlayerEvent::WENT_OFFLINE, PlayerEvent::EmptyEvent{});
-
-		if (parse->PlayerHasQuestSub(EVENT_DISCONNECT)) {
-			parse->EventPlayer(EVENT_DISCONNECT, this, "", 0);
+		if (r) {
+			r->MemberZoned(this);
 		}
 
 		/* QS: PlayerLogConnectDisconnect */
-		if (RuleB(QueryServ, PlayerLogConnectDisconnect)){
+		if (RuleB(QueryServ, PlayerLogConnectDisconnect)) {
 			std::string event_desc = StringFormat("Disconnect :: in zoneid:%i instid:%i", GetZoneID(), GetInstanceID());
 			QServ->PlayerLogEvent(Player_Log_Connect_State, CharacterID(), event_desc);
 		}
 	}
 
-	if (!bZoning)
-	{
+	if (!bZoning) {
 		SetDynamicZoneMemberStatus(DynamicZoneMemberStatus::Offline);
 	}
 
 	RemoveAllAuras();
 
-	Mob *Other = trade->With();
-	if(Other)
-	{
+	auto* o = trade->With();
+	if (o) {
 		LogTrading("Client disconnected during a trade. Returning their items");
 		FinishTrade(this);
 
-		if(Other->IsClient())
-			Other->CastToClient()->FinishTrade(Other);
+		if (o->IsClient()) {
+			o->CastToClient()->FinishTrade(o);
+		}
 
 		/* Reset both sides of the trade */
 		trade->Reset();
-		Other->trade->Reset();
+		o->trade->Reset();
 	}
 
 	database.SetFirstLogon(CharacterID(), 0); //We change firstlogon status regardless of if a player logs out to zone or not, because we only want to trigger it on their first login from world.
 
-	/* Remove ourself from all proximities */
+	/* Remove from all proximities */
 	ClearAllProximities();
 
 	auto outapp = new EQApplicationPacket(OP_LogoutReply);
 	FastQueuePacket(&outapp);
+
+	RecordPlayerEventLog(PlayerEvent::WENT_OFFLINE, PlayerEvent::EmptyEvent{});
+
+	if (parse->PlayerHasQuestSub(EVENT_DISCONNECT)) {
+		parse->EventPlayer(EVENT_DISCONNECT, this, "", 0);
+	}
 
 	Disconnect();
 }
@@ -1039,7 +1036,7 @@ void Client::OPRezzAnswer(uint32 Action, uint32 SpellID, uint16 ZoneID, uint16 I
 			BuffFadeNonPersistDeath();
 		}
 
-		int SpellEffectDescNum = GetSpellEffectDescNum(SpellID);
+		int SpellEffectDescNum = GetSpellEffectDescriptionNumber(SpellID);
 		// Rez spells with Rez effects have this DescNum (first is Titanium, second is 6.2 Client)
 		if(RuleB(Character, UseResurrectionSickness) && SpellEffectDescNum == 82 || SpellEffectDescNum == 39067) {
 			SetHP(GetMaxHP() / 5);
@@ -1145,6 +1142,7 @@ void Client::OPMemorizeSpell(const EQApplicationPacket* app)
 				const auto* item = inst->GetItem();
 
 				if (
+					item &&
 					RuleB(Character, RestrictSpellScribing) &&
 					!item->IsEquipable(GetRace(), GetClass())
 				) {
@@ -1971,7 +1969,7 @@ void Client::CalcRestState()
 	for (unsigned int j = 0; j < buff_count; j++) {
 		if(IsValidSpell(buffs[j].spellid)) {
 			if(IsDetrimentalSpell(buffs[j].spellid) && (buffs[j].ticsremaining > 0))
-				if(!DetrimentalSpellAllowsRest(buffs[j].spellid))
+				if(!IsRestAllowedSpell(buffs[j].spellid))
 					return;
 		}
 	}
@@ -2403,4 +2401,19 @@ void Client::SendGuildLFGuildStatus()
 
 	worldserver.SendPacket(pack);
 	safe_delete(pack);
+}
+
+bool Client::CheckWaterAutoFireLoS(Mob* m)
+{
+	if (
+		!RuleB(Combat, WaterMatchRequiredForAutoFireLoS) ||
+		!zone->watermap
+	) {
+		return true;
+	}
+
+	return (
+		zone->watermap->InLiquid(GetPosition()) ==
+		zone->watermap->InLiquid(m->GetPosition())
+	);
 }

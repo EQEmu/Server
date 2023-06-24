@@ -258,7 +258,7 @@ bool EQ::ProfanityManager::clear_database_entries(DBcore *db) {
 	return true;
 }
 
-bool EQ::ProfanityManager::check_for_existing_entry(std::string profanity) {
+bool EQ::ProfanityManager::check_for_existing_entry(const std::string& profanity) {
 	if (profanity.empty()) {
 		return false;
 	}

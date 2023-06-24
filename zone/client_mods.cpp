@@ -22,8 +22,6 @@
 #include "../common/rulesys.h"
 #include "../common/spdat.h"
 
-#include "../common/data_verification.h"
-
 #include "client.h"
 #include "mob.h"
 
@@ -290,7 +288,7 @@ int64 Client::CalcHPRegen(bool bCombat)
 
 	if (!bCombat && CanFastRegen() && (IsSitting() || CanMedOnHorse())) {
 		auto max_hp = GetMaxHP();
-		int fast_regen = 6 * (max_hp / zone->newzone_data.fast_regen_hp);
+		int64 fast_regen = 6 * (max_hp / (zone ? zone->newzone_data.fast_regen_hp : 180));
 		if (base < fast_regen) // weird, but what the client is doing
 			base = fast_regen;
 	}
@@ -506,50 +504,6 @@ int64 Client::CalcBaseHP()
 		base_hp = (5) + (GetLevel() * lm / 10) + (((GetSTA() - Post255) * GetLevel() * lm / 3000)) + ((Post255 * GetLevel()) * lm / 6000);
 	}
 	return base_hp;
-}
-
-// This is for calculating Base HPs + STA bonus for SoD or later clients.
-uint64 Client::GetClassHPFactor()
-{
-	int factor;
-	// Note: Base HP factor under level 41 is equal to factor / 12, and from level 41 to 80 is factor / 6.
-	// Base HP over level 80 is factor / 10
-	// HP per STA point per level is factor / 30 for level 80+
-	// HP per STA under level 40 is the level 80 HP Per STA / 120, and for over 40 it is / 60.
-	switch (GetClass()) {
-		case DRUID:
-		case ENCHANTER:
-		case NECROMANCER:
-		case MAGICIAN:
-		case WIZARD:
-			factor = 240;
-			break;
-		case BEASTLORD:
-		case BERSERKER:
-		case MONK:
-		case ROGUE:
-		case SHAMAN:
-			factor = 255;
-			break;
-		case BARD:
-		case CLERIC:
-			factor = 264;
-			break;
-		case SHADOWKNIGHT:
-		case PALADIN:
-			factor = 288;
-			break;
-		case RANGER:
-			factor = 276;
-			break;
-		case WARRIOR:
-			factor = 300;
-			break;
-		default:
-			factor = 240;
-			break;
-	}
-	return factor;
 }
 
 // This should return the combined AC of all the items the player is wearing.
@@ -843,10 +797,10 @@ uint32 Client::CalcCurrentWeight()
 
 int32 Client::CalcAlcoholPhysicalEffect()
 {
-	if (m_pp.intoxication <= 55) {
+	if (GetIntoxication() <= 55) {
 		return 0;
 	}
-	return (m_pp.intoxication - 40) / 16;
+	return (GetIntoxication() - 40) / 16;
 }
 
 int32 Client::CalcSTR()
@@ -924,8 +878,8 @@ int32 Client::CalcINT()
 	int32 val = m_pp.INT + itembonuses.INT + spellbonuses.INT;
 	int32 mod = aabonuses.INT;
 	INT = val + mod;
-	if (m_pp.intoxication) {
-		int32 AlcINT = INT - (int32)((float)m_pp.intoxication / 200.0f * (float)INT) - 1;
+	if (GetIntoxication()) {
+		int32 AlcINT = INT - (int32)((float)GetIntoxication() / 200.0f * (float)INT) - 1;
 		if ((AlcINT < (int)(0.2 * INT))) {
 			INT = (int)(0.2f * (float)INT);
 		}
@@ -948,8 +902,8 @@ int32 Client::CalcWIS()
 	int32 val = m_pp.WIS + itembonuses.WIS + spellbonuses.WIS;
 	int32 mod = aabonuses.WIS;
 	WIS = val + mod;
-	if (m_pp.intoxication) {
-		int32 AlcWIS = WIS - (int32)((float)m_pp.intoxication / 200.0f * (float)WIS) - 1;
+	if (GetIntoxication()) {
+		int32 AlcWIS = WIS - (int32)((float)GetIntoxication() / 200.0f * (float)WIS) - 1;
 		if ((AlcWIS < (int)(0.2 * WIS))) {
 			WIS = (int)(0.2f * (float)WIS);
 		}

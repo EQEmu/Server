@@ -16,7 +16,7 @@ void command_suspendmulti(Client *c, const Seperator *sep)
 	const auto& n = Strings::Split(sep->arg[1], "|");
 	std::vector<std::string> v;
 	for (const auto& c : n) {
-		v.push_back(fmt::format("'{}'", Strings::ToLower(c)));
+		v.emplace_back(fmt::format("'{}'", Strings::ToLower(c)));
 	}
 
 	auto days = Strings::ToUnsignedInt(sep->arg[2]);

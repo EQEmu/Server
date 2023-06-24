@@ -19,7 +19,6 @@
 #include "../common/global_define.h"
 #include "../common/events/player_event_logs.h"
 
-#include <stdlib.h>
 #include <list>
 
 #ifndef WIN32
@@ -27,7 +26,6 @@
 #endif
 
 #include "../common/rulesys.h"
-#include "../common/strings.h"
 
 #include "queryserv.h"
 #include "quest_parser_collection.h"
@@ -36,7 +34,6 @@
 #include "zonedb.h"
 #include "worldserver.h"
 #include "../common/repositories/char_recipe_list_repository.h"
-#include "../common/zone_store.h"
 #include "../common/repositories/tradeskill_recipe_repository.h"
 #include "../common/repositories/tradeskill_recipe_entries_repository.h"
 
@@ -120,7 +117,18 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 		return;
 	}
 
-	if (!RuleB(Inventory, AllowMultipleOfSameAugment) && tobe_auged->ContainsAugmentByID(auged_with->GetID())) {
+	if (
+		RuleB(Inventory, EnforceAugmentRestriction) &&
+		user->IsAugmentRestricted(tobe_auged->GetItemType(), auged_with->GetAugmentRestriction())
+	) {
+		user->MessageString(Chat::Red, AUGMENT_RESTRICTED);
+		return;
+	}
+
+	if (
+		!RuleB(Inventory, AllowMultipleOfSameAugment) &&
+		tobe_auged->ContainsAugmentByID(auged_with->GetID())
+	) {
 		user->Message(Chat::Red, "Error: Cannot put multiple of the same augment in an item.");
 		return;
 	}
@@ -755,91 +763,6 @@ void Object::HandleAutoCombine(Client* user, const RecipeAutoCombine_Struct* rac
 		if (parse->PlayerHasQuestSub(EVENT_COMBINE_FAILURE)) {
 			parse->EventPlayer(EVENT_COMBINE_FAILURE, user, spec.name, spec.recipe_id);
 		}
-	}
-}
-
-EQ::skills::SkillType Object::TypeToSkill(uint32 type)
-{
-	switch(type) { // grouped and ordered by SkillUseTypes name - new types need to be verified for proper SkillUseTypes and use
-/*SkillAlchemy*/
-	case EQ::item::BagTypeMedicineBag:
-		return EQ::skills::SkillAlchemy;
-
-/*SkillBaking*/
-	//case EQ::item::BagTypeMixingBowl: // No idea...
-	case EQ::item::BagTypeOven:
-		return EQ::skills::SkillBaking;
-
-/*SkillBlacksmithing*/
-	case EQ::item::BagTypeForge:
-	//case EQ::item::BagTypeKoadaDalForge:
-	case EQ::item::BagTypeTeirDalForge:
-	case EQ::item::BagTypeOggokForge:
-	case EQ::item::BagTypeStormguardForge:
-	//case EQ::item::BagTypeAkanonForge:
-	//case EQ::item::BagTypeNorthmanForge:
-	//case EQ::item::BagTypeCabilisForge:
-	//case EQ::item::BagTypeFreeportForge:
-	//case EQ::item::BagTypeRoyalQeynosForge:
-	//case EQ::item::BagTypeTrollForge:
-	case EQ::item::BagTypeFierDalForge:
-	case EQ::item::BagTypeValeForge:
-	//case EQ::item::BagTypeErudForge:
-	//case EQ::item::BagTypeGuktaForge:
-		return EQ::skills::SkillBlacksmithing;
-
-/*SkillBrewing*/
-	//case EQ::item::BagTypeIceCreamChurn: // No idea...
-	case EQ::item::BagTypeBrewBarrel:
-		return EQ::skills::SkillBrewing;
-
-/*SkillFishing*/
-	case EQ::item::BagTypeTackleBox:
-		return EQ::skills::SkillFishing;
-
-/*SkillFletching*/
-	case EQ::item::BagTypeFletchingKit:
-	//case EQ::item::BagTypeFierDalFletchingKit:
-		return EQ::skills::SkillFletching;
-
-/*SkillJewelryMaking*/
-	case EQ::item::BagTypeJewelersKit:
-		return EQ::skills::SkillJewelryMaking;
-
-/*SkillMakePoison*/
-	// This is a guess and needs to be verified... (Could be SkillAlchemy)
-	//case EQ::item::BagTypeMortar:
-		// return SkillMakePoison;
-
-/*SkillPottery*/
-	case EQ::item::BagTypePotteryWheel:
-	case EQ::item::BagTypeKiln:
-	//case EQ::item::BagTypeIksarPotteryWheel:
-		return EQ::skills::SkillPottery;
-
-/*SkillResearch*/
-	//case EQ::item::BagTypeLexicon:
-	case EQ::item::BagTypeWizardsLexicon:
-	case EQ::item::BagTypeMagesLexicon:
-	case EQ::item::BagTypeNecromancersLexicon:
-	case EQ::item::BagTypeEnchantersLexicon:
-	//case EQ::item::BagTypeConcordanceofResearch:
-		return EQ::skills::SkillResearch;
-
-/*SkillTailoring*/
-	case EQ::item::BagTypeSewingKit:
-	//case EQ::item::BagTypeHalflingTailoringKit:
-	//case EQ::item::BagTypeErudTailoringKit:
-	//case EQ::item::BagTypeFierDalTailoringKit:
-		return EQ::skills::SkillTailoring;
-
-/*SkillTinkering*/
-	case EQ::item::BagTypeToolBox:
-		return EQ::skills::SkillTinkering;
-
-/*Undefined*/
-	default:
-		return TradeskillUnknown;
 	}
 }
 
@@ -1612,7 +1535,7 @@ bool ZoneDatabase::GetTradeRecipe(
 	for(auto row = results.begin(); row != results.end(); ++row) {
 		uint32 item = (uint32)Strings::ToInt(row[0]);
 		uint8 num = (uint8) Strings::ToInt(row[1]);
-		spec->onsuccess.push_back(std::pair<uint32,uint8>(item, num));
+		spec->onsuccess.emplace_back(std::pair<uint32,uint8>(item, num));
 	}
 
     spec->onfail.clear();
@@ -1626,7 +1549,7 @@ bool ZoneDatabase::GetTradeRecipe(
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			uint32 item = (uint32) Strings::ToInt(row[0]);
 			uint8  num  = (uint8) Strings::ToInt(row[1]);
-			spec->onfail.push_back(std::pair<uint32, uint8>(item, num));
+			spec->onfail.emplace_back(std::pair<uint32, uint8>(item, num));
 		}
 	}
 
@@ -1649,7 +1572,7 @@ bool ZoneDatabase::GetTradeRecipe(
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			uint32 item = (uint32) Strings::ToInt(row[0]);
 			uint8  num  = (uint8) Strings::ToInt(row[1]);
-			spec->salvage.push_back(std::pair<uint32, uint8>(item, num));
+			spec->salvage.emplace_back(std::pair<uint32, uint8>(item, num));
 		}
 	}
 

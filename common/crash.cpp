@@ -41,9 +41,6 @@ void SendCrashReport(const std::string &crash_report)
 		r.set_connection_timeout(1, 0);
 		r.set_read_timeout(1, 0);
 		r.set_write_timeout(1, 0);
-		httplib::Headers headers = {
-			{"Content-Type", "application/json"}
-		};
 
 		// os info
 		auto os         = EQ::GetOS();
@@ -125,7 +122,7 @@ public:
 		StackWalker::OnOutput(szText);
 	}
 
-	const std::vector<std::string>& const GetLines() { return _lines; }
+	const std::vector<std::string>& GetLines() { return _lines; }
 private:
 	std::vector<std::string> _lines;
 };

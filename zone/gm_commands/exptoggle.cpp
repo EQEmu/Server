@@ -21,7 +21,7 @@ void command_exptoggle(Client *c, const Seperator *sep)
 		Chat::White,
 		fmt::format(
 			"Experience gain for {} is now {}abled.",
-			c->GetTargetDescription(t, TargetDescriptionType::LCSelf),
+			c->GetTargetDescription(t),
 			is_exp_enabled ? "en" : "dis"
 		).c_str()
 	);

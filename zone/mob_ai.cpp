@@ -38,7 +38,6 @@
 #include <algorithm>
 #include <iostream>
 #include <limits>
-#include <math.h>
 
 extern EntityList entity_list;
 extern FastMath g_Math;
@@ -654,7 +653,7 @@ void Client::AI_SpellCast()
 		slot_to_use = static_cast<EQ::spells::CastingSlot>(slots[idx]);
 	}
 
-	if(IsMezSpell(spell_to_cast) || IsFearSpell(spell_to_cast))
+	if(IsMesmerizeSpell(spell_to_cast) || IsFearSpell(spell_to_cast))
 	{
 		Mob *tar = entity_list.GetTargetForMez(this);
 		if(!tar)
@@ -2920,7 +2919,7 @@ DBnpcspells_Struct *ZoneDatabase::GetNPCSpells(uint32 iDBSpellsID)
 			spell_set.entries.push_back(entry);
 		}
 
-		npc_spells_cache.insert(std::make_pair(iDBSpellsID, spell_set));
+		npc_spells_cache.emplace(std::make_pair(iDBSpellsID, spell_set));
 
 		return &npc_spells_cache[iDBSpellsID];
     }

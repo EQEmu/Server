@@ -353,7 +353,7 @@ bool Database::ReserveName(uint32 account_id, char* name) {
 
 	query = StringFormat("INSERT INTO `character_data` SET `account_id` = %i, `name` = '%s'", account_id, name);
 	results = QueryDatabase(query);
-	if (!results.Success() || results.ErrorMessage() != ""){ return false; }
+	if (!results.Success() || !results.ErrorMessage().empty()){ return false; }
 
 	// Put character into the default guild if rule is being used.
 	int guild_id = RuleI(Character, DefaultGuild);
@@ -363,7 +363,7 @@ bool Database::ReserveName(uint32 account_id, char* name) {
 		if (character_id > -1) {
 			query = StringFormat("INSERT INTO `guild_members` SET `char_id` = %i, `guild_id` = '%i'", character_id, guild_id);
 			results = QueryDatabase(query);
-			if (!results.Success() || results.ErrorMessage() != ""){
+			if (!results.Success() || !results.ErrorMessage().empty()){
 				LogInfo("Could not put character [{}] into default Guild", name);
 			}
 		}
@@ -449,7 +449,8 @@ bool Database::DeleteCharacter(char *character_name)
 	return true;
 }
 
-bool Database::SaveCharacterCreate(uint32 character_id, uint32 account_id, PlayerProfile_Struct* pp){
+bool Database::SaveCharacterCreate(uint32 character_id, uint32 account_id, PlayerProfile_Struct *pp)
+{
 	std::string query = StringFormat(
 		"REPLACE INTO `character_data` ("
 		"id,"
@@ -634,101 +635,102 @@ bool Database::SaveCharacterCreate(uint32 character_id, uint32 account_id, Playe
 		"%u,"  // guild_auto_consent
 		"%u"  // RestTimer
 		")",
-		character_id,					  // " id,                        "
-		account_id,						  // " account_id,                "
-		Strings::Escape(pp->name).c_str(),	  // " `name`,                    "
+		character_id,                      // " id,                        "
+		account_id,                          // " account_id,                "
+		Strings::Escape(pp->name).c_str(),      // " `name`,                    "
 		Strings::Escape(pp->last_name).c_str(), // " last_name,              "
-		pp->gender,						  // " gender,                    "
-		pp->race,						  // " race,                      "
-		pp->class_,						  // " class,                     "
-		pp->level,						  // " `level`,                   "
-		pp->deity,						  // " deity,                     "
-		pp->birthday,					  // " birthday,                  "
-		pp->lastlogin,					  // " last_login,                "
-		pp->timePlayedMin,				  // " time_played,               "
-		pp->pvp,						  // " pvp_status,                "
-		pp->level2,						  // " level2,                    "
-		pp->anon,						  // " anon,                      "
-		pp->gm,							  // " gm,                        "
-		pp->intoxication,				  // " intoxication,              "
-		pp->haircolor,					  // " hair_color,                "
-		pp->beardcolor,					  // " beard_color,               "
-		pp->eyecolor1,					  // " eye_color_1,               "
-		pp->eyecolor2,					  // " eye_color_2,               "
-		pp->hairstyle,					  // " hair_style,                "
-		pp->beard,						  // " beard,                     "
-		pp->ability_time_seconds,		  // " ability_time_seconds,      "
-		pp->ability_number,				  // " ability_number,            "
-		pp->ability_time_minutes,		  // " ability_time_minutes,      "
-		pp->ability_time_hours,			  // " ability_time_hours,        "
+		pp->gender,                          // " gender,                    "
+		pp->race,                          // " race,                      "
+		pp->class_,                          // " class,                     "
+		pp->level,                          // " `level`,                   "
+		pp->deity,                          // " deity,                     "
+		pp->birthday,                      // " birthday,                  "
+		pp->lastlogin,                      // " last_login,                "
+		pp->timePlayedMin,                  // " time_played,               "
+		pp->pvp,                          // " pvp_status,                "
+		pp->level2,                          // " level2,                    "
+		pp->anon,                          // " anon,                      "
+		pp->gm,                              // " gm,                        "
+		pp->intoxication,                  // " intoxication,              "
+		pp->haircolor,                      // " hair_color,                "
+		pp->beardcolor,                      // " beard_color,               "
+		pp->eyecolor1,                      // " eye_color_1,               "
+		pp->eyecolor2,                      // " eye_color_2,               "
+		pp->hairstyle,                      // " hair_style,                "
+		pp->beard,                          // " beard,                     "
+		pp->ability_time_seconds,          // " ability_time_seconds,      "
+		pp->ability_number,                  // " ability_number,            "
+		pp->ability_time_minutes,          // " ability_time_minutes,      "
+		pp->ability_time_hours,              // " ability_time_hours,        "
 		Strings::Escape(pp->title).c_str(),  // " title,                     "
 		Strings::Escape(pp->suffix).c_str(), // " suffix,                    "
-		pp->exp,						  // " exp,                       "
-		pp->points,						  // " points,                    "
-		pp->mana,						  // " mana,                      "
-		pp->cur_hp,						  // " cur_hp,                    "
-		pp->STR,						  // " str,                       "
-		pp->STA,						  // " sta,                       "
-		pp->CHA,						  // " cha,                       "
-		pp->DEX,						  // " dex,                       "
-		pp->INT,						  // " `int`,                     "
-		pp->AGI,						  // " agi,                       "
-		pp->WIS,						  // " wis,                       "
-		pp->face,						  // " face,                      "
-		pp->y,							  // " y,                         "
-		pp->x,							  // " x,                         "
-		pp->z,							  // " z,                         "
-		pp->heading,					  // " heading,                   "
-		pp->pvp2,						  // " pvp2,                      "
-		pp->pvptype,					  // " pvp_type,                  "
-		pp->autosplit,					  // " autosplit_enabled,         "
-		pp->zone_change_count,			  // " zone_change_count,         "
-		pp->drakkin_heritage,			  // " drakkin_heritage,          "
-		pp->drakkin_tattoo,				  // " drakkin_tattoo,            "
-		pp->drakkin_details,			  // " drakkin_details,           "
-		pp->toxicity,					  // " toxicity,                  "
-		pp->hunger_level,				  // " hunger_level,              "
-		pp->thirst_level,				  // " thirst_level,              "
-		pp->ability_up,					  // " ability_up,                "
-		pp->zone_id,					  // " zone_id,                   "
-		pp->zoneInstance,				  // " zone_instance,             "
-		pp->leadAAActive,				  // " leadership_exp_on,         "
-		pp->ldon_points_guk,			  // " ldon_points_guk,           "
-		pp->ldon_points_mir,			  // " ldon_points_mir,           "
-		pp->ldon_points_mmc,			  // " ldon_points_mmc,           "
-		pp->ldon_points_ruj,			  // " ldon_points_ruj,           "
-		pp->ldon_points_tak,			  // " ldon_points_tak,           "
-		pp->ldon_points_available,		  // " ldon_points_available,     "
-		pp->tribute_time_remaining,		  // " tribute_time_remaining,    "
-		pp->showhelm,					  // " show_helm,                 "
-		pp->career_tribute_points,		  // " career_tribute_points,     "
-		pp->tribute_points,				  // " tribute_points,            "
-		pp->tribute_active,				  // " tribute_active,            "
-		pp->endurance,					  // " endurance,                 "
-		pp->group_leadership_exp,		  // " group_leadership_exp,      "
-		pp->raid_leadership_exp,		  // " raid_leadership_exp,       "
-		pp->group_leadership_points,	  // " group_leadership_points,   "
-		pp->raid_leadership_points,		  // " raid_leadership_points,    "
-		pp->air_remaining,				  // " air_remaining,             "
-		pp->PVPKills,					  // " pvp_kills,                 "
-		pp->PVPDeaths,					  // " pvp_deaths,                "
-		pp->PVPCurrentPoints,			  // " pvp_current_points,        "
-		pp->PVPCareerPoints,			  // " pvp_career_points,         "
-		pp->PVPBestKillStreak,			  // " pvp_best_kill_streak,      "
-		pp->PVPWorstDeathStreak,		  // " pvp_worst_death_streak,    "
-		pp->PVPCurrentKillStreak,		  // " pvp_current_kill_streak,   "
-		pp->aapoints_spent,				  // " aa_points_spent,           "
-		pp->expAA,						  // " aa_exp,                    "
-		pp->aapoints,					  // " aa_points,                 "
-		pp->groupAutoconsent,			  // " group_auto_consent,        "
-		pp->raidAutoconsent,			  // " raid_auto_consent,         "
-		pp->guildAutoconsent,			  // " guild_auto_consent,        "
-		pp->RestTimer					  // " RestTimer)                 "
+		pp->exp,                          // " exp,                       "
+		pp->points,                          // " points,                    "
+		pp->mana,                          // " mana,                      "
+		pp->cur_hp,                          // " cur_hp,                    "
+		pp->STR,                          // " str,                       "
+		pp->STA,                          // " sta,                       "
+		pp->CHA,                          // " cha,                       "
+		pp->DEX,                          // " dex,                       "
+		pp->INT,                          // " `int`,                     "
+		pp->AGI,                          // " agi,                       "
+		pp->WIS,                          // " wis,                       "
+		pp->face,                          // " face,                      "
+		pp->y,                              // " y,                         "
+		pp->x,                              // " x,                         "
+		pp->z,                              // " z,                         "
+		pp->heading,                      // " heading,                   "
+		pp->pvp2,                          // " pvp2,                      "
+		pp->pvptype,                      // " pvp_type,                  "
+		pp->autosplit,                      // " autosplit_enabled,         "
+		pp->zone_change_count,              // " zone_change_count,         "
+		pp->drakkin_heritage,              // " drakkin_heritage,          "
+		pp->drakkin_tattoo,                  // " drakkin_tattoo,            "
+		pp->drakkin_details,              // " drakkin_details,           "
+		pp->toxicity,                      // " toxicity,                  "
+		pp->hunger_level,                  // " hunger_level,              "
+		pp->thirst_level,                  // " thirst_level,              "
+		pp->ability_up,                      // " ability_up,                "
+		pp->zone_id,                      // " zone_id,                   "
+		pp->zoneInstance,                  // " zone_instance,             "
+		pp->leadAAActive,                  // " leadership_exp_on,         "
+		pp->ldon_points_guk,              // " ldon_points_guk,           "
+		pp->ldon_points_mir,              // " ldon_points_mir,           "
+		pp->ldon_points_mmc,              // " ldon_points_mmc,           "
+		pp->ldon_points_ruj,              // " ldon_points_ruj,           "
+		pp->ldon_points_tak,              // " ldon_points_tak,           "
+		pp->ldon_points_available,          // " ldon_points_available,     "
+		pp->tribute_time_remaining,          // " tribute_time_remaining,    "
+		pp->showhelm,                      // " show_helm,                 "
+		pp->career_tribute_points,          // " career_tribute_points,     "
+		pp->tribute_points,                  // " tribute_points,            "
+		pp->tribute_active,                  // " tribute_active,            "
+		pp->endurance,                      // " endurance,                 "
+		pp->group_leadership_exp,          // " group_leadership_exp,      "
+		pp->raid_leadership_exp,          // " raid_leadership_exp,       "
+		pp->group_leadership_points,      // " group_leadership_points,   "
+		pp->raid_leadership_points,          // " raid_leadership_points,    "
+		pp->air_remaining,                  // " air_remaining,             "
+		pp->PVPKills,                      // " pvp_kills,                 "
+		pp->PVPDeaths,                      // " pvp_deaths,                "
+		pp->PVPCurrentPoints,              // " pvp_current_points,        "
+		pp->PVPCareerPoints,              // " pvp_career_points,         "
+		pp->PVPBestKillStreak,              // " pvp_best_kill_streak,      "
+		pp->PVPWorstDeathStreak,          // " pvp_worst_death_streak,    "
+		pp->PVPCurrentKillStreak,          // " pvp_current_kill_streak,   "
+		pp->aapoints_spent,                  // " aa_points_spent,           "
+		pp->expAA,                          // " aa_exp,                    "
+		pp->aapoints,                      // " aa_points,                 "
+		pp->groupAutoconsent,              // " group_auto_consent,        "
+		pp->raidAutoconsent,              // " raid_auto_consent,         "
+		pp->guildAutoconsent,              // " guild_auto_consent,        "
+		pp->RestTimer                      // " RestTimer)                 "
 	);
-	auto results = QueryDatabase(query);
+	QueryDatabase(query);
 
 	/* Save Bind Points */
-	query = StringFormat("REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, slot)"
+	query = StringFormat(
+		"REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, slot)"
 		" VALUES (%u, %u, %u, %f, %f, %f, %f, %i), "
 		"(%u, %u, %u, %f, %f, %f, %f, %i), "
 		"(%u, %u, %u, %f, %f, %f, %f, %i), "
@@ -739,57 +741,73 @@ bool Database::SaveCharacterCreate(uint32 character_id, uint32 account_id, Playe
 		character_id, pp->binds[2].zone_id, 0, pp->binds[2].x, pp->binds[2].y, pp->binds[2].z, pp->binds[2].heading, 2,
 		character_id, pp->binds[3].zone_id, 0, pp->binds[3].x, pp->binds[3].y, pp->binds[3].z, pp->binds[3].heading, 3,
 		character_id, pp->binds[4].zone_id, 0, pp->binds[4].x, pp->binds[4].y, pp->binds[4].z, pp->binds[4].heading, 4
-	); results = QueryDatabase(query);
+	);
+	QueryDatabase(query);
 
-        /* HoTT Ability */
-        if(RuleB(Character, GrantHoTTOnCreate))
-        {
-                query = StringFormat("INSERT INTO `character_leadership_abilities` (id, slot, `rank`) VALUES (%u, %i, %i)", character_id, 14, 1);
-                results = QueryDatabase(query);
-        }
+	/* HoTT Ability */
+	if (RuleB(Character, GrantHoTTOnCreate)) {
+		query = StringFormat(
+			"INSERT INTO `character_leadership_abilities` (id, slot, `rank`) VALUES (%u, %i, %i)",
+			character_id,
+			14,
+			1
+		);
+		QueryDatabase(query);
+	}
 
 	/* Save Skills */
-	int firstquery = 0;
-	for (int i = 0; i < MAX_PP_SKILL; i++){
-		if (pp->skills[i] > 0){
-			if (firstquery != 1){
+	int      firstquery = 0;
+	for (int i          = 0; i < MAX_PP_SKILL; i++) {
+		if (pp->skills[i] > 0) {
+			if (firstquery != 1) {
 				firstquery = 1;
-				query = StringFormat("REPLACE INTO `character_skills` (id, skill_id, value) VALUES (%u, %u, %u)", character_id, i, pp->skills[i]);
-			}
-			else{
+				query      = StringFormat(
+					"REPLACE INTO `character_skills` (id, skill_id, value) VALUES (%u, %u, %u)",
+					character_id,
+					i,
+					pp->skills[i]
+				);
+			} else {
 				query = query + StringFormat(", (%u, %u, %u)", character_id, i, pp->skills[i]);
 			}
 		}
 	}
-	results = QueryDatabase(query);
+	QueryDatabase(query);
 
 	/* Save Language */
 	firstquery = 0;
-	for (int i = 0; i < MAX_PP_LANGUAGE; i++){
-		if (pp->languages[i] > 0){
-			if (firstquery != 1){
+	for (int i = 0; i < MAX_PP_LANGUAGE; i++) {
+		if (pp->languages[i] > 0) {
+			if (firstquery != 1) {
 				firstquery = 1;
-				query = StringFormat("REPLACE INTO `character_languages` (id, lang_id, value) VALUES (%u, %u, %u)", character_id, i, pp->languages[i]);
-			}
-			else{
+				query      = StringFormat(
+					"REPLACE INTO `character_languages` (id, lang_id, value) VALUES (%u, %u, %u)",
+					character_id,
+					i,
+					pp->languages[i]
+				);
+			} else {
 				query = query + StringFormat(", (%u, %u, %u)", character_id, i, pp->languages[i]);
 			}
 		}
 	}
-	results = QueryDatabase(query);
+	QueryDatabase(query);
 
 	return true;
 }
 
 uint32 Database::GetCharacterID(const char *name) {
-	std::string query = StringFormat("SELECT `id` FROM `character_data` WHERE `name` = '%s'", name);
+	const auto query = fmt::format(
+		"SELECT `id` FROM `character_data` WHERE `name` = '{}'",
+		Strings::Escape(name)
+	);
 	auto results = QueryDatabase(query);
-	auto row = results.begin();
-	if (results.RowCount() == 1)
-	{
-		return Strings::ToUnsignedInt(row[0]);
+	if (!results.Success() || !results.RowCount()) {
+		return 0;
 	}
-	return 0;
+
+	auto row = results.begin();
+	return Strings::ToUnsignedInt(row[0]);
 }
 
 /*
@@ -999,7 +1017,7 @@ bool Database::GetVariable(std::string varname, std::string &varvalue)
 	return false;
 }
 
-bool Database::SetVariable(const std::string varname, const std::string &varvalue)
+bool Database::SetVariable(const std::string& varname, const std::string &varvalue)
 {
 	std::string escaped_name = Strings::Escape(varname);
 	std::string escaped_value = Strings::Escape(varvalue);
@@ -2043,10 +2061,12 @@ uint32 Database::GetRaidIDByCharID(uint32 character_id) {
 		character_id
 	);
 	auto results = QueryDatabase(query);
-	for (auto row = results.begin(); row != results.end(); ++row) {
-		return Strings::ToUnsignedInt(row[0]);
+	if (!results.Success() || !results.RowCount()) {
+		return 0;
 	}
-	return 0;
+
+	auto row = results.begin();
+	return Strings::ToUnsignedInt(row[0]);
 }
 
 int Database::CountInvSnapshots() {
@@ -2272,7 +2292,6 @@ bool Database::CopyCharacter(
 			new_rows.emplace_back(new_values);
 		}
 
-		std::string              insert_values;
 		std::vector<std::string> insert_rows;
 
 		for (auto &r: new_rows) {
@@ -2328,7 +2347,7 @@ void Database::SourceDatabaseTableFromUrl(std::string table_name, std::string ur
 		);
 
 		if (!DoesTableExist(table_name)) {
-			LogMySQLQuery("Table [{}] does not exist. Downloading from Github and installing...", table_name);
+			LogMySQLQuery("Table [{}] does not exist. Downloading and installing...", table_name);
 
 			// http get request
 			httplib::Client cli(
@@ -2336,7 +2355,7 @@ void Database::SourceDatabaseTableFromUrl(std::string table_name, std::string ur
 					"{}://{}",
 					request_uri.get_scheme(),
 					request_uri.get_host()
-				).c_str()
+				)
 			);
 
 			cli.set_connection_timeout(0, 60000000); // 60 sec
@@ -2345,7 +2364,7 @@ void Database::SourceDatabaseTableFromUrl(std::string table_name, std::string ur
 
 			int sourced_queries = 0;
 
-			if (auto res = cli.Get(request_uri.get_path().c_str())) {
+			if (auto res = cli.Get(request_uri.get_path())) {
 				if (res->status == 200) {
 					for (auto &s: Strings::Split(res->body, ';')) {
 						if (!Strings::Trim(s).empty()) {
@@ -2388,4 +2407,56 @@ uint8 Database::GetMinStatus(uint32 zone_id, uint32 instance_version)
 	);
 
 	return !zones.empty() ? zones[0].min_status : 0;
+}
+
+void Database::SourceSqlFromUrl(std::string url)
+{
+	try {
+		uri request_uri(url);
+
+		LogHTTPDetail(
+			"parsing url [{}] path [{}] host [{}] query_string [{}] protocol [{}] port [{}]",
+			url,
+			request_uri.get_path(),
+			request_uri.get_host(),
+			request_uri.get_query(),
+			request_uri.get_scheme(),
+			request_uri.get_port()
+		);
+
+		LogInfo("Downloading and installing from [{}]", url);
+
+		// http get request
+		httplib::Client cli(
+			fmt::format(
+				"{}://{}",
+				request_uri.get_scheme(),
+				request_uri.get_host()
+			)
+		);
+
+		cli.set_connection_timeout(0, 60000000); // 60 sec
+		cli.set_read_timeout(60, 0); // 60 seconds
+		cli.set_write_timeout(60, 0); // 60 seconds
+
+		if (auto res = cli.Get(request_uri.get_path())) {
+			if (res->status == 200) {
+				auto results = QueryDatabaseMulti(res->body);
+				if (!results.ErrorMessage().empty()) {
+					LogError("Error sourcing SQL [{}]", results.ErrorMessage());
+					return;
+				}
+			}
+			if (res->status == 404) {
+				LogError("Error retrieving URL [{}]", url);
+			}
+		}
+		else {
+			LogError("Error retrieving URL [{}]", url);
+		}
+
+	}
+	catch (std::invalid_argument iae) {
+		LogError("URI parser error [{}]", iae.what());
+	}
 }
