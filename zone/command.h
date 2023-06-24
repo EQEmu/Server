@@ -249,7 +249,6 @@ void command_setxp(Client *c, const Seperator *sep);
 void command_showbuffs(Client *c, const Seperator *sep);
 void command_shownumhits(Client *c, const Seperator *sep);
 void command_shownpcgloballoot(Client *c, const Seperator *sep);
-void command_showpetspell(Client *c, const Seperator *sep);
 void command_showskills(Client *c, const Seperator *sep);
 void command_showspellslist(Client *c, const Seperator *sep);
 void command_showstats(Client *c, const Seperator *sep);
