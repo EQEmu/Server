@@ -93,6 +93,7 @@ void command_findcharacter(Client *c, const Seperator *sep);
 void command_findclass(Client *c, const Seperator *sep);
 void command_findcurrency(Client *c, const Seperator *sep);
 void command_findfaction(Client *c, const Seperator *sep);
+void command_findlanguage(Client *c, const Seperator *sep);
 void command_findnpctype(Client *c, const Seperator *sep);
 void command_findrace(Client *c, const Seperator *sep);
 void command_findrecipe(Client *c, const Seperator *sep);
