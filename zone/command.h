@@ -155,8 +155,7 @@ void command_makepet(Client *c, const Seperator *sep);
 void command_mana(Client *c, const Seperator *sep);
 void command_max_all_skills(Client *c, const Seperator *sep);
 void command_memspell(Client *c, const Seperator *sep);
-void command_merchantcloseshop(Client *c, const Seperator *sep);
-void command_merchantopenshop(Client *c, const Seperator *sep);
+void command_merchantshop(Client *c, const Seperator *sep);
 void command_modifynpcstat(Client *c, const Seperator *sep);
 void command_motd(Client *c, const Seperator *sep);
 void command_movechar(Client *c, const Seperator *sep);
@@ -182,11 +181,6 @@ void command_nukebuffs(Client *c, const Seperator *sep);
 void command_nukeitem(Client *c, const Seperator *sep);
 void command_object(Client *c, const Seperator *sep);
 void command_oocmute(Client *c, const Seperator *sep);
-
-#ifdef PACKET_PROFILER
-void command_packetprofile(Client *c, const Seperator *sep);
-#endif
-
 void command_path(Client *c, const Seperator *sep);
 void command_peekinv(Client *c, const Seperator *sep);
 void command_peqzone(Client *c, const Seperator *sep);
@@ -198,7 +192,6 @@ void command_petitems(Client *c, const Seperator *sep);
 void command_petitioninfo(Client *c, const Seperator *sep);
 void command_picklock(Client *c, const Seperator *sep);
 void command_profanity(Client *c, const Seperator *sep);
-
 void command_proximity(Client *c, const Seperator *sep);
 void command_push(Client *c, const Seperator *sep);
 void command_pvp(Client *c, const Seperator *sep);
@@ -246,11 +239,10 @@ void command_setskillall(Client *c, const Seperator *sep);
 void command_setstartzone(Client *c, const Seperator *sep);
 void command_setstat(Client *c, const Seperator *sep);
 void command_setxp(Client *c, const Seperator *sep);
-void command_showbonusstats(Client *c, const Seperator *sep);
 void command_showbuffs(Client *c, const Seperator *sep);
 void command_shownpcgloballoot(Client *c, const Seperator *sep);
-void command_showpetspell(Client *c, const Seperator *sep);
 void command_showskills(Client *c, const Seperator *sep);
+void command_showspells(Client *c, const Seperator *sep);
 void command_showspellslist(Client *c, const Seperator *sep);
 void command_showstats(Client *c, const Seperator *sep);
 void command_showzonegloballoot(Client *c, const Seperator *sep);
@@ -260,7 +252,6 @@ void command_spawn(Client *c, const Seperator *sep);
 void command_spawneditmass(Client *c, const Seperator *sep);
 void command_spawnfix(Client *c, const Seperator *sep);
 void command_spawnstatus(Client *c, const Seperator *sep);
-void command_spellinfo(Client *c, const Seperator *sep);
 void command_stun(Client *c, const Seperator *sep);
 void command_summon(Client *c, const Seperator *sep);
 void command_summonburiedplayercorpse(Client *c, const Seperator *sep);
@@ -281,7 +272,6 @@ void command_trapinfo(Client *c, const Seperator *sep);
 void command_tune(Client *c, const Seperator *sep);
 void command_undye(Client *c, const Seperator *sep);
 void command_unfreeze(Client *c, const Seperator *sep);
-void command_unlock(Client *c, const Seperator *sep);
 void command_unmemspell(Client *c, const Seperator *sep);
 void command_unmemspells(Client *c, const Seperator *sep);
 void command_unscribespell(Client *c, const Seperator *sep);

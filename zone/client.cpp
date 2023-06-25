@@ -66,6 +66,7 @@ extern volatile bool RunLoops;
 #include "../common/repositories/discovered_items_repository.h"
 #include "../common/events/player_events.h"
 #include "../common/events/player_event_logs.h"
+#include "dialogue_window.h"
 
 
 extern QueryServ* QServ;
@@ -12231,4 +12232,102 @@ void Client::PlayerTradeEventLog(Trade *t, Trade *t2)
 
 	RecordPlayerEventLogWithClient(trader, PlayerEvent::TRADE, e);
 	RecordPlayerEventLogWithClient(trader2, PlayerEvent::TRADE, e);
+}
+
+void Client::ShowSpells(Client* c, ShowSpellType show_spell_type)
+{
+	std::string spell_string;
+
+	switch (show_spell_type) {
+		case ShowSpellType::Disciplines:
+			spell_string = "Discipline";
+			break;
+		case ShowSpellType::Spells:
+			spell_string = "Spell";
+			break;
+		default:
+			return;
+	}
+
+	std::string spell_table;
+
+	// Headers
+	spell_table += DialogueWindow::TableRow(
+		fmt::format(
+			"{}{}{}",
+			DialogueWindow::TableCell("Slot"),
+			DialogueWindow::TableCell(spell_string),
+			DialogueWindow::TableCell("Spell ID")
+		)
+	);
+
+	std::map<int, uint16> m;
+	auto                  spell_count = 0;
+
+	if (show_spell_type == ShowSpellType::Disciplines) {
+		for (auto index = 0; index < MAX_PP_DISCIPLINES; index++) {
+			if (IsValidSpell(m_pp.disciplines.values[index])) {
+				m[index] = static_cast<uint16>(m_pp.disciplines.values[index]);
+			}
+		}
+	} else if (show_spell_type == ShowSpellType::Spells) {
+		for (auto index = 0; index < EQ::spells::SPELL_GEM_COUNT; index++) {
+			if (IsValidSpell(m_pp.mem_spells[index])) {
+				m[index] = static_cast<uint16>(m_pp.mem_spells[index]);
+			}
+		}
+	}
+
+	for (const auto& s : m) {
+		spell_table += DialogueWindow::TableRow(
+			fmt::format(
+				"{}{}{}",
+				DialogueWindow::TableCell(std::to_string(s.first)),
+				DialogueWindow::TableCell(GetSpellName(s.second)),
+				DialogueWindow::TableCell(Strings::Commify(s.second))
+			)
+		);
+
+		spell_count++;
+	}
+
+	if (!spell_count) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"{} {} not have any {}s {}.",
+				c->GetTargetDescription(this, TargetDescriptionType::UCYou),
+				c == this ? "do" : "does",
+				Strings::ToLower(spell_string),
+				show_spell_type == ShowSpellType::Disciplines ? "learned" : "memorized"
+			).c_str()
+		);
+		return;
+	}
+
+	if (spell_table.size() >= 4096) {
+		for (const auto& [index, spell_id] : m) {
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"{}. {} ({})",
+					index,
+					GetSpellName(spell_id),
+					Strings::Commify(spell_id)
+				).c_str()
+			);
+		}
+		return;
+	}
+
+	spell_table = DialogueWindow::Table(spell_table);
+
+	c->SendPopupToClient(
+		fmt::format(
+			"{}s for {}",
+			spell_string,
+			c->GetTargetDescription(this, TargetDescriptionType::UCSelf)
+		).c_str(),
+		spell_table.c_str()
+	);
 }
