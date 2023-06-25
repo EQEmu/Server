@@ -21,7 +21,7 @@ void QueryServConnection::AddConnection(std::shared_ptr<EQ::Net::ServertalkServe
 	//Set handlers
 	connection->OnMessage(ServerOP_QueryServGeneric, std::bind(&QueryServConnection::HandleGenericMessage, this, std::placeholders::_1, std::placeholders::_2));
 	connection->OnMessage(ServerOP_LFGuildUpdate, std::bind(&QueryServConnection::HandleLFGuildUpdateMessage, this, std::placeholders::_1, std::placeholders::_2));
-	m_streams.insert(std::make_pair(connection->GetUUID(), connection));
+	m_streams.emplace(std::make_pair(connection->GetUUID(), connection));
 	m_keepalive = std::make_unique<EQ::Timer>(1000, true, std::bind(&QueryServConnection::OnKeepAlive, this, std::placeholders::_1));
 }
 

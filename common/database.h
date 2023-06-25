@@ -235,7 +235,7 @@ public:
 	/* Database Variables */
 
 	bool	GetVariable(std::string varname, std::string &varvalue);
-	bool	SetVariable(const std::string varname, const std::string &varvalue);
+	bool	SetVariable(const std::string& varname, const std::string &varvalue);
 	bool	LoadVariables();
 
 	/* General Queries */
@@ -263,7 +263,7 @@ public:
 	void	ClearInvSnapshots(bool from_now = false);
 
 	void SourceDatabaseTableFromUrl(std::string table_name, std::string url);
-
+	void SourceSqlFromUrl(std::string url);
 
 private:
 

@@ -120,7 +120,7 @@ std::vector<std::string> WorldContentService::GetContentFlagsDisabled()
 /**
  * @param content_flags
  */
-void WorldContentService::SetContentFlags(std::vector<ContentFlagsRepository::ContentFlags> content_flags)
+void WorldContentService::SetContentFlags(const std::vector<ContentFlagsRepository::ContentFlags>& content_flags)
 {
 	WorldContentService::content_flags = content_flags;
 }

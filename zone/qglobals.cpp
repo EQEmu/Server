@@ -102,22 +102,6 @@ void QGlobalCache::GetQGlobals(std::list<QGlobal> &globals, NPC *n, Client *c, Z
 	}
 }
 
-bool QGlobalCache::GetQGlobal(QGlobal &g, std::string name, NPC *n, Client *c, Zone *z) {
-	std::list<QGlobal> globals;
-	QGlobalCache::GetQGlobals(globals, n, c, z);
-
-	auto iter = globals.begin();
-	while(iter != globals.end()) {
-		if(iter->name.compare(name) == 0) {
-			g = (*iter);
-			return true;
-		}
-		++iter;
-	}
-
-	return false;
-}
-
 void QGlobalCache::PurgeExpiredGlobals()
 {
 	if(!qGlobalBucket.size())

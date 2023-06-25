@@ -51,6 +51,11 @@ typedef enum {
 	byFlagNotSet	//apply action if the flag is NOT set
 } byFlagSetting;
 
+enum OrnamentationAugmentTypes {
+	StandardOrnamentation = 20,
+	SpecialOrnamentation = 21
+};
+
 class SharedDatabase;
 
 // ########################################
@@ -103,7 +108,8 @@ namespace EQ
 		bool AvailableWearSlot(uint32 aug_wear_slots) const;
 		int8 AvailableAugmentSlot(int32 augment_type) const;
 		bool IsAugmentSlotAvailable(int32 augment_type, uint8 slot) const;
-		inline int32 GetAugmentType() const { return ((m_item) ? m_item->AugType : 0); }
+		inline int GetAugmentType() const { return m_item ? m_item->AugType : 0; }
+		inline uint32 GetAugmentRestriction() const { return m_item ? m_item->AugRestrict : 0; }
 
 		inline bool IsExpendable() const { return ((m_item) ? ((m_item->Click.Type == item::ItemEffectExpendable) || (m_item->ItemType == item::ItemTypePotion)) : false); }
 
@@ -136,7 +142,8 @@ namespace EQ
 		bool IsAugmented();
 		bool ContainsAugmentByID(uint32 item_id);
 		int CountAugmentByID(uint32 item_id);
-		ItemInstance* GetOrnamentationAug(int32 ornamentationAugtype) const;
+		bool IsOrnamentationAugment(EQ::ItemInstance* augment) const;
+		ItemInstance* GetOrnamentationAugment() const;
 		bool UpdateOrnamentationInfo();
 		static bool CanTransform(const ItemData *ItemToTry, const ItemData *Container, bool AllowAll = false);
 
@@ -304,34 +311,33 @@ namespace EQ
 
 		void _PutItem(uint8 index, ItemInstance* inst) { m_contents[index] = inst; }
 
-		ItemInstTypes		m_use_type;	// Usage type for item
-		const ItemData*		m_item;		// Ptr to item data
-		int16				m_charges;	// # of charges for chargeable items
-		uint32				m_price;	// Bazaar /trader price
-		uint32				m_color;
-		uint32				m_merchantslot;
-		int16				m_currentslot;
-		bool				m_attuned;
-		int32				m_merchantcount;		//number avaliable on the merchant, -1=unlimited
-		int32				m_SerialNumber;	// Unique identifier for this instance of an item. Needed for Bazaar.
-		uint32				m_exp;
-		int8				m_evolveLvl;
-		bool				m_activated;
-		ItemData*			m_scaledItem;
-		::EvolveInfo*		m_evolveInfo;
-		bool				m_scaling;
-		uint32				m_ornamenticon;
-		uint32				m_ornamentidfile;
-		uint32				m_new_id_file;
-		uint32				m_ornament_hero_model;
-		uint32				m_recast_timestamp;
-		int                 m_task_delivered_count = 0;
+		ItemInstTypes		m_use_type {ItemInstNormal};	// Usage type for item
+		const ItemData*		m_item {nullptr};		// Ptr to item data
+		int16				m_charges {0};	// # of charges for chargeable items
+		uint32				m_price {0};	// Bazaar /trader price
+		uint32				m_color {0};
+		uint32				m_merchantslot {0};
+		int16				m_currentslot {0};
+		bool				m_attuned {false};
+		int32				m_merchantcount {1}; //number avaliable on the merchant, -1=unlimited
+		int32				m_SerialNumber {0};	// Unique identifier for this instance of an item. Needed for Bazaar.
+		uint32				m_exp {0};
+		int8				m_evolveLvl {0};
+		bool				m_activated {false};
+		ItemData*			m_scaledItem {nullptr};
+		::EvolveInfo*		m_evolveInfo {nullptr};
+		bool				m_scaling {false};
+		uint32				m_ornamenticon {0};
+		uint32				m_ornamentidfile {0};
+		uint32				m_new_id_file {0};
+		uint32				m_ornament_hero_model {0};
+		uint32				m_recast_timestamp {0};
+		int                 m_task_delivered_count {0};
 
-		//
-		// Items inside of this item (augs or contents);
-		std::map<uint8, ItemInstance*>		m_contents; // Zero-based index: min=0, max=9
-		std::map<std::string, std::string>	m_custom_data;
-		std::map<std::string, ::Timer>		m_timers;
+		// Items inside of this item (augs or contents) {};
+		std::map<uint8, ItemInstance*>		m_contents {}; // Zero-based index: min=0, max=9
+		std::map<std::string, std::string>	m_custom_data {};
+		std::map<std::string, ::Timer>		m_timers {};
 	};
 }
 

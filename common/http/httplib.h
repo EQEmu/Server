@@ -6690,7 +6690,7 @@ static WSInit wsinit_;
 		if (params.empty()) { return Get(path, headers); }
 
 		std::string path_with_query = append_query_params(path, params);
-		return Get(path_with_query.c_str(), headers, progress);
+		return Get(path_with_query, headers, progress);
 	}
 
 	inline Result ClientImpl::Get(const std::string &path, const Params &params,
@@ -6710,7 +6710,7 @@ static WSInit wsinit_;
 		}
 
 		std::string path_with_query = append_query_params(path, params);
-		return Get(path_with_query.c_str(), headers, response_handler,
+		return Get(path_with_query, headers, response_handler,
 				   content_receiver, progress);
 	}
 
@@ -6807,7 +6807,7 @@ static WSInit wsinit_;
 		std::string content_type;
 		const auto &body = detail::serialize_multipart_formdata(
 			items, detail::make_multipart_data_boundary(), content_type);
-		return Post(path, headers, body, content_type.c_str());
+		return Post(path, headers, body, content_type);
 	}
 
 	inline Result ClientImpl::Post(const std::string &path, const Headers &headers,
@@ -6820,7 +6820,7 @@ static WSInit wsinit_;
 		std::string content_type;
 		const auto &body =
 						detail::serialize_multipart_formdata(items, boundary, content_type);
-		return Post(path, headers, body, content_type.c_str());
+		return Post(path, headers, body, content_type);
 	}
 
 	inline Result ClientImpl::Put(const std::string &path) {

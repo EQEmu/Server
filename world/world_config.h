@@ -59,8 +59,8 @@ public:
 	static void LockWorld() { if (_world_config) _world_config->Locked=true; }
 	static void UnlockWorld() { if (_world_config) _world_config->Locked=false; }
 
-	static void SetWorldAddress(std::string addr) { if (_world_config) _world_config->WorldAddress=addr; }
-	static void SetLocalAddress(std::string addr) { if (_world_config) _world_config->LocalAddress=addr; }
+	static void SetWorldAddress(const std::string& addr) { if (_world_config) _world_config->WorldAddress=addr; }
+	static void SetLocalAddress(const std::string& addr) { if (_world_config) _world_config->LocalAddress=addr; }
 
 	void Dump() const;
 };

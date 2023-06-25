@@ -2170,14 +2170,14 @@ bool Lua_Mob::IsTargetable() {
 	return self->IsTargetable();
 }
 
-bool Lua_Mob::HasShieldEquiped() {
+bool Lua_Mob::HasShieldEquipped() {
 	Lua_Safe_Call_Bool();
-	return self->HasShieldEquiped();
+	return self->HasShieldEquipped();
 }
 
-bool Lua_Mob::HasTwoHandBluntEquiped() {
+bool Lua_Mob::HasTwoHandBluntEquipped() {
 	Lua_Safe_Call_Bool();
-	return self->HasTwoHandBluntEquiped();
+	return self->HasTwoHandBluntEquipped();
 }
 
 bool Lua_Mob::HasTwoHanderEquipped() {
@@ -2374,6 +2374,41 @@ bool Lua_Mob::IsHorse()
 Lua_Mob Lua_Mob::GetHateClosest() {
 	Lua_Safe_Call_Class(Lua_Mob);
 	return Lua_Mob(self->GetHateClosest());
+}
+
+Lua_Mob Lua_Mob::GetHateClosest(bool skip_mezzed) {
+	Lua_Safe_Call_Class(Lua_Mob);
+	return Lua_Mob(self->GetHateClosest(skip_mezzed));
+}
+
+Lua_Bot Lua_Mob::GetHateClosestBot() {
+	Lua_Safe_Call_Class(Lua_Bot);
+	return Lua_Bot(self->GetHateClosestBot());
+}
+
+Lua_Bot Lua_Mob::GetHateClosestBot(bool skip_mezzed) {
+	Lua_Safe_Call_Class(Lua_Bot);
+	return Lua_Bot(self->GetHateClosestBot());
+}
+
+Lua_Client Lua_Mob::GetHateClosestClient() {
+	Lua_Safe_Call_Class(Lua_Client);
+	return Lua_Client(self->GetHateClosestClient());
+}
+
+Lua_Client Lua_Mob::GetHateClosestClient(bool skip_mezzed) {
+	Lua_Safe_Call_Class(Lua_Client);
+	return Lua_Client(self->GetHateClosestClient(skip_mezzed));
+}
+
+Lua_NPC Lua_Mob::GetHateClosestNPC() {
+	Lua_Safe_Call_Class(Lua_NPC);
+	return Lua_NPC(self->GetHateClosestNPC());
+}
+
+Lua_NPC Lua_Mob::GetHateClosestNPC(bool skip_mezzed) {
+	Lua_Safe_Call_Class(Lua_NPC);
+	return Lua_NPC(self->GetHateClosestNPC(skip_mezzed));
 }
 
 Lua_HateList Lua_Mob::GetHateListByDistance() {
@@ -2709,7 +2744,7 @@ luabind::object Lua_Mob::GetEntityVariables(lua_State* L) {
 	if (d_) {
 		auto self = reinterpret_cast<NativeType*>(d_);
 		auto l = self->GetEntityVariables();
-		auto i = 0;
+		auto i = 1;
 		for (const auto& v : l) {
 			t[i] = v;
 			i++;
@@ -2875,6 +2910,16 @@ float Lua_Mob::GetDefaultRaceSize() {
 	return self->GetDefaultRaceSize();
 }
 
+float Lua_Mob::GetDefaultRaceSize(int race_id) {
+	Lua_Safe_Call_Real();
+	return self->GetDefaultRaceSize(race_id);
+}
+
+float Lua_Mob::GetDefaultRaceSize(int race_id, int gender_id) {
+	Lua_Safe_Call_Real();
+	return self->GetDefaultRaceSize(race_id, gender_id);
+}
+
 float Lua_Mob::GetActSpellRange(uint16 spell_id, float range) {
 	Lua_Safe_Call_Real();
 	return self->GetActSpellRange(spell_id, range);
@@ -2983,6 +3028,26 @@ void Lua_Mob::StopAllTimers() {
 void Lua_Mob::StopTimer(const char* timer_name) {
 	Lua_Safe_Call_Void();
 	quest_manager.stoptimer(timer_name, self);
+}
+
+luabind::object Lua_Mob::GetBuffSpellIDs(lua_State* L) {
+	auto t = luabind::newtable(L);
+	if (d_) {
+		auto self = reinterpret_cast<NativeType*>(d_);
+		auto l = self->GetBuffSpellIDs();
+		auto i = 1;
+		for (const auto& v : l) {
+			t[i] = v;
+			i++;
+		}
+	}
+
+	return t;
+}
+
+bool Lua_Mob::HasSpellEffect(int effect_id) {
+	Lua_Safe_Call_Bool();
+	return self->HasSpellEffect(effect_id);
 }
 
 luabind::scope lua_register_mob() {
@@ -3184,6 +3249,7 @@ luabind::scope lua_register_mob() {
 	.def("GetBucketKey", (std::string(Lua_Mob::*)(void))&Lua_Mob::GetBucketKey)
 	.def("GetBucketRemaining", (std::string(Lua_Mob::*)(std::string))&Lua_Mob::GetBucketRemaining)
 	.def("GetBuffSlotFromType", &Lua_Mob::GetBuffSlotFromType)
+	.def("GetBuffSpellIDs", &Lua_Mob::GetBuffSpellIDs)
 	.def("GetBuffStatValueBySlot", (void(Lua_Mob::*)(uint8, const char*))& Lua_Mob::GetBuffStatValueBySlot)
 	.def("GetBuffStatValueBySpell", (void(Lua_Mob::*)(int, const char*))&Lua_Mob::GetBuffStatValueBySpell)
 	.def("GetCHA", &Lua_Mob::GetCHA)
@@ -3196,7 +3262,9 @@ luabind::scope lua_register_mob() {
 	.def("GetDEX", &Lua_Mob::GetDEX)
 	.def("GetDR", &Lua_Mob::GetDR)
 	.def("GetDamageAmount", (uint32(Lua_Mob::*)(Lua_Mob))&Lua_Mob::GetDamageAmount)
-	.def("GetDefaultRaceSize", &Lua_Mob::GetDefaultRaceSize)
+	.def("GetDefaultRaceSize", (float(Lua_Mob::*)(void))&Lua_Mob::GetDefaultRaceSize)
+	.def("GetDefaultRaceSize", (float(Lua_Mob::*)(int))&Lua_Mob::GetDefaultRaceSize)
+	.def("GetDefaultRaceSize", (float(Lua_Mob::*)(int,int))&Lua_Mob::GetDefaultRaceSize)
 	.def("GetDeity", &Lua_Mob::GetDeity)
 	.def("GetDisplayAC", &Lua_Mob::GetDisplayAC)
 	.def("GetDrakkinDetails", &Lua_Mob::GetDrakkinDetails)
@@ -3220,7 +3288,14 @@ luabind::scope lua_register_mob() {
 	.def("GetHaste", (int(Lua_Mob::*)(void))&Lua_Mob::GetHaste)
 	.def("GetHateAmount", (int64(Lua_Mob::*)(Lua_Mob))&Lua_Mob::GetHateAmount)
 	.def("GetHateAmount", (int64(Lua_Mob::*)(Lua_Mob,bool))&Lua_Mob::GetHateAmount)
-	.def("GetHateClosest", &Lua_Mob::GetHateClosest)
+	.def("GetHateClosest", (Lua_Mob(Lua_Mob::*)(void))&Lua_Mob::GetHateClosest)
+	.def("GetHateClosest", (Lua_Mob(Lua_Mob::*)(bool))&Lua_Mob::GetHateClosest)
+	.def("GetHateClosestBot", (Lua_Bot(Lua_Mob::*)(void))&Lua_Mob::GetHateClosestBot)
+	.def("GetHateClosestBot", (Lua_Bot(Lua_Mob::*)(bool))&Lua_Mob::GetHateClosestBot)
+	.def("GetHateClosestClient", (Lua_Client(Lua_Mob::*)(void))&Lua_Mob::GetHateClosestClient)
+	.def("GetHateClosestClient", (Lua_Client(Lua_Mob::*)(bool))&Lua_Mob::GetHateClosestClient)
+	.def("GetHateClosestNPC", (Lua_NPC(Lua_Mob::*)(void))&Lua_Mob::GetHateClosestNPC)
+	.def("GetHateClosestNPC", (Lua_NPC(Lua_Mob::*)(bool))&Lua_Mob::GetHateClosestNPC)
 	.def("GetHateDamageTop", (Lua_Mob(Lua_Mob::*)(Lua_Mob))&Lua_Mob::GetHateDamageTop)
 	.def("GetHateList", &Lua_Mob::GetHateList)
 	.def("GetHateListBots", (Lua_HateList(Lua_Mob::*)(void))&Lua_Mob::GetHateListBots)
@@ -3321,9 +3396,10 @@ luabind::scope lua_register_mob() {
 	.def("HasOwner", (bool(Lua_Mob::*)(void))&Lua_Mob::HasOwner)
 	.def("HasPet", (bool(Lua_Mob::*)(void))&Lua_Mob::HasPet)
 	.def("HasProcs", &Lua_Mob::HasProcs)
-	.def("HasShieldEquiped", (bool(Lua_Mob::*)(void))&Lua_Mob::HasShieldEquiped)
+	.def("HasShieldEquipped", (bool(Lua_Mob::*)(void))&Lua_Mob::HasShieldEquipped)
+	.def("HasSpellEffect", &Lua_Mob::HasSpellEffect)
 	.def("HasTimer", &Lua_Mob::HasTimer)
-	.def("HasTwoHandBluntEquiped", (bool(Lua_Mob::*)(void))&Lua_Mob::HasTwoHandBluntEquiped)
+	.def("HasTwoHandBluntEquipped", (bool(Lua_Mob::*)(void))&Lua_Mob::HasTwoHandBluntEquipped)
 	.def("HasTwoHanderEquipped", (bool(Lua_Mob::*)(void))&Lua_Mob::HasTwoHanderEquipped)
 	.def("Heal", &Lua_Mob::Heal)
 	.def("HealDamage", (void(Lua_Mob::*)(uint64))&Lua_Mob::HealDamage)

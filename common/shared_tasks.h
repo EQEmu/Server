@@ -216,7 +216,7 @@ public:
 
 	// active record of database shared task
 	const SharedTasksRepository::SharedTasks &GetDbSharedTask() const;
-	void SetDbSharedTask(const SharedTasksRepository::SharedTasks &m_db_shared_task);
+	void SetDbSharedTask(const SharedTasksRepository::SharedTasks &t);
 
 	std::vector<SharedTaskActivityStateEntry> m_shared_task_activity_state;
 	std::vector<SharedTaskMember>             m_members;

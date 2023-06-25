@@ -19,7 +19,6 @@
 #include "../common/global_define.h"
 #include "../common/spdat.h"
 #include "../common/strings.h"
-#include "../common/types.h"
 
 #include "entity.h"
 #include "client.h"
@@ -27,7 +26,6 @@
 
 #include "pets.h"
 #include "zonedb.h"
-#include "../common/zone_store.h"
 
 #include <string>
 
@@ -76,103 +74,6 @@ void GetRandPetName(char *name)
 
 	strn0cpy(name, temp.c_str(), 64);
 }
-
-//not used anymore
-/*int CalcPetHp(int levelb, int classb, int STA)
-{
-	int multiplier = 0;
-	int base_hp = 0;
-	switch(classb) {
-		case WARRIOR:{
-			if (levelb < 20)
-				multiplier = 22;
-			else if (levelb < 30)
-				multiplier = 23;
-			else if (levelb < 40)
-				multiplier = 25;
-			else if (levelb < 53)
-				multiplier = 27;
-			else if (levelb < 57)
-				multiplier = 28;
-			else
-				multiplier = 30;
-			break;
-		}
-		case DRUID:
-		case CLERIC:
-		case SHAMAN:{
-			multiplier = 15;
-			break;
-		}
-		case PALADIN:
-		case SHADOWKNIGHT:{
-			if (levelb < 35)
-				multiplier = 21;
-			else if (levelb < 45)
-				multiplier = 22;
-			else if (levelb < 51)
-				multiplier = 23;
-			else if (levelb < 56)
-				multiplier = 24;
-			else if (levelb < 60)
-				multiplier = 25;
-			else
-				multiplier = 26;
-			break;
-		}
-		case MONK:
-		case BARD:
-		case ROGUE:
-		case BEASTLORD:{
-			if (levelb < 51)
-				multiplier = 18;
-			else if (levelb < 58)
-				multiplier = 19;
-			else
-				multiplier = 20;
-			break;
-		}
-		case RANGER:{
-			if (levelb < 58)
-				multiplier = 20;
-			else
-				multiplier = 21;
-			break;
-		}
-		case MAGICIAN:
-		case WIZARD:
-		case NECROMANCER:
-		case ENCHANTER:{
-			multiplier = 12;
-			break;
-		}
-		default:{
-			if (levelb < 35)
-				multiplier = 21;
-			else if (levelb < 45)
-				multiplier = 22;
-			else if (levelb < 51)
-				multiplier = 23;
-			else if (levelb < 56)
-				multiplier = 24;
-			else if (levelb < 60)
-				multiplier = 25;
-			else
-				multiplier = 26;
-			break;
-		}
-	}
-
-	if (multiplier == 0)
-	{
-		LogFile->write(EQEMuLog::Error, "Multiplier == 0 in CalcPetHp,using Generic....");;
-		multiplier=12;
-	}
-
-	base_hp = 5 + (multiplier*levelb) + ((multiplier*levelb*STA) + 1)/300;
-	return base_hp;
-}
-*/
 
 void Mob::MakePet(uint16 spell_id, const char* pettype, const char *petname) {
 	// petpower of -1 is used to get the petpower based on whichever focus is currently
@@ -443,22 +344,24 @@ Pet::Pet(NPCType *type_data, Mob *owner, PetType type, uint16 spell_id, int16 po
 : NPC(type_data, 0, owner->GetPosition() + glm::vec4(2.0f, 2.0f, 0.0f, 0.0f), GravityBehavior::Water)
 {
 	GiveNPCTypeData(type_data);
-	typeofpet = type;
-	petpower = power;
-	SetOwnerID(owner->GetID());
+	SetPetType(type);
+	SetPetPower(power);
+	SetOwnerID(owner ? owner->GetID() : 0);
 	SetPetSpellID(spell_id);
 
 	// All pets start at false on newer clients. The client
 	// turns it on and tracks the state.
-	taunting=false;
+	SetTaunting(false);
 
 	// Older clients didn't track state, and default taunting is on (per @mackal)
 	// Familiar and animation pets don't get taunt until an AA.
 	if (owner && owner->IsClient()) {
 		if (!(owner->CastToClient()->ClientVersionBit() & EQ::versions::maskUFAndLater)) {
-			if ((typeofpet != petFamiliar && typeofpet != petAnimation) ||
-				aabonuses.PetCommands[PET_TAUNT]) {
-				taunting=true;
+			if (
+				(GetPetType() != petFamiliar && GetPetType() != petAnimation) ||
+				aabonuses.PetCommands[PET_TAUNT]
+			) {
+				SetTaunting(true);
 			}
 		}
 	}
@@ -503,21 +406,22 @@ bool ZoneDatabase::GetPoweredPetEntry(const char *pet_type, int16 petpower, PetR
 }
 
 Mob* Mob::GetPet() {
-	if(GetPetID() == 0)
-		return(nullptr);
-
-	Mob* tmp = entity_list.GetMob(GetPetID());
-	if(tmp == nullptr) {
-		SetPetID(0);
-		return(nullptr);
+	if (!GetPetID()) {
+		return nullptr;
 	}
 
-	if(tmp->GetOwnerID() != GetID()) {
+	const auto m = entity_list.GetMob(GetPetID());
+	if (!m) {
 		SetPetID(0);
-		return(nullptr);
+		return nullptr;
 	}
 
-	return(tmp);
+	if (m->GetOwnerID() != GetID()) {
+		SetPetID(0);
+		return nullptr;
+	}
+
+	return m;
 }
 
 bool Mob::HasPet() const {
@@ -634,13 +538,13 @@ void NPC::SetPetState(SpellBuff_Struct *pet_buffs, uint32 *items) {
 					case SE_WeaponProc:
 						// We need to reapply buff based procs
 						// We need to do this here so suspended pets also regain their procs.
-						AddProcToWeapon(GetProcID(buffs[j1].spellid,x1), false, 100+spells[buffs[j1].spellid].limit_value[x1], buffs[j1].spellid, buffs[j1].casterlevel, GetProcLimitTimer(buffs[j1].spellid, ProcType::MELEE_PROC));
+						AddProcToWeapon(GetProcID(buffs[j1].spellid,x1), false, 100+spells[buffs[j1].spellid].limit_value[x1], buffs[j1].spellid, buffs[j1].casterlevel, GetSpellProcLimitTimer(buffs[j1].spellid, ProcType::MELEE_PROC));
 						break;
 					case SE_DefensiveProc:
-						AddDefensiveProc(GetProcID(buffs[j1].spellid, x1), 100 + spells[buffs[j1].spellid].limit_value[x1], buffs[j1].spellid, GetProcLimitTimer(buffs[j1].spellid, ProcType::DEFENSIVE_PROC));
+						AddDefensiveProc(GetProcID(buffs[j1].spellid, x1), 100 + spells[buffs[j1].spellid].limit_value[x1], buffs[j1].spellid, GetSpellProcLimitTimer(buffs[j1].spellid, ProcType::DEFENSIVE_PROC));
 						break;
 					case SE_RangedProc:
-						AddRangedProc(GetProcID(buffs[j1].spellid, x1), 100 + spells[buffs[j1].spellid].limit_value[x1], buffs[j1].spellid, GetProcLimitTimer(buffs[j1].spellid, ProcType::RANGED_PROC));
+						AddRangedProc(GetProcID(buffs[j1].spellid, x1), 100 + spells[buffs[j1].spellid].limit_value[x1], buffs[j1].spellid, GetSpellProcLimitTimer(buffs[j1].spellid, ProcType::RANGED_PROC));
 						break;
 					case SE_Charm:
 					case SE_Rune:

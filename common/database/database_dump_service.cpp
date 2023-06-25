@@ -28,6 +28,7 @@
 #include "../database_schema.h"
 #include "../file.h"
 #include "../process/process.h"
+#include "../termcolor/rang.hpp"
 
 #include <ctime>
 
@@ -36,6 +37,7 @@
 #else
 
 #include <sys/time.h>
+#include <thread>
 
 #endif
 
@@ -91,6 +93,8 @@ std::string DatabaseDumpService::GetMySQLVersion()
 	return Strings::Trim(version_output);
 }
 
+const std::string CREDENTIALS_FILE = "login.my.cnf";
+
 /**
  * @return
  */
@@ -99,21 +103,15 @@ std::string DatabaseDumpService::GetBaseMySQLDumpCommand()
 	auto config = EQEmuConfig::get();
 	if (IsDumpContentTables() && !config->ContentDbHost.empty()) {
 		return fmt::format(
-			"mysqldump -u {} -p{} -h {} --port={} {}",
-			config->ContentDbUsername,
-			config->ContentDbPassword,
-			config->ContentDbHost,
-			config->ContentDbPort,
+			"mysqldump --defaults-extra-file={} {}",
+			CREDENTIALS_FILE,
 			config->ContentDbName
 		);
 	};
 
 	return fmt::format(
-		"mysqldump -u {} -p{} -h {} --port={} {}",
-		config->DatabaseUsername,
-		config->DatabasePassword,
-		config->DatabaseHost,
-		config->DatabasePort,
+		"mysqldump --defaults-extra-file={} {}",
+		CREDENTIALS_FILE,
 		config->DatabaseDB
 	);
 }
@@ -145,7 +143,7 @@ std::string DatabaseDumpService::GetQueryServTables()
 
 std::string DatabaseDumpService::GetSystemTablesList()
 {
-	auto system_tables = DatabaseSchema::GetServerTables();
+	auto system_tables  = DatabaseSchema::GetServerTables();
 	auto version_tables = DatabaseSchema::GetVersionTables();
 
 	system_tables.insert(
@@ -199,7 +197,7 @@ std::string DatabaseDumpService::GetDumpFileNameWithPath()
 	return GetSetDumpPath() + GetDumpFileName();
 }
 
-void DatabaseDumpService::Dump()
+void DatabaseDumpService::DatabaseDump()
 {
 	if (!IsMySQLInstalled()) {
 		LogError("MySQL is not installed; Please check your PATH for a valid MySQL installation");
@@ -293,14 +291,6 @@ void DatabaseDumpService::Dump()
 		pipe_file = fmt::format(" > {}.sql", GetDumpFileNameWithPath());
 	}
 
-	std::string execute_command = fmt::format(
-		"{} {} {} {}",
-		GetBaseMySQLDumpCommand(),
-		options,
-		tables_to_dump,
-		pipe_file
-	);
-
 	if (!File::Exists(GetSetDumpPath()) && !IsDumpOutputToConsole()) {
 		File::Makedir(GetSetDumpPath());
 	}
@@ -308,18 +298,49 @@ void DatabaseDumpService::Dump()
 	if (IsDumpDropTableSyntaxOnly()) {
 		std::vector<std::string> tables = Strings::Split(tables_to_dump, ' ');
 
-		for (auto &table : tables) {
+		for (auto &table: tables) {
 			std::cout << "DROP TABLE IF EXISTS `" << table << "`;" << std::endl;
 		}
 
 		if (tables_to_dump.empty()) {
 			std::cerr << "No tables were specified" << std::endl;
 		}
+
+		return;
 	}
 	else {
+		const auto execute_command = fmt::format(
+			"{} {} {} {}",
+			GetBaseMySQLDumpCommand(),
+			options,
+			tables_to_dump,
+			pipe_file
+		);
+
+		BuildCredentialsFile();
 		std::string execution_result = Process::execute(execute_command);
 		if (!execution_result.empty() && IsDumpOutputToConsole()) {
 			std::cout << execution_result;
+		}
+	}
+
+	LogSys.LoadLogSettingsDefaults();
+
+	if (!pipe_file.empty()) {
+		std::string file = fmt::format("{}.sql", GetDumpFileNameWithPath());
+		auto        r    = File::GetContents(file);
+		if (!r.error.empty()) {
+			LogError("{}", r.error);
+		}
+
+		for (auto &line: Strings::Split(r.contents, "\n")) {
+			if (Strings::Contains(line, "mysqldump:")) {
+				LogError("{}", line);
+				LogError("Database dump failed. Correct the error before continuing or trying again");
+				LogError("This is to prevent data loss on behalf of the server operator");
+				RemoveSqlBackup();
+				std::exit(1);
+			}
 		}
 	}
 
@@ -328,10 +349,9 @@ void DatabaseDumpService::Dump()
 	}
 
 	LogInfo("Database dump created at [{}.sql]", GetDumpFileNameWithPath());
-
 	if (IsDumpWithCompression() && !IsDumpOutputToConsole()) {
 		if (HasCompressionBinary()) {
-			LogInfo("Compression requested... Compressing dump [{}.sql]", GetDumpFileNameWithPath());
+			LogInfo("Compression requested. Compressing dump [{}.sql]", GetDumpFileNameWithPath());
 
 			if (IsTarAvailable()) {
 				Process::execute(
@@ -343,6 +363,7 @@ void DatabaseDumpService::Dump()
 					)
 				);
 				LogInfo("Compressed dump created at [{}.tar.gz]", GetDumpFileNameWithPath());
+				RemoveSqlBackup();
 			}
 			else if (Is7ZipAvailable()) {
 				Process::execute(
@@ -353,6 +374,7 @@ void DatabaseDumpService::Dump()
 					)
 				);
 				LogInfo("Compressed dump created at [{}.zip]", GetDumpFileNameWithPath());
+				RemoveSqlBackup();
 			}
 			else {
 				LogInfo("Compression requested, but no available compression binary was found");
@@ -362,6 +384,8 @@ void DatabaseDumpService::Dump()
 			LogWarning("Compression requested but binary not found... Skipping...");
 		}
 	}
+
+	RemoveCredentialsFile();
 
 //	LogDebug("[{}] dump-to-console", IsDumpOutputToConsole());
 //	LogDebug("[{}] dump-path", GetSetDumpPath());
@@ -534,4 +558,49 @@ bool DatabaseDumpService::IsDumpMercTables() const
 void DatabaseDumpService::SetDumpMercTables(bool dump_merc_tables)
 {
 	DatabaseDumpService::dump_merc_tables = dump_merc_tables;
+}
+
+void DatabaseDumpService::RemoveSqlBackup()
+{
+	std::string file = fmt::format("{}.sql", GetDumpFileNameWithPath());
+	if (File::Exists(file)) {
+		std::filesystem::remove(file);
+	}
+
+	RemoveCredentialsFile();
+}
+
+void DatabaseDumpService::BuildCredentialsFile()
+{
+	auto          config = EQEmuConfig::get();
+	std::ofstream out(CREDENTIALS_FILE);
+	if (out.is_open()) {
+		if (IsDumpContentTables() && !config->ContentDbHost.empty()) {
+			out << "[mysqldump]" << std::endl;
+			out << "user=" << config->ContentDbUsername << std::endl;
+			out << "password=" << config->ContentDbPassword << std::endl;
+			out << "host=" << config->ContentDbHost << std::endl;
+			out << "port=" << config->ContentDbPort << std::endl;
+			out << "default-character-set=utf8" << std::endl;
+		}
+		else {
+			out << "[mysqldump]" << std::endl;
+			out << "user=" << config->DatabaseUsername << std::endl;
+			out << "password=" << config->DatabasePassword << std::endl;
+			out << "host=" << config->DatabaseHost << std::endl;
+			out << "port=" << config->DatabasePort << std::endl;
+			out << "default-character-set=utf8" << std::endl;
+		}
+		out.close();
+	}
+	else {
+		LogError("Failed to open credentials file for writing");
+	}
+}
+
+void DatabaseDumpService::RemoveCredentialsFile()
+{
+	if (File::Exists(CREDENTIALS_FILE)) {
+		std::filesystem::remove(CREDENTIALS_FILE);
+	}
 }

@@ -145,7 +145,6 @@ private:
 	void ExportVar(const char *pkgprefix, const char *varname, uint32 value);
 	void ExportVar(const char *pkgprefix, const char *varname, float value);
 	void ExportVar(const char* pkgprefix, const char* varname, const char* classname, void* value);
-	void ExportVarComplex(const char *pkgprefix, const char *varname, const char *value);
 
 	int EventCommon(
 		QuestEventID event,

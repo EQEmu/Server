@@ -27,7 +27,6 @@
 #include "../common/emu_versions.h"
 #include "../common/features.h"
 #include "../common/item_instance.h"
-#include "../common/item_data.h"
 #include "../common/linked_list.h"
 #include "../common/servertalk.h"
 #include "../common/say_link.h"
@@ -45,7 +44,6 @@
 
 #include "bot.h"
 
-#include <cctype>
 #include <stdio.h>
 #include <string>
 #include <utility>
@@ -164,7 +162,7 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 		size = 15;
 	}
 
-	taunting             = false;
+	SetTaunting(false);
 	proximity            = nullptr;
 	copper               = 0;
 	silver               = 0;
@@ -834,14 +832,6 @@ void NPC::AddCash(uint16 in_copper, uint16 in_silver, uint16 in_gold, uint16 in_
 		platinum = 0;
 }
 
-void NPC::AddCash()
-{
-	copper   = zone->random.Int(1, 100);
-	silver   = zone->random.Int(1, 50);
-	gold     = zone->random.Int(1, 10);
-	platinum = zone->random.Int(1, 5);
-}
-
 void NPC::RemoveCash() {
 	copper = 0;
 	silver = 0;
@@ -1151,59 +1141,6 @@ void NPC::Depop(bool start_spawn_timer) {
 	}
 }
 
-bool NPC::DatabaseCastAccepted(int spell_id) {
-	for (int i=0; i < EFFECT_COUNT; i++) {
-		switch(spells[spell_id].effect_id[i]) {
-		case SE_Stamina: {
-			if(IsEngaged() && GetHPRatio() < 100)
-				return true;
-			else
-				return false;
-			break;
-		}
-		case SE_CurrentHPOnce:
-		case SE_CurrentHP: {
-			if(GetHPRatio() < 100 && spells[spell_id].buff_duration == 0)
-				return true;
-			else
-				return false;
-			break;
-		}
-
-		case SE_HealOverTime: {
-			if(GetHPRatio() < 100)
-				return true;
-			else
-				return false;
-			break;
-		}
-		case SE_DamageShield: {
-			return true;
-		}
-		case SE_NecPet:
-		case SE_SummonPet: {
-			if(GetPet()){
-#ifdef SPELLQUEUE
-				printf("%s: Attempted to make a second pet, denied.\n",GetName());
-#endif
-				return false;
-			}
-			break;
-		}
-		case SE_LocateCorpse:
-		case SE_SummonCorpse: {
-			return false; //Pfft, npcs don't need to summon corpses/locate corpses!
-			break;
-		}
-		default:
-			if(spells[spell_id].good_effect == 1 && !(spells[spell_id].buff_duration == 0 && GetHPRatio() == 100) && !IsEngaged())
-				return true;
-			return false;
-		}
-	}
-	return false;
-}
-
 bool NPC::SpawnZoneController()
 {
 
@@ -1380,7 +1317,7 @@ NPC * NPC::SpawnNodeNPC(std::string name, std::string last_name, const glm::vec4
 }
 
 NPC* NPC::SpawnNPC(const char* spawncommand, const glm::vec4& position, Client* client) {
-	if(spawncommand == 0 || spawncommand[0] == 0) {
+	if (spawncommand == 0 || spawncommand[0] == 0) {
 		return 0;
 	}
 	else {
@@ -1389,42 +1326,54 @@ NPC* NPC::SpawnNPC(const char* spawncommand, const glm::vec4& position, Client* 
 		if (!sep.IsNumber(1)) {
 			sprintf(sep.arg[1], "1");
 		}
+
 		if (!sep.IsNumber(2)) {
 			sprintf(sep.arg[2], "1");
 		}
+
 		if (!sep.IsNumber(3)) {
 			sprintf(sep.arg[3], "0");
 		}
+
 		if (Strings::ToInt(sep.arg[4]) > 2100000000 || Strings::ToInt(sep.arg[4]) <= 0) {
 			sprintf(sep.arg[4], " ");
 		}
+
 		if (!strcmp(sep.arg[5], "-")) {
 			sprintf(sep.arg[5], " ");
 		}
+
 		if (!sep.IsNumber(5)) {
 			sprintf(sep.arg[5], " ");
 		}
+
 		if (!sep.IsNumber(6)) {
 			sprintf(sep.arg[6], "1");
 		}
+
 		if (!sep.IsNumber(8)) {
 			sprintf(sep.arg[8], "0");
 		}
+
 		if (!sep.IsNumber(9)) {
 			sprintf(sep.arg[9], "0");
 		}
+
 		if (!sep.IsNumber(7)) {
 			sprintf(sep.arg[7], "0");
 		}
+
 		if (!strcmp(sep.arg[4], "-")) {
 			sprintf(sep.arg[4], " ");
 		}
+
 		if (!sep.IsNumber(10)) {    // bodytype
 			sprintf(sep.arg[10], "0");
 		}
+
 		//Calc MaxHP if client neglected to enter it...
 		if (sep.arg[4] && !sep.IsNumber(4)) {
-			sprintf(sep.arg[4], "0");
+			sprintf(sep.arg[4], "1");
 		}
 
 		// Autoselect NPC Gender
@@ -1437,6 +1386,7 @@ NPC* NPC::SpawnNPC(const char* spawncommand, const glm::vec4& position, Client* 
 		memset(npc_type, 0, sizeof(NPCType));
 
 		strncpy(npc_type->name, sep.arg[0], 60);
+
 		npc_type->current_hp       = Strings::ToInt(sep.arg[4]);
 		npc_type->max_hp           = Strings::ToInt(sep.arg[4]);
 		npc_type->race             = Strings::ToInt(sep.arg[1]);
@@ -1447,8 +1397,8 @@ NPC* NPC::SpawnNPC(const char* spawncommand, const glm::vec4& position, Client* 
 		npc_type->npc_id           = 0;
 		npc_type->loottable_id     = 0;
 		npc_type->texture          = Strings::ToInt(sep.arg[3]);
-		npc_type->light            = 0; // spawncommand needs update
-		npc_type->runspeed         = 1.25;
+		npc_type->light            = 0;
+		npc_type->runspeed         = 1.25f;
 		npc_type->d_melee_texture1 = Strings::ToInt(sep.arg[7]);
 		npc_type->d_melee_texture2 = Strings::ToInt(sep.arg[8]);
 		npc_type->merchanttype     = Strings::ToInt(sep.arg[9]);
@@ -1464,8 +1414,8 @@ NPC* NPC::SpawnNPC(const char* spawncommand, const glm::vec4& position, Client* 
 
 		npc_type->attack_delay = 3000;
 
-		npc_type->prim_melee_type = 28;
-		npc_type->sec_melee_type = 28;
+		npc_type->prim_melee_type = static_cast<uint8>(EQ::skills::SkillHandtoHand);
+		npc_type->sec_melee_type  = static_cast<uint8>(EQ::skills::SkillHandtoHand);
 
 		auto npc = new NPC(npc_type, nullptr, position, GravityBehavior::Water);
 		npc->GiveNPCTypeData(npc_type);
@@ -1474,17 +1424,34 @@ NPC* NPC::SpawnNPC(const char* spawncommand, const glm::vec4& position, Client* 
 
 		if (client) {
 			// Notify client of spawn data
-			client->Message(Chat::White, "New spawn:");
-			client->Message(Chat::White, "Name: %s", npc->name);
-			client->Message(Chat::White, "Race: %u", npc->race);
-			client->Message(Chat::White, "Level: %u", npc->level);
-			client->Message(Chat::White, "Material: %u", npc->texture);
-			client->Message(Chat::White, "Current/Max HP: %i", npc->max_hp);
-			client->Message(Chat::White, "Gender: %u", npc->gender);
-			client->Message(Chat::White, "Class: %u", npc->class_);
-			client->Message(Chat::White, "Weapon Item Number: %u/%u", npc->d_melee_texture1, npc->d_melee_texture2);
-			client->Message(Chat::White, "MerchantID: %u", npc->MerchantType);
-			client->Message(Chat::White, "Bodytype: %u", npc->bodytype);
+			client->Message(Chat::White, fmt::format("Name | {}", npc->name).c_str());
+			client->Message(Chat::White, fmt::format("Level | {}", npc->level).c_str());
+			client->Message(Chat::White, fmt::format("Health | {}", npc->max_hp).c_str());
+			client->Message(Chat::White, fmt::format("Race | {} ({})", GetRaceIDName(npc->race), npc->race).c_str());
+			client->Message(Chat::White, fmt::format("Class | {} ({})", GetClassIDName(npc->class_), npc->class_).c_str());
+			client->Message(Chat::White, fmt::format("Gender | {} ({})", GetGenderName(npc->gender), npc->gender).c_str());
+			client->Message(Chat::White, fmt::format("Texture | {}", npc->texture).c_str());
+
+			if (npc->d_melee_texture1 || npc->d_melee_texture2) {
+				client->Message(
+					Chat::White,
+					fmt::format(
+						"Weapon Item Number | Primary: {} Secondary: {}",
+						npc->d_melee_texture1,
+						npc->d_melee_texture2
+					).c_str()
+				);
+			}
+
+			if (npc->MerchantType) {
+				client->Message(Chat::White, fmt::format("Merchant ID | {}", npc->MerchantType).c_str());
+			}
+
+			if (npc->bodytype) {
+				client->Message(Chat::White, fmt::format("Body Type | {} ({})", EQ::constants::GetBodyTypeName(npc->bodytype), npc->bodytype).c_str());
+			}
+
+			client->Message(Chat::White, "New NPC spawned!");
 		}
 
 		return npc;
@@ -1920,7 +1887,7 @@ void NPC::PickPocket(Client* thief)
 			if (item_test->Magic || !item_test->NoDrop || item_test->IsClassBag() || thief->CheckLoreConflict(item_test) || item_iter->equip_slot != EQ::invslot::SLOT_INVALID)
 				continue;
 
-			loot_selection.push_back(std::make_pair(item_test, ((item_test->Stackable) ? (1) : (item_iter->charges))));
+			loot_selection.emplace_back(std::make_pair(item_test, ((item_test->Stackable) ? (1) : (item_iter->charges))));
 		}
 		if (loot_selection.empty()) {
 			steal_item = false;
@@ -2613,15 +2580,31 @@ void NPC::ModifyNPCStat(const std::string& stat, const std::string& value)
 		return;
 	}
 	else if (stat_lower == "min_hit") {
-		min_dmg     = Strings::ToInt(value);
+		min_dmg = Strings::ToInt(value);
+
 		// TODO: fix DB
+
+		if (min_dmg > max_dmg) {
+			const auto temporary_damage = max_dmg;
+			max_dmg = min_dmg;
+			min_dmg = temporary_damage;
+		}
+
 		base_damage = round((max_dmg - min_dmg) / 1.9);
 		min_damage  = min_dmg - round(base_damage / 10.0);
 		return;
 	}
 	else if (stat_lower == "max_hit") {
-		max_dmg     = Strings::ToInt(value);
+		max_dmg = Strings::ToInt(value);
+
 		// TODO: fix DB
+
+		if (max_dmg < min_dmg) {
+			const auto temporary_damage = min_dmg;
+			min_dmg = max_dmg;
+			max_dmg = temporary_damage;
+		}
+
 		base_damage = round((max_dmg - min_dmg) / 1.9);
 		min_damage  = min_dmg - round(base_damage / 10.0);
 		return;

@@ -20,7 +20,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include <iostream>
 #endif
 
-#include "../common/features.h"
 #include "../common/rulesys.h"
 #include "../common/strings.h"
 #include "../common/misc_functions.h"
@@ -34,7 +33,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "mob_movement_manager.h"
 
 #include <math.h>
-#include <stdlib.h>
 
 extern FastMath g_Math;
 

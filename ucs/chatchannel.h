@@ -15,7 +15,7 @@ class ChatChannel {
 
 public:
 
-	ChatChannel(std::string inName, std::string inOwner, std::string inPassword, bool inPermanent, int inMinimumStatus = 0);
+	ChatChannel(const std::string& inName, const std::string& inOwner, const std::string& inPassword, bool inPermanent, int inMinimumStatus = 0);
 	~ChatChannel();
 
 	void AddClient(Client *c);
@@ -29,7 +29,7 @@ public:
 	void SetPassword(const std::string& in_password);
 	bool IsOwner(const std::string& name) { return (m_owner == name); }
 	const std::string& GetPassword() { return m_password; }
-	void SetOwner(std::string& inOwner);
+	void SetOwner(const std::string& in_owner);
 	std::string& GetOwnerName();
 	void SetTemporary();
 	void SetPermanent();
@@ -76,7 +76,7 @@ class ChatChannelList {
 
 public:
 	ChatChannel* CreateChannel(const std::string& name, const std::string& owner, const std::string& password, bool permanent, int minimum_status, bool save_to_database = false);
-	ChatChannel* FindChannel(std::string name);
+	ChatChannel* FindChannel(const std::string& name);
 	ChatChannel* AddClientToChannel(std::string channel_name, Client* c, bool command_directed = false);
 	ChatChannel* RemoveClientFromChannel(const std::string& in_channel_name, Client* c, bool command_directed = false);
 	void RemoveChannel(ChatChannel *Channel);
@@ -91,8 +91,8 @@ public:
 	static void AddToFilteredNames(const std::string& name);
 	static bool IsOnChannelBlockList(const std::string& channel_name);
 	static bool IsOnFilteredNameList(const std::string& channel_name);
-	static inline void SetChannelBlockList(std::vector<std::string> new_list) { m_blocked_channel_names = new_list; }
-	static inline void SetFilteredNameList(std::vector<std::string> new_list) { m_filtered_names = new_list; }
+	static inline void SetChannelBlockList(const std::vector<std::string>& new_list) { m_blocked_channel_names = new_list; }
+	static inline void SetFilteredNameList(const std::vector<std::string>& new_list) { m_filtered_names = new_list; }
 private:
 
 	LinkedList<ChatChannel*> ChatChannels;
@@ -101,6 +101,6 @@ private:
 
 };
 
-std::string CapitaliseName(std::string inString);
+std::string CapitaliseName(const std::string& inString);
 
 #endif

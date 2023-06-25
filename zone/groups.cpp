@@ -20,9 +20,6 @@
 #include "../common/eqemu_logsys.h"
 #include "expedition.h"
 #include "masterentity.h"
-#include "../common/packet_functions.h"
-#include "../common/packet_dump.h"
-#include "../common/strings.h"
 #include "worldserver.h"
 #include "string_ids.h"
 #include "../common/events/player_event_logs.h"
@@ -298,7 +295,7 @@ bool Group::AddMember(Mob* newmember, const char *NewMemberName, uint32 Characte
 			}
 
 			//put existing group member(s) into the new member's list
-			if(InZone && newmember->IsClient())
+			if(InZone && newmember && newmember->IsClient())
 			{
 				if(IsLeader(members[i]))
 				{
@@ -307,13 +304,13 @@ bool Group::AddMember(Mob* newmember, const char *NewMemberName, uint32 Characte
 				else
 				{
 					strcpy(newmember->CastToClient()->GetPP().groupMembers[x], members[i]->GetCleanName());
-					x++;
+					++x;
 				}
 			}
 		}
 	}
 
-	if(InZone)
+	if(InZone && newmember)
 	{
 		//put new member in his own list.
 		newmember->SetGrouped(true);
@@ -545,7 +542,6 @@ bool Group::UpdatePlayer(Mob* update) {
 }
 
 void Group::MemberZoned(Mob* removemob) {
-	uint32 i;
 
 	if (!removemob) {
 		return;
@@ -557,21 +553,21 @@ void Group::MemberZoned(Mob* removemob) {
 
 	//should NOT clear the name, it is used for world communication.
 	for (auto & m : members) {
-		if (m && (m == removemob || m->IsBot() && m->CastToBot()->GetBotOwner() == removemob)) {
+		if (m && (m == removemob || (m->IsBot() && m->CastToBot()->GetBotOwner() == removemob))) {
 			m = nullptr;
 		}
 	}
 
 	if (removemob->IsClient() && HasRole(removemob, RoleAssist)) {
-		SetGroupAssistTarget(0);
+		SetGroupAssistTarget(nullptr);
 	}
 
 	if (removemob->IsClient() && HasRole(removemob, RoleTank)) {
-		SetGroupTankTarget(0);
+		SetGroupTankTarget(nullptr);
 	}
 
 	if (removemob->IsClient() && HasRole(removemob, RolePuller)) {
-		SetGroupPullerTarget(0);
+		SetGroupPullerTarget(nullptr);
 	}
 
 	if (removemob->IsClient() && removemob == mentoree) {
@@ -1158,17 +1154,33 @@ bool Group::LearnMembers() {
 			"Error getting group members for group [{}]",
 			GetID()
 		);
-		return false;
+	}
+
+	for(int i = 0; i < MAX_GROUP_MEMBERS; ++i)
+	{
+		members[i] = nullptr;
+		memset(membername[i],0,64);
+		MemberRoles[i] = 0;
 	}
 
 	int memberIndex = 0;
 	for (const auto& member : rows) {
-		if (member.name.empty()) {
-			continue;
+		if (memberIndex >= MAX_GROUP_MEMBERS) {
+			LogError(
+				"Too many members in group [{}]",
+				GetID()
+			);
+			break;
 		}
-		members[memberIndex] = nullptr;
-		strn0cpy(membername[memberIndex], member.name.c_str(), 64);
-		memberIndex++;
+
+		if (member.name.empty()) {
+			members[memberIndex] = nullptr;
+			membername[memberIndex][0] = '\0';
+		} else {
+			members[memberIndex] = nullptr;
+			strn0cpy(membername[memberIndex], member.name.c_str(), 64);
+		}
+		++memberIndex;
 	}
 
 	VerifyGroup();
@@ -1189,13 +1201,12 @@ void Group::VerifyGroup() {
 		}
 
 		Mob *them = entity_list.GetMob(membername[i]);
-		if(them == nullptr && members[i] != nullptr) {	//they aren't in zone
-			membername[i][0] = '\0';
+		if (!them && members[i]) {	//they aren't in zone
 			members[i] = nullptr;
 			continue;
 		}
 
-		if(them != nullptr && members[i] != them) {	//our pointer is out of date... not so good.
+		if (them != nullptr && members[i] != them) {	//our pointer is out of date... not so good.
 			members[i] = them;
 			continue;
 		}

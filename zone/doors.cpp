@@ -30,10 +30,8 @@
 #include "string_ids.h"
 #include "worldserver.h"
 #include "zonedb.h"
-#include "../common/zone_store.h"
 #include "../common/repositories/criteria/content_filter_criteria.h"
 
-#include <iostream>
 #include <string.h>
 
 #define OPEN_DOOR 0x02
@@ -222,7 +220,7 @@ void Doors::HandleClick(Client *sender, uint8 trigger)
 		}
 	}
 
-	if (m_dz_switch_id != 0) {
+	if (sender && m_dz_switch_id != 0) {
 		sender->UpdateTasksOnTouchSwitch(m_dz_switch_id);
 		if (sender->TryMovePCDynamicZoneSwitch(m_dz_switch_id)) {
 			safe_delete(outapp);
@@ -625,13 +623,13 @@ void Doors::ForceOpen(Mob *sender, bool alt_mode)
 	if (!alt_mode) { // original function
 		if (!m_is_open) {
 			if (!m_disable_timer) {
-				LogDoorsDetail("door_id [{}] starting timer", md->doorid);
+				LogDoorsDetail("door_id [{}] starting timer", m_door_id);
 				m_close_timer.Start();
 			}
 			m_is_open = true;
 		}
 		else {
-			LogDoorsDetail("door_id [{}] disable timer", md->doorid);
+			LogDoorsDetail("door_id [{}] disable timer", m_door_id);
 			m_close_timer.Disable();
 			if (!m_disable_timer) {
 				m_is_open = false;
@@ -640,7 +638,7 @@ void Doors::ForceOpen(Mob *sender, bool alt_mode)
 	}
 	else { // alternative function
 		if (!m_disable_timer) {
-			LogDoorsDetail("door_id [{}] alt starting timer", md->doorid);
+			LogDoorsDetail("door_id [{}] alt starting timer", m_door_id);
 			m_close_timer.Start();
 		}
 		m_is_open = true;

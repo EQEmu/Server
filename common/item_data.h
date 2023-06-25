@@ -355,181 +355,186 @@ namespace EQ
 
 	struct ItemData {
 		// Non packet based fields
-		uint8	MinStatus;
+		uint8	MinStatus {};
 
 		// Packet based fields
-		uint8	ItemClass;		// Item Type: 0=common, 1=container, 2=book
-		char	Name[64];		// Name
-		char	Lore[80];		// Lore Name: *=lore, &=summoned, #=artifact, ~=pending lore
-		char	IDFile[30];		// Visible model
-		uint32	ID;				// Unique ID (also PK for DB)
-		int32	Weight;			// Item weight * 10
-		uint8	NoRent;			// No Rent: 0=norent, 255=not norent
-		uint8	NoDrop;			// No Drop: 0=nodrop, 255=not nodrop
-		uint8	Size;			// Size: 0=tiny, 1=small, 2=medium, 3=large, 4=giant
-		uint32	Slots;			// Bitfield for which slots this item can be used in
-		uint32	Price;			// Item cost (?)
-		uint32	Icon;			// Icon Number
-		int32	LoreGroup;		// Later items use LoreGroup instead of LoreFlag. we might want to see about changing this to int32 since it is commonly -1 and is constantly being cast from signed (-1) to unsigned (4294967295)
-		bool	LoreFlag;		// This will be true if LoreGroup is non-zero
-		bool	PendingLoreFlag;
-		bool	ArtifactFlag;
-		bool	SummonedFlag;
-		uint8	FVNoDrop;		// Firiona Vie nodrop flag
-		uint32	Favor;			// Individual favor
-		uint32	GuildFavor;		// Guild favor
-		uint32	PointType;
+		uint8	ItemClass {};		// Item Type: 0=common, 1=container, 2=book
+		char	Name[64] {};		// Name
+		char	Lore[80] {};		// Lore Name: *=lore, &=summoned, #=artifact, ~=pending lore
+		char	IDFile[30] {};		// Visible model
+		uint32	ID {};				// Unique ID (also PK for DB)
+		int32	Weight {};			// Item weight * 10
+		uint8	NoRent{} ;			// No Rent: 0=norent, 255=not norent
+		uint8	NoDrop {};			// No Drop: 0=nodrop, 255=not nodrop
+		uint8	Size {};			// Size: 0=tiny, 1=small, 2=medium, 3=large, 4=giant
+		uint32	Slots {};			// Bitfield for which slots this item can be used in
+		uint32	Price {};			// Item cost (?)
+		uint32	Icon {};			// Icon Number
+		int32	LoreGroup {};		// Later items use LoreGroup instead of LoreFlag. we might want to see about changing this to int32 since it is commonly -1 and is constantly being cast from signed (-1) to unsigned (4294967295)
+		bool	LoreFlag {};		// This will be true if LoreGroup is non-zero
+		bool	PendingLoreFlag {};
+		bool	ArtifactFlag {};
+		bool	SummonedFlag {};
+		uint8	FVNoDrop {};		// Firiona Vie nodrop flag
+		uint32	Favor {};			// Individual favor
+		uint32	GuildFavor {};		// Guild favor
+		uint32	PointType {};
 
 		//uint32	Unk117;
 		//uint32	Unk118;
 		//uint32	Unk121;
 		//uint32	Unk124;
 
-		uint8	BagType;		// 0:Small Bag, 1:Large Bag, 2:Quiver, 3:Belt Pouch ... there are 50 types
-		uint8	BagSlots;		// Number of slots: can only be 2, 4, 6, 8, or 10
-		uint8	BagSize;		// 0:TINY, 1:SMALL, 2:MEDIUM, 3:LARGE, 4:GIANT
-		uint8	BagWR;			// 0->100
+		uint8	BagType {};		// 0:Small Bag, 1:Large Bag, 2:Quiver, 3:Belt Pouch ... there are 50 types
+		uint8	BagSlots {};		// Number of slots: can only be 2, 4, 6, 8, or 10
+		uint8	BagSize {};		// 0:TINY, 1:SMALL, 2:MEDIUM, 3:LARGE, 4:GIANT
+		uint8	BagWR {};			// 0->100
 
-		bool	BenefitFlag;
-		bool	Tradeskills;	// Is this a tradeskill item?
-		int8	CR;				// Save vs Cold
-		int8	DR;				// Save vs Disease
-		int8	PR;				// Save vs Poison
-		int8	MR;				// Save vs Magic
-		int8	FR;				// Save vs Fire
-		int8	AStr;			// Strength
-		int8	ASta;			// Stamina
-		int8	AAgi;			// Agility
-		int8	ADex;			// Dexterity
-		int8	ACha;			// Charisma
-		int8	AInt;			// Intelligence
-		int8	AWis;			// Wisdom
-		int32	HP;				// HP
-		int32	Mana;			// Mana
-		int32	AC;				// AC
-		uint32	Deity;			// Bitmask of Deities that can equip this item
+		bool	BenefitFlag {};
+		bool	Tradeskills {};	// Is this a tradeskill item?
+		int8	CR {};				// Save vs Cold
+		int8	DR {};				// Save vs Disease
+		int8	PR {};				// Save vs Poison
+		int8	MR {};				// Save vs Magic
+		int8	FR {};				// Save vs Fire
+		int8	AStr {};			// Strength
+		int8	ASta {};			// Stamina
+		int8	AAgi {};			// Agility
+		int8	ADex {};			// Dexterity
+		int8	ACha {};			// Charisma
+		int8	AInt {};			// Intelligence
+		int8	AWis {};			// Wisdom
+		int32	HP {};				// HP
+		int32	Mana {};			// Mana
+		int32	AC {};				// AC
+		uint32	Deity {};			// Bitmask of Deities that can equip this item
 		//uint32	Unk033
-		int32	SkillModValue;	// % Mod to skill specified in SkillModType
-		int32	SkillModMax;	// Max skill point modification
-		uint32	SkillModType;	// Type of skill for SkillModValue to apply to
-		uint32	BaneDmgRace;	// Bane Damage Race
-		int32	BaneDmgAmt;		// Bane Damage Body Amount
-		uint32	BaneDmgBody;	// Bane Damage Body
-		bool	Magic;			// True=Magic Item, False=not
-		int32	CastTime_;
-		uint8	ReqLevel;		// Required Level to use item
-		uint32	BardType;		// Bard Skill Type
-		int32	BardValue;		// Bard Skill Amount
-		int8	Light;			// Light
-		uint8	Delay;			// Delay * 10
-		uint8	RecLevel;		// Recommended level to use item
-		uint8	RecSkill;		// Recommended skill to use item (refers to primary skill of item)
-		uint8	ElemDmgType;	// Elemental Damage Type (1=magic, 2=fire)
-		uint8	ElemDmgAmt;		// Elemental Damage
-		uint8	Range;			// Range of item
-		uint32	Damage;			// Delay between item usage (in 0.1 sec increments)
-		uint32	Color;			// RR GG BB 00 <-- as it appears in pc
-		uint32	Classes;		// Bitfield of classes that can equip item (1 << class#)
-		uint32	Races;			// Bitfield of races that can equip item (1 << race#)
-		//uint32	Unk054;
-		int16	MaxCharges;		// Maximum charges items can hold: -1 if not a chargeable item
-		uint8	ItemType;		// Item Type/Skill (itemClass* from above)
-		int32	SubType;		// Some items have sub types that can be used for other things (unbreakable fishing poles, SE_FFItemClass)
-		uint8	Material;		// Item material type
-		uint32	HerosForgeModel;// Hero's Forge Armor Model Type (2-13?)
-		float	SellRate;		// Sell rate
-		//uint32	Unk059;
+		int32	SkillModValue {};	// % Mod to skill specified in SkillModType
+		int32	SkillModMax {};	// Max skill point modification
+		uint32	SkillModType {};	// Type of skill for SkillModValue to apply to
+		uint32	BaneDmgRace {};	// Bane Damage Race
+		int32	BaneDmgAmt {};		// Bane Damage Body Amount
+		uint32	BaneDmgBody {};	// Bane Damage Body
+		bool	Magic {};			// True=Magic Item, False=not
+		int32	CastTime_ {};
+		uint8	ReqLevel {};		// Required Level to use item
+		uint32	BardType {};		// Bard Skill Type
+		int32	BardValue {};		// Bard Skill Amount
+		int8	Light {};			// Light
+		uint8	Delay {};			// Delay * 10
+		uint8	RecLevel {};		// Recommended level to use item
+		uint8	RecSkill {};		// Recommended skill to use item (refers to primary skill of item)
+		uint8	ElemDmgType {};	// Elemental Damage Type (1=magic, 2=fire)
+		uint8	ElemDmgAmt {};		// Elemental Damage
+		uint8	Range {};			// Range of item
+		uint32	Damage {};			// Delay between item usage (in 0.1 sec increments)
+		uint32	Color {};			// RR GG BB 00 <-- as it appears in pc
+		uint32	Classes {};		// Bitfield of classes that can equip item (1 << class#)
+		uint32	Races {};			// Bitfield of races that can equip item (1 << race#)
+		//uint32	Unk054 {};
+		int16	MaxCharges {};		// Maximum charges items can hold: -1 if not a chargeable item
+		uint8	ItemType {};		// Item Type/Skill (itemClass* from above)
+		int32	SubType {};		// Some items have sub types that can be used for other things (unbreakable fishing poles, SE_FFItemClass)
+		uint8	Material {};		// Item material type
+		uint32	HerosForgeModel {};// Hero's Forge Armor Model Type (2-13?)
+		float	SellRate {};		// Sell rate
+		//uint32	Unk059 {};
 		union {
 			uint32 Fulfilment;	// Food fulfilment (How long it lasts)
 			uint32 CastTime;		// Cast Time for clicky effects, in milliseconds
 		};
-		uint32 EliteMaterial;
-		int32	ProcRate;
-		int8	CombatEffects;	// PoP: Combat Effects +
-		int8	Shielding;		// PoP: Shielding %
-		int8	StunResist;		// PoP: Stun Resist %
-		int8	StrikeThrough;	// PoP: Strike Through %
-		int32	ExtraDmgSkill;
-		int32	ExtraDmgAmt;
-		int8	SpellShield;	// PoP: Spell Shield %
-		int8	Avoidance;		// PoP: Avoidance +
-		int8	Accuracy;		// PoP: Accuracy +
-		uint32	CharmFileID;
-		int32	FactionMod1;	// Faction Mod 1
-		int32	FactionMod2;	// Faction Mod 2
-		int32	FactionMod3;	// Faction Mod 3
-		int32	FactionMod4;	// Faction Mod 4
-		int32	FactionAmt1;	// Faction Amt 1
-		int32	FactionAmt2;	// Faction Amt 2
-		int32	FactionAmt3;	// Faction Amt 3
-		int32	FactionAmt4;	// Faction Amt 4
-		char	CharmFile[32];	// ?
-		uint32	AugType;
-		uint8	AugSlotType[invaug::SOCKET_COUNT];	// RoF: Augment Slot 1-6 Type
-		uint8	AugSlotVisible[invaug::SOCKET_COUNT];	// RoF: Augment Slot 1-6 Visible
-		uint8	AugSlotUnk2[invaug::SOCKET_COUNT];	// RoF: Augment Slot 1-6 Unknown Most likely Powersource related
-		uint32	LDoNTheme;
-		uint32	LDoNPrice;
-		uint32	LDoNSold;
-		uint32	BaneDmgRaceAmt;
-		uint32	AugRestrict;
-		int32	Endur;
-		int32	DotShielding;
-		int32	Attack;
-		int32	Regen;
-		int32	ManaRegen;
-		int32	EnduranceRegen;
-		int32	Haste;
-		int32	DamageShield;
-		uint32	RecastDelay;
-		int	RecastType;
-		uint32	AugDistiller;
-		bool	Attuneable;
-		bool	NoPet;
-		bool	PotionBelt;
-		bool	Stackable;
-		bool	NoTransfer;
-		bool	QuestItemFlag;
-		int16	StackSize;
-		uint8	PotionBeltSlots;
-		item::ItemEffect_Struct Click, Proc, Worn, Focus, Scroll, Bard;
+		uint32 EliteMaterial {};
+		int32	ProcRate {};
+		int8	CombatEffects {};	// PoP: Combat Effects +
+		int8	Shielding {};		// PoP: Shielding %
+		int8	StunResist {};		// PoP: Stun Resist %
+		int8	StrikeThrough {};	// PoP: Strike Through %
+		int32	ExtraDmgSkill {};
+		int32	ExtraDmgAmt {};
+		int8	SpellShield {};	// PoP: Spell Shield %
+		int8	Avoidance {};		// PoP: Avoidance +
+		int8	Accuracy {};		// PoP: Accuracy +
+		uint32	CharmFileID {};
+		int32	FactionMod1 {};	// Faction Mod 1
+		int32	FactionMod2 {};	// Faction Mod 2
+		int32	FactionMod3 {};	// Faction Mod 3
+		int32	FactionMod4 {};	// Faction Mod 4
+		int32	FactionAmt1 {};	// Faction Amt 1
+		int32	FactionAmt2 {};	// Faction Amt 2
+		int32	FactionAmt3 {};	// Faction Amt 3
+		int32	FactionAmt4 {};	// Faction Amt 4
+		char	CharmFile[32] {};	// ?
+		uint32	AugType {};
+		uint8	AugSlotType[invaug::SOCKET_COUNT] {};	// RoF: Augment Slot 1-6 Type
+		uint8	AugSlotVisible[invaug::SOCKET_COUNT] {};	// RoF: Augment Slot 1-6 Visible
+		uint8	AugSlotUnk2[invaug::SOCKET_COUNT] {};	// RoF: Augment Slot 1-6 Unknown Most likely Powersource related
+		uint32	LDoNTheme {};
+		uint32	LDoNPrice {};
+		uint32	LDoNSold {};
+		uint32	BaneDmgRaceAmt {};
+		uint32	AugRestrict {};
+		int32	Endur {};
+		int32	DotShielding {};
+		int32	Attack {};
+		int32	Regen {};
+		int32	ManaRegen {};
+		int32	EnduranceRegen {};
+		int32	Haste {};
+		int32	DamageShield {};
+		uint32	RecastDelay {};
+		int	RecastType {};
+		uint32	AugDistiller {};
+		bool	Attuneable {};
+		bool	NoPet {};
+		bool	PotionBelt {};
+		bool	Stackable {};
+		bool	NoTransfer {};
+		bool	QuestItemFlag {};
+		int16	StackSize {};
+		uint8	PotionBeltSlots {};
+		item::ItemEffect_Struct Click {};
+		item::ItemEffect_Struct Proc {};
+		item::ItemEffect_Struct Worn {};
+		item::ItemEffect_Struct Focus {};
+		item::ItemEffect_Struct Scroll {};
+		item::ItemEffect_Struct Bard {};
 
-		uint8	Book;			// 0=Not book, 1=Book
-		uint32	BookType;
-		char	Filename[33];	// Filename for book data
+		uint8	Book {};			// 0=Not book, 1=Book
+		uint32	BookType {};
+		char	Filename[33] {};	// Filename for book data
 		// Begin SoF Fields
-		int32 SVCorruption;
-		uint32 Purity;
-		uint8 EvolvingItem;
-		uint32 EvolvingID;
-		uint8 EvolvingLevel;
-		uint8 EvolvingMax;
-		uint32 BackstabDmg;
-		uint32 DSMitigation;
-		int32 HeroicStr;
-		int32 HeroicInt;
-		int32 HeroicWis;
-		int32 HeroicAgi;
-		int32 HeroicDex;
-		int32 HeroicSta;
-		int32 HeroicCha;
-		int32 HeroicMR;
-		int32 HeroicFR;
-		int32 HeroicCR;
-		int32 HeroicDR;
-		int32 HeroicPR;
-		int32 HeroicSVCorrup;
-		int32 HealAmt;
-		int32 SpellDmg;
-		uint32 LDoNSellBackRate;
-		uint32 ScriptFileID;
-		uint16 ExpendableArrow;
-		uint32 Clairvoyance;
-		char	ClickName[65];
-		char	ProcName[65];
-		char	WornName[65];
-		char	FocusName[65];
-		char	ScrollName[65];
+		int32 SVCorruption {};
+		uint32 Purity {};
+		uint8 EvolvingItem {};
+		uint32 EvolvingID {};
+		uint8 EvolvingLevel {};
+		uint8 EvolvingMax {};
+		uint32 BackstabDmg {};
+		uint32 DSMitigation {};
+		int32 HeroicStr {};
+		int32 HeroicInt {};
+		int32 HeroicWis {};
+		int32 HeroicAgi {};
+		int32 HeroicDex {};
+		int32 HeroicSta {};
+		int32 HeroicCha {};
+		int32 HeroicMR {};
+		int32 HeroicFR {};
+		int32 HeroicCR {};
+		int32 HeroicDR {};
+		int32 HeroicPR {};
+		int32 HeroicSVCorrup {};
+		int32 HealAmt {};
+		int32 SpellDmg {};
+		uint32 LDoNSellBackRate {};
+		uint32 ScriptFileID {};
+		uint16 ExpendableArrow {};
+		uint32 Clairvoyance {};
+		char	ClickName[65] {};
+		char	ProcName[65] {};
+		char	WornName[65] {};
+		char	FocusName[65] {};
+		char	ScrollName[65] {};
 		//BardName
 
 		bool IsEquipable(uint16 Race, uint16 Class) const;

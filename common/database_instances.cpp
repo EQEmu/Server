@@ -429,8 +429,6 @@ void Database::AssignRaidToInstance(uint32 raid_id, uint32 instance_id)
 
 void Database::DeleteInstance(uint16 instance_id)
 {
-	std::string query;
-
 	InstanceListPlayerRepository::DeleteWhere(*this, fmt::format("id = {}", instance_id));
 
 	RespawnTimesRepository::DeleteWhere(*this, fmt::format("instance_id = {}", instance_id));

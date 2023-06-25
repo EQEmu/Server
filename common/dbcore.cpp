@@ -13,6 +13,7 @@
 #include <iostream>
 #include <mysqld_error.h>
 #include <string.h>
+#include "strings.h"
 
 #ifdef _WINDOWS
 #define snprintf	_snprintf
@@ -74,13 +75,13 @@ void DBcore::ping()
 	m_mutex->unlock();
 }
 
-MySQLRequestResult DBcore::QueryDatabase(std::string query, bool retryOnFailureOnce)
+MySQLRequestResult DBcore::QueryDatabase(const std::string& query, bool retryOnFailureOnce)
 {
 	auto r = QueryDatabase(query.c_str(), query.length(), retryOnFailureOnce);
 	return r;
 }
 
-bool DBcore::DoesTableExist(std::string table_name)
+bool DBcore::DoesTableExist(const std::string& table_name)
 {
 	auto results = QueryDatabase(fmt::format("SHOW TABLES LIKE '{}'", table_name));
 
@@ -136,7 +137,7 @@ MySQLRequestResult DBcore::QueryDatabase(const char *query, uint32 querylen, boo
 		/**
 		 * Error logging
 		 */
-		if (mysql_errno(mysql) > 0 && strlen(query) > 0) {
+		if (mysql_errno(mysql) > 0 && query[0] != '\0') {
 			LogMySQLError("[{}] [{}]\n[{}]", mysql_errno(mysql), mysql_error(mysql), query);
 		}
 
@@ -304,4 +305,131 @@ void DBcore::SetMutex(Mutex *mutex)
 	safe_delete(m_mutex);
 
 	DBcore::m_mutex = mutex;
+}
+
+// executes multiple statements in one query
+// do not use this in application logic
+// this was built and maintained for database migrations only
+MySQLRequestResult DBcore::QueryDatabaseMulti(const std::string &query)
+{
+	SetMultiStatementsOn();
+
+	BenchTimer timer;
+	timer.reset();
+
+	LockMutex lock(m_mutex);
+
+	// Reconnect if we are not connected before hand.
+	if (pStatus != Connected) {
+		Open();
+	}
+	auto r = MySQLRequestResult{};
+
+	int status = mysql_real_query(mysql, query.c_str(), query.length());
+
+	// process single result
+	if (status != 0) {
+		unsigned int error_number = mysql_errno(mysql);
+
+		if (error_number == CR_SERVER_GONE_ERROR) {
+			pStatus = Error;
+		}
+
+		// error logging
+		if (mysql_errno(mysql) > 0 && query.length() > 0 && mysql_errno(mysql) != 1065) {
+			std::string error_raw   = fmt::format("{}", mysql_error(mysql));
+			std::string mysql_err   = Strings::Trim(error_raw);
+			std::string clean_query = Strings::Replace(query, "\n", "");
+			LogMySQLError("[{}] ({}) query [{}]", mysql_err, mysql_errno(mysql), clean_query);
+
+			MYSQL_RES *res = mysql_store_result(mysql);
+
+			uint32 row_count = 0;
+			if (res) {
+				row_count = (uint32) mysql_num_rows(res);
+			}
+
+			r = MySQLRequestResult(
+				res,
+				(uint32) mysql_affected_rows(mysql),
+				row_count,
+				(uint32) mysql_field_count(mysql),
+				(uint32) mysql_insert_id(mysql)
+			);
+
+			std::string error_message = mysql_error(mysql);
+			r.SetErrorMessage(error_message);
+			r.SetErrorNumber(mysql_errno(mysql));
+
+			if (res) {
+				mysql_free_result(res);
+			}
+
+			return r;
+		}
+	}
+
+
+	int index = 0;
+
+	// there could be a query with a semicolon in the actual data, this is best effort for
+	// logging / display purposes
+	// rare that we see this when this is only used in DDL statements
+	auto pieces = Strings::Split(query, ";");
+
+	// process each statement result
+	do {
+		uint32    row_count = 0;
+		MYSQL_RES *res      = mysql_store_result(mysql);
+
+		r = MySQLRequestResult(
+			res,
+			(uint32) mysql_affected_rows(mysql),
+			row_count,
+			(uint32) mysql_field_count(mysql),
+			(uint32) mysql_insert_id(mysql)
+		);
+
+		if (pieces.size() >= index) {
+			auto piece = pieces[index];
+			LogMySQLQuery(
+				"{} -- ({} row{} affected) ({}s)",
+				piece,
+				r.RowsAffected(),
+				r.RowsAffected() == 1 ? "" : "s",
+				std::to_string(timer.elapsed())
+			);
+		}
+
+		if (res) {
+			row_count = (uint32) mysql_num_rows(res);
+		}
+
+		// more results? -1 = no, >0 = error, 0 = yes (keep looping)
+		if ((status = mysql_next_result(mysql)) > 0) {
+			if (mysql_errno(mysql) > 0) {
+				LogMySQLError("[{}] [{}]", mysql_errno(mysql), mysql_error(mysql));
+			}
+
+			mysql_free_result(res);
+
+			// error logging
+			std::string error_message = mysql_error(mysql);
+			r.SetErrorMessage(error_message);
+			r.SetErrorNumber(mysql_errno(mysql));
+
+			// we handle errors elsewhere
+			return r;
+		}
+
+		if (res) {
+			mysql_free_result(res);
+		}
+
+		index++;
+	} while (status == 0);
+
+	SetMultiStatementsOff();
+
+	return r;
 }

@@ -4,6 +4,7 @@
 
 #include "lua_ptr.h"
 
+// Forward declaration
 class Lua_Item;
 
 namespace EQ
@@ -28,7 +29,7 @@ public:
 	Lua_ItemInst(EQ::ItemInstance *d, bool cloned) : Lua_Ptr(d), cloned_(cloned) { }
 	Lua_ItemInst& operator=(const Lua_ItemInst& o);
 	Lua_ItemInst(const Lua_ItemInst& o);
-	virtual ~Lua_ItemInst() { if(cloned_) { EQ::ItemInstance *ptr = GetLuaPtrData(); if(ptr) { delete ptr; } } }
+	virtual ~Lua_ItemInst();
 
 	operator EQ::ItemInstance*() {
 		return reinterpret_cast<EQ::ItemInstance*>(GetLuaPtrData());

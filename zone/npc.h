@@ -179,8 +179,6 @@ public:
 	virtual void	ThrowingAttack(Mob* other) { }
 	int32 GetNumberOfAttacks() const { return attack_count; }
 	void DoRangedAttackDmg(Mob* other, bool Launch = true, int16 damage_mod = 0, int16 chance_mod = 0, EQ::skills::SkillType skill = EQ::skills::SkillArchery, float speed = 4.0f, const char *IDFile = nullptr);
-
-	bool	DatabaseCastAccepted(int spell_id);
 	bool	IsFactionListAlly(uint32 other_faction);
 	bool	IsGuard();
 	FACTION_VALUE CheckNPCFactionAlly(int32 other_faction);
@@ -191,8 +189,6 @@ public:
 
 	void	GetPetState(SpellBuff_Struct *buffs, uint32 *items, char *name);
 	void	SetPetState(SpellBuff_Struct *buffs, uint32 *items);
-	void	InteractiveChat(uint8 chan_num, uint8 language, const char * message, const char* targetname,Mob* sender);
-	void	TakenAction(uint8 action,Mob* actiontaker);
 	virtual void SpellProcess();
 	virtual void FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho);
 
@@ -208,7 +204,6 @@ public:
 	inline const ItemList &GetItemList() { return itemlist; }
 	ServerLootItem_Struct*	GetItem(int slot_id);
 	void	AddCash(uint16 in_copper, uint16 in_silver, uint16 in_gold, uint16 in_platinum);
-	void	AddCash();
 	void	RemoveCash();
 	void	QueryLoot(Client* to, bool is_pet_query = false);
 	bool	HasItem(uint32 item_id);
@@ -584,7 +579,6 @@ protected:
 	uint32	npc_spells_id;
 	uint8	casting_spell_AIindex;
 
-	uint32*	pDontCastBefore_casting_spell;
 	std::vector<AISpells_Struct> AIspells;
 	bool HasAISpell;
 	virtual bool AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes, bool bInnates = false);
@@ -641,7 +635,6 @@ protected:
 
 	//waypoint crap:
 	std::vector<wplist> Waypoints;
-	void _ClearWaypints();
 	int max_wp;
 	int save_wp;
 	glm::vec4 m_GuardPoint;

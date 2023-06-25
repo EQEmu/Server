@@ -37,6 +37,7 @@
 
 #include <fmt/format.h>
 #include <filesystem>
+#include <iostream>
 
 namespace fs = std::filesystem;
 
@@ -79,4 +80,27 @@ std::string File::FindEqemuConfigPath()
 std::string File::GetCwd()
 {
 	return fs::current_path().string();
+}
+
+FileContentsResult File::GetContents(const std::string &file_name)
+{
+	std::string   error;
+	std::ifstream f;
+	f.open(file_name);
+	std::string line;
+	std::string lines;
+	if (f.is_open()) {
+		while (f) {
+			std::getline(f, line);
+			lines += line + "\n";
+		}
+	}
+	else {
+		error = fmt::format("Couldn't open file [{}]", file_name);
+	}
+
+	return FileContentsResult{
+		.contents = lines,
+		.error = error,
+	};
 }

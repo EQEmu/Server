@@ -631,13 +631,7 @@ void bot_subcommand_bot_toggle_archer(Client *c, const Seperator *sep);
 void bot_subcommand_bot_toggle_helm(Client *c, const Seperator *sep);
 void bot_subcommand_bot_update(Client *c, const Seperator *sep);
 void bot_subcommand_bot_woad(Client *c, const Seperator *sep);
-void bot_subcommand_botgroup_add_member(Client *c, const Seperator *sep);
-void bot_subcommand_botgroup_auto_spawn(Client *c, const Seperator *sep);
-void bot_subcommand_botgroup_create(Client *c, const Seperator *sep);
-void bot_subcommand_botgroup_delete(Client *c, const Seperator *sep);
-void bot_subcommand_botgroup_list(Client *c, const Seperator *sep);
-void bot_subcommand_botgroup_load(Client *c, const Seperator *sep);
-void bot_subcommand_botgroup_remove_member(Client *c, const Seperator *sep);
+
 void bot_subcommand_circle(Client *c, const Seperator *sep);
 void bot_subcommand_heal_rotation_adaptive_targeting(Client *c, const Seperator *sep);
 void bot_subcommand_heal_rotation_add_member(Client *c, const Seperator *sep);

@@ -489,7 +489,7 @@ bool Client::VerifyLoginHash(
  * @param db_loginserver
  */
 void Client::DoSuccessfulLogin(
-	const std::string in_account_name,
+	const std::string& in_account_name,
 	int db_account_id,
 	const std::string &db_loginserver
 )

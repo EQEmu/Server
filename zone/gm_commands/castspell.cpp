@@ -21,7 +21,7 @@ void command_castspell(Client *c, const Seperator *sep)
 	else {
 		uint16 spell_id = Strings::ToUnsignedInt(sep->arg[1]);
 
-		if (CastRestrictedSpell(spell_id) && c->Admin() < commandCastSpecials) {
+		if (IsCastRestrictedSpell(spell_id) && c->Admin() < commandCastSpecials) {
 			c->Message(Chat::Red, "Unable to cast spell.");
 		}
 		else if (spell_id >= SPDAT_RECORDS) {

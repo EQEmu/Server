@@ -285,9 +285,7 @@ protected:
 private:
 
 	int32 CalcAC();
-	int32 GetACMit();
 	int32 GetACAvoid();
-	int32 acmod();
 	int32 CalcATK();
 	//int CalcHaste();
 
@@ -307,7 +305,6 @@ private:
 	int32 CalcCorrup();
 	int64 CalcMaxHP();
 	int64 CalcBaseHP();
-	int64 GetClassHPFactor();
 	int64 CalcHPRegen();
 	int64 CalcHPRegenCap();
 	int64 CalcMaxMana();

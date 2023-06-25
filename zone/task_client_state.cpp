@@ -169,13 +169,7 @@ void ClientTaskState::EnableTask(int character_id, int task_count, int *task_lis
 		query_stream << (i ? ", " : "") << StringFormat("(%i, %i)", character_id, tasks_enabled[i]);
 	}
 
-	std::string query = query_stream.str();
-	if (!tasks_enabled.empty()) {
-		database.QueryDatabase(query);
-	}
-	else {
-		LogTasks("Called for character_id [{}] but, no tasks exist", character_id);
-	}
+	database.QueryDatabase(query_stream.str());
 }
 
 void ClientTaskState::DisableTask(int character_id, int task_count, int *task_list)
@@ -228,17 +222,7 @@ void ClientTaskState::DisableTask(int character_id, int task_count, int *task_li
 
 	queryStream << ")";
 
-	std::string query = queryStream.str();
-
-	if (tasks_disabled.size()) {
-		database.QueryDatabase(query);
-	}
-	else {
-		LogTasks(
-			"DisableTask called for character_id [{}] ... but, no tasks exist",
-			character_id
-		);
-	}
+	database.QueryDatabase(queryStream.str());
 }
 
 bool ClientTaskState::IsTaskEnabled(int task_id)

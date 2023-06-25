@@ -7,7 +7,6 @@
 #include "../common/global_define.h"
 #include "../common/rulesys.h"
 #include "../common/say_link.h"
-#include "../common/strings.h"
 #include <list>
 
 Mob* Perl_EntityList_GetMobID(EntityList* self, uint16_t mob_id) // @categories Script Utility

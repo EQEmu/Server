@@ -58,10 +58,6 @@ EQTime::EQTime()
 	SetCurrentEQTimeOfDay(start, time(0));
 }
 
-EQTime::~EQTime()
-{
-}
-
 //getEQTimeOfDay - Reads timeConvert and writes the result to eqTimeOfDay
 //This function was written by the ShowEQ Project.
 //Input: Current Time (as a time_t), a pointer to the TimeOfDay_Struct that will be written to.

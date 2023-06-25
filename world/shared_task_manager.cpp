@@ -1545,7 +1545,7 @@ bool SharedTaskManager::CanAddPlayer(SharedTask *s, uint32_t character_id, std::
 void SharedTaskManager::RecordSharedTaskCompletion(SharedTask *s)
 {
 	// shared task
-	auto t  = s->GetDbSharedTask();
+	auto& t  = s->GetDbSharedTask();
 	auto ct = CompletedSharedTasksRepository::NewEntity();
 
 	ct.id              = t.id;

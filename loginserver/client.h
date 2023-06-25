@@ -175,7 +175,7 @@ public:
 		const std::string &password_hash
 	);
 
-	void DoSuccessfulLogin(const std::string in_account_name, int db_account_id, const std::string &db_loginserver);
+	void DoSuccessfulLogin(const std::string& in_account_name, int db_account_id, const std::string &db_loginserver);
 	void CreateLocalAccount(const std::string &username, const std::string &password);
 	void CreateEQEmuAccount(const std::string &in_account_name, const std::string &in_account_password, unsigned int loginserver_account_id);
 

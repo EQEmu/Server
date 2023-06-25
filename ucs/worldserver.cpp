@@ -43,7 +43,7 @@ extern const ucsconfig *Config;
 extern UCSDatabase       database;
 extern DiscordManager  discord_manager;
 
-void ProcessMailTo(Client *c, std::string from, std::string subject, std::string message);
+void ProcessMailTo(Client *c, const std::string& from, const std::string& subject, const std::string& message);
 
 void Client45ToServerSayLink(std::string& serverSayLink, const std::string& clientSayLink);
 void Client50ToServerSayLink(std::string& serverSayLink, const std::string& clientSayLink);

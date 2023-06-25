@@ -3851,17 +3851,17 @@ namespace UF
 			ob.write((const char*)&evotop, sizeof(UF::structs::EvolvingItem));
 		}
 
-		//ORNAMENT IDFILE / ICON -
-		int ornamentationAugtype = RuleI(Character, OrnamentationAugmentType);
-		uint16 ornaIcon = 0;
-		if (inst->GetOrnamentationAug(ornamentationAugtype)) {
-			const EQ::ItemData *aug_weap = inst->GetOrnamentationAug(ornamentationAugtype)->GetItem();
-			ornaIcon = aug_weap->Icon;
+		uint16     ornament_icon = 0;
+		const auto augment       = inst->GetOrnamentationAugment();
 
-			ob.write(aug_weap->IDFile, strlen(aug_weap->IDFile));
+		if (augment) {
+			const auto augment_item = augment->GetItem();
+			ornament_icon = augment_item->Icon;
+
+			ob.write(augment_item->IDFile, strlen(augment_item->IDFile));
 		}
 		else if (inst->GetOrnamentationIDFile() && inst->GetOrnamentationIcon()) {
-			ornaIcon = inst->GetOrnamentationIcon();
+			ornament_icon = inst->GetOrnamentationIcon();
 			char tmp[30]; memset(tmp, 0x0, 30); sprintf(tmp, "IT%d", inst->GetOrnamentationIDFile());
 
 			ob.write(tmp, strlen(tmp));
@@ -3870,7 +3870,7 @@ namespace UF
 
 		UF::structs::ItemSerializationHeaderFinish hdrf;
 
-		hdrf.ornamentIcon = ornaIcon;
+		hdrf.ornamentIcon = ornament_icon;
 		hdrf.unknown060 = 0; //This is Always 0.. or it breaks shit..
 		hdrf.unknown061 = 0; //possibly ornament / special ornament
 		hdrf.isCopied = 0; //Flag for item to be 'Copied'

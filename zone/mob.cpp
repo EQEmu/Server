@@ -131,36 +131,40 @@ Mob::Mob(
 	mMovementManager = &MobMovementManager::Get();
 	mMovementManager->AddMob(this);
 
-	targeted = 0;
+	targeted          = 0;
 	currently_fleeing = false;
 
 	AI_Init();
 	SetMoving(false);
-	moved            = false;
-	turning = false;
-	m_RewindLocation = glm::vec3();
+
+	moved              = false;
+	turning            = false;
+	m_RewindLocation   = glm::vec3();
 	m_RelativePosition = glm::vec4();
 
-	name[0] = 0;
+	name[0]      = 0;
 	orig_name[0] = 0;
 
 	clean_name[0] = 0;
 	lastname[0]   = 0;
+
 	if (in_name) {
 		strn0cpy(name, in_name, 64);
 		strn0cpy(orig_name, in_name, 64);
 	}
+
 	if (in_lastname) {
 		strn0cpy(lastname, in_lastname, 64);
 	}
-	current_hp        = in_cur_hp;
+
+	current_hp    = in_cur_hp;
 	max_hp        = in_max_hp;
 	base_hp       = in_max_hp;
 	gender        = in_gender;
 	race          = in_race;
 	base_gender   = in_gender;
 	base_race     = in_race;
-	use_model	  = in_usemodel;
+	use_model     = in_usemodel;
 	class_        = in_class;
 	bodytype      = in_bodytype;
 	orig_bodytype = in_bodytype;
@@ -185,8 +189,7 @@ Mob::Mob(
 		fearspeed      = 0.625f;
 		base_fearspeed = 25;
 		// npcs
-	}
-	else {
+	} else {
 		base_walkspeed = base_runspeed * 100 / 265;
 		walkspeed      = ((float) base_walkspeed) * 0.025f;
 		base_fearspeed = base_runspeed * 100 / 127;
@@ -199,7 +202,6 @@ Mob::Mob(
 	current_speed = base_runspeed;
 
 	m_PlayerState = 0;
-
 
 	// sanity check
 	if (runspeed < 0 || runspeed > 20) {
@@ -220,38 +222,33 @@ Mob::Mob(
 	feettexture   = in_feettexture;
 	multitexture  = (armtexture || bracertexture || handtexture || legtexture || feettexture);
 
-	haircolor               = in_haircolor;
-	beardcolor              = in_beardcolor;
-	eyecolor1               = in_eyecolor1;
-	eyecolor2               = in_eyecolor2;
-	hairstyle               = in_hairstyle;
-	luclinface              = in_luclinface;
-	beard                   = in_beard;
-	drakkin_heritage        = in_drakkin_heritage;
-	drakkin_tattoo          = in_drakkin_tattoo;
-	drakkin_details         = in_drakkin_details;
-	attack_speed            = 0;
-	attack_delay            = 0;
-	slow_mitigation         = 0;
-	findable                = false;
-	trackable               = true;
-	has_shieldequiped       = false;
-	has_twohandbluntequiped = false;
-	has_twohanderequipped   = false;
-	has_duelweaponsequiped  = false;
-	can_facestab            = false;
-	has_numhits             = false;
-	has_MGB                 = false;
-	has_ProjectIllusion     = false;
-	SpellPowerDistanceMod   = 0;
-	last_los_check          = false;
+	haircolor                   = in_haircolor;
+	beardcolor                  = in_beardcolor;
+	eyecolor1                   = in_eyecolor1;
+	eyecolor2                   = in_eyecolor2;
+	hairstyle                   = in_hairstyle;
+	luclinface                  = in_luclinface;
+	beard                       = in_beard;
+	drakkin_heritage            = in_drakkin_heritage;
+	drakkin_tattoo              = in_drakkin_tattoo;
+	drakkin_details             = in_drakkin_details;
+	attack_speed                = 0;
+	attack_delay                = 0;
+	slow_mitigation             = 0;
+	findable                    = false;
+	trackable                   = true;
+	has_shield_equipped         = false;
+	has_two_hand_blunt_equipped = false;
+	has_two_hander_equipped     = false;
+	has_dual_weapons_equipped   = false;
+	can_facestab                = false;
+	has_numhits                 = false;
+	has_MGB                     = false;
+	has_ProjectIllusion         = false;
+	SpellPowerDistanceMod       = 0;
+	last_los_check              = false;
 
-	if (in_aa_title > 0) {
-		aa_title = in_aa_title;
-	}
-	else {
-		aa_title = 0xFF;
-	}
+	aa_title = in_aa_title > 0 ? in_aa_title : 0xFF;
 
 	AC                   = in_ac;
 	ATK                  = in_atk;
@@ -280,7 +277,6 @@ Mob::Mob(
 	hidden               = false;
 	improved_hidden      = false;
 	invulnerable         = false;
-	IsFullHP             = (current_hp == max_hp);
 	qglobal              = 0;
 	spawned              = false;
 	rare_spawn           = false;
@@ -384,8 +380,8 @@ Mob::Mob(
 	spellbonuses.AssistRange = -1;
 	SetPetID(0);
 	SetOwnerID(0);
-	typeofpet         = petNone; // default to not a pet
-	petpower          = 0;
+	SetPetType(petNone); // default to not a pet
+	SetPetPower(0);
 	held              = false;
 	gheld             = false;
 	nocast            = false;
@@ -428,24 +424,24 @@ Mob::Mob(
 	permarooted = (runspeed > 0) ? false : true;
 
 	pause_timer_complete = false;
-	ForcedMovement = 0;
-	roamer = false;
-	rooted = false;
-	charmed = false;
+	ForcedMovement       = 0;
+	roamer               = false;
+	rooted               = false;
+	charmed              = false;
 
-	weaponstance.enabled = false;
-	weaponstance.spellbonus_enabled = false;	//Set when bonus is applied
-	weaponstance.itembonus_enabled = false;		//Set when bonus is applied
-	weaponstance.aabonus_enabled = false;		//Controlled by function TogglePassiveAA
+	weaponstance.enabled                  = false;
+	weaponstance.spellbonus_enabled       = false; //Set when bonus is applied
+	weaponstance.itembonus_enabled        = false; //Set when bonus is applied
+	weaponstance.aabonus_enabled          = false; //Controlled by function TogglePassiveAA
 	weaponstance.spellbonus_buff_spell_id = 0;
-	weaponstance.itembonus_buff_spell_id = 0;
-	weaponstance.aabonus_buff_spell_id = 0;
+	weaponstance.itembonus_buff_spell_id  = 0;
+	weaponstance.aabonus_buff_spell_id    = 0;
 
 	pStandingPetOrder = SPO_Follow;
 	pseudo_rooted     = false;
 
 	nobuff_invisible = 0;
-	see_invis = 0;
+	see_invis        = 0;
 
 	innate_see_invis  = GetSeeInvisibleLevelFromNPCStat(in_see_invis);
 	see_invis_undead  = GetSeeInvisibleLevelFromNPCStat(in_see_invis_undead);
@@ -492,19 +488,19 @@ Mob::Mob(
 	}
 
 	for (int i = 0; i < MAX_APPEARANCE_EFFECTS; i++) {
-		appearance_effects_id[i] = 0;
+		appearance_effects_id[i]   = 0;
 		appearance_effects_slot[i] = 0;
 	}
 
 	emoteid              = 0;
 	endur_upkeep         = false;
 	degenerating_effects = false;
-	PrimaryAggro = false;
-	AssistAggro = false;
-	npc_assist_cap = 0;
+	PrimaryAggro         = false;
+	AssistAggro          = false;
+	npc_assist_cap       = 0;
 
 	use_double_melee_round_dmg_bonus = false;
-	dw_same_delay = 0;
+	dw_same_delay                    = 0;
 
 	queue_wearchange_slot = -1;
 
@@ -1138,7 +1134,6 @@ void Mob::SetSpawnLastNameByClass(NewSpawn_Struct* ns)
 			strcpy(ns->spawn.lastName, "Mercenary Liaison");
 			break;
 		default:
-			strcpy(ns->spawn.lastName, ns->spawn.lastName);
 			break;
 	}
 }
@@ -1368,7 +1363,6 @@ void Mob::CreateDespawnPacket(EQApplicationPacket* app, bool Decay)
 
 void Mob::CreateHPPacket(EQApplicationPacket* app)
 {
-	IsFullHP=(current_hp>=max_hp);
 	app->SetOpcode(OP_MobHealth);
 	app->size = sizeof(SpawnHPUpdate_Struct2);
 	safe_delete_array(app->pBuffer);
@@ -2489,8 +2483,12 @@ void Mob::SendIllusionPacket(
 
 	// update internal values for mob
 	size             = (in_size <= 0.0f) ? GetRaceGenderDefaultHeight(race, gender) : in_size;
-	texture          = new_texture;
-	helmtexture      = new_helmtexture;
+	if (new_texture != 0xFF) {
+		texture          = new_texture;
+	}
+	if (new_helmtexture != 0xFF) {
+		helmtexture      = new_helmtexture;
+	}
 	haircolor        = new_haircolor;
 	beardcolor       = new_beardcolor;
 	eyecolor1        = new_eyecolor1;
@@ -4397,7 +4395,7 @@ int Mob::CountDispellableBuffs()
 		if(buffs[x].counters)
 			continue;
 
-		if(spells[buffs[x].spellid].good_effect == 0)
+		if(spells[buffs[x].spellid].good_effect == DETRIMENTAL_EFFECT)
 			continue;
 
 		if(IsValidSpell(buffs[x].spellid) && spells[buffs[x].spellid].buff_duration_formula != DF_Permanent) {
@@ -5113,6 +5111,10 @@ void Mob::TarGlobal(const char *varname, const char *value, const char *duration
 
 void Mob::DelGlobal(const char *varname) {
 
+	if (!zone) {
+		return;
+	}
+
 	int qgZoneid=zone->GetZoneID();
 	int qgCharid=0;
 	int qgNpcid=0;
@@ -5133,22 +5135,19 @@ void Mob::DelGlobal(const char *varname) {
 
 	database.QueryDatabase(query);
 
-	if(zone)
-	{
-		auto pack = new ServerPacket(ServerOP_QGlobalDelete, sizeof(ServerQGlobalDelete_Struct));
-		ServerQGlobalDelete_Struct *qgu = (ServerQGlobalDelete_Struct*)pack->pBuffer;
+	auto pack = new ServerPacket(ServerOP_QGlobalDelete, sizeof(ServerQGlobalDelete_Struct));
+	ServerQGlobalDelete_Struct *qgu = (ServerQGlobalDelete_Struct*)pack->pBuffer;
 
-		qgu->npc_id = qgNpcid;
-		qgu->char_id = qgCharid;
-		qgu->zone_id = qgZoneid;
-		strcpy(qgu->name, varname);
+	qgu->npc_id = qgNpcid;
+	qgu->char_id = qgCharid;
+	qgu->zone_id = qgZoneid;
+	strcpy(qgu->name, varname);
 
-		entity_list.DeleteQGlobal(std::string((char*)qgu->name), qgu->npc_id, qgu->char_id, qgu->zone_id);
-		zone->DeleteQGlobal(std::string((char*)qgu->name), qgu->npc_id, qgu->char_id, qgu->zone_id);
+	entity_list.DeleteQGlobal(std::string((char*)qgu->name), qgu->npc_id, qgu->char_id, qgu->zone_id);
+	zone->DeleteQGlobal(std::string((char*)qgu->name), qgu->npc_id, qgu->char_id, qgu->zone_id);
 
-		worldserver.SendPacket(pack);
-		safe_delete(pack);
-	}
+	worldserver.SendPacket(pack);
+	safe_delete(pack);
 }
 
 // Inserts global variable into quest_globals table
@@ -6055,14 +6054,14 @@ void Mob::AddFactionBonus(uint32 pFactionID,int32 bonus) {
 	faction_bonus = faction_bonuses.find(pFactionID);
 	if(faction_bonus == faction_bonuses.end())
 	{
-		faction_bonuses.insert(NewFactionBonus(pFactionID,bonus));
+		faction_bonuses.emplace(NewFactionBonus(pFactionID,bonus));
 	}
 	else
 	{
 		if(faction_bonus->second<bonus)
 		{
 			faction_bonuses.erase(pFactionID);
-			faction_bonuses.insert(NewFactionBonus(pFactionID,bonus));
+			faction_bonuses.emplace(NewFactionBonus(pFactionID,bonus));
 		}
 	}
 }
@@ -6075,14 +6074,14 @@ void Mob::AddItemFactionBonus(uint32 pFactionID,int32 bonus) {
 	faction_bonus = item_faction_bonuses.find(pFactionID);
 	if(faction_bonus == item_faction_bonuses.end())
 	{
-		item_faction_bonuses.insert(NewFactionBonus(pFactionID,bonus));
+		item_faction_bonuses.emplace(NewFactionBonus(pFactionID,bonus));
 	}
 	else
 	{
 		if((bonus > 0 && faction_bonus->second < bonus) || (bonus < 0 && faction_bonus->second > bonus))
 		{
 			item_faction_bonuses.erase(pFactionID);
-			item_faction_bonuses.insert(NewFactionBonus(pFactionID,bonus));
+			item_faction_bonuses.emplace(NewFactionBonus(pFactionID,bonus));
 		}
 	}
 }
@@ -6232,20 +6231,20 @@ FACTION_VALUE Mob::GetSpecialFactionCon(Mob* iOther) {
 
 bool Mob::HasSpellEffect(int effect_id)
 {
-	int i;
+	const auto buff_count = GetMaxTotalSlots();
+	for (int i = 0; i < buff_count; i++) {
+		const auto spell_id = buffs[i].spellid;
 
-	int buff_count = GetMaxTotalSlots();
-	for(i = 0; i < buff_count; i++)
-	{
-		if (!IsValidSpell(buffs[i].spellid)) {
+		if (!IsValidSpell(spell_id)) {
 			continue;
 		}
 
-		if (IsEffectInSpell(buffs[i].spellid, effect_id)) {
-			return(1);
+		if (IsEffectInSpell(spell_id, effect_id)) {
+			return true;
 		}
 	}
-	return(0);
+
+	return false;
 }
 
 int Mob::GetSpecialAbility(int ability)
@@ -6729,8 +6728,11 @@ void Mob::CommonBreakInvisible()
 	CancelSneakHide();
 }
 
-float Mob::GetDefaultRaceSize() const {
-	return GetRaceGenderDefaultHeight(race, gender);
+float Mob::GetDefaultRaceSize(int race_id, int gender_id) const {
+	return GetRaceGenderDefaultHeight(
+		race_id > 0 ? race_id : race,
+		gender_id >= 0 ? gender_id : gender
+	);
 }
 
 bool Mob::ShieldAbility(uint32 target_id, int shielder_max_distance, int shield_duration, int shield_target_mitigation, int shielder_mitigation, bool use_aa, bool can_shield_npc)
@@ -6979,9 +6981,9 @@ std::string Mob::GetBucketKey() {
 std::string Mob::GetBucketRemaining(std::string bucket_name) {
 	std::string full_bucket_name = fmt::format("{}-{}", GetBucketKey(), bucket_name);
 	std::string bucket_remaining = DataBucket::GetDataRemaining(full_bucket_name);
-	if (!bucket_remaining.empty() && Strings::ToInt(bucket_remaining.c_str()) > 0) {
+	if (!bucket_remaining.empty() && Strings::ToInt(bucket_remaining) > 0) {
 		return bucket_remaining;
-	} else if (Strings::ToInt(bucket_remaining.c_str()) == 0) {
+	} else if (Strings::ToInt(bucket_remaining) == 0) {
 		return "0";
 	}
 	return std::string();

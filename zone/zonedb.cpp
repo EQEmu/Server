@@ -1,7 +1,6 @@
 
 #include "../common/eqemu_logsys.h"
 #include "../common/extprofile.h"
-#include "../common/item_instance.h"
 #include "../common/rulesys.h"
 #include "../common/strings.h"
 
@@ -12,9 +11,14 @@
 #include "zone.h"
 #include "zonedb.h"
 #include "aura.h"
-#include "../common/repositories/criteria/content_filter_criteria.h"
+#include "../common/repositories/character_tribute_repository.h"
 #include "../common/repositories/character_disciplines_repository.h"
 #include "../common/repositories/npc_types_repository.h"
+#include "../common/repositories/character_bind_repository.h"
+#include "../common/repositories/character_pet_buffs_repository.h"
+#include "../common/repositories/character_pet_inventory_repository.h"
+#include "../common/repositories/character_pet_info_repository.h"
+#include "../common/repositories/character_buffs_repository.h"
 
 #include <ctime>
 #include <iostream>
@@ -955,23 +959,23 @@ bool ZoneDatabase::LoadCharacterBandolier(uint32 character_id, PlayerProfile_Str
 	return true;
 }
 
-bool ZoneDatabase::LoadCharacterTribute(uint32 character_id, PlayerProfile_Struct* pp){
-	std::string query = StringFormat("SELECT `tier`, `tribute` FROM `character_tribute` WHERE `id` = %u", character_id);
-	auto results = database.QueryDatabase(query);
-	int i = 0;
-	for (i = 0; i < EQ::invtype::TRIBUTE_SIZE; i++){
-		pp->tributes[i].tribute = 0xFFFFFFFF;
-		pp->tributes[i].tier = 0;
+void ZoneDatabase::LoadCharacterTribute(Client* c){
+	const auto& l = CharacterTributeRepository::GetWhere(database, fmt::format("character_id = {}", c->CharacterID()));
+
+	for (auto& t : c->GetPP().tributes) {
+		t.tier    = 0;
+		t.tribute = TRIBUTE_NONE;
 	}
-	i = 0;
-	for (auto& row = results.begin(); row != results.end(); ++row) {
-		if(Strings::ToInt(row[1]) != TRIBUTE_NONE){
-			pp->tributes[i].tier = Strings::ToInt(row[0]);
-			pp->tributes[i].tribute = Strings::ToInt(row[1]);
+
+	auto i = 0;
+
+	for (const auto& e : l) {
+		if (e.tribute != TRIBUTE_NONE) {
+			c->GetPP().tributes[i].tier    = e.tier;
+			c->GetPP().tributes[i].tribute = e.tribute;
 			i++;
 		}
 	}
-	return true;
 }
 
 bool ZoneDatabase::LoadCharacterPotions(uint32 character_id, PlayerProfile_Struct *pp)
@@ -1032,25 +1036,6 @@ bool ZoneDatabase::SaveCharacterLanguage(uint32 character_id, uint32 lang_id, ui
 	return true;
 }
 
-bool ZoneDatabase::SaveCharacterBindPoint(uint32 character_id, const BindStruct &bind, uint32 bind_num)
-{
-	/* Save Home Bind Point */
-	std::string query =
-	    StringFormat("REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, slot) VALUES (%u, "
-			 "%u, %u, %f, %f, %f, %f, %i)",
-			 character_id, bind.zone_id, bind.instance_id, bind.x, bind.y, bind.z, bind.heading, bind_num);
-
-	LogDebug("ZoneDatabase::SaveCharacterBindPoint for character ID: [{}] zone_id: [{}] instance_id: [{}] position: [{}] [{}] [{}] [{}] bind_num: [{}]",
-		character_id, bind.zone_id, bind.instance_id, bind.x, bind.y, bind.z, bind.heading, bind_num);
-
-	auto results = QueryDatabase(query);
-	if (!results.RowsAffected())
-		LogDebug("ERROR Bind Home Save: [{}]. [{}]", results.ErrorMessage().c_str(),
-			query.c_str());
-
-	return true;
-}
-
 bool ZoneDatabase::SaveCharacterMaterialColor(uint32 character_id, uint32 slot_id, uint32 color){
 	uint8 red = (color & 0x00FF0000) >> 16;
 	uint8 green = (color & 0x0000FF00) >> 8;
@@ -1074,18 +1059,35 @@ bool ZoneDatabase::SaveCharacterDisc(uint32 character_id, uint32 slot_id, uint32
 	return true;
 }
 
-bool ZoneDatabase::SaveCharacterTribute(uint32 character_id, PlayerProfile_Struct* pp){
-	std::string query = StringFormat("DELETE FROM `character_tribute` WHERE `id` = %u", character_id);
-	QueryDatabase(query);
-	/* Save Tributes only if we have values... */
-	for (int i = 0; i < EQ::invtype::TRIBUTE_SIZE; i++){
-		if (pp->tributes[i].tribute >= 0 && pp->tributes[i].tribute != TRIBUTE_NONE){
-			std::string query = StringFormat("REPLACE INTO `character_tribute` (id, tier, tribute) VALUES (%u, %u, %u)", character_id, pp->tributes[i].tier, pp->tributes[i].tribute);
-			QueryDatabase(query);
-			LogDebug("ZoneDatabase::SaveCharacterTribute for character ID: [{}], tier:[{}] tribute:[{}] done", character_id, pp->tributes[i].tier, pp->tributes[i].tribute);
+void ZoneDatabase::SaveCharacterTribute(Client* c)
+{
+	std::vector<CharacterTributeRepository::CharacterTribute> tributes = {};
+	CharacterTributeRepository::CharacterTribute tribute = {};
+
+	uint32 tribute_count = 0;
+	for (auto& t : c->GetPP().tributes) {
+		if (t.tribute != TRIBUTE_NONE) {
+			tribute_count++;
 		}
 	}
-	return true;
+
+	tributes.reserve(tribute_count);
+
+	for (auto& t : c->GetPP().tributes) {
+		if (t.tribute != TRIBUTE_NONE) {
+			tribute.character_id = c->CharacterID();
+			tribute.tier         = t.tier;
+			tribute.tribute      = t.tribute;
+
+			tributes.emplace_back(tribute);
+		}
+	}
+
+	CharacterTributeRepository::DeleteWhere(database, fmt::format("character_id = {}", c->CharacterID()));
+
+	if (tribute_count > 0) {
+		CharacterTributeRepository::InsertMany(database, tributes);
+	}
 }
 
 bool ZoneDatabase::SaveCharacterBandolier(uint32 character_id, uint8 bandolier_id, uint8 bandolier_slot, uint32 item_id, uint32 icon, const char* bandolier_name)
@@ -1133,8 +1135,6 @@ bool ZoneDatabase::SaveCharacterData(
 	if (c->AccountID() <= 0) {
 		return false;
 	}
-
-	const auto mail_key = database.GetMailKey(c->CharacterID());
 
 	clock_t t = std::clock(); /* Function timer start */
 	const auto query = fmt::format(
@@ -1429,7 +1429,7 @@ bool ZoneDatabase::SaveCharacterData(
 		m_epp->perAA,
 		m_epp->expended_aa,
 		m_epp->last_invsnapshot_time,
-		mail_key.c_str()
+		c->GetMailKeyFull()
 	);
 	auto results = database.QueryDatabase(query);
 	LogDebug(
@@ -1686,7 +1686,7 @@ void ZoneDatabase::ListCharacterInvSnapshots(uint32 character_id, std::list<std:
 		return;
 
 	for (auto row : results)
-		is_list.push_back(std::pair<uint32, int>(Strings::ToUnsignedInt(row[0]), Strings::ToInt(row[1])));
+		is_list.emplace_back(std::pair<uint32, int>(Strings::ToUnsignedInt(row[0]), Strings::ToInt(row[1])));
 }
 
 bool ZoneDatabase::ValidateCharacterInvSnapshotTimestamp(uint32 character_id, uint32 timestamp) {
@@ -1736,7 +1736,7 @@ void ZoneDatabase::ParseCharacterInvSnapshot(uint32 character_id, uint32 timesta
 		return;
 
 	for (auto row : results)
-		parse_list.push_back(std::pair<int16, uint32>(Strings::ToInt(row[0]), Strings::ToUnsignedInt(row[1])));
+		parse_list.emplace_back(std::pair<int16, uint32>(Strings::ToInt(row[0]), Strings::ToUnsignedInt(row[1])));
 }
 
 void ZoneDatabase::DivergeCharacterInvSnapshotFromInventory(uint32 character_id, uint32 timestamp, std::list<std::pair<int16, uint32>> &compare_list) {
@@ -1780,7 +1780,7 @@ void ZoneDatabase::DivergeCharacterInvSnapshotFromInventory(uint32 character_id,
 		return;
 
 	for (auto row : results)
-		compare_list.push_back(std::pair<int16, uint32>(Strings::ToInt(row[0]), Strings::ToUnsignedInt(row[1])));
+		compare_list.emplace_back(std::pair<int16, uint32>(Strings::ToInt(row[0]), Strings::ToUnsignedInt(row[1])));
 }
 
 void ZoneDatabase::DivergeCharacterInventoryFromInvSnapshot(uint32 character_id, uint32 timestamp, std::list<std::pair<int16, uint32>> &compare_list) {
@@ -1821,7 +1821,7 @@ void ZoneDatabase::DivergeCharacterInventoryFromInvSnapshot(uint32 character_id,
 		return;
 
 	for (auto row : results)
-		compare_list.push_back(std::pair<int16, uint32>(Strings::ToInt(row[0]), Strings::ToUnsignedInt(row[1])));
+		compare_list.emplace_back(std::pair<int16, uint32>(Strings::ToInt(row[0]), Strings::ToUnsignedInt(row[1])));
 }
 
 bool ZoneDatabase::RestoreCharacterInvSnapshot(uint32 character_id, uint32 timestamp) {
@@ -3077,29 +3077,62 @@ void ZoneDatabase::UpdateAltCurrencyValue(uint32 char_id, uint32 currency_id, ui
 
 void ZoneDatabase::SaveBuffs(Client *client) {
 
-	std::string query = StringFormat("DELETE FROM `character_buffs` WHERE `character_id` = '%u'", client->CharacterID());
-	database.QueryDatabase(query);
+	// delete the character buffs
+	CharacterBuffsRepository::DeleteWhere(database, fmt::format("character_id = {}", client->CharacterID()));
 
+	// get the character buffs
 	uint32 buff_count = client->GetMaxBuffSlots();
 	Buffs_Struct *buffs = client->GetBuffs();
+
+	// character buffs struct
+	auto b = CharacterBuffsRepository::NewEntity();
+
+	// vector of character buffs
+	std::vector<CharacterBuffsRepository::CharacterBuffs> character_buffs = {};
+
+	// count the number of buffs that are valid
+	int character_buff_count = 0;
+	for (int index = 0; index < buff_count; index++) {
+		if (!IsValidSpell(buffs[index].spellid)) {
+			continue;
+		}
+		character_buff_count++;
+	}
+
+	// allocate memory for the character buffs
+	character_buffs.reserve(character_buff_count);
 
 	for (int index = 0; index < buff_count; index++) {
 		if (!IsValidSpell(buffs[index].spellid)) {
 			continue;
 		}
 
-		query = StringFormat("INSERT INTO `character_buffs` (character_id, slot_id, spell_id, "
-                            "caster_level, caster_name, ticsremaining, counters, numhits, melee_rune, "
-                            "magic_rune, persistent, dot_rune, caston_x, caston_y, caston_z, ExtraDIChance, "
-							"instrument_mod) "
-                            "VALUES('%u', '%u', '%u', '%u', '%s', '%d', '%u', '%u', '%u', '%u', '%u', '%u', "
-                            "'%i', '%i', '%i', '%i', '%i')", client->CharacterID(), index, buffs[index].spellid,
-                            buffs[index].casterlevel, buffs[index].caster_name, buffs[index].ticsremaining,
-                            buffs[index].counters, buffs[index].hit_number, buffs[index].melee_rune,
-                            buffs[index].magic_rune, buffs[index].persistant_buff, buffs[index].dot_rune,
-                            buffs[index].caston_x, buffs[index].caston_y, buffs[index].caston_z,
-                            buffs[index].ExtraDIChance, buffs[index].instrument_mod);
-       QueryDatabase(query);
+		// fill in the buff struct
+		b.character_id   = client->CharacterID();
+		b.slot_id        = index;
+		b.spell_id       = buffs[index].spellid;
+		b.caster_level   = buffs[index].casterlevel;
+		b.caster_name    = buffs[index].caster_name;
+		b.ticsremaining  = buffs[index].ticsremaining;
+		b.counters       = buffs[index].counters;
+		b.numhits        = buffs[index].hit_number;
+		b.melee_rune     = buffs[index].melee_rune;
+		b.magic_rune     = buffs[index].magic_rune;
+		b.persistent     = buffs[index].persistant_buff;
+		b.dot_rune       = buffs[index].dot_rune;
+		b.caston_x       = buffs[index].caston_x;
+		b.caston_y       = buffs[index].caston_y;
+		b.caston_z       = buffs[index].caston_z;
+		b.ExtraDIChance  = buffs[index].ExtraDIChance;
+		b.instrument_mod = buffs[index].instrument_mod;
+
+		// add the buff to the vector
+		character_buffs.emplace_back(b);
+	}
+
+	// insert the buffs into the database
+	if (!character_buffs.empty()) {
+		CharacterBuffsRepository::InsertMany(database, character_buffs);
 	}
 }
 
@@ -3235,72 +3268,123 @@ void ZoneDatabase::SavePetInfo(Client *client)
 {
 	PetInfo *petinfo = nullptr;
 
-	std::string query = StringFormat("DELETE FROM `character_pet_buffs` WHERE `char_id` = %u", client->CharacterID());
-	auto results = database.QueryDatabase(query);
-	if (!results.Success())
-		return;
+	// Pet Info
+	std::vector<CharacterPetInfoRepository::CharacterPetInfo> pet_infos = {};
+	CharacterPetInfoRepository::CharacterPetInfo pet_info = {};
 
-	query = StringFormat("DELETE FROM `character_pet_inventory` WHERE `char_id` = %u", client->CharacterID());
-	results = database.QueryDatabase(query);
-	if (!results.Success())
-		return;
+	// Pet buffs
+	std::vector<CharacterPetBuffsRepository::CharacterPetBuffs> pet_buffs = {};
+	CharacterPetBuffsRepository::CharacterPetBuffs pet_buff = {};
 
+	// Pet inventory
+	std::vector<CharacterPetInventoryRepository::CharacterPetInventory> inventory = {};
+	CharacterPetInventoryRepository::CharacterPetInventory item = {};
+
+	// Loop through pet types
 	for (int pet = 0; pet < 2; pet++) {
 		petinfo = client->GetPetInfo(pet);
-		if (!petinfo)
+		if (!petinfo) {
 			continue;
+		}
 
-		query = StringFormat("INSERT INTO `character_pet_info` "
-				"(`char_id`, `pet`, `petname`, `petpower`, `spell_id`, `hp`, `mana`, `size`, `taunting`) "
-				"VALUES (%u, %u, '%s', %i, %u, %u, %u, %f, %u) "
-				"ON DUPLICATE KEY UPDATE `petname` = '%s', `petpower` = %i, `spell_id` = %u, "
-				"`hp` = %u, `mana` = %u, `size` = %f, `taunting` = %u",
-				client->CharacterID(), pet, petinfo->Name, petinfo->petpower, petinfo->SpellID,
-				petinfo->HP, petinfo->Mana, petinfo->size, (petinfo->taunting) ? 1 : 0,
-				// and now the ON DUPLICATE ENTRIES
-				petinfo->Name, petinfo->petpower, petinfo->SpellID, petinfo->HP, petinfo->Mana, petinfo->size, (petinfo->taunting) ? 1 : 0);
-		results = database.QueryDatabase(query);
-		if (!results.Success())
-			return;
-		query.clear();
+		// build pet info into struct
+		pet_info.char_id  = client->CharacterID();
+		pet_info.pet      = pet;
+		pet_info.petname  = petinfo->Name;
+		pet_info.petpower = petinfo->petpower;
+		pet_info.spell_id = petinfo->SpellID;
+		pet_info.hp       = petinfo->HP;
+		pet_info.mana     = petinfo->Mana;
+		pet_info.size     = petinfo->size;
+		pet_info.taunting = (petinfo->taunting) ? 1 : 0;
 
-		// pet buffs!
+		// add pet info to vector
+		pet_infos.push_back(pet_info);
+
+		// build pet buffs into struct
+		int pet_buff_count = 0;
 		int max_slots = RuleI(Spells, MaxTotalSlotsPET);
+
+		// count pet buffs
 		for (int index = 0; index < max_slots; index++) {
 			if (!IsValidSpell(petinfo->Buffs[index].spellid)) {
 				continue;
 			}
-			if (query.length() == 0)
-				query = StringFormat("INSERT INTO `character_pet_buffs` "
-						"(`char_id`, `pet`, `slot`, `spell_id`, `caster_level`, "
-						"`ticsremaining`, `counters`, `instrument_mod`) "
-						"VALUES (%u, %u, %u, %u, %u, %d, %d, %u)",
-						client->CharacterID(), pet, index, petinfo->Buffs[index].spellid,
-						petinfo->Buffs[index].level, petinfo->Buffs[index].duration,
-						petinfo->Buffs[index].counters, petinfo->Buffs[index].bard_modifier);
-			else
-				query += StringFormat(", (%u, %u, %u, %u, %u, %d, %d, %u)",
-						client->CharacterID(), pet, index, petinfo->Buffs[index].spellid,
-						petinfo->Buffs[index].level, petinfo->Buffs[index].duration,
-						petinfo->Buffs[index].counters, petinfo->Buffs[index].bard_modifier);
+			pet_buff_count++;
 		}
-		database.QueryDatabase(query);
-		query.clear();
 
-		// pet inventory!
-		for (int index = EQ::invslot::EQUIPMENT_BEGIN; index <= EQ::invslot::EQUIPMENT_END; index++) {
-			if (!petinfo->Items[index])
+		// reserve space for pet buffs
+		pet_buffs.reserve(pet_buff_count);
+
+		// loop through pet buffs
+		for (int index = 0; index < max_slots; index++) {
+			if (!IsValidSpell(petinfo->Buffs[index].spellid)) {
 				continue;
+			}
 
-			if (query.length() == 0)
-				query = StringFormat("INSERT INTO `character_pet_inventory` "
-						"(`char_id`, `pet`, `slot`, `item_id`) "
-						"VALUES (%u, %u, %u, %u)",
-						client->CharacterID(), pet, index, petinfo->Items[index]);
-			else
-				query += StringFormat(", (%u, %u, %u, %u)", client->CharacterID(), pet, index, petinfo->Items[index]);
+			pet_buff.char_id        = client->CharacterID();
+			pet_buff.pet            = pet;
+			pet_buff.slot           = index;
+			pet_buff.spell_id       = petinfo->Buffs[index].spellid;
+			pet_buff.caster_level   = petinfo->Buffs[index].level;
+			pet_buff.ticsremaining  = petinfo->Buffs[index].duration;
+			pet_buff.counters       = petinfo->Buffs[index].counters;
+			pet_buff.instrument_mod = petinfo->Buffs[index].bard_modifier;
+
+			// add pet buffs to vector
+			pet_buffs.push_back(pet_buff);
 		}
-		database.QueryDatabase(query);
+
+		// build pet inventory into struct
+		int pet_inventory_count = 0;
+		for (int index = EQ::invslot::EQUIPMENT_BEGIN; index <= EQ::invslot::EQUIPMENT_END; index++) {
+			if (!petinfo->Items[index]) {
+				continue;
+			}
+			pet_inventory_count++;
+		}
+
+		// reserve space for pet inventory
+		inventory.reserve(pet_inventory_count);
+
+		// loop through pet inventory
+		for (int index = EQ::invslot::EQUIPMENT_BEGIN; index <= EQ::invslot::EQUIPMENT_END; index++) {
+			if (!petinfo->Items[index]) {
+				continue;
+			}
+
+			item.char_id = client->CharacterID();
+			item.pet     = pet;
+			item.slot    = index;
+			item.item_id = petinfo->Items[index];
+
+			// add pet inventory to vector
+			inventory.push_back(item);
+		}
+	}
+
+	// Delete existing pet info
+	CharacterPetInfoRepository::DeleteWhere(database, fmt::format("char_id = {}", client->CharacterID()));
+
+	// insert pet info into database
+	if (!pet_infos.empty()) {
+		CharacterPetInfoRepository::InsertMany(database, pet_infos);
+	}
+
+	// Delete existing pet buffs
+	CharacterPetBuffsRepository::DeleteWhere(database, fmt::format("char_id = {}", client->CharacterID()));
+
+	// insert pet buffs into database
+	if (!pet_buffs.empty()) {
+		CharacterPetBuffsRepository::InsertMany(database, pet_buffs);
+	}
+
+	// Delete existing pet inventory
+	CharacterPetInventoryRepository::DeleteWhere(database, fmt::format("char_id = {}", client->CharacterID()));
+
+	// insert pet inventory into database
+	if (!inventory.empty()) {
+		CharacterPetInventoryRepository::InsertMany(database, inventory);
 	}
 }
 
@@ -4142,7 +4226,7 @@ bool ZoneDatabase::LoadCharacterCorpseData(uint32 corpse_id, CharacterCorpseEntr
 		item.ornamentidfile = Strings::ToUnsignedInt(row[r++]);
 		item.ornament_hero_model = Strings::ToUnsignedInt(row[r++]);
 
-		corpse.items.push_back(std::move(item));
+		corpse.items.emplace_back(std::move(item));
 		r = 0;
 		i++;
 	}
@@ -4520,5 +4604,54 @@ void ZoneDatabase::UpdateGMStatus(uint32 accID, int newStatus)
 			accID
 		);
 		database.QueryDatabase(query);
+	}
+}
+
+void ZoneDatabase::SaveCharacterBinds(Client *c)
+{
+	// bulk save character binds
+	std::vector<CharacterBindRepository::CharacterBind> binds = {};
+	CharacterBindRepository::CharacterBind bind = {};
+
+	// count character binds
+	int bind_count = 0;
+	for (auto & b : c->GetPP().binds) {
+		if (b.zone_id) {
+			bind_count++;
+		}
+	}
+
+	LogInfo("bind count is [{}]", bind_count);
+
+	// allocate memory for binds
+	binds.reserve(bind_count);
+
+	// copy binds to vector
+	int i = 0;
+	for (auto &b: c->GetPP().binds) {
+		if (b.zone_id) {
+			// copy bind data
+			bind.id          = c->CharacterID();
+			bind.zone_id     = b.zone_id;
+			bind.instance_id = b.instance_id;
+			bind.x           = b.x;
+			bind.y           = b.y;
+			bind.z           = b.z;
+			bind.heading     = b.heading;
+			bind.slot        = i;
+
+			// add bind to vector
+			binds.emplace_back(bind);
+
+			i++;
+		}
+	}
+
+	// save binds
+	if (bind_count > 0) {
+		// delete old binds
+		CharacterBindRepository::DeleteWhere(database, fmt::format("id = {}", c->CharacterID()));
+		// save new binds
+		CharacterBindRepository::InsertMany(database, binds);
 	}
 }

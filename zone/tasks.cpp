@@ -15,9 +15,7 @@ extern QueryServ *QServ;
 void Client::LoadClientTaskState()
 {
 	if (RuleB(TaskSystem, EnableTaskSystem) && task_manager) {
-		if (task_state) {
-			safe_delete(task_state);
-		}
+		safe_delete(task_state);
 
 		task_state = new ClientTaskState();
 		if (!task_manager->LoadClientState(this, task_state)) {
@@ -147,8 +145,7 @@ void Client::StartTaskRequestCooldownTimer()
 	uint32_t milliseconds = RuleI(TaskSystem, RequestCooldownTimerSeconds) * 1000;
 	task_request_timer.Start(milliseconds);
 
-	uint32_t size = sizeof(uint32_t);
-	auto outapp = std::make_unique<EQApplicationPacket>(OP_TaskRequestTimer, size);
+	auto outapp = std::make_unique<EQApplicationPacket>(OP_TaskRequestTimer, sizeof(uint32_t));
 	outapp->WriteUInt32(milliseconds);
 	QueuePacket(outapp.get());
 }

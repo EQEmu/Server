@@ -133,55 +133,54 @@ uint32 SharedDatabase::GetTotalTimeEntitledOnAccount(uint32 AccountID) {
 
 void SharedDatabase::SetMailKey(int CharID, int IPAddress, int MailKey)
 {
-	char MailKeyString[17];
+	char mail_key[17];
 
-	if (RuleB(Chat, EnableMailKeyIPVerification) == true)
-		sprintf(MailKeyString, "%08X%08X", IPAddress, MailKey);
-	else
-		sprintf(MailKeyString, "%08X", MailKey);
+	if (RuleB(Chat, EnableMailKeyIPVerification) == true) {
+		sprintf(mail_key, "%08X%08X", IPAddress, MailKey);
+	}
+	else {
+		sprintf(mail_key, "%08X", MailKey);
+	}
 
-	const std::string query = StringFormat("UPDATE character_data SET mailkey = '%s' WHERE id = '%i'",
-	                                       MailKeyString, CharID);
-	const auto results = QueryDatabase(query);
-	if (!results.Success())
-		LogError("SharedDatabase::SetMailKey({}, {}) : {}", CharID, MailKeyString, results.ErrorMessage().c_str());
+	const std::string query = StringFormat(
+		"UPDATE character_data SET mailkey = '%s' WHERE id = '%i'",
+		mail_key, CharID
+	);
 
+	const auto        results = QueryDatabase(query);
+	if (!results.Success()) {
+		LogError("SharedDatabase::SetMailKey({}, {}) : {}", CharID, mail_key, results.ErrorMessage().c_str());
+	}
 }
 
-std::string SharedDatabase::GetMailKey(int CharID, bool key_only)
+SharedDatabase::MailKeys SharedDatabase::GetMailKey(int character_id)
 {
-	const std::string query = StringFormat("SELECT `mailkey` FROM `character_data` WHERE `id`='%i' LIMIT 1", CharID);
-	auto results = QueryDatabase(query);
-
+	const std::string query   = StringFormat("SELECT `mailkey` FROM `character_data` WHERE `id`='%i' LIMIT 1", character_id);
+	auto              results = QueryDatabase(query);
 	if (!results.Success()) {
-
-		Log(Logs::Detail, Logs::MySQLError, "Error retrieving mailkey from database: %s", results.ErrorMessage().c_str());
-		return std::string();
+		return MailKeys{};
 	}
 
 	if (!results.RowCount()) {
-
-		Log(Logs::General, Logs::ClientLogin, "Error: Mailkey for character id [%i] does not exist or could not be found", CharID);
-		return std::string();
+		Log(Logs::General,
+			Logs::ClientLogin,
+			"Error: Mailkey for character id [%i] does not exist or could not be found",
+			character_id
+		);
+		return MailKeys{};
 	}
 
-	auto& row = results.begin();
+	auto &row = results.begin();
 	if (row != results.end()) {
-
 		std::string mail_key = row[0];
 
-		if (mail_key.length() > 8 && key_only) {
-			return mail_key.substr(8);
-		}
-		else {
-			return mail_key;
-		}
+		return MailKeys{
+			.mail_key = mail_key.substr(8),
+			.mail_key_full = mail_key
+		};
 	}
-	else {
 
-		Log(Logs::General, Logs::MySQLError, "Internal MySQL error in SharedDatabase::GetMailKey(int, bool)");
-		return std::string();
-	}
+	return MailKeys{};
 }
 
 bool SharedDatabase::SaveCursor(uint32 char_id, std::list<EQ::ItemInstance*>::const_iterator &start, std::list<EQ::ItemInstance*>::const_iterator &end)
@@ -425,17 +424,13 @@ bool SharedDatabase::DeleteSharedBankSlot(uint32 char_id, int16 slot_id) {
 
 int32 SharedDatabase::GetSharedPlatinum(uint32 account_id)
 {
-	const std::string query = StringFormat("SELECT sharedplat FROM account WHERE id = '%i'", account_id);
-    auto results = QueryDatabase(query);
-    if (!results.Success()) {
-		return false;
-    }
+	const auto query   = fmt::format("SELECT sharedplat FROM account WHERE id = {}", account_id);
+	auto       results = QueryDatabase(query);
+	if (!results.Success() || !results.RowCount()) {
+		return 0;
+	}
 
-    if (results.RowCount() != 1)
-        return 0;
-
-	auto& row = results.begin();
-
+	auto row = results.begin();
 	return Strings::ToInt(row[0]);
 }
 
@@ -499,25 +494,32 @@ bool SharedDatabase::GetSharedBank(uint32 id, EQ::InventoryProfile *inv, bool is
 {
 	std::string query;
 
-	if (is_charid)
-		query = StringFormat("SELECT sb.slotid, sb.itemid, sb.charges, "
-				     "sb.augslot1, sb.augslot2, sb.augslot3, "
-				     "sb.augslot4, sb.augslot5, sb.augslot6, sb.custom_data "
-				     "FROM sharedbank sb INNER JOIN character_data ch "
-				     "ON ch.account_id=sb.acctid WHERE ch.id = %i ORDER BY sb.slotid",
-				     id);
-	else
-		query = StringFormat("SELECT slotid, itemid, charges, "
-				     "augslot1, augslot2, augslot3, "
-				     "augslot4, augslot5, augslot6, custom_data "
-				     "FROM sharedbank WHERE acctid=%i ORDER BY slotid",
-				     id);
+	if (is_charid) {
+		query = fmt::format(
+			"SELECT sb.slotid, sb.itemid, sb.charges, "
+			"sb.augslot1, sb.augslot2, sb.augslot3, "
+			"sb.augslot4, sb.augslot5, sb.augslot6, sb.custom_data "
+			"FROM sharedbank sb INNER JOIN character_data ch "
+			"ON ch.account_id = sb.acctid WHERE ch.id = {} ORDER BY sb.slotid",
+			id
+		);
+	} else {
+		query = fmt::format(
+			"SELECT slotid, itemid, charges, "
+			"augslot1, augslot2, augslot3, "
+			"augslot4, augslot5, augslot6, custom_data "
+			"FROM sharedbank WHERE acctid = {} ORDER BY slotid",
+			id
+		);
+	}
+
 	auto results = QueryDatabase(query);
+	// If we have no results we still need to return true
 	if (!results.Success()) {
 		return false;
 	}
 
-	for (auto& row = results.begin(); row != results.end(); ++row) {
+	for (auto row : results) {
 		int16 slot_id = static_cast<int16>(Strings::ToInt(row[0]));
 		uint32 item_id = Strings::ToUnsignedInt(row[1]);
 		const int16 charges = static_cast<int16>(Strings::ToInt(row[2]));
@@ -533,16 +535,26 @@ bool SharedDatabase::GetSharedBank(uint32 id, EQ::InventoryProfile *inv, bool is
 		const EQ::ItemData *item = GetItem(item_id);
 
 		if (!item) {
-			LogError("Warning: [{}] [{}] has an invalid item_id [{}] in inventory slot [{}]",
-				((is_charid == true) ? "charid" : "acctid"), id, item_id, slot_id);
+			LogError(
+				"Warning: [{}] [{}] has an invalid item_id [{}] in inventory slot [{}]",
+				is_charid ? "charid" : "acctid",
+				id,
+				item_id,
+				slot_id
+			);
 			continue;
 		}
 
-		EQ::ItemInstance *inst = CreateBaseItem(item, charges);
+		auto inst = CreateBaseItem(item, charges);
+		if (!inst) {
+			continue;
+		}
+
 		if (inst && item->IsClassCommon()) {
 			for (int i = EQ::invaug::SOCKET_BEGIN; i <= EQ::invaug::SOCKET_END; i++) {
-				if (aug[i])
+				if (aug[i]) {
 					inst->PutAugment(this, i, aug[i]);
+				}
 			}
 		}
 
@@ -556,14 +568,21 @@ bool SharedDatabase::GetSharedBank(uint32 id, EQ::InventoryProfile *inv, bool is
 		safe_delete(inst);
 
 		// Save ptr to item in inventory
-		if (put_slot_id != INVALID_INDEX)
+		if (put_slot_id != INVALID_INDEX) {
 			continue;
+		}
 
-		LogError("Warning: Invalid slot_id for item in shared bank inventory: [{}]=[{}], item_id=[{}], slot_id=[{}]",
-			((is_charid == true) ? "charid" : "acctid"), id, item_id, slot_id);
+		LogError(
+			"Warning: Invalid slot_id for item in shared bank inventory: [{}]=[{}], item_id=[{}], slot_id=[{}]",
+			is_charid ? "charid" : "acctid",
+			id,
+			item_id,
+			slot_id
+		);
 
-		if (is_charid)
+		if (is_charid) {
 			SaveInventory(id, nullptr, slot_id);
+		}
 	}
 
 	return true;
@@ -619,7 +638,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv)
 		}
 		else if (slot_id <= EQ::invbag::BANK_BAGS_END && slot_id >= EQ::invbag::BANK_BAGS_BEGIN) { // Titanium check
 			const auto parent_index = ((slot_id - EQ::invbag::BANK_BAGS_BEGIN) / EQ::invbag::SLOT_COUNT);
-			if (parent_index < EQ::invslot::SLOT_BEGIN || parent_index >= bank_size) {
+			if (parent_index >= bank_size) {
 				cv_conflict = true;
 				continue;
 			}
@@ -1564,24 +1583,28 @@ EQ::ItemInstance* SharedDatabase::CreateBaseItem(const EQ::ItemData* item, int16
 	if (item) {
 		// if maxcharges is -1 that means it is an unlimited use item.
 		// set it to 1 charge so that it is usable on creation
-		if (charges == 0 && item->MaxCharges == -1)
+		if (charges == 0 && item->MaxCharges == -1) {
 			charges = 1;
+		}
+
 		// Stackable items need a minimum charge of 1 to remain moveable.
-		if(charges <= 0 && item->Stackable)
+		if (charges <= 0 && item->Stackable) {
 			charges = 1;
+		}
 
 		inst = new EQ::ItemInstance(item, charges);
 
-		if (inst == nullptr) {
+		if (!inst) {
 			LogError("Error: valid item data returned a null reference for EQ::ItemInstance creation in SharedDatabase::CreateBaseItem()");
 			LogError("Item Data = ID: {}, Name: {}, Charges: {}", item->ID, item->Name, charges);
 			return nullptr;
 		}
 
-		if(item->CharmFileID != 0 || (item->LoreGroup >= 1000 && item->LoreGroup != -1)) {
+		if (item->CharmFileID != 0 || item->LoreGroup >= 1000) {
 			inst->Initialize(this);
 		}
 	}
+
 	return inst;
 }
 

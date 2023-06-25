@@ -68,7 +68,7 @@ namespace DatabaseSchema {
 			{"character_spells",               "id"},
 			{"character_task_timers",          "character_id"},
 			{"character_tasks",                "charid"},
-			{"character_tribute",              "id"},
+			{"character_tribute",              "character_id"},
 			{"completed_tasks",                "charid"},
 			{"data_buckets",                   "id"},
 			{"faction_values",                 "char_id"},
@@ -256,6 +256,7 @@ namespace DatabaseSchema {
 	{
 		return {
 			"chatchannels",
+			"chatchannel_reserved_names",
 			"command_settings",
 			"content_flags",
 			"db_str",
@@ -392,9 +393,6 @@ namespace DatabaseSchema {
 			"bot_command_settings",
 			"bot_create_combinations",
 			"bot_data",
-			"bot_group_members",
-			"bot_groups",
-			"bot_guild_members",
 			"bot_heal_rotation_members",
 			"bot_heal_rotation_targets",
 			"bot_heal_rotations",

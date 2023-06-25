@@ -1,11 +1,7 @@
 #include "data_bucket.h"
-#include <utility>
-#include "../common/strings.h"
 #include "zonedb.h"
-#include "../common/zone_store.h"
 #include <ctime>
 #include <cctype>
-#include <algorithm>
 
 /**
  * Persists data via bucket_name as key
@@ -23,7 +19,7 @@ void DataBucket::SetData(const std::string& bucket_key, const std::string& bucke
 		if (isalpha(expires_time[0]) || isalpha(expires_time[expires_time.length() - 1])) {
 			expires_time_unix = (long long) std::time(nullptr) + Strings::TimeToSeconds(expires_time);
 		} else {
-			expires_time_unix = (long long) std::time(nullptr) + Strings::ToInt(expires_time.c_str());
+			expires_time_unix = (long long) std::time(nullptr) + Strings::ToInt(expires_time);
 		}
 	}
 
