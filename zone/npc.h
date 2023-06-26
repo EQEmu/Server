@@ -543,8 +543,6 @@ public:
 
 	static LootDropEntries_Struct NewLootDropEntry();
 
-	inline uint32 GetEquipmentItemID(int16 slot_id) { return equipment[slot_id]; };
-
 protected:
 
 	void HandleRoambox();

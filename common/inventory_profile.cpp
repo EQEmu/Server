@@ -249,15 +249,11 @@ int16 EQ::InventoryProfile::PutItem(int16 slot_id, const ItemInstance& inst)
 	// Clean up item already in slot (if exists)
 	DeleteItem(slot_id);
 
-	LogInfo("Slot ID {} Inst {}", slot_id, inst ? "Y" : "N");
-
 	if (!inst) {
 		// User is effectively deleting the item
 		// in the slot, why hold a null ptr in map<>?
 		return slot_id;
 	}
-
-	LogInfo("Slot ID {} Item ID {} Item Name {}", slot_id, inst.GetID(), inst.GetItem()->Name);
 
 	// Delegate to internal method
 	return _PutItem(slot_id, inst.Clone());
@@ -1396,8 +1392,6 @@ int16 EQ::InventoryProfile::_PutItem(int16 slot_id, ItemInstance* inst)
 		PopItem(slot_id);
 		return slot_id;
 	}
-
-	LogInfo("In _PutItem with slot_id {} item_id {} item_name {}", slot_id, inst->GetID(), inst->GetItem()->Name);
 
 	int16 result = INVALID_INDEX;
 	int16 parentSlot = INVALID_INDEX;
