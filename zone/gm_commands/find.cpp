@@ -23,11 +23,16 @@ void command_find(Client *c, const Seperator *sep)
 	}
 
 	// execute the command
-	auto      request_cmd = Strings::ToLower(sep->arg[1]);
 	for (auto &cmd: commands) {
-		if (cmd.command == request_cmd) {
+		if (cmd.command == Strings::ToLower(sep->arg[1])) {
 			cmd.function(c, sep);
 			return;
 		}
+	}
+
+	// command not found
+	c->Message(Chat::White, "Command not found. Usage: #find [command]");
+	for (auto &cmd: commands) {
+		c->Message(Chat::White, fmt::format("Usage: #find {}", cmd.usage).c_str());
 	}
 }
