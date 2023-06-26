@@ -241,7 +241,6 @@ void command_setstartzone(Client *c, const Seperator *sep);
 void command_setstat(Client *c, const Seperator *sep);
 void command_setxp(Client *c, const Seperator *sep);
 void command_showbuffs(Client *c, const Seperator *sep);
-void command_shownumhits(Client *c, const Seperator *sep);
 void command_shownpcgloballoot(Client *c, const Seperator *sep);
 void command_showskills(Client *c, const Seperator *sep);
 void command_showspells(Client *c, const Seperator *sep);

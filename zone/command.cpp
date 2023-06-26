@@ -294,7 +294,6 @@ int command_init(void)
 		command_add("setstat", "Sets the stats to a specific value.", AccountStatus::Max, command_setstat) ||
 		command_add("setxp", "[value] - Set your or your player target's experience", AccountStatus::GMAdmin, command_setxp) ||
 		command_add("showbuffs", "List buffs active on your target or you if no target", AccountStatus::Guide, command_showbuffs) ||
-		command_add("shownumhits", "Shows buffs numhits for yourself.", AccountStatus::Player, command_shownumhits) ||
 		command_add("shownpcgloballoot", "Show global loot entries for your target NPC", AccountStatus::Guide, command_shownpcgloballoot) ||
 		command_add("showskills", "[Start Skill ID] [All] - Show the values of your or your player target's skills in a popup 50 at a time, use 'all' as second argument to show non-usable skill's values", AccountStatus::Guide, command_showskills) ||
 		command_add("showspells", "[disciplines|spells] - Show your or your target's memorized spells or learned disciplines", AccountStatus::GMAdmin, command_showspells) ||
@@ -1133,7 +1132,6 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/setxp.cpp"
 #include "gm_commands/showbuffs.cpp"
 #include "gm_commands/shownpcgloballoot.cpp"
-#include "gm_commands/shownumhits.cpp"
 #include "gm_commands/showskills.cpp"
 #include "gm_commands/showspells.cpp"
 #include "gm_commands/showspellslist.cpp"

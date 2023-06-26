@@ -812,8 +812,7 @@ public:
 	uint8 GetArchetype() const;
 	void SetZone(uint32 zone_id, uint32 instance_id);
 	void ShowStats(Client* client);
-	void ShowBuffs(Client* client);
-	void ShowBuffList(Client* client);
+	void ShowBuffs(Client* c);
 	bool PlotPositionAroundTarget(Mob* target, float &x_dest, float &y_dest, float &z_dest, bool lookForAftArc = true);
 	bool PlotPositionOnArcInFrontOfTarget(Mob *target, float &x_dest, float &y_dest, float &z_dest, float distance, float min_deg = 5.0f, float max_deg = 150.0f);
 	bool PlotPositionOnArcBehindTarget(Mob *target, float &x_dest, float &y_dest, float &z_dest, float distance);
