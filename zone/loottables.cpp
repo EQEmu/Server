@@ -365,7 +365,7 @@ void NPC::AddLootDrop(
 
 	int foundslot = -1; // for multi-slot items
 
-	const EQ::ItemInstance* inst = database.CreateItem(
+	const auto* inst = database.CreateItem(
 		item2->ID,
 		loot_drop.item_charges,
 		aug1,
