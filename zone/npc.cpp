@@ -441,6 +441,8 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 		m_can_open_doors = false;
 	}
 
+	GetInv().SetInventoryVersion(EQ::versions::MobVersion::NPC);
+	GetInv().SetGMInventory(false); // bot expansions are not currently implemented (defaults to static)
 }
 
 float NPC::GetRoamboxMaxX() const
