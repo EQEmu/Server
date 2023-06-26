@@ -363,7 +363,7 @@ void NPC::AddLootDrop(
 
 	bool found = false; // track if we found an empty slot we fit into
 
-	auto foundslot = -1; // for multi-slot items
+	int foundslot = -1; // for multi-slot items
 
 	const EQ::ItemInstance* inst = database.CreateItem(
 		item2->ID,
