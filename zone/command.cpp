@@ -137,6 +137,7 @@ int command_init(void)
 		command_add("factionassociation", "[factionid] [amount] - triggers a faction hits via association", AccountStatus::GMLeadAdmin, command_faction_association) ||
 		command_add("feature", "Change your or your target's feature's temporarily", AccountStatus::QuestTroupe, command_feature) ||
 		command_add("size", "Change your targets size (alias of #feature size)", AccountStatus::QuestTroupe, command_feature) ||
+		command_add("find", "Search command used to find various things", AccountStatus::Guide, command_find) ||
 		command_add("findaa", "[Search Criteria] - Search for an AA", AccountStatus::Guide, command_findaa) ||
 		command_add("findaliases", "[Search Criteria]- Searches for available command aliases, by alias or command", AccountStatus::Player, command_findaliases) ||
 		command_add("findcharacter", "[Search Criteria] - Search for a character", AccountStatus::Guide, command_findcharacter) ||
@@ -981,6 +982,7 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/exptoggle.cpp"
 #include "gm_commands/faction.cpp"
 #include "gm_commands/feature.cpp"
+#include "gm_commands/find.cpp"
 #include "gm_commands/findaa.cpp"
 #include "gm_commands/findcharacter.cpp"
 #include "gm_commands/findclass.cpp"
