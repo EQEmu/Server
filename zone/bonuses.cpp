@@ -149,11 +149,8 @@ void Mob::CalcItemBonuses(StatBonuses* b) {
 		const auto* inst = GetInv().GetItem(i);
 
 		if (!inst) {
-			Shout(fmt::format("Found nothing in slot {} ({}).", EQ::invslot::GetInvPossessionsSlotName(i), i).c_str());
 			continue;
 		}
-
-		Shout(fmt::format("Attempting to grab item from slot {}, got id {} name {}", i, inst->GetID(), inst->GetItem()->Name).c_str());
 
 		AddItemBonuses(inst, b, false, false, 0, (i == EQ::invslot::slotAmmo));
 
