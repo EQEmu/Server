@@ -442,7 +442,7 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 	}
 
 	GetInv().SetInventoryVersion(EQ::versions::MobVersion::RoF2);
-	GetInv().SetGMInventory(false); // bot expansions are not currently implemented (defaults to static)
+	GetInv().SetGMInventory(false);
 }
 
 float NPC::GetRoamboxMaxX() const
