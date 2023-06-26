@@ -2,8 +2,8 @@
 
 void FindAA(Client *c, const Seperator *sep)
 {
-	if (sep->IsNumber(1)) {
-		int  aa_id   = Strings::ToInt(sep->arg[1]);
+	if (sep->IsNumber(2)) {
+		int  aa_id   = Strings::ToInt(sep->arg[2]);
 		auto aa_name = zone->GetAAName(aa_id);
 		if (!aa_name.empty()) {
 			c->Message(
@@ -26,7 +26,7 @@ void FindAA(Client *c, const Seperator *sep)
 		}
 	}
 	else {
-		const auto search_criteria = Strings::ToLower(sep->argplus[1]);
+		const auto search_criteria = Strings::ToLower(sep->argplus[2]);
 		if (!search_criteria.empty()) {
 			std::map<int, std::string> ordered_aas;
 
