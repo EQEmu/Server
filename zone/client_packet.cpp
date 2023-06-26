@@ -3048,18 +3048,18 @@ void Client::Handle_OP_AssistGroup(const EQApplicationPacket *app)
 	eid = (EntityId_Struct*)outapp->pBuffer;
 	if (entity && entity->IsMob()) {
 		Mob* new_target = entity->CastToMob();
-			if (new_target && (GetGM() ||
-				Distance(m_Position, new_target->GetPosition()) <= TARGETING_RANGE)) {
-				cheat_manager.SetExemptStatus(Assist, true);
-				eid->entity_id = new_target->GetID();
-			}
-			else {
-				eid->entity_id = 0;
-			}
+		if (new_target && (GetGM() ||
+			Distance(m_Position, new_target->GetPosition()) <= TARGETING_RANGE)) {
+			cheat_manager.SetExemptStatus(Assist, true);
+			eid->entity_id = new_target->GetID();
 		}
 		else {
 			eid->entity_id = 0;
 		}
+	}
+	else {
+		eid->entity_id = 0;
+	}
 
 	FastQueuePacket(&outapp);
 	return;
@@ -5884,11 +5884,9 @@ void Client::Handle_OP_DoGroupLeadershipAbility(const EQApplicationPacket *app)
 	}
 	case RaidLeadershipAbility_MarkNPC:
 	{
-		if (GetTarget() && GetTarget()->IsMob())
-		{
+		if (GetTarget() && GetTarget()->IsMob()) {
 			Raid* r = GetRaid();
-			if (r)
-			{
+			if (r) {
 				r->RaidMarkNPC(this, dglas->Parameter);
 			}
 		}
@@ -16353,10 +16351,10 @@ void Client::RecordKilledNPCEvent(NPC *n)
 		}
 	}
 }
+
 void Client::Handle_OP_RaidDelegateAbility(const EQApplicationPacket* app) 
 {
-	if (app->size != sizeof(DelegateAbility_Struct))
-	{
+	if (app->size != sizeof(DelegateAbility_Struct)) {
 		LogDebug("Size mismatch in OP_RaidDelegateAbility expected [{}] got [{}]", sizeof(DelegateAbility_Struct), app->size);
 		DumpPacket(app);
 		return;
@@ -16383,10 +16381,10 @@ void Client::Handle_OP_RaidDelegateAbility(const EQApplicationPacket* app)
 		break;
 	}
 }
+
 void Client::Handle_OP_RaidClearNPCMarks(const EQApplicationPacket* app)
 {
-	if (app->size != 0)
-	{
+	if (app->size != 0)	{
 		LogDebug("Size mismatch in OP_RaidClearNPCMark expected [{}] got [{}]", 0, app->size);
 		DumpPacket(app);
 		return;
@@ -16394,5 +16392,4 @@ void Client::Handle_OP_RaidClearNPCMarks(const EQApplicationPacket* app)
 
 	auto r = entity_list.GetRaidByName(GetName());
 	r->RaidClearNPCMarks(GetName());
-
 }

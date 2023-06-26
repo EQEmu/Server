@@ -2753,9 +2753,9 @@ namespace RoF2
 			auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidGeneral_Struct));
 			auto note = (RaidGeneral_Struct*)outapp->pBuffer;
 			note->action = raidSetNote;
-			strn0cpy(note->leader_name, in_note->leader_name, 64);
-			strn0cpy(note->player_name, in_note->player_name, 64);
-			strn0cpy(note->note, in_note->note, 64);
+			strn0cpy(note->leader_name, in_note->leader_name, sizeof(note->leader_name));
+			strn0cpy(note->player_name, in_note->player_name, sizeof(note->leader_name));
+			strn0cpy(note->note, in_note->note, sizeof(note->note));
 			dest->QueuePacket(outapp);
 			safe_delete(outapp);
 		}

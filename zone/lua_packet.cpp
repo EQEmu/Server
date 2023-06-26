@@ -80,7 +80,7 @@ void Lua_Packet::SetOpcode(int op) {
 
 int Lua_Packet::GetRawOpcode() {
 	Lua_Safe_Call_Int();
-	return static_cast<int16>(self->GetOpcodeBypass());
+	return static_cast<int>(self->GetOpcodeBypass());
 }
 
 void Lua_Packet::SetRawOpcode(int op) {

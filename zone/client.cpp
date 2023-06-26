@@ -7163,13 +7163,7 @@ void Client::SendXTargetPacket(uint32 Slot, Mob *m)
 		if (strlen(XTargets[Slot].Name) && ((XTargets[Slot].Type == CurrentTargetPC) ||
 			(XTargets[Slot].Type == GroupTank) ||
 			(XTargets[Slot].Type == GroupAssist) ||
-			(XTargets[Slot].Type == Puller)))/*  ||
-			(XTargets[Slot].Type == RaidAssist1) ||
-			(XTargets[Slot].Type == RaidAssist2) ||
-			(XTargets[Slot].Type == RaidAssist3) ||
-			(XTargets[Slot].Type == RaidAssist1Target) ||
-			(XTargets[Slot].Type == RaidAssist2Target) ||
-			(XTargets[Slot].Type == RaidAssist3Target)))*/
+			(XTargets[Slot].Type == Puller)))
 		{
 			outapp->WriteUInt8(2);
 		}
@@ -7233,13 +7227,7 @@ void Client::RemoveGroupXTargets()
 	{
 		if ((XTargets[i].Type == GroupTank) ||
 			(XTargets[i].Type == GroupAssist) ||
-			(XTargets[i].Type == Puller)/* ||
-			(XTargets[i].Type == RaidAssist1) ||
-			(XTargets[i].Type == RaidAssist2) ||
-			(XTargets[i].Type == RaidAssist3) ||
-			(XTargets[i].Type == GroupMarkTarget1) ||
-			(XTargets[i].Type == GroupMarkTarget2) ||
-			(XTargets[i].Type == GroupMarkTarget3)*/)
+			(XTargets[i].Type == Puller))
 		{
 			XTargets[i].ID = 0;
 			XTargets[i].Name[0] = 0;

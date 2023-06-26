@@ -1552,9 +1552,9 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		auto snote = (ServerRaidNote_Struct*)pack->pBuffer;
 		if (snote->rid > 0) {
 			Raid* r = entity_list.GetRaidByID(snote->rid);
-			if (!r)
-				break;
-			r->SendRaidNotes();
+			if (r) {
+				r->SendRaidNotes();
+			}
 		}
 		break;
 	}
