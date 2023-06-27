@@ -25,21 +25,21 @@ void command_find(Client *c, const Seperator *sep)
 	};
 
 	std::vector<FindCommand> commands = {
-		FindCommand{.command = "aa", .usage = "aa [Search Criteria]", .function = FindAA},
-		FindCommand{.command = "character", .usage = "character [Search Criteria]", .function = FindCharacter},
-		FindCommand{.command = "class", .usage = "class [Search Criteria]", .function = FindClass},
-		FindCommand{.command = "currency", .usage = "currency [Search Criteria]", .function = FindCurrency},
-		FindCommand{.command = "deity", .usage = "deity [Search Criteria]", .function = FindDeity},
-		FindCommand{.command = "faction", .usage = "faction [Search Criteria]", .function = FindFaction},
-		FindCommand{.command = "item", .usage = "item [Search Criteria]", .function = FindItem, .aliases = {"#fi"}},
-		FindCommand{.command = "language", .usage = "language [Search Criteria]", .function = FindLanguage},
-		FindCommand{.command = "npctype", .usage = "npctype [Search Criteria]", .function = FindNPCType},
-		FindCommand{.command = "race", .usage = "race [Search Criteria]", .function = FindRace},
-		FindCommand{.command = "recipe", .usage = "recipe [Search Criteria]", .function = FindRecipe},
-		FindCommand{.command = "skill", .usage = "skill [Search Criteria]", .function = FindSkill},
-		FindCommand{.command = "spell", .usage = "spell [Search Criteria]", .function = FindSpell},
-		FindCommand{.command = "task", .usage = "task [Search Criteria]", .function = FindTask},
-		FindCommand{.command = "zone", .usage = "zone [Search Criteria]", .function = FindZone},
+		FindCommand{.command = "aa", .usage = "aa [Search Criteria]", .function = FindAA, .aliases = {"#findaa"}},
+		FindCommand{.command = "character", .usage = "character [Search Criteria]", .function = FindCharacter, .aliases = {"#findcharacter"}},
+		FindCommand{.command = "class", .usage = "class [Search Criteria]", .function = FindClass, .aliases = {"#findclass"}},
+		FindCommand{.command = "currency", .usage = "currency [Search Criteria]", .function = FindCurrency, .aliases = {"#findcurrency"}},
+		FindCommand{.command = "deity", .usage = "deity [Search Criteria]", .function = FindDeity, .aliases = {"#finddeity"}},
+		FindCommand{.command = "faction", .usage = "faction [Search Criteria]", .function = FindFaction, .aliases = {"#findfaction"}},
+		FindCommand{.command = "item", .usage = "item [Search Criteria]", .function = FindItem, .aliases = {"#fi", "#finditem"}},
+		FindCommand{.command = "language", .usage = "language [Search Criteria]", .function = FindLanguage, .aliases = {"#findlanguage"}},
+		FindCommand{.command = "npctype", .usage = "npctype [Search Criteria]", .function = FindNPCType, .aliases = {"#fn", "#findnpc", "#findnpctype"}},
+		FindCommand{.command = "race", .usage = "race [Search Criteria]", .function = FindRace, .aliases = {"#findrace"}},
+		FindCommand{.command = "recipe", .usage = "recipe [Search Criteria]", .function = FindRecipe, .aliases = {"#findrecipe"}},
+		FindCommand{.command = "skill", .usage = "skill [Search Criteria]", .function = FindSkill, .aliases = {"#findskill"}},
+		FindCommand{.command = "spell", .usage = "spell [Search Criteria]", .function = FindSpell, .aliases = {"#fs", "#findspell"}},
+		FindCommand{.command = "task", .usage = "task [Search Criteria]", .function = FindTask, .aliases = {"#findtask"}},
+		FindCommand{.command = "zone", .usage = "zone [Search Criteria]", .function = FindZone, .aliases = {"#fz", "#findzone"}},
 	};
 
 	// Check for arguments
