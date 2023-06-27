@@ -13,10 +13,12 @@ void FindNPCType(Client *c, const Seperator *sep)
 		);
 	} else {
 		query += fmt::format(
-			"`name` LIKE '%{}%'",
+			"`name` LIKE '%%{}%%'",
 			Strings::Escape(search_criteria)
 		);
 	}
+
+	query += " ORDER BY `id` ASC LIMIT 50";
 
 	auto results = content_db.QueryDatabase(query);
 	if (!results.Success() || !results.RowCount()) {

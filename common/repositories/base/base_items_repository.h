@@ -16,6 +16,7 @@
 #include "../../strings.h"
 #include <ctime>
 
+
 class BaseItemsRepository {
 public:
 	struct Items {
@@ -122,7 +123,7 @@ public:
 		int32_t     pr;
 		int32_t     procrate;
 		int32_t     races;
-		int32_t     range;
+		int32_t     range_;
 		int32_t     reclevel;
 		int32_t     recskill;
 		int32_t     reqlevel;
@@ -417,7 +418,7 @@ public:
 			"pr",
 			"procrate",
 			"races",
-			"range",
+			"`range`",
 			"reclevel",
 			"recskill",
 			"reqlevel",
@@ -708,7 +709,7 @@ public:
 			"pr",
 			"procrate",
 			"races",
-			"range",
+			"`range`",
 			"reclevel",
 			"recskill",
 			"reqlevel",
@@ -1033,7 +1034,7 @@ public:
 		e.pr                  = 0;
 		e.procrate            = 0;
 		e.races               = 0;
-		e.range               = 0;
+		e.range_              = 0;
 		e.reclevel            = 0;
 		e.recskill            = 0;
 		e.reqlevel            = 0;
@@ -1240,8 +1241,9 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				items_id
 			)
 		);
@@ -1353,7 +1355,7 @@ public:
 			e.pr                  = static_cast<int32_t>(atoi(row[100]));
 			e.procrate            = static_cast<int32_t>(atoi(row[101]));
 			e.races               = static_cast<int32_t>(atoi(row[102]));
-			e.range               = static_cast<int32_t>(atoi(row[103]));
+			e.range_              = static_cast<int32_t>(atoi(row[103]));
 			e.reclevel            = static_cast<int32_t>(atoi(row[104]));
 			e.recskill            = static_cast<int32_t>(atoi(row[105]));
 			e.reqlevel            = static_cast<int32_t>(atoi(row[106]));
@@ -1671,7 +1673,7 @@ public:
 		v.push_back(columns[100] + " = " + std::to_string(e.pr));
 		v.push_back(columns[101] + " = " + std::to_string(e.procrate));
 		v.push_back(columns[102] + " = " + std::to_string(e.races));
-		v.push_back(columns[103] + " = " + std::to_string(e.range));
+		v.push_back(columns[103] + " = " + std::to_string(e.range_));
 		v.push_back(columns[104] + " = " + std::to_string(e.reclevel));
 		v.push_back(columns[105] + " = " + std::to_string(e.recskill));
 		v.push_back(columns[106] + " = " + std::to_string(e.reqlevel));
@@ -1977,7 +1979,7 @@ public:
 		v.push_back(std::to_string(e.pr));
 		v.push_back(std::to_string(e.procrate));
 		v.push_back(std::to_string(e.races));
-		v.push_back(std::to_string(e.range));
+		v.push_back(std::to_string(e.range_));
 		v.push_back(std::to_string(e.reclevel));
 		v.push_back(std::to_string(e.recskill));
 		v.push_back(std::to_string(e.reqlevel));
@@ -2291,7 +2293,7 @@ public:
 			v.push_back(std::to_string(e.pr));
 			v.push_back(std::to_string(e.procrate));
 			v.push_back(std::to_string(e.races));
-			v.push_back(std::to_string(e.range));
+			v.push_back(std::to_string(e.range_));
 			v.push_back(std::to_string(e.reclevel));
 			v.push_back(std::to_string(e.recskill));
 			v.push_back(std::to_string(e.reqlevel));
@@ -2609,7 +2611,7 @@ public:
 			e.pr                  = static_cast<int32_t>(atoi(row[100]));
 			e.procrate            = static_cast<int32_t>(atoi(row[101]));
 			e.races               = static_cast<int32_t>(atoi(row[102]));
-			e.range               = static_cast<int32_t>(atoi(row[103]));
+			e.range_              = static_cast<int32_t>(atoi(row[103]));
 			e.reclevel            = static_cast<int32_t>(atoi(row[104]));
 			e.recskill            = static_cast<int32_t>(atoi(row[105]));
 			e.reqlevel            = static_cast<int32_t>(atoi(row[106]));
@@ -2918,7 +2920,7 @@ public:
 			e.pr                  = static_cast<int32_t>(atoi(row[100]));
 			e.procrate            = static_cast<int32_t>(atoi(row[101]));
 			e.races               = static_cast<int32_t>(atoi(row[102]));
-			e.range               = static_cast<int32_t>(atoi(row[103]));
+			e.range_              = static_cast<int32_t>(atoi(row[103]));
 			e.reclevel            = static_cast<int32_t>(atoi(row[104]));
 			e.recskill            = static_cast<int32_t>(atoi(row[105]));
 			e.reqlevel            = static_cast<int32_t>(atoi(row[106]));

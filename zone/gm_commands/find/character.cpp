@@ -36,7 +36,7 @@ void FindCharacter(Client *c, const Seperator *sep)
 	const auto& l = CharacterDataRepository::GetWhere(
 		content_db,
 		fmt::format(
-			"LOWER(`name`) LIKE '%{}%'",
+			"LOWER(`name`) LIKE '%%{}%%' ORDER BY `id` ASC LIMIT 50",
 			search_criteria
 		)
 	);

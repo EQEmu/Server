@@ -58,7 +58,7 @@ void FindRecipe(Client *c, const Seperator *sep)
 	const auto& l = TradeskillRecipeRepository::GetWhere(
 		database,
 		fmt::format(
-			"LOWER(`name`) LIKE '%{}%' ORDER BY `id` ASC",
+			"LOWER(`name`) LIKE '%%{}%%' ORDER BY `id` ASC",
 			search_criteria
 		)
 	);

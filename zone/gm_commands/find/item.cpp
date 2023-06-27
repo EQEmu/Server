@@ -32,9 +32,9 @@ void FindItem(Client *c, const Seperator *sep)
 			c->Message(
 				Chat::White,
 				fmt::format(
-					"[{}] [{}]",
-					summon_links,
-					database.CreateItemLink(item_id)
+					"{} | {}",
+					database.CreateItemLink(item_id),
+					summon_links
 				).c_str()
 			);
 
@@ -57,7 +57,7 @@ void FindItem(Client *c, const Seperator *sep)
 	const auto& l = ItemsRepository::GetWhere(
 		content_db,
 		fmt::format(
-			"LOWER(`name`) LIKE '%{}%'",
+			"LOWER(`name`) LIKE '%%{}%%' ORDER BY id ASC LIMIT 50",
 			search_criteria
 		)
 	);
@@ -104,9 +104,9 @@ void FindItem(Client *c, const Seperator *sep)
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"[{}] [{}]",
-				summon_links,
-				database.CreateItemLink(item_id)
+				"{} | {}",
+				database.CreateItemLink(item_id),
+				summon_links
 			).c_str()
 		);
 

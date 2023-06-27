@@ -30,7 +30,7 @@ void FindZone(Client *c, const Seperator *sep)
 		search_type   = "Expansion";
 	} else if (is_short_name_search) {
 		query += fmt::format(
-			"LOWER(`long_name`) LIKE '%{}%' OR LOWER(`short_name`) LIKE '%{}%'",
+			"LOWER(`long_name`) LIKE '%%{}%%' OR LOWER(`short_name`) LIKE '%%{}%%'",
 			Strings::Escape(Strings::ToLower(sep->argplus[2])),
 			Strings::Escape(Strings::ToLower(sep->argplus[2]))
 		);
@@ -38,6 +38,8 @@ void FindZone(Client *c, const Seperator *sep)
 		search_string = sep->argplus[2];
 		search_type   = "Expansion";
 	}
+
+	query += " ORDER BY `zoneidnumber` ASC LIMIT 50";
 
 	auto results = content_db.QueryDatabase(query);
 	if (!results.Success() || !results.RowCount()) {
