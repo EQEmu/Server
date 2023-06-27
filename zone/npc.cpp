@@ -250,7 +250,7 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 		GetClass() == NORRATHS_KEEPERS_MERCHANT ||
 		GetClass() == DARK_REIGN_MERCHANT ||
 		GetClass() == ALT_CURRENCY_MERCHANT
-	)
+	);
 	adventure_template_id = npc_type_data->adventure_template;
 	flymode               = iflymode;
 
