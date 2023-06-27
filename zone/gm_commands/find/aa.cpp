@@ -10,7 +10,7 @@ void FindAA(Client *c, const Seperator *sep)
 				Chat::White,
 				fmt::format(
 					"AA {} | {}",
-					aa_id,
+					Strings::Commify(aa_id),
 					aa_name
 				).c_str()
 			);
@@ -22,7 +22,7 @@ void FindAA(Client *c, const Seperator *sep)
 			Chat::White,
 			fmt::format(
 				"AA ID {} was not found.",
-				aa_id
+				Strings::Commify(aa_id)
 			).c_str()
 		);
 
