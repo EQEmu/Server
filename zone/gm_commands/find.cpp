@@ -1,5 +1,19 @@
 #include "../client.h"
 #include "find/aa.cpp"
+#include "find/character.cpp"
+#include "find/class.cpp"
+#include "find/currency.cpp"
+#include "find/deity.cpp"
+#include "find/faction.cpp"
+#include "find/item.cpp"
+#include "find/language.cpp"
+#include "find/npctype.cpp"
+#include "find/race.cpp"
+#include "find/recipe.cpp"
+#include "find/skill.cpp"
+#include "find/spell.cpp"
+#include "find/task.cpp"
+#include "find/zone.cpp"
 
 void command_find(Client *c, const Seperator *sep)
 {
@@ -11,28 +25,39 @@ void command_find(Client *c, const Seperator *sep)
 
 	std::vector<FindCommand> commands = {
 		FindCommand{.command = "aa", .usage = "aa [Search Criteria]", .function = FindAA},
+		FindCommand{.command = "character", .usage = "character [Search Criteria]", .function = FindCharacter},
+		FindCommand{.command = "class", .usage = "class [Search Criteria]", .function = FindClass},
+		FindCommand{.command = "currency", .usage = "currency [Search Criteria]", .function = FindCurrency},
+		FindCommand{.command = "deity", .usage = "deity [Search Criteria]", .function = FindDeity},
+		FindCommand{.command = "faction", .usage = "faction [Search Criteria]", .function = FindFaction},
+		FindCommand{.command = "item", .usage = "item [Search Criteria]", .function = FindItem},
+		FindCommand{.command = "language", .usage = "language [Search Criteria]", .function = FindLanguage},
+		FindCommand{.command = "npctype", .usage = "npctype [Search Criteria]", .function = FindNPCType},
+		FindCommand{.command = "race", .usage = "race [Search Criteria]", .function = FindRace},
+		FindCommand{.command = "recipe", .usage = "recipe [Search Criteria]", .function = FindRecipe},
+		FindCommand{.command = "skill", .usage = "skill [Search Criteria]", .function = FindSkill},
+		FindCommand{.command = "spell", .usage = "spell [Search Criteria]", .function = FindSpell},
+		FindCommand{.command = "task", .usage = "task [Search Criteria]", .function = FindTask},
+		FindCommand{.command = "zone", .usage = "zone [Search Criteria]", .function = FindZone},
 	};
 
-	// check for arguments
-	auto arguments = sep->argnum;
+	const auto arguments = sep->argnum;
 	if (!arguments) {
-		for (auto &cmd: commands) {
+		for (const auto& cmd: commands) {
 			c->Message(Chat::White, fmt::format("Usage: #find {}", cmd.usage).c_str());
 		}
 		return;
 	}
 
-	// execute the command
-	for (auto &cmd: commands) {
+	for (const auto &cmd : commands) {
 		if (cmd.command == Strings::ToLower(sep->arg[1])) {
 			cmd.function(c, sep);
 			return;
 		}
 	}
 
-	// command not found
 	c->Message(Chat::White, "Command not found. Usage: #find [command]");
-	for (auto &cmd: commands) {
+	for (const auto &cmd : commands) {
 		c->Message(Chat::White, fmt::format("Usage: #find {}", cmd.usage).c_str());
 	}
 }

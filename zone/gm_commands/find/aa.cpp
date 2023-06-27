@@ -3,94 +3,86 @@
 void FindAA(Client *c, const Seperator *sep)
 {
 	if (sep->IsNumber(2)) {
-		int  aa_id   = Strings::ToInt(sep->arg[2]);
-		auto aa_name = zone->GetAAName(aa_id);
+		const auto  aa_id   = Strings::ToInt(sep->arg[2]);
+		const auto& aa_name = zone->GetAAName(aa_id);
 		if (!aa_name.empty()) {
 			c->Message(
 				Chat::White,
 				fmt::format(
-					"AA {}: {}",
+					"AA {} | {}",
 					aa_id,
 					aa_name
 				).c_str()
 			);
+
+			return;
 		}
-		else {
+
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"AA ID {} was not found.",
+				aa_id
+			).c_str()
+		);
+
+		return;
+	}
+
+	const auto& search_criteria = Strings::ToLower(sep->argplus[2]);
+
+	auto found_count = 0;
+
+	std::map<int, std::string> ordered_aas;
+
+	for (const auto &a: zone->aa_abilities) {
+		ordered_aas[a.second.get()->first->id] = a.second.get()->name;
+	}
+
+	for (const auto &a: ordered_aas) {
+		const auto& aa_name = zone->GetAAName(a.first);
+		if (!aa_name.empty()) {
+			const auto& aa_name_lower = Strings::ToLower(aa_name);
+			if (!Strings::Contains(aa_name_lower, search_criteria)) {
+				continue;
+			}
+
 			c->Message(
 				Chat::White,
 				fmt::format(
-					"AA ID {} was not found.",
-					aa_id
+					"AA {} | {}",
+					Strings::Commify(a.first),
+					aa_name
 				).c_str()
 			);
-		}
-	}
-	else {
-		const auto search_criteria = Strings::ToLower(sep->argplus[2]);
-		if (!search_criteria.empty()) {
-			std::map<int, std::string> ordered_aas;
 
-			for (const auto &a: zone->aa_abilities) {
-				ordered_aas[a.second.get()->first->id] = a.second.get()->name;
-			}
-
-			int found_count = 0;
-			for (const auto &a: ordered_aas) {
-				auto aa_name = zone->GetAAName(a.first);
-				if (!aa_name.empty()) {
-					auto aa_name_lower = Strings::ToLower(aa_name);
-					if (aa_name_lower.find(search_criteria) == std::string::npos) {
-						continue;
-					}
-
-					c->Message(
-						Chat::White,
-						fmt::format(
-							"AA {}: {}",
-							a.first,
-							aa_name
-						).c_str()
-					);
-					found_count++;
-
-					if (found_count == 50) {
-						break;
-					}
-				}
-			}
-
-			if (!found_count) {
-				c->Message(
-					Chat::White,
-					fmt::format(
-						"No AAs were found matching '{}'.",
-						search_criteria
-					).c_str()
-				);
-				return;
-			}
+			found_count++;
 
 			if (found_count == 50) {
-				c->Message(
-					Chat::White,
-					fmt::format(
-						"50 AAs were found matching '{}', max reached.",
-						search_criteria
-					).c_str()
-				);
-			}
-			else {
-				auto skill_message = found_count == 1 ? "An AA was" : fmt::format("{} AAs were", found_count);
-
-				c->Message(
-					Chat::White,
-					fmt::format(
-						"{} found matching '{}'.",
-						skill_message,
-						search_criteria
-					).c_str()
-				);
+				break;
 			}
 		}
 	}
+
+	if (found_count == 50) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"50 AAs were found matching '{}', max reached.",
+				sep->argplus[2]
+			).c_str()
+		);
+
+		return;
+	}
+
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"{} AA{} found matching '{}'.",
+			found_count,
+			found_count != 1 ? "s" : "",
+			sep->argplus[2]
+		).c_str()
+	);
 }
