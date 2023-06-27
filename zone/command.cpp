@@ -368,14 +368,26 @@ int command_init(void)
 	};
 
 	std::vector<StaticAlias> static_aliases = {
-		{
-			"find",
-			"fi", "fn", "fs", "fz",
-			"findaa", "findcharacter", "findclass", "findcurrency",
-			"finddeity", "findfaction", "finditem", "findlanguage",
-			"findnpc", "findnpctype", "findrace", "findrecipe",
-			"findskill", "findspell", "findtask", "findzone"
-		}
+		{ "find", "fi" },
+		{ "find", "fn" },
+		{ "find", "fs" },
+		{ "find", "fz" },
+		{ "find", "findaa" },
+		{ "find", "findcharacter" },
+		{ "find", "findclass" },
+		{ "find", "findcurrency" },
+		{ "find", "finddeity" },
+		{ "find", "findfaction" },
+		{ "find", "finditem" },
+		{ "find", "findlanguage" },
+		{ "find", "findnpc" },
+		{ "find", "findnpctype" },
+		{ "find", "findrace" },
+		{ "find", "findrecipe" },
+		{ "find", "findskill" },
+		{ "find", "findspell" },
+		{ "find", "findtask" },
+		{ "find", "findzone" }
 	};
 
 	for (auto& cs : command_settings) {

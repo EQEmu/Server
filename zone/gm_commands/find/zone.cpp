@@ -59,11 +59,11 @@ void FindZone(Client *c, const Seperator *sep)
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"{}[{}] ({}) [{}] (ID {}){}",
+				"{}{} {} ({}) (ID {}){}",
 				(
 					version == 0 ?
 					fmt::format(
-						"[{}]",
+						"{} | ",
 						Saylink::Silent(
 							fmt::format(
 								"#zone {}",
@@ -74,13 +74,16 @@ void FindZone(Client *c, const Seperator *sep)
 					) :
 					""
 				),
-				Saylink::Silent(
-					fmt::format(
-						"#gmzone {} {}",
-						short_name,
-						version
-					),
-					"GM Zone"
+				fmt::format(
+					"{} |",
+					Saylink::Silent(
+						fmt::format(
+							"#gmzone {} {}",
+							short_name,
+							version
+						),
+						"GM Zone"
+					)
 				),
 				long_name,
 				short_name,
