@@ -91,7 +91,7 @@ void FindZone(Client *c, const Seperator *sep)
 				(
 					version != 0 ?
 					fmt::format(
-						" Version ({})",
+						" (Version {})",
 						version
 					) :
 					""
