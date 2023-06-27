@@ -21,6 +21,7 @@ void command_find(Client *c, const Seperator *sep)
 		std::string command{};
 		std::string usage{};
 		void (*function)(Client *c, const Seperator *sep) = nullptr;
+		std::vector<std::string> aliases{};
 	};
 
 	std::vector<FindCommand> commands = {
@@ -30,7 +31,7 @@ void command_find(Client *c, const Seperator *sep)
 		FindCommand{.command = "currency", .usage = "currency [Search Criteria]", .function = FindCurrency},
 		FindCommand{.command = "deity", .usage = "deity [Search Criteria]", .function = FindDeity},
 		FindCommand{.command = "faction", .usage = "faction [Search Criteria]", .function = FindFaction},
-		FindCommand{.command = "item", .usage = "item [Search Criteria]", .function = FindItem},
+		FindCommand{.command = "item", .usage = "item [Search Criteria]", .function = FindItem, .aliases = {"#fi"}},
 		FindCommand{.command = "language", .usage = "language [Search Criteria]", .function = FindLanguage},
 		FindCommand{.command = "npctype", .usage = "npctype [Search Criteria]", .function = FindNPCType},
 		FindCommand{.command = "race", .usage = "race [Search Criteria]", .function = FindRace},
@@ -41,23 +42,47 @@ void command_find(Client *c, const Seperator *sep)
 		FindCommand{.command = "zone", .usage = "zone [Search Criteria]", .function = FindZone},
 	};
 
+	// Check for arguments
 	const auto arguments = sep->argnum;
 	if (!arguments) {
-		for (const auto& cmd: commands) {
+		for (const auto &cmd: commands) {
 			c->Message(Chat::White, fmt::format("Usage: #find {}", cmd.usage).c_str());
 		}
 		return;
 	}
 
-	for (const auto &cmd : commands) {
+	// look for alias or command
+	for (const auto &cmd: commands) {
+		// Check for alias first
+		for (const auto &alias: cmd.aliases) {
+			if (!alias.empty() && alias == Strings::ToLower(sep->arg[0])) {
+				// build string from sep args
+				std::vector<std::string> args = {};
+
+				// skip the first arg
+				for (auto i = 1; i <= arguments; i++) {
+					args.emplace_back(sep->arg[i]);
+				}
+
+				// build the rewrite string
+				std::string rewrite = fmt::format("#find {} {}", cmd.command, Strings::Join(args, " "));
+
+				// rewrite to #find <sub-command <args>
+				c->SendGMCommand(rewrite);
+				return;
+			}
+		}
+
+		// Check for command
 		if (cmd.command == Strings::ToLower(sep->arg[1])) {
 			cmd.function(c, sep);
 			return;
 		}
 	}
 
+	// Command not found
 	c->Message(Chat::White, "Command not found. Usage: #find [command]");
-	for (const auto &cmd : commands) {
+	for (const auto &cmd: commands) {
 		c->Message(Chat::White, fmt::format("Usage: #find {}", cmd.usage).c_str());
 	}
 }

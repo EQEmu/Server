@@ -361,6 +361,24 @@ int command_init(void)
 	std::vector<std::pair<std::string, uint8>> injected_command_settings;
 	std::vector<std::string> orphaned_command_settings;
 
+	// static aliases
+	struct StaticAlias {
+		std::string command;
+		std::string alias;
+	};
+
+	std::vector<StaticAlias> static_aliases = {
+		{"find", "fi"},
+	};
+
+	for (auto& cs : command_settings) {
+		for (const auto& sa : static_aliases) {
+			if (cs.first == sa.command) {
+				cs.second.second.emplace_back(sa.alias);
+			}
+		}
+	}
+
 	for (const auto& cs : command_settings) {
 		auto cl = commandlist.find(cs.first);
 		if (cl == commandlist.end()) {
@@ -372,7 +390,7 @@ int command_init(void)
 		}
 	}
 
-	if (orphaned_command_settings.size()) {
+	if (!orphaned_command_settings.empty()) {
 		if (!database.UpdateOrphanedCommandSettings(orphaned_command_settings)) {
 			LogInfo("Failed to process 'Orphaned Commands' update operation.");
 		}
@@ -382,16 +400,16 @@ int command_init(void)
 	for (const auto& w : working_cl) {
 		auto cs = command_settings.find(w.first);
 		if (cs == command_settings.end()) {
-			injected_command_settings.emplace_back(std::pair<std::string, uint8>(w.first, w.second->admin));
+			injected_command_settings.emplace_back(w.first, w.second->admin);
 			LogInfo(
-				"New Command [{}] found... Adding to `command_settings` table with admin [{}]...",
+				"New Command [{}] found. Adding to `command_settings` table with admin [{}]...",
 				w.first,
 				w.second->admin
 			);
 
 			if (w.second->admin == AccountStatus::Player) {
 				LogCommands(
-					"command_init(): Warning: Command [{}] defaulting to admin level 0!",
+					"Warning: Command [{}] defaulting to admin level 0!",
 					w.first
 				);
 			}
@@ -401,7 +419,7 @@ int command_init(void)
 
 		w.second->admin = cs->second.first;
 		LogCommands(
-			"command_init(): - Command [{}] set to admin level [{}]",
+			"Command [{}] set to admin level [{}]",
 			w.first,
 			cs->second.first
 		);
@@ -435,7 +453,7 @@ int command_init(void)
 		}
 	}
 
-	if (injected_command_settings.size()) {
+	if (!injected_command_settings.empty()) {
 		if (!database.UpdateInjectedCommandSettings(injected_command_settings)) {
 			LogInfo("Failed to process 'Injected Commands' update operation.");
 		}
