@@ -364,36 +364,44 @@ int command_init(void)
 	// static aliases
 	struct StaticAlias {
 		std::string command;
-		std::string alias;
+		std::vector<std::string> aliases;
 	};
 
 	std::vector<StaticAlias> static_aliases = {
-		{ "find", "fi" },
-		{ "find", "fn" },
-		{ "find", "fs" },
-		{ "find", "fz" },
-		{ "find", "findaa" },
-		{ "find", "findcharacter" },
-		{ "find", "findclass" },
-		{ "find", "findcurrency" },
-		{ "find", "finddeity" },
-		{ "find", "findfaction" },
-		{ "find", "finditem" },
-		{ "find", "findlanguage" },
-		{ "find", "findnpc" },
-		{ "find", "findnpctype" },
-		{ "find", "findrace" },
-		{ "find", "findrecipe" },
-		{ "find", "findskill" },
-		{ "find", "findspell" },
-		{ "find", "findtask" },
-		{ "find", "findzone" }
+		{
+			.command = "find",
+			.aliases = {
+				"fi",
+				"fn",
+				"fs",
+				"fz",
+				"findaa",
+				"findcharacter",
+				"findclass",
+				"findcurrency",
+				"finddeity",
+				"findfaction",
+				"finditem",
+				"findlanguage",
+				"findnpc",
+				"findnpctype",
+				"findrace",
+				"findrecipe",
+				"findskill",
+				"findspell",
+				"findtask",
+				"findzone",
+			}
+		},
 	};
 
+	// inject static aliases
 	for (auto& cs : command_settings) {
 		for (const auto& sa : static_aliases) {
 			if (cs.first == sa.command) {
-				cs.second.second.emplace_back(sa.alias);
+				for (const auto& alias : sa.aliases) {
+					cs.second.second.emplace_back(alias);
+				}
 			}
 		}
 	}
