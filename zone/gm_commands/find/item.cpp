@@ -54,15 +54,9 @@ void FindItem(Client *c, const Seperator *sep)
 
 	const auto& search_criteria = Strings::ToLower(sep->argplus[2]);
 
-	const auto& l = ItemsRepository::GetWhere(
-		content_db,
-		fmt::format(
-			"LOWER(`name`) LIKE '%%{}%%' ORDER BY id ASC LIMIT 50",
-			search_criteria
-		)
-	);
+	const auto& l = ItemsRepository::GetItemIDsBySearchCriteria(content_db, search_criteria, 50);
 
-	if (l.empty() || !l[0].id) {
+	if (l.empty()) {
 		c->Message(
 			Chat::White,
 			fmt::format(
@@ -77,12 +71,11 @@ void FindItem(Client *c, const Seperator *sep)
 	auto found_count = 0;
 
 	for (const auto& e : l) {
-		const auto item_id = e.id;
-		const auto *item = database.GetItem(item_id);
+		const auto *item = database.GetItem(e);
 		auto summon_links = Saylink::Silent(
 			fmt::format(
 				"#si {}",
-				item_id
+				e
 			),
 			"X"
 		);
@@ -93,7 +86,7 @@ void FindItem(Client *c, const Seperator *sep)
 				Saylink::Silent(
 					fmt::format(
 						"#si {} {}",
-						item_id,
+						e,
 						item->StackSize
 					),
 					std::to_string(item->StackSize)
@@ -105,7 +98,7 @@ void FindItem(Client *c, const Seperator *sep)
 			Chat::White,
 			fmt::format(
 				"{} | {}",
-				database.CreateItemLink(item_id),
+				database.CreateItemLink(e),
 				summon_links
 			).c_str()
 		);
