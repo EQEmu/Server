@@ -1204,6 +1204,7 @@ public:
 	void				RotateToRunning(float new_heading);
 	void				StopNavigation();
 	float				CalculateDistance(float x, float y, float z);
+	float				CalculateDistance(Mob* mob);
 	float				GetGroundZ(float new_x, float new_y, float z_offset=0.0);
 	void				SendTo(float new_x, float new_y, float new_z);
 	void				SendToFixZ(float new_x, float new_y, float new_z);

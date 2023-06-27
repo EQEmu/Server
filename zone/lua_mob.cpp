@@ -18,6 +18,10 @@
 
 struct SpecialAbilities { };
 
+struct Lua_Mob_List {
+	std::vector<Lua_Mob> entries;
+};
+
 const char *Lua_Mob::GetName() {
 	Lua_Safe_Call_String();
 	return self->GetName();
@@ -1263,6 +1267,11 @@ void Lua_Mob::StopNavigation() {
 float Lua_Mob::CalculateDistance(double x, double y, double z) {
 	Lua_Safe_Call_Real();
 	return self->CalculateDistance(static_cast<float>(x), static_cast<float>(y), static_cast<float>(z));
+}
+
+float Lua_Mob::CalculateDistance(Lua_Mob mob) {
+	Lua_Safe_Call_Real();
+	return self->CalculateDistance(mob);
 }
 
 void Lua_Mob::SendTo(double x, double y, double z) {
@@ -3050,6 +3059,38 @@ bool Lua_Mob::HasSpellEffect(int effect_id) {
 	return self->HasSpellEffect(effect_id);
 }
 
+Lua_Mob_List Lua_Mob::GetCloseMobList() {
+	Lua_Safe_Call_Class(Lua_Mob_List);
+
+	Lua_Mob_List ret;
+
+	const auto& l = entity_list.GetCloseMobList(self);
+
+	for (const auto& e : l) {
+		if (e.second != self) {
+			ret.entries.emplace_back(Lua_Mob(e.second));
+		}
+	}
+
+	return ret;
+}
+
+Lua_Mob_List Lua_Mob::GetCloseMobList(float distance) {
+	Lua_Safe_Call_Class(Lua_Mob_List);
+
+	Lua_Mob_List ret;
+
+	const auto& l = entity_list.GetCloseMobList(self);
+
+	for (const auto& e : l) {
+		if (e.second != self && self->CalculateDistance(e.second) <= distance) {
+			ret.entries.emplace_back(Lua_Mob(e.second));
+		}
+	}
+
+	return ret;
+}
+
 luabind::scope lua_register_mob() {
 	return luabind::class_<Lua_Mob, Lua_Entity>("Mob")
 	.def(luabind::constructor<>())
@@ -3083,6 +3124,7 @@ luabind::scope lua_register_mob() {
 	.def("BuffFadeBySlot", (void(Lua_Mob::*)(int,bool))&Lua_Mob::BuffFadeBySlot)
 	.def("BuffFadeBySpellID", (void(Lua_Mob::*)(int))&Lua_Mob::BuffFadeBySpellID)
 	.def("CalculateDistance", (float(Lua_Mob::*)(double,double,double))&Lua_Mob::CalculateDistance)
+	.def("CalculateDistance", (float(Lua_Mob::*)(Lua_Mob))&Lua_Mob::CalculateDistance)
 	.def("CalculateHeadingToTarget", (double(Lua_Mob::*)(double,double))&Lua_Mob::CalculateHeadingToTarget)
 	.def("CameraEffect", (void(Lua_Mob::*)(uint32,float))&Lua_Mob::CameraEffect)
 	.def("CameraEffect", (void(Lua_Mob::*)(uint32,float,Lua_Client))&Lua_Mob::CameraEffect)
@@ -3258,6 +3300,8 @@ luabind::scope lua_register_mob() {
 	.def("GetClass", &Lua_Mob::GetClass)
 	.def("GetClassName", &Lua_Mob::GetClassName)
 	.def("GetCleanName", &Lua_Mob::GetCleanName)
+	.def("GetCloseMobList", (Lua_Mob_List(Lua_Mob::*)(void))&Lua_Mob::GetCloseMobList)
+	.def("GetCloseMobList", (Lua_Mob_List(Lua_Mob::*)(float))&Lua_Mob::GetCloseMobList)
 	.def("GetCorruption", &Lua_Mob::GetCorruption)
 	.def("GetDEX", &Lua_Mob::GetDEX)
 	.def("GetDR", &Lua_Mob::GetDR)

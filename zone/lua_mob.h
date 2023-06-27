@@ -12,6 +12,7 @@ class Lua_StatBonuses;
 class Lua_Bot;
 class Lua_NPC;
 class Lua_Client;
+struct Lua_Mob_List;
 
 namespace luabind {
 	struct scope;
@@ -287,6 +288,7 @@ public:
 	void NavigateTo(double x, double y, double z);
 	void StopNavigation();
 	float CalculateDistance(double x, double y, double z);
+	float CalculateDistance(Lua_Mob mob);
 	void SendTo(double x, double y, double z);
 	void SendToFixZ(double x, double y, double z);
 	void NPCSpecialAttacks(const char *parse, int perm);
@@ -549,6 +551,8 @@ public:
 	void StopTimer(const char* timer_name);
 	luabind::object GetBuffSpellIDs(lua_State* L);
 	bool HasSpellEffect(int effect_id);
+	Lua_Mob_List GetCloseMobList();
+	Lua_Mob_List GetCloseMobList(float distance);
 };
 
 #endif
