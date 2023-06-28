@@ -1,3 +1,53 @@
+## [22.16.0] - 06/27/2023
+
+### Code
+
+* Default skill type to Hand to Hand in #npcedit meleetype ([#3422](https://github.com/EQEmu/Server/pull/3422)) @Kinglykrab 2023-06-19
+* Delete common/worldconn.cpp ([#3436](https://github.com/EQEmu/Server/pull/3436)) @Kinglykrab 2023-06-24
+* Remove DatabaseCastAccepted() from zone/npc.cpp and zone/npc.h ([#3449](https://github.com/EQEmu/Server/pull/3449)) @Kinglykrab 2023-06-24
+* Remove GetACAvoid() from zone/merc.h ([#3447](https://github.com/EQEmu/Server/pull/3447)) @Kinglykrab 2023-06-25
+* Remove GetACMit() from zone/merc.h ([#3446](https://github.com/EQEmu/Server/pull/3446)) @Kinglykrab 2023-06-24
+* Remove _ClearWaypints() from zone/npc.h ([#3445](https://github.com/EQEmu/Server/pull/3445)) @Kinglykrab 2023-06-24
+* Remove acmod() from zone/merc.h ([#3448](https://github.com/EQEmu/Server/pull/3448)) @Kinglykrab 2023-06-24
+* Remove command_packetprofile from zone/command.h ([#3432](https://github.com/EQEmu/Server/pull/3432)) @Kinglykrab 2023-06-24
+* Remove command_showpetspell in zone/command.h ([#3430](https://github.com/EQEmu/Server/pull/3430)) @Kinglykrab 2023-06-24
+* Remove command_unlock from zone/command.h ([#3431](https://github.com/EQEmu/Server/pull/3431)) @Kinglykrab 2023-06-24
+
+### Commands
+
+* Add #finddeity Command ([#3435](https://github.com/EQEmu/Server/pull/3435)) @Kinglykrab 2023-06-26
+* Add #findlanguage Command ([#3434](https://github.com/EQEmu/Server/pull/3434)) @Kinglykrab 2023-06-25
+* Add #showspells Command ([#3429](https://github.com/EQEmu/Server/pull/3429)) @Kinglykrab 2023-06-24
+* Add missing subcommands to #npcedit ([#3423](https://github.com/EQEmu/Server/pull/3423)) @Kinglykrab 2023-06-19
+* Cleanup #showbuffs Command ([#3439](https://github.com/EQEmu/Server/pull/3439)) @Kinglykrab 2023-06-26
+* Cleanup #shownpcgloballoot and #showzonegloballoot Commands ([#3440](https://github.com/EQEmu/Server/pull/3440)) @Kinglykrab 2023-06-24
+* Cleanup #viewcurrencies Command ([#3441](https://github.com/EQEmu/Server/pull/3441)) @Kinglykrab 2023-06-25
+* Consolidate #findX commands to a singular #find Command ([#3452](https://github.com/EQEmu/Server/pull/3452)) @Kinglykrab 2023-06-28
+* Consolidate #merchant_close_shop and #merchant_open_shop to #merchantshop ([#3433](https://github.com/EQEmu/Server/pull/3433)) @Kinglykrab 2023-06-24
+* Delete #showbonusstats Command ([#3437](https://github.com/EQEmu/Server/pull/3437)) @Kinglykrab 2023-06-24
+* Delete #spellinfo Command ([#3438](https://github.com/EQEmu/Server/pull/3438)) @Kinglykrab 2023-06-24
+
+### Database
+
+* Fix database version checking edge case issue ([#3428](https://github.com/EQEmu/Server/pull/3428)) @Akkadius 2023-06-22
+* Fix multi-statement error reporting ([#3425](https://github.com/EQEmu/Server/pull/3425)) @Akkadius 2023-06-19
+* Implement native database migrations in server ([#2857](https://github.com/EQEmu/Server/pull/2857)) @Akkadius 2023-06-19
+
+### Fixes
+
+* Fix NPC Item Stat Bonuses ([#3444](https://github.com/EQEmu/Server/pull/3444)) @Kinglykrab 2023-06-26
+* Fix error in 023_01_21_bots_raid_members.sql ([#3453](https://github.com/EQEmu/Server/pull/3453)) @mibastian 2023-06-28
+* Fix possible crash with #npcedit weapon ([#3421](https://github.com/EQEmu/Server/pull/3421)) @Kinglykrab 2023-06-19
+* Merchant Open Flag set only for regular Merchants ([#3454](https://github.com/EQEmu/Server/pull/3454)) @Kinglykrab 2023-06-27
+
+### Readme
+
+* Update new location of database updates ([#3424](https://github.com/EQEmu/Server/pull/3424)) @joligario 2023-06-19
+
+### Rules
+
+* Add ClientPetsUserOwnerNameInLastName rule ([#3442](https://github.com/EQEmu/Server/pull/3442)) @Kinglykrab 2023-06-25
+
 ## [22.15.3] - 06/19/2023
 
 ### Fixes
