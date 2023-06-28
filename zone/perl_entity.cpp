@@ -617,9 +617,7 @@ perl::array Perl_EntityList_GetCloseMobList(EntityList* self, Mob* mob) {
 	const auto& l = self->GetCloseMobList(mob);
 
 	for (const auto& e : l) {
-		if (e.second != mob) {
-			result.push_back(e.second);
-		}
+		result.push_back(e.second);
 	}
 
 	return result;
@@ -631,7 +629,24 @@ perl::array Perl_EntityList_GetCloseMobList(EntityList* self, Mob* mob, float di
 	const auto& l = self->GetCloseMobList(mob, distance);
 
 	for (const auto& e : l) {
-		if (e.second != mob && mob->CalculateDistance(e.second) <= distance) {
+		if (mob->CalculateDistance(e.second) <= distance) {
+			result.push_back(e.second);
+		}
+	}
+
+	return result;
+}
+
+perl::array Perl_EntityList_GetCloseMobList(EntityList* self, Mob* mob, float distance, bool ignore_self) {
+	perl::array result;
+
+	const auto& l = self->GetCloseMobList(mob, distance);
+
+	for (const auto& e : l) {
+		if (
+			(!ignore_self || e.second != mob) &&
+			mob->CalculateDistance(e.second) <= distance
+		) {
 			result.push_back(e.second);
 		}
 	}
@@ -670,6 +685,7 @@ void perl_register_entitylist()
 	package.add("GetClientList", &Perl_EntityList_GetClientList);
 	package.add("GetCloseMobList", (perl::array(*)(EntityList*, Mob*))&Perl_EntityList_GetCloseMobList);
 	package.add("GetCloseMobList", (perl::array(*)(EntityList*, Mob*, float))&Perl_EntityList_GetCloseMobList);
+	package.add("GetCloseMobList", (perl::array(*)(EntityList*, Mob*, float, bool))&Perl_EntityList_GetCloseMobList);
 	package.add("GetCorpseByID", &Perl_EntityList_GetCorpseByID);
 	package.add("GetCorpseByName", &Perl_EntityList_GetCorpseByName);
 	package.add("GetCorpseByOwner", &Perl_EntityList_GetCorpseByOwner);

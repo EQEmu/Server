@@ -553,6 +553,7 @@ public:
 	bool HasSpellEffect(int effect_id);
 	Lua_Mob_List GetCloseMobList();
 	Lua_Mob_List GetCloseMobList(float distance);
+	Lua_Mob_List GetCloseMobList(float distance, bool ignore_self);
 };
 
 #endif

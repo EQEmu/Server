@@ -3067,9 +3067,7 @@ Lua_Mob_List Lua_Mob::GetCloseMobList() {
 	const auto& l = entity_list.GetCloseMobList(self);
 
 	for (const auto& e : l) {
-		if (e.second != self) {
-			ret.entries.emplace_back(Lua_Mob(e.second));
-		}
+		ret.entries.emplace_back(Lua_Mob(e.second));
 	}
 
 	return ret;
@@ -3083,7 +3081,26 @@ Lua_Mob_List Lua_Mob::GetCloseMobList(float distance) {
 	const auto& l = entity_list.GetCloseMobList(self);
 
 	for (const auto& e : l) {
-		if (e.second != self && self->CalculateDistance(e.second) <= distance) {
+		if (self->CalculateDistance(e.second) <= distance) {
+			ret.entries.emplace_back(Lua_Mob(e.second));
+		}
+	}
+
+	return ret;
+}
+
+Lua_Mob_List Lua_Mob::GetCloseMobList(float distance, bool ignore_self) {
+	Lua_Safe_Call_Class(Lua_Mob_List);
+
+	Lua_Mob_List ret;
+
+	const auto& l = entity_list.GetCloseMobList(self);
+
+	for (const auto& e : l) {
+		if (
+			(!ignore_self || e.second != self) &&
+			self->CalculateDistance(e.second) <= distance
+		) {
 			ret.entries.emplace_back(Lua_Mob(e.second));
 		}
 	}
@@ -3302,6 +3319,7 @@ luabind::scope lua_register_mob() {
 	.def("GetCleanName", &Lua_Mob::GetCleanName)
 	.def("GetCloseMobList", (Lua_Mob_List(Lua_Mob::*)(void))&Lua_Mob::GetCloseMobList)
 	.def("GetCloseMobList", (Lua_Mob_List(Lua_Mob::*)(float))&Lua_Mob::GetCloseMobList)
+	.def("GetCloseMobList", (Lua_Mob_List(Lua_Mob::*)(float,bool))&Lua_Mob::GetCloseMobList)
 	.def("GetCorruption", &Lua_Mob::GetCorruption)
 	.def("GetDEX", &Lua_Mob::GetDEX)
 	.def("GetDR", &Lua_Mob::GetDR)

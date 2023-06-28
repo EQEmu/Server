@@ -3017,9 +3017,7 @@ perl::array Perl_Mob_GetCloseMobList(Mob* self)
 	perl::array result;
 
 	for (const auto& e : l) {
-		if (e.second != self) {
-			result.push_back(e.second);
-		}
+		result.push_back(e.second);
 	}
 
 	return result;
@@ -3032,7 +3030,25 @@ perl::array Perl_Mob_GetCloseMobList(Mob* self, float distance)
 	perl::array result;
 
 	for (const auto& e : l) {
-		if (e.second != self && self->CalculateDistance(e.second) <= distance) {
+		if (self->CalculateDistance(e.second) <= distance) {
+			result.push_back(e.second);
+		}
+	}
+
+	return result;
+}
+
+perl::array Perl_Mob_GetCloseMobList(Mob* self, float distance, bool ignore_self)
+{
+	const auto& l = entity_list.GetCloseMobList(self, distance);
+
+	perl::array result;
+
+	for (const auto& e : l) {
+		if (
+			(!ignore_self || e.second != self) &&
+			self->CalculateDistance(e.second) <= distance
+		) {
 			result.push_back(e.second);
 		}
 	}
@@ -3233,6 +3249,7 @@ void perl_register_mob()
 	package.add("GetCleanName", &Perl_Mob_GetCleanName);
 	package.add("GetCloseMobList", (perl::array(*)(Mob*))&Perl_Mob_GetCloseMobList);
 	package.add("GetCloseMobList", (perl::array(*)(Mob*, float))&Perl_Mob_GetCloseMobList);
+	package.add("GetCloseMobList", (perl::array(*)(Mob*, float, bool))&Perl_Mob_GetCloseMobList);
 	package.add("GetCorruption", &Perl_Mob_GetCorruption);
 	package.add("GetDefaultRaceSize", (float(*)(Mob*))&Perl_Mob_GetDefaultRaceSize);
 	package.add("GetDefaultRaceSize", (float(*)(Mob*, int))&Perl_Mob_GetDefaultRaceSize);

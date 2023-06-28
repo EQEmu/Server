@@ -141,6 +141,7 @@ public:
 	void SignalBotByBotName(std::string bot_name, int signal_id);
 	Lua_Mob_List GetCloseMobList(Lua_Mob mob);
 	Lua_Mob_List GetCloseMobList(Lua_Mob mob, float distance);
+	Lua_Mob_List GetCloseMobList(Lua_Mob mob, float distance, bool ignore_self);
 };
 
 #endif
