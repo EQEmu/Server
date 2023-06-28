@@ -3066,6 +3066,8 @@ Lua_Mob_List Lua_Mob::GetCloseMobList() {
 
 	const auto& l = entity_list.GetCloseMobList(self);
 
+	ret.entries.reserve(l.size());
+
 	for (const auto& e : l) {
 		ret.entries.emplace_back(Lua_Mob(e.second));
 	}
@@ -3079,6 +3081,8 @@ Lua_Mob_List Lua_Mob::GetCloseMobList(float distance) {
 	Lua_Mob_List ret;
 
 	const auto& l = entity_list.GetCloseMobList(self);
+
+	ret.entries.reserve(l.size());
 
 	for (const auto& e : l) {
 		if (self->CalculateDistance(e.second) <= distance) {
@@ -3096,11 +3100,14 @@ Lua_Mob_List Lua_Mob::GetCloseMobList(float distance, bool ignore_self) {
 
 	const auto& l = entity_list.GetCloseMobList(self);
 
+	ret.entries.reserve(l.size());
+
 	for (const auto& e : l) {
-		if (
-			(!ignore_self || e.second != self) &&
-			self->CalculateDistance(e.second) <= distance
-		) {
+		if (ignore_self && e.second == self) {
+			continue;
+		}
+
+		if (self->CalculateDistance(e.second) <= distance) {
 			ret.entries.emplace_back(Lua_Mob(e.second));
 		}
 	}

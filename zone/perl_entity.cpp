@@ -611,10 +611,13 @@ Bot* Perl_EntityList_GetRandomBot(EntityList* self, float x, float y, float z, f
 	return self->GetRandomBot(glm::vec3(x, y, z), distance, exclude_bot);
 }
 
-perl::array Perl_EntityList_GetCloseMobList(EntityList* self, Mob* mob) {
+perl::array Perl_EntityList_GetCloseMobList(EntityList* self, Mob* mob)
+{
 	perl::array result;
 
 	const auto& l = self->GetCloseMobList(mob);
+
+	result.reserve(l.size());
 
 	for (const auto& e : l) {
 		result.push_back(e.second);
@@ -623,10 +626,13 @@ perl::array Perl_EntityList_GetCloseMobList(EntityList* self, Mob* mob) {
 	return result;
 }
 
-perl::array Perl_EntityList_GetCloseMobList(EntityList* self, Mob* mob, float distance) {
+perl::array Perl_EntityList_GetCloseMobList(EntityList* self, Mob* mob, float distance)
+{
 	perl::array result;
 
 	const auto& l = self->GetCloseMobList(mob, distance);
+
+	result.reserve(l.size());
 
 	for (const auto& e : l) {
 		if (mob->CalculateDistance(e.second) <= distance) {
@@ -637,16 +643,20 @@ perl::array Perl_EntityList_GetCloseMobList(EntityList* self, Mob* mob, float di
 	return result;
 }
 
-perl::array Perl_EntityList_GetCloseMobList(EntityList* self, Mob* mob, float distance, bool ignore_self) {
+perl::array Perl_EntityList_GetCloseMobList(EntityList* self, Mob* mob, float distance, bool ignore_self)
+{
 	perl::array result;
 
 	const auto& l = self->GetCloseMobList(mob, distance);
 
+	result.reserve(l.size());
+
 	for (const auto& e : l) {
-		if (
-			(!ignore_self || e.second != mob) &&
-			mob->CalculateDistance(e.second) <= distance
-		) {
+		if (ignore_self && e.second == mob) {
+			continue;
+		}
+
+		if (mob->CalculateDistance(e.second) <= distance) {
 			result.push_back(e.second);
 		}
 	}

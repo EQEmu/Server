@@ -3012,9 +3012,11 @@ bool Perl_Mob_HasSpellEffect(Mob* self, int effect_id)
 
 perl::array Perl_Mob_GetCloseMobList(Mob* self)
 {
+	perl::array result;
+
 	const auto& l = entity_list.GetCloseMobList(self);
 
-	perl::array result;
+	result.reserve(l.size());
 
 	for (const auto& e : l) {
 		result.push_back(e.second);
@@ -3025,9 +3027,11 @@ perl::array Perl_Mob_GetCloseMobList(Mob* self)
 
 perl::array Perl_Mob_GetCloseMobList(Mob* self, float distance)
 {
+	perl::array result;
+
 	const auto& l = entity_list.GetCloseMobList(self, distance);
 
-	perl::array result;
+	result.reserve(l.size());
 
 	for (const auto& e : l) {
 		if (self->CalculateDistance(e.second) <= distance) {
@@ -3040,15 +3044,18 @@ perl::array Perl_Mob_GetCloseMobList(Mob* self, float distance)
 
 perl::array Perl_Mob_GetCloseMobList(Mob* self, float distance, bool ignore_self)
 {
-	const auto& l = entity_list.GetCloseMobList(self, distance);
-
 	perl::array result;
 
+	const auto& l = entity_list.GetCloseMobList(self, distance);
+
+	result.reserve(l.size());
+
 	for (const auto& e : l) {
-		if (
-			(!ignore_self || e.second != self) &&
-			self->CalculateDistance(e.second) <= distance
-		) {
+		if (ignore_self && e.second == self) {
+			continue;
+		}
+
+		if (self->CalculateDistance(e.second) <= distance) {
 			result.push_back(e.second);
 		}
 	}
