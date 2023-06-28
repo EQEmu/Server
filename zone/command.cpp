@@ -137,21 +137,7 @@ int command_init(void)
 		command_add("factionassociation", "[factionid] [amount] - triggers a faction hits via association", AccountStatus::GMLeadAdmin, command_faction_association) ||
 		command_add("feature", "Change your or your target's feature's temporarily", AccountStatus::QuestTroupe, command_feature) ||
 		command_add("size", "Change your targets size (alias of #feature size)", AccountStatus::QuestTroupe, command_feature) ||
-		command_add("findaa", "[Search Criteria] - Search for an AA", AccountStatus::Guide, command_findaa) ||
-		command_add("findaliases", "[Search Criteria]- Searches for available command aliases, by alias or command", AccountStatus::Player, command_findaliases) ||
-		command_add("findcharacter", "[Search Criteria] - Search for a character", AccountStatus::Guide, command_findcharacter) ||
-		command_add("findclass", "[Search Criteria] - Search for a class", AccountStatus::Guide, command_findclass) ||
-		command_add("findcurrency", "[Search Criteria] - Search for an alternate currency", AccountStatus::Guide, command_findcurrency) ||
-		command_add("finddeity", "[Search Criteria] - Search for a deity", AccountStatus::Guide, command_finddeity) ||
-		command_add("findfaction", "[Search Criteria] - Search for a faction", AccountStatus::Guide, command_findfaction) ||
-		command_add("findlanguage", "[Search Criteria] - Search for a language", AccountStatus::Guide, command_findlanguage) ||
-		command_add("findnpctype", "[Search Criteria] - Search database NPC types", AccountStatus::GMAdmin, command_findnpctype) ||
-		command_add("findrace", "[Search Criteria] - Search for a race", AccountStatus::Guide, command_findrace) ||
-		command_add("findrecipe", "[Search Criteria] - Search for a recipe", AccountStatus::Guide, command_findrecipe) ||
-		command_add("findskill", "[Search Criteria] - Search for a skill", AccountStatus::Guide, command_findskill) ||
-		command_add("findspell", "[Search Criteria] - Search for a spell", AccountStatus::Guide, command_findspell) ||
-		command_add("findtask", "[Search Criteria] - Search for a task", AccountStatus::Guide, command_findtask) ||
-		command_add("findzone", "[Search Criteria] - Search database zones", AccountStatus::GMAdmin, command_findzone) ||
+		command_add("find", "Search command used to find various things", AccountStatus::Guide, command_find) ||
 		command_add("fixmob", "[race|gender|texture|helm|face|hair|haircolor|beard|beardcolor|heritage|tattoo|detail] [next|prev] - Manipulate appearance of your target", AccountStatus::QuestTroupe, command_fixmob) ||
 		command_add("flag", "[Status] [Account Name] - Refresh your admin status, or set an account's Admin status if arguments provided", AccountStatus::Player, command_flag) ||
 		command_add("flagedit", "Edit zone flags on your target. Use #flagedit help for more info.", AccountStatus::GMAdmin, command_flagedit) ||
@@ -191,7 +177,6 @@ int command_init(void)
 		command_add("invul", "[On|Off]] - Turn player target's or your invulnerable flag on or off", AccountStatus::QuestTroupe, command_invul) ||
 		command_add("ipban", "[IP] - Ban IP", AccountStatus::GMMgmt, command_ipban) ||
 		command_add("iplookup", "[charname] - Look up IP address of charname", AccountStatus::GMMgmt, command_iplookup) ||
-		command_add("itemsearch", "[Search Criteria] - Search for an item", AccountStatus::Steward, command_itemsearch) ||
 		command_add("kick", "[Character Name] - Disconnect a player by name", AccountStatus::GMLeadAdmin, command_kick) ||
 		command_add("kill", "Kill your target", AccountStatus::GMAdmin, command_kill) ||
 		command_add("killallnpcs", "[npc_name] - Kills all npcs by search name, leave blank for all attackable NPC's", AccountStatus::GMMgmt, command_killallnpcs) ||
@@ -376,6 +361,51 @@ int command_init(void)
 	std::vector<std::pair<std::string, uint8>> injected_command_settings;
 	std::vector<std::string> orphaned_command_settings;
 
+	// static aliases
+	struct StaticAlias {
+		std::string command;
+		std::vector<std::string> aliases;
+	};
+
+	std::vector<StaticAlias> static_aliases = {
+		{
+			.command = "find",
+			.aliases = {
+				"fi",
+				"fn",
+				"fs",
+				"fz",
+				"findaa",
+				"findcharacter",
+				"findclass",
+				"findcurrency",
+				"finddeity",
+				"findfaction",
+				"finditem",
+				"findlanguage",
+				"findnpc",
+				"findnpctype",
+				"findrace",
+				"findrecipe",
+				"findskill",
+				"findspell",
+				"findtask",
+				"findzone",
+			}
+		},
+	};
+
+	// inject static aliases
+	for (auto& cs : command_settings) {
+		for (const auto& sa : static_aliases) {
+			if (cs.first == sa.command) {
+				for (const auto& alias : sa.aliases) {
+					cs.second.second.emplace_back(alias);
+				}
+			}
+		}
+	}
+
 	for (const auto& cs : command_settings) {
 		auto cl = commandlist.find(cs.first);
 		if (cl == commandlist.end()) {
@@ -387,7 +417,7 @@ int command_init(void)
 		}
 	}
 
-	if (orphaned_command_settings.size()) {
+	if (!orphaned_command_settings.empty()) {
 		if (!database.UpdateOrphanedCommandSettings(orphaned_command_settings)) {
 			LogInfo("Failed to process 'Orphaned Commands' update operation.");
 		}
@@ -397,16 +427,16 @@ int command_init(void)
 	for (const auto& w : working_cl) {
 		auto cs = command_settings.find(w.first);
 		if (cs == command_settings.end()) {
-			injected_command_settings.emplace_back(std::pair<std::string, uint8>(w.first, w.second->admin));
+			injected_command_settings.emplace_back(w.first, w.second->admin);
 			LogInfo(
-				"New Command [{}] found... Adding to `command_settings` table with admin [{}]...",
+				"New Command [{}] found. Adding to `command_settings` table with admin [{}]...",
 				w.first,
 				w.second->admin
 			);
 
 			if (w.second->admin == AccountStatus::Player) {
 				LogCommands(
-					"command_init(): Warning: Command [{}] defaulting to admin level 0!",
+					"Warning: Command [{}] defaulting to admin level 0!",
 					w.first
 				);
 			}
@@ -416,7 +446,7 @@ int command_init(void)
 
 		w.second->admin = cs->second.first;
 		LogCommands(
-			"command_init(): - Command [{}] set to admin level [{}]",
+			"Command [{}] set to admin level [{}]",
 			w.first,
 			cs->second.first
 		);
@@ -450,7 +480,7 @@ int command_init(void)
 		}
 	}
 
-	if (injected_command_settings.size()) {
+	if (!injected_command_settings.empty()) {
 		if (!database.UpdateInjectedCommandSettings(injected_command_settings)) {
 			LogInfo("Failed to process 'Injected Commands' update operation.");
 		}
@@ -981,20 +1011,7 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/exptoggle.cpp"
 #include "gm_commands/faction.cpp"
 #include "gm_commands/feature.cpp"
-#include "gm_commands/findaa.cpp"
-#include "gm_commands/findcharacter.cpp"
-#include "gm_commands/findclass.cpp"
-#include "gm_commands/findcurrency.cpp"
-#include "gm_commands/finddeity.cpp"
-#include "gm_commands/findfaction.cpp"
-#include "gm_commands/findlanguage.cpp"
-#include "gm_commands/findnpctype.cpp"
-#include "gm_commands/findrace.cpp"
-#include "gm_commands/findrecipe.cpp"
-#include "gm_commands/findskill.cpp"
-#include "gm_commands/findspell.cpp"
-#include "gm_commands/findtask.cpp"
-#include "gm_commands/findzone.cpp"
+#include "gm_commands/find.cpp"
 #include "gm_commands/fixmob.cpp"
 #include "gm_commands/flag.cpp"
 #include "gm_commands/flagedit.cpp"
@@ -1032,7 +1049,6 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/invul.cpp"
 #include "gm_commands/ipban.cpp"
 #include "gm_commands/iplookup.cpp"
-#include "gm_commands/itemsearch.cpp"
 #include "gm_commands/kick.cpp"
 #include "gm_commands/kill.cpp"
 #include "gm_commands/killallnpcs.cpp"
