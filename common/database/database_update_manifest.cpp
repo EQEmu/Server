@@ -4642,11 +4642,10 @@ ADD COLUMN `avoidance` int(11) unsigned NOT NULL DEFAULT 0 AFTER `heal_scale`;
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
-ALTER TABLE `npc_scale_global_base`
-MODIFY COLUMN `hp` bigint(20) NOT NULL DEFAULT 0 AFTER `ac`,
-MODIFY COLUMN `hp_regen_rate` bigint(20) NOT NULL DEFAULT 0 AFTER `max_dmg`,
-ADD COLUMN `hp_regen_per_second` bigint(20) NOT NULL DEFAULT 0 AFTER `hp_regen_rate`,
-ADD COLUMN `avoidance` int(11) unsigned NOT NULL DEFAULT 0 AFTER `heal_scale`;
+DROP INDEX `PRIMARY` ON `raid_members`;
+CREATE UNIQUE INDEX `UNIQUE` ON `raid_members`(`name`);
+ALTER TABLE `raid_members` ADD COLUMN `bot_id` int(4) NOT NULL DEFAULT 0 AFTER `charid`;
+ALTER TABLE `raid_members` ADD COLUMN `id` BIGINT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT FIRST;
 
 )"
 	},
