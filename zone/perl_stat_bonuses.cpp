@@ -441,7 +441,7 @@ int32 Perl_StatBonuses_GetCriticalHealOverTime(StatBonuses* self)
 	return self->CriticalHealOverTime;
 }
 
-int32 Perl_StatBonuses_GetCriticalDoTChance(StatBonuses* self)
+int32 Perl_StatBonuses_GetCriticalDOTChance(StatBonuses* self)
 {
 	return self->CriticalDoTChance;
 }
@@ -1331,7 +1331,7 @@ void perl_register_stat_bonuses()
 	package.add("GetCRCapModifier", &Perl_StatBonuses_GetCRCapModifier);
 	package.add("GetCripplingBlowChance", &Perl_StatBonuses_GetCripplingBlowChance);
 	package.add("GetCriticalDamageModifier", &Perl_StatBonuses_GetCriticalDamageModifier);
-	package.add("GetCriticalDoTChance", &Perl_StatBonuses_GetCriticalDoTChance);
+	package.add("GetCriticalDOTChance", &Perl_StatBonuses_GetCriticalDOTChance);
 	package.add("GetCriticalDOTDecay", &Perl_StatBonuses_GetCriticalDOTDecay);
 	package.add("GetCriticalHealChance", &Perl_StatBonuses_GetCriticalHealChance);
 	package.add("GetCriticalHealDecay", &Perl_StatBonuses_GetCriticalHealDecay);
