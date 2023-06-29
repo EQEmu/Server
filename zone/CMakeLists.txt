@@ -120,6 +120,7 @@ SET(zone_sources
     perl_questitem.cpp
     perl_raids.cpp
     perl_spell.cpp
+    perl_stat_bonuses.cpp
     perlpacket.cpp
     petitions.cpp
     pets.cpp
