@@ -5512,6 +5512,12 @@ void bot_subcommand_bot_create(Client *c, const Seperator *sep)
 
 	std::string bot_name = sep->arg[1];
 	bot_name = Strings::UcFirst(bot_name);
+
+	if (Strings::Contains(bot_name, "_")) {
+		c->Message(Chat::White, "Bot name cannot contain underscores!");
+		return;
+	}
+	
 	if (arguments < 2 || !sep->IsNumber(2)) {
 		c->Message(Chat::White, "Invalid class!");
 		return;
