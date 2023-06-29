@@ -231,12 +231,12 @@ int32 Perl_StatBonuses_GetHeroicDR(StatBonuses* self)
 	return self->HeroicDR;
 }
 
-int32 Perl_StatBonuses_GetCorrup(StatBonuses* self)
+int32 Perl_StatBonuses_GetCorruption(StatBonuses* self)
 {
 	return self->Corrup;
 }
 
-int32 Perl_StatBonuses_GetCorrupCapModifier(StatBonuses* self)
+int32 Perl_StatBonuses_GetCorruptionCapModifier(StatBonuses* self)
 {
 	return self->CorrupCapMod;
 }
@@ -421,7 +421,7 @@ int32 Perl_StatBonuses_GetSpellCriticalDamageIncrease(StatBonuses* self)
 	return self->SpellCritDmgIncrease;
 }
 
-int32 Perl_StatBonuses_GetSpellCriticalDamageIncreaseNOStack(StatBonuses* self)
+int32 Perl_StatBonuses_GetSpellCriticalDamageIncreaseNoStack(StatBonuses* self)
 {
 	return self->SpellCritDmgIncNoStack;
 }
@@ -576,7 +576,7 @@ int32 Perl_StatBonuses_GetExtraAttackChance(StatBonuses* self)
 	return self->ExtraAttackChance[0];
 }
 
-int32 Perl_StatBonuses_GetDoTShielding(StatBonuses* self)
+int32 Perl_StatBonuses_GetDOTShielding(StatBonuses* self)
 {
 	return self->DoTShielding;
 }
@@ -1325,8 +1325,8 @@ void perl_register_stat_bonuses()
 	package.add("GetClairvoyance", &Perl_StatBonuses_GetClairvoyance);
 	package.add("GetCombatStability", &Perl_StatBonuses_GetCombatStability);
 	package.add("GetConsumeProjectile", &Perl_StatBonuses_GetConsumeProjectile);
-	package.add("GetCorrup", &Perl_StatBonuses_GetCorrup);
-	package.add("GetCorrupCapModifier", &Perl_StatBonuses_GetCorrupCapModifier);
+	package.add("GetCorruption", &Perl_StatBonuses_GetCorruption);
+	package.add("GetCorruptionCapModifier", &Perl_StatBonuses_GetCorruptionCapModifier);
 	package.add("GetCR", &Perl_StatBonuses_GetCR);
 	package.add("GetCRCapModifier", &Perl_StatBonuses_GetCRCapModifier);
 	package.add("GetCripplingBlowChance", &Perl_StatBonuses_GetCripplingBlowChance);
@@ -1355,7 +1355,7 @@ void perl_register_stat_bonuses()
 	package.add("GetDivineSaveChance", &Perl_StatBonuses_GetDivineSaveChance);
 	package.add("GetDodgeChance", &Perl_StatBonuses_GetDodgeChance);
 	package.add("GetDOTCriticalDamageIncrease", &Perl_StatBonuses_GetDOTCriticalDamageIncrease);
-	package.add("GetDoTShielding", &Perl_StatBonuses_GetDoTShielding);
+	package.add("GetDOTShielding", &Perl_StatBonuses_GetDOTShielding);
 	package.add("GetDoubleAttackChance", &Perl_StatBonuses_GetDoubleAttackChance);
 	package.add("GetDoubleRangedAttack", &Perl_StatBonuses_GetDoubleRangedAttack);
 	package.add("GetDoubleRiposte", &Perl_StatBonuses_GetDoubleRiposte);
@@ -1514,7 +1514,7 @@ void perl_register_stat_bonuses()
 	package.add("GetSlayUndead", &Perl_StatBonuses_GetSlayUndead);
 	package.add("GetSongModifierCap", &Perl_StatBonuses_GetSongModifierCap);
 	package.add("GetSongRange", &Perl_StatBonuses_GetSongRange);
-	package.add("GetSpellCriticalDamageIncreaseNOStack", &Perl_StatBonuses_GetSpellCriticalDamageIncreaseNOStack);
+	package.add("GetSpellCriticalDamageIncreaseNoStack", &Perl_StatBonuses_GetSpellCriticalDamageIncreaseNoStack);
 	package.add("GetSpellCriticalDamageIncrease", &Perl_StatBonuses_GetSpellCriticalDamageIncrease);
 	package.add("GetSpellDamageShield", &Perl_StatBonuses_GetSpellDamageShield);
 	package.add("GetSpellDamage", &Perl_StatBonuses_GetSpellDamage);
