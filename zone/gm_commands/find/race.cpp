@@ -13,7 +13,7 @@ void FindRace(Client *c, const Seperator *sep)
 					race_id,
 					race_name,
 					(
-						c->IsPlayerRace(race_id) ?
+						IsPlayerRace(race_id) ?
 						fmt::format(
 							" ({})",
 							Strings::Commify(GetPlayerRaceBit(race_id))
@@ -55,7 +55,7 @@ void FindRace(Client *c, const Seperator *sep)
 				race_id,
 				race_name,
 				(
-					c->IsPlayerRace(race_id) ?
+					IsPlayerRace(race_id) ?
 					fmt::format(
 						" ({})",
 						Strings::Commify(GetPlayerRaceBit(race_id))
