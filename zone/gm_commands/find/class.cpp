@@ -13,7 +13,7 @@ void FindClass(Client *c, const Seperator *sep)
 					class_id,
 					class_name,
 					(
-						c->IsPlayerClass(class_id) ?
+						IsPlayerClass(class_id) ?
 						fmt::format(
 							" ({})",
 							Strings::Commify(GetPlayerClassBit(class_id))
@@ -55,7 +55,7 @@ void FindClass(Client *c, const Seperator *sep)
 				class_id,
 				class_name,
 				(
-					c->IsPlayerClass(class_id) ?
+					IsPlayerClass(class_id) ?
 					fmt::format(
 						" | ({})",
 						Strings::Commify(GetPlayerClassBit(class_id))
