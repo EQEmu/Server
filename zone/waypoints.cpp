@@ -592,7 +592,19 @@ void NPC::NextGuardPosition() {
 }
 
 float Mob::CalculateDistance(float x, float y, float z) {
-	return (float)sqrtf(((m_Position.x - x)*(m_Position.x - x)) + ((m_Position.y - y)*(m_Position.y - y)) + ((m_Position.z - z)*(m_Position.z - z)));
+	return sqrtf(
+		((m_Position.x - x) * (m_Position.x - x)) +
+		((m_Position.y - y) * (m_Position.y - y)) +
+		((m_Position.z - z) * (m_Position.z - z))
+	);
+}
+
+float Mob::CalculateDistance(Mob* mob) {
+	return sqrtf(
+		((m_Position.x - mob->GetX()) * (m_Position.x - mob->GetX())) +
+		((m_Position.y - mob->GetX()) * (m_Position.y - mob->GetY())) +
+		((m_Position.z - mob->GetX()) * (m_Position.z - mob->GetZ()))
+	);
 }
 
 void Mob::WalkTo(float x, float y, float z)

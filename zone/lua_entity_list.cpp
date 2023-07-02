@@ -635,6 +635,62 @@ Lua_Bot Lua_EntityList::GetRandomBot(float x, float y, float z, float distance, 
 	return self->GetRandomBot(glm::vec3(x, y, z), distance, exclude_bot);
 }
 
+Lua_Mob_List Lua_EntityList::GetCloseMobList(Lua_Mob mob) {
+	Lua_Safe_Call_Class(Lua_Mob_List);
+
+	Lua_Mob_List ret;
+
+	const auto& l = self->GetCloseMobList(mob);
+
+	ret.entries.reserve(l.size());
+
+	for (const auto& e : l) {
+		ret.entries.emplace_back(Lua_Mob(e.second));
+	}
+
+	return ret;
+}
+
+Lua_Mob_List Lua_EntityList::GetCloseMobList(Lua_Mob mob, float distance) {
+	Lua_Safe_Call_Class(Lua_Mob_List);
+
+	Lua_Mob_List ret;
+
+	const auto& l = self->GetCloseMobList(mob);
+
+	ret.entries.reserve(l.size());
+
+	for (const auto& e : l) {
+		if (mob.CalculateDistance(e.second) <= distance) {
+			ret.entries.emplace_back(Lua_Mob(e.second));
+		}
+	}
+
+	return ret;
+}
+
+Lua_Mob_List Lua_EntityList::GetCloseMobList(Lua_Mob mob, float distance, bool ignore_self) {
+	Lua_Safe_Call_Class(Lua_Mob_List);
+
+	Lua_Mob_List ret;
+
+	const auto& l = self->GetCloseMobList(mob);
+
+	ret.entries.reserve(l.size());
+
+	for (const auto& e : l) {
+		if (ignore_self && e.second == mob) {
+			continue;
+		}
+
+		if (mob.CalculateDistance(e.second) <= distance) {
+			ret.entries.emplace_back(Lua_Mob(e.second));
+		}
+	}
+
+	return ret;
+}
+
 luabind::scope lua_register_entity_list() {
 	return luabind::class_<Lua_EntityList>("EntityList")
 	.def(luabind::constructor<>())
@@ -665,6 +721,8 @@ luabind::scope lua_register_entity_list() {
 	.def("GetClientByName", (Lua_Client(Lua_EntityList::*)(const char*))&Lua_EntityList::GetClientByName)
 	.def("GetClientByWID", (Lua_Client(Lua_EntityList::*)(uint32))&Lua_EntityList::GetClientByWID)
 	.def("GetClientList", (Lua_Client_List(Lua_EntityList::*)(void))&Lua_EntityList::GetClientList)
+	.def("GetCloseMobList", (Lua_Mob_List(Lua_EntityList::*)(Lua_Mob))&Lua_EntityList::GetCloseMobList)
+	.def("GetCloseMobList", (Lua_Mob_List(Lua_EntityList::*)(Lua_Mob,float))&Lua_EntityList::GetCloseMobList)
 	.def("GetCorpseByID", (Lua_Corpse(Lua_EntityList::*)(int))&Lua_EntityList::GetCorpseByID)
 	.def("GetCorpseByName", (Lua_Corpse(Lua_EntityList::*)(const char*))&Lua_EntityList::GetCorpseByName)
 	.def("GetCorpseByOwner", (Lua_Corpse(Lua_EntityList::*)(Lua_Client))&Lua_EntityList::GetCorpseByOwner)
