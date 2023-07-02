@@ -87,7 +87,6 @@ public:
 	int GetTaskDeliveredCount();
 	int RemoveTaskDeliveredItems();
 	std::string GetName();
-	bool IsAttuned();
 	void ItemSay(const char* text);
 	void ItemSay(const char* text, uint8 language_id);
 
