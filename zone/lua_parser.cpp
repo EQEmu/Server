@@ -272,7 +272,7 @@ LuaParser::LuaParser() {
 	PlayerArgumentDispatch[EVENT_EQUIP_ITEM_CLIENT]          = handle_player_equip_item;
 	PlayerArgumentDispatch[EVENT_UNEQUIP_ITEM_CLIENT]        = handle_player_equip_item;
 	PlayerArgumentDispatch[EVENT_SKILL_UP]                   = handle_player_skill_up;
-	PlayerArgumentDispatch[EVENT_LANGUAGE_SKILL_UP]          = handle_player_skill_up;
+	PlayerArgumentDispatch[EVENT_LANGUAGE_SKILL_UP]          = handle_player_language_skill_up;
 	PlayerArgumentDispatch[EVENT_ALT_CURRENCY_MERCHANT_BUY]  = handle_player_alt_currency_merchant;
 	PlayerArgumentDispatch[EVENT_ALT_CURRENCY_MERCHANT_SELL] = handle_player_alt_currency_merchant;
 	PlayerArgumentDispatch[EVENT_MERCHANT_BUY]               = handle_player_merchant;
