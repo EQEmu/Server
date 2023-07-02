@@ -2249,7 +2249,7 @@ const char* GetGenderName(uint32 gender_id) {
 const std::string GetPlayerRaceAbbreviation(uint16 race_id)
 {
 	if (!IsPlayerRace(race_id)) {
-		return std::string();
+		return std::string("UNK");
 	}
 
 	switch (race_id) {
@@ -2287,7 +2287,7 @@ const std::string GetPlayerRaceAbbreviation(uint16 race_id)
 			return "DRK";
 	}
 
-	return std::string();
+	return std::string("UNK");
 }
 
 bool IsPlayerRace(uint16 race_id) {

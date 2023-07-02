@@ -469,6 +469,8 @@ public:
 	bool IsAutoAttackEnabled();
 	bool IsAutoFireEnabled();
 	uint32 GetEXPForLevel(uint16 check_level);
+	std::string GetClassAbbreviation();
+	std::string GetRaceAbbreviation();
 
 	void ApplySpell(int spell_id);
 	void ApplySpell(int spell_id, int duration);
