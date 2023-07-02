@@ -61,7 +61,9 @@ public:
 	void SetColor(uint32 color);
 	uint32 GetColor();
 	bool IsInstNoDrop();
+	bool IsAttuned();
 	void SetInstNoDrop(bool flag);
+	void SetAttuned(bool flag);
 	std::string GetCustomDataString();
 	void SetCustomData(const std::string &identifier, const std::string &value);
 	void SetCustomData(const std::string &identifier, int value);
