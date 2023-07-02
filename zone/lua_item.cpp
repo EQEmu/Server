@@ -475,34 +475,34 @@ uint32 Lua_Item::GetAugType() {
 	return self->AugType;
 }
 
-int Lua_Item::GetAugSlotType(int i) {
+int Lua_Item::GetAugSlotType(uint8 slot_id) {
 	Lua_Safe_Call_Int();
 
-	if(i >= 5 || i < 0) {
+	if (!EQ::ValueWithin(slot_id, EQ::invaug::SOCKET_BEGIN, EQ::invaug::SOCKET_END)) {
 		return 0;
 	}
 
-	return self->AugSlotType[i];
+	return self->AugSlotType[slot_id];
 }
 
-int Lua_Item::GetAugSlotVisible(int i) {
+int Lua_Item::GetAugSlotVisible(uint8 slot_id) {
 	Lua_Safe_Call_Int();
 
-	if(i >= 5 || i < 0) {
+	if (!EQ::ValueWithin(slot_id, EQ::invaug::SOCKET_BEGIN, EQ::invaug::SOCKET_END)) {
 		return 0;
 	}
 
-	return self->AugSlotVisible[i];
+	return self->AugSlotVisible[slot_id];
 }
 
-int Lua_Item::GetAugSlotUnk2(int i) {
+int Lua_Item::GetAugSlotUnk2(uint8 slot_id) {
 	Lua_Safe_Call_Int();
 
-	if(i >= 5 || i < 0) {
+	if (!EQ::ValueWithin(slot_id, EQ::invaug::SOCKET_BEGIN, EQ::invaug::SOCKET_END)) {
 		return 0;
 	}
 
-	return self->AugSlotUnk2[i];
+	return self->AugSlotUnk2[slot_id];
 }
 
 uint32 Lua_Item::GetLDoNTheme() {

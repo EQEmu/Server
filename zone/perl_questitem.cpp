@@ -83,7 +83,6 @@ int Perl_QuestItem_RemoveTaskDeliveredItems(EQ::ItemInstance* self)
 {
 	return self->RemoveTaskDeliveredItems();
 }
-
 void Perl_QuestItem_AddEXP(EQ::ItemInstance* self, uint32 exp)
 {
 	self->AddExp(exp);
@@ -239,6 +238,14 @@ void Perl_QuestItem_StopTimer(EQ::ItemInstance* self, std::string timer_name)
 	self->StopTimer(timer_name);
 }
 
+EQ::ItemData* Perl_QuestItem_GetItem(EQ::ItemInstance* self) {
+	return const_cast<EQ::ItemData*>(self->GetItem());
+}
+
+EQ::ItemData* Perl_QuestItem_GetUnscaledItem(EQ::ItemInstance* self) {
+	return const_cast<EQ::ItemData*>(self->GetUnscaledItem());
+}
+
 void perl_register_questitem()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -259,7 +266,8 @@ void perl_register_questitem()
 	package.add("GetCustomDataString", &Perl_QuestItem_GetCustomDataString);
 	package.add("GetEXP", &Perl_QuestItem_GetEXP);
 	package.add("GetID", &Perl_QuestItem_GetID);
-	package.add("GetItem", &Perl_QuestItem_GetItem);
+	package.add("GetItem", (EQ::ItemData*(*)(EQ::ItemInstance*))&Perl_QuestItem_GetItem);
+	package.add("GetItem", (EQ::ItemInstance*(*)(EQ::ItemInstance*, uint8))&Perl_QuestItem_GetItem);
 	package.add("GetItemID", &Perl_QuestItem_GetItemID);
 	package.add("GetItemScriptID", &Perl_QuestItem_GetItemScriptID);
 	package.add("GetKillsNeeded", &Perl_QuestItem_GetKillsNeeded);
@@ -268,6 +276,7 @@ void perl_register_questitem()
 	package.add("GetPrice", &Perl_QuestItem_GetPrice);
 	package.add("GetTaskDeliveredCount", &Perl_QuestItem_GetTaskDeliveredCount);
 	package.add("GetTotalItemCount", &Perl_QuestItem_GetTotalItemCount);
+	package.add("GetUnscaledItem", &Perl_QuestItem_GetUnscaledItem);
 	package.add("IsAmmo", &Perl_QuestItem_IsAmmo);
 	package.add("IsAttuned", &Perl_QuestItem_IsAttuned);
 	package.add("IsAugmentable", &Perl_QuestItem_IsAugmentable);

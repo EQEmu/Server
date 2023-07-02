@@ -121,9 +121,9 @@ public:
 	int GetFactionAmt4();
 	const char *GetCharmFile();
 	uint32 GetAugType();
-	int GetAugSlotType(int i);
-	int GetAugSlotVisible(int i);
-	int GetAugSlotUnk2(int i);
+	int GetAugSlotType(uint8 slot_id);
+	int GetAugSlotVisible(uint8 slot_id);
+	int GetAugSlotUnk2(uint8 slot_id);
 	uint32 GetLDoNTheme();
 	uint32 GetLDoNPrice();
 	uint32 GetLDoNSold();
