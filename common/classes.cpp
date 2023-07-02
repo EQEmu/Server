@@ -755,7 +755,7 @@ uint8 ClassArmorType(uint8 class_id)
 const std::string GetPlayerClassAbbreviation(uint8 class_id)
 {
 	if (!EQ::ValueWithin(class_id, WARRIOR, BERSERKER)) {
-		return std::string();
+		return std::string("UNK");
 	}
 
 	switch (class_id) {
@@ -793,7 +793,7 @@ const std::string GetPlayerClassAbbreviation(uint8 class_id)
 			return "BER";
 	}
 
-	return std::string();
+	return std::string("UNK");
 }
 
 bool IsPlayerClass(uint8 class_id) {
