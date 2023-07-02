@@ -39,6 +39,11 @@ bool Perl_QuestItem_IsAttuned(EQ::ItemInstance* self) // @categories Inventory a
 	return self->IsAttuned();
 }
 
+bool Perl_QuestItem_IsInstanceNoDrop(EQ::ItemInstance* self) // @categories Inventory and Items
+{
+	return self->IsAttuned();
+}
+
 int Perl_QuestItem_GetCharges(EQ::ItemInstance* self) // @categories Inventory and Items
 {
 	return self->GetCharges();
@@ -208,9 +213,34 @@ void Perl_QuestItem_SetAttuned(EQ::ItemInstance* self, bool is_attuned)
 	self->SetAttuned(is_attuned);
 }
 
+void Perl_QuestItem_SetInstanceNoDrop(EQ::ItemInstance* self, bool is_attuned)
+{
+	self->SetAttuned(is_attuned);
+}
+
 void Perl_QuestItem_SetColor(EQ::ItemInstance* self, uint32 color)
 {
 	self->SetColor(color);
+}
+
+void Perl_QuestItem_SetCustomData(EQ::ItemInstance* self, std::string identifier, bool value)
+{
+	self->SetCustomData(identifier, value);
+}
+
+void Perl_QuestItem_SetCustomData(EQ::ItemInstance* self, std::string identifier, float value)
+{
+	self->SetCustomData(identifier, value);
+}
+
+void Perl_QuestItem_SetCustomData(EQ::ItemInstance* self, std::string identifier, int value)
+{
+	self->SetCustomData(identifier, value);
+}
+
+void Perl_QuestItem_SetCustomData(EQ::ItemInstance* self, std::string identifier, std::string value)
+{
+	self->SetCustomData(identifier, value);
 }
 
 void Perl_QuestItem_SetEXP(EQ::ItemInstance* self, uint32 exp)
@@ -284,7 +314,7 @@ void perl_register_questitem()
 	package.add("IsEquipable", (bool(*)(EQ::ItemInstance*, int16))&Perl_QuestItem_IsEquipable);
 	package.add("IsEquipable", (bool(*)(EQ::ItemInstance*, uint16, uint16))&Perl_QuestItem_IsEquipable);
 	package.add("IsExpendable", &Perl_QuestItem_IsExpendable);
-	package.add("IsInstanceNoDrop", &Perl_QuestItem_IsAttuned);
+	package.add("IsInstanceNoDrop", &Perl_QuestItem_IsInstanceNoDrop);
 	package.add("IsStackable", &Perl_QuestItem_IsStackable);
 	package.add("IsType", &Perl_QuestItem_IsType);
 	package.add("IsWeapon", &Perl_QuestItem_IsWeapon);
@@ -294,12 +324,12 @@ void perl_register_questitem()
 	package.add("SetAttuned", &Perl_QuestItem_SetAttuned);
 	package.add("SetCharges", &Perl_QuestItem_SetCharges);
 	package.add("SetColor", &Perl_QuestItem_SetColor);
-	package.add("SetCustomData", (void(*)(EQ::ItemInstance*, std::string, bool))&Perl_QuestItem_SetColor);
-	package.add("SetCustomData", (void(*)(EQ::ItemInstance*, std::string, float))&Perl_QuestItem_SetColor);
-	package.add("SetCustomData", (void(*)(EQ::ItemInstance*, std::string, int))&Perl_QuestItem_SetColor);
-	package.add("SetCustomData", (void(*)(EQ::ItemInstance*, std::string, std::string))&Perl_QuestItem_SetColor);
+	package.add("SetCustomData", (void(*)(EQ::ItemInstance*, std::string, bool))&Perl_QuestItem_SetCustomData);
+	package.add("SetCustomData", (void(*)(EQ::ItemInstance*, std::string, float))&Perl_QuestItem_SetCustomData);
+	package.add("SetCustomData", (void(*)(EQ::ItemInstance*, std::string, int))&Perl_QuestItem_SetCustomData);
+	package.add("SetCustomData", (void(*)(EQ::ItemInstance*, std::string, std::string))&Perl_QuestItem_SetCustomData);
 	package.add("SetEXP", &Perl_QuestItem_SetEXP);
-	package.add("SetInstanceNoDrop", &Perl_QuestItem_SetAttuned);
+	package.add("SetInstanceNoDrop", &Perl_QuestItem_SetInstanceNoDrop);
 	package.add("SetPrice", &Perl_QuestItem_SetPrice);
 	package.add("SetScale", &Perl_QuestItem_SetScale);
 	package.add("SetScaling", &Perl_QuestItem_SetScaling);
