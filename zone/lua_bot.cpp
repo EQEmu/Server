@@ -494,6 +494,16 @@ void Lua_Bot::AddItem(const luabind::object& item_table) {
 	}
 }
 
+std::string Lua_Bot::GetClassAbbreviation() {
+	Lua_Safe_Call_String();
+	return GetPlayerClassAbbreviation(self->GetClass());
+}
+
+std::string Lua_Bot::GetRaceAbbreviation() {
+	Lua_Safe_Call_String();
+	return GetPlayerRaceAbbreviation(self->GetBaseRace());
+}
+
 luabind::scope lua_register_bot() {
 	return luabind::class_<Lua_Bot, Lua_Mob>("Bot")
 	.def(luabind::constructor<>())
@@ -541,6 +551,7 @@ luabind::scope lua_register_bot() {
 	.def("GetBotID", (uint32(Lua_Bot::*)(void))&Lua_Bot::GetBotID)
 	.def("GetBotItem", (Lua_ItemInst(Lua_Bot::*)(uint16))&Lua_Bot::GetBotItem)
 	.def("GetBotItemIDBySlot", (uint32(Lua_Bot::*)(uint16))&Lua_Bot::GetBotItemIDBySlot)
+	.def("GetClassAbbreviation", (std::string(Lua_Bot::*)(void))&Lua_Bot::GetClassAbbreviation)
 	.def("GetExpansionBitmask", (int(Lua_Bot::*)(void))&Lua_Bot::GetExpansionBitmask)
 	.def("GetGroup", (Lua_Group(Lua_Bot::*)(void))&Lua_Bot::GetGroup)
 	.def("GetHealAmount", (int(Lua_Bot::*)(void))&Lua_Bot::GetHealAmount)
@@ -548,6 +559,7 @@ luabind::scope lua_register_bot() {
 	.def("GetItemAt", (Lua_ItemInst(Lua_Bot::*)(int16))&Lua_Bot::GetItemAt)
 	.def("GetItemIDAt", (int(Lua_Bot::*)(int16))&Lua_Bot::GetItemIDAt)
 	.def("GetOwner", (Lua_Mob(Lua_Bot::*)(void))&Lua_Bot::GetOwner)
+	.def("GetRaceAbbreviation", (std::string(Lua_Bot::*)(void))&Lua_Bot::GetRaceAbbreviation)
 	.def("GetRawItemAC", (int(Lua_Bot::*)(void))&Lua_Bot::GetRawItemAC)
 	.def("GetSpellDamage", (int(Lua_Bot::*)(void))&Lua_Bot::GetSpellDamage)
 	.def("HasAugmentEquippedByID", (bool(Lua_Bot::*)(uint32))&Lua_Bot::HasAugmentEquippedByID)

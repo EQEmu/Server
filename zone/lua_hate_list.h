@@ -24,7 +24,7 @@ public:
 	void SetDamage(int64 value);
 	int64 GetHate();
 	void SetHate(int64 value);
-	int GetFrenzy();
+	bool GetFrenzy();
 	void SetFrenzy(bool value);
 };
 

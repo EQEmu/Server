@@ -664,6 +664,24 @@ perl::array Perl_EntityList_GetCloseMobList(EntityList* self, Mob* mob, float di
 	return result;
 }
 
+Spawn2* Perl_EntityList_GetSpawnByID(EntityList* self, uint32 spawn_id) {
+	return self->GetSpawnByID(spawn_id);
+}
+
+perl::array Perl_EntityList_GetSpawnList(EntityList* self) {
+	perl::array ret;
+
+	std::list<Spawn2*> l;
+
+	self->GetSpawnList(l);
+
+	for (const auto& e : l) {
+		ret.push_back(e);
+	}
+
+	return ret;
+}
+
 void perl_register_entitylist()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -734,6 +752,8 @@ void perl_register_entitylist()
 	package.add("GetRandomNPC", (NPC*(*)(EntityList*))&Perl_EntityList_GetRandomNPC);
 	package.add("GetRandomNPC", (NPC*(*)(EntityList*, float, float, float, float))&Perl_EntityList_GetRandomNPC);
 	package.add("GetRandomNPC", (NPC*(*)(EntityList*, float, float, float, float, NPC*))&Perl_EntityList_GetRandomNPC);
+	package.add("GetSpawnByID", (Spawn2*(*)(EntityList*, uint32))&Perl_EntityList_GetSpawnByID);
+	package.add("GetSpawnList", (perl::array(*)(EntityList*))&Perl_EntityList_GetSpawnList);
 	package.add("HalveAggro", &Perl_EntityList_HalveAggro);
 	package.add("IsMobSpawnedByNpcTypeID", &Perl_EntityList_IsMobSpawnedByNpcTypeID);
 	package.add("MakeNameUnique", &Perl_EntityList_MakeNameUnique);

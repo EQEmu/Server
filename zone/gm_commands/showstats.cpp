@@ -2,11 +2,11 @@
 
 void command_showstats(Client *c, const Seperator *sep)
 {
-	if (c->GetTarget() != 0) {
-		c->GetTarget()->ShowStats(c);
+	Mob* t = c;
+	if (c->GetTarget()) {
+		t = c->GetTarget();
 	}
-	else {
-		c->ShowStats(c);
-	}
+
+	t->ShowStats(c);
 }
 

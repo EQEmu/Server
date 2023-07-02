@@ -243,7 +243,14 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 	SetMana(GetMaxMana());
 
 	MerchantType          = npc_type_data->merchanttype;
-	merchant_open         = GetClass() == MERCHANT;
+	merchant_open         = (
+		GetClass() == MERCHANT ||
+		GetClass() == DISCORD_MERCHANT ||
+		GetClass() == ADVENTURE_MERCHANT ||
+		GetClass() == NORRATHS_KEEPERS_MERCHANT ||
+		GetClass() == DARK_REIGN_MERCHANT ||
+		GetClass() == ALT_CURRENCY_MERCHANT
+	);
 	adventure_template_id = npc_type_data->adventure_template;
 	flymode               = iflymode;
 

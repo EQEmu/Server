@@ -2,16 +2,19 @@
 
 void command_mystats(Client *c, const Seperator *sep)
 {
-	if (c->GetTarget() && c->GetPet()) {
-		if (c->GetTarget()->IsPet() && c->GetTarget() == c->GetPet()) {
-			c->GetTarget()->ShowStats(c);
-		}
-		else {
-			c->ShowStats(c);
-		}
+	Mob* t = c;
+	if (c->GetTarget()) {
+		t = c->GetTarget();
 	}
-	else {
-		c->ShowStats(c);
+
+	if (
+		(t->IsPet() && t == c->GetPet()) ||
+		(t->IsBot() && t->CastToBot()->GetOwner() && t->CastToBot()->GetOwner() == c)
+	) {
+		t->ShowStats(c);
+		return;
 	}
+
+	c->ShowStats(c);
 }
 

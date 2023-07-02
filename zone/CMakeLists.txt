@@ -119,7 +119,9 @@ SET(zone_sources
     perl_player_corpse.cpp
     perl_questitem.cpp
     perl_raids.cpp
+    perl_spawn.cpp
     perl_spell.cpp
+    perl_stat_bonuses.cpp
     perlpacket.cpp
     petitions.cpp
     pets.cpp
