@@ -46,6 +46,7 @@ void perl_register_group();
 void perl_register_raid();
 void perl_register_inventory();
 void perl_register_questitem();
+void perl_register_spawn();
 void perl_register_spell();
 void perl_register_hateentry();
 void perl_register_object();
@@ -1068,6 +1069,7 @@ void PerlembParser::MapFunctions()
 	perl_register_raid();
 	perl_register_inventory();
 	perl_register_questitem();
+	perl_register_spawn();
 	perl_register_spell();
 	perl_register_hateentry();
 	perl_register_object();
