@@ -176,7 +176,17 @@ bool Lua_ItemInst::IsInstNoDrop() {
 	return self->IsAttuned();
 }
 
+bool Lua_ItemInst::IsAttuned() {
+	Lua_Safe_Call_Bool();
+	return self->IsAttuned();
+}
+
 void Lua_ItemInst::SetInstNoDrop(bool flag) {
+	Lua_Safe_Call_Void();
+	return self->SetAttuned(flag);
+}
+
+void Lua_ItemInst::SetAttuned(bool flag) {
 	Lua_Safe_Call_Void();
 	return self->SetAttuned(flag);
 }
@@ -342,7 +352,7 @@ luabind::scope lua_register_iteminst() {
 	.def("GetTotalItemCount", (uint8(Lua_ItemInst::*)(void))&Lua_ItemInst::GetTotalItemCount)
 	.def("GetUnscaledItem", (Lua_ItemInst(Lua_ItemInst::*)(int))&Lua_ItemInst::GetUnscaledItem)
 	.def("IsAmmo", (bool(Lua_ItemInst::*)(void))&Lua_ItemInst::IsAmmo)
-	.def("IsAttuned", (bool(Lua_ItemInst::*)(void))&Lua_ItemInst::IsInstNoDrop)
+	.def("IsAttuned", (bool(Lua_ItemInst::*)(void))&Lua_ItemInst::IsAttuned)
 	.def("IsAugmentable", (bool(Lua_ItemInst::*)(void))&Lua_ItemInst::IsAugmentable)
 	.def("IsAugmented", (bool(Lua_ItemInst::*)(void))&Lua_ItemInst::IsAugmented)
 	.def("IsEquipable", (bool(Lua_ItemInst::*)(int16))&Lua_ItemInst::IsEquipable)
@@ -355,7 +365,7 @@ luabind::scope lua_register_iteminst() {
 	.def("ItemSay", (void(Lua_ItemInst::*)(const char*))&Lua_ItemInst::ItemSay)
 	.def("ItemSay", (void(Lua_ItemInst::*)(const char*, uint8))&Lua_ItemInst::ItemSay)
 	.def("RemoveTaskDeliveredItems", &Lua_ItemInst::RemoveTaskDeliveredItems)
-	.def("SetAttuned", (void(Lua_ItemInst::*)(bool))&Lua_ItemInst::SetInstNoDrop)
+	.def("SetAttuned", (void(Lua_ItemInst::*)(bool))&Lua_ItemInst::SetAttuned)
 	.def("SetCharges", (void(Lua_ItemInst::*)(int))&Lua_ItemInst::SetCharges)
 	.def("SetColor", (void(Lua_ItemInst::*)(uint32))&Lua_ItemInst::SetColor)
 	.def("SetCustomData", (void(Lua_ItemInst::*)(const std::string&,bool))&Lua_ItemInst::SetCustomData)
