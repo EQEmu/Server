@@ -638,6 +638,8 @@ void Client::CompleteConnect()
 				raid->SendRaidLockTo(this);
 
 			raid->SendHPManaEndPacketsTo(this);
+			raid->SendAssistTarget(this);
+			raid->SendMarkTargets(this);
 		}
 	}
 	else {
@@ -11974,6 +11976,8 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 							if (raid->IsLocked()) {
 								raid->SendRaidLockTo(c);
 							}
+							raid->SendAssistTarget(c);
+							raid->SendMarkTargets(c);
 						}
 					}
 					group->JoinRaidXTarget(raid);
@@ -11988,6 +11992,8 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 					if (raid->IsLocked()) {
 						raid->SendRaidLockTo(this);
 					}
+					raid->SendAssistTarget(this);
+					raid->SendMarkTargets(this);
 				}
 			}
 			else
@@ -12028,6 +12034,8 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 									if (raid->IsLocked()) {
 										raid->SendRaidLockTo(c);
 									}
+									raid->SendAssistTarget(c);
+									raid->SendMarkTargets(c);
 								}
 								else {
 									Client* c = nullptr;
@@ -12044,6 +12052,8 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 									if (raid->IsLocked()) {
 										raid->SendRaidLockTo(c);
 									}
+									raid->SendAssistTarget(c);
+									raid->SendMarkTargets(c);
 								}
 							}
 						}
@@ -12083,6 +12093,8 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 								if (raid->IsLocked()) {
 									raid->SendRaidLockTo(c);
 								}
+								raid->SendAssistTarget(c);
+								raid->SendMarkTargets(c);
 							}
 							else
 							{
@@ -12100,6 +12112,8 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 								if (raid->IsLocked()) {
 									raid->SendRaidLockTo(c);
 								}
+								raid->SendAssistTarget(c);
+								raid->SendMarkTargets(c);
 							}
 						}
 					}
@@ -12140,6 +12154,8 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 									if (raid->IsLocked()) {
 										raid->SendRaidLockTo(c);
 									}
+									raid->SendAssistTarget(c);
+									raid->SendMarkTargets(c);
 								}
 								else
 								{
@@ -12156,6 +12172,8 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 									if (raid->IsLocked()) {
 										raid->SendRaidLockTo(c);
 									}
+									raid->SendAssistTarget(c);
+									raid->SendMarkTargets(c);
 								}
 							}
 						}
@@ -12169,6 +12187,8 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 						if (raid->IsLocked()) {
 							raid->SendRaidLockTo(this);
 						}
+						raid->SendAssistTarget(this);
+						raid->SendMarkTargets(this);
 					}
 					else { // neither has a group
 						raid = new Raid(player_sending_invite);
@@ -12183,6 +12203,8 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 						if (raid->IsLocked()) {
 							raid->SendRaidLockTo(this);
 						}
+						raid->SendAssistTarget(this);
+						raid->SendMarkTargets(this);
 					}
 				}
 			}
@@ -12529,8 +12551,9 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 	{
 
 		Raid* raid = entity_list.GetRaidByClient(this);
-		if (!raid)
+		if (!raid) {
 			break;
+		}
 
 		raid->SaveRaidNote(raid_command_packet->leader_name, raid_command_packet->note);
 		raid->SendRaidNotesToWorld();
@@ -15854,118 +15877,87 @@ void Client::Handle_OP_XTargetRequest(const EQApplicationPacket *app)
 	}
 
 	case RaidAssist1:
-	{
-		Client* c = entity_list.GetClientByName(this->GetName());
-		if (c) {
-			Raid* r = entity_list.GetRaidByClient(c);
-			if (r) {
-				Client* ma1 = entity_list.GetClientByName(r->MainAssisterPCs[0]);
-				if (ma1)
-					c->UpdateXTargetType(RaidAssist1, ma1, ma1->GetName());
-			}
-		}
-		break;
-	}
 	case RaidAssist2:
-	{
-		Client* c = entity_list.GetClientByName(this->GetName());
-		if (c) {
-			Raid* r = entity_list.GetRaidByClient(c);
-			if (r) {
-				Client* ma2 = entity_list.GetClientByName(r->MainAssisterPCs[1]);
-				if (ma2)
-					c->UpdateXTargetType(RaidAssist2, ma2, ma2->GetName());
-			}
-		}
-		break;
-	}
 	case RaidAssist3:
 	{
-		Client* c = entity_list.GetClientByName(this->GetName());
-		if (c) {
-			Raid* r = entity_list.GetRaidByClient(c);
-			if (r) {
-				Client* ma3 = entity_list.GetClientByName(r->MainAssisterPCs[2]);
-				if (ma3)
-					c->UpdateXTargetType(RaidAssist3, ma3, ma3->GetName());
+		struct AssistType {
+			XTargetType type;
+			int32       assist_slot;
+		};
+
+		std::vector<AssistType> assist_types = {
+			{ RaidAssist1, MAIN_ASSIST_1_SLOT },
+			{ RaidAssist2, MAIN_ASSIST_2_SLOT },
+			{ RaidAssist3, MAIN_ASSIST_3_SLOT }
+		};
+
+		for (auto& t : assist_types) {
+			if (t.type == Type) {
+				Raid* r = GetRaid();
+				if (r) {
+					Client* ma = entity_list.GetClientByName(r->main_assister_pcs[t.assist_slot]);
+					if (ma) {
+						UpdateXTargetType(t.type, ma, ma->GetName());
+					}
+				}
 			}
 		}
 		break;
 	}
+
 	case RaidAssist1Target:
-	{
-		Client* c = entity_list.GetClientByName(this->GetName());
-		if (c) {
-			Raid* r = entity_list.GetRaidByClient(c);
-			if (r) {
-				Client* ma1 = entity_list.GetClientByName(r->MainAssisterPCs[0]);
-				if (ma1 && ma1->GetTarget())
-					c->UpdateXTargetType(RaidAssist1Target, ma1->GetTarget(), ma1->GetTarget()->GetName());
-			}
-		}
-		break;
-	}
 	case RaidAssist2Target:
-	{
-		Client* c = entity_list.GetClientByName(this->GetName());
-		if (c) {
-			Raid* r = entity_list.GetRaidByClient(c);
-			if (r) {
-				Client* ma2 = entity_list.GetClientByName(r->MainAssisterPCs[1]);
-				if (ma2 && ma2->GetTarget())
-					c->UpdateXTargetType(RaidAssist2Target, ma2->GetTarget(), ma2->GetTarget()->GetName());
-			}
-		}
-		break;
-	}
 	case RaidAssist3Target:
 	{
-		Client* c = entity_list.GetClientByName(this->GetName());
-		if (c) {
-			Raid* r = entity_list.GetRaidByClient(c);
-			if (r) {
-				Client* ma3 = entity_list.GetClientByName(r->MainAssisterPCs[2]);
-				if (ma3 && ma3->GetTarget())
-					c->UpdateXTargetType(RaidAssist3Target, ma3->GetTarget(), ma3->GetTarget()->GetName());
+		struct AssistType {
+			XTargetType type;
+			int32       assist_slot;
+		};
+
+		std::vector<AssistType> assist_types = {
+			{ RaidAssist1Target, MAIN_ASSIST_1_SLOT },
+			{ RaidAssist2Target, MAIN_ASSIST_2_SLOT },
+			{ RaidAssist3Target, MAIN_ASSIST_3_SLOT }
+		};
+
+		for (auto& t : assist_types) {
+			if (t.type == Type) {
+				Raid* r = GetRaid();
+				if (r) {
+					Client* ma = entity_list.GetClientByName(r->main_assister_pcs[t.assist_slot]);
+					if (ma && ma->GetTarget()) {
+						UpdateXTargetType(t.type, ma->GetTarget(), ma->GetTarget()->GetName());
+					}
+				}
 			}
 		}
 		break;
 	}
+
 	case RaidMarkTarget1:
-	{
-		Client* c = entity_list.GetClientByName(this->GetName());
-		if (c) {
-			Raid* r = entity_list.GetRaidByClient(c);
-			if (r) {
-				auto mm1 = entity_list.GetNPCByID(r->MarkedNPCs[0]);
-				if (mm1)
-					c->UpdateXTargetType(RaidMarkTarget1, mm1->CastToMob(), mm1->CastToMob()->GetName());
-			}
-		}
-		break;
-	}
 	case RaidMarkTarget2:
-	{
-		Client* c = entity_list.GetClientByName(this->GetName());
-		if (c) {
-			Raid* r = entity_list.GetRaidByClient(c);
-			if (r) {
-				auto mm2 = entity_list.GetNPCByID(r->MarkedNPCs[1]);
-				if (mm2)
-					c->UpdateXTargetType(RaidMarkTarget2, mm2->CastToMob(), mm2->CastToMob()->GetName());
-			}
-		}
-		break;
-	}
 	case RaidMarkTarget3:
 	{
-		Client* c = entity_list.GetClientByName(this->GetName());
-		if (c) {
-			Raid* r = entity_list.GetRaidByClient(c);
-			if (r) {
-				auto mm3 = entity_list.GetNPCByID(r->MarkedNPCs[2]);
-				if (mm3)
-					c->UpdateXTargetType(RaidMarkTarget3, mm3->CastToMob(), mm3->CastToMob()->GetName());
+		struct AssistType {
+			XTargetType type;
+			int32       assist_slot;
+		};
+
+		std::vector<AssistType> assist_types = {
+			{ RaidMarkTarget1, MAIN_MARKER_1_SLOT },
+			{ RaidMarkTarget2, MAIN_MARKER_2_SLOT },
+			{ RaidMarkTarget3, MAIN_MARKER_3_SLOT }
+		};
+
+		for (auto& t : assist_types) {
+			if (t.type == Type) {
+				Raid* r = GetRaid();
+				if (r) {
+					auto mm = entity_list.GetNPCByID(r->marked_npcs[t.assist_slot]);
+					if (mm) {
+						UpdateXTargetType(t.type, mm->CastToMob(), mm->CastToMob()->GetName());
+					}
+				}
 			}
 		}
 		break;

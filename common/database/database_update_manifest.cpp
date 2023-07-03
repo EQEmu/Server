@@ -4748,19 +4748,19 @@ ADD PRIMARY KEY (`id`);
 	ManifestEntry{
 		.version = 9229,
 		.description = "2023_06_23_raid_feature_updates",
-		.check = "SHOW COLUMNS FROM `raid_members` LIKE 'isassister'",
+		.check = "SHOW COLUMNS FROM `raid_members` LIKE 'is_assister'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
 	ALTER TABLE `raid_members` 
-	ADD COLUMN `ismarker` TINYINT UNSIGNED DEFAULT(0) NOT NULL AFTER `islooter`,
-	ADD COLUMN `isassister` TINYINT UNSIGNED DEFAULT(0) NOT NULL AFTER `ismarker`,
-	ADD COLUMN `note` VARCHAR(64) DEFAULT("") NOT NULL AFTER `isassister`;
+	ADD COLUMN `is_marker` TINYINT UNSIGNED DEFAULT(0) NOT NULL AFTER `islooter`,
+	ADD COLUMN `is_assister` TINYINT UNSIGNED DEFAULT(0) NOT NULL AFTER `is_marker`,
+	ADD COLUMN `note` VARCHAR(64) DEFAULT("") NOT NULL AFTER `is_assister`;
 
 	ALTER TABLE `raid_details` 
-	ADD COLUMN `markedNPC1` SMALLINT UNSIGNED DEFAULT(0) NOT NULL AFTER `motd`,
-	ADD COLUMN `markedNPC2` SMALLINT UNSIGNED DEFAULT(0) NOT NULL AFTER `markedNPC1`,
-	ADD COLUMN `markedNPC3` SMALLINT UNSIGNED DEFAULT(0) NOT NULL AFTER `markedNPC2`;
+	ADD COLUMN `marked_npc1` SMALLINT UNSIGNED DEFAULT(0) NOT NULL AFTER `motd`,
+	ADD COLUMN `marked_npc2` SMALLINT UNSIGNED DEFAULT(0) NOT NULL AFTER `marked_npc1`,
+	ADD COLUMN `marked_npc3` SMALLINT UNSIGNED DEFAULT(0) NOT NULL AFTER `marked_npc2`;
 	)",
 	},
 

@@ -4329,7 +4329,7 @@ void Mob::SetTarget(Mob *mob)
 		GetTarget()->SendHPUpdate(true);
 	}
 
-	if (IsClient() || IsBot()) {
+	if (IsOfClientBot()) {
 		Raid* r = GetRaid();
 		if (r) {
 			r->UpdateRaidXTargets();

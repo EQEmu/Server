@@ -4128,6 +4128,11 @@ struct DelegateAbility_Struct
 /*028*/	char	Name[64];
 };
 
+enum {
+	ClearDelegate = 1,
+	SetDelegate   = 0,
+};
+
 struct GroupUpdateLeaderAA_Struct
 {
 /*000*/	char	Unknown000[64];

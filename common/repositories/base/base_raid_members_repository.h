@@ -31,8 +31,8 @@ public:
 		int8_t      isgroupleader;
 		int8_t      israidleader;
 		int8_t      islooter;
-		int8_t      ismarker;
-		uint16_t    isassister;
+		uint8_t     is_marker;
+		uint8_t     is_assister;
 		std::string note;
 	};
 
@@ -55,8 +55,8 @@ public:
 			"isgroupleader",
 			"israidleader",
 			"islooter",
-			"ismarker",
-			"isassister",
+			"is_marker",
+			"is_assister",
 			"note",
 		};
 	}
@@ -75,8 +75,8 @@ public:
 			"isgroupleader",
 			"israidleader",
 			"islooter",
-			"ismarker",
-			"isassister",
+			"is_marker",
+			"is_assister",
 			"note",
 		};
 	}
@@ -129,8 +129,8 @@ public:
 		e.isgroupleader = 0;
 		e.israidleader  = 0;
 		e.islooter      = 0;
-		e.ismarker      = 0;
-		e.isassister    = 0;
+		e.is_marker     = 0;
+		e.is_assister   = 0;
 		e.note          = "";
 
 		return e;
@@ -179,8 +179,8 @@ public:
 			e.isgroupleader = static_cast<int8_t>(atoi(row[8]));
 			e.israidleader  = static_cast<int8_t>(atoi(row[9]));
 			e.islooter      = static_cast<int8_t>(atoi(row[10]));
-			e.ismarker      = static_cast<int8_t>(atoi(row[11]));
-			e.isassister    = static_cast<uint16_t>(strtoul(row[12], nullptr, 10));
+			e.is_marker     = static_cast<uint8_t>(strtoul(row[11], nullptr, 10));
+			e.is_assister   = static_cast<uint8_t>(strtoul(row[12], nullptr, 10));
 			e.note          = row[13] ? row[13] : "";
 
 			return e;
@@ -225,8 +225,8 @@ public:
 		v.push_back(columns[8] + " = " + std::to_string(e.isgroupleader));
 		v.push_back(columns[9] + " = " + std::to_string(e.israidleader));
 		v.push_back(columns[10] + " = " + std::to_string(e.islooter));
-		v.push_back(columns[11] + " = " + std::to_string(e.ismarker));
-		v.push_back(columns[12] + " = " + std::to_string(e.isassister));
+		v.push_back(columns[11] + " = " + std::to_string(e.is_marker));
+		v.push_back(columns[12] + " = " + std::to_string(e.is_assister));
 		v.push_back(columns[13] + " = '" + Strings::Escape(e.note) + "'");
 
 		auto results = db.QueryDatabase(
@@ -260,8 +260,8 @@ public:
 		v.push_back(std::to_string(e.isgroupleader));
 		v.push_back(std::to_string(e.israidleader));
 		v.push_back(std::to_string(e.islooter));
-		v.push_back(std::to_string(e.ismarker));
-		v.push_back(std::to_string(e.isassister));
+		v.push_back(std::to_string(e.is_marker));
+		v.push_back(std::to_string(e.is_assister));
 		v.push_back("'" + Strings::Escape(e.note) + "'");
 
 		auto results = db.QueryDatabase(
@@ -303,8 +303,8 @@ public:
 			v.push_back(std::to_string(e.isgroupleader));
 			v.push_back(std::to_string(e.israidleader));
 			v.push_back(std::to_string(e.islooter));
-			v.push_back(std::to_string(e.ismarker));
-			v.push_back(std::to_string(e.isassister));
+			v.push_back(std::to_string(e.is_marker));
+			v.push_back(std::to_string(e.is_assister));
 			v.push_back("'" + Strings::Escape(e.note) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
@@ -350,8 +350,8 @@ public:
 			e.isgroupleader = static_cast<int8_t>(atoi(row[8]));
 			e.israidleader  = static_cast<int8_t>(atoi(row[9]));
 			e.islooter      = static_cast<int8_t>(atoi(row[10]));
-			e.ismarker      = static_cast<int8_t>(atoi(row[11]));
-			e.isassister    = static_cast<uint16_t>(strtoul(row[12], nullptr, 10));
+			e.is_marker     = static_cast<uint8_t>(strtoul(row[11], nullptr, 10));
+			e.is_assister   = static_cast<uint8_t>(strtoul(row[12], nullptr, 10));
 			e.note          = row[13] ? row[13] : "";
 
 			all_entries.push_back(e);
@@ -388,8 +388,8 @@ public:
 			e.isgroupleader = static_cast<int8_t>(atoi(row[8]));
 			e.israidleader  = static_cast<int8_t>(atoi(row[9]));
 			e.islooter      = static_cast<int8_t>(atoi(row[10]));
-			e.ismarker      = static_cast<int8_t>(atoi(row[11]));
-			e.isassister    = static_cast<uint16_t>(strtoul(row[12], nullptr, 10));
+			e.is_marker     = static_cast<uint8_t>(strtoul(row[11], nullptr, 10));
+			e.is_assister   = static_cast<uint8_t>(strtoul(row[12], nullptr, 10));
 			e.note          = row[13] ? row[13] : "";
 
 			all_entries.push_back(e);
