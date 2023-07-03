@@ -2851,7 +2851,7 @@ luabind::object Lua_Client::GetPEQZoneFlags(lua_State* L) {
 	if (d_) {
 		auto self = reinterpret_cast<NativeType*>(d_);
 		auto l = self->GetPEQZoneFlags();
-		auto i = 1;
+		int i = 1;
 		for (const auto& f : l) {
 			t[i] = f;
 			i++;
@@ -2866,7 +2866,7 @@ luabind::object Lua_Client::GetZoneFlags(lua_State* L) {
 	if (d_) {
 		auto self = reinterpret_cast<NativeType*>(d_);
 		auto l = self->GetZoneFlags();
-		auto i = 1;
+		int i = 1;
 		for (const auto& f : l) {
 			t[i] = f;
 			i++;
