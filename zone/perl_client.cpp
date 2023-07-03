@@ -1432,7 +1432,7 @@ void Perl_Client_UnFreeze(Client* self)
 	self->SendAppearancePacket(AT_Anim, ANIM_STAND);
 }
 
-int Perl_Client_GetAggroCount(Client* self) // @categories Script Utility, Hate and Aggro
+uint32 Perl_Client_GetAggroCount(Client* self) // @categories Script Utility, Hate and Aggro
 {
 	return self->GetAggroCount();
 }

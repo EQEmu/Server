@@ -163,21 +163,6 @@ void handle_npc_single_client(
 	lua_setfield(L, -2, "other");
 }
 
-void handle_npc_single_npc(
-	QuestInterface *parse,
-	lua_State* L,
-	NPC* npc,
-	Mob *init,
-	std::string data,
-	uint32 extra_data,
-	std::vector<std::any> *extra_pointers
-) {
-	Lua_NPC l_npc(reinterpret_cast<NPC*>(init));
-	luabind::adl::object l_npc_o = luabind::adl::object(L, l_npc);
-	l_npc_o.push(L);
-	lua_setfield(L, -2, "other");
-}
-
 void handle_npc_task_accepted(
 	QuestInterface *parse,
 	lua_State* L,

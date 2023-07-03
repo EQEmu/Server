@@ -4531,7 +4531,7 @@ bool Client::IsLeadershipEXPOn() {
 
 }
 
-int Client::GetAggroCount() {
+uint32 Client::GetAggroCount() {
 	return AggroCount;
 }
 
@@ -6904,87 +6904,6 @@ void Client::SetMaxXTargets(uint8 NewMax)
 	outapp->WriteUInt32(0);
 	FastQueuePacket(&outapp);
 }
-
-const char* Client::GetRacePlural(Client* client) {
-
-	switch (client->CastToMob()->GetRace()) {
-		case HUMAN:
-			return "Humans"; break;
-		case BARBARIAN:
-			return "Barbarians"; break;
-		case ERUDITE:
-			return "Erudites"; break;
-		case WOOD_ELF:
-			return "Wood Elves"; break;
-		case HIGH_ELF:
-			return "High Elves"; break;
-		case DARK_ELF:
-			return "Dark Elves"; break;
-		case HALF_ELF:
-			return "Half Elves"; break;
-		case DWARF:
-			return "Dwarves"; break;
-		case TROLL:
-			return "Trolls"; break;
-		case OGRE:
-			return "Ogres"; break;
-		case HALFLING:
-			return "Halflings"; break;
-		case GNOME:
-			return "Gnomes"; break;
-		case IKSAR:
-			return "Iksar"; break;
-		case VAHSHIR:
-			return "Vah Shir"; break;
-		case FROGLOK:
-			return "Frogloks"; break;
-		case DRAKKIN:
-			return "Drakkin"; break;
-		default:
-			return "Races"; break;
-	}
-}
-
-const char* Client::GetClassPlural(Client* client) {
-
-	switch (client->CastToMob()->GetClass()) {
-		case WARRIOR:
-			return "Warriors"; break;
-		case CLERIC:
-			return "Clerics"; break;
-		case PALADIN:
-			return "Paladins"; break;
-		case RANGER:
-			return "Rangers"; break;
-		case SHADOWKNIGHT:
-			return "Shadowknights"; break;
-		case DRUID:
-			return "Druids"; break;
-		case MONK:
-			return "Monks"; break;
-		case BARD:
-			return "Bards"; break;
-		case ROGUE:
-			return "Rogues"; break;
-		case SHAMAN:
-			return "Shamen"; break;
-		case NECROMANCER:
-			return "Necromancers"; break;
-		case WIZARD:
-			return "Wizards"; break;
-		case MAGICIAN:
-			return "Magicians"; break;
-		case ENCHANTER:
-			return "Enchanters"; break;
-		case BEASTLORD:
-			return "Beastlords"; break;
-		case BERSERKER:
-			return "Berserkers"; break;
-		default:
-			return "Classes"; break;
-	}
-}
-
 
 void Client::SendWebLink(const char *website)
 {

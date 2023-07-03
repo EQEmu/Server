@@ -8262,3 +8262,83 @@ int Mob::DispatchZoneControllerEvent(
 
 	return ret;
 }
+
+std::string Mob::GetRacePlural()
+{
+	switch (GetBaseRace()) {
+		case RACE_HUMAN_1:
+			return "Humans";
+		case RACE_BARBARIAN_2:
+			return "Barbarians";
+		case RACE_ERUDITE_3:
+			return "Erudites";
+		case RACE_WOOD_ELF_4:
+			return "Wood Elves";
+		case RACE_HIGH_ELF_5:
+			return "High Elves";
+		case RACE_DARK_ELF_6:
+			return "Dark Elves";
+		case RACE_HALF_ELF_7:
+			return "Half Elves";
+		case RACE_DWARF_8:
+			return "Dwarves";
+		case RACE_TROLL_9:
+			return "Trolls";
+		case RACE_OGRE_10:
+			return "Ogres";
+		case RACE_HALFLING_11:
+			return "Halflings";
+		case RACE_GNOME_12:
+			return "Gnomes";
+		case RACE_IKSAR_128:
+			return "Iksar";
+		case RACE_VAH_SHIR_130:
+			return "Vah Shir";
+		case RACE_FROGLOK_330:
+			return "Frogloks";
+		case RACE_DRAKKIN_522:
+			return "Drakkin";
+		default:
+			return "Races";
+	}
+}
+
+std::string Mob::GetClassPlural()
+{
+	switch (GetClass()) {
+		case WARRIOR:
+			return "Warriors";
+		case CLERIC:
+			return "Clerics";
+		case PALADIN:
+			return "Paladins";
+		case RANGER:
+			return "Rangers";
+		case SHADOWKNIGHT:
+			return "Shadowknights";
+		case DRUID:
+			return "Druids";
+		case MONK:
+			return "Monks";
+		case BARD:
+			return "Bards";
+		case ROGUE:
+			return "Rogues";
+		case SHAMAN:
+			return "Shamans";
+		case NECROMANCER:
+			return "Necromancers";
+		case WIZARD:
+			return "Wizards";
+		case MAGICIAN:
+			return "Magicians";
+		case ENCHANTER:
+			return "Enchanters";
+		case BEASTLORD:
+			return "Beastlords";
+		case BERSERKER:
+			return "Berserkers";
+		default:
+			return "Classes";
+	}
+}

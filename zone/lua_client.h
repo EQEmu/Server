@@ -367,7 +367,7 @@ public:
 	void AssignToInstance(int instance_id);
 	void Freeze();
 	void UnFreeze();
-	int GetAggroCount();
+	uint32 GetAggroCount();
 	uint64 GetCarriedMoney();
 	uint32 GetCarriedPlatinum();
 	uint64 GetAllMoney();

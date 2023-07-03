@@ -1347,7 +1347,7 @@ public:
 
 	bool CanEnterZone(const std::string& zone_short_name = "", int16 instance_version = -1);
 
-	int GetAggroCount();
+	uint32 GetAggroCount();
 	void IncrementAggroCount(bool raid_target = false);
 	void DecrementAggroCount();
 	void SendPVPStats();
@@ -1559,8 +1559,6 @@ public:
 	Timer* GetMercTimer() { return &merc_timer; };
 	Timer* GetPickLockTimer() { return &pick_lock_timer; };
 
-	const char* GetRacePlural(Client* client);
-	const char* GetClassPlural(Client* client);
 	void SendWebLink(const char* website);
 	void SendMarqueeMessage(uint32 type, std::string message, uint32 duration = 3000);
 	void SendMarqueeMessage(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, std::string message);
@@ -1907,7 +1905,7 @@ private:
 	int8 last_reported_mana_percent;
 	int8 last_reported_endurance_percent;
 
-	unsigned int AggroCount; // How many mobs are aggro on us.
+	uint32 AggroCount; // How many mobs are aggro on us.
 
 	bool ooc_regen;
 	float AreaHPRegen;
