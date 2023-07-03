@@ -1509,14 +1509,34 @@ bool Lua_Client::HasSpellScribed(int spell_id) {
 	return self->HasSpellScribed(spell_id);
 }
 
-void Lua_Client::SetAccountFlag(std::string flag, std::string val) {
+void Lua_Client::ClearAccountFlag(const std::string& flag) {
 	Lua_Safe_Call_Void();
-	self->SetAccountFlag(flag, val);
+	self->ClearAccountFlag(flag);
 }
 
-std::string Lua_Client::GetAccountFlag(std::string flag) {
+void Lua_Client::SetAccountFlag(const std::string& flag, const std::string& value) {
+	Lua_Safe_Call_Void();
+	self->SetAccountFlag(flag, value);
+}
+
+std::string Lua_Client::GetAccountFlag(const std::string& flag) {
 	Lua_Safe_Call_String();
 	return self->GetAccountFlag(flag);
+}
+
+luabind::object Lua_Client::GetAccountFlags(lua_State* L) {
+	auto t = luabind::newtable(L);
+	if (d_) {
+		auto self = reinterpret_cast<NativeType*>(d_);
+		auto l = self->GetAccountFlags();
+		auto i = 1;
+		for (const auto& e : l) {
+			t[i] = e;
+			i++;
+		}
+	}
+
+	return t;
 }
 
 Lua_Group Lua_Client::GetGroup() {
@@ -3136,6 +3156,7 @@ luabind::scope lua_register_client() {
 	.def("CheckIncreaseSkill", (void(Lua_Client::*)(int,Lua_Mob,int))&Lua_Client::CheckIncreaseSkill)
 	.def("CheckSpecializeIncrease", (void(Lua_Client::*)(int))&Lua_Client::CheckSpecializeIncrease)
 	.def("ClearCompassMark",(void(Lua_Client::*)(void))&Lua_Client::ClearCompassMark)
+	.def("ClearAccountFlag", (void(Lua_Client::*)(const std::string&))&Lua_Client::ClearAccountFlag)
 	.def("ClearPEQZoneFlag", (void(Lua_Client::*)(uint32))&Lua_Client::ClearPEQZoneFlag)
 	.def("ClearZoneFlag", (void(Lua_Client::*)(uint32))&Lua_Client::ClearZoneFlag)
 	.def("Connected", (bool(Lua_Client::*)(void))&Lua_Client::Connected)
@@ -3190,7 +3211,8 @@ luabind::scope lua_register_client() {
 	.def("GetAAPoints", (int(Lua_Client::*)(void))&Lua_Client::GetAAPoints)
 	.def("GetAFK", (int(Lua_Client::*)(void))&Lua_Client::GetAFK)
 	.def("GetAccountAge", (int(Lua_Client::*)(void))&Lua_Client::GetAccountAge)
-	.def("GetAccountFlag", (std::string(Lua_Client::*)(std::string))&Lua_Client::GetAccountFlag)
+	.def("GetAccountFlag", (std::string(Lua_Client::*)(const std::string&))&Lua_Client::GetAccountFlag)
+	.def("GetAccountFlags", (luabind::object(Lua_Client::*)(lua_State*))&Lua_Client::GetAccountFlags)
 	.def("GetAggroCount", (int(Lua_Client::*)(void))&Lua_Client::GetAggroCount)
 	.def("GetAllMoney", (uint64(Lua_Client::*)(void))&Lua_Client::GetAllMoney)
 	.def("GetAlternateCurrencyValue", (int(Lua_Client::*)(uint32))&Lua_Client::GetAlternateCurrencyValue)
@@ -3470,8 +3492,7 @@ luabind::scope lua_register_client() {
 	.def("SetAATitle", (void(Lua_Client::*)(std::string))&Lua_Client::SetAATitle)
 	.def("SetAATitle", (void(Lua_Client::*)(std::string,bool))&Lua_Client::SetAATitle)
 	.def("SetAFK", (void(Lua_Client::*)(uint8))&Lua_Client::SetAFK)
-	.def("SetAccountFlag", (void(Lua_Client::*)(std::string,std::string))&Lua_Client::SetAccountFlag)
-	.def("SetAccountFlag", (void(Lua_Client::*)(std::string,std::string))&Lua_Client::SetAccountFlag)
+	.def("SetAccountFlag", (void(Lua_Client::*)(const std::string&,const std::string&))&Lua_Client::SetAccountFlag)
 	.def("SetAlternateCurrencyValue", (void(Lua_Client::*)(uint32,int))&Lua_Client::SetAlternateCurrencyValue)
 	.def("SetAnon", (void(Lua_Client::*)(uint8))&Lua_Client::SetAnon)
 	.def("SetBaseClass", (void(Lua_Client::*)(int))&Lua_Client::SetBaseClass)

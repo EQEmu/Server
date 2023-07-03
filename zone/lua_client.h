@@ -380,8 +380,10 @@ public:
 	int GetAlternateCurrencyValue(uint32 currency);
 	void SendWebLink(const char *site);
 	bool HasSpellScribed(int spell_id);
-	void SetAccountFlag(std::string flag, std::string val);
-	std::string GetAccountFlag(std::string flag);
+	void ClearAccountFlag(const std::string& flag);
+	void SetAccountFlag(const std::string& flag, const std::string& value);
+	std::string GetAccountFlag(const std::string& flag);
+	luabind::object GetAccountFlags(lua_State* L);
 	int GetAccountAge();
 	Lua_Group GetGroup();
 	Lua_Raid GetRaid();

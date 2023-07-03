@@ -1502,6 +1502,11 @@ bool Perl_Client_HasSpellScribed(Client* self, int spell_id) // @categories Spel
 	return self->HasSpellScribed(spell_id);
 }
 
+void Perl_Client_ClearAccountFlag(Client* self, std::string flag) // @categories Account and Character
+{
+	self->ClearAccountFlag(flag);
+}
+
 void Perl_Client_SetAccountFlag(Client* self, std::string flag, std::string value) // @categories Account and Character
 {
 	self->SetAccountFlag(flag, value);
@@ -1510,6 +1515,21 @@ void Perl_Client_SetAccountFlag(Client* self, std::string flag, std::string valu
 std::string Perl_Client_GetAccountFlag(Client* self, std::string flag) // @categories Account and Character
 {
 	return self->GetAccountFlag(flag);
+}
+
+perl::array Perl_Client_GetAccountFlags(Client* self)
+{
+	perl::array result;
+
+	const auto& l = self->GetAccountFlags();
+
+	result.reserve(l.size());
+
+	for (const auto& e : l) {
+		result.push_back(e);
+	}
+
+	return result;
 }
 
 int Perl_Client_GetHunger(Client* self) // @categories Account and Character, Stats and Attributes
@@ -2994,6 +3014,7 @@ void perl_register_client()
 	package.add("CheckIncreaseSkill", (bool(*)(Client*, int, int))&Perl_Client_CheckIncreaseSkill);
 	package.add("CheckSpecializeIncrease", &Perl_Client_CheckSpecializeIncrease);
 	package.add("ClearCompassMark", &Perl_Client_ClearCompassMark);
+	package.add("ClearAccountFlag", &Perl_Client_ClearAccountFlag);
 	package.add("ClearPEQZoneFlag", &Perl_Client_ClearPEQZoneFlag);
 	package.add("ClearZoneFlag", &Perl_Client_ClearZoneFlag);
 	package.add("Connected", &Perl_Client_Connected);
@@ -3042,6 +3063,7 @@ void perl_register_client()
 	package.add("GetAFK", &Perl_Client_GetAFK);
 	package.add("GetAccountAge", &Perl_Client_GetAccountAge);
 	package.add("GetAccountFlag", &Perl_Client_GetAccountFlag);
+	package.add("GetAccountFlags", &Perl_Client_GetAccountFlags);
 	package.add("GetAggroCount", &Perl_Client_GetAggroCount);
 	package.add("GetAllMoney", &Perl_Client_GetAllMoney);
 	package.add("GetAlternateCurrencyValue", &Perl_Client_GetAlternateCurrencyValue);
