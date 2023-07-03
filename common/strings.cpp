@@ -695,8 +695,31 @@ std::string Strings::ConvertToDigit(int n, const std::string& suffix)
 		return NUM_TO_ENGLISH_X[n] + suffix;
 	}
 }
+
+bool Strings::BeginsWith(const std::string& subject, const std::string& search)
+{
+	if (subject.length() < search.length()) {
+		return false;
+	}
+
+	return subject.starts_with(search);
+}
+
+bool Strings::EndsWith(const std::string& subject, const std::string& search)
+{
+	if (subject.length() < search.length()) {
+		return false;
+	}
+
+	return subject.ends_with(search);
+}
+
 bool Strings::Contains(const std::string& subject, const std::string& search)
 {
+	if (subject.length() < search.length()) {
+		return false;
+	}
+
 	return subject.find(search) != std::string::npos;
 }
 
