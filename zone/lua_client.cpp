@@ -1529,7 +1529,7 @@ luabind::object Lua_Client::GetAccountFlags(lua_State* L) {
 	if (d_) {
 		auto self = reinterpret_cast<NativeType*>(d_);
 		auto l = self->GetAccountFlags();
-		auto i = 1;
+		int i = 1;
 		for (const auto& e : l) {
 			t[i] = e;
 			i++;
