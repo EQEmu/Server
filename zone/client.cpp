@@ -58,6 +58,7 @@ extern volatile bool RunLoops;
 #include "mob_movement_manager.h"
 #include "cheat_manager.h"
 
+#include "../common/repositories/account_flags_repository.h"
 #include "../common/repositories/bug_reports_repository.h"
 #include "../common/repositories/char_recipe_list_repository.h"
 #include "../common/repositories/character_spells_repository.h"
@@ -7480,36 +7481,57 @@ void Client::SendFactionMessage(int32 tmpvalue, int32 faction_id, int32 faction_
 
 void Client::LoadAccountFlags()
 {
-
 	accountflags.clear();
-	std::string query = StringFormat("SELECT p_flag, p_value "
-									"FROM account_flags WHERE p_accid = '%d'",
-									account_id);
-	auto results = database.QueryDatabase(query);
-	if (!results.Success()) {
+
+	const auto& l = AccountFlagsRepository::GetWhere(database, fmt::format("p_accid = {}", account_id));
+	if (l.empty()) {
 		return;
 	}
 
-	for (auto row = results.begin(); row != results.end(); ++row)
-		accountflags[row[0]] = row[1];
-}
-
-void Client::SetAccountFlag(std::string flag, std::string val) {
-
-	std::string query = StringFormat("REPLACE INTO account_flags (p_accid, p_flag, p_value) "
-									"VALUES( '%d', '%s', '%s')",
-									account_id, flag.c_str(), val.c_str());
-	auto results = database.QueryDatabase(query);
-	if(!results.Success()) {
-		return;
+	for (const auto& e : l) {
+		accountflags[e.p_flag] = e.p_value;
 	}
-
-	accountflags[flag] = val;
 }
 
-std::string Client::GetAccountFlag(std::string flag)
+void Client::ClearAccountFlag(const std::string& flag)
 {
-	return(accountflags[flag]);
+	auto e = AccountFlagsRepository::NewEntity();
+
+	e.p_accid = account_id;
+	e.p_flag  = flag;
+
+	AccountFlagsRepository::ClearFlag(database, e);
+}
+
+void Client::SetAccountFlag(const std::string& flag, const std::string& value)
+{
+	auto e = AccountFlagsRepository::NewEntity();
+
+	e.p_accid = account_id;
+	e.p_flag  = flag;
+	e.p_value = value;
+
+	AccountFlagsRepository::ReplaceFlag(database, e);
+
+	accountflags[flag] = value;
+}
+
+std::string Client::GetAccountFlag(const std::string& flag)
+{
+	return accountflags[flag];
+}
+
+std::vector<std::string> Client::GetAccountFlags()
+{
+	std::vector<std::string> l;
+
+	l.reserve(accountflags.size());
+
+	for (const auto& e : accountflags) {
+		l.emplace_back(e.first);
+	}
+
+	return l;
 }
 
 void Client::TickItemCheck()

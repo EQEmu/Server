@@ -44,7 +44,35 @@ public:
      */
 
 	// Custom extended repository methods here
+	static void ClearFlag(
+		Database& db,
+		AccountFlagsRepository::AccountFlags e
+	) {
+		AccountFlagsRepository::DeleteWhere(
+			database,
+			fmt::format(
+				"p_accid = {} AND p_flag = '{}'",
+				e.p_accid,
+				Strings::Escape(e.p_flag)
+			)
+		);
+	}
 
+	static void ReplaceFlag(
+		Database& db,
+		AccountFlagsRepository::AccountFlags e
+	) {
+		db.QueryDatabase(
+			fmt::format(
+				"REPLACE INTO {} ({}) VALUES ({}, '{}', '{}')",
+				TableName(),
+				ColumnsRaw(),
+				e.p_accid,
+				Strings::Escape(e.p_flag),
+				Strings::Escape(e.p_value)
+			)
+		);
+	}
 };
 
 #endif //EQEMU_ACCOUNT_FLAGS_REPOSITORY_H
