@@ -8265,10 +8265,6 @@ int Mob::DispatchZoneControllerEvent(
 
 std::string Mob::GetRacePlural()
 {
-	if (!IsPlayerRace(GetBaseRace())) {
-		return "Races";
-	}
-
 	switch (GetBaseRace()) {
 		case RACE_HUMAN_1:
 			return "Humans";
@@ -8309,10 +8305,6 @@ std::string Mob::GetRacePlural()
 
 std::string Mob::GetClassPlural()
 {
-	if (!IsPlayerClass(GetClass())) {
-		return "Classes";
-	}
-
 	switch (GetClass()) {
 		case WARRIOR:
 			return "Warriors";
