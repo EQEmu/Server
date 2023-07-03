@@ -1360,8 +1360,8 @@ public:
 	uint32 GetLDoNLossesTheme(uint32 t);
 	uint32 GetLDoNPointsTheme(uint32 t);
 	void UpdateLDoNWinLoss(uint32 theme_id, bool win = false, bool remove = false);
-	void CheckLDoNHail(Mob *target);
-	void CheckEmoteHail(Mob *target, const char* message);
+	void CheckLDoNHail(NPC* n);
+	void CheckEmoteHail(NPC* n, const char* message);
 
 	void HandleLDoNOpen(NPC *target);
 	void HandleLDoNSenseTraps(NPC *target, uint16 skill, uint8 type);

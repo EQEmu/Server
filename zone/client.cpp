@@ -5938,90 +5938,64 @@ void Client::AdventureFinish(bool win, int theme, int points)
 	FastQueuePacket(&outapp);
 }
 
-void Client::CheckLDoNHail(Mob *target)
+void Client::CheckLDoNHail(NPC* n)
 {
-	if(!zone->adv_data)
-	{
+	if (!zone->adv_data || !n || n->GetOwnerID()) {
 		return;
 	}
 
-	if(!target || !target->IsNPC())
-	{
+	auto* ds = (ServerZoneAdventureDataReply_Struct*) zone->adv_data;
+	if (ds->type != Adventure_Rescue || ds->data_id != n->GetNPCTypeID()) {
 		return;
 	}
 
-	if(target->GetOwnerID() != 0)
-	{
+	if (entity_list.CheckNPCsClose(n)) {
+		n->Say(
+			"You're here to save me? I couldn't possibly risk leaving yet. There are "
+			"far too many of those horrid things out there waiting to recapture me! Please get "
+			"rid of some more of those vermin and then we can try to leave."
+		);
 		return;
 	}
 
-	ServerZoneAdventureDataReply_Struct* ds = (ServerZoneAdventureDataReply_Struct*)zone->adv_data;
-	if(ds->type != Adventure_Rescue)
-	{
-		return;
-	}
-
-	if(ds->data_id != target->GetNPCTypeID())
-	{
-		return;
-	}
-
-	if(entity_list.CheckNPCsClose(target) != 0)
-	{
-		target->Say("You're here to save me? I couldn't possibly risk leaving yet. There are "
-			"far too many of those horrid things out there waiting to recapture me! Please get"
-			" rid of some more of those vermin and then we can try to leave.");
-		return;
-	}
-
-	Mob *pet = GetPet();
-	if(pet)
-	{
-		if(pet->GetPetType() == petCharmed)
-		{
+	auto pet = GetPet();
+	if (pet) {
+		if (pet->GetPetType() == petCharmed) {
 			pet->BuffFadeByEffect(SE_Charm);
-		}
-		else if(pet->GetPetType() == petNPCFollow)
-		{
+		} else if (pet->GetPetType() == petNPCFollow) {
 			pet->SetOwnerID(0);
-		}
-		else
-		{
+		} else {
 			pet->Depop();
 		}
 	}
 
-	SetPet(target);
-	target->SetOwnerID(GetID());
-	target->Say("Wonderful! Someone to set me free! I feared for my life for so long,"
-		" never knowing when they might choose to end my life. Now that you're here though"
-		" I can rest easy. Please help me find my way out of here as soon as you can"
-		" I'll stay close behind you!");
+	SetPet(n);
+	n->SetOwnerID(GetID());
+	n->Say(
+		"Wonderful! Someone to set me free! I feared for my life for so long, "
+		"never knowing when they might choose to end my life. Now that you're here though "
+		"I can rest easy. Please help me find my way out of here as soon as you can "
+		"I'll stay close behind you!"
+	);
 }
 
-void Client::CheckEmoteHail(Mob *target, const char* message)
+void Client::CheckEmoteHail(NPC* n, const char* message)
 {
-	if(
-		(message[0] != 'H'	&&
-		message[0] != 'h')	||
-		message[1] != 'a'	||
-		message[2] != 'i'	||
-		message[3] != 'l'){
+	if (
+		!Strings::BeginsWith(message, "hail") &&
+		!Strings::BeginsWith(message, "Hail")
+	) {
 		return;
 	}
 
-	if(!target || !target->IsNPC())
-	{
+	if (!n || n->GetOwnerID()) {
 		return;
 	}
 
-	if(target->GetOwnerID() != 0)
-	{
-		return;
+	const auto emote_id = n->GetEmoteID();
+	if (emote_id) {
+		target->CastToNPC()->DoNPCEmote(EQ::constants::EmoteEventTypes::Hailed, emote_id);
 	}
-	uint32 emoteid = target->GetEmoteID();
-	if(emoteid != 0)
-		target->CastToNPC()->DoNPCEmote(EQ::constants::EmoteEventTypes::Hailed, emoteid);
 }
 
 void Client::MarkSingleCompassLoc(float in_x, float in_y, float in_z, uint8 count)
