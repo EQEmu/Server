@@ -1347,7 +1347,7 @@ public:
 
 	bool CanEnterZone(const std::string& zone_short_name = "", int16 instance_version = -1);
 
-	int GetAggroCount();
+	uint32 GetAggroCount();
 	void IncrementAggroCount(bool raid_target = false);
 	void DecrementAggroCount();
 	void SendPVPStats();
@@ -1903,7 +1903,7 @@ private:
 	int8 last_reported_mana_percent;
 	int8 last_reported_endurance_percent;
 
-	unsigned int AggroCount; // How many mobs are aggro on us.
+	uint32 AggroCount; // How many mobs are aggro on us.
 
 	bool ooc_regen;
 	float AreaHPRegen;
