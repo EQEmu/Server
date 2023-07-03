@@ -1449,7 +1449,7 @@ void Lua_Client::UnFreeze() {
 	self->SendAppearancePacket(AT_Anim, ANIM_STAND);
 }
 
-int Lua_Client::GetAggroCount() {
+uint32 Lua_Client::GetAggroCount() {
 	Lua_Safe_Call_Int();
 	return self->GetAggroCount();
 }
@@ -3191,7 +3191,7 @@ luabind::scope lua_register_client() {
 	.def("GetAFK", (int(Lua_Client::*)(void))&Lua_Client::GetAFK)
 	.def("GetAccountAge", (int(Lua_Client::*)(void))&Lua_Client::GetAccountAge)
 	.def("GetAccountFlag", (std::string(Lua_Client::*)(std::string))&Lua_Client::GetAccountFlag)
-	.def("GetAggroCount", (int(Lua_Client::*)(void))&Lua_Client::GetAggroCount)
+	.def("GetAggroCount", (uint32(Lua_Client::*)(void))&Lua_Client::GetAggroCount)
 	.def("GetAllMoney", (uint64(Lua_Client::*)(void))&Lua_Client::GetAllMoney)
 	.def("GetAlternateCurrencyValue", (int(Lua_Client::*)(uint32))&Lua_Client::GetAlternateCurrencyValue)
 	.def("GetAnon", (int(Lua_Client::*)(void))&Lua_Client::GetAnon)
