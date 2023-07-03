@@ -1018,8 +1018,8 @@ bool QuestManager::isdisctome(uint32 item_id) {
 	const std::string item_name = item->Name;
 
 	if (
-		!Strings::Contains(item_name, "Tome of ") &&
-		!Strings::Contains(item_name, "Skill: ")
+		!Strings::BeginsWith(item_name, "Tome of ") &&
+		!Strings::BeginsWith(item_name, "Skill: ")
 	) {
 		return false;
 	}
