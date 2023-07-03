@@ -3115,6 +3115,18 @@ Lua_Mob_List Lua_Mob::GetCloseMobList(float distance, bool ignore_self) {
 	return ret;
 }
 
+std::string Lua_Mob::GetClassPlural()
+{
+	Lua_Safe_Call_String();
+	return self->GetClassPlural();
+}
+
+std::string Lua_Mob::GetRacePlural()
+{
+	Lua_Safe_Call_String();
+	return self->GetRacePlural();
+}
+
 luabind::scope lua_register_mob() {
 	return luabind::class_<Lua_Mob, Lua_Entity>("Mob")
 	.def(luabind::constructor<>())
@@ -3323,6 +3335,7 @@ luabind::scope lua_register_mob() {
 	.def("GetCasterLevel", &Lua_Mob::GetCasterLevel)
 	.def("GetClass", &Lua_Mob::GetClass)
 	.def("GetClassName", &Lua_Mob::GetClassName)
+	.def("GetClassPlural", &Lua_Mob::GetClassPlural)
 	.def("GetCleanName", &Lua_Mob::GetCleanName)
 	.def("GetCloseMobList", (Lua_Mob_List(Lua_Mob::*)(void))&Lua_Mob::GetCloseMobList)
 	.def("GetCloseMobList", (Lua_Mob_List(Lua_Mob::*)(float))&Lua_Mob::GetCloseMobList)
@@ -3426,6 +3439,7 @@ luabind::scope lua_register_mob() {
 	.def("GetPhR", &Lua_Mob::GetPhR)
 	.def("GetRace", &Lua_Mob::GetRace)
 	.def("GetRaceName", &Lua_Mob::GetRaceName)
+	.def("GetRacePlural", &Lua_Mob::GetRacePlural)
 	.def("GetRemainingTimeMS", &Lua_Mob::GetRemainingTimeMS)
 	.def("GetResist", (int(Lua_Mob::*)(int))&Lua_Mob::GetResist)
 	.def("GetReverseFactionCon", (int(Lua_Mob::*)(Lua_Mob))&Lua_Mob::GetReverseFactionCon)
