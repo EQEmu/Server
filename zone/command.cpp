@@ -126,7 +126,6 @@ int command_init(void)
 		command_add("dzkickplayers", "Removes all players from current expedition. (/kickplayers alternative for pre-RoF clients)", AccountStatus::Player, command_dzkickplayers) ||
 		command_add("editmassrespawn", "[name-search] [second-value] - Mass (Zone wide) NPC respawn timer editing command", AccountStatus::GMAdmin, command_editmassrespawn) ||
 		command_add("emote", "[Name|World|Zone] [type] [message] - Send an emote message by name, to the world, or to your zone (^ separator allows multiple messages to be sent at once)", AccountStatus::QuestTroupe, command_emote) ||
-		command_add("emotesearch", "[Search Criteria] - Search for NPC Emotes", AccountStatus::QuestTroupe, command_emotesearch) ||
 		command_add("emoteview", "Lists all NPC Emotes", AccountStatus::QuestTroupe, command_emoteview) ||
 		command_add("emptyinventory", "Clears your or your target's entire inventory (Equipment, General, Bank, and Shared Bank)", AccountStatus::GMImpossible, command_emptyinventory) ||
 		command_add("enablerecipe", "[Recipe ID] - Enables a Recipe", AccountStatus::QuestTroupe, command_enablerecipe) ||
@@ -380,6 +379,7 @@ int command_init(void)
 				"findclass",
 				"findcurrency",
 				"finddeity",
+				"findemote",
 				"findfaction",
 				"finditem",
 				"findlanguage",
@@ -1002,7 +1002,6 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/dzkickplayers.cpp"
 #include "gm_commands/editmassrespawn.cpp"
 #include "gm_commands/emote.cpp"
-#include "gm_commands/emotesearch.cpp"
 #include "gm_commands/emoteview.cpp"
 #include "gm_commands/emptyinventory.cpp"
 #include "gm_commands/enablerecipe.cpp"

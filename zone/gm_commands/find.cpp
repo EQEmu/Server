@@ -4,6 +4,7 @@
 #include "find/class.cpp"
 #include "find/currency.cpp"
 #include "find/deity.cpp"
+#include "find/emote.cpp"
 #include "find/faction.cpp"
 #include "find/item.cpp"
 #include "find/language.cpp"
@@ -33,6 +34,7 @@ void command_find(Client *c, const Seperator *sep)
 		Cmd{.cmd = "class", .u = "class [Search Criteria]", .fn = FindClass, .a = {"#findclass"}},
 		Cmd{.cmd = "currency", .u = "currency [Search Criteria]", .fn = FindCurrency, .a = {"#findcurrency"}},
 		Cmd{.cmd = "deity", .u = "deity [Search Criteria]", .fn = FindDeity, .a = {"#finddeity"}},
+		Cmd{.cmd = "emote", .u = "emote [Search Criteria]", .fn = FindEmote, .a = {"#findemote"}},
 		Cmd{.cmd = "faction", .u = "faction [Search Criteria]", .fn = FindFaction, .a = {"#findfaction"}},
 		Cmd{.cmd = "item", .u = "item [Search Criteria]", .fn = FindItem, .a = {"#fi", "#finditem"}},
 		Cmd{.cmd = "language", .u = "language [Search Criteria]", .fn = FindLanguage, .a = {"#findlanguage"}},

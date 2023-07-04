@@ -77,7 +77,6 @@ void command_dz(Client *c, const Seperator *sep);
 void command_dzkickplayers(Client *c, const Seperator *sep);
 void command_editmassrespawn(Client *c, const Seperator *sep);
 void command_emote(Client *c, const Seperator *sep);
-void command_emotesearch(Client *c, const Seperator *sep);
 void command_emoteview(Client *c, const Seperator *sep);
 void command_emptyinventory(Client *c, const Seperator *sep);
 void command_enablerecipe(Client *c, const Seperator *sep);
