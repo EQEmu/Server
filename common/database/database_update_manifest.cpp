@@ -4744,6 +4744,22 @@ ADD COLUMN `id` int(11) NOT NULL AUTO_INCREMENT FIRST,
 ADD PRIMARY KEY (`id`);
 )",
 	},
+	ManifestEntry{
+		.version = 9229,
+		.description = "2023_07_04_chatchannel_reserved_names_fix.sql",
+		.check = "SHOW TABLES LIKE 'chatchannel_reserved_names'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+CREATE TABLE `chatchannel_reserved_names`
+(
+`id`   int(11) NOT NULL AUTO_INCREMENT,
+`name` varchar(64) NOT NULL,
+PRIMARY KEY (`id`) USING BTREE,
+UNIQUE KEY `name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+)"
+	},
 
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
