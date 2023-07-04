@@ -1,6 +1,6 @@
-#include "../client.h"
+#include "../../client.h"
 
-void command_showstats(Client *c, const Seperator *sep)
+void ShowStats(Client *c, const Seperator *sep)
 {
 	Mob* t = c;
 	if (c->GetTarget()) {
@@ -9,4 +9,3 @@ void command_showstats(Client *c, const Seperator *sep)
 
 	t->ShowStats(c);
 }
-

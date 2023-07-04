@@ -1,6 +1,6 @@
-#include "../client.h"
+#include "../../client.h"
 
-void command_showbuffs(Client *c, const Seperator *sep)
+void ShowBuffs(Client *c, const Seperator *sep)
 {
 	Mob* t = c;
 	if (c->GetTarget()) {
@@ -9,4 +9,3 @@ void command_showbuffs(Client *c, const Seperator *sep)
 
 	t->ShowBuffs(c);
 }
-

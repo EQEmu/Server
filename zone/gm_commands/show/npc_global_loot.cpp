@@ -1,6 +1,6 @@
-#include "../client.h"
+#include "../../client.h"
 
-void command_shownpcgloballoot(Client *c, const Seperator *sep)
+void ShowNPCGlobalLoot(Client *c, const Seperator *sep)
 {
 	if (!c->GetTarget() || !c->GetTarget()->IsNPC()) {
 		c->Message(Chat::White, "You must target an NPC to use this command.");
@@ -11,4 +11,3 @@ void command_shownpcgloballoot(Client *c, const Seperator *sep)
 
 	zone->ShowNPCGlobalLoot(c, t);
 }
-

@@ -279,14 +279,7 @@ int command_init(void)
 		command_add("setstartzone", "[Zone ID|Zone Short Name] - Sets your or your target's starting zone (Use '0' or 'Reset' to allow the player use of /setstartcity)", AccountStatus::QuestTroupe, command_setstartzone) ||
 		command_add("setstat", "Sets the stats to a specific value.", AccountStatus::Max, command_setstat) ||
 		command_add("setxp", "[value] - Set your or your player target's experience", AccountStatus::GMAdmin, command_setxp) ||
-		command_add("showbuffs", "List buffs active on your target or you if no target", AccountStatus::Guide, command_showbuffs) ||
-		command_add("shownpcgloballoot", "Show global loot entries for your target NPC", AccountStatus::Guide, command_shownpcgloballoot) ||
-		command_add("showskills", "[Start Skill ID] [All] - Show the values of your or your player target's skills in a popup 50 at a time, use 'all' as second argument to show non-usable skill's values", AccountStatus::Guide, command_showskills) ||
-		command_add("showspells", "[disciplines|spells] - Show your or your target's memorized spells or learned disciplines", AccountStatus::GMAdmin, command_showspells) ||
-		command_add("showspellslist", "Shows spell list of targeted NPC", AccountStatus::GMAdmin, command_showspellslist) ||
-		command_add("showstats", "Show details about you or your target", AccountStatus::Guide, command_showstats) ||
-		command_add("showzonegloballoot", "Show global loot entries for your current zone", AccountStatus::Guide, command_showzonegloballoot) ||
-		command_add("showzonepoints", "Show zone points for current zone", AccountStatus::Guide, command_showzonepoints) ||
+		command_add("show", "List command used to show various things", AccountStatus::Guide, command_show) ||
 		command_add("shutdown", "Shut this zone process down", AccountStatus::GMLeadAdmin, command_shutdown) ||
 		command_add("spawn", "[name] [race] [level] [material] [hp] [gender] [class] [priweapon] [secweapon] [merchantid] - Spawn an NPC", AccountStatus::Steward, command_spawn) ||
 		command_add("spawneditmass", "[Search Criteria] [Edit Option] [Edit Value] [Apply] Mass editing spawn command (Apply is optional, 0 = False, 1 = True, default is False)", AccountStatus::GMLeadAdmin, command_spawneditmass) ||
@@ -391,6 +384,19 @@ int command_init(void)
 				"findspell",
 				"findtask",
 				"findzone",
+			}
+		},
+		{
+			.command = "show",
+			.aliases = {
+				"showbuffs",
+				"shownpcgloballoot",
+				"showskills",
+				"showspells",
+				"showspellslist",
+				"showstats",
+				"showzonegloballoot",
+				"showzonepoints"
 			}
 		},
 	};
@@ -1148,14 +1154,7 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/setstartzone.cpp"
 #include "gm_commands/setstat.cpp"
 #include "gm_commands/setxp.cpp"
-#include "gm_commands/showbuffs.cpp"
-#include "gm_commands/shownpcgloballoot.cpp"
-#include "gm_commands/showskills.cpp"
-#include "gm_commands/showspells.cpp"
-#include "gm_commands/showspellslist.cpp"
-#include "gm_commands/showstats.cpp"
-#include "gm_commands/showzonegloballoot.cpp"
-#include "gm_commands/showzonepoints.cpp"
+#include "gm_commands/show.cpp"
 #include "gm_commands/shutdown.cpp"
 #include "gm_commands/spawn.cpp"
 #include "gm_commands/spawneditmass.cpp"
