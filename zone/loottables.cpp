@@ -299,7 +299,7 @@ void NPC::AddLootDrop(
 	uint32 aug6
 )
 {
-	if (item2 == nullptr) {
+	if (!item2) {
 		return;
 	}
 
@@ -363,7 +363,7 @@ void NPC::AddLootDrop(
 
 	bool found = false; // track if we found an empty slot we fit into
 
-	int foundslot = -1; // for multi-slot items
+	int foundslot = INVALID_INDEX; // for multi-slot items
 
 	const auto* inst = database.CreateItem(
 		item2->ID,
@@ -375,6 +375,10 @@ void NPC::AddLootDrop(
 		aug5,
 		aug6
 	);
+
+	if (!inst) {
+		return;
+	}
 
 	if (loot_drop.equip_item > 0) {
 		uint8 eslot = 0xFF;
@@ -524,7 +528,10 @@ void NPC::AddLootDrop(
 	}
 
 	if (itemlist) {
-		GetInv().PutItem(foundslot, *inst);
+		if (foundslot != INVALID_INDEX) {
+			GetInv().PutItem(foundslot, *inst);
+		}
+
 		itemlist->push_back(item);
 	} else {
 		safe_delete(item);
