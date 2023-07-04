@@ -1444,7 +1444,7 @@ int16 EQ::InventoryProfile::_PutItem(int16 slot_id, ItemInstance* inst)
 	}
 
 	if (result == INVALID_INDEX) {
-		LogError("InventoryProfile::_PutItem: Invalid slot_id specified ({}) with parent slot id ({})", slot_id, parentSlot);
+		LogError("Invalid slot_id specified ({}) with parent slot id ({})", slot_id, parentSlot);
 		InventoryProfile::MarkDirty(inst); // Slot not found, clean up
 	}
 
