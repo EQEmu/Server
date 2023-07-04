@@ -1050,9 +1050,11 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 		// above critical still stands.
 		// Mastery modifier is: 10%/25%/50% for rank one/two/three
 		chance = 95.0f + (float(user_skill - spec->trivial) / 40.0f);
+
 		if (RuleB(Skills, TrivialTradeskillCombinesNoFail)) {
 			chance = 100;
 		}
+
 		MessageString(Chat::Emote, TRADESKILL_TRIVIAL);
 	} else if(chance < 5) {
 		// Minimum chance is always 5
