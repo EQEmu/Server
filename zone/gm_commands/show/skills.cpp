@@ -8,9 +8,9 @@ void ShowSkills(Client *c, const Seperator *sep)
 		t = c->GetTarget()->CastToClient();
 	}
 
-	std::string popup_text;
+	std::string popup_table;
 
-	popup_text += DialogueWindow::TableRow(
+	popup_table += DialogueWindow::TableRow(
 		fmt::format(
 			"{}{}{}{}{}",
 			DialogueWindow::TableCell("ID"),
@@ -23,7 +23,7 @@ void ShowSkills(Client *c, const Seperator *sep)
 
 	for (const auto& s : EQ::skills::GetSkillTypeMap()) {
 		if (t->CanHaveSkill(s.first) && t->MaxSkill(s.first)) {
-			popup_text += DialogueWindow::TableRow(
+			popup_table += DialogueWindow::TableRow(
 				fmt::format(
 					"{}{}{}{}{}",
 					DialogueWindow::TableCell(std::to_string(s.first)),
@@ -36,15 +36,13 @@ void ShowSkills(Client *c, const Seperator *sep)
 		}
 	}
 
-	popup_text = DialogueWindow::Table(popup_text);
-
-	const std::string& popup_title = fmt::format(
-		"Skills for {}",
-		c->GetTargetDescription(t, TargetDescriptionType::UCSelf)
-	);
+	popup_table = DialogueWindow::Table(popup_table);
 
 	c->SendPopupToClient(
-		popup_title.c_str(),
-		popup_text.c_str()
+		fmt::format(
+			"Skills for {}",
+			c->GetTargetDescription(t, TargetDescriptionType::UCSelf)
+		).c_str(),
+		popup_table.c_str()
 	);
 }

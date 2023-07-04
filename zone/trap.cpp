@@ -360,17 +360,17 @@ void EntityList::UpdateAllTraps(bool respawn, bool repopnow)
 	Log(Logs::General, Logs::Traps, "All traps updated.");
 }
 
-void EntityList::GetTrapInfo(Client* client)
+void EntityList::GetTrapInfo(Client* c)
 {
-	uint32 trap_count = 0;
+	uint32 trap_count  = 0;
 	uint32 trap_number = 1;
 
 	for (const auto& trap : trap_list) {
 		auto t = trap.second;
 		if (t->IsTrap()) {
-			bool is_set = (t->chkarea_timer.Enabled() && !t->reset_timer.Enabled());
+			const bool is_set = (t->chkarea_timer.Enabled() && !t->reset_timer.Enabled());
 
-			client->Message(
+			c->Message(
 				Chat::White,
 				fmt::format(
 					"Trap {} | ID: {} Active: {} Coordinates: {:.2f}, {:.2f}, {:.2f}",
@@ -383,7 +383,7 @@ void EntityList::GetTrapInfo(Client* client)
 				).c_str()
 			);
 
-			client->Message(
+			c->Message(
 				Chat::White,
 				fmt::format(
 					"Trap {} | Times Triggered: {} Group: {}",
@@ -394,7 +394,7 @@ void EntityList::GetTrapInfo(Client* client)
 			);
 
 			if (!t->message.empty()) {
-				client->Message(
+				c->Message(
 					Chat::White,
 					fmt::format(
 						"Trap {} | Message: {}",
@@ -410,14 +410,14 @@ void EntityList::GetTrapInfo(Client* client)
 	}
 
 	if (!trap_count) {
-		client->Message(Chat::White, "No traps were found in this zone.");
+		c->Message(Chat::White, "No traps were found.");
 		return;
 	}
 
-	client->Message(
+	c->Message(
 		Chat::White,
 		fmt::format(
-			"{} trap{} found.",
+			"{} Trap{} found.",
 			trap_count,
 			trap_count != 1 ? "s" : ""
 		).c_str()

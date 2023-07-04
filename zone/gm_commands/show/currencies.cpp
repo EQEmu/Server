@@ -1,32 +1,33 @@
-#include "../client.h"
+#include "../../client.h"
+#include "../../dialogue_window.h"
 
-void command_viewcurrencies(Client *c, const Seperator *sep)
+void ShowCurrencies(Client *c, const Seperator *sep)
 {
 	auto t = c;
 	if (c->GetTarget() && c->GetTarget()->IsClient()) {
 		t = c->GetTarget()->CastToClient();
 	}
 
-	const auto platinum = (
+	const uint32 platinum = (
 		t->GetMoney(3, 0) +
 		t->GetMoney(3, 1) +
 		t->GetMoney(3, 2) +
 		t->GetMoney(3, 3)
 	);
 
-	const auto gold = (
+	const uint32 gold = (
 		t->GetMoney(2, 0) +
 		t->GetMoney(2, 1) +
 		t->GetMoney(2, 2)
 	);
 
-	const auto silver = (
+	const uint32 silver = (
 		t->GetMoney(1, 0) +
 		t->GetMoney(1, 1) +
 		t->GetMoney(1, 2)
 	);
 
-	const auto copper = (
+	const uint32 copper = (
 		t->GetMoney(0, 0) +
 		t->GetMoney(0, 1) +
 		t->GetMoney(0, 2)
@@ -57,7 +58,7 @@ void command_viewcurrencies(Client *c, const Seperator *sep)
 		);
 	}
 
-	const auto ebon_crystals = t->GetEbonCrystals();
+	const uint32 ebon_crystals = t->GetEbonCrystals();
 	if (ebon_crystals) {
 		currency_table += DialogueWindow::TableRow(
 			fmt::format(
@@ -68,7 +69,7 @@ void command_viewcurrencies(Client *c, const Seperator *sep)
 		);
 	}
 
-	const auto radiant_crystals = t->GetRadiantCrystals();
+	const uint32 radiant_crystals = t->GetRadiantCrystals();
 	if (radiant_crystals) {
 		currency_table += DialogueWindow::TableRow(
 			fmt::format(
@@ -80,7 +81,7 @@ void command_viewcurrencies(Client *c, const Seperator *sep)
 	}
 
 	for (const auto& a : zone->AlternateCurrencies) {
-		const auto currency_value = t->GetAlternateCurrencyValue(a.id);
+		const uint32 currency_value = t->GetAlternateCurrencyValue(a.id);
 		if (currency_value) {
 			const auto* d = database.GetItem(a.item_id);
 			currency_table += DialogueWindow::TableRow(
@@ -94,7 +95,7 @@ void command_viewcurrencies(Client *c, const Seperator *sep)
 	}
 
 	for (const auto& l : EQ::constants::GetLDoNThemeMap()) {
-		const auto ldon_currency_value = t->GetLDoNPointsTheme(l.first);
+		const uint32 ldon_currency_value = t->GetLDoNPointsTheme(l.first);
 		if (ldon_currency_value) {
 			currency_table += DialogueWindow::TableRow(
 				fmt::format(
@@ -106,7 +107,7 @@ void command_viewcurrencies(Client *c, const Seperator *sep)
 		}
 	}
 
-	auto pvp_points = t->GetPVPPoints();
+	const uint32 pvp_points = t->GetPVPPoints();
 	if (pvp_points) {
 		currency_table += DialogueWindow::TableRow(
 			fmt::format(

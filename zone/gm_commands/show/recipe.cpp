@@ -1,32 +1,33 @@
-#include "../client.h"
-#include "../command.h"
+#include "../../client.h"
+#include "../../command.h"
 #include "../../common/repositories/tradeskill_recipe_repository.h"
 #include "../../common/repositories/tradeskill_recipe_entries_repository.h"
 
-void command_viewrecipe(Client *c, const Seperator *sep)
+void ShowRecipe(Client *c, const Seperator *sep)
 {
-	int arguments = sep->argnum;
-	if (!arguments || !sep->IsNumber(1)) {
-		c->Message(Chat::White, "Command Syntax: #viewrecipe [Recipe ID]");
+	if (!sep->IsNumber(2)) {
+		c->Message(Chat::White, "Command Syntax: #show recipe [Recipe ID]");
 		return;
 	}
 
-	auto recipe_id = static_cast<uint16>(Strings::ToUnsignedInt(sep->arg[1]));
-	auto re = TradeskillRecipeEntriesRepository::GetWhere(
+	const uint16 recipe_id = static_cast<uint16>(Strings::ToUnsignedInt(sep->arg[1]));
+
+	const auto& re = TradeskillRecipeEntriesRepository::GetWhere(
 		database,
 		fmt::format("recipe_id = {} ORDER BY id ASC", recipe_id)
 	);
-	auto r = TradeskillRecipeRepository::GetWhere(
+
+	const auto& r = TradeskillRecipeRepository::GetWhere(
 		database,
 		fmt::format("id = {}", recipe_id)
 	);
 
-	if (re.empty() || r.empty() || !re[0].id || !r[0].id) {
+	if (re.empty() || r.empty()) {
 		c->Message(
 			Chat::White,
 			fmt::format(
 				"Recipe ID {} has no entries or could not be found.",
-				Strings::Commify(std::to_string(recipe_id))
+				Strings::Commify(recipe_id)
 			).c_str()
 		);
 		return;
@@ -36,13 +37,13 @@ void command_viewrecipe(Client *c, const Seperator *sep)
 		Chat::White,
 		fmt::format(
 			"Recipe {} | {}",
-			Strings::Commify(std::to_string(recipe_id)),
+			Strings::Commify(recipe_id),
 			r[0].name
 		).c_str()
 	);
 
-	auto entry_number = 1;
-	bool can_summon_items = c->Admin() >= GetCommandStatus(c, "summonitem");
+	uint32 entry_number = 1;
+	const bool can_summon_items = c->Admin() >= GetCommandStatus(c, "summonitem");
 
 	for (const auto& e : re) {
 		c->Message(
@@ -51,8 +52,22 @@ void command_viewrecipe(Client *c, const Seperator *sep)
 				"Entry {}{} | {}{}",
 				entry_number,
 				e.iscontainer > 0 ? " (Container)" : "",
-				e.item_id > 1000 ? database.CreateItemLink(e.item_id) : EQ::constants::GetObjectTypeName(e.item_id),
-				can_summon_items && e.item_id > 1000 ? fmt::format(" | {}", Saylink::Silent(fmt::format("#si {}", e.item_id), "Summon")) : ""
+				(
+					e.item_id > 1000 ?
+					database.CreateItemLink(e.item_id) :
+					EQ::constants::GetObjectTypeName(e.item_id)
+				),
+				(
+					can_summon_items && e.item_id > 1000 ?
+					fmt::format(
+						" | {}",
+						Saylink::Silent(
+							fmt::format("#si {}", e.item_id),
+							"Summon"
+						)
+					) :
+					""
+				)
 			).c_str()
 		);
 

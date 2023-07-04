@@ -1,11 +1,25 @@
 #include "../client.h"
 #include "show/buffs.cpp"
+#include "show/buried_corpse_count.cpp"
+#include "show/currencies.cpp"
+#include "show/emote.cpp"
+#include "show/hatelist.cpp"
 #include "show/npc_global_loot.cpp"
+#include "show/npc_type.cpp"
+#include "show/peqzone_flags.cpp"
+#include "show/petition.cpp"
+#include "show/petition_info.cpp"
+#include "show/quest_globals.cpp"
+#include "show/recipe.cpp"
 #include "show/skills.cpp"
+#include "show/spawn_status.cpp"
 #include "show/spells.cpp"
 #include "show/spells_list.cpp"
 #include "show/stats.cpp"
+#include "show/traps.cpp"
+#include "show/variable.cpp"
 #include "show/zone_global_loot.cpp"
+#include "show/zone_loot.cpp"
 #include "show/zone_points.cpp"
 
 void command_show(Client *c, const Seperator *sep)
@@ -15,23 +29,38 @@ void command_show(Client *c, const Seperator *sep)
 		std::string u{}; // usage
 		void (*fn)(Client *c, const Seperator *sep) = nullptr; // function
 		std::vector<std::string> a{}; // aliases
+		bool has_parameters { false };
 	};
 
 	std::vector<Cmd> commands = {
 		Cmd{.cmd = "buffs", .u = "buffs", .fn = ShowBuffs, .a = {"#showbuffs"}},
+		Cmd{.cmd = "buried_corpse_count", .u = "buried_corpse_count", .fn = ShowBuriedCorpseCount, .a = {"#getplayerburiedcorpsecount"}},
+		Cmd{.cmd = "currencies", .u = "currencies", .fn = ShowCurrencies, .a = {"#viewcurrencies"}},
+		Cmd{.cmd = "emote", .u = "emote", .fn = ShowEmote, .a = {"#emoteview"}},
+		Cmd{.cmd = "hatelist", .u = "hatelist", .fn = ShowHateList, .a = {"#hatelist"}},
 		Cmd{.cmd = "npc_global_loot", .u = "npc_global_loot", .fn = ShowNPCGlobalLoot, .a = {"#shownpcgloballoot"}},
+		Cmd{.cmd = "npc_type", .u = "npc_type [NPC ID]", .fn = ShowNPCType, .a = {"#viewnpctype"}, .has_parameters = true},
+		Cmd{.cmd = "peqzone_flags", .u = "peqzone_flags", .fn = ShowPEQZoneFlags, .a = {"#peqzone_flags"}},
+		Cmd{.cmd = "petition", .u = "petition", .fn = ShowPetition, .a = {"#listpetition", "#viewpetition"}, .has_parameters = true},
+		Cmd{.cmd = "petition_info", .u = "petition_info", .fn = ShowPetitionInfo, .a = {"#petitioninfo"}, .has_parameters = true},
+		Cmd{.cmd = "quest_globals", .u = "quest_globals", .fn = ShowQuestGlobals, .a = {"#globalview"}},
+		Cmd{.cmd = "recipe", .u = "recipe [Recipe ID]", .fn = ShowRecipe, .a = {"#viewrecipe"}, .has_parameters = true},
 		Cmd{.cmd = "skills", .u = "skills", .fn = ShowSkills, .a = {"#showskills"}},
+		Cmd{.cmd = "spawn_status", .u = "spawn_status [all|disabled|enabled|Spawn ID]", .fn = ShowSpawnStatus, .a = {"#spawnstatus"}, .has_parameters = true},
 		Cmd{.cmd = "spells", .u = "spells [disciplines|spells]", .fn = ShowSpells, .a = {"#showspells"}},
 		Cmd{.cmd = "spells_list", .u = "spells_list", .fn = ShowSpellsList, .a = {"#showspellslist"}},
 		Cmd{.cmd = "stats", .u = "stats", .fn = ShowStats, .a = {"#showstats"}},
+		Cmd{.cmd = "traps", .u = "traps", .fn = ShowTraps, .a = {"#trapinfo"}},
+		Cmd{.cmd = "variable", .u = "variable [Variable Name]", .fn = ShowVariable, .a = {"#getvariable"}, .has_parameters = true},
 		Cmd{.cmd = "zone_global_loot", .u = "zone_global_loot", .fn = ShowZoneGlobalLoot, .a = {"#showzonegloballoot"}},
+		Cmd{.cmd = "zone_loot", .u = "zone_loot", .fn = ShowZoneLoot, .a = {"#viewzoneloot"}, .has_parameters = true},
 		Cmd{.cmd = "zone_points", .u = "zone_points", .fn = ShowZonePoints, .a = {"#showzonepoints"}},
 	};
 
 	// Check for arguments
 	const auto arguments = sep->argnum;
-	if (!arguments && Strings::EqualFold(sep->arg[0], "spells")) {
-		for (const auto &cmd: commands) {
+	for (const auto &cmd: commands) {
+		if (!arguments && !cmd.has_parameters) {
 			c->Message(Chat::White, fmt::format("Usage: #show {}", cmd.u).c_str());
 		}
 		return;

@@ -553,7 +553,7 @@ public:
 		bool add_self_to_other_lists = false
 	);
 
-	void GetTrapInfo(Client* client);
+	void GetTrapInfo(Client* c);
 	bool IsTrapGroupSpawned(uint32 trap_id, uint8 group);
 	void UpdateAllTraps(bool respawn, bool repopnow = false);
 	void ClearTrapPointers();

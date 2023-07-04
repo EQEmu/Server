@@ -127,7 +127,6 @@ int command_init(void)
 		command_add("editmassrespawn", "[name-search] [second-value] - Mass (Zone wide) NPC respawn timer editing command", AccountStatus::GMAdmin, command_editmassrespawn) ||
 		command_add("emote", "[Name|World|Zone] [type] [message] - Send an emote message by name, to the world, or to your zone (^ separator allows multiple messages to be sent at once)", AccountStatus::QuestTroupe, command_emote) ||
 		command_add("emotesearch", "[Search Criteria] - Search for NPC Emotes", AccountStatus::QuestTroupe, command_emotesearch) ||
-		command_add("emoteview", "Lists all NPC Emotes", AccountStatus::QuestTroupe, command_emoteview) ||
 		command_add("emptyinventory", "Clears your or your target's entire inventory (Equipment, General, Bank, and Shared Bank)", AccountStatus::GMImpossible, command_emptyinventory) ||
 		command_add("enablerecipe", "[Recipe ID] - Enables a Recipe", AccountStatus::QuestTroupe, command_enablerecipe) ||
 		command_add("endurance", "Restores your or your target's endurance.", AccountStatus::Guide, command_endurance) ||
@@ -148,12 +147,9 @@ int command_init(void)
 		command_add("gassign", "[Grid ID] - Assign targetted NPC to predefined wandering grid id", AccountStatus::GMAdmin, command_gassign) ||
 		command_add("gearup", "Developer tool to quickly equip yourself or your target", AccountStatus::GMMgmt, command_gearup) ||
 		command_add("gender", "[0/1/2] - Change your or your target's gender to male/female/neuter", AccountStatus::Guide, command_gender) ||
-		command_add("getplayerburiedcorpsecount", "Get your or your target's total number of buried player corpses.", AccountStatus::GMAdmin, command_getplayerburiedcorpsecount) ||
-		command_add("getvariable", "[Variable Name] - Get the value of a variable from the database", AccountStatus::GMMgmt, command_getvariable) ||
 		command_add("ginfo", "get group info on target.", AccountStatus::ApprenticeGuide, command_ginfo) ||
 		command_add("giveitem", "[itemid] [charges] - Summon an item onto your target's cursor. Charges are optional.", AccountStatus::GMMgmt, command_giveitem) ||
 		command_add("givemoney", "[Platinum] [Gold] [Silver] [Copper] - Gives specified amount of money to you or your player target", AccountStatus::GMMgmt, command_givemoney) ||
-		command_add("globalview", "Lists all qglobals in cache if you were to do a quest with this target.", AccountStatus::QuestTroupe, command_globalview) ||
 		command_add("gm", "[On|Off] - Modify your or your target's GM Flag", AccountStatus::QuestTroupe, command_gm) ||
 		command_add("gmspeed", "[On|Off] - Turn GM Speed On or Off for you or your player target", AccountStatus::GMAdmin, command_gmspeed) ||
 		command_add("gmzone", "[Zone ID|Zone Short Name] [Version] [Instance Identifier] - Zones to a private GM instance (Version defaults to 0 and Instance Identifier defaults to 'gmzone' if not used)", AccountStatus::GMAdmin, command_gmzone) ||
@@ -162,7 +158,6 @@ int command_init(void)
 		command_add("grid", "[add/delete] [grid_num] [wandertype] [pausetype] - Create/delete a wandering grid", AccountStatus::GMAreas, command_grid) ||
 		command_add("guild", "Guild manipulation commands. Use argument help for more info.", AccountStatus::Steward, command_guild) ||
 		command_add("haste", "[Percentage] - Set your or your target's GM Bonus Haste (100 is 100% more Attack Speed)", AccountStatus::GMAdmin, command_haste) ||
-		command_add("hatelist", "Display hate list for NPC.", AccountStatus::QuestTroupe, command_hatelist) ||
 		command_add("heal", "Completely heal your target", AccountStatus::Steward, command_heal) ||
 		command_add("help", "[Search Criteria] - List available commands and their description, specify partial command as argument to search", AccountStatus::Player, command_help) ||
 		command_add("heromodel", "[Hero Model] [Slot] - Set your or your target's appearance to a full set of Hero's Forge Armor, if slot is set, sends exact model just to slot.", AccountStatus::GMMgmt, command_heromodel) ||
@@ -183,7 +178,6 @@ int command_init(void)
 		command_add("lastname", "[Last Name] - Set your or your player target's last name (use \"-1\" to remove last name)", AccountStatus::Guide, command_lastname) ||
 		command_add("level", "[Level] - Set your or your target's level", AccountStatus::Steward, command_level) ||
 		command_add("list", "[npcs|players|corpses|doors|objects] [search] - Search entities", AccountStatus::ApprenticeGuide, command_list) ||
-		command_add("listpetition", "List petitions", AccountStatus::Guide, command_listpetition) ||
 		command_add("lootsim", "[npc_type_id] [loottable_id] [iterations] - Runs benchmark simulations using real loot logic to report numbers and data", AccountStatus::GMImpossible, command_lootsim) ||
 		command_add("load_shared_memory", "[shared_memory_name] - Reloads shared memory and uses the input as output", AccountStatus::GMImpossible, command_load_shared_memory) ||
 		command_add("loc", "Print out your or your target's current location and heading", AccountStatus::Player, command_loc) ||
@@ -201,7 +195,6 @@ int command_init(void)
 		command_add("mysql", "[Help|Query] [SQL Query] - Mysql CLI, see 'Help' for options.", AccountStatus::GMImpossible, command_mysql) ||
 		command_add("mystats", "Show details about you or your pet", AccountStatus::Guide, command_mystats) ||
 		command_add("name", "[New Name] - Rename your player target", AccountStatus::GMLeadAdmin, command_name) ||
-		command_add("netstats", "Gets the network stats for a stream.", AccountStatus::GMMgmt, command_netstats) ||
 		command_add("network", "Admin commands for the udp network interface.", AccountStatus::GMImpossible, command_network) ||
 		command_add("npccast", "[targetname/entityid] [spellid] - Causes NPC target to cast spellid on targetname/entityid", AccountStatus::QuestTroupe, command_npccast) ||
 		command_add("npcedit", "[column] [value] - Mega NPC editing command", AccountStatus::GMAdmin, command_npcedit) ||
@@ -222,12 +215,10 @@ int command_init(void)
 		command_add("path", "view and edit pathing", AccountStatus::GMMgmt, command_path) ||
 		command_add("peekinv", "[equip/gen/cursor/poss/limbo/curlim/trib/bank/shbank/allbank/trade/world/all] - Print out contents of your player target's inventory", AccountStatus::GMAdmin, command_peekinv) ||
 		command_add("peqzone", "[Zone ID|Zone Short Name] - Teleports you to the specified zone if you meet the requirements.", AccountStatus::Player, command_peqzone) ||
-		command_add("peqzone_flags", "displays the PEQZone Flags of you or your target", AccountStatus::Player, command_peqzone_flags) ||
 		command_add("permaclass", "[Class ID] - Change your or your player target's class, changed client is disconnected", AccountStatus::QuestTroupe, command_permaclass) ||
 		command_add("permagender", "[Gender ID] - Change your or your player target's gender", AccountStatus::QuestTroupe, command_permagender) ||
 		command_add("permarace", "[Race ID] - Change your or your player target's race", AccountStatus::QuestTroupe, command_permarace) ||
 		command_add("petitems", "View your pet's items if you have one", AccountStatus::ApprenticeGuide, command_petitems) ||
-		command_add("petitioninfo", "[petition number] - Get info about a petition", AccountStatus::ApprenticeGuide, command_petitioninfo) ||
 		command_add("picklock", "Analog for ldon pick lock for the newer clients since we still don't have it working.", AccountStatus::Player, command_picklock) ||
 		command_add("profanity", "Manage censored language.", AccountStatus::GMLeadAdmin, command_profanity) ||
 		command_add("push", "[Back Push] [Up Push] - Lets you do spell push on an NPC", AccountStatus::GMLeadAdmin, command_push) ||
@@ -284,7 +275,6 @@ int command_init(void)
 		command_add("spawn", "[name] [race] [level] [material] [hp] [gender] [class] [priweapon] [secweapon] [merchantid] - Spawn an NPC", AccountStatus::Steward, command_spawn) ||
 		command_add("spawneditmass", "[Search Criteria] [Edit Option] [Edit Value] [Apply] Mass editing spawn command (Apply is optional, 0 = False, 1 = True, default is False)", AccountStatus::GMLeadAdmin, command_spawneditmass) ||
 		command_add("spawnfix", "Find targeted NPC in database based on its X/Y/heading and update the database to make it spawn at your current location/heading.", AccountStatus::GMAreas, command_spawnfix) ||
-		command_add("spawnstatus", "[All|Disabled|Enabled|Spawn ID] - Show respawn timer status", AccountStatus::GMAdmin, command_spawnstatus) ||
 		command_add("stun", "[duration] - Stuns you or your target for duration", AccountStatus::GMAdmin, command_stun) ||
 		command_add("summon", "[Character Name] - Summons your corpse, NPC, or player target, or by character name if specified", AccountStatus::QuestTroupe, command_summon) ||
 		command_add("summonburiedplayercorpse", "Summons the target's oldest buried corpse, if any exist.", AccountStatus::GMAdmin, command_summonburiedplayercorpse) ||
@@ -301,7 +291,6 @@ int command_init(void)
 		command_add("title", "[Title] - Set your or your player target's title (use \"-1\" to remove title)", AccountStatus::Guide, command_title) ||
 		command_add("titlesuffix", "[Title Suffix] - Set your or your player target's title suffix (use \"-1\" to remove title suffix)", AccountStatus::Guide, command_titlesuffix) ||
 		command_add("traindisc", "[level] - Trains all the disciplines usable by the target, up to level specified. (may freeze client for a few seconds)", AccountStatus::GMLeadAdmin, command_traindisc) ||
-		command_add("trapinfo", "Gets infomation about the traps currently spawned in the zone.", AccountStatus::QuestTroupe, command_trapinfo) ||
 		command_add("tune", "Calculate statistical values related to combat.", AccountStatus::GMAdmin, command_tune) ||
 		command_add("undye", "Remove dye from all of your or your target's armor slots", AccountStatus::GMAdmin, command_undye) ||
 		command_add("unfreeze", "Unfreeze your target", AccountStatus::QuestTroupe, command_unfreeze) ||
@@ -314,11 +303,6 @@ int command_init(void)
 		command_add("updatechecksum", "update client checksum", AccountStatus::GMImpossible, command_updatechecksum) ||
 		command_add("uptime", "[zone server id] - Get uptime of worldserver, or zone server if argument provided", AccountStatus::Steward, command_uptime) ||
 		command_add("version", "Display current version of EQEmu server", AccountStatus::Player, command_version) ||
-		command_add("viewcurrencies", "View your or your target's currencies", AccountStatus::GMAdmin, command_viewcurrencies) ||
-		command_add("viewnpctype", "[NPC ID] - Show stats for an NPC by NPC ID", AccountStatus::GMAdmin, command_viewnpctype) ||
-		command_add("viewpetition", "[petition number] - View a petition", AccountStatus::ApprenticeGuide, command_viewpetition) ||
-		command_add("viewrecipe", "[Recipe ID] - Show a recipe's entries", AccountStatus::GMAdmin, command_viewrecipe) ||
-		command_add("viewzoneloot", "[item id] - Allows you to search a zone's loot for a specific item ID. (0 shows all loot in the zone)", AccountStatus::QuestTroupe, command_viewzoneloot) ||
 		command_add("wc", "[Slot ID] [Material] [Hero Forge Model] [Elite Material] - Sets the specified slot for you or your target to a material, Hero Forge Model and Elite Material are optional", AccountStatus::GMMgmt, command_wc) ||
 		command_add("weather", "[0/1/2/3] (Off/Rain/Snow/Manual) - Change the weather", AccountStatus::QuestTroupe, command_weather) ||
 		command_add("who", "[search]", AccountStatus::ApprenticeGuide, command_who) ||
@@ -389,6 +373,14 @@ int command_init(void)
 		{
 			.command = "show",
 			.aliases = {
+				"emoteview",
+				"getplayerburiedcorpsecount",
+				"getvariable",
+				"globalview",
+				"hatelist",
+				"listpetition",
+				"petitioninfo",
+				"peqzone_flags",
 				"showbuffs",
 				"shownpcgloballoot",
 				"showskills",
@@ -396,7 +388,14 @@ int command_init(void)
 				"showspellslist",
 				"showstats",
 				"showzonegloballoot",
-				"showzonepoints"
+				"showzonepoints",
+				"spawnstatus",
+				"trapinfo",
+				"viewcurrencies",
+				"viewnpctype",
+				"viewpetition",
+				"viewrecipe",
+				"viewzoneloot"
 			}
 		},
 	};
@@ -1009,7 +1008,6 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/editmassrespawn.cpp"
 #include "gm_commands/emote.cpp"
 #include "gm_commands/emotesearch.cpp"
-#include "gm_commands/emoteview.cpp"
 #include "gm_commands/emptyinventory.cpp"
 #include "gm_commands/enablerecipe.cpp"
 #include "gm_commands/endurance.cpp"
@@ -1028,12 +1026,9 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/gassign.cpp"
 #include "gm_commands/gearup.cpp"
 #include "gm_commands/gender.cpp"
-#include "gm_commands/getplayerburiedcorpsecount.cpp"
-#include "gm_commands/getvariable.cpp"
 #include "gm_commands/ginfo.cpp"
 #include "gm_commands/giveitem.cpp"
 #include "gm_commands/givemoney.cpp"
-#include "gm_commands/globalview.cpp"
 #include "gm_commands/gm.cpp"
 #include "gm_commands/gmspeed.cpp"
 #include "gm_commands/gmzone.cpp"
@@ -1042,7 +1037,6 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/grid.cpp"
 #include "gm_commands/guild.cpp"
 #include "gm_commands/haste.cpp"
-#include "gm_commands/hatelist.cpp"
 #include "gm_commands/heal.cpp"
 #include "gm_commands/heromodel.cpp"
 #include "gm_commands/hideme.cpp"
@@ -1061,7 +1055,6 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/lastname.cpp"
 #include "gm_commands/level.cpp"
 #include "gm_commands/list.cpp"
-#include "gm_commands/listpetition.cpp"
 #include "gm_commands/lootsim.cpp"
 #include "gm_commands/loc.cpp"
 #include "gm_commands/logs.cpp"
@@ -1078,7 +1071,6 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/mysql.cpp"
 #include "gm_commands/mystats.cpp"
 #include "gm_commands/name.cpp"
-#include "gm_commands/netstats.cpp"
 #include "gm_commands/network.cpp"
 #include "gm_commands/npccast.cpp"
 #include "gm_commands/npcedit.cpp"
@@ -1098,12 +1090,10 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/path.cpp"
 #include "gm_commands/peekinv.cpp"
 #include "gm_commands/peqzone.cpp"
-#include "gm_commands/peqzone_flags.cpp"
 #include "gm_commands/permaclass.cpp"
 #include "gm_commands/permagender.cpp"
 #include "gm_commands/permarace.cpp"
 #include "gm_commands/petitems.cpp"
-#include "gm_commands/petitioninfo.cpp"
 #include "gm_commands/petname.cpp"
 #include "gm_commands/picklock.cpp"
 #include "gm_commands/profanity.cpp"
@@ -1159,7 +1149,6 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/spawn.cpp"
 #include "gm_commands/spawneditmass.cpp"
 #include "gm_commands/spawnfix.cpp"
-#include "gm_commands/spawnstatus.cpp"
 #include "gm_commands/faction_association.cpp"
 #include "gm_commands/stun.cpp"
 #include "gm_commands/summon.cpp"
@@ -1176,7 +1165,6 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/title.cpp"
 #include "gm_commands/titlesuffix.cpp"
 #include "gm_commands/traindisc.cpp"
-#include "gm_commands/trapinfo.cpp"
 #include "gm_commands/tune.cpp"
 #include "gm_commands/undye.cpp"
 #include "gm_commands/unfreeze.cpp"
@@ -1189,11 +1177,6 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/untraindiscs.cpp"
 #include "gm_commands/uptime.cpp"
 #include "gm_commands/version.cpp"
-#include "gm_commands/viewcurrencies.cpp"
-#include "gm_commands/viewnpctype.cpp"
-#include "gm_commands/viewpetition.cpp"
-#include "gm_commands/viewrecipe.cpp"
-#include "gm_commands/viewzoneloot.cpp"
 #include "gm_commands/wc.cpp"
 #include "gm_commands/weather.cpp"
 #include "gm_commands/who.cpp"
