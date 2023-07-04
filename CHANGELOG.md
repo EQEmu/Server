@@ -1,3 +1,15 @@
+## [22.18.0] - 07/04/2023
+
+### Commands
+
+* Add #emotesearch to #find command ([#3480](https://github.com/EQEmu/Server/pull/3480)) @Kinglykrab 2023-07-04
+* Cleanup #copycharacter Command ([#3479](https://github.com/EQEmu/Server/pull/3479)) @Kinglykrab 2023-07-04
+
+### Fixes
+
+* Add chatchannel_reserved_names to a new manifest ([#3482](https://github.com/EQEmu/Server/pull/3482)) @Kinglykrab 2023-07-04
+* Fix issue in zone store of returning reference to local variable ([#3477](https://github.com/EQEmu/Server/pull/3477)) @Kinglykrab 2023-07-04
+
 ## [22.17.0] - 07/03/2023
 
 ### Cleanup/Feature
