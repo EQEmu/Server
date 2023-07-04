@@ -1,3 +1,45 @@
+## [22.17.0] - 07/03/2023
+
+### Cleanup/Feature
+
+* Add support for bots to #showstats/#mystats ([#3427](https://github.com/EQEmu/Server/pull/3427)) @Kinglykrab 2023-07-01
+
+### Code
+
+* Remove LoadItemDBFieldNames() from common/misc.cpp and common/misc.h ([#3473](https://github.com/EQEmu/Server/pull/3473)) @Kinglykrab 2023-07-04
+* Remove handle_npc_single_npc from zone/lua_parser_events.cpp and zone/lua_parser_events.h ([#3467](https://github.com/EQEmu/Server/pull/3467)) @Kinglykrab 2023-07-03
+
+### Database
+
+* Set multi statements off when returning early ([#3462](https://github.com/EQEmu/Server/pull/3462)) @Akkadius 2023-07-01
+
+### Feature
+
+* Add Strings::BeginsWith() and Strings::EndsWith() ([#3471](https://github.com/EQEmu/Server/pull/3471)) @Kinglykrab 2023-07-03
+
+### Fixes
+
+* Add check for underscores in botcreate command ([#3458](https://github.com/EQEmu/Server/pull/3458)) @tuday2 2023-06-29
+* EVENT_LANGUAGE_SKILL_UP in Lua was using EVENT_SKILL_UP logic ([#3466](https://github.com/EQEmu/Server/pull/3466)) @Kinglykrab 2023-07-03
+* Fix _PutItem having a slot_id of -1 on mobs with no items ([#3474](https://github.com/EQEmu/Server/pull/3474)) @Kinglykrab 2023-07-04
+* Fix data type of GetAggroCount() ([#3470](https://github.com/EQEmu/Server/pull/3470)) @Kinglykrab 2023-07-03
+
+### Logging
+
+* Fix logging crash when % are sent through query logs ([#3461](https://github.com/EQEmu/Server/pull/3461)) @Akkadius 2023-07-01
+
+### Quest API
+
+* Add ClearAccountFlag() and GetAccountFlags() to Perl/Lua ([#3469](https://github.com/EQEmu/Server/pull/3469)) @Kinglykrab 2023-07-03
+* Add GetClassAbbreviation() and GetRaceAbbreviation() to Perl/Lua ([#3463](https://github.com/EQEmu/Server/pull/3463)) @Kinglykrab 2023-07-02
+* Add GetClassPlural() and GetRacePlural() to Perl/Lua ([#3468](https://github.com/EQEmu/Server/pull/3468)) @Kinglykrab 2023-07-03
+* Add GetCloseMobList() and CalculateDistance() overload to Perl/Lua ([#3455](https://github.com/EQEmu/Server/pull/3455)) @Kinglykrab 2023-07-02
+* Add Hate Entry Methods to Perl ([#3459](https://github.com/EQEmu/Server/pull/3459)) @Kinglykrab 2023-07-02
+* Add ItemData Class to Perl ([#3465](https://github.com/EQEmu/Server/pull/3465)) @Kinglykrab 2023-07-02
+* Add Spawn2 Class to Perl ([#3456](https://github.com/EQEmu/Server/pull/3456)) @Kinglykrab 2023-07-02
+* Add StatBonuses Class to Perl ([#3460](https://github.com/EQEmu/Server/pull/3460)) @Kinglykrab 2023-07-02
+* Add missing Item Methods to Perl/Lua. ([#3464](https://github.com/EQEmu/Server/pull/3464)) @Kinglykrab 2023-07-02
+
 ## [22.16.0] - 06/27/2023
 
 ### Code
