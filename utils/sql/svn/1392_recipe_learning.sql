@@ -9,4 +9,5 @@ alter table `tradeskill_recipe` add column `must_learn` tinyint not null default
 
 insert into rule_values (ruleset_id, rule_name, rule_value, notes) values
 (1, 'Skills:UseLimitTradeskillSearchSkillDiff', 'true', 'Enables the limit for the maximum difference between trivial and skill for recipe searches and favorites.'),
+(1, 'Skills:TrivialNoFail', 'false', 'Makes all trivial recipes no-fail.'),
 (1, 'Skills:MaxTradeskillSearchSkillDiff', '50', 'The maximum difference in skill between the trivial of an item and the skill of the player if the trivial is higher than the skill. Recipes that have not been learnt or made at least once via the Experiment mode will be removed from searches based on this criteria.');
