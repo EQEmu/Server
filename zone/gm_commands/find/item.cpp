@@ -7,7 +7,7 @@ void FindItem(Client *c, const Seperator *sep)
 		const auto  item_id = Strings::ToUnsignedInt(sep->arg[2]);
 		const auto* item    = database.GetItem(item_id);
 		if (item) {
-			auto summon_links = Saylink::Silent(
+			std::string summon_links = Saylink::Silent(
 				fmt::format(
 					"#si {}",
 					item_id
@@ -33,8 +33,8 @@ void FindItem(Client *c, const Seperator *sep)
 				Chat::White,
 				fmt::format(
 					"{} | {}",
-					database.CreateItemLink(item_id),
-					summon_links
+					summon_links,
+					database.CreateItemLink(item_id)
 				).c_str()
 			);
 
@@ -71,8 +71,8 @@ void FindItem(Client *c, const Seperator *sep)
 	auto found_count = 0;
 
 	for (const auto& e : l) {
-		const auto *item = database.GetItem(e);
-		auto summon_links = Saylink::Silent(
+		const auto* item = database.GetItem(e);
+		std::string summon_links = Saylink::Silent(
 			fmt::format(
 				"#si {}",
 				e
@@ -98,8 +98,8 @@ void FindItem(Client *c, const Seperator *sep)
 			Chat::White,
 			fmt::format(
 				"{} | {}",
-				database.CreateItemLink(e),
-				summon_links
+				summon_links,
+				database.CreateItemLink(e)
 			).c_str()
 		);
 
