@@ -13,8 +13,8 @@ void ShowSpells(Client *c, const Seperator *sep)
 		!is_disciplines &&
 		!is_spells
 	) {
-		c->Message(Chat::White, "Usages: #showspells disciplines - Show your or your target's learned disciplines");
-		c->Message(Chat::White, "Usages: #showspells spells - Show your or your target's memorized spells");
+		c->Message(Chat::White, "Usages: #show spells disciplines - Show your or your target's learned disciplines");
+		c->Message(Chat::White, "Usages: #show spells spells - Show your or your target's memorized spells");
 		return;
 	}
 

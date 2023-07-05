@@ -3,7 +3,6 @@
 void ShowPEQZoneFlags(Client *c, const Seperator *sep)
 {
 	auto t = c;
-
 	if (
 		c->GetTarget() &&
 		c->GetTarget()->IsClient() &&
@@ -14,4 +13,3 @@ void ShowPEQZoneFlags(Client *c, const Seperator *sep)
 
 	t->SendPEQZoneFlagInfo(c);
 }
-

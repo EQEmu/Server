@@ -2,12 +2,12 @@
 
 void ShowLineOfSight(Client *c, const Seperator *sep)
 {
-	if (!c->GetTarget()) {
+	if (!c->GetTarget() || c->GetTarget() == c) {
 		c->Message(Chat::White, "You must have a target to use this command.");
 		return;
 	}
 
-	auto t = c->GetTarget();
+	const auto t = c->GetTarget();
 
 	const bool has_los = c->CheckLosFN(t);
 
@@ -20,4 +20,3 @@ void ShowLineOfSight(Client *c, const Seperator *sep)
 		).c_str()
 	);
 }
-

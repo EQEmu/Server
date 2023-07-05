@@ -14,4 +14,3 @@ void ShowZoneStatus(Client *c, const Seperator *sep)
 	worldserver.SendPacket(pack);
 	delete pack;
 }
-

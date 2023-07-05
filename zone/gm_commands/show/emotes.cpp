@@ -7,10 +7,10 @@ void ShowEmotes(Client *c, const Seperator *sep)
 		return;
 	}
 
-	auto t = c->GetTarget()->CastToNPC();
+	const auto t = c->GetTarget()->CastToNPC();
 
-	uint32 emote_count = 0;
-	uint32 emote_id    = t->GetEmoteID();
+	uint32       emote_count = 0;
+	const uint32 emote_id    = t->GetEmoteID();
 
 	LinkedListIterator<NPC_Emote_Struct *> iterator(zone->NPCEmoteList);
 	iterator.Reset();

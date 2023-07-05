@@ -7,7 +7,7 @@ void ShowNPCStats(Client *c, const Seperator *sep)
 		return;
 	}
 
-	auto t = c->GetTarget()->CastToNPC();
+	const auto t = c->GetTarget()->CastToNPC();
 
 	// Stats
 	t->ShowStats(c);

@@ -9,9 +9,10 @@ void ShowZonePoints(Client *c, const Seperator *sep)
 		}
 	}
 
-	int found_zone_points = 0;
+	uint32 found_count = 0;
 
 	c->Message(Chat::White, "Listing zone points...");
+
 	c->SendChatLineBreak();
 
 	for (auto &p : zone->virtual_zone_point_list) {
@@ -120,13 +121,13 @@ void ShowZonePoints(Client *c, const Seperator *sep)
 			)
 		);
 
-		found_zone_points++;
+		found_count++;
 	}
 
 	LinkedListIterator<ZonePoint *> iterator(zone->zone_point_list);
 	iterator.Reset();
 	while (iterator.MoreElements()) {
-		ZonePoint* p                    = iterator.GetData();
+		const auto &p = iterator.GetData();
 
 		const std::string& zone_long_name = ZoneLongName(p->target_zone_id);
 		const std::string& node_name      = fmt::format("ZonePoint To [{}]", zone_long_name);
@@ -168,11 +169,11 @@ void ShowZonePoints(Client *c, const Seperator *sep)
 
 		iterator.Advance();
 
-		found_zone_points++;
+		found_count++;
 	}
 
-	if (!found_zone_points) {
-		c->Message(Chat::White, "There were no zone points found...");
+	if (!found_count) {
+		c->Message(Chat::White, "There were no zone points found.");
 	}
 
 	c->SendChatLineBreak();

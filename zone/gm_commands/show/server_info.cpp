@@ -104,4 +104,3 @@ void ShowServerInfo(Client *c, const Seperator *sep)
 		popup_text.c_str()
 	);
 }
-

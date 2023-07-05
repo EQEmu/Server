@@ -23,4 +23,3 @@ void ShowIPLookup(Client *c, const Seperator *sep)
 	worldserver.SendPacket(pack);
 	safe_delete(pack);
 }
-

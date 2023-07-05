@@ -23,4 +23,3 @@ void ShowWaypoints(Client *c, const Seperator *sep)
 
 	t->DisplayWaypointInfo(c);
 }
-

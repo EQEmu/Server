@@ -2,12 +2,12 @@
 
 void ShowFieldOfView(Client *c, const Seperator *sep)
 {
-	if (!c->GetTarget() && c->GetTarget() != c) {
+	if (!c->GetTarget() || c->GetTarget() == c) {
 		c->Message(Chat::White, "You must have a target to use this command.");
 		return;
 	}
 
-	auto t = c->GetTarget();
+	const auto t = c->GetTarget();
 
 	const bool is_behind = c->BehindMob(t, c->GetX(), c->GetY());
 
@@ -21,4 +21,3 @@ void ShowFieldOfView(Client *c, const Seperator *sep)
 		).c_str()
 	);
 }
-

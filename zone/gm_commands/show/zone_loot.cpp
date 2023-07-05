@@ -12,26 +12,26 @@ void ShowZoneLoot(Client *c, const Seperator *sep)
 
 	const uint32 search_item_id = Strings::ToUnsignedInt(sep->arg[2]);
 
-	std::vector<std::pair<NPC*, ItemList>> v;
+	std::vector<std::pair<NPC *, ItemList>> v;
 
-	uint32 loot_count = 0;
+	uint32 loot_count  = 0;
 	uint32 loot_number = 1;
 
-	for (auto npc_entity : entity_list.GetNPCList()) {
+	for (auto npc_entity: entity_list.GetNPCList()) {
 		auto il = npc_entity.second->GetItemList();
 		v.emplace_back(std::make_pair(npc_entity.second, il));
 	}
 
-	for (const auto& e : v) {
-		NPC*        n = e.first;
-		const auto& l = e.second;
+	for (const auto &e: v) {
+		NPC        *n = e.first;
+		const auto &l = e.second;
 
 		std::string npc_link;
 		if (n) {
 			const uint32 instance_id = zone->GetInstanceID();
 			const uint32 zone_id     = zone->GetZoneID();
 
-			const std::string& command_link = Saylink::Silent(
+			const std::string &command_link = Saylink::Silent(
 				fmt::format(
 					"#{} {} {} {} {}",
 					(instance_id != 0 ? "zoneinstance" : "zone"),
@@ -51,7 +51,7 @@ void ShowZoneLoot(Client *c, const Seperator *sep)
 			);
 		}
 
-		for (const auto& i : l) {
+		for (const auto &i: l) {
 			if (!search_item_id || i->item_id == search_item_id) {
 				EQ::SayLinkEngine linker;
 				linker.SetLinkType(EQ::saylink::SayLinkLootItem);
@@ -100,4 +100,3 @@ void ShowZoneLoot(Client *c, const Seperator *sep)
 		).c_str()
 	);
 }
-

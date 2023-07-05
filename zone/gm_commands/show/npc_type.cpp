@@ -7,10 +7,10 @@ void ShowNPCType(Client *c, const Seperator *sep)
 		return;
 	}
 
-	const uint32 npc_id        = Strings::ToUnsignedInt(sep->arg[2]);
-	const auto   npc_type_data = content_db.LoadNPCTypesData(npc_id);
+	const uint32 npc_id = Strings::ToUnsignedInt(sep->arg[2]);
+	const auto   d      = content_db.LoadNPCTypesData(npc_id);
 
-	if (!npc_type_data) {
+	if (!d) {
 		c->Message(
 			Chat::White,
 			fmt::format(
@@ -23,7 +23,7 @@ void ShowNPCType(Client *c, const Seperator *sep)
 	}
 
 	auto npc = new NPC(
-		npc_type_data,
+		d,
 		nullptr,
 		c->GetPosition(),
 		GravityBehavior::Water
@@ -33,4 +33,3 @@ void ShowNPCType(Client *c, const Seperator *sep)
 
 	safe_delete(npc);
 }
-

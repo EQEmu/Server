@@ -8,7 +8,7 @@ void ShowVariable(Client *c, const Seperator *sep)
 		return;
 	}
 
-	const std::string& variable = sep->argplus[1];
+	const std::string& variable = sep->argplus[2];
 
 	std::string value;
 	if (!database.GetVariable(variable, value)) {

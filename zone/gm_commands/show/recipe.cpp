@@ -132,4 +132,3 @@ void ShowRecipe(Client *c, const Seperator *sep)
 		entry_number++;
 	}
 }
-

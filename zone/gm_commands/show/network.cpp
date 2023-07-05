@@ -136,4 +136,3 @@ void ShowNetwork(Client *c, const Seperator *sep)
 		popup_table.c_str()
 	);
 }
-

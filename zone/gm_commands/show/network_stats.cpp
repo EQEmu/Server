@@ -3,16 +3,6 @@
 
 void ShowNetworkStats(Client *c, const Seperator *sep)
 {
-	const bool is_full  = sep->arg[2] ? !strcasecmp(sep->arg[2], "full") : false;
-	const bool is_reset = sep->arg[2] ? !strcasecmp(sep->arg[2], "reset") : false;
-
-	if (is_reset) {
-		auto connection = c->Connection();
-		c->Message(Chat::White, "Resetting client stats (packet loss will not read correctly after reset).");
-		connection->ResetStats();
-		return;
-	}
-
 	const auto connection = c->Connection();
 	const auto opts       = connection->GetManager()->GetOptions();
 	const auto eqs_stats  = connection->GetStats();
@@ -252,53 +242,51 @@ void ShowNetworkStats(Client *c, const Seperator *sep)
 		);
 	}
 
-	if (is_full) {
-		popup_table += DialogueWindow::Break(2);
+	popup_table += DialogueWindow::Break(2);
 
-		std::string sent_rows;
+	std::string sent_rows;
 
-		for (int i = 0; i < _maxEmuOpcode; ++i) {
-			const int count = eqs_stats.SentCount[i];
-			if (count) {
-				sent_rows += DialogueWindow::TableRow(
-					DialogueWindow::TableCell(OpcodeNames[i]) +
-					DialogueWindow::TableCell(
-						fmt::format(
-							"{} ({:.2f} Per Second)",
-							Strings::Commify(count),
-							count / sec_since_stats_reset
-						)
+	for (int i = 0; i < _maxEmuOpcode; ++i) {
+		const int count = eqs_stats.SentCount[i];
+		if (count) {
+			sent_rows += DialogueWindow::TableRow(
+				DialogueWindow::TableCell(OpcodeNames[i]) +
+				DialogueWindow::TableCell(
+					fmt::format(
+						"{} ({:.2f} Per Second)",
+						Strings::Commify(count),
+						count / sec_since_stats_reset
 					)
-				);
-			}
+				)
+			);
 		}
-
-		std::string recv_rows;
-
-		for (int i = 0; i < _maxEmuOpcode; ++i) {
-			const int count = eqs_stats.RecvCount[i];
-			if (count) {
-				recv_rows += DialogueWindow::TableRow(
-					DialogueWindow::TableCell(OpcodeNames[i]) +
-					DialogueWindow::TableCell(
-						fmt::format(
-							"{} ({:.2f} Per Second)",
-							Strings::Commify(count),
-							count / sec_since_stats_reset
-						)
-					)
-				);
-			}
-		}
-
-		popup_table += DialogueWindow::TableRow(DialogueWindow::TableCell("Sent Packet Types"));
-
-		popup_table += sent_rows;
-
-		popup_table += DialogueWindow::TableRow(DialogueWindow::TableCell("Received Packet Types"));
-
-		popup_table += recv_rows;
 	}
+
+	std::string recv_rows;
+
+	for (int i = 0; i < _maxEmuOpcode; ++i) {
+		const int count = eqs_stats.RecvCount[i];
+		if (count) {
+			recv_rows += DialogueWindow::TableRow(
+				DialogueWindow::TableCell(OpcodeNames[i]) +
+				DialogueWindow::TableCell(
+					fmt::format(
+						"{} ({:.2f} Per Second)",
+						Strings::Commify(count),
+						count / sec_since_stats_reset
+					)
+				)
+			);
+		}
+	}
+
+	popup_table += DialogueWindow::TableRow(DialogueWindow::TableCell("Sent Packet Types"));
+
+	popup_table += sent_rows;
+
+	popup_table += DialogueWindow::TableRow(DialogueWindow::TableCell("Received Packet Types"));
+
+	popup_table += recv_rows;
 
 	popup_table = DialogueWindow::Table(popup_table);
 
@@ -307,4 +295,3 @@ void ShowNetworkStats(Client *c, const Seperator *sep)
 		popup_table.c_str()
 	);
 }
-

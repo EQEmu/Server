@@ -2,11 +2,12 @@
 
 void ShowSpellsList(Client *c, const Seperator *sep)
 {
-	auto t = c->GetTarget();
-	if (!t || !t->IsNPC()) {
+	if (!c->GetTarget() || !c->GetTarget()->IsNPC()) {
 		c->Message(Chat::White, "You must target an NPC to use this command.");
 		return;
 	}
 
-	t->CastToNPC()->AISpellsList(c);
+	const auto t = c->GetTarget()->CastToNPC();
+
+	t->AISpellsList(c);
 }

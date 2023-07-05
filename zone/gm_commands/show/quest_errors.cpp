@@ -33,4 +33,3 @@ void ShowQuestErrors(Client *c, const Seperator *sep)
 		error_count++;
 	}
 }
-

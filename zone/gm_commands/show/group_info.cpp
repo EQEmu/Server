@@ -87,4 +87,3 @@ void ShowGroupInfo(Client *c, const Seperator *sep)
 		popup_table.c_str()
 	);
 }
-
