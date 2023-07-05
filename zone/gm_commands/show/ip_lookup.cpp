@@ -5,16 +5,18 @@ extern WorldServer worldserver;
 
 void ShowIPLookup(Client *c, const Seperator *sep)
 {
+	const uint32 ip_length = strlen(sep->argplus[2]);
+
 	auto pack = new ServerPacket(
 		ServerOP_IPLookup,
-		sizeof(ServerGenericWorldQuery_Struct) + strlen(sep->argplus[2]) + 1
+		sizeof(ServerGenericWorldQuery_Struct) + ip_length + 1
 	);
 
 	auto s = (ServerGenericWorldQuery_Struct *) pack->pBuffer;
 	strn0cpy(s->from, c->GetName(), sizeof(s->from));
 	s->admin = c->Admin();
 
-	if (strlen(sep->argplus[2])) {
+	if (ip_length) {
 		strn0cpy(s->query, sep->argplus[2], sizeof(s->query));
 	}
 
