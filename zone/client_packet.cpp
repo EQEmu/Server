@@ -3051,18 +3051,18 @@ void Client::Handle_OP_AssistGroup(const EQApplicationPacket *app)
 	EntityId_Struct* eid = (EntityId_Struct*)app->pBuffer;
 	Entity* entity = entity_list.GetID(eid->entity_id);
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_Assist, sizeof(EntityId_Struct));
-	eid = (EntityId_Struct*)outapp->pBuffer;
 	if (entity && entity->IsMob()) {
 		Mob* new_target = entity->CastToMob();
 		if (new_target && (GetGM() ||
 			Distance(m_Position, new_target->GetPosition()) <= TARGETING_RANGE)) {
 			cheat_manager.SetExemptStatus(Assist, true);
+			EQApplicationPacket* outapp = new EQApplicationPacket(OP_Assist, sizeof(EntityId_Struct));
+			eid = (EntityId_Struct*)outapp->pBuffer;
 			eid->entity_id = new_target->GetID();
+			FastQueuePacket(&outapp);
+			safe_delete(outapp);
 		}
 	}
-
-	FastQueuePacket(&outapp);
 }
 
 void Client::Handle_OP_AugmentInfo(const EQApplicationPacket *app)
