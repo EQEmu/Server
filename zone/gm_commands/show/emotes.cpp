@@ -1,6 +1,6 @@
 #include "../../client.h"
 
-void ShowEmote(Client *c, const Seperator *sep)
+void ShowEmotes(Client *c, const Seperator *sep)
 {
 	if (!c->GetTarget() || !c->GetTarget()->IsNPC()) {
 		c->Message(Chat::White, "You must target an NPC to view their emotes.");
