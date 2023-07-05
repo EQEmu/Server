@@ -5,7 +5,7 @@ extern WorldServer worldserver;
 
 void ShowIPLookup(Client *c, const Seperator *sep)
 {
-	const uint32 ip_length = sep->argnum == 2 ? strlen(sep->argplus[2]) : 0;
+	const uint32 ip_length = strlen(sep->argplus[2]);
 
 	auto pack = new ServerPacket(
 		ServerOP_IPLookup,
@@ -17,7 +17,7 @@ void ShowIPLookup(Client *c, const Seperator *sep)
 	s->admin = c->Admin();
 
 	if (ip_length) {
-		strn0cpy(s->query, sep->argplus[2], sizeof(s->query));
+		strcpy(s->query, sep->argplus[2]);
 	}
 
 	worldserver.SendPacket(pack);
