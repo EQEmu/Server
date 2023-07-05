@@ -128,4 +128,3 @@ void command_show(Client *c, const Seperator *sep)
 		c->Message(Chat::White, fmt::format("Usage: #show {}", cmd.u).c_str());
 	}
 }
-
