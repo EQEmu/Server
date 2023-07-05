@@ -6779,16 +6779,14 @@ void Client::Handle_OP_GMSearchCorpse(const EQApplicationPacket *app)
 
 void Client::Handle_OP_GMServers(const EQApplicationPacket *app)
 {
-	if (!worldserver.Connected())
-		Message(Chat::Red, "Error: World server disconnected");
-	else {
-		auto pack = new ServerPacket(ServerOP_ZoneStatus, strlen(GetName()) + 2);
-		memset(pack->pBuffer, (uint8)admin, 1);
-		strcpy((char *)&pack->pBuffer[1], GetName());
-		worldserver.SendPacket(pack);
-		safe_delete(pack);
-	}
-	return;
+	auto pack = new ServerPacket(ServerOP_ZoneStatus, sizeof(ServerZoneStatus_Struct));
+
+	auto z = (ServerZoneStatus_Struct *) pack->pBuffer;
+	z->admin = Admin();
+	strn0cpy(z->name, GetName(), sizeof(z->name));
+
+	worldserver.SendPacket(pack);
+	delete pack;
 }
 
 void Client::Handle_OP_GMSummon(const EQApplicationPacket *app)

@@ -26,189 +26,123 @@ void ShowNetwork(Client *c, const Seperator *sep)
 		std::string popup_table;
 
 		popup_table += DialogueWindow::TableRow(
-			fmt::format(
-				"{}{}",
-				DialogueWindow::TableCell("Option"),
-				DialogueWindow::TableCell("Value")
-			)
+			DialogueWindow::TableCell("Option") +
+			DialogueWindow::TableCell("Value")
 		);
 
 		popup_table += DialogueWindow::TableRow(
-			fmt::format(
-				"{}{}",
-				DialogueWindow::TableCell("Max Packet Size"),
-				DialogueWindow::TableCell(std::to_string(opts.daybreak_options.max_packet_size))
-			)
+			DialogueWindow::TableCell("Max Packet Size") +
+			DialogueWindow::TableCell(Strings::Commify(opts.daybreak_options.max_packet_size))
 		);
 
 		popup_table += DialogueWindow::TableRow(
-			fmt::format(
-				"{}{}",
-				DialogueWindow::TableCell("Max Connection Count"),
-				DialogueWindow::TableCell(std::to_string(opts.daybreak_options.max_connection_count))
-			)
+			DialogueWindow::TableCell("Max Connection Count") +
+			DialogueWindow::TableCell(Strings::Commify(opts.daybreak_options.max_connection_count))
 		);
 
 		popup_table += DialogueWindow::TableRow(
-			fmt::format(
-				"{}{}",
-				DialogueWindow::TableCell("Keep Alive Delay"),
-				DialogueWindow::TableCell(Strings::MillisecondsToTime(opts.daybreak_options.keepalive_delay_ms))
-			)
+			DialogueWindow::TableCell("Keep Alive Delay") +
+			DialogueWindow::TableCell(Strings::MillisecondsToTime(opts.daybreak_options.keepalive_delay_ms))
 		);
 
 		popup_table += DialogueWindow::TableRow(
-			fmt::format(
-				"{}{}",
-				DialogueWindow::TableCell("Resend Delay Factor"),
-				DialogueWindow::TableCell(
-					fmt::format(
-						"{:.2f}",
-						opts.daybreak_options.resend_delay_factor
-					)
+			DialogueWindow::TableCell("Resend Delay Factor") +
+			DialogueWindow::TableCell(
+				fmt::format(
+					"{:.2f}",
+					opts.daybreak_options.resend_delay_factor
 				)
 			)
 		);
 
 		popup_table += DialogueWindow::TableRow(
-			fmt::format(
-				"{}{}",
-				DialogueWindow::TableCell("Resend Delay"),
-				DialogueWindow::TableCell(Strings::MillisecondsToTime(opts.daybreak_options.resend_delay_ms))
-			)
+			DialogueWindow::TableCell("Resend Delay") +
+			DialogueWindow::TableCell(Strings::MillisecondsToTime(opts.daybreak_options.resend_delay_ms))
 		);
 
 		popup_table += DialogueWindow::TableRow(
-			fmt::format(
-				"{}{}",
-				DialogueWindow::TableCell("Resend Delay Minimum"),
-				DialogueWindow::TableCell(Strings::MillisecondsToTime(opts.daybreak_options.resend_delay_min))
-			)
+			DialogueWindow::TableCell("Resend Delay Minimum") +
+			DialogueWindow::TableCell(Strings::MillisecondsToTime(opts.daybreak_options.resend_delay_min))
 		);
 
 		popup_table += DialogueWindow::TableRow(
-			fmt::format(
-				"{}{}",
-				DialogueWindow::TableCell("Resend Delay Maximum"),
-				DialogueWindow::TableCell(Strings::MillisecondsToTime(opts.daybreak_options.resend_delay_max))
-			)
+			DialogueWindow::TableCell("Resend Delay Maximum") +
+			DialogueWindow::TableCell(Strings::MillisecondsToTime(opts.daybreak_options.resend_delay_max))
 		);
 
 		popup_table += DialogueWindow::TableRow(
-			fmt::format(
-				"{}{}",
-				DialogueWindow::TableCell("Connect Delay"),
-				DialogueWindow::TableCell(Strings::MillisecondsToTime(opts.daybreak_options.connect_delay_ms))
-			)
+			DialogueWindow::TableCell("Connect Delay") +
+			DialogueWindow::TableCell(Strings::MillisecondsToTime(opts.daybreak_options.connect_delay_ms))
 		);
 
 		popup_table += DialogueWindow::TableRow(
-			fmt::format(
-				"{}{}",
-				DialogueWindow::TableCell("Connect Stale"),
-				DialogueWindow::TableCell(Strings::MillisecondsToTime(opts.daybreak_options.connect_stale_ms))
-			)
+			DialogueWindow::TableCell("Connect Stale") +
+			DialogueWindow::TableCell(Strings::MillisecondsToTime(opts.daybreak_options.connect_stale_ms))
 		);
 
 		popup_table += DialogueWindow::TableRow(
-			fmt::format(
-				"{}{}",
-				DialogueWindow::TableCell("Stale Connection"),
-				DialogueWindow::TableCell(Strings::MillisecondsToTime(opts.daybreak_options.stale_connection_ms))
-			)
+			DialogueWindow::TableCell("Stale Connection") +
+			DialogueWindow::TableCell(Strings::MillisecondsToTime(opts.daybreak_options.stale_connection_ms))
 		);
 
 		popup_table += DialogueWindow::TableRow(
-			fmt::format(
-				"{}{}",
-				DialogueWindow::TableCell("CRC Length"),
-				DialogueWindow::TableCell(std::to_string(opts.daybreak_options.crc_length))
-			)
+			DialogueWindow::TableCell("CRC Length") +
+			DialogueWindow::TableCell(Strings::Commify(opts.daybreak_options.crc_length))
 		);
 
 		popup_table += DialogueWindow::TableRow(
-			fmt::format(
-				"{}{}",
-				DialogueWindow::TableCell("Hold Size"),
-				DialogueWindow::TableCell(std::to_string(opts.daybreak_options.hold_size))
-			)
+			DialogueWindow::TableCell("Hold Size") +
+			DialogueWindow::TableCell(Strings::Commify(opts.daybreak_options.hold_size))
 		);
 
 		popup_table += DialogueWindow::TableRow(
-			fmt::format(
-				"{}{}",
-				DialogueWindow::TableCell("Hold Length"),
-				DialogueWindow::TableCell(Strings::MillisecondsToTime(opts.daybreak_options.hold_length_ms))
-			)
+			DialogueWindow::TableCell("Hold Length") +
+			DialogueWindow::TableCell(Strings::MillisecondsToTime(opts.daybreak_options.hold_length_ms))
 		);
 
 		popup_table += DialogueWindow::TableRow(
-			fmt::format(
-				"{}{}",
-				DialogueWindow::TableCell("Simulated In Packet Loss"),
-				DialogueWindow::TableCell(std::to_string(opts.daybreak_options.simulated_in_packet_loss))
-			)
+			DialogueWindow::TableCell("Simulated In Packet Loss") +
+			DialogueWindow::TableCell(std::to_string(opts.daybreak_options.simulated_in_packet_loss))
 		);
 
 		popup_table += DialogueWindow::TableRow(
-			fmt::format(
-				"{}{}",
-				DialogueWindow::TableCell("Simulated Out Packet Loss"),
-				DialogueWindow::TableCell(std::to_string(opts.daybreak_options.simulated_out_packet_loss))
-			)
+			DialogueWindow::TableCell("Simulated Out Packet Loss") +
+			DialogueWindow::TableCell(std::to_string(opts.daybreak_options.simulated_out_packet_loss))
 		);
 
 		popup_table += DialogueWindow::TableRow(
-			fmt::format(
-				"{}{}",
-				DialogueWindow::TableCell("Tic Rate (Hz)"),
-				DialogueWindow::TableCell(
-					fmt::format(
-						"{:.2f}",
-						opts.daybreak_options.tic_rate_hertz
-					)
+			DialogueWindow::TableCell("Tic Rate (Hz)") +
+			DialogueWindow::TableCell(
+				fmt::format(
+					"{:.2f}",
+					opts.daybreak_options.tic_rate_hertz
 				)
 			)
 		);
 
 		popup_table += DialogueWindow::TableRow(
-			fmt::format(
-				"{}{}",
-				DialogueWindow::TableCell("Resend Timeout"),
-				DialogueWindow::TableCell(Strings::MillisecondsToTime(opts.daybreak_options.resend_timeout))
-			)
+			DialogueWindow::TableCell("Resend Timeout") +
+			DialogueWindow::TableCell(Strings::MillisecondsToTime(opts.daybreak_options.resend_timeout))
 		);
 
 		popup_table += DialogueWindow::TableRow(
-			fmt::format(
-				"{}{}",
-				DialogueWindow::TableCell("Connection Close Time"),
-				DialogueWindow::TableCell(Strings::MillisecondsToTime(opts.daybreak_options.connection_close_time))
-			)
+			DialogueWindow::TableCell("Connection Close Time") +
+			DialogueWindow::TableCell(Strings::MillisecondsToTime(opts.daybreak_options.connection_close_time))
 		);
 
 		popup_table += DialogueWindow::TableRow(
-			fmt::format(
-				"{}{}",
-				DialogueWindow::TableCell("Encode Passes (1)"),
-				DialogueWindow::TableCell(std::to_string(opts.daybreak_options.encode_passes[0]))
-			)
+			DialogueWindow::TableCell("Encode Passes (1)") +
+			DialogueWindow::TableCell(Strings::Commify(opts.daybreak_options.encode_passes[0]))
 		);
 
 		popup_table += DialogueWindow::TableRow(
-			fmt::format(
-				"{}{}",
-				DialogueWindow::TableCell("Encode Passes (2)"),
-				DialogueWindow::TableCell(std::to_string(opts.daybreak_options.encode_passes[1]))
-			)
+			DialogueWindow::TableCell("Encode Passes (2)") +
+			DialogueWindow::TableCell(Strings::Commify(opts.daybreak_options.encode_passes[1]))
 		);
 
 		popup_table += DialogueWindow::TableRow(
-			fmt::format(
-				"{}{}",
-				DialogueWindow::TableCell("Port"),
-				DialogueWindow::TableCell(std::to_string(opts.daybreak_options.port))
-			)
+			DialogueWindow::TableCell("Port") +
+			DialogueWindow::TableCell(Strings::Commify(opts.daybreak_options.port))
 		);
 
 		popup_table = DialogueWindow::Table(popup_table);
@@ -218,7 +152,8 @@ void ShowNetwork(Client *c, const Seperator *sep)
 			popup_table.c_str()
 		);
 	} else if (is_set) {
-		const std::string& value = arguments == 3 ? sep->arg[3] : std::string();
+		const std::string& value = arguments >= 3 ? sep->arg[3] : std::string();
+
 		if (value.empty()) {
 			c->Message(Chat::White, "Usage: #show network set connect_delay_ms [Value]");
 			c->Message(Chat::White, "Usage: #show network set connect_stale_ms [Value]");

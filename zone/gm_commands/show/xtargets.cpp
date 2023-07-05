@@ -1,20 +1,20 @@
-#include "../client.h"
+#include "../../client.h"
 #include "../../common/data_verification.h"
 
-void command_xtargets(Client *c, const Seperator *sep)
+void ShowXTargets(Client *c, const Seperator *sep)
 {
 	auto t = c;
 	if (c->GetTarget() && c->GetTarget()->IsClient()) {
 		t = c->GetTarget()->CastToClient();
 	}
 
-	auto arguments = sep->argnum;
-	if (!arguments || !sep->IsNumber(1)) {
+	const auto arguments = sep->argnum;
+	if (arguments < 2 || !sep->IsNumber(2)) {
 		t->ShowXTargets(c);
 		return;
 	}
 
-	const auto new_max = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[1]));
+	const auto new_max = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[2]));
 
 	if (!EQ::ValueWithin(new_max, 5, XTARGET_HARDCAP)) {
 		c->Message(

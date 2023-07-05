@@ -10,7 +10,7 @@ void ShowRecipe(Client *c, const Seperator *sep)
 		return;
 	}
 
-	const uint16 recipe_id = static_cast<uint16>(Strings::ToUnsignedInt(sep->arg[1]));
+	const uint16 recipe_id = static_cast<uint16>(Strings::ToUnsignedInt(sep->arg[2]));
 
 	const auto& re = TradeskillRecipeEntriesRepository::GetWhere(
 		database,

@@ -4,13 +4,13 @@ void ShowZoneLoot(Client *c, const Seperator *sep)
 {
 	if (!sep->IsNumber(2)) {
 		c->Message(
-			Chat::Yellow,
+			Chat::White,
 			"Usage: #show zone_loot [Item ID]"
 		);
 		return;
 	}
 
-	const uint32 search_item_id = Strings::ToUnsignedInt(sep->arg[1]);
+	const uint32 search_item_id = Strings::ToUnsignedInt(sep->arg[2]);
 
 	std::vector<std::pair<NPC*, ItemList>> v;
 
@@ -31,7 +31,7 @@ void ShowZoneLoot(Client *c, const Seperator *sep)
 			const uint32 instance_id = zone->GetInstanceID();
 			const uint32 zone_id     = zone->GetZoneID();
 
-			std::string command_link = Saylink::Silent(
+			const std::string& command_link = Saylink::Silent(
 				fmt::format(
 					"#{} {} {} {} {}",
 					(instance_id != 0 ? "zoneinstance" : "zone"),

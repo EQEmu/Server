@@ -1,11 +1,11 @@
-#include "../client.h"
-#include "../object.h"
+#include "../../client.h"
+#include "../../object.h"
 
-void command_peekinv(Client *c, const Seperator *sep)
+void ShowInventory(Client *c, const Seperator *sep)
 {
-	auto arguments = sep->argnum;
-	if (!arguments) {
-		SendPeekInvSubCommands(c);
+	const auto arguments = sep->argnum;
+	if (arguments < 2) {
+		SendShowInventorySubCommands(c);
 		return;
 	}
 
@@ -50,19 +50,19 @@ void command_peekinv(Client *c, const Seperator *sep)
 
 	int scope_mask = peekNone;
 
-	const bool is_all          = !strcasecmp(sep->arg[1], "all");
-	const bool is_all_bank     = !strcasecmp(sep->arg[1], "allbank");
-	const bool is_bank         = !strcasecmp(sep->arg[1], "bank");
-	const bool is_cursor       = !strcasecmp(sep->arg[1], "cursor");
-	const bool is_cursor_limbo = !strcasecmp(sep->arg[1], "curlimbo");
-	const bool is_equipment    = !strcasecmp(sep->arg[1], "equip");
-	const bool is_general      = !strcasecmp(sep->arg[1], "gen");
-	const bool is_limbo        = !strcasecmp(sep->arg[1], "limbo");
-	const bool is_possessions  = !strcasecmp(sep->arg[1], "poss");
-	const bool is_shared_bank  = !strcasecmp(sep->arg[1], "shbank");
-	const bool is_trade        = !strcasecmp(sep->arg[1], "trade");
-	const bool is_tribute      = !strcasecmp(sep->arg[1], "trib");
-	const bool is_world        = !strcasecmp(sep->arg[1], "world");
+	const bool is_all          = !strcasecmp(sep->arg[2], "all");
+	const bool is_all_bank     = !strcasecmp(sep->arg[2], "allbank");
+	const bool is_bank         = !strcasecmp(sep->arg[2], "bank");
+	const bool is_cursor       = !strcasecmp(sep->arg[2], "cursor");
+	const bool is_cursor_limbo = !strcasecmp(sep->arg[2], "curlimbo");
+	const bool is_equipment    = !strcasecmp(sep->arg[2], "equip");
+	const bool is_general      = !strcasecmp(sep->arg[2], "gen");
+	const bool is_limbo        = !strcasecmp(sep->arg[2], "limbo");
+	const bool is_possessions  = !strcasecmp(sep->arg[2], "poss");
+	const bool is_shared_bank  = !strcasecmp(sep->arg[2], "shbank");
+	const bool is_trade        = !strcasecmp(sep->arg[2], "trade");
+	const bool is_tribute      = !strcasecmp(sep->arg[2], "trib");
+	const bool is_world        = !strcasecmp(sep->arg[2], "world");
 
 	if (is_all) {
 		scope_mask = (peekOutOfScope - 1);
@@ -91,7 +91,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 	} else if (is_world) {
 		scope_mask |= peekWorld;
 	} else {
-		SendPeekInvSubCommands(c);
+		SendShowInventorySubCommands(c);
 		return;
 	}
 
@@ -433,18 +433,18 @@ void command_peekinv(Client *c, const Seperator *sep)
 	}
 }
 
-void SendPeekInvSubCommands(Client* c) {
-	c->Message(Chat::White, "Usage: #peekinv equip - Shows items in Equipment slots");
-	c->Message(Chat::White, "Usage: #peekinv gen - Shows items in General slots");
-	c->Message(Chat::White, "Usage: #peekinv cursor - Shows items in Cursor slots");
-	c->Message(Chat::White, "Usage: #peekinv poss - Shows items in Equipment, General, and Cursor slots");
-	c->Message(Chat::White, "Usage: #peekinv limbo - Shows items in Limbo slots");
-	c->Message(Chat::White, "Usage: #peekinv curlim - Shows items in Cursor and Limbo slots");
-	c->Message(Chat::White, "Usage: #peekinv trib - Shows items in Tribute slots");
-	c->Message(Chat::White, "Usage: #peekinv bank - Shows items in Bank slots");
-	c->Message(Chat::White, "Usage: #peekinv shbank - Shows items in Shared Bank slots");
-	c->Message(Chat::White, "Usage: #peekinv allbank - Shows items in Bank and Shared Bank slots");
-	c->Message(Chat::White, "Usage: #peekinv trade - Shows items in Trade slots");
-	c->Message(Chat::White, "Usage: #peekinv world - Shows items in World slots");
-	c->Message(Chat::White, "Usage: #peekinv all - Shows items in all slots");
+void SendShowInventorySubCommands(Client* c) {
+	c->Message(Chat::White, "Usage: #show inventory equip - Shows items in Equipment slots");
+	c->Message(Chat::White, "Usage: #show inventory gen - Shows items in General slots");
+	c->Message(Chat::White, "Usage: #show inventory cursor - Shows items in Cursor slots");
+	c->Message(Chat::White, "Usage: #show inventory poss - Shows items in Equipment, General, and Cursor slots");
+	c->Message(Chat::White, "Usage: #show inventory limbo - Shows items in Limbo slots");
+	c->Message(Chat::White, "Usage: #show inventory curlim - Shows items in Cursor and Limbo slots");
+	c->Message(Chat::White, "Usage: #show inventory trib - Shows items in Tribute slots");
+	c->Message(Chat::White, "Usage: #show inventory bank - Shows items in Bank slots");
+	c->Message(Chat::White, "Usage: #show inventory shbank - Shows items in Shared Bank slots");
+	c->Message(Chat::White, "Usage: #show inventory allbank - Shows items in Bank and Shared Bank slots");
+	c->Message(Chat::White, "Usage: #show inventory trade - Shows items in Trade slots");
+	c->Message(Chat::White, "Usage: #show inventory world - Shows items in World slots");
+	c->Message(Chat::White, "Usage: #show inventory all - Shows items in all slots");
 }

@@ -11,27 +11,21 @@ void ShowSkills(Client *c, const Seperator *sep)
 	std::string popup_table;
 
 	popup_table += DialogueWindow::TableRow(
-		fmt::format(
-			"{}{}{}{}{}",
-			DialogueWindow::TableCell("ID"),
-			DialogueWindow::TableCell("Name"),
-			DialogueWindow::TableCell("Current"),
-			DialogueWindow::TableCell("Max"),
-			DialogueWindow::TableCell("Raw")
-		)
+		DialogueWindow::TableCell("ID") +
+		DialogueWindow::TableCell("Name") +
+		DialogueWindow::TableCell("Current") +
+		DialogueWindow::TableCell("Max") +
+		DialogueWindow::TableCell("Raw")
 	);
 
 	for (const auto& s : EQ::skills::GetSkillTypeMap()) {
 		if (t->CanHaveSkill(s.first) && t->MaxSkill(s.first)) {
 			popup_table += DialogueWindow::TableRow(
-				fmt::format(
-					"{}{}{}{}{}",
-					DialogueWindow::TableCell(std::to_string(s.first)),
-					DialogueWindow::TableCell(s.second),
-					DialogueWindow::TableCell(std::to_string(t->GetSkill(s.first))),
-					DialogueWindow::TableCell(std::to_string(t->MaxSkill(s.first))),
-					DialogueWindow::TableCell(std::to_string(t->GetRawSkill(s.first)))
-				)
+				DialogueWindow::TableCell(std::to_string(s.first)) +
+				DialogueWindow::TableCell(s.second) +
+				DialogueWindow::TableCell(std::to_string(t->GetSkill(s.first))) +
+				DialogueWindow::TableCell(std::to_string(t->MaxSkill(s.first))) +
+				DialogueWindow::TableCell(std::to_string(t->GetRawSkill(s.first)))
 			);
 		}
 	}

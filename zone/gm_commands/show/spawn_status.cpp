@@ -38,7 +38,7 @@ void ShowSpawnStatus(Client *c, const Seperator *sep)
 
 	const uint32 spawn_id = (
 		is_search ?
-		Strings::ToUnsignedInt(sep->arg[1]) :
+		Strings::ToUnsignedInt(sep->arg[2]) :
 		0
 	);
 
