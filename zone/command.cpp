@@ -391,6 +391,7 @@ int command_init(void)
 				"findspell",
 				"findtask",
 				"findzone",
+				"itemsearch"
 			}
 		},
 	};
