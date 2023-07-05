@@ -881,7 +881,7 @@ struct UsertoWorldResponse_Struct {
 struct ServerGenericWorldQuery_Struct {
 	char	from[64];	// charname the query is from
 	int16	admin;		// char's admin level
-	char	query[0];	// text of the query
+	char	query[64];	// text of the query
 };
 
 struct ServerLockZone_Struct {
