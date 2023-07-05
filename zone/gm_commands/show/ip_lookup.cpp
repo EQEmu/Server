@@ -5,7 +5,7 @@ extern WorldServer worldserver;
 
 void ShowIPLookup(Client *c, const Seperator *sep)
 {
-	const uint32 ip_length = strlen(sep->argplus[2]);
+	const uint32 ip_length = sep->argnum == 2 ? strlen(sep->argplus[2]) : 0;
 
 	auto pack = new ServerPacket(
 		ServerOP_IPLookup,
