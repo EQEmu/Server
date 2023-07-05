@@ -2760,7 +2760,7 @@ void Raid::SendRaidAssistTarget()
 	{
 		auto player = entity_list.GetMob(main_assister_pcs[MAIN_ASSIST_1_SLOT]);
 		if (player) {
-			target = entity_list.GetMob(main_assister_pcs[MAIN_ASSIST_1_SLOT])->GetTarget();
+			target = player->GetTarget();
 			if (target) {
 				assist_target_id = target->GetID();
 				number = MAIN_ASSIST_1;
@@ -2770,7 +2770,7 @@ void Raid::SendRaidAssistTarget()
 	if (!assist_target_id && strlen(main_assister_pcs[MAIN_ASSIST_2_SLOT]) > 0) {
 		auto player = entity_list.GetMob(main_assister_pcs[MAIN_ASSIST_2_SLOT]);
 		if (player) {
-			target = entity_list.GetMob(main_assister_pcs[MAIN_ASSIST_2_SLOT])->GetTarget();
+			target = player->GetTarget();
 			if (target) {
 				assist_target_id = target->GetID();
 				number = MAIN_ASSIST_2;
@@ -2780,7 +2780,7 @@ void Raid::SendRaidAssistTarget()
 	if (!assist_target_id && strlen(main_assister_pcs[MAIN_ASSIST_3_SLOT]) > 0) {
 		auto player = entity_list.GetMob(main_assister_pcs[MAIN_ASSIST_3_SLOT]);
 		if (player) {
-			target = entity_list.GetMob(main_assister_pcs[MAIN_ASSIST_3_SLOT])->GetTarget();
+			target = player->GetTarget();
 			if (target) {
 				assist_target_id = target->GetID();
 				number = MAIN_ASSIST_3;
@@ -2817,7 +2817,7 @@ void Raid::SendAssistTarget(Client* c)
 	{
 		auto player = entity_list.GetMob(main_assister_pcs[MAIN_ASSIST_1_SLOT]);
 		if (player) {
-			target = entity_list.GetMob(main_assister_pcs[MAIN_ASSIST_1_SLOT])->GetTarget();
+			target = player->GetTarget();
 			if (target) {
 				assist_target_id = target->GetID();
 				number = MAIN_ASSIST_1;
@@ -2827,7 +2827,7 @@ void Raid::SendAssistTarget(Client* c)
 	if (!assist_target_id && strlen(main_assister_pcs[MAIN_ASSIST_2_SLOT]) > 0) {
 		auto player = entity_list.GetMob(main_assister_pcs[MAIN_ASSIST_2_SLOT]);
 		if (player) {
-			target = entity_list.GetMob(main_assister_pcs[MAIN_ASSIST_2_SLOT])->GetTarget();
+			target = player->GetTarget();
 			if (target) {
 				assist_target_id = target->GetID();
 				number = MAIN_ASSIST_2;
@@ -2837,7 +2837,7 @@ void Raid::SendAssistTarget(Client* c)
 	if (!assist_target_id && strlen(main_assister_pcs[MAIN_ASSIST_3_SLOT]) > 0) {
 		auto player = entity_list.GetMob(main_assister_pcs[MAIN_ASSIST_3_SLOT]);
 		if (player) {
-			target = entity_list.GetMob(main_assister_pcs[MAIN_ASSIST_3_SLOT])->GetTarget();
+			target = player->GetTarget();
 			if (target) {
 				assist_target_id = target->GetID();
 				number = MAIN_ASSIST_3;
