@@ -101,6 +101,16 @@ typedef enum {
 	MAIN_MARKER_3 = 3,
 }MainMarkerType;
 
+enum {
+	ClearDelegate = 1,
+	SetDelegate = 0,
+	FindNextRaidMainMarkerSlot = 1,
+	FindNextRaidMainAssisterSlot = 2,
+	DELEGATE_OFF = 0,
+	DELEGATE_ON  = 1
+};
+
+
 constexpr uint8_t MAX_RAID_GROUPS = 12;
 constexpr uint8_t MAX_RAID_MEMBERS = 72;
 const uint32 RAID_GROUPLESS = 0xFFFFFFFF;
@@ -221,7 +231,7 @@ public:
 	void	SendEndurancePacketFrom(Mob *mob);
 	void	RaidSay(const char *msg, Client *c, uint8 language, uint8 lang_skill);
 	void	RaidGroupSay(const char *msg, Client *c, uint8 language, uint8 lang_skill);
-	void    SaveRaidNote(const char* who, const char* note);
+	void    SaveRaidNote(std::string who, std::string note);
 	std::vector<RaidMember> GetMembersWithNotes();
 	void	DelegateAbilityAssist(Mob* mob, const char* who);
 	void	DelegateAbilityMark(Mob* mob, const char* who);
@@ -229,7 +239,7 @@ public:
 	void    UpdateXTargetType(XTargetType Type, Mob* m, const char* Name = (const char*)nullptr);
 	int     FindNextRaidDelegateSlot(int option);
 	void    UpdateXtargetMarkedNPC();
-	void    RaidClearNPCMarks(const char* client_name);
+	void    RaidClearNPCMarks(Client* c);
 	void    RemoveRaidDelegates(const char* delegatee);
 	void	UpdateRaidXTargets();
 

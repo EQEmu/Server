@@ -3055,16 +3055,9 @@ void Client::Handle_OP_AssistGroup(const EQApplicationPacket *app)
 			cheat_manager.SetExemptStatus(Assist, true);
 			eid->entity_id = new_target->GetID();
 		}
-		else {
-			eid->entity_id = 0;
-		}
-	}
-	else {
-		eid->entity_id = 0;
 	}
 
 	FastQueuePacket(&outapp);
-	return;
 }
 
 void Client::Handle_OP_AugmentInfo(const EQApplicationPacket *app)
@@ -16358,14 +16351,18 @@ void Client::Handle_OP_RaidDelegateAbility(const EQApplicationPacket* app)
 	{
 	case RaidDelegateMainAssist: 
 	{
-		auto r = entity_list.GetRaidByName(this->GetName());
-		r->DelegateAbilityAssist(this, das->Name);
+		auto r = GetRaid();
+		if (r) {
+			r->DelegateAbilityAssist(this, das->Name);
+		}
 		break;
 	}
 	case RaidDelegateMainMarker: 
 	{
-		auto r = entity_list.GetRaidByName(this->GetName());
-		r->DelegateAbilityMark(this, das->Name);
+		auto r = GetRaid();
+		if (r) {
+			r->DelegateAbilityMark(this, das->Name);
+		}
 		break;
 	}
 	default:
@@ -16376,12 +16373,14 @@ void Client::Handle_OP_RaidDelegateAbility(const EQApplicationPacket* app)
 
 void Client::Handle_OP_RaidClearNPCMarks(const EQApplicationPacket* app)
 {
-	if (app->size != 0)	{
+	if (app->size != 0) {
 		LogDebug("Size mismatch in OP_RaidClearNPCMark expected [{}] got [{}]", 0, app->size);
 		DumpPacket(app);
 		return;
 	}
 
-	auto r = entity_list.GetRaidByName(GetName());
-	r->RaidClearNPCMarks(GetName());
+	auto r = GetRaid();
+	if (r) {
+		r->RaidClearNPCMarks(this);
+	}
 }

@@ -18,6 +18,8 @@
 
 #include "../common/strings.h"
 #include "../common/events/player_event_logs.h"
+#include "../common/repositories/raid_details_repository.h"
+#include "../common/repositories/raid_members_repository.h"
 
 #include "client.h"
 #include "entity.h"
@@ -2258,19 +2260,19 @@ void Raid::SetNewRaidLeader(uint32 i)
 	}
 }
 
-void Raid::SaveRaidNote(const char* who, const char* note) {
-
-	if (strlen(who) == 0 || strlen(note) == 0) {
+void Raid::SaveRaidNote(std::string who, std::string note) 
+{
+	if (who.empty() || note.empty()) {
 		return;
 	}
 
-	std::string query = StringFormat("UPDATE raid_members SET note = '%s' WHERE raidid = %lu AND name = '%s'",
-		Strings::Escape(note).c_str(),
-		GetID(),
-		Strings::Escape(who).c_str()
-	);
-	auto results = database.QueryDatabase(query);
-
+	auto result = RaidMembersRepository::UpdateRaidNote(database, GetID(), note, who);
+	if (!result) {
+		LogError("Unable to update the raid note for player [{}] in guild [{}].",
+			who,
+			GetID()
+		);
+	}
 }
 
 std::vector<RaidMember> Raid::GetMembersWithNotes()
@@ -2313,7 +2315,7 @@ void Raid::DelegateAbilityAssist(Mob* delegator, const char* delegatee)
 {
 	auto raid_delegatee = entity_list.GetRaidByName(delegatee);
 	if (!raid_delegatee) {
-		delegator->CastToClient()->MessageString(Chat::Cyan, 5082, delegatee);
+		delegator->CastToClient()->MessageString(Chat::Cyan, NOT_IN_YOUR_RAID, delegatee);
 		return;
 	}
 	uint32 raid_delegatee_id = raid_delegatee->GetID();
@@ -2344,40 +2346,40 @@ void Raid::DelegateAbilityAssist(Mob* delegator, const char* delegatee)
 	if (ma) {
 		das->Action = ClearDelegate;
 		memset(main_assister_pcs[ma - 1], 0, 64);
-		rm->main_assister = 0;
-		std::string query = StringFormat("UPDATE raid_members SET is_assister = 0 WHERE raidid = %i AND name= '%s';",
+		rm->main_assister = DELEGATE_OFF;
+		auto result = RaidMembersRepository::UpdateRaidAssister(
+			database,
 			GetID(),
-			delegatee
+			delegatee,
+			DELEGATE_OFF
 		);
-		auto results = database.QueryDatabase(query);
-		if (!results.Success()) {
-			LogError("Unable to clear raid main assister for player: [{}] with error [{}]\n",
-				delegatee,
-				results.ErrorMessage().c_str()
+		if (!result) {
+			LogError("Unable to clear raid main assister for player: [{}].",
+				delegatee
 			);
 		}
 	}
 	else {
-		if (slot >= 0) {
+		if (slot >= MAIN_ASSIST_1_SLOT) {
 			strcpy(main_assister_pcs[slot], delegatee);
 			rm->main_assister = slot + 1;
 			das->Action = SetDelegate;	
-			std::string query = StringFormat("UPDATE raid_members SET is_assister = %i WHERE raidid = %i AND name= '%s';",
-				slot + 1,
-				this->GetID(),
-				delegatee
+			auto result = RaidMembersRepository::UpdateRaidAssister(
+				database,
+				GetID(),
+				delegatee,
+				slot + 1
 			);
-			auto results = database.QueryDatabase(query);
-			if (!results.Success())
-				LogError("Unable to set raid main assist for player: [{}] slot: [{}] with error [{}]\n",
+			if (!result) {
+				LogError("Unable to set raid main assister for player: [{}] to [{}].",
 					delegatee,
-					slot + 1,
-					results.ErrorMessage().c_str()
+					slot + 1
 				);
+			}
 		}
 	}
 	das->DelegateAbility = RaidDelegateMainAssist;
-	das->MemberNumber = 0;
+	das->MemberNumber = slot + 1;
 	das->EntityID = c->GetID();
 	strcpy(das->Name, delegatee);
 	QueuePacket(outapp);
@@ -2449,7 +2451,7 @@ void Raid::DelegateAbilityMark(Mob* delegator, const char* delegatee)
 {
 	auto raid_delegatee = entity_list.GetRaidByName(delegatee);
 	if (!raid_delegatee) {
-		delegator->CastToClient()->MessageString(Chat::Cyan, 5082, delegatee);
+		delegator->CastToClient()->MessageString(Chat::Cyan, NOT_IN_YOUR_RAID, delegatee);
 		return;
 	}
 	uint32 raid_delegatee_id = raid_delegatee->GetID();
@@ -2481,16 +2483,16 @@ void Raid::DelegateAbilityMark(Mob* delegator, const char* delegatee)
 	if (mm) {
 		das->Action = ClearDelegate;
 		memset(main_marker_pcs[mm - 1], 0, 64);
-		rm->main_marker = 0;
-		std::string query = StringFormat("UPDATE raid_members SET is_marker = 0 WHERE raidid = %i AND name= '%s';",
+		rm->main_marker = DELEGATE_OFF;
+		auto result = RaidMembersRepository::UpdateRaidMarker(
+			database,
 			GetID(),
-			delegatee
+			delegatee,
+			DELEGATE_OFF
 		);
-		auto results = database.QueryDatabase(query);
-		if (!results.Success()) {
-			LogError("Unable to clear raid main marker for player: [{}] with error [{}]\n",
-				delegatee,
-				results.ErrorMessage().c_str()
+		if (!result) {
+			LogError("Unable to clear rain main marker for player: [{}].",
+				delegatee
 			);
 		}
 	}
@@ -2499,17 +2501,16 @@ void Raid::DelegateAbilityMark(Mob* delegator, const char* delegatee)
 			strcpy(main_marker_pcs[slot], c->GetName());
 			rm->main_marker = slot + 1;
 			das->Action = SetDelegate;
-			std::string query = StringFormat("UPDATE raid_members SET is_marker = %i WHERE raidid = %i AND name= '%s';",
-				slot + 1,
-				this->GetID(),
-				delegatee
+			auto result = RaidMembersRepository::UpdateRaidMarker(
+				database,
+				GetID(),
+				delegatee,
+				slot + 1
 			);
-			auto results = database.QueryDatabase(query);
-			if (!results.Success()) {
-				LogError("Unable to set raid main marker for player: [{}] slot: [{}] with error [{}]\n",
+			if (!result) {
+				LogError("Unable to set raid main marker for player: [{}] to [{}].",
 					delegatee,
-					slot + 1,
-					results.ErrorMessage().c_str()
+					slot + 1
 				);
 			}
 		}
@@ -2524,9 +2525,7 @@ void Raid::DelegateAbilityMark(Mob* delegator, const char* delegatee)
 
 int Raid::FindNextRaidDelegateSlot(int option) 
 {
-	//option 1 FindNextRaidMainMarkerSlot
-	//option 2 FindNextRaidMainAssisterSlot
-	if (option == 1) {
+	if (option == FindNextRaidMainMarkerSlot) {
 		for (int i = 0; i < MAX_NO_RAID_MAIN_MARKERS; i++) {
 			if (strlen(main_marker_pcs[i]) == 0) {
 					return i;
@@ -2534,7 +2533,7 @@ int Raid::FindNextRaidDelegateSlot(int option)
 		}
 		return -1;		
 	}
-	else if (option == 2) {
+	else if (option == FindNextRaidMainAssisterSlot) {
 		for (int i = 0; i < MAX_NO_RAID_MAIN_ASSISTERS; i++) {
 			if (strlen(main_assister_pcs[i]) == 0) {
 				return i;
@@ -2583,18 +2582,17 @@ void Raid::RaidMarkNPC(Mob* mob, uint32 parameter)
 		auto cname = c->GetCleanName();
 		if (strcasecmp(main_marker_pcs[i], cname) == 0 || strcasecmp(leadername, cname) == 0) {
 			marked_npcs[parameter - 1] = c->GetTarget()->GetID();
-
-			std::string query = StringFormat("UPDATE raid_details SET marked_npc%i = %i WHERE raidid = %i;",
+			auto result = RaidDetailsRepository::UpdateRaidMarkedNPC(
+				database,
+				GetID(),
 				parameter,
-				marked_npcs[parameter - 1],
-				this->GetID()
+				marked_npcs[parameter - 1]
 			);
-			auto results = database.QueryDatabase(query);
-			if (!results.Success()) {
-				LogError("Unable to set MarkedNPC{} from slot: [{}] with error [{}]\n",
+			if (!result) {
+				LogError("Unable to set MarkedNPC{} from slot: [{}] for guild [{}].",
 					parameter,
 					parameter - 1,
-					results.ErrorMessage().c_str()
+					GetID()
 				);
 			}
 
@@ -2627,27 +2625,32 @@ void Raid::UpdateXtargetMarkedNPC()
 	}
 }
 
-void Raid::RaidClearNPCMarks(const char* client_name) 
+void Raid::RaidClearNPCMarks(Client* c) 
 {
-	auto mob_id = entity_list.GetMob(client_name)->GetID();
+	auto mob_id = c->GetID();
 
-		if (strcasecmp(main_marker_pcs[MAIN_MARKER_1_SLOT], client_name) || strcasecmp(main_marker_pcs[MAIN_MARKER_2_SLOT], client_name) || strcasecmp(main_marker_pcs[MAIN_MARKER_3_SLOT], client_name)) {
+		if (Strings::EqualFold(main_marker_pcs[MAIN_MARKER_1_SLOT], c->GetCleanName()) || Strings::EqualFold(main_marker_pcs[MAIN_MARKER_2_SLOT], c->GetCleanName()) || Strings::EqualFold(main_marker_pcs[MAIN_MARKER_3_SLOT], c->GetCleanName())) {
 			for (int i = 0; i < MAX_MARKED_NPCS; i++) {
 				if (marked_npcs[i]) {
 					auto npc_name = entity_list.GetNPCByID(marked_npcs[i])->GetCleanName();
 					RaidMessageString(nullptr, Chat::Cyan, RAID_NO_LONGER_MARKED, npc_name);
 				}
 				marked_npcs[i] = 0;
-			}
-			std::string query = StringFormat("UPDATE raid_details SET marked_npc1 = 0, marked_npc2 = 0, marked_npc3 = 0  WHERE raidid = %i;", 
-				GetID()
-			);
-			auto results = database.QueryDatabase(query);
-			if (!results.Success()) {
-				LogError("Unable to clear MarkedNPC marks with error [{}]\n",
-					results.ErrorMessage().c_str()
+				auto result = RaidDetailsRepository::UpdateRaidMarkedNPC(
+					database,
+					GetID(),
+					i + 1,
+					0
 				);
+				if (!result) {
+					LogError("Unable to clear MarkedNPC{} from slot: [{}] for guild [{}].",
+						i + 1,
+						i,
+						GetID()
+					);
+				}
 			}
+
 			auto outapp = new EQApplicationPacket(OP_RaidClearNPCMarks, sizeof(MarkNPC_Struct));
 			MarkNPC_Struct* mnpcs = (MarkNPC_Struct*)outapp->pBuffer;
 			mnpcs->TargetID = 0;
@@ -2657,7 +2660,7 @@ void Raid::RaidClearNPCMarks(const char* client_name)
 			UpdateXtargetMarkedNPC();
 		}
 		else {
-			entity_list.GetClientByID(mob_id)->MessageString(Chat::Cyan, NOT_DELEGATED_MARKER);
+			c->MessageString(Chat::Cyan, NOT_DELEGATED_MARKER);
 		}
 }
 
@@ -2855,7 +2858,7 @@ void Raid::SendAssistTarget(Client* c)
 bool Raid::IsAssister(const char* who) 
 {
 	for (int i = 0; i < MAX_NO_RAID_MAIN_ASSISTERS; i++) {
-		if (strcasecmp(main_assister_pcs[i], who) == 0) {
+		if (Strings::EqualFold(main_assister_pcs[i], who)) {
 			return 1;
 		}
 	}
@@ -2912,7 +2915,7 @@ void Raid::SendRaidAssister(const char* assister)
 bool Raid::IsMarker(const char* who)
 {
 	for (int i = 0; i < MAX_NO_RAID_MAIN_MARKERS; i++) {
-		if (strcasecmp(main_marker_pcs[i], who) == 0) {
+		if (Strings::EqualFold(main_marker_pcs[i], who)) {
 			return 1;
 		}
 	}
