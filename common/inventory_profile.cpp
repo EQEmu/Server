@@ -353,7 +353,7 @@ bool EQ::InventoryProfile::SwapItem(
 				fail_state = swapRaceClass;
 				return false;
 			}
-			if (deity_id && source_item->Deity && !(deity::ConvertDeityTypeToDeityTypeBit((deity::DeityType)deity_id) & source_item->Deity)) {
+			if (deity_id && source_item->Deity && !(deity::GetDeityBitmask((deity::DeityType)deity_id) & source_item->Deity)) {
 				fail_state = swapDeity;
 				return false;
 			}
@@ -379,7 +379,7 @@ bool EQ::InventoryProfile::SwapItem(
 				fail_state = swapRaceClass;
 				return false;
 			}
-			if (deity_id && destination_item->Deity && !(deity::ConvertDeityTypeToDeityTypeBit((deity::DeityType)deity_id) & destination_item->Deity)) {
+			if (deity_id && destination_item->Deity && !(deity::GetDeityBitmask((deity::DeityType)deity_id) & destination_item->Deity)) {
 				fail_state = swapDeity;
 				return false;
 			}
@@ -1444,7 +1444,7 @@ int16 EQ::InventoryProfile::_PutItem(int16 slot_id, ItemInstance* inst)
 	}
 
 	if (result == INVALID_INDEX) {
-		LogError("InventoryProfile::_PutItem: Invalid slot_id specified ({}) with parent slot id ({})", slot_id, parentSlot);
+		LogError("Invalid slot_id specified ({}) with parent slot id ({})", slot_id, parentSlot);
 		InventoryProfile::MarkDirty(inst); // Slot not found, clean up
 	}
 

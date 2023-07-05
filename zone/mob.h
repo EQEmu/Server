@@ -523,7 +523,7 @@ public:
 	virtual inline uint8 GetBaseGender() const { return base_gender; }
 	virtual uint16 GetFactionRace();
 	virtual inline uint16 GetDeity() const { return deity; }
-	virtual EQ::deity::DeityTypeBit GetDeityBit() { return EQ::deity::ConvertDeityTypeToDeityTypeBit((EQ::deity::DeityType)deity); }
+	virtual EQ::deity::DeityTypeBit GetDeityBit() { return EQ::deity::GetDeityBitmask((EQ::deity::DeityType)deity); }
 	inline uint16 GetRace() const { return race; }
 	inline uint16 GetModel() const { return (use_model == 0) ? race : use_model; }
 	inline uint8 GetGender() const { return gender; }
@@ -801,8 +801,6 @@ public:
 	//Util
 	static uint32 RandomTimer(int min, int max);
 	static uint8 GetDefaultGender(uint16 in_race, uint8 in_gender = 0xFF);
-	static bool IsPlayerClass(uint16 in_class);
-	static bool IsPlayerRace(uint16 in_race);
 	EQ::skills::SkillType GetSkillByItemType(int ItemType);
 	uint8 GetItemTypeBySkill(EQ::skills::SkillType skill);
 	virtual void MakePet(uint16 spell_id, const char* pettype, const char *petname = nullptr);
@@ -811,9 +809,9 @@ public:
 	char GetCasterClass() const;
 	uint8 GetArchetype() const;
 	void SetZone(uint32 zone_id, uint32 instance_id);
+	void SendStatsWindow(Client* c, bool use_window);
 	void ShowStats(Client* client);
-	void ShowBuffs(Client* client);
-	void ShowBuffList(Client* client);
+	void ShowBuffs(Client* c);
 	bool PlotPositionAroundTarget(Mob* target, float &x_dest, float &y_dest, float &z_dest, bool lookForAftArc = true);
 	bool PlotPositionOnArcInFrontOfTarget(Mob *target, float &x_dest, float &y_dest, float &z_dest, float distance, float min_deg = 5.0f, float max_deg = 150.0f);
 	bool PlotPositionOnArcBehindTarget(Mob *target, float &x_dest, float &y_dest, float &z_dest, float distance);
@@ -1205,6 +1203,7 @@ public:
 	void				RotateToRunning(float new_heading);
 	void				StopNavigation();
 	float				CalculateDistance(float x, float y, float z);
+	float				CalculateDistance(Mob* mob);
 	float				GetGroundZ(float new_x, float new_y, float z_offset=0.0);
 	void				SendTo(float new_x, float new_y, float new_z);
 	void				SendToFixZ(float new_x, float new_y, float new_z);
@@ -1331,6 +1330,9 @@ public:
 	inline uint32 GetEmoteID() { return emoteid; }
 
 	bool HasSpellEffect(int effect_id);
+
+	std::string GetRacePlural();
+	std::string GetClassPlural();
 
 	//Command #Tune functions
 	void TuneGetStats(Mob* defender, Mob *attacker);

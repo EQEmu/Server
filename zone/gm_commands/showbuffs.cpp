@@ -2,11 +2,11 @@
 
 void command_showbuffs(Client *c, const Seperator *sep)
 {
-	if (c->GetTarget() == 0) {
-		c->CastToMob()->ShowBuffs(c);
+	Mob* t = c;
+	if (c->GetTarget()) {
+		t = c->GetTarget();
 	}
-	else {
-		c->GetTarget()->CastToMob()->ShowBuffs(c);
-	}
+
+	t->ShowBuffs(c);
 }
 

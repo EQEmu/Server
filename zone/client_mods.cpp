@@ -649,7 +649,7 @@ int64 Client::CalcBaseMana()
 int64 Client::CalcBaseManaRegen()
 {
 	uint8 clevel = GetLevel();
-	int32 regen = 0;
+	int64 regen = 0;
 	if (IsSitting() || (GetHorseId() != 0)) {
 		if (HasSkill(EQ::skills::SkillMeditate)) {
 			regen = (((GetSkill(EQ::skills::SkillMeditate) / 10) + (clevel - (clevel / 4))) / 4) + 4;
@@ -666,7 +666,7 @@ int64 Client::CalcBaseManaRegen()
 
 int64 Client::CalcManaRegen(bool bCombat)
 {
-	int regen = 0;
+	int64 regen = 0;
 	auto level = GetLevel();
 	// so the new formulas break down with older skill caps where you don't have the skill until 4 or 8
 	// so for servers that want to use the old skill progression they can set this rule so they
@@ -688,9 +688,9 @@ int64 Client::CalcManaRegen(bool bCombat)
 				}
 			}
 			if (old)
-				regen = std::max(regen, 2);
+				regen = std::max(regen, static_cast<int64>(2));
 		} else if (old) {
-			regen = std::max(regen, 1);
+			regen = std::max(regen, static_cast<int64>(1));
 		}
 	}
 

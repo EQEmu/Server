@@ -2124,6 +2124,11 @@ void Client::Handle_OP_AdventureMerchantRequest(const EQApplicationPacket *app)
 		(tmp->GetClass() != DISCORD_MERCHANT) && (tmp->GetClass() != NORRATHS_KEEPERS_MERCHANT) && (tmp->GetClass() != DARK_REIGN_MERCHANT)))
 		return;
 
+	if (!tmp->CastToNPC()->IsMerchantOpen()) {
+		tmp->SayString(zone->random.Int(MERCHANT_CLOSED_ONE, MERCHANT_CLOSED_THREE));
+		return;
+	}
+
 	//you have to be somewhat close to them to be properly using them
 	if (DistanceSquared(m_Position, tmp->GetPosition()) > USE_NPC_RANGE2)
 		return;
@@ -9185,8 +9190,14 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 		}
 		else if (inst->IsClassCommon())
 		{
-			if (!RuleB(Skills, RequireTomeHandin) && item->ItemType == EQ::item::ItemTypeSpell && (strstr((const char*)item->Name, "Tome of ") || strstr((const char*)item->Name, "Skill: ")))
-			{
+			if (
+				!RuleB(Skills, RequireTomeHandin) &&
+				item->ItemType == EQ::item::ItemTypeSpell &&
+				(
+					Strings::BeginsWith(item->Name, "Tome of ") ||
+					Strings::BeginsWith(item->Name, "Skill: ")
+				)
+			) {
 				DeleteItemInInventory(slot_id, 1, true);
 				TrainDiscipline(item->ID);
 			}
@@ -10750,7 +10761,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 	case PET_HEALTHREPORT: {
 		if ((mypet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || mypet->GetPetType() != petAnimation) {
 			MessageString(Chat::PetResponse, PET_REPORT_HP, ConvertArrayF(mypet->GetHPRatio(), val1));
-			mypet->ShowBuffList(this);
+			mypet->ShowBuffs(this);
 		}
 		break;
 	}
@@ -11500,10 +11511,9 @@ void Client::Handle_OP_PopupResponse(const EQApplicationPacket *app)
 			break;
 
 		case POPUPID_UPDATE_SHOWSTATSWINDOW:
-			if (GetTarget() && GetTarget()->IsClient()) {
-				GetTarget()->CastToClient()->SendStatsWindow(this, true);
-			}
-			else {
+			if (GetTarget() && GetTarget()->IsOfClientBot()) {
+				GetTarget()->SendStatsWindow(this, true);
+			} else {
 				SendStatsWindow(this, true);
 			}
 			return;
@@ -14101,9 +14111,8 @@ void Client::Handle_OP_ShopRequest(const EQApplicationPacket *app)
 	if (tmp->Charmed())
 		action = 0;
 
-	// 1199 I don't have time for that now. etc
 	if (!tmp->CastToNPC()->IsMerchantOpen()) {
-		tmp->SayString(zone->random.Int(1199, 1202));
+		tmp->SayString(zone->random.Int(MERCHANT_CLOSED_ONE, MERCHANT_CLOSED_THREE));
 		action = 0;
 	}
 
@@ -14508,8 +14517,8 @@ void Client::Handle_OP_TargetCommand(const EQApplicationPacket *app)
 
 	if (nt) {
 		if (GetGM() || (!nt->IsInvisible(this) && (DistanceSquared(m_Position, nt->GetPosition()) <= TARGETING_RANGE*TARGETING_RANGE))) {
-			if (nt->GetBodyType() == BT_NoTarget2 || 
-				nt->GetBodyType() == BT_Special || 
+			if (nt->GetBodyType() == BT_NoTarget2 ||
+				nt->GetBodyType() == BT_Special ||
 				nt->GetBodyType() == BT_NoTarget) {
 				can_target = false;
 			}

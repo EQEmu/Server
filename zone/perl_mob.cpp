@@ -1374,6 +1374,11 @@ float Perl_Mob_CalculateDistance(Mob* self, float x, float y, float z) // @categ
 	return self->CalculateDistance(x, y, z);
 }
 
+float Perl_Mob_CalculateDistance(Mob* self, Mob* mob) // @categories Script Utility
+{
+	return self->CalculateDistance(mob);
+}
+
 void Perl_Mob_SendTo(Mob* self, float new_x, float new_y, float new_z) // @categories Script Utility
 {
 	self->SendTo(new_x, new_y, new_z);
@@ -3005,6 +3010,84 @@ bool Perl_Mob_HasSpellEffect(Mob* self, int effect_id)
 	return self->HasSpellEffect(effect_id);
 }
 
+perl::array Perl_Mob_GetCloseMobList(Mob* self)
+{
+	perl::array result;
+
+	const auto& l = entity_list.GetCloseMobList(self);
+
+	result.reserve(l.size());
+
+	for (const auto& e : l) {
+		result.push_back(e.second);
+	}
+
+	return result;
+}
+
+perl::array Perl_Mob_GetCloseMobList(Mob* self, float distance)
+{
+	perl::array result;
+
+	const auto& l = entity_list.GetCloseMobList(self, distance);
+
+	result.reserve(l.size());
+
+	for (const auto& e : l) {
+		if (self->CalculateDistance(e.second) <= distance) {
+			result.push_back(e.second);
+		}
+	}
+
+	return result;
+}
+
+perl::array Perl_Mob_GetCloseMobList(Mob* self, float distance, bool ignore_self)
+{
+	perl::array result;
+
+	const auto& l = entity_list.GetCloseMobList(self, distance);
+
+	result.reserve(l.size());
+
+	for (const auto& e : l) {
+		if (ignore_self && e.second == self) {
+			continue;
+		}
+
+		if (self->CalculateDistance(e.second) <= distance) {
+			result.push_back(e.second);
+		}
+	}
+
+	return result;
+}
+
+StatBonuses* Perl_Mob_GetAABonuses(Mob* self)
+{
+	return self->GetAABonusesPtr();
+}
+
+StatBonuses* Perl_Mob_GetItemBonuses(Mob* self)
+{
+	return self->GetItemBonusesPtr();
+}
+
+StatBonuses* Perl_Mob_GetSpellBonuses(Mob* self)
+{
+	return self->GetSpellBonusesPtr();
+}
+
+std::string Perl_Mob_GetClassPlural(Mob* self)
+{
+	return self->GetClassPlural();
+}
+
+std::string Perl_Mob_GetRacePlural(Mob* self)
+{
+	return self->GetRacePlural();
+}
+
 void perl_register_mob()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -3035,7 +3118,8 @@ void perl_register_mob()
 	package.add("BuffFadeBySlot", (void(*)(Mob*, int))&Perl_Mob_BuffFadeBySlot);
 	package.add("BuffFadeBySlot", (void(*)(Mob*, int, bool))&Perl_Mob_BuffFadeBySlot);
 	package.add("BuffFadeBySpellID", &Perl_Mob_BuffFadeBySpellID);
-	package.add("CalculateDistance", &Perl_Mob_CalculateDistance);
+	package.add("CalculateDistance", (float(*)(Mob*, float, float, float))&Perl_Mob_CalculateDistance);
+	package.add("CalculateDistance", (float(*)(Mob*, Mob*))&Perl_Mob_CalculateDistance);
 	package.add("CalculateHeadingToTarget", &Perl_Mob_CalculateHeadingToTarget);
 	package.add("CameraEffect", (void(*)(Mob*, uint32))&Perl_Mob_CameraEffect);
 	package.add("CameraEffect", (void(*)(Mob*, uint32, float))&Perl_Mob_CameraEffect);
@@ -3153,6 +3237,7 @@ void perl_register_mob()
 	package.add("GMMove", (void(*)(Mob*, float, float, float, float))&Perl_Mob_GMMove);
 	package.add("Gate", &Perl_Mob_Gate);
 	package.add("GetAA", &Perl_Mob_GetAA);
+	package.add("GetAABonuses", &Perl_Mob_GetAABonuses);
 	package.add("GetAAByAAID", &Perl_Mob_GetAAByAAID);
 	package.add("GetAC", &Perl_Mob_GetAC);
 	package.add("GetAGI", &Perl_Mob_GetAGI);
@@ -3193,8 +3278,12 @@ void perl_register_mob()
 	package.add("GetCasterLevel", &Perl_Mob_GetCasterLevel);
 	package.add("GetClass", &Perl_Mob_GetClass);
 	package.add("GetClassLevelFactor", &Perl_Mob_GetClassLevelFactor);
+	package.add("GetClassPlural", &Perl_Mob_GetClassPlural);
 	package.add("GetClassName", &Perl_Mob_GetClassName);
 	package.add("GetCleanName", &Perl_Mob_GetCleanName);
+	package.add("GetCloseMobList", (perl::array(*)(Mob*))&Perl_Mob_GetCloseMobList);
+	package.add("GetCloseMobList", (perl::array(*)(Mob*, float))&Perl_Mob_GetCloseMobList);
+	package.add("GetCloseMobList", (perl::array(*)(Mob*, float, bool))&Perl_Mob_GetCloseMobList);
 	package.add("GetCorruption", &Perl_Mob_GetCorruption);
 	package.add("GetDefaultRaceSize", (float(*)(Mob*))&Perl_Mob_GetDefaultRaceSize);
 	package.add("GetDefaultRaceSize", (float(*)(Mob*, int))&Perl_Mob_GetDefaultRaceSize);
@@ -3259,6 +3348,7 @@ void perl_register_mob()
 	package.add("GetInvisibleLevel", &Perl_Mob_GetInvisibleLevel);
 	package.add("GetInvisibleUndeadLevel", &Perl_Mob_GetInvisibleUndeadLevel);
 	package.add("GetInvul", &Perl_Mob_GetInvul);
+	package.add("GetItemBonuses", &Perl_Mob_GetItemBonuses);
 	package.add("GetItemHPBonuses", &Perl_Mob_GetItemHPBonuses);
 	package.add("GetItemStat", &Perl_Mob_GetItemStat);
 	package.add("GetLastName", &Perl_Mob_GetLastName);
@@ -3296,6 +3386,7 @@ void perl_register_mob()
 	package.add("GetPhR", &Perl_Mob_GetPhR);
 	package.add("GetRace", &Perl_Mob_GetRace);
 	package.add("GetRaceName", &Perl_Mob_GetRaceName);
+	package.add("GetRacePlural", &Perl_Mob_GetRacePlural);
 	package.add("GetRemainingTimeMS", &Perl_Mob_GetRemainingTimeMS);
 	package.add("GetResist", &Perl_Mob_GetResist);
 	package.add("GetReverseFactionCon", &Perl_Mob_GetReverseFactionCon);
@@ -3310,6 +3401,7 @@ void perl_register_mob()
 	package.add("GetSpecialAbility", &Perl_Mob_GetSpecialAbility);
 	package.add("GetSpecialAbilityParam", &Perl_Mob_GetSpecialAbilityParam);
 	package.add("GetSpecializeSkillValue", &Perl_Mob_GetSpecializeSkillValue);
+	package.add("GetSpellBonuses", &Perl_Mob_GetSpellBonuses);
 	package.add("GetSpellHPBonuses", &Perl_Mob_GetSpellHPBonuses);
 	package.add("GetSpellIDFromSlot", &Perl_Mob_GetSpellIDFromSlot);
 	package.add("GetSpellStat", (int(*)(Mob*, uint32, const char*))&Perl_Mob_GetSpellStat);

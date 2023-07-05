@@ -1269,7 +1269,7 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 	//for (i = 0; i < _MaterialCount; i++)
 	for (i = 0; i < 9; i++) {
 		// Only Player Races Wear Armor
-		if (Mob::IsPlayerRace(race) || i > 6) {
+		if (IsPlayerRace(race) || i > 6) {
 			ns->spawn.equipment.Slot[i].Material        = GetEquipmentMaterial(i);
 			ns->spawn.equipment.Slot[i].EliteModel      = IsEliteMaterialItem(i);
 			ns->spawn.equipment.Slot[i].HerosForgeModel = GetHerosForgeModel(i);
@@ -1627,13 +1627,1151 @@ void Mob::MakeSpawnUpdate(PlayerPositionUpdateServer_Struct* spu) {
 	spu->delta_heading = FloatToEQ10(m_Delta.w);
 }
 
-void Mob::ShowStats(Client* client)
+void Mob::SendStatsWindow(Client* c, bool use_window)
 {
+	if (!IsOfClientBot()) {
+		return;
+	}
+
+	const std::string& color_red    = "red_1";
+	const std::string& color_blue   = "royal_blue";
+	const std::string& color_green  = "forest_green";
+	const std::string& bright_green = "green";
+	const std::string& bright_red   = "red";
+	const std::string& heroic_color = "gold";
+
+	// Health, Mana, and Endurance
+	std::string HME_row;
+	std::string hme_color;
+	std::string cur_field;
+	std::string total_field;
+	std::string cur_name;
+	std::string cur_color;
+
+	auto hme_rows = 3; // Rows in display
+
+	for (auto hme_row_counter = 0; hme_row_counter < hme_rows; hme_row_counter++) {
+		switch (hme_row_counter) {
+			case 0: {
+				cur_name    = "Health ";
+				cur_field   = Strings::Commify(GetHP());
+				total_field = Strings::Commify(GetMaxHP());
+				hme_color   = color_red;
+				break;
+			}
+			case 1: {
+				if (CalcMaxMana()) {
+					cur_name    = "Mana ";
+					cur_field   = Strings::Commify(GetMana());
+					total_field = Strings::Commify(GetMaxMana());
+					hme_color   = color_blue;
+				} else {
+					continue;
+				}
+
+				break;
+			}
+			case 2: {
+				cur_name    = "Endurance ";
+				cur_field   = Strings::Commify(GetEndurance());
+				total_field = Strings::Commify(GetMaxEndurance());
+				hme_color   = color_green;
+				break;
+			}
+			default: {
+				break;
+			}
+		}
+
+		if (!cur_field.compare(total_field)) {
+			cur_color = bright_green;
+		} else {
+			cur_color = bright_red;
+		}
+
+		HME_row += DialogueWindow::TableRow(
+			fmt::format(
+				"{}{}",
+				DialogueWindow::TableCell(DialogueWindow::ColorMessage(hme_color, cur_name)),
+				DialogueWindow::TableCell(
+					fmt::format(
+						"{} / {}",
+						DialogueWindow::ColorMessage(cur_color, cur_field),
+						DialogueWindow::ColorMessage(bright_green, total_field)
+					)
+				)
+			)
+		);
+	}
+
+	// Regen
+	std::string regen_string;
+	std::string regen_row_header;
+	std::string regen_row_color;
+	std::string base_regen_field;
+	std::string item_regen_field;
+	std::string cap_regen_field;
+	std::string spell_regen_field;
+	std::string aa_regen_field;
+	std::string total_regen_field;
+
+	auto regen_rows = 3;
+
+	for (auto regen_row_counter = 0; regen_row_counter < regen_rows; regen_row_counter++) {
+		switch (regen_row_counter) {
+			case 0: {
+				regen_row_header = "Health";
+				regen_row_color = color_red;
+
+				if (IsBot()) {
+					base_regen_field = Strings::Commify(CastToBot()->LevelRegen());
+				} else if (IsClient()) {
+					base_regen_field = Strings::Commify(CastToClient()->LevelRegen());
+				}
+
+				item_regen_field  = Strings::Commify(itembonuses.HPRegen + itembonuses.heroic_hp_regen);
+				cap_regen_field   = Strings::Commify(CalcHPRegenCap());
+				spell_regen_field = Strings::Commify(spellbonuses.HPRegen);
+				aa_regen_field    = Strings::Commify(aabonuses.HPRegen);
+
+				if (IsBot()) {
+					total_regen_field = Strings::Commify(CastToBot()->CalcHPRegen());
+				} else if (IsClient()) {
+					total_regen_field = Strings::Commify(CastToClient()->CalcHPRegen(true));
+				}
+
+				break;
+			}
+			case 1: {
+				if (GetMaxMana() > 0) {
+					regen_row_header = "Mana";
+					regen_row_color = color_blue;
+
+					if (IsBot()) {
+						base_regen_field = std::to_string(0);
+					} else if (IsClient()) {
+						base_regen_field = Strings::Commify(CastToClient()->CalcBaseManaRegen());
+					}
+
+					item_regen_field  = Strings::Commify(itembonuses.ManaRegen + itembonuses.heroic_mana_regen);
+					cap_regen_field   = Strings::Commify(CalcManaRegenCap());
+					spell_regen_field = Strings::Commify(spellbonuses.ManaRegen);
+					aa_regen_field    = Strings::Commify(aabonuses.ManaRegen);
+
+					if (IsBot()) {
+						total_regen_field = Strings::Commify(CastToBot()->CalcManaRegen());
+					} else if (IsClient()) {
+						total_regen_field = Strings::Commify(CastToClient()->CalcManaRegen(true));
+					}
+				} else {
+					continue;
+				}
+
+				break;
+			}
+			case 2: {
+				regen_row_header = "Endurance";
+				regen_row_color  = color_green;
+
+				base_regen_field  = Strings::Commify(((GetLevel() * 4 / 10) + 2));
+				item_regen_field  = Strings::Commify(itembonuses.EnduranceRegen + itembonuses.heroic_end_regen);
+				cap_regen_field   = Strings::Commify(CalcEnduranceRegenCap());
+				spell_regen_field = Strings::Commify(spellbonuses.EnduranceRegen);
+				aa_regen_field    = Strings::Commify(aabonuses.EnduranceRegen);
+
+				if (IsBot()) {
+					total_regen_field = Strings::Commify(CastToBot()->CalcEnduranceRegen());
+				} else if (IsClient()) {
+					total_regen_field = Strings::Commify(CastToClient()->CalcEnduranceRegen(true));
+				}
+
+				break;
+			}
+			default: {
+				break;
+			}
+		}
+
+		regen_string += DialogueWindow::TableRow(
+			fmt::format(
+				"{}{}{}{}{}{}",
+				DialogueWindow::TableCell(DialogueWindow::ColorMessage(regen_row_color, regen_row_header)),
+				DialogueWindow::TableCell(DialogueWindow::ColorMessage(regen_row_color, base_regen_field)),
+				DialogueWindow::TableCell(DialogueWindow::ColorMessage(regen_row_color, fmt::format("{} ({})", item_regen_field, cap_regen_field))),
+				DialogueWindow::TableCell(DialogueWindow::ColorMessage(regen_row_color, spell_regen_field)),
+				DialogueWindow::TableCell(DialogueWindow::ColorMessage(regen_row_color, aa_regen_field)),
+				DialogueWindow::TableCell(DialogueWindow::ColorMessage(regen_row_color, total_regen_field))
+			)
+		);
+	}
+
+	// Stats
+	std::string stat_table;
+	std::string a_stat;
+	std::string a_stat_name;
+	std::string h_stat;
+	std::string a_resist;
+	std::string a_resist_name;
+	std::string h_resist_field;
+
+	auto stat_rows = 7;
+
+	for (auto stat_row_counter = 0; stat_row_counter < stat_rows; stat_row_counter++) {
+		switch (stat_row_counter) {
+			case 0: {
+				a_stat_name   = "Agility";
+				a_resist_name = "Cold";
+
+				a_stat         = Strings::Commify(GetAGI());
+				h_stat         = Strings::Commify(GetHeroicAGI());
+				a_resist       = Strings::Commify(GetCR());
+				h_resist_field = Strings::Commify(GetHeroicCR());
+				break;
+			}
+			case 1: {
+				a_stat_name   = "Charisma";
+				a_resist_name = "Corruption";
+
+				a_stat   = Strings::Commify(GetCHA());
+				h_stat   = Strings::Commify(GetHeroicCHA());
+				a_resist = Strings::Commify(GetCorrup());
+
+				if (IsBot()) {
+					h_resist_field = Strings::Commify(CastToBot()->GetHeroicCorrup());
+				} else if (IsClient()) {
+					h_resist_field = Strings::Commify(CastToClient()->GetHeroicCorrup());
+				}
+
+				break;
+			}
+			case 2: {
+				a_stat_name   = "Dexterity";
+				a_resist_name = "Disease";
+
+				a_stat         = Strings::Commify(GetDEX());
+				h_stat         = Strings::Commify(GetHeroicDEX());
+				a_resist       = Strings::Commify(GetDR());
+				h_resist_field = Strings::Commify(GetHeroicDR());
+				break;
+			}
+			case 3: {
+				a_stat_name   = "Intelligence";
+				a_resist_name = "Fire";
+
+				a_stat         = Strings::Commify(GetINT());
+				h_stat         = Strings::Commify(GetHeroicINT());
+				a_resist       = Strings::Commify(GetFR());
+				h_resist_field = Strings::Commify(GetHeroicFR());
+				break;
+			}
+			case 4: {
+				a_stat_name   = "Stamina";
+				a_resist_name = "Magic";
+
+				a_stat         = Strings::Commify(GetSTA());
+				h_stat         = Strings::Commify(GetHeroicSTA());
+				a_resist       = Strings::Commify(GetMR());
+				h_resist_field = Strings::Commify(GetHeroicMR());
+				break;
+			}
+			case 5: {
+				a_stat_name   = "Strength";
+				a_resist_name = "Physical";
+
+				a_stat   = Strings::Commify(GetSTR());
+				h_stat   = Strings::Commify(GetHeroicSTR());
+				a_resist = Strings::Commify(GetPhR());
+
+				if (IsBot()) {
+					h_resist_field = std::to_string(0);
+				} else if (IsClient()) {
+					h_resist_field = Strings::Commify(CastToClient()->GetHeroicPhR());
+				}
+
+				break;
+			}
+			case 6: {
+				a_stat_name   = "Wisdom";
+				a_resist_name = "Poison";
+
+				a_stat         = Strings::Commify(GetWIS());
+				h_stat         = Strings::Commify(GetHeroicWIS());
+				a_resist       = Strings::Commify(GetPR());
+				h_resist_field = Strings::Commify(GetHeroicPR());
+
+				break;
+			}
+			default: {
+				break;
+			}
+		}
+
+		stat_table += DialogueWindow::TableRow(
+			fmt::format(
+				"{}{}{}{}",
+				DialogueWindow::TableCell(a_stat_name),
+				DialogueWindow::TableCell(
+					fmt::format(
+						"{} {}",
+						a_stat,
+						DialogueWindow::ColorMessage(heroic_color, fmt::format("+{}", h_stat))
+					)
+				),
+				DialogueWindow::TableCell(a_resist_name),
+				DialogueWindow::TableCell(
+					fmt::format(
+						"{} {}",
+						a_resist,
+						DialogueWindow::ColorMessage(heroic_color, fmt::format("+{}", h_resist_field))
+					)
+				)
+			)
+		);
+	}
+
+	// Mod2
+	std::string mod2_table;
+	std::string mod2a;
+	std::string mod2a_name;
+	std::string mod2a_cap;
+	std::string mod2b;
+	std::string mod2b_name;
+	std::string mod2b_cap;
+
+	auto mod2_rows = 4;
+
+	for (auto mod2_row_counter = 0; mod2_row_counter < mod2_rows; mod2_row_counter++) {
+		switch (mod2_row_counter) {
+			case 0: {
+				mod2a_name = "Avoidance";
+				mod2b_name = "Combat Effects";
+				mod2a_cap  = Strings::Commify(RuleI(Character, ItemAvoidanceCap));
+				mod2b_cap  = Strings::Commify(RuleI(Character, ItemCombatEffectsCap));
+
+				if (IsBot()) {
+					mod2a = Strings::Commify(CastToBot()->GetAvoidance());
+				} else if (IsClient()) {
+					mod2a = Strings::Commify(CastToClient()->GetAvoidance());
+				}
+
+				if (IsBot()) {
+					mod2b = Strings::Commify(CastToBot()->GetCombatEffects());
+				} else if (IsClient()) {
+					mod2b = Strings::Commify(CastToClient()->GetCombatEffects());
+				}
+
+				break;
+			}
+			case 1: {
+				mod2a_name = "Accuracy";
+				mod2b_name = "Strikethrough";
+				mod2a_cap  = Strings::Commify(RuleI(Character, ItemAccuracyCap));
+				mod2b_cap  = Strings::Commify(RuleI(Character, ItemStrikethroughCap));
+
+				if (IsBot()) {
+					mod2a = Strings::Commify(CastToBot()->GetAccuracy());
+				} else if (IsClient()) {
+					mod2a = Strings::Commify(CastToClient()->GetAccuracy());
+				}
+
+				if (IsBot()) {
+					mod2b = Strings::Commify(CastToBot()->GetStrikeThrough());
+				} else if (IsClient()) {
+					mod2b = Strings::Commify(CastToClient()->GetStrikeThrough());
+				}
+
+				break;
+			}
+			case 2: {
+				mod2a_name = "Shielding";
+				mod2b_name = "Spell Shielding";
+				mod2a_cap  = Strings::Commify(RuleI(Character, ItemShieldingCap));
+				mod2b_cap  = Strings::Commify(RuleI(Character, ItemSpellShieldingCap));
+
+				if (IsBot()) {
+					mod2a = Strings::Commify(CastToBot()->GetShielding());
+				} else if (IsClient()) {
+					mod2a = Strings::Commify(CastToClient()->GetShielding());
+				}
+
+
+				if (IsBot()) {
+					mod2b = Strings::Commify(CastToBot()->GetSpellShield());
+				} else if (IsClient()) {
+					mod2b = Strings::Commify(CastToClient()->GetSpellShield());
+				}
+
+				break;
+			}
+			case 3: {
+				mod2a_name = "Stun Resist";
+				mod2b_name = "DOT Shielding";
+				mod2a_cap  = Strings::Commify(RuleI(Character, ItemStunResistCap));
+				mod2b_cap  = Strings::Commify(RuleI(Character, ItemDoTShieldingCap));
+
+				if (IsBot()) {
+					mod2a = Strings::Commify(CastToBot()->GetStunResist());
+				} else if (IsClient()) {
+					mod2a = Strings::Commify(CastToClient()->GetStunResist());
+				}
+
+				if (IsBot()) {
+					mod2b = Strings::Commify(CastToBot()->GetDoTShield());
+				} else if (IsClient()) {
+					mod2b = Strings::Commify(CastToClient()->GetDoTShield());
+				}
+
+				break;
+			}
+		}
+
+		mod2_table += DialogueWindow::TableRow(
+			fmt::format(
+				"{}{}",
+				DialogueWindow::TableCell(
+					fmt::format(
+						"{}: {} / {}",
+						mod2a_name,
+						Strings::Commify(mod2a),
+						Strings::Commify(mod2a_cap)
+					)
+				),
+				DialogueWindow::TableCell(
+					fmt::format(
+						"{}: {} / {}",
+						mod2b_name,
+						Strings::Commify(mod2b),
+						Strings::Commify(mod2b_cap)
+					)
+				)
+			)
+		);
+	}
+
+	uint32 rune_number       = 0;
+	uint32 magic_rune_number = 0;
+
+	for (auto i = 0; i < GetMaxTotalSlots(); i++) {
+		if (IsValidSpell(buffs[i].spellid)) {
+			if (buffs[i].melee_rune > 0) {
+				rune_number += buffs[i].melee_rune;
+			}
+
+			if (buffs[i].magic_rune > 0) {
+				magic_rune_number += buffs[i].magic_rune;
+			}
+		}
+	}
+
+	auto shield_ac = 0;
+
+	if (IsBot()) {
+		CastToBot()->GetRawACNoShield(shield_ac);
+	} else if (IsClient()) {
+		CastToClient()->GetRawACNoShield(shield_ac);
+	}
+
+	std::string skill_mods;
+
+	for (auto j = 0; j <= EQ::skills::HIGHEST_SKILL; j++) {
+		if (itembonuses.skillmod[j] != 0) {
+			const std::string& sign = itembonuses.skillmod[j] >= 0 ? "+" : "-";
+
+			skill_mods += fmt::format(
+				"{}: {}{}%%{}",
+				EQ::skills::GetSkillName(static_cast<EQ::skills::SkillType>(j)),
+				sign,
+				Strings::Commify(itembonuses.skillmod[j]),
+				DialogueWindow::Break(1)
+			);
+		}
+	}
+
+	std::string skill_dmgs;
+
+	for (auto j = 0; j <= EQ::skills::HIGHEST_SKILL; j++) {
+		if ((itembonuses.SkillDamageAmount[j] + spellbonuses.SkillDamageAmount[j]) != 0) {
+			const std::string& sign = (itembonuses.SkillDamageAmount[j] + spellbonuses.SkillDamageAmount[j]) >= 0 ? "+" : "-";
+
+			skill_dmgs += fmt::format(
+				"{}: {}{}{}",
+				EQ::skills::GetSkillName(static_cast<EQ::skills::SkillType>(j)),
+				sign,
+				Strings::Commify(itembonuses.SkillDamageAmount[j] + spellbonuses.SkillDamageAmount[j]),
+				DialogueWindow::Break(1)
+			);
+		}
+	}
+
+	std::string faction_item_string;
+
+	for (const auto& f : item_faction_bonuses) {
+		if (f.second != 0) {
+			const auto &faction_name = content_db.GetFactionName(f.first);
+			const std::string& sign  = f.second >= 0 ? "+" : "-";
+
+			faction_item_string += fmt::format(
+				"{}: {}{}{}",
+				!faction_name.empty() ? faction_name : "Unknown Faction",
+				sign,
+				Strings::Commify(f.second),
+				DialogueWindow::Break(1)
+			);
+		}
+	}
+
+	std::string bard_info;
+
+	if (GetClass() == BARD) {
+		const auto brass_mod  = IsBot() ? CastToBot()->GetBrassMod() : CastToClient()->GetBrassMod();
+		const auto perc_mod   = IsBot() ? CastToBot()->GetPercMod() : CastToClient()->GetPercMod();
+		const auto sing_mod   = IsBot() ? CastToBot()->GetSingMod() : CastToClient()->GetSingMod();
+		const auto string_mod = IsBot() ? CastToBot()->GetStringMod() : CastToClient()->GetStringMod();
+		const auto wind_mod   = IsBot() ? CastToBot()->GetWindMod() : CastToClient()->GetWindMod();
+
+		if (brass_mod) {
+			bard_info += fmt::format(
+				"Brass: {}{}",
+				Strings::Commify(brass_mod),
+				DialogueWindow::Break(1)
+			);
+		}
+
+		if (perc_mod) {
+			bard_info += fmt::format(
+				"Percussion: {}{}",
+				Strings::Commify(perc_mod),
+				DialogueWindow::Break(1)
+			);
+		}
+
+		if (sing_mod) {
+			bard_info += fmt::format(
+				"Singing: {}{}",
+				Strings::Commify(sing_mod),
+				DialogueWindow::Break(1)
+			);
+		}
+
+		if (string_mod) {
+			bard_info += fmt::format(
+				"String: {}{}",
+				Strings::Commify(string_mod),
+				DialogueWindow::Break(1)
+			);
+		}
+
+		if (wind_mod) {
+			bard_info += fmt::format(
+				"Wind: {}{}",
+				Strings::Commify(wind_mod),
+				DialogueWindow::Break(1)
+			);
+		}
+	}
+
+	auto skill = EQ::skills::SkillHandtoHand;
+	auto *inst = GetInv().GetItem(EQ::invslot::slotPrimary);
+
+	if (inst && inst->IsClassCommon()) {
+		switch (inst->GetItem()->ItemType) {
+			case EQ::item::ItemType1HSlash:
+				skill = EQ::skills::Skill1HSlashing;
+				break;
+			case EQ::item::ItemType2HSlash:
+				skill = EQ::skills::Skill2HSlashing;
+				break;
+			case EQ::item::ItemType1HPiercing:
+				skill = EQ::skills::Skill1HPiercing;
+				break;
+			case EQ::item::ItemType1HBlunt:
+				skill = EQ::skills::Skill1HBlunt;
+				break;
+			case EQ::item::ItemType2HBlunt:
+				skill = EQ::skills::Skill2HBlunt;
+				break;
+			case EQ::item::ItemType2HPiercing:
+				if (IsClient() && CastToClient()->ClientVersion() < EQ::versions::ClientVersion::RoF2) {
+					skill = EQ::skills::Skill1HPiercing;
+				} else {
+					skill = EQ::skills::Skill2HPiercing;
+				}
+
+				break;
+			default:
+				break;
+		}
+	}
+
+	std::string final_string;
+
+	// Class, Level, and Race
+	final_string += DialogueWindow::Table(
+		DialogueWindow::TableRow(
+			fmt::format(
+				"{}{}{}",
+				DialogueWindow::TableCell(fmt::format("Race: {}", GetPlayerRaceAbbreviation(GetBaseRace()))),
+				DialogueWindow::TableCell(fmt::format("Class: {}", GetPlayerClassAbbreviation(GetClass()))),
+				DialogueWindow::TableCell(fmt::format("Level: {}", std::to_string(GetLevel())))
+			)
+		)
+	);
+
+	// Runes
+	if (rune_number || magic_rune_number) {
+		final_string += DialogueWindow::Table(
+			DialogueWindow::TableRow(
+				fmt::format(
+					"{}{}{}",
+					DialogueWindow::TableCell(
+						fmt::format("Rune: {}", rune_number)
+					),
+					DialogueWindow::TableCell(""),
+					DialogueWindow::TableCell(
+						fmt::format("Spell Rune: {}", magic_rune_number)
+					)
+				)
+			)
+		);
+
+		final_string += DialogueWindow::Break(1);
+	}
+
+	// Health, Mana, and Endurance
+	final_string += DialogueWindow::Table(HME_row);
+
+	// Attack
+	final_string += DialogueWindow::ColorMessage(
+		"green_yellow",
+		fmt::format(
+			"To Hit: {} / {}",
+			Strings::Commify(compute_tohit(skill)),
+			Strings::Commify(GetTotalToHit(skill, 0))
+		)
+	);
+
+	final_string += DialogueWindow::Break(1);
+
+	// Attack 2
+	final_string += fmt::format(
+		"Offense: {}{} | {}{}",
+		Strings::Commify(offense(skill)),
+		(
+			itembonuses.ATK ?
+			fmt::format(
+				" | Item: {} / {} | Used: {}",
+				Strings::Commify(itembonuses.ATK),
+				Strings::Commify(RuleI(Character, ItemATKCap)),
+				Strings::Commify(static_cast<int>(itembonuses.ATK * 1.342))
+			) :
+			""
+		),
+		spellbonuses.ATK ? fmt::format(" | Spell: {}", Strings::Commify(spellbonuses.ATK)) : "",
+		DialogueWindow::Break(1)
+	);
+
+	// Armor Class
+	final_string += fmt::format(
+		"{}{}",
+		DialogueWindow::ColorMessage(
+			"green_yellow",
+			fmt::format(
+				"Mitigation AC: {}",
+				Strings::Commify(GetMitigationAC())
+			)
+		),
+		DialogueWindow::Break(1)
+	);
+
+	// Armor Class 2
+	final_string += fmt::format(
+		"Defense: {} / {}{}{}{}",
+		Strings::Commify(compute_defense()),
+		Strings::Commify(GetTotalDefense()),
+		spellbonuses.AC ? fmt::format(" | Spell: {}", Strings::Commify(spellbonuses.AC)) : "",
+		shield_ac ? fmt::format(" | Shield: {}", Strings::Commify(shield_ac)) : "",
+		DialogueWindow::Break(1)
+	);
+
+	// Run Speed
+	final_string += fmt::format(
+		"{}{}",
+		DialogueWindow::ColorMessage(
+			"green_yellow",
+			fmt::format(
+				"Runspeed: {}",
+				IsBot() ? CastToBot()->GetRunspeed() : CastToClient()->GetRunspeed()
+			)
+		),
+		DialogueWindow::Break(1)
+	);
+
+	final_string += DialogueWindow::CenterMessage("Haste");
+
+	// Haste Table
+	const auto& haste_table = DialogueWindow::Table(
+		fmt::format(
+			"{}{}",
+			DialogueWindow::TableRow(
+				fmt::format(
+					"{}{}{}{}",
+					DialogueWindow::TableCell("Item"),
+					DialogueWindow::TableCell("Spell"),
+					DialogueWindow::TableCell("Over"),
+					DialogueWindow::TableCell("Total (Cap)")
+				)
+			),
+			DialogueWindow::TableRow(
+				fmt::format(
+					"{}{}{}{}",
+					DialogueWindow::TableCell(Strings::Commify(itembonuses.haste)),
+					DialogueWindow::TableCell(Strings::Commify(spellbonuses.haste + spellbonuses.hastetype2)),
+					DialogueWindow::TableCell(Strings::Commify(spellbonuses.hastetype3 + ExtraHaste)),
+					DialogueWindow::TableCell(fmt::format("{} ({})", Strings::Commify(GetHaste()), Strings::Commify(RuleI(Character, HasteCap))))
+				)
+			)
+		)
+	);
+
+	final_string += haste_table;
+
+	// Regen Table
+	final_string += DialogueWindow::CenterMessage("Regen");
+
+	const auto& regen_table = DialogueWindow::Table(
+		fmt::format(
+			"{}{}",
+			DialogueWindow::TableRow(
+				fmt::format(
+					"{}{}{}{}{}{}",
+					DialogueWindow::TableCell("Type"),
+					DialogueWindow::TableCell("Base"),
+					DialogueWindow::TableCell("Items (Cap)"),
+					DialogueWindow::TableCell("Spell"),
+					DialogueWindow::TableCell("AAs"),
+					DialogueWindow::TableCell("Total")
+				)
+			),
+			regen_string
+		)
+	);
+
+	// Regen
+	final_string += regen_table + DialogueWindow::Break(1);
+
+	// Stats
+	final_string += DialogueWindow::Table(stat_table) + DialogueWindow::Break(1);
+
+	// Mod 2
+	final_string += DialogueWindow::Table(mod2_table) + DialogueWindow::Break(1);
+
+	// Heal Amount
+	if (GetHealAmt()) {
+		final_string += fmt::format(
+			"Heal Amount: {} / {}{}",
+			Strings::Commify(GetHealAmt()),
+			Strings::Commify(RuleI(Character, ItemHealAmtCap)),
+			DialogueWindow::Break(1)
+		);
+	}
+
+	// Heal Amount
+	if (GetSpellDmg()) {
+		final_string += fmt::format(
+			"Spell Damage: {} / {}{}",
+			Strings::Commify(GetSpellDmg()),
+			Strings::Commify(RuleI(Character, ItemSpellDmgCap)),
+			DialogueWindow::Break(1)
+		);
+	}
+
+	// Damage Shield
+	if (itembonuses.DamageShield || spellbonuses.DamageShield) {
+		final_string += fmt::format(
+			"Damage Shield: {}{}{}{}",
+			Strings::Commify(itembonuses.DamageShield + spellbonuses.DamageShield),
+			(
+				spellbonuses.DamageShield ?
+				fmt::format(" | Spell: {}", Strings::Commify(spellbonuses.DamageShield)) :
+				""
+			),
+			(
+				itembonuses.DamageShield ?
+				fmt::format(
+					" | Item: {} / {}",
+					Strings::Commify(itembonuses.DamageShield),
+					Strings::Commify(RuleI(Character, ItemDamageShieldCap))
+				) :
+				""
+			),
+			DialogueWindow::Break(2)
+		);
+	}
+
+	// Clairvoyance
+	const auto clairvoyance  = IsBot() ? CastToBot()->GetClair() : CastToClient()->GetClair();
+	if (clairvoyance) {
+		final_string += fmt::format(
+			"Clairvoyance: {} / {}{}",
+			Strings::Commify(clairvoyance),
+			Strings::Commify(RuleI(Character, ItemClairvoyanceCap)),
+			DialogueWindow::Break(1)
+		);
+	}
+
+	// Damage Shield Mitigation
+	const auto ds_mitigation = IsBot() ? CastToBot()->GetDSMit() : CastToClient()->GetDSMit();
+	if (ds_mitigation) {
+		final_string += fmt::format(
+			"DS Mitigation: {} / {}{}",
+			Strings::Commify(ds_mitigation),
+			Strings::Commify(RuleI(Character, ItemDSMitigationCap)),
+			DialogueWindow::Break(1)
+		);
+	}
+
+	if (clairvoyance || ds_mitigation) {
+		final_string += DialogueWindow::Break(1);
+	}
+
+	// Bard Modifiers
+	if (GetClass() == BARD) {
+		final_string += bard_info + DialogueWindow::Break(1);
+	}
+
+	// Skill Modifiers
+	if (!skill_mods.empty()) {
+		final_string += skill_mods + DialogueWindow::Break(1);
+	}
+
+	// Skill Damage Modifiers
+	if (!skill_dmgs.empty()) {
+		final_string += skill_dmgs + DialogueWindow::Break(1);
+	}
+
+	// Faction Modifiers
+	if (!faction_item_string.empty()) {
+		final_string += faction_item_string;
+	}
+
+	if (use_window) {
+		if (final_string.size() < 4096) {
+			const uint32 popup_buttons = (c->ClientVersion() < EQ::versions::ClientVersion::SoD) ? 0 : 1;
+			c->SendWindow(
+				0,
+				POPUPID_UPDATE_SHOWSTATSWINDOW,
+				popup_buttons,
+				"Close",
+				"Update",
+				0,
+				1,
+				this,
+				"",
+				final_string.c_str()
+			);
+
+			goto extra_info;
+		} else {
+			c->Message(Chat::Yellow, "The window has exceeded its character limit, displaying stats to chat window:");
+		}
+	}
+
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"Statistics Information for {} {}",
+			GetCleanName(),
+			GetLastName()
+		).c_str()
+	);
+
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"Level: {} Class: {} ({}) Race: {} ({}) Damage Shield: {}/{} Size: {:.1f} Run Speed: {} Weight: {:.1f}/{}",
+			GetLevel(),
+			GetClassIDName(GetClass()),
+			GetClass(),
+			GetRaceIDName(GetRace()),
+			GetRace(),
+			IsBot() ? Strings::Commify(CastToBot()->GetDS()) : Strings::Commify(CastToClient()->GetDS()),
+			Strings::Commify(RuleI(Character, ItemDamageShieldCap)),
+			GetSize(),
+			GetRunspeed(),
+			IsBot() ? static_cast<float>(CastToBot()->CalcCurrentWeight()) / 10.0f : static_cast<float>(CastToClient()->CalcCurrentWeight()) / 10.0f,
+			Strings::Commify(GetSTR())
+		).c_str()
+	);
+
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"Health: {}/{} Regen: {}/{}",
+			GetHP(),
+			GetMaxHP(),
+			IsBot() ? Strings::Commify(CastToBot()->CalcHPRegen()) : Strings::Commify(CastToClient()->CalcHPRegen()),
+			CalcHPRegenCap()
+		).c_str()
+	);
+
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"To Hit: {} Total: {}",
+			Strings::Commify(compute_tohit(skill)),
+			Strings::Commify(GetTotalToHit(skill, 0))
+		).c_str()
+	);
+
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"Defense: {} Total: {}",
+			Strings::Commify(compute_defense()),
+			Strings::Commify(GetTotalDefense())
+		).c_str()
+	);
+
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"Offense: {} Mitigation AC: {}",
+			Strings::Commify(offense(skill)),
+			Strings::Commify(GetMitigationAC())
+		).c_str()
+	);
+
 	if (IsClient()) {
-		CastToClient()->SendStatsWindow(client, RuleB(Character, UseNewStatsWindow));
+		c->Message(
+			Chat::White,
+			fmt::format(
+				" AFK: {} LFG: {} Anon: {} PVP: {} GM: {} Fly Mode: {} ({}) GM Speed: {} Hide Me: {} Invulnerability: {} LD: {} Client Version: {} Tells Off: {}",
+				CastToClient()->AFK ? "Yes" : "No",
+				CastToClient()->LFG ? "Yes" : "No",
+				CastToClient()->GetAnon() ? "Yes" : "No",
+				CastToClient()->GetPVP() ? "Yes" : "No",
+				CastToClient()->GetGM() ? "On" : "Off",
+				EQ::constants::GetFlyModeName(static_cast<uint8>(flymode)),
+				flymode,
+				CastToClient()->GetGMSpeed() ? "On" : "Off",
+				CastToClient()->GetHideMe() ? "On" : "Off",
+				CastToClient()->GetGMInvul() ? "On" : "Off",
+				CastToClient()->IsLD() ? "Yes" : "No",
+				CastToClient()->ClientVersionBit(),
+				CastToClient()->tellsoff ? "Yes" : "No"
+			).c_str()
+		);
+	}
+
+	if (CalcMaxMana()) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Mana: {}/{} Regen: {}/{}",
+				Strings::Commify(GetMana()),
+				Strings::Commify(GetMaxMana()),
+				IsBot() ? Strings::Commify(CastToBot()->CalcManaRegen()) : Strings::Commify(CastToClient()->CalcManaRegen()),
+				Strings::Commify(CalcManaRegenCap())
+			).c_str()
+		);
+	}
+
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"Endurance: {}/{} Regen: {}/{}",
+			Strings::Commify(GetEndurance()),
+			Strings::Commify(GetMaxEndurance()),
+			IsBot() ? Strings::Commify(CastToBot()->CalcEnduranceRegen()) : Strings::Commify(CastToClient()->CalcEnduranceRegen(true)),
+			Strings::Commify(CalcEnduranceRegenCap())
+		).c_str()
+	);
+
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"Attack: {} Item and Spell Attack: {}/{} Server Side Attack: {}",
+			IsBot() ? Strings::Commify(CastToBot()->GetTotalATK()) : Strings::Commify(CastToClient()->GetTotalATK()),
+			Strings::Commify(GetATKBonus()),
+			Strings::Commify(RuleI(Character, ItemATKCap)),
+			Strings::Commify(GetATK())
+		).c_str()
+	);
+
+	if (GetHaste()) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Haste: {}/{} (Item: {} + Spell: {} + Over: {})",
+				Strings::Commify(GetHaste()),
+				Strings::Commify(RuleI(Character, HasteCap)),
+				Strings::Commify(itembonuses.haste),
+				Strings::Commify(spellbonuses.haste + spellbonuses.hastetype2),
+				Strings::Commify(spellbonuses.hastetype3 + ExtraHaste)
+			).c_str()
+		);
+	}
+
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"Statistics | Agility: {} Charisma: {} Dexterity: {} Intelligence: {} Stamina: {} Strength: {} Wisdom: {}",
+			Strings::Commify(GetAGI()),
+			Strings::Commify(GetCHA()),
+			Strings::Commify(GetDEX()),
+			Strings::Commify(GetINT()),
+			Strings::Commify(GetSTA()),
+			Strings::Commify(GetSTR()),
+			Strings::Commify(GetWIS())
+		).c_str()
+	);
+
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"Heroic Statistics | Agility: {} Charisma: {} Dexterity: {} Intelligence: {} Stamina: {} Strength: {} Wisdom: {}",
+			Strings::Commify(GetHeroicAGI()),
+			Strings::Commify(GetHeroicCHA()),
+			Strings::Commify(GetHeroicDEX()),
+			Strings::Commify(GetHeroicINT()),
+			Strings::Commify(GetHeroicSTA()),
+			Strings::Commify(GetHeroicSTR()),
+			Strings::Commify(GetHeroicWIS())
+		).c_str()
+	);
+
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"Resistances | Cold: {} Corruption: {} Disease: {} Fire: {} Magic: {} Poison: {} Physical: {}",
+			Strings::Commify(GetCR()),
+			Strings::Commify(GetCorrup()),
+			Strings::Commify(GetDR()),
+			Strings::Commify(GetFR()),
+			Strings::Commify(GetMR()),
+			Strings::Commify(GetPR()),
+			Strings::Commify(GetPhR())
+		).c_str()
+	);
+
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"Heroic Resistances | Cold: {} Corruption: {} Disease: {} Fire: {} Magic: {} Poison: {}",
+			GetHeroicCR(),
+			IsBot() ? Strings::Commify(CastToBot()->GetHeroicCorrup()) : Strings::Commify(CastToClient()->GetHeroicCorrup()),
+			GetHeroicDR(),
+			GetHeroicFR(),
+			GetHeroicMR(),
+			GetHeroicPR()
+		).c_str()
+	);
+
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"Accuracy: {} Avoidance: {} Combat Effects: {} DOT Shielding: {} Shielding: {} Spell Shield: {} Strikethrough: {} Stun Resist: {}",
+			IsBot() ? Strings::Commify(CastToBot()->GetAccuracy()) : Strings::Commify(CastToClient()->GetAccuracy()),
+			IsBot() ? Strings::Commify(CastToBot()->GetAvoidance()) : Strings::Commify(CastToClient()->GetAvoidance()),
+			IsBot() ? Strings::Commify(CastToBot()->GetCombatEffects()) : Strings::Commify(CastToClient()->GetCombatEffects()),
+			IsBot() ? Strings::Commify(CastToBot()->GetDoTShield()) : Strings::Commify(CastToClient()->GetDoTShield()),
+			IsBot() ? Strings::Commify(CastToBot()->GetShielding()) : Strings::Commify(CastToClient()->GetShielding()),
+			IsBot() ? Strings::Commify(CastToBot()->GetSpellShield()) : Strings::Commify(CastToClient()->GetSpellShield()),
+			IsBot() ? Strings::Commify(CastToBot()->GetStrikeThrough()) : Strings::Commify(CastToClient()->GetStrikeThrough()),
+			IsBot() ? Strings::Commify(CastToBot()->GetStunResist()) : Strings::Commify(CastToClient()->GetStunResist())
+		).c_str()
+	);
+
+	if (GetHealAmt() || GetSpellDmg()) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Heal Amount: {} Spell Damage: {}",
+				Strings::Commify(GetHealAmt()),
+				Strings::Commify(GetSpellDmg())
+			).c_str()
+		);
+	}
+
+	if (clairvoyance || ds_mitigation) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Clairvoyance: {} Damage Shield Mitigation: {}",
+				Strings::Commify(clairvoyance),
+				Strings::Commify(ds_mitigation)
+			).c_str()
+		);
+	}
+
+	if (GetClass() == BARD) {
+		const auto brass_mod  = IsBot() ? CastToBot()->GetBrassMod() : CastToClient()->GetBrassMod();
+		const auto perc_mod   = IsBot() ? CastToBot()->GetPercMod() : CastToClient()->GetPercMod();
+		const auto sing_mod   = IsBot() ? CastToBot()->GetSingMod() : CastToClient()->GetSingMod();
+		const auto string_mod = IsBot() ? CastToBot()->GetStringMod() : CastToClient()->GetStringMod();
+		const auto wind_mod   = IsBot() ? CastToBot()->GetWindMod() : CastToClient()->GetWindMod();
+
+		if (
+			brass_mod ||
+			perc_mod ||
+			sing_mod ||
+			string_mod ||
+			wind_mod
+		) {
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"Brass: {} Percussion: {} Singing: {} String: {} Wind: {}",
+					Strings::Commify(brass_mod),
+					Strings::Commify(perc_mod),
+					Strings::Commify(sing_mod),
+					Strings::Commify(string_mod),
+					Strings::Commify(wind_mod)
+				).c_str()
+			);
+		}
+	}
+
+	extra_info:
+
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"Base Race: {} ({}) Gender: {} ({}) Base Gender: {} ({}) Texture: {} Helmet Texture: {}",
+			GetRaceIDName(GetBaseRace()),
+			GetBaseRace(),
+			GetGenderName(GetGender()),
+			GetGender(),
+			GetGenderName(GetBaseGender()),
+			GetBaseGender(),
+			GetTexture(),
+			GetHelmTexture()
+		).c_str()
+	);
+
+	if (c->Admin() >= AccountStatus::GMAdmin) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"ID: {} Entity ID: {} Pet ID: {} Owner ID: {} AI Controlled: {} Targeted: {}",
+				IsBot() ? CastToBot()->GetBotID() : CastToClient()->CharacterID(),
+				GetID(),
+				GetPetID(),
+				GetOwnerID(),
+				IsAIControlled() ? "Yes" : "No",
+				targeted
+			).c_str()
+		);
+	}
+}
+
+void Mob::ShowStats(Client* c)
+{
+	if (IsOfClientBot()) {
+		SendStatsWindow(c, RuleB(Character, UseNewStatsWindow));
 	} else if (IsCorpse()) {
 		if (IsPlayerCorpse()) {
-			client->Message(
+			c->Message(
 				Chat::White,
 				fmt::format(
 					"Player Corpse | Character ID: {}  ID: {}",
@@ -1642,7 +2780,7 @@ void Mob::ShowStats(Client* client)
 				).c_str()
 			);
 		} else {
-			client->Message(
+			c->Message(
 				Chat::White,
 				fmt::format(
 					"NPC Corpse | ID: {}",
@@ -1651,24 +2789,26 @@ void Mob::ShowStats(Client* client)
 			);
 		}
 	} else {
-		NPC* target = CastToNPC();
-		std::string target_name = target->GetCleanName();
-		std::string target_last_name = target->GetLastName();
-		bool has_charmed_stats = (
-			target->GetCharmedAccuracy() != 0 ||
-			target->GetCharmedArmorClass() != 0 ||
-			target->GetCharmedAttack() != 0 ||
-			target->GetCharmedAttackDelay() != 0 ||
-			target->GetCharmedAvoidance() != 0 ||
-			target->GetCharmedMaxDamage() != 0 ||
-			target->GetCharmedMinDamage() != 0
+		const auto& t = CastToNPC();
+
+		const std::string target_name      = t->GetCleanName();
+		const std::string target_last_name = t->GetLastName();
+
+		const auto has_charmed_stats = (
+			t->GetCharmedAccuracy() != 0 ||
+			t->GetCharmedArmorClass() != 0 ||
+			t->GetCharmedAttack() != 0 ||
+			t->GetCharmedAttackDelay() != 0 ||
+			t->GetCharmedAvoidance() != 0 ||
+			t->GetCharmedMaxDamage() != 0 ||
+			t->GetCharmedMinDamage() != 0
 		);
 
 		// Faction
-		if (target->GetNPCFactionID()) {
-			auto faction_id = target->GetPrimaryFaction();
+		if (t->GetNPCFactionID()) {
+			auto faction_id = t->GetPrimaryFaction();
 			auto faction_name = content_db.GetFactionName(faction_id);
-			client->Message(
+			c->Message(
 				Chat::White,
 				fmt::format(
 					"Faction: {} ({})",
@@ -1679,147 +2819,148 @@ void Mob::ShowStats(Client* client)
 		}
 
 		// Adventure Template
-		if (target->GetAdventureTemplate()) {
-			client->Message(
+		if (t->GetAdventureTemplate()) {
+			c->Message(
 				Chat::White,
 				fmt::format(
 					"Adventure Template: {}",
-					target->GetAdventureTemplate()
+					t->GetAdventureTemplate()
 				).c_str()
 			);
 		}
 
 		// Body
-		auto bodytype_name = EQ::constants::GetBodyTypeName(target->GetBodyType());
-		client->Message(
+		auto bodytype_name = EQ::constants::GetBodyTypeName(t->GetBodyType());
+		c->Message(
 			Chat::White,
 			fmt::format(
 				"Body | Size: {:.2f} Type: {}",
-				target->GetSize(),
+				t->GetSize(),
 				(
 					bodytype_name.empty() ?
 					fmt::format(
 						"{}",
-						target->GetBodyType()
+						t->GetBodyType()
 					) :
 					fmt::format(
 						"{} ({})",
 						bodytype_name,
-						target->GetBodyType()
+						t->GetBodyType()
 					)
 				)
 			).c_str()
 		);
 
 		// Face
-		client->Message(
+		c->Message(
 			Chat::White,
 			fmt::format(
 				"Features | Face: {} Eye One: {} Eye Two: {}",
-				target->GetLuclinFace(),
-				target->GetEyeColor1(),
-				target->GetEyeColor2()
+				t->GetLuclinFace(),
+				t->GetEyeColor1(),
+				t->GetEyeColor2()
 			).c_str()
 		);
 
 		// Hair
-		client->Message(
+		c->Message(
 			Chat::White,
 			fmt::format(
 				"Features | Hair: {} Hair Color: {}",
-				target->GetHairStyle(),
-				target->GetHairColor()
+				t->GetHairStyle(),
+				t->GetHairColor()
 			).c_str()
 		);
 
 		// Beard
-		client->Message(
+		c->Message(
 			Chat::White,
 			fmt::format(
 				"Features | Beard: {} Beard Color: {}",
-				target->GetBeard(),
-				target->GetBeardColor()
+				t->GetBeard(),
+				t->GetBeardColor()
 			).c_str()
 		);
 
 		// Drakkin Features
-		if (target->GetRace() == RACE_DRAKKIN_522) {
-			client->Message(
+		if (t->GetRace() == RACE_DRAKKIN_522) {
+			c->Message(
 				Chat::White,
 				fmt::format(
 					"Drakkin Features | Heritage: {} Tattoo: {} Details: {}",
-					target->GetDrakkinHeritage(),
-					target->GetDrakkinTattoo(),
-					target->GetDrakkinDetails()
+					t->GetDrakkinHeritage(),
+					t->GetDrakkinTattoo(),
+					t->GetDrakkinDetails()
 				).c_str()
 			);
 		}
 
 		// Textures
-		client->Message(
+		c->Message(
 			Chat::White,
 			fmt::format(
 				"Textures | Armor: {} Helmet: {}",
-				target->GetTexture(),
-				target->GetHelmTexture()
+				t->GetTexture(),
+				t->GetHelmTexture()
 			).c_str()
 		);
 
 		if (
-			target->GetArmTexture() ||
-			target->GetBracerTexture() ||
-			target->GetHandTexture()
+			t->GetArmTexture() ||
+			t->GetBracerTexture() ||
+			t->GetHandTexture()
 		) {
-			client->Message(
+			c->Message(
 				Chat::White,
 				fmt::format(
 					"Textures | Arms: {} Bracers: {} Hands: {}",
-					target->GetArmTexture(),
-					target->GetBracerTexture(),
-					target->GetHandTexture()
+					t->GetArmTexture(),
+					t->GetBracerTexture(),
+					t->GetHandTexture()
 				).c_str()
 			);
 		}
 
 		if (
-			target->GetFeetTexture() ||
-			target->GetLegTexture()
+			t->GetFeetTexture() ||
+			t->GetLegTexture()
 		) {
-			client->Message(
+			c->Message(
 				Chat::White,
 				fmt::format(
 					"Textures | Legs: {} Feet: {}",
-					target->GetLegTexture(),
-					target->GetFeetTexture()
+					t->GetLegTexture(),
+					t->GetFeetTexture()
 				).c_str()
 			);
 		}
 
 		// Hero's Forge
-		if (target->GetHeroForgeModel()) {
-			client->Message(
+		if (t->GetHeroForgeModel()) {
+			c->Message(
 				Chat::White,
 				fmt::format(
 					"Hero's Forge: {}",
-					target->GetHeroForgeModel()
+					t->GetHeroForgeModel()
 				).c_str()
 			);
 		}
 
 		// Owner Data
-		if (target->GetOwner()) {
-			auto owner_name = target->GetOwner()->GetCleanName();
+		if (t->GetOwner()) {
+			const auto& o = t->GetOwner();
+			auto owner_name = o->GetCleanName();
 			auto owner_type = (
-				target->GetOwner()->IsNPC() ?
+				o->IsNPC() ?
 				"NPC" :
 				(
-					target->GetOwner()->IsClient() ?
+					o->IsClient() ?
 					"Client" :
 					"Other"
 				)
 			);
-			auto owner_id = target->GetOwnerID();
-			client->Message(
+			auto owner_id = t->GetOwnerID();
+			c->Message(
 				Chat::White,
 				fmt::format(
 					"Owner | Name: {} ({}) Type: {}",
@@ -1831,10 +2972,10 @@ void Mob::ShowStats(Client* client)
 		}
 
 		// Pet Data
-		if (target->GetPet()) {
-			auto pet_name = target->GetPet()->GetCleanName();
-			auto pet_id = target->GetPetID();
-			client->Message(
+		if (t->GetPet()) {
+			auto pet_name = t->GetPet()->GetCleanName();
+			auto pet_id = t->GetPetID();
+			c->Message(
 				Chat::White,
 				fmt::format(
 					"Pet | Name: {} ({})",
@@ -1845,128 +2986,128 @@ void Mob::ShowStats(Client* client)
 		}
 
 		// Merchant Data
-		if (target->MerchantType) {
-			client->Message(
+		if (t->MerchantType) {
+			c->Message(
 				Chat::White,
 				fmt::format(
 					"Merchant | ID: {} Currency Type: {}",
-					target->MerchantType,
-					target->GetAltCurrencyType()
+					t->MerchantType,
+					t->GetAltCurrencyType()
 				).c_str()
 			);
 		}
 
 		// Spell Data
-		if (target->AI_HasSpells() || target->AI_HasSpellsEffects()) {
-			client->Message(
+		if (t->AI_HasSpells() || t->AI_HasSpellsEffects()) {
+			c->Message(
 				Chat::White,
 				fmt::format(
 					"Spells | ID: {} Effects ID: {}",
-					target->GetNPCSpellsID(),
-					target->GetNPCSpellsEffectsID()
+					t->GetNPCSpellsID(),
+					t->GetNPCSpellsEffectsID()
 				).c_str()
 			);
 		}
 
 		// Health
-		client->Message(
+		c->Message(
 			Chat::White,
 			fmt::format(
 				"Health: {}/{} ({:.2f}%) Regen: {}",
-				target->GetHP(),
-				target->GetMaxHP(),
-				target->GetHPRatio(),
-				target->GetHPRegen()
+				t->GetHP(),
+				t->GetMaxHP(),
+				t->GetHPRatio(),
+				t->GetHPRegen()
 			).c_str()
 		);
 
 		// Mana
-		if (target->GetMaxMana() > 0) {
-			client->Message(
+		if (t->GetMaxMana() > 0) {
+			c->Message(
 				Chat::White,
 				fmt::format(
 					"Mana: {}/{} ({:.2f}%) Regen: {}",
-					target->GetMana(),
-					target->GetMaxMana(),
-					target->GetManaRatio(),
-					target->GetManaRegen()
+					t->GetMana(),
+					t->GetMaxMana(),
+					t->GetManaRatio(),
+					t->GetManaRegen()
 				).c_str()
 			);
 		}
 
 		// Damage
-		client->Message(
+		c->Message(
 			Chat::White,
 			fmt::format(
 				"Damage | Min: {} Max: {}",
-				target->GetMinDMG(),
-				target->GetMaxDMG()
+				t->GetMinDMG(),
+				t->GetMaxDMG()
 			).c_str()
 		);
 
 		// Attack Count / Delay
-		client->Message(
+		c->Message(
 			Chat::White,
 			fmt::format(
 				"Attack | Count: {} Delay: {}",
-				target->GetNumberOfAttacks(),
-				target->GetAttackDelay()
+				t->GetNumberOfAttacks(),
+				t->GetAttackDelay()
 			).c_str()
 		);
 
 		// Weapon Textures
-		client->Message(
+		c->Message(
 			Chat::White,
 			fmt::format(
 				"Weapon Textures | Primary: {} Secondary: {} Ammo: {}",
-				target->GetEquipmentMaterial(EQ::textures::weaponPrimary),
-				target->GetEquipmentMaterial(EQ::textures::weaponSecondary),
-				target->GetAmmoIDfile()
+				t->GetEquipmentMaterial(EQ::textures::weaponPrimary),
+				t->GetEquipmentMaterial(EQ::textures::weaponSecondary),
+				t->GetAmmoIDfile()
 			).c_str()
 		);
 
 		// Weapon Types
-		client->Message(
+		c->Message(
 			Chat::White,
 			fmt::format(
 				"Weapon Types | Primary: {} ({}) Secondary: {} ({})",
-				EQ::skills::GetSkillName(static_cast<EQ::skills::SkillType>(target->GetPrimSkill())),
-				target->GetPrimSkill(),
-				EQ::skills::GetSkillName(static_cast<EQ::skills::SkillType>(target->GetSecSkill())),
-				target->GetSecSkill()
+				EQ::skills::GetSkillName(static_cast<EQ::skills::SkillType>(t->GetPrimSkill())),
+				t->GetPrimSkill(),
+				EQ::skills::GetSkillName(static_cast<EQ::skills::SkillType>(t->GetSecSkill())),
+				t->GetSecSkill()
 			).c_str()
 		);
 
-		client->Message(
+		c->Message(
 			Chat::White,
 			fmt::format(
 				"Weapon Types | Ranged: {} ({})",
-				EQ::skills::GetSkillName(static_cast<EQ::skills::SkillType>(target->GetRangedSkill())),
-				target->GetRangedSkill()
+				EQ::skills::GetSkillName(static_cast<EQ::skills::SkillType>(t->GetRangedSkill())),
+				t->GetRangedSkill()
 			).c_str()
 		);
 
 		// Combat Stats
-		client->Message(
+		c->Message(
 			Chat::White,
 			fmt::format(
 				"Combat Stats | Accuracy: {} Armor Class: {} Attack: {}",
-				target->GetAccuracyRating(),
-				target->GetAC(),
-				target->GetATK()
+				t->GetAccuracyRating(),
+				t->GetAC(),
+				t->GetATK()
 			).c_str()
 		);
 
-		client->Message(
+		c->Message(
 			Chat::White,
 			fmt::format(
 				"Combat Stats | Avoidance: {} Slow Mitigation: {}",
-				target->GetAvoidanceRating(),
-				target->GetSlowMitigation()
+				t->GetAvoidanceRating(),
+				t->GetSlowMitigation()
 			).c_str()
 		);
 
-		client->Message(
+		c->Message(
 			Chat::White,
 			fmt::format(
 				"Combat Stats | To Hit: {} Total To Hit: {}",
@@ -1975,7 +3116,7 @@ void Mob::ShowStats(Client* client)
 			).c_str()
 		);
 
-		client->Message(
+		c->Message(
 			Chat::White,
 			fmt::format(
 				"Combat Stats | Defense: {} Total Defense: {}",
@@ -1984,7 +3125,7 @@ void Mob::ShowStats(Client* client)
 			).c_str()
 		);
 
-		client->Message(
+		c->Message(
 			Chat::White,
 			fmt::format(
 				"Combat Stats | Offense: {} Mitigation Armor Class: {}",
@@ -1994,302 +3135,302 @@ void Mob::ShowStats(Client* client)
 		);
 
 		// Stats
-		client->Message(
+		c->Message(
 			Chat::White,
 			fmt::format(
 				"Stats | Agility: {} Charisma: {} Dexterity: {} Intelligence: {}",
-				target->GetAGI(),
-				target->GetCHA(),
-				target->GetDEX(),
-				target->GetINT()
+				t->GetAGI(),
+				t->GetCHA(),
+				t->GetDEX(),
+				t->GetINT()
 			).c_str()
 		);
 
-		client->Message(
+		c->Message(
 			Chat::White,
 			fmt::format(
 				"Stats | Stamina: {} Strength: {} Wisdom: {}",
-				target->GetSTA(),
-				target->GetSTR(),
-				target->GetWIS()
+				t->GetSTA(),
+				t->GetSTR(),
+				t->GetWIS()
 			).c_str()
 		);
 
 		// Charmed Stats
 		if (has_charmed_stats) {
-			client->Message(
+			c->Message(
 				Chat::White,
 				fmt::format(
 					"Charmed Stats | Attack: {} Attack Delay: {}",
-					target->GetCharmedAttack(),
-					target->GetCharmedAttackDelay()
+					t->GetCharmedAttack(),
+					t->GetCharmedAttackDelay()
 				).c_str()
 			);
 
-			client->Message(
+			c->Message(
 				Chat::White,
 				fmt::format(
 					"Charmed Stats | Accuracy: {} Avoidance: {}",
-					target->GetCharmedAccuracy(),
-					target->GetCharmedAvoidance()
+					t->GetCharmedAccuracy(),
+					t->GetCharmedAvoidance()
 				).c_str()
 			);
 
-			client->Message(
+			c->Message(
 				Chat::White,
 				fmt::format(
 					"Charmed Stats | Min Damage: {} Max Damage: {}",
-					target->GetCharmedMinDamage(),
-					target->GetCharmedMaxDamage()
+					t->GetCharmedMinDamage(),
+					t->GetCharmedMaxDamage()
 				).c_str()
 			);
 		}
 
 		// Resists
-		client->Message(
+		c->Message(
 			Chat::White,
 			fmt::format(
 				"Resists | Cold: {} Disease: {} Fire: {} Magic: {}",
-				target->GetCR(),
-				target->GetDR(),
-				target->GetFR(),
-				target->GetMR()
+				t->GetCR(),
+				t->GetDR(),
+				t->GetFR(),
+				t->GetMR()
 			).c_str()
 		);
 
-		client->Message(
+		c->Message(
 			Chat::White,
 			fmt::format(
 				"Resists | Poison: {} Corruption: {} Physical: {}",
-				target->GetPR(),
-				target->GetCorrup(),
-				target->GetPhR()
+				t->GetPR(),
+				t->GetCorrup(),
+				t->GetPhR()
 			).c_str()
 		);
 
 		// Scaling
-		client->Message(
+		c->Message(
 			Chat::White,
 			fmt::format(
 				"Scaling | Heal: {} Spell: {}",
-				target->GetHealScale(),
-				target->GetSpellScale()
+				t->GetHealScale(),
+				t->GetSpellScale()
 			).c_str()
 		);
 
 		// See Invisible / Invisible vs. Undead / Hide / Improved Hide
-		client->Message(
+		c->Message(
 			Chat::White,
 			fmt::format(
 				"Can See | Invisible: {} Invisible vs. Undead: {}",
-				target->SeeInvisible() ? "Yes" : "No",
-				target->SeeInvisibleUndead() ? "Yes" : "No"
+				t->SeeInvisible() ? "Yes" : "No",
+				t->SeeInvisibleUndead() ? "Yes" : "No"
 			).c_str()
 		);
 
-		client->Message(
+		c->Message(
 			Chat::White,
 			fmt::format(
 				"Can See | Hide: {} Improved Hide: {}",
-				target->SeeHide() ? "Yes" : "No",
-				target->SeeImprovedHide() ? "Yes" : "No"
+				t->SeeHide() ? "Yes" : "No",
+				t->SeeImprovedHide() ? "Yes" : "No"
 			).c_str()
 		);
 
 		// Aggro / Assist Radius
-		client->Message(
+		c->Message(
 			Chat::White,
 			fmt::format(
 				"Radius | Aggro: {} Assist: {}",
-				target->GetAggroRange(),
-				target->GetAssistRange()
+				t->GetAggroRange(),
+				t->GetAssistRange()
 			).c_str()
 		);
 
 		// Emote
-		if (target->GetEmoteID()) {
-			client->Message(
+		if (t->GetEmoteID()) {
+			c->Message(
 				Chat::White,
 				fmt::format(
 					"Emote: {}",
-					target->GetEmoteID()
+					t->GetEmoteID()
 				).c_str()
 			);
 		}
 
 		// Run/Walk Speed
-		client->Message(
+		c->Message(
 			Chat::White,
 			fmt::format(
 				"Speed | Run: {} Walk: {}",
-				target->GetRunspeed(),
-				target->GetWalkspeed()
+				t->GetRunspeed(),
+				t->GetWalkspeed()
 			).c_str()
 		);
 
 		// Position
-		client->Message(
+		c->Message(
 			Chat::White,
 			fmt::format(
 				"Position | {}, {}, {}, {}",
-				target->GetX(),
-				target->GetY(),
-				target->GetZ(),
-				target->GetHeading()
+				t->GetX(),
+				t->GetY(),
+				t->GetZ(),
+				t->GetHeading()
 			).c_str()
 		);
 
 		// Experience Modifier
-		client->Message(
+		c->Message(
 			Chat::White,
 			fmt::format(
 				"Experience Modifier: {}",
-				target->GetKillExpMod()
+				t->GetKillExpMod()
 			).c_str()
 		);
 
 		// Quest Globals
-		client->Message(
+		c->Message(
 			Chat::White,
 			fmt::format(
 				"Quest Globals: {}",
-				target->qglobal ? "Enabled" : "Disabled"
+				t->qglobal ? "Enabled" : "Disabled"
 			).c_str()
 		);
 
 		// Proximity
-		if (target->IsProximitySet()) {
-			client->Message(
+		if (t->IsProximitySet()) {
+			c->Message(
 				Chat::White,
 				fmt::format(
 					"Proximity | Say: {}",
-					target->proximity->say ? "Enabled" : "Disabled"
+					t->proximity->say ? "Enabled" : "Disabled"
 				).c_str()
 			);
 
-			client->Message(
+			c->Message(
 				Chat::White,
 				fmt::format(
 					"Proximity X | Min: {} Max: {} Range: {}",
-					target->GetProximityMinX(),
-					target->GetProximityMaxX(),
-					(target->GetProximityMaxX() - target->GetProximityMinX())
+					t->GetProximityMinX(),
+					t->GetProximityMaxX(),
+					(t->GetProximityMaxX() - t->GetProximityMinX())
 				).c_str()
 			);
 
-			client->Message(
+			c->Message(
 				Chat::White,
 				fmt::format(
 					"Proximity Y | Min: {} Max: {} Range: {}",
-					target->GetProximityMinY(),
-					target->GetProximityMaxY(),
-					(target->GetProximityMaxY() - target->GetProximityMinY())
+					t->GetProximityMinY(),
+					t->GetProximityMaxY(),
+					(t->GetProximityMaxY() - t->GetProximityMinY())
 				).c_str()
 			);
 
-			client->Message(
+			c->Message(
 				Chat::White,
 				fmt::format(
 					"Proximity Z | Min: {} Max: {} Range: {}",
-					target->GetProximityMinZ(),
-					target->GetProximityMaxZ(),
-					(target->GetProximityMaxZ() - target->GetProximityMinZ())
+					t->GetProximityMinZ(),
+					t->GetProximityMaxZ(),
+					(t->GetProximityMaxZ() - t->GetProximityMinZ())
 				).c_str()
 			);
 		}
 
 		// Spawn Data
 		if (
-			target->GetGrid() ||
-			target->GetSpawnGroupId() ||
-			target->GetSpawnPointID()
+			t->GetGrid() ||
+			t->GetSpawnGroupId() ||
+			t->GetSpawnPointID()
 		) {
-			client->Message(
+			c->Message(
 				Chat::White,
 				fmt::format(
 					"Spawn | Group: {} Point: {} Grid: {}",
-					target->GetSpawnGroupId(),
-					target->GetSpawnPointID(),
-					target->GetGrid()
+					t->GetSpawnGroupId(),
+					t->GetSpawnPointID(),
+					t->GetGrid()
 				).c_str()
 			);
 		}
 
-		client->Message(
+		c->Message(
 			Chat::White,
 			fmt::format(
 				"Spawn | Raid: {} Rare: {}",
-				target->IsRaidTarget() ? "Yes" : "No",
-				target->IsRareSpawn() ? "Yes" : "No",
-				target->GetSkipGlobalLoot() ? "Yes" : "No"
+				t->IsRaidTarget() ? "Yes" : "No",
+				t->IsRareSpawn() ? "Yes" : "No",
+				t->GetSkipGlobalLoot() ? "Yes" : "No"
 			).c_str()
 		);
 
-		client->Message(
+		c->Message(
 			Chat::White,
 			fmt::format(
 				"Spawn | Skip Global Loot: {} Ignore Despawn: {}",
-				target->GetSkipGlobalLoot() ? "Yes" : "No",
-				target->GetIgnoreDespawn() ? "Yes" : "No"
+				t->GetSkipGlobalLoot() ? "Yes" : "No",
+				t->GetIgnoreDespawn() ? "Yes" : "No"
 			).c_str()
 		);
 
-		client->Message(
+		c->Message(
 			Chat::White,
 			fmt::format(
 				"Spawn | Findable: {} Trackable: {} Underwater: {}",
-				target->IsFindable() ? "Yes" : "No",
-				target->IsTrackable() ? "Yes" : "No",
-				target->IsUnderwaterOnly() ? "Yes" : "No"
+				t->IsFindable() ? "Yes" : "No",
+				t->IsTrackable() ? "Yes" : "No",
+				t->IsUnderwaterOnly() ? "Yes" : "No"
 			).c_str()
 		);
 
-		client->Message(
+		c->Message(
 			Chat::White,
 			fmt::format(
 				"Spawn | Stuck Behavior: {} Fly Mode: {}",
-				target->GetStuckBehavior(),
-				static_cast<int>(target->GetFlyMode())
+				t->GetStuckBehavior(),
+				static_cast<int>(t->GetFlyMode())
 			).c_str()
 		);
 
-		client->Message(
+		c->Message(
 			Chat::White,
 			fmt::format(
 				"Spawn | Aggro NPCs: {} Always Aggro: {}",
-				target->GetNPCAggro() ? "Yes" : "No",
-				target->GetAlwaysAggro() ? "Yes" : "No"
+				t->GetNPCAggro() ? "Yes" : "No",
+				t->GetAlwaysAggro() ? "Yes" : "No"
 			).c_str()
 		);
 
 		// Race / Class / Gender
-		client->Message(
+		c->Message(
 			Chat::White,
 			fmt::format(
 				"Race: {} ({}) Class: {} ({}) Gender: {} ({})",
-				GetRaceIDName(target->GetRace()),
-				target->GetRace(),
-				GetClassIDName(target->GetClass()),
-				target->GetClass(),
-				GetGenderName(target->GetGender()),
-				target->GetGender()
+				GetRaceIDName(t->GetRace()),
+				t->GetRace(),
+				GetClassIDName(t->GetClass()),
+				t->GetClass(),
+				GetGenderName(t->GetGender()),
+				t->GetGender()
 			).c_str()
 		);
 
 		// NPC
-		client->Message(
+		c->Message(
 			Chat::White,
 			fmt::format(
 				"NPC | ID: {} Entity ID: {} Name: {}{} Level: {}",
-				target->GetNPCTypeID(),
-				target->GetID(),
+				t->GetNPCTypeID(),
+				t->GetID(),
 				target_name,
 				(
 					!target_last_name.empty() ?
 					fmt::format(" ({})", target_last_name) :
 					""
 				),
-				target->GetLevel()
+				t->GetLevel()
 			).c_str()
 		);
 	}
@@ -2321,54 +3462,57 @@ void Mob::DoAnim(const int animation_id, int animation_speed, bool ackreq, eqFil
 	safe_delete(outapp);
 }
 
-void Mob::ShowBuffs(Client* client) {
-	if(SPDAT_RECORDS <= 0)
+void Mob::ShowBuffs(Client* c) {
+	if (SPDAT_RECORDS <= 0) {
 		return;
-	client->Message(Chat::White, "Buffs on: %s", GetName());
-	uint32 i;
-	uint32 buff_count = GetMaxTotalSlots();
-	for (i=0; i < buff_count; i++) {
-		if (IsValidSpell(buffs[i].spellid)) {
-			if (spells[buffs[i].spellid].buff_duration_formula == DF_Permanent)
-				client->Message(Chat::White, "  %i: %s: Permanent", i, spells[buffs[i].spellid].name);
-			else
-				client->Message(Chat::White, "  %i: %s: %i tics left", i, spells[buffs[i].spellid].name, buffs[i].ticsremaining);
+	}
 
+	std::string buffs_table;
+
+	buffs_table += DialogueWindow::TableRow(
+		fmt::format(
+			"{}{}{}{}{}",
+			DialogueWindow::TableCell("Slot"),
+			DialogueWindow::TableCell("Spell"),
+			DialogueWindow::TableCell("Spell ID"),
+			DialogueWindow::TableCell("Duration"),
+			DialogueWindow::TableCell("Hits")
+		)
+	);
+
+	for (auto i = 0; i < GetMaxTotalSlots(); i++) {
+		const auto spell_id              = buffs[i].spellid;
+		const auto buff_duration_formula = spells[spell_id].buff_duration_formula;
+		if (IsValidSpell(spell_id)) {
+			const auto is_permanent = (
+				buff_duration_formula == DF_Aura ||
+				buff_duration_formula == DF_Permanent
+			);
+
+			const auto time = Strings::SecondsToTime(buffs[i].ticsremaining * 6);
+
+			buffs_table += DialogueWindow::TableRow(
+				fmt::format(
+					"{}{}{}{}{}",
+					DialogueWindow::TableCell(std::to_string(i)),
+					DialogueWindow::TableCell(GetSpellName(spell_id)),
+					DialogueWindow::TableCell(Strings::Commify(spell_id)),
+					DialogueWindow::TableCell(is_permanent ? "Permanent" : time),
+					DialogueWindow::TableCell(std::to_string(buffs[i].hit_number))
+				)
+			);
 		}
 	}
-	if (IsClient()){
-		client->Message(Chat::White, "itembonuses:");
-		client->Message(Chat::White, "Atk:%i Ac:%i HP(%i):%i Mana:%i", itembonuses.ATK, itembonuses.AC, itembonuses.HPRegen, itembonuses.HP, itembonuses.Mana);
-		client->Message(Chat::White, "Str:%i Sta:%i Dex:%i Agi:%i Int:%i Wis:%i Cha:%i",
-			itembonuses.STR,itembonuses.STA,itembonuses.DEX,itembonuses.AGI,itembonuses.INT,itembonuses.WIS,itembonuses.CHA);
-		client->Message(Chat::White, "SvMagic:%i SvFire:%i SvCold:%i SvPoison:%i SvDisease:%i",
-				itembonuses.MR,itembonuses.FR,itembonuses.CR,itembonuses.PR,itembonuses.DR);
-		client->Message(Chat::White, "DmgShield:%i Haste:%i", itembonuses.DamageShield, itembonuses.haste );
-		client->Message(Chat::White, "spellbonuses:");
-		client->Message(Chat::White, "Atk:%i Ac:%i HP(%i):%i Mana:%i", spellbonuses.ATK, spellbonuses.AC, spellbonuses.HPRegen, spellbonuses.HP, spellbonuses.Mana);
-		client->Message(Chat::White, "Str:%i Sta:%i Dex:%i Agi:%i Int:%i Wis:%i Cha:%i",
-			spellbonuses.STR,spellbonuses.STA,spellbonuses.DEX,spellbonuses.AGI,spellbonuses.INT,spellbonuses.WIS,spellbonuses.CHA);
-		client->Message(Chat::White, "SvMagic:%i SvFire:%i SvCold:%i SvPoison:%i SvDisease:%i",
-				spellbonuses.MR,spellbonuses.FR,spellbonuses.CR,spellbonuses.PR,spellbonuses.DR);
-		client->Message(Chat::White, "DmgShield:%i Haste:%i", spellbonuses.DamageShield, spellbonuses.haste );
-	}
-}
 
-void Mob::ShowBuffList(Client* client) {
-	if(SPDAT_RECORDS <= 0)
-		return;
+	buffs_table = DialogueWindow::Table(buffs_table);
 
-	client->Message(Chat::White, "Buffs on: %s", GetCleanName());
-	uint32 i;
-	uint32 buff_count = GetMaxTotalSlots();
-	for (i = 0; i < buff_count; i++) {
-		if (IsValidSpell(buffs[i].spellid)) {
-			if (spells[buffs[i].spellid].buff_duration_formula == DF_Permanent)
-				client->Message(Chat::White, "  %i: %s: Permanent", i, spells[buffs[i].spellid].name);
-			else
-				client->Message(Chat::White, "  %i: %s: %i tics left", i, spells[buffs[i].spellid].name, buffs[i].ticsremaining);
-		}
-	}
+	c->SendPopupToClient(
+		fmt::format(
+			"Buffs on {}",
+			c->GetTargetDescription(this, TargetDescriptionType::UCSelf)
+		).c_str(),
+		buffs_table.c_str()
+	);
 }
 
 void Mob::GMMove(float x, float y, float z, float heading, bool save_guard_spot) {
@@ -2803,32 +3947,6 @@ bool Mob::RandomizeFeatures(bool send_illusion, bool set_variables)
 	return false;
 }
 
-bool Mob::IsPlayerClass(uint16 in_class) {
-	if (
-		in_class >= WARRIOR &&
-		in_class <= BERSERKER
-	) {
-		return true;
-	}
-
-	return false;
-}
-
-bool Mob::IsPlayerRace(uint16 in_race) {
-
-	if (
-		(in_race >= HUMAN && in_race <= GNOME) ||
-		in_race == IKSAR ||
-		in_race == VAHSHIR ||
-		in_race == FROGLOK ||
-		in_race == DRAKKIN
-	) {
-		return true;
-	}
-
-	return false;
-}
-
 uint16 Mob::GetFactionRace() {
 	uint16 current_race = GetRace();
 	if (IsPlayerRace(current_race) || current_race == TREE ||
@@ -2842,7 +3960,7 @@ uint16 Mob::GetFactionRace() {
 
 uint8 Mob::GetDefaultGender(uint16 in_race, uint8 in_gender) {
 	if (
-		Mob::IsPlayerRace(in_race) ||
+		IsPlayerRace(in_race) ||
 		in_race == RACE_BROWNIE_15 ||
 		in_race == RACE_KERRAN_23 ||
 		in_race == RACE_LION_50 ||
@@ -7151,4 +8269,84 @@ int Mob::DispatchZoneControllerEvent(
 	}
 
 	return ret;
+}
+
+std::string Mob::GetRacePlural()
+{
+	switch (GetBaseRace()) {
+		case RACE_HUMAN_1:
+			return "Humans";
+		case RACE_BARBARIAN_2:
+			return "Barbarians";
+		case RACE_ERUDITE_3:
+			return "Erudites";
+		case RACE_WOOD_ELF_4:
+			return "Wood Elves";
+		case RACE_HIGH_ELF_5:
+			return "High Elves";
+		case RACE_DARK_ELF_6:
+			return "Dark Elves";
+		case RACE_HALF_ELF_7:
+			return "Half Elves";
+		case RACE_DWARF_8:
+			return "Dwarves";
+		case RACE_TROLL_9:
+			return "Trolls";
+		case RACE_OGRE_10:
+			return "Ogres";
+		case RACE_HALFLING_11:
+			return "Halflings";
+		case RACE_GNOME_12:
+			return "Gnomes";
+		case RACE_IKSAR_128:
+			return "Iksar";
+		case RACE_VAH_SHIR_130:
+			return "Vah Shir";
+		case RACE_FROGLOK_330:
+			return "Frogloks";
+		case RACE_DRAKKIN_522:
+			return "Drakkin";
+		default:
+			return "Races";
+	}
+}
+
+std::string Mob::GetClassPlural()
+{
+	switch (GetClass()) {
+		case WARRIOR:
+			return "Warriors";
+		case CLERIC:
+			return "Clerics";
+		case PALADIN:
+			return "Paladins";
+		case RANGER:
+			return "Rangers";
+		case SHADOWKNIGHT:
+			return "Shadowknights";
+		case DRUID:
+			return "Druids";
+		case MONK:
+			return "Monks";
+		case BARD:
+			return "Bards";
+		case ROGUE:
+			return "Rogues";
+		case SHAMAN:
+			return "Shamans";
+		case NECROMANCER:
+			return "Necromancers";
+		case WIZARD:
+			return "Wizards";
+		case MAGICIAN:
+			return "Magicians";
+		case ENCHANTER:
+			return "Enchanters";
+		case BEASTLORD:
+			return "Beastlords";
+		case BERSERKER:
+			return "Berserkers";
+		default:
+			return "Classes";
+	}
 }

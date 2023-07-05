@@ -60,16 +60,6 @@ void handle_npc_single_client(
 	std::vector<std::any> *extra_pointers
 );
 
-void handle_npc_single_npc(
-	QuestInterface *parse,
-	lua_State* L,
-	NPC* npc,
-	Mob *init,
-	std::string data,
-	uint32 extra_data,
-	std::vector<std::any> *extra_pointers
-);
-
 void handle_npc_task_accepted(
 	QuestInterface *parse,
 	lua_State* L,

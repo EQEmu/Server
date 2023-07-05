@@ -3,6 +3,7 @@
 #include <luabind/luabind.hpp>
 #include <luabind/object.hpp>
 
+#include "../common/languages.h"
 #include "masterentity.h"
 #include "lua_iteminst.h"
 #include "lua_item.h"
@@ -55,12 +56,12 @@ bool Lua_ItemInst::IsStackable() {
 	return self->IsStackable();
 }
 
-bool Lua_ItemInst::IsEquipable(int race, int class_) {
+bool Lua_ItemInst::IsEquipable(uint16 race_bitmask, uint16 class_bitmask) {
 	Lua_Safe_Call_Bool();
-	return self->IsEquipable(race, class_);
+	return self->IsEquipable(race_bitmask, class_bitmask);
 }
 
-bool Lua_ItemInst::IsEquipable(int slot_id) {
+bool Lua_ItemInst::IsEquipable(int16 slot_id) {
 	Lua_Safe_Call_Bool();
 	return self->IsEquipable(slot_id);
 }
@@ -80,9 +81,9 @@ bool Lua_ItemInst::IsExpendable() {
 	return self->IsExpendable();
 }
 
-Lua_ItemInst Lua_ItemInst::GetItem(int slot) {
+Lua_ItemInst Lua_ItemInst::GetItem(uint8 slot_id) {
 	Lua_Safe_Call_Class(Lua_ItemInst);
-	return Lua_ItemInst(self->GetItem(slot));
+	return Lua_ItemInst(self->GetItem(slot_id));
 }
 
 Lua_Item Lua_ItemInst::GetItem() {
@@ -90,29 +91,29 @@ Lua_Item Lua_ItemInst::GetItem() {
 	return Lua_Item(self->GetItem());
 }
 
-Lua_Item Lua_ItemInst::GetUnscaledItem(int slot) {
+Lua_Item Lua_ItemInst::GetUnscaledItem() {
 	Lua_Safe_Call_Class(Lua_Item);
 	return self->GetUnscaledItem();
 }
 
-uint32 Lua_ItemInst::GetItemID(int slot) {
+uint32 Lua_ItemInst::GetItemID(uint8 slot_id) {
 	Lua_Safe_Call_Int();
-	return self->GetItemID(slot);
+	return self->GetItemID(slot_id);
 }
 
-int Lua_ItemInst::GetTotalItemCount() {
+uint8 Lua_ItemInst::GetTotalItemCount() {
 	Lua_Safe_Call_Int();
 	return self->GetTotalItemCount();
 }
 
-Lua_ItemInst Lua_ItemInst::GetAugment(int slot) {
+Lua_ItemInst Lua_ItemInst::GetAugment(uint8 slot_id) {
 	Lua_Safe_Call_Class(Lua_ItemInst);
-	return self->GetAugment(slot);
+	return self->GetAugment(slot_id);
 }
 
-uint32 Lua_ItemInst::GetAugmentItemID(int slot) {
+uint32 Lua_ItemInst::GetAugmentItemID(uint8 slot_id) {
 	Lua_Safe_Call_Int();
-	return self->GetAugmentItemID(slot);
+	return self->GetAugmentItemID(slot_id);
 }
 
 bool Lua_ItemInst::IsAugmented() {
@@ -175,7 +176,17 @@ bool Lua_ItemInst::IsInstNoDrop() {
 	return self->IsAttuned();
 }
 
+bool Lua_ItemInst::IsAttuned() {
+	Lua_Safe_Call_Bool();
+	return self->IsAttuned();
+}
+
 void Lua_ItemInst::SetInstNoDrop(bool flag) {
+	Lua_Safe_Call_Void();
+	return self->SetAttuned(flag);
+}
+
+void Lua_ItemInst::SetAttuned(bool flag) {
 	Lua_Safe_Call_Void();
 	return self->SetAttuned(flag);
 }
@@ -240,12 +251,12 @@ void Lua_ItemInst::AddExp(uint32 exp) {
 	self->AddExp(exp);
 }
 
-int Lua_ItemInst::GetMaxEvolveLvl() {
+int8 Lua_ItemInst::GetMaxEvolveLvl() {
 	Lua_Safe_Call_Int();
 	return self->GetMaxEvolveLvl();
 }
 
-uint32 Lua_ItemInst::GetKillsNeeded(int current_level) {
+uint32 Lua_ItemInst::GetKillsNeeded(uint8 current_level) {
 	Lua_Safe_Call_Int();
 	return self->GetKillsNeeded(current_level);
 }
@@ -290,6 +301,23 @@ int Lua_ItemInst::RemoveTaskDeliveredItems() {
 	return self->RemoveTaskDeliveredItems();
 }
 
+std::string Lua_ItemInst::GetName() {
+	Lua_Safe_Call_String();
+	return self->GetItem()->Name;
+}
+
+void Lua_ItemInst::ItemSay(const char* text) // @categories Inventory and Items
+{
+	Lua_Safe_Call_Void();
+	quest_manager.GetInitiator()->ChannelMessageSend(self->GetItem()->Name, 0, ChatChannel_Say, LANG_COMMON_TONGUE, MAX_LANGUAGE_SKILL, text);
+}
+
+void Lua_ItemInst::ItemSay(const char* text, uint8 language_id) // @categories Inventory and Items
+{
+	Lua_Safe_Call_Void();
+	quest_manager.GetInitiator()->ChannelMessageSend(self->GetItem()->Name, 0, ChatChannel_Say, language_id, MAX_LANGUAGE_SKILL, text);
+}
+
 luabind::scope lua_register_iteminst() {
 	return luabind::class_<Lua_ItemInst>("ItemInst")
 	.def(luabind::constructor<>())
@@ -313,26 +341,31 @@ luabind::scope lua_register_iteminst() {
 	.def("GetExp", (uint32(Lua_ItemInst::*)(void))&Lua_ItemInst::GetExp)
 	.def("GetID", (uint32(Lua_ItemInst::*)(void))&Lua_ItemInst::GetID)
 	.def("GetItem", (Lua_Item(Lua_ItemInst::*)(void))&Lua_ItemInst::GetItem)
-	.def("GetItem", (Lua_ItemInst(Lua_ItemInst::*)(int))&Lua_ItemInst::GetItem)
+	.def("GetItem", (Lua_ItemInst(Lua_ItemInst::*)(uint8))&Lua_ItemInst::GetItem)
 	.def("GetItemID", (uint32(Lua_ItemInst::*)(int))&Lua_ItemInst::GetItemID)
 	.def("GetItemScriptID", (uint32(Lua_ItemInst::*)(void))&Lua_ItemInst::GetItemScriptID)
 	.def("GetKillsNeeded", (uint32(Lua_ItemInst::*)(int))&Lua_ItemInst::GetKillsNeeded)
 	.def("GetMaxEvolveLvl", (int(Lua_ItemInst::*)(void))&Lua_ItemInst::GetMaxEvolveLvl)
+	.def("GetName", (std::string(Lua_ItemInst::*)(void))&Lua_ItemInst::GetName)
 	.def("GetPrice", (uint32(Lua_ItemInst::*)(void))&Lua_ItemInst::GetPrice)
 	.def("GetTaskDeliveredCount", &Lua_ItemInst::GetTaskDeliveredCount)
-	.def("GetTotalItemCount", (int(Lua_ItemInst::*)(void))&Lua_ItemInst::GetTotalItemCount)
+	.def("GetTotalItemCount", (uint8(Lua_ItemInst::*)(void))&Lua_ItemInst::GetTotalItemCount)
 	.def("GetUnscaledItem", (Lua_ItemInst(Lua_ItemInst::*)(int))&Lua_ItemInst::GetUnscaledItem)
 	.def("IsAmmo", (bool(Lua_ItemInst::*)(void))&Lua_ItemInst::IsAmmo)
+	.def("IsAttuned", (bool(Lua_ItemInst::*)(void))&Lua_ItemInst::IsAttuned)
 	.def("IsAugmentable", (bool(Lua_ItemInst::*)(void))&Lua_ItemInst::IsAugmentable)
 	.def("IsAugmented", (bool(Lua_ItemInst::*)(void))&Lua_ItemInst::IsAugmented)
-	.def("IsEquipable", (bool(Lua_ItemInst::*)(int))&Lua_ItemInst::IsEquipable)
-	.def("IsEquipable", (bool(Lua_ItemInst::*)(int,int))&Lua_ItemInst::IsEquipable)
+	.def("IsEquipable", (bool(Lua_ItemInst::*)(int16))&Lua_ItemInst::IsEquipable)
+	.def("IsEquipable", (bool(Lua_ItemInst::*)(uint16,uint16))&Lua_ItemInst::IsEquipable)
 	.def("IsExpendable", (bool(Lua_ItemInst::*)(void))&Lua_ItemInst::IsExpendable)
 	.def("IsInstNoDrop", (bool(Lua_ItemInst::*)(void))&Lua_ItemInst::IsInstNoDrop)
 	.def("IsStackable", (bool(Lua_ItemInst::*)(void))&Lua_ItemInst::IsStackable)
 	.def("IsType", (bool(Lua_ItemInst::*)(int))&Lua_ItemInst::IsType)
 	.def("IsWeapon", (bool(Lua_ItemInst::*)(void))&Lua_ItemInst::IsWeapon)
+	.def("ItemSay", (void(Lua_ItemInst::*)(const char*))&Lua_ItemInst::ItemSay)
+	.def("ItemSay", (void(Lua_ItemInst::*)(const char*, uint8))&Lua_ItemInst::ItemSay)
 	.def("RemoveTaskDeliveredItems", &Lua_ItemInst::RemoveTaskDeliveredItems)
+	.def("SetAttuned", (void(Lua_ItemInst::*)(bool))&Lua_ItemInst::SetAttuned)
 	.def("SetCharges", (void(Lua_ItemInst::*)(int))&Lua_ItemInst::SetCharges)
 	.def("SetColor", (void(Lua_ItemInst::*)(uint32))&Lua_ItemInst::SetColor)
 	.def("SetCustomData", (void(Lua_ItemInst::*)(const std::string&,bool))&Lua_ItemInst::SetCustomData)
