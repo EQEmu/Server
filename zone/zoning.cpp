@@ -1023,8 +1023,8 @@ void Client::SendZoneFlagInfo(Client *to) const {
 		to->Message(
 			Chat::White,
 			fmt::format(
-				"{} {} no Zone Flags.",
-				to == this ? "You" : GetName(),
+				"{} {} no zone flags.",
+				to->GetTargetDescription(const_cast<Mob*>(CastToMob()), TargetDescriptionType::UCYou),
 				to == this ? "have" : "has"
 			).c_str()
 		);
@@ -1034,32 +1034,29 @@ void Client::SendZoneFlagInfo(Client *to) const {
 	to->Message(
 		Chat::White,
 		fmt::format(
-			"{} {} the following Zone Flags:",
-			to == this ? "You" : GetName(),
+			"{} {} the following zone flags:",
+			to->GetTargetDescription(const_cast<Mob*>(CastToMob()), TargetDescriptionType::UCYou),
 			to == this ? "have" : "has"
 		).c_str()
 	);
 
-	int flag_count = 0;
-	for (const auto& zone_id : zone_flags) {
-		int flag_number = (flag_count + 1);
-		const char* zone_short_name = ZoneName(zone_id, true);
-		if (strncmp(zone_short_name, "UNKNOWN", strlen(zone_short_name)) != 0) {
-			std::string zone_long_name = ZoneLongName(zone_id);
-			std::string flag_name = "ERROR";
+	uint32 flag_count = 0;
 
-			auto z = GetZone(zone_id);
-			if (z) {
-				flag_name = z->flag_needed;
-			}
+	for (const auto& zone_id : zone_flags) {
+		const uint32 flag_number = (flag_count + 1);
+
+		const auto& z = GetZone(zone_id);
+
+		if (z) {
+			const std::string& flag_name = z->flag_needed;
 
 			to->Message(
 				Chat::White,
 				fmt::format(
-					"Flag {} | Zone: {} ({}) ID: {}",
+					"Flag {} | Zone: {} ({}) ID: {}{}",
 					flag_number,
-					zone_long_name,
-					zone_short_name,
+					z->long_name,
+					z->short_name,
 					zone_id,
 					(
 						!flag_name.empty() ?
@@ -1078,10 +1075,10 @@ void Client::SendZoneFlagInfo(Client *to) const {
 	to->Message(
 		Chat::White,
 		fmt::format(
-			"{} {} {} Zone Flags.",
-			to == this ? "You" : GetName(),
-			to == this ? "have" : "has",
-			flag_count
+			"{} Zone flag{} found for {}.",
+			flag_count,
+			flag_count != 1 ? "s" : "",
+			to->GetTargetDescription(const_cast<Mob*>(CastToMob()))
 		).c_str()
 	);
 }

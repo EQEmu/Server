@@ -6,6 +6,7 @@
 #include "show/distance.cpp"
 #include "show/emotes.cpp"
 #include "show/field_of_view.cpp"
+#include "show/flags.cpp"
 #include "show/group_info.cpp"
 #include "show/hatelist.cpp"
 #include "show/inventory.cpp"
@@ -19,6 +20,7 @@
 #include "show/peqzone_flags.cpp"
 #include "show/petition.cpp"
 #include "show/petition_info.cpp"
+#include "show/proximity.cpp"
 #include "show/quest_errors.cpp"
 #include "show/quest_globals.cpp"
 #include "show/recipe.cpp"
@@ -28,12 +30,14 @@
 #include "show/spells.cpp"
 #include "show/spells_list.cpp"
 #include "show/stats.cpp"
+#include "show/timers.cpp"
 #include "show/traps.cpp"
 #include "show/uptime.cpp"
 #include "show/variable.cpp"
 #include "show/version.cpp"
 #include "show/waypoints.cpp"
 #include "show/xtargets.cpp"
+#include "show/zone_data.cpp"
 #include "show/zone_global_loot.cpp"
 #include "show/zone_loot.cpp"
 #include "show/zone_points.cpp"
@@ -56,6 +60,7 @@ void command_show(Client *c, const Seperator *sep)
 		Cmd{.cmd = "distance", .u = "distance", .fn = ShowDistance, .a = {"#distance"}},
 		Cmd{.cmd = "emotes", .u = "emotes", .fn = ShowEmotes, .a = {"#emoteview"}},
 		Cmd{.cmd = "field_of_view", .u = "field_of_view", .fn = ShowFieldOfView, .a = {"#fov"}},
+		Cmd{.cmd = "flags", .u = "flags", .fn = ShowFlags, .a = {"#flags"}},
 		Cmd{.cmd = "group_info", .u = "group_info", .fn = ShowGroupInfo, .a = {"#ginfo"}},
 		Cmd{.cmd = "hatelist", .u = "hatelist", .fn = ShowHateList, .a = {"#hatelist"}},
 		Cmd{.cmd = "inventory", .u = "inventory", .fn = ShowInventory, .a = {"#peekinv"}},
@@ -69,6 +74,7 @@ void command_show(Client *c, const Seperator *sep)
 		Cmd{.cmd = "peqzone_flags", .u = "peqzone_flags", .fn = ShowPEQZoneFlags, .a = {"#peqzone_flags"}},
 		Cmd{.cmd = "petition", .u = "petition", .fn = ShowPetition, .a = {"#listpetition", "#viewpetition"}},
 		Cmd{.cmd = "petition_info", .u = "petition_info", .fn = ShowPetitionInfo, .a = {"#petitioninfo"}},
+		Cmd{.cmd = "proximity", .u = "proximity", .fn = ShowProximity, .a = {"#proximity"}},
 		Cmd{.cmd = "quest_errors", .u = "quest_errors", .fn = ShowQuestErrors, .a = {"#questerrors"}},
 		Cmd{.cmd = "quest_globals", .u = "quest_globals", .fn = ShowQuestGlobals, .a = {"#globalview"}},
 		Cmd{.cmd = "recipe", .u = "recipe [Recipe ID]", .fn = ShowRecipe, .a = {"#viewrecipe"}},
@@ -78,12 +84,14 @@ void command_show(Client *c, const Seperator *sep)
 		Cmd{.cmd = "spells", .u = "spells [disciplines|spells]", .fn = ShowSpells, .a = {"#showspells"}},
 		Cmd{.cmd = "spells_list", .u = "spells_list", .fn = ShowSpellsList, .a = {"#showspellslist"}},
 		Cmd{.cmd = "stats", .u = "stats", .fn = ShowStats, .a = {"#showstats"}},
+		Cmd{.cmd = "timers", .u = "timers", .fn = ShowTimers, .a = {"#timers"}},
 		Cmd{.cmd = "traps", .u = "traps", .fn = ShowTraps, .a = {"#trapinfo"}},
 		Cmd{.cmd = "uptime", .u = "uptime [Zone Server ID] (Zone Server ID is optional)", .fn = ShowUptime, .a = {"#uptime"}},
 		Cmd{.cmd = "variable", .u = "variable [Variable Name]", .fn = ShowVariable, .a = {"#getvariable"}},
 		Cmd{.cmd = "version", .u = "version", .fn = ShowVersion, .a = {"#version"}},
 		Cmd{.cmd = "waypoints", .u = "waypoints", .fn = ShowWaypoints, .a = {"#wpinfo"}},
 		Cmd{.cmd = "xtargets", .u = "xtargets [Amount] (Amount is optional)", .fn = ShowXTargets, .a = {"#xtargets"}},
+		Cmd{.cmd = "zone_data", .u = "zone_data", .fn = ShowZoneData, .a = {"#zstats"}},
 		Cmd{.cmd = "zone_global_loot", .u = "zone_global_loot", .fn = ShowZoneGlobalLoot, .a = {"#showzonegloballoot"}},
 		Cmd{.cmd = "zone_loot", .u = "zone_loot", .fn = ShowZoneLoot, .a = {"#viewzoneloot"}},
 		Cmd{.cmd = "zone_points", .u = "zone_points", .fn = ShowZonePoints, .a = {"#showzonepoints"}},

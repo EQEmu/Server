@@ -136,7 +136,6 @@ int command_init(void)
 		command_add("fixmob", "[race|gender|texture|helm|face|hair|haircolor|beard|beardcolor|heritage|tattoo|detail] [next|prev] - Manipulate appearance of your target", AccountStatus::QuestTroupe, command_fixmob) ||
 		command_add("flag", "[Status] [Account Name] - Refresh your admin status, or set an account's Admin status if arguments provided", AccountStatus::Player, command_flag) ||
 		command_add("flagedit", "Edit zone flags on your target. Use #flagedit help for more info.", AccountStatus::GMAdmin, command_flagedit) ||
-		command_add("flags", "displays the Zone Flags of you or your target", AccountStatus::Player, command_flags) ||
 		command_add("flymode", "[0/1/2/3/4/5] - Set your or your player target's flymode to ground/flying/levitate/water/floating/levitate_running", AccountStatus::Guide, command_flymode) ||
 		command_add("freeze", "Freeze your target", AccountStatus::QuestTroupe, command_freeze) ||
 		command_add("gassign", "[Grid ID] - Assign targetted NPC to predefined wandering grid id", AccountStatus::GMAdmin, command_gassign) ||
@@ -212,7 +211,6 @@ int command_init(void)
 		command_add("picklock", "Analog for ldon pick lock for the newer clients since we still don't have it working.", AccountStatus::Player, command_picklock) ||
 		command_add("profanity", "Manage censored language.", AccountStatus::GMLeadAdmin, command_profanity) ||
 		command_add("push", "[Back Push] [Up Push] - Lets you do spell push on an NPC", AccountStatus::GMLeadAdmin, command_push) ||
-		command_add("proximity", "Shows NPC proximity", AccountStatus::GMLeadAdmin, command_proximity) ||
 		command_add("pvp", "[On|Off] - Set you or your player target's PVP status", AccountStatus::GMAdmin, command_pvp) ||
 		command_add("qglobal", "[On|Off|View] - Toggles quest global functionality for your NPC target", AccountStatus::GMAdmin, command_qglobal) ||
 		command_add("race", "[racenum] - Change your or your target's race. Use racenum 0 to return to normal", AccountStatus::Guide, command_race) ||
@@ -274,7 +272,6 @@ int command_init(void)
 		command_add("petname", "[newname] - Temporarily renames your pet. Leave name blank to restore the original name.", AccountStatus::GMAdmin, command_petname) ||
 		command_add("texture", "[Texture] [Helmet Texture] - Change your or your target's texture (Helmet Texture defaults to 0 if not used)", AccountStatus::Steward, command_texture) ||
 		command_add("time", "[Hour] [Minute] - Set world time to specified time", AccountStatus::EQSupport, command_time) ||
-		command_add("timers", "Display persistent timers for target", AccountStatus::GMMgmt, command_timers) ||
 		command_add("timezone", "[Hour] [Minutes] - Set timezone (Minutes are optional)", AccountStatus::EQSupport, command_timezone) ||
 		command_add("title", "[Title] - Set your or your player target's title (use \"-1\" to remove title)", AccountStatus::Guide, command_title) ||
 		command_add("titlesuffix", "[Title Suffix] - Set your or your player target's title suffix (use \"-1\" to remove title suffix)", AccountStatus::Guide, command_titlesuffix) ||
@@ -308,7 +305,6 @@ int command_init(void)
 		command_add("zsafecoords", "[X] [Y] [Z] [Heading] [Permanent (0 = False, 1 = True)] - Set the current zone's safe coordinates", AccountStatus::QuestTroupe, command_zsafecoords) ||
 		command_add("zsave", " Saves zheader to the database", AccountStatus::QuestTroupe, command_zsave) ||
 		command_add("zsky", "[Sky Type] [Permanent (0 = False, 1 = True)] - Change zone sky type", AccountStatus::QuestTroupe, command_zsky) ||
-		command_add("zstats", "Show info about zone header", AccountStatus::QuestTroupe, command_zstats) ||
 		command_add("zunderworld", "[Z] [Permanent (0 = False, 1 = True)] - Change zone underworld Z", AccountStatus::QuestTroupe, command_zunderworld)
 	) {
 		command_deinit();
@@ -361,6 +357,7 @@ int command_init(void)
 				"cvs",
 				"distance",
 				"emoteview",
+				"flags",
 				"fov",
 				"getplayerburiedcorpsecount",
 				"getvariable",
@@ -375,6 +372,7 @@ int command_init(void)
 				"peekinv",
 				"petitioninfo",
 				"peqzone_flags",
+				"proximity",
 				"questerrors",
 				"serverinfo",
 				"showbuffs",
@@ -386,6 +384,7 @@ int command_init(void)
 				"showzonegloballoot",
 				"showzonepoints",
 				"spawnstatus",
+				"timers",
 				"trapinfo",
 				"uptime",
 				"version",
@@ -396,7 +395,8 @@ int command_init(void)
 				"viewzoneloot",
 				"wpinfo",
 				"xtargets",
-				"zonestatus"
+				"zonestatus",
+				"zstats"
 			}
 		},
 	};
@@ -1016,7 +1016,6 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/fixmob.cpp"
 #include "gm_commands/flag.cpp"
 #include "gm_commands/flagedit.cpp"
-#include "gm_commands/flags.cpp"
 #include "gm_commands/flymode.cpp"
 #include "gm_commands/freeze.cpp"
 #include "gm_commands/gassign.cpp"
@@ -1088,7 +1087,6 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/petname.cpp"
 #include "gm_commands/picklock.cpp"
 #include "gm_commands/profanity.cpp"
-#include "gm_commands/proximity.cpp"
 #include "gm_commands/push.cpp"
 #include "gm_commands/pvp.cpp"
 #include "gm_commands/qglobal.cpp"
@@ -1149,7 +1147,6 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/tempname.cpp"
 #include "gm_commands/texture.cpp"
 #include "gm_commands/time.cpp"
-#include "gm_commands/timers.cpp"
 #include "gm_commands/timezone.cpp"
 #include "gm_commands/title.cpp"
 #include "gm_commands/titlesuffix.cpp"
@@ -1183,5 +1180,4 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/zsafecoords.cpp"
 #include "gm_commands/zsave.cpp"
 #include "gm_commands/zsky.cpp"
-#include "gm_commands/zstats.cpp"
 #include "gm_commands/zunderworld.cpp"
