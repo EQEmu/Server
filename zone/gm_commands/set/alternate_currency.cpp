@@ -1,25 +1,22 @@
 #include "../../client.h"
 
-void command_setaltcurrency(Client *c, const Seperator *sep)
+void SetAlternateCurrency(Client *c, const Seperator *sep)
 {
-	int arguments = sep->argnum;
-	if (
-		arguments < 2 ||
-		!sep->IsNumber(1) ||
-		!sep->IsNumber(2)
-	) {
-		c->Message(Chat::White, "Command Syntax: #setaltcurrency [Currency ID] [Amount]");
+	const auto arguments = sep->argnum;
+	if (arguments < 3 || !sep->IsNumber(2) || !sep->IsNumber(3)) {
+		c->Message(Chat::White, "Command Syntax: #set alternate_currency [Currency ID] [Amount]");
 		return;
 	}
 
-	auto target = c;
+	auto t = c;
 	if (c->GetTarget() && c->GetTarget()->IsClient()) {
-		target = c->GetTarget()->CastToClient();
+		t = c->GetTarget()->CastToClient();
 	}
 
-	auto currency_id = Strings::ToUnsignedInt(sep->arg[1]);
-	auto amount = static_cast<int>(std::min(Strings::ToBigInt(sep->arg[2]), (int64) 2000000000));
-	uint32 currency_item_id = zone->GetCurrencyItemID(currency_id);
+	const uint32 currency_id      = Strings::ToUnsignedInt(sep->arg[2]);
+	const uint32 currency_item_id = zone->GetCurrencyItemID(currency_id);
+	const uint32 currency_amount  = Strings::ToUnsignedInt(sep->arg[3]);
+
 	if (!currency_item_id) {
 		c->Message(
 			Chat::White,
@@ -31,21 +28,16 @@ void command_setaltcurrency(Client *c, const Seperator *sep)
 		return;
 	}
 
-	target->SetAlternateCurrencyValue(currency_id, amount);
+	t->SetAlternateCurrencyValue(currency_id, currency_amount);
 
 	c->Message(
 		Chat::White,
 		fmt::format(
 			"{} now {} {} {}.",
-			c->GetTargetDescription(target, TargetDescriptionType::UCYou),
-			c == target ? "have" : "has",
-			(
-				amount ?
-				std::to_string(amount) :
-				"no"
-			),
+			c->GetTargetDescription(t, TargetDescriptionType::UCYou),
+			c == t ? "have" : "has",
+			Strings::Commify(currency_amount),
 			database.CreateItemLink(currency_item_id)
 		).c_str()
 	);
 }
-

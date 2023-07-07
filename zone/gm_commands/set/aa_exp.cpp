@@ -3,65 +3,67 @@
 #include "../../raids.h"
 #include "../../raids.h"
 
-void command_setaaxp(Client *c, const Seperator *sep)
+void SetAAEXP(Client *c, const Seperator *sep)
 {
-	int arguments = sep->argnum;
-	if (arguments <= 1 || !sep->IsNumber(2)) {
-		c->Message(Chat::White, "Usage: #setaaxp [AA|Group|Raid] [AA Experience]");
+	const auto arguments = sep->argnum;
+	if (arguments < 3 || !sep->IsNumber(3)) {
+		c->Message(Chat::White, "Usage: #set aa_exp [aa|group|raid] [Amount]");
 		return;
 	}
 
-	Client *target = c;
+	auto t = c;
 	if (c->GetTarget() && c->GetTarget()->IsClient()) {
-		target = c->GetTarget()->CastToClient();
+		t = c->GetTarget()->CastToClient();
 	}
 
-	std::string aa_type = Strings::ToLower(sep->arg[1]);
+	const std::string& aa_type = Strings::ToLower(sep->arg[2]);
+	const uint32 aa_experience = Strings::ToUnsignedInt(sep->arg[3]);
+
 	std::string group_raid_string;
-	uint32 aa_experience = static_cast<uint32>(std::min(
-		Strings::ToUnsignedBigInt(sep->arg[2]),
-		(uint64) 2000000000
-	));
-	bool is_aa = aa_type.find("aa") != std::string::npos;
-	bool is_group = aa_type.find("group") != std::string::npos;
-	bool is_raid = aa_type.find("raid") != std::string::npos;
-	if (!is_aa && !is_group && !is_raid) {
-		c->Message(Chat::White, "Usage: #setaaxp [AA|Group|Raid] [AA Experience]");
+
+	const bool is_aa    = Strings::EqualFold(aa_type, "aa");
+	const bool is_group = Strings::EqualFold(aa_type, "group");
+	const bool is_raid  = Strings::EqualFold(aa_type, "raid");
+
+	if (
+		!is_aa &&
+		!is_group &&
+		!is_raid
+	) {
+		c->Message(Chat::White, "Usage: #set aa_exp [aa|group|raid] [Amount]");
 		return;
 	}
 
 	if (is_aa) {
-		target->SetEXP(
-			target->GetEXP(),
+		t->SetEXP(
+			t->GetEXP(),
 			aa_experience,
 			false
 		);
-	}
-	else if (is_group) {
+	} else if (is_group) {
 		group_raid_string = "Group ";
-		target->SetLeadershipEXP(
+
+		t->SetLeadershipEXP(
 			aa_experience,
-			target->GetRaidEXP()
+			t->GetRaidEXP()
 		);
-	}
-	else if (is_raid) {
+	} else if (is_raid) {
 		group_raid_string = "Raid ";
-		target->SetLeadershipEXP(
-			target->GetGroupEXP(),
+
+		t->SetLeadershipEXP(
+			t->GetGroupEXP(),
 			aa_experience
 		);
 	}
 
-	std::string aa_exp_message = fmt::format(
-		"{} now {} {} {}AA Experience.",
-		c->GetTargetDescription(target, TargetDescriptionType::UCYou),
-		c == target ? "have" : "has",
-		aa_experience,
-		group_raid_string
-	);
 	c->Message(
 		Chat::White,
-		aa_exp_message.c_str()
+		fmt::format(
+			"{} now {} {} {}AA Experience.",
+			c->GetTargetDescription(t, TargetDescriptionType::UCYou),
+			c == t ? "have" : "has",
+			Strings::Commify(aa_experience),
+			group_raid_string
+		).c_str()
 	);
 }
-

@@ -1,47 +1,33 @@
 #include "../../client.h"
 
-void command_sethp(Client *c, const Seperator *sep)
+void SetHP(Client *c, const Seperator *sep)
 {
-	int arguments = sep->argnum;
-	if (!arguments || !sep->IsNumber(1)) {
-		c->Message(Chat::White, "Usage: #sethp [Health]");
+	const auto arguments = sep->argnum;
+	if (arguments < 2 || !sep->IsNumber(2)) {
+		c->Message(Chat::White, "Usage: #set hp [Amount]");
 		return;
 	}
 
-	auto health = static_cast<int>(std::min(Strings::ToBigInt(sep->arg[1]), (int64) 2000000000));
-	bool set_to_max = false;
-	Mob* target = c;
+	Mob* t = c;
 	if (c->GetTarget()) {
-		target = c->GetTarget();
+		t = c->GetTarget();
 	}
 
-	if (health >= target->GetMaxHP()) {
-		health = target->GetMaxHP();
-		set_to_max = true;
+	int64 health = Strings::ToBigInt(sep->arg[2]);
+
+	if (health >= t->GetMaxHP()) {
+		health = t->GetMaxHP();
 	}
 
-	target->SetHP(health);
-	target->SendHPUpdate();
+	t->SetHP(health);
+	t->SendHPUpdate();
 
 	c->Message(
 		Chat::White,
 		fmt::format(
-			"Set {} to {} Health{}.",
-			c->GetTargetDescription(target),
-			(
-				set_to_max ?
-				"full" :
-				std::to_string(health)
-			),
-			(
-				set_to_max ?
-				fmt::format(
-					" ({})",
-					health
-				) :
-				""
-			)
+			"Set {} to {} Health.",
+			c->GetTargetDescription(t),
+			Strings::Commify(health)
 		).c_str()
 	);
 }
-

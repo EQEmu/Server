@@ -3,61 +3,64 @@
 #include "../../raids.h"
 #include "../../raids.h"
 
-void command_setaapts(Client *c, const Seperator *sep)
+void SetAAPoints(Client *c, const Seperator *sep)
 {
-	int arguments = sep->argnum;
-	if (arguments <= 1 || !sep->IsNumber(2)) {
-		c->Message(Chat::White, "Usage: #setaapts [AA|Group|Raid] [AA Amount]");
+	const auto arguments = sep->argnum;
+	if (arguments < 3 || !sep->IsNumber(3)) {
+		c->Message(Chat::White, "Usage: #set aa_points [aa|group|raid] [Amount]");
 		return;
 	}
 
-	Client *target = c;
+	auto t = c;
 	if (c->GetTarget() && c->GetTarget()->IsClient()) {
-		target = c->GetTarget()->CastToClient();
+		t = c->GetTarget()->CastToClient();
 	}
 
-	std::string aa_type   = Strings::ToLower(sep->arg[1]);
+	const std::string& aa_type   = Strings::ToLower(sep->arg[2]);
+	const uint32       aa_points = Strings::ToUnsignedInt(sep->arg[3]);
+
 	std::string group_raid_string;
-	uint32 aa_points = static_cast<uint32>(std::min(Strings::ToUnsignedBigInt(sep->arg[2]), (uint64) 2000000000));
-	bool is_aa = aa_type.find("aa") != std::string::npos;
-	bool is_group = aa_type.find("group") != std::string::npos;
-	bool is_raid = aa_type.find("raid") != std::string::npos;
-	if (!is_aa && !is_group && !is_raid) {
-		c->Message(Chat::White, "Usage: #setaapts [AA|Group|Raid] [AA Amount]");
+
+	const bool is_aa    = Strings::EqualFold(aa_type, "aa");
+	const bool is_group = Strings::EqualFold(aa_type, "group");
+	const bool is_raid  = Strings::EqualFold(aa_type, "raid");
+
+	if (
+		!is_aa &&
+		!is_group &&
+		!is_raid
+	) {
+		c->Message(Chat::White, "Usage: #set aa_points [aa|group|raid] [Amount]");
 		return;
 	}
 
 	if (is_aa) {
-		target->GetPP().aapoints = aa_points;
-		target->GetPP().expAA    = 0;
-		target->SendAlternateAdvancementStats();
-	}
-	else if (is_group || is_raid) {
+		t->GetPP().aapoints = aa_points;
+		t->GetPP().expAA    = 0;
+		t->SendAlternateAdvancementStats();
+	} else if (is_group || is_raid) {
 		if (is_group) {
 			group_raid_string = "Group ";
-			target->GetPP().group_leadership_points = aa_points;
-			target->GetPP().group_leadership_exp    = 0;
-		}
-		else if (is_raid) {
+			t->GetPP().group_leadership_points = aa_points;
+			t->GetPP().group_leadership_exp    = 0;
+		} else if (is_raid) {
 			group_raid_string = "Raid ";
-			target->GetPP().raid_leadership_points = aa_points;
-			target->GetPP().raid_leadership_exp    = 0;
+			t->GetPP().raid_leadership_points = aa_points;
+			t->GetPP().raid_leadership_exp    = 0;
 		}
-		target->SendLeadershipEXPUpdate();
+
+		t->SendLeadershipEXPUpdate();
 	}
 
-	std::string aa_message = fmt::format(
-		"{} now {} {} {}AA Point{}.",
-		c->GetTargetDescription(target, TargetDescriptionType::UCYou),
-		c == target ? "have" : "has",
-		aa_points,
-		group_raid_string,
-		aa_points != 1 ? "s" : ""
-
-	);
 	c->Message(
 		Chat::White,
-		aa_message.c_str()
+		fmt::format(
+			"{} now {} {} {}AA Point{}.",
+			c->GetTargetDescription(t, TargetDescriptionType::UCYou),
+			c == t ? "have" : "has",
+			Strings::Commify(aa_points),
+			group_raid_string,
+			aa_points != 1 ? "s" : ""
+		).c_str()
 	);
 }
-

@@ -1,54 +1,40 @@
 #include "../../client.h"
 
-void command_setmana(Client *c, const Seperator *sep)
+void SetMana(Client *c, const Seperator *sep)
 {
-	int arguments = sep->argnum;
-	if (!arguments || !sep->IsNumber(1)) {
-		c->Message(Chat::White, "Usage: #setmana [Mana]");
+	const auto arguments = sep->argnum;
+	if (arguments < 2 || !sep->IsNumber(2)) {
+		c->Message(Chat::White, "Usage: #set mana [Amount]");
 		return;
 	}
 
-	auto mana = static_cast<int>(std::min(Strings::ToBigInt(sep->arg[1]), (int64) 2000000000));
-	bool set_to_max = false;
-	Mob* target = c;
+	Mob* t = c;
 	if (c->GetTarget()) {
-		target = c->GetTarget();
+		t = c->GetTarget();
 	}
 
-	if (target->IsClient()) {
-		if (mana >= target->CastToClient()->CalcMaxMana()) {
-			mana = target->CastToClient()->CalcMaxMana();
-			set_to_max = true;
+	int64 mana = Strings::ToBigInt(sep->arg[2]);
+
+	if (t->IsClient()) {
+		if (mana >= t->CastToClient()->CalcMaxMana()) {
+			mana = t->CastToClient()->CalcMaxMana();
 		}
 
-		target->CastToClient()->SetMana(mana);
+		t->CastToClient()->SetMana(mana);
 	} else {
-		if (mana >= target->CalcMaxMana()) {
-			mana = target->CalcMaxMana();
-			set_to_max = true;
+		if (mana >= t->CalcMaxMana()) {
+			mana = t->CalcMaxMana();
 		}
 
-		target->SetMana(mana);
+		t->SetMana(mana);
 	}
 
 	c->Message(
 		Chat::White,
 		fmt::format(
-			"Set {} to {} Mana{}.",
-			c->GetTargetDescription(target),
-			(
-				set_to_max ?
-				"full" :
-				std::to_string(mana)
-			),
-			(
-				set_to_max ?
-				fmt::format(
-					" ({})",
-					mana
-				) :
-				""
-			)
+			"Set {} to {} Mana.",
+			c->GetTargetDescription(t),
+			Strings::Commify(mana)
 		).c_str()
 	);
 }

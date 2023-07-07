@@ -1,21 +1,20 @@
 #include "../../client.h"
 
-void command_heal(Client *c, const Seperator *sep)
+void SetHPFull(Client *c, const Seperator *sep)
 {
-	Mob* target = c;
+	Mob* t = c;
 	if (c->GetTarget()) {
-		target = c->GetTarget();
+		t = c->GetTarget();
 	}
 
-	target->Heal();
+	t->Heal();
 
 	c->Message(
 		Chat::White,
 		fmt::format(
 			"Set {} to full Health ({}).",
-			c->GetTargetDescription(target),
-			target->GetMaxHP()
+			c->GetTargetDescription(t),
+			Strings::Commify(t->GetMaxHP())
 		).c_str()
 	);
 }
-

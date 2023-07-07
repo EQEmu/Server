@@ -1,25 +1,28 @@
 #include "../../client.h"
 
-void command_mana(Client *c, const Seperator *sep)
+void SetManaFull(Client *c, const Seperator *sep)
 {
-	auto target = c->GetTarget() ? c->GetTarget() : c;
-	int mana = 0;
-	if (target->IsClient()) {
-		mana = target->CastToClient()->CalcMaxMana();
-		target->CastToClient()->SetMana(mana);
+	Mob* t = c;
+	if (c->GetTarget()) {
+		t = c->GetTarget();
 	}
-	else {
-		mana = target->CalcMaxMana();
-		target->SetMana(mana);
+
+	int64 mana;
+
+	if (t->IsClient()) {
+		mana = t->CastToClient()->CalcMaxMana();
+		t->CastToClient()->SetMana(mana);
+	} else {
+		mana = t->CalcMaxMana();
+		t->SetMana(mana);
 	}
 
 	c->Message(
 		Chat::White,
 		fmt::format(
 			"Set {} to full Mana ({}).",
-			c->GetTargetDescription(target),
-			mana
+			c->GetTargetDescription(t),
+			Strings::Commify(mana)
 		).c_str()
 	);
 }
-

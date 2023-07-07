@@ -1,52 +1,48 @@
 #include "../../client.h"
 
-void command_setcrystals(Client *c, const Seperator *sep)
+void SetCrystals(Client *c, const Seperator *sep)
 {
-	int arguments = sep->argnum;
-	if (arguments <= 1 || !sep->IsNumber(2)) {
-		c->Message(Chat::White, "Usage: #setcrystals [Ebon|Radiant] [Crystal Amount]");
+	const auto arguments = sep->argnum;
+	if (arguments < 2 || !sep->IsNumber(3)) {
+		c->Message(Chat::White, "Usage: #setcrystals [ebon|radiant] [Amount]");
 		return;
 	}
 
-	Client *target = c;
+	auto t = c;
 	if (c->GetTarget() && c->GetTarget()->IsClient()) {
-		target = c->GetTarget()->CastToClient();
+		t = c->GetTarget()->CastToClient();
 	}
 
-	std::string crystal_type = Strings::ToLower(sep->arg[1]);
-	uint32 crystal_amount = static_cast<uint32>(std::min(
-		Strings::ToUnsignedBigInt(sep->arg[2]),
-		(uint64) 2000000000
-	));
-	bool is_ebon = crystal_type.find("ebon") != std::string::npos;
-	bool is_radiant = crystal_type.find("radiant") != std::string::npos;
+	const std::string& crystal_type = Strings::ToLower(sep->arg[2]);
+	const uint32 crystal_amount = Strings::ToUnsignedInt(sep->arg[3]);
+
+	const bool is_ebon = Strings::EqualFold(crystal_type, "ebon");
+	const bool is_radiant = Strings::EqualFold(crystal_type, "radiant");
 	if (!is_ebon && !is_radiant) {
-		c->Message(Chat::White, "Usage: #setcrystals [Ebon|Radiant] [Crystal Amount]");
+		c->Message(Chat::White, "Usage: #setcrystals [ebon|radiant] [Amount]");
 		return;
 	}
 
-	uint32 crystal_item_id = (
+	const uint32 crystal_item_id = (
 		is_ebon ?
 		RuleI(Zone, EbonCrystalItemID) :
 		RuleI(Zone, RadiantCrystalItemID)
 	);
 
-	auto crystal_link = database.CreateItemLink(crystal_item_id);
 	if (is_radiant) {
-		target->SetRadiantCrystals(crystal_amount);
+		t->SetRadiantCrystals(crystal_amount);
 	} else {
-		target->SetEbonCrystals(crystal_amount);
+		t->SetEbonCrystals(crystal_amount);
 	}
 
 	c->Message(
 		Chat::White,
 		fmt::format(
 			"{} now {} {} {}.",
-			c->GetTargetDescription(target, TargetDescriptionType::UCYou),
-			c == target ? "have" : "has",
-			crystal_amount,
-			crystal_link
+			c->GetTargetDescription(t, TargetDescriptionType::UCYou),
+			c == t ? "have" : "has",
+			Strings::Commify(crystal_amount),
+			database.CreateItemLink(crystal_item_id)
 		).c_str()
 	);
 }
-

@@ -1,11 +1,10 @@
 #include "../../client.h"
 
-void command_setskill(Client *c, const Seperator *sep)
+void SetSkill(Client *c, const Seperator *sep)
 {
 	const auto arguments = sep->argnum;
-
-	if (arguments < 2 || !sep->IsNumber(1) || !sep->IsNumber(2)) {
-		c->Message(Chat::White, "Usage: #setskill [Skill ID] [Skill Value]");
+	if (arguments < 3 || !sep->IsNumber(2) || !sep->IsNumber(3)) {
+		c->Message(Chat::White, "Usage: #set skill [Skill ID] [Skill Value]");
 		return;
 	}
 
@@ -14,11 +13,11 @@ void command_setskill(Client *c, const Seperator *sep)
 		t = c->GetTarget()->CastToClient();
 	}
 
-	const auto skill_id    = Strings::ToInt(sep->arg[1]);
-	const auto skill_value = Strings::ToInt(sep->arg[2]);
+	const uint16 skill_id    = Strings::ToUnsignedInt(sep->arg[1]);
+	const uint16 skill_value = Strings::ToUnsignedInt(sep->arg[2]);
 
 	if (!EQ::ValueWithin(skill_id, EQ::skills::Skill1HBlunt, EQ::skills::HIGHEST_SKILL)) {
-		c->Message(Chat::White, "Usage: #setskill [Skill ID] [Skill Value]");
+		c->Message(Chat::White, "Usage: #set skill [Skill ID] [Skill Value]");
 		c->Message(Chat::White, fmt::format("Skill ID: 0 to {}", EQ::skills::HIGHEST_SKILL).c_str());
 		return;
 	}
@@ -43,4 +42,3 @@ void command_setskill(Client *c, const Seperator *sep)
 		);
 	}
 }
-

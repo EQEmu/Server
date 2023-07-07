@@ -1,20 +1,21 @@
 #include "../../client.h"
 #include "../../titles.h"
 
-void command_title(Client *c, const Seperator *sep)
+void SetTitle(Client *c, const Seperator *sep)
 {
-	int arguments = sep->argnum;
-	if (!arguments) {
-		c->Message(Chat::White, "Usage: #title [Title] (use \"-1\" to remove title)");
+	const auto arguments = sep->argnum;
+	if (arguments < 2) {
+		c->Message(Chat::White, "Usage: #set title [Title]");
+		c->Message(Chat::White, "Note: Use \"-1\" to remove title.");
 		return;
 	}
 
-	bool is_remove = !strcasecmp(sep->argplus[1], "-1");
-	std::string title = is_remove ? "" : sep->argplus[1];
+	const bool is_remove = Strings::EqualFold(sep->argplus[2], "-1");
+	std::string title = !is_remove ? sep->argplus[2] : "";
 
-	auto target = c;
+	auto t = c;
 	if (c->GetTarget() && c->GetTarget()->IsClient()) {
-		target = c->GetTarget()->CastToClient();
+		t = c->GetTarget()->CastToClient();
 	}
 
 	if (title.size() > 31) {
@@ -27,12 +28,12 @@ void command_title(Client *c, const Seperator *sep)
 	}
 
 	if (is_remove) {
-		target->SetAATitle(title);
+		t->SetAATitle(title);
 	} else {
-		title_manager.CreateNewPlayerTitle(target, title);
+		title_manager.CreateNewPlayerTitle(t, title);
 	}
 
-	target->Save();
+	t->Save();
 
 	c->Message(
 		Chat::White,
@@ -40,7 +41,7 @@ void command_title(Client *c, const Seperator *sep)
 			"Title has been {}{} for {}{}",
 			is_remove ? "removed" : "changed",
 			!is_remove ? " and saved" : "",
-			c->GetTargetDescription(target),
+			c->GetTargetDescription(t),
 			(
 				is_remove ?
 				"." :
@@ -52,5 +53,3 @@ void command_title(Client *c, const Seperator *sep)
 		).c_str()
 	);
 }
-
-

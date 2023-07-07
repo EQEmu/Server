@@ -1,27 +1,28 @@
 #include "../../client.h"
 
-void command_endurance(Client *c, const Seperator *sep)
+void SetEnduranceFull(Client *c, const Seperator *sep)
 {
-	Mob* target = c;
+	Mob* t = c;
 	if (c->GetTarget()) {
-		target = c->GetTarget();
+		t = c->GetTarget();
 	}
 
-	int endurance = 0;
-	if (target->IsClient()) {
-		endurance = target->CastToClient()->GetMaxEndurance();
-		target->CastToClient()->SetEndurance(endurance);
+	int endurance;
+
+	if (t->IsClient()) {
+		endurance = t->CastToClient()->GetMaxEndurance();
+		t->CastToClient()->SetEndurance(endurance);
 	} else {
-		endurance = target->GetMaxEndurance();
-		target->SetEndurance(endurance);
+		endurance = t->GetMaxEndurance();
+		t->SetEndurance(endurance);
 	}
 
 	c->Message(
 		Chat::White,
 		fmt::format(
 			"Set {} to full Endurance ({}).",
-			c->GetTargetDescription(target),
-			endurance
+			c->GetTargetDescription(t),
+			Strings::Commify(endurance)
 		).c_str()
 	);
 }

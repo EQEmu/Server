@@ -1,23 +1,27 @@
 #include "../../client.h"
 
-void command_setpass(Client *c, const Seperator *sep)
+void SetPassword(Client *c, const Seperator *sep)
 {
-	int arguments = sep->argnum;
-	if (arguments < 2) {
-		c->Message(Chat::White, "Usage: #setpass [Account Name] [Password]");
+	const auto arguments = sep->argnum;
+	if (arguments < 3) {
+		c->Message(Chat::White, "Usage: #set password [Account Name] [Password]");
 		return;
 	}
 
-	std::string account_name;
+	std::string account_name = sep->arg[1];
+	std::string password     = sep->arg[2];
 	std::string loginserver;
+
 	ParseAccountString(sep->arg[1], account_name, loginserver);
+
 	int16 status = 0;
-	auto account_id = database.GetAccountIDByName(account_name, loginserver, &status);
+
+	const uint32 account_id = database.GetAccountIDByName(account_name, loginserver, &status);
 	if (!account_id) {
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"Account {} not found.",
+				"Account {} was not found.",
 				account_name
 			).c_str()
 		);
@@ -40,7 +44,7 @@ void command_setpass(Client *c, const Seperator *sep)
 		fmt::format(
 			"Password {} changed for Account {}.",
 			(
-				database.SetLocalPassword(account_id, sep->arg[2]) ?
+				database.SetLocalPassword(account_id, password.c_str()) ?
 				"successfully" :
 				"failed"
 			),
@@ -48,4 +52,3 @@ void command_setpass(Client *c, const Seperator *sep)
 		).c_str()
 	);
 }
-

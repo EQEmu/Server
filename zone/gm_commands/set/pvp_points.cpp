@@ -1,32 +1,33 @@
 #include "../../client.h"
 
-void command_setpvppoints(Client *c, const Seperator *sep)
+void SetPVPPoints(Client *c, const Seperator *sep)
 {
-	int arguments = sep->argnum;
-	if (!arguments || !sep->IsNumber(1)) {
-		c->Message(Chat::White, "Command Syntax: #setpvppoints [Amount]");
+	const auto arguments = sep->argnum;
+	if (arguments < 2 || !sep->IsNumber(2)) {
+		c->Message(Chat::White, "Usage: #set pvp_points [Amount]");
 		return;
 	}
 
-	Client *target = c;
+	auto t = c;
 	if (c->GetTarget() && c->GetTarget()->IsClient()) {
-		target = c->GetTarget()->CastToClient();
+		t = c->GetTarget()->CastToClient();
 	}
 
-	uint32 pvp_points = static_cast<uint32>(std::min(Strings::ToUnsignedBigInt(sep->arg[1]), (uint64) 2000000000));
-	target->SetPVPPoints(pvp_points);
-	target->Save();
-	target->SendPVPStats();
-	std::string pvp_message = fmt::format(
-		"{} now {} {} PVP Point{}.",
-		c->GetTargetDescription(target, TargetDescriptionType::UCYou),
-		c == target ? "have" : "has",
-		pvp_points,
-		pvp_points != 1 ? "s" : ""
-	);
+	const uint32 pvp_points = Strings::ToUnsignedInt(sep->arg[2]);
+
+	t->SetPVPPoints(pvp_points);
+	t->Save();
+	t->SendPVPStats();
+
 	c->Message(
 		Chat::White,
-		pvp_message.c_str()
+		fmt::format(
+			"{} now {} {} PVP Point{}.",
+			c->GetTargetDescription(t, TargetDescriptionType::UCYou),
+			c == t ? "have" : "has",
+			Strings::Commify(pvp_points),
+			pvp_points != 1 ? "s" : ""
+		).c_str()
 	);
 }
 

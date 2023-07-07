@@ -1,10 +1,11 @@
+#include "../../bot.h"
 #include "../../client.h"
 
-void command_level(Client *c, const Seperator *sep)
+void SetLevel(Client *c, const Seperator *sep)
 {
 	const auto arguments = sep->argnum;
-	if (!arguments || !sep->IsNumber(1)) {
-		c->Message(Chat::White, "Usage: #level [Level]");
+	if (arguments < 2 || !sep->IsNumber(2)) {
+		c->Message(Chat::White, "Usage: #set level [Level]");
 		return;
 	}
 
@@ -13,30 +14,16 @@ void command_level(Client *c, const Seperator *sep)
 		t = c->GetTarget();
 	}
 
-	auto level = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[1]));
-	auto max_level = static_cast<uint8>(RuleI(Character, MaxLevel));
+	const uint8 max_level = RuleI(Character, MaxLevel);
+	const uint8 level     = Strings::ToUnsignedInt(sep->arg[2]);
 
 	if (c != t && c->Admin() < RuleI(GM, MinStatusToLevelTarget)) {
 		c->Message(Chat::White, "Your status is not high enough to change another person's level.");
 		return;
 	}
 
-	if (
-		level > max_level &&
-		c->Admin() < commandLevelAboveCap
-	) {
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"Level {} is above the Maximum Level of {} and your status is not high enough to go beyond the cap.",
-				level,
-				max_level
-			).c_str()
-		);
-		return;
-	}
-
 	t->SetLevel(level, true);
+
 	if (t->IsClient()) {
 		t->CastToClient()->SendLevelAppearance();
 

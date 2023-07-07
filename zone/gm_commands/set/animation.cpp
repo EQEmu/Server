@@ -1,31 +1,28 @@
 #include "../../client.h"
 
-void command_setanim(Client *c, const Seperator *sep)
+void SetAnimation(Client *c, const Seperator *sep)
 {
 	const auto arguments = sep->argnum;
-	if (!arguments || !sep->IsNumber(1)) {
-		c->Message(Chat::White, "Usage: #setanim [Animation ID]");
+	if (arguments < 2 || !sep->IsNumber(2)) {
+		c->Message(Chat::White, "Usage: #set animation [Animation ID]");
 
-		uint32 animation_number = 1;
 		for (const auto& a : EQ::constants::GetSpawnAnimationMap()) {
 			c->Message(
 				Chat::White,
 				fmt::format(
-					"Animation {} | ID: {} Name: {}",
-					animation_number,
+					"Animation {} | {}",
 					a.first,
 					a.second
 				).c_str()
 			);
-
-			animation_number++;
 		}
+
 		return;
 	}
 
-	Mob* target = c;
+	Mob* t = c;
 	if (c->GetTarget()) {
-		target = c->GetTarget();
+		t = c->GetTarget();
 	}
 
 	const auto animation_id = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[1]));
@@ -36,37 +33,31 @@ void command_setanim(Client *c, const Seperator *sep)
 			static_cast<uint8>(eaLooting)
 		)
 	) {
-		c->Message(Chat::White, "Usage: #setanim [Animation ID]");
+		c->Message(Chat::White, "Usage: #set animation [Animation ID]");
 
-		uint32 animation_number = 1;
 		for (const auto& a : EQ::constants::GetSpawnAnimationMap()) {
 			c->Message(
 				Chat::White,
 				fmt::format(
-					"Animation {} | ID: {} Name: {}",
-					animation_number,
+					"Animation {} | {}",
 					a.first,
 					a.second
 				).c_str()
 			);
-
-			animation_number++;
 		}
+
 		return;
 	}
 
-	target->SetAppearance(static_cast<EmuAppearance>(animation_id), false);
-
-	const auto animation_name = EQ::constants::GetSpawnAnimationName(animation_id);
+	t->SetAppearance(static_cast<EmuAppearance>(animation_id), false);
 
 	c->Message(
 		Chat::White,
 		fmt::format(
 			"Set animation to {} ({}) for {}.",
-			animation_name,
+			EQ::constants::GetSpawnAnimationName(animation_id),
 			animation_id,
-			c->GetTargetDescription(target)
+			c->GetTargetDescription(t)
 		).c_str()
 	);
 }
-

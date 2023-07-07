@@ -1,54 +1,40 @@
 #include "../../client.h"
 
-void command_setendurance(Client *c, const Seperator *sep)
+void SetEndurance(Client *c, const Seperator *sep)
 {
-	int arguments = sep->argnum;
-	if (!arguments || !sep->IsNumber(1)) {
-		c->Message(Chat::White, "Usage: #setendurance [Endurance]");
+	const auto arguments = sep->argnum;
+	if (arguments < 2 || !sep->IsNumber(2)) {
+		c->Message(Chat::White, "Usage: #set endurance [Endurance]");
 		return;
 	}
 
-	auto endurance = static_cast<int>(std::min(Strings::ToBigInt(sep->arg[1]), (int64) 2000000000));
-	bool set_to_max = false;
-	Mob* target = c;
+	int endurance = Strings::ToInt(sep->arg[2]);
+
+	Mob* t = c;
 	if (c->GetTarget()) {
-		target = c->GetTarget();
+		t = c->GetTarget();
 	}
 
-	if (target->IsClient()) {
-		if (endurance >= target->CastToClient()->GetMaxEndurance()) {
-			endurance = target->CastToClient()->GetMaxEndurance();
-			set_to_max = true;
+	if (t->IsClient()) {
+		if (endurance >= t->CastToClient()->GetMaxEndurance()) {
+			endurance = t->CastToClient()->GetMaxEndurance();
 		}
 
-		target->CastToClient()->SetEndurance(endurance);
+		t->CastToClient()->SetEndurance(endurance);
 	} else {
-		if (endurance >= target->GetMaxEndurance()) {
-			endurance = target->GetMaxEndurance();
-			set_to_max = true;
+		if (endurance >= t->GetMaxEndurance()) {
+			endurance = t->GetMaxEndurance();
 		}
 
-		target->SetEndurance(endurance);
+		t->SetEndurance(endurance);
 	}
 
 	c->Message(
 		Chat::White,
 		fmt::format(
-			"Set {} to {} Endurance{}.",
-			c->GetTargetDescription(target),
-			(
-				set_to_max ?
-				"full" :
-				std::to_string(endurance)
-			),
-			(
-				set_to_max ?
-				fmt::format(
-					" ({})",
-					endurance
-				) :
-				""
-			)
+			"Set {} to {} Endurance.",
+			c->GetTargetDescription(t),
+			Strings::Commify(endurance)
 		).c_str()
 	);
 }

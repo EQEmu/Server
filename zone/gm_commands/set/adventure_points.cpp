@@ -1,76 +1,66 @@
 #include "../../client.h"
 #include "../../../common/data_verification.h"
 
-void command_set_adventure_points(Client *c, const Seperator *sep)
+void SetAdventurePoints(Client *c, const Seperator *sep)
 {
-	int arguments = sep->argnum;
+	const auto arguments = sep->argnum;
+	if (arguments < 3 || !sep->IsNumber(2) || !sep->IsNumber(3)) {
+		c->Message(Chat::White, "Usage: #set adventure_points [Theme] [Points]");
 
-	if (
-		!arguments ||
-		!sep->IsNumber(1) ||
-		!sep->IsNumber(2)
-	) {
-		c->Message(Chat::White, "Usage: #setadventurepoints [Theme] [Points]");
-		c->Message(Chat::White, "Valid themes are as follows.");
-		auto theme_map = EQ::constants::GetLDoNThemeMap();
-		for (const auto& theme : theme_map) {
-			c->Message(
-				Chat::White,
-				fmt::format(
-					"Theme {} | {}",
-					theme.first,
-					theme.second
-				).c_str()
-			);
+		c->Message(Chat::White, "Valid themes are as follows:");
+
+		for (const auto& e : EQ::constants::GetLDoNThemeMap()) {
+			if (e.first != LDoNThemes::Unused) {
+				c->Message(
+					Chat::White,
+					fmt::format(
+						"Theme {} | {}",
+						e.first,
+						e.second
+					).c_str()
+				);
+			}
 		}
-		c->Message(Chat::White, "Note: Theme 0 splits the points evenly across all Themes.");
+
 		return;
 	}
 
-	auto target = c;
+	auto t = c;
 	if (c->GetTarget() && c->GetTarget()->IsClient()) {
-		target = c->GetTarget()->CastToClient();
+		t = c->GetTarget()->CastToClient();
 	}
 
-	auto theme_id = Strings::ToUnsignedInt(sep->arg[1]);
-	if (!EQ::ValueWithin(theme_id, LDoNThemes::Unused, LDoNThemes::TAK)) {
-		c->Message(Chat::White, "Valid themes are as follows.");
-		auto& theme_map = EQ::constants::GetLDoNThemeMap();
-		for (const auto& theme : theme_map) {
-			c->Message(
-				Chat::White,
-				fmt::format(
-					"Theme {} | {}",
-					theme.first,
-					theme.second
-				).c_str()
-			);
+	const uint32 theme_id = Strings::ToUnsignedInt(sep->arg[2]);
+	const uint32 points = Strings::ToUnsignedInt(sep->arg[3]);
+
+	if (!EQ::ValueWithin(theme_id, LDoNThemes::GUK, LDoNThemes::TAK)) {
+		c->Message(Chat::White, "Valid themes are as follows:");
+
+		for (const auto& e : EQ::constants::GetLDoNThemeMap()) {
+			if (e.first != LDoNThemes::Unused) {
+				c->Message(
+					Chat::White,
+					fmt::format(
+						"Theme {} | {}",
+						e.first,
+						e.second
+					).c_str()
+				);
+			}
 		}
-		c->Message(Chat::White, "Note: Theme 0 splits the points evenly across all Themes.");
+
 		return;
 	}
-
-	auto points = Strings::ToInt(sep->arg[2]);
 
 	c->Message(
 		Chat::White,
 		fmt::format(
-			"{} for {}.",
-			(
-				theme_id == LDoNThemes::Unused ?
-				fmt::format(
-					"Splitting {} Points Evenly",
-					points
-				) :
-				fmt::format(
-					"Adding {} {} Points",
-					points,
-					EQ::constants::GetLDoNThemeName(theme_id)
-				)
-			),
-			c->GetTargetDescription(target)
+			"Set {} Points to {} for {}.",
+			EQ::constants::GetLDoNThemeName(theme_id),
+			Strings::Commify(points),
+			c->GetTargetDescription(t)
 		).c_str()
 	);
 
-	target->UpdateLDoNPoints(theme_id, points);
+	t->SetLDoNPoints(theme_id, points);
 }
