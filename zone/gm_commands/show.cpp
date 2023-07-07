@@ -1,4 +1,5 @@
 #include "../client.h"
+#include "show/aggro.cpp"
 #include "show/buffs.cpp"
 #include "show/buried_corpse_count.cpp"
 #include "show/client_version_summary.cpp"
@@ -53,6 +54,7 @@ void command_show(Client *c, const Seperator *sep)
 	};
 
 	std::vector<Cmd> commands = {
+		Cmd{.cmd = "aggro", .u = "aggro [Distance] [-v] (-v is verbose Faction Information)", .fn = ShowAggro, .a = {"#aggro"}},
 		Cmd{.cmd = "buffs", .u = "buffs", .fn = ShowBuffs, .a = {"#showbuffs"}},
 		Cmd{.cmd = "buried_corpse_count", .u = "buried_corpse_count", .fn = ShowBuriedCorpseCount, .a = {"#getplayerburiedcorpsecount"}},
 		Cmd{.cmd = "client_version_summary", .u = "client_version_summary", .fn = ShowClientVersionSummary, .a = {"#cvs"}},
