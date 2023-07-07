@@ -287,7 +287,6 @@ int command_init(void)
 		command_add("updatechecksum", "update client checksum", AccountStatus::GMImpossible, command_updatechecksum) ||
 		command_add("wc", "[Slot ID] [Material] [Hero Forge Model] [Elite Material] - Sets the specified slot for you or your target to a material, Hero Forge Model and Elite Material are optional", AccountStatus::GMMgmt, command_wc) ||
 		command_add("weather", "[0/1/2/3] (Off/Rain/Snow/Manual) - Change the weather", AccountStatus::QuestTroupe, command_weather) ||
-		command_add("who", "[search]", AccountStatus::ApprenticeGuide, command_who) ||
 		command_add("worldshutdown", "Shut down world and all zones", AccountStatus::GMMgmt, command_worldshutdown) ||
 		command_add("wp", "[add|delete] [grid_id] [pause] [waypoint_id] [-h] - Add or delete a waypoint by grid ID. (-h to use current heading)", AccountStatus::GMAreas, command_wp) ||
 		command_add("wpadd", "[pause] [-h] - Add your current location as a waypoint to your NPC target's AI path. (-h to use current heading)", AccountStatus::GMAreas, command_wpadd) ||
@@ -393,6 +392,7 @@ int command_init(void)
 				"viewpetition",
 				"viewrecipe",
 				"viewzoneloot",
+				"who",
 				"wpinfo",
 				"xtargets",
 				"zonestatus",
@@ -1162,7 +1162,6 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/untraindiscs.cpp"
 #include "gm_commands/wc.cpp"
 #include "gm_commands/weather.cpp"
-#include "gm_commands/who.cpp"
 #include "gm_commands/worldshutdown.cpp"
 #include "gm_commands/worldwide.cpp"
 #include "gm_commands/wp.cpp"

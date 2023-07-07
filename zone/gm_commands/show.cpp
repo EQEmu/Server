@@ -37,6 +37,7 @@
 #include "show/variable.cpp"
 #include "show/version.cpp"
 #include "show/waypoints.cpp"
+#include "show/who.cpp"
 #include "show/xtargets.cpp"
 #include "show/zone_data.cpp"
 #include "show/zone_global_loot.cpp"
@@ -92,6 +93,7 @@ void command_show(Client *c, const Seperator *sep)
 		Cmd{.cmd = "variable", .u = "variable [Variable Name]", .fn = ShowVariable, .a = {"#getvariable"}},
 		Cmd{.cmd = "version", .u = "version", .fn = ShowVersion, .a = {"#version"}},
 		Cmd{.cmd = "waypoints", .u = "waypoints", .fn = ShowWaypoints, .a = {"#wpinfo"}},
+		Cmd{.cmd = "who", .u = "who [Search Criteria] (Search criteria is optional)", .fn = ShowWho, .a = {"#who"}},
 		Cmd{.cmd = "xtargets", .u = "xtargets [Amount] (Amount is optional)", .fn = ShowXTargets, .a = {"#xtargets"}},
 		Cmd{.cmd = "zone_data", .u = "zone_data", .fn = ShowZoneData, .a = {"#zstats"}},
 		Cmd{.cmd = "zone_global_loot", .u = "zone_global_loot", .fn = ShowZoneGlobalLoot, .a = {"#showzonegloballoot"}},
