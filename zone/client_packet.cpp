@@ -16346,37 +16346,38 @@ void Client::RecordKilledNPCEvent(NPC *n)
 	}
 }
 
-void Client::Handle_OP_RaidDelegateAbility(const EQApplicationPacket* app) 
+void Client::Handle_OP_RaidDelegateAbility(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(DelegateAbility_Struct)) {
-		LogDebug("Size mismatch in OP_RaidDelegateAbility expected [{}] got [{}]", sizeof(DelegateAbility_Struct), app->size);
+		LogDebug(
+			"Size mismatch in OP_RaidDelegateAbility expected [{}] got [{}]",
+			sizeof(DelegateAbility_Struct),
+			app->size
+		);
 		DumpPacket(app);
 		return;
 	}
 
-	DelegateAbility_Struct* das = (DelegateAbility_Struct*)app->pBuffer;
+	DelegateAbility_Struct *das = (DelegateAbility_Struct *) app->pBuffer;
 
-	switch (das->DelegateAbility)
-	{
-	case RaidDelegateMainAssist: 
-	{
-		auto r = GetRaid();
-		if (r) {
-			r->DelegateAbilityAssist(this, das->Name);
+	switch (das->DelegateAbility) {
+		case RaidDelegateMainAssist: {
+			auto r = GetRaid();
+			if (r) {
+				r->DelegateAbilityAssist(this, das->Name);
+			}
+			break;
 		}
-		break;
-	}
-	case RaidDelegateMainMarker: 
-	{
-		auto r = GetRaid();
-		if (r) {
-			r->DelegateAbilityMark(this, das->Name);
+		case RaidDelegateMainMarker: {
+			auto r = GetRaid();
+			if (r) {
+				r->DelegateAbilityMark(this, das->Name);
+			}
+			break;
 		}
-		break;
-	}
-	default:
-		LogDebug("RaidDelegateAbility default case");
-		break;
+		default:
+			LogDebug("RaidDelegateAbility default case");
+			break;
 	}
 }
 
