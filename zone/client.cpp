@@ -6554,20 +6554,22 @@ void Client::RemoveXTarget(Mob *m, bool OnlyAutoSlots)
 
 void Client::UpdateXTargetType(XTargetType Type, Mob *m, const char *Name)
 {
-	if(!XTargettingAvailable())
+	if (!XTargettingAvailable()) {
 		return;
+	}
 
-	for(int i = 0; i < GetMaxXTargets(); ++i)
-	{
-		if(XTargets[i].Type == Type)
-		{
-			if(m)
+	for (int i = 0; i < GetMaxXTargets(); ++i) {
+		if (XTargets[i].Type == Type) {
+			if (m) {
 				XTargets[i].ID = m->GetID();
-			else
+			}
+			else {
 				XTargets[i].ID = 0;
+			}
 
-			if(Name)
+			if (Name) {
 				strncpy(XTargets[i].Name, Name, 64);
+			}
 
 			SendXTargetPacket(i, m);
 		}

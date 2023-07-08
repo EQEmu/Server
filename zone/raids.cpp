@@ -2493,7 +2493,7 @@ void Raid::DelegateAbilityMark(Mob* delegator, const char* delegatee)
 		);
 		if (!result) {
 			LogError("Unable to clear rain main marker for player: [{}].",
-				delegatee
+					 delegatee
 			);
 		}
 	}
@@ -2510,8 +2510,8 @@ void Raid::DelegateAbilityMark(Mob* delegator, const char* delegatee)
 			);
 			if (!result) {
 				LogError("Unable to set raid main marker for player: [{}] to [{}].",
-					delegatee,
-					slot + 1
+						 delegatee,
+						 slot + 1
 				);
 			}
 		}
@@ -2544,16 +2544,15 @@ int Raid::FindNextRaidDelegateSlot(int option)
 	}
 }
 
-void Raid::UpdateXTargetType(XTargetType Type, Mob* m, const char* Name)
+void Raid::UpdateXTargetType(XTargetType Type, Mob *m, const char *name)
 {
-	for (const auto& rm : members) {
-		if (!rm.member || rm.is_bot || !rm.member->XTargettingAvailable())
+	for (const auto &rm: members) {
+		if (!rm.member || rm.is_bot || !rm.member->XTargettingAvailable()) {
 			continue;
+		}
 
-		for (int i = 0; i < rm.member->GetMaxXTargets(); ++i)
-		{
-			if (rm.member->XTargets[i].Type == Type)
-			{
+		for (int i = 0; i < rm.member->GetMaxXTargets(); ++i) {
+			if (rm.member->XTargets[i].Type == Type) {
 				if (m) {
 					rm.member->XTargets[i].ID = m->GetID();
 				}
@@ -2561,8 +2560,8 @@ void Raid::UpdateXTargetType(XTargetType Type, Mob* m, const char* Name)
 					rm.member->XTargets[i].ID = 0;
 				}
 
-				if (Name) {
-					strncpy(rm.member->XTargets[i].Name, Name, 64);
+				if (name) {
+					strncpy(rm.member->XTargets[i].Name, name, 64);
 				}
 
 				rm.member->SendXTargetPacket(i, m);
@@ -2869,7 +2868,6 @@ void Raid::SendRaidAssisterTo(const char* assister, Client* to)
 	}
 
 	auto mob = entity_list.GetMob(assister);
-
 	if (mob) {
 		auto m_id = mob->GetID();
 		if (m_id) {

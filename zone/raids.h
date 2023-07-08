@@ -236,7 +236,7 @@ public:
 	void	DelegateAbilityAssist(Mob* mob, const char* who);
 	void	DelegateAbilityMark(Mob* mob, const char* who);
 	void    RaidMarkNPC(Mob* mob, uint32 parameter);
-	void    UpdateXTargetType(XTargetType Type, Mob* m, const char* Name = (const char*)nullptr);
+	void    UpdateXTargetType(XTargetType Type, Mob* m, const char* name = (const char*)nullptr);
 	int     FindNextRaidDelegateSlot(int option);
 	void    UpdateXtargetMarkedNPC();
 	void    RaidClearNPCMarks(Client* c);
