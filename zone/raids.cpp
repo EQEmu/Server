@@ -2902,7 +2902,6 @@ void Raid::SendRaidMarkerTo(const char* marker, Client* to)
 	}
 
 	auto mob = entity_list.GetMob(marker);
-
 	if (mob) {
 		auto m_id = mob->GetID();
 		if (m_id) {
