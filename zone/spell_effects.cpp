@@ -788,9 +788,12 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				SetPetOrder(SPO_Follow);
 				SetAppearance(eaStanding);
 				// Client has saved previous pet sit/stand - make all new pets
-				// stand on charm.
+				// stand and follow on charm.
 				if (caster->IsClient()) {
-					caster->CastToClient()->SetPetCommandState(PET_BUTTON_SIT,0);
+					Client *cpet = caster->CastToClient();
+					cpet->SetPetCommandState(PET_BUTTON_SIT,0);
+					cpet->SetPetCommandState(PET_BUTTON_FOLLOW, 1);
+					cpet->SetPetCommandState(PET_BUTTON_GUARD, 0);
 				}
 
 				SetPetType(petCharmed);
