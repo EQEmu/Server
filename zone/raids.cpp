@@ -1670,31 +1670,17 @@ void Raid::SetRaidDetails()
 
 void Raid::GetRaidDetails()
 {
-	std::string query = StringFormat("SELECT locked, loottype, motd, marked_npc1, marked_npc2, marked_npc3 FROM raid_details WHERE raidid = %lu",
-									 (unsigned long)GetID());
-	auto results = database.QueryDatabase(query);
-
-	if (!results.Success()) {
+	auto raid_details = RaidDetailsRepository::FindOne(database, GetID());
+	if (raid_details.raidid == 0) {
 		return;
 	}
 
-	if (results.RowCount() == 0) {
-		LogError(
-			"Error getting raid details for raid [{}]: [{}]",
-			(unsigned long) GetID(),
-			results.ErrorMessage().c_str()
-		);
-		return;
-	}
-
-	auto row = results.begin();
-
-	locked        = Strings::ToInt(row[0]);
-	LootType      = Strings::ToInt(row[1]);
-	motd          = std::string(row[2]);
-	marked_npcs[0] = Strings::ToUnsignedInt(row[3]);
-	marked_npcs[1] = Strings::ToUnsignedInt(row[4]);
-	marked_npcs[2] = Strings::ToUnsignedInt(row[5]);
+	locked   = raid_details.locked;
+	LootType = raid_details.loottype;
+	motd     = raid_details.motd;
+	marked_npcs[0] = raid_details.marked_npc_1;
+	marked_npcs[1] = raid_details.marked_npc_2;
+	marked_npcs[2] = raid_details.marked_npc_3;
 }
 
 void Raid::SaveRaidMOTD()
@@ -2524,7 +2510,7 @@ int Raid::FindNextRaidDelegateSlot(int option)
 	if (option == FindNextRaidMainMarkerSlot) {
 		for (int i = 0; i < MAX_NO_RAID_MAIN_MARKERS; i++) {
 			if (strlen(main_marker_pcs[i]) == 0) {
-					return i;
+				return i;
 			}
 		}
 	}

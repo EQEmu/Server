@@ -52,7 +52,7 @@ public:
 	) {
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"UPDATE `{}` SET `marked_npc{}` = '{}' WHERE raidid = '{}';",
+				"UPDATE `{}` SET `marked_npc_{}` = '{}' WHERE raidid = '{}';",
 				TableName(),
 				marked_npc_number,
 				value,

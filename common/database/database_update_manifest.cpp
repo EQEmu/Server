@@ -4767,15 +4767,15 @@ UNIQUE KEY `name` (`name`)
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
-	ALTER TABLE `raid_members` 
+	ALTER TABLE `raid_members`
 	ADD COLUMN `is_marker` TINYINT UNSIGNED DEFAULT(0) NOT NULL AFTER `islooter`,
 	ADD COLUMN `is_assister` TINYINT UNSIGNED DEFAULT(0) NOT NULL AFTER `is_marker`,
 	ADD COLUMN `note` VARCHAR(64) DEFAULT("") NOT NULL AFTER `is_assister`;
 
-	ALTER TABLE `raid_details` 
-	ADD COLUMN `marked_npc1` SMALLINT UNSIGNED DEFAULT(0) NOT NULL AFTER `motd`,
-	ADD COLUMN `marked_npc2` SMALLINT UNSIGNED DEFAULT(0) NOT NULL AFTER `marked_npc1`,
-	ADD COLUMN `marked_npc3` SMALLINT UNSIGNED DEFAULT(0) NOT NULL AFTER `marked_npc2`;
+	ALTER TABLE `raid_details`
+	ADD COLUMN `marked_npc_1` SMALLINT UNSIGNED DEFAULT(0) NOT NULL AFTER `motd`,
+	ADD COLUMN `marked_npc_2` SMALLINT UNSIGNED DEFAULT(0) NOT NULL AFTER `marked_npc_1`,
+	ADD COLUMN `marked_npc_3` SMALLINT UNSIGNED DEFAULT(0) NOT NULL AFTER `marked_npc_2`;
 	)",
 	},
 
