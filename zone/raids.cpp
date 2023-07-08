@@ -2853,12 +2853,13 @@ void Raid::SendAssistTarget(Client *c)
 
 bool Raid::IsAssister(const char* who)
 {
-	for (int i = 0; i < MAX_NO_RAID_MAIN_ASSISTERS; i++) {
-		if (Strings::EqualFold(main_assister_pcs[i], who)) {
-			return 1;
+	for (auto & main_assister_pc : main_assister_pcs) {
+		if (strcasecmp(main_assister_pc, who) == 0) {
+			return true;
 		}
 	}
-	return 0;
+
+	return false;
 }
 
 void Raid::SendRaidAssisterTo(const char* assister, Client* to)
