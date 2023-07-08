@@ -52,13 +52,7 @@
 #include "set/title.cpp"
 #include "set/title_suffix.cpp"
 #include "set/weather.cpp"
-#include "set/zone_clipping.cpp"
-#include "set/zone_color.cpp"
-#include "set/zone_header.cpp"
-#include "set/zone_locked.cpp"
-#include "set/zone_safe_coordinates.cpp"
-#include "set/zone_sky.cpp"
-#include "set/zone_underworld.cpp"
+#include "set/zone.cpp"
 
 void command_set(Client *c, const Seperator *sep)
 {
@@ -124,13 +118,7 @@ void command_set(Client *c, const Seperator *sep)
 		Cmd{.cmd = "title_suffix", .u = "title_suffix [Title Suffix]", .fn = SetTitleSuffix, .a = {"#titlesuffix"}},
 		Cmd{.cmd = "temporary_name", .u = "temporary_name [Name]", .fn = SetTemporaryName, .a = {"#tempname"}},
 		Cmd{.cmd = "weather", .u = "weather [0|1|2|3]", .fn = SetWeather, .a = {"#weather"}},
-		Cmd{.cmd = "zone_clipping", .u = "zone_clipping [Minimum Clip] [Maximum Clip] [Fog Minimum Clip] [Fog Maximum Clip] [Permanent (0 = False, 1 = True)] (Permanent is optional)", .fn = SetZoneClipping, .a = {"#zclip"}},
-		Cmd{.cmd = "zone_color", .u = "zone_color [Red] [Green] [Blue] [Permanent (0 = False, 1 = True)] (Permanent is optional)", .fn = SetZoneColor, .a = {"#zcolor"}},
-		Cmd{.cmd = "zone_header", .u = "zone_header [Zone ID|Zone Short Name] [Version]", .fn = SetZoneHeader, .a = {"#zcolor"}},
-		Cmd{.cmd = "zone_locked", .u = "zone_locked [on|off] [Zone ID|Zone Short Name]", .fn = SetZoneLocked, .a = {"#zonelock"}},
-		Cmd{.cmd = "zone_safe_coordinates", .u = "zone_safe_coordinates [X] [Y] [Z] [Heading] [Permanent (0 = False, 1 = True)] (Permanent is optional)", .fn = SetZoneSafeCoordinates, .a = {"#zsafecoords"}},
-		Cmd{.cmd = "zone_sky", .u = "zone_sky [Sky Type] [Permanent (0 = False, 1 = True)] (Permanent is optional)", .fn = SetZoneSky, .a = {"#zsky"}},
-		Cmd{.cmd = "zone_underworld", .u = "zone_underworld [Z] [Permanent (0 = False, 1 = True)] (Permanent is optional)", .fn = SetZoneUnderworld, .a = {"#zunderworld"}},
+		Cmd{.cmd = "zone", .u = "zone [option]", .fn = SetZoneData, .a = {"#zclip", "#zcolor", "#zheader", "#zonelock", "#zsafecoords", "#zsky", "#zunderworld"}},
 	};
 
 	// Check for arguments
