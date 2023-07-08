@@ -234,8 +234,7 @@ int command_init(void)
 		command_add("zoneinstance", "[Instance ID] [X] [Y] [Z] - Teleport to specified Instance by ID (coordinates are optional)", AccountStatus::Guide, command_zone_instance) ||
 		command_add("zoneshutdown", "[shortname] - Shut down a zone server", AccountStatus::GMLeadAdmin, command_zoneshutdown) ||
 		command_add("zopp", "Troubleshooting command - Sends a fake item packet to you. No server reference is created.", AccountStatus::GMImpossible, command_zopp) ||
-		command_add("zsave", " Saves zheader to the database", AccountStatus::QuestTroupe, command_zsave) ||
-		command_add("zstats", "Show info about zone header", AccountStatus::QuestTroupe, command_zstats)
+		command_add("zsave", " Saves zheader to the database", AccountStatus::QuestTroupe, command_zsave)
 	) {
 		command_deinit();
 		return -1;
@@ -354,7 +353,7 @@ int command_init(void)
 				"zunderworld"
 			}
 		},
-    {
+		{
 			.command = "show",
 			.aliases = {
 				"aggro",
