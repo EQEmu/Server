@@ -2750,42 +2750,34 @@ void Raid::SendRemoveAllRaidXTargets()
 	}
 }
 
+// Send a packet to the entire raid notifying them of the group target selected by the Main Assist.
 void Raid::SendRaidAssistTarget()
 {
-	// Send a packet to the entire raid notifying them of the group target selected by the Main Assist.
-
 	uint16 assist_target_id = 0;
 	uint16 number = 0;
 	Mob* target = nullptr;
 
-	if (strlen(main_assister_pcs[MAIN_ASSIST_1_SLOT]) > 0)
-	{
-		auto player = entity_list.GetMob(main_assister_pcs[MAIN_ASSIST_1_SLOT]);
-		if (player) {
-			target = player->GetTarget();
-			if (target) {
-				assist_target_id = target->GetID();
-				number = MAIN_ASSIST_1;
-			}
-		}
-	}
-	if (!assist_target_id && strlen(main_assister_pcs[MAIN_ASSIST_2_SLOT]) > 0) {
-		auto player = entity_list.GetMob(main_assister_pcs[MAIN_ASSIST_2_SLOT]);
-		if (player) {
-			target = player->GetTarget();
-			if (target) {
-				assist_target_id = target->GetID();
-				number = MAIN_ASSIST_2;
-			}
-		}
-	}
-	if (!assist_target_id && strlen(main_assister_pcs[MAIN_ASSIST_3_SLOT]) > 0) {
-		auto player = entity_list.GetMob(main_assister_pcs[MAIN_ASSIST_3_SLOT]);
-		if (player) {
-			target = player->GetTarget();
-			if (target) {
-				assist_target_id = target->GetID();
-				number = MAIN_ASSIST_3;
+	struct AssistTypes {
+		MainAssistType main_assist_type_slot;
+		MainAssistType main_assist_number;
+	};
+
+	std::vector<AssistTypes> assist_types = {
+		{.main_assist_type_slot = MAIN_ASSIST_1_SLOT, .main_assist_number = MAIN_ASSIST_1},
+		{.main_assist_type_slot = MAIN_ASSIST_2_SLOT, .main_assist_number = MAIN_ASSIST_2},
+		{.main_assist_type_slot = MAIN_ASSIST_3_SLOT, .main_assist_number = MAIN_ASSIST_3}
+	};
+
+	for (auto &a: assist_types) {
+		if (strlen(main_assister_pcs[a.main_assist_type_slot]) > 0) {
+			auto player = entity_list.GetMob(main_assister_pcs[a.main_assist_type_slot]);
+			if (player) {
+				target = player->GetTarget();
+				if (target) {
+					assist_target_id = target->GetID();
+					number           = a.main_assist_number;
+					break;
+				}
 			}
 		}
 	}
