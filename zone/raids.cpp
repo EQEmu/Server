@@ -2715,10 +2715,9 @@ void Raid::SendRemoveRaidXTargets(XTargetType Type)
 
 void Raid::SendRemoveAllRaidXTargets()
 {
-	for (const auto& m : members) {
+	for (const auto &m: members) {
 		if (m.member && !m.is_bot) {
-			for (int i = 0; i < m.member->GetMaxXTargets(); ++i)
-			{
+			for (int i = 0; i < m.member->GetMaxXTargets(); ++i) {
 				if ((m.member->XTargets[i].Type == RaidAssist1) ||
 					(m.member->XTargets[i].Type == RaidAssist2) ||
 					(m.member->XTargets[i].Type == RaidAssist3) ||
@@ -2727,8 +2726,7 @@ void Raid::SendRemoveAllRaidXTargets()
 					(m.member->XTargets[i].Type == RaidAssist3Target) ||
 					(m.member->XTargets[i].Type == RaidMarkTarget1) ||
 					(m.member->XTargets[i].Type == RaidMarkTarget2) ||
-					(m.member->XTargets[i].Type == RaidMarkTarget3))
-				{
+					(m.member->XTargets[i].Type == RaidMarkTarget3)) {
 					m.member->XTargets[i].ID = 0;
 					m.member->XTargets[i].Name[0] = 0;
 					m.member->SendXTargetPacket(i, nullptr);
