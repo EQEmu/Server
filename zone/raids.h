@@ -90,7 +90,7 @@ typedef enum {
 	MAIN_ASSIST_1 = 1,
 	MAIN_ASSIST_2 = 2,
 	MAIN_ASSIST_3 = 3,
-}MainAssistType;
+} MainAssistType;
 
 typedef enum {
 	MAIN_MARKER_1_SLOT = 0,
@@ -99,7 +99,7 @@ typedef enum {
 	MAIN_MARKER_1 = 1,
 	MAIN_MARKER_2 = 2,
 	MAIN_MARKER_3 = 3,
-}MainMarkerType;
+} MainMarkerType;
 
 enum {
 	ClearDelegate = 1,
