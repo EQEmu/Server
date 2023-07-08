@@ -794,6 +794,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					cpet->SetPetCommandState(PET_BUTTON_SIT,0);
 					cpet->SetPetCommandState(PET_BUTTON_FOLLOW, 1);
 					cpet->SetPetCommandState(PET_BUTTON_GUARD, 0);
+					cpet->SetPetCommandState(PET_BUTTON_STOP, 0);
 				}
 
 				SetPetType(petCharmed);
