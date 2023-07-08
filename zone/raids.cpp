@@ -2527,7 +2527,6 @@ int Raid::FindNextRaidDelegateSlot(int option)
 					return i;
 			}
 		}
-		return -1;
 	}
 	else if (option == FindNextRaidMainAssisterSlot) {
 		for (int i = 0; i < MAX_NO_RAID_MAIN_ASSISTERS; i++) {
@@ -2535,8 +2534,9 @@ int Raid::FindNextRaidDelegateSlot(int option)
 				return i;
 			}
 		}
-		return -1;
 	}
+
+	return -1;
 }
 
 void Raid::UpdateXTargetType(XTargetType Type, Mob *m, const char *name)
