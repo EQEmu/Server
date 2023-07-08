@@ -1793,15 +1793,12 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 		}
 
 		regen_string += DialogueWindow::TableRow(
-			fmt::format(
-				"{}{}{}{}{}{}",
-				DialogueWindow::TableCell(DialogueWindow::ColorMessage(regen_row_color, regen_row_header)),
-				DialogueWindow::TableCell(DialogueWindow::ColorMessage(regen_row_color, base_regen_field)),
-				DialogueWindow::TableCell(DialogueWindow::ColorMessage(regen_row_color, fmt::format("{} ({})", item_regen_field, cap_regen_field))),
-				DialogueWindow::TableCell(DialogueWindow::ColorMessage(regen_row_color, spell_regen_field)),
-				DialogueWindow::TableCell(DialogueWindow::ColorMessage(regen_row_color, aa_regen_field)),
-				DialogueWindow::TableCell(DialogueWindow::ColorMessage(regen_row_color, total_regen_field))
-			)
+			DialogueWindow::TableCell(DialogueWindow::ColorMessage(regen_row_color, regen_row_header)) +
+			DialogueWindow::TableCell(DialogueWindow::ColorMessage(regen_row_color, base_regen_field)) +
+			DialogueWindow::TableCell(DialogueWindow::ColorMessage(regen_row_color, fmt::format("{} ({})", item_regen_field, cap_regen_field))) +
+			DialogueWindow::TableCell(DialogueWindow::ColorMessage(regen_row_color, spell_regen_field)) +
+			DialogueWindow::TableCell(DialogueWindow::ColorMessage(regen_row_color, aa_regen_field)) +
+			DialogueWindow::TableCell(DialogueWindow::ColorMessage(regen_row_color, total_regen_field))
 		);
 	}
 
@@ -1907,23 +1904,20 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 		}
 
 		stat_table += DialogueWindow::TableRow(
-			fmt::format(
-				"{}{}{}{}",
-				DialogueWindow::TableCell(a_stat_name),
-				DialogueWindow::TableCell(
-					fmt::format(
-						"{} {}",
-						a_stat,
-						DialogueWindow::ColorMessage(heroic_color, fmt::format("+{}", h_stat))
-					)
-				),
-				DialogueWindow::TableCell(a_resist_name),
-				DialogueWindow::TableCell(
-					fmt::format(
-						"{} {}",
-						a_resist,
-						DialogueWindow::ColorMessage(heroic_color, fmt::format("+{}", h_resist_field))
-					)
+			DialogueWindow::TableCell(a_stat_name) +
+			DialogueWindow::TableCell(
+				fmt::format(
+					"{} {}",
+					a_stat,
+					DialogueWindow::ColorMessage(heroic_color, fmt::format("+{}", h_stat))
+				)
+			) +
+			DialogueWindow::TableCell(a_resist_name) +
+			DialogueWindow::TableCell(
+				fmt::format(
+					"{} {}",
+					a_resist,
+					DialogueWindow::ColorMessage(heroic_color, fmt::format("+{}", h_resist_field))
 				)
 			)
 		);
@@ -2026,23 +2020,20 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 		}
 
 		mod2_table += DialogueWindow::TableRow(
-			fmt::format(
-				"{}{}",
-				DialogueWindow::TableCell(
-					fmt::format(
-						"{}: {} / {}",
-						mod2a_name,
-						Strings::Commify(mod2a),
-						Strings::Commify(mod2a_cap)
-					)
-				),
-				DialogueWindow::TableCell(
-					fmt::format(
-						"{}: {} / {}",
-						mod2b_name,
-						Strings::Commify(mod2b),
-						Strings::Commify(mod2b_cap)
-					)
+			DialogueWindow::TableCell(
+				fmt::format(
+					"{}: {} / {}",
+					mod2a_name,
+					Strings::Commify(mod2a),
+					Strings::Commify(mod2a_cap)
+				)
+			) +
+			DialogueWindow::TableCell(
+				fmt::format(
+					"{}: {} / {}",
+					mod2b_name,
+					Strings::Commify(mod2b),
+					Strings::Commify(mod2b_cap)
 				)
 			)
 		);
@@ -2208,12 +2199,9 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 	// Class, Level, and Race
 	final_string += DialogueWindow::Table(
 		DialogueWindow::TableRow(
-			fmt::format(
-				"{}{}{}",
-				DialogueWindow::TableCell(fmt::format("Race: {}", GetPlayerRaceAbbreviation(GetBaseRace()))),
-				DialogueWindow::TableCell(fmt::format("Class: {}", GetPlayerClassAbbreviation(GetClass()))),
-				DialogueWindow::TableCell(fmt::format("Level: {}", std::to_string(GetLevel())))
-			)
+			DialogueWindow::TableCell(fmt::format("Race: {}", GetPlayerRaceAbbreviation(GetBaseRace()))) +
+			DialogueWindow::TableCell(fmt::format("Class: {}", GetPlayerClassAbbreviation(GetClass()))) +
+			DialogueWindow::TableCell(fmt::format("Level: {}", std::to_string(GetLevel())))
 		)
 	);
 
@@ -2221,15 +2209,12 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 	if (rune_number || magic_rune_number) {
 		final_string += DialogueWindow::Table(
 			DialogueWindow::TableRow(
-				fmt::format(
-					"{}{}{}",
-					DialogueWindow::TableCell(
-						fmt::format("Rune: {}", rune_number)
-					),
-					DialogueWindow::TableCell(""),
-					DialogueWindow::TableCell(
-						fmt::format("Spell Rune: {}", magic_rune_number)
-					)
+				DialogueWindow::TableCell(
+					fmt::format("Rune: {}", rune_number)
+				) +
+				DialogueWindow::TableCell("") +
+				DialogueWindow::TableCell(
+					fmt::format("Spell Rune: {}", magic_rune_number)
 				)
 			)
 		);
@@ -2313,21 +2298,21 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 		fmt::format(
 			"{}{}",
 			DialogueWindow::TableRow(
-				fmt::format(
-					"{}{}{}{}",
-					DialogueWindow::TableCell("Item"),
-					DialogueWindow::TableCell("Spell"),
-					DialogueWindow::TableCell("Over"),
-					DialogueWindow::TableCell("Total (Cap)")
-				)
+				DialogueWindow::TableCell("Item") +
+				DialogueWindow::TableCell("Spell") +
+				DialogueWindow::TableCell("Over") +
+				DialogueWindow::TableCell("Total (Cap)")
 			),
 			DialogueWindow::TableRow(
-				fmt::format(
-					"{}{}{}{}",
-					DialogueWindow::TableCell(Strings::Commify(itembonuses.haste)),
-					DialogueWindow::TableCell(Strings::Commify(spellbonuses.haste + spellbonuses.hastetype2)),
-					DialogueWindow::TableCell(Strings::Commify(spellbonuses.hastetype3 + ExtraHaste)),
-					DialogueWindow::TableCell(fmt::format("{} ({})", Strings::Commify(GetHaste()), Strings::Commify(RuleI(Character, HasteCap))))
+				DialogueWindow::TableCell(Strings::Commify(itembonuses.haste)) +
+				DialogueWindow::TableCell(Strings::Commify(spellbonuses.haste + spellbonuses.hastetype2)) +
+				DialogueWindow::TableCell(Strings::Commify(spellbonuses.hastetype3 + ExtraHaste)) +
+				DialogueWindow::TableCell(
+					fmt::format(
+						"{} ({})",
+						Strings::Commify(GetHaste()),
+						Strings::Commify(RuleI(Character, HasteCap))
+					)
 				)
 			)
 		)
@@ -2339,21 +2324,15 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 	final_string += DialogueWindow::CenterMessage("Regen");
 
 	const auto& regen_table = DialogueWindow::Table(
-		fmt::format(
-			"{}{}",
-			DialogueWindow::TableRow(
-				fmt::format(
-					"{}{}{}{}{}{}",
-					DialogueWindow::TableCell("Type"),
-					DialogueWindow::TableCell("Base"),
-					DialogueWindow::TableCell("Items (Cap)"),
-					DialogueWindow::TableCell("Spell"),
-					DialogueWindow::TableCell("AAs"),
-					DialogueWindow::TableCell("Total")
-				)
-			),
-			regen_string
-		)
+		DialogueWindow::TableRow(
+			DialogueWindow::TableCell("Type") +
+			DialogueWindow::TableCell("Base") +
+			DialogueWindow::TableCell("Items (Cap)") +
+			DialogueWindow::TableCell("Spell") +
+			DialogueWindow::TableCell("AAs") +
+			DialogueWindow::TableCell("Total")
+		) +
+		regen_string
 	);
 
 	// Regen
