@@ -126,11 +126,9 @@ void command_set(Client *c, const Seperator *sep)
 
 	// look for alias or command
 	for (const auto &cmd: commands) {
-		c->Message(Chat::White, fmt::format("CMD: {}", cmd.cmd).c_str());
 		// Check for alias first
 		for (const auto &alias: cmd.a) {
 			if (!alias.empty() && Strings::EqualFold(alias, sep->arg[0])) {
-				c->Message(Chat::White, fmt::format("CMD: {} Alias: {}", cmd.cmd, alias).c_str());
 				// build string from sep args
 				std::vector<std::string> args = {};
 
@@ -150,7 +148,6 @@ void command_set(Client *c, const Seperator *sep)
 
 		// Check for command
 		if (cmd.cmd == Strings::ToLower(sep->arg[1])) {
-			c->Message(Chat::White, fmt::format("CMD: {} found", cmd.cmd).c_str());
 			cmd.fn(c, sep);
 			return;
 		}
