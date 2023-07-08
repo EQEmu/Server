@@ -2492,9 +2492,7 @@ void Raid::DelegateAbilityMark(Mob* delegator, const char* delegatee)
 			DELEGATE_OFF
 		);
 		if (!result) {
-			LogError("Unable to clear rain main marker for player: [{}].",
-					 delegatee
-			);
+			LogError("Unable to clear rain main marker for player: [{}].", delegatee);
 		}
 	}
 	else {
@@ -2509,10 +2507,7 @@ void Raid::DelegateAbilityMark(Mob* delegator, const char* delegatee)
 				slot + 1
 			);
 			if (!result) {
-				LogError("Unable to set raid main marker for player: [{}] to [{}].",
-						 delegatee,
-						 slot + 1
-				);
+				LogError("Unable to set raid main marker for player: [{}] to [{}].", delegatee, slot + 1);
 			}
 		}
 	}
@@ -2645,11 +2640,7 @@ void Raid::RaidClearNPCMarks(Client* c)
 				0
 			);
 			if (!result) {
-				LogError("Unable to clear MarkedNPC{} from slot: [{}] for guild [{}].",
-						 i + 1,
-						 i,
-						 GetID()
-				);
+				LogError("Unable to clear MarkedNPC{} from slot: [{}] for guild [{}].", i + 1, i, GetID());
 			}
 		}
 
@@ -2709,13 +2700,10 @@ void Raid::SendRemoveAllRaidXTargets(const char* client_name)
 
 void Raid::SendRemoveRaidXTargets(XTargetType Type)
 {
-
-	for (const auto& m : members) {
+	for (const auto &m: members) {
 		if (m.member && !m.is_bot) {
-			for (int i = 0; i < m.member->GetMaxXTargets(); ++i)
-			{
-				if (m.member->XTargets[i].Type == Type)
-				{
+			for (int i = 0; i < m.member->GetMaxXTargets(); ++i) {
+				if (m.member->XTargets[i].Type == Type) {
 					m.member->XTargets[i].ID = 0;
 					m.member->XTargets[i].Name[0] = 0;
 					m.member->SendXTargetPacket(i, nullptr);
