@@ -17,6 +17,14 @@ typedef struct {
 	CmdFuncPtr function; // null means perl function
 } CommandRecord;
 
+typedef struct {
+	uint32      id = 0;
+	std::string parent_command;
+	std::string sub_command;
+	uint8       access_level;
+	std::string top_level_aliases;
+} SubCommandRecord;
+
 extern int (*command_dispatch)(Client *, std::string, bool);
 extern int command_count; // Commands Loaded Count
 

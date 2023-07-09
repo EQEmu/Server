@@ -1635,25 +1635,29 @@ bool SharedDatabase::GetCommandSettings(std::map<std::string, std::pair<uint8, s
 {
 	command_settings.clear();
 
-	const std::string query = "SELECT `command`, `access`, `aliases` FROM `command_settings`";
+	const std::string& query = "SELECT `command`, `access`, `aliases` FROM `command_settings`";
 	auto results = QueryDatabase(query);
-	if (!results.Success())
+	if (!results.Success() || !results.RowCount()) {
 		return false;
+	}
 
-	for (auto& row = results.begin(); row != results.end(); ++row) {
+	for (auto row : results) {
 		command_settings[row[0]].first = Strings::ToUnsignedInt(row[1]);
-		if (row[2][0] == 0)
+		if (row[2][0] == 0) {
 			continue;
+		}
 
 		std::vector<std::string> aliases = Strings::Split(row[2], '|');
-		for (auto iter = aliases.begin(); iter != aliases.end(); ++iter) {
-			if (iter->empty())
+		for (const auto& e : aliases) {
+			if (e.empty()) {
 				continue;
-			command_settings[row[0]].second.push_back(*iter);
+			}
+
+			command_settings[row[0]].second.push_back(e);
 		}
 	}
 
-    return true;
+	return true;
 }
 
 bool SharedDatabase::UpdateInjectedCommandSettings(const std::vector<std::pair<std::string, uint8>> &injected)
@@ -1668,13 +1672,15 @@ bool SharedDatabase::UpdateInjectedCommandSettings(const std::vector<std::pair<s
 			)
 		);
 
-		if (!QueryDatabase(query).Success()) {
+		auto results = QueryDatabase(query);
+		if (!results.Success()) {
 			return false;
 		}
 
 		LogInfo(
-			"[{0}] New Command(s) Added",
-			injected.size()
+			"[{}] New Command{} Added",
+			injected.size(),
+			injected.size() != 1 ? "s" : ""
 		);
 	}
 
@@ -1689,14 +1695,88 @@ bool SharedDatabase::UpdateOrphanedCommandSettings(const std::vector<std::string
 			Strings::ImplodePair(",", std::pair<char, char>('\'', '\''), orphaned)
 		);
 
-		if (!QueryDatabase(query).Success()) {
+		auto results = QueryDatabase(query);
+		if (!results.Success()) {
 			return false;
 		}
 
 		LogInfo(
 			"{} Orphaned Command{} Deleted",
 			orphaned.size(),
-			(orphaned.size() == 1 ? "" : "s")
+			orphaned.size() != 1 ? "s" : ""
+		);
+	}
+
+	return true;
+}
+
+bool SharedDatabase::GetCommandSubSettings(std::vector<CommandSubsettingsRepository::CommandSubsettings> &command_subsettings)
+{
+	command_subsettings.clear();
+
+	const auto& l = CommandSubsettingsRepository::All(*this);
+
+	if (l.empty()) {
+		return false;
+	}
+
+	command_subsettings.reserve(l.size());
+
+	for (const auto& e : l) {
+		command_subsettings.emplace_back(e);
+	}
+
+	return true;
+}
+
+bool SharedDatabase::UpdateInjectedCommandSubSettings(const std::vector<CommandSubsettingsRepository::CommandSubsettings> &injected)
+{
+	if (injected.size()) {
+		for (const auto& e : injected) {
+			const std::string& query = fmt::format(
+				"REPLACE INTO `command_subsettings` (`parent_command`, `sub_command`, `access_level`, `top_level_aliases`) VALUES ('{}', '{}', {}, '{}')",
+				Strings::Escape(e.parent_command),
+				Strings::Escape(e.sub_command),
+				e.access_level,
+				Strings::Escape(e.top_level_aliases)
+			);
+
+			auto results = QueryDatabase(query);
+			if (!results.Success()) {
+				return false;
+			}
+		}
+
+		LogInfo(
+			"[{}] New Subcommand{} Added",
+			injected.size(),
+			injected.size() != 1 ? "s" : ""
+		);
+	}
+
+	return true;
+}
+
+bool SharedDatabase::UpdateOrphanedCommandSubSettings(const std::vector<CommandSubsettingsRepository::CommandSubsettings> &orphaned)
+{
+	if (orphaned.size()) {
+		for (const auto& e : orphaned) {
+			const std::string& query = fmt::format(
+				"DELETE FROM `command_subsettings` WHERE `parent_command` = '{}' AND `sub_command` = '{}'",
+				Strings::Escape(e.parent_command),
+				Strings::Escape(e.sub_command)
+			);
+
+			auto results = QueryDatabase(query);
+			if (results.Success()) {
+				return false;
+			}
+		}
+
+		LogInfo(
+			"{} Orphaned Subcommand{} Deleted",
+			orphaned.size(),
+			orphaned.size() != 1 ? "s" : ""
 		);
 	}
 
