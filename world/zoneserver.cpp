@@ -748,7 +748,8 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		}
 		case ServerOP_ZoneStatus: {
 			if (pack->size >= 1) {
-				zoneserver_list.SendZoneStatus((char *)&pack->pBuffer[1], (uint8)pack->pBuffer[0], this);
+				auto z = (ServerZoneStatus_Struct*) pack->pBuffer;
+				zoneserver_list.SendZoneStatus(z->name, z->admin, this);
 			}
 
 			break;
