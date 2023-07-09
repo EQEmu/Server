@@ -2815,19 +2815,6 @@ void bot_command_bot(Client *c, const Seperator *sep)
 	helper_send_available_subcommands(c, "bot", subcommand_list);
 }
 
-void bot_command_botgroup(Client *c, const Seperator *sep)
-{
-	const std::list<const char*> subcommand_list = {
-		"botgroupaddmember", "botgroupcreate", "botgroupdelete", "botgrouplist", "botgroupload", "botgroupremovemember"
-	};
-
-	if (helper_command_alias_fail(c, "bot_command_botgroup", sep->arg[0], "botgroup")) {
-		return;
-	}
-
-	helper_send_available_subcommands(c, "bot-group", subcommand_list);
-}
-
 void bot_command_charm(Client *c, const Seperator *sep)
 {
 	auto local_list = &bot_command_spells[BCEnum::SpT_Charm];
