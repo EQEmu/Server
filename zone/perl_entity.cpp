@@ -4,6 +4,7 @@
 
 #include "embperl.h"
 #include "entity.h"
+#include "mob.h"
 #include "../common/global_define.h"
 #include "../common/rulesys.h"
 #include "../common/say_link.h"
@@ -610,6 +611,77 @@ Bot* Perl_EntityList_GetRandomBot(EntityList* self, float x, float y, float z, f
 	return self->GetRandomBot(glm::vec3(x, y, z), distance, exclude_bot);
 }
 
+perl::array Perl_EntityList_GetCloseMobList(EntityList* self, Mob* mob)
+{
+	perl::array result;
+
+	const auto& l = self->GetCloseMobList(mob);
+
+	result.reserve(l.size());
+
+	for (const auto& e : l) {
+		result.push_back(e.second);
+	}
+
+	return result;
+}
+
+perl::array Perl_EntityList_GetCloseMobList(EntityList* self, Mob* mob, float distance)
+{
+	perl::array result;
+
+	const auto& l = self->GetCloseMobList(mob, distance);
+
+	result.reserve(l.size());
+
+	for (const auto& e : l) {
+		if (mob->CalculateDistance(e.second) <= distance) {
+			result.push_back(e.second);
+		}
+	}
+
+	return result;
+}
+
+perl::array Perl_EntityList_GetCloseMobList(EntityList* self, Mob* mob, float distance, bool ignore_self)
+{
+	perl::array result;
+
+	const auto& l = self->GetCloseMobList(mob, distance);
+
+	result.reserve(l.size());
+
+	for (const auto& e : l) {
+		if (ignore_self && e.second == mob) {
+			continue;
+		}
+
+		if (mob->CalculateDistance(e.second) <= distance) {
+			result.push_back(e.second);
+		}
+	}
+
+	return result;
+}
+
+Spawn2* Perl_EntityList_GetSpawnByID(EntityList* self, uint32 spawn_id) {
+	return self->GetSpawnByID(spawn_id);
+}
+
+perl::array Perl_EntityList_GetSpawnList(EntityList* self) {
+	perl::array ret;
+
+	std::list<Spawn2*> l;
+
+	self->GetSpawnList(l);
+
+	for (const auto& e : l) {
+		ret.push_back(e);
+	}
+
+	return ret;
+}
+
 void perl_register_entitylist()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -639,6 +711,9 @@ void perl_register_entitylist()
 	package.add("GetClientByName", &Perl_EntityList_GetClientByName);
 	package.add("GetClientByWID", &Perl_EntityList_GetClientByWID);
 	package.add("GetClientList", &Perl_EntityList_GetClientList);
+	package.add("GetCloseMobList", (perl::array(*)(EntityList*, Mob*))&Perl_EntityList_GetCloseMobList);
+	package.add("GetCloseMobList", (perl::array(*)(EntityList*, Mob*, float))&Perl_EntityList_GetCloseMobList);
+	package.add("GetCloseMobList", (perl::array(*)(EntityList*, Mob*, float, bool))&Perl_EntityList_GetCloseMobList);
 	package.add("GetCorpseByID", &Perl_EntityList_GetCorpseByID);
 	package.add("GetCorpseByName", &Perl_EntityList_GetCorpseByName);
 	package.add("GetCorpseByOwner", &Perl_EntityList_GetCorpseByOwner);
@@ -677,6 +752,8 @@ void perl_register_entitylist()
 	package.add("GetRandomNPC", (NPC*(*)(EntityList*))&Perl_EntityList_GetRandomNPC);
 	package.add("GetRandomNPC", (NPC*(*)(EntityList*, float, float, float, float))&Perl_EntityList_GetRandomNPC);
 	package.add("GetRandomNPC", (NPC*(*)(EntityList*, float, float, float, float, NPC*))&Perl_EntityList_GetRandomNPC);
+	package.add("GetSpawnByID", (Spawn2*(*)(EntityList*, uint32))&Perl_EntityList_GetSpawnByID);
+	package.add("GetSpawnList", (perl::array(*)(EntityList*))&Perl_EntityList_GetSpawnList);
 	package.add("HalveAggro", &Perl_EntityList_HalveAggro);
 	package.add("IsMobSpawnedByNpcTypeID", &Perl_EntityList_IsMobSpawnedByNpcTypeID);
 	package.add("MakeNameUnique", &Perl_EntityList_MakeNameUnique);

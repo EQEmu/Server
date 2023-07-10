@@ -446,6 +446,8 @@ void EQEmuLogSys::Out(
 	// remove this when we remove all legacy logs
 	bool ignore_log_legacy_format = (
 		log_category == Logs::Netcode ||
+		log_category == Logs::MySQLQuery ||
+		log_category == Logs::MySQLError ||
 		log_category == Logs::PacketServerClient ||
 		log_category == Logs::PacketClientServer ||
 		log_category == Logs::PacketServerToServer

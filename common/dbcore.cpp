@@ -365,6 +365,8 @@ MySQLRequestResult DBcore::QueryDatabaseMulti(const std::string &query)
 				mysql_free_result(res);
 			}
 
+			SetMultiStatementsOff();
+
 			return r;
 		}
 	}
@@ -417,6 +419,8 @@ MySQLRequestResult DBcore::QueryDatabaseMulti(const std::string &query)
 			std::string error_message = mysql_error(mysql);
 			r.SetErrorMessage(error_message);
 			r.SetErrorNumber(mysql_errno(mysql));
+
+			SetMultiStatementsOff();
 
 			// we handle errors elsewhere
 			return r;

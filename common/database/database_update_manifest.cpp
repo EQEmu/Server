@@ -4642,11 +4642,10 @@ ADD COLUMN `avoidance` int(11) unsigned NOT NULL DEFAULT 0 AFTER `heal_scale`;
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
-ALTER TABLE `npc_scale_global_base`
-MODIFY COLUMN `hp` bigint(20) NOT NULL DEFAULT 0 AFTER `ac`,
-MODIFY COLUMN `hp_regen_rate` bigint(20) NOT NULL DEFAULT 0 AFTER `max_dmg`,
-ADD COLUMN `hp_regen_per_second` bigint(20) NOT NULL DEFAULT 0 AFTER `hp_regen_rate`,
-ADD COLUMN `avoidance` int(11) unsigned NOT NULL DEFAULT 0 AFTER `heal_scale`;
+DROP INDEX `PRIMARY` ON `raid_members`;
+CREATE UNIQUE INDEX `UNIQUE` ON `raid_members`(`name`);
+ALTER TABLE `raid_members` ADD COLUMN `bot_id` int(4) NOT NULL DEFAULT 0 AFTER `charid`;
+ALTER TABLE `raid_members` ADD COLUMN `id` BIGINT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT FIRST;
 
 )"
 	},
@@ -4744,6 +4743,22 @@ CHANGE COLUMN `id` `character_id` int(11) UNSIGNED NOT NULL DEFAULT 0,
 ADD COLUMN `id` int(11) NOT NULL AUTO_INCREMENT FIRST,
 ADD PRIMARY KEY (`id`);
 )",
+	},
+	ManifestEntry{
+		.version = 9229,
+		.description = "2023_07_04_chatchannel_reserved_names_fix.sql",
+		.check = "SHOW TABLES LIKE 'chatchannel_reserved_names'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+CREATE TABLE `chatchannel_reserved_names`
+(
+`id`   int(11) NOT NULL AUTO_INCREMENT,
+`name` varchar(64) NOT NULL,
+PRIMARY KEY (`id`) USING BTREE,
+UNIQUE KEY `name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+)"
 	},
 
 // -- template; copy/paste this when you need to create a new entry

@@ -586,7 +586,8 @@ sub get_reserved_cpp_variable_names {
     return (
         "class",
         "int",
-        "key"
+        "key",
+        "range"
     );
 }
 

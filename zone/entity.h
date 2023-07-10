@@ -539,7 +539,7 @@ public:
 	inline const std::unordered_map<uint16, Object *> &GetObjectList() { return object_list; }
 	inline const std::unordered_map<uint16, Doors *> &GetDoorsList() { return door_list; }
 
-	std::unordered_map<uint16, Mob *> &GetCloseMobList(Mob *mob, float distance = 0);
+	std::unordered_map<uint16, Mob *> &GetCloseMobList(Mob *mob, float distance = 0.0f);
 
 	void	DepopAll(int NPCTypeID, bool StartSpawnTimer = true);
 
@@ -553,7 +553,7 @@ public:
 		bool add_self_to_other_lists = false
 	);
 
-	void GetTrapInfo(Client* client);
+	void GetTrapInfo(Client* c);
 	bool IsTrapGroupSpawned(uint32 trap_id, uint8 group);
 	void UpdateAllTraps(bool respawn, bool repopnow = false);
 	void ClearTrapPointers();

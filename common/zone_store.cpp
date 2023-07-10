@@ -370,7 +370,7 @@ uint32 ZoneStore::GetZoneRuleSet(uint32 zone_id, int version)
 	return 0;
 }
 
-const std::string& ZoneStore::GetZoneNote(uint32 zone_id, int version)
+const std::string ZoneStore::GetZoneNote(uint32 zone_id, int version)
 {
 	for (auto &z: m_zones) {
 		if (z.zoneidnumber == zone_id && z.version == version) {
@@ -384,8 +384,7 @@ const std::string& ZoneStore::GetZoneNote(uint32 zone_id, int version)
 		}
 	}
 
-	const auto& note = std::string();
-	return note;
+	return "";
 }
 
 float ZoneStore::GetZoneUnderworld(uint32 zone_id, int version)
@@ -736,7 +735,7 @@ float ZoneStore::GetZoneFogDensity(uint32 zone_id, int version)
 	return 0.0f;
 }
 
-const std::string& ZoneStore::GetZoneFlagNeeded(uint32 zone_id, int version)
+const std::string ZoneStore::GetZoneFlagNeeded(uint32 zone_id, int version)
 {
 	for (auto &z: m_zones) {
 		if (z.zoneidnumber == zone_id && z.version == version) {
@@ -750,8 +749,7 @@ const std::string& ZoneStore::GetZoneFlagNeeded(uint32 zone_id, int version)
 		}
 	}
 
-	const auto& flag_needed = std::string();
-	return flag_needed;
+	return "";
 }
 
 int8 ZoneStore::GetZoneCanBind(uint32 zone_id, int version)
@@ -1259,7 +1257,7 @@ int8 ZoneStore::GetZoneMaximumExpansion(uint32 zone_id, int version)
 	return DEFAULT_ZONE_MIN_MAX_EXPANSION;
 }
 
-const std::string& ZoneStore::GetZoneContentFlags(uint32 zone_id, int version)
+const std::string ZoneStore::GetZoneContentFlags(uint32 zone_id, int version)
 {
 	for (auto &z: m_zones) {
 		if (z.zoneidnumber == zone_id && z.version == version) {
@@ -1271,13 +1269,12 @@ const std::string& ZoneStore::GetZoneContentFlags(uint32 zone_id, int version)
 		if (z.zoneidnumber == zone_id && z.version == 0) {
 			return z.content_flags;
 		}
-	}
+	};
 
-	const auto& content_flags = std::string();
-	return content_flags;
+	return "";
 }
 
-const std::string& ZoneStore::GetZoneContentFlagsDisabled(uint32 zone_id, int version)
+const std::string ZoneStore::GetZoneContentFlagsDisabled(uint32 zone_id, int version)
 {
 	for (auto &z: m_zones) {
 		if (z.zoneidnumber == zone_id && z.version == version) {
@@ -1291,8 +1288,7 @@ const std::string& ZoneStore::GetZoneContentFlagsDisabled(uint32 zone_id, int ve
 		}
 	}
 
-	const auto& content_flags_disabled = std::string();
-	return content_flags_disabled;
+	return "";
 }
 
 int ZoneStore::GetZoneUnderworldTeleportIndex(uint32 zone_id, int version)

@@ -20,7 +20,7 @@ void command_texture(Client *c, const Seperator *sep)
 		target = c->GetTarget();
 	}
 
-	if (Mob::IsPlayerRace(target->GetModel())) { // Player Races Wear Armor, so Wearchange is sent instead
+	if (IsPlayerRace(target->GetModel())) { // Player Races Wear Armor, so Wearchange is sent instead
 		for (
 			int texture_slot = EQ::textures::textureBegin;
 			texture_slot <= EQ::textures::LastTintableTexture;
@@ -44,7 +44,7 @@ void command_texture(Client *c, const Seperator *sep)
 			c->GetTargetDescription(target, TargetDescriptionType::UCSelf),
 			texture,
 			(
-				Mob::IsPlayerRace(target->GetModel()) ?
+				IsPlayerRace(target->GetModel()) ?
 				"" :
 				fmt::format(
 					" Helmet Texture: {}",

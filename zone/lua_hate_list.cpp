@@ -37,8 +37,8 @@ void Lua_HateEntry::SetHate(int64 value) {
 	self->stored_hate_amount = value;
 }
 
-int Lua_HateEntry::GetFrenzy() {
-	Lua_Safe_Call_Int();
+bool Lua_HateEntry::GetFrenzy() {
+	Lua_Safe_Call_Bool();
 	return self->is_entity_frenzy;
 }
 

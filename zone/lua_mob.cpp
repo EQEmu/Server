@@ -18,6 +18,10 @@
 
 struct SpecialAbilities { };
 
+struct Lua_Mob_List {
+	std::vector<Lua_Mob> entries;
+};
+
 const char *Lua_Mob::GetName() {
 	Lua_Safe_Call_String();
 	return self->GetName();
@@ -1263,6 +1267,11 @@ void Lua_Mob::StopNavigation() {
 float Lua_Mob::CalculateDistance(double x, double y, double z) {
 	Lua_Safe_Call_Real();
 	return self->CalculateDistance(static_cast<float>(x), static_cast<float>(y), static_cast<float>(z));
+}
+
+float Lua_Mob::CalculateDistance(Lua_Mob mob) {
+	Lua_Safe_Call_Real();
+	return self->CalculateDistance(mob);
 }
 
 void Lua_Mob::SendTo(double x, double y, double z) {
@@ -2744,7 +2753,7 @@ luabind::object Lua_Mob::GetEntityVariables(lua_State* L) {
 	if (d_) {
 		auto self = reinterpret_cast<NativeType*>(d_);
 		auto l = self->GetEntityVariables();
-		auto i = 1;
+		int i = 1;
 		for (const auto& v : l) {
 			t[i] = v;
 			i++;
@@ -3035,7 +3044,7 @@ luabind::object Lua_Mob::GetBuffSpellIDs(lua_State* L) {
 	if (d_) {
 		auto self = reinterpret_cast<NativeType*>(d_);
 		auto l = self->GetBuffSpellIDs();
-		auto i = 1;
+		int i = 1;
 		for (const auto& v : l) {
 			t[i] = v;
 			i++;
@@ -3048,6 +3057,74 @@ luabind::object Lua_Mob::GetBuffSpellIDs(lua_State* L) {
 bool Lua_Mob::HasSpellEffect(int effect_id) {
 	Lua_Safe_Call_Bool();
 	return self->HasSpellEffect(effect_id);
+}
+
+Lua_Mob_List Lua_Mob::GetCloseMobList() {
+	Lua_Safe_Call_Class(Lua_Mob_List);
+
+	Lua_Mob_List ret;
+
+	const auto& l = entity_list.GetCloseMobList(self);
+
+	ret.entries.reserve(l.size());
+
+	for (const auto& e : l) {
+		ret.entries.emplace_back(Lua_Mob(e.second));
+	}
+
+	return ret;
+}
+
+Lua_Mob_List Lua_Mob::GetCloseMobList(float distance) {
+	Lua_Safe_Call_Class(Lua_Mob_List);
+
+	Lua_Mob_List ret;
+
+	const auto& l = entity_list.GetCloseMobList(self);
+
+	ret.entries.reserve(l.size());
+
+	for (const auto& e : l) {
+		if (self->CalculateDistance(e.second) <= distance) {
+			ret.entries.emplace_back(Lua_Mob(e.second));
+		}
+	}
+
+	return ret;
+}
+
+Lua_Mob_List Lua_Mob::GetCloseMobList(float distance, bool ignore_self) {
+	Lua_Safe_Call_Class(Lua_Mob_List);
+
+	Lua_Mob_List ret;
+
+	const auto& l = entity_list.GetCloseMobList(self);
+
+	ret.entries.reserve(l.size());
+
+	for (const auto& e : l) {
+		if (ignore_self && e.second == self) {
+			continue;
+		}
+
+		if (self->CalculateDistance(e.second) <= distance) {
+			ret.entries.emplace_back(Lua_Mob(e.second));
+		}
+	}
+
+	return ret;
+}
+
+std::string Lua_Mob::GetClassPlural()
+{
+	Lua_Safe_Call_String();
+	return self->GetClassPlural();
+}
+
+std::string Lua_Mob::GetRacePlural()
+{
+	Lua_Safe_Call_String();
+	return self->GetRacePlural();
 }
 
 luabind::scope lua_register_mob() {
@@ -3083,6 +3160,7 @@ luabind::scope lua_register_mob() {
 	.def("BuffFadeBySlot", (void(Lua_Mob::*)(int,bool))&Lua_Mob::BuffFadeBySlot)
 	.def("BuffFadeBySpellID", (void(Lua_Mob::*)(int))&Lua_Mob::BuffFadeBySpellID)
 	.def("CalculateDistance", (float(Lua_Mob::*)(double,double,double))&Lua_Mob::CalculateDistance)
+	.def("CalculateDistance", (float(Lua_Mob::*)(Lua_Mob))&Lua_Mob::CalculateDistance)
 	.def("CalculateHeadingToTarget", (double(Lua_Mob::*)(double,double))&Lua_Mob::CalculateHeadingToTarget)
 	.def("CameraEffect", (void(Lua_Mob::*)(uint32,float))&Lua_Mob::CameraEffect)
 	.def("CameraEffect", (void(Lua_Mob::*)(uint32,float,Lua_Client))&Lua_Mob::CameraEffect)
@@ -3257,7 +3335,11 @@ luabind::scope lua_register_mob() {
 	.def("GetCasterLevel", &Lua_Mob::GetCasterLevel)
 	.def("GetClass", &Lua_Mob::GetClass)
 	.def("GetClassName", &Lua_Mob::GetClassName)
+	.def("GetClassPlural", &Lua_Mob::GetClassPlural)
 	.def("GetCleanName", &Lua_Mob::GetCleanName)
+	.def("GetCloseMobList", (Lua_Mob_List(Lua_Mob::*)(void))&Lua_Mob::GetCloseMobList)
+	.def("GetCloseMobList", (Lua_Mob_List(Lua_Mob::*)(float))&Lua_Mob::GetCloseMobList)
+	.def("GetCloseMobList", (Lua_Mob_List(Lua_Mob::*)(float,bool))&Lua_Mob::GetCloseMobList)
 	.def("GetCorruption", &Lua_Mob::GetCorruption)
 	.def("GetDEX", &Lua_Mob::GetDEX)
 	.def("GetDR", &Lua_Mob::GetDR)
@@ -3357,6 +3439,7 @@ luabind::scope lua_register_mob() {
 	.def("GetPhR", &Lua_Mob::GetPhR)
 	.def("GetRace", &Lua_Mob::GetRace)
 	.def("GetRaceName", &Lua_Mob::GetRaceName)
+	.def("GetRacePlural", &Lua_Mob::GetRacePlural)
 	.def("GetRemainingTimeMS", &Lua_Mob::GetRemainingTimeMS)
 	.def("GetResist", (int(Lua_Mob::*)(int))&Lua_Mob::GetResist)
 	.def("GetReverseFactionCon", (int(Lua_Mob::*)(Lua_Mob))&Lua_Mob::GetReverseFactionCon)

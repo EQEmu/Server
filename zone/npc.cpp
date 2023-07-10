@@ -243,7 +243,14 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 	SetMana(GetMaxMana());
 
 	MerchantType          = npc_type_data->merchanttype;
-	merchant_open         = GetClass() == MERCHANT;
+	merchant_open         = (
+		GetClass() == MERCHANT ||
+		GetClass() == DISCORD_MERCHANT ||
+		GetClass() == ADVENTURE_MERCHANT ||
+		GetClass() == NORRATHS_KEEPERS_MERCHANT ||
+		GetClass() == DARK_REIGN_MERCHANT ||
+		GetClass() == ALT_CURRENCY_MERCHANT
+	);
 	adventure_template_id = npc_type_data->adventure_template;
 	flymode               = iflymode;
 
@@ -441,6 +448,8 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 		m_can_open_doors = false;
 	}
 
+	GetInv().SetInventoryVersion(EQ::versions::MobVersion::RoF2);
+	GetInv().SetGMInventory(false);
 }
 
 float NPC::GetRoamboxMaxX() const
@@ -2359,74 +2368,67 @@ void NPC::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 void NPC::PetOnSpawn(NewSpawn_Struct* ns)
 {
 	//Basic settings to make sure swarm pets work properly.
-	Mob *swarmOwner = nullptr;
-	if  (GetSwarmOwner())
-	{
-		swarmOwner = entity_list.GetMobID(GetSwarmOwner());
+	Mob *swarm_owner = nullptr;
+	if (GetSwarmOwner()) {
+		swarm_owner = entity_list.GetMobID(GetSwarmOwner());
 	}
 
-	if  (swarmOwner != nullptr)
-	{
-		if(swarmOwner->IsClient())
-		{
+	if (swarm_owner) {
+		if (swarm_owner->IsClient()) {
 			SetPetOwnerClient(true); //Simple flag to determine if pet belongs to a client
 			SetAllowBeneficial(true);//Allow temp pets to receive buffs and heals if owner is client.
 			//This will allow CLIENT swarm pets NOT to be targeted with F8.
-			ns->spawn.targetable_with_hotkey = 0;
-			no_target_hotkey = 1;
-		}
-		else
-		{
+			ns->spawn.targetable_with_hotkey = false;
+			no_target_hotkey = true;
+		} else {
 			//NPC cast swarm pets should still be targetable with F8.
-			ns->spawn.targetable_with_hotkey = 1;
-			no_target_hotkey = 0;
+			ns->spawn.targetable_with_hotkey = true;
+			no_target_hotkey = false;
 		}
 
 		SetTempPet(true); //Simple mob flag for checking if temp pet
-		swarmOwner->SetTempPetsActive(true); //Necessary fail safe flag set if mob ever had a swarm pet to ensure they are removed.
-		swarmOwner->SetTempPetCount(swarmOwner->GetTempPetCount() + 1);
+		swarm_owner->SetTempPetsActive(true); //Necessary fail safe flag set if mob ever had a swarm pet to ensure they are removed.
+		swarm_owner->SetTempPetCount(swarm_owner->GetTempPetCount() + 1);
 
 		//Not recommended if using above (However, this will work better on older clients).
-		if (RuleB(Pets, UnTargetableSwarmPet))
-		{
-			ns->spawn.bodytype = 11;
-			if(!IsCharmed() && swarmOwner->IsClient()) {
-				std::string tmp_lastname = swarmOwner->GetName();
-				tmp_lastname += "'s Pet";
-				if (tmp_lastname.size() < sizeof(ns->spawn.lastName))
-					strn0cpy(ns->spawn.lastName, tmp_lastname.c_str(), sizeof(ns->spawn.lastName));
+		if (RuleB(Pets, UnTargetableSwarmPet)) {
+			ns->spawn.bodytype = BT_NoTarget;
+		}
+
+		if (
+			!IsCharmed() &&
+			swarm_owner->IsClient() &&
+			RuleB(Pets, ClientPetsUseOwnerNameInLastName)
+		) {
+			const auto& tmp_lastname = fmt::format("{}'s Pet", swarm_owner->GetName());
+			if (tmp_lastname.size() < sizeof(ns->spawn.lastName)) {
+				strn0cpy(ns->spawn.lastName, tmp_lastname.c_str(), sizeof(ns->spawn.lastName));
 			}
 		}
 
-		if (swarmOwner->IsNPC()) {
+		if (swarm_owner->IsNPC()) {
 			SetPetOwnerNPC(true);
 		}
-	}
-	else if(GetOwnerID())
-	{
+	} else if (GetOwnerID()) {
 		ns->spawn.is_pet = 1;
-		if (!IsCharmed())
-		{
-			Client *client = entity_list.GetClientByID(GetOwnerID());
-			if(client)
-			{
+
+		if (!IsCharmed()) {
+			const auto c = entity_list.GetClientByID(GetOwnerID());
+			if (c) {
 				SetPetOwnerClient(true);
-				std::string tmp_lastname = client->GetName();
-				tmp_lastname += "'s Pet";
-				if (tmp_lastname.size() < sizeof(ns->spawn.lastName))
-					strn0cpy(ns->spawn.lastName, tmp_lastname.c_str(), sizeof(ns->spawn.lastName));
-			}
-			else
-			{
-				if (entity_list.GetNPCByID(GetOwnerID()))
-				{
+				if (RuleB(Pets, ClientPetsUseOwnerNameInLastName)) {
+					const auto& tmp_lastname = fmt::format("{}'s Pet", c->GetName());
+					if (tmp_lastname.size() < sizeof(ns->spawn.lastName)) {
+						strn0cpy(ns->spawn.lastName, tmp_lastname.c_str(), sizeof(ns->spawn.lastName));
+					}
+				}
+			} else {
+				if (entity_list.GetNPCByID(GetOwnerID())) {
 					SetPetOwnerNPC(true);
 				}
 			}
 		}
-	}
-	else
-	{
+	} else {
 		ns->spawn.is_pet = 0;
 	}
 }

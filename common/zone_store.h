@@ -54,7 +54,7 @@ public:
 	int GetZoneTimeZone(uint32 zone_id, int version = 0);
 	int GetZoneMaximumPlayers(uint32 zone_id, int version = 0);
 	uint32 GetZoneRuleSet(uint32 zone_id, int version = 0);
-	const std::string& GetZoneNote(uint32 zone_id, int version = 0);
+	const std::string GetZoneNote(uint32 zone_id, int version = 0);
 	float GetZoneUnderworld(uint32 zone_id, int version = 0);
 	float GetZoneMinimumClip(uint32 zone_id, int version = 0);
 	float GetZoneMaximumClip(uint32 zone_id, int version = 0);
@@ -69,7 +69,7 @@ public:
 	float GetZoneWalkSpeed(uint32 zone_id, int version = 0);
 	uint8 GetZoneTimeType(uint32 zone_id, int version = 0);
 	float GetZoneFogDensity(uint32 zone_id, int version = 0);
-	const std::string& GetZoneFlagNeeded(uint32 zone_id, int version = 0);
+	const std::string GetZoneFlagNeeded(uint32 zone_id, int version = 0);
 	int8 GetZoneCanBind(uint32 zone_id, int version = 0);
 	int8 GetZoneCanCombat(uint32 zone_id, int version = 0);
 	int8 GetZoneCanLevitate(uint32 zone_id, int version = 0);
@@ -95,8 +95,8 @@ public:
 	uint32 GetZoneMaximumMovementUpdateRange(uint32 zone_id, int version = 0);
 	int8 GetZoneMinimumExpansion(uint32 zone_id, int version = 0);
 	int8 GetZoneMaximumExpansion(uint32 zone_id, int version = 0);
-	const std::string& GetZoneContentFlags(uint32 zone_id, int version = 0);
-	const std::string& GetZoneContentFlagsDisabled(uint32 zone_id, int version = 0);
+	const std::string GetZoneContentFlags(uint32 zone_id, int version = 0);
+	const std::string GetZoneContentFlagsDisabled(uint32 zone_id, int version = 0);
 	int GetZoneUnderworldTeleportIndex(uint32 zone_id, int version = 0);
 	int GetZoneLavaDamage(uint32 zone_id, int version = 0);
 	int GetZoneMinimumLavaDamage(uint32 zone_id, int version = 0);
