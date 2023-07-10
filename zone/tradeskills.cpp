@@ -1505,7 +1505,7 @@ bool ZoneDatabase::GetTradeRecipe(
 				INNER JOIN tradeskill_recipe_entries ON tradeskill_recipe.id = tradeskill_recipe_entries.recipe_id
 			WHERE
 				tradeskill_recipe.id = {}
-				AND tradeskill_recipe_entries.item_id {};
+				AND tradeskill_recipe_entries.item_id {}
 				AND tradeskill_recipe.enabled
 				GROUP BY
 				tradeskill_recipe.id
