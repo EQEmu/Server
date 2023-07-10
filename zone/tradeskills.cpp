@@ -1243,7 +1243,8 @@ bool ZoneDatabase::GetTradeRecipe(
 	Client* c,
 	DBTradeskillRecipe_Struct* spec,
 	bool* is_augmented
-) {
+)
+{
 	if (!container) {
 		return false;
 	}
@@ -1266,10 +1267,10 @@ bool ZoneDatabase::GetTradeRecipe(
 	uint32      count = 0;
 	uint32      sum   = 0;
 
-	for (uint8 i = EQ::invbag::SLOT_BEGIN; i < EQ::invbag::SLOT_COUNT; i++) { // <watch> TODO: need to determine if this is bound to world/item container size
-		LogTradeskills("Fetching item [{}]", i);
+	for (uint8 slot_id = EQ::invbag::SLOT_BEGIN; slot_id < EQ::invbag::SLOT_COUNT; slot_id++) { // <watch> TODO: need to determine if this is bound to world/item container size
+		LogTradeskills("Fetching item [{}]", slot_id);
 
-		const auto inst = container->GetItem(i);
+		const auto inst = container->GetItem(slot_id);
 		if (!inst) {
 			continue;
 		}
@@ -1297,7 +1298,7 @@ bool ZoneDatabase::GetTradeRecipe(
 
 		LogTradeskills(
 			"Item in container index [{}] item [{}] found [{}]",
-			i,
+			slot_id,
 			item->ID,
 			count
 		);
@@ -1433,8 +1434,8 @@ bool ZoneDatabase::GetTradeRecipe(
 	for (auto row : results) {
 		int component_count = 0;
 
-		for (int x = EQ::invbag::SLOT_BEGIN; x < EQ::invtype::WORLD_SIZE; x++) {
-			const auto inst = container->GetItem(x);
+		for (uint8 slot_id = EQ::invbag::SLOT_BEGIN; slot_id < EQ::invtype::WORLD_SIZE; slot_id++) {
+			const auto inst = container->GetItem(slot_id);
 			if (!inst) {
 				continue;
 			}
@@ -1474,7 +1475,7 @@ bool ZoneDatabase::GetTradeRecipe(
 	uint8 c_type,
 	uint32 some_id,
 	Client* c,
-	DBTradeskillRecipe_Struct *spec
+	DBTradeskillRecipe_Struct* spec
 )
 {
 	if (!c) {
