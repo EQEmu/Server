@@ -1556,7 +1556,7 @@ bool ZoneDatabase::GetTradeRecipe(
 
 	//Pull the on-success items...
 	query = fmt::format(
-		"SELECT item_id,successcount FROM tradeskill_recipe_entries WHERE successcount > 0 AND recipe_id = {}",
+		"SELECT item_id, successcount FROM tradeskill_recipe_entries WHERE successcount > 0 AND recipe_id = {}",
 		recipe_id
 	);
 	results = QueryDatabase(query);
@@ -1565,7 +1565,7 @@ bool ZoneDatabase::GetTradeRecipe(
 	}
 
 	if (!results.RowCount() && !spec->quest) {
-		LogError("Error in GetTradeRecept success: no success items returned");
+		LogError("Error in success: no success items returned");
 		return false;
 	}
 
