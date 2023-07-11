@@ -5501,11 +5501,6 @@ void bot_subcommand_bot_create(Client *c, const Seperator *sep)
 	std::string bot_name = sep->arg[1];
 	bot_name = Strings::UcFirst(bot_name);
 
-	if (Strings::Contains(bot_name, "_")) {
-		c->Message(Chat::White, "Bot name cannot contain underscores!");
-		return;
-	}
-
 	if (arguments < 2 || !sep->IsNumber(2)) {
 		c->Message(Chat::White, "Invalid class!");
 		return;
@@ -8858,7 +8853,7 @@ uint32 helper_bot_create(Client *bot_owner, std::string bot_name, uint8 bot_clas
 		bot_owner->Message(
 			Chat::White,
 			fmt::format(
-				"'{}' is an invalid name. You may only use characters 'A-Z', 'a-z' and '_'.",
+				"'{}' is an invalid name. You may only use characters 'A-Z' or 'a-z'.",
 				bot_name
 			).c_str()
 		);
