@@ -1,3 +1,27 @@
+## [22.19.0] - 07/08/2023
+
+### Bots
+
+* Add Pickpocket Command ([#3484](https://github.com/EQEmu/Server/pull/3484)) @tuday2 2023-07-08
+
+### Code
+
+* Move #find item summon links to front ([#3483](https://github.com/EQEmu/Server/pull/3483)) @Kinglykrab 2023-07-05
+* Remove LoadItemDBFieldNames() from common/misc.cpp and common/misc.h ([#3473](https://github.com/EQEmu/Server/pull/3473)) @Kinglykrab 2023-07-04
+
+### Commands
+
+* Add #itemsearch alias to #find aliases ([#3485](https://github.com/EQEmu/Server/pull/3485)) @Kinglykrab 2023-07-08
+* Consolidate #show commands into a singular #show command ([#3478](https://github.com/EQEmu/Server/pull/3478)) @Kinglykrab 2023-07-08
+
+### Fixes
+
+* Fix _PutItem having a slot_id of -1 on mobs with no items ([#3474](https://github.com/EQEmu/Server/pull/3474)) @Kinglykrab 2023-07-04
+
+### Rules
+
+* Add Skills:TrivialTradeskillCombinesNoFail Rule ([#3481](https://github.com/EQEmu/Server/pull/3481)) @JasXSL 2023-07-05
+
 ## [22.18.0] - 07/04/2023
 
 ### Commands

@@ -368,7 +368,7 @@ int command_init(void)
 		{.parent_command = "show", .sub_command = "zone_loot", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "viewzoneloot"},
 		{.parent_command = "show", .sub_command = "zone_points", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "showzonepoints"},
 		{.parent_command = "show", .sub_command = "zone_stats", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "zstats"},
-		{.parent_command = "show", .sub_command = "zone_status", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "zonestatus"},
+		{.parent_command = "show", .sub_command = "zone_status", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "zonestatus"},\
 	};
 
 	// inject static aliases
