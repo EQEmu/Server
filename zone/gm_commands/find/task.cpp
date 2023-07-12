@@ -7,7 +7,7 @@ void FindTask(Client *c, const Seperator *sep)
 		return;
 	}
 
-	const auto can_assign_tasks = c->Admin() >= GetCommandStatus(c, "task");
+	const auto can_assign_tasks = c->Admin() >= GetCommandStatus("task");
 
 	if (sep->IsNumber(2)) {
 		const auto  task_id   = Strings::ToUnsignedInt(sep->arg[2]);

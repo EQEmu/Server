@@ -2,7 +2,7 @@
 
 void FindCurrency(Client *c, const Seperator *sep)
 {
-	const auto can_summon_items = c->Admin() >= GetCommandStatus(c, "summonitem");
+	const auto can_summon_items = c->Admin() >= GetCommandStatus("summonitem");
 
 	if (sep->IsNumber(2)) {
 		const auto item_id     = Strings::ToUnsignedInt(sep->arg[2]);

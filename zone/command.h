@@ -18,7 +18,6 @@ typedef struct {
 } CommandRecord;
 
 typedef struct {
-	uint32      id = 0;
 	std::string parent_command;
 	std::string sub_command;
 	uint8       access_level;
@@ -34,7 +33,7 @@ void command_deinit(void);
 int command_add(std::string command_name, std::string description, uint8 admin, CmdFuncPtr function);
 int command_notavail(Client *c, std::string message, bool ignore_status);
 int command_realdispatch(Client *c, std::string message, bool ignore_status);
-uint8 GetCommandStatus(Client *c, std::string command_name);
+uint8 GetCommandStatus(std::string command_name);
 void ListModifyNPCStatMap(Client *c);
 std::map<std::string, std::string> GetModifyNPCStatMap();
 std::string GetModifyNPCStatDescription(std::string stat);
@@ -42,6 +41,9 @@ void SendNPCEditSubCommands(Client *c);
 void SendRuleSubCommands(Client *c);
 void SendGuildSubCommands(Client *c);
 void SendShowInventorySubCommands(Client *c);
+
+std::vector<SubCommandRecord> GetSubCommandRecords();
+std::vector<CommandSubsettingsRepository::CommandSubsettings> GetCommandSubsettingsByCommand(std::string command);
 
 // Commands
 void command_acceptrules(Client *c, const Seperator *sep);

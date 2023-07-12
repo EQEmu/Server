@@ -4,7 +4,7 @@
 
 void FindRecipe(Client *c, const Seperator *sep)
 {
-	const auto can_view_recipes = c->Admin() >= GetCommandStatus(c, "viewrecipe");
+	const auto can_view_recipes = c->Admin() >= GetCommandStatus("viewrecipe");
 
 	if (sep->IsNumber(2)) {
 		const auto recipe_id = static_cast<uint16>(Strings::ToUnsignedInt(sep->arg[2]));

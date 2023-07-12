@@ -43,7 +43,7 @@ void ShowRecipe(Client *c, const Seperator *sep)
 	);
 
 	uint32 entry_number = 1;
-	const bool can_summon_items = c->Admin() >= GetCommandStatus(c, "summonitem");
+	const bool can_summon_items = c->Admin() >= GetCommandStatus("summonitem");
 
 	for (const auto& e : re) {
 		c->Message(

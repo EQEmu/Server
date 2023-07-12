@@ -6,7 +6,7 @@ extern WorldServer worldserver;
 void SetGMStatus(Client *c, const Seperator *sep)
 {
 	const auto arguments = sep->argnum;
-	if (!arguments) {
+	if (arguments < 2) {
 		auto t = c;
 		if (c->GetTarget() && c->GetTarget()->IsClient()) {
 			t = c->GetTarget()->CastToClient();

@@ -50,6 +50,7 @@ std::map<std::string, CommandRecord *> commandlist;
 std::map<std::string, std::string> commandaliases;
 std::vector<CommandRecord *> command_delete_list;
 std::map<std::string, uint8> commands_map;
+std::vector<CommandSubsettingsRepository::CommandSubsettings> command_subsettings;
 
 /*
  * command_notavail
@@ -203,6 +204,8 @@ int command_init(void)
 		command_add("scribespells", "[Max level] [Min level] - Scribe all spells for you or your player target that are usable by them, up to level specified. (may freeze client for a few seconds)", AccountStatus::GMLeadAdmin, command_scribespells) ||
 		command_add("sendzonespawns", "Refresh spawn list for all clients in zone", AccountStatus::GMLeadAdmin, command_sendzonespawns) ||
 		command_add("sensetrap", "Analog for ldon sense trap for the newer clients since we still don't have it working.", AccountStatus::Player, command_sensetrap) ||
+		command_add("set", "Set command used to set various things", AccountStatus::Guide, command_set) ||
+		command_add("show", "Show command used to show various things", AccountStatus::Guide, command_show) ||
 		command_add("shutdown", "Shut this zone process down", AccountStatus::GMLeadAdmin, command_shutdown) ||
 		command_add("spawn", "[name] [race] [level] [material] [hp] [gender] [class] [priweapon] [secweapon] [merchantid] - Spawn an NPC", AccountStatus::Steward, command_spawn) ||
 		command_add("spawneditmass", "[Search Criteria] [Edit Option] [Edit Value] [Apply] Mass editing spawn command (Apply is optional, 0 = False, 1 = True, default is False)", AccountStatus::GMLeadAdmin, command_spawneditmass) ||
@@ -241,141 +244,36 @@ int command_init(void)
 	}
 
 	std::map<std::string, std::pair<uint8, std::vector<std::string>>> command_settings;
-	std::vector<CommandSubsettingsRepository::CommandSubsettings> command_subsettings;
 	database.GetCommandSettings(command_settings);
 	database.GetCommandSubSettings(command_subsettings);
 
 	std::vector<std::pair<std::string, uint8>> injected_command_settings;
 	std::vector<std::string> orphaned_command_settings;
 
-	std::vector<CommandSubsettingsRepository::CommandSubsettings> injected_command_subsettings;
-	std::vector<CommandSubsettingsRepository::CommandSubsettings> orphaned_command_subsettings;
+	const auto& sub_command_records = GetSubCommandRecords();
 
-	std::vector<SubCommandRecord> sub_command_records = {
-		{.parent_command = "find", .sub_command = "aa", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "findaa"},
-		{.parent_command = "find", .sub_command = "character", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "findcharacter"},
-		{.parent_command = "find", .sub_command = "class", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "findclass"},
-		{.parent_command = "find", .sub_command = "currency", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "findcurrency"},
-		{.parent_command = "find", .sub_command = "deity", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "finddeity"},
-		{.parent_command = "find", .sub_command = "emote", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "findemote"},
-		{.parent_command = "find", .sub_command = "faction", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "findfaction"},
-		{.parent_command = "find", .sub_command = "item", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "fi|finditem|itemsearch"},
-		{.parent_command = "find", .sub_command = "language", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "findlanguage"},
-		{.parent_command = "find", .sub_command = "npc_type", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "fn|findnpc|findnpctype"},
-		{.parent_command = "find", .sub_command = "race", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "findrace"},
-		{.parent_command = "find", .sub_command = "recipe", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "findrecipe"},
-		{.parent_command = "find", .sub_command = "skill", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "findskill"},
-		{.parent_command = "find", .sub_command = "spell", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "fs|findspell"},
-		{.parent_command = "find", .sub_command = "task", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "findtask"},
-		{.parent_command = "find", .sub_command = "zone", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "fz|findzone"},
-		{.parent_command = "set", .sub_command = "aa_exp", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "setaaxp|setaaexp"},
-		{.parent_command = "set", .sub_command = "aa_points", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "setaapts|setaapoints"},
-		{.parent_command = "set", .sub_command = "adventure_points", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "setadventurepoints"},
-		{.parent_command = "set", .sub_command = "alternate_currency", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "setaltcurrency"},
-		{.parent_command = "set", .sub_command = "animation", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "setanim"},
-		{.parent_command = "set", .sub_command = "anon", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "setanon"},
-		{.parent_command = "set", .sub_command = "bind", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "bind"},
-		{.parent_command = "set", .sub_command = "checksum", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "updatechecksum"},
-		{.parent_command = "set", .sub_command = "class_permanent", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "permaclass"},
-		{.parent_command = "set", .sub_command = "crystals", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "setcrystals"},
-		{.parent_command = "set", .sub_command = "date", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "date"},
-		{.parent_command = "set", .sub_command = "endurance", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "setendurance"},
-		{.parent_command = "set", .sub_command = "endurance", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "setendurance"},
-		{.parent_command = "set", .sub_command = "exp", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "setxp|setexp"},
-		{.parent_command = "set", .sub_command = "faction", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "setfaction"},
-		{.parent_command = "set", .sub_command = "flag", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "flag"},
-		{.parent_command = "set", .sub_command = "flymode", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "flymode"},
-		{.parent_command = "set", .sub_command = "freeze", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "freeze|unfreeze"},
-		{.parent_command = "set", .sub_command = "gender", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "gender"},
-		{.parent_command = "set", .sub_command = "gender_permanent", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "permagender"},
-		{.parent_command = "set", .sub_command = "gm", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "gm"},
-		{.parent_command = "set", .sub_command = "gm_speed", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "gmspeed"},
-		{.parent_command = "set", .sub_command = "god_mode", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "godmode"},
-		{.parent_command = "set", .sub_command = "haste", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "haste"},
-		{.parent_command = "set", .sub_command = "heal", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "heal"},
-		{.parent_command = "set", .sub_command = "hero_model", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "heromodel"},
-		{.parent_command = "set", .sub_command = "hide_me", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "hideme"},
-		{.parent_command = "set", .sub_command = "hp", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "sethp"},
-		{.parent_command = "set", .sub_command = "invulnerable", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "invul|invulnerable"},
-		{.parent_command = "set", .sub_command = "language", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "setlanguage"},
-		{.parent_command = "set", .sub_command = "last_name", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "lastname"},
-		{.parent_command = "set", .sub_command = "level", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "level"},
-		{.parent_command = "set", .sub_command = "loginserver_info", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "setlsinfo"},
-		{.parent_command = "set", .sub_command = "mana", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "setmana"},
-		{.parent_command = "set", .sub_command = "mana", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "setmana"},
-		{.parent_command = "set", .sub_command = "motd", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "motd"},
-		{.parent_command = "set", .sub_command = "name", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "name"},
-		{.parent_command = "set", .sub_command = "ooc_mute", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "oocmute"},
-		{.parent_command = "set", .sub_command = "password", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "setpass"},
-		{.parent_command = "set", .sub_command = "pvp", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "pvp"},
-		{.parent_command = "set", .sub_command = "pvp_points", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "setpvppoints"},
-		{.parent_command = "set", .sub_command = "race", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "race"},
-		{.parent_command = "set", .sub_command = "race_permanent", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "permarace"},
-		{.parent_command = "set", .sub_command = "server_locked", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "serverlock"},
-		{.parent_command = "set", .sub_command = "skill", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "setskill"},
-		{.parent_command = "set", .sub_command = "skill_all", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "setallskill|setallskills|setskillall"},
-		{.parent_command = "set", .sub_command = "skill_all_max", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "maxskills"},
-		{.parent_command = "set", .sub_command = "start_zone", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "setstartzone"},
-		{.parent_command = "set", .sub_command = "temporary_name", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "tempname"},
-		{.parent_command = "set", .sub_command = "texture", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "texture"},
-		{.parent_command = "set", .sub_command = "time", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "time"},
-		{.parent_command = "set", .sub_command = "time_zone", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "timezone"},
-		{.parent_command = "set", .sub_command = "title", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "title"},
-		{.parent_command = "set", .sub_command = "title_suffix", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "titlesuffix"},
-		{.parent_command = "set", .sub_command = "weather", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "weather"},
-		{.parent_command = "set", .sub_command = "zone", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "zclip|zcolor|zheader|zonelock|zsafecoords|zsky|zunderworld"},
-		{.parent_command = "show", .sub_command = "aggro", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "aggro"},
-		{.parent_command = "show", .sub_command = "buffs", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "showbuffs"},
-		{.parent_command = "show", .sub_command = "buried_corpse_count", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "getplayerburiedcorpsecount"},
-		{.parent_command = "show", .sub_command = "client_version_summary", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "cvs"},
-		{.parent_command = "show", .sub_command = "currencies", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "viewcurrencies"},
-		{.parent_command = "show", .sub_command = "distance", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "distance"},
-		{.parent_command = "show", .sub_command = "emote", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "emoteview"},
-		{.parent_command = "show", .sub_command = "field_of_view", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "fov"},
-		{.parent_command = "show", .sub_command = "flags", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "flags"},
-		{.parent_command = "show", .sub_command = "group_info", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "ginfo"},
-		{.parent_command = "show", .sub_command = "hatelist", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "hatelist"},
-		{.parent_command = "show", .sub_command = "inventory", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "peekinv"},
-		{.parent_command = "show", .sub_command = "ip_lookup", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "iplookup"},
-		{.parent_command = "show", .sub_command = "line_of_sight", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "checklos"},
-		{.parent_command = "show", .sub_command = "network", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "network"},
-		{.parent_command = "show", .sub_command = "network_stats", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "netstats"},
-		{.parent_command = "show", .sub_command = "npc_global_loot", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "shownpcgloballoot"},
-		{.parent_command = "show", .sub_command = "npc_stats", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "npcstats"},
-		{.parent_command = "show", .sub_command = "npc_type", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "viewnpctype"},
-		{.parent_command = "show", .sub_command = "peqzone_flags", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "peqzone_flags"},
-		{.parent_command = "show", .sub_command = "petition", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "listpetition|viewpetition"},
-		{.parent_command = "show", .sub_command = "petition_info", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "petitioninfo"},
-		{.parent_command = "show", .sub_command = "proximity", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "proximity"},
-		{.parent_command = "show", .sub_command = "quest_errors", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "questerrors"},
-		{.parent_command = "show", .sub_command = "quest_globals", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "globalview"},
-		{.parent_command = "show", .sub_command = "recipe", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "viewrecipe"},
-		{.parent_command = "show", .sub_command = "server_info", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "serverinfo"},
-		{.parent_command = "show", .sub_command = "skills", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "showskills"},
-		{.parent_command = "show", .sub_command = "spawn_status", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "spawnstatus"},
-		{.parent_command = "show", .sub_command = "spells", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "showspells"},
-		{.parent_command = "show", .sub_command = "spells_list", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "showspellslist"},
-		{.parent_command = "show", .sub_command = "stats", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "showstats"},
-		{.parent_command = "show", .sub_command = "timers", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "timers"},
-		{.parent_command = "show", .sub_command = "traps", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "trapinfo"},
-		{.parent_command = "show", .sub_command = "uptime", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "uptime"},
-		{.parent_command = "show", .sub_command = "variable", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "getvariable"},
-		{.parent_command = "show", .sub_command = "version", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "version"},
-		{.parent_command = "show", .sub_command = "waypoints", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "wpinfo"},
-		{.parent_command = "show", .sub_command = "who", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "who"},
-		{.parent_command = "show", .sub_command = "xtargets", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "xtargets"},
-		{.parent_command = "show", .sub_command = "zone_global_loot", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "showzonegloballoot"},
-		{.parent_command = "show", .sub_command = "zone_loot", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "viewzoneloot"},
-		{.parent_command = "show", .sub_command = "zone_points", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "showzonepoints"},
-		{.parent_command = "show", .sub_command = "zone_stats", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "zstats"},
-		{.parent_command = "show", .sub_command = "zone_status", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "zonestatus"},
-	};
-
-	// inject static aliases
+	// inject static sub command aliases
 	for (auto& cs : command_settings) {
-		for (const auto& sa : sub_command_records) {
-			if (cs.first == sa.parent_command) {
-				for (const auto& alias : Strings::Split("|", sa.top_level_aliases)) {
+		for (const auto& e : sub_command_records) {
+			if (cs.first == e.parent_command) {
+				for (const auto& alias : Strings::Split(e.top_level_aliases, "|")) {
+					cs.second.second.emplace_back(alias);
+				}
+			}
+		}
+	}
+
+	// inject database sub command aliases
+	for (auto& cs : command_settings) {
+		for (const auto& e : command_subsettings) {
+			if (cs.first == e.parent_command) {
+				for (const auto& alias : Strings::Split(e.top_level_aliases, "|")) {
+					auto index = std::find(cs.second.second.begin(), cs.second.second.end(), alias);
+					if (index != cs.second.second.end()) { // override static with database settings
+						LogInfo("Overriding {} alias {}.", cs.first, alias);
+						cs.second.second.erase(index);
+					}
+
 					cs.second.second.emplace_back(alias);
 				}
 			}
@@ -421,6 +319,7 @@ int command_init(void)
 		}
 
 		w.second->admin = cs->second.first;
+
 		LogCommands(
 			"Command [{}] set to admin level [{}]",
 			w.first,
@@ -445,7 +344,7 @@ int command_init(void)
 				continue;
 			}
 
-			commandlist[a] = w.second;
+			commandlist[a]    = w.second;
 			commandaliases[a] = w.first;
 
 			LogCommands(
@@ -518,24 +417,50 @@ int command_add(std::string command_name, std::string description, uint8 admin, 
 	}
 
 	auto c = new CommandRecord;
-	c->admin = admin;
+
+	c->admin       = admin;
 	c->description = description;
-	c->function = function;
+	c->function    = function;
 
-	commands_map[command_name] = admin;
-
-	commandlist[command_name] = c;
+	commands_map[command_name]   = admin;
+	commandlist[command_name]    = c;
 	commandaliases[command_name] = command_name;
+
 	command_delete_list.push_back(c);
 	command_count++;
 
 	return 0;
 }
 
-uint8 GetCommandStatus(Client *c, std::string command_name) {
-	auto command_status = commands_map[command_name];
-	return command_status;
+uint8 GetCommandStatus(std::string command_name)
+{
+	return commands_map[command_name];
 }
+
+std::vector<CommandSubsettingsRepository::CommandSubsettings> GetCommandSubsettingsByCommand(std::string command)
+{
+	std::vector<CommandSubsettingsRepository::CommandSubsettings> v;
+
+	const auto& l = CommandSubsettingsRepository::GetWhere(
+		database,
+		fmt::format(
+			"`parent_command` = '{}'",
+			Strings::Escape(command)
+		)
+	);
+	if (l.empty()) {
+		return v;
+	}
+
+	v.reserve(l.size());
+
+	for (const auto& e : l) {
+		v.emplace_back(e);
+	}
+
+	return v;
+}
+
 
 /*
  *
@@ -560,9 +485,52 @@ int command_realdispatch(Client *c, std::string message, bool ignore_status)
 	}
 
 	auto cur = commandlist[cstr];
-	if (!ignore_status && c->Admin() < cur->admin) {
-		c->Message(Chat::White, "Your status is not high enough to use this command.");
-		return -1;
+
+	bool is_subcommand            = false;
+	bool can_use_subcommand       = false;
+	bool found_subcommand_setting = false;
+
+	const auto arguments = sep.argnum;
+
+	if (arguments >= 2) {
+		std::string command = sep.arg[0];
+		const std::string& sub_command = sep.arg[1];
+		command = command.substr(1, command.length());
+
+		const auto& l = GetCommandSubsettingsByCommand(command);
+
+		for (const auto &e : l) {
+			if (e.sub_command == sub_command) {
+				can_use_subcommand       = c->Admin() >= static_cast<int16>(e.access_level);
+				is_subcommand            = true;
+				found_subcommand_setting = true;
+				break;
+			}
+		}
+
+		if (!found_subcommand_setting) {
+			const auto &sub_command_records = GetSubCommandRecords();
+
+			for (const auto &e: sub_command_records) {
+				if (e.sub_command == sub_command) {
+					can_use_subcommand = c->Admin() >= static_cast<int16>(e.access_level);
+					is_subcommand      = true;
+					break;
+				}
+			}
+		}
+	}
+
+	if (!ignore_status) {
+		if (!is_subcommand && c->Admin() < cur->admin) {
+			c->Message(Chat::White, "Your status is not high enough to use this command.");
+			return -1;
+		}
+
+		if (is_subcommand && !can_use_subcommand) {
+			c->Message(Chat::White, "Your status is not high enough to use this subcommand.");
+			return -1;
+		}
 	}
 
 	/* QS: Player_Log_Issued_Commands */
@@ -617,7 +585,10 @@ void command_help(Client *c, const Seperator *sep)
 
 	for (const auto& cur : commandlist) {
 		if (!search_criteria.empty()) {
-			if (!Strings::Contains(cur.first, search_criteria) && !Strings::Contains(cur.second->description, search_criteria)) {
+			if (
+				!Strings::Contains(cur.first, search_criteria) &&
+				!Strings::Contains(cur.second->description, search_criteria)
+			) {
 				continue;
 			}
 		}
@@ -637,10 +608,9 @@ void command_help(Client *c, const Seperator *sep)
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"{} | Status: {} | {}",
+				"{} | {}",
 				command_link,
-				cur.second->admin,
-				!cur.second->description.empty() ? cur.second->description : ""
+				cur.second->description
 			).c_str()
 		);
 
@@ -668,88 +638,6 @@ void command_help(Client *c, const Seperator *sep)
 				) :
 				""
 			)
-		).c_str()
-	);
-}
-
-void command_findaliases(Client *c, const Seperator *sep)
-{
-	int arguments = sep->argnum;
-	if (!arguments) {
-		c->Message(Chat::White, "Usage: #findaliases [Search Critera]");
-		return;
-	}
-
-	std::string search_criteria = Strings::ToLower(sep->argplus[1]);
-
-	auto find_iter = commandaliases.find(search_criteria);
-	if (find_iter == commandaliases.end()) {
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"No commands or aliases found matching '{}'.",
-				search_criteria
-			).c_str()
-		);
-		return;
-	}
-
-	auto command_iter = commandlist.find(find_iter->second);
-	if (
-		find_iter->second.empty() ||
-		command_iter == commandlist.end()
-	) {
-		c->Message(Chat::White, "An unknown condition occurred.");
-		return;
-	}
-
-	auto current_commmand_link = Saylink::Silent(
-		fmt::format(
-			"{}{}",
-			COMMAND_CHAR,
-			command_iter->first
-		)
-	);
-
-	int alias_count = 0;
-	int alias_number = 1;
-	std::string alias_link;
-	for (const auto& a : commandaliases) {
-		if (
-			find_iter->second != a.second ||
-			c->Admin() < command_iter->second->admin
-		) {
-			continue;
-		}
-
-		alias_link = Saylink::Silent(
-			fmt::format(
-				"{}{}",
-				COMMAND_CHAR,
-				a.first
-			)
-		);
-
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"Alias {} | {}",
-				alias_number,
-				alias_link
-			).c_str()
-		);
-
-		alias_count++;
-		alias_number++;
-	}
-
-	c->Message(
-		Chat::White,
-		fmt::format(
-			"{} Alias{} listed for {}.",
-			alias_count,
-			alias_count != 1 ? "es" : "",
-			current_commmand_link
 		).c_str()
 	);
 }
@@ -935,6 +823,131 @@ void command_bot(Client *c, const Seperator *sep)
 	} else {
 		c->Message(Chat::Red, "Bots are disabled on this server.");
 	}
+}
+
+std::vector<SubCommandRecord> GetSubCommandRecords()
+{
+	std::vector<SubCommandRecord> sub_command_records = {
+		{.parent_command = "find", .sub_command = "aa", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "findaa"},
+		{.parent_command = "find", .sub_command = "character", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "findcharacter"},
+		{.parent_command = "find", .sub_command = "class", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "findclass"},
+		{.parent_command = "find", .sub_command = "currency", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "findcurrency"},
+		{.parent_command = "find", .sub_command = "deity", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "finddeity"},
+		{.parent_command = "find", .sub_command = "emote", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "findemote"},
+		{.parent_command = "find", .sub_command = "faction", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "findfaction"},
+		{.parent_command = "find", .sub_command = "item", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "fi|finditem|itemsearch"},
+		{.parent_command = "find", .sub_command = "language", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "findlanguage"},
+		{.parent_command = "find", .sub_command = "npc_type", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "fn|findnpc|findnpctype"},
+		{.parent_command = "find", .sub_command = "race", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "findrace"},
+		{.parent_command = "find", .sub_command = "recipe", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "findrecipe"},
+		{.parent_command = "find", .sub_command = "skill", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "findskill"},
+		{.parent_command = "find", .sub_command = "spell", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "fs|findspell"},
+		{.parent_command = "find", .sub_command = "task", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "findtask"},
+		{.parent_command = "find", .sub_command = "zone", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "fz|findzone"},
+		{.parent_command = "set", .sub_command = "aa_exp", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "setaaxp|setaaexp"},
+		{.parent_command = "set", .sub_command = "aa_points", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "setaapts|setaapoints"},
+		{.parent_command = "set", .sub_command = "adventure_points", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "setadventurepoints"},
+		{.parent_command = "set", .sub_command = "alternate_currency", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "setaltcurrency"},
+		{.parent_command = "set", .sub_command = "animation", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "setanim"},
+		{.parent_command = "set", .sub_command = "anon", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "setanon"},
+		{.parent_command = "set", .sub_command = "bind", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "bind"},
+		{.parent_command = "set", .sub_command = "checksum", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "updatechecksum"},
+		{.parent_command = "set", .sub_command = "class_permanent", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "permaclass"},
+		{.parent_command = "set", .sub_command = "crystals", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "setcrystals"},
+		{.parent_command = "set", .sub_command = "date", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "date"},
+		{.parent_command = "set", .sub_command = "endurance", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "setendurance"},
+		{.parent_command = "set", .sub_command = "endurance_full", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "endurance"},
+		{.parent_command = "set", .sub_command = "exp", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "setxp|setexp"},
+		{.parent_command = "set", .sub_command = "faction", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "setfaction"},
+		{.parent_command = "set", .sub_command = "flymode", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "flymode"},
+		{.parent_command = "set", .sub_command = "freeze", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "freeze|unfreeze"},
+		{.parent_command = "set", .sub_command = "gender", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "gender"},
+		{.parent_command = "set", .sub_command = "gender_permanent", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "permagender"},
+		{.parent_command = "set", .sub_command = "gm", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "gm"},
+		{.parent_command = "set", .sub_command = "gm_speed", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "gmspeed"},
+		{.parent_command = "set", .sub_command = "gm_status", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "flag"},
+		{.parent_command = "set", .sub_command = "god_mode", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "godmode"},
+		{.parent_command = "set", .sub_command = "haste", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "haste"},
+		{.parent_command = "set", .sub_command = "hero_model", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "heromodel"},
+		{.parent_command = "set", .sub_command = "hide_me", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "hideme"},
+		{.parent_command = "set", .sub_command = "hp", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "sethp"},
+		{.parent_command = "set", .sub_command = "hp_full", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "heal"},
+		{.parent_command = "set", .sub_command = "invulnerable", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "invul|invulnerable"},
+		{.parent_command = "set", .sub_command = "language", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "setlanguage"},
+		{.parent_command = "set", .sub_command = "last_name", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "lastname"},
+		{.parent_command = "set", .sub_command = "level", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "level"},
+		{.parent_command = "set", .sub_command = "loginserver_info", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "setlsinfo"},
+		{.parent_command = "set", .sub_command = "mana", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "setmana"},
+		{.parent_command = "set", .sub_command = "mana_full", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "mana"},
+		{.parent_command = "set", .sub_command = "motd", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "motd"},
+		{.parent_command = "set", .sub_command = "name", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "name"},
+		{.parent_command = "set", .sub_command = "ooc_mute", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "oocmute"},
+		{.parent_command = "set", .sub_command = "password", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "setpass"},
+		{.parent_command = "set", .sub_command = "pvp", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "pvp"},
+		{.parent_command = "set", .sub_command = "pvp_points", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "setpvppoints"},
+		{.parent_command = "set", .sub_command = "race", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "race"},
+		{.parent_command = "set", .sub_command = "race_permanent", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "permarace"},
+		{.parent_command = "set", .sub_command = "server_locked", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "serverlock"},
+		{.parent_command = "set", .sub_command = "skill", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "setskill"},
+		{.parent_command = "set", .sub_command = "skill_all", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "setallskill|setallskills|setskillall"},
+		{.parent_command = "set", .sub_command = "skill_all_max", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "maxskills"},
+		{.parent_command = "set", .sub_command = "start_zone", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "setstartzone"},
+		{.parent_command = "set", .sub_command = "temporary_name", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "tempname"},
+		{.parent_command = "set", .sub_command = "texture", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "texture"},
+		{.parent_command = "set", .sub_command = "time", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "time"},
+		{.parent_command = "set", .sub_command = "time_zone", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "timezone"},
+		{.parent_command = "set", .sub_command = "title", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "title"},
+		{.parent_command = "set", .sub_command = "title_suffix", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "titlesuffix"},
+		{.parent_command = "set", .sub_command = "weather", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "weather"},
+		{.parent_command = "set", .sub_command = "zone", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "zclip|zcolor|zheader|zonelock|zsafecoords|zsky|zunderworld"},
+		{.parent_command = "show", .sub_command = "aggro", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "aggro"},
+		{.parent_command = "show", .sub_command = "buffs", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "showbuffs"},
+		{.parent_command = "show", .sub_command = "buried_corpse_count", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "getplayerburiedcorpsecount"},
+		{.parent_command = "show", .sub_command = "client_version_summary", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "cvs"},
+		{.parent_command = "show", .sub_command = "currencies", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "viewcurrencies"},
+		{.parent_command = "show", .sub_command = "distance", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "distance"},
+		{.parent_command = "show", .sub_command = "emote", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "emoteview"},
+		{.parent_command = "show", .sub_command = "field_of_view", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "fov"},
+		{.parent_command = "show", .sub_command = "flags", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "flags"},
+		{.parent_command = "show", .sub_command = "group_info", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "ginfo"},
+		{.parent_command = "show", .sub_command = "hatelist", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "hatelist"},
+		{.parent_command = "show", .sub_command = "inventory", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "peekinv"},
+		{.parent_command = "show", .sub_command = "ip_lookup", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "iplookup"},
+		{.parent_command = "show", .sub_command = "line_of_sight", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "checklos"},
+		{.parent_command = "show", .sub_command = "network", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "network"},
+		{.parent_command = "show", .sub_command = "network_stats", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "netstats"},
+		{.parent_command = "show", .sub_command = "npc_global_loot", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "shownpcgloballoot"},
+		{.parent_command = "show", .sub_command = "npc_stats", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "npcstats"},
+		{.parent_command = "show", .sub_command = "npc_type", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "viewnpctype"},
+		{.parent_command = "show", .sub_command = "peqzone_flags", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "peqzone_flags"},
+		{.parent_command = "show", .sub_command = "petition", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "listpetition|viewpetition"},
+		{.parent_command = "show", .sub_command = "petition_info", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "petitioninfo"},
+		{.parent_command = "show", .sub_command = "proximity", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "proximity"},
+		{.parent_command = "show", .sub_command = "quest_errors", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "questerrors"},
+		{.parent_command = "show", .sub_command = "quest_globals", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "globalview"},
+		{.parent_command = "show", .sub_command = "recipe", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "viewrecipe"},
+		{.parent_command = "show", .sub_command = "server_info", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "serverinfo"},
+		{.parent_command = "show", .sub_command = "skills", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "showskills"},
+		{.parent_command = "show", .sub_command = "spawn_status", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "spawnstatus"},
+		{.parent_command = "show", .sub_command = "spells", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "showspells"},
+		{.parent_command = "show", .sub_command = "spells_list", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "showspellslist"},
+		{.parent_command = "show", .sub_command = "stats", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "showstats"},
+		{.parent_command = "show", .sub_command = "timers", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "timers"},
+		{.parent_command = "show", .sub_command = "traps", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "trapinfo"},
+		{.parent_command = "show", .sub_command = "uptime", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "uptime"},
+		{.parent_command = "show", .sub_command = "variable", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "getvariable"},
+		{.parent_command = "show", .sub_command = "version", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "version"},
+		{.parent_command = "show", .sub_command = "waypoints", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "wpinfo"},
+		{.parent_command = "show", .sub_command = "who", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "who"},
+		{.parent_command = "show", .sub_command = "xtargets", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "xtargets"},
+		{.parent_command = "show", .sub_command = "zone_global_loot", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "showzonegloballoot"},
+		{.parent_command = "show", .sub_command = "zone_loot", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "viewzoneloot"},
+		{.parent_command = "show", .sub_command = "zone_points", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "showzonepoints"},
+		{.parent_command = "show", .sub_command = "zone_stats", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "zstats"},
+		{.parent_command = "show", .sub_command = "zone_status", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "zonestatus"},
+	};
+
+	return sub_command_records;
 }
 
 #include "gm_commands/acceptrules.cpp"

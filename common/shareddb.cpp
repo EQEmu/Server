@@ -1690,7 +1690,7 @@ bool SharedDatabase::UpdateInjectedCommandSettings(const std::vector<std::pair<s
 bool SharedDatabase::UpdateOrphanedCommandSettings(const std::vector<std::string> &orphaned)
 {
 	if (orphaned.size()) {
-		const std::string query = fmt::format(
+		std::string query = fmt::format(
 			"DELETE FROM `command_settings` WHERE `command` IN ({})",
 			Strings::ImplodePair(",", std::pair<char, char>('\'', '\''), orphaned)
 		);
@@ -1700,10 +1700,22 @@ bool SharedDatabase::UpdateOrphanedCommandSettings(const std::vector<std::string
 			return false;
 		}
 
+		query = fmt::format(
+			"DELETE FROM `command_subsettings` WHERE `parent_command` IN ({})",
+			Strings::ImplodePair(",", std::pair<char, char>('\'', '\''), orphaned)
+		);
+
+		auto results_two = QueryDatabase(query);
+		if (!results_two.Success()) {
+			return false;
+		}
+
 		LogInfo(
-			"{} Orphaned Command{} Deleted",
+			"{} Orphaned Command{} Deleted | {} Orphaned Subcommand{} Deleted",
 			orphaned.size(),
-			orphaned.size() != 1 ? "s" : ""
+			orphaned.size() != 1 ? "s" : "",
+			results_two.RowsAffected(),
+			results_two.RowsAffected() != 1 ? "s" : ""
 		);
 	}
 
@@ -1729,59 +1741,6 @@ bool SharedDatabase::GetCommandSubSettings(std::vector<CommandSubsettingsReposit
 	return true;
 }
 
-bool SharedDatabase::UpdateInjectedCommandSubSettings(const std::vector<CommandSubsettingsRepository::CommandSubsettings> &injected)
-{
-	if (injected.size()) {
-		for (const auto& e : injected) {
-			const std::string& query = fmt::format(
-				"REPLACE INTO `command_subsettings` (`parent_command`, `sub_command`, `access_level`, `top_level_aliases`) VALUES ('{}', '{}', {}, '{}')",
-				Strings::Escape(e.parent_command),
-				Strings::Escape(e.sub_command),
-				e.access_level,
-				Strings::Escape(e.top_level_aliases)
-			);
-
-			auto results = QueryDatabase(query);
-			if (!results.Success()) {
-				return false;
-			}
-		}
-
-		LogInfo(
-			"[{}] New Subcommand{} Added",
-			injected.size(),
-			injected.size() != 1 ? "s" : ""
-		);
-	}
-
-	return true;
-}
-
-bool SharedDatabase::UpdateOrphanedCommandSubSettings(const std::vector<CommandSubsettingsRepository::CommandSubsettings> &orphaned)
-{
-	if (orphaned.size()) {
-		for (const auto& e : orphaned) {
-			const std::string& query = fmt::format(
-				"DELETE FROM `command_subsettings` WHERE `parent_command` = '{}' AND `sub_command` = '{}'",
-				Strings::Escape(e.parent_command),
-				Strings::Escape(e.sub_command)
-			);
-
-			auto results = QueryDatabase(query);
-			if (results.Success()) {
-				return false;
-			}
-		}
-
-		LogInfo(
-			"{} Orphaned Subcommand{} Deleted",
-			orphaned.size(),
-			orphaned.size() != 1 ? "s" : ""
-		);
-	}
-
-	return true;
-}
 
 bool SharedDatabase::LoadSkillCaps(const std::string &prefix) {
 	skill_caps_mmf.reset(nullptr);

@@ -4760,6 +4760,22 @@ UNIQUE KEY `name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 )"
 	},
+	ManifestEntry{
+		.version = 9230,
+		.description = "2023_07_11_command_subsettings.sql",
+		.check = "SHOW TABLES LIKE 'command_subsettings'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(CREATE TABLE `command_subsettings` \ (
+`id` int UNSIGNED NOT NULL AUTO_INCREMENT,
+`parent_command` varchar(32) NOT NULL,
+`sub_command` varchar(32) NOT NULL,
+`access_level` int(11) UNSIGNED NOT NULL DEFAULT 0,
+`top_level_aliases` varchar(255) NOT NULL,
+PRIMARY KEY (`id`),
+UNIQUE INDEX `command`(`parent_command`, `subcommand`)
+)"
+	},
 
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
