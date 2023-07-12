@@ -3127,6 +3127,12 @@ std::string Lua_Mob::GetRacePlural()
 	return self->GetRacePlural();
 }
 
+bool Lua_Mob::IsTemporaryPet()
+{
+	Lua_Safe_Call_Bool();
+	return self->IsTempPet();
+}
+
 luabind::scope lua_register_mob() {
 	return luabind::class_<Lua_Mob, Lua_Entity>("Mob")
 	.def(luabind::constructor<>())
