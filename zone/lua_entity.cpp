@@ -168,7 +168,6 @@ luabind::scope lua_register_entity() {
 	.def("IsOfClientBot", &Lua_Entity::IsOfClientBot)
 	.def("IsOfClientBotMerc", &Lua_Entity::IsOfClientBotMerc)
 	.def("IsPlayerCorpse", &Lua_Entity::IsPlayerCorpse)
-	.def("IsTemporaryPet", &Lua_Entity::IsTemporaryPet)
 	.def("IsTrap", &Lua_Entity::IsTrap);
 }
 
