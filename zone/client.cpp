@@ -1537,23 +1537,23 @@ void Client::SetLDoNPoints(uint32 theme_id, uint32 points)
 {
 	switch (theme_id) {
 		case LDoNThemes::GUK: {
-			m_pp.ldon_points_guk += points;
+			m_pp.ldon_points_guk = points;
 			break;
 		}
 		case LDoNThemes::MIR: {
-			m_pp.ldon_points_mir += points;
+			m_pp.ldon_points_mir = points;
 			break;
 		}
 		case LDoNThemes::MMC: {
-			m_pp.ldon_points_mmc += points;
+			m_pp.ldon_points_mmc = points;
 			break;
 		}
 		case LDoNThemes::RUJ: {
-			m_pp.ldon_points_ruj += points;
+			m_pp.ldon_points_ruj = points;
 			break;
 		}
 		case LDoNThemes::TAK: {
-			m_pp.ldon_points_tak += points;
+			m_pp.ldon_points_tak = points;
 			break;
 		}
 	}
