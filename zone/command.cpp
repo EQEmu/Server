@@ -270,7 +270,6 @@ int command_init(void)
 				for (const auto& alias : Strings::Split(e.top_level_aliases, "|")) {
 					auto index = std::find(cs.second.second.begin(), cs.second.second.end(), alias);
 					if (index != cs.second.second.end()) { // override static with database settings
-						LogInfo("Overriding {} alias {}.", cs.first, alias);
 						cs.second.second.erase(index);
 					}
 
