@@ -1486,7 +1486,7 @@ bool ZoneDatabase::GetTradeRecipe(
 	if (!some_id) { // world combiner so no item number
 		container_where_filter = fmt::format("= {}", c_type);
 	} else { // container in inventory
-		container_where_filter = StringFormat("IN ({}, {})", c_type, some_id);
+		container_where_filter = fmt::format("IN ({}, {})", c_type, some_id);
 	}
 
 	std::string query = fmt::format(
