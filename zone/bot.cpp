@@ -1273,8 +1273,11 @@ bool Bot::IsValidName(std::string& name)
 	if (!isupper(name[0]))
 		return false;
 
-	for (int i = 1; i < name.length(); ++i) {
-		if ((!RuleB(Bots, AllowCamelCaseNames) && !islower(name[i])) && name[i] != '_') {
+	for (char c : name.substr(1)) {
+		if (!RuleB(Bots, AllowCamelCaseNames) && !islower(c)) {
+			return false;
+		}
+		if (isdigit(c) || ispunct(c)) {
 			return false;
 		}
 	}
