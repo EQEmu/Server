@@ -4773,7 +4773,7 @@ UNIQUE KEY `name` (`name`)
 `access_level` int(11) UNSIGNED NOT NULL DEFAULT 0,
 `top_level_aliases` varchar(255) NOT NULL,
 PRIMARY KEY (`id`),
-UNIQUE INDEX `command`(`parent_command`, `subcommand`)
+UNIQUE INDEX `command`(`parent_command`, `sub_command`)
 )"
 	},
 
