@@ -397,6 +397,14 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			zoneserver_list.SendPacket(pack);
 			break;
 		}
+		case ServerOP_RaidNote: {
+			if (pack->size < sizeof(ServerRaidNote_Struct)) {
+				break;
+			}
+
+			zoneserver_list.SendPacket(pack);
+			break;
+		}
 		case ServerOP_SpawnCondition: {
 			if (pack->size != sizeof(ServerSpawnCondition_Struct)) {
 				break;

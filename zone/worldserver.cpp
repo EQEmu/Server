@@ -1548,6 +1548,16 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		r->SendRaidMOTD();
 		break;
 	}
+	case ServerOP_RaidNote: {
+		auto snote = (ServerRaidNote_Struct*)pack->pBuffer;
+		if (snote->rid > 0) {
+			Raid* r = entity_list.GetRaidByID(snote->rid);
+			if (r) {
+				r->SendRaidNotes();
+			}
+		}
+		break;
+	}
 	case ServerOP_SpawnPlayerCorpse: {
 		SpawnPlayerCorpse_Struct* s = (SpawnPlayerCorpse_Struct*)pack->pBuffer;
 		Corpse* NewCorpse = database.LoadCharacterCorpse(s->player_corpse_id);

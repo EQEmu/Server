@@ -1924,6 +1924,7 @@ private:
 public:
 	void SetSharedTaskId(int64 shared_task_id);
 	int64 GetSharedTaskId() const;
+	struct XTarget_Struct XTargets[XTARGET_HARDCAP];
 private:
 
 	bool m_exp_enabled;
@@ -1976,7 +1977,6 @@ private:
 	bool XTargetAutoAddHaters;
 	bool m_dirtyautohaters;
 
-	struct XTarget_Struct XTargets[XTARGET_HARDCAP];
 	XTargetAutoHaters m_autohatermgr;
 	XTargetAutoHaters *m_activeautohatermgr;
 

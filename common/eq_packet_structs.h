@@ -4105,7 +4105,9 @@ struct UpdateLeadershipAA_Struct {
 
 enum
 {
-	GroupLeadershipAbility_MarkNPC = 0
+	GroupLeadershipAbility_MarkNPC = 0,
+	RaidLeadershipAbility_MarkNPC = 16,
+	RaidLeadershipAbility_MainAssist = 19
 };
 
 struct DoGroupLeadershipAbility_Struct
@@ -4149,8 +4151,10 @@ struct InspectBuffs_Struct {
 struct RaidGeneral_Struct {
 /*00*/	uint32		action;	//=10
 /*04*/	char		player_name[64];	//should both be the player's name
-/*64*/	char		leader_name[64];
-/*132*/	uint32		parameter;
+/*68*/	uint32		unknown1;
+/*72*/	char		leader_name[64];
+/*136*/	uint32		parameter;
+/*200*/	char		note[64];
 };
 
 struct RaidAddMember_Struct {
