@@ -687,7 +687,7 @@ bool ZoneDatabase::LoadCharacterData(uint32 character_id, PlayerProfile_Struct* 
 		pp->ldon_points_ruj = Strings::ToInt(row[r]); r++;								 // "ldon_points_ruj,           "
 		pp->ldon_points_tak = Strings::ToInt(row[r]); r++;								 // "ldon_points_tak,           "
 		pp->ldon_points_available = Strings::ToInt(row[r]); r++;							 // "ldon_points_available,     "
-		pp->tribute_time_remaining = Strings::ToInt(row[r]); r++;							 // "tribute_time_remaining,    "
+		pp->tribute_time_remaining = Strings::ToUnsignedInt(row[r]); r++;					 // "tribute_time_remaining,    "
 		pp->showhelm = Strings::ToInt(row[r]); r++;										 // "show_helm,                 "
 		pp->career_tribute_points = Strings::ToInt(row[r]); r++;							 // "career_tribute_points,     "
 		pp->tribute_points = Strings::ToInt(row[r]); r++;									 // "tribute_points,            "

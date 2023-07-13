@@ -4761,7 +4761,25 @@ UNIQUE KEY `name` (`name`)
 )"
 	},
 	ManifestEntry{
-		.version = 9230,
+    .version = 9230,
+		.description = "2023_06_23_raid_feature_updates",
+		.check = "SHOW COLUMNS FROM `raid_members` LIKE 'is_assister'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+	ALTER TABLE `raid_members`
+	ADD COLUMN `is_marker` TINYINT UNSIGNED DEFAULT(0) NOT NULL AFTER `islooter`,
+	ADD COLUMN `is_assister` TINYINT UNSIGNED DEFAULT(0) NOT NULL AFTER `is_marker`,
+	ADD COLUMN `note` VARCHAR(64) DEFAULT("") NOT NULL AFTER `is_assister`;
+
+	ALTER TABLE `raid_details`
+	ADD COLUMN `marked_npc_1` SMALLINT UNSIGNED DEFAULT(0) NOT NULL AFTER `motd`,
+	ADD COLUMN `marked_npc_2` SMALLINT UNSIGNED DEFAULT(0) NOT NULL AFTER `marked_npc_1`,
+	ADD COLUMN `marked_npc_3` SMALLINT UNSIGNED DEFAULT(0) NOT NULL AFTER `marked_npc_2`;
+	)",
+	},
+	ManifestEntry{
+		.version = 9231,
 		.description = "2023_07_11_command_subsettings.sql",
 		.check = "SHOW TABLES LIKE 'command_subsettings'",
 		.condition = "empty",
