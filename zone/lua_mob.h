@@ -556,6 +556,7 @@ public:
 	Lua_Mob_List GetCloseMobList(float distance, bool ignore_self);
 	std::string GetClassPlural();
 	std::string GetRacePlural();
+	bool IsTemporaryPet();
 };
 
 #endif

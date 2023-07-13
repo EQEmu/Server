@@ -78,6 +78,21 @@ bool Lua_Entity::IsBot() {
 	return self->IsBot();
 }
 
+bool Lua_Entity::IsAura() {
+	Lua_Safe_Call_Bool();
+	return self->IsAura();
+}
+
+bool Lua_Entity::IsOfClientBot() {
+	Lua_Safe_Call_Bool();
+	return self->IsOfClientBot();
+}
+
+bool Lua_Entity::IsOfClientBotMerc() {
+	Lua_Safe_Call_Bool();
+	return self->IsOfClientBotMerc();
+}
+
 int Lua_Entity::GetID() {
 	Lua_Safe_Call_Bool();
 	return self->GetID();
@@ -138,6 +153,7 @@ luabind::scope lua_register_entity() {
 	.def("CastToNPC", &Lua_Entity::CastToNPC)
 	.def("CastToObject", &Lua_Entity::CastToObject)
 	.def("GetID", &Lua_Entity::GetID)
+	.def("IsAura", &Lua_Entity::IsAura)
 	.def("IsBeacon", &Lua_Entity::IsBeacon)
 	.def("IsBot", &Lua_Entity::IsBot)
 	.def("IsClient", &Lua_Entity::IsClient)
@@ -149,6 +165,8 @@ luabind::scope lua_register_entity() {
 	.def("IsNPC", &Lua_Entity::IsNPC)
 	.def("IsNPCCorpse", &Lua_Entity::IsNPCCorpse)
 	.def("IsObject", &Lua_Entity::IsObject)
+	.def("IsOfClientBot", &Lua_Entity::IsOfClientBot)
+	.def("IsOfClientBotMerc", &Lua_Entity::IsOfClientBotMerc)
 	.def("IsPlayerCorpse", &Lua_Entity::IsPlayerCorpse)
 	.def("IsTrap", &Lua_Entity::IsTrap);
 }

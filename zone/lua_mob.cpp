@@ -3127,6 +3127,12 @@ std::string Lua_Mob::GetRacePlural()
 	return self->GetRacePlural();
 }
 
+bool Lua_Mob::IsTemporaryPet()
+{
+	Lua_Safe_Call_Bool();
+	return self->IsTempPet();
+}
+
 luabind::scope lua_register_mob() {
 	return luabind::class_<Lua_Mob, Lua_Entity>("Mob")
 	.def(luabind::constructor<>())
@@ -3518,6 +3524,7 @@ luabind::scope lua_register_mob() {
 	.def("IsStunned", (bool(Lua_Mob::*)(void))&Lua_Mob::IsStunned)
 	.def("IsTargetable", (bool(Lua_Mob::*)(void))&Lua_Mob::IsTargetable)
 	.def("IsTargeted", &Lua_Mob::IsTargeted)
+	.def("IsTemporaryPet", &Lua_Mob::IsTemporaryPet)
 	.def("IsTrackable", (bool(Lua_Mob::*)(void))&Lua_Mob::IsTrackable)
 	.def("IsWarriorClass", &Lua_Mob::IsWarriorClass)
 	.def("Kill", (void(Lua_Mob::*)(void))&Lua_Mob::Kill)

@@ -368,6 +368,7 @@
 #define PETITION_DELETED			5054	//Your petition was successfully deleted.
 #define ALREADY_IN_RAID				5060	//%1 is already in a raid.
 #define ALREADY_IN_YOUR_RAID		5077	//%1 is already in your raid.
+#define NOT_IN_YOUR_RAID            5082	//%1 is not in your raid.
 #define GAIN_RAIDEXP				5085	//You gained raid experience!
 #define DUNGEON_SEALED				5141	//The gateway to the dungeon is sealed off to you.  Perhaps you would be able to enter if you needed to adventure there.
 #define ADVENTURE_COMPLETE			5147	//You received %1 points for successfully completing the adventure.
@@ -433,9 +434,13 @@
 #define LEADERSHIP_EXP_ON			8653	//
 #define LEADERSHIP_EXP_OFF			8654	//
 #define CURRENT_SPELL_EFFECTS		8757	//%1's current spell effects:
+#define MAX_MAIN_RAID_ASSISTERS		8782	//Max number of main assists reached (3)
+#define MAX_MAIN_RAID_MARKERS		8783	//Max number of main markers reached (3)
+#define NOT_DELEGATED_MARKER		8794	//You have not been delegated Raid Mark
 #define GAIN_GROUP_LEADERSHIP_EXP	8788	//
 #define GAIN_RAID_LEADERSHIP_EXP	8789	//
 #define BUFF_MINUTES_REMAINING		8799	//%1 (%2 minutes remaining)
+#define RAID_NO_LONGER_MARKED       8801	//%1 is no longer marked
 #define YOU_HAVE_BEEN_GIVEN         8994    //You have been given: %1
 #define NO_MORE_TRAPS				9002	//You have already placed your maximum number of traps.
 #define FEAR_TOO_HIGH				9035	//Your target is too high of a level for your fear spell.
