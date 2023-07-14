@@ -3135,21 +3135,6 @@ uint32 Client::GetEquippedItemFromTextureSlot(uint8 material_slot) const
 	return 0;
 }
 
-#if 0
-int32 Client::GetEquipmentMaterial(uint8 material_slot)
-{
-	const ItemData *item;
-
-	item = database.GetItem(GetEquippedItemFromTextureSlot(material_slot));
-	if(item != 0)
-	{
-		return item->Material;
-	}
-
-	return 0;
-}
-#endif
-
 uint32 Client::GetEquipmentColor(uint8 material_slot) const
 {
 	if (material_slot > EQ::textures::LastTexture)

@@ -4780,11 +4780,22 @@ UNIQUE KEY `name` (`name`)
 	},
 	ManifestEntry{
 		.version = 9231,
+		.description = "2023_07_14_npc_unsigned_melee_texture.sql",
+		.check = "SHOW COLUMNS FROM `npc_types` LIKE 'd_melee_texture1'",
+		.condition = "contains",
+		.match = "int(11) signed",
+		.sql = R"(ALTER TABLE `npc_types`
+	MODIFY COLUMN `d_melee_texture1` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `armortint_blue`,
+	MODIFY COLUMN `d_melee_texture2` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `d_melee_texture1`;
+	)",
+	},
+  ManifestEntry{
+    .version = 9232,
 		.description = "2023_07_11_command_subsettings.sql",
 		.check = "SHOW TABLES LIKE 'command_subsettings'",
 		.condition = "empty",
 		.match = "",
-		.sql = R"(CREATE TABLE `command_subsettings` \ (
+		.sql = R"(CREATE TABLE `command_subsettings` (
 `id` int UNSIGNED NOT NULL AUTO_INCREMENT,
 `parent_command` varchar(32) NOT NULL,
 `sub_command` varchar(32) NOT NULL,
@@ -4793,7 +4804,7 @@ UNIQUE KEY `name` (`name`)
 PRIMARY KEY (`id`),
 UNIQUE INDEX `command`(`parent_command`, `sub_command`)
 )"
-	},
+  },
 
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
