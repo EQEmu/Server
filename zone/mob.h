@@ -290,15 +290,15 @@ public:
 
 	EQ::skills::SkillType AttackAnimation(int Hand, const EQ::ItemInstance* weapon, EQ::skills::SkillType skillinuse = EQ::skills::Skill1HBlunt);
 
-	int32 GetTextureProfileMaterial(uint8 material_slot) const;
-	int32 GetTextureProfileColor(uint8 material_slot) const;
-	int32 GetTextureProfileHeroForgeModel(uint8 material_slot) const;
+	uint32 GetTextureProfileMaterial(uint8 material_slot) const;
+	uint32 GetTextureProfileColor(uint8 material_slot) const;
+	uint32 GetTextureProfileHeroForgeModel(uint8 material_slot) const;
 
 	virtual void SendArmorAppearance(Client *one_client = nullptr);
-	virtual void SendTextureWC(uint8 slot, uint16 texture, uint32 hero_forge_model = 0, uint32 elite_material = 0, uint32 unknown06 = 0, uint32 unknown18 = 0);
+	virtual void SendTextureWC(uint8 slot, uint32 texture, uint32 hero_forge_model = 0, uint32 elite_material = 0, uint32 unknown06 = 0, uint32 unknown18 = 0);
 	virtual void SendWearChange(uint8 material_slot, Client *one_client = nullptr);
 	virtual void SetSlotTint(uint8 material_slot, uint8 red_tint, uint8 green_tint, uint8 blue_tint);
-	virtual void WearChange(uint8 material_slot, uint16 texture, uint32 color = 0, uint32 hero_forge_model = 0);
+	virtual void WearChange(uint8 material_slot, uint32 texture, uint32 color = 0, uint32 hero_forge_model = 0);
 
 	void ChangeSize(float in_size, bool bNoRestriction = false);
 	void DoAnim(const int animation_id, int animation_speed = 0, bool ackreq = true, eqFilterType filter = FilterNone);
@@ -308,7 +308,7 @@ public:
 	void SendLevelAppearance();
 	void SendStunAppearance();
 	void SendTargetable(bool on, Client *specific_target = nullptr);
-	void SetMobTextureProfile(uint8 material_slot, uint16 texture, uint32 color = 0, uint32 hero_forge_model = 0);
+	void SetMobTextureProfile(uint8 material_slot, uint32 texture, uint32 color = 0, uint32 hero_forge_model = 0);
 
 	//Spell
 	void SendSpellEffect(uint32 effect_id, uint32 duration, uint32 finish_delay, bool zone_wide,
@@ -503,9 +503,9 @@ public:
 	virtual uint8 ConvertItemTypeToSkillID(uint8 item_type);
 	virtual uint16 GetSkill(EQ::skills::SkillType skill_num) const { return 0; }
 	virtual uint32 GetEquippedItemFromTextureSlot(uint8 material_slot) const { return(0); }
-	virtual int32 GetEquipmentMaterial(uint8 material_slot) const;
+	virtual uint32 GetEquipmentMaterial(uint8 material_slot) const;
 	virtual uint8 GetEquipmentType(uint8 material_slot) const;
-	virtual int32 GetHerosForgeModel(uint8 material_slot) const;
+	virtual uint32 GetHerosForgeModel(uint8 material_slot) const;
 	virtual uint32 GetEquipmentColor(uint8 material_slot) const;
 	virtual uint32 IsEliteMaterialItem(uint8 material_slot) const;
 	bool CanClassEquipItem(uint32 item_id);

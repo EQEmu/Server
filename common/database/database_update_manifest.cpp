@@ -4778,6 +4778,17 @@ UNIQUE KEY `name` (`name`)
 	ADD COLUMN `marked_npc_3` SMALLINT UNSIGNED DEFAULT(0) NOT NULL AFTER `marked_npc_2`;
 	)",
 	},
+	ManifestEntry{
+		.version = 9231,
+		.description = "2023_07_14_npc_unsigned_melee_texture.sql",
+		.check = "SHOW COLUMNS FROM `npc_types` LIKE 'd_melee_texture1'",
+		.condition = "contains",
+		.match = "int(11) signed",
+		.sql = R"(ALTER TABLE `npc_types`
+	MODIFY COLUMN `d_melee_texture1` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `armortint_blue`,
+	MODIFY COLUMN `d_melee_texture2` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `d_melee_texture1`;
+	)",
+	},
 
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{

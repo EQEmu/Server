@@ -3573,7 +3573,7 @@ void QuestManager::removetitle(int titleset) {
 	initiator->RemoveTitle(titleset);
 }
 
-void QuestManager::wearchange(uint8 slot, uint16 texture, uint32 hero_forge_model /*= 0*/, uint32 elite_material /*= 0*/)
+void QuestManager::wearchange(uint8 slot, uint32 texture, uint32 hero_forge_model, uint32 elite_material)
 {
 	QuestManagerCurrentQuestVars();
 
