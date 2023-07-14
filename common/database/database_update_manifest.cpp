@@ -4789,8 +4789,8 @@ UNIQUE KEY `name` (`name`)
 	MODIFY COLUMN `d_melee_texture2` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `d_melee_texture1`;
 	)",
 	},
-  ManifestEntry{
-    .version = 9232,
+	ManifestEntry{
+		.version = 9232,
 		.description = "2023_07_11_command_subsettings.sql",
 		.check = "SHOW TABLES LIKE 'command_subsettings'",
 		.condition = "empty",
@@ -4803,8 +4803,9 @@ UNIQUE KEY `name` (`name`)
 `top_level_aliases` varchar(255) NOT NULL,
 PRIMARY KEY (`id`),
 UNIQUE INDEX `command`(`parent_command`, `sub_command`)
+)
 )"
-  },
+	},
 
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
