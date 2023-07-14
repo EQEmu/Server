@@ -5145,8 +5145,8 @@ void lua_create_npc(luabind::adl::object table, float x, float y, float z, float
 	LuaCreateNPCParse(max_dmg, uint32, 4);
 	LuaCreateNPCParse(attack_count, int16, 0);
 	LuaCreateNPCParseString(special_abilities, 512, "");
-	LuaCreateNPCParse(d_melee_texture1, uint16, 0);
-	LuaCreateNPCParse(d_melee_texture2, uint16, 0);
+	LuaCreateNPCParse(d_melee_texture1, uint32, 0);
+	LuaCreateNPCParse(d_melee_texture2, uint32, 0);
 	LuaCreateNPCParseString(ammo_idfile, 30, "");
 	LuaCreateNPCParse(prim_melee_type, uint8, 0);
 	LuaCreateNPCParse(sec_melee_type, uint8, 0);

@@ -176,17 +176,17 @@ void Perl_Mob_SendWearChange(Mob* self, uint8_t material_slot) // @categories Sc
 	self->SendWearChange(material_slot);
 }
 
-int32_t Perl_Mob_GetEquipment(Mob* self, uint8_t material_slot) // @categories Inventory and Items
+uint32_t Perl_Mob_GetEquipment(Mob* self, uint8_t material_slot) // @categories Inventory and Items
 {
 	return self->GetEquippedItemFromTextureSlot(material_slot);
 }
 
-int32_t Perl_Mob_GetEquipmentMaterial(Mob* self, uint8_t material_slot) // @categories Inventory and Items
+uint32_t Perl_Mob_GetEquipmentMaterial(Mob* self, uint8_t material_slot) // @categories Inventory and Items
 {
 	return self->GetEquipmentMaterial(material_slot);
 }
 
-int32_t Perl_Mob_GetEquipmentColor(Mob* self, uint8_t material_slot) // @categories Inventory and Items
+uint32_t Perl_Mob_GetEquipmentColor(Mob* self, uint8_t material_slot) // @categories Inventory and Items
 {
 	return self->GetEquipmentColor(material_slot);
 }
@@ -2062,17 +2062,17 @@ void Perl_Mob_SetSlotTint(Mob* self, uint8 material_slot, uint8 red_tint, uint8 
 	self->SetSlotTint(material_slot, red_tint, green_tint, blue_tint);
 }
 
-void Perl_Mob_WearChange(Mob* self, uint8 material_slot, uint16 texture) // @categories Script Utility
+void Perl_Mob_WearChange(Mob* self, uint8 material_slot, uint32 texture) // @categories Script Utility
 {
 	self->WearChange(material_slot, texture);
 }
 
-void Perl_Mob_WearChange(Mob* self, uint8 material_slot, uint16 texture, uint32 color) // @categories Script Utility
+void Perl_Mob_WearChange(Mob* self, uint8 material_slot, uint32 texture, uint32 color) // @categories Script Utility
 {
 	self->WearChange(material_slot, texture, color);
 }
 
-void Perl_Mob_WearChange(Mob* self, uint8 material_slot, uint16 texture, uint32 color, uint32 hero_forge_model) // @categories Script Utility
+void Perl_Mob_WearChange(Mob* self, uint8 material_slot, uint32 texture, uint32 color, uint32 hero_forge_model) // @categories Script Utility
 {
 	self->WearChange(material_slot, texture, color, hero_forge_model);
 }
@@ -3705,9 +3705,9 @@ void perl_register_mob()
 	package.add("TypesTempPet", (void(*)(Mob*, uint32, const char*, uint32, bool, Mob*))&Perl_Mob_TypesTempPet);
 	package.add("TypesTempPet", (void(*)(Mob*, uint32, const char*, uint32, bool, Mob*, bool))&Perl_Mob_TypesTempPet);
 	package.add("WalkTo", &Perl_Mob_WalkTo);
-	package.add("WearChange", (void(*)(Mob*, uint8, uint16))&Perl_Mob_WearChange);
-	package.add("WearChange", (void(*)(Mob*, uint8, uint16, uint32))&Perl_Mob_WearChange);
-	package.add("WearChange", (void(*)(Mob*, uint8, uint16, uint32, uint32))&Perl_Mob_WearChange);
+	package.add("WearChange", (void(*)(Mob*, uint8, uint32))&Perl_Mob_WearChange);
+	package.add("WearChange", (void(*)(Mob*, uint8, uint32, uint32))&Perl_Mob_WearChange);
+	package.add("WearChange", (void(*)(Mob*, uint8, uint32, uint32, uint32))&Perl_Mob_WearChange);
 	package.add("WipeHateList", &Perl_Mob_WipeHateList);
 }
 
