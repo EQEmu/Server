@@ -6,7 +6,7 @@ extern WorldServer worldserver;
 void SetServerLocked(Client *c, const Seperator *sep)
 {
 	const auto arguments = sep->argnum;
-	if (arguments < 2 || !sep->IsNumber(2)) {
+	if (arguments < 2) {
 		c->Message(Chat::White, "Usage: #set server_locked [on|off]");
 		return;
 	}
