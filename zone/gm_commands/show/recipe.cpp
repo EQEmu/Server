@@ -6,7 +6,7 @@
 void ShowRecipe(Client *c, const Seperator *sep)
 {
 	if (!sep->IsNumber(2)) {
-		c->Message(Chat::White, "Command Syntax: #show recipe [Recipe ID]");
+		c->Message(Chat::White, "Usage: #show recipe [Recipe ID]");
 		return;
 	}
 

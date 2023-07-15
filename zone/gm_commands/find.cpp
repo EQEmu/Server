@@ -80,6 +80,17 @@ void command_find(Client *c, const Seperator *sep)
 
 				// rewrite to #find <sub-command <args>
 				c->SendGMCommand(rewrite);
+
+				c->Message(
+					Chat::Gray,
+					fmt::format(
+						"{} is now located under {}, using {}.",
+						sep->arg[0],
+						Saylink::Silent("#find"),
+						Saylink::Silent(rewrite)
+					).c_str()
+				);
+
 				return;
 			}
 		}

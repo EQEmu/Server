@@ -140,8 +140,19 @@ void command_set(Client *c, const Seperator *sep)
 				// build the rewrite string
 				const std::string& rewrite = fmt::format("#set {} {}", cmd.cmd, Strings::Join(args, " "));
 
-				// rewrite to #show <sub-command <args>
+				// rewrite to #set <sub-command <args>
 				c->SendGMCommand(rewrite);
+
+				c->Message(
+					Chat::Gray,
+					fmt::format(
+						"{} is now located under {}, using {}.",
+						sep->arg[0],
+						Saylink::Silent("#set"),
+						Saylink::Silent(rewrite)
+					).c_str()
+				);
+
 				return;
 			}
 		}

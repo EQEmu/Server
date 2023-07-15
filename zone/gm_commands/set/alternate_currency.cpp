@@ -4,7 +4,7 @@ void SetAlternateCurrency(Client *c, const Seperator *sep)
 {
 	const auto arguments = sep->argnum;
 	if (arguments < 3 || !sep->IsNumber(2) || !sep->IsNumber(3)) {
-		c->Message(Chat::White, "Command Syntax: #set alternate_currency [Currency ID] [Amount]");
+		c->Message(Chat::White, "Usage: #set alternate_currency [Currency ID] [Amount]");
 		return;
 	}
 
