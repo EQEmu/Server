@@ -492,13 +492,9 @@ int command_realdispatch(Client *c, std::string message, bool ignore_status)
 	const auto arguments = sep.argnum;
 
 	if (arguments >= 2) {
-		std::string command = sep.arg[0];
 		const std::string& sub_command = sep.arg[1];
-		command = command.substr(1, command.length());
 
-		const auto& l = GetCommandSubsettingsByCommand(command);
-
-		for (const auto &e : l) {
+		for (const auto &e : command_subsettings) {
 			if (e.sub_command == sub_command) {
 				can_use_subcommand       = c->Admin() >= static_cast<int16>(e.access_level);
 				is_subcommand            = true;
