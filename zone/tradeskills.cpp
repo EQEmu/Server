@@ -389,6 +389,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 	}
 
 	DBTradeskillRecipe_Struct spec;
+	bool                      is_augmented = false;
 
 	if (parse->PlayerHasQuestSub(EVENT_COMBINE)) {
 		if (parse->EventPlayer(EVENT_COMBINE, user, std::to_string(in_combine->container_slot), 0) == 1) {
@@ -399,11 +400,16 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 		}
 	}
 
-	if (!content_db.GetTradeRecipe(container, c_type, some_id, user->CharacterID(), &spec)) {
+	if (!content_db.GetTradeRecipe(container, c_type, some_id, user, &spec, &is_augmented)) {
 
 		LogTradeskillsDetail("Check 2");
 
-		user->MessageString(Chat::Emote,TRADESKILL_NOCOMBINE);
+		if (!is_augmented) {
+			user->MessageString(Chat::Emote, TRADESKILL_NOCOMBINE);
+		} else {
+			user->Message(Chat::Emote, "You must remove augments from all component items before you can attempt this combine.");
+		}
+
 		auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
 		user->QueuePacket(outapp);
 		safe_delete(outapp);
@@ -592,7 +598,7 @@ void Object::HandleAutoCombine(Client* user, const RecipeAutoCombine_Struct* rac
 
 	//ask the database for the recipe to make sure it exists...
 	DBTradeskillRecipe_Struct spec;
-	if (!content_db.GetTradeRecipe(rac->recipe_id, rac->object_type, rac->some_id, user->CharacterID(), &spec)) {
+	if (!content_db.GetTradeRecipe(rac->recipe_id, rac->object_type, rac->some_id, user, &spec)) {
 		LogError("Unknown recipe for HandleAutoCombine: [{}]\n", rac->recipe_id);
 		user->QueuePacket(outapp);
 		safe_delete(outapp);
@@ -1231,25 +1237,28 @@ void Client::CheckIncreaseTradeskill(int16 bonusstat, int16 stat_modifier, float
 }
 
 bool ZoneDatabase::GetTradeRecipe(
-	const EQ::ItemInstance *container,
+	const EQ::ItemInstance* container,
 	uint8 c_type,
 	uint32 some_id,
-	uint32 char_id,
-	DBTradeskillRecipe_Struct *spec
+	Client* c,
+	DBTradeskillRecipe_Struct* spec,
+	bool* is_augmented
 )
 {
-	if (container == nullptr) {
-		LogTradeskills("Container null");
+	if (!container) {
 		return false;
 	}
 
-	std::string containers;// make where clause segment for container(s)
-	if (some_id == 0) {
-		containers = StringFormat("= %u", c_type); // world combiner so no item number
+	if (!c) {
+		return false;
 	}
-	else {
-		containers = StringFormat("IN (%u,%u)", c_type, some_id);
-	} // container in inventory
+
+	std::string containers; // make where clause segment for container(s)
+	if (!some_id) { // world combiner so no item number
+		containers = fmt::format("= {}", c_type);
+	} else { // container in inventory
+		containers = fmt::format("IN ({}, {})", c_type, some_id);
+	}
 
 	//Could prolly watch for stacks in this loop and handle them properly...
 	//just increment sum and count accordingly
@@ -1257,26 +1266,31 @@ bool ZoneDatabase::GetTradeRecipe(
 	std::string buf2;
 	uint32      count = 0;
 	uint32      sum   = 0;
-	for (uint8  i     = 0; i < 10; i++) { // <watch> TODO: need to determine if this is bound to world/item container size
-		LogTradeskills("Fetching item [{}]", i);
 
-		const EQ::ItemInstance *inst = container->GetItem(i);
+	for (uint8 slot_id = EQ::invbag::SLOT_BEGIN; slot_id < EQ::invbag::SLOT_COUNT; slot_id++) { // <watch> TODO: need to determine if this is bound to world/item container size
+		LogTradeskills("Fetching item [{}]", slot_id);
+
+		const auto inst = container->GetItem(slot_id);
 		if (!inst) {
 			continue;
 		}
 
-		const EQ::ItemData *item = database.GetItem(inst->GetItem()->ID);
+		if (inst->IsAugmented()) {
+			*is_augmented = true;
+			return false;
+		}
+
+		const auto item = database.GetItem(inst->GetItem()->ID);
 		if (!item) {
 			LogTradeskills("item [{}] not found!", inst->GetItem()->ID);
 			continue;
 		}
 
 		if (first) {
-			buf2 += StringFormat("%d", item->ID);
+			buf2 += fmt::format("{}", item->ID);
 			first = false;
-		}
-		else {
-			buf2 += StringFormat(",%d", item->ID);
+		} else {
+			buf2 += fmt::format(", {}", item->ID);
 		}
 
 		sum += item->ID;
@@ -1284,99 +1298,110 @@ bool ZoneDatabase::GetTradeRecipe(
 
 		LogTradeskills(
 			"Item in container index [{}] item [{}] found [{}]",
-			i,
+			slot_id,
 			item->ID,
 			count
 		);
 	}
 
-	//no items == no recipe
-	if (count == 0) {
+	// no items == no recipe
+	if (!count) {
 		return false;
 	}
 
-	std::string query = StringFormat("SELECT tre.recipe_id "
-                                    "FROM tradeskill_recipe_entries AS tre "
-                                    "INNER JOIN tradeskill_recipe AS tr ON (tre.recipe_id = tr.id) "
-                                    "WHERE tr.enabled AND (( tre.item_id IN(%s) AND tre.componentcount > 0) "
-                                    "OR ( tre.item_id %s AND tre.iscontainer=1 ))"
-                                    "GROUP BY tre.recipe_id HAVING sum(tre.componentcount) = %u "
-                                    "AND sum(tre.item_id * tre.componentcount) = %u",
-                                    buf2.c_str(), containers.c_str(), count, sum);
-    auto results = QueryDatabase(query);
+	std::string query = fmt::format(
+		"SELECT tre.recipe_id FROM tradeskill_recipe_entries AS tre "
+		"INNER JOIN tradeskill_recipe AS tr ON (tre.recipe_id = tr.id) "
+		"WHERE tr.enabled AND ((tre.item_id IN ({}) AND tre.componentcount > 0) "
+		"OR (tre.item_id {} AND tre.iscontainer = 1))"
+		"GROUP BY tre.recipe_id HAVING SUM(tre.componentcount) = {} "
+		"AND SUM(tre.item_id * tre.componentcount) = {}",
+		buf2,
+		containers,
+		count,
+		sum
+	);
+
+	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		LogError("Error in GetTradeRecipe search, query: [{}]", query.c_str());
-		LogError("Error in GetTradeRecipe search, error: [{}]", results.ErrorMessage().c_str());
+		LogError("Error in search, query: [{}]", query.c_str());
+		LogError("Error in search, error: [{}]", results.ErrorMessage().c_str());
 		return false;
 	}
-
-    if (results.RowCount() > 1) {
-        //multiple recipes, partial match... do an extra query to get it exact.
-        //this happens when combining components for a smaller recipe
-        //which is completely contained within another recipe
-        first = true;
-        uint32 index = 0;
-        buf2 = "";
-        for (auto row = results.begin(); row != results.end(); ++row, ++index) {
-            uint32 recipeid = (uint32)Strings::ToInt(row[0]);
-            if(first) {
-                buf2 += StringFormat("%u", recipeid);
-                first = false;
-            } else
-                buf2 += StringFormat(",%u", recipeid);
-
-            //length limit on buf2
-            if(index == 214) { //Maximum number of recipe matches (19 * 215 = 4096)
-        		LogError("GetTradeRecipe warning: Too many matches. Unable to search all recipe entries. Searched [{}] of [{}] possible entries", index + 1, results.RowCount());
-                break;
-            }
-        }
-
-        query = StringFormat("SELECT tre.recipe_id "
-                            "FROM tradeskill_recipe_entries AS tre "
-							 "WHERE tre.recipe_id IN (%s) "
-							 "GROUP BY tre.recipe_id HAVING sum(tre.componentcount) = %u "
-							 "AND sum(tre.item_id * tre.componentcount) = %u", buf2.c_str(), count, sum
-		);
-		results = QueryDatabase(query);
-		if (!results.Success()) {
-			LogError("Error in GetTradeRecipe, re-query: [{}]", query.c_str());
-			LogError("Error in GetTradeRecipe, error: [{}]", results.ErrorMessage().c_str());
-			return false;
-		}
-	}
-
-    if (results.RowCount() < 1)
-        return false;
 
 	if (results.RowCount() > 1) {
-		//The recipe is not unique, so we need to compare the container were using.
-		uint32 containerId = 0;
+		//multiple recipes, partial match... do an extra query to get it exact.
+		//this happens when combining components for a smaller recipe
+		//which is completely contained within another recipe
+		first = true;
+		uint32 index = 0;
+		buf2 = "";
+		for (auto row : results) {
+			const uint32 recipe_id = Strings::ToUnsignedInt(row[0]);
+			if (first) {
+				buf2 += fmt::format("{}", recipe_id);
+				first = false;
+			} else {
+				buf2 += fmt::format(", {}", recipe_id);
+			}
 
-		if (some_id) { //Standard container
-			containerId = some_id;
-		}
-		else if (c_type) {//World container
-			containerId = c_type;
-		}
-		else { //Invalid container
-			return false;
+			// length limit on buf2
+			if (index == 214) { // Maximum number of recipe matches (19 * 215 = 4096)
+				LogError(
+					"Warning: Too many matches. Unable to search all recipe entries. Searched [{}] of [{}] possible entries",
+					index + 1,
+					results.RowCount());
+				break;
+			}
+
+			++index;
 		}
 
-		query   = StringFormat(
-			"SELECT tre.recipe_id "
-			"FROM tradeskill_recipe_entries AS tre "
-			"WHERE tre.recipe_id IN (%s) "
-			"AND tre.item_id = %u;", buf2.c_str(), containerId
+		query = fmt::format(
+			"SELECT tre.recipe_id FROM tradeskill_recipe_entries AS tre "
+			"WHERE tre.recipe_id IN ({}) GROUP BY tre.recipe_id HAVING sum(tre.componentcount) = {} "
+			"AND sum(tre.item_id * tre.componentcount) = {}",
+			buf2,
+			count,
+			sum
 		);
 		results = QueryDatabase(query);
 		if (!results.Success()) {
-			LogError("Error in GetTradeRecipe, re-query: [{}]", query.c_str());
-			LogError("Error in GetTradeRecipe, error: [{}]", results.ErrorMessage().c_str());
+			LogError("Re-query: [{}]", query.c_str());
+			LogError("Error: [{}]", results.ErrorMessage().c_str());
+			return false;
+		}
+	}
+
+	if (results.RowCount() < 1) {
+		return false;
+	}
+
+	if (results.RowCount() > 1) { //The recipe is not unique, so we need to compare the container were using.
+		uint32 container_item_id = 0;
+
+		if (some_id) { // Standard container
+			container_item_id = some_id;
+		} else if (c_type) { // World container
+			container_item_id = c_type;
+		} else { // Invalid container
 			return false;
 		}
 
-		if (results.RowCount() == 0) { //Recipe contents matched more than 1 recipe, but not in this container
+		query = fmt::format(
+			"SELECT tre.recipe_id FROM tradeskill_recipe_entries AS tre WHERE tre.recipe_id IN ({}) AND tre.item_id = {}",
+			buf2,
+			container_item_id
+		);
+
+		results = QueryDatabase(query);
+		if (!results.Success()) {
+			LogError("Re-query: [{}]", query);
+			LogError("Error: [{}]", results.ErrorMessage());
+			return false;
+		}
+
+		if (!results.RowCount()) { //Recipe contents matched more than 1 recipe, but not in this container
 			LogError("Combine error: Incorrect container is being used!");
 			return false;
 		}
@@ -1385,44 +1410,47 @@ bool ZoneDatabase::GetTradeRecipe(
 			LogError(
 				"Combine error: Recipe is not unique! [{}] matches found for container [{}]. Continuing with first recipe match",
 				results.RowCount(),
-				containerId
+				container_item_id
 			);
 		}
 	}
 
 	auto row = results.begin();
-	uint32 recipe_id = (uint32)Strings::ToInt(row[0]);
+	const uint32 recipe_id = Strings::ToUnsignedInt(row[0]);
 
 	//Right here we verify that we actually have ALL of the tradeskill components..
 	//instead of part which is possible with experimentation.
 	//This is here because something's up with the query above.. it needs to be rethought out
-	bool has_components = true;
-	query = StringFormat("SELECT item_id, componentcount "
-                        "FROM tradeskill_recipe_entries "
-                        "WHERE recipe_id = %i AND componentcount > 0",
-                        recipe_id);
-	results = QueryDatabase(query);
-    if (!results.Success()) {
-        return GetTradeRecipe(recipe_id, c_type, some_id, char_id, spec);
-    }
+	query = fmt::format(
+		"SELECT item_id, componentcount FROM tradeskill_recipe_entries WHERE componentcount > 0 AND recipe_id = {}",
+		recipe_id
+	);
 
-	if (results.RowCount() == 0) {
-		return GetTradeRecipe(recipe_id, c_type, some_id, char_id, spec);
+	results = QueryDatabase(query);
+	if (!results.Success() || !results.RowCount()) {
+		return GetTradeRecipe(recipe_id, c_type, some_id, c, spec);
 	}
 
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	for (auto row : results) {
 		int component_count = 0;
 
-		for (int x = EQ::invbag::SLOT_BEGIN; x < EQ::invtype::WORLD_SIZE; x++) {
-            const EQ::ItemInstance* inst = container->GetItem(x);
-            if(!inst)
-                continue;
+		for (uint8 slot_id = EQ::invbag::SLOT_BEGIN; slot_id < EQ::invtype::WORLD_SIZE; slot_id++) {
+			const auto inst = container->GetItem(slot_id);
+			if (!inst) {
+				continue;
+			}
 
-			const EQ::ItemData* item = database.GetItem(inst->GetItem()->ID);
-            if (!item)
-                continue;
+			if (inst->IsAugmented()) {
+				*is_augmented = true;
+				return false;
+			}
 
-			if (item->ID == Strings::ToInt(row[0])) {
+			const auto item = database.GetItem(inst->GetItem()->ID);
+			if (!item) {
+				continue;
+			}
+
+			if (item->ID == Strings::ToUnsignedInt(row[0])) {
 				component_count++;
 			}
 
@@ -1439,29 +1467,30 @@ bool ZoneDatabase::GetTradeRecipe(
 		}
 	}
 
-	return GetTradeRecipe(recipe_id, c_type, some_id, char_id, spec);
+	return GetTradeRecipe(recipe_id, c_type, some_id, c, spec);
 }
 
 bool ZoneDatabase::GetTradeRecipe(
 	uint32 recipe_id,
 	uint8 c_type,
 	uint32 some_id,
-	uint32 char_id,
-	DBTradeskillRecipe_Struct *spec
+	Client* c,
+	DBTradeskillRecipe_Struct* spec
 )
 {
-	std::string container_where_filter;
-	if (some_id == 0) {
-		// world combiner so no item number
-		container_where_filter = StringFormat("= %u", c_type);
-	}
-	else {
-		// container in inventory
-		container_where_filter = StringFormat("IN (%u,%u)", c_type, some_id);
+	if (!c) {
+		return false;
 	}
 
-	std::string query = StringFormat(
-		SQL (
+	std::string container_where_filter;
+	if (!some_id) { // world combiner so no item number
+		container_where_filter = fmt::format("= {}", c_type);
+	} else { // container in inventory
+		container_where_filter = fmt::format("IN ({}, {})", c_type, some_id);
+	}
+
+	std::string query = fmt::format(
+		SQL(
 			SELECT
 			tradeskill_recipe.id,
 			tradeskill_recipe.tradeskill,
@@ -1476,85 +1505,91 @@ bool ZoneDatabase::GetTradeRecipe(
 				tradeskill_recipe
 				INNER JOIN tradeskill_recipe_entries ON tradeskill_recipe.id = tradeskill_recipe_entries.recipe_id
 			WHERE
-				tradeskill_recipe.id = %lu
-				AND tradeskill_recipe_entries.item_id %s
+				tradeskill_recipe.id = {}
+				AND tradeskill_recipe_entries.item_id {}
 				AND tradeskill_recipe.enabled
 				GROUP BY
 				tradeskill_recipe.id
-			)
-		,
-		(unsigned long) recipe_id,
-		container_where_filter.c_str()
+		),
+		recipe_id,
+		container_where_filter
 	);
-    auto results = QueryDatabase(query);
+	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		LogError("Error in GetTradeRecipe, query: [{}]", query.c_str());
-		LogError("Error in GetTradeRecipe, error: [{}]", results.ErrorMessage().c_str());
+		LogError("Error, query: [{}]", query.c_str());
+		LogError("Error: [{}]", results.ErrorMessage().c_str());
 		return false;
 	}
 
-	if (results.RowCount() != 1) {
+	if (!results.RowCount()) {
 		return false;
 	}
 
 	auto row = results.begin();
 
-	spec->tradeskill        = (EQ::skills::SkillType) Strings::ToInt(row[1]);
-	spec->skill_needed      = (int16) Strings::ToInt(row[2]);
-	spec->trivial           = (uint16) Strings::ToInt(row[3]);
-	spec->nofail            = Strings::ToInt(row[4]) ? true : false;
-	spec->replace_container = Strings::ToInt(row[5]) ? true : false;
+	spec->tradeskill        = static_cast<EQ::skills::SkillType>(Strings::ToUnsignedInt(row[1]));
+	spec->skill_needed      = Strings::ToInt(row[2]);
+	spec->trivial           = Strings::ToUnsignedInt(row[3]);
+	spec->nofail            = Strings::ToBool(row[4]);
+	spec->replace_container = Strings::ToBool(row[5]);
 	spec->name              = row[6];
-	spec->must_learn        = (uint8) Strings::ToInt(row[7]);
-	spec->quest             = Strings::ToInt(row[8]) ? true : false;
+	spec->must_learn        = Strings::ToUnsignedInt(row[7]);
+	spec->quest             = Strings::ToBool(row[8]);
 	spec->has_learnt        = false;
 	spec->madecount         = 0;
 	spec->recipe_id         = recipe_id;
 
 	auto r = CharRecipeListRepository::GetWhere(
 		database,
-		fmt::format("char_id = {} and recipe_id = {}", char_id, recipe_id)
+		fmt::format(
+			"char_id = {} and recipe_id = {}",
+			c->CharacterID(),
+			recipe_id
+		)
 	);
 
 	if (!r.empty() && r[0].recipe_id) { //If this exists we learned it
 		LogTradeskills("made_count [{}]", r[0].madecount);
 
 		spec->has_learnt = true;
-		spec->madecount  = (uint32) r[0].madecount;
+		spec->madecount  = static_cast<uint32>(r[0].madecount);
 	}
 
 	//Pull the on-success items...
-	query = StringFormat("SELECT item_id,successcount FROM tradeskill_recipe_entries "
-                        "WHERE successcount > 0 AND recipe_id = %u", recipe_id);
-    results = QueryDatabase(query);
+	query = fmt::format(
+		"SELECT item_id, successcount FROM tradeskill_recipe_entries WHERE successcount > 0 AND recipe_id = {}",
+		recipe_id
+	);
+	results = QueryDatabase(query);
 	if (!results.Success()) {
 		return false;
 	}
 
-	if(results.RowCount() < 1 && !spec->quest) {
-		LogError("Error in GetTradeRecept success: no success items returned");
+	if (!results.RowCount() && !spec->quest) {
+		LogError("Error in success: no success items returned");
 		return false;
 	}
 
 	spec->onsuccess.clear();
-	for(auto row = results.begin(); row != results.end(); ++row) {
-		uint32 item = (uint32)Strings::ToInt(row[0]);
-		uint8 num = (uint8) Strings::ToInt(row[1]);
-		spec->onsuccess.emplace_back(std::pair<uint32,uint8>(item, num));
+	for(auto row : results) {
+		const uint32 item_id       = Strings::ToUnsignedInt(row[0]);
+		const uint8  success_count = Strings::ToUnsignedInt(row[1]);
+		spec->onsuccess.emplace_back(std::pair<uint32, uint8>(item_id, success_count));
 	}
 
-    spec->onfail.clear();
+	spec->onfail.clear();
+
 	//Pull the on-fail items...
-	query   = StringFormat(
-		"SELECT item_id, failcount FROM tradeskill_recipe_entries "
-		"WHERE failcount > 0 AND recipe_id = %u", recipe_id
+	query = fmt::format(
+		"SELECT item_id, failcount FROM tradeskill_recipe_entries WHERE failcount > 0 AND recipe_id = {}",
+		recipe_id
 	);
 	results = QueryDatabase(query);
 	if (results.Success()) {
-		for (auto row = results.begin(); row != results.end(); ++row) {
-			uint32 item = (uint32) Strings::ToInt(row[0]);
-			uint8  num  = (uint8) Strings::ToInt(row[1]);
-			spec->onfail.emplace_back(std::pair<uint32, uint8>(item, num));
+		for (auto row : results) {
+			const uint32 item_id    = Strings::ToUnsignedInt(row[0]);
+			const uint8  fail_count = Strings::ToUnsignedInt(row[1]);
+			spec->onfail.emplace_back(std::pair<uint32, uint8>(item_id, fail_count));
 		}
 	}
 
@@ -1566,18 +1601,17 @@ bool ZoneDatabase::GetTradeRecipe(
 	}
 
 	// Pull the salvage list
-	query = StringFormat(
-		"SELECT item_id, salvagecount "
-		"FROM tradeskill_recipe_entries "
-		"WHERE salvagecount > 0 AND recipe_id = %u", recipe_id
+	query = fmt::format(
+		"SELECT item_id, salvagecount FROM tradeskill_recipe_entries WHERE salvagecount > 0 AND recipe_id = {}",
+		recipe_id
 	);
 
 	results = QueryDatabase(query);
 	if (results.Success()) {
-		for (auto row = results.begin(); row != results.end(); ++row) {
-			uint32 item = (uint32) Strings::ToInt(row[0]);
-			uint8  num  = (uint8) Strings::ToInt(row[1]);
-			spec->salvage.emplace_back(std::pair<uint32, uint8>(item, num));
+		for (auto row : results) {
+			const uint32 item_id    = Strings::ToUnsignedInt(row[0]);
+			const uint8  salvage_count = Strings::ToUnsignedInt(row[1]);
+			spec->salvage.emplace_back(std::pair<uint32, uint8>(item_id, salvage_count));
 		}
 	}
 
