@@ -1726,7 +1726,7 @@ bool SharedDatabase::GetCommandSubSettings(std::vector<CommandSubsettingsReposit
 {
 	command_subsettings.clear();
 
-	const auto& l = CommandSubsettingsRepository::All(*this);
+	const auto& l = CommandSubsettingsRepository::GetAll(*this);
 
 	if (l.empty()) {
 		return false;

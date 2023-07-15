@@ -4761,7 +4761,7 @@ UNIQUE KEY `name` (`name`)
 )"
 	},
 	ManifestEntry{
-    .version = 9230,
+		.version = 9230,
 		.description = "2023_06_23_raid_feature_updates",
 		.check = "SHOW COLUMNS FROM `raid_members` LIKE 'is_assister'",
 		.condition = "empty",
