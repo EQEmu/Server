@@ -17,13 +17,6 @@ typedef struct {
 	CmdFuncPtr function; // null means perl function
 } CommandRecord;
 
-typedef struct {
-	std::string parent_command;
-	std::string sub_command;
-	uint8       access_level;
-	std::string top_level_aliases;
-} SubCommandRecord;
-
 extern int (*command_dispatch)(Client *, std::string, bool);
 extern int command_count; // Commands Loaded Count
 
@@ -41,9 +34,6 @@ void SendNPCEditSubCommands(Client *c);
 void SendRuleSubCommands(Client *c);
 void SendGuildSubCommands(Client *c);
 void SendShowInventorySubCommands(Client *c);
-
-std::vector<SubCommandRecord> GetSubCommandRecords();
-std::vector<CommandSubsettingsRepository::CommandSubsettings> GetCommandSubsettingsByCommand(std::string command);
 
 // Commands
 void command_acceptrules(Client *c, const Seperator *sep);
