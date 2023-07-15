@@ -11,7 +11,7 @@ void SetServerLocked(Client *c, const Seperator *sep)
 		return;
 	}
 
-	bool is_locked = false;
+	bool is_locked = Strings::ToBool(sep->arg[2]);
 
 	if (c->EntityVariableExists("old_command")) {
 		const std::string& old_command = c->GetEntityVariable("old_command");
@@ -19,8 +19,6 @@ void SetServerLocked(Client *c, const Seperator *sep)
 			is_locked = true;
 		} else if (old_command == "unlock" || old_command == "serverunlock") {
 			is_locked = false;
-		} else {
-			is_locked = Strings::ToBool(sep->arg[2]);
 		}
 	}
 
