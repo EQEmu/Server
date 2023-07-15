@@ -10041,7 +10041,9 @@ void bot_command_pickpocket(Client *c, const Seperator *sep)
 	glm::vec4 mob_distance    = (c->GetPosition() - target_mob->GetPosition());
 	float     mob_xy_distance = ((mob_distance.x * mob_distance.x) + (mob_distance.y * mob_distance.y));
 	float     mob_z_distance  = (mob_distance.z * mob_distance.z);
-	if (mob_z_distance >= 40 || mob_xy_distance > 250) {
+	float     z_offset_diff   = target_mob->GetZOffset() - c->GetZOffset();
+	
+	if (mob_z_distance >= (35-z_offset_diff) || mob_xy_distance > 250) {
 		c->Message(Chat::White, "You must be closer to an enemy to use this command");
 		return;
 	}
