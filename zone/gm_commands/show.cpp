@@ -121,8 +121,19 @@ void command_show(Client *c, const Seperator *sep)
 				// build the rewrite string
 				const std::string& rewrite = fmt::format("#show {} {}", cmd.cmd, Strings::Join(args, " "));
 
-				// rewrite to #show <sub-command <args>
+				// rewrite to #show <sub-command <args>>
 				c->SendGMCommand(rewrite);
+
+				c->Message(
+					Chat::Gray,
+					fmt::format(
+						"{} is now located under {}, using {}.",
+						sep->arg[0],
+						Saylink::Silent("#show"),
+						Saylink::Silent(rewrite)
+					).c_str()
+				);
+
 				return;
 			}
 		}

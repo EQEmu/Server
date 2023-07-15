@@ -6,7 +6,7 @@
 void ShowRecipe(Client *c, const Seperator *sep)
 {
 	if (!sep->IsNumber(2)) {
-		c->Message(Chat::White, "Command Syntax: #show recipe [Recipe ID]");
+		c->Message(Chat::White, "Usage: #show recipe [Recipe ID]");
 		return;
 	}
 
@@ -43,7 +43,7 @@ void ShowRecipe(Client *c, const Seperator *sep)
 	);
 
 	uint32 entry_number = 1;
-	const bool can_summon_items = c->Admin() >= GetCommandStatus(c, "summonitem");
+	const bool can_summon_items = c->Admin() >= GetCommandStatus("summonitem");
 
 	for (const auto& e : re) {
 		c->Message(

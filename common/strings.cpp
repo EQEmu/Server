@@ -882,3 +882,17 @@ std::string Strings::RemoveNumbers(std::string s)
 
 	return s.substr(0, current);
 }
+
+std::string Strings::ZoneTime(const uint8 hours, const uint8 minutes)
+{
+	return fmt::format(
+		"{:02}:{:02} {}",
+		(
+			(hours % 12) == 0 ?
+			12 :
+			(hours % 12)
+		),
+		minutes,
+		hours >= 13 ? "PM" : "AM"
+	);
+}

@@ -1533,6 +1533,50 @@ bool Client::UpdateLDoNPoints(uint32 theme_id, int points) {
 	return true;
 }
 
+void Client::SetLDoNPoints(uint32 theme_id, uint32 points)
+{
+	switch (theme_id) {
+		case LDoNThemes::GUK: {
+			m_pp.ldon_points_guk = points;
+			break;
+		}
+		case LDoNThemes::MIR: {
+			m_pp.ldon_points_mir = points;
+			break;
+		}
+		case LDoNThemes::MMC: {
+			m_pp.ldon_points_mmc = points;
+			break;
+		}
+		case LDoNThemes::RUJ: {
+			m_pp.ldon_points_ruj = points;
+			break;
+		}
+		case LDoNThemes::TAK: {
+			m_pp.ldon_points_tak = points;
+			break;
+		}
+	}
+
+	m_pp.ldon_points_available += points;
+
+	auto outapp = new EQApplicationPacket(OP_AdventurePointsUpdate, sizeof(AdventurePoints_Update_Struct));
+
+	auto a = (AdventurePoints_Update_Struct*) outapp->pBuffer;
+
+	a->ldon_available_points = m_pp.ldon_points_available;
+	a->ldon_guk_points       = m_pp.ldon_points_guk;
+	a->ldon_mirugal_points   = m_pp.ldon_points_mir;
+	a->ldon_mistmoore_points = m_pp.ldon_points_mmc;
+	a->ldon_rujarkian_points = m_pp.ldon_points_ruj;
+	a->ldon_takish_points    = m_pp.ldon_points_tak;
+
+	outapp->priority = 6;
+
+	QueuePacket(outapp);
+	safe_delete(outapp);
+}
+
 void Client::SetSkill(EQ::skills::SkillType skillid, uint16 value) {
 	if (skillid > EQ::skills::HIGHEST_SKILL)
 		return;
