@@ -1,3 +1,28 @@
+## [22.20.0] - 07/15/2023
+
+### Bots
+
+* Remove orphaned commands related to botgroup ([#3489](https://github.com/EQEmu/Server/pull/3489)) @tuday2 2023-07-09
+
+### Commands
+
+* Consolidate #set-like commands into a singular #set command ([#3486](https://github.com/EQEmu/Server/pull/3486)) @Kinglykrab 2023-07-15
+
+### Feature
+
+* Add Support for item textures higher than 65,535 ([#3494](https://github.com/EQEmu/Server/pull/3494)) @Kinglykrab 2023-07-14
+* Update raid features ([#3443](https://github.com/EQEmu/Server/pull/3443)) @neckkola 2023-07-13
+
+### Fixes
+
+* Fix Tradeskill Combines with augmented items ([#3490](https://github.com/EQEmu/Server/pull/3490)) @Kinglykrab 2023-07-15
+* Fix charmed pets to follow when charmed. ([#3488](https://github.com/EQEmu/Server/pull/3488)) @noudess 2023-07-08
+* Update bot naming check and add more explanation ([#3491](https://github.com/EQEmu/Server/pull/3491)) @tuday2 2023-07-13
+
+### Quest API
+
+* Add Mob/Entity type check methods to Perl/Lua ([#3493](https://github.com/EQEmu/Server/pull/3493)) @Kinglykrab 2023-07-13
+
 ## [22.19.0] - 07/08/2023
 
 ### Bots
