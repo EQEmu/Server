@@ -78,7 +78,7 @@ void command_find(Client *c, const Seperator *sep)
 				// build the rewrite string
 				std::string rewrite = fmt::format("#find {} {}", cmd.cmd, Strings::Join(args, " "));
 
-				// rewrite to #find <sub-command <args>
+				// rewrite to #find <sub-command <args>>
 				c->SendGMCommand(rewrite);
 
 				c->Message(

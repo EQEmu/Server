@@ -11,7 +11,18 @@ void SetServerLocked(Client *c, const Seperator *sep)
 		return;
 	}
 
-	const bool is_locked = Strings::ToBool(sep->arg[2]);
+	bool is_locked = false;
+
+	if (c->EntityVariableExists("old_command")) {
+		const std::string& old_command = c->GetEntityVariable("old_command");
+		if (old_command == "lock" || old_command == "serverlock") {
+			is_locked = true;
+		} else if (old_command == "unlock" || old_command == "serverunlock") {
+			is_locked = false;
+		} else {
+			is_locked = Strings::ToBool(sep->arg[2]);
+		}
+	}
 
 	auto pack = new ServerPacket(ServerOP_Lock, sizeof(ServerLock_Struct));
 

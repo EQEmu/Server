@@ -105,7 +105,7 @@ void command_set(Client *c, const Seperator *sep)
 		Cmd{.cmd = "pvp_points", .u = "pvp_points [Amount]", .fn = SetPVPPoints, .a = {"#setpvppoints"}},
 		Cmd{.cmd = "race", .u = "race [Race ID]", .fn = SetRace, .a = {"#race"}},
 		Cmd{.cmd = "race_permanent", .u = "race_permanent [Race ID]", .fn = SetRacePermanent, .a = {"#permarace"}},
-		Cmd{.cmd = "server_locked", .u = "server_locked [on|off]", .fn = SetServerLocked, .a = {"#serverlock"}},
+		Cmd{.cmd = "server_locked", .u = "server_locked [on|off]", .fn = SetServerLocked, .a = {"#lock", "#serverlock", "#serverunlock", "#unlock"}},
 		Cmd{.cmd = "skill", .u = "skill [Skill ID] [Skill Level]", .fn = SetSkill, .a = {"#setskill"}},
 		Cmd{.cmd = "skill_all", .u = "skill_all [Skill Level]", .fn = SetSkillAll, .a = {"#setskillall"}},
 		Cmd{.cmd = "skill_all_max", .u = "skill_all_max", .fn = SetSkillAllMax, .a = {"#maxskills"}},
@@ -140,8 +140,10 @@ void command_set(Client *c, const Seperator *sep)
 				// build the rewrite string
 				const std::string& rewrite = fmt::format("#set {} {}", cmd.cmd, Strings::Join(args, " "));
 
-				// rewrite to #set <sub-command <args>
+				// rewrite to #set <sub-command <args>>
+				c->SetEntityVariable("old_command", alias);
 				c->SendGMCommand(rewrite);
+				c->DeleteEntityVariable("old_command");
 
 				c->Message(
 					Chat::Gray,
