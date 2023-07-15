@@ -3092,6 +3092,12 @@ std::string Lua_Client::GetRaceAbbreviation()
 	return GetPlayerRaceAbbreviation(self->GetBaseRace());
 }
 
+void Lua_Client::SetLDoNPoints(uint32 theme_id, uint32 points)
+{
+	Lua_Safe_Call_Void();
+	self->SetLDoNPoints(theme_id, points);
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 	.def(luabind::constructor<>())
@@ -3536,6 +3542,7 @@ luabind::scope lua_register_client() {
 	.def("SetIPExemption", (void(Lua_Client::*)(int))&Lua_Client::SetIPExemption)
 	.def("SetItemCooldown", (void(Lua_Client::*)(uint32,uint32))&Lua_Client::SetItemCooldown)
 	.def("SetLanguageSkill", (void(Lua_Client::*)(int,int))&Lua_Client::SetLanguageSkill)
+	.def("SetLDoNPoints", (void(Lua_Client::*)(uint32,uint32))&Lua_Client::SetLDoNPoints)
 	.def("SetMaterial", (void(Lua_Client::*)(int,uint32))&Lua_Client::SetMaterial)
 	.def("SetPEQZoneFlag", (void(Lua_Client::*)(uint32))&Lua_Client::SetPEQZoneFlag)
 	.def("SetPVP", (void(Lua_Client::*)(bool))&Lua_Client::SetPVP)

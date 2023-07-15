@@ -2947,6 +2947,11 @@ std::string Perl_Client_GetRaceAbbreviation(Client* self)
 	return GetPlayerRaceAbbreviation(self->GetBaseRace());
 }
 
+void Perl_Client_SetLDoNPoints(Client* self, uint32 theme_id, uint32 points)
+{
+	self->SetLDoNPoints(theme_id, points);
+}
+
 void perl_register_client()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -3394,6 +3399,7 @@ void perl_register_client()
 	package.add("SetInvulnerableEnvironmentDamage", &Perl_Client_SetInvulnerableEnvironmentDamage);
 	package.add("SetItemCooldown", &Perl_Client_SetItemCooldown);
 	package.add("SetLanguageSkill", &Perl_Client_SetLanguageSkill);
+	package.add("SetLDoNPoints", &Perl_Client_SetLDoNPoints);
 	package.add("SetMaterial", &Perl_Client_SetMaterial);
 	package.add("SetPEQZoneFlag", &Perl_Client_SetPEQZoneFlag);
 	package.add("SetPVP", &Perl_Client_SetPVP);
