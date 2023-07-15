@@ -100,7 +100,7 @@ void command_set(Client *c, const Seperator *sep)
 		Cmd{.cmd = "mana_full", .u = "mana_full", .fn = SetManaFull, .a = {"#mana"}},
 		Cmd{.cmd = "name", .u = "name", .fn = SetName, .a = {"#name"}},
 		Cmd{.cmd = "ooc_mute", .u = "ooc_mute", .fn = SetOOCMute, .a = {"#oocmute"}},
-		Cmd{.cmd = "password", .u = "password [Account Name] [Password]", .fn = SetPassword, .a = {"#setpass"}},
+		Cmd{.cmd = "password", .u = "password [Account Name] [Password] (account table password)", .fn = SetPassword, .a = {"#setpass"}},
 		Cmd{.cmd = "pvp", .u = "pvp [on|off]", .fn = SetPVP, .a = {"#pvp"}},
 		Cmd{.cmd = "pvp_points", .u = "pvp_points [Amount]", .fn = SetPVPPoints, .a = {"#setpvppoints"}},
 		Cmd{.cmd = "race", .u = "race [Race ID]", .fn = SetRace, .a = {"#race"}},
