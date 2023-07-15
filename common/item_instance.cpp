@@ -720,12 +720,14 @@ EQ::ItemInstance* EQ::ItemInstance::RemoveAugment(uint8 index)
 
 bool EQ::ItemInstance::IsAugmented()
 {
-	if (!m_item || !m_item->IsClassCommon())
+	if (!m_item || !m_item->IsClassCommon()) {
 		return false;
+	}
 
-	for (int index = invaug::SOCKET_BEGIN; index <= invaug::SOCKET_END; ++index) {
-		if (GetAugmentItemID(index))
+	for (uint8 slot_id = invaug::SOCKET_BEGIN; slot_id <= invaug::SOCKET_END; ++slot_id) {
+		if (GetAugmentItemID(slot_id)) {
 			return true;
+		}
 	}
 
 	return false;

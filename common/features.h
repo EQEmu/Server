@@ -240,36 +240,22 @@ enum {	//some random constants
 
 //Some hard coded statuses from commands and other places:
 enum {
-	minStatusToBeGM = 40,
-	minStatusToUseGMCommands = 80,
-	minStatusToKick = 150,
-	minStatusToAvoidFalling = 100,
-	minStatusToHaveInvalidSpells = 80,
-	minStatusToHaveInvalidSkills = 80,
-	minStatusToIgnoreZoneFlags = 80,
+	minStatusToBeGM               = 40,
+	minStatusToUseGMCommands      = 80,
+	minStatusToKick               = 150,
+	minStatusToAvoidFalling       = 100,
+	minStatusToIgnoreZoneFlags    = 80,
 	minStatusToSeeOthersZoneFlags = 80,
-	minStatusToEditOtherGuilds = 80,
-	commandMovecharSelfOnly = 80,	//below this == only self move allowed
-	commandMovecharToSpecials = 200,	//ability to send people to cshom/load zones
-	commandZoneToSpecials = 80,		//zone to cshome, out of load zones
-	commandToggleAI = 250,			//can turn NPC AI on and off
-	commandCastSpecials = 100,		//can cast special spells
-	commandInstacast = 100,			//insta-cast all #casted spells
-	commandLevelAboveCap = 100,		//can #level players above level cap
-	commandLevelNPCAboveCap = 100,	//can #level NPCs above level cap
-	commandSetSkillsOther = 100,	//ability to setskills on others
-	commandRaceOthers = 100,	//ability to #race on others
-	commandGenderOthers = 100,	//ability to #gender on others
-	commandTextureOthers = 100,	//ability to #texture on others
-	commandDoAnimOthers = 100,	//can #doanim on others
-	commandLockZones = 101,		//can lock or unlock zones
-	commandEditPlayerCorpses = 150,	//can Edit Player Corpses
-	commandChangeFlags = 200,		//ability to set/refresh flags
-	commandBanPlayers = 100,		//can set bans on players
-	commandChangeDatarate = 201,	//edit client's data rate
-	commandZoneToCoords = 0,		//can #zone with coords
-	commandInterrogateInv = 100,	//below this == only log on error state and self-only target dump
-	commandInvSnapshot = 150		//ability to clear/restore snapshots
+	minStatusToEditOtherGuilds    = 80,
+	commandMovecharSelfOnly       = 80,  //below this == only self move allowed
+	commandMovecharToSpecials     = 200, //ability to send people to cshom/load zones
+	commandCastSpecials           = 100, //can cast special spells
+	commandInstacast              = 100, //insta-cast all #casted spells
+	commandDoAnimOthers           = 100, //can #doanim on others
+	commandLockZones              = 101, //can lock or unlock zones
+	commandEditPlayerCorpses      = 150, //can Edit Player Corpses
+	commandInterrogateInv         = 100, //below this == only log on error state and self-only target dump
+	commandInvSnapshot            = 150  //ability to clear/restore snapshots
 };
 
 

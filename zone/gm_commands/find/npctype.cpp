@@ -33,7 +33,7 @@ void FindNPCType(Client *c, const Seperator *sep)
 		return;
 	}
 
-	const auto can_spawn_npcs = c->Admin() >= GetCommandStatus(c, "#npctypespawn");
+	const auto can_spawn_npcs = c->Admin() >= GetCommandStatus("#npctypespawn");
 
 	auto found_count = 0;
 

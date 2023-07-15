@@ -16,6 +16,7 @@
 #include "../../strings.h"
 #include <ctime>
 
+
 class BaseRaidDetailsRepository {
 public:
 	struct RaidDetails {
@@ -23,6 +24,9 @@ public:
 		int32_t     loottype;
 		int8_t      locked;
 		std::string motd;
+		uint16_t    marked_npc_1;
+		uint16_t    marked_npc_2;
+		uint16_t    marked_npc_3;
 	};
 
 	static std::string PrimaryKey()
@@ -37,6 +41,9 @@ public:
 			"loottype",
 			"locked",
 			"motd",
+			"marked_npc_1",
+			"marked_npc_2",
+			"marked_npc_3",
 		};
 	}
 
@@ -47,6 +54,9 @@ public:
 			"loottype",
 			"locked",
 			"motd",
+			"marked_npc_1",
+			"marked_npc_2",
+			"marked_npc_3",
 		};
 	}
 
@@ -87,10 +97,13 @@ public:
 	{
 		RaidDetails e{};
 
-		e.raidid   = 0;
-		e.loottype = 0;
-		e.locked   = 0;
-		e.motd     = "";
+		e.raidid       = 0;
+		e.loottype     = 0;
+		e.locked       = 0;
+		e.motd         = "";
+		e.marked_npc_1 = 0;
+		e.marked_npc_2 = 0;
+		e.marked_npc_3 = 0;
 
 		return e;
 	}
@@ -116,8 +129,9 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				raid_details_id
 			)
 		);
@@ -126,10 +140,13 @@ public:
 		if (results.RowCount() == 1) {
 			RaidDetails e{};
 
-			e.raidid   = static_cast<int32_t>(atoi(row[0]));
-			e.loottype = static_cast<int32_t>(atoi(row[1]));
-			e.locked   = static_cast<int8_t>(atoi(row[2]));
-			e.motd     = row[3] ? row[3] : "";
+			e.raidid       = static_cast<int32_t>(atoi(row[0]));
+			e.loottype     = static_cast<int32_t>(atoi(row[1]));
+			e.locked       = static_cast<int8_t>(atoi(row[2]));
+			e.motd         = row[3] ? row[3] : "";
+			e.marked_npc_1 = static_cast<uint16_t>(strtoul(row[4], nullptr, 10));
+			e.marked_npc_2 = static_cast<uint16_t>(strtoul(row[5], nullptr, 10));
+			e.marked_npc_3 = static_cast<uint16_t>(strtoul(row[6], nullptr, 10));
 
 			return e;
 		}
@@ -167,6 +184,9 @@ public:
 		v.push_back(columns[1] + " = " + std::to_string(e.loottype));
 		v.push_back(columns[2] + " = " + std::to_string(e.locked));
 		v.push_back(columns[3] + " = '" + Strings::Escape(e.motd) + "'");
+		v.push_back(columns[4] + " = " + std::to_string(e.marked_npc_1));
+		v.push_back(columns[5] + " = " + std::to_string(e.marked_npc_2));
+		v.push_back(columns[6] + " = " + std::to_string(e.marked_npc_3));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -192,6 +212,9 @@ public:
 		v.push_back(std::to_string(e.loottype));
 		v.push_back(std::to_string(e.locked));
 		v.push_back("'" + Strings::Escape(e.motd) + "'");
+		v.push_back(std::to_string(e.marked_npc_1));
+		v.push_back(std::to_string(e.marked_npc_2));
+		v.push_back(std::to_string(e.marked_npc_3));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -225,6 +248,9 @@ public:
 			v.push_back(std::to_string(e.loottype));
 			v.push_back(std::to_string(e.locked));
 			v.push_back("'" + Strings::Escape(e.motd) + "'");
+			v.push_back(std::to_string(e.marked_npc_1));
+			v.push_back(std::to_string(e.marked_npc_2));
+			v.push_back(std::to_string(e.marked_npc_3));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
@@ -258,10 +284,13 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			RaidDetails e{};
 
-			e.raidid   = static_cast<int32_t>(atoi(row[0]));
-			e.loottype = static_cast<int32_t>(atoi(row[1]));
-			e.locked   = static_cast<int8_t>(atoi(row[2]));
-			e.motd     = row[3] ? row[3] : "";
+			e.raidid       = static_cast<int32_t>(atoi(row[0]));
+			e.loottype     = static_cast<int32_t>(atoi(row[1]));
+			e.locked       = static_cast<int8_t>(atoi(row[2]));
+			e.motd         = row[3] ? row[3] : "";
+			e.marked_npc_1 = static_cast<uint16_t>(strtoul(row[4], nullptr, 10));
+			e.marked_npc_2 = static_cast<uint16_t>(strtoul(row[5], nullptr, 10));
+			e.marked_npc_3 = static_cast<uint16_t>(strtoul(row[6], nullptr, 10));
 
 			all_entries.push_back(e);
 		}
@@ -286,10 +315,13 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			RaidDetails e{};
 
-			e.raidid   = static_cast<int32_t>(atoi(row[0]));
-			e.loottype = static_cast<int32_t>(atoi(row[1]));
-			e.locked   = static_cast<int8_t>(atoi(row[2]));
-			e.motd     = row[3] ? row[3] : "";
+			e.raidid       = static_cast<int32_t>(atoi(row[0]));
+			e.loottype     = static_cast<int32_t>(atoi(row[1]));
+			e.locked       = static_cast<int8_t>(atoi(row[2]));
+			e.motd         = row[3] ? row[3] : "";
+			e.marked_npc_1 = static_cast<uint16_t>(strtoul(row[4], nullptr, 10));
+			e.marked_npc_2 = static_cast<uint16_t>(strtoul(row[5], nullptr, 10));
+			e.marked_npc_3 = static_cast<uint16_t>(strtoul(row[6], nullptr, 10));
 
 			all_entries.push_back(e);
 		}

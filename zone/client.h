@@ -602,6 +602,7 @@ public:
 	inline void SetEXPModifier(uint32 zone_id, double exp_modifier, int16 instance_version = -1) { database.SetEXPModifier(CharacterID(), zone_id, exp_modifier, instance_version); };
 
 	bool UpdateLDoNPoints(uint32 theme_id, int points);
+	void SetLDoNPoints(uint32 theme_id, uint32 points);
 	void SetPVPPoints(uint32 Points) { m_pp.PVPCurrentPoints = Points; }
 	uint32 GetPVPPoints() { return m_pp.PVPCurrentPoints; }
 	void AddPVPPoints(uint32 Points);
@@ -1924,6 +1925,7 @@ private:
 public:
 	void SetSharedTaskId(int64 shared_task_id);
 	int64 GetSharedTaskId() const;
+	struct XTarget_Struct XTargets[XTARGET_HARDCAP];
 private:
 
 	bool m_exp_enabled;
@@ -1976,7 +1978,6 @@ private:
 	bool XTargetAutoAddHaters;
 	bool m_dirtyautohaters;
 
-	struct XTarget_Struct XTargets[XTARGET_HARDCAP];
 	XTargetAutoHaters m_autohatermgr;
 	XTargetAutoHaters *m_activeautohatermgr;
 

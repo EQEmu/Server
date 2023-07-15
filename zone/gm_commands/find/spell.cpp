@@ -7,7 +7,7 @@ void FindSpell(Client *c, const Seperator *sep)
 		return;
 	}
 
-	const auto can_cast_spells = c->Admin() >= GetCommandStatus(c, "castspell");
+	const auto can_cast_spells = c->Admin() >= GetCommandStatus("castspell");
 
 	if (sep->IsNumber(2)) {
 		const auto spell_id = Strings::ToUnsignedInt(sep->arg[2]);

@@ -21,14 +21,14 @@ bool Perl_Mob_IsNPC(Mob* self) // @categories Script Utility
 	return self->IsNPC();
 }
 
-bool Perl_Mob_IsBot(Mob* self) // @categories Script Utility
-{
-	return self->IsBot();
-}
-
 bool Perl_Mob_IsMob(Mob* self) // @categories Script Utility
 {
 	return self->IsMob();
+}
+
+bool Perl_Mob_IsMerc(Mob* self) // @categories Script Utility
+{
+	return self->IsMerc();
 }
 
 bool Perl_Mob_IsCorpse(Mob* self) // @categories Script Utility, Corpse
@@ -64,6 +64,36 @@ bool Perl_Mob_IsTrap(Mob* self) // @categories Script Utility
 bool Perl_Mob_IsBeacon(Mob* self) // @categories Script Utility
 {
 	return self->IsBeacon();
+}
+
+bool Perl_Mob_IsEncounter(Mob* self) // @categories Script Utility
+{
+	return self->IsEncounter();
+}
+
+bool Perl_Mob_IsBot(Mob* self) // @categories Script Utility
+{
+	return self->IsBot();
+}
+
+bool Perl_Mob_IsAura(Mob* self) // @categories Script Utility
+{
+	return self->IsAura();
+}
+
+bool Perl_Mob_IsOfClientBot(Mob* self) // @categories Script Utility
+{
+	return self->IsOfClientBot();
+}
+
+bool Perl_Mob_IsOfClientBotMerc(Mob* self) // @categories Script Utility
+{
+	return self->IsOfClientBotMerc();
+}
+
+bool Perl_Mob_IsTemporaryPet(Mob* self) // @categories Script Utility
+{
+	return self->IsTempPet();
 }
 
 Client* Perl_Mob_CastToClient(Mob* self) // @categories Account and Character, Script Utility
@@ -146,17 +176,17 @@ void Perl_Mob_SendWearChange(Mob* self, uint8_t material_slot) // @categories Sc
 	self->SendWearChange(material_slot);
 }
 
-int32_t Perl_Mob_GetEquipment(Mob* self, uint8_t material_slot) // @categories Inventory and Items
+uint32_t Perl_Mob_GetEquipment(Mob* self, uint8_t material_slot) // @categories Inventory and Items
 {
 	return self->GetEquippedItemFromTextureSlot(material_slot);
 }
 
-int32_t Perl_Mob_GetEquipmentMaterial(Mob* self, uint8_t material_slot) // @categories Inventory and Items
+uint32_t Perl_Mob_GetEquipmentMaterial(Mob* self, uint8_t material_slot) // @categories Inventory and Items
 {
 	return self->GetEquipmentMaterial(material_slot);
 }
 
-int32_t Perl_Mob_GetEquipmentColor(Mob* self, uint8_t material_slot) // @categories Inventory and Items
+uint32_t Perl_Mob_GetEquipmentColor(Mob* self, uint8_t material_slot) // @categories Inventory and Items
 {
 	return self->GetEquipmentColor(material_slot);
 }
@@ -2032,17 +2062,17 @@ void Perl_Mob_SetSlotTint(Mob* self, uint8 material_slot, uint8 red_tint, uint8 
 	self->SetSlotTint(material_slot, red_tint, green_tint, blue_tint);
 }
 
-void Perl_Mob_WearChange(Mob* self, uint8 material_slot, uint16 texture) // @categories Script Utility
+void Perl_Mob_WearChange(Mob* self, uint8 material_slot, uint32 texture) // @categories Script Utility
 {
 	self->WearChange(material_slot, texture);
 }
 
-void Perl_Mob_WearChange(Mob* self, uint8 material_slot, uint16 texture, uint32 color) // @categories Script Utility
+void Perl_Mob_WearChange(Mob* self, uint8 material_slot, uint32 texture, uint32 color) // @categories Script Utility
 {
 	self->WearChange(material_slot, texture, color);
 }
 
-void Perl_Mob_WearChange(Mob* self, uint8 material_slot, uint16 texture, uint32 color, uint32 hero_forge_model) // @categories Script Utility
+void Perl_Mob_WearChange(Mob* self, uint8 material_slot, uint32 texture, uint32 color, uint32 hero_forge_model) // @categories Script Utility
 {
 	self->WearChange(material_slot, texture, color, hero_forge_model);
 }
@@ -3443,6 +3473,7 @@ void perl_register_mob()
 	package.add("IsAmnesiad", &Perl_Mob_IsAmnesiad);
 	package.add("IsAttackAllowed", (bool(*)(Mob*, Mob*))&Perl_Mob_IsAttackAllowed);
 	package.add("IsAttackAllowed", (bool(*)(Mob*, Mob*, bool))&Perl_Mob_IsAttackAllowed);
+	package.add("IsAura", &Perl_Mob_IsAura);
 	package.add("IsBeacon", &Perl_Mob_IsBeacon);
 	package.add("IsBeneficialAllowed", &Perl_Mob_IsBeneficialAllowed);
 	package.add("IsBerserk", &Perl_Mob_IsBerserk);
@@ -3453,6 +3484,7 @@ void perl_register_mob()
 	package.add("IsCorpse", &Perl_Mob_IsCorpse);
 	package.add("IsDoor", &Perl_Mob_IsDoor);
 	package.add("IsEliteMaterialItem", &Perl_Mob_IsEliteMaterialItem);
+	package.add("IsEncounter", &Perl_Mob_IsEncounter);
 	package.add("IsEngaged", &Perl_Mob_IsEngaged);
 	package.add("IsEnraged", &Perl_Mob_IsEnraged);
 	package.add("IsFeared", &Perl_Mob_IsFeared);
@@ -3462,12 +3494,15 @@ void perl_register_mob()
 	package.add("IsInvisible", (bool(*)(Mob*))&Perl_Mob_IsInvisible);
 	package.add("IsInvisible", (bool(*)(Mob*, Mob*))&Perl_Mob_IsInvisible);
 	package.add("IsMeleeDisabled", &Perl_Mob_IsMeleeDisabled);
+	package.add("IsMerc", &Perl_Mob_IsMerc);
 	package.add("IsMezzed", &Perl_Mob_IsMezzed);
 	package.add("IsMob", &Perl_Mob_IsMob);
 	package.add("IsMoving", &Perl_Mob_IsMoving);
 	package.add("IsNPC", &Perl_Mob_IsNPC);
 	package.add("IsNPCCorpse", &Perl_Mob_IsNPCCorpse);
 	package.add("IsObject", &Perl_Mob_IsObject);
+	package.add("IsOfClientBot", &Perl_Mob_IsOfClientBot);
+	package.add("IsOfClientBotMerc", &Perl_Mob_IsOfClientBotMerc);
 	package.add("IsPausedTimer", &Perl_Mob_IsPausedTimer);
 	package.add("IsPet", &Perl_Mob_IsPet);
 	package.add("IsPlayerCorpse", &Perl_Mob_IsPlayerCorpse);
@@ -3478,6 +3513,7 @@ void perl_register_mob()
 	package.add("IsStunned", &Perl_Mob_IsStunned);
 	package.add("IsTargetable", &Perl_Mob_IsTargetable);
 	package.add("IsTargeted", &Perl_Mob_IsTargeted);
+	package.add("IsTemporaryPet", &Perl_Mob_IsTemporaryPet);
 	package.add("IsTrackable", &Perl_Mob_IsTrackable);
 	package.add("IsTrap", &Perl_Mob_IsTrap);
 	package.add("IsWarriorClass", &Perl_Mob_IsWarriorClass);
@@ -3669,9 +3705,9 @@ void perl_register_mob()
 	package.add("TypesTempPet", (void(*)(Mob*, uint32, const char*, uint32, bool, Mob*))&Perl_Mob_TypesTempPet);
 	package.add("TypesTempPet", (void(*)(Mob*, uint32, const char*, uint32, bool, Mob*, bool))&Perl_Mob_TypesTempPet);
 	package.add("WalkTo", &Perl_Mob_WalkTo);
-	package.add("WearChange", (void(*)(Mob*, uint8, uint16))&Perl_Mob_WearChange);
-	package.add("WearChange", (void(*)(Mob*, uint8, uint16, uint32))&Perl_Mob_WearChange);
-	package.add("WearChange", (void(*)(Mob*, uint8, uint16, uint32, uint32))&Perl_Mob_WearChange);
+	package.add("WearChange", (void(*)(Mob*, uint8, uint32))&Perl_Mob_WearChange);
+	package.add("WearChange", (void(*)(Mob*, uint8, uint32, uint32))&Perl_Mob_WearChange);
+	package.add("WearChange", (void(*)(Mob*, uint8, uint32, uint32, uint32))&Perl_Mob_WearChange);
 	package.add("WipeHateList", &Perl_Mob_WipeHateList);
 }
 

@@ -4760,6 +4760,52 @@ UNIQUE KEY `name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 )"
 	},
+	ManifestEntry{
+		.version = 9230,
+		.description = "2023_06_23_raid_feature_updates",
+		.check = "SHOW COLUMNS FROM `raid_members` LIKE 'is_assister'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+	ALTER TABLE `raid_members`
+	ADD COLUMN `is_marker` TINYINT UNSIGNED DEFAULT(0) NOT NULL AFTER `islooter`,
+	ADD COLUMN `is_assister` TINYINT UNSIGNED DEFAULT(0) NOT NULL AFTER `is_marker`,
+	ADD COLUMN `note` VARCHAR(64) DEFAULT("") NOT NULL AFTER `is_assister`;
+
+	ALTER TABLE `raid_details`
+	ADD COLUMN `marked_npc_1` SMALLINT UNSIGNED DEFAULT(0) NOT NULL AFTER `motd`,
+	ADD COLUMN `marked_npc_2` SMALLINT UNSIGNED DEFAULT(0) NOT NULL AFTER `marked_npc_1`,
+	ADD COLUMN `marked_npc_3` SMALLINT UNSIGNED DEFAULT(0) NOT NULL AFTER `marked_npc_2`;
+	)",
+	},
+	ManifestEntry{
+		.version = 9231,
+		.description = "2023_07_14_npc_unsigned_melee_texture.sql",
+		.check = "SHOW COLUMNS FROM `npc_types` LIKE 'd_melee_texture1'",
+		.condition = "contains",
+		.match = "int(11) signed",
+		.sql = R"(ALTER TABLE `npc_types`
+	MODIFY COLUMN `d_melee_texture1` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `armortint_blue`,
+	MODIFY COLUMN `d_melee_texture2` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `d_melee_texture1`;
+	)",
+	},
+	ManifestEntry{
+		.version = 9232,
+		.description = "2023_07_11_command_subsettings.sql",
+		.check = "SHOW TABLES LIKE 'command_subsettings'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(CREATE TABLE `command_subsettings` (
+`id` int UNSIGNED NOT NULL AUTO_INCREMENT,
+`parent_command` varchar(32) NOT NULL,
+`sub_command` varchar(32) NOT NULL,
+`access_level` int(11) UNSIGNED NOT NULL DEFAULT 0,
+`top_level_aliases` varchar(255) NOT NULL,
+PRIMARY KEY (`id`),
+UNIQUE INDEX `command`(`parent_command`, `sub_command`)
+)
+)"
+	},
 
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{

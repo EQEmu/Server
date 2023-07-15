@@ -687,7 +687,7 @@ bool ZoneDatabase::LoadCharacterData(uint32 character_id, PlayerProfile_Struct* 
 		pp->ldon_points_ruj = Strings::ToInt(row[r]); r++;								 // "ldon_points_ruj,           "
 		pp->ldon_points_tak = Strings::ToInt(row[r]); r++;								 // "ldon_points_tak,           "
 		pp->ldon_points_available = Strings::ToInt(row[r]); r++;							 // "ldon_points_available,     "
-		pp->tribute_time_remaining = Strings::ToInt(row[r]); r++;							 // "tribute_time_remaining,    "
+		pp->tribute_time_remaining = Strings::ToUnsignedInt(row[r]); r++;					 // "tribute_time_remaining,    "
 		pp->showhelm = Strings::ToInt(row[r]); r++;										 // "show_helm,                 "
 		pp->career_tribute_points = Strings::ToInt(row[r]); r++;							 // "career_tribute_points,     "
 		pp->tribute_points = Strings::ToInt(row[r]); r++;									 // "tribute_points,            "
@@ -2269,8 +2269,8 @@ const NPCType* ZoneDatabase::GetMercType(uint32 id, uint16 raceid, uint32 client
 		else
 			tmpNPCType->special_abilities[0] = '\0';
 
-		tmpNPCType->d_melee_texture1 = Strings::ToInt(row[28]);
-		tmpNPCType->d_melee_texture2 = Strings::ToInt(row[29]);
+		tmpNPCType->d_melee_texture1 = Strings::ToUnsignedInt(row[28]);
+		tmpNPCType->d_melee_texture2 = Strings::ToUnsignedInt(row[29]);
 		tmpNPCType->prim_melee_type = Strings::ToInt(row[30]);
 		tmpNPCType->sec_melee_type = Strings::ToInt(row[31]);
 		tmpNPCType->runspeed = Strings::ToFloat(row[32]);

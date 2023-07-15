@@ -30,18 +30,15 @@
 
 #include "bot.h"
 
-/**
- * Stores internal representation of mob texture by material slot
- *
- * @param material_slot
- * @param texture
- * @param color
- * @param hero_forge_model
- */
-void Mob::SetMobTextureProfile(uint8 material_slot, uint16 texture, uint32 color, uint32 hero_forge_model)
+void Mob::SetMobTextureProfile(
+	uint8 material_slot,
+	uint32 texture,
+	uint32 color,
+	uint32 hero_forge_model
+)
 {
-	Log(Logs::Detail, Logs::MobAppearance,
-		"[%s] material_slot: %u texture: %u color: %u hero_forge_model: %u",
+	LogMobAppearanceDetail(
+		"[{}] material_slot [{}] texture [{}] color [{}] hero_forge_model [{}]",
 		GetCleanName(),
 		material_slot,
 		texture,
@@ -100,13 +97,7 @@ void Mob::SetMobTextureProfile(uint8 material_slot, uint16 texture, uint32 color
 	}
 }
 
-/**
- * Returns internal representation of mob texture by material
- *
- * @param material_slot
- * @return
- */
-int32 Mob::GetTextureProfileMaterial(uint8 material_slot) const
+uint32 Mob::GetTextureProfileMaterial(uint8 material_slot) const
 {
 	switch (material_slot) {
 		case EQ::textures::armorHead:
@@ -132,13 +123,7 @@ int32 Mob::GetTextureProfileMaterial(uint8 material_slot) const
 	}
 }
 
-/**
- * Returns internal representation of mob texture by color
- *
- * @param material_slot
- * @return
- */
-int32 Mob::GetTextureProfileColor(uint8 material_slot) const
+uint32 Mob::GetTextureProfileColor(uint8 material_slot) const
 {
 	switch (material_slot) {
 		case EQ::textures::armorHead:
@@ -164,13 +149,7 @@ int32 Mob::GetTextureProfileColor(uint8 material_slot) const
 	}
 }
 
-/**
- * Returns internal representation of mob texture by HerosForgeModel
- *
- * @param material_slot
- * @return
- */
-int32 Mob::GetTextureProfileHeroForgeModel(uint8 material_slot) const
+uint32 Mob::GetTextureProfileHeroForgeModel(uint8 material_slot) const
 {
 	switch (material_slot) {
 		case EQ::textures::armorHead:
@@ -196,25 +175,19 @@ int32 Mob::GetTextureProfileHeroForgeModel(uint8 material_slot) const
 	}
 }
 
-/**
- * Gets the material or texture for a slot (leather / plate etc.)
- *
- * @param material_slot
- * @return
- */
-int32 Mob::GetEquipmentMaterial(uint8 material_slot) const
+uint32 Mob::GetEquipmentMaterial(uint8 material_slot) const
 {
-	uint32 equipment_material       = 0;
-	int32  texture_profile_material = GetTextureProfileMaterial(material_slot);
+	uint32       equipment_material       = 0;
+	const uint32 texture_profile_material = GetTextureProfileMaterial(material_slot);
 
 	LogMobAppearance(
-		"[{}] material_slot: {} texture_profile_material: {}",
+		"[{}] material_slot [{}] texture_profile_material [{}]",
 		clean_name,
 		material_slot,
 		texture_profile_material
 	);
 
-	if (texture_profile_material > 0) {
+	if (texture_profile_material) {
 		return texture_profile_material;
 	}
 
@@ -230,7 +203,7 @@ int32 Mob::GetEquipmentMaterial(uint8 material_slot) const
 					return 0;
 				}
 
-				const auto* inst = CastToClient()->m_inv[inventory_slot];
+				const auto inst = CastToClient()->m_inv[inventory_slot];
 
 				if (inst) {
 					const auto augment = inst->GetOrnamentationAugment();
@@ -238,7 +211,7 @@ int32 Mob::GetEquipmentMaterial(uint8 material_slot) const
 					if (augment) {
 						item = augment->GetItem();
 						if (item && strlen(item->IDFile) > 2 && Strings::IsNumber(&item->IDFile[2])) {
-							equipment_material = Strings::ToInt(&item->IDFile[2]);
+							equipment_material = Strings::ToUnsignedInt(&item->IDFile[2]);
 						}
 					} else if (inst->GetOrnamentationIDFile()) {
 						equipment_material = inst->GetOrnamentationIDFile();
@@ -247,10 +220,9 @@ int32 Mob::GetEquipmentMaterial(uint8 material_slot) const
 			}
 
 			if (!equipment_material && strlen(item->IDFile) > 2 && Strings::IsNumber(&item->IDFile[2])) {
-				equipment_material = Strings::ToInt(&item->IDFile[2]);
+				equipment_material = Strings::ToUnsignedInt(&item->IDFile[2]);
 			}
-		}
-		else {
+		} else {
 			equipment_material = item->Material;
 		}
 	}
@@ -260,8 +232,8 @@ int32 Mob::GetEquipmentMaterial(uint8 material_slot) const
 
 uint8 Mob::GetEquipmentType(uint8 material_slot) const
 {
-	auto item_type = static_cast<uint8>(EQ::item::ItemType2HBlunt);
-	auto item = database.GetItem(GetEquippedItemFromTextureSlot(material_slot));
+	const auto item      = database.GetItem(GetEquippedItemFromTextureSlot(material_slot));
+	auto       item_type = static_cast<uint8>(EQ::item::ItemType2HBlunt);
 
 	if (item) {
 		const auto is_equipped_weapon = EQ::ValueWithin(material_slot, EQ::textures::weaponPrimary, EQ::textures::weaponSecondary);
@@ -273,7 +245,7 @@ uint8 Mob::GetEquipmentType(uint8 material_slot) const
 					return item_type;
 				}
 
-				const auto* inst = CastToClient()->m_inv[inventory_slot];
+				const auto inst = CastToClient()->m_inv[inventory_slot];
 				if (inst) {
 					item_type = inst->GetItemType();
 				}
@@ -284,36 +256,26 @@ uint8 Mob::GetEquipmentType(uint8 material_slot) const
 	return item_type;
 }
 
-/**
- * @param material_slot
- * @return
- */
 uint32 Mob::GetEquipmentColor(uint8 material_slot) const
 {
-	const EQ::ItemData *item = nullptr;
-
 	if (armor_tint.Slot[material_slot].Color) {
 		return armor_tint.Slot[material_slot].Color;
 	}
 
-	item = database.GetItem(GetEquippedItemFromTextureSlot(material_slot));
-	if (item != nullptr) {
+	const auto item = database.GetItem(GetEquippedItemFromTextureSlot(material_slot));
+	if (item) {
 		return item->Color;
 	}
 
 	return 0;
 }
 
-/**
- * @param material_slot
- * @return
- */
-int32 Mob::GetHerosForgeModel(uint8 material_slot) const
+uint32 Mob::GetHerosForgeModel(uint8 material_slot) const
 {
-	uint32 hero_model = 0;
+	uint32 heros_forge_model = 0;
 	if (EQ::ValueWithin(material_slot, 0, EQ::textures::weaponPrimary)) {
-		const EQ::ItemData *item = database.GetItem(GetEquippedItemFromTextureSlot(material_slot));
-		const auto         slot  = EQ::InventoryProfile::CalcSlotFromMaterial(material_slot);
+		auto       item = database.GetItem(GetEquippedItemFromTextureSlot(material_slot));
+		const auto slot = EQ::InventoryProfile::CalcSlotFromMaterial(material_slot);
 
 		if (item && slot != INVALID_INDEX) {
 			if (IsClient()) {
@@ -322,33 +284,33 @@ int32 Mob::GetHerosForgeModel(uint8 material_slot) const
 					const auto augment = inst->GetOrnamentationAugment();
 
 					if (augment) {
-						item       = augment->GetItem();
-						hero_model = item->HerosForgeModel;
+						item              = augment->GetItem();
+						heros_forge_model = item->HerosForgeModel;
 					} else if (inst->GetOrnamentHeroModel()) {
-						hero_model = inst->GetOrnamentHeroModel();
+						heros_forge_model = inst->GetOrnamentHeroModel();
 					}
 				}
 			}
 
-			if (hero_model == 0) {
-				hero_model = item->HerosForgeModel;
+			if (!heros_forge_model) {
+				heros_forge_model = item->HerosForgeModel;
 			}
 		}
 
 		if (IsNPC()) {
-			hero_model = CastToNPC()->GetHeroForgeModel();
+			heros_forge_model = CastToNPC()->GetHeroForgeModel();
 
 			/**
 			 * Robes require full model number, and should only be sent to chest, arms, wrists, and legs slots
 			 */
 			if (
-				hero_model > 1000 &&
+				heros_forge_model > 1000 &&
 				material_slot != EQ::textures::armorChest &&
 				material_slot != EQ::textures::armorArms &&
 				material_slot != EQ::textures::armorWrist &&
 				material_slot != EQ::textures::armorLegs
 			) {
-				hero_model = 0;
+				heros_forge_model = 0;
 			}
 		}
 	}
@@ -359,21 +321,21 @@ int32 Mob::GetHerosForgeModel(uint8 material_slot) const
 	 * Otherwise, use the exact Model if model is > 999
 	 * Robes for example are 11607 to 12107 in RoF
 	 */
-	if (EQ::ValueWithin(hero_model, 1, 999)) {
-		hero_model *= 100;
-		hero_model += material_slot;
+	if (EQ::ValueWithin(heros_forge_model, 1, 999)) {
+		heros_forge_model *= 100;
+		heros_forge_model += material_slot;
 	}
 
-	return hero_model;
+	return heros_forge_model;
 }
 
 uint32 NPC::GetEquippedItemFromTextureSlot(uint8 material_slot) const
 {
-	if (material_slot > 8) {
+	if (material_slot >= EQ::textures::materialCount) {
 		return 0;
 	}
 
-	int16 inventory_slot = EQ::InventoryProfile::CalcSlotFromMaterial(material_slot);
+	const int16 inventory_slot = EQ::InventoryProfile::CalcSlotFromMaterial(material_slot);
 	if (inventory_slot == INVALID_INDEX) {
 		return 0;
 	}
@@ -381,10 +343,6 @@ uint32 NPC::GetEquippedItemFromTextureSlot(uint8 material_slot) const
 	return equipment[inventory_slot];
 }
 
-/**
- * NPCs typically use this function for sending appearance
- * @param one_client
- */
 void Mob::SendArmorAppearance(Client *one_client)
 {
 	/**
@@ -402,114 +360,84 @@ void Mob::SendArmorAppearance(Client *one_client)
 
 	if (IsPlayerRace(race)) {
 		if (!IsClient()) {
-			for (uint8 i = 0; i <= EQ::textures::materialCount; ++i) {
-				const EQ::ItemData *item = database.GetItem(GetEquippedItemFromTextureSlot(i));
-				if (item != nullptr) {
-					SendWearChange(i, one_client);
+			for (uint8 slot_id = 0; slot_id <= EQ::textures::materialCount; ++slot_id) {
+				const auto item = database.GetItem(GetEquippedItemFromTextureSlot(slot_id));
+				if (item) {
+					SendWearChange(slot_id, one_client);
 				}
 			}
 		}
 	}
 
-	for (uint8 i = 0; i <= EQ::textures::materialCount; ++i) {
-		if (GetTextureProfileMaterial(i)) {
-			SendWearChange(i, one_client);
+	for (uint8 slot_id = 0; slot_id <= EQ::textures::materialCount; ++slot_id) {
+		if (GetTextureProfileMaterial(slot_id)) {
+			SendWearChange(slot_id, one_client);
 		}
 	}
 }
 
-/**
- * @param material_slot
- * @param one_client
- */
 void Mob::SendWearChange(uint8 material_slot, Client *one_client)
 {
-	auto packet       = new EQApplicationPacket(OP_WearChange, sizeof(WearChange_Struct));
-	auto *wear_change = (WearChange_Struct *) packet->pBuffer;
+	auto packet = new EQApplicationPacket(OP_WearChange, sizeof(WearChange_Struct));
+	auto w      = (WearChange_Struct *) packet->pBuffer;
 
 	Log(Logs::Detail, Logs::MobAppearance, "[%s]",
 		GetCleanName()
 	);
 
-	wear_change->spawn_id         = GetID();
-	wear_change->material         = static_cast<uint32>(GetEquipmentMaterial(material_slot));
-	wear_change->elite_material   = IsEliteMaterialItem(material_slot);
-	wear_change->hero_forge_model = static_cast<uint32>(GetHerosForgeModel(material_slot));
+	w->spawn_id         = GetID();
+	w->material         = static_cast<uint32>(GetEquipmentMaterial(material_slot));
+	w->elite_material   = IsEliteMaterialItem(material_slot);
+	w->hero_forge_model = static_cast<uint32>(GetHerosForgeModel(material_slot));
 
 	if (IsBot()) {
-		auto item_inst = CastToBot()->GetBotItem(EQ::InventoryProfile::CalcSlotFromMaterial(material_slot));
-		if (item_inst)
-			wear_change->color.Color = item_inst->GetColor();
-		else
-			wear_change->color.Color = 0;
-	}
-	else {
-		wear_change->color.Color = GetEquipmentColor(material_slot);
+		const auto item_inst = CastToBot()->GetBotItem(EQ::InventoryProfile::CalcSlotFromMaterial(material_slot));
+		w->color.Color = item_inst ? item_inst->GetColor() : 0;
+	} else {
+		w->color.Color = GetEquipmentColor(material_slot);
 	}
 
-	wear_change->wear_slot_id = material_slot;
+	w->wear_slot_id = material_slot;
 
 	// Part of a bug fix to ensure heroforge models send to other clients in zone.
-	queue_wearchange_slot = wear_change->hero_forge_model ? material_slot : -1;
+	queue_wearchange_slot = w->hero_forge_model ? material_slot : -1;
 
 	if (!one_client) {
 		entity_list.QueueClients(this, packet);
-	}
-	else {
+	} else {
 		one_client->QueuePacket(packet, false, Client::CLIENT_CONNECTED);
 	}
 
 	safe_delete(packet);
 }
 
-/**
- *
- * @param slot
- * @param texture
- * @param hero_forge_model
- * @param elite_material
- * @param unknown06
- * @param unknown18
- */
 void Mob::SendTextureWC(
 	uint8 slot,
-	uint16 texture,
+	uint32 texture,
 	uint32 hero_forge_model,
 	uint32 elite_material,
 	uint32 unknown06,
 	uint32 unknown18
 )
 {
-	auto outapp       = new EQApplicationPacket(OP_WearChange, sizeof(WearChange_Struct));
-	auto *wear_change = (WearChange_Struct *) outapp->pBuffer;
+	auto outapp = new EQApplicationPacket(OP_WearChange, sizeof(WearChange_Struct));
+	auto w      = (WearChange_Struct *) outapp->pBuffer;
 
-	if (IsClient()) {
-		wear_change->color.Color = GetEquipmentColor(slot);
-	}
-	else {
-		wear_change->color.Color = GetArmorTint(slot);
-	}
+	w->color.Color      = IsClient() ? GetEquipmentColor(slot) : GetArmorTint(slot);
+	w->spawn_id         = GetID();
+	w->material         = texture;
+	w->wear_slot_id     = slot;
+	w->unknown06        = unknown06;
+	w->elite_material   = elite_material;
+	w->hero_forge_model = hero_forge_model;
+	w->unknown18        = unknown18;
 
-	wear_change->spawn_id         = GetID();
-	wear_change->material         = texture;
-	wear_change->wear_slot_id     = slot;
-	wear_change->unknown06        = unknown06;
-	wear_change->elite_material   = elite_material;
-	wear_change->hero_forge_model = hero_forge_model;
-	wear_change->unknown18        = unknown18;
-
-	SetMobTextureProfile(slot, texture, wear_change->color.Color, hero_forge_model);
+	SetMobTextureProfile(slot, texture, w->color.Color, hero_forge_model);
 
 	entity_list.QueueClients(this, outapp);
 	safe_delete(outapp);
 }
 
-/**
- * @param material_slot
- * @param red_tint
- * @param green_tint
- * @param blue_tint
- */
 void Mob::SetSlotTint(uint8 material_slot, uint8 red_tint, uint8 green_tint, uint8 blue_tint)
 {
 	uint32 color;
@@ -520,13 +448,13 @@ void Mob::SetSlotTint(uint8 material_slot, uint8 red_tint, uint8 green_tint, uin
 	armor_tint.Slot[material_slot].Color = color;
 
 	auto outapp = new EQApplicationPacket(OP_WearChange, sizeof(WearChange_Struct));
-	auto *wc    = (WearChange_Struct *) outapp->pBuffer;
+	auto w      = (WearChange_Struct *) outapp->pBuffer;
 
-	wc->spawn_id         = GetID();
-	wc->material         = GetEquipmentMaterial(material_slot);
-	wc->hero_forge_model = GetHerosForgeModel(material_slot);
-	wc->color.Color      = color;
-	wc->wear_slot_id     = material_slot;
+	w->spawn_id         = GetID();
+	w->material         = GetEquipmentMaterial(material_slot);
+	w->hero_forge_model = GetHerosForgeModel(material_slot);
+	w->color.Color      = color;
+	w->wear_slot_id     = material_slot;
 
 	SetMobTextureProfile(material_slot, texture, color);
 
@@ -534,32 +462,25 @@ void Mob::SetSlotTint(uint8 material_slot, uint8 red_tint, uint8 green_tint, uin
 	safe_delete(outapp);
 }
 
-/**
- * @param material_slot
- * @param texture
- * @param color
- * @param hero_forge_model
- */
-void Mob::WearChange(uint8 material_slot, uint16 texture, uint32 color, uint32 hero_forge_model)
+void Mob::WearChange(
+	uint8 material_slot,
+	uint32 texture,
+	uint32 color,
+	uint32 hero_forge_model
+)
 {
 	armor_tint.Slot[material_slot].Color = color;
 
-	/**
-	 * Change internal values
-	 */
 	SetMobTextureProfile(material_slot, texture, color, hero_forge_model);
 
-	/**
-	 * Packet update
-	 */
-	auto outapp       = new EQApplicationPacket(OP_WearChange, sizeof(WearChange_Struct));
-	auto *wear_change = (WearChange_Struct *) outapp->pBuffer;
+	auto outapp = new EQApplicationPacket(OP_WearChange, sizeof(WearChange_Struct));
+	auto w      = (WearChange_Struct *) outapp->pBuffer;
 
-	wear_change->spawn_id         = GetID();
-	wear_change->material         = texture;
-	wear_change->hero_forge_model = hero_forge_model;
-	wear_change->color.Color      = color;
-	wear_change->wear_slot_id     = material_slot;
+	w->spawn_id         = GetID();
+	w->material         = texture;
+	w->hero_forge_model = hero_forge_model;
+	w->color.Color      = color;
+	w->wear_slot_id     = material_slot;
 
 	entity_list.QueueClients(this, outapp);
 	safe_delete(outapp);

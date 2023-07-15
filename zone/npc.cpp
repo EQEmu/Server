@@ -1408,8 +1408,8 @@ NPC* NPC::SpawnNPC(const char* spawncommand, const glm::vec4& position, Client* 
 		npc_type->texture          = Strings::ToInt(sep.arg[3]);
 		npc_type->light            = 0;
 		npc_type->runspeed         = 1.25f;
-		npc_type->d_melee_texture1 = Strings::ToInt(sep.arg[7]);
-		npc_type->d_melee_texture2 = Strings::ToInt(sep.arg[8]);
+		npc_type->d_melee_texture1 = Strings::ToUnsignedInt(sep.arg[7]);
+		npc_type->d_melee_texture2 = Strings::ToUnsignedInt(sep.arg[8]);
 		npc_type->merchanttype     = Strings::ToInt(sep.arg[9]);
 		npc_type->bodytype         = Strings::ToInt(sep.arg[10]);
 
@@ -1789,16 +1789,16 @@ uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_ver
 	return false;
 }
 
-int32 NPC::GetEquipmentMaterial(uint8 material_slot) const
+uint32 NPC::GetEquipmentMaterial(uint8 material_slot) const
 {
-	int32 texture_profile_material = GetTextureProfileMaterial(material_slot);
+	const uint32 texture_profile_material = GetTextureProfileMaterial(material_slot);
 
 	Log(Logs::Detail, Logs::MobAppearance, "[%s] material_slot: %u",
 		clean_name,
 		material_slot
 	);
 
-	if (texture_profile_material > 0) {
+	if (texture_profile_material) {
 		return texture_profile_material;
 	}
 
@@ -1833,12 +1833,12 @@ int32 NPC::GetEquipmentMaterial(uint8 material_slot) const
 				return d_melee_texture2;
 			default:
 				//they have nothing in the slot, and its not a special slot... they get nothing.
-				return (0);
+				return 0;
 		}
 	}
 
 	//they have some loot item in this slot, pass it up to the default handler
-	return (Mob::GetEquipmentMaterial(material_slot));
+	return Mob::GetEquipmentMaterial(material_slot);
 }
 
 uint32 NPC::GetMaxDamage(uint8 tlevel)
@@ -2967,15 +2967,13 @@ uint32 NPC::GetSpawnPointID() const
 	return 0;
 }
 
-void NPC::NPCSlotTexture(uint8 slot, uint16 texture)
+void NPC::NPCSlotTexture(uint8 slot, uint32 texture)
 {
-	if (slot == EQ::invslot::slotNeck) {
+	if (slot == EQ::textures::TextureSlot::weaponPrimary) {
 		d_melee_texture1 = texture;
-	}
-	else if (slot == EQ::invslot::slotBack) {
+	} else if (slot == EQ::textures::TextureSlot::weaponSecondary) {
 		d_melee_texture2 = texture;
-	}
-	else if (slot < EQ::invslot::slotShoulders) {
+	} else {
 		// Reserved for texturing individual armor slots
 	}
 }

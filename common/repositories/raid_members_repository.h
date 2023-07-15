@@ -44,7 +44,59 @@ public:
      */
 
 	// Custom extended repository methods here
+	static int UpdateRaidNote(
+		Database& db,
+		int32_t raid_id,
+		const std::string& note,
+		const std::string& character_name
+	) {
+		auto results = db.QueryDatabase(
+			fmt::format("UPDATE `{}` SET `note` = '{}' WHERE raidid = '{}' AND name = '{}';",
+				TableName(),
+				Strings::Escape(note),
+				raid_id,
+				Strings::Escape(character_name)
+			)
+		);
+		return results.Success() ? results.RowsAffected() : 0;
+	}
+	
+	static int UpdateRaidAssister(
+		Database& db,
+		int32_t raid_id,
+		const std::string& character_name,
+		uint8_t value
+	) {
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"UPDATE `{}` SET `is_assister` = '{}' WHERE raidid = '{}' AND `name` = '{}';",
+				TableName(),
+				value,
+				raid_id,
+				Strings::Escape(character_name)
+			)
+		);
 
+		return results.Success() ? results.RowsAffected() : 0;
+	}
+
+	static int UpdateRaidMarker(
+		Database& db,
+		int32_t raid_id,
+		const std::string& character_name,
+		uint8_t value
+	) {
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"UPDATE `{}` SET `is_marker` = '{}' WHERE raidid = '{}' AND `name` = '{}';",
+				TableName(),
+				value,
+				raid_id,
+				Strings::Escape(character_name)
+			)
+		);
+
+		return results.Success() ? results.RowsAffected() : 0;
+	}
 };
-
 #endif //EQEMU_RAID_MEMBERS_REPOSITORY_H

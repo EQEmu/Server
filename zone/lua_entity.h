@@ -47,6 +47,9 @@ public:
 	bool IsBeacon();
 	bool IsEncounter();
 	bool IsBot();
+	bool IsAura();
+	bool IsOfClientBot();
+	bool IsOfClientBotMerc();
 	int GetID();
 
 	Lua_Client CastToClient();
