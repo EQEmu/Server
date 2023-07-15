@@ -11,7 +11,7 @@ void SetName(Client *c, const Seperator *sep)
 	if (c->GetTarget() && c->GetTarget()->IsClient()) {
 		auto t = c->GetTarget()->CastToClient();
 
-		std::string new_name = sep->arg[1];
+		std::string new_name = sep->arg[2];
 		std::string old_name = t->GetCleanName();
 
 		if (t->ChangeFirstName(new_name.c_str(), c->GetCleanName())) {

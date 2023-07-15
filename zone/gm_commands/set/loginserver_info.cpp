@@ -12,7 +12,7 @@ void SetLoginserverInfo(Client *c, const Seperator *sep)
 	}
 
 	const std::string& email    = sep->arg[2];
-	const std::string& password = sep->arg[2];
+	const std::string& password = sep->arg[3];
 
 	auto pack = new ServerPacket(ServerOP_LSAccountUpdate, sizeof(ServerLSAccountUpdate_Struct));
 

@@ -4,15 +4,13 @@ void SetPassword(Client *c, const Seperator *sep)
 {
 	const auto arguments = sep->argnum;
 	if (arguments < 3) {
-		c->Message(Chat::White, "Usage: #set password [Account Name] [Password]");
+		c->Message(Chat::White, "Usage: #set password [Account Name] [Password] [Loginserver]");
 		return;
 	}
 
-	std::string account_name = sep->arg[1];
-	std::string password     = sep->arg[2];
-	std::string loginserver;
-
-	ParseAccountString(sep->arg[1], account_name, loginserver);
+	std::string account_name = sep->arg[2];
+	std::string password     = sep->arg[3];
+	std::string loginserver  = arguments >= 4 ? sep->arg[4] : "eqemu";
 
 	int16 status = 0;
 

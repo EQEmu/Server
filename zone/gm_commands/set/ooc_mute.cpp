@@ -6,7 +6,7 @@ extern WorldServer worldserver;
 void SetOOCMute(Client *c, const Seperator *sep)
 {
 	const auto arguments = sep->argnum;
-	if (arguments < 2 || !sep->IsNumber(2)) {
+	if (arguments < 2) {
 		c->Message(Chat::White, "Usage: #set ooc_mute [on|off]");
 		return;
 	}

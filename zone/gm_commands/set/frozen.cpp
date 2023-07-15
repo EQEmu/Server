@@ -27,8 +27,8 @@ void SetFrozen(Client *c, const Seperator *sep)
 		Chat::White,
 		fmt::format(
 			"You have {}frozen {}.",
-			c->GetTargetDescription(t),
-			!is_frozen ? "un" : ""
+			!is_frozen ? "un" : "",
+			c->GetTargetDescription(t)
 		).c_str()
 	);
 }

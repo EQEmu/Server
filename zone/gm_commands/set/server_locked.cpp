@@ -11,7 +11,7 @@ void SetServerLocked(Client *c, const Seperator *sep)
 		return;
 	}
 
-	const bool is_locked = Strings::ToBool(sep->arg[1]);
+	const bool is_locked = Strings::ToBool(sep->arg[2]);
 
 	auto pack = new ServerPacket(ServerOP_Lock, sizeof(ServerLock_Struct));
 

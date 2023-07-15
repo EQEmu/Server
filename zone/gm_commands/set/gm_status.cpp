@@ -49,7 +49,7 @@ void SetGMStatus(Client *c, const Seperator *sep)
 		return;
 	}
 
-	const std::string& account_name = sep->argplus[2];
+	const std::string& account_name = sep->argplus[3];
 
 	if (gm_status > c->Admin()) {
 		c->Message(

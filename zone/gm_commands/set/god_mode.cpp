@@ -14,7 +14,7 @@ void SetGodMode(Client *c, const Seperator *sep)
 		t = c->GetTarget()->CastToClient();
 	}
 
-	const bool   god_mode   = Strings::ToBool(sep->arg[1]);
+	const bool   god_mode   = Strings::ToBool(sep->arg[2]);
 	const uint32 account_id = c->AccountID();
 
 	auto a = AccountRepository::FindOne(database, c->AccountID());

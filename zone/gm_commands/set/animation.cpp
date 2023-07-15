@@ -25,7 +25,7 @@ void SetAnimation(Client *c, const Seperator *sep)
 		t = c->GetTarget();
 	}
 
-	const auto animation_id = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[1]));
+	const auto animation_id = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[2]));
 	if (
 		!EQ::ValueWithin(
 			animation_id,

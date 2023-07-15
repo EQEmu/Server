@@ -13,8 +13,8 @@ void SetSkill(Client *c, const Seperator *sep)
 		t = c->GetTarget()->CastToClient();
 	}
 
-	const uint16 skill_id    = Strings::ToUnsignedInt(sep->arg[1]);
-	const uint16 skill_value = Strings::ToUnsignedInt(sep->arg[2]);
+	const uint16 skill_id    = Strings::ToUnsignedInt(sep->arg[2]);
+	const uint16 skill_value = Strings::ToUnsignedInt(sep->arg[3]);
 
 	if (!EQ::ValueWithin(skill_id, EQ::skills::Skill1HBlunt, EQ::skills::HIGHEST_SKILL)) {
 		c->Message(Chat::White, "Usage: #set skill [Skill ID] [Skill Value]");

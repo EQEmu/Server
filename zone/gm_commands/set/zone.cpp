@@ -90,8 +90,8 @@ void SetZoneData(Client *c, const Seperator *sep)
 		const float maximum_fog_clip = sep->arg[6] ? Strings::ToFloat(sep->arg[6]) : 0.0f;
 		const bool  permanent        = sep->arg[7] ? Strings::ToBool(sep->arg[7]) : false;
 
-		if (minimum_clip <= 0.0f || maximum_clip <= 0.0f) {
-			c->Message(Chat::White, "Minimum Clip and Maximum Clip must be greater than 0.");
+		if (minimum_clip < 0.0f || maximum_clip < 0.0f) {
+			c->Message(Chat::White, "Minimum Clip and Maximum Clip must be greater than or equal 0.0.");
 			return;
 		} else if (minimum_clip > maximum_clip) {
 			c->Message(Chat::White, "Minimum Clip must be less than or equal to Maximum Clip!");
