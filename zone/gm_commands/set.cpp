@@ -141,7 +141,7 @@ void command_set(Client *c, const Seperator *sep)
 				const std::string& rewrite = fmt::format("#set {} {}", cmd.cmd, Strings::Join(args, " "));
 
 				// rewrite to #set <sub-command <args>>
-				c->SetEntityVariable("old_command", alias);
+				c->SetEntityVariable("old_command", Strings::Replace(alias, "#", ""));
 				c->SendGMCommand(rewrite);
 				c->DeleteEntityVariable("old_command");
 
