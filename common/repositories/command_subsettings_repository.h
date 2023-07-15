@@ -107,7 +107,7 @@ public:
 			{.parent_command = "set", .sub_command = "pvp_points", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "setpvppoints"},
 			{.parent_command = "set", .sub_command = "race", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "race"},
 			{.parent_command = "set", .sub_command = "race_permanent", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "permarace"},
-			{.parent_command = "set", .sub_command = "server_locked", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "serverlock"},
+			{.parent_command = "set", .sub_command = "server_locked", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "lock|serverlock|serverunlock|unlock"},
 			{.parent_command = "set", .sub_command = "skill", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "setskill"},
 			{.parent_command = "set", .sub_command = "skill_all", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "setallskill|setallskills|setskillall"},
 			{.parent_command = "set", .sub_command = "skill_all_max", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "maxskills"},
