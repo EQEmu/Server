@@ -4809,7 +4809,7 @@ UNIQUE INDEX `command`(`parent_command`, `sub_command`)
 	ManifestEntry{
 		.version = 9233,
 		.description = "2023_07_16_scoped_data_buckets.sql",
-		.check = "SHOW TABLES LIKE 'command_subsettings'",
+		.check = "SHOW COLUMNS FROM `data_buckets` LIKE 'character_id'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
