@@ -211,7 +211,7 @@ std::string DataBucket::GetScopedDbFilters(const DataBucketKey& k)
 		query.emplace_back(fmt::format("bot_id = {}", k.bot_id));
 	}
 
-	return Strings::Join(query, " AND ");
+	return Strings::Join(query, " AND ") + " AND ";
 }
 
 
