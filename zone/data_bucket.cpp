@@ -37,6 +37,14 @@ void DataBucket::SetData(const DataBucketKey &k)
 		b = r[0];
 	}
 
+	if (k.character_id > 0) {
+		b.character_id = k.character_id;
+	} else if (k.npc_id > 0) {
+		b.npc_id = k.npc_id;
+	} else if (k.bot_id > 0) {
+		b.bot_id = k.bot_id;
+	}
+
 	uint64    bucket_id         = b.id;
 	long long expires_time_unix = 0;
 
