@@ -3,7 +3,6 @@
 #include "mob.h"
 #include <ctime>
 #include <cctype>
-#include "../common/repositories/data_buckets_repository.h"
 
 std::vector<DataBucketEntry> data_bucket_cache;
 
@@ -25,6 +24,7 @@ void DataBucket::SetData(const DataBucketKey &k)
 {
 	auto b = DataBucketsRepository::NewEntity();
 	auto r = GetData(k);
+	// if we have an entry, use it
 	// if we have an entry, use it
 	if (r.id > 0) {
 		b = r;
@@ -117,7 +117,7 @@ DataBucketsRepository::DataBuckets DataBucket::GetData(const DataBucketKey &k)
 {
 	for (const auto& ce : data_bucket_cache) {
 		if (CheckBucketMatch(ce.e, k)) {
-			return ce.e.value;
+			return ce.e;
 		}
 	}
 
@@ -165,10 +165,11 @@ bool DataBucket::DeleteData(const std::string &bucket_key)
 	return DeleteData(r);
 }
 
+// GetDataBuckets bulk loads all data buckets for a mob
 bool DataBucket::GetDataBuckets(Mob *mob)
 {
 	DataBucketKey k = mob->GetScopedBucketKeys();
-	auto          l = BaseDataBucketsRepository::GetWhere(
+	auto          l = DataBucketsRepository::GetWhere(
 		database,
 		fmt::format(
 			"{} (`expires` > {} OR `expires` = 0)",
