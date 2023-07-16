@@ -213,6 +213,3 @@ std::string DataBucket::GetScopedDbFilters(const DataBucketKey& k)
 
 	return Strings::Join(query, " AND ") + " AND ";
 }
-
-
-
