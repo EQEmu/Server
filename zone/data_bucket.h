@@ -10,6 +10,12 @@
 #include "../common/repositories/data_buckets_repository.h"
 #include "mob.h"
 
+struct DataBucketEntry {
+	DataBucketsRepository::DataBuckets e;
+	uint64_t                           updated_time;
+};
+
+extern std::vector<DataBucketEntry> data_bucket_cache;
 
 struct DataBucketKey {
 	std::string key;
@@ -39,6 +45,9 @@ public:
 	static std::string GetDataRemaining(const DataBucketKey& k);
 	static std::string CheckBucketKey(const Mob* mob, const DataBucketKey& k);
 	static std::string GetScopedDbFilters(const DataBucketKey& k);
+
+	// bucket repository versus key matching
+	static bool CheckBucketMatch(const DataBucketsRepository::DataBuckets& dbe, const DataBucketKey& k);
 };
 
 #endif //EQEMU_DATABUCKET_H

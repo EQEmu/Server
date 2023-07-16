@@ -5,6 +5,8 @@
 #include <cctype>
 #include "../common/repositories/data_buckets_repository.h"
 
+std::vector<DataBucketEntry> data_bucket_cache;
+
 void DataBucket::SetData(const std::string &bucket_key, const std::string &bucket_value, std::string expires_time)
 {
 	auto k = DataBucketKey{
@@ -21,49 +23,73 @@ void DataBucket::SetData(const std::string &bucket_key, const std::string &bucke
 
 void DataBucket::SetData(const DataBucketKey &k)
 {
-	auto r = DataBucketsRepository::GetWhere(
-		database,
-		fmt::format(
-			"{} `key` = '{}' AND (`expires` > {} OR `expires` = 0) LIMIT 1",
-			DataBucket::GetScopedDbFilters(k),
-			Strings::Escape(k.key),
-			(long long) std::time(nullptr)
-		)
-	);
-
-	// if we have an entry, use it
+	bool found = false;
 	auto b = DataBucketsRepository::NewEntity();
-	if (!r.empty()) {
-		b = r[0];
-	}
 
-	if (k.character_id > 0) {
-		b.character_id = k.character_id;
-	} else if (k.npc_id > 0) {
-		b.npc_id = k.npc_id;
-	} else if (k.bot_id > 0) {
-		b.bot_id = k.bot_id;
-	}
+	for (uint32 index = 0; index < data_bucket_cache.size(); index++) {
+		auto& ce = data_bucket_cache[index];
+		if (CheckBucketMatch(ce.e, k)) {
+			b     = ce.e;
+			found = true;
 
-	uint64    bucket_id         = b.id;
-	long long expires_time_unix = 0;
-
-	if (!k.expires.empty()) {
-		expires_time_unix = (long long) std::time(nullptr) + Strings::ToInt(k.expires);
-		if (isalpha(k.expires[0]) || isalpha(k.expires[k.expires.length() - 1])) {
-			expires_time_unix = (long long) std::time(nullptr) + Strings::TimeToSeconds(k.expires);
+			ce.e.value      = k.value;
+			ce.updated_time = std::chrono::duration_cast<std::chrono::milliseconds>(
+				std::chrono::system_clock::now().time_since_epoch()
+			).count();
 		}
 	}
 
-	if (bucket_id > 0) {
-		b.expires = expires_time_unix;
-		b.value   = k.value;
-		DataBucketsRepository::UpdateOne(database, b);
+	if (!found) {
+		auto r = DataBucketsRepository::GetWhere(
+			database,
+			fmt::format(
+				"{} `key` = '{}' AND (`expires` > {} OR `expires` = 0) LIMIT 1",
+				DataBucket::GetScopedDbFilters(k),
+				Strings::Escape(k.key),
+				(long long) std::time(nullptr)
+			)
+		);
+
+		// if we have an entry, use it
+		if (!r.empty()) {
+			b = r[0];
+		}
+
+		if (k.character_id > 0) {
+			b.character_id = k.character_id;
+		} else if (k.npc_id > 0) {
+			b.npc_id = k.npc_id;
+		} else if (k.bot_id > 0) {
+			b.bot_id = k.bot_id;
+		}
 	}
-	else {
-		b.expires = expires_time_unix;
-		b.key_    = k.key;
-		b.value   = k.value;
+
+	const uint64 bucket_id         = b.id;
+	int64        expires_time_unix = 0;
+
+	if (!k.expires.empty()) {
+		expires_time_unix = static_cast<int64>(std::time(nullptr)) + Strings::ToInt(k.expires);
+		if (isalpha(k.expires[0]) || isalpha(k.expires[k.expires.length() - 1])) {
+			expires_time_unix = static_cast<int64>(std::time(nullptr)) + Strings::TimeToSeconds(k.expires);
+		}
+	}
+
+	b.expires = expires_time_unix;
+	b.value   = k.value;
+
+	if (bucket_id) {
+		DataBucketsRepository::UpdateOne(database, b);
+	} else {
+		DataBucketEntry dbe;
+
+		dbe.e            = b;
+		dbe.updated_time = std::chrono::duration_cast<std::chrono::milliseconds>(
+			std::chrono::system_clock::now().time_since_epoch()
+		).count();
+
+		data_bucket_cache.emplace_back(dbe);
+
+		b.key_ = k.key;
 		DataBucketsRepository::InsertOne(database, b);
 	}
 }
@@ -77,6 +103,12 @@ std::string DataBucket::GetData(const std::string &bucket_key)
 
 std::string DataBucket::GetData(const DataBucketKey &k)
 {
+	for (const auto& ce : data_bucket_cache) {
+		if (CheckBucketMatch(ce.e, k)) {
+			return ce.e.value;
+		}
+	}
+
 	auto r = DataBucketsRepository::GetWhere(
 		database,
 		fmt::format(
@@ -162,6 +194,12 @@ std::string DataBucket::CheckBucketKey(const Mob *mob, const DataBucketKey &k)
 
 bool DataBucket::DeleteData(const DataBucketKey &k)
 {
+	for (auto ce = data_bucket_cache.begin(); ce != data_bucket_cache.end(); ce++) {
+		if (CheckBucketMatch(ce->e, k)) {
+			data_bucket_cache.erase(ce);
+		}
+	}
+
 	return DataBucketsRepository::DeleteWhere(
 		database,
 		fmt::format(
@@ -174,6 +212,12 @@ bool DataBucket::DeleteData(const DataBucketKey &k)
 
 std::string DataBucket::GetDataExpires(const DataBucketKey &k)
 {
+	for (const auto& ce : data_bucket_cache) {
+		if (CheckBucketMatch(ce.e, k)) {
+			return std::to_string(ce.e.expires);
+		}
+	}
+
 	auto r = DataBucketsRepository::GetWhere(
 		database,
 		fmt::format(
@@ -193,6 +237,12 @@ std::string DataBucket::GetDataExpires(const DataBucketKey &k)
 
 std::string DataBucket::GetDataRemaining(const DataBucketKey &k)
 {
+	for (const auto& ce : data_bucket_cache) {
+		if (CheckBucketMatch(ce.e, k)) {
+			return std::to_string(ce.e.expires - static_cast<uint32>(std::time(nullptr)));
+		}
+	}
+
 	auto r = DataBucketsRepository::GetWhere(
 		database,
 		fmt::format(
@@ -227,5 +277,15 @@ std::string DataBucket::GetScopedDbFilters(const DataBucketKey &k)
 		"{} {}",
 		Strings::Join(query, " AND "),
 		!query.empty() ? "AND" : ""
+	);
+}
+
+bool DataBucket::CheckBucketMatch(const DataBucketsRepository::DataBuckets& dbe, const DataBucketKey& k)
+{
+	return (
+		dbe.key_ == k.key &&
+		dbe.bot_id == k.bot_id &&
+		dbe.character_id == k.character_id &&
+		dbe.npc_id == k.npc_id
 	);
 }
