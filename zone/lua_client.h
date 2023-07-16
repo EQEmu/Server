@@ -473,6 +473,7 @@ public:
 	uint32 GetEXPForLevel(uint16 check_level);
 	std::string GetClassAbbreviation();
 	std::string GetRaceAbbreviation();
+	void SetLDoNPoints(uint32 theme_id, uint32 points);
 
 	void ApplySpell(int spell_id);
 	void ApplySpell(int spell_id, int duration);
