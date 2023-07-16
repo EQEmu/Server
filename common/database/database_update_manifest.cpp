@@ -4806,6 +4806,27 @@ UNIQUE INDEX `command`(`parent_command`, `sub_command`)
 )
 )"
 	},
+	ManifestEntry{
+		.version = 9233,
+		.description = "2023_07_16_scoped_data_buckets.sql",
+		.check = "SHOW COLUMNS FROM `data_buckets` LIKE 'character_id'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+
+ALTER TABLE `data_buckets`
+ADD COLUMN `character_id` bigint(11) NOT NULL DEFAULT 0 AFTER `expires`,
+ADD COLUMN `npc_id` bigint(11) NOT NULL DEFAULT 0 AFTER `character_id`,
+ADD COLUMN `bot_id` bigint(11) NOT NULL DEFAULT 0 AFTER `npc_id`,
+DROP INDEX `key_index`,
+ADD UNIQUE INDEX `keys`(`key`,`character_id`,`npc_id`,`bot_id`);
+
+UPDATE data_buckets SET character_id = SUBSTRING_INDEX(SUBSTRING_INDEX( `key`, '-', 2 ), '-', -1), `key` = SUBSTR(SUBSTRING_INDEX(`key`, SUBSTRING_INDEX( `key`, '-', 2 ), -1), 2) WHERE `key` LIKE 'character-%';
+UPDATE data_buckets SET npc_id = SUBSTRING_INDEX(SUBSTRING_INDEX( `key`, '-', 2 ), '-', -1), `key` = SUBSTR(SUBSTRING_INDEX(`key`, SUBSTRING_INDEX( `key`, '-', 2 ), -1), 2) WHERE `key` LIKE 'npc-%';
+UPDATE data_buckets SET bot_id = SUBSTRING_INDEX(SUBSTRING_INDEX( `key`, '-', 2 ), '-', -1), `key` = SUBSTR(SUBSTRING_INDEX(`key`, SUBSTRING_INDEX( `key`, '-', 2 ), -1), 2) WHERE `key` LIKE 'bot-%';
+
+)"
+	},
 
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{

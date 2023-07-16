@@ -69,6 +69,7 @@ enum class eSpecialAttacks : int {
 	ChaoticStab
 };
 
+class DataBucketKey;
 class Mob : public Entity {
 public:
 	enum CLIENT_CONN_STATUS { CLIENT_CONNECTING, CLIENT_CONNECTED, CLIENT_LINKDEAD,
@@ -1413,7 +1414,6 @@ public:
 	void DeleteBucket(std::string bucket_name);
 	std::string GetBucket(std::string bucket_name);
 	std::string GetBucketExpires(std::string bucket_name);
-	std::string GetBucketKey();
 	std::string GetBucketRemaining(std::string bucket_name);
 	void SetBucket(std::string bucket_name, std::string bucket_value, std::string expiration = "");
 
@@ -1442,6 +1442,8 @@ public:
 	void DrawDebugCoordinateNode(std::string node_name, const glm::vec4 vec);
 
 	void CalcHeroicBonuses(StatBonuses* newbon);
+
+	DataBucketKey GetScopedBucketKeys();
 
 protected:
 	void CommonDamage(Mob* other, int64 &damage, const uint16 spell_id, const EQ::skills::SkillType attack_skill, bool &avoidable, const int8 buffslot, const bool iBuffTic, eSpecialAttacks specal = eSpecialAttacks::None);

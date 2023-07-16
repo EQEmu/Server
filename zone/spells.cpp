@@ -5877,13 +5877,10 @@ bool Client::SpellBucketCheck(uint16 spell_id, uint32 character_id) {
 		return true; // If the entry in the spell_buckets table has nothing set for the qglobal name, allow scribing.
 	}
 
-	auto new_bucket_name = fmt::format(
-		"{}-{}",
-		GetBucketKey(),
-		spell_bucket_name
-	);
+	DataBucketKey k = GetScopedBucketKeys();
+	k.key = spell_bucket_name;
 
-	auto bucket_value = DataBucket::GetData(new_bucket_name);
+	auto bucket_value = DataBucket::GetData(k);
 	if (!bucket_value.empty()) {
 		if (Strings::IsNumber(bucket_value) && Strings::IsNumber(spell_bucket_value)) {
 			if (Strings::ToInt(bucket_value) >= Strings::ToInt(spell_bucket_value)) {

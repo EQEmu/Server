@@ -2420,7 +2420,7 @@ std::string Perl_Mob_GetBucketExpires(Mob* self, std::string bucket_name) // @ca
 
 std::string Perl_Mob_GetBucketKey(Mob* self) // @categories Script Utility
 {
-	return self->GetBucketKey();
+	return {};
 }
 
 std::string Perl_Mob_GetBucketRemaining(Mob* self, std::string bucket_name) // @categories Script Utility

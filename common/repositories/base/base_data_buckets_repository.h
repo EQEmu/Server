@@ -24,6 +24,9 @@ public:
 		std::string key_;
 		std::string value;
 		uint32_t    expires;
+		int64_t     character_id;
+		int64_t     npc_id;
+		int64_t     bot_id;
 	};
 
 	static std::string PrimaryKey()
@@ -38,6 +41,9 @@ public:
 			"`key`",
 			"value",
 			"expires",
+			"character_id",
+			"npc_id",
+			"bot_id",
 		};
 	}
 
@@ -48,6 +54,9 @@ public:
 			"`key`",
 			"value",
 			"expires",
+			"character_id",
+			"npc_id",
+			"bot_id",
 		};
 	}
 
@@ -88,10 +97,13 @@ public:
 	{
 		DataBuckets e{};
 
-		e.id      = 0;
-		e.key_    = "";
-		e.value   = "";
-		e.expires = 0;
+		e.id           = 0;
+		e.key_         = "";
+		e.value        = "";
+		e.expires      = 0;
+		e.character_id = 0;
+		e.npc_id       = 0;
+		e.bot_id       = 0;
 
 		return e;
 	}
@@ -128,10 +140,13 @@ public:
 		if (results.RowCount() == 1) {
 			DataBuckets e{};
 
-			e.id      = strtoull(row[0], nullptr, 10);
-			e.key_    = row[1] ? row[1] : "";
-			e.value   = row[2] ? row[2] : "";
-			e.expires = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
+			e.id           = strtoull(row[0], nullptr, 10);
+			e.key_         = row[1] ? row[1] : "";
+			e.value        = row[2] ? row[2] : "";
+			e.expires      = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
+			e.character_id = strtoll(row[4], nullptr, 10);
+			e.npc_id       = strtoll(row[5], nullptr, 10);
+			e.bot_id       = strtoll(row[6], nullptr, 10);
 
 			return e;
 		}
@@ -168,6 +183,9 @@ public:
 		v.push_back(columns[1] + " = '" + Strings::Escape(e.key_) + "'");
 		v.push_back(columns[2] + " = '" + Strings::Escape(e.value) + "'");
 		v.push_back(columns[3] + " = " + std::to_string(e.expires));
+		v.push_back(columns[4] + " = " + std::to_string(e.character_id));
+		v.push_back(columns[5] + " = " + std::to_string(e.npc_id));
+		v.push_back(columns[6] + " = " + std::to_string(e.bot_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -193,6 +211,9 @@ public:
 		v.push_back("'" + Strings::Escape(e.key_) + "'");
 		v.push_back("'" + Strings::Escape(e.value) + "'");
 		v.push_back(std::to_string(e.expires));
+		v.push_back(std::to_string(e.character_id));
+		v.push_back(std::to_string(e.npc_id));
+		v.push_back(std::to_string(e.bot_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -226,6 +247,9 @@ public:
 			v.push_back("'" + Strings::Escape(e.key_) + "'");
 			v.push_back("'" + Strings::Escape(e.value) + "'");
 			v.push_back(std::to_string(e.expires));
+			v.push_back(std::to_string(e.character_id));
+			v.push_back(std::to_string(e.npc_id));
+			v.push_back(std::to_string(e.bot_id));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
@@ -259,10 +283,13 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			DataBuckets e{};
 
-			e.id      = strtoull(row[0], nullptr, 10);
-			e.key_    = row[1] ? row[1] : "";
-			e.value   = row[2] ? row[2] : "";
-			e.expires = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
+			e.id           = strtoull(row[0], nullptr, 10);
+			e.key_         = row[1] ? row[1] : "";
+			e.value        = row[2] ? row[2] : "";
+			e.expires      = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
+			e.character_id = strtoll(row[4], nullptr, 10);
+			e.npc_id       = strtoll(row[5], nullptr, 10);
+			e.bot_id       = strtoll(row[6], nullptr, 10);
 
 			all_entries.push_back(e);
 		}
@@ -287,10 +314,13 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			DataBuckets e{};
 
-			e.id      = strtoull(row[0], nullptr, 10);
-			e.key_    = row[1] ? row[1] : "";
-			e.value   = row[2] ? row[2] : "";
-			e.expires = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
+			e.id           = strtoull(row[0], nullptr, 10);
+			e.key_         = row[1] ? row[1] : "";
+			e.value        = row[2] ? row[2] : "";
+			e.expires      = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
+			e.character_id = strtoll(row[4], nullptr, 10);
+			e.npc_id       = strtoll(row[5], nullptr, 10);
+			e.bot_id       = strtoll(row[6], nullptr, 10);
 
 			all_entries.push_back(e);
 		}
