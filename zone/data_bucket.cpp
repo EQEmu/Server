@@ -3,7 +3,6 @@
 #include "mob.h"
 #include <ctime>
 #include <cctype>
-#include "../common/repositories/data_buckets_repository.h"
 
 std::vector<DataBucketEntry> data_bucket_cache;
 
@@ -40,19 +39,11 @@ void DataBucket::SetData(const DataBucketKey &k)
 	}
 
 	if (!found) {
-		auto r = DataBucketsRepository::GetWhere(
-			database,
-			fmt::format(
-				"{} `key` = '{}' AND (`expires` > {} OR `expires` = 0) LIMIT 1",
-				DataBucket::GetScopedDbFilters(k),
-				Strings::Escape(k.key),
-				(long long) std::time(nullptr)
-			)
-		);
 
+		auto r = GetData(k);
 		// if we have an entry, use it
-		if (!r.empty()) {
-			b = r[0];
+		if (r.id == 0) {
+			b = r;
 		}
 
 		if (k.character_id > 0) {
@@ -98,14 +89,14 @@ std::string DataBucket::GetData(const std::string &bucket_key)
 {
 	DataBucketKey k = {};
 	k.key = bucket_key;
-	return GetData(k);
+	return GetData(k).value;
 }
 
-std::string DataBucket::GetData(const DataBucketKey &k)
+DataBucketsRepository::DataBuckets DataBucket::GetData(const DataBucketKey &k)
 {
 	for (const auto& ce : data_bucket_cache) {
 		if (CheckBucketMatch(ce.e, k)) {
-			return ce.e.value;
+			return ce.e;
 		}
 	}
 
@@ -123,7 +114,7 @@ std::string DataBucket::GetData(const DataBucketKey &k)
 		return {};
 	}
 
-	return r[0].value;
+	return r[0];
 }
 
 std::string DataBucket::GetDataExpires(const std::string &bucket_key)
@@ -148,10 +139,11 @@ bool DataBucket::DeleteData(const std::string &bucket_key)
 	return DeleteData(r);
 }
 
+// GetDataBuckets bulk loads all data buckets for a mob
 bool DataBucket::GetDataBuckets(Mob *mob)
 {
 	DataBucketKey k = mob->GetScopedBucketKeys();
-	auto          l = BaseDataBucketsRepository::GetWhere(
+	auto          l = DataBucketsRepository::GetWhere(
 		database,
 		fmt::format(
 			"{} (`expires` > {} OR `expires` = 0)",
@@ -218,21 +210,12 @@ std::string DataBucket::GetDataExpires(const DataBucketKey &k)
 		}
 	}
 
-	auto r = DataBucketsRepository::GetWhere(
-		database,
-		fmt::format(
-			"{} `key` = '{}' AND (`expires` > {} OR `expires` = 0) LIMIT 1",
-			DataBucket::GetScopedDbFilters(k),
-			k.key,
-			(long long) std::time(nullptr)
-		)
-	);
-
-	if (r.empty()) {
+	auto r = GetData(k);
+	if (r.id == 0) {
 		return {};
 	}
 
-	return fmt::format("{}", r[0].expires);
+	return std::to_string(r.expires);
 }
 
 std::string DataBucket::GetDataRemaining(const DataBucketKey &k)
@@ -243,21 +226,12 @@ std::string DataBucket::GetDataRemaining(const DataBucketKey &k)
 		}
 	}
 
-	auto r = DataBucketsRepository::GetWhere(
-		database,
-		fmt::format(
-			"{} `key` = '{}' AND (`expires` > {} OR `expires` = 0) LIMIT 1",
-			DataBucket::GetScopedDbFilters(k),
-			k.key,
-			(long long) std::time(nullptr)
-		)
-	);
-
-	if (r.empty()) {
+	auto r = GetData(k);
+	if (r.id == 0) {
 		return "0";
 	}
 
-	return fmt::format("{}", r[0].expires - (long long) std::time(nullptr));
+	return fmt::format("{}", r.expires - (long long) std::time(nullptr));
 }
 
 std::string DataBucket::GetScopedDbFilters(const DataBucketKey &k)

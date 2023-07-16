@@ -1276,10 +1276,10 @@ uint8 Client::GetCharMaxLevelFromBucket()
 	DataBucketKey k = GetScopedBucketKeys();
 	k.key = "CharMaxLevel";
 
-	auto bucket_value = DataBucket::GetData(k);
-	if (!bucket_value.empty()) {
-		if (Strings::IsNumber(bucket_value)) {
-			return static_cast<uint8>(Strings::ToUnsignedInt(bucket_value));
+	auto b = DataBucket::GetData(k);
+	if (!b.value.empty()) {
+		if (Strings::IsNumber(b.value)) {
+			return static_cast<uint8>(Strings::ToUnsignedInt(b.value));
 		}
 	}
 
