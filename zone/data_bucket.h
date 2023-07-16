@@ -22,7 +22,7 @@ struct DataBucketKey {
 
 class DataBucket {
 public:
-	// non-scoped bucket methods
+	// non-scoped bucket methods (for global buckets)
 	static void SetData(const std::string& bucket_key, const std::string& bucket_value, std::string expires_time = "");
 	static bool DeleteData(const std::string& bucket_key);
 	static std::string GetData(const std::string& bucket_key);
