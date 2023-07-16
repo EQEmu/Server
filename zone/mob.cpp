@@ -8049,54 +8049,63 @@ void Mob::SetCanOpenDoors(bool can_open)
 	m_can_open_doors = can_open;
 }
 
-void Mob::DeleteBucket(std::string bucket_name) {
-	std::string full_bucket_name = fmt::format("{}-{}", GetBucketKey(), bucket_name);
-	DataBucket::DeleteData(full_bucket_name);
+void Mob::DeleteBucket(std::string bucket_name)
+{
+	DataBucketKey k = GetScopedBucketKeys();
+	k.key = bucket_name;
+
+	DataBucket::DeleteData(k);
 }
 
-std::string Mob::GetBucket(std::string bucket_name) {
-	std::string full_bucket_name = fmt::format("{}-{}", GetBucketKey(), bucket_name);
-	std::string bucket_value = DataBucket::GetData(full_bucket_name);
+std::string Mob::GetBucket(std::string bucket_name)
+{
+	DataBucketKey k = GetScopedBucketKeys();
+	k.key = bucket_name;
+
+	std::string bucket_value = DataBucket::GetData(k);
 	if (!bucket_value.empty()) {
 		return bucket_value;
 	}
-	return std::string();
+	return {};
 }
 
-std::string Mob::GetBucketExpires(std::string bucket_name) {
-	std::string full_bucket_name = fmt::format("{}-{}", GetBucketKey(), bucket_name);
-	std::string bucket_expiration = DataBucket::GetDataExpires(full_bucket_name);
+std::string Mob::GetBucketExpires(std::string bucket_name)
+{
+	DataBucketKey k = GetScopedBucketKeys();
+	k.key = bucket_name;
+
+	std::string bucket_expiration = DataBucket::GetDataExpires(k);
 	if (!bucket_expiration.empty()) {
 		return bucket_expiration;
 	}
-	return std::string();
+
+	return {};
 }
 
-std::string Mob::GetBucketKey() {
-	if (IsClient()) {
-		return fmt::format("character-{}", CastToClient()->CharacterID());
-	} else if (IsNPC()) {
-		return fmt::format("npc-{}", GetNPCTypeID());
-	} else if (IsBot()) {
-		return fmt::format("bot-{}", CastToBot()->GetBotID());
-	}
-	return std::string();
-}
+std::string Mob::GetBucketRemaining(std::string bucket_name)
+{
+	DataBucketKey k = GetScopedBucketKeys();
+	k.key = bucket_name;
 
-std::string Mob::GetBucketRemaining(std::string bucket_name) {
-	std::string full_bucket_name = fmt::format("{}-{}", GetBucketKey(), bucket_name);
-	std::string bucket_remaining = DataBucket::GetDataRemaining(full_bucket_name);
+	std::string bucket_remaining = DataBucket::GetDataRemaining(k);
 	if (!bucket_remaining.empty() && Strings::ToInt(bucket_remaining) > 0) {
 		return bucket_remaining;
-	} else if (Strings::ToInt(bucket_remaining) == 0) {
+	}
+	else if (Strings::ToInt(bucket_remaining) == 0) {
 		return "0";
 	}
-	return std::string();
+
+	return {};
 }
 
-void Mob::SetBucket(std::string bucket_name, std::string bucket_value, std::string expiration) {
-	std::string full_bucket_name = fmt::format("{}-{}", GetBucketKey(), bucket_name);
-	DataBucket::SetData(full_bucket_name, bucket_value, expiration);
+void Mob::SetBucket(std::string bucket_name, std::string bucket_value, std::string expiration)
+{
+	DataBucketKey k = GetScopedBucketKeys();
+	k.key     = bucket_name;
+	k.expires = expiration;
+	k.value   = bucket_value;
+
+	DataBucket::SetData(k);
 }
 
 std::string Mob::GetMobDescription()
@@ -8328,4 +8337,18 @@ std::string Mob::GetClassPlural()
 		default:
 			return "Classes";
 	}
+}
+
+DataBucketKey Mob::GetScopedBucketKeys()
+{
+	DataBucketKey k = {};
+	if (IsClient()) {
+		k.character_id = CastToClient()->CharacterID();
+	} else if (IsNPC()) {
+		k.npc_id = GetNPCTypeID();
+	} else if (IsBot()) {
+		k.bot_id = CastToBot()->GetBotID();
+	}
+
+	return k;
 }

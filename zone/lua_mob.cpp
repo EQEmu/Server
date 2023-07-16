@@ -2353,7 +2353,7 @@ std::string Lua_Mob::GetBucketExpires(std::string bucket_name)
 std::string Lua_Mob::GetBucketKey()
 {
 	Lua_Safe_Call_String();
-	return self->GetBucketKey();
+	return {};
 }
 
 std::string Lua_Mob::GetBucketRemaining(std::string bucket_name)

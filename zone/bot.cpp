@@ -8193,21 +8193,16 @@ void Bot::OwnerMessage(const std::string& message)
 bool Bot::CheckDataBucket(std::string bucket_name, const std::string& bucket_value, uint8 bucket_comparison)
 {
 	if (!bucket_name.empty() && !bucket_value.empty()) {
-		auto full_name = fmt::format(
-			"{}-{}",
-			GetBucketKey(),
-			bucket_name
-		);
+		// try to fetch from bot first
+		DataBucketKey k = GetScopedBucketKeys();
+		k.key = bucket_name;
 
-		auto player_value = DataBucket::CheckBucketKey(this, full_name);
+		auto player_value = DataBucket::CheckBucketKey(this, k);
 		if (player_value.empty() && GetBotOwner()) {
-			full_name = fmt::format(
-				"{}-{}",
-				GetBotOwner()->GetBucketKey(),
-				bucket_name
-			);
+			// fetch from owner
+			k = GetBotOwner()->GetScopedBucketKeys();
 
-			player_value = DataBucket::CheckBucketKey(GetBotOwner(), full_name);
+			player_value = DataBucket::CheckBucketKey(GetBotOwner(), k);
 			if (player_value.empty()) {
 				return false;
 			}
