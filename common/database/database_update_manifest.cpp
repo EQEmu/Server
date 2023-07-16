@@ -4819,7 +4819,7 @@ ADD COLUMN `character_id` bigint(11) NOT NULL DEFAULT 0 AFTER `expires`,
 ADD COLUMN `npc_id` bigint(11) NOT NULL DEFAULT 0 AFTER `character_id`,
 ADD COLUMN `bot_id` bigint(11) NOT NULL DEFAULT 0 AFTER `npc_id`,
 DROP INDEX `key_index`,
-ADD UNIQUE INDEX `keys`(`key`,`character_id`,`npc_id`,`bot_id`)
+ADD UNIQUE INDEX `keys`(`key`,`character_id`,`npc_id`,`bot_id`);
 
 UPDATE data_buckets SET character_id = SUBSTRING_INDEX(SUBSTRING_INDEX( `key`, '-', 2 ), '-', -1), `key` = SUBSTR(SUBSTRING_INDEX(`key`, SUBSTRING_INDEX( `key`, '-', 2 ), -1), 2) WHERE `key` LIKE 'character-%';
 UPDATE data_buckets SET npc_id = SUBSTRING_INDEX(SUBSTRING_INDEX( `key`, '-', 2 ), '-', -1), `key` = SUBSTR(SUBSTRING_INDEX(`key`, SUBSTRING_INDEX( `key`, '-', 2 ), -1), 2) WHERE `key` LIKE 'npc-%';
