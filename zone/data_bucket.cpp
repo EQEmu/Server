@@ -1,10 +1,11 @@
 #include "data_bucket.h"
+#include "entity.h"
 #include "zonedb.h"
 #include "mob.h"
 #include <ctime>
 #include <cctype>
 
-std::vector<DataBucketEntry> data_bucket_cache;
+std::vector<DataBucketEntry> g_data_bucket_cache = {};
 
 void DataBucket::SetData(const std::string &bucket_key, const std::string &bucket_value, std::string expires_time)
 {
@@ -24,7 +25,6 @@ void DataBucket::SetData(const DataBucketKey &k)
 {
 	auto b = DataBucketsRepository::NewEntity();
 	auto r = GetData(k);
-	// if we have an entry, use it
 	// if we have an entry, use it
 	if (r.id > 0) {
 		b = r;
@@ -115,8 +115,15 @@ std::string DataBucket::GetData(const std::string &bucket_key)
 
 DataBucketsRepository::DataBuckets DataBucket::GetData(const DataBucketKey &k)
 {
-	for (const auto& ce : data_bucket_cache) {
+	for (const auto& ce : g_data_bucket_cache) {
 		if (CheckBucketMatch(ce.e, k)) {
+			if (ce.e.expires > 0 && ce.e.expires < std::time(nullptr)) {
+				LogDataBuckets("Attempted to read expired key [{}] removing from cache", ce.e.key_);
+				DeleteData(k);
+				return DataBucketsRepository::NewEntity();
+			}
+
+			LogDataBuckets("Returning key [{}] value [{}] from cache", ce.e.key_, ce.e.value);
 			return ce.e;
 		}
 	}
@@ -160,63 +167,47 @@ std::string DataBucket::GetDataRemaining(const std::string &bucket_key)
 
 bool DataBucket::DeleteData(const std::string &bucket_key)
 {
-	DataBucketKey r = {};
-	r.key = bucket_key;
-	return DeleteData(r);
+	DataBucketKey k = {};
+	k.key = bucket_key;
+	return DeleteData(k);
 }
 
 // GetDataBuckets bulk loads all data buckets for a mob
 bool DataBucket::GetDataBuckets(Mob *mob)
 {
-	DataBucketKey k = mob->GetScopedBucketKeys();
-	auto          l = DataBucketsRepository::GetWhere(
-		database,
-		fmt::format(
-			"{} (`expires` > {} OR `expires` = 0)",
-			DataBucket::GetScopedDbFilters(k),
-			(long long) std::time(nullptr)
-		)
-	);
+	DataBucketLoadType::Type t;
+	const uint32             id = mob->GetMobTypeIdentifier();
 
-	if (l.empty()) {
+	if (!id) {
 		return false;
 	}
 
-	mob->m_data_bucket_cache.clear();
-
-	DataBucketCache d;
-
-	for (const auto &e: l) {
-		d.bucket_id      = e.id;
-		d.bucket_key     = e.key_;
-		d.bucket_value   = e.value;
-		d.bucket_expires = e.expires;
-
-		mob->m_data_bucket_cache.emplace_back(d);
+	if (mob->IsBot()) {
+		t = DataBucketLoadType::Bot;
+	} else if (mob->IsClient()) {
+		t = DataBucketLoadType::Client;
+	} else if (mob->IsNPC()) {
+		t = DataBucketLoadType::NPC;
 	}
+
+	BulkLoadEntities(t, {id});
 
 	return true;
 }
 
-std::string DataBucket::CheckBucketKey(const Mob *mob, const DataBucketKey &k)
-{
-	std::string     bucket_value;
-	for (const auto &d: mob->m_data_bucket_cache) {
-		if (d.bucket_key == k.key) {
-			bucket_value = d.bucket_value;
-			break;
-		}
-	}
-	return bucket_value;
-}
-
 bool DataBucket::DeleteData(const DataBucketKey &k)
 {
-	for (auto ce = data_bucket_cache.begin(); ce != data_bucket_cache.end(); ce++) {
-		if (CheckBucketMatch(ce->e, k)) {
-			data_bucket_cache.erase(ce);
-		}
-	}
+	// delete from cache where contents match
+	g_data_bucket_cache.erase(
+		std::remove_if(
+			g_data_bucket_cache.begin(),
+			g_data_bucket_cache.end(),
+			[&](DataBucketEntry& ce) {
+				return CheckBucketMatch(ce.e, k);
+			}
+		),
+		g_data_bucket_cache.end()
+	);
 
 	return DataBucketsRepository::DeleteWhere(
 		database,
@@ -305,4 +296,91 @@ bool DataBucket::CheckBucketMatch(const DataBucketsRepository::DataBuckets& dbe,
 		dbe.character_id == k.character_id &&
 		dbe.npc_id == k.npc_id
 	);
+}
+
+void DataBucket::BulkLoadEntities(DataBucketLoadType::Type t, std::vector<uint32> ids)
+{
+	if (ids.empty()) {
+		return;
+	}
+
+	if (ids.size() == 1) {
+		bool has_cache = false;
+		for (const auto& ce : g_data_bucket_cache) {
+			if (t == DataBucketLoadType::Bot) {
+				has_cache = ce.e.bot_id == ids[0];
+			} else if (t == DataBucketLoadType::Client) {
+				has_cache = ce.e.character_id == ids[0];
+			} else if (t == DataBucketLoadType::NPC) {
+				has_cache = ce.e.npc_id == ids[0];
+			}
+		}
+
+		if (has_cache) {
+			LogDataBucketsDetail("LoadType [{}] ID [{}] has cache", DataBucketLoadType::Name[t], ids[0]);
+			return;
+		}
+	}
+
+	std::string column;
+
+	switch (t) {
+		case DataBucketLoadType::Bot:
+			column = "bot_id";
+			break;
+		case DataBucketLoadType::Client:
+			column = "character_id";
+			break;
+		case DataBucketLoadType::NPC:
+			column = "npc_id";
+			break;
+		default:
+			LogError("Incorrect LoadType [{}]", t);
+			break;
+	}
+
+	const auto& l = DataBucketsRepository::GetWhere(
+		database,
+		fmt::format(
+			"{} IN ({}) AND (`expires` > {} OR `expires` = 0)",
+			column,
+			Strings::Join(ids, ", "),
+			(long long) std::time(nullptr)
+		)
+	);
+
+	if (l.empty()) {
+		return;
+	}
+
+	LogDataBucketsDetail("cache size before [{}] l size [{}]", g_data_bucket_cache.size(), l.size());
+
+	g_data_bucket_cache.reserve(g_data_bucket_cache.size() + l.size());
+
+	for (const auto& e : l) {
+		LogDataBucketsDetail("bucket id [{}] bucket key [{}] bucket value [{}]", e.id, e.key_, e.value);
+
+		g_data_bucket_cache.emplace_back(
+			DataBucketEntry{
+				.e = e,
+				.updated_time = GetCurrentTimeUNIX()
+			}
+		);
+	}
+
+	LogDataBucketsDetail("cache size after [{}]", g_data_bucket_cache.size());
+
+	LogDataBuckets(
+		"Bulk Loaded ids [{}] column [{}] new cache size is [{}]",
+		ids.size(),
+		column,
+		g_data_bucket_cache.size()
+	);
+}
+
+uint64_t DataBucket::GetCurrentTimeUNIX()
+{
+	return std::chrono::duration_cast<std::chrono::milliseconds>(
+		std::chrono::system_clock::now().time_since_epoch()
+	).count();
 }

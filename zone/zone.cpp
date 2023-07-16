@@ -1196,8 +1196,6 @@ bool Zone::Init(bool is_static) {
 	LoadGrids();
 	LoadTickItems();
 
-	LoadDataBuckets();
-
 	npc_scale_manager->LoadScaleData();
 
 	// logging origination information
@@ -3137,24 +3135,4 @@ bool Zone::CompareDataBucket(uint8 bucket_comparison, const std::string& bucket_
 	}
 
 	return passes;
-}
-
-void Zone::LoadDataBuckets()
-{
-	const auto& l = DataBucketsRepository::All(database);
-
-	if (l.empty()) {
-		return;
-	}
-
-	for (const auto& e : l) {
-		DataBucketEntry dbe;
-
-		dbe.e            = e;
-		dbe.updated_time = std::chrono::duration_cast<std::chrono::milliseconds>(
-			std::chrono::system_clock::now().time_since_epoch()
-		).count();
-
-		data_bucket_cache.emplace_back(dbe);
-	}
 }
