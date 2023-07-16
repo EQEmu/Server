@@ -19,7 +19,7 @@ void DataBucket::SetData(const std::string &bucket_key, const std::string &bucke
 	DataBucket::SetData(k);
 }
 
-void DataBucket::SetData(const DataBucketKey& k)
+void DataBucket::SetData(const DataBucketKey &k)
 {
 	auto r = DataBucketsRepository::GetWhere(
 		database,
@@ -66,7 +66,7 @@ std::string DataBucket::GetData(const std::string &bucket_key)
 	return GetData(k);
 }
 
-std::string DataBucket::GetData(const DataBucketKey& k)
+std::string DataBucket::GetData(const DataBucketKey &k)
 {
 	auto r = DataBucketsRepository::GetWhere(
 		database,
@@ -109,7 +109,7 @@ bool DataBucket::DeleteData(const std::string &bucket_key)
 bool DataBucket::GetDataBuckets(Mob *mob)
 {
 	DataBucketKey k = mob->GetScopedBucketKeys();
-	auto l = BaseDataBucketsRepository::GetWhere(
+	auto          l = BaseDataBucketsRepository::GetWhere(
 		database,
 		fmt::format(
 			"{} (`expires` > {} OR `expires` = 0)",
@@ -138,7 +138,7 @@ bool DataBucket::GetDataBuckets(Mob *mob)
 	return true;
 }
 
-std::string DataBucket::CheckBucketKey(const Mob *mob, const DataBucketKey& k)
+std::string DataBucket::CheckBucketKey(const Mob *mob, const DataBucketKey &k)
 {
 	std::string     bucket_value;
 	for (const auto &d: mob->m_data_bucket_cache) {
@@ -150,7 +150,7 @@ std::string DataBucket::CheckBucketKey(const Mob *mob, const DataBucketKey& k)
 	return bucket_value;
 }
 
-bool DataBucket::DeleteData(const DataBucketKey& k)
+bool DataBucket::DeleteData(const DataBucketKey &k)
 {
 	return DataBucketsRepository::DeleteWhere(
 		database,
@@ -162,7 +162,7 @@ bool DataBucket::DeleteData(const DataBucketKey& k)
 	);
 }
 
-std::string DataBucket::GetDataExpires(const DataBucketKey& k)
+std::string DataBucket::GetDataExpires(const DataBucketKey &k)
 {
 	auto r = DataBucketsRepository::GetWhere(
 		database,
@@ -180,7 +180,7 @@ std::string DataBucket::GetDataExpires(const DataBucketKey& k)
 	return fmt::format("{}", r[0].expires);
 }
 
-std::string DataBucket::GetDataRemaining(const DataBucketKey& k)
+std::string DataBucket::GetDataRemaining(const DataBucketKey &k)
 {
 	auto r = DataBucketsRepository::GetWhere(
 		database,
@@ -198,7 +198,7 @@ std::string DataBucket::GetDataRemaining(const DataBucketKey& k)
 	return fmt::format("{}", r[0].expires - (long long) std::time(nullptr));
 }
 
-std::string DataBucket::GetScopedDbFilters(const DataBucketKey& k)
+std::string DataBucket::GetScopedDbFilters(const DataBucketKey &k)
 {
 	std::vector<std::string> query = {};
 	if (k.character_id > 0) {
@@ -211,5 +211,9 @@ std::string DataBucket::GetScopedDbFilters(const DataBucketKey& k)
 		query.emplace_back(fmt::format("bot_id = {}", k.bot_id));
 	}
 
-	return Strings::Join(query, " AND ") + " AND ";
+	return fmt::format(
+		"{} {}",
+		Strings::Join(query, " AND "),
+		!query.empty() ? "AND" : ""
+	);
 }
