@@ -273,6 +273,7 @@ public:
 	void LoadAdventureFlavor();
 	void LoadAlternateAdvancement();
 	void LoadAlternateCurrencies();
+	void LoadDataBuckets();
 	void LoadDynamicZoneTemplates();
 	void LoadZoneBlockedSpells();
 	void LoadLDoNTrapEntries();
