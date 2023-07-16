@@ -15,8 +15,6 @@ struct DataBucketEntry {
 	uint64_t                           updated_time;
 };
 
-extern std::vector<DataBucketEntry> data_bucket_cache;
-
 struct DataBucketKey {
 	std::string key;
 	std::string value;
@@ -25,6 +23,21 @@ struct DataBucketKey {
 	int64_t     npc_id;
 	int64_t     bot_id;
 };
+
+namespace DataBucketLoadType {
+	enum Type : uint8 {
+		Bot,
+		Client,
+		NPC,
+		MaxType
+	};
+
+	static const std::string Name[Type::MaxType] = {
+		"Bot",
+		"Client",
+		"NPC",
+	};
+}
 
 class DataBucket {
 public:
@@ -37,17 +50,20 @@ public:
 
 	static bool GetDataBuckets(Mob* mob);
 
+	static uint64_t GetCurrentTimeUNIX();
+
 	// scoped bucket methods
 	static void SetData(const DataBucketKey& k);
 	static bool DeleteData(const DataBucketKey& k);
 	static DataBucketsRepository::DataBuckets GetData(const DataBucketKey& k);
 	static std::string GetDataExpires(const DataBucketKey& k);
 	static std::string GetDataRemaining(const DataBucketKey& k);
-	static std::string CheckBucketKey(const Mob* mob, const DataBucketKey& k);
 	static std::string GetScopedDbFilters(const DataBucketKey& k);
 
 	// bucket repository versus key matching
 	static bool CheckBucketMatch(const DataBucketsRepository::DataBuckets& dbe, const DataBucketKey& k);
+
+	static void BulkLoadEntities(DataBucketLoadType::Type t, std::vector<uint32> ids);
 };
 
 #endif //EQEMU_DATABUCKET_H
