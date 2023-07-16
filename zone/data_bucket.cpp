@@ -24,7 +24,8 @@ void DataBucket::SetData(const DataBucketKey &k)
 	auto r = DataBucketsRepository::GetWhere(
 		database,
 		fmt::format(
-			"`key` = '{}' AND (`expires` > {} OR `expires` = 0) LIMIT 1",
+			"{} `key` = '{}' AND (`expires` > {} OR `expires` = 0) LIMIT 1",
+			DataBucket::GetScopedDbFilters(k),
 			Strings::Escape(k.key),
 			(long long) std::time(nullptr)
 		)
@@ -71,7 +72,8 @@ std::string DataBucket::GetData(const DataBucketKey &k)
 	auto r = DataBucketsRepository::GetWhere(
 		database,
 		fmt::format(
-			"`key` = '{}' AND (`expires` > {} OR `expires` = 0) LIMIT 1",
+			"{} `key` = '{}' AND (`expires` > {} OR `expires` = 0) LIMIT 1",
+			DataBucket::GetScopedDbFilters(k),
 			k.key,
 			(long long) std::time(nullptr)
 		)
@@ -167,7 +169,8 @@ std::string DataBucket::GetDataExpires(const DataBucketKey &k)
 	auto r = DataBucketsRepository::GetWhere(
 		database,
 		fmt::format(
-			"`key` = '{}' AND (`expires` > {} OR `expires` = 0) LIMIT 1",
+			"{} `key` = '{}' AND (`expires` > {} OR `expires` = 0) LIMIT 1",
+			DataBucket::GetScopedDbFilters(k),
 			k.key,
 			(long long) std::time(nullptr)
 		)
@@ -185,7 +188,8 @@ std::string DataBucket::GetDataRemaining(const DataBucketKey &k)
 	auto r = DataBucketsRepository::GetWhere(
 		database,
 		fmt::format(
-			"`key` = '{}' AND (`expires` > {} OR `expires` = 0) LIMIT 1",
+			"{} `key` = '{}' AND (`expires` > {} OR `expires` = 0) LIMIT 1",
+			DataBucket::GetScopedDbFilters(k),
 			k.key,
 			(long long) std::time(nullptr)
 		)
