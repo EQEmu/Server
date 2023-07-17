@@ -65,13 +65,17 @@ void DataBucket::SetData(const DataBucketKey &k)
 	} else {
 		b.key_ = k.key;
 
-		// add data bucket and timestamp to cache
-		g_data_bucket_cache.emplace_back(
-			DataBucketEntry{
-				.e = DataBucketsRepository::InsertOne(database, b),
-				.updated_time = DataBucket::GetCurrentTimeUNIX()
-			}
-		);
+		b = DataBucketsRepository::InsertOne(database, b);
+
+		if (!ExistsInCache(b)) {
+			// add data bucket and timestamp to cache
+			g_data_bucket_cache.emplace_back(
+				DataBucketEntry{
+					.e = b,
+					.updated_time = DataBucket::GetCurrentTimeUNIX()
+				}
+			);
+		}
 	}
 }
 
@@ -84,6 +88,8 @@ std::string DataBucket::GetData(const std::string &bucket_key)
 
 DataBucketsRepository::DataBuckets DataBucket::GetData(const DataBucketKey &k)
 {
+	LogDataBuckets("Getting bucket key [{}] bot_id [{}] character_id [{}] npc_id [{}]", k.key, k.bot_id, k.character_id, k.npc_id);
+
 	for (const auto& ce : g_data_bucket_cache) {
 		if (CheckBucketMatch(ce.e, k)) {
 			if (ce.e.expires > 0 && ce.e.expires < std::time(nullptr)) {
@@ -161,6 +167,8 @@ bool DataBucket::GetDataBuckets(Mob *mob)
 
 bool DataBucket::DeleteData(const DataBucketKey &k)
 {
+	LogDataBuckets("Deleting bucket key [{}] bot_id [{}] character_id [{}] npc_id [{}]", k.key, k.bot_id, k.character_id, k.npc_id);
+
 	// delete from cache where contents match
 	g_data_bucket_cache.erase(
 		std::remove_if(
@@ -185,6 +193,8 @@ bool DataBucket::DeleteData(const DataBucketKey &k)
 
 std::string DataBucket::GetDataExpires(const DataBucketKey &k)
 {
+	LogDataBuckets("Getting bucket expiration key [{}] bot_id [{}] character_id [{}] npc_id [{}]", k.key, k.bot_id, k.character_id, k.npc_id);
+
 	for (const auto& ce : g_data_bucket_cache) {
 		if (CheckBucketMatch(ce.e, k)) {
 			return std::to_string(ce.e.expires);
@@ -201,6 +211,8 @@ std::string DataBucket::GetDataExpires(const DataBucketKey &k)
 
 std::string DataBucket::GetDataRemaining(const DataBucketKey &k)
 {
+	LogDataBuckets("Getting bucket remaining key [{}] bot_id [{}] character_id [{}] npc_id [{}]", k.key, k.bot_id, k.character_id, k.npc_id);
+
 	for (const auto& ce : g_data_bucket_cache) {
 		if (CheckBucketMatch(ce.e, k)) {
 			return std::to_string(ce.e.expires - static_cast<uint32>(std::time(nullptr)));
@@ -302,17 +314,27 @@ void DataBucket::BulkLoadEntities(DataBucketLoadType::Type t, std::vector<uint32
 
 	LogDataBucketsDetail("cache size before [{}] l size [{}]", g_data_bucket_cache.size(), l.size());
 
-	g_data_bucket_cache.reserve(g_data_bucket_cache.size() + l.size());
+	uint32 added_count = 0;
 
 	for (const auto& e : l) {
-		LogDataBucketsDetail("bucket id [{}] bucket key [{}] bucket value [{}]", e.id, e.key_, e.value);
+		if (!ExistsInCache(e)) {
+			added_count++;
+		}
+	}
 
-		g_data_bucket_cache.emplace_back(
-			DataBucketEntry{
-				.e = e,
-				.updated_time = GetCurrentTimeUNIX()
-			}
-		);
+	g_data_bucket_cache.reserve(g_data_bucket_cache.size() + added_count);
+
+	for (const auto& e : l) {
+		if (!ExistsInCache(e)) {
+			LogDataBucketsDetail("bucket id [{}] bucket key [{}] bucket value [{}]", e.id, e.key_, e.value);
+
+			g_data_bucket_cache.emplace_back(
+				DataBucketEntry{
+					.e = e,
+					.updated_time = GetCurrentTimeUNIX()
+				}
+			);
+		}
 	}
 
 	LogDataBucketsDetail("cache size after [{}]", g_data_bucket_cache.size());
@@ -325,9 +347,42 @@ void DataBucket::BulkLoadEntities(DataBucketLoadType::Type t, std::vector<uint32
 	);
 }
 
+void DataBucket::DeleteCachedBuckets(DataBucketLoadType::Type t, uint32 id)
+{
+	LogDataBuckets("LoadType [{}] ID [{}] Cache Size Before [{}]", DataBucketLoadType::Name[t], id, g_data_bucket_cache.size());
+
+	g_data_bucket_cache.erase(
+		std::remove_if(
+			g_data_bucket_cache.begin(),
+			g_data_bucket_cache.end(),
+			[&](DataBucketEntry& ce) {
+				return (
+					(t == DataBucketLoadType::Bot && ce.e.bot_id == id) ||
+					(t == DataBucketLoadType::Client && ce.e.character_id == id) ||
+					(t == DataBucketLoadType::NPC && ce.e.npc_id == id)
+				);
+			}
+		),
+		g_data_bucket_cache.end()
+	);
+
+	LogDataBuckets("LoadType [{}] ID [{}] Cache Size After [{}]", DataBucketLoadType::Name[t], id, g_data_bucket_cache.size());
+}
+
 uint64_t DataBucket::GetCurrentTimeUNIX()
 {
 	return std::chrono::duration_cast<std::chrono::milliseconds>(
 		std::chrono::system_clock::now().time_since_epoch()
 	).count();
+}
+
+bool DataBucket::ExistsInCache(const DataBucketsRepository::DataBuckets& e)
+{
+	for (const auto& ce : g_data_bucket_cache) {
+		if (ce.e.id == e.id) {
+			return true;
+		}
+	}
+
+	return false;
 }

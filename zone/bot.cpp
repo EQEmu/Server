@@ -427,6 +427,7 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 Bot::~Bot() {
 	AI_Stop();
 	LeaveHealRotationMemberPool();
+	DataBucket::DeleteCachedBuckets(DataBucketLoadType::Bot, GetBotID());
 
 	if (HasPet()) {
 		GetPet()->Depop();
