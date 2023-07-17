@@ -105,11 +105,13 @@ std::string DataBucket::GetData(const std::string &bucket_key)
 
 DataBucketsRepository::DataBuckets DataBucket::GetData(const DataBucketKey &k)
 {
-	LogDataBuckets("Getting bucket key [{}] bot_id [{}] character_id [{}] npc_id [{}]",
-				   k.key,
-				   k.bot_id,
-				   k.character_id,
-				   k.npc_id);
+	LogDataBuckets(
+		"Getting bucket key [{}] bot_id [{}] character_id [{}] npc_id [{}]",
+		k.key,
+		k.bot_id,
+		k.character_id,
+		k.npc_id
+	);
 
 	for (const auto &ce: g_data_bucket_cache) {
 		if (CheckBucketMatch(ce.e, k)) {
@@ -233,11 +235,13 @@ bool DataBucket::GetDataBuckets(Mob *mob)
 
 bool DataBucket::DeleteData(const DataBucketKey &k)
 {
-	LogDataBuckets("Deleting bucket key [{}] bot_id [{}] character_id [{}] npc_id [{}]",
-				   k.key,
-				   k.bot_id,
-				   k.character_id,
-				   k.npc_id);
+	LogDataBuckets(
+		"Deleting bucket key [{}] bot_id [{}] character_id [{}] npc_id [{}]",
+		k.key,
+		k.bot_id,
+		k.character_id,
+		k.npc_id
+	);
 
 	// delete from cache where contents match
 	g_data_bucket_cache.erase(
