@@ -147,6 +147,24 @@ DataBucketsRepository::DataBuckets DataBucket::GetData(const DataBucketKey &k)
 	if (r[0].expires > 0 && r[0].expires < (long long) std::time(nullptr)) {
 		DeleteData(k);
 		return {};
+	}2
+
+	bool has_cache = false;
+	for (auto& ce : g_data_bucket_cache) {
+		if (ce.e.id == r[0].id) {
+			has_cache = true;
+			break;
+		}
+	}
+
+	if (!has_cache) {
+		// add data bucket and timestamp to cache
+		g_data_bucket_cache.emplace_back(
+			DataBucketEntry{
+				.e = r[0],
+				.updated_time = DataBucket::GetCurrentTimeUNIX()
+			}
+		);
 	}
 
 	return r[0];
