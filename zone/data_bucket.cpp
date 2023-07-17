@@ -79,6 +79,11 @@ void DataBucket::SetData(const DataBucketKey &k)
 
 			// delete from cache where there might have been a written bucket miss to the cache
 			// this is to prevent the cache from growing too large
+			LogDataBucketsDetail(
+				"Deleting bucket misses from cache where key [{}] size before [{}]",
+				b.key_,
+				g_data_bucket_cache.size()
+			);
 			g_data_bucket_cache.erase(
 				std::remove_if(
 					g_data_bucket_cache.begin(),
@@ -91,6 +96,11 @@ void DataBucket::SetData(const DataBucketKey &k)
 					}
 				),
 				g_data_bucket_cache.end()
+			);
+			LogDataBucketsDetail(
+				"Deleted bucket misses from cache where key [{}] size after [{}]",
+				b.key_,
+				g_data_bucket_cache.size()
 			);
 		}
 	}
