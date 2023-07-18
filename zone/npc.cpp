@@ -3956,8 +3956,8 @@ bool NPC::CanPathTo(float x, float y, float z)
 	opts.offset      = GetZOffset();
 	opts.flags       = PathingNotDisabled ^ PathingZoneLine;
 
-	auto partial = false;
-	auto stuck   = false;
+	bool partial = false;
+	bool stuck   = false;
 	auto route   = zone->pathing->FindPath(
 		glm::vec3(GetX(), GetY(), GetZ()),
 		glm::vec3(x, y, z),
