@@ -8062,9 +8062,9 @@ std::string Mob::GetBucket(std::string bucket_name)
 	DataBucketKey k = GetScopedBucketKeys();
 	k.key = bucket_name;
 
-	std::string bucket_value = DataBucket::GetData(k);
-	if (!bucket_value.empty()) {
-		return bucket_value;
+	auto b = DataBucket::GetData(k);
+	if (!b.value.empty()) {
+		return b.value;
 	}
 	return {};
 }
