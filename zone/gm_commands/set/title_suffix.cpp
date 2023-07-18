@@ -10,8 +10,8 @@ void SetTitleSuffix(Client *c, const Seperator *sep)
 		return;
 	}
 
-	const bool is_remove = !strcasecmp(sep->argplus[1], "-1");
-	std::string suffix = is_remove ? "" : sep->argplus[1];
+	const bool is_remove = !strcasecmp(sep->argplus[2], "-1");
+	std::string suffix = is_remove ? "" : sep->argplus[2];
 
 	auto t = c;
 	if (c->GetTarget() && c->GetTarget()->IsClient()) {
