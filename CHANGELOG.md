@@ -1,3 +1,25 @@
+## [22.21.0] - 07/18/2023
+
+### Data Buckets
+
+* Implement scoped data buckets ([#3498](https://github.com/EQEmu/Server/pull/3498)) @Akkadius 2023-07-16
+
+### Fixes
+
+* Fix rule check and add rule for pickpocket command ([#3492](https://github.com/EQEmu/Server/pull/3492)) @tuday2 2023-07-16
+
+### Pathing
+
+* Improvements to roambox logic, pathing ([#3502](https://github.com/EQEmu/Server/pull/3502)) @Akkadius 2023-07-18
+
+### Quest API
+
+* Add SetLDoNPoints() to Perl/Lua ([#3496](https://github.com/EQEmu/Server/pull/3496)) @Kinglykrab 2023-07-16
+
+### Z Clipping
+
+* Don't issue zclip adjustments when NPC is not moving ([#3499](https://github.com/EQEmu/Server/pull/3499)) @Akkadius 2023-07-16
+
 ## [22.20.1] - 07/15/2023
 
 ### Database
