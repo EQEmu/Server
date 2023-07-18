@@ -3956,7 +3956,6 @@ bool NPC::CanPathTo(float x, float y, float z)
 	opts.offset      = GetZOffset();
 	opts.flags       = PathingNotDisabled ^ PathingZoneLine;
 
-	//This is probably pointless since the nav mesh tool currently sets zonelines to disabled anyway
 	auto partial = false;
 	auto stuck   = false;
 	auto route   = zone->pathing->FindPath(
@@ -3967,5 +3966,5 @@ bool NPC::CanPathTo(float x, float y, float z)
 		opts
 	);
 
-	return route.size();
+	return !route.empty();
 }
