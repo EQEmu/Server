@@ -1074,10 +1074,12 @@ void Mob::AI_Process() {
 			bool is_moving = IsMoving() && !(IsRooted() || IsStunned() || IsMezzed());
 			auto t         = GetTarget();
 			if (is_moving && t) {
-				float self_z   = GetZ() - GetZOffset();
-				float target_z = t->GetPosition().z - t->GetZOffset();
-				if (DistanceNoZ(GetPosition(), t->GetPosition()) < 75 &&
-					std::abs(self_z - target_z) >= 25 && !CheckLosFN(t)) {
+				float self_z            = GetZ() - GetZOffset();
+				float target_z          = t->GetPosition().z - t->GetZOffset();
+				bool  can_path_to       = CastToNPC()->CanPathTo(t->GetX(), t->GetY(), t->GetZ());
+				bool  within_distance   = DistanceNoZ(GetPosition(), t->GetPosition()) < 75;
+				bool  within_z_distance = std::abs(self_z - target_z) >= 25;
+				if (within_distance && within_z_distance && !can_path_to) {
 					float new_z = FindDestGroundZ(t->GetPosition());
 					GMMove(t->GetPosition().x, t->GetPosition().y, new_z + GetZOffset(), t->GetPosition().w, false);
 					FaceTarget(t);
