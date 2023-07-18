@@ -34,7 +34,7 @@ public:
 	// scoped bucket methods
 	static void SetData(const DataBucketKey& k);
 	static bool DeleteData(const DataBucketKey& k);
-	static std::string GetData(const DataBucketKey& k);
+	static DataBucketsRepository::DataBuckets GetData(const DataBucketKey& k);
 	static std::string GetDataExpires(const DataBucketKey& k);
 	static std::string GetDataRemaining(const DataBucketKey& k);
 	static std::string CheckBucketKey(const Mob* mob, const DataBucketKey& k);
