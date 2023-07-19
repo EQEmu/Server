@@ -9,10 +9,20 @@
 #include "../common/types.h"
 #include "../common/repositories/data_buckets_repository.h"
 #include "mob.h"
+#include "../common/json/json_archive_single_line.h"
 
 struct DataBucketEntry {
 	DataBucketsRepository::DataBuckets e;
 	uint64_t                           updated_time;
+
+	template<class Archive>
+	void serialize(Archive &ar)
+	{
+		ar(
+			CEREAL_NVP(e),
+			CEREAL_NVP(updated_time)
+		);
+	}
 };
 
 struct DataBucketKey {
@@ -66,6 +76,8 @@ public:
 
 	static void BulkLoadEntities(DataBucketLoadType::Type t, std::vector<uint32> ids);
 	static void DeleteCachedBuckets(DataBucketLoadType::Type t, uint32 id);
+
+	static bool SendDataBucketCacheUpdate(const DataBucketEntry &e);
 };
 
 #endif //EQEMU_DATABUCKET_H

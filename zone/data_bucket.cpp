@@ -2,8 +2,11 @@
 #include "entity.h"
 #include "zonedb.h"
 #include "mob.h"
+#include "worldserver.h"
 #include <ctime>
 #include <cctype>
+
+extern WorldServer worldserver;
 
 std::vector<DataBucketEntry> g_data_bucket_cache = {};
 
@@ -60,6 +63,9 @@ void DataBucket::SetData(const DataBucketKey &k)
 			if (CheckBucketMatch(ce.e, k)) {
 				ce.e            = b;
 				ce.updated_time = GetCurrentTimeUNIX();
+
+				SendDataBucketCacheUpdate(ce);
+				break;
 			}
 		}
 
@@ -70,12 +76,14 @@ void DataBucket::SetData(const DataBucketKey &k)
 		b = DataBucketsRepository::InsertOne(database, b);
 		if (!ExistsInCache(b)) {
 			// add data bucket and timestamp to cache
-			g_data_bucket_cache.emplace_back(
-				DataBucketEntry{
-					.e = b,
-					.updated_time = DataBucket::GetCurrentTimeUNIX()
-				}
-			);
+			auto ce = DataBucketEntry{
+				.e = b,
+				.updated_time = DataBucket::GetCurrentTimeUNIX()
+			};
+
+			g_data_bucket_cache.emplace_back(ce);
+
+			SendDataBucketCacheUpdate(ce);
 
 			// delete from cache where there might have been a written bucket miss to the cache
 			// this is to prevent the cache from growing too large
@@ -128,6 +136,7 @@ DataBucketsRepository::DataBuckets DataBucket::GetData(const DataBucketKey &k)
 			if (ce.e.expires > 0 && ce.e.expires < std::time(nullptr)) {
 				LogDataBuckets("Attempted to read expired key [{}] removing from cache", ce.e.key_);
 				DeleteData(k);
+				SendDataBucketCacheUpdate(ce);
 				return DataBucketsRepository::NewEntity();
 			}
 
@@ -152,7 +161,6 @@ DataBucketsRepository::DataBuckets DataBucket::GetData(const DataBucketKey &k)
 	);
 
 	if (r.empty()) {
-
 		// cache bucket misses, so we don't have to hit the database
 		// when scripts try to read a bucket that doesn't exist
 		g_data_bucket_cache.emplace_back(
@@ -263,7 +271,7 @@ bool DataBucket::DeleteData(const DataBucketKey &k)
 			g_data_bucket_cache.begin(),
 			g_data_bucket_cache.end(),
 			[&](DataBucketEntry &ce) {
-				return CheckBucketMatch(ce.e, k);
+				return CheckBucketMatch(ce.e, k) && SendDataBucketCacheUpdate(ce);
 			}
 		),
 		g_data_bucket_cache.end()
@@ -485,4 +493,26 @@ bool DataBucket::ExistsInCache(const DataBucketsRepository::DataBuckets &e)
 	}
 
 	return false;
+}
+
+bool DataBucket::SendDataBucketCacheUpdate(const DataBucketEntry &e)
+{
+	if (!e.e.id) {
+		return false;
+	}
+
+	EQ::Net::DynamicPacket p;
+	p.PutSerialize(0, e);
+
+	auto pack_size = sizeof(ServerDataBucketCacheUpdate_Struct) + p.Length();
+	auto pack      = new ServerPacket(ServerOP_PlayerEvent, static_cast<uint32_t>(pack_size));
+	auto buf       = reinterpret_cast<ServerDataBucketCacheUpdate_Struct *>(pack->pBuffer);
+
+	buf->cereal_size = static_cast<uint32_t>(p.Length());
+
+	memcpy(buf->cereal_data, p.Data(), p.Length());
+
+	worldserver.SendPacket(pack);
+
+	return true;
 }

@@ -286,6 +286,8 @@
 // player events
 #define ServerOP_PlayerEvent 0x5100
 
+#define ServerOP_DataBucketCacheUpdate 0x5200
+
 enum {
 	CZUpdateType_Character,
 	CZUpdateType_Group,
@@ -1816,6 +1818,11 @@ struct ServerDzCreateSerialized_Struct {
 };
 
 struct ServerSendPlayerEvent_Struct {
+	uint32_t cereal_size;
+	char cereal_data[0];
+};
+
+struct ServerDataBucketCacheUpdate_Struct {
 	uint32_t cereal_size;
 	char cereal_data[0];
 };
