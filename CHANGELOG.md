@@ -1,3 +1,21 @@
+## [22.21.1] - 07/18/2023
+
+### Bug
+
+* Show Petition and Show Petition_Info fix ([#3503](https://github.com/EQEmu/Server/pull/3503)) @fryguy503 2023-07-18
+
+### Code
+
+* Remove arbitrary teleport blocking in Tutorial and Load zones ([#3506](https://github.com/EQEmu/Server/pull/3506)) @Valorith 2023-07-19
+
+### Databuckets
+
+* Fix issue with expired databuckets not being expired and returned properly ([#3504](https://github.com/EQEmu/Server/pull/3504)) @Akkadius 2023-07-18
+
+### Fixes
+
+* #set title_suffix Argument Position ([#3505](https://github.com/EQEmu/Server/pull/3505)) @Kinglykrab 2023-07-18
+
 ## [22.21.0] - 07/18/2023
 
 ### Data Buckets
