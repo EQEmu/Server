@@ -1,3 +1,43 @@
+## [22.21.1] - 07/18/2023
+
+### Bug
+
+* Show Petition and Show Petition_Info fix ([#3503](https://github.com/EQEmu/Server/pull/3503)) @fryguy503 2023-07-18
+
+### Code
+
+* Remove arbitrary teleport blocking in Tutorial and Load zones ([#3506](https://github.com/EQEmu/Server/pull/3506)) @Valorith 2023-07-19
+
+### Databuckets
+
+* Fix issue with expired databuckets not being expired and returned properly ([#3504](https://github.com/EQEmu/Server/pull/3504)) @Akkadius 2023-07-18
+
+### Fixes
+
+* #set title_suffix Argument Position ([#3505](https://github.com/EQEmu/Server/pull/3505)) @Kinglykrab 2023-07-18
+
+## [22.21.0] - 07/18/2023
+
+### Data Buckets
+
+* Implement scoped data buckets ([#3498](https://github.com/EQEmu/Server/pull/3498)) @Akkadius 2023-07-16
+
+### Fixes
+
+* Fix rule check and add rule for pickpocket command ([#3492](https://github.com/EQEmu/Server/pull/3492)) @tuday2 2023-07-16
+
+### Pathing
+
+* Improvements to roambox logic, pathing ([#3502](https://github.com/EQEmu/Server/pull/3502)) @Akkadius 2023-07-18
+
+### Quest API
+
+* Add SetLDoNPoints() to Perl/Lua ([#3496](https://github.com/EQEmu/Server/pull/3496)) @Kinglykrab 2023-07-16
+
+### Z Clipping
+
+* Don't issue zclip adjustments when NPC is not moving ([#3499](https://github.com/EQEmu/Server/pull/3499)) @Akkadius 2023-07-16
+
 ## [22.20.1] - 07/15/2023
 
 ### Database

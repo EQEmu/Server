@@ -3825,9 +3825,14 @@ void NPC::HandleRoambox()
 			auto requested_y = EQ::Clamp((GetY() + move_y), m_roambox.min_y, m_roambox.max_y);
 			auto requested_z = GetGroundZ(requested_x, requested_y);
 
+			if (std::abs(requested_z - GetZ()) > 100) {
+				LogNPCRoamBox("[{}] | Failed to find reasonable ground [{}]", GetCleanName(), i);
+				continue;
+			}
+
 			std::vector<float> heights = {0, 250, -250};
 			for (auto &h: heights) {
-				if (CheckLosFN(requested_x, requested_y, requested_z + h, GetSize())) {
+				if (CanPathTo(requested_x, requested_y, requested_z + h)) {
 					LogNPCRoamBox("[{}] Found line of sight to path attempt [{}] at height [{}]", GetCleanName(), i, h);
 					can_path = true;
 					break;
@@ -3941,4 +3946,25 @@ void NPC::SetTaunting(bool is_taunting) {
 	if (IsPet() && IsPetOwnerClient()) {
 		GetOwner()->CastToClient()->SetPetCommandState(PET_BUTTON_TAUNT, is_taunting);
 	}
+}
+
+bool NPC::CanPathTo(float x, float y, float z)
+{
+	PathfinderOptions opts;
+	opts.smooth_path = true;
+	opts.step_size   = RuleR(Pathing, NavmeshStepSize);
+	opts.offset      = GetZOffset();
+	opts.flags       = PathingNotDisabled ^ PathingZoneLine;
+
+	bool partial = false;
+	bool stuck   = false;
+	auto route   = zone->pathing->FindPath(
+		glm::vec3(GetX(), GetY(), GetZ()),
+		glm::vec3(x, y, z),
+		partial,
+		stuck,
+		opts
+	);
+
+	return !route.empty();
 }

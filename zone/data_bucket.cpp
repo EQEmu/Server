@@ -145,10 +145,9 @@ DataBucketsRepository::DataBuckets DataBucket::GetData(const DataBucketKey &k)
 	auto r = DataBucketsRepository::GetWhere(
 		database,
 		fmt::format(
-			"{} `key` = '{}' AND (`expires` > {} OR `expires` = 0) LIMIT 1",
+			"{} `key` = '{}' LIMIT 1",
 			DataBucket::GetScopedDbFilters(k),
-			k.key,
-			(long long) std::time(nullptr)
+			k.key
 		)
 	);
 
@@ -174,8 +173,13 @@ DataBucketsRepository::DataBuckets DataBucket::GetData(const DataBucketKey &k)
 		return {};
 	}
 
-	// cache the database result
-	bool      has_cache = false;
+	// if the entry has expired, delete it
+	if (r[0].expires > 0 && r[0].expires < (long long) std::time(nullptr)) {
+		DeleteData(k);
+		return {};
+	}
+
+	bool has_cache = false;
 	for (auto &ce: g_data_bucket_cache) {
 		if (ce.e.id == r[0].id) {
 			has_cache = true;
@@ -285,12 +289,6 @@ std::string DataBucket::GetDataExpires(const DataBucketKey &k)
 		k.npc_id
 	);
 
-	for (const auto &ce: g_data_bucket_cache) {
-		if (CheckBucketMatch(ce.e, k)) {
-			return std::to_string(ce.e.expires);
-		}
-	}
-
 	auto r = GetData(k);
 	if (r.id == 0) {
 		return {};
@@ -308,12 +306,6 @@ std::string DataBucket::GetDataRemaining(const DataBucketKey &k)
 		k.character_id,
 		k.npc_id
 	);
-
-	for (const auto &ce: g_data_bucket_cache) {
-		if (CheckBucketMatch(ce.e, k)) {
-			return std::to_string(ce.e.expires - static_cast<uint32>(std::time(nullptr)));
-		}
-	}
 
 	auto r = GetData(k);
 	if (r.id == 0) {
