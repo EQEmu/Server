@@ -84,7 +84,6 @@ void DataBucket::SetData(const DataBucketKey &k)
 				b.key_,
 				g_data_bucket_cache.size()
 			);
-
 			g_data_bucket_cache.erase(
 				std::remove_if(
 					g_data_bucket_cache.begin(),
@@ -98,7 +97,6 @@ void DataBucket::SetData(const DataBucketKey &k)
 				),
 				g_data_bucket_cache.end()
 			);
-
 			LogDataBucketsDetail(
 				"Deleted bucket misses from cache where key [{}] size after [{}]",
 				b.key_,
@@ -182,7 +180,7 @@ DataBucketsRepository::DataBuckets DataBucket::GetData(const DataBucketKey &k)
 	}
 
 	bool has_cache = false;
-	for (auto& ce : g_data_bucket_cache) {
+	for (auto &ce: g_data_bucket_cache) {
 		if (ce.e.id == r[0].id) {
 			has_cache = true;
 			break;
@@ -291,12 +289,6 @@ std::string DataBucket::GetDataExpires(const DataBucketKey &k)
 		k.npc_id
 	);
 
-	for (const auto &ce: g_data_bucket_cache) {
-		if (CheckBucketMatch(ce.e, k)) {
-			return std::to_string(ce.e.expires);
-		}
-	}
-
 	auto r = GetData(k);
 	if (r.id == 0) {
 		return {};
@@ -314,12 +306,6 @@ std::string DataBucket::GetDataRemaining(const DataBucketKey &k)
 		k.character_id,
 		k.npc_id
 	);
-
-	for (const auto &ce: g_data_bucket_cache) {
-		if (CheckBucketMatch(ce.e, k)) {
-			return std::to_string(ce.e.expires - static_cast<uint32>(std::time(nullptr)));
-		}
-	}
 
 	auto r = GetData(k);
 	if (r.id == 0) {
