@@ -714,19 +714,6 @@ bool Mob::DoCastingChecksZoneRestrictions(bool check_on_casting, int32 spell_id)
 				return false;
 			}
 		}
-		/*
-			Zones where you can not gate.
-		*/
-		if (IsClient() &&
-			(zone->GetZoneID() == Zones::TUTORIAL || zone->GetZoneID() == Zones::LOAD) &&
-			CastToClient()->Admin() < AccountStatus::QuestTroupe) {
-			if (IsEffectInSpell(spell_id, SE_Gate) ||
-				IsEffectInSpell(spell_id, SE_Translocate) ||
-				IsEffectInSpell(spell_id, SE_Teleport)) {
-				Message(Chat::White, "The Gods brought you here, only they can send you away.");
-				return false;
-			}
-		}
 	}
 
 	return true;
