@@ -531,10 +531,11 @@ void DataBucket::HandleWorldMessage(ServerPacket *p)
 					bool match = n.e.id > 0 && ce.e.id == n.e.id;
 					if (match) {
 						LogDataBuckets(
-							"[delete] cache key [{}] id [{}] cache_size [{}]",
+							"[delete] cache key [{}] id [{}] cache_size before [{}] after [{}]",
 							ce.e.key_,
 							ce.e.id,
-							g_data_bucket_cache.size()
+							g_data_bucket_cache.size(),
+							g_data_bucket_cache.size() - 1
 						);
 					}
 					return match;
@@ -588,19 +589,22 @@ void DataBucket::HandleWorldMessage(ServerPacket *p)
 	if (!has_key) {
 		DeleteFromMissesCache(n.e);
 
-		LogDataBuckets(
-			"[create] Adding new cache id [{}] key [{}] value [{}] cache_size [{}]",
-			n.e.id,
-			n.e.key_,
-			n.e.value,
-			g_data_bucket_cache.size()
-		);
+		int64 size_before = g_data_bucket_cache.size();
 
 		g_data_bucket_cache.emplace_back(
 			DataBucketCacheEntry{
 				.e = n.e,
 				.updated_time = GetCurrentTimeUNIX()
 			}
+		);
+
+		LogDataBuckets(
+			"[create] Adding new cache id [{}] key [{}] value [{}] cache size before [{}] after [{}]",
+			n.e.id,
+			n.e.key_,
+			n.e.value,
+			size_before,
+			g_data_bucket_cache.size()
 		);
 	}
 }
