@@ -194,11 +194,22 @@ std::string DataBucket::GetScopedDbFilters(const DataBucketKey &k)
 	if (k.character_id > 0) {
 		query.emplace_back(fmt::format("character_id = {}", k.character_id));
 	}
-	else if (k.npc_id > 0) {
+	else {
+		query.emplace_back("character_id = 0");
+	}
+
+	if (k.npc_id > 0) {
 		query.emplace_back(fmt::format("npc_id = {}", k.npc_id));
 	}
-	else if (k.bot_id > 0) {
+	else {
+		query.emplace_back("npc_id = 0");
+	}
+
+	if (k.bot_id > 0) {
 		query.emplace_back(fmt::format("bot_id = {}", k.bot_id));
+	}
+	else {
+		query.emplace_back("bot_id = 0");
 	}
 
 	return fmt::format(
