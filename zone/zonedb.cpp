@@ -3303,7 +3303,7 @@ void ZoneDatabase::SavePetInfo(Client *client)
 
 		// build pet buffs into struct
 		int pet_buff_count = 0;
-		int max_slots = RuleI(Spells, MaxTotalSlotsPET);
+		int max_slots = RuleI(Spells, MaxTotalSlotsPET) > 30 ? 30 : RuleI(Spells, MaxTotalSlotsPET);
 
 		// count pet buffs
 		for (int index = 0; index < max_slots; index++) {
