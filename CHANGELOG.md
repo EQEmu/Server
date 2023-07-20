@@ -1,3 +1,9 @@
+## [22.21.2] - 07/19/2023
+
+### Databuckets
+
+* Fix rarer same bucket name scoping overlap issue ([#3509](https://github.com/EQEmu/Server/pull/3509)) @Akkadius 2023-07-20
+
 ## [22.21.1] - 07/18/2023
 
 ### Bug
