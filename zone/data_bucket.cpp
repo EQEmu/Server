@@ -8,7 +8,7 @@
 
 extern WorldServer worldserver;
 
-std::vector<DataBucketEntry> g_data_bucket_cache = {};
+std::vector<DataBucketCacheEntry> g_data_bucket_cache = {};
 
 void DataBucket::SetData(const std::string &bucket_key, const std::string &bucket_value, std::string expires_time)
 {
@@ -27,7 +27,7 @@ void DataBucket::SetData(const std::string &bucket_key, const std::string &bucke
 void DataBucket::SetData(const DataBucketKey &k)
 {
 	auto b = DataBucketsRepository::NewEntity();
-	auto r = GetData(k);
+	auto r = GetData(k, true);
 	// if we have an entry, use it
 	if (r.id > 0) {
 		b = r;
@@ -61,9 +61,9 @@ void DataBucket::SetData(const DataBucketKey &k)
 		// loop cache and update cache value and timestamp
 		for (auto &ce: g_data_bucket_cache) {
 			if (CheckBucketMatch(ce.e, k)) {
-				ce.e            = b;
-				ce.updated_time = GetCurrentTimeUNIX();
-
+				ce.e             = b;
+				ce.updated_time  = GetCurrentTimeUNIX();
+				ce.update_action = DataBucketCacheUpdateAction::Upsert;
 				SendDataBucketCacheUpdate(ce);
 				break;
 			}
@@ -76,40 +76,17 @@ void DataBucket::SetData(const DataBucketKey &k)
 		b = DataBucketsRepository::InsertOne(database, b);
 		if (!ExistsInCache(b)) {
 			// add data bucket and timestamp to cache
-			auto ce = DataBucketEntry{
+			auto ce = DataBucketCacheEntry{
 				.e = b,
-				.updated_time = DataBucket::GetCurrentTimeUNIX()
+				.updated_time = DataBucket::GetCurrentTimeUNIX(),
+				.update_action = DataBucketCacheUpdateAction::Upsert
 			};
 
 			g_data_bucket_cache.emplace_back(ce);
 
 			SendDataBucketCacheUpdate(ce);
 
-			// delete from cache where there might have been a written bucket miss to the cache
-			// this is to prevent the cache from growing too large
-			LogDataBucketsDetail(
-				"Deleting bucket misses from cache where key [{}] size before [{}]",
-				b.key_,
-				g_data_bucket_cache.size()
-			);
-			g_data_bucket_cache.erase(
-				std::remove_if(
-					g_data_bucket_cache.begin(),
-					g_data_bucket_cache.end(),
-					[&](DataBucketEntry &ce) {
-						return ce.e.id == 0 && ce.e.key_ == b.key_ &&
-							   ce.e.character_id == b.character_id &&
-							   ce.e.npc_id == b.npc_id &&
-							   ce.e.bot_id == b.bot_id;
-					}
-				),
-				g_data_bucket_cache.end()
-			);
-			LogDataBucketsDetail(
-				"Deleted bucket misses from cache where key [{}] size after [{}]",
-				b.key_,
-				g_data_bucket_cache.size()
-			);
+			DeleteFromMissesCache(b);
 		}
 	}
 }
@@ -121,7 +98,11 @@ std::string DataBucket::GetData(const std::string &bucket_key)
 	return GetData(k).value;
 }
 
-DataBucketsRepository::DataBuckets DataBucket::GetData(const DataBucketKey &k)
+// GetData fetches bucket data from the database or cache if it exists
+// if the bucket doesn't exist, it will be added to the cache as a miss
+// if ignore_misses_cache is true, the bucket will not be added to the cache as a miss
+// the only place we should be ignoring the misses cache is on the initial read during SetData
+DataBucketsRepository::DataBuckets DataBucket::GetData(const DataBucketKey &k, bool ignore_misses_cache)
 {
 	LogDataBuckets(
 		"Getting bucket key [{}] bot_id [{}] character_id [{}] npc_id [{}]",
@@ -136,7 +117,6 @@ DataBucketsRepository::DataBuckets DataBucket::GetData(const DataBucketKey &k)
 			if (ce.e.expires > 0 && ce.e.expires < std::time(nullptr)) {
 				LogDataBuckets("Attempted to read expired key [{}] removing from cache", ce.e.key_);
 				DeleteData(k);
-				SendDataBucketCacheUpdate(ce);
 				return DataBucketsRepository::NewEntity();
 			}
 
@@ -161,22 +141,24 @@ DataBucketsRepository::DataBuckets DataBucket::GetData(const DataBucketKey &k)
 	);
 
 	if (r.empty()) {
-		// cache bucket misses, so we don't have to hit the database
-		// when scripts try to read a bucket that doesn't exist
-		g_data_bucket_cache.emplace_back(
-			DataBucketEntry{
-				.e = DataBucketsRepository::DataBuckets{
-					.id = 0,
-					.key_ = k.key,
-					.value = "",
-					.expires = 0,
-					.character_id = k.character_id,
-					.npc_id = k.npc_id,
-					.bot_id = k.bot_id
-				},
-				.updated_time = DataBucket::GetCurrentTimeUNIX()
-			}
-		);
+		if (ignore_misses_cache) {
+			// cache bucket misses, so we don't have to hit the database
+			// when scripts try to read a bucket that doesn't exist
+			g_data_bucket_cache.emplace_back(
+				DataBucketCacheEntry{
+					.e = DataBucketsRepository::DataBuckets{
+						.id = 0,
+						.key_ = k.key,
+						.value = "",
+						.expires = 0,
+						.character_id = k.character_id,
+						.npc_id = k.npc_id,
+						.bot_id = k.bot_id
+					},
+					.updated_time = DataBucket::GetCurrentTimeUNIX()
+				}
+			);
+		}
 
 		return {};
 	}
@@ -187,7 +169,7 @@ DataBucketsRepository::DataBuckets DataBucket::GetData(const DataBucketKey &k)
 		return {};
 	}
 
-	bool has_cache = false;
+	bool      has_cache = false;
 	for (auto &ce: g_data_bucket_cache) {
 		if (ce.e.id == r[0].id) {
 			has_cache = true;
@@ -198,7 +180,7 @@ DataBucketsRepository::DataBuckets DataBucket::GetData(const DataBucketKey &k)
 	if (!has_cache) {
 		// add data bucket and timestamp to cache
 		g_data_bucket_cache.emplace_back(
-			DataBucketEntry{
+			DataBucketCacheEntry{
 				.e = r[0],
 				.updated_time = DataBucket::GetCurrentTimeUNIX()
 			}
@@ -270,8 +252,14 @@ bool DataBucket::DeleteData(const DataBucketKey &k)
 		std::remove_if(
 			g_data_bucket_cache.begin(),
 			g_data_bucket_cache.end(),
-			[&](DataBucketEntry &ce) {
-				return CheckBucketMatch(ce.e, k) && SendDataBucketCacheUpdate(ce);
+			[&](DataBucketCacheEntry &ce) {
+				bool match = CheckBucketMatch(ce.e, k);
+				if (match) {
+					ce.update_action = DataBucketCacheUpdateAction::Delete;
+					SendDataBucketCacheUpdate(ce);
+				}
+
+				return match;
 			}
 		),
 		g_data_bucket_cache.end()
@@ -427,7 +415,7 @@ void DataBucket::BulkLoadEntities(DataBucketLoadType::Type t, std::vector<uint32
 			LogDataBucketsDetail("bucket id [{}] bucket key [{}] bucket value [{}]", e.id, e.key_, e.value);
 
 			g_data_bucket_cache.emplace_back(
-				DataBucketEntry{
+				DataBucketCacheEntry{
 					.e = e,
 					.updated_time = GetCurrentTimeUNIX()
 				}
@@ -458,7 +446,7 @@ void DataBucket::DeleteCachedBuckets(DataBucketLoadType::Type t, uint32 id)
 		std::remove_if(
 			g_data_bucket_cache.begin(),
 			g_data_bucket_cache.end(),
-			[&](DataBucketEntry &ce) {
+			[&](DataBucketCacheEntry &ce) {
 				return (
 					(t == DataBucketLoadType::Bot && ce.e.bot_id == id) ||
 					(t == DataBucketLoadType::Client && ce.e.character_id == id) ||
@@ -477,9 +465,9 @@ void DataBucket::DeleteCachedBuckets(DataBucketLoadType::Type t, uint32 id)
 	);
 }
 
-uint64_t DataBucket::GetCurrentTimeUNIX()
+int64_t DataBucket::GetCurrentTimeUNIX()
 {
-	return std::chrono::duration_cast<std::chrono::milliseconds>(
+	return std::chrono::duration_cast<std::chrono::nanoseconds>(
 		std::chrono::system_clock::now().time_since_epoch()
 	).count();
 }
@@ -495,7 +483,7 @@ bool DataBucket::ExistsInCache(const DataBucketsRepository::DataBuckets &e)
 	return false;
 }
 
-bool DataBucket::SendDataBucketCacheUpdate(const DataBucketEntry &e)
+bool DataBucket::SendDataBucketCacheUpdate(const DataBucketCacheEntry &e)
 {
 	if (!e.e.id) {
 		return false;
@@ -505,7 +493,7 @@ bool DataBucket::SendDataBucketCacheUpdate(const DataBucketEntry &e)
 	p.PutSerialize(0, e);
 
 	auto pack_size = sizeof(ServerDataBucketCacheUpdate_Struct) + p.Length();
-	auto pack      = new ServerPacket(ServerOP_PlayerEvent, static_cast<uint32_t>(pack_size));
+	auto pack      = new ServerPacket(ServerOP_DataBucketCacheUpdate, static_cast<uint32_t>(pack_size));
 	auto buf       = reinterpret_cast<ServerDataBucketCacheUpdate_Struct *>(pack->pBuffer);
 
 	buf->cereal_size = static_cast<uint32_t>(p.Length());
@@ -515,4 +503,131 @@ bool DataBucket::SendDataBucketCacheUpdate(const DataBucketEntry &e)
 	worldserver.SendPacket(pack);
 
 	return true;
+}
+
+void DataBucket::HandleWorldMessage(ServerPacket *p)
+{
+	DataBucketCacheEntry         n;
+	auto                         s = (ServerDataBucketCacheUpdate_Struct *) p->pBuffer;
+	EQ::Util::MemoryStreamReader ss(s->cereal_data, s->cereal_size);
+	cereal::BinaryInputArchive   archive(ss);
+	archive(n);
+
+	LogDataBucketsDetail(
+		"Received cache packet for id [{}] key [{}] value [{}] action [{}]",
+		n.e.id,
+		n.e.key_,
+		n.e.value,
+		n.update_action
+	);
+
+	// delete
+	if (n.update_action == DataBucketCacheUpdateAction::Delete) {
+		g_data_bucket_cache.erase(
+			std::remove_if(
+				g_data_bucket_cache.begin(),
+				g_data_bucket_cache.end(),
+				[&](DataBucketCacheEntry &ce) {
+					bool match = n.e.id > 0 && ce.e.id == n.e.id;
+					if (match) {
+						LogDataBuckets(
+							"[delete] cache key [{}] id [{}] cache_size [{}]",
+							ce.e.key_,
+							ce.e.id,
+							g_data_bucket_cache.size()
+						);
+					}
+					return match;
+				}
+			),
+			g_data_bucket_cache.end()
+		);
+
+		return;
+	}
+
+	// update
+	bool has_key = false;
+
+	for (auto &ce: g_data_bucket_cache) {
+		int64 time_delta = ce.updated_time - n.updated_time;
+		if (ce.updated_time >= n.updated_time) {
+			LogDataBuckets(
+				"Attempted to update older cache key [{}] rejecting old time [{}] new time [{}] delta [{}] cache_size [{}]",
+				ce.e.key_,
+				ce.updated_time,
+				n.updated_time,
+				time_delta,
+				g_data_bucket_cache.size()
+			);
+			return;
+		}
+
+		// update cache
+		if (ce.e.id == n.e.id) {
+			DeleteFromMissesCache(n.e);
+
+			LogDataBuckets(
+				"[update] cache id [{}] key [{}] value [{}] old time [{}] new time [{}] delta [{}] cache_size [{}]",
+				ce.e.id,
+				ce.e.key_,
+				n.e.value,
+				ce.updated_time,
+				n.updated_time,
+				time_delta,
+				g_data_bucket_cache.size()
+			);
+			ce.e            = n.e;
+			ce.updated_time = n.updated_time;
+			has_key = true;
+			break;
+		}
+	}
+
+	// create
+	if (!has_key) {
+		DeleteFromMissesCache(n.e);
+
+		LogDataBuckets(
+			"[create] Adding new cache id [{}] key [{}] value [{}] cache_size [{}]",
+			n.e.id,
+			n.e.key_,
+			n.e.value,
+			g_data_bucket_cache.size()
+		);
+
+		g_data_bucket_cache.emplace_back(
+			DataBucketCacheEntry{
+				.e = n.e,
+				.updated_time = GetCurrentTimeUNIX()
+			}
+		);
+	}
+}
+
+void DataBucket::DeleteFromMissesCache(DataBucketsRepository::DataBuckets e)
+{
+	// delete from cache where there might have been a written bucket miss to the cache
+	// this is to prevent the cache from growing too large
+	int64 size_before = g_data_bucket_cache.size();
+
+	g_data_bucket_cache.erase(
+		std::remove_if(
+			g_data_bucket_cache.begin(),
+			g_data_bucket_cache.end(),
+			[&](DataBucketCacheEntry &ce) {
+				return ce.e.id == 0 && ce.e.key_ == e.key_ &&
+					   ce.e.character_id == e.character_id &&
+					   ce.e.npc_id == e.npc_id &&
+					   ce.e.bot_id == e.bot_id;
+			}
+		),
+		g_data_bucket_cache.end()
+	);
+	LogDataBucketsDetail(
+		"Deleted bucket misses from cache where key [{}] size before [{}] after [{}]",
+		e.key_,
+		size_before,
+		g_data_bucket_cache.size()
+	);
 }

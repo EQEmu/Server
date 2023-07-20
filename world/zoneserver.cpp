@@ -1470,11 +1470,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			break;
 		}
 		case ServerOP_DataBucketCacheUpdate: {
-			DataBucketEntry              n;
-			auto                         s = (ServerDataBucketCacheUpdate_Struct *) pack->pBuffer;
-			EQ::Util::MemoryStreamReader ss(s->cereal_data, s->cereal_size);
-			cereal::BinaryInputArchive   archive(ss);
-			archive(n);
+			zoneserver_list.SendPacket(pack);
 
 			break;
 		}

@@ -3329,6 +3329,11 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		SharedTaskZoneMessaging::HandleWorldMessage(pack);
 		break;
 	}
+	case ServerOP_DataBucketCacheUpdate:
+	{
+		DataBucket::HandleWorldMessage(pack);
+		break;
+	}
 	default: {
 		LogInfo("Unknown ZS Opcode [{}] size [{}]", (int)pack->opcode, pack->size);
 		break;
