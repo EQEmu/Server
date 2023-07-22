@@ -141,7 +141,12 @@ DataBucketsRepository::DataBuckets DataBucket::GetData(const DataBucketKey &k, b
 	);
 
 	if (r.empty()) {
-		if (ignore_misses_cache) {
+
+		// if we're ignoring the misses cache, don't add to the cache
+		// the only place this is ignored is during the initial read of SetData
+		if (!ignore_misses_cache) {
+			size_t size_before = g_data_bucket_cache.size();
+
 			// cache bucket misses, so we don't have to hit the database
 			// when scripts try to read a bucket that doesn't exist
 			g_data_bucket_cache.emplace_back(
@@ -157,6 +162,16 @@ DataBucketsRepository::DataBuckets DataBucket::GetData(const DataBucketKey &k, b
 					},
 					.updated_time = DataBucket::GetCurrentTimeUNIX()
 				}
+			);
+
+			LogDataBuckets(
+				"Key [{}] not found in database, adding to cache as a miss character_id [{}] npc_id [{}] bot_id [{}] cache size before [{}] after [{}]",
+				k.key,
+				k.character_id,
+				k.npc_id,
+				k.bot_id,
+				size_before,
+				g_data_bucket_cache.size()
 			);
 		}
 
@@ -239,13 +254,7 @@ bool DataBucket::GetDataBuckets(Mob *mob)
 
 bool DataBucket::DeleteData(const DataBucketKey &k)
 {
-	LogDataBuckets(
-		"Deleting bucket key [{}] bot_id [{}] character_id [{}] npc_id [{}]",
-		k.key,
-		k.bot_id,
-		k.character_id,
-		k.npc_id
-	);
+	size_t size_before = g_data_bucket_cache.size();
 
 	// delete from cache where contents match
 	g_data_bucket_cache.erase(
@@ -263,6 +272,16 @@ bool DataBucket::DeleteData(const DataBucketKey &k)
 			}
 		),
 		g_data_bucket_cache.end()
+	);
+
+	LogDataBuckets(
+		"Deleting bucket key [{}] bot_id [{}] character_id [{}] npc_id [{}] cache size before [{}] after [{}]",
+		k.key,
+		k.bot_id,
+		k.character_id,
+		k.npc_id,
+		size_before,
+		g_data_bucket_cache.size()
 	);
 
 	return DataBucketsRepository::DeleteWhere(
@@ -409,6 +428,8 @@ void DataBucket::BulkLoadEntities(DataBucketLoadType::Type t, std::vector<uint32
 		return;
 	}
 
+	size_t size_before = g_data_bucket_cache.size();
+
 	LogDataBucketsDetail("cache size before [{}] l size [{}]", g_data_bucket_cache.size(), l.size());
 
 	uint32 added_count = 0;
@@ -446,12 +467,7 @@ void DataBucket::BulkLoadEntities(DataBucketLoadType::Type t, std::vector<uint32
 
 void DataBucket::DeleteCachedBuckets(DataBucketLoadType::Type t, uint32 id)
 {
-	LogDataBuckets(
-		"LoadType [{}] id [{}] cache size before [{}]",
-		DataBucketLoadType::Name[t],
-		id,
-		g_data_bucket_cache.size()
-	);
+	size_t size_before = g_data_bucket_cache.size();
 
 	g_data_bucket_cache.erase(
 		std::remove_if(
@@ -469,9 +485,10 @@ void DataBucket::DeleteCachedBuckets(DataBucketLoadType::Type t, uint32 id)
 	);
 
 	LogDataBuckets(
-		"LoadType [{}] id [{}] cache size after [{}]",
+		"LoadType [{}] id [{}] cache size before [{}] after [{}]",
 		DataBucketLoadType::Name[t],
 		id,
+		size_before,
 		g_data_bucket_cache.size()
 	);
 }
@@ -600,7 +617,7 @@ void DataBucket::HandleWorldMessage(ServerPacket *p)
 	if (!has_key) {
 		DeleteFromMissesCache(n.e);
 
-		int64 size_before = g_data_bucket_cache.size();
+		size_t size_before = g_data_bucket_cache.size();
 
 		g_data_bucket_cache.emplace_back(
 			DataBucketCacheEntry{
@@ -624,7 +641,7 @@ void DataBucket::DeleteFromMissesCache(DataBucketsRepository::DataBuckets e)
 {
 	// delete from cache where there might have been a written bucket miss to the cache
 	// this is to prevent the cache from growing too large
-	int64 size_before = g_data_bucket_cache.size();
+	size_t size_before = g_data_bucket_cache.size();
 
 	g_data_bucket_cache.erase(
 		std::remove_if(
