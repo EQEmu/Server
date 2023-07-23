@@ -138,6 +138,7 @@ namespace Logs {
 		QuestErrors,
 		PlayerEvents,
 		DataBuckets,
+		Zoning,
 		MaxCategoryID /* Don't Remove this */
 	};
 
@@ -235,6 +236,7 @@ namespace Logs {
 		"QuestErrors",
 		"PlayerEvents",
 		"DataBuckets",
+		"Zoning",
 	};
 }
 

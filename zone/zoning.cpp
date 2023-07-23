@@ -55,6 +55,22 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 #endif
 	auto* zc = (ZoneChange_Struct*)app->pBuffer;
 
+	LogZoning(
+		"Client [{}] zoning to [{}] ({}) instance_id [{}] x [{}] y [{}] z [{}] zone_reason [{}] success [{}] zone_mode [{}] ({})",
+		GetCleanName(),
+		zc->char_name,
+		ZoneName(zc->zoneID),
+		zc->zoneID,
+		zc->instanceID,
+		zc->x,
+		zc->y,
+		zc->z,
+		zc->zone_reason,
+		zc->success,
+		GetZoneModeString(zone_mode),
+		zone_mode
+	);
+
 	uint16 target_zone_id = 0;
 	auto target_instance_id = zc->instanceID;
 	ZonePoint* zone_point = nullptr;
@@ -132,6 +148,14 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 	}
 
 	if (target_instance_id) {
+		LogZoning(
+			"Client attempting zone to [{}] instance_id [{}] to zone [{}] ({})",
+			GetCleanName(),
+			target_instance_id,
+			ZoneName(target_zone_id),
+			target_zone_id
+		);
+
 		//make sure we are in it and it's unexpired.
 		if (!database.VerifyInstanceAlive(target_instance_id, CharacterID())) {
 			Message(
@@ -185,7 +209,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 	int16 min_status = AccountStatus::Player;
 	uint8 min_level  = 0;
 
-	LogInfo("Loaded zone flag [{}]", zone_data->flag_needed);
+	LogZoning("Loaded zone flag [{}]", zone_data->flag_needed);
 
 	safe_x       = zone_data->safe_x;
 	safe_y       = zone_data->safe_y;
@@ -328,7 +352,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 			meets_zone_expansion_check = true;
 		}
 
-		LogInfo(
+		LogZoning(
 			"Checking zone request [{}] for expansion [{}] ({}) success [{}]",
 			target_zone_name,
 			(content_service.GetCurrentExpansion()),
@@ -360,11 +384,40 @@ void Client::SendZoneCancel(ZoneChange_Struct *zc) {
 	EQApplicationPacket *outapp = nullptr;
 	outapp = new EQApplicationPacket(OP_ZoneChange, sizeof(ZoneChange_Struct));
 	ZoneChange_Struct *zc2 = (ZoneChange_Struct*)outapp->pBuffer;
+
+	LogZoning(
+		"(zs) Client [{}] char_name [{}] zoning to [{}] ({}) cancelled instance_id [{}] x [{}] y [{}] z [{}] zone_reason [{}] success [{}]",
+		GetCleanName(),
+		zc->char_name,
+		ZoneName(zc2->zoneID),
+		zc->zoneID,
+		zc->instanceID,
+		zc->x,
+		zc->y,
+		zc->z,
+		zc->zone_reason,
+		zc->success
+	);
+
 	strcpy(zc2->char_name, zc->char_name);
 	zc2->zoneID = zone->GetZoneID();
 	zc2->success = 1;
 	outapp->priority = 6;
 	FastQueuePacket(&outapp);
+
+	LogZoning(
+		"(zc2) Client [{}] char_name [{}] zoning to [{}] ({}) cancelled instance_id [{}] x [{}] y [{}] z [{}] zone_reason [{}] success [{}]",
+		GetCleanName(),
+		zc2->char_name,
+		ZoneName(zc2->zoneID),
+		zc2->zoneID,
+		zc2->instanceID,
+		zc2->x,
+		zc2->y,
+		zc2->z,
+		zc2->zone_reason,
+		zc2->success
+	);
 
 	//reset to unsolicited.
 	zone_mode = ZoneUnsolicited;
@@ -386,6 +439,20 @@ void Client::SendZoneError(ZoneChange_Struct *zc, int8 err)
 	zc2->success = err;
 	outapp->priority = 6;
 	FastQueuePacket(&outapp);
+
+	LogZoning(
+		"Client [{}] char_name [{}] zoning to [{}] ({}) (error) instance_id [{}] x [{}] y [{}] z [{}] zone_reason [{}] success [{}]",
+		GetCleanName(),
+		zc2->char_name,
+		ZoneName(zc2->zoneID),
+		zc2->zoneID,
+		zc2->instanceID,
+		zc2->x,
+		zc2->y,
+		zc2->z,
+		zc2->zone_reason,
+		zc2->success
+	);
 
 	//reset to unsolicited.
 	zone_mode = ZoneUnsolicited;
@@ -423,15 +490,18 @@ void Client::DoZoneSuccess(ZoneChange_Struct *zc, uint16 zone_id, uint32 instanc
 		}
 	}
 
-	LogInfo(
-		"Zoning [{}] to: [{}] ([{}]) - ([{}]) x [{}] y [{}] z [{}]",
-		m_pp.name,
+	LogZoning(
+		"Client [{}] char_name [{}] zoning to [{}] ({}) instance_id [{}] x [{}] y [{}] z [{}] zone_reason [{}] success [{}]",
+		GetCleanName(),
+		zc->char_name,
 		ZoneName(zone_id),
 		zone_id,
 		instance_id,
 		dest_x,
 		dest_y,
-		dest_z
+		dest_z,
+		zc->zone_reason,
+		zc->success
 	);
 
 	//set the player's coordinates in the new zone so they have them
