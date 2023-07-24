@@ -15,7 +15,7 @@
 #include "../../database.h"
 #include "../../strings.h"
 #include <ctime>
-
+#include <cereal/cereal.hpp>
 
 class BaseDataBucketsRepository {
 public:
@@ -27,6 +27,21 @@ public:
 		int64_t     character_id;
 		int64_t     npc_id;
 		int64_t     bot_id;
+
+		// cereal
+		template<class Archive>
+		void serialize(Archive &ar)
+		{
+			ar(
+				CEREAL_NVP(id),
+				CEREAL_NVP(key_),
+				CEREAL_NVP(value),
+				CEREAL_NVP(expires),
+				CEREAL_NVP(character_id),
+				CEREAL_NVP(npc_id),
+				CEREAL_NVP(bot_id)
+			);
+		}
 	};
 
 	static std::string PrimaryKey()

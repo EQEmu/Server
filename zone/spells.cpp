@@ -5886,7 +5886,7 @@ bool Client::SpellBucketCheck(uint16 spell_id, uint32 character_id) {
 		spell_bucket_name
 	);
 
-	auto bucket_value = DataBucket::GetData(old_bucket_name);
+	std::string bucket_value = DataBucket::GetData(old_bucket_name);
 	if (!bucket_value.empty()) {
 		if (Strings::IsNumber(bucket_value) && Strings::IsNumber(spell_bucket_value)) {
 			if (Strings::ToInt(bucket_value) >= Strings::ToInt(spell_bucket_value)) {

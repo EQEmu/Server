@@ -1927,6 +1927,8 @@ const NPCType *ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 		);
 	}
 
+	std::vector<uint32> npc_ids;
+
 	for (NpcTypesRepository::NpcTypes &n : NpcTypesRepository::GetWhere((Database &) content_db, filter)) {
 		NPCType *t;
 		t = new NPCType;
@@ -2137,7 +2139,14 @@ const NPCType *ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 
 		zone->npctable[t->npc_id] = t;
 		npc = t;
+
+		// If NPC ID is not in npc_ids, add to vector
+		if (!std::count(npc_ids.begin(), npc_ids.end(), t->npc_id)) {
+			npc_ids.emplace_back(t->npc_id);
+		}
 	}
+
+	DataBucket::BulkLoadEntities(DataBucketLoadType::NPC, npc_ids);
 
 	return npc;
 }
