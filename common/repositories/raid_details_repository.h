@@ -48,7 +48,7 @@ public:
 		Database& db,
 		int32_t raid_id,
 		uint8_t marked_npc_number,
-		uint8_t value
+		uint32_t value
 	) {
 		auto results = db.QueryDatabase(
 			fmt::format(

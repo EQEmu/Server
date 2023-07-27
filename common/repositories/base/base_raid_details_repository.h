@@ -24,9 +24,9 @@ public:
 		int32_t     loottype;
 		int8_t      locked;
 		std::string motd;
-		uint16_t    marked_npc_1;
-		uint16_t    marked_npc_2;
-		uint16_t    marked_npc_3;
+		uint32_t    marked_npc_1;
+		uint32_t    marked_npc_2;
+		uint32_t    marked_npc_3;
 	};
 
 	static std::string PrimaryKey()
@@ -144,9 +144,9 @@ public:
 			e.loottype     = static_cast<int32_t>(atoi(row[1]));
 			e.locked       = static_cast<int8_t>(atoi(row[2]));
 			e.motd         = row[3] ? row[3] : "";
-			e.marked_npc_1 = static_cast<uint16_t>(strtoul(row[4], nullptr, 10));
-			e.marked_npc_2 = static_cast<uint16_t>(strtoul(row[5], nullptr, 10));
-			e.marked_npc_3 = static_cast<uint16_t>(strtoul(row[6], nullptr, 10));
+			e.marked_npc_1 = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
+			e.marked_npc_2 = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
+			e.marked_npc_3 = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
 
 			return e;
 		}
@@ -288,9 +288,9 @@ public:
 			e.loottype     = static_cast<int32_t>(atoi(row[1]));
 			e.locked       = static_cast<int8_t>(atoi(row[2]));
 			e.motd         = row[3] ? row[3] : "";
-			e.marked_npc_1 = static_cast<uint16_t>(strtoul(row[4], nullptr, 10));
-			e.marked_npc_2 = static_cast<uint16_t>(strtoul(row[5], nullptr, 10));
-			e.marked_npc_3 = static_cast<uint16_t>(strtoul(row[6], nullptr, 10));
+			e.marked_npc_1 = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
+			e.marked_npc_2 = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
+			e.marked_npc_3 = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
 
 			all_entries.push_back(e);
 		}
@@ -319,9 +319,9 @@ public:
 			e.loottype     = static_cast<int32_t>(atoi(row[1]));
 			e.locked       = static_cast<int8_t>(atoi(row[2]));
 			e.motd         = row[3] ? row[3] : "";
-			e.marked_npc_1 = static_cast<uint16_t>(strtoul(row[4], nullptr, 10));
-			e.marked_npc_2 = static_cast<uint16_t>(strtoul(row[5], nullptr, 10));
-			e.marked_npc_3 = static_cast<uint16_t>(strtoul(row[6], nullptr, 10));
+			e.marked_npc_1 = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
+			e.marked_npc_2 = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
+			e.marked_npc_3 = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
 
 			all_entries.push_back(e);
 		}

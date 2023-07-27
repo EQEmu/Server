@@ -4806,6 +4806,18 @@ UNIQUE INDEX `command`(`parent_command`, `sub_command`)
 )
 )"
 	},
+	ManifestEntry{
+		.version = 9233,
+		.description = "2023_07_27_update_raid_details.sql",
+		.check = "SELECT DATA_TYPE FROM INFORMATION_SCHEMA.`COLUMNS` WHERE TABLE_NAME = 'raid_details' AND COLUMN_NAME = 'marked_npc_1';",
+		.condition = "match",
+		.match = "smallint",
+		.sql = R"(ALTER TABLE `raid_details`
+				CHANGE COLUMN `marked_npc_1` `marked_npc_1` INT UNSIGNED NOT NULL DEFAULT 0 AFTER `motd`,
+				CHANGE COLUMN `marked_npc_2` `marked_npc_2` INT UNSIGNED NOT NULL DEFAULT 0 AFTER `marked_npc_1`,
+				CHANGE COLUMN `marked_npc_3` `marked_npc_3` INT UNSIGNED NOT NULL DEFAULT 0 AFTER `marked_npc_2`;
+				)"
+	},
 
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{

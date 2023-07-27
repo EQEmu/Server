@@ -242,6 +242,10 @@ public:
 	void    RaidClearNPCMarks(Client* c);
 	void    RemoveRaidDelegates(const char* delegatee);
 	void	UpdateRaidXTargets();
+	uint32  EncodeMarkedNPC(Mob* m);
+	uint32  DecodeMobIDFromMarkedNPC(uint32 encoded_value);
+	uint32  DecodeZoneIDFromMarkedNPC(uint32 encoded_value);
+	uint32  DecodeInstanceIDFromMarkedNPC(uint32 encoded_value);
 
 	//Packet Functions
 	void	SendRaidCreate(Client *to);
