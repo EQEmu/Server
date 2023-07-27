@@ -33,6 +33,7 @@
 #include "../item_instance.h"
 #include "titanium_structs.h"
 #include "../path_manager.h"
+#include "../../zone/raids.h"
 
 #include <sstream>
 
@@ -1245,6 +1246,119 @@ namespace Titanium
 		FINISH_ENCODE();
 	}
 
+	ENCODE(OP_MarkRaidNPC)
+	{
+		ENCODE_LENGTH_EXACT(MarkNPC_Struct);
+		SETUP_DIRECT_ENCODE(MarkNPC_Struct, MarkNPC_Struct);
+	
+		EQApplicationPacket* outapp = new EQApplicationPacket(OP_MarkNPC, sizeof(MarkNPC_Struct));
+		MarkNPC_Struct* mnpcs = (MarkNPC_Struct*)outapp->pBuffer;
+		mnpcs->TargetID = emu->TargetID;
+		mnpcs->Number = emu->Number;
+		dest->QueuePacket(outapp);
+		safe_delete(outapp);
+
+		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_RaidJoin)
+	{
+		EQApplicationPacket* inapp = *p;
+		unsigned char* __emu_buffer = inapp->pBuffer;
+		RaidCreate_Struct* raid_create = (RaidCreate_Struct*)__emu_buffer;
+
+		auto outapp_create = new EQApplicationPacket(OP_RaidUpdate, sizeof(structs::RaidGeneral_Struct));
+		structs::RaidGeneral_Struct* general = (structs::RaidGeneral_Struct*)outapp_create->pBuffer;
+
+		general->action = 8;
+		general->parameter = 1;
+		strn0cpy(general->leader_name, raid_create->leader_name, 64);
+		strn0cpy(general->player_name, raid_create->leader_name, 64);
+
+		dest->FastQueuePacket(&outapp_create);
+		safe_delete(outapp_create);
+	}
+
+	ENCODE(OP_RaidUpdate)
+	{
+		EQApplicationPacket* inapp = *p;
+		unsigned char* __emu_buffer = inapp->pBuffer;
+		RaidGeneral_Struct* raid_gen = (RaidGeneral_Struct*)__emu_buffer;
+		
+		switch (raid_gen->action)
+		{
+		case 0: {
+			RaidAddMember_Struct* in_add_member = (RaidAddMember_Struct*)__emu_buffer;
+
+			ENCODE_LENGTH_EXACT(RaidAddMember_Struct);
+			SETUP_DIRECT_ENCODE(RaidAddMember_Struct, structs::RaidAdd_Struct);
+
+			eq->action = emu->raidGen.action;
+			eq->level = emu->level;
+			eq->_class = emu->_class;
+			eq->groupid = emu->raidGen.parameter;
+			eq->group_leader = emu->isGroupLeader;
+			strcpy(eq->leader_name, emu->raidGen.leader_name);
+			strcpy(eq->player_name, emu->raidGen.player_name);
+
+			FINISH_ENCODE();
+			break;
+		}
+		case 14:
+		case 30:
+		{
+			RaidLeadershipUpdate_Struct* inlaa = (RaidLeadershipUpdate_Struct*)__emu_buffer;
+			auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(structs::RaidLeadershipUpdate_Struct));
+			structs::RaidLeadershipUpdate_Struct* outlaa = (structs::RaidLeadershipUpdate_Struct*)outapp->pBuffer;
+
+			outlaa->action = inlaa->action;
+			strn0cpy(outlaa->player_name, inlaa->player_name, 64);
+			strn0cpy(outlaa->leader_name, inlaa->leader_name, 64);
+			memcpy(&outlaa->raid, &inlaa->raid, sizeof(RaidLeadershipAA_Struct));
+			dest->FastQueuePacket(&outapp);
+			safe_delete(outapp);
+			break;
+		}
+		case 35: 
+		{
+			auto in_motd = (RaidMOTD_Struct*)__emu_buffer;
+			auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(structs::RaidMOTD_Struct));
+			auto motd = (structs::RaidMOTD_Struct*)outapp->pBuffer;
+			motd->general.action = raidSetMotd				;
+			strn0cpy(motd->general.leader_name, in_motd->general.leader_name, sizeof(motd->general.leader_name));
+			strn0cpy(motd->general.player_name, in_motd->general.player_name, sizeof(motd->general.leader_name));
+			strncpy(motd->motd, in_motd->motd.c_str(), in_motd->motd.length());
+			dest->QueuePacket(outapp);
+			safe_delete(outapp);
+			break;
+		}
+		case raidSetNote: {
+			auto in_note = (RaidNote_Struct*)__emu_buffer;
+			auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(structs::RaidNote_Struct));
+			auto note = (structs::RaidNote_Struct*)outapp->pBuffer;
+			note->general.action = raidSetNote;
+			strn0cpy(note->general.leader_name, in_note->general.leader_name, sizeof(note->general.leader_name));
+			strn0cpy(note->general.player_name, in_note->general.player_name, sizeof(note->general.leader_name));
+			strncpy(note->note, in_note->note.c_str(), in_note->note.length());
+			dest->QueuePacket(outapp);
+			safe_delete(outapp);
+			break;
+		}
+		default: {
+			ENCODE_LENGTH_EXACT(RaidGeneral_Struct);
+			SETUP_DIRECT_ENCODE(RaidGeneral_Struct, structs::RaidGeneral_Struct);
+
+			OUT(action);
+			OUT(parameter);
+			OUT_str(leader_name);
+			OUT_str(player_name);
+
+			FINISH_ENCODE();
+			break;
+		}
+		}
+	}
+
 	ENCODE(OP_ReadBook)
 	{
 		// no apparent slot translation needed
@@ -2270,6 +2384,74 @@ namespace Titanium
 		IN(target);
 
 		FINISH_DIRECT_DECODE();
+	}
+
+	DECODE(OP_RaidInvite)
+	{
+		DECODE_LENGTH_ATLEAST(structs::RaidGeneral_Struct);
+		RaidGeneral_Struct* rgs = (RaidGeneral_Struct*)__packet->pBuffer;
+
+		switch (rgs->action)
+		{
+		case 35: {
+			//Start Here.  Setup the buffer into a temp location and map to eq
+			unsigned char* in = __packet->pBuffer;
+			structs::RaidMOTD_Struct* eq = (structs::RaidMOTD_Struct*)in;
+
+			//Setup a new object using the new Struct
+			RaidMOTD_Struct* emu = new RaidMOTD_Struct();
+
+			//Map values and convert char to string to be used within source
+			IN(general.action);
+			IN(general.parameter);
+			IN_str(general.leader_name);
+			IN_str(general.player_name);
+			emu->motd = std::string(eq->motd);
+
+			//Point buffer to new structure
+			__packet->size = sizeof(RaidNote_Struct);
+			__packet->pBuffer = (unsigned char*)emu;
+			//delete original inbound packet buffer
+			delete[](in);
+
+			break;
+		}
+		case 36:
+		{
+			//Start Here.  Setup the buffer into a temp location and map to eq
+			unsigned char* in = __packet->pBuffer;
+			structs::RaidMOTD_Struct* eq = (structs::RaidMOTD_Struct*)in;
+
+			//Setup a new object using the new Struct
+			RaidMOTD_Struct* emu = new RaidMOTD_Struct();
+
+			//Map values and convert char to string to be used within source
+			IN(general.action);
+			IN(general.parameter);
+			IN_str(general.leader_name);
+			IN_str(general.player_name);
+			emu->motd = std::string(eq->motd);
+
+			//Point buffer to new structure
+			__packet->size = sizeof(RaidNote_Struct);
+			__packet->pBuffer = (unsigned char*)emu;
+			//delete original inbound packet buffer
+			delete[](in);
+
+			break;				
+		}
+		default: 
+		{
+			SETUP_DIRECT_DECODE(RaidGeneral_Struct, structs::RaidGeneral_Struct);
+			IN(action);
+			IN(parameter);
+			IN_str(leader_name);
+			IN_str(player_name);
+
+			FINISH_DIRECT_DECODE();
+			break;
+		}
+		}
 	}
 
 	DECODE(OP_ReadBook)

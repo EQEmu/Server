@@ -123,7 +123,7 @@ struct RaidMember{
 	uint32 group_number;
 	uint8 _class;
 	uint8 level;
-	char note[64];
+	std::string note;
 	bool is_group_leader;
 	bool is_raid_leader;
 	bool is_looter;

@@ -12555,8 +12555,8 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 		if (!raid) {
 			break;
 		}
-
-		raid->SaveRaidNote(raid_command_packet->leader_name, raid_command_packet->note);
+		RaidNote_Struct* note = (RaidNote_Struct*)app->pBuffer;
+		raid->SaveRaidNote(raid_command_packet->leader_name, note->note);
 		raid->SendRaidNotesToWorld();
 		break;
 	}

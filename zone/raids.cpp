@@ -1543,21 +1543,23 @@ void Raid::SendRaidGroupRemove(const char *who, uint32 gid)
 
 void Raid::SendRaidMOTD(Client *c)
 {
-	if (!c || motd.empty()) {
+	if (!c || motd.empty() || c->IsBot()) {
 		return;
 	}
 
-	if (entity_list.GetBotByBotName(c->GetName())) {
-		return;
-	}
+	RaidMOTD_Struct temp;
+	temp.general.action = raidSetMotd;
+	temp.general.parameter = 0;
+	temp.general.unknown1 = 0;
+	strn0cpy(temp.general.leader_name, c->GetName(), 64);
+	strn0cpy(temp.general.player_name, GetLeaderName().c_str(), 64);
+	temp.motd = motd;
 
-	size_t size = motd.size() + 1;
-	auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidMOTD_Struct) + size);
-	auto rmotd = (RaidMOTD_Struct *)outapp->pBuffer;
-	rmotd->general.action = raidSetMotd;
-	strn0cpy(rmotd->general.player_name, c->GetName(), 64);
-	strn0cpy(rmotd->motd, motd.c_str(), size);
-	c->FastQueuePacket(&outapp);
+	auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidNote_Struct));
+	outapp->pBuffer = (unsigned char*)&temp;
+	QueuePacket(outapp);
+	outapp->pBuffer = nullptr;
+	safe_delete(outapp);
 }
 
 void Raid::SendRaidMOTD()
@@ -1720,7 +1722,8 @@ bool Raid::LearnMembers()
 
 		members[i].member = nullptr;
 		strn0cpy(members[i].member_name, row[0], sizeof(members[i].member_name));
-		strn0cpy(members[i].note, row[10], sizeof(members[i].note));
+//		strn0cpy(members[i].note, row[10], sizeof(members[i].note));
+		members[i].note = std::string(row[10]);
 		uint32 group_id = Strings::ToUnsignedInt(row[1]);
 
 		if (group_id >= MAX_RAID_GROUPS) {
@@ -2265,7 +2268,8 @@ std::vector<RaidMember> Raid::GetMembersWithNotes()
 {
 	std::vector<RaidMember> raid_members;
 	for (const auto& m : members) {
-		if (strlen(m.note) != 0) {
+		//if (strlen(m.note) != 0) {
+		if (!m.note.empty()) {
 			raid_members.emplace_back(m);
 		}
 	}
@@ -2278,13 +2282,18 @@ void Raid::SendRaidNotes()
 	VerifyRaid();
 
 	for (const auto& c : GetMembersWithNotes()) {
-		auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidGeneral_Struct));
-		auto note = (RaidGeneral_Struct*)outapp->pBuffer;
-		note->action = raidSetNote;
-		strn0cpy(note->leader_name, c.member_name, 64);
-		strn0cpy(note->player_name, GetLeaderName().c_str(), 64);
-		strn0cpy(note->note, c.note, 64);
+		RaidNote_Struct temp;
+		temp.general.action = raidSetNote;
+		temp.general.parameter = 0;
+		temp.general.unknown1 = 0;
+		strn0cpy(temp.general.leader_name, c.member_name, 64);
+		strn0cpy(temp.general.player_name, GetLeaderName().c_str(), 64);
+		temp.note = c.note;
+
+		auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidNote_Struct));
+		outapp->pBuffer = (unsigned char*)&temp;
 		QueuePacket(outapp);
+		outapp->pBuffer = nullptr;
 		safe_delete(outapp);
 	}
 }

@@ -4154,7 +4154,6 @@ struct RaidGeneral_Struct {
 /*68*/	uint32		unknown1;
 /*72*/	char		leader_name[64];
 /*136*/	uint32		parameter;
-/*200*/	char		note[64];
 };
 
 struct RaidAddMember_Struct {
@@ -4165,9 +4164,14 @@ struct RaidAddMember_Struct {
 /*139*/	uint8 flags[5]; //no idea if these are needed...
 };
 
+struct RaidNote_Struct {
+/*000*/ RaidGeneral_Struct general;
+/*140*/ std::string note;
+};
+
 struct RaidMOTD_Struct {
 /*000*/ RaidGeneral_Struct general; // leader_name and action only used
-/*136*/ char motd[0]; // max size is 1024, but reply is variable
+/*140*/ std::string motd; // max size is 1024, but reply is variable
 };
 
 struct RaidLeadershipUpdate_Struct {
