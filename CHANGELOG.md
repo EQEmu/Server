@@ -1,3 +1,9 @@
+## [22.20.1] - 07/15/2023
+
+### Database
+
+* Fix database manifest entry for #3443  @neckkola 2023-07-15
+
 ## [22.20.0] - 07/15/2023
 
 ### Bots

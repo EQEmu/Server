@@ -1558,7 +1558,13 @@ void Client::SetLDoNPoints(uint32 theme_id, uint32 points)
 		}
 	}
 
-	m_pp.ldon_points_available += points;
+	m_pp.ldon_points_available = (
+		m_pp.ldon_points_guk +
+		m_pp.ldon_points_mir +
+		m_pp.ldon_points_mmc +
+		m_pp.ldon_points_ruj +
+		m_pp.ldon_points_tak
+	);
 
 	auto outapp = new EQApplicationPacket(OP_AdventurePointsUpdate, sizeof(AdventurePoints_Update_Struct));
 
