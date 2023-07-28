@@ -557,6 +557,7 @@ public:
 	std::string GetClassPlural();
 	std::string GetRacePlural();
 	bool IsTemporaryPet();
+	uint32 GetMobTypeIdentifier();
 };
 
 #endif

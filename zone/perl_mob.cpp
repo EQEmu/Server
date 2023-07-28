@@ -3113,6 +3113,11 @@ std::string Perl_Mob_GetClassPlural(Mob* self)
 	return self->GetClassPlural();
 }
 
+uint32 Perl_Mob_GetMobTypeIdentifier(Mob* self)
+{
+	return self->GetMobTypeIdentifier();
+}
+
 std::string Perl_Mob_GetRacePlural(Mob* self)
 {
 	return self->GetRacePlural();
@@ -3399,6 +3404,7 @@ void perl_register_mob()
 	package.add("GetMaxSTR", &Perl_Mob_GetMaxSTR);
 	package.add("GetMaxWIS", &Perl_Mob_GetMaxWIS);
 	package.add("GetMeleeMitigation", &Perl_Mob_GetMeleeMitigation);
+	package.add("GetMobTypeIdentifier", &Perl_Mob_GetMobTypeIdentifier);
 	package.add("GetModSkillDmgTaken", &Perl_Mob_GetModSkillDmgTaken);
 	package.add("GetModVulnerability", &Perl_Mob_GetModVulnerability);
 	package.add("GetNPCTypeID", &Perl_Mob_GetNPCTypeID);
