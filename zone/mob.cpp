@@ -8352,3 +8352,16 @@ DataBucketKey Mob::GetScopedBucketKeys()
 
 	return k;
 }
+
+uint32 Mob::GetMobTypeIdentifier()
+{
+	if (IsClient()) {
+		return CastToClient()->CharacterID();
+	} else if (IsNPC()) {
+		return GetNPCTypeID();
+	} else if (IsBot()) {
+		return CastToBot()->GetBotID();
+	}
+
+	return 0;
+}

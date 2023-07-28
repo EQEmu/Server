@@ -1,3 +1,33 @@
+## [22.22.0] - 07/27/2023
+
+### Code
+
+* Fix casing in corpse money and decay time. ([#3511](https://github.com/EQEmu/Server/pull/3511)) @Kinglykrab 2023-07-23
+
+### Crash Fix
+
+* Guard against Spells:MaxTotalSlotsPET being set above client allowed maximum. ([#3507](https://github.com/EQEmu/Server/pull/3507)) @Valorith 2023-07-22
+
+### Data Buckets
+
+* Distributed Databucket Caching ([#3500](https://github.com/EQEmu/Server/pull/3500)) @Kinglykrab 2023-07-24
+
+### Database
+
+* Fix console output in database:dump --dump-output-to-console  @Akkadius 2023-07-25
+
+### Fixes
+
+* Escape search string in #find item ([#3510](https://github.com/EQEmu/Server/pull/3510)) @Kinglykrab 2023-07-22
+
+### Quest API
+
+* Add GetMobTypeIdentifier() to Perl/Lua ([#3512](https://github.com/EQEmu/Server/pull/3512)) @Kinglykrab 2023-07-28
+
+### Saylink
+
+* Fix cases where saylinks were not being cached ([#3508](https://github.com/EQEmu/Server/pull/3508)) @Akkadius 2023-07-20
+
 ## [22.21.2] - 07/19/2023
 
 ### Databuckets

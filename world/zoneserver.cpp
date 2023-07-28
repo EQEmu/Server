@@ -46,6 +46,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/repositories/player_event_logs_repository.h"
 #include "../common/events/player_event_logs.h"
 #include "../common/patches/patches.h"
+#include "../zone/data_bucket.h"
 
 extern ClientList client_list;
 extern GroupLFPList LFPGroupList;
@@ -1466,6 +1467,11 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		case ServerOP_DzMovePC:
 		case ServerOP_DzUpdateMemberStatus: {
 			DynamicZone::HandleZoneMessage(pack);
+			break;
+		}
+		case ServerOP_DataBucketCacheUpdate: {
+			zoneserver_list.SendPacket(pack);
+
 			break;
 		}
 		default: {

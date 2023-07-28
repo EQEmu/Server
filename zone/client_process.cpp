@@ -857,12 +857,12 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 			DataBucketKey k = GetScopedBucketKeys();
 			k.key = bucket_name;
 
-			auto const& player_value = DataBucket::CheckBucketKey(this, k);
-			if (player_value.empty()) {
+			auto b = DataBucket::GetData(k);
+			if (b.value.empty()) {
 				continue;
 			}
 
-			if (!zone->CompareDataBucket(ml.bucket_comparison, bucket_value, player_value)) {
+			if (!zone->CompareDataBucket(ml.bucket_comparison, bucket_value, b.value)) {
 				continue;
 			}
 		}
