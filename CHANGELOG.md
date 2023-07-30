@@ -1,3 +1,13 @@
+## [22.22.1] - 07/30/2023
+
+### Database
+
+* Hotfix: Add command_subsettings to server tables  @Akkadius 2023-07-29
+
+### Doors
+
+* Add door blacklist ([#3516](https://github.com/EQEmu/Server/pull/3516)) @Akkadius 2023-07-30
+
 ## [22.22.0] - 07/27/2023
 
 ### Code
