@@ -981,52 +981,7 @@ void Mob::AI_Process() {
 
 	if (moving && CanOpenDoors()) {
 		if (AI_scan_door_open_timer->Check()) {
-			auto      &door_list = entity_list.GetDoorsList();
-			for (auto itr : door_list) {
-				Doors *door = itr.second;
-
-				if (door->GetKeyItem()) {
-					continue;
-				}
-
-				if (door->GetLockpick()) {
-					continue;
-				}
-
-				if (door->IsDoorOpen()) {
-					continue;
-				}
-
-				if (door->GetTriggerDoorID() > 0) {
-					auto trigger_door = entity_list.GetDoorsByDoorID(door->GetTriggerDoorID());
-					if (trigger_door) {
-						if (Strings::RemoveNumbers(door->GetDoorName()) !=
-							Strings::RemoveNumbers(trigger_door->GetDoorName())) {
-							continue;
-						}
-					}
-				}
-
-				if (door->GetDoorParam() > 0) {
-					continue;
-				}
-
-				float distance                = DistanceSquared(m_Position, door->GetPosition());
-				float distance_scan_door_open = 20;
-
-				if (distance <= (distance_scan_door_open * distance_scan_door_open)) {
-
-					/**
-					 * Make sure we're opening a door within height relevance and not platforms
-					 * above or below
-					 */
-					if (std::abs(m_Position.z - door->GetPosition().z) > 10) {
-						continue;
-					}
-
-					door->ForceOpen(this);
-				}
-			}
+			HandleMobDoorOpen();
 		}
 	}
 

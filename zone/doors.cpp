@@ -83,6 +83,8 @@ Doors::Doors(const DoorsRepository::Doors &door) :
 	m_close_timer.Disable();
 
 	m_disable_timer = (door.disable_timer == 1 ? true : false);
+
+	m_is_blacklisted_to_open = GetIsDoorBlacklisted();
 }
 
 Doors::Doors(const char *model, const glm::vec4 &position, uint8 open_type, uint16 size) :
@@ -900,4 +902,28 @@ bool Doors::HasDestinationZone() const
 bool Doors::IsDestinationZoneSame() const
 {
 	return m_same_destination_zone;
+}
+
+// IsDoorBlacklisted has a static list of doors that are blacklisted
+// from being opened by NPCs. This is used to prevent NPCs from opening
+// doors that are not meant to be opened by NPCs.
+bool Doors::GetIsDoorBlacklisted()
+{
+	std::vector<std::string> blacklist = {
+		"TOGGLE",
+		"PNDRESSER101",
+	};
+
+	for (auto& name : blacklist) {
+		std::string door_name = GetDoorName();
+		if (name == door_name) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool Doors::IsDoorBlacklisted() {
+	return m_is_blacklisted_to_open;
 }
