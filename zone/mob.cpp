@@ -8365,3 +8365,48 @@ uint32 Mob::GetMobTypeIdentifier()
 
 	return 0;
 }
+
+void Mob::HandleDoorOpen()
+{
+	for (auto e : entity_list.GetDoorsList()) {
+		Doors *d = e.second;
+		if (d->GetKeyItem()) {
+			continue;
+		}
+		if (d->GetLockpick()) {
+			continue;
+		}
+		if (d->IsDoorOpen()) {
+			continue;
+		}
+		if (d->IsDoorBlacklisted()) {
+			continue;
+		}
+
+		// If the door is a trigger door, check if the trigger door is open
+		if (d->GetTriggerDoorID() > 0) {
+			auto td = entity_list.GetDoorsByDoorID(d->GetTriggerDoorID());
+			if (td) {
+				if (Strings::RemoveNumbers(d->GetDoorName()) != Strings::RemoveNumbers(td->GetDoorName())) {
+					continue;
+				}
+			}
+		}
+
+		if (d->GetDoorParam() > 0) {
+			continue;
+		}
+
+		float distance                = DistanceSquared(m_Position, d->GetPosition());
+		float distance_scan_door_open = 20;
+
+		if (distance <= (distance_scan_door_open * distance_scan_door_open)) {
+			// Make sure we're opening a door within height relevance and not platforms above or below us
+			if (std::abs(m_Position.z - d->GetPosition().z) > 10) {
+				continue;
+			}
+
+			d->ForceOpen(this);
+		}
+	}
+}

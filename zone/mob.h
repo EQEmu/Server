@@ -1866,6 +1866,7 @@ private:
 	void SetHeroicWisBonuses(StatBonuses* n);
 
 	void DoSpellInterrupt(uint16 spell_id, int32 mana_cost, int my_curmana);
+	void HandleDoorOpen();
 };
 
 #endif
