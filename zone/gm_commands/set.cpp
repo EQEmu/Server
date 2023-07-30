@@ -82,7 +82,7 @@ void command_set(Client *c, const Seperator *sep)
 		Cmd{.cmd = "frozen", .u = "frozen [on|off]", .fn = SetFrozen, .a = {"#freeze", "#unfreeze"}},
 		Cmd{.cmd = "gender", .u = "gender [Gender ID]", .fn = SetGender, .a = {"#gender"}},
 		Cmd{.cmd = "gender_permanent", .u = "gender_permanent [Gender ID]", .fn = SetGenderPermanent, .a = {"#permagender"}},
-		Cmd{.cmd = "gm", .u = "gm [on|off]", .fn = SetGM, .a = {"#flymode"}},
+		Cmd{.cmd = "gm", .u = "gm [on|off]", .fn = SetGM, .a = {"#gm"}},
 		Cmd{.cmd = "gm_speed", .u = "gm_speed [on|off]", .fn = SetGMSpeed, .a = {"#gmspeed"}},
 		Cmd{.cmd = "gm_status", .u = "gm_status [GM Status] [Account]", .fn = SetGMStatus, .a = {"#flag"}},
 		Cmd{.cmd = "god_mode", .u = "god_mode [on|off]", .fn = SetGodMode, .a = {"#godmode"}},
