@@ -981,7 +981,7 @@ void Mob::AI_Process() {
 
 	if (moving && CanOpenDoors()) {
 		if (AI_scan_door_open_timer->Check()) {
-			HandleMobDoorOpen();
+			HandleDoorOpen();
 		}
 	}
 

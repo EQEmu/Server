@@ -8366,7 +8366,7 @@ uint32 Mob::GetMobTypeIdentifier()
 	return 0;
 }
 
-void Mob::HandleMobDoorOpen()
+void Mob::HandleDoorOpen()
 {
 	for (auto e : entity_list.GetDoorsList()) {
 		Doors *d = e.second;
