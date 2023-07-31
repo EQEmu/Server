@@ -345,6 +345,9 @@ void handle_npc_cast(
 
 	const uint32 spell_id = Strings::ToUnsignedInt(sep.arg[0]);
 	Lua_Spell l_spell(IsValidSpell(spell_id) ? &spells[spell_id] : nullptr);
+	luabind::adl::object l_spell_o = luabind::adl::object(L, l_spell);
+	l_spell_o.push(L);
+	lua_setfield(L, -2, "spell");
 
 	lua_pushinteger(L, Strings::ToUnsignedInt(sep.arg[1]));
 	lua_setfield(L, -2, "caster_id");
