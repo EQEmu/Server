@@ -10245,7 +10245,7 @@ void Mob::ApplySpellEffectIllusion(int32 spell_id, Mob *caster, int buffslot, in
 			gender_id
 		);
 
-		if (base != RACE_ELEMENTAL_75) {
+		if (base != RACE_ELEMENTAL_75 && base != RACE_DRAKKIN_522) {
 			if (max > 0) {
 				if (limit == 0) {
 					SendIllusionPacket(
@@ -10285,7 +10285,7 @@ void Mob::ApplySpellEffectIllusion(int32 spell_id, Mob *caster, int buffslot, in
 					}
 				);
 			}
-		} else {
+		} else if (base == RACE_ELEMENTAL_75){
 			SendIllusionPacket(
 				AppearanceStruct{
 					.gender_id = static_cast<uint8>(gender_id),
@@ -10293,6 +10293,28 @@ void Mob::ApplySpellEffectIllusion(int32 spell_id, Mob *caster, int buffslot, in
 					.texture = static_cast<uint8>(limit),
 				}
 			);
+		} else if (base == RACE_DRAKKIN_522) {
+			FaceChange_Struct f{
+				.haircolor = GetHairColor(),
+				.beardcolor = GetBeardColor(),
+				.eyecolor1 = GetEyeColor1(),
+				.eyecolor2 = GetEyeColor2(),
+				.hairstyle = GetHairStyle(),
+				.beard = GetBeard(),
+				.face = GetLuclinFace(),
+				.drakkin_heritage = static_cast<uint32>(limit),
+				.drakkin_tattoo = GetDrakkinTattoo(),
+				.drakkin_details = GetDrakkinDetails(),
+			};
+
+			SendIllusionPacket(
+				AppearanceStruct{
+					.gender_id = static_cast<uint8>(gender_id),
+					.race_id = static_cast<uint16>(base),
+				}
+			);
+
+			SetFaceAppearance(f);
 		}
 
 		SendAppearancePacket(AT_Size, race_size);
