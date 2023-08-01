@@ -62,6 +62,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/repositories/account_repository.h"
 
 #include "../common/events/player_event_logs.h"
+#include "../common/repositories/character_stats_record_repository.h"
 
 extern QueryServ* QServ;
 extern Zone* zone;
@@ -779,6 +780,8 @@ void Client::CompleteConnect()
 	if (parse->PlayerHasQuestSub(EVENT_ENTER_ZONE)) {
 		parse->EventPlayer(EVENT_ENTER_ZONE, this, "", 0);
 	}
+
+	RecordStats();
 
 	// the way that the client deals with positions during the initial spawn struct
 	// is subtly different from how it deals with getting a position update
@@ -16390,5 +16393,91 @@ void Client::Handle_OP_RaidClearNPCMarks(const EQApplicationPacket* app)
 	auto r = GetRaid();
 	if (r) {
 		r->RaidClearNPCMarks(this);
+	}
+}
+
+void Client::RecordStats()
+{
+	auto r = CharacterStatsRecordRepository::FindOne(
+		database,
+		CharacterID()
+	);
+
+	r.name                     = GetCleanName();
+	r.aa_points                = GetAAPoints();
+	r.level                    = GetLevel();
+	r.class_                   = GetClass();
+	r.race                     = GetRace();
+	r.aa_points                = GetAAPoints();
+	r.hp                       = GetMaxHP();
+	r.mana                     = GetMaxMana();
+	r.endurance                = GetMaxEndurance();
+	r.ac                       = GetDisplayAC();
+	r.strength                 = GetSTR();
+	r.stamina                  = GetSTA();
+	r.dexterity                = GetDEX();
+	r.agility                  = GetAGI();
+	r.intelligence             = GetINT();
+	r.wisdom                   = GetWIS();
+	r.charisma                 = GetCHA();
+	r.magic_resist             = GetMR();
+	r.fire_resist              = GetFR();
+	r.cold_resist              = GetCR();
+	r.poison_resist            = GetPR();
+	r.disease_resist           = GetDR();
+	r.corruption_resist        = GetCorrup();
+	r.heroic_strength          = GetHeroicSTR();
+	r.heroic_stamina           = GetHeroicSTA();
+	r.heroic_dexterity         = GetHeroicDEX();
+	r.heroic_agility           = GetHeroicAGI();
+	r.heroic_intelligence      = GetHeroicINT();
+	r.heroic_wisdom            = GetHeroicWIS();
+	r.heroic_charisma          = GetHeroicCHA();
+	r.heroic_magic_resist      = GetHeroicMR();
+	r.heroic_fire_resist       = GetHeroicFR();
+	r.heroic_cold_resist       = GetHeroicCR();
+	r.heroic_poison_resist     = GetHeroicPR();
+	r.heroic_disease_resist    = GetHeroicDR();
+	r.heroic_corruption_resist = GetHeroicCorrup();
+	r.haste                    = GetHaste();
+	r.accuracy                 = GetAccuracy();
+	r.attack                   = GetTotalATK();
+	r.avoidance                = GetAvoidance();
+	r.clairvoyance             = GetClair();
+	r.combat_effects           = GetCombatEffects();
+	r.damage_shield_mitigation = GetDSMit();
+	r.damage_shield            = GetDS();
+	r.dot_shielding            = GetDoTShield();
+	r.hp_regen                 = GetHPRegen();
+	r.mana_regen               = GetManaRegen();
+	r.endurance_regen          = GetEnduranceRegen();
+	r.shielding                = GetShielding();
+	r.spell_damage             = GetSpellDmg();
+	r.spell_shielding          = GetSpellShield();
+	r.strikethrough            = GetStrikeThrough();
+	r.stun_resist              = GetStunResist();
+	r.backstab                 = 0;
+	r.wind                     = GetWindMod();
+	r.brass                    = GetBrassMod();
+	r.string                   = GetStringMod();
+	r.percussion               = GetPercMod();
+	r.singing                  = GetSingMod();
+	r.baking                   = GetSkill(EQ::skills::SkillType::SkillBaking);
+	r.alchemy                  = GetSkill(EQ::skills::SkillType::SkillAlchemy);
+	r.jewelry                  = GetSkill(EQ::skills::SkillType::SkillJewelryMaking);
+	r.tailoring                = GetSkill(EQ::skills::SkillType::SkillTailoring);
+	r.blacksmithing            = GetSkill(EQ::skills::SkillType::SkillBlacksmithing);
+	r.fletching                = GetSkill(EQ::skills::SkillType::SkillFletching);
+	r.brewing                  = GetSkill(EQ::skills::SkillType::SkillBrewing);
+	r.fishing                  = GetSkill(EQ::skills::SkillType::SkillFishing);
+	r.pottery                  = GetSkill(EQ::skills::SkillType::SkillPottery);
+	r.alcohol                  = GetSkill(EQ::skills::SkillType::SkillAlcoholTolerance);
+	r.tinkering                = GetSkill(EQ::skills::SkillType::SkillTinkering);
+
+	if (r.character_id > 0) {
+		CharacterStatsRecordRepository::UpdateOne(database, r);
+	} else {
+		r.character_id = CharacterID();
+		CharacterStatsRecordRepository::InsertOne(database, r);
 	}
 }

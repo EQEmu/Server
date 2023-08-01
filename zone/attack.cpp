@@ -6458,3 +6458,8 @@ int64 Mob::GetManaRegen() const
 {
 	return mana_regen;
 }
+
+int64 Mob::GetEnduranceRegen() const
+{
+	return 0; // not implemented
+}
