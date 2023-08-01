@@ -31,7 +31,13 @@ void SetRacePermanent(Client *c, const Seperator *sep)
 	t->SetBaseRace(race_id);
 	t->SetBaseGender(gender_id);
 	t->Save();
-	t->SendIllusionPacket(race_id, gender_id);
+	t->SendIllusionPacket(
+		AppearanceStruct{
+			.gender_id = gender_id,
+			.race_id = race_id,
+			.size = t->GetSize()
+		}
+	);
 
 	c->Message(
 		Chat::White,

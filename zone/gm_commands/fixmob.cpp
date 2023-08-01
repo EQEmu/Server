@@ -238,9 +238,22 @@ void command_fixmob(Client *c, const Seperator *sep)
 		}
 		else {
 			target->SendIllusionPacket(
-				Race, Gender, Texture, HelmTexture, HairColor, BeardColor,
-				EyeColor1, EyeColor2, HairStyle, LuclinFace, Beard, 0xFF,
-				DrakkinHeritage, DrakkinTattoo, DrakkinDetails
+				AppearanceStruct{
+					.beard = Beard,
+					.beard_color = BeardColor,
+					.drakkin_details = DrakkinDetails,
+					.drakkin_heritage = DrakkinHeritage,
+					.drakkin_tattoo = DrakkinTattoo,
+					.eye_color_one = EyeColor1,
+					.eye_color_two = EyeColor2,
+					.face = LuclinFace,
+					.gender_id = Gender,
+					.hair = HairStyle,
+					.hair_color = HairColor,
+					.helmet_texture = HelmTexture,
+					.race_id = Race,
+					.texture = Texture,
+				}
 			);
 
 			c->Message(Chat::White, "%s=%i", ChangeType, ChangeSetting);
