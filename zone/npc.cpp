@@ -2583,30 +2583,16 @@ void NPC::ModifyNPCStat(const std::string& stat, const std::string& value)
 	}
 	else if (stat_lower == "min_hit") {
 		min_dmg = Strings::ToInt(value);
-
-		// TODO: fix DB
-
-		if (min_dmg > max_dmg) {
-			const auto temporary_damage = max_dmg;
-			max_dmg = min_dmg;
-			min_dmg = temporary_damage;
-		}
-
+		// Clamp max_dmg to be >= min_dmg
+		max_dmg = std::max(min_dmg, max_dmg);
 		base_damage = round((max_dmg - min_dmg) / 1.9);
 		min_damage  = min_dmg - round(base_damage / 10.0);
 		return;
 	}
 	else if (stat_lower == "max_hit") {
 		max_dmg = Strings::ToInt(value);
-
-		// TODO: fix DB
-
-		if (max_dmg < min_dmg) {
-			const auto temporary_damage = min_dmg;
-			min_dmg = max_dmg;
-			max_dmg = temporary_damage;
-		}
-
+		// Clamp min_dmg to be <= max_dmg
+		min_dmg = std::min(min_dmg, max_dmg);
 		base_damage = round((max_dmg - min_dmg) / 1.9);
 		min_damage  = min_dmg - round(base_damage / 10.0);
 		return;
