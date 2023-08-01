@@ -2462,7 +2462,7 @@ namespace SoD
 			{
 				emu->race = 127;
 				emu->bodytype = 11;
-				emu->gender = 0;
+				emu->gender = MALE;
 				ShowName = 0;
 			}
 

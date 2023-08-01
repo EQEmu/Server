@@ -60,11 +60,11 @@ void command_fixmob(Client *c, const Seperator *sep)
 			ChangeSetting = Race;
 		}
 		else if (strcasecmp(command, "gender") == 0) {
-			if (Gender == 0 && codeMove == 'p') {
-				Gender = 2;
+			if (Gender == MALE && codeMove == 'p') {
+				Gender = NEUTER;
 			}
-			else if (Gender >= 2 && codeMove != 'p') {
-				Gender = 0;
+			else if (Gender >= NEUTER && codeMove != 'p') {
+				Gender = MALE;
 			}
 			else {
 				Gender += Adjustment;

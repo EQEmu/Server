@@ -2035,7 +2035,7 @@ namespace SoF
 				eq->bodytype = 11;      //non-targetable
 				eq->showname = 0;       //no visible name
 				eq->race = 127;         //invisible man
-				eq->gender = 0;         //invisible men are gender 0
+				eq->gender = MALE;         //invisible men are gender 0
 			}
 			else
 			{

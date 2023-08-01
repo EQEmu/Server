@@ -268,11 +268,12 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 				case SE_IllusionCopy:
 				case SE_Illusion: {
 					if (spell.base_value[x1] == -1) {
-						if (gender == 1) {
-							gender = 0;
-						} else if (gender == 0) {
-							gender = 1;
+						if (gender == FEMALE) {
+							gender = MALE;
+						} else if (gender == MALE) {
+							gender = FEMALE;
 						}
+
 						SendIllusionPacket(
 							AppearanceStruct{
 								.gender_id = gender,
