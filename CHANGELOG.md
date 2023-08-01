@@ -1,3 +1,19 @@
+## [22.23.0] - 07/31/2023
+
+### Databuckets
+
+* Improvements to distributed cache, reload commands ([#3519](https://github.com/EQEmu/Server/pull/3519)) @Akkadius 2023-08-01
+
+### Fixes
+
+* Fix #gm top level alias for #set gm ([#3517](https://github.com/EQEmu/Server/pull/3517)) @Kinglykrab 2023-07-30
+* Fix Appearance Issues ([#3520](https://github.com/EQEmu/Server/pull/3520)) @Kinglykrab 2023-08-01
+* Fix NPC Cast Events not parsing properly. ([#3518](https://github.com/EQEmu/Server/pull/3518)) @Kinglykrab 2023-08-01
+
+### Scaling/Bug Fix
+
+* Scaling where min and max damage was bugged ([#3514](https://github.com/EQEmu/Server/pull/3514)) @noudess 2023-08-01
+
 ## [22.22.1] - 07/30/2023
 
 ### Database
