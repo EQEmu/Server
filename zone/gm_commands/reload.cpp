@@ -18,6 +18,7 @@ void command_reload(Client *c, const Seperator *sep)
 	bool is_blocked_spells       = !strcasecmp(sep->arg[1], "blocked_spells");
 	bool is_commands             = !strcasecmp(sep->arg[1], "commands");
 	bool is_content_flags        = !strcasecmp(sep->arg[1], "content_flags");
+	bool is_data_buckets         = !strcasecmp(sep->arg[1], "data_buckets_cache");
 	bool is_doors                = !strcasecmp(sep->arg[1], "doors");
 	bool is_dztemplates          = !strcasecmp(sep->arg[1], "dztemplates");
 	bool is_ground_spawns        = !strcasecmp(sep->arg[1], "ground_spawns");
@@ -46,6 +47,7 @@ void command_reload(Client *c, const Seperator *sep)
 		!is_blocked_spells &&
 		!is_commands &&
 		!is_content_flags &&
+		!is_data_buckets &&
 		!is_doors &&
 		!is_dztemplates &&
 		!is_ground_spawns &&
@@ -92,6 +94,9 @@ void command_reload(Client *c, const Seperator *sep)
 	} else if (is_doors) {
 		c->Message(Chat::White, "Attempting to reload Doors globally.");
 		pack = new ServerPacket(ServerOP_ReloadDoors, 0);
+	} else if (is_data_buckets) {
+		c->Message(Chat::White, "Attempting to flush data buckets cache globally.");
+		pack = new ServerPacket(ServerOP_ReloadDataBucketsCache, 0);
 	} else if (is_dztemplates) {
 		c->Message(Chat::White, "Attempting to reload Dynamic Zone Templates globally.");
 		pack = new ServerPacket(ServerOP_ReloadDzTemplates, 0);

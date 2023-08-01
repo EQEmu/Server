@@ -88,6 +88,7 @@ public:
 	static bool SendDataBucketCacheUpdate(const DataBucketCacheEntry &e);
 	static void HandleWorldMessage(ServerPacket *p);
 	static void DeleteFromMissesCache(DataBucketsRepository::DataBuckets e);
+	static void ClearCache();
 };
 
 #endif //EQEMU_DATABUCKET_H
