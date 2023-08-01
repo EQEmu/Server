@@ -92,6 +92,8 @@ public:
 		int32_t     alcohol;
 		int32_t     fishing;
 		int32_t     tinkering;
+		time_t      created_at;
+		time_t      updated_at;
 	};
 
 	static std::string PrimaryKey()
@@ -174,6 +176,8 @@ public:
 			"alcohol",
 			"fishing",
 			"tinkering",
+			"created_at",
+			"updated_at",
 		};
 	}
 
@@ -252,6 +256,8 @@ public:
 			"alcohol",
 			"fishing",
 			"tinkering",
+			"UNIX_TIMESTAMP(created_at)",
+			"UNIX_TIMESTAMP(updated_at)",
 		};
 	}
 
@@ -364,6 +370,8 @@ public:
 		e.alcohol                  = 0;
 		e.fishing                  = 0;
 		e.tinkering                = 0;
+		e.created_at               = 0;
+		e.updated_at               = 0;
 
 		return e;
 	}
@@ -472,6 +480,8 @@ public:
 			e.alcohol                  = static_cast<int32_t>(atoi(row[69]));
 			e.fishing                  = static_cast<int32_t>(atoi(row[70]));
 			e.tinkering                = static_cast<int32_t>(atoi(row[71]));
+			e.created_at               = strtoll(row[72] ? row[72] : "-1", nullptr, 10);
+			e.updated_at               = strtoll(row[73] ? row[73] : "-1", nullptr, 10);
 
 			return e;
 		}
@@ -577,6 +587,8 @@ public:
 		v.push_back(columns[69] + " = " + std::to_string(e.alcohol));
 		v.push_back(columns[70] + " = " + std::to_string(e.fishing));
 		v.push_back(columns[71] + " = " + std::to_string(e.tinkering));
+		v.push_back(columns[72] + " = FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
+		v.push_back(columns[73] + " = FROM_UNIXTIME(" + (e.updated_at > 0 ? std::to_string(e.updated_at) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -670,6 +682,8 @@ public:
 		v.push_back(std::to_string(e.alcohol));
 		v.push_back(std::to_string(e.fishing));
 		v.push_back(std::to_string(e.tinkering));
+		v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.updated_at > 0 ? std::to_string(e.updated_at) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -771,6 +785,8 @@ public:
 			v.push_back(std::to_string(e.alcohol));
 			v.push_back(std::to_string(e.fishing));
 			v.push_back(std::to_string(e.tinkering));
+			v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.updated_at > 0 ? std::to_string(e.updated_at) : "null") + ")");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
@@ -876,6 +892,8 @@ public:
 			e.alcohol                  = static_cast<int32_t>(atoi(row[69]));
 			e.fishing                  = static_cast<int32_t>(atoi(row[70]));
 			e.tinkering                = static_cast<int32_t>(atoi(row[71]));
+			e.created_at               = strtoll(row[72] ? row[72] : "-1", nullptr, 10);
+			e.updated_at               = strtoll(row[73] ? row[73] : "-1", nullptr, 10);
 
 			all_entries.push_back(e);
 		}
@@ -972,6 +990,8 @@ public:
 			e.alcohol                  = static_cast<int32_t>(atoi(row[69]));
 			e.fishing                  = static_cast<int32_t>(atoi(row[70]));
 			e.tinkering                = static_cast<int32_t>(atoi(row[71]));
+			e.created_at               = strtoll(row[72] ? row[72] : "-1", nullptr, 10);
+			e.updated_at               = strtoll(row[73] ? row[73] : "-1", nullptr, 10);
 
 			all_entries.push_back(e);
 		}

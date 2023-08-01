@@ -16474,11 +16474,13 @@ void Client::RecordStats()
 	r.pottery                  = GetSkill(EQ::skills::SkillType::SkillPottery);
 	r.alcohol                  = GetSkill(EQ::skills::SkillType::SkillAlcoholTolerance);
 	r.tinkering                = GetSkill(EQ::skills::SkillType::SkillTinkering);
+	r.updated_at               = std::time(nullptr);
 
 	if (r.character_id > 0) {
 		CharacterStatsRecordRepository::UpdateOne(database, r);
 	} else {
 		r.character_id = CharacterID();
+		r.created_at = std::time(nullptr);
 		CharacterStatsRecordRepository::InsertOne(database, r);
 	}
 }

@@ -4926,6 +4926,8 @@ CREATE TABLE `character_stats_record`  (
   `alcohol` int NULL DEFAULT 0,
   `fishing` int NULL DEFAULT 0,
   `tinkering` int NULL DEFAULT 0,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
   PRIMARY KEY (`character_id`)
 );
 )"
