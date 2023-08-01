@@ -16405,7 +16405,7 @@ void Client::RecordStats()
 
 	r.status                   = Admin();
 	r.name                     = GetCleanName();
-	r.aa_points                = GetAAPoints();
+	r.aa_points                = GetAAPoints() + GetSpentAA();
 	r.level                    = GetLevel();
 	r.class_                   = GetBaseClass();
 	r.race                     = GetBaseRace();
