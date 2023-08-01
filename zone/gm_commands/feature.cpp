@@ -2,55 +2,35 @@
 
 void command_feature(Client *c, const Seperator *sep)
 {
-	// nested command aliasing
 	std::string command         = sep->arg[0] ? sep->arg[0] : "";
-	bool        is_size_alias   = sep->arg[0] && Strings::Contains(command, "#size");
-	bool        is_nested_alias = (is_size_alias);
+	const bool  is_size_alias   = sep->arg[0] && Strings::Contains(command, "#size");
+	const bool  is_nested_alias = is_size_alias;
 
-	int arguments = sep->argnum;
+	const auto arguments = sep->argnum;
 	if ((arguments < 2 || !sep->IsNumber(2)) && !is_nested_alias) {
-		auto feature_save_link = Saylink::Silent("#npcedit featuresave");
-
-		c->Message(Chat::White, "Usage: #feature beard [Beard] - Change your or your target's Beard");
-		c->Message(Chat::White, "Usage: #feature beardcolor [Beard Color] - Change your or your target's Beard Color");
-		c->Message(Chat::White, "Usage: #feature details [Details] - Change your or your target's Drakkin Details");
-		c->Message(Chat::White, "Usage: #feature eyes [Eye Color] - Change your or your target's Eyes");
-		c->Message(Chat::White, "Usage: #feature face [Face] - Change your or your target's Face");
-		c->Message(Chat::White, "Usage: #feature gender [Gender] - Change your or your target's Gender");
-		c->Message(Chat::White, "Usage: #feature hair [Hair] - Change your or your target's Hair");
-		c->Message(Chat::White, "Usage: #feature haircolor [Hair Color] - Change your or your target's Hair Color");
-		c->Message(Chat::White, "Usage: #feature helm [Helmet Texture] - Change your or your target's Helmet Texture");
-		c->Message(Chat::White, "Usage: #feature heritage [Heritage] - Change your or your target's Drakkin Heritage");
-		c->Message(Chat::White, "Usage: #feature race [Race ID] - Change your or your target's Race");
-		c->Message(Chat::White, "Usage: #feature size [Size] - Change your or your target's Size (Valid values are 0 to 255, decimal increments are allowed.)");
-		c->Message(Chat::White, "Usage: #feature tattoo [Tattoo] - Change your or your target's Drakkin Tattoos");
-		c->Message(Chat::White, "Usage: #feature texture [Texture] - Change your or your target's Texture");
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"Note: All features are temporary. If your target is an NPC, you can save these features to the database using {}.",
-				feature_save_link
-			).c_str()
-		);
+		SendFeatureSubCommands(c);
 		return;
 	}
 
-	Mob* target = c->GetTarget() ? c->GetTarget() : c;
+	Mob* t = c;
+	if (c->GetTarget()) {
+		t = c->GetTarget();
+	}
 
-	bool is_beard = !strcasecmp(sep->arg[1], "beard");
-	bool is_beard_color = !strcasecmp(sep->arg[1], "beardcolor");
-	bool is_details = !strcasecmp(sep->arg[1], "details");
-	bool is_eyes = !strcasecmp(sep->arg[1], "eyes");
-	bool is_face = !strcasecmp(sep->arg[1], "face");
-	bool is_gender = !strcasecmp(sep->arg[1], "gender");
-	bool is_hair = !strcasecmp(sep->arg[1], "hair");
-	bool is_hair_color = !strcasecmp(sep->arg[1], "haircolor");
-	bool is_helm = !strcasecmp(sep->arg[1], "helm");
-	bool is_heritage = !strcasecmp(sep->arg[1], "heritage");
-	bool is_race = !strcasecmp(sep->arg[1], "race");
-	bool is_size = !strcasecmp(sep->arg[1], "size") || is_size_alias;
-	bool is_tattoo = !strcasecmp(sep->arg[1], "tattoo");
-	bool is_texture = !strcasecmp(sep->arg[1], "texture");
+	const bool is_beard       = !strcasecmp(sep->arg[1], "beard");
+	const bool is_beard_color = !strcasecmp(sep->arg[1], "beardcolor");
+	const bool is_details     = !strcasecmp(sep->arg[1], "details");
+	const bool is_eyes        = !strcasecmp(sep->arg[1], "eyes");
+	const bool is_face        = !strcasecmp(sep->arg[1], "face");
+	const bool is_gender      = !strcasecmp(sep->arg[1], "gender");
+	const bool is_hair        = !strcasecmp(sep->arg[1], "hair");
+	const bool is_hair_color  = !strcasecmp(sep->arg[1], "haircolor");
+	const bool is_helm        = !strcasecmp(sep->arg[1], "helm");
+	const bool is_heritage    = !strcasecmp(sep->arg[1], "heritage");
+	const bool is_race        = !strcasecmp(sep->arg[1], "race");
+	const bool is_size        = !strcasecmp(sep->arg[1], "size") || is_size_alias;
+	const bool is_tattoo      = !strcasecmp(sep->arg[1], "tattoo");
+	const bool is_texture     = !strcasecmp(sep->arg[1], "texture");
 
 	if (
 		!is_beard &&
@@ -68,103 +48,82 @@ void command_feature(Client *c, const Seperator *sep)
 		!is_tattoo &&
 		!is_texture
 	) {
-		auto feature_save_link = Saylink::Silent("#npcedit featuresave");
-
-		c->Message(Chat::White, "Usage: #feature beard [Beard] - Change your or your target's Beard");
-		c->Message(Chat::White, "Usage: #feature beardcolor [Beard Color] - Change your or your target's Beard Color");
-		c->Message(Chat::White, "Usage: #feature details [Details] - Change your or your target's Drakkin Details");
-		c->Message(Chat::White, "Usage: #feature eyes [Eye Color] - Change your or your target's Eyes");
-		c->Message(Chat::White, "Usage: #feature face [Face] - Change your or your target's Face");
-		c->Message(Chat::White, "Usage: #feature gender [Gender] - Change your or your target's Gender");
-		c->Message(Chat::White, "Usage: #feature hair [Hair] - Change your or your target's Hair");
-		c->Message(Chat::White, "Usage: #feature haircolor [Hair Color] - Change your or your target's Hair Color");
-		c->Message(Chat::White, "Usage: #feature helm [Helmet Texture] - Change your or your target's Helmet Texture");
-		c->Message(Chat::White, "Usage: #feature heritage [Heritage] - Change your or your target's Drakkin Heritage");
-		c->Message(Chat::White, "Usage: #feature race [Race ID] - Change your or your target's Race");
-		c->Message(Chat::White, "Usage: #feature size [Size] - Change your or your target's Size (Valid values are 0 to 255, decimal increments are allowed.)");
-		c->Message(Chat::White, "Usage: #feature tattoo [Tattoo] - Change your or your target's Drakkin Tattoos");
-		c->Message(Chat::White, "Usage: #feature texture [Texture] - Change your or your target's Texture");
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"Note: All features are temporary. If your target is an NPC, you can save these features to the database using {}.",
-				feature_save_link
-			).c_str()
-		);
+		SendFeatureSubCommands(c);
 		return;
 	}
 
-	FaceChange_Struct face{};
-	face.haircolor        = target->GetHairColor();
-	face.beardcolor       = target->GetBeardColor();
-	face.eyecolor1        = target->GetEyeColor1();
-	face.eyecolor2        = target->GetEyeColor2();
-	face.hairstyle        = target->GetHairStyle();
-	face.face             = target->GetLuclinFace();
-	face.beard            = target->GetBeard();
-	face.drakkin_heritage = target->GetDrakkinHeritage();
-	face.drakkin_tattoo   = target->GetDrakkinTattoo();
-	face.drakkin_details  = target->GetDrakkinDetails();
+	FaceChange_Struct f{
+		.haircolor = t->GetHairColor(),
+		.beardcolor = t->GetBeardColor(),
+		.eyecolor1 = t->GetEyeColor1(),
+		.eyecolor2 = t->GetEyeColor2(),
+		.hairstyle = t->GetHairStyle(),
+		.beard = t->GetBeard(),
+		.face = t->GetLuclinFace(),
+		.drakkin_heritage = t->GetDrakkinHeritage(),
+		.drakkin_tattoo = t->GetDrakkinTattoo(),
+		.drakkin_details = t->GetDrakkinDetails(),
+	};
 
-	auto gender = target->GetGender();
-	auto helm_texture = target->GetHelmTexture();
-	auto race = target->GetModel();
-	auto size = target->GetSize();
-	auto texture = target->GetTexture();
+	uint8  gender       = t->GetGender();
+	uint8  helm_texture = t->GetHelmTexture();
+	uint16 race         = t->GetModel();
+	float  size         = t->GetSize();
+	uint8  texture      = t->GetTexture();
 
 	std::string feature_changed;
 	float value_changed = 0.0f;
 
 	if (is_beard) {
-		face.beard = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[2]));
+		f.beard = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[2]));
 		feature_changed = "Beard";
-		value_changed = face.beard;
+		value_changed = f.beard;
 	} else if (is_beard_color) {
-		face.beardcolor = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[2]));
+		f.beardcolor = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[2]));
 		feature_changed = "Beard Color";
-		value_changed = face.beardcolor;
+		value_changed = f.beardcolor;
 	} else if (is_details) {
-		if (target->GetRace() != DRAKKIN) {
+		if (t->GetRace() != DRAKKIN) {
 			c->Message(Chat::White, "You must target a Drakkin to use this command.");
 			return;
 		}
 
-		face.drakkin_details = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[2]));
+		f.drakkin_details = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[2]));
 		feature_changed = "Drakkin Details";
-		value_changed = static_cast<float>(face.drakkin_details);
+		value_changed = static_cast<float>(f.drakkin_details);
 	} else if (is_eyes) {
-		face.eyecolor1 = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[2]));
+		f.eyecolor1 = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[2]));
 		feature_changed = "Eyes";
-		value_changed = face.eyecolor1; // eyecolor2 isn't used
+		value_changed = f.eyecolor1; // eyecolor2 isn't used
 	} else if (is_face) {
-		face.face = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[2]));
+		f.face = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[2]));
 		feature_changed = "Face";
-		value_changed = face.face;
+		value_changed = f.face;
 	} else if (is_gender) {
 		gender = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[2]));
 		feature_changed = "Gender";
 		value_changed = gender;
 	} else if (is_hair) {
-		face.hairstyle = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[2]));
+		f.hairstyle = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[2]));
 		feature_changed = "Hair";
-		value_changed = face.hairstyle;
+		value_changed = f.hairstyle;
 	} else if (is_hair_color) {
-		face.haircolor = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[2]));
+		f.haircolor = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[2]));
 		feature_changed = "Hair Color";
-		value_changed = face.haircolor;
+		value_changed = f.haircolor;
 	} else if (is_helm) {
 		helm_texture = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[2]));
 		feature_changed = "Helmet Texture";
 		value_changed = helm_texture;
 	} else if (is_heritage) {
-		if (target->GetRace() != DRAKKIN) {
+		if (t->GetRace() != DRAKKIN) {
 			c->Message(Chat::White, "You must target a Drakkin to use this command.");
 			return;
 		}
 
-		face.drakkin_heritage = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[2]));
+		f.drakkin_heritage = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[2]));
 		feature_changed = "Drakkin Heritage";
-		value_changed = static_cast<float>(face.drakkin_heritage);
+		value_changed = static_cast<float>(f.drakkin_heritage);
 	} else if (is_race) {
 		race = static_cast<uint16>(Strings::ToUnsignedInt(sep->arg[2]));
 		feature_changed = "Race";
@@ -189,14 +148,14 @@ void command_feature(Client *c, const Seperator *sep)
 		feature_changed = "Size";
 		value_changed = size;
 	} else if (is_tattoo) {
-		if (target->GetRace() != DRAKKIN) {
+		if (t->GetRace() != DRAKKIN) {
 			c->Message(Chat::White, "You must target a Drakkin to use this command.");
 			return;
 		}
 
-		face.drakkin_tattoo = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[2]));
+		f.drakkin_tattoo = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[2]));
 		feature_changed = "Drakkin Tattoos";
-		value_changed = static_cast<float>(face.drakkin_tattoo);
+		value_changed = static_cast<float>(f.drakkin_tattoo);
 	} else if (is_texture) {
 		texture = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[2]));
 		feature_changed = "Texture";
@@ -206,29 +165,34 @@ void command_feature(Client *c, const Seperator *sep)
 	// For now face number is not set through SetFace. This is because the
 	// client may not update face features after being set to an invalid face
 	// until a specific valid face number is re-sent (needs more research)
-	if (!is_gender && !is_helm && !is_race && !is_size && !is_texture && !is_face)
-	{
-		target->SetFaceAppearance(face);
-	}
-	else
-	{
-		target->SendIllusionPacket(
-			race,
-			gender,
-			texture,
-			helm_texture,
-			face.haircolor,
-			face.beardcolor,
-			target->GetEyeColor1(),
-			target->GetEyeColor2(),
-			face.hairstyle,
-			face.face,
-			face.beard,
-			0xFF,
-			face.drakkin_heritage,
-			face.drakkin_tattoo,
-			face.drakkin_details,
-			size
+	if (
+		!is_face &&
+		!is_gender &&
+		!is_helm &&
+		!is_race &&
+		!is_size &&
+		!is_texture
+	) {
+		t->SetFaceAppearance(f);
+	} else {
+		t->SendIllusionPacket(
+			AppearanceStruct{
+				.beard = f.beard,
+				.beard_color = f.beardcolor,
+				.drakkin_details = f.drakkin_details,
+				.drakkin_heritage = f.drakkin_heritage,
+				.drakkin_tattoo = f.drakkin_tattoo,
+				.eye_color_one = t->GetEyeColor1(),
+				.eye_color_two = t->GetEyeColor2(),
+				.face = f.face,
+				.gender_id = gender,
+				.hair = f.hairstyle,
+				.hair_color = f.haircolor,
+				.helmet_texture = helm_texture,
+				.race_id = race,
+				.size = size,
+				.texture = texture,
+			}
 		);
 	}
 
@@ -237,7 +201,7 @@ void command_feature(Client *c, const Seperator *sep)
 		fmt::format(
 			"{} set for {} to {}.",
 			feature_changed,
-			c->GetTargetDescription(target),
+			c->GetTargetDescription(t),
 			(
 				is_size ?
 				fmt::format(
@@ -253,3 +217,29 @@ void command_feature(Client *c, const Seperator *sep)
 	);
 }
 
+void SendFeatureSubCommands(Client *c)
+{
+	const std::string& feature_save_link = Saylink::Silent("#npcedit featuresave");
+
+	c->Message(Chat::White, "Usage: #feature beard [Beard] - Change your or your target's Beard");
+	c->Message(Chat::White, "Usage: #feature beardcolor [Beard Color] - Change your or your target's Beard Color");
+	c->Message(Chat::White, "Usage: #feature details [Details] - Change your or your target's Drakkin Details");
+	c->Message(Chat::White, "Usage: #feature eyes [Eye Color] - Change your or your target's Eyes");
+	c->Message(Chat::White, "Usage: #feature face [Face] - Change your or your target's Face");
+	c->Message(Chat::White, "Usage: #feature gender [Gender] - Change your or your target's Gender");
+	c->Message(Chat::White, "Usage: #feature hair [Hair] - Change your or your target's Hair");
+	c->Message(Chat::White, "Usage: #feature haircolor [Hair Color] - Change your or your target's Hair Color");
+	c->Message(Chat::White, "Usage: #feature helm [Helmet Texture] - Change your or your target's Helmet Texture");
+	c->Message(Chat::White, "Usage: #feature heritage [Heritage] - Change your or your target's Drakkin Heritage");
+	c->Message(Chat::White, "Usage: #feature race [Race ID] - Change your or your target's Race");
+	c->Message(Chat::White, "Usage: #feature size [Size] - Change your or your target's Size (Valid values are 0 to 255, decimal increments are allowed.)");
+	c->Message(Chat::White, "Usage: #feature tattoo [Tattoo] - Change your or your target's Drakkin Tattoos");
+	c->Message(Chat::White, "Usage: #feature texture [Texture] - Change your or your target's Texture");
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"Note: All features are temporary. If your target is an NPC, you can save these features to the database using {}.",
+			feature_save_link
+		).c_str()
+	);
+}

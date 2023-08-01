@@ -529,7 +529,7 @@ void PathfinderWaypoint::ShowNode(const Node &n) {
 	npc_type->current_hp = 4000000;
 	npc_type->max_hp = 4000000;
 	npc_type->race = 2254;
-	npc_type->gender = 2;
+	npc_type->gender = NEUTER;
 	npc_type->class_ = 9;
 	npc_type->deity = 1;
 	npc_type->level = 75;

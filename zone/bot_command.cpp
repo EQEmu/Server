@@ -63,6 +63,7 @@
 #include "water_map.h"
 #include "worldserver.h"
 #include "dialogue_window.h"
+#include "mob.h"
 
 #include <fmt/format.h>
 
@@ -8819,26 +8820,28 @@ void helper_bot_appearance_form_final(Client *bot_owner, Bot *my_bot)
 
 void helper_bot_appearance_form_update(Bot *my_bot)
 {
-	if (!my_bot)
+	if (!my_bot) {
 		return;
+	}
 
 	my_bot->SendIllusionPacket(
-		my_bot->GetRace(),
-		my_bot->GetGender(),
-		0xFF,	//my_bot->GetTexture(),		// 0xFF - change back if issues arise
-		0xFF,	//my_bot->GetHelmTexture(),	// 0xFF - change back if issues arise
-		my_bot->GetHairColor(),
-		my_bot->GetBeardColor(),
-		my_bot->GetEyeColor1(),
-		my_bot->GetEyeColor2(),
-		my_bot->GetHairStyle(),
-		my_bot->GetLuclinFace(),
-		my_bot->GetBeard(),
-		0xFF,					// aa_title (0xFF)
-		my_bot->GetDrakkinHeritage(),
-		my_bot->GetDrakkinTattoo(),
-		my_bot->GetDrakkinDetails(),
-		my_bot->GetSize()
+		AppearanceStruct{
+			.beard = my_bot->GetBeard(),
+			.beard_color = my_bot->GetBeardColor(),
+			.drakkin_details = my_bot->GetDrakkinDetails(),
+			.drakkin_heritage = my_bot->GetDrakkinHeritage(),
+			.drakkin_tattoo = my_bot->GetDrakkinTattoo(),
+			.eye_color_one = my_bot->GetEyeColor1(),
+			.eye_color_two = my_bot->GetEyeColor2(),
+			.face = my_bot->GetLuclinFace(),
+			.gender_id = my_bot->GetGender(),
+			.hair = my_bot->GetHairStyle(),
+			.hair_color = my_bot->GetHairColor(),
+			.helmet_texture = my_bot->GetHelmTexture(),
+			.race_id = my_bot->GetRace(),
+			.size = my_bot->GetSize(),
+			.texture = my_bot->GetTexture(),
+		}
 	);
 }
 
@@ -10002,7 +10005,7 @@ void bot_command_pickpocket(Client *c, const Seperator *sep)
 	if (helper_command_disabled(c, RuleB(Bots, AllowPickpocketCommand), "pickpocket")) {
 		return;
 	}
-	
+
 	if (helper_command_alias_fail(c, "bot_command_pickpocket", sep->arg[0], "pickpocket")) {
 		return;
 	}
@@ -10037,7 +10040,7 @@ void bot_command_pickpocket(Client *c, const Seperator *sep)
 	float     mob_xy_distance = ((mob_distance.x * mob_distance.x) + (mob_distance.y * mob_distance.y));
 	float     mob_z_distance  = (mob_distance.z * mob_distance.z);
 	float     z_offset_diff   = target_mob->GetZOffset() - c->GetZOffset();
-	
+
 	if (mob_z_distance >= (35-z_offset_diff) || mob_xy_distance > 250) {
 		c->Message(Chat::White, "You must be closer to an enemy to use this command");
 		return;

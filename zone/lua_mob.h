@@ -351,9 +351,9 @@ public:
 	void SendAppearanceEffect(uint32 parm1, uint32 parm2, uint32 parm3, uint32 parm4, uint32 parm5);
 	void SendAppearanceEffect(uint32 parm1, uint32 parm2, uint32 parm3, uint32 parm4, uint32 parm5, Lua_Client specific_target);
 	void SetFlyMode(int in);
-	void SetTexture(int in);
-	void SetRace(int in);
-	void SetGender(int in);
+	void SetTexture(uint8 texture);
+	void SetRace(uint16 race_id);
+	void SetGender(uint8 gender_id);
 	void SendIllusionPacket(luabind::adl::object illusion);
 	void ChangeRace(int in);
 	void ChangeGender(int in);

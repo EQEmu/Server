@@ -1474,9 +1474,11 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				if(caster && caster->GetTarget()){
 						SendIllusionPacket
 						(
-							caster->GetTarget()->GetRace(),
-							caster->GetTarget()->GetGender(),
-							caster->GetTarget()->GetTexture()
+							AppearanceStruct{
+								.gender_id = caster->GetTarget()->GetGender(),
+								.race_id = caster->GetTarget()->GetRace(),
+								.texture = caster->GetTarget()->GetTexture(),
+							}
 						);
 						caster->SendAppearancePacket(AT_Size, static_cast<uint32>(caster->GetTarget()->GetSize()));
 
@@ -4265,7 +4267,7 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 			case SE_IllusionCopy:
 			case SE_Illusion:
 			{
-				SendIllusionPacket(0, GetBaseGender());
+				SendIllusionPacket(AppearanceStruct{});
 				// The GetSize below works because the above setting race to zero sets size back.
 				SendAppearancePacket(AT_Size, GetSize());
 
@@ -10199,36 +10201,29 @@ void Mob::ApplySpellEffectIllusion(int32 spell_id, Mob *caster, int buffslot, in
 	if (base == -1) {
 		// Specific Gender Illusions
 		if (spell_id == SPELL_ILLUSION_MALE || spell_id == SPELL_ILLUSION_FEMALE) {
-			int specific_gender = -1;
-			// Male
-			if (spell_id == SPELL_ILLUSION_MALE)
-				specific_gender = 0;
-			// Female
-			else if (spell_id == SPELL_ILLUSION_FEMALE)
-				specific_gender = 1;
-			if (specific_gender > -1) {
-				if (caster && caster->GetTarget()) {
-					SendIllusionPacket
-					(
-						caster->GetTarget()->GetBaseRace(),
-						specific_gender,
-						caster->GetTarget()->GetTexture()
-					);
-				}
+			uint8 specific_gender = spell_id == SPELL_ILLUSION_MALE ? MALE : FEMALE;
+
+			if (caster && caster->GetTarget()) {
+				SendIllusionPacket(
+					AppearanceStruct{
+						.gender_id = specific_gender,
+						.race_id = caster->GetTarget()->GetBaseRace(),
+						.texture = caster->GetTarget()->GetTexture(),
+					}
+				);
 			}
 		}
-		// Change Gender Illusions
+			// Change Gender Illusions
 		else {
 			if (caster && caster->GetTarget()) {
-				int opposite_gender = 0;
-				if (caster->GetTarget()->GetGender() == 0)
-					opposite_gender = 1;
+				uint8 opposite_gender = caster->GetTarget()->GetGender() == MALE ? FEMALE : MALE;
 
-				SendIllusionPacket
-				(
-					caster->GetTarget()->GetRace(),
-					opposite_gender,
-					caster->GetTarget()->GetTexture()
+				SendIllusionPacket(
+					AppearanceStruct{
+						.gender_id = opposite_gender,
+						.race_id = caster->GetTarget()->GetRace(),
+						.texture = caster->GetTarget()->GetTexture(),
+					}
 				);
 			}
 		}
@@ -10254,46 +10249,52 @@ void Mob::ApplySpellEffectIllusion(int32 spell_id, Mob *caster, int buffslot, in
 			if (max > 0) {
 				if (limit == 0) {
 					SendIllusionPacket(
-						base,
-						gender_id
+						AppearanceStruct{
+							.gender_id = static_cast<uint8>(gender_id),
+							.race_id = static_cast<uint16>(base),
+						}
 					);
-				}
-				else {
+				} else {
 					if (max != 3) {
 						SendIllusionPacket(
-							base,
-							gender_id,
-							limit,
-							max
+							AppearanceStruct{
+								.gender_id = static_cast<uint8>(gender_id),
+								.helmet_texture = static_cast<uint8>(max),
+								.race_id = static_cast<uint16>(base),
+								.texture = static_cast<uint8>(limit),
+							}
 						);
-					}
-					else {
+					} else {
 						SendIllusionPacket(
-							base,
-							gender_id,
-							limit,
-							limit
+							AppearanceStruct{
+								.gender_id = static_cast<uint8>(gender_id),
+								.helmet_texture = static_cast<uint8>(limit),
+								.race_id = static_cast<uint16>(base),
+								.texture = static_cast<uint8>(limit),
+							}
 						);
 					}
 				}
-			}
-			else {
+			} else {
 				SendIllusionPacket(
-					base,
-					gender_id,
-					limit,
-					max
+					AppearanceStruct{
+						.gender_id = static_cast<uint8>(gender_id),
+						.helmet_texture = static_cast<uint8>(max),
+						.race_id = static_cast<uint16>(base),
+						.texture = static_cast<uint8>(limit),
+					}
 				);
 			}
-
-		}
-		else {
+		} else {
 			SendIllusionPacket(
-				base,
-				gender_id,
-				limit
+				AppearanceStruct{
+					.gender_id = static_cast<uint8>(gender_id),
+					.race_id = static_cast<uint16>(base),
+					.texture = static_cast<uint8>(limit),
+				}
 			);
 		}
+
 		SendAppearancePacket(AT_Size, race_size);
 	}
 
