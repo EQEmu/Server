@@ -916,6 +916,8 @@ void Client::CompleteConnect()
 
 	heroforge_wearchange_timer.Start(250);
 
+	RecordStats();
+
 	// enforce some rules..
 	if (!CanEnterZone()) {
 		LogInfo("Kicking character [{}] from zone, not allowed here (missing requirements)", GetCleanName());
@@ -1792,8 +1794,6 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	if (ClientVersion() >= EQ::versions::ClientVersion::RoF) {
 		Handle_Connect_OP_ReqNewZone(nullptr);
 	}
-
-	RecordStats();
 
 	SetAttackTimer();
 	conn_state = ZoneInfoSent;
