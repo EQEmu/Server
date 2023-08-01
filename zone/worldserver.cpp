@@ -2004,6 +2004,12 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		RuleManager::Instance()->LoadRules(&database, RuleManager::Instance()->GetActiveRuleset(), true);
 		break;
 	}
+	case ServerOP_ReloadDataBucketsCache:
+	{
+		zone->SendReloadMessage("Data buckets cache");
+		DataBucket::ClearCache();
+		break;
+	}
 	case ServerOP_ReloadDoors:
 	case ServerOP_ReloadGroundSpawns:
 	case ServerOP_ReloadObjects:

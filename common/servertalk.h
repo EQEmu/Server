@@ -249,6 +249,7 @@
 #define ServerOP_ReloadZonePoints 0x4122
 #define ServerOP_ReloadDzTemplates 0x4123
 #define ServerOP_ReloadZoneData 0x4124
+#define ServerOP_ReloadDataBucketsCache 0x4125
 
 #define ServerOP_CZDialogueWindow 0x4500
 #define ServerOP_CZLDoNUpdate 0x4501

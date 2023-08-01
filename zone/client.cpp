@@ -8883,7 +8883,8 @@ void Client::ShowDevToolsMenu()
 	menu_reload_two += Saylink::Silent("#reload commands", "Commands");
 	menu_reload_two += " | " + Saylink::Silent("#reload content_flags", "Content Flags");
 
-	menu_reload_three += Saylink::Silent("#reload doors", "Doors");
+	menu_reload_three += Saylink::Silent("#reload data_buckets_cache", "Databuckets");
+	menu_reload_three += " | " + Saylink::Silent("#reload doors", "Doors");
 	menu_reload_three += " | " + Saylink::Silent("#reload ground_spawns", "Ground Spawns");
 
 	menu_reload_four += Saylink::Silent("#reload logs", "Level Based Experience Modifiers");
@@ -10834,6 +10835,16 @@ void Client::SendReloadCommandMessages() {
 		fmt::format(
 			"Usage: {} - Reloads Doors globally",
 			doors_link
+		).c_str()
+	);
+
+	auto data_buckets_link = Saylink::Silent("#reload data_buckets_cache");
+
+	Message(
+		Chat::White,
+		fmt::format(
+			"Usage: {} - Reloads data buckets cache globally",
+			data_buckets_link
 		).c_str()
 	);
 
