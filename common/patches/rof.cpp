@@ -3826,7 +3826,7 @@ namespace RoF
 			{
 				emu->race = 127;
 				emu->bodytype = 11;
-				emu->gender = MALE;
+				emu->gender = 0;
 				ShowName = 0;
 			}
 

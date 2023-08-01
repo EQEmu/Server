@@ -11,6 +11,7 @@
 #include "aa_ability.h"
 #include "event_codes.h"
 #include "../common/repositories/doors_repository.h"
+#include "../common/races.h"
 
 #include "bot_database.h"
 
