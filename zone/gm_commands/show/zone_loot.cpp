@@ -59,7 +59,7 @@ void ShowZoneLoot(Client *c, const Seperator *sep)
 							fmt::format(
 								"{} ({}) | ",
 								linker.GenerateLink(),
-								Strings::Commify(i->item_id)
+								i->item_id
 							) :
 							""
 						),
@@ -94,7 +94,7 @@ void ShowZoneLoot(Client *c, const Seperator *sep)
 			fmt::format(
 				"{} ({}) is dropping in {} place{}.",
 				database.CreateItemLink(search_item_id),
-				Strings::Commify(search_item_id),
+				search_item_id,
 				loot_count,
 				loot_count != 1 ? "s" : ""
 			).c_str()
