@@ -10,7 +10,7 @@ void FindFaction(Client *c, const Seperator *sep)
 				Chat::White,
 				fmt::format(
 					"Faction {} | {}",
-					Strings::Commify(faction_id),
+					faction_id,
 					faction_name
 				).c_str()
 			);
@@ -22,7 +22,7 @@ void FindFaction(Client *c, const Seperator *sep)
 			Chat::White,
 			fmt::format(
 				"Faction ID {} was not found.",
-				Strings::Commify(faction_id)
+				faction_id
 			).c_str()
 		);
 
@@ -48,7 +48,7 @@ void FindFaction(Client *c, const Seperator *sep)
 			Chat::White,
 			fmt::format(
 				"Faction {} | {}",
-				Strings::Commify(faction_id),
+				faction_id,
 				faction_name
 			).c_str()
 		);

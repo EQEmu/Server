@@ -26,7 +26,7 @@ void ShowGroupInfo(Client *c, const Seperator *sep)
 
 	popup_table += DialogueWindow::TableRow(
 		DialogueWindow::TableCell("Group ID") +
-		DialogueWindow::TableCell(Strings::Commify(g->GetID()))
+		DialogueWindow::TableCell(std::to_string(g->GetID()))
 	);
 
 	popup_table += DialogueWindow::TableRow(
