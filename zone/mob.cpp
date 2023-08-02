@@ -2105,7 +2105,7 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 				"{}: {}{}{}",
 				!faction_name.empty() ? faction_name : "Unknown Faction",
 				sign,
-				Strings::Commify(f.second),
+				f.second,
 				DialogueWindow::Break(1)
 			);
 		}
@@ -3475,7 +3475,7 @@ void Mob::ShowBuffs(Client* c) {
 					"{}{}{}{}{}",
 					DialogueWindow::TableCell(std::to_string(i)),
 					DialogueWindow::TableCell(GetSpellName(spell_id)),
-					DialogueWindow::TableCell(Strings::Commify(spell_id)),
+					DialogueWindow::TableCell(std::to_string(spell_id)),
 					DialogueWindow::TableCell(is_permanent ? "Permanent" : time),
 					DialogueWindow::TableCell(std::to_string(buffs[i].hit_number))
 				)

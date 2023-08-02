@@ -19,7 +19,7 @@ void FindRecipe(Client *c, const Seperator *sep)
 				Chat::White,
 				fmt::format(
 					"Recipe ID {} could not be found.",
-					Strings::Commify(recipe_id)
+					recipe_id
 				).c_str()
 			);
 			return;
@@ -29,7 +29,7 @@ void FindRecipe(Client *c, const Seperator *sep)
 			Chat::White,
 			fmt::format(
 				"Recipe {} | {}{}",
-				Strings::Commify(recipe_id),
+				recipe_id,
 				l[0].name,
 				(
 					can_view_recipes ?

@@ -34,7 +34,7 @@ void ShowTimers(Client *c, const Seperator *sep)
 		const uint32 remaining_time = e.second->GetRemainingTime();
 		if (remaining_time) {
 			popup_table += DialogueWindow::TableRow(
-				DialogueWindow::TableCell(Strings::Commify(e.first)) +
+				DialogueWindow::TableCell(std::to_string(e.first)) +
 				DialogueWindow::TableCell(Strings::SecondsToTime(remaining_time))
 			);
 		}

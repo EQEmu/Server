@@ -39,9 +39,9 @@ void GlobalLootManager::ShowZoneGlobalLoot(Client *c) const
 		global_loot_table += DialogueWindow::TableRow(
 			fmt::format(
 				"{}{}{}",
-				DialogueWindow::TableCell(Strings::Commify(e.GetID())),
+				DialogueWindow::TableCell(std::to_string(e.GetID())),
 				DialogueWindow::TableCell(e.GetDescription()),
-				DialogueWindow::TableCell(Strings::Commify(e.GetLootTableID()))
+				DialogueWindow::TableCell(std::to_string(e.GetLootTableID()))
 			)
 		);
 	}
@@ -76,9 +76,9 @@ void GlobalLootManager::ShowNPCGlobalLoot(Client *c, NPC *t) const
 			global_loot_table += DialogueWindow::TableRow(
 				fmt::format(
 					"{}{}{}",
-					DialogueWindow::TableCell(Strings::Commify(e.GetID())),
+					DialogueWindow::TableCell(std::to_string(e.GetID())),
 					DialogueWindow::TableCell(e.GetDescription()),
-					DialogueWindow::TableCell(Strings::Commify(e.GetLootTableID()))
+					DialogueWindow::TableCell(std::to_string(e.GetLootTableID()))
 				)
 			);
 		}

@@ -27,7 +27,7 @@ void ShowRecipe(Client *c, const Seperator *sep)
 			Chat::White,
 			fmt::format(
 				"Recipe ID {} has no entries or could not be found.",
-				Strings::Commify(recipe_id)
+				recipe_id
 			).c_str()
 		);
 		return;
@@ -37,7 +37,7 @@ void ShowRecipe(Client *c, const Seperator *sep)
 		Chat::White,
 		fmt::format(
 			"Recipe {} | {}",
-			Strings::Commify(recipe_id),
+			recipe_id,
 			r[0].name
 		).c_str()
 	);

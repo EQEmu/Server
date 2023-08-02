@@ -63,7 +63,7 @@ void ShowZoneLoot(Client *c, const Seperator *sep)
 						"{}. {} ({}) {}",
 						loot_number,
 						linker.GenerateLink(),
-						Strings::Commify(i->item_id),
+						i->item_id,
 						npc_link
 					).c_str()
 				);
