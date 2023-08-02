@@ -42,6 +42,8 @@
 #include <stdio.h>
 #include <iostream>
 
+#include "rulesys.h"
+
 //Const char based
 #include "strings_legacy.cpp" // legacy c functions
 #include "strings_misc.cpp" // anything non "Strings" scoped
@@ -279,6 +281,10 @@ bool Strings::Contains(std::vector<std::string> container, const std::string& el
 
 std::string Strings::Commify(const std::string &number)
 {
+	if (RuleB(World, DisableNumberCommification)) {
+		return number;
+	}
+
 	std::string temp_string;
 
 	auto string_length = static_cast<int>(number.length());
