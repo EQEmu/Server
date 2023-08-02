@@ -25,7 +25,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 	auto npc_id        = t->GetNPCTypeID();
 	auto npc_id_string = fmt::format(
 		"NPC ID {}",
-		Strings::Commify(std::to_string(npc_id))
+		npc_id
 	);
 
 	auto n = NpcTypesRepository::FindOne(content_db, npc_id);

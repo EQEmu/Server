@@ -11750,7 +11750,7 @@ void Client::ShowSpells(Client* c, ShowSpellType show_spell_type)
 					"{}. {} ({})",
 					index,
 					GetSpellName(spell_id),
-					Strings::Commify(spell_id)
+					spell_id
 				).c_str()
 			);
 		}
