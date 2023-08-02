@@ -55,7 +55,9 @@ Raid::Raid(uint32 raidID)
 	for (int i = 0; i < MAX_NO_RAID_MAIN_ASSISTERS; i++) {
 		memset(main_assister_pcs[i], 0, 64);
 		memset(main_marker_pcs[i], 0, 64);
-		marked_npcs[i]      = 0;
+		marked_npcs[i].entity_id = 0;
+		marked_npcs[i].zone_id = 0;
+		marked_npcs[i].instance_id = 0;
 	}
 }
 
@@ -80,7 +82,9 @@ Raid::Raid(Client* nLeader)
 	for (int i = 0; i < MAX_NO_RAID_MAIN_ASSISTERS; i++) {
 		memset(main_assister_pcs[i], 0, 64);
 		memset(main_marker_pcs[i], 0, 64);
-		marked_npcs[i] = 0;
+		marked_npcs[i].entity_id = 0;
+		marked_npcs[i].zone_id = 0;
+		marked_npcs[i].instance_id = 0;
 	}
 }
 
@@ -1678,9 +1682,15 @@ void Raid::GetRaidDetails()
 	locked   = raid_details.locked;
 	LootType = raid_details.loottype;
 	motd     = raid_details.motd;
-	marked_npcs[0] = raid_details.marked_npc_1;
-	marked_npcs[1] = raid_details.marked_npc_2;
-	marked_npcs[2] = raid_details.marked_npc_3;
+	marked_npcs[0].entity_id   = raid_details.marked_npc_1_entity_id;
+	marked_npcs[0].zone_id     = raid_details.marked_npc_1_zone_id;
+	marked_npcs[0].instance_id = raid_details.marked_npc_1_instance_id;
+	marked_npcs[1].entity_id   = raid_details.marked_npc_2_entity_id;
+	marked_npcs[1].zone_id     = raid_details.marked_npc_2_zone_id;
+	marked_npcs[1].instance_id = raid_details.marked_npc_2_instance_id;
+	marked_npcs[2].entity_id   = raid_details.marked_npc_3_entity_id;
+	marked_npcs[2].zone_id     = raid_details.marked_npc_3_zone_id;
+	marked_npcs[2].instance_id = raid_details.marked_npc_3_instance_id;
 }
 
 void Raid::SaveRaidMOTD()
@@ -2419,8 +2429,8 @@ void Raid::UpdateRaidXTargets()
 	};
 
 	for (auto& u : marked_updates) {
-		if (marked_npcs[u.slot]) {
-			auto m = entity_list.GetMob(DecodeMobIDFromMarkedNPC(marked_npcs[u.slot]));
+		if (marked_npcs[u.slot].entity_id) {
+			auto m = entity_list.GetMob(marked_npcs[u.slot].entity_id);
 			if (m && m->GetHP() > 0) {
 				UpdateXTargetType(u.mark_target, m, m->GetName());
 			}
@@ -2562,13 +2572,17 @@ void Raid::RaidMarkNPC(Mob* mob, uint32 parameter)
 	for (int i = 0; i < MAX_NO_RAID_MAIN_MARKERS; i++) {
 		auto cname = c->GetCleanName();
 		if (strcasecmp(main_marker_pcs[i], cname) == 0 || strcasecmp(leadername, cname) == 0) {
-			marked_npcs[parameter - 1] = EncodeMarkedNPC(c->GetTarget());
+			marked_npcs[parameter - 1].entity_id = c->GetTarget()->GetID();
+			marked_npcs[parameter - 1].zone_id = c->GetTarget()->GetZoneID();
+			marked_npcs[parameter - 1].instance_id = c->GetTarget()->GetInstanceVersion();
 			auto result = RaidDetailsRepository::UpdateRaidMarkedNPC(
 				database,
 				GetID(),
-				parameter,
-				marked_npcs[parameter - 1]
-			);
+				marked_npcs[parameter - 1].entity_id,
+				marked_npcs[parameter - 1].zone_id,
+				marked_npcs[parameter - 1].instance_id,
+				parameter
+				);
 			if (!result) {
 				LogError("Unable to set MarkedNPC{} from slot: [{}] for guild [{}].",
 					parameter,
@@ -2579,7 +2593,7 @@ void Raid::RaidMarkNPC(Mob* mob, uint32 parameter)
 
 			auto outapp = new EQApplicationPacket(OP_MarkRaidNPC, sizeof(MarkNPC_Struct));
 			MarkNPC_Struct* mnpcs = (MarkNPC_Struct*)outapp->pBuffer;
-			mnpcs->TargetID = DecodeMobIDFromMarkedNPC(marked_npcs[parameter - 1]);
+			mnpcs->TargetID = marked_npcs[parameter - 1].entity_id;
 			mnpcs->Number = parameter;
 			strcpy(mnpcs->Name, c->GetTarget()->GetCleanName());
 			QueuePacket(outapp);
@@ -2596,7 +2610,7 @@ void Raid::RaidMarkNPC(Mob* mob, uint32 parameter)
 void Raid::UpdateXtargetMarkedNPC()
 {
 	for (int i = 0; i < MAX_MARKED_NPCS; i++) {
-		auto mm = entity_list.GetNPCByID(DecodeMobIDFromMarkedNPC(marked_npcs[i]));
+		auto mm = entity_list.GetNPCByID(marked_npcs[i].entity_id);
 		if (mm) {
 			UpdateXTargetType(static_cast<XTargetType>(RaidMarkTarget1 + i), mm->CastToMob(), mm->CastToMob()->GetName());
 		}
@@ -2614,17 +2628,21 @@ void Raid::RaidClearNPCMarks(Client* c)
 		Strings::EqualFold(main_marker_pcs[MAIN_MARKER_2_SLOT], c->GetCleanName()) ||
 		Strings::EqualFold(main_marker_pcs[MAIN_MARKER_3_SLOT], c->GetCleanName())) {
 		for (int i = 0; i < MAX_MARKED_NPCS; i++) {
-			if (marked_npcs[i] && DecodeZoneIDFromMarkedNPC(marked_npcs[i]) == c->GetZoneID()
-				&& DecodeInstanceIDFromMarkedNPC(marked_npcs[i]) == c->GetInstanceID()) 
+			if (marked_npcs[i].entity_id > 0 && marked_npcs[i].zone_id == c->GetZoneID()
+				&& marked_npcs[i].instance_id == c->GetInstanceID()) 
 			{
-				auto npc_name = entity_list.GetNPCByID(DecodeMobIDFromMarkedNPC(marked_npcs[i]))->GetCleanName();
+				auto npc_name = entity_list.GetNPCByID(marked_npcs[i].entity_id)->GetCleanName();
 				RaidMessageString(nullptr, Chat::Cyan, RAID_NO_LONGER_MARKED, npc_name);
-				marked_npcs[i] = 0;
+				marked_npcs[i].entity_id = 0;
+				marked_npcs[i].zone_id = 0;
+				marked_npcs[i].instance_id = 0;
 				auto result = RaidDetailsRepository::UpdateRaidMarkedNPC(
 					database,
 					GetID(),
-					i + 1,
-					0
+					0,
+					0,
+					0,
+					i + 1
 				);
 				if (!result) {
 					LogError("Unable to clear MarkedNPC{} from slot: [{}] for guild [{}].", i + 1, i, GetID());
@@ -2936,9 +2954,9 @@ void Raid::SendMarkTargets(Client* c)
 	}
 
 	for (int i = 0; i < MAX_MARKED_NPCS; i++) {
-		if (marked_npcs[i] > 0 && DecodeZoneIDFromMarkedNPC(marked_npcs[i]) == c->GetZoneID() 
-			&& DecodeInstanceIDFromMarkedNPC(marked_npcs[i]) == c->GetInstanceID()) {
-			auto marked_mob = entity_list.GetMob(DecodeMobIDFromMarkedNPC(marked_npcs[i]));
+		if (marked_npcs[i].entity_id > 0 && marked_npcs[i].zone_id == c->GetZoneID() 
+			&& marked_npcs[i].instance_id == c->GetInstanceID()) {
+			auto marked_mob = entity_list.GetMob(marked_npcs[i].entity_id);
 			if (marked_mob) {
 				auto outapp = new EQApplicationPacket(OP_MarkRaidNPC, sizeof(MarkNPC_Struct));
 				MarkNPC_Struct* mnpcs = (MarkNPC_Struct*)outapp->pBuffer;
@@ -2951,29 +2969,4 @@ void Raid::SendMarkTargets(Client* c)
 		}
 	}
 	UpdateXtargetMarkedNPC();
-}
-
-uint32 Raid::EncodeMarkedNPC(Mob* m)
-{
-	uint32 instance = m->GetInstanceVersion() << 27;
-	uint32 mob = m->GetID() << 15;
-	uint32 zone = m->GetZoneID();
-	uint32 encoded_value = instance | mob | zone;
-
-	return encoded_value;
-}
-
-uint32 Raid::DecodeMobIDFromMarkedNPC(uint32 encoded_value) 
-{
-	return encoded_value >> 15 & 0x00000FFF;
-}
-
-uint32 Raid::DecodeZoneIDFromMarkedNPC(uint32 encoded_value)
-{
-	return encoded_value & 0x00007FFF;
-}
-
-uint32 Raid::DecodeInstanceIDFromMarkedNPC(uint32 encoded_value)
-{
-	return encoded_value >> 27;
 }

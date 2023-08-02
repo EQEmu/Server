@@ -4830,14 +4830,20 @@ UPDATE data_buckets SET bot_id = SUBSTRING_INDEX(SUBSTRING_INDEX( `key`, '-', 2 
 	ManifestEntry{
 		.version = 9234,
 		.description = "2023_07_27_update_raid_details.sql",
-		.check = "SELECT DATA_TYPE FROM INFORMATION_SCHEMA.`COLUMNS` WHERE TABLE_NAME = 'raid_details' AND COLUMN_NAME = 'marked_npc_1';",
-		.condition = "match",
-		.match = "smallint",
+		.check = "SHOW COLUMNS FROM `raid_details` LIKE 'marked_npc_1_entity_id';",
+		.condition = "empty",
+		.match = "",
 		.sql = R"(ALTER TABLE `raid_details`
-				CHANGE COLUMN `marked_npc_1` `marked_npc_1` INT UNSIGNED NOT NULL DEFAULT 0 AFTER `motd`,
-				CHANGE COLUMN `marked_npc_2` `marked_npc_2` INT UNSIGNED NOT NULL DEFAULT 0 AFTER `marked_npc_1`,
-				CHANGE COLUMN `marked_npc_3` `marked_npc_3` INT UNSIGNED NOT NULL DEFAULT 0 AFTER `marked_npc_2`;
-				)"
+			CHANGE COLUMN `marked_npc_1` `marked_npc_1_entity_id` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `motd`,
+			ADD COLUMN `marked_npc_1_zone_id` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `marked_npc_1_entity_id`,
+			ADD COLUMN `marked_npc_1_instance_id` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `marked_npc_1_zone_id`,
+			CHANGE COLUMN `marked_npc_2` `marked_npc_2_entity_id` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `marked_npc_1_instance_id`,
+			ADD COLUMN `marked_npc_2_zone_id` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `marked_npc_2_entity_id`,
+			ADD COLUMN `marked_npc_2_instance_id` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `marked_npc_2_zone_id`,
+			CHANGE COLUMN `marked_npc_3` `marked_npc_3_entity_id` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `marked_npc_2_instance_id`,
+			ADD COLUMN `marked_npc_3_zone_id` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `marked_npc_3_entity_id`,
+			ADD COLUMN `marked_npc_3_instance_id` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `marked_npc_3_zone_id`;
+		)"
     },
 
 // -- template; copy/paste this when you need to create a new entry

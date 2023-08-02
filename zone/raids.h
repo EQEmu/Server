@@ -110,6 +110,12 @@ enum {
 	DELEGATE_ON  = 1
 };
 
+struct Raid_Marked_NPC {
+	uint32	entity_id;
+	uint32	zone_id;
+	uint32	instance_id;
+};
+
 
 constexpr uint8_t MAX_RAID_GROUPS = 12;
 constexpr uint8_t MAX_RAID_MEMBERS = 72;
@@ -242,10 +248,6 @@ public:
 	void    RaidClearNPCMarks(Client* c);
 	void    RemoveRaidDelegates(const char* delegatee);
 	void	UpdateRaidXTargets();
-	uint32  EncodeMarkedNPC(Mob* m);
-	uint32  DecodeMobIDFromMarkedNPC(uint32 encoded_value);
-	uint32  DecodeZoneIDFromMarkedNPC(uint32 encoded_value);
-	uint32  DecodeInstanceIDFromMarkedNPC(uint32 encoded_value);
 
 	//Packet Functions
 	void	SendRaidCreate(Client *to);
@@ -330,7 +332,7 @@ public:
 	char leadername[64];
 	char main_assister_pcs[MAX_NO_RAID_MAIN_ASSISTERS][64];
 	char main_marker_pcs[MAX_NO_RAID_MAIN_MARKERS][64];
-	uint32	marked_npcs[MAX_MARKED_NPCS];
+	Raid_Marked_NPC	marked_npcs[MAX_MARKED_NPCS];
 protected:
 	Client *leader;
 	bool locked;
