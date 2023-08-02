@@ -268,26 +268,48 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 				case SE_IllusionCopy:
 				case SE_Illusion: {
 					if (spell.base_value[x1] == -1) {
-						if (gender == 1)
-							gender = 0;
-						else if (gender == 0)
-							gender = 1;
-						SendIllusionPacket(GetRace(), gender, 0xFF, 0xFF);
-					}
-					else if (spell.base_value[x1] == -2) // WTF IS THIS
+						if (gender == FEMALE) {
+							gender = MALE;
+						} else if (gender == MALE) {
+							gender = FEMALE;
+						}
+
+						SendIllusionPacket(
+							AppearanceStruct{
+								.gender_id = gender,
+								.race_id = GetRace(),
+							}
+						);
+					} else if (spell.base_value[x1] == -2) // WTF IS THIS
 					{
 						if (GetRace() == IKSAR || GetRace() == VAHSHIR || GetRace() <= GNOME) {
-							SendIllusionPacket(GetRace(), GetGender(), spell.limit_value[x1], spell.max_value[x1]);
+							SendIllusionPacket(
+								AppearanceStruct{
+									.gender_id = GetGender(),
+									.helmet_texture = static_cast<uint8>(spell.max_value[x1]),
+									.race_id = GetRace(),
+									.texture = static_cast<uint8>(spell.limit_value[x1]),
+								}
+							);
 						}
+					} else if (spell.max_value[x1] > 0) {
+						SendIllusionPacket(
+							AppearanceStruct{
+								.helmet_texture = static_cast<uint8>(spell.max_value[x1]),
+								.race_id = static_cast<uint16>(spell.base_value[x1]),
+								.texture = static_cast<uint8>(spell.limit_value[x1]),
+							}
+						);
+					} else {
+						SendIllusionPacket(
+							AppearanceStruct{
+								.helmet_texture = static_cast<uint8>(spell.max_value[x1]),
+								.race_id = static_cast<uint16>(spell.base_value[x1]),
+								.texture = static_cast<uint8>(spell.limit_value[x1]),
+							}
+						);
 					}
-					else if (spell.max_value[x1] > 0)
-					{
-						SendIllusionPacket(spell.base_value[x1], 0xFF, spell.limit_value[x1], spell.max_value[x1]);
-					}
-					else
-					{
-						SendIllusionPacket(spell.base_value[x1], 0xFF, 0xFF, 0xFF);
-					}
+
 					switch (spell.base_value[x1]) {
 					case OGRE:
 						SendAppearancePacket(AT_Size, 9);
@@ -427,6 +449,7 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 Bot::~Bot() {
 	AI_Stop();
 	LeaveHealRotationMemberPool();
+	DataBucket::DeleteCachedBuckets(DataBucketLoadType::Bot, GetBotID());
 
 	if (HasPet()) {
 		GetPet()->Depop();
@@ -8193,27 +8216,22 @@ void Bot::OwnerMessage(const std::string& message)
 bool Bot::CheckDataBucket(std::string bucket_name, const std::string& bucket_value, uint8 bucket_comparison)
 {
 	if (!bucket_name.empty() && !bucket_value.empty()) {
-		auto full_name = fmt::format(
-			"{}-{}",
-			GetBucketKey(),
-			bucket_name
-		);
+		// try to fetch from bot first
+		DataBucketKey k = GetScopedBucketKeys();
+		k.key = bucket_name;
 
-		auto player_value = DataBucket::CheckBucketKey(this, full_name);
-		if (player_value.empty() && GetBotOwner()) {
-			full_name = fmt::format(
-				"{}-{}",
-				GetBotOwner()->GetBucketKey(),
-				bucket_name
-			);
+		auto b = DataBucket::GetData(k);
+		if (b.value.empty() && GetBotOwner()) {
+			// fetch from owner
+			k = GetBotOwner()->GetScopedBucketKeys();
 
-			player_value = DataBucket::CheckBucketKey(GetBotOwner(), full_name);
-			if (player_value.empty()) {
+			b = DataBucket::GetData(k);
+			if (b.value.empty()) {
 				return false;
 			}
 		}
 
-		if (zone->CompareDataBucket(bucket_comparison, bucket_value, player_value)) {
+		if (zone->CompareDataBucket(bucket_comparison, bucket_value, b.value)) {
 			return true;
 		}
 	}

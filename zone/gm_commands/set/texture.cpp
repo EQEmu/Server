@@ -8,8 +8,8 @@ void SetTexture(Client *c, const Seperator *sep)
 		return;
 	}
 
-	const uint16 texture        = Strings::ToUnsignedInt(sep->arg[2]);
-	const uint8  helmet_texture = (
+	const uint8 texture        = Strings::ToUnsignedInt(sep->arg[2]);
+	const uint8 helmet_texture = (
 		sep->IsNumber(3) ?
 		Strings::ToUnsignedInt(sep->arg[3]) :
 		0
@@ -30,10 +30,12 @@ void SetTexture(Client *c, const Seperator *sep)
 		}
 	} else { // Non-Player Races only need Illusion Packets to be sent for texture
 		t->SendIllusionPacket(
-			t->GetModel(),
-			t->GetGender(),
-			texture,
-			helmet_texture
+			AppearanceStruct{
+				.gender_id = t->GetGender(),
+				.helmet_texture = helmet_texture,
+				.race_id = t->GetModel(),
+				.texture = texture,
+			}
 		);
 	}
 

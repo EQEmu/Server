@@ -2187,7 +2187,7 @@ bool QuestManager::isdooropen(uint32 doorid) {
 	return false;
 }
 
-void QuestManager::npcrace(int race_id)
+void QuestManager::npcrace(uint16 race_id)
 {
 	QuestManagerCurrentQuestVars();
 
@@ -2195,10 +2195,14 @@ void QuestManager::npcrace(int race_id)
 		return;
 	}
 
-	owner->SendIllusionPacket(race_id);
+	owner->SendIllusionPacket(
+		AppearanceStruct{
+			.race_id = race_id,
+		}
+	);
 }
 
-void QuestManager::npcgender(int gender_id)
+void QuestManager::npcgender(uint8 gender_id)
 {
 	QuestManagerCurrentQuestVars();
 
@@ -2206,10 +2210,15 @@ void QuestManager::npcgender(int gender_id)
 		return;
 	}
 
-	owner->SendIllusionPacket(owner->GetRace(), gender_id);
+	owner->SendIllusionPacket(
+		AppearanceStruct{
+			.gender_id = gender_id,
+			.race_id = owner->GetRace(),
+		}
+	);
 }
 
-void QuestManager::npcsize(int newsize)
+void QuestManager::npcsize(float size)
 {
 	QuestManagerCurrentQuestVars();
 
@@ -2217,10 +2226,10 @@ void QuestManager::npcsize(int newsize)
 		return;
 	}
 
-	owner->ChangeSize(newsize, true);
+	owner->ChangeSize(size, true);
 }
 
-void QuestManager::npctexture(int newtexture)
+void QuestManager::npctexture(uint8 texture)
 {
 	QuestManagerCurrentQuestVars();
 
@@ -2228,10 +2237,15 @@ void QuestManager::npctexture(int newtexture)
 		return;
 	}
 
-	owner->SendIllusionPacket(owner->GetRace(), 0xFF, newtexture);
+	owner->SendIllusionPacket(
+		AppearanceStruct{
+			.race_id = owner->GetRace(),
+			.texture = texture,
+		}
+	);
 }
 
-void QuestManager::playerrace(int race_id)
+void QuestManager::playerrace(uint16 race_id)
 {
 	QuestManagerCurrentQuestVars();
 
@@ -2239,10 +2253,14 @@ void QuestManager::playerrace(int race_id)
 		return;
 	}
 
-	initiator->SendIllusionPacket(race_id);
+	initiator->SendIllusionPacket(
+		AppearanceStruct{
+			.race_id = race_id,
+		}
+	);
 }
 
-void QuestManager::playergender(int gender_id)
+void QuestManager::playergender(uint8 gender_id)
 {
 	QuestManagerCurrentQuestVars();
 
@@ -2250,10 +2268,15 @@ void QuestManager::playergender(int gender_id)
 		return;
 	}
 
-	initiator->SendIllusionPacket(initiator->GetRace(), gender_id);
+	initiator->SendIllusionPacket(
+		AppearanceStruct{
+			.gender_id = gender_id,
+			.race_id = initiator->GetRace(),
+		}
+	);
 }
 
-void QuestManager::playersize(int newsize)
+void QuestManager::playersize(float size)
 {
 	QuestManagerCurrentQuestVars();
 
@@ -2261,10 +2284,10 @@ void QuestManager::playersize(int newsize)
 		return;
 	}
 
-	initiator->ChangeSize(newsize, true);
+	initiator->ChangeSize(size, true);
 }
 
-void QuestManager::playertexture(int newtexture)
+void QuestManager::playertexture(uint8 texture)
 {
 	QuestManagerCurrentQuestVars();
 
@@ -2272,7 +2295,12 @@ void QuestManager::playertexture(int newtexture)
 		return;
 	}
 
-	initiator->SendIllusionPacket(initiator->GetRace(), 0xFF, newtexture);
+	initiator->SendIllusionPacket(
+		AppearanceStruct{
+			.race_id = initiator->GetRace(),
+			.texture = texture,
+		}
+	);
 }
 
 void QuestManager::playerfeature(const char* feature, int setting)
@@ -2334,22 +2362,23 @@ void QuestManager::playerfeature(const char* feature, int setting)
 	}
 
 	initiator->SendIllusionPacket(
-		Race,
-		Gender,
-		Texture,
-		HelmTexture,
-		HairColor,
-		BeardColor,
-		EyeColor1,
-		EyeColor2,
-		HairStyle,
-		LuclinFace,
-		Beard,
-		0xFF,
-		DrakkinHeritage,
-		DrakkinTattoo,
-		DrakkinDetails,
-		Size
+		AppearanceStruct{
+			.beard = Beard,
+			.beard_color = BeardColor,
+			.drakkin_details = DrakkinDetails,
+			.drakkin_heritage = DrakkinHeritage,
+			.drakkin_tattoo = DrakkinTattoo,
+			.eye_color_one = EyeColor1,
+			.eye_color_two = EyeColor2,
+			.face = LuclinFace,
+			.gender_id = Gender,
+			.hair = HairStyle,
+			.hair_color = HairColor,
+			.helmet_texture = HelmTexture,
+			.race_id = Race,
+			.size = Size,
+			.texture = Texture,
+		}
 	);
 }
 
@@ -2412,22 +2441,23 @@ void QuestManager::npcfeature(const char* feature, int setting)
 	}
 
 	owner->SendIllusionPacket(
-		Race,
-		Gender,
-		Texture,
-		HelmTexture,
-		HairColor,
-		BeardColor,
-		EyeColor1,
-		EyeColor2,
-		HairStyle,
-		LuclinFace,
-		Beard,
-		0xFF,
-		DrakkinHeritage,
-		DrakkinTattoo,
-		DrakkinDetails,
-		Size
+		AppearanceStruct{
+			.beard = Beard,
+			.beard_color = BeardColor,
+			.drakkin_details = DrakkinDetails,
+			.drakkin_heritage = DrakkinHeritage,
+			.drakkin_tattoo = DrakkinTattoo,
+			.eye_color_one = EyeColor1,
+			.eye_color_two = EyeColor2,
+			.face = LuclinFace,
+			.gender_id = Gender,
+			.hair = HairStyle,
+			.hair_color = HairColor,
+			.helmet_texture = HelmTexture,
+			.race_id = Race,
+			.size = Size,
+			.texture = Texture,
+		}
 	);
 }
 

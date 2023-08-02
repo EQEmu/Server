@@ -1809,10 +1809,26 @@ void Perl_Mob_SendAppearanceEffectGround(Mob* self, int32 parm1, int32 parm2, in
 
 void Perl_Mob_RemoveAllAppearanceEffects(Mob* self) // @categories Script Utility
 {
-	self->SendIllusionPacket(self->GetRace(), self->GetGender(), self->GetTexture(), self->GetHelmTexture(),
-		self->GetHairColor(), self->GetBeardColor(), self->GetEyeColor1(), self->GetEyeColor2(),
-		self->GetHairStyle(), self->GetLuclinFace(), self->GetBeard(), 0xFF,
-		self->GetDrakkinHeritage(), self->GetDrakkinTattoo(), self->GetDrakkinDetails(), self->GetSize(), false);
+	self->SendIllusionPacket(
+		AppearanceStruct{
+			.beard = self->GetBeard(),
+			.beard_color = self->GetBeardColor(),
+			.drakkin_details = self->GetDrakkinDetails(),
+			.drakkin_heritage = self->GetDrakkinHeritage(),
+			.drakkin_tattoo = self->GetDrakkinTattoo(),
+			.eye_color_one = self->GetEyeColor1(),
+			.eye_color_two = self->GetEyeColor2(),
+			.face = self->GetLuclinFace(),
+			.gender_id = self->GetGender(),
+			.hair = self->GetHairStyle(),
+			.hair_color = self->GetHairColor(),
+			.helmet_texture = self->GetHelmTexture(),
+			.race_id = self->GetRace(),
+			.send_effects = false,
+			.size = self->GetSize(),
+			.texture = self->GetTexture(),
+		}
+	);
 	self->ClearAppearenceEffects();
 }
 
@@ -1821,134 +1837,416 @@ void Perl_Mob_SetFlyMode(Mob* self, int flymode) // @categories Script Utility
 	self->SetFlyMode(static_cast<GravityBehavior>(flymode));
 }
 
-void Perl_Mob_SetTexture(Mob* self, int32 texture) // @categories Stats and Attributes
+void Perl_Mob_SetTexture(Mob* self, uint8 texture) // @categories Stats and Attributes
 {
-	self->SendIllusionPacket(self->GetRace(), 0xFF, texture);
+	self->SendIllusionPacket(
+		AppearanceStruct{
+			.race_id = self->GetRace(),
+			.texture = texture,
+		}
+	);
 }
 
-void Perl_Mob_SetRace(Mob* self, int32 race) // @categories Stats and Attributes
+void Perl_Mob_SetRace(Mob* self, uint16 race_id) // @categories Stats and Attributes
 {
-	self->SendIllusionPacket(race);
+	self->SendIllusionPacket(
+		AppearanceStruct{
+			.race_id = race_id,
+		}
+	);
 }
 
-void Perl_Mob_SetGender(Mob* self, int32 gender) // @categories Stats and Attributes
+void Perl_Mob_SetGender(Mob* self, uint8 gender_id) // @categories Stats and Attributes
 {
-	self->SendIllusionPacket(self->GetRace(), gender);
+	self->SendIllusionPacket(
+		AppearanceStruct{
+			.gender_id = gender_id,
+			.race_id = self->GetRace(),
+		}
+	);
 }
 
 // todo: SendIllusion should be sent in a hash like lua
-void Perl_Mob_SendIllusion(Mob* self, uint16 race) // @categories Script Utility
+void Perl_Mob_SendIllusion(Mob *self, uint16 race_id) // @categories Script Utility
 {
-	self->SendIllusionPacket(race);
+	self->SendIllusionPacket(
+		AppearanceStruct{
+			.race_id = race_id,
+		}
+	);
 }
 
-void Perl_Mob_SendIllusion(Mob* self, uint16 race, uint8 gender) // @categories Script Utility
+void Perl_Mob_SendIllusion(Mob *self, uint16 race_id, uint8 gender_id) // @categories Script Utility
 {
-	self->SendIllusionPacket(race, gender);
+	self->SendIllusionPacket(
+		AppearanceStruct{
+			.gender_id = gender_id,
+			.race_id = race_id,
+		}
+	);
 }
 
-void Perl_Mob_SendIllusion(Mob* self, uint16 race, uint8 gender, uint8 texture) // @categories Script Utility
+void Perl_Mob_SendIllusion(Mob *self, uint16 race_id, uint8 gender_id, uint8 texture) // @categories Script Utility
 {
-	self->SendIllusionPacket(race, gender, texture);
+	self->SendIllusionPacket(
+		AppearanceStruct{
+			.gender_id = gender_id,
+			.race_id = race_id,
+			.texture = texture,
+		}
+	);
 }
 
-void Perl_Mob_SendIllusion(Mob* self, uint16 race, uint8 gender, uint8 texture, uint8 helmtexture) // @categories Script Utility
+void Perl_Mob_SendIllusion(
+	Mob *self,
+	uint16 race_id,
+	uint8 gender_id,
+	uint8 texture,
+	uint8 helmet_texture
+) // @categories Script Utility
 {
-	self->SendIllusionPacket(race, gender, texture, helmtexture);
+	self->SendIllusionPacket(
+		AppearanceStruct{
+			.gender_id = gender_id,
+			.helmet_texture = helmet_texture,
+			.race_id = race_id,
+			.texture = texture,
+		}
+	);
 }
 
-void Perl_Mob_SendIllusion(Mob* self, uint16 race, uint8 gender, uint8 texture, uint8 helmtexture, uint8 face) // @categories Script Utility
+void Perl_Mob_SendIllusion(
+	Mob *self,
+	uint16 race_id,
+	uint8 gender_id,
+	uint8 texture,
+	uint8 helmet_texture,
+	uint8 face
+) // @categories Script Utility
 {
-	self->SendIllusionPacket(race, gender, texture, helmtexture, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, face);
+	self->SendIllusionPacket(
+		AppearanceStruct{
+			.face = face,
+			.gender_id = gender_id,
+			.helmet_texture = helmet_texture,
+			.race_id = race_id,
+			.texture = texture,
+		}
+	);
 }
 
-void Perl_Mob_SendIllusion(Mob* self, uint16 race, uint8 gender, uint8 texture, uint8 helmtexture, uint8 face, uint8 hairstyle) // @categories Script Utility
+void Perl_Mob_SendIllusion(
+	Mob *self,
+	uint16 race_id,
+	uint8 gender_id,
+	uint8 texture,
+	uint8 helmet_texture,
+	uint8 face,
+	uint8 hair
+) // @categories Script Utility
 {
-	self->SendIllusionPacket(race, gender, texture, helmtexture, 0xFF, 0xFF, 0xFF, 0xFF, hairstyle, face);
+	self->SendIllusionPacket(
+		AppearanceStruct{
+			.face = face,
+			.gender_id = gender_id,
+			.hair = hair,
+			.helmet_texture = helmet_texture,
+			.race_id = race_id,
+			.texture = texture,
+		}
+	);
 }
 
-void Perl_Mob_SendIllusion(Mob* self, uint16 race, uint8 gender, uint8 texture, uint8 helmtexture, uint8 face, uint8 hairstyle, uint8 haircolor) // @categories Script Utility
+void Perl_Mob_SendIllusion(
+	Mob *self,
+	uint16 race_id,
+	uint8 gender_id,
+	uint8 texture,
+	uint8 helmet_texture,
+	uint8 face,
+	uint8 hair,
+	uint8 hair_color
+) // @categories Script Utility
 {
-	self->SendIllusionPacket(race, gender, texture, helmtexture, haircolor, 0xFF, 0xFF, 0xFF, hairstyle, face);
+	self->SendIllusionPacket(
+		AppearanceStruct{
+			.face = face,
+			.gender_id = gender_id,
+			.hair = hair,
+			.hair_color = hair_color,
+			.helmet_texture = helmet_texture,
+			.race_id = race_id,
+			.texture = texture,
+		}
+	);
 }
 
-void Perl_Mob_SendIllusion(Mob* self, uint16 race, uint8 gender, uint8 texture, uint8 helmtexture, uint8 face, uint8 hairstyle, uint8 haircolor, uint8 beard) // @categories Script Utility
+void Perl_Mob_SendIllusion(
+	Mob *self,
+	uint16 race_id,
+	uint8 gender_id,
+	uint8 texture,
+	uint8 helmet_texture,
+	uint8 face,
+	uint8 hair,
+	uint8 hair_color,
+	uint8 beard
+) // @categories Script Utility
 {
-	self->SendIllusionPacket(race, gender, texture, helmtexture, haircolor, 0xFF, 0xFF, 0xFF, hairstyle, face, beard);
+	self->SendIllusionPacket(
+		AppearanceStruct{
+			.beard = beard,
+			.face = face,
+			.gender_id = gender_id,
+			.hair = hair,
+			.hair_color = hair_color,
+			.helmet_texture = helmet_texture,
+			.race_id = race_id,
+			.texture = texture,
+		}
+	);
 }
 
-void Perl_Mob_SendIllusion(Mob* self, uint16 race, uint8 gender, uint8 texture, uint8 helmtexture, uint8 face, uint8 hairstyle, uint8 haircolor, uint8 beard, uint8 beardcolor) // @categories Script Utility
+void Perl_Mob_SendIllusion(
+	Mob *self,
+	uint16 race_id,
+	uint8 gender_id,
+	uint8 texture,
+	uint8 helmet_texture,
+	uint8 face,
+	uint8 hair,
+	uint8 hair_color,
+	uint8 beard,
+	uint8 beard_color
+) // @categories Script Utility
 {
-	self->SendIllusionPacket(race, gender, texture, helmtexture, haircolor, beardcolor, 0xFF, 0xFF, hairstyle, face, beard);
+	self->SendIllusionPacket(
+		AppearanceStruct{
+			.beard = beard,
+			.beard_color = beard_color,
+			.face = face,
+			.gender_id = gender_id,
+			.hair = hair,
+			.hair_color = hair_color,
+			.helmet_texture = helmet_texture,
+			.race_id = race_id,
+			.texture = texture,
+		}
+	);
 }
 
-void Perl_Mob_SendIllusion(Mob* self, uint16 race, uint8 gender, uint8 texture, uint8 helmtexture, uint8 face, uint8 hairstyle, uint8 haircolor, uint8 beard, uint8 beardcolor, uint32 drakkin_heritage) // @categories Script Utility
+void Perl_Mob_SendIllusion(
+	Mob *self,
+	uint16 race_id,
+	uint8 gender_id,
+	uint8 texture,
+	uint8 helmet_texture,
+	uint8 face,
+	uint8 hair,
+	uint8 hair_color,
+	uint8 beard,
+	uint8 beard_color,
+	uint32 drakkin_heritage
+) // @categories Script Utility
 {
-	self->SendIllusionPacket(race, gender, texture, helmtexture, haircolor, beardcolor, 0xFF, 0xFF, hairstyle, face, beard, 0xFF, drakkin_heritage);
+	self->SendIllusionPacket(
+		AppearanceStruct{
+			.beard = beard,
+			.beard_color = beard_color,
+			.drakkin_heritage = drakkin_heritage,
+			.face = face,
+			.gender_id = gender_id,
+			.hair = hair,
+			.hair_color = hair_color,
+			.helmet_texture = helmet_texture,
+			.race_id = race_id,
+			.texture = texture,
+		}
+	);
 }
 
-void Perl_Mob_SendIllusion(Mob* self, uint16 race, uint8 gender, uint8 texture, uint8 helmtexture, uint8 face, uint8 hairstyle, uint8 haircolor, uint8 beard, uint8 beardcolor, uint32 drakkin_heritage, uint32 drakkin_tattoo) // @categories Script Utility
+void Perl_Mob_SendIllusion(
+	Mob *self,
+	uint16 race_id,
+	uint8 gender_id,
+	uint8 texture,
+	uint8 helmet_texture,
+	uint8 face,
+	uint8 hair,
+	uint8 hair_color,
+	uint8 beard,
+	uint8 beard_color,
+	uint32 drakkin_heritage,
+	uint32 drakkin_tattoo
+) // @categories Script Utility
 {
-	self->SendIllusionPacket(race, gender, texture, helmtexture, haircolor, beardcolor, 0xFF, 0xFF, hairstyle, face, beard, 0xFF, drakkin_heritage, drakkin_tattoo);
+	self->SendIllusionPacket(
+		AppearanceStruct{
+			.beard = beard,
+			.beard_color = beard_color,
+			.drakkin_heritage = drakkin_heritage,
+			.drakkin_tattoo = drakkin_tattoo,
+			.face = face,
+			.gender_id = gender_id,
+			.hair = hair,
+			.hair_color = hair_color,
+			.helmet_texture = helmet_texture,
+			.race_id = race_id,
+			.texture = texture,
+		}
+	);
 }
 
-void Perl_Mob_SendIllusion(Mob* self, uint16 race, uint8 gender, uint8 texture, uint8 helmtexture, uint8 face, uint8 hairstyle, uint8 haircolor, uint8 beard, uint8 beardcolor, uint32 drakkin_heritage, uint32 drakkin_tattoo, uint32 drakkin_details) // @categories Script Utility
+void Perl_Mob_SendIllusion(
+	Mob *self,
+	uint16 race_id,
+	uint8 gender_id,
+	uint8 texture,
+	uint8 helmet_texture,
+	uint8 face,
+	uint8 hair,
+	uint8 hair_color,
+	uint8 beard,
+	uint8 beard_color,
+	uint32 drakkin_heritage,
+	uint32 drakkin_tattoo,
+	uint32 drakkin_details
+) // @categories Script Utility
 {
-	self->SendIllusionPacket(race, gender, texture, helmtexture, haircolor, beardcolor, 0xFF, 0xFF, hairstyle, face, beard, 0xFF, drakkin_heritage, drakkin_tattoo, drakkin_details);
+	self->SendIllusionPacket(
+		AppearanceStruct{
+			.beard = beard,
+			.beard_color = beard_color,
+			.drakkin_details = drakkin_details,
+			.drakkin_heritage = drakkin_heritage,
+			.drakkin_tattoo = drakkin_tattoo,
+			.face = face,
+			.gender_id = gender_id,
+			.hair = hair,
+			.hair_color = hair_color,
+			.helmet_texture = helmet_texture,
+			.race_id = race_id,
+			.texture = texture,
+		}
+	);
 }
 
-void Perl_Mob_SendIllusion(Mob* self, uint16 race, uint8 gender, uint8 texture, uint8 helmtexture, uint8 face, uint8 hairstyle, uint8 haircolor, uint8 beard, uint8 beardcolor, uint32 drakkin_heritage, uint32 drakkin_tattoo, uint32 drakkin_details, float size) // @categories Script Utility
+void Perl_Mob_SendIllusion(
+	Mob *self,
+	uint16 race_id,
+	uint8 gender_id,
+	uint8 texture,
+	uint8 helmet_texture,
+	uint8 face,
+	uint8 hair,
+	uint8 hair_color,
+	uint8 beard,
+	uint8 beard_color,
+	uint32 drakkin_heritage,
+	uint32 drakkin_tattoo,
+	uint32 drakkin_details,
+	float size
+) // @categories Script Utility
 {
-	self->SendIllusionPacket(race, gender, texture, helmtexture, haircolor, beardcolor, 0xFF, 0xFF, hairstyle, face, beard, 0xFF, drakkin_heritage, drakkin_tattoo, drakkin_details, size);
+	self->SendIllusionPacket(
+		AppearanceStruct{
+			.beard = beard,
+			.beard_color = beard_color,
+			.drakkin_details = drakkin_details,
+			.drakkin_heritage = drakkin_heritage,
+			.drakkin_tattoo = drakkin_tattoo,
+			.face = face,
+			.gender_id = gender_id,
+			.hair = hair,
+			.hair_color = hair_color,
+			.helmet_texture = helmet_texture,
+			.race_id = race_id,
+			.size = size,
+			.texture = texture,
+		}
+	);
 }
 
-void Perl_Mob_SendIllusion(Mob* self, uint16 race, uint8 gender, uint8 texture, uint8 helmtexture, uint8 face, uint8 hairstyle, uint8 haircolor, uint8 beard, uint8 beardcolor, uint32 drakkin_heritage, uint32 drakkin_tattoo, uint32 drakkin_details, float size, Client* target) // @categories Script Utility
+void Perl_Mob_SendIllusion(
+	Mob *self,
+	uint16 race_id,
+	uint8 gender_id,
+	uint8 texture,
+	uint8 helmet_texture,
+	uint8 face,
+	uint8 hair,
+	uint8 hair_color,
+	uint8 beard,
+	uint8 beard_color,
+	uint32 drakkin_heritage,
+	uint32 drakkin_tattoo,
+	uint32 drakkin_details,
+	float size,
+	Client *target
+) // @categories Script Utility
 {
-	self->SendIllusionPacket(race, gender, texture, helmtexture, haircolor, beardcolor, 0xFF, 0xFF, hairstyle, face, beard, 0xFF, drakkin_heritage, drakkin_tattoo, drakkin_details, size, true, target);
+	self->SendIllusionPacket(
+		AppearanceStruct{
+			.beard = beard,
+			.beard_color = beard_color,
+			.drakkin_details = drakkin_details,
+			.drakkin_heritage = drakkin_heritage,
+			.drakkin_tattoo = drakkin_tattoo,
+			.face = face,
+			.gender_id = gender_id,
+			.hair = hair,
+			.hair_color = hair_color,
+			.helmet_texture = helmet_texture,
+			.race_id = race_id,
+			.size = size,
+			.target = target,
+			.texture = texture,
+		}
+	);
 }
 
 void Perl_Mob_SendIllusionPacket(Mob* self, perl::reference table_ref)
 {
 	perl::hash table = table_ref;
 
-	uint16  race                    = table.exists("race") ? table["race"] : self->GetRace();
-	uint8   gender                  = table.exists("gender") ? table["gender"] : self->GetGender();
-	uint8   texture                 = table.exists("texture") ? table["texture"] : self->GetTexture();
-	uint8   helmtexture             = table.exists("helmtexture") ? table["helmtexture"] : self->GetHelmTexture();
-	uint8   haircolor               = table.exists("haircolor") ? table["haircolor"] : self->GetHairColor();
-	uint8   beardcolor              = table.exists("beardcolor") ? table["beardcolor"] : self->GetBeardColor();
-	uint8   eyecolor1               = table.exists("eyecolor1") ? table["eyecolor1"] : self->GetEyeColor1();
-	uint8   eyecolor2               = table.exists("eyecolor2") ? table["eyecolor2"] : self->GetEyeColor2();
-	uint8   hairstyle               = table.exists("hairstyle") ? table["hairstyle"] : self->GetHairStyle();
-	uint8   luclinface              = table.exists("luclinface") ? table["luclinface"] : self->GetLuclinFace();
-	uint8   beard                   = table.exists("beard") ? table["beard"] : self->GetBeard();
-	uint8   aa_title                = table.exists("aa_title") ? table["aa_title"] : 255;
-	uint32  drakkin_heritage        = table.exists("drakkin_heritage") ? table["drakkin_heritage"] : self->GetDrakkinHeritage();
-	uint32  drakkin_tattoo          = table.exists("drakkin_tattoo") ? table["drakkin_tattoo"] : self->GetDrakkinTattoo();
-	uint32  drakkin_details         = table.exists("drakkin_details") ? table["drakkin_details"] : self->GetDrakkinDetails();
-	float   size                    = table.exists("size") ? table["size"] : self->GetSize();
-	bool    send_appearance_effects = table.exists("send_appearance_effects") ? table["send_appearance_effects"] : true;
-	Client* target                  = table.exists("target") ? static_cast<Client *>(table["target"]) : nullptr;
+	uint16 race_id                 = table.exists("race") ? table["race"] : self->GetRace();
+	uint8  gender_id               = table.exists("gender") ? table["gender"] : self->GetGender();
+	uint8  texture                 = table.exists("texture") ? table["texture"] : self->GetTexture();
+	uint8  helmet_texture          = table.exists("helmtexture") ? table["helmtexture"] : self->GetHelmTexture();
+	uint8  hair_color              = table.exists("haircolor") ? table["haircolor"] : self->GetHairColor();
+	uint8  beard_color             = table.exists("beardcolor") ? table["beardcolor"] : self->GetBeardColor();
+	uint8  eye_color_one           = table.exists("eyecolor1") ? table["eyecolor1"] : self->GetEyeColor1();
+	uint8  eye_color_two           = table.exists("eyecolor2") ? table["eyecolor2"] : self->GetEyeColor2();
+	uint8  hair                    = table.exists("hairstyle") ? table["hairstyle"] : self->GetHairStyle();
+	uint8  face                    = table.exists("luclinface") ? table["luclinface"] : self->GetLuclinFace();
+	uint8  beard                   = table.exists("beard") ? table["beard"] : self->GetBeard();
+	uint8  aa_title                = table.exists("aa_title") ? table["aa_title"] : 255;
+	uint32 drakkin_heritage        = table.exists("drakkin_heritage") ? table["drakkin_heritage"] : self->GetDrakkinHeritage();
+	uint32 drakkin_tattoo          = table.exists("drakkin_tattoo") ? table["drakkin_tattoo"] : self->GetDrakkinTattoo();
+	uint32 drakkin_details         = table.exists("drakkin_details") ? table["drakkin_details"] : self->GetDrakkinDetails();
+	float  size                    = table.exists("size") ? table["size"] : self->GetSize();
+	bool   send_appearance_effects = table.exists("send_appearance_effects") ? table["send_appearance_effects"] : true;
+
+	Client *target = table.exists("target") ? static_cast<Client *>(table["target"]) : nullptr;
 
 	self->SendIllusionPacket(
-		race,
-		gender,
-		texture,
-		helmtexture,
-		haircolor,
-		beardcolor,
-		eyecolor1,
-		eyecolor2,
-		hairstyle,
-		luclinface,
-		beard,
-		aa_title,
-		drakkin_heritage,
-		drakkin_tattoo,
-		drakkin_details,
-		size,
-		send_appearance_effects,
-		target
+		AppearanceStruct{
+			.beard = beard,
+			.beard_color = beard_color,
+			.drakkin_details = drakkin_details,
+			.drakkin_heritage = drakkin_heritage,
+			.drakkin_tattoo = drakkin_tattoo,
+			.face = face,
+			.gender_id = gender_id,
+			.hair = hair,
+			.hair_color = hair_color,
+			.helmet_texture = helmet_texture,
+			.race_id = race_id,
+			.send_effects = send_appearance_effects,
+			.size = size,
+			.target = target,
+			.texture = texture,
+		}
 	);
 }
 
@@ -2420,7 +2718,7 @@ std::string Perl_Mob_GetBucketExpires(Mob* self, std::string bucket_name) // @ca
 
 std::string Perl_Mob_GetBucketKey(Mob* self) // @categories Script Utility
 {
-	return self->GetBucketKey();
+	return {};
 }
 
 std::string Perl_Mob_GetBucketRemaining(Mob* self, std::string bucket_name) // @categories Script Utility
@@ -3113,6 +3411,11 @@ std::string Perl_Mob_GetClassPlural(Mob* self)
 	return self->GetClassPlural();
 }
 
+uint32 Perl_Mob_GetMobTypeIdentifier(Mob* self)
+{
+	return self->GetMobTypeIdentifier();
+}
+
 std::string Perl_Mob_GetRacePlural(Mob* self)
 {
 	return self->GetRacePlural();
@@ -3399,6 +3702,7 @@ void perl_register_mob()
 	package.add("GetMaxSTR", &Perl_Mob_GetMaxSTR);
 	package.add("GetMaxWIS", &Perl_Mob_GetMaxWIS);
 	package.add("GetMeleeMitigation", &Perl_Mob_GetMeleeMitigation);
+	package.add("GetMobTypeIdentifier", &Perl_Mob_GetMobTypeIdentifier);
 	package.add("GetModSkillDmgTaken", &Perl_Mob_GetModSkillDmgTaken);
 	package.add("GetModVulnerability", &Perl_Mob_GetModVulnerability);
 	package.add("GetNPCTypeID", &Perl_Mob_GetNPCTypeID);

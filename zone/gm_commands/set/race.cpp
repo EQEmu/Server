@@ -37,7 +37,12 @@ void SetRace(Client *c, const Seperator *sep)
 		return;
 	}
 
-	t->SendIllusionPacket(race_id);
+	t->SendIllusionPacket(
+		AppearanceStruct{
+			.race_id = race_id,
+			.size = t->GetSize(),
+		}
+	);
 
 	c->Message(
 		Chat::White,

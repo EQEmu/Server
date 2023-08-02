@@ -1273,27 +1273,13 @@ uint8 Client::GetCharMaxLevelFromQGlobal() {
 
 uint8 Client::GetCharMaxLevelFromBucket()
 {
-	auto new_bucket_name = fmt::format(
-		"{}-CharMaxLevel",
-		GetBucketKey()
-	);
+	DataBucketKey k = GetScopedBucketKeys();
+	k.key = "CharMaxLevel";
 
-	auto bucket_value = DataBucket::GetData(new_bucket_name);
-	if (!bucket_value.empty()) {
-		if (Strings::IsNumber(bucket_value)) {
-			return static_cast<uint8>(Strings::ToUnsignedInt(bucket_value));
-		}
-	}
-
-	auto old_bucket_name = fmt::format(
-		"{}-CharMaxLevel",
-		CharacterID()
-	);
-
-	bucket_value = DataBucket::GetData(old_bucket_name);
-	if (!bucket_value.empty()) {
-		if (Strings::IsNumber(bucket_value)) {
-			return static_cast<uint8>(Strings::ToUnsignedInt(bucket_value));
+	auto b = DataBucket::GetData(k);
+	if (!b.value.empty()) {
+		if (Strings::IsNumber(b.value)) {
+			return static_cast<uint8>(Strings::ToUnsignedInt(b.value));
 		}
 	}
 

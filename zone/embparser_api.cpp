@@ -1047,42 +1047,42 @@ void Perl__processmobswhilezoneempty(bool on)
 	quest_manager.processmobswhilezoneempty(on);
 }
 
-void Perl__npcrace(int race_id)
+void Perl__npcrace(uint16 race_id)
 {
 	quest_manager.npcrace(race_id);
 }
 
-void Perl__npcgender(int gender_id)
+void Perl__npcgender(uint8 gender_id)
 {
 	quest_manager.npcgender(gender_id);
 }
 
-void Perl__npcsize(int size)
+void Perl__npcsize(float size)
 {
 	quest_manager.npcsize(size);
 }
 
-void Perl__npctexture(int texture_id)
+void Perl__npctexture(uint8 texture_id)
 {
 	quest_manager.npctexture(texture_id);
 }
 
-void Perl__playerrace(int race_id)
+void Perl__playerrace(uint16 race_id)
 {
 	quest_manager.playerrace(race_id);
 }
 
-void Perl__playergender(int gender_id)
+void Perl__playergender(uint8 gender_id)
 {
 	quest_manager.playergender(gender_id);
 }
 
-void Perl__playersize(int newsize)
+void Perl__playersize(float size)
 {
-	quest_manager.playersize(newsize);
+	quest_manager.playersize(size);
 }
 
-void Perl__playertexture(int texture_id)
+void Perl__playertexture(uint8 texture_id)
 {
 	quest_manager.playertexture(texture_id);
 }

@@ -5224,12 +5224,12 @@ void Client::Handle_OP_ConsiderCorpse(const EQApplicationPacket *app)
 
 	uint32 decay_time = t->GetDecayTime();
 	if (decay_time) {
-		auto time_string = Strings::SecondsToTime(decay_time, true);
+		const std::string& time_string = Strings::SecondsToTime(decay_time, true);
 		Message(
 			Chat::NPCQuestSay,
 			fmt::format(
 				"This corpse will decay in {}.",
-				time_string
+				Strings::ToLower(time_string)
 			).c_str()
 		);
 

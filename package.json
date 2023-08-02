@@ -1,6 +1,6 @@
 {
   "name": "eqemu-server",
-  "version": "22.20.1",
+  "version": "22.23.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/EQEmu/Server.git"

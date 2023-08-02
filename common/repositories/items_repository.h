@@ -53,7 +53,7 @@ public:
 		auto query = fmt::format(
 			"SELECT `id` FROM {} WHERE LOWER(`name`) LIKE '%%{}%%' ORDER BY id ASC",
 			TableName(),
-			search_string
+			Strings::Escape(search_string)
 		);
 
 		if (query_limit >= 1) {

@@ -112,6 +112,7 @@ if ($requested_table_to_generate ne "all") {
 }
 
 my @cereal_enabled_tables = (
+    "data_buckets",
     "player_event_logs"
 );
 

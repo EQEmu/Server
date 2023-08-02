@@ -44,7 +44,7 @@ void ShowPetition(Client *c, const Seperator *sep)
 
 	const uint32 petition_id = Strings::ToUnsignedInt(sep->arg[2]);
 
-	const auto& l = PetitionsRepository::GetWhere(database, fmt::format("petition_id = {}", petition_id));
+	const auto& l = PetitionsRepository::GetWhere(database, fmt::format("petid = {}", petition_id));
 	if (l.empty()) {
 		c->Message(
 			Chat::White,
