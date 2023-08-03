@@ -651,13 +651,12 @@ Lua_Mob_List Lua_EntityList::GetCloseMobList(Lua_Mob mob) {
 
 Lua_Mob_List Lua_EntityList::GetCloseMobList(Lua_Mob mob, float distance) {
 	Lua_Safe_Call_Class(Lua_Mob_List);
-
 	Lua_Mob_List ret;
 
-	const auto& l = self->GetCloseMobList(mob);
-	ret.entries.reserve(l.size());
-	for (const auto& e : l) {
-		ret.entries.emplace_back(Lua_Mob(e.second));
+	for (const auto& e : self->GetCloseMobList(mob)) {
+		if (mob.CalculateDistance(e.second) <= distance) {
+			ret.entries.emplace_back(Lua_Mob(e.second));
+		}
 	}
 
 	return ret;
@@ -673,7 +672,9 @@ Lua_Mob_List Lua_EntityList::GetCloseMobList(Lua_Mob mob, float distance, bool i
 			continue;
 		}
 
-		ret.entries.emplace_back(Lua_Mob(e.second));
+		if (mob.CalculateDistance(e.second) <= distance) {
+			ret.entries.emplace_back(Lua_Mob(e.second));
+		}
 	}
 
 	return ret;

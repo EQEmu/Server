@@ -614,11 +614,8 @@ Bot* Perl_EntityList_GetRandomBot(EntityList* self, float x, float y, float z, f
 perl::array Perl_EntityList_GetCloseMobList(EntityList* self, Mob* mob)
 {
 	perl::array result;
-
 	const auto& l = self->GetCloseMobList(mob);
-
 	result.reserve(l.size());
-
 	for (const auto& e : l) {
 		result.push_back(e.second);
 	}
@@ -629,10 +626,7 @@ perl::array Perl_EntityList_GetCloseMobList(EntityList* self, Mob* mob)
 perl::array Perl_EntityList_GetCloseMobList(EntityList* self, Mob* mob, float distance)
 {
 	perl::array result;
-
-	const auto& l = self->GetCloseMobList(mob, distance);
-	result.reserve(l.size());
-	for (const auto& e : l) {
+	for (const auto& e : self->GetCloseMobList(mob, distance)) {
 		if (mob->CalculateDistance(e.second) <= distance) {
 			result.push_back(e.second);
 		}
@@ -649,7 +643,9 @@ perl::array Perl_EntityList_GetCloseMobList(EntityList* self, Mob* mob, float di
 			continue;
 		}
 
-		result.push_back(e.second);
+		if (mob->CalculateDistance(e.second) <= distance) {
+			result.push_back(e.second);
+		}
 	}
 
 	return result;
