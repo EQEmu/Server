@@ -631,9 +631,7 @@ perl::array Perl_EntityList_GetCloseMobList(EntityList* self, Mob* mob, float di
 	perl::array result;
 
 	const auto& l = self->GetCloseMobList(mob, distance);
-
 	result.reserve(l.size());
-
 	for (const auto& e : l) {
 		if (mob->CalculateDistance(e.second) <= distance) {
 			result.push_back(e.second);
@@ -646,19 +644,12 @@ perl::array Perl_EntityList_GetCloseMobList(EntityList* self, Mob* mob, float di
 perl::array Perl_EntityList_GetCloseMobList(EntityList* self, Mob* mob, float distance, bool ignore_self)
 {
 	perl::array result;
-
-	const auto& l = self->GetCloseMobList(mob, distance);
-
-	result.reserve(l.size());
-
-	for (const auto& e : l) {
+	for (const auto& e : self->GetCloseMobList(mob, distance)) {
 		if (ignore_self && e.second == mob) {
 			continue;
 		}
 
-		if (mob->CalculateDistance(e.second) <= distance) {
-			result.push_back(e.second);
-		}
+		result.push_back(e.second);
 	}
 
 	return result;
