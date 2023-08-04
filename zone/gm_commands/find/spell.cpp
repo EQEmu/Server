@@ -16,7 +16,7 @@ void FindSpell(Client *c, const Seperator *sep)
 				Chat::White,
 				fmt::format(
 					"Spell ID {} was not found.",
-					Strings::Commify(spell_id)
+					spell_id
 				).c_str()
 			);
 
@@ -27,7 +27,7 @@ void FindSpell(Client *c, const Seperator *sep)
 			Chat::White,
 			fmt::format(
 				"Spell {} | {}",
-				Strings::Commify(spell_id),
+				spell_id,
 				spells[spell_id].name
 			).c_str()
 		);
@@ -53,7 +53,7 @@ void FindSpell(Client *c, const Seperator *sep)
 				Chat::White,
 				fmt::format(
 					"Spell {} | {}{}",
-					Strings::Commify(spell_id),
+					spell_id,
 					spell_name,
 					(
 						can_cast_spells ?

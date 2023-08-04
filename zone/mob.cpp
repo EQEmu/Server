@@ -2105,7 +2105,7 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 				"{}: {}{}{}",
 				!faction_name.empty() ? faction_name : "Unknown Faction",
 				sign,
-				Strings::Commify(f.second),
+				f.second,
 				DialogueWindow::Break(1)
 			);
 		}
@@ -3475,7 +3475,7 @@ void Mob::ShowBuffs(Client* c) {
 					"{}{}{}{}{}",
 					DialogueWindow::TableCell(std::to_string(i)),
 					DialogueWindow::TableCell(GetSpellName(spell_id)),
-					DialogueWindow::TableCell(Strings::Commify(spell_id)),
+					DialogueWindow::TableCell(std::to_string(spell_id)),
 					DialogueWindow::TableCell(is_permanent ? "Permanent" : time),
 					DialogueWindow::TableCell(std::to_string(buffs[i].hit_number))
 				)
@@ -3518,135 +3518,100 @@ void Mob::GMMove(const glm::vec4 &position) {
 	}
 }
 
-void Mob::SendIllusionPacket(
-	uint16 in_race,
-	uint8 in_gender,
-	uint8 in_texture,
-	uint8 in_helmtexture,
-	uint8 in_haircolor,
-	uint8 in_beardcolor,
-	uint8 in_eyecolor1,
-	uint8 in_eyecolor2,
-	uint8 in_hairstyle,
-	uint8 in_luclinface,
-	uint8 in_beard,
-	uint8 in_aa_title,
-	uint32 in_drakkin_heritage,
-	uint32 in_drakkin_tattoo,
-	uint32 in_drakkin_details,
-	float in_size,
-	bool send_appearance_effects,
-	Client* target
-)
+void Mob::SendIllusionPacket(const AppearanceStruct& a)
 {
-	uint8  new_texture     = in_texture;
-	uint8  new_helmtexture = in_helmtexture;
-	uint8  new_haircolor;
-	uint8  new_beardcolor;
-	uint8  new_eyecolor1;
-	uint8  new_eyecolor2;
-	uint8  new_hairstyle;
-	uint8  new_luclinface;
-	uint8  new_beard;
-	uint8  new_aa_title;
-	uint32 new_drakkin_heritage;
-	uint32 new_drakkin_tattoo;
-	uint32 new_drakkin_details;
+	uint16 new_race = (
+		a.race_id != RACE_DOUG_0 ?
+		a.race_id :
+		(use_model ? use_model : GetBaseRace())
+	);
 
-	race = in_race;
-	if (race == 0) {
-		race = use_model ? use_model : GetBaseRace();
-	}
+	uint8 new_gender = (
+		a.gender_id != UINT8_MAX ?
+		a.gender_id :
+		(a.race_id ? GetDefaultGender(a.race_id, a.gender_id) : GetBaseGender())
+	);
 
-	if (in_gender != 0xFF) {
-		gender = in_gender;
-	}
-	else {
-		gender = in_race ? GetDefaultGender(race, gender) : GetBaseGender();
-	}
+	float new_size = a.size <= 0.0f ? GetRaceGenderDefaultHeight(race, gender) : a.size;
 
-	if (in_texture == 0xFF && !IsPlayerRace(race)) {
-		new_texture = GetTexture();
-	}
+	uint8 new_texture        = a.texture == UINT8_MAX && !IsPlayerRace(a.race_id) ? GetTexture() : a.texture;
+	uint8 new_helmet_texture = a.helmet_texture == UINT8_MAX && !IsPlayerRace(race) ? GetHelmTexture() : a.helmet_texture;
 
-	if (in_helmtexture == 0xFF && !IsPlayerRace(race)) {
-		new_helmtexture = GetHelmTexture();
-	}
+	uint8 new_hair       = a.hair == UINT8_MAX ? GetHairStyle() : a.hair;
+	uint8 new_hair_color = a.hair_color == UINT8_MAX ? GetHairColor() : a.hair_color;
 
-	new_haircolor        = (in_haircolor == 0xFF) ? GetHairColor() : in_haircolor;
-	new_beardcolor       = (in_beardcolor == 0xFF) ? GetBeardColor() : in_beardcolor;
-	new_eyecolor1        = (in_eyecolor1 == 0xFF) ? GetEyeColor1() : in_eyecolor1;
-	new_eyecolor2        = (in_eyecolor2 == 0xFF) ? GetEyeColor2() : in_eyecolor2;
-	new_hairstyle        = (in_hairstyle == 0xFF) ? GetHairStyle() : in_hairstyle;
-	new_luclinface       = (in_luclinface == 0xFF) ? GetLuclinFace() : in_luclinface;
-	new_beard            = (in_beard == 0xFF) ? GetBeard() : in_beard;
-	new_drakkin_heritage = (in_drakkin_heritage == 0xFFFFFFFF) ? GetDrakkinHeritage() : in_drakkin_heritage;
-	new_drakkin_tattoo   = (in_drakkin_tattoo == 0xFFFFFFFF) ? GetDrakkinTattoo() : in_drakkin_tattoo;
-	new_drakkin_details  = (in_drakkin_details == 0xFFFFFFFF) ? GetDrakkinDetails() : in_drakkin_details;
-	new_aa_title         = in_aa_title;
+	uint8 new_beard       = a.beard == UINT8_MAX ? GetBeard() : a.beard;
+	uint8 new_beard_color = a.beard_color == UINT8_MAX ? GetBeardColor() : a.beard_color;
+
+	uint8 new_eye_color_one = a.eye_color_one == UINT8_MAX ? GetEyeColor1() : a.eye_color_one;
+	uint8 new_eye_color_two = a.eye_color_two == UINT8_MAX ? GetEyeColor2() : a.eye_color_two;
+
+	uint8 new_face = a.face == UINT8_MAX ? GetLuclinFace() : a.face;
+
+	uint32 new_drakkin_details  = a.drakkin_details == UINT32_MAX ? GetDrakkinDetails() : a.drakkin_details;
+	uint32 new_drakkin_heritage = a.drakkin_heritage == UINT32_MAX ? GetDrakkinHeritage() : a.drakkin_heritage;
+	uint32 new_drakkin_tattoo   = a.drakkin_tattoo == UINT32_MAX ? GetDrakkinTattoo() : a.drakkin_tattoo;
 
 	// Reset features to Base from the Player Profile
-	if (IsClient() && in_race == 0) {
-		race                 = CastToClient()->GetBaseRace();
-		gender               = CastToClient()->GetBaseGender();
-		new_texture          = texture          = 0xFF;
-		new_helmtexture      = helmtexture      = 0xFF;
-		new_haircolor        = haircolor        = CastToClient()->GetBaseHairColor();
-		new_beardcolor       = beardcolor       = CastToClient()->GetBaseBeardColor();
-		new_eyecolor1        = eyecolor1        = CastToClient()->GetBaseEyeColor();
-		new_eyecolor2        = eyecolor2        = CastToClient()->GetBaseEyeColor();
-		new_hairstyle        = hairstyle        = CastToClient()->GetBaseHairStyle();
-		new_luclinface       = luclinface       = CastToClient()->GetBaseFace();
-		new_beard            = beard            = CastToClient()->GetBaseBeard();
-		new_aa_title         = aa_title         = 0xFF;
-		new_drakkin_heritage = drakkin_heritage = CastToClient()->GetBaseHeritage();
-		new_drakkin_tattoo   = drakkin_tattoo   = CastToClient()->GetBaseTattoo();
-		new_drakkin_details  = drakkin_details  = CastToClient()->GetBaseDetails();
+	if (IsClient() && a.race_id == RACE_DOUG_0) {
+		new_beard            = CastToClient()->GetBaseBeard();
+		new_beard_color      = CastToClient()->GetBaseBeardColor();
+		new_drakkin_details  = CastToClient()->GetBaseDetails();
+		new_drakkin_heritage = CastToClient()->GetBaseHeritage();
+		new_drakkin_tattoo   = CastToClient()->GetBaseTattoo();
+		new_eye_color_one    = CastToClient()->GetBaseEyeColor();
+		new_eye_color_two    = CastToClient()->GetBaseEyeColor();
+		new_face             = CastToClient()->GetBaseFace();
+		new_gender           = CastToClient()->GetBaseGender();
+		new_helmet_texture   = UINT8_MAX;
+		new_hair             = CastToClient()->GetBaseHairStyle();
+		new_hair_color       = CastToClient()->GetBaseHairColor();
+		new_race             = CastToClient()->GetBaseRace();
+		new_size             = CastToClient()->GetSize();
+		new_texture          = UINT8_MAX;
 	}
 
-	// update internal values for mob
-	size             = (in_size <= 0.0f) ? GetRaceGenderDefaultHeight(race, gender) : in_size;
-	if (new_texture != 0xFF) {
-		texture          = new_texture;
-	}
-	if (new_helmtexture != 0xFF) {
-		helmtexture      = new_helmtexture;
-	}
-	haircolor        = new_haircolor;
-	beardcolor       = new_beardcolor;
-	eyecolor1        = new_eyecolor1;
-	eyecolor2        = new_eyecolor2;
-	hairstyle        = new_hairstyle;
-	luclinface       = new_luclinface;
 	beard            = new_beard;
+	beardcolor       = new_beard_color;
 	drakkin_heritage = new_drakkin_heritage;
 	drakkin_tattoo   = new_drakkin_tattoo;
 	drakkin_details  = new_drakkin_details;
+	eyecolor1        = new_eye_color_one;
+	eyecolor2        = new_eye_color_two;
+	luclinface       = new_face;
+	gender           = new_gender;
+	hairstyle        = new_hair;
+	haircolor        = new_hair_color;
+	helmtexture      = new_helmet_texture;
+	race             = new_race;
+	size             = new_size;
+	texture          = new_texture;
 
-	auto            outapp = new EQApplicationPacket(OP_Illusion, sizeof(Illusion_Struct));
-	Illusion_Struct *is    = (Illusion_Struct *) outapp->pBuffer;
+	auto outapp = new EQApplicationPacket(OP_Illusion, sizeof(Illusion_Struct));
+	auto is     = (Illusion_Struct *) outapp->pBuffer;
+
 	is->spawnid = GetID();
-	strcpy(is->charname, GetCleanName());
-	is->race             = race;
-	is->gender           = gender;
-	is->texture          = new_texture;
-	is->helmtexture      = new_helmtexture;
-	is->haircolor        = new_haircolor;
-	is->beardcolor       = new_beardcolor;
+	strn0cpy(is->charname, GetCleanName(), sizeof(is->charname));
+	is->beardcolor       = new_beard_color;
 	is->beard            = new_beard;
-	is->eyecolor1        = new_eyecolor1;
-	is->eyecolor2        = new_eyecolor2;
-	is->hairstyle        = new_hairstyle;
-	is->face             = new_luclinface;
 	is->drakkin_heritage = new_drakkin_heritage;
 	is->drakkin_tattoo   = new_drakkin_tattoo;
 	is->drakkin_details  = new_drakkin_details;
-	is->size             = size;
+	is->eyecolor1        = new_eye_color_one;
+	is->eyecolor2        = new_eye_color_two;
+	is->face             = new_face;
+	is->gender           = new_gender;
+	is->hairstyle        = new_hair;
+	is->haircolor        = new_hair_color;
+	is->helmtexture      = new_helmet_texture;
+	is->race             = new_race;
+	is->size             = new_size;
+	is->texture          = new_texture;
 
-	if (!target) {
+	if (!a.target) {
 		entity_list.QueueClients(this, outapp);
 	} else {
-		target->QueuePacket(outapp, false);
+		a.target->QueuePacket(outapp, false);
 	}
 
 	safe_delete(outapp);
@@ -3654,7 +3619,7 @@ void Mob::SendIllusionPacket(
 	/* Refresh armor and tints after send illusion packet */
 	SendArmorAppearance();
 
-	if (send_appearance_effects) {
+	if (a.send_effects) {
 		SendSavedAppearenceEffects(nullptr);
 	}
 
@@ -3663,17 +3628,17 @@ void Mob::SendIllusionPacket(
 		race,
 		gender,
 		new_texture,
-		new_helmtexture,
-		new_haircolor,
-		new_beardcolor,
-		new_eyecolor1,
-		new_eyecolor2,
-		new_hairstyle,
-		new_luclinface,
+		new_helmet_texture,
+		new_hair_color,
+		new_beard_color,
+		new_eye_color_one,
+		new_eye_color_two,
+		new_hair,
+		new_face,
 		new_drakkin_heritage,
 		new_drakkin_tattoo,
 		new_drakkin_details,
-		size,
+		new_size,
 		target ? target->GetCleanName() : "No Target"
 	);
 }
@@ -3903,21 +3868,22 @@ bool Mob::RandomizeFeatures(bool send_illusion, bool set_variables)
 
 		if (send_illusion) {
 			SendIllusionPacket(
-				GetRace(),
-				current_gender,
-				new_texture,
-				new_helm_texture,
-				new_hair_color,
-				new_beard_color,
-				new_eye_color_one,
-				new_eye_color_two,
-				new_hair_style,
-				new_luclin_face,
-				new_beard,
-				0xFF,
-				new_drakkin_heritage,
-				new_drakkin_tattoo,
-				new_drakkin_details
+				AppearanceStruct{
+					.beard = new_beard,
+					.beard_color = new_beard_color,
+					.drakkin_details = new_drakkin_details,
+					.drakkin_heritage = new_drakkin_heritage,
+					.drakkin_tattoo = new_drakkin_tattoo,
+					.eye_color_one = new_eye_color_one,
+					.eye_color_two = new_eye_color_two,
+					.face = new_luclin_face,
+					.gender_id = current_gender,
+					.hair = new_hair_style,
+					.hair_color = new_hair_color,
+					.helmet_texture = new_helm_texture,
+					.race_id = GetRace(),
+					.texture = new_texture,
+				}
 			);
 		}
 
@@ -8153,21 +8119,23 @@ void Mob::CloneAppearance(Mob* other, bool clone_name)
 	}
 
 	SendIllusionPacket(
-		other->GetRace(),
-		other->GetGender(),
-		other->GetTexture(),
-		other->GetHelmTexture(),
-		other->GetHairColor(),
-		other->GetBeardColor(),
-		other->GetEyeColor1(),
-		other->GetEyeColor2(),
-		other->GetHairStyle(),
-		other->GetBeard(),
-		0xFF,
-		other->GetRace() == DRAKKIN ? other->GetDrakkinHeritage() : 0xFFFFFFFF,
-		other->GetRace() == DRAKKIN ? other->GetDrakkinTattoo() : 0xFFFFFFFF,
-		other->GetRace() == DRAKKIN ? other->GetDrakkinDetails() : 0xFFFFFFFF,
-		other->GetSize()
+		AppearanceStruct{
+			.beard = other->GetBeard(),
+			.beard_color = other->GetBeardColor(),
+			.drakkin_details = other->GetDrakkinDetails(),
+			.drakkin_heritage = other->GetDrakkinHeritage(),
+			.drakkin_tattoo = other->GetDrakkinTattoo(),
+			.eye_color_one = other->GetEyeColor1(),
+			.eye_color_two = other->GetEyeColor2(),
+			.face = other->GetLuclinFace(),
+			.gender_id = other->GetGender(),
+			.hair = other->GetHairStyle(),
+			.hair_color = other->GetHairColor(),
+			.helmet_texture = other->GetHelmTexture(),
+			.race_id = other->GetRace(),
+			.size = other->GetSize(),
+			.texture = other->GetTexture(),
+		}
 	);
 
 	for (
@@ -8364,4 +8332,49 @@ uint32 Mob::GetMobTypeIdentifier()
 	}
 
 	return 0;
+}
+
+void Mob::HandleDoorOpen()
+{
+	for (auto e : entity_list.GetDoorsList()) {
+		Doors *d = e.second;
+		if (d->GetKeyItem()) {
+			continue;
+		}
+		if (d->GetLockpick()) {
+			continue;
+		}
+		if (d->IsDoorOpen()) {
+			continue;
+		}
+		if (d->IsDoorBlacklisted()) {
+			continue;
+		}
+
+		// If the door is a trigger door, check if the trigger door is open
+		if (d->GetTriggerDoorID() > 0) {
+			auto td = entity_list.GetDoorsByDoorID(d->GetTriggerDoorID());
+			if (td) {
+				if (Strings::RemoveNumbers(d->GetDoorName()) != Strings::RemoveNumbers(td->GetDoorName())) {
+					continue;
+				}
+			}
+		}
+
+		if (d->GetDoorParam() > 0) {
+			continue;
+		}
+
+		float distance                = DistanceSquared(m_Position, d->GetPosition());
+		float distance_scan_door_open = 20;
+
+		if (distance <= (distance_scan_door_open * distance_scan_door_open)) {
+			// Make sure we're opening a door within height relevance and not platforms above or below us
+			if (std::abs(m_Position.z - d->GetPosition().z) > 10) {
+				continue;
+			}
+
+			d->ForceOpen(this);
+		}
+	}
 }

@@ -551,6 +551,8 @@ void DataBucket::HandleWorldMessage(ServerPacket *p)
 
 	// delete
 	if (n.update_action == DataBucketCacheUpdateAction::Delete) {
+		DeleteFromMissesCache(n.e);
+
 		g_data_bucket_cache.erase(
 			std::remove_if(
 				g_data_bucket_cache.begin(),
@@ -577,23 +579,23 @@ void DataBucket::HandleWorldMessage(ServerPacket *p)
 
 	// update
 	bool has_key = false;
-
 	for (auto &ce: g_data_bucket_cache) {
-		int64 time_delta = ce.updated_time - n.updated_time;
-		if (ce.updated_time >= n.updated_time) {
-			LogDataBuckets(
-				"Attempted to update older cache key [{}] rejecting old time [{}] new time [{}] delta [{}] cache_size [{}]",
-				ce.e.key_,
-				ce.updated_time,
-				n.updated_time,
-				time_delta,
-				g_data_bucket_cache.size()
-			);
-			return;
-		}
-
 		// update cache
 		if (ce.e.id == n.e.id) {
+			// reject old updates
+			int64 time_delta = ce.updated_time - n.updated_time;
+			if (ce.updated_time >= n.updated_time) {
+				LogDataBuckets(
+					"Attempted to update older cache key [{}] rejecting old time [{}] new time [{}] delta [{}] cache_size [{}]",
+					ce.e.key_,
+					ce.updated_time,
+					n.updated_time,
+					time_delta,
+					g_data_bucket_cache.size()
+				);
+				return;
+			}
+
 			DeleteFromMissesCache(n.e);
 
 			LogDataBuckets(
@@ -662,4 +664,10 @@ void DataBucket::DeleteFromMissesCache(DataBucketsRepository::DataBuckets e)
 		size_before,
 		g_data_bucket_cache.size()
 	);
+}
+
+void DataBucket::ClearCache()
+{
+	g_data_bucket_cache.clear();
+	LogInfo("Cleared data buckets cache");
 }

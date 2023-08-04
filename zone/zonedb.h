@@ -11,6 +11,7 @@
 #include "aa_ability.h"
 #include "event_codes.h"
 #include "../common/repositories/doors_repository.h"
+#include "../common/races.h"
 
 #include "bot_database.h"
 
@@ -339,7 +340,7 @@ namespace BeastlordPetData {
 		uint16 race_id = WOLF;
 		uint8 texture = 0;
 		uint8 helm_texture = 0;
-		uint8 gender = 2;
+		uint8 gender = NEUTER;
 		float size_modifier = 1.0f;
 		uint8 face = 0;
 	};

@@ -69,7 +69,10 @@ public:
 	bool HasDestinationZone() const;
 	bool IsDestinationZoneSame() const;
 
+	bool IsDoorBlacklisted();
+
 private:
+	bool GetIsDoorBlacklisted();
 
 	bool      m_has_destination_zone = false;
 	bool      m_same_destination_zone = false;
@@ -99,5 +102,6 @@ private:
 	uint8     m_is_ldon_door;
 	int       m_dz_switch_id = 0;
 	uint32    m_client_version_mask;
+	bool      m_is_blacklisted_to_open = false; // is door blacklisted to open by npcs
 };
 #endif

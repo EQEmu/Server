@@ -30,6 +30,7 @@ uint8 GetCommandStatus(std::string command_name);
 void ListModifyNPCStatMap(Client *c);
 std::map<std::string, std::string> GetModifyNPCStatMap();
 std::string GetModifyNPCStatDescription(std::string stat);
+void SendFeatureSubCommands(Client *c);
 void SendNPCEditSubCommands(Client *c);
 void SendRuleSubCommands(Client *c);
 void SendGuildSubCommands(Client *c);

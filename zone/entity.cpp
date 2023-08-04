@@ -674,6 +674,8 @@ void EntityList::AddNPC(NPC *npc, bool send_spawn_packet, bool dont_queue)
 	npc_list.emplace(std::pair<uint16, NPC *>(npc->GetID(), npc));
 	mob_list.emplace(std::pair<uint16, Mob *>(npc->GetID(), npc));
 
+	entity_list.ScanCloseMobs(npc->close_mobs, npc, true);
+
 	if (parse->HasQuestSub(npc->GetNPCTypeID(), EVENT_SPAWN)) {
 		parse->EventNPC(EVENT_SPAWN, npc, nullptr, "", 0);
 	}
@@ -712,8 +714,6 @@ void EntityList::AddNPC(NPC *npc, bool send_spawn_packet, bool dont_queue)
 	}
 
 	npc->SendPositionToClients();
-
-	entity_list.ScanCloseMobs(npc->close_mobs, npc, true);
 
 	if (parse->HasQuestSub(ZONE_CONTROLLER_NPC_ID, EVENT_SPAWN_ZONE)) {
 		npc->DispatchZoneControllerEvent(EVENT_SPAWN_ZONE, npc, "", 0, nullptr);

@@ -69,6 +69,27 @@ enum class eSpecialAttacks : int {
 	ChaoticStab
 };
 
+struct AppearanceStruct {
+	uint8  aa_title         = UINT8_MAX;
+	uint8  beard            = UINT8_MAX;
+	uint8  beard_color      = UINT8_MAX;
+	uint32 drakkin_details  = UINT32_MAX;
+	uint32 drakkin_heritage = UINT32_MAX;
+	uint32 drakkin_tattoo   = UINT32_MAX;
+	uint8  eye_color_one    = UINT8_MAX;
+	uint8  eye_color_two    = UINT8_MAX;
+	uint8  face             = UINT8_MAX;
+	uint8  gender_id        = UINT8_MAX;
+	uint8  hair             = UINT8_MAX;
+	uint8  hair_color       = UINT8_MAX;
+	uint8  helmet_texture   = UINT8_MAX;
+	uint16 race_id          = RACE_DOUG_0;
+	bool   send_effects     = true;
+	float  size             = -1.0f;
+	Client *target          = nullptr;
+	uint8  texture          = UINT8_MAX;
+};
+
 class DataBucketKey;
 class Mob : public Entity {
 public:
@@ -889,26 +910,7 @@ public:
 
 	int64 CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, bool best_focus=false, uint16 casterid = 0, Mob *caster = nullptr);
 	uint8 IsFocusEffect(uint16 spellid, int effect_index, bool AA=false,uint32 aa_effect=0);
-	void SendIllusionPacket(
-		uint16 in_race,
-		uint8 in_gender = 0xFF,
-		uint8 in_texture = 0xFF,
-		uint8 in_helmtexture = 0xFF,
-		uint8 in_haircolor = 0xFF,
-		uint8 in_beardcolor = 0xFF,
-		uint8 in_eyecolor1 = 0xFF,
-		uint8 in_eyecolor2 = 0xFF,
-		uint8 in_hairstyle = 0xFF,
-		uint8 in_luclinface = 0xFF,
-		uint8 in_beard = 0xFF,
-		uint8 in_aa_title = 0xFF,
-		uint32 in_drakkin_heritage = 0xFFFFFFFF,
-		uint32 in_drakkin_tattoo = 0xFFFFFFFF,
-		uint32 in_drakkin_details = 0xFFFFFFFF,
-		float in_size = -1.0f,
-		bool send_appearance_effects = true,
-		Client* target = nullptr
-	);
+	void SendIllusionPacket(const AppearanceStruct& a);
 	void CloneAppearance(Mob* other, bool clone_name = false);
 	void SetFaceAppearance(const FaceChange_Struct& face, bool skip_sender = false);
 	bool RandomizeFeatures(bool send_illusion = true, bool set_variables = true);
@@ -1866,6 +1868,7 @@ private:
 	void SetHeroicWisBonuses(StatBonuses* n);
 
 	void DoSpellInterrupt(uint16 spell_id, int32 mana_cost, int my_curmana);
+	void HandleDoorOpen();
 };
 
 #endif

@@ -67,23 +67,24 @@ void command_appearanceeffects(Client *c, const Seperator *sep)
 		);
 	} else if (is_remove) {
 		t->SendIllusionPacket(
-			t->GetRace(),
-			t->GetGender(),
-			t->GetTexture(),
-			t->GetHelmTexture(),
-			t->GetHairColor(),
-			t->GetBeardColor(),
-			t->GetEyeColor1(),
-			t->GetEyeColor2(),
-			t->GetHairStyle(),
-			t->GetLuclinFace(),
-			t->GetBeard(),
-			0xFF,
-			t->GetDrakkinHeritage(),
-			t->GetDrakkinTattoo(),
-			t->GetDrakkinDetails(),
-			t->GetSize(),
-			false
+			AppearanceStruct{
+				.beard = t->GetBeard(),
+				.beard_color = t->GetBeardColor(),
+				.drakkin_details = t->GetDrakkinDetails(),
+				.drakkin_heritage = t->GetDrakkinHeritage(),
+				.drakkin_tattoo = t->GetDrakkinTattoo(),
+				.eye_color_one = t->GetEyeColor1(),
+				.eye_color_two = t->GetEyeColor2(),
+				.face = t->GetLuclinFace(),
+				.gender_id = t->GetGender(),
+				.hair = t->GetHairStyle(),
+				.hair_color = t->GetHairColor(),
+				.helmet_texture = t->GetHelmTexture(),
+				.race_id = t->GetRace(),
+				.send_effects = false,
+				.size = t->GetSize(),
+				.texture = t->GetTexture(),
+			}
 		);
 		t->ClearAppearenceEffects();
 		c->Message(
