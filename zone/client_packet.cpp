@@ -15953,7 +15953,7 @@ void Client::Handle_OP_XTargetRequest(const EQApplicationPacket *app)
 			if (t.type == Type) {
 				Raid* r = GetRaid();
 				if (r) {
-					auto mm = entity_list.GetNPCByID(r->marked_npcs[t.assist_slot]);
+					auto mm = entity_list.GetNPCByID(r->marked_npcs[t.assist_slot].entity_id);
 					if (mm) {
 						UpdateXTargetType(t.type, mm->CastToMob(), mm->CastToMob()->GetName());
 					}
