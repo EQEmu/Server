@@ -1,3 +1,29 @@
+## [22.24.0] - 08/05/2023
+
+### Character
+
+* Record character stats to `character_stats_record` table ([#3522](https://github.com/EQEmu/Server/pull/3522)) @Akkadius 2023-08-05
+
+### Code
+
+* Cleanup #view zone_loot Command ([#3523](https://github.com/EQEmu/Server/pull/3523)) @Kinglykrab 2023-08-02
+* Remove Strings::Commify from all identifier values ([#3528](https://github.com/EQEmu/Server/pull/3528)) @Kinglykrab 2023-08-02
+
+### Feature
+
+* Add Support for Drakkin Heritage Illusions ([#3521](https://github.com/EQEmu/Server/pull/3521)) @Kinglykrab 2023-08-01
+
+### Fixes
+
+* Bug fix for raid mark NPC across zones ([#3525](https://github.com/EQEmu/Server/pull/3525)) @neckkola 2023-08-05
+* Bugs table should not target content database ([#3535](https://github.com/EQEmu/Server/pull/3535)) @Akkadius 2023-08-05
+* Fix +/- 0.1 XYZ Door Manipulation ([#3527](https://github.com/EQEmu/Server/pull/3527)) @Kinglykrab 2023-08-02
+* Fix issue with mob scanning when trying to use EVENT_SPAWN ([#3529](https://github.com/EQEmu/Server/pull/3529)) @Akkadius 2023-08-04
+
+### Quest API
+
+* Adjust GetCloseMobList calls internally ([#3530](https://github.com/EQEmu/Server/pull/3530)) @Akkadius 2023-08-04
+
 ## [22.23.0] - 07/31/2023
 
 ### Databuckets
