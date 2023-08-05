@@ -781,16 +781,16 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 				const bool isPetAndCanHaveQuestItems = (PetsCanTakeQuestItems &&	isPet);
 				// if it was not a NO DROP or Attuned item (or if a GM is trading), let the NPC have it
 				if(GetGM() || (inst->IsAttuned() == false &&
-					(item->NoDrop != 0 || isPetAndCanHaveNoDrop) &&
-					(item->IsQuestItem() == false || isPetAndCanHaveQuestItems))) {
+					((item->NoDrop != 0 && inst->IsAttuned() == false) || isPetAndCanHaveNoDrop) &&
+					((item->IsQuestItem() == false || isPetAndCanHaveQuestItems)))) {
 					// pets need to look inside bags and try to equip items found there
 					if (item->IsClassBag() && item->BagSlots > 0) {
 						for (int16 bslot = EQ::invbag::SLOT_BEGIN; bslot < item->BagSlots; bslot++) {
 							const EQ::ItemInstance* baginst = inst->GetItem(bslot);
 							if (baginst) {
 								const EQ::ItemData* bagitem = baginst->GetItem();
-								if (bagitem && (GetGM() || (bagitem->NoDrop != 0 && baginst->IsAttuned() == false)  &&
-								((isPet == true && (bagitem->IsQuestItem() == false or PetsCanTakeQuestItems) or isPet == false)))) {
+								if (bagitem && (GetGM() || ((bagitem->NoDrop != 0 && baginst->IsAttuned() == false) or isPetAndCanHaveNoDrop)  &&
+								((bagitem->IsQuestItem() == false || isPetAndCanHaveQuestItems)))) {
 
 									auto loot_drop_entry = NPC::NewLootDropEntry();
 									loot_drop_entry.equip_item   = 1;
