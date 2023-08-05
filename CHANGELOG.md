@@ -16,6 +16,7 @@
 ### Fixes
 
 * Bug fix for raid mark NPC across zones ([#3525](https://github.com/EQEmu/Server/pull/3525)) @neckkola 2023-08-05
+* Bugs table should not target content database ([#3535](https://github.com/EQEmu/Server/pull/3535)) @Akkadius 2023-08-05
 * Fix +/- 0.1 XYZ Door Manipulation ([#3527](https://github.com/EQEmu/Server/pull/3527)) @Kinglykrab 2023-08-02
 * Fix issue with mob scanning when trying to use EVENT_SPAWN ([#3529](https://github.com/EQEmu/Server/pull/3529)) @Akkadius 2023-08-04
 
