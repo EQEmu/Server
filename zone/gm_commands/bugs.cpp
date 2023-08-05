@@ -41,7 +41,7 @@ void command_bugs(Client *c, const Seperator *sep)
 
 		auto bug_id = Strings::ToUnsignedInt(sep->arg[2]);
 
-		auto r = BugReportsRepository::FindOne(content_db, bug_id);
+		auto r = BugReportsRepository::FindOne(database, bug_id);
 		if (!r.id) {
 			c->Message(
 				Chat::White,
@@ -55,7 +55,7 @@ void command_bugs(Client *c, const Seperator *sep)
 
 		r.bug_status = 1;
 
-		if (!BugReportsRepository::UpdateOne(content_db, r)) {
+		if (!BugReportsRepository::UpdateOne(database, r)) {
 			c->Message(
 				Chat::White,
 				fmt::format(
@@ -81,7 +81,7 @@ void command_bugs(Client *c, const Seperator *sep)
 		}
 
 		auto bug_id = Strings::ToUnsignedInt(sep->arg[2]);
-		auto deleted_count = BugReportsRepository::DeleteOne(content_db, bug_id);
+		auto deleted_count = BugReportsRepository::DeleteOne(database, bug_id);
 		if (!deleted_count) {
 			c->Message(
 				Chat::White,
@@ -112,7 +112,7 @@ void command_bugs(Client *c, const Seperator *sep)
 		auto bug_id = Strings::ToUnsignedInt(sep->arg[2]);
 		auto bug_review = sep->argplus[3];
 
-		auto r = BugReportsRepository::FindOne(content_db, bug_id);
+		auto r = BugReportsRepository::FindOne(database, bug_id);
 		if (!r.id) {
 			c->Message(
 				Chat::White,
@@ -128,7 +128,7 @@ void command_bugs(Client *c, const Seperator *sep)
 		r.last_reviewer = c->GetCleanName();
 		r.reviewer_notes = bug_review;
 
-		if (!BugReportsRepository::UpdateOne(content_db, r)) {
+		if (!BugReportsRepository::UpdateOne(database, r)) {
 			c->Message(
 				Chat::White,
 				fmt::format(
@@ -154,7 +154,7 @@ void command_bugs(Client *c, const Seperator *sep)
 
 		auto search_criteria = sep->argplus[2];
 		auto l = BugReportsRepository::GetWhere(
-			content_db,
+			database,
 			fmt::format(
 				"bug_status = 0 AND (character_name LIKE '%%{}%%' OR bug_report LIKE '%%{}%%')",
 				Strings::Escape(search_criteria),
@@ -205,7 +205,7 @@ void command_bugs(Client *c, const Seperator *sep)
 
 		auto bug_id = Strings::ToUnsignedInt(sep->arg[2]);
 
-		auto r = BugReportsRepository::FindOne(content_db, bug_id);
+		auto r = BugReportsRepository::FindOne(database, bug_id);
 		if (!r.id) {
 			c->Message(
 				Chat::White,
