@@ -789,7 +789,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 							const EQ::ItemInstance* baginst = inst->GetItem(bslot);
 							if (baginst) {
 								const EQ::ItemData* bagitem = baginst->GetItem();
-								if (bagitem && (GetGM() || ((bagitem->NoDrop != 0 && !baginst->IsAttuned()) or is_pet_and_can_have_nodrop_items)  &&
+								if (bagitem && (GetGM() || ((bagitem->NoDrop != 0 && !baginst->IsAttuned()) || is_pet_and_can_have_nodrop_items)  &&
 								((!bagitem->IsQuestItem()|| is_pet_and_can_have_quest_items || !is_pet)))) {
 
 									auto loot_drop_entry = NPC::NewLootDropEntry();
@@ -803,7 +803,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 										true
 									);
 								}
-								else if (is_pet == true && bagitem->IsQuestItem()) {
+								else if (is_pet && bagitem->IsQuestItem()) {
 									tradingWith->SayString(TRADE_BACK, GetCleanName());
 									PushItemOnCursor(*baginst, true);
 									Message(Chat::Red, "You cannot trade quest items with your pet.");
