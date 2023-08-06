@@ -230,6 +230,10 @@ bool EQ::ItemData::IsTypeShield() const
 	return (ItemType == item::ItemTypeShield);
 }
 
+bool EQ::ItemData::IsQuestItem() const {
+	return QuestItemFlag;
+}
+
 bool EQ::ItemData::CheckLoreConflict(const ItemData* l_item, const ItemData* r_item)
 {
 	if (!l_item || !r_item)

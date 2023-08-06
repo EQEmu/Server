@@ -71,9 +71,10 @@ void Trade::Start(uint32 mob_id, bool initiate_with)
 
 	// Autostart on other mob?
 	if (initiate_with) {
-		Mob* with = With();
-		if (with)
+		Mob *with = With();
+		if (with) {
 			with->trade->Start(owner->GetID(), false);
+		}
 	}
 }
 
@@ -774,20 +775,22 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 				}
 
 				const EQ::ItemData* item = inst->GetItem();
-
-				bool isPetAndCanHaveNoDrop = (RuleB(Pets, CanTakeNoDrop) &&
-					_CLIENTPET(tradingWith) &&
-					tradingWith->GetPetType()<=petOther);
+				const bool is_pet = _CLIENTPET(tradingWith) && tradingWith->GetPetType()<=petOther;
+				const bool pets_can_take_quest_items = RuleB(Pets, CanTakeQuestItems);
+				const bool is_pet_and_can_have_nodrop_items = (RuleB(Pets, CanTakeNoDrop) &&	is_pet);
+				const bool is_pet_and_can_have_quest_items = (pets_can_take_quest_items &&	is_pet);
 				// if it was not a NO DROP or Attuned item (or if a GM is trading), let the NPC have it
-				if(GetGM() || (inst->IsAttuned() == false &&
-					(item->NoDrop != 0 || isPetAndCanHaveNoDrop))) {
+				if (GetGM() ||
+					(((item->NoDrop != 0 && !inst->IsAttuned()) || is_pet_and_can_have_nodrop_items) &&
+					((!item->IsQuestItem() || is_pet_and_can_have_quest_items || !is_pet)))) {
 					// pets need to look inside bags and try to equip items found there
 					if (item->IsClassBag() && item->BagSlots > 0) {
 						for (int16 bslot = EQ::invbag::SLOT_BEGIN; bslot < item->BagSlots; bslot++) {
 							const EQ::ItemInstance* baginst = inst->GetItem(bslot);
 							if (baginst) {
 								const EQ::ItemData* bagitem = baginst->GetItem();
-								if (bagitem && (GetGM() || (bagitem->NoDrop != 0 && baginst->IsAttuned() == false))) {
+								if (bagitem && (GetGM() || ((bagitem->NoDrop != 0 && !baginst->IsAttuned()) || is_pet_and_can_have_nodrop_items)  &&
+								((!bagitem->IsQuestItem()|| is_pet_and_can_have_quest_items || !is_pet)))) {
 
 									auto loot_drop_entry = NPC::NewLootDropEntry();
 									loot_drop_entry.equip_item   = 1;
@@ -799,6 +802,11 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 										loot_drop_entry,
 										true
 									);
+								}
+								else if (is_pet && bagitem->IsQuestItem()) {
+									tradingWith->SayString(TRADE_BACK, GetCleanName());
+									PushItemOnCursor(*baginst, true);
+									Message(Chat::Red, "You cannot trade quest items with your pet.");
 								}
 								else if (RuleB(NPC, ReturnNonQuestNoDropItems)) {
 									tradingWith->SayString(TRADE_BACK, GetCleanName());
@@ -818,6 +826,12 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 						new_loot_drop_entry,
 						true
 					);
+				}
+				// Return quest items being traded to player pet when not allowed
+				else if (is_pet && item->IsQuestItem()) {
+					tradingWith->SayString(TRADE_BACK, GetCleanName());
+					PushItemOnCursor(*inst, true);
+					Message(Chat::Red, "You cannot trade quest items with your pet.");
 				}
 				// Return NO DROP and Attuned items being handed into a non-quest NPC if the rule is true
 				else if (RuleB(NPC, ReturnNonQuestNoDropItems)) {
