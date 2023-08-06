@@ -541,6 +541,7 @@ RULE_INT(NPC, LastFightingDelayMovingMin, 10000, "Minimum time before mob goes h
 RULE_INT(NPC, LastFightingDelayMovingMax, 20000, "Maximum time before mob goes home after all aggro loss (milliseconds)")
 RULE_BOOL(NPC, SmartLastFightingDelayMoving, true, "When true, mobs that started going home previously will do so again immediately if still on FD hate list")
 RULE_BOOL(NPC, ReturnNonQuestNoDropItems, false, "Returns NO DROP items on NPC that don't have an EVENT_TRADE sub in their script")
+RULE_BOOL(NPC, ReturnQuestItemsFromNonQuestNPCs, false, "Returns Quest items traded to NPCs that are not flagged as a Quest NPC")
 RULE_INT(NPC, StartEnrageValue, 9, " Percentage HP that an NPC will begin to enrage")
 RULE_BOOL(NPC, LiveLikeEnrage, false, "If set to true then only player controlled pets will enrage")
 RULE_BOOL(NPC, EnableMeritBasedFaction, false, "If set to true, faction will be given in the same way as experience (solo/group/raid)")

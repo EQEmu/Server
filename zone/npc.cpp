@@ -199,6 +199,7 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 	CHA                  = npc_type_data->CHA;
 	npc_mana             = npc_type_data->Mana;
 	m_is_underwater_only = npc_type_data->underwater;
+	m_is_quest_npc       = npc_type_data->is_quest_npc;
 
 	//quick fix of ordering if they screwed it up in the DB
 	if (max_dmg < min_dmg) {
