@@ -793,22 +793,22 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 							if (baginst) {
 								const EQ::ItemData *bagitem = baginst->GetItem();
 								if (bagitem && (GetGM() ||
-												(!restrict_quest_items_to_quest_npc ||
-												 (is_quest_npc && bagitem->IsQuestItem()) || !bagitem->IsQuestItem()) &&
-												// If rule is enabled, return any quest items given to non-quest NPCs (inside bags)
-												(bagitem->NoDrop != 0 && !baginst->IsAttuned()) &&
-												((is_pet && (!bagitem->IsQuestItem() || pets_can_take_quest_items) ||
-												  !is_pet)))) {
+									(!restrict_quest_items_to_quest_npc ||
+									(is_quest_npc && bagitem->IsQuestItem()) || !bagitem->IsQuestItem()) &&
+									// If rule is enabled, return any quest items given to non-quest NPCs (inside bags)
+									(bagitem->NoDrop != 0 && !baginst->IsAttuned()) &&
+									((is_pet && (!bagitem->IsQuestItem() || pets_can_take_quest_items) ||
+									!is_pet)))) {
 
 									auto loot_drop_entry = NPC::NewLootDropEntry();
 									loot_drop_entry.equip_item = 1;
 									loot_drop_entry.item_charges = static_cast<int8>(baginst->GetCharges());
 
 									tradingWith->CastToNPC()->AddLootDrop(
-											bagitem,
-											&tradingWith->CastToNPC()->itemlist,
-											loot_drop_entry,
-											true
+										bagitem,
+										&tradingWith->CastToNPC()->itemlist,
+										loot_drop_entry,
+										true
 									);
 									// Return quest items being traded to non-quest NPC when the rule is true
 								} else if (restrict_quest_items_to_quest_npc && (!is_quest_npc && bagitem->IsQuestItem())) {
@@ -833,10 +833,10 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 					new_loot_drop_entry.item_charges = static_cast<int8>(inst->GetCharges());
 
 					tradingWith->CastToNPC()->AddLootDrop(
-							item,
-							&tradingWith->CastToNPC()->itemlist,
-							new_loot_drop_entry,
-							true
+						item,
+						&tradingWith->CastToNPC()->itemlist,
+						new_loot_drop_entry,
+						true
 					);
 				}
 				// Return quest items being traded to non-quest NPC when the rule is true
