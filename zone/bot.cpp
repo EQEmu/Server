@@ -3328,16 +3328,23 @@ bool Bot::Spawn(Client* botCharacterOwner) {
 
 		if (auto raid = entity_list.GetRaidByBotName(GetName())) {
 			// Safety Check to confirm we have a valid raid
-			if (raid->IsRaidMember(GetBotOwner()->CastToClient())) {
+			if (!raid->IsRaidMember(GetBotOwner()->GetName())) {
 				Bot::RemoveBotFromRaid(this);
 			} else {
-				raid->LearnMembers();
 				SetRaidGrouped(true);
+				raid->LearnMembers();
+				raid->VerifyRaid();
 			}
 		}
 		else if (auto group = entity_list.GetGroupByMobName(GetName())) {
-			group->LearnMembers();
-			SetGrouped(true);
+			// Safety Check to confirm we have a valid group
+			if (!group->IsGroupMember(GetBotOwner()->GetName())) {
+				Bot::RemoveBotFromGroup(this, group);
+			} else {
+				SetGrouped(true);
+				group->LearnMembers();
+				group->VerifyGroup();
+			}
 		}
 
 		return true;
@@ -4534,10 +4541,9 @@ void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client*
 }
 
 bool Bot::Death(Mob *killerMob, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill) {
-	if (!NPC::Death(killerMob, damage, spell_id, attack_skill))
+	if (!NPC::Death(killerMob, damage, spell_id, attack_skill)) {
 		return false;
-
-	Save();
+	}
 
 	Mob *my_owner = GetBotOwner();
 	if (my_owner && my_owner->IsClient() && my_owner->CastToClient()->GetBotOption(Client::booDeathMarquee)) {
@@ -4547,79 +4553,9 @@ bool Bot::Death(Mob *killerMob, int64 damage, uint16 spell_id, EQ::skills::Skill
 			my_owner->CastToClient()->SendMarqueeMessage(Chat::White, 510, 0, 1000, 3000, StringFormat("%s has been slain", GetCleanName()));
 	}
 
-	Mob *give_exp = hate_list.GetDamageTopOnHateList(this);
-	Client *give_exp_client = nullptr;
-	if (give_exp && give_exp->IsClient())
-		give_exp_client = give_exp->CastToClient();
-
-	bool IsLdonTreasure = (GetClass() == LDON_TREASURE);
 	const auto c = entity_list.GetCorpseByID(GetID());
 	if (c) {
 		c->Depop();
-	}
-
-	if (HasRaid()) {
-		if (auto raid = entity_list.GetRaidByBotName(GetName()); raid) {
-			for (auto& m: raid->members) {
-				if (strcmp(m.member_name, GetName()) == 0) {
-					m.member = nullptr;
-				}
-			}
-		}
-	}
-	else if (HasGroup()) {
-		if (auto g = GetGroup()) {
-			for (int i = 0; i < MAX_GROUP_MEMBERS; i++) {
-				if (g->members[i]) {
-					if (g->members[i] == this) {
-						// If the leader dies, make the next bot the leader
-						// and reset all bots followid
-						if (g->IsLeader(g->members[i])) {
-							if (g->members[i + 1]) {
-								g->SetLeader(g->members[i + 1]);
-								g->members[i + 1]->SetFollowID(g->members[i]->GetFollowID());
-								for (int j = 0; j < MAX_GROUP_MEMBERS; j++) {
-									if (g->members[j] && (g->members[j] != g->members[i + 1]))
-										g->members[j]->SetFollowID(g->members[i + 1]->GetID());
-								}
-							}
-						}
-
-						// delete from group data
-						RemoveBotFromGroup(this, g);
-						//Make sure group still exists if it doesnt they were already updated in RemoveBotFromGroup
-						g = GetGroup();
-						if (!g)
-							break;
-
-						// if group members exist below this one, move
-						// them all up one slot in the group list
-						int j = (i + 1);
-						for (; j < MAX_GROUP_MEMBERS; j++) {
-							if (g->members[j]) {
-								g->members[j - 1] = g->members[j];
-								strcpy(g->membername[j - 1], g->members[j]->GetCleanName());
-								g->membername[j][0] = '\0';
-								memset(g->membername[j], 0, 64);
-								g->members[j] = nullptr;
-							}
-						}
-
-						// update the client group
-						EQApplicationPacket* outapp = new EQApplicationPacket(OP_GroupUpdate, sizeof(GroupJoin_Struct));
-						GroupJoin_Struct* gu = (GroupJoin_Struct*) outapp->pBuffer;
-						gu->action = groupActLeave;
-						strcpy(gu->membername, GetCleanName());
-						for (int k = 0; k < MAX_GROUP_MEMBERS; k++) {
-							if (g->members[k] && g->members[k]->IsClient()) {
-								g->members[k]->CastToClient()->QueuePacket(outapp);
-							}
-						}
-						safe_delete(outapp);
-					}
-				}
-			}
-		}
 	}
 
 	LeaveHealRotationMemberPool();
@@ -4640,6 +4576,7 @@ bool Bot::Death(Mob *killerMob, int64 damage, uint16 spell_id, EQ::skills::Skill
 		parse->EventBot(EVENT_DEATH_COMPLETE, this, killerMob, export_string, 0);
 	}
 
+	Zone();
 	entity_list.RemoveBot(GetID());
 
 return true;
