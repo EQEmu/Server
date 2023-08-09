@@ -75,7 +75,7 @@ int64 Mob::GetActSpellDamage(uint16 spell_id, int64 value, Mob* target) {
 	chance += itembonuses.FrenziedDevastation + spellbonuses.FrenziedDevastation + aabonuses.FrenziedDevastation;
 
 	//Crtical Hit Calculation pathway
-	if (chance > 0 || (IsOfClientBot() && GetClass() == WIZARD && GetLevel() >= RuleI(Spells, WizCritLevel))) {
+	if (chance > 0 || (IsOfClientBot() && GetClass == WIZARD && GetLevel() >= RuleI(Spells, WizCritLevel))) {
 
 		 int32 ratio = RuleI(Spells, BaseCritRatio); //Critical modifier is applied from spell effects only. Keep at 100 for live like criticals.
 
