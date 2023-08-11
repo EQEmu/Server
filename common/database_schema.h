@@ -135,6 +135,7 @@ namespace DatabaseSchema {
 			"character_potionbelt",
 			"character_skills",
 			"character_spells",
+			"character_stats_record",
 			"character_task_timers",
 			"character_tasks",
 			"character_tribute",
