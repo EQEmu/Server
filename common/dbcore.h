@@ -17,6 +17,8 @@
 #define CR_SERVER_GONE_ERROR    2006
 #define CR_SERVER_LOST          2013
 
+namespace mysql { class PreparedStmt; }
+
 class DBcore {
 public:
 	enum eStatus {
@@ -47,6 +49,11 @@ public:
 		mysqlOwner = false;
 	}
 	void SetMutex(Mutex *mutex);
+
+	// only safe on connections shared with other threads if results buffered
+	// unsafe to use off main thread due to internal server logging
+	// throws std::runtime_error on failure
+	mysql::PreparedStmt Prepare(std::string query);
 
 protected:
 	bool Open(

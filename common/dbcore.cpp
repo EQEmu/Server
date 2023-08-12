@@ -7,6 +7,7 @@
 #include "timer.h"
 
 #include "dbcore.h"
+#include "mysql_stmt.h"
 
 #include <fstream>
 #include <iostream>
@@ -435,4 +436,9 @@ MySQLRequestResult DBcore::QueryDatabaseMulti(const std::string &query)
 	SetMultiStatementsOff();
 
 	return r;
+}
+
+mysql::PreparedStmt DBcore::Prepare(std::string query)
+{
+	return mysql::PreparedStmt(*mysql, std::move(query), m_mutex);
 }
