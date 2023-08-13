@@ -459,14 +459,14 @@ bool BotDatabase::LoadBot(const uint32 bot_id, Bot*& loaded_bot)
 	safe_delete(d);
 
 	loaded_bot = new Bot(
-                bot_id,
-                l.owner_id,
-                l.spells_id,
-                l.time_spawned,
-                l.zone_id,
-                t,
-                l.expansion_bitmask
-            );
+        bot_id,
+        l.owner_id,
+        l.spells_id,
+        l.time_spawned,
+        l.zone_id,
+        t,
+        l.expansion_bitmask
+    );
 
 	if (loaded_bot) {
 		loaded_bot->SetSurname(l.last_name);
