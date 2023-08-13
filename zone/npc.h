@@ -443,6 +443,7 @@ public:
 	const bool HasPrivateCorpse() const { return NPCTypedata_ours ? NPCTypedata_ours->private_corpse : NPCTypedata->private_corpse; }
 
 	virtual const bool IsUnderwaterOnly() const { return m_is_underwater_only; }
+	virtual const bool IsQuestNPC() const { return m_is_quest_npc; }
 	const char* GetRawNPCTypeName() const { return NPCTypedata_ours ? NPCTypedata_ours->name : NPCTypedata->name; }
 
 	virtual int GetKillExpMod() const { return NPCTypedata_ours ? NPCTypedata_ours->exp_mod : NPCTypedata->exp_mod; }
@@ -670,6 +671,7 @@ protected:
 	uint32 adventure_template_id;
 
 	bool m_is_underwater_only = false;
+	bool m_is_quest_npc = false;
 
 	//mercenary stuff
 	std::list<MercType> mercTypeList;
