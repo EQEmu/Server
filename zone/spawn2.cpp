@@ -26,6 +26,7 @@
 #include "worldserver.h"
 #include "zone.h"
 #include "zonedb.h"
+#include "../common/repositories/criteria/content_filter_criteria.h"
 
 extern EntityList entity_list;
 extern Zone* zone;
@@ -467,7 +468,7 @@ bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spa
 	LogInfo("Loaded [{}] respawn timer(s)", Strings::Commify(results.RowCount()));
 
 	const char *zone_name = ZoneName(zoneid);
-	std::string query = StringFormat(
+	std::string query = fmt::format(
 		"SELECT "
 		"id, "
 		"spawngroupID, "
@@ -485,7 +486,8 @@ bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spa
 		"animation "
 		"FROM "
 		"spawn2 "
-		"WHERE zone = '%s' AND  (version = %u OR version = -1)",
+		"WHERE TRUE {} AND zone = '{}' AND (version = {} OR version = -1) ",
+		ContentFilterCriteria::apply(),
 		zone_name,
 		version
 	);
