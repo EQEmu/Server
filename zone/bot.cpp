@@ -119,7 +119,15 @@ Bot::Bot(NPCType *npcTypeData, Client* botOwner) : NPC(npcTypeData, nullptr, glm
 }
 
 // This constructor is used when the bot is loaded out of the database
-Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double totalPlayTime, uint32 lastZoneId, NPCType *npcTypeData, int32 expansion_bitmask)
+Bot::Bot(
+		uint32 botID,
+		uint32 botOwnerCharacterID,
+		uint32 botSpellsID,
+		double totalPlayTime,
+		uint32 lastZoneId,
+		NPCType *npcTypeData,
+		int32 expansion_bitmask
+	)
 	: NPC(npcTypeData, nullptr, glm::vec4(), Ground, false), rest_timer(1), ping_timer(1)
 {
 	GiveNPCTypeData(npcTypeData);
