@@ -130,7 +130,7 @@ public:
 
 	// Class Constructors
 	Bot(NPCType *npcTypeData, Client* botOwner);
-	Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double totalPlayTime, uint32 lastZoneId, NPCType *npcTypeData);
+	Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double totalPlayTime, uint32 lastZoneId, NPCType *npcTypeData, int32 expansion_bitmask);
 
 	//abstract virtual override function implementations requird by base abstract class
 	bool Death(Mob* killerMob, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill) override;
