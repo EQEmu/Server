@@ -1459,10 +1459,17 @@ void Client::TradeRequestFailed(const EQApplicationPacket* app) {
 
 static void BazaarAuditTrail(const char *seller, const char *buyer, const char *itemName, int quantity, int totalCost, int tranType) {
 
-	std::string query = StringFormat("INSERT INTO `trader_audit` "
-                                    "(`time`, `seller`, `buyer`, `itemname`, `quantity`, `totalcost`, `trantype`) "
-                                    "VALUES (NOW(), '%s', '%s', '%s', %i, %i, %i)",
-                                    seller, buyer, itemName, quantity, totalCost, tranType);
+	const std::string& query = fmt::format(
+		"INSERT INTO `trader_audit` "
+        	"(`time`, `seller`, `buyer`, `itemname`, `quantity`, `totalcost`, `trantype`) "
+		"VALUES (NOW(), '{}', '{}', '{}', {}, {}, {})",
+		seller,
+		buyer,
+		Strings::Escape(itemName),
+		quantity,
+		totalCost,
+		tranType
+	);
 	database.QueryDatabase(query);
 }
 
