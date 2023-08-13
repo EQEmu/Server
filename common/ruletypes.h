@@ -450,6 +450,8 @@ RULE_BOOL(Spells, TargetsTargetRequiresCombatRange, true, "Disable to remove com
 RULE_BOOL(Spells, NPCBuffLevelRestrictions, false, "Impose BuffLevelRestrictions on NPCs if true")
 RULE_INT(Spells, ResurrectionEffectBlock, 2, "0 = allow overwrites/rule disabled. If set to 1 = Block all buffs that would overwrite Resurrection Effects. If set to 2 = Will not overwrite Resurrection Effects, instead moves new buff to an empty slot if available. Default is 2.")
 RULE_BOOL(Spells, WaterMatchRequiredForLoS, true, "Enable/Disable the requirement of both the attacker/victim being both in or out of water for spells LoS to pass.")
+RULE_INT(Spells, WizardCritMinimumRandomRatio, 20, "The minimum value for the random range which Wizards and Caster DPS Mercs innately have for spell crit ratio. Set to 20 for vanilla values.")
+RULE_INT(Spells, WizardCritMaximumRandomRatio, 70, "The maximum value for the random range which Wizards and Caster DPS Mercs innately have for spell crit ratio. Set to 70 for vanilla values.")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Combat)
