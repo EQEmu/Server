@@ -457,7 +457,7 @@ public:
 	virtual uint32 GetLastBuffSlot(bool disc, bool song);
 	virtual void InitializeBuffSlots() { buffs = nullptr; }
 	virtual void UninitializeBuffSlots() { }
-	EQApplicationPacket *MakeBuffsPacket(bool for_target = true);
+	EQApplicationPacket *MakeBuffsPacket(bool for_target = true, bool clear = false);
 	void SendBuffsToClient(Client *c);
 	inline Buffs_Struct* GetBuffs() { return buffs; }
 	void DoGravityEffect();

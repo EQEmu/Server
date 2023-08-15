@@ -1361,7 +1361,7 @@ void EntityList::SendZoneSpawnsBulk(Client *client)
 				(spawn->IsClient() && (spawn->GetRace() == MINOR_ILL_OBJ || spawn->GetRace() == TREE))
 			);
 
-			if (is_delayed_packet) {
+			if (false) {
 				app = new EQApplicationPacket;
 				spawn->CreateSpawnPacket(app);
 				client->QueuePacket(app, true, Client::CLIENT_CONNECTED);
@@ -1595,7 +1595,7 @@ void EntityList::RefreshClientXTargets(Client *c)
 }
 
 void EntityList::QueueClientsByTarget(Mob *sender, const EQApplicationPacket *app,
-		bool iSendToSender, Mob *SkipThisMob, bool ackreq, bool HoTT, uint32 ClientVersionBits, bool inspect_buffs)
+		bool iSendToSender, Mob *SkipThisMob, bool ackreq, bool HoTT, uint32 ClientVersionBits, bool inspect_buffs, bool clear)
 {
 	auto it = client_list.begin();
 	while (it != client_list.end()) {
@@ -1611,7 +1611,7 @@ void EntityList::QueueClientsByTarget(Mob *sender, const EQApplicationPacket *ap
 
 		TargetsTarget = Target->GetTarget();
 
-		bool Send = false;
+		bool Send = clear;
 
 		if (c == SkipThisMob)
 			continue;
@@ -1624,22 +1624,23 @@ void EntityList::QueueClientsByTarget(Mob *sender, const EQApplicationPacket *ap
 			if (Target == sender) {
 				if (inspect_buffs) { // if inspect_buffs is true we're sending a mob's buffs to those with the LAA
 					if (c->GetGM() || RuleB(Spells, AlwaysSendTargetsBuffs)) {
-						Send = true;
+						Send = !clear;
 					} else if (c->IsRaidGrouped()) {
 						Raid *raid = c->GetRaid();
-						if (!raid)
-							continue;
-						uint32 gid = raid->GetGroup(c);
-						if (gid > 11 || raid->GroupCount(gid) < 3)
-							continue;
-						if (raid->GetLeadershipAA(groupAAInspectBuffs, gid))
-							Send = true;
+						if (raid) {
+							uint32 gid = raid->GetGroup(c);
+							if (gid <= 11 && raid->GroupCount(gid) >= 3) {
+								if (raid->GetLeadershipAA(groupAAInspectBuffs, gid))
+									Send = !clear;
+							}
+						}
 					} else {
 						Group *group = c->GetGroup();
-						if (!group || group->GroupCount() < 3)
-							continue;
-						if (group->GetLeadershipAA(groupAAInspectBuffs))
-							Send = true;
+						if (group && group->GroupCount() >= 3) {
+							if (group->GetLeadershipAA(groupAAInspectBuffs)) {
+								Send = !clear;
+							}
+						}
 					}
 				} else {
 					Send = true;
@@ -1649,8 +1650,9 @@ void EntityList::QueueClientsByTarget(Mob *sender, const EQApplicationPacket *ap
 			}
 		}
 
-		if (Send && (c->ClientVersionBit() & ClientVersionBits))
+		if (Send && (c->ClientVersionBit() & ClientVersionBits)) {
 			c->QueuePacket(app, ackreq);
+		}
 	}
 }
 
