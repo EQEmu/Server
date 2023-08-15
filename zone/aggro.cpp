@@ -975,8 +975,7 @@ bool Mob::IsBeneficialAllowed(Mob *target)
 	return false;
 }
 
-bool Mob::CombatRange(Mob* other, float fixed_size_mod, bool aeRampage)
-{
+bool Mob::CombatRange(Mob* other, float fixed_size_mod, bool aeRampage, ExtraAttackOptions *opts) {
 	if (!other) {
 		return(false);
 	}
@@ -1071,9 +1070,23 @@ bool Mob::CombatRange(Mob* other, float fixed_size_mod, bool aeRampage)
 			SetPseudoRoot(false);
 		}
 	}
+	
 	if (aeRampage) {
-		float multiplyer = GetSize() * RuleR(Combat, AERampageSafeZone);
-		float ramp_range = (size_mod * multiplyer);
+		float aeramp_size = RuleR(Combat, AERampageMaxDistance);
+
+		if (opts) {
+			if (opts->range_percent > 0) {
+				aeramp_size = opts->range_percent;
+			}
+		}
+
+		if (aeramp_size <= 0 ) {
+			aeramp_size = 0.90;
+		} else {
+			aeramp_size /= 100;
+		}
+
+		float ramp_range = size_mod * aeramp_size;
 		if (_DistNoRoot <= ramp_range) {
 			return true;
 		} else {
@@ -1081,8 +1094,7 @@ bool Mob::CombatRange(Mob* other, float fixed_size_mod, bool aeRampage)
 		}
 	}
 
-	if (_DistNoRoot <= size_mod)
-	{
+	if (_DistNoRoot <= size_mod) {
 		//A hack to kill an exploit till we get something better.
 		if (flymode != GravityBehavior::Flying && _zDist > 500 && !CheckLastLosState()) {
 			return false;

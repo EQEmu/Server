@@ -714,8 +714,9 @@ void HateList::PrintHateListToClient(Client *c)
 
 int HateList::AreaRampage(Mob *caster, Mob *target, int count, ExtraAttackOptions *opts)
 {
-	if (!target || !caster)
+	if (!target || !caster) {
 		return 0;
+	}
 
 	// tank will be hit ONLY if they are the only target on the hate list
 	// if there is anyone else on the hate list, the tank will not be hit, even if those others aren't hit either
@@ -730,9 +731,10 @@ int HateList::AreaRampage(Mob *caster, Mob *target, int count, ExtraAttackOption
 	std::vector<uint16> id_list;
 	for (auto &h : list) {
 		if (h->entity_on_hatelist && h->entity_on_hatelist != caster && h->entity_on_hatelist != target &&
-			caster->CombatRange(h->entity_on_hatelist, 1.0, true)) {
+			caster->CombatRange(h->entity_on_hatelist, 1.0, true, opts)) {
 			id_list.push_back(h->entity_on_hatelist->GetID());
 		}
+		
 		if (count != -1 && id_list.size() > count) {
 			break;
 		}
