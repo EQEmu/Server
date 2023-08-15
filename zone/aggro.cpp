@@ -1080,18 +1080,15 @@ bool Mob::CombatRange(Mob* other, float fixed_size_mod, bool aeRampage, ExtraAtt
 			}
 		}
 
-		if (aeramp_size <= 0 ) {
+		if (aeramp_size <= 0) {
 			aeramp_size = 0.90;
 		} else {
 			aeramp_size /= 100;
 		}
 
 		float ramp_range = size_mod * aeramp_size;
-		if (_DistNoRoot <= ramp_range) {
-			return true;
-		} else {
-			return false;
-		}
+		
+		return _DistNoRoot <= ramp_range;
 	}
 
 	if (_DistNoRoot <= size_mod) {
