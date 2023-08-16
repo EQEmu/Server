@@ -1629,7 +1629,7 @@ void EntityList::QueueClientsByTarget(Mob *sender, const EQApplicationPacket *ap
 						Raid *raid = c->GetRaid();
 						if (raid) {
 							uint32 gid = raid->GetGroup(c);
-							if (gid <= 11 && raid->GroupCount(gid) >= 3) {
+							if (gid < MAX_RAID_GROUPS && raid->GroupCount(gid) >= 3) {
 								if (raid->GetLeadershipAA(groupAAInspectBuffs, gid))
 									Send = !clear;
 							}
