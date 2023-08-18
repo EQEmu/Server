@@ -4225,12 +4225,11 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 		//Note: if players can become pets, they will not receive damage messages of their own
 		//this was done to simplify the code here (since we can only effectively skip one mob on queue)
 		eqFilterType filter;
-		Mob* skip = attacker;
 		if (attacker && attacker->GetOwnerID()) {
 			//attacker is a pet, let pet owners see their pet's damage
 			Mob* owner = attacker->GetOwner();
 			if (owner && owner->IsClient()) {
-				if ((IsValidSpell(spell_id) || (FromDamageShield)) && damage > 0) {
+				if (FromDamageShield && damage > 0) {
 					//special crap for spell damage, looks hackish to me
 					char val1[20] = { 0 };
 					owner->MessageString(Chat::NonMelee, OTHER_HIT_NONMELEE, GetCleanName(), ConvertArray(damage, val1));
@@ -4249,11 +4248,17 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 						filter = FilterPetMisses;
 
 					if (!FromDamageShield)
-						owner->CastToClient()->QueuePacket(outapp, true, CLIENT_CONNECTED, filter);
+						entity_list.QueueCloseClients(
+							this, /* Sender */
+							outapp, /* packet */
+							false, /* Skip Sender */
+							((IsValidSpell(spell_id)) ? RuleI(Range, SpellMessages) : RuleI(Range, DamageMessages)),
+							0, /* don't skip anyone on spell */
+							true, /* Packet ACK */
+							filter /* eqFilterType filter */
+							);
 				}
 			}
-
-			skip = owner;
 		}
 		else {
 			//attacker is not a pet, send to the attacker
@@ -4351,16 +4356,21 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 					CastToClient()->QueuePacket(outapp);
 				}
 
-				// Otherwise, send normal spell or melee message to observers.
-				entity_list.QueueCloseClients(
-					this, /* Sender */
-					outapp, /* packet */
-					true, /* Skip Sender */
-					range, /* distance packet travels at the speed of sound */
-					(IsValidSpell(spell_id) && skill_used != EQ::skills::SkillTigerClaw) ? 0 : skip,
-					true, /* Packet ACK */
-					filter /* eqFilterType filter */
-					);
+				// Send normal message to observers
+				// Exclude damage done by client pets as that's handled
+				// elsewhere using proper "my pet damage filter"
+				Mob *owner = attacker->GetOwner();
+				if (!owner || (owner && !owner->IsClient())) {
+					entity_list.QueueCloseClients(
+						this, /* Sender */
+						outapp, /* packet */
+						true, /* Skip Sender */
+						range, /* distance packet travels at the speed of sound */
+						0,
+						true, /* Packet ACK */
+						filter /* eqFilterType filter */
+						);
+				}
 			}
 		}
 
