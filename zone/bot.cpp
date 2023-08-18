@@ -8170,6 +8170,7 @@ bool Bot::CheckDataBucket(std::string bucket_name, const std::string& bucket_val
 		if (b.value.empty() && GetBotOwner()) {
 			// fetch from owner
 			k = GetBotOwner()->GetScopedBucketKeys();
+			k.key = bucket_name;
 
 			b = DataBucket::GetData(k);
 			if (b.value.empty()) {
