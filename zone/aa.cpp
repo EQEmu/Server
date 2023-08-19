@@ -1442,6 +1442,8 @@ bool ZoneDatabase::LoadAlternateAdvancement(Client *c) {
 		"WHERE `id` = %u", c->CharacterID());
 	MySQLRequestResult results = database.QueryDatabase(query);
 
+	memset(&c->GetPP().aa_array[0], 0, sizeof(AA_Array) * MAX_PP_AA_ARRAY);
+
 	int i = 0;
 	for(auto row = results.begin(); row != results.end(); ++row) {
 		uint32 aa = Strings::ToUnsignedInt(row[0]);
@@ -1701,9 +1703,10 @@ bool Mob::CanPurchaseAlternateAdvancementRank(AA::Rank *rank, bool check_price, 
 }
 
 void Zone::LoadAlternateAdvancement() {
-	if(!content_db.LoadAlternateAdvancementAbilities(aa_abilities,
-		aa_ranks))
-	{
+	aa_abilities.clear();
+	aa_ranks.clear();
+
+	if (!content_db.LoadAlternateAdvancementAbilities(aa_abilities, aa_ranks)) {
 		aa_abilities.clear();
 		aa_ranks.clear();
 		LogInfo("Failed to load Alternate Advancement Data");
