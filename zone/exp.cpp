@@ -1185,8 +1185,7 @@ void Raid::SplitExp(const uint64 exp, Mob* other) {
 				static_cast<float>(raid_experience) *
 				RuleR(Character, RaidFlatExpMultiplier)
 		);
-	}
-	else if (RuleB(Character, EnableRaidEXPModifier)) {
+	} else if (RuleB(Character, EnableRaidEXPModifier)) {
 		raid_experience = static_cast<uint64>(
 				static_cast<float>(raid_experience) *
 				(1.0f - RuleR(Character, RaidExpMultiplier))
