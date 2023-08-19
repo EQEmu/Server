@@ -1180,7 +1180,13 @@ void Raid::SplitExp(const uint64 exp, Mob* other) {
 	auto       raid_experience = exp;
 	const auto highest_level   = GetHighestLevel();
 
-	if (RuleB(Character, EnableRaidEXPModifier)) {
+	if (RuleB(Character, EnableRaidFlatEXPModifier)) {
+		raid_experience = static_cast<uint64>(
+				static_cast<float>(raid_experience) *
+				RuleR(Character, RaidFlatExpMultiplier)
+		);
+	}
+	else if (RuleB(Character, EnableRaidEXPModifier)) {
 		raid_experience = static_cast<uint64>(
 			static_cast<float>(raid_experience) *
 			(1.0f - RuleR(Character, RaidExpMultiplier))
