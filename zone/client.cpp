@@ -11768,3 +11768,29 @@ void Client::ShowSpells(Client* c, ShowSpellType show_spell_type)
 		spell_table.c_str()
 	);
 }
+
+std::string GetZoneModeString(ZoneMode mode)
+{
+	switch (mode) {
+		case ZoneToSafeCoords:
+			return "ZoneToSafeCoords";
+		case GMSummon:
+			return "GMSummon";
+		case ZoneToBindPoint:
+			return "ZoneToBindPoint";
+		case ZoneSolicited:
+			return "ZoneSolicited";
+		case ZoneUnsolicited:
+			return "ZoneUnsolicited";
+		case GateToBindPoint:
+			return "GateToBindPoint";
+		case SummonPC:
+			return "SummonPC";
+		case Rewind:
+			return "Rewind";
+		case EvacToSafeCoords:
+			return "EvacToSafeCoords";
+		default:
+			return "Unknown";
+	}
+}

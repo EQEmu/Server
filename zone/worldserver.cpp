@@ -355,8 +355,24 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 			break;
 		ZoneToZone_Struct* ztz = (ZoneToZone_Struct*)pack->pBuffer;
 
-		if (ztz->current_zone_id == zone->GetZoneID()
-			&& ztz->current_instance_id == zone->GetInstanceID()) {
+		LogZoning(
+			"ZoneToZone client [{}] guild_id [{}] requested_zone [{}] requested_zone_id [{}] requested_instance_id [{}] current_zone [{}] current_zone_id [{}] current_instance_id [{}] response [{}] admin [{}] ignorerestrictions [{}]",
+			ztz->name,
+			ztz->guild_id,
+			ZoneName(ztz->requested_zone_id),
+			ztz->requested_zone_id,
+			ztz->requested_instance_id,
+			ZoneName(ztz->current_zone_id),
+			ztz->current_zone_id,
+			ztz->current_instance_id,
+			ztz->response,
+			ztz->admin,
+			ztz->ignorerestrictions
+		);
+
+		// the client was rejected by the world server
+		// zone was not ready for some reason
+		if (ztz->current_zone_id == zone->GetZoneID() && ztz->current_instance_id == zone->GetInstanceID()) {
 			// it's a response
 			Entity* entity = entity_list.GetClientByName(ztz->name);
 			if (entity == 0)
@@ -371,6 +387,20 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 				entity->CastToMob()->SetZone(ztz->current_zone_id, ztz->current_instance_id);
 				entity->CastToClient()->SetZoning(false);
 				entity->CastToClient()->SetLockSavePosition(false);
+
+				LogZoning("ZoneToZone (ZoneNotReady) client [{}] guild_id [{}] requested_zone [{}] requested_zone_id [{}] requested_instance_id [{}] current_zone [{}] current_zone_id [{}] current_instance_id [{}] response [{}] admin [{}] ignorerestrictions [{}] ",
+					ztz->name,
+					ztz->guild_id,
+					ZoneName(ztz->requested_zone_id),
+					ztz->requested_zone_id,
+					ztz->requested_instance_id,
+					ZoneName(ztz->current_zone_id),
+					ztz->current_zone_id,
+					ztz->current_instance_id,
+					ztz->response,
+					ztz->admin,
+					ztz->ignorerestrictions
+				);
 			}
 			else {
 				entity->CastToClient()->UpdateWho(1);
@@ -411,6 +441,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 			}
 			}
 		}
+		// the client was accepted by the world server
 		else {
 			// it's a request
 			ztz->response = 0;

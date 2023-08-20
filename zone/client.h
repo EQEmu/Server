@@ -123,6 +123,9 @@ typedef enum {
 	EvacToSafeCoords
 } ZoneMode;
 
+// translate above enum to a string
+std::string GetZoneModeString(ZoneMode mode);
+
 enum {
 	HideCorpseNone = 0,
 	HideCorpseAll = 1,
