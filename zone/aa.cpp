@@ -1701,9 +1701,6 @@ bool Mob::CanPurchaseAlternateAdvancementRank(AA::Rank *rank, bool check_price, 
 }
 
 void Zone::LoadAlternateAdvancement() {
-	aa_abilities.clear();
-	aa_ranks.clear();
-
 	if (!content_db.LoadAlternateAdvancementAbilities(aa_abilities, aa_ranks)) {
 		aa_abilities.clear();
 		aa_ranks.clear();
