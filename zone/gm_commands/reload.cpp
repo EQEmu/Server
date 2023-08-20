@@ -230,74 +230,8 @@ void command_reload(Client *c, const Seperator *sep)
 		auto RW = (ReloadWorld_Struct *) pack->pBuffer;
 		RW->global_repop = global_repop;
 	} else if (is_zone) {
-		zone_store.LoadZones(content_db);
-
-		if (arguments < 2) {
-			c->Message(
-				Chat::White,
-				fmt::format(
-					"Zone Header Load {} | Zone: {}",
-					(
-						zone->LoadZoneCFG(zone->GetShortName(), zone->GetInstanceVersion()) ?
-						"Succeeded" :
-						"Failed"
-					),
-					zone->GetZoneDescription()
-				).c_str()
-			);
-			return;
-		}
-
-		auto zone_id = (
-			sep->IsNumber(2) ?
-			Strings::ToUnsignedInt(sep->arg[2]) :
-			ZoneID(sep->arg[2])
-		);
-		if (!zone_id) {
-			c->Message(
-				Chat::White,
-				fmt::format(
-					"Zone ID {} could not be found.",
-					zone_id
-				).c_str()
-			);
-			return;
-		}
-
-		auto zone_short_name = ZoneName(zone_id);
-		auto zone_long_name  = ZoneLongName(zone_id);
-		auto version         = (
-			sep->IsNumber(3) ?
-			Strings::ToUnsignedInt(sep->arg[3]) :
-			0
-		);
-
-		auto outapp = new EQApplicationPacket(OP_NewZone, sizeof(NewZone_Struct));
-		memcpy(outapp->pBuffer, &zone->newzone_data, outapp->size);
-		entity_list.QueueClients(c, outapp);
-		safe_delete(outapp);
-
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"Zone Header Load {} | Zone: {} ({}){}",
-				(
-					zone->LoadZoneCFG(zone_short_name, version) ?
-					"Succeeded" :
-					"Failed"
-				),
-				zone_long_name,
-				zone_short_name,
-				(
-					version ?
-					fmt::format(
-						" Version: {}",
-						version
-					) :
-					""
-				)
-			).c_str()
-		);
+		c->Message(Chat::White, "Attempting to reloading Zone data globally.");
+		pack = new ServerPacket(ServerOP_ReloadZoneData, sizeof(NewZone_Struct));
 	} else if (is_zone_points) {
 		c->Message(Chat::White, "Attempting to reloading Zone Points globally.");
 		pack = new ServerPacket(ServerOP_ReloadZonePoints, 0);
