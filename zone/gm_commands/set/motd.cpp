@@ -3,7 +3,7 @@
 
 extern WorldServer worldserver;
 
-void command_motd(Client *c, const Seperator *sep)
+void SetMOTD(Client *c, const Seperator *sep)
 {
 	const auto arguments = sep->argnum;
 	if (arguments < 2) {
