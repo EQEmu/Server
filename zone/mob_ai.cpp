@@ -1285,6 +1285,11 @@ void Mob::AI_Process() {
 								opts.crit_flat = cur;
 							}
 
+							cur = GetSpecialAbilityParam(SPECATK_AREA_RAMPAGE, 8);
+							if (cur > 0) {
+								opts.range_percent = cur;
+							}
+							
 							AreaRampage(&opts);
 							specialed = true;
 						}
