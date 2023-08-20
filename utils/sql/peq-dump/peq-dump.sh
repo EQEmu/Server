@@ -45,7 +45,7 @@ bash -c "${world_bin} database:dump --login-tables --table-structure-only --dump
 bash -c "${world_bin} database:dump --player-tables --table-structure-only --dump-output-to-console | sed 's/ AUTO_INCREMENT=[0-9]*\b//g' > ${dump_path}create_tables_player.sql"
 bash -c "${world_bin} database:dump --state-tables --table-structure-only --dump-output-to-console | sed 's/ AUTO_INCREMENT=[0-9]*\b//g' > ${dump_path}create_tables_state.sql"
 bash -c "${world_bin} database:dump --static-instance-data --dump-output-to-console > ${dump_path}create_tables_state.sql"
-bash -c "${world_bin} database:dump --query-serv-tables --table-structure-only --dump-output-to-console | sed 's/ AUTO_INCREMENT=[0-9]*\b//g' > ${dump_path}create_tables_queryserv.sql"
+bash -c "${world_bin} database:dump --query-serv-tables --table-structure-only --dump-output-to-console | sed 's/ AUTO_INCREMENT=[0-9]*\b//g' >> ${dump_path}create_tables_queryserv.sql"
 
 # with content
 bash -c "${world_bin} database:dump --content-tables --dump-output-to-console > ${dump_path}create_tables_content.sql"
