@@ -4854,7 +4854,7 @@ UPDATE data_buckets SET bot_id = SUBSTRING_INDEX(SUBSTRING_INDEX( `key`, '-', 2 
 		.sql = R"(
 
 CREATE TABLE `character_stats_record`  (
-  `character_id` int NULL,
+  `character_id` int NOT NULL,
   `name` varchar(100) NULL,
   `status` int NULL DEFAULT 0,
   `level` int NULL DEFAULT 0,
