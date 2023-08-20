@@ -191,6 +191,8 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	ServerPacket tpack(opcode, p);
 	ServerPacket *pack = &tpack;
 
+	bool reloaded_zones = false;
+
 	switch (opcode) {
 	case 0:
 	case ServerOP_KeepAlive: {
@@ -2111,7 +2113,11 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	}
 	case ServerOP_ReloadZoneData:
 	{
-		zone_store.LoadZones(content_db);
+		if (!reloaded_zones) {
+			zone_store.LoadZones(content_db);
+			reloaded_zones = true;
+		}
+
 		if (zone && zone->IsLoaded()) {
 			zone->LoadZoneCFG(zone->GetShortName(), zone->GetInstanceVersion());
 			zone->SendReloadMessage("Zone Data");
