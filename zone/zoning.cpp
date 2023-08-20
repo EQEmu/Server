@@ -149,7 +149,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 
 	if (target_instance_id) {
 		LogZoning(
-			"Client attempting zone to [{}] instance_id [{}] to zone [{}] ({})",
+			"Client [{}] attempting zone to instance_id [{}] zone [{}] ({})",
 			GetCleanName(),
 			target_instance_id,
 			ZoneName(target_zone_id),
