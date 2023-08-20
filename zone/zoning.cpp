@@ -341,9 +341,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 
 	//TODO: ADVENTURE ENTRANCE CHECK
 
-	/**
-	 * Expansion check
-	 */
+	// Expansion checks and routing
 	if (content_service.GetCurrentExpansion() >= Expansion::Classic && !GetGM()) {
 		bool meets_zone_expansion_check = false;
 
@@ -367,6 +365,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 
 	if (content_service.GetCurrentExpansion() >= Expansion::Classic && GetGM()) {
 		LogInfo("[{}] Bypassing Expansion zone checks because GM status is set", GetCleanName());
+		Message(Chat::Yellow, "Bypassing Expansion zone checks because GM status is set");
 	}
 
 	if (zoning_message == ZoningMessage::ZoneSuccess) {
