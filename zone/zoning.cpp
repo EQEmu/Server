@@ -317,7 +317,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 
 	//TODO: ADVENTURE ENTRANCE CHECK
 
-	// Expansion check
+	// Expansion checks and routing
 	if (content_service.GetCurrentExpansion() >= Expansion::Classic && !GetGM()) {
 		bool meets_zone_expansion_check = false;
 

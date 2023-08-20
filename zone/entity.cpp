@@ -5647,7 +5647,7 @@ void EntityList::StopMobAI()
 
 void EntityList::SendAlternateAdvancementStats() {
 	for (auto &c : client_list) {
-		c.second->Message(0, "Reloading AA");
+		c.second->Message(Chat::White, "Reloading AA");
 		c.second->ReloadExpansionProfileSetting();
 		c.second->SendClearPlayerAA();
 		c.second->SendAlternateAdvancementTable();
