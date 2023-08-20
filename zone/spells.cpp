@@ -6258,16 +6258,22 @@ void Mob::SendBuffsToClient(Client *c)
 	}
 }
 
-EQApplicationPacket *Mob::MakeBuffsPacket(bool for_target)
+EQApplicationPacket *Mob::MakeBuffsPacket(bool for_target, bool clear_buffs)
 {
 	uint32 count = 0;
+	uint32 buff_count;
+
 	// for self we want all buffs, for target, we want to skip song window buffs
 	// since NPCs and pets don't have a song window, we still see it for them :P
-	uint32 buff_count = for_target ? GetMaxBuffSlots() : GetMaxTotalSlots();
-	for(int i = 0; i < buff_count; ++i)
-	{
-		if (IsValidSpell(buffs[i].spellid))
-		{
+	if (for_target) {
+		buff_count = (clear_buffs) ? 0 : GetMaxBuffSlots();
+	}
+	else {
+		buff_count = GetMaxTotalSlots();
+	}
+
+	for(int i = 0; i < buff_count; ++i) {
+		if (IsValidSpell(buffs[i].spellid)) {
 			++count;
 		}
 	}
@@ -6275,12 +6281,10 @@ EQApplicationPacket *Mob::MakeBuffsPacket(bool for_target)
 	EQApplicationPacket* outapp = nullptr;
 
 	//Create it for a targeting window, else create it for a create buff packet.
-	if(for_target)
-	{
+	if(for_target) {
 		outapp = new EQApplicationPacket(OP_TargetBuffs, sizeof(BuffIcon_Struct) + sizeof(BuffIconEntry_Struct) * count);
 	}
-	else
-	{
+	else {
 		outapp = new EQApplicationPacket(OP_BuffCreate, sizeof(BuffIcon_Struct) + sizeof(BuffIconEntry_Struct) * count);
 	}
 	BuffIcon_Struct *buff = (BuffIcon_Struct*)outapp->pBuffer;
@@ -6297,10 +6301,8 @@ EQApplicationPacket *Mob::MakeBuffsPacket(bool for_target)
 
 	buff->name_lengths = 0; // hacky shit
 	uint32 index = 0;
-	for(int i = 0; i < buff_count; ++i)
-	{
-		if (IsValidSpell(buffs[i].spellid))
-		{
+	for(int i = 0; i < buff_count; ++i) {
+		if (IsValidSpell(buffs[i].spellid)) {
 			buff->entries[index].buff_slot = i;
 			buff->entries[index].spell_id = buffs[i].spellid;
 			buff->entries[index].tics_remaining = buffs[i].ticsremaining;
