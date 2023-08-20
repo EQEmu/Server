@@ -2112,7 +2112,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	case ServerOP_ReloadZoneData:
 	{
 		zone_store.LoadZones(content_db);
-
 		if (zone && zone->IsLoaded()) {
 			zone->LoadZoneCFG(zone->GetShortName(), zone->GetInstanceVersion());
 			zone->SendReloadMessage("Zone Data");
