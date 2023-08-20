@@ -2136,7 +2136,7 @@ void Client::Handle_OP_AdventureMerchantRequest(const EQApplicationPacket *app)
 	const EQ::ItemData *item = nullptr;
 	std::list<MerchantList> merlist = zone->merchanttable[merchantid];
 	std::list<MerchantList>::const_iterator itr;
-	for (itr = merlist.begin(); itr != merlist.end() && count<255; ++itr) {
+	for (itr = merlist.begin(); itr != merlist.end(); ++itr) {
 		const MerchantList &ml = *itr;
 		if (GetLevel() < ml.level_required) {
 			continue;
