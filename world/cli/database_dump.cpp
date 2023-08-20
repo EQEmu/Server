@@ -15,6 +15,7 @@ void WorldserverCLI::DatabaseDump(int argc, char **argv, argh::parser &cmd, std:
 		"--state-tables",
 		"--system-tables",
 		"--query-serv-tables",
+		"--static-instance-data",
 		"--table-structure-only",
 		"--table-lock",
 		"--dump-path=",
@@ -51,6 +52,7 @@ void WorldserverCLI::DatabaseDump(int argc, char **argv, argh::parser &cmd, std:
 	s->SetDumpWithCompression(cmd[{"--compress"}]);
 	s->SetDumpOutputToConsole(cmd[{"--dump-output-to-console"}]);
 	s->SetDumpDropTableSyntaxOnly(cmd[{"--drop-table-syntax-only"}]);
+	s->SetDumpStaticInstanceData(cmd[{"--static-instance-data"}]);
 
 	s->DatabaseDump();
 }

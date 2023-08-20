@@ -279,6 +279,11 @@ void DatabaseDumpService::DatabaseDump()
 		}
 	}
 
+	if (IsDumpStaticInstanceData()) {
+		tables_to_dump += "instance_list";
+		options += " --no-create-info --where=\"instance_list.is_global > 0 and instance_list.never_expires > 0\"";
+	}
+
 	if (!dump_descriptor.empty()) {
 		SetDumpFileName(GetDumpFileName() + dump_descriptor);
 	}
@@ -605,4 +610,14 @@ void DatabaseDumpService::RemoveCredentialsFile()
 	if (File::Exists(CREDENTIALS_FILE)) {
 		std::filesystem::remove(CREDENTIALS_FILE);
 	}
+}
+
+bool DatabaseDumpService::IsDumpStaticInstanceData()
+{
+	return dump_static_instance_data;
+}
+
+void DatabaseDumpService::SetDumpStaticInstanceData(bool b)
+{
+	dump_static_instance_data = b;
 }
