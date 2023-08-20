@@ -1595,7 +1595,7 @@ void EntityList::RefreshClientXTargets(Client *c)
 }
 
 void EntityList::QueueClientsByTarget(Mob *sender, const EQApplicationPacket *app,
-		bool iSendToSender, Mob *SkipThisMob, bool ackreq, bool HoTT, uint32 ClientVersionBits, bool inspect_buffs, bool clear)
+		bool iSendToSender, Mob *SkipThisMob, bool ackreq, bool HoTT, uint32 ClientVersionBits, bool inspect_buffs, bool clear_target_window)
 {
 	auto it = client_list.begin();
 	while (it != client_list.end()) {
@@ -1611,7 +1611,7 @@ void EntityList::QueueClientsByTarget(Mob *sender, const EQApplicationPacket *ap
 
 		TargetsTarget = Target->GetTarget();
 
-		bool Send = clear;
+		bool Send = clear_target_window;
 
 		if (c == SkipThisMob)
 			continue;
@@ -1624,21 +1624,21 @@ void EntityList::QueueClientsByTarget(Mob *sender, const EQApplicationPacket *ap
 			if (Target == sender) {
 				if (inspect_buffs) { // if inspect_buffs is true we're sending a mob's buffs to those with the LAA
 					if (c->GetGM() || RuleB(Spells, AlwaysSendTargetsBuffs)) {
-						Send = !clear;
+						Send = !clear_target_window;
 					} else if (c->IsRaidGrouped()) {
 						Raid *raid = c->GetRaid();
 						if (raid) {
 							uint32 gid = raid->GetGroup(c);
 							if (gid < MAX_RAID_GROUPS && raid->GroupCount(gid) >= 3) {
 								if (raid->GetLeadershipAA(groupAAInspectBuffs, gid))
-									Send = !clear;
+									Send = !clear_target_window;
 							}
 						}
 					} else {
 						Group *group = c->GetGroup();
 						if (group && group->GroupCount() >= 3) {
 							if (group->GetLeadershipAA(groupAAInspectBuffs)) {
-								Send = !clear;
+								Send = !clear_target_window;
 							}
 						}
 					}
