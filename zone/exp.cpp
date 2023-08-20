@@ -1212,7 +1212,6 @@ void Raid::SplitExp(const uint64 exp, Mob* other) {
 	}
 
 	raid_experience = static_cast<uint64>(static_cast<float>(raid_experience) *	RuleR(Character, FinalRaidExpMultiplier));
-
 }
 
 void Client::SetLeadershipEXP(uint64 group_exp, uint64 raid_exp) {
