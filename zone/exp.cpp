@@ -1184,6 +1184,8 @@ void Raid::SplitExp(const uint64 exp, Mob* other) {
 		raid_experience = static_cast<uint64>(static_cast<float>(raid_experience) *	(1.0f - RuleR(Character, RaidExpMultiplier)));
 	}
 
+	raid_experience = static_cast<uint64>(static_cast<float>(raid_experience) * RuleR(Character, FinalRaidExpMultiplier));
+
 	const auto consider_level = Mob::GetLevelCon(highest_level, other->GetLevel());
 	if (consider_level == CON_GRAY) {
 		return;
@@ -1210,8 +1212,6 @@ void Raid::SplitExp(const uint64 exp, Mob* other) {
 			}
 		}
 	}
-
-	raid_experience = static_cast<uint64>(static_cast<float>(raid_experience) *	RuleR(Character, FinalRaidExpMultiplier));
 }
 
 void Client::SetLeadershipEXP(uint64 group_exp, uint64 raid_exp) {
