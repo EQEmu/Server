@@ -625,7 +625,7 @@ RULE_BOOL(Bots, FinishBuffing, false, "Allow for buffs to complete even if the b
 RULE_BOOL(Bots, GroupBuffing, false, "Bots will cast single target buffs as group buffs, default is false for single. Does not make single target buffs work for MGB")
 RULE_INT(Bots, HealRotationMaxMembers, 24, "Maximum number of heal rotation members")
 RULE_INT(Bots, HealRotationMaxTargets, 12, "Maximum number of heal rotation targets")
-RULE_REAL(Bots, ManaRegen, 2.0, "Adjust mana regen for bots, 1 is fast and higher numbers slow it down 3 is about the same as players")
+RULE_REAL(Bots, ManaRegen, 2.0, "Adjust mana regen, value is multiplicative and is applied after all Mana Regen sources have been applied, including the Rule Character:ManaRegenMultiplier.")
 RULE_BOOL(Bots, PreferNoManaCommandSpells, true, "Give sorting priority to newer no-mana spells (i.e., 'Bind Affinity')")
 RULE_BOOL(Bots, QuestableSpawnLimit, false, "Optional quest method to manage bot spawn limits using the quest_globals name bot_spawn_limit, see: /bazaar/Aediles_Thrall.pl")
 RULE_INT(Bots, SpawnLimit, 71, "Number of bots a character can have spawned at one time, You + 71 bots is a 12 group pseudo-raid")
