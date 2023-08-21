@@ -1611,7 +1611,7 @@ void EntityList::QueueClientsByTarget(Mob *sender, const EQApplicationPacket *ap
 
 		TargetsTarget = Target->GetTarget();
 
-		bool Send = clear_target_window;
+		bool Send = false;
 
 		if (c == SkipThisMob)
 			continue;
@@ -1623,6 +1623,7 @@ void EntityList::QueueClientsByTarget(Mob *sender, const EQApplicationPacket *ap
 		if (c != sender) {
 			if (Target == sender) {
 				if (inspect_buffs) { // if inspect_buffs is true we're sending a mob's buffs to those with the LAA
+					Send = clear_target_window;
 					if (c->GetGM() || RuleB(Spells, AlwaysSendTargetsBuffs)) {
 						Send = !clear_target_window;
 					} else if (c->IsRaidGrouped()) {
