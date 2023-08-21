@@ -148,14 +148,15 @@ bool Database::GetUnusedInstanceID(uint16 &instance_id)
 
 	// recycle instances - change query to get first unused id above reserved
 	if (RuleB(Instances, RecycleInstanceIds)) {
-		query = (
+		query = fmt::format(
 			SQL(
 				SELECT MIN(i.id + 1) AS next_available
 				FROM instance_list i
 				LEFT JOIN instance_list i2 ON i.id + 1 = i2.id
-				WHERE i.id > RuleI(Instances, ReservedInstances)
+				WHERE i.id > {}
 				AND i2.id IS NULL;
-			)
+			),
+			RuleI(Instances, ReservedInstances)
 		);
 	}
 
