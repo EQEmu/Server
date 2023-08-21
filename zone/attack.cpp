@@ -4225,6 +4225,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 		//Note: if players can become pets, they will not receive damage messages of their own
 		//this was done to simplify the code here (since we can only effectively skip one mob on queue)
 		eqFilterType filter;
+		Mob* skip = attacker;
 		if (attacker && attacker->GetOwnerID()) {
 			//attacker is a pet, let pet owners see their pet's damage
 			Mob* owner = attacker->GetOwner();
@@ -4259,6 +4260,8 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 							);
 				}
 			}
+			
+			skip = owner;
 		}
 		else {
 			//attacker is not a pet, send to the attacker
@@ -4366,7 +4369,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 						outapp, /* packet */
 						true, /* Skip Sender */
 						range, /* distance packet travels at the speed of sound */
-						0,
+						(IsValidSpell(spell_id) && skill_used != EQ::skills::SkillTigerClaw) ? 0 : skip,
 						true, /* Packet ACK */
 						filter /* eqFilterType filter */
 						);
