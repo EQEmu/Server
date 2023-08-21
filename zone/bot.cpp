@@ -5400,10 +5400,10 @@ void Bot::ProcessBotOwnerRefDelete(Mob* botOwner) {
 int64 Bot::CalcMaxMana() {
 	switch(GetCasterClass()) {
 		case 'I':
-			max_mana = (GenerateBaseManaPoints() + itembonuses.Mana + spellbonuses.Mana + GroupLeadershipAAManaEnhancement());
+			max_mana = (GenerateBaseManaPoints() + itembonuses.Mana + spellbonuses.Mana + aabonuses.Mana + GroupLeadershipAAManaEnhancement());
 			max_mana += itembonuses.heroic_max_mana;
 		case 'W': {
-			max_mana = (GenerateBaseManaPoints() + itembonuses.Mana + spellbonuses.Mana + GroupLeadershipAAManaEnhancement());
+			max_mana = (GenerateBaseManaPoints() + itembonuses.Mana + spellbonuses.Mana + aabonuses.Mana + GroupLeadershipAAManaEnhancement());
 			max_mana += itembonuses.heroic_max_mana;
 			break;
 		}
