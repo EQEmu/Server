@@ -4260,7 +4260,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 							);
 				}
 			}
-			
+
 			skip = owner;
 		}
 		else {
