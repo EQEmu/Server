@@ -138,7 +138,7 @@ bool Database::GetUnusedInstanceID(uint16 &instance_id)
 		instance_id = 0;
 		return false;
 	}
-	
+
 	// initial query - get max unused id above reserved
 	auto query = fmt::format(
 		"SELECT IFNULL(MAX(id), {}) + 1 FROM instance_list WHERE id > {}",
@@ -174,12 +174,12 @@ bool Database::GetUnusedInstanceID(uint16 &instance_id)
 		return true;
 	}
 
-	auto row = results.begin();
-
-	// check that id is within limits
-	if (Strings::ToInt(row[0]) <= max_instance_id) {
-		instance_id = Strings::ToInt(row[0]);
-		return true;
+	for (auto row : results) {
+		// check that id is within limits
+		if (row[0] && Strings::ToInt(row[0]) <= max_instance_id) {
+			instance_id = Strings::ToInt(row[0]);
+			return true;
+		}
 	}
 
 	// unhandled situation - should not reach here
