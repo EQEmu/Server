@@ -1812,6 +1812,7 @@ bool lua_is_content_flag_enabled(std::string content_flag){
 
 void lua_set_content_flag(std::string flag_name, bool enabled){
 	content_service.SetContentFlag(flag_name, enabled);
+	zone->ReloadContentFlags();
 }
 
 Lua_Expedition lua_get_expedition() {
