@@ -395,6 +395,8 @@ public:
 
 	void SetIsHotzone(bool is_hotzone);
 
+	void ReloadContentFlags();
+
 private:
 	bool      allow_mercs;
 	bool      can_bind;
