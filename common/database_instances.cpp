@@ -139,50 +139,105 @@ bool Database::GetUnusedInstanceID(uint16 &instance_id)
 		return false;
 	}
 
-	// initial query - get max unused id above reserved
-	auto query = fmt::format(
-		"SELECT IFNULL(MAX(id), {}) + 1 FROM instance_list WHERE id > {}",
-		max_reserved_instance_id,
-		max_reserved_instance_id
-	);
-
-	// recycle instances - change query to get first unused id above reserved
+	// recycle instances
 	if (RuleB(Instances, RecycleInstanceIds)) {
+		
+		//query to get first unused id above reserved
+		auto query = fmt::format(
+			SQL(
+				SELECT id
+				FROM instance_list
+				WHERE id = {};
+			),
+			max_reserved_instance_id + 1
+		);
+
+		auto results = QueryDatabase(query);
+
+		// could not successfully query - bail out
+		if (!results.Success()) {
+			instance_id = 0;
+			return false;
+		}
+
+		// first id is available
+		if (results.RowCount() == 0) {
+			instance_id = max_reserved_instance_id + 1;
+			return true;
+		}
+
+		// now look for next available above reserved
 		query = fmt::format(
 			SQL(
 				SELECT MIN(i.id + 1) AS next_available
 				FROM instance_list i
 				LEFT JOIN instance_list i2 ON i.id + 1 = i2.id
-				WHERE i.id > {}
+				WHERE i.id >= {}
 				AND i2.id IS NULL;
 			),
-			RuleI(Instances, ReservedInstances)
+			max_reserved_instance_id
 		);
-	}
 
-	auto results = QueryDatabase(query);
+		results = QueryDatabase(query);
 
-	// could not successfully query - bail out
-	if (!results.Success()) {
-		instance_id = 0;
-		return false;
-	}
+		// could not successfully query - bail out
+		if (!results.Success()) {
+			instance_id = 0;
+			return false;
+		}
 
-	// no instances running - assign first id above reserved
-	if (results.RowCount() == 0) {
-		instance_id = max_reserved_instance_id + 1;
-		return true;
-	}
+		// did not retrieve any rows - bail out
+		if (results.RowCount() == 0) {
+			instance_id = 0;
+			return false;
+		}
 
-	for (auto row : results) {
+		auto row = results.begin();
+
 		// check that id is within limits
-		if (row[0] && Strings::ToInt(row[0]) <= max_instance_id) {
+		if (Strings::ToInt(row[0]) <= max_instance_id) {
 			instance_id = Strings::ToInt(row[0]);
 			return true;
 		}
 	}
+	else {
+		// get max unused id above reserved
+		auto query = fmt::format(
+			"SELECT IFNULL(MAX(id), {}) + 1 FROM instance_list WHERE id > {}",
+			max_reserved_instance_id,
+			max_reserved_instance_id
+		);
 
-	// unhandled situation - should not reach here
+		auto results = QueryDatabase(query);
+
+		// could not successfully query - bail out
+		if (!results.Success()) {
+			instance_id = 0;
+			return false;
+		}
+
+		// did not retrieve any rows - bail out
+		if (results.RowCount() == 0) {
+			instance_id = 0;
+			return false;
+		}
+
+		auto row = results.begin();
+
+		// no instances currently used
+		if (row[0] == NULL) {
+			instance_id = max_reserved_instance_id + 1;
+			return true;
+		}
+
+		// check that id is within limits
+		if (Strings::ToInt(row[0]) <= max_instance_id) {
+			instance_id = Strings::ToInt(row[0]);
+			return true;
+		}
+	}
+	
+	// no available instance ids
 	instance_id = 0;
 	return false;
 }
