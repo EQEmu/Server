@@ -1594,6 +1594,15 @@ bool Mob::CanUseAlternateAdvancementRank(AA::Rank *rank) {
 		}
 	}
 
+	int expansion = RuleI(Expansion, CurrentExpansion);
+	bool use_expansion_aa = RuleB(Expansion, UseCurrentExpansionAAOnly);
+	if (use_expansion_aa && expansion >= 0) {
+		if (rank->expansion > expansion) {
+			return false;
+		}
+	}
+
+
 	if (IsClient()) {
 		if (rank->expansion && !(CastToClient()->GetPP().expansions & (1 << (rank->expansion - 1)))) {
 			return false;
@@ -1793,17 +1802,11 @@ bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std
 	}
 
 	LogInfo("Loaded [{}] Alternate Advancement Abilities", Strings::Commify((int)abilities.size()));
-	int expansion = RuleI(Expansion, CurrentExpansion);
-	bool use_expansion_aa = RuleB(Expansion, UseCurrentExpansionAAOnly);
-
 	ranks.clear();
-	if (use_expansion_aa && expansion >= 0) {
-		query = fmt::format("SELECT id, upper_hotkey_sid, lower_hotkey_sid, title_sid, desc_sid, cost, level_req, spell, spell_type, recast_time, "
-		"next_id, expansion FROM aa_ranks WHERE expansion <= {}", expansion);
-	} else {
-		query = "SELECT id, upper_hotkey_sid, lower_hotkey_sid, title_sid, desc_sid, cost, level_req, spell, spell_type, recast_time, "
+
+	query = "SELECT id, upper_hotkey_sid, lower_hotkey_sid, title_sid, desc_sid, cost, level_req, spell, spell_type, recast_time, "
 		"next_id, expansion FROM aa_ranks";
-	}
+
 	results = QueryDatabase(query);
 	if(results.Success()) {
 		for(auto row = results.begin(); row != results.end(); ++row) {
