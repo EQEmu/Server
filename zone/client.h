@@ -905,6 +905,8 @@ public:
 	int GetAAPoints() { return m_pp.aapoints; }
 	int GetSpentAA() { return m_pp.aapoints_spent; }
 	uint32 GetRequiredAAExperience();
+	void AutoGrantAAPoints();
+	bool HasAlreadyPurchasedRank(AA::Rank* rank);
 
 	bool SendGMCommand(std::string message, bool ignore_status = false);
 

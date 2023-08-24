@@ -918,6 +918,8 @@ void Client::CompleteConnect()
 
 	RecordStats();
 
+	AutoGrantAAPoints();
+
 	// enforce some rules..
 	if (!CanEnterZone()) {
 		LogInfo("Kicking character [{}] from zone, not allowed here (missing requirements)", GetCleanName());

@@ -2071,3 +2071,59 @@ void Client::TogglePurchaseAlternativeAdvancementRank(int rank_id){
 	CalcBonuses();
 }
 
+void Client::AutoGrantAAPoints() {
+	int auto_grant_expansion = RuleI(Expansion, AutoGrantAAExpansion);
+
+	if (auto_grant_expansion == -1) {
+		return;
+	}
+
+	//iterate through every AA
+	for (auto& iter : zone->aa_abilities) {
+		auto ability = iter.second.get();
+
+		if (ability->grant_only) {
+			continue;
+		}
+
+		if (ability->charges > 0) {
+			continue;
+		}
+
+		auto level = GetLevel();
+		auto p = 1;
+		auto rank = ability->first;
+		while (rank != nullptr) {
+			if (CanUseAlternateAdvancementRank(rank)) {
+				if (rank->expansion <= auto_grant_expansion && rank->level_req <= level && !HasAlreadyPurchasedRank(rank)) {
+					FinishAlternateAdvancementPurchase(rank, true);
+				}
+			}
+			else {
+				break;
+			}
+
+			p++;
+			rank = rank->next;
+		}
+	}
+}
+
+bool Client::HasAlreadyPurchasedRank(AA::Rank *rank) {
+	//We could make this more efficient if needed.
+	for (auto& iter : aa_ranks) {
+		auto ability_rank = zone->GetAlternateAdvancementAbilityAndRank(iter.first, iter.second.first);
+		auto ability = ability_rank.first;
+		auto current = ability_rank.second;
+
+		while (current != nullptr) {
+			if (current == rank) {
+				return true;
+			}
+
+			current = current->prev;
+		}
+	}
+
+	return false;
+}

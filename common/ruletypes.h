@@ -820,6 +820,7 @@ RULE_CATEGORY_END()
 RULE_CATEGORY(Expansion)
 RULE_INT(Expansion, CurrentExpansion, -1, "The current expansion enabled for the server [-1 = ALL, 0 = Classic, 1 = Kunark etc.]")
 RULE_BOOL(Expansion, UseCurrentExpansionAAOnly, false, "When true will only load AA ranks that match CurrentExpansion rule")
+RULE_INT(Expansion, AutoGrantAAExpansion, -1, "Expansion to auto grant AAs up to, [-1 = Disabled, 0 = Classic, 1 = Kunark etc.]")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Instances)
