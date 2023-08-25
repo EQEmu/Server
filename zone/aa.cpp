@@ -1654,6 +1654,10 @@ bool Mob::CanPurchaseAlternateAdvancementRank(AA::Rank *rank, bool check_price, 
 		return false;
 	}
 
+	if (IsClient() && CastToClient()->HasAlreadyPurchasedRank(rank)) {
+		return false;
+	}
+
 	//You can't purchase grant only AAs they can only be assigned
 	if(check_grant && ability->grant_only) {
 		return false;
@@ -1773,7 +1777,7 @@ bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std
 {
 	abilities.clear();
 	std::string query = "SELECT id, name, category, classes, races, deities, drakkin_heritage, status, type, charges, "
-		"grant_only, reset_on_death, first_rank_id FROM aa_ability WHERE enabled = 1";
+		"grant_only, reset_on_death, auto_grant_enabled, first_rank_id FROM aa_ability WHERE enabled = 1";
 	auto results = QueryDatabase(query);
 	if(results.Success()) {
 		for(auto row = results.begin(); row != results.end(); ++row) {
@@ -1791,7 +1795,8 @@ bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std
 			ability->charges = Strings::ToInt(row[9]);
 			ability->grant_only = Strings::ToBool(row[10]);
 			ability->reset_on_death = Strings::ToBool(row[11]);
-			ability->first_rank_id = Strings::ToInt(row[12]);
+			ability->auto_grant_enabled = Strings::ToBool(row[12]);
+			ability->first_rank_id = Strings::ToInt(row[13]);
 			ability->first = nullptr;
 
 			abilities[ability->id] = std::unique_ptr<AA::Ability>(ability);
@@ -2090,6 +2095,10 @@ void Client::AutoGrantAAPoints() {
 			continue;
 		}
 
+		if (!ability->auto_grant_enabled) {
+			continue;
+		}
+
 		auto level = GetLevel();
 		auto p = 1;
 		auto rank = ability->first;
@@ -2110,19 +2119,22 @@ void Client::AutoGrantAAPoints() {
 }
 
 bool Client::HasAlreadyPurchasedRank(AA::Rank *rank) {
-	//We could make this more efficient if needed.
-	for (auto& iter : aa_ranks) {
-		auto ability_rank = zone->GetAlternateAdvancementAbilityAndRank(iter.first, iter.second.first);
-		auto ability = ability_rank.first;
-		auto current = ability_rank.second;
+	auto iter = aa_ranks.find(rank->base_ability->id);
 
-		while (current != nullptr) {
-			if (current == rank) {
-				return true;
-			}
+	if (iter == aa_ranks.end()) {
+		return false;
+	}
 
-			current = current->prev;
+	auto ability_rank = zone->GetAlternateAdvancementAbilityAndRank(iter->first, iter->second.first);
+	auto ability = ability_rank.first;
+	auto current = ability_rank.second;
+
+	while (current != nullptr) {
+		if (current == rank) {
+			return true;
 		}
+
+		current = current->prev;
 	}
 
 	return false;

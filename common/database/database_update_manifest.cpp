@@ -4932,6 +4932,17 @@ CREATE TABLE `character_stats_record`  (
 );
 )"
 	},
+	ManifestEntry{
+		.version = 9236,
+		.description = "2023_08_24_aa_ability_auto_grant.sql",
+		.check = "SHOW COLUMNS FROM `aa_ability` LIKE 'auto_grant_enabled';",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `aa_ability` ADD COLUMN `auto_grant_enabled` TINYINT(4) NOT NULL DEFAULT '0' AFTER `reset_on_death`;
+UPDATE `aa_ability` SET `auto_grant_enabled` = 1 WHERE `grant_only` = 0 AND `charges` = 0 AND `category` = -1;
+)"
+	},
 
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{

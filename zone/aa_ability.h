@@ -50,6 +50,7 @@ public:
 	int status;
 	bool grant_only;
 	bool reset_on_death;
+	bool auto_grant_enabled;
 	int type;
 	int charges;
 	int first_rank_id;
