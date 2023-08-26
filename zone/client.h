@@ -906,6 +906,7 @@ public:
 	int GetSpentAA() { return m_pp.aapoints_spent; }
 	uint32 GetRequiredAAExperience();
 	void AutoGrantAAPoints();
+	void GrantAllAAPoints();
 	bool HasAlreadyPurchasedRank(AA::Rank* rank);
 
 	bool SendGMCommand(std::string message, bool ignore_status = false);
@@ -1664,7 +1665,7 @@ protected:
 	bool client_data_loaded;
 
 
-	void FinishAlternateAdvancementPurchase(AA::Rank *rank, bool ignore_cost);
+	void FinishAlternateAdvancementPurchase(AA::Rank *rank, bool ignore_cost, bool silent);
 
 	Mob* bind_sight_target;
 
