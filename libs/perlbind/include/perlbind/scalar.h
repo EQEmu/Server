@@ -251,4 +251,6 @@ private:
   scalar m_value;
 };
 
+using ref = reference;
+
 } // namespace perlbind
