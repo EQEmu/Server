@@ -141,7 +141,7 @@ bool Database::GetUnusedInstanceID(uint16 &instance_id)
 
 	// recycle instances
 	if (RuleB(Instances, RecycleInstanceIds)) {
-		
+
 		//query to get first unused id above reserved
 		auto query = fmt::format(
 			SQL(
@@ -195,48 +195,51 @@ bool Database::GetUnusedInstanceID(uint16 &instance_id)
 		auto row = results.begin();
 
 		// check that id is within limits
-		if (Strings::ToInt(row[0]) <= max_instance_id) {
+		if (row[0] && Strings::ToInt(row[0]) <= max_instance_id) {
 			instance_id = Strings::ToInt(row[0]);
 			return true;
 		}
+
+		// no available instance ids
+		instance_id = 0;
+		return false;
 	}
-	else {
-		// get max unused id above reserved
-		auto query = fmt::format(
-			"SELECT IFNULL(MAX(id), {}) + 1 FROM instance_list WHERE id > {}",
-			max_reserved_instance_id,
-			max_reserved_instance_id
-		);
 
-		auto results = QueryDatabase(query);
+	// get max unused id above reserved
+	auto query = fmt::format(
+		"SELECT IFNULL(MAX(id), {}) + 1 FROM instance_list WHERE id > {}",
+		max_reserved_instance_id,
+		max_reserved_instance_id
+	);
 
-		// could not successfully query - bail out
-		if (!results.Success()) {
-			instance_id = 0;
-			return false;
-		}
+	auto results = QueryDatabase(query);
 
-		// did not retrieve any rows - bail out
-		if (results.RowCount() == 0) {
-			instance_id = 0;
-			return false;
-		}
-
-		auto row = results.begin();
-
-		// no instances currently used
-		if (row[0] == NULL) {
-			instance_id = max_reserved_instance_id + 1;
-			return true;
-		}
-
-		// check that id is within limits
-		if (Strings::ToInt(row[0]) <= max_instance_id) {
-			instance_id = Strings::ToInt(row[0]);
-			return true;
-		}
+	// could not successfully query - bail out
+	if (!results.Success()) {
+		instance_id = 0;
+		return false;
 	}
-	
+
+	// did not retrieve any rows - bail out
+	if (results.RowCount() == 0) {
+		instance_id = 0;
+		return false;
+	}
+
+	auto row = results.begin();
+
+	// no instances currently used
+	if (!row[0]) {
+		instance_id = max_reserved_instance_id + 1;
+		return true;
+	}
+
+	// check that id is within limits
+	if (Strings::ToInt(row[0]) <= max_instance_id) {
+		instance_id = Strings::ToInt(row[0]);
+		return true;
+	}
+
 	// no available instance ids
 	instance_id = 0;
 	return false;
