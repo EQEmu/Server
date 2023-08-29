@@ -56,7 +56,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 	auto* zc = (ZoneChange_Struct*)app->pBuffer;
 
 	LogZoning(
-		"Client [{}] zoning to [{}] ({}) instance_id [{}] x [{}] y [{}] z [{}] zone_reason [{}] success [{}] zone_mode [{}] ({})",
+		"Client [{}] char_name [{}] zoning to [{}] ({}) instance_id [{}] x [{}] y [{}] z [{}] zone_reason [{}] success [{}] zone_mode [{}] ({})",
 		GetCleanName(),
 		zc->char_name,
 		ZoneName(zc->zoneID),
@@ -68,7 +68,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 		zc->zone_reason,
 		zc->success,
 		GetZoneModeString(zone_mode),
-		zone_mode
+		int(zone_mode)
 	);
 
 	uint16 target_zone_id = 0;
