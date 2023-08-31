@@ -3136,3 +3136,13 @@ bool Zone::CompareDataBucket(uint8 bucket_comparison, const std::string& bucket_
 
 	return passes;
 }
+
+void Zone::ReloadContentFlags()
+{
+	auto pack = new ServerPacket(ServerOP_ReloadContentFlags, 0);
+	if (pack) {
+		worldserver.SendPacket(pack);
+	}
+
+	safe_delete(pack);
+}

@@ -381,6 +381,8 @@ Client::Client(EQStreamInterface *ieqs) : Mob(
 Client::~Client() {
 	mMovementManager->RemoveClient(this);
 
+	DataBucket::DeleteCachedBuckets(DataBucketLoadType::Client, CharacterID());
+
 	if (RuleB(Bots, Enabled)) {
 		Bot::ProcessBotOwnerRefDelete(this);
 	}
@@ -1558,7 +1560,13 @@ void Client::SetLDoNPoints(uint32 theme_id, uint32 points)
 		}
 	}
 
-	m_pp.ldon_points_available += points;
+	m_pp.ldon_points_available = (
+		m_pp.ldon_points_guk +
+		m_pp.ldon_points_mir +
+		m_pp.ldon_points_mmc +
+		m_pp.ldon_points_ruj +
+		m_pp.ldon_points_tak
+	);
 
 	auto outapp = new EQApplicationPacket(OP_AdventurePointsUpdate, sizeof(AdventurePoints_Update_Struct));
 
@@ -8875,7 +8883,8 @@ void Client::ShowDevToolsMenu()
 	menu_reload_two += Saylink::Silent("#reload commands", "Commands");
 	menu_reload_two += " | " + Saylink::Silent("#reload content_flags", "Content Flags");
 
-	menu_reload_three += Saylink::Silent("#reload doors", "Doors");
+	menu_reload_three += Saylink::Silent("#reload data_buckets_cache", "Databuckets");
+	menu_reload_three += " | " + Saylink::Silent("#reload doors", "Doors");
 	menu_reload_three += " | " + Saylink::Silent("#reload ground_spawns", "Ground Spawns");
 
 	menu_reload_four += Saylink::Silent("#reload logs", "Level Based Experience Modifiers");
@@ -10829,6 +10838,16 @@ void Client::SendReloadCommandMessages() {
 		).c_str()
 	);
 
+	auto data_buckets_link = Saylink::Silent("#reload data_buckets_cache");
+
+	Message(
+		Chat::White,
+		fmt::format(
+			"Usage: {} - Reloads data buckets cache globally",
+			data_buckets_link
+		).c_str()
+	);
+
 	auto dztemplates_link = Saylink::Silent("#reload dztemplates");
 	Message(Chat::White, fmt::format("Usage: {} - Reloads Dynamic Zone Templates globally", dztemplates_link).c_str());
 
@@ -11731,7 +11750,7 @@ void Client::ShowSpells(Client* c, ShowSpellType show_spell_type)
 					"{}. {} ({})",
 					index,
 					GetSpellName(spell_id),
-					Strings::Commify(spell_id)
+					spell_id
 				).c_str()
 			);
 		}
@@ -11748,4 +11767,30 @@ void Client::ShowSpells(Client* c, ShowSpellType show_spell_type)
 		).c_str(),
 		spell_table.c_str()
 	);
+}
+
+std::string GetZoneModeString(ZoneMode mode)
+{
+	switch (mode) {
+		case ZoneToSafeCoords:
+			return "ZoneToSafeCoords";
+		case GMSummon:
+			return "GMSummon";
+		case ZoneToBindPoint:
+			return "ZoneToBindPoint";
+		case ZoneSolicited:
+			return "ZoneSolicited";
+		case ZoneUnsolicited:
+			return "ZoneUnsolicited";
+		case GateToBindPoint:
+			return "GateToBindPoint";
+		case SummonPC:
+			return "SummonPC";
+		case Rewind:
+			return "Rewind";
+		case EvacToSafeCoords:
+			return "EvacToSafeCoords";
+		default:
+			return "Unknown";
+	}
 }

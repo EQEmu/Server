@@ -4768,14 +4768,14 @@ UNIQUE KEY `name` (`name`)
 		.match = "",
 		.sql = R"(
 	ALTER TABLE `raid_members`
-	ADD COLUMN `is_marker` TINYINT UNSIGNED DEFAULT(0) NOT NULL AFTER `islooter`,
-	ADD COLUMN `is_assister` TINYINT UNSIGNED DEFAULT(0) NOT NULL AFTER `is_marker`,
-	ADD COLUMN `note` VARCHAR(64) DEFAULT("") NOT NULL AFTER `is_assister`;
+	ADD COLUMN `is_marker` TINYINT UNSIGNED DEFAULT 0 NOT NULL AFTER `islooter`,
+	ADD COLUMN `is_assister` TINYINT UNSIGNED DEFAULT 0 NOT NULL AFTER `is_marker`,
+	ADD COLUMN `note` VARCHAR(64) DEFAULT '' NOT NULL AFTER `is_assister`;
 
 	ALTER TABLE `raid_details`
-	ADD COLUMN `marked_npc_1` SMALLINT UNSIGNED DEFAULT(0) NOT NULL AFTER `motd`,
-	ADD COLUMN `marked_npc_2` SMALLINT UNSIGNED DEFAULT(0) NOT NULL AFTER `marked_npc_1`,
-	ADD COLUMN `marked_npc_3` SMALLINT UNSIGNED DEFAULT(0) NOT NULL AFTER `marked_npc_2`;
+	ADD COLUMN `marked_npc_1` SMALLINT UNSIGNED DEFAULT 0 NOT NULL AFTER `motd`,
+	ADD COLUMN `marked_npc_2` SMALLINT UNSIGNED DEFAULT 0 NOT NULL AFTER `marked_npc_1`,
+	ADD COLUMN `marked_npc_3` SMALLINT UNSIGNED DEFAULT 0 NOT NULL AFTER `marked_npc_2`;
 	)",
 	},
 	ManifestEntry{
@@ -4804,6 +4804,132 @@ UNIQUE KEY `name` (`name`)
 PRIMARY KEY (`id`),
 UNIQUE INDEX `command`(`parent_command`, `sub_command`)
 )
+)"
+	},
+	ManifestEntry{
+		.version = 9233,
+		.description = "2023_07_16_scoped_data_buckets.sql",
+		.check = "SHOW COLUMNS FROM `data_buckets` LIKE 'character_id'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+
+ALTER TABLE `data_buckets`
+ADD COLUMN `character_id` bigint(11) NOT NULL DEFAULT 0 AFTER `expires`,
+ADD COLUMN `npc_id` bigint(11) NOT NULL DEFAULT 0 AFTER `character_id`,
+ADD COLUMN `bot_id` bigint(11) NOT NULL DEFAULT 0 AFTER `npc_id`,
+DROP INDEX `key_index`,
+ADD UNIQUE INDEX `keys`(`key`,`character_id`,`npc_id`,`bot_id`);
+
+UPDATE data_buckets SET character_id = SUBSTRING_INDEX(SUBSTRING_INDEX( `key`, '-', 2 ), '-', -1), `key` = SUBSTR(SUBSTRING_INDEX(`key`, SUBSTRING_INDEX( `key`, '-', 2 ), -1), 2) WHERE `key` LIKE 'character-%';
+UPDATE data_buckets SET npc_id = SUBSTRING_INDEX(SUBSTRING_INDEX( `key`, '-', 2 ), '-', -1), `key` = SUBSTR(SUBSTRING_INDEX(`key`, SUBSTRING_INDEX( `key`, '-', 2 ), -1), 2) WHERE `key` LIKE 'npc-%';
+UPDATE data_buckets SET bot_id = SUBSTRING_INDEX(SUBSTRING_INDEX( `key`, '-', 2 ), '-', -1), `key` = SUBSTR(SUBSTRING_INDEX(`key`, SUBSTRING_INDEX( `key`, '-', 2 ), -1), 2) WHERE `key` LIKE 'bot-%';
+
+)"
+	},
+	ManifestEntry{
+		.version = 9234,
+		.description = "2023_07_27_update_raid_details.sql",
+		.check = "SHOW COLUMNS FROM `raid_details` LIKE 'marked_npc_1_entity_id';",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(ALTER TABLE `raid_details`
+			CHANGE COLUMN `marked_npc_1` `marked_npc_1_entity_id` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `motd`,
+			ADD COLUMN `marked_npc_1_zone_id` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `marked_npc_1_entity_id`,
+			ADD COLUMN `marked_npc_1_instance_id` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `marked_npc_1_zone_id`,
+			CHANGE COLUMN `marked_npc_2` `marked_npc_2_entity_id` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `marked_npc_1_instance_id`,
+			ADD COLUMN `marked_npc_2_zone_id` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `marked_npc_2_entity_id`,
+			ADD COLUMN `marked_npc_2_instance_id` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `marked_npc_2_zone_id`,
+			CHANGE COLUMN `marked_npc_3` `marked_npc_3_entity_id` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `marked_npc_2_instance_id`,
+			ADD COLUMN `marked_npc_3_zone_id` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `marked_npc_3_entity_id`,
+			ADD COLUMN `marked_npc_3_instance_id` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `marked_npc_3_zone_id`;
+		)"
+    },
+	ManifestEntry{
+		.version = 9235,
+		.description = "2023_07_31_character_stats_record.sql",
+		.check = "SHOW TABLES LIKE 'character_stats_record'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+
+CREATE TABLE `character_stats_record`  (
+  `character_id` int NOT NULL,
+  `name` varchar(100) NULL,
+  `status` int NULL DEFAULT 0,
+  `level` int NULL DEFAULT 0,
+  `class` int NULL DEFAULT 0,
+  `race` int NULL DEFAULT 0,
+  `aa_points` int NULL DEFAULT 0,
+  `hp` bigint NULL DEFAULT 0,
+  `mana` bigint NULL DEFAULT 0,
+  `endurance` bigint NULL DEFAULT 0,
+  `ac` int NULL DEFAULT 0,
+  `strength` int NULL DEFAULT 0,
+  `stamina` int NULL DEFAULT 0,
+  `dexterity` int NULL DEFAULT 0,
+  `agility` int NULL DEFAULT 0,
+  `intelligence` int NULL DEFAULT 0,
+  `wisdom` int NULL DEFAULT 0,
+  `charisma` int NULL DEFAULT 0,
+  `magic_resist` int NULL DEFAULT 0,
+  `fire_resist` int NULL DEFAULT 0,
+  `cold_resist` int NULL DEFAULT 0,
+  `poison_resist` int NULL DEFAULT 0,
+  `disease_resist` int NULL DEFAULT 0,
+  `corruption_resist` int NULL DEFAULT 0,
+  `heroic_strength` int NULL DEFAULT 0,
+  `heroic_stamina` int NULL DEFAULT 0,
+  `heroic_dexterity` int NULL DEFAULT 0,
+  `heroic_agility` int NULL DEFAULT 0,
+  `heroic_intelligence` int NULL DEFAULT 0,
+  `heroic_wisdom` int NULL DEFAULT 0,
+  `heroic_charisma` int NULL DEFAULT 0,
+  `heroic_magic_resist` int NULL DEFAULT 0,
+  `heroic_fire_resist` int NULL DEFAULT 0,
+  `heroic_cold_resist` int NULL DEFAULT 0,
+  `heroic_poison_resist` int NULL DEFAULT 0,
+  `heroic_disease_resist` int NULL DEFAULT 0,
+  `heroic_corruption_resist` int NULL DEFAULT 0,
+  `haste` int NULL DEFAULT 0,
+  `accuracy` int NULL DEFAULT 0,
+  `attack` int NULL DEFAULT 0,
+  `avoidance` int NULL DEFAULT 0,
+  `clairvoyance` int NULL DEFAULT 0,
+  `combat_effects` int NULL DEFAULT 0,
+  `damage_shield_mitigation` int NULL DEFAULT 0,
+  `damage_shield` int NULL DEFAULT 0,
+  `dot_shielding` int NULL DEFAULT 0,
+  `hp_regen` int NULL DEFAULT 0,
+  `mana_regen` int NULL DEFAULT 0,
+  `endurance_regen` int NULL DEFAULT 0,
+  `shielding` int NULL DEFAULT 0,
+  `spell_damage` int NULL DEFAULT 0,
+  `spell_shielding` int NULL DEFAULT 0,
+  `strikethrough` int NULL DEFAULT 0,
+  `stun_resist` int NULL DEFAULT 0,
+  `backstab` int NULL DEFAULT 0,
+  `wind` int NULL DEFAULT 0,
+  `brass` int NULL DEFAULT 0,
+  `string` int NULL DEFAULT 0,
+  `percussion` int NULL DEFAULT 0,
+  `singing` int NULL DEFAULT 0,
+  `baking` int NULL DEFAULT 0,
+  `alchemy` int NULL DEFAULT 0,
+  `tailoring` int NULL DEFAULT 0,
+  `blacksmithing` int NULL DEFAULT 0,
+  `fletching` int NULL DEFAULT 0,
+  `brewing` int NULL DEFAULT 0,
+  `jewelry` int NULL DEFAULT 0,
+  `pottery` int NULL DEFAULT 0,
+  `research` int NULL DEFAULT 0,
+  `alcohol` int NULL DEFAULT 0,
+  `fishing` int NULL DEFAULT 0,
+  `tinkering` int NULL DEFAULT 0,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`character_id`)
+);
 )"
 	},
 

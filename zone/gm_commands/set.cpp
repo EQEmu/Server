@@ -33,6 +33,7 @@
 #include "set/loginserver_info.cpp"
 #include "set/mana.cpp"
 #include "set/mana_full.cpp"
+#include "set/motd.cpp"
 #include "set/name.cpp"
 #include "set/ooc_mute.cpp"
 #include "set/password.cpp"
@@ -82,7 +83,7 @@ void command_set(Client *c, const Seperator *sep)
 		Cmd{.cmd = "frozen", .u = "frozen [on|off]", .fn = SetFrozen, .a = {"#freeze", "#unfreeze"}},
 		Cmd{.cmd = "gender", .u = "gender [Gender ID]", .fn = SetGender, .a = {"#gender"}},
 		Cmd{.cmd = "gender_permanent", .u = "gender_permanent [Gender ID]", .fn = SetGenderPermanent, .a = {"#permagender"}},
-		Cmd{.cmd = "gm", .u = "gm [on|off]", .fn = SetGM, .a = {"#flymode"}},
+		Cmd{.cmd = "gm", .u = "gm [on|off]", .fn = SetGM, .a = {"#gm"}},
 		Cmd{.cmd = "gm_speed", .u = "gm_speed [on|off]", .fn = SetGMSpeed, .a = {"#gmspeed"}},
 		Cmd{.cmd = "gm_status", .u = "gm_status [GM Status] [Account]", .fn = SetGMStatus, .a = {"#flag"}},
 		Cmd{.cmd = "god_mode", .u = "god_mode [on|off]", .fn = SetGodMode, .a = {"#godmode"}},
@@ -98,6 +99,7 @@ void command_set(Client *c, const Seperator *sep)
 		Cmd{.cmd = "loginserver_info", .u = "loginserver_info [Email] [Password]", .fn = SetLoginserverInfo, .a = {"#setlsinfo"}},
 		Cmd{.cmd = "mana", .u = "mana [Amount]", .fn = SetMana, .a = {"#setmana"}},
 		Cmd{.cmd = "mana_full", .u = "mana_full", .fn = SetManaFull, .a = {"#mana"}},
+		Cmd{.cmd = "motd", .u = "motd", .fn = SetMOTD, .a = {"#motd"}},
 		Cmd{.cmd = "name", .u = "name", .fn = SetName, .a = {"#name"}},
 		Cmd{.cmd = "ooc_mute", .u = "ooc_mute", .fn = SetOOCMute, .a = {"#oocmute"}},
 		Cmd{.cmd = "password", .u = "password [Account Name] [Password] (account table password)", .fn = SetPassword, .a = {"#setpass"}},

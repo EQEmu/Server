@@ -47,7 +47,7 @@ void FindNPCType(Client *c, const Seperator *sep)
 			Chat::White,
 			fmt::format(
 				"NPC {} | {}{}",
-				Strings::Commify(row[0]),
+				row[0],
 				row[1],
 				(
 					can_spawn_npcs ?

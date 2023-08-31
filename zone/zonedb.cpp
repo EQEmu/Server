@@ -1927,6 +1927,8 @@ const NPCType *ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 		);
 	}
 
+	std::vector<uint32> npc_ids;
+
 	for (NpcTypesRepository::NpcTypes &n : NpcTypesRepository::GetWhere((Database &) content_db, filter)) {
 		NPCType *t;
 		t = new NPCType;
@@ -1989,6 +1991,7 @@ const NPCType *ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 		t->ranged_type     = n.ranged_type;
 		t->runspeed        = n.runspeed;
 		t->findable        = n.findable != 0;
+		t->is_quest_npc    = n.isquest != 0;
 		t->trackable       = n.trackable != 0;
 		t->hp_regen        = n.hp_regen_rate;
 		t->mana_regen      = n.mana_regen_rate;
@@ -2137,7 +2140,14 @@ const NPCType *ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 
 		zone->npctable[t->npc_id] = t;
 		npc = t;
+
+		// If NPC ID is not in npc_ids, add to vector
+		if (!std::count(npc_ids.begin(), npc_ids.end(), t->npc_id)) {
+			npc_ids.emplace_back(t->npc_id);
+		}
 	}
+
+	DataBucket::BulkLoadEntities(DataBucketLoadType::NPC, npc_ids);
 
 	return npc;
 }
@@ -3303,7 +3313,8 @@ void ZoneDatabase::SavePetInfo(Client *client)
 
 		// build pet buffs into struct
 		int pet_buff_count = 0;
-		int max_slots = RuleI(Spells, MaxTotalSlotsPET);
+		// Guard against setting the maximum pet slots above the client allowed maximum.
+		int max_slots = RuleI(Spells, MaxTotalSlotsPET) > PET_BUFF_COUNT ? PET_BUFF_COUNT : RuleI(Spells, MaxTotalSlotsPET);
 
 		// count pet buffs
 		for (int index = 0; index < max_slots; index++) {
@@ -4620,8 +4631,6 @@ void ZoneDatabase::SaveCharacterBinds(Client *c)
 			bind_count++;
 		}
 	}
-
-	LogInfo("bind count is [{}]", bind_count);
 
 	// allocate memory for binds
 	binds.reserve(bind_count);

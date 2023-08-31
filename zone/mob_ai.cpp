@@ -981,52 +981,7 @@ void Mob::AI_Process() {
 
 	if (moving && CanOpenDoors()) {
 		if (AI_scan_door_open_timer->Check()) {
-			auto      &door_list = entity_list.GetDoorsList();
-			for (auto itr : door_list) {
-				Doors *door = itr.second;
-
-				if (door->GetKeyItem()) {
-					continue;
-				}
-
-				if (door->GetLockpick()) {
-					continue;
-				}
-
-				if (door->IsDoorOpen()) {
-					continue;
-				}
-
-				if (door->GetTriggerDoorID() > 0) {
-					auto trigger_door = entity_list.GetDoorsByDoorID(door->GetTriggerDoorID());
-					if (trigger_door) {
-						if (Strings::RemoveNumbers(door->GetDoorName()) !=
-							Strings::RemoveNumbers(trigger_door->GetDoorName())) {
-							continue;
-						}
-					}
-				}
-
-				if (door->GetDoorParam() > 0) {
-					continue;
-				}
-
-				float distance                = DistanceSquared(m_Position, door->GetPosition());
-				float distance_scan_door_open = 20;
-
-				if (distance <= (distance_scan_door_open * distance_scan_door_open)) {
-
-					/**
-					 * Make sure we're opening a door within height relevance and not platforms
-					 * above or below
-					 */
-					if (std::abs(m_Position.z - door->GetPosition().z) > 10) {
-						continue;
-					}
-
-					door->ForceOpen(this);
-				}
-			}
+			HandleDoorOpen();
 		}
 	}
 
@@ -1071,12 +1026,15 @@ void Mob::AI_Process() {
 
 	if (engaged) {
 		if (IsNPC() && m_z_clip_check_timer.Check()) {
-			auto t = GetTarget();
-			if (t) {
-				float self_z   = GetZ() - GetZOffset();
-				float target_z = t->GetPosition().z - t->GetZOffset();
-				if (DistanceNoZ(GetPosition(), t->GetPosition()) < 75 &&
-					std::abs(self_z - target_z) >= 25 && !CheckLosFN(t)) {
+			bool is_moving = IsMoving() && !(IsRooted() || IsStunned() || IsMezzed());
+			auto t         = GetTarget();
+			if (is_moving && t) {
+				float self_z            = GetZ() - GetZOffset();
+				float target_z          = t->GetPosition().z - t->GetZOffset();
+				bool  can_path_to       = CastToNPC()->CanPathTo(t->GetX(), t->GetY(), t->GetZ());
+				bool  within_distance   = DistanceNoZ(GetPosition(), t->GetPosition()) < 75;
+				bool  within_z_distance = std::abs(self_z - target_z) >= 25;
+				if (within_distance && within_z_distance && !can_path_to) {
 					float new_z = FindDestGroundZ(t->GetPosition());
 					GMMove(t->GetPosition().x, t->GetPosition().y, new_z + GetZOffset(), t->GetPosition().w, false);
 					FaceTarget(t);
@@ -1327,6 +1285,11 @@ void Mob::AI_Process() {
 								opts.crit_flat = cur;
 							}
 
+							cur = GetSpecialAbilityParam(SPECATK_AREA_RAMPAGE, 8);
+							if (cur > 0) {
+								opts.range_percent = cur;
+							}
+							
 							AreaRampage(&opts);
 							specialed = true;
 						}

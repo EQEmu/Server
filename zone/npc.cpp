@@ -199,6 +199,7 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 	CHA                  = npc_type_data->CHA;
 	npc_mana             = npc_type_data->Mana;
 	m_is_underwater_only = npc_type_data->underwater;
+	m_is_quest_npc       = npc_type_data->is_quest_npc;
 
 	//quick fix of ordering if they screwed it up in the DB
 	if (max_dmg < min_dmg) {
@@ -1219,7 +1220,7 @@ void NPC::SpawnGridNodeNPC(const glm::vec4 &position, int32 grid_id, int32 grid_
 	npc_type->current_hp = 4000000;
 	npc_type->max_hp = 4000000;
 	npc_type->race = 2254;
-	npc_type->gender = 2;
+	npc_type->gender = NEUTER;
 	npc_type->class_ = 9;
 	npc_type->deity = 1;
 	npc_type->level = 200;
@@ -2583,30 +2584,16 @@ void NPC::ModifyNPCStat(const std::string& stat, const std::string& value)
 	}
 	else if (stat_lower == "min_hit") {
 		min_dmg = Strings::ToInt(value);
-
-		// TODO: fix DB
-
-		if (min_dmg > max_dmg) {
-			const auto temporary_damage = max_dmg;
-			max_dmg = min_dmg;
-			min_dmg = temporary_damage;
-		}
-
+		// Clamp max_dmg to be >= min_dmg
+		max_dmg = std::max(min_dmg, max_dmg);
 		base_damage = round((max_dmg - min_dmg) / 1.9);
 		min_damage  = min_dmg - round(base_damage / 10.0);
 		return;
 	}
 	else if (stat_lower == "max_hit") {
 		max_dmg = Strings::ToInt(value);
-
-		// TODO: fix DB
-
-		if (max_dmg < min_dmg) {
-			const auto temporary_damage = min_dmg;
-			min_dmg = max_dmg;
-			max_dmg = temporary_damage;
-		}
-
+		// Clamp min_dmg to be <= max_dmg
+		min_dmg = std::min(min_dmg, max_dmg);
 		base_damage = round((max_dmg - min_dmg) / 1.9);
 		min_damage  = min_dmg - round(base_damage / 10.0);
 		return;
@@ -3825,9 +3812,14 @@ void NPC::HandleRoambox()
 			auto requested_y = EQ::Clamp((GetY() + move_y), m_roambox.min_y, m_roambox.max_y);
 			auto requested_z = GetGroundZ(requested_x, requested_y);
 
+			if (std::abs(requested_z - GetZ()) > 100) {
+				LogNPCRoamBox("[{}] | Failed to find reasonable ground [{}]", GetCleanName(), i);
+				continue;
+			}
+
 			std::vector<float> heights = {0, 250, -250};
 			for (auto &h: heights) {
-				if (CheckLosFN(requested_x, requested_y, requested_z + h, GetSize())) {
+				if (CanPathTo(requested_x, requested_y, requested_z + h)) {
 					LogNPCRoamBox("[{}] Found line of sight to path attempt [{}] at height [{}]", GetCleanName(), i, h);
 					can_path = true;
 					break;
@@ -3941,4 +3933,25 @@ void NPC::SetTaunting(bool is_taunting) {
 	if (IsPet() && IsPetOwnerClient()) {
 		GetOwner()->CastToClient()->SetPetCommandState(PET_BUTTON_TAUNT, is_taunting);
 	}
+}
+
+bool NPC::CanPathTo(float x, float y, float z)
+{
+	PathfinderOptions opts;
+	opts.smooth_path = true;
+	opts.step_size   = RuleR(Pathing, NavmeshStepSize);
+	opts.offset      = GetZOffset();
+	opts.flags       = PathingNotDisabled ^ PathingZoneLine;
+
+	bool partial = false;
+	bool stuck   = false;
+	auto route   = zone->pathing->FindPath(
+		glm::vec3(GetX(), GetY(), GetZ()),
+		glm::vec3(x, y, z),
+		partial,
+		stuck,
+		opts
+	);
+
+	return !route.empty();
 }

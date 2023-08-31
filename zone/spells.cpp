@@ -714,19 +714,6 @@ bool Mob::DoCastingChecksZoneRestrictions(bool check_on_casting, int32 spell_id)
 				return false;
 			}
 		}
-		/*
-			Zones where you can not gate.
-		*/
-		if (IsClient() &&
-			(zone->GetZoneID() == Zones::TUTORIAL || zone->GetZoneID() == Zones::LOAD) &&
-			CastToClient()->Admin() < AccountStatus::QuestTroupe) {
-			if (IsEffectInSpell(spell_id, SE_Gate) ||
-				IsEffectInSpell(spell_id, SE_Translocate) ||
-				IsEffectInSpell(spell_id, SE_Teleport)) {
-				Message(Chat::White, "The Gods brought you here, only they can send you away.");
-				return false;
-			}
-		}
 	}
 
 	return true;
@@ -5877,20 +5864,17 @@ bool Client::SpellBucketCheck(uint16 spell_id, uint32 character_id) {
 		return true; // If the entry in the spell_buckets table has nothing set for the qglobal name, allow scribing.
 	}
 
-	auto new_bucket_name = fmt::format(
-		"{}-{}",
-		GetBucketKey(),
-		spell_bucket_name
-	);
+	DataBucketKey k = GetScopedBucketKeys();
+	k.key = spell_bucket_name;
 
-	auto bucket_value = DataBucket::GetData(new_bucket_name);
-	if (!bucket_value.empty()) {
-		if (Strings::IsNumber(bucket_value) && Strings::IsNumber(spell_bucket_value)) {
-			if (Strings::ToInt(bucket_value) >= Strings::ToInt(spell_bucket_value)) {
+	auto b = DataBucket::GetData(k);
+	if (!b.value.empty()) {
+		if (Strings::IsNumber(b.value) && Strings::IsNumber(spell_bucket_value)) {
+			if (Strings::ToInt(b.value) >= Strings::ToInt(spell_bucket_value)) {
 				return true; // If value is greater than or equal to spell bucket value, allow scribing.
 			}
 		} else {
-			if (bucket_value == spell_bucket_value) {
+			if (b.value == spell_bucket_value) {
 				return true; // If value is equal to spell bucket value, allow scribing.
 			}
 		}
@@ -5902,7 +5886,7 @@ bool Client::SpellBucketCheck(uint16 spell_id, uint32 character_id) {
 		spell_bucket_name
 	);
 
-	bucket_value = DataBucket::GetData(old_bucket_name);
+	std::string bucket_value = DataBucket::GetData(old_bucket_name);
 	if (!bucket_value.empty()) {
 		if (Strings::IsNumber(bucket_value) && Strings::IsNumber(spell_bucket_value)) {
 			if (Strings::ToInt(bucket_value) >= Strings::ToInt(spell_bucket_value)) {
@@ -6274,16 +6258,22 @@ void Mob::SendBuffsToClient(Client *c)
 	}
 }
 
-EQApplicationPacket *Mob::MakeBuffsPacket(bool for_target)
+EQApplicationPacket *Mob::MakeBuffsPacket(bool for_target, bool clear_buffs)
 {
 	uint32 count = 0;
+	uint32 buff_count;
+
 	// for self we want all buffs, for target, we want to skip song window buffs
 	// since NPCs and pets don't have a song window, we still see it for them :P
-	uint32 buff_count = for_target ? GetMaxBuffSlots() : GetMaxTotalSlots();
-	for(int i = 0; i < buff_count; ++i)
-	{
-		if (IsValidSpell(buffs[i].spellid))
-		{
+	if (for_target) {
+		buff_count = (clear_buffs) ? 0 : GetMaxBuffSlots();
+	}
+	else {
+		buff_count = GetMaxTotalSlots();
+	}
+
+	for(int i = 0; i < buff_count; ++i) {
+		if (IsValidSpell(buffs[i].spellid)) {
 			++count;
 		}
 	}
@@ -6291,12 +6281,10 @@ EQApplicationPacket *Mob::MakeBuffsPacket(bool for_target)
 	EQApplicationPacket* outapp = nullptr;
 
 	//Create it for a targeting window, else create it for a create buff packet.
-	if(for_target)
-	{
+	if(for_target) {
 		outapp = new EQApplicationPacket(OP_TargetBuffs, sizeof(BuffIcon_Struct) + sizeof(BuffIconEntry_Struct) * count);
 	}
-	else
-	{
+	else {
 		outapp = new EQApplicationPacket(OP_BuffCreate, sizeof(BuffIcon_Struct) + sizeof(BuffIconEntry_Struct) * count);
 	}
 	BuffIcon_Struct *buff = (BuffIcon_Struct*)outapp->pBuffer;
@@ -6313,10 +6301,8 @@ EQApplicationPacket *Mob::MakeBuffsPacket(bool for_target)
 
 	buff->name_lengths = 0; // hacky shit
 	uint32 index = 0;
-	for(int i = 0; i < buff_count; ++i)
-	{
-		if (IsValidSpell(buffs[i].spellid))
-		{
+	for(int i = 0; i < buff_count; ++i) {
+		if (IsValidSpell(buffs[i].spellid)) {
 			buff->entries[index].buff_slot = i;
 			buff->entries[index].spell_id = buffs[i].spellid;
 			buff->entries[index].tics_remaining = buffs[i].ticsremaining;

@@ -12,7 +12,7 @@ void FindCharacter(Client *c, const Seperator *sep)
 				Chat::White,
 				fmt::format(
 					"Character ID {} does not exist or is invalid.",
-					Strings::Commify(character_id)
+					character_id
 				).c_str()
 			);
 
@@ -23,7 +23,7 @@ void FindCharacter(Client *c, const Seperator *sep)
 			Chat::White,
 			fmt::format(
 				"Character ID {} | {}",
-				Strings::Commify(character_id),
+				character_id,
 				e.name
 			).c_str()
 		);

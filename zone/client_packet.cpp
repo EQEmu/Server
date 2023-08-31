@@ -62,6 +62,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/repositories/account_repository.h"
 
 #include "../common/events/player_event_logs.h"
+#include "../common/repositories/character_stats_record_repository.h"
 
 extern QueryServ* QServ;
 extern Zone* zone;
@@ -915,6 +916,8 @@ void Client::CompleteConnect()
 
 	heroforge_wearchange_timer.Start(250);
 
+	RecordStats();
+
 	// enforce some rules..
 	if (!CanEnterZone()) {
 		LogInfo("Kicking character [{}] from zone, not allowed here (missing requirements)", GetCleanName());
@@ -1442,12 +1445,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	if (m_pp.ldon_points_tak < 0 || m_pp.ldon_points_tak > 2000000000) { m_pp.ldon_points_tak = 0; }
 	if (m_pp.ldon_points_available < 0 || m_pp.ldon_points_available > 2000000000) { m_pp.ldon_points_available = 0; }
 
-	if (RuleB(World, UseClientBasedExpansionSettings)) {
-		m_pp.expansions = EQ::expansions::ConvertClientVersionToExpansionsMask(ClientVersion());
-	}
-	else {
-		m_pp.expansions = (RuleI(World, ExpansionSettings) & EQ::expansions::ConvertClientVersionToExpansionsMask(ClientVersion()));
-	}
+	ReloadExpansionProfileSetting();
 
 	if (!database.LoadAlternateAdvancement(this)) {
 		LogError("Error loading AA points for [{}]", GetName());
@@ -2138,7 +2136,7 @@ void Client::Handle_OP_AdventureMerchantRequest(const EQApplicationPacket *app)
 	const EQ::ItemData *item = nullptr;
 	std::list<MerchantList> merlist = zone->merchanttable[merchantid];
 	std::list<MerchantList>::const_iterator itr;
-	for (itr = merlist.begin(); itr != merlist.end() && count<255; ++itr) {
+	for (itr = merlist.begin(); itr != merlist.end(); ++itr) {
 		const MerchantList &ml = *itr;
 		if (GetLevel() < ml.level_required) {
 			continue;
@@ -5224,12 +5222,12 @@ void Client::Handle_OP_ConsiderCorpse(const EQApplicationPacket *app)
 
 	uint32 decay_time = t->GetDecayTime();
 	if (decay_time) {
-		auto time_string = Strings::SecondsToTime(decay_time, true);
+		const std::string& time_string = Strings::SecondsToTime(decay_time, true);
 		Message(
 			Chat::NPCQuestSay,
 			fmt::format(
 				"This corpse will decay in {}.",
-				time_string
+				Strings::ToLower(time_string)
 			).c_str()
 		);
 
@@ -15953,7 +15951,7 @@ void Client::Handle_OP_XTargetRequest(const EQApplicationPacket *app)
 			if (t.type == Type) {
 				Raid* r = GetRaid();
 				if (r) {
-					auto mm = entity_list.GetNPCByID(r->marked_npcs[t.assist_slot]);
+					auto mm = entity_list.GetNPCByID(r->marked_npcs[t.assist_slot].entity_id);
 					if (mm) {
 						UpdateXTargetType(t.type, mm->CastToMob(), mm->CastToMob()->GetName());
 					}
@@ -16390,5 +16388,103 @@ void Client::Handle_OP_RaidClearNPCMarks(const EQApplicationPacket* app)
 	auto r = GetRaid();
 	if (r) {
 		r->RaidClearNPCMarks(this);
+	}
+}
+
+void Client::RecordStats()
+{
+	auto r = CharacterStatsRecordRepository::FindOne(
+		database,
+		CharacterID()
+	);
+
+	r.status                   = Admin();
+	r.name                     = GetCleanName();
+	r.aa_points                = GetAAPoints() + GetSpentAA();
+	r.level                    = GetLevel();
+	r.class_                   = GetBaseClass();
+	r.race                     = GetBaseRace();
+	r.hp                       = GetMaxHP() - GetSpellBonuses().HP;
+	r.mana                     = GetMaxMana() - GetSpellBonuses().Mana;
+	r.endurance                = GetMaxEndurance() - GetSpellBonuses().Endurance;
+	r.ac                       = GetDisplayAC() - GetSpellBonuses().AC;
+	r.strength                 = GetSTR() - GetSpellBonuses().STR;
+	r.stamina                  = GetSTA() - GetSpellBonuses().STA;
+	r.dexterity                = GetDEX() - GetSpellBonuses().DEX;
+	r.agility                  = GetAGI() - GetSpellBonuses().AGI;
+	r.intelligence             = GetINT() - GetSpellBonuses().INT;
+	r.wisdom                   = GetWIS() - GetSpellBonuses().WIS;
+	r.charisma                 = GetCHA() - GetSpellBonuses().CHA;
+	r.magic_resist             = GetMR() - GetSpellBonuses().MR;
+	r.fire_resist              = GetFR() - GetSpellBonuses().FR;
+	r.cold_resist              = GetCR() - GetSpellBonuses().CR;
+	r.poison_resist            = GetPR() - GetSpellBonuses().PR;
+	r.disease_resist           = GetDR() - GetSpellBonuses().DR;
+	r.corruption_resist        = GetCorrup() - GetSpellBonuses().Corrup;
+	r.heroic_strength          = GetHeroicSTR() - GetSpellBonuses().HeroicSTR;
+	r.heroic_stamina           = GetHeroicSTA() - GetSpellBonuses().HeroicSTA;
+	r.heroic_dexterity         = GetHeroicDEX() - GetSpellBonuses().HeroicDEX;
+	r.heroic_agility           = GetHeroicAGI() - GetSpellBonuses().HeroicAGI;
+	r.heroic_intelligence      = GetHeroicINT() - GetSpellBonuses().HeroicINT;
+	r.heroic_wisdom            = GetHeroicWIS() - GetSpellBonuses().HeroicWIS;
+	r.heroic_charisma          = GetHeroicCHA() - GetSpellBonuses().HeroicCHA;
+	r.heroic_magic_resist      = GetHeroicMR() - GetSpellBonuses().HeroicMR;
+	r.heroic_fire_resist       = GetHeroicFR() - GetSpellBonuses().HeroicFR;
+	r.heroic_cold_resist       = GetHeroicCR() - GetSpellBonuses().HeroicCR;
+	r.heroic_poison_resist     = GetHeroicPR() - GetSpellBonuses().HeroicPR;
+	r.heroic_disease_resist    = GetHeroicDR() - GetSpellBonuses().HeroicDR;
+	r.heroic_corruption_resist = GetHeroicCorrup() - GetSpellBonuses().HeroicCorrup;
+	r.haste                    = GetHaste();
+	r.accuracy                 = GetAccuracy() - GetSpellBonuses().Accuracy[EQ::skills::HIGHEST_SKILL + 1];
+	r.attack                   = GetTotalATK() - GetSpellBonuses().ATK;
+	r.avoidance                = GetAvoidance() - GetSpellBonuses().AvoidMeleeChance;
+	r.clairvoyance             = GetClair() - GetSpellBonuses().Clairvoyance;
+	r.combat_effects           = GetCombatEffects() - GetSpellBonuses().ProcChance;
+	r.damage_shield_mitigation = GetDSMit() - GetSpellBonuses().DSMitigation;
+	r.damage_shield            = GetDS() - GetSpellBonuses().DamageShield;
+	r.dot_shielding            = GetDoTShield() - GetSpellBonuses().DoTShielding;
+	r.hp_regen                 = GetHPRegen() - GetSpellBonuses().HPRegen;
+	r.mana_regen               = GetManaRegen() - GetSpellBonuses().ManaRegen;
+	r.endurance_regen          = GetEnduranceRegen() - GetSpellBonuses().EnduranceRegen;
+	r.shielding                = GetShielding() - GetSpellBonuses().MeleeMitigation;
+	r.spell_damage             = GetSpellDmg() - GetSpellBonuses().SpellDmg;
+	r.spell_shielding          = GetSpellShield() - GetSpellBonuses().SpellShield;
+	r.strikethrough            = GetStrikeThrough() - GetSpellBonuses().StrikeThrough;
+	r.stun_resist              = GetStunResist() - GetSpellBonuses().StunResist;
+	r.backstab                 = 0;
+	r.wind                     = GetWindMod();
+	r.brass                    = GetBrassMod();
+	r.string                   = GetStringMod();
+	r.percussion               = GetPercMod();
+	r.singing                  = GetSingMod();
+	r.baking                   = GetSkill(EQ::skills::SkillType::SkillBaking);
+	r.alchemy                  = GetSkill(EQ::skills::SkillType::SkillAlchemy);
+	r.jewelry                  = GetSkill(EQ::skills::SkillType::SkillJewelryMaking);
+	r.tailoring                = GetSkill(EQ::skills::SkillType::SkillTailoring);
+	r.blacksmithing            = GetSkill(EQ::skills::SkillType::SkillBlacksmithing);
+	r.fletching                = GetSkill(EQ::skills::SkillType::SkillFletching);
+	r.brewing                  = GetSkill(EQ::skills::SkillType::SkillBrewing);
+	r.fishing                  = GetSkill(EQ::skills::SkillType::SkillFishing);
+	r.pottery                  = GetSkill(EQ::skills::SkillType::SkillPottery);
+	r.alcohol                  = GetSkill(EQ::skills::SkillType::SkillAlcoholTolerance);
+	r.tinkering                = GetSkill(EQ::skills::SkillType::SkillTinkering);
+	r.updated_at               = std::time(nullptr);
+
+	if (r.character_id > 0) {
+		CharacterStatsRecordRepository::UpdateOne(database, r);
+	} else {
+		r.character_id = CharacterID();
+		r.created_at = std::time(nullptr);
+		CharacterStatsRecordRepository::InsertOne(database, r);
+	}
+}
+
+void Client::ReloadExpansionProfileSetting()
+{
+	if (RuleB(World, UseClientBasedExpansionSettings)) {
+		m_pp.expansions = EQ::expansions::ConvertClientVersionToExpansionsMask(ClientVersion());
+	}
+	else {
+		m_pp.expansions = RuleI(World, ExpansionSettings);
 	}
 }

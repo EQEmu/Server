@@ -208,11 +208,14 @@ void Client::SendExpansionInfo() {
 	auto outapp = new EQApplicationPacket(OP_ExpansionInfo, sizeof(ExpansionInfo_Struct));
 	ExpansionInfo_Struct *eis = (ExpansionInfo_Struct*)outapp->pBuffer;
 
-	if (RuleB(World, UseClientBasedExpansionSettings)) {
+	if (RuleI(World, CharacterSelectExpansionSettings) != -1) {
+		eis->Expansions = RuleI(World, CharacterSelectExpansionSettings);
+	}
+	else if (RuleB(World, UseClientBasedExpansionSettings)) {
 		eis->Expansions = EQ::expansions::ConvertClientVersionToExpansionsMask(eqs->ClientVersion());
 	}
 	else {
-		eis->Expansions = (RuleI(World, ExpansionSettings) & EQ::expansions::ConvertClientVersionToExpansionsMask(eqs->ClientVersion()));
+		eis->Expansions = RuleI(World, ExpansionSettings);
 	}
 
 	QueuePacket(outapp);

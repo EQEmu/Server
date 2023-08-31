@@ -124,6 +124,7 @@ struct NPCType
 	int             avoidance_rating;    // flat bonus before mods
 	bool            findable;        //can be found with find command
 	bool            trackable;
+	bool            is_quest_npc;
 	int16           slow_mitigation;
 	uint8           maxlevel;
 	uint32          scalerate;

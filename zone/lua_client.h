@@ -473,6 +473,13 @@ public:
 	uint32 GetEXPForLevel(uint16 check_level);
 	std::string GetClassAbbreviation();
 	std::string GetRaceAbbreviation();
+	void SetLDoNPoints(uint32 theme_id, uint32 points);
+	void DeleteBucket(std::string bucket_name);
+	std::string GetBucket(std::string bucket_name);
+	std::string GetBucketExpires(std::string bucket_name);
+	std::string GetBucketRemaining(std::string bucket_name);
+	void SetBucket(std::string bucket_name, std::string bucket_value);
+	void SetBucket(std::string bucket_name, std::string bucket_value, std::string expiration);
 
 	void ApplySpell(int spell_id);
 	void ApplySpell(int spell_id, int duration);

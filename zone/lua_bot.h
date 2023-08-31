@@ -68,6 +68,12 @@ public:
 	void SendSpellAnim(uint16 target_id, uint16 spell_id);
 	std::string GetClassAbbreviation();
 	std::string GetRaceAbbreviation();
+	void DeleteBucket(std::string bucket_name);
+	std::string GetBucket(std::string bucket_name);
+	std::string GetBucketExpires(std::string bucket_name);
+	std::string GetBucketRemaining(std::string bucket_name);
+	void SetBucket(std::string bucket_name, std::string bucket_value);
+	void SetBucket(std::string bucket_name, std::string bucket_value, std::string expiration);
 
 	void ApplySpell(int spell_id);
 	void ApplySpell(int spell_id, int duration);

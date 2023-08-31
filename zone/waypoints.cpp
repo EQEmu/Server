@@ -846,8 +846,15 @@ void Mob::FixZ(int32 z_find_offset /*= 5*/, bool fix_client_z /*= false*/) {
 	glm::vec3 current_loc(m_Position);
 	float new_z = GetFixedZ(current_loc, z_find_offset);
 
-	if (new_z == m_Position.z)
+	// reject z if it is too far from the current z
+	if (std::abs(new_z - m_Position.z) > 100) {
 		return;
+	}
+
+	// reject if it's the same as the current z
+	if (new_z == m_Position.z) {
+		return;
+	}
 
 	if ((new_z > -2000) && new_z != BEST_Z_INVALID) {
 		if (RuleB(Map, MobZVisualDebug)) {

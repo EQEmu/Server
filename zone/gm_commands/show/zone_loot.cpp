@@ -2,15 +2,7 @@
 
 void ShowZoneLoot(Client *c, const Seperator *sep)
 {
-	if (!sep->IsNumber(2)) {
-		c->Message(
-			Chat::White,
-			"Usage: #show zone_loot [Item ID]"
-		);
-		return;
-	}
-
-	const uint32 search_item_id = Strings::ToUnsignedInt(sep->arg[2]);
+	const uint32 search_item_id = sep->IsNumber(2) ? Strings::ToUnsignedInt(sep->arg[2]) : 0;
 
 	std::vector<std::pair<NPC *, ItemList>> v;
 
@@ -44,7 +36,7 @@ void ShowZoneLoot(Client *c, const Seperator *sep)
 			);
 
 			npc_link = fmt::format(
-				"NPC: {} (ID {}) [{}]",
+				"{} (ID {}) | {}",
 				n->GetCleanName(),
 				n->GetID(),
 				command_link
@@ -60,11 +52,32 @@ void ShowZoneLoot(Client *c, const Seperator *sep)
 				c->Message(
 					Chat::White,
 					fmt::format(
-						"{}. {} ({}) {}",
+						"Item {} | {}{}{}",
 						loot_number,
-						linker.GenerateLink(),
-						Strings::Commify(i->item_id),
-						npc_link
+						(
+							!search_item_id ?
+							fmt::format(
+								"{} ({}) | ",
+								linker.GenerateLink(),
+								i->item_id
+							) :
+							""
+						),
+						npc_link,
+						(
+							!search_item_id ?
+								fmt::format(
+									" | {}",
+									Saylink::Silent(
+										fmt::format(
+											"#show zone_loot {}",
+											i->item_id
+										),
+										"Show"
+									)
+								) :
+								""
+						)
 					).c_str()
 				);
 
@@ -81,7 +94,7 @@ void ShowZoneLoot(Client *c, const Seperator *sep)
 			fmt::format(
 				"{} ({}) is dropping in {} place{}.",
 				database.CreateItemLink(search_item_id),
-				Strings::Commify(search_item_id),
+				search_item_id,
 				loot_count,
 				loot_count != 1 ? "s" : ""
 			).c_str()
@@ -93,7 +106,7 @@ void ShowZoneLoot(Client *c, const Seperator *sep)
 	c->Message(
 		Chat::White,
 		fmt::format(
-			"{} Item {} {} dropping.",
+			"{} Item{} {} dropping.",
 			loot_count,
 			loot_count != 1 ? "s" : "",
 			loot_count != 1 ? "are" : "is"

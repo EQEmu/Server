@@ -1,11 +1,11 @@
-#ifndef EQEMU_ITEMS_REPOSITORY_H
-#define EQEMU_ITEMS_REPOSITORY_H
+#ifndef EQEMU_CHARACTER_STATS_RECORD_REPOSITORY_H
+#define EQEMU_CHARACTER_STATS_RECORD_REPOSITORY_H
 
 #include "../database.h"
 #include "../strings.h"
-#include "base/base_items_repository.h"
+#include "base/base_character_stats_record_repository.h"
 
-class ItemsRepository: public BaseItemsRepository {
+class CharacterStatsRecordRepository: public BaseCharacterStatsRecordRepository {
 public:
 
     /**
@@ -32,10 +32,10 @@ public:
      *
      * Example custom methods in a repository
      *
-     * ItemsRepository::GetByZoneAndVersion(int zone_id, int zone_version)
-     * ItemsRepository::GetWhereNeverExpires()
-     * ItemsRepository::GetWhereXAndY()
-     * ItemsRepository::DeleteWhereXAndY()
+     * CharacterStatsRecordRepository::GetByZoneAndVersion(int zone_id, int zone_version)
+     * CharacterStatsRecordRepository::GetWhereNeverExpires()
+     * CharacterStatsRecordRepository::GetWhereXAndY()
+     * CharacterStatsRecordRepository::DeleteWhereXAndY()
      *
      * Most of the above could be covered by base methods, but if you as a developer
      * find yourself re-using logic for other parts of the code, its best to just make a
@@ -44,35 +44,7 @@ public:
      */
 
 	// Custom extended repository methods here
-	static std::vector<int32> GetItemIDsBySearchCriteria(
-		Database& db,
-		std::string search_string,
-		int query_limit = 0
-	)
-	{
-		auto query = fmt::format(
-			"SELECT `id` FROM {} WHERE LOWER(`name`) LIKE '%%{}%%' ORDER BY id ASC",
-			TableName(),
-			Strings::Escape(search_string)
-		);
 
-		if (query_limit >= 1) {
-			query += fmt::format(" LIMIT {}", query_limit);
-		}
-
-		std::vector<int32> item_id_list;
-
-		auto results = db.QueryDatabase(query);
-		if (!results.Success() || !results.RowCount()) {
-			return item_id_list;
-		}
-
-		for (auto row : results) {
-			item_id_list.emplace_back(Strings::ToInt(row[0]));
-		}
-
-		return item_id_list;
-	}
 };
 
-#endif //EQEMU_ITEMS_REPOSITORY_H
+#endif //EQEMU_CHARACTER_STATS_RECORD_REPOSITORY_H

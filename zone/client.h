@@ -123,6 +123,9 @@ typedef enum {
 	EvacToSafeCoords
 } ZoneMode;
 
+// translate above enum to a string
+std::string GetZoneModeString(ZoneMode mode);
+
 enum {
 	HideCorpseNone = 0,
 	HideCorpseAll = 1,
@@ -233,6 +236,7 @@ public:
 	~Client();
 
 	void ReconnectUCS();
+	void RecordStats();
 
 	void SetDisplayMobInfoWindow(bool display_mob_info_window);
 	bool GetDisplayMobInfoWindow() const;
@@ -381,6 +385,7 @@ public:
 	inline PetInfo* GetPetInfo(uint16 pet) { return (pet==1)?&m_suspendedminion:&m_petinfo; }
 	inline InspectMessage_Struct& GetInspectMessage() { return m_inspect_message; }
 	inline const InspectMessage_Struct& GetInspectMessage() const { return m_inspect_message; }
+	void ReloadExpansionProfileSetting();
 
 	void SetPetCommandState(int button, int state);
 

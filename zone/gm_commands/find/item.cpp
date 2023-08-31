@@ -104,7 +104,7 @@ void FindItem(Client *c, const Seperator *sep)
 				"{} | {} ({})",
 				summon_links,
 				database.CreateItemLink(e),
-				Strings::Commify(item->ID)
+				item->ID
 			).c_str()
 		);
 

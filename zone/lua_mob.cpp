@@ -1554,19 +1554,33 @@ void Lua_Mob::SetFlyMode(int in) {
 	self->SetFlyMode(static_cast<GravityBehavior>(in));
 }
 
-void Lua_Mob::SetTexture(int in) {
+void Lua_Mob::SetTexture(uint8 texture) {
 	Lua_Safe_Call_Void();
-	self->SendIllusionPacket(self->GetRace(), 0xFF, in);
+	self->SendIllusionPacket(
+		AppearanceStruct{
+			.race_id = self->GetRace(),
+			.texture = texture
+		}
+	);
 }
 
-void Lua_Mob::SetRace(int in) {
+void Lua_Mob::SetRace(uint16 race_id) {
 	Lua_Safe_Call_Void();
-	self->SendIllusionPacket(in);
+	self->SendIllusionPacket(
+		AppearanceStruct{
+			.race_id = race_id
+		}
+	);
 }
 
-void Lua_Mob::SetGender(int in) {
+void Lua_Mob::SetGender(uint8 gender_id) {
 	Lua_Safe_Call_Void();
-	self->SendIllusionPacket(self->GetRace(), in);
+	self->SendIllusionPacket(
+		AppearanceStruct{
+			.gender_id = gender_id,
+			.race_id = self->GetRace(),
+		}
+	);
 }
 
 void Lua_Mob::SendIllusionPacket(luabind::adl::object illusion) {
@@ -1740,24 +1754,26 @@ void Lua_Mob::SendIllusionPacket(luabind::adl::object illusion) {
 	}
 
 	self->SendIllusionPacket(
-		race,
-		gender,
-		texture,
-		helmtexture,
-		haircolor,
-		beardcolor,
-		eyecolor1,
-		eyecolor2,
-		hairstyle,
-		luclinface,
-		beard,
-		aa_title,
-		drakkin_heritage,
-		drakkin_tattoo,
-		drakkin_details,
-		size,
-		send_appearance_effects,
-		target
+		AppearanceStruct{
+			.aa_title = aa_title,
+			.beard = beard,
+			.beard_color = beardcolor,
+			.drakkin_details = drakkin_details,
+			.drakkin_heritage = drakkin_heritage,
+			.drakkin_tattoo = drakkin_tattoo,
+			.eye_color_one = eyecolor1,
+			.eye_color_two = eyecolor2,
+			.face = luclinface,
+			.gender_id = gender,
+			.hair = hairstyle,
+			.hair_color = haircolor,
+			.helmet_texture = helmtexture,
+			.race_id = race,
+			.send_effects = send_appearance_effects,
+			.size = size,
+			.target = target,
+			.texture = texture,
+		}
 	);
 }
 
@@ -2353,7 +2369,7 @@ std::string Lua_Mob::GetBucketExpires(std::string bucket_name)
 std::string Lua_Mob::GetBucketKey()
 {
 	Lua_Safe_Call_String();
-	return self->GetBucketKey();
+	return {};
 }
 
 std::string Lua_Mob::GetBucketRemaining(std::string bucket_name)
@@ -3133,6 +3149,12 @@ bool Lua_Mob::IsTemporaryPet()
 	return self->IsTempPet();
 }
 
+uint32 Lua_Mob::GetMobTypeIdentifier()
+{
+	Lua_Safe_Call_Int();
+	return self->GetMobTypeIdentifier();
+}
+
 luabind::scope lua_register_mob() {
 	return luabind::class_<Lua_Mob, Lua_Entity>("Mob")
 	.def(luabind::constructor<>())
@@ -3429,6 +3451,7 @@ luabind::scope lua_register_mob() {
 	.def("GetMeleeDamageMod_SE", &Lua_Mob::GetMeleeDamageMod_SE)
 	.def("GetMeleeMinDamageMod_SE", &Lua_Mob::GetMeleeMinDamageMod_SE)
 	.def("GetMeleeMitigation", (int32(Lua_Mob::*)(void))&Lua_Mob::GetMeleeMitigation)
+	.def("GetMobTypeIdentifier", (uint32(Lua_Mob::*)(void))&Lua_Mob::GetMobTypeIdentifier)
 	.def("GetModSkillDmgTaken", (int(Lua_Mob::*)(int))&Lua_Mob::GetModSkillDmgTaken)
 	.def("GetModVulnerability", (int(Lua_Mob::*)(int))&Lua_Mob::GetModVulnerability)
 	.def("GetNPCTypeID", &Lua_Mob::GetNPCTypeID)
@@ -3598,7 +3621,7 @@ luabind::scope lua_register_mob() {
 	.def("SetExtraHaste", (void(Lua_Mob::*)(int))&Lua_Mob::SetExtraHaste)
 	.def("SetFlurryChance", (void(Lua_Mob::*)(int))&Lua_Mob::SetFlurryChance)
 	.def("SetFlyMode", (void(Lua_Mob::*)(int))&Lua_Mob::SetFlyMode)
-	.def("SetGender", (void(Lua_Mob::*)(int))&Lua_Mob::SetGender)
+	.def("SetGender", (void(Lua_Mob::*)(uint8))&Lua_Mob::SetGender)
 	.def("SetGlobal", (void(Lua_Mob::*)(const char*,const char*,int,const char*))&Lua_Mob::SetGlobal)
 	.def("SetGlobal", (void(Lua_Mob::*)(const char*,const char*,int,const char*,Lua_Mob))&Lua_Mob::SetGlobal)
 	.def("SetHP", &Lua_Mob::SetHP)
@@ -3615,14 +3638,14 @@ luabind::scope lua_register_mob() {
 	.def("SetPet", &Lua_Mob::SetPet)
 	.def("SetPetOrder", (void(Lua_Mob::*)(int))&Lua_Mob::SetPetOrder)
 	.def("SetPseudoRoot", (void(Lua_Mob::*)(bool))&Lua_Mob::SetPseudoRoot)
-	.def("SetRace", (void(Lua_Mob::*)(int))&Lua_Mob::SetRace)
+	.def("SetRace", (void(Lua_Mob::*)(uint16))&Lua_Mob::SetRace)
 	.def("SetRunning", (void(Lua_Mob::*)(bool))&Lua_Mob::SetRunning)
 	.def("SetSlotTint", (void(Lua_Mob::*)(int,int,int,int))&Lua_Mob::SetSlotTint)
 	.def("SetSpecialAbility", (void(Lua_Mob::*)(int,int))&Lua_Mob::SetSpecialAbility)
 	.def("SetSpecialAbilityParam", (void(Lua_Mob::*)(int,int,int))&Lua_Mob::SetSpecialAbilityParam)
 	.def("SetTarget", &Lua_Mob::SetTarget)
 	.def("SetTargetable", (void(Lua_Mob::*)(bool))&Lua_Mob::SetTargetable)
-	.def("SetTexture", (void(Lua_Mob::*)(int))&Lua_Mob::SetTexture)
+	.def("SetTexture", (void(Lua_Mob::*)(uint8))&Lua_Mob::SetTexture)
 	.def("SetTimer", &Lua_Mob::SetTimer)
 	.def("SetTimerMS", &Lua_Mob::SetTimerMS)
 	.def("StopAllTimers", &Lua_Mob::StopAllTimers)

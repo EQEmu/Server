@@ -47,7 +47,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 			const std::string set_size_action = "set_size";
 
 			// we're passing a move action here
-			if (!arg3.empty() && Strings::IsNumber(arg3)) {
+			if (!arg3.empty() && (Strings::IsFloat(arg3) || Strings::IsNumber(arg3))) {
 				float x_move   = 0.0f;
 				float y_move   = 0.0f;
 				float z_move   = 0.0f;
