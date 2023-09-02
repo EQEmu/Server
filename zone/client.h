@@ -920,6 +920,7 @@ public:
 	void ApplySpell(
 		int spell_id,
 		int duration = 0,
+		int level = -1,
 		ApplySpellType apply_type = ApplySpellType::Solo,
 		bool allow_pets = false,
 		bool is_raid_group_only = true,
@@ -929,6 +930,7 @@ public:
 	void SetSpellDuration(
 		int spell_id,
 		int duration = 0,
+		int level = -1,
 		ApplySpellType apply_type = ApplySpellType::Solo,
 		bool allow_pets = false,
 		bool is_raid_group_only = true,
