@@ -13,6 +13,7 @@
 #include "set/endurance.cpp"
 #include "set/endurance_full.cpp"
 #include "set/exp.cpp"
+#include "set/faction.cpp"
 #include "set/flymode.cpp"
 #include "set/frozen.cpp"
 #include "set/gender.cpp"
@@ -79,6 +80,7 @@ void command_set(Client *c, const Seperator *sep)
 		Cmd{.cmd = "endurance", .u = "endurance [Amount]", .fn = SetEndurance, .a = {"#setendurance"}},
 		Cmd{.cmd = "endurance_full", .u = "endurance_full", .fn = SetEnduranceFull, .a = {"#endurance"}},
 		Cmd{.cmd = "exp", .u = "exp [aa|exp] [Amount]", .fn = SetEXP, .a = {"#setxp"}},
+		Cmd{.cmd = "faction", .u = "faction [Faction ID]", .fn = SetFaction, .a = {"#setfaction"}},
 		Cmd{.cmd = "flymode", .u = "flymode [Flymode ID]", .fn = SetFlymode, .a = {"#flymode"}},
 		Cmd{.cmd = "frozen", .u = "frozen [on|off]", .fn = SetFrozen, .a = {"#freeze", "#unfreeze"}},
 		Cmd{.cmd = "gender", .u = "gender [Gender ID]", .fn = SetGender, .a = {"#gender"}},
