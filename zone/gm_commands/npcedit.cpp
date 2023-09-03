@@ -345,7 +345,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 				auto faction_id = cf->primaryfaction;
 				auto faction_name = content_db.GetFactionName(faction_id);
 
-				n.npc_faction_id = faction_id;
+				n.npc_faction_id = npc_faction_id;
 				d = fmt::format(
 					"{} is now using Faction {}.",
 					npc_id_string,
