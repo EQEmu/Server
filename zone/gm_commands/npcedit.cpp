@@ -339,24 +339,33 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "faction")) {
 		if (sep->IsNumber(2)) {
-			auto faction_id   = Strings::ToInt(sep->arg[2]);
-			auto faction_name = content_db.GetFactionName(faction_id);
-			n.npc_faction_id = faction_id;
-			d = fmt::format(
-				"{} is now using Faction {}.",
-				npc_id_string,
-				(
-					!faction_name.empty() ?
-					fmt::format(
-						"{} ({})",
-						faction_name,
-						faction_id
-					) :
-					Strings::Commify(sep->arg[2])
-				)
-			);
+			auto npc_faction_id   = Strings::ToInt(sep->arg[2]);
+			const NPCFactionList* cf = content_db.GetNPCFactionEntry(npc_faction_id);
+			if (cf) {
+				auto faction_id = cf->primaryfaction;
+				auto faction_name = content_db.GetFactionName(faction_id);
+
+				n.npc_faction_id = npc_faction_id;
+				d = fmt::format(
+					"{} is now using Faction {}.",
+					npc_id_string,
+					(
+						!faction_name.empty() ?
+						fmt::format(
+							"{} ({})",
+							faction_name,
+							faction_id
+						) :
+						Strings::Commify(sep->arg[2])
+					)
+				);
+			}
+			else {
+				c->Message(Chat::White, "Need to provide a valid, existing, npc_faction_id");
+				return;
+			}
 		} else {
-			c->Message(Chat::White, "Usage: #npcedit faction [Faction ID] - Sets an NPC's Faction ID");
+			c->Message(Chat::White, "Usage: #npcedit faction [npc_faction_id] - Sets an NPC's npc Faction ID (not primary faction) but lookup into table.");
 			return;
 		}
 	} else if (!strcasecmp(sep->arg[1], "adventure_template_id")) {
