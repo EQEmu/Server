@@ -1111,7 +1111,7 @@ void Client::PurchaseAlternateAdvancementRank(int rank_id) {
 		return;
 	}
 
-	FinishAlternateAdvancementPurchase(rank, false, false);
+	FinishAlternateAdvancementPurchase(rank, false, true);
 }
 
 bool Client::GrantAlternateAdvancementAbility(int aa_id, int points, bool ignore_cost) {
@@ -1134,13 +1134,13 @@ bool Client::GrantAlternateAdvancementAbility(int aa_id, int points, bool ignore
 		}
 
 		ret = true;
-		FinishAlternateAdvancementPurchase(rank, ignore_cost, false);
+		FinishAlternateAdvancementPurchase(rank, ignore_cost, true);
 	}
 
 	return ret;
 }
 
-void Client::FinishAlternateAdvancementPurchase(AA::Rank *rank, bool ignore_cost, bool silent) {
+void Client::FinishAlternateAdvancementPurchase(AA::Rank *rank, bool ignore_cost, bool send_message_and_save) {
 	auto rank_id = rank->base_ability->first_rank_id;
 
 	if (rank->base_ability->charges) {
@@ -1156,7 +1156,7 @@ void Client::FinishAlternateAdvancementPurchase(AA::Rank *rank, bool ignore_cost
 		SetAA(rank_id, rank->current_value, 0);
 
 		//if not max then send next aa
-		if (rank->next && !silent) {
+		if (rank->next && send_message_and_save) {
 			SendAlternateAdvancementRank(rank->base_ability->id, rank->next->current_value);
 		}
 	}
@@ -1164,9 +1164,9 @@ void Client::FinishAlternateAdvancementPurchase(AA::Rank *rank, bool ignore_cost
 	auto cost = !ignore_cost ? rank->cost : 0;
 
 	m_pp.aapoints -= static_cast<uint32>(cost);
-	SaveAA();
 
-	if (!silent) {
+	if (send_message_and_save) {
+		SaveAA();
 		SendAlternateAdvancementPoints();
 		SendAlternateAdvancementStats();
 	}
@@ -1183,7 +1183,7 @@ void Client::FinishAlternateAdvancementPurchase(AA::Rank *rank, bool ignore_cost
 	}
 
 	if (rank->prev) {
-		if (!silent) {
+		if (send_message_and_save) {
 			MessageString(
 				Chat::Yellow,
 				AA_IMPROVE,
@@ -1207,7 +1207,7 @@ void Client::FinishAlternateAdvancementPurchase(AA::Rank *rank, bool ignore_cost
 			QServ->PlayerLogEvent(Player_Log_AA_Purchases, CharacterID(), event_desc);
 		}
 	} else {
-		if (!silent) {
+		if (send_message_and_save) {
 			MessageString(
 				Chat::Yellow,
 				AA_GAIN_ABILITY,
@@ -2111,7 +2111,7 @@ void Client::AutoGrantAAPoints() {
 		while (rank != nullptr) {
 			if (CanUseAlternateAdvancementRank(rank)) {
 				if (rank->expansion <= auto_grant_expansion && rank->level_req <= level && !HasAlreadyPurchasedRank(rank)) {
-					FinishAlternateAdvancementPurchase(rank, true, true);
+					FinishAlternateAdvancementPurchase(rank, true, false);
 
 					if (rank->prev) {
 						MessageString(
@@ -2165,7 +2165,7 @@ void Client::GrantAllAAPoints()
 		while (rank != nullptr) {
 			if (CanUseAlternateAdvancementRank(rank)) {
 				if (rank->level_req <= level && !HasAlreadyPurchasedRank(rank)) {
-					FinishAlternateAdvancementPurchase(rank, true, true);
+					FinishAlternateAdvancementPurchase(rank, true, false);
 				}
 			}
 			else {
@@ -2177,6 +2177,7 @@ void Client::GrantAllAAPoints()
 		}
 	}
 
+	SaveAA();
 	SendClearAA();
 	SendAlternateAdvancementTable();
 	SendAlternateAdvancementPoints();
