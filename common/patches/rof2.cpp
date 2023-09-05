@@ -2785,7 +2785,10 @@ namespace RoF2
 		else
 			eq->window = emu->window;
 		OUT(type);
-		OUT(invslot);
+		eq->invslot = ServerToRoF2TypelessSlot(emu->invslot, invtype::typePossessions);
+		OUT(target_id);
+		OUT(can_cast);
+		OUT(can_scribe);
 		strn0cpy(eq->txtfile, emu->booktext, sizeof(eq->txtfile));
 
 		FINISH_ENCODE();
@@ -4411,6 +4414,17 @@ namespace RoF2
 		FINISH_DIRECT_DECODE();
 	}
 
+	DECODE(OP_BookButton)
+	{
+		DECODE_LENGTH_EXACT(structs::BookButton_Struct);
+		SETUP_DIRECT_DECODE(BookButton_Struct, structs::BookButton_Struct);
+
+		emu->invslot = static_cast<int16_t>(RoF2ToServerTypelessSlot(eq->slot, invtype::typePossessions));
+		IN(target_id);
+
+		FINISH_DIRECT_DECODE();
+	}
+
 	DECODE(OP_Buff)
 	{
 		DECODE_LENGTH_EXACT(structs::SpellBuffPacket_Struct);
@@ -5117,8 +5131,8 @@ namespace RoF2
 		SETUP_DIRECT_DECODE(BookRequest_Struct, structs::BookRequest_Struct);
 
 		IN(type);
-		IN(invslot);
-		IN(subslot);
+		emu->invslot = static_cast<int16_t>(RoF2ToServerTypelessSlot(eq->invslot, invtype::typePossessions));
+		IN(target_id);
 		emu->window = (uint8)eq->window;
 		strn0cpy(emu->txtfile, eq->txtfile, sizeof(emu->txtfile));
 

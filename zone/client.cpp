@@ -2211,25 +2211,13 @@ void Client::ReadBook(BookRequest_Struct *book) {
 
 
 		if (ClientVersion() >= EQ::versions::ClientVersion::SoF) {
-			// Find out what slot the book was read from.
 			// SoF+ need to look up book type for the output message.
-			int16	read_from_slot;
-
-			if (book->subslot >= 0) {
-				uint16 offset;
-				offset = (book->invslot-23) * 10;	// How many packs to skip.
-				read_from_slot = 251 + offset + book->subslot;
-			}
-			else {
-				read_from_slot = book->invslot -1;
-			}
-
 			const EQ::ItemInstance *inst = nullptr;
 
-			if (read_from_slot <= EQ::invbag::GENERAL_BAGS_END)
-				{
-				inst = m_inv[read_from_slot];
-				}
+			if (book->invslot <= EQ::invbag::GENERAL_BAGS_END)
+			{
+				inst = m_inv[book->invslot];
+			}
 
 			if(inst)
 				out->type = inst->GetItem()->Book;
@@ -2240,6 +2228,9 @@ void Client::ReadBook(BookRequest_Struct *book) {
 			out->type = book->type;
 		}
 		out->invslot = book->invslot;
+		out->target_id = book->target_id;
+		out->can_cast = 0; // todo: implement
+		out->can_scribe = 0; // todo: implement
 
 		memcpy(out->booktext, booktxt2.c_str(), length);
 

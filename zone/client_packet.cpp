@@ -145,6 +145,7 @@ void MapOpcodes()
 	ConnectedOpcodes[OP_Bind_Wound] = &Client::Handle_OP_Bind_Wound;
 	ConnectedOpcodes[OP_BlockedBuffs] = &Client::Handle_OP_BlockedBuffs;
 	ConnectedOpcodes[OP_BoardBoat] = &Client::Handle_OP_BoardBoat;
+	ConnectedOpcodes[OP_BookButton] = &Client::Handle_OP_BookButton;
 	ConnectedOpcodes[OP_Buff] = &Client::Handle_OP_Buff;
 	ConnectedOpcodes[OP_BuffRemoveRequest] = &Client::Handle_OP_BuffRemoveRequest;
 	ConnectedOpcodes[OP_Bug] = &Client::Handle_OP_Bug;
@@ -4126,6 +4127,28 @@ void Client::Handle_OP_BoardBoat(const EQApplicationPacket *app)
 	Message(Chat::White, "Board boat: %s", boatname);
 
 	return;
+}
+
+void Client::Handle_OP_BookButton(const EQApplicationPacket* app)
+{
+	if (app->size != sizeof(BookButton_Struct))
+	{
+		LogError("Size mismatch in OP_BookButton. expected [{}] got [{}]", sizeof(BookButton_Struct), app->size);
+		DumpPacket(app);
+		return;
+	}
+
+	BookButton_Struct* book = reinterpret_cast<BookButton_Struct*>(app->pBuffer);
+
+	const EQ::ItemInstance* const inst = GetInv().GetItem(book->invslot);
+	if (inst && inst->GetItem()->Book)
+	{
+		// todo: if scribe book learn recipes and delete book from inventory
+		// todo: if cast book use its spell on target and delete book from inventory (unless reusable?)
+	}
+
+	EQApplicationPacket outapp(OP_FinishWindow, 0);
+	QueuePacket(&outapp);
 }
 
 void Client::Handle_OP_Buff(const EQApplicationPacket *app)

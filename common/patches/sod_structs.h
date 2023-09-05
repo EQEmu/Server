@@ -2351,12 +2351,21 @@ struct BookText_Struct {
 // This is just a "text file" on the server
 // or in our case, the 'name' column in our books table.
 struct BookRequest_Struct {
-/*0000*/	uint32 window;		// where to display the text (0xFFFFFFFF means new window).
-/*0004*/	uint32 invslot;		// The inventory slot the book is in. Not used, but echoed in the response packet.
-/*0008*/	uint32 type;		// 0 = Scroll, 1 = Book, 2 = Item Info. Possibly others
-/*0012*/	uint32 unknown0012;
-/*0016*/	uint16 unknown0016;
-/*0018*/	char txtfile[8194];
+/*0000*/ uint32 window;     // where to display the text (0xFFFFFFFF means new window).
+/*0004*/ uint32 invslot;    // The inventory slot the book is in
+/*0008*/ uint32 type;       // 0 = Scroll, 1 = Book, 2 = Item Info. Possibly others
+/*0012*/ uint32 target_id;
+/*0016*/ uint8 can_cast;
+/*0017*/ uint8 can_scribe;
+/*0018*/ char txtfile[8194];
+};
+
+// used by Scribe and CastSpell book buttons
+struct BookButton_Struct
+{
+/*0000*/ int32 invslot;
+/*0004*/ int32 target_id; // client's target when using the book
+/*0008*/ int32 unused;    // always 0 from button packets
 };
 
 /*
