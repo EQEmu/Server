@@ -2539,90 +2539,424 @@ void lua_cross_zone_message_player_by_name(uint32 type, const char* client_name,
 	quest_manager.CrossZoneMessage(update_type, update_identifier, type, message, client_name);
 }
 
-void lua_cross_zone_move_player_by_char_id(int character_id, const char* zone_short_name) {
-	uint8 update_type = CZUpdateType_Character;
-	uint8 update_subtype = CZMoveUpdateSubtype_MoveZone;
-	uint16 instance_id = 0;
-	quest_manager.CrossZoneMove(update_type, update_subtype, character_id, zone_short_name, instance_id);
+void lua_cross_zone_move_player_by_char_id(uint32 character_id, std::string zone_short_name) {
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.update_identifier = character_id,
+			.update_type = CZUpdateType_Character,
+			.update_subtype = CZMoveUpdateSubtype_MoveZone,
+			.zone_short_name = zone_short_name,
+		}
+	);
 }
 
-void lua_cross_zone_move_player_by_group_id(int group_id, const char* zone_short_name) {
-	uint8 update_type = CZUpdateType_Group;
-	uint8 update_subtype = CZMoveUpdateSubtype_MoveZone;
-	uint16 instance_id = 0;
-	quest_manager.CrossZoneMove(update_type, update_subtype, group_id, zone_short_name, instance_id);
+void lua_cross_zone_move_player_by_char_id(uint32 character_id, std::string zone_short_name, float x, float y, float z) {
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.coordinates = glm::vec4(x, y, z, 0.0f),
+			.update_identifier = character_id,
+			.update_type = CZUpdateType_Character,
+			.update_subtype = CZMoveUpdateSubtype_MoveZone,
+			.zone_short_name = zone_short_name,
+		}
+	);
 }
 
-void lua_cross_zone_move_player_by_raid_id(int raid_id, const char* zone_short_name) {
-	uint8 update_type = CZUpdateType_Raid;
-	uint8 update_subtype = CZMoveUpdateSubtype_MoveZone;
-	uint16 instance_id = 0;
-	quest_manager.CrossZoneMove(update_type, update_subtype, raid_id, zone_short_name, instance_id);
+void lua_cross_zone_move_player_by_char_id(uint32 character_id, std::string zone_short_name, float x, float y, float z, float heading) {
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.coordinates = glm::vec4(x, y, z, heading),
+			.update_identifier = character_id,
+			.update_type = CZUpdateType_Character,
+			.update_subtype = CZMoveUpdateSubtype_MoveZone,
+			.zone_short_name = zone_short_name,
+		}
+	);
 }
 
-void lua_cross_zone_move_player_by_guild_id(int guild_id, const char* zone_short_name) {
-	uint8 update_type = CZUpdateType_Guild;
-	uint8 update_subtype = CZMoveUpdateSubtype_MoveZone;
-	uint16 instance_id = 0;
-	quest_manager.CrossZoneMove(update_type, update_subtype, guild_id, zone_short_name, instance_id);
+void lua_cross_zone_move_player_by_group_id(uint32 group_id, std::string zone_short_name) {
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.update_identifier = group_id,
+			.update_type = CZUpdateType_Group,
+			.update_subtype = CZMoveUpdateSubtype_MoveZone,
+			.zone_short_name = zone_short_name,
+		}
+	);
 }
 
-void lua_cross_zone_move_player_by_expedition_id(int expedition_id, const char* zone_short_name) {
-	uint8 update_type = CZUpdateType_Expedition;
-	uint8 update_subtype = CZMoveUpdateSubtype_MoveZone;
-	uint16 instance_id = 0;
-	quest_manager.CrossZoneMove(update_type, update_subtype, expedition_id, zone_short_name, instance_id);
+void lua_cross_zone_move_player_by_group_id(uint32 group_id, std::string zone_short_name, float x, float y, float z) {
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.coordinates = glm::vec4(x, y, z, 0.0f),
+			.update_identifier = group_id,
+			.update_type = CZUpdateType_Group,
+			.update_subtype = CZMoveUpdateSubtype_MoveZone,
+			.zone_short_name = zone_short_name,
+		}
+	);
 }
 
-void lua_cross_zone_move_player_by_client_name(const char* client_name, const char* zone_short_name) {
-	uint8 update_type = CZUpdateType_Character;
-	uint8 update_subtype = CZMoveUpdateSubtype_MoveZone;
-	int update_identifier = 0;
-	uint16 instance_id = 0;
-	quest_manager.CrossZoneMove(update_type, update_subtype, update_identifier, zone_short_name, instance_id, client_name);
+void lua_cross_zone_move_player_by_group_id(uint32 group_id, std::string zone_short_name, float x, float y, float z, float heading) {
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.coordinates = glm::vec4(x, y, z, heading),
+			.update_identifier = group_id,
+			.update_type = CZUpdateType_Group,
+			.update_subtype = CZMoveUpdateSubtype_MoveZone,
+			.zone_short_name = zone_short_name,
+		}
+	);
 }
 
-void lua_cross_zone_move_instance_by_char_id(int character_id, uint16 instance_id) {
-	uint8 update_type = CZUpdateType_Character;
-	uint8 update_subtype = CZMoveUpdateSubtype_MoveZoneInstance;
-	const char* zone_short_name = "";
-	quest_manager.CrossZoneMove(update_type, update_subtype, character_id, zone_short_name, instance_id);
+void lua_cross_zone_move_player_by_raid_id(uint32 raid_id, std::string zone_short_name) {
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.update_identifier = raid_id,
+			.update_type = CZUpdateType_Raid,
+			.update_subtype = CZMoveUpdateSubtype_MoveZone,
+			.zone_short_name = zone_short_name,
+		}
+	);
 }
 
-void lua_cross_zone_move_instance_by_group_id(int group_id, uint16 instance_id) {
-	uint8 update_type = CZUpdateType_Group;
-	uint8 update_subtype = CZMoveUpdateSubtype_MoveZoneInstance;
-	const char* zone_short_name = "";
-	quest_manager.CrossZoneMove(update_type, update_subtype, group_id, zone_short_name, instance_id);
+void lua_cross_zone_move_player_by_raid_id(uint32 raid_id, std::string zone_short_name, float x, float y, float z) {
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.coordinates = glm::vec4(x, y, z, 0.0f),
+			.update_identifier = raid_id,
+			.update_type = CZUpdateType_Raid,
+			.update_subtype = CZMoveUpdateSubtype_MoveZone,
+			.zone_short_name = zone_short_name,
+		}
+	);
 }
 
-void lua_cross_zone_move_instance_by_raid_id(int raid_id, uint16 instance_id) {
-	uint8 update_type = CZUpdateType_Raid;
-	uint8 update_subtype = CZMoveUpdateSubtype_MoveZoneInstance;
-	const char* zone_short_name = "";
-	quest_manager.CrossZoneMove(update_type, update_subtype, raid_id, zone_short_name, instance_id);
+void lua_cross_zone_move_player_by_raid_id(uint32 raid_id, std::string zone_short_name, float x, float y, float z, float heading) {
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.coordinates = glm::vec4(x, y, z, heading),
+			.update_identifier = raid_id,
+			.update_type = CZUpdateType_Raid,
+			.update_subtype = CZMoveUpdateSubtype_MoveZone,
+			.zone_short_name = zone_short_name,
+		}
+	);
 }
 
-void lua_cross_zone_move_instance_by_guild_id(int guild_id, uint16 instance_id) {
-	uint8 update_type = CZUpdateType_Guild;
-	uint8 update_subtype = CZMoveUpdateSubtype_MoveZoneInstance;
-	const char* zone_short_name = "";
-	quest_manager.CrossZoneMove(update_type, update_subtype, guild_id, zone_short_name, instance_id);
+void lua_cross_zone_move_player_by_guild_id(uint32 guild_id, std::string zone_short_name) {
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.update_identifier = guild_id,
+			.update_type = CZUpdateType_Guild,
+			.update_subtype = CZMoveUpdateSubtype_MoveZone,
+			.zone_short_name = zone_short_name,
+		}
+	);
+}
+
+void lua_cross_zone_move_player_by_guild_id(uint32 guild_id, std::string zone_short_name, float x, float y, float z) {
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.coordinates = glm::vec4(x, y, z, 0.0f),
+			.update_identifier = guild_id,
+			.update_type = CZUpdateType_Guild,
+			.update_subtype = CZMoveUpdateSubtype_MoveZone,
+			.zone_short_name = zone_short_name,
+		}
+	);
+}
+
+void lua_cross_zone_move_player_by_guild_id(uint32 guild_id, std::string zone_short_name, float x, float y, float z, float heading) {
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.coordinates = glm::vec4(x, y, z, heading),
+			.update_identifier = guild_id,
+			.update_type = CZUpdateType_Guild,
+			.update_subtype = CZMoveUpdateSubtype_MoveZone,
+			.zone_short_name = zone_short_name,
+		}
+	);
+}
+
+void lua_cross_zone_move_player_by_expedition_id(uint32 expedition_id, std::string zone_short_name) {
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.update_identifier = expedition_id,
+			.update_type = CZUpdateType_Expedition,
+			.update_subtype = CZMoveUpdateSubtype_MoveZone,
+			.zone_short_name = zone_short_name,
+		}
+	);
+}
+
+void lua_cross_zone_move_player_by_expedition_id(uint32 expedition_id, std::string zone_short_name, float x, float y, float z) {
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.coordinates = glm::vec4(x, y, z, 0.0f),
+			.update_identifier = expedition_id,
+			.update_type = CZUpdateType_Expedition,
+			.update_subtype = CZMoveUpdateSubtype_MoveZone,
+			.zone_short_name = zone_short_name,
+		}
+	);
+}
+
+void lua_cross_zone_move_player_by_expedition_id(uint32 expedition_id, std::string zone_short_name, float x, float y, float z, float heading) {
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.coordinates = glm::vec4(x, y, z, heading),
+			.update_identifier = expedition_id,
+			.update_type = CZUpdateType_Expedition,
+			.update_subtype = CZMoveUpdateSubtype_MoveZone,
+			.zone_short_name = zone_short_name,
+		}
+	);
+}
+
+void lua_cross_zone_move_player_by_client_name(std::string client_name, std::string zone_short_name) {
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.client_name = client_name,
+			.update_type = CZUpdateType_ClientName,
+			.update_subtype = CZMoveUpdateSubtype_MoveZone,
+			.zone_short_name = zone_short_name,
+		}
+	);
+}
+
+void lua_cross_zone_move_player_by_client_name(std::string client_name, std::string zone_short_name, float x, float y, float z) {
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.client_name = client_name,
+			.coordinates = glm::vec4(x, y, z, 0.0f),
+			.update_type = CZUpdateType_ClientName,
+			.update_subtype = CZMoveUpdateSubtype_MoveZone,
+			.zone_short_name = zone_short_name,
+		}
+	);
+}
+
+void lua_cross_zone_move_player_by_client_name(std::string client_name, std::string zone_short_name, float x, float y, float z, float heading) {
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.client_name = client_name,
+			.coordinates = glm::vec4(x, y, z, heading),
+			.update_type = CZUpdateType_ClientName,
+			.update_subtype = CZMoveUpdateSubtype_MoveZone,
+			.zone_short_name = zone_short_name,
+		}
+	);
+}
+
+void lua_cross_zone_move_instance_by_char_id(uint32 character_id, uint16 instance_id) {
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.instance_id = instance_id,
+			.update_identifier = character_id,
+			.update_type = CZUpdateType_Character,
+			.update_subtype = CZMoveUpdateSubtype_MoveZoneInstance,
+		}
+	);
+}
+
+void lua_cross_zone_move_instance_by_char_id(uint32 character_id, uint16 instance_id, float x, float y, float z) {
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.coordinates = glm::vec4(x, y, z, 0.0f),
+			.instance_id = instance_id,
+			.update_identifier = character_id,
+			.update_type = CZUpdateType_Character,
+			.update_subtype = CZMoveUpdateSubtype_MoveZoneInstance,
+		}
+	);
+}
+
+void lua_cross_zone_move_instance_by_char_id(uint32 character_id, uint16 instance_id, float x, float y, float z, float heading) {
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.coordinates = glm::vec4(x, y, z, heading),
+			.instance_id = instance_id,
+			.update_identifier = character_id,
+			.update_type = CZUpdateType_Character,
+			.update_subtype = CZMoveUpdateSubtype_MoveZoneInstance,
+		}
+	);
+}
+
+void lua_cross_zone_move_instance_by_group_id(uint32 group_id, uint16 instance_id) {
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.instance_id = instance_id,
+			.update_identifier = group_id,
+			.update_type = CZUpdateType_Group,
+			.update_subtype = CZMoveUpdateSubtype_MoveZoneInstance,
+		}
+	);
+}
+
+void lua_cross_zone_move_instance_by_group_id(uint32 group_id, uint16 instance_id, float x, float y, float z) {
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.coordinates = glm::vec4(x, y, z, 0.0f),
+			.instance_id = instance_id,
+			.update_identifier = group_id,
+			.update_type = CZUpdateType_Group,
+			.update_subtype = CZMoveUpdateSubtype_MoveZoneInstance,
+		}
+	);
+}
+
+void lua_cross_zone_move_instance_by_group_id(uint32 group_id, uint16 instance_id, float x, float y, float z, float heading) {
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.coordinates = glm::vec4(x, y, z, heading),
+			.instance_id = instance_id,
+			.update_identifier = group_id,
+			.update_type = CZUpdateType_Group,
+			.update_subtype = CZMoveUpdateSubtype_MoveZoneInstance,
+		}
+	);
+}
+
+void lua_cross_zone_move_instance_by_raid_id(uint32 raid_id, uint16 instance_id) {
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.instance_id = instance_id,
+			.update_identifier = raid_id,
+			.update_type = CZUpdateType_Raid,
+			.update_subtype = CZMoveUpdateSubtype_MoveZoneInstance,
+		}
+	);
+}
+
+void lua_cross_zone_move_instance_by_raid_id(uint32 raid_id, uint16 instance_id, float x, float y, float z) {
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.coordinates = glm::vec4(x, y, z, 0.0f),
+			.instance_id = instance_id,
+			.update_identifier = raid_id,
+			.update_type = CZUpdateType_Raid,
+			.update_subtype = CZMoveUpdateSubtype_MoveZoneInstance,
+		}
+	);
+}
+
+void lua_cross_zone_move_instance_by_raid_id(uint32 raid_id, uint16 instance_id, float x, float y, float z, float heading) {
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.coordinates = glm::vec4(x, y, z, heading),
+			.instance_id = instance_id,
+			.update_identifier = raid_id,
+			.update_type = CZUpdateType_Raid,
+			.update_subtype = CZMoveUpdateSubtype_MoveZoneInstance,
+		}
+	);
+}
+
+void lua_cross_zone_move_instance_by_guild_id(uint32 guild_id, uint16 instance_id) {
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.instance_id = instance_id,
+			.update_identifier = guild_id,
+			.update_type = CZUpdateType_Guild,
+			.update_subtype = CZMoveUpdateSubtype_MoveZoneInstance,
+		}
+	);
+}
+
+void lua_cross_zone_move_instance_by_guild_id(uint32 guild_id, uint16 instance_id, float x, float y, float z) {
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.coordinates = glm::vec4(x, y, z, 0.0f),
+			.instance_id = instance_id,
+			.update_identifier = guild_id,
+			.update_type = CZUpdateType_Guild,
+			.update_subtype = CZMoveUpdateSubtype_MoveZoneInstance,
+		}
+	);
+}
+
+void lua_cross_zone_move_instance_by_guild_id(uint32 guild_id, uint16 instance_id, float x, float y, float z, float heading) {
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.coordinates = glm::vec4(x, y, z, heading),
+			.instance_id = instance_id,
+			.update_identifier = guild_id,
+			.update_type = CZUpdateType_Guild,
+			.update_subtype = CZMoveUpdateSubtype_MoveZoneInstance,
+		}
+	);
 }
 
 void lua_cross_zone_move_instance_by_expedition_id(uint32 expedition_id, uint16 instance_id) {
-	uint8 update_type = CZUpdateType_Expedition;
-	uint8 update_subtype = CZMoveUpdateSubtype_MoveZoneInstance;
-	const char* zone_short_name = "";
-	quest_manager.CrossZoneMove(update_type, update_subtype, expedition_id, zone_short_name, instance_id);
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.instance_id = instance_id,
+			.update_identifier = expedition_id,
+			.update_type = CZUpdateType_Expedition,
+			.update_subtype = CZMoveUpdateSubtype_MoveZoneInstance,
+		}
+	);
 }
 
-void lua_cross_zone_move_instance_by_client_name(const char* client_name, uint16 instance_id) {
-	uint8 update_type = CZUpdateType_ClientName;
-	uint8 update_subtype = CZMoveUpdateSubtype_MoveZoneInstance;
-	int update_identifier = 0;
-	const char* zone_short_name = "";
-	quest_manager.CrossZoneMove(update_type, update_subtype, update_identifier, zone_short_name, instance_id, client_name);
+void lua_cross_zone_move_instance_by_expedition_id(uint32 expedition_id, uint16 instance_id, float x, float y, float z) {
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.coordinates = glm::vec4(x, y, z, 0.0f),
+			.instance_id = instance_id,
+			.update_identifier = expedition_id,
+			.update_type = CZUpdateType_Expedition,
+			.update_subtype = CZMoveUpdateSubtype_MoveZoneInstance,
+		}
+	);
+}
+
+void lua_cross_zone_move_instance_by_expedition_id(uint32 expedition_id, uint16 instance_id, float x, float y, float z, float heading) {
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.coordinates = glm::vec4(x, y, z, heading),
+			.instance_id = instance_id,
+			.update_identifier = expedition_id,
+			.update_type = CZUpdateType_Expedition,
+			.update_subtype = CZMoveUpdateSubtype_MoveZoneInstance,
+		}
+	);
+}
+
+void lua_cross_zone_move_instance_by_client_name(std::string client_name, uint16 instance_id) {
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.client_name = client_name,
+			.instance_id = instance_id,
+			.update_type = CZUpdateType_ClientName,
+			.update_subtype = CZMoveUpdateSubtype_MoveZoneInstance,
+		}
+	);
+}
+
+void lua_cross_zone_move_instance_by_client_name(std::string client_name, uint16 instance_id, float x, float y, float z) {
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.client_name = client_name,
+			.coordinates = glm::vec4(x, y, z, 0.0f),
+			.instance_id = instance_id,
+			.update_type = CZUpdateType_ClientName,
+			.update_subtype = CZMoveUpdateSubtype_MoveZoneInstance,
+		}
+	);
+}
+
+void lua_cross_zone_move_instance_by_client_name(std::string client_name, uint16 instance_id, float x, float y, float z, float heading) {
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.client_name = client_name,
+			.coordinates = glm::vec4(x, y, z, heading),
+			.instance_id = instance_id,
+			.update_type = CZUpdateType_ClientName,
+			.update_subtype = CZMoveUpdateSubtype_MoveZoneInstance,
+		}
+	);
 }
 
 void lua_cross_zone_remove_ldon_loss_by_char_id(int character_id, uint32 theme_id) {
@@ -5890,18 +6224,42 @@ luabind::scope lua_register_general() {
 		luabind::def("cross_zone_message_player_by_guild_id", &lua_cross_zone_message_player_by_guild_id),
 		luabind::def("cross_zone_message_player_by_expedition_id", &lua_cross_zone_message_player_by_expedition_id),
 		luabind::def("cross_zone_message_player_by_name", &lua_cross_zone_message_player_by_name),
-		luabind::def("cross_zone_move_player_by_char_id", &lua_cross_zone_move_player_by_char_id),
-		luabind::def("cross_zone_move_player_by_group_id", &lua_cross_zone_move_player_by_group_id),
-		luabind::def("cross_zone_move_player_by_raid_id", &lua_cross_zone_move_player_by_raid_id),
-		luabind::def("cross_zone_move_player_by_guild_id", &lua_cross_zone_move_player_by_guild_id),
-		luabind::def("cross_zone_move_player_by_expedition_id", &lua_cross_zone_move_player_by_expedition_id),
-		luabind::def("cross_zone_move_player_by_client_name", &lua_cross_zone_move_player_by_client_name),
-		luabind::def("cross_zone_move_instance_by_char_id", &lua_cross_zone_move_instance_by_char_id),
-		luabind::def("cross_zone_move_instance_by_group_id", &lua_cross_zone_move_instance_by_group_id),
-		luabind::def("cross_zone_move_instance_by_raid_id", &lua_cross_zone_move_instance_by_raid_id),
-		luabind::def("cross_zone_move_instance_by_guild_id", &lua_cross_zone_move_instance_by_guild_id),
-		luabind::def("cross_zone_move_instance_by_expedition_id", &lua_cross_zone_move_instance_by_expedition_id),
-		luabind::def("cross_zone_move_instance_by_client_name", &lua_cross_zone_move_instance_by_client_name),
+		luabind::def("cross_zone_move_player_by_char_id", (void(*)(uint32,std::string))&lua_cross_zone_move_player_by_char_id),
+		luabind::def("cross_zone_move_player_by_char_id", (void(*)(uint32,std::string,float,float,float))&lua_cross_zone_move_player_by_char_id),
+		luabind::def("cross_zone_move_player_by_char_id", (void(*)(uint32,std::string,float,float,float,float))&lua_cross_zone_move_player_by_char_id),
+		luabind::def("cross_zone_move_player_by_group_id", (void(*)(uint32,std::string))&lua_cross_zone_move_player_by_group_id),
+		luabind::def("cross_zone_move_player_by_group_id", (void(*)(uint32,std::string,float,float,float))&lua_cross_zone_move_player_by_group_id),
+		luabind::def("cross_zone_move_player_by_group_id", (void(*)(uint32,std::string,float,float,float,float))&lua_cross_zone_move_player_by_group_id),
+		luabind::def("cross_zone_move_player_by_raid_id", (void(*)(uint32,std::string))&lua_cross_zone_move_player_by_raid_id),
+		luabind::def("cross_zone_move_player_by_raid_id", (void(*)(uint32,std::string,float,float,float))&lua_cross_zone_move_player_by_raid_id),
+		luabind::def("cross_zone_move_player_by_raid_id", (void(*)(uint32,std::string,float,float,float,float))&lua_cross_zone_move_player_by_raid_id),
+		luabind::def("cross_zone_move_player_by_guild_id", (void(*)(uint32,std::string))&lua_cross_zone_move_player_by_guild_id),
+		luabind::def("cross_zone_move_player_by_guild_id", (void(*)(uint32,std::string,float,float,float))&lua_cross_zone_move_player_by_guild_id),
+		luabind::def("cross_zone_move_player_by_guild_id", (void(*)(uint32,std::string,float,float,float,float))&lua_cross_zone_move_player_by_guild_id),
+		luabind::def("cross_zone_move_player_by_expedition_id", (void(*)(uint32,std::string))&lua_cross_zone_move_player_by_expedition_id),
+		luabind::def("cross_zone_move_player_by_expedition_id", (void(*)(uint32,std::string,float,float,float))&lua_cross_zone_move_player_by_expedition_id),
+		luabind::def("cross_zone_move_player_by_expedition_id", (void(*)(uint32,std::string,float,float,float,float))&lua_cross_zone_move_player_by_expedition_id),
+		luabind::def("cross_zone_move_player_by_client_name", (void(*)(std::string,std::string))&lua_cross_zone_move_player_by_client_name),
+		luabind::def("cross_zone_move_player_by_client_name", (void(*)(std::string,std::string,float,float,float))&lua_cross_zone_move_player_by_client_name),
+		luabind::def("cross_zone_move_player_by_client_name", (void(*)(std::string,std::string,float,float,float,float))&lua_cross_zone_move_player_by_client_name),
+		luabind::def("cross_zone_move_instance_by_char_id", (void(*)(uint32,uint16))&lua_cross_zone_move_instance_by_char_id),
+		luabind::def("cross_zone_move_instance_by_char_id", (void(*)(uint32,uint16,float,float,float))&lua_cross_zone_move_instance_by_char_id),
+		luabind::def("cross_zone_move_instance_by_char_id", (void(*)(uint32,uint16,float,float,float,float))&lua_cross_zone_move_instance_by_char_id),
+		luabind::def("cross_zone_move_instance_by_group_id", (void(*)(uint32,uint16))&lua_cross_zone_move_instance_by_group_id),
+		luabind::def("cross_zone_move_instance_by_group_id", (void(*)(uint32,uint16,float,float,float))&lua_cross_zone_move_instance_by_group_id),
+		luabind::def("cross_zone_move_instance_by_group_id", (void(*)(uint32,uint16,float,float,float,float))&lua_cross_zone_move_instance_by_group_id),
+		luabind::def("cross_zone_move_instance_by_raid_id", (void(*)(uint32,uint16))&lua_cross_zone_move_instance_by_raid_id),
+		luabind::def("cross_zone_move_instance_by_raid_id", (void(*)(uint32,uint16,float,float,float))&lua_cross_zone_move_instance_by_raid_id),
+		luabind::def("cross_zone_move_instance_by_raid_id", (void(*)(uint32,uint16,float,float,float,float))&lua_cross_zone_move_instance_by_raid_id),
+		luabind::def("cross_zone_move_instance_by_guild_id", (void(*)(uint32,uint16))&lua_cross_zone_move_instance_by_guild_id),
+		luabind::def("cross_zone_move_instance_by_guild_id", (void(*)(uint32,uint16,float,float,float))&lua_cross_zone_move_instance_by_guild_id),
+		luabind::def("cross_zone_move_instance_by_guild_id", (void(*)(uint32,uint16,float,float,float,float))&lua_cross_zone_move_instance_by_guild_id),
+		luabind::def("cross_zone_move_instance_by_expedition_id", (void(*)(uint32,uint16))&lua_cross_zone_move_instance_by_expedition_id),
+		luabind::def("cross_zone_move_instance_by_expedition_id", (void(*)(uint32,uint16,float,float,float))&lua_cross_zone_move_instance_by_expedition_id),
+		luabind::def("cross_zone_move_instance_by_expedition_id", (void(*)(uint32,uint16,float,float,float,float))&lua_cross_zone_move_instance_by_expedition_id),
+		luabind::def("cross_zone_move_instance_by_client_name", (void(*)(std::string,uint16))&lua_cross_zone_move_instance_by_client_name),
+		luabind::def("cross_zone_move_instance_by_client_name", (void(*)(std::string,uint16,float,float,float))&lua_cross_zone_move_instance_by_client_name),
+		luabind::def("cross_zone_move_instance_by_client_name", (void(*)(std::string,uint16,float,float,float,float))&lua_cross_zone_move_instance_by_client_name),
 		luabind::def("cross_zone_remove_ldon_loss_by_char_id", &lua_cross_zone_remove_ldon_loss_by_char_id),
 		luabind::def("cross_zone_remove_ldon_loss_by_group_id", &lua_cross_zone_remove_ldon_loss_by_group_id),
 		luabind::def("cross_zone_remove_ldon_loss_by_raid_id", &lua_cross_zone_remove_ldon_loss_by_raid_id),
