@@ -113,92 +113,81 @@ Group::~Group()
 }
 
 //Split money used in OP_Split (/split and /autosplit).
-void Group::SplitMoney(uint32 copper, uint32 silver, uint32 gold, uint32 platinum, Client *splitter) {
-	//avoid unneeded work
-	if (
-		!copper &&
-		!silver &&
-		!gold &&
-		!platinum
-	) {
-		return;
-	}
+void Group::SplitMoney(uint32 copper, uint32 silver, uint32 gold, uint32 platinum, Client *splitter, bool autoSplit = false) {
+    // Return early if no money to split.
+    if (!copper && !silver && !gold && !platinum) {
+        return;
+    }
 
-	uint8 member_count = 0;
-	for (uint32 i = 0; i < MAX_GROUP_MEMBERS; i++) {
-		// Don't split with Mercs or Bots
-		if (members[i] && members[i]->IsClient()) {
-			member_count++;
-		}
-	}
+    uint8 member_count = 0;
+    // Count the number of actual players in the group.
+    for (uint32 i = 0; i < MAX_GROUP_MEMBERS; i++) {
+        if (members[i] && members[i]->IsClient()) {
+            member_count++;
+        }
+    }
 
-	if (!member_count) {
-		return;
-	}
+    // Return if no group members found.
+    if (!member_count) {
+        return;
+    }
 
-	uint32 modifier;
-	if (member_count > 1) {
-		modifier = platinum % member_count;
+    // Determine the member who will receive the leftover coins.
+    uint8 special_member_index = autoSplit ? zone->random.Int(0, member_count - 1) : (splitter ? splitter->CharacterID() : 0);
 
-		if (modifier) {
-			platinum -= modifier;
-			gold += 10 * modifier;
-		}
+    // Calculate split and remainder for each coin type
+    uint32 copper_split = copper / member_count;
+    uint32 copper_remainder = copper % member_count;
 
-		modifier = gold % member_count;
+    uint32 silver_split = silver / member_count;
+    uint32 silver_remainder = silver % member_count;
 
-		if (modifier) {
-			gold -= modifier;
-			silver += 10 * modifier;
-		}
+    uint32 gold_split = gold / member_count;
+    uint32 gold_remainder = gold % member_count;
 
-		modifier = silver % member_count;
+    uint32 platinum_split = platinum / member_count;
+    uint32 platinum_remainder = platinum % member_count;
 
-		if (modifier) {
-			silver -= modifier;
-			copper += 10 * modifier;
-		}
-	}
+    // Loop through the group members to split the coins.
+    for (uint32 i = 0; i < MAX_GROUP_MEMBERS; i++) {
+        if (members[i] && members[i]->IsClient()) {
+            Client* member_client = members[i]->CastToClient();
 
-	auto copper_split = copper / member_count;
-	auto silver_split = silver / member_count;
-	auto gold_split = gold / member_count;
-	auto platinum_split = platinum / member_count;
+            uint32 log_copper = copper_split;
+            uint32 log_silver = silver_split;
+            uint32 log_gold = gold_split;
+            uint32 log_platinum = platinum_split;
 
-	for (uint32 i = 0; i < MAX_GROUP_MEMBERS; i++) {
-		if (members[i] && members[i]->IsClient()) { // If Group Member is Client
-			members[i]->CastToClient()->AddMoneyToPP(
-				copper_split,
-				silver_split,
-				gold_split,
-				platinum_split,
-				true
-			);
+            if (i == special_member_index) {
+                log_copper += copper_remainder;
+                log_silver += silver_remainder;
+                log_gold += gold_remainder;
+                log_platinum += platinum_remainder;
+            }
 
-			if (player_event_logs.IsEventEnabled(PlayerEvent::SPLIT_MONEY)) {
-				auto e = PlayerEvent::SplitMoneyEvent{
-					.copper = copper_split,
-					.silver = silver_split,
-					.gold = gold_split,
-					.platinum = platinum_split,
-					.player_money_balance = members[i]->CastToClient()->GetCarriedMoney(),
-				};
+            // Add the coins to the player's purse.
+            member_client->AddMoneyToPP(log_copper, log_silver, log_gold, log_platinum, true);
 
-				RecordPlayerEventLogWithClient(members[i]->CastToClient(), PlayerEvent::SPLIT_MONEY, e);
-			}
+            // If logging of player money transactions is enabled, record the transaction.
+            if (player_event_logs.IsEventEnabled(PlayerEvent::SPLIT_MONEY)) {
+                auto e = PlayerEvent::SplitMoneyEvent{
+                        .copper = log_copper,
+                        .silver = log_silver,
+                        .gold = log_gold,
+                        .platinum = log_platinum,
+                        .player_money_balance = member_client->GetCarriedMoney(),
+                };
+                RecordPlayerEventLogWithClient(member_client, PlayerEvent::SPLIT_MONEY, e);
+            }
 
-			members[i]->CastToClient()->MessageString(
-				Chat::MoneySplit,
-				YOU_RECEIVE_AS_SPLIT,
-				Strings::Money(
-					platinum_split,
-					gold_split,
-					silver_split,
-					copper_split
-				).c_str()
-			);
-		}
-	}
+            // Notify the player of their received coins.
+            member_client->MessageString(
+                    Chat::MoneySplit,
+                    YOU_RECEIVE_AS_SPLIT,
+                    Strings::Money(log_platinum, log_gold, log_silver, log_copper).c_str()
+            );
+        }
+    }
 }
 
 bool Group::AddMember(Mob* newmember, const char *NewMemberName, uint32 CharacterID, bool ismerc)
