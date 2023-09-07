@@ -113,17 +113,21 @@ Group::~Group()
 }
 
 //Split money used in OP_Split (/split and /autosplit).
-void Group::SplitMoney(uint32 copper, uint32 silver, uint32 gold, uint32 platinum, Client *splitter, bool autoSplit = false) {
+void Group::SplitMoney(uint32 copper, uint32 silver, uint32 gold, uint32 platinum, Client *splitter) {
     // Return early if no money to split.
     if (!copper && !silver && !gold && !platinum) {
         return;
     }
 
     uint8 member_count = 0;
+    uint8 splitter_index = MAX_GROUP_MEMBERS
     // Count the number of actual players in the group.
     for (uint32 i = 0; i < MAX_GROUP_MEMBERS; i++) {
         if (members[i] && members[i]->IsClient()) {
             member_count++;
+            if (splitter && members[i]->CastToClient()->CharacterID() == splitter->CharacterID()) {
+                splitter_index = i;
+            }
         }
     }
 
@@ -131,9 +135,10 @@ void Group::SplitMoney(uint32 copper, uint32 silver, uint32 gold, uint32 platinu
     if (!member_count) {
         return;
     }
-
-    // Determine the member who will receive the leftover coins.
-    uint8 special_member_index = autoSplit ? zone->random.Int(0, member_count - 1) : (splitter ? splitter->CharacterID() : 0);
+    // no splitter was found - this should never happen but is handled just in case
+    if (splitter_index == MAX_GROUP_MEMBERS) {
+        splitter_index = zone->random.Int(0, member_count - 1)
+    }
 
     // Calculate split and remainder for each coin type
     uint32 copper_split = copper / member_count;
@@ -158,7 +163,7 @@ void Group::SplitMoney(uint32 copper, uint32 silver, uint32 gold, uint32 platinu
             uint32 log_gold = gold_split;
             uint32 log_platinum = platinum_split;
 
-            if (i == special_member_index) {
+            if (i == splitter_index) {
                 log_copper += copper_remainder;
                 log_silver += silver_remainder;
                 log_gold += gold_remainder;
