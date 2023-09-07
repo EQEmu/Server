@@ -119,14 +119,18 @@ void Group::SplitMoney(uint32 copper, uint32 silver, uint32 gold, uint32 platinu
         return;
     }
 
+    if (!splitter) {
+        return;
+    }
+
     uint8 member_count = 0;
-    uint8 splitter_index = MAX_GROUP_MEMBERS
-    // Count the number of actual players in the group.
+    bool splitter_in_group = false;
     for (uint32 i = 0; i < MAX_GROUP_MEMBERS; i++) {
+        // Don't split with Mercs or Bots
         if (members[i] && members[i]->IsClient()) {
             member_count++;
-            if (splitter && members[i]->CastToClient()->CharacterID() == splitter->CharacterID()) {
-                splitter_index = i;
+            if (members[i]->CastToClient() == splitter) {
+                splitter_in_group = true;
             }
         }
     }
@@ -135,9 +139,10 @@ void Group::SplitMoney(uint32 copper, uint32 silver, uint32 gold, uint32 platinu
     if (!member_count) {
         return;
     }
-    // no splitter was found - this should never happen but is handled just in case
-    if (splitter_index == MAX_GROUP_MEMBERS) {
-        splitter_index = zone->random.Int(0, member_count - 1)
+
+    // Splitter must be in group
+    if (!splitter_in_group) {
+        return;
     }
 
     // Calculate split and remainder for each coin type
@@ -154,8 +159,8 @@ void Group::SplitMoney(uint32 copper, uint32 silver, uint32 gold, uint32 platinu
     uint32 platinum_remainder = platinum % member_count;
 
     // Loop through the group members to split the coins.
-    for (uint32 i = 0; i < MAX_GROUP_MEMBERS; i++) {
-        if (members[i] && members[i]->IsClient()) {
+    for (const auto& m : members) {
+        if (m && m->IsClient()) {
             Client* member_client = members[i]->CastToClient();
 
             uint32 log_copper = copper_split;
@@ -163,7 +168,7 @@ void Group::SplitMoney(uint32 copper, uint32 silver, uint32 gold, uint32 platinu
             uint32 log_gold = gold_split;
             uint32 log_platinum = platinum_split;
 
-            if (i == splitter_index) {
+            if (member_client == splitter) {
                 log_copper += copper_remainder;
                 log_silver += silver_remainder;
                 log_gold += gold_remainder;
