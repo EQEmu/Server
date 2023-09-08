@@ -749,11 +749,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 
 		if (RuleB(TaskSystem, EnableTaskSystem)) {
 			if (UpdateTasksOnDeliver(items, *trade, tradingWith->CastToNPC())) {
-				if (!tradingWith->IsMoving())
-					tradingWith->FaceTarget(this);
-
 				EVENT_ITEM_ScriptStopReturn();
-
 			}
 		}
 
@@ -839,6 +835,11 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 						true
 					);
 				}
+                // Can not complete trade with a mob when you are on their hate list
+                else if (tradingWith->hate_list.IsEntOnHateList(this)) {
+                    tradingWith->SayString(TRADE_BACK, GetCleanName());
+                    PushItemOnCursor(*inst, true);
+                }
 				// Return quest items being traded to non-quest NPC when the rule is true
 				else if (restrict_quest_items_to_quest_npc && (!is_quest_npc && item->IsQuestItem())) {
 					tradingWith->SayString(TRADE_BACK, GetCleanName());
@@ -873,10 +874,6 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 		snprintf(temp1, 100, "platinum.%d", tradingWith->GetNPCTypeID());
 		snprintf(temp2, 100, "%u", trade->pp);
 		parse->AddVar(temp1, temp2);
-
-		if(tradingWith->GetAppearance() != eaDead) {
-			tradingWith->FaceTarget(this);
-		}
 
 		if (parse->HasQuestSub(tradingWith->GetNPCTypeID(), EVENT_TRADE)) {
 			std::vector<std::any> item_list(items.begin(), items.end());
