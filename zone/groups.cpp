@@ -119,10 +119,12 @@ void Group::SplitMoney(uint32 copper, uint32 silver, uint32 gold, uint32 platinu
         return;
     }
 
+    // splitter can not be nullptr
     if (!splitter) {
         return;
     }
 
+    // find number of clients in group and check if splitter is in group
     uint8 member_count = 0;
     bool splitter_in_group = false;
     for (uint32 i = 0; i < MAX_GROUP_MEMBERS; i++) {
@@ -161,13 +163,14 @@ void Group::SplitMoney(uint32 copper, uint32 silver, uint32 gold, uint32 platinu
     // Loop through the group members to split the coins.
     for (const auto& m : members) {
         if (m && m->IsClient()) {
-            Client* member_client = members[i]->CastToClient();
+            Client* member_client = m->CastToClient();
 
             uint32 log_copper = copper_split;
             uint32 log_silver = silver_split;
             uint32 log_gold = gold_split;
             uint32 log_platinum = platinum_split;
 
+            // splitter gets the remainders of coin
             if (member_client == splitter) {
                 log_copper += copper_remainder;
                 log_silver += silver_remainder;
