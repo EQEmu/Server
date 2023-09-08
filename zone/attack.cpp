@@ -2371,6 +2371,41 @@ void NPC::Damage(Mob* other, int64 damage, uint16 spell_id, EQ::skills::SkillTyp
 	}
 }
 
+bool NPC::ShouldLeaveCorpseUponDeath(Mob* killer_mob, Mob* killer, bool damageTopWasZero, bool isLdonTreasure) {
+    if (damageTopWasZero) {
+        return false
+    }
+
+    bool allow_merchant_corpse = RuleB(Merchant, AllowCorpse);
+    bool is_merchant = (class_ == MERCHANT || class_ == ADVENTURE_MERCHANT || MerchantType != 0);
+
+    // Initial checks on current entity
+    bool hasNoOwner = !HasOwner();
+    bool isNotMerc = !IsMerc();
+    bool hasNoSwarmInfo = !GetSwarmInfo();
+    bool isPermittedMerchant = !is_merchant || allow_merchant_corpse;
+
+    // Check on the killer's properties
+    bool killerIsClientOrOwnedByClient = killer &&
+                                         (killer->IsClient() ||
+                                          (killer->HasOwner() && killer->GetUltimateOwner()->IsClient()));
+    bool killerIsClientNPCSwarm = killer && killer->IsNPC() &&
+                                  killer->CastToNPC()->GetSwarmInfo() &&
+                                  killer->CastToNPC()->GetSwarmInfo()->GetOwner() &&
+                                  killer->CastToNPC()->GetSwarmInfo()->GetOwner()->IsClient();
+    bool killerConditions = killerIsClientOrOwnedByClient || killerIsClientNPCSwarm;
+
+    // Additional checks
+    bool isLdonTreasureWithKillerMob = killer_mob && isLdonTreasure;
+
+    // Combined conditions
+    bool isValidEntity = hasNoOwner && isNotMerc && hasNoSwarmInfo && isPermittedMerchant;
+    bool isAcceptableKiller = killerConditions || isLdonTreasureWithKillerMob;
+
+    // Final Predicate
+    return isValidEntity && isAcceptableKiller
+};
+
 bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillType attack_skill)
 {
 	LogCombat("Fatal blow dealt by [{}] with [{}] damage, spell [{}], skill [{}]",
@@ -2492,11 +2527,17 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 		hate_list.AddEntToHateList(killer_mob, damage);
 	}
 
-	Mob *give_exp = hate_list.GetDamageTopOnHateList(this);
+    Mob *give_exp = hate_list.GetDamageTopOnHateList(this);
 
-	if (give_exp) {
-		give_exp = killer;
-	}
+    bool damageTopWasZero = hate_list.GetEntHateAmount(give_exp, true) == 0
+
+    if (give_exp && !damageTopWasZero) {
+        give_exp = killer;
+    } else {
+        // if the top damage did 0 total damage then no faction hits, xp, or corpse
+        // this can happen if a mob is killed entirely by a damage shield
+        give_exp = nullptr;
+    }
 
 	if (give_exp && give_exp->HasOwner()) {
 		bool ownerInGroup = false;
@@ -2700,16 +2741,8 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 		}
 	}
 
-	bool    allow_merchant_corpse = RuleB(Merchant, AllowCorpse);
-	bool    is_merchant = (class_ == MERCHANT || class_ == ADVENTURE_MERCHANT || MerchantType != 0);
-
 	Corpse* corpse = nullptr;
-
-	if (!HasOwner() && !IsMerc() && !GetSwarmInfo() && (!is_merchant || allow_merchant_corpse) &&
-		((killer && (killer->IsClient() || (killer->HasOwner() && killer->GetUltimateOwner()->IsClient()) ||
-		(killer->IsNPC() && killer->CastToNPC()->GetSwarmInfo() && killer->CastToNPC()->GetSwarmInfo()->GetOwner() && killer->CastToNPC()->GetSwarmInfo()->GetOwner()->IsClient())))
-		|| (killer_mob && IsLdonTreasure)))
-	{
+    if (ShouldLeaveCorpseUponDeath(killer_mob, killer, damageTopWasZero, IsLdonTreasure)) {
 		if (killer != 0) {
 			if (killer->GetOwner() != 0 && killer->GetOwner()->IsClient())
 				killer = killer->GetOwner();

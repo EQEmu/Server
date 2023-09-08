@@ -100,46 +100,52 @@ void HateList::SetHateAmountOnEnt(Mob* other, int64 in_hate, uint64 in_damage)
 
 Mob* HateList::GetDamageTopOnHateList(Mob* hater)
 {
-	Mob* current = nullptr;
-	Group* grp = nullptr;
-	Raid* r = nullptr;
-	uint64 dmg_amt = 0;
+    Mob* highestDamageMob = nullptr;
+    uint64 maxDamage = 0;
 
-	auto iterator = list.begin();
-	while (iterator != list.end())
-	{
-		grp = nullptr;
-		r = nullptr;
+    for (const auto& hateEntity : list)
+    {
+        Mob* currentMob = hateEntity->entity_on_hatelist;
 
-		if ((*iterator)->entity_on_hatelist && (*iterator)->entity_on_hatelist->IsClient()){
-			r = entity_list.GetRaidByClient((*iterator)->entity_on_hatelist->CastToClient());
-		}
+        // If there's no entity, continue to the next iteration
+        if (!currentMob) continue;
 
-		grp = entity_list.GetGroupByMob((*iterator)->entity_on_hatelist);
+        if (currentMob->IsClient())
+        {
+            Raid* raid = entity_list.GetRaidByClient(currentMob->CastToClient());
+            if (raid)
+            {
+                uint64 raidDamage = raid->GetTotalRaidDamage(hater);
+                if (raidDamage >= maxDamage)
+                {
+                    highestDamageMob = currentMob;
+                    maxDamage = raidDamage;
+                }
+                continue; // Move to the next iteration since a raid was found
+            }
+        }
 
-		if ((*iterator)->entity_on_hatelist && r){
-			if (r->GetTotalRaidDamage(hater) >= dmg_amt)
-			{
-				current = (*iterator)->entity_on_hatelist;
-				dmg_amt = r->GetTotalRaidDamage(hater);
-			}
-		}
-		else if ((*iterator)->entity_on_hatelist != nullptr && grp != nullptr)
-		{
-			if (grp->GetTotalGroupDamage(hater) >= dmg_amt)
-			{
-				current = (*iterator)->entity_on_hatelist;
-				dmg_amt = grp->GetTotalGroupDamage(hater);
-			}
-		}
-		else if ((*iterator)->entity_on_hatelist != nullptr && (uint64)(*iterator)->hatelist_damage >= dmg_amt)
-		{
-			current = (*iterator)->entity_on_hatelist;
-			dmg_amt = (*iterator)->hatelist_damage;
-		}
-		++iterator;
-	}
-	return current;
+        Group* group = entity_list.GetGroupByMob(currentMob);
+        if (group)
+        {
+            uint64 groupDamage = group->GetTotalGroupDamage(hater);
+            if (groupDamage >= maxDamage)
+            {
+                highestDamageMob = currentMob;
+                maxDamage = groupDamage;
+            }
+            continue; // Move to the next iteration since a group was found
+        }
+
+        uint64 individualDamage = static_cast<uint64>(hateEntity->hatelist_damage);
+        if (individualDamage >= maxDamage)
+        {
+            highestDamageMob = currentMob;
+            maxDamage = individualDamage;
+        }
+    }
+
+    return highestDamageMob;
 }
 
 Mob* HateList::GetClosestEntOnHateList(Mob *hater, bool skip_mezzed, EntityFilterType entity_type) {
