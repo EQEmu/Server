@@ -2373,7 +2373,7 @@ void NPC::Damage(Mob* other, int64 damage, uint16 spell_id, EQ::skills::SkillTyp
 
 bool NPC::ShouldLeaveCorpseUponDeath(Mob* killer_mob, Mob* killer, bool damageTopWasZero, bool isLdonTreasure) {
     if (damageTopWasZero) {
-        return false
+        return false;
     }
 
     bool allow_merchant_corpse = RuleB(Merchant, AllowCorpse);
@@ -2403,7 +2403,7 @@ bool NPC::ShouldLeaveCorpseUponDeath(Mob* killer_mob, Mob* killer, bool damageTo
     bool isAcceptableKiller = killerConditions || isLdonTreasureWithKillerMob;
 
     // Final Predicate
-    return isValidEntity && isAcceptableKiller
+    return isValidEntity && isAcceptableKiller;
 };
 
 bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillType attack_skill)
@@ -2529,7 +2529,7 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 
     Mob *give_exp = hate_list.GetDamageTopOnHateList(this);
 
-    bool damageTopWasZero = hate_list.GetEntHateAmount(give_exp, true) == 0
+    bool damageTopWasZero = hate_list.GetEntHateAmount(give_exp, true) == 0;
 
     if (give_exp && !damageTopWasZero) {
         give_exp = killer;
