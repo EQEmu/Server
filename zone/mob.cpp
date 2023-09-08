@@ -593,57 +593,49 @@ void Mob::CalcSeeInvisibleLevel()
 	see_invis = std::max({ spellbonuses.SeeInvis, itembonuses.SeeInvis, aabonuses.SeeInvis, innate_see_invis });
 }
 
-void Mob::CalcInvisibleLevel()
-{
-	bool is_invisible = invisible;
-
-	invisible = std::max({ spellbonuses.invisibility, nobuff_invisible });
-	invisible_undead = spellbonuses.invisibility_verse_undead;
-	invisible_animals = spellbonuses.invisibility_verse_animal;
-
-	if (!is_invisible && invisible) {
-		SetInvisible(Invisibility::Invisible, true);
-		return;
-	}
-
-	if (is_invisible && !invisible) {
-		SetInvisible(invisible, true);
-		return;
-	}
+bool Mob::HasAnInvisibilityEffect() {
+    return invisible || hidden || improved_hidden || invisible_animals || invisible_undead;
 }
 
-void Mob::SetInvisible(uint8 state, bool set_on_bonus_calc)
-{
-	/*
-		If you set an NPC to invisible you will only be able to see it on
-		your client if your see invisible level is greater than equal to the invisible level.
-		Note, the clients spell file must match the servers see invisible level on the spell.
-	*/
+void Mob::BreakCharmPetIfConditionsMet() {
+    auto pet = GetPet();
+    if (pet && pet->GetPetType() == petCharmed && HasAnInvisibilityEffect()) {
+        if (RuleB(Pets, LivelikeBreakCharmOnInvis) || IsInvisible(pet)) {
+            pet->BuffFadeByEffect(SE_Charm);
+        }
+        LogRules("Pets:LivelikeBreakCharmOnInvis for [{}] | Invis [{}] - Hidden [{}] - Shroud of Stealth [{}] - IVA [{}] - IVU [{}]",
+                 GetCleanName(), invisible, hidden, improved_hidden, invisible_animals, invisible_undead);
+    }
+}
 
-	if (state == Invisibility::Visible) {
-		SendAppearancePacket(AT_Invis, Invisibility::Visible);
-		ZeroInvisibleVars(InvisType::T_INVISIBLE);
-	}
-	else {
-		/*
-			if your setting invisible from a script, or escape/fading memories effect then
-			we use the internal invis variable which allows invisible without a buff on mob.
-		*/
-		if (!set_on_bonus_calc) {
-			nobuff_invisible = state;
-			CalcInvisibleLevel();
-		}
-		SendAppearancePacket(AT_Invis, invisible);
-	}
 
-	// Invis and hide breaks charms
-	auto pet = GetPet();
-	if (pet && pet->GetPetType() == petCharmed && (invisible || hidden || improved_hidden || invisible_animals || invisible_undead)) {
-		if (RuleB(Pets, LivelikeBreakCharmOnInvis) || IsInvisible(pet)) {
-			pet->BuffFadeByEffect(SE_Charm);
-		}
-		LogRules("Pets:LivelikeBreakCharmOnInvis for [{}] | Invis [{}] - Hidden [{}] - Shroud of Stealth [{}] - IVA [{}] - IVU [{}]", GetCleanName(), invisible, hidden, improved_hidden, invisible_animals, invisible_undead);
-	}
+void Mob::CalcInvisibleLevel() {
+    bool was_invisible = invisible;
+
+    invisible = std::max({ spellbonuses.invisibility, nobuff_invisible });
+    invisible_undead = spellbonuses.invisibility_verse_undead;
+    invisible_animals = spellbonuses.invisibility_verse_animal;
+
+    if (was_invisible != invisible) {
+        SetInvisible(invisible, true);
+    } else {
+        BreakCharmPetIfConditionsMet();
+    }
+}
+
+void Mob::SetInvisible(uint8 state, bool set_on_bonus_calc) {
+    if (state == Invisibility::Visible) {
+        SendAppearancePacket(AT_Invis, Invisibility::Visible);
+        ZeroInvisibleVars(InvisType::T_INVISIBLE);
+    } else {
+        if (!set_on_bonus_calc) {
+            nobuff_invisible = state;
+            CalcInvisibleLevel();
+        }
+        SendAppearancePacket(AT_Invis, invisible);
+    }
+
+    BreakCharmPetIfConditionsMet();
 }
 
 void Mob::ZeroInvisibleVars(uint8 invisible_type)
