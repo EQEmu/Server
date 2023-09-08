@@ -836,7 +836,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 					);
 				}
                 // Can not complete trade with a mob when you are on their hate list
-                else if (tradingWith->hate_list.IsEntOnHateList(this)) {
+                else if (tradingWith->CheckAggro(this)) {
                     tradingWith->SayString(TRADE_BACK, GetCleanName());
                     PushItemOnCursor(*inst, true);
                 }
