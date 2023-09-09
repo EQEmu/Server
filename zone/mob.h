@@ -269,7 +269,7 @@ public:
 		return;
 	}
 
-    void HasAnInvisibilityEffect();
+    bool HasAnInvisibilityEffect();
     void BreakCharmPetIfConditionsMet();
 	//Invisible
 	bool IsInvisible(Mob* other = 0) const;
