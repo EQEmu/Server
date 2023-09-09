@@ -269,8 +269,8 @@ public:
 		return;
 	}
 
-    bool HasAnInvisibilityEffect();
-    void BreakCharmPetIfConditionsMet();
+	bool HasAnInvisibilityEffect();
+	void BreakCharmPetIfConditionsMet();
 	//Invisible
 	bool IsInvisible(Mob* other = 0) const;
 	void SetInvisible(uint8 state, bool set_on_bonus_calc = false);

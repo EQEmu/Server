@@ -594,48 +594,47 @@ void Mob::CalcSeeInvisibleLevel()
 }
 
 bool Mob::HasAnInvisibilityEffect() {
-    return invisible || hidden || improved_hidden || invisible_animals || invisible_undead;
+	return invisible || hidden || improved_hidden || invisible_animals || invisible_undead;
 }
 
 void Mob::BreakCharmPetIfConditionsMet() {
-    auto pet = GetPet();
-    if (pet && pet->GetPetType() == petCharmed && HasAnInvisibilityEffect()) {
-        if (RuleB(Pets, LivelikeBreakCharmOnInvis) || IsInvisible(pet)) {
-            pet->BuffFadeByEffect(SE_Charm);
-        }
-        LogRules("Pets:LivelikeBreakCharmOnInvis for [{}] | Invis [{}] - Hidden [{}] - Shroud of Stealth [{}] - IVA [{}] - IVU [{}]",
-                 GetCleanName(), invisible, hidden, improved_hidden, invisible_animals, invisible_undead);
-    }
+	auto pet = GetPet();
+	if (pet && pet->GetPetType() == petCharmed && HasAnInvisibilityEffect()) {
+		if (RuleB(Pets, LivelikeBreakCharmOnInvis) || IsInvisible(pet)) {
+			pet->BuffFadeByEffect(SE_Charm);
+		}
+		LogRules("Pets:LivelikeBreakCharmOnInvis for [{}] | Invis [{}] - Hidden [{}] - Shroud of Stealth [{}] - IVA [{}] - IVU [{}]",
+				 GetCleanName(), invisible, hidden, improved_hidden, invisible_animals, invisible_undead);
+	}
 }
 
-
 void Mob::CalcInvisibleLevel() {
-    bool was_invisible = invisible;
+	bool was_invisible = invisible;
 
-    invisible = std::max({ spellbonuses.invisibility, nobuff_invisible });
-    invisible_undead = spellbonuses.invisibility_verse_undead;
-    invisible_animals = spellbonuses.invisibility_verse_animal;
+	invisible = std::max({ spellbonuses.invisibility, nobuff_invisible });
+	invisible_undead = spellbonuses.invisibility_verse_undead;
+	invisible_animals = spellbonuses.invisibility_verse_animal;
 
-    if (was_invisible != invisible) {
-        SetInvisible(invisible, true);
-    } else {
-        BreakCharmPetIfConditionsMet();
-    }
+	if (was_invisible != invisible) {
+		SetInvisible(invisible, true);
+	} else {
+		BreakCharmPetIfConditionsMet();
+	}
 }
 
 void Mob::SetInvisible(uint8 state, bool set_on_bonus_calc) {
-    if (state == Invisibility::Visible) {
-        SendAppearancePacket(AT_Invis, Invisibility::Visible);
-        ZeroInvisibleVars(InvisType::T_INVISIBLE);
-    } else {
-        if (!set_on_bonus_calc) {
-            nobuff_invisible = state;
-            CalcInvisibleLevel();
-        }
-        SendAppearancePacket(AT_Invis, invisible);
-    }
+	if (state == Invisibility::Visible) {
+		SendAppearancePacket(AT_Invis, Invisibility::Visible);
+		ZeroInvisibleVars(InvisType::T_INVISIBLE);
+	} else {
+		if (!set_on_bonus_calc) {
+			nobuff_invisible = state;
+			CalcInvisibleLevel();
+		}
+		SendAppearancePacket(AT_Invis, invisible);
+	}
 
-    BreakCharmPetIfConditionsMet();
+	BreakCharmPetIfConditionsMet();
 }
 
 void Mob::ZeroInvisibleVars(uint8 invisible_type)
