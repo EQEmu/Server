@@ -4402,14 +4402,20 @@ std::vector<uint16> Mob::GetBuffSpellIDs()
 	return l;
 }
 
-bool Mob::FindBuff(uint16 spell_id)
+bool Mob::FindBuff(uint16 spell_id, uint16 caster_id)
 {
-	uint32 buff_count = GetMaxTotalSlots();
+	const int buff_count = GetMaxTotalSlots();
 	for (int buff_slot = 0; buff_slot < buff_count; buff_slot++) {
-		auto current_spell_id = buffs[buff_slot].spellid;
+		const uint16 current_spell_id = buffs[buff_slot].spellid;
 		if (
-			IsValidSpell(current_spell_id) &&
-			current_spell_id == spell_id
+			(
+				IsValidSpell(current_spell_id) &&
+				current_spell_id == spell_id
+			) &&
+			(
+				!caster_id ||
+				buffs[buff_slot].casterid == caster_id
+			)
 		) {
 			return true;
 		}

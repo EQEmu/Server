@@ -90,7 +90,8 @@ public:
 	uint8 GetInvisibleUndeadLevel();
 	void SetSeeInvisibleLevel(uint8 invisible_level);
 	void SetSeeInvisibleUndeadLevel(uint8 invisible_level);
-	bool FindBuff(int spell_id);
+	bool FindBuff(uint16 spell_id);
+	bool FindBuff(uint16 spell_id, uint16 caster_id);
 	uint16 FindBuffBySlot(int slot);
 	uint32 BuffCount();
 	uint32 BuffCount(bool is_beneficial);
