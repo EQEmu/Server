@@ -41,7 +41,7 @@
 
 char* strn0cpy(char* dest, const char* source, uint32 size);
 
-#define MAX_SPECIAL_ATTACK_PARAMS 8
+#define MAX_SPECIAL_ATTACK_PARAMS 9
 
 class Client;
 class EQApplicationPacket;
