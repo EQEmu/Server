@@ -1073,10 +1073,13 @@ bool Mob::CombatRange(Mob* other, float fixed_size_mod, bool aeRampage, ExtraAtt
 	
 	if (aeRampage) {
 		float aeramp_size = RuleR(Combat, AERampageMaxDistance);
+		
+		LogCombatDetail("AERampage: Default - aeramp_size = [{}] ", aeramp_size);
 
 		if (opts) {
 			if (opts->range_percent > 0) {
 				aeramp_size = opts->range_percent;
+				LogCombatDetail("AE Rampage: range_percent = [{}] -- aeramp_size [{}]", opts->range_percent, aeramp_size);
 			}
 		}
 
@@ -1087,8 +1090,17 @@ bool Mob::CombatRange(Mob* other, float fixed_size_mod, bool aeRampage, ExtraAtt
 		}
 
 		float ramp_range = size_mod * aeramp_size;
+
+		LogCombatDetail("AE Rampage: ramp_range = [{}] -- (size_mod [{}] * aeramp_size [{}])", ramp_range, size_mod, aeramp_size);
+		LogCombatDetail("AE Rampage: _DistNoRoot [{}] <= ramp_range [{}]", _DistNoRoot, ramp_range);
 		
-		return _DistNoRoot <= ramp_range;
+		if (_DistNoRoot <= ramp_range) {
+			LogCombatDetail("AE Rampage: Combat Distance returned [true]");
+			return true;
+		} else {
+			LogCombatDetail("AE Rampage: Combat Distance returned [false]");
+			return false;
+		}
 	}
 
 	if (_DistNoRoot <= size_mod) {
