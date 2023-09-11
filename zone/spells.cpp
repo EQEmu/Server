@@ -4408,10 +4408,8 @@ bool Mob::FindBuff(uint16 spell_id, uint16 caster_id)
 	for (int buff_slot = 0; buff_slot < buff_count; buff_slot++) {
 		const uint16 current_spell_id = buffs[buff_slot].spellid;
 		if (
-			(
-				IsValidSpell(current_spell_id) &&
-				current_spell_id == spell_id
-			) &&
+			IsValidSpell(current_spell_id) &&
+			current_spell_id == spell_id &&
 			(
 				!caster_id ||
 				buffs[buff_slot].casterid == caster_id
