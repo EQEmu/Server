@@ -5068,7 +5068,7 @@ const char *Mob::GetCleanName()
 	return clean_name;
 }
 
-std::string Mob::GetTargetDescription(Mob* target, uint8 description_type)
+std::string Mob::GetTargetDescription(Mob* target, uint8 description_type, uint16 entity_id_override)
 {
 	std::string self_return = "yourself";
 
@@ -5119,7 +5119,7 @@ std::string Mob::GetTargetDescription(Mob* target, uint8 description_type)
 			fmt::format(
 				"{} ({})",
 				target->GetCleanName(),
-				target->GetID()
+				entity_id_override ? entity_id_override : target->GetID()
 			)
 		)
 	);
