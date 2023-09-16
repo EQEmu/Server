@@ -4189,14 +4189,14 @@ bool Mob::SpellOnTarget(
 
 	if (!(spelltar->IsNPC() && IsNPC() && !(IsPet() && GetOwner()->IsClient()))) {
 		if (spelltar->IsAIControlled() && IsDetrimentalSpell(spell_id) && !IsHarmonySpell(spell_id)) {
-			int32 aggro_amount = CheckAggroAmount(spell_id, spelltar, isproc);
+			auto aggro_amount = CheckAggroAmount(spell_id, spelltar, isproc);
 			LogSpellsDetail("Spell {} cast on {} generated {} hate", spell_id,
 				spelltar->GetName(), aggro_amount);
 			if (aggro_amount > 0) {
 				spelltar->AddToHateList(this, aggro_amount);
 			} else {
-				int32 newhate = spelltar->GetHateAmount(this) + aggro_amount;
-				spelltar->SetHateAmountOnEnt(this, std::max(newhate, 1));
+				int64 newhate = spelltar->GetHateAmount(this) + aggro_amount;
+				spelltar->SetHateAmountOnEnt(this, std::max(newhate, static_cast<int64>(1)));
 			}
 		} else if (IsBeneficialSpell(spell_id) && !IsSummonPCSpell(spell_id)) {
 			entity_list.AddHealAggro(
