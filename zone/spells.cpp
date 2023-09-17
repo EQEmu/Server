@@ -2736,12 +2736,18 @@ bool Mob::ApplyBardPulse(int32 spell_id, Mob *spell_target, CastingSlot slot) {
 		Live does not spam client with do not take hold messages. Checking here avoids that from happening. Only try to reapply if charm fades.
 	*/
 	if (spell_target->IsCharmed() && spells[spell_id].mana == 0 && spell_target->GetOwner() == this && IsEffectInSpell(spell_id, SE_Charm)) {
+		if (IsClient()) {
+			CastToClient()->CheckSongSkillIncrease(spell_id);
+		}
 		return true;
 	}
 	/*
 		If divine aura applied while pulsing, it is not interrupted but does not reapply until DA fades.
 	*/
 	if (DivineAura() && !IsCastNotStandingSpell(spell_id)) {
+		if (IsClient()) {
+			CastToClient()->CheckSongSkillIncrease(spell_id);
+		}
 		return true;
 	}
 	/*
@@ -2755,6 +2761,9 @@ bool Mob::ApplyBardPulse(int32 spell_id, Mob *spell_target, CastingSlot slot) {
 		return false;
 	}
 
+	if (IsClient()) {
+		CastToClient()->CheckSongSkillIncrease(spell_id);
+	}
 	return true;
 }
 
