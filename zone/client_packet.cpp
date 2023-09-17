@@ -14423,7 +14423,7 @@ void Client::Handle_OP_Split(const EQApplicationPacket *app)
 	if (raid)
 		raid->SplitMoney(raid->GetGroup(this), split->copper, split->silver, split->gold, split->platinum);
 	else if (group)
-		group->SplitMoney(split->copper, split->silver, split->gold, split->platinum);
+		group->SplitMoney(split->copper, split->silver, split->gold, split->platinum, this);
 
 	return;
 
