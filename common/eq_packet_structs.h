@@ -2559,7 +2559,10 @@ struct GMEmoteZone_Struct {
 struct BookText_Struct {
 	uint8 window;	// where to display the text (0xFF means new window)
 	uint8 type;		//type: 0=scroll, 1=book, 2=item info.. prolly others.
-	uint32 invslot;	// Only used in SoF and later clients.
+	int16 invslot;  // Only used in SoF and later clients.
+	int32 target_id;
+	int8 can_cast;
+	int8 can_scribe;
 	char booktext[1]; // Variable Length
 };
 // This is the request to read a book.
@@ -2568,9 +2571,16 @@ struct BookText_Struct {
 struct BookRequest_Struct {
 	uint8 window;	// where to display the text (0xFF means new window)
 	uint8 type;		//type: 0=scroll, 1=book, 2=item info.. prolly others.
-	uint32 invslot;	// Only used in Sof and later clients;
-	int16 subslot; // The subslot inside of a bag if it is inside one.
+	int16 invslot;  // Only used in Sof and later clients;
+	int32 target_id;
 	char txtfile[20];
+};
+
+// used by Scribe and CastSpell book buttons
+struct BookButton_Struct
+{
+	int16 invslot;   // server slot
+	int32 target_id;
 };
 
 /*

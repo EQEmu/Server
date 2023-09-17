@@ -56,6 +56,7 @@
 	void Handle_OP_Bind_Wound(const EQApplicationPacket *app);
 	void Handle_OP_BlockedBuffs(const EQApplicationPacket *app);
 	void Handle_OP_BoardBoat(const EQApplicationPacket *app);
+	void Handle_OP_BookButton(const EQApplicationPacket *app);
 	void Handle_OP_Buff(const EQApplicationPacket *app);
 	void Handle_OP_BuffRemoveRequest(const EQApplicationPacket *app);
 	void Handle_OP_Bug(const EQApplicationPacket *app);
