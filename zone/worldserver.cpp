@@ -2509,98 +2509,105 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	}
 	case ServerOP_CZMove:
 	{
-		CZMove_Struct* CZM = (CZMove_Struct*) pack->pBuffer;
-		uint8 update_type = CZM->update_type;
-		uint8 update_subtype = CZM->update_subtype;
-		int update_identifier = CZM->update_identifier;
-		const char* zone_short_name = CZM->zone_short_name;
-		uint16 instance_id = CZM->instance_id;
-		const char* client_name = CZM->client_name;
+		auto s = (CZMove_Struct*) pack->pBuffer;
+
+		const std::string& client_name       = s->client_name;
+		const glm::vec4&   coordinates       = s->coordinates;
+		const uint16       instance_id       = s->instance_id;
+		const uint32       update_identifier = s->update_identifier;
+		const uint8        update_type       = s->update_type;
+		const uint8        update_subtype    = s->update_subtype;
+		const std::string& zone_short_name   = s->zone_short_name;
+
+		if (Strings::IsNumber(client_name) || Strings::IsNumber(zone_short_name)) {
+			break;
+		}
+
 		if (update_type == CZUpdateType_Character) {
-			auto client = entity_list.GetClientByCharID(update_identifier);
-			if (client) {
+			Client* c = entity_list.GetClientByCharID(update_identifier);
+			if (c) {
 				switch (update_subtype) {
 					case CZMoveUpdateSubtype_MoveZone:
-						client->MoveZone(zone_short_name);
+						c->MoveZone(zone_short_name.c_str(), coordinates);
 						break;
 					case CZMoveUpdateSubtype_MoveZoneInstance:
-						client->MoveZoneInstance(instance_id);
+						c->MoveZoneInstance(instance_id, coordinates);
 						break;
 				}
 			}
 		} else if (update_type == CZUpdateType_Group) {
-			auto client_group = entity_list.GetGroupByID(update_identifier);
-			if (client_group) {
-				for (int member_index = 0; member_index < MAX_GROUP_MEMBERS; member_index++) {
-					if (client_group->members[member_index] && client_group->members[member_index]->IsClient()) {
-						auto group_member = client_group->members[member_index]->CastToClient();
+			Group* g = entity_list.GetGroupByID(update_identifier);
+			if (g) {
+				for (const auto& gm : g->members) {
+					if (gm->IsClient()) {
+						Client* c = gm->CastToClient();
 						switch (update_subtype) {
 							case CZMoveUpdateSubtype_MoveZone:
-								group_member->MoveZone(zone_short_name);
+								c->MoveZone(zone_short_name.c_str(), coordinates);
 								break;
 							case CZMoveUpdateSubtype_MoveZoneInstance:
-								group_member->MoveZoneInstance(instance_id);
+								c->MoveZoneInstance(instance_id, coordinates);
 								break;
 						}
 					}
 				}
 			}
 		} else if (update_type == CZUpdateType_Raid) {
-			auto client_raid = entity_list.GetRaidByID(update_identifier);
-			if (client_raid) {
-				for (const auto& m : client_raid->members) {
-					if (m.is_bot) {
+			Raid* r = entity_list.GetRaidByID(update_identifier);
+			if (r) {
+				for (const auto& rm : r->members) {
+					if (rm.is_bot) {
 						continue;
 					}
 
-					if (m.member && m.member->IsClient()) {
-						auto raid_member = m.member->CastToClient();
+					if (rm.member && rm.member->IsClient()) {
+						Client* m = rm.member->CastToClient();
 						switch (update_subtype) {
 							case CZMoveUpdateSubtype_MoveZone:
-								raid_member->MoveZone(zone_short_name);
+								m->MoveZone(zone_short_name.c_str(), coordinates);
 								break;
 							case CZMoveUpdateSubtype_MoveZoneInstance:
-								raid_member->MoveZoneInstance(instance_id);
+								m->MoveZoneInstance(instance_id, coordinates);
 								break;
 						}
 					}
 				}
 			}
 		} else if (update_type == CZUpdateType_Guild) {
-			for (auto &client: entity_list.GetClientList()) {
-				if (client.second->GuildID() > 0 && client.second->GuildID() == update_identifier) {
+			for (auto& c : entity_list.GetClientList()) {
+				if (c.second && c.second->IsInAGuild() && c.second->IsInGuild(update_identifier)) {
 					switch (update_subtype) {
 						case CZMoveUpdateSubtype_MoveZone:
-							client.second->MoveZone(zone_short_name);
+							c.second->MoveZone(zone_short_name.c_str(), coordinates);
 							break;
 						case CZMoveUpdateSubtype_MoveZoneInstance:
-							client.second->MoveZoneInstance(instance_id);
+							c.second->MoveZoneInstance(instance_id, coordinates);
 							break;
 					}
 				}
 			}
 		} else if (update_type == CZUpdateType_Expedition) {
-			for (auto &client: entity_list.GetClientList()) {
-				if (client.second->GetExpedition() && client.second->GetExpedition()->GetID() == update_identifier) {
+			for (auto& c : entity_list.GetClientList()) {
+				if (c.second && c.second->GetExpeditionID() == update_identifier) {
 					switch (update_subtype) {
 						case CZMoveUpdateSubtype_MoveZone:
-							client.second->MoveZone(zone_short_name);
+							c.second->MoveZone(zone_short_name.c_str(), coordinates);
 							break;
 						case CZMoveUpdateSubtype_MoveZoneInstance:
-							client.second->MoveZoneInstance(instance_id);
+							c.second->MoveZoneInstance(instance_id, coordinates);
 							break;
 					}
 				}
 			}
 		} else if (update_type == CZUpdateType_ClientName) {
-			auto client = entity_list.GetClientByName(client_name);
-			if (client) {
+			Client* c = entity_list.GetClientByName(client_name.c_str());
+			if (c) {
 				switch (update_subtype) {
 					case CZMoveUpdateSubtype_MoveZone:
-						client->MoveZone(zone_short_name);
+						c->MoveZone(zone_short_name.c_str(), coordinates);
 						break;
 					case CZMoveUpdateSubtype_MoveZoneInstance:
-						client->MoveZoneInstance(instance_id);
+						c->MoveZoneInstance(instance_id, coordinates);
 						break;
 				}
 			}
@@ -3106,21 +3113,29 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	}
 	case ServerOP_WWMove:
 	{
-		WWMove_Struct* WWM = (WWMove_Struct*) pack->pBuffer;
-		uint8 update_type = WWM->update_type;
-		uint16 instance_id = WWM->instance_id;
-		const char* zone_short_name = WWM->zone_short_name;
-		uint8 min_status = WWM->min_status;
-		uint8 max_status = WWM->max_status;
+		auto m = (WWMove_Struct*) pack->pBuffer;
+
+		uint16      instance_id     = m->instance_id;
+		uint8       max_status      = m->max_status;
+		uint8       min_status      = m->min_status;
+		uint8       update_type     = m->update_type;
+		std::string zone_short_name = m->zone_short_name;
+
 		for (auto &client : entity_list.GetClientList()) {
 			switch (update_type) {
 				case WWMoveUpdateType_MoveZone:
-					if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == AccountStatus::Player)) {
-						client.second->MoveZone(zone_short_name);
+					if (
+						client.second->Admin() >= min_status &&
+						(client.second->Admin() <= max_status || max_status == AccountStatus::Player)
+					) {
+						client.second->MoveZone(zone_short_name.c_str());
 					}
 					break;
 				case WWMoveUpdateType_MoveZoneInstance:
-					if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == AccountStatus::Player)) {
+					if (
+						client.second->Admin() >= min_status &&
+						(client.second->Admin() <= max_status || max_status == AccountStatus::Player)
+					) {
 						client.second->MoveZoneInstance(instance_id);
 					}
 					break;

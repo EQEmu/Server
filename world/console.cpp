@@ -1226,15 +1226,20 @@ void ConsoleCrossZoneMove(
 	}
 
 	auto pack = new ServerPacket(ServerOP_CZMove, sizeof(CZMove_Struct));
-	auto* CZM = (CZMove_Struct*) pack->pBuffer;
+	auto m = (CZMove_Struct*) pack->pBuffer;
 
-	CZM->update_type       = update_type;
-	CZM->update_subtype    = !instance_id ? CZMoveUpdateSubtype_MoveZone : CZMoveUpdateSubtype_MoveZoneInstance;
-	CZM->update_identifier = update_identifier;
-	CZM->instance_id       = instance_id;
+	if (!name.empty()) {
+		m->client_name = name;
+	}
 
-	strn0cpy(CZM->zone_short_name, zone_short_name.c_str(), sizeof(CZM->zone_short_name));
-	strn0cpy(CZM->client_name, name.c_str(), sizeof(CZM->client_name));
+	m->instance_id       = instance_id;
+	m->update_identifier = update_identifier;
+	m->update_type       = update_type;
+	m->update_subtype    = !instance_id ? CZMoveUpdateSubtype_MoveZone : CZMoveUpdateSubtype_MoveZoneInstance;
+
+	if (!zone_short_name.empty()) {
+		m->zone_short_name = zone_short_name;
+	}
 
 	zoneserver_list.SendPacket(pack);
 	safe_delete(pack);
