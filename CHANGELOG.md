@@ -1,3 +1,42 @@
+## [22.26.0] - 09/17/2023
+
+### Bug
+
+* Additional Wild Ramp param was causing an overflow it appears at least on local testing. ([#3589](https://github.com/EQEmu/Server/pull/3589)) @fryguy503 2023-09-11
+
+### Commands
+
+* npc_edit faction and #setfaction duplicate and incorrect. ([#3577](https://github.com/EQEmu/Server/pull/3577)) @noudess 2023-09-03
+
+### Feature
+
+* Add Defensive Proc Rules for Level Gap Penalty ([#3580](https://github.com/EQEmu/Server/pull/3580)) @Kinglykrab 2023-09-17
+* Add opcodes for Cast and Scribe book buttons ([#3578](https://github.com/EQEmu/Server/pull/3578)) @hgtw 2023-09-17
+* Cleanup Group Split Money Logic ([#3583](https://github.com/EQEmu/Server/pull/3583)) @crdunwel 2023-09-17
+
+### Fixes
+
+* AA System Fixes ([#3572](https://github.com/EQEmu/Server/pull/3572)) @KimLS 2023-09-17
+* Check for Song Skill Increase on Bard Pulse ([#3586](https://github.com/EQEmu/Server/pull/3586)) @crdunwel 2023-09-17
+* Fix #set faction/#setfaction Command ([#3575](https://github.com/EQEmu/Server/pull/3575)) @Kinglykrab 2023-09-02
+* Fix Killed XYZH support in EVENT_DEATH in Perl. ([#3591](https://github.com/EQEmu/Server/pull/3591)) @Kinglykrab 2023-09-17
+* Fix entity ID on death with #castspell ([#3592](https://github.com/EQEmu/Server/pull/3592)) @Kinglykrab 2023-09-17
+* Zoning logging edge case safety  @Akkadius 2023-08-29
+
+### Logging
+
+* Add logging to track down Wild Ramp issue ([#3588](https://github.com/EQEmu/Server/pull/3588)) @fryguy503 2023-09-11
+
+### Messages
+
+* Remove duplicate message on tracking begin ([#3574](https://github.com/EQEmu/Server/pull/3574)) @noudess 2023-09-11
+* Swarm pet normal damage messages were missing ([#3594](https://github.com/EQEmu/Server/pull/3594)) @noudess 2023-09-17
+
+### Quest API
+
+* Add ApplySpell() and SetBuffDuration() overloads to Perl/Lua ([#3576](https://github.com/EQEmu/Server/pull/3576)) @Kinglykrab 2023-09-17
+* Add XYZ/XYZH Overloads to Cross Zone Move Methods ([#3581](https://github.com/EQEmu/Server/pull/3581)) @Kinglykrab 2023-09-17
+
 ## [22.25.0] - 08/28/2023
 
 ### Bots
