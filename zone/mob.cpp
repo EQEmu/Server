@@ -615,18 +615,20 @@ void Mob::BreakCharmPetIfConditionsMet() {
 	}
 }
 
-void Mob::CalcInvisibleLevel() {
+void Mob::CalcInvisibleLevel()
+{
 	bool was_invisible = invisible;
 
-	invisible = std::max({ spellbonuses.invisibility, nobuff_invisible });
-	invisible_undead = spellbonuses.invisibility_verse_undead;
+	invisible         = std::max({spellbonuses.invisibility, nobuff_invisible});
+	invisible_undead  = spellbonuses.invisibility_verse_undead;
 	invisible_animals = spellbonuses.invisibility_verse_animal;
 
 	if (was_invisible != invisible) {
 		SetInvisible(invisible, true);
-	} else {
-		BreakCharmPetIfConditionsMet();
+		return;
 	}
+
+	BreakCharmPetIfConditionsMet();
 }
 
 void Mob::SetInvisible(uint8 state, bool set_on_bonus_calc) {
