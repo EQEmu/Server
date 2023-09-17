@@ -1111,7 +1111,7 @@ void Client::PurchaseAlternateAdvancementRank(int rank_id) {
 		return;
 	}
 
-	FinishAlternateAdvancementPurchase(rank, false);
+	FinishAlternateAdvancementPurchase(rank, false, true);
 }
 
 bool Client::GrantAlternateAdvancementAbility(int aa_id, int points, bool ignore_cost) {
@@ -1134,13 +1134,13 @@ bool Client::GrantAlternateAdvancementAbility(int aa_id, int points, bool ignore
 		}
 
 		ret = true;
-		FinishAlternateAdvancementPurchase(rank, ignore_cost);
+		FinishAlternateAdvancementPurchase(rank, ignore_cost, true);
 	}
 
 	return ret;
 }
 
-void Client::FinishAlternateAdvancementPurchase(AA::Rank *rank, bool ignore_cost) {
+void Client::FinishAlternateAdvancementPurchase(AA::Rank *rank, bool ignore_cost, bool send_message_and_save) {
 	auto rank_id = rank->base_ability->first_rank_id;
 
 	if (rank->base_ability->charges) {
@@ -1156,7 +1156,7 @@ void Client::FinishAlternateAdvancementPurchase(AA::Rank *rank, bool ignore_cost
 		SetAA(rank_id, rank->current_value, 0);
 
 		//if not max then send next aa
-		if (rank->next) {
+		if (rank->next && send_message_and_save) {
 			SendAlternateAdvancementRank(rank->base_ability->id, rank->next->current_value);
 		}
 	}
@@ -1164,10 +1164,12 @@ void Client::FinishAlternateAdvancementPurchase(AA::Rank *rank, bool ignore_cost
 	auto cost = !ignore_cost ? rank->cost : 0;
 
 	m_pp.aapoints -= static_cast<uint32>(cost);
-	SaveAA();
 
-	SendAlternateAdvancementPoints();
-	SendAlternateAdvancementStats();
+	if (send_message_and_save) {
+		SaveAA();
+		SendAlternateAdvancementPoints();
+		SendAlternateAdvancementStats();
+	}
 
 	if (player_event_logs.IsEventEnabled(PlayerEvent::AA_PURCHASE)) {
 		auto e = PlayerEvent::AAPurchasedEvent{
@@ -1181,14 +1183,16 @@ void Client::FinishAlternateAdvancementPurchase(AA::Rank *rank, bool ignore_cost
 	}
 
 	if (rank->prev) {
-		MessageString(
-			Chat::Yellow,
-			AA_IMPROVE,
-			std::to_string(rank->title_sid).c_str(),
-			std::to_string(rank->prev->current_value).c_str(),
-			std::to_string(cost).c_str(),
-			cost == 1 ? std::to_string(AA_POINT).c_str() : std::to_string(AA_POINTS).c_str()
-		);
+		if (send_message_and_save) {
+			MessageString(
+				Chat::Yellow,
+				AA_IMPROVE,
+				std::to_string(rank->title_sid).c_str(),
+				std::to_string(rank->prev->current_value).c_str(),
+				std::to_string(cost).c_str(),
+				cost == 1 ? std::to_string(AA_POINT).c_str() : std::to_string(AA_POINTS).c_str()
+			);
+		}
 
 		/* QS: Player_Log_AA_Purchases */
 		if (RuleB(QueryServ, PlayerLogAAPurchases)) {
@@ -1203,13 +1207,15 @@ void Client::FinishAlternateAdvancementPurchase(AA::Rank *rank, bool ignore_cost
 			QServ->PlayerLogEvent(Player_Log_AA_Purchases, CharacterID(), event_desc);
 		}
 	} else {
-		MessageString(
-			Chat::Yellow,
-			AA_GAIN_ABILITY,
-			std::to_string(rank->title_sid).c_str(),
-			std::to_string(cost).c_str(),
-			cost == 1 ? std::to_string(AA_POINT).c_str() : std::to_string(AA_POINTS).c_str()
-		);
+		if (send_message_and_save) {
+			MessageString(
+				Chat::Yellow,
+				AA_GAIN_ABILITY,
+				std::to_string(rank->title_sid).c_str(),
+				std::to_string(cost).c_str(),
+				cost == 1 ? std::to_string(AA_POINT).c_str() : std::to_string(AA_POINTS).c_str()
+			);
+		}
 
 		/* QS: Player_Log_AA_Purchases */
 		if (RuleB(QueryServ, PlayerLogAAPurchases)) {
@@ -1594,6 +1600,15 @@ bool Mob::CanUseAlternateAdvancementRank(AA::Rank *rank) {
 		}
 	}
 
+	int expansion = RuleI(Expansion, CurrentExpansion);
+	bool use_expansion_aa = RuleB(Expansion, UseCurrentExpansionAAOnly);
+	if (use_expansion_aa && expansion >= 0) {
+		if (rank->expansion > expansion) {
+			return false;
+		}
+	}
+
+
 	if (IsClient()) {
 		if (rank->expansion && !(CastToClient()->GetPP().expansions & (1 << (rank->expansion - 1)))) {
 			return false;
@@ -1642,6 +1657,10 @@ bool Mob::CanPurchaseAlternateAdvancementRank(AA::Rank *rank, bool check_price, 
 		return false;
 
 	if(!CanUseAlternateAdvancementRank(rank)) {
+		return false;
+	}
+
+	if (IsClient() && CastToClient()->HasAlreadyPurchasedRank(rank)) {
 		return false;
 	}
 
@@ -1764,7 +1783,7 @@ bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std
 {
 	abilities.clear();
 	std::string query = "SELECT id, name, category, classes, races, deities, drakkin_heritage, status, type, charges, "
-		"grant_only, reset_on_death, first_rank_id FROM aa_ability WHERE enabled = 1";
+		"grant_only, reset_on_death, auto_grant_enabled, first_rank_id FROM aa_ability WHERE enabled = 1";
 	auto results = QueryDatabase(query);
 	if(results.Success()) {
 		for(auto row = results.begin(); row != results.end(); ++row) {
@@ -1782,7 +1801,8 @@ bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std
 			ability->charges = Strings::ToInt(row[9]);
 			ability->grant_only = Strings::ToBool(row[10]);
 			ability->reset_on_death = Strings::ToBool(row[11]);
-			ability->first_rank_id = Strings::ToInt(row[12]);
+			ability->auto_grant_enabled = Strings::ToBool(row[12]);
+			ability->first_rank_id = Strings::ToInt(row[13]);
 			ability->first = nullptr;
 
 			abilities[ability->id] = std::unique_ptr<AA::Ability>(ability);
@@ -1793,17 +1813,11 @@ bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std
 	}
 
 	LogInfo("Loaded [{}] Alternate Advancement Abilities", Strings::Commify((int)abilities.size()));
-	int expansion = RuleI(Expansion, CurrentExpansion);
-	bool use_expansion_aa = RuleB(Expansion, UseCurrentExpansionAAOnly);
-
 	ranks.clear();
-	if (use_expansion_aa && expansion >= 0) {
-		query = fmt::format("SELECT id, upper_hotkey_sid, lower_hotkey_sid, title_sid, desc_sid, cost, level_req, spell, spell_type, recast_time, "
-		"next_id, expansion FROM aa_ranks WHERE expansion <= {}", expansion);
-	} else {
-		query = "SELECT id, upper_hotkey_sid, lower_hotkey_sid, title_sid, desc_sid, cost, level_req, spell, spell_type, recast_time, "
+
+	query = "SELECT id, upper_hotkey_sid, lower_hotkey_sid, title_sid, desc_sid, cost, level_req, spell, spell_type, recast_time, "
 		"next_id, expansion FROM aa_ranks";
-	}
+
 	results = QueryDatabase(query);
 	if(results.Success()) {
 		for(auto row = results.begin(); row != results.end(); ++row) {
@@ -2068,3 +2082,126 @@ void Client::TogglePurchaseAlternativeAdvancementRank(int rank_id){
 	CalcBonuses();
 }
 
+void Client::AutoGrantAAPoints() {
+	int auto_grant_expansion = RuleI(Expansion, AutoGrantAAExpansion);
+
+	if (auto_grant_expansion == -1) {
+		return;
+	}
+
+	//iterate through every AA
+	for (auto& iter : zone->aa_abilities) {
+		auto ability = iter.second.get();
+
+		if (ability->grant_only) {
+			continue;
+		}
+
+		if (ability->charges > 0) {
+			continue;
+		}
+
+		if (!ability->auto_grant_enabled) {
+			continue;
+		}
+
+		auto level = GetLevel();
+		auto p = 1;
+		auto rank = ability->first;
+		while (rank != nullptr) {
+			if (CanUseAlternateAdvancementRank(rank)) {
+				if (rank->expansion <= auto_grant_expansion && rank->level_req <= level && !HasAlreadyPurchasedRank(rank)) {
+					FinishAlternateAdvancementPurchase(rank, true, false);
+
+					if (rank->prev) {
+						MessageString(
+							Chat::Yellow,
+							AA_IMPROVE,
+							std::to_string(rank->title_sid).c_str(),
+							std::to_string(rank->prev->current_value).c_str(),
+							"0",
+							std::to_string(AA_POINTS).c_str()
+						);
+					}
+					else {
+						MessageString(
+							Chat::Yellow,
+							AA_GAIN_ABILITY,
+							std::to_string(rank->title_sid).c_str(),
+							"0",
+							std::to_string(AA_POINTS).c_str()
+						);
+					}
+				}
+			}
+			else {
+				break;
+			}
+
+			p++;
+			rank = rank->next;
+		}
+	}
+
+	SendClearAA();
+	SendAlternateAdvancementTable();
+	SendAlternateAdvancementPoints();
+	SendAlternateAdvancementStats();
+}
+
+void Client::GrantAllAAPoints()
+{
+	//iterate through every AA
+	for (auto& iter : zone->aa_abilities) {
+		auto ability = iter.second.get();
+
+		if (ability->charges > 0) {
+			continue;
+		}
+
+		auto level = GetLevel();
+		auto p = 1;
+		auto rank = ability->first;
+		while (rank != nullptr) {
+			if (CanUseAlternateAdvancementRank(rank)) {
+				if (rank->level_req <= level && !HasAlreadyPurchasedRank(rank)) {
+					FinishAlternateAdvancementPurchase(rank, true, false);
+				}
+			}
+			else {
+				break;
+			}
+
+			p++;
+			rank = rank->next;
+		}
+	}
+
+	SaveAA();
+	SendClearAA();
+	SendAlternateAdvancementTable();
+	SendAlternateAdvancementPoints();
+	SendAlternateAdvancementStats();
+}
+
+bool Client::HasAlreadyPurchasedRank(AA::Rank *rank) {
+	auto iter = aa_ranks.find(rank->base_ability->id);
+
+	if (iter == aa_ranks.end()) {
+		return false;
+	}
+
+	auto ability_rank = zone->GetAlternateAdvancementAbilityAndRank(iter->first, iter->second.first);
+	auto ability = ability_rank.first;
+	auto current = ability_rank.second;
+
+	while (current != nullptr) {
+		if (current == rank) {
+			return true;
+		}
+
+		current = current->prev;
+	}
+
+	return false;
+}

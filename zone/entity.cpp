@@ -5652,6 +5652,10 @@ void EntityList::SendAlternateAdvancementStats() {
 	for (auto &c : client_list) {
 		c.second->Message(Chat::White, "Reloading AA");
 		c.second->ReloadExpansionProfileSetting();
+		if (!database.LoadAlternateAdvancement(c.second)) {
+			c.second->Message(Chat::Red, "Error loading alternate advancement character data");
+		}
+
 		c.second->SendClearPlayerAA();
 		c.second->SendAlternateAdvancementTable();
 		c.second->SendAlternateAdvancementStats();

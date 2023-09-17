@@ -938,6 +938,8 @@ void Client::SetLevel(uint8 set_level, bool command)
 		m_pp.exp = GetEXPForLevel(set_level);
 		Message(Chat::Yellow, fmt::format("Welcome to level {}!", set_level).c_str());
 		lu->exp = 0;
+
+		AutoGrantAAPoints();
 	} else {
 		const auto temporary_xp = (
 			static_cast<float>(m_pp.exp - GetEXPForLevel(GetLevel())) /
