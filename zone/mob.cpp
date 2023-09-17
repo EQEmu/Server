@@ -603,8 +603,15 @@ void Mob::BreakCharmPetIfConditionsMet() {
 		if (RuleB(Pets, LivelikeBreakCharmOnInvis) || IsInvisible(pet)) {
 			pet->BuffFadeByEffect(SE_Charm);
 		}
-		LogRules("Pets:LivelikeBreakCharmOnInvis for [{}] | Invis [{}] - Hidden [{}] - Shroud of Stealth [{}] - IVA [{}] - IVU [{}]",
-				 GetCleanName(), invisible, hidden, improved_hidden, invisible_animals, invisible_undead);
+		LogRules(
+			"Pets:LivelikeBreakCharmOnInvis for [{}] invisible [{}] hidden [{}] improved_hidden (shroud of stealth) [{}] invisible_animals [{}] invisible_undead [{}]",
+			GetCleanName(),
+			invisible,
+			hidden,
+			improved_hidden,
+			invisible_animals,
+			invisible_undead
+		);
 	}
 }
 
