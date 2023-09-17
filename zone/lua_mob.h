@@ -481,10 +481,12 @@ public:
 	bool CanRaceEquipItem(uint32 item_id);
 	void ApplySpellBuff(int spell_id);
 	void ApplySpellBuff(int spell_id, int duration);
+	void ApplySpellBuff(int spell_id, int duration, int level);
 	int GetBuffStatValueBySlot(uint8 slot, const char* identifier);
 	int GetBuffStatValueBySpell(int spell_id, const char* identifier);
 	void SetBuffDuration(int spell_id);
 	void SetBuffDuration(int spell_id, int duration);
+	void SetBuffDuration(int spell_id, int duration, int level);
 	void CloneAppearance(Lua_Mob other);
 	void CloneAppearance(Lua_Mob other, bool clone_name);
 	void DamageArea(int64 damage);

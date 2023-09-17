@@ -497,8 +497,8 @@ public:
 	void ListAppearanceEffects(Client* c);
 	void ClearAppearenceEffects();
 	void SendSavedAppearenceEffects(Client *receiver);
-	void SetBuffDuration(int spell_id, int duration = 0);
-	void ApplySpellBuff(int spell_id, int duration = 0);
+	void SetBuffDuration(int spell_id, int duration = 0, int level_override = -1);
+	void ApplySpellBuff(int spell_id, int duration = 0, int level_override = -1);
 	int GetBuffStatValueBySpell(int32 spell_id, const char* stat_identifier);
 	int GetBuffStatValueBySlot(uint8 slot, const char* stat_identifier);
 
