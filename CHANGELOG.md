@@ -2,7 +2,7 @@
 
 ### Fixes
 
-* Add Validation to #find, #set, and #show args ([#3598](https://github.com/EQEmu/Server/pull/3598)) @Kinglykrab 2023-09-18
+* Add Validation to #find, #set, and #show args ([#3598](https://github.com/EQEmu/Server/pull/3598)) @Kinglykrab 2023-09-17
 
 ## [22.26.0] - 09/17/2023
 
