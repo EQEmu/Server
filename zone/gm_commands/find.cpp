@@ -72,7 +72,9 @@ void command_find(Client *c, const Seperator *sep)
 
 				// skip the first arg
 				for (auto i = 1; i <= arguments; i++) {
-					args.emplace_back(sep->arg[i]);
+					if (sep->arg[i]) {
+						args.emplace_back(sep->arg[i]);
+					}
 				}
 
 				// build the rewrite string
