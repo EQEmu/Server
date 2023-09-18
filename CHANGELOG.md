@@ -1,3 +1,9 @@
+## [22.26.2] - 09/18/2023
+
+### Fixes
+
+* Fix an issue with schema versioning for the AA update
+
 ## [22.26.1] - 09/17/2023
 
 ### Fixes
