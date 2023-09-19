@@ -4786,6 +4786,11 @@ bool Mob::HateSummon() {
 			new_pos = target->TryMoveAlong(new_pos, 5.0f, angle);
 
 			if (target->IsClient()) {
+				auto target_zone_id = target->GetZoneID();
+				auto summoner_zone_id = zone->GetZoneID();
+				if (!(target_zone_id == summoner_zone_id)) { // Ensure the target is in the same zone as the summoner
+					return false;
+				}
 				target->CastToClient()->MovePC(
 					zone->GetZoneID(),
 					zone->GetInstanceID(),
