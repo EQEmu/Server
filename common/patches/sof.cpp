@@ -1376,13 +1376,13 @@ namespace SoF
 	ENCODE(OP_RaidUpdate)
 	{
 		EQApplicationPacket* inapp = *p;
-		*p = nullptr;
 		unsigned char* __emu_buffer = inapp->pBuffer;
 		RaidGeneral_Struct* raid_gen = (RaidGeneral_Struct*)__emu_buffer;
 
 		switch (raid_gen->action)
 		{
 		case raidAdd: {
+			*p = nullptr;
 			RaidAddMember_Struct* in_add_member = (RaidAddMember_Struct*)__emu_buffer;
 
 			auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(structs::RaidAddMember_Struct));
@@ -1405,6 +1405,7 @@ namespace SoF
 		}
 		case raidSetMotd:
 		{
+			*p = nullptr;
 			RaidMOTD_Struct* emu = (RaidMOTD_Struct*)__emu_buffer;
 
 			auto size = strlen(emu->motd) + 1;
@@ -1422,6 +1423,7 @@ namespace SoF
 		case raidSetLeaderAbilities:
 		case raidMakeLeader:
 		{
+			*p = nullptr;
 			RaidLeadershipUpdate_Struct* inlaa = (RaidLeadershipUpdate_Struct*)__emu_buffer;
 			auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(structs::RaidLeadershipUpdate_Struct));
 			structs::RaidLeadershipUpdate_Struct* outlaa = (structs::RaidLeadershipUpdate_Struct*)outapp->pBuffer;
@@ -1436,6 +1438,7 @@ namespace SoF
 		}
 		case raidSetNote:
 		{
+			*p = nullptr;
 			auto in_note = (RaidNote_Struct*)__emu_buffer;
 			auto size = strlen(in_note->note) + 1;
 
@@ -1450,8 +1453,14 @@ namespace SoF
 			dest->FastQueuePacket(&outapp);
 			break;
 		}
+		case raidNoRaid:
+		{
+			dest->FastQueuePacket(&*p);
+			break;
+		}
 		default:
 		{
+			*p = nullptr;
 			RaidGeneral_Struct* in_raid_general = (RaidGeneral_Struct*)__emu_buffer;
 			auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(structs::RaidGeneral_Struct));
 			structs::RaidGeneral_Struct* raid_general = (structs::RaidGeneral_Struct*)outapp->pBuffer;
