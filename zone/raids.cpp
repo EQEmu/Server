@@ -20,6 +20,8 @@
 #include "../common/events/player_event_logs.h"
 #include "../common/repositories/raid_details_repository.h"
 #include "../common/repositories/raid_members_repository.h"
+#include "../common/raid.h"
+
 
 #include "client.h"
 #include "entity.h"
@@ -1547,18 +1549,18 @@ void Raid::SendRaidMOTD(Client *c)
 		return;
 	}
 
-	RaidMOTD_Struct temp;
-	temp.general.action = raidSetMotd;
-	temp.general.parameter = 0;
-	temp.general.unknown1 = 0;
-	strn0cpy(temp.general.leader_name, c->GetName(), 64);
-	strn0cpy(temp.general.player_name, GetLeaderName().c_str(), 64);
-	temp.motd = motd;
+	auto size = motd.size() + 1;
+	auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidMOTD_Struct) + size);
+	auto data = (RaidMOTD_Struct*)outapp->pBuffer;
 
-	auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidNote_Struct));
-	outapp->pBuffer = (unsigned char*)&temp;
-	QueuePacket(outapp);
-	outapp->pBuffer = nullptr;
+	data->general.action = raidSetMotd;
+	data->general.parameter = 0;
+	data->general.unknown1 = 0;
+	strncpy_s(data->general.leader_name, c->GetName(), sizeof(c->GetName()));
+	strncpy_s(data->general.player_name, GetLeaderName().c_str(), 64);
+	strn0cpy(data->motd, motd.c_str(), size);
+
+	c->QueuePacket(outapp);
 	safe_delete(outapp);
 }
 
@@ -1585,7 +1587,7 @@ void Raid::SendRaidMOTDToWorld()
 		return;
 	}
 
-	size_t size = motd.size() + 1;
+	auto size = motd.size() + 1;
 	auto pack = new ServerPacket(ServerOP_RaidMOTD, sizeof(ServerRaidMOTD_Struct) + size);
 	auto smotd = (ServerRaidMOTD_Struct *)pack->pBuffer;
 	smotd->rid = GetID();
@@ -2268,7 +2270,6 @@ std::vector<RaidMember> Raid::GetMembersWithNotes()
 {
 	std::vector<RaidMember> raid_members;
 	for (const auto& m : members) {
-		//if (strlen(m.note) != 0) {
 		if (!m.note.empty()) {
 			raid_members.emplace_back(m);
 		}
@@ -2282,18 +2283,19 @@ void Raid::SendRaidNotes()
 	VerifyRaid();
 
 	for (const auto& c : GetMembersWithNotes()) {
-		RaidNote_Struct temp;
-		temp.general.action = raidSetNote;
-		temp.general.parameter = 0;
-		temp.general.unknown1 = 0;
-		strn0cpy(temp.general.leader_name, c.member_name, 64);
-		strn0cpy(temp.general.player_name, GetLeaderName().c_str(), 64);
-		temp.note = c.note;
 
-		auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidNote_Struct));
-		outapp->pBuffer = (unsigned char*)&temp;
+		auto size = c.note.size() + 1;
+		auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidNote_Struct) + size);
+		auto data = (RaidNote_Struct*)outapp->pBuffer;
+
+		data->general.action = raidSetNote;
+		data->general.parameter = 0;
+		data->general.unknown1 = 0;
+		strn0cpy(data->general.leader_name, c.member_name, sizeof(c.member_name));
+		strn0cpy(data->general.player_name, GetLeaderName().c_str(), GetLeaderName().length());
+		strn0cpy(data->note, c.note.c_str(), size);
+
 		QueuePacket(outapp);
-		outapp->pBuffer = nullptr;
 		safe_delete(outapp);
 	}
 }

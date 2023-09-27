@@ -34,7 +34,7 @@
 #include "../rulesys.h"
 #include "../path_manager.h"
 #include "../races.h"
-#include "../../zone/raids.h"
+#include "../raid.h"
 
 #include <iostream>
 #include <sstream>
@@ -1694,13 +1694,13 @@ namespace SoD
 		auto outapp_create = new EQApplicationPacket(OP_RaidUpdate, sizeof(structs::RaidGeneral_Struct));
 		structs::RaidGeneral_Struct* general = (structs::RaidGeneral_Struct*)outapp_create->pBuffer;
 
-		general->action = 8;
-		general->parameter = 1;
-		strn0cpy(general->leader_name, raid_create->leader_name, 64);
-		strn0cpy(general->player_name, raid_create->leader_name, 64);
+		general->action = raidCreate;
+		general->parameter = RaidCommandAcceptInvite;
+		strncpy_s(general->leader_name, raid_create->leader_name, sizeof(raid_create->leader_name));
+		strncpy_s(general->player_name, raid_create->leader_name, sizeof(raid_create->leader_name));
 
 		dest->FastQueuePacket(&outapp_create);
-		safe_delete(outapp_create);
+		safe_delete(inapp);
 	}
 
 	ENCODE(OP_RaidUpdate)
@@ -1712,7 +1712,7 @@ namespace SoD
 
 		switch (raid_gen->action)
 		{
-		case 0: {
+		case raidAdd: {
 			RaidAddMember_Struct* in_add_member = (RaidAddMember_Struct*)__emu_buffer;
 
 			auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(structs::RaidAddMember_Struct));
@@ -1720,8 +1720,8 @@ namespace SoD
 
 			add_member->raidGen.action = in_add_member->raidGen.action;
 			add_member->raidGen.parameter = in_add_member->raidGen.parameter;
-			strn0cpy(add_member->raidGen.leader_name, in_add_member->raidGen.leader_name, 64);
-			strn0cpy(add_member->raidGen.player_name, in_add_member->raidGen.player_name, 64);
+			strn0cpy(add_member->raidGen.leader_name, in_add_member->raidGen.leader_name, sizeof(in_add_member->raidGen.leader_name));
+			strn0cpy(add_member->raidGen.player_name, in_add_member->raidGen.player_name, sizeof(in_add_member->raidGen.player_name));
 			add_member->_class = in_add_member->_class;
 			add_member->level = in_add_member->level;
 			add_member->isGroupLeader = in_add_member->isGroupLeader;
@@ -1731,69 +1731,72 @@ namespace SoD
 			add_member->flags[3] = in_add_member->flags[3];
 			add_member->flags[4] = in_add_member->flags[4];
 			dest->FastQueuePacket(&outapp);
-			safe_delete(outapp);
 			break;
 		}
-		case 35:
+		case raidSetMotd:
 		{
 			RaidMOTD_Struct* emu = (RaidMOTD_Struct*)__emu_buffer;
-			auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(structs::RaidMOTD_Struct));
+
+			auto size = strlen(emu->motd) + 1;
+			auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(structs::RaidMOTD_Struct) + size);
 			structs::RaidMOTD_Struct* eq = (structs::RaidMOTD_Struct*)outapp->pBuffer;
 
 			OUT(general.action);
 			OUT_str(general.player_name);
 			OUT_str(general.leader_name);
-			strncpy(eq->motd, emu->motd.c_str(), emu->motd.length());
+			strn0cpy(eq->motd, emu->motd, size);
+
 			dest->FastQueuePacket(&outapp);
-			safe_delete(outapp);
 			break;
 		}
-		case 14:
-		case 30:
+		case raidSetLeaderAbilities:
+		case raidMakeLeader:
 		{
 			RaidLeadershipUpdate_Struct* inlaa = (RaidLeadershipUpdate_Struct*)__emu_buffer;
 			auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(structs::RaidLeadershipUpdate_Struct));
 			structs::RaidLeadershipUpdate_Struct* outlaa = (structs::RaidLeadershipUpdate_Struct*)outapp->pBuffer;
 
 			outlaa->action = inlaa->action;
-			strn0cpy(outlaa->player_name, inlaa->player_name, 64);
-			strn0cpy(outlaa->leader_name, inlaa->leader_name, 64);
+			strn0cpy(outlaa->player_name, inlaa->player_name, sizeof(inlaa->player_name));
+			strn0cpy(outlaa->leader_name, inlaa->leader_name, sizeof(inlaa->leader_name));
 			memcpy(&outlaa->raid, &inlaa->raid, sizeof(RaidLeadershipAA_Struct));
+
 			dest->FastQueuePacket(&outapp);
-			safe_delete(outapp);
 			break;
 		}
 		case raidSetNote:
 		{
 			auto in_note = (RaidNote_Struct*)__emu_buffer;
-			auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(structs::RaidNote_Struct));
+			auto size = strlen(in_note->note) + 1;
+
+			auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(structs::RaidNote_Struct) + size);
 			auto note = (structs::RaidNote_Struct*)outapp->pBuffer;
+
 			note->general.action = raidSetNote;
 			strn0cpy(note->general.leader_name, in_note->general.leader_name, sizeof(note->general.leader_name));
 			strn0cpy(note->general.player_name, in_note->general.player_name, sizeof(note->general.leader_name));
-			strncpy(note->note, in_note->note.c_str(), in_note->note.length());
-			dest->QueuePacket(outapp);
-			safe_delete(outapp);
+			strn0cpy(note->note, in_note->note, size);
+
+			dest->FastQueuePacket(&outapp);
 			break;
 		}
 		default:
 		{
 			RaidGeneral_Struct* in_raid_general = (RaidGeneral_Struct*)__emu_buffer;
-
 			auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(structs::RaidGeneral_Struct));
 			structs::RaidGeneral_Struct* raid_general = (structs::RaidGeneral_Struct*)outapp->pBuffer;
-			strn0cpy(raid_general->leader_name, in_raid_general->leader_name, 64);
-			strn0cpy(raid_general->player_name, in_raid_general->player_name, 64);
+
+			strn0cpy(raid_general->leader_name, in_raid_general->leader_name, sizeof(in_raid_general->leader_name));
+			strn0cpy(raid_general->player_name, in_raid_general->player_name, sizeof(in_raid_general->player_name));
 			raid_general->action = in_raid_general->action;
 			raid_general->parameter = in_raid_general->parameter;
+
 			dest->FastQueuePacket(&outapp);
-			safe_delete(outapp);
 			break;
 		}
 		safe_delete(inapp);
 		}
 	}
-
 
 	ENCODE(OP_ReadBook)
 	{
@@ -3347,61 +3350,40 @@ namespace SoD
 	DECODE(OP_RaidInvite)
 	{
 		DECODE_LENGTH_ATLEAST(structs::RaidGeneral_Struct);
+
 		RaidGeneral_Struct* rgs = (RaidGeneral_Struct*)__packet->pBuffer;
 
 		switch (rgs->action)
 		{
-		case 35: {
-			//Start Here.  Setup the buffer into a temp location and map to eq
-			unsigned char* in = __packet->pBuffer;
-			structs::RaidMOTD_Struct* eq = (structs::RaidMOTD_Struct*)in;
+		case raidSetMotd:
+		{
+			SETUP_VAR_DECODE(RaidMOTD_Struct, structs::RaidMOTD_Struct, motd);
 
-			//Setup a new object using the new Struct
-			RaidMOTD_Struct* emu = new RaidMOTD_Struct();
-
-			//Map values and convert char to string to be used within source
 			IN(general.action);
 			IN(general.parameter);
 			IN_str(general.leader_name);
 			IN_str(general.player_name);
-			emu->motd = std::string(eq->motd);
+			strn0cpy(emu->motd, eq->motd, strlen(eq->motd) + 1);
 
-			//Point buffer to new structure
-			__packet->size = sizeof(RaidNote_Struct);
-			__packet->pBuffer = (unsigned char*)emu;
-			//delete original inbound packet buffer
-			delete[](in);
-
+			FINISH_VAR_DECODE();
 			break;
 		}
-		case 36:
+		case raidSetNote:
 		{
-			//Start Here.  Setup the buffer into a temp location and map to eq
-			unsigned char* in = __packet->pBuffer;
-			structs::RaidNote_Struct* eq = (structs::RaidNote_Struct*)in;
+			SETUP_VAR_DECODE(RaidNote_Struct, structs::RaidNote_Struct, note);
 
-			//Setup a new object using the new Struct
-			RaidNote_Struct* emu = new RaidNote_Struct();
-
-			//Map values and convert char to string to be used within source
 			IN(general.action);
 			IN(general.parameter);
 			IN_str(general.leader_name);
 			IN_str(general.player_name);
-			emu->note = std::string(eq->note);
+			strn0cpy(emu->note, eq->note, strlen(eq->note) + 1);
 
-			//Point buffer to new structure
-			__packet->size = sizeof(RaidNote_Struct);
-			__packet->pBuffer = (unsigned char*)emu;
-			//delete original inbound packet buffer
-			delete[](in);
-
+			FINISH_VAR_DECODE();
 			break;
 		}
 		default:
 		{
 			SETUP_DIRECT_DECODE(RaidGeneral_Struct, structs::RaidGeneral_Struct);
-
 			IN(action);
 			IN(parameter);
 			IN_str(leader_name);
@@ -3412,7 +3394,6 @@ namespace SoD
 		}
 		}
 	}
-
 
 	DECODE(OP_ReadBook)
 	{

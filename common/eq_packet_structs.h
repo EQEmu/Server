@@ -4166,12 +4166,12 @@ struct RaidAddMember_Struct {
 
 struct RaidNote_Struct {
 /*000*/ RaidGeneral_Struct general;
-/*140*/ std::string note;
+/*140*/ char note[];
 };
 
 struct RaidMOTD_Struct {
 /*000*/ RaidGeneral_Struct general; // leader_name and action only used
-/*140*/ std::string motd; // max size is 1024, but reply is variable
+/*140*/ char motd[]; // max size is 1024, but reply is variable
 };
 
 struct RaidLeadershipUpdate_Struct {

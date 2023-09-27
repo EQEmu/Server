@@ -33,7 +33,7 @@
 #include "../item_instance.h"
 #include "titanium_structs.h"
 #include "../path_manager.h"
-#include "../../zone/raids.h"
+#include "../raid.h"
 
 #include <sstream>
 
@@ -1261,87 +1261,84 @@ namespace Titanium
 		FINISH_ENCODE();
 	}
 
-	ENCODE(OP_RaidJoin)
-	{
-		EQApplicationPacket* inapp = *p;
-		unsigned char* __emu_buffer = inapp->pBuffer;
-		RaidCreate_Struct* raid_create = (RaidCreate_Struct*)__emu_buffer;
-
-		auto outapp_create = new EQApplicationPacket(OP_RaidUpdate, sizeof(structs::RaidGeneral_Struct));
-		structs::RaidGeneral_Struct* general = (structs::RaidGeneral_Struct*)outapp_create->pBuffer;
-
-		general->action = 8;
-		general->parameter = 1;
-		strn0cpy(general->leader_name, raid_create->leader_name, 64);
-		strn0cpy(general->player_name, raid_create->leader_name, 64);
-
-		dest->FastQueuePacket(&outapp_create);
-		safe_delete(outapp_create);
-	}
-
 	ENCODE(OP_RaidUpdate)
 	{
 		EQApplicationPacket* inapp = *p;
-		unsigned char* __emu_buffer = inapp->pBuffer;
-		RaidGeneral_Struct* raid_gen = (RaidGeneral_Struct*)__emu_buffer;
+		unsigned char* __temp_buffer = inapp->pBuffer;
+		RaidGeneral_Struct* raid_gen = (RaidGeneral_Struct*)__temp_buffer;
 		
 		switch (raid_gen->action)
 		{
-		case 0: {
-			RaidAddMember_Struct* in_add_member = (RaidAddMember_Struct*)__emu_buffer;
-
+		case raidAdd: 
+		{
 			ENCODE_LENGTH_EXACT(RaidAddMember_Struct);
-			SETUP_DIRECT_ENCODE(RaidAddMember_Struct, structs::RaidAdd_Struct);
+			SETUP_DIRECT_ENCODE(RaidAddMember_Struct, structs::RaidAddMember_Struct);
 
-			eq->action = emu->raidGen.action;
-			eq->level = emu->level;
-			eq->_class = emu->_class;
-			eq->groupid = emu->raidGen.parameter;
-			eq->group_leader = emu->isGroupLeader;
-			strcpy(eq->leader_name, emu->raidGen.leader_name);
-			strcpy(eq->player_name, emu->raidGen.player_name);
+			OUT(raidGen.action);
+			OUT(level);
+			OUT(_class);
+			OUT(raidGen.parameter);
+			OUT(isGroupLeader);
+			OUT_str(raidGen.leader_name);
+			OUT_str(raidGen.player_name);
 
 			FINISH_ENCODE();
 			break;
 		}
-		case 14:
-		case 30:
+		case raidSetLeaderAbilities:
+		case raidMakeLeader:
 		{
-			RaidLeadershipUpdate_Struct* inlaa = (RaidLeadershipUpdate_Struct*)__emu_buffer;
+			*p = nullptr;
+			RaidLeadershipUpdate_Struct* emu = (RaidLeadershipUpdate_Struct*)__temp_buffer;
 			auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(structs::RaidLeadershipUpdate_Struct));
-			structs::RaidLeadershipUpdate_Struct* outlaa = (structs::RaidLeadershipUpdate_Struct*)outapp->pBuffer;
+			structs::RaidLeadershipUpdate_Struct* eq = (structs::RaidLeadershipUpdate_Struct*)outapp->pBuffer;
 
-			outlaa->action = inlaa->action;
-			strn0cpy(outlaa->player_name, inlaa->player_name, 64);
-			strn0cpy(outlaa->leader_name, inlaa->leader_name, 64);
-			memcpy(&outlaa->raid, &inlaa->raid, sizeof(RaidLeadershipAA_Struct));
+			OUT(action);
+			OUT_str(player_name);
+			OUT_str(leader_name);
+			memcpy(&eq->raid, &emu->raid, sizeof(RaidLeadershipAA_Struct));
 			dest->FastQueuePacket(&outapp);
 			safe_delete(outapp);
+			safe_delete(inapp);
 			break;
 		}
-		case 35: 
+		case raidSetMotd:
 		{
-			auto in_motd = (RaidMOTD_Struct*)__emu_buffer;
-			auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(structs::RaidMOTD_Struct));
-			auto motd = (structs::RaidMOTD_Struct*)outapp->pBuffer;
-			motd->general.action = raidSetMotd				;
-			strn0cpy(motd->general.leader_name, in_motd->general.leader_name, sizeof(motd->general.leader_name));
-			strn0cpy(motd->general.player_name, in_motd->general.player_name, sizeof(motd->general.leader_name));
-			strncpy(motd->motd, in_motd->motd.c_str(), in_motd->motd.length());
-			dest->QueuePacket(outapp);
-			safe_delete(outapp);
+			*p = nullptr;
+			auto emu = (RaidMOTD_Struct*)__temp_buffer;
+			auto size = strlen(emu->motd) + 1;
+			auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(structs::RaidMOTD_Struct) + size);
+			auto eq = (structs::RaidMOTD_Struct*)outapp->pBuffer;
+			
+			eq->general.action = raidSetMotd;
+			OUT_str(general.leader_name);
+			OUT_str(general.player_name);
+			strn0cpy(eq->motd, emu->motd, size);
+
+			dest->FastQueuePacket(&outapp);
+			safe_delete(inapp);
 			break;
 		}
-		case raidSetNote: {
-			auto in_note = (RaidNote_Struct*)__emu_buffer;
-			auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(structs::RaidNote_Struct));
-			auto note = (structs::RaidNote_Struct*)outapp->pBuffer;
-			note->general.action = raidSetNote;
-			strn0cpy(note->general.leader_name, in_note->general.leader_name, sizeof(note->general.leader_name));
-			strn0cpy(note->general.player_name, in_note->general.player_name, sizeof(note->general.leader_name));
-			strncpy(note->note, in_note->note.c_str(), in_note->note.length());
-			dest->QueuePacket(outapp);
-			safe_delete(outapp);
+		case raidSetNote: 
+		{
+			*p = nullptr;
+			auto emu = (RaidNote_Struct*)__temp_buffer;
+			auto size = strlen(emu->note) + 1;
+			auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(structs::RaidNote_Struct) + size);
+			auto eq = (structs::RaidNote_Struct*)outapp->pBuffer;
+
+			eq->general.action = raidSetNote;
+			OUT_str(general.leader_name);
+			OUT_str(general.player_name);
+			strncpy(eq->note, emu->note, size);
+
+			dest->FastQueuePacket(&outapp);
+			safe_delete(inapp);
+			break;
+		}
+		case raidNoRaid:
+		{
+			dest->FastQueuePacket(&*p);
 			break;
 		}
 		default: {
@@ -2393,54 +2390,33 @@ namespace Titanium
 
 		switch (rgs->action)
 		{
-		case 35: {
-			//Start Here.  Setup the buffer into a temp location and map to eq
-			unsigned char* in = __packet->pBuffer;
-			structs::RaidMOTD_Struct* eq = (structs::RaidMOTD_Struct*)in;
+		case raidSetMotd:
+		{
+			SETUP_VAR_DECODE(RaidMOTD_Struct, structs::RaidMOTD_Struct, motd);
 
-			//Setup a new object using the new Struct
-			RaidMOTD_Struct* emu = new RaidMOTD_Struct();
-
-			//Map values and convert char to string to be used within source
 			IN(general.action);
 			IN(general.parameter);
 			IN_str(general.leader_name);
 			IN_str(general.player_name);
-			emu->motd = std::string(eq->motd);
+			strn0cpy(emu->motd, eq->motd, strlen(eq->motd) + 1);
 
-			//Point buffer to new structure
-			__packet->size = sizeof(RaidNote_Struct);
-			__packet->pBuffer = (unsigned char*)emu;
-			//delete original inbound packet buffer
-			delete[](in);
-
+			FINISH_VAR_DECODE();
 			break;
 		}
-		case 36:
+		case raidSetNote:
 		{
-			//Start Here.  Setup the buffer into a temp location and map to eq
-			unsigned char* in = __packet->pBuffer;
-			structs::RaidMOTD_Struct* eq = (structs::RaidMOTD_Struct*)in;
+			SETUP_VAR_DECODE(RaidNote_Struct, structs::RaidNote_Struct, note);
 
-			//Setup a new object using the new Struct
-			RaidMOTD_Struct* emu = new RaidMOTD_Struct();
-
-			//Map values and convert char to string to be used within source
 			IN(general.action);
 			IN(general.parameter);
 			IN_str(general.leader_name);
 			IN_str(general.player_name);
-			emu->motd = std::string(eq->motd);
+			strn0cpy(emu->note, eq->note, strlen(eq->note) + 1);
 
-			//Point buffer to new structure
-			__packet->size = sizeof(RaidNote_Struct);
-			__packet->pBuffer = (unsigned char*)emu;
-			//delete original inbound packet buffer
-			delete[](in);
-
-			break;				
-		}
-		default: 
+			FINISH_VAR_DECODE();
+			break;
+		}		
+		default:
 		{
 			SETUP_DIRECT_DECODE(RaidGeneral_Struct, structs::RaidGeneral_Struct);
 			IN(action);

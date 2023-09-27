@@ -3017,34 +3017,29 @@ struct leadExpUpdateStruct {
    /*0028*/ uint32 unknown0028;
 };
 
-
-
 struct RaidGeneral_Struct {
-/*00*/	uint32		action;	//=10
-/*04*/	char		player_name[64];	//should both be the player's name
-/*04*/	char		leader_name[64];
+/*000*/	uint32		action;	//=10
+/*004*/	char		player_name[64];	//should both be the player's name
+/*068*/	char		leader_name[64];
 /*132*/	uint32		parameter;
 };
 
-struct RaidAdd_Struct {
-/*000*/	uint32		action;	//=0
-/*004*/	char		player_name[64];	//should both be the player's name
-/*068*/	char		leader_name[64];
-/*132*/	uint32		groupid;
+struct RaidAddMember_Struct {
+/*000*/	RaidGeneral_Struct raidGen;
 /*136*/	uint8		_class;
 /*137*/	uint8		level;
-/*138*/	uint8		group_leader;
-/*135*/	uint8		unknown135;	//seems to be 0x42 or 0
+/*138*/	uint8		isGroupLeader;
+/*139*/	uint8		unknown139;	//seems to be 0x42 or 0
 };
 
 struct RaidNote_Struct {
 /*000*/ RaidGeneral_Struct general;
-/*140*/ char note[64];
+/*136*/ char note[];
 };
 
 struct RaidMOTD_Struct {
 /*000*/ RaidGeneral_Struct general; // leader_name and action only used
-/*140*/ char motd[1024]; // max size is 1024, but reply is variable
+/*136*/ char motd[]; // max size is 1024, but reply is variable
 };
 
 struct RaidLeadershipUpdate_Struct {
