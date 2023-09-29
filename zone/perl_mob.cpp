@@ -362,6 +362,11 @@ bool Perl_Mob_FindBuff(Mob* self, uint16 spell_id) // @categories Spells and Dis
 	return self->FindBuff(spell_id);
 }
 
+bool Perl_Mob_FindBuff(Mob* self, uint16 spell_id, uint16 caster_id) // @categories Spells and Disciplines, Script Utility
+{
+	return self->FindBuff(spell_id, caster_id);
+}
+
 int Perl_Mob_FindBuffBySlot(Mob* self, int slot) // @categories Spells and Disciplines, Script Utility
 {
 	return self->FindBuffBySlot(slot);
@@ -3570,7 +3575,8 @@ void perl_register_mob()
 	package.add("EntityVariableExists", &Perl_Mob_EntityVariableExists);
 	package.add("FaceTarget", (void(*)(Mob*))&Perl_Mob_FaceTarget);
 	package.add("FaceTarget", (void(*)(Mob*, Mob*))&Perl_Mob_FaceTarget);
-	package.add("FindBuff", &Perl_Mob_FindBuff);
+	package.add("FindBuff", (bool(*)(Mob*, uint16))&Perl_Mob_FindBuff);
+	package.add("FindBuff", (bool(*)(Mob*, uint16, uint16))&Perl_Mob_FindBuff);
 	package.add("FindBuffBySlot", &Perl_Mob_FindBuffBySlot);
 	package.add("FindGroundZ", (float(*)(Mob*, float, float))&Perl_Mob_FindGroundZ);
 	package.add("FindGroundZ", (float(*)(Mob*, float, float, float))&Perl_Mob_FindGroundZ);

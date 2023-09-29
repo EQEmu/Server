@@ -315,9 +315,14 @@ void Lua_Mob::SetInvisible(int state) {
 	self->SetInvisible(state);
 }
 
-bool Lua_Mob::FindBuff(int spell_id) {
+bool Lua_Mob::FindBuff(uint16 spell_id) {
 	Lua_Safe_Call_Bool();
 	return self->FindBuff(spell_id);
+}
+
+bool Lua_Mob::FindBuff(uint16 spell_id, uint16 caster_id) {
+	Lua_Safe_Call_Bool();
+	return self->FindBuff(spell_id, caster_id);
 }
 
 uint16 Lua_Mob::FindBuffBySlot(int slot) {
@@ -3324,7 +3329,8 @@ luabind::scope lua_register_mob() {
 	.def("Emote", &Lua_Mob::Emote)
 	.def("EntityVariableExists", &Lua_Mob::EntityVariableExists)
 	.def("FaceTarget", (void(Lua_Mob::*)(Lua_Mob))&Lua_Mob::FaceTarget)
-	.def("FindBuff", &Lua_Mob::FindBuff)
+	.def("FindBuff", (bool(Lua_Mob::*)(uint16))&Lua_Mob::FindBuff)
+	.def("FindBuff", (bool(Lua_Mob::*)(uint16,uint16))&Lua_Mob::FindBuff)
 	.def("FindBuffBySlot", (uint16(Lua_Mob::*)(int))&Lua_Mob::FindBuffBySlot)
 	.def("FindGroundZ", (double(Lua_Mob::*)(double,double))&Lua_Mob::FindGroundZ)
 	.def("FindGroundZ", (double(Lua_Mob::*)(double,double,double))&Lua_Mob::FindGroundZ)
