@@ -3034,12 +3034,12 @@ struct RaidAddMember_Struct {
 
 struct RaidNote_Struct {
 /*000*/ RaidGeneral_Struct general;
-/*136*/ char note[];
+/*136*/ char note[64];
 };
 
 struct RaidMOTD_Struct {
 /*000*/ RaidGeneral_Struct general; // leader_name and action only used
-/*136*/ char motd[]; // max size is 1024, but reply is variable
+/*136*/ char motd[1024]; // max size is 1024, but reply is variable
 };
 
 struct RaidLeadershipUpdate_Struct {

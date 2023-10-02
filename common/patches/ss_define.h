@@ -70,9 +70,6 @@
 #define OUT_str(x) \
 	strncpy(eq->x, emu->x, sizeof(eq->x)); \
         eq->x[sizeof(eq->x)-1] = '\0';
-#define OUT_str_x_y(x,y) \
-	strncpy(eq->x, emu->y, sizeof(eq->x)); \
-        eq->x[sizeof(eq->x)-1] = '\0';
 #define OUT_array(x, n) \
 	for(__i = 0; __i < n; __i++) \
 		eq->x[__i] = emu->x[__i];

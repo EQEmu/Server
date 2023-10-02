@@ -1549,8 +1549,7 @@ void Raid::SendRaidMOTD(Client *c)
 		return;
 	}
 
-	auto size = motd.size() + 1;
-	auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidMOTD_Struct) + size);
+	auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidMOTD_Struct));
 	auto data = (RaidMOTD_Struct*)outapp->pBuffer;
 
 	data->general.action = raidSetMotd;
@@ -1558,7 +1557,7 @@ void Raid::SendRaidMOTD(Client *c)
 	data->general.unknown1 = 0;
 	strncpy_s(data->general.leader_name, c->GetName(), sizeof(c->GetName()));
 	strncpy_s(data->general.player_name, GetLeaderName().c_str(), 64);
-	strn0cpy(data->motd, motd.c_str(), size);
+	strn0cpy(data->motd, motd.c_str(), sizeof(data->motd));
 
 	c->QueuePacket(outapp);
 	safe_delete(outapp);
@@ -1587,11 +1586,10 @@ void Raid::SendRaidMOTDToWorld()
 		return;
 	}
 
-	auto size = motd.size() + 1;
-	auto pack = new ServerPacket(ServerOP_RaidMOTD, sizeof(ServerRaidMOTD_Struct) + size);
+	auto pack = new ServerPacket(ServerOP_RaidMOTD, sizeof(ServerRaidMOTD_Struct));
 	auto smotd = (ServerRaidMOTD_Struct *)pack->pBuffer;
 	smotd->rid = GetID();
-	strn0cpy(smotd->motd, motd.c_str(), size);
+	strn0cpy(smotd->motd, motd.c_str(), sizeof(smotd->motd));
 	worldserver.SendPacket(pack);
 	safe_delete(pack);
 }
@@ -2284,8 +2282,7 @@ void Raid::SendRaidNotes()
 
 	for (const auto& c : GetMembersWithNotes()) {
 
-		auto size = c.note.size() + 1;
-		auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidNote_Struct) + size);
+		auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidNote_Struct));
 		auto data = (RaidNote_Struct*)outapp->pBuffer;
 
 		data->general.action = raidSetNote;
@@ -2293,7 +2290,7 @@ void Raid::SendRaidNotes()
 		data->general.unknown1 = 0;
 		strn0cpy(data->general.leader_name, c.member_name, sizeof(c.member_name));
 		strn0cpy(data->general.player_name, GetLeaderName().c_str(), GetLeaderName().length());
-		strn0cpy(data->note, c.note.c_str(), size);
+		strn0cpy(data->note, c.note.c_str(), sizeof(data->note));
 
 		QueuePacket(outapp);
 		safe_delete(outapp);

@@ -1075,7 +1075,7 @@ struct ServerRaidMessage_Struct {
 
 struct ServerRaidMOTD_Struct {
 	uint32 rid;
-	char motd[0];
+	char motd[1024];
 };
 
 struct ServerRaidNote_Struct {
