@@ -46,7 +46,7 @@ void ShowGroupInfo(Client *c, const Seperator *sep)
 	);
 
 	const std::string yes = DialogueWindow::ColorMessage("forest_green", "Y");
-	const std::string no  = DialogueWindow::ColorMessage("red1", "N");
+	const std::string no  = DialogueWindow::ColorMessage("red_1", "N");
 
 	for (int group_member = 0; group_member < MAX_GROUP_MEMBERS; group_member++) {
 		if (g->membername[group_member][0] == '\0') {
@@ -60,8 +60,8 @@ void ShowGroupInfo(Client *c, const Seperator *sep)
 		popup_table += DialogueWindow::TableRow(
 			fmt::format(
 				"{}{}{}{}{}{}",
-				group_member,
-				(
+				DialogueWindow::TableCell(std::to_string(group_member)),
+				DialogueWindow::TableCell(
 					strcmp(g->membername[group_member], c->GetCleanName()) ?
 					g->membername[group_member] :
 					fmt::format(
@@ -69,10 +69,10 @@ void ShowGroupInfo(Client *c, const Seperator *sep)
 						g->membername[group_member]
 					)
 				),
-				g->members[group_member] ? yes : no,
-				is_assist ? yes : no,
-				is_puller ? yes : no,
-				is_tank ? yes : no
+				DialogueWindow::TableCell(g->members[group_member] ? yes : no),
+				DialogueWindow::TableCell(is_assist ? yes : no),
+				DialogueWindow::TableCell(is_puller ? yes : no),
+				DialogueWindow::TableCell(is_tank ? yes : no)
 			)
 		);
 	}

@@ -24,7 +24,7 @@ void ShowZoneData(Client *c, const Seperator *sep)
 				fmt::format(
 					"{} {} {}",
 					DialogueWindow::ColorMessage(
-						"red1",
+						"red_1",
 						std::to_string(zone->newzone_data.fog_red[fog_index])
 					),
 					DialogueWindow::ColorMessage(
@@ -206,7 +206,7 @@ void ShowZoneData(Client *c, const Seperator *sep)
 		DialogueWindow::TableCell(
 			zone->newzone_data.suspend_buffs ?
 			DialogueWindow::ColorMessage("forest_green", "Y") :
-			DialogueWindow::ColorMessage("red1", "N")
+			DialogueWindow::ColorMessage("red_1", "N")
 		)
 	);
 
