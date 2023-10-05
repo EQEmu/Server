@@ -1555,9 +1555,9 @@ void Raid::SendRaidMOTD(Client *c)
 	data->general.action = raidSetMotd;
 	data->general.parameter = 0;
 	data->general.unknown1 = 0;
-	strncpy_s(data->general.leader_name, c->GetName(), sizeof(c->GetName()));
-	strncpy_s(data->general.player_name, GetLeaderName().c_str(), 64);
-	strn0cpy(data->motd, motd.c_str(), sizeof(data->motd));
+	strncpy(data->general.leader_name, c->GetName(), sizeof(c->GetName()));
+	strncpy(data->general.player_name, GetLeaderName().c_str(), 64);
+	strncpy(data->motd, motd.c_str(), sizeof(data->motd));
 
 	c->QueuePacket(outapp);
 	safe_delete(outapp);

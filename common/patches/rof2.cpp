@@ -2688,8 +2688,8 @@ namespace RoF2
 
 		general->action = raidCreate;
 		general->parameter = RaidCommandAcceptInvite;
-		strncpy_s(general->leader_name, emu->leader_name, sizeof(emu->leader_name));
-		strncpy_s(general->player_name, emu->leader_name, sizeof(emu->leader_name));
+		strncpy(general->leader_name, emu->leader_name, sizeof(emu->leader_name));
+		strncpy(general->player_name, emu->leader_name, sizeof(emu->leader_name));
 
 		dest->FastQueuePacket(&outapp);
 

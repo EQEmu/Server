@@ -1942,8 +1942,8 @@ namespace UF
 
 		general->action = raidCreate;
 		general->parameter = RaidCommandAcceptInvite;
-		strncpy_s(general->leader_name, emu->leader_name, sizeof(emu->leader_name));
-		strncpy_s(general->player_name, emu->leader_name, sizeof(emu->leader_name));
+		strncpy(general->leader_name, emu->leader_name, sizeof(emu->leader_name));
+		strncpy(general->player_name, emu->leader_name, sizeof(emu->leader_name));
 
 		dest->FastQueuePacket(&outapp);
 
@@ -3667,13 +3667,13 @@ namespace UF
 		case raidSetMotd:
 		{
 			SETUP_VAR_DECODE(RaidMOTD_Struct, structs::RaidMOTD_Struct, motd);
-			
+
 			IN(general.action);
 			IN(general.parameter);
 			IN_str(general.leader_name);
 			IN_str(general.player_name);
-			strn0cpy(emu->motd, eq->motd, strlen(eq->motd) + 1);
-			
+			IN_str(motd);
+
 			FINISH_VAR_DECODE();
 			break;
 		}
@@ -3685,7 +3685,7 @@ namespace UF
 			IN(general.parameter);
 			IN_str(general.leader_name);
 			IN_str(general.player_name);
-			strn0cpy(emu->note, eq->note, strlen(eq->note) + 1);
+			IN_str(note);
 
 			FINISH_VAR_DECODE();
 			break;
