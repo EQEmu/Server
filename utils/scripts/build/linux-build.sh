@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -x
+set -ex
 
 sudo chown eqemu:eqemu /drone/src/ * -R
 sudo chown eqemu:eqemu /home/eqemu/.ccache/ * -R
