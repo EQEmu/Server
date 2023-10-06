@@ -5114,7 +5114,7 @@ std::string Mob::GetTargetDescription(Mob* target, uint8 description_type, uint1
 	auto d = fmt::format(
 		"{}",
 		(
-			this == target ?
+			target && this == target ?
 			self_return :
 			fmt::format(
 				"{} ({})",
