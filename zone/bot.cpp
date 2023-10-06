@@ -465,6 +465,15 @@ Bot::~Bot() {
 	}
 
 	entity_list.RemoveBot(GetID());
+
+	// remove bot from group
+	if (GetGroup()) {
+		GetGroup()->DelMember(this);
+	}
+
+	if (GetRaid()) {
+		GetRaid()->RemoveMember(GetName());
+	}
 }
 
 void Bot::SetBotID(uint32 botID) {
