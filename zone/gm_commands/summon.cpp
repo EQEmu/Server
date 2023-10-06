@@ -58,12 +58,17 @@ void command_summon(Client *c, const Seperator *sep)
 	} else if (c->GetTarget()) {
 		target = c->GetTarget();
 	}
-	
+
 	if (c == target) {
 		c->Message(Chat::White, "You cannot summon yourself.");
 		return;
 	}
-	
+
+	if (!target) {
+		c->Message(Chat::White, "You must have a target to summon.");
+		return;
+	}
+
 	c->Message(
 		Chat::White,
 		fmt::format(
