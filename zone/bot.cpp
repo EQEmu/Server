@@ -466,7 +466,6 @@ Bot::~Bot() {
 
 	entity_list.RemoveBot(GetID());
 
-	// remove bot from group
 	if (GetGroup()) {
 		GetGroup()->DelMember(this);
 	}
