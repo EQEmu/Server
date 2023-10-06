@@ -55,8 +55,14 @@ bool File::Exists(const std::string &name)
  */
 void File::Makedir(const std::string &directory_name)
 {
-	fs::create_directory(directory_name);
-	fs::permissions(directory_name, fs::perms::owner_all);
+	try {
+		fs::create_directory(directory_name);
+		fs::permissions(directory_name, fs::perms::owner_all);
+	}
+	catch (const fs::filesystem_error &ex) {
+		std::cout << "Failed to create directory: " << directory_name << std::endl;
+		std::cout << ex.what() << std::endl;
+	}
 }
 
 std::string File::FindEqemuConfigPath()
