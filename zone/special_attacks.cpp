@@ -440,7 +440,7 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 			max_dmg = DMG_INVULNERABLE;
 		}
 
-		while (attack_rounds) {
+		while (attack_rounds > 0) {
 			if (GetTarget()) {
 				DoSpecialAttackDamage(GetTarget(), EQ::skills::SkillFrenzy, max_dmg, 0, max_dmg, reuse_time);
 			}
@@ -458,7 +458,7 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 	const uint8 class_id = GetClass();
 
 	// Warrior, Ranger, Monk, Beastlord, and Berserker can kick always
-	const uint32 allowed_kick_classes = RuleI(Combat, ExtraAllowedKickClasses);
+	const uint32 allowed_kick_classes = RuleI(Combat, ExtraAllowedKickClassesBitmask);
 
 	const bool can_use_kick = (
 		class_id == WARRIOR ||
@@ -469,6 +469,7 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 		allowed_kick_classes & GetPlayerClassBit(class_id)
 	);
 
+	bool found_skill = false;
 
 	if (
 		ca_atk->m_atk == 100 &&
@@ -489,7 +490,7 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 			reuse_time = KickReuseTime - 1 - skill_reduction;
 			DoSpecialAttackDamage(GetTarget(), EQ::skills::SkillKick, damage, 0, hate_override, reuse_time);
 
-			goto send_reuse_time;
+			found_skill = true;
 		}
 	}
 
@@ -514,7 +515,7 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 
 			int extra = 0;
 			// always 1/4 of the double attack chance, 25% at rank 5 (100/4)
-			while (wu_chance) {
+			while (wu_chance > 0) {
 				if (zone->random.Roll(wu_chance)) {
 					++extra;
 				} else {
@@ -552,7 +553,7 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 			CheckIncreaseSkill((EQ::skills::SkillType) ca_atk->m_skill, GetTarget(), 10);
 		}
 
-		goto send_reuse_time;
+		found_skill = true;
 	}
 
 	if (
@@ -562,13 +563,16 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 	) {
 		reuse_time = BackstabReuseTime - 1 - skill_reduction;
 		TryBackstab(GetTarget(), reuse_time);
-		goto send_reuse_time;
+		found_skill = true;
 	}
 
-	reuse_time = 9 - skill_reduction;
+	if (!found_skill) {
+		reuse_time = 9 - skill_reduction;
+	}
 
-send_reuse_time:
 	reuse_time = (reuse_time * haste_modifier) / 100;
+
+	reuse_time = EQ::Clamp(reuse_time, 0, reuse_time);
 
 	if (reuse_time) {
 		p_timers.Start(timer, reuse_time);
