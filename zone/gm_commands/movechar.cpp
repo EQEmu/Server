@@ -46,7 +46,12 @@ void command_movechar(Client *c, const Seperator *sep)
 	}
 
 	auto zone_id = ZoneID(zone_short_name);
-	std::string zone_long_name = ZoneLongName(zone_id);
+	auto z = GetZone(zone_id);
+
+	if (!z) {
+		c->Message(Chat::Red, "Invalid zone.");
+		return;
+	}
 
 	bool is_special_zone = (
 		zone_short_name.find("cshome") != std::string::npos ||
@@ -59,7 +64,7 @@ void command_movechar(Client *c, const Seperator *sep)
 			Chat::White,
 			fmt::format(
 				"{} ({}) is a special zone and you cannot move someone there.",
-				zone_long_name,
+				z->long_name,
 				zone_short_name
 			).c_str()
 		);
@@ -91,7 +96,7 @@ void command_movechar(Client *c, const Seperator *sep)
 			fmt::format(
 				"Character Move {} | Zone: {} ({}) ID: {}",
 				moved_string,
-				zone_long_name,
+				z->long_name,
 				zone_short_name,
 				zone_id
 			).c_str()
