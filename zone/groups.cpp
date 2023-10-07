@@ -555,8 +555,13 @@ void Group::MemberZoned(Mob* removemob) {
 
 	//should NOT clear the name, it is used for world communication.
 	for (auto & m : members) {
-		if (m && (m == removemob || (m->IsBot() && m->CastToBot()->GetBotOwner() == removemob))) {
-			m = nullptr;
+		if (m) {
+			if (m->IsBot() && m->CastToBot()->GetBotOwner() && m->CastToBot()->GetBotOwner() == removemob) {
+				m = nullptr;
+			}
+			else if (m == removemob) {
+				m = nullptr;
+			}
 		}
 	}
 
