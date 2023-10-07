@@ -878,7 +878,13 @@ bool Lua_Mob::CastSpell(int spell_id, int target_id) {
 
 bool Lua_Mob::CastSpell(int spell_id, int target_id, int slot) {
 	Lua_Safe_Call_Bool();
-	return self->CastSpell(spell_id, target_id, static_cast<EQ::spells::CastingSlot>(slot));
+
+	int cast_slot = 0;
+	if (slot >= 0 || slot <= 23 || slot == 255) {
+		cast_slot = slot;
+	}
+
+	return self->CastSpell(spell_id, target_id, static_cast<EQ::spells::CastingSlot>(cast_slot));
 }
 
 bool Lua_Mob::CastSpell(int spell_id, int target_id, int slot, int cast_time) {
