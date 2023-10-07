@@ -1576,6 +1576,10 @@ bool Mob::SetAA(uint32 rank_id, uint32 new_value, uint32 charges) {
 
 
 bool Mob::CanUseAlternateAdvancementRank(AA::Rank *rank) {
+	if (!rank) {
+		return false;
+	}
+
 	AA::Ability *ability = rank->base_ability;
 
 	if(!ability)
