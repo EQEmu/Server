@@ -471,7 +471,7 @@ Bot::~Bot() {
 	}
 
 	if (GetRaid()) {
-		GetRaid()->RemoveMember(GetName());
+		GetRaid()->MemberZoned(CastToClient());
 	}
 }
 
