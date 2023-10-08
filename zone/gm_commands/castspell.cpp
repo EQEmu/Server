@@ -31,13 +31,8 @@ void command_castspell(Client *c, const Seperator *sep)
 		return;
 	}
 
-	const bool can_instant_cast = c->Admin() >= commandInstacast;
-	bool       instant_cast     = false;
-	if (can_instant_cast && sep->IsNumber(2)) {
-		instant_cast = Strings::ToBool(sep->arg[2]);
-	}
-
-	const uint16 target_id = t->GetID();
+	const bool   instant_cast = sep->IsNumber(2) ? Strings::ToBool(sep->arg[2]) : true;
+	const uint16 target_id    = t->GetID();
 
 	if (instant_cast) {
 		c->SpellFinished(spell_id, t);
