@@ -5,6 +5,10 @@
 
 void ZoneCLI::SidecarServeHttp(int argc, char **argv, argh::parser &cmd, std::string &description)
 {
+	if (cmd[{"-h", "--help"}]) {
+		return;
+	}
+
 	RegisterExecutablePlatform(EQEmuExePlatform::ExePlatformZoneSidecar);
 
 	int port = 0;

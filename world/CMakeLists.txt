@@ -1,7 +1,6 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.12)
 
 SET(world_sources
-    api/world_api.cpp
     adventure.cpp
     adventure_manager.cpp
     client.cpp
@@ -38,7 +37,6 @@ SET(world_sources
     )
 
 SET(world_headers
-    api/world_api.h
     adventure.h
     adventure_manager.h
     adventure_template.h

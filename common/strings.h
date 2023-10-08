@@ -185,8 +185,6 @@ public:
 		value = strtod(tmp_str.data(), nullptr);
 		return res;
 	}
-
-	static std::string Random(size_t length);
 };
 
 const std::string StringFormat(const char *format, ...);

@@ -806,21 +806,6 @@ bool Strings::ToBool(const std::string& bool_string)
 	return false;
 }
 
-// returns a random string of specified length
-std::string Strings::Random(size_t length)
-{
-	auto        randchar = []() -> char {
-		const char   charset[] = "0123456789"
-								 "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-								 "abcdefghijklmnopqrstuvwxyz";
-		const size_t max_index = (sizeof(charset) - 1);
-		return charset[static_cast<size_t>(std::rand()) % max_index];
-	};
-	std::string str(length, 0);
-	std::generate_n(str.begin(), length, randchar);
-	return str;
-}
-
 // a wrapper for stoi which will return a fallback if the string
 // fails to cast to a number
 int Strings::ToInt(const std::string &s, int fallback)

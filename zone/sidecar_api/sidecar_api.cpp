@@ -19,7 +19,6 @@ void CatchSidecarSignal(int sig_num)
 #include "log_handler.cpp"
 #include "test_controller.cpp"
 #include "map_best_z_controller.cpp"
-#include "loot_simulator_controller.cpp"
 #include "../../common/file.h"
 
 constexpr static int HTTP_RESPONSE_OK           = 200;
@@ -80,7 +79,8 @@ void SidecarApi::BootWebserver(int port, const std::string &key)
 
 				if (header_key == "Authorization") {
 					std::string auth_key = header_value;
-					Strings::FindReplace(auth_key, "Bearer ", "");
+					Strings::FindReplace(auth_key, "Bearer", "");
+					Strings::Trim(auth_key);
 
 					LogHTTPDetail(
 						"Request Authorization key is [{}] set key is [{}] match [{}]",
@@ -90,22 +90,22 @@ void SidecarApi::BootWebserver(int port, const std::string &key)
 					);
 
 					// authorization key matches, pass the request on to the route handler
-					if (auth_key == authorization_key) {
+					if (!authorization_key.empty() && auth_key != authorization_key) {
 						LogHTTPDetail("[Sidecar] Returning as unhandled, authorization passed");
 						return httplib::Server::HandlerResponse::Unhandled;
-					}
-					else {
-						LogInfo("[API] Authorization key [{}] not authorized", auth_key);
 					}
 				}
 			}
 
-			nlohmann::json j;
-			j["error"] = "Authorization key not authorized!";
-			res.set_content(j.dump(), "application/json");
-			res.status = HTTP_RESPONSE_UNAUTHORIZED;
+			if (!authorization_key.empty()) {
+				nlohmann::json j;
+				j["error"] = "Authorization key not valid!";
+				res.set_content(j.dump(), "application/json");
+				res.status = HTTP_RESPONSE_UNAUTHORIZED;
+				return httplib::Server::HandlerResponse::Handled;
+			}
 
-			return httplib::Server::HandlerResponse::Handled;
+			return httplib::Server::HandlerResponse::Unhandled;
 		}
 	);
 	api.Get("/api/v1/test-controller", SidecarApi::TestController);

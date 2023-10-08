@@ -1,3 +1,9 @@
+#include "sidecar_api.h"
+#include "../../common/json/json.hpp"
+#include "../zone.h"
+
+extern Zone* zone;
+
 void SidecarApi::LootSimulatorController(const httplib::Request &req, httplib::Response &res)
 {
 	int  loottable_id = req.has_param("loottable_id") ? std::stoi(req.get_param_value("loottable_id")) : 4027;
@@ -25,11 +31,13 @@ void SidecarApi::LootSimulatorController(const httplib::Request &req, httplib::R
 			for (auto &n: entity_list.GetNPCList()) {
 				if (n.second->GetNPCTypeID() == npc_id) {
 					LogInfo("found npc id [{}]", npc_id);
-					n.second->Depop();
-					zone->spawn2_timer.Trigger();
-					zone->Process();
+					n.second->Depop(false);
 				}
 			}
+
+			entity_list.Process();
+			entity_list.MobProcess();
+
 
 			npc->SetRecordLootStats(true);
 			for (int i = 0; i < iterations; i++) {

@@ -134,6 +134,7 @@ SET(zone_sources
     raids.cpp
     raycast_mesh.cpp
     sidecar_api/sidecar_api.cpp
+    sidecar_api/loot_simulator_controller.cpp
     shared_task_zone_messaging.cpp
     spawn2.cpp
     spawn2.h
@@ -162,7 +163,7 @@ SET(zone_sources
     zone_event_scheduler.cpp
     zone_reload.cpp
     zoning.cpp
-    )
+)
 
 SET(zone_headers
     aa.h
@@ -255,7 +256,6 @@ SET(zone_headers
     raids.h
     raycast_mesh.h
     sidecar_api/sidecar_api.h
-    skills.h
     shared_task_zone_messaging.h
     spawn2.cpp
     spawn2.h

@@ -127,12 +127,12 @@ int main(int argc, char **argv)
 
 	set_exception_handler();
 
-	path.LoadPaths();
-
 	// silence logging if we ran a command
 	if (ZoneCLI::RanConsoleCommand(argc, argv)) {
 		LogSys.SilenceConsoleLogging();
 	}
+
+	path.LoadPaths();
 
 #ifdef USE_MAP_MMFS
 	if (argc == 3 && strcasecmp(argv[1], "convert_map") == 0) {
