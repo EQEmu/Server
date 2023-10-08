@@ -1535,7 +1535,7 @@ namespace Titanium
 			eq->Class[char_index] = 0;
 			eq->Face[char_index] = 0;
 
-			strncpy(eq->Name[char_index], "<none>", 6);
+			strn0cpy(eq->Name[char_index], "<none>", 6);
 
 			eq->Gender[char_index] = 0;
 			eq->EyeColor1[char_index] = 0;
@@ -2410,7 +2410,7 @@ namespace Titanium
 				len = sizeof(eq->motd);
 			}
 			
-			strncpy(emu->motd, eq->motd, len > 1024 ? 1024 : len); 
+			strn0cpy(emu->motd, eq->motd, len > 1024 ? 1024 : len); 
 			emu->motd[len - 1] = '\0';
 
 			FINISH_VAR_DECODE();

@@ -68,7 +68,7 @@
 #undef OUT
 #define OUT(x) eq->x = emu->x;
 #define OUT_str(x) \
-	strncpy(eq->x, emu->x, sizeof(eq->x)); \
+	strn0cpy(eq->x, emu->x, sizeof(eq->x)); \
         eq->x[sizeof(eq->x)-1] = '\0';
 #define OUT_array(x, n) \
 	for(__i = 0; __i < n; __i++) \

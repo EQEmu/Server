@@ -1697,8 +1697,8 @@ namespace SoD
 
 		general->action = raidCreate;
 		general->parameter = RaidCommandAcceptInvite;
-		strncpy(general->leader_name, emu->leader_name, sizeof(emu->leader_name));
-		strncpy(general->player_name, emu->leader_name, sizeof(emu->leader_name));
+		strn0cpy(general->leader_name, emu->leader_name, sizeof(emu->leader_name));
+		strn0cpy(general->player_name, emu->leader_name, sizeof(emu->leader_name));
 
 		dest->FastQueuePacket(&outapp);
 

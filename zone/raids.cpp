@@ -1555,9 +1555,9 @@ void Raid::SendRaidMOTD(Client *c)
 	data->general.action = raidSetMotd;
 	data->general.parameter = 0;
 	data->general.unknown1 = 0;
-	strncpy(data->general.leader_name, c->GetName(), sizeof(c->GetName()));
-	strncpy(data->general.player_name, GetLeaderName().c_str(), 64);
-	strncpy(data->motd, motd.c_str(), sizeof(data->motd));
+	strn0cpy(data->general.leader_name, c->GetName(), sizeof(c->GetName()));
+	strn0cpy(data->general.player_name, GetLeaderName().c_str(), 64);
+	strn0cpy(data->motd, motd.c_str(), sizeof(data->motd));
 
 	c->QueuePacket(outapp);
 	safe_delete(outapp);
@@ -2550,7 +2550,7 @@ void Raid::UpdateXTargetType(XTargetType Type, Mob *m, const char *name)
 				}
 
 				if (name) {
-					strncpy(rm.member->XTargets[i].Name, name, 64);
+					strn0cpy(rm.member->XTargets[i].Name, name, 64);
 				}
 
 				rm.member->SendXTargetPacket(i, m);
