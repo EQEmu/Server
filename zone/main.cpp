@@ -169,7 +169,7 @@ int main(int argc, char **argv)
 	std::string z_name;
 	if (!ZoneCLI::RanSidecarCommand(argc, argv)) {
 		if (argc == 4) {
-			instance_id = atoi(argv[3]);
+			instance_id = Strings::ToInt(argv[3]);
 			worldserver.SetLauncherName(argv[2]);
 			auto zone_port = Strings::Split(argv[1], ':');
 
@@ -179,7 +179,28 @@ int main(int argc, char **argv)
 
 			if (zone_port.size() > 1) {
 				std::string p_name = zone_port[1];
-				Config->SetZonePort(atoi(p_name.c_str()));
+				Config->SetZonePort(Strings::ToInt(p_name));
+			}
+
+			worldserver.SetLaunchedName(z_name.c_str());
+			if (strncmp(z_name.c_str(), "dynamic_", 8) == 0) {
+				zone_name = ".";
+			}
+			else {
+				zone_name = z_name.c_str();
+			}
+		}
+		else if (argc == 3) {
+			worldserver.SetLauncherName(argv[2]);
+			auto zone_port = Strings::Split(argv[1], ':');
+
+			if (!zone_port.empty()) {
+				z_name = zone_port[0];
+			}
+
+			if (zone_port.size() > 1) {
+				std::string p_name = zone_port[1];
+				Config->SetZonePort(Strings::ToInt(p_name));
 			}
 
 			worldserver.SetLaunchedName(z_name.c_str());
@@ -200,7 +221,7 @@ int main(int argc, char **argv)
 
 			if (zone_port.size() > 1) {
 				std::string p_name = zone_port[1];
-				Config->SetZonePort(atoi(p_name.c_str()));
+				Config->SetZonePort(Strings::ToInt(p_name));
 			}
 
 			worldserver.SetLaunchedName(z_name.c_str());
