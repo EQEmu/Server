@@ -3164,6 +3164,18 @@ void Lua_Client::SetBucket(std::string bucket_name, std::string bucket_value, st
 	self->SetBucket(bucket_name, bucket_value, expiration);
 }
 
+void Lua_Client::GrantAllAAPoints()
+{
+	Lua_Safe_Call_Void();
+	self->GrantAllAAPoints();
+}
+
+void Lua_Client::GrantAllAAPoints(uint8 unlock_level)
+{
+	Lua_Safe_Call_Void();
+	self->GrantAllAAPoints(unlock_level);
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 	.def(luabind::constructor<>())
@@ -3414,6 +3426,8 @@ luabind::scope lua_register_client() {
 	.def("GetPEQZoneFlags", (luabind::object(Lua_Client::*)(lua_State*))&Lua_Client::GetPEQZoneFlags)
 	.def("GetZoneFlags", (luabind::object(Lua_Client::*)(lua_State*))&Lua_Client::GetZoneFlags)
 	.def("GoFish", (void(Lua_Client::*)(void))&Lua_Client::GoFish)
+	.def("GrantAllAAPoints", (void(Lua_Client::*)(void))&Lua_Client::GrantAllAAPoints)
+	.def("GrantAllAAPoints", (void(Lua_Client::*)(uint8))&Lua_Client::GrantAllAAPoints)
 	.def("GrantAlternateAdvancementAbility", (bool(Lua_Client::*)(int, int))&Lua_Client::GrantAlternateAdvancementAbility)
 	.def("GrantAlternateAdvancementAbility", (bool(Lua_Client::*)(int, int, bool))&Lua_Client::GrantAlternateAdvancementAbility)
 	.def("GuildID", (uint32(Lua_Client::*)(void))&Lua_Client::GuildID)
