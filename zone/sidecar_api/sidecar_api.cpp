@@ -68,7 +68,7 @@ void SidecarApi::BootWebserver(int port, const std::string &key)
 
 	httplib::Server api;
 
-	api.set_logger(SidecarApi::LogHandler);
+	api.set_logger(SidecarApi::RequestLogHandler);
 	api.set_pre_routing_handler(
 		[](const auto &req, auto &res) {
 			for (const auto &header: req.headers) {

@@ -23,16 +23,20 @@ void SidecarApi::LootSimulatorController(const httplib::Request &req, httplib::R
 			glm::vec4(0, 0, 0, 0),
 			GravityBehavior::Water
 		);
-		BenchTimer benchmark;// depop the previous one
+		BenchTimer benchmark;
+
+		// depop the previous one
 		for (auto &n: entity_list.GetNPCList()) {
 			if (n.second->GetNPCTypeID() == npc_id) {
 				LogInfo("found npc id [{}]", npc_id);
 				n.second->Depop(false);
 			}
 		}
+
 		entity_list.Process();
 		entity_list.MobProcess();
 		npc->SetRecordLootStats(true);
+
 		for (int i = 0; i < iterations; i++) {
 			npc->AddLootTable(loottable_id);
 
@@ -40,12 +44,16 @@ void SidecarApi::LootSimulatorController(const httplib::Request &req, httplib::R
 				npc->AddLootTable(id);
 			}
 		}
+
 		entity_list.AddNPC(npc);
+
 		j["data"]["loottable_id"] = loottable_id;
 		j["data"]["npc_id"]             = npc_id;
 		j["data"]["npc_name"]           = npc->GetCleanName();
 		j["data"]["rolled_items_count"] = npc->GetRolledItems().size();
-		j["data"]["iterations"]         = iterations;// npc level loot table
+		j["data"]["iterations"]         = iterations;
+
+		// npc level loot table
 		auto loot_table = database.GetLootTable(loottable_id);
 		if (!loot_table) {
 			res.status = 400;

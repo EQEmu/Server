@@ -1,4 +1,4 @@
-void SidecarApi::LogHandler(const httplib::Request &req, const httplib::Response &res)
+void SidecarApi::RequestLogHandler(const httplib::Request &req, const httplib::Response &res)
 {
 	if (!req.path.empty()) {
 		std::vector<std::string> params;
