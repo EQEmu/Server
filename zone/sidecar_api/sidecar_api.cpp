@@ -8,6 +8,7 @@
 #include "../zone.h"
 #include "../client.h"
 #include "../../common/json/json.hpp"
+#include <signal.h>
 
 void CatchSidecarSignal(int sig_num)
 {
