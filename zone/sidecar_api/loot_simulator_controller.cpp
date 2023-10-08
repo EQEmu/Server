@@ -87,7 +87,9 @@ void SidecarApi::LootSimulatorController(const httplib::Request &req, httplib::R
 			}
 
 			j["lootdrops"].push_back(jle);
-		}// global loot
+		}
+
+		// global loot
 		for (auto &id: zone->GetGlobalLootTables(npc)) {
 			loot_table = database.GetLootTable(id);
 			if (!loot_table) {
