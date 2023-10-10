@@ -1535,7 +1535,7 @@ namespace Titanium
 			eq->Class[char_index] = 0;
 			eq->Face[char_index] = 0;
 
-			strn0cpy(eq->Name[char_index], "<none>", 6);
+			strncpy(eq->Name[char_index], "<none>", 6);
 
 			eq->Gender[char_index] = 0;
 			eq->EyeColor1[char_index] = 0;
