@@ -354,6 +354,9 @@ void handle_npc_cast(
 
 	lua_pushinteger(L, Strings::ToUnsignedInt(sep.arg[2]));
 	lua_setfield(L, -2, "caster_level");
+
+	lua_pushinteger(L, Strings::ToUnsignedInt(sep.arg[3]));
+	lua_setfield(L, -2, "target_id");
 }
 
 void handle_npc_area(
@@ -715,6 +718,9 @@ void handle_player_cast(
 
 	lua_pushinteger(L, Strings::ToUnsignedInt(sep.arg[2]));
 	lua_setfield(L, -2, "caster_level");
+
+	lua_pushinteger(L, Strings::ToUnsignedInt(sep.arg[3]));
+	lua_setfield(L, -2, "target_id");
 }
 
 void handle_player_task_fail(
@@ -1955,6 +1961,9 @@ void handle_bot_cast(
 
 	lua_pushinteger(L, Strings::ToUnsignedInt(sep.arg[2]));
 	lua_setfield(L, -2, "caster_level");
+
+	lua_pushinteger(L, Strings::ToUnsignedInt(sep.arg[3]));
+	lua_setfield(L, -2, "target_id");
 }
 
 void handle_bot_combat(
