@@ -243,6 +243,12 @@ sub update_items_table {
 	#::: Update stackables
 	$dbh->do("UPDATE items i SET i.stackable = 1 WHERE i.stacksize > 1");
 	
+	#::: Update legacy research tome bagtypes
+	$dbh->do("UPDATE items i SET i.bagtype = 24 WHERE i.id IN (17655, 17903)"); #RESEARCHWIZ
+	$dbh->do("UPDATE items i SET i.bagtype = 25 WHERE i.id IN (17502, 17653)"); #RESEARCHMAG
+	$dbh->do("UPDATE items i SET i.bagtype = 26 WHERE i.id IN (17501, 17654)"); #RESEARCHNEC
+	$dbh->do("UPDATE items i SET i.bagtype = 27 WHERE i.id IN (17500, 17652)"); #RESEARCHENC
+
 	print "Added all new items to Items table (" . $rows . ")!\n";
 	
 }
