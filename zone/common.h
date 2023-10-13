@@ -207,6 +207,7 @@ enum {
 	MODIFY_AVOID_DAMAGE = 51,                    //Modify by percent the NPCs chance to riposte, block, parry or dodge individually, or for all skills
 	IMMUNE_FADING_MEMORIES = 52,
 	IMMUNE_OPEN = 53,
+	IMMUNE_ASSASSINATE = 54,
 	MAX_SPECIAL_ATTACK
 };
 
