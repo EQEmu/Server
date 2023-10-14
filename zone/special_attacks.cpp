@@ -2337,7 +2337,8 @@ int Mob::TryAssassinate(Mob *defender, EQ::skills::SkillType skillInUse)
 		!defender->IsClient() &&
 		GetLevel() >= 60 &&
 		(skillInUse == EQ::skills::SkillBackstab || skillInUse == EQ::skills::SkillThrowing) &&
-		(defender->GetBodyType() == BT_Humanoid || !RuleB(Combat, AssassinateOnlyHumanoids))
+		(defender->GetBodyType() == BT_Humanoid || !RuleB(Combat, AssassinateOnlyHumanoids)) &&
+		!defender->GetSpecialAbility(IMMUNE_ASSASSINATE)
 	) {
 		int chance = GetDEX();
 		if (skillInUse == EQ::skills::SkillBackstab) {

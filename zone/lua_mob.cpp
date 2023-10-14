@@ -3757,7 +3757,8 @@ luabind::scope lua_register_special_abilities() {
 				luabind::value("immune_aggro_client", static_cast<int>(IMMUNE_AGGRO_CLIENT)),
 				luabind::value("immune_aggro_npc", static_cast<int>(IMMUNE_AGGRO_NPC)),
 				luabind::value("modify_avoid_damage", static_cast<int>(MODIFY_AVOID_DAMAGE)),
-				luabind::value("immune_open", static_cast<int>(IMMUNE_OPEN))
+				luabind::value("immune_open", static_cast<int>(IMMUNE_OPEN)),
+				luabind::value("immune_assassinate", static_cast<int>(IMMUNE_ASSASSINATE))
 		)];
 }
 
