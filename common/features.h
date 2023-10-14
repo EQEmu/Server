@@ -250,9 +250,7 @@ enum {
 	commandMovecharSelfOnly       = 80,  //below this == only self move allowed
 	commandMovecharToSpecials     = 200, //ability to send people to cshom/load zones
 	commandCastSpecials           = 100, //can cast special spells
-	commandInstacast              = 100, //insta-cast all #casted spells
 	commandDoAnimOthers           = 100, //can #doanim on others
-	commandLockZones              = 101, //can lock or unlock zones
 	commandEditPlayerCorpses      = 150, //can Edit Player Corpses
 	commandInterrogateInv         = 100, //below this == only log on error state and self-only target dump
 	commandInvSnapshot            = 150  //ability to clear/restore snapshots
