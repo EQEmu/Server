@@ -2153,30 +2153,28 @@ void Client::AutoGrantAAPoints() {
 	SendAlternateAdvancementStats();
 }
 
-void Client::GrantAllAAPoints()
+void Client::GrantAllAAPoints(uint8 unlock_level)
 {
 	//iterate through every AA
-	for (auto& iter : zone->aa_abilities) {
-		auto ability = iter.second.get();
+	for (auto& aa : zone->aa_abilities) {
+		AA::Ability* ability = aa.second.get();
 
 		if (ability->charges > 0) {
 			continue;
 		}
 
-		auto level = GetLevel();
-		auto p = 1;
-		auto rank = ability->first;
-		while (rank != nullptr) {
-			if (CanUseAlternateAdvancementRank(rank)) {
-				if (rank->level_req <= level && !HasAlreadyPurchasedRank(rank)) {
-					FinishAlternateAdvancementPurchase(rank, true, false);
-				}
-			}
-			else {
+		const uint8 level = unlock_level ? unlock_level : GetLevel();
+
+		AA::Rank* rank = ability->first;
+		while (rank) {
+			if (!CanUseAlternateAdvancementRank(rank)) {
 				break;
 			}
 
-			p++;
+			if (rank->level_req <= level && !HasAlreadyPurchasedRank(rank)) {
+				FinishAlternateAdvancementPurchase(rank, true, false);
+			}
+
 			rank = rank->next;
 		}
 	}
@@ -2188,18 +2186,18 @@ void Client::GrantAllAAPoints()
 	SendAlternateAdvancementStats();
 }
 
-bool Client::HasAlreadyPurchasedRank(AA::Rank *rank) {
-	auto iter = aa_ranks.find(rank->base_ability->id);
-
-	if (iter == aa_ranks.end()) {
+bool Client::HasAlreadyPurchasedRank(AA::Rank* rank) {
+	const auto& aa = aa_ranks.find(rank->base_ability->id);
+	if (aa == aa_ranks.end()) {
 		return false;
 	}
 
-	auto ability_rank = zone->GetAlternateAdvancementAbilityAndRank(iter->first, iter->second.first);
-	auto ability = ability_rank.first;
-	auto current = ability_rank.second;
+	const auto& ability_rank = zone->GetAlternateAdvancementAbilityAndRank(aa->first, aa->second.first);
 
-	while (current != nullptr) {
+	AA::Ability* ability = ability_rank.first;
+	AA::Rank*    current = ability_rank.second;
+
+	while (current) {
 		if (current == rank) {
 			return true;
 		}

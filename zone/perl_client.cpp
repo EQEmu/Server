@@ -2982,6 +2982,16 @@ void Perl_Client_SetLDoNPoints(Client* self, uint32 theme_id, uint32 points)
 	self->SetLDoNPoints(theme_id, points);
 }
 
+void Perl_Client_GrantAllAAPoints(Client* self)
+{
+	self->GrantAllAAPoints();
+}
+
+void Perl_Client_GrantAllAAPoints(Client* self, uint8 unlock_level)
+{
+	self->GrantAllAAPoints(unlock_level);
+}
+
 void perl_register_client()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -3232,6 +3242,8 @@ void perl_register_client()
 	package.add("GetPEQZoneFlags", &Perl_Client_GetPEQZoneFlags);
 	package.add("GetZoneFlags", &Perl_Client_GetZoneFlags);
 	package.add("GoFish", &Perl_Client_GoFish);
+	package.add("GrantAllAAPoints", (void(*)(Client*))&Perl_Client_GrantAllAAPoints);
+	package.add("GrantAllAAPoints", (void(*)(Client*, uint8))&Perl_Client_GrantAllAAPoints);
 	package.add("GrantAlternateAdvancementAbility", (bool(*)(Client*, int, int))&Perl_Client_GrantAlternateAdvancementAbility);
 	package.add("GrantAlternateAdvancementAbility", (bool(*)(Client*, int, int, bool))&Perl_Client_GrantAlternateAdvancementAbility);
 	package.add("GuildID", &Perl_Client_GuildID);
