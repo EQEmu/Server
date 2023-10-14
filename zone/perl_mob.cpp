@@ -1902,13 +1902,7 @@ void Perl_Mob_SendIllusion(Mob *self, uint16 race_id, uint8 gender_id, uint8 tex
 	);
 }
 
-void Perl_Mob_SendIllusion(
-	Mob *self,
-	uint16 race_id,
-	uint8 gender_id,
-	uint8 texture,
-	uint8 helmet_texture
-) // @categories Script Utility
+void Perl_Mob_SendIllusion(Mob *self, uint16 race_id, uint8 gender_id, uint8 texture, uint8 helmet_texture) // @categories Script Utility
 {
 	self->SendIllusionPacket(
 		AppearanceStruct{
@@ -1920,14 +1914,7 @@ void Perl_Mob_SendIllusion(
 	);
 }
 
-void Perl_Mob_SendIllusion(
-	Mob *self,
-	uint16 race_id,
-	uint8 gender_id,
-	uint8 texture,
-	uint8 helmet_texture,
-	uint8 face
-) // @categories Script Utility
+void Perl_Mob_SendIllusion(Mob *self, uint16 race_id, uint8 gender_id, uint8 texture, uint8 helmet_texture, uint8 face) // @categories Script Utility
 {
 	self->SendIllusionPacket(
 		AppearanceStruct{
@@ -1940,15 +1927,7 @@ void Perl_Mob_SendIllusion(
 	);
 }
 
-void Perl_Mob_SendIllusion(
-	Mob *self,
-	uint16 race_id,
-	uint8 gender_id,
-	uint8 texture,
-	uint8 helmet_texture,
-	uint8 face,
-	uint8 hair
-) // @categories Script Utility
+void Perl_Mob_SendIllusion(Mob *self, uint16 race_id, uint8 gender_id, uint8 texture, uint8 helmet_texture, uint8 face, uint8 hair) // @categories Script Utility
 {
 	self->SendIllusionPacket(
 		AppearanceStruct{
@@ -1962,16 +1941,7 @@ void Perl_Mob_SendIllusion(
 	);
 }
 
-void Perl_Mob_SendIllusion(
-	Mob *self,
-	uint16 race_id,
-	uint8 gender_id,
-	uint8 texture,
-	uint8 helmet_texture,
-	uint8 face,
-	uint8 hair,
-	uint8 hair_color
-) // @categories Script Utility
+void Perl_Mob_SendIllusion(Mob *self, uint16 race_id, uint8 gender_id, uint8 texture, uint8 helmet_texture, uint8 face, uint8 hair, uint8 hair_color) // @categories Script Utility
 {
 	self->SendIllusionPacket(
 		AppearanceStruct{
@@ -1986,17 +1956,7 @@ void Perl_Mob_SendIllusion(
 	);
 }
 
-void Perl_Mob_SendIllusion(
-	Mob *self,
-	uint16 race_id,
-	uint8 gender_id,
-	uint8 texture,
-	uint8 helmet_texture,
-	uint8 face,
-	uint8 hair,
-	uint8 hair_color,
-	uint8 beard
-) // @categories Script Utility
+void Perl_Mob_SendIllusion(Mob *self, uint16 race_id, uint8 gender_id, uint8 texture, uint8 helmet_texture, uint8 face, uint8 hair, uint8 hair_color, uint8 beard) // @categories Script Utility
 {
 	self->SendIllusionPacket(
 		AppearanceStruct{
@@ -2012,18 +1972,7 @@ void Perl_Mob_SendIllusion(
 	);
 }
 
-void Perl_Mob_SendIllusion(
-	Mob *self,
-	uint16 race_id,
-	uint8 gender_id,
-	uint8 texture,
-	uint8 helmet_texture,
-	uint8 face,
-	uint8 hair,
-	uint8 hair_color,
-	uint8 beard,
-	uint8 beard_color
-) // @categories Script Utility
+void Perl_Mob_SendIllusion(Mob *self, uint16 race_id, uint8 gender_id, uint8 texture, uint8 helmet_texture, uint8 face, uint8 hair, uint8 hair_color, uint8 beard, uint8 beard_color) // @categories Script Utility
 {
 	self->SendIllusionPacket(
 		AppearanceStruct{
@@ -2040,19 +1989,7 @@ void Perl_Mob_SendIllusion(
 	);
 }
 
-void Perl_Mob_SendIllusion(
-	Mob *self,
-	uint16 race_id,
-	uint8 gender_id,
-	uint8 texture,
-	uint8 helmet_texture,
-	uint8 face,
-	uint8 hair,
-	uint8 hair_color,
-	uint8 beard,
-	uint8 beard_color,
-	uint32 drakkin_heritage
-) // @categories Script Utility
+void Perl_Mob_SendIllusion(Mob *self, uint16 race_id, uint8 gender_id, uint8 texture, uint8 helmet_texture, uint8 face, uint8 hair, uint8 hair_color, uint8 beard, uint8 beard_color, uint32 drakkin_heritage) // @categories Script Utility
 {
 	self->SendIllusionPacket(
 		AppearanceStruct{
@@ -2070,20 +2007,7 @@ void Perl_Mob_SendIllusion(
 	);
 }
 
-void Perl_Mob_SendIllusion(
-	Mob *self,
-	uint16 race_id,
-	uint8 gender_id,
-	uint8 texture,
-	uint8 helmet_texture,
-	uint8 face,
-	uint8 hair,
-	uint8 hair_color,
-	uint8 beard,
-	uint8 beard_color,
-	uint32 drakkin_heritage,
-	uint32 drakkin_tattoo
-) // @categories Script Utility
+void Perl_Mob_SendIllusion(Mob *self, uint16 race_id, uint8 gender_id, uint8 texture, uint8 helmet_texture, uint8 face, uint8 hair, uint8 hair_color, uint8 beard, uint8 beard_color, uint32 drakkin_heritage, uint32 drakkin_tattoo) // @categories Script Utility
 {
 	self->SendIllusionPacket(
 		AppearanceStruct{
@@ -2102,21 +2026,7 @@ void Perl_Mob_SendIllusion(
 	);
 }
 
-void Perl_Mob_SendIllusion(
-	Mob *self,
-	uint16 race_id,
-	uint8 gender_id,
-	uint8 texture,
-	uint8 helmet_texture,
-	uint8 face,
-	uint8 hair,
-	uint8 hair_color,
-	uint8 beard,
-	uint8 beard_color,
-	uint32 drakkin_heritage,
-	uint32 drakkin_tattoo,
-	uint32 drakkin_details
-) // @categories Script Utility
+void Perl_Mob_SendIllusion(Mob *self, uint16 race_id, uint8 gender_id, uint8 texture, uint8 helmet_texture, uint8 face, uint8 hair, uint8 hair_color, uint8 beard, uint8 beard_color, uint32 drakkin_heritage, uint32 drakkin_tattoo, uint32 drakkin_details) // @categories Script Utility
 {
 	self->SendIllusionPacket(
 		AppearanceStruct{
@@ -2136,22 +2046,7 @@ void Perl_Mob_SendIllusion(
 	);
 }
 
-void Perl_Mob_SendIllusion(
-	Mob *self,
-	uint16 race_id,
-	uint8 gender_id,
-	uint8 texture,
-	uint8 helmet_texture,
-	uint8 face,
-	uint8 hair,
-	uint8 hair_color,
-	uint8 beard,
-	uint8 beard_color,
-	uint32 drakkin_heritage,
-	uint32 drakkin_tattoo,
-	uint32 drakkin_details,
-	float size
-) // @categories Script Utility
+void Perl_Mob_SendIllusion(Mob *self, uint16 race_id, uint8 gender_id, uint8 texture, uint8 helmet_texture, uint8 face, uint8 hair, uint8 hair_color, uint8 beard, uint8 beard_color, uint32 drakkin_heritage, uint32 drakkin_tattoo, uint32 drakkin_details, float size) // @categories Script Utility
 {
 	self->SendIllusionPacket(
 		AppearanceStruct{
@@ -2172,23 +2067,7 @@ void Perl_Mob_SendIllusion(
 	);
 }
 
-void Perl_Mob_SendIllusion(
-	Mob *self,
-	uint16 race_id,
-	uint8 gender_id,
-	uint8 texture,
-	uint8 helmet_texture,
-	uint8 face,
-	uint8 hair,
-	uint8 hair_color,
-	uint8 beard,
-	uint8 beard_color,
-	uint32 drakkin_heritage,
-	uint32 drakkin_tattoo,
-	uint32 drakkin_details,
-	float size,
-	Client *target
-) // @categories Script Utility
+void Perl_Mob_SendIllusion(Mob *self, uint16 race_id, uint8 gender_id, uint8 texture, uint8 helmet_texture, uint8 face, uint8 hair, uint8 hair_color, uint8 beard, uint8 beard_color, uint32 drakkin_heritage, uint32 drakkin_tattoo, uint32 drakkin_details, float size, Client *target) // @categories Script Utility
 {
 	self->SendIllusionPacket(
 		AppearanceStruct{
