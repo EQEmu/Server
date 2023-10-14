@@ -1660,7 +1660,6 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 	if (IsClient()) {
 		if (parse->PlayerHasQuestSub(EVENT_CAST)) {
 			std::vector<std::any> args = { spell_target };
-
 			const auto& export_string = fmt::format(
 				"{} {} {} {}",
 				spell_id,
@@ -1673,7 +1672,6 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 	} else if (IsNPC()) {
 		if (parse->HasQuestSub(GetNPCTypeID(), EVENT_CAST)) {
 			std::vector<std::any> args = { spell_target };
-
 			const auto& export_string = fmt::format(
 				"{} {} {} {}",
 				spell_id,
@@ -1686,7 +1684,6 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 	} else if (IsBot()) {
 		if (parse->BotHasQuestSub(EVENT_CAST)) {
 			std::vector<std::any> args = { spell_target };
-
 			const auto& export_string = fmt::format(
 				"{} {} {} {}",
 				spell_id,
