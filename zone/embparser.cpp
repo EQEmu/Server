@@ -1654,6 +1654,10 @@ void PerlembParser::ExportEventVariables(
 			ExportVar(package_name.c_str(), "caster_level", sep.arg[2]);
 			ExportVar(package_name.c_str(), "target_id", sep.arg[3]);
 
+			if (extra_pointers && extra_pointers->size() == 1) {
+				ExportVar(package_name.c_str(), "target", "Mob", std::any_cast<Mob*>(extra_pointers->at(0)));
+			}
+
 			if (IsValidSpell(Strings::ToUnsignedInt(sep.arg[0]))) {
 				ExportVar(package_name.c_str(), "spell", "Spell", (void*)&spells[Strings::ToUnsignedInt(sep.arg[0])]);
 			}
