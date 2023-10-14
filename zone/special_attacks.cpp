@@ -2301,7 +2301,8 @@ int Mob::TryHeadShot(Mob *defender, EQ::skills::SkillType skillInUse)
 		!defender->IsClient() &&
 		skillInUse == EQ::skills::SkillArchery &&
 		GetTarget() == defender &&
-		(defender->GetBodyType() == BT_Humanoid || !RuleB(Combat, HeadshotOnlyHumanoids))
+		(defender->GetBodyType() == BT_Humanoid || !RuleB(Combat, HeadshotOnlyHumanoids)) &&
+		!defender->GetSpecialAbility(IMMUNE_HEADSHOT)
 	) {
 		uint32 HeadShot_Dmg = aabonuses.HeadShot[SBIndex::FINISHING_EFFECT_DMG] + spellbonuses.HeadShot[SBIndex::FINISHING_EFFECT_DMG] + itembonuses.HeadShot[SBIndex::FINISHING_EFFECT_DMG];
 		uint8 HeadShot_Level = 0; // Get Highest Headshot Level
