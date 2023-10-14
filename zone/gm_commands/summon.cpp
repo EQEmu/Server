@@ -15,7 +15,7 @@ void command_summon(Client *c, const Seperator *sep)
 		return;
 	}
 
-	Mob* target;
+	Mob* t = c;
 
 	if (arguments == 1) {
 		std::string character_name = sep->arg[1];
@@ -33,7 +33,7 @@ void command_summon(Client *c, const Seperator *sep)
 
 		auto search_client = entity_list.GetClientByName(character_name.c_str());
 		if (search_client) {
-			target = search_client->CastToMob();
+			t = search_client->CastToMob();
 		} else {
 			if (!worldserver.Connected()) {
 				c->Message(Chat::White, "World server is currently disconnected.");
@@ -56,15 +56,15 @@ void command_summon(Client *c, const Seperator *sep)
 			return;
 		}
 	} else if (c->GetTarget()) {
-		target = c->GetTarget();
+		t = c->GetTarget();
 	}
 
-	if (c == target) {
+	if (c == t) {
 		c->Message(Chat::White, "You cannot summon yourself.");
 		return;
 	}
 
-	if (!target) {
+	if (!t) {
 		c->Message(Chat::White, "You must have a target to summon.");
 		return;
 	}
@@ -73,7 +73,7 @@ void command_summon(Client *c, const Seperator *sep)
 		Chat::White,
 		fmt::format(
 			"Summoning {} to {:.2f}, {:.2f}, {:.2f} in {} ({}).",
-			c->GetTargetDescription(target),
+			c->GetTargetDescription(t),
 			c->GetX(),
 			c->GetY(),
 			c->GetZ(),
@@ -82,8 +82,8 @@ void command_summon(Client *c, const Seperator *sep)
 		).c_str()
 	);
 
-	if (target->IsClient()) {
-		target->CastToClient()->MovePC(
+	if (t->IsClient()) {
+		t->CastToClient()->MovePC(
 			zone->GetZoneID(),
 			zone->GetInstanceID(),
 			c->GetX(),
@@ -96,10 +96,10 @@ void command_summon(Client *c, const Seperator *sep)
 		return;
 	}
 
-	target->GMMove(c->GetPosition());
+	t->GMMove(c->GetPosition());
 
-	if (target->IsNPC()) {
-		target->CastToNPC()->SaveGuardSpot(glm::vec4(0.0f));
+	if (t->IsNPC()) {
+		t->CastToNPC()->SaveGuardSpot(glm::vec4(0.0f));
 	}
 }
 
