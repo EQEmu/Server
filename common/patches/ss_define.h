@@ -128,15 +128,6 @@
 	emu_struct *emu = (emu_struct *) __packet->pBuffer; \
 	eq_struct *eq = (eq_struct *) __eq_buffer;
 
-#define SETUP_VAR_DECODE(emu_struct, eq_struct, var_field) \
-	unsigned char *__eq_buffer = __packet->pBuffer; \
-	eq_struct* in = (eq_struct*)__packet->pBuffer; \
-	auto size = strlen(in->var_field); \
-	__packet->size = sizeof(emu_struct) + size + 1; \
-	__packet->pBuffer = new unsigned char[__packet->size]; \
-	emu_struct *emu = (emu_struct *) __packet->pBuffer; \
-	eq_struct *eq = (eq_struct *) __eq_buffer;
-
 #define MEMSET_IN(emu_struct) \
 	memset(__packet->pBuffer, 0, sizeof(emu_struct));
 
@@ -154,9 +145,6 @@
 #define FAIL_DIRECT_DECODE() \
 	delete[] __eq_buffer; \
 	p->SetOpcode(OP_Unknown);
-
-#define FINISH_VAR_DECODE() \
-	delete[] __eq_buffer; 
 
 //call to finish an encoder using SETUP_DIRECT_DECODE
 #define FINISH_DIRECT_DECODE() \

@@ -20,8 +20,6 @@
 #include "../common/events/player_event_logs.h"
 #include "../common/repositories/raid_details_repository.h"
 #include "../common/repositories/raid_members_repository.h"
-#include "../common/raid.h"
-
 
 #include "client.h"
 #include "entity.h"
@@ -1549,22 +1547,21 @@ void Raid::SendRaidGroupRemove(const char *who, uint32 gid)
 
 void Raid::SendRaidMOTD(Client *c)
 {
-	if (!c || motd.empty() || c->IsBot()) {
+	if (!c || motd.empty()) {
 		return;
 	}
 
-	auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidMOTD_Struct));
-	auto data = (RaidMOTD_Struct*)outapp->pBuffer;
+	if (entity_list.GetBotByBotName(c->GetName())) {
+		return;
+	}
 
-	data->general.action = raidSetMotd;
-	data->general.parameter = 0;
-	data->general.unknown1 = 0;
-	strn0cpy(data->general.leader_name, c->GetName(), sizeof(c->GetName()));
-	strn0cpy(data->general.player_name, GetLeaderName().c_str(), 64);
-	strn0cpy(data->motd, motd.c_str(), sizeof(data->motd));
-
-	c->QueuePacket(outapp);
-	safe_delete(outapp);
+	size_t size = motd.size() + 1;
+	auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidMOTD_Struct) + size);
+	auto rmotd = (RaidMOTD_Struct *)outapp->pBuffer;
+	rmotd->general.action = raidSetMotd;
+	strn0cpy(rmotd->general.player_name, c->GetName(), 64);
+	strn0cpy(rmotd->motd, motd.c_str(), size);
+	c->FastQueuePacket(&outapp);
 }
 
 void Raid::SendRaidMOTD()
@@ -1590,10 +1587,11 @@ void Raid::SendRaidMOTDToWorld()
 		return;
 	}
 
-	auto pack = new ServerPacket(ServerOP_RaidMOTD, sizeof(ServerRaidMOTD_Struct));
+	size_t size = motd.size() + 1;
+	auto pack = new ServerPacket(ServerOP_RaidMOTD, sizeof(ServerRaidMOTD_Struct) + size);
 	auto smotd = (ServerRaidMOTD_Struct *)pack->pBuffer;
 	smotd->rid = GetID();
-	strn0cpy(smotd->motd, motd.c_str(), sizeof(smotd->motd));
+	strn0cpy(smotd->motd, motd.c_str(), size);
 	worldserver.SendPacket(pack);
 	safe_delete(pack);
 }
@@ -1732,8 +1730,7 @@ bool Raid::LearnMembers()
 
 		members[i].member = nullptr;
 		strn0cpy(members[i].member_name, row[0], sizeof(members[i].member_name));
-//		strn0cpy(members[i].note, row[10], sizeof(members[i].note));
-		members[i].note = std::string(row[10]);
+		strn0cpy(members[i].note, row[10], sizeof(members[i].note));
 		uint32 group_id = Strings::ToUnsignedInt(row[1]);
 
 		if (group_id >= MAX_RAID_GROUPS) {
@@ -2278,7 +2275,7 @@ std::vector<RaidMember> Raid::GetMembersWithNotes()
 {
 	std::vector<RaidMember> raid_members;
 	for (const auto& m : members) {
-		if (!m.note.empty()) {
+		if (strlen(m.note) != 0) {
 			raid_members.emplace_back(m);
 		}
 	}
@@ -2291,17 +2288,12 @@ void Raid::SendRaidNotes()
 	VerifyRaid();
 
 	for (const auto& c : GetMembersWithNotes()) {
-
-		auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidNote_Struct));
-		auto data = (RaidNote_Struct*)outapp->pBuffer;
-
-		data->general.action = raidSetNote;
-		data->general.parameter = 0;
-		data->general.unknown1 = 0;
-		strn0cpy(data->general.leader_name, c.member_name, sizeof(c.member_name));
-		strn0cpy(data->general.player_name, GetLeaderName().c_str(), GetLeaderName().length());
-		strn0cpy(data->note, c.note.c_str(), sizeof(data->note));
-
+		auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidGeneral_Struct));
+		auto note = (RaidGeneral_Struct*)outapp->pBuffer;
+		note->action = raidSetNote;
+		strn0cpy(note->leader_name, c.member_name, 64);
+		strn0cpy(note->player_name, GetLeaderName().c_str(), 64);
+		strn0cpy(note->note, c.note, 64);
 		QueuePacket(outapp);
 		safe_delete(outapp);
 	}
@@ -2560,7 +2552,7 @@ void Raid::UpdateXTargetType(XTargetType Type, Mob *m, const char *name)
 				}
 
 				if (name) {
-					strn0cpy(rm.member->XTargets[i].Name, name, 64);
+					strncpy(rm.member->XTargets[i].Name, name, 64);
 				}
 
 				rm.member->SendXTargetPacket(i, m);

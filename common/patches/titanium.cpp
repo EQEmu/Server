@@ -33,7 +33,6 @@
 #include "../item_instance.h"
 #include "titanium_structs.h"
 #include "../path_manager.h"
-#include "../raid.h"
 
 #include <sstream>
 
@@ -1246,119 +1245,6 @@ namespace Titanium
 		FINISH_ENCODE();
 	}
 
-	ENCODE(OP_MarkRaidNPC)
-	{
-		ENCODE_LENGTH_EXACT(MarkNPC_Struct);
-		SETUP_DIRECT_ENCODE(MarkNPC_Struct, MarkNPC_Struct);
-	
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_MarkNPC, sizeof(MarkNPC_Struct));
-		MarkNPC_Struct* mnpcs = (MarkNPC_Struct*)outapp->pBuffer;
-		mnpcs->TargetID = emu->TargetID;
-		mnpcs->Number = emu->Number;
-		dest->QueuePacket(outapp);
-		safe_delete(outapp);
-
-		FINISH_ENCODE();
-	}
-
-	ENCODE(OP_RaidUpdate)
-	{
-		EQApplicationPacket* inapp = *p;
-		*p = nullptr;
-		unsigned char* __emu_buffer = inapp->pBuffer;
-		RaidGeneral_Struct* raid_gen = (RaidGeneral_Struct*)__emu_buffer;
-		
-		switch (raid_gen->action)
-		{
-		case raidAdd: 
-		{
-			RaidAddMember_Struct* emu = (RaidAddMember_Struct*)__emu_buffer;
-
-			auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(structs::RaidAddMember_Struct));
-			structs::RaidAddMember_Struct* eq = (structs::RaidAddMember_Struct*)outapp->pBuffer;
-
-			OUT(raidGen.action);
-			OUT(raidGen.parameter);
-			OUT_str(raidGen.leader_name);
-			OUT_str(raidGen.player_name);
-			OUT(_class);
-			OUT(level);
-			OUT(isGroupLeader);
-
-			dest->FastQueuePacket(&outapp);
-			break;
-
-		}
-		case raidSetMotd:
-		{
-			RaidMOTD_Struct* emu = (RaidMOTD_Struct*)__emu_buffer;
-
-			auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(structs::RaidMOTD_Struct));
-			structs::RaidMOTD_Struct* eq = (structs::RaidMOTD_Struct*)outapp->pBuffer;
-
-			OUT(general.action);
-			OUT_str(general.player_name);
-			OUT_str(general.leader_name);
-			OUT_str(motd);
-
-			dest->FastQueuePacket(&outapp);
-			break;
-		}
-		case raidSetLeaderAbilities:
-		case raidMakeLeader:
-		{
-			RaidLeadershipUpdate_Struct* emu = (RaidLeadershipUpdate_Struct*)__emu_buffer;
-
-			auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(structs::RaidLeadershipUpdate_Struct));
-			structs::RaidLeadershipUpdate_Struct* eq = (structs::RaidLeadershipUpdate_Struct*)outapp->pBuffer;
-
-			OUT(action);
-			OUT_str(player_name);
-			OUT_str(leader_name);
-			memcpy(&eq->raid, &emu->raid, sizeof(RaidLeadershipAA_Struct));
-
-			dest->FastQueuePacket(&outapp);
-			break;
-		}
-		case raidSetNote:
-		{
-			auto emu = (RaidNote_Struct*)__emu_buffer;
-
-			auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(structs::RaidNote_Struct));
-			auto eq = (structs::RaidNote_Struct*)outapp->pBuffer;
-
-			OUT(general.action);
-			OUT_str(general.leader_name);
-			OUT_str(general.player_name);
-			OUT_str(note);
-
-			dest->FastQueuePacket(&outapp);
-			break;
-		}
-		case raidNoRaid:
-		{
-			dest->QueuePacket(inapp);
-			break;
-		}
-		default: 
-		{
-			RaidGeneral_Struct* emu = (RaidGeneral_Struct*)__emu_buffer;
-
-			auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(structs::RaidGeneral_Struct));
-			structs::RaidGeneral_Struct* eq = (structs::RaidGeneral_Struct*)outapp->pBuffer;
-
-			OUT(action);
-			OUT(parameter);
-			OUT_str(leader_name);
-			OUT_str(player_name);
-
-			dest->FastQueuePacket(&outapp);
-			break;
-		}
-		}
-		safe_delete(inapp);
-	}
-
 	ENCODE(OP_ReadBook)
 	{
 		// no apparent slot translation needed
@@ -2384,63 +2270,6 @@ namespace Titanium
 		IN(target);
 
 		FINISH_DIRECT_DECODE();
-	}
-
-	DECODE(OP_RaidInvite)
-	{
-		DECODE_LENGTH_ATLEAST(structs::RaidGeneral_Struct);
-		RaidGeneral_Struct* rgs = (RaidGeneral_Struct*)__packet->pBuffer;
-
-		switch (rgs->action)
-		{
-		case raidSetMotd:
-		{
-			SETUP_VAR_DECODE(RaidMOTD_Struct, structs::RaidMOTD_Struct, motd);
-
-			IN(general.action);
-			IN(general.parameter);
-			IN_str(general.leader_name);
-			IN_str(general.player_name);
-			
-			auto len = 0;
-			if (__packet->size < sizeof(structs::RaidMOTD_Struct)) {
-				len = __packet->size - sizeof(structs::RaidGeneral_Struct);
-			}
-			else {
-				len = sizeof(eq->motd);
-			}
-			
-			strn0cpy(emu->motd, eq->motd, len > 1024 ? 1024 : len); 
-			emu->motd[len - 1] = '\0';
-
-			FINISH_VAR_DECODE();
-			break;
-		}
-		case raidSetNote:
-		{
-			SETUP_VAR_DECODE(RaidNote_Struct, structs::RaidNote_Struct, note);
-
-			IN(general.action);
-			IN(general.parameter);
-			IN_str(general.leader_name);
-			IN_str(general.player_name);
-			IN_str(note);
-
-			FINISH_VAR_DECODE();
-			break;
-		}		
-		default:
-		{
-			SETUP_DIRECT_DECODE(RaidGeneral_Struct, structs::RaidGeneral_Struct);
-			IN(action);
-			IN(parameter);
-			IN_str(leader_name);
-			IN_str(player_name);
-
-			FINISH_DIRECT_DECODE();
-			break;
-		}
-		}
 	}
 
 	DECODE(OP_ReadBook)

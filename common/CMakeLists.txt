@@ -589,7 +589,6 @@ SET(common_headers
     ptimer.h
     queue.h
     races.h
-	raid.h
     random.h
     rdtsc.h
     rulesys.h
