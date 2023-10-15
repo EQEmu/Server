@@ -1721,7 +1721,7 @@ bool Raid::LearnMembers()
 	}
 
 	int i = 0;
-	for (auto &e: raid_members) {
+	for (const auto &e: raid_members) {
 		if (e.name.empty()) {
 			continue;
 		}
