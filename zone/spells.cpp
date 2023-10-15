@@ -238,13 +238,16 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 
 	if (IsClient()) {
 		if (parse->PlayerHasQuestSub(EVENT_CAST_BEGIN)) {
+			Mob* spell_target = entity_list.GetMobID(target_id);
+			std::vector<std::any> args = { spell_target };
 			const auto& export_string = fmt::format(
-				"{} {} {}",
+				"{} {} {} {}",
 				spell_id,
 				GetID(),
-				GetCasterLevel(spell_id)
+				GetCasterLevel(spell_id),
+				target_id
 			);
-			if (parse->EventPlayer(EVENT_CAST_BEGIN, CastToClient(), export_string, 0) != 0) {
+			if (parse->EventPlayer(EVENT_CAST_BEGIN, CastToClient(), export_string, 0, &args) != 0) {
 				if (IsDiscipline(spell_id)) {
 					CastToClient()->SendDisciplineTimer(spells[spell_id].timer_id, 0);
 				}
@@ -256,23 +259,29 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 		}
 	} else if (IsNPC()) {
 		if (parse->HasQuestSub(GetNPCTypeID(), EVENT_CAST_BEGIN)) {
+			Mob* spell_target = entity_list.GetMobID(target_id);
+			std::vector<std::any> args = { spell_target };
 			const auto& export_string = fmt::format(
-				"{} {} {}",
+				"{} {} {} {}",
 				spell_id,
 				GetID(),
-				GetCasterLevel(spell_id)
+				GetCasterLevel(spell_id),
+				target_id
 			);
-			parse->EventNPC(EVENT_CAST_BEGIN, CastToNPC(), nullptr, export_string, 0);
+			parse->EventNPC(EVENT_CAST_BEGIN, CastToNPC(), nullptr, export_string, 0, &args);
 		}
 	} else if (IsBot()) {
 		if (parse->BotHasQuestSub(EVENT_CAST_BEGIN)) {
+			Mob* spell_target = entity_list.GetMobID(target_id);
+			std::vector<std::any> args = { spell_target };
 			const auto& export_string = fmt::format(
-				"{} {} {}",
+				"{} {} {} {}",
 				spell_id,
 				GetID(),
-				GetCasterLevel(spell_id)
+				GetCasterLevel(spell_id),
+				target_id
 			);
-			parse->EventBot(EVENT_CAST_BEGIN, CastToBot(), nullptr, export_string, 0);
+			parse->EventBot(EVENT_CAST_BEGIN, CastToBot(), nullptr, export_string, 0, &args);
 		}
 	}
 
@@ -1648,24 +1657,41 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 	// at this point the spell has successfully been cast
 	//
 
-	const auto& export_string = fmt::format(
-		"{} {} {}",
-		spell_id,
-		GetID(),
-		GetCasterLevel(spell_id)
-	);
-
 	if (IsClient()) {
 		if (parse->PlayerHasQuestSub(EVENT_CAST)) {
-			parse->EventPlayer(EVENT_CAST, CastToClient(), export_string, 0);
+			std::vector<std::any> args = { spell_target };
+			const auto& export_string = fmt::format(
+				"{} {} {} {}",
+				spell_id,
+				GetID(),
+				GetCasterLevel(spell_id),
+				target_id
+			);
+			parse->EventPlayer(EVENT_CAST, CastToClient(), export_string, 0, &args);
 		}
 	} else if (IsNPC()) {
 		if (parse->HasQuestSub(GetNPCTypeID(), EVENT_CAST)) {
-			parse->EventNPC(EVENT_CAST, CastToNPC(), nullptr, export_string, 0);
+			std::vector<std::any> args = { spell_target };
+			const auto& export_string = fmt::format(
+				"{} {} {} {}",
+				spell_id,
+				GetID(),
+				GetCasterLevel(spell_id),
+				target_id
+			);
+			parse->EventNPC(EVENT_CAST, CastToNPC(), nullptr, export_string, 0, &args);
 		}
 	} else if (IsBot()) {
 		if (parse->BotHasQuestSub(EVENT_CAST)) {
-			parse->EventBot(EVENT_CAST, CastToBot(), nullptr, export_string, 0);
+			std::vector<std::any> args = { spell_target };
+			const auto& export_string = fmt::format(
+				"{} {} {} {}",
+				spell_id,
+				GetID(),
+				GetCasterLevel(spell_id),
+				target_id
+			);
+			parse->EventBot(EVENT_CAST, CastToBot(), nullptr, export_string, 0, &args);
 		}
 	}
 
@@ -3664,10 +3690,14 @@ bool Mob::SpellOnTarget(
 	}
 
 	// select target
+	uint16 target_id = 0;
+
 	if (IsEffectInSpell(spell_id, SE_BindSight)) {
 		action->target = GetID();
+		target_id = GetID();
 	} else {
 		action->target = spelltar->GetID();
+		target_id = spelltar->GetID();
 	}
 
 	action->spell_level = action->level = caster_level;	// caster level, for animation only
@@ -3700,33 +3730,39 @@ bool Mob::SpellOnTarget(
 
 	if (spelltar->IsNPC()) {
 		if (parse->HasQuestSub(spelltar->GetNPCTypeID(), EVENT_CAST_ON)) {
+			std::vector<std::any> args = { spelltar };
 			const auto& export_string = fmt::format(
-				"{} {} {}",
+				"{} {} {} {}",
 				spell_id,
 				GetID(),
-				caster_level
+				caster_level,
+				target_id
 			);
-			parse->EventNPC(EVENT_CAST_ON, spelltar->CastToNPC(), this, export_string, 0);
+			parse->EventNPC(EVENT_CAST_ON, spelltar->CastToNPC(), this, export_string, 0, &args);
 		}
 	} else if (spelltar->IsClient()) {
 		if (parse->PlayerHasQuestSub(EVENT_CAST_ON)) {
+			std::vector<std::any> args = { spelltar };
 			const auto& export_string = fmt::format(
-				"{} {} {}",
+				"{} {} {} {}",
 				spell_id,
 				GetID(),
-				caster_level
+				caster_level,
+				target_id
 			);
-			parse->EventPlayer(EVENT_CAST_ON, spelltar->CastToClient(), export_string, 0);
+			parse->EventPlayer(EVENT_CAST_ON, spelltar->CastToClient(), export_string, 0, &args);
 		}
 	} else if (spelltar->IsBot()) {
 		if (parse->BotHasQuestSub(EVENT_CAST_ON)) {
+			std::vector<std::any> args = { spelltar };
 			const auto& export_string = fmt::format(
-				"{} {} {}",
+				"{} {} {} {}",
 				spell_id,
 				GetID(),
-				caster_level
+				caster_level,
+				target_id
 			);
-			parse->EventBot(EVENT_CAST_ON, spelltar->CastToBot(), this, export_string, 0);
+			parse->EventBot(EVENT_CAST_ON, spelltar->CastToBot(), this, export_string, 0, &args);
 		}
 	}
 
