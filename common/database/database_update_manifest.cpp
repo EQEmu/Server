@@ -4943,6 +4943,21 @@ ALTER TABLE `aa_ability` ADD COLUMN `auto_grant_enabled` TINYINT(4) NOT NULL DEF
 UPDATE `aa_ability` SET `auto_grant_enabled` = 1 WHERE `grant_only` = 0 AND `charges` = 0 AND `category` = -1;
 )"
 	},
+	ManifestEntry{
+		.version = 9237,
+		.description = "2023_10_15_import_13th_floor.sql",
+		.check = "SHOW COLUMNS FROM `items` LIKE 'bardeffect';",
+		.condition = "contains",
+		.match = "mediumint",
+		.sql = R"(
+ALTER TABLE `items`
+ MODIFY COLUMN `scriptfileid`        MEDIUMINT(6)     NOT NULL DEFAULT 0,
+ MODIFY COLUMN `powersourcecapacity` MEDIUMINT(7)     NOT NULL DEFAULT 0,
+ MODIFY COLUMN `augdistiller`        INT(11) UNSIGNED NOT NULL DEFAULT 0,
+ MODIFY COLUMN `scrollunk1`          INT(11) UNSIGNED NOT NULL DEFAULT 0,
+ MODIFY COLUMN `bardeffect`          MEDIUMINT(6)     NOT NULL DEFAULT 0;
+)"
+	},
 
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
