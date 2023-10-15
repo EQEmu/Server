@@ -1707,34 +1707,31 @@ bool Raid::LearnMembers()
 {
 	memset(members, 0, (sizeof(RaidMember) * MAX_RAID_MEMBERS));
 
-	const auto query = fmt::format(
-		"SELECT name, groupid, _class, level, "
-		"isgroupleader, israidleader, islooter, is_marker, is_assister, bot_id, note "
-		"FROM raid_members WHERE raidid = {} ORDER BY groupid",
-		GetID()
+	auto raid_members = RaidMembersRepository::GetWhere(
+			content_db,
+			fmt::format(
+					"raidid = {}",
+					GetID()
+			)
 	);
 
-	auto results = database.QueryDatabase(query);
-	if (!results.Success()) {
-		return false;
-	}
-
-	if (!results.RowCount()) {
+	if (raid_members.empty()) {
 		disbandCheck = true;
 		return false;
 	}
 
 	int i = 0;
-	for (auto row: results) {
-		if (!row[0]) {
+	for (auto &e: raid_members) {
+		if (e.name.empty()) {
 			continue;
 		}
 
 		members[i].member = nullptr;
-		strn0cpy(members[i].member_name, row[0], sizeof(members[i].member_name));
-//		strn0cpy(members[i].note, row[10], sizeof(members[i].note));
-		members[i].note = std::string(row[10]);
-		uint32 group_id = Strings::ToUnsignedInt(row[1]);
+		strn0cpy(members[i].member_name, e.name.c_str(), sizeof(members[i].member_name));
+		uint32 group_id = e.groupid;
+		if (!e.note.empty()) {
+			members[i].note = e.note;
+		}
 
 		if (group_id >= MAX_RAID_GROUPS) {
 			members[i].group_number = RAID_GROUPLESS;
@@ -1743,14 +1740,14 @@ bool Raid::LearnMembers()
 			members[i].group_number = group_id;
 		}
 
-		members[i]._class          = Strings::ToUnsignedInt(row[2]);
-		members[i].level           = Strings::ToUnsignedInt(row[3]);
-		members[i].is_group_leader = Strings::ToBool(row[4]);
-		members[i].is_raid_leader  = Strings::ToBool(row[5]);
-		members[i].is_looter       = Strings::ToBool(row[6]);
-		members[i].main_marker     = Strings::ToUnsignedInt(row[7]);
-		members[i].main_assister   = Strings::ToUnsignedInt(row[8]);
-		members[i].is_bot          = Strings::ToBool(row[9]) > 0;
+		members[i]._class          = e._class;
+		members[i].level           = e.level;
+		members[i].is_group_leader = e.isgroupleader;
+		members[i].is_raid_leader  = e.israidleader;
+		members[i].is_looter       = e.islooter;
+		members[i].main_marker     = e.is_marker;
+		members[i].main_assister   = e.is_assister;
+		members[i].is_bot          = e.bot_id > 0;
 		++i;
 	}
 	return true;
