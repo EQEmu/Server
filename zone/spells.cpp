@@ -4199,9 +4199,26 @@ bool Mob::SpellOnTarget(
 				spelltar->SetHateAmountOnEnt(this, std::max(newhate, static_cast<int64>(1)));
 			}
 		} else if (IsBeneficialSpell(spell_id) && !IsSummonPCSpell(spell_id)) {
+			if (this != spelltar && IsClient()){
+				if (spelltar->IsClient()) {
+					CastToClient()->UpdateRestTimer(spelltar->CastToClient()->GetRestTimer());
+				} else if (spelltar->IsPet()) {
+					auto* owner = spelltar->GetOwner();
+					if (owner && owner != this && owner->IsClient()) {
+						CastToClient()->UpdateRestTimer(owner->CastToClient()->GetRestTimer());
+					}
+				}
+			}
+
 			entity_list.AddHealAggro(
-					spelltar, this,
-					CheckHealAggroAmount(spell_id, spelltar, (spelltar->GetMaxHP() - spelltar->GetHP())));
+				spelltar,
+				this,
+				CheckHealAggroAmount(
+					spell_id,
+					spelltar,
+					(spelltar->GetMaxHP() - spelltar->GetHP())
+				)
+			);
 		}
 	}
 
