@@ -467,7 +467,7 @@ Bot::~Bot() {
 	entity_list.RemoveBot(GetID());
 
 	if (GetGroup()) {
-		GetGroup()->DelMember(this);
+		GetGroup()->MemberZoned(this);
 	}
 
 	if (GetRaid()) {
