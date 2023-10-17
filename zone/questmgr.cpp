@@ -2650,6 +2650,8 @@ bool QuestManager::createBot(const char *name, const char *lastname, uint8 level
 				).c_str()
 			);
 		} else {
+			new_bot->AddBotStartingItems(race, botclass);
+
 			initiator->Message(
 				Chat::White,
 				fmt::format(

@@ -9041,6 +9041,8 @@ uint32 helper_bot_create(Client *bot_owner, std::string bot_name, uint8 bot_clas
 		parse->EventPlayer(EVENT_BOT_CREATE, bot_owner, export_string, 0);
 	}
 
+	my_bot->AddBotStartingItems(bot_race, bot_class);
+
 	safe_delete(my_bot);
 
 	return bot_id;
