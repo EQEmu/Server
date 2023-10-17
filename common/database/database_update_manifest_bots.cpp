@@ -81,7 +81,7 @@ CREATE TABLE `bot_starting_items`  (
 `content_flags` varchar(100) CHARACTER SET latin1 COLLATE latin1_swedish_ci NULL DEFAULT NULL,
 `content_flags_disabled` varchar(100) CHARACTER SET latin1 COLLATE latin1_swedish_ci NULL DEFAULT NULL,
 PRIMARY KEY (`id`)
-) ENGINE = MyISAM CHARACTER SET = latin1 COLLATE = latin1_swedish_ci;
+) ENGINE = InnoDB CHARACTER SET = latin1 COLLATE = latin1_swedish_ci;
 )"
 	}
 // -- template; copy/paste this when you need to create a new entry
