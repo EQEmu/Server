@@ -22,8 +22,11 @@
 #include "doors.h"
 #include "quest_parser_collection.h"
 #include "lua_parser.h"
+#include "../common/repositories/bot_inventories_repository.h"
 #include "../common/repositories/bot_spell_settings_repository.h"
+#include "../common/repositories/bot_starting_items_repository.h"
 #include "../common/data_verification.h"
+#include "../common/repositories/criteria/content_filter_criteria.h"
 
 // This constructor is used during the bot create command
 Bot::Bot(NPCType *npcTypeData, Client* botOwner) : NPC(npcTypeData, nullptr, glm::vec4(), Ground, false), rest_timer(1), ping_timer(1) {
@@ -8725,6 +8728,50 @@ bool Bot::CheckSpawnConditions(Client* c) {
 	}
 
 	return true;
+}
+
+void Bot::AddBotStartingItems(uint16 race_id, uint8 class_id)
+{
+	if (!IsPlayerRace(race_id) || !IsPlayerClass(class_id)) {
+		return;
+	}
+
+	const uint16 race_bitmask  = GetPlayerRaceBit(race_id);
+	const uint16 class_bitmask = GetPlayerClassBit(class_id);
+
+	const auto& l = BotStartingItemsRepository::GetWhere(
+		content_db,
+		fmt::format(
+			"(races & {} OR races = 0) AND "
+			"(classes & {} OR classes = 0) {}",
+			race_bitmask,
+			class_bitmask,
+			ContentFilterCriteria::apply()
+		)
+	);
+
+	if (l.empty()) {
+		return;
+	}
+
+	std::vector<BotInventoriesRepository::BotInventories> v;
+
+	for (const auto& e : l) {
+		if (
+			CanClassEquipItem(e.item_id) &&
+			(CanRaceEquipItem(e.item_id) || RuleB(Bots, AllowBotEquipAnyRaceGear))
+		) {
+			auto i = BotInventoriesRepository::NewEntity();
+			i.bot_id       = GetBotID();
+			i.slot_id      = e.slot_id;
+			i.item_id      = e.item_id;
+			i.inst_charges = e.item_charges;
+
+			v.emplace_back(i);
+		}
+	}
+
+	BotInventoriesRepository::InsertMany(content_db, v);
 }
 
 uint8 Bot::spell_casting_chances[SPELL_TYPE_COUNT][PLAYER_CLASS_COUNT][EQ::constants::STANCE_TYPE_COUNT][cntHSND] = { 0 };

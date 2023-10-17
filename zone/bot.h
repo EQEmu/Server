@@ -460,6 +460,8 @@ public:
 		uint8 gender
 	);
 
+	void AddBotStartingItems(uint16 race_id, uint8 class_id);
+
 	// Static Bot Group Methods
 	static bool AddBotToGroup(Bot* bot, Group* group);
 	static bool RemoveBotFromGroup(Bot* bot, Group* group);

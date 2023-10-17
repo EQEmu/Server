@@ -61,6 +61,29 @@ DROP TABLE IF EXISTS `bot_group_members`;
 SET FOREIGN_KEY_CHECKS = 1;
 )",
 	},
+	ManifestEntry{
+		.version = 9040,
+		.description = "2023_11_16_bot_starting_items.sql",
+		.check = "SHOW TABLES LIKE 'bot_starting_items'",
+		.condition = "",
+		.match = "empty",
+		.sql = R"(
+CREATE TABLE `bot_starting_items`  (
+`id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+`races` int(11) UNSIGNED NOT NULL DEFAULT 0,
+`classes` int(11) UNSIGNED NOT NULL DEFAULT 0,
+`item_id` int(11) UNSIGNED NOT NULL DEFAULT 0,
+`item_charges` tinyint(3) UNSIGNED NOT NULL DEFAULT 1,
+`min_status` tinyint(3) UNSIGNED NOT NULL DEFAULT 0,
+`slot_id` mediumint(9) NOT NULL DEFAULT -1,
+`min_expansion` tinyint(4) NOT NULL DEFAULT -1,
+`max_expansion` tinyint(4) NOT NULL DEFAULT -1,
+`content_flags` varchar(100) CHARACTER SET latin1 COLLATE latin1_swedish_ci NULL DEFAULT NULL,
+`content_flags_disabled` varchar(100) CHARACTER SET latin1 COLLATE latin1_swedish_ci NULL DEFAULT NULL,
+PRIMARY KEY (`id`)
+) ENGINE = InnoDB CHARACTER SET = latin1 COLLATE = latin1_swedish_ci;
+)"
+	}
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
 //		.version = 9228,
