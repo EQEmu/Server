@@ -8756,7 +8756,7 @@ void Bot::AddBotStartingItems(uint16 race_id, uint8 class_id)
 
 	std::vector<BotInventoriesRepository::BotInventories> v;
 
-	for (const auto &e : l) {
+	for (const auto& e : l) {
 		if (
 			CanClassEquipItem(e.item_id) &&
 			(CanRaceEquipItem(e.item_id) || RuleB(Bots, AllowBotEquipAnyRaceGear))
