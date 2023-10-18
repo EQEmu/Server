@@ -2197,12 +2197,21 @@ void Zone::LoadZoneBlockedSpells()
 		if (zone_total_blocked_spells > 0) {
 			blocked_spells = new ZoneSpellsBlocked[zone_total_blocked_spells];
 			if (!content_db.LoadBlockedSpells(zone_total_blocked_spells, blocked_spells, GetZoneID())) {
-				LogError(" Failed to load blocked spells");
+				LogError(
+					"Failed to load blocked spells for {} ({}).",
+					zone_store.GetZoneName(GetZoneID(), true),
+					GetZoneID()
+				);
 				ClearBlockedSpells();
 			}
 		}
 
-		LogInfo("Loaded [{}] blocked spells(s)", Strings::Commify(zone_total_blocked_spells));
+		LogInfo(
+			"Loaded [{}] blocked spells(s) for {} ({}).",
+			Strings::Commify(zone_total_blocked_spells),
+			zone_store.GetZoneName(GetZoneID(), true),
+			GetZoneID()
+		);
 	}
 }
 
