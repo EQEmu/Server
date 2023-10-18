@@ -11,6 +11,7 @@
 #include "zone.h"
 #include "zonedb.h"
 #include "aura.h"
+#include "../common/repositories/blocked_spells_repository.h"
 #include "../common/repositories/character_tribute_repository.h"
 #include "../common/repositories/character_disciplines_repository.h"
 #include "../common/repositories/npc_types_repository.h"
@@ -19,6 +20,7 @@
 #include "../common/repositories/character_pet_inventory_repository.h"
 #include "../common/repositories/character_pet_info_repository.h"
 #include "../common/repositories/character_buffs_repository.h"
+#include "../common/repositories/criteria/content_filter_criteria.h"
 
 #include <ctime>
 #include <iostream>
@@ -2845,50 +2847,55 @@ uint8 ZoneDatabase::RaidGroupCount(uint32 raidid, uint32 groupid) {
 	return Strings::ToInt(row[0]);
  }
 
-int32 ZoneDatabase::GetBlockedSpellsCount(uint32 zoneid)
+int64 ZoneDatabase::GetBlockedSpellsCount(uint32 zone_id)
 {
-	std::string query = StringFormat("SELECT count(*) FROM blocked_spells WHERE zoneid = %d", zoneid);
-	auto results = QueryDatabase(query);
-	if (!results.Success()) {
-		return -1;
-	}
-
-	if (results.RowCount() == 0)
-        return -1;
-
-    auto& row = results.begin();
-
-	return Strings::ToInt(row[0]);
+	return BlockedSpellsRepository::Count(
+		database,
+		fmt::format(
+			"zoneid = {} {}",
+			zone_id,
+			ContentFilterCriteria::apply()
+		)
+	);
 }
 
-bool ZoneDatabase::LoadBlockedSpells(int32 blockedSpellsCount, ZoneSpellsBlocked* into, uint32 zoneid)
+bool ZoneDatabase::LoadBlockedSpells(int64 blocked_spells_count, ZoneSpellsBlocked* into, uint32 zone_id)
 {
-	LogInfo("Loading Blocked Spells from database");
+	LogInfo("Loading Blocked Spells from database for {} ({}).", zone_store.GetZoneName(zone_id, true), zone_id);
 
-	std::string query = StringFormat("SELECT id, spellid, type, x, y, z, x_diff, y_diff, z_diff, message "
-                                    "FROM blocked_spells WHERE zoneid = %d ORDER BY id ASC", zoneid);
-    auto results = QueryDatabase(query);
-    if (!results.Success()) {
-		return false;
-    }
+	const auto& l = BlockedSpellsRepository::GetWhere(
+		database,
+		fmt::format(
+			"zoneid = {} {} ORDER BY id ASC",
+			zone_id,
+			ContentFilterCriteria::apply()
+		)
+	);
 
-    if (results.RowCount() == 0)
+	if (l.empty()) {
 		return true;
+	}
 
-    int32 index = 0;
-    for(auto& row = results.begin(); row != results.end(); ++row, ++index) {
-        if(index >= blockedSpellsCount) {
-            std::cerr << "Error, Blocked Spells Count of " << blockedSpellsCount << " exceeded." << std::endl;
-            break;
-        }
+	int64 i = 0;
 
-        memset(&into[index], 0, sizeof(ZoneSpellsBlocked));
-        into[index].spellid = Strings::ToInt(row[1]);
-        into[index].type = Strings::ToInt(row[2]);
-        into[index].m_Location = glm::vec3(Strings::ToFloat(row[3]), Strings::ToFloat(row[4]), Strings::ToFloat(row[5]));
-        into[index].m_Difference = glm::vec3(Strings::ToFloat(row[6]), Strings::ToFloat(row[7]), Strings::ToFloat(row[8]));
-        strn0cpy(into[index].message, row[9], 255);
-    }
+	for (const auto& e : l) {
+		if (i >= blocked_spells_count) {
+			LogError(
+				"Blocked spells count of {} exceeded for {} ({}).",
+				blocked_spells_count,
+				zone_store.GetZoneName(zone_id, true),
+				zone_id
+			);
+			break;
+		}
+
+		memset(&into[i], 0, sizeof(ZoneSpellsBlocked));
+		into[i].spellid      = e.spellid;
+		into[i].type         = e.type;
+		into[i].m_Location   = glm::vec3(e.x, e.y, e.z);
+		into[i].m_Difference = glm::vec3(e.x_diff, e.y_diff, e.z_diff);
+		strn0cpy(into[i].message, e.message.c_str(), sizeof(into[i].message));
+	}
 
 	return true;
 }
