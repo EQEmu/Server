@@ -4958,6 +4958,17 @@ ALTER TABLE `items`
  MODIFY COLUMN `bardeffect`          MEDIUMINT(6)     NOT NULL DEFAULT 0;
 )"
 	},
+	ManifestEntry{
+		.version = 9238,
+		.description = "2023_10_18_tradeskill_add_learned_by_item_id.sql",
+		.check = "SHOW COLUMNS FROM `tradeskill_recipe` LIKE 'learned_by_item_id'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `tradeskill_recipe`
+	ADD COLUMN `learned_by_item_id` int(11) NOT NULL DEFAULT 0 AFTER `must_learn`;
+)"
+	},
 
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
