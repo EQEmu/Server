@@ -1,3 +1,21 @@
+## [22.29.0] - 10/20/2023
+
+### Feature
+
+* Add Expansion and Content Flag support to Blocked Spells ([#3638](https://github.com/EQEmu/Server/pull/3638)) @Kinglykrab 2023-10-20
+
+### Fixes
+
+* Fix crash when checking Bot Group/Raid membership ([#3641](https://github.com/EQEmu/Server/pull/3641)) @Aeadoin 2023-10-20
+
+### Perl
+
+* Static linker fix on Linux ([#3642](https://github.com/EQEmu/Server/pull/3642)) @Akkadius 2023-10-20
+
+### Rules
+
+* Add rule to configure max number of procs per round Combat:MaxProcs ([#3640](https://github.com/EQEmu/Server/pull/3640)) @Akkadius 2023-10-20
+
 ## [22.28.1] - 10/20/2023
 
 ### Build
