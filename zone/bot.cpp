@@ -3336,7 +3336,8 @@ bool Bot::Spawn(Client* botCharacterOwner) {
 
 		if (auto raid = entity_list.GetRaidByBotName(GetName())) {
 			// Safety Check to confirm we have a valid raid
-			if (!raid->IsRaidMember(GetBotOwner()->GetName())) {
+			auto owner = GetBotOwner();
+			if (owner && !raid->IsRaidMember(owner->GetCleanName())) {
 				Bot::RemoveBotFromRaid(this);
 			} else {
 				SetRaidGrouped(true);
@@ -3346,7 +3347,8 @@ bool Bot::Spawn(Client* botCharacterOwner) {
 		}
 		else if (auto group = entity_list.GetGroupByMobName(GetName())) {
 			// Safety Check to confirm we have a valid group
-			if (!group->IsGroupMember(GetBotOwner()->GetName())) {
+			auto owner = GetBotOwner();
+			if (owner && !group->IsGroupMember(owner->GetCleanName())) {
 				Bot::RemoveBotFromGroup(this, group);
 			} else {
 				SetGrouped(true);
