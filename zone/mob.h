@@ -1459,6 +1459,9 @@ protected:
 
 	Timer m_z_clip_check_timer;
 
+	// dynamically set via memory on constructor
+	int8 m_max_procs = 0;
+
 	virtual bool AI_EngagedCastCheck() { return(false); }
 	virtual bool AI_PursueCastCheck() { return(false); }
 	virtual bool AI_IdleCastCheck() { return(false); }
@@ -1600,7 +1603,7 @@ protected:
 	int16 GetSympatheticSpellProcRate(uint16 spell_id);
 	uint16 GetSympatheticSpellProcID(uint16 spell_id);
 
-	enum {MAX_PROCS = 4};
+	enum {MAX_PROCS = 10};
 	tProc PermaProcs[MAX_PROCS];
 	tProc SpellProcs[MAX_PROCS];
 	tProc DefensiveProcs[MAX_PROCS];
