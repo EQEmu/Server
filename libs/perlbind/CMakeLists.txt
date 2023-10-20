@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.7)
 
 project(perlbind LANGUAGES CXX)
 
-set(CMAKE_FIND_LIBRARY_SUFFIXES ".lib" ".so" ".a")
+set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
 
 IF (EQEMU_BUILD_STATIC)
   SET(BUILD_SHARED_LIBS OFF)
