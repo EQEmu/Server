@@ -11,6 +11,12 @@ ENDIF(EQEMU_BUILD_STATIC)
 
 find_package(PerlLibs)
 
+IF (UNIX)
+  SET(PERL_LIBRARY_ENABLED ON)
+  SET(PERL_LIBRARY_LIBS ${PERL_LIBRARY})
+  SET(PERL_LIBRARY_INCLUDE ${PERL_INCLUDE_PATH})
+ENDIF (UNIX)
+
 set(PERLBIND_HEADERS
   include/perlbind/array.h
   include/perlbind/forward.h
