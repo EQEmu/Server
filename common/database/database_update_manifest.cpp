@@ -4973,8 +4973,8 @@ ALTER TABLE `tradeskill_recipe`
 		.version = 9239,
 		.description = "2023_10_18_blocked_spells_expansions_content_flags.sql",
 		.check = "SHOW COLUMNS FROM `blocked_spells` LIKE 'min_expansion'",
-		.condition = "",
-		.match = "empty",
+		.condition = "empty",
+		.match = "",
 		.sql = R"(
 ALTER TABLE `blocked_spells`
 ADD COLUMN `min_expansion` tinyint(4) NOT NULL DEFAULT -1 AFTER `description`,
