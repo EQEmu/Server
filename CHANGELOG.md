@@ -9,6 +9,7 @@
 * Fix issue with subcommand settings not working ([#3643](https://github.com/EQEmu/Server/pull/3643)) @Kinglykrab 2023-10-21
 * Hotfix command without hotfix name ([#3644](https://github.com/EQEmu/Server/pull/3644)) @joligario 2023-10-21
 * Verifying mail keys when none exist ([#3645](https://github.com/EQEmu/Server/pull/3645)) @joligario 2023-10-21
+
 ## [22.29.0] - 10/20/2023
 
 ### Feature
