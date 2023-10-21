@@ -474,19 +474,6 @@ int command_realdispatch(Client *c, std::string message, bool ignore_status)
 		}
 	}
 
-	c->Message(
-		Chat::White,
-		fmt::format(
-			"{} Argument{} | {} | Is{} Subcommand | Setting {}Found | {} Use Subcommand",
-			arguments,
-			arguments != 1 ? "s" : "",
-			current_command->description,
-			is_subcommand ? "" : " Not",
-			found_subcommand_setting ? "" : "Not ",
-			can_use_subcommand ? "Can" : "Cannot"
-		).c_str()
-	);
-
 	if (!ignore_status) {
 		if (!is_subcommand && c->Admin() < current_command->admin) {
 			c->Message(Chat::White, "Your status is not high enough to use this command.");
