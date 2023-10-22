@@ -205,6 +205,11 @@ PerlembParser::~PerlembParser()
 	safe_delete(perl);
 }
 
+void PerlembParser::Init()
+{
+	ReloadQuests();
+}
+
 void PerlembParser::ReloadQuests()
 {
 	try {
