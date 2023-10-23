@@ -710,7 +710,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				snprintf(effect_desc, _EDLEN, "Faction Mod: %+i", effect_value);
 #endif
 				// EverHood
-				if(caster && GetPrimaryFaction()>0) {
+				if(caster && !IsPet() && GetPrimaryFaction()>0) {
 					caster->AddFactionBonus(GetPrimaryFaction(),effect_value);
 				}
 				break;
