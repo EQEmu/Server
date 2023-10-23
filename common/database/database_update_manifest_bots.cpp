@@ -65,8 +65,8 @@ SET FOREIGN_KEY_CHECKS = 1;
 		.version = 9040,
 		.description = "2023_11_16_bot_starting_items.sql",
 		.check = "SHOW TABLES LIKE 'bot_starting_items'",
-		.condition = "",
-		.match = "empty",
+		.condition = "empty",
+		.match = "",
 		.sql = R"(
 CREATE TABLE `bot_starting_items`  (
 `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,
