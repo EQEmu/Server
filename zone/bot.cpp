@@ -8773,7 +8773,9 @@ void Bot::AddBotStartingItems(uint16 race_id, uint8 class_id)
 		}
 	}
 
-	BotInventoriesRepository::InsertMany(content_db, v);
+	if (!v.empty()) {
+		BotInventoriesRepository::InsertMany(content_db, v);
+	}
 }
 
 uint8 Bot::spell_casting_chances[SPELL_TYPE_COUNT][PLAYER_CLASS_COUNT][EQ::constants::STANCE_TYPE_COUNT][cntHSND] = { 0 };
