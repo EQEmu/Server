@@ -282,9 +282,6 @@ int Embperl::dosub(const char * subname, const std::vector<std::string> * args, 
 			if (File::Exists("/opt/eqemu-perl/bin/perl")) {
 				perl = "/opt/eqemu-perl/bin/perl";
 			}
-			else {
-				perl = "perl";
-			}
 
 			std::string syntax_error = Process::execute(
 				fmt::format("{} -c {} 2>&1", perl, filename)
