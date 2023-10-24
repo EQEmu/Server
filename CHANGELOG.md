@@ -1,3 +1,26 @@
+## [22.30.0] - 10/23/2023
+
+### API
+
+* Implement Zone Sidecar ([#3635](https://github.com/EQEmu/Server/pull/3635)) @Akkadius 2023-10-24
+
+### Commands
+
+* Move #suspend from content database ([#3651](https://github.com/EQEmu/Server/pull/3651)) @joligario 2023-10-24
+
+### Fixes
+
+* Fix Bot Starting Items SQL ([#3649](https://github.com/EQEmu/Server/pull/3649)) @Kinglykrab 2023-10-23
+
+### Perl
+
+* Implement eqemu-perl for Linux ([#3652](https://github.com/EQEmu/Server/pull/3652)) @Akkadius 2023-10-24
+* Reload perl quests on zone bootup ([#3648](https://github.com/EQEmu/Server/pull/3648)) @hgtw 2023-10-24
+
+### Pets
+
+* Disallow effect of alliance line when cast on pets. ([#3650](https://github.com/EQEmu/Server/pull/3650)) @noudess 2023-10-24
+
 ## [22.29.1] - 10/21/2023
 
 ### DB
