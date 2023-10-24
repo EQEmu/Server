@@ -2,6 +2,7 @@
 #define EQEMU_ACCOUNT_MANAGEMENT_H
 
 #include "iostream"
+#include <tuple>
 #include "../common/types.h"
 
 class AccountManagement {
@@ -65,7 +66,7 @@ public:
 	 * @param in_account_password
 	 * @return
 	 */
-	static uint32 CheckExternalLoginserverUserCredentials(
+	static std::tuple<uint32, std::string> CheckExternalLoginserverUserCredentials(
 		const std::string &in_account_username,
 		const std::string &in_account_password
 	);

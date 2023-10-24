@@ -280,7 +280,7 @@ namespace LoginserverWebserver {
 					return;
 				}
 
-				uint32 account_id = AccountManagement::CheckExternalLoginserverUserCredentials(
+				auto [account_id, key] = AccountManagement::CheckExternalLoginserverUserCredentials(
 					username,
 					password
 				);
@@ -288,6 +288,7 @@ namespace LoginserverWebserver {
 				if (account_id > 0) {
 					response["message"]            = "Credentials valid!";
 					response["data"]["account_id"] = account_id;
+					response["data"]["key"] = key;
 				}
 				else {
 					response["error"] = "Credentials invalid!";

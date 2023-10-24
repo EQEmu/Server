@@ -267,15 +267,15 @@ constexpr int REQUEST_TIMEOUT_MS = 1500;
  * @param in_account_password
  * @return
  */
-uint32 AccountManagement::CheckExternalLoginserverUserCredentials(
+std::tuple<uint32, std::string> AccountManagement::CheckExternalLoginserverUserCredentials(
 	const std::string &in_account_username,
 	const std::string &in_account_password
 )
 {
 	auto res = task_runner.Enqueue(
-		[&]() -> uint32 {
+		[&]() -> std::tuple<uint32, std::string> {
 			bool   running = true;
-			uint32 ret     = 0;
+			std::tuple<uint32, std::string> ret = { 0, "" };
 
 			EQ::Net::DaybreakConnectionManager           mgr;
 			std::shared_ptr<EQ::Net::DaybreakConnection> c;
@@ -346,9 +346,9 @@ uint32 AccountManagement::CheckExternalLoginserverUserCredentials(
 							EQ::Net::StaticPacket sp(&decrypted[0], encrypt_size);
 							auto                  response_error = sp.GetUInt16(1);
 							auto                  m_dbid         = sp.GetUInt32(8);
-
+							auto                  key = sp.GetCString(12);
 							{
-								ret     = (response_error <= 101 ? m_dbid : 0);
+								ret = { (response_error <= 101 ? m_dbid : 0), std::string(key)};
 								running = false;
 							}
 							break;
@@ -365,7 +365,7 @@ uint32 AccountManagement::CheckExternalLoginserverUserCredentials(
 				EQ::Net::DNSLookup(
 					address, port, false, [&](const std::string &addr) {
 						if (addr.empty()) {
-							ret     = 0;
+							ret = { 0, "" };
 							running = false;
 						}
 
