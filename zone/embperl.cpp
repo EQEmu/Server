@@ -210,7 +210,7 @@ void Embperl::init_eval_file(void)
 			"} else {"
 			// we 'my' $filename,$mtime,$package,$sub to prevent them from changing our state up here.
 			"	eval(\"package $package; my(\\$filename,\\$mtime,\\$package,\\$sub); \\$isloaded = 1; require './$filename'; \");"
-			//  " print $@ if $@;"
+			  " print $@ if $@;"
 /*				"local *FH;open FH, $filename or die \"open '$filename' $!\";"
 				"local($/) = undef;my $sub = <FH>;close FH;"
 				"my $eval = qq{package $package; sub handler { $sub; }};"
@@ -277,8 +277,17 @@ int Embperl::dosub(const char * subname, const std::vector<std::string> * args, 
 		std::string sub = subname;
 		if (sub == "main::eval_file" && !filename.empty() && File::Exists(filename)) {
 			BenchTimer benchmark;
+
+			std::string perl = "perl";
+			if (File::Exists("/opt/eqemu-perl/bin/perl")) {
+				perl = "/opt/eqemu-perl/bin/perl";
+			}
+			else {
+				perl = "perl";
+			}
+
 			std::string syntax_error = Process::execute(
-				fmt::format("perl -c {} 2>&1", filename)
+				fmt::format("{} -c {} 2>&1", perl, filename)
 			);
 			LogQuests("Perl eval [{}] took [{}]", filename, benchmark.elapsed());
 			syntax_error = Strings::Trim(syntax_error);
