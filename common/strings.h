@@ -185,7 +185,6 @@ public:
 		value = strtod(tmp_str.data(), nullptr);
 		return res;
 	}
-
 };
 
 const std::string StringFormat(const char *format, ...);

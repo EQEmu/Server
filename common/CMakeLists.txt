@@ -70,6 +70,7 @@ SET(common_sources
     perl_eqdb.cpp
     perl_eqdb_res.cpp
     process/process.cpp
+    process.cpp
     proc_launcher.cpp
     profanity_manager.cpp
     ptimer.cpp
@@ -90,6 +91,7 @@ SET(common_sources
     timer.cpp
     unix.cpp
     platform.cpp
+    json/json.hpp
     json/jsoncpp.cpp
     zone_store.cpp
     net/console_server.cpp
@@ -583,6 +585,7 @@ SET(common_headers
     path_manager.cpp
     platform.h
     process/process.h
+    process.h
     proc_launcher.h
     profanity_manager.h
     profiler.h
