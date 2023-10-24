@@ -247,7 +247,7 @@ namespace LoginserverCommandHandler {
 
 		EQEmuCommand::ValidateCmdInput(arguments, options, cmd, argc, argv);
 
-		auto res = AccountManagement::CheckExternalLoginserverUserCredentials(
+		auto [res, _] = AccountManagement::CheckExternalLoginserverUserCredentials(
 			cmd(2).str(),
 			cmd(3).str()
 		);

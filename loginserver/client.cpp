@@ -346,7 +346,7 @@ void Client::AttemptLoginAccountCreation(
 		}
 
 
-		uint32 account_id = AccountManagement::CheckExternalLoginserverUserCredentials(
+		auto [account_id, _] = AccountManagement::CheckExternalLoginserverUserCredentials(
 			user,
 			pass
 		);
