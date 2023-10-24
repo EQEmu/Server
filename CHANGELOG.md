@@ -1,3 +1,9 @@
+## [22.30.1] - 10/24/2023
+
+### Fixes
+
+* Fix empty InsertMany in bot starting items. ([#3653](https://github.com/EQEmu/Server/pull/3653)) @Kinglykrab 2023-10-24
+
 ## [22.30.0] - 10/23/2023
 
 ### API
