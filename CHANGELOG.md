@@ -1,3 +1,9 @@
+## [22.30.2] - 10/26/2023
+
+### Fixes
+
+Revert Perl regression in #3648 causing scripts to not reliably initialize on zone bootup. @Akkadius 2023-10-26
+
 ## [22.30.1] - 10/24/2023
 
 ### Fixes
