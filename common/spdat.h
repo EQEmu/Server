@@ -171,6 +171,37 @@
 #define SPELL_ILLUSION_MALE 1732
 #define SPELL_UNSUMMON_SELF 892
 #define SPELL_ANCIENT_LIFEBANE 2115
+#define SPELL_GMHP25K 6817
+#define SPELL_GMHP50K 6818
+#define SPELL_GMHP100K 6819
+#define SPELL_GMHP225K 6820
+#define SPELL_GMHP475K 6821
+#define SPELL_GMHP925K 6822
+#define SPELL_GMHP2M 6823
+#define SPELL_GMHP3M 6824
+#define SPELL_GMHP5M 39851
+#define SPELL_GUIDE_ACTING_ONE 778
+#define SPELL_GUIDE_ALLIANCE_ONE 810
+#define SPELL_GUIDE_CANCEL_MAGIC_ONE 811
+#define SPELL_GUIDE_JOURNEY_ONE 813
+#define SPELL_GUIDE_VISION_ONE 814
+#define SPELL_GUIDE_HEALTH_ONE 815
+#define SPELL_GUIDE_INVULNERABILITY_ONE 816
+#define SPELL_GUIDE_BOLT_ONE 817
+#define SPELL_GUIDE_MEMORY_BLUR_ONE 818
+#define SPELL_GUIDE_ACTING_TWO 1209
+#define SPELL_GUIDE_CANCEL_MAGIC_TWO 1211
+#define SPELL_GUIDE_JOURNEY_TWO 1212
+#define SPELL_GUIDE_VISION_TWO 1213
+#define SPELL_GUIDE_HEALTH_TWO 1214
+#define SPELL_GUIDE_INVULNERABILITY_TWO 1215
+#define SPELL_GUIDE_BOLT_TWO 1216
+#define SPELL_GUIDE_MEMORY_BLUR_TWO 1217
+#define SPELL_GUIDE_ALLIANCE_TWO 1219
+#define SPELL_GUIDE_EVACUATION 3921
+#define SPELL_GUIDE_LEVITATION 39852
+#define SPELL_GUIDE_SPELL_HASTE 39853
+#define SPELL_GUIDE_HASTE 39854
 
 //spellgroup ids
 #define SPELLGROUP_FRENZIED_BURNOUT 2754
@@ -201,8 +232,22 @@
 #define INSTRUMENT_LUTE 13011
 #define INSTRUMENT_HORN 13012
 
+//option types for the rule Spells:ResurrectionEffectBlock
+#define RES_EFFECTS_CANNOT_STACK -1
+#define NO_RES_EFFECTS_BLOCK 0
+#define RES_EFFECTS_BLOCK 1
+#define RES_EFFECTS_BLOCK_WITH_BUFFS 2
+#define MOVE_NEW_SLOT 2
 
-const int Z_AGGRO=10;
+#define PARTIAL_DEATH_SAVE 1
+#define FULL_DEATH_SAVE 2
+
+#define MAX_FAST_HEAL_CASTING_TIME 2000
+#define MAX_VERY_FAST_HEAL_CASTING_TIME 1000
+
+#define DETRIMENTAL_EFFECT 0
+#define BENEFICIAL_EFFECT 1
+#define BENEFICIAL_EFFECT_GROUP_ONLY 2
 
 const uint32 MobAISpellRange=100; // max range of buffs
 
@@ -1160,7 +1205,7 @@ typedef enum {
 #define SE_LimitUseMin					422 // implemented, @Ff Minium amount of numhits for a spell to be focused, base: numhit amt
 #define SE_LimitUseType					423 // implemented,	@Ff Focus will only affect if has this numhits type, base: numhit type
 #define SE_GravityEffect				424 // implemented - Pulls/pushes you toward/away the mob at a set pace
-//#define SE_Display					425 // *not implemented - Illusion: Flying Dragon(21626)
+#define SE_Display						425 // *not implemented - Illusion: Flying Dragon(21626)
 #define SE_IncreaseExtTargetWindow		426 // *not implmented[AA] - increases the capacity of your extended target window
 #define SE_SkillProcAttempt				427 // implemented - chance to proc when using a skill(ie taunt)
 #define SE_LimitToSkill					428 // implemented, @Procs, limits what combat skills will effect a skill proc, base: skill value, limit: none, max: none
@@ -1443,7 +1488,7 @@ extern int32 SPDAT_RECORDS;
 bool IsTargetableAESpell(uint16 spell_id);
 bool IsSacrificeSpell(uint16 spell_id);
 bool IsLifetapSpell(uint16 spell_id);
-bool IsMezSpell(uint16 spell_id);
+bool IsMesmerizeSpell(uint16 spell_id);
 bool IsStunSpell(uint16 spell_id);
 bool IsSlowSpell(uint16 spell_id);
 bool IsHasteSpell(uint16 spell_id);
@@ -1452,22 +1497,23 @@ bool IsPercentalHealSpell(uint16 spell_id);
 bool IsGroupOnlySpell(uint16 spell_id);
 bool IsBeneficialSpell(uint16 spell_id);
 bool IsDetrimentalSpell(uint16 spell_id);
-bool IsInvisSpell(uint16 spell_id);
+bool IsInvisibleSpell(uint16 spell_id);
 bool IsInvulnerabilitySpell(uint16 spell_id);
-bool IsCHDurationSpell(uint16 spell_id);
+bool IsCompleteHealDurationSpell(uint16 spell_id);
 bool IsPoisonCounterSpell(uint16 spell_id);
 bool IsDiseaseCounterSpell(uint16 spell_id);
 bool IsSummonItemSpell(uint16 spell_id);
 bool IsSummonSkeletonSpell(uint16 spell_id);
 bool IsSummonPetSpell(uint16 spell_id);
 bool IsSummonPCSpell(uint16 spell_id);
+bool IsPetSpell(uint16 spell_id);
 bool IsCharmSpell(uint16 spell_id);
 bool IsBlindSpell(uint16 spell_id);
-bool IsEffectHitpointsSpell(uint16 spell_id);
-bool IsReduceCastTimeSpell(uint16 spell_id);
+bool IsHealthSpell(uint16 spell_id);
+bool IsCastTimeReductionSpell(uint16 spell_id);
 bool IsIncreaseDurationSpell(uint16 spell_id);
-bool IsReduceManaSpell(uint16 spell_id);
-bool IsExtRangeSpell(uint16 spell_id);
+bool IsManaCostReductionSpell(uint16 spell_id);
+bool IsIncreaseRangeSpell(uint16 spell_id);
 bool IsImprovedHealingSpell(uint16 spell_id);
 bool IsImprovedDamageSpell(uint16 spell_id);
 bool IsAEDurationSpell(uint16 spell_id);
@@ -1475,26 +1521,22 @@ bool IsPureNukeSpell(uint16 spell_id);
 bool IsAENukeSpell(uint16 spell_id);
 bool IsPBAENukeSpell(uint16 spell_id);
 bool IsAERainNukeSpell(uint16 spell_id);
-bool IsPartialCapableSpell(uint16 spell_id);
+bool IsPartialResistableSpell(uint16 spell_id);
 bool IsResistableSpell(uint16 spell_id);
 bool IsGroupSpell(uint16 spell_id);
 bool IsTGBCompatibleSpell(uint16 spell_id);
 bool IsBardSong(uint16 spell_id);
-bool IsEffectInSpell(uint16 spellid, int effect);
-uint16 GetTriggerSpellID(uint16 spell_id, uint32 effect);
-bool IsBlankSpellEffect(uint16 spellid, int effect_index);
-bool IsValidSpell(uint32 spellid);
-bool IsSummonSpell(uint16 spellid);
-bool IsEvacSpell(uint16 spellid);
-bool IsDamageSpell(uint16 spellid);
-bool IsFearSpell(uint16 spellid);
-bool IsCureSpell(uint16 spellid);
-bool BeneficialSpell(uint16 spell_id);
-bool GroupOnlySpell(uint16 spell_id);
-int GetSpellEffectIndex(uint16 spell_id, int effect);
-int CanUseSpell(uint16 spellid, int classa, int level);
-int GetMinLevel(uint16 spell_id);
-int GetSpellLevel(uint16 spell_id, int classa);
+bool IsEffectInSpell(uint16 spell_id, int effect_id);
+uint16 GetSpellTriggerSpellID(uint16 spell_id, int effect_id);
+bool IsBlankSpellEffect(uint16 spell_id, int effect_index);
+bool IsValidSpell(uint32 spell_id);
+bool IsSummonSpell(uint16 spell_id);
+bool IsDamageSpell(uint16 spell_id);
+bool IsFearSpell(uint16 spell_id);
+bool IsCureSpell(uint16 spell_id);
+int GetSpellEffectIndex(uint16 spell_id, int effect_id);
+uint8 GetSpellMinimumLevel(uint16 spell_id);
+uint8 GetSpellLevel(uint16 spell_id, uint8 class_id);
 int CalcBuffDuration_formula(int level, int formula, int duration);
 int32 CalculatePoisonCounters(uint16 spell_id);
 int32 CalculateDiseaseCounters(uint16 spell_id);
@@ -1505,10 +1547,11 @@ bool IsDisciplineBuff(uint16 spell_id);
 bool IsDiscipline(uint16 spell_id);
 bool IsCombatSkill(uint16 spell_id);
 bool IsResurrectionEffects(uint16 spell_id);
+int8 GetSpellResurrectionSicknessCheck(uint16 spell_id_one, uint16 spell_id_two);
 bool IsRuneSpell(uint16 spell_id);
 bool IsMagicRuneSpell(uint16 spell_id);
 bool IsManaTapSpell(uint16 spell_id);
-bool IsAllianceSpellLine(uint16 spell_id);
+bool IsAllianceSpell(uint16 spell_id);
 bool IsDeathSaveSpell(uint16 spell_id);
 bool IsFullDeathSaveSpell(uint16 spell_id);
 bool IsPartialDeathSaveSpell(uint16 spell_id);
@@ -1517,10 +1560,10 @@ bool IsSuccorSpell(uint16 spell_id);
 bool IsTeleportSpell(uint16 spell_id);
 bool IsTranslocateSpell(uint16 spell_id);
 bool IsGateSpell(uint16 spell_id);
-bool IsPlayerIllusionSpell(uint16 spell_id); // seveian 2008-09-23
+bool IsIllusionSpell(uint16 spell_id);
 bool IsLDoNObjectSpell(uint16 spell_id);
-int32 GetSpellResistType(uint16 spell_id);
-int32 GetSpellTargetType(uint16 spell_id);
+int GetSpellResistType(uint16 spell_id);
+int GetSpellTargetType(uint16 spell_id);
 bool IsHealOverTimeSpell(uint16 spell_id);
 bool IsCompleteHealSpell(uint16 spell_id);
 bool IsFastHealSpell(uint16 spell_id);
@@ -1535,38 +1578,36 @@ bool IsSelfConversionSpell(uint16 spell_id);
 bool IsBuffSpell(uint16 spell_id);
 bool IsPersistDeathSpell(uint16 spell_id);
 bool IsSuspendableSpell(uint16 spell_id);
-uint32 GetMorphTrigger(uint32 spell_id);
-bool IsCastonFadeDurationSpell(uint16 spell_id);
-bool IsPowerDistModSpell(uint16 spell_id);
-uint32 GetPartialMeleeRuneReduction(uint32 spell_id);
-uint32 GetPartialMagicRuneReduction(uint32 spell_id);
-uint32 GetPartialMeleeRuneAmount(uint32 spell_id);
-uint32 GetPartialMagicRuneAmount(uint32 spell_id);
-bool NoDetrimentalSpellAggro(uint16 spell_id);
-bool IsStackableDot(uint16 spell_id);
-bool IsBardOnlyStackEffect(int effect);
-bool IsCastWhileInvis(uint16 spell_id);
-bool IsEffectIgnoredInStacking(int spa);
-bool IsFocusLimit(int spa);
-bool SpellRequiresTarget(int target_type);
-bool IsVirusSpell(int32 spell_id);
-int GetViralMinSpreadTime(int32 spell_id);
-int GetViralMaxSpreadTime(int32 spell_id);
-int GetViralSpreadRange(int32 spell_id);
-bool IsInstrumentModAppliedToSpellEffect(int32 spell_id, int effect);
-bool IsPulsingBardSong(int32 spell_id);
-uint32 GetProcLimitTimer(int32 spell_id, int proc_type);
-bool IgnoreCastingRestriction(int32 spell_id);
-int CalcPetHp(int levelb, int classb, int STA = 75);
-int GetSpellEffectDescNum(uint16 spell_id);
-DmgShieldType GetDamageShieldType(uint16 spell_id, int32 DSType = 0);
-bool DetrimentalSpellAllowsRest(uint16 spell_id);
-uint32 GetNimbusEffect(uint16 spell_id);
-int32 GetFuriousBash(uint16 spell_id);
+bool IsCastOnFadeDurationSpell(uint16 spell_id);
+bool IsDistanceModifierSpell(uint16 spell_id);
+int GetSpellPartialMeleeRuneReduction(uint16 spell_id);
+int GetSpellPartialMagicRuneReduction(uint16 spell_id);
+int GetSpellPartialMeleeRuneAmount(uint16 spell_id);
+int GetSpellPartialMagicRuneAmount(uint16 spell_id);
+bool IsNoDetrimentalSpellAggroSpell(uint16 spell_id);
+bool IsStackableDOT(uint16 spell_id);
+bool IsBardOnlyStackEffect(int effect_id);
+bool IsCastWhileInvisibleSpell(uint16 spell_id);
+bool IsEffectIgnoredInStacking(int effect_id);
+bool IsFocusLimit(int effect_id);
+bool IsTargetRequiredForSpell(uint16 spell_id);
+bool IsVirusSpell(uint16 spell_id);
+int GetSpellViralMinimumSpreadTime(uint16 spell_id);
+int GetSpellViralMaximumSpreadTime(uint16 spell_id);
+int GetSpellViralSpreadRange(uint16 spell_id);
+bool IsInstrumentModifierAppliedToSpellEffect(uint16 spell_id, int effect_id);
+bool IsPulsingBardSong(uint16 spell_id);
+int GetSpellProcLimitTimer(uint16 spell_id, int proc_type);
+bool IsCastNotStandingSpell(uint16 spell_id);
+int GetSpellEffectDescriptionNumber(uint16 spell_id);
+DmgShieldType GetDamageShieldType(uint16 spell_id, int damage_shield_type = 0);
+bool IsRestAllowedSpell(uint16 spell_id);
+int GetSpellNimbusEffect(uint16 spell_id);
+int GetSpellFuriousBash(uint16 spell_id);
 bool IsShortDurationBuff(uint16 spell_id);
-bool IsSpellUsableThisZoneType(uint16 spell_id, uint8 zone_type);
+bool IsSpellUsableInThisZoneType(uint16 spell_id, uint8 zone_type);
 const char *GetSpellName(uint16 spell_id);
-int GetSpellStatValue(uint32 spell_id, const char* stat_identifier, uint8 slot = 0);
-bool CastRestrictedSpell(int spellid);
+int GetSpellStatValue(uint16 spell_id, const char* stat_identifier, uint8 slot = 0);
+bool IsCastRestrictedSpell(uint16 spell_id);
 
 #endif

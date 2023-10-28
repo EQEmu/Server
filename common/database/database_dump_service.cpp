@@ -93,6 +93,8 @@ std::string DatabaseDumpService::GetMySQLVersion()
 	return Strings::Trim(version_output);
 }
 
+const std::string CREDENTIALS_FILE = "login.my.cnf";
+
 /**
  * @return
  */
@@ -101,21 +103,15 @@ std::string DatabaseDumpService::GetBaseMySQLDumpCommand()
 	auto config = EQEmuConfig::get();
 	if (IsDumpContentTables() && !config->ContentDbHost.empty()) {
 		return fmt::format(
-			"mysqldump -u {} -p{} -h {} --port={} {}",
-			config->ContentDbUsername,
-			config->ContentDbPassword,
-			config->ContentDbHost,
-			config->ContentDbPort,
+			"mysqldump --defaults-extra-file={} {}",
+			CREDENTIALS_FILE,
 			config->ContentDbName
 		);
 	};
 
 	return fmt::format(
-		"mysqldump -u {} -p{} -h {} --port={} {}",
-		config->DatabaseUsername,
-		config->DatabasePassword,
-		config->DatabaseHost,
-		config->DatabasePort,
+		"mysqldump --defaults-extra-file={} {}",
+		CREDENTIALS_FILE,
 		config->DatabaseDB
 	);
 }
@@ -283,6 +279,11 @@ void DatabaseDumpService::DatabaseDump()
 		}
 	}
 
+	if (IsDumpStaticInstanceData()) {
+		tables_to_dump += "instance_list";
+		options += " --no-create-info --where=\"instance_list.is_global > 0 and instance_list.never_expires > 0\"";
+	}
+
 	if (!dump_descriptor.empty()) {
 		SetDumpFileName(GetDumpFileName() + dump_descriptor);
 	}
@@ -309,6 +310,8 @@ void DatabaseDumpService::DatabaseDump()
 		if (tables_to_dump.empty()) {
 			std::cerr << "No tables were specified" << std::endl;
 		}
+
+		return;
 	}
 	else {
 		const auto execute_command = fmt::format(
@@ -319,13 +322,16 @@ void DatabaseDumpService::DatabaseDump()
 			pipe_file
 		);
 
+		BuildCredentialsFile();
 		std::string execution_result = Process::execute(execute_command);
 		if (!execution_result.empty() && IsDumpOutputToConsole()) {
 			std::cout << execution_result;
 		}
 	}
 
-	LogSys.EnableConsoleLogging();
+	if (!IsDumpOutputToConsole()) {
+		LogSys.LoadLogSettingsDefaults();
+	}
 
 	if (!pipe_file.empty()) {
 		std::string file = fmt::format("{}.sql", GetDumpFileNameWithPath());
@@ -350,10 +356,9 @@ void DatabaseDumpService::DatabaseDump()
 	}
 
 	LogInfo("Database dump created at [{}.sql]", GetDumpFileNameWithPath());
-
 	if (IsDumpWithCompression() && !IsDumpOutputToConsole()) {
 		if (HasCompressionBinary()) {
-			LogInfo("Compression requested... Compressing dump [{}.sql]", GetDumpFileNameWithPath());
+			LogInfo("Compression requested. Compressing dump [{}.sql]", GetDumpFileNameWithPath());
 
 			if (IsTarAvailable()) {
 				Process::execute(
@@ -386,6 +391,8 @@ void DatabaseDumpService::DatabaseDump()
 			LogWarning("Compression requested but binary not found... Skipping...");
 		}
 	}
+
+	RemoveCredentialsFile();
 
 //	LogDebug("[{}] dump-to-console", IsDumpOutputToConsole());
 //	LogDebug("[{}] dump-path", GetSetDumpPath());
@@ -566,4 +573,51 @@ void DatabaseDumpService::RemoveSqlBackup()
 	if (File::Exists(file)) {
 		std::filesystem::remove(file);
 	}
+
+	RemoveCredentialsFile();
+}
+
+void DatabaseDumpService::BuildCredentialsFile()
+{
+	auto          config = EQEmuConfig::get();
+	std::ofstream out(CREDENTIALS_FILE);
+	if (out.is_open()) {
+		if (IsDumpContentTables() && !config->ContentDbHost.empty()) {
+			out << "[mysqldump]" << std::endl;
+			out << "user=" << config->ContentDbUsername << std::endl;
+			out << "password=" << config->ContentDbPassword << std::endl;
+			out << "host=" << config->ContentDbHost << std::endl;
+			out << "port=" << config->ContentDbPort << std::endl;
+			out << "default-character-set=utf8" << std::endl;
+		}
+		else {
+			out << "[mysqldump]" << std::endl;
+			out << "user=" << config->DatabaseUsername << std::endl;
+			out << "password=" << config->DatabasePassword << std::endl;
+			out << "host=" << config->DatabaseHost << std::endl;
+			out << "port=" << config->DatabasePort << std::endl;
+			out << "default-character-set=utf8" << std::endl;
+		}
+		out.close();
+	}
+	else {
+		LogError("Failed to open credentials file for writing");
+	}
+}
+
+void DatabaseDumpService::RemoveCredentialsFile()
+{
+	if (File::Exists(CREDENTIALS_FILE)) {
+		std::filesystem::remove(CREDENTIALS_FILE);
+	}
+}
+
+bool DatabaseDumpService::IsDumpStaticInstanceData()
+{
+	return dump_static_instance_data;
+}
+
+void DatabaseDumpService::SetDumpStaticInstanceData(bool b)
+{
+	dump_static_instance_data = b;
 }

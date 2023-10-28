@@ -37,19 +37,18 @@ public:
 
 	bool IsType(int item_class);
 	bool IsStackable();
-	bool IsEquipable(int race, int class_);
-	bool IsEquipable(int slot_id);
+	bool IsEquipable(uint16 race_bitmask, uint16 class_bitmask);
+	bool IsEquipable(int16 slot_id);
 	bool IsAugmentable();
 	int GetAugmentType();
 	bool IsExpendable();
-	Lua_ItemInst GetItem(int slot);
+	Lua_ItemInst GetItem(uint8 slot_id);
 	Lua_Item GetItem();
-	void SetItem(Lua_Item item);
-	Lua_Item GetUnscaledItem(int slot);
-	uint32 GetItemID(int slot);
-	int GetTotalItemCount();
-	Lua_ItemInst GetAugment(int slot);
-	uint32 GetAugmentItemID(int slot);
+	Lua_Item GetUnscaledItem();
+	uint32 GetItemID(uint8 slot_id);
+	uint8 GetTotalItemCount();
+	Lua_ItemInst GetAugment(uint8 slot_id);
+	uint32 GetAugmentItemID(uint8 slot_id);
 	bool IsAugmented();
 	bool IsWeapon();
 	bool IsAmmo();
@@ -62,7 +61,9 @@ public:
 	void SetColor(uint32 color);
 	uint32 GetColor();
 	bool IsInstNoDrop();
+	bool IsAttuned();
 	void SetInstNoDrop(bool flag);
+	void SetAttuned(bool flag);
 	std::string GetCustomDataString();
 	void SetCustomData(const std::string &identifier, const std::string &value);
 	void SetCustomData(const std::string &identifier, int value);
@@ -75,8 +76,8 @@ public:
 	uint32 GetExp();
 	void SetExp(uint32 exp);
 	void AddExp(uint32 exp);
-	int GetMaxEvolveLvl();
-	uint32 GetKillsNeeded(int current_level);
+	int8 GetMaxEvolveLvl();
+	uint32 GetKillsNeeded(uint8 current_level);
 	Lua_ItemInst Clone();
 	void SetTimer(std::string name, uint32 time);
 	void StopTimer(std::string name);
@@ -85,6 +86,9 @@ public:
 	int CountAugmentByID(uint32 item_id);
 	int GetTaskDeliveredCount();
 	int RemoveTaskDeliveredItems();
+	std::string GetName();
+	void ItemSay(const char* text);
+	void ItemSay(const char* text, uint8 language_id);
 
 private:
 	bool cloned_;

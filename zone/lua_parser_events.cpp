@@ -163,21 +163,6 @@ void handle_npc_single_client(
 	lua_setfield(L, -2, "other");
 }
 
-void handle_npc_single_npc(
-	QuestInterface *parse,
-	lua_State* L,
-	NPC* npc,
-	Mob *init,
-	std::string data,
-	uint32 extra_data,
-	std::vector<std::any> *extra_pointers
-) {
-	Lua_NPC l_npc(reinterpret_cast<NPC*>(init));
-	luabind::adl::object l_npc_o = luabind::adl::object(L, l_npc);
-	l_npc_o.push(L);
-	lua_setfield(L, -2, "other");
-}
-
 void handle_npc_task_accepted(
 	QuestInterface *parse,
 	lua_State* L,
@@ -246,7 +231,7 @@ void handle_npc_hate(
 	l_mob_o.push(L);
 	lua_setfield(L, -2, "other");
 
-	lua_pushboolean(L, Strings::ToInt(data) == 0 ? false : true);
+	lua_pushboolean(L, Strings::ToBool(data));
 	lua_setfield(L, -2, "joined");
 }
 
@@ -316,8 +301,8 @@ void handle_npc_death(
 	lua_pushinteger(L, Strings::ToInt(sep.arg[1]));
 	lua_setfield(L, -2, "damage");
 
-	int spell_id = Strings::ToInt(sep.arg[2]);
-	if(IsValidSpell(spell_id)) {
+	const uint32 spell_id = Strings::ToUnsignedInt(sep.arg[2]);
+	if (IsValidSpell(spell_id)) {
 		Lua_Spell l_spell(&spells[spell_id]);
 		luabind::adl::object l_spell_o = luabind::adl::object(L, l_spell);
 		l_spell_o.push(L);
@@ -332,16 +317,14 @@ void handle_npc_death(
 	lua_pushinteger(L, Strings::ToInt(sep.arg[3]));
 	lua_setfield(L, -2, "skill_id");
 
-	if (extra_pointers && extra_pointers->size() >= 1)
-	{
+	if (extra_pointers && extra_pointers->size() >= 1) {
 		Lua_Corpse l_corpse(std::any_cast<Corpse*>(extra_pointers->at(0)));
 		luabind::adl::object l_corpse_o = luabind::adl::object(L, l_corpse);
 		l_corpse_o.push(L);
 		lua_setfield(L, -2, "corpse");
 	}
 
-	if (extra_pointers && extra_pointers->size() >= 2)
-	{
+	if (extra_pointers && extra_pointers->size() >= 2) {
 		Lua_NPC l_npc(std::any_cast<NPC*>(extra_pointers->at(1)));
 		luabind::adl::object l_npc_o = luabind::adl::object(L, l_npc);
 		l_npc_o.push(L);
@@ -358,17 +341,28 @@ void handle_npc_cast(
 	uint32 extra_data,
 	std::vector<std::any> *extra_pointers
 ) {
-	int spell_id = Strings::ToInt(data);
-	if(IsValidSpell(spell_id)) {
-		Lua_Spell l_spell(&spells[spell_id]);
-		luabind::adl::object l_spell_o = luabind::adl::object(L, l_spell);
-		l_spell_o.push(L);
-		lua_setfield(L, -2, "spell");
-	} else {
-		Lua_Spell l_spell(nullptr);
-		luabind::adl::object l_spell_o = luabind::adl::object(L, l_spell);
-		l_spell_o.push(L);
-		lua_setfield(L, -2, "spell");
+	Seperator sep(data.c_str());
+
+	const uint32 spell_id = Strings::ToUnsignedInt(sep.arg[0]);
+	Lua_Spell l_spell(IsValidSpell(spell_id) ? &spells[spell_id] : nullptr);
+	luabind::adl::object l_spell_o = luabind::adl::object(L, l_spell);
+	l_spell_o.push(L);
+	lua_setfield(L, -2, "spell");
+
+	lua_pushinteger(L, Strings::ToUnsignedInt(sep.arg[1]));
+	lua_setfield(L, -2, "caster_id");
+
+	lua_pushinteger(L, Strings::ToUnsignedInt(sep.arg[2]));
+	lua_setfield(L, -2, "caster_level");
+
+	lua_pushinteger(L, Strings::ToUnsignedInt(sep.arg[3]));
+	lua_setfield(L, -2, "target_id");
+
+	if (extra_pointers && extra_pointers->size() == 1) {
+		Lua_Mob l_mob(std::any_cast<Mob*>(extra_pointers->at(0)));
+		luabind::adl::object l_mob_o = luabind::adl::object(L, l_mob);
+		l_mob_o.push(L);
+		lua_setfield(L, -2, "target");
 	}
 }
 
@@ -477,16 +471,16 @@ void handle_npc_damage(
 	lua_pushnumber(L, Strings::ToInt(sep.arg[3]));
 	lua_setfield(L, -2, "skill_id");
 
-	lua_pushboolean(L, Strings::ToInt(sep.arg[4]) == 0 ? false : true);
+	lua_pushboolean(L, Strings::ToBool(sep.arg[4]));
 	lua_setfield(L, -2, "is_damage_shield");
 
-	lua_pushboolean(L, Strings::ToInt(sep.arg[5]) == 0 ? false : true);
+	lua_pushboolean(L, Strings::ToBool(sep.arg[5]));
 	lua_setfield(L, -2, "is_avoidable");
 
 	lua_pushnumber(L, Strings::ToInt(sep.arg[6]));
 	lua_setfield(L, -2, "buff_slot");
 
-	lua_pushboolean(L, Strings::ToInt(sep.arg[7]) == 0 ? false : true);
+	lua_pushboolean(L, Strings::ToBool(sep.arg[7]));
 	lua_setfield(L, -2, "is_buff_tic");
 
 	lua_pushnumber(L, Strings::ToInt(sep.arg[8]));
@@ -726,11 +720,21 @@ void handle_player_cast(
 
 	lua_setfield(L, -2, "spell");
 
-	lua_pushinteger(L, Strings::ToInt(sep.arg[1]));
+	lua_pushinteger(L, Strings::ToUnsignedInt(sep.arg[1]));
 	lua_setfield(L, -2, "caster_id");
 
-	lua_pushinteger(L, Strings::ToInt(sep.arg[2]));
+	lua_pushinteger(L, Strings::ToUnsignedInt(sep.arg[2]));
 	lua_setfield(L, -2, "caster_level");
+
+	lua_pushinteger(L, Strings::ToUnsignedInt(sep.arg[3]));
+	lua_setfield(L, -2, "target_id");
+
+	if (extra_pointers && extra_pointers->size() == 1) {
+		Lua_Mob l_mob(std::any_cast<Mob*>(extra_pointers->at(0)));
+		luabind::adl::object l_mob_o = luabind::adl::object(L, l_mob);
+		l_mob_o.push(L);
+		lua_setfield(L, -2, "target");
+	}
 }
 
 void handle_player_task_fail(
@@ -948,7 +952,7 @@ void handle_player_respawn(
 	lua_pushinteger(L, Strings::ToInt(data));
 	lua_setfield(L, -2, "option");
 
-	lua_pushboolean(L, extra_data == 1 ? true : false);
+	lua_pushboolean(L, Strings::ToBool(std::to_string(extra_data)));
 	lua_setfield(L, -2, "resurrect");
 }
 
@@ -965,7 +969,7 @@ void handle_player_packet(
 	l_packet_o.push(L);
 	lua_setfield(L, -2, "packet");
 
-	lua_pushboolean(L, extra_data == 1 ? true : false);
+	lua_pushboolean(L, Strings::ToBool(std::to_string(extra_data)));
 	lua_setfield(L, -2, "connecting");
 }
 
@@ -1285,16 +1289,16 @@ void handle_player_damage(
 	lua_pushnumber(L, Strings::ToInt(sep.arg[3]));
 	lua_setfield(L, -2, "skill_id");
 
-	lua_pushboolean(L, Strings::ToInt(sep.arg[4]) == 0 ? false : true);
+	lua_pushboolean(L, Strings::ToBool(sep.arg[4]));
 	lua_setfield(L, -2, "is_damage_shield");
 
-	lua_pushboolean(L, Strings::ToInt(sep.arg[5]) == 0 ? false : true);
+	lua_pushboolean(L, Strings::ToBool(sep.arg[5]));
 	lua_setfield(L, -2, "is_avoidable");
 
 	lua_pushnumber(L, Strings::ToInt(sep.arg[6]));
 	lua_setfield(L, -2, "buff_slot");
 
-	lua_pushboolean(L, Strings::ToInt(sep.arg[7]) == 0 ? false : true);
+	lua_pushboolean(L, Strings::ToBool(sep.arg[7]));
 	lua_setfield(L, -2, "is_buff_tic");
 
 	lua_pushnumber(L, Strings::ToInt(sep.arg[8]));
@@ -1408,6 +1412,35 @@ void handle_player_target_change(
 		luabind::adl::object l_mob_o = luabind::adl::object(L, l_mob);
 		l_mob_o.push(L);
 		lua_setfield(L, -2, "other");
+	}
+}
+
+void handle_player_memorize_scribe_spell(
+	QuestInterface *parse,
+	lua_State* L,
+	Client* client,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+) {
+	Seperator sep(data.c_str());
+
+	lua_pushnumber(L, Strings::ToUnsignedInt(sep.arg[0]));
+	lua_setfield(L, -2, "slot_id");
+
+	lua_pushnumber(L, Strings::ToUnsignedInt(sep.arg[1]));
+	lua_setfield(L, -2, "spell_id");
+
+	if (IsValidSpell(Strings::ToUnsignedInt(sep.arg[1]))) {
+		Lua_Spell l_spell(&spells[Strings::ToUnsignedInt(sep.arg[1])]);
+		luabind::adl::object l_spell_o = luabind::adl::object(L, l_spell);
+		l_spell_o.push(L);
+		lua_setfield(L, -2, "spell");
+	} else {
+		Lua_Spell l_spell(nullptr);
+		luabind::adl::object l_spell_o = luabind::adl::object(L, l_spell);
+		l_spell_o.push(L);
+		lua_setfield(L, -2, "spell");
 	}
 }
 
@@ -1592,7 +1625,7 @@ void handle_spell_event(
 		Lua_Mob l_mob(mob);
 		luabind::adl::object l_mob_o = luabind::adl::object(L, l_mob);
 		l_mob_o.push(L);
-	} else if(client) {
+	} else if (client) {
 		Lua_Mob l_client(client);
 		luabind::adl::object l_client_o = luabind::adl::object(L, l_client);
 		l_client_o.push(L);
@@ -1609,13 +1642,13 @@ void handle_spell_event(
 
 	Seperator sep(data.c_str());
 
-	lua_pushinteger(L, Strings::ToInt(sep.arg[0]));
+	lua_pushinteger(L, Strings::ToUnsignedInt(sep.arg[0]));
 	lua_setfield(L, -2, "caster_id");
 
 	lua_pushinteger(L, Strings::ToInt(sep.arg[1]));
 	lua_setfield(L, -2, "tics_remaining");
 
-	lua_pushinteger(L, Strings::ToInt(sep.arg[2]));
+	lua_pushinteger(L, Strings::ToUnsignedInt(sep.arg[2]));
 	lua_setfield(L, -2, "caster_level");
 
 	lua_pushinteger(L, Strings::ToInt(sep.arg[3]));
@@ -1641,7 +1674,7 @@ void handle_translocate_finish(
 		Lua_Mob l_mob(mob);
 		luabind::adl::object l_mob_o = luabind::adl::object(L, l_mob);
 		l_mob_o.push(L);
-	} else if(client) {
+	} else if (client) {
 		Lua_Mob l_client(client);
 		luabind::adl::object l_client_o = luabind::adl::object(L, l_client);
 		l_client_o.push(L);
@@ -1931,24 +1964,27 @@ void handle_bot_cast(
 ) {
 	Seperator sep(data.c_str());
 
-	int spell_id = Strings::ToInt(sep.arg[0]);
-	if (IsValidSpell(spell_id)) {
-		Lua_Spell l_spell(&spells[spell_id]);
-		luabind::adl::object l_spell_o = luabind::adl::object(L, l_spell);
-		l_spell_o.push(L);
-	} else {
-		Lua_Spell l_spell(nullptr);
-		luabind::adl::object l_spell_o = luabind::adl::object(L, l_spell);
-		l_spell_o.push(L);
-	}
-
+	const uint32 spell_id = Strings::ToUnsignedInt(sep.arg[0]);
+	Lua_Spell l_spell(IsValidSpell(spell_id) ? &spells[spell_id] : nullptr);
+	luabind::adl::object l_spell_o = luabind::adl::object(L, l_spell);
+	l_spell_o.push(L);
 	lua_setfield(L, -2, "spell");
 
-	lua_pushinteger(L, Strings::ToInt(sep.arg[1]));
+	lua_pushinteger(L, Strings::ToUnsignedInt(sep.arg[1]));
 	lua_setfield(L, -2, "caster_id");
 
-	lua_pushinteger(L, Strings::ToInt(sep.arg[2]));
+	lua_pushinteger(L, Strings::ToUnsignedInt(sep.arg[2]));
 	lua_setfield(L, -2, "caster_level");
+
+	lua_pushinteger(L, Strings::ToUnsignedInt(sep.arg[3]));
+	lua_setfield(L, -2, "target_id");
+
+	if (extra_pointers && extra_pointers->size() == 1) {
+		Lua_Mob l_mob(std::any_cast<Mob*>(extra_pointers->at(0)));
+		luabind::adl::object l_mob_o = luabind::adl::object(L, l_mob);
+		l_mob_o.push(L);
+		lua_setfield(L, -2, "target");
+	}
 }
 
 void handle_bot_combat(
@@ -1965,7 +2001,7 @@ void handle_bot_combat(
 	l_mob_o.push(L);
 	lua_setfield(L, -2, "other");
 
-	lua_pushboolean(L, Strings::ToInt(data) == 0 ? false : true);
+	lua_pushboolean(L, Strings::ToBool(data));
 	lua_setfield(L, -2, "joined");
 }
 
@@ -1989,7 +2025,7 @@ void handle_bot_death(
 	lua_pushinteger(L, Strings::ToInt(sep.arg[1]));
 	lua_setfield(L, -2, "damage");
 
-	int spell_id = Strings::ToInt(sep.arg[2]);
+	const uint32 spell_id = Strings::ToUnsignedInt(sep.arg[2]);
 	if (IsValidSpell(spell_id)) {
 		Lua_Spell l_spell(&spells[spell_id]);
 		luabind::adl::object l_spell_o = luabind::adl::object(L, l_spell);
@@ -2243,16 +2279,16 @@ void handle_bot_damage(
 	lua_pushnumber(L, Strings::ToInt(sep.arg[3]));
 	lua_setfield(L, -2, "skill_id");
 
-	lua_pushboolean(L, Strings::ToInt(sep.arg[4]) == 0 ? false : true);
+	lua_pushboolean(L, Strings::ToBool(sep.arg[4]));
 	lua_setfield(L, -2, "is_damage_shield");
 
-	lua_pushboolean(L, Strings::ToInt(sep.arg[5]) == 0 ? false : true);
+	lua_pushboolean(L, Strings::ToBool(sep.arg[5]));
 	lua_setfield(L, -2, "is_avoidable");
 
 	lua_pushnumber(L, Strings::ToInt(sep.arg[6]));
 	lua_setfield(L, -2, "buff_slot");
 
-	lua_pushboolean(L, Strings::ToInt(sep.arg[7]) == 0 ? false : true);
+	lua_pushboolean(L, Strings::ToBool(sep.arg[7]));
 	lua_setfield(L, -2, "is_buff_tic");
 
 	lua_pushnumber(L, Strings::ToInt(sep.arg[8]));

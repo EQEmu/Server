@@ -464,7 +464,8 @@ bool BotDatabase::LoadBot(const uint32 bot_id, Bot*& loaded_bot)
 		l.spells_id,
 		l.time_spawned,
 		l.zone_id,
-		t
+		t,
+		l.expansion_bitmask
 	);
 
 	if (loaded_bot) {
@@ -478,8 +479,6 @@ bool BotDatabase::LoadBot(const uint32 bot_id, Bot*& loaded_bot)
 		loaded_bot->SetFollowDistance(bfd);
 
 		loaded_bot->SetStopMeleeLevel(l.stop_melee_level);
-
-		loaded_bot->SetExpansionBitmask(l.expansion_bitmask, false);
 
 		loaded_bot->SetBotEnforceSpellSetting((l.enforce_spell_settings ? true : false));
 

@@ -46,7 +46,10 @@ void perl_register_group();
 void perl_register_raid();
 void perl_register_inventory();
 void perl_register_questitem();
+void perl_register_questitem_data();
+void perl_register_spawn();
 void perl_register_spell();
+void perl_register_stat_bonuses();
 void perl_register_hateentry();
 void perl_register_object();
 void perl_register_doors();
@@ -179,6 +182,10 @@ const char *QuestEventSubroutines[_LargestEventID] = {
 	"EVENT_ITEM_CLICK_CAST_CLIENT",
 	"EVENT_DESTROY_ITEM_CLIENT",
 	"EVENT_DROP_ITEM_CLIENT",
+	"EVENT_MEMORIZE_SPELL",
+	"EVENT_UNMEMORIZE_SPELL",
+	"EVENT_SCRIBE_SPELL",
+	"EVENT_UNSCRIBE_SPELL",
 	// Add new events before these or Lua crashes
 	"EVENT_SPELL_EFFECT_BOT",
 	"EVENT_SPELL_EFFECT_BUFF_TIC_BOT"
@@ -1064,7 +1071,10 @@ void PerlembParser::MapFunctions()
 	perl_register_raid();
 	perl_register_inventory();
 	perl_register_questitem();
+	perl_register_questitem_data();
+	perl_register_spawn();
 	perl_register_spell();
+	perl_register_stat_bonuses();
 	perl_register_hateentry();
 	perl_register_object();
 	perl_register_doors();
@@ -1550,6 +1560,7 @@ void PerlembParser::ExportEventVariables(
 			if (extra_pointers && extra_pointers->size() == 1) {
 				ExportVar(package_name.c_str(), "target", "Mob", std::any_cast<Mob*>(extra_pointers->at(0)));
 			}
+
 			break;
 		}
 
@@ -1596,9 +1607,11 @@ void PerlembParser::ExportEventVariables(
 		case EVENT_CLICK_DOOR: {
 			ExportVar(package_name.c_str(), "doorid", data);
 			ExportVar(package_name.c_str(), "version", zone->GetInstanceVersion());
+
 			if (extra_pointers && extra_pointers->size() == 1) {
 				ExportVar(package_name.c_str(), "door", "Doors", std::any_cast<Doors*>(extra_pointers->at(0)));
 			}
+
 			break;
 		}
 
@@ -1639,6 +1652,16 @@ void PerlembParser::ExportEventVariables(
 			ExportVar(package_name.c_str(), "spell_id", sep.arg[0]);
 			ExportVar(package_name.c_str(), "caster_id", sep.arg[1]);
 			ExportVar(package_name.c_str(), "caster_level", sep.arg[2]);
+			ExportVar(package_name.c_str(), "target_id", sep.arg[3]);
+
+			if (extra_pointers && extra_pointers->size() == 1) {
+				ExportVar(package_name.c_str(), "target", "Mob", std::any_cast<Mob*>(extra_pointers->at(0)));
+			}
+
+			if (IsValidSpell(Strings::ToUnsignedInt(sep.arg[0]))) {
+				ExportVar(package_name.c_str(), "spell", "Spell", (void*)&spells[Strings::ToUnsignedInt(sep.arg[0])]);
+			}
+
 			break;
 		}
 
@@ -1673,9 +1696,11 @@ void PerlembParser::ExportEventVariables(
 		case EVENT_PLAYER_PICKUP: {
 			ExportVar(package_name.c_str(), "picked_up_id", data);
 			ExportVar(package_name.c_str(), "picked_up_entity_id", extradata);
+
 			if (extra_pointers && extra_pointers->size() == 1) {
 				ExportVar(package_name.c_str(), "item", "QuestItem", std::any_cast<EQ::ItemInstance*>(extra_pointers->at(0)));
 			}
+
 			break;
 		}
 
@@ -1721,12 +1746,18 @@ void PerlembParser::ExportEventVariables(
 			ExportVar(package_name.c_str(), "itemname", item_inst->GetItem()->Name);
 			ExportVar(package_name.c_str(), "slotid", extradata);
 			ExportVar(package_name.c_str(), "spell_id", item_inst->GetItem()->Click.Effect);
+
+			if (IsValidSpell(item_inst->GetItem()->Click.Effect)) {
+				ExportVar(package_name.c_str(), "spell", "Spell", (void*)&spells[item_inst->GetItem()->Click.Effect]);
+			}
+
 			break;
 		}
 
 		case EVENT_ITEM_CLICK_CAST_CLIENT:
 		case EVENT_ITEM_CLICK_CLIENT: {
 			ExportVar(package_name.c_str(), "slot_id", data);
+
 			if (extra_pointers && extra_pointers->size() == 1) {
 				auto* item = std::any_cast<EQ::ItemInstance*>(extra_pointers->at(0));
 				if (item) {
@@ -1734,8 +1765,13 @@ void PerlembParser::ExportEventVariables(
 					ExportVar(package_name.c_str(), "item_name", item->GetItem()->Name);
 					ExportVar(package_name.c_str(), "spell_id", item->GetItem()->Click.Effect);
 					ExportVar(package_name.c_str(), "item", "QuestItem", item);
+
+					if (IsValidSpell(item->GetItem()->Click.Effect)) {
+						ExportVar(package_name.c_str(), "spell", "Spell", (void*)&spells[item->GetItem()->Click.Effect]);
+					}
 				}
 			}
+
 			break;
 		}
 
@@ -1766,6 +1802,11 @@ void PerlembParser::ExportEventVariables(
 			ExportVar(package_name.c_str(), "tics_remaining", sep.arg[1]);
 			ExportVar(package_name.c_str(), "caster_level", sep.arg[2]);
 			ExportVar(package_name.c_str(), "buff_slot", sep.arg[3]);
+
+			if (IsValidSpell(objid)) {
+				ExportVar(package_name.c_str(), "spell", "Spell", (void*)&spells[objid]);
+			}
+
 			break;
 		}
 
@@ -1779,34 +1820,42 @@ void PerlembParser::ExportEventVariables(
 
 		case EVENT_FORAGE_SUCCESS: {
 			ExportVar(package_name.c_str(), "foraged_item", extradata);
+
 			if (extra_pointers && extra_pointers->size() == 1) {
 				ExportVar(package_name.c_str(), "item", "QuestItem", std::any_cast<EQ::ItemInstance*>(extra_pointers->at(0)));
 			}
+
 			break;
 		}
 
 		case EVENT_FISH_SUCCESS: {
 			ExportVar(package_name.c_str(), "fished_item", extradata);
+
 			if (extra_pointers && extra_pointers->size() == 1) {
 				ExportVar(package_name.c_str(), "item", "QuestItem", std::any_cast<EQ::ItemInstance*>(extra_pointers->at(0)));
 			}
+
 			break;
 		}
 
 		case EVENT_CLICK_OBJECT: {
 			ExportVar(package_name.c_str(), "objectid", data);
 			ExportVar(package_name.c_str(), "clicker_id", extradata);
+
 			if (extra_pointers && extra_pointers->size() == 1) {
 				ExportVar(package_name.c_str(), "object", "Object", std::any_cast<Object*>(extra_pointers->at(0)));
 			}
+
 			break;
 		}
 
 		case EVENT_DISCOVER_ITEM: {
 			ExportVar(package_name.c_str(), "itemid", extradata);
+
 			if (extra_pointers && extra_pointers->size() == 1) {
 				ExportVar(package_name.c_str(), "item", "QuestItem", std::any_cast<EQ::ItemInstance*>(extra_pointers->at(0)));
 			}
+
 			break;
 		}
 
@@ -1826,27 +1875,20 @@ void PerlembParser::ExportEventVariables(
 			break;
 		}
 
-		case EVENT_DEATH_ZONE:
-		case EVENT_DEATH:
-		case EVENT_DEATH_COMPLETE: {
+		case EVENT_DEATH: {
 			Seperator sep(data);
 			ExportVar(package_name.c_str(), "killer_id", sep.arg[0]);
 			ExportVar(package_name.c_str(), "killer_damage", sep.arg[1]);
 			ExportVar(package_name.c_str(), "killer_spell", sep.arg[2]);
 			ExportVar(package_name.c_str(), "killer_skill", sep.arg[3]);
-			if (extra_pointers && extra_pointers->size() >= 1)
-			{
-				Corpse* corpse = std::any_cast<Corpse*>(extra_pointers->at(0));
-				if (corpse)
-				{
-					ExportVar(package_name.c_str(), "killed_corpse_id", corpse->GetID());
-				}
+
+			if (IsValidSpell(Strings::ToUnsignedInt(sep.arg[2]))) {
+				ExportVar(package_name.c_str(), "spell", "Spell", (void*)&spells[Strings::ToUnsignedInt(sep.arg[2])]);
 			}
-			if (extra_pointers && extra_pointers->size() >= 2)
-			{
-				NPC* killed = std::any_cast<NPC*>(extra_pointers->at(1));
-				if (killed)
-				{
+
+			if (extra_pointers && extra_pointers->size() == 1) {
+				Mob* killed = std::any_cast<Mob*>(extra_pointers->at(0));
+				if (killed) {
 					ExportVar(package_name.c_str(), "killed_entity_id", killed->GetID());
 					ExportVar(package_name.c_str(), "killed_bot_id", killed->IsBot() ? killed->CastToBot()->GetBotID() : 0);
 					ExportVar(package_name.c_str(), "killed_npc_id", killed->IsNPC() ? killed->GetNPCTypeID() : 0);
@@ -1856,6 +1898,42 @@ void PerlembParser::ExportEventVariables(
 					ExportVar(package_name.c_str(), "killed_h", killed->GetHeading());
 				}
 			}
+
+			break;
+		}
+
+		case EVENT_DEATH_ZONE:
+		case EVENT_DEATH_COMPLETE: {
+			Seperator sep(data);
+			ExportVar(package_name.c_str(), "killer_id", sep.arg[0]);
+			ExportVar(package_name.c_str(), "killer_damage", sep.arg[1]);
+			ExportVar(package_name.c_str(), "killer_spell", sep.arg[2]);
+			ExportVar(package_name.c_str(), "killer_skill", sep.arg[3]);
+
+			if (IsValidSpell(Strings::ToUnsignedInt(sep.arg[2]))) {
+				ExportVar(package_name.c_str(), "spell", "Spell", (void*)&spells[Strings::ToUnsignedInt(sep.arg[2])]);
+			}
+
+			if (extra_pointers && extra_pointers->size() >= 1) {
+				Corpse* corpse = std::any_cast<Corpse*>(extra_pointers->at(0));
+				if (corpse) {
+					ExportVar(package_name.c_str(), "killed_corpse_id", corpse->GetID());
+				}
+			}
+
+			if (extra_pointers && extra_pointers->size() >= 2) {
+				NPC* killed = std::any_cast<NPC*>(extra_pointers->at(1));
+				if (killed) {
+					ExportVar(package_name.c_str(), "killed_entity_id", killed->GetID());
+					ExportVar(package_name.c_str(), "killed_bot_id", killed->IsBot() ? killed->CastToBot()->GetBotID() : 0);
+					ExportVar(package_name.c_str(), "killed_npc_id", killed->IsNPC() ? killed->GetNPCTypeID() : 0);
+					ExportVar(package_name.c_str(), "killed_x", killed->GetX());
+					ExportVar(package_name.c_str(), "killed_y", killed->GetY());
+					ExportVar(package_name.c_str(), "killed_z", killed->GetZ());
+					ExportVar(package_name.c_str(), "killed_h", killed->GetHeading());
+				}
+			}
+
 			break;
 		}
 
@@ -1878,6 +1956,7 @@ void PerlembParser::ExportEventVariables(
 				ExportVar(package_name.c_str(), "slot_id", extradata);
 				ExportVar(package_name.c_str(), "item", "QuestItem", item_instance);
 			}
+
 			break;
 		}
 
@@ -1905,8 +1984,7 @@ void PerlembParser::ExportEventVariables(
 			std::string tradeskill_id = "-1";
 			if (strcmp(sep.arg[0], "check_zone") == 0) {
 				zone_id = sep.arg[1];
-			}
-			else if (strcmp(sep.arg[0], "check_tradeskill") == 0) {
+			} else if (strcmp(sep.arg[0], "check_tradeskill") == 0) {
 				tradeskill_id = sep.arg[1];
 			}
 
@@ -1935,17 +2013,21 @@ void PerlembParser::ExportEventVariables(
 
 		case EVENT_CONSIDER: {
 			ExportVar(package_name.c_str(), "entity_id", Strings::ToInt(data));
+
 			if (extra_pointers && extra_pointers->size() == 1) {
 				ExportVar(package_name.c_str(), "target", "Mob", std::any_cast<Mob*>(extra_pointers->at(0)));
 			}
+
 			break;
 		}
 
 		case EVENT_CONSIDER_CORPSE: {
 			ExportVar(package_name.c_str(), "corpse_entity_id", Strings::ToInt(data));
+
 			if (extra_pointers && extra_pointers->size() == 1) {
 				ExportVar(package_name.c_str(), "corpse", "Corpse", std::any_cast<Corpse*>(extra_pointers->at(0)));
 			}
+
 			break;
 		}
 
@@ -1960,9 +2042,11 @@ void PerlembParser::ExportEventVariables(
 			ExportVar(package_name.c_str(), "item_id", extradata);
 			ExportVar(package_name.c_str(), "item_quantity", sep.arg[0]);
 			ExportVar(package_name.c_str(), "slot_id", sep.arg[1]);
+
 			if (extra_pointers && extra_pointers->size() == 1) {
 				ExportVar(package_name.c_str(), "item", "QuestItem", std::any_cast<EQ::ItemInstance*>(extra_pointers->at(0)));
 			}
+
 			break;
 		}
 
@@ -1972,9 +2056,11 @@ void PerlembParser::ExportEventVariables(
 			ExportVar(package_name.c_str(), "item_id", extradata);
 			ExportVar(package_name.c_str(), "item_quantity", sep.arg[0]);
 			ExportVar(package_name.c_str(), "slot_id", sep.arg[1]);
+
 			if (extra_pointers && extra_pointers->size() == 1) {
 				ExportVar(package_name.c_str(), "item", "QuestItem", std::any_cast<EQ::ItemInstance*>(extra_pointers->at(0)));
 			}
+
 			break;
 		}
 
@@ -2080,9 +2166,11 @@ void PerlembParser::ExportEventVariables(
 
 		case EVENT_INSPECT: {
 			ExportVar(package_name.c_str(), "target_id", extradata);
+
 			if (extra_pointers && extra_pointers->size() == 1) {
 				ExportVar(package_name.c_str(), "target", "Mob", std::any_cast<Mob*>(extra_pointers->at(0)));
 			}
+
 			break;
 		}
 
@@ -2107,6 +2195,7 @@ void PerlembParser::ExportEventVariables(
 				ExportVar(package_name.c_str(), "area_id", *std::any_cast<int*>(extra_pointers->at(0)));
 				ExportVar(package_name.c_str(), "area_type", *std::any_cast<int*>(extra_pointers->at(1)));
 			}
+
 			break;
 		}
 
@@ -2146,6 +2235,11 @@ void PerlembParser::ExportEventVariables(
 			ExportVar(package_name.c_str(), "buff_slot", sep.arg[6]);
 			ExportVar(package_name.c_str(), "is_buff_tic", sep.arg[7]);
 			ExportVar(package_name.c_str(), "special_attack", sep.arg[8]);
+
+			if (IsValidSpell(Strings::ToUnsignedInt(sep.arg[2]))) {
+				ExportVar(package_name.c_str(), "spell", "Spell", (void*)&spells[Strings::ToUnsignedInt(sep.arg[2])]);
+			}
+
 			break;
 		}
 
@@ -2157,6 +2251,22 @@ void PerlembParser::ExportEventVariables(
 				ExportVar(package_name.c_str(), "quantity", inst->IsStackable() ? inst->GetCharges() : 1);
 				ExportVar(package_name.c_str(), "item", "QuestItem", inst);
 			}
+
+			break;
+		}
+
+		case EVENT_MEMORIZE_SPELL:
+		case EVENT_UNMEMORIZE_SPELL:
+		case EVENT_SCRIBE_SPELL:
+		case EVENT_UNSCRIBE_SPELL: {
+			Seperator sep(data);
+			ExportVar(package_name.c_str(), "slot_id", sep.arg[0]);
+			ExportVar(package_name.c_str(), "spell_id", sep.arg[1]);
+
+			if (IsValidSpell(Strings::ToUnsignedInt(sep.arg[1]))) {
+				ExportVar(package_name.c_str(), "spell", "Spell", (void*)&spells[Strings::ToUnsignedInt(sep.arg[1])]);
+			}
+
 			break;
 		}
 

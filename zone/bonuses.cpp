@@ -146,17 +146,7 @@ void Mob::CalcItemBonuses(StatBonuses* b) {
 	int16 i;
 
 	for (i = EQ::invslot::BONUS_BEGIN; i <= EQ::invslot::BONUS_SKILL_END; i++) {
-		const EQ::ItemInstance* inst = nullptr;
-		if (IsOfClientBotMerc()) {
-			inst = GetInv().GetItem(i);
-		} else {
-			const auto* item = CastToNPC()->GetItem(i);
-			if (!item) {
-				continue;
-			}
-
-			inst = database.CreateItem(item->item_id);
-		}
+		const auto* inst = GetInv().GetItem(i);
 
 		if (!inst) {
 			continue;
@@ -5959,26 +5949,26 @@ void Mob::CalcHeroicBonuses(StatBonuses* newbon)
 
 void Mob::SetHeroicWisBonuses(StatBonuses* n)
 {
-	n->heroic_max_mana += IsWISCasterClass(GetClass()) ? GetHeroicWIS() * RuleR(Character, HeroicWisdomMultiplier) * 10 : 0;
-	n->heroic_mana_regen += IsWISCasterClass(GetClass()) ? GetHeroicWIS() * RuleR(Character, HeroicWisdomMultiplier) / 25 : 0;
+	n->heroic_max_mana += IsHeroicWISCasterClass(GetClass()) ? GetHeroicWIS() * RuleR(Character, HeroicWisdomMultiplier) * 10 : 0;
+	n->heroic_mana_regen += IsHeroicWISCasterClass(GetClass()) ? GetHeroicWIS() * RuleR(Character, HeroicWisdomMultiplier) / 25 : 0;
 	n->HealAmt += GetHeroicWIS() * RuleR(Character, HeroicWisdomIncreaseHealAmtMultiplier);
 
 	if (RuleB(Character, HeroicStatsUseDataBucketsToScale)) {
-		n->heroic_max_mana += IsWISCasterClass(GetClass()) ? GetHeroicWIS() * CheckHeroicBonusesDataBuckets(HeroicBonusBucket::WisMaxMana) * 10 : 0;
-		n->heroic_mana_regen += IsWISCasterClass(GetClass()) ? GetHeroicWIS() * CheckHeroicBonusesDataBuckets(HeroicBonusBucket::WisManaRegen) / 25 : 0;
+		n->heroic_max_mana += IsHeroicWISCasterClass(GetClass()) ? GetHeroicWIS() * CheckHeroicBonusesDataBuckets(HeroicBonusBucket::WisMaxMana) * 10 : 0;
+		n->heroic_mana_regen += IsHeroicWISCasterClass(GetClass()) ? GetHeroicWIS() * CheckHeroicBonusesDataBuckets(HeroicBonusBucket::WisManaRegen) / 25 : 0;
 		n->HealAmt += GetHeroicWIS() * CheckHeroicBonusesDataBuckets(HeroicBonusBucket::WisHealAmt);
 	}
 }
 
 void Mob::SetHeroicIntBonuses(StatBonuses* n)
 {
-	n->heroic_max_mana += IsINTCasterClass(GetClass()) ? GetHeroicINT() * RuleR(Character, HeroicIntelligenceMultiplier) * 10 : 0;
-	n->heroic_mana_regen += IsINTCasterClass(GetClass()) ? GetHeroicINT() * RuleR(Character, HeroicIntelligenceMultiplier) / 25 : 0;
+	n->heroic_max_mana += IsHeroicINTCasterClass(GetClass()) ? GetHeroicINT() * RuleR(Character, HeroicIntelligenceMultiplier) * 10 : 0;
+	n->heroic_mana_regen += IsHeroicINTCasterClass(GetClass()) ? GetHeroicINT() * RuleR(Character, HeroicIntelligenceMultiplier) / 25 : 0;
 	n->SpellDmg += GetHeroicINT() * RuleR(Character, HeroicIntelligenceIncreaseSpellDmgMultiplier);
 
 	if (RuleB(Character, HeroicStatsUseDataBucketsToScale)) {
-		n->heroic_max_mana += IsINTCasterClass(GetClass()) ? GetHeroicINT() * CheckHeroicBonusesDataBuckets(HeroicBonusBucket::IntMaxMana) * 10 : 0;
-		n->heroic_mana_regen += IsINTCasterClass(GetClass()) ? GetHeroicINT() * CheckHeroicBonusesDataBuckets(HeroicBonusBucket::IntManaRegen) / 25 : 0;
+		n->heroic_max_mana += IsHeroicINTCasterClass(GetClass()) ? GetHeroicINT() * CheckHeroicBonusesDataBuckets(HeroicBonusBucket::IntMaxMana) * 10 : 0;
+		n->heroic_mana_regen += IsHeroicINTCasterClass(GetClass()) ? GetHeroicINT() * CheckHeroicBonusesDataBuckets(HeroicBonusBucket::IntManaRegen) / 25 : 0;
 		n->SpellDmg += GetHeroicINT() * CheckHeroicBonusesDataBuckets(HeroicBonusBucket::IntSpellDmg);
 	}
 }
@@ -6043,14 +6033,10 @@ float Mob::CheckHeroicBonusesDataBuckets(std::string bucket_name)
 {
 	std::string bucket_value;
 	if (!bucket_name.empty()) {
-		const auto full_name = fmt::format(
-			"{}-{}",
-			GetBucketKey(),
-			bucket_name
-		);
-
+		DataBucketKey k = GetScopedBucketKeys();
+		k.key = bucket_name;
 		if (IsOfClientBot()) {
-			bucket_value = DataBucket::CheckBucketKey(this, full_name);
+			bucket_value = DataBucket::GetData(k).value;
 		}
 
 		if (bucket_value.empty() || !Strings::IsNumber(bucket_value)) {

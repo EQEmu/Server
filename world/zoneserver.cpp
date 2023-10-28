@@ -45,6 +45,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/content/world_content_service.h"
 #include "../common/repositories/player_event_logs_repository.h"
 #include "../common/events/player_event_logs.h"
+#include "../common/patches/patches.h"
+#include "../zone/data_bucket.h"
 
 extern ClientList client_list;
 extern GroupLFPList LFPGroupList;
@@ -390,6 +392,14 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		}
 		case ServerOP_RaidMOTD: {
 			if (pack->size < sizeof(ServerRaidMOTD_Struct)) {
+				break;
+			}
+
+			zoneserver_list.SendPacket(pack);
+			break;
+		}
+		case ServerOP_RaidNote: {
+			if (pack->size < sizeof(ServerRaidNote_Struct)) {
 				break;
 			}
 
@@ -747,7 +757,8 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		}
 		case ServerOP_ZoneStatus: {
 			if (pack->size >= 1) {
-				zoneserver_list.SendZoneStatus((char *)&pack->pBuffer[1], (uint8)pack->pBuffer[0], this);
+				auto z = (ServerZoneStatus_Struct*) pack->pBuffer;
+				zoneserver_list.SendZoneStatus(z->name, z->admin, this);
 			}
 
 			break;
@@ -784,11 +795,29 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 				client = client_list.FindCharacter(ztz->name);
 			}
 
-			LogInfo("ZoneToZone request for [{}] current zone [{}] req zone [{}]", ztz->name, ztz->current_zone_id, ztz->requested_zone_id);
+			LogZoning(
+				"ZoneToZone request for client [{}] guild_id [{}] requested_zone [{}] requested_zone_id [{}] requested_instance_id [{}] current_zone [{}] current_zone_id [{}] current_instance_id [{}] response [{}] admin [{}] ignorerestrictions [{}]",
+				ztz->name,
+				ztz->guild_id,
+				ZoneName(ztz->requested_zone_id),
+				ztz->requested_zone_id,
+				ztz->requested_instance_id,
+				ZoneName(ztz->current_zone_id),
+				ztz->current_zone_id,
+				ztz->current_instance_id,
+				ztz->response,
+				ztz->admin,
+				ztz->ignorerestrictions
+			);
 
 			/* This is a request from the egress zone */
 			if (GetZoneID() == ztz->current_zone_id && GetInstanceID() == ztz->current_instance_id) {
-				LogInfo("Processing ZTZ for egress from zone for client [{}]", ztz->name);
+				LogZoning(
+					"ZoneToZone request for client [{}] for egress from zone [{}]",
+					ztz->name,
+					ZoneName(ztz->current_zone_id),
+					ztz->current_zone_id
+				);
 
 				if (
 					ztz->admin < AccountStatus::QuestTroupe &&
@@ -796,6 +825,14 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 					zoneserver_list.IsZoneLocked(ztz->requested_zone_id)
 				) {
 					ztz->response = 0;
+
+					LogZoning(
+						"ZoneToZone request for client [{}] for egress from zone [{}] denied, zone is locked",
+						ztz->name,
+						ZoneName(ztz->current_zone_id),
+						ztz->current_zone_id
+					);
+
 					SendPacket(pack);
 					break;
 				}
@@ -807,12 +844,25 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 				);
 
 				if (ingress_server) {
-					LogInfo("Found a zone already booted for [{}]", ztz->name);
+					LogZoning(
+						"Found a zone already booted for ZoneToZone for client [{}] for ingress_server from zone [{}] found booted zone",
+						ztz->name,
+						ZoneName(ztz->current_zone_id),
+						ztz->current_zone_id
+					);
+
 					ztz->response = 1;
 				} else {
 					int server_id;
 					if ((server_id = zoneserver_list.TriggerBootup(ztz->requested_zone_id, ztz->requested_instance_id))) {
-						LogInfo("Successfully booted a zone for [{}]", ztz->name);
+						LogZoning(
+							"ZoneToZone successfully booted a zone for character [{}] zone [{}] ({}) instance [{}] ({})",
+							ztz->name,
+							ZoneName(ztz->requested_zone_id),
+							ztz->requested_zone_id,
+							ztz->requested_instance_id,
+							server_id
+						);
 						ztz->response = 1;
 						ingress_server = zoneserver_list.FindByID(server_id);
 					} else {
@@ -830,8 +880,8 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 					ingress_server->SendPacket(pack);	// inform target server
 				}
 			} else {
-				LogInfo(
-					"Processing ZTZ for ingress to zone for client [{}] instance_id [{}] zone_id [{}]",
+				LogZoning(
+					"Processing ZTZ for egress to zone for client [{}] instance_id [{}] zone_id [{}]",
 					ztz->name,
 					ztz->current_instance_id,
 					ztz->current_zone_id
@@ -843,7 +893,13 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 				);
 
 				if (egress_server) {
-					LogInfo("Found egress server, forwarding client");
+					LogZoning(
+						"Found egress server_id [{}] zone_id [{}] zone_name [{}] instance_id [{}], forwarding client",
+						egress_server->GetID(),
+						egress_server->GetZoneID(),
+						egress_server->GetZoneName(),
+						egress_server->GetInstanceID()
+					);
 					egress_server->SendPacket(pack);
 				}
 			}
@@ -1296,6 +1352,10 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			QSLink.SendPacket(pack);
 			break;
 		}
+		case ServerOP_ReloadOpcodes: {
+			ReloadAllPatches();
+			break;
+		}
 		case ServerOP_CZDialogueWindow:
 		case ServerOP_CZLDoNUpdate:
 		case ServerOP_CZMarquee:
@@ -1328,13 +1388,13 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		case ServerOP_ReloadBlockedSpells:
 		case ServerOP_ReloadCommands:
 		case ServerOP_ReloadDoors:
+		case ServerOP_ReloadDataBucketsCache:
 		case ServerOP_ReloadGroundSpawns:
 		case ServerOP_ReloadLevelEXPMods:
 		case ServerOP_ReloadMerchants:
 		case ServerOP_ReloadNPCEmotes:
 		case ServerOP_ReloadObjects:
 		case ServerOP_ReloadPerlExportSettings:
-		case ServerOP_ReloadRules:
 		case ServerOP_ReloadStaticZoneData:
 		case ServerOP_ReloadTitles:
 		case ServerOP_ReloadTraps:
@@ -1357,6 +1417,11 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		case ServerOP_WWTaskUpdate:
 		case ServerOP_ZonePlayer: {
 			zoneserver_list.SendPacket(pack);
+			break;
+		}
+		case ServerOP_ReloadRules: {
+			zoneserver_list.SendPacket(pack);
+			RuleManager::Instance()->LoadRules(&database, "default", true);
 			break;
 		}
 		case ServerOP_ReloadContentFlags: {
@@ -1452,6 +1517,11 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		case ServerOP_DzMovePC:
 		case ServerOP_DzUpdateMemberStatus: {
 			DynamicZone::HandleZoneMessage(pack);
+			break;
+		}
+		case ServerOP_DataBucketCacheUpdate: {
+			zoneserver_list.SendPacket(pack);
+
 			break;
 		}
 		default: {

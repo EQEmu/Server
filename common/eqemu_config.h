@@ -120,6 +120,8 @@ class EQEmuConfig
 		uint16 ZonePortHigh;
 		uint8 DefaultStatus;
 
+		bool auto_database_updates;
+
 //	uint16 DynamicCount;
 
 //	map<string,uint16> StaticZones;

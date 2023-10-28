@@ -41,12 +41,11 @@ public:
 	HateList();
 	~HateList();
 
-	Mob *GetClosestEntOnHateList(Mob *hater, bool skip_mezzed = false);
+	Mob *GetClosestEntOnHateList(Mob *hater, bool skip_mezzed = false, EntityFilterType entity_type = EntityFilterType::All);
 	Mob *GetDamageTopOnHateList(Mob *hater); // didn't add 'skip_mezzed' due to calls being in ::Death()
 	Mob *GetEntWithMostHateOnList(Mob *center, Mob *skip = nullptr, bool skip_mezzed = false);
 	Mob *GetRandomEntOnHateList(bool skip_mezzed = false);
 	Mob *GetEntWithMostHateOnList(bool skip_mezzed = false);
-	Mob *GetEscapingEntOnHateList(); // returns first eligble entity
 	Mob *GetEscapingEntOnHateList(Mob *center, float range = 0.0f, bool first = false);
 
 	Bot* GetRandomBotOnHateList(bool skip_mezzed = false);
@@ -85,7 +84,6 @@ public:
 		bool add_to_hate_list_if_not_exist = true
 	);
 	void DoFactionHits(int64 npc_faction_level_id, int32 faction_id, int32 faction_value);
-	void IsEntityInFrenzyMode();
 	void PrintHateListToClient(Client *c);
 	void SetHateAmountOnEnt(Mob *other, int64 in_hate, uint64 in_damage);
 	void SetHateOwner(Mob *new_hate_owner) { hate_owner = new_hate_owner; }

@@ -1793,6 +1793,17 @@ struct GMSummon_Struct {
 /*104*/	uint32	unknown2; // E0 E0 56 00
 };
 
+struct GMFind_Struct {
+	char	charname[64];
+	char	gmname[64];
+	uint32	success;
+	uint32	zoneID;
+	float	x;
+	float	y;
+	float	z;
+	uint32	unknown2;
+};
+
 struct GMGoto_Struct { // x,y is swapped as compared to summon and makes sense as own packet
 /*  0*/ char	charname[64];
 
@@ -2548,7 +2559,10 @@ struct GMEmoteZone_Struct {
 struct BookText_Struct {
 	uint8 window;	// where to display the text (0xFF means new window)
 	uint8 type;		//type: 0=scroll, 1=book, 2=item info.. prolly others.
-	uint32 invslot;	// Only used in SoF and later clients.
+	int16 invslot;  // Only used in SoF and later clients.
+	int32 target_id;
+	int8 can_cast;
+	int8 can_scribe;
 	char booktext[1]; // Variable Length
 };
 // This is the request to read a book.
@@ -2557,9 +2571,16 @@ struct BookText_Struct {
 struct BookRequest_Struct {
 	uint8 window;	// where to display the text (0xFF means new window)
 	uint8 type;		//type: 0=scroll, 1=book, 2=item info.. prolly others.
-	uint32 invslot;	// Only used in Sof and later clients;
-	int16 subslot; // The subslot inside of a bag if it is inside one.
+	int16 invslot;  // Only used in Sof and later clients;
+	int32 target_id;
 	char txtfile[20];
+};
+
+// used by Scribe and CastSpell book buttons
+struct BookButton_Struct
+{
+	int16 invslot;   // server slot
+	int32 target_id;
 };
 
 /*
@@ -4094,7 +4115,9 @@ struct UpdateLeadershipAA_Struct {
 
 enum
 {
-	GroupLeadershipAbility_MarkNPC = 0
+	GroupLeadershipAbility_MarkNPC = 0,
+	RaidLeadershipAbility_MarkNPC = 16,
+	RaidLeadershipAbility_MainAssist = 19
 };
 
 struct DoGroupLeadershipAbility_Struct
@@ -4138,8 +4161,9 @@ struct InspectBuffs_Struct {
 struct RaidGeneral_Struct {
 /*00*/	uint32		action;	//=10
 /*04*/	char		player_name[64];	//should both be the player's name
-/*64*/	char		leader_name[64];
-/*132*/	uint32		parameter;
+/*68*/	uint32		unknown1;
+/*72*/	char		leader_name[64];
+/*136*/	uint32		parameter;
 };
 
 struct RaidAddMember_Struct {
@@ -4150,9 +4174,14 @@ struct RaidAddMember_Struct {
 /*139*/	uint8 flags[5]; //no idea if these are needed...
 };
 
+struct RaidNote_Struct {
+/*000*/ RaidGeneral_Struct general;
+/*140*/ char note[64];
+};
+
 struct RaidMOTD_Struct {
-/*000*/ RaidGeneral_Struct general; // leader_name and action only used
-/*136*/ char motd[0]; // max size is 1024, but reply is variable
+/*000*/ RaidGeneral_Struct general;
+/*140*/ char motd[1024];
 };
 
 struct RaidLeadershipUpdate_Struct {

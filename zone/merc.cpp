@@ -770,7 +770,7 @@ void Merc::CalcRestState() {
 	for (unsigned int j = 0; j < buff_count; j++) {
 		if(IsValidSpell(buffs[j].spellid)) {
 			if(IsDetrimentalSpell(buffs[j].spellid) && (buffs[j].ticsremaining > 0))
-				if(!DetrimentalSpellAllowsRest(buffs[j].spellid))
+				if(!IsRestAllowedSpell(buffs[j].spellid))
 					return;
 		}
 	}
@@ -4299,10 +4299,10 @@ Merc* Merc::LoadMerc(Client *c, MercTemplate* merc_template, uint32 merchant_id,
 	if(merc_template)
 	{
 		//TODO: Maybe add a way of updating client merc stats in a seperate function? like, for example, on leveling up.
-		
+
 		const NPCType* npc_type_to_copy = nullptr;
 		if (c) {
-			const NPCType* npc_type_to_copy = content_db.GetMercType(merc_template->MercNPCID, merc_template->RaceID, c->GetLevel());
+			npc_type_to_copy = content_db.GetMercType(merc_template->MercNPCID, merc_template->RaceID, c->GetLevel());
 		}
 
 		if(npc_type_to_copy != nullptr)
@@ -4323,7 +4323,7 @@ Merc* Merc::LoadMerc(Client *c, MercTemplate* merc_template, uint32 merchant_id,
 			npc_type->race = merc_template->RaceID;
 
 			// Use the Gender and Size of the Merchant if possible
-			uint8 tmpgender = 0;
+			uint8 tmpgender = MALE;
 			float tmpsize = 6.0f;
 			if(merchant_id > 0)
 			{
@@ -5624,7 +5624,7 @@ void Client::SetMerc(Merc* newmerc) {
 		GetMercInfo().myTemplate = nullptr;
 		GetMercInfo().IsSuspended = false;
 		GetMercInfo().SuspendedTime = 0;
-		GetMercInfo().Gender = 0;
+		GetMercInfo().Gender = MALE;
 		GetMercInfo().State = 0;
 		memset(GetMercInfo().merc_name, 0, 64);
 		Log(Logs::General, Logs::Mercenaries, "SetMerc No Merc for %s.", GetName());

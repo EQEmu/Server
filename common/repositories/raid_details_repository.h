@@ -44,7 +44,28 @@ public:
      */
 
 	// Custom extended repository methods here
+	static int UpdateRaidMarkedNPC(
+		Database& db,
+		int32_t raid_id,
+		uint32_t marked_npc_entity_id,
+		uint32_t marked_npc_zone_id,
+		uint32_t marked_npc_instance_id,
+		uint32_t slot_number
+	) {
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"UPDATE `{0}` SET `marked_npc_{4}_entity_id` = '{1}',`marked_npc_{4}_zone_id` = '{2}',`marked_npc_{4}_instance_id` = '{3}' WHERE raidid = '{5}';",
+				TableName(),
+				marked_npc_entity_id,
+				marked_npc_zone_id,
+				marked_npc_instance_id,
+				slot_number,
+				raid_id
+				)
+		);
 
+		return results.Success() ? results.RowsAffected() : 0;
+	}
 };
 
 #endif //EQEMU_RAID_DETAILS_REPOSITORY_H

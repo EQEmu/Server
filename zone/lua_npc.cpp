@@ -777,6 +777,42 @@ bool Lua_NPC::HasSpecialAbilities() {
 	return self->HasSpecialAbilities();
 }
 
+void Lua_NPC::DeleteBucket(std::string bucket_name)
+{
+	Lua_Safe_Call_Void();
+	self->DeleteBucket(bucket_name);
+}
+
+std::string Lua_NPC::GetBucket(std::string bucket_name)
+{
+	Lua_Safe_Call_String();
+	return self->GetBucket(bucket_name);
+}
+
+std::string Lua_NPC::GetBucketExpires(std::string bucket_name)
+{
+	Lua_Safe_Call_String();
+	return self->GetBucketExpires(bucket_name);
+}
+
+std::string Lua_NPC::GetBucketRemaining(std::string bucket_name)
+{
+	Lua_Safe_Call_String();
+	return self->GetBucketRemaining(bucket_name);
+}
+
+void Lua_NPC::SetBucket(std::string bucket_name, std::string bucket_value)
+{
+	Lua_Safe_Call_Void();
+	self->SetBucket(bucket_name, bucket_value);
+}
+
+void Lua_NPC::SetBucket(std::string bucket_name, std::string bucket_value, std::string expiration)
+{
+	Lua_Safe_Call_Void();
+	self->SetBucket(bucket_name, bucket_value, expiration);
+}
+
 luabind::scope lua_register_npc() {
 	return luabind::class_<Lua_NPC, Lua_Mob>("NPC")
 	.def(luabind::constructor<>())
@@ -804,12 +840,16 @@ luabind::scope lua_register_npc() {
 	.def("ClearLastName", (void(Lua_NPC::*)(void))&Lua_NPC::ClearLastName)
 	.def("CountItem", (uint16(Lua_NPC::*)(uint32))&Lua_NPC::CountItem)
 	.def("CountLoot", (int(Lua_NPC::*)(void))&Lua_NPC::CountLoot)
+	.def("DeleteBucket", (void(Lua_NPC::*)(std::string))&Lua_NPC::DeleteBucket)
 	.def("DisplayWaypointInfo", (void(Lua_NPC::*)(Lua_Client))&Lua_NPC::DisplayWaypointInfo)
 	.def("DoClassAttacks", (void(Lua_NPC::*)(Lua_Mob))&Lua_NPC::DoClassAttacks)
 	.def("GetAccuracyRating", (int(Lua_NPC::*)(void))&Lua_NPC::GetAccuracyRating)
 	.def("GetAttackDelay", (int(Lua_NPC::*)(void))&Lua_NPC::GetAttackDelay)
 	.def("GetAttackSpeed", (float(Lua_NPC::*)(void))&Lua_NPC::GetAttackSpeed)
 	.def("GetAvoidanceRating", &Lua_NPC::GetAvoidanceRating)
+	.def("GetBucket", (std::string(Lua_NPC::*)(std::string))&Lua_NPC::GetBucket)
+	.def("GetBucketExpires", (std::string(Lua_NPC::*)(std::string))&Lua_NPC::GetBucketExpires)
+	.def("GetBucketRemaining", (std::string(Lua_NPC::*)(std::string))&Lua_NPC::GetBucketRemaining)
 	.def("GetCopper", (uint32(Lua_NPC::*)(void))&Lua_NPC::GetCopper)
 	.def("GetFirstSlotByItemID", (uint16(Lua_NPC::*)(uint32))&Lua_NPC::GetFirstSlotByItemID)
 	.def("GetFollowCanRun", (bool(Lua_NPC::*)(void))&Lua_NPC::GetFollowCanRun)
@@ -894,6 +934,8 @@ luabind::scope lua_register_npc() {
 	.def("ScaleNPC", (void(Lua_NPC::*)(uint8,bool))&Lua_NPC::ScaleNPC)
 	.def("SendPayload", (void(Lua_NPC::*)(int))&Lua_NPC::SendPayload)
 	.def("SendPayload", (void(Lua_NPC::*)(int,std::string))&Lua_NPC::SendPayload)
+	.def("SetBucket", (void(Lua_NPC::*)(std::string,std::string))&Lua_NPC::SetBucket)
+	.def("SetBucket", (void(Lua_NPC::*)(std::string,std::string,std::string))&Lua_NPC::SetBucket)
 	.def("SetCopper", (void(Lua_NPC::*)(uint32))&Lua_NPC::SetCopper)
 	.def("SetFollowCanRun", (void(Lua_NPC::*)(bool))&Lua_NPC::SetFollowCanRun)
 	.def("SetFollowDistance", (void(Lua_NPC::*)(int))&Lua_NPC::SetFollowDistance)

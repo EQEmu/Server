@@ -674,6 +674,8 @@ void EntityList::AddNPC(NPC *npc, bool send_spawn_packet, bool dont_queue)
 	npc_list.emplace(std::pair<uint16, NPC *>(npc->GetID(), npc));
 	mob_list.emplace(std::pair<uint16, Mob *>(npc->GetID(), npc));
 
+	entity_list.ScanCloseMobs(npc->close_mobs, npc, true);
+
 	if (parse->HasQuestSub(npc->GetNPCTypeID(), EVENT_SPAWN)) {
 		parse->EventNPC(EVENT_SPAWN, npc, nullptr, "", 0);
 	}
@@ -712,8 +714,6 @@ void EntityList::AddNPC(NPC *npc, bool send_spawn_packet, bool dont_queue)
 	}
 
 	npc->SendPositionToClients();
-
-	entity_list.ScanCloseMobs(npc->close_mobs, npc, true);
 
 	if (parse->HasQuestSub(ZONE_CONTROLLER_NPC_ID, EVENT_SPAWN_ZONE)) {
 		npc->DispatchZoneControllerEvent(EVENT_SPAWN_ZONE, npc, "", 0, nullptr);
@@ -1595,7 +1595,7 @@ void EntityList::RefreshClientXTargets(Client *c)
 }
 
 void EntityList::QueueClientsByTarget(Mob *sender, const EQApplicationPacket *app,
-		bool iSendToSender, Mob *SkipThisMob, bool ackreq, bool HoTT, uint32 ClientVersionBits, bool inspect_buffs)
+		bool iSendToSender, Mob *SkipThisMob, bool ackreq, bool HoTT, uint32 ClientVersionBits, bool inspect_buffs, bool clear_target_window)
 {
 	auto it = client_list.begin();
 	while (it != client_list.end()) {
@@ -1623,23 +1623,25 @@ void EntityList::QueueClientsByTarget(Mob *sender, const EQApplicationPacket *ap
 		if (c != sender) {
 			if (Target == sender) {
 				if (inspect_buffs) { // if inspect_buffs is true we're sending a mob's buffs to those with the LAA
+					Send = clear_target_window;
 					if (c->GetGM() || RuleB(Spells, AlwaysSendTargetsBuffs)) {
-						Send = true;
+						Send = !clear_target_window;
 					} else if (c->IsRaidGrouped()) {
 						Raid *raid = c->GetRaid();
-						if (!raid)
-							continue;
-						uint32 gid = raid->GetGroup(c);
-						if (gid > 11 || raid->GroupCount(gid) < 3)
-							continue;
-						if (raid->GetLeadershipAA(groupAAInspectBuffs, gid))
-							Send = true;
+						if (raid) {
+							uint32 gid = raid->GetGroup(c);
+							if (gid < MAX_RAID_GROUPS && raid->GroupCount(gid) >= 3) {
+								if (raid->GetLeadershipAA(groupAAInspectBuffs, gid))
+									Send = !clear_target_window;
+							}
+						}
 					} else {
 						Group *group = c->GetGroup();
-						if (!group || group->GroupCount() < 3)
-							continue;
-						if (group->GetLeadershipAA(groupAAInspectBuffs))
-							Send = true;
+						if (group && group->GroupCount() >= 3) {
+							if (group->GetLeadershipAA(groupAAInspectBuffs)) {
+								Send = !clear_target_window;
+							}
+						}
 					}
 				} else {
 					Send = true;
@@ -1649,8 +1651,9 @@ void EntityList::QueueClientsByTarget(Mob *sender, const EQApplicationPacket *ap
 			}
 		}
 
-		if (Send && (c->ClientVersionBit() & ClientVersionBits))
+		if (Send && (c->ClientVersionBit() & ClientVersionBits)) {
 			c->QueuePacket(app, ackreq);
+		}
 	}
 }
 
@@ -1755,21 +1758,6 @@ void EntityList::QueueClients(
 		++it;
 	}
 }
-
-void EntityList::QueueManaged(Mob *sender, const EQApplicationPacket *app,
-		bool ignore_sender, bool ackreq)
-{
-	auto it = client_list.begin();
-	while (it != client_list.end()) {
-		Client *ent = it->second;
-
-		if ((!ignore_sender || ent != sender))
-			ent->QueuePacket(app, ackreq, Client::CLIENT_CONNECTED);
-
-		++it;
-	}
-}
-
 
 void EntityList::QueueClientsStatus(Mob *sender, const EQApplicationPacket *app,
 		bool ignore_sender, uint8 minstatus, uint8 maxstatus)
@@ -2192,21 +2180,6 @@ Group *EntityList::GetGroupByClient(Client *client)
 	return nullptr;
 }
 
-Raid *EntityList::GetRaidByLeaderName(const char *leader)
-{
-	std::list<Raid *>::iterator iterator;
-
-	iterator = raid_list.begin();
-
-	while (iterator != raid_list.end()) {
-		if ((*iterator)->GetLeader() && strcmp((*iterator)->GetLeader()->GetName(), leader) == 0) {
-			return *iterator;
-		}
-		++iterator;
-	}
-	return nullptr;
-}
-
 Raid *EntityList::GetRaidByID(uint32 id)
 {
 	std::list<Raid *>::iterator iterator;
@@ -2286,22 +2259,14 @@ Raid* EntityList::GetRaidByBot(const Bot* bot)
 	return nullptr;
 }
 
-
-Raid *EntityList::GetRaidByMob(Mob *mob)
+Raid* EntityList::GetRaidByName(const char* name)
 {
-	std::list<Raid *>::iterator iterator;
-
-	iterator = raid_list.begin();
-
-	while (iterator != raid_list.end()) {
-		for(int x = 0; x < MAX_RAID_MEMBERS; x++) {
-			// TODO: Implement support for Mob objects in Raid class
-			/*if((*iterator)->members[x].member){
-				if((*iterator)->members[x].member == mob)
-					return *iterator;
-			}*/
+	for (const auto& r : raid_list) {
+		for (const auto& m : r->members) {
+			if (Strings::EqualFold(m.member_name, name)) {
+				return r;
+			}
 		}
-		++iterator;
 	}
 	return nullptr;
 }
@@ -2846,31 +2811,6 @@ bool EntityList::RemoveMob(uint16 delete_id)
 }
 
 /**
- * @param delete_mob
- * @return
- */
-bool EntityList::RemoveMob(Mob *delete_mob)
-{
-	if (delete_mob == 0) {
-		return true;
-	}
-
-	auto it = mob_list.begin();
-	while (it != mob_list.end()) {
-		if (it->second == delete_mob) {
-			safe_delete(it->second);
-			if (!corpse_list.count(it->first)) {
-				free_ids.push(it->first);
-			}
-			mob_list.erase(it);
-			return true;
-		}
-		++it;
-	}
-	return false;
-}
-
-/**
  * @param delete_id
  * @return
  */
@@ -3121,18 +3061,6 @@ bool EntityList::RemoveGroup(uint32 delete_id)
 	return true;
 }
 
-bool EntityList::RemoveRaid(uint32 delete_id)
-{
-	auto it = std::find_if(raid_list.begin(), raid_list.end(),
-			[delete_id](const Raid *a) { return a->GetID() == delete_id; });
-	if (it == raid_list.end())
-		return false;
-	auto raid = *it;
-	raid_list.erase(it);
-	safe_delete(raid);
-	return true;
-}
-
 void EntityList::Clear()
 {
 	RemoveAllClients();
@@ -3215,21 +3143,6 @@ void EntityList::RemoveEntity(uint16 id)
 void EntityList::Process()
 {
 	CheckSpawnQueue();
-}
-
-void EntityList::CountNPC(uint32 *NPCCount, uint32 *NPCLootCount, uint32 *gmspawntype_count)
-{
-	*NPCCount = 0;
-	*NPCLootCount = 0;
-
-	auto it = npc_list.begin();
-	while (it != npc_list.end()) {
-		(*NPCCount)++;
-		(*NPCLootCount) += it->second->CountLoot();
-		if (it->second->GetNPCTypeID() == 0)
-			(*gmspawntype_count)++;
-		++it;
-	}
 }
 
 void EntityList::Depop(bool StartSpawnTimer)
@@ -3566,15 +3479,6 @@ void EntityList::ClearClientPetitionQueue()
 	return;
 }
 
-void EntityList::WriteEntityIDs()
-{
-	auto it = mob_list.begin();
-	while (it != mob_list.end()) {
-		std::cout << "ID: " << it->first << "  Name: " << it->second->GetName() << std::endl;
-		++it;
-	}
-}
-
 BulkZoneSpawnPacket::BulkZoneSpawnPacket(Client *iSendTo, uint32 iMaxSpawnsPerPacket)
 {
 	data = nullptr;
@@ -3639,24 +3543,6 @@ void EntityList::HalveAggro(Mob *who)
 	while (it != npc_list.end()) {
 		if (it->second->CastToNPC()->CheckAggro(who))
 			it->second->CastToNPC()->SetHateAmountOnEnt(who, it->second->CastToNPC()->GetHateAmount(who) / 2);
-		++it;
-	}
-}
-
-void EntityList::Evade(Mob *who)
-{
-	uint32 flatval = who->GetLevel() * 13;
-	int amt = 0;
-	auto it = npc_list.begin();
-	while (it != npc_list.end()) {
-		if (it->second->CastToNPC()->CheckAggro(who)) {
-			amt = it->second->CastToNPC()->GetHateAmount(who);
-			amt -= flatval;
-			if (amt > 0)
-				it->second->CastToNPC()->SetHateAmountOnEnt(who, amt);
-			else
-				it->second->CastToNPC()->SetHateAmountOnEnt(who, 0);
-		}
 		++it;
 	}
 }
@@ -4400,35 +4286,6 @@ bool EntityList::LimitCheckGroup(uint32 spawngroup_id, int count)
 	return true;
 }
 
-//check limits on an npc type in a given spawn group, and
-//checks limits on the entire zone in one pass.
-//returns true if neither limit has been reached
-bool EntityList::LimitCheckBoth(uint32 npc_type, uint32 spawngroup_id, int group_count, int type_count)
-{
-	if (group_count < 1 && type_count < 1)
-		return true;
-
-	std::map<uint16, SpawnLimitRecord>::iterator cur,end;
-	cur = npc_limit_list.begin();
-	end = npc_limit_list.end();
-
-	for (; cur != end; ++cur) {
-		if (cur->second.npc_type == npc_type) {
-			type_count--;
-			if (type_count == 0) {
-				return false;
-			}
-		}
-		if (cur->second.spawngroup_id == spawngroup_id) {
-			group_count--;
-			if (group_count == 0) {
-				return false;
-			}
-		}
-	}
-	return true;
-}
-
 bool EntityList::LimitCheckName(const char *npc_name)
 {
 	auto it = npc_list.begin();
@@ -4473,25 +4330,6 @@ void EntityList::DestroyTempPets(Mob *owner)
 		}
 		++it;
 	}
-}
-
-int16 EntityList::CountTempPets(Mob *owner)
-{
-	int16 count = 0;
-	auto it = npc_list.begin();
-	while (it != npc_list.end()) {
-		NPC* n = it->second;
-		if (n->GetSwarmInfo()) {
-			if (n->GetSwarmInfo()->owner_id == owner->GetID()) {
-				count++;
-			}
-		}
-		++it;
-	}
-
-	owner->SetTempPetCount(count);
-
-	return count;
 }
 
 void EntityList::AddTempPetsToHateList(Mob *owner, Mob* other, bool bFrenzy)
@@ -4544,32 +4382,6 @@ void EntityList::AddTempPetsToHateListOnOwnerDamage(Mob *owner, Mob* attacker, i
 		}
 		++it;
 	}
-}
-
-bool Entity::CheckCoordLosNoZLeaps(float cur_x, float cur_y, float cur_z,
-		float trg_x, float trg_y, float trg_z, float perwalk)
-{
-	if (zone->zonemap == nullptr)
-		return true;
-
-	glm::vec3 myloc;
-	glm::vec3 oloc;
-	glm::vec3 hit;
-
-	myloc.x = cur_x;
-	myloc.y = cur_y;
-	myloc.z = cur_z+5;
-
-	oloc.x = trg_x;
-	oloc.y = trg_y;
-	oloc.z = trg_z+5;
-
-	if (myloc.x == oloc.x && myloc.y == oloc.y && myloc.z == oloc.z)
-		return true;
-
-	if (!zone->zonemap->LineIntersectsZoneNoZLeaps(myloc,oloc,perwalk,&hit))
-		return true;
-	return false;
 }
 
 void EntityList::QuestJournalledSayClose(
@@ -5213,17 +5025,6 @@ uint32 EntityList::CheckNPCsClose(Mob *center)
 	return count;
 }
 
-void EntityList::GateAllClients()
-{
-	auto it = client_list.begin();
-	while (it != client_list.end()) {
-		Client *c = it->second;
-		if (c)
-			c->GoToBind();
-		++it;
-	}
-}
-
 void EntityList::SignalAllClients(int signal_id)
 {
 	for (const auto& c : client_list) {
@@ -5231,20 +5032,6 @@ void EntityList::SignalAllClients(int signal_id)
 			c.second->Signal(signal_id);
 		}
 	}
-}
-
-uint16 EntityList::GetClientCount(){
-	uint16 ClientCount = 0;
-	std::list<Client*> client_list;
-	entity_list.GetClientList(client_list);
-	auto iter = client_list.begin();
-	while (iter != client_list.end()) {
-		Client *entry = (*iter);
-		entry->GetCleanName();
-		ClientCount++;
-		iter++;
-	}
-	return ClientCount;
 }
 
 void EntityList::GetMobList(std::list<Mob *> &m_list)
@@ -5875,6 +5662,12 @@ void EntityList::StopMobAI()
 
 void EntityList::SendAlternateAdvancementStats() {
 	for (auto &c : client_list) {
+		c.second->Message(Chat::White, "Reloading AA");
+		c.second->ReloadExpansionProfileSetting();
+		if (!database.LoadAlternateAdvancement(c.second)) {
+			c.second->Message(Chat::Red, "Error loading alternate advancement character data");
+		}
+
 		c.second->SendClearPlayerAA();
 		c.second->SendAlternateAdvancementTable();
 		c.second->SendAlternateAdvancementStats();

@@ -17,6 +17,7 @@
 */
 
 #include "../common/races.h"
+#include "data_verification.h"
 
 const char* GetRaceIDName(uint16 race_id)
 {
@@ -67,7 +68,7 @@ const char* GetRaceIDName(uint16 race_id)
 	//	return "Froglok";
 	//case DRAKKIN:
 	//	return "Drakkin";
-	
+
 	// RoF2 Race Labels
 	case RT_ABHORRENT:
 		return "Abhorrent";
@@ -1593,11 +1594,13 @@ float GetRaceGenderDefaultHeight(int race, int gender)
 
 	const auto size = sizeof(male_height) / sizeof(male_height[0]);
 
-	if (race >= size)
+	if (race >= size) {
 		return 6.0f;
+	}
 
-	if (gender == 1)
+	if (gender == FEMALE) {
 		return female_height[race];
+	}
 
 	return male_height[race];
 }
@@ -1696,7 +1699,7 @@ bool PlayerAppearance::IsValidBeardColor(uint16 race_id, uint8 gender_id, uint8 
 {
 	if (beard_color_value == 0xFF)
 	return true;
-	
+
 	switch (BINDRG(race_id, gender_id)) {
 	case GNOME_MALE:
 		if (beard_color_value <= 24)
@@ -1783,7 +1786,7 @@ bool PlayerAppearance::IsValidEyeColor(uint16 race_id, uint8 gender_id, uint8 ey
 	case VAHSHIR_FEMALE:
 		if (eye_color_value <= 9)
 			return true;
-		break;	
+		break;
 	case TROLL_MALE:
 	case TROLL_FEMALE:
 		if (eye_color_value <= 10)
@@ -2109,7 +2112,7 @@ bool PlayerAppearance::IsValidTexture(uint16 race_id, uint8 gender_id, uint8 tex
 {
 	if (texture_value == 0xFF)
 		return true;
-	
+
 	if (use_luclin) {
 		switch (BINDRG(race_id, gender_id)) {
 		case HUMAN_MALE:
@@ -2243,4 +2246,58 @@ const char* GetGenderName(uint32 gender_id) {
 		gender_name = "Neuter";
 	}
 	return gender_name;
+}
+
+const std::string GetPlayerRaceAbbreviation(uint16 race_id)
+{
+	if (!IsPlayerRace(race_id)) {
+		return std::string("UNK");
+	}
+
+	switch (race_id) {
+		case RACE_HUMAN_1:
+			return "HUM";
+		case RACE_BARBARIAN_2:
+			return "BAR";
+		case RACE_ERUDITE_3:
+			return "ERU";
+		case RACE_WOOD_ELF_4:
+			return "ELF";
+		case RACE_HIGH_ELF_5:
+			return "HIE";
+		case RACE_DARK_ELF_6:
+			return "DEF";
+		case RACE_HALF_ELF_7:
+			return "HEF";
+		case RACE_DWARF_8:
+			return "DWF";
+		case RACE_TROLL_9:
+			return "TRL";
+		case RACE_OGRE_10:
+			return "OGR";
+		case RACE_HALFLING_11:
+			return "HFL";
+		case RACE_GNOME_12:
+			return "GNM";
+		case RACE_IKSAR_128:
+			return "IKS";
+		case RACE_VAH_SHIR_130:
+			return "VAH";
+		case RACE_FROGLOK_330:
+			return "FRG";
+		case RACE_DRAKKIN_522:
+			return "DRK";
+	}
+
+	return std::string("UNK");
+}
+
+bool IsPlayerRace(uint16 race_id) {
+	return (
+		EQ::ValueWithin(race_id, RACE_HUMAN_1, RACE_GNOME_12) ||
+		race_id == RACE_IKSAR_128 ||
+		race_id == RACE_VAH_SHIR_130 ||
+		race_id == RACE_FROGLOK_330 ||
+		race_id == RACE_DRAKKIN_522
+	);
 }

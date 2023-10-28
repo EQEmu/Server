@@ -19,7 +19,7 @@ void command_suspend(Client *c, const Seperator *sep)
 	const std::string reason = sep->arg[3] ? sep->argplus[3] : "";
 
 	auto l = AccountRepository::GetWhere(
-		content_db,
+		database,
 		fmt::format(
 			"LOWER(charname) = '{}'",
 			Strings::Escape(character_name)
@@ -41,7 +41,7 @@ void command_suspend(Client *c, const Seperator *sep)
 	l[0].suspendeduntil = std::time(nullptr) + (days * 86400);
 	l[0].suspend_reason = reason;
 
-	if (!AccountRepository::UpdateOne(content_db, l[0])) {
+	if (!AccountRepository::UpdateOne(database, l[0])) {
 		c->Message(
 			Chat::White,
 			fmt::format(

@@ -1,1 +1,0 @@
-ALTER TABLE `bot_groups` ADD COLUMN `auto_spawn` tinyint(1) UNSIGNED NOT NULL DEFAULT 0 AFTER `group_name`;

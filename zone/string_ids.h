@@ -100,6 +100,7 @@
 #define DUP_LORE					290		//Duplicate lore items are not allowed.
 #define TGB_ON						293		//Target other group buff is *ON*.
 #define TGB_OFF						294		//Target other group buff is *OFF*.
+#define DONT_SEE_TARGET				303		//I don't see anyone by that name around here...
 #define DISARMED_TRAP				305		//You have disarmed the trap.
 #define LDON_SENSE_TRAP1			306		//You do not Sense any traps.
 #define TRADESKILL_NOCOMBINE		334		//You cannot combine these items in this container type!
@@ -247,6 +248,9 @@
 #define WONT_SELL_DEEDS5			1170 	//I am tolerant by nature..but infidels like you push me past my limit..get out!
 #define WONT_SELL_DEEDS6			1171 	//I cannot abide you or your actions against all that is right..BE GONE!
 #define AA_POINT					1197	//point
+#define MERCHANT_CLOSED_ONE			1199	//I don't have time for that now.
+#define MERCHANT_CLOSED_TWO			1200	//Can't you see I'm doing something here?
+#define MERCHANT_CLOSED_THREE		1201	//I am not open for business right now.
 #define AA_POINTS					1215	//points
 #define SPELL_FIZZLE_OTHER			1218	//%1's spell fizzles!
 #define MISSED_NOTE_OTHER			1219	//A missed note brings %1's song to a close!
@@ -364,10 +368,12 @@
 #define PETITION_DELETED			5054	//Your petition was successfully deleted.
 #define ALREADY_IN_RAID				5060	//%1 is already in a raid.
 #define ALREADY_IN_YOUR_RAID		5077	//%1 is already in your raid.
+#define NOT_IN_YOUR_RAID            5082	//%1 is not in your raid.
 #define GAIN_RAIDEXP				5085	//You gained raid experience!
 #define DUNGEON_SEALED				5141	//The gateway to the dungeon is sealed off to you.  Perhaps you would be able to enter if you needed to adventure there.
 #define ADVENTURE_COMPLETE			5147	//You received %1 points for successfully completing the adventure.
 #define SUCCOR_FAIL					5169	//The portal collapes before you can escape!
+#define AUGMENT_RESTRICTED			5480	//The item does not satisfy the augment's restrictions.
 #define PET_ATTACKING				5501	//%1 tells you, 'Attacking %2 Master.'
 #define AVOID_STUNNING_BLOW			5753	//You avoid the stunning blow.
 #define FATAL_BOW_SHOT				5745	//%1 performs a FATAL BOW SHOT!!
@@ -428,9 +434,13 @@
 #define LEADERSHIP_EXP_ON			8653	//
 #define LEADERSHIP_EXP_OFF			8654	//
 #define CURRENT_SPELL_EFFECTS		8757	//%1's current spell effects:
+#define MAX_MAIN_RAID_ASSISTERS		8782	//Max number of main assists reached (3)
+#define MAX_MAIN_RAID_MARKERS		8783	//Max number of main markers reached (3)
+#define NOT_DELEGATED_MARKER		8794	//You have not been delegated Raid Mark
 #define GAIN_GROUP_LEADERSHIP_EXP	8788	//
 #define GAIN_RAID_LEADERSHIP_EXP	8789	//
 #define BUFF_MINUTES_REMAINING		8799	//%1 (%2 minutes remaining)
+#define RAID_NO_LONGER_MARKED       8801	//%1 is no longer marked
 #define YOU_HAVE_BEEN_GIVEN         8994    //You have been given: %1
 #define NO_MORE_TRAPS				9002	//You have already placed your maximum number of traps.
 #define FEAR_TOO_HIGH				9035	//Your target is too high of a level for your fear spell.

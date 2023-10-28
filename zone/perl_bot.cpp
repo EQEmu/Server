@@ -65,24 +65,59 @@ void Perl_Bot_ApplySpell(Bot* self, int spell_id, int duration)
 	self->ApplySpell(spell_id, duration);
 }
 
-void Perl_Bot_ApplySpell(Bot* self, int spell_id, int duration, bool allow_pets)
+void Perl_Bot_ApplySpell(Bot* self, int spell_id, int duration, int level)
 {
-	self->ApplySpell(spell_id, duration, ApplySpellType::Solo, allow_pets);
+	self->ApplySpell(spell_id, duration, level, ApplySpellType::Solo);
+}
+
+void Perl_Bot_ApplySpell(Bot* self, int spell_id, int duration, int level, bool allow_pets)
+{
+	self->ApplySpell(spell_id, duration, level, ApplySpellType::Solo, allow_pets);
 }
 
 void Perl_Bot_ApplySpellGroup(Bot* self, int spell_id)
 {
-	self->ApplySpell(spell_id, 0, ApplySpellType::Group);
+	self->ApplySpell(spell_id, 0, -1, ApplySpellType::Group);
 }
 
 void Perl_Bot_ApplySpellGroup(Bot* self, int spell_id, int duration)
 {
-	self->ApplySpell(spell_id, duration, ApplySpellType::Group);
+	self->ApplySpell(spell_id, duration, -1, ApplySpellType::Group);
 }
 
-void Perl_Bot_ApplySpellGroup(Bot* self, int spell_id, int duration, bool allow_pets)
+void Perl_Bot_ApplySpellGroup(Bot* self, int spell_id, int duration, int level)
 {
-	self->ApplySpell(spell_id, duration, ApplySpellType::Group, allow_pets);
+	self->ApplySpell(spell_id, duration, level, ApplySpellType::Group);
+}
+
+void Perl_Bot_ApplySpellGroup(Bot* self, int spell_id, int duration, int level, bool allow_pets)
+{
+	self->ApplySpell(spell_id, duration, level, ApplySpellType::Group, allow_pets);
+}
+
+void Perl_Bot_ApplySpellRaid(Bot* self, int spell_id)
+{
+	self->ApplySpell(spell_id, 0, -1, ApplySpellType::Raid);
+}
+
+void Perl_Bot_ApplySpellRaid(Bot* self, int spell_id, int duration)
+{
+	self->ApplySpell(spell_id, duration, -1, ApplySpellType::Raid);
+}
+
+void Perl_Bot_ApplySpellRaid(Bot* self, int spell_id, int duration, int level)
+{
+	self->ApplySpell(spell_id, duration, level, ApplySpellType::Raid);
+}
+
+void Perl_Bot_ApplySpellRaid(Bot* self, int spell_id, int duration, int level, bool allow_pets)
+{
+	self->ApplySpell(spell_id, duration, level, ApplySpellType::Raid, allow_pets);
+}
+
+void Perl_Bot_ApplySpellRaid(Bot* self, int spell_id, int duration, int level, bool allow_pets, bool is_raid_group_only)
+{
+	self->ApplySpell(spell_id, duration, level, ApplySpellType::Raid, allow_pets, is_raid_group_only);
 }
 
 uint32 Perl_Bot_CountBotItem(Bot* self, uint32 item_id)
@@ -315,24 +350,59 @@ void Perl_Bot_SetSpellDuration(Bot* self, int spell_id, int duration)
 	self->SetSpellDuration(spell_id, duration);
 }
 
-void Perl_Bot_SetSpellDuration(Bot* self, int spell_id, int duration, bool allow_pets)
+void Perl_Bot_SetSpellDuration(Bot* self, int spell_id, int duration, int level)
 {
-	self->SetSpellDuration(spell_id, duration, ApplySpellType::Solo, allow_pets);
+	self->SetSpellDuration(spell_id, duration);
+}
+
+void Perl_Bot_SetSpellDuration(Bot* self, int spell_id, int duration, int level, bool allow_pets)
+{
+	self->SetSpellDuration(spell_id, duration, level, ApplySpellType::Solo, allow_pets);
 }
 
 void Perl_Bot_SetSpellDurationGroup(Bot* self, int spell_id)
 {
-	self->SetSpellDuration(spell_id, 0, ApplySpellType::Group);
+	self->SetSpellDuration(spell_id, 0, -1, ApplySpellType::Group);
 }
 
 void Perl_Bot_SetSpellDurationGroup(Bot* self, int spell_id, int duration)
 {
-	self->SetSpellDuration(spell_id, duration, ApplySpellType::Group);
+	self->SetSpellDuration(spell_id, duration, -1, ApplySpellType::Group);
 }
 
-void Perl_Bot_SetSpellDurationGroup(Bot* self, int spell_id, int duration, bool allow_pets)
+void Perl_Bot_SetSpellDurationGroup(Bot* self, int spell_id, int duration, int level)
 {
-	self->SetSpellDuration(spell_id, duration, ApplySpellType::Group, allow_pets);
+	self->SetSpellDuration(spell_id, duration, level, ApplySpellType::Group);
+}
+
+void Perl_Bot_SetSpellDurationGroup(Bot* self, int spell_id, int duration, int level, bool allow_pets)
+{
+	self->SetSpellDuration(spell_id, duration, level, ApplySpellType::Group, allow_pets);
+}
+
+void Perl_Bot_SetSpellDurationRaid(Bot* self, int spell_id)
+{
+	self->SetSpellDuration(spell_id, 0, -1, ApplySpellType::Raid);
+}
+
+void Perl_Bot_SetSpellDurationRaid(Bot* self, int spell_id, int duration)
+{
+	self->SetSpellDuration(spell_id, duration, -1, ApplySpellType::Raid);
+}
+
+void Perl_Bot_SetSpellDurationRaid(Bot* self, int spell_id, int duration, int level)
+{
+	self->SetSpellDuration(spell_id, duration, level, ApplySpellType::Raid);
+}
+
+void Perl_Bot_SetSpellDurationRaid(Bot* self, int spell_id, int duration, int level, bool allow_pets)
+{
+	self->SetSpellDuration(spell_id, duration, level, ApplySpellType::Raid, allow_pets);
+}
+
+void Perl_Bot_SetSpellDurationRaid(Bot* self, int spell_id, int duration, int level, bool allow_pets, bool is_raid_group_only)
+{
+	self->SetSpellDuration(spell_id, duration, level, ApplySpellType::Raid, allow_pets, is_raid_group_only);
 }
 
 bool Perl_Bot_ReloadBotDataBuckets(Bot* self)
@@ -445,6 +515,16 @@ void Perl_Bot_AddItem(Bot *self, perl::reference table_ref)
 	}
 }
 
+std::string Perl_Bot_GetClassAbbreviation(Bot* self)
+{
+	return GetPlayerClassAbbreviation(self->GetClass());
+}
+
+std::string Perl_Bot_GetRaceAbbreviation(Bot* self)
+{
+	return GetPlayerRaceAbbreviation(self->GetBaseRace());
+}
+
 void perl_register_bot()
 {
 	perl::interpreter state(PERL_GET_THX);
@@ -463,10 +543,17 @@ void perl_register_bot()
 	package.add("AddItem", &Perl_Bot_AddItem);
 	package.add("ApplySpell", (void(*)(Bot*, int))&Perl_Bot_ApplySpell);
 	package.add("ApplySpell", (void(*)(Bot*, int, int))&Perl_Bot_ApplySpell);
-	package.add("ApplySpell", (void(*)(Bot*, int, int, bool))&Perl_Bot_ApplySpell);
+	package.add("ApplySpell", (void(*)(Bot*, int, int, int))&Perl_Bot_ApplySpell);
+	package.add("ApplySpell", (void(*)(Bot*, int, int, int, bool))&Perl_Bot_ApplySpell);
 	package.add("ApplySpellGroup", (void(*)(Bot*, int))&Perl_Bot_ApplySpellGroup);
 	package.add("ApplySpellGroup", (void(*)(Bot*, int, int))&Perl_Bot_ApplySpellGroup);
-	package.add("ApplySpellGroup", (void(*)(Bot*, int, int, bool))&Perl_Bot_ApplySpellGroup);
+	package.add("ApplySpellGroup", (void(*)(Bot*, int, int, int))&Perl_Bot_ApplySpellGroup);
+	package.add("ApplySpellGroup", (void(*)(Bot*, int, int, int, bool))&Perl_Bot_ApplySpellGroup);
+	package.add("ApplySpellRaid", (void(*)(Bot*, int))&Perl_Bot_ApplySpellRaid);
+	package.add("ApplySpellRaid", (void(*)(Bot*, int, int))&Perl_Bot_ApplySpellRaid);
+	package.add("ApplySpellRaid", (void(*)(Bot*, int, int, int))&Perl_Bot_ApplySpellRaid);
+	package.add("ApplySpellRaid", (void(*)(Bot*, int, int, int, bool))&Perl_Bot_ApplySpellRaid);
+	package.add("ApplySpellRaid", (void(*)(Bot*, int, int, int, bool, bool))&Perl_Bot_ApplySpellRaid);
 	package.add("Camp", (void(*)(Bot*))&Perl_Bot_Camp);
 	package.add("Camp", (void(*)(Bot*, bool))&Perl_Bot_Camp);
 	package.add("CountAugmentEquippedByID", &Perl_Bot_CountAugmentEquippedByID);
@@ -492,6 +579,7 @@ void perl_register_bot()
 	package.add("GetBotID", &Perl_Bot_GetBotID);
 	package.add("GetBotItem", &Perl_Bot_GetBotItem);
 	package.add("GetBotItemIDBySlot", &Perl_Bot_GetBotItemIDBySlot);
+	package.add("GetClassAbbreviation", &Perl_Bot_GetClassAbbreviation);
 	package.add("GetExpansionBitmask", &Perl_Bot_GetExpansionBitmask);
 	package.add("GetGroup", &Perl_Bot_GetGroup);
 	package.add("GetHealAmount", &Perl_Bot_GetHealAmount);
@@ -499,6 +587,7 @@ void perl_register_bot()
 	package.add("GetItemAt", &Perl_Bot_GetItemAt);
 	package.add("GetItemIDAt", &Perl_Bot_GetItemIDAt);
 	package.add("GetOwner", &Perl_Bot_GetOwner);
+	package.add("GetRaceAbbreviation", &Perl_Bot_GetRaceAbbreviation);
 	package.add("GetRawItemAC", &Perl_Bot_GetRawItemAC);
 	package.add("GetSpellDamage", &Perl_Bot_GetSpellDamage);
 	package.add("HasAugmentEquippedByID", &Perl_Bot_HasAugmentEquippedByID);
@@ -521,10 +610,17 @@ void perl_register_bot()
 	package.add("SetExpansionBitmask", (void(*)(Bot*, int, bool))&Perl_Bot_SetExpansionBitmask);
 	package.add("SetSpellDuration", (void(*)(Bot*, int))&Perl_Bot_SetSpellDuration);
 	package.add("SetSpellDuration", (void(*)(Bot*, int, int))&Perl_Bot_SetSpellDuration);
-	package.add("SetSpellDuration", (void(*)(Bot*, int, int, bool))&Perl_Bot_SetSpellDuration);
+	package.add("SetSpellDuration", (void(*)(Bot*, int, int, int))&Perl_Bot_SetSpellDuration);
+	package.add("SetSpellDuration", (void(*)(Bot*, int, int, int, bool))&Perl_Bot_SetSpellDuration);
 	package.add("SetSpellDurationGroup", (void(*)(Bot*, int))&Perl_Bot_SetSpellDurationGroup);
 	package.add("SetSpellDurationGroup", (void(*)(Bot*, int, int))&Perl_Bot_SetSpellDurationGroup);
-	package.add("SetSpellDurationGroup", (void(*)(Bot*, int, int, bool))&Perl_Bot_SetSpellDurationGroup);
+	package.add("SetSpellDurationGroup", (void(*)(Bot*, int, int, int))&Perl_Bot_SetSpellDurationGroup);
+	package.add("SetSpellDurationGroup", (void(*)(Bot*, int, int, int, bool))&Perl_Bot_SetSpellDurationGroup);
+	package.add("SetSpellDurationRaid", (void(*)(Bot*, int))&Perl_Bot_SetSpellDurationRaid);
+	package.add("SetSpellDurationRaid", (void(*)(Bot*, int, int))&Perl_Bot_SetSpellDurationRaid);
+	package.add("SetSpellDurationRaid", (void(*)(Bot*, int, int, int))&Perl_Bot_SetSpellDurationRaid);
+	package.add("SetSpellDurationRaid", (void(*)(Bot*, int, int, int, bool))&Perl_Bot_SetSpellDurationRaid);
+	package.add("SetSpellDurationRaid", (void(*)(Bot*, int, int, int, bool, bool))&Perl_Bot_SetSpellDurationRaid);
 	package.add("Signal", &Perl_Bot_Signal);
 	package.add("Sit", &Perl_Bot_Sit);
 	package.add("Stand", &Perl_Bot_Stand);

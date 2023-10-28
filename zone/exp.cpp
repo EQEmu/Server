@@ -938,6 +938,8 @@ void Client::SetLevel(uint8 set_level, bool command)
 		m_pp.exp = GetEXPForLevel(set_level);
 		Message(Chat::Yellow, fmt::format("Welcome to level {}!", set_level).c_str());
 		lu->exp = 0;
+
+		AutoGrantAAPoints();
 	} else {
 		const auto temporary_xp = (
 			static_cast<float>(m_pp.exp - GetEXPForLevel(GetLevel())) /
@@ -1181,11 +1183,10 @@ void Raid::SplitExp(const uint64 exp, Mob* other) {
 	const auto highest_level   = GetHighestLevel();
 
 	if (RuleB(Character, EnableRaidEXPModifier)) {
-		raid_experience = static_cast<uint64>(
-			static_cast<float>(raid_experience) *
-			(1.0f - RuleR(Character, RaidExpMultiplier))
-		);
+		raid_experience = static_cast<uint64>(static_cast<float>(raid_experience) *	(1.0f - RuleR(Character, RaidExpMultiplier)));
 	}
+
+	raid_experience = static_cast<uint64>(static_cast<float>(raid_experience) * RuleR(Character, FinalRaidExpMultiplier));
 
 	const auto consider_level = Mob::GetLevelCon(highest_level, other->GetLevel());
 	if (consider_level == CON_GRAY) {
@@ -1273,27 +1274,13 @@ uint8 Client::GetCharMaxLevelFromQGlobal() {
 
 uint8 Client::GetCharMaxLevelFromBucket()
 {
-	auto new_bucket_name = fmt::format(
-		"{}-CharMaxLevel",
-		GetBucketKey()
-	);
+	DataBucketKey k = GetScopedBucketKeys();
+	k.key = "CharMaxLevel";
 
-	auto bucket_value = DataBucket::GetData(new_bucket_name);
-	if (!bucket_value.empty()) {
-		if (Strings::IsNumber(bucket_value)) {
-			return static_cast<uint8>(Strings::ToUnsignedInt(bucket_value));
-		}
-	}
-
-	auto old_bucket_name = fmt::format(
-		"{}-CharMaxLevel",
-		CharacterID()
-	);
-
-	bucket_value = DataBucket::GetData(old_bucket_name);
-	if (!bucket_value.empty()) {
-		if (Strings::IsNumber(bucket_value)) {
-			return static_cast<uint8>(Strings::ToUnsignedInt(bucket_value));
+	auto b = DataBucket::GetData(k);
+	if (!b.value.empty()) {
+		if (Strings::IsNumber(b.value)) {
+			return static_cast<uint8>(Strings::ToUnsignedInt(b.value));
 		}
 	}
 

@@ -135,28 +135,24 @@ void NpcScaleManager::ScaleNPC(
 		npc->ModifyNPCStat("phr", std::to_string(scale_data.physical_resist));
 	}
 
-	if (always_scale || npc->GetMinDMG() == 0) {
+	// If either is scaled, both need to be.  The values for base_damage and min_damage will be in flux until
+	// both are complete.
+
+	if (always_scale || npc->GetMinDMG() == 0 || npc->GetMaxDMG() == 0) {
 		int64 min_dmg = scale_data.min_dmg;
+		int64 max_dmg = scale_data.max_dmg;
+
 		if (RuleB(Combat, UseNPCDamageClassLevelMods)) {
 			uint32 class_level_damage_mod = GetClassLevelDamageMod(npc->GetLevel(), npc->GetClass());
 			min_dmg = (min_dmg * class_level_damage_mod) / 220;
-
-			LogNPCScaling("ClassLevelDamageMod::min_dmg base: [{}] calc: [{}]", scale_data.min_dmg, min_dmg);
+			max_dmg = (max_dmg * class_level_damage_mod) / 220;
 		}
 
 		npc->ModifyNPCStat("min_hit", std::to_string(min_dmg));
-	}
-
-	if (always_scale || npc->GetMaxDMG() == 0) {
-		int64 max_dmg = scale_data.max_dmg;
-		if (RuleB(Combat, UseNPCDamageClassLevelMods)) {
-			uint32 class_level_damage_mod = GetClassLevelDamageMod(npc->GetLevel(), npc->GetClass());
-			max_dmg = (scale_data.max_dmg * class_level_damage_mod) / 220;
-
-			LogNPCScaling("ClassLevelDamageMod::max_dmg base: [{}] calc: [{}]", scale_data.max_dmg, max_dmg);
-		}
-
 		npc->ModifyNPCStat("max_hit", std::to_string(max_dmg));
+
+		LogNPCScaling("ClassLevelDamageMod::min_dmg base: [{}] calc: [{}]", scale_data.min_dmg, min_dmg);
+		LogNPCScaling("ClassLevelDamageMod::max_dmg base: [{}] calc: [{}]", scale_data.max_dmg, max_dmg);
 	}
 
 	if (always_scale || (npc->GetHPRegen() == 0 && is_auto_scaled)) {

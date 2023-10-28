@@ -83,6 +83,8 @@ Doors::Doors(const DoorsRepository::Doors &door) :
 	m_close_timer.Disable();
 
 	m_disable_timer = (door.disable_timer == 1 ? true : false);
+
+	m_is_blacklisted_to_open = GetIsDoorBlacklisted();
 }
 
 Doors::Doors(const char *model, const glm::vec4 &position, uint8 open_type, uint16 size) :
@@ -623,13 +625,13 @@ void Doors::ForceOpen(Mob *sender, bool alt_mode)
 	if (!alt_mode) { // original function
 		if (!m_is_open) {
 			if (!m_disable_timer) {
-				LogDoorsDetail("door_id [{}] starting timer", md->doorid);
+				LogDoorsDetail("door_id [{}] starting timer", m_door_id);
 				m_close_timer.Start();
 			}
 			m_is_open = true;
 		}
 		else {
-			LogDoorsDetail("door_id [{}] disable timer", md->doorid);
+			LogDoorsDetail("door_id [{}] disable timer", m_door_id);
 			m_close_timer.Disable();
 			if (!m_disable_timer) {
 				m_is_open = false;
@@ -638,7 +640,7 @@ void Doors::ForceOpen(Mob *sender, bool alt_mode)
 	}
 	else { // alternative function
 		if (!m_disable_timer) {
-			LogDoorsDetail("door_id [{}] alt starting timer", md->doorid);
+			LogDoorsDetail("door_id [{}] alt starting timer", m_door_id);
 			m_close_timer.Start();
 		}
 		m_is_open = true;
@@ -900,4 +902,28 @@ bool Doors::HasDestinationZone() const
 bool Doors::IsDestinationZoneSame() const
 {
 	return m_same_destination_zone;
+}
+
+// IsDoorBlacklisted has a static list of doors that are blacklisted
+// from being opened by NPCs. This is used to prevent NPCs from opening
+// doors that are not meant to be opened by NPCs.
+bool Doors::GetIsDoorBlacklisted()
+{
+	std::vector<std::string> blacklist = {
+		"TOGGLE",
+		"PNDRESSER101",
+	};
+
+	for (auto& name : blacklist) {
+		std::string door_name = GetDoorName();
+		if (name == door_name) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool Doors::IsDoorBlacklisted() {
+	return m_is_blacklisted_to_open;
 }

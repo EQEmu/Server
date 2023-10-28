@@ -55,6 +55,22 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 #endif
 	auto* zc = (ZoneChange_Struct*)app->pBuffer;
 
+	LogZoning(
+		"Client [{}] char_name [{}] zoning to [{}] ({}) instance_id [{}] x [{}] y [{}] z [{}] zone_reason [{}] success [{}] zone_mode [{}] ({})",
+		GetCleanName(),
+		zc->char_name,
+		ZoneName(zc->zoneID) ? ZoneName(zc->zoneID) : "Unknown",
+		zc->zoneID,
+		zc->instanceID,
+		zc->x,
+		zc->y,
+		zc->z,
+		zc->zone_reason,
+		zc->success,
+		GetZoneModeString(zone_mode),
+		int(zone_mode)
+	);
+
 	uint16 target_zone_id = 0;
 	auto target_instance_id = zc->instanceID;
 	ZonePoint* zone_point = nullptr;
@@ -132,6 +148,14 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 	}
 
 	if (target_instance_id) {
+		LogZoning(
+			"Client [{}] attempting zone to instance_id [{}] zone [{}] ({})",
+			GetCleanName(),
+			target_instance_id,
+			ZoneName(target_zone_id) ? ZoneName(target_zone_id) : "Unknown",
+			target_zone_id
+		);
+
 		//make sure we are in it and it's unexpired.
 		if (!database.VerifyInstanceAlive(target_instance_id, CharacterID())) {
 			Message(
@@ -185,7 +209,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 	int16 min_status = AccountStatus::Player;
 	uint8 min_level  = 0;
 
-	LogInfo("Loaded zone flag [{}]", zone_data->flag_needed);
+	LogZoning("Loaded zone flag [{}]", zone_data->flag_needed);
 
 	safe_x       = zone_data->safe_x;
 	safe_y       = zone_data->safe_y;
@@ -317,9 +341,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 
 	//TODO: ADVENTURE ENTRANCE CHECK
 
-	/**
-	 * Expansion check
-	 */
+	// Expansion checks and routing
 	if (content_service.GetCurrentExpansion() >= Expansion::Classic && !GetGM()) {
 		bool meets_zone_expansion_check = false;
 
@@ -328,7 +350,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 			meets_zone_expansion_check = true;
 		}
 
-		LogInfo(
+		LogZoning(
 			"Checking zone request [{}] for expansion [{}] ({}) success [{}]",
 			target_zone_name,
 			(content_service.GetCurrentExpansion()),
@@ -343,6 +365,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 
 	if (content_service.GetCurrentExpansion() >= Expansion::Classic && GetGM()) {
 		LogInfo("[{}] Bypassing Expansion zone checks because GM status is set", GetCleanName());
+		Message(Chat::Yellow, "Bypassing Expansion zone checks because GM status is set");
 	}
 
 	if (zoning_message == ZoningMessage::ZoneSuccess) {
@@ -360,11 +383,40 @@ void Client::SendZoneCancel(ZoneChange_Struct *zc) {
 	EQApplicationPacket *outapp = nullptr;
 	outapp = new EQApplicationPacket(OP_ZoneChange, sizeof(ZoneChange_Struct));
 	ZoneChange_Struct *zc2 = (ZoneChange_Struct*)outapp->pBuffer;
+
+	LogZoning(
+		"(zs) Client [{}] char_name [{}] zoning to [{}] ({}) cancelled instance_id [{}] x [{}] y [{}] z [{}] zone_reason [{}] success [{}]",
+		GetCleanName(),
+		zc->char_name,
+		ZoneName(zc2->zoneID) ? ZoneName(zc2->zoneID) : "Unknown",
+		zc->zoneID,
+		zc->instanceID,
+		zc->x,
+		zc->y,
+		zc->z,
+		zc->zone_reason,
+		zc->success
+	);
+
 	strcpy(zc2->char_name, zc->char_name);
 	zc2->zoneID = zone->GetZoneID();
 	zc2->success = 1;
 	outapp->priority = 6;
 	FastQueuePacket(&outapp);
+
+	LogZoning(
+		"(zc2) Client [{}] char_name [{}] zoning to [{}] ({}) cancelled instance_id [{}] x [{}] y [{}] z [{}] zone_reason [{}] success [{}]",
+		GetCleanName(),
+		zc2->char_name,
+		ZoneName(zc2->zoneID) ? ZoneName(zc2->zoneID) : "Unknown",
+		zc2->zoneID,
+		zc2->instanceID,
+		zc2->x,
+		zc2->y,
+		zc2->z,
+		zc2->zone_reason,
+		zc2->success
+	);
 
 	//reset to unsolicited.
 	zone_mode = ZoneUnsolicited;
@@ -386,6 +438,20 @@ void Client::SendZoneError(ZoneChange_Struct *zc, int8 err)
 	zc2->success = err;
 	outapp->priority = 6;
 	FastQueuePacket(&outapp);
+
+	LogZoning(
+		"Client [{}] char_name [{}] zoning to [{}] ({}) (error) instance_id [{}] x [{}] y [{}] z [{}] zone_reason [{}] success [{}]",
+		GetCleanName(),
+		zc2->char_name,
+		ZoneName(zc2->zoneID) ? ZoneName(zc2->zoneID) : "Unknown",
+		zc2->zoneID,
+		zc2->instanceID,
+		zc2->x,
+		zc2->y,
+		zc2->z,
+		zc2->zone_reason,
+		zc2->success
+	);
 
 	//reset to unsolicited.
 	zone_mode = ZoneUnsolicited;
@@ -423,15 +489,18 @@ void Client::DoZoneSuccess(ZoneChange_Struct *zc, uint16 zone_id, uint32 instanc
 		}
 	}
 
-	LogInfo(
-		"Zoning [{}] to: [{}] ([{}]) - ([{}]) x [{}] y [{}] z [{}]",
-		m_pp.name,
-		ZoneName(zone_id),
+	LogZoning(
+		"Client [{}] char_name [{}] zoning to [{}] ({}) instance_id [{}] x [{}] y [{}] z [{}] zone_reason [{}] success [{}]",
+		GetCleanName(),
+		zc->char_name,
+		ZoneName(zone_id) ? ZoneName(zone_id) : "Unknown",
 		zone_id,
 		instance_id,
 		dest_x,
 		dest_y,
-		dest_z
+		dest_z,
+		zc->zone_reason,
+		zc->success
 	);
 
 	//set the player's coordinates in the new zone so they have them
@@ -506,32 +575,41 @@ void Client::MovePC(uint32 zoneID, uint32 instanceID, float x, float y, float z,
 }
 
 void Client::MoveZone(const char *zone_short_name, const glm::vec4 &location) {
-	ProcessMovePC(ZoneID(zone_short_name), 0, location.x, location.y, location.z, location.w, 3, ZoneToSafeCoords);
+	const bool use_coordinates = (
+		location.x != 0.0f ||
+		location.y != 0.0f ||
+		location.z != 0.0f ||
+		location.w != 0.0f
+	);
+
+	const ZoneMode zone_type = use_coordinates ? ZoneSolicited : ZoneToSafeCoords;
+
+	ProcessMovePC(ZoneID(zone_short_name), 0, location.x, location.y, location.z, location.w, 3, zone_type);
 }
 
 void Client::MoveZoneGroup(const char *zone_short_name, const glm::vec4 &location) {
-	if (!GetGroup()) {
+	Group* g = GetGroup();
+	if (!g) {
 		MoveZone(zone_short_name, location);
 	} else {
-		auto client_group = GetGroup();
-		for (int member_index = 0; member_index < MAX_GROUP_MEMBERS; member_index++) {
-			if (client_group->members[member_index] && client_group->members[member_index]->IsClient()) {
-				auto group_member = client_group->members[member_index]->CastToClient();
-				group_member->MoveZone(zone_short_name, location);
+		for (const auto& gm : g->members) {
+			if (gm && gm->IsClient()) {
+				Client* c = gm->CastToClient();
+				c->MoveZone(zone_short_name, location);
 			}
 		}
 	}
 }
 
 void Client::MoveZoneRaid(const char *zone_short_name, const glm::vec4 &location) {
-	if (!GetRaid()) {
+	Raid* r = GetRaid();
+	if (!r) {
 		MoveZone(zone_short_name, location);
 	} else {
-		auto client_raid = GetRaid();
-		for (int member_index = 0; member_index < MAX_RAID_MEMBERS; member_index++) {
-			if (client_raid->members[member_index].member && client_raid->members[member_index].member->IsClient()) {
-				auto raid_member = client_raid->members[member_index].member->CastToClient();
-				raid_member->MoveZone(zone_short_name, location);
+		for (const auto& rm : r->members) {
+			if (rm.member && rm.member->IsClient()) {
+				Client* c = rm.member->CastToClient();
+				c->MoveZone(zone_short_name, location);
 			}
 		}
 	}
@@ -542,32 +620,41 @@ void Client::MoveZoneInstance(uint16 instance_id, const glm::vec4 &location) {
 		database.AddClientToInstance(instance_id, CharacterID());
 	}
 
-	ProcessMovePC(database.GetInstanceZoneID(instance_id), instance_id, location.x, location.y, location.z, location.w, 3, ZoneToSafeCoords);
+	const bool use_coordinates = (
+		location.x != 0.0f ||
+		location.y != 0.0f ||
+		location.z != 0.0f ||
+		location.w != 0.0f
+	);
+
+	const ZoneMode zone_type = use_coordinates ? ZoneSolicited : ZoneToSafeCoords;
+
+	ProcessMovePC(database.GetInstanceZoneID(instance_id), instance_id, location.x, location.y, location.z, location.w, 3, zone_type);
 }
 
 void Client::MoveZoneInstanceGroup(uint16 instance_id, const glm::vec4 &location) {
-	if (!GetGroup()) {
+	Group* g = GetGroup();
+	if (!g) {
 		MoveZoneInstance(instance_id, location);
 	} else {
-		auto client_group = GetGroup();
-		for (int member_index = 0; member_index < MAX_GROUP_MEMBERS; member_index++) {
-			if (client_group->members[member_index] && client_group->members[member_index]->IsClient()) {
-				auto group_member = client_group->members[member_index]->CastToClient();
-				group_member->MoveZoneInstance(instance_id, location);
+		for (const auto& gm : g->members) {
+			if (gm && gm->IsClient()) {
+				Client* c = gm->CastToClient();
+				c->MoveZoneInstance(instance_id, location);
 			}
 		}
 	}
 }
 
 void Client::MoveZoneInstanceRaid(uint16 instance_id, const glm::vec4 &location) {
-	if (!GetRaid()) {
+	Raid* r = GetRaid();
+	if (!r) {
 		MoveZoneInstance(instance_id, location);
 	} else {
-		auto client_raid = GetRaid();
-		for (int member_index = 0; member_index < MAX_RAID_MEMBERS; member_index++) {
-			if (client_raid->members[member_index].member && client_raid->members[member_index].member->IsClient()) {
-				auto raid_member = client_raid->members[member_index].member->CastToClient();
-				raid_member->MoveZoneInstance(instance_id, location);
+		for (const auto& rm : r->members) {
+			if (rm.member && rm.member->IsClient()) {
+				Client* c = rm.member->CastToClient();
+				c->MoveZoneInstance(instance_id, location);
 			}
 		}
 	}
@@ -890,23 +977,28 @@ void NPC::Gate(uint8 bind_number) {
 
 void Client::SetBindPoint(int bind_number, int to_zone, int to_instance, const glm::vec3 &location)
 {
-	if (bind_number < 0 || bind_number >= 4)
+	if (bind_number < 0 || bind_number >= 4) {
 		bind_number = 0;
+	}
 
 	if (to_zone == -1) {
-		m_pp.binds[bind_number].zone_id = zone->GetZoneID();
-		m_pp.binds[bind_number].instance_id = (zone->GetInstanceID() != 0 && zone->IsInstancePersistent()) ? zone->GetInstanceID() : 0;
-		m_pp.binds[bind_number].x = m_Position.x;
-		m_pp.binds[bind_number].y = m_Position.y;
-		m_pp.binds[bind_number].z = m_Position.z;
-	} else {
-		m_pp.binds[bind_number].zone_id = to_zone;
-		m_pp.binds[bind_number].instance_id = to_instance;
-		m_pp.binds[bind_number].x = location.x;
-		m_pp.binds[bind_number].y = location.y;
-		m_pp.binds[bind_number].z = location.z;
+		m_pp.binds[bind_number].zone_id     = zone->GetZoneID();
+		m_pp.binds[bind_number].instance_id = (zone->GetInstanceID() != 0 && zone->IsInstancePersistent())? zone->GetInstanceID() : 0;
+		m_pp.binds[bind_number].x           = m_Position.x;
+		m_pp.binds[bind_number].y           = m_Position.y;
+		m_pp.binds[bind_number].z           = m_Position.z;
+		m_pp.binds[bind_number].heading     = GetHeading();
 	}
-	database.SaveCharacterBindPoint(CharacterID(), m_pp.binds[bind_number], bind_number);
+	else {
+		m_pp.binds[bind_number].zone_id     = to_zone;
+		m_pp.binds[bind_number].instance_id = to_instance;
+		m_pp.binds[bind_number].x           = location.x;
+		m_pp.binds[bind_number].y           = location.y;
+		m_pp.binds[bind_number].z           = location.z;
+		m_pp.binds[bind_number].heading     = GetHeading();
+	}
+
+	database.SaveCharacterBinds(this);
 }
 
 void Client::SetBindPoint2(int bind_number, int to_zone, int to_instance, const glm::vec4 &location)
@@ -929,7 +1021,8 @@ void Client::SetBindPoint2(int bind_number, int to_zone, int to_instance, const 
 		m_pp.binds[bind_number].z = location.z;
 		m_pp.binds[bind_number].heading = location.w;
 	}
-	database.SaveCharacterBindPoint(CharacterID(), m_pp.binds[bind_number], bind_number);
+
+	database.SaveCharacterBinds(this);
 }
 
 void Client::GoToBind(uint8 bind_number) {
@@ -1017,8 +1110,8 @@ void Client::SendZoneFlagInfo(Client *to) const {
 		to->Message(
 			Chat::White,
 			fmt::format(
-				"{} {} no Zone Flags.",
-				to == this ? "You" : GetName(),
+				"{} {} no zone flags.",
+				to->GetTargetDescription(const_cast<Mob*>(CastToMob()), TargetDescriptionType::UCYou),
 				to == this ? "have" : "has"
 			).c_str()
 		);
@@ -1028,32 +1121,29 @@ void Client::SendZoneFlagInfo(Client *to) const {
 	to->Message(
 		Chat::White,
 		fmt::format(
-			"{} {} the following Zone Flags:",
-			to == this ? "You" : GetName(),
+			"{} {} the following zone flags:",
+			to->GetTargetDescription(const_cast<Mob*>(CastToMob()), TargetDescriptionType::UCYou),
 			to == this ? "have" : "has"
 		).c_str()
 	);
 
-	int flag_count = 0;
-	for (const auto& zone_id : zone_flags) {
-		int flag_number = (flag_count + 1);
-		const char* zone_short_name = ZoneName(zone_id, true);
-		if (strncmp(zone_short_name, "UNKNOWN", strlen(zone_short_name)) != 0) {
-			std::string zone_long_name = ZoneLongName(zone_id);
-			std::string flag_name = "ERROR";
+	uint32 flag_count = 0;
 
-			auto z = GetZone(zone_id);
-			if (z) {
-				flag_name = z->flag_needed;
-			}
+	for (const auto& zone_id : zone_flags) {
+		const uint32 flag_number = (flag_count + 1);
+
+		const auto& z = GetZone(zone_id);
+
+		if (z) {
+			const std::string& flag_name = z->flag_needed;
 
 			to->Message(
 				Chat::White,
 				fmt::format(
-					"Flag {} | Zone: {} ({}) ID: {}",
+					"Flag {} | Zone: {} ({}) ID: {}{}",
 					flag_number,
-					zone_long_name,
-					zone_short_name,
+					z->long_name,
+					z->short_name,
 					zone_id,
 					(
 						!flag_name.empty() ?
@@ -1072,10 +1162,10 @@ void Client::SendZoneFlagInfo(Client *to) const {
 	to->Message(
 		Chat::White,
 		fmt::format(
-			"{} {} {} Zone Flags.",
-			to == this ? "You" : GetName(),
-			to == this ? "have" : "has",
-			flag_count
+			"{} Zone flag{} found for {}.",
+			flag_count,
+			flag_count != 1 ? "s" : "",
+			to->GetTargetDescription(const_cast<Mob*>(CastToMob()))
 		).c_str()
 	);
 }

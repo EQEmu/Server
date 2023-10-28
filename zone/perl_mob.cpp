@@ -21,14 +21,14 @@ bool Perl_Mob_IsNPC(Mob* self) // @categories Script Utility
 	return self->IsNPC();
 }
 
-bool Perl_Mob_IsBot(Mob* self) // @categories Script Utility
-{
-	return self->IsBot();
-}
-
 bool Perl_Mob_IsMob(Mob* self) // @categories Script Utility
 {
 	return self->IsMob();
+}
+
+bool Perl_Mob_IsMerc(Mob* self) // @categories Script Utility
+{
+	return self->IsMerc();
 }
 
 bool Perl_Mob_IsCorpse(Mob* self) // @categories Script Utility, Corpse
@@ -64,6 +64,36 @@ bool Perl_Mob_IsTrap(Mob* self) // @categories Script Utility
 bool Perl_Mob_IsBeacon(Mob* self) // @categories Script Utility
 {
 	return self->IsBeacon();
+}
+
+bool Perl_Mob_IsEncounter(Mob* self) // @categories Script Utility
+{
+	return self->IsEncounter();
+}
+
+bool Perl_Mob_IsBot(Mob* self) // @categories Script Utility
+{
+	return self->IsBot();
+}
+
+bool Perl_Mob_IsAura(Mob* self) // @categories Script Utility
+{
+	return self->IsAura();
+}
+
+bool Perl_Mob_IsOfClientBot(Mob* self) // @categories Script Utility
+{
+	return self->IsOfClientBot();
+}
+
+bool Perl_Mob_IsOfClientBotMerc(Mob* self) // @categories Script Utility
+{
+	return self->IsOfClientBotMerc();
+}
+
+bool Perl_Mob_IsTemporaryPet(Mob* self) // @categories Script Utility
+{
+	return self->IsTempPet();
 }
 
 Client* Perl_Mob_CastToClient(Mob* self) // @categories Account and Character, Script Utility
@@ -146,17 +176,17 @@ void Perl_Mob_SendWearChange(Mob* self, uint8_t material_slot) // @categories Sc
 	self->SendWearChange(material_slot);
 }
 
-int32_t Perl_Mob_GetEquipment(Mob* self, uint8_t material_slot) // @categories Inventory and Items
+uint32_t Perl_Mob_GetEquipment(Mob* self, uint8_t material_slot) // @categories Inventory and Items
 {
 	return self->GetEquippedItemFromTextureSlot(material_slot);
 }
 
-int32_t Perl_Mob_GetEquipmentMaterial(Mob* self, uint8_t material_slot) // @categories Inventory and Items
+uint32_t Perl_Mob_GetEquipmentMaterial(Mob* self, uint8_t material_slot) // @categories Inventory and Items
 {
 	return self->GetEquipmentMaterial(material_slot);
 }
 
-int32_t Perl_Mob_GetEquipmentColor(Mob* self, uint8_t material_slot) // @categories Inventory and Items
+uint32_t Perl_Mob_GetEquipmentColor(Mob* self, uint8_t material_slot) // @categories Inventory and Items
 {
 	return self->GetEquipmentColor(material_slot);
 }
@@ -330,6 +360,11 @@ void Perl_Mob_SetSeeInvisibleUndeadLevel(Mob* self, uint8 see_invis_undead_level
 bool Perl_Mob_FindBuff(Mob* self, uint16 spell_id) // @categories Spells and Disciplines, Script Utility
 {
 	return self->FindBuff(spell_id);
+}
+
+bool Perl_Mob_FindBuff(Mob* self, uint16 spell_id, uint16 caster_id) // @categories Spells and Disciplines, Script Utility
+{
+	return self->FindBuff(spell_id, caster_id);
 }
 
 int Perl_Mob_FindBuffBySlot(Mob* self, int slot) // @categories Spells and Disciplines, Script Utility
@@ -1054,6 +1089,11 @@ void Perl_Mob_SetPetID(Mob* self, uint16 new_pet_id) // @categories Pet
 	self->SetPetID(new_pet_id);
 }
 
+Mob* Perl_Mob_GetPet(Mob* self) // @categories Script Utility, Pet
+{
+	return self->GetPet();
+}
+
 int Perl_Mob_GetPetID(Mob* self) // @categories Script Utility, Pet
 {
 	return self->GetPetID();
@@ -1367,6 +1407,11 @@ void Perl_Mob_StopNavigation(Mob* self)
 float Perl_Mob_CalculateDistance(Mob* self, float x, float y, float z) // @categories Script Utility
 {
 	return self->CalculateDistance(x, y, z);
+}
+
+float Perl_Mob_CalculateDistance(Mob* self, Mob* mob) // @categories Script Utility
+{
+	return self->CalculateDistance(mob);
 }
 
 void Perl_Mob_SendTo(Mob* self, float new_x, float new_y, float new_z) // @categories Script Utility
@@ -1769,10 +1814,26 @@ void Perl_Mob_SendAppearanceEffectGround(Mob* self, int32 parm1, int32 parm2, in
 
 void Perl_Mob_RemoveAllAppearanceEffects(Mob* self) // @categories Script Utility
 {
-	self->SendIllusionPacket(self->GetRace(), self->GetGender(), self->GetTexture(), self->GetHelmTexture(),
-		self->GetHairColor(), self->GetBeardColor(), self->GetEyeColor1(), self->GetEyeColor2(),
-		self->GetHairStyle(), self->GetLuclinFace(), self->GetBeard(), 0xFF,
-		self->GetDrakkinHeritage(), self->GetDrakkinTattoo(), self->GetDrakkinDetails(), self->GetSize(), false);
+	self->SendIllusionPacket(
+		AppearanceStruct{
+			.beard = self->GetBeard(),
+			.beard_color = self->GetBeardColor(),
+			.drakkin_details = self->GetDrakkinDetails(),
+			.drakkin_heritage = self->GetDrakkinHeritage(),
+			.drakkin_tattoo = self->GetDrakkinTattoo(),
+			.eye_color_one = self->GetEyeColor1(),
+			.eye_color_two = self->GetEyeColor2(),
+			.face = self->GetLuclinFace(),
+			.gender_id = self->GetGender(),
+			.hair = self->GetHairStyle(),
+			.hair_color = self->GetHairColor(),
+			.helmet_texture = self->GetHelmTexture(),
+			.race_id = self->GetRace(),
+			.send_effects = false,
+			.size = self->GetSize(),
+			.texture = self->GetTexture(),
+		}
+	);
 	self->ClearAppearenceEffects();
 }
 
@@ -1781,134 +1842,295 @@ void Perl_Mob_SetFlyMode(Mob* self, int flymode) // @categories Script Utility
 	self->SetFlyMode(static_cast<GravityBehavior>(flymode));
 }
 
-void Perl_Mob_SetTexture(Mob* self, int32 texture) // @categories Stats and Attributes
+void Perl_Mob_SetTexture(Mob* self, uint8 texture) // @categories Stats and Attributes
 {
-	self->SendIllusionPacket(self->GetRace(), 0xFF, texture);
+	self->SendIllusionPacket(
+		AppearanceStruct{
+			.race_id = self->GetRace(),
+			.texture = texture,
+		}
+	);
 }
 
-void Perl_Mob_SetRace(Mob* self, int32 race) // @categories Stats and Attributes
+void Perl_Mob_SetRace(Mob* self, uint16 race_id) // @categories Stats and Attributes
 {
-	self->SendIllusionPacket(race);
+	self->SendIllusionPacket(
+		AppearanceStruct{
+			.race_id = race_id,
+		}
+	);
 }
 
-void Perl_Mob_SetGender(Mob* self, int32 gender) // @categories Stats and Attributes
+void Perl_Mob_SetGender(Mob* self, uint8 gender_id) // @categories Stats and Attributes
 {
-	self->SendIllusionPacket(self->GetRace(), gender);
+	self->SendIllusionPacket(
+		AppearanceStruct{
+			.gender_id = gender_id,
+			.race_id = self->GetRace(),
+		}
+	);
 }
 
 // todo: SendIllusion should be sent in a hash like lua
-void Perl_Mob_SendIllusion(Mob* self, uint16 race) // @categories Script Utility
+void Perl_Mob_SendIllusion(Mob *self, uint16 race_id) // @categories Script Utility
 {
-	self->SendIllusionPacket(race);
+	self->SendIllusionPacket(
+		AppearanceStruct{
+			.race_id = race_id,
+		}
+	);
 }
 
-void Perl_Mob_SendIllusion(Mob* self, uint16 race, uint8 gender) // @categories Script Utility
+void Perl_Mob_SendIllusion(Mob *self, uint16 race_id, uint8 gender_id) // @categories Script Utility
 {
-	self->SendIllusionPacket(race, gender);
+	self->SendIllusionPacket(
+		AppearanceStruct{
+			.gender_id = gender_id,
+			.race_id = race_id,
+		}
+	);
 }
 
-void Perl_Mob_SendIllusion(Mob* self, uint16 race, uint8 gender, uint8 texture) // @categories Script Utility
+void Perl_Mob_SendIllusion(Mob *self, uint16 race_id, uint8 gender_id, uint8 texture) // @categories Script Utility
 {
-	self->SendIllusionPacket(race, gender, texture);
+	self->SendIllusionPacket(
+		AppearanceStruct{
+			.gender_id = gender_id,
+			.race_id = race_id,
+			.texture = texture,
+		}
+	);
 }
 
-void Perl_Mob_SendIllusion(Mob* self, uint16 race, uint8 gender, uint8 texture, uint8 helmtexture) // @categories Script Utility
+void Perl_Mob_SendIllusion(Mob *self, uint16 race_id, uint8 gender_id, uint8 texture, uint8 helmet_texture) // @categories Script Utility
 {
-	self->SendIllusionPacket(race, gender, texture, helmtexture);
+	self->SendIllusionPacket(
+		AppearanceStruct{
+			.gender_id = gender_id,
+			.helmet_texture = helmet_texture,
+			.race_id = race_id,
+			.texture = texture,
+		}
+	);
 }
 
-void Perl_Mob_SendIllusion(Mob* self, uint16 race, uint8 gender, uint8 texture, uint8 helmtexture, uint8 face) // @categories Script Utility
+void Perl_Mob_SendIllusion(Mob *self, uint16 race_id, uint8 gender_id, uint8 texture, uint8 helmet_texture, uint8 face) // @categories Script Utility
 {
-	self->SendIllusionPacket(race, gender, texture, helmtexture, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, face);
+	self->SendIllusionPacket(
+		AppearanceStruct{
+			.face = face,
+			.gender_id = gender_id,
+			.helmet_texture = helmet_texture,
+			.race_id = race_id,
+			.texture = texture,
+		}
+	);
 }
 
-void Perl_Mob_SendIllusion(Mob* self, uint16 race, uint8 gender, uint8 texture, uint8 helmtexture, uint8 face, uint8 hairstyle) // @categories Script Utility
+void Perl_Mob_SendIllusion(Mob *self, uint16 race_id, uint8 gender_id, uint8 texture, uint8 helmet_texture, uint8 face, uint8 hair) // @categories Script Utility
 {
-	self->SendIllusionPacket(race, gender, texture, helmtexture, 0xFF, 0xFF, 0xFF, 0xFF, hairstyle, face);
+	self->SendIllusionPacket(
+		AppearanceStruct{
+			.face = face,
+			.gender_id = gender_id,
+			.hair = hair,
+			.helmet_texture = helmet_texture,
+			.race_id = race_id,
+			.texture = texture,
+		}
+	);
 }
 
-void Perl_Mob_SendIllusion(Mob* self, uint16 race, uint8 gender, uint8 texture, uint8 helmtexture, uint8 face, uint8 hairstyle, uint8 haircolor) // @categories Script Utility
+void Perl_Mob_SendIllusion(Mob *self, uint16 race_id, uint8 gender_id, uint8 texture, uint8 helmet_texture, uint8 face, uint8 hair, uint8 hair_color) // @categories Script Utility
 {
-	self->SendIllusionPacket(race, gender, texture, helmtexture, haircolor, 0xFF, 0xFF, 0xFF, hairstyle, face);
+	self->SendIllusionPacket(
+		AppearanceStruct{
+			.face = face,
+			.gender_id = gender_id,
+			.hair = hair,
+			.hair_color = hair_color,
+			.helmet_texture = helmet_texture,
+			.race_id = race_id,
+			.texture = texture,
+		}
+	);
 }
 
-void Perl_Mob_SendIllusion(Mob* self, uint16 race, uint8 gender, uint8 texture, uint8 helmtexture, uint8 face, uint8 hairstyle, uint8 haircolor, uint8 beard) // @categories Script Utility
+void Perl_Mob_SendIllusion(Mob *self, uint16 race_id, uint8 gender_id, uint8 texture, uint8 helmet_texture, uint8 face, uint8 hair, uint8 hair_color, uint8 beard) // @categories Script Utility
 {
-	self->SendIllusionPacket(race, gender, texture, helmtexture, haircolor, 0xFF, 0xFF, 0xFF, hairstyle, face, beard);
+	self->SendIllusionPacket(
+		AppearanceStruct{
+			.beard = beard,
+			.face = face,
+			.gender_id = gender_id,
+			.hair = hair,
+			.hair_color = hair_color,
+			.helmet_texture = helmet_texture,
+			.race_id = race_id,
+			.texture = texture,
+		}
+	);
 }
 
-void Perl_Mob_SendIllusion(Mob* self, uint16 race, uint8 gender, uint8 texture, uint8 helmtexture, uint8 face, uint8 hairstyle, uint8 haircolor, uint8 beard, uint8 beardcolor) // @categories Script Utility
+void Perl_Mob_SendIllusion(Mob *self, uint16 race_id, uint8 gender_id, uint8 texture, uint8 helmet_texture, uint8 face, uint8 hair, uint8 hair_color, uint8 beard, uint8 beard_color) // @categories Script Utility
 {
-	self->SendIllusionPacket(race, gender, texture, helmtexture, haircolor, beardcolor, 0xFF, 0xFF, hairstyle, face, beard);
+	self->SendIllusionPacket(
+		AppearanceStruct{
+			.beard = beard,
+			.beard_color = beard_color,
+			.face = face,
+			.gender_id = gender_id,
+			.hair = hair,
+			.hair_color = hair_color,
+			.helmet_texture = helmet_texture,
+			.race_id = race_id,
+			.texture = texture,
+		}
+	);
 }
 
-void Perl_Mob_SendIllusion(Mob* self, uint16 race, uint8 gender, uint8 texture, uint8 helmtexture, uint8 face, uint8 hairstyle, uint8 haircolor, uint8 beard, uint8 beardcolor, uint32 drakkin_heritage) // @categories Script Utility
+void Perl_Mob_SendIllusion(Mob *self, uint16 race_id, uint8 gender_id, uint8 texture, uint8 helmet_texture, uint8 face, uint8 hair, uint8 hair_color, uint8 beard, uint8 beard_color, uint32 drakkin_heritage) // @categories Script Utility
 {
-	self->SendIllusionPacket(race, gender, texture, helmtexture, haircolor, beardcolor, 0xFF, 0xFF, hairstyle, face, beard, 0xFF, drakkin_heritage);
+	self->SendIllusionPacket(
+		AppearanceStruct{
+			.beard = beard,
+			.beard_color = beard_color,
+			.drakkin_heritage = drakkin_heritage,
+			.face = face,
+			.gender_id = gender_id,
+			.hair = hair,
+			.hair_color = hair_color,
+			.helmet_texture = helmet_texture,
+			.race_id = race_id,
+			.texture = texture,
+		}
+	);
 }
 
-void Perl_Mob_SendIllusion(Mob* self, uint16 race, uint8 gender, uint8 texture, uint8 helmtexture, uint8 face, uint8 hairstyle, uint8 haircolor, uint8 beard, uint8 beardcolor, uint32 drakkin_heritage, uint32 drakkin_tattoo) // @categories Script Utility
+void Perl_Mob_SendIllusion(Mob *self, uint16 race_id, uint8 gender_id, uint8 texture, uint8 helmet_texture, uint8 face, uint8 hair, uint8 hair_color, uint8 beard, uint8 beard_color, uint32 drakkin_heritage, uint32 drakkin_tattoo) // @categories Script Utility
 {
-	self->SendIllusionPacket(race, gender, texture, helmtexture, haircolor, beardcolor, 0xFF, 0xFF, hairstyle, face, beard, 0xFF, drakkin_heritage, drakkin_tattoo);
+	self->SendIllusionPacket(
+		AppearanceStruct{
+			.beard = beard,
+			.beard_color = beard_color,
+			.drakkin_heritage = drakkin_heritage,
+			.drakkin_tattoo = drakkin_tattoo,
+			.face = face,
+			.gender_id = gender_id,
+			.hair = hair,
+			.hair_color = hair_color,
+			.helmet_texture = helmet_texture,
+			.race_id = race_id,
+			.texture = texture,
+		}
+	);
 }
 
-void Perl_Mob_SendIllusion(Mob* self, uint16 race, uint8 gender, uint8 texture, uint8 helmtexture, uint8 face, uint8 hairstyle, uint8 haircolor, uint8 beard, uint8 beardcolor, uint32 drakkin_heritage, uint32 drakkin_tattoo, uint32 drakkin_details) // @categories Script Utility
+void Perl_Mob_SendIllusion(Mob *self, uint16 race_id, uint8 gender_id, uint8 texture, uint8 helmet_texture, uint8 face, uint8 hair, uint8 hair_color, uint8 beard, uint8 beard_color, uint32 drakkin_heritage, uint32 drakkin_tattoo, uint32 drakkin_details) // @categories Script Utility
 {
-	self->SendIllusionPacket(race, gender, texture, helmtexture, haircolor, beardcolor, 0xFF, 0xFF, hairstyle, face, beard, 0xFF, drakkin_heritage, drakkin_tattoo, drakkin_details);
+	self->SendIllusionPacket(
+		AppearanceStruct{
+			.beard = beard,
+			.beard_color = beard_color,
+			.drakkin_details = drakkin_details,
+			.drakkin_heritage = drakkin_heritage,
+			.drakkin_tattoo = drakkin_tattoo,
+			.face = face,
+			.gender_id = gender_id,
+			.hair = hair,
+			.hair_color = hair_color,
+			.helmet_texture = helmet_texture,
+			.race_id = race_id,
+			.texture = texture,
+		}
+	);
 }
 
-void Perl_Mob_SendIllusion(Mob* self, uint16 race, uint8 gender, uint8 texture, uint8 helmtexture, uint8 face, uint8 hairstyle, uint8 haircolor, uint8 beard, uint8 beardcolor, uint32 drakkin_heritage, uint32 drakkin_tattoo, uint32 drakkin_details, float size) // @categories Script Utility
+void Perl_Mob_SendIllusion(Mob *self, uint16 race_id, uint8 gender_id, uint8 texture, uint8 helmet_texture, uint8 face, uint8 hair, uint8 hair_color, uint8 beard, uint8 beard_color, uint32 drakkin_heritage, uint32 drakkin_tattoo, uint32 drakkin_details, float size) // @categories Script Utility
 {
-	self->SendIllusionPacket(race, gender, texture, helmtexture, haircolor, beardcolor, 0xFF, 0xFF, hairstyle, face, beard, 0xFF, drakkin_heritage, drakkin_tattoo, drakkin_details, size);
+	self->SendIllusionPacket(
+		AppearanceStruct{
+			.beard = beard,
+			.beard_color = beard_color,
+			.drakkin_details = drakkin_details,
+			.drakkin_heritage = drakkin_heritage,
+			.drakkin_tattoo = drakkin_tattoo,
+			.face = face,
+			.gender_id = gender_id,
+			.hair = hair,
+			.hair_color = hair_color,
+			.helmet_texture = helmet_texture,
+			.race_id = race_id,
+			.size = size,
+			.texture = texture,
+		}
+	);
 }
 
-void Perl_Mob_SendIllusion(Mob* self, uint16 race, uint8 gender, uint8 texture, uint8 helmtexture, uint8 face, uint8 hairstyle, uint8 haircolor, uint8 beard, uint8 beardcolor, uint32 drakkin_heritage, uint32 drakkin_tattoo, uint32 drakkin_details, float size, Client* target) // @categories Script Utility
+void Perl_Mob_SendIllusion(Mob *self, uint16 race_id, uint8 gender_id, uint8 texture, uint8 helmet_texture, uint8 face, uint8 hair, uint8 hair_color, uint8 beard, uint8 beard_color, uint32 drakkin_heritage, uint32 drakkin_tattoo, uint32 drakkin_details, float size, Client *target) // @categories Script Utility
 {
-	self->SendIllusionPacket(race, gender, texture, helmtexture, haircolor, beardcolor, 0xFF, 0xFF, hairstyle, face, beard, 0xFF, drakkin_heritage, drakkin_tattoo, drakkin_details, size, true, target);
+	self->SendIllusionPacket(
+		AppearanceStruct{
+			.beard = beard,
+			.beard_color = beard_color,
+			.drakkin_details = drakkin_details,
+			.drakkin_heritage = drakkin_heritage,
+			.drakkin_tattoo = drakkin_tattoo,
+			.face = face,
+			.gender_id = gender_id,
+			.hair = hair,
+			.hair_color = hair_color,
+			.helmet_texture = helmet_texture,
+			.race_id = race_id,
+			.size = size,
+			.target = target,
+			.texture = texture,
+		}
+	);
 }
 
 void Perl_Mob_SendIllusionPacket(Mob* self, perl::reference table_ref)
 {
 	perl::hash table = table_ref;
 
-	uint16  race                    = table.exists("race") ? table["race"] : self->GetRace();
-	uint8   gender                  = table.exists("gender") ? table["gender"] : self->GetGender();
-	uint8   texture                 = table.exists("texture") ? table["texture"] : self->GetTexture();
-	uint8   helmtexture             = table.exists("helmtexture") ? table["helmtexture"] : self->GetHelmTexture();
-	uint8   haircolor               = table.exists("haircolor") ? table["haircolor"] : self->GetHairColor();
-	uint8   beardcolor              = table.exists("beardcolor") ? table["beardcolor"] : self->GetBeardColor();
-	uint8   eyecolor1               = table.exists("eyecolor1") ? table["eyecolor1"] : self->GetEyeColor1();
-	uint8   eyecolor2               = table.exists("eyecolor2") ? table["eyecolor2"] : self->GetEyeColor2();
-	uint8   hairstyle               = table.exists("hairstyle") ? table["hairstyle"] : self->GetHairStyle();
-	uint8   luclinface              = table.exists("luclinface") ? table["luclinface"] : self->GetLuclinFace();
-	uint8   beard                   = table.exists("beard") ? table["beard"] : self->GetBeard();
-	uint8   aa_title                = table.exists("aa_title") ? table["aa_title"] : 255;
-	uint32  drakkin_heritage        = table.exists("drakkin_heritage") ? table["drakkin_heritage"] : self->GetDrakkinHeritage();
-	uint32  drakkin_tattoo          = table.exists("drakkin_tattoo") ? table["drakkin_tattoo"] : self->GetDrakkinTattoo();
-	uint32  drakkin_details         = table.exists("drakkin_details") ? table["drakkin_details"] : self->GetDrakkinDetails();
-	float   size                    = table.exists("size") ? table["size"] : self->GetSize();
-	bool    send_appearance_effects = table.exists("send_appearance_effects") ? table["send_appearance_effects"] : true;
-	Client* target                  = table.exists("target") ? static_cast<Client *>(table["target"]) : nullptr;
+	uint16 race_id                 = table.exists("race") ? table["race"] : self->GetRace();
+	uint8  gender_id               = table.exists("gender") ? table["gender"] : self->GetGender();
+	uint8  texture                 = table.exists("texture") ? table["texture"] : self->GetTexture();
+	uint8  helmet_texture          = table.exists("helmtexture") ? table["helmtexture"] : self->GetHelmTexture();
+	uint8  hair_color              = table.exists("haircolor") ? table["haircolor"] : self->GetHairColor();
+	uint8  beard_color             = table.exists("beardcolor") ? table["beardcolor"] : self->GetBeardColor();
+	uint8  eye_color_one           = table.exists("eyecolor1") ? table["eyecolor1"] : self->GetEyeColor1();
+	uint8  eye_color_two           = table.exists("eyecolor2") ? table["eyecolor2"] : self->GetEyeColor2();
+	uint8  hair                    = table.exists("hairstyle") ? table["hairstyle"] : self->GetHairStyle();
+	uint8  face                    = table.exists("luclinface") ? table["luclinface"] : self->GetLuclinFace();
+	uint8  beard                   = table.exists("beard") ? table["beard"] : self->GetBeard();
+	uint8  aa_title                = table.exists("aa_title") ? table["aa_title"] : 255;
+	uint32 drakkin_heritage        = table.exists("drakkin_heritage") ? table["drakkin_heritage"] : self->GetDrakkinHeritage();
+	uint32 drakkin_tattoo          = table.exists("drakkin_tattoo") ? table["drakkin_tattoo"] : self->GetDrakkinTattoo();
+	uint32 drakkin_details         = table.exists("drakkin_details") ? table["drakkin_details"] : self->GetDrakkinDetails();
+	float  size                    = table.exists("size") ? table["size"] : self->GetSize();
+	bool   send_appearance_effects = table.exists("send_appearance_effects") ? table["send_appearance_effects"] : true;
+
+	Client *target = table.exists("target") ? static_cast<Client *>(table["target"]) : nullptr;
 
 	self->SendIllusionPacket(
-		race,
-		gender,
-		texture,
-		helmtexture,
-		haircolor,
-		beardcolor,
-		eyecolor1,
-		eyecolor2,
-		hairstyle,
-		luclinface,
-		beard,
-		aa_title,
-		drakkin_heritage,
-		drakkin_tattoo,
-		drakkin_details,
-		size,
-		send_appearance_effects,
-		target
+		AppearanceStruct{
+			.beard = beard,
+			.beard_color = beard_color,
+			.drakkin_details = drakkin_details,
+			.drakkin_heritage = drakkin_heritage,
+			.drakkin_tattoo = drakkin_tattoo,
+			.face = face,
+			.gender_id = gender_id,
+			.hair = hair,
+			.hair_color = hair_color,
+			.helmet_texture = helmet_texture,
+			.race_id = race_id,
+			.send_effects = send_appearance_effects,
+			.size = size,
+			.target = target,
+			.texture = texture,
+		}
 	);
 }
 
@@ -2022,17 +2244,17 @@ void Perl_Mob_SetSlotTint(Mob* self, uint8 material_slot, uint8 red_tint, uint8 
 	self->SetSlotTint(material_slot, red_tint, green_tint, blue_tint);
 }
 
-void Perl_Mob_WearChange(Mob* self, uint8 material_slot, uint16 texture) // @categories Script Utility
+void Perl_Mob_WearChange(Mob* self, uint8 material_slot, uint32 texture) // @categories Script Utility
 {
 	self->WearChange(material_slot, texture);
 }
 
-void Perl_Mob_WearChange(Mob* self, uint8 material_slot, uint16 texture, uint32 color) // @categories Script Utility
+void Perl_Mob_WearChange(Mob* self, uint8 material_slot, uint32 texture, uint32 color) // @categories Script Utility
 {
 	self->WearChange(material_slot, texture, color);
 }
 
-void Perl_Mob_WearChange(Mob* self, uint8 material_slot, uint16 texture, uint32 color, uint32 hero_forge_model) // @categories Script Utility
+void Perl_Mob_WearChange(Mob* self, uint8 material_slot, uint32 texture, uint32 color, uint32 hero_forge_model) // @categories Script Utility
 {
 	self->WearChange(material_slot, texture, color, hero_forge_model);
 }
@@ -2380,7 +2602,7 @@ std::string Perl_Mob_GetBucketExpires(Mob* self, std::string bucket_name) // @ca
 
 std::string Perl_Mob_GetBucketKey(Mob* self) // @categories Script Utility
 {
-	return self->GetBucketKey();
+	return {};
 }
 
 std::string Perl_Mob_GetBucketRemaining(Mob* self, std::string bucket_name) // @categories Script Utility
@@ -2430,6 +2652,41 @@ perl::array Perl_Mob_GetHateListByDistance(Mob* self, uint32 distance) // @categ
 Mob* Perl_Mob_GetHateClosest(Mob* self) // @categories Hate and Aggro
 {
 	return self->GetHateClosest();
+}
+
+Mob* Perl_Mob_GetHateClosest(Mob* self, bool skip_mezzed) // @categories Hate and Aggro
+{
+	return self->GetHateClosest(skip_mezzed);
+}
+
+Bot* Perl_Mob_GetHateClosestBot(Mob* self) // @categories Hate and Aggro
+{
+	return self->GetHateClosestBot();
+}
+
+Bot* Perl_Mob_GetHateClosestBot(Mob* self, bool skip_mezzed) // @categories Hate and Aggro
+{
+	return self->GetHateClosestBot(skip_mezzed);
+}
+
+Client* Perl_Mob_GetHateClosestClient(Mob* self) // @categories Hate and Aggro
+{
+	return self->GetHateClosestClient();
+}
+
+Client* Perl_Mob_GetHateClosestClient(Mob* self, bool skip_mezzed) // @categories Hate and Aggro
+{
+	return self->GetHateClosestClient(skip_mezzed);
+}
+
+NPC* Perl_Mob_GetHateClosestNPC(Mob* self) // @categories Hate and Aggro
+{
+	return self->GetHateClosestNPC();
+}
+
+NPC* Perl_Mob_GetHateClosestNPC(Mob* self, bool skip_mezzed) // @categories Hate and Aggro
+{
+	return self->GetHateClosestNPC(skip_mezzed);
 }
 
 std::string Perl_Mob_GetLastName(Mob* self) // @categories Script Utility
@@ -2507,6 +2764,11 @@ void Perl_Mob_SetBuffDuration(Mob* self, int spell_id, int duration) // @categor
 	self->SetBuffDuration(spell_id, duration);
 }
 
+void Perl_Mob_SetBuffDuration(Mob* self, int spell_id, int duration, int level) // @categories Script Utility, Spells and Disciplines
+{
+	self->SetBuffDuration(spell_id, duration, level);
+}
+
 void Perl_Mob_ApplySpellBuff(Mob* self, int spell_id) // @categories Script Utility, Spells and Disciplines
 {
 	self->ApplySpellBuff(spell_id);
@@ -2515,6 +2777,11 @@ void Perl_Mob_ApplySpellBuff(Mob* self, int spell_id) // @categories Script Util
 void Perl_Mob_ApplySpellBuff(Mob* self, int spell_id, int duration) // @categories Script Utility, Spells and Disciplines
 {
 	self->ApplySpellBuff(spell_id, duration);
+}
+
+void Perl_Mob_ApplySpellBuff(Mob* self, int spell_id, int duration, int level) // @categories Script Utility, Spells and Disciplines
+{
+	self->ApplySpellBuff(spell_id, duration, level);
 }
 
 int Perl_Mob_GetSkillDmgAmt(Mob* self, int skill_id)
@@ -2887,6 +3154,16 @@ float Perl_Mob_GetDefaultRaceSize(Mob* self) // @categories Script Utility
 	return self->GetDefaultRaceSize();
 }
 
+float Perl_Mob_GetDefaultRaceSize(Mob* self, int race_id) // @categories Script Utility
+{
+	return self->GetDefaultRaceSize(race_id);
+}
+
+float Perl_Mob_GetDefaultRaceSize(Mob* self, int race_id, int gender_id) // @categories Script Utility
+{
+	return self->GetDefaultRaceSize(race_id, gender_id);
+}
+
 uint32 Perl_Mob_GetRemainingTimeMS(Mob* self, const char* timer_name)
 {
 	return quest_manager.getremainingtimeMS(timer_name, self);
@@ -2950,6 +3227,94 @@ perl::array Perl_Mob_GetBuffSpellIDs(Mob* self)
 	return l;
 }
 
+bool Perl_Mob_HasSpellEffect(Mob* self, int effect_id)
+{
+	return self->HasSpellEffect(effect_id);
+}
+
+perl::array Perl_Mob_GetCloseMobList(Mob* self)
+{
+	perl::array result;
+
+	const auto& l = entity_list.GetCloseMobList(self);
+
+	result.reserve(l.size());
+
+	for (const auto& e : l) {
+		result.push_back(e.second);
+	}
+
+	return result;
+}
+
+perl::array Perl_Mob_GetCloseMobList(Mob* self, float distance)
+{
+	perl::array result;
+
+	const auto& l = entity_list.GetCloseMobList(self, distance);
+
+	result.reserve(l.size());
+
+	for (const auto& e : l) {
+		if (self->CalculateDistance(e.second) <= distance) {
+			result.push_back(e.second);
+		}
+	}
+
+	return result;
+}
+
+perl::array Perl_Mob_GetCloseMobList(Mob* self, float distance, bool ignore_self)
+{
+	perl::array result;
+
+	const auto& l = entity_list.GetCloseMobList(self, distance);
+
+	result.reserve(l.size());
+
+	for (const auto& e : l) {
+		if (ignore_self && e.second == self) {
+			continue;
+		}
+
+		if (self->CalculateDistance(e.second) <= distance) {
+			result.push_back(e.second);
+		}
+	}
+
+	return result;
+}
+
+StatBonuses* Perl_Mob_GetAABonuses(Mob* self)
+{
+	return self->GetAABonusesPtr();
+}
+
+StatBonuses* Perl_Mob_GetItemBonuses(Mob* self)
+{
+	return self->GetItemBonusesPtr();
+}
+
+StatBonuses* Perl_Mob_GetSpellBonuses(Mob* self)
+{
+	return self->GetSpellBonusesPtr();
+}
+
+std::string Perl_Mob_GetClassPlural(Mob* self)
+{
+	return self->GetClassPlural();
+}
+
+uint32 Perl_Mob_GetMobTypeIdentifier(Mob* self)
+{
+	return self->GetMobTypeIdentifier();
+}
+
+std::string Perl_Mob_GetRacePlural(Mob* self)
+{
+	return self->GetRacePlural();
+}
+
 void perl_register_mob()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -2965,6 +3330,7 @@ void perl_register_mob()
 	package.add("AddToHateList", (void(*)(Mob*, Mob*, int64_t, int64_t, bool, bool, bool))&Perl_Mob_AddToHateList);
 	package.add("ApplySpellBuff", (void(*)(Mob*, int))&Perl_Mob_ApplySpellBuff);
 	package.add("ApplySpellBuff", (void(*)(Mob*, int, int))&Perl_Mob_ApplySpellBuff);
+	package.add("ApplySpellBuff", (void(*)(Mob*, int, int, int))&Perl_Mob_ApplySpellBuff);
 	package.add("Attack", (bool(*)(Mob*, Mob*))&Perl_Mob_Attack);
 	package.add("Attack", (bool(*)(Mob*, Mob*, int))&Perl_Mob_Attack);
 	package.add("Attack", (bool(*)(Mob*, Mob*, int, bool))&Perl_Mob_Attack);
@@ -2980,7 +3346,8 @@ void perl_register_mob()
 	package.add("BuffFadeBySlot", (void(*)(Mob*, int))&Perl_Mob_BuffFadeBySlot);
 	package.add("BuffFadeBySlot", (void(*)(Mob*, int, bool))&Perl_Mob_BuffFadeBySlot);
 	package.add("BuffFadeBySpellID", &Perl_Mob_BuffFadeBySpellID);
-	package.add("CalculateDistance", &Perl_Mob_CalculateDistance);
+	package.add("CalculateDistance", (float(*)(Mob*, float, float, float))&Perl_Mob_CalculateDistance);
+	package.add("CalculateDistance", (float(*)(Mob*, Mob*))&Perl_Mob_CalculateDistance);
 	package.add("CalculateHeadingToTarget", &Perl_Mob_CalculateHeadingToTarget);
 	package.add("CameraEffect", (void(*)(Mob*, uint32))&Perl_Mob_CameraEffect);
 	package.add("CameraEffect", (void(*)(Mob*, uint32, float))&Perl_Mob_CameraEffect);
@@ -3087,7 +3454,8 @@ void perl_register_mob()
 	package.add("EntityVariableExists", &Perl_Mob_EntityVariableExists);
 	package.add("FaceTarget", (void(*)(Mob*))&Perl_Mob_FaceTarget);
 	package.add("FaceTarget", (void(*)(Mob*, Mob*))&Perl_Mob_FaceTarget);
-	package.add("FindBuff", &Perl_Mob_FindBuff);
+	package.add("FindBuff", (bool(*)(Mob*, uint16))&Perl_Mob_FindBuff);
+	package.add("FindBuff", (bool(*)(Mob*, uint16, uint16))&Perl_Mob_FindBuff);
 	package.add("FindBuffBySlot", &Perl_Mob_FindBuffBySlot);
 	package.add("FindGroundZ", (float(*)(Mob*, float, float))&Perl_Mob_FindGroundZ);
 	package.add("FindGroundZ", (float(*)(Mob*, float, float, float))&Perl_Mob_FindGroundZ);
@@ -3098,6 +3466,7 @@ void perl_register_mob()
 	package.add("GMMove", (void(*)(Mob*, float, float, float, float))&Perl_Mob_GMMove);
 	package.add("Gate", &Perl_Mob_Gate);
 	package.add("GetAA", &Perl_Mob_GetAA);
+	package.add("GetAABonuses", &Perl_Mob_GetAABonuses);
 	package.add("GetAAByAAID", &Perl_Mob_GetAAByAAID);
 	package.add("GetAC", &Perl_Mob_GetAC);
 	package.add("GetAGI", &Perl_Mob_GetAGI);
@@ -3138,10 +3507,16 @@ void perl_register_mob()
 	package.add("GetCasterLevel", &Perl_Mob_GetCasterLevel);
 	package.add("GetClass", &Perl_Mob_GetClass);
 	package.add("GetClassLevelFactor", &Perl_Mob_GetClassLevelFactor);
+	package.add("GetClassPlural", &Perl_Mob_GetClassPlural);
 	package.add("GetClassName", &Perl_Mob_GetClassName);
 	package.add("GetCleanName", &Perl_Mob_GetCleanName);
+	package.add("GetCloseMobList", (perl::array(*)(Mob*))&Perl_Mob_GetCloseMobList);
+	package.add("GetCloseMobList", (perl::array(*)(Mob*, float))&Perl_Mob_GetCloseMobList);
+	package.add("GetCloseMobList", (perl::array(*)(Mob*, float, bool))&Perl_Mob_GetCloseMobList);
 	package.add("GetCorruption", &Perl_Mob_GetCorruption);
-	package.add("GetDefaultRaceSize", &Perl_Mob_GetDefaultRaceSize);
+	package.add("GetDefaultRaceSize", (float(*)(Mob*))&Perl_Mob_GetDefaultRaceSize);
+	package.add("GetDefaultRaceSize", (float(*)(Mob*, int))&Perl_Mob_GetDefaultRaceSize);
+	package.add("GetDefaultRaceSize", (float(*)(Mob*, int, int))&Perl_Mob_GetDefaultRaceSize);
 	package.add("GetDEX", &Perl_Mob_GetDEX);
 	package.add("GetDR", &Perl_Mob_GetDR);
 	package.add("GetDamageAmount", &Perl_Mob_GetDamageAmount);
@@ -3171,7 +3546,14 @@ void perl_register_mob()
 	package.add("GetHaste", &Perl_Mob_GetHaste);
 	package.add("GetHateAmount", (int64_t(*)(Mob*, Mob*))&Perl_Mob_GetHateAmount);
 	package.add("GetHateAmount", (int64_t(*)(Mob*, Mob*, bool))&Perl_Mob_GetHateAmount);
-	package.add("GetHateClosest", &Perl_Mob_GetHateClosest);
+	package.add("GetHateClosest", (Mob*(*)(Mob*))&Perl_Mob_GetHateClosest);
+	package.add("GetHateClosest", (Mob*(*)(Mob*, bool))&Perl_Mob_GetHateClosest);
+	package.add("GetHateClosestBot", (Bot*(*)(Mob*))&Perl_Mob_GetHateClosestBot);
+	package.add("GetHateClosestBot", (Bot*(*)(Mob*, bool))&Perl_Mob_GetHateClosestBot);
+	package.add("GetHateClosestClient", (Client*(*)(Mob*))&Perl_Mob_GetHateClosestClient);
+	package.add("GetHateClosestClient", (Client*(*)(Mob*, bool))&Perl_Mob_GetHateClosestClient);
+	package.add("GetHateClosestNPC", (NPC*(*)(Mob*))&Perl_Mob_GetHateClosestNPC);
+	package.add("GetHateClosestNPC", (NPC*(*)(Mob*, bool))&Perl_Mob_GetHateClosestNPC);
 	package.add("GetHateDamageTop", &Perl_Mob_GetHateDamageTop);
 	package.add("GetHateList", &Perl_Mob_GetHateList);
 	package.add("GetHateListBots", (perl::array(*)(Mob*))&Perl_Mob_GetHateListBots);
@@ -3195,6 +3577,7 @@ void perl_register_mob()
 	package.add("GetInvisibleLevel", &Perl_Mob_GetInvisibleLevel);
 	package.add("GetInvisibleUndeadLevel", &Perl_Mob_GetInvisibleUndeadLevel);
 	package.add("GetInvul", &Perl_Mob_GetInvul);
+	package.add("GetItemBonuses", &Perl_Mob_GetItemBonuses);
 	package.add("GetItemHPBonuses", &Perl_Mob_GetItemHPBonuses);
 	package.add("GetItemStat", &Perl_Mob_GetItemStat);
 	package.add("GetLastName", &Perl_Mob_GetLastName);
@@ -3215,6 +3598,7 @@ void perl_register_mob()
 	package.add("GetMaxSTR", &Perl_Mob_GetMaxSTR);
 	package.add("GetMaxWIS", &Perl_Mob_GetMaxWIS);
 	package.add("GetMeleeMitigation", &Perl_Mob_GetMeleeMitigation);
+	package.add("GetMobTypeIdentifier", &Perl_Mob_GetMobTypeIdentifier);
 	package.add("GetModSkillDmgTaken", &Perl_Mob_GetModSkillDmgTaken);
 	package.add("GetModVulnerability", &Perl_Mob_GetModVulnerability);
 	package.add("GetNPCTypeID", &Perl_Mob_GetNPCTypeID);
@@ -3225,12 +3609,14 @@ void perl_register_mob()
 	package.add("GetOwner", &Perl_Mob_GetOwner);
 	package.add("GetOwnerID", &Perl_Mob_GetOwnerID);
 	package.add("GetPR", &Perl_Mob_GetPR);
+	package.add("GetPet", &Perl_Mob_GetPet);
 	package.add("GetPetID", &Perl_Mob_GetPetID);
 	package.add("GetPetOrder", &Perl_Mob_GetPetOrder);
 	package.add("GetPetType", &Perl_Mob_GetPetType);
 	package.add("GetPhR", &Perl_Mob_GetPhR);
 	package.add("GetRace", &Perl_Mob_GetRace);
 	package.add("GetRaceName", &Perl_Mob_GetRaceName);
+	package.add("GetRacePlural", &Perl_Mob_GetRacePlural);
 	package.add("GetRemainingTimeMS", &Perl_Mob_GetRemainingTimeMS);
 	package.add("GetResist", &Perl_Mob_GetResist);
 	package.add("GetReverseFactionCon", &Perl_Mob_GetReverseFactionCon);
@@ -3245,6 +3631,7 @@ void perl_register_mob()
 	package.add("GetSpecialAbility", &Perl_Mob_GetSpecialAbility);
 	package.add("GetSpecialAbilityParam", &Perl_Mob_GetSpecialAbilityParam);
 	package.add("GetSpecializeSkillValue", &Perl_Mob_GetSpecializeSkillValue);
+	package.add("GetSpellBonuses", &Perl_Mob_GetSpellBonuses);
 	package.add("GetSpellHPBonuses", &Perl_Mob_GetSpellHPBonuses);
 	package.add("GetSpellIDFromSlot", &Perl_Mob_GetSpellIDFromSlot);
 	package.add("GetSpellStat", (int(*)(Mob*, uint32, const char*))&Perl_Mob_GetSpellStat);
@@ -3272,6 +3659,7 @@ void perl_register_mob()
 	package.add("HasPet", &Perl_Mob_HasPet);
 	package.add("HasProcs", &Perl_Mob_HasProcs);
 	package.add("HasShieldEquipped", &Perl_Mob_HasShieldEquipped);
+	package.add("HasSpellEffect", &Perl_Mob_HasSpellEffect);
 	package.add("HasTimer", &Perl_Mob_HasTimer);
 	package.add("HasTwoHandBluntEquipped", &Perl_Mob_HasTwoHandBluntEquipped);
 	package.add("HasTwoHanderEquipped", &Perl_Mob_HasTwoHanderEquipped);
@@ -3285,6 +3673,7 @@ void perl_register_mob()
 	package.add("IsAmnesiad", &Perl_Mob_IsAmnesiad);
 	package.add("IsAttackAllowed", (bool(*)(Mob*, Mob*))&Perl_Mob_IsAttackAllowed);
 	package.add("IsAttackAllowed", (bool(*)(Mob*, Mob*, bool))&Perl_Mob_IsAttackAllowed);
+	package.add("IsAura", &Perl_Mob_IsAura);
 	package.add("IsBeacon", &Perl_Mob_IsBeacon);
 	package.add("IsBeneficialAllowed", &Perl_Mob_IsBeneficialAllowed);
 	package.add("IsBerserk", &Perl_Mob_IsBerserk);
@@ -3295,6 +3684,7 @@ void perl_register_mob()
 	package.add("IsCorpse", &Perl_Mob_IsCorpse);
 	package.add("IsDoor", &Perl_Mob_IsDoor);
 	package.add("IsEliteMaterialItem", &Perl_Mob_IsEliteMaterialItem);
+	package.add("IsEncounter", &Perl_Mob_IsEncounter);
 	package.add("IsEngaged", &Perl_Mob_IsEngaged);
 	package.add("IsEnraged", &Perl_Mob_IsEnraged);
 	package.add("IsFeared", &Perl_Mob_IsFeared);
@@ -3304,12 +3694,15 @@ void perl_register_mob()
 	package.add("IsInvisible", (bool(*)(Mob*))&Perl_Mob_IsInvisible);
 	package.add("IsInvisible", (bool(*)(Mob*, Mob*))&Perl_Mob_IsInvisible);
 	package.add("IsMeleeDisabled", &Perl_Mob_IsMeleeDisabled);
+	package.add("IsMerc", &Perl_Mob_IsMerc);
 	package.add("IsMezzed", &Perl_Mob_IsMezzed);
 	package.add("IsMob", &Perl_Mob_IsMob);
 	package.add("IsMoving", &Perl_Mob_IsMoving);
 	package.add("IsNPC", &Perl_Mob_IsNPC);
 	package.add("IsNPCCorpse", &Perl_Mob_IsNPCCorpse);
 	package.add("IsObject", &Perl_Mob_IsObject);
+	package.add("IsOfClientBot", &Perl_Mob_IsOfClientBot);
+	package.add("IsOfClientBotMerc", &Perl_Mob_IsOfClientBotMerc);
 	package.add("IsPausedTimer", &Perl_Mob_IsPausedTimer);
 	package.add("IsPet", &Perl_Mob_IsPet);
 	package.add("IsPlayerCorpse", &Perl_Mob_IsPlayerCorpse);
@@ -3320,6 +3713,7 @@ void perl_register_mob()
 	package.add("IsStunned", &Perl_Mob_IsStunned);
 	package.add("IsTargetable", &Perl_Mob_IsTargetable);
 	package.add("IsTargeted", &Perl_Mob_IsTargeted);
+	package.add("IsTemporaryPet", &Perl_Mob_IsTemporaryPet);
 	package.add("IsTrackable", &Perl_Mob_IsTrackable);
 	package.add("IsTrap", &Perl_Mob_IsTrap);
 	package.add("IsWarriorClass", &Perl_Mob_IsWarriorClass);
@@ -3429,6 +3823,7 @@ void perl_register_mob()
 	package.add("SetBucket", (void(*)(Mob*, std::string, std::string, std::string))&Perl_Mob_SetBucket);
 	package.add("SetBuffDuration", (void(*)(Mob*, int))&Perl_Mob_SetBuffDuration);
 	package.add("SetBuffDuration", (void(*)(Mob*, int, int))&Perl_Mob_SetBuffDuration);
+	package.add("SetBuffDuration", (void(*)(Mob*, int, int, int))&Perl_Mob_SetBuffDuration);
 	package.add("SetCurrentWP", &Perl_Mob_SetCurrentWP);
 	package.add("SetDeltas", &Perl_Mob_SetDeltas);
 	package.add("SetDisableMelee", &Perl_Mob_SetDisableMelee);
@@ -3511,9 +3906,9 @@ void perl_register_mob()
 	package.add("TypesTempPet", (void(*)(Mob*, uint32, const char*, uint32, bool, Mob*))&Perl_Mob_TypesTempPet);
 	package.add("TypesTempPet", (void(*)(Mob*, uint32, const char*, uint32, bool, Mob*, bool))&Perl_Mob_TypesTempPet);
 	package.add("WalkTo", &Perl_Mob_WalkTo);
-	package.add("WearChange", (void(*)(Mob*, uint8, uint16))&Perl_Mob_WearChange);
-	package.add("WearChange", (void(*)(Mob*, uint8, uint16, uint32))&Perl_Mob_WearChange);
-	package.add("WearChange", (void(*)(Mob*, uint8, uint16, uint32, uint32))&Perl_Mob_WearChange);
+	package.add("WearChange", (void(*)(Mob*, uint8, uint32))&Perl_Mob_WearChange);
+	package.add("WearChange", (void(*)(Mob*, uint8, uint32, uint32))&Perl_Mob_WearChange);
+	package.add("WearChange", (void(*)(Mob*, uint8, uint32, uint32, uint32))&Perl_Mob_WearChange);
 	package.add("WipeHateList", &Perl_Mob_WipeHateList);
 }
 

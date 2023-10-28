@@ -14,13 +14,10 @@
 #define _CLIENTCORPSE(x) (x && x->IsCorpse() && x->CastToCorpse()->IsPlayerCorpse() && !x->CastToCorpse()->IsBecomeNPCCorpse())
 #define _NPCCORPSE(x) (x && x->IsCorpse() && (x->CastToCorpse()->IsNPCCorpse() || x->CastToCorpse()->IsBecomeNPCCorpse()))
 #define _CLIENTPET(x) (x && x->CastToMob()->GetOwner() && x->CastToMob()->GetOwner()->IsClient())
-#define _NPCPET(x) (x && x->IsNPC() && x->CastToMob()->GetOwner() && x->CastToMob()->GetOwner()->IsNPC())
-#define _BECOMENPCPET(x) (x && x->CastToMob()->GetOwner() && x->CastToMob()->GetOwner()->IsClient() && x->CastToMob()->GetOwner()->CastToClient()->IsBecomeNPC())
 
 //LOS Parameters:
 #define HEAD_POSITION 0.9f	//ratio of GetSize() where NPCs see from
 #define SEE_POSITION 0.5f	//ratio of GetSize() where NPCs try to see for LOS
-#define CHECK_LOS_STEP 1.0f
 
 #define ARCHETYPE_HYBRID	1
 #define ARCHETYPE_CASTER	2
@@ -44,7 +41,6 @@
 
 //Spell specialization parameters, not sure of a better place for them
 #define SPECIALIZE_FIZZLE 11		//% fizzle chance reduce at 200 specialized
-#define SPECIALIZE_MANA_REDUCE 12	//% mana cost reduction at 200 specialized
 
 //these are large right now because the x,y,z coords of the zone
 //lines do not make a lot of sense
@@ -211,6 +207,8 @@ enum {
 	MODIFY_AVOID_DAMAGE = 51,                    //Modify by percent the NPCs chance to riposte, block, parry or dodge individually, or for all skills
 	IMMUNE_FADING_MEMORIES = 52,
 	IMMUNE_OPEN = 53,
+	IMMUNE_ASSASSINATE = 54,
+	IMMUNE_HEADSHOT = 55,
 	MAX_SPECIAL_ATTACK
 };
 
@@ -232,7 +230,6 @@ enum GravityBehavior {
 	LevitateWhileRunning
 };
 
-struct TradeEntity;
 class Trade;
 enum TradeState {
 	TradeNone,
@@ -846,7 +843,6 @@ public:
 	virtual ~Trade();
 
 	void Reset();
-	void SetTradeCash(uint32 in_pp, uint32 in_gp, uint32 in_sp, uint32 in_cp);
 
 	// Initiate a trade with another mob
 	// Also puts other mob into trader mode with this mob
@@ -897,7 +893,7 @@ struct ExtraAttackOptions {
 	int hit_chance;
 	int melee_damage_bonus_flat;
 	int skilldmgtaken_bonus_flat;
-
+	int range_percent;
 };
 
 struct DamageTable {

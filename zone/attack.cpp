@@ -160,7 +160,7 @@ int Mob::compute_tohit(EQ::skills::SkillType skillinuse)
 	if (IsNPC())
 		tohit += CastToNPC()->GetAccuracyRating();
 	if (IsClient()) {
-		double reduction = CastToClient()->m_pp.intoxication / 2.0;
+		double reduction = CastToClient()->GetIntoxication() / 2.0;
 		if (reduction > 20.0) {
 			reduction = std::min((110 - reduction) / 100.0, 1.0);
 			tohit = reduction * static_cast<double>(tohit);
@@ -256,7 +256,7 @@ int Mob::compute_defense()
 		defense += CastToNPC()->GetAvoidanceRating();
 
 	if (IsClient()) {
-		double reduction = CastToClient()->m_pp.intoxication / 2.0;
+		double reduction = CastToClient()->GetIntoxication() / 2.0;
 		if (reduction > 20.0) {
 			reduction = std::min((110 - reduction) / 100.0, 1.0);
 			defense = reduction * static_cast<double>(defense);
@@ -1741,7 +1741,8 @@ bool Client::Death(Mob* killerMob, int64 damage, uint16 spell, EQ::skills::Skill
 			static_cast<int>(attack_skill)
 		);
 
-		if (parse->EventPlayer(EVENT_DEATH, this, export_string, 0) != 0) {
+		std::vector<std::any> args = { CastToMob() };
+		if (parse->EventPlayer(EVENT_DEATH, this, export_string, 0, &args) != 0) {
 			if (GetHP() < 0) {
 				SetHP(0);
 			}
@@ -2388,7 +2389,8 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 				static_cast<int>(attack_skill)
 			);
 
-			if (parse->EventNPC(EVENT_DEATH, this, oos, export_string, 0) != 0) {
+			std::vector<std::any> args = { CastToMob() };
+			if (parse->EventNPC(EVENT_DEATH, this, oos, export_string, 0, &args) != 0) {
 				if (GetHP() < 0) {
 					SetHP(0);
 				}
@@ -2405,7 +2407,9 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 				spell,
 				static_cast<int>(attack_skill)
 			);
-			if (parse->EventBot(EVENT_DEATH, CastToBot(), oos, export_string, 0) != 0) {
+
+			std::vector<std::any> args = { CastToMob() };
+			if (parse->EventBot(EVENT_DEATH, CastToBot(), oos, export_string, 0, &args) != 0) {
 				if (GetHP() < 0) {
 					SetHP(0);
 				}
@@ -2958,7 +2962,7 @@ void Mob::AddToHateList(Mob* other, int64 hate /*= 0*/, int64 damage /*= 0*/, bo
 	if (GetSpecialAbility(IMMUNE_AGGRO_CLIENT) && other->IsClient())
 		return;
 
-	if (IsValidSpell(spell_id) && NoDetrimentalSpellAggro(spell_id))
+	if (IsValidSpell(spell_id) && IsNoDetrimentalSpellAggroSpell(spell_id))
 		return;
 
 	if (other == myowner)
@@ -3624,7 +3628,7 @@ int64 Mob::ReduceAllDamage(int64 damage)
 
 bool Mob::HasProcs() const
 {
-	for (int i = 0; i < MAX_PROCS; i++) {
+	for (int i = 0; i < m_max_procs; i++) {
 		if (IsValidSpell(PermaProcs[i].spellID) || IsValidSpell(SpellProcs[i].spellID)) {
 			return true;
 		}
@@ -3642,7 +3646,7 @@ bool Mob::HasProcs() const
 
 bool Mob::HasDefensiveProcs() const
 {
-	for (int i = 0; i < MAX_PROCS; i++) {
+	for (int i = 0; i < m_max_procs; i++) {
 		if (IsValidSpell(DefensiveProcs[i].spellID)) {
 			return true;
 		}
@@ -3678,7 +3682,7 @@ bool Mob::HasSkillProcSuccess() const
 
 bool Mob::HasRangedProcs() const
 {
-	for (int i = 0; i < MAX_PROCS; i++){
+	for (int i = 0; i < m_max_procs; i++){
 		if (IsValidSpell(RangedProcs[i].spellID)) {
 			return true;
 		}
@@ -4226,11 +4230,11 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 		//this was done to simplify the code here (since we can only effectively skip one mob on queue)
 		eqFilterType filter;
 		Mob* skip = attacker;
-		if (attacker && attacker->GetOwnerID()) {
+		if (attacker && attacker->GetOwner()) {
 			//attacker is a pet, let pet owners see their pet's damage
 			Mob* owner = attacker->GetOwner();
 			if (owner && owner->IsClient()) {
-				if ((IsValidSpell(spell_id) || (FromDamageShield)) && damage > 0) {
+				if (FromDamageShield && damage > 0) {
 					//special crap for spell damage, looks hackish to me
 					char val1[20] = { 0 };
 					owner->MessageString(Chat::NonMelee, OTHER_HIT_NONMELEE, GetCleanName(), ConvertArray(damage, val1));
@@ -4249,7 +4253,15 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 						filter = FilterPetMisses;
 
 					if (!FromDamageShield)
-						owner->CastToClient()->QueuePacket(outapp, true, CLIENT_CONNECTED, filter);
+						entity_list.QueueCloseClients(
+							this, /* Sender */
+							outapp, /* packet */
+							false, /* Skip Sender */
+							((IsValidSpell(spell_id)) ? RuleI(Range, SpellMessages) : RuleI(Range, DamageMessages)),
+							0, /* don't skip anyone on spell */
+							true, /* Packet ACK */
+							filter /* eqFilterType filter */
+							);
 				}
 			}
 
@@ -4351,16 +4363,21 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 					CastToClient()->QueuePacket(outapp);
 				}
 
-				// Otherwise, send normal spell or melee message to observers.
-				entity_list.QueueCloseClients(
-					this, /* Sender */
-					outapp, /* packet */
-					true, /* Skip Sender */
-					range, /* distance packet travels at the speed of sound */
-					(IsValidSpell(spell_id) && skill_used != EQ::skills::SkillTigerClaw) ? 0 : skip,
-					true, /* Packet ACK */
-					filter /* eqFilterType filter */
-					);
+				// Send normal message to observers
+				// Exclude damage done by client pets as that's handled
+				// elsewhere using proper "my pet damage filter"
+				Mob *owner = attacker->GetOwner();
+				if (!owner || (owner && !owner->IsClient())) {
+					entity_list.QueueCloseClients(
+						this, /* Sender */
+						outapp, /* packet */
+						true, /* Skip Sender */
+						range, /* distance packet travels at the speed of sound */
+						(IsValidSpell(spell_id) && skill_used != EQ::skills::SkillTigerClaw) ? 0 : skip,
+						true, /* Packet ACK */
+						filter /* eqFilterType filter */
+						);
+				}
 			}
 		}
 
@@ -4447,11 +4464,19 @@ void Mob::HealDamage(uint64 amount, Mob* caster, uint16 spell_id)
 				}
 			}
 			else { // normal heals
-				FilteredMessageString(caster, Chat::NonMelee, FilterSpellDamage,
-					YOU_HEALED, caster->GetCleanName(), itoa(acthealed));
+				// Message to caster
+				if (caster->IsClient()) {
+					caster->FilteredMessageString(caster, Chat::NonMelee,
+						FilterSpellDamage, YOU_HEAL, GetCleanName(),
+						itoa(acthealed));
+					}
 
-					caster->FilteredMessageString(caster, Chat::NonMelee, FilterSpellDamage,
-						YOU_HEAL, GetCleanName(), itoa(acthealed));
+				// Message to target
+				if (IsClient() && caster != this) {
+					FilteredMessageString(caster, Chat::NonMelee,
+					FilterSpellDamage, YOU_HEALED, caster->GetCleanName(),
+					itoa(acthealed));
+				}
 			}
 		} else if (
 			CastToClient()->GetFilter(FilterHealOverTime) != FilterShowSelfOnly ||
@@ -4518,8 +4543,8 @@ float Mob::GetDefensiveProcChances(float &ProcBonus, float &ProcChance, uint16 h
 }
 
 // argument 'weapon' not used
-void Mob::TryDefensiveProc(Mob *on, uint16 hand) {
-
+void Mob::TryDefensiveProc(Mob *on, uint16 hand)
+{
 	if (!on) {
 		SetTarget(nullptr);
 		LogError("A null Mob object was passed to Mob::TryDefensiveProc for evaluation!");
@@ -4531,31 +4556,34 @@ void Mob::TryDefensiveProc(Mob *on, uint16 hand) {
 	}
 
 	if (!on->HasDied() && on->GetHP() > 0) {
-
-		float ProcChance, ProcBonus;
-		on->GetDefensiveProcChances(ProcBonus, ProcChance, hand, this);
+		float proc_chance, proc_bonus;
+		on->GetDefensiveProcChances(proc_bonus, proc_chance, hand, this);
 
 		if (hand == EQ::invslot::slotSecondary) {
-			ProcChance /= 2;
+			proc_chance /= 2;
 		}
 
-		int level_penalty = 0;
-		int level_diff = GetLevel() - on->GetLevel();
-		if (level_diff > 6) {//10% penalty per level if > 6 levels over target.
-			level_penalty = (level_diff - 6) * 10;
+		int level_penalty     = 0;
+		int level_diff        = GetLevel() - on->GetLevel();
+		int penalty_level_gap = RuleI(Spells, DefensiveProcPenaltyLevelGap);
+		if (
+			penalty_level_gap >= 0 &&
+			level_diff > penalty_level_gap
+		) {//10% penalty per level if > penalty_level_gap levels over target.
+			level_penalty = (level_diff - penalty_level_gap) * RuleR(Spells, DefensiveProcPenaltyLevelGapModifier);
 		}
 
-		ProcChance -= ProcChance*level_penalty / 100;
+		proc_chance -= proc_chance * level_penalty / 100;
 
-		if (ProcChance < 0) {
+		if (proc_chance < 0) {
 			return;
 		}
 
 		//Spell Procs and Quest added procs
-		for (int i = 0; i < MAX_PROCS; i++) {
+		for (int i = 0; i < m_max_procs; i++) {
 			if (IsValidSpell(DefensiveProcs[i].spellID)) {
 				if (!IsProcLimitTimerActive(DefensiveProcs[i].base_spellID, DefensiveProcs[i].proc_reuse_time, ProcType::DEFENSIVE_PROC)) {
-					float chance = ProcChance * (static_cast<float>(DefensiveProcs[i].chance) / 100.0f);
+					float chance = proc_chance * (static_cast<float>(DefensiveProcs[i].chance) / 100.0f);
 					if (zone->random.Roll(chance)) {
 						ExecWeaponProc(nullptr, DefensiveProcs[i].spellID, on);
 						CheckNumHitsRemaining(NumHit::DefensiveSpellProcs, 0, DefensiveProcs[i].base_spellID);
@@ -4568,14 +4596,14 @@ void Mob::TryDefensiveProc(Mob *on, uint16 hand) {
 		//AA Procs
 		if (IsOfClientBot()) {
 			for (int i = 0; i < MAX_AA_PROCS; i += 4) {
-				int32 aa_rank_id = aabonuses.DefensiveProc[i + +SBIndex::COMBAT_PROC_ORIGIN_ID];
-				int32 aa_spell_id = aabonuses.DefensiveProc[i + SBIndex::COMBAT_PROC_SPELL_ID];
-				int32 aa_proc_chance = 100 + aabonuses.DefensiveProc[i + SBIndex::COMBAT_PROC_RATE_MOD];
+				int32  aa_rank_id          = aabonuses.DefensiveProc[i + +SBIndex::COMBAT_PROC_ORIGIN_ID];
+				int32  aa_spell_id         = aabonuses.DefensiveProc[i + SBIndex::COMBAT_PROC_SPELL_ID];
+				int32  aa_proc_chance      = 100 + aabonuses.DefensiveProc[i + SBIndex::COMBAT_PROC_RATE_MOD];
 				uint32 aa_proc_reuse_timer = aabonuses.DefensiveProc[i + SBIndex::COMBAT_PROC_REUSE_TIMER];
 
 				if (aa_rank_id) {
 					if (!IsProcLimitTimerActive(-aa_rank_id, aa_proc_reuse_timer, ProcType::DEFENSIVE_PROC)) {
-						float chance = ProcChance * (static_cast<float>(aa_proc_chance) / 100.0f);
+						float chance = proc_chance * (static_cast<float>(aa_proc_chance) / 100.0f);
 						if (zone->random.Roll(chance) && IsValidSpell(aa_spell_id)) {
 							ExecWeaponProc(nullptr, aa_spell_id, on);
 							SetProcLimitTimer(-aa_rank_id, aa_proc_reuse_timer, ProcType::DEFENSIVE_PROC);
@@ -4755,7 +4783,7 @@ void Mob::TrySpellProc(const EQ::ItemInstance *inst, const EQ::ItemData *weapon,
 
 	int16 poison_slot=-1;
 
-	for (uint32 i = 0; i < MAX_PROCS; i++) {
+	for (uint32 i = 0; i < m_max_procs; i++) {
 		if (IsPet() && hand != EQ::invslot::slotPrimary) //Pets can only proc spell procs from their primay hand (ie; beastlord pets)
 			continue; // If pets ever can proc from off hand, this will need to change
 
@@ -5184,8 +5212,11 @@ bool Mob::TryFinishingBlow(Mob *defender, int64 &damage)
 			FB_Level = itembonuses.FinishingBlowLvl[SBIndex::FINISHING_EFFECT_LEVEL_MAX];
 
 		// modern AA description says rank 1 (500) is 50% chance
-		int ProcChance =
-				aabonuses.FinishingBlow[SBIndex::FINISHING_EFFECT_PROC_CHANCE] + spellbonuses.FinishingBlow[SBIndex::FINISHING_EFFECT_PROC_CHANCE] + spellbonuses.FinishingBlow[SBIndex::FINISHING_EFFECT_PROC_CHANCE];
+		int ProcChance = (
+			aabonuses.FinishingBlow[SBIndex::FINISHING_EFFECT_PROC_CHANCE] +
+			itembonuses.FinishingBlow[SBIndex::FINISHING_EFFECT_PROC_CHANCE] +
+			spellbonuses.FinishingBlow[SBIndex::FINISHING_EFFECT_PROC_CHANCE]
+		);
 
 		if (FB_Level && FB_Dmg && (defender->GetLevel() <= FB_Level) &&
 			(ProcChance >= zone->random.Int(1, 1000))) {
@@ -6449,4 +6480,9 @@ int64 Mob::GetHPRegenPerSecond() const
 int64 Mob::GetManaRegen() const
 {
 	return mana_regen;
+}
+
+int64 Mob::GetEnduranceRegen() const
+{
+	return 0; // not implemented
 }

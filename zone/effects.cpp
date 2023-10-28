@@ -95,7 +95,7 @@ int64 Mob::GetActSpellDamage(uint16 spell_id, int64 value, Mob* target) {
 		else if ((IsOfClientBot() && GetClass() == WIZARD) || (IsMerc() && GetClass() == CASTERDPS)) {
 			if ((GetLevel() >= RuleI(Spells, WizCritLevel)) && zone->random.Roll(RuleI(Spells, WizCritChance))){
 				//Wizard innate critical chance is calculated seperately from spell effect and is not a set ratio. (20-70 is parse confirmed)
-				ratio += zone->random.Int(20,70);
+				ratio += zone->random.Int(RuleI(Spells, WizardCritMinimumRandomRatio), RuleI(Spells, WizardCritMaximumRandomRatio));
 				Critical = true;
 			}
 		}
@@ -622,8 +622,8 @@ bool Client::TrainDiscipline(uint32 itemid) {
 	const std::string item_name = item->Name;
 
 	if (
-		item_name.substr(0, 5) != std::string("Tome ") &&
-		item_name.substr(0, 7) != std::string("Skill: ")
+		!Strings::BeginsWith(item_name, "Tome of ") &&
+		!Strings::BeginsWith(item_name, "Skill: ")
 	) {
 		Message(Chat::Red, "This item is not a tome.");
 		//summon them the item back...
@@ -709,8 +709,8 @@ bool Client::MemorizeSpellFromItem(uint32 item_id) {
 	const std::string item_name = item->Name;
 
 	if (
-		item_name.substr(0, 7) != std::string("Spell: ") &&
-		item_name.substr(0, 6) != std::string("Song: ")
+		!Strings::BeginsWith(item_name, "Spell: ") &&
+		!Strings::BeginsWith(item_name, "Song: ")
 	) {
 		Message(Chat::Red, "This item is not a scroll.");
 		SummonItem(item_id);
@@ -810,9 +810,9 @@ void Client::SendDisciplineUpdate() {
 
 bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 	// Dont let client waste a reuse timer if they can't use the disc
-	if ((IsStunned() && !IgnoreCastingRestriction(spell_id))||
+	if ((IsStunned() && !IsCastNotStandingSpell(spell_id))||
 		IsFeared() ||
-		(IsMezzed() && !IgnoreCastingRestriction(spell_id)) ||
+		(IsMezzed() && !IsCastNotStandingSpell(spell_id)) ||
 		IsAmnesiad() ||
 		IsPet())
 	{
@@ -837,7 +837,7 @@ bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 		return false;
 	}
 
-	if (DivineAura() && !IgnoreCastingRestriction(spell_id)) {
+	if (DivineAura() && !IsCastNotStandingSpell(spell_id)) {
 		return false;
 	}
 

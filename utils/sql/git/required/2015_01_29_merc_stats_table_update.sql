@@ -1,1 +1,0 @@
-ALTER TABLE `merc_stats` ADD `statscale` int( 11 ) NOT NULL DEFAULT '100' AFTER `runspeed`;

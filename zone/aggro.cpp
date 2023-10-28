@@ -975,8 +975,7 @@ bool Mob::IsBeneficialAllowed(Mob *target)
 	return false;
 }
 
-bool Mob::CombatRange(Mob* other, float fixed_size_mod, bool aeRampage)
-{
+bool Mob::CombatRange(Mob* other, float fixed_size_mod, bool aeRampage, ExtraAttackOptions *opts) {
 	if (!other) {
 		return(false);
 	}
@@ -1071,18 +1070,40 @@ bool Mob::CombatRange(Mob* other, float fixed_size_mod, bool aeRampage)
 			SetPseudoRoot(false);
 		}
 	}
+	
 	if (aeRampage) {
-		float multiplyer = GetSize() * RuleR(Combat, AERampageSafeZone);
-		float ramp_range = (size_mod * multiplyer);
+		float aeramp_size = RuleR(Combat, AERampageMaxDistance);
+		
+		LogCombatDetail("AERampage: Default - aeramp_size = [{}] ", aeramp_size);
+
+		if (opts) {
+			if (opts->range_percent > 0) {
+				aeramp_size = opts->range_percent;
+				LogCombatDetail("AE Rampage: range_percent = [{}] -- aeramp_size [{}]", opts->range_percent, aeramp_size);
+			}
+		}
+
+		if (aeramp_size <= 0) {
+			aeramp_size = 0.90;
+		} else {
+			aeramp_size /= 100;
+		}
+
+		float ramp_range = size_mod * aeramp_size;
+
+		LogCombatDetail("AE Rampage: ramp_range = [{}] -- (size_mod [{}] * aeramp_size [{}])", ramp_range, size_mod, aeramp_size);
+		LogCombatDetail("AE Rampage: _DistNoRoot [{}] <= ramp_range [{}]", _DistNoRoot, ramp_range);
+		
 		if (_DistNoRoot <= ramp_range) {
+			LogCombatDetail("AE Rampage: Combat Distance returned [true]");
 			return true;
 		} else {
+			LogCombatDetail("AE Rampage: Combat Distance returned [false]");
 			return false;
 		}
 	}
 
-	if (_DistNoRoot <= size_mod)
-	{
+	if (_DistNoRoot <= size_mod) {
 		//A hack to kill an exploit till we get something better.
 		if (flymode != GravityBehavior::Flying && _zDist > 500 && !CheckLastLosState()) {
 			return false;
@@ -1161,7 +1182,7 @@ bool Mob::CheckLosFN(glm::vec3 posWatcher, float sizeWatcher, glm::vec3 posTarge
 //offensive spell aggro
 int32 Mob::CheckAggroAmount(uint16 spell_id, Mob *target, bool isproc)
 {
-	if (NoDetrimentalSpellAggro(spell_id))
+	if (IsNoDetrimentalSpellAggroSpell(spell_id))
 		return 0;
 
 	int32 AggroAmount = 0;

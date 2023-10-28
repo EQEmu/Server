@@ -11,6 +11,7 @@
 #include "aa_ability.h"
 #include "event_codes.h"
 #include "../common/repositories/doors_repository.h"
+#include "../common/races.h"
 
 #include "bot_database.h"
 
@@ -304,7 +305,7 @@ struct CharacterCorpseItemEntry
 	uint32 ornament_hero_model;
 };
 
-struct CharacterCorpseEntry 
+struct CharacterCorpseEntry
 {
 	bool locked;
 	uint32 exp;
@@ -339,7 +340,7 @@ namespace BeastlordPetData {
 		uint16 race_id = WOLF;
 		uint8 texture = 0;
 		uint8 helm_texture = 0;
-		uint8 gender = 2;
+		uint8 gender = NEUTER;
 		float size_modifier = 1.0f;
 		uint8 face = 0;
 	};
@@ -442,11 +443,9 @@ public:
 	bool LoadCharacterPotions(uint32 character_id, PlayerProfile_Struct* pp);
 	bool LoadCharacterSkills(uint32 character_id, PlayerProfile_Struct* pp);
 	bool LoadCharacterSpellBook(uint32 character_id, PlayerProfile_Struct* pp);
-	bool LoadCharacterTribute(uint32 character_id, PlayerProfile_Struct* pp);
 
 	bool SaveCharacterAA(uint32 character_id, uint32 aa_id, uint32 current_level, uint32 charges);
 	bool SaveCharacterBandolier(uint32 character_id, uint8 bandolier_id, uint8 bandolier_slot, uint32 item_id, uint32 icon, const char* bandolier_name);
-	bool SaveCharacterBindPoint(uint32 character_id, const BindStruct &bind, uint32 bind_number);
 	bool SaveCharacterCurrency(uint32 character_id, PlayerProfile_Struct* pp);
 	bool SaveCharacterData(Client* c, PlayerProfile_Struct* pp, ExtendedProfile_Struct* m_epp);
 	bool SaveCharacterDisc(uint32 character_id, uint32 slot_id, uint32 disc_id);
@@ -457,7 +456,6 @@ public:
 	bool SaveCharacterPotionBelt(uint32 character_id, uint8 potion_id, uint32 item_id, uint32 icon);
 	bool SaveCharacterSkill(uint32 character_id, uint32 skill_id, uint32 value);
 	bool SaveCharacterSpell(uint32 character_id, uint32 spell_id, uint32 slot_id);
-	bool SaveCharacterTribute(uint32 character_id, PlayerProfile_Struct* pp);
 
 	double GetAAEXPModifier(uint32 character_id, uint32 zone_id, int16 instance_version = -1) const;
 	double GetEXPModifier(uint32 character_id, uint32 zone_id, int16 instance_version = -1) const;
@@ -528,8 +526,6 @@ public:
 	bool		LoadSpawnGroups(const char* zone_name, uint16 version, SpawnGroupList* spawn_group_list);
 	bool		LoadSpawnGroupsByID(int spawn_group_id, SpawnGroupList* spawn_group_list);
 	bool		PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spawn2_list, int16 version);
-	bool		PopulateZoneSpawnListClose(uint32 zoneid, LinkedList<Spawn2*> &spawn2_list, int16 version, const glm::vec4& client_position, uint32 repop_distance);
-	Spawn2*		LoadSpawn2(LinkedList<Spawn2*> &spawn2_list, uint32 spawn2id, uint32 timeleft);
 	bool		CreateSpawn2(Client *c, uint32 spawngroup, const char* zone, const glm::vec4& position, uint32 respawn, uint32 variance, uint16 condition, int16 cond_value);
 	void		UpdateRespawnTime(uint32 id, uint16 instance_id,uint32 timeleft);
 	uint32		GetSpawnTimeLeft(uint32 id, uint16 instance_id);
@@ -604,8 +600,8 @@ public:
 	void	DeleteMerchantTemp(uint32 npcid, uint32 slot, uint32 zone_id, uint32 instance_id);
 
 	/* Tradeskills  */
-	bool	GetTradeRecipe(const EQ::ItemInstance* container, uint8 c_type, uint32 some_id, uint32 char_id, DBTradeskillRecipe_Struct *spec);
-	bool	GetTradeRecipe(uint32 recipe_id, uint8 c_type, uint32 some_id, uint32 char_id, DBTradeskillRecipe_Struct *spec);
+	bool	GetTradeRecipe(const EQ::ItemInstance* container, uint8 c_type, uint32 some_id, Client* c, DBTradeskillRecipe_Struct* spec, bool* is_augmented);
+	bool	GetTradeRecipe(uint32 recipe_id, uint8 c_type, uint32 some_id, Client* c, DBTradeskillRecipe_Struct* spec);
 	uint32	GetZoneForage(uint32 ZoneID, uint8 skill); /* for foraging */
 	uint32	GetZoneFishing(uint32 ZoneID, uint8 skill, uint32 &npc_id, uint8 &npc_chance);
 	void	UpdateRecipeMadecount(uint32 recipe_id, uint32 char_id, uint32 madecount);
@@ -623,8 +619,8 @@ public:
 	int GetDoorsDBCountPlusOne(std::string zone_short_name, int16 version);
 
 	/* Blocked Spells   */
-	int32	GetBlockedSpellsCount(uint32 zoneid);
-	bool	LoadBlockedSpells(int32 blockedSpellsCount, ZoneSpellsBlocked* into, uint32 zoneid);
+	int64 GetBlockedSpellsCount(uint32 zone_id);
+	bool LoadBlockedSpells(int64 blocked_spells_count, ZoneSpellsBlocked* into, uint32 zone_id);
 
 	/* Traps   */
 	bool	LoadTraps(const char* zonename, int16 version);
@@ -666,6 +662,10 @@ public:
 	// bot database add-on to eliminate the need for a second database connection
 	BotDatabase botdb;
 
+	static void LoadCharacterTribute(Client* c);
+
+	static void SaveCharacterBinds(Client *c);
+	static void SaveCharacterTribute(Client* c);
 protected:
 	void ZDBInitVars();
 

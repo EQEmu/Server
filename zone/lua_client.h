@@ -367,7 +367,7 @@ public:
 	void AssignToInstance(int instance_id);
 	void Freeze();
 	void UnFreeze();
-	int GetAggroCount();
+	uint32 GetAggroCount();
 	uint64 GetCarriedMoney();
 	uint32 GetCarriedPlatinum();
 	uint64 GetAllMoney();
@@ -380,8 +380,10 @@ public:
 	int GetAlternateCurrencyValue(uint32 currency);
 	void SendWebLink(const char *site);
 	bool HasSpellScribed(int spell_id);
-	void SetAccountFlag(std::string flag, std::string val);
-	std::string GetAccountFlag(std::string flag);
+	void ClearAccountFlag(const std::string& flag);
+	void SetAccountFlag(const std::string& flag, const std::string& value);
+	std::string GetAccountFlag(const std::string& flag);
+	luabind::object GetAccountFlags(lua_State* L);
 	int GetAccountAge();
 	Lua_Group GetGroup();
 	Lua_Raid GetRaid();
@@ -395,6 +397,7 @@ public:
 	void QueuePacket(Lua_Packet app, bool ack_req, int client_connection_status, int filter);
 	int GetHunger();
 	int GetThirst();
+	int GetIntoxication();
 	void SetHunger(int in_hunger);
 	void SetThirst(int in_thirst);
 	void SetConsumption(int in_hunger, int in_thirst);
@@ -467,38 +470,56 @@ public:
 	void UseAugmentContainer(int container_slot);
 	bool IsAutoAttackEnabled();
 	bool IsAutoFireEnabled();
+	uint32 GetEXPForLevel(uint16 check_level);
+	std::string GetClassAbbreviation();
+	std::string GetRaceAbbreviation();
+	void SetLDoNPoints(uint32 theme_id, uint32 points);
+	void DeleteBucket(std::string bucket_name);
+	std::string GetBucket(std::string bucket_name);
+	std::string GetBucketExpires(std::string bucket_name);
+	std::string GetBucketRemaining(std::string bucket_name);
+	void SetBucket(std::string bucket_name, std::string bucket_value);
+	void SetBucket(std::string bucket_name, std::string bucket_value, std::string expiration);
+	void GrantAllAAPoints();
+	void GrantAllAAPoints(uint8 unlock_level);
 
 	void ApplySpell(int spell_id);
 	void ApplySpell(int spell_id, int duration);
-	void ApplySpell(int spell_id, int duration, bool allow_pets);
-	void ApplySpell(int spell_id, int duration, bool allow_pets, bool allow_bots);
+	void ApplySpell(int spell_id, int duration, int level);
+	void ApplySpell(int spell_id, int duration, int level, bool allow_pets);
+	void ApplySpell(int spell_id, int duration, int level, bool allow_pets, bool allow_bots);
 
 	void ApplySpellGroup(int spell_id);
 	void ApplySpellGroup(int spell_id, int duration);
-	void ApplySpellGroup(int spell_id, int duration, bool allow_pets);
-	void ApplySpellGroup(int spell_id, int duration, bool allow_pets, bool allow_bots);
+	void ApplySpellGroup(int spell_id, int duration, int level);
+	void ApplySpellGroup(int spell_id, int duration, int level, bool allow_pets);
+	void ApplySpellGroup(int spell_id, int duration, int level, bool allow_pets, bool allow_bots);
 
 	void ApplySpellRaid(int spell_id);
 	void ApplySpellRaid(int spell_id, int duration);
-	void ApplySpellRaid(int spell_id, int duration, bool allow_pets);
-	void ApplySpellRaid(int spell_id, int duration, bool allow_pets, bool is_raid_group_only);
-	void ApplySpellRaid(int spell_id, int duration, bool allow_pets, bool is_raid_group_only, bool allow_bots);
+	void ApplySpellRaid(int spell_id, int duration, int level);
+	void ApplySpellRaid(int spell_id, int duration, int level, bool allow_pets);
+	void ApplySpellRaid(int spell_id, int duration, int level, bool allow_pets, bool is_raid_group_only);
+	void ApplySpellRaid(int spell_id, int duration, int level, bool allow_pets, bool is_raid_group_only, bool allow_bots);
 
 	void SetSpellDuration(int spell_id);
 	void SetSpellDuration(int spell_id, int duration);
-	void SetSpellDuration(int spell_id, int duration, bool allow_pets);
-	void SetSpellDuration(int spell_id, int duration, bool allow_pets, bool allow_bots);
+	void SetSpellDuration(int spell_id, int duration, int level);
+	void SetSpellDuration(int spell_id, int duration, int level, bool allow_pets);
+	void SetSpellDuration(int spell_id, int duration, int level, bool allow_pets, bool allow_bots);
 
 	void SetSpellDurationGroup(int spell_id);
 	void SetSpellDurationGroup(int spell_id, int duration);
-	void SetSpellDurationGroup(int spell_id, int duration, bool allow_pets);
-	void SetSpellDurationGroup(int spell_id, int duration, bool allow_pets, bool allow_bots);
+	void SetSpellDurationGroup(int spell_id, int duration, int level);
+	void SetSpellDurationGroup(int spell_id, int duration, int level, bool allow_pets);
+	void SetSpellDurationGroup(int spell_id, int duration, int level, bool allow_pets, bool allow_bots);
 
 	void SetSpellDurationRaid(int spell_id);
 	void SetSpellDurationRaid(int spell_id, int duration);
-	void SetSpellDurationRaid(int spell_id, int duration, bool allow_pets);
-	void SetSpellDurationRaid(int spell_id, int duration, bool allow_pets, bool is_raid_group_only);
-	void SetSpellDurationRaid(int spell_id, int duration, bool allow_pets, bool is_raid_group_only, bool allow_bots);
+	void SetSpellDurationRaid(int spell_id, int duration, int level);
+	void SetSpellDurationRaid(int spell_id, int duration, int level, bool allow_pets);
+	void SetSpellDurationRaid(int spell_id, int duration, int level, bool allow_pets, bool is_raid_group_only);
+	void SetSpellDurationRaid(int spell_id, int duration, int level, bool allow_pets, bool is_raid_group_only, bool allow_bots);
 
 
 	int GetEnvironmentDamageModifier();

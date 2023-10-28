@@ -15,6 +15,9 @@ SET(common_sources
     database.cpp
     database_conversions.cpp
     database_instances.cpp
+    database/database_update_manifest.cpp
+    database/database_update_manifest_bots.cpp
+    database/database_update.cpp
     dbcore.cpp
     deity.cpp
     dynamic_zone_base.cpp
@@ -67,6 +70,7 @@ SET(common_sources
     perl_eqdb.cpp
     perl_eqdb_res.cpp
     process/process.cpp
+    process.cpp
     proc_launcher.cpp
     profanity_manager.cpp
     ptimer.cpp
@@ -87,6 +91,7 @@ SET(common_sources
     timer.cpp
     unix.cpp
     platform.cpp
+    json/json.hpp
     json/jsoncpp.cpp
     zone_store.cpp
     net/console_server.cpp
@@ -506,6 +511,7 @@ SET(common_headers
     data_verification.h
     database.h
     database_schema.h
+    database/database_update.h
     dbcore.h
     deity.h
     discord/discord.h
@@ -579,12 +585,14 @@ SET(common_headers
     path_manager.cpp
     platform.h
     process/process.h
+    process.h
     proc_launcher.h
     profanity_manager.h
     profiler.h
     ptimer.h
     queue.h
     races.h
+	raid.h
     random.h
     rdtsc.h
     rulesys.h
@@ -666,7 +674,8 @@ SET(common_headers
     StackWalker/StackWalker.h
     util/memory_stream.h
     util/directory.h
-    util/uuid.h)
+    util/uuid.h
+)
 
 SOURCE_GROUP(Event FILES
     event/event_loop.h

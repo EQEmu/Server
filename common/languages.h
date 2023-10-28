@@ -48,5 +48,7 @@
 #define LANG_HADAL			26
 #define LANG_UNKNOWN	27
 
+#define MAX_LANGUAGE_SKILL 100
+
 #endif
 

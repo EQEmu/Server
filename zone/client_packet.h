@@ -56,6 +56,7 @@
 	void Handle_OP_Bind_Wound(const EQApplicationPacket *app);
 	void Handle_OP_BlockedBuffs(const EQApplicationPacket *app);
 	void Handle_OP_BoardBoat(const EQApplicationPacket *app);
+	void Handle_OP_BookButton(const EQApplicationPacket *app);
 	void Handle_OP_Buff(const EQApplicationPacket *app);
 	void Handle_OP_BuffRemoveRequest(const EQApplicationPacket *app);
 	void Handle_OP_Bug(const EQApplicationPacket *app);
@@ -241,7 +242,9 @@
 	void Handle_OP_PVPLeaderBoardRequest(const EQApplicationPacket *app);
 	void Handle_OP_QueryUCSServerStatus(const EQApplicationPacket *app);
 	void Handle_OP_RaidCommand(const EQApplicationPacket *app);
-	void Handle_OP_RandomReq(const EQApplicationPacket *app);
+	void Handle_OP_RaidDelegateAbility(const EQApplicationPacket* app);
+	void Handle_OP_RaidClearNPCMarks(const EQApplicationPacket* app);
+	void Handle_OP_RandomReq(const EQApplicationPacket* app);
 	void Handle_OP_ReadBook(const EQApplicationPacket *app);
 	void Handle_OP_RecipeAutoCombine(const EQApplicationPacket *app);
 	void Handle_OP_RecipeDetails(const EQApplicationPacket *app);

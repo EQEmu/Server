@@ -42,19 +42,6 @@ HateList::~HateList()
 {
 }
 
-// added for frenzy support
-// checks if target still is in frenzy mode
-void HateList::IsEntityInFrenzyMode()
-{
-	auto iterator = list.begin();
-	while (iterator != list.end())
-	{
-		if ((*iterator)->entity_on_hatelist->GetHPRatio() >= 20)
-			(*iterator)->is_entity_frenzy = false;
-		++iterator;
-	}
-}
-
 void HateList::WipeHateList()
 {
 	auto iterator = list.begin();
@@ -155,28 +142,54 @@ Mob* HateList::GetDamageTopOnHateList(Mob* hater)
 	return current;
 }
 
-Mob* HateList::GetClosestEntOnHateList(Mob *hater, bool skip_mezzed) {
+Mob* HateList::GetClosestEntOnHateList(Mob *hater, bool skip_mezzed, EntityFilterType entity_type) {
 	Mob* close_entity = nullptr;
 	float close_distance = 99999.9f;
 	float this_distance;
 
-	auto iterator = list.begin();
-	while (iterator != list.end()) {
-		if (skip_mezzed && (*iterator)->entity_on_hatelist->IsMezzed()) {
-			++iterator;
+	for (const auto& e : list) {
+		if (!e->entity_on_hatelist) {
 			continue;
 		}
 
-		this_distance = DistanceSquaredNoZ((*iterator)->entity_on_hatelist->GetPosition(), hater->GetPosition());
-		if ((*iterator)->entity_on_hatelist != nullptr && this_distance <= close_distance) {
-			close_distance = this_distance;
-			close_entity = (*iterator)->entity_on_hatelist;
+		if (skip_mezzed && e->entity_on_hatelist->IsMezzed()) {
+			continue;
 		}
-		++iterator;
+
+		switch (entity_type) {
+			case EntityFilterType::Bots:
+				if (!e->entity_on_hatelist->IsBot()) {
+					continue;
+				}
+				break;
+			case EntityFilterType::Clients:
+				if (!e->entity_on_hatelist->IsClient()) {
+					continue;
+				}
+				break;
+			case EntityFilterType::NPCs:
+				if (!e->entity_on_hatelist->IsNPC()) {
+					continue;
+				}
+				break;
+			case EntityFilterType::All:
+			default:
+				break;
+		}
+
+		this_distance = DistanceSquaredNoZ(e->entity_on_hatelist->GetPosition(), hater->GetPosition());
+		if (this_distance <= close_distance) {
+			close_distance = this_distance;
+			close_entity   = e->entity_on_hatelist;
+		}
 	}
 
-	if ((!close_entity && hater->IsNPC()) || (close_entity && close_entity->DivineAura()))
+	if (
+		(!close_entity && hater->IsNPC()) ||
+		(close_entity && close_entity->DivineAura())
+	) {
 		close_entity = hater->CastToNPC()->GetHateTop();
+	}
 
 	return close_entity;
 }
@@ -591,29 +604,6 @@ Mob *HateList::GetRandomEntOnHateList(bool skip_mezzed)
 	return nullptr;
 }
 
-Mob *HateList::GetEscapingEntOnHateList() {
-	// function is still in design stage
-
-	for (auto iter : list) {
-		if (!iter->entity_on_hatelist)
-			continue;
-
-		if (!iter->entity_on_hatelist->IsFeared())
-			continue;
-
-		if (iter->entity_on_hatelist->IsRooted())
-			continue;
-		if (iter->entity_on_hatelist->IsMezzed())
-			continue;
-		if (iter->entity_on_hatelist->IsStunned())
-			continue;
-
-		return iter->entity_on_hatelist;
-	}
-
-	return nullptr;
-}
-
 Mob *HateList::GetEscapingEntOnHateList(Mob *center, float range, bool first) {
 	// function is still in design stage
 
@@ -724,8 +714,9 @@ void HateList::PrintHateListToClient(Client *c)
 
 int HateList::AreaRampage(Mob *caster, Mob *target, int count, ExtraAttackOptions *opts)
 {
-	if (!target || !caster)
+	if (!target || !caster) {
 		return 0;
+	}
 
 	// tank will be hit ONLY if they are the only target on the hate list
 	// if there is anyone else on the hate list, the tank will not be hit, even if those others aren't hit either
@@ -740,9 +731,10 @@ int HateList::AreaRampage(Mob *caster, Mob *target, int count, ExtraAttackOption
 	std::vector<uint16> id_list;
 	for (auto &h : list) {
 		if (h->entity_on_hatelist && h->entity_on_hatelist != caster && h->entity_on_hatelist != target &&
-			caster->CombatRange(h->entity_on_hatelist, 1.0, true)) {
+			caster->CombatRange(h->entity_on_hatelist, 1.0, true, opts)) {
 			id_list.push_back(h->entity_on_hatelist->GetID());
 		}
+		
 		if (count != -1 && id_list.size() > count) {
 			break;
 		}

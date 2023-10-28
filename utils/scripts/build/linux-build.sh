@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -x
+set -ex
 
 sudo chown eqemu:eqemu /drone/src/ * -R
 sudo chown eqemu:eqemu /home/eqemu/.ccache/ * -R
@@ -9,10 +9,12 @@ git submodule init && git submodule update
 
 perl utils/scripts/build/tag-version.pl
 
-mkdir -p build && cd build && cmake -DEQEMU_BUILD_TESTS=ON -DEQEMU_BUILD_LOGIN=ON -DEQEMU_BUILD_LUA=ON -DCMAKE_CXX_FLAGS_RELWITHDEBINFO:STRING="-Os" -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -G 'Unix Makefiles' .. && make -j$((`nproc`-4))
+mkdir -p build && cd build && cmake -DEQEMU_BUILD_TESTS=ON -DEQEMU_BUILD_STATIC=ON -DEQEMU_BUILD_LOGIN=ON -DEQEMU_BUILD_LUA=ON  -DEQEMU_BUILD_PERL=ON -DCMAKE_CXX_FLAGS_RELWITHDEBINFO:STRING="-Os" -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -G 'Unix Makefiles' .. && make -j$((`nproc`-4))
 
 curl https://raw.githubusercontent.com/Akkadius/eqemu-install-v2/master/eqemu_config.json --output eqemu_config.json
 ./bin/tests
+
+ldd ./bin/zone
 
 # shellcheck disable=SC2164
 cd /drone/src/

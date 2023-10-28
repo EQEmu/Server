@@ -41,9 +41,6 @@ void SendCrashReport(const std::string &crash_report)
 		r.set_connection_timeout(1, 0);
 		r.set_read_timeout(1, 0);
 		r.set_write_timeout(1, 0);
-		httplib::Headers headers = {
-			{"Content-Type", "application/json"}
-		};
 
 		// os info
 		auto os         = EQ::GetOS();

@@ -1,3 +1,4 @@
+\
 #ifndef EQEMU_LUA_BOT_H
 #define EQEMU_LUA_BOT_H
 #ifdef LUA_EQEMU
@@ -65,32 +66,46 @@ public:
 	Lua_ItemInst GetItemAt(int16 slot_id);
 	int GetItemIDAt(int16 slot_id);
 	void SendSpellAnim(uint16 target_id, uint16 spell_id);
+	std::string GetClassAbbreviation();
+	std::string GetRaceAbbreviation();
+	void DeleteBucket(std::string bucket_name);
+	std::string GetBucket(std::string bucket_name);
+	std::string GetBucketExpires(std::string bucket_name);
+	std::string GetBucketRemaining(std::string bucket_name);
+	void SetBucket(std::string bucket_name, std::string bucket_value);
+	void SetBucket(std::string bucket_name, std::string bucket_value, std::string expiration);
 
 	void ApplySpell(int spell_id);
 	void ApplySpell(int spell_id, int duration);
-	void ApplySpell(int spell_id, int duration, bool allow_pets);
+	void ApplySpell(int spell_id, int duration, int level);
+	void ApplySpell(int spell_id, int duration, int level, bool allow_pets);
 
 	void ApplySpellGroup(int spell_id);
 	void ApplySpellGroup(int spell_id, int duration);
-	void ApplySpellGroup(int spell_id, int duration, bool allow_pets);
+	void ApplySpellGroup(int spell_id, int duration, int level);
+	void ApplySpellGroup(int spell_id, int duration, int level, bool allow_pets);
 
 	void ApplySpellRaid(int spell_id);
 	void ApplySpellRaid(int spell_id, int duration);
-	void ApplySpellRaid(int spell_id, int duration, bool allow_pets);
-	void ApplySpellRaid(int spell_id, int duration, bool allow_pets, bool is_raid_group_only);
+	void ApplySpellRaid(int spell_id, int duration, int level);
+	void ApplySpellRaid(int spell_id, int duration, int level, bool allow_pets);
+	void ApplySpellRaid(int spell_id, int duration, int level, bool allow_pets, bool is_raid_group_only);
 
 	void SetSpellDuration(int spell_id);
 	void SetSpellDuration(int spell_id, int duration);
-	void SetSpellDuration(int spell_id, int duration, bool allow_pets);
+	void SetSpellDuration(int spell_id, int duration, int level);
+	void SetSpellDuration(int spell_id, int duration, int level, bool allow_pets);
 
 	void SetSpellDurationGroup(int spell_id);
 	void SetSpellDurationGroup(int spell_id, int duration);
-	void SetSpellDurationGroup(int spell_id, int duration, bool allow_pets);
+	void SetSpellDurationGroup(int spell_id, int duration, int level);
+	void SetSpellDurationGroup(int spell_id, int duration, int level, bool allow_pets);
 
 	void SetSpellDurationRaid(int spell_id);
 	void SetSpellDurationRaid(int spell_id, int duration);
-	void SetSpellDurationRaid(int spell_id, int duration, bool allow_pets);
-	void SetSpellDurationRaid(int spell_id, int duration, bool allow_pets, bool is_raid_group_only);
+	void SetSpellDurationRaid(int spell_id, int duration, int level);
+	void SetSpellDurationRaid(int spell_id, int duration, int level, bool allow_pets);
+	void SetSpellDurationRaid(int spell_id, int duration, int level, bool allow_pets, bool is_raid_group_only);
 
 	int CountAugmentEquippedByID(uint32 item_id);
 	int CountItemEquippedByID(uint32 item_id);

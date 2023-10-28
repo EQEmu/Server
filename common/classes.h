@@ -19,6 +19,7 @@
 #define CLASSES_CH
 
 #include "../common/types.h"
+#include <string>
 
 #define NO_CLASS 0
 #define WARRIOR 1
@@ -127,6 +128,9 @@
 const char* GetClassIDName(uint8 class_id, uint8 level = 0);
 const char* GetPlayerClassName(uint32 player_class_value, uint8 level = 0);
 
+bool IsPlayerClass(uint8 class_id);
+const std::string GetPlayerClassAbbreviation(uint8 class_id);
+
 uint32 GetPlayerClassValue(uint8 class_id);
 uint32 GetPlayerClassBit(uint8 class_id);
 
@@ -140,7 +144,8 @@ bool IsHybridClass(uint8 class_id);
 bool IsCasterClass(uint8 class_id);
 bool IsINTCasterClass(uint8 class_id);
 bool IsWISCasterClass(uint8 class_id);
-
+bool IsHeroicINTCasterClass(uint8 class_id);
+bool IsHeroicWISCasterClass(uint8 class_id);
 bool IsPlateClass(uint8 class_id);
 bool IsChainClass(uint8 class_id);
 bool IsLeatherClass(uint8 class_id);

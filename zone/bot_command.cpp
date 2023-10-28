@@ -63,6 +63,7 @@
 #include "water_map.h"
 #include "worldserver.h"
 #include "dialogue_window.h"
+#include "mob.h"
 
 #include <fmt/format.h>
 
@@ -1423,6 +1424,7 @@ int bot_command_init(void)
 		bot_command_add("petremove", "Orders a bot to remove its charmed pet", AccountStatus::Player, bot_subcommand_pet_remove) ||
 		bot_command_add("petsettype", "Orders a Magician bot to use a specified pet type", AccountStatus::Player, bot_subcommand_pet_set_type) ||
 		bot_command_add("picklock", "Orders a capable bot to pick the lock of the closest door", AccountStatus::Player, bot_command_pick_lock) ||
+		bot_command_add("pickpocket", "Orders a capable bot to pickpocket a NPC", AccountStatus::Player, bot_command_pickpocket) ||
 		bot_command_add("precombat", "Sets flag used to determine pre-combat behavior", AccountStatus::Player, bot_command_precombat) ||
 		bot_command_add("portal", "Orders a Wizard bot to open a magical doorway to a specified destination", AccountStatus::Player, bot_subcommand_portal) ||
 		bot_command_add("pull", "Orders a designated bot to 'pull' an enemy", AccountStatus::Player, bot_command_pull) ||
@@ -2097,7 +2099,6 @@ namespace ActionableBots
 		ABT_Target,
 		ABT_ByName,
 		ABT_OwnerGroup,
-		ABT_BotGroup,
 		ABT_TargetGroup,
 		ABT_NamesGroup,
 		ABT_HealRotation,
@@ -2438,7 +2439,6 @@ void bot_command_actionable(Client *c, const Seperator *sep)
 	c->Message(Chat::White, "target - selects target as single bot .. use ^command [target] or imply by empty actionable argument");
 	c->Message(Chat::White, "byname [name] - selects single bot by name");
 	c->Message(Chat::White, "ownergroup - selects all bots in the owner's group");
-	c->Message(Chat::White, "botgroup [name] - selects members of a bot-group by its name");
 	c->Message(Chat::White, "targetgroup - selects all bots in target's group");
 	c->Message(Chat::White, "namesgroup [name] - selects all bots in name's group");
 	c->Message(Chat::White, "healrotation [name] - selects all member and target bots of a heal rotation where name is a member");
@@ -2456,7 +2456,7 @@ void bot_command_aggressive(Client *c, const Seperator *sep)
 	if (helper_spell_list_fail(c, local_list, BCEnum::SpT_Stance) || helper_command_alias_fail(c, "bot_command_aggressive", sep->arg[0], "aggressive"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::White, "usage: %s ([actionable: target | byname | ownergroup | botgroup | targetgroup | namesgroup | healrotationtargets | spawned] ([actionable_name]))", sep->arg[0]);
+		c->Message(Chat::White, "usage: %s ([actionable: target | byname | ownergroup | targetgroup | namesgroup | healrotationtargets | spawned] ([actionable_name]))", sep->arg[0]);
 		helper_send_usage_required_bots(c, BCEnum::SpT_Stance);
 		return;
 	}
@@ -2686,7 +2686,7 @@ void bot_command_attack(Client *c, const Seperator *sep)
 	}
 	if (helper_is_help_or_usage(sep->arg[1])) {
 
-		c->Message(Chat::White, "usage: <enemy_target> %s [actionable: byname | ownergroup | botgroup | namesgroup | healrotation | default: spawned] ([actionable_name])", sep->arg[0]);
+		c->Message(Chat::White, "usage: <enemy_target> %s [actionable: byname | ownergroup | namesgroup | healrotation | default: spawned] ([actionable_name])", sep->arg[0]);
 		return;
 	}
 	const int ab_mask = ActionableBots::ABM_Type2;
@@ -2812,19 +2812,6 @@ void bot_command_bot(Client *c, const Seperator *sep)
 		return;
 
 	helper_send_available_subcommands(c, "bot", subcommand_list);
-}
-
-void bot_command_botgroup(Client *c, const Seperator *sep)
-{
-	const std::list<const char*> subcommand_list = {
-		"botgroupaddmember", "botgroupcreate", "botgroupdelete", "botgrouplist", "botgroupload", "botgroupremovemember"
-	};
-
-	if (helper_command_alias_fail(c, "bot_command_botgroup", sep->arg[0], "botgroup")) {
-		return;
-	}
-
-	helper_send_available_subcommands(c, "bot-group", subcommand_list);
 }
 
 void bot_command_charm(Client *c, const Seperator *sep)
@@ -2956,7 +2943,7 @@ void bot_command_defensive(Client *c, const Seperator *sep)
 	if (helper_spell_list_fail(c, local_list, BCEnum::SpT_Stance) || helper_command_alias_fail(c, "bot_command_defensive", sep->arg[0], "defensive"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::White, "usage: %s ([actionable: target | byname | ownergroup | botgroup | targetgroup | namesgroup | healrotationtargets | spawned] ([actionable_name]))", sep->arg[0]);
+		c->Message(Chat::White, "usage: %s ([actionable: target | byname | ownergroup | targetgroup | namesgroup | healrotationtargets | spawned] ([actionable_name]))", sep->arg[0]);
 		helper_send_usage_required_bots(c, BCEnum::SpT_Stance);
 		return;
 	}
@@ -3158,7 +3145,7 @@ void bot_command_follow(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_command_follow", sep->arg[0], "follow"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::White, "usage: (<friendly_target>) %s ([option: reset]) [actionable: byname | ownergroup | botgroup | namesgroup | healrotation | spawned] ([actionable_name])", sep->arg[0]);
+		c->Message(Chat::White, "usage: (<friendly_target>) %s ([option: reset]) [actionable: byname | ownergroup | namesgroup | healrotation | spawned] ([actionable_name])", sep->arg[0]);
 		c->Message(Chat::White, "usage: %s chain", sep->arg[0]);
 		return;
 	}
@@ -3265,7 +3252,7 @@ void bot_command_guard(Client *c, const Seperator *sep)
 	}
 	if (helper_is_help_or_usage(sep->arg[1])) {
 
-		c->Message(Chat::White, "usage: %s ([option: clear]) [actionable: target | byname | ownergroup | botgroup | namesgroup | healrotation | spawned] ([actionable_name])", sep->arg[0]);
+		c->Message(Chat::White, "usage: %s ([option: clear]) [actionable: target | byname | ownergroup | namesgroup | healrotation | spawned] ([actionable_name])", sep->arg[0]);
 		return;
 	}
 	const int ab_mask = (ActionableBots::ABM_Target | ActionableBots::ABM_Type2);
@@ -3399,7 +3386,7 @@ void bot_command_hold(Client *c, const Seperator *sep)
 	}
 	if (helper_is_help_or_usage(sep->arg[1])) {
 
-		c->Message(Chat::White, "usage: %s ([option: clear]) [actionable: target | byname | ownergroup | botgroup | namesgroup | healrotation | spawned] ([actionable_name])", sep->arg[0]);
+		c->Message(Chat::White, "usage: %s ([option: clear]) [actionable: target | byname | ownergroup | namesgroup | healrotation | spawned] ([actionable_name])", sep->arg[0]);
 		return;
 	}
 	const int ab_mask = (ActionableBots::ABM_Target | ActionableBots::ABM_Type2);
@@ -4739,7 +4726,7 @@ void bot_command_taunt(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_command_taunt", sep->arg[0], "taunt"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::White, "usage: %s ([option: on | off]) ([actionable: target | byname | ownergroup | botgroup | targetgroup | namesgroup | healrotationtargets | spawned] ([actionable_name]))", sep->arg[0]);
+		c->Message(Chat::White, "usage: %s ([option: on | off]) ([actionable: target | byname | ownergroup | targetgroup | namesgroup | healrotationtargets | spawned] ([actionable_name]))", sep->arg[0]);
 		return;
 	}
 	const int ab_mask = ActionableBots::ABM_Type1;
@@ -5056,7 +5043,7 @@ void bot_subcommand_bot_camp(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_subcommand_bot_camp", sep->arg[0], "botcamp"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::White, "usage: %s ([actionable: target | byname | ownergroup | botgroup | targetgroup | namesgroup | healrotation | spawned] ([actionable_name]))", sep->arg[0]);
+		c->Message(Chat::White, "usage: %s ([actionable: target | byname | ownergroup | targetgroup | namesgroup | healrotation | spawned] ([actionable_name]))", sep->arg[0]);
 		return;
 	}
 	const int ab_mask = ActionableBots::ABM_NoFilter;
@@ -5316,7 +5303,7 @@ void bot_command_view_combos(Client *c, const Seperator *sep)
 	const uint16 bot_race = static_cast<uint16>(Strings::ToUnsignedInt(sep->arg[1]));
 	const std::string race_name = GetRaceIDName(bot_race);
 
-	if (!Mob::IsPlayerRace(bot_race)) {
+	if (!IsPlayerRace(bot_race)) {
 		c->Message(
 			Chat::White,
 			fmt::format(
@@ -5512,6 +5499,7 @@ void bot_subcommand_bot_create(Client *c, const Seperator *sep)
 
 	std::string bot_name = sep->arg[1];
 	bot_name = Strings::UcFirst(bot_name);
+
 	if (arguments < 2 || !sep->IsNumber(2)) {
 		c->Message(Chat::White, "Invalid class!");
 		return;
@@ -5639,7 +5627,7 @@ void bot_subcommand_bot_dye_armor(Client *c, const Seperator *sep)
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"Usage: {} [Material Slot] [Red: 0-255] [Green: 0-255] [Blue: 0-255] ([actionable: target | byname | ownergroup | botgroup | targetgroup | namesgroup | healrotation | spawned] ([actionable_name]))",
+				"Usage: {} [Material Slot] [Red: 0-255] [Green: 0-255] [Blue: 0-255] ([actionable: target | byname | ownergroup | targetgroup | namesgroup | healrotation | spawned] ([actionable_name]))",
 				sep->arg[0]
 			).c_str()
 		);
@@ -5846,8 +5834,8 @@ void bot_subcommand_bot_follow_distance(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_subcommand_bot_follow_distance", sep->arg[0], "botfollowdistance"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::White, "usage: %s [set] [distance] ([actionable: target | byname | ownergroup | botgroup | targetgroup | namesgroup | healrotation | spawned] ([actionable_name]))", sep->arg[0]);
-		c->Message(Chat::White, "usage: %s [clear] ([actionable: target | byname | ownergroup | botgroup | targetgroup | namesgroup | healrotation | spawned] ([actionable_name]))", sep->arg[0]);
+		c->Message(Chat::White, "usage: %s [set] [distance] ([actionable: target | byname | ownergroup | targetgroup | namesgroup | healrotation | spawned] ([actionable_name]))", sep->arg[0]);
+		c->Message(Chat::White, "usage: %s [clear] ([actionable: target | byname | ownergroup | targetgroup | namesgroup | healrotation | spawned] ([actionable_name]))", sep->arg[0]);
 		return;
 	}
 	const int ab_mask = ActionableBots::ABM_NoFilter;
@@ -6021,7 +6009,7 @@ void bot_subcommand_bot_inspect_message(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_subcommand_bot_inspect_message", sep->arg[0], "botinspectmessage"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::White, "usage: %s [set | clear] ([actionable: target | byname | ownergroup | botgroup | targetgroup | namesgroup | healrotation | spawned] ([actionable_name]))", sep->arg[0]);
+		c->Message(Chat::White, "usage: %s [set | clear] ([actionable: target | byname | ownergroup | targetgroup | namesgroup | healrotation | spawned] ([actionable_name]))", sep->arg[0]);
 		c->Message(Chat::White, "Notes:");
 		if (c->ClientVersion() >= EQ::versions::ClientVersion::SoF) {
 			c->Message(Chat::White, "- Self-inspect and type your bot's inspect message");
@@ -6403,7 +6391,7 @@ void bot_subcommand_bot_report(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_subcommand_bot_report", sep->arg[0], "botreport"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::White, "usage: %s ([actionable: target | byname | ownergroup | botgroup | targetgroup | namesgroup | healrotation | spawned] ([actionable_name]))", sep->arg[0]);
+		c->Message(Chat::White, "usage: %s ([actionable: target | byname | ownergroup | targetgroup | namesgroup | healrotation | spawned] ([actionable_name]))", sep->arg[0]);
 		return;
 	}
 	const int ab_mask = ActionableBots::ABM_NoFilter;
@@ -6762,7 +6750,7 @@ void bot_subcommand_bot_summon(Client *c, const Seperator *sep)
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"Usage: {} ([actionable: target | byname | ownergroup | botgroup | targetgroup | namesgroup | healrotation | spawned] ([actionable_name]))",
+				"Usage: {} ([actionable: target | byname | ownergroup | targetgroup | namesgroup | healrotation | spawned] ([actionable_name]))",
 				sep->arg[0]
 			).c_str()
 		);
@@ -6907,7 +6895,7 @@ void bot_subcommand_bot_toggle_helm(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_subcommand_bot_toggle_helm", sep->arg[0], "bottogglehelm"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::White, "usage: %s ([option: on | off]) ([actionable: target | byname | ownergroup | botgroup | targetgroup | namesgroup | healrotation | spawned] ([actionable_name]))", sep->arg[0]);
+		c->Message(Chat::White, "usage: %s ([option: on | off]) ([actionable: target | byname | ownergroup | targetgroup | namesgroup | healrotation | spawned] ([actionable_name]))", sep->arg[0]);
 		return;
 	}
 	const int ab_mask = ActionableBots::ABM_NoFilter;
@@ -8587,7 +8575,7 @@ void bot_subcommand_pet_get_lost(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_subcommand_pet_get_lost", sep->arg[0], "petgetlost"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::White, "usage: %s ([actionable: target | byname | ownergroup | botgroup | targetgroup | namesgroup | healrotation | spawned] ([actionable_name]))", sep->arg[0]);
+		c->Message(Chat::White, "usage: %s ([actionable: target | byname | ownergroup | targetgroup | namesgroup | healrotation | spawned] ([actionable_name]))", sep->arg[0]);
 		return;
 	}
 	int ab_mask = ActionableBots::ABM_NoFilter;
@@ -8830,26 +8818,28 @@ void helper_bot_appearance_form_final(Client *bot_owner, Bot *my_bot)
 
 void helper_bot_appearance_form_update(Bot *my_bot)
 {
-	if (!my_bot)
+	if (!my_bot) {
 		return;
+	}
 
 	my_bot->SendIllusionPacket(
-		my_bot->GetRace(),
-		my_bot->GetGender(),
-		0xFF,	//my_bot->GetTexture(),		// 0xFF - change back if issues arise
-		0xFF,	//my_bot->GetHelmTexture(),	// 0xFF - change back if issues arise
-		my_bot->GetHairColor(),
-		my_bot->GetBeardColor(),
-		my_bot->GetEyeColor1(),
-		my_bot->GetEyeColor2(),
-		my_bot->GetHairStyle(),
-		my_bot->GetLuclinFace(),
-		my_bot->GetBeard(),
-		0xFF,					// aa_title (0xFF)
-		my_bot->GetDrakkinHeritage(),
-		my_bot->GetDrakkinTattoo(),
-		my_bot->GetDrakkinDetails(),
-		my_bot->GetSize()
+		AppearanceStruct{
+			.beard = my_bot->GetBeard(),
+			.beard_color = my_bot->GetBeardColor(),
+			.drakkin_details = my_bot->GetDrakkinDetails(),
+			.drakkin_heritage = my_bot->GetDrakkinHeritage(),
+			.drakkin_tattoo = my_bot->GetDrakkinTattoo(),
+			.eye_color_one = my_bot->GetEyeColor1(),
+			.eye_color_two = my_bot->GetEyeColor2(),
+			.face = my_bot->GetLuclinFace(),
+			.gender_id = my_bot->GetGender(),
+			.hair = my_bot->GetHairStyle(),
+			.hair_color = my_bot->GetHairColor(),
+			.helmet_texture = my_bot->GetHelmTexture(),
+			.race_id = my_bot->GetRace(),
+			.size = my_bot->GetSize(),
+			.texture = my_bot->GetTexture(),
+		}
 	);
 }
 
@@ -8864,8 +8854,8 @@ uint32 helper_bot_create(Client *bot_owner, std::string bot_name, uint8 bot_clas
 		bot_owner->Message(
 			Chat::White,
 			fmt::format(
-				"'{}' is an invalid name. You may only use characters 'A-Z', 'a-z' and '_'.",
-				bot_name
+				"'{}' is an invalid name. You may only use characters 'A-Z' or 'a-z'. Mixed case {} allowed.",
+				bot_name, RuleB(Bots, AllowCamelCaseNames) ? "is" : "is not"
 			).c_str()
 		);
 		return bot_id;
@@ -8894,7 +8884,7 @@ uint32 helper_bot_create(Client *bot_owner, std::string bot_name, uint8 bot_clas
 		return bot_id;
 	}
 
-	if (!Bot::IsValidRaceClassCombo(bot_race, bot_class) && bot_owner->IsPlayerRace(bot_race)) {
+	if (!Bot::IsValidRaceClassCombo(bot_race, bot_class) && IsPlayerRace(bot_race)) {
 		const std::string bot_race_name = GetRaceIDName(bot_race);
 		const std::string bot_class_name = GetClassIDName(bot_class);
 		const auto view_saylink = Saylink::Silent(
@@ -9051,6 +9041,8 @@ uint32 helper_bot_create(Client *bot_owner, std::string bot_name, uint8 bot_clas
 		parse->EventPlayer(EVENT_BOT_CREATE, bot_owner, export_string, 0);
 	}
 
+	my_bot->AddBotStartingItems(bot_race, bot_class);
+
 	safe_delete(my_bot);
 
 	return bot_id;
@@ -9181,7 +9173,7 @@ bool helper_cast_standard_spell(Bot* casting_bot, Mob* target_mob, int spell_id,
 
 bool helper_command_disabled(Client* bot_owner, bool rule_value, const char* command)
 {
-	if (rule_value) {
+	if (!rule_value) {
 		bot_owner->Message(Chat::White, "Bot command %s is not enabled on this server.", command);
 		return true;
 	}
@@ -10006,4 +9998,201 @@ void bot_command_caster_range(Client* c, const Seperator* sep)
 	else {
 		c->Message(Chat::White, "Incorrect argument, use help for a list of options.");
 	}
+}
+
+void bot_command_pickpocket(Client *c, const Seperator *sep)
+{
+	if (helper_command_disabled(c, RuleB(Bots, AllowPickpocketCommand), "pickpocket")) {
+		return;
+	}
+
+	if (helper_command_alias_fail(c, "bot_command_pickpocket", sep->arg[0], "pickpocket")) {
+		return;
+	}
+
+	if (helper_is_help_or_usage(sep->arg[1])) {
+		c->Message(Chat::White, "usage: <enemy_target>", sep->arg[0]);
+		return;
+	}
+
+	std::list<Bot *> sbl;
+	MyBots::PopulateSBL_BySpawnedBots(c, sbl);
+
+	// Check for capable rogue
+	ActionableBots::Filter_ByClasses(c, sbl, PLAYER_CLASS_ROGUE_BIT);
+	Bot *my_bot = ActionableBots::AsSpawned_ByMinLevelAndClass(c, sbl, 7, ROGUE);
+	if (!my_bot) {
+		c->Message(Chat::White, "No bots are capable of performing this action");
+		return;
+	}
+
+	// Make sure a mob is targetted and a valid NPC
+	Mob *target_mob = ActionableTarget::AsSingle_ByAttackable(c);
+	if (!target_mob || !target_mob->IsNPC()) {
+		c->Message(Chat::White, "You must <target> an enemy to use this command");
+		return;
+	}
+
+	NPC *target_npc = ActionableTarget::AsSingle_ByAttackable(c)->CastToNPC();
+
+	// Check if mob is close enough
+	glm::vec4 mob_distance    = (c->GetPosition() - target_mob->GetPosition());
+	float     mob_xy_distance = ((mob_distance.x * mob_distance.x) + (mob_distance.y * mob_distance.y));
+	float     mob_z_distance  = (mob_distance.z * mob_distance.z);
+	float     z_offset_diff   = target_mob->GetZOffset() - c->GetZOffset();
+
+	if (mob_z_distance >= (35-z_offset_diff) || mob_xy_distance > 250) {
+		c->Message(Chat::White, "You must be closer to an enemy to use this command");
+		return;
+	}
+
+	// Adapted from pickpock skill in npc.cpp
+	// Make sure we are allowed to target them
+	uint8 over_level = target_mob->GetLevel();
+	if (over_level > (my_bot->GetLevel() + THIEF_PICKPOCKET_OVER)) {
+		c->Message(Chat::Red, "You are too inexperienced to pick pocket this target");
+		return;
+	}
+
+	// Random fail roll
+	if (zone->random.Roll(5)) {
+		if (zone->CanDoCombat()) {
+			target_mob->AddToHateList(c, 50);
+		}
+		target_mob->Say("Stop thief!");
+		c->Message(Chat::Red, "You are noticed trying to steal!");
+		return;
+	}
+
+	// Setup variables for calcs
+	bool steal_skill  = my_bot->GetSkill(EQ::skills::SkillPickPockets);
+	bool steal_chance = steal_skill * 100 / (5 * over_level + 5);
+
+	// Determine whether to steal money or an item.
+	uint32 money[6] = {
+		0,
+		((steal_skill >= 125) ? (target_npc->GetPlatinum()) : (0)),
+		((steal_skill >= 60) ? (target_npc->GetGold()) : (0)),
+		target_npc->GetSilver(),
+		target_npc->GetCopper(),
+		0
+	};
+
+	bool   has_coin   = ((money[PickPocketPlatinum] | money[PickPocketGold] | money[PickPocketSilver] | money[PickPocketCopper]) != 0);
+	bool   steal_item = (steal_skill >= steal_chance && (zone->random.Roll(50) || !has_coin));
+
+	// Steal item
+	while (steal_item) {
+		std::vector<std::pair<const EQ::ItemData *, uint16>> loot_selection; // <const ItemData*, charges>
+		for (auto                                            item_iter: target_npc->itemlist) {
+			if (!item_iter || !item_iter->item_id) {
+				continue;
+			}
+			auto item_test = database.GetItem(item_iter->item_id);
+			if (item_test->Magic || !item_test->NoDrop || item_test->IsClassBag() || c->CheckLoreConflict(item_test) ||
+				item_iter->equip_slot != EQ::invslot::SLOT_INVALID) {
+				continue;
+			}
+			loot_selection.emplace_back(
+				std::make_pair(
+					item_test,
+					((item_test->Stackable) ? (1) : (item_iter->charges))
+				)
+			);
+		}
+		if (loot_selection.empty()) {
+			steal_item = false;
+			break;
+		}
+
+		int random = zone->random.Int(0, (loot_selection.size() - 1));
+
+		int16 slot_id = c->GetInv().FindFreeSlot(
+			false,
+			true,
+			(loot_selection[random].first->Size),
+			(loot_selection[random].first->ItemType == EQ::item::ItemTypeArrow)
+		);
+		if (slot_id == INVALID_INDEX) {
+			steal_item = false;
+			break;
+		}
+
+		auto item_inst = database.CreateItem(loot_selection[random].first, loot_selection[random].second);
+		if (item_inst == nullptr) {
+			steal_item = false;
+			break;
+		}
+
+		// Successful item pickpocket
+		if (item_inst->IsStackable() && RuleB(Character, UseStackablePickPocketing)) {
+			if (!c->TryStacking(item_inst, ItemPacketTrade, false, false)) {
+				c->PutItemInInventory(slot_id, *item_inst);
+				c->SendItemPacket(slot_id, item_inst, ItemPacketTrade);
+			}
+		}
+		else {
+			c->PutItemInInventory(slot_id, *item_inst);
+			c->SendItemPacket(slot_id, item_inst, ItemPacketTrade);
+		}
+		target_npc->RemoveItem(item_inst->GetID());
+		c->Message(Chat::White, "You stole an item.");
+		safe_delete(item_inst);
+		return;
+	}
+
+	// no items, try money
+	while (!steal_item && has_coin) {
+		uint32 coin_amount = zone->random.Int(1, (steal_skill / 25) + 1);
+
+		int coin_type = PickPocketPlatinum;
+		while (coin_type <= PickPocketCopper) {
+			if (money[coin_type]) {
+				if (coin_amount > money[coin_type]) {
+					coin_amount = money[coin_type];
+				}
+				break;
+			}
+			++coin_type;
+		}
+		if (coin_type > PickPocketCopper) {
+			break;
+		}
+
+		memset(money, 0, (sizeof(int) * 6));
+		money[coin_type] = coin_amount;
+
+		if (zone->random.Roll(steal_chance)) { // Successful coin pickpocket
+			switch (coin_type) {
+				case PickPocketPlatinum:
+					target_npc->SetPlatinum(target_npc->GetPlatinum() - coin_amount);
+					break;
+				case PickPocketGold:
+					target_npc->SetGold(target_npc->GetGold() - coin_amount);
+					break;
+				case PickPocketSilver:
+					target_npc->SetSilver(target_npc->GetSilver() - coin_amount);
+					break;
+				case PickPocketCopper:
+					target_npc->SetCopper(target_npc->GetCopper() - coin_amount);
+					break;
+				default: // has_coin..but, doesn't have coin?
+					c->Message(Chat::Red, "You failed to pickpocket.");
+					return;
+			}
+			c->Message(Chat::White, "You stole money.");
+			c->AddMoneyToPP(
+				money[PickPocketCopper],
+				money[PickPocketSilver],
+				money[PickPocketGold],
+				money[PickPocketPlatinum],
+				true
+			);
+			return;
+		}
+
+		c->Message(Chat::Red, "You failed to pickpocket.");
+		return;
+	}
+	c->Message(Chat::White, "This target's pockets are empty");
 }

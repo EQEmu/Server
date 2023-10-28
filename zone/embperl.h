@@ -18,10 +18,6 @@ Eglin
 #include <stdio.h>
 #include <string.h>
 
-// this option disables distinct int/float/string function argument types for
-// backwards compatibility with current perl api usage
-// e.g. quest::settimer(0, 1) using number for timer name instead of string
-#define PERLBIND_NO_STRICT_SCALAR_TYPES
 #include <perlbind/perlbind.h>
 namespace perl = perlbind;
 

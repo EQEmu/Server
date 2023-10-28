@@ -51,6 +51,7 @@
 #include "zone.h"
 #include "zonedb.h"
 #include "../common/events/player_event_logs.h"
+#include "water_map.h"
 
 extern QueryServ* QServ;
 extern Zone* zone;
@@ -336,7 +337,7 @@ bool Client::Process() {
 					if (ranged_timer.Check(false)) {
 						if (GetTarget() && (GetTarget()->IsNPC() || GetTarget()->IsClient()) && IsAttackAllowed(GetTarget())) {
 							if (GetTarget()->InFrontMob(this, GetTarget()->GetX(), GetTarget()->GetY())) {
-								if (CheckLosFN(GetTarget())) {
+								if (CheckLosFN(GetTarget()) && CheckWaterAutoFireLoS(GetTarget())) {
 									//client has built in los check, but auto fire does not.. done last.
 									RangedAttack(GetTarget());
 									if (CheckDoubleRangedAttack())
@@ -356,7 +357,7 @@ bool Client::Process() {
 					if (ranged_timer.Check(false)) {
 						if (GetTarget() && (GetTarget()->IsNPC() || GetTarget()->IsClient()) && IsAttackAllowed(GetTarget())) {
 							if (GetTarget()->InFrontMob(this, GetTarget()->GetX(), GetTarget()->GetY())) {
-								if (CheckLosFN(GetTarget())) {
+								if (CheckLosFN(GetTarget()) && CheckWaterAutoFireLoS(GetTarget())) {
 									//client has built in los check, but auto fire does not.. done last.
 									ThrowingAttack(GetTarget());
 								}
@@ -518,9 +519,9 @@ bool Client::Process() {
 				Save(0);
 			}
 
-			if (m_pp.intoxication > 0)
+			if (GetIntoxication() > 0)
 			{
-				--m_pp.intoxication;
+				SetIntoxication(GetIntoxication()-1);
 				CalcBonuses();
 			}
 
@@ -740,6 +741,8 @@ void Client::OnDisconnect(bool hard_disconnect) {
 		parse->EventPlayer(EVENT_DISCONNECT, this, "", 0);
 	}
 
+	RecordStats();
+
 	Disconnect();
 }
 
@@ -852,18 +855,16 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 		auto bucket_name = ml.bucket_name;
 		auto const& bucket_value = ml.bucket_value;
 		if (!bucket_name.empty() && !bucket_value.empty()) {
-			auto full_name = fmt::format(
-				"{}-{}",
-				GetBucketKey(),
-				bucket_name
-			);
 
-			auto const& player_value = DataBucket::CheckBucketKey(this, full_name);
-			if (player_value.empty()) {
+			DataBucketKey k = GetScopedBucketKeys();
+			k.key = bucket_name;
+
+			auto b = DataBucket::GetData(k);
+			if (b.value.empty()) {
 				continue;
 			}
 
-			if (!zone->CompareDataBucket(ml.bucket_comparison, bucket_value, player_value)) {
+			if (!zone->CompareDataBucket(ml.bucket_comparison, bucket_value, b.value)) {
 				continue;
 			}
 		}
@@ -1035,7 +1036,7 @@ void Client::OPRezzAnswer(uint32 Action, uint32 SpellID, uint16 ZoneID, uint16 I
 			BuffFadeNonPersistDeath();
 		}
 
-		int SpellEffectDescNum = GetSpellEffectDescNum(SpellID);
+		int SpellEffectDescNum = GetSpellEffectDescriptionNumber(SpellID);
 		// Rez spells with Rez effects have this DescNum (first is Titanium, second is 6.2 Client)
 		if(RuleB(Character, UseResurrectionSickness) && SpellEffectDescNum == 82 || SpellEffectDescNum == 39067) {
 			SetHP(GetMaxHP() / 5);
@@ -1968,7 +1969,7 @@ void Client::CalcRestState()
 	for (unsigned int j = 0; j < buff_count; j++) {
 		if(IsValidSpell(buffs[j].spellid)) {
 			if(IsDetrimentalSpell(buffs[j].spellid) && (buffs[j].ticsremaining > 0))
-				if(!DetrimentalSpellAllowsRest(buffs[j].spellid))
+				if(!IsRestAllowedSpell(buffs[j].spellid))
 					return;
 		}
 	}
@@ -2400,4 +2401,19 @@ void Client::SendGuildLFGuildStatus()
 
 	worldserver.SendPacket(pack);
 	safe_delete(pack);
+}
+
+bool Client::CheckWaterAutoFireLoS(Mob* m)
+{
+	if (
+		!RuleB(Combat, WaterMatchRequiredForAutoFireLoS) ||
+		!zone->watermap
+	) {
+		return true;
+	}
+
+	return (
+		zone->watermap->InLiquid(GetPosition()) ==
+		zone->watermap->InLiquid(m->GetPosition())
+	);
 }

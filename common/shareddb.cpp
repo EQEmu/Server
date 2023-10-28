@@ -133,55 +133,54 @@ uint32 SharedDatabase::GetTotalTimeEntitledOnAccount(uint32 AccountID) {
 
 void SharedDatabase::SetMailKey(int CharID, int IPAddress, int MailKey)
 {
-	char MailKeyString[17];
+	char mail_key[17];
 
-	if (RuleB(Chat, EnableMailKeyIPVerification) == true)
-		sprintf(MailKeyString, "%08X%08X", IPAddress, MailKey);
-	else
-		sprintf(MailKeyString, "%08X", MailKey);
+	if (RuleB(Chat, EnableMailKeyIPVerification) == true) {
+		sprintf(mail_key, "%08X%08X", IPAddress, MailKey);
+	}
+	else {
+		sprintf(mail_key, "%08X", MailKey);
+	}
 
-	const std::string query = StringFormat("UPDATE character_data SET mailkey = '%s' WHERE id = '%i'",
-	                                       MailKeyString, CharID);
-	const auto results = QueryDatabase(query);
-	if (!results.Success())
-		LogError("SharedDatabase::SetMailKey({}, {}) : {}", CharID, MailKeyString, results.ErrorMessage().c_str());
+	const std::string query = StringFormat(
+		"UPDATE character_data SET mailkey = '%s' WHERE id = '%i'",
+		mail_key, CharID
+	);
 
+	const auto        results = QueryDatabase(query);
+	if (!results.Success()) {
+		LogError("SharedDatabase::SetMailKey({}, {}) : {}", CharID, mail_key, results.ErrorMessage().c_str());
+	}
 }
 
-std::string SharedDatabase::GetMailKey(int CharID, bool key_only)
+SharedDatabase::MailKeys SharedDatabase::GetMailKey(int character_id)
 {
-	const std::string query = StringFormat("SELECT `mailkey` FROM `character_data` WHERE `id`='%i' LIMIT 1", CharID);
-	auto results = QueryDatabase(query);
-
+	const std::string query   = StringFormat("SELECT `mailkey` FROM `character_data` WHERE `id`='%i' LIMIT 1", character_id);
+	auto              results = QueryDatabase(query);
 	if (!results.Success()) {
-
-		Log(Logs::Detail, Logs::MySQLError, "Error retrieving mailkey from database: %s", results.ErrorMessage().c_str());
-		return std::string();
+		return MailKeys{};
 	}
 
 	if (!results.RowCount()) {
-
-		Log(Logs::General, Logs::ClientLogin, "Error: Mailkey for character id [%i] does not exist or could not be found", CharID);
-		return std::string();
+		Log(Logs::General,
+			Logs::ClientLogin,
+			"Error: Mailkey for character id [%i] does not exist or could not be found",
+			character_id
+		);
+		return MailKeys{};
 	}
 
-	auto& row = results.begin();
+	auto &row = results.begin();
 	if (row != results.end()) {
-
 		std::string mail_key = row[0];
 
-		if (mail_key.length() > 8 && key_only) {
-			return mail_key.substr(8);
-		}
-		else {
-			return mail_key;
-		}
+		return MailKeys{
+			.mail_key = mail_key.substr(8),
+			.mail_key_full = mail_key
+		};
 	}
-	else {
 
-		Log(Logs::General, Logs::MySQLError, "Internal MySQL error in SharedDatabase::GetMailKey(int, bool)");
-		return std::string();
-	}
+	return MailKeys{};
 }
 
 bool SharedDatabase::SaveCursor(uint32 char_id, std::list<EQ::ItemInstance*>::const_iterator &start, std::list<EQ::ItemInstance*>::const_iterator &end)
@@ -1636,25 +1635,29 @@ bool SharedDatabase::GetCommandSettings(std::map<std::string, std::pair<uint8, s
 {
 	command_settings.clear();
 
-	const std::string query = "SELECT `command`, `access`, `aliases` FROM `command_settings`";
+	const std::string& query = "SELECT `command`, `access`, `aliases` FROM `command_settings`";
 	auto results = QueryDatabase(query);
-	if (!results.Success())
+	if (!results.Success() || !results.RowCount()) {
 		return false;
+	}
 
-	for (auto& row = results.begin(); row != results.end(); ++row) {
+	for (auto row : results) {
 		command_settings[row[0]].first = Strings::ToUnsignedInt(row[1]);
-		if (row[2][0] == 0)
+		if (row[2][0] == 0) {
 			continue;
+		}
 
 		std::vector<std::string> aliases = Strings::Split(row[2], '|');
-		for (auto iter = aliases.begin(); iter != aliases.end(); ++iter) {
-			if (iter->empty())
+		for (const auto& e : aliases) {
+			if (e.empty()) {
 				continue;
-			command_settings[row[0]].second.push_back(*iter);
+			}
+
+			command_settings[row[0]].second.push_back(e);
 		}
 	}
 
-    return true;
+	return true;
 }
 
 bool SharedDatabase::UpdateInjectedCommandSettings(const std::vector<std::pair<std::string, uint8>> &injected)
@@ -1669,13 +1672,15 @@ bool SharedDatabase::UpdateInjectedCommandSettings(const std::vector<std::pair<s
 			)
 		);
 
-		if (!QueryDatabase(query).Success()) {
+		auto results = QueryDatabase(query);
+		if (!results.Success()) {
 			return false;
 		}
 
 		LogInfo(
-			"[{0}] New Command(s) Added",
-			injected.size()
+			"[{}] New Command{} Added",
+			injected.size(),
+			injected.size() != 1 ? "s" : ""
 		);
 	}
 
@@ -1685,24 +1690,57 @@ bool SharedDatabase::UpdateInjectedCommandSettings(const std::vector<std::pair<s
 bool SharedDatabase::UpdateOrphanedCommandSettings(const std::vector<std::string> &orphaned)
 {
 	if (orphaned.size()) {
-		const std::string query = fmt::format(
+		std::string query = fmt::format(
 			"DELETE FROM `command_settings` WHERE `command` IN ({})",
 			Strings::ImplodePair(",", std::pair<char, char>('\'', '\''), orphaned)
 		);
 
-		if (!QueryDatabase(query).Success()) {
+		auto results = QueryDatabase(query);
+		if (!results.Success()) {
+			return false;
+		}
+
+		query = fmt::format(
+			"DELETE FROM `command_subsettings` WHERE `parent_command` IN ({})",
+			Strings::ImplodePair(",", std::pair<char, char>('\'', '\''), orphaned)
+		);
+
+		auto results_two = QueryDatabase(query);
+		if (!results_two.Success()) {
 			return false;
 		}
 
 		LogInfo(
-			"{} Orphaned Command{} Deleted",
+			"{} Orphaned Command{} Deleted | {} Orphaned Subcommand{} Deleted",
 			orphaned.size(),
-			(orphaned.size() == 1 ? "" : "s")
+			orphaned.size() != 1 ? "s" : "",
+			results_two.RowsAffected(),
+			results_two.RowsAffected() != 1 ? "s" : ""
 		);
 	}
 
 	return true;
 }
+
+bool SharedDatabase::GetCommandSubSettings(std::vector<CommandSubsettingsRepository::CommandSubsettings> &command_subsettings)
+{
+	command_subsettings.clear();
+
+	const auto& l = CommandSubsettingsRepository::GetAll(*this);
+
+	if (l.empty()) {
+		return false;
+	}
+
+	command_subsettings.reserve(l.size());
+
+	for (const auto& e : l) {
+		command_subsettings.emplace_back(e);
+	}
+
+	return true;
+}
+
 
 bool SharedDatabase::LoadSkillCaps(const std::string &prefix) {
 	skill_caps_mmf.reset(nullptr);

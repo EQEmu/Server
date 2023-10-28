@@ -61,11 +61,6 @@ void Trade::Reset()
 	pp=0; gp=0; sp=0; cp=0;
 }
 
-void Trade::SetTradeCash(uint32 in_pp, uint32 in_gp, uint32 in_sp, uint32 in_cp)
-{
-	pp=in_pp; gp=in_gp; sp=in_sp; cp=in_cp;
-}
-
 // Initiate a trade with another mob
 // initiate_with specifies whether to start trade with other mob as well
 void Trade::Start(uint32 mob_id, bool initiate_with)
@@ -76,9 +71,10 @@ void Trade::Start(uint32 mob_id, bool initiate_with)
 
 	// Autostart on other mob?
 	if (initiate_with) {
-		Mob* with = With();
-		if (with)
+		Mob *with = With();
+		if (with) {
 			with->trade->Start(owner->GetID(), false);
+		}
 	}
 }
 
@@ -779,23 +775,33 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 				}
 
 				const EQ::ItemData* item = inst->GetItem();
-
-				bool isPetAndCanHaveNoDrop = (RuleB(Pets, CanTakeNoDrop) &&
-					_CLIENTPET(tradingWith) &&
-					tradingWith->GetPetType()<=petOther);
+				const bool is_pet = _CLIENTPET(tradingWith) && tradingWith->GetPetType()<=petOther;
+				const bool is_quest_npc = tradingWith->CastToNPC()->IsQuestNPC();
+				const bool restrict_quest_items_to_quest_npc = RuleB(NPC, ReturnQuestItemsFromNonQuestNPCs);
+				const bool pets_can_take_quest_items = RuleB(Pets, CanTakeQuestItems);
+				const bool is_pet_and_can_have_nodrop_items = (RuleB(Pets, CanTakeNoDrop) &&	is_pet);
+				const bool is_pet_and_can_have_quest_items = (pets_can_take_quest_items &&	is_pet);
 				// if it was not a NO DROP or Attuned item (or if a GM is trading), let the NPC have it
-				if(GetGM() || (inst->IsAttuned() == false &&
-					(item->NoDrop != 0 || isPetAndCanHaveNoDrop))) {
+				if (GetGM() ||
+					(!restrict_quest_items_to_quest_npc || (is_quest_npc && item->IsQuestItem()) || !item->IsQuestItem()) && // If rule is enabled, return any quest items given to non-quest NPCs
+					(((item->NoDrop != 0 && !inst->IsAttuned()) || is_pet_and_can_have_nodrop_items) &&
+					((!item->IsQuestItem() || is_pet_and_can_have_quest_items || !is_pet)))) {
 					// pets need to look inside bags and try to equip items found there
 					if (item->IsClassBag() && item->BagSlots > 0) {
 						for (int16 bslot = EQ::invbag::SLOT_BEGIN; bslot < item->BagSlots; bslot++) {
-							const EQ::ItemInstance* baginst = inst->GetItem(bslot);
+							const EQ::ItemInstance *baginst = inst->GetItem(bslot);
 							if (baginst) {
-								const EQ::ItemData* bagitem = baginst->GetItem();
-								if (bagitem && (GetGM() || (bagitem->NoDrop != 0 && baginst->IsAttuned() == false))) {
+								const EQ::ItemData *bagitem = baginst->GetItem();
+								if (bagitem && (GetGM() ||
+									(!restrict_quest_items_to_quest_npc ||
+									(is_quest_npc && bagitem->IsQuestItem()) || !bagitem->IsQuestItem()) &&
+									// If rule is enabled, return any quest items given to non-quest NPCs (inside bags)
+									(bagitem->NoDrop != 0 && !baginst->IsAttuned()) &&
+									((is_pet && (!bagitem->IsQuestItem() || pets_can_take_quest_items) ||
+									!is_pet)))) {
 
 									auto loot_drop_entry = NPC::NewLootDropEntry();
-									loot_drop_entry.equip_item   = 1;
+									loot_drop_entry.equip_item = 1;
 									loot_drop_entry.item_charges = static_cast<int8>(baginst->GetCharges());
 
 									tradingWith->CastToNPC()->AddLootDrop(
@@ -804,8 +810,17 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 										loot_drop_entry,
 										true
 									);
-								}
-								else if (RuleB(NPC, ReturnNonQuestNoDropItems)) {
+									// Return quest items being traded to non-quest NPC when the rule is true
+								} else if (restrict_quest_items_to_quest_npc && (!is_quest_npc && bagitem->IsQuestItem())) {
+									tradingWith->SayString(TRADE_BACK, GetCleanName());
+									PushItemOnCursor(*baginst, true);
+									Message(Chat::Red, "You can only trade quest items to quest NPCs.");
+									// Return quest items being traded to player pet when not allowed
+								} else if (is_pet && bagitem->IsQuestItem() && !pets_can_take_quest_items) {
+									tradingWith->SayString(TRADE_BACK, GetCleanName());
+									PushItemOnCursor(*baginst, true);
+									Message(Chat::Red, "You cannot trade quest items with your pet.");
+								} else if (RuleB(NPC, ReturnNonQuestNoDropItems)) {
 									tradingWith->SayString(TRADE_BACK, GetCleanName());
 									PushItemOnCursor(*baginst, true);
 								}
@@ -814,7 +829,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 					}
 
 					auto new_loot_drop_entry = NPC::NewLootDropEntry();
-					new_loot_drop_entry.equip_item   = 1;
+					new_loot_drop_entry.equip_item = 1;
 					new_loot_drop_entry.item_charges = static_cast<int8>(inst->GetCharges());
 
 					tradingWith->CastToNPC()->AddLootDrop(
@@ -823,6 +838,18 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 						new_loot_drop_entry,
 						true
 					);
+				}
+				// Return quest items being traded to non-quest NPC when the rule is true
+				else if (restrict_quest_items_to_quest_npc && (!is_quest_npc && item->IsQuestItem())) {
+					tradingWith->SayString(TRADE_BACK, GetCleanName());
+					PushItemOnCursor(*inst, true);
+					Message(Chat::Red, "You can only trade quest items to quest NPCs.");
+				}
+				// Return quest items being traded to player pet when not allowed
+				else if (is_pet && item->IsQuestItem()) {
+					tradingWith->SayString(TRADE_BACK, GetCleanName());
+					PushItemOnCursor(*inst, true);
+					Message(Chat::Red, "You cannot trade quest items with your pet.");
 				}
 				// Return NO DROP and Attuned items being handed into a non-quest NPC if the rule is true
 				else if (RuleB(NPC, ReturnNonQuestNoDropItems)) {
@@ -1315,19 +1342,6 @@ void Client::NukeTraderItem(uint16 Slot,int16 Charges,int16 Quantity,Client* Cus
 	safe_delete(outapp2);
 
 }
-void Client::TraderUpdate(uint16 SlotID,uint32 TraderID){
-	// This method is no longer used.
-
-	auto outapp = new EQApplicationPacket(OP_TraderItemUpdate, sizeof(TraderItemUpdate_Struct));
-	TraderItemUpdate_Struct* tus=(TraderItemUpdate_Struct*)outapp->pBuffer;
-	tus->Charges = 0xFFFF;
-	tus->FromSlot = SlotID;
-	tus->ToSlot = 0xFF;
-	tus->TraderID = TraderID;
-	tus->Unknown000 = 0;
-	QueuePacket(outapp);
-	safe_delete(outapp);
-}
 
 void Client::FindAndNukeTraderItem(int32 SerialNumber, int16 Quantity, Client* Customer, uint16 TraderSlot){
 
@@ -1463,10 +1477,17 @@ void Client::TradeRequestFailed(const EQApplicationPacket* app) {
 
 static void BazaarAuditTrail(const char *seller, const char *buyer, const char *itemName, int quantity, int totalCost, int tranType) {
 
-	std::string query = StringFormat("INSERT INTO `trader_audit` "
-                                    "(`time`, `seller`, `buyer`, `itemname`, `quantity`, `totalcost`, `trantype`) "
-                                    "VALUES (NOW(), '%s', '%s', '%s', %i, %i, %i)",
-                                    seller, buyer, itemName, quantity, totalCost, tranType);
+	const std::string& query = fmt::format(
+		"INSERT INTO `trader_audit` "
+        	"(`time`, `seller`, `buyer`, `itemname`, `quantity`, `totalcost`, `trantype`) "
+		"VALUES (NOW(), '{}', '{}', '{}', {}, {}, {})",
+		seller,
+		buyer,
+		Strings::Escape(itemName),
+		quantity,
+		totalCost,
+		tranType
+	);
 	database.QueryDatabase(query);
 }
 
@@ -3017,4 +3038,14 @@ void Client::BuyerItemSearch(const EQApplicationPacket *app) {
 
 	QueuePacket(outapp);
 	safe_delete(outapp);
+}
+
+const std::string &Client::GetMailKeyFull() const
+{
+	return m_mail_key_full;
+}
+
+const std::string &Client::GetMailKey() const
+{
+	return m_mail_key;
 }

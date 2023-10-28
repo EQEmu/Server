@@ -353,23 +353,10 @@ bool Zone::LoadGroundSpawns() {
 	return(true);
 }
 
-void Zone::DumpMerchantList(uint32 npcid) {
-	std::list<TempMerchantList> tmp_merlist = tmpmerchanttable[npcid];
-	std::list<TempMerchantList>::const_iterator tmp_itr;
-	TempMerchantList ml;
-
-	for (tmp_itr = tmp_merlist.begin(); tmp_itr != tmp_merlist.end(); ++tmp_itr) {
-		ml = *tmp_itr;
-
-		LogInventory("slot[{}] Orig[{}] Item[{}] Charges[{}]", ml.slot, ml.origslot, ml.item, ml.charges);
-	}
-}
-
 int Zone::SaveTempItem(uint32 merchantid, uint32 npcid, uint32 item, int32 charges, bool sold) {
 
 	LogInventory("[{}] [{}] charges of [{}]", ((sold) ? "Sold" : "Bought"),
 		charges, item);
-	//DumpMerchantList(npcid);
 	// Iterate past main items.
 	// If the item being transacted is in this list, return 0;
 	std::list<MerchantList> merlist = merchanttable[merchantid];
@@ -436,7 +423,6 @@ int Zone::SaveTempItem(uint32 merchantid, uint32 npcid, uint32 item, int32 charg
 		}
 
 		tmpmerchanttable[npcid] = tmp_merlist;
-		//DumpMerchantList(npcid);
 		return ml.slot;
 	}
 	else {
@@ -499,7 +485,6 @@ int Zone::SaveTempItem(uint32 merchantid, uint32 npcid, uint32 item, int32 charg
 		ml2.origslot = first_empty_slot;
 		tmp_merlist.push_back(ml2);
 		tmpmerchanttable[npcid] = tmp_merlist;
-		//DumpMerchantList(npcid);
 		return ml2.slot;
 	}
 }
@@ -1836,6 +1821,11 @@ void Zone::ResetShutdownTimer() {
 	autoshutdown_timer.Start(autoshutdown_timer.GetDuration(), true);
 }
 
+void Zone::StopShutdownTimer() {
+	LogInfo("Stopping zone shutdown timer");
+	autoshutdown_timer.Disable();
+}
+
 bool Zone::Depop(bool StartSpawnTimer) {
 	std::map<uint32,NPCType *>::iterator itr;
 	entity_list.Depop(StartSpawnTimer);
@@ -2205,11 +2195,6 @@ bool Zone::HasGraveyard() {
 	return Result;
 }
 
-void Zone::SetGraveyard(uint32 zoneid, const glm::vec4& graveyardPosition) {
-	pgraveyard_zoneid = zoneid;
-	m_graveyard       = graveyardPosition;
-}
-
 void Zone::LoadZoneBlockedSpells()
 {
 	if (!blocked_spells) {
@@ -2217,12 +2202,21 @@ void Zone::LoadZoneBlockedSpells()
 		if (zone_total_blocked_spells > 0) {
 			blocked_spells = new ZoneSpellsBlocked[zone_total_blocked_spells];
 			if (!content_db.LoadBlockedSpells(zone_total_blocked_spells, blocked_spells, GetZoneID())) {
-				LogError(" Failed to load blocked spells");
+				LogError(
+					"Failed to load blocked spells for {} ({}).",
+					zone_store.GetZoneName(GetZoneID(), true),
+					GetZoneID()
+				);
 				ClearBlockedSpells();
 			}
 		}
 
-		LogInfo("Loaded [{}] blocked spells(s)", Strings::Commify(zone_total_blocked_spells));
+		LogInfo(
+			"Loaded [{}] blocked spells(s) for {} ({}).",
+			Strings::Commify(zone_total_blocked_spells),
+			zone_store.GetZoneName(GetZoneID(), true),
+			GetZoneID()
+		);
 	}
 }
 
@@ -3155,4 +3149,14 @@ bool Zone::CompareDataBucket(uint8 bucket_comparison, const std::string& bucket_
 	}
 
 	return passes;
+}
+
+void Zone::ReloadContentFlags()
+{
+	auto pack = new ServerPacket(ServerOP_ReloadContentFlags, 0);
+	if (pack) {
+		worldserver.SendPacket(pack);
+	}
+
+	safe_delete(pack);
 }

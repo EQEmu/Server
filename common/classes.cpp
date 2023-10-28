@@ -17,6 +17,7 @@
 	*/
 #include "../common/global_define.h"
 #include "../common/classes.h"
+#include "data_verification.h"
 
 const char *GetClassIDName(uint8 class_id, uint8 level)
 {
@@ -630,12 +631,41 @@ bool IsINTCasterClass(uint8 class_id)
 	}
 }
 
+bool IsHeroicINTCasterClass(uint8 class_id)
+{
+	switch (class_id) {
+		case NECROMANCER:
+		case WIZARD:
+		case MAGICIAN:
+		case ENCHANTER:
+		case SHADOWKNIGHT:
+			return true;
+		default:
+			return false;
+	}
+}
+
 bool IsWISCasterClass(uint8 class_id)
 {
 	switch (class_id) {
 		case CLERIC:
 		case DRUID:
 		case SHAMAN:
+			return true;
+		default:
+			return false;
+	}
+}
+
+bool IsHeroicWISCasterClass(uint8 class_id)
+{
+	switch (class_id) {
+		case CLERIC:
+		case DRUID:
+		case SHAMAN:
+		case PALADIN:
+		case BEASTLORD:
+		case RANGER:
 			return true;
 		default:
 			return false;
@@ -720,4 +750,52 @@ uint8 ClassArmorType(uint8 class_id)
 		default:
 			return ARMOR_TYPE_UNKNOWN;
 	}
+}
+
+const std::string GetPlayerClassAbbreviation(uint8 class_id)
+{
+	if (!EQ::ValueWithin(class_id, WARRIOR, BERSERKER)) {
+		return std::string("UNK");
+	}
+
+	switch (class_id) {
+		case WARRIOR:
+			return "WAR";
+		case CLERIC:
+			return "CLR";
+		case PALADIN:
+			return "PAL";
+		case RANGER:
+			return "RNG";
+		case SHADOWKNIGHT:
+			return "SHD";
+		case DRUID:
+			return "DRU";
+		case MONK:
+			return "MNK";
+		case BARD:
+			return "BRD";
+		case ROGUE:
+			return "ROG";
+		case SHAMAN:
+			return "SHM";
+		case NECROMANCER:
+			return "NEC";
+		case WIZARD:
+			return "WIZ";
+		case MAGICIAN:
+			return "MAG";
+		case ENCHANTER:
+			return "ENC";
+		case BEASTLORD:
+			return "BST";
+		case BERSERKER:
+			return "BER";
+	}
+
+	return std::string("UNK");
+}
+
+bool IsPlayerClass(uint8 class_id) {
+	return EQ::ValueWithin(class_id, WARRIOR, BERSERKER);
 }

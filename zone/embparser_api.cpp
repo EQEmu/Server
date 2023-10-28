@@ -18,6 +18,7 @@
 
 #include "../common/features.h"
 #include "../common/content/world_content_service.h"
+#include "../common/zone_store.h"
 
 #ifdef EMBPERL
 #ifdef EMBPERL_XS
@@ -527,10 +528,10 @@ std::string Perl__getspellname(uint32 spell_id)
 	return quest_manager.getspellname(spell_id);
 }
 
-int Perl__get_spell_level(uint32_t spell_id, int class_id)
+uint8 Perl__get_spell_level(uint16 spell_id, uint8 class_id)
 {
-	int spell_level = IsValidSpell(spell_id) ? GetSpellLevel(spell_id, class_id) : 0;
-	return (spell_level > RuleI(Character, MaxLevel)) ? 0 : spell_level;
+	const auto spell_level = GetSpellLevel(spell_id, class_id);
+	return spell_level > RuleI(Character, MaxLevel) ? UINT8_MAX : spell_level;
 }
 
 std::string Perl__getskillname(int skill_id)
@@ -1046,42 +1047,42 @@ void Perl__processmobswhilezoneempty(bool on)
 	quest_manager.processmobswhilezoneempty(on);
 }
 
-void Perl__npcrace(int race_id)
+void Perl__npcrace(uint16 race_id)
 {
 	quest_manager.npcrace(race_id);
 }
 
-void Perl__npcgender(int gender_id)
+void Perl__npcgender(uint8 gender_id)
 {
 	quest_manager.npcgender(gender_id);
 }
 
-void Perl__npcsize(int size)
+void Perl__npcsize(float size)
 {
 	quest_manager.npcsize(size);
 }
 
-void Perl__npctexture(int texture_id)
+void Perl__npctexture(uint8 texture_id)
 {
 	quest_manager.npctexture(texture_id);
 }
 
-void Perl__playerrace(int race_id)
+void Perl__playerrace(uint16 race_id)
 {
 	quest_manager.playerrace(race_id);
 }
 
-void Perl__playergender(int gender_id)
+void Perl__playergender(uint8 gender_id)
 {
 	quest_manager.playergender(gender_id);
 }
 
-void Perl__playersize(int newsize)
+void Perl__playersize(float size)
 {
-	quest_manager.playersize(newsize);
+	quest_manager.playersize(size);
 }
 
-void Perl__playertexture(int texture_id)
+void Perl__playertexture(uint8 texture_id)
 {
 	quest_manager.playertexture(texture_id);
 }
@@ -1694,14 +1695,489 @@ bool Perl__IsRunning()
 	return quest_manager.IsRunning();
 }
 
-bool Perl__IsEffectInSpell(uint32 spell_id, uint32 effect_id)
+bool Perl__IsEffectInSpell(uint16 spell_id, int effect_id)
 {
 	return IsEffectInSpell(spell_id, effect_id);
 }
 
 bool Perl__IsBeneficialSpell(uint16 spell_id)
 {
-	return BeneficialSpell(spell_id);
+	return IsBeneficialSpell(spell_id);
+}
+
+bool Perl__IsDetrimentalSpell(uint16 spell_id)
+{
+	return IsDetrimentalSpell(spell_id);
+}
+
+bool Perl__IsTargetableAESpell(uint16 spell_id)
+{
+	return IsTargetableAESpell(spell_id);
+}
+
+bool Perl__IsSacrificeSpell(uint16 spell_id)
+{
+	return IsSacrificeSpell(spell_id);
+}
+
+bool Perl__IsLifetapSpell(uint16 spell_id)
+{
+	return IsLifetapSpell(spell_id);
+}
+
+bool Perl__IsMesmerizeSpell(uint16 spell_id)
+{
+	return IsMesmerizeSpell(spell_id);
+}
+
+bool Perl__IsStunSpell(uint16 spell_id)
+{
+	return IsStunSpell(spell_id);
+}
+
+bool Perl__IsSummonSpell(uint16 spell_id)
+{
+	return IsSummonSpell(spell_id);
+}
+
+bool Perl__IsDamageSpell(uint16 spell_id)
+{
+	return IsDamageSpell(spell_id);
+}
+
+bool Perl__IsFearSpell(uint16 spell_id)
+{
+	return IsFearSpell(spell_id);
+}
+
+bool Perl__IsCureSpell(uint16 spell_id)
+{
+	return IsCureSpell(spell_id);
+}
+
+bool Perl__IsHasteSpell(uint16 spell_id)
+{
+	return IsHasteSpell(spell_id);
+}
+
+bool Perl__IsHarmonySpell(uint16 spell_id)
+{
+	return IsHarmonySpell(spell_id);
+}
+
+bool Perl__IsPercentalHealSpell(uint16 spell_id)
+{
+	return IsPercentalHealSpell(spell_id);
+}
+
+bool Perl__IsGroupOnlySpell(uint16 spell_id)
+{
+	return IsGroupOnlySpell(spell_id);
+}
+
+bool Perl__IsInvisibleSpell(uint16 spell_id)
+{
+	return IsInvisibleSpell(spell_id);
+}
+
+bool Perl__IsInvulnerabilitySpell(uint16 spell_id)
+{
+	return IsInvulnerabilitySpell(spell_id);
+}
+
+bool Perl__IsCompleteHealDurationSpell(uint16 spell_id)
+{
+	return IsCompleteHealDurationSpell(spell_id);
+}
+
+bool Perl__IsPoisonCounterSpell(uint16 spell_id)
+{
+	return IsPoisonCounterSpell(spell_id);
+}
+
+bool Perl__IsDiseaseCounterSpell(uint16 spell_id)
+{
+	return IsDiseaseCounterSpell(spell_id);
+}
+
+bool Perl__IsSummonItemSpell(uint16 spell_id)
+{
+	return IsSummonItemSpell(spell_id);
+}
+
+bool Perl__IsSummonSkeletonSpell(uint16 spell_id)
+{
+	return IsSummonSkeletonSpell(spell_id);
+}
+
+bool Perl__IsSummonPetSpell(uint16 spell_id)
+{
+	return IsSummonPetSpell(spell_id);
+}
+
+bool Perl__IsPetSpell(uint16 spell_id)
+{
+	return IsPetSpell(spell_id);
+}
+
+bool Perl__IsSummonPCSpell(uint16 spell_id)
+{
+	return IsSummonPCSpell(spell_id);
+}
+
+bool Perl__IsCharmSpell(uint16 spell_id)
+{
+	return IsCharmSpell(spell_id);
+}
+
+bool Perl__IsBlindSpell(uint16 spell_id)
+{
+	return IsBlindSpell(spell_id);
+}
+
+bool Perl__IsHealthSpell(uint16 spell_id)
+{
+	return IsHealthSpell(spell_id);
+}
+
+bool Perl__IsCastTimeReductionSpell(uint16 spell_id)
+{
+	return IsCastTimeReductionSpell(spell_id);
+}
+
+bool Perl__IsIncreaseDurationSpell(uint16 spell_id)
+{
+	return IsIncreaseDurationSpell(spell_id);
+}
+
+bool Perl__IsManaCostReductionSpell(uint16 spell_id)
+{
+	return IsManaCostReductionSpell(spell_id);
+}
+
+bool Perl__IsIncreaseRangeSpell(uint16 spell_id)
+{
+	return IsIncreaseRangeSpell(spell_id);
+}
+
+bool Perl__IsImprovedHealingSpell(uint16 spell_id)
+{
+	return IsImprovedHealingSpell(spell_id);
+}
+
+bool Perl__IsImprovedDamageSpell(uint16 spell_id)
+{
+	return IsImprovedDamageSpell(spell_id);
+}
+
+bool Perl__IsAEDurationSpell(uint16 spell_id)
+{
+	return IsAEDurationSpell(spell_id);
+}
+
+bool Perl__IsPureNukeSpell(uint16 spell_id)
+{
+	return IsPureNukeSpell(spell_id);
+}
+
+bool Perl__IsAENukeSpell(uint16 spell_id)
+{
+	return IsAENukeSpell(spell_id);
+}
+
+bool Perl__IsPBAENukeSpell(uint16 spell_id)
+{
+	return IsPBAENukeSpell(spell_id);
+}
+
+bool Perl__IsAERainNukeSpell(uint16 spell_id)
+{
+	return IsAERainNukeSpell(spell_id);
+}
+
+bool Perl__IsPartialResistableSpell(uint16 spell_id)
+{
+	return IsPartialResistableSpell(spell_id);
+}
+
+bool Perl__IsResistableSpell(uint16 spell_id)
+{
+	return IsResistableSpell(spell_id);
+}
+
+bool Perl__IsGroupSpell(uint16 spell_id)
+{
+	return IsGroupSpell(spell_id);
+}
+
+bool Perl__IsTGBCompatibleSpell(uint16 spell_id)
+{
+	return IsTGBCompatibleSpell(spell_id);
+}
+
+bool Perl__IsBardSong(uint16 spell_id)
+{
+	return IsBardSong(spell_id);
+}
+
+bool Perl__IsPulsingBardSong(uint16 spell_id)
+{
+	return IsPulsingBardSong(spell_id);
+}
+
+bool Perl__IsDisciplineBuff(uint16 spell_id)
+{
+	return IsDisciplineBuff(spell_id);
+}
+
+bool Perl__IsDiscipline(uint16 spell_id)
+{
+	return IsDiscipline(spell_id);
+}
+
+bool Perl__IsCombatSkill(uint16 spell_id)
+{
+	return IsCombatSkill(spell_id);
+}
+
+bool Perl__IsResurrectionEffects(uint16 spell_id)
+{
+	return IsResurrectionEffects(spell_id);
+}
+
+bool Perl__IsRuneSpell(uint16 spell_id)
+{
+	return IsRuneSpell(spell_id);
+}
+
+bool Perl__IsMagicRuneSpell(uint16 spell_id)
+{
+	return IsMagicRuneSpell(spell_id);
+}
+
+bool Perl__IsManaTapSpell(uint16 spell_id)
+{
+	return IsManaTapSpell(spell_id);
+}
+
+bool Perl__IsAllianceSpell(uint16 spell_id)
+{
+	return IsAllianceSpell(spell_id);
+}
+
+bool Perl__IsDeathSaveSpell(uint16 spell_id)
+{
+	return IsDeathSaveSpell(spell_id);
+}
+
+bool Perl__IsPartialDeathSaveSpell(uint16 spell_id)
+{
+	return IsPartialDeathSaveSpell(spell_id);
+}
+
+bool Perl__IsFullDeathSaveSpell(uint16 spell_id)
+{
+	return IsFullDeathSaveSpell(spell_id);
+}
+
+bool Perl__IsShadowStepSpell(uint16 spell_id)
+{
+	return IsShadowStepSpell(spell_id);
+}
+
+bool Perl__IsSuccorSpell(uint16 spell_id)
+{
+	return IsSuccorSpell(spell_id);
+}
+
+bool Perl__IsTeleportSpell(uint16 spell_id)
+{
+	return IsTeleportSpell(spell_id);
+}
+
+bool Perl__IsTranslocateSpell(uint16 spell_id)
+{
+	return IsTranslocateSpell(spell_id);
+}
+
+bool Perl__IsGateSpell(uint16 spell_id)
+{
+	return IsGateSpell(spell_id);
+}
+
+bool Perl__IsIllusionSpell(uint16 spell_id)
+{
+	return IsIllusionSpell(spell_id);
+}
+
+bool Perl__IsLDoNObjectSpell(uint16 spell_id)
+{
+	return IsLDoNObjectSpell(spell_id);
+}
+
+bool Perl__IsHealOverTimeSpell(uint16 spell_id)
+{
+	return IsHealOverTimeSpell(spell_id);
+}
+
+bool Perl__IsCompleteHealSpell(uint16 spell_id)
+{
+	return IsCompleteHealSpell(spell_id);
+}
+
+bool Perl__IsFastHealSpell(uint16 spell_id)
+{
+	return IsFastHealSpell(spell_id);
+}
+
+bool Perl__IsVeryFastHealSpell(uint16 spell_id)
+{
+	return IsVeryFastHealSpell(spell_id);
+}
+
+bool Perl__IsRegularSingleTargetHealSpell(uint16 spell_id)
+{
+	return IsRegularSingleTargetHealSpell(spell_id);
+}
+
+bool Perl__IsRegularGroupHealSpell(uint16 spell_id)
+{
+	return IsRegularGroupHealSpell(spell_id);
+}
+
+bool Perl__IsGroupCompleteHealSpell(uint16 spell_id)
+{
+	return IsGroupCompleteHealSpell(spell_id);
+}
+
+bool Perl__IsGroupHealOverTimeSpell(uint16 spell_id)
+{
+	return IsGroupHealOverTimeSpell(spell_id);
+}
+
+bool Perl__IsDebuffSpell(uint16 spell_id)
+{
+	return IsDebuffSpell(spell_id);
+}
+
+bool Perl__IsResistDebuffSpell(uint16 spell_id)
+{
+	return IsResistDebuffSpell(spell_id);
+}
+
+bool Perl__IsSelfConversionSpell(uint16 spell_id)
+{
+	return IsSelfConversionSpell(spell_id);
+}
+
+bool Perl__IsBuffSpell(uint16 spell_id)
+{
+	return IsBuffSpell(spell_id);
+}
+
+bool Perl__IsPersistDeathSpell(uint16 spell_id)
+{
+	return IsPersistDeathSpell(spell_id);
+}
+
+bool Perl__IsSuspendableSpell(uint16 spell_id)
+{
+	return IsSuspendableSpell(spell_id);
+}
+
+bool Perl__IsCastOnFadeDurationSpell(uint16 spell_id)
+{
+	return IsCastOnFadeDurationSpell(spell_id);
+}
+
+bool Perl__IsDistanceModifierSpell(uint16 spell_id)
+{
+	return IsDistanceModifierSpell(spell_id);
+}
+
+bool Perl__IsRestAllowedSpell(uint16 spell_id)
+{
+	return IsRestAllowedSpell(spell_id);
+}
+
+bool Perl__IsNoDetrimentalSpellAggroSpell(uint16 spell_id)
+{
+	return IsNoDetrimentalSpellAggroSpell(spell_id);
+}
+
+bool Perl__IsStackableDOT(uint16 spell_id)
+{
+	return IsStackableDOT(spell_id);
+}
+
+bool Perl__IsShortDurationBuff(uint16 spell_id)
+{
+	return IsShortDurationBuff(spell_id);
+}
+
+bool Perl__IsTargetRequiredForSpell(uint16 spell_id)
+{
+	return IsTargetRequiredForSpell(spell_id);
+}
+
+bool Perl__IsVirusSpell(uint16 spell_id)
+{
+	return IsVirusSpell(spell_id);
+}
+
+bool Perl__IsValidSpell(uint16 spell_id)
+{
+	return IsValidSpell(spell_id);
+}
+
+bool Perl__IsEffectIgnoredInStacking(int effect_id)
+{
+	return IsEffectIgnoredInStacking(effect_id);
+}
+
+bool Perl__IsFocusLimit(int effect_id)
+{
+	return IsFocusLimit(effect_id);
+}
+
+bool Perl__IsBardOnlyStackEffect(int effect_id)
+{
+	return IsBardOnlyStackEffect(effect_id);
+}
+
+bool Perl__IsCastWhileInvisibleSpell(uint16 spell_id)
+{
+	return IsCastWhileInvisibleSpell(spell_id);
+}
+
+bool Perl__IsCastRestrictedSpell(uint16 spell_id)
+{
+	return IsCastRestrictedSpell(spell_id);
+}
+
+bool Perl__IsCastNotStandingSpell(uint16 spell_id)
+{
+	return IsCastNotStandingSpell(spell_id);
+}
+
+bool Perl__IsInstrumentModifierAppliedToSpellEffect(uint16 spell_id, int effect_id)
+{
+	return IsInstrumentModifierAppliedToSpellEffect(spell_id, effect_id);
+}
+
+bool Perl__IsBlankSpellEffect(uint16 spell_id, int effect_index)
+{
+	return IsBlankSpellEffect(spell_id, effect_index);
+}
+
+uint16 Perl__GetSpellTriggerSpellID(uint16 spell_id, int effect_id)
+{
+	return GetSpellTriggerSpellID(spell_id, effect_id);
+}
+
+uint8 Perl__GetSpellMinimumLevel(uint16 spell_id)
+{
+	return GetSpellMinimumLevel(spell_id);
 }
 
 int Perl__GetSpellResistType(uint16 spell_id)
@@ -1712,6 +2188,106 @@ int Perl__GetSpellResistType(uint16 spell_id)
 int Perl__GetSpellTargetType(uint16 spell_id)
 {
 	return GetSpellTargetType(spell_id);
+}
+
+int Perl__GetSpellPartialMeleeRuneReduction(uint16 spell_id)
+{
+	return GetSpellPartialMeleeRuneReduction(spell_id);
+}
+
+int Perl__GetSpellPartialMagicRuneReduction(uint16 spell_id)
+{
+	return GetSpellPartialMagicRuneReduction(spell_id);
+}
+
+int Perl__GetSpellPartialMeleeRuneAmount(uint16 spell_id)
+{
+	return GetSpellPartialMeleeRuneAmount(spell_id);
+}
+
+int Perl__GetSpellPartialMagicRuneAmount(uint16 spell_id)
+{
+	return GetSpellPartialMagicRuneAmount(spell_id);
+}
+
+int Perl__GetSpellViralMinimumSpreadTime(uint16 spell_id)
+{
+	return GetSpellViralMinimumSpreadTime(spell_id);
+}
+
+int Perl__GetSpellViralMaximumSpreadTime(uint16 spell_id)
+{
+	return GetSpellViralMaximumSpreadTime(spell_id);
+}
+
+int Perl__GetSpellViralSpreadRange(uint16 spell_id)
+{
+	return GetSpellViralSpreadRange(spell_id);
+}
+
+int Perl__GetSpellProcLimitTimer(uint16 spell_id, int proc_type)
+{
+	return GetSpellProcLimitTimer(spell_id, proc_type);
+}
+
+int Perl__GetSpellEffectDescriptionNumber(uint16 spell_id)
+{
+	return GetSpellEffectDescriptionNumber(spell_id);
+}
+
+int Perl__GetSpellFuriousBash(uint16 spell_id)
+{
+	return GetSpellFuriousBash(spell_id);
+}
+
+bool Perl__IsSpellUsableInThisZoneType(uint16 spell_id)
+{
+	return IsSpellUsableInThisZoneType(spell_id, zone->GetZoneType());
+}
+
+bool Perl__IsSpellUsableInThisZoneType(uint16 spell_id, uint8 zone_type)
+{
+	return IsSpellUsableInThisZoneType(spell_id, zone_type);
+}
+
+int Perl__GetSpellEffectIndex(uint16 spell_id, int effect_id)
+{
+	return GetSpellEffectIndex(spell_id, effect_id);
+}
+
+int Perl__CalculatePoisonCounters(uint16 spell_id)
+{
+	return CalculatePoisonCounters(spell_id);
+}
+
+int Perl__CalculateDiseaseCounters(uint16 spell_id)
+{
+	return CalculateDiseaseCounters(spell_id);
+}
+
+int Perl__CalculateCurseCounters(uint16 spell_id)
+{
+	return CalculateCurseCounters(spell_id);
+}
+
+int Perl__CalculateCorruptionCounters(uint16 spell_id)
+{
+	return CalculateCorruptionCounters(spell_id);
+}
+
+int Perl__CalculateCounters(uint16 spell_id)
+{
+	return CalculateCounters(spell_id);
+}
+
+int8 Perl__GetSpellResurrectionSicknessCheck(uint16 spell_id_one, uint16 spell_id_two)
+{
+	return GetSpellResurrectionSicknessCheck(spell_id_one, spell_id_two);
+}
+
+int Perl__GetSpellNimbusEffect(uint16 spell_id)
+{
+	return GetSpellNimbusEffect(spell_id);
 }
 
 void Perl__FlyMode(GravityBehavior flymode)
@@ -1739,17 +2315,17 @@ void Perl__removetitle(int title_set)
 	quest_manager.removetitle(title_set);
 }
 
-void Perl__wearchange(uint8 slot, uint16 texture_id)
+void Perl__wearchange(uint8 slot, uint32 texture_id)
 {
 	quest_manager.wearchange(slot, texture_id);
 }
 
-void Perl__wearchange(uint8 slot, uint16 texture_id, uint32 hero_forge_model_id)
+void Perl__wearchange(uint8 slot, uint32 texture_id, uint32 hero_forge_model_id)
 {
 	quest_manager.wearchange(slot, texture_id, hero_forge_model_id);
 }
 
-void Perl__wearchange(uint8 slot, uint16 texture_id, uint32 hero_forge_model_id, uint32 elite_material_id)
+void Perl__wearchange(uint8 slot, uint32 texture_id, uint32 hero_forge_model_id, uint32 elite_material_id)
 {
 	quest_manager.wearchange(slot, texture_id, hero_forge_model_id, elite_material_id);
 }
@@ -2170,6 +2746,7 @@ bool Perl__IsContentFlagEnabled(std::string flag_name)
 void Perl__SetContentFlag(std::string flag_name, bool enabled)
 {
 	content_service.SetContentFlag(flag_name, enabled);
+	zone->ReloadContentFlags();
 }
 
 Expedition* Perl__get_expedition()
@@ -2904,78 +3481,488 @@ void Perl__crosszonemessageplayerbyname(const char* client_name, uint32 type, co
 	quest_manager.CrossZoneMessage(CZUpdateType_ClientName, update_identifier, type, message, client_name);
 }
 
-void Perl__crosszonemoveplayerbycharid(int character_id, const char* zone_short_name)
+void Perl__crosszonemoveplayerbycharid(uint32 character_id, std::string zone_short_name)
 {
-	uint16 instance_id = 0;
-	quest_manager.CrossZoneMove(CZUpdateType_Character, CZMoveUpdateSubtype_MoveZone, character_id, zone_short_name, instance_id);
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.update_identifier = character_id,
+			.update_type = CZUpdateType_Character,
+			.update_subtype = CZMoveUpdateSubtype_MoveZone,
+			.zone_short_name = zone_short_name,
+		}
+	);
 }
 
-void Perl__crosszonemoveplayerbygroupid(int group_id, const char* zone_short_name)
+void Perl__crosszonemoveplayerbycharid(uint32 character_id, std::string zone_short_name, float x, float y, float z)
 {
-	uint16 instance_id = 0;
-	quest_manager.CrossZoneMove(CZUpdateType_Group, CZMoveUpdateSubtype_MoveZone, group_id, zone_short_name, instance_id);
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.coordinates = glm::vec4(x, y, z, 0.0f),
+			.update_identifier = character_id,
+			.update_type = CZUpdateType_Character,
+			.update_subtype = CZMoveUpdateSubtype_MoveZone,
+			.zone_short_name = zone_short_name,
+		}
+	);
 }
 
-void Perl__crosszonemoveplayerbyraidid(int raid_id, const char* zone_short_name)
+void Perl__crosszonemoveplayerbycharid(
+	uint32 character_id,
+	std::string zone_short_name,
+	float x,
+	float y,
+	float z,
+	float heading
+)
 {
-	uint16 instance_id = 0;
-	quest_manager.CrossZoneMove(CZUpdateType_Raid, CZMoveUpdateSubtype_MoveZone, raid_id, zone_short_name, instance_id);
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.coordinates = glm::vec4(x, y, z, heading),
+			.update_identifier = character_id,
+			.update_type = CZUpdateType_Character,
+			.update_subtype = CZMoveUpdateSubtype_MoveZone,
+			.zone_short_name = zone_short_name,
+		}
+	);
 }
 
-void Perl__crosszonemoveplayerbyguildid(int guild_id, const char* zone_short_name)
+void Perl__crosszonemoveplayerbygroupid(uint32 group_id, std::string zone_short_name)
 {
-	uint16 instance_id = 0;
-	quest_manager.CrossZoneMove(CZUpdateType_Guild, CZMoveUpdateSubtype_MoveZone, guild_id, zone_short_name, instance_id);
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.update_identifier = group_id,
+			.update_type = CZUpdateType_Group,
+			.update_subtype = CZMoveUpdateSubtype_MoveZone,
+			.zone_short_name = zone_short_name,
+		}
+	);
 }
 
-void Perl__crosszonemoveplayerbyexpeditionid(uint32 expedition_id, const char* zone_short_name)
+void Perl__crosszonemoveplayerbygroupid(uint32 group_id, std::string zone_short_name, float x, float y, float z)
 {
-	uint16 instance_id = 0;
-	quest_manager.CrossZoneMove(CZUpdateType_Expedition, CZMoveUpdateSubtype_MoveZone, expedition_id, zone_short_name, instance_id);
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.coordinates = glm::vec4(x, y, z, 0.0f),
+			.update_identifier = group_id,
+			.update_type = CZUpdateType_Group,
+			.update_subtype = CZMoveUpdateSubtype_MoveZone,
+			.zone_short_name = zone_short_name,
+		}
+	);
 }
 
-void Perl__crosszonemoveplayerbyname(const char* client_name, const char* zone_short_name)
+void Perl__crosszonemoveplayerbygroupid(
+	uint32 group_id,
+	std::string zone_short_name,
+	float x,
+	float y,
+	float z,
+	float heading
+)
 {
-	int update_identifier = 0;
-	uint16 instance_id = 0;
-	quest_manager.CrossZoneMove(CZUpdateType_ClientName, CZMoveUpdateSubtype_MoveZone, update_identifier, zone_short_name, instance_id, client_name);
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.coordinates = glm::vec4(x, y, z, heading),
+			.update_identifier = group_id,
+			.update_type = CZUpdateType_Group,
+			.update_subtype = CZMoveUpdateSubtype_MoveZone,
+			.zone_short_name = zone_short_name,
+		}
+	);
 }
 
-void Perl__crosszonemoveinstancebycharid(int character_id, uint16 instance_id)
+void Perl__crosszonemoveplayerbyraidid(uint32 raid_id, std::string zone_short_name)
 {
-	const char* zone_short_name = "";
-	quest_manager.CrossZoneMove(CZUpdateType_Character, CZMoveUpdateSubtype_MoveZoneInstance, character_id, zone_short_name, instance_id);
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.update_identifier = raid_id,
+			.update_type = CZUpdateType_Raid,
+			.update_subtype = CZMoveUpdateSubtype_MoveZone,
+			.zone_short_name = zone_short_name,
+		}
+	);
 }
 
-void Perl__crosszonemoveinstancebygroupid(int group_id, uint16 instance_id)
+void Perl__crosszonemoveplayerbyraidid(uint32 raid_id, std::string zone_short_name, float x, float y, float z)
 {
-	const char* zone_short_name = "";
-	quest_manager.CrossZoneMove(CZUpdateType_Group, CZMoveUpdateSubtype_MoveZoneInstance, group_id, zone_short_name, instance_id);
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.coordinates = glm::vec4(x, y, z, 0.0f),
+			.update_identifier = raid_id,
+			.update_type = CZUpdateType_Raid,
+			.update_subtype = CZMoveUpdateSubtype_MoveZone,
+			.zone_short_name = zone_short_name,
+		}
+	);
 }
 
-void Perl__crosszonemoveinstancebyraidid(int raid_id, uint16 instance_id)
+void Perl__crosszonemoveplayerbyraidid(uint32 raid_id, std::string zone_short_name, float x, float y, float z, float heading)
 {
-	const char* zone_short_name = "";
-	quest_manager.CrossZoneMove(CZUpdateType_Raid, CZMoveUpdateSubtype_MoveZoneInstance, raid_id, zone_short_name, instance_id);
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.coordinates = glm::vec4(x, y, z, heading),
+			.update_identifier = raid_id,
+			.update_type = CZUpdateType_Raid,
+			.update_subtype = CZMoveUpdateSubtype_MoveZone,
+			.zone_short_name = zone_short_name,
+		}
+	);
 }
 
-void Perl__crosszonemoveinstancebyguildid(int guild_id, uint16 instance_id)
+void Perl__crosszonemoveplayerbyguildid(uint32 guild_id, std::string zone_short_name)
 {
-	const char* zone_short_name = "";
-	quest_manager.CrossZoneMove(CZUpdateType_Guild, CZMoveUpdateSubtype_MoveZoneInstance, guild_id, zone_short_name, instance_id);
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.update_identifier = guild_id,
+			.update_type = CZUpdateType_Guild,
+			.update_subtype = CZMoveUpdateSubtype_MoveZone,
+			.zone_short_name = zone_short_name,
+		}
+	);
+}
+
+void Perl__crosszonemoveplayerbyguildid(uint32 guild_id, std::string zone_short_name, float x, float y, float z)
+{
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.coordinates = glm::vec4(x, y, z, 0.0f),
+			.update_identifier = guild_id,
+			.update_type = CZUpdateType_Guild,
+			.update_subtype = CZMoveUpdateSubtype_MoveZone,
+			.zone_short_name = zone_short_name,
+		}
+	);
+}
+
+void Perl__crosszonemoveplayerbyguildid(
+	uint32 guild_id,
+	std::string zone_short_name,
+	float x,
+	float y,
+	float z,
+	float heading
+)
+{
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.coordinates = glm::vec4(x, y, z, heading),
+			.update_identifier = guild_id,
+			.update_type = CZUpdateType_Guild,
+			.update_subtype = CZMoveUpdateSubtype_MoveZone,
+			.zone_short_name = zone_short_name,
+		}
+	);
+}
+
+void Perl__crosszonemoveplayerbyexpeditionid(uint32 expedition_id, std::string zone_short_name)
+{
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.update_identifier = expedition_id,
+			.update_type = CZUpdateType_Expedition,
+			.update_subtype = CZMoveUpdateSubtype_MoveZone,
+			.zone_short_name = zone_short_name,
+		}
+	);
+}
+
+void Perl__crosszonemoveplayerbyexpeditionid(uint32 expedition_id, std::string zone_short_name, float x, float y, float z)
+{
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.coordinates = glm::vec4(x, y, z, 0.0f),
+			.update_identifier = expedition_id,
+			.update_type = CZUpdateType_Expedition,
+			.update_subtype = CZMoveUpdateSubtype_MoveZone,
+			.zone_short_name = zone_short_name,
+		}
+	);
+}
+
+void Perl__crosszonemoveplayerbyexpeditionid(
+	uint32 expedition_id,
+	std::string zone_short_name,
+	float x,
+	float y,
+	float z,
+	float heading
+)
+{
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.coordinates = glm::vec4(x, y, z, heading),
+			.update_identifier = expedition_id,
+			.update_type = CZUpdateType_Expedition,
+			.update_subtype = CZMoveUpdateSubtype_MoveZone,
+			.zone_short_name = zone_short_name,
+		}
+	);
+}
+
+void Perl__crosszonemoveplayerbyname(std::string client_name, std::string zone_short_name)
+{
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.client_name = client_name,
+			.update_type = CZUpdateType_ClientName,
+			.update_subtype = CZMoveUpdateSubtype_MoveZone,
+			.zone_short_name = zone_short_name,
+		}
+	);
+}
+
+void Perl__crosszonemoveplayerbyname(std::string client_name, std::string zone_short_name, float x, float y, float z)
+{
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.client_name = client_name,
+			.coordinates = glm::vec4(x, y, z, 0.0f),
+			.update_type = CZUpdateType_ClientName,
+			.update_subtype = CZMoveUpdateSubtype_MoveZone,
+			.zone_short_name = zone_short_name,
+		}
+	);
+}
+
+void Perl__crosszonemoveplayerbyname(std::string client_name, std::string zone_short_name, float x, float y, float z, float heading)
+{
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.client_name = client_name,
+			.coordinates = glm::vec4(x, y, z, heading),
+			.update_type = CZUpdateType_ClientName,
+			.update_subtype = CZMoveUpdateSubtype_MoveZone,
+			.zone_short_name = zone_short_name,
+		}
+	);
+}
+
+void Perl__crosszonemoveinstancebycharid(uint32 character_id, uint16 instance_id)
+{
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.instance_id = instance_id,
+			.update_identifier = character_id,
+			.update_type = CZUpdateType_Character,
+			.update_subtype = CZMoveUpdateSubtype_MoveZoneInstance,
+		}
+	);
+}
+
+void Perl__crosszonemoveinstancebycharid(uint32 character_id, uint16 instance_id, float x, float y, float z)
+{
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.coordinates = glm::vec4(x, y, z, 0.0f),
+			.instance_id = instance_id,
+			.update_identifier = character_id,
+			.update_type = CZUpdateType_Character,
+			.update_subtype = CZMoveUpdateSubtype_MoveZoneInstance,
+		}
+	);
+}
+
+void Perl__crosszonemoveinstancebycharid(uint32 character_id, uint16 instance_id, float x, float y, float z, float heading)
+{
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.coordinates = glm::vec4(x, y, z, heading),
+			.instance_id = instance_id,
+			.update_identifier = character_id,
+			.update_type = CZUpdateType_Character,
+			.update_subtype = CZMoveUpdateSubtype_MoveZoneInstance,
+		}
+	);
+}
+
+void Perl__crosszonemoveinstancebygroupid(uint32 group_id, uint16 instance_id)
+{
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.instance_id = instance_id,
+			.update_identifier = group_id,
+			.update_type = CZUpdateType_Group,
+			.update_subtype = CZMoveUpdateSubtype_MoveZoneInstance,
+		}
+	);
+}
+
+void Perl__crosszonemoveinstancebygroupid(uint32 group_id, uint16 instance_id, float x, float y, float z)
+{
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.coordinates = glm::vec4(x, y, z, 0.0f),
+			.instance_id = instance_id,
+			.update_identifier = group_id,
+			.update_type = CZUpdateType_Group,
+			.update_subtype = CZMoveUpdateSubtype_MoveZoneInstance,
+		}
+	);
+}
+
+void Perl__crosszonemoveinstancebygroupid(uint32 group_id, uint16 instance_id, float x, float y, float z, float heading)
+{
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.coordinates = glm::vec4(x, y, z, heading),
+			.instance_id = instance_id,
+			.update_identifier = group_id,
+			.update_type = CZUpdateType_Group,
+			.update_subtype = CZMoveUpdateSubtype_MoveZoneInstance,
+		}
+	);
+}
+
+void Perl__crosszonemoveinstancebyraidid(uint32 raid_id, uint16 instance_id)
+{
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.instance_id = instance_id,
+			.update_identifier = raid_id,
+			.update_type = CZUpdateType_Raid,
+			.update_subtype = CZMoveUpdateSubtype_MoveZoneInstance,
+		}
+	);
+}
+
+void Perl__crosszonemoveinstancebyraidid(uint32 raid_id, uint16 instance_id, float x, float y, float z)
+{
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.coordinates = glm::vec4(x, y, z, 0.0f),
+			.instance_id = instance_id,
+			.update_identifier = raid_id,
+			.update_type = CZUpdateType_Raid,
+			.update_subtype = CZMoveUpdateSubtype_MoveZoneInstance,
+		}
+	);
+}
+
+void Perl__crosszonemoveinstancebyraidid(uint32 raid_id, uint16 instance_id, float x, float y, float z, float heading)
+{
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.coordinates = glm::vec4(x, y, z, heading),
+			.instance_id = instance_id,
+			.update_identifier = raid_id,
+			.update_type = CZUpdateType_Raid,
+			.update_subtype = CZMoveUpdateSubtype_MoveZoneInstance,
+		}
+	);
+}
+
+void Perl__crosszonemoveinstancebyguildid(uint32 guild_id, uint16 instance_id)
+{
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.instance_id = instance_id,
+			.update_identifier = guild_id,
+			.update_type = CZUpdateType_Guild,
+			.update_subtype = CZMoveUpdateSubtype_MoveZoneInstance,
+		}
+	);
+}
+
+void Perl__crosszonemoveinstancebyguildid(uint32 guild_id, uint16 instance_id, float x, float y, float z)
+{
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.coordinates = glm::vec4(x, y, z, 0.0f),
+			.instance_id = instance_id,
+			.update_identifier = guild_id,
+			.update_type = CZUpdateType_Guild,
+			.update_subtype = CZMoveUpdateSubtype_MoveZoneInstance,
+		}
+	);
+}
+
+void Perl__crosszonemoveinstancebyguildid(uint32 guild_id, uint16 instance_id, float x, float y, float z, float heading)
+{
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.coordinates = glm::vec4(x, y, z, heading),
+			.instance_id = instance_id,
+			.update_identifier = guild_id,
+			.update_type = CZUpdateType_Guild,
+			.update_subtype = CZMoveUpdateSubtype_MoveZoneInstance,
+		}
+	);
 }
 
 void Perl__crosszonemoveinstancebyexpeditionid(uint32 expedition_id, uint16 instance_id)
 {
-	const char* zone_short_name = "";
-	quest_manager.CrossZoneMove(CZUpdateType_Expedition, CZMoveUpdateSubtype_MoveZoneInstance, expedition_id, zone_short_name, instance_id);
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.instance_id = instance_id,
+			.update_identifier = expedition_id,
+			.update_type = CZUpdateType_Expedition,
+			.update_subtype = CZMoveUpdateSubtype_MoveZoneInstance,
+		}
+	);
 }
 
-void Perl__crosszonemoveinstancebyclientname(const char* client_name, uint16 instance_id)
+void Perl__crosszonemoveinstancebyexpeditionid(uint32 expedition_id, uint16 instance_id, float x, float y, float z)
 {
-	int update_identifier = 0;
-	const char* zone_short_name = "";
-	quest_manager.CrossZoneMove(CZUpdateType_ClientName, CZMoveUpdateSubtype_MoveZoneInstance, update_identifier, zone_short_name, instance_id, client_name);
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.coordinates = glm::vec4(x, y, z, 0.0f),
+			.instance_id = instance_id,
+			.update_identifier = expedition_id,
+			.update_type = CZUpdateType_Expedition,
+			.update_subtype = CZMoveUpdateSubtype_MoveZoneInstance,
+		}
+	);
+}
+
+void Perl__crosszonemoveinstancebyexpeditionid(uint32 expedition_id, uint16 instance_id, float x, float y, float z, float heading)
+{
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.coordinates = glm::vec4(x, y, z, heading),
+			.instance_id = instance_id,
+			.update_identifier = expedition_id,
+			.update_type = CZUpdateType_Expedition,
+			.update_subtype = CZMoveUpdateSubtype_MoveZoneInstance,
+		}
+	);
+}
+
+void Perl__crosszonemoveinstancebyclientname(std::string client_name, uint16 instance_id)
+{
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.client_name = client_name,
+			.instance_id = instance_id,
+			.update_type = CZUpdateType_ClientName,
+			.update_subtype = CZMoveUpdateSubtype_MoveZoneInstance,
+		}
+	);
+}
+
+void Perl__crosszonemoveinstancebyclientname(std::string client_name, uint16 instance_id, float x, float y, float z)
+{
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.client_name = client_name,
+			.coordinates = glm::vec4(x, y, z, 0.0f),
+			.instance_id = instance_id,
+			.update_type = CZUpdateType_ClientName,
+			.update_subtype = CZMoveUpdateSubtype_MoveZoneInstance,
+		}
+	);
+}
+
+void Perl__crosszonemoveinstancebyclientname(std::string client_name, uint16 instance_id, float x, float y, float z, float heading)
+{
+	quest_manager.CrossZoneMove(
+		CZMove_Struct{
+			.client_name = client_name,
+			.coordinates = glm::vec4(x, y, z, heading),
+			.instance_id = instance_id,
+			.update_type = CZUpdateType_ClientName,
+			.update_subtype = CZMoveUpdateSubtype_MoveZoneInstance,
+		}
+	);
 }
 
 void Perl__crosszoneremoveldonlossbycharid(int character_id, uint32 theme_id)
@@ -4119,6 +5106,655 @@ void Perl__send_player_handin_event()
 	quest_manager.SendPlayerHandinEvent();
 }
 
+float Perl__GetZoneSafeX(uint32 zone_id)
+{
+	return zone_store.GetZoneSafeCoordinates(zone_id).x;
+}
+
+float Perl__GetZoneSafeX(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneSafeCoordinates(zone_id, version).x;
+}
+
+float Perl__GetZoneSafeY(uint32 zone_id)
+{
+	return zone_store.GetZoneSafeCoordinates(zone_id).y;
+}
+
+float Perl__GetZoneSafeY(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneSafeCoordinates(zone_id, version).y;
+}
+
+float Perl__GetZoneSafeZ(uint32 zone_id)
+{
+	return zone_store.GetZoneSafeCoordinates(zone_id).z;
+}
+
+float Perl__GetZoneSafeZ(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneSafeCoordinates(zone_id, version).z;
+}
+
+float Perl__GetZoneSafeHeading(uint32 zone_id)
+{
+	return zone_store.GetZoneSafeCoordinates(zone_id).w;
+}
+
+float Perl__GetZoneSafeHeading(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneSafeCoordinates(zone_id, version).w;
+}
+
+float Perl__GetZoneGraveyardID(uint32 zone_id)
+{
+	return zone_store.GetZoneGraveyardID(zone_id);
+}
+
+float Perl__GetZoneGraveyardID(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneGraveyardID(zone_id, version);
+}
+
+uint8 Perl__GetZoneMinimumLevel(uint32 zone_id)
+{
+	return zone_store.GetZoneMinimumLevel(zone_id);
+}
+
+uint8 Perl__GetZoneMinimumLevel(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneMinimumLevel(zone_id, version);
+}
+
+uint8 Perl__GetZoneMaximumLevel(uint32 zone_id)
+{
+	return zone_store.GetZoneMaximumLevel(zone_id);
+}
+
+uint8 Perl__GetZoneMaximumLevel(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneMaximumLevel(zone_id, version);
+}
+
+uint8 Perl__GetZoneMinimumStatus(uint32 zone_id)
+{
+	return zone_store.GetZoneMinimumStatus(zone_id);
+}
+
+uint8 Perl__GetZoneMinimumStatus(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneMinimumStatus(zone_id, version);
+}
+
+int Perl__GetZoneTimeZone(uint32 zone_id)
+{
+	return zone_store.GetZoneTimeZone(zone_id);
+}
+
+int Perl__GetZoneTimeZone(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneTimeZone(zone_id, version);
+}
+
+int Perl__GetZoneMaximumPlayers(uint32 zone_id)
+{
+	return zone_store.GetZoneMaximumPlayers(zone_id);
+}
+
+int Perl__GetZoneMaximumPlayers(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneMaximumPlayers(zone_id, version);
+}
+
+uint32 Perl__GetZoneRuleSet(uint32 zone_id)
+{
+	return zone_store.GetZoneRuleSet(zone_id);
+}
+
+uint32 Perl__GetZoneRuleSet(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneRuleSet(zone_id, version);
+}
+
+std::string Perl__GetZoneNote(uint32 zone_id)
+{
+	return zone_store.GetZoneNote(zone_id);
+}
+
+std::string Perl__GetZoneNote(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneNote(zone_id, version);
+}
+
+float Perl__GetZoneUnderworld(uint32 zone_id)
+{
+	return zone_store.GetZoneUnderworld(zone_id);
+}
+
+float Perl__GetZoneUnderworld(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneUnderworld(zone_id, version);
+}
+
+float Perl__GetZoneMinimumClip(uint32 zone_id)
+{
+	return zone_store.GetZoneMinimumClip(zone_id);
+}
+
+float Perl__GetZoneMinimumClip(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneMinimumClip(zone_id, version);
+}
+
+float Perl__GetZoneMaximumClip(uint32 zone_id)
+{
+	return zone_store.GetZoneMaximumClip(zone_id);
+}
+
+float Perl__GetZoneMaximumClip(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneMaximumClip(zone_id, version);
+}
+
+float Perl__GetZoneFogMinimumClip(uint32 zone_id)
+{
+	return zone_store.GetZoneFogMinimumClip(zone_id);
+}
+
+float Perl__GetZoneFogMinimumClip(uint32 zone_id, uint8 slot)
+{
+	return zone_store.GetZoneFogMinimumClip(zone_id, slot);
+}
+
+float Perl__GetZoneFogMinimumClip(uint32 zone_id, uint8 slot, int version)
+{
+	return zone_store.GetZoneFogMinimumClip(zone_id, slot, version);
+}
+
+float Perl__GetZoneFogMaximumClip(uint32 zone_id)
+{
+	return zone_store.GetZoneFogMaximumClip(zone_id);
+}
+
+float Perl__GetZoneFogMaximumClip(uint32 zone_id, uint8 slot)
+{
+	return zone_store.GetZoneFogMaximumClip(zone_id, slot);
+}
+
+float Perl__GetZoneFogMaximumClip(uint32 zone_id, uint8 slot, int version)
+{
+	return zone_store.GetZoneFogMaximumClip(zone_id, slot, version);
+}
+
+uint8 Perl__GetZoneFogRed(uint32 zone_id)
+{
+	return zone_store.GetZoneFogRed(zone_id);
+}
+
+uint8 Perl__GetZoneFogRed(uint32 zone_id, uint8 slot)
+{
+	return zone_store.GetZoneFogRed(zone_id, slot);
+}
+
+uint8 Perl__GetZoneFogRed(uint32 zone_id, uint8 slot, int version)
+{
+	return zone_store.GetZoneFogRed(zone_id, slot, version);
+}
+
+uint8 Perl__GetZoneFogGreen(uint32 zone_id)
+{
+	return zone_store.GetZoneFogGreen(zone_id);
+}
+
+uint8 Perl__GetZoneFogGreen(uint32 zone_id, uint8 slot)
+{
+	return zone_store.GetZoneFogGreen(zone_id, slot);
+}
+
+uint8 Perl__GetZoneFogGreen(uint32 zone_id, uint8 slot, int version)
+{
+	return zone_store.GetZoneFogGreen(zone_id, slot, version);
+}
+
+uint8 Perl__GetZoneFogBlue(uint32 zone_id)
+{
+	return zone_store.GetZoneFogBlue(zone_id);
+}
+
+uint8 Perl__GetZoneFogBlue(uint32 zone_id, uint8 slot)
+{
+	return zone_store.GetZoneFogBlue(zone_id, slot);
+}
+
+uint8 Perl__GetZoneFogBlue(uint32 zone_id, uint8 slot, int version)
+{
+	return zone_store.GetZoneFogBlue(zone_id, slot, version);
+}
+
+uint8 Perl__GetZoneSky(uint32 zone_id)
+{
+	return zone_store.GetZoneSky(zone_id);
+}
+
+uint8 Perl__GetZoneSky(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneSky(zone_id, version);
+}
+
+uint8 Perl__GetZoneZType(uint32 zone_id)
+{
+	return zone_store.GetZoneZType(zone_id);
+}
+
+uint8 Perl__GetZoneZType(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneZType(zone_id, version);
+}
+
+float Perl__GetZoneExperienceMultiplier(uint32 zone_id)
+{
+	return zone_store.GetZoneExperienceMultiplier(zone_id);
+}
+
+float Perl__GetZoneExperienceMultiplier(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneExperienceMultiplier(zone_id, version);
+}
+
+float Perl__GetZoneWalkSpeed(uint32 zone_id)
+{
+	return zone_store.GetZoneWalkSpeed(zone_id);
+}
+
+float Perl__GetZoneWalkSpeed(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneWalkSpeed(zone_id, version);
+}
+
+uint8 Perl__GetZoneTimeType(uint32 zone_id)
+{
+	return zone_store.GetZoneTimeType(zone_id);
+}
+
+uint8 Perl__GetZoneTimeType(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneTimeType(zone_id, version);
+}
+
+float Perl__GetZoneFogDensity(uint32 zone_id)
+{
+	return zone_store.GetZoneFogDensity(zone_id);
+}
+
+float Perl__GetZoneFogDensity(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneFogDensity(zone_id, version);
+}
+
+std::string Perl__GetZoneFlagNeeded(uint32 zone_id)
+{
+	return zone_store.GetZoneFlagNeeded(zone_id);
+}
+
+std::string Perl__GetZoneFlagNeeded(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneFlagNeeded(zone_id, version);
+}
+
+int8 Perl__GetZoneCanBind(uint32 zone_id)
+{
+	return zone_store.GetZoneCanBind(zone_id);
+}
+
+int8 Perl__GetZoneCanBind(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneCanBind(zone_id, version);
+}
+
+int8 Perl__GetZoneCanCombat(uint32 zone_id)
+{
+	return zone_store.GetZoneCanCombat(zone_id);
+}
+
+int8 Perl__GetZoneCanCombat(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneCanCombat(zone_id, version);
+}
+
+int8 Perl__GetZoneCanLevitate(uint32 zone_id)
+{
+	return zone_store.GetZoneCanLevitate(zone_id);
+}
+
+int8 Perl__GetZoneCanLevitate(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneCanLevitate(zone_id, version);
+}
+
+int8 Perl__GetZoneCastOutdoor(uint32 zone_id)
+{
+	return zone_store.GetZoneCastOutdoor(zone_id);
+}
+
+int8 Perl__GetZoneCastOutdoor(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneCastOutdoor(zone_id, version);
+}
+
+uint8 Perl__GetZoneHotzone(uint32 zone_id)
+{
+	return zone_store.GetZoneHotzone(zone_id);
+}
+
+uint8 Perl__GetZoneHotzone(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneHotzone(zone_id, version);
+}
+
+uint8 Perl__GetZoneInstanceType(uint32 zone_id)
+{
+	return zone_store.GetZoneInstanceType(zone_id);
+}
+
+uint8 Perl__GetZoneInstanceType(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneInstanceType(zone_id, version);
+}
+
+uint64 Perl__GetZoneShutdownDelay(uint32 zone_id)
+{
+	return zone_store.GetZoneShutdownDelay(zone_id);
+}
+
+uint64 Perl__GetZoneShutdownDelay(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneShutdownDelay(zone_id, version);
+}
+
+int8 Perl__GetZonePEQZone(uint32 zone_id)
+{
+	return zone_store.GetZonePEQZone(zone_id);
+}
+
+int8 Perl__GetZonePEQZone(uint32 zone_id, int version)
+{
+	return zone_store.GetZonePEQZone(zone_id, version);
+}
+
+int8 Perl__GetZoneExpansion(uint32 zone_id)
+{
+	return zone_store.GetZoneExpansion(zone_id);
+}
+
+int8 Perl__GetZoneExpansion(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneExpansion(zone_id, version);
+}
+
+int8 Perl__GetZoneBypassExpansionCheck(uint32 zone_id)
+{
+	return zone_store.GetZoneBypassExpansionCheck(zone_id);
+}
+
+int8 Perl__GetZoneBypassExpansionCheck(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneBypassExpansionCheck(zone_id, version);
+}
+
+uint8 Perl__GetZoneSuspendBuffs(uint32 zone_id)
+{
+	return zone_store.GetZoneSuspendBuffs(zone_id);
+}
+
+uint8 Perl__GetZoneSuspendBuffs(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneSuspendBuffs(zone_id, version);
+}
+
+int Perl__GetZoneRainChance(uint32 zone_id)
+{
+	return zone_store.GetZoneRainChance(zone_id);
+}
+
+int Perl__GetZoneRainChance(uint32 zone_id, uint8 slot)
+{
+	return zone_store.GetZoneRainChance(zone_id, slot);
+}
+
+int Perl__GetZoneRainChance(uint32 zone_id, uint8 slot, int version)
+{
+	return zone_store.GetZoneRainChance(zone_id, slot, version);
+}
+
+int Perl__GetZoneRainDuration(uint32 zone_id)
+{
+	return zone_store.GetZoneRainDuration(zone_id);
+}
+
+int Perl__GetZoneRainDuration(uint32 zone_id, uint8 slot)
+{
+	return zone_store.GetZoneRainDuration(zone_id, slot);
+}
+
+int Perl__GetZoneRainDuration(uint32 zone_id, uint8 slot, int version)
+{
+	return zone_store.GetZoneRainDuration(zone_id, slot, version);
+}
+
+int Perl__GetZoneSnowChance(uint32 zone_id)
+{
+	return zone_store.GetZoneSnowChance(zone_id);
+}
+
+int Perl__GetZoneSnowChance(uint32 zone_id, uint8 slot)
+{
+	return zone_store.GetZoneSnowChance(zone_id, slot);
+}
+
+int Perl__GetZoneSnowChance(uint32 zone_id, uint8 slot, int version)
+{
+	return zone_store.GetZoneSnowChance(zone_id, slot, version);
+}
+
+int Perl__GetZoneSnowDuration(uint32 zone_id)
+{
+	return zone_store.GetZoneSnowDuration(zone_id);
+}
+
+int Perl__GetZoneSnowDuration(uint32 zone_id, uint8 slot)
+{
+	return zone_store.GetZoneSnowDuration(zone_id, slot);
+}
+
+int Perl__GetZoneSnowDuration(uint32 zone_id, uint8 slot, int version)
+{
+	return zone_store.GetZoneSnowDuration(zone_id, slot, version);
+}
+
+float Perl__GetZoneGravity(uint32 zone_id)
+{
+	return zone_store.GetZoneGravity(zone_id);
+}
+
+float Perl__GetZoneGravity(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneGravity(zone_id, version);
+}
+
+int Perl__GetZoneType(uint32 zone_id)
+{
+	return zone_store.GetZoneType(zone_id);
+}
+
+int Perl__GetZoneType(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneType(zone_id, version);
+}
+
+int8 Perl__GetZoneSkyLock(uint32 zone_id)
+{
+	return zone_store.GetZoneSkyLock(zone_id);
+}
+
+int8 Perl__GetZoneSkyLock(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneSkyLock(zone_id, version);
+}
+
+int Perl__GetZoneFastRegenHP(uint32 zone_id)
+{
+	return zone_store.GetZoneFastRegenHP(zone_id);
+}
+
+int Perl__GetZoneFastRegenHP(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneFastRegenHP(zone_id, version);
+}
+
+int Perl__GetZoneFastRegenMana(uint32 zone_id)
+{
+	return zone_store.GetZoneFastRegenMana(zone_id);
+}
+
+int Perl__GetZoneFastRegenMana(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneFastRegenMana(zone_id, version);
+}
+
+int Perl__GetZoneFastRegenEndurance(uint32 zone_id)
+{
+	return zone_store.GetZoneFastRegenEndurance(zone_id);
+}
+
+int Perl__GetZoneFastRegenEndurance(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneFastRegenEndurance(zone_id, version);
+}
+
+int Perl__GetZoneNPCMaximumAggroDistance(uint32 zone_id)
+{
+	return zone_store.GetZoneNPCMaximumAggroDistance(zone_id);
+}
+
+int Perl__GetZoneNPCMaximumAggroDistance(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneNPCMaximumAggroDistance(zone_id, version);
+}
+
+uint32 Perl__GetZoneMaximumMovementUpdateRange(uint32 zone_id)
+{
+	return zone_store.GetZoneMaximumMovementUpdateRange(zone_id);
+}
+
+uint32 Perl__GetZoneMaximumMovementUpdateRange(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneMaximumMovementUpdateRange(zone_id, version);
+}
+
+int8 Perl__GetZoneMinimumExpansion(uint32 zone_id)
+{
+	return zone_store.GetZoneMinimumExpansion(zone_id);
+}
+
+int8 Perl__GetZoneMinimumExpansion(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneMinimumExpansion(zone_id, version);
+}
+
+int8 Perl__GetZoneMaximumExpansion(uint32 zone_id)
+{
+	return zone_store.GetZoneMaximumExpansion(zone_id);
+}
+
+int8 Perl__GetZoneMaximumExpansion(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneMaximumExpansion(zone_id, version);
+}
+
+std::string Perl__GetZoneContentFlags(uint32 zone_id)
+{
+	return zone_store.GetZoneContentFlags(zone_id);
+}
+
+std::string Perl__GetZoneContentFlags(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneContentFlags(zone_id, version);
+}
+
+std::string Perl__GetZoneContentFlagsDisabled(uint32 zone_id)
+{
+	return zone_store.GetZoneContentFlagsDisabled(zone_id);
+}
+
+std::string Perl__GetZoneContentFlagsDisabled(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneContentFlagsDisabled(zone_id, version);
+}
+
+int Perl__GetZoneUnderworldTeleportIndex(uint32 zone_id)
+{
+	return zone_store.GetZoneUnderworldTeleportIndex(zone_id);
+}
+
+int Perl__GetZoneUnderworldTeleportIndex(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneUnderworldTeleportIndex(zone_id, version);
+}
+
+int Perl__GetZoneLavaDamage(uint32 zone_id)
+{
+	return zone_store.GetZoneLavaDamage(zone_id);
+}
+
+int Perl__GetZoneLavaDamage(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneLavaDamage(zone_id, version);
+}
+
+int Perl__GetZoneMinimumLavaDamage(uint32 zone_id)
+{
+	return zone_store.GetZoneMinimumLavaDamage(zone_id);
+}
+
+int Perl__GetZoneMinimumLavaDamage(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneMinimumLavaDamage(zone_id, version);
+}
+
+void Perl__send_channel_message(uint8 channel_number, uint32 guild_id, uint8 language_id, uint8 language_skill, const char* message)
+{
+	quest_manager.SendChannelMessage(channel_number, guild_id, language_id, language_skill, message);
+}
+
+void Perl__send_channel_message(Client* from, uint8 channel_number, uint32 guild_id, uint8 language_id, uint8 language_skill, const char* message)
+{
+	quest_manager.SendChannelMessage(from, channel_number, guild_id, language_id, language_skill, message);
+}
+
+void Perl__send_channel_message(Client* from, const char* to, uint8 channel_number, uint32 guild_id, uint8 language_id, uint8 language_skill, const char* message)
+{
+	quest_manager.SendChannelMessage(from, to, channel_number, guild_id, language_id, language_skill, message);
+}
+
+std::string Perl__convert_money_to_string(perl::hash table)
+{
+	uint64 platinum = table.exists("platinum") ? static_cast<uint64>(table["platinum"]) : 0;
+	uint64 gold     = table.exists("gold") ? static_cast<uint64>(table["gold"]) : 0;
+	uint64 silver   = table.exists("silver") ? static_cast<uint64>(table["silver"]) : 0;
+	uint64 copper   = table.exists("copper") ? static_cast<uint64>(table["copper"]) : 0;
+
+	if (
+		!copper &&
+		!silver &&
+		!gold &&
+		!platinum
+	) {
+		return std::string();
+	}
+
+	return Strings::Money(platinum, gold, silver, copper);
+}
+
 void perl_register_quest()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -4131,7 +5767,11 @@ void perl_register_quest()
 	package.add("createbotcount", (int(*)())&Perl__createbotcount);
 	package.add("createbotcount", (int(*)(uint8))&Perl__createbotcount);
 	package.add("createBot", &Perl__createBot);
-
+	package.add("CalculateCorruptionCounters", &Perl__CalculateCorruptionCounters);
+	package.add("CalculateCounters", &Perl__CalculateCounters);
+	package.add("CalculateCurseCounters", &Perl__CalculateCurseCounters);
+	package.add("CalculateDiseaseCounters", &Perl__CalculateDiseaseCounters);
+	package.add("CalculatePoisonCounters", &Perl__CalculatePoisonCounters);
 	package.add("AssignGroupToInstance", &Perl__AssignGroupToInstance);
 	package.add("AssignRaidToInstance", &Perl__AssignRaidToInstance);
 	package.add("AssignToInstance", &Perl__AssignToInstance);
@@ -4152,26 +5792,250 @@ void perl_register_quest()
 	package.add("GetInstanceIDsByCharID", &Perl__GetInstanceIDsByCharID);
 	package.add("GetInstanceVersionByID", &Perl__GetInstanceVersionByID);
 	package.add("GetInstanceZoneIDByID", &Perl__GetInstanceZoneIDByID);
+	package.add("GetSpellPartialMagicRuneReduction", &Perl__GetSpellPartialMagicRuneReduction);
+	package.add("GetSpellPartialMagicRuneAmount", &Perl__GetSpellPartialMagicRuneAmount);
+	package.add("GetSpellPartialMeleeRuneReduction", &Perl__GetSpellPartialMeleeRuneReduction);
+	package.add("GetSpellPartialMeleeRuneAmount", &Perl__GetSpellPartialMeleeRuneAmount);
+	package.add("GetSpellProcLimitTimer", &Perl__GetSpellProcLimitTimer);
+	package.add("GetSpellResurrectionSicknessCheck", &Perl__GetSpellResurrectionSicknessCheck);
+	package.add("GetSpellEffectDescriptionNumber", &Perl__GetSpellEffectDescriptionNumber);
+	package.add("GetSpellEffectIndex", &Perl__GetSpellEffectIndex);
+	package.add("GetSpellFuriousBash", &Perl__GetSpellFuriousBash);
+	package.add("GetSpellMinimumLevel", &Perl__GetSpellMinimumLevel);
+	package.add("GetSpellNimbusEffect", &Perl__GetSpellNimbusEffect);
 	package.add("GetSpellResistType", &Perl__GetSpellResistType);
 	package.add("GetSpellTargetType", &Perl__GetSpellTargetType);
+	package.add("GetSpellTriggerSpellID", &Perl__GetSpellTriggerSpellID);
+	package.add("GetSpellViralMaximumSpreadTime", &Perl__GetSpellViralMaximumSpreadTime);
+	package.add("GetSpellViralMinimumSpreadTime", &Perl__GetSpellViralMinimumSpreadTime);
+	package.add("GetSpellViralSpreadRange", &Perl__GetSpellViralSpreadRange);
 	package.add("GetTimeSeconds", &Perl__GetTimeSeconds);
+	package.add("GetZoneBypassExpansionCheck", (int8(*)(uint32))&Perl__GetZoneBypassExpansionCheck);
+	package.add("GetZoneBypassExpansionCheck", (int8(*)(uint32, int))&Perl__GetZoneBypassExpansionCheck);
+	package.add("GetZoneCanBind", (int8(*)(uint32))&Perl__GetZoneCanBind);
+	package.add("GetZoneCanBind", (int8(*)(uint32, int))&Perl__GetZoneCanBind);
+	package.add("GetZoneCanCombat", (int8(*)(uint32))&Perl__GetZoneCanCombat);
+	package.add("GetZoneCanCombat", (int8(*)(uint32, int))&Perl__GetZoneCanCombat);
+	package.add("GetZoneCanLevitate", (int8(*)(uint32))&Perl__GetZoneCanLevitate);
+	package.add("GetZoneCanLevitate", (int8(*)(uint32, int))&Perl__GetZoneCanLevitate);
+	package.add("GetZoneCastOutdoor", (int8(*)(uint32))&Perl__GetZoneCastOutdoor);
+	package.add("GetZoneCastOutdoor", (int8(*)(uint32, int))&Perl__GetZoneCastOutdoor);
+	package.add("GetZoneContentFlags", (std::string(*)(uint32))&Perl__GetZoneContentFlags);
+	package.add("GetZoneContentFlags", (std::string(*)(uint32, int))&Perl__GetZoneContentFlags);
+	package.add("GetZoneContentFlagsDisabled", (std::string(*)(uint32))&Perl__GetZoneContentFlagsDisabled);
+	package.add("GetZoneContentFlagsDisabled", (std::string(*)(uint32, int))&Perl__GetZoneContentFlagsDisabled);
+	package.add("GetZoneGraveyardID", (float(*)(uint32))&Perl__GetZoneGraveyardID);
+	package.add("GetZoneGraveyardID", (float(*)(uint32, int))&Perl__GetZoneGraveyardID);
+	package.add("GetZoneHotzone", (uint8(*)(uint32))&Perl__GetZoneHotzone);
+	package.add("GetZoneHotzone", (uint8(*)(uint32, int))&Perl__GetZoneHotzone);
+	package.add("GetZoneInstanceType", (uint8(*)(uint32))&Perl__GetZoneInstanceType);
+	package.add("GetZoneInstanceType", (uint8(*)(uint32, int))&Perl__GetZoneInstanceType);
 	package.add("GetZoneID", &Perl__GetZoneID);
+	package.add("GetZoneExpansion", (int8(*)(uint32))&Perl__GetZoneExpansion);
+	package.add("GetZoneExpansion", (int8(*)(uint32, int))&Perl__GetZoneExpansion);
+	package.add("GetZoneExperienceMultiplier", (float(*)(uint32))&Perl__GetZoneExperienceMultiplier);
+	package.add("GetZoneExperienceMultiplier", (float(*)(uint32, int))&Perl__GetZoneExperienceMultiplier);
+	package.add("GetZoneFastRegenHP", (int(*)(uint32))&Perl__GetZoneFastRegenHP);
+	package.add("GetZoneFastRegenHP", (int(*)(uint32, int))&Perl__GetZoneFastRegenHP);
+	package.add("GetZoneFastRegenMana", (int(*)(uint32))&Perl__GetZoneFastRegenMana);
+	package.add("GetZoneFastRegenMana", (int(*)(uint32, int))&Perl__GetZoneFastRegenMana);
+	package.add("GetZoneFastRegenEndurance", (int(*)(uint32))&Perl__GetZoneFastRegenEndurance);
+	package.add("GetZoneFastRegenEndurance", (int(*)(uint32, int))&Perl__GetZoneFastRegenEndurance);
+	package.add("GetZoneFlagNeeded", (std::string(*)(uint32))&Perl__GetZoneFlagNeeded);
+	package.add("GetZoneFlagNeeded", (std::string(*)(uint32, int))&Perl__GetZoneFlagNeeded);
+	package.add("GetZoneFogMaximumClip", (float(*)(uint32))&Perl__GetZoneFogMaximumClip);
+	package.add("GetZoneFogMaximumClip", (float(*)(uint32, uint8))&Perl__GetZoneFogMaximumClip);
+	package.add("GetZoneFogMaximumClip", (float(*)(uint32, uint8, int))&Perl__GetZoneFogMaximumClip);
+	package.add("GetZoneFogMinimumClip", (float(*)(uint32))&Perl__GetZoneFogMinimumClip);
+	package.add("GetZoneFogMinimumClip", (float(*)(uint32, uint8))&Perl__GetZoneFogMinimumClip);
+	package.add("GetZoneFogMinimumClip", (float(*)(uint32, uint8, int))&Perl__GetZoneFogMinimumClip);
+	package.add("GetZoneFogBlue", (uint8(*)(uint32))&Perl__GetZoneFogBlue);
+	package.add("GetZoneFogBlue", (uint8(*)(uint32, uint8))&Perl__GetZoneFogBlue);
+	package.add("GetZoneFogBlue", (uint8(*)(uint32, uint8, int))&Perl__GetZoneFogBlue);
+	package.add("GetZoneFogDensity", (float(*)(uint32))&Perl__GetZoneFogDensity);
+	package.add("GetZoneFogDensity", (float(*)(uint32, int))&Perl__GetZoneFogDensity);
+	package.add("GetZoneFogGreen", (uint8(*)(uint32))&Perl__GetZoneFogGreen);
+	package.add("GetZoneFogGreen", (uint8(*)(uint32, uint8))&Perl__GetZoneFogGreen);
+	package.add("GetZoneFogGreen", (uint8(*)(uint32, uint8, int))&Perl__GetZoneFogGreen);
+	package.add("GetZoneFogRed", (uint8(*)(uint32))&Perl__GetZoneFogRed);
+	package.add("GetZoneFogRed", (uint8(*)(uint32, uint8))&Perl__GetZoneFogRed);
+	package.add("GetZoneFogRed", (uint8(*)(uint32, uint8, int))&Perl__GetZoneFogRed);
+	package.add("GetZoneGravity", (float(*)(uint32))&Perl__GetZoneMaximumClip);
+	package.add("GetZoneGravity", (float(*)(uint32, int))&Perl__GetZoneMaximumClip);
+	package.add("GetZoneMaximumClip", (float(*)(uint32))&Perl__GetZoneMaximumClip);
+	package.add("GetZoneMaximumClip", (float(*)(uint32, int))&Perl__GetZoneMaximumClip);
+	package.add("GetZoneMaximumExpansion", (int8(*)(uint32))&Perl__GetZoneMaximumExpansion);
+	package.add("GetZoneMaximumExpansion", (int8(*)(uint32, int))&Perl__GetZoneMaximumExpansion);
+	package.add("GetZoneMaximumLevel", (uint8(*)(uint32))&Perl__GetZoneMaximumLevel);
+	package.add("GetZoneMaximumLevel", (uint8(*)(uint32, int))&Perl__GetZoneMaximumLevel);
+	package.add("GetZoneMaximumMovementUpdateRange", (uint32(*)(uint32))&Perl__GetZoneMaximumMovementUpdateRange);
+	package.add("GetZoneMaximumMovementUpdateRange", (uint32(*)(uint32, int))&Perl__GetZoneMaximumMovementUpdateRange);
+	package.add("GetZoneMaximumPlayers", (int(*)(uint32))&Perl__GetZoneMaximumPlayers);
+	package.add("GetZoneMaximumPlayers", (int(*)(uint32, int))&Perl__GetZoneMaximumPlayers);
+	package.add("GetZoneMinimumClip", (float(*)(uint32))&Perl__GetZoneMinimumClip);
+	package.add("GetZoneMinimumClip", (float(*)(uint32, int))&Perl__GetZoneMinimumClip);
+	package.add("GetZoneMinimumExpansion", (int8(*)(uint32))&Perl__GetZoneMinimumExpansion);
+	package.add("GetZoneMinimumExpansion", (int8(*)(uint32, int))&Perl__GetZoneMinimumExpansion);
+	package.add("GetZoneMinimumLavaDamage", (int(*)(uint32))&Perl__GetZoneMinimumLavaDamage);
+	package.add("GetZoneMinimumLavaDamage", (int(*)(uint32, int))&Perl__GetZoneMinimumLavaDamage);
+	package.add("GetZoneMinimumLevel", (uint8(*)(uint32))&Perl__GetZoneMinimumLevel);
+	package.add("GetZoneMinimumLevel", (uint8(*)(uint32, int))&Perl__GetZoneMinimumLevel);
+	package.add("GetZoneMinimumStatus", (uint8(*)(uint32))&Perl__GetZoneMinimumStatus);
+	package.add("GetZoneMinimumStatus", (uint8(*)(uint32, int))&Perl__GetZoneMinimumStatus);
+	package.add("GetZoneNote", (std::string(*)(uint32))&Perl__GetZoneNote);
+	package.add("GetZoneNote", (std::string(*)(uint32, int))&Perl__GetZoneNote);
+	package.add("GetZoneNPCMaximumAggroDistance", (int(*)(uint32))&Perl__GetZoneNPCMaximumAggroDistance);
+	package.add("GetZoneNPCMaximumAggroDistance", (int(*)(uint32, int))&Perl__GetZoneNPCMaximumAggroDistance);
+	package.add("GetZoneLavaDamage", (int(*)(uint32))&Perl__GetZoneLavaDamage);
+	package.add("GetZoneLavaDamage", (int(*)(uint32, int))&Perl__GetZoneLavaDamage);
 	package.add("GetZoneLongName", &Perl__GetZoneLongName);
 	package.add("GetZoneLongNameByID", &Perl__GetZoneLongNameByID);
+	package.add("GetZonePEQZone", (int8(*)(uint32))&Perl__GetZonePEQZone);
+	package.add("GetZonePEQZone", (int8(*)(uint32, int))&Perl__GetZonePEQZone);
+	package.add("GetZoneRainChance", (int(*)(uint32))&Perl__GetZoneRainChance);
+	package.add("GetZoneRainChance", (int(*)(uint32, uint8))&Perl__GetZoneRainChance);
+	package.add("GetZoneRainChance", (int(*)(uint32, uint8, int))&Perl__GetZoneRainChance);
+	package.add("GetZoneRainDuration", (int(*)(uint32))&Perl__GetZoneRainDuration);
+	package.add("GetZoneRainDuration", (int(*)(uint32, uint8))&Perl__GetZoneRainDuration);
+	package.add("GetZoneRainDuration", (int(*)(uint32, uint8, int))&Perl__GetZoneRainDuration);
+	package.add("GetZoneRuleSet", (uint32(*)(uint32))&Perl__GetZoneRuleSet);
+	package.add("GetZoneRuleSet", (uint32(*)(uint32, int))&Perl__GetZoneRuleSet);
+	package.add("GetZoneSafeHeading", (float(*)(uint32))&Perl__GetZoneSafeHeading);
+	package.add("GetZoneSafeHeading", (float(*)(uint32, int))&Perl__GetZoneSafeHeading);
+	package.add("GetZoneSafeX", (float(*)(uint32))&Perl__GetZoneSafeX);
+	package.add("GetZoneSafeX", (float(*)(uint32, int))&Perl__GetZoneSafeX);
+	package.add("GetZoneSafeY", (float(*)(uint32))&Perl__GetZoneSafeY);
+	package.add("GetZoneSafeY", (float(*)(uint32, int))&Perl__GetZoneSafeY);
+	package.add("GetZoneSafeZ", (float(*)(uint32))&Perl__GetZoneSafeZ);
+	package.add("GetZoneSafeZ", (float(*)(uint32, int))&Perl__GetZoneSafeZ);
+	package.add("GetZoneShutdownDelay", (uint64(*)(uint32))&Perl__GetZoneShutdownDelay);
+	package.add("GetZoneShutdownDelay", (uint64(*)(uint32, int))&Perl__GetZoneShutdownDelay);
+	package.add("GetZoneSky", (uint8(*)(uint32))&Perl__GetZoneSky);
+	package.add("GetZoneSky", (uint8(*)(uint32, int))&Perl__GetZoneSky);
+	package.add("GetZoneSkyLock", (int8(*)(uint32))&Perl__GetZoneSkyLock);
+	package.add("GetZoneSkyLock", (int8(*)(uint32, int))&Perl__GetZoneSkyLock);
+	package.add("GetZoneSnowChance", (int(*)(uint32))&Perl__GetZoneSnowChance);
+	package.add("GetZoneSnowChance", (int(*)(uint32, uint8))&Perl__GetZoneSnowChance);
+	package.add("GetZoneSnowChance", (int(*)(uint32, uint8, int))&Perl__GetZoneSnowChance);
+	package.add("GetZoneSnowDuration", (int(*)(uint32))&Perl__GetZoneSnowDuration);
+	package.add("GetZoneSnowDuration", (int(*)(uint32, uint8))&Perl__GetZoneSnowDuration);
+	package.add("GetZoneSnowDuration", (int(*)(uint32, uint8, int))&Perl__GetZoneSnowDuration);
+	package.add("GetZoneSuspendBuffs", (uint8(*)(uint32))&Perl__GetZoneSuspendBuffs);
+	package.add("GetZoneSuspendBuffs", (uint8(*)(uint32, int))&Perl__GetZoneSuspendBuffs);
+	package.add("GetZoneZType", (uint8(*)(uint32))&Perl__GetZoneZType);
+	package.add("GetZoneZType", (uint8(*)(uint32, int))&Perl__GetZoneZType);
 	package.add("GetZoneShortName", &Perl__GetZoneShortName);
-	package.add("set_rule", &Perl__set_rule);
-	package.add("get_rule", &Perl__get_rule);
-	package.add("get_data", &Perl__get_data);
-	package.add("get_data_expires", &Perl__get_data_expires);
-	package.add("get_data_remaining", &Perl__get_data_remaining);
-	package.add("set_data", (void(*)(std::string, std::string))&Perl__set_data);
-	package.add("set_data", (void(*)(std::string, std::string, std::string))&Perl__set_data);
-	package.add("delete_data", &Perl__delete_data);
+	package.add("GetZoneTimeType", (uint8(*)(uint32))&Perl__GetZoneTimeType);
+	package.add("GetZoneTimeType", (uint8(*)(uint32, int))&Perl__GetZoneTimeType);
+	package.add("GetZoneTimeZone", (int(*)(uint32))&Perl__GetZoneTimeZone);
+	package.add("GetZoneTimeZone", (int(*)(uint32, int))&Perl__GetZoneTimeZone);
+	package.add("GetZoneType", (int(*)(uint32))&Perl__GetZoneType);
+	package.add("GetZoneType", (int(*)(uint32, int))&Perl__GetZoneType);
+	package.add("GetZoneUnderworld", (float(*)(uint32))&Perl__GetZoneUnderworld);
+	package.add("GetZoneUnderworld", (float(*)(uint32, int))&Perl__GetZoneUnderworld);
+	package.add("GetZoneUnderworldTeleportIndex", (int(*)(uint32))&Perl__GetZoneUnderworldTeleportIndex);
+	package.add("GetZoneUnderworldTeleportIndex", (int(*)(uint32, int))&Perl__GetZoneUnderworldTeleportIndex);
+	package.add("GetZoneWalkSpeed", (float(*)(uint32))&Perl__GetZoneWalkSpeed);
+	package.add("GetZoneWalkSpeed", (float(*)(uint32, int))&Perl__GetZoneWalkSpeed);
+	package.add("IsAEDurationSpell", &Perl__IsAEDurationSpell);
+	package.add("IsAENukeSpell", &Perl__IsAENukeSpell);
+	package.add("IsAERainNukeSpell", &Perl__IsAERainNukeSpell);
+	package.add("IsAllianceSpell", &Perl__IsAllianceSpell);
+	package.add("IsBardOnlyStackEffect", &Perl__IsBardOnlyStackEffect);
+	package.add("IsBardSong", &Perl__IsBardSong);
 	package.add("IsBeneficialSpell", &Perl__IsBeneficialSpell);
+	package.add("IsBlankSpellEffect", &Perl__IsBlankSpellEffect);
+	package.add("IsBlindSpell", &Perl__IsBlindSpell);
+	package.add("IsBuffSpell", &Perl__IsBuffSpell);
+	package.add("IsCastOnFadeDurationSpell", &Perl__IsCastOnFadeDurationSpell);
+	package.add("IsCastNotStandingSpell", &Perl__IsCastNotStandingSpell);
+	package.add("IsCastRestrictedSpell", &Perl__IsCastRestrictedSpell);
+	package.add("IsCastTimeReductionSpell", &Perl__IsCastTimeReductionSpell);
+	package.add("IsCastWhileInvisibleSpell", &Perl__IsCastWhileInvisibleSpell);
+	package.add("IsCharmSpell", &Perl__IsCharmSpell);
+	package.add("IsCombatSkill", &Perl__IsCombatSkill);
+	package.add("IsCompleteHealSpell", &Perl__IsCompleteHealSpell);
+	package.add("IsCompleteHealDurationSpell", &Perl__IsCompleteHealDurationSpell);
+	package.add("IsCureSpell", &Perl__IsCureSpell);
+	package.add("IsDamageSpell", &Perl__IsDamageSpell);
+	package.add("IsDeathSaveSpell", &Perl__IsDeathSaveSpell);
+	package.add("IsDebuffSpell", &Perl__IsDebuffSpell);
+	package.add("IsDetrimentalSpell", &Perl__IsDetrimentalSpell);
+	package.add("IsDiscipline", &Perl__IsDiscipline);
+	package.add("IsDisciplineBuff", &Perl__IsDisciplineBuff);
+	package.add("IsDiseaseCounterSpell", &Perl__IsDiseaseCounterSpell);
+	package.add("IsDistanceModifierSpell", &Perl__IsDistanceModifierSpell);
+	package.add("IsEffectIgnoredInStacking", &Perl__IsEffectIgnoredInStacking);
 	package.add("IsEffectInSpell", &Perl__IsEffectInSpell);
+	package.add("IsFastHealSpell", &Perl__IsFastHealSpell);
+	package.add("IsFearSpell", &Perl__IsFearSpell);
+	package.add("IsFocusLimit", &Perl__IsFocusLimit);
+	package.add("IsFullDeathSaveSpell", &Perl__IsFullDeathSaveSpell);
+	package.add("IsGateSpell", &Perl__IsGateSpell);
+	package.add("IsGroupCompleteHealSpell", &Perl__IsGroupCompleteHealSpell);
+	package.add("IsGroupHealOverTimeSpell", &Perl__IsGroupHealOverTimeSpell);
+	package.add("IsGroupOnlySpell", &Perl__IsGroupOnlySpell);
+	package.add("IsGroupSpell", &Perl__IsGroupSpell);
+	package.add("IsHarmonySpell", &Perl__IsHarmonySpell);
+	package.add("IsHasteSpell", &Perl__IsHasteSpell);
+	package.add("IsHealOverTimeSpell", &Perl__IsHealOverTimeSpell);
+	package.add("IsHealthSpell", &Perl__IsHealthSpell);
+	package.add("IsIllusionSpell", &Perl__IsIllusionSpell);
+	package.add("IsImprovedDamageSpell", &Perl__IsImprovedDamageSpell);
+	package.add("IsImprovedHealingSpell", &Perl__IsImprovedHealingSpell);
+	package.add("IsIncreaseDurationSpell", &Perl__IsIncreaseDurationSpell);
+	package.add("IsIncreaseRangeSpell", &Perl__IsIncreaseRangeSpell);
+	package.add("IsInstrumentModifierAppliedToSpellEffect", &Perl__IsInstrumentModifierAppliedToSpellEffect);
+	package.add("IsInvisibleSpell", &Perl__IsInvisibleSpell);
+	package.add("IsInvulnerabilitySpell", &Perl__IsInvulnerabilitySpell);
+	package.add("IsLDoNObjectSpell", &Perl__IsLDoNObjectSpell);
+	package.add("IsLifetapSpell", &Perl__IsLifetapSpell);
+	package.add("IsMagicRuneSpell", &Perl__IsMagicRuneSpell);
+	package.add("IsManaCostReductionSpell", &Perl__IsManaCostReductionSpell);
+	package.add("IsManaTapSpell", &Perl__IsManaTapSpell);
+	package.add("IsMesmerizeSpell", &Perl__IsMesmerizeSpell);
+	package.add("IsNoDetrimentalSpellAggroSpell", &Perl__IsNoDetrimentalSpellAggroSpell);
+	package.add("IsPartialDeathSaveSpell", &Perl__IsPartialDeathSaveSpell);
+	package.add("IsPartialResistableSpell", &Perl__IsPartialResistableSpell);
+	package.add("IsPBAENukeSpell", &Perl__IsPBAENukeSpell);
+	package.add("IsPercentalHealSpell", &Perl__IsPercentalHealSpell);
+	package.add("IsPersistDeathSpell", &Perl__IsPersistDeathSpell);
+	package.add("IsPetSpell", &Perl__IsPetSpell);
+	package.add("IsPoisonCounterSpell", &Perl__IsPoisonCounterSpell);
+	package.add("IsPulsingBardSong", &Perl__IsPulsingBardSong);
+	package.add("IsPureNukeSpell", &Perl__IsPureNukeSpell);
 	package.add("IsRaining", &Perl__IsRaining);
-	package.add("IsSnowing", &Perl__IsSnowing);
+	package.add("IsRegularGroupHealSpell", &Perl__IsRegularGroupHealSpell);
+	package.add("IsRegularSingleTargetHealSpell", &Perl__IsRegularSingleTargetHealSpell);
+	package.add("IsResistableSpell", &Perl__IsResistableSpell);
+	package.add("IsResistDebuffSpell", &Perl__IsResistDebuffSpell);
+	package.add("IsRestAllowedSpell", &Perl__IsRestAllowedSpell);
+	package.add("IsResurrectionEffects", &Perl__IsResurrectionEffects);
+	package.add("IsRuneSpell", &Perl__IsRuneSpell);
 	package.add("IsRunning", &Perl__IsRunning);
+	package.add("IsSacrificeSpell", &Perl__IsSacrificeSpell);
+	package.add("IsSelfConversionSpell", &Perl__IsSelfConversionSpell);
+	package.add("IsShadowStepSpell", &Perl__IsShadowStepSpell);
+	package.add("IsShortDurationBuff", &Perl__IsShortDurationBuff);
+	package.add("IsSnowing", &Perl__IsSnowing);
+	package.add("IsSpellUsableInThisZoneType", (bool(*)(uint16))&Perl__IsSpellUsableInThisZoneType);
+	package.add("IsSpellUsableInThisZoneType", (bool(*)(uint16, uint8))&Perl__IsSpellUsableInThisZoneType);
+	package.add("IsStackableDOT", &Perl__IsStackableDOT);
+	package.add("IsStunSpell", &Perl__IsStunSpell);
+	package.add("IsSuccorSpell", &Perl__IsSuccorSpell);
+	package.add("IsSummonItemSpell", &Perl__IsSummonItemSpell);
+	package.add("IsSummonPCSpell", &Perl__IsSummonPCSpell);
+	package.add("IsSummonPetSpell", &Perl__IsSummonPetSpell);
+	package.add("IsSummonSkeletonSpell", &Perl__IsSummonSkeletonSpell);
+	package.add("IsSummonSpell", &Perl__IsSummonSpell);
+	package.add("IsSuspendableSpell", &Perl__IsSuspendableSpell);
+	package.add("IsTargetableAESpell", &Perl__IsTargetableAESpell);
+	package.add("IsTargetRequiredForSpell", &Perl__IsTargetRequiredForSpell);
+	package.add("IsTeleportSpell", &Perl__IsTeleportSpell);
+	package.add("IsTranslocateSpell", &Perl__IsTranslocateSpell);
+	package.add("IsVeryFastHealSpell", &Perl__IsVeryFastHealSpell);
+	package.add("IsVirusSpell", &Perl__IsVirusSpell);
+	package.add("IsValidSpell", &Perl__IsValidSpell);
 	package.add("LearnRecipe", &Perl__LearnRecipe);
 	package.add("MerchantCountItem", &Perl__MerchantCountItem);
 	package.add("MerchantSetItem", (void(*)(uint32, uint32))&Perl__MerchantSetItem);
@@ -4215,6 +6079,7 @@ void perl_register_quest()
 	package.add("collectitems", &Perl__collectitems);
 	package.add("commify", &Perl__commify);
 	package.add("completedtasksinset", &Perl__completedtasksinset);
+	package.add("convert_money_to_string", &Perl__convert_money_to_string);
 	package.add("countitem", &Perl__countitem);
 	package.add("countspawnednpcs", &Perl__countspawnednpcs);
 	package.add("createdoor", (uint16(*)(const char*, float, float, float, float))&Perl__CreateDoor);
@@ -4307,18 +6172,42 @@ void perl_register_quest()
 	package.add("crosszonemessageplayerbyguildid", &Perl__crosszonemessageplayerbyguildid);
 	package.add("crosszonemessageplayerbyexpeditionid", &Perl__crosszonemessageplayerbyexpeditionid);
 	package.add("crosszonemessageplayerbyname", &Perl__crosszonemessageplayerbyname);
-	package.add("crosszonemoveplayerbycharid", &Perl__crosszonemoveplayerbycharid);
-	package.add("crosszonemoveplayerbygroupid", &Perl__crosszonemoveplayerbygroupid);
-	package.add("crosszonemoveplayerbyraidid", &Perl__crosszonemoveplayerbyraidid);
-	package.add("crosszonemoveplayerbyguildid", &Perl__crosszonemoveplayerbyguildid);
-	package.add("crosszonemoveplayerbyexpeditionid", &Perl__crosszonemoveplayerbyexpeditionid);
-	package.add("crosszonemoveplayerbyname", &Perl__crosszonemoveplayerbyname);
-	package.add("crosszonemoveinstancebycharid", &Perl__crosszonemoveinstancebycharid);
-	package.add("crosszonemoveinstancebygroupid", &Perl__crosszonemoveinstancebygroupid);
-	package.add("crosszonemoveinstancebyraidid", &Perl__crosszonemoveinstancebyraidid);
-	package.add("crosszonemoveinstancebyguildid", &Perl__crosszonemoveinstancebyguildid);
-	package.add("crosszonemoveinstancebyexpeditionid", &Perl__crosszonemoveinstancebyexpeditionid);
-	package.add("crosszonemoveinstancebyclientname", &Perl__crosszonemoveinstancebyclientname);
+	package.add("crosszonemoveplayerbycharid", (void(*)(uint32, std::string))&Perl__crosszonemoveplayerbycharid);
+	package.add("crosszonemoveplayerbycharid", (void(*)(uint32, std::string, float, float, float))&Perl__crosszonemoveplayerbycharid);
+	package.add("crosszonemoveplayerbycharid", (void(*)(uint32, std::string, float, float, float, float))&Perl__crosszonemoveplayerbycharid);
+	package.add("crosszonemoveplayerbygroupid", (void(*)(uint32, std::string))&Perl__crosszonemoveplayerbygroupid);
+	package.add("crosszonemoveplayerbygroupid", (void(*)(uint32, std::string, float, float, float))&Perl__crosszonemoveplayerbygroupid);
+	package.add("crosszonemoveplayerbygroupid", (void(*)(uint32, std::string, float, float, float, float))&Perl__crosszonemoveplayerbygroupid);
+	package.add("crosszonemoveplayerbyraidid", (void(*)(uint32, std::string))&Perl__crosszonemoveplayerbyraidid);
+	package.add("crosszonemoveplayerbyraidid", (void(*)(uint32, std::string, float, float, float))&Perl__crosszonemoveplayerbyraidid);
+	package.add("crosszonemoveplayerbyraidid", (void(*)(uint32, std::string, float, float, float, float))&Perl__crosszonemoveplayerbyraidid);
+	package.add("crosszonemoveplayerbyguildid", (void(*)(uint32, std::string))&Perl__crosszonemoveplayerbyguildid);
+	package.add("crosszonemoveplayerbyguildid", (void(*)(uint32, std::string, float, float, float))&Perl__crosszonemoveplayerbyguildid);
+	package.add("crosszonemoveplayerbyguildid", (void(*)(uint32, std::string, float, float, float, float))&Perl__crosszonemoveplayerbyguildid);
+	package.add("crosszonemoveplayerbyexpeditionid", (void(*)(uint32, std::string))&Perl__crosszonemoveplayerbyexpeditionid);
+	package.add("crosszonemoveplayerbyexpeditionid", (void(*)(uint32, std::string, float, float, float))&Perl__crosszonemoveplayerbyexpeditionid);
+	package.add("crosszonemoveplayerbyexpeditionid", (void(*)(uint32, std::string, float, float, float, float))&Perl__crosszonemoveplayerbyexpeditionid);
+	package.add("crosszonemoveplayerbyname", (void(*)(std::string, std::string))&Perl__crosszonemoveplayerbyname);
+	package.add("crosszonemoveplayerbyname", (void(*)(std::string, std::string, float, float, float))&Perl__crosszonemoveplayerbyname);
+	package.add("crosszonemoveplayerbyname", (void(*)(std::string, std::string, float, float, float, float))&Perl__crosszonemoveplayerbyname);
+	package.add("crosszonemoveinstancebycharid", (void(*)(uint32, uint16))&Perl__crosszonemoveinstancebycharid);
+	package.add("crosszonemoveinstancebycharid", (void(*)(uint32, uint16, float, float, float))&Perl__crosszonemoveinstancebycharid);
+	package.add("crosszonemoveinstancebycharid", (void(*)(uint32, uint16, float, float, float, float))&Perl__crosszonemoveinstancebycharid);
+	package.add("crosszonemoveinstancebygroupid", (void(*)(uint32, uint16))&Perl__crosszonemoveinstancebygroupid);
+	package.add("crosszonemoveinstancebygroupid", (void(*)(uint32, uint16, float, float, float))&Perl__crosszonemoveinstancebygroupid);
+	package.add("crosszonemoveinstancebygroupid", (void(*)(uint32, uint16, float, float, float, float))&Perl__crosszonemoveinstancebygroupid);
+	package.add("crosszonemoveinstancebyraidid", (void(*)(uint32, uint16))&Perl__crosszonemoveinstancebyraidid);
+	package.add("crosszonemoveinstancebyraidid", (void(*)(uint32, uint16, float, float, float))&Perl__crosszonemoveinstancebyraidid);
+	package.add("crosszonemoveinstancebyraidid", (void(*)(uint32, uint16, float, float, float, float))&Perl__crosszonemoveinstancebyraidid);
+	package.add("crosszonemoveinstancebyguildid", (void(*)(uint32, uint16))&Perl__crosszonemoveinstancebyguildid);
+	package.add("crosszonemoveinstancebyguildid", (void(*)(uint32, uint16, float, float, float))&Perl__crosszonemoveinstancebyguildid);
+	package.add("crosszonemoveinstancebyguildid", (void(*)(uint32, uint16, float, float, float, float))&Perl__crosszonemoveinstancebyguildid);
+	package.add("crosszonemoveinstancebyexpeditionid", (void(*)(uint32, uint16))&Perl__crosszonemoveinstancebyexpeditionid);
+	package.add("crosszonemoveinstancebyexpeditionid", (void(*)(uint32, uint16, float, float, float))&Perl__crosszonemoveinstancebyexpeditionid);
+	package.add("crosszonemoveinstancebyexpeditionid", (void(*)(uint32, uint16, float, float, float, float))&Perl__crosszonemoveinstancebyexpeditionid);
+	package.add("crosszonemoveinstancebyclientname", (void(*)(std::string, uint16))&Perl__crosszonemoveinstancebyclientname);
+	package.add("crosszonemoveinstancebyclientname", (void(*)(std::string, uint16, float, float, float))&Perl__crosszonemoveinstancebyclientname);
+	package.add("crosszonemoveinstancebyclientname", (void(*)(std::string, uint16, float, float, float, float))&Perl__crosszonemoveinstancebyclientname);
 	package.add("crosszoneremoveldonlossbycharid", &Perl__crosszoneremoveldonlossbycharid);
 	package.add("crosszoneremoveldonlossbygroupid", &Perl__crosszoneremoveldonlossbygroupid);
 	package.add("crosszoneremoveldonlossbyraidid", &Perl__crosszoneremoveldonlossbyraidid);
@@ -4445,6 +6334,7 @@ void perl_register_quest()
 	package.add("worldwideupdateactivity", (void(*)(uint32, int, int, uint8, uint8))&Perl__worldwideupdateactivity);
 	package.add("debug", (void(*)(const char*))&Perl__debug);
 	package.add("debug", (void(*)(const char*, int))&Perl__debug);
+	package.add("delete_data", &Perl__delete_data);
 	package.add("delglobal", &Perl__delglobal);
 	package.add("depop", (void(*)())&Perl__depop);
 	package.add("depop", (void(*)(int))&Perl__depop);
@@ -4499,6 +6389,9 @@ void perl_register_quest()
 	package.add("getconsiderlevelname", &Perl__getconsiderlevelname);
 	package.add("gethexcolorcode", &Perl__gethexcolorcode);
 	package.add("getcurrencyid", &Perl__getcurrencyid);
+	package.add("get_data", &Perl__get_data);
+	package.add("get_data_expires", &Perl__get_data_expires);
+	package.add("get_data_remaining", &Perl__get_data_remaining);
 	package.add("get_dz_task_id", &Perl__get_dz_task_id);
 	package.add("getexpmodifierbycharid", (double(*)(uint32, uint32))&Perl__getexpmodifierbycharid);
 	package.add("getexpmodifierbycharid", (double(*)(uint32, uint32, int16))&Perl__getexpmodifierbycharid);
@@ -4516,6 +6409,7 @@ void perl_register_quest()
 	package.add("getlanguagename", &Perl__getlanguagename);
 	package.add("getldonthemename", &Perl__getldonthemename);
 	package.add("getnpcnamebyid", &Perl__getnpcnamebyid);
+	package.add("get_rule", &Perl__get_rule);
 	package.add("get_spawn_condition", (int(*)(const char*, uint16))&Perl__get_spawn_condition);
 	package.add("get_spawn_condition", (int(*)(const char*, uint32, uint16))&Perl__get_spawn_condition);
 	package.add("getcharnamebyid", &Perl__getcharnamebyid);
@@ -4665,14 +6559,20 @@ void perl_register_quest()
 	package.add("secondstotime", &Perl__secondstotime);
 	package.add("selfcast", &Perl__selfcast);
 	package.add("send_player_handin_event", &Perl__send_player_handin_event);
+	package.add("send_channel_message", (void(*)(uint8, uint32, uint8, uint8, const char*))&Perl__send_channel_message);
+	package.add("send_channel_message", (void(*)(Client*, uint8, uint32, uint8, uint8, const char*))&Perl__send_channel_message);
+	package.add("send_channel_message", (void(*)(Client*, const char*, uint8, uint32, uint8, uint8, const char*))&Perl__send_channel_message);
 	package.add("setaaexpmodifierbycharid", (void(*)(uint32, uint32, double))&Perl__setaaexpmodifierbycharid);
 	package.add("setaaexpmodifierbycharid", (void(*)(uint32, uint32, double, int16))&Perl__setaaexpmodifierbycharid);
+	package.add("set_data", (void(*)(std::string, std::string))&Perl__set_data);
+	package.add("set_data", (void(*)(std::string, std::string, std::string))&Perl__set_data);
 	package.add("set_proximity", (void(*)(float, float, float, float))&Perl__set_proximity);
 	package.add("set_proximity", (void(*)(float, float, float, float, float, float))&Perl__set_proximity);
 	package.add("set_proximity", (void(*)(float, float, float, float, float, float, bool))&Perl__set_proximity);
 	package.add("set_proximity_range", (void(*)(float, float))&Perl__set_proximity_range);
 	package.add("set_proximity_range", (void(*)(float, float, float))&Perl__set_proximity_range);
 	package.add("set_proximity_range", (void(*)(float, float, float, bool))&Perl__set_proximity_range);
+	package.add("set_rule", &Perl__set_rule);
 	package.add("set_zone_flag", &Perl__set_zone_flag);
 	package.add("setallskill", &Perl__setallskill);
 	package.add("setanim", &Perl__setanim);
@@ -4749,9 +6649,9 @@ void perl_register_quest()
 	package.add("varlink", (std::string(*)(uint32, int16, uint32, uint32, uint32, uint32, uint32, uint32, bool))&Perl__varlink);
 	package.add("voicetell", &Perl__voicetell);
 	package.add("we", &Perl__we);
-	package.add("wearchange", (void(*)(uint8, uint16))&Perl__wearchange);
-	package.add("wearchange", (void(*)(uint8, uint16, uint32))&Perl__wearchange);
-	package.add("wearchange", (void(*)(uint8, uint16, uint32, uint32))&Perl__wearchange);
+	package.add("wearchange", (void(*)(uint8, uint32))&Perl__wearchange);
+	package.add("wearchange", (void(*)(uint8, uint32, uint32))&Perl__wearchange);
+	package.add("wearchange", (void(*)(uint8, uint32, uint32, uint32))&Perl__wearchange);
 	package.add("whisper", &Perl__whisper);
 	package.add("write", &Perl__write);
 	package.add("ze", &Perl__ze);
@@ -4786,7 +6686,7 @@ void perl_register_quest()
 	package.add("is_veil_of_alaris_enabled", &Perl__IsVeilOfAlarisEnabled);
 	package.add("is_rain_of_fear_enabled", &Perl__IsRainOfFearEnabled);
 	package.add("is_call_of_the_forsaken_enabled", &Perl__IsCallOfTheForsakenEnabled);
-	package.add("is_the_darkend_sea_enabled", &Perl__IsTheDarkenedSeaEnabled);
+	package.add("is_the_darkened_sea_enabled", &Perl__IsTheDarkenedSeaEnabled);
 	package.add("is_the_broken_mirror_enabled", &Perl__IsTheBrokenMirrorEnabled);
 	package.add("is_empires_of_kunark_enabled", &Perl__IsEmpiresOfKunarkEnabled);
 	package.add("is_ring_of_scale_enabled", &Perl__IsRingOfScaleEnabled);
@@ -4813,7 +6713,7 @@ void perl_register_quest()
 	package.add("is_current_expansion_veil_of_alaris", &Perl__IsCurrentExpansionVeilOfAlaris);
 	package.add("is_current_expansion_rain_of_fear", &Perl__IsCurrentExpansionRainOfFear);
 	package.add("is_current_expansion_call_of_the_forsaken", &Perl__IsCurrentExpansionCallOfTheForsaken);
-	package.add("is_current_expansion_the_darkend_sea", &Perl__IsCurrentExpansionTheDarkenedSea);
+	package.add("is_current_expansion_the_darkened_sea", &Perl__IsCurrentExpansionTheDarkenedSea);
 	package.add("is_current_expansion_the_broken_mirror", &Perl__IsCurrentExpansionTheBrokenMirror);
 	package.add("is_current_expansion_empires_of_kunark", &Perl__IsCurrentExpansionEmpiresOfKunark);
 	package.add("is_current_expansion_ring_of_scale", &Perl__IsCurrentExpansionRingOfScale);

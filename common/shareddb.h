@@ -28,6 +28,7 @@
 #include "fixed_memory_hash_set.h"
 #include "fixed_memory_variable_hash_set.h"
 #include "say_link.h"
+#include "repositories/command_subsettings_repository.h"
 
 #include <list>
 #include <map>
@@ -77,11 +78,16 @@ public:
 	bool GetCommandSettings(std::map<std::string, std::pair<uint8, std::vector<std::string>>> &command_settings);
 	bool UpdateInjectedCommandSettings(const std::vector<std::pair<std::string, uint8>> &injected);
 	bool UpdateOrphanedCommandSettings(const std::vector<std::string> &orphaned);
+	bool GetCommandSubSettings(std::vector<CommandSubsettingsRepository::CommandSubsettings> &command_subsettings);
 	uint32 GetTotalTimeEntitledOnAccount(uint32 AccountID);
 	bool SetGMInvul(uint32 account_id, bool gminvul);
 	bool SetGMFlymode(uint32 account_id, uint8 flymode);
 	void SetMailKey(int CharID, int IPAddress, int MailKey);
-	std::string GetMailKey(int CharID, bool key_only = false);
+	struct MailKeys {
+		std::string mail_key;
+		std::string mail_key_full;
+	};
+	MailKeys GetMailKey(int character_id);
 	bool SaveCursor(
 		uint32 char_id,
 		std::list<EQ::ItemInstance *>::const_iterator &start,

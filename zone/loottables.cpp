@@ -299,7 +299,7 @@ void NPC::AddLootDrop(
 	uint32 aug6
 )
 {
-	if (item2 == nullptr) {
+	if (!item2) {
 		return;
 	}
 
@@ -363,11 +363,27 @@ void NPC::AddLootDrop(
 
 	bool found = false; // track if we found an empty slot we fit into
 
+	int foundslot = INVALID_INDEX; // for multi-slot items
+
+	const auto* inst = database.CreateItem(
+		item2->ID,
+		loot_drop.item_charges,
+		aug1,
+		aug2,
+		aug3,
+		aug4,
+		aug5,
+		aug6
+	);
+
+	if (!inst) {
+		return;
+	}
+
 	if (loot_drop.equip_item > 0) {
 		uint8 eslot = 0xFF;
 		char newid[20];
 		const EQ::ItemData* compitem = nullptr;
-		int32 foundslot = -1; // for multi-slot items
 
 		// Equip rules are as follows:
 		// If the item has the NoPet flag set it will not be equipped.
@@ -395,9 +411,15 @@ void NPC::AddLootDrop(
 								foundslot = i;
 							}
 							else {
+								// Unequip old item
+								auto* olditem = GetItem(i);
+
+								olditem->equip_slot = EQ::invslot::SLOT_INVALID;
+
 								equipment[i] = item2->ID;
+
 								foundslot = i;
-								found = true;
+								found     = true;
 							}
 						} // end if ac
 					}
@@ -505,10 +527,15 @@ void NPC::AddLootDrop(
 		}
 	}
 
-	if (itemlist != nullptr) {
+	if (itemlist) {
+		if (foundslot != INVALID_INDEX) {
+			GetInv().PutItem(foundslot, *inst);
+		}
+
 		itemlist->push_back(item);
+	} else {
+		safe_delete(item);
 	}
-	else safe_delete(item);
 
 	if (found) {
 		CalcBonuses();

@@ -277,17 +277,14 @@ protected:
 
 	uint16 skills[EQ::skills::HIGHEST_SKILL + 1];
 	uint32 equipment[EQ::invslot::EQUIPMENT_COUNT]; //this is an array of item IDs
-	uint16 d_melee_texture1; //this is an item Material value
-	uint16 d_melee_texture2; //this is an item Material value (offhand)
+	uint32 d_melee_texture1; //this is an item Material value
+	uint32 d_melee_texture2; //this is an item Material value (offhand)
 	uint8 prim_melee_type; //Sets the Primary Weapon attack message and animation
 	uint8 sec_melee_type; //Sets the Secondary Weapon attack message and animation
 
 private:
 
 	int32 CalcAC();
-	int32 GetACMit();
-	int32 GetACAvoid();
-	int32 acmod();
 	int32 CalcATK();
 	//int CalcHaste();
 
@@ -307,7 +304,6 @@ private:
 	int32 CalcCorrup();
 	int64 CalcMaxHP();
 	int64 CalcBaseHP();
-	int64 GetClassHPFactor();
 	int64 CalcHPRegen();
 	int64 CalcHPRegenCap();
 	int64 CalcMaxMana();

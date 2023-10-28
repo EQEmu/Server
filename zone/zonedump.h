@@ -99,8 +99,8 @@ struct NPCType
 	int             charm_atk;
 	int16           attack_count;
 	char            special_abilities[512];
-	uint16          d_melee_texture1;
-	uint16          d_melee_texture2;
+	uint32          d_melee_texture1;
+	uint32          d_melee_texture2;
 	char            ammo_idfile[30];
 	uint8           prim_melee_type;
 	uint8           sec_melee_type;
@@ -124,6 +124,7 @@ struct NPCType
 	int             avoidance_rating;    // flat bonus before mods
 	bool            findable;        //can be found with find command
 	bool            trackable;
+	bool            is_quest_npc;
 	int16           slow_mitigation;
 	uint8           maxlevel;
 	uint32          scalerate;

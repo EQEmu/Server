@@ -58,6 +58,9 @@ public:
 	bool IsDumpMercTables() const;
 	void SetDumpMercTables(bool dump_bot_tables);
 
+	void SetDumpStaticInstanceData(bool b);
+	bool IsDumpStaticInstanceData();
+
 private:
 	bool        dump_all_tables             = false;
 	bool        dump_state_tables           = false;
@@ -73,6 +76,8 @@ private:
 	bool        dump_drop_table_syntax_only = false;
 	bool        dump_bot_tables             = false;
 	bool        dump_merc_tables            = false;
+	bool        dump_static_instance_data   = false;
+
 	std::string dump_path;
 	std::string dump_file_name;
 
@@ -93,6 +98,8 @@ private:
 	std::string GetSetDumpPath();
 	std::string GetQueryServTables();
 	void RemoveSqlBackup();
+	void BuildCredentialsFile();
+	void RemoveCredentialsFile();
 };
 
 
