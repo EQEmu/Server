@@ -14,7 +14,20 @@ struct EQ::Net::WebsocketServerConnection::Impl {
 	std::string account_name;
 	uint32 account_id;
 	int status;
+	bool closed;
 };
+
+void EQ::Net::WebsocketServerConnection::SetClosed(bool val) {
+	_impl->closed = val;
+	if (val) {
+		_impl->connection->external_disconnect = true;
+		_impl->connection->OnRead([this](EQ::Net::TCPConnection* c, const unsigned char* buffer, size_t buffer_size) {});
+	}
+}
+
+bool EQ::Net::WebsocketServerConnection::GetClosed() const {
+	return _impl->closed;
+}
 
 EQ::Net::WebsocketServerConnection::WebsocketServerConnection(WebsocketServer *parent, 
 	std::shared_ptr<TCPConnection> connection,
@@ -28,14 +41,23 @@ EQ::Net::WebsocketServerConnection::WebsocketServerConnection(WebsocketServer *p
 	_impl->account_id = 0;
 	_impl->status = 0;
 	_impl->ws_connection = ws_connection;
-	_impl->ws_connection->set_message_handler(std::bind(&WebsocketServerConnection::OnMessage, this, std::placeholders::_1, std::placeholders::_2));
 	_impl->ws_connection->start();
-
-	connection->OnDisconnect([this](EQ::Net::TCPConnection *connection) {
-		_impl->parent->ReleaseConnection(this);
-	});
+	_impl->closed = false;
+	
+	//connection->OnDisconnect([this](EQ::Net::TCPConnection *connection) {
+	//	_impl->parent->ReleaseConnection(this);
+	//	_impl->closed = true;
+	//	connection->external_disconnect = true;
+	//	connection->OnRead([this](EQ::Net::TCPConnection* c, const unsigned char* buffer, size_t buffer_size) {
+	//	});
+	//});
 	
 	connection->OnRead([this](EQ::Net::TCPConnection *c, const unsigned char *buffer, size_t buffer_size) {
+		auto state = _impl->ws_connection->get_state();
+		if (c->external_disconnect || _impl == nullptr || _impl->closed || 
+			state == websocketpp::session::state::closed || state == websocketpp::session::state::closing) {
+			return;
+		}
 		_impl->ws_connection->read_all((const char*)buffer, buffer_size);
 	});
 
@@ -44,6 +66,10 @@ EQ::Net::WebsocketServerConnection::WebsocketServerConnection(WebsocketServer *p
 
 EQ::Net::WebsocketServerConnection::~WebsocketServerConnection()
 {
+	//if (_impl != nullptr && _impl->connection != nullptr) {
+	//	_impl->connection->external_disconnect = true;
+	//}
+	//_impl->ws_connection->interrupt();
 }
 
 std::string EQ::Net::WebsocketServerConnection::GetID() const
@@ -51,10 +77,17 @@ std::string EQ::Net::WebsocketServerConnection::GetID() const
 	return _impl->id;
 }
 
+void EQ::Net::WebsocketServerConnection::QueuePacket(Packet& p) {
+	if (_impl != nullptr && _impl.get() != NULL && _impl->ws_connection != nullptr && _impl->ws_connection->get_state() == websocketpp::session::state::open) {
+		_impl->ws_connection->send(p.Data(), p.Length());
+	}
+}
+
 bool EQ::Net::WebsocketServerConnection::IsAuthorized() const
 {
 	return _impl->authorized;
 }
+
 
 std::string EQ::Net::WebsocketServerConnection::GetAccountName() const
 {
@@ -68,7 +101,7 @@ uint32 EQ::Net::WebsocketServerConnection::GetAccountID() const
 
 int EQ::Net::WebsocketServerConnection::GetStatus() const
 {
-	return _impl->status;
+	return _impl.get() == NULL ? CLOSED : _impl->status;
 }
 
 std::string EQ::Net::WebsocketServerConnection::RemoteIP() const
@@ -81,7 +114,7 @@ int EQ::Net::WebsocketServerConnection::RemotePort() const
 	return _impl->connection->RemotePort();
 }
 
-std::shared_ptr<EQ::Net::websocket_connection> EQ::Net::WebsocketServerConnection::GetWebsocketConnection()
+const std::shared_ptr<EQ::Net::websocket_connection> EQ::Net::WebsocketServerConnection::GetWebsocketConnection()
 {
 	return _impl->ws_connection;
 }

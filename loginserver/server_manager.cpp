@@ -125,7 +125,7 @@ std::unique_ptr<EQApplicationPacket> ServerManager::CreateServerListPacket(Clien
 
 		std::string world_ip = world_server->GetConnection()->Handle()->RemoteIP();
 		if (world_ip == client_ip || IpUtil::IsIpInPrivateRfc1918(client_ip)) {
-			use_local_ip = true;
+			// use_local_ip = true;
 		}
 
 		LogDebug(

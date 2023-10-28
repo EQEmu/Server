@@ -95,6 +95,10 @@ public:
 	virtual uint32 GetRemoteIP() const = 0;
 	virtual uint16 GetRemotePort() const = 0;
 	virtual bool CheckState(EQStreamState state) = 0;
+	bool IsWebsocketStream() { return m_is_ws; };
+	virtual void SetOnBeforeRemove(std::function<void()> fn) = 0;
+	virtual std::function<void()> OnBeforeRemove() const = 0;
+	virtual bool IsDisconnected() const = 0;
 	virtual std::string Describe() const = 0;
 	virtual void SetActive(bool val) { }
 	virtual MatchState CheckSignature(const Signature *sig) { return MatchFailed; }
@@ -105,6 +109,9 @@ public:
 	virtual Stats GetStats() const = 0;
 	virtual void ResetStats() = 0;
 	virtual EQStreamManagerInterface* GetManager() const = 0;
+
+	protected:
+	bool m_is_ws = false;
 };
 
 #endif /*EQSTREAMINTF_H_*/

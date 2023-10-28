@@ -135,7 +135,7 @@ void EQStreamIdentifier::Process() {
 		}
 
 		//if we found a match, or were not able to identify it
-		if(found_one || all_ready) {
+		if(found_one) {
 			//cannot print ip/port here. r.stream is invalid.
 			cur = m_streams.erase(cur);
 		} else {

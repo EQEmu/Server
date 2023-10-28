@@ -27,21 +27,39 @@ struct EQ::Net::WebsocketServer::Impl
 	std::unique_ptr<TCPServer> server;
 	std::unique_ptr<EQ::Timer> ping_timer;
 	std::map<std::shared_ptr<websocket_connection>, std::unique_ptr<WebsocketServerConnection>> connections;
+	std::map<std::shared_ptr<websocket_connection>, std::unique_ptr<EQStream>> stream_connections;
 	std::map<std::string, MethodHandlerEntry> methods;
 	websocket_server ws_server;
 	LoginHandler login_handler;
+	DisconnectHandler disconnect_handler;
 	std::array<std::unordered_set<WebsocketServerConnection*>, SubscriptionEventMax> subscriptions;
 };
 
-EQ::Net::WebsocketServer::WebsocketServer(const std::string &addr, int port)
+EQ::Net::WebsocketServer::WebsocketServer(const std::string &addr, int port, EQStreamManager* s_interface)
 {
+	this->stream_interface = s_interface;
 	_impl = std::make_unique<Impl>();
 	_impl->server = std::make_unique<EQ::Net::TCPServer>();
 	_impl->server->Listen(addr, port, false, [this](std::shared_ptr<EQ::Net::TCPConnection> connection) {
 		auto wsc = _impl->ws_server.get_connection();
 		WebsocketServerConnection *c = new WebsocketServerConnection(this, connection, wsc);
 		_impl->connections.insert(std::make_pair(wsc, std::unique_ptr<WebsocketServerConnection>(c)));
+		stream_interface->WebsocketNewConnection(wsc, std::shared_ptr<WebsocketServerConnection>(c));
 	});
+
+	_impl->ws_server.set_close_handler([this](websocketpp::connection_hdl hdl){
+
+		auto c = _impl->ws_server.get_con_from_hdl(hdl);
+		auto iter1 = stream_interface->m_ws_streams.find(c);
+		if (iter1 != stream_interface->m_ws_streams.end()) {
+			if (_impl->disconnect_handler != nullptr) {
+				_impl->disconnect_handler(iter1->second->GetRemoteIP(), iter1->second->GetRemotePort());
+			}
+			iter1->second->SetIsDisconnected(true);
+			stream_interface->m_ws_streams.erase(iter1);
+		}
+		}
+	);
 
 	_impl->ws_server.set_write_handler(
 		[this](websocketpp::connection_hdl hdl, char const *data, size_t size) -> websocketpp::lib::error_code {
@@ -54,37 +72,45 @@ EQ::Net::WebsocketServer::WebsocketServer(const std::string &addr, int port)
 		return websocketpp::lib::error_code();
 	});
 
+	_impl->ws_server.set_message_handler([this](websocketpp::connection_hdl hdl, websocket_message_ptr msg)
+	 {
+			auto msg_code = msg->get_opcode();
+			auto& payload = msg->get_payload();
+
+			if (msg->get_opcode() != websocketpp::frame::opcode::binary) {
+				return;
+			}
+
+			auto c = _impl->ws_server.get_con_from_hdl(hdl);
+			auto iter = stream_interface->m_ws_streams.find(c);
+			if (iter != stream_interface->m_ws_streams.end()) {
+				EQ::Net::StaticPacket packet((void*)payload.data(), payload.size());
+				std::unique_ptr<EQ::Net::Packet> t(new EQ::Net::DynamicPacket());
+				t->PutPacket(0, packet);
+				iter->second->m_packet_queue.push_back(std::move(t));
+			}
+	});
+
 	_impl->ping_timer = std::make_unique<EQ::Timer>(5000, true, [this](EQ::Timer *t) {
 		auto iter = _impl->connections.begin();
 
 		while (iter != _impl->connections.end()) {
 			try {
 				auto &connection = iter->second;
-				connection->GetWebsocketConnection()->ping("keepalive");
+				const auto& wsc = connection->GetWebsocketConnection();
+				if (wsc != nullptr) {
+					wsc->ping("keepalive");
+				}
+				
 			}
 			catch (std::exception &) {
-				iter->second->GetTCPConnection()->Disconnect();
+				// iter->second->GetTCPConnection()->Disconnect();
 			}
 
 			iter++;
 		}
 	});
 
-	_impl->methods.insert(std::make_pair("login", MethodHandlerEntry(std::bind(&WebsocketServer::Login, this, std::placeholders::_1, std::placeholders::_2), 0)));
-	_impl->methods.insert(std::make_pair("subscribe", MethodHandlerEntry(std::bind(&WebsocketServer::Subscribe, this, std::placeholders::_1, std::placeholders::_2), 0)));
-	_impl->methods.insert(std::make_pair("unsubscribe", MethodHandlerEntry(std::bind(&WebsocketServer::Unsubscribe, this, std::placeholders::_1, std::placeholders::_2), 0)));
-	_impl->login_handler = [](const WebsocketServerConnection* connection, const std::string& user, const std::string& pass) {
-		WebsocketLoginStatus ret;
-		ret.account_name = "admin";
-		
-		if (connection->RemoteIP() == "127.0.0.1" || connection->RemoteIP() == "::") {
-			ret.logged_in = true;
-			return ret;
-		}
-
-		ret.logged_in = false;
-		return ret;
-	};
 
 	_impl->ws_server.clear_access_channels(websocketpp::log::alevel::all);
 }
@@ -93,10 +119,13 @@ EQ::Net::WebsocketServer::~WebsocketServer()
 {
 }
 
+void EQ::Net::WebsocketServer::SetDisconnectHandler(DisconnectHandler handler) {
+	_impl->disconnect_handler = handler;
+}
+
 void EQ::Net::WebsocketServer::ReleaseConnection(WebsocketServerConnection *connection)
 {
 	UnsubscribeAll(connection);
-
 	_impl->connections.erase(connection->GetWebsocketConnection());
 }
 

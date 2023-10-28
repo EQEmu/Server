@@ -491,16 +491,6 @@ int main(int argc, char** argv) {
 		frame_prev = frame_now;
 
 		/**
-		 * Websocket server
-		 */
-		if (!websocker_server_opened && Config->ZonePort != 0) {
-			LogInfo("Websocket Server listener started on address [{}] port [{}]", Config->TelnetIP.c_str(), Config->ZonePort);
-			ws_server = std::make_unique<EQ::Net::WebsocketServer>(Config->TelnetIP, Config->ZonePort);
-			RegisterApiService(ws_server);
-			websocker_server_opened = true;
-		}
-
-		/**
 		 * EQStreamManager
 		 */
 		if (!eqsf_open && Config->ZonePort != 0) {
@@ -525,6 +515,16 @@ int main(int argc, char** argv) {
 					);
 				}
 			);
+
+			LogInfo("Websocket Server listener started on address [{}] port [{}]", Config->TelnetIP.c_str(), Config->ZonePort);
+			ws_server = std::make_unique<EQ::Net::WebsocketServer>(Config->TelnetIP, Config->ZonePort, eqsm.get());
+
+			ws_server->SetDisconnectHandler([&](uint32 ip, uint16 port) {
+				auto entity = entity_list.GetClient(ip, port);
+				entity_list.RemoveClient(entity);
+				entity_list.RemoveMob(entity->GetID());
+			});
+			
 		}
 
 		//give the stream identifier a chance to do its work....

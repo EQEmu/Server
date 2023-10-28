@@ -11,6 +11,7 @@ EQStreamProxy::EQStreamProxy(std::shared_ptr<EQStreamInterface> &stream, const S
 	m_structs(structs),
 	m_opcodes(opcodes)
 {
+	m_is_ws = stream->IsWebsocketStream();
 	stream = nullptr;	//take the stream.
 	m_stream->SetOpcodeManager(m_opcodes);
 }

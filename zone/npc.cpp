@@ -3798,7 +3798,12 @@ void NPC::SendPositionToClients()
 	auto      p  = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
 	auto      *s = (PlayerPositionUpdateServer_Struct *) p->pBuffer;
 	for (auto &c: entity_list.GetClientList()) {
+		
 		MakeSpawnUpdate(s);
+		if (s->delta_x != 0 || s->delta_y != 0 || s->delta_z != 0) {
+
+			printf("Updating delta x,y,z for %s: %d, %d, %d", name, s->delta_x, s->delta_y, s->delta_z);
+		}
 		c.second->QueuePacket(p, false);
 	}
 	safe_delete(p);

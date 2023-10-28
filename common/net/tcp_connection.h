@@ -30,12 +30,14 @@ namespace EQ
 			std::string RemoteIP() const;
 			int RemotePort() const;
 
+			std::atomic_bool external_disconnect = false;
 		private:
 			TCPConnection();
 
 			uv_tcp_t *m_socket;
 			std::function<void(TCPConnection*, const unsigned char *, size_t)> m_on_read_cb;
 			std::function<void(TCPConnection*)> m_on_disconnect_cb;
+			
 		};
 	}
 }

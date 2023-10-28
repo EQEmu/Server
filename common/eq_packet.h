@@ -135,6 +135,8 @@ class EQRawApplicationPacket : public EQApplicationPacket {
 	friend class EQStream;
 public:
 	EQRawApplicationPacket(uint16 opcode, const unsigned char *buf, const uint32 len);
+	EQRawApplicationPacket(const unsigned char* buf, const uint32 len);
+	
 	uint16 GetRawOpcode() const { return(opcode); }
 
 	virtual void build_raw_header_dump(char *buffer, uint16 seq=0xffff) const;
@@ -147,7 +149,6 @@ protected:
 	//the actual raw EQ opcode
 	uint16 opcode;
 
-	EQRawApplicationPacket(const unsigned char *buf, const uint32 len);
 };
 
 extern void DumpPacket(const EQApplicationPacket* app, bool iShowInfo = false);

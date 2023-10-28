@@ -28,6 +28,9 @@ public:
 	virtual void RemoveData();
 	virtual bool CheckState(EQStreamState state);
 	virtual std::string Describe() const;
+	virtual void SetOnBeforeRemove(std::function<void()> fn) {};
+	virtual std::function<void()> OnBeforeRemove() const { return nullptr; };
+	virtual bool IsDisconnected() const { return false; };
 	virtual const EQ::versions::ClientVersion ClientVersion() const;
 	virtual EQStreamState GetState();
 	virtual void SetOpcodeManager(OpcodeManager **opm);

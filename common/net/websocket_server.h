@@ -1,6 +1,7 @@
 #pragma once
 
 #include "websocket_server_connection.h"
+#include "eqstream.h"
 
 #include "../json/json.h"
 #include <memory>
@@ -46,12 +47,13 @@ namespace EQ
 		public:
 			typedef std::function<Json::Value(WebsocketServerConnection*, const Json::Value&)> MethodHandler;
 			typedef std::function<WebsocketLoginStatus(WebsocketServerConnection*, const std::string&, const std::string&)> LoginHandler;
-
-			WebsocketServer(const std::string &addr, int port);
+			typedef std::function<void(uint32, uint16)> DisconnectHandler;
+			WebsocketServer(const std::string& addr, int port, EQStreamManager* s_interface);
 			~WebsocketServer();
 			
 			void SetMethodHandler(const std::string& method, MethodHandler handler, int required_status);
 			void SetLoginHandler(LoginHandler handler);
+			void SetDisconnectHandler(DisconnectHandler handler);
 			void DispatchEvent(WebsocketSubscriptionEvent evt, Json::Value data = Json::Value(), int required_status = 0);
 		private:
 			void ReleaseConnection(WebsocketServerConnection *connection);
@@ -67,7 +69,8 @@ namespace EQ
 
 			struct Impl;
 			std::unique_ptr<Impl> _impl;
-
+			EQStreamManager* stream_interface;
+			OpcodeManager* opcode_manager;
 			friend class WebsocketServerConnection;
 		};
 	}

@@ -28,6 +28,16 @@ void EQ::Net::EQStreamManager::DaybreakNewConnection(std::shared_ptr<DaybreakCon
 	}
 }
 
+void EQ::Net::EQStreamManager::WebsocketNewConnection(std::shared_ptr<EQ::Net::websocket_connection> wsc, std::shared_ptr<WebsocketServerConnection> connection)
+{
+	std::shared_ptr<EQStream> stream(new EQStream(this, connection));
+	auto pair = std::make_pair(wsc, stream);
+	m_ws_streams.emplace(pair);
+	if (m_on_new_connection) {
+		m_on_new_connection(stream);
+	}
+}
+
 void EQ::Net::EQStreamManager::DaybreakConnectionStateChange(std::shared_ptr<DaybreakConnection> connection, DbProtocolStatus from, DbProtocolStatus to)
 {
 	auto iter = m_streams.find(connection);
@@ -58,6 +68,14 @@ EQ::Net::EQStream::EQStream(EQStreamManagerInterface *owner, std::shared_ptr<Day
 	m_owner = owner;
 	m_connection = connection;
 	m_opcode_manager = nullptr;
+}
+
+EQ::Net::EQStream::EQStream(EQStreamManagerInterface* owner, std::shared_ptr<WebsocketServerConnection> connection)
+{
+	m_owner = owner;
+	m_ws_connection = connection;
+	m_opcode_manager = nullptr;
+	m_is_ws = true;
 }
 
 EQ::Net::EQStream::~EQStream()
@@ -95,8 +113,12 @@ void EQ::Net::EQStream::QueuePacket(const EQApplicationPacket *p, bool ack_req) 
 			out.PutData(2, p->pBuffer, p->size);
 			break;
 		}
-
-		if (ack_req) {
+		if (opcode == 0x14cb) {
+			int r = 123;
+		}
+		if (m_is_ws) {
+			m_ws_connection->QueuePacket(out);
+		}else if (ack_req) {
 			m_connection->QueuePacket(out);
 		}
 		else {
@@ -142,15 +164,20 @@ EQApplicationPacket *EQ::Net::EQStream::PopPacket() {
 }
 
 void EQ::Net::EQStream::Close() {
-	m_connection->Close();
+	if (m_connection) {
+		m_connection->Close();
+	}
 }
 
 std::string EQ::Net::EQStream::GetRemoteAddr() const
 {
-	return m_connection->RemoteEndpoint();
+	return m_connection != nullptr ? m_connection->RemoteEndpoint() : m_ws_connection != nullptr ? m_ws_connection->RemoteIP() : "";
 }
 
 uint32 EQ::Net::EQStream::GetRemoteIP() const {
+	if (m_is_ws) {
+		return inet_addr(m_ws_connection->RemoteIP().c_str());
+	}
 	return inet_addr(m_connection->RemoteEndpoint().c_str());
 }
 
@@ -219,6 +246,13 @@ EQStreamInterface::MatchState EQ::Net::EQStream::CheckSignature(const Signature 
 }
 
 EQStreamState EQ::Net::EQStream::GetState() {
+	if (m_is_ws) {
+		if (m_ws_connection == nullptr || !m_ws_connection->ImplActive()) {
+			return CLOSED;
+		}
+
+		return ESTABLISHED;
+	}
 	auto status = m_connection->GetStatus();
 	switch (status) {
 	case StatusConnecting:

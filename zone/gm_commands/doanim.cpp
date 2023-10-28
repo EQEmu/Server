@@ -30,11 +30,11 @@ void command_doanim(Client *c, const Seperator *sep)
 			c->Message(
 				Chat::White,
 				fmt::format(
-					"Animation ID {} does not exist or is invalid.",
+					"Animation ID {} does not exist or is invalid. Doing anyway",
 					animation_id
 				).c_str()
 			);
-			return;
+			animation_name = "UNKNOWN";
 		}
 	} else {
 		const std::string search_criteria = sep->arg[1];

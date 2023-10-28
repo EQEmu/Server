@@ -36,6 +36,7 @@
 #include "../common/eqtime.h"
 #include "../common/event/event_loop.h"
 #include "../common/net/eqstream.h"
+#include "../common/net/websocket_server.h"
 #include "../common/opcodemgr.h"
 #include "../common/guilds.h"
 #include "../common/eq_stream_ident.h"
@@ -350,7 +351,12 @@ int main(int argc, char **argv)
 	uint8                              ReconnectCounter = 100;
 	std::shared_ptr<EQStreamInterface> eqs;
 	EQStreamInterface                  *eqsi;
-
+	
+	auto ws_server = std::make_unique<EQ::Net::WebsocketServer>("0.0.0.0", 7777, &eqsm);
+	ws_server->SetDisconnectHandler([&](uint32 ip, uint16 port) {
+		client_list.DisconnectByIP(ip);
+		client_list.DisconnectByIP(0);
+	});
 	eqsm.OnNewConnection(
 		[&stream_identifier](std::shared_ptr<EQ::Net::EQStream> stream) {
 			stream_identifier.AddStream(stream);

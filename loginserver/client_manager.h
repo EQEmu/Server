@@ -43,6 +43,12 @@ public:
 	 * @return
 	 */
 	Client *GetClient(unsigned int account_id, const std::string &loginserver);
+
+	std::list<Client*>      clients;
+	OpcodeManager* titanium_ops;
+	EQ::Net::EQStreamManager* titanium_stream;
+	OpcodeManager* sod_ops;
+	EQ::Net::EQStreamManager* sod_stream;
 private:
 
 	/**
@@ -50,11 +56,7 @@ private:
 	 */
 	void ProcessDisconnect();
 
-	std::list<Client *>      clients;
-	OpcodeManager            *titanium_ops;
-	EQ::Net::EQStreamManager *titanium_stream;
-	OpcodeManager            *sod_ops;
-	EQ::Net::EQStreamManager *sod_stream;
+	
 };
 
 #endif

@@ -117,7 +117,10 @@ void ClientManager::Process()
 	while (iter != clients.end()) {
 		if ((*iter)->Process() == false) {
 			LogWarning("Client had a fatal error and had to be removed from the login");
-			delete (*iter);
+			// We handle this externally for WS clients
+			if (!(*iter)->GetConnection()->IsWebsocketStream()) {
+				delete (*iter);
+			}
 			iter = clients.erase(iter);
 		}
 		else {
@@ -131,9 +134,15 @@ void ClientManager::ProcessDisconnect()
 	auto iter = clients.begin();
 	while (iter != clients.end()) {
 		std::shared_ptr<EQStreamInterface> c = (*iter)->GetConnection();
-		if (c->CheckState(CLOSED)) {
+		if ((c->IsWebsocketStream() && c->IsDisconnected()) ||c->CheckState(CLOSED)) {
+			if (c->OnBeforeRemove()) {
+				c->OnBeforeRemove()();
+			}
 			LogInfo("Client disconnected from the server, removing client");
-			delete (*iter);
+			if (!c->IsWebsocketStream()) {
+				delete (*iter);
+			}
+			
 			iter = clients.erase(iter);
 		}
 		else {
@@ -152,8 +161,13 @@ void ClientManager::RemoveExistingClient(unsigned int account_id, const std::str
 	while (iter != clients.end()) {
 		if ((*iter)->GetAccountID() == account_id && (*iter)->GetLoginServerName().compare(loginserver) == 0) {
 			LogInfo("Client attempting to log in existing client already logged in, removing existing client");
-			delete (*iter);
-			iter = clients.erase(iter);
+			if (!(*iter)->GetConnection()->IsWebsocketStream()) {
+				delete (*iter);
+				iter = clients.erase(iter);
+			}
+			else {
+				++iter;
+			}
 		}
 		else {
 			++iter;

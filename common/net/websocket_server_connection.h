@@ -2,6 +2,7 @@
 
 #include "tcp_server.h"
 #include "../types.h"
+#include "packet.h"
 #include "../json/json-forwards.h"
 #include <websocketpp/config/core.hpp>
 #include <websocketpp/server.hpp>
@@ -29,10 +30,15 @@ namespace EQ
 			uint32 GetAccountID() const;
 			int GetStatus() const;
 			std::string RemoteIP() const;
+			bool ImplActive() { return _impl != nullptr; };
 			int RemotePort() const;
-		private:
-			std::shared_ptr<websocket_connection> GetWebsocketConnection();
+			void QueuePacket(EQ::Net::Packet& p);
+			const std::shared_ptr<websocket_connection> GetWebsocketConnection();
 			std::shared_ptr<TCPConnection> GetTCPConnection();
+			void SetClosed(bool val);
+			bool GetClosed() const;
+		private:
+			
 			void OnMessage(websocketpp::connection_hdl hdl, websocket_message_ptr msg);
 			void SendResponse(const Json::Value &response, double time_elapsed);
 			void SetAuthorized(bool v, const std::string account_name, uint32 account_id, int status);

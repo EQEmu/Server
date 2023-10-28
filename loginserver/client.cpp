@@ -35,12 +35,11 @@ bool Client::Process()
 			(LogSys.IsLogEnabled(Logs::Detail, Logs::PacketClientServer) ? DumpPacketToString(app) : "")
 		);
 
-		if (m_client_status == cs_failed_to_login) {
-			delete app;
-			app = m_connection->PopPacket();
-			continue;
-		}
-
+		//if (m_client_status == cs_failed_to_login) {
+		//	delete app;
+		//	app = m_connection->PopPacket();
+		//	continue;
+		//}
 		switch (app->GetOpcode()) {
 			case OP_SessionReady: {
 				LogInfo("Session ready received from client account {}", GetClientDescription());
@@ -48,10 +47,7 @@ bool Client::Process()
 				break;
 			}
 			case OP_Login: {
-				if (app->Size() < 20) {
-					LogError("Login received but it is too small, discarding");
-					break;
-				}
+		
 
 				LogInfo("Login received from client {}", GetClientDescription());
 
@@ -77,6 +73,9 @@ bool Client::Process()
 
 				Handle_Play((const char *) app->pBuffer);
 				break;
+			}
+			default: {
+				SendServerListPacket(*(uint32_t*)app->pBuffer);
 			}
 		}
 
@@ -130,6 +129,42 @@ void Client::Handle_Login(const char *data, unsigned int size)
 {
 	if (m_client_status != cs_waiting_for_login) {
 		LogError("Login received after already having logged in");
+		//return;
+	}
+	std::string db_loginserver = "local";
+	if (m_connection->IsWebsocketStream()) {
+		std::string db_account_password_hash, user, cred;
+		unsigned int db_account_id = 0;
+		auto components = Strings::Split(std::string(data).substr(0, size - 2), ':');
+		if (components.size() == 2) {
+			user = components[0];
+			cred = components[1];
+		}
+		if (server.db->GetLoginDataFromAccountInfo(user, db_loginserver, db_account_password_hash, db_account_id)) {
+			auto result = VerifyLoginHash(user, db_loginserver, cred, db_account_password_hash);
+			if (result) {
+				LogInfo(
+					"login [{0}] user [{1}] Login succeeded",
+					db_loginserver,
+					user
+				);
+
+				DoSuccessfulLogin(user, db_account_id, db_loginserver);
+			}
+			else {
+				LogInfo(
+					"login [{0}] user [{1}] Login failed",
+					db_loginserver,
+					user
+				);
+
+				DoFailedLogin();
+			}
+		}
+		else {
+			m_client_status = cs_creating_account;
+			AttemptLoginAccountCreation(user, cred, db_loginserver);
+		}
 		return;
 	}
 
@@ -153,7 +188,7 @@ void Client::Handle_Login(const char *data, unsigned int size)
 
 	unsigned int db_account_id = 0;
 
-	std::string db_loginserver = "local";
+
 	if (server.options.CanAutoLinkAccounts()) {
 		db_loginserver = "eqemu";
 	}
@@ -536,18 +571,27 @@ void Client::DoSuccessfulLogin(
 
 	SendExpansionPacketData(login_reply);
 
-	char encrypted_buffer[80] = {0};
-	auto rc = eqcrypt_block((const char*)&login_reply, sizeof(login_reply), encrypted_buffer, 1);
-	if (rc == nullptr) {
-		LogDebug("Failed to encrypt eqcrypt block");
+	if (m_connection->IsWebsocketStream()) {
+		constexpr int outsize = sizeof(login_reply);
+		auto outapp = std::make_unique<EQApplicationPacket>(OP_LoginAccepted, outsize);
+		outapp->WriteData(&login_reply, sizeof(login_reply));
+
+		m_connection->QueuePacket(outapp.get());
 	}
+	else {
+		char encrypted_buffer[80] = { 0 };
+		auto rc = eqcrypt_block((const char*)&login_reply, sizeof(login_reply), encrypted_buffer, 1);
+		if (rc == nullptr) {
+			LogDebug("Failed to encrypt eqcrypt block");
+		}
 
-	constexpr int outsize = sizeof(LoginBaseMessage_Struct) + sizeof(encrypted_buffer);
-	auto outapp = std::make_unique<EQApplicationPacket>(OP_LoginAccepted, outsize);
-	outapp->WriteData(&base_header, sizeof(base_header));
-	outapp->WriteData(&encrypted_buffer, sizeof(encrypted_buffer));
+		constexpr int outsize = sizeof(LoginBaseMessage_Struct) + sizeof(encrypted_buffer);
+		auto outapp = std::make_unique<EQApplicationPacket>(OP_LoginAccepted, outsize);
+		outapp->WriteData(&base_header, sizeof(base_header));
+		outapp->WriteData(&encrypted_buffer, sizeof(encrypted_buffer));
 
-	m_connection->QueuePacket(outapp.get());
+		m_connection->QueuePacket(outapp.get());
+	}
 
 	m_client_status = cs_logged_in;
 }

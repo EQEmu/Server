@@ -1872,6 +1872,18 @@ Client *EntityList::GetClientByLSID(uint32 iLSID)
 	return nullptr;
 }
 
+Client* EntityList::GetClient(uint32 ip, uint16 port)
+{
+	auto it = client_list.begin();
+	while (it != client_list.end()) {
+		if (it->second->GetIP() == ip || it->second->GetPort() == port) {
+			return it->second;
+		}
+		++it;
+	}
+	return nullptr;
+}
+
 Bot* EntityList::GetRandomBot(const glm::vec3& location, float distance, Bot* exclude_bot)
 {
 	auto is_whole_zone = false;

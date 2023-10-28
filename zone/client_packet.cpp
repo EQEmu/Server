@@ -1177,11 +1177,11 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	Client* client = entity_list.GetClientByName(cze->char_name);
 	if (!zone->GetAuth(ip, cze->char_name, &WID, &account_id, &character_id, &admin, lskey, &tellsoff)) {
 		LogClientLogin("[{}] failed zone auth check", cze->char_name);
-		if (nullptr != client) {
+		/*if (nullptr != client) {
 			client->Save();
 			client->Kick("Failed auth check");
 		}
-		return;
+		return;*/
 	}
 
 	strcpy(name, cze->char_name);
@@ -1192,8 +1192,8 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 
 		LogError("Ghosting client: Account ID:[{}] Name:[{}] Character:[{}] IP:[{}]",
 			client->AccountID(), client->AccountName(), client->GetName(), inet_ntoa(ghost_addr));
-		client->Save();
-		client->Disconnect();
+		//client->Save();
+		//client->Disconnect();
 	}
 
 	uint32 pplen = 0;

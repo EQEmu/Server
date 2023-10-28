@@ -1615,6 +1615,11 @@ void Mob::MakeSpawnUpdate(PlayerPositionUpdateServer_Struct* spu) {
 	spu->x_pos = FloatToEQ19(m_Position.x);
 	spu->y_pos = FloatToEQ19(m_Position.y);
 	spu->z_pos = FloatToEQ19(m_Position.z);
+
+	if (m_Delta.x != 0.0f || m_Delta.y != 0.0f || m_Delta.z != 0.0f) {
+
+		printf("Updating delta x,y,z for %s: %f, %f, %f", name, m_Delta.x, m_Delta.y, m_Delta.z);
+	}
 	spu->delta_x = FloatToEQ13(m_Delta.x);
 	spu->delta_y = FloatToEQ13(m_Delta.y);
 	spu->delta_z = FloatToEQ13(m_Delta.z);

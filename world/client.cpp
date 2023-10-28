@@ -1467,7 +1467,7 @@ void Client::Clearance(int8 response)
 	ZoneServerInfo_Struct* zsi = (ZoneServerInfo_Struct*)outapp->pBuffer;
 
 	std::string zs_addr;
-	if(cle && cle->IsLocalClient()) {
+	if(false && cle && cle->IsLocalClient()) {
 		const char *local_addr = zs->GetCLocalAddress();
 
 		if(local_addr[0]) {

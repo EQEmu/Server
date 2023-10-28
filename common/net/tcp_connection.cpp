@@ -106,16 +106,16 @@ void EQ::Net::TCPConnection::OnDisconnect(std::function<void(TCPConnection*)> cb
 
 void EQ::Net::TCPConnection::Disconnect()
 {
-	if (m_socket) {
+	if (m_socket && !external_disconnect) {
 		m_socket->data = this;
 		uv_close((uv_handle_t*)m_socket, [](uv_handle_t* handle) {
-			TCPConnection *connection = (TCPConnection*)handle->data;
-
-			if (connection->m_on_disconnect_cb) {
-				connection->m_on_disconnect_cb(connection);
+			TCPConnection* connection = reinterpret_cast<TCPConnection*>(handle->data);
+			if (connection != nullptr && !connection->external_disconnect) {
+				if (connection->m_on_disconnect_cb) {
+					connection->m_on_disconnect_cb(connection);
+				}
+				delete (uv_tcp_t*)handle;
 			}
-
-			delete (uv_tcp_t *)handle;
 		});
 		m_socket = nullptr;
 	}
@@ -123,7 +123,7 @@ void EQ::Net::TCPConnection::Disconnect()
 
 void EQ::Net::TCPConnection::Read(const char *data, size_t count)
 {
-	if (m_on_read_cb) {
+	if (m_on_read_cb && !this->external_disconnect) {
 		m_on_read_cb(this, (unsigned char*)data, count);
 	}
 }

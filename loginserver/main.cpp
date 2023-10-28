@@ -7,6 +7,7 @@
 #include "../common/crash.h"
 #include "../common/eqemu_logsys.h"
 #include "../common/http/httplib.h"
+#include "../common/net/websocket_server.h"
 #include "login_server.h"
 #include "loginserver_webserver.h"
 #include "loginserver_command_handler.h"
@@ -19,6 +20,7 @@
 #include <thread>
 
 LoginServer server;
+std::unique_ptr<EQ::Net::WebsocketServer> ws_server;
 EQEmuLogSys LogSys;
 bool        run_server = true;
 PathManager path;
@@ -246,6 +248,12 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
+	LogInfo("Websocket Server listener started on address port [{}]", 7775);
+	ws_server = std::make_unique<EQ::Net::WebsocketServer>("0.0.0.0", 7775, server.client_manager->titanium_stream);
+	ws_server->SetDisconnectHandler([&](uint32 ip, uint16 port) {
+		server.client_manager->Process();
+	});
+
 #ifdef WIN32
 #ifdef UNICODE
 		SetConsoleTitle(L"EQEmu Login Server");
@@ -264,6 +272,7 @@ int main(int argc, char **argv)
 		std::thread web_api_thread(start_web_server);
 		web_api_thread.detach();
 	}
+
 
 	LogInfo("[Config] [Account] CanAutoCreateAccounts [{0}]", server.options.CanAutoCreateAccounts());
 	LogInfo("[Config] [ClientConfiguration] DisplayExpansions [{0}]", server.options.IsDisplayExpansions());
