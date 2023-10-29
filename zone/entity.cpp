@@ -5850,3 +5850,13 @@ void EntityList::DamageArea(
 		}
 	}
 }
+
+void EntityList::RemoveFromBeacons(Mob *p_mob)
+{
+	for (auto it = beacon_list.begin(); it != beacon_list.end(); ++it) {
+		if (it->second == p_mob) {
+			beacon_list.erase(it);
+			break;
+		}
+	}
+}
