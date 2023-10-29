@@ -407,6 +407,7 @@ public:
 	void	RemoveFromTargetsFadingMemories(Mob* spell_target, bool RemoveFromXTargets = false, uint32 max_level = 0);
 	void	RemoveFromXTargets(Mob* mob);
 	void	RemoveFromAutoXTargets(Mob* mob);
+	void    RemoveFromBeacons(Mob *p_mob);
 	void	ReplaceWithTarget(Mob* pOldMob, Mob*pNewTarget);
 	void	QueueCloseClients(Mob* sender, const EQApplicationPacket* app, bool ignore_sender=false, float distance=200, Mob* skipped_mob = 0, bool is_ack_required = true, eqFilterType filter=FilterNone);
 	void	QueueClients(Mob* sender, const EQApplicationPacket* app, bool ignore_sender=false, bool ackreq = true);
