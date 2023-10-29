@@ -1,3 +1,26 @@
+## [22.31.0] - 10/29/2023
+
+### Crash
+
+* Fix crash when client pointer does not exist during #hotfix ([#3661](https://github.com/EQEmu/Server/pull/3661)) @Akkadius 2023-10-29
+* Fix spell in AESpell related to beacons ([#3659](https://github.com/EQEmu/Server/pull/3659)) @Akkadius 2023-10-29
+
+### Database
+
+* Add id to variables table ([#3658](https://github.com/EQEmu/Server/pull/3658)) @Akkadius 2023-10-29
+
+### Linux
+
+* Add symbols to release builds ([#3660](https://github.com/EQEmu/Server/pull/3660)) @Akkadius 2023-10-29
+
+### Perl
+
+* Revert " Reload perl quests on zone bootup " ([#3648](https://github.com/EQEmu/Server/pull/3648)) @Akkadius 2023-10-26
+
+### Trading
+
+* Fix part 3 of Issue 932. ([#3654](https://github.com/EQEmu/Server/pull/3654)) @noudess 2023-10-29
+
 ## [22.30.2] - 10/26/2023
 
 ### Fixes
