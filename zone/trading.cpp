@@ -757,8 +757,22 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 			}
 		}
 
-		// todo: rule or npc field to auto return normal items also
-		if (!quest_npc)
+		// Regardless of quest or non-quest NPC - No in combat trade completion
+		// is allowed.
+		if (tradingWith->CheckAggro(this))
+		{
+			for (EQ::ItemInstance* inst : items) {
+				if (!inst || !inst->GetItem()) {
+					continue;
+				}
+
+				tradingWith->SayString(TRADE_BACK, GetCleanName());
+				PushItemOnCursor(*inst, true);
+			}
+		}
+		// Only enforce trade rules if the NPC doesn't have an EVENT_TRADE
+		// subroutine.  That overrides all.
+		else if (!quest_npc)
 		{
 			for (EQ::ItemInstance* inst : items) {
 				if (!inst || !inst->GetItem()) {
