@@ -9,7 +9,17 @@ git submodule init && git submodule update
 
 perl utils/scripts/build/tag-version.pl
 
-mkdir -p build && cd build && cmake -DEQEMU_BUILD_TESTS=ON -DEQEMU_BUILD_STATIC=ON -DEQEMU_BUILD_LOGIN=ON -DEQEMU_BUILD_LUA=ON  -DEQEMU_BUILD_PERL=ON -DCMAKE_CXX_FLAGS_RELWITHDEBINFO:STRING="-Os" -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -G 'Unix Makefiles' .. && make -j$((`nproc`-4))
+mkdir -p build && cd build && \
+  cmake -DEQEMU_BUILD_TESTS=ON \
+      -DEQEMU_BUILD_STATIC=ON \
+      -DEQEMU_BUILD_LOGIN=ON \
+      -DEQEMU_BUILD_LUA=ON \
+      -DEQEMU_BUILD_PERL=ON \
+      -DCMAKE_CXX_FLAGS:STRING="-O2 -g" \
+      -DCMAKE_CXX_FLAGS_RELWITHDEBINFO:STRING="-O2 -g" \
+      -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+      -G 'Unix Makefiles' \
+      .. && make -j$((`nproc`-4))
 
 curl https://raw.githubusercontent.com/Akkadius/eqemu-install-v2/master/eqemu_config.json --output eqemu_config.json
 ./bin/tests
