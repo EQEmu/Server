@@ -4983,6 +4983,20 @@ ADD COLUMN `content_flags` varchar(100) CHARACTER SET latin1 COLLATE latin1_swed
 ADD COLUMN `content_flags_disabled` varchar(100) CHARACTER SET latin1 COLLATE latin1_swedish_ci NULL DEFAULT NULL AFTER `content_flags`;
 )"
 	},
+	ManifestEntry{
+		.version = 9240,
+		.description = "2023_10_29_variables_id.sql",
+		.check = "SHOW COLUMNS FROM `variables` LIKE 'id'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `variables`
+ADD COLUMN `id` int(11) NOT NULL AUTO_INCREMENT FIRST,
+DROP PRIMARY KEY,
+ADD PRIMARY KEY (`id`) USING BTREE,
+ADD UNIQUE INDEX(`varname`);
+)"
+	},
 
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
