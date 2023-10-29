@@ -691,7 +691,7 @@ void command_hotfix(Client *c, const Seperator *sep)
 			}
 			worldserver.SendPacket(&pack);
 
-			if (c) { c->Message(Chat::White, "Hotfix applied"); }
+			worldserver.SendEmoteMessage(0, 0, AccountStatus::ApprenticeGuide, Chat::Yellow, "Hotfix applied");
 		}
 	);
 
