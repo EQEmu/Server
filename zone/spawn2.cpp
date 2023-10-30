@@ -27,6 +27,8 @@
 #include "zone.h"
 #include "zonedb.h"
 #include "../common/repositories/criteria/content_filter_criteria.h"
+#include "../common/repositories/spawn2_repository.h"
+#include "../common/repositories/spawn2_disabled_repository.h"
 
 extern EntityList entity_list;
 extern Zone* zone;
@@ -468,60 +470,61 @@ bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spa
 	LogInfo("Loaded [{}] respawn timer(s)", Strings::Commify(results.RowCount()));
 
 	const char *zone_name = ZoneName(zoneid);
-	std::string query = fmt::format(
-		"SELECT "
-		"id, "
-		"spawngroupID, "
-		"x, "
-		"y, "
-		"z, "
-		"heading, "
-		"respawntime, "
-		"variance, "
-		"pathgrid, "
-		"path_when_zone_idle, "
-		"_condition, "
-		"cond_value, "
-		"enabled, "
-		"animation "
-		"FROM "
-		"spawn2 "
-		"WHERE TRUE {} AND zone = '{}' AND (version = {} OR version = -1) ",
-		ContentFilterCriteria::apply(),
-		zone_name,
-		version
-	);
-	results = QueryDatabase(query);
 
-	if (!results.Success()) {
-		return false;
+	auto spawns = Spawn2Repository::GetWhere(
+		content_db, fmt::format(
+			"WHERE TRUE {} AND zone = '{}' AND (version = {} OR version = -1) ",
+			ContentFilterCriteria::apply(),
+			zone_name,
+			version
+		)
+	);
+
+	std::vector<uint32> spawn2_ids;
+	for (auto &s: spawns) {
+		spawn2_ids.push_back(s.id);
 	}
 
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	auto disabled_spawns = Spawn2DisabledRepository::GetWhere(
+		database,
+		fmt::format(
+			"WHERE spawn2_id IN ({})",
+			Strings::Join(spawn2_ids, ",")
+		)
+	);
 
+	for (auto &s: spawns) {
 		uint32 spawn_time_left = 0;
-		Spawn2* new_spawn = 0;
-		bool perl_enabled = Strings::ToInt(row[12]) == 1 ? true : false;
+		if (spawn_times.count(s.id) != 0) {
+			spawn_time_left = spawn_times[s.id];
+		}
 
-		if (spawn_times.count(Strings::ToInt(row[0])) != 0)
-			spawn_time_left = spawn_times[Strings::ToInt(row[0])];
+		// load from spawn2_disabled
+		bool spawn_enabled = true;
+		// check if spawn is disabled
+		for (auto &ds: disabled_spawns) {
+			if (ds.spawn2_id == s.id) {
+				spawn_enabled = false;
+				break;
+			}
+		}
 
-		new_spawn = new Spawn2(
-			Strings::ToInt(row[0]),					// uint32 in_spawn2_id
-			Strings::ToInt(row[1]),					// uint32 spawngroup_id
-			Strings::ToFloat(row[2]),					// float in_x
-			Strings::ToFloat(row[3]),					// float in_y
-			Strings::ToFloat(row[4]),					// float in_z
-			Strings::ToFloat(row[5]),					// float in_heading
-			Strings::ToInt(row[6]),					// uint32 respawn
-			Strings::ToInt(row[7]),					// uint32 variance
-			spawn_time_left,				// uint32 timeleft
-			Strings::ToInt(row[8]),					// uint32 grid
-			(bool)Strings::ToInt(row[9]),				// bool path_when_zone_idle
-			Strings::ToInt(row[10]),					// uint16 in_cond_id
-			Strings::ToInt(row[11]),					// int16 in_min_value
-			perl_enabled,					// bool in_enabled
-			(EmuAppearance)Strings::ToInt(row[13])	// EmuAppearance anim
+		auto new_spawn = new Spawn2(
+			s.id,
+			s.spawngroupID,
+			s.x,
+			s.y,
+			s.z,
+			s.heading,
+			s.respawntime,
+			s.variance,
+			spawn_time_left,
+			s.pathgrid,
+			(bool) s.path_when_zone_idle,
+			s._condition,
+			(int16) s.cond_value,
+			spawn_enabled,
+			(EmuAppearance) s.animation
 		);
 
 		spawn2_list.Insert(new_spawn);
