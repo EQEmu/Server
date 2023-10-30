@@ -362,8 +362,9 @@ void QuestManager::enable_spawn2(uint32 spawn2_id)
 	database.UpdateSpawn2Status(spawn2_id, 1, zone->GetInstanceID());
 	auto pack = new ServerPacket(ServerOP_SpawnStatusChange, sizeof(ServerSpawnStatusChange_Struct));
 	auto *ssc = (ServerSpawnStatusChange_Struct *) pack->pBuffer;
-	ssc->id         = spawn2_id;
-	ssc->new_status = true;
+	ssc->id          = spawn2_id;
+	ssc->new_status  = true;
+	scc->instance_id = zone->GetInstanceID();
 	worldserver.SendPacket(pack);
 	safe_delete(pack);
 }
@@ -373,8 +374,10 @@ void QuestManager::disable_spawn2(uint32 spawn2_id)
 	database.UpdateSpawn2Status(spawn2_id, 0, zone->GetInstanceID());
 	auto pack = new ServerPacket(ServerOP_SpawnStatusChange, sizeof(ServerSpawnStatusChange_Struct));
 	auto *ssc = (ServerSpawnStatusChange_Struct *) pack->pBuffer;
-	ssc->id         = spawn2_id;
-	ssc->new_status = false;
+	ssc->id          = spawn2_id;
+	ssc->new_status  = false;
+	scc->instance_id = zone->GetInstanceID();
+
 	worldserver.SendPacket(pack);
 	safe_delete(pack);
 }
