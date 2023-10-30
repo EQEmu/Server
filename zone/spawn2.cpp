@@ -485,13 +485,16 @@ bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spa
 		spawn2_ids.push_back(s.id);
 	}
 
-	auto disabled_spawns = Spawn2DisabledRepository::GetWhere(
-		database,
-		fmt::format(
-			"spawn2_id IN ({})",
-			Strings::Join(spawn2_ids, ",")
-		)
-	);
+	std::vector<Spawn2DisabledRepository::Spawn2Disabled> disabled_spawns = {};
+	if (spawn2_ids.size() > 0) {
+		disabled_spawns = Spawn2DisabledRepository::GetWhere(
+			database,
+			fmt::format(
+				"spawn2_id IN ({})",
+				Strings::Join(spawn2_ids, ",")
+			)
+		);
+	}
 
 	for (auto &s: spawns) {
 		uint32 spawn_time_left = 0;
