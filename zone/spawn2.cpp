@@ -486,12 +486,13 @@ bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spa
 	}
 
 	std::vector<Spawn2DisabledRepository::Spawn2Disabled> disabled_spawns = {};
-	if (spawn2_ids.size() > 0) {
+	if (!spawn2_ids.empty()) {
 		disabled_spawns = Spawn2DisabledRepository::GetWhere(
 			database,
 			fmt::format(
-				"spawn2_id IN ({})",
-				Strings::Join(spawn2_ids, ",")
+				"spawn2_id IN ({}) and instance_id = {}",
+				Strings::Join(spawn2_ids, ","),
+				zone->GetInstanceID()
 			)
 		);
 	}

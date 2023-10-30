@@ -359,7 +359,7 @@ Mob *QuestManager::spawn_from_spawn2(uint32 spawn2_id)
 
 void QuestManager::enable_spawn2(uint32 spawn2_id)
 {
-	database.UpdateSpawn2Status(spawn2_id, 1);
+	database.UpdateSpawn2Status(spawn2_id, 1, zone->GetInstanceID());
 	auto pack = new ServerPacket(ServerOP_SpawnStatusChange, sizeof(ServerSpawnStatusChange_Struct));
 	ServerSpawnStatusChange_Struct* ssc = (ServerSpawnStatusChange_Struct*) pack->pBuffer;
 	ssc->id = spawn2_id;
@@ -370,7 +370,7 @@ void QuestManager::enable_spawn2(uint32 spawn2_id)
 
 void QuestManager::disable_spawn2(uint32 spawn2_id)
 {
-	database.UpdateSpawn2Status(spawn2_id, 0);
+	database.UpdateSpawn2Status(spawn2_id, 0, zone->GetInstanceID());
 	auto pack = new ServerPacket(ServerOP_SpawnStatusChange, sizeof(ServerSpawnStatusChange_Struct));
 	ServerSpawnStatusChange_Struct* ssc = (ServerSpawnStatusChange_Struct*) pack->pBuffer;
 	ssc->id = spawn2_id;

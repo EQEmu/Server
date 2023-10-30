@@ -172,20 +172,25 @@ uint32 ZoneDatabase::GetSpawnTimeLeft(uint32 id, uint16 instance_id)
 
 }
 
-void ZoneDatabase::UpdateSpawn2Status(uint32 id, uint8 new_status)
+void ZoneDatabase::UpdateSpawn2Status(uint32 id, uint8 new_status, uint32 instance_id)
 {
-	auto spawns = Spawn2DisabledRepository::GetWhere(*this, fmt::format("spawn2_id = {}", id));
+	auto spawns = Spawn2DisabledRepository::GetWhere(
+		*this,
+		fmt::format("spawn2_id = {} and instance_id = {}", id, instance_id)
+	);
 	if (!spawns.empty()) {
 		auto spawn = spawns[0];
 		// 1 = enabled 0 = disabled
-		spawn.disabled = new_status ? 0 : 1;
+		spawn.disabled    = new_status ? 0 : 1;
+		spawn.instance_id = instance_id;
 		Spawn2DisabledRepository::UpdateOne(*this, spawn);
 		return;
 	}
 
 	auto spawn = Spawn2DisabledRepository::NewEntity();
-	spawn.spawn2_id = id;
-	spawn.disabled  = new_status ? 0 : 1;
+	spawn.spawn2_id   = id;
+	spawn.instance_id = instance_id;
+	spawn.disabled    = new_status ? 0 : 1;
 	Spawn2DisabledRepository::InsertOne(*this, spawn);
 }
 

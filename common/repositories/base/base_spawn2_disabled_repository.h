@@ -22,6 +22,7 @@ public:
 	struct Spawn2Disabled {
 		int64_t id;
 		int32_t spawn2_id;
+		int32_t instance_id;
 		int16_t disabled;
 	};
 
@@ -35,6 +36,7 @@ public:
 		return {
 			"id",
 			"spawn2_id",
+			"instance_id",
 			"disabled",
 		};
 	}
@@ -44,6 +46,7 @@ public:
 		return {
 			"id",
 			"spawn2_id",
+			"instance_id",
 			"disabled",
 		};
 	}
@@ -85,9 +88,10 @@ public:
 	{
 		Spawn2Disabled e{};
 
-		e.id        = 0;
-		e.spawn2_id = 0;
-		e.disabled  = 0;
+		e.id          = 0;
+		e.spawn2_id   = 0;
+		e.instance_id = 0;
+		e.disabled    = 0;
 
 		return e;
 	}
@@ -124,9 +128,10 @@ public:
 		if (results.RowCount() == 1) {
 			Spawn2Disabled e{};
 
-			e.id        = strtoll(row[0], nullptr, 10);
-			e.spawn2_id = static_cast<int32_t>(atoi(row[1]));
-			e.disabled  = static_cast<int16_t>(atoi(row[2]));
+			e.id          = strtoll(row[0], nullptr, 10);
+			e.spawn2_id   = static_cast<int32_t>(atoi(row[1]));
+			e.instance_id = static_cast<int32_t>(atoi(row[2]));
+			e.disabled    = static_cast<int16_t>(atoi(row[3]));
 
 			return e;
 		}
@@ -161,7 +166,8 @@ public:
 		auto columns = Columns();
 
 		v.push_back(columns[1] + " = " + std::to_string(e.spawn2_id));
-		v.push_back(columns[2] + " = " + std::to_string(e.disabled));
+		v.push_back(columns[2] + " = " + std::to_string(e.instance_id));
+		v.push_back(columns[3] + " = " + std::to_string(e.disabled));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -185,6 +191,7 @@ public:
 
 		v.push_back(std::to_string(e.id));
 		v.push_back(std::to_string(e.spawn2_id));
+		v.push_back(std::to_string(e.instance_id));
 		v.push_back(std::to_string(e.disabled));
 
 		auto results = db.QueryDatabase(
@@ -217,6 +224,7 @@ public:
 
 			v.push_back(std::to_string(e.id));
 			v.push_back(std::to_string(e.spawn2_id));
+			v.push_back(std::to_string(e.instance_id));
 			v.push_back(std::to_string(e.disabled));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
@@ -251,9 +259,10 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Spawn2Disabled e{};
 
-			e.id        = strtoll(row[0], nullptr, 10);
-			e.spawn2_id = static_cast<int32_t>(atoi(row[1]));
-			e.disabled  = static_cast<int16_t>(atoi(row[2]));
+			e.id          = strtoll(row[0], nullptr, 10);
+			e.spawn2_id   = static_cast<int32_t>(atoi(row[1]));
+			e.instance_id = static_cast<int32_t>(atoi(row[2]));
+			e.disabled    = static_cast<int16_t>(atoi(row[3]));
 
 			all_entries.push_back(e);
 		}
@@ -278,9 +287,10 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Spawn2Disabled e{};
 
-			e.id        = strtoll(row[0], nullptr, 10);
-			e.spawn2_id = static_cast<int32_t>(atoi(row[1]));
-			e.disabled  = static_cast<int16_t>(atoi(row[2]));
+			e.id          = strtoll(row[0], nullptr, 10);
+			e.spawn2_id   = static_cast<int32_t>(atoi(row[1]));
+			e.instance_id = static_cast<int32_t>(atoi(row[2]));
+			e.disabled    = static_cast<int16_t>(atoi(row[3]));
 
 			all_entries.push_back(e);
 		}

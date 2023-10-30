@@ -5008,6 +5008,7 @@ CREATE TABLE `spawn2_backup_2023_10_29` LIKE `spawn2`;
 CREATE TABLE `spawn2_disabled` (
   `id` bigint(11) NOT NULL AUTO_INCREMENT,
   `spawn2_id` int(11) DEFAULT NULL,
+  `instance_id` int(11) DEFAULT 0,
   `disabled` smallint(11) DEFAULT 0,
   PRIMARY KEY (`id`),
   UNIQUE KEY `spawn2_id` (`spawn2_id`)
