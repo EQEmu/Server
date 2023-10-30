@@ -473,7 +473,7 @@ bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spa
 
 	auto spawns = Spawn2Repository::GetWhere(
 		content_db, fmt::format(
-			"WHERE TRUE {} AND zone = '{}' AND (version = {} OR version = -1) ",
+			"TRUE {} AND zone = '{}' AND (version = {} OR version = -1) ",
 			ContentFilterCriteria::apply(),
 			zone_name,
 			version
@@ -488,7 +488,7 @@ bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spa
 	auto disabled_spawns = Spawn2DisabledRepository::GetWhere(
 		database,
 		fmt::format(
-			"WHERE spawn2_id IN ({})",
+			"spawn2_id IN ({})",
 			Strings::Join(spawn2_ids, ",")
 		)
 	);
