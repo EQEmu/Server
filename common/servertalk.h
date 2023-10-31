@@ -82,7 +82,7 @@
 #define ServerOP_DisbandGroup		0x003d //for disbanding a whole group cross zone
 #define ServerOP_GroupJoin			0x003e //for joining ooz folks
 #define ServerOP_UpdateSpawn		0x003f
-#define ServerOP_SpawnStatusChange	0x0040
+//#define ServerOP_SpawnStatusChange	0x0040
 #define ServerOP_DropClient         0x0041	// DropClient
 #define ServerOP_DepopAllPlayersCorpses	0x0060
 #define ServerOP_QGlobalUpdate		0x0061
@@ -1140,12 +1140,6 @@ struct ServerInstanceUpdateTime_Struct
 {
 	uint16 instance_id;
 	uint32 new_duration;
-};
-
-struct ServerSpawnStatusChange_Struct {
-	uint32 id;
-	bool   new_status;
-	uint32 instance_id;
 };
 
 struct ServerQGlobalUpdate_Struct
