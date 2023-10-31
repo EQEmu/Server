@@ -2850,7 +2850,7 @@ uint8 ZoneDatabase::RaidGroupCount(uint32 raidid, uint32 groupid) {
 int64 ZoneDatabase::GetBlockedSpellsCount(uint32 zone_id)
 {
 	return BlockedSpellsRepository::Count(
-		database,
+		*this,
 		fmt::format(
 			"zoneid = {} {}",
 			zone_id,
@@ -2864,7 +2864,7 @@ bool ZoneDatabase::LoadBlockedSpells(int64 blocked_spells_count, ZoneSpellsBlock
 	LogInfo("Loading Blocked Spells from database for {} ({}).", zone_store.GetZoneName(zone_id, true), zone_id);
 
 	const auto& l = BlockedSpellsRepository::GetWhere(
-		database,
+		*this,
 		fmt::format(
 			"zoneid = {} {} ORDER BY id ASC",
 			zone_id,
