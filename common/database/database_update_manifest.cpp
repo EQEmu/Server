@@ -5011,7 +5011,7 @@ CREATE TABLE `spawn2_disabled` (
   `instance_id` int(11) DEFAULT 0,
   `disabled` smallint(11) DEFAULT 0,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `spawn2_id` (`spawn2_id`)
+  UNIQUE KEY `spawn2_id` (`spawn2_id`,`instance_id`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 INSERT INTO spawn2_disabled (spawn2_id, disabled) SELECT id, 1 FROM spawn2 WHERE enabled = 0;
 ALTER TABLE `spawn2` DROP COLUMN `enabled`;
