@@ -711,7 +711,13 @@ bool Mob::DoCastingChecksZoneRestrictions(bool check_on_casting, int32 spell_id)
 		Message(Chat::Red, "You cannot cast detrimental spells here.");
 		return false;
 	}
-
+	/*
+		Zones where you can not cast a spell that is for nighttime only
+	*/
+	if (spells[spell_id].time_of_day == 2 && !zone->zone_time.IsNightTime()) {
+		MessageString(Chat::Red, CAST_NIGHTTIME);
+		return false;
+	}
 	if (check_on_casting) {
 		/*
 			Zones where you can not cast out door only spells. This is only checked when casting is completed.
