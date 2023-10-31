@@ -1,3 +1,9 @@
+## [22.31.1] - 10/31/2023
+
+### Fixes
+
+* Hotfix issue with blocked spells not loading properly @Akkadius 2023-10-31
+
 ## [22.31.0] - 10/29/2023
 
 ### Crash
