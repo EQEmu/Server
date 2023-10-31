@@ -1,3 +1,21 @@
+## [22.31.3] - 10/31/2023
+
+### Bug
+
+* Force raids off content database ([#3665](https://github.com/EQEmu/Server/pull/3665)) @joligario 2023-10-31
+
+### Crash
+
+* Revert " Fix spell in AESpell related to beacons " ([#3659](https://github.com/EQEmu/Server/pull/3659)) @Akkadius 2023-10-31
+
+### Fixes
+
+* Fix issue with blocked spells not loading properly  @Akkadius 2023-10-31
+
+### Logs
+
+* Convert Loot Messages to Error Logs ([#3663](https://github.com/EQEmu/Server/pull/3663)) @Kinglykrab 2023-10-31
+
 ## [22.31.2] - 10/31/2023
 
 ### Fixes
