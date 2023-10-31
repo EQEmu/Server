@@ -1708,7 +1708,7 @@ bool Raid::LearnMembers()
 	memset(members, 0, (sizeof(RaidMember) * MAX_RAID_MEMBERS));
 
 	auto raid_members = RaidMembersRepository::GetWhere(
-			content_db,
+			database,
 			fmt::format(
 					"raidid = {}",
 					GetID()
