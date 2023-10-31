@@ -1,3 +1,9 @@
+## [22.31.2] - 10/31/2023
+
+### Fixes
+
+* Hotfix issue with beacon spells crashing @Akkadius 2023-10-31
+
 ## [22.31.1] - 10/31/2023
 
 ### Fixes
