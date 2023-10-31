@@ -188,8 +188,8 @@ void ZoneDatabase::UpdateSpawn2Status(uint32 id, uint8 new_status, uint32 instan
 	}
 
 	auto spawn = Spawn2DisabledRepository::NewEntity();
-	spawn.spawn2_id   = (int32_t) id;
-	spawn.instance_id = (int32_t) instance_id;
+	spawn.spawn2_id   = id;
+	spawn.instance_id = instance_id;
 	spawn.disabled    = new_status ? 0 : 1;
 	Spawn2DisabledRepository::InsertOne(*this, spawn);
 }

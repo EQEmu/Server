@@ -398,7 +398,6 @@ public:
 
 	void ReloadContentFlags();
 
-	void SetSpawn2Disabled(uint32 spawn2_id, bool disabled);
 private:
 	bool      allow_mercs;
 	bool      can_bind;

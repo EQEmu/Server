@@ -3160,27 +3160,3 @@ void Zone::ReloadContentFlags()
 
 	safe_delete(pack);
 }
-
-void Zone::SetSpawn2Disabled(uint32 spawn2_id, bool disabled)
-{
-	LinkedListIterator<Spawn2 *> iterator(spawn2_list);
-	iterator.Reset();
-	Spawn2 *found_spawn = nullptr;
-	while (iterator.MoreElements()) {
-		Spawn2 *cur = iterator.GetData();
-		if (cur->GetID() == spawn2_id) {
-			found_spawn = cur;
-			break;
-		}
-		iterator.Advance();
-	}
-
-	if (found_spawn) {
-		if (disabled) {
-			found_spawn->Disable();
-		}
-		else {
-			found_spawn->Enable();
-		}
-	}
-}

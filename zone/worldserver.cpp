@@ -1724,6 +1724,38 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		break;
 
 	}
+	case ServerOP_SpawnStatusChange:
+	{
+		if (zone)
+		{
+			ServerSpawnStatusChange_Struct *ssc = (ServerSpawnStatusChange_Struct*)pack->pBuffer;
+			if (ssc->instance_id != zone->GetInstanceID()) {
+				break;
+			}
+
+			LinkedListIterator<Spawn2 *> iterator(zone->spawn2_list);
+			iterator.Reset();
+			Spawn2 *found_spawn = nullptr;
+			while (iterator.MoreElements()) {
+				Spawn2 *cur = iterator.GetData();
+				if (cur->GetID() == ssc->id) {
+					found_spawn = cur;
+					break;
+				}
+				iterator.Advance();
+			}
+
+			if (found_spawn) {
+				if (ssc->new_status == 0) {
+					found_spawn->Disable();
+				}
+				else {
+					found_spawn->Enable();
+				}
+			}
+		}
+		break;
+	}
 	case ServerOP_QGlobalUpdate:
 	{
 		if (pack->size != sizeof(ServerQGlobalUpdate_Struct))
