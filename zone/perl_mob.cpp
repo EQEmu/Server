@@ -462,6 +462,11 @@ int Perl_Mob_GetBaseRace(Mob* self) // @categories Stats and Attributes
 	return self->GetBaseRace();
 }
 
+std::string Perl_Mob_GetBaseRaceName(Mob* self) // @categories Stats and Attributes
+{
+	return GetRaceIDName(self->GetBaseRace());
+}
+
 int Perl_Mob_GetBaseGender(Mob* self) // @categories Stats and Attributes
 {
 	return self->GetBaseGender();
@@ -3490,6 +3495,7 @@ void perl_register_mob()
 	package.add("GetAssistRange", &Perl_Mob_GetAssistRange);
 	package.add("GetBaseGender", &Perl_Mob_GetBaseGender);
 	package.add("GetBaseRace", &Perl_Mob_GetBaseRace);
+	package.add("GetBaseRaceName", &Perl_Mob_GetBaseRaceName);
 	package.add("GetBaseSize", &Perl_Mob_GetBaseSize);
 	package.add("GetBeard", &Perl_Mob_GetBeard);
 	package.add("GetBeardColor", &Perl_Mob_GetBeardColor);

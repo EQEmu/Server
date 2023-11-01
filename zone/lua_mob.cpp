@@ -375,6 +375,11 @@ const char *Lua_Mob::GetRaceName() {
 	return GetRaceIDName(self->GetRace());
 }
 
+const char* Lua_Mob::GetBaseRaceName() {
+	Lua_Safe_Call_String();
+	return GetRaceIDName(self->GetBaseRace());
+}
+
 int Lua_Mob::GetGender() {
 	Lua_Safe_Call_Int();
 	return self->GetGender();
@@ -3386,6 +3391,7 @@ luabind::scope lua_register_mob() {
 	.def("GetCasterLevel", &Lua_Mob::GetCasterLevel)
 	.def("GetClass", &Lua_Mob::GetClass)
 	.def("GetClassName", &Lua_Mob::GetClassName)
+	.def("GetBaseRaceName", &Lua_Mob::GetBaseRaceName)
 	.def("GetClassPlural", &Lua_Mob::GetClassPlural)
 	.def("GetCleanName", &Lua_Mob::GetCleanName)
 	.def("GetCloseMobList", (Lua_Mob_List(Lua_Mob::*)(void))&Lua_Mob::GetCloseMobList)
