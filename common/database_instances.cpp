@@ -29,6 +29,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/repositories/raid_members_repository.h"
 #include "../common/repositories/respawn_times_repository.h"
 #include "../common/repositories/spawn_condition_values_repository.h"
+#include "repositories/spawn2_disabled_repository.h"
 
 
 #include "database.h"
@@ -48,6 +49,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include <netinet/in.h>
 #include <sys/time.h>
 #endif
+
 
 bool Database::AddClientToInstance(uint16 instance_id, uint32 character_id)
 {
@@ -553,6 +555,7 @@ void Database::PurgeExpiredInstances()
 	CharacterCorpsesRepository::BuryInstances(*this, imploded_instance_ids);
 	DynamicZoneMembersRepository::DeleteByManyInstances(*this, imploded_instance_ids);
 	DynamicZonesRepository::DeleteWhere(*this, fmt::format("instance_id IN ({})", imploded_instance_ids));
+	Spawn2DisabledRepository::DeleteWhere(*this, fmt::format("instance_id IN ({})", imploded_instance_ids));
 }
 
 void Database::SetInstanceDuration(uint16 instance_id, uint32 new_duration)
