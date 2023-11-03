@@ -40,7 +40,6 @@ extern WorldServer worldserver;
 Raid::Raid(uint32 raidID)
 : GroupIDConsumer(raidID)
 {
-	memset(members ,0, (sizeof(RaidMember)*MAX_RAID_MEMBERS));
 	memset(&raid_aa, 0, sizeof(RaidLeadershipAA_Struct));
 	memset(group_aa, 0, sizeof(GroupLeadershipAA_Struct) * MAX_RAID_GROUPS);
 	for (auto& gm : group_mentor) {
@@ -66,7 +65,6 @@ Raid::Raid(uint32 raidID)
 Raid::Raid(Client* nLeader)
 : GroupIDConsumer()
 {
-	memset(members ,0, (sizeof(RaidMember)*MAX_RAID_MEMBERS));
 	memset(&raid_aa, 0, sizeof(RaidLeadershipAA_Struct));
 	memset(group_aa, 0, sizeof(GroupLeadershipAA_Struct) * MAX_RAID_GROUPS);
 	for (auto& gm : group_mentor) {
@@ -1705,7 +1703,7 @@ void Raid::SaveRaidMOTD()
 
 bool Raid::LearnMembers()
 {
-	memset(members, 0, (sizeof(RaidMember) * MAX_RAID_MEMBERS));
+	EmptyRaidMembers();
 
 	auto raid_members = RaidMembersRepository::GetWhere(
 			database,
@@ -2974,4 +2972,23 @@ void Raid::SendMarkTargets(Client* c)
 		}
 	}
 	UpdateXtargetMarkedNPC();
+}
+
+void Raid::EmptyRaidMembers() 
+{
+	for (int i = 0; i < MAX_RAID_MEMBERS; i++) {
+		members[i].group_number    = RAID_GROUPLESS;
+		members[i].is_group_leader = 0;
+		members[i].level           = 0;
+		members[i].main_assister   = 0;
+		members[i].main_marker     = 0;
+		members[i]._class          = 0;
+		members[i].is_bot          = false;
+		members[i].is_looter       = false;
+		members[i].is_raid_leader  = false;
+		members[i].is_raid_main_assist_one = false;
+		members[i].member          = nullptr;
+		members[i].note            = '\0';
+		members[i].member_name[0]  = '\0';
+	}
 }
