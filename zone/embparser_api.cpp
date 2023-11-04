@@ -6005,6 +6005,7 @@ void perl_register_quest()
 	package.add("IsTargetRequiredForSpell", &Perl__IsTargetRequiredForSpell);
 	package.add("IsTeleportSpell", &Perl__IsTeleportSpell);
 	package.add("IsTranslocateSpell", &Perl__IsTranslocateSpell);
+	package.add("IsTGBCompatibleSpell", &Perl__IsTGBCompatibleSpell);
 	package.add("IsVeryFastHealSpell", &Perl__IsVeryFastHealSpell);
 	package.add("IsVirusSpell", &Perl__IsVirusSpell);
 	package.add("IsValidSpell", &Perl__IsValidSpell);
