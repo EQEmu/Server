@@ -51,7 +51,9 @@ namespace ItemField
 #define F(x) x,
 #include "item_fieldlist.h"
 #undef F
-		updated
+		updated,
+		minstatus,
+		comment,
 	};
 }
 
@@ -965,7 +967,7 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 #define F(x) "`"#x"`,"
 #include "item_fieldlist.h"
 #undef F
-		"updated FROM items ORDER BY id";
+		"updated, minstatus, comment FROM items ORDER BY id";
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
 		return;
@@ -977,9 +979,13 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 		// Unique Identifier
 		item.ID = Strings::ToUnsignedInt(row[ItemField::id]);
 
-		// Name and Lore
+		// Minimum Status
+		item.MinStatus = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::minstatus]));
+
+		// Name, Lore, and Comment
 		strn0cpy(item.Name, row[ItemField::name], sizeof(item.Name));
 		strn0cpy(item.Lore, row[ItemField::lore], sizeof(item.Lore));
+		strn0cpy(item.Comment, row[ItemField::comment], sizeof(item.Comment));
 
 		// Flags
 		item.ArtifactFlag = Strings::ToBool(row[ItemField::artifactflag]);

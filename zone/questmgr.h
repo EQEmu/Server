@@ -250,6 +250,8 @@ public:
 	int collectitems_processSlot(int16 slot_id, uint32 item_id, bool remove);
 	int countitem(uint32 item_id);
 	void removeitem(uint32 item_id, uint32 quantity = 1);
+	std::string getitemcomment(uint32 item_id);
+	std::string getitemlore(uint32 item_id);
 	std::string getitemname(uint32 item_id);
 	void enabletitle(int titleset);
 	bool checktitle(int titlecheck);

@@ -30,6 +30,11 @@ const char *Lua_Item::GetLore() {
 	return self->Lore;
 }
 
+const char *Lua_Item::GetComment() {
+	Lua_Safe_Call_String();
+	return self->Comment;
+}
+
 const char *Lua_Item::GetIDFile() {
 	Lua_Safe_Call_String();
 	return self->IDFile;
@@ -957,6 +962,7 @@ luabind::scope lua_register_item() {
 	.def("Click_Type", &Lua_Item::GetClick_Type)
 	.def("Color", &Lua_Item::GetColor)
 	.def("CombatEffects", &Lua_Item::GetCombatEffects)
+	.def("Comment", &Lua_Item::GetComment)
 	.def("DR", &Lua_Item::GetDR)
 	.def("DSMitigation", &Lua_Item::GetDSMitigation)
 	.def("Damage", &Lua_Item::GetDamage)
