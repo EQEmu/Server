@@ -200,3 +200,25 @@ void EQTime::ToString(TimeOfDay_Struct *t, std::string &str) {
 	buf[127] = '\0';
 	str = buf;
 }
+
+bool EQTime::IsDayTime() {
+	TimeOfDay_Struct tod; //Day time is 5am to 6:59pm (14 hours in-game)
+	GetCurrentEQTimeOfDay(&tod); //TODO: what if it fails and returns zero?
+
+	if (tod.hour >= 5 || tod.hour < 19) {
+		return true;
+	}
+
+	return false;
+}
+
+bool EQTime::IsNightTime() {
+	TimeOfDay_Struct tod; //Night time is 7pm to 4:59am (10 hours in-game)
+	GetCurrentEQTimeOfDay(&tod); //TODO: what if it fails and returns zero?
+
+	if (tod.hour >= 19 || tod.hour < 5) {
+		return true;
+	}
+
+	return false;
+}

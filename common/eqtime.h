@@ -28,6 +28,8 @@ public:
 	uint32 getEQTimeZone() { return timezone; }
 	uint32 getEQTimeZoneHr() { return timezone/60; }
 	uint32 getEQTimeZoneMin() { return timezone%60; }
+	bool IsDayTime();
+	bool IsNightTime();
 
 	//Set functions
 	int SetCurrentEQTimeOfDay(TimeOfDay_Struct start_eq, time_t start_real);

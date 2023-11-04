@@ -1052,4 +1052,11 @@ enum ScribeSpellActions
 	Unmemorize
 };
 
+enum SpellTimeRestrictions
+{
+	NoRestriction,
+	Day,
+	Night
+};
+
 #endif /*COMMON_EQ_CONSTANTS_H*/

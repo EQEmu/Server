@@ -63,6 +63,8 @@
 #define SAC_TOO_HIGH				204		//This being is too powerful to be a sacrifice.
 #define CANNOT_SAC_SELF				205		//You cannot sacrifice yourself.
 #define SILENCED_STRING				207		//You *CANNOT* cast spells, you have been silenced!
+#define CAST_DAYTIME                208		//Spell can only be cast during the day.
+#define CAST_NIGHTTIME              209		//Spell can only be cast during the night.
 #define CANNOT_AFFECT_PC			210		//That spell can not affect this target PC.
 #define SPELL_NEED_TAR				214		//You must first select a target for this spell!
 #define SUMMON_ONLY_GROUP_CORPSE	215		//You must first target a living group member whose corpse you wish to summon.
