@@ -3551,14 +3551,7 @@ void Perl__crosszonemoveplayerbygroupid(uint32 group_id, std::string zone_short_
 	);
 }
 
-void Perl__crosszonemoveplayerbygroupid(
-	uint32 group_id,
-	std::string zone_short_name,
-	float x,
-	float y,
-	float z,
-	float heading
-)
+void Perl__crosszonemoveplayerbygroupid(uint32 group_id, std::string zone_short_name, float x, float y, float z, float heading)
 {
 	quest_manager.CrossZoneMove(
 		CZMove_Struct{
