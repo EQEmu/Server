@@ -1,3 +1,43 @@
+## [22.32.0] - 11/6/2023
+
+### Bots
+
+* Fix invalid races from being created ([#3681](https://github.com/EQEmu/Server/pull/3681)) @nytmyr 2023-11-06
+
+### Crash
+
+* Fix crash on CentOS when forming a raid with PCs or BOTs ([#3676](https://github.com/EQEmu/Server/pull/3676)) @neckkola 2023-11-06
+
+### Fixes
+
+* Add IsTGBCompatibleSpell() to package.add ([#3675](https://github.com/EQEmu/Server/pull/3675)) @Kinglykrab 2023-11-04
+* Fix Perl__worldwideremovetask package ([#3670](https://github.com/EQEmu/Server/pull/3670)) @Kinglykrab 2023-11-04
+* Revert " Fix Killed XYZH support in EVENT_DEATH in Perl. " (#3682) ([#3591](https://github.com/EQEmu/Server/pull/3591)) @fryguy503 2023-11-06
+CRASH
+### GCC
+
+* Compatibility fix for GCC 13 ([#3677](https://github.com/EQEmu/Server/pull/3677)) @joligario 2023-11-05
+
+### Parser
+
+* Cleanup Spire Parsing for crosszonemoveplayerbycharid ([#3674](https://github.com/EQEmu/Server/pull/3674)) @Kinglykrab 2023-11-04
+* Cleanup Spire Parsing for crosszonemoveplayerbyexpeditionid ([#3671](https://github.com/EQEmu/Server/pull/3671)) @Kinglykrab 2023-11-04
+* Cleanup Spire Parsing for crosszonemoveplayerbygroupid ([#3673](https://github.com/EQEmu/Server/pull/3673)) @Kinglykrab 2023-11-04
+* Cleanup Spire Parsing for crosszonemoveplayerbyguildid ([#3672](https://github.com/EQEmu/Server/pull/3672)) @Kinglykrab 2023-11-04
+
+### Quest API
+
+* Add GetBaseRaceName() to Perl and Lua ([#3668](https://github.com/EQEmu/Server/pull/3668)) @joligario 2023-11-01
+* Add details to Lua event dispatch errors ([#3679](https://github.com/EQEmu/Server/pull/3679)) @hgtw 2023-11-06
+
+### Spawn
+
+* Split spawn2 enabled into its own state table ([#3664](https://github.com/EQEmu/Server/pull/3664)) @Akkadius 2023-11-06
+
+### Spells
+
+* Added IsNightTime() for Dance of the Fireflies ([#3667](https://github.com/EQEmu/Server/pull/3667)) @regneq 2023-11-04
+
 ## [22.31.3] - 10/31/2023
 
 ### Bug
