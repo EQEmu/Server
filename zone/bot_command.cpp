@@ -8884,7 +8884,7 @@ uint32 helper_bot_create(Client *bot_owner, std::string bot_name, uint8 bot_clas
 		return bot_id;
 	}
 
-	if (!Bot::IsValidRaceClassCombo(bot_race, bot_class) && IsPlayerRace(bot_race)) {
+	if (!Bot::IsValidRaceClassCombo(bot_race, bot_class)) {
 		const std::string bot_race_name = GetRaceIDName(bot_race);
 		const std::string bot_class_name = GetClassIDName(bot_class);
 		const auto view_saylink = Saylink::Silent(
