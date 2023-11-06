@@ -16,6 +16,7 @@
 #include "../../strings.h"
 #include <ctime>
 
+
 class BaseSpawn2Repository {
 public:
 	struct Spawn2 {
@@ -33,7 +34,6 @@ public:
 		int8_t      path_when_zone_idle;
 		uint32_t    _condition;
 		int32_t     cond_value;
-		uint8_t     enabled;
 		uint8_t     animation;
 		int8_t      min_expansion;
 		int8_t      max_expansion;
@@ -63,7 +63,6 @@ public:
 			"path_when_zone_idle",
 			"_condition",
 			"cond_value",
-			"enabled",
 			"animation",
 			"min_expansion",
 			"max_expansion",
@@ -89,7 +88,6 @@ public:
 			"path_when_zone_idle",
 			"_condition",
 			"cond_value",
-			"enabled",
 			"animation",
 			"min_expansion",
 			"max_expansion",
@@ -149,7 +147,6 @@ public:
 		e.path_when_zone_idle    = 0;
 		e._condition             = 0;
 		e.cond_value             = 1;
-		e.enabled                = 1;
 		e.animation              = 0;
 		e.min_expansion          = -1;
 		e.max_expansion          = -1;
@@ -180,8 +177,9 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				spawn2_id
 			)
 		);
@@ -204,12 +202,11 @@ public:
 			e.path_when_zone_idle    = static_cast<int8_t>(atoi(row[11]));
 			e._condition             = static_cast<uint32_t>(strtoul(row[12], nullptr, 10));
 			e.cond_value             = static_cast<int32_t>(atoi(row[13]));
-			e.enabled                = static_cast<uint8_t>(strtoul(row[14], nullptr, 10));
-			e.animation              = static_cast<uint8_t>(strtoul(row[15], nullptr, 10));
-			e.min_expansion          = static_cast<int8_t>(atoi(row[16]));
-			e.max_expansion          = static_cast<int8_t>(atoi(row[17]));
-			e.content_flags          = row[18] ? row[18] : "";
-			e.content_flags_disabled = row[19] ? row[19] : "";
+			e.animation              = static_cast<uint8_t>(strtoul(row[14], nullptr, 10));
+			e.min_expansion          = static_cast<int8_t>(atoi(row[15]));
+			e.max_expansion          = static_cast<int8_t>(atoi(row[16]));
+			e.content_flags          = row[17] ? row[17] : "";
+			e.content_flags_disabled = row[18] ? row[18] : "";
 
 			return e;
 		}
@@ -256,12 +253,11 @@ public:
 		v.push_back(columns[11] + " = " + std::to_string(e.path_when_zone_idle));
 		v.push_back(columns[12] + " = " + std::to_string(e._condition));
 		v.push_back(columns[13] + " = " + std::to_string(e.cond_value));
-		v.push_back(columns[14] + " = " + std::to_string(e.enabled));
-		v.push_back(columns[15] + " = " + std::to_string(e.animation));
-		v.push_back(columns[16] + " = " + std::to_string(e.min_expansion));
-		v.push_back(columns[17] + " = " + std::to_string(e.max_expansion));
-		v.push_back(columns[18] + " = '" + Strings::Escape(e.content_flags) + "'");
-		v.push_back(columns[19] + " = '" + Strings::Escape(e.content_flags_disabled) + "'");
+		v.push_back(columns[14] + " = " + std::to_string(e.animation));
+		v.push_back(columns[15] + " = " + std::to_string(e.min_expansion));
+		v.push_back(columns[16] + " = " + std::to_string(e.max_expansion));
+		v.push_back(columns[17] + " = '" + Strings::Escape(e.content_flags) + "'");
+		v.push_back(columns[18] + " = '" + Strings::Escape(e.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -297,7 +293,6 @@ public:
 		v.push_back(std::to_string(e.path_when_zone_idle));
 		v.push_back(std::to_string(e._condition));
 		v.push_back(std::to_string(e.cond_value));
-		v.push_back(std::to_string(e.enabled));
 		v.push_back(std::to_string(e.animation));
 		v.push_back(std::to_string(e.min_expansion));
 		v.push_back(std::to_string(e.max_expansion));
@@ -346,7 +341,6 @@ public:
 			v.push_back(std::to_string(e.path_when_zone_idle));
 			v.push_back(std::to_string(e._condition));
 			v.push_back(std::to_string(e.cond_value));
-			v.push_back(std::to_string(e.enabled));
 			v.push_back(std::to_string(e.animation));
 			v.push_back(std::to_string(e.min_expansion));
 			v.push_back(std::to_string(e.max_expansion));
@@ -399,12 +393,11 @@ public:
 			e.path_when_zone_idle    = static_cast<int8_t>(atoi(row[11]));
 			e._condition             = static_cast<uint32_t>(strtoul(row[12], nullptr, 10));
 			e.cond_value             = static_cast<int32_t>(atoi(row[13]));
-			e.enabled                = static_cast<uint8_t>(strtoul(row[14], nullptr, 10));
-			e.animation              = static_cast<uint8_t>(strtoul(row[15], nullptr, 10));
-			e.min_expansion          = static_cast<int8_t>(atoi(row[16]));
-			e.max_expansion          = static_cast<int8_t>(atoi(row[17]));
-			e.content_flags          = row[18] ? row[18] : "";
-			e.content_flags_disabled = row[19] ? row[19] : "";
+			e.animation              = static_cast<uint8_t>(strtoul(row[14], nullptr, 10));
+			e.min_expansion          = static_cast<int8_t>(atoi(row[15]));
+			e.max_expansion          = static_cast<int8_t>(atoi(row[16]));
+			e.content_flags          = row[17] ? row[17] : "";
+			e.content_flags_disabled = row[18] ? row[18] : "";
 
 			all_entries.push_back(e);
 		}
@@ -443,12 +436,11 @@ public:
 			e.path_when_zone_idle    = static_cast<int8_t>(atoi(row[11]));
 			e._condition             = static_cast<uint32_t>(strtoul(row[12], nullptr, 10));
 			e.cond_value             = static_cast<int32_t>(atoi(row[13]));
-			e.enabled                = static_cast<uint8_t>(strtoul(row[14], nullptr, 10));
-			e.animation              = static_cast<uint8_t>(strtoul(row[15], nullptr, 10));
-			e.min_expansion          = static_cast<int8_t>(atoi(row[16]));
-			e.max_expansion          = static_cast<int8_t>(atoi(row[17]));
-			e.content_flags          = row[18] ? row[18] : "";
-			e.content_flags_disabled = row[19] ? row[19] : "";
+			e.animation              = static_cast<uint8_t>(strtoul(row[14], nullptr, 10));
+			e.min_expansion          = static_cast<int8_t>(atoi(row[15]));
+			e.max_expansion          = static_cast<int8_t>(atoi(row[16]));
+			e.content_flags          = row[17] ? row[17] : "";
+			e.content_flags_disabled = row[18] ? row[18] : "";
 
 			all_entries.push_back(e);
 		}

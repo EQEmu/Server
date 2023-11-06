@@ -1142,10 +1142,10 @@ struct ServerInstanceUpdateTime_Struct
 	uint32 new_duration;
 };
 
-struct ServerSpawnStatusChange_Struct
-{
+struct ServerSpawnStatusChange_Struct {
 	uint32 id;
-	bool new_status;
+	bool   new_status;
+	uint32 instance_id;
 };
 
 struct ServerQGlobalUpdate_Struct

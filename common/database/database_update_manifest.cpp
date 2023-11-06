@@ -4997,6 +4997,26 @@ ADD PRIMARY KEY (`id`) USING BTREE,
 ADD UNIQUE INDEX(`varname`);
 )"
 	},
+	ManifestEntry{
+		.version = 9241,
+		.description = "2023_10_29_split_spawn2_enabled.sql",
+		.check = "SHOW TABLES LIKE 'spawn2_disabled'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+CREATE TABLE `spawn2_backup_2023_10_29` LIKE `spawn2`;
+CREATE TABLE `spawn2_disabled` (
+  `id` bigint(11) NOT NULL AUTO_INCREMENT,
+  `spawn2_id` int(11) DEFAULT NULL,
+  `instance_id` int(11) DEFAULT 0,
+  `disabled` smallint(11) DEFAULT 0,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `spawn2_id` (`spawn2_id`,`instance_id`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
+INSERT INTO spawn2_disabled (spawn2_id, disabled) SELECT id, 1 FROM spawn2 WHERE enabled = 0;
+ALTER TABLE `spawn2` DROP COLUMN `enabled`;
+)"
+	},
 
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
