@@ -75,19 +75,19 @@ const uint32 RAID_GROUPLESS = 0xFFFFFFFF;
 #define MAX_NO_RAID_MAIN_MARKERS 3
 
 struct RaidMember{
-	char member_name[64];
-	Client *member;
-	uint32 group_number;
-	uint8 _class;
-	uint8 level;
-	std::string note;
-	bool is_group_leader;
-	bool is_raid_leader;
-	bool is_looter;
-	uint8 main_marker;
-	uint8 main_assister;
-	bool is_bot = false;
-	bool is_raid_main_assist_one = false;
+	char member_name[64]{ 0 };
+	Client* member{ nullptr };
+	uint32 group_number{ RAID_GROUPLESS };
+	uint8 _class{ 0 };
+	uint8 level{ 0 };
+	std::string note{};
+	bool is_group_leader{ false };
+	bool is_raid_leader{ false };
+	bool is_looter{ false };
+	uint8 main_marker{ 0 };
+	uint8 main_assister{ 0 };
+	bool is_bot{ false };
+	bool is_raid_main_assist_one{false};
 };
 
 struct GroupMentor {
@@ -131,6 +131,7 @@ public:
 	void	SetNewRaidLeader(uint32 i);
 	bool    IsAssister(const char* who);
 	bool    IsMarker(const char* who);
+	void    EmptyRaidMembers();
 
 	uint32	GetFreeGroup();
 	uint8	GroupCount(uint32 gid);
