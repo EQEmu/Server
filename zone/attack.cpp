@@ -1741,8 +1741,7 @@ bool Client::Death(Mob* killerMob, int64 damage, uint16 spell, EQ::skills::Skill
 			static_cast<int>(attack_skill)
 		);
 
-		std::vector<std::any> args = { CastToMob() };
-		if (parse->EventPlayer(EVENT_DEATH, this, export_string, 0, &args) != 0) {
+		if (parse->EventPlayer(EVENT_DEATH, this, export_string, 0) != 0) {
 			if (GetHP() < 0) {
 				SetHP(0);
 			}
@@ -2389,8 +2388,7 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 				static_cast<int>(attack_skill)
 			);
 
-			std::vector<std::any> args = { CastToMob() };
-			if (parse->EventNPC(EVENT_DEATH, this, oos, export_string, 0, &args) != 0) {
+			if (parse->EventNPC(EVENT_DEATH, this, oos, export_string, 0) != 0) {
 				if (GetHP() < 0) {
 					SetHP(0);
 				}
@@ -2407,9 +2405,7 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 				spell,
 				static_cast<int>(attack_skill)
 			);
-
-			std::vector<std::any> args = { CastToMob() };
-			if (parse->EventBot(EVENT_DEATH, CastToBot(), oos, export_string, 0, &args) != 0) {
+			if (parse->EventBot(EVENT_DEATH, CastToBot(), oos, export_string, 0) != 0) {
 				if (GetHP() < 0) {
 					SetHP(0);
 				}
