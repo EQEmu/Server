@@ -2988,7 +2988,7 @@ void Raid::EmptyRaidMembers()
 		members[i].is_raid_leader  = false;
 		members[i].is_raid_main_assist_one = false;
 		members[i].member          = nullptr;
-		members[i].note            = '\0';
+		members[i].note.clear();
 		members[i].member_name[0]  = '\0';
 	}
 }
