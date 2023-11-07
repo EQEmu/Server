@@ -5005,6 +5005,7 @@ ADD UNIQUE INDEX(`varname`);
 		.match = "",
 		.sql = R"(
 CREATE TABLE `spawn2_backup_2023_10_29` LIKE `spawn2`;
+INSERT INTO `spawn2_backup_2023_10_29` SELECT * FROM `spawn2`;
 CREATE TABLE `spawn2_disabled` (
   `id` bigint(11) NOT NULL AUTO_INCREMENT,
   `spawn2_id` int(11) DEFAULT NULL,

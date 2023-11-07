@@ -1,3 +1,9 @@
+## [22.32.1] - 11/6/2023
+
+### Hotfix
+
+* Adjust spawn2_disabled migration to copy data over
+
 ## [22.32.0] - 11/6/2023
 
 ### Bots
