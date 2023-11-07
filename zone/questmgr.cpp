@@ -3198,8 +3198,29 @@ std::string QuestManager::varlink(
 
 	return linker.GenerateLink();
 }
+
+std::string QuestManager::getitemcomment(uint32 item_id) {
+	const auto* item_data = database.GetItem(item_id);
+	if (!item_data) {
+		return "INVALID ITEM ID IN GETITEMCOMMENT";
+	}
+
+	std::string item_comment = item_data->Comment;
+	return item_comment;
+}
+
+std::string QuestManager::getitemlore(uint32 item_id) {
+	const auto* item_data = database.GetItem(item_id);
+	if (!item_data) {
+		return "INVALID ITEM ID IN GETITEMLORE";
+	}
+
+	std::string item_lore = item_data->Lore;
+	return item_lore;
+}
+
 std::string QuestManager::getitemname(uint32 item_id) {
-	const EQ::ItemData* item_data = database.GetItem(item_id);
+	const auto* item_data = database.GetItem(item_id);
 	if (!item_data) {
 		return "INVALID ITEM ID IN GETITEMNAME";
 	}

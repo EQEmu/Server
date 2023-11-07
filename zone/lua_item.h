@@ -32,6 +32,7 @@ public:
 	int GetItemClass();
 	const char *GetName();
 	const char *GetLore();
+	const char *GetComment();
 	const char *GetIDFile();
 	uint32 GetID();
 	int GetWeight();

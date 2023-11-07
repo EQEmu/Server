@@ -1433,6 +1433,16 @@ void Perl__removeitem(uint32_t item_id, int quantity)
 	quest_manager.removeitem(item_id, quantity);
 }
 
+std::string Perl__getitemcomment(uint32 item_id)
+{
+	return quest_manager.getitemcomment(item_id);
+}
+
+std::string Perl__getitemlore(uint32 item_id)
+{
+	return quest_manager.getitemlore(item_id);
+}
+
 std::string Perl__getitemname(uint32 item_id)
 {
 	return quest_manager.getitemname(item_id);
@@ -6377,6 +6387,8 @@ void perl_register_quest()
 	package.add("get_expedition_lockouts_by_char_id", (perl::reference(*)(uint32, std::string))&Perl__get_expedition_lockouts_by_char_id);
 	package.add("getfactionname", &Perl__getfactionname);
 	package.add("getinventoryslotid", &Perl__getinventoryslotid);
+	package.add("getitemcomment", &Perl__getitemcomment);
+	package.add("getitemlore", &Perl__getitemlore);
 	package.add("getitemname", &Perl__getitemname);
 	package.add("getitemstat", &Perl__getitemstat);
 	package.add("getlanguagename", &Perl__getlanguagename);

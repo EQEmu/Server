@@ -26,6 +26,11 @@ const char* Perl_QuestItemData_GetLore(EQ::ItemData* self)
 	return self->Lore;
 }
 
+const char* Perl_QuestItem_GetComment(EQ::ItemData* self)
+{
+	return self->Comment;
+}
+
 const char* Perl_QuestItemData_GetIDFile(EQ::ItemData* self)
 {
 	return self->IDFile;
@@ -949,6 +954,7 @@ void perl_register_questitem_data()
 	package.add("GetClickType", &Perl_QuestItemData_GetClickType);
 	package.add("GetColor", &Perl_QuestItemData_GetColor);
 	package.add("GetCombatEffects", &Perl_QuestItemData_GetCombatEffects);
+	package.add("GetComment", &Perl_QuestItem_GetComment);
 	package.add("GetCorruption", &Perl_QuestItemData_GetCorruption);
 	package.add("GetDR", &Perl_QuestItemData_GetDR);
 	package.add("GetDSMitigation", &Perl_QuestItemData_GetDSMitigation);

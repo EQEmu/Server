@@ -356,6 +356,7 @@ namespace EQ
 	struct ItemData {
 		// Non packet based fields
 		uint8	MinStatus {};
+		char	Comment[255] {};
 
 		// Packet based fields
 		uint8	ItemClass {};		// Item Type: 0=common, 1=container, 2=book
