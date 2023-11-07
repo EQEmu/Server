@@ -5870,8 +5870,8 @@ void perl_register_quest()
 	package.add("GetZoneFogRed", (uint8(*)(uint32))&Perl__GetZoneFogRed);
 	package.add("GetZoneFogRed", (uint8(*)(uint32, uint8))&Perl__GetZoneFogRed);
 	package.add("GetZoneFogRed", (uint8(*)(uint32, uint8, int))&Perl__GetZoneFogRed);
-	package.add("GetZoneGravity", (float(*)(uint32))&Perl__GetZoneGravity);
-	package.add("GetZoneGravity", (float(*)(uint32, int))&Perl__GetZoneGravity);
+	package.add("GetZoneGravity", (float(*)(uint32))&Perl__GetZoneMaximumClip);
+	package.add("GetZoneGravity", (float(*)(uint32, int))&Perl__GetZoneMaximumClip);
 	package.add("GetZoneMaximumClip", (float(*)(uint32))&Perl__GetZoneMaximumClip);
 	package.add("GetZoneMaximumClip", (float(*)(uint32, int))&Perl__GetZoneMaximumClip);
 	package.add("GetZoneMaximumExpansion", (int8(*)(uint32))&Perl__GetZoneMaximumExpansion);
