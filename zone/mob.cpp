@@ -3586,10 +3586,17 @@ void Mob::SendIllusionPacket(const AppearanceStruct& a)
 	gender           = new_gender;
 	hairstyle        = new_hair;
 	haircolor        = new_hair_color;
-	helmtexture      = new_helmet_texture;
 	race             = new_race;
 	size             = new_size;
-	texture          = new_texture;
+
+	// These two should not be modified in base data - it kills db texture
+	// when illusion is only for RandomizeFeatures...
+	if (new_helmet_texture != UINT8_MAX) {
+		helmtexture      = new_helmet_texture;
+	}
+	if (new_texture != UINT8_MAX) {
+		texture          = new_texture;
+	}
 
 	auto outapp = new EQApplicationPacket(OP_Illusion, sizeof(Illusion_Struct));
 	auto is     = (Illusion_Struct *) outapp->pBuffer;
