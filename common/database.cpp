@@ -2114,12 +2114,21 @@ struct TimeOfDay_Struct Database::LoadTime(time_t &realtime)
 	else{
 		auto row = results.begin();
 
+		uint8 hour = Strings::ToUnsignedInt(row[1]);
+		time_t realtime_ = Strings::ToBigInt(row[5]);
+		if (RuleI(World, BootHour) > 0 && RuleI(World, BootHour) <= 24)
+		{
+			hour = RuleI(World, BootHour);
+			realtime_ = time(0);
+			LogMySQLQuery("EQTime: Setting hour to: [{}]", hour);
+		}
+
 		eqTime.minute = Strings::ToUnsignedInt(row[0]);
-		eqTime.hour = Strings::ToUnsignedInt(row[1]);
+		eqTime.hour = hour;
 		eqTime.day = Strings::ToUnsignedInt(row[2]);
 		eqTime.month = Strings::ToUnsignedInt(row[3]);
 		eqTime.year = Strings::ToUnsignedInt(row[4]);
-		realtime = Strings::ToBigInt(row[5]);
+		realtime = realtime_;
 	}
 
 	return eqTime;

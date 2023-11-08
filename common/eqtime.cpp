@@ -222,3 +222,25 @@ bool EQTime::IsNightTime() {
 
 	return false;
 }
+
+bool EQTime::IsInbetweenTime(uint8 min_time, uint8 max_time) {
+	TimeOfDay_Struct tod;
+	GetCurrentEQTimeOfDay(&tod);
+
+	if (min_time == 0 || max_time == 0 || min_time > 24 || max_time > 24) {
+		return true;
+	}
+
+	if (max_time < min_time) {
+		if ((tod.hour >= min_time && tod.hour > max_time) || (tod.hour < min_time && tod.hour <= max_time)) {
+			return true;
+		}
+	}
+	else {
+		if (tod.hour >= min_time && tod.hour <= max_time) {
+			return true;
+		}
+	}
+
+	return false;
+}

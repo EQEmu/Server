@@ -29,12 +29,13 @@
 extern EntityList entity_list;
 extern Zone       *zone;
 
-SpawnEntry::SpawnEntry(uint32 in_NPCType, int in_chance, uint16 in_filter, uint8 in_npc_spawn_limit)
-{
+SpawnEntry::SpawnEntry(uint32 in_NPCType, int in_chance, uint16 in_filter, uint8 in_npc_spawn_limit, uint8 in_min_time, uint8 in_max_time) {
 	NPCType                = in_NPCType;
 	chance                 = in_chance;
 	condition_value_filter = in_filter;
 	npc_spawn_limit        = in_npc_spawn_limit;
+	min_time               = in_min_time;
+	max_time               = in_max_time;
 }
 
 SpawnGroup::SpawnGroup(
@@ -85,8 +86,15 @@ uint32 SpawnGroup::GetNPCType(uint16 in_filter)
 			continue;
 		}
 
-		if (se->condition_value_filter != in_filter)
+		if (se->min_time != 0 && se->max_time != 0 && se->min_time <= 24 && se->max_time <= 24) {
+			if (!zone->zone_time.IsInbetweenTime(se->min_time, se->max_time)) {
+				continue;
+			}
+		}
+
+		if (se->condition_value_filter != in_filter) {
 			continue;
+		}
 
 		totalchance += se->chance;
 		possible.push_back(se);
@@ -224,7 +232,9 @@ bool ZoneDatabase::LoadSpawnGroups(const char *zone_name, uint16 version, SpawnG
 			chance,
 			condition_value_filter,
 			npc_types.spawn_limit
-				AS sl
+				AS sl,
+				min_time,
+				max_time
 				FROM
 				spawnentry,
 			spawn2,
@@ -251,7 +261,9 @@ bool ZoneDatabase::LoadSpawnGroups(const char *zone_name, uint16 version, SpawnG
 			Strings::ToInt(row[1]),
 			Strings::ToInt(row[2]),
 			Strings::ToInt(row[3]),
-			(row[4] ? Strings::ToInt(row[4]) : 0)
+			(row[4] ? Strings::ToInt(row[4]) : 0),
+			Strings::ToInt(row[5]),
+			Strings::ToInt(row[6])
 		);
 
 		SpawnGroup *spawn_group = spawn_group_list->GetSpawnGroup(Strings::ToInt(row[0]));
@@ -340,7 +352,9 @@ bool ZoneDatabase::LoadSpawnGroupsByID(int spawn_group_id, SpawnGroupList *spawn
 			spawnentry.npcid,
 			spawnentry.chance,
 			spawnentry.condition_value_filter,
-			spawngroup.spawn_limit
+			spawngroup.spawn_limit,
+			spawnentry.min_time,
+			spawnentry.max_time
 				FROM
 				spawnentry,
 			spawngroup
@@ -361,16 +375,20 @@ bool ZoneDatabase::LoadSpawnGroupsByID(int spawn_group_id, SpawnGroupList *spawn
 			Strings::ToInt(row[1]),
 			Strings::ToInt(row[2]),
 			Strings::ToInt(row[3]),
-			(row[4] ? Strings::ToInt(row[4]) : 0)
+			(row[4] ? Strings::ToInt(row[4]) : 0),
+			Strings::ToInt(row[5]),
+			Strings::ToInt(row[6])
 		);
 
 		LogSpawnsDetail(
-			"Loading spawn_entry spawn_group_id [{}] npc_id [{}] chance [{}] condition_value_filter [{}] spawn_limit [{}]",
+			"Loading spawn_entry spawn_group_id [{}] npc_id [{}] chance [{}] condition_value_filter [{}] spawn_limit [{}] min_time [{}] max_time [{}] ",
 			row[0],
 			row[1],
 			row[2],
 			row[3],
-			row[4]
+			row[4],
+			row[5],
+			row[6]
 		);
 
 		SpawnGroup *spawn_group = spawn_group_list->GetSpawnGroup(Strings::ToInt(row[0]));
