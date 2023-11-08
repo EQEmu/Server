@@ -16,6 +16,7 @@
 #include "../../strings.h"
 #include <ctime>
 
+
 class BaseSpawnentryRepository {
 public:
 	struct Spawnentry {
@@ -23,8 +24,8 @@ public:
 		int32_t     npcID;
 		int16_t     chance;
 		int32_t     condition_value_filter;
-		int8_t      min_time;
-		int8_t      max_time;
+		int16_t     min_time;
+		int16_t     max_time;
 		int8_t      min_expansion;
 		int8_t      max_expansion;
 		std::string content_flags;
@@ -140,8 +141,9 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				spawnentry_id
 			)
 		);
@@ -154,8 +156,8 @@ public:
 			e.npcID                  = static_cast<int32_t>(atoi(row[1]));
 			e.chance                 = static_cast<int16_t>(atoi(row[2]));
 			e.condition_value_filter = static_cast<int32_t>(atoi(row[3]));
-			e.min_time               = static_cast<int8_t>(atoi(row[4]));
-			e.max_time               = static_cast<int8_t>(atoi(row[5]));
+			e.min_time               = static_cast<int16_t>(atoi(row[4]));
+			e.max_time               = static_cast<int16_t>(atoi(row[5]));
 			e.min_expansion          = static_cast<int8_t>(atoi(row[6]));
 			e.max_expansion          = static_cast<int8_t>(atoi(row[7]));
 			e.content_flags          = row[8] ? row[8] : "";
@@ -310,8 +312,8 @@ public:
 			e.npcID                  = static_cast<int32_t>(atoi(row[1]));
 			e.chance                 = static_cast<int16_t>(atoi(row[2]));
 			e.condition_value_filter = static_cast<int32_t>(atoi(row[3]));
-			e.min_time               = static_cast<int8_t>(atoi(row[4]));
-			e.max_time               = static_cast<int8_t>(atoi(row[5]));
+			e.min_time               = static_cast<int16_t>(atoi(row[4]));
+			e.max_time               = static_cast<int16_t>(atoi(row[5]));
 			e.min_expansion          = static_cast<int8_t>(atoi(row[6]));
 			e.max_expansion          = static_cast<int8_t>(atoi(row[7]));
 			e.content_flags          = row[8] ? row[8] : "";
@@ -344,8 +346,8 @@ public:
 			e.npcID                  = static_cast<int32_t>(atoi(row[1]));
 			e.chance                 = static_cast<int16_t>(atoi(row[2]));
 			e.condition_value_filter = static_cast<int32_t>(atoi(row[3]));
-			e.min_time               = static_cast<int8_t>(atoi(row[4]));
-			e.max_time               = static_cast<int8_t>(atoi(row[5]));
+			e.min_time               = static_cast<int16_t>(atoi(row[4]));
+			e.max_time               = static_cast<int16_t>(atoi(row[5]));
 			e.min_expansion          = static_cast<int8_t>(atoi(row[6]));
 			e.max_expansion          = static_cast<int8_t>(atoi(row[7]));
 			e.content_flags          = row[8] ? row[8] : "";
