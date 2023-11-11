@@ -46,6 +46,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #else
 #include "unix.h"
 #include "../zone/zonedb.h"
+#include "zone_store.h"
 #include <netinet/in.h>
 #include <sys/time.h>
 #endif
@@ -127,7 +128,36 @@ bool Database::CreateInstance(uint16 instance_id, uint32 zone_id, uint32 version
 	e.start_time = std::time(nullptr);
 	e.duration = duration;
 
-	return InstanceListRepository::InsertOne(*this, e).id;
+	auto i = InstanceListRepository::InsertOne(*this, e);
+	if (!i.id) {
+		return false;
+	}
+
+	auto z = GetZone(zone_id);
+	if (!z) {
+		LogError("Failed to find zone for instance creation - zone_id [{}]", zone_id);
+		return false;
+	}
+
+	// copy spawn2_disabled entries from regular zone to instance
+	auto spawns = Spawn2DisabledRepository::GetWhere(
+		*this,
+		fmt::format(
+			"spawn2_id IN (select id from spawn2 where LOWER(zone) = '{}' and version = {}) and instance_id = 0",
+			z->short_name,
+			version
+		)
+	);
+
+	if (!spawns.empty()) {
+		for (auto &s: spawns) {
+			s.id = 0;
+			s.instance_id = instance_id;
+		}
+		Spawn2DisabledRepository::InsertMany(*this, spawns);
+	}
+
+	return i.id;
 }
 
 bool Database::GetUnusedInstanceID(uint16 &instance_id)

@@ -6,6 +6,8 @@
 #include "rulesys.h"
 #include "servertalk.h"
 #include "util/uuid.h"
+#include "repositories/spawn2_disabled_repository.h"
+#include "zone_store.h"
 
 DynamicZoneBase::DynamicZoneBase(DynamicZonesRepository::DynamicZoneInstance&& entry)
 {
@@ -62,6 +64,30 @@ uint32_t DynamicZoneBase::CreateInstance()
 	{
 		LogDynamicZones("Failed to create instance [{}] for zone [{}]", unused_instance_id, m_zone_id);
 		return 0;
+	}
+
+	auto z = GetZone(m_zone_id);
+	if (!z) {
+		LogError("Failed to find zone for instance creation - zone_id [{}]", m_zone_id);
+		return false;
+	}
+
+	// copy spawn2_disabled entries from regular zone to instance
+	auto spawns = Spawn2DisabledRepository::GetWhere(
+		GetDatabase(),
+		fmt::format(
+			"spawn2_id IN (select id from spawn2 where LOWER(zone) = '{}' and version = {}) and instance_id = 0",
+			z->short_name,
+			m_zone_version
+		)
+	);
+
+	if (!spawns.empty()) {
+		for (auto &s: spawns) {
+			s.id = 0;
+			s.instance_id = instance.id;
+		}
+		Spawn2DisabledRepository::InsertMany(GetDatabase(), spawns);
 	}
 
 	m_instance_id = instance.id;
