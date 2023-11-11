@@ -1,3 +1,4 @@
+
 /*	EQEMu: Everquest Server Emulator
 Copyright (C) 2001-2005 EQEMu Development Team (http://eqemulator.net)
 
@@ -47,6 +48,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/events/player_event_logs.h"
 #include "../common/patches/patches.h"
 #include "../zone/data_bucket.h"
+#include "../common/repositories/guild_tributes_repository.h"
 
 extern ClientList client_list;
 extern GroupLFPList LFPGroupList;
@@ -978,6 +980,8 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		case ServerOP_DeleteGuild:
 		case ServerOP_GuildCharRefresh:
 		case ServerOP_GuildMemberUpdate:
+		case ServerOP_GuildPermissionUpdate:
+		case ServerOP_GuildRankNameChange:
 		case ServerOP_RefreshGuild: {
 			guild_mgr.ProcessZonePacket(pack);
 			break;
@@ -1522,6 +1526,213 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		case ServerOP_DataBucketCacheUpdate: {
 			zoneserver_list.SendPacket(pack);
 
+			break;
+		}
+		case ServerOP_GuildTributeUpdate: {
+			GuildTributeUpdate* data = (GuildTributeUpdate*)pack->pBuffer;
+			auto guild = guild_mgr.GetGuildByGuildID(data->guild_id);
+
+			if (guild) {
+				guild->tribute.enabled		  = 0;
+				guild->tribute.id_1			  = data->tribute_id_1;
+				guild->tribute.id_2			  = data->tribute_id_2;
+				guild->tribute.id_1_tier	  = data->tribute_id_1_tier;
+				guild->tribute.id_2_tier	  = data->tribute_id_2_tier;
+				guild->tribute.time_remaining = RuleI(Guild, TributeTime);
+
+				guild->tribute.timer.Disable();
+
+				for (auto const& z : zoneserver_list.getZoneServerList()) {
+					auto r = z.get();
+					if (r->GetZoneID() > 0) {
+						r->SendPacket(pack);
+					}
+				}
+			}
+			break;
+		}
+		case ServerOP_GuildTributeActivate: {
+			GuildTributeUpdate* data = (GuildTributeUpdate*)pack->pBuffer;
+			auto guild = guild_mgr.GetGuildByGuildID(data->guild_id);
+
+			if (guild) {
+				guild->tribute.enabled		  = data->enabled;
+
+				if (guild->tribute.enabled) {
+					data->enabled			= 1;
+					if (guild->tribute.time_remaining == RuleI(Guild, TributeTime)) {
+						data->favor = (guild->tribute.favor -= guild_mgr.GetGuildTributeCost(data->guild_id));
+					}
+					data->time_remaining	= guild->tribute.time_remaining;
+					data->tribute_id_1		= guild->tribute.id_1;
+					data->tribute_id_2		= guild->tribute.id_2;
+					data->tribute_id_1_tier = guild->tribute.id_1_tier;
+					data->tribute_id_2_tier = guild->tribute.id_2_tier;
+
+					guild->tribute.timer.Start(guild->tribute.time_remaining);
+					LogInfo("Guild Tribute Timer Started.");
+				}
+				else {
+					if (guild->tribute.timer.Enabled()) {
+						guild->tribute.time_remaining = guild->tribute.timer.GetRemainingTime();
+					}
+					data->enabled = 0;
+					data->favor				= guild->tribute.favor;
+					data->time_remaining	= guild->tribute.time_remaining;
+					data->tribute_id_1		= guild->tribute.id_1;
+					data->tribute_id_2		= guild->tribute.id_2;
+					data->tribute_id_1_tier = guild->tribute.id_1_tier;
+					data->tribute_id_2_tier = guild->tribute.id_2_tier;
+					LogInfo("Guild Tribute Timer Stopped with {} ms remaining.", data->time_remaining);
+					guild->tribute.timer.Disable();
+				}
+				guild_mgr.DBSetGuildTributeEnabled(data->guild_id, data->enabled);
+				guild_mgr.DBSetGuildFavor(data->guild_id, data->favor);
+				guild_mgr.DBSetTributeTimeRemaining(data->guild_id, data->time_remaining);
+
+				for (auto const& z : zoneserver_list.getZoneServerList()) {
+					auto r = z.get();
+					if (r->GetZoneID() > 0) {
+						r->SendPacket(pack);
+					}
+				}
+			}
+			break;
+		}
+		case ServerOP_GuildTributeOptInToggle:
+		{
+			GuildTributeMemberToggle* in = (GuildTributeMemberToggle*)pack->pBuffer;
+			auto guild = guild_mgr.GetGuildByGuildID(in->guild_id);
+
+			auto c = client_list.FindCharacter(in->player_name);
+			if (c) {
+				c->SetGuildTributeOptIn(in->tribute_toggle ? true : false);
+			}
+
+			auto cle = client_list.FindCLEByCharacterID(in->char_id);
+			if (cle) {
+				cle->SetGuildTributeOptIn(in->tribute_toggle ? true : false);
+			}
+			
+			if (guild) {
+			
+				CharGuildInfo gci;
+				guild_mgr.GetCharInfo(in->char_id, gci);
+
+				ServerPacket* out = new ServerPacket(ServerOP_GuildTributeOptInToggle, sizeof(GuildTributeMemberToggle));
+				GuildTributeMemberToggle* data = (GuildTributeMemberToggle*)out->pBuffer;
+
+				data->char_id = in->char_id;
+				data->command = in->command;
+				data->tribute_toggle = in->tribute_toggle;
+				data->no_donations = gci.total_tribute;
+				data->member_last_donated = gci.last_tribute;
+				data->guild_id = in->guild_id;
+				strncpy(data->player_name, in->player_name, strlen(in->player_name));
+				data->time_remaining = guild->tribute.timer.GetRemainingTime();
+
+				for (auto const& z : zoneserver_list.getZoneServerList()) {
+					if (z.get()->GetZoneID() > 0) {
+						z.get()->SendPacket(out);
+					}
+				}
+				safe_delete(out);
+			}
+			break;
+		}
+		case ServerOP_RequestGuildActiveTributes:
+		{
+			GuildTributeUpdate* in = (GuildTributeUpdate*)pack->pBuffer;
+			auto guild = guild_mgr.GetGuildByGuildID(in->guild_id);
+
+			if (guild) {
+				ServerPacket* sp = new ServerPacket(ServerOP_RequestGuildActiveTributes, sizeof(GuildTributeUpdate));
+				GuildTributeUpdate* out = (GuildTributeUpdate*)sp->pBuffer;
+				
+				out->guild_id		   = in->guild_id;
+				out->enabled	       = guild->tribute.enabled;
+				out->favor			   = guild->tribute.favor;
+				out->tribute_id_1	   = guild->tribute.id_1;
+				out->tribute_id_2	   = guild->tribute.id_2;
+				out->tribute_id_1_tier = guild->tribute.id_1_tier;
+				out->tribute_id_2_tier = guild->tribute.id_2_tier;
+				if (guild->tribute.timer.Enabled()) {
+					out->time_remaining = guild->tribute.timer.GetRemainingTime();
+					guild->tribute.time_remaining = guild->tribute.timer.GetRemainingTime();
+				}
+				else {
+					out->time_remaining = guild->tribute.time_remaining;
+				}
+
+				for (auto const& z : zoneserver_list.getZoneServerList()) {
+					auto r = z.get();
+					if (r->GetZoneID() > 0) {
+						r->SendPacket(sp);
+					}
+				}
+				safe_delete(sp);
+			}
+
+			break;
+		}
+		case ServerOP_RequestGuildFavorAndTimer:
+		{
+			GuildTributeUpdate* in = (GuildTributeUpdate*)pack->pBuffer;
+			auto guild = guild_mgr.GetGuildByGuildID(in->guild_id);
+
+			if (guild) {
+				ServerPacket* sp = new ServerPacket(ServerOP_RequestGuildFavorAndTimer, sizeof(GuildTributeFavorTimer_Struct));
+				GuildTributeFavorTimer_Struct* out = (GuildTributeFavorTimer_Struct*)sp->pBuffer;
+
+				out->guild_id	   = in->guild_id;
+				out->guild_favor   = guild->tribute.favor;
+				if (guild->tribute.timer.Enabled()) {
+					out->tribute_timer = guild->tribute.timer.GetRemainingTime();
+					guild->tribute.time_remaining = guild->tribute.timer.GetRemainingTime();
+				}
+				else {
+					out->tribute_timer = guild->tribute.time_remaining;
+				}
+				out->trophy_timer  = 0;
+
+				for (auto const& z : zoneserver_list.getZoneServerList()) {
+					auto r = z.get();
+					if (r->GetZoneID() > 0) {
+						r->SendPacket(sp);
+					}
+				}
+				safe_delete(sp);
+			}
+
+			break;
+		}
+		case ServerOP_GuildTributeUpdateDonations:
+		{
+			GuildTributeUpdate* in = (GuildTributeUpdate*)pack->pBuffer;
+
+			auto guild = guild_mgr.GetGuildByGuildID(in->guild_id);
+			if (guild) {
+				guild->tribute.favor = in->favor;
+
+				guild_mgr.SendGuildTributeFavorAndTimer(in->guild_id, guild->tribute.favor, guild->tribute.timer.GetRemainingTime());
+
+				ServerPacket* sp = new ServerPacket(ServerOP_GuildTributeUpdateDonations, sizeof(GuildTributeUpdate));
+				GuildTributeUpdate* out = (GuildTributeUpdate*)sp->pBuffer;
+
+				out->guild_id = in->guild_id;
+				strncpy(out->player_name, in->player_name, strlen(in->player_name));
+				out->member_favor = in->member_favor;
+				out->member_enabled = in->member_enabled ? true : false;
+				out->member_time = in->member_time;
+
+				for (auto const& z : zoneserver_list.getZoneServerList()) {
+					auto r = z.get();
+					if (r->GetZoneID() > 0) {
+						r->SendPacket(sp);
+					}
+				}
+				safe_delete(sp);
+			}
 			break;
 		}
 		default: {

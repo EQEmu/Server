@@ -223,6 +223,9 @@ SET(repositories
     repositories/base/base_group_leaders_repository.h
     repositories/base/base_guilds_repository.h
     repositories/base/base_guild_ranks_repository.h
+    repositories/base/base_guild_permissions_repository.h
+    repositories/base/base_guild_members_repository.h
+    repositories/base/base_guild_bank_repository.h
     repositories/base/base_guild_relations_repository.h
     repositories/base/base_horses_repository.h
     repositories/base/base_instance_list_repository.h
@@ -401,6 +404,9 @@ SET(repositories
     repositories/group_leaders_repository.h
     repositories/guilds_repository.h
     repositories/guild_ranks_repository.h
+    repositories/guild_permissions_repository.h
+    repositories/guild_members_repository.h
+    repositories/guild_bank_repository.h
     repositories/guild_relations_repository.h
     repositories/horses_repository.h
     repositories/instance_list_repository.h

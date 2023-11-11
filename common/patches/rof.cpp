@@ -1308,13 +1308,13 @@ namespace RoF
 				PutFieldN(class_);
 
 				/* Translate older ranks to new values */
-				switch (emu_e->rank) {
-				case 0: { e->rank = htonl(5); break; }  // GUILD_MEMBER	0
-				case 1: { e->rank = htonl(3); break; }  // GUILD_OFFICER 1
-				case 2: { e->rank = htonl(1); break; }  // GUILD_LEADER	2
-				default: { e->rank = htonl(emu_e->rank); break; } // GUILD_NONE
-				}
-
+				//switch (emu_e->rank) {
+				//case 0: { e->rank = htonl(5); break; }  // GUILD_MEMBER	0
+				//case 1: { e->rank = htonl(3); break; }  // GUILD_OFFICER 1
+				//case 2: { e->rank = htonl(1); break; }  // GUILD_LEADER	2
+				//default: { e->rank = htonl(emu_e->rank); break; } // GUILD_NONE
+				//}
+				PutFieldN(rank);
 				PutFieldN(time_last_on);
 				PutFieldN(tribute_enable);
 				e->unknown01 = 0;

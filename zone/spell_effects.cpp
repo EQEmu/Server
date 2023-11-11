@@ -6533,7 +6533,49 @@ int64 Mob::GetFocusEffect(focusType type, uint16 spell_id, Mob *caster, bool fro
 							focus_max_real = focus_max;
 							UsedItem = TempItem;
 							UsedFocusID = TempItem->Focus.Effect;
-						} else if (focus_max < 0 && focus_max < focus_max_real) {
+						}
+						else if (focus_max < 0 && focus_max < focus_max_real) {
+							focus_max_real = focus_max;
+							UsedItem = TempItem;
+							UsedFocusID = TempItem->Focus.Effect;
+						}
+					}
+					else {
+						Total = CalcFocusEffect(type, TempItem->Focus.Effect, spell_id);
+						if (Total > 0 && realTotal >= 0 && Total > realTotal) {
+							realTotal = Total;
+							UsedItem = TempItem;
+							UsedFocusID = TempItem->Focus.Effect;
+						}
+						else if (Total < 0 && Total < realTotal) {
+							realTotal = Total;
+							UsedItem = TempItem;
+							UsedFocusID = TempItem->Focus.Effect;
+						}
+					}
+				}
+			}
+		}
+
+		if (IsClient()) {
+			//Client Guild Tribute Focus
+			for (int x = EQ::invslot::GUILD_TRIBUTE_BEGIN; x <= EQ::invslot::GUILD_TRIBUTE_END; ++x) {
+				TempItem = nullptr;
+				EQ::ItemInstance* ins = GetInv().GetItem(x);
+				if (!ins) {
+					continue;
+				}
+
+				TempItem = ins->GetItem();
+				if (TempItem && IsValidSpell(TempItem->Focus.Effect)) {
+					if (rand_effectiveness) {
+						focus_max = CalcFocusEffect(type, TempItem->Focus.Effect, spell_id, true);
+						if (focus_max > 0 && focus_max_real >= 0 && focus_max > focus_max_real) {
+							focus_max_real = focus_max;
+							UsedItem = TempItem;
+							UsedFocusID = TempItem->Focus.Effect;
+						}
+						else if (focus_max < 0 && focus_max < focus_max_real) {
 							focus_max_real = focus_max;
 							UsedItem = TempItem;
 							UsedFocusID = TempItem->Focus.Effect;

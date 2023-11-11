@@ -106,8 +106,11 @@ public:
 	inline uint16		race() const		{ return prace; }
 	inline uint8			Anon()				{ return panon; }
 	inline uint8			TellsOff() const	{ return ptellsoff; }
-	inline uint32		GuildID() const	{ return pguild_id; }
+	inline uint32		GuildID() const { return pguild_id; }
+	inline uint32		GuildRank() const { return pguild_rank; }
+	inline bool		    GuildTributeOptIn() const {	return pguild_tribute_opt_in; }
 	inline void			SetGuild(uint32 guild_id) { pguild_id = guild_id; }
+	inline void			SetGuildTributeOptIn(bool opt) { pguild_tribute_opt_in = opt; }
 	inline bool			LFG() const			{ return pLFG; }
 	inline uint8			GetGM() const		{ return gm; }
 	inline void			SetGM(uint8 igm)	{ gm = igm; }
@@ -160,6 +163,8 @@ private:
 	uint8	panon{};
 	uint8	ptellsoff{};
 	uint32	pguild_id{};
+	uint32  pguild_rank;
+	bool	pguild_tribute_opt_in{};
 	bool	pLFG{};
 	uint8	gm{};
 	uint8	pClientVersion{};

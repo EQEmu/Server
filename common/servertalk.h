@@ -93,6 +93,15 @@
 #define ServerOP_WebInterfaceEvent  0x0066
 #define ServerOP_WebInterfaceSubscribe 0x0067
 #define ServerOP_WebInterfaceUnsubscribe 0x0068
+#define ServerOP_GuildPermissionUpdate			  0x0069
+#define ServerOP_GuildTributeUpdate				  0x0070
+#define ServerOP_GuildRankNameChange			  0x0071
+#define ServerOP_GuildTributeActivate			  0x0072
+#define ServerOP_GuildTributeOptInToggle		  0x0073
+#define ServerOP_GuildTributeFavAndTimer		  0x0074
+#define ServerOP_RequestGuildActiveTributes		  0x0075
+#define ServerOP_RequestGuildFavorAndTimer		  0x0076
+#define ServerOP_GuildTributeUpdateDonations      0x0077
 
 #define ServerOP_RaidAdd			0x0100 //in use
 #define ServerOP_RaidRemove			0x0101 //in use
@@ -563,6 +572,8 @@ struct ServerClientList_Struct {
 	uint8	anon;
 	bool	tellsoff;
 	uint32	guild_id;
+	uint32	guild_rank;
+	bool    guild_tribute_opt_in;
 	bool	LFG;
 	uint8	gm;
 	uint8	ClientVersion;
@@ -1002,12 +1013,20 @@ struct ServerGuildCharRefresh_Struct {
 	uint32 char_id;
 };
 
+struct ServerGuildCharRefresh2_Struct {
+	uint32 guild_id;
+	uint32 old_guild_id;
+	uint32 char_id;
+	uint32 rank;
+};
+
 struct ServerGuildRankUpdate_Struct
 {
 	uint32 GuildID;
-	char MemberName[64];
+	char   MemberName[64];
 	uint32 Rank;
 	uint32 Banker;
+	bool   no_update;
 };
 
 struct ServerGuildMemberUpdate_Struct {
@@ -1015,6 +1034,22 @@ struct ServerGuildMemberUpdate_Struct {
 	char MemberName[64];
 	uint32 ZoneID;
 	uint32 LastSeen;
+};
+
+struct ServerGuildPermissionUpdate_Struct
+{
+	uint32 GuildID;
+	char   MemberName[64];
+	uint32 Rank;
+	uint32 FunctionID;
+	uint32 FunctionValue;
+};
+
+struct ServerGuildRankNameChange
+{
+	uint32		guild_id;
+	uint32		rank;
+	std::string	rank_name;
 };
 
 struct SpawnPlayerCorpse_Struct {
@@ -1843,6 +1878,32 @@ struct ServerOOCMute_Struct {
 struct ServerZoneStatus_Struct {
 	char  name[64];
 	int16 admin;
+};
+
+struct GuildTributeUpdate {
+	uint32 guild_id;
+	uint32 tribute_id_1;
+	uint32 tribute_id_2;
+	uint32 tribute_id_1_tier;
+	uint32 tribute_id_2_tier;
+	uint32 enabled;
+	uint32 favor;
+	uint32 time_remaining;
+	uint32 member_favor;
+	uint32 member_time;
+	uint32 member_enabled;
+	char   player_name[64];
+};
+
+struct GuildTributeMemberToggle {
+	uint32	guild_id;
+	uint32	char_id;
+	char	player_name[64];
+	uint32	tribute_toggle;
+	uint32	command;
+	uint32	time_remaining;
+	uint32	no_donations;
+	uint32  member_last_donated;
 };
 
 #pragma pack()

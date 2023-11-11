@@ -173,7 +173,8 @@ EQ::ItemInstance* EQ::InventoryProfile::GetItem(int16 slot_id) const
 		result = _GetItem(m_inv, slot_id);
 	}
 	else if ((slot_id >= invslot::EQUIPMENT_BEGIN && slot_id <= invslot::EQUIPMENT_END) ||
-		(slot_id >= invslot::TRIBUTE_BEGIN && slot_id <= invslot::TRIBUTE_END)) {
+		(slot_id >= invslot::TRIBUTE_BEGIN && slot_id <= invslot::TRIBUTE_END) ||
+		(slot_id >= invslot::GUILD_TRIBUTE_BEGIN && slot_id <= invslot::GUILD_TRIBUTE_END)) {
 		// Equippable slots (on body)
 		result = _GetItem(m_worn, slot_id);
 	}
@@ -462,6 +463,10 @@ EQ::ItemInstance* EQ::InventoryProfile::PopItem(int16 slot_id)
 		m_inv.erase(slot_id);
 	}
 	else if (slot_id >= invslot::TRIBUTE_BEGIN && slot_id <= invslot::TRIBUTE_END) {
+		p = m_worn[slot_id];
+		m_worn.erase(slot_id);
+	}
+	else if (slot_id >= invslot::GUILD_TRIBUTE_BEGIN && slot_id <= invslot::GUILD_TRIBUTE_END) {
 		p = m_worn[slot_id];
 		m_worn.erase(slot_id);
 	}
@@ -1416,6 +1421,10 @@ int16 EQ::InventoryProfile::_PutItem(int16 slot_id, ItemInstance* inst)
 		}
 	}
 	else if (slot_id >= invslot::TRIBUTE_BEGIN && slot_id <= invslot::TRIBUTE_END) {
+		m_worn[slot_id] = inst;
+		result = slot_id;
+	}
+	else if (slot_id >= invslot::GUILD_TRIBUTE_BEGIN && slot_id <= invslot::GUILD_TRIBUTE_END) {
 		m_worn[slot_id] = inst;
 		result = slot_id;
 	}

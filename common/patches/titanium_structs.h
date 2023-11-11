@@ -1423,6 +1423,23 @@ struct GuildUpdate_Struct {
 	GuildsListEntry_Struct entry;
 };
 
+struct GuildTributeDonateItemRequest_Struct {
+	/*000*/ uint32 	Slot;
+	/*004*/ uint32 	quanity;
+	/*008*/ uint32	tribute_master_id;
+	/*012*/ uint32 	unknown8;
+	/*016*/ uint32	guild_id;
+	/*020*/ uint32 	unknown20;
+	/*024*/ uint32	unknown24;
+};
+
+struct GuildTributeDonateItemReply_Struct {
+	/*000*/ uint32	slot;
+	/*004*/ uint32	quanity;
+	/*008*/ uint32	unknown8;
+	/*012*/	uint32	favor;
+};
+
 /*
 ** Money Loot
 ** Length: 22 Bytes
@@ -3508,7 +3525,7 @@ struct LFGuild_GuildToggle_Struct
 /*540*/ uint32	TimeZone;
 /*544*/ uint8	Toggle;
 /*545*/ uint8	Unknown545[3];
-/*548*/ uint32	Expires;
+/*548*/ uint32	TimePosted;
 /*552*/ char	Name[64];
 /*616*/
 };
@@ -3697,6 +3714,15 @@ struct SayLinkBodyFrame_Struct {
 /*036*/	char EvolveLevel[1];
 /*037*/	char Hash[8];
 /*045*/
+};
+
+struct GuildSetRank_Struct
+{
+	/*00*/	uint32	Unknown00;
+	/*04*/	uint32	Unknown04;
+	/*08*/	uint32	Rank;
+	/*72*/	char	MemberName[64];
+	/*76*/	uint32	Banker;
 };
 
 	}; /*structs*/

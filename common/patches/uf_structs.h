@@ -1670,6 +1670,15 @@ struct Surname_Struct
 /*0100*/
 };
 
+struct GuildSetRank_Struct
+{
+	/*00*/	uint32	Unknown00;
+	/*04*/	uint32	Unknown04;
+	/*08*/	uint32	Rank; 
+	/*72*/	char	MemberName[64]; 
+	/*76*/	uint32	Banker;
+};
+
 struct GuildsListEntry_Struct {
 	char name[64];
 };
@@ -3065,6 +3074,23 @@ struct GuildRemoveStruct{
 struct GuildMakeLeader{
 	char	name[64];
 	char	target[64];
+};
+
+struct GuildTributeDonateItemRequest_Struct {
+/*000*/ uint32 	Slot;
+/*004*/ uint32 	quanity;
+/*008*/ uint32	tribute_master_id;
+/*012*/ uint32 	unknown8;
+/*016*/ uint32	guild_id;
+/*020*/ uint32 	unknown20;
+/*024*/ uint32	unknown24;
+};
+
+struct GuildTributeDonateItemReply_Struct {
+/*000*/ uint32	slot;
+/*004*/ uint32	quanity;
+/*008*/ uint32	unknown8;
+/*012*/	uint32	favor;
 };
 
 struct Make_Pet_Struct { //Simple struct for getting pet info

@@ -18,17 +18,21 @@
 
 #include "../common/servertalk.h"
 #include "../common/strings.h"
-
+#include "string_ids.h"
 #include "client.h"
 #include "guild_mgr.h"
 #include "worldserver.h"
 #include "zonedb.h"
+#include "../common/emu_versions.h"
+#include "../common/repositories/guild_ranks_repository.h"
+
 
 ZoneGuildManager guild_mgr;
 GuildBankManager *GuildBanks;
 
 extern WorldServer worldserver;
 extern volatile bool is_zone_loaded;
+extern EntityList entity_list;
 
 void ZoneGuildManager::SendGuildRefresh(uint32 guild_id, bool name, bool motd, bool rank, bool relation) {
 	LogGuilds("Sending guild refresh for [{}] to world, changes: name=[{}], motd=[{}], rank=d, relation=[{}]", guild_id, name, motd, rank, relation);
@@ -81,6 +85,7 @@ void ZoneGuildManager::SendRankUpdate(uint32 CharID)
 	strn0cpy(sgrus->MemberName, gci.char_name.c_str(), sizeof(sgrus->MemberName));
 	sgrus->Rank = gci.rank;
 	sgrus->Banker = gci.banker + (gci.alt * 2);
+	sgrus->no_update = true;
 
 	worldserver.SendPacket(pack);
 
@@ -168,6 +173,15 @@ uint8 *ZoneGuildManager::MakeGuildMembers(uint32 guild_id, const char *prefix_na
 		PutField(level);
 		e->banker = ci->banker + (ci->alt * 2);	// low bit is banker flag, next bit is 'alt' flag.
 		PutField(class_);
+		auto c = entity_list.GetClientByID(ci->char_id);
+		if (c && c->ClientVersion() < EQ::versions::ClientVersion::RoF) {
+			switch (ci->rank) {
+			case 8:case 7:case 6:case 5:case 4: { ci->rank = 0; break; }	//GUILD MEMBER 0
+			case 3:case 2: { ci->rank = 1; break; }							//GUILD OFFICER 1
+			case 1: { ci->rank = 2; break; }								//GUILD LEADER 2
+			default: { break; }
+			}
+		}
 		PutField(rank);
 		PutField(time_last_on);
 		PutField(tribute_enable);
@@ -175,7 +189,8 @@ uint8 *ZoneGuildManager::MakeGuildMembers(uint32 guild_id, const char *prefix_na
 		PutField(last_tribute);
 		SlideStructString( note_buf, ci->public_note );
 		e->zoneinstance = 0;
-		e->zone_id = 0;	// Flag them as offline (zoneid 0) as world will update us with their online status afterwards.
+		e->zone_id = 0;			// Flag them as offline (zoneid 0) as world will update us with their online status afterwards.
+
 #undef SlideStructString
 #undef PutFieldN
 
@@ -201,7 +216,7 @@ void ZoneGuildManager::ListGuilds(Client *c, uint32 guild_id) const {
 			return;
 		}
 
-		const auto leader_name = database.GetCharNameByID(g->second->leader_char_id);
+		const auto leader_name = database.GetCharNameByID(g->second->leader);
 		c->Message(
 			Chat::White,
 			fmt::format(
@@ -212,7 +227,7 @@ void ZoneGuildManager::ListGuilds(Client *c, uint32 guild_id) const {
 					fmt::format(
 						"Leader: {} ({}) ",
 						leader_name,
-						g->second->leader_char_id
+						g->second->leader
 					) :
 					""
 				),
@@ -250,7 +265,7 @@ void ZoneGuildManager::ListGuilds(Client *c, std::string search_criteria) const 
 				continue;
 			}
 
-			const auto leader_name = database.GetCharNameByID(guild.second->leader_char_id);
+			const auto leader_name = database.GetCharNameByID(guild.second->leader);
 			c->Message(
 				Chat::White,
 				fmt::format(
@@ -261,7 +276,7 @@ void ZoneGuildManager::ListGuilds(Client *c, std::string search_criteria) const 
 						fmt::format(
 							"Leader: {} ({}) ",
 							leader_name,
-							guild.second->leader_char_id
+							guild.second->leader
 						) :
 						""
 					),
@@ -310,7 +325,7 @@ void ZoneGuildManager::DescribeGuild(Client *c, uint32 guild_id) const {
 
 	const GuildInfo *info = res->second;
 
-	auto leader_name = database.GetCharNameByID(info->leader_char_id);
+	auto leader_name = database.GetCharNameByID(info->leader);
 	std::string popup_text = "<table>";
 	popup_text += fmt::format(
 		"<tr><td>Name</td><td>{}</td><td>Guild ID</td><td>{}</td></tr>",
@@ -320,7 +335,7 @@ void ZoneGuildManager::DescribeGuild(Client *c, uint32 guild_id) const {
 	popup_text += fmt::format(
 		"<tr><td>Leader</td><td>{}</td><td>Character ID</td><td>{}</td></tr>",
 		leader_name,
-		info->leader_char_id
+		info->leader
 	);
 	popup_text += "<br><br>";
 	popup_text += "<tr>";
@@ -334,40 +349,40 @@ void ZoneGuildManager::DescribeGuild(Client *c, uint32 guild_id) const {
 	popup_text += "<td>Speak Guild Chat</td>";
 	popup_text += "<td>War/Peace</td>";
 	popup_text += "</tr>";
-
-	for (uint8 guild_rank = 0; guild_rank <= GUILD_MAX_RANK; guild_rank++) {
-		auto can_hear_guild_chat = info->ranks[guild_rank].permissions[GUILD_HEAR] ? "<c \"#00FF00\">Y</c>" : "<c \"#F62217\">N</c>";
-		auto can_speak_guild_chat = info->ranks[guild_rank].permissions[GUILD_SPEAK] ? "<c \"#00FF00\">Y</c>" : "<c \"#F62217\">N</c>";
-		auto can_invite = info->ranks[guild_rank].permissions[GUILD_INVITE] ? "<c \"#00FF00\">Y</c>" : "<c \"#F62217\">N</c>";
-		auto can_remove = info->ranks[guild_rank].permissions[GUILD_REMOVE] ? "<c \"#00FF00\">Y</c>" : "<c \"#F62217\">N</c>";
-		auto can_promote = info->ranks[guild_rank].permissions[GUILD_PROMOTE] ? "<c \"#00FF00\">Y</c>" : "<c \"#F62217\">N</c>";
-		auto can_demote = info->ranks[guild_rank].permissions[GUILD_DEMOTE] ? "<c \"#00FF00\">Y</c>" : "<c \"#F62217\">N</c>";
-		auto can_set_motd = info->ranks[guild_rank].permissions[GUILD_MOTD] ? "<c \"#00FF00\">Y</c>" : "<c \"#F62217\">N</c>";
-		auto can_war_peace = info->ranks[guild_rank].permissions[GUILD_WARPEACE] ? "<c \"#00FF00\">Y</c>" : "<c \"#F62217\">N</c>";
-		popup_text += fmt::format(
-			"<tr>"
-			"<td>{} ({})</td>"
-			"<td>{}</td>"
-			"<td>{}</td>"
-			"<td>{}</td>"
-			"<td>{}</td>"
-			"<td>{}</td>"
-			"<td>{}</td>"
-			"<td>{}</td>"
-			"<td>{}</td>"
-			"</tr>",
-			!info->ranks[guild_rank].name.empty() ? info->ranks[guild_rank].name : "Nameless",
-			guild_rank,
-			can_demote,
-			can_hear_guild_chat,
-			can_invite,
-			can_promote,
-			can_remove,
-			can_set_motd,
-			can_speak_guild_chat,
-			can_war_peace
-		);
-	}
+					
+	//for (uint8 guild_rank = 0; guild_rank <= GUILD_MAX_RANK; guild_rank++) {
+	//	auto can_hear_guild_chat = info->rank_s[guild_rank].permissions[GUILD_HEAR] ? "<c \"#00FF00\">Y</c>" : "<c \"#F62217\">N</c>";
+	//	auto can_speak_guild_chat = info->ranks[guild_rank].permissions[GUILD_SPEAK] ? "<c \"#00FF00\">Y</c>" : "<c \"#F62217\">N</c>";
+	//	auto can_invite = info->ranks[guild_rank].permissions[GUILD_INVITE] ? "<c \"#00FF00\">Y</c>" : "<c \"#F62217\">N</c>";
+	//	auto can_remove = info->ranks[guild_rank].permissions[GUILD_REMOVE] ? "<c \"#00FF00\">Y</c>" : "<c \"#F62217\">N</c>";
+	//	auto can_promote = info->ranks[guild_rank].permissions[GUILD_PROMOTE] ? "<c \"#00FF00\">Y</c>" : "<c \"#F62217\">N</c>";
+	//	auto can_demote = info->ranks[guild_rank].permissions[GUILD_DEMOTE] ? "<c \"#00FF00\">Y</c>" : "<c \"#F62217\">N</c>";
+	//	auto can_set_motd = info->ranks[guild_rank].permissions[GUILD_MOTD] ? "<c \"#00FF00\">Y</c>" : "<c \"#F62217\">N</c>";
+	//	auto can_war_peace = info->ranks[guild_rank].permissions[GUILD_WARPEACE] ? "<c \"#00FF00\">Y</c>" : "<c \"#F62217\">N</c>";
+	//	popup_text += fmt::format(
+	//		"<tr>"
+	//		"<td>{} ({})</td>"
+	//		"<td>{}</td>"
+	//		"<td>{}</td>"
+	//		"<td>{}</td>"
+	//		"<td>{}</td>"
+	//		"<td>{}</td>"
+	//		"<td>{}</td>"
+	//		"<td>{}</td>"
+	//		"<td>{}</td>"
+	//		"</tr>",
+	//		!info->ranks[guild_rank].name.empty() ? info->ranks[guild_rank].name : "Nameless",
+	//		guild_rank,
+	//		can_demote,
+	//		can_hear_guild_chat,
+	//		can_invite,
+	//		can_promote,
+	//		can_remove,
+	//		can_set_motd,
+	//		can_speak_guild_chat,
+	//		can_war_peace
+	//	);
+	//}
 
 	popup_text += "</table>";
 
@@ -396,69 +411,85 @@ bool ZoneGuildManager::VerifyAndClearInvite(uint32 char_id, uint32 guild_id, uin
 	return(valid);
 }
 
-void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack) {
-	switch(pack->opcode) {
-	case ServerOP_RefreshGuild: {
-		if(pack->size != sizeof(ServerGuildRefresh_Struct)) {
+void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack) 
+{
+	switch (pack->opcode)
+	{
+	case ServerOP_RefreshGuild:
+	{
+		if (pack->size != sizeof(ServerGuildRefresh_Struct)) {
 			LogError("Received ServerOP_RefreshGuild of incorrect size [{}], expected [{}]", pack->size, sizeof(ServerGuildRefresh_Struct));
 			return;
 		}
-		ServerGuildRefresh_Struct *s = (ServerGuildRefresh_Struct *) pack->pBuffer;
 
-		LogGuilds("Received guild refresh from world for [{}], changes: name=[{}], motd=[{}], rank=[{}], relation=[{}]", s->guild_id, s->name_change, s->motd_change, s->rank_change, s->relation_change);
+		ServerGuildRefresh_Struct* s = (ServerGuildRefresh_Struct*)pack->pBuffer;
+		LogDebug("Received guild refresh from world for guild id [{}] changes: name=[{}] motd=[{}] rank=[{}] relation=[{}]",
+			s->guild_id,
+			s->name_change,
+			s->motd_change,
+			s->rank_change,
+			s->relation_change
+		);
 
-		//reload all the guild details from the database.
 		RefreshGuild(s->guild_id);
 
-		if(s->motd_change) {
+		if (s->motd_change) {
 			//resend guild MOTD to all guild members in this zone.
 			entity_list.SendGuildMOTD(s->guild_id);
 		}
 
-		if(s->name_change) {
+		if (s->name_change) {
 			//until we figure out the guild update packet, we resend the whole guild list.
 			entity_list.SendGuildList();
 		}
 
-		if(s->rank_change) {
+		if (s->rank_change) {
 			//we need to send spawn appearance packets for all members of this guild in the zone, to everybody.
 			entity_list.SendGuildSpawnAppearance(s->guild_id);
 		}
 
-		if(s->relation_change) {
+		if (s->relation_change) {
 			//unknown until we implement guild relations.
 		}
 
 		break;
 	}
 
-	case ServerOP_GuildCharRefresh: {
-		if(pack->size != sizeof(ServerGuildCharRefresh_Struct)) {
+	case ServerOP_GuildCharRefresh:
+	{
+		if (pack->size != sizeof(ServerGuildCharRefresh_Struct)) {
 			LogError("Received ServerOP_RefreshGuild of incorrect size [{}], expected [{}]", pack->size, sizeof(ServerGuildCharRefresh_Struct));
 			return;
 		}
-		ServerGuildCharRefresh_Struct *s = (ServerGuildCharRefresh_Struct *) pack->pBuffer;
+		ServerGuildCharRefresh_Struct* s = (ServerGuildCharRefresh_Struct*)pack->pBuffer;
+		LogDebug("Received guild member refresh from world for char [{}] from guild [{}]",
+			s->char_id,
+			s->guild_id
+		);
+		RefreshGuild(s->guild_id);
 
-		LogGuilds("Received guild member refresh from world for char [{}] from guild [{}]", s->char_id, s->guild_id);
+		Client* c = entity_list.GetClientByCharID(s->char_id);
 
-		Client *c = entity_list.GetClientByCharID(s->char_id);
-
-		if(c != nullptr) {
+		if (c != nullptr) {
 			//this reloads the char's guild info from the database and sends appearance updates
 			c->RefreshGuildInfo();
 		}
 
 		//it would be nice if we had the packet to send just a one-person update
-		if(s->guild_id == GUILD_NONE) {
-			if(c != nullptr)
+		if (s->guild_id == GUILD_NONE) {
+			if (c != nullptr) {
 				c->SendGuildMembers();	//only need to update this player's list (trying to clear it)
-		} else {
+				c->SendGuildMOTD();
+			}
+		}
+		else {
 			entity_list.SendGuildMembers(s->guild_id);		//even send GUILD_NONE (empty)
+
 		}
 
-		if(s->old_guild_id != 0 && s->old_guild_id != GUILD_NONE && s->old_guild_id != s->guild_id)
+		if (s->old_guild_id != 0 && s->old_guild_id != GUILD_NONE && s->old_guild_id != s->guild_id)
 			entity_list.SendGuildMembers(s->old_guild_id);
-		else if(c != nullptr && s->guild_id != GUILD_NONE) {
+		else if (c != nullptr && s->guild_id != GUILD_NONE) {
 			//char is in zone, and has changed into a new guild, send MOTD.
 			c->SendGuildMOTD();
 			if (c->ClientVersion() >= EQ::versions::ClientVersion::RoF)
@@ -473,9 +504,27 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack) {
 
 	case ServerOP_GuildRankUpdate:
 	{
-		if(is_zone_loaded)
+		auto IsActionABankAction = [&](GuildAction action) -> bool {
+			std::vector<GuildAction> Guild_Bank_Actions =
+			{
+			GUILD_ACTION_BANK_DEPOSIT_ITEMS,
+			GUILD_ACTION_BANK_PROMOTE_ITEMS,
+			GUILD_ACTION_BANK_VIEW_ITEMS,
+			GUILD_ACTION_BANK_WITHDRAW_ITEMS
+			};
+			for (auto const& a : Guild_Bank_Actions) {
+				if (a == action) {
+					return true;
+				}
+			}
+			return false;
+			};
+
+		ServerGuildRankUpdate_Struct* sgrus = (ServerGuildRankUpdate_Struct*)pack->pBuffer;
+
+		if (is_zone_loaded)
 		{
-			if(pack->size != sizeof(ServerGuildRankUpdate_Struct))
+			if (pack->size != sizeof(ServerGuildRankUpdate_Struct))
 			{
 				LogError("Received ServerOP_RankUpdate of incorrect size [{}], expected [{}]",
 					pack->size, sizeof(ServerGuildRankUpdate_Struct));
@@ -483,76 +532,122 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack) {
 				return;
 			}
 
-			ServerGuildRankUpdate_Struct *sgrus = (ServerGuildRankUpdate_Struct*)pack->pBuffer;
-
 			auto outapp = new EQApplicationPacket(OP_SetGuildRank, sizeof(GuildSetRank_Struct));
-
-			GuildSetRank_Struct *gsrs = (GuildSetRank_Struct*)outapp->pBuffer;
-
+			GuildSetRank_Struct* gsrs = (GuildSetRank_Struct*)outapp->pBuffer;
 			gsrs->Rank = sgrus->Rank;
 			strn0cpy(gsrs->MemberName, sgrus->MemberName, sizeof(gsrs->MemberName));
 			gsrs->Banker = sgrus->Banker;
+			entity_list.QueueClientsGuild(outapp, sgrus->GuildID);
 
-			entity_list.QueueClientsGuild(nullptr, outapp, false, sgrus->GuildID);
+			auto c = entity_list.GetClientByName(sgrus->MemberName);
+			if (c) {
+				c->SetGuildRank(sgrus->Rank);
+				c->SendAppearancePacket(AT_GuildRank, sgrus->Rank, false);
+			}
 
-			safe_delete(outapp);
+			auto guild_bank_status = guild_mgr.GetGuildBankerStatus(sgrus->GuildID, sgrus->Rank);
+			if (guild_bank_status && !sgrus->no_update) {
+				entity_list.GuildSetPreRoFBankerFlag(sgrus->GuildID, sgrus->Rank, true);
+			}
+			else if (!guild_bank_status && !sgrus->no_update) {
+				entity_list.GuildSetPreRoFBankerFlag(sgrus->GuildID, sgrus->Rank, false);
+			}
+			//auto client_list = entity_list.GetClientList();
+			//for (auto const& c : client_list) {
+			//	if (c.second->GuildID() == sgrus->GuildID) {
+			//		CharGuildInfo cgi;
+			//		guild_mgr.GetCharInfo(c.second->CharacterID(), cgi);
+			//		if (guild_bank_status && !cgi.banker) {
+			//			guild_mgr.SetBankerFlag(c.second->CharacterID(), true);
+			//			gsrs->Banker = 1 + (cgi.alt ? 2 : 0);
+			//		}
+			//		else if (!guild_bank_status && cgi.banker) {
+			//			guild_mgr.SetBankerFlag(c.second->CharacterID(), false);
+			//			gsrs->Banker = 0 + (cgi.alt ? 2 : 0);
+			//		}
+			//	}
+			//	c.second->QueuePacket(outapp);
+			//}
+			//safe_delete(outapp);
+
+//		Client* c = entity_list.GetClientByName(sgrus->MemberName);
+//		if (c) {
+//			c->SendAppearancePacket(AT_GuildRank, sgrus->Rank, false);
+//		}
+//		entity_list.SendAllGuildTitleDisplay(sgrus->GuildID);
 		}
-
 		break;
 	}
 
-	case ServerOP_DeleteGuild: {
-		if(pack->size != sizeof(ServerGuildID_Struct)) {
+	case ServerOP_DeleteGuild:
+	{
+		if (pack->size != sizeof(ServerGuildID_Struct)) {
 			LogError("Received ServerOP_DeleteGuild of incorrect size [{}], expected [{}]", pack->size, sizeof(ServerGuildID_Struct));
 			return;
 		}
-		ServerGuildID_Struct *s = (ServerGuildID_Struct *) pack->pBuffer;
 
-		LogGuilds("Received guild delete from world for guild [{}]", s->guild_id);
+		if (is_zone_loaded)
+		{
+			ServerGuildID_Struct* s = (ServerGuildID_Struct*)pack->pBuffer;
 
-		//clear all the guild tags.
-		entity_list.RefreshAllGuildInfo(s->guild_id);
+			LogGuilds("Received guild delete from world for guild [{}]", s->guild_id);
 
-		//remove the guild data from the local guild manager
-		guild_mgr.LocalDeleteGuild(s->guild_id);
+			auto guild = GetGuildByGuildID(s->guild_id);
 
-		//if we stop forcing guild list to send on guild create, we need to do this:
-		//in the case that we delete a guild and add a new one.
-		//entity_list.SendGuildList();
+			auto clients = entity_list.GetClientList();
+			for (auto& c : clients) {
+				if (c.second->GuildID() == s->guild_id) {
+					c.second->SetGuildID(GUILD_NONE);
+					c.second->SetGuildRank(GUILD_RANK_NONE);
+					c.second->SetGuildTributeOptIn(false);
+					c.second->SendGuildActiveTributes(c.second->GuildID());
+					c.second->RefreshGuildInfo();
+					c.second->SendGuildMembers();
+					c.second->MessageString(Chat::Guild, GUILD_DISBANDED);
+				}
+			}
 
+			auto res = m_guilds.find(s->guild_id);
+			if (res != m_guilds.end()) {
+				delete res->second;
+				m_guilds.erase(res);
+			}
+			//			LoadGuilds();
+		}
 		break;
 	}
 
 	case ServerOP_GuildMemberUpdate:
 	{
-		ServerGuildMemberUpdate_Struct *sgmus = (ServerGuildMemberUpdate_Struct*)pack->pBuffer;
+		ServerGuildMemberUpdate_Struct* sgmus = (ServerGuildMemberUpdate_Struct*)pack->pBuffer;
 
-		if(is_zone_loaded)
+		if (is_zone_loaded)
 		{
 			auto outapp = new EQApplicationPacket(OP_GuildMemberUpdate, sizeof(GuildMemberUpdate_Struct));
 
-			GuildMemberUpdate_Struct *gmus = (GuildMemberUpdate_Struct*)outapp->pBuffer;
+			GuildMemberUpdate_Struct* gmus = (GuildMemberUpdate_Struct*)outapp->pBuffer;
 
 			gmus->GuildID = sgmus->GuildID;
 			strn0cpy(gmus->MemberName, sgmus->MemberName, sizeof(gmus->MemberName));
 			gmus->ZoneID = sgmus->ZoneID;
-			gmus->InstanceID = 0;	// I don't think we care what Instance they are in, for the Guild Management Window.
+			gmus->InstanceID = 0;	// If online, set to be online.  I don't think we care what Instance they are in, for the Guild Management Window.
 			gmus->LastSeen = sgmus->LastSeen;
 
-			entity_list.QueueClientsGuild(nullptr, outapp, false, sgmus->GuildID);
+			entity_list.QueueClientsGuild(outapp, sgmus->GuildID);
 
 			safe_delete(outapp);
 		}
 		break;
 	}
 	case ServerOP_OnlineGuildMembersResponse:
+	{
 		if (is_zone_loaded)
 		{
-			char *Buffer = (char *)pack->pBuffer;
+			char* Buffer = (char*)pack->pBuffer;
 
 			uint32 FromID = VARSTRUCT_DECODE_TYPE(uint32, Buffer);
 			uint32 Count = VARSTRUCT_DECODE_TYPE(uint32, Buffer);
-			Client *c = entity_list.GetClientByCharID(FromID);
+			Client* c = entity_list.GetClientByCharID(FromID);
 
 			if (!c || !c->IsInAGuild())
 			{
@@ -561,10 +656,10 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack) {
 			}
 			LogGuilds("Processing ServerOP_OnlineGuildMembersResponse");
 			auto outapp = new EQApplicationPacket(OP_GuildMemberUpdate, sizeof(GuildMemberUpdate_Struct));
-			GuildMemberUpdate_Struct *gmus = (GuildMemberUpdate_Struct*)outapp->pBuffer;
+			GuildMemberUpdate_Struct* gmus = (GuildMemberUpdate_Struct*)outapp->pBuffer;
 			char Name[64];
 			gmus->LastSeen = time(nullptr);
-			gmus->InstanceID = 0;
+			gmus->InstanceID = 1;
 			gmus->GuildID = c->GuildID();
 			for (int i = 0; i < Count; i++) {
 				// Just make the packet once and swap out name/zone and send
@@ -578,10 +673,10 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack) {
 
 		}
 		break;
-
+	}
 	case ServerOP_LFGuildUpdate:
 	{
-		if(is_zone_loaded)
+		if (is_zone_loaded)
 		{
 			char GuildName[33];
 			char Comments[257];
@@ -599,12 +694,12 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack) {
 
 			uint32 GuildID = GetGuildIDByName(GuildName);
 
-			if(GuildID == GUILD_NONE)
+			if (GuildID == GUILD_NONE)
 				break;
 
 			auto outapp = new EQApplicationPacket(OP_LFGuild, sizeof(LFGuild_GuildToggle_Struct));
 
-			LFGuild_GuildToggle_Struct *gts = (LFGuild_GuildToggle_Struct *)outapp->pBuffer;
+			LFGuild_GuildToggle_Struct* gts = (LFGuild_GuildToggle_Struct*)outapp->pBuffer;
 			gts->Command = 1;
 			strcpy(gts->Comment, Comments);
 			gts->FromLevel = FromLevel;
@@ -615,10 +710,119 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack) {
 			gts->Toggle = Toggle;
 			gts->TimePosted = TimePosted;
 			gts->Name[0] = 0;
-			entity_list.QueueClientsGuild(nullptr, outapp, false, GuildID);
+			entity_list.QueueClientsGuild(outapp, GuildID);
 			safe_delete(outapp);
-			break;
 		}
+		break;
+	}
+	case ServerOP_GuildPermissionUpdate:
+	{
+		auto IsActionABankAction = [&](GuildAction action) -> bool {
+			std::vector<GuildAction> Guild_Bank_Actions =
+			{
+			GUILD_ACTION_BANK_DEPOSIT_ITEMS,
+			GUILD_ACTION_BANK_PROMOTE_ITEMS,
+			GUILD_ACTION_BANK_VIEW_ITEMS,
+			GUILD_ACTION_BANK_WITHDRAW_ITEMS
+			};
+			for (auto const& a : Guild_Bank_Actions) {
+				if (a == action) {
+					return true;
+				}
+			}
+			return false;
+			};
+
+		if (is_zone_loaded)
+		{
+			ServerGuildPermissionUpdate_Struct* sgpus = (ServerGuildPermissionUpdate_Struct*)pack->pBuffer;
+			auto res = m_guilds.find(sgpus->GuildID);
+			if (sgpus->FunctionValue) {
+				res->second->functions[sgpus->FunctionID].perm_value |= (1UL << (8 - sgpus->Rank));
+			}
+			else {
+				res->second->functions[sgpus->FunctionID].perm_value &= ~(1UL << (8 - sgpus->Rank));
+			}
+
+			auto client = entity_list.GetMob(sgpus->MemberName);
+			auto outapp = new EQApplicationPacket(OP_GuildUpdateURLAndChannel, sizeof(GuildPermission_Struct));
+			GuildPermission_Struct* guuacs = (GuildPermission_Struct*)outapp->pBuffer;
+			guuacs->Action = 5;
+			guuacs->rank = sgpus->Rank;
+			guuacs->function_id = sgpus->FunctionID;
+			guuacs->value = sgpus->FunctionValue;
+
+			entity_list.QueueClientsGuild(outapp, sgpus->GuildID);
+			LogDebug("Zone Received guild permission update from world for rank {} function id [{}] and value [{}]",
+				guuacs->rank = sgpus->Rank,
+				guuacs->function_id = sgpus->FunctionID,
+				guuacs->value = sgpus->FunctionValue
+			);
+			safe_delete(outapp);
+
+			if (sgpus->FunctionID == 4) {
+				entity_list.SendAllGuildTitleDisplay(sgpus->GuildID);
+			}
+
+			//for backwards compatibility with guild bank functionality
+			//if the four permissions (deposit, promote, withdraw and view) exist for a rank, turn on the banker flag for pre RoF clients
+			if (IsActionABankAction((GuildAction)sgpus->FunctionID) && GetGuildBankerStatus(sgpus->GuildID, sgpus->Rank)) {
+				entity_list.GuildSetPreRoFBankerFlag(sgpus->GuildID, sgpus->Rank, true);
+			}
+			else if (IsActionABankAction((GuildAction)sgpus->FunctionID) && !GetGuildBankerStatus(sgpus->GuildID, sgpus->Rank)) {
+				entity_list.GuildSetPreRoFBankerFlag(sgpus->GuildID, sgpus->Rank, false);
+			}
+		}
+		break;
+	}
+	case ServerOP_GuildRankNameChange:
+	{
+		if (is_zone_loaded)
+		{
+			ServerGuildRankNameChange* s = (ServerGuildRankNameChange*)pack->pBuffer;
+			LogGuilds("Received guild rank name change from world for rank [{}] from guild [{}]", s->rank, s->guild_id);
+
+			auto guild = guild_mgr.GetGuildByGuildID(s->guild_id);
+			if (guild) {
+				guild->rank_names[s->rank] = s->rank_name;
+
+				auto outapp = new EQApplicationPacket(OP_GuildUpdateURLAndChannel, sizeof(GuildUpdateUCP));
+				GuildUpdateUCP* gucp = (GuildUpdateUCP*)outapp->pBuffer;
+				gucp->payload.rank_name.rank = s->rank;
+				strcpy(gucp->payload.rank_name.rank_name, s->rank_name.c_str());
+				gucp->action = 4;
+				entity_list.QueueClientsGuild(outapp, s->guild_id);
+				safe_delete(outapp);
+
+				for (auto const& gm : guild_mgr.GetGuildMembers(s->guild_id)) {
+					auto outapp = new EQApplicationPacket(OP_GuildMemberUpdate, sizeof(GuildMemberUpdate_Struct));
+					GuildMemberUpdate_Struct* gmus = (GuildMemberUpdate_Struct*)outapp->pBuffer;
+					gmus->GuildID = s->guild_id;
+					CharGuildInfo cgi;
+					guild_mgr.GetCharInfo(gm.char_id, cgi);
+					if (cgi.rank == s->rank) {
+						safe_delete(outapp);
+						continue;
+					}
+
+					strn0cpy(gmus->MemberName, cgi.char_name.c_str(), sizeof(cgi.char_name.c_str()));
+					auto client = entity_list.GetClientByCharID(gm.char_id);
+					if (client) {
+						gmus->ZoneID = client->GetZoneID();
+						gmus->InstanceID = client->GetInstanceID();
+						gmus->LastSeen = time(nullptr);
+					}
+					else {
+						gmus->ZoneID = 0;
+						gmus->InstanceID = 0;
+						gmus->LastSeen = 0;
+					}
+					entity_list.QueueClientsGuild(outapp, s->guild_id);
+					safe_delete(outapp);
+				}
+			}
+		}
+		break;
 	}
 	}
 }
@@ -1453,4 +1657,81 @@ bool GuildBankManager::AllowedToWithdraw(uint32 GuildID, uint16 Area, uint16 Slo
 		return true;
 
 	return false;
+}
+
+void ZoneGuildManager::UpdateRankPermission(uint32 gid, uint32 charid, uint32 fid, uint32 rank, uint32 value) 
+{
+	auto res = m_guilds.find(gid);
+	if (value) {
+		res->second->functions[fid].perm_value |= (1UL << (8 - rank));
+	}
+	else {
+		res->second->functions[fid].perm_value &= ~(1UL << (8 - rank));
+	}
+	auto query = fmt::format("UPDATE guild_permissions SET permission = {} WHERE perm_id = {} AND guild_id = {};", res->second->functions[fid].perm_value, fid, gid);
+	auto results = m_db->QueryDatabase(query);
+
+}
+
+void ZoneGuildManager::SendPermissionUpdate(uint32 guild_id, uint32 rank, uint32 function_id, uint32 value)
+{
+
+	auto pack = new ServerPacket(ServerOP_GuildPermissionUpdate, sizeof(ServerGuildPermissionUpdate_Struct));
+	ServerGuildPermissionUpdate_Struct* sgpus = (ServerGuildPermissionUpdate_Struct*)pack->pBuffer;
+
+	sgpus->GuildID = guild_id;
+	sgpus->Rank = rank;
+	sgpus->FunctionID = function_id;
+	sgpus->FunctionValue = value;
+	worldserver.SendPacket(pack);
+	safe_delete(pack);
+}
+
+void ZoneGuildManager::UpdateRankName(uint32 guild_id, uint32 rank, std::string rank_name) 
+{
+	GuildRanksRepository::GuildRanks out;
+	out.guild_id = guild_id;
+	out.rank = rank;
+	out.title = rank_name;
+	GuildRanksRepository::UpdateTitle(*m_db, out);
+}
+
+void ZoneGuildManager::SendRankName(uint32 guild_id, uint32 rank, std::string& rank_name)
+{
+	auto pack = new ServerPacket(ServerOP_GuildRankNameChange, sizeof(ServerGuildRankNameChange));
+	ServerGuildRankNameChange* sgpus = (ServerGuildRankNameChange*)pack->pBuffer;
+
+	sgpus->guild_id = guild_id;
+	sgpus->rank = rank;
+	sgpus->rank_name = static_cast<std::string>(rank_name);
+	worldserver.SendPacket(pack);	
+	safe_delete(pack);
+}
+
+void ZoneGuildManager::SendAllRankNames(uint32 guild_id, uint32 char_id)
+{
+	auto guild = m_guilds.find(guild_id);
+	auto c = entity_list.GetClientByCharID(char_id);
+	if (c)
+	{
+		auto outapp = new EQApplicationPacket(OP_GuildUpdateURLAndChannel, sizeof(GuildUpdateUCP));
+		GuildUpdateUCP* gucp = (GuildUpdateUCP*)outapp->pBuffer;
+		for (int i = 1; i <= 8; i++)
+		{
+			gucp->payload.rank_name.rank = i;
+			strcpy(gucp->payload.rank_name.rank_name, guild->second->rank_names[i].c_str());
+			gucp->action = 4;
+			c->QueuePacket(outapp);
+		}
+		safe_delete(outapp);
+	}
+}
+
+BaseGuildManager::GuildInfo* ZoneGuildManager::GetGuildByGuildID(uint32 guild_id)
+{
+	auto guild = m_guilds.find(guild_id);
+	if (guild != m_guilds.end()) {
+		return guild->second;
+	}
+	return nullptr;
 }

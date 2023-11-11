@@ -67,6 +67,12 @@ public:
 	bool VerifyAndClearInvite(uint32 char_id, uint32 guild_id, uint8 rank);
 	void SendGuildMemberUpdateToWorld(const char *MemberName, uint32 GuildID, uint16 ZoneID, uint32 LastSeen);
 	void RequestOnlineGuildMembers(uint32 FromID, uint32 GuildID);
+	void UpdateRankPermission(uint32 gid, uint32 charid, uint32 fid, uint32 rank, uint32 value);
+	void SendPermissionUpdate(uint32 guild_id, uint32 rank, uint32 function_id, uint32 value);
+	void UpdateRankName(uint32 gid, uint32 rank, std::string rank_name);
+	void SendRankName(uint32 guild_id, uint32 rank, std::string& rank_name);
+	void SendAllRankNames(uint32 guild_id, uint32 char_id);
+	BaseGuildManager::GuildInfo* GetGuildByGuildID(uint32 guild_id);
 
 protected:
 	virtual void SendGuildRefresh(uint32 guild_id, bool name, bool motd, bool rank, bool relation);

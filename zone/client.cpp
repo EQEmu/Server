@@ -208,6 +208,7 @@ Client::Client(EQStreamInterface *ieqs) : Mob(
 	lsaccountid = 0;
 	guild_id = GUILD_NONE;
 	guildrank = 0;
+	guild_tribute_opt_in = 0;
 	GuildBanker = false;
 	memset(lskey, 0, sizeof(lskey));
 	strcpy(account_name, "");
@@ -377,6 +378,7 @@ Client::Client(EQStreamInterface *ieqs) : Mob(
 	SetBotPrecombat(false);
 
 	AI_Init();
+
 }
 
 Client::~Client() {
@@ -388,8 +390,9 @@ Client::~Client() {
 		Bot::ProcessBotOwnerRefDelete(this);
 	}
 
-	if(IsInAGuild())
+	if (IsInAGuild()) {
 		guild_mgr.SendGuildMemberUpdateToWorld(GetName(), GuildID(), 0, time(nullptr));
+	}
 
 	Mob* horse = entity_list.GetMob(CastToClient()->GetHorseId());
 	if (horse)
@@ -732,7 +735,7 @@ bool Client::Save(uint8 iCommitNow) {
 			SetNextInvSnapshot(RuleI(Character, InvSnapshotMinRetryM));
 		}
 	}
-
+	
 	database.SaveCharacterData(this, &m_pp, &m_epp); /* Save Character Data */
 
 	return true;
@@ -933,12 +936,13 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 	switch(chan_num)
 	{
 	case ChatChannel_Guild: { /* Guild Chat */
-		if (!IsInAGuild())
+		if (!IsInAGuild()) {
 			MessageString(Chat::DefaultText, GUILD_NOT_MEMBER2);	//You are not a member of any guild.
-		else if (!guild_mgr.CheckPermission(GuildID(), GuildRank(), GUILD_SPEAK))
-			Message(0, "Error: You dont have permission to speak to the guild.");
-		else if (!worldserver.SendChannelMessage(this, targetname, chan_num, GuildID(), language, lang_skill, message))
-			Message(0, "Error: World server disconnected");
+		} else if (!guild_mgr.CheckPermission(GuildID(), GuildRank(), GUILD_ACTION_GUILD_CHAT_SPEAK_IN)) {
+			MessageString(Chat::EchoGuild, NO_PROPER_ACCESS);
+		} else if (!worldserver.SendChannelMessage(this, targetname, chan_num, GuildID(), language, lang_skill, message)) {
+			Message(Chat::White, "Error: World server disconnected");
+		}
 		break;
 	}
 	case ChatChannel_Group: { /* Group Chat */
@@ -1735,6 +1739,8 @@ void Client::UpdateWho(uint8 remove)
 	s->ClientVersion = static_cast<unsigned int>(ClientVersion());
 	s->tellsoff      = tellsoff;
 	s->guild_id      = guild_id;
+	s->guild_rank    = guildrank;
+	s->guild_tribute_opt_in = guild_tribute_opt_in;
 	s->LFG           = LFG;
 	if (LFG) {
 		s->LFGFromLevel   = LFGFromLevel;
@@ -2119,7 +2125,7 @@ void Client::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 	if (!IsInAGuild()) {
 		ns->spawn.guildrank = 0xFF;
 	} else {
-		ns->spawn.guildrank = guild_mgr.GetDisplayedRank(GuildID(), GuildRank(), AccountID());
+		ns->spawn.guildrank = guild_mgr.GetDisplayedRank(GuildID(), GuildRank(), CharacterID());
 	}
 	ns->spawn.size			= 0; // Changing size works, but then movement stops! (wth?)
 	ns->spawn.runspeed		= (gmspeed == 0) ? runspeed : 3.125f;
@@ -10086,6 +10092,7 @@ int Client::CountItem(uint32 item_id)
 		{ EQ::invbag::GENERAL_BAGS_BEGIN, EQ::invbag::GENERAL_BAGS_END },
 		{ EQ::invbag::CURSOR_BAG_BEGIN, EQ::invbag::CURSOR_BAG_END},
 		{ EQ::invslot::BANK_BEGIN, EQ::invslot::BANK_END },
+		{ EQ::invslot::GUILD_TRIBUTE_BEGIN, EQ::invslot::GUILD_TRIBUTE_END },
 		{ EQ::invbag::BANK_BAGS_BEGIN, EQ::invbag::BANK_BAGS_END },
 		{ EQ::invslot::SHARED_BANK_BEGIN, EQ::invslot::SHARED_BANK_END },
 		{ EQ::invbag::SHARED_BANK_BAGS_BEGIN, EQ::invbag::SHARED_BANK_BAGS_END },
@@ -10238,6 +10245,7 @@ void Client::RemoveItem(uint32 item_id, uint32 quantity)
 		{ EQ::invbag::GENERAL_BAGS_BEGIN, EQ::invbag::GENERAL_BAGS_END },
 		{ EQ::invbag::CURSOR_BAG_BEGIN, EQ::invbag::CURSOR_BAG_END},
 		{ EQ::invslot::BANK_BEGIN, EQ::invslot::BANK_END },
+		{ EQ::invslot::GUILD_TRIBUTE_BEGIN, EQ::invslot::GUILD_TRIBUTE_END },
 		{ EQ::invbag::BANK_BAGS_BEGIN, EQ::invbag::BANK_BAGS_END },
 		{ EQ::invslot::SHARED_BANK_BEGIN, EQ::invslot::SHARED_BANK_END },
 		{ EQ::invbag::SHARED_BANK_BAGS_BEGIN, EQ::invbag::SHARED_BANK_BAGS_END },

@@ -1,11 +1,11 @@
-#ifndef EQEMU_GUILD_RANKS_REPOSITORY_H
-#define EQEMU_GUILD_RANKS_REPOSITORY_H
+#ifndef EQEMU_GUILD_PERMISSIONS_REPOSITORY_H
+#define EQEMU_GUILD_PERMISSIONS_REPOSITORY_H
 
 #include "../database.h"
 #include "../strings.h"
-#include "base/base_guild_ranks_repository.h"
+#include "base/base_guild_permissions_repository.h"
 
-class GuildRanksRepository: public BaseGuildRanksRepository {
+class GuildPermissionsRepository: public BaseGuildPermissionsRepository {
 public:
 
     /**
@@ -32,10 +32,10 @@ public:
      *
      * Example custom methods in a repository
      *
-     * GuildRanksRepository::GetByZoneAndVersion(int zone_id, int zone_version)
-     * GuildRanksRepository::GetWhereNeverExpires()
-     * GuildRanksRepository::GetWhereXAndY()
-     * GuildRanksRepository::DeleteWhereXAndY()
+     * GuildPermissionsRepository::GetByZoneAndVersion(int zone_id, int zone_version)
+     * GuildPermissionsRepository::GetWhereNeverExpires()
+     * GuildPermissionsRepository::GetWhereXAndY()
+     * GuildPermissionsRepository::DeleteWhereXAndY()
      *
      * Most of the above could be covered by base methods, but if you as a developer
      * find yourself re-using logic for other parts of the code, its best to just make a
@@ -44,25 +44,25 @@ public:
      */
 
 	// Custom extended repository methods here
-	
-	static int ReplaceOne(
+
+	static int UpdateOne(
 		Database& db,
-		const GuildRanks& e
+		const GuildPermissions& e
 	)
 	{
 		std::vector<std::string> v;
 
-		std::vector<std::string> columns = { "guild_id", "rank", "title"};
-
+		v.push_back(std::to_string(e.id));
+		v.push_back(std::to_string(e.perm_id));
 		v.push_back(std::to_string(e.guild_id));
-		v.push_back(std::to_string(e.rank));
-		v.push_back("'" + Strings::Escape(e.title) + "'");
+		v.push_back(std::to_string(e.permission));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"REPLACE INTO {} ({}) VALUES({})",
 				TableName(),
-				Strings::Implode(", ", columns),
+				ColumnsRaw(),
+//				Strings::Implode(", ", columns),
 				Strings::Implode(", ", v)
 			)
 		);
@@ -72,18 +72,18 @@ public:
 
 	static int ReplaceMany(
 		Database& db,
-		const std::vector<GuildRanks>& entries
+		const std::vector<GuildPermissions>& entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
-		std::vector<std::string> columns = { "guild_id", "rank", "title" };
 
 		for (auto& e : entries) {
 			std::vector<std::string> v;
 
+			v.push_back(std::to_string(e.id));
+			v.push_back(std::to_string(e.perm_id));
 			v.push_back(std::to_string(e.guild_id));
-			v.push_back(std::to_string(e.rank));
-			v.push_back("'" + Strings::Escape(e.title) + "'");
+			v.push_back(std::to_string(e.permission));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
@@ -94,37 +94,14 @@ public:
 			fmt::format(
 				"REPLACE INTO {} ({}) VALUES{}",
 				TableName(),
-				Strings::Implode(", ", columns),
-				Strings::Implode(", ", insert_chunks)
+				ColumnsRaw(),
+					Strings::Implode(", ", insert_chunks)
 			)
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static int UpdateTitle(
-		Database& db,
-		const GuildRanks& e
-	)
-	{
-		std::vector<std::string> v;
-
-		auto columns = Columns();
-		
-		v.push_back(columns[2] + " = '" + Strings::Escape(e.title) + "'");
-
-		auto results = db.QueryDatabase(
-			fmt::format(
-				"UPDATE {} SET {} WHERE `guild_id` = {} AND `rank` = {}",
-				TableName(),
-				Strings::Implode(", ", v),
-				e.guild_id,
-				e.rank
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
 };
 
-#endif //EQEMU_GUILD_RANKS_REPOSITORY_H
+#endif //EQEMU_GUILD_PERMISSIONS_REPOSITORY_H

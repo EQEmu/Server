@@ -9,20 +9,24 @@
  * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
  */
 
-#ifndef EQEMU_BASE_GUILD_RANKS_REPOSITORY_H
-#define EQEMU_BASE_GUILD_RANKS_REPOSITORY_H
+#ifndef EQEMU_BASE_GUILD_TRIBUTES_REPOSITORY_H
+#define EQEMU_BASE_GUILD_TRIBUTES_REPOSITORY_H
 
 #include "../../database.h"
 #include "../../strings.h"
 #include <ctime>
 
 
-class BaseGuildRanksRepository {
+class BaseGuildTributesRepository {
 public:
-	struct GuildRanks {
-		uint32_t    guild_id;
-		uint8_t     rank;
-		std::string title;
+	struct GuildTributes {
+		uint32_t guild_id;
+		uint32_t tribute_id_1;
+		uint32_t tribute_id_1_tier;
+		uint32_t tribute_id_2;
+		uint32_t tribute_id_2_tier;
+		uint32_t time_remaining;
+		uint32_t enabled;
 	};
 
 	static std::string PrimaryKey()
@@ -34,8 +38,12 @@ public:
 	{
 		return {
 			"guild_id",
-			"rank",
-			"title",
+			"tribute_id_1",
+			"tribute_id_1_tier",
+			"tribute_id_2",
+			"tribute_id_2_tier",
+			"time_remaining",
+			"enabled",
 		};
 	}
 
@@ -43,8 +51,12 @@ public:
 	{
 		return {
 			"guild_id",
-			"rank",
-			"title",
+			"tribute_id_1",
+			"tribute_id_1_tier",
+			"tribute_id_2",
+			"tribute_id_2_tier",
+			"time_remaining",
+			"enabled",
 		};
 	}
 
@@ -60,7 +72,7 @@ public:
 
 	static std::string TableName()
 	{
-		return std::string("guild_ranks");
+		return std::string("guild_tributes");
 	}
 
 	static std::string BaseSelect()
@@ -81,34 +93,38 @@ public:
 		);
 	}
 
-	static GuildRanks NewEntity()
+	static GuildTributes NewEntity()
 	{
-		GuildRanks e{};
+		GuildTributes e{};
 
-		e.guild_id = 0;
-		e.rank     = 0;
-		e.title    = "";
+		e.guild_id          = 0;
+		e.tribute_id_1      = 0;
+		e.tribute_id_1_tier = 0;
+		e.tribute_id_2      = 0;
+		e.tribute_id_2_tier = 0;
+		e.time_remaining    = 0;
+		e.enabled           = 0;
 
 		return e;
 	}
 
-	static GuildRanks GetGuildRanks(
-		const std::vector<GuildRanks> &guild_rankss,
-		int guild_ranks_id
+	static GuildTributes GetGuildTributes(
+		const std::vector<GuildTributes> &guild_tributess,
+		int guild_tributes_id
 	)
 	{
-		for (auto &guild_ranks : guild_rankss) {
-			if (guild_ranks.guild_id == guild_ranks_id) {
-				return guild_ranks;
+		for (auto &guild_tributes : guild_tributess) {
+			if (guild_tributes.guild_id == guild_tributes_id) {
+				return guild_tributes;
 			}
 		}
 
 		return NewEntity();
 	}
 
-	static GuildRanks FindOne(
+	static GuildTributes FindOne(
 		Database& db,
-		int guild_ranks_id
+		int guild_tributes_id
 	)
 	{
 		auto results = db.QueryDatabase(
@@ -116,17 +132,21 @@ public:
 				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
 				PrimaryKey(),
-				guild_ranks_id
+				guild_tributes_id
 			)
 		);
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			GuildRanks e{};
+			GuildTributes e{};
 
-			e.guild_id = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.rank     = static_cast<uint8_t>(strtoul(row[1], nullptr, 10));
-			e.title    = row[2] ? row[2] : "";
+			e.guild_id          = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.tribute_id_1      = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.tribute_id_1_tier = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.tribute_id_2      = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
+			e.tribute_id_2_tier = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
+			e.time_remaining    = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
+			e.enabled           = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
 
 			return e;
 		}
@@ -136,7 +156,7 @@ public:
 
 	static int DeleteOne(
 		Database& db,
-		int guild_ranks_id
+		int guild_tributes_id
 	)
 	{
 		auto results = db.QueryDatabase(
@@ -144,7 +164,7 @@ public:
 				"DELETE FROM {} WHERE {} = {}",
 				TableName(),
 				PrimaryKey(),
-				guild_ranks_id
+				guild_tributes_id
 			)
 		);
 
@@ -153,7 +173,7 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		const GuildRanks &e
+		const GuildTributes &e
 	)
 	{
 		std::vector<std::string> v;
@@ -161,8 +181,12 @@ public:
 		auto columns = Columns();
 
 		v.push_back(columns[0] + " = " + std::to_string(e.guild_id));
-		v.push_back(columns[1] + " = " + std::to_string(e.rank));
-		v.push_back(columns[2] + " = '" + Strings::Escape(e.title) + "'");
+		v.push_back(columns[1] + " = " + std::to_string(e.tribute_id_1));
+		v.push_back(columns[2] + " = " + std::to_string(e.tribute_id_1_tier));
+		v.push_back(columns[3] + " = " + std::to_string(e.tribute_id_2));
+		v.push_back(columns[4] + " = " + std::to_string(e.tribute_id_2_tier));
+		v.push_back(columns[5] + " = " + std::to_string(e.time_remaining));
+		v.push_back(columns[6] + " = " + std::to_string(e.enabled));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -177,16 +201,20 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static GuildRanks InsertOne(
+	static GuildTributes InsertOne(
 		Database& db,
-		GuildRanks e
+		GuildTributes e
 	)
 	{
 		std::vector<std::string> v;
 
 		v.push_back(std::to_string(e.guild_id));
-		v.push_back(std::to_string(e.rank));
-		v.push_back("'" + Strings::Escape(e.title) + "'");
+		v.push_back(std::to_string(e.tribute_id_1));
+		v.push_back(std::to_string(e.tribute_id_1_tier));
+		v.push_back(std::to_string(e.tribute_id_2));
+		v.push_back(std::to_string(e.tribute_id_2_tier));
+		v.push_back(std::to_string(e.time_remaining));
+		v.push_back(std::to_string(e.enabled));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -208,7 +236,7 @@ public:
 
 	static int InsertMany(
 		Database& db,
-		const std::vector<GuildRanks> &entries
+		const std::vector<GuildTributes> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
@@ -217,8 +245,12 @@ public:
 			std::vector<std::string> v;
 
 			v.push_back(std::to_string(e.guild_id));
-			v.push_back(std::to_string(e.rank));
-			v.push_back("'" + Strings::Escape(e.title) + "'");
+			v.push_back(std::to_string(e.tribute_id_1));
+			v.push_back(std::to_string(e.tribute_id_1_tier));
+			v.push_back(std::to_string(e.tribute_id_2));
+			v.push_back(std::to_string(e.tribute_id_2_tier));
+			v.push_back(std::to_string(e.time_remaining));
+			v.push_back(std::to_string(e.enabled));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
@@ -236,9 +268,9 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static std::vector<GuildRanks> All(Database& db)
+	static std::vector<GuildTributes> All(Database& db)
 	{
-		std::vector<GuildRanks> all_entries;
+		std::vector<GuildTributes> all_entries;
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -250,11 +282,15 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			GuildRanks e{};
+			GuildTributes e{};
 
-			e.guild_id = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.rank     = static_cast<uint8_t>(strtoul(row[1], nullptr, 10));
-			e.title    = row[2] ? row[2] : "";
+			e.guild_id          = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.tribute_id_1      = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.tribute_id_1_tier = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.tribute_id_2      = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
+			e.tribute_id_2_tier = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
+			e.time_remaining    = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
+			e.enabled           = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
 
 			all_entries.push_back(e);
 		}
@@ -262,9 +298,9 @@ public:
 		return all_entries;
 	}
 
-	static std::vector<GuildRanks> GetWhere(Database& db, const std::string &where_filter)
+	static std::vector<GuildTributes> GetWhere(Database& db, const std::string &where_filter)
 	{
-		std::vector<GuildRanks> all_entries;
+		std::vector<GuildTributes> all_entries;
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -277,11 +313,15 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			GuildRanks e{};
+			GuildTributes e{};
 
-			e.guild_id = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.rank     = static_cast<uint8_t>(strtoul(row[1], nullptr, 10));
-			e.title    = row[2] ? row[2] : "";
+			e.guild_id          = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.tribute_id_1      = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.tribute_id_1_tier = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.tribute_id_2      = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
+			e.tribute_id_2_tier = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
+			e.time_remaining    = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
+			e.enabled           = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
 
 			all_entries.push_back(e);
 		}
@@ -342,4 +382,4 @@ public:
 
 };
 
-#endif //EQEMU_BASE_GUILD_RANKS_REPOSITORY_H
+#endif //EQEMU_BASE_GUILD_TRIBUTES_REPOSITORY_H

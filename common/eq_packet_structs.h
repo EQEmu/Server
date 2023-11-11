@@ -3327,6 +3327,7 @@ struct Internal_GuildMemberEntry_Struct {
 //	char	public_note[1];				//variable length.
 	uint16	zoneinstance;				//network byte order
 	uint16	zone_id;					//network byte order
+	uint32  online;
 };
 
 struct Internal_GuildMembers_Struct {	//just for display purposes, this is not actually used in the message encoding.
@@ -3354,6 +3355,41 @@ struct GuildUpdate_PublicNote{
 	char	name[64];
 	char	target[64];
 	char	note[1]; //variable length.
+};
+
+struct GuildUpdateURLAndChannel {
+	char text[512];
+};
+
+struct GuildUpdatePermissions {
+	uint32	rank;				// the rank that is being changed
+	uint32	function_id;		// the id of the guild function
+	uint32	value;				// 1 is on, 0 is off
+
+};
+
+struct GuildUpdateRankNames {
+	uint32	rank;				// the rank that is being updated
+	char	rank_name[76];		// the rank name
+};
+
+struct GuildUpdateUCP {
+	uint32	action;				// 0 and 1 use url and channel payload.  5 uses permissions payload
+	char	unknown[76];
+	union {
+		GuildUpdateURLAndChannel url_channel;
+		GuildUpdatePermissions permissions;
+		GuildUpdateRankNames rank_name;
+	}payload;
+};
+
+struct GuildPermission_Struct 
+{
+	uint32	Action;				// 5 = Update function permission
+	char	Unknown0004[76];	// not used
+	uint32	rank;				// the rank that is being changed
+	uint32	function_id;		// the id of the guild function
+	uint32	value;				// 1 is on, 0 is off
 };
 
 struct GuildUpdateURLAndChannel_Struct
@@ -3394,6 +3430,7 @@ struct GuildStatus_Struct
 struct GuildDemoteStruct{
 	char	name[64];
 	char	target[64];
+	uint32	rank;
 };
 
 struct GuildRemoveStruct{
@@ -3403,9 +3440,9 @@ struct GuildRemoveStruct{
 	uint32	leaderstatus; //?
 };
 
-struct GuildMakeLeader{
-	char	name[64];
-	char	target[64];
+struct GuildMakeLeader_Struct{
+	char	requestor[64];
+	char	new_leader[64];
 };
 
 struct BugReport_Struct {
@@ -3514,15 +3551,142 @@ struct TributeAbility_Struct {
 	char	name[0];
 };
 
-struct GuildTributeAbility_Struct {
-	uint32	guild_id;
-	TributeAbility_Struct ability;
-};
-
 struct SelectTributeReq_Struct {
 	uint32	client_id;	//? maybe action ID?
 	uint32	tribute_id;
 	uint32	unknown8;	//seen E3 00 00 00
+};
+
+struct GuildTributeAbilityDetail_Struct {
+	uint32	tribute_id;	//backwards byte order!
+	uint32	tier_count;	//backwards byte order!
+	TributeLevel_Struct tiers[MAX_TRIBUTE_TIERS];
+	uint32  unknown132;
+	char	name[0];
+};
+
+struct GuildTributeAbility_Struct {
+	uint32	guild_id;
+	GuildTributeAbilityDetail_Struct ability;
+};
+
+struct GuildTributeSelectReq_Struct {
+	uint32	tribute_id;
+	uint32	tier;
+	uint32	tribute_id2;
+	uint32	unknown12;	//seen A7 01 00 00
+};
+
+struct GuildTributeSelectReply_Struct {
+	uint32 tribute_id;
+	uint32 tier;
+	uint32 tribute_id2;
+	char   description;
+};
+
+struct GuildTributeModifyBenefits_Struct {
+/*000*/uint32	command;
+/*004*/uint32	data;
+/*008*/char		unknown8[12];
+/*020*/uint32	tribute_master_id;
+/*024*/uint32	tribute_id_1;
+/*028*/uint32	tribute_id_2;
+/*032*/uint32	tribute_id_1_tier;
+/*036*/uint32	tribute_id_2_tier;
+/*040*/char		unknown[40];
+};
+
+struct GuildTributeOptInOutReq_Struct {
+/*000*/uint32	guild_id;
+/*004*/uint32	tribute_toggle;
+/*008*/char		player[64];
+/*072*/uint32	command;
+/*076*/uint32	tribute_master_id;
+};
+
+struct GuildTributeOptInOutReply_Struct {
+/*000*/uint32 	guild_id;
+/*004*/char		player_name[64];
+/*068*/uint32	tribute_toggle;//			0 off 1 on
+/*072*/uint32 	tribute_trophy_toggle;// 	0 off 1 on		not yet implemented		
+/*076*/uint32	no_donations;
+/*080*/uint32	time;
+/*084*/uint32	command;
+};
+
+struct GuildTributeSaveActive_Struct {
+/*000*/ uint32 	command;
+/*004*/ char 	unknown04[16];
+/*020*/ uint32 	master_tribute_id;
+/*024*/	uint32	tribute_id_1;
+/*028*/ uint32	tribute_id_2;
+/*032*/ uint32	tribute_1_tier;
+/*036*/ uint32	tribute_2_tier;
+/*040*/ char	unknown40[8];
+};
+
+struct GuildTributeFavorTimer_Struct {
+/*000*/ uint32	guild_id;
+/*004*/ uint32	guild_favor;
+/*008*/ uint32	tribute_timer;
+/*012*/ uint32	trophy_timer;
+};
+
+struct GuildTributeSendActive_Struct {
+/*000*/ uint32	not_used;
+/*004*/ uint32	guild_favor;
+/*008*/ uint32	tribute_timer;
+/*012*/ uint32	tribute_enabled;
+/*016*/ char	unknown16[8];
+/*024*/ uint32	tribute_id_1;
+/*028*/ uint32	tribute_id_2;
+/*032*/ uint32	tribute_id_1_tier;
+/*036*/ uint32	tribute_id_2_tier;
+};
+
+struct GuildTributeToggleReq_Struct {
+/*000*/ uint32	command;
+/*004*/ uint32	unknown4;
+/*008*/ uint32	unknown8;
+};
+
+struct GuildTributeDonateItemRequest_Struct {
+/*000*/	uint32	Type;
+/*004*/ uint16 	Slot;
+/*006*/ uint16 	SubIndex;
+/*008*/ uint16 	AugIndex;
+/*010*/ uint16 	Unknown10;
+/*012*/ uint32 	quanity;
+/*016*/ uint32	tribute_master_id;
+/*020*/ uint32 	unknown20;
+/*024*/ uint32	guild_id;
+/*028*/ uint32	unknown28;
+/*032*/ uint32 	unknown32;
+};
+
+struct GuildTributeDonateItemReply_Struct {
+/*000*/ uint32	Type;
+/*004*/ uint16	slot;
+/*006*/ uint16 	SubIndex;
+/*008*/	uint16	AugIndex;
+/*010*/	uint16	unknown10;
+/*012*/ uint32	quanity;
+/*016*/ uint32	unknown20;
+/*020*/	uint32	favor;
+};
+
+struct GuildTributeDonatePlatRequest_Struct {
+/*000*/	uint32	quanity;
+/*004*/	uint32	tribute_master_id;
+/*008*/ uint32	unknown1;
+/*012*/	uint32  guild_id;
+/*016*/ uint32  unknown2;
+};
+
+struct GuildTributeDonatePlatReply_Struct {
+	/*000*/ uint32	quanity;
+	/*004*/ uint32	unknown2;
+	/*008*/	uint32	favor;
 };
 
 struct SelectTributeReply_Struct {

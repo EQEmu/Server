@@ -83,6 +83,11 @@ int Lua_Packet::GetRawOpcode() {
 	return static_cast<int>(self->GetOpcodeBypass());
 }
 
+int Lua_Packet::GetProtocolOpcode() {
+	Lua_Safe_Call_Int();
+	return static_cast<int>(self->GetProtocolOpcode());
+}
+
 void Lua_Packet::SetRawOpcode(int op) {
 	Lua_Safe_Call_Void();
 	self->SetOpcode(static_cast<EmuOpcode>(op));
@@ -329,6 +334,7 @@ luabind::scope lua_register_packet() {
 	.property("valid", &Lua_Packet::Valid)
 	.def("GetOpcode", &Lua_Packet::GetOpcode)
 	.def("GetRawOpcode", &Lua_Packet::GetRawOpcode)
+	.def("GetProtocolOpcode", &Lua_Packet::GetProtocolOpcode)
 	.def("GetSize", &Lua_Packet::GetSize)
 	.def("GetWritePosition", &Lua_Packet::GetWritePosition)
 	.def("ReadDouble", &Lua_Packet::ReadDouble)

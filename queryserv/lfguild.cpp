@@ -10,27 +10,27 @@
 extern WorldServer *worldserver;
 extern QSDatabase database;
 
-PlayerLookingForGuild::PlayerLookingForGuild(char *Name, char *Comments, uint32 Level, uint32 Class, uint32 AACount, uint32 Timezone, uint32 TimePosted)
+PlayerLookingForGuild::PlayerLookingForGuild(char *p_Name, char * p_Comments, uint32 p_Level, uint32 p_Class, uint32 p_AACount, uint32 p_Timezone, uint32 p_TimePosted)
 {
-	Name = Name;
-	Comments = Comments;
-	Level = Level;
-	Class = Class;
-	AACount = AACount;
-	TimeZone = Timezone;
-	TimePosted = TimePosted;
+	Name = std::string(p_Name);
+	Comments = std::string(p_Comments);
+	Level = p_Level;
+	Class = p_Class;
+	AACount = p_AACount;
+	TimeZone = p_Timezone;
+	TimePosted = p_TimePosted;
 }
 
-GuildLookingForPlayers::GuildLookingForPlayers(char *Name, char *Comments, uint32 FromLevel, uint32 ToLevel, uint32 Classes, uint32 AACount, uint32 Timezone, uint32 TimePosted)
+GuildLookingForPlayers::GuildLookingForPlayers(char * g_Name, char * g_Comments, uint32 g_FromLevel, uint32 g_ToLevel, uint32 g_Classes, uint32 g_AACount, uint32 g_Timezone, uint32 g_TimePosted)
 {
-	Name = Name;
-	Comments = Comments;
-	FromLevel = FromLevel;
-	ToLevel = ToLevel;
-	Classes = Classes;
-	AACount = AACount;
-	TimeZone = Timezone;
-	TimePosted = TimePosted;
+	Name = std::string(g_Name);
+	Comments = std::string(g_Comments);
+	FromLevel = g_FromLevel;
+	ToLevel = g_ToLevel;
+	Classes = g_Classes;
+	AACount = g_AACount;
+	TimeZone = g_Timezone;
+	TimePosted = g_TimePosted;
 }
 
 bool LFGuildManager::LoadDatabase()

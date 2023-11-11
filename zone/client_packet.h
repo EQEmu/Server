@@ -166,7 +166,14 @@
 	void Handle_OP_GuildPublicNote(const EQApplicationPacket *app);
 	void Handle_OP_GuildRemove(const EQApplicationPacket *app);
 	void Handle_OP_GuildStatus(const EQApplicationPacket *app);
+	void Handle_OP_GuildTributeModifyBenefits(const EQApplicationPacket* app);
+	void Handle_OP_GuildTributeOptInOut(const EQApplicationPacket* app);
+	void Handle_OP_GuildTributeSaveActiveTributes(const EQApplicationPacket* app);
+	void Handle_OP_GuildTributeSelect(const EQApplicationPacket* app);
+	void Handle_OP_GuildTributeToggle(const EQApplicationPacket* app);
 	void Handle_OP_GuildUpdateURLAndChannel(const EQApplicationPacket *app);
+	void Handle_OP_GuildTributeDonateItem(const EQApplicationPacket* app);
+	void Handle_OP_GuildTributeDonatePlat(const EQApplicationPacket* app);
 	void Handle_OP_GuildWar(const EQApplicationPacket *app);
 	void Handle_OP_Heartbeat(const EQApplicationPacket *app);
 	void Handle_OP_Hide(const EQApplicationPacket *app);

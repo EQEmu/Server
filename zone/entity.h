@@ -245,6 +245,7 @@ public:
 	void	SendGuildMembers(uint32 guild_id);
 	void	RefreshAllGuildInfo(uint32 guild_id);
 	void	SendGuildList();
+	void    GuildSetPreRoFBankerFlag(uint32 guild_id, uint32 guild_rank, bool banker_status);
 	void	CheckGroupList (const char *fname, const int fline);
 	void	GroupProcess();
 	void	RaidProcess();
@@ -402,6 +403,9 @@ public:
 	void	QuestJournalledSayClose(Mob *sender, float dist, const char* mobname, const char* message, Journal::Options &opts);
 	void	GroupMessage(uint32 gid, const char *from, const char *message);
 	void	ExpeditionWarning(uint32 minutes_left);
+	void    SendToGuildTitleDisplay(Client* c);
+	void    SendAllGuildTitleDisplay(uint32 guild_id);
+	void    UpdateGuildTributes(uint32 guild_id);
 
 	void	RemoveFromTargets(Mob* mob, bool RemoveFromXTargets = false);
 	void	RemoveFromTargetsFadingMemories(Mob* spell_target, bool RemoveFromXTargets = false, uint32 max_level = 0);
@@ -411,7 +415,8 @@ public:
 	void	QueueCloseClients(Mob* sender, const EQApplicationPacket* app, bool ignore_sender=false, float distance=200, Mob* skipped_mob = 0, bool is_ack_required = true, eqFilterType filter=FilterNone);
 	void	QueueClients(Mob* sender, const EQApplicationPacket* app, bool ignore_sender=false, bool ackreq = true);
 	void	QueueClientsStatus(Mob* sender, const EQApplicationPacket* app, bool ignore_sender = false, uint8 minstatus = AccountStatus::Player, uint8 maxstatus = AccountStatus::Player);
-	void	QueueClientsGuild(Mob* sender, const EQApplicationPacket* app, bool ignore_sender = false, uint32 guildeqid = 0);
+	void	QueueClientsGuild(const EQApplicationPacket* app, uint32 guildeqid = 0);
+	void    QueueClientsNotInGuild(Mob* sender, const EQApplicationPacket* app, bool ignore_sender, uint32 guild_id);
 	void	QueueClientsGuildBankItemUpdate(const GuildBankItemUpdate_Struct *gbius, uint32 GuildID);
 	void	QueueClientsByTarget(Mob* sender, const EQApplicationPacket* app, bool iSendToSender = true, Mob* SkipThisMob = 0, bool ackreq = true, bool HoTT = true, uint32 ClientVersionBits = 0xFFFFFFFF, bool inspect_buffs = false, bool clear_target_window  = false);
 

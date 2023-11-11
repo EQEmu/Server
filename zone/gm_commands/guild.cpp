@@ -30,6 +30,8 @@ void command_guild(Client *c, const Seperator *sep)
 	bool is_set_leader = !strcasecmp(sep->arg[1], "setleader");
 	bool is_set_rank = !strcasecmp(sep->arg[1], "setrank");
 	bool is_status = !strcasecmp(sep->arg[1], "status");
+	bool is_details = !strcasecmp(sep->arg[1], "details");
+	bool is_test = !strcasecmp(sep->arg[1], "test");
 	if (
 		!is_create &&
 		!is_delete &&
@@ -41,7 +43,9 @@ void command_guild(Client *c, const Seperator *sep)
 		!is_set &&
 		!is_set_leader &&
 		!is_set_rank &&
-		!is_status
+		!is_status &&
+		!is_details &&
+		!is_test
 	) {
 		SendGuildSubCommands(c);
 		return;
@@ -476,6 +480,139 @@ void command_guild(Client *c, const Seperator *sep)
 			}
 		}
 	}
+	else if (is_details) 
+	{
+	auto guild_id = Strings::ToUnsignedInt(sep->arg[2]);
+	auto guild = guild_mgr.GetGuildByGuildID(guild_id);
+	if (!guild) {
+		c->Message(Chat::Yellow, fmt::format("Guild {} not found.  #guild list can be used to get guild ids.", guild_id).c_str());
+		return;
+	}
+
+	if (guild) {
+		c->Message(Chat::Yellow, fmt::format("Guild ID:         {}.", sep->arg[2]).c_str());
+		c->Message(Chat::Yellow, fmt::format("Guild Name:       {}.", guild->name.c_str()).c_str());
+		c->Message(Chat::Yellow, fmt::format("Guild Leader ID:  {}.", guild->leader).c_str());
+		c->Message(Chat::Yellow, fmt::format("Guild MinStatus:  {}.", guild->minstatus).c_str());
+		c->Message(Chat::Yellow, fmt::format("Guild MOTD:       {}.", guild->motd.c_str()).c_str());
+		c->Message(Chat::Yellow, fmt::format("Guild MOTD Setter:{}.", guild->motd_setter.c_str()).c_str());
+		c->Message(Chat::Yellow, fmt::format("Guild Channel:    {}.", guild->channel.c_str()).c_str());
+		c->Message(Chat::Yellow, fmt::format("Guild URL:        {}.", guild->url.c_str()).c_str());
+
+		for (int i = 1; i <= GUILD_MAX_RANK; i++) {
+			c->Message(Chat::Yellow, fmt::format("Guild Rank:       {} - {}.", i, guild->rank_names[i].c_str()).c_str());
+		}
+
+		c->Message(Chat::Yellow, "Guild Functions:   {db_id} - {guild_id} - {perm_id} - {perm_value}.");
+		for (int i = 1; i <= GUILD_MAX_FUNCTIONS; i++) {
+		c->Message(Chat::Yellow, fmt::format("Guild Function:   {} - {} - {} - {}.",
+			guild->functions[i].id,
+			guild->functions[i].guild_id,
+			guild->functions[i].perm_id,
+			guild->functions[i].perm_value
+			).c_str());
+		}
+		c->Message(Chat::Yellow, fmt::format("Guild Tribute:  Favor     {}", guild->tribute.favor).c_str());
+		c->Message(Chat::Yellow, fmt::format("Guild Tribute:  Tribute 1 {}/{}   - Tribute 2 {}/{}",
+			guild->tribute.id_1,
+			guild->tribute.id_1_tier,
+			guild->tribute.id_2,
+			guild->tribute.id_2_tier
+			).c_str());
+		c->Message(Chat::Yellow, fmt::format("Guild Tribute:  Time Remaining {} - Enabled {}",
+			guild->tribute.time_remaining,
+			guild->tribute.enabled
+		).c_str());
+	}	
+	for (auto& c1 : entity_list.GetClientList()) {
+		if (c1.second->GuildID() == guild_id) {
+			c->Message(Chat::Yellow, fmt::format("PlayerName: {} ID: {} Rank: {} OptIn: {}.", 
+				c1.second->GetCleanName(),
+				c1.second->GuildID(),
+				c1.second->GuildRank(),
+				c1.second->GuildTributeOptIn()
+				).c_str());
+		}
+	}
+	}
+	else if (is_test)
+	{
+		auto guild_id = Strings::ToUnsignedInt(sep->arg[2]);
+		auto command3  = Strings::ToUnsignedInt(sep->arg[3]);
+		auto command4  = Strings::ToUnsignedInt(sep->arg[4]);
+		auto command5  = Strings::ToUnsignedInt(sep->arg[5]);
+
+		auto target = c->GetTarget();
+		if (!target) {
+			return;
+		}
+
+		if (command3 == 1) {
+			target->SendAppearancePacket(command4, command5);
+			c->Message(Chat::Yellow, "SendAppearancePacket sent.");
+		}
+		if (command3 == 2) {
+			target->SendAppearancePacket(command4, command5, true, false, target->CastToClient(), false );
+			c->Message(Chat::Yellow, "SendAppearancePacket sent.");
+		}
+		if (command3 == 3) {
+			c->SendGuildTributes();
+			c->Message(Chat::Yellow, "Guild Tributes sent.");
+		}
+		if (command3 == 4) {
+			//#guild test 2 4 60 1
+			c->Message(Chat::Yellow, "Guild Tribute Item sent to client.");
+			c->DoGuildTributeUpdate();
+		}
+		if (command3 == 5) {
+			//#guild test 2 4 60 1
+			c->Message(Chat::Yellow, "Put item {} in slot {} ");
+			const EQ::ItemInstance* inst = database.CreateItem(command4, 1);
+			c->PutItemInInventory(EQ::invslot::GUILD_TRIBUTE_BEGIN + command5, *inst);
+			c->SendItemPacket(EQ::invslot::GUILD_TRIBUTE_BEGIN + command5, inst, (ItemPacketType)guild_id);
+		}
+		if (command3 == 6) {
+			//#guild test 2 6 4 450/451
+			c->Message(Chat::Yellow, "Delete item in slot {} ", command4);
+			c->DeleteItemInInventory(command5);
+		}
+		if (command3 == 7) {
+			//#guild test 2 7 450/451 0
+			c->Message(Chat::Yellow, "Send Delete packet for item in slot {} ", command4);
+			//c->DeleteItemInInventory(command4, 0, true, false);
+			EQApplicationPacket* outapp;
+			outapp = new EQApplicationPacket(OP_DeleteItem, sizeof(DeleteItem_Struct));
+			DeleteItem_Struct* delitem = (DeleteItem_Struct*)outapp->pBuffer;
+			delitem->from_slot = command4;
+			delitem->to_slot = 0xFFFFFFFF;
+			delitem->number_in_stack = 0xFFFFFFFF;
+			c->QueuePacket(outapp);
+			safe_delete(outapp);
+		}
+		if (command3 == 8) {
+			//#guild test 150022 8 450 108
+			const EQ::ItemInstance* inst = database.CreateItem(guild_id, 1);
+			c->Message(Chat::Yellow, "Put item {} in slot {} ", guild_id, command4);
+//			c->PutItemInInventory(command4, *inst, command5);
+			
+			std::string packet = inst->Serialize(command4);
+			EmuOpcode opcode = OP_Unknown;
+			EQApplicationPacket* outapp = nullptr;
+			ItemPacket_Struct* itempacket = nullptr;
+
+			// Construct packet
+			opcode = OP_ItemPacket;
+			outapp = new EQApplicationPacket(opcode, packet.length() + sizeof(ItemPacket_Struct));
+			itempacket = (ItemPacket_Struct*)outapp->pBuffer;
+			memcpy(itempacket->SerializedItem, packet.c_str(), packet.length());
+			itempacket->PacketType = (ItemPacketType)command5;
+		}
+		if (command3 == 9) {
+			//#guild test 2 6 4 450/451
+			c->Message(Chat::Yellow, "Send Guild List");
+			c->SendGuildMembers();
+		}
+		}
 }
 
 void SendGuildSubCommands(Client *c)
