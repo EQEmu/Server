@@ -62,6 +62,13 @@ public:
 //	bool	DonateTribute(uint32 charid, uint32 guild_id, uint32 tribute_amount);
 
 	uint8 *MakeGuildMembers(uint32 guild_id, const char *prefix_name, uint32 &length);	//make a guild member list packet, returns ownership of the buffer.
+	uint8 *MakeGuildMembers2(uint32 guild_id, const char* prefix_name, uint32& length);
+	void  SendToWorldMemberLevelUpdate(uint32 guild_id, uint32 level, std::string player_name);
+	void  SendToWorldMemberPublicNote(uint32 guild_id, std::string player_name, std::string public_note);
+	void  SendToWorldMemberRemove(uint32 guild_id, std::string player_name);
+	void  SendToWorldMemberAdd(uint32 guild_id, uint32 char_id, uint32 level, uint32 _class, uint32 rank, uint32 zone_id, std::string player_name);
+	bool  RemoveMember(uint32 guild_id, uint32 char_id, std::string player_name);
+	void  AddMember(uint32 guild_id, uint32 char_id, uint32 level, uint32 _class, uint32 rank, uint32 zone_id, std::string player_name);
 
 	void RecordInvite(uint32 char_id, uint32 guild_id, uint8 rank);
 	bool VerifyAndClearInvite(uint32 char_id, uint32 guild_id, uint8 rank);
@@ -70,7 +77,7 @@ public:
 	void UpdateRankPermission(uint32 gid, uint32 charid, uint32 fid, uint32 rank, uint32 value);
 	void SendPermissionUpdate(uint32 guild_id, uint32 rank, uint32 function_id, uint32 value);
 	void UpdateRankName(uint32 gid, uint32 rank, std::string rank_name);
-	void SendRankName(uint32 guild_id, uint32 rank, std::string& rank_name);
+	void SendRankName(uint32 guild_id, uint32 rank, std::string rank_name);
 	void SendAllRankNames(uint32 guild_id, uint32 char_id);
 	BaseGuildManager::GuildInfo* GetGuildByGuildID(uint32 guild_id);
 

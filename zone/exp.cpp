@@ -969,6 +969,11 @@ void Client::SetLevel(uint8 set_level, bool command)
 		SetPVP(true);
 	}
 
+	if (IsInAGuild()) {
+		guild_mgr.SendToWorldMemberLevelUpdate(GuildID(), GetLevel(), std::string(GetCleanName()));
+		DoGuildTributeUpdate();
+	}
+
 	DoTributeUpdate();
 	SendHPUpdate();
 	SetMana(CalcMaxMana());

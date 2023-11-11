@@ -4001,7 +4001,7 @@ uint8 Mob::GetDefaultGender(uint16 in_race, uint8 in_gender) {
 	}
 }
 
-void Mob::SendAppearancePacket(uint32 type, uint32 value, bool WholeZone, bool iIgnoreSelf, Client *specific_target, bool WholeZoneMinusMyGuild) {
+void Mob::								SendAppearancePacket(uint32 type, uint32 value, bool WholeZone, bool iIgnoreSelf, Client *specific_target, bool WholeZoneMinusMyGuild) {
 	if (!GetID())
 		return;
 	auto outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));

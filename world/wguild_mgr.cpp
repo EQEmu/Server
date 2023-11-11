@@ -214,7 +214,7 @@ void WorldGuildManager::ProcessZonePacket(ServerPacket *pack) {
 			LogGuilds("World Received ServerOP_GuildRankNameChange from zone for guild [{}] rank id {} with new name of {}",
 				rnc->guild_id,
 				rnc->rank,
-				rnc->rank_name.c_str()
+				rnc->rank_name
 			);
 			for (auto const& z : zoneserver_list.getZoneServerList()) {
 				auto r = z.get();
@@ -227,10 +227,23 @@ void WorldGuildManager::ProcessZonePacket(ServerPacket *pack) {
 			LogError("World Received ServerOP_GuildRankNameChange from zone for guild [{}] rank id {} with new name of {} but could not find guild.",
 				rnc->guild_id,
 				rnc->rank,
-				rnc->rank_name.c_str()
+				rnc->rank_name
 			);
 		}
 
+		break;
+	}
+	case ServerOP_GuildMemberLevelUpdate:
+	case ServerOP_GuildMemberPublicNote:
+	case ServerOP_GuildMemberRemove:
+	case ServerOP_GuildMemberAdd:
+	{
+		for (auto const& z : zoneserver_list.getZoneServerList()) {
+			auto r = z.get();
+			if (r->GetZoneID() > 0) {
+				r->SendPacket(pack);
+			}
+		}
 		break;
 	}
 	default:

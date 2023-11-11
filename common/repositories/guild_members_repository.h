@@ -161,13 +161,27 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static int UpdateOnline(Database& db, uint32 char_id, uint32 status)
+	static int UpdateOnline(Database& db, uint32 char_id, bool status)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET `online` = '{}' WHERE `char_id` = '{}'",
 				TableName(),
-				status,
+				status ? 1 : 0,
+				char_id
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int UpdateNote(Database& db, uint32 char_id, std::string public_note)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"UPDATE {} SET `public_note` = '{}' WHERE `char_id` = '{}'",
+				TableName(),
+				public_note,
 				char_id
 			)
 		);

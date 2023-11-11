@@ -786,6 +786,10 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	case ServerOP_GuildRankUpdate:
 	case ServerOP_GuildRankNameChange:
 	case ServerOP_LFGuildUpdate:
+	case ServerOP_GuildMemberLevelUpdate:
+	case ServerOP_GuildMemberPublicNote:
+	case ServerOP_GuildMemberRemove:
+	case ServerOP_GuildMemberAdd:
 	{
 		guild_mgr.ProcessWorldPacket(pack);
 		break;

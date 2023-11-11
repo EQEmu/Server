@@ -503,13 +503,13 @@ bool BaseGuildManager::SetTributeFlag(uint32 charid, bool enabled) {
 	return(true);
 }
 
-bool BaseGuildManager::SetPublicNote(uint32 charid, const char *note) {
-	if(!DBSetPublicNote(charid, note))
-		return(false);
-
-	SendCharRefresh(GUILD_NONE, 0, charid);
-
-	return(true);
+bool BaseGuildManager::SetPublicNote(uint32 charid, std::string public_note) 
+{
+	if (!DBSetPublicNote(charid, public_note)) {
+		return false;
+	}
+	
+	return true;
 }
 
 uint32 BaseGuildManager::DBCreateGuild(std::string name, uint32 leader) 
@@ -866,27 +866,17 @@ bool BaseGuildManager::DBSetTributeFlag(uint32 charid, bool enabled) {
 	return(QueryWithLogging(query, "setting a guild member's tribute flag"));
 }
 
-bool BaseGuildManager::DBSetPublicNote(uint32 charid, const char* note) {
-	if(m_db == nullptr)
-		return(false);
-
-	//escape our strings.
-	uint32 len = strlen(note);
-	auto esc = new char[len * 2 + 1];
-	m_db->DoEscapeString(esc, note, len);
-
-	//insert the new `guilds` entry
-	std::string query = StringFormat("UPDATE guild_members SET public_note='%s' WHERE char_id=%d", esc, charid);
-	safe_delete_array(esc);
-	auto results = m_db->QueryDatabase(query);
-
-	if (!results.Success())
-	{
+bool BaseGuildManager::DBSetPublicNote(uint32 charid, std::string public_note) 
+{
+	if (m_db == nullptr) {
 		return false;
 	}
 
-	LogGuilds("Set public not for char [{}]", charid);
-
+	auto result = GuildMembersRepository::UpdateNote(*m_db, charid, public_note);
+	if (!result) {
+		LogGuilds("Set public not for char [{}]", charid);
+		return false;
+	}
 	return true;
 }
 
@@ -907,7 +897,7 @@ bool BaseGuildManager::QueryWithLogging(std::string query, const char *errmsg) {
 #define GuildMemberBaseQuery \
 "SELECT c.`id`, c.`name`, c.`class`, c.`level`, c.`last_login`, c.`zone_id`," \
 " g.`guild_id`, g.`rank`, g.`tribute_enable`, g.`total_tribute`, g.`last_tribute`," \
-" g.`banker`, g.`public_note`, g.`alt` " \
+" g.`banker`, g.`public_note`, g.`alt`, g.`online` " \
 " FROM `character_data` AS c LEFT JOIN `guild_members` AS g ON c.`id` = g.`char_id` "
 static void ProcessGuildMember(MySQLRequestRow row, CharGuildInfo &into) {
 	//fields from `characer_`
@@ -927,7 +917,8 @@ static void ProcessGuildMember(MySQLRequestRow row, CharGuildInfo &into) {
 	into.banker			= row[11]? (row[11][0] == '0'?false:true) : false;
 	into.public_note	= row[12]? row[12] : "";
 	into.alt		    = row[13] ? (row[13][0] == '0' ? false : true) : false;
-	
+	into.online         = row[14] ? (row[14][0] == '0' ? false : true) : false;
+
 	//a little sanity checking/cleanup
 	if(into.guild_id == 0)
 		into.guild_id = GUILD_NONE;
@@ -1436,4 +1427,27 @@ uint32 BaseGuildManager::DBSetMemberFavor(uint32 guild_id, uint32 char_id, uint3
 	return gci.total_tribute;
 }
 
+bool BaseGuildManager::DBSetMemberOnline(uint32 char_id, bool status)
+{
+	CharGuildInfo gci;
+	GetCharInfo(char_id, gci);
 
+	if (gci.char_name.empty()) {
+		LogGuilds("Requested to set member id {} online status [{}] but could not find the character.", char_id, status);
+		return false;
+	}
+
+	if (m_db == nullptr) {
+		LogGuilds("Requested to set member {} online status [{}] but there is no database object", gci.char_name.c_str(), status);
+		return false;
+	}
+
+	if (!GuildMembersRepository::UpdateOnline(*m_db, char_id, status)) {
+		LogError("Error updating member id {} online status [{}] in database.", char_id, status);
+		return false;
+	}
+
+	LogGuilds("Set member {} id {} online status [{}] in the database", gci.char_name.c_str(), char_id, status);
+
+	return true;
+}

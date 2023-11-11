@@ -65,6 +65,7 @@ class CharGuildInfo
 		bool	banker;
 		bool	alt;
 		std::string	public_note;
+		bool	online;
 };
 
 //this object holds guild functionality shared between world and zone.
@@ -103,13 +104,14 @@ class BaseGuildManager
 		bool	GetBankerFlag(uint32 CharID, bool compat_mode = false);
 		bool    GetGuildBankerStatus(uint32 guild_id, uint32 guild_rank);
 		bool	SetTributeFlag(uint32 charid, bool enabled);
-		bool	SetPublicNote(uint32 charid, const char *note);
+		bool	SetPublicNote(uint32 charid, std::string public_note);
 		uint32  DBSetGuildFavor(uint32 guild_id, uint32 enabled);
 		bool    DBSetGuildTributeEnabled(uint32 guild_id, uint32 enabled);
 		bool    DBSetMemberTributeEnabled(uint32 guild_id, uint32 char_id, uint32 enabled);
 		bool    DBSetTributeTimeRemaining(uint32 guild_id, uint32 enabled);
 		uint32	DBSetMemberFavor(uint32 guild_id, uint32 char_id, uint32 favor);
-		
+		bool    DBSetMemberOnline(uint32 char_id, bool status);
+
 		//queries
 		bool	GetCharInfo(const char *char_name, CharGuildInfo &into);
 		bool	GetCharInfo(uint32 char_id, CharGuildInfo &into);
@@ -162,7 +164,7 @@ class BaseGuildManager
 		bool	DBSetGuildRank(uint32 charid, uint8 rank);
 		bool	DBSetAltFlag(uint32 charid, bool is_alt);
 		bool	DBSetTributeFlag(uint32 charid, bool enabled);
-		bool	DBSetPublicNote(uint32 charid, const char *note);
+		bool	DBSetPublicNote(uint32 charid, std::string public_note);
 		bool	QueryWithLogging(std::string query, const char *errmsg);
 //	void	DBSetPublicNote(uint32 guild_id,char* charname, char* note);
 

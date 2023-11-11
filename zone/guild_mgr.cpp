@@ -478,7 +478,7 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack)
 		//it would be nice if we had the packet to send just a one-person update
 		if (s->guild_id == GUILD_NONE) {
 			if (c != nullptr) {
-				c->SendGuildMembers();	//only need to update this player's list (trying to clear it)
+				//c->SendGuildMembers();	//only need to update this player's list (trying to clear it)
 				c->SendGuildMOTD();
 			}
 		}
@@ -602,7 +602,7 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack)
 					c.second->SetGuildTributeOptIn(false);
 					c.second->SendGuildActiveTributes(c.second->GuildID());
 					c.second->RefreshGuildInfo();
-					c.second->SendGuildMembers();
+					//c.second->SendGuildMembers();
 					c.second->MessageString(Chat::Guild, GUILD_DISBANDED);
 				}
 			}
@@ -789,38 +789,74 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack)
 				auto outapp = new EQApplicationPacket(OP_GuildUpdateURLAndChannel, sizeof(GuildUpdateUCP));
 				GuildUpdateUCP* gucp = (GuildUpdateUCP*)outapp->pBuffer;
 				gucp->payload.rank_name.rank = s->rank;
-				strcpy(gucp->payload.rank_name.rank_name, s->rank_name.c_str());
+				strcpy(gucp->payload.rank_name.rank_name, s->rank_name);
 				gucp->action = 4;
 				entity_list.QueueClientsGuild(outapp, s->guild_id);
 				safe_delete(outapp);
 
-				for (auto const& gm : guild_mgr.GetGuildMembers(s->guild_id)) {
-					auto outapp = new EQApplicationPacket(OP_GuildMemberUpdate, sizeof(GuildMemberUpdate_Struct));
-					GuildMemberUpdate_Struct* gmus = (GuildMemberUpdate_Struct*)outapp->pBuffer;
-					gmus->GuildID = s->guild_id;
-					CharGuildInfo cgi;
-					guild_mgr.GetCharInfo(gm.char_id, cgi);
-					if (cgi.rank == s->rank) {
-						safe_delete(outapp);
-						continue;
-					}
+				//for (auto const& gm : guild_mgr.GetGuildMembers(s->guild_id)) {
+				//	auto outapp = new EQApplicationPacket(OP_GuildMemberUpdate, sizeof(GuildMemberUpdate_Struct));
+				//	GuildMemberUpdate_Struct* gmus = (GuildMemberUpdate_Struct*)outapp->pBuffer;
+				//	gmus->GuildID = s->guild_id;
+				//	CharGuildInfo cgi;
+				//	guild_mgr.GetCharInfo(gm.char_id, cgi);
+				//	if (cgi.rank == s->rank) {
+				//		safe_delete(outapp);
+				//		continue;
+				//	}
 
-					strn0cpy(gmus->MemberName, cgi.char_name.c_str(), sizeof(cgi.char_name.c_str()));
-					auto client = entity_list.GetClientByCharID(gm.char_id);
-					if (client) {
-						gmus->ZoneID = client->GetZoneID();
-						gmus->InstanceID = client->GetInstanceID();
-						gmus->LastSeen = time(nullptr);
-					}
-					else {
-						gmus->ZoneID = 0;
-						gmus->InstanceID = 0;
-						gmus->LastSeen = 0;
-					}
-					entity_list.QueueClientsGuild(outapp, s->guild_id);
-					safe_delete(outapp);
-				}
+				//	strn0cpy(gmus->MemberName, cgi.char_name.c_str(), sizeof(cgi.char_name.c_str()));
+				//	auto client = entity_list.GetClientByCharID(gm.char_id);
+				//	if (client) {
+				//		gmus->ZoneID = client->GetZoneID();
+				//		gmus->InstanceID = client->GetInstanceID();
+				//		gmus->LastSeen = time(nullptr);
+				//	}
+				//	else {
+				//		gmus->ZoneID = 0;
+				//		gmus->InstanceID = 0;
+				//		gmus->LastSeen = 0;
+				//	}
+				//	entity_list.QueueClientsGuild(outapp, s->guild_id);
+				//	safe_delete(outapp);
+				//}
 			}
+		}
+		break;
+	}
+	case ServerOP_GuildMemberLevelUpdate:
+	{
+		if (is_zone_loaded)
+		{
+			auto s_in = (ServerOP_GuildMessage_Struct*)pack->pBuffer;
+			entity_list.SendGuildMemberLevel(s_in->guild_id, s_in->player_level, s_in->player_name);
+		}
+		break;
+	}
+	case ServerOP_GuildMemberPublicNote:
+	{
+		if (is_zone_loaded)
+		{
+			auto s_in = (ServerOP_GuildMessage_Struct*)pack->pBuffer;
+			entity_list.SendGuildMemberPublicNote(s_in->guild_id, s_in->player_name, s_in->note);
+		}
+		break;
+	}
+	case ServerOP_GuildMemberRemove:
+	{
+		if (is_zone_loaded)
+		{
+			auto s_in = (ServerOP_GuildMessage_Struct*)pack->pBuffer;
+			entity_list.SendGuildMemberRemove(s_in->guild_id, s_in->player_name);
+		}
+		break;
+	}
+	case ServerOP_GuildMemberAdd:
+	{
+		if (is_zone_loaded)
+		{
+			auto s_in = (ServerOP_GuildMessage_Struct*)pack->pBuffer;
+			entity_list.SendGuildMemberAdd(s_in->guild_id, s_in->player_level, s_in->player_class, s_in->player_rank, 0, s_in->player_zone_id, s_in->player_name);
 		}
 		break;
 	}
@@ -1696,14 +1732,14 @@ void ZoneGuildManager::UpdateRankName(uint32 guild_id, uint32 rank, std::string 
 	GuildRanksRepository::UpdateTitle(*m_db, out);
 }
 
-void ZoneGuildManager::SendRankName(uint32 guild_id, uint32 rank, std::string& rank_name)
+void ZoneGuildManager::SendRankName(uint32 guild_id, uint32 rank, std::string rank_name)
 {
 	auto pack = new ServerPacket(ServerOP_GuildRankNameChange, sizeof(ServerGuildRankNameChange));
 	ServerGuildRankNameChange* sgpus = (ServerGuildRankNameChange*)pack->pBuffer;
 
 	sgpus->guild_id = guild_id;
 	sgpus->rank = rank;
-	sgpus->rank_name = static_cast<std::string>(rank_name);
+	strn0cpy(sgpus->rank_name, rank_name.c_str(), sizeof(sgpus->rank_name));
 	worldserver.SendPacket(pack);	
 	safe_delete(pack);
 }
@@ -1734,4 +1770,168 @@ BaseGuildManager::GuildInfo* ZoneGuildManager::GetGuildByGuildID(uint32 guild_id
 		return guild->second;
 	}
 	return nullptr;
+}
+
+uint8* ZoneGuildManager::MakeGuildMembers2(uint32 guild_id, const char* prefix_name, uint32& length) {
+	uint8* retbuffer;
+
+	std::vector<CharGuildInfo*> members;
+	if (!GetEntireGuild(guild_id, members))
+		return(nullptr);
+
+	//figure out the actual packet length.
+	uint32 fixed_length = sizeof(Internal_GuildMembers_Struct) + members.size() * sizeof(Internal_GuildMemberEntry_Struct);
+	std::vector<CharGuildInfo*>::iterator cur, end;
+	CharGuildInfo* ci;
+	cur = members.begin();
+	end = members.end();
+	uint32 name_len = 0;
+	uint32 note_len = 0;
+	for (; cur != end; ++cur) {
+		ci = *cur;
+		name_len += ci->char_name.length();
+		note_len += ci->public_note.length();
+	}
+
+	//calc total length.
+	length = fixed_length + name_len + note_len + members.size() * 2;	//string data + null terminators
+
+	//make our nice buffer
+	retbuffer = new uint8[length];
+
+	Internal_GuildMembers_Struct* gms = (Internal_GuildMembers_Struct*)retbuffer;
+
+	//fill in the global header
+	strcpy(gms->player_name, prefix_name);
+	gms->count = members.size();
+	gms->name_length = name_len;
+	gms->note_length = note_len;
+
+	char* name_buf = (char*)(retbuffer + fixed_length);
+	char* note_buf = (char*)(name_buf + name_len + members.size());
+
+	//fill in each member's entry.
+	Internal_GuildMemberEntry_Struct* e = gms->member;
+
+	cur = members.begin();
+	end = members.end();
+	for (; cur != end; ++cur) {
+		ci = *cur;
+
+		//the order we set things here must match the struct
+
+//nice helper macro
+#define SlideStructString(field, str) \
+		strcpy(field, str.c_str()); \
+		field += str.length() + 1
+#define PutField(field) \
+		e->field = ci->field
+
+		SlideStructString(name_buf, ci->char_name);
+		PutField(level);
+		e->banker = ci->banker + (ci->alt * 2);	// low bit is banker flag, next bit is 'alt' flag.
+		PutField(class_);
+		auto c = entity_list.GetClientByID(ci->char_id);
+		if (c && c->ClientVersion() < EQ::versions::ClientVersion::RoF) {
+			switch (ci->rank) {
+			case 8:case 7:case 6:case 5:case 4: { ci->rank = 0; break; }	//GUILD MEMBER 0
+			case 3:case 2: { ci->rank = 1; break; }							//GUILD OFFICER 1
+			case 1: { ci->rank = 2; break; }								//GUILD LEADER 2
+			default: { break; }
+			}
+		}
+		PutField(rank);
+		PutField(time_last_on);
+		PutField(tribute_enable);
+		PutField(total_tribute);
+		PutField(last_tribute);
+		SlideStructString(note_buf, ci->public_note);
+		//e->zoneinstance = 0;
+		if (ci->online) {
+			e->zone_id = ci->zone_id;	//This routine, if there is a zone_id, will update the entire guild window (roster, notes, tribute) for online characters.
+		}
+		else {
+			e->zone_id = 0;				//If zone_id is 0 and we rely on the current world routine, the notes/tribute tabs are not updated for online characters.
+		}
+
+#undef SlideStructString
+#undef PutFieldN
+
+		delete* cur;
+
+		e++;
+	}
+
+	return(retbuffer);
+}
+
+void ZoneGuildManager::SendToWorldMemberLevelUpdate(uint32 guild_id, uint32 level, std::string player_name)
+{
+	auto s_outapp = new ServerPacket(ServerOP_GuildMemberLevelUpdate, sizeof(ServerOP_GuildMessage_Struct));
+	ServerOP_GuildMessage_Struct* s_out = (ServerOP_GuildMessage_Struct*)s_outapp->pBuffer;
+	s_out->guild_id = guild_id;
+	s_out->player_level = level;
+	strn0cpy(s_out->player_name, player_name.c_str(), sizeof(s_out->player_name));
+	worldserver.SendPacket(s_outapp);
+	safe_delete(s_outapp);
+}
+
+void ZoneGuildManager::SendToWorldMemberPublicNote(uint32 guild_id, std::string player_name, std::string public_note)
+{
+	auto s_outapp = new ServerPacket(ServerOP_GuildMemberPublicNote, sizeof(ServerOP_GuildMessage_Struct));
+	ServerOP_GuildMessage_Struct* s_out = (ServerOP_GuildMessage_Struct*)s_outapp->pBuffer;
+	s_out->guild_id = guild_id;
+	strn0cpy(s_out->player_name, player_name.c_str(), sizeof(s_out->player_name));
+	strn0cpy(s_out->note, public_note.c_str(), sizeof(s_out->note));
+	worldserver.SendPacket(s_outapp);
+	safe_delete(s_outapp);
+}
+
+void ZoneGuildManager::SendToWorldMemberRemove(uint32 guild_id, std::string player_name)
+{
+	auto s_outapp = new ServerPacket(ServerOP_GuildMemberRemove, sizeof(ServerOP_GuildMessage_Struct));
+	ServerOP_GuildMessage_Struct* s_out = (ServerOP_GuildMessage_Struct*)s_outapp->pBuffer;
+	s_out->guild_id = guild_id;
+	strn0cpy(s_out->player_name, player_name.c_str(), sizeof(s_out->player_name));
+	worldserver.SendPacket(s_outapp);
+	safe_delete(s_outapp);
+}
+
+void ZoneGuildManager::SendToWorldMemberAdd(uint32 guild_id, uint32 char_id, uint32 level, uint32 _class, uint32 rank, uint32 zone_id, std::string player_name)
+{
+	auto s_outapp = new ServerPacket(ServerOP_GuildMemberAdd, sizeof(ServerOP_GuildMessage_Struct));
+	ServerOP_GuildMessage_Struct* s_out = (ServerOP_GuildMessage_Struct*)s_outapp->pBuffer;
+	s_out->guild_id = guild_id;
+	s_out->player_level = level;
+	s_out->player_rank = rank;
+	s_out->player_zone_id = zone_id;
+	s_out->player_class = _class;
+	strn0cpy(s_out->player_name, player_name.c_str(), sizeof(s_out->player_name));
+	worldserver.SendPacket(s_outapp);
+	safe_delete(s_outapp);
+}
+
+bool ZoneGuildManager::RemoveMember(uint32 guild_id, uint32 char_id, std::string player_name)
+{
+	GuildMembersRepository::DeleteOne(*m_db, char_id);
+	SendToWorldMemberRemove(guild_id, player_name);
+	return true;
+}
+
+void ZoneGuildManager::AddMember(uint32 guild_id, uint32 char_id, uint32 level, uint32 _class, uint32 rank, uint32 zone_id, std::string player_name)
+{
+	BaseGuildMembersRepository::GuildMembers member;
+	member.alt = 0;
+	member.banker = 0;
+	member.char_id = char_id;
+	member.guild_id = guild_id;
+	member.last_tribute = 0;
+	member.public_note.clear();
+	member.rank = rank;
+	member.total_tribute = 0;
+	member.tribute_enable = 0;
+
+	GuildMembersRepository::InsertOne(*m_db, member);
+	DBSetMemberOnline(char_id, true);
+	SendToWorldMemberAdd(guild_id, char_id, level, _class, rank, zone_id, player_name);
 }

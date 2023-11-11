@@ -5,6 +5,7 @@
 #include "../common/packet_functions.h"
 #include "../common/eq_packet_structs.h"
 #include "../common/net/packet.h"
+#include "../common/guilds.h"
 #include <cereal/cereal.hpp>
 #include <cereal/archives/binary.hpp>
 #include <cereal/types/chrono.hpp>
@@ -102,6 +103,10 @@
 #define ServerOP_RequestGuildActiveTributes		  0x0075
 #define ServerOP_RequestGuildFavorAndTimer		  0x0076
 #define ServerOP_GuildTributeUpdateDonations      0x0077
+#define ServerOP_GuildMemberLevelUpdate           0x0078
+#define ServerOP_GuildMemberPublicNote            0x0079
+#define ServerOP_GuildMemberRemove                0x007A
+#define ServerOP_GuildMemberAdd                   0x007B
 
 #define ServerOP_RaidAdd			0x0100 //in use
 #define ServerOP_RaidRemove			0x0101 //in use
@@ -1049,7 +1054,7 @@ struct ServerGuildRankNameChange
 {
 	uint32		guild_id;
 	uint32		rank;
-	std::string	rank_name;
+	char		rank_name[51]; //RoF2 has 51 max.
 };
 
 struct SpawnPlayerCorpse_Struct {
@@ -1904,6 +1909,19 @@ struct GuildTributeMemberToggle {
 	uint32	time_remaining;
 	uint32	no_donations;
 	uint32  member_last_donated;
+};
+
+struct ServerOP_GuildMessage_Struct {
+	uint32	guild_id			{ GUILD_NONE };
+	char	player_name[64]		{ 0 };
+	uint32	player_level		{ 0 };
+	uint32	player_class		{ 0 };
+	uint32	player_rank			{ GUILD_RANK_NONE };
+	uint32	player_zone_id		{ 0 };
+	bool	player_offline		{ false };
+	char	player_new_name[64]	{ 0 };
+	char	new_guild_name[64]	{ 0 };
+	char	note[256]			{ 0 };
 };
 
 #pragma pack()

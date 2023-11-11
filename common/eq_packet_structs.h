@@ -3354,7 +3354,7 @@ struct GuildUpdate_PublicNote{
 	uint32	unknown0;
 	char	name[64];
 	char	target[64];
-	char	note[1]; //variable length.
+	char	note[256];
 };
 
 struct GuildUpdateURLAndChannel {

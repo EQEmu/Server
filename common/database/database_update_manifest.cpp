@@ -5197,6 +5197,12 @@ ADD COLUMN `enabled` smallint NULL DEFAULT 1 AFTER `faction_amount`
 			UPDATE guild_members SET `rank` = '5' WHERE `rank` = '0';
 			UPDATE guild_members SET `rank` = '3' WHERE `rank` = '1';
 			UPDATE guild_members SET `rank` = '1' WHERE `rank` = '2';
+
+			ALTER TABLE `guild_members`
+				ADD COLUMN `online` TINYINT(3) UNSIGNED NOT NULL DEFAULT '0' AFTER `alt`;
+
+			ALTER TABLE `guilds`
+				ADD COLUMN `favor` INT(10) UNSIGNED NOT NULL DEFAULT '0' AFTER `url`;				
 			)"
 	}
 // -- template; copy/paste this when you need to create a new entry

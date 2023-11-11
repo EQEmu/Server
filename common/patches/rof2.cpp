@@ -1319,6 +1319,7 @@ namespace RoF2
 		buffer++;
 
 		// Guild ID
+		//*((uint32*)buffer) = htonl(2);
 		buffer += sizeof(uint32);
 
 		//add member count.
