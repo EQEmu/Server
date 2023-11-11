@@ -30,7 +30,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/repositories/respawn_times_repository.h"
 #include "../common/repositories/spawn_condition_values_repository.h"
 #include "repositories/spawn2_disabled_repository.h"
-
+#include "zone_store.h"
 
 #include "database.h"
 
@@ -46,7 +46,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #else
 #include "unix.h"
 #include "../zone/zonedb.h"
-#include "zone_store.h"
 #include <netinet/in.h>
 #include <sys/time.h>
 #endif
