@@ -513,7 +513,6 @@ bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spa
 		for (auto &ds: disabled_spawns) {
 			if (ds.spawn2_id == s.id) {
 				spawn_enabled = !ds.disabled;
-				break;
 			}
 		}
 
