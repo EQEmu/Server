@@ -1,3 +1,13 @@
+## [22.33.0] - 11/11/2023
+
+### Feature
+
+* Add Comment to Item Data/Quest API ([#3669](https://github.com/EQEmu/Server/pull/3669)) @Kinglykrab 2023-11-07
+
+### Spawn2
+
+* Fix edge case with instances not copying disabled spawn state ([#3688](https://github.com/EQEmu/Server/pull/3688)) @Akkadius 2023-11-12
+
 ## [22.32.1] - 11/6/2023
 
 ### Hotfix
@@ -20,6 +30,7 @@
 * Fix Perl__worldwideremovetask package ([#3670](https://github.com/EQEmu/Server/pull/3670)) @Kinglykrab 2023-11-04
 * Revert " Fix Killed XYZH support in EVENT_DEATH in Perl. " (#3682) ([#3591](https://github.com/EQEmu/Server/pull/3591)) @fryguy503 2023-11-06
 CRASH
+
 ### GCC
 
 * Compatibility fix for GCC 13 ([#3677](https://github.com/EQEmu/Server/pull/3677)) @joligario 2023-11-05
