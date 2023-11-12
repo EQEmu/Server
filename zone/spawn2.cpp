@@ -485,12 +485,15 @@ bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spa
 		spawn2_ids.push_back(s.id);
 	}
 
+	// we load spawn2_disabled entries for this zone
+	// if there are more specific entries for an instance of this zone, we load those instead
+	// if there are no entries for this zone, we load the default entries
 	std::vector<Spawn2DisabledRepository::Spawn2Disabled> disabled_spawns = {};
 	if (!spawn2_ids.empty()) {
 		disabled_spawns = Spawn2DisabledRepository::GetWhere(
 			database,
 			fmt::format(
-				"spawn2_id IN ({}) and instance_id = {}",
+				"spawn2_id IN ({}) and (instance_id = {} OR instance_id = 0) ORDER BY instance_id",
 				Strings::Join(spawn2_ids, ","),
 				zone->GetInstanceID()
 			)
@@ -505,10 +508,11 @@ bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spa
 
 		// load from spawn2_disabled
 		bool spawn_enabled = true;
+
 		// check if spawn is disabled
 		for (auto &ds: disabled_spawns) {
 			if (ds.spawn2_id == s.id) {
-				spawn_enabled = false;
+				spawn_enabled = !ds.disabled;
 				break;
 			}
 		}
