@@ -5020,7 +5020,7 @@ ALTER TABLE `spawn2` DROP COLUMN `enabled`;
 	},
 	ManifestEntry{
 	  .version = 9242,
-	  .description = "2023_11_7_mintime_maxtime_spawnentry_and_boothour_rule.sql",
+	  .description = "2023_11_7_mintime_maxtime_spawnentry.sql",
 	  .check = "SHOW COLUMNS FROM `spawnentry` LIKE 'min_time'",
 	  .condition = "empty",
 	  .match = "",
@@ -5028,7 +5028,6 @@ ALTER TABLE `spawn2` DROP COLUMN `enabled`;
 ALTER TABLE `spawnentry`
 ADD COLUMN `min_time` smallint(4) NOT NULL DEFAULT 0 AFTER `condition_value_filter`,
 ADD COLUMN `max_time` smallint(4) NOT NULL DEFAULT 0 AFTER `min_time`;
-INSERT INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES (1, 'World:BootHour', '0', 'Sets the in-game hour world will set when it first boots. 0-24 are valid options, where 0 disables this rule');
 )"
   },
 // -- template; copy/paste this when you need to create a new entry
