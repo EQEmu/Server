@@ -139,6 +139,7 @@ namespace Logs {
 		PlayerEvents,
 		DataBuckets,
 		Zoning,
+		EqTime,
 		MaxCategoryID /* Don't Remove this */
 	};
 
@@ -237,6 +238,7 @@ namespace Logs {
 		"PlayerEvents",
 		"DataBuckets",
 		"Zoning",
+		"EqTime",
 	};
 }
 

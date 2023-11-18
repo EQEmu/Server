@@ -814,6 +814,16 @@
         OutF(LogSys, Logs::Detail, Logs::Zoning, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
+#define LogEqTime(message, ...) do {\
+    if (LogSys.IsLogEnabled(Logs::General, Logs::EqTime))\
+        OutF(LogSys, Logs::General, Logs::EqTime, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogEqTimeDetail(message, ...) do {\
+    if (LogSys.IsLogEnabled(Logs::Detail, Logs::EqTime))\
+        OutF(LogSys, Logs::Detail, Logs::EqTime, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
 #define Log(debug_level, log_category, message, ...) do {\
     if (LogSys.IsLogEnabled(debug_level, log_category))\
         LogSys.Out(debug_level, log_category, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
