@@ -5018,17 +5018,6 @@ INSERT INTO spawn2_disabled (spawn2_id, disabled) SELECT id, 1 FROM spawn2 WHERE
 ALTER TABLE `spawn2` DROP COLUMN `enabled`;
 )"
 	},
-	ManifestEntry{
-		.version = 9242,
-		.description = "2023_11_18_takeplatinum_command.sql",
-		.check = "SELECT * FROM `command_settings` WHERE `command` LIKE 'takeplatinum'",
-		.condition = "empty",
-		.match = "",
-		.sql = R"(
-INSERT INTO `command_settings` VALUES ('takeplatinum', '150', '');
-
-)",
-	},
 
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
