@@ -1918,7 +1918,7 @@ void Client::SendBazaarResults(
 		RuleI(Bazaar, MaxSearchResults)
 	);
 
-	auto results = database.QueryDatabase(query);
+	auto results = content_db.QueryDatabase(query);
 
 	if (!results.Success()) {
 		return;
