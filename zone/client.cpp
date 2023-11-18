@@ -2262,10 +2262,10 @@ void Client::QuestReadBook(const char* text, uint8 type) {
 
 uint32 Client::GetCarriedPlatinum() {
 	return (
-		GetMoney(3, 0) +
-		(GetMoney(2, 0) / 10) +
-		(GetMoney(1, 0) / 100) +
-		(GetMoney(0, 0) / 1000)
+		GetMoney(MoneyTypes::Platinum, MoneySubtypes::Personal) +
+		(GetMoney(MoneyTypes::Gold, MoneySubtypes::Personal) / 10) +
+		(GetMoney(MoneyTypes::Silver, MoneySubtypes::Personal) / 100) +
+		(GetMoney(MoneyTypes::Copper, MoneySubtypes::Personal) / 1000)
 	);
 }
 
@@ -8119,16 +8119,17 @@ void Client::SendHPUpdateMarquee(){
 
 uint32 Client::GetMoney(uint8 type, uint8 subtype) {
 	uint32 value = 0;
+
 	switch (type) {
-		case 0: {
+		case MoneyTypes::Copper: {
 			switch (subtype) {
-				case 0:
+				case MoneySubtypes::Personal:
 					value = static_cast<uint32>(m_pp.copper);
 					break;
-				case 1:
+				case MoneySubtypes::Bank:
 					value = static_cast<uint32>(m_pp.copper_bank);
 					break;
-				case 2:
+				case MoneySubtypes::Cursor:
 					value = static_cast<uint32>(m_pp.copper_cursor);
 					break;
 				default:
@@ -8136,15 +8137,15 @@ uint32 Client::GetMoney(uint8 type, uint8 subtype) {
 			}
 			break;
 		}
-		case 1: {
+		case MoneyTypes::Silver: {
 			switch (subtype) {
-				case 0:
+				case MoneySubtypes::Personal:
 					value = static_cast<uint32>(m_pp.silver);
 					break;
-				case 1:
+				case MoneySubtypes::Bank:
 					value = static_cast<uint32>(m_pp.silver_bank);
 					break;
-				case 2:
+				case MoneySubtypes::Cursor:
 					value = static_cast<uint32>(m_pp.silver_cursor);
 					break;
 				default:
@@ -8152,15 +8153,15 @@ uint32 Client::GetMoney(uint8 type, uint8 subtype) {
 			}
 			break;
 		}
-		case 2: {
+		case MoneyTypes::Gold: {
 			switch (subtype) {
-				case 0:
+				case MoneySubtypes::Personal:
 					value = static_cast<uint32>(m_pp.gold);
 					break;
-				case 1:
+				case MoneySubtypes::Bank:
 					value = static_cast<uint32>(m_pp.gold_bank);
 					break;
-				case 2:
+				case MoneySubtypes::Cursor:
 					value = static_cast<uint32>(m_pp.gold_cursor);
 					break;
 				default:
@@ -8168,18 +8169,18 @@ uint32 Client::GetMoney(uint8 type, uint8 subtype) {
 			}
 			break;
 		}
-		case 3: {
+		case MoneyTypes::Platinum: {
 			switch (subtype) {
-				case 0:
+				case MoneySubtypes::Personal:
 					value = static_cast<uint32>(m_pp.platinum);
 					break;
-				case 1:
+				case MoneySubtypes::Bank:
 					value = static_cast<uint32>(m_pp.platinum_bank);
 					break;
-				case 2:
+				case MoneySubtypes::Cursor:
 					value = static_cast<uint32>(m_pp.platinum_cursor);
 					break;
-				case 3:
+				case MoneySubtypes::SharedBank:
 					value = static_cast<uint32>(m_pp.platinum_shared);
 					break;
 				default:
@@ -8190,6 +8191,7 @@ uint32 Client::GetMoney(uint8 type, uint8 subtype) {
 		default:
 			break;
 	}
+
 	return value;
 }
 

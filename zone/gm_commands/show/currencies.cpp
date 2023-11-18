@@ -3,34 +3,34 @@
 
 void ShowCurrencies(Client *c, const Seperator *sep)
 {
-	auto t = c;
+	Client* t = c;
 	if (c->GetTarget() && c->GetTarget()->IsClient()) {
 		t = c->GetTarget()->CastToClient();
 	}
 
-	const uint32 platinum = (
-		t->GetMoney(3, 0) +
-		t->GetMoney(3, 1) +
-		t->GetMoney(3, 2) +
-		t->GetMoney(3, 3)
+	const uint64 platinum = (
+		t->GetMoney(MoneyTypes::Platinum, MoneySubtypes::Personal) +
+		t->GetMoney(MoneyTypes::Platinum, MoneySubtypes::Bank) +
+		t->GetMoney(MoneyTypes::Platinum, MoneySubtypes::Cursor) +
+		t->GetMoney(MoneyTypes::Platinum, MoneySubtypes::SharedBank)
 	);
 
-	const uint32 gold = (
-		t->GetMoney(2, 0) +
-		t->GetMoney(2, 1) +
-		t->GetMoney(2, 2)
+	const uint64 gold = (
+		t->GetMoney(MoneyTypes::Gold, MoneySubtypes::Personal) +
+		t->GetMoney(MoneyTypes::Gold, MoneySubtypes::Bank) +
+		t->GetMoney(MoneyTypes::Gold, MoneySubtypes::Cursor)
 	);
 
-	const uint32 silver = (
-		t->GetMoney(1, 0) +
-		t->GetMoney(1, 1) +
-		t->GetMoney(1, 2)
+	const uint64 silver = (
+		t->GetMoney(MoneyTypes::Silver, MoneySubtypes::Personal) +
+		t->GetMoney(MoneyTypes::Silver, MoneySubtypes::Bank) +
+		t->GetMoney(MoneyTypes::Silver, MoneySubtypes::Cursor)
 	);
 
-	const uint32 copper = (
-		t->GetMoney(0, 0) +
-		t->GetMoney(0, 1) +
-		t->GetMoney(0, 2)
+	const uint64 copper = (
+		t->GetMoney(MoneyTypes::Copper, MoneySubtypes::Personal) +
+		t->GetMoney(MoneyTypes::Copper, MoneySubtypes::Bank) +
+		t->GetMoney(MoneyTypes::Copper, MoneySubtypes::Cursor)
 	);
 
 	std::string currency_table;
@@ -51,6 +51,16 @@ void ShowCurrencies(Client *c, const Seperator *sep)
 		currency_table += DialogueWindow::TableRow(
 			DialogueWindow::TableCell("Money") +
 			DialogueWindow::TableCell(Strings::Money(platinum, gold, silver, copper))
+		);
+
+		has_currency = true;
+	}
+
+	const int aa_points = t->GetAAPoints();
+	if (aa_points) {
+		currency_table += DialogueWindow::TableRow(
+			DialogueWindow::TableCell("AA Points") +
+			DialogueWindow::TableCell(Strings::Commify(aa_points))
 		);
 
 		has_currency = true;
@@ -79,9 +89,9 @@ void ShowCurrencies(Client *c, const Seperator *sep)
 	for (const auto& a : zone->AlternateCurrencies) {
 		const uint32 currency_value = t->GetAlternateCurrencyValue(a.id);
 		if (currency_value) {
-			const auto* d = database.GetItem(a.item_id);
+			const auto *item = database.GetItem(a.item_id);
 			currency_table += DialogueWindow::TableRow(
-				DialogueWindow::TableCell(d->Name) +
+				DialogueWindow::TableCell(item->Name) +
 				DialogueWindow::TableCell(Strings::Commify(currency_value))
 			);
 
