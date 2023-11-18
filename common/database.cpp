@@ -2097,37 +2097,45 @@ void Database::ClearInvSnapshots(bool from_now) {
 
 struct TimeOfDay_Struct Database::LoadTime(time_t &realtime)
 {
-
-	TimeOfDay_Struct eqTime;
-	std::string query = StringFormat("SELECT minute,hour,day,month,year,realtime FROM eqtime limit 1");
+	TimeOfDay_Struct t{};
+	std::string      query = StringFormat("SELECT minute,hour,day,month,year,realtime FROM eqtime limit 1");
 	auto results = QueryDatabase(query);
 
-	if (!results.Success() || results.RowCount() == 0){
+	if (!results.Success() || results.RowCount() == 0) {
 		LogInfo("Loading EQ time of day failed. Using defaults");
-		eqTime.minute = 0;
-		eqTime.hour = 9;
-		eqTime.day = 1;
-		eqTime.month = 1;
-		eqTime.year = 3100;
+		t.minute = 0;
+		t.hour   = 9;
+		t.day    = 1;
+		t.month  = 1;
+		t.year   = 3100;
 		realtime = time(nullptr);
-	}
-	else{
-		auto row = results.begin();
-
-		eqTime.minute = Strings::ToUnsignedInt(row[0]);
-		eqTime.hour = Strings::ToUnsignedInt(row[1]);
-		eqTime.day = Strings::ToUnsignedInt(row[2]);
-		eqTime.month = Strings::ToUnsignedInt(row[3]);
-		eqTime.year = Strings::ToUnsignedInt(row[4]);
-		realtime = Strings::ToBigInt(row[5]);
+		return t;
 	}
 
-	return eqTime;
+	auto row = results.begin();
+
+	uint8  hour      = Strings::ToUnsignedInt(row[1]);
+	time_t realtime_ = Strings::ToBigInt(row[5]);
+	if (RuleI(World, BootHour) > 0 && RuleI(World, BootHour) <= 24) {
+		hour      = RuleI(World, BootHour);
+		realtime_ = time(nullptr);
+	}
+
+	t.minute = Strings::ToUnsignedInt(row[0]);
+	t.hour   = hour;
+	t.day    = Strings::ToUnsignedInt(row[2]);
+	t.month  = Strings::ToUnsignedInt(row[3]);
+	t.year   = Strings::ToUnsignedInt(row[4]);
+	realtime = realtime_;
+
+	LogEqTime("Setting hour to [{}]", hour);
+
+	return t;
 }
 
 bool Database::SaveTime(int8 minute, int8 hour, int8 day, int8 month, int16 year)
 {
-	std::string query = StringFormat("UPDATE eqtime set minute = %d, hour = %d, day = %d, month = %d, year = %d, realtime = %d limit 1", minute, hour, day, month, year, time(0));
+	std::string query = StringFormat("UPDATE eqtime set minute = %d, hour = %d, day = %d, month = %d, year = %d, realtime = %d limit 1", minute, hour, day, month, year, time(nullptr));
 	auto results = QueryDatabase(query);
 
 	return results.Success();

@@ -1273,7 +1273,7 @@ int lua_get_zone_weather() {
 }
 
 luabind::adl::object lua_get_zone_time(lua_State *L) {
-	TimeOfDay_Struct eqTime;
+	TimeOfDay_Struct eqTime{};
 	zone->zone_time.GetCurrentEQTimeOfDay(time(0), &eqTime);
 
 	luabind::adl::object ret = luabind::newtable(L);

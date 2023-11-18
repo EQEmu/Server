@@ -46,16 +46,16 @@ EQTime::EQTime()
 	timezone = 0;
 	memset(&eqTime, 0, sizeof(eqTime));
 	//Defaults for time
-	TimeOfDay_Struct start;
-	start.day = 1;
-	start.hour = 9;
-	start.minute = 0;
-	start.month = 1;
-	start.year = 3100;
+	TimeOfDay_Struct t{};
+	t.day    = 1;
+	t.hour   = 9;
+	t.minute = 0;
+	t.month  = 1;
+	t.year   = 3100;
 	//Set default time zone
 	timezone = 0;
 	//Start EQTimer
-	SetCurrentEQTimeOfDay(start, time(0));
+	SetCurrentEQTimeOfDay(t, time(nullptr));
 }
 
 //getEQTimeOfDay - Reads timeConvert and writes the result to eqTimeOfDay
@@ -202,7 +202,7 @@ void EQTime::ToString(TimeOfDay_Struct *t, std::string &str) {
 }
 
 bool EQTime::IsDayTime() {
-	TimeOfDay_Struct tod; //Day time is 5am to 6:59pm (14 hours in-game)
+	TimeOfDay_Struct tod{}; //Day time is 5am to 6:59pm (14 hours in-game)
 	GetCurrentEQTimeOfDay(&tod); //TODO: what if it fails and returns zero?
 
 	if (tod.hour >= 5 || tod.hour < 19) {
@@ -213,11 +213,33 @@ bool EQTime::IsDayTime() {
 }
 
 bool EQTime::IsNightTime() {
-	TimeOfDay_Struct tod; //Night time is 7pm to 4:59am (10 hours in-game)
+	TimeOfDay_Struct tod{}; //Night time is 7pm to 4:59am (10 hours in-game)
 	GetCurrentEQTimeOfDay(&tod); //TODO: what if it fails and returns zero?
 
 	if (tod.hour >= 19 || tod.hour < 5) {
 		return true;
+	}
+
+	return false;
+}
+
+bool EQTime::IsInbetweenTime(uint8 min_time, uint8 max_time) {
+	TimeOfDay_Struct tod{};
+	GetCurrentEQTimeOfDay(&tod);
+
+	if (min_time == 0 || max_time == 0 || min_time > 24 || max_time > 24) {
+		return true;
+	}
+
+	if (max_time < min_time) {
+		if ((tod.hour >= min_time && tod.hour > max_time) || (tod.hour < min_time && tod.hour <= max_time)) {
+			return true;
+		}
+	}
+	else {
+		if (tod.hour >= min_time && tod.hour <= max_time) {
+			return true;
+		}
 	}
 
 	return false;

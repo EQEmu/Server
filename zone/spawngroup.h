@@ -26,10 +26,12 @@
 
 class SpawnEntry {
 public:
-	SpawnEntry(uint32 in_NPCType, int in_chance, uint16 in_filter, uint8 in_npc_spawn_limit);
+	SpawnEntry(uint32 in_NPCType, int in_chance, uint16 in_filter, uint8 in_npc_spawn_limit, uint8 in_min_time, uint8 in_max_time);
 	~SpawnEntry() {}
 	uint32 NPCType;
 	int    chance;
+	uint8 min_time;
+	uint8 max_time;
 	uint16 condition_value_filter;
 
 	//this is a cached value from npc_types, for speed

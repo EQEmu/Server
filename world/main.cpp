@@ -424,12 +424,21 @@ int main(int argc, char **argv)
 		}
 
 		if (EQTimeTimer.Check()) {
-			TimeOfDay_Struct tod;
-			zoneserver_list.worldclock.GetCurrentEQTimeOfDay(time(0), &tod);
-			if (!database.SaveTime(tod.minute, tod.hour, tod.day, tod.month, tod.year))
-				LogError("Failed to save eqtime");
-			else
-				LogDebug("EQTime successfully saved");
+			TimeOfDay_Struct tod{};
+			zoneserver_list.worldclock.GetCurrentEQTimeOfDay(time(nullptr), &tod);
+			if (!database.SaveTime(tod.minute, tod.hour, tod.day, tod.month, tod.year)) {
+				LogEqTime("Failed to save eqtime");
+			}
+			else {
+				LogEqTime(
+					"EQTime successfully saved - time is now [{}:{}:{}:{}:{}]",
+					tod.year,
+					tod.month,
+					tod.day,
+					tod.hour,
+					tod.minute
+				);
+			}
 		}
 
 		zoneserver_list.Process();

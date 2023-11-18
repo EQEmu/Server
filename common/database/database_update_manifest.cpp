@@ -5018,7 +5018,18 @@ INSERT INTO spawn2_disabled (spawn2_id, disabled) SELECT id, 1 FROM spawn2 WHERE
 ALTER TABLE `spawn2` DROP COLUMN `enabled`;
 )"
 	},
-
+	ManifestEntry{
+	  .version = 9242,
+	  .description = "2023_11_7_mintime_maxtime_spawnentry.sql",
+	  .check = "SHOW COLUMNS FROM `spawnentry` LIKE 'min_time'",
+	  .condition = "empty",
+	  .match = "",
+	  .sql = R"(
+ALTER TABLE `spawnentry`
+ADD COLUMN `min_time` smallint(4) NOT NULL DEFAULT 0 AFTER `condition_value_filter`,
+ADD COLUMN `max_time` smallint(4) NOT NULL DEFAULT 0 AFTER `min_time`;
+)"
+  },
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
 //		.version = 9228,

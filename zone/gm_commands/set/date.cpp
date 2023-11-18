@@ -14,14 +14,14 @@ void SetDate(Client *c, const Seperator *sep)
 		return;
 	}
 
-	TimeOfDay_Struct eq_time;
-	zone->zone_time.GetCurrentEQTimeOfDay(time(0), &eq_time);
+	TimeOfDay_Struct t{};
+	zone->zone_time.GetCurrentEQTimeOfDay(time(0), &t);
 
 	const uint16 year   = Strings::ToUnsignedInt(sep->arg[2]);
 	const uint8  month  = Strings::ToUnsignedInt(sep->arg[3]);
 	const uint8  day    = Strings::ToUnsignedInt(sep->arg[4]);
-	const uint8  hour   = !sep->IsNumber(5) ? eq_time.hour : Strings::ToUnsignedInt(sep->arg[5]) + 1;
-	const uint8  minute = !sep->IsNumber(6) ? eq_time.minute : Strings::ToUnsignedInt(sep->arg[6]);
+	const uint8  hour   = !sep->IsNumber(5) ? t.hour : Strings::ToUnsignedInt(sep->arg[5]) + 1;
+	const uint8  minute = !sep->IsNumber(6) ? t.minute : Strings::ToUnsignedInt(sep->arg[6]);
 
 	c->Message(
 		Chat::White,
