@@ -3,7 +3,7 @@
 
 void ShowCurrencies(Client *c, const Seperator *sep)
 {
-	Client* t = c;
+	Client *t = c;
 	if (c->GetTarget() && c->GetTarget()->IsClient()) {
 		t = c->GetTarget()->CastToClient();
 	}
