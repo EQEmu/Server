@@ -689,7 +689,7 @@ void SpawnConditionManager::Process() {
 		//check each spawn event.
 
 		//get our current time
-		TimeOfDay_Struct tod;
+		TimeOfDay_Struct tod{};
 		zone->zone_time.GetCurrentEQTimeOfDay(&tod);
 
 		//see if time is past our nearest event.
@@ -742,7 +742,7 @@ void SpawnConditionManager::ExecEvent(SpawnEvent &event, bool send_update) {
 		return;	//unable to find the spawn condition to operate on
 	}
 
-	TimeOfDay_Struct tod;
+	TimeOfDay_Struct tod{};
 	zone->zone_time.GetCurrentEQTimeOfDay(&tod);
 	if(event.strict && (event.next.hour != tod.hour || event.next.day != tod.day || event.next.month != tod.month || event.next.year != tod.year))
 	{
@@ -953,7 +953,7 @@ bool SpawnConditionManager::LoadSpawnConditions(const char* zone_name, uint32 in
 	//spawn points which get turned on. Im too lazy to figure out a
 	//better solution, and I just dont care thats much.
 	//get our current time
-	TimeOfDay_Struct tod;
+	TimeOfDay_Struct tod{};
 	zone->zone_time.GetCurrentEQTimeOfDay(&tod);
 
 	for(auto cur = spawn_events.begin(); cur != spawn_events.end(); ++cur) {

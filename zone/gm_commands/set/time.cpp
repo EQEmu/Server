@@ -6,7 +6,7 @@ void SetTime(Client *c, const Seperator *sep)
 	if (arguments < 2 || !sep->IsNumber(2)) {
 		c->Message(Chat::White, "Usage: #set time [Hour] [Minute]");
 
-		TimeOfDay_Struct world_time;
+		TimeOfDay_Struct world_time{};
 		zone->zone_time.GetCurrentEQTimeOfDay(time(0), &world_time);
 
 		auto time_string = fmt::format(

@@ -1440,7 +1440,7 @@ void PerlembParser::ExportZoneVariables(std::string &package_name)
 		ExportVar(package_name.c_str(), "zonesn", zone->GetShortName());
 		ExportVar(package_name.c_str(), "instanceid", zone->GetInstanceID());
 		ExportVar(package_name.c_str(), "instanceversion", zone->GetInstanceVersion());
-		TimeOfDay_Struct eqTime;
+		TimeOfDay_Struct eqTime{};
 		zone->zone_time.GetCurrentEQTimeOfDay(time(0), &eqTime);
 		ExportVar(package_name.c_str(), "zonehour", eqTime.hour - 1);
 		ExportVar(package_name.c_str(), "zonemin", eqTime.minute);

@@ -965,7 +965,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 
 			char time_message[255];
 			time_t current_time = time(nullptr);
-			TimeOfDay_Struct eq_time;
+			TimeOfDay_Struct eq_time{};
 			zone->zone_time.GetCurrentEQTimeOfDay(current_time, &eq_time);
 
 			sprintf(time_message, "EQTime [%02d:%s%d %s]",
