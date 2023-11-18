@@ -4,7 +4,7 @@ void command_givemoney(Client *c, const Seperator *sep)
 {
 	int arguments = sep->argnum;
 	if (!arguments || !sep->IsNumber(1)) { //as long as the first one is a number, we'll just let atoi convert the rest to 0 or a number
-		c->Message(Chat::Red, "Usage: #Usage: #givemoney [Platinum] [Gold] [Silver] [Copper]");
+		c->Message(Chat::Red, "Usage: #givemoney [Platinum] [Gold] [Silver] [Copper]");
 		return;
 	}
 
@@ -19,7 +19,7 @@ void command_givemoney(Client *c, const Seperator *sep)
 	uint32 silver = sep->IsNumber(3) ? Strings::ToUnsignedInt(sep->arg[3]) : 0;
 	uint32 copper = sep->IsNumber(4) ? Strings::ToUnsignedInt(sep->arg[4]) : 0;
 	if (!platinum && !gold && !silver && !copper) {
-		c->Message(Chat::Red, "Usage: #Usage: #givemoney [Platinum] [Gold] [Silver] [Copper]");
+		c->Message(Chat::Red, "Usage: #givemoney [Platinum] [Gold] [Silver] [Copper]");
 		return;
 	}
 
