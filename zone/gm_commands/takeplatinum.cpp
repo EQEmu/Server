@@ -43,7 +43,7 @@ void command_takeplatinum(Client *c, const Seperator *sep)
 		c->Message(
 			Chat::Red,
 			fmt::format(
-				"Unable to subtract {} from {}. Taking too much?",
+				"Unable to subtract {} from {}.",
 				Strings::Money(
 					platinum,
 					0,
