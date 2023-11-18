@@ -4,7 +4,7 @@ void command_takeplatinum(Client *c, const Seperator *sep)
 {
 	int arguments = sep->argnum;
 	if (!arguments || !sep->IsNumber(1)) { //must be a number
-		c->Message(Chat::Red, "Usage: #Usage: #takeplatinum [Platinum]");
+		c->Message(Chat::Red, "Usage: #takeplatinum [Platinum]");
 		return;
 	}
 
@@ -15,7 +15,7 @@ void command_takeplatinum(Client *c, const Seperator *sep)
 
 	uint32 platinum = Strings::ToUnsignedInt(sep->arg[1]);
 	if (!platinum) {
-		c->Message(Chat::Red, "Usage: #Usage: #takeplatinum [Platinum]");
+		c->Message(Chat::Red, "Usage: #takeplatinum [Platinum]");
 		return;
 	}
 
