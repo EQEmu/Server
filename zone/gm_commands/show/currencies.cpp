@@ -56,16 +56,6 @@ void ShowCurrencies(Client *c, const Seperator *sep)
 		has_currency = true;
 	}
 
-	const int aa_points = t->GetAAPoints();
-	if (aa_points) {
-		currency_table += DialogueWindow::TableRow(
-			DialogueWindow::TableCell("AA Points") +
-			DialogueWindow::TableCell(Strings::Commify(aa_points))
-		);
-
-		has_currency = true;
-	}
-
 	const uint32 ebon_crystals = t->GetEbonCrystals();
 	if (ebon_crystals) {
 		currency_table += DialogueWindow::TableRow(
