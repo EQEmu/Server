@@ -235,11 +235,11 @@ bool EQTime::IsInbetweenTime(uint8 min_time, uint8 max_time) {
 		if ((tod.hour >= min_time && tod.hour > max_time) || (tod.hour < min_time && tod.hour <= max_time)) {
 			return true;
 		}
-		return false;
 	}
-
-	if (tod.hour >= min_time && tod.hour <= max_time) {
-		return true;
+	else {
+		if (tod.hour >= min_time && tod.hour <= max_time) {
+			return true;
+		}
 	}
 
 	return false;
