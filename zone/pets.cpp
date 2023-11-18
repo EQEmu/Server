@@ -384,7 +384,7 @@ bool ZoneDatabase::GetPoweredPetEntry(const char *pet_type, int16 petpower, PetR
 							"FROM pets WHERE type='%s' AND petpower<=%d ORDER BY petpower DESC LIMIT 1",
 							pet_type, petpower);
 
-	auto results = QueryDatabase(query);
+	auto results = content_db.QueryDatabase(query);
 	if (!results.Success()) {
 		return false;
 	}
