@@ -217,6 +217,7 @@ int command_init(void)
 		command_add("summonitem", "[itemid] [charges] - Summon an item onto your cursor. Charges are optional.", AccountStatus::GMMgmt, command_summonitem) ||
 		command_add("suspend", "[name] [days] [reason] - Suspend by character name and for specificed number of days", AccountStatus::GMLeadAdmin, command_suspend) ||
 		command_add("suspendmulti", "[Character Name One|Character Name Two|etc] [Days] [Reason] - Suspend multiple characters by name for specified number of days", AccountStatus::GMLeadAdmin, command_suspendmulti) ||
+		command_add("takeplatinum", "[Platinum] - Takes specified amount of platinum from you or your player target", AccountStatus::GMMgmt, command_takeplatinum) ||
 		command_add("task", "(subcommand) - Task system commands", AccountStatus::GMLeadAdmin, command_task) ||
 		command_add("petname", "[newname] - Temporarily renames your pet. Leave name blank to restore the original name.", AccountStatus::GMAdmin, command_petname) ||
 		command_add("traindisc", "[level] - Trains all the disciplines usable by the target, up to level specified. (may freeze client for a few seconds)", AccountStatus::GMLeadAdmin, command_traindisc) ||
@@ -903,6 +904,7 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/summonitem.cpp"
 #include "gm_commands/suspend.cpp"
 #include "gm_commands/suspendmulti.cpp"
+#include "gm_commands/takeplatinum.cpp"
 #include "gm_commands/task.cpp"
 #include "gm_commands/traindisc.cpp"
 #include "gm_commands/tune.cpp"
