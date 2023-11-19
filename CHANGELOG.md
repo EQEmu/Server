@@ -1,5 +1,37 @@
 ## [22.33.0] - 11/11/2023
 
+### Bots
+
+* Add ownerraid, byclass and byrace actionables and fix group-based arguments for raids. ([#3680](https://github.com/EQEmu/Server/pull/3680)) @nytmyr 2023-11-19
+
+### Code
+
+* Cleanup #giveitem and #summonitem ([#3692](https://github.com/EQEmu/Server/pull/3692)) @Kinglykrab 2023-11-19
+* Cleanup #show currencies Command ([#3693](https://github.com/EQEmu/Server/pull/3693)) @Kinglykrab 2023-11-19
+
+### Commands
+
+* Add #show aa_points Command ([#3695](https://github.com/EQEmu/Server/pull/3695)) @Kinglykrab 2023-11-19
+
+### Database
+
+* Pull pet power from content database ([#3689](https://github.com/EQEmu/Server/pull/3689)) @joligario 2023-11-18
+
+### GM Commands
+
+* Add `#takeplatinum` ([#3690](https://github.com/EQEmu/Server/pull/3690)) @joligario 2023-11-19
+* Remove duplicate comment ([#3691](https://github.com/EQEmu/Server/pull/3691)) @joligario 2023-11-19
+
+### Illusions
+
+* RandomizeFeastures erased texture. ([#3686](https://github.com/EQEmu/Server/pull/3686)) @noudess 2023-11-12
+
+### Spawn
+
+* (imported from takp) Added min_time and max_time to spawnentry. This will prevent a NPC from… ([#3685](https://github.com/EQEmu/Server/pull/3685)) @regneq 2023-11-18
+
+## [22.33.0] - 11/11/2023
+
 ### Feature
 
 * Add Comment to Item Data/Quest API ([#3669](https://github.com/EQEmu/Server/pull/3669)) @Kinglykrab 2023-11-07
