@@ -1062,6 +1062,10 @@ void Mob::AI_Process() {
 			SetTarget(hate_list.GetClosestEntOnHateList(this));
 		else {
 			if (AI_target_check_timer->Check()) {
+				if (IsNPC() && (!IsPet() || (HasOwner() && GetOwner()->IsNPC())) && !CastToNPC()->WillAggroNPCs()) {
+					WipeHateList(true); // wipe NPCs from hate list to prevent faction war
+				}
+				
 				if (IsFocused()) {
 					if (!target) {
 						SetTarget(hate_list.GetEntWithMostHateOnList(this));

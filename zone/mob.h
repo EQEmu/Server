@@ -767,7 +767,7 @@ public:
 	void SetAssistAggro(bool value) { AssistAggro = value; if (PrimaryAggro) AssistAggro = false; }
 	bool HateSummon();
 	void FaceTarget(Mob* mob_to_face = 0);
-	void WipeHateList();
+	void WipeHateList(bool npc_only = false);
 	void AddFeignMemory(Mob* attacker);
 	void RemoveFromFeignMemory(Mob* attacker);
 	void ClearFeignMemory();
