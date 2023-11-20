@@ -1,3 +1,9 @@
+## [22.34.1] - 11/20/2023
+
+### EQTime
+
+Hotfix for world not spamming save messages by setting to detail level logging @Akkadius 2023-11-20 
+
 ## [22.34.0] - 11/19/2023
 
 ### Bots

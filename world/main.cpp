@@ -430,8 +430,7 @@ int main(int argc, char **argv)
 				LogEqTime("Failed to save eqtime");
 			}
 			else {
-				LogEqTime(
-					"EQTime successfully saved - time is now [{}:{}:{}:{}:{}]",
+				LogEqTimeDetail("EQTime successfully saved - time is now year [{}] month [{}] day [{}] hour [{}] minute [{}]",
 					tod.year,
 					tod.month,
 					tod.day,
