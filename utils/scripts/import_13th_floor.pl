@@ -16,6 +16,7 @@ my $db_user = "";
 my $db_pass = "";
 my $total_items = 0;
 my $read_items_file = "items.txt"; #default
+my $keep_temp_items_table = 0; #keeps the imported items table
 
 read_eqemu_config_json();
 
@@ -66,7 +67,7 @@ sub read_items_file_from_13th_floor_text {
 
         #::: If we don't have items_floor table
         if ($has_items_floor eq '') {
-                $dbh->do("CREATE TABLE `items_floor` (`" . join("` VARCHAR(64) NOT NULL DEFAULT '', `", @fields). "` VARCHAR(64) NOT NULL DEFAULT '', UNIQUE INDEX `ID` (`id`)) COLLATE='latin1_swedish_ci' ENGINE=MyISAM");
+                $dbh->do("CREATE TABLE `items_floor` (`" . join("` VARCHAR(64) NOT NULL DEFAULT '', `", @fields). "` VARCHAR(64) NOT NULL DEFAULT '', UNIQUE INDEX `ID` (`id`)) COLLATE='latin1_swedish_ci' ENGINE=InnoDB");
                 $dbh->do("ALTER TABLE `items_floor` CHANGE `id` `id` INT(11) NOT NULL DEFAULT '0'");
                 printf "Database items_floor created\n";
         }
@@ -265,6 +266,12 @@ sub update_items_table {
         $dbh->do("UPDATE items i SET i.bagtype = 25 WHERE i.id IN (17502, 17653)"); #RESEARCHMAG
         $dbh->do("UPDATE items i SET i.bagtype = 26 WHERE i.id IN (17501, 17654)"); #RESEARCHNEC
         $dbh->do("UPDATE items i SET i.bagtype = 27 WHERE i.id IN (17500, 17652)"); #RESEARCHENC
+
+        #::: Remove temp table
+        if (!$keep_temp_items_table) {
+          print "Cleaning up temp items table...\n";
+          $dbh->do("DROP TABLE items_floor");
+        }
 }
 
 sub trim($) {
