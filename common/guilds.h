@@ -81,5 +81,6 @@ typedef enum {
 	GUILD_ACTION_MEMBERS_DEMOTE_SELF                  = 30,
 } GuildAction;
 
+constexpr int format_as(GuildAction action) { return static_cast<int>(action); }
 
 #endif

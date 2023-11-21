@@ -252,6 +252,8 @@ typedef enum {
 	ActivityCompleted = 2
 }                  ActivityState;
 
+constexpr int format_as(ActivityState state) { return static_cast<int>(state); }
+
 struct ClientActivityInformation {
 	int           activity_id;
 	int           done_count;

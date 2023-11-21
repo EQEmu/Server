@@ -71,6 +71,8 @@ namespace EQ
 			bit_DeityAll           = UINT32_MAX
 		};
 
+		constexpr int format_as(DeityType type) { return static_cast<int>(type); }
+
 		extern DeityTypeBit GetDeityBitmask(DeityType deity_type);
 		extern std::string GetDeityName(DeityType deity_type);
 		extern const std::map<DeityType, std::string>& GetDeityMap();

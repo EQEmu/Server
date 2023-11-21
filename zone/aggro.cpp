@@ -343,7 +343,7 @@ void NPC::DescribeAggro(Client *to_who, Mob *mob, bool verbose) {
 				"{} does not have low enough faction, their Faction Level is {} ({}).",
 				to_who->GetTargetDescription(mob),
 				FactionValueToString(faction_value),
-				faction_value
+				static_cast<int>(faction_value)
 			).c_str()
 		);
 		return;
@@ -556,7 +556,7 @@ bool Mob::CheckWillAggro(Mob *mob) {
 	LogAggro("Is In zone?:[{}]\n", mob->InZone());
 	LogAggro("Dist^2: [{}]\n", distance_squared);
 	LogAggro("Range^2: [{}]\n", aggro_range_squared);
-	LogAggro("Faction: [{}]\n", faction_value);
+	LogAggro("Faction: [{}]\n", static_cast<int>(faction_value));
 	LogAggro("AlwaysAggroFlag: [{}]\n", AlwaysAggro());
 	LogAggro("Int: [{}]\n", GetINT());
 	LogAggro("Con: [{}]\n", GetLevelCon(mob->GetLevel()));

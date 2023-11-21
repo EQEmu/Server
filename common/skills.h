@@ -162,6 +162,8 @@ namespace EQ
 	// server profile does not reflect this yet..so, prefixed with 'PACKET_'
 #define PACKET_SKILL_ARRAY_SIZE 100
 
+		constexpr int format_as(SkillType skill) { return static_cast<int>(skill); }
+
 		bool IsTradeskill(SkillType skill);
 		bool IsSpecializedSkill(SkillType skill);
 		float GetSkillMeleePushForce(SkillType skill);
