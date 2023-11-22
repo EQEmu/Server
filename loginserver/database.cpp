@@ -121,43 +121,25 @@ bool Database::GetLoginTokenDataFromToken(
 	std::string &user
 )
 {
-	auto query = fmt::format(
-		"SELECT tbllogintokens.Id, tbllogintokens.IpAddress, tbllogintokenclaims.Name, tbllogintokenclaims.Value FROM tbllogintokens "
-		"JOIN tbllogintokenclaims ON tbllogintokens.Id = tbllogintokenclaims.TokenId WHERE tbllogintokens.Expires > NOW() "
-		"AND tbllogintokens.Id='{0}' AND tbllogintokens.IpAddress='{1}'",
+	auto query = fmt::format("SELECT login_server, username, account_id FROM login_tickets WHERE expires > NOW()"
+		" AND id='{0}' AND ip_address='{1}' LIMIT 1",
 		Strings::Escape(token),
-		Strings::Escape(ip)
-	);
+		Strings::Escape(ip));
 
 	auto results = QueryDatabase(query);
 	if (results.RowCount() == 0 || !results.Success()) {
 		return false;
 	}
 
-	bool      found_username          = false;
-	bool      found_login_id          = false;
-	bool      found_login_server_name = false;
-	for (auto row                     = results.begin(); row != results.end(); ++row) {
-		if (strcmp(row[2], "username") == 0) {
-			user           = row[3];
-			found_username = true;
-			continue;
-		}
-
-		if (strcmp(row[2], "login_server_id") == 0) {
-			db_account_id  = Strings::ToUnsignedInt(row[3]);
-			found_login_id = true;
-			continue;
-		}
-
-		if (strcmp(row[2], "login_server_name") == 0) {
-			db_loginserver          = row[3];
-			found_login_server_name = true;
-			continue;
-		}
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		db_loginserver = row[0];
+		user = row[1];
+		db_account_id = Strings::ToUnsignedInt(row[2]);
+		
+		return true;
 	}
 
-	return found_username && found_login_id && found_login_server_name;
+	return false;
 }
 
 /**
