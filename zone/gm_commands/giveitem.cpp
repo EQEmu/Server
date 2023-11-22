@@ -2,7 +2,7 @@
 
 void command_giveitem(Client *c, const Seperator *sep)
 {
-	if (!c->GetTarget() || !!c->GetTarget()->IsClient()) {
+	if (!c->GetTarget() || !c->GetTarget()->IsClient()) {
 		c->Message(Chat::White, "You must target a player to use this command.");
 		return;
 	}
