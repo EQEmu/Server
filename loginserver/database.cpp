@@ -121,8 +121,8 @@ bool Database::GetLoginTokenDataFromToken(
 	std::string &user
 )
 {
-	auto query = fmt::format("SELECT LoginServer, Username, AccountId FROM login_tickets WHERE Expires > NOW()"
-		" AND Id='{0}' AND IpAddress='{1}' LIMIT 1",
+	auto query = fmt::format("SELECT login_server, username, account_id FROM login_tickets WHERE expires > NOW()"
+		" AND id='{0}' AND ip_address='{1}' LIMIT 1",
 		Strings::Escape(token),
 		Strings::Escape(ip));
 
