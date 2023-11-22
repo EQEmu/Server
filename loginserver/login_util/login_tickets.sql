@@ -1,0 +1,11 @@
+DROP TABLE IF EXISTS `login_tickets`;
+CREATE TABLE `login_tickets` (
+	`Id` VARCHAR(128) NOT NULL,
+	`LoginServer` TEXT NOT NULL,
+	`Username` TEXT NOT NULL,
+	`AccountId` INT(10) UNSIGNED NOT NULL,
+	`IpAddress` VARCHAR(45) NOT NULL,
+	`Expires` DATETIME NOT NULL,
+	PRIMARY KEY (`Id`) USING BTREE
+)
+ENGINE=InnoDB;
