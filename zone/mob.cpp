@@ -5315,7 +5315,7 @@ int Mob::GetHaste()
 		h += spellbonuses.hastetype2 > 10 ? 10 : spellbonuses.hastetype2;
 
 	// 26+ no cap, 1-25 10
-	if (level > 25) // 26+
+	if (level > 25 || (IsClient() && RuleB(Character, IgnoreLevelBasedHasteCaps))) // 26+
 		h += itembonuses.haste;
 	else // 1-25
 		h += itembonuses.haste > 10 ? 10 : itembonuses.haste;
@@ -5337,7 +5337,7 @@ int Mob::GetHaste()
 		h = cap;
 
 	// 51+ 25 (despite there being higher spells...), 1-50 10
-	if (level > 50) { // 51+
+	if (level > 50 || (IsClient() && RuleB(Character, IgnoreLevelBasedHasteCaps))) { // 51+
 		cap = RuleI(Character, Hastev3Cap);
 		if (spellbonuses.hastetype3 > cap) {
 			h += cap;
