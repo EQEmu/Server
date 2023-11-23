@@ -183,7 +183,7 @@ bool Bot::BotCastHateReduction(Mob* tar, uint8 botLevel, const BotSpell& botSpel
 			if (tar->CanBuffStack(iter.SpellId, botLevel, true) < 0)
 				continue;
 
-			if (IsValidSpellRange(botSpell.SpellId, tar)) {
+			if (IsValidSpellRange(iter.SpellId, tar)) {
 				casted_spell = AIDoSpellCast(iter.SpellIndex, tar, iter.ManaCost);
 			}
 			if (casted_spell) {
@@ -328,7 +328,7 @@ bool Bot::BotCastSlow(Mob* tar, uint8 botLevel, uint8 botClass, BotSpell& botSpe
 						continue;
 					}
 
-					if (IsValidSpellRange(botSpell.SpellId, tar)) {
+					if (IsValidSpellRange(iter.SpellId, tar)) {
 						casted_spell = AIDoSpellCast(iter.SpellIndex, tar, iter.ManaCost);
 					}
 
@@ -447,7 +447,7 @@ bool Bot::BotCastDOT(Mob* tar, uint8 botLevel, const BotSpell& botSpell, const b
 
 					uint32 TempDontDotMeBefore = tar->DontDotMeBefore();
 
-					if (IsValidSpellRange(botSpell.SpellId, tar)) {
+					if (IsValidSpellRange(s.SpellId, tar)) {
 						casted_spell = AIDoSpellCast(s.SpellIndex, tar, s.ManaCost, &TempDontDotMeBefore);
 					}
 
