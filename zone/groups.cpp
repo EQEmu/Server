@@ -2510,3 +2510,9 @@ bool Group::IsLeader(const char* name) {
 
 	return false;
 }
+
+std::string Group::GetGroupLeaderName(uint32 group_id) {
+	char leader_name_buffer[64] = { 0 };
+	database.GetGroupLeadershipInfo(group_id, leader_name_buffer);
+	return std::string(leader_name_buffer);
+}
