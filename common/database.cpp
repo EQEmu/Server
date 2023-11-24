@@ -29,6 +29,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "../common/repositories/account_repository.h"
+
 // Disgrace: for windows compile
 #ifdef _WINDOWS
 #include <windows.h>
@@ -1643,25 +1645,20 @@ void Database::ClearGroupLeader(uint32 gid) {
 		std::cout << "Unable to clear group leader: " << results.ErrorMessage() << std::endl;
 }
 
-uint8 Database::GetAgreementFlag(uint32 acctid) {
-
-	std::string query = StringFormat("SELECT rulesflag FROM account WHERE id=%i",acctid);
-	auto results = QueryDatabase(query);
-
-	if (!results.Success())
+uint8 Database::GetAgreementFlag(uint32 account_id)
+{
+	const auto& e = AccountRepository::FindOne(*this, account_id);
+	if (!e.id) {
 		return 0;
+	}
 
-	if (results.RowCount() != 1)
-		return 0;
-
-	auto row = results.begin();
-
-	return Strings::ToUnsignedInt(row[0]);
+	return e.rulesflag;
 }
 
-void Database::SetAgreementFlag(uint32 acctid) {
-	std::string query = StringFormat("UPDATE account SET rulesflag=1 where id=%i", acctid);
-	QueryDatabase(query);
+void Database::SetAgreementFlag(uint32 account_id) {
+	auto e = AccountRepository::FindOne(*this, account_id);
+	e.rulesflag = 1;
+	AccountRepository::UpdateOne(*this, e);
 }
 
 void Database::ClearRaid(uint32 rid) {
