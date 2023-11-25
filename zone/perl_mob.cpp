@@ -326,6 +326,11 @@ void Perl_Mob_GMMove(Mob* self, float x, float y, float z, float heading) // @ca
 	self->GMMove(x, y, z, heading);
 }
 
+void Perl_Mob_GMMove(Mob* self, float x, float y, float z, float heading, bool save_guard_spot) // @categories Script Utility
+{
+	self->GMMove(x, y, z, heading, save_guard_spot);
+}
+
 bool Perl_Mob_HasProcs(Mob* self) // @categories Stats and Attributes
 {
 	return self->HasProcs();
@@ -3469,6 +3474,7 @@ void perl_register_mob()
 	package.add("FindType", (bool(*)(Mob*, uint16_t, bool, uint16_t))&Perl_Mob_FindType);
 	package.add("GMMove", (void(*)(Mob*, float, float, float))&Perl_Mob_GMMove);
 	package.add("GMMove", (void(*)(Mob*, float, float, float, float))&Perl_Mob_GMMove);
+	package.add("GMMove", (void(*)(Mob*, float, float, float, float, bool))&Perl_Mob_GMMove);
 	package.add("Gate", &Perl_Mob_Gate);
 	package.add("GetAA", &Perl_Mob_GetAA);
 	package.add("GetAABonuses", &Perl_Mob_GetAABonuses);
