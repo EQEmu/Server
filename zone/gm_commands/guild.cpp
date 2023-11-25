@@ -329,6 +329,7 @@ void command_guild(Client *c, const Seperator *sep)
 					).c_str()
 				);
 			} else {
+				guild_mgr.SetGuild(character_id, GUILD_NONE, 0);
 				c->Message(
 					Chat::White,
 					fmt::format(
