@@ -515,6 +515,7 @@ Mob::Mob(
 
 	is_boat = IsBoat();
 
+	current_alliance_faction = -1;
 }
 
 Mob::~Mob()
@@ -7126,24 +7127,10 @@ int8 Mob::GetDecayEffectValue(uint16 spell_id, uint16 spelleffect) {
 	return effect_value;
 }
 
-// Faction Mods for Alliance type spells
+// Faction Mods for Alliance type spells (only 1 ever active)
 void Mob::AddFactionBonus(uint32 pFactionID,int32 bonus) {
-	std::map <uint32, int32> :: const_iterator faction_bonus;
-	typedef std::pair <uint32, int32> NewFactionBonus;
-
-	faction_bonus = faction_bonuses.find(pFactionID);
-	if(faction_bonus == faction_bonuses.end())
-	{
-		faction_bonuses.emplace(NewFactionBonus(pFactionID,bonus));
-	}
-	else
-	{
-		if(faction_bonus->second<bonus)
-		{
-			faction_bonuses.erase(pFactionID);
-			faction_bonuses.emplace(NewFactionBonus(pFactionID,bonus));
-		}
-	}
+	current_alliance_faction = pFactionID;
+	current_alliance_mod = bonus;
 }
 
 // Faction Mods from items
@@ -7167,11 +7154,9 @@ void Mob::AddItemFactionBonus(uint32 pFactionID,int32 bonus) {
 }
 
 int32 Mob::GetFactionBonus(uint32 pFactionID) {
-	std::map <uint32, int32> :: const_iterator faction_bonus;
-	faction_bonus = faction_bonuses.find(pFactionID);
-	if(faction_bonus != faction_bonuses.end())
+	if(current_alliance_faction == pFactionID)
 	{
-		return (*faction_bonus).second;
+		return current_alliance_mod;
 	}
 	return 0;
 }

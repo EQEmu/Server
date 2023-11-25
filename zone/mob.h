@@ -1774,8 +1774,9 @@ protected:
 	uint32 time_until_can_move;
 	HateList hate_list;
 	std::set<uint32> feign_memory_list;
-	// This is to keep track of mobs we cast faction mod spells on
-	std::map<uint32,int32> faction_bonuses; // Primary FactionID, Bonus
+	// This is to keep track of the current (one only) faction mod (alliance)
+	uint32 current_alliance_faction;
+	int32 current_alliance_mod;
 	void AddFactionBonus(uint32 pFactionID,int32 bonus);
 	int32 GetFactionBonus(uint32 pFactionID);
 	// This is to keep track of item faction modifiers
