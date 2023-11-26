@@ -908,6 +908,7 @@ public:
 	void AutoGrantAAPoints();
 	void GrantAllAAPoints(uint8 unlock_level = 0);
 	bool HasAlreadyPurchasedRank(AA::Rank* rank);
+	void ListPurchasedAAs(Client *to, std::string search_criteria = std::string());
 
 	bool SendGMCommand(std::string message, bool ignore_status = false);
 
