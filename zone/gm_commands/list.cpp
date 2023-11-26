@@ -3,237 +3,273 @@
 #include "../object.h"
 #include "../doors.h"
 
+struct UniqueEntity {
+	uint16      entity_id;
+	std::string entity_name;
+	uint32      unique_id;
+	glm::vec4   position;
+};
+
 void command_list(Client *c, const Seperator *sep)
 {
+	const int arguments = sep->argnum;
+	if (!arguments) {
+		c->Message(Chat::White, "Usage: #list [corpses|doors|npcs|objects|players] [search]");
+		c->Message(Chat::White, "Example: #list npcs (Blank for all)");
+		return;
+	}
+
+	const bool is_corpses = !strcasecmp(sep->arg[1], "corpses");
+	const bool is_doors   = !strcasecmp(sep->arg[1], "doors");
+	const bool is_npcs    = !strcasecmp(sep->arg[1], "npcs");
+	const bool is_objects = !strcasecmp(sep->arg[1], "objects");
+	const bool is_players = !strcasecmp(sep->arg[1], "players");
+
+	if (
+		!is_corpses &&
+		!is_doors &&
+		!is_npcs &&
+		!is_objects &&
+		!is_players
+	) {
+		c->Message(Chat::White, "Usage: #list [npcs|players|corpses|doors|objects] [search]");
+		c->Message(Chat::White, "Example: #list npcs (Blank for all)");
+		return;
+	}
+
 	std::string search_type;
-	if (strcasecmp(sep->arg[1], "npcs") == 0) {
-		search_type = "npcs";
+	std::string unique_type;
+
+	if (is_corpses) {
+		search_type = "corpse";
+		unique_type = "Corpse ID";
+	} else if (is_doors) {
+		search_type = "door";
+		unique_type = "Door ID";
+	} else if (is_npcs) {
+		search_type = "NPC";
+		unique_type = "NPC ID";
+	} else if (is_objects) {
+		search_type = "object";
+		unique_type = "Object ID";
+	} else if (is_players) {
+		search_type = "player";
+		unique_type = "Character ID";
 	}
 
-	if (strcasecmp(sep->arg[1], "players") == 0) {
-		search_type = "players";
-	}
+	uint32 entity_count = 0;
+	uint32 found_count  = 0;
 
-	if (strcasecmp(sep->arg[1], "corpses") == 0) {
-		search_type = "corpses";
-	}
+	const std::string &search_string = sep->arg[2] ? Strings::ToLower(sep->arg[2]) : std::string();
 
-	if (strcasecmp(sep->arg[1], "doors") == 0) {
-		search_type = "doors";
-	}
+	std::vector<UniqueEntity> unique_entities;
 
-	if (strcasecmp(sep->arg[1], "objects") == 0) {
-		search_type = "objects";
-	}
+	if (is_corpses) {
+		const auto &l = entity_list.GetCorpseList();
 
-	if (search_type.length() > 0) {
+		for (const auto &e : l) {
+			Corpse *entity = e.second;
 
-		int entity_count = 0;
-		int found_count  = 0;
+			entity_count++;
 
-		std::string search_string;
-
-		if (sep->arg[2]) {
-			search_string = Strings::ToLower(sep->arg[2]);
-		}
-
-		// NPC
-		if (search_type.find("npcs") != std::string::npos) {
-			auto &entity_list_search = entity_list.GetMobList();
-
-			for (auto &itr : entity_list_search) {
-				Mob *entity = itr.second;
-				if (!entity->IsNPC()) {
-					continue;
-				}
-
-				entity_count++;
-
-				std::string entity_name = Strings::ToLower(entity->GetName());
-				if (search_string.length() > 0 && entity_name.find(search_string) == std::string::npos) {
-					continue;
-				}
-
-				std::string saylink = StringFormat(
-					"#goto %.0f %0.f %.0f",
-					entity->GetX(),
-					entity->GetY(),
-					entity->GetZ() + (entity->IsBoat() ? 50 : 0));
-
-				c->Message(
-					0,
-					"| %s | ID %5d | %s | x %.0f | y %0.f | z %.0f",
-					Saylink::Silent(saylink, "Goto").c_str(),
-					entity->GetID(),
-					entity->GetName(),
-					entity->GetX(),
-					entity->GetY(),
-					entity->GetZ()
-				);
-
-				found_count++;
+			const std::string &entity_name = Strings::ToLower(entity->GetName());
+			if (!search_string.empty() && entity_name.find(search_string) == std::string::npos) {
+				continue;
 			}
-		}
 
-		// Client
-		if (search_type.find("players") != std::string::npos) {
-			auto &entity_list_search = entity_list.GetClientList();
-
-			for (auto &itr : entity_list_search) {
-				Client *entity = itr.second;
-
-				entity_count++;
-
-				std::string entity_name = Strings::ToLower(entity->GetName());
-
-				/**
-				 * Filter by name
-				 */
-				if (search_string.length() > 0 && entity_name.find(search_string) == std::string::npos) {
-					continue;
+			unique_entities.emplace_back(
+				UniqueEntity{
+					.entity_id = entity->GetID(),
+					.entity_name = entity->GetName(),
+					.unique_id = entity->GetCorpseDBID(),
+					.position = entity->GetPosition()
 				}
-
-				std::string saylink = StringFormat(
-					"#goto %.0f %0.f %.0f",
-					entity->GetX(),
-					entity->GetY(),
-					entity->GetZ());
-
-				c->Message(
-					0,
-					"| %s | ID %5d | %s | x %.0f | y %0.f | z %.0f",
-					Saylink::Silent(saylink, "Goto").c_str(),
-					entity->GetID(),
-					entity->GetName(),
-					entity->GetX(),
-					entity->GetY(),
-					entity->GetZ()
-				);
-
-				found_count++;
-			}
-		}
-
-		// Corpse
-		if (search_type.find("corpses") != std::string::npos) {
-			auto &entity_list_search = entity_list.GetCorpseList();
-
-			for (auto &itr : entity_list_search) {
-				Corpse *entity = itr.second;
-
-				entity_count++;
-
-				std::string entity_name = Strings::ToLower(entity->GetName());
-				if (search_string.length() > 0 && entity_name.find(search_string) == std::string::npos) {
-					continue;
-				}
-
-				std::string saylink = StringFormat(
-					"#goto %.0f %0.f %.0f",
-					entity->GetX(),
-					entity->GetY(),
-					entity->GetZ());
-
-				c->Message(
-					0,
-					"| %s | ID %5d | %s | x %.0f | y %0.f | z %.0f",
-					Saylink::Silent(saylink, "Goto").c_str(),
-					entity->GetID(),
-					entity->GetName(),
-					entity->GetX(),
-					entity->GetY(),
-					entity->GetZ()
-				);
-
-				found_count++;
-			}
-		}
-
-		// Doors
-		if (search_type.find("doors") != std::string::npos) {
-			auto &entity_list_search = entity_list.GetDoorsList();
-
-			for (auto &itr : entity_list_search) {
-				Doors *entity = itr.second;
-
-				entity_count++;
-
-				std::string entity_name = Strings::ToLower(entity->GetDoorName());
-				if (search_string.length() > 0 && entity_name.find(search_string) == std::string::npos) {
-					continue;
-				}
-
-				std::string saylink = StringFormat(
-					"#goto %.0f %0.f %.0f",
-					entity->GetX(),
-					entity->GetY(),
-					entity->GetZ());
-
-				c->Message(
-					0,
-					"| %s | Entity ID %5d | Door ID %i | %s | x %.0f | y %0.f | z %.0f",
-					Saylink::Silent(saylink, "Goto").c_str(),
-					entity->GetID(),
-					entity->GetDoorID(),
-					entity->GetDoorName(),
-					entity->GetX(),
-					entity->GetY(),
-					entity->GetZ()
-				);
-
-				found_count++;
-			}
-		}
-
-		// Objects
-		if (search_type.find("objects") != std::string::npos) {
-			auto &entity_list_search = entity_list.GetObjectList();
-
-			for (auto &itr : entity_list_search) {
-				Object *entity = itr.second;
-
-				entity_count++;
-
-				std::string entity_name = Strings::ToLower(entity->GetModelName());
-				if (search_string.length() > 0 && entity_name.find(search_string) == std::string::npos) {
-					continue;
-				}
-
-				std::string saylink = StringFormat(
-					"#goto %.0f %0.f %.0f",
-					entity->GetX(),
-					entity->GetY(),
-					entity->GetZ());
-
-				c->Message(
-					0,
-					"| %s | Entity ID %5d | Object DBID %i | %s | x %.0f | y %0.f | z %.0f",
-					Saylink::Silent(saylink, "Goto").c_str(),
-					entity->GetID(),
-					entity->GetDBID(),
-					entity->GetModelName(),
-					entity->GetX(),
-					entity->GetY(),
-					entity->GetZ()
-				);
-
-				found_count++;
-			}
-		}
-
-		if (found_count) {
-			c->Message(
-				0, "Found (%i) of type (%s) in zone (%i) total",
-				found_count,
-				search_type.c_str(),
-				entity_count
 			);
+
+			found_count++;
+		}
+	} else if (is_doors) {
+		const auto &l = entity_list.GetDoorsList();
+
+		for (const auto &e : l) {
+			Doors *entity = e.second;
+
+			entity_count++;
+
+			const std::string &entity_name = Strings::ToLower(entity->GetDoorName());
+			if (!search_string.empty() && entity_name.find(search_string) == std::string::npos) {
+				continue;
+			}
+
+			unique_entities.emplace_back(
+				UniqueEntity{
+					.entity_id = entity->GetID(),
+					.entity_name = entity->GetDoorName(),
+					.unique_id = entity->GetDoorID(),
+					.position = entity->GetPosition()
+				}
+			);
+
+			found_count++;
+		}
+	} else if (is_npcs) {
+		const auto &l = entity_list.GetMobList();
+
+		for (const auto &e : l) {
+			Mob *entity = e.second;
+			if (!entity->IsNPC()) {
+				continue;
+			}
+
+			entity_count++;
+
+			const std::string &entity_name = Strings::ToLower(entity->GetName());
+			if (!search_string.empty() && entity_name.find(search_string) == std::string::npos) {
+				continue;
+			}
+
+			unique_entities.emplace_back(
+				UniqueEntity{
+					.entity_id = entity->GetID(),
+					.entity_name = entity->GetName(),
+					.unique_id = entity->GetNPCTypeID(),
+					.position = entity->GetPosition()
+				}
+			);
+
+			found_count++;
+		}
+	} else if (is_objects) {
+		const auto &l = entity_list.GetObjectList();
+
+		for (const auto &e : l) {
+			Object *entity = e.second;
+
+			entity_count++;
+
+			const std::string &entity_name = Strings::ToLower(entity->GetModelName());
+			if (!search_string.empty() && entity_name.find(search_string) == std::string::npos) {
+				continue;
+			}
+
+			unique_entities.emplace_back(
+				UniqueEntity{
+					.entity_id = entity->GetID(),
+					.entity_name = entity->GetModelName(),
+					.unique_id = entity->GetDBID(),
+					.position = glm::vec4(entity->GetX(), entity->GetY(), entity->GetZ(), 0.0f)
+				}
+			);
+
+			found_count++;
+		}
+	} else if (is_players) {
+		const auto &l = entity_list.GetClientList();
+
+		for (const auto &e : l) {
+			Client *entity = e.second;
+
+			entity_count++;
+
+			const std::string &entity_name = Strings::ToLower(entity->GetName());
+			if (!search_string.empty() && entity_name.find(search_string) == std::string::npos) {
+				continue;
+			}
+
+			unique_entities.emplace_back(
+				UniqueEntity{
+					.entity_id = entity->GetID(),
+					.entity_name = entity->GetName(),
+					.unique_id = entity->CharacterID(),
+					.position = entity->GetPosition()
+				}
+			);
+
+			found_count++;
 		}
 	}
-	else {
-		c->Message(Chat::White, "Usage of #list");
-		c->Message(Chat::White, "- #list [npcs|players|corpses|doors|objects] [search]");
-		c->Message(Chat::White, "- Example: #list npcs (Blank for all)");
-	}
-}
 
+	if (!found_count) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Could not find any {}{}.",
+				search_type,
+				(
+					!search_string.empty() ?
+					fmt::format(
+						" matching '{}'",
+						search_string
+					) :
+					""
+				)
+			).c_str()
+		);
+		return;
+	}
+
+	std::sort(unique_entities.begin(), unique_entities.end(), [](UniqueEntity a, UniqueEntity b) {
+		if (a.entity_id && b.entity_id) {
+			return a.entity_id < b.entity_id;
+		} else {
+			return a.unique_id < b.unique_id;
+		}
+	});
+
+	for (const auto& e : unique_entities) {
+		const std::string &saylink = Saylink::Silent(
+			fmt::format(
+				"#goto {:.2f} {:.2f} {:.2f}",
+				e.position.x,
+				e.position.y,
+				e.position.z
+			),
+			"Goto"
+		);
+
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"| {}{}{} | {} |",
+				saylink,
+				(
+					e.entity_id ?
+					fmt::format(
+						" | ID {}",
+						e.entity_id
+					) :
+					""
+				),
+				(
+					e.unique_id ?
+					fmt::format(
+						" | {} {}",
+						unique_type,
+						e.unique_id
+					) :
+					""
+				),
+				e.entity_name
+			).c_str()
+		);
+	}
+
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"Found {} {}{}{}, {} total.",
+			found_count,
+			search_type,
+			found_count != 1 ? "s" : "",
+			(
+				!search_string.empty() ?
+				fmt::format(
+					" matching '{}'",
+					search_string
+				) :
+				""
+			),
+			entity_count
+		).c_str()
+	);
+}
