@@ -76,7 +76,7 @@ public:
 	void	SplitMoney(uint32 copper, uint32 silver, uint32 gold, uint32 platinum, Client *splitter = nullptr);
 	inline	void SetLeader(Mob* c){ leader = c; };
 	inline	Mob* GetLeader() { return leader; };
-	const char*	GetLeaderName() { return membername[0]; };
+	const char*	GetLeaderName() { return GetGroupLeaderName(GetID()).c_str(); };
 	void	SendHPManaEndPacketsTo(Mob* newmember);
 	void	SendHPPacketsFrom(Mob* member);
 	void	SendManaPacketFrom(Mob* member);
@@ -177,6 +177,8 @@ private:
 	int mentor_percent;
 
 	XTargetAutoHaters m_autohatermgr;
+
+	std::string GetGroupLeaderName(uint32 group_id);
 };
 
 #endif
