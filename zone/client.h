@@ -1275,6 +1275,10 @@ public:
 		}
 		else { return 0; }
 	}
+	inline bool CompleteTask(uint32 task_id)
+	{
+		return task_state ? task_state->CompleteTask(this, task_id) : false;
+	}
 	inline void FailTask(int task_id) { if (task_state) { task_state->FailTask(this, task_id); }}
 	inline int TaskTimeLeft(int task_id) { return (task_state ? task_state->TaskTimeLeft(task_id) : 0); }
 	inline int EnabledTaskCount(int task_set_id)
