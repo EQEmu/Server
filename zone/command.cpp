@@ -866,6 +866,7 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/nukebuffs.cpp"
 #include "gm_commands/nukeitem.cpp"
 #include "gm_commands/object.cpp"
+#include "gm_commands/object_manipulation.cpp"
 #include "gm_commands/path.cpp"
 #include "gm_commands/peqzone.cpp"
 #include "gm_commands/petitems.cpp"

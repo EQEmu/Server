@@ -2594,11 +2594,11 @@ struct BookButton_Struct
 struct Object_Struct {
 /*00*/	uint32	linked_list_addr[2];// They are, get this, prev and next, ala linked list
 /*08*/	float	size;				//
-/*10*/	uint16	solidtype;			//
+/*10*/	uint16	solid_type;			//
 /*12*/	uint32	drop_id;			// Unique object id for zone
 /*16*/	uint16	zone_id;			// Redudant, but: Zone the object appears in
 /*18*/	uint16	zone_instance;		//
-/*20*/	uint32	unknown020;			//
+/*20*/	uint32	incline;			//
 /*24*/	uint32	unknown024;			//
 /*28*/	float	tilt_x;
 /*32*/	float	tilt_y;

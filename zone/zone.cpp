@@ -260,8 +260,8 @@ bool Zone::LoadZoneObjects()
 		data.linked_list_addr[0] = 0;
 		data.linked_list_addr[1] = 0;
 
-		data.solidtype = (uint32)Strings::ToInt(row[12]);
-		data.unknown020 = (uint32)Strings::ToInt(row[13]);
+		data.solid_type = (uint32)Strings::ToInt(row[12]);
+		data.incline = (uint32)Strings::ToInt(row[13]);
 		data.unknown024 = (uint32)Strings::ToInt(row[14]);
 		data.unknown076 = (uint32)Strings::ToInt(row[15]);
 		data.size = Strings::ToFloat(row[16]);
@@ -291,7 +291,7 @@ bool Zone::LoadZoneObjects()
 		}
 
 		// Father Nitwit's fix... not perfect...
-		if (inst == nullptr && type != OT_DROPPEDITEM) {
+		if (inst == nullptr && type != ObjectTypes::Temporary) {
 			inst = new EQ::ItemInstance(ItemInstWorldContainer);
 		}
 
@@ -303,7 +303,7 @@ bool Zone::LoadZoneObjects()
 		auto object = new Object(id, type, icon, data, inst);
 		object->SetDisplayName(row[19]);
 		entity_list.AddObject(object, false);
-		if (type == OT_DROPPEDITEM && itemid != 0)
+		if (type == ObjectTypes::Temporary && itemid != 0)
 			entity_list.RemoveObject(object->GetID());
 
 		safe_delete(inst);

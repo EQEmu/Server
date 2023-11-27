@@ -10355,6 +10355,16 @@ void Client::SetDoorToolEntityId(uint16 door_tool_entity_id)
 	Client::m_door_tool_entity_id = door_tool_entity_id;
 }
 
+uint16 Client::GetObjectToolEntityId() const
+{
+	return m_object_tool_entity_id;
+}
+
+void Client::SetObjectToolEntityId(uint16 object_tool_entity_id)
+{
+	Client::m_object_tool_entity_id = object_tool_entity_id;
+}
+
 int Client::GetIPExemption()
 {
 	return database.GetIPExemption(GetIPString());
