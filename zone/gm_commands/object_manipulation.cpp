@@ -450,9 +450,10 @@ void ObjectManipulation::CommandHandler(Client *c, const Seperator *sep)
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"Name [{}] [{}] [{}]",
+				"Name [{}] [{}] [{}] [{}]",
 				o->GetModelName(),
 				Saylink::Silent("#object save", "Save"),
+				Saylink::Silent("#object delete", "Delete"),
 				Saylink::Silent("#object undo", "Undo")
 			).c_str()
 		);
