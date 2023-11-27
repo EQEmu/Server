@@ -33,7 +33,7 @@ void ObjectManipulation::CommandHandler(Client *c, const Seperator *sep)
 		!is_rotate &&
 		!is_save &&
 		!is_undo
-		) {
+	) {
 		ObjectManipulation::SendSubcommands(c);
 		return;
 	}
