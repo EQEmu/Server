@@ -285,10 +285,9 @@ void ObjectManipulation::CommandHandler(Client *c, const Seperator *sep)
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"Object Selected ID [{}] Database ID [{}] Name [{}]",
+				"Object Selected ID [{}] Database ID [{}]",
 				c->GetObjectToolEntityId(),
-				object_id,
-				o->GetModelName()
+				object_id
 			).c_str()
 		);
 
