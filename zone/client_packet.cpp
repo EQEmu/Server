@@ -4664,7 +4664,7 @@ void Client::Handle_OP_ClickObject(const EQApplicationPacket *app)
 					"Object ({}) [{}] [{}]",
 					entity->CastToObject()->GetDBID(),
 					Saylink::Silent("#object edit", "Edit"),
-					Saylink::Silent("#object edit", "Delete"),
+					Saylink::Silent("#object edit", "Delete")
 				).c_str()
 			);
 		}
