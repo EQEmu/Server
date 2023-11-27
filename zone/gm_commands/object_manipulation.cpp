@@ -15,23 +15,33 @@ void ObjectManipulation::CommandHandler(Client *c, const Seperator *sep)
 		return;
 	}
 
-	const bool is_add    = !strcasecmp(sep->arg[1], "add");
-	const bool is_copy   = !strcasecmp(sep->arg[1], "copy");
-	const bool is_delete = !strcasecmp(sep->arg[1], "delete");
-	const bool is_edit   = !strcasecmp(sep->arg[1], "edit");
-	const bool is_move   = !strcasecmp(sep->arg[1], "move");
-	const bool is_rotate = !strcasecmp(sep->arg[1], "rotate");
-	const bool is_save   = !strcasecmp(sep->arg[1], "save");
-	const bool is_undo   = !strcasecmp(sep->arg[1], "undo");
+	const bool is_add        = !strcasecmp(sep->arg[1], "add");
+	const bool is_delete     = !strcasecmp(sep->arg[1], "delete");
+	const bool is_edit       = !strcasecmp(sep->arg[1], "edit");
+	const bool is_icon       = !strcasecmp(sep->arg[1], "icon");
+	const bool is_incline    = !strcasecmp(sep->arg[1], "incline");
+	const bool is_model      = !strcasecmp(sep->arg[1], "model");
+	const bool is_move       = !strcasecmp(sep->arg[1], "move");
+	const bool is_rotate     = !strcasecmp(sep->arg[1], "rotate");
+	const bool is_save       = !strcasecmp(sep->arg[1], "save");
+	const bool is_size       = !strcasecmp(sep->arg[1], "size");
+	const bool is_solid_type = !strcasecmp(sep->arg[1], "solid_type");
+	const bool is_type       = !strcasecmp(sep->arg[1], "type");
+	const bool is_undo       = !strcasecmp(sep->arg[1], "undo");
 
 	if (
 		!is_add &&
-		!is_copy &&
 		!is_delete &&
 		!is_edit &&
+		!is_icon &&
+		!is_incline &&
+		!is_model &&
 		!is_move &&
 		!is_rotate &&
 		!is_save &&
+		!is_size &&
+		!is_solid_type &&
+		!is_type &&
 		!is_undo
 	) {
 		ObjectManipulation::SendSubcommands(c);
@@ -39,7 +49,7 @@ void ObjectManipulation::CommandHandler(Client *c, const Seperator *sep)
 	}
 
 	if (is_add) {
-		if (arguments < 3) {
+		if (arguments < 2) {
 			c->Message(
 				Chat::White,
 				"Usage: #object add [Type] [Model] [Icon] [Size] [Solid Type] [Incline] | Add an object"
@@ -55,7 +65,7 @@ void ObjectManipulation::CommandHandler(Client *c, const Seperator *sep)
 
 		memset(&od, 0, sizeof(od));
 
-		const uint32 type = Strings::ToUnsignedInt(sep->arg[2]) == 0 ? 255 : Strings::ToUnsignedInt(sep->arg[2]);
+		const uint32 type = Strings::ToUnsignedInt(sep->arg[2]) == ObjectTypes::StaticLocked ? ObjectTypes::StaticUnlocked : Strings::ToUnsignedInt(sep->arg[2]);
 		if (type == ObjectTypes::StaticLocked) {
 			c->Message(
 				Chat::White,
@@ -169,132 +179,17 @@ void ObjectManipulation::CommandHandler(Client *c, const Seperator *sep)
 				save_saylink
 			).c_str()
 		);
-	} else if (is_copy) {
-		if (arguments < 3) {
-			c->Message(
-				Chat::White,
-				"Usage: #object copy [All|Object ID] [Instance Version] | Copy objects to another instance version"
-			);
-			c->Message(Chat::White, "Note: Only objects saved in the database can be copied to another instance");
-			return;
-		}
 
-		Object_Struct od;
-
-		memset(&od, 0, sizeof(od));
-
-		const bool   is_all           = !strcasecmp(sep->arg[2], "all");
-		const uint32 object_id        = sep->IsNumber(2) ? Strings::ToUnsignedInt(sep->arg[2]) : 0;
-		const uint16 instance_version = static_cast<uint16>(Strings::ToUnsignedInt(sep->arg[3]));
-
-		if (instance_version == zone->GetInstanceVersion()) {
-			c->Message(Chat::White, "Source and destination instance versions are the same.");
-			return;
-		}
-
-		od.zone_instance = instance_version;
-
-		if (is_all) {
-			auto l = ObjectRepository::GetWhere(
-				content_db,
-				fmt::format(
-					"zone_id = {} AND version = {}",
-					zone->GetZoneID(),
-					zone->GetInstanceVersion()
-				)
-			);
-			if (l.empty()) {
-				c->Message(Chat::White, "No objects were found to copy.");
-				return;
-			}
-
-			for (auto &e: l) {
-				e.version = od.zone_instance;
-			}
-
-			const int objects_copied = ObjectRepository::InsertMany(content_db, l);
-
-			if (objects_copied) {
-				c->Message(
-					Chat::White,
-					fmt::format(
-						"Copied {} object{} to instance version {}.",
-						l.size(),
-						l.size() != 1 ? "s" : "",
-						od.zone_instance
-					).c_str()
-				);
-			} else {
-				c->Message(
-					Chat::White,
-					fmt::format(
-						"Failed to copy objects to instance version {}.",
-						od.zone_instance
-					).c_str()
-				);
-			}
-			return;
-		}
-
-		auto e = ObjectRepository::FindOne(content_db, object_id);
-
-		if (!e.id) {
-			c->Message(
-				Chat::White,
-				fmt::format(
-					"Object ID {} does not exist.",
-					object_id
-				).c_str()
-			);
-			return;
-		}
-
-		if (e.zoneid != zone->GetZoneID()) {
-			c->Message(
-				Chat::White,
-				fmt::format(
-					"Object ID {} is not a part of this zone.",
-					object_id
-				).c_str()
-			);
-			return;
-		}
-
-		if (e.version != zone->GetInstanceVersion()) {
-			c->Message(
-				Chat::White,
-				fmt::format(
-					"Object ID {} is not a part of this instance version.",
-					object_id
-				).c_str()
-			);
-			return;
-		}
-
-		e.version = od.zone_instance;
-
-		const auto o = ObjectRepository::InsertOne(content_db, e);
-
-		if (!o.id) {
-			c->Message(
-				Chat::White,
-				fmt::format(
-					"Failed to copy object ID {} to instance version {}.",
-					object_id,
-					od.zone_instance
-				).c_str()
-			);
-			return;
-		}
+		c->SetObjectToolEntityId(o->GetID());
 	} else if (is_delete) {
-		if (arguments < 2) {
-			c->Message(Chat::White, "Usage: #object delete [Object ID] | Delete an object permanently");
+		if (!c->GetObjectToolEntityId()) {
+			c->Message(Chat::White, "You do not have a selected object.");
 			return;
 		}
 
-		const uint32 object_id = Strings::ToUnsignedInt(sep->arg[2]);
+		Object *o = entity_list.GetObjectByID(c->GetObjectToolEntityId());
 
-		Object *o = entity_list.FindObject(object_id);
+		const uint32 object_id = o->GetDBID();
 
 		if (o) {
 			auto app = new EQApplicationPacket();
@@ -343,6 +238,7 @@ void ObjectManipulation::CommandHandler(Client *c, const Seperator *sep)
 				zone->GetInstanceVersion()
 			)
 		);
+
 		if (e[0].type == ObjectTypes::Temporary) {
 			c->Message(
 				Chat::White,
@@ -382,16 +278,247 @@ void ObjectManipulation::CommandHandler(Client *c, const Seperator *sep)
 			);
 		}
 	} else if (is_edit) {
-		if (arguments < 4) {
-			c->Message(Chat::White, "Usage: #object edit [Object ID] [Property] [Value] | Edit an object");
-			c->Message(Chat::White, "Note: Static Object (Type 0) Properties: model, type, size, solid_type, incline");
-			c->Message(Chat::White, "Note: Tradeskill Object (Type 2+) Properties: model, type, icon");
+		Object *o = entity_list.GetObjectByID(c->GetObjectToolEntityId());
+
+		const uint32 object_id = o->GetDBID();
+
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Object Selected ID [{}] Database ID [{}] Name [{}]",
+				c->GetObjectToolEntityId(),
+				object_id,
+				o->GetModelName()
+			).c_str()
+		);
+
+		std::vector<std::string> move_x_options_positive;
+		std::vector<std::string> move_x_options_negative;
+		std::vector<std::string> move_y_options_positive;
+		std::vector<std::string> move_y_options_negative;
+		std::vector<std::string> move_z_options_positive;
+		std::vector<std::string> move_z_options_negative;
+		std::vector<std::string> rotate_options_positive;
+		std::vector<std::string> rotate_options_negative;
+		std::vector<std::string> size_options_positive;
+		std::vector<std::string> size_options_negative;
+
+		std::vector<std::string> xyz_values = {
+			"0.1", "1", "5", "10", "25", "50", "100"
+		};
+
+		for (const auto &v: xyz_values) {
+			const float current_x       = o->GetX();
+			const float current_y       = o->GetY();
+			const float current_z       = o->GetZ();
+			const float current_heading = o->GetHeadingData();
+
+			const float new_x       = current_x + Strings::ToFloat(v);
+			const float new_y       = current_y + Strings::ToFloat(v);
+			const float new_z       = current_z + Strings::ToFloat(v);
+			const float new_heading = current_heading + Strings::ToFloat(v);
+
+			move_x_options_positive.emplace_back(
+				Saylink::Silent(
+					fmt::format(
+						"#object move {:.2f} {:.2f} {:.2f}",
+						new_x,
+						current_y,
+						current_z
+					),
+					v
+				)
+			);
+
+			move_y_options_positive.emplace_back(
+				Saylink::Silent(
+					fmt::format(
+						"#object move {:.2f} {:.2f} {:.2f}",
+						current_x,
+						new_y,
+						current_z
+					),
+					v
+				)
+			);
+
+			move_z_options_positive.emplace_back(
+				Saylink::Silent(
+					fmt::format(
+						"#object move {:.2f} {:.2f} {:.2f}",
+						current_x,
+						current_y,
+						new_z
+					),
+					v
+				)
+			);
+
+			rotate_options_positive.emplace_back(
+				Saylink::Silent(
+					fmt::format(
+						"#object rotate {:.2f}",
+						new_heading
+					),
+					v
+				)
+			);
+		}
+
+		for (auto v = xyz_values.rbegin(); v != xyz_values.rend(); ++v) {
+			const float current_x       = o->GetX();
+			const float current_y       = o->GetY();
+			const float current_z       = o->GetZ();
+			const float current_heading = o->GetHeadingData();
+
+			const float new_x       = current_x - Strings::ToFloat(*v);
+			const float new_y       = current_y - Strings::ToFloat(*v);
+			const float new_z       = current_z - Strings::ToFloat(*v);
+			const float new_heading = current_heading - Strings::ToFloat(*v);
+
+			move_x_options_negative.emplace_back(
+				Saylink::Silent(
+					fmt::format(
+						"#object move {:.2f} {:.2f} {:.2f}",
+						new_x,
+						current_y,
+						current_z
+					),
+					*v
+				)
+			);
+
+			move_y_options_negative.emplace_back(
+				Saylink::Silent(
+					fmt::format(
+						"#object move {:.2f} {:.2f} {:.2f}",
+						current_x,
+						new_y,
+						current_z
+					),
+					*v
+				)
+			);
+
+			move_z_options_negative.emplace_back(
+				Saylink::Silent(
+					fmt::format(
+						"#object move {:.2f} {:.2f} {:.2f}",
+						current_x,
+						current_y,
+						new_z
+					),
+					*v
+				)
+			);
+
+			rotate_options_negative.emplace_back(
+				Saylink::Silent(
+					fmt::format(
+						"#object rotate {:.2f}",
+						new_heading
+					),
+					*v
+				)
+			);
+		}
+
+		std::vector<std::string> size_values = {
+			"1", "5", "10", "25", "50", "100", "1000"
+		};
+
+		for (const auto &v: size_values) {
+			const float current_size = o->GetSize();
+
+			const float new_size = current_size + Strings::ToFloat(v);
+
+			size_options_positive.emplace_back(
+				Saylink::Silent(fmt::format("#door size {:.2f}", new_size), v)
+			);
+		}
+
+		for (auto v = size_values.rbegin(); v != size_values.rend(); ++v) {
+			const float current_size = o->GetSize();
+
+			const float new_size = current_size - Strings::ToFloat(*v);
+
+			size_options_negative.emplace_back(
+				Saylink::Silent(fmt::format("#door edit {:.2f}", new_size, *v), *v)
+			);
+		}
+
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Name [{}] [{}] [{}]",
+				o->GetModelName(),
+				Saylink::Silent("#object save", "Save"),
+				Saylink::Silent("#object undo", "Undo")
+			).c_str()
+		);
+
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"[{}] - [X] + [{}]",
+				Strings::Implode(" | ", move_x_options_negative),
+				Strings::Implode(" | ", move_x_options_positive)
+			).c_str()
+		);
+
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"[{}] - [Y] + [{}]",
+				Strings::Implode(" | ", move_y_options_negative),
+				Strings::Implode(" | ", move_y_options_positive)
+			).c_str()
+		);
+
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"[{}] - [Z] + [{}]",
+				Strings::Implode(" | ", move_z_options_negative),
+				Strings::Implode(" | ", move_z_options_positive)
+			).c_str()
+		);
+
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"[{}] - [H] + [{}]",
+				Strings::Implode(" | ", rotate_options_negative),
+				Strings::Implode(" | ", rotate_options_positive)
+			).c_str()
+		);
+
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"[{}] - [Size] + [{}]",
+				Strings::Implode(" | ", size_options_negative),
+				Strings::Implode(" | ", size_options_positive)
+			).c_str()
+		);
+
+		return;
+	} else if (
+		is_icon ||
+		is_incline ||
+		is_model ||
+		is_size ||
+		is_solid_type ||
+		is_type
+	) {
+		if (!c->GetObjectToolEntityId()) {
+			c->Message(Chat::White, "You do not have a selected object.");
 			return;
 		}
 
-		const uint32 object_id = Strings::ToUnsignedInt(sep->arg[2]);
+		Object *o = entity_list.GetObjectByID(c->GetObjectToolEntityId());
 
-		Object *o = entity_list.FindObject(object_id);
+		const uint32 object_id = o->GetDBID();
 
 		Object_Struct od;
 
@@ -475,17 +602,14 @@ void ObjectManipulation::CommandHandler(Client *c, const Seperator *sep)
 			}
 		}
 
-		const std::string &property_name  = sep->arg[3];
-		const std::string &property_value = sep->arg[4];
-
 		uint32 icon = o->GetIcon();
 		o->GetObjectData(&od);
 
-		if (Strings::EqualFold(property_name, "icon")) {
+		if (is_icon) {
 			if (
 				od.object_type <= ObjectTypes::Temporary ||
 				od.object_type == ObjectTypes::StaticUnlocked
-				) {
+			) {
 				c->Message(
 					Chat::White,
 					fmt::format(
@@ -496,12 +620,12 @@ void ObjectManipulation::CommandHandler(Client *c, const Seperator *sep)
 				return;
 			}
 
-			if (!Strings::IsNumber(property_value)) {
+			if (!Strings::IsNumber(sep->arg[2])) {
 				c->Message(Chat::White, "Invalid icon specified. Please enter a valid icon.");
 				return;
 			}
 
-			icon = Strings::ToUnsignedInt(property_value);
+			icon = Strings::ToUnsignedInt(sep->arg[2]);
 
 			o->SetIcon(icon);
 
@@ -513,7 +637,7 @@ void ObjectManipulation::CommandHandler(Client *c, const Seperator *sep)
 					icon
 				).c_str()
 			);
-		} else if (Strings::EqualFold(property_name, "incline")) {
+		} else if (is_incline) {
 			if (od.object_type != ObjectTypes::StaticUnlocked) {
 				c->Message(
 					Chat::White,
@@ -525,12 +649,12 @@ void ObjectManipulation::CommandHandler(Client *c, const Seperator *sep)
 				return;
 			}
 
-			if (!Strings::IsNumber(property_value)) {
+			if (!Strings::IsNumber(sep->arg[2])) {
 				c->Message(Chat::White, "Invalid incline specified. Please enter a valid incline.");
 				return;
 			}
 
-			od.incline = Strings::ToUnsignedInt(property_value);
+			od.incline = Strings::ToUnsignedInt(sep->arg[2]);
 			o->SetObjectData(&od);
 
 			const auto &save_saylink = Saylink::Silent(
@@ -550,23 +674,25 @@ void ObjectManipulation::CommandHandler(Client *c, const Seperator *sep)
 					save_saylink
 				).c_str()
 			);
-		} else if (Strings::EqualFold(property_name, "model")) {
-			if (property_value[0] < 'A' || property_value[0] > 'Z') {
+		} else if (is_model) {
+			const std::string &object_name = sep->argplus[2];
+
+			if (object_name[0] < 'A' || object_name[0] > 'Z') {
 				c->Message(Chat::White, "Model names must begin with a letter.");
 				return;
 			}
 
-			strn0cpy(od.object_name, property_value.c_str(), sizeof(od.object_name));
+			strn0cpy(od.object_name, object_name.c_str(), sizeof(od.object_name));
 
 			c->Message(
 				Chat::White,
 				fmt::format(
 					"Object ID {} is now using model '{}'",
 					object_id,
-					property_value
+					object_name
 				).c_str()
 			);
-		} else if (Strings::EqualFold(property_name, "size")) {
+		} else if (is_size) {
 			if (od.object_type != ObjectTypes::StaticUnlocked) {
 				c->Message(
 					Chat::White,
@@ -578,12 +704,12 @@ void ObjectManipulation::CommandHandler(Client *c, const Seperator *sep)
 				return;
 			}
 
-			if (!Strings::IsNumber(property_value)) {
+			if (!Strings::IsNumber(sep->arg[2])) {
 				c->Message(Chat::White, "Invalid size specified. Please provide a valid size.");
 				return;
 			}
 
-			od.size = Strings::ToFloat(property_value);
+			od.size = Strings::ToFloat(sep->arg[2]);
 			o->SetObjectData(&od);
 
 			if (od.size == 0.0f) {
@@ -607,7 +733,7 @@ void ObjectManipulation::CommandHandler(Client *c, const Seperator *sep)
 					save_saylink
 				).c_str()
 			);
-		} else if (Strings::EqualFold(property_name, "solid_type")) {
+		} else if (is_solid_type) {
 			if (od.object_type != ObjectTypes::StaticUnlocked) {
 				c->Message(
 					Chat::White,
@@ -619,12 +745,12 @@ void ObjectManipulation::CommandHandler(Client *c, const Seperator *sep)
 				return;
 			}
 
-			if (!Strings::IsNumber(property_value)) {
+			if (!Strings::IsNumber(sep->arg[2])) {
 				c->Message(Chat::White, "Invalid solid type specified. Please provide a valid solid type.");
 				return;
 			}
 
-			od.solid_type = static_cast<uint16>(Strings::ToUnsignedInt(property_value));
+			od.solid_type = static_cast<uint16>(Strings::ToUnsignedInt(sep->arg[2]));
 			o->SetObjectData(&od);
 
 			const auto &save_saylink = Saylink::Silent(
@@ -644,13 +770,13 @@ void ObjectManipulation::CommandHandler(Client *c, const Seperator *sep)
 					save_saylink
 				).c_str()
 			);
-		} else if (Strings::EqualFold(property_name, "type")) {
-			if (!Strings::IsNumber(property_value)) {
+		} else if (is_type) {
+			if (!Strings::IsNumber(sep->arg[2])) {
 				c->Message(Chat::White, "Invalid type specified. Please enter a valid type.");
 				return;
 			}
 
-			od.object_type = Strings::ToUnsignedInt(property_value);
+			od.object_type = Strings::ToUnsignedInt(sep->arg[2]);
 
 			if (od.object_type == ObjectTypes::StaticLocked) {
 				const auto &save_saylink = Saylink::Silent(
@@ -702,17 +828,22 @@ void ObjectManipulation::CommandHandler(Client *c, const Seperator *sep)
 		safe_delete(app);
 		return;
 	} else if (is_move) {
+		if (!c->GetObjectToolEntityId()) {
+			c->Message(Chat::White, "You do not have a selected object.");
+			return;
+		}
+
 		if (arguments < 2) {
-			c->Message(Chat::White, "Usage: #object move [Object ID] [0|X] [Y] [Z] [H] | Move an object");
-			c->Message(Chat::White, "Note: Using 0 for X moves the object to your position, heading is optional");
+			c->Message(Chat::White, "Usage: #object move [X] [Y] [Z] | Move the selected object");
 			return;
 		}
 
 		Object_Struct od;
 
-		const uint32 object_id = Strings::ToUnsignedInt(sep->arg[2]);
+		Object *o = entity_list.GetObjectByID(c->GetObjectToolEntityId());
 
-		Object *o = entity_list.FindObject(object_id);
+		const uint32 object_id = o->GetDBID();
+
 		if (!o) {
 			const auto &e = ObjectRepository::FindOne(content_db, object_id);
 
@@ -806,50 +937,22 @@ void ObjectManipulation::CommandHandler(Client *c, const Seperator *sep)
 			}
 		}
 
-		const float x       = Strings::IsFloat(sep->arg[3]) ? Strings::ToFloat(sep->arg[3]) : 0.0f;
-		const float y       = arguments >= 4 ? Strings::ToFloat(sep->arg[4]) : 0.0f;
-		const float z       = arguments >= 5 ? Strings::ToFloat(sep->arg[5]) : 0.0f;
-		const float heading = arguments >= 6 ? Strings::ToFloat(sep->arg[6]) : 0.0f;
+		const float x = Strings::IsFloat(sep->arg[2]) ? Strings::ToFloat(sep->arg[2]) : 0.0f;
+		const float y = arguments >= 3 ? Strings::ToFloat(sep->arg[3]) : 0.0f;
+		const float z = arguments >= 4 ? Strings::ToFloat(sep->arg[4]) : 0.0f;
 
-		if (
-			x == 0.0f &&
-			y == 0.0f &&
-			z == 0.0f &&
-			heading == 0.0f
-			) {
-			od.x = c->GetX();
-			od.y = c->GetY();
-			od.z = (c->GetZ() - (c->GetSize() * 0.625f));
+		od.x = x;
 
-			o->SetHeading(c->GetHeading());
-
-			const float x_offset = (10.0f * std::sin(c->GetHeading() / 256.0f * 3.14159265f));
-			const float y_offset = (10.0f * std::cos(c->GetHeading() / 256.0f * 3.14159265f));
-
-			c->MovePC(
-				c->GetX() - x_offset,
-				c->GetY() - y_offset,
-				c->GetZ(),
-				c->GetHeading()
-			);
+		if (arguments >= 3) {
+			od.y = y;
 		} else {
-			od.x = x;
+			o->GetLocation(nullptr, &od.y, nullptr);
+		}
 
-			if (arguments >= 4) {
-				od.y = y;
-			} else {
-				o->GetLocation(nullptr, &od.y, nullptr);
-			}
-
-			if (arguments >= 5) {
-				od.z = z;
-			} else {
-				o->GetLocation(nullptr, nullptr, &od.z);
-			}
-
-			if (arguments >= 6) {
-				o->SetHeading(heading);
-			}
+		if (arguments >= 4) {
+			od.z = z;
+		} else {
+			o->GetLocation(nullptr, nullptr, &od.z);
 		}
 
 		o->SetLocation(od.x, od.y, od.z);
@@ -865,26 +968,21 @@ void ObjectManipulation::CommandHandler(Client *c, const Seperator *sep)
 		safe_delete(app);
 		return;
 	} else if (is_rotate) {
-		if (!sep->IsNumber(2) || !sep->IsNumber(3)) {
-			c->Message(Chat::White, "Usage: #object rotate [Object ID] [Heading] | Rotate an object");
+		if (!c->GetObjectToolEntityId()) {
+			c->Message(Chat::White, "You do not have a selected object.");
 			return;
 		}
 
-		const uint32 object_id = Strings::ToUnsignedInt(sep->arg[2]);
-
-		Object *o = entity_list.FindObject(object_id);
-		if (!o) {
-			c->Message(
-				Chat::White,
-				fmt::format(
-					"Object ID {} does not exist or is a static object that needs to be unlocked with '#object edit'.",
-					object_id
-				).c_str()
-			);
+		if (!sep->IsNumber(2)) {
+			c->Message(Chat::White, "Usage: #object rotate [Heading] | Rotate the selected object");
 			return;
 		}
 
-		const float heading = Strings::ToFloat(sep->arg[3]);
+		Object *o = entity_list.GetObjectByID(c->GetObjectToolEntityId());
+
+		const uint32 object_id = o->GetDBID();
+
+		const float heading = Strings::ToFloat(sep->arg[2]);
 
 		o->SetHeading(heading);
 
@@ -899,16 +997,16 @@ void ObjectManipulation::CommandHandler(Client *c, const Seperator *sep)
 		safe_delete(app);
 		return;
 	} else if (is_save) {
-		if (!sep->IsNumber(2)) {
-			c->Message(Chat::White, "Usage: #object save [Object ID] | Save an object");
+		if (!c->GetObjectToolEntityId()) {
+			c->Message(Chat::White, "You do not have a selected object.");
 			return;
 		}
 
 		Object_Struct od;
 
-		uint32 object_id = Strings::ToUnsignedInt(sep->arg[2]);
+		Object *o = entity_list.GetObjectByID(c->GetObjectToolEntityId());
 
-		Object *o = entity_list.FindObject(object_id);
+		uint32 object_id = o->GetDBID();
 
 		od.zone_id       = 0;
 		od.zone_instance = 0;
@@ -923,69 +1021,6 @@ void ObjectManipulation::CommandHandler(Client *c, const Seperator *sep)
 			od.object_type   = e.type;
 
 			is_new = false;
-		}
-
-		if (!o) {
-			if (is_new) {
-				c->Message(
-					Chat::White,
-					fmt::format(
-						"Object ID {} does not exist.",
-						object_id
-					).c_str()
-				);
-				return;
-			}
-
-			if (od.zone_id != zone->GetZoneID()) {
-				c->Message(
-					Chat::White,
-					fmt::format(
-						"Object ID {} is not a part of this zone.",
-						object_id
-					).c_str()
-				);
-				return;
-			}
-
-			if (od.zone_instance != zone->GetInstanceVersion()) {
-				c->Message(
-					Chat::White,
-					fmt::format(
-						"Object ID {} is not a part of this instance version.",
-						object_id
-					).c_str()
-				);
-				return;
-			}
-
-			if (od.object_type == ObjectTypes::StaticLocked) {
-				c->Message(
-					Chat::White,
-					fmt::format(
-						"Object ID {} has already been saved. Use '#object edit' to edit it again.",
-						object_id
-					).c_str()
-				);
-				return;
-			} else if (od.object_type == ObjectTypes::Temporary) {
-				c->Message(
-					Chat::White,
-					"Note: Object Type 1 is used for temporarily spawned ground spawns and dropped "
-					"items, which are not supported with #object. See the 'ground_spawns' table in "
-					"the database."
-				);
-				return;
-			}
-
-			c->Message(
-				Chat::White,
-				fmt::format(
-					"Object ID {} does not exist.",
-					object_id
-				).c_str()
-			);
-			return;
 		}
 
 		if (od.zone_id && od.zone_id != zone->GetZoneID()) {
@@ -1184,25 +1219,14 @@ void ObjectManipulation::CommandHandler(Client *c, const Seperator *sep)
 			);
 		}
 	} else if (is_undo) {
-		if (!sep->IsNumber(2)) {
-			c->Message(Chat::White, "Usage: #object undo [Object ID] | Reload an object from the database");
+		if (!c->GetObjectToolEntityId()) {
+			c->Message(Chat::White, "You do not have a selected object.");
 			return;
 		}
 
-		const uint32 object_id = Strings::ToUnsignedInt(sep->arg[2]);
+		Object *o = entity_list.GetObjectByID(c->GetObjectToolEntityId());
 
-		Object *o = entity_list.FindObject(object_id);
-
-		if (!o) {
-			c->Message(
-				Chat::White,
-				fmt::format(
-					"Object ID {} does not exist.",
-					object_id
-				).c_str()
-			);
-			return;
-		}
+		const uint32 object_id = o->GetDBID();
 
 		if (o->GetType() == ObjectTypes::Temporary) {
 			c->Message(
@@ -1285,18 +1309,20 @@ void ObjectManipulation::SendSubcommands(Client *c)
 		Chat::White,
 		"Note: Model must start with a letter, max length 16. Solid Types | 0 (Solid), 1 (Sometimes Non-Solid)"
 	);
-	c->Message(
-		Chat::White,
-		"Usage: #object copy [All|Object ID] [Instance Version] | Copy objects to another instance version"
-	);
 	c->Message(Chat::White, "Note: Only objects saved in the database can be copied to another instance");
-	c->Message(Chat::White, "Usage: #object delete [Object ID] | Delete an object permanently");
-	c->Message(Chat::White, "Usage: #object edit [Object ID] [Property] [Value] | Edit an object");
+	c->Message(Chat::White, "Usage: #object delete | Delete the selected object");
+	c->Message(Chat::White, "Usage: #object edit | Edit the selected object");
 	c->Message(Chat::White, "Note: Static Object (Type 0) Properties: model, type, size, solid_type, incline");
 	c->Message(Chat::White, "Note: Tradeskill Object (Type 2+) Properties: model, type, icon");
-	c->Message(Chat::White, "Usage: #object move [Object ID] [0|X] [Y] [Z] [H] | Move an object");
+	c->Message(Chat::White, "Usage: #object icon [Icon] | Edit the selected object's icon");
+	c->Message(Chat::White, "Usage: #object incline [Incline] | Edit the selected object's incline");
+	c->Message(Chat::White, "Usage: #object model [Model] | Edit the selected object's model");
+	c->Message(Chat::White, "Usage: #object move [0|X] [Y] [Z] [H] | Move the selected object");
 	c->Message(Chat::White, "Note: Using 0 for X moves the object to your position, heading is optional");
-	c->Message(Chat::White, "Usage: #object rotate [Object ID] [Heading] | Rotate an object");
-	c->Message(Chat::White, "Usage: #object save [Object ID] | Save an object");
-	c->Message(Chat::White, "Usage: #object undo [Object ID] | Reload an object from the database");
+	c->Message(Chat::White, "Usage: #object rotate [Heading] | Rotate the selected object");
+	c->Message(Chat::White, "Usage: #object save | Save the selected object");
+	c->Message(Chat::White, "Usage: #object size [Size] | Edit the selected object's size");
+	c->Message(Chat::White, "Usage: #object solid_type [Solid Type] | Edit the selected object's solid type");
+	c->Message(Chat::White, "Usage: #object type [Type] | Edit the selected object's type");
+	c->Message(Chat::White, "Usage: #object undo | Reload the selected object from the database");
 }
