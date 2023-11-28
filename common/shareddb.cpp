@@ -41,6 +41,7 @@
 #include "repositories/criteria/content_filter_criteria.h"
 #include "repositories/account_repository.h"
 #include "repositories/faction_association_repository.h"
+#include "repositories/starting_items_repository.h"
 #include "path_manager.h"
 #include "repositories/loottable_repository.h"
 
@@ -446,45 +447,81 @@ bool SharedDatabase::SetSharedPlatinum(uint32 account_id, int32 amount_to_add) {
 	return true;
 }
 
-bool SharedDatabase::SetStartingItems(PlayerProfile_Struct* pp, EQ::InventoryProfile* inv, uint32 si_race, uint32 si_class, uint32 si_deity, uint32 si_current_zone, char* si_name, int admin_level) {
+bool SharedDatabase::SetStartingItems(
+	PlayerProfile_Struct *pp,
+	EQ::InventoryProfile *inv,
+	uint32 si_race,
+	uint32 si_class,
+	uint32 si_deity,
+	uint32 si_current_zone,
+	char *si_name,
+	int admin_level
+)
+{
+	const EQ::ItemData *item_data;
 
-	const EQ::ItemData *myitem;
+	const auto &l = StartingItemsRepository::All(*this);
 
-	const std::string query   = StringFormat(
-		"SELECT itemid, item_charges, slot FROM starting_items "
-		"WHERE (race = %i or race = 0) AND (class = %i or class = 0) AND "
-		"(deityid = %i or deityid = 0) AND (zoneid = %i or zoneid = 0) AND "
-		"gm <= %i %s ORDER BY id",
-		si_race,
-		si_class,
-		si_deity,
-		si_current_zone,
-		admin_level,
-		ContentFilterCriteria::apply().c_str()
-	);
-
-	auto results = QueryDatabase(query);
-	if (!results.Success()) {
+	if (l.empty()) {
 		return false;
 	}
 
+	std::vector<StartingItemsRepository::StartingItems> v;
 
-	for (auto& row = results.begin(); row != results.end(); ++row) {
-		const int32 itemid = Strings::ToInt(row[0]);
-		const int32 charges = Strings::ToInt(row[1]);
-		int32 slot = Strings::ToInt(row[2]);
-		myitem = GetItem(itemid);
+	for (const auto &e : l) {
+		const auto &classes = Strings::Split(e.class_list, "|");
+		const auto &deities = Strings::Split(e.deity_list, "|");
+		const auto &races   = Strings::Split(e.race_list, "|");
+		const auto &zones   = Strings::Split(e.zone_id_list, "|");
 
-		if(!myitem)
+		const std::string &all = std::to_string(0);
+
+		if (classes[0] != all) {
+			if (!Strings::Contains(classes, std::to_string(si_class))) {
+				continue;
+			}
+		}
+
+		if (deities[0] != all) {
+			if (!Strings::Contains(deities, std::to_string(si_deity))) {
+				continue;
+			}
+		}
+
+		if (races[0] != all) {
+			if (!Strings::Contains(races, std::to_string(si_race))) {
+				continue;
+			}
+		}
+
+		if (zones[0] != all) {
+			if (!Strings::Contains(zones, std::to_string(si_current_zone))) {
+				continue;
+			}
+		}
+
+		v.emplace_back(e);
+	}
+
+	for (const auto &e : v) {
+		const uint32 item_id      = e.item_id;
+		const uint8  item_charges = e.item_charges;
+		int32        slot         = e.slot;
+
+		item_data = GetItem(item_id);
+
+		if (!item_data) {
 			continue;
+		}
 
-		const EQ::ItemInstance* myinst = CreateBaseItem(myitem, charges);
+		const auto *inst = CreateBaseItem(item_data, item_charges);
 
-		if(slot < 0)
-			slot = inv->FindFreeSlot(0, 0);
+		if (slot < EQ::invslot::slotCharm) {
+			slot = inv->FindFreeSlot(false, false);
+		}
 
-		inv->PutItem(slot, *myinst);
-		safe_delete(myinst);
+		inv->PutItem(slot, *inst);
+		safe_delete(inst);
 	}
 
 	return true;
