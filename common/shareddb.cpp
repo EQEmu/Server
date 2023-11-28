@@ -500,10 +500,6 @@ bool SharedDatabase::SetStartingItems(
 			}
 		}
 
-		if (e.gm > admin_level) {
-			continue;
-		}
-
 		v.emplace_back(e);
 	}
 
