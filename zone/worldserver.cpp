@@ -3393,17 +3393,20 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 }
 
 bool WorldServer::SendChannelMessage(Client* from, const char* to, uint8 chan_num, uint32 guilddbid, uint8 language, uint8 lang_skill, const char* message, ...) {
-	if (!worldserver.Connected())
+	if (!worldserver.Connected()) {
 		return false;
+	}
+
 	va_list argptr;
-	char buffer[512];
+	auto length = strlen(message) + 1;
+	char* buffer = new char[length];
 
 	va_start(argptr, message);
-	vsnprintf(buffer, 512, message, argptr);
+	vsnprintf(buffer, length, message, argptr);
 	va_end(argptr);
-	buffer[511] = '\0';
+	buffer[length - 1] = '\0';
 
-	auto pack = new ServerPacket(ServerOP_ChannelMessage, sizeof(ServerChannelMessage_Struct) + strlen(buffer) + 1);
+	auto pack = new ServerPacket(ServerOP_ChannelMessage, sizeof(ServerChannelMessage_Struct) + length);
 	ServerChannelMessage_Struct* scm = (ServerChannelMessage_Struct*)pack->pBuffer;
 
 	if (from == 0) {
@@ -3432,6 +3435,7 @@ bool WorldServer::SendChannelMessage(Client* from, const char* to, uint8 chan_nu
 
 	bool ret = SendPacket(pack);
 	safe_delete(pack);
+	safe_delete_array(buffer);
 	return ret;
 }
 
