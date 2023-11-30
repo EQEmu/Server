@@ -16,17 +16,18 @@
 #include "../../strings.h"
 #include <ctime>
 
+
 class BaseStartingItemsRepository {
 public:
 	struct StartingItems {
 		uint32_t    id;
-		int32_t     race;
-		int32_t     class_;
-		int32_t     deityid;
-		int32_t     zoneid;
-		int32_t     itemid;
+		std::string race_list;
+		std::string class_list;
+		std::string deity_list;
+		std::string zone_id_list;
+		uint32_t    item_id;
 		uint8_t     item_charges;
-		int8_t      gm;
+		uint8_t     gm;
 		int32_t     slot;
 		int8_t      min_expansion;
 		int8_t      max_expansion;
@@ -43,11 +44,11 @@ public:
 	{
 		return {
 			"id",
-			"race",
-			"`class`",
-			"deityid",
-			"zoneid",
-			"itemid",
+			"race_list",
+			"class_list",
+			"deity_list",
+			"zone_id_list",
+			"item_id",
 			"item_charges",
 			"gm",
 			"slot",
@@ -62,11 +63,11 @@ public:
 	{
 		return {
 			"id",
-			"race",
-			"`class`",
-			"deityid",
-			"zoneid",
-			"itemid",
+			"race_list",
+			"class_list",
+			"deity_list",
+			"zone_id_list",
+			"item_id",
 			"item_charges",
 			"gm",
 			"slot",
@@ -115,11 +116,11 @@ public:
 		StartingItems e{};
 
 		e.id                     = 0;
-		e.race                   = 0;
-		e.class_                 = 0;
-		e.deityid                = 0;
-		e.zoneid                 = 0;
-		e.itemid                 = 0;
+		e.race_list              = "";
+		e.class_list             = "";
+		e.deity_list             = "";
+		e.zone_id_list           = "";
+		e.item_id                = 0;
 		e.item_charges           = 1;
 		e.gm                     = 0;
 		e.slot                   = -1;
@@ -152,8 +153,9 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				starting_items_id
 			)
 		);
@@ -163,13 +165,13 @@ public:
 			StartingItems e{};
 
 			e.id                     = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.race                   = static_cast<int32_t>(atoi(row[1]));
-			e.class_                 = static_cast<int32_t>(atoi(row[2]));
-			e.deityid                = static_cast<int32_t>(atoi(row[3]));
-			e.zoneid                 = static_cast<int32_t>(atoi(row[4]));
-			e.itemid                 = static_cast<int32_t>(atoi(row[5]));
+			e.race_list              = row[1] ? row[1] : "";
+			e.class_list             = row[2] ? row[2] : "";
+			e.deity_list             = row[3] ? row[3] : "";
+			e.zone_id_list           = row[4] ? row[4] : "";
+			e.item_id                = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
 			e.item_charges           = static_cast<uint8_t>(strtoul(row[6], nullptr, 10));
-			e.gm                     = static_cast<int8_t>(atoi(row[7]));
+			e.gm                     = static_cast<uint8_t>(strtoul(row[7], nullptr, 10));
 			e.slot                   = static_cast<int32_t>(atoi(row[8]));
 			e.min_expansion          = static_cast<int8_t>(atoi(row[9]));
 			e.max_expansion          = static_cast<int8_t>(atoi(row[10]));
@@ -208,11 +210,11 @@ public:
 
 		auto columns = Columns();
 
-		v.push_back(columns[1] + " = " + std::to_string(e.race));
-		v.push_back(columns[2] + " = " + std::to_string(e.class_));
-		v.push_back(columns[3] + " = " + std::to_string(e.deityid));
-		v.push_back(columns[4] + " = " + std::to_string(e.zoneid));
-		v.push_back(columns[5] + " = " + std::to_string(e.itemid));
+		v.push_back(columns[1] + " = '" + Strings::Escape(e.race_list) + "'");
+		v.push_back(columns[2] + " = '" + Strings::Escape(e.class_list) + "'");
+		v.push_back(columns[3] + " = '" + Strings::Escape(e.deity_list) + "'");
+		v.push_back(columns[4] + " = '" + Strings::Escape(e.zone_id_list) + "'");
+		v.push_back(columns[5] + " = " + std::to_string(e.item_id));
 		v.push_back(columns[6] + " = " + std::to_string(e.item_charges));
 		v.push_back(columns[7] + " = " + std::to_string(e.gm));
 		v.push_back(columns[8] + " = " + std::to_string(e.slot));
@@ -242,11 +244,11 @@ public:
 		std::vector<std::string> v;
 
 		v.push_back(std::to_string(e.id));
-		v.push_back(std::to_string(e.race));
-		v.push_back(std::to_string(e.class_));
-		v.push_back(std::to_string(e.deityid));
-		v.push_back(std::to_string(e.zoneid));
-		v.push_back(std::to_string(e.itemid));
+		v.push_back("'" + Strings::Escape(e.race_list) + "'");
+		v.push_back("'" + Strings::Escape(e.class_list) + "'");
+		v.push_back("'" + Strings::Escape(e.deity_list) + "'");
+		v.push_back("'" + Strings::Escape(e.zone_id_list) + "'");
+		v.push_back(std::to_string(e.item_id));
 		v.push_back(std::to_string(e.item_charges));
 		v.push_back(std::to_string(e.gm));
 		v.push_back(std::to_string(e.slot));
@@ -284,11 +286,11 @@ public:
 			std::vector<std::string> v;
 
 			v.push_back(std::to_string(e.id));
-			v.push_back(std::to_string(e.race));
-			v.push_back(std::to_string(e.class_));
-			v.push_back(std::to_string(e.deityid));
-			v.push_back(std::to_string(e.zoneid));
-			v.push_back(std::to_string(e.itemid));
+			v.push_back("'" + Strings::Escape(e.race_list) + "'");
+			v.push_back("'" + Strings::Escape(e.class_list) + "'");
+			v.push_back("'" + Strings::Escape(e.deity_list) + "'");
+			v.push_back("'" + Strings::Escape(e.zone_id_list) + "'");
+			v.push_back(std::to_string(e.item_id));
 			v.push_back(std::to_string(e.item_charges));
 			v.push_back(std::to_string(e.gm));
 			v.push_back(std::to_string(e.slot));
@@ -330,13 +332,13 @@ public:
 			StartingItems e{};
 
 			e.id                     = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.race                   = static_cast<int32_t>(atoi(row[1]));
-			e.class_                 = static_cast<int32_t>(atoi(row[2]));
-			e.deityid                = static_cast<int32_t>(atoi(row[3]));
-			e.zoneid                 = static_cast<int32_t>(atoi(row[4]));
-			e.itemid                 = static_cast<int32_t>(atoi(row[5]));
+			e.race_list              = row[1] ? row[1] : "";
+			e.class_list             = row[2] ? row[2] : "";
+			e.deity_list             = row[3] ? row[3] : "";
+			e.zone_id_list           = row[4] ? row[4] : "";
+			e.item_id                = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
 			e.item_charges           = static_cast<uint8_t>(strtoul(row[6], nullptr, 10));
-			e.gm                     = static_cast<int8_t>(atoi(row[7]));
+			e.gm                     = static_cast<uint8_t>(strtoul(row[7], nullptr, 10));
 			e.slot                   = static_cast<int32_t>(atoi(row[8]));
 			e.min_expansion          = static_cast<int8_t>(atoi(row[9]));
 			e.max_expansion          = static_cast<int8_t>(atoi(row[10]));
@@ -367,13 +369,13 @@ public:
 			StartingItems e{};
 
 			e.id                     = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.race                   = static_cast<int32_t>(atoi(row[1]));
-			e.class_                 = static_cast<int32_t>(atoi(row[2]));
-			e.deityid                = static_cast<int32_t>(atoi(row[3]));
-			e.zoneid                 = static_cast<int32_t>(atoi(row[4]));
-			e.itemid                 = static_cast<int32_t>(atoi(row[5]));
+			e.race_list              = row[1] ? row[1] : "";
+			e.class_list             = row[2] ? row[2] : "";
+			e.deity_list             = row[3] ? row[3] : "";
+			e.zone_id_list           = row[4] ? row[4] : "";
+			e.item_id                = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
 			e.item_charges           = static_cast<uint8_t>(strtoul(row[6], nullptr, 10));
-			e.gm                     = static_cast<int8_t>(atoi(row[7]));
+			e.gm                     = static_cast<uint8_t>(strtoul(row[7], nullptr, 10));
 			e.slot                   = static_cast<int32_t>(atoi(row[8]));
 			e.min_expansion          = static_cast<int8_t>(atoi(row[9]));
 			e.max_expansion          = static_cast<int8_t>(atoi(row[10]));

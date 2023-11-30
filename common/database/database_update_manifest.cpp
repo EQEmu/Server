@@ -5019,17 +5019,72 @@ ALTER TABLE `spawn2` DROP COLUMN `enabled`;
 )"
 	},
 	ManifestEntry{
-	  .version = 9242,
-	  .description = "2023_11_7_mintime_maxtime_spawnentry.sql",
-	  .check = "SHOW COLUMNS FROM `spawnentry` LIKE 'min_time'",
-	  .condition = "empty",
-	  .match = "",
-	  .sql = R"(
+		.version = 9242,
+		.description = "2023_11_7_mintime_maxtime_spawnentry.sql",
+		.check = "SHOW COLUMNS FROM `spawnentry` LIKE 'min_time'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
 ALTER TABLE `spawnentry`
 ADD COLUMN `min_time` smallint(4) NOT NULL DEFAULT 0 AFTER `condition_value_filter`,
 ADD COLUMN `max_time` smallint(4) NOT NULL DEFAULT 0 AFTER `min_time`;
 )"
   },
+  ManifestEntry{
+		.version = 9243,
+		.description = "2023_11_27_starting_items_revamp.sql",
+		.check = "SHOW COLUMNS FROM `starting_items` LIKE 'race_list'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+CREATE TABLE `starting_items_backup_9243` LIKE `starting_items`;
+INSERT INTO `starting_items_backup_9243` SELECT * FROM `starting_items`;
+
+CREATE TABLE `starting_items_new`  (
+  `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `race_list` text CHARACTER SET latin1 COLLATE latin1_swedish_ci NULL DEFAULT NULL,
+  `class_list` text CHARACTER SET latin1 COLLATE latin1_swedish_ci NULL DEFAULT NULL,
+  `deity_list` text CHARACTER SET latin1 COLLATE latin1_swedish_ci NULL DEFAULT NULL,
+  `zone_id_list` text CHARACTER SET latin1 COLLATE latin1_swedish_ci NULL DEFAULT NULL,
+  `item_id` int(11) UNSIGNED NOT NULL DEFAULT 0,
+  `item_charges` tinyint(3) UNSIGNED NOT NULL DEFAULT 1,
+  `gm` mediumint(3) UNSIGNED NOT NULL DEFAULT 0,
+  `slot` mediumint(9) NOT NULL DEFAULT -1,
+  `min_expansion` tinyint(4) NOT NULL DEFAULT -1,
+  `max_expansion` tinyint(4) NOT NULL DEFAULT -1,
+  `content_flags` varchar(100) NULL,
+  `content_flags_disabled` varchar(100) NULL,
+  PRIMARY KEY (`id`)
+);
+
+INSERT INTO
+`starting_items_new`
+(
+	SELECT
+		0 AS `id`,
+		GROUP_CONCAT(DISTINCT `class` ORDER BY class ASC SEPARATOR '|') AS `class_list`,
+		GROUP_CONCAT(DISTINCT `race` ORDER BY race ASC SEPARATOR '|') AS `race_list`,
+		GROUP_CONCAT(DISTINCT `deityid` ORDER BY deityid ASC SEPARATOR '|') AS `deity_list`,
+		GROUP_CONCAT(DISTINCT `zoneid` ORDER BY zoneid ASC SEPARATOR '|') AS `zone_list`,
+		`itemid`,
+		`item_charges`,
+		`gm`,
+		`slot`,
+		`min_expansion`,
+		`max_expansion`,
+		`content_flags`,
+		`content_flags_disabled `
+	FROM
+		`starting_items`
+	GROUP BY
+		`itemid`
+);
+
+DROP TABLE `starting_items`;
+RENAME TABLE `starting_items_new` TO `starting_items`;
+)"
+
+	}
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
 //		.version = 9228,
