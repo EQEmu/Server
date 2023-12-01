@@ -238,25 +238,6 @@ enum {	//some random constants
 // Timer to update aggrometer
 #define AGGRO_METER_UPDATE_MS 1000
 
-//Some hard coded statuses from commands and other places:
-enum {
-	minStatusToBeGM               = 40,
-	minStatusToUseGMCommands      = 80,
-	minStatusToKick               = 150,
-	minStatusToAvoidFalling       = 100,
-	minStatusToIgnoreZoneFlags    = 80,
-	minStatusToSeeOthersZoneFlags = 80,
-	minStatusToEditOtherGuilds    = 80,
-	commandMovecharSelfOnly       = 80,  //below this == only self move allowed
-	commandMovecharToSpecials     = 200, //ability to send people to cshom/load zones
-	commandCastSpecials           = 100, //can cast special spells
-	commandDoAnimOthers           = 100, //can #doanim on others
-	commandEditPlayerCorpses      = 150, //can Edit Player Corpses
-	commandInterrogateInv         = 100, //below this == only log on error state and self-only target dump
-	commandInvSnapshot            = 150  //ability to clear/restore snapshots
-};
-
-
 // This is the item ID we use for say links, we use the max that fits in 5 ASCII chars
 #define SAYLINK_ITEM_ID 0xFFFFF
 

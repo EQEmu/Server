@@ -1343,7 +1343,7 @@ bool Client::CanEnterZone(const std::string& zone_short_name, int16 instance_ver
 	}
 
 	if (!z->flag_needed.empty() && Strings::IsNumber(z->flag_needed) && Strings::ToBool(z->flag_needed)) {
-		if (Admin() < minStatusToIgnoreZoneFlags && !HasZoneFlag(z->zoneidnumber)) {
+		if (!GetGM() && !HasZoneFlag(z->zoneidnumber)) {
 			LogInfo(
 				"Character [{}] does not have the flag to be in this zone [{}]!",
 				GetCleanName(),
