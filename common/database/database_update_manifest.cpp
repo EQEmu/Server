@@ -5029,8 +5029,8 @@ ALTER TABLE `spawnentry`
 ADD COLUMN `min_time` smallint(4) NOT NULL DEFAULT 0 AFTER `condition_value_filter`,
 ADD COLUMN `max_time` smallint(4) NOT NULL DEFAULT 0 AFTER `min_time`;
 )"
-  },
-  ManifestEntry{
+	},
+	ManifestEntry{
 		.version = 9243,
 		.description = "2023_11_27_starting_items_revamp.sql",
 		.check = "SHOW COLUMNS FROM `starting_items` LIKE 'race_list'",
@@ -5083,8 +5083,18 @@ INSERT INTO
 DROP TABLE `starting_items`;
 RENAME TABLE `starting_items_new` TO `starting_items`;
 )"
-
+	},
+	ManifestEntry{
+		.version = 9244,
+		.description = "2023_11_30_items_table_schema.sql",
+		.check = "SHOW COLUMNS FROM `items` LIKE 'updated'",
+		.condition = "contains",
+		.match = "NULL",
+		.sql = R"(
+ALTER TABLE `items` MODIFY COLUMN `updated` datetime NULL DEFAULT NULL;
+		)"
 	}
+
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
 //		.version = 9228,
