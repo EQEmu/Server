@@ -6471,11 +6471,11 @@ void Client::Handle_OP_GMBecomeNPC(const EQApplicationPacket *app)
 		}
 
 		m->SendAppearancePacket(AT_NPCName, 1, true);
-		target->SetBecomeNPC(true);
-		target->SetBecomeNPCLevel(b->maxlevel);
+		t->SetBecomeNPC(true);
+		t->SetBecomeNPCLevel(b->maxlevel);
 		m->MessageString(Chat::White, TOGGLE_OFF);
-		target->tellsoff = true;
-		target->UpdateWho();
+		t->tellsoff = true;
+		t->UpdateWho();
 	}
 }
 
