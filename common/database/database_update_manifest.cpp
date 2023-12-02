@@ -5073,7 +5073,7 @@ INSERT INTO
 		`min_expansion`,
 		`max_expansion`,
 		`content_flags`,
-		`content_flags_disabled `
+		`content_flags_disabled`
 	FROM
 		`starting_items`
 	GROUP BY
