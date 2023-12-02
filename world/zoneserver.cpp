@@ -720,15 +720,15 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			break;
 		}
 		case ServerOP_ZoneShutdown: {
-			auto s = (ServerZoneStateChange_struct*) pack->pBuffer;
+			auto *s = (ServerZoneStateChange_Struct*) pack->pBuffer;
 			ZoneServer* zs = 0;
-			if (s->ZoneServerID) {
-				zs = zoneserver_list.FindByID(s->ZoneServerID);
-			} else if (s->zoneid) {
-				zs = zoneserver_list.FindByName(ZoneName(s->zoneid));
+			if (s->zone_server_id) {
+				zs = zoneserver_list.FindByID(s->zone_server_id);
+			} else if (s->zone_id) {
+				zs = zoneserver_list.FindByName(ZoneName(s->zone_id));
 			} else {
 				zoneserver_list.SendEmoteMessage(
-					s->adminname,
+					s->admin_name,
 					0,
 					AccountStatus::Player,
 					Chat::White,
@@ -738,7 +738,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 
 			if (!zs) {
 				zoneserver_list.SendEmoteMessage(
-					s->adminname,
+					s->admin_name,
 					0,
 					AccountStatus::Player,
 					Chat::White,
@@ -751,8 +751,8 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			break;
 		}
 		case ServerOP_ZoneBootup: {
-			auto s = (ServerZoneStateChange_struct*) pack->pBuffer;
-			zoneserver_list.SOPZoneBootup(s->adminname, s->ZoneServerID, ZoneName(s->zoneid), s->makestatic);
+			auto *s = (ServerZoneStateChange_Struct*) pack->pBuffer;
+			zoneserver_list.SOPZoneBootup(s->admin_name, s->zone_server_id, ZoneName(s->zone_id), s->is_static);
 			break;
 		}
 		case ServerOP_ZoneStatus: {
@@ -1606,20 +1606,23 @@ void ZoneServer::ChangeWID(uint32 iCharID, uint32 iWID) {
 
 
 void ZoneServer::TriggerBootup(uint32 in_zone_id, uint32 in_instance_id, const char* admin_name, bool is_static_zone) {
-	is_booting_up = true;
+	is_booting_up       = true;
 	zone_server_zone_id = in_zone_id;
-	instance_id = in_instance_id;
+	instance_id         = in_instance_id;
 
-	auto pack = new ServerPacket(ServerOP_ZoneBootup, sizeof(ServerZoneStateChange_struct));
-	auto s = (ServerZoneStateChange_struct*) pack->pBuffer;
-	s->ZoneServerID = zone_server_id;
+	auto pack = new ServerPacket(ServerOP_ZoneBootup, sizeof(ServerZoneStateChange_Struct));
+	auto *s = (ServerZoneStateChange_Struct*) pack->pBuffer;
+
+	s->zone_server_id = zone_server_id;
+
+	s->zone_id     = in_zone_id ? in_zone_id : GetZoneID();
+	s->instance_id = in_instance_id;
+	s->is_static   = is_static_zone;
+
 	if (admin_name) {
-		strn0cpy(s->adminname, admin_name, sizeof(s->adminname));
+		strn0cpy(s->admin_name, admin_name, sizeof(s->admin_name));
 	}
 
-	s->zoneid = in_zone_id ? in_zone_id : GetZoneID();
-	s->instanceid = in_instance_id;
-	s->makestatic = is_static_zone;
 	SendPacket(pack);
 	delete pack;
 	LSBootUpdate(in_zone_id, in_instance_id);
