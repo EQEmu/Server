@@ -75,7 +75,7 @@ public:
 		int32_t     damageshield;
 		int32_t     deity;
 		int32_t     delay;
-		int32_t     augdistiller;
+		uint32_t    augdistiller;
 		int32_t     dotshielding;
 		int32_t     dr;
 		int32_t     clicktype;
@@ -227,7 +227,7 @@ public:
 		int32_t     focusunk5;
 		std::string focusunk6;
 		int32_t     focusunk7;
-		int32_t     scrollunk1;
+		uint32_t    scrollunk1;
 		int32_t     scrollunk2;
 		int32_t     scrollunk3;
 		int32_t     scrollunk4;
@@ -266,10 +266,10 @@ public:
 		std::string created;
 		int16_t     elitematerial;
 		int16_t     ldonsellbackrate;
-		int16_t     scriptfileid;
+		int32_t     scriptfileid;
 		int16_t     expendablearrow;
-		int16_t     powersourcecapacity;
-		int16_t     bardeffect;
+		int32_t     powersourcecapacity;
+		int32_t     bardeffect;
 		int16_t     bardeffecttype;
 		int16_t     bardlevel2;
 		int16_t     bardlevel;
@@ -1307,7 +1307,7 @@ public:
 			e.damageshield        = static_cast<int32_t>(atoi(row[52]));
 			e.deity               = static_cast<int32_t>(atoi(row[53]));
 			e.delay               = static_cast<int32_t>(atoi(row[54]));
-			e.augdistiller        = static_cast<int32_t>(atoi(row[55]));
+			e.augdistiller        = static_cast<uint32_t>(strtoul(row[55], nullptr, 10));
 			e.dotshielding        = static_cast<int32_t>(atoi(row[56]));
 			e.dr                  = static_cast<int32_t>(atoi(row[57]));
 			e.clicktype           = static_cast<int32_t>(atoi(row[58]));
@@ -1459,7 +1459,7 @@ public:
 			e.focusunk5           = static_cast<int32_t>(atoi(row[204]));
 			e.focusunk6           = row[205] ? row[205] : "";
 			e.focusunk7           = static_cast<int32_t>(atoi(row[206]));
-			e.scrollunk1          = static_cast<int32_t>(atoi(row[207]));
+			e.scrollunk1          = static_cast<uint32_t>(strtoul(row[207], nullptr, 10));
 			e.scrollunk2          = static_cast<int32_t>(atoi(row[208]));
 			e.scrollunk3          = static_cast<int32_t>(atoi(row[209]));
 			e.scrollunk4          = static_cast<int32_t>(atoi(row[210]));
@@ -1498,10 +1498,10 @@ public:
 			e.created             = row[243] ? row[243] : "";
 			e.elitematerial       = static_cast<int16_t>(atoi(row[244]));
 			e.ldonsellbackrate    = static_cast<int16_t>(atoi(row[245]));
-			e.scriptfileid        = static_cast<int16_t>(atoi(row[246]));
+			e.scriptfileid        = static_cast<int32_t>(atoi(row[246]));
 			e.expendablearrow     = static_cast<int16_t>(atoi(row[247]));
-			e.powersourcecapacity = static_cast<int16_t>(atoi(row[248]));
-			e.bardeffect          = static_cast<int16_t>(atoi(row[249]));
+			e.powersourcecapacity = static_cast<int32_t>(atoi(row[248]));
+			e.bardeffect          = static_cast<int32_t>(atoi(row[249]));
 			e.bardeffecttype      = static_cast<int16_t>(atoi(row[250]));
 			e.bardlevel2          = static_cast<int16_t>(atoi(row[251]));
 			e.bardlevel           = static_cast<int16_t>(atoi(row[252]));
@@ -2563,7 +2563,7 @@ public:
 			e.damageshield        = static_cast<int32_t>(atoi(row[52]));
 			e.deity               = static_cast<int32_t>(atoi(row[53]));
 			e.delay               = static_cast<int32_t>(atoi(row[54]));
-			e.augdistiller        = static_cast<int32_t>(atoi(row[55]));
+			e.augdistiller        = static_cast<uint32_t>(strtoul(row[55], nullptr, 10));
 			e.dotshielding        = static_cast<int32_t>(atoi(row[56]));
 			e.dr                  = static_cast<int32_t>(atoi(row[57]));
 			e.clicktype           = static_cast<int32_t>(atoi(row[58]));
@@ -2715,7 +2715,7 @@ public:
 			e.focusunk5           = static_cast<int32_t>(atoi(row[204]));
 			e.focusunk6           = row[205] ? row[205] : "";
 			e.focusunk7           = static_cast<int32_t>(atoi(row[206]));
-			e.scrollunk1          = static_cast<int32_t>(atoi(row[207]));
+			e.scrollunk1          = static_cast<uint32_t>(strtoul(row[207], nullptr, 10));
 			e.scrollunk2          = static_cast<int32_t>(atoi(row[208]));
 			e.scrollunk3          = static_cast<int32_t>(atoi(row[209]));
 			e.scrollunk4          = static_cast<int32_t>(atoi(row[210]));
@@ -2754,10 +2754,10 @@ public:
 			e.created             = row[243] ? row[243] : "";
 			e.elitematerial       = static_cast<int16_t>(atoi(row[244]));
 			e.ldonsellbackrate    = static_cast<int16_t>(atoi(row[245]));
-			e.scriptfileid        = static_cast<int16_t>(atoi(row[246]));
+			e.scriptfileid        = static_cast<int32_t>(atoi(row[246]));
 			e.expendablearrow     = static_cast<int16_t>(atoi(row[247]));
-			e.powersourcecapacity = static_cast<int16_t>(atoi(row[248]));
-			e.bardeffect          = static_cast<int16_t>(atoi(row[249]));
+			e.powersourcecapacity = static_cast<int32_t>(atoi(row[248]));
+			e.bardeffect          = static_cast<int32_t>(atoi(row[249]));
 			e.bardeffecttype      = static_cast<int16_t>(atoi(row[250]));
 			e.bardlevel2          = static_cast<int16_t>(atoi(row[251]));
 			e.bardlevel           = static_cast<int16_t>(atoi(row[252]));
@@ -2872,7 +2872,7 @@ public:
 			e.damageshield        = static_cast<int32_t>(atoi(row[52]));
 			e.deity               = static_cast<int32_t>(atoi(row[53]));
 			e.delay               = static_cast<int32_t>(atoi(row[54]));
-			e.augdistiller        = static_cast<int32_t>(atoi(row[55]));
+			e.augdistiller        = static_cast<uint32_t>(strtoul(row[55], nullptr, 10));
 			e.dotshielding        = static_cast<int32_t>(atoi(row[56]));
 			e.dr                  = static_cast<int32_t>(atoi(row[57]));
 			e.clicktype           = static_cast<int32_t>(atoi(row[58]));
@@ -3024,7 +3024,7 @@ public:
 			e.focusunk5           = static_cast<int32_t>(atoi(row[204]));
 			e.focusunk6           = row[205] ? row[205] : "";
 			e.focusunk7           = static_cast<int32_t>(atoi(row[206]));
-			e.scrollunk1          = static_cast<int32_t>(atoi(row[207]));
+			e.scrollunk1          = static_cast<uint32_t>(strtoul(row[207], nullptr, 10));
 			e.scrollunk2          = static_cast<int32_t>(atoi(row[208]));
 			e.scrollunk3          = static_cast<int32_t>(atoi(row[209]));
 			e.scrollunk4          = static_cast<int32_t>(atoi(row[210]));
@@ -3063,10 +3063,10 @@ public:
 			e.created             = row[243] ? row[243] : "";
 			e.elitematerial       = static_cast<int16_t>(atoi(row[244]));
 			e.ldonsellbackrate    = static_cast<int16_t>(atoi(row[245]));
-			e.scriptfileid        = static_cast<int16_t>(atoi(row[246]));
+			e.scriptfileid        = static_cast<int32_t>(atoi(row[246]));
 			e.expendablearrow     = static_cast<int16_t>(atoi(row[247]));
-			e.powersourcecapacity = static_cast<int16_t>(atoi(row[248]));
-			e.bardeffect          = static_cast<int16_t>(atoi(row[249]));
+			e.powersourcecapacity = static_cast<int32_t>(atoi(row[248]));
+			e.bardeffect          = static_cast<int32_t>(atoi(row[249]));
 			e.bardeffecttype      = static_cast<int16_t>(atoi(row[250]));
 			e.bardlevel2          = static_cast<int16_t>(atoi(row[251]));
 			e.bardlevel           = static_cast<int16_t>(atoi(row[252]));

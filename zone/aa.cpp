@@ -2207,3 +2207,97 @@ bool Client::HasAlreadyPurchasedRank(AA::Rank* rank) {
 
 	return false;
 }
+
+void Client::ListPurchasedAAs(Client *to, std::string search_criteria)
+{
+	if (!to) {
+		return;
+	}
+
+	std::map<std::string, uint8> client_aa_ranks;
+
+	for (auto &aa : zone->aa_abilities) {
+		AA::Ability *ability = aa.second.get();
+
+		AA::Rank *rank = ability->first;
+		while (rank) {
+			if (!CanUseAlternateAdvancementRank(rank)) {
+				break;
+			}
+
+			if (HasAlreadyPurchasedRank(rank)) {
+				const std::string aa_name = zone->GetAAName(rank->id);
+				if (
+					search_criteria.empty() ||
+					Strings::Contains(
+						Strings::ToLower(aa_name),
+						Strings::ToLower(search_criteria)
+					)
+				) {
+					if (client_aa_ranks.find(aa_name) == client_aa_ranks.end()) {
+						client_aa_ranks[aa_name] = 1;
+					} else {
+						client_aa_ranks[aa_name]++;
+					}
+				}
+			}
+
+			rank = rank->next;
+		}
+	}
+
+	if (client_aa_ranks.empty()) {
+		to->Message(
+			Chat::White,
+			fmt::format(
+				"{} {} no purchased AAs{}.",
+				to->GetTargetDescription(this, TargetDescriptionType::UCYou),
+				this == to ? "have" : "has",
+				(
+					!search_criteria.empty() ?
+					fmt::format(
+						" matching '{}'",
+						search_criteria
+					) :
+					""
+				)
+			).c_str()
+		);
+		return;
+	}
+
+	int aa_number = 1;
+
+	for (const auto &aa : client_aa_ranks) {
+		to->Message(
+			Chat::White,
+			fmt::format(
+				"{}. {} (Rank {})",
+				aa_number,
+				aa.first,
+				aa.second
+			).c_str()
+		);
+
+		aa_number++;
+	}
+
+	to->Message(
+		Chat::White,
+		fmt::format(
+			"{} {} {} purchased AA{}{}.",
+			to->GetTargetDescription(this, TargetDescriptionType::UCYou),
+			this == to ? "have" : "has",
+			client_aa_ranks.size(),
+			client_aa_ranks.size() > 1 ? "s" : "",
+			(
+				!search_criteria.empty() ?
+				fmt::format(
+					" matching '{}'",
+					search_criteria
+				) :
+				""
+			)
+		).c_str()
+	);
+}

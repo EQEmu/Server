@@ -2,13 +2,8 @@
 
 void ShowFlags(Client *c, const Seperator *sep)
 {
-	auto t = c;
-
-	if (
-		c->GetTarget() &&
-		c->GetTarget()->IsClient() &&
-		c->Admin() >= minStatusToSeeOthersZoneFlags
-	) {
+	Client *t = c;
+	if (c->GetTarget() && c->GetTarget()->IsClient()) {
 		t =  c->GetTarget()->CastToClient();
 	}
 

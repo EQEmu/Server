@@ -2,18 +2,18 @@
 
 void command_movechar(Client *c, const Seperator *sep)
 {
-	int arguments = sep->argnum;
+	const int arguments = sep->argnum;
 	if (arguments < 2) {
 		c->Message(Chat::White, "Usage: #movechar [Character ID|Character Name] [Zone ID|Zone Short Name]");
 		return;
 	}
 
-	std::string character_name = (
+	const std::string &character_name = (
 		sep->IsNumber(1) ?
 		database.GetCharNameByID(Strings::ToUnsignedInt(sep->arg[1])) :
 		sep->arg[1]
 	);
-	auto character_id = database.GetCharacterID(character_name.c_str());
+	const uint32 character_id = database.GetCharacterID(character_name.c_str());
 	if (!character_id) {
 		c->Message(
 			Chat::White,
@@ -25,15 +25,15 @@ void command_movechar(Client *c, const Seperator *sep)
 		return;
 	}
 
-	auto account_id = database.GetAccountIDByChar(character_name.c_str());
+	const uint32 account_id = database.GetAccountIDByChar(character_name.c_str());
 
-	std::string zone_short_name = Strings::ToLower(
+	const std::string &zone_short_name = Strings::ToLower(
 		sep->IsNumber(2) ?
 		ZoneName(Strings::ToUnsignedInt(sep->arg[2]), true) :
 		sep->arg[2]
 	);
 
-	bool is_unknown_zone = zone_short_name.find("unknown") != std::string::npos;
+	const bool is_unknown_zone = zone_short_name.find("unknown") != std::string::npos;
 	if (is_unknown_zone) {
 		c->Message(
 			Chat::White,
@@ -45,63 +45,34 @@ void command_movechar(Client *c, const Seperator *sep)
 		return;
 	}
 
-	auto zone_id = ZoneID(zone_short_name);
-	auto z = GetZone(zone_id);
+	const uint32 zone_id = ZoneID(zone_short_name);
+	auto         z       = GetZone(zone_id);
 
 	if (!z) {
 		c->Message(Chat::Red, "Invalid zone.");
 		return;
 	}
 
-	bool is_special_zone = (
-		zone_short_name.find("cshome") != std::string::npos ||
-		zone_short_name.find("load") != std::string::npos ||
-		zone_short_name.find("load2") != std::string::npos
+	const bool  moved        = database.MoveCharacterToZone(character_name.c_str(), zone_id);
+	std::string moved_string = moved ? "Succeeded" : "Failed";
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"Character Move {} | Character: {} ({})",
+			moved_string,
+			character_name,
+			character_id
+		).c_str()
 	);
 
-	if (c->Admin() < commandMovecharToSpecials && is_special_zone) {
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"{} ({}) is a special zone and you cannot move someone there.",
-				z->long_name,
-				zone_short_name
-			).c_str()
-		);
-		return;
-	}
-
-	if (
-		c->Admin() >= commandMovecharSelfOnly ||
-		account_id == c->AccountID()
-	) {
-		bool moved = database.MoveCharacterToZone(character_name.c_str(), zone_id);
-		std::string moved_string = (
-			moved ?
-			"Succeeded" :
-			"Failed"
-		);
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"Character Move {} | Character: {} ({})",
-				moved_string,
-				character_name,
-				character_id
-			).c_str()
-		);
-
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"Character Move {} | Zone: {} ({}) ID: {}",
-				moved_string,
-				z->long_name,
-				zone_short_name,
-				zone_id
-			).c_str()
-		);
-	} else {
-		c->Message(Chat::White, "You cannot move characters that are not on your account.");
-	}
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"Character Move {} | Zone: {} ({}) ID: {}",
+			moved_string,
+			z->long_name,
+			zone_short_name,
+			zone_id
+		).c_str()
+	);
 }

@@ -2,8 +2,13 @@
 
 ########################################################################
 #::: 13th floor import script
-#::: Current Source: http://items.sodeq.org/download.php
-#::: Authors: (Natedog, Akkadius)
+#::: Items Source: http://items.sodeq.org/download.php
+#::: How To:
+#:::   1. Place this script with your server eqemu_config.json
+#:::   2. Download the items.txt file and place with this script
+#:::   3. Run this script with Perl
+#:::   4. Review new and updated items in the items_new table
+#:::   5. Make any desired changes and replace the items table contents
 ########################################################################
 
 use DBI;
@@ -16,6 +21,7 @@ my $db_user = "";
 my $db_pass = "";
 my $total_items = 0;
 my $read_items_file = "items.txt"; #default
+my $keep_temp_items_table = 0; #keeps the imported items table
 
 read_eqemu_config_json();
 
@@ -24,7 +30,7 @@ my $dbh = DBI->connect("DBI:mysql:database=$db_name;host=$db_host;port=$db_port"
 read_items_file_from_13th_floor_text();
 update_items_table();
 
-print "\n\nImport complete!\n\n";
+print "\n\nImport complete! Review items_new table before replacing into items table.\n\n";
 
 sub read_eqemu_config_json {
     use JSON;
@@ -66,7 +72,7 @@ sub read_items_file_from_13th_floor_text {
 
         #::: If we don't have items_floor table
         if ($has_items_floor eq '') {
-                $dbh->do("CREATE TABLE `items_floor` (`" . join("` VARCHAR(64) NOT NULL DEFAULT '', `", @fields). "` VARCHAR(64) NOT NULL DEFAULT '', UNIQUE INDEX `ID` (`id`)) COLLATE='latin1_swedish_ci' ENGINE=MyISAM");
+                $dbh->do("CREATE TABLE `items_floor` (`" . join("` VARCHAR(64) NOT NULL DEFAULT '', `", @fields). "` VARCHAR(64) NOT NULL DEFAULT '', UNIQUE INDEX `ID` (`id`)) COLLATE='latin1_swedish_ci' ENGINE=InnoDB");
                 $dbh->do("ALTER TABLE `items_floor` CHANGE `id` `id` INT(11) NOT NULL DEFAULT '0'");
                 printf "Database items_floor created\n";
         }
@@ -139,7 +145,12 @@ sub read_items_file_from_13th_floor_text {
 
 sub update_items_table {
 
-        print "Updating items table...\n";
+        #::: Establish items_new table
+        print "Setting up new items table...\n";
+        $dbh->do("DROP TABLE IF EXISTS items_new");
+        $dbh->do("CREATE TABLE items_new AS SELECT * FROM items");
+
+        print "Updating new items table...\n";
 
         my @matching_table;
         my @missing_items_table;
@@ -147,7 +158,7 @@ sub update_items_table {
 
         print "Comparing table structure...\n";
         #::: Get columns from `items`
-        my $sth = $dbh->prepare("SHOW COLUMNS FROM `items`;");
+        my $sth = $dbh->prepare("SHOW COLUMNS FROM `items_new`;");
         $sth->execute();
         my @items_table;
         while (my @row = $sth->fetchrow_array()) {
@@ -230,7 +241,7 @@ sub update_items_table {
         }
 
         my $update_query = "
-                INSERT INTO items (" . $items_field_list . ")
+                INSERT INTO items_new (" . $items_field_list . ")
                 SELECT " . $items_floor_field_list . "
                 FROM items_floor fi
                 ON DUPLICATE KEY UPDATE " . $update_fields;
@@ -257,14 +268,20 @@ sub update_items_table {
 
         #::: Update stackables
         print "Updating stackable field...\n";
-        $dbh->do("UPDATE items i SET i.stackable = 1 WHERE i.stacksize > 1");
+        $dbh->do("UPDATE items_new i SET i.stackable = 1 WHERE i.stacksize > 1");
 
         #::: Update legacy research tome bagtypes
         print "Updating legacy research tomes...\n";
-        $dbh->do("UPDATE items i SET i.bagtype = 24 WHERE i.id IN (17655, 17903)"); #RESEARCHWIZ
-        $dbh->do("UPDATE items i SET i.bagtype = 25 WHERE i.id IN (17502, 17653)"); #RESEARCHMAG
-        $dbh->do("UPDATE items i SET i.bagtype = 26 WHERE i.id IN (17501, 17654)"); #RESEARCHNEC
-        $dbh->do("UPDATE items i SET i.bagtype = 27 WHERE i.id IN (17500, 17652)"); #RESEARCHENC
+        $dbh->do("UPDATE items_new i SET i.bagtype = 24 WHERE i.id IN (17655, 17903)"); #RESEARCHWIZ
+        $dbh->do("UPDATE items_new i SET i.bagtype = 25 WHERE i.id IN (17502, 17653)"); #RESEARCHMAG
+        $dbh->do("UPDATE items_new i SET i.bagtype = 26 WHERE i.id IN (17501, 17654)"); #RESEARCHNEC
+        $dbh->do("UPDATE items_new i SET i.bagtype = 27 WHERE i.id IN (17500, 17652)"); #RESEARCHENC
+
+        #::: Remove temp table
+        if (!$keep_temp_items_table) {
+          print "Cleaning up temp items table...\n";
+          $dbh->do("DROP TABLE items_floor");
+        }
 }
 
 sub trim($) {

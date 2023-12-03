@@ -10,7 +10,7 @@ void command_doanim(Client *c, const Seperator *sep)
 	}
 
 	Mob* t = c;
-	if (c->GetTarget() && c->Admin() >= commandDoAnimOthers) {
+	if (c->GetTarget()) {
 		t = c->GetTarget();
 	}
 
