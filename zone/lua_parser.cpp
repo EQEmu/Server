@@ -171,7 +171,9 @@ const char *LuaEvents[_LargestEventID] = {
 	"event_unscribe_spell",
 	"event_loot_added",
 	"event_ldon_points_gain",
-	"event_ldon_points_loss"
+	"event_ldon_points_loss",
+	"event_alt_currency_gain",
+	"event_alt_currency_loss"
 };
 
 extern Zone *zone;
@@ -306,6 +308,8 @@ LuaParser::LuaParser() {
 	PlayerArgumentDispatch[EVENT_UNSCRIBE_SPELL]             = handle_player_memorize_scribe_spell;
 	PlayerArgumentDispatch[EVENT_LDON_POINTS_GAIN]           = handle_player_ldon_points_gain_loss;
 	PlayerArgumentDispatch[EVENT_LDON_POINTS_LOSS]           = handle_player_ldon_points_gain_loss;
+	PlayerArgumentDispatch[EVENT_ALT_CURRENCY_GAIN]          = handle_player_alt_currency_gain_loss;
+	PlayerArgumentDispatch[EVENT_ALT_CURRENCY_LOSS]          = handle_player_alt_currency_gain_loss;
 
 	ItemArgumentDispatch[EVENT_ITEM_CLICK]      = handle_item_click;
 	ItemArgumentDispatch[EVENT_ITEM_CLICK_CAST] = handle_item_click;

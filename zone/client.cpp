@@ -6491,11 +6491,10 @@ void Client::SetAlternateCurrencyValue(uint32 currency_id, uint32 new_amount)
 	SendAlternateCurrencyValue(currency_id);
 }
 
-int Client::AddAlternateCurrencyValue(uint32 currency_id, int32 amount, int8 method)
+int Client::AddAlternateCurrencyValue(uint32 currency_id, int32 amount, bool is_scripted)
 {
-
 	/* Added via Quest, rest of the logging methods may be done inline due to information available in that area of the code */
-	if (method == 1){
+	if (is_scripted) {
 		/* QS: PlayerLogAlternateCurrencyTransactions :: Cursor to Item Storage */
 		if (RuleB(QueryServ, PlayerLogAlternateCurrencyTransactions)){
 			std::string event_desc = StringFormat("Added via Quest :: Cursor to Item :: alt_currency_id:%i amount:%i in zoneid:%i instid:%i", currency_id, GetZoneID(), GetInstanceID());
@@ -6503,31 +6502,48 @@ int Client::AddAlternateCurrencyValue(uint32 currency_id, int32 amount, int8 met
 		}
 	}
 
-	if(amount == 0) {
+	if (!amount) {
 		return 0;
 	}
 
-	if(!alternate_currency_loaded) {
+	if (!alternate_currency_loaded) {
 		alternate_currency_queued_operations.push(std::make_pair(currency_id, amount));
 		return 0;
 	}
 
 	int new_value = 0;
 	auto iter = alternate_currency.find(currency_id);
-	if(iter == alternate_currency.end()) {
+	if (iter == alternate_currency.end()) {
 		new_value = amount;
 	} else {
 		new_value = (*iter).second + amount;
 	}
 
-	if(new_value < 0) {
+	if (new_value < 0) {
+		new_value = 0;
 		alternate_currency[currency_id] = 0;
 		database.UpdateAltCurrencyValue(CharacterID(), currency_id, 0);
 	} else {
 		alternate_currency[currency_id] = new_value;
 		database.UpdateAltCurrencyValue(CharacterID(), currency_id, new_value);
 	}
+
 	SendAlternateCurrencyValue(currency_id);
+
+	if (parse->PlayerHasQuestSub(EVENT_ALT_CURRENCY_GAIN) || parse->PlayerHasQuestSub(EVENT_ALT_CURRENCY_LOSS)) {
+		const std::string &export_string = fmt::format(
+			"{} {} {}",
+			currency_id,
+			std::abs(amount),
+			new_value
+		);
+
+		if (amount > 0) {
+			parse->EventPlayer(EVENT_ALT_CURRENCY_GAIN, this, export_string, 0);
+		} else {
+			parse->EventPlayer(EVENT_ALT_CURRENCY_LOSS, this, export_string, 0);
+		}
+	}
 
 	return new_value;
 }
