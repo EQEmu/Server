@@ -191,6 +191,9 @@ const char *QuestEventSubroutines[_LargestEventID] = {
 	"EVENT_LDON_POINTS_LOSS",
 	"EVENT_ALT_CURRENCY_GAIN",
 	"EVENT_ALT_CURRENCY_LOSS",
+	"EVENT_CRYSTAL_GAIN",
+	"EVENT_CRYSTAL_LOSS",
+
 	// Add new events before these or Lua crashes
 	"EVENT_SPELL_EFFECT_BOT",
 	"EVENT_SPELL_EFFECT_BUFF_TIC_BOT"
@@ -2278,6 +2281,15 @@ void PerlembParser::ExportEventVariables(
 			ExportVar(package_name.c_str(), "currency_id", sep.arg[0]);
 			ExportVar(package_name.c_str(), "amount", sep.arg[1]);
 			ExportVar(package_name.c_str(), "total", sep.arg[2]);
+			break;
+		}
+
+		case EVENT_CRYSTAL_GAIN:
+		case EVENT_CRYSTAL_LOSS: {
+			Seperator sep(data);
+			ExportVar(package_name.c_str(), "ebon_amount", sep.arg[0]);
+			ExportVar(package_name.c_str(), "radiant_amount", sep.arg[1]);
+			ExportVar(package_name.c_str(), "is_reclaim", sep.arg[2]);
 			break;
 		}
 

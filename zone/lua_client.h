@@ -482,6 +482,10 @@ public:
 	void SetBucket(std::string bucket_name, std::string bucket_value, std::string expiration);
 	void GrantAllAAPoints();
 	void GrantAllAAPoints(uint8 unlock_level);
+	void AddEbonCrystals(uint32 amount);
+	void AddRadiantCrystals(uint32 amount);
+	void RemoveEbonCrystals(uint32 amount);
+	void RemoveRadiantCrystals(uint32 amount);
 
 	void ApplySpell(int spell_id);
 	void ApplySpell(int spell_id, int duration);

@@ -124,6 +124,12 @@ struct LDoNTrapTemplate
 	uint8 locked;
 };
 
+enum CrystalReclaimTypes
+{
+	Ebon = 5,
+	Radiant = 4,
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 
 

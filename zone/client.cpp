@@ -5727,26 +5727,89 @@ void Client::AddPVPPoints(uint32 Points)
 	SendPVPStats();
 }
 
-void Client::AddCrystals(uint32 radiant, uint32 ebon)
-{
-	m_pp.currentRadCrystals += radiant;
-	m_pp.careerRadCrystals += radiant;
-	m_pp.currentEbonCrystals += ebon;
-	m_pp.careerEbonCrystals += ebon;
+void Client::AddEbonCrystals(uint32 amount, bool is_reclaim) {
+	m_pp.currentEbonCrystals += amount;
+	m_pp.careerEbonCrystals += amount;
 
 	SaveCurrency();
-
 	SendCrystalCounts();
 
-	// newer clients handle message client side (older clients likely used eqstr 5967 and 5968, this matches live)
-	if (radiant > 0)
-	{
-		MessageString(Chat::Yellow, YOU_RECEIVE, fmt::format("{} Radiant Crystals", radiant).c_str());
-	}
+	MessageString(
+		Chat::Yellow,
+		YOU_RECEIVE,
+		fmt::format(
+			"{} {}",
+			amount,
+			database.CreateItemLink(RuleI(Zone, EbonCrystalItemID))
+		).c_str()
+	);
 
-	if (ebon > 0)
-	{
-		MessageString(Chat::Yellow, YOU_RECEIVE, fmt::format("{} Ebon Crystals", ebon).c_str());
+	if (parse->PlayerHasQuestSub(EVENT_CRYSTAL_GAIN)) {
+		const std::string &export_string = fmt::format(
+			"{} 0 {}",
+			amount,
+			is_reclaim ? 1 : 0
+		);
+		parse->EventPlayer(EVENT_CRYSTAL_GAIN, this, export_string, 0);
+	}
+}
+
+void Client::AddRadiantCrystals(uint32 amount, bool is_reclaim) {
+	m_pp.currentRadCrystals += amount;
+	m_pp.careerRadCrystals += amount;
+
+	SaveCurrency();
+	SendCrystalCounts();
+
+	MessageString(
+		Chat::Yellow,
+		YOU_RECEIVE,
+		fmt::format(
+			"{} {}",
+			amount,
+			database.CreateItemLink(RuleI(Zone, RadiantCrystalItemID))
+		).c_str()
+	);
+
+	if (parse->PlayerHasQuestSub(EVENT_CRYSTAL_GAIN)) {
+		const std::string &export_string = fmt::format(
+			"0 {} {}",
+			amount,
+			is_reclaim ? 1 : 0
+		);
+		parse->EventPlayer(EVENT_CRYSTAL_GAIN, this, export_string, 0);
+	}
+}
+
+void Client::RemoveEbonCrystals(uint32 amount, bool is_reclaim) {
+	m_pp.currentEbonCrystals -= amount;
+
+	SaveCurrency();
+	SendCrystalCounts();
+
+	if (parse->PlayerHasQuestSub(EVENT_CRYSTAL_LOSS)) {
+		const std::string &export_string = fmt::format(
+			"{} 0 {}",
+			amount,
+			is_reclaim ? 1 : 0
+		);
+		parse->EventPlayer(EVENT_CRYSTAL_LOSS, this, export_string, 0);
+	}
+}
+
+void Client::RemoveRadiantCrystals(uint32 amount, bool is_reclaim) {
+	m_pp.currentRadCrystals -= amount;
+
+	SaveCurrency();
+	SendCrystalCounts();
+
+	if (parse->PlayerHasQuestSub(EVENT_CRYSTAL_LOSS)) {
+		const std::string &export_string = fmt::format(
+			"0 {} {}",
+			amount,
+			is_reclaim ? 1 : 0
+		);
+		parse->EventPlayer(EVENT_CRYSTAL_LOSS, this, export_string, 0);
 	}
 }
 

@@ -5475,59 +5475,50 @@ void Client::Handle_OP_CreateObject(const EQApplicationPacket *app)
 void Client::Handle_OP_CrystalCreate(const EQApplicationPacket *app)
 {
 	VERIFY_PACKET_LENGTH(OP_CrystalCreate, app, CrystalReclaim_Struct);
-	CrystalReclaim_Struct *cr = (CrystalReclaim_Struct*)app->pBuffer;
+	auto *cr = (CrystalReclaim_Struct *) app->pBuffer;
 
-	const uint32 requestQty = cr->amount;
-	const bool isRadiant = cr->type == 4;
-	const bool isEbon = cr->type == 5;
+	const uint32 quantity   = cr->amount;
+	const bool   is_radiant = cr->type == CrystalReclaimTypes::Radiant;
+	const bool   is_ebon    = cr->type == CrystalReclaimTypes::Ebon;
 
-	// Check: Valid type requested.
-	if (!isRadiant && !isEbon) {
+	if (!is_radiant && !is_ebon) {
 		return;
 	}
-	// Check: Valid quantity requested.
-	if (requestQty < 1) {
+
+	if (quantity < 1) {
 		return;
 	}
 
 	// Check: Valid client state to make request.
 	// In this situation the client is either desynced or attempting an exploit.
-	const uint32 currentQty = isRadiant ? GetRadiantCrystals() : GetEbonCrystals();
-	if (currentQty == 0) {
+	const uint32 current_quantity = is_radiant ? GetRadiantCrystals() : GetEbonCrystals();
+	if (!current_quantity) {
 		return;
 	}
 
 	// Prevent the client from creating more than they have.
-	const uint32 amount = EQ::ClampUpper(requestQty, currentQty);
-	const uint32 itemID = isRadiant ? RuleI(Zone, RadiantCrystalItemID) : RuleI(Zone, EbonCrystalItemID);
+	const uint32 amount  = EQ::ClampUpper(quantity, current_quantity);
+	const uint32 item_id = is_radiant ? RuleI(Zone, RadiantCrystalItemID) : RuleI(Zone, EbonCrystalItemID);
 
-	// Summon crystals for player.
-	const bool success = SummonItem(itemID, amount);
-
+	const bool success = SummonItem(item_id, amount);
 	if (!success) {
 		return;
 	}
 
-	// Deduct crystals from client and update them.
-	if (isRadiant) {
-		m_pp.currentRadCrystals -= amount;
-		m_pp.careerRadCrystals -= amount;
+	if (is_ebon) {
+		RemoveEbonCrystals(amount, true);
+	} else if (is_radiant) {
+		RemoveRadiantCrystals(amount, true);
 	}
-	else if (isEbon) {
-		m_pp.currentEbonCrystals -= amount;
-		m_pp.careerEbonCrystals -= amount;
-	}
-
-	SaveCurrency();
-	SendCrystalCounts();
 }
 
 void Client::Handle_OP_CrystalReclaim(const EQApplicationPacket *app)
 {
-	uint32 ebon = NukeItem(RuleI(Zone, EbonCrystalItemID), invWhereWorn | invWherePersonal | invWhereCursor);
-	uint32 radiant = NukeItem(RuleI(Zone, RadiantCrystalItemID), invWhereWorn | invWherePersonal | invWhereCursor);
+	const uint32 ebon    = NukeItem(RuleI(Zone, EbonCrystalItemID), invWhereWorn | invWherePersonal | invWhereCursor);
+	const uint32 radiant = NukeItem(RuleI(Zone, RadiantCrystalItemID), invWhereWorn | invWherePersonal | invWhereCursor);
 	if ((ebon + radiant) > 0) {
-		AddCrystals(radiant, ebon);
+		AddEbonCrystals(ebon, true);
+		AddRadiantCrystals(radiant, true);
 	}
 }
 
