@@ -5097,7 +5097,7 @@ ALTER TABLE `items` MODIFY COLUMN `updated` datetime NULL DEFAULT NULL;
 	ManifestEntry{
 		.version = 9245,
 		.description = "2023_12_03_object_incline.sql",
-		.check = "SHOW CLUMNS FROM `object` LIKE 'incline'",
+		.check = "SHOW COLUMNS FROM `object` LIKE 'incline'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
