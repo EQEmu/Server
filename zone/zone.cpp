@@ -182,7 +182,7 @@ bool Zone::LoadZoneObjects()
 			ContentFilterCriteria::apply()
 		)
 	);
-	if (!l.empty()) {
+	if (l.empty()) {
 		LogError("Error Loading Objects for Zone [{}] Version [{}]", zoneid, instanceversion);
 		return false;
 	}
