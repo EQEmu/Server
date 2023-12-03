@@ -550,15 +550,14 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		break;
 	}
 	case ServerOP_ZoneShutdown: {
-		if (pack->size != sizeof(ServerZoneStateChange_struct)) {
-			std::cout << "Wrong size on ServerOP_ZoneShutdown. Got: " << pack->size << ", Expected: " << sizeof(ServerZoneStateChange_struct) << std::endl;
+		if (pack->size != sizeof(ServerZoneStateChange_Struct)) {
+			LogError("Wrong size on ServerOP_ZoneShutdown. Got: [{}] Expected: [{}]", pack->size, sizeof(ServerZoneStateChange_Struct));
 			break;
 		}
-		// Annouce the change to the world
+
 		if (!is_zone_loaded) {
 			SetZoneData(0);
-		}
-		else {
+		} else {
 			SendEmoteMessage(
 				0,
 				0,
@@ -569,27 +568,24 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 				).c_str()
 			);
 
-			ServerZoneStateChange_struct* zst = (ServerZoneStateChange_struct *)pack->pBuffer;
-			std::cout << "Zone shutdown by " << zst->adminname << std::endl;
+			auto *s = (ServerZoneStateChange_Struct *) pack->pBuffer;
+			LogInfo("Zone shutdown by {}.", s->admin_name);
 			Zone::Shutdown();
 		}
 		break;
 	}
 	case ServerOP_ZoneBootup: {
-		if (pack->size != sizeof(ServerZoneStateChange_struct)) {
-			std::cout << "Wrong size on ServerOP_ZoneBootup. Got: " << pack->size << ", Expected: " << sizeof(ServerZoneStateChange_struct) << std::endl;
+		if (pack->size != sizeof(ServerZoneStateChange_Struct)) {
+			LogError("Wrong size on ServerOP_ZoneShutdown. Got: [{}] Expected: [{}]", pack->size, sizeof(ServerZoneStateChange_Struct));
 			break;
 		}
-		ServerZoneStateChange_struct* zst = (ServerZoneStateChange_struct *)pack->pBuffer;
+
+		auto *s = (ServerZoneStateChange_Struct *) pack->pBuffer;
 		if (is_zone_loaded) {
 			SetZoneData(zone->GetZoneID(), zone->GetInstanceID());
-			if (zst->zoneid == zone->GetZoneID()) {
-				// This packet also doubles as "incoming client" notification, lets not shut down before they get here
-//				zone->StartShutdownTimer(AUTHENTICATION_TIMEOUT * 1000);
-			}
-			else {
+			if (s->zone_id != zone->GetZoneID()) {
 				SendEmoteMessage(
-					zst->adminname,
+					s->admin_name,
 					0,
 					Chat::White,
 					fmt::format(
@@ -601,10 +597,11 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 			break;
 		}
 
-		if (zst->adminname[0] != 0)
-			std::cout << "Zone bootup by " << zst->adminname << std::endl;
+		if (s->admin_name[0] != 0) {
+			LogInfo("Zone bootup by {}.", s->admin_name);
+		}
 
-		Zone::Bootup(zst->zoneid, zst->instanceid, zst->makestatic);
+		Zone::Bootup(s->zone_id, s->instance_id, s->is_static);
 		break;
 	}
 	case ServerOP_ZoneIncClient: {
