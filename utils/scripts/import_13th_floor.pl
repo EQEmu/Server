@@ -72,7 +72,7 @@ sub read_items_file_from_13th_floor_text {
 
         #::: If we don't have items_floor table
         if ($has_items_floor eq '') {
-                $dbh->do("CREATE TABLE `items_floor` (`" . join("` VARCHAR(64) NOT NULL DEFAULT '', `", @fields). "` VARCHAR(64) NOT NULL DEFAULT '', UNIQUE INDEX `ID` (`id`)) COLLATE='latin1_swedish_ci' ENGINE=InnoDB");
+                $dbh->do("CREATE TABLE `items_floor` (`" . join("` VARCHAR(64) NOT NULL DEFAULT '', `", @fields). "` VARCHAR(64) NOT NULL DEFAULT '', UNIQUE INDEX `ID` (`id`)) COLLATE='latin1_swedish_ci' ENGINE=MyISAM");
                 $dbh->do("ALTER TABLE `items_floor` CHANGE `id` `id` INT(11) NOT NULL DEFAULT '0'");
                 printf "Database items_floor created\n";
         }
