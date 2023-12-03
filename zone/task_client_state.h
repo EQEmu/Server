@@ -84,6 +84,7 @@ public:
 	bool CanAcceptNewTask(Client* client, int task_id, int npc_entity_id) const;
 	bool HasExploreTask(Client* client) const;
 	void EndSharedTask(Client* client, bool send_fail);
+	bool CompleteTask(Client *c, uint32 task_id);
 
 	inline bool HasFreeTaskSlot() { return m_active_task.task_id == TASKSLOTEMPTY; }
 

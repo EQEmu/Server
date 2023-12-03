@@ -11137,16 +11137,15 @@ void Client::AddAAPoints(uint32 points)
 {
 	m_pp.aapoints += points;
 
-	if (points == 1 && m_pp.aapoints == 1)
-	{
+	if (parse->PlayerHasQuestSub(EVENT_AA_GAIN)) {
+		parse->EventPlayer(EVENT_AA_GAIN, this, std::to_string(points), 0);
+	}
+
+	if (points == 1 && m_pp.aapoints == 1) {
 		MessageString(Chat::Yellow, GAIN_SINGLE_AA_SINGLE_AA, fmt::format_int(m_pp.aapoints).c_str());
-	}
-	else if (points == 1 && m_pp.aapoints > 1)
-	{
+	} else if (points == 1 && m_pp.aapoints > 1) {
 		MessageString(Chat::Yellow, GAIN_SINGLE_AA_MULTI_AA, fmt::format_int(m_pp.aapoints).c_str());
-	}
-	else
-	{
+	} else {
 		MessageString(Chat::Yellow, GAIN_MULTI_AA_MULTI_AA, fmt::format_int(points).c_str(), fmt::format_int(m_pp.aapoints).c_str());
 	}
 

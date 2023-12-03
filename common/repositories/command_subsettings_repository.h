@@ -120,6 +120,7 @@ public:
 			{.parent_command = "set", .sub_command = "title_suffix", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "titlesuffix"},
 			{.parent_command = "set", .sub_command = "weather", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "weather"},
 			{.parent_command = "set", .sub_command = "zone", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "zclip|zcolor|zheader|zonelock|zsafecoords|zsky|zunderworld"},
+			{.parent_command = "show", .sub_command = "aas", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "showaas"},
 			{.parent_command = "show", .sub_command = "aa_points", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "showaapoints|showaapts"},
 			{.parent_command = "show", .sub_command = "aggro", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "aggro"},
 			{.parent_command = "show", .sub_command = "buffs", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "showbuffs"},

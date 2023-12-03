@@ -2,24 +2,27 @@
 
 void command_disarmtrap(Client *c, const Seperator *sep)
 {
-	Mob *target = c->GetTarget();
-
-	if (!target) {
-		c->Message(Chat::Red, "You must have a target.");
+	Mob *t = c->GetTarget();
+	if (!t || !t->IsNPC()) {
+		c->Message(Chat::White, "You must target an NPC to use this command.");
 		return;
 	}
 
-	if (target->IsNPC()) {
-		if (c->HasSkill(EQ::skills::SkillDisarmTraps)) {
-			if (DistanceSquaredNoZ(c->GetPosition(), target->GetPosition()) > RuleI(Adventure, LDoNTrapDistanceUse)) {
-				c->Message(Chat::Red, "%s is too far away.", target->GetCleanName());
-				return;
-			}
-			c->HandleLDoNDisarm(target->CastToNPC(), c->GetSkill(EQ::skills::SkillDisarmTraps), LDoNTypeMechanical);
-		}
-		else {
-			c->Message(Chat::Red, "You do not have the disarm trap skill.");
-		}
+	if (!c->HasSkill(EQ::skills::SkillDisarmTraps)) {
+		c->Message(Chat::White, "You do not have the Disarm Trap skill.");
+		return;
 	}
-}
 
+	if (DistanceSquaredNoZ(c->GetPosition(), t->GetPosition()) > RuleI(Adventure, LDoNTrapDistanceUse)) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"{} is too far away.",
+				t->GetCleanName()
+			).c_str()
+		);
+		return;
+	}
+
+	c->HandleLDoNDisarm(t->CastToNPC(), c->GetSkill(EQ::skills::SkillDisarmTraps), LDoNTypeMechanical);
+}
