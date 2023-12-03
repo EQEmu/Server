@@ -15,20 +15,13 @@ void command_interrogateinv(Client *c, const Seperator *sep)
 	// same or not.
 
 	if (strcasecmp(sep->arg[1], "help") == 0) {
-		if (c->Admin() < commandInterrogateInv) {
-			c->Message(Chat::White, "Usage: #interrogateinv");
-			c->Message(Chat::White, "  Displays your inventory's current in-memory nested storage references");
-		}
-		else {
-			c->Message(Chat::White, "Usage: #interrogateinv [log] [silent]");
-			c->Message(
-				Chat::White,
-				"  Displays your or your Player target inventory's current in-memory nested storage references"
-			);
-			c->Message(Chat::White, "  [log] - Logs interrogation to file");
-			c->Message(Chat::White, "  [silent] - Omits the in-game message portion of the interrogation");
-		}
-		return;
+		c->Message(Chat::White, "Usage: #interrogateinv [log] [silent]");
+		c->Message(
+			Chat::White,
+			"  Displays your or your Player target inventory's current in-memory nested storage references"
+		);
+		c->Message(Chat::White, "  [log] - Logs interrogation to file");
+		c->Message(Chat::White, "  [silent] - Omits the in-game message portion of the interrogation");
 	}
 
 	Client                                    *target   = nullptr;
@@ -38,33 +31,20 @@ void command_interrogateinv(Client *c, const Seperator *sep)
 	bool                                      error     = false;
 	bool                                      allowtrip = false;
 
-	if (c->Admin() < commandInterrogateInv) {
-		if (c->GetInterrogateInvState()) {
-			c->Message(Chat::Red, "The last use of #interrogateinv on this inventory instance discovered an error...");
-			c->Message(Chat::Red, "Logging out, zoning or re-arranging items at this point will result in item loss!");
-			return;
-		}
-		target    = c;
-		allowtrip = true;
+	if (c->GetTarget() == nullptr) {
+		target = c;
+	} else if (c->GetTarget()->IsClient()) {
+		target = c->GetTarget()->CastToClient();
+	} else {
+		c->Message(Chat::Default, "Use of this command is limited to Client entities");
+		return;
 	}
-	else {
-		if (c->GetTarget() == nullptr) {
-			target = c;
-		}
-		else if (c->GetTarget()->IsClient()) {
-			target = c->GetTarget()->CastToClient();
-		}
-		else {
-			c->Message(Chat::Default, "Use of this command is limited to Client entities");
-			return;
-		}
 
-		if (strcasecmp(sep->arg[1], "log") == 0) {
-			log = true;
-		}
-		if (strcasecmp(sep->arg[2], "silent") == 0) {
-			silent = true;
-		}
+	if (strcasecmp(sep->arg[1], "log") == 0) {
+		log = true;
+	}
+	if (strcasecmp(sep->arg[2], "silent") == 0) {
+		silent = true;
 	}
 
 	bool success = target->InterrogateInventory(c, log, silent, allowtrip, error);
