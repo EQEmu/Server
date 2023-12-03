@@ -1814,9 +1814,12 @@ private:
 	bool dev_tools_enabled;
 
 	uint16 m_door_tool_entity_id;
+	uint16 m_object_tool_entity_id;
 public:
 	uint16 GetDoorToolEntityId() const;
 	void SetDoorToolEntityId(uint16 door_tool_entity_id);
+	uint16 GetObjectToolEntityId() const;
+	void SetObjectToolEntityId(uint16 object_tool_entity_id);
 private:
 
 	int32 max_end;

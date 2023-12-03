@@ -73,8 +73,6 @@ IT10714_ACTORDEF=Augmentation Sealer
 IT10725_ACTORDEF=Shuriken
 */
 
-#define OT_DROPPEDITEM EQ::item::BagTypeLargeBag
-
 // Icon values:
 //0x0453 a pie
 //0x0454 cookies?
@@ -88,6 +86,51 @@ IT10725_ACTORDEF=Shuriken
 //0x045C is brewing barrel
 //0x045D is a hammer
 //0x045E is a wierd rope shape
+
+enum ObjectTypes {
+	StaticLocked = 0,
+	Temporary = 1,
+	ToolBox = 10,
+	Research = 11,
+	Mortar = 12,
+	SelfDusting = 13,
+	Baking1 = 14,
+	Baking2 = 15,
+	Tailoring = 16,
+	Forge = 17,
+	Fletching = 18,
+	BrewBarrel = 19,
+	Jewelcrafting = 20,
+	PotteryWheel = 21,
+	PotteryKiln = 22,
+	WizardResearch = 24,
+	MagicianResearch = 25,
+	NecromancerResearch = 26,
+	EnchanterResearch = 27,
+	Invalid1 = 28,
+	Invalid2 = 29,
+	Experimental = 30,
+	HighElfForge = 31,
+	DarkElfForge = 32,
+	OgreForge = 33,
+	DwarfForge = 34,
+	GnomeForge = 35,
+	BarbarianForge = 36,
+	IksarForge = 38,
+	HumanForge = 39,
+	HumanForge2 = 40,
+	HalflingTailoring = 41,
+	EruditeTailoring = 42,
+	WoodElfTailoring = 43,
+	WoodElfFletching = 44,
+	IksarPotteryWheel = 45,
+	TrollForge = 47,
+	WoodElfForge = 48,
+	HalflingForge = 49,
+	EruditeForge = 50,
+	AugmentationPool = 53,
+	StaticUnlocked = 255
+};
 
 class Object: public Entity
 {

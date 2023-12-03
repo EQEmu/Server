@@ -56,6 +56,7 @@
 #include "zone_reload.h"
 #include "../common/repositories/criteria/content_filter_criteria.h"
 #include "../common/repositories/merchantlist_repository.h"
+#include "../common/repositories/object_repository.h"
 #include "../common/repositories/rule_sets_repository.h"
 #include "../common/serverinfo.h"
 
@@ -172,101 +173,94 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool is_static) {
 //this really loads the objects into entity_list
 bool Zone::LoadZoneObjects()
 {
-	std::string query = StringFormat(
-		"SELECT id, zoneid, xpos, ypos, zpos, heading, itemid, charges, objectname, type, icon, "
-		"unknown08, unknown10, unknown20, unknown24, unknown76, size, tilt_x, tilt_y, display_name "
-		"FROM object WHERE zoneid = %i AND (version = %u OR version = -1) %s",
-		zoneid,
-		instanceversion,
-		ContentFilterCriteria::apply().c_str()
+	const auto &l = ObjectRepository::GetWhere(
+		content_db,
+		fmt::format(
+			"zoneid = {} AND (version = {} OR version = -1) {}",
+			zoneid,
+			instanceversion,
+			ContentFilterCriteria::apply()
+		)
 	);
-	auto results = content_db.QueryDatabase(query);
-	if (!results.Success()) {
-		LogError("Error Loading Objects from DB: [{}]",
-			results.ErrorMessage().c_str());
+	if (l.empty()) {
+		LogError("Error Loading Objects for Zone [{}] Version [{}]", zoneid, instanceversion);
 		return false;
 	}
 
-	for (auto row = results.begin(); row != results.end(); ++row) {
-		if (Strings::ToInt(row[9]) == 0) {
-			// Type == 0 - Static Object
-			const char *shortname = ZoneName(Strings::ToInt(row[1]), false); // zoneid -> zone_shortname
+	for (const auto &e : l) {
+		if (e.type == ObjectTypes::StaticLocked) {
+			const std::string &zone_short_name = ZoneName(e.zoneid, false);
 
-			if (!shortname)
+			if (zone_short_name.empty()) {
 				continue;
+			}
 
-			// todo: clean up duplicate code with command_object
 			auto d = DoorsRepository::NewEntity();
 
-			d.zone = shortname;
-			d.id = 1000000000 + Strings::ToInt(row[0]); // Out of range of normal use for doors.id
-			d.doorid = -1; // Client doesn't care if these are all the same door_id
-			d.pos_x = Strings::ToFloat(row[2]);		     // xpos
-			d.pos_y = Strings::ToFloat(row[3]);		     // ypos
-			d.pos_z = Strings::ToFloat(row[4]);		     // zpos
-			d.heading = Strings::ToFloat(row[5]);	    // heading
+			d.zone                = zone_short_name;
+			d.id                  = 1000000000 + e.id;
+			d.doorid              = -1;
+			d.pos_x               = e.xpos;
+			d.pos_y               = e.ypos;
+			d.pos_z               = e.zpos;
+			d.heading             = e.heading;
+			d.name                = Strings::Replace(e.objectname, "_ACTORDEF", "");
+			d.dest_zone           = "NONE";
+			d.incline             = e.incline;
+			d.client_version_mask = 0xFFFFFFFF;
 
-			d.name = row[8]; // objectname
-
-			// Strip trailing "_ACTORDEF" if present. Client won't accept it for doors.
-			int pos = d.name.size() - strlen("_ACTORDEF");
-			if (pos > 0 && d.name.compare(pos, std::string::npos, "_ACTORDEF") == 0)
-			{
-				d.name.erase(pos);
-			}
-
-			d.dest_zone = "NONE";
-
-			if ((d.size = Strings::ToInt(row[11])) == 0) // unknown08 = optional size percentage
+			if (e.size_percentage == 0) {
 				d.size = 100;
-
-			switch (d.opentype = Strings::ToInt(row[12])) // unknown10 = optional request_nonsolid (0 or 1 or experimental number)
-			{
-			case 0:
-				d.opentype = 31;
-				break;
-			case 1:
-				d.opentype = 9;
-				break;
 			}
 
-			d.incline = Strings::ToInt(row[13]);	  // unknown20 = optional model incline value
-			d.client_version_mask = 0xFFFFFFFF; // We should load the mask from the zone.
+			switch (d.opentype = e.solid_type)
+			{
+				case 0:
+					d.opentype = 31;
+					break;
+				case 1:
+					d.opentype = 9;
+					break;
+			}
 
 			auto door = new Doors(d);
 			entity_list.AddDoor(door);
 		}
 
-		Object_Struct data = {0};
-		uint32 id = 0;
-		uint32 icon = 0;
-		uint32 type = 0;
-		uint32 itemid = 0;
-		uint32 idx = 0;
-		int16 charges = 0;
+		Object_Struct data    = {0};
+		uint32        id      = 0;
+		uint32        icon    = 0;
+		uint32        type    = 0;
+		uint32        itemid  = 0;
+		uint32        idx     = 0;
+		int16         charges = 0;
 
-		id = (uint32)Strings::ToInt(row[0]);
-		data.zone_id = Strings::ToInt(row[1]);
-		data.x = Strings::ToFloat(row[2]);
-		data.y = Strings::ToFloat(row[3]);
-		data.z = Strings::ToFloat(row[4]);
-		data.heading = Strings::ToFloat(row[5]);
-		itemid = (uint32)Strings::ToInt(row[6]);
-		charges = (int16)Strings::ToInt(row[7]);
-		strcpy(data.object_name, row[8]);
-		type = (uint8)Strings::ToInt(row[9]);
-		icon = (uint32)Strings::ToInt(row[10]);
+		id = e.id;
+
+		data.zone_id = e.zoneid;
+		data.x       = e.xpos;
+		data.y       = e.ypos;
+		data.z       = e.zpos;
+		data.heading = e.heading;
+
+		itemid  = e.itemid;
+		charges = e.charges;
+		type    = e.type;
+		icon    = e.icon;
+
 		data.object_type = type;
 		data.linked_list_addr[0] = 0;
 		data.linked_list_addr[1] = 0;
 
-		data.solidtype = (uint32)Strings::ToInt(row[12]);
-		data.unknown020 = (uint32)Strings::ToInt(row[13]);
-		data.unknown024 = (uint32)Strings::ToInt(row[14]);
-		data.unknown076 = (uint32)Strings::ToInt(row[15]);
-		data.size = Strings::ToFloat(row[16]);
-		data.tilt_x = Strings::ToFloat(row[17]);
-		data.tilt_y = Strings::ToFloat(row[18]);
+		strn0cpy(data.object_name, e.objectname.c_str(), sizeof(data.object_name));
+
+		data.solid_type = e.solid_type;
+		data.incline    = e.incline;
+		data.unknown024 = e.unknown24;
+		data.unknown076 = e.unknown76;
+		data.size       = e.size;
+		data.tilt_x     = e.tilt_x;
+		data.tilt_y     = e.tilt_y;
 		data.unknown084 = 0;
 
 
@@ -280,9 +274,8 @@ bool Zone::LoadZoneObjects()
 		}
 
 		EQ::ItemInstance *inst = nullptr;
-		// FatherNitwit: this dosent seem to work...
-		// tradeskill containers do not have an itemid of 0... at least what I am seeing
-		if (itemid == 0) {
+		// tradeskill containers do not have an itemid of 0
+		if (!itemid) {
 			// Generic tradeskill container
 			inst = new EQ::ItemInstance(ItemInstWorldContainer);
 		} else {
@@ -290,8 +283,7 @@ bool Zone::LoadZoneObjects()
 			inst = database.CreateItem(itemid);
 		}
 
-		// Father Nitwit's fix... not perfect...
-		if (inst == nullptr && type != OT_DROPPEDITEM) {
+		if (!inst && type != ObjectTypes::Temporary) {
 			inst = new EQ::ItemInstance(ItemInstWorldContainer);
 		}
 
@@ -301,15 +293,17 @@ bool Zone::LoadZoneObjects()
 		}
 
 		auto object = new Object(id, type, icon, data, inst);
-		object->SetDisplayName(row[19]);
+		object->SetDisplayName(e.display_name.c_str());
 		entity_list.AddObject(object, false);
-		if (type == OT_DROPPEDITEM && itemid != 0)
+
+		if (type == ObjectTypes::Temporary && itemid) {
 			entity_list.RemoveObject(object->GetID());
+		}
 
 		safe_delete(inst);
 	}
 
-	LogInfo("Loaded [{}] world objects", Strings::Commify(results.RowCount()));
+	LogInfo("Loaded [{}] world objects", Strings::Commify(l.size()));
 
 	return true;
 }

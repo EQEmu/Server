@@ -60,6 +60,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/repositories/criteria/content_filter_criteria.h"
 #include "../common/shared_tasks.h"
 #include "gm_commands/door_manipulation.h"
+#include "gm_commands/object_manipulation.h"
 #include "client.h"
 #include "../common/repositories/account_repository.h"
 
@@ -4649,6 +4650,20 @@ void Client::Handle_OP_ClickObject(const EQApplicationPacket *app)
 		if (parse->PlayerHasQuestSub(EVENT_CLICK_OBJECT)) {
 			std::vector<std::any> args = { object };
 			parse->EventPlayer(EVENT_CLICK_OBJECT, this, std::to_string(click_object->drop_id), GetID(), &args);
+		}
+
+		if (IsDevToolsEnabled()) {
+			SetObjectToolEntityId(entity->GetID());
+			ObjectManipulation::CommandHeader(this);
+			Message(
+				Chat::White,
+				fmt::format(
+					"Object ({}) [{}] [{}]",
+					entity->CastToObject()->GetDBID(),
+					Saylink::Silent("#object edit", "Edit"),
+					Saylink::Silent("#object delete", "Delete")
+				).c_str()
+			);
 		}
 	}
 

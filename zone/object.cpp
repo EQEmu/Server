@@ -40,19 +40,24 @@ extern EntityList entity_list;
 extern WorldServer worldserver;
 
 // Loading object from database
-Object::Object(uint32 id, uint32 type, uint32 icon, const Object_Struct& object, const EQ::ItemInstance* inst)
- : respawn_timer(0), decay_timer(300000)
+Object::Object(
+	uint32 id,
+	uint32 type,
+	uint32 icon,
+	const Object_Struct &object,
+	const EQ::ItemInstance *inst
+) : respawn_timer(0), decay_timer(300000)
 {
-
-	user = nullptr;
+	user      = nullptr;
 	last_user = nullptr;
 
 	// Initialize members
-	m_id = id;
-	m_type = type;
-	m_icon = icon;
-	m_inst = nullptr;
-	m_ground_spawn=false;
+	m_id           = id;
+	m_type         = type;
+	m_icon         = icon;
+	m_inst         = nullptr;
+	m_ground_spawn = false;
+
 	// Copy object data
 	memcpy(&m_data, &object, sizeof(Object_Struct));
 	if (inst) {
@@ -61,13 +66,14 @@ Object::Object(uint32 id, uint32 type, uint32 icon, const Object_Struct& object,
 	} else {
 		decay_timer.Disable();
 	}
+
 	respawn_timer.Disable();
 
 	// Set drop_id to zero - it will be set when added to zone with SetID()
 	m_data.drop_id = 0;
-	m_data.size = object.size;
-	m_data.tilt_x = object.tilt_x;
-	m_data.tilt_y = object.tilt_y;
+	m_data.size    = object.size;
+	m_data.tilt_x  = object.tilt_x;
+	m_data.tilt_y  = object.tilt_y;
 
 	FixZ();
 }
@@ -85,7 +91,7 @@ Object::Object(const EQ::ItemInstance* inst, char* name,float max_x,float min_x,
 	m_min_y=min_y;
 	m_id	= 0;
 	m_inst	= (inst) ? inst->Clone() : nullptr;
-	m_type	= OT_DROPPEDITEM;
+	m_type	= ObjectTypes::Temporary;
 	m_icon	= 0;
 	m_ground_spawn = true;
 	decay_timer.Disable();
@@ -116,7 +122,7 @@ Object::Object(Client* client, const EQ::ItemInstance* inst)
 	// Initialize members
 	m_id	= 0;
 	m_inst	= (inst) ? inst->Clone() : nullptr;
-	m_type	= OT_DROPPEDITEM;
+	m_type	= ObjectTypes::Temporary;
 	m_icon	= 0;
 	m_ground_spawn = false;
 	// Set as much struct data as we can
@@ -179,7 +185,7 @@ Object::Object(const EQ::ItemInstance *inst, float x, float y, float z, float he
 	// Initialize members
 	m_id	= 0;
 	m_inst	= (inst) ? inst->Clone() : nullptr;
-	m_type	= OT_DROPPEDITEM;
+	m_type	= ObjectTypes::Temporary;
 	m_icon	= 0;
 	m_ground_spawn = false;
 	// Set as much struct data as we can
@@ -436,7 +442,7 @@ void Object::CreateDeSpawnPacket(EQApplicationPacket* app)
 }
 
 bool Object::Process(){
-	if(m_type == OT_DROPPEDITEM && decay_timer.Enabled() && decay_timer.Check()) {
+	if(m_type == ObjectTypes::Temporary && decay_timer.Enabled() && decay_timer.Check()) {
 		// Send click to all clients (removes entity on client)
 		auto outapp = new EQApplicationPacket(OP_ClickObject, sizeof(ClickObject_Struct));
 		ClickObject_Struct* click_object = (ClickObject_Struct*)outapp->pBuffer;
@@ -497,7 +503,7 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 	if(m_ground_spawn) {//This is a Cool Groundspawn
 		respawn_timer.Start();
 	}
-	if (m_type == OT_DROPPEDITEM) {
+	if (m_type == ObjectTypes::Temporary) {
 		bool cursordelete = false;
 		bool duplicate_lore = false;
 		if (m_inst && sender) {
@@ -969,7 +975,7 @@ void Object::SetSize(float size)
 
 void Object::SetSolidType(uint16 solidtype)
 {
-	m_data.solidtype = solidtype;
+	m_data.solid_type = solidtype;
 	auto app = new EQApplicationPacket();
 	auto app2 = new EQApplicationPacket();
 	CreateDeSpawnPacket(app);
@@ -987,7 +993,7 @@ float Object::GetSize()
 
 uint16 Object::GetSolidType()
 {
-	return m_data.solidtype;
+	return m_data.solid_type;
 }
 
 const char* Object::GetModelName()
