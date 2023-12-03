@@ -5089,7 +5089,7 @@ RENAME TABLE `starting_items_new` TO `starting_items`;
 		.description = "2023_11_30_items_table_schema.sql",
 		.check = "SHOW COLUMNS FROM `items` LIKE 'updated'",
 		.condition = "contains",
-		.match = "NULL",
+		.match = "0000-00-00 00:00:00",
 		.sql = R"(
 ALTER TABLE `items` MODIFY COLUMN `updated` datetime NULL DEFAULT NULL;
 		)"
