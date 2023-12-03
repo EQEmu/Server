@@ -5030,6 +5030,19 @@ ADD COLUMN `min_time` smallint(4) NOT NULL DEFAULT 0 AFTER `condition_value_filt
 ADD COLUMN `max_time` smallint(4) NOT NULL DEFAULT 0 AFTER `min_time`;
 )"
   },
+	ManifestEntry{
+		.version = 9243,
+		.description = "2023_12_03_object_incline.sql",
+		.check = "SHOW CLUMNS FROM `object` LIKE 'incline'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `object`
+CHANGE COLUMN `unknown08` `size_percentage` float NOT NULL DEFAULT 0 AFTER `icon`;
+CHANGE COLUMN `unknown10` `solid_type` mediumint(5) NOT NULL DEFAULT 0 AFTER `size`,
+CHANGE COLUMN `unknown20` `incline` int(11) NOT NULL DEFAULT 0 AFTER `solid_type`;
+)"
+	}
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
 //		.version = 9228,

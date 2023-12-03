@@ -1048,33 +1048,33 @@ void ObjectManipulation::CommandHandler(Client *c, const Seperator *sep)
 		if (!is_new) {
 			auto e = ObjectRepository::FindOne(content_db, object_id);
 
-			e.xpos       = od.x;
-			e.ypos       = od.y;
-			e.zpos       = od.z;
-			e.heading    = od.heading;
-			e.objectname = od.object_name;
-			e.type       = od.object_type;
-			e.icon       = icon;
-			e.unknown08  = od.size;
-			e.unknown10  = od.solid_type;
-			e.unknown20  = od.incline;
+			e.xpos            = od.x;
+			e.ypos            = od.y;
+			e.zpos            = od.z;
+			e.heading         = od.heading;
+			e.objectname      = od.object_name;
+			e.type            = od.object_type;
+			e.icon            = icon;
+			e.size_percentage = od.size;
+			e.solid_type      = od.solid_type;
+			e.incline         = od.incline;
 
 			updated = ObjectRepository::UpdateOne(content_db, e);
 		} else if (!object_id) {
 			auto e = ObjectRepository::NewEntity();
 
-			e.xpos       = od.x;
-			e.ypos       = od.y;
-			e.zpos       = od.z;
-			e.heading    = od.heading;
-			e.objectname = od.object_name;
-			e.type       = od.object_type;
-			e.icon       = icon;
-			e.unknown08  = od.size;
-			e.unknown10  = od.solid_type;
-			e.unknown20  = od.incline;
-			e.zoneid     = zone->GetZoneID();
-			e.version    = zone->GetInstanceVersion();
+			e.xpos            = od.x;
+			e.ypos            = od.y;
+			e.zpos            = od.z;
+			e.heading         = od.heading;
+			e.objectname      = od.object_name;
+			e.type            = od.object_type;
+			e.icon            = icon;
+			e.size_percentage = od.size;
+			e.solid_type      = od.solid_type;
+			e.incline         = od.incline;
+			e.zoneid          = zone->GetZoneID();
+			e.version         = zone->GetInstanceVersion();
 
 			e = ObjectRepository::InsertOne(content_db, e);
 			updated = e.id ? 2 : 0;
@@ -1082,19 +1082,19 @@ void ObjectManipulation::CommandHandler(Client *c, const Seperator *sep)
 		} else {
 			auto e = ObjectRepository::NewEntity();
 
-			e.id         = object_id;
-			e.xpos       = od.x;
-			e.ypos       = od.y;
-			e.zpos       = od.z;
-			e.heading    = od.heading;
-			e.objectname = od.object_name;
-			e.type       = od.object_type;
-			e.icon       = icon;
-			e.unknown08  = od.size;
-			e.unknown10  = od.solid_type;
-			e.unknown20  = od.incline;
-			e.zoneid     = zone->GetZoneID();
-			e.version    = zone->GetInstanceVersion();
+			e.id              = object_id;
+			e.xpos            = od.x;
+			e.ypos            = od.y;
+			e.zpos            = od.z;
+			e.heading         = od.heading;
+			e.objectname      = od.object_name;
+			e.type            = od.object_type;
+			e.icon            = icon;
+			e.size_percentage = od.size;
+			e.solid_type      = od.solid_type;
+			e.incline         = od.incline;
+			e.zoneid          = zone->GetZoneID();
+			e.version         = zone->GetInstanceVersion();
 
 			updated = ObjectRepository::InsertOne(content_db, e).id ? 1 : 0;
 		}
@@ -1158,13 +1158,7 @@ void ObjectManipulation::CommandHandler(Client *c, const Seperator *sep)
 			door.pos_z   = od.z;
 			door.heading = od.heading;
 
-			door.name = od.object_name;
-
-			// Strip trailing "_ACTORDEF" if present. Client won't accept it for doors.
-			int pos = door.name.size() - strlen("_ACTORDEF");
-			if (pos > 0 && door.name.compare(pos, std::string::npos, "_ACTORDEF") == 0) {
-				door.name.erase(pos);
-			}
+			door.name = Strings::Replace(od.object_name, "_ACTORDEF", "");
 
 			door.dest_zone = "NONE";
 
@@ -1268,9 +1262,9 @@ void ObjectManipulation::CommandHandler(Client *c, const Seperator *sep)
 		od.z           = e.zpos;
 		od.heading     = e.heading;
 		od.object_type = e.type;
-		od.size        = e.unknown08;
-		od.solid_type  = e.unknown10;
-		od.incline     = e.unknown20;
+		od.size        = e.size_percentage;
+		od.solid_type  = e.solid_type;
+		od.incline     = e.incline;
 
 		strn0cpy(od.object_name, e.objectname.c_str(), sizeof(od.object_name));
 

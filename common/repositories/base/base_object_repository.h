@@ -16,6 +16,7 @@
 #include "../../strings.h"
 #include <ctime>
 
+
 class BaseObjectRepository {
 public:
 	struct Object {
@@ -31,9 +32,9 @@ public:
 		std::string objectname;
 		int32_t     type;
 		int32_t     icon;
-		int32_t     unknown08;
-		int32_t     unknown10;
-		int32_t     unknown20;
+		float       size_percentage;
+		int32_t     solid_type;
+		int32_t     incline;
 		int32_t     unknown24;
 		int32_t     unknown60;
 		int32_t     unknown64;
@@ -71,9 +72,9 @@ public:
 			"objectname",
 			"type",
 			"icon",
-			"unknown08",
-			"unknown10",
-			"unknown20",
+			"size_percentage",
+			"solid_type",
+			"incline",
 			"unknown24",
 			"unknown60",
 			"unknown64",
@@ -107,9 +108,9 @@ public:
 			"objectname",
 			"type",
 			"icon",
-			"unknown08",
-			"unknown10",
-			"unknown20",
+			"size_percentage",
+			"solid_type",
+			"incline",
 			"unknown24",
 			"unknown60",
 			"unknown64",
@@ -177,9 +178,9 @@ public:
 		e.objectname             = "";
 		e.type                   = 0;
 		e.icon                   = 0;
-		e.unknown08              = 0;
-		e.unknown10              = 0;
-		e.unknown20              = 0;
+		e.size_percentage        = 0;
+		e.solid_type             = 0;
+		e.incline                = 0;
 		e.unknown24              = 0;
 		e.unknown60              = 0;
 		e.unknown64              = 0;
@@ -220,8 +221,9 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				object_id
 			)
 		);
@@ -242,9 +244,9 @@ public:
 			e.objectname             = row[9] ? row[9] : "";
 			e.type                   = static_cast<int32_t>(atoi(row[10]));
 			e.icon                   = static_cast<int32_t>(atoi(row[11]));
-			e.unknown08              = static_cast<int32_t>(atoi(row[12]));
-			e.unknown10              = static_cast<int32_t>(atoi(row[13]));
-			e.unknown20              = static_cast<int32_t>(atoi(row[14]));
+			e.size_percentage        = strtof(row[12], nullptr);
+			e.solid_type             = static_cast<int32_t>(atoi(row[13]));
+			e.incline                = static_cast<int32_t>(atoi(row[14]));
 			e.unknown24              = static_cast<int32_t>(atoi(row[15]));
 			e.unknown60              = static_cast<int32_t>(atoi(row[16]));
 			e.unknown64              = static_cast<int32_t>(atoi(row[17]));
@@ -304,9 +306,9 @@ public:
 		v.push_back(columns[9] + " = '" + Strings::Escape(e.objectname) + "'");
 		v.push_back(columns[10] + " = " + std::to_string(e.type));
 		v.push_back(columns[11] + " = " + std::to_string(e.icon));
-		v.push_back(columns[12] + " = " + std::to_string(e.unknown08));
-		v.push_back(columns[13] + " = " + std::to_string(e.unknown10));
-		v.push_back(columns[14] + " = " + std::to_string(e.unknown20));
+		v.push_back(columns[12] + " = " + std::to_string(e.size_percentage));
+		v.push_back(columns[13] + " = " + std::to_string(e.solid_type));
+		v.push_back(columns[14] + " = " + std::to_string(e.incline));
 		v.push_back(columns[15] + " = " + std::to_string(e.unknown24));
 		v.push_back(columns[16] + " = " + std::to_string(e.unknown60));
 		v.push_back(columns[17] + " = " + std::to_string(e.unknown64));
@@ -355,9 +357,9 @@ public:
 		v.push_back("'" + Strings::Escape(e.objectname) + "'");
 		v.push_back(std::to_string(e.type));
 		v.push_back(std::to_string(e.icon));
-		v.push_back(std::to_string(e.unknown08));
-		v.push_back(std::to_string(e.unknown10));
-		v.push_back(std::to_string(e.unknown20));
+		v.push_back(std::to_string(e.size_percentage));
+		v.push_back(std::to_string(e.solid_type));
+		v.push_back(std::to_string(e.incline));
 		v.push_back(std::to_string(e.unknown24));
 		v.push_back(std::to_string(e.unknown60));
 		v.push_back(std::to_string(e.unknown64));
@@ -414,9 +416,9 @@ public:
 			v.push_back("'" + Strings::Escape(e.objectname) + "'");
 			v.push_back(std::to_string(e.type));
 			v.push_back(std::to_string(e.icon));
-			v.push_back(std::to_string(e.unknown08));
-			v.push_back(std::to_string(e.unknown10));
-			v.push_back(std::to_string(e.unknown20));
+			v.push_back(std::to_string(e.size_percentage));
+			v.push_back(std::to_string(e.solid_type));
+			v.push_back(std::to_string(e.incline));
 			v.push_back(std::to_string(e.unknown24));
 			v.push_back(std::to_string(e.unknown60));
 			v.push_back(std::to_string(e.unknown64));
@@ -477,9 +479,9 @@ public:
 			e.objectname             = row[9] ? row[9] : "";
 			e.type                   = static_cast<int32_t>(atoi(row[10]));
 			e.icon                   = static_cast<int32_t>(atoi(row[11]));
-			e.unknown08              = static_cast<int32_t>(atoi(row[12]));
-			e.unknown10              = static_cast<int32_t>(atoi(row[13]));
-			e.unknown20              = static_cast<int32_t>(atoi(row[14]));
+			e.size_percentage        = strtof(row[12], nullptr);
+			e.solid_type             = static_cast<int32_t>(atoi(row[13]));
+			e.incline                = static_cast<int32_t>(atoi(row[14]));
 			e.unknown24              = static_cast<int32_t>(atoi(row[15]));
 			e.unknown60              = static_cast<int32_t>(atoi(row[16]));
 			e.unknown64              = static_cast<int32_t>(atoi(row[17]));
@@ -531,9 +533,9 @@ public:
 			e.objectname             = row[9] ? row[9] : "";
 			e.type                   = static_cast<int32_t>(atoi(row[10]));
 			e.icon                   = static_cast<int32_t>(atoi(row[11]));
-			e.unknown08              = static_cast<int32_t>(atoi(row[12]));
-			e.unknown10              = static_cast<int32_t>(atoi(row[13]));
-			e.unknown20              = static_cast<int32_t>(atoi(row[14]));
+			e.size_percentage        = strtof(row[12], nullptr);
+			e.solid_type             = static_cast<int32_t>(atoi(row[13]));
+			e.incline                = static_cast<int32_t>(atoi(row[14]));
 			e.unknown24              = static_cast<int32_t>(atoi(row[15]));
 			e.unknown60              = static_cast<int32_t>(atoi(row[16]));
 			e.unknown64              = static_cast<int32_t>(atoi(row[17]));
