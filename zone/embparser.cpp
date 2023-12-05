@@ -186,7 +186,7 @@ const char *QuestEventSubroutines[_LargestEventID] = {
 	"EVENT_UNMEMORIZE_SPELL",
 	"EVENT_SCRIBE_SPELL",
 	"EVENT_UNSCRIBE_SPELL",
-	"EVENT_ADDED_LOOT",
+	"EVENT_LOOT_ADDED",
 	// Add new events before these or Lua crashes
 	"EVENT_SPELL_EFFECT_BOT",
 	"EVENT_SPELL_EFFECT_BUFF_TIC_BOT"
@@ -2242,7 +2242,7 @@ void PerlembParser::ExportEventVariables(
 			break;
 		}
 
-		case EVENT_ADDED_LOOT: {
+		case EVENT_LOOT_ADDED: {
 			if (extra_pointers && extra_pointers->size() == 1) {
 				auto *inst = std::any_cast<EQ::ItemInstance *>(extra_pointers->at(0));
 				if (inst) {

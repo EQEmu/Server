@@ -532,9 +532,9 @@ void NPC::AddLootDrop(
 			GetInv().PutItem(found_slot, *inst);
 		}
 
-		if (parse->HasQuestSub(GetNPCTypeID(), EVENT_ADDED_LOOT)) {
+		if (parse->HasQuestSub(GetNPCTypeID(), EVENT_LOOT_ADDED)) {
 			std::vector<std::any> args = { inst };
-			parse->EventNPC(EVENT_ADDED_LOOT, this, nullptr, "", 0, &args);
+			parse->EventNPC(EVENT_LOOT_ADDED, this, nullptr, "", 0, &args);
 		}
 
 		itemlist->push_back(item);
