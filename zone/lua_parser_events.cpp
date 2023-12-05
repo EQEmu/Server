@@ -492,7 +492,7 @@ void handle_npc_damage(
 	lua_setfield(L, -2, "other");
 }
 
-void handle_npc_added_loot(
+void handle_npc_loot_added(
 	QuestInterface *parse,
 	lua_State* L,
 	NPC* npc,
