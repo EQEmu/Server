@@ -5101,10 +5101,9 @@ ALTER TABLE `items` MODIFY COLUMN `updated` datetime NULL DEFAULT NULL;
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
-ALTER TABLE `object`
-CHANGE COLUMN `unknown08` `size_percentage` float NOT NULL DEFAULT 0 AFTER `icon`;
-CHANGE COLUMN `unknown10` `solid_type` mediumint(5) NOT NULL DEFAULT 0 AFTER `size`;
-CHANGE COLUMN `unknown20` `incline` int(11) NOT NULL DEFAULT 0 AFTER `solid_type`;
+ALTER TABLE `object` CHANGE COLUMN `unknown08` `size_percentage` float NOT NULL DEFAULT 0 AFTER `icon`;
+ALTER TABLE `object` CHANGE COLUMN `unknown10` `solid_type` mediumint(5) NOT NULL DEFAULT 0 AFTER `size`;
+ALTER TABLE `object` CHANGE COLUMN `unknown20` `incline` int(11) NOT NULL DEFAULT 0 AFTER `solid_type`;
 )"
 	}
 
