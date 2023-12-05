@@ -6610,7 +6610,9 @@ luabind::scope lua_register_events() {
 			luabind::value("unmemorize_spell", static_cast<int>(EVENT_UNMEMORIZE_SPELL)),
 			luabind::value("scribe_spell", static_cast<int>(EVENT_SCRIBE_SPELL)),
 			luabind::value("unscribe_spell", static_cast<int>(EVENT_UNSCRIBE_SPELL)),
-			luabind::value("loot_added", static_cast<int>(EVENT_LOOT_ADDED))
+			luabind::value("loot_added", static_cast<int>(EVENT_LOOT_ADDED)),
+			luabind::value("ldon_points_gain", static_cast<int>(EVENT_LDON_POINTS_GAIN)),
+			luabind::value("ldon_points_loss", static_cast<int>(EVENT_LDON_POINTS_LOSS))
 		)];
 }
 
