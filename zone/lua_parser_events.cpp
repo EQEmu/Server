@@ -504,8 +504,8 @@ void handle_npc_added_loot(
 	if (extra_pointers && extra_pointers->size() == 1) {
 		auto *inst = std::any_cast<EQ::ItemInstance *>(extra_pointers->at(0));
 		auto *item = database.GetItem(inst->GetID());
-
-				if (item) {
+	
+		if (item) {
 			Lua_Item             l_item(item);
 			luabind::adl::object l_item_o = luabind::adl::object(L, l_item);
 			l_item_o.push(L);
