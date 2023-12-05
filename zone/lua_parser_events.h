@@ -210,6 +210,16 @@ void handle_npc_damage(
 	std::vector<std::any> *extra_pointers
 );
 
+void handle_npc_added_loot(
+	QuestInterface *parse,
+	lua_State* L,
+	NPC* npc,
+	Mob *init,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+);
+
 // Player
 void handle_player_say(
 	QuestInterface *parse,

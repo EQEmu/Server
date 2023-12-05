@@ -27,24 +27,37 @@
 #include "zonedb.h"
 #include "global_loot_manager.h"
 #include "../common/repositories/criteria/content_filter_criteria.h"
+#include "quest_parser_collection.h"
 
 #ifdef _WINDOWS
 #define snprintf	_snprintf
 #endif
 
 // Queries the loottable: adds item & coin to the npc
-void ZoneDatabase::AddLootTableToNPC(NPC* npc, uint32 loottable_id, ItemList* itemlist, uint32* copper, uint32* silver, uint32* gold, uint32* plat) {
-	const LootTable_Struct* lts = nullptr;
-	// global loot passes nullptr for these
-	bool bGlobal = copper == nullptr && silver == nullptr && gold == nullptr && plat == nullptr;
-	if (!bGlobal) {
+void ZoneDatabase::AddLootTableToNPC(
+	NPC *npc,
+	uint32 loottable_id,
+	ItemList *itemlist,
+	uint32 *copper,
+	uint32 *silver,
+	uint32 *gold,
+	uint32 *plat
+)
+{
+	const bool is_global = (
+		copper == nullptr &&
+		silver == nullptr &&
+		gold == nullptr &&
+		plat == nullptr
+	);
+	if (!is_global) {
 		*copper = 0;
 		*silver = 0;
 		*gold = 0;
 		*plat = 0;
 	}
 
-	lts = database.GetLootTable(loottable_id);
+	const auto *lts = database.GetLootTable(loottable_id);
 	if (!lts) {
 		return;
 	}
@@ -55,19 +68,23 @@ void ZoneDatabase::AddLootTableToNPC(NPC* npc, uint32 loottable_id, ItemList* it
 
 	uint32 min_cash = lts->mincash;
 	uint32 max_cash = lts->maxcash;
-	if(min_cash > max_cash) {
-		uint32 t = min_cash;
+	if (min_cash > max_cash) {
+		const uint32 t = min_cash;
 		min_cash = max_cash;
 		max_cash = t;
 	}
 
 	uint32 cash = 0;
-	if (!bGlobal) {
-		if(max_cash > 0 && lts->avgcoin > 0 && EQ::ValueWithin(lts->avgcoin, min_cash, max_cash)) {
-			float upper_chance = (float)(lts->avgcoin - min_cash) / (float)(max_cash - min_cash);
-			float avg_cash_roll = (float)zone->random.Real(0.0, 1.0);
+	if (!is_global) {
+		if (
+			max_cash > 0 &&
+			lts->avgcoin > 0 &&
+			EQ::ValueWithin(lts->avgcoin, min_cash, max_cash)
+		) {
+			const float upper_chance  = static_cast<float>(lts->avgcoin - min_cash) / static_cast<float>(max_cash - min_cash);
+			const float avg_cash_roll = static_cast<float>(zone->random.Real(0.0, 1.0));
 
-			if(avg_cash_roll < upper_chance) {
+			if (avg_cash_roll < upper_chance) {
 				cash = zone->random.Int(lts->avgcoin, max_cash);
 			} else {
 				cash = zone->random.Int(min_cash, lts->avgcoin);
@@ -77,7 +94,7 @@ void ZoneDatabase::AddLootTableToNPC(NPC* npc, uint32 loottable_id, ItemList* it
 		}
 	}
 
-	if(cash != 0) {
+	if (cash != 0) {
 		*plat = cash / 1000;
 		cash -= *plat * 1000;
 
@@ -90,25 +107,23 @@ void ZoneDatabase::AddLootTableToNPC(NPC* npc, uint32 loottable_id, ItemList* it
 		*copper = cash;
 	}
 
-	uint32 global_loot_multiplier = RuleI(Zone, GlobalLootMultiplier);
+	const uint32 global_loot_multiplier = RuleI(Zone, GlobalLootMultiplier);
 
-	// Do items
-	for (uint32 i=0; i<lts->NumEntries; i++) {
+	for (uint32 i = 0; i < lts->NumEntries; i++) {
 		for (uint32 k = 1; k <= (lts->Entries[i].multiplier * global_loot_multiplier); k++) {
-			uint8 droplimit = lts->Entries[i].droplimit;
-			uint8 mindrop = lts->Entries[i].mindrop;
+			const uint8 drop_limit   = lts->Entries[i].droplimit;
+			const uint8 minimum_drop = lts->Entries[i].mindrop;
 
 			//LootTable Entry probability
-			float ltchance = 0.0f;
-			ltchance = lts->Entries[i].probability;
+			const float probability = lts->Entries[i].probability;
 
 			float drop_chance = 0.0f;
-			if(ltchance > 0.0 && ltchance < 100.0) {
-				drop_chance = (float)zone->random.Real(0.0, 100.0);
+			if (EQ::ValueWithin(probability, 0.0f, 100.0f)) {
+				drop_chance = static_cast<float>(zone->random.Real(0.0, 100.0));
 			}
 
-			if (ltchance != 0.0 && (ltchance == 100.0 || drop_chance <= ltchance)) {
-				AddLootDropToNPC(npc, lts->Entries[i].lootdrop_id, itemlist, droplimit, mindrop);
+			if (probability != 0.0 && (probability == 100.0 || drop_chance <= probability)) {
+				AddLootDropToNPC(npc, lts->Entries[i].lootdrop_id, itemlist, drop_limit, minimum_drop);
 			}
 		}
 	}
@@ -118,31 +133,29 @@ void ZoneDatabase::AddLootTableToNPC(NPC* npc, uint32 loottable_id, ItemList* it
 // maxdrops = size of the array npcd
 void ZoneDatabase::AddLootDropToNPC(NPC *npc, uint32 lootdrop_id, ItemList *item_list, uint8 droplimit, uint8 mindrop)
 {
-	const LootDrop_Struct *loot_drop = GetLootDrop(lootdrop_id);
-	if (!loot_drop) {
-		return;
-	}
-
-	if (loot_drop->NumEntries == 0) {
-		return;
-	}
-
-	if (!content_service.DoesPassContentFiltering(loot_drop->content_flags)) {
+	const auto *lds = GetLootDrop(lootdrop_id);
+	if (
+		!lds ||
+		lds->NumEntries == 0 ||
+		!content_service.DoesPassContentFiltering(lds->content_flags)
+	) {
 		return;
 	}
 
 	// if this lootdrop is droplimit=0 and mindrop 0, scan list once and return
 	if (droplimit == 0 && mindrop == 0) {
-		for (uint32 i = 0; i < loot_drop->NumEntries; ++i) {
-			int      charges = loot_drop->Entries[i].multiplier;
-			for (int j       = 0; j < charges; ++j) {
-				if (zone->random.Real(0.0, 100.0) <= loot_drop->Entries[i].chance &&
-					npc->MeetsLootDropLevelRequirements(loot_drop->Entries[i], true)) {
-					const EQ::ItemData *database_item = GetItem(loot_drop->Entries[i].item_id);
+		for (uint32 i = 0; i < lds->NumEntries; ++i) {
+			const uint8 charges = lds->Entries[i].multiplier;
+			for (int j = 0; j < charges; ++j) {
+				if (
+					zone->random.Real(0.0, 100.0) <= lds->Entries[i].chance &&
+					npc->MeetsLootDropLevelRequirements(lds->Entries[i], true)
+				) {
+					const EQ::ItemData *database_item = GetItem(lds->Entries[i].item_id);
 					npc->AddLootDrop(
 						database_item,
 						item_list,
-						loot_drop->Entries[i]
+						lds->Entries[i]
 					);
 				}
 			}
@@ -150,7 +163,7 @@ void ZoneDatabase::AddLootDropToNPC(NPC *npc, uint32 lootdrop_id, ItemList *item
 		return;
 	}
 
-	if (loot_drop->NumEntries > 100 && droplimit == 0) {
+	if (lds->NumEntries > 100 && droplimit == 0) {
 		droplimit = 10;
 	}
 
@@ -163,16 +176,17 @@ void ZoneDatabase::AddLootDropToNPC(NPC *npc, uint32 lootdrop_id, ItemList *item
 	bool  roll_table_chance_bypass = false;
 	bool  active_item_list         = false;
 
-	for (uint32 i = 0; i < loot_drop->NumEntries; ++i) {
-		const EQ::ItemData *db_item = GetItem(loot_drop->Entries[i].item_id);
-		if (db_item && npc->MeetsLootDropLevelRequirements(loot_drop->Entries[i])) {
-			roll_t += loot_drop->Entries[i].chance;
-			if (loot_drop->Entries[i].chance >= 100) {
+	for (uint32 i = 0; i < lds->NumEntries; ++i) {
+		const EQ::ItemData *db_item = GetItem(lds->Entries[i].item_id);
+		if (db_item && npc->MeetsLootDropLevelRequirements(lds->Entries[i])) {
+			roll_t += lds->Entries[i].chance;
+
+			if (lds->Entries[i].chance >= 100) {
 				roll_table_chance_bypass = true;
+			} else {
+				no_loot_prob *= (100 - lds->Entries[i].chance) / 100.0f;
 			}
-			else {
-				no_loot_prob *= (100 - loot_drop->Entries[i].chance) / 100.0f;
-			}
+
 			active_item_list = true;
 		}
 	}
@@ -191,41 +205,40 @@ void ZoneDatabase::AddLootDropToNPC(NPC *npc, uint32 lootdrop_id, ItemList *item
 	for (int i = 0; i < droplimit; ++i) {
 		if (drops < mindrop || roll_table_chance_bypass || (float) zone->random.Real(0.0, 1.0) >= no_loot_prob) {
 			float       roll = (float) zone->random.Real(0.0, roll_t);
-			for (uint32 j    = 0; j < loot_drop->NumEntries; ++j) {
-				const EQ::ItemData *db_item = GetItem(loot_drop->Entries[j].item_id);
+			for (uint32 j    = 0; j < lds->NumEntries; ++j) {
+				const auto *db_item = GetItem(lds->Entries[j].item_id);
 				if (db_item) {
 					// if it doesn't meet the requirements do nothing
-					if (!npc->MeetsLootDropLevelRequirements(loot_drop->Entries[j])) {
+					if (!npc->MeetsLootDropLevelRequirements(lds->Entries[j])) {
 						continue;
 					}
 
-					if (roll < loot_drop->Entries[j].chance) {
+					if (roll < lds->Entries[j].chance) {
 						npc->AddLootDrop(
 							db_item,
 							item_list,
-							loot_drop->Entries[j]
+							lds->Entries[j]
 						);
 						drops++;
 
-						int charges = (int) loot_drop->Entries[i].multiplier;
-						charges = EQ::ClampLower(charges, 1);
+						uint8 charges = lds->Entries[i].multiplier;
+						charges = EQ::ClampLower(charges, static_cast<uint8>(1));
 
 						for (int k = 1; k < charges; ++k) {
-							float c_roll = (float) zone->random.Real(0.0, 100.0);
-							if (c_roll <= loot_drop->Entries[i].chance) {
+							float c_roll = static_cast<float>(zone->random.Real(0.0, 100.0));
+							if (c_roll <= lds->Entries[i].chance) {
 								npc->AddLootDrop(
 									db_item,
 									item_list,
-									loot_drop->Entries[i]
+									lds->Entries[i]
 								);
 							}
 						}
 
-						j = loot_drop->NumEntries;
+						j = lds->NumEntries;
 						break;
-					}
-					else {
-						roll -= loot_drop->Entries[j].chance;
+					} else {
+						roll -= lds->Entries[j].chance;
 					}
 				}
 			}
@@ -291,19 +304,18 @@ void NPC::AddLootDrop(
 	ItemList *itemlist,
 	LootDropEntries_Struct loot_drop,
 	bool wear_change,
-	uint32 aug1,
-	uint32 aug2,
-	uint32 aug3,
-	uint32 aug4,
-	uint32 aug5,
-	uint32 aug6
+	uint32 augment_one,
+	uint32 augment_two,
+	uint32 augment_three,
+	uint32 augment_four,
+	uint32 augment_five,
+	uint32 augment_six
 )
 {
 	if (!item2) {
 		return;
 	}
 
-	//make sure we are doing something...
 	if (!itemlist && !wear_change) {
 		return;
 	}
@@ -340,17 +352,16 @@ void NPC::AddLootDrop(
 
 	item->item_id           = item2->ID;
 	item->charges           = loot_drop.item_charges;
-	item->aug_1             = aug1;
-	item->aug_2             = aug2;
-	item->aug_3             = aug3;
-	item->aug_4             = aug4;
-	item->aug_5             = aug5;
-	item->aug_6             = aug6;
-	item->attuned           = 0;
+	item->aug_1             = augment_one;
+	item->aug_2             = augment_two;
+	item->aug_3             = augment_three;
+	item->aug_4             = augment_four;
+	item->aug_5             = augment_five;
+	item->aug_6             = augment_six;
+	item->attuned           = false;
 	item->trivial_min_level = loot_drop.trivial_min_level;
 	item->trivial_max_level = loot_drop.trivial_max_level;
 	item->equip_slot        = EQ::invslot::SLOT_INVALID;
-
 
 	// unsure if required to equip, YOLO for now
 	if (item2->ItemType == EQ::item::ItemTypeBow) {
@@ -363,17 +374,17 @@ void NPC::AddLootDrop(
 
 	bool found = false; // track if we found an empty slot we fit into
 
-	int foundslot = INVALID_INDEX; // for multi-slot items
+	int found_slot = INVALID_INDEX; // for multi-slot items
 
-	const auto* inst = database.CreateItem(
+	auto *inst = database.CreateItem(
 		item2->ID,
 		loot_drop.item_charges,
-		aug1,
-		aug2,
-		aug3,
-		aug4,
-		aug5,
-		aug6
+		augment_one,
+		augment_two,
+		augment_three,
+		augment_four,
+		augment_five,
+		augment_six
 	);
 
 	if (!inst) {
@@ -381,9 +392,8 @@ void NPC::AddLootDrop(
 	}
 
 	if (loot_drop.equip_item > 0) {
-		uint8 eslot = 0xFF;
-		char newid[20];
-		const EQ::ItemData* compitem = nullptr;
+		uint8 equipment_slot = UINT8_MAX;
+		const EQ::ItemData *compitem = nullptr;
 
 		// Equip rules are as follows:
 		// If the item has the NoPet flag set it will not be equipped.
@@ -395,141 +405,136 @@ void NPC::AddLootDrop(
 		// it is an improvement.
 
 		if (!item2->NoPet) {
-			for (int i = EQ::invslot::EQUIPMENT_BEGIN; !found && i <= EQ::invslot::EQUIPMENT_END; i++) {
-				uint32 slots = (1 << i);
+			for (
+				int i = EQ::invslot::EQUIPMENT_BEGIN;
+				!found && i <= EQ::invslot::EQUIPMENT_END;
+				i++
+			) {
+				const uint32 slots = (1 << i);
 				if (item2->Slots & slots) {
-					if(equipment[i])
-					{
+					if (equipment[i]) {
 						compitem = database.GetItem(equipment[i]);
-						if (item2->AC > compitem->AC ||
-							(item2->AC == compitem->AC && item2->HP > compitem->HP))
-						{
+						if (
+							item2->AC > compitem->AC ||
+							(item2->AC == compitem->AC && item2->HP > compitem->HP)
+						) {
 							// item would be an upgrade
 							// check if we're multi-slot, if yes then we have to keep
 							// looking in case any of the other slots we can fit into are empty.
 							if (item2->Slots != slots) {
-								foundslot = i;
-							}
-							else {
+								found_slot = i;
+							} else {
 								// Unequip old item
-								auto* olditem = GetItem(i);
+								auto *old_item = GetItem(i);
 
-								olditem->equip_slot = EQ::invslot::SLOT_INVALID;
+								old_item->equip_slot = EQ::invslot::SLOT_INVALID;
 
 								equipment[i] = item2->ID;
 
-								foundslot = i;
-								found     = true;
+								found_slot = i;
+								found      = true;
 							}
-						} // end if ac
-					}
-					else
-					{
+						}
+					} else {
 						equipment[i] = item2->ID;
-						foundslot = i;
-						found = true;
+
+						found_slot = i;
+						found      = true;
 					}
-				} // end if (slots)
-			} // end for
-		} // end if NoPet
+				}
+			}
+		}
 
 		// Possible slot was found but not selected. Pick it now.
-		if (!found && foundslot >= 0) {
-			equipment[foundslot] = item2->ID;
+		if (!found && found_slot >= 0) {
+			equipment[found_slot] = item2->ID;
+
 			found = true;
 		}
 
-		// @merth: IDFile size has been increased, this needs to change
-		uint16 emat;
-		if(item2->Material <= 0
-			|| (item2->Slots & ((1 << EQ::invslot::slotPrimary) | (1 << EQ::invslot::slotSecondary)))) {
-			memset(newid, 0, sizeof(newid));
-			for(int i=0;i<7;i++){
-				if (!isalpha(item2->IDFile[i])){
-					strn0cpy(newid, &item2->IDFile[i],6);
-					i=8;
+		uint32 equipment_material;
+		if (
+			item2->Material <= 0 ||
+			(
+				item2->Slots & (
+					(1 << EQ::invslot::slotPrimary) |
+					(1 << EQ::invslot::slotSecondary)
+				)
+			)
+		) {
+			equipment_material = Strings::ToUnsignedInt(&item2->IDFile[2]);
+		} else {
+			equipment_material = item2->Material;
+		}
+
+		if (found_slot == EQ::invslot::slotPrimary) {
+			equipment_slot = EQ::textures::weaponPrimary;
+
+			if (item2->Damage > 0) {
+				SendAddPlayerState(PlayerState::PrimaryWeaponEquipped);
+
+				if (!RuleB(Combat, ClassicNPCBackstab)) {
+					SetFacestab(true);
 				}
 			}
 
-			emat = Strings::ToInt(newid);
-		} else {
-			emat = item2->Material;
-		}
-
-		if (foundslot == EQ::invslot::slotPrimary) {
-
-			eslot = EQ::textures::weaponPrimary;
-			if (item2->Damage > 0) {
-				SendAddPlayerState(PlayerState::PrimaryWeaponEquipped);
-				if (!RuleB(Combat, ClassicNPCBackstab))
-					SetFacestab(true);
-			}
-			if (item2->IsType2HWeapon())
+			if (item2->IsType2HWeapon()) {
 				SetTwoHanderEquipped(true);
-		}
-		else if (foundslot == EQ::invslot::slotSecondary
-			&& (GetOwner() != nullptr || (CanThisClassDualWield() && zone->random.Roll(NPC_DW_CHANCE)) || (item2->Damage==0)) &&
-			(item2->IsType1HWeapon() || item2->ItemType == EQ::item::ItemTypeShield || item2->ItemType ==  EQ::item::ItemTypeLight))
-		{
-
-			eslot = EQ::textures::weaponSecondary;
-			if (item2->Damage > 0)
-				SendAddPlayerState(PlayerState::SecondaryWeaponEquipped);
-		}
-		else if (foundslot == EQ::invslot::slotHead) {
-			eslot = EQ::textures::armorHead;
-		}
-		else if (foundslot == EQ::invslot::slotChest) {
-			eslot = EQ::textures::armorChest;
-		}
-		else if (foundslot == EQ::invslot::slotArms) {
-			eslot = EQ::textures::armorArms;
-		}
-		else if (foundslot == EQ::invslot::slotWrist1 || foundslot == EQ::invslot::slotWrist2) {
-			eslot = EQ::textures::armorWrist;
-		}
-		else if (foundslot == EQ::invslot::slotHands) {
-			eslot = EQ::textures::armorHands;
-		}
-		else if (foundslot == EQ::invslot::slotLegs) {
-			eslot = EQ::textures::armorLegs;
-		}
-		else if (foundslot == EQ::invslot::slotFeet) {
-			eslot = EQ::textures::armorFeet;
-		}
-
-		/*
-		what was this about???
-
-		if (((npc->GetRace()==127) && (npc->CastToMob()->GetOwnerID()!=0)) && (item2->Slots==24576) || (item2->Slots==8192) || (item2->Slots==16384)){
-			npc->d_melee_texture2=Strings::ToInt(newid);
-			wc->wear_slot_id=8;
-			if (item2->Material >0)
-				wc->material=item2->Material;
-			else
-				wc->material=Strings::ToInt(newid);
-			npc->AC+=item2->AC;
-			npc->STR+=item2->STR;
-			npc->INT+=item2->INT;
-		}
-		*/
-
-		//if we found an open slot it goes in...
-		if(eslot != 0xFF) {
-			if(wear_change) {
-				p_wear_change_struct->wear_slot_id = eslot;
-				p_wear_change_struct->material     = emat;
 			}
+		} else if (
+			found_slot == EQ::invslot::slotSecondary &&
+			(
+				GetOwner() ||
+				(CanThisClassDualWield() && zone->random.Roll(NPC_DW_CHANCE)) ||
+				item2->Damage == 0
+			) &&
+			(
+				item2->IsType1HWeapon() ||
+				item2->ItemType == EQ::item::ItemTypeShield ||
+				item2->ItemType == EQ::item::ItemTypeLight
+			)
+		) {
+			equipment_slot = EQ::textures::weaponSecondary;
 
+			if (item2->Damage > 0) {
+				SendAddPlayerState(PlayerState::SecondaryWeaponEquipped);
+			}
+		} else if (found_slot == EQ::invslot::slotHead) {
+			equipment_slot = EQ::textures::armorHead;
+		} else if (found_slot == EQ::invslot::slotChest) {
+			equipment_slot = EQ::textures::armorChest;
+		} else if (found_slot == EQ::invslot::slotArms) {
+			equipment_slot = EQ::textures::armorArms;
+		} else if (EQ::ValueWithin(found_slot, EQ::invslot::slotWrist1, EQ::invslot::slotWrist2)) {
+			equipment_slot = EQ::textures::armorWrist;
+		} else if (found_slot == EQ::invslot::slotHands) {
+			equipment_slot = EQ::textures::armorHands;
+		} else if (found_slot == EQ::invslot::slotLegs) {
+			equipment_slot = EQ::textures::armorLegs;
+		} else if (found_slot == EQ::invslot::slotFeet) {
+			equipment_slot = EQ::textures::armorFeet;
 		}
+
+		if (equipment_slot != UINT8_MAX) {
+			if (wear_change) {
+				p_wear_change_struct->wear_slot_id = equipment_slot;
+				p_wear_change_struct->material     = equipment_material;
+			}
+		}
+
 		if (found) {
-			item->equip_slot = foundslot;
+			item->equip_slot = found_slot;
 		}
 	}
 
 	if (itemlist) {
-		if (foundslot != INVALID_INDEX) {
-			GetInv().PutItem(foundslot, *inst);
+		if (found_slot != INVALID_INDEX) {
+			GetInv().PutItem(found_slot, *inst);
+		}
+
+		if (parse->HasQuestSub(GetNPCTypeID(), EVENT_ADDED_LOOT)) {
+			std::vector<std::any> args = { inst };
+			parse->EventNPC(EVENT_ADDED_LOOT, this, nullptr, "", 0, &args);
 		}
 
 		itemlist->push_back(item);
@@ -551,6 +556,7 @@ void NPC::AddLootDrop(
 	}
 
 	UpdateEquipmentLight();
+
 	if (UpdateActiveLight()) {
 		SendAppearancePacket(AT_Light, GetActiveLightType());
 	}
@@ -591,15 +597,17 @@ void NPC::AddItem(
 	AddLootDrop(i, &itemlist, loot_drop_entry, true, aug1, aug2, aug3, aug4, aug5, aug6);
 }
 
-void NPC::AddLootTable() {
+void NPC::AddLootTable()
+{
 	if (npctype_id != 0) { // check if it's a GM spawn
-		database.AddLootTableToNPC(this,loottable_id, &itemlist, &copper, &silver, &gold, &platinum);
+		database.AddLootTableToNPC(this, loottable_id, &itemlist, &copper, &silver, &gold, &platinum);
 	}
 }
 
-void NPC::AddLootTable(uint32 ldid) {
+void NPC::AddLootTable(uint32 loottable_id)
+{
 	if (npctype_id != 0) { // check if it's a GM spawn
-	  database.AddLootTableToNPC(this,ldid, &itemlist, &copper, &silver, &gold, &platinum);
+		database.AddLootTableToNPC(this, loottable_id, &itemlist, &copper, &silver, &gold, &platinum);
 	}
 }
 
