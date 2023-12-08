@@ -3641,6 +3641,7 @@ void Bot::LevelBotWithClient(Client* client, uint8 level, bool sendlvlapp) {
 					bot->SendLevelAppearance();
 				// modified from Client::SetLevel()
 				bot->SendAppearancePacket(AT_WhoLevel, level, true, true); // who level change
+				bot->AI_AddBotSpells(bot->GetBotSpellID());
 			}
 		}
 
