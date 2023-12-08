@@ -5811,7 +5811,7 @@ std::unordered_map<uint32, std::vector<uint16>> Client::LoadSpellGroupCache(uint
 		m_pp.class_, min_level, max_level
 	);
 
-	auto results = database.QueryDatabase(query);
+	auto results = content_db.QueryDatabase(query);
 	if (!results.Success() || !results.RowCount()) {
 		return spell_group_cache;
 	}
