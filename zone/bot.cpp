@@ -3634,12 +3634,27 @@ void Bot::LevelBotWithClient(Client* client, uint8 level, bool sendlvlapp) {
 
 		for (auto biter = blist.begin(); biter != blist.end(); ++biter) {
 			Bot* bot = *biter;
+
 			if (bot && (bot->GetLevel() != client->GetLevel())) {
 				bot->SetPetChooser(false); // not sure what this does, but was in bot 'update' code
 				bot->CalcBotStats(client->GetBotOption(Client::booStatsUpdate));
-				if (sendlvlapp)
+
+				if (sendlvlapp) {
 					bot->SendLevelAppearance();
+				}
 				// modified from Client::SetLevel()
+				if (!RuleB(Bots, BotHealOnLevel)) {
+					int mhp = bot->CalcMaxHP();
+					if (bot->GetHP() > mhp) {
+						bot->SetHP(mhp);
+					}
+				}
+				else {
+					bot->SetHP(bot->CalcMaxHP());
+					bot->SetMana(bot->CalcMaxMana());
+				}
+
+				bot->SendHPUpdate();
 				bot->SendAppearancePacket(AT_WhoLevel, level, true, true); // who level change
 				bot->AI_AddBotSpells(bot->GetBotSpellID());
 			}
