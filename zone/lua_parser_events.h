@@ -1055,5 +1055,25 @@ void handle_bot_damage(
 	std::vector<std::any> *extra_pointers
 );
 
+void handle_bot_level_up(
+	QuestInterface *parse,
+	lua_State* L,
+	Bot* bot,
+	Mob* init,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+);
+
+void handle_bot_level_down(
+	QuestInterface *parse,
+	lua_State* L,
+	Bot* bot,
+	Mob* init,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+);
+
 #endif
 #endif

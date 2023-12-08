@@ -395,7 +395,7 @@ public:
 	// Static Class Methods
 	static Bot* LoadBot(uint32 botID);
 	static uint32 SpawnedBotCount(const uint32 owner_id, uint8 class_id = NO_CLASS);
-	static void LevelBotWithClient(Client* client, uint8 level, bool sendlvlapp);
+	static void LevelBotWithClient(Client* c, uint8 new_level, bool send_appearance);
 
 	static bool IsBotAttackAllowed(Mob* attacker, Mob* target, bool& hasRuleDefined);
 	static Bot* GetBotByBotClientOwnerAndBotName(Client* c, const std::string& botName);

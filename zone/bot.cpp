@@ -3626,41 +3626,45 @@ uint32 Bot::SpawnedBotCount(const uint32 owner_id, uint8 class_id) {
 	return spawned_bot_count;
 }
 
-void Bot::LevelBotWithClient(Client* client, uint8 level, bool sendlvlapp) {
+void Bot::LevelBotWithClient(Client* c, uint8 new_level, bool send_appearance) {
 	// This essentially performs a '#bot update,' with appearance packets, based on the current methods.
-	// This should not be called outside of Client::SetEXP() due to it's lack of rule checks.
-	if (client) {
-		std::list<Bot*> blist = entity_list.GetBotsByBotOwnerCharacterID(client->CharacterID());
+	// This should not be called outside of Client::SetEXP() due to its lack of rule checks.
 
-		for (auto biter = blist.begin(); biter != blist.end(); ++biter) {
-			Bot* bot = *biter;
+	if (c) {
+		const auto &l = entity_list.GetBotsByBotOwnerCharacterID(c->CharacterID());
 
-			if (bot && (bot->GetLevel() != client->GetLevel())) {
-				bot->SetPetChooser(false); // not sure what this does, but was in bot 'update' code
-				bot->CalcBotStats(client->GetBotOption(Client::booStatsUpdate));
+		for (const auto &e : l) {
+			if (e && (e->GetLevel() != c->GetLevel())) {
+				int levels_gained = (new_level - e->GetLevel());
 
-				if (sendlvlapp) {
-					bot->SendLevelAppearance();
+				if (levels_gained < 0) {
+					parse->EventBot(EVENT_LEVEL_DOWN, e, nullptr, std::to_string(std::abs(levels_gained)), 0);
+				} else {
+					parse->EventBot(EVENT_LEVEL_UP, e, nullptr, std::to_string(levels_gained), 0);
 				}
-				// modified from Client::SetLevel()
+
+				e->SetPetChooser(false); // not sure what this does, but was in bot 'update' code
+				e->CalcBotStats(c->GetBotOption(Client::booStatsUpdate));
+
+				if (send_appearance) {
+					e->SendLevelAppearance();
+				}
+
 				if (!RuleB(Bots, BotHealOnLevel)) {
-					int mhp = bot->CalcMaxHP();
-					if (bot->GetHP() > mhp) {
-						bot->SetHP(mhp);
+					const int64 max_hp = e->CalcMaxHP();
+					if (e->GetHP() > max_hp) {
+						e->SetHP(max_hp);
 					}
-				}
-				else {
-					bot->SetHP(bot->CalcMaxHP());
-					bot->SetMana(bot->CalcMaxMana());
+				} else {
+					e->SetHP(e->CalcMaxHP());
+					e->SetMana(e->CalcMaxMana());
 				}
 
-				bot->SendHPUpdate();
-				bot->SendAppearancePacket(AT_WhoLevel, level, true, true); // who level change
-				bot->AI_AddBotSpells(bot->GetBotSpellID());
+				e->SendHPUpdate();
+				e->SendAppearancePacket(AT_WhoLevel, new_level, true, true); // who level change
+				e->AI_AddBotSpells(e->GetBotSpellID());
 			}
 		}
-
-		blist.clear();
 	}
 }
 
