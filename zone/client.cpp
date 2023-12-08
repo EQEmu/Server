@@ -4165,7 +4165,7 @@ void Client::KeyRingList()
 
 	for (const auto &e : keyring) {
 		item = database.GetItem(e);
-		if (i) {
+		if (item) {
 			const std::string &item_string = RuleB(World, UseItemLinksForKeyRing) ? database.CreateItemLink(e) : item->Name;
 
 			Message(Chat::LightBlue, item_string.c_str());
