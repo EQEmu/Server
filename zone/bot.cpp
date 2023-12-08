@@ -3635,12 +3635,12 @@ void Bot::LevelBotWithClient(Client* c, uint8 new_level, bool send_appearance) {
 
 		for (const auto &e : l) {
 			if (e && (e->GetLevel() != c->GetLevel())) {
-				int levels_gained = (new_level - e->GetLevel());
+				int levels_change = (new_level - e->GetLevel());
 
-				if (levels_gained < 0) {
-					parse->EventBot(EVENT_LEVEL_DOWN, e, nullptr, std::to_string(std::abs(levels_gained)), 0);
+				if (levels_change < 0) {
+					parse->EventBot(EVENT_LEVEL_DOWN, e, nullptr, std::to_string(std::abs(levels_change)), 0);
 				} else {
-					parse->EventBot(EVENT_LEVEL_UP, e, nullptr, std::to_string(levels_gained), 0);
+					parse->EventBot(EVENT_LEVEL_UP, e, nullptr, std::to_string(levels_change), 0);
 				}
 
 				e->SetPetChooser(false); // not sure what this does, but was in bot 'update' code
