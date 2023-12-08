@@ -4135,7 +4135,7 @@ void Client::KeyRingAdd(uint32 item_id)
 		return;
 	}
 
-	const std::string &item_link = database.CreateItem(item_id);
+	const std::string &item_link = database.CreateItemLink(item_id);
 
 	Message(
 		Chat::LightBlue,
