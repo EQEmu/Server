@@ -65,6 +65,7 @@ extern volatile bool RunLoops;
 #include "../common/repositories/character_disciplines_repository.h"
 #include "../common/repositories/character_data_repository.h"
 #include "../common/repositories/discovered_items_repository.h"
+#include "../common/repositories/keyring_repository.h"
 #include "../common/events/player_events.h"
 #include "../common/events/player_event_logs.h"
 #include "dialogue_window.h"
@@ -4087,54 +4088,87 @@ void Client::SendWindow(
 
 void Client::KeyRingLoad()
 {
-	std::string query = StringFormat("SELECT item_id FROM keyring "
-									"WHERE char_id = '%i' ORDER BY item_id", character_id);
-	auto results = database.QueryDatabase(query);
-	if (!results.Success()) {
+	const auto &l = KeyringRepository::GetWhere(
+		database,
+		fmt::format(
+			"`char_id` = {} ORDER BY `item_id`",
+			character_id
+		)
+	);
+
+	if (l.empty()) {
 		return;
 	}
 
-	for (auto row = results.begin(); row != results.end(); ++row)
-		keyring.push_back(Strings::ToInt(row[0]));
 
+	for (const auto &e : l) {
+		keyring.emplace_back(e.item_id);
+	}
 }
 
 void Client::KeyRingAdd(uint32 item_id)
 {
-	if(0==item_id)
-		return;
-
-	bool found = KeyRingCheck(item_id);
-	if (found)
-		return;
-
-	std::string query = StringFormat("INSERT INTO keyring(char_id, item_id) VALUES(%i, %i)", character_id, item_id);
-	auto results = database.QueryDatabase(query);
-	if (!results.Success()) {
+	if (!item_id) {
 		return;
 	}
 
-	Message(Chat::LightBlue,"Added to keyring.");
+	const bool found = KeyRingCheck(item_id);
+	if (found) {
+		return;
+	}
 
-	keyring.push_back(item_id);
+	auto e = KeyringRepository::NewEntity();
+
+	e.char_id = CharacterID();
+	e.item_id = item_id;
+
+	e = KeyringRepository::InsertOne(database, e);
+
+	if (!e.id) {
+		return;
+	}
+
+	keyring.emplace_back(item_id);
+
+	if (!RuleB(World, UseItemLinksForKeyRing)) {
+		Message(Chat::LightBlue, "Added to keyring.");
+		return;
+	}
+
+	const std::string &item_link = database.CreateItem(item_id);
+
+	Message(
+		Chat::LightBlue,
+		fmt::format(
+			"Added {} to keyring.",
+			item_link
+		).c_str()
+	);
 }
 
 bool Client::KeyRingCheck(uint32 item_id)
 {
-	for (auto iter = keyring.begin(); iter != keyring.end(); ++iter) {
-		if(*iter == item_id)
+	for (const auto &e : keyring) {
+		if (e == item_id) {
 			return true;
+		}
 	}
+
 	return false;
 }
 
 void Client::KeyRingList()
 {
-	Message(Chat::LightBlue,"Keys on Keyring:");
+	Message(Chat::LightBlue, "Keys on Keyring:");
+
 	const EQ::ItemData *item = nullptr;
-	for (auto iter = keyring.begin(); iter != keyring.end(); ++iter) {
-		if ((item = database.GetItem(*iter))!=nullptr) {
-			Message(Chat::LightBlue,item->Name);
+
+	for (const auto &e : keyring) {
+		item = database.GetItem(e);
+		if (i) {
+			const std::string &item_string = RuleB(World, UseItemLinksForKeyRing) ? database.CreateItemLink(e) : item->Name;
+
+			Message(Chat::LightBlue, item_string.c_str());
 		}
 	}
 }

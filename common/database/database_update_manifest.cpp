@@ -5105,6 +5105,18 @@ ALTER TABLE `object` CHANGE COLUMN `unknown08` `size_percentage` float NOT NULL 
 ALTER TABLE `object` CHANGE COLUMN `unknown10` `solid_type` mediumint(5) NOT NULL DEFAULT 0 AFTER `size`;
 ALTER TABLE `object` CHANGE COLUMN `unknown20` `incline` int(11) NOT NULL DEFAULT 0 AFTER `solid_type`;
 )"
+	},
+	ManifestEntry{
+		.version = 9246,
+		.description = "2023_12_07_keyring_id.sql",
+		.check = "SHOW COLUMNS FROM `keyring` LIKE 'id'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `keyring`
+ADD COLUMN `id` int UNSIGNED NOT NULL AUTO_INCREMENT FIRST,
+ADD PRIMARY KEY (`id`);
+)"
 	}
 
 // -- template; copy/paste this when you need to create a new entry
