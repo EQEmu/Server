@@ -126,16 +126,12 @@
 
 
 const char* GetClassIDName(uint8 class_id, uint8 level = 0);
-const char* GetPlayerClassName(uint32 player_class_value, uint8 level = 0);
 
 bool IsPlayerClass(uint8 class_id);
 const std::string GetPlayerClassAbbreviation(uint8 class_id);
 
 uint32 GetPlayerClassValue(uint8 class_id);
 uint32 GetPlayerClassBit(uint8 class_id);
-
-uint8 GetClassIDFromPlayerClassValue(uint32 player_class_value);
-uint8 GetClassIDFromPlayerClassBit(uint32 player_class_bit);
 
 bool IsFighterClass(uint8 class_id);
 bool IsSpellFighterClass(uint8 class_id);
