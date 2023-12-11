@@ -918,44 +918,66 @@ bool BotDatabase::LoadTimers(Bot* bot_inst)
 		return false;
 
 	query = StringFormat(
-		"SELECT"
-		" IfNull(bt.`timer_id`, '0') As timer_id,"
-		" IfNull(bt.`timer_value`, '0') As timer_value,"
-		" IfNull(MAX(sn.`recast_time`), '0') AS MaxTimer"
-		" FROM `bot_timers` bt, `spells_new` sn"
-		" WHERE bt.`bot_id` = '%u' AND sn.`EndurTimerIndex` = ("
-		"SELECT case"
-		" WHEN timer_id > '%i' THEN timer_id - '%i'"
-		" ELSE timer_id END AS timer_id"
-		" FROM `bot_timers` WHERE `timer_id` = bt.`timer_id` AND `bot_id` = bt.`bot_id`" // double-check validity
-		")"
-		" AND sn.`classes%i` <= '%i'",
-		bot_inst->GetBotID(),
-		(DisciplineReuseStart - 1),
-		(DisciplineReuseStart - 1),
-		bot_inst->GetClass(),
-		bot_inst->GetLevel()
+		"SELECT *"
+		" FROM `bot_timers` bt"
+		" WHERE bt.`bot_id` = '%u'",
+		bot_inst->GetBotID()
 	);
+
 	auto results = database.QueryDatabase(query);
 	if (!results.Success())
 		return false;
 	if (!results.RowCount())
 		return true;
 
-	uint32* bot_timers = bot_inst->GetTimers();
-	if (!bot_timers)
-		return false;
+	std::vector<BotTimer_Struct> bot_timers;
 
-	int timer_id = 0;
-	uint32 timer_value = 0;
-	uint32 max_value = 0;
+	uint32 timer_id		= 0;
+	uint32 timer_value	= 0;
+	uint32 recast_time	= 0;
+	bool is_spell		= false;
+	bool is_disc		= false;
+	uint16 spell_id		= 0;
+	bool is_item		= false;
+	uint32 item_id		= 0;
+
+	BotTimer_Struct t;
+	t.timer_id		= 0;
+	t.timer_value	= 0;
+	t.recast_time	= 0;
+	t.is_spell		= false;
+	t.is_disc		= false;
+	t.spell_id		= 0;
+	t.is_item		= false;
+	t.item_id		= 0;
+
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		timer_id = Strings::ToInt(row[0]) - 1;
-		timer_value = Strings::ToInt(row[1]);
-		max_value = Strings::ToInt(row[2]);
+		//bot_id		= Strings::ToInt(row[0]); //unused
+		timer_id		= Strings::ToInt(row[1]);
+		timer_value		= Strings::ToInt(row[2]);
+		recast_time		= Strings::ToInt(row[3]);
+		is_spell		= Strings::ToInt(row[4]);
+		is_disc			= Strings::ToInt(row[5]);
+		spell_id		= Strings::ToInt(row[6]);
+		is_item			= Strings::ToInt(row[7]);
+		item_id			= Strings::ToInt(row[8]);
 
-		if (timer_id >= 0 && timer_id < MaxTimer && timer_value < (Timer::GetCurrentTime() + max_value))
-			bot_timers[timer_id] = timer_value;
+		if (timer_value < (Timer::GetCurrentTime() + recast_time)) {
+			t.timer_id		= timer_id;
+			t.timer_value	= timer_value;
+			t.recast_time	= recast_time;
+			t.is_spell		= is_spell ? true : false;
+			t.is_disc		= is_disc ? true : false;
+			t.spell_id		= spell_id;
+			t.is_item		= is_item ? true : false;
+			t.item_id		= item_id;
+
+			bot_timers.push_back(t);
+		}
+	}
+
+	if (!bot_timers.empty()) {
+		bot_inst->SetBotTimers(bot_timers);
 	}
 
 	return true;
@@ -963,28 +985,46 @@ bool BotDatabase::LoadTimers(Bot* bot_inst)
 
 bool BotDatabase::SaveTimers(Bot* bot_inst)
 {
-	if (!bot_inst)
+	if (!bot_inst) {
 		return false;
+	}
 
-	if (!DeleteTimers(bot_inst->GetBotID()))
+	if (!DeleteTimers(bot_inst->GetBotID())) {
 		return false;
+	}
 
-	uint32* bot_timers = bot_inst->GetTimers();
-	if (!bot_timers)
-		return false;
+	std::vector<BotTimer_Struct> bot_timers = bot_inst->GetBotTimers();
 
-	for (int timer_index = 0; timer_index < MaxTimer; ++timer_index) {
-		if (bot_timers[timer_index] <= Timer::GetCurrentTime())
-			continue;
+	if (bot_timers.empty()) {
+		return true;
+	}
 
-		query = fmt::format(
-				"REPLACE INTO `bot_timers` (`bot_id`, `timer_id`, `timer_value`) VALUES ('{}', '{}', '{}')",
-				bot_inst->GetBotID(), (timer_index + 1), bot_timers[timer_index]
-		);
-		auto results = database.QueryDatabase(query);
-		if (!results.Success()) {
-			DeleteTimers(bot_inst->GetBotID());
-			return false;
+	if (!bot_timers.empty()) {
+		for (int i = 0; i < bot_timers.size(); i++) {
+			if (bot_timers[i].timer_value <= Timer::GetCurrentTime()) {
+				continue;
+			}
+
+			query = fmt::format(
+				"REPLACE INTO `bot_timers` "
+				" (`bot_id`, `timer_id`, `timer_value`, `recast_time`, `is_spell`, `is_disc`, `spell_id`, `is_item`, `item_id`)"
+				" VALUES ('{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}')",
+				bot_inst->GetBotID(),
+				bot_timers[i].timer_id,
+				bot_timers[i].timer_value,
+				bot_timers[i].recast_time,
+				bot_timers[i].is_spell ? 1 : 0,
+				bot_timers[i].is_disc ? 1 : 0,
+				bot_timers[i].spell_id,
+				bot_timers[i].is_item ? 1 : 0,
+				bot_timers[i].item_id
+			);
+
+			auto results = database.QueryDatabase(query);
+			if (!results.Success()) {
+				DeleteTimers(bot_inst->GetBotID());
+				return false;
+			}
 		}
 	}
 
@@ -993,13 +1033,15 @@ bool BotDatabase::SaveTimers(Bot* bot_inst)
 
 bool BotDatabase::DeleteTimers(const uint32 bot_id)
 {
-	if (!bot_id)
+	if (!bot_id) {
 		return false;
+	}
 
 	query = StringFormat("DELETE FROM `bot_timers` WHERE `bot_id` = '%u'", bot_id);
 	auto results = database.QueryDatabase(query);
-	if (!results.Success())
+	if (!results.Success()) {
 		return false;
+	}
 
 	return true;
 }

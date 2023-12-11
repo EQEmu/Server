@@ -81,4 +81,15 @@ struct BotSpells_Struct {
 	uint8		bucket_comparison;
 };
 
+struct BotTimer_Struct {
+	uint32		timer_id;
+	uint32		timer_value;
+	uint32		recast_time;
+	bool		is_spell;
+	bool		is_disc;
+	uint16		spell_id;
+	bool		is_item;
+	uint32		item_id;
+};
+
 #endif // BOT_STRUCTS

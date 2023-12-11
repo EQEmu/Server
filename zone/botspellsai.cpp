@@ -108,7 +108,7 @@ bool Bot::BotCastSong(Mob* tar, uint8 botLevel) {
 			auto iter : botSongList) {
 		if (!iter.SpellId)
 			continue;
-		if (!CheckSpellRecastTimers(this, iter.SpellIndex))
+		if (!CheckSpellRecastTimer(iter.SpellId))
 			continue;
 		if (!IsSpellUsableInThisZoneType(iter.SpellId, zone->GetZoneType()))
 			continue;
@@ -142,7 +142,7 @@ bool Bot::BotCastCombatSong(Mob* tar, uint8 botLevel) {
 		auto iter : botSongList) {
 		if (!iter.SpellId)
 			continue;
-		if (!CheckSpellRecastTimers(this, iter.SpellIndex))
+		if (!CheckSpellRecastTimer(iter.SpellId))
 			continue;
 		if (!IsSpellUsableInThisZoneType(iter.SpellId, zone->GetZoneType()))
 			continue;
@@ -174,7 +174,7 @@ bool Bot::BotCastHateReduction(Mob* tar, uint8 botLevel, const BotSpell& botSpel
 		for (auto iter : botSongList) {
 			if (!iter.SpellId)
 				continue;
-			if (!CheckSpellRecastTimers(this, iter.SpellIndex))
+			if (!CheckSpellRecastTimer(iter.SpellId))
 				continue;
 			if (!IsSpellUsableInThisZoneType(iter.SpellId, zone->GetZoneType()))
 				continue;
@@ -312,7 +312,7 @@ bool Bot::BotCastSlow(Mob* tar, uint8 botLevel, uint8 botClass, BotSpell& botSpe
 						continue;
 					}
 
-					if (!CheckSpellRecastTimers(this, iter.SpellIndex)) {
+					if (!CheckSpellRecastTimer(iter.SpellId)) {
 						continue;
 					}
 
@@ -403,7 +403,7 @@ bool Bot::BotCastDOT(Mob* tar, uint8 botLevel, const BotSpell& botSpell, const b
 					continue;
 				}
 
-				if (CheckSpellRecastTimers(this, s.SpellIndex))
+				if (CheckSpellRecastTimer(s.SpellId))
 				{
 
 					if (!(!tar->IsImmuneToSpell(s.SpellId, this) && tar->CanBuffStack(s.SpellId, botLevel, true) >= 0)) {
@@ -438,7 +438,7 @@ bool Bot::BotCastDOT(Mob* tar, uint8 botLevel, const BotSpell& botSpell, const b
 					continue;
 				}
 
-				if (CheckSpellRecastTimers(this, s.SpellIndex)) {
+				if (CheckSpellRecastTimer(s.SpellId)) {
 
 					if (!(!tar->IsImmuneToSpell(s.SpellId, this) &&
 						  tar->CanBuffStack(s.SpellId, botLevel, true) >= 0)) {
@@ -652,7 +652,7 @@ bool Bot::BotCastCombatBuff(Mob* tar, uint8 botLevel, uint8 botClass) {
 				}
 			}
 
-			if (CheckSpellRecastTimers(this, s.SpellIndex)) {
+			if (CheckSpellRecastTimer(s.SpellId)) {
 				uint32 TempDontBuffMeBefore = tar->DontBuffMeBefore();
 				casted_spell = AIDoSpellCast(s.SpellIndex, tar, s.ManaCost, &TempDontBuffMeBefore);
 				if (TempDontBuffMeBefore != tar->DontBuffMeBefore()) {
@@ -947,7 +947,7 @@ bool Bot::BotCastBuff(Mob* tar, uint8 botLevel, uint8 botClass) {
 				}
 			}
 
-			if (CheckSpellRecastTimers(this, s.SpellIndex))
+			if (CheckSpellRecastTimer(s.SpellId))
 			{
 				uint32 TempDontBuffMeBefore = tar->DontBuffMeBefore();
 
@@ -1306,10 +1306,8 @@ bool Bot::AIDoSpellCast(int32 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgain
 		SetMana(hasMana);
 	}
 	else {
-		AIBot_spells[i].time_cancast = Timer::GetCurrentTime() + spells[AIBot_spells[i].spellid].recast_time;
-
-		if (spells[AIBot_spells[i].spellid].timer_id > 0) {
-			SetSpellRecastTimer(spells[AIBot_spells[i].spellid].timer_id, spells[AIBot_spells[i].spellid].recast_time);
+		if (CalcSpellRecastTimer(AIBot_spells[i].spellid) > 0) {
+			SetSpellRecastTimer(AIBot_spells[i].spellid);
 		}
 	}
 
@@ -2044,7 +2042,7 @@ BotSpell Bot::GetFirstBotSpellBySpellType(Bot* botCaster, uint32 spellType) {
 				continue;
 			}
 
-			if ((botSpellList[i].type & spellType) && CheckSpellRecastTimers(botCaster, i)) {
+			if ((botSpellList[i].type & spellType) && botCaster->CheckSpellRecastTimer(botSpellList[i].spellid)) {
 				result.SpellId = botSpellList[i].spellid;
 				result.SpellIndex = i;
 				result.ManaCost = botSpellList[i].manacost;
@@ -2069,7 +2067,7 @@ BotSpell Bot::GetBestBotSpellForFastHeal(Bot *botCaster) {
 
 		for (auto botSpellListItr : botSpellList) {
 			// Assuming all the spells have been loaded into this list by level and in descending order
-			if (IsFastHealSpell(botSpellListItr.SpellId) && CheckSpellRecastTimers(botCaster, botSpellListItr.SpellIndex)) {
+			if (IsFastHealSpell(botSpellListItr.SpellId) && botCaster->CheckSpellRecastTimer(botSpellListItr.SpellId)) {
 				result.SpellId = botSpellListItr.SpellId;
 				result.SpellIndex = botSpellListItr.SpellIndex;
 				result.ManaCost = botSpellListItr.ManaCost;
@@ -2106,7 +2104,7 @@ BotSpell Bot::GetBestBotSpellForHealOverTime(Bot* botCaster) {
 					if (
 						botSpellList[i].spellid == botSpellListItr.SpellId &&
 						(botSpellList[i].type & SpellType_Heal) &&
-						CheckSpellRecastTimers(botCaster, botSpellListItr.SpellIndex)
+						botCaster->CheckSpellRecastTimer(botSpellListItr.SpellId)
 					) {
 						result.SpellId = botSpellListItr.SpellId;
 						result.SpellIndex = botSpellListItr.SpellIndex;
@@ -2139,7 +2137,7 @@ BotSpell Bot::GetBestBotSpellForPercentageHeal(Bot *botCaster) {
 				continue;
 			}
 
-			if (IsCompleteHealSpell(botSpellList[i].spellid) && CheckSpellRecastTimers(botCaster, i)) {
+			if (IsCompleteHealSpell(botSpellList[i].spellid) && botCaster->CheckSpellRecastTimer(botSpellList[i].spellid)) {
 				result.SpellId = botSpellList[i].spellid;
 				result.SpellIndex = i;
 				result.ManaCost = botSpellList[i].manacost;
@@ -2163,7 +2161,7 @@ BotSpell Bot::GetBestBotSpellForRegularSingleTargetHeal(Bot* botCaster) {
 
 		for (std::list<BotSpell>::iterator botSpellListItr = botSpellList.begin(); botSpellListItr != botSpellList.end(); ++botSpellListItr) {
 			// Assuming all the spells have been loaded into this list by level and in descending order
-			if (IsRegularSingleTargetHealSpell(botSpellListItr->SpellId) && CheckSpellRecastTimers(botCaster, botSpellListItr->SpellIndex)) {
+			if (IsRegularSingleTargetHealSpell(botSpellListItr->SpellId) && botCaster->CheckSpellRecastTimer(botSpellListItr->SpellId)) {
 				result.SpellId = botSpellListItr->SpellId;
 				result.SpellIndex = botSpellListItr->SpellIndex;
 				result.ManaCost = botSpellListItr->ManaCost;
@@ -2192,7 +2190,7 @@ BotSpell Bot::GetFirstBotSpellForSingleTargetHeal(Bot* botCaster) {
 					IsRegularSingleTargetHealSpell(botSpellListItr->SpellId) ||
 					IsFastHealSpell(botSpellListItr->SpellId)
 				) &&
-				CheckSpellRecastTimers(botCaster, botSpellListItr->SpellIndex)
+				botCaster->CheckSpellRecastTimer(botSpellListItr->SpellId)
 			) {
 				result.SpellId = botSpellListItr->SpellId;
 				result.SpellIndex = botSpellListItr->SpellIndex;
@@ -2219,7 +2217,7 @@ BotSpell Bot::GetBestBotSpellForGroupHeal(Bot* botCaster) {
 			// Assuming all the spells have been loaded into this list by level and in descending order
 			if (
 				IsRegularGroupHealSpell(botSpellListItr->SpellId) &&
-				CheckSpellRecastTimers(botCaster, botSpellListItr->SpellIndex)
+				botCaster->CheckSpellRecastTimer(botSpellListItr->SpellId)
 			) {
 				result.SpellId = botSpellListItr->SpellId;
 				result.SpellIndex = botSpellListItr->SpellIndex;
@@ -2257,7 +2255,7 @@ BotSpell Bot::GetBestBotSpellForGroupHealOverTime(Bot* botCaster) {
 					if (
 						botSpellList[i].spellid == botSpellListItr->SpellId &&
 						(botSpellList[i].type & SpellType_Heal) &&
-						CheckSpellRecastTimers(botCaster, botSpellListItr->SpellIndex)
+						botCaster->CheckSpellRecastTimer(botSpellListItr->SpellId)
 					) {
 						result.SpellId = botSpellListItr->SpellId;
 						result.SpellIndex = botSpellListItr->SpellIndex;
@@ -2287,7 +2285,7 @@ BotSpell Bot::GetBestBotSpellForGroupCompleteHeal(Bot* botCaster) {
 			// Assuming all the spells have been loaded into this list by level and in descending order
 			if (
 				IsGroupCompleteHealSpell(botSpellListItr->SpellId) &&
-				CheckSpellRecastTimers(botCaster, botSpellListItr->SpellIndex)
+				botCaster->CheckSpellRecastTimer(botSpellListItr->SpellId)
 			) {
 				result.SpellId = botSpellListItr->SpellId;
 				result.SpellIndex = botSpellListItr->SpellIndex;
@@ -2314,7 +2312,7 @@ BotSpell Bot::GetBestBotSpellForMez(Bot* botCaster) {
 			// Assuming all the spells have been loaded into this list by level and in descending order
 			if (
 				IsMesmerizeSpell(botSpellListItr->SpellId) &&
-				CheckSpellRecastTimers(botCaster, botSpellListItr->SpellIndex)
+				botCaster->CheckSpellRecastTimer(botSpellListItr->SpellId)
 			) {
 				result.SpellId = botSpellListItr->SpellId;
 				result.SpellIndex = botSpellListItr->SpellIndex;
@@ -2343,7 +2341,7 @@ BotSpell Bot::GetBestBotSpellForMagicBasedSlow(Bot* botCaster) {
 			if (
 				IsSlowSpell(botSpellListItr->SpellId) &&
 				spells[botSpellListItr->SpellId].resist_type == RESIST_MAGIC &&
-				CheckSpellRecastTimers(botCaster, botSpellListItr->SpellIndex)
+				botCaster->CheckSpellRecastTimer(botSpellListItr->SpellId)
 			) {
 				result.SpellId = botSpellListItr->SpellId;
 				result.SpellIndex = botSpellListItr->SpellIndex;
@@ -2371,7 +2369,7 @@ BotSpell Bot::GetBestBotSpellForDiseaseBasedSlow(Bot* botCaster) {
 			if (
 				IsSlowSpell(botSpellListItr->SpellId) &&
 				spells[botSpellListItr->SpellId].resist_type == RESIST_DISEASE &&
-				CheckSpellRecastTimers(botCaster, botSpellListItr->SpellIndex)
+				botCaster->CheckSpellRecastTimer(botSpellListItr->SpellId)
 			) {
 				result.SpellId = botSpellListItr->SpellId;
 				result.SpellIndex = botSpellListItr->SpellIndex;
@@ -2437,7 +2435,7 @@ BotSpell Bot::GetBestBotMagicianPetSpell(Bot *botCaster) {
 
 		for(std::list<BotSpell>::iterator botSpellListItr = botSpellList.begin(); botSpellListItr != botSpellList.end(); ++botSpellListItr) {
 			// Assuming all the spells have been loaded into this list by level and in descending order
-			if (IsSummonPetSpell(botSpellListItr->SpellId) && CheckSpellRecastTimers(botCaster, botSpellListItr->SpellIndex)) {
+			if (IsSummonPetSpell(botSpellListItr->SpellId) && botCaster->CheckSpellRecastTimer(botSpellListItr->SpellId)) {
 				if (!strncmp(spells[botSpellListItr->SpellId].teleport_zone, petType.c_str(), petType.length())) {
 					result.SpellId = botSpellListItr->SpellId;
 					result.SpellIndex = botSpellListItr->SpellIndex;
@@ -2546,7 +2544,7 @@ BotSpell Bot::GetBestBotSpellForNukeByTargetType(Bot* botCaster, SpellTargetType
 
 		for(std::list<BotSpell>::iterator botSpellListItr = botSpellList.begin(); botSpellListItr != botSpellList.end(); ++botSpellListItr) {
 			// Assuming all the spells have been loaded into this list by level and in descending order
-			if ((IsPureNukeSpell(botSpellListItr->SpellId) || IsDamageSpell(botSpellListItr->SpellId)) && CheckSpellRecastTimers(botCaster, botSpellListItr->SpellIndex)) {
+			if ((IsPureNukeSpell(botSpellListItr->SpellId) || IsDamageSpell(botSpellListItr->SpellId)) && botCaster->CheckSpellRecastTimer(botSpellListItr->SpellId)) {
 				result.SpellId = botSpellListItr->SpellId;
 				result.SpellIndex = botSpellListItr->SpellIndex;
 				result.ManaCost = botSpellListItr->ManaCost;
@@ -2574,7 +2572,7 @@ BotSpell Bot::GetBestBotSpellForStunByTargetType(Bot* botCaster, SpellTargetType
 		for(std::list<BotSpell>::iterator botSpellListItr = botSpellList.begin(); botSpellListItr != botSpellList.end(); ++botSpellListItr)
 		{
 			// Assuming all the spells have been loaded into this list by level and in descending order
-			if (IsStunSpell(botSpellListItr->SpellId) && CheckSpellRecastTimers(botCaster, botSpellListItr->SpellIndex))
+			if (IsStunSpell(botSpellListItr->SpellId) && botCaster->CheckSpellRecastTimer(botSpellListItr->SpellId))
 			{
 				result.SpellId = botSpellListItr->SpellId;
 				result.SpellIndex = botSpellListItr->SpellIndex;
@@ -2614,7 +2612,7 @@ BotSpell Bot::GetBestBotWizardNukeSpellByTargetResists(Bot* botCaster, Mob* targ
 			// Assuming all the spells have been loaded into this list by level and in descending order
 			bool spellSelected = false;
 
-			if (CheckSpellRecastTimers(botCaster, botSpellListItr->SpellIndex)) {
+			if (botCaster->CheckSpellRecastTimer(botSpellListItr->SpellId)) {
 				if (selectLureNuke && (spells[botSpellListItr->SpellId].resist_difficulty < lureResisValue)) {
 					spellSelected = true;
 				}
@@ -2682,7 +2680,7 @@ BotSpell Bot::GetDebuffBotSpell(Bot* botCaster, Mob *tar) {
 			if (((botSpellList[i].type & SpellType_Debuff) || IsDebuffSpell(botSpellList[i].spellid))
 				&& (!tar->IsImmuneToSpell(botSpellList[i].spellid, botCaster)
 				&& tar->CanBuffStack(botSpellList[i].spellid, botCaster->GetLevel(), true) >= 0)
-				&& CheckSpellRecastTimers(botCaster, i)) {
+				&& botCaster->CheckSpellRecastTimer(botSpellList[i].spellid)) {
 				result.SpellId = botSpellList[i].spellid;
 				result.SpellIndex = i;
 				result.ManaCost = botSpellList[i].manacost;
@@ -2735,7 +2733,7 @@ BotSpell Bot::GetBestBotSpellForResistDebuff(Bot* botCaster, Mob *tar) {
 				|| (needsDiseaseResistDebuff && (IsEffectInSpell(botSpellList[i].spellid, SE_ResistDisease)) || IsEffectInSpell(botSpellList[i].spellid, SE_ResistAll)))
 				&& (!tar->IsImmuneToSpell(botSpellList[i].spellid, botCaster)
 				&& tar->CanBuffStack(botSpellList[i].spellid, botCaster->GetLevel(), true) >= 0)
-				&& CheckSpellRecastTimers(botCaster, i)) {
+				&& botCaster->CheckSpellRecastTimer(botSpellList[i].spellid)) {
 				result.SpellId = botSpellList[i].spellid;
 				result.SpellIndex = i;
 				result.ManaCost = botSpellList[i].manacost;
@@ -2786,31 +2784,31 @@ BotSpell Bot::GetBestBotSpellForCure(Bot* botCaster, Mob *tar) {
 			for (std::list<BotSpell_wPriority>::iterator itr = cureList.begin(); itr != cureList.end(); ++itr) {
 				BotSpell selectedBotSpell = *itr;
 
-				if (IsGroupSpell(itr->SpellId) && CheckSpellRecastTimers(botCaster, itr->SpellIndex)) {
+				if (IsGroupSpell(itr->SpellId) && botCaster->CheckSpellRecastTimer(selectedBotSpell.SpellId)) {
 					if (selectedBotSpell.SpellId == 0)
 						continue;
 
-					if (isPoisoned && IsEffectInSpell(itr->SpellId, SE_PoisonCounter)) {
+					if (isPoisoned && IsEffectInSpell(selectedBotSpell.SpellId, SE_PoisonCounter)) {
 						spellSelected = true;
 					}
-					else if (isDiseased && IsEffectInSpell(itr->SpellId, SE_DiseaseCounter)) {
+					else if (isDiseased && IsEffectInSpell(selectedBotSpell.SpellId, SE_DiseaseCounter)) {
 						spellSelected = true;
 					}
-					else if (isCursed && IsEffectInSpell(itr->SpellId, SE_CurseCounter)) {
+					else if (isCursed && IsEffectInSpell(selectedBotSpell.SpellId, SE_CurseCounter)) {
 						spellSelected = true;
 					}
-					else if (isCorrupted && IsEffectInSpell(itr->SpellId, SE_CorruptionCounter)) {
+					else if (isCorrupted && IsEffectInSpell(selectedBotSpell.SpellId, SE_CorruptionCounter)) {
 						spellSelected = true;
 					}
-					else if (IsEffectInSpell(itr->SpellId, SE_DispelDetrimental)) {
+					else if (IsEffectInSpell(selectedBotSpell.SpellId, SE_DispelDetrimental)) {
 						spellSelected = true;
 					}
 
 					if (spellSelected)
 					{
-						result.SpellId = itr->SpellId;
-						result.SpellIndex = itr->SpellIndex;
-						result.ManaCost = itr->ManaCost;
+						result.SpellId = selectedBotSpell.SpellId;
+						result.SpellIndex = selectedBotSpell.SpellIndex;
+						result.ManaCost = selectedBotSpell.ManaCost;
 
 						break;
 					}
@@ -2823,31 +2821,31 @@ BotSpell Bot::GetBestBotSpellForCure(Bot* botCaster, Mob *tar) {
 			for(std::list<BotSpell_wPriority>::iterator itr = cureList.begin(); itr != cureList.end(); ++itr) {
 				BotSpell selectedBotSpell = *itr;
 
-				if (CheckSpellRecastTimers(botCaster, itr->SpellIndex)) {
+				if (botCaster->CheckSpellRecastTimer(selectedBotSpell.SpellId)) {
 					if (selectedBotSpell.SpellId == 0)
 						continue;
 
-					if (isPoisoned && IsEffectInSpell(itr->SpellId, SE_PoisonCounter)) {
+					if (isPoisoned && IsEffectInSpell(selectedBotSpell.SpellId, SE_PoisonCounter)) {
 						spellSelected = true;
 					}
-					else if (isDiseased && IsEffectInSpell(itr->SpellId, SE_DiseaseCounter)) {
+					else if (isDiseased && IsEffectInSpell(selectedBotSpell.SpellId, SE_DiseaseCounter)) {
 						spellSelected = true;
 					}
-					else if (isCursed && IsEffectInSpell(itr->SpellId, SE_CurseCounter)) {
+					else if (isCursed && IsEffectInSpell(selectedBotSpell.SpellId, SE_CurseCounter)) {
 						spellSelected = true;
 					}
-					else if (isCorrupted && IsEffectInSpell(itr->SpellId, SE_CorruptionCounter)) {
+					else if (isCorrupted && IsEffectInSpell(selectedBotSpell.SpellId, SE_CorruptionCounter)) {
 						spellSelected = true;
 					}
-					else if (IsEffectInSpell(itr->SpellId, SE_DispelDetrimental)) {
+					else if (IsEffectInSpell(selectedBotSpell.SpellId, SE_DispelDetrimental)) {
 						spellSelected = true;
 					}
 
 					if (spellSelected)
 					{
-						result.SpellId = itr->SpellId;
-						result.SpellIndex = itr->SpellIndex;
-						result.ManaCost = itr->ManaCost;
+						result.SpellId = selectedBotSpell.SpellId;
+						result.SpellIndex = selectedBotSpell.SpellIndex;
+						result.ManaCost = selectedBotSpell.ManaCost;
 
 						break;
 					}
@@ -2857,69 +2855,6 @@ BotSpell Bot::GetBestBotSpellForCure(Bot* botCaster, Mob *tar) {
 	}
 
 	return result;
-}
-
-void Bot::SetSpellRecastTimer(int timer_index, int32 recast_delay) {
-	if (timer_index > 0 && timer_index <= MaxSpellTimer) {
-		timers[timer_index - 1] = Timer::GetCurrentTime() + recast_delay;
-	}
-}
-
-int32 Bot::GetSpellRecastTimer(Bot *caster, int timer_index) {
-	int32 result = 0;
-	if (caster) {
-		if (timer_index > 0 && timer_index <= MaxSpellTimer) {
-			result = caster->timers[timer_index - 1];
-		}
-	}
-	return result;
-}
-
-bool Bot::CheckSpellRecastTimers(Bot *caster, int SpellIndex) {
-	if (caster) {
-		if (caster->AIBot_spells[SpellIndex].time_cancast < Timer::GetCurrentTime()) { //checks spell recast
-			if (GetSpellRecastTimer(caster, spells[caster->AIBot_spells[SpellIndex].spellid].timer_id) < Timer::GetCurrentTime()) { //checks for spells on the same timer
-				return true; //can cast spell
-			}
-		}
-	}
-	return false;
-}
-
-void Bot::SetDisciplineRecastTimer(int timer_index, int32 recast_delay) {
-	if (timer_index > 0 && timer_index <= MaxDisciplineTimer) {
-		timers[DisciplineReuseStart + timer_index - 1] = Timer::GetCurrentTime() + recast_delay;
-	}
-}
-
-int32 Bot::GetDisciplineRecastTimer(Bot *caster, int timer_index) {
-	int32 result = 0;
-	if (caster) {
-		if (timer_index > 0 && timer_index <= MaxDisciplineTimer) {
-			result = caster->timers[DisciplineReuseStart + timer_index - 1];
-		}
-	}
-	return result;
-}
-
-uint32 Bot::GetDisciplineRemainingTime(Bot *caster, int timer_index) {
-	int32 result = 0;
-	if (caster) {
-		if (timer_index > 0 && timer_index <= MaxDisciplineTimer) {
-			if (GetDisciplineRecastTimer(caster, timer_index) > Timer::GetCurrentTime())
-				result = GetDisciplineRecastTimer(caster, timer_index) - Timer::GetCurrentTime();
-		}
-	}
-	return result;
-}
-
-bool Bot::CheckDisciplineRecastTimers(Bot *caster, int timer_index) {
-	if (caster) {
-		if (GetDisciplineRecastTimer(caster, timer_index) < Timer::GetCurrentTime()) { //checks for spells on the same timer
-			return true; //can cast spell
-		}
-	}
-	return false;
 }
 
 uint8 Bot::GetChanceToCastBySpellType(uint32 spellType)
