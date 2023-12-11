@@ -1736,6 +1736,17 @@ bool Bot::Process()
 		}
 	}
 
+	if (auto_save_timer.Check()) {
+		clock_t t = std::clock(); /* Function timer start */
+		Save();
+		LogDebug(
+			"ZoneDatabase::SaveBotData [{}], done Took [{}] seconds",
+			GetBotID(),
+			((float)(std::clock() - t)) / CLOCKS_PER_SEC
+		);
+		auto_save_timer.Start(RuleI(Bots, AutosaveIntervalSeconds) * 1000);
+	}
+
 	if (IsStunned() || IsMezzed()) {
 		return true;
 	}
@@ -3321,6 +3332,7 @@ bool Bot::Spawn(Client* botCharacterOwner) {
 		LoadPet();
 		SentPositionPacket(0.0f, 0.0f, 0.0f, 0.0f, 0);
 		ping_timer.Start(8000);
+		auto_save_timer.Start(RuleI(Bots, AutosaveIntervalSeconds) * 1000);
 		// there is something askew with spawn struct appearance fields...
 		// I re-enabled this until I can sort it out
 		const auto& m = GetBotItemSlots();
