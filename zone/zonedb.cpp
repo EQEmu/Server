@@ -2912,6 +2912,7 @@ bool ZoneDatabase::LoadBlockedSpells(int64 blocked_spells_count, ZoneSpellsBlock
 		into[i].m_Location   = glm::vec3(e.x, e.y, e.z);
 		into[i].m_Difference = glm::vec3(e.x_diff, e.y_diff, e.z_diff);
 		strn0cpy(into[i].message, e.message.c_str(), sizeof(into[i].message));
+		i++;
 	}
 
 	return true;
