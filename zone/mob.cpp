@@ -3921,7 +3921,7 @@ uint8 Mob::GetDefaultGender(uint16 in_race, uint8 in_gender) {
 		in_race == RACE_BROWNIE_15 ||
 		in_race == RACE_KERRAN_23 ||
 		in_race == RACE_LION_50 ||
-		in_race == RACE_DRACNID_57 ||
+		in_race == RACE_DRACHNID_57 ||
 		in_race == RACE_ZOMBIE_70 ||
 		in_race == RACE_QEYNOS_CITIZEN_71 ||
 		in_race == RACE_RIVERVALE_CITIZEN_81 ||

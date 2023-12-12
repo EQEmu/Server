@@ -851,7 +851,6 @@
 
 
 const char* GetRaceIDName(uint16 race_id);
-const char* GetPlayerRaceName(uint32 player_race_value);
 const char* GetGenderName(uint32 gender_id);
 
 bool IsPlayerRace(uint16 race_id);
@@ -859,9 +858,6 @@ const std::string GetPlayerRaceAbbreviation(uint16 race_id);
 
 uint32 GetPlayerRaceValue(uint16 race_id);
 uint32 GetPlayerRaceBit(uint16 race_id);
-
-uint16 GetRaceIDFromPlayerRaceValue(uint32 player_race_value);
-uint16 GetRaceIDFromPlayerRaceBit(uint32 player_race_bit);
 
 float GetRaceGenderDefaultHeight(int race, int gender);
 
@@ -939,7 +935,7 @@ namespace PlayerAppearance
 #define RACE_ORC_54 54
 #define RACE_HUMAN_BEGGAR_55 55
 #define RACE_PIXIE_56 56
-#define RACE_DRACNID_57 57
+#define RACE_DRACHNID_57 57
 #define RACE_SOLUSEK_RO_58 58
 #define RACE_BLOODGILL_59 59
 #define RACE_SKELETON_60 60
