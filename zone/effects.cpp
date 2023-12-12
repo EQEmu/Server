@@ -528,11 +528,10 @@ int64 Mob::GetActSpellHealing(uint16 spell_id, int64 value, Mob* target, bool fr
 				const int duration = CalcBuffDuration(this, target, spell_id);
 				if (duration > 0) {
 					extra_heal /= duration;
+					value += extra_heal;
 				}
 			}
 		}
-
-		value += extra_heal;
 
 		value *= critical_modifier;
 	}
