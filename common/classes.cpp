@@ -23,7 +23,9 @@ const char *GetClassIDName(uint8 class_id, uint8 level)
 {
 	switch (class_id) {
 		case WARRIOR:
-			if (level >= 70) {
+			if (level >= 75) {
+				return "Imperator";
+			} else if (level >= 70) {
 				return "Vanquisher";
 			} else if (level >= 65) {
 				return "Overlord";
@@ -37,7 +39,9 @@ const char *GetClassIDName(uint8 class_id, uint8 level)
 				return "Warrior";
 			}
 		case CLERIC:
-			if (level >= 70) {
+			if (level >= 75) {
+				return "Exemplar";
+			} else if (level >= 70) {
 				return "Prelate";
 			} else if (level >= 65) {
 				return "Archon";
@@ -51,7 +55,9 @@ const char *GetClassIDName(uint8 class_id, uint8 level)
 				return "Cleric";
 			}
 		case PALADIN:
-			if (level >= 70) {
+			if (level >= 75) {
+				return "Holy Defender";
+			} else if (level >= 70) {
 				return "Lord";
 			} else if (level >= 65) {
 				return "Lord Protector";
@@ -65,7 +71,9 @@ const char *GetClassIDName(uint8 class_id, uint8 level)
 				return "Paladin";
 			}
 		case RANGER:
-			if (level >= 70) {
+			if (level >= 75) {
+				return "Huntmaster";
+			} else if (level >= 70) {
 				return "Plainswalker";
 			} else if (level >= 65) {
 				return "Forest Stalker";
@@ -79,7 +87,9 @@ const char *GetClassIDName(uint8 class_id, uint8 level)
 				return "Ranger";
 			}
 		case SHADOWKNIGHT:
-			if (level >= 70) {
+			if (level >= 75) {
+				return "Bloodreaver";
+			} else if (level >= 70) {
 				return "Scourge Knight";
 			} else if (level >= 65) {
 				return "Dread Lord";
@@ -93,7 +103,9 @@ const char *GetClassIDName(uint8 class_id, uint8 level)
 				return "Shadowknight";
 			}
 		case DRUID:
-			if (level >= 70) {
+			if (level >= 75) {
+				return "Storm Caller";
+			} else if (level >= 70) {
 				return "Natureguard";
 			} else if (level >= 65) {
 				return "Storm Warden";
@@ -107,7 +119,9 @@ const char *GetClassIDName(uint8 class_id, uint8 level)
 				return "Druid";
 			}
 		case MONK:
-			if (level >= 70) {
+			if (level >= 75) {
+				return "Ashenhand";
+			} else if (level >= 70) {
 				return "Stone Fist";
 			} else if (level >= 65) {
 				return "Transcendent";
@@ -121,7 +135,9 @@ const char *GetClassIDName(uint8 class_id, uint8 level)
 				return "Monk";
 			}
 		case BARD:
-			if (level >= 70) {
+			if (level >= 75) {
+				return "Lyricist";
+			} else if (level >= 70) {
 				return "Performer";
 			} else if (level >= 65) {
 				return "Maestro";
@@ -135,7 +151,9 @@ const char *GetClassIDName(uint8 class_id, uint8 level)
 				return "Bard";
 			}
 		case ROGUE:
-			if (level >= 70) {
+			if (level >= 75) {
+				return "Shadowblade";
+			} else if (level >= 70) {
 				return "Nemesis";
 			} else if (level >= 65) {
 				return "Deceiver";
@@ -149,7 +167,9 @@ const char *GetClassIDName(uint8 class_id, uint8 level)
 				return "Rogue";
 			}
 		case SHAMAN:
-			if (level >= 70) {
+			if (level >= 75) {
+				return "Spiritwatcher";
+			} else if (level >= 70) {
 				return "Soothsayer";
 			} else if (level >= 65) {
 				return "Prophet";
@@ -163,7 +183,9 @@ const char *GetClassIDName(uint8 class_id, uint8 level)
 				return "Shaman";
 			}
 		case NECROMANCER:
-			if (level >= 70) {
+			if (level >= 75) {
+				return "Deathcaller";
+			} else if (level >= 70) {
 				return "Wraith";
 			} else if (level >= 65) {
 				return "Arch Lich";
@@ -177,7 +199,9 @@ const char *GetClassIDName(uint8 class_id, uint8 level)
 				return "Necromancer";
 			}
 		case WIZARD:
-			if (level >= 70) {
+			if (level >= 75) {
+				return "Pyromancer";
+			} else if (level >= 70) {
 				return "Grand Arcanist";
 			} else if (level >= 65) {
 				return "Arcanist";
@@ -191,7 +215,9 @@ const char *GetClassIDName(uint8 class_id, uint8 level)
 				return "Wizard";
 			}
 		case MAGICIAN:
-			if (level >= 70) {
+			if (level >= 75) {
+				return "Grand Summoner";
+			} else if (level >= 70) {
 				return "Arch Magus";
 			} else if (level >= 65) {
 				return "Arch Convoker";
@@ -206,7 +232,9 @@ const char *GetClassIDName(uint8 class_id, uint8 level)
 				return "Magician";
 			}
 		case ENCHANTER:
-			if (level >= 70) {
+			if (level >= 75) {
+				return "Entrancer";
+			} else if (level >= 70) {
 				return "Bedazzler";
 			} else if (level >= 65) {
 				return "Coercer";
@@ -220,7 +248,9 @@ const char *GetClassIDName(uint8 class_id, uint8 level)
 				return "Enchanter";
 			}
 		case BEASTLORD:
-			if (level >= 70) {
+			if (level >= 75) {
+				return "Frostblood";
+			} else if (level >= 70) {
 				return "Wildblood";
 			} else if (level >= 65) {
 				return "Feral Lord";
@@ -234,7 +264,9 @@ const char *GetClassIDName(uint8 class_id, uint8 level)
 				return "Beastlord";
 			}
 		case BERSERKER:
-			if (level >= 70) {
+			if (level >= 75) {
+				return "Juggernaut";
+			} else if (level >= 70) {
 				return "Ravager";
 			} else if (level >= 65) {
 				return "Fury";
@@ -248,19 +280,7 @@ const char *GetClassIDName(uint8 class_id, uint8 level)
 				return "Berserker";
 			}
 		case BANKER:
-			if (level >= 70) {
-				return "Master Banker";
-			} else if (level >= 65) {
-				return "Elder Banker";
-			} else if (level >= 60) {
-				return "Oldest Banker";
-			} else if (level >= 55) {
-				return "Older Banker";
-			} else if (level >= 51) {
-				return "Old Banker";
-			} else {
-				return "Banker";
-			}
+			return "Banker";
 		case WARRIORGM:
 			return "Warrior Guildmaster";
 		case CLERICGM:
