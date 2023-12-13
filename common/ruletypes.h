@@ -652,6 +652,7 @@ RULE_INT(Bots, ResurrectionSicknessSpell, 756, "756 is Default Resurrection Sick
 RULE_BOOL(Bots, AllowPickpocketCommand, true, "Allows the use of the bot command 'pickpocket'")
 RULE_BOOL(Bots, BotHealOnLevel, false, "Setting whether a bot should heal completely when leveling. Default FALSE.")
 RULE_INT(Bots, AutosaveIntervalSeconds, 300, "Number of seconds after which a timer is triggered which stores the bot data. The value 0 means no periodic automatic saving.")
+RULE_BOOL(Bots, CazicTouchBotsOwner, true, "Default True. Cazic Touch/DT will hit bot owner rather than bot.")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Chat)
