@@ -635,12 +635,12 @@ void WorldBoot::CheckForPossibleConfigurationIssues()
 		LogWarning("Docs [https://docs.eqemu.io/server/installation/configure-your-eqemu_config/#mailserver]");
 		LogWarning("");
 		LogWarning(
-			"[server.world.address] value [{}] [server.chatserver.host] [{}]",
+			"[server.world.address] value [{}] [server.ucs.host] [{}]",
 			config_address,
 			c->ChatHost
 		);
 		LogWarning(
-			"[server.world.address] value [{}] [server.mailserver.host] [{}]",
+			"[server.world.address] value [{}] [server.ucs.host] [{}]",
 			config_address,
 			c->MailHost
 		);

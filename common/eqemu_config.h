@@ -62,11 +62,9 @@ class EQEmuConfig
 		std::string SharedKey;
 		bool DisableConfigChecks;
 
-		// From <chatserver/>
+		// From <ucs/>
 		std::string ChatHost;
 		uint16 ChatPort;
-
-		// From <mailserver/>
 		std::string MailHost;
 		uint16 MailPort;
 
