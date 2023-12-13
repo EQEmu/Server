@@ -677,7 +677,7 @@ void helper_command_depart_list(Client* bot_owner, Bot* druid_bot, Bot* wizard_b
 bool helper_is_help_or_usage(const char* arg);
 bool helper_no_available_bots(Client *bot_owner, Bot *my_bot = nullptr);
 void helper_send_available_subcommands(Client *bot_owner, const char* command_simile, const std::list<const char*>& subcommand_list);
-void helper_send_usage_required_bots(Client *bot_owner, BCEnum::SpType spell_type, uint8 bot_class = NO_CLASS);
+void helper_send_usage_required_bots(Client *bot_owner, BCEnum::SpType spell_type, uint8 bot_class = Class::None);
 bool helper_spell_check_fail(STBaseEntry* local_entry);
 bool helper_spell_list_fail(Client *bot_owner, bcst_list* spell_list, BCEnum::SpType spell_type);
 #endif

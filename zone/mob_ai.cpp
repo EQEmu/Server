@@ -1330,7 +1330,7 @@ void Mob::AI_Process() {
 				// Now pursue
 				// TODO: Check here for another person on hate list with close hate value
 				if (AI_PursueCastCheck()) {
-					if (IsCasting() && GetClass() != BARD) {
+					if (IsCasting() && GetClass() != Class::Bard) {
 						StopNavigation();
 						FaceTarget();
 					}
@@ -1382,7 +1382,7 @@ void Mob::AI_Process() {
 			}
 		}
 		if (AI_IdleCastCheck()) {
-			if (IsCasting() && GetClass() != BARD) {
+			if (IsCasting() && GetClass() != Class::Bard) {
 				StopNavigation();
 			}
 		}

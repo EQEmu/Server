@@ -117,7 +117,7 @@ void Client::CalcBonuses()
 
 	// hmm maybe a better way to do this
 	int metabolism = spellbonuses.Metabolism + itembonuses.Metabolism + aabonuses.Metabolism;
-	int timer = GetClass() == MONK ? CONSUMPTION_MNK_TIMER : CONSUMPTION_TIMER;
+	int timer = GetClass() == Class::Monk ? CONSUMPTION_MNK_TIMER : CONSUMPTION_TIMER;
 	timer = timer * (100 + metabolism) / 100;
 	if (timer != consume_food_timer.GetTimerTime())
 		consume_food_timer.SetTimer(timer);
@@ -2053,7 +2053,7 @@ void Mob::CalcSpellBonuses(StatBonuses* newbon)
 		}
 	}
 
-	if (GetClass() == BARD)
+	if (GetClass() == Class::Bard)
 		newbon->ManaRegen = 0; // Bards do not get mana regen from spells.
 }
 

@@ -2676,7 +2676,7 @@ bool Client::HasSkill(EQ::skills::SkillType skill_id) const {
 }
 
 bool Client::CanHaveSkill(EQ::skills::SkillType skill_id) const {
-	if (ClientVersion() < EQ::versions::ClientVersion::RoF2 && class_ == BERSERKER && skill_id == EQ::skills::Skill1HPiercing)
+	if (ClientVersion() < EQ::versions::ClientVersion::RoF2 && class_ == Class::Berserker && skill_id == EQ::skills::Skill1HPiercing)
 		skill_id = EQ::skills::Skill2HPiercing;
 
 	return(content_db.GetSkillCap(GetClass(), skill_id, RuleI(Character, MaxLevel)) > 0);
@@ -2684,7 +2684,7 @@ bool Client::CanHaveSkill(EQ::skills::SkillType skill_id) const {
 }
 
 uint16 Client::MaxSkill(EQ::skills::SkillType skillid, uint16 class_, uint16 level) const {
-	if (ClientVersion() < EQ::versions::ClientVersion::RoF2 && class_ == BERSERKER && skillid == EQ::skills::Skill1HPiercing)
+	if (ClientVersion() < EQ::versions::ClientVersion::RoF2 && class_ == Class::Berserker && skillid == EQ::skills::Skill1HPiercing)
 		skillid = EQ::skills::Skill2HPiercing;
 
 	return(content_db.GetSkillCap(class_, skillid, level));
@@ -2692,7 +2692,7 @@ uint16 Client::MaxSkill(EQ::skills::SkillType skillid, uint16 class_, uint16 lev
 
 uint8 Client::SkillTrainLevel(EQ::skills::SkillType skillid, uint16 class_)
 {
-	if (ClientVersion() < EQ::versions::ClientVersion::RoF2 && class_ == BERSERKER && skillid == EQ::skills::Skill1HPiercing)
+	if (ClientVersion() < EQ::versions::ClientVersion::RoF2 && class_ == Class::Berserker && skillid == EQ::skills::Skill1HPiercing)
 		skillid = EQ::skills::Skill2HPiercing;
 
 	return(content_db.GetTrainLevel(class_, skillid, RuleI(Character, MaxLevel)));
@@ -3028,7 +3028,7 @@ bool Client::BindWound(Mob *bindmob, bool start, bool fail)
 
 						int max_percent = 50 + maxHPBonus;
 
-						if (GetClass() == MONK && GetSkill(EQ::skills::SkillBindWound) > 200) {
+						if (GetClass() == Class::Monk && GetSkill(EQ::skills::SkillBindWound) > 200) {
 							max_percent = 70 + maxHPBonus;
 						}
 
@@ -3077,9 +3077,9 @@ bool Client::BindWound(Mob *bindmob, bool start, bool fail)
 					else {
 						int percent_base = 50;
 						if (GetRawSkill(EQ::skills::SkillBindWound) > 200) {
-							if ((GetClass() == MONK) || (GetClass() == BEASTLORD))
+							if ((GetClass() == Class::Monk) || (GetClass() == Class::Beastlord))
 								percent_base = 70;
-							else if ((GetLevel() > 50) && ((GetClass() == WARRIOR) || (GetClass() == ROGUE) || (GetClass() == CLERIC)))
+							else if ((GetLevel() > 50) && ((GetClass() == Class::Warrior) || (GetClass() == Class::Rogue) || (GetClass() == Class::Cleric)))
 								percent_base = 70;
 						}
 
@@ -4232,7 +4232,7 @@ void Client::UpdateLFP() {
 
 	for(unsigned int i=0; i<MAX_GROUP_MEMBERS; i++) {
 		LFPMembers[i].Name[0] = '\0';
-		LFPMembers[i].Class = NO_CLASS;
+		LFPMembers[i].Class = Class::None;
 		LFPMembers[i].Level = 0;
 		LFPMembers[i].Zone = 0;
 	}
@@ -4849,7 +4849,7 @@ void Client::HandleLDoNOpen(NPC *target)
 {
 	if(target)
 	{
-		if(target->GetClass() != LDON_TREASURE)
+		if(target->GetClass() != Class::LDoNTreasure)
 		{
 			LogDebug("[{}] tried to open [{}] but [{}] was not a treasure chest",
 				GetName(), target->GetName(), target->GetName());
@@ -4918,7 +4918,7 @@ void Client::HandleLDoNOpen(NPC *target)
 
 void Client::HandleLDoNSenseTraps(NPC *target, uint16 skill, uint8 type)
 {
-	if(target && target->GetClass() == LDON_TREASURE)
+	if(target && target->GetClass() == Class::LDoNTreasure)
 	{
 		if(target->IsLDoNTrapped())
 		{
@@ -4961,7 +4961,7 @@ void Client::HandleLDoNDisarm(NPC *target, uint16 skill, uint8 type)
 {
 	if(target)
 	{
-		if(target->GetClass() == LDON_TREASURE)
+		if(target->GetClass() == Class::LDoNTreasure)
 		{
 			if(!target->IsLDoNTrapped())
 			{
@@ -5011,7 +5011,7 @@ void Client::HandleLDoNPickLock(NPC *target, uint16 skill, uint8 type)
 {
 	if(target)
 	{
-		if(target->GetClass() == LDON_TREASURE)
+		if(target->GetClass() == Class::LDoNTreasure)
 		{
 			if(target->IsLDoNTrapped())
 			{
@@ -8603,20 +8603,20 @@ void Client::InitInnates()
 	}
 
 	switch (class_) {
-		case DRUID:
+		case Class::Druid:
 			m_pp.InnateSkills[InnateHarmony] = InnateEnabled;
 			break;
-		case BARD:
+		case Class::Bard:
 			m_pp.InnateSkills[InnateReveal] = InnateEnabled;
 			break;
-		case ROGUE:
+		case Class::Rogue:
 			m_pp.InnateSkills[InnateSurprise] = InnateEnabled;
 			m_pp.InnateSkills[InnateReveal]   = InnateEnabled;
 			break;
-		case RANGER:
+		case Class::Ranger:
 			m_pp.InnateSkills[InnateAwareness] = InnateEnabled;
 			break;
-		case MONK:
+		case Class::Monk:
 			m_pp.InnateSkills[InnateSurprise]  = InnateEnabled;
 			m_pp.InnateSkills[InnateAwareness] = InnateEnabled;
 		default:
@@ -9754,7 +9754,7 @@ std::vector<int> Client::GetLearnableDisciplines(uint8 min_level, uint8 max_leve
 			continue;
 		}
 
-		if (spells[spell_id].classes[WARRIOR] == 0) {
+		if (spells[spell_id].classes[Class::Warrior] == 0) {
 			continue;
 		}
 
@@ -9825,7 +9825,7 @@ std::vector<int> Client::GetScribeableSpells(uint8 min_level, uint8 max_level) {
 			continue;
 		}
 
-		if (spells[spell_id].classes[WARRIOR] == 0) {
+		if (spells[spell_id].classes[Class::Warrior] == 0) {
 			continue;
 		}
 
@@ -10694,37 +10694,37 @@ uint16 Client::LearnDisciplines(uint8 min_level, uint8 max_level)
 
 uint16 Client::GetClassTrackingDistanceMultiplier(uint16 class_) {
 	switch (class_) {
-	case WARRIOR:
+	case Class::Warrior:
 		return RuleI(Character, WarriorTrackingDistanceMultiplier);
-	case CLERIC:
+	case Class::Cleric:
 		return RuleI(Character, ClericTrackingDistanceMultiplier);
-	case PALADIN:
+	case Class::Paladin:
 		return RuleI(Character, PaladinTrackingDistanceMultiplier);
-	case RANGER:
+	case Class::Ranger:
 		return RuleI(Character, RangerTrackingDistanceMultiplier);
-	case SHADOWKNIGHT:
+	case Class::ShadowKnight:
 		return RuleI(Character, ShadowKnightTrackingDistanceMultiplier);
-	case DRUID:
+	case Class::Druid:
 		return RuleI(Character, DruidTrackingDistanceMultiplier);
-	case MONK:
+	case Class::Monk:
 		return RuleI(Character, MonkTrackingDistanceMultiplier);
-	case BARD:
+	case Class::Bard:
 		return RuleI(Character, BardTrackingDistanceMultiplier);
-	case ROGUE:
+	case Class::Rogue:
 		return RuleI(Character, RogueTrackingDistanceMultiplier);
-	case SHAMAN:
+	case Class::Shaman:
 		return RuleI(Character, ShamanTrackingDistanceMultiplier);
-	case NECROMANCER:
+	case Class::Necromancer:
 		return RuleI(Character, NecromancerTrackingDistanceMultiplier);
-	case WIZARD:
+	case Class::Wizard:
 		return RuleI(Character, WizardTrackingDistanceMultiplier);
-	case MAGICIAN:
+	case Class::Magician:
 		return RuleI(Character, MagicianTrackingDistanceMultiplier);
-	case ENCHANTER:
+	case Class::Enchanter:
 		return RuleI(Character, EnchanterTrackingDistanceMultiplier);
-	case BEASTLORD:
+	case Class::Beastlord:
 		return RuleI(Character, BeastlordTrackingDistanceMultiplier);
-	case BERSERKER:
+	case Class::Berserker:
 		return RuleI(Character, BerserkerTrackingDistanceMultiplier);
 	default:
 		return 0;

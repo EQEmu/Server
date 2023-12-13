@@ -128,8 +128,8 @@ uint64 Client::CalcEXP(uint8 consider_level, bool ignore_modifiers) {
 
 		if (RuleB(Character, UseRaceClassExpBonuses)) {
 			if (
-				GetClass() == WARRIOR ||
-				GetClass() == ROGUE ||
+				GetClass() == Class::Warrior ||
+				GetClass() == Class::Rogue ||
 				GetBaseRace() == HALFLING
 			) {
 				total_modifier *= 1.05;
@@ -295,7 +295,7 @@ void Client::CalculateStandardAAExp(uint64 &add_aaxp, uint8 conlevel, bool resex
 			aatotalmod *= 1.05;
 		}
 
-		if (GetClass() == ROGUE || GetClass() == WARRIOR) {
+		if (GetClass() == Class::Rogue || GetClass() == Class::Warrior) {
 			aatotalmod *= 1.05;
 		}
 	}
@@ -443,7 +443,7 @@ void Client::CalculateExp(uint64 in_add_exp, uint64 &add_exp, uint64 &add_aaxp, 
 				totalmod *= 1.05;
 			}
 
-			if (GetClass() == ROGUE || GetClass() == WARRIOR) {
+			if (GetClass() == Class::Rogue || GetClass() == Class::Warrior) {
 				totalmod *= 1.05;
 			}
 		}
@@ -1051,15 +1051,15 @@ uint32 Client::GetEXPForLevel(uint16 check_level)
 	if(RuleB(Character,UseOldClassExpPenalties))
 	{
 		float classmod = 1.0;
-		if(GetClass() == PALADIN || GetClass() == SHADOWKNIGHT || GetClass() == RANGER || GetClass() == BARD) {
+		if(GetClass() == Class::Paladin || GetClass() == Class::ShadowKnight || GetClass() == Class::Ranger || GetClass() == Class::Bard) {
 			classmod = 1.4;
-		} else if(GetClass() == MONK) {
+		} else if(GetClass() == Class::Monk) {
 			classmod = 1.2;
-		} else if(GetClass() == WIZARD || GetClass() == ENCHANTER || GetClass() == MAGICIAN || GetClass() == NECROMANCER) {
+		} else if(GetClass() == Class::Wizard || GetClass() == Class::Enchanter || GetClass() == Class::Magician || GetClass() == Class::Necromancer) {
 			classmod = 1.1;
-		} else if(GetClass() == ROGUE) {
+		} else if(GetClass() == Class::Rogue) {
 			classmod = 0.91;
-		} else if(GetClass() == WARRIOR) {
+		} else if(GetClass() == Class::Warrior) {
 			classmod = 0.9;
 		}
 

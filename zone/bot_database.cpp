@@ -141,7 +141,7 @@ bool BotDatabase::LoadBotSpellCastingChances()
 		if (spell_type_index >= Bot::SPELL_TYPE_COUNT)
 			continue;
 		uint8 class_index = Strings::ToInt(row[1]);
-		if (class_index < WARRIOR || class_index > BERSERKER)
+		if (class_index < Class::Warrior || class_index > Class::Berserker)
 			continue;
 		--class_index;
 		uint8 stance_index = Strings::ToInt(row[2]);
@@ -224,7 +224,7 @@ bool BotDatabase::QueryBotCount(const uint32 owner_id, int class_id, uint32& bot
 	auto row = results.begin();
 	bot_count = Strings::ToUnsignedInt(row[0]);
 
-	if (EQ::ValueWithin(class_id, WARRIOR, BERSERKER)) {
+	if (EQ::ValueWithin(class_id, Class::Warrior, Class::Berserker)) {
 		query = fmt::format(
 			"SELECT COUNT(`bot_id`) FROM `bot_data` WHERE `owner_id` = {} AND `class` = {}",
 			owner_id,
@@ -2517,7 +2517,7 @@ uint8 BotDatabase::GetSpellCastingChance(uint8 spell_type_index, uint8 class_ind
 {
 	if (spell_type_index >= Bot::SPELL_TYPE_COUNT)
 		return 0;
-	if (class_index >= PLAYER_CLASS_COUNT)
+	if (class_index >= Class::PLAYER_CLASS_COUNT)
 		return 0;
 	if (stance_index >= EQ::constants::STANCE_TYPE_COUNT)
 		return 0;

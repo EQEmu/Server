@@ -448,7 +448,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 
 	//changing from a switch to string of if's since we don't need to iterate through all of the skills in the SkillType enum
 	if (spec.tradeskill == EQ::skills::SkillAlchemy) {
-		if (user_pp.class_ != SHAMAN) {
+		if (user_pp.class_ != Class::Shaman) {
 			user->Message(Chat::Red, "This tradeskill can only be performed by a shaman.");
 			auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
 			user->QueuePacket(outapp);
@@ -473,7 +473,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 		}
 	}
 	else if (spec.tradeskill == EQ::skills::SkillMakePoison) {
-		if (user_pp.class_ != ROGUE) {
+		if (user_pp.class_ != Class::Rogue) {
 			user->Message(Chat::Red, "Only rogues can mix poisons.");
 			auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
 			user->QueuePacket(outapp);

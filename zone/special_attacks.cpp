@@ -287,7 +287,7 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 
 	// make sure were actually able to use such an attack. (Bards can throw while casting. ~Kayen confirmed on live 1/22)
 	if (
-		(spellend_timer.Enabled() && GetClass() != BARD) ||
+		(spellend_timer.Enabled() && GetClass() != Class::Bard) ||
 		IsFeared() ||
 		IsStunned() ||
 		IsMezzed() ||
@@ -420,7 +420,7 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 		CheckIncreaseSkill(EQ::skills::SkillFrenzy, GetTarget(), 10);
 		DoAnim(anim1HWeapon, 0, false);
 
-		if (GetClass() == BERSERKER) {
+		if (GetClass() == Class::Berserker) {
 			int chance = GetLevel() * 2 + GetSkill(EQ::skills::SkillFrenzy);
 
 			if (zone->random.Roll0(450) < chance) {
@@ -461,11 +461,11 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 	const uint32 allowed_kick_classes = RuleI(Combat, ExtraAllowedKickClassesBitmask);
 
 	const bool can_use_kick = (
-		class_id == WARRIOR ||
-		class_id == RANGER ||
-		class_id == MONK ||
-		class_id == BEASTLORD ||
-		class_id == BERSERKER ||
+		class_id == Class::Warrior ||
+		class_id == Class::Ranger ||
+		class_id == Class::Monk ||
+		class_id == Class::Beastlord ||
+		class_id == Class::Berserker ||
 		allowed_kick_classes & GetPlayerClassBit(class_id)
 	);
 
@@ -494,7 +494,7 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 		}
 	}
 
-	if (class_id == MONK) {
+	if (class_id == Class::Monk) {
 		reuse_time = MonkSpecialAttack(GetTarget(), ca_atk->m_skill) - 1 - skill_reduction;
 
 		// Live AA - Technique of Master Wu
@@ -559,7 +559,7 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 	if (
 		ca_atk->m_atk == 100 &&
 		ca_atk->m_skill == EQ::skills::SkillBackstab &&
-		class_id == ROGUE
+		class_id == Class::Rogue
 	) {
 		reuse_time = BackstabReuseTime - 1 - skill_reduction;
 		TryBackstab(GetTarget(), reuse_time);
@@ -1495,7 +1495,7 @@ void Client::ThrowingAttack(Mob* other, bool CanDoubleAttack) { //old was 51
 	}
 
 	if(!IsAttackAllowed(other) ||
-		(IsCasting() && GetClass() != BARD) ||
+		(IsCasting() && GetClass() != Class::Bard) ||
 		IsSitting() ||
 		(DivineAura() && !GetGM()) ||
 		IsStunned() ||
@@ -1779,13 +1779,13 @@ void NPC::DoClassAttacks(Mob *target) {
 		int knightreuse = 1000; //lets give it a small cooldown actually.
 
 		switch(GetClass()){
-			case SHADOWKNIGHT: case SHADOWKNIGHTGM:{
+			case Class::ShadowKnight: case Class::ShadowKnightGM:{
 				if (CastSpell(SPELL_NPC_HARM_TOUCH, target->GetID())) {
 					knightreuse = HarmTouchReuseTime * 1000;
 					}
 				break;
 			}
-			case PALADIN: case PALADINGM:{
+			case Class::Paladin: case Class::PaladinGM:{
 				if(GetHPRatio() < 20) {
 					if (CastSpell(SPELL_LAY_ON_HANDS, GetID())) {
 						knightreuse = LayOnHandsReuseTime * 1000;
@@ -1822,14 +1822,14 @@ void NPC::DoClassAttacks(Mob *target) {
 	bool did_attack = false;
 	//class specific stuff...
 	switch(GetClass()) {
-		case ROGUE: case ROGUEGM:
+		case Class::Rogue: case Class::RogueGM:
 			if(level >= 10) {
 				reuse = BackstabReuseTime * 1000;
 				TryBackstab(target, reuse);
 				did_attack = true;
 			}
 			break;
-		case MONK: case MONKGM: {
+		case Class::Monk: case Class::MonkGM: {
 			uint8 satype = EQ::skills::SkillKick;
 			if (level > 29) { satype = EQ::skills::SkillFlyingKick; }
 			else if (level > 24) { satype = EQ::skills::SkillDragonPunch; }
@@ -1842,7 +1842,7 @@ void NPC::DoClassAttacks(Mob *target) {
 			did_attack = true;
 			break;
 		}
-		case WARRIOR: case WARRIORGM:{
+		case Class::Warrior: case Class::WarriorGM:{
 			if(level >= RuleI(Combat, NPCBashKickLevel)){
 				if(zone->random.Roll(75)) { //tested on live, warrior mobs both kick and bash, kick about 75% of the time, casting doesn't seem to make a difference.
 					DoAnim(animKick, 0, false);
@@ -1870,12 +1870,12 @@ void NPC::DoClassAttacks(Mob *target) {
 			}
 			break;
 		}
-		case BERSERKER: case BERSERKERGM:{
+		case Class::Berserker: case Class::BerserkerGM:{
 			int AtkRounds = 1;
 			int32 max_dmg = GetBaseSkillDamage(EQ::skills::SkillFrenzy);
 			DoAnim(anim2HSlashing, 0, false);
 
-			if (GetClass() == BERSERKER) {
+			if (GetClass() == Class::Berserker) {
 				int chance = GetLevel() * 2 + GetSkill(EQ::skills::SkillFrenzy);
 				if (zone->random.Roll0(450) < chance)
 					AtkRounds++;
@@ -1892,8 +1892,8 @@ void NPC::DoClassAttacks(Mob *target) {
 			did_attack = true;
 			break;
 		}
-		case RANGER: case RANGERGM:
-		case BEASTLORD: case BEASTLORDGM: {
+		case Class::Ranger: case Class::RangerGM:
+		case Class::Beastlord: case Class::BeastlordGM: {
 			//kick
 			if(level >= RuleI(Combat, NPCBashKickLevel)){
 				DoAnim(animKick, 0, false);
@@ -1908,9 +1908,9 @@ void NPC::DoClassAttacks(Mob *target) {
 			}
 			break;
 		}
-		case CLERIC: case CLERICGM: //clerics can bash too.
-		case SHADOWKNIGHT: case SHADOWKNIGHTGM:
-		case PALADIN: case PALADINGM:{
+		case Class::Cleric: case Class::ClericGM: //clerics can bash too.
+		case Class::ShadowKnight: case Class::ShadowKnightGM:
+		case Class::Paladin: case Class::PaladinGM:{
 			if(level >= RuleI(Combat, NPCBashKickLevel)){
 				DoAnim(animTailRake, 0, false);
 				int64 dmg = GetBaseSkillDamage(EQ::skills::SkillBash);
@@ -1957,19 +1957,19 @@ void Client::DoClassAttacks(Mob *ca_target, uint16 skill, bool IsRiposte)
 
 	if (skill == -1){
 		switch(GetClass()){
-		case WARRIOR:
-		case RANGER:
-		case BEASTLORD:
+		case Class::Warrior:
+		case Class::Ranger:
+		case Class::Beastlord:
 			skill_to_use = EQ::skills::SkillKick;
 			break;
-		case BERSERKER:
+		case Class::Berserker:
 			skill_to_use = EQ::skills::SkillFrenzy;
 			break;
-		case SHADOWKNIGHT:
-		case PALADIN:
+		case Class::ShadowKnight:
+		case Class::Paladin:
 			skill_to_use = EQ::skills::SkillBash;
 			break;
-		case MONK:
+		case Class::Monk:
 			if(GetLevel() >= 30)
 			{
 				skill_to_use = EQ::skills::SkillFlyingKick;
@@ -1995,7 +1995,7 @@ void Client::DoClassAttacks(Mob *ca_target, uint16 skill, bool IsRiposte)
 				skill_to_use = EQ::skills::SkillKick;
 			}
 			break;
-		case ROGUE:
+		case Class::Rogue:
 			skill_to_use = EQ::skills::SkillBackstab;
 			break;
 		}
@@ -2035,7 +2035,7 @@ void Client::DoClassAttacks(Mob *ca_target, uint16 skill, bool IsRiposte)
 		ReuseTime = (FrenzyReuseTime - 1) / HasteMod;
 
 		// bards can do riposte frenzy for some reason
-		if (!IsRiposte && GetClass() == BERSERKER) {
+		if (!IsRiposte && GetClass() == Class::Berserker) {
 			int chance = GetLevel() * 2 + GetSkill(EQ::skills::SkillFrenzy);
 			if (zone->random.Roll0(450) < chance)
 				AtkRounds++;

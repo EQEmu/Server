@@ -558,7 +558,7 @@ bool Mob::AvoidDamage(Mob *other, DamageHitInfo &hit)
 	}
 
 	// dodge
-	if (CanThisClassDodge() && (InFront || GetClass() == MONK)) {
+	if (CanThisClassDodge() && (InFront || GetClass() == Class::Monk)) {
 		if (IsClient())
 			CastToClient()->CheckIncreaseSkill(EQ::skills::SkillDodge, other, -10);
 		// check auto discs ... I guess aa/items too :P
@@ -674,28 +674,28 @@ int Mob::GetACSoftcap()
 	int level = std::min(105, static_cast<int>(GetLevel())) - 1;
 
 	switch (GetClass()) {
-	case WARRIOR:
+	case Class::Warrior:
 		return war_softcaps[level];
-	case CLERIC:
-	case BARD:
-	case MONK:
+	case Class::Cleric:
+	case Class::Bard:
+	case Class::Monk:
 		return clrbrdmnk_softcaps[level];
-	case PALADIN:
-	case SHADOWKNIGHT:
+	case Class::Paladin:
+	case Class::ShadowKnight:
 		return palshd_softcaps[level];
-	case RANGER:
+	case Class::Ranger:
 		return rng_softcaps[level];
-	case DRUID:
+	case Class::Druid:
 		return dru_softcaps[level];
-	case ROGUE:
-	case SHAMAN:
-	case BEASTLORD:
-	case BERSERKER:
+	case Class::Rogue:
+	case Class::Shaman:
+	case Class::Beastlord:
+	case Class::Berserker:
 		return rogshmbstber_softcaps[level];
-	case NECROMANCER:
-	case WIZARD:
-	case MAGICIAN:
-	case ENCHANTER:
+	case Class::Necromancer:
+	case Class::Wizard:
+	case Class::Magician:
+	case Class::Enchanter:
 		return necwizmagenc_softcaps[level];
 	default:
 		return 350;
@@ -707,28 +707,28 @@ double Mob::GetSoftcapReturns()
 	// These are based on the dev post, they seem to be correct for every level
 	// AKA no more hard caps
 	switch (GetClass()) {
-	case WARRIOR:
+	case Class::Warrior:
 		return 0.35;
-	case CLERIC:
-	case BARD:
-	case MONK:
+	case Class::Cleric:
+	case Class::Bard:
+	case Class::Monk:
 		return 0.3;
-	case PALADIN:
-	case SHADOWKNIGHT:
+	case Class::Paladin:
+	case Class::ShadowKnight:
 		return 0.33;
-	case RANGER:
+	case Class::Ranger:
 		return 0.315;
-	case DRUID:
+	case Class::Druid:
 		return 0.265;
-	case ROGUE:
-	case SHAMAN:
-	case BEASTLORD:
-	case BERSERKER:
+	case Class::Rogue:
+	case Class::Shaman:
+	case Class::Beastlord:
+	case Class::Berserker:
 		return 0.28;
-	case NECROMANCER:
-	case WIZARD:
-	case MAGICIAN:
-	case ENCHANTER:
+	case Class::Necromancer:
+	case Class::Wizard:
+	case Class::Magician:
+	case Class::Enchanter:
 		return 0.25;
 	default:
 		return 0.3;
@@ -739,7 +739,7 @@ int Mob::GetClassRaceACBonus()
 {
 	int ac_bonus = 0;
 	auto level = GetLevel();
-	if (GetClass() == MONK) {
+	if (GetClass() == Class::Monk) {
 		int hardcap = 30;
 		int softcap = 14;
 		if (level > 99) {
@@ -824,7 +824,7 @@ int Mob::GetClassRaceACBonus()
 		}
 	}
 
-	if (GetClass() == ROGUE) {
+	if (GetClass() == Class::Rogue) {
 		int level_scaler = level - 26;
 		if (GetAGI() < 80)
 			ac_bonus = level_scaler / 4;
@@ -840,7 +840,7 @@ int Mob::GetClassRaceACBonus()
 			ac_bonus = 12;
 	}
 
-	if (GetClass() == BEASTLORD) {
+	if (GetClass() == Class::Beastlord) {
 		int level_scaler = level - 6;
 		if (GetAGI() < 80)
 			ac_bonus = level_scaler / 5;
@@ -894,14 +894,14 @@ int Mob::ACSum(bool skip_caps)
 		ac += GetPetACBonusFromOwner();
 		auto spell_aa_ac = aabonuses.AC + spellbonuses.AC;
 		ac += GetSkill(EQ::skills::SkillDefense) / 5;
-		if (EQ::ValueWithin(static_cast<int>(GetClass()), NECROMANCER, ENCHANTER))
+		if (EQ::ValueWithin(static_cast<int>(GetClass()), Class::Necromancer, Class::Enchanter))
 			ac += spell_aa_ac / 3;
 		else
 			ac += spell_aa_ac / 4;
 	}
 	else { // TODO: so we can't set NPC skills ... so the skill bonus ends up being HUGE so lets nerf them a bit
 		auto spell_aa_ac = aabonuses.AC + spellbonuses.AC;
-		if (EQ::ValueWithin(static_cast<int>(GetClass()), NECROMANCER, ENCHANTER))
+		if (EQ::ValueWithin(static_cast<int>(GetClass()), Class::Necromancer, Class::Enchanter))
 			ac += GetSkill(EQ::skills::SkillDefense) / 2 + spell_aa_ac / 3;
 		else
 			ac += GetSkill(EQ::skills::SkillDefense) / 3 + spell_aa_ac / 4;
@@ -1085,7 +1085,7 @@ int64 Mob::GetWeaponDamage(Mob *against, const EQ::ItemData *weapon_item) {
 				return 0;
 			}
 		}
-		else if ((GetClass() == MONK || GetClass() == BEASTLORD) && GetLevel() >= 30) {
+		else if ((GetClass() == Class::Monk || GetClass() == Class::Beastlord) && GetLevel() >= 30) {
 			dmg = GetHandToHandDamage();
 		}
 		else {
@@ -1199,7 +1199,7 @@ int64 Mob::GetWeaponDamage(Mob *against, const EQ::ItemInstance *weapon_item, in
 					MagicGloves = gloves->GetItemMagical(true);
 			}
 
-			if (GetClass() == MONK || GetClass() == BEASTLORD) {
+			if (GetClass() == Class::Monk || GetClass() == Class::Beastlord) {
 				if (MagicGloves || GetLevel() >= 30) {
 					dmg = GetHandToHandDamage();
 					if (hate)
@@ -1295,15 +1295,15 @@ int64 Mob::DoDamageCaps(int64 base_damage)
 	}
 	else if (level >= 40) {
 		switch (GetClass()) {
-		case CLERIC:
-		case DRUID:
-		case SHAMAN:
+		case Class::Cleric:
+		case Class::Druid:
+		case Class::Shaman:
 			cap = 80;
 			break;
-		case NECROMANCER:
-		case WIZARD:
-		case MAGICIAN:
-		case ENCHANTER:
+		case Class::Necromancer:
+		case Class::Wizard:
+		case Class::Magician:
+		case Class::Enchanter:
 			cap = 40;
 			break;
 		default:
@@ -1313,15 +1313,15 @@ int64 Mob::DoDamageCaps(int64 base_damage)
 	}
 	else if (level >= 30) {
 		switch (GetClass()) {
-		case CLERIC:
-		case DRUID:
-		case SHAMAN:
+		case Class::Cleric:
+		case Class::Druid:
+		case Class::Shaman:
 			cap = 26;
 			break;
-		case NECROMANCER:
-		case WIZARD:
-		case MAGICIAN:
-		case ENCHANTER:
+		case Class::Necromancer:
+		case Class::Wizard:
+		case Class::Magician:
+		case Class::Enchanter:
 			cap = 18;
 			break;
 		default:
@@ -1331,15 +1331,15 @@ int64 Mob::DoDamageCaps(int64 base_damage)
 	}
 	else if (level >= 20) {
 		switch (GetClass()) {
-		case CLERIC:
-		case DRUID:
-		case SHAMAN:
+		case Class::Cleric:
+		case Class::Druid:
+		case Class::Shaman:
 			cap = 20;
 			break;
-		case NECROMANCER:
-		case WIZARD:
-		case MAGICIAN:
-		case ENCHANTER:
+		case Class::Necromancer:
+		case Class::Wizard:
+		case Class::Magician:
+		case Class::Enchanter:
 			cap = 12;
 			break;
 		default:
@@ -1349,15 +1349,15 @@ int64 Mob::DoDamageCaps(int64 base_damage)
 	}
 	else if (level >= 10) {
 		switch (GetClass()) {
-		case CLERIC:
-		case DRUID:
-		case SHAMAN:
+		case Class::Cleric:
+		case Class::Druid:
+		case Class::Shaman:
 			cap = 12;
 			break;
-		case NECROMANCER:
-		case WIZARD:
-		case MAGICIAN:
-		case ENCHANTER:
+		case Class::Necromancer:
+		case Class::Wizard:
+		case Class::Magician:
+		case Class::Enchanter:
 			cap = 10;
 			break;
 		default:
@@ -1367,15 +1367,15 @@ int64 Mob::DoDamageCaps(int64 base_damage)
 	}
 	else {
 		switch (GetClass()) {
-		case CLERIC:
-		case DRUID:
-		case SHAMAN:
+		case Class::Cleric:
+		case Class::Druid:
+		case Class::Shaman:
 			cap = 9;
 			break;
-		case NECROMANCER:
-		case WIZARD:
-		case MAGICIAN:
-		case ENCHANTER:
+		case Class::Necromancer:
+		case Class::Wizard:
+		case Class::Magician:
+		case Class::Enchanter:
 			cap = 6;
 			break;
 		default:
@@ -1476,7 +1476,7 @@ bool Mob::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 	LogCombatDetail("Attacking [{}] with hand [{}] [{}]", other->GetName(), Hand, bRiposte ? "this is a riposte" : "");
 
 	if (
-		(IsCasting() && GetClass() != BARD && !IsFromSpell)
+		(IsCasting() && GetClass() != Class::Bard && !IsFromSpell)
 		|| ((IsClient() && CastToClient()->dead) || (other->IsClient() && other->CastToClient()->dead))
 		|| (GetHP() < 0)
 		|| (!IsAttackAllowed(other))
@@ -2019,7 +2019,7 @@ bool Client::Death(Mob* killerMob, int64 damage, uint16 spell, EQ::skills::Skill
 	/*
 	Reset reuse timer for classic skill based Lay on Hands (For tit I guess)
 	*/
-	if (GetClass() == PALADIN) { // we could check if it's not expired I guess, but should be fine not to
+	if (GetClass() == Class::Paladin) { // we could check if it's not expired I guess, but should be fine not to
 		p_timers.Clear(&database, pTimerLayHands);
 	}
 
@@ -2343,7 +2343,7 @@ void NPC::Damage(Mob* other, int64 damage, uint16 spell_id, EQ::skills::SkillTyp
 	if (!IsEngaged())
 		zone->AddAggroMob();
 
-	if (GetClass() == LDON_TREASURE)
+	if (GetClass() == Class::LDoNTreasure)
 	{
 		if (IsLDoNLocked() && GetLDoNLockedSkill() != LDoNTypeMechanical)
 		{
@@ -2461,7 +2461,7 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 	BuffFadeAll();
 	const auto killed_level = GetLevel();
 
-	if (GetClass() == LDON_TREASURE) { // open chest
+	if (GetClass() == Class::LDoNTreasure) { // open chest
 		auto outapp = new EQApplicationPacket(OP_Animation, sizeof(Animation_Struct));
 		Animation_Struct* anim = (Animation_Struct*)outapp->pBuffer;
 		anim->spawnid = GetID();
@@ -2488,7 +2488,7 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 		respawn2->DeathReset(1);
 	}
 
-	if (killer_mob && GetClass() != LDON_TREASURE) {
+	if (killer_mob && GetClass() != Class::LDoNTreasure) {
 		hate_list.AddEntToHateList(killer_mob, damage);
 	}
 
@@ -2535,7 +2535,7 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 		hate_list.DoFactionHits(GetNPCFactionID(), GetPrimaryFaction(), GetFactionAmount());
 	}
 
-	bool IsLdonTreasure = (GetClass() == LDON_TREASURE);
+	bool IsLdonTreasure = (GetClass() == Class::LDoNTreasure);
 
 	if (give_exp_client && !IsCorpse()) {
 		Group *kg = entity_list.GetGroupByClient(give_exp_client);
@@ -2701,7 +2701,7 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 	}
 
 	bool    allow_merchant_corpse = RuleB(Merchant, AllowCorpse);
-	bool    is_merchant = (class_ == MERCHANT || class_ == ADVENTURE_MERCHANT || MerchantType != 0);
+	bool    is_merchant = (class_ == Class::Merchant || class_ == Class::AdventureMerchant || MerchantType != 0);
 
 	Corpse* corpse = nullptr;
 
@@ -3295,14 +3295,14 @@ int Mob::GetHandToHandDamage(void)
 		7, 7, 7, 8, 8, 8, 8, 8, 8, 9,        // 21-30
 		9, 9, 9, 9, 9, 10, 10, 10, 10, 10,   // 31-40
 		10, 11, 11, 11, 11, 11, 11, 12, 12 }; // 41-49
-	if (GetClass() == MONK) {
+	if (GetClass() == Class::Monk) {
 		if (IsClient() && CastToClient()->GetItemIDAt(12) == 10652 && GetLevel() > 50)
 			return 9;
 		if (level > 62)
 			return 15;
 		return mnk_dmg[level];
 	}
-	else if (GetClass() == BEASTLORD) {
+	else if (GetClass() == Class::Beastlord) {
 		if (level > 49)
 			return 13;
 		return bst_dmg[level];
@@ -3354,7 +3354,7 @@ int Mob::GetHandToHandDelay(void)
 		28, 28, 28, 27, 27, 27, 27, 27, 26, 26, // 61-70
 		26, 26, 26 };                            // 71-73
 
-	if (GetClass() == MONK) {
+	if (GetClass() == Class::Monk) {
 		// Have a look to see if we have epic fists on
 		if (IsClient() && CastToClient()->GetItemIDAt(12) == 10652 && GetLevel() > 50)
 			return 16;
@@ -3363,7 +3363,7 @@ int Mob::GetHandToHandDelay(void)
 			return GetRace() == IKSAR ? 21 : 20;
 		return GetRace() == IKSAR ? mnk_iks_delay[level] : mnk_hum_delay[level];
 	}
-	else if (GetClass() == BEASTLORD) {
+	else if (GetClass() == Class::Beastlord) {
 		int level = GetLevel();
 		if (level > 73)
 			return 25;
@@ -4067,7 +4067,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 				}
 			}
 			else if (skill_used == EQ::skills::SkillKick &&
-				(attacker->GetLevel() > 55 || attacker->IsNPC()) && GetClass() == WARRIOR) {
+				(attacker->GetLevel() > 55 || attacker->IsNPC()) && GetClass() == Class::Warrior) {
 				can_stun = true;
 			}
 
@@ -5053,11 +5053,11 @@ void Mob::TryCriticalHit(Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *
 	// We either require an innate crit chance or some SPA 169 to crit
 	bool innate_crit = false;
 	int crit_chance = GetCriticalChanceBonus(hit.skill);
-	if ((GetClass() == WARRIOR || GetClass() == BERSERKER) && GetLevel() >= 12)
+	if ((GetClass() == Class::Warrior || GetClass() == Class::Berserker) && GetLevel() >= 12)
 		innate_crit = true;
-	else if (GetClass() == RANGER && GetLevel() >= 12 && hit.skill == EQ::skills::SkillArchery)
+	else if (GetClass() == Class::Ranger && GetLevel() >= 12 && hit.skill == EQ::skills::SkillArchery)
 		innate_crit = true;
-	else if (GetClass() == ROGUE && GetLevel() >= 12 && hit.skill == EQ::skills::SkillThrowing)
+	else if (GetClass() == Class::Rogue && GetLevel() >= 12 && hit.skill == EQ::skills::SkillThrowing)
 		innate_crit = true;
 
 	// we have a chance to crit!
@@ -5077,7 +5077,7 @@ void Mob::TryCriticalHit(Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *
 		dex_bonus += 45; // chances did not match live without a small boost
 
 						 // so if we have an innate crit we have a better chance, except for ber throwing
-		if (!innate_crit || (GetClass() == BERSERKER && hit.skill == EQ::skills::SkillThrowing))
+		if (!innate_crit || (GetClass() == Class::Berserker && hit.skill == EQ::skills::SkillThrowing))
 			dex_bonus = dex_bonus * 3 / 5;
 
 		if (crit_chance)
@@ -5101,7 +5101,7 @@ void Mob::TryCriticalHit(Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *
 			LogCombat("Crit success roll [{}] dex chance [{}] og dmg [{}] crit_mod [{}] new dmg [{}]", roll, dex_bonus, og_damage, crit_mod, hit.damage_done);
 
 			// step 3: check deadly strike
-			if (GetClass() == ROGUE && hit.skill == EQ::skills::SkillThrowing) {
+			if (GetClass() == Class::Rogue && hit.skill == EQ::skills::SkillThrowing) {
 				if (BehindMob(defender, GetX(), GetY())) {
 					int chance = GetLevel() * 12;
 					if (zone->random.Int(1, 1000) < chance) {
@@ -5284,7 +5284,7 @@ void Mob::DoRiposte(Mob *defender)
 	if (DoubleRipChance && zone->random.Roll(DoubleRipChance)) {
 		LogCombat("Preforming a return SPECIAL ATTACK ([{}] percent chance)", DoubleRipChance);
 
-		if (defender->GetClass() == MONK)
+		if (defender->GetClass() == Class::Monk)
 			defender->MonkSpecialAttack(this, defender->aabonuses.GiveDoubleRiposte[SBIndex::DOUBLE_RIPOSTE_SKILL]);
 		else if (defender->IsClient()) // so yeah, even if you don't have the skill you can still do the attack :P (and we don't crash anymore)
 			defender->CastToClient()->DoClassAttacks(this, defender->aabonuses.GiveDoubleRiposte[SBIndex::DOUBLE_RIPOSTE_SKILL], true);
@@ -5301,7 +5301,7 @@ void Mob::ApplyMeleeDamageMods(uint16 skill, int64 &damage, Mob *defender, Extra
 		dmgbonusmod += opts->melee_damage_bonus_flat;
 
 	if (defender) {
-		if (defender->IsOfClientBotMerc() && defender->GetClass() == WARRIOR) {
+		if (defender->IsOfClientBotMerc() && defender->GetClass() == Class::Warrior) {
 			dmgbonusmod -= 5;
 		}
 		// 168 defensive
@@ -5445,7 +5445,7 @@ const DamageTable &Mob::GetDamageTable() const
 		{ 415, 15,  40 }, // 105
 	};
 
-	bool monk = GetClass() == MONK;
+	bool monk = GetClass() == Class::Monk;
 	bool melee = IsWarriorClass();
 	// tables caped at 105 for now -- future proofed for a while at least :P
 	int level = std::min(static_cast<int>(GetLevel()), 105);
@@ -5893,7 +5893,7 @@ void Mob::CommonOutgoingHitSuccess(Mob* defender, DamageHitInfo &hit, ExtraAttac
 
 	// BER weren't parsing the halving
 	if (hit.skill == EQ::skills::SkillArchery ||
-		(hit.skill == EQ::skills::SkillThrowing && GetClass() != BERSERKER))
+		(hit.skill == EQ::skills::SkillThrowing && GetClass() != Class::Berserker))
 		hit.damage_done /= 2;
 
 	if (hit.damage_done < 1)
@@ -5906,7 +5906,7 @@ void Mob::CommonOutgoingHitSuccess(Mob* defender, DamageHitInfo &hit, ExtraAttac
 		if (headshot > 0) {
 			hit.damage_done = headshot;
 		}
-		else if (GetClass() == RANGER && GetLevel() > 50) { // no double dmg on headshot
+		else if (GetClass() == Class::Ranger && GetLevel() > 50) { // no double dmg on headshot
 			if ((defender->IsNPC() && !defender->IsMoving() && !defender->IsRooted()) || !RuleB(Combat, ArcheryBonusRequiresStationary)) {
 				hit.damage_done *= 2;
 				MessageString(Chat::MeleeCrit, BOW_DOUBLE_DAMAGE);
@@ -5931,7 +5931,7 @@ void Mob::CommonOutgoingHitSuccess(Mob* defender, DamageHitInfo &hit, ExtraAttac
 				hit.damage_done = ass;
 		}
 	}
-	else if (hit.skill == EQ::skills::SkillFrenzy && GetClass() == BERSERKER && GetLevel() > 50) {
+	else if (hit.skill == EQ::skills::SkillFrenzy && GetClass() == Class::Berserker && GetLevel() > 50) {
 		extra_mincap = 4 * GetLevel() / 5;
 	}
 

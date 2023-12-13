@@ -2758,7 +2758,7 @@ namespace UF
 			if (strlen(emu->suffix))
 				PacketSize += strlen(emu->suffix) + 1;
 
-			if (emu->DestructibleObject || emu->class_ == LDON_TREASURE)
+			if (emu->DestructibleObject || emu->class_ == Class::LDoNTreasure)
 			{
 				if (emu->DestructibleObject)
 					PacketSize = PacketSize - 4;	// No bodytype
@@ -2847,7 +2847,7 @@ namespace UF
 
 			uint8 OtherData = 0;
 
-			if (emu->class_ == LDON_TREASURE) //Ldon chest
+			if (emu->class_ == Class::LDoNTreasure) //Ldon chest
 			{
 				OtherData = OtherData | 0x01;
 			}
@@ -2873,7 +2873,7 @@ namespace UF
 			}
 			VARSTRUCT_ENCODE_TYPE(float, Buffer, 0);	// unknown4
 
-			if (emu->DestructibleObject || emu->class_ == LDON_TREASURE)
+			if (emu->DestructibleObject || emu->class_ == Class::LDoNTreasure)
 			{
 				VARSTRUCT_ENCODE_STRING(Buffer, emu->DestructibleModel);
 				VARSTRUCT_ENCODE_STRING(Buffer, emu->DestructibleName2);
