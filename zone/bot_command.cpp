@@ -5351,7 +5351,7 @@ void bot_subcommand_bot_beard_color(Client *c, const Seperator *sep)
 	uint8 uvalue = Strings::ToInt(sep->arg[1]);
 
 	auto fail_type = BCEnum::AFT_None;
-	if (my_bot->GetGender() != Genders::Male && my_bot->GetRace() != Races::Dwarf)
+	if (my_bot->GetGender() != Gender::Male && my_bot->GetRace() != Race::Dwarf)
 		fail_type = BCEnum::AFT_GenderRace;
 	else if (!PlayerAppearance::IsValidBeardColor(my_bot->GetRace(), my_bot->GetGender(), uvalue))
 		fail_type = BCEnum::AFT_Value;
@@ -5388,7 +5388,7 @@ void bot_subcommand_bot_beard_style(Client *c, const Seperator *sep)
 	uint8 uvalue = Strings::ToInt(sep->arg[1]);
 
 	auto fail_type = BCEnum::AFT_None;
-	if (my_bot->GetGender() != Genders::Male && my_bot->GetRace() != Races::Dwarf)
+	if (my_bot->GetGender() != Gender::Male && my_bot->GetRace() != Race::Dwarf)
 		fail_type = BCEnum::AFT_GenderRace;
 	else if (!PlayerAppearance::IsValidBeard(my_bot->GetRace(), my_bot->GetGender(), uvalue))
 		fail_type = BCEnum::AFT_Value;
@@ -5631,11 +5631,11 @@ void bot_command_view_combos(Client *c, const Seperator *sep)
 	};
 
 	const uint16 race_values[17] = {
-		Races::Doug,
-		Races::Human, Races::Barbarian, Races::Erudite, Races::WoodElf,
-		Races::HighElf, Races::DarkElf, Races::HalfElf, Races::Dwarf,
-		Races::Troll, Races::Ogre, Races::Halfling, Races::Gnome,
-		Races::Iksar, Races::VahShir, Races::Froglok, Races::Drakkin
+		Race::Doug,
+		Race::Human, Race::Barbarian, Race::Erudite, Race::WoodElf,
+		Race::HighElf, Race::DarkElf, Race::HalfElf, Race::Dwarf,
+		Race::Troll, Race::Ogre, Race::Halfling, Race::Gnome,
+		Race::Iksar, Race::VahShir, Race::Froglok, Race::Drakkin
 	};
 
 	if (helper_command_alias_fail(c, "bot_command_view_combos", sep->arg[0], "viewcombos")) {
@@ -5746,11 +5746,11 @@ void bot_subcommand_bot_create(Client *c, const Seperator *sep)
 	};
 
 	const uint16 race_values[17] = {
-		Races::Doug,
-		Races::Human, Races::Barbarian, Races::Erudite, Races::WoodElf,
-		Races::HighElf, Races::DarkElf, Races::HalfElf, Races::Dwarf,
-		Races::Troll, Races::Ogre, Races::Halfling, Races::Gnome,
-		Races::Iksar, Races::VahShir, Races::Froglok, Races::Drakkin
+		Race::Doug,
+		Race::Human, Race::Barbarian, Race::Erudite, Race::WoodElf,
+		Race::HighElf, Race::DarkElf, Race::HalfElf, Race::Dwarf,
+		Race::Troll, Race::Ogre, Race::Halfling, Race::Gnome,
+		Race::Iksar, Race::VahShir, Race::Froglok, Race::Drakkin
 	};
 
 	const std::string gender_substrs[2] = {
@@ -5837,7 +5837,7 @@ void bot_subcommand_bot_create(Client *c, const Seperator *sep)
 
 		window_text.append(
 			fmt::format(
-				"<c \"#FFFFFF\">Genders{}<c \"#FFFF\">",
+				"<c \"#FFFFFF\">Gender{}<c \"#FFFF\">",
 				DialogueWindow::Break()
 			)
 		);
@@ -5889,18 +5889,18 @@ void bot_subcommand_bot_create(Client *c, const Seperator *sep)
 		return;
 	}
 
-	uint8 bot_gender = Genders::Male;
+	uint8 bot_gender = Gender::Male;
 
 	if (sep->IsNumber(4)) {
 		bot_gender = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[4]));
-		if (bot_gender == Genders::Neuter) {
-			bot_gender = Genders::Male;
+		if (bot_gender == Gender::Neuter) {
+			bot_gender = Gender::Male;
 		}
 	} else {
 		if (!strcasecmp(sep->arg[4], "m") || !strcasecmp(sep->arg[4], "male")) {
-			bot_gender = Genders::Male;
+			bot_gender = Gender::Male;
 		} else if (!strcasecmp(sep->arg[4], "f") || !strcasecmp(sep->arg[4], "female")) {
-			bot_gender = Genders::Female;
+			bot_gender = Gender::Female;
 		}
 	}
 
@@ -5961,7 +5961,7 @@ void bot_subcommand_bot_details(Client *c, const Seperator *sep)
 	uint32 uvalue = Strings::ToInt(sep->arg[1]);
 
 	auto fail_type = BCEnum::AFT_None;
-	if (my_bot->GetRace() != Races::Drakkin)
+	if (my_bot->GetRace() != Race::Drakkin)
 		fail_type = BCEnum::AFT_Race;
 	else if (!PlayerAppearance::IsValidDetail(my_bot->GetRace(), my_bot->GetGender(), uvalue))
 		fail_type = BCEnum::AFT_Value;
@@ -6188,7 +6188,7 @@ void bot_subcommand_bot_face(Client *c, const Seperator *sep)
 	}
 	else {
 		uint8 old_woad = 0;
-		if (my_bot->GetRace() == Races::Barbarian)
+		if (my_bot->GetRace() == Race::Barbarian)
 			old_woad = ((my_bot->GetLuclinFace() / 10) * 10);
 		my_bot->SetLuclinFace((old_woad + uvalue));
 	}
@@ -6361,7 +6361,7 @@ void bot_subcommand_bot_heritage(Client *c, const Seperator *sep)
 	uint32 uvalue = Strings::ToInt(sep->arg[1]);
 
 	auto fail_type = BCEnum::AFT_None;
-	if (my_bot->GetRace() != Races::Drakkin)
+	if (my_bot->GetRace() != Race::Drakkin)
 		fail_type = BCEnum::AFT_Race;
 	else if (!PlayerAppearance::IsValidHeritage(my_bot->GetRace(), my_bot->GetGender(), uvalue))
 		fail_type = BCEnum::AFT_Value;
@@ -7200,7 +7200,7 @@ void bot_subcommand_bot_tattoo(Client *c, const Seperator *sep)
 	uint32 uvalue = Strings::ToInt(sep->arg[1]);
 
 	auto fail_type = BCEnum::AFT_None;
-	if (my_bot->GetRace() != Races::Drakkin)
+	if (my_bot->GetRace() != Race::Drakkin)
 		fail_type = BCEnum::AFT_Race;
 	else if (!PlayerAppearance::IsValidTattoo(my_bot->GetRace(), my_bot->GetGender(), uvalue))
 		fail_type = BCEnum::AFT_Value;
@@ -7443,7 +7443,7 @@ void bot_subcommand_bot_woad(Client *c, const Seperator *sep)
 	uint8 uvalue = Strings::ToInt(sep->arg[1]);
 
 	auto fail_type = BCEnum::AFT_None;
-	if (my_bot->GetRace() != Races::Barbarian) {
+	if (my_bot->GetRace() != Race::Barbarian) {
 		fail_type = BCEnum::AFT_Race;
 	}
 	else if (!PlayerAppearance::IsValidWoad(my_bot->GetRace(), my_bot->GetGender(), uvalue)) {
@@ -9279,15 +9279,15 @@ uint32 helper_bot_create(Client *bot_owner, std::string bot_name, uint8 bot_clas
 		return bot_id;
 	}
 
-	if (!EQ::ValueWithin(bot_gender, Genders::Male, Genders::Female)) {
+	if (!EQ::ValueWithin(bot_gender, Gender::Male, Gender::Female)) {
 		bot_owner->Message(
 			Chat::White,
 			fmt::format(
 				"Gender: {} ({}) or {} ({})",
-				GetGenderName(Genders::Male),
-				Genders::Male,
-				GetGenderName(Genders::Female),
-				Genders::Female
+				GetGenderName(Gender::Male),
+				Gender::Male,
+				GetGenderName(Gender::Female),
+				Gender::Female
 			).c_str()
 		);
 		return bot_id;
@@ -9392,7 +9392,7 @@ uint32 helper_bot_create(Client *bot_owner, std::string bot_name, uint8 bot_clas
 	bot_owner->Message(
 		Chat::White,
 		fmt::format(
-			"Bot Created | Name: {} ID: {} Race: {} Class: {}",
+			"Bot Created | Name: {} ID: {} Race:: {} Class: {}",
 			my_bot->GetCleanName(),
 			my_bot->GetBotID(),
 			GetRaceIDName(my_bot->GetRace()),

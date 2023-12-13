@@ -5,7 +5,7 @@ void SetGenderPermanent(Client *c, const Seperator *sep)
 	const auto arguments = sep->argnum;
 	if (arguments < 2 || !sep->IsNumber(2)) {
 		c->Message(Chat::White, "Usage: #set gender_permanent [Gender ID]");
-		c->Message(Chat::White, "Genders: 0 = Male, 1 = Female, 2 = Neuter");
+		c->Message(Chat::White, "Gender: 0 = Male, 1 = Female, 2 = Neuter");
 		return;
 	}
 
@@ -15,9 +15,9 @@ void SetGenderPermanent(Client *c, const Seperator *sep)
 	}
 
 	const uint8 gender_id = Strings::ToInt(sep->arg[2]);
-	if (!EQ::ValueWithin(gender_id, Genders::Male, Genders::Neuter)) {
+	if (!EQ::ValueWithin(gender_id, Gender::Male, Gender::Neuter)) {
 		c->Message(Chat::White, "Usage: #set gender_permanent [Gender ID]");
-		c->Message(Chat::White, "Genders: 0 = Male, 1 = Female, 2 = Neuter");
+		c->Message(Chat::White, "Gender: 0 = Male, 1 = Female, 2 = Neuter");
 		return;
 	}
 

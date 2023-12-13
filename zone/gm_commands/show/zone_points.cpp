@@ -4,7 +4,7 @@ void ShowZonePoints(Client *c, const Seperator *sep)
 {
 	for (const auto& m : entity_list.GetMobList()) {
 		Mob* mob = m.second;
-		if (mob->IsNPC() && mob->GetRace() == Races::Node) {
+		if (mob->IsNPC() && mob->GetRace() == Race::Node) {
 			mob->Depop();
 		}
 	}

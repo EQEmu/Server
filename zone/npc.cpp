@@ -155,10 +155,10 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 
 	// lava dragon is a fixed size model and should always use its default
 	// otherwise pathing issues
-	if (race == Races::LavaDragon) {
+	if (race == Race::LavaDragon) {
 		size = 5;
 	}
-	if (race == Races::Wurm) {
+	if (race == Race::Wurm) {
 		size = 15;
 	}
 
@@ -1220,7 +1220,7 @@ void NPC::SpawnGridNodeNPC(const glm::vec4 &position, int32 grid_id, int32 grid_
 	npc_type->current_hp = 4000000;
 	npc_type->max_hp = 4000000;
 	npc_type->race = 2254;
-	npc_type->gender = Genders::Neuter;
+	npc_type->gender = Gender::Neuter;
 	npc_type->class_ = 9;
 	npc_type->deity = 1;
 	npc_type->level = 200;
@@ -3691,29 +3691,29 @@ void NPC::ScaleNPC(uint8 npc_level, bool always_scale, bool override_special_abi
 bool NPC::IsGuard()
 {
 	switch (GetRace()) {
-		case Races::FreeportGuard:
+		case Race::FreeportGuard:
 			if (GetTexture() == 1 || GetTexture() == 2) {
 				return true;
 			}
 
 			break;
-		case Races::IksarCitizen:
+		case Race::IksarCitizen:
 			if (GetTexture() == 1) {
 				return true;
 			}
 
 			break;
-		case Races::Felguard:
-		case Races::Fayguard:
-		case Races::VahShirGuard:
-		case Races::QeynosCitizen:
-		case Races::RivervaleCitizen:
-		case Races::EruditeCitizen:
-		case Races::HalasCitizen:
-		case Races::NeriakCitizen:
-		case Races::GrobbCitizen:
-		case Races::OggokCitizen:
-		case Races::KaladimCitizen:
+		case Race::Felguard:
+		case Race::Fayguard:
+		case Race::VahShirGuard:
+		case Race::QeynosCitizen:
+		case Race::RivervaleCitizen:
+		case Race::EruditeCitizen:
+		case Race::HalasCitizen:
+		case Race::NeriakCitizen:
+		case Race::GrobbCitizen:
+		case Race::OggokCitizen:
+		case Race::KaladimCitizen:
 			return true;
 		default:
 			break;

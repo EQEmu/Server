@@ -22,1267 +22,1267 @@
 const char *GetRaceIDName(uint16 race_id)
 {
 	switch (race_id) {
-		case Races::Human:
-		case Races::HighpassCitizen:
-		case Races::QeynosCitizen:
-		case Races::Human2:
+		case Race::Human:
+		case Race::HighpassCitizen:
+		case Race::QeynosCitizen:
+		case Race::Human2:
 			return "Human";
-		case Races::Barbarian:
-		case Races::HalasCitizen:
+		case Race::Barbarian:
+		case Race::HalasCitizen:
 			return "Barbarian";
-		case Races::Erudite:
-		case Races::EruditeCitizen:
-		case Races::Erudite2:
+		case Race::Erudite:
+		case Race::EruditeCitizen:
+		case Race::Erudite2:
 			return "Erudite";
-		case Races::WoodElf:
+		case Race::WoodElf:
 			return "Wood Elf";
-		case Races::HighElf:
+		case Race::HighElf:
 			return "High Elf";
-		case Races::DarkElf:
-		case Races::NeriakCitizen:
+		case Race::DarkElf:
+		case Race::NeriakCitizen:
 			return "Dark Elf";
-		case Races::HalfElf:
+		case Race::HalfElf:
 			return "Half Elf";
-		case Races::Dwarf:
-		case Races::KaladimCitizen:
+		case Race::Dwarf:
+		case Race::KaladimCitizen:
 			return "Dwarf";
-		case Races::Troll:
-		case Races::GrobbCitizen:
-		case Races::TrollCrewMember:
-		case Races::PirateDeckhand:
-		case Races::BrokenSkullPirate:
+		case Race::Troll:
+		case Race::GrobbCitizen:
+		case Race::TrollCrewMember:
+		case Race::PirateDeckhand:
+		case Race::BrokenSkullPirate:
 			return "Troll";
-		case Races::Ogre:
-		case Races::OggokCitizen:
-		case Races::Ogre2:
+		case Race::Ogre:
+		case Race::OggokCitizen:
+		case Race::Ogre2:
 			return "Ogre";
-		case Races::Halfling:
-		case Races::RivervaleCitizen:
+		case Race::Halfling:
+		case Race::RivervaleCitizen:
 			return "Halfling";
-		case Races::Gnome:
+		case Race::Gnome:
 			return "Gnome";
-		case Races::Aviak:
-		case Races::Aviak2:
+		case Race::Aviak:
+		case Race::Aviak2:
 			return "Aviak";
-		case Races::Werewolf:
-		case Races::Werewolf2:
-		case Races::Werewolf3:
+		case Race::Werewolf:
+		case Race::Werewolf2:
+		case Race::Werewolf3:
 			return "Werewolf";
-		case Races::Brownie:
-		case Races::Brownie2:
+		case Race::Brownie:
+		case Race::Brownie2:
 			return "Brownie";
-		case Races::Centaur:
-		case Races::Centaur2:
+		case Race::Centaur:
+		case Race::Centaur2:
 			return "Centaur";
-		case Races::Golem:
-		case Races::Golem2:
+		case Race::Golem:
+		case Race::Golem2:
 			return "Golem";
-		case Races::Giant:
-		case Races::ForestGiant:
-		case Races::FrostGiant:
-		case Races::StormGiant:
-		case Races::EarthGolem:
-		case Races::IronGolem:
-		case Races::StormGolem:
-		case Races::AirGolem:
-		case Races::WoodGolem:
-		case Races::FireGolem:
-		case Races::WaterGolem:
-		case Races::Giant2:
-		case Races::Giant3:
-		case Races::Giant4:
+		case Race::Giant:
+		case Race::ForestGiant:
+		case Race::FrostGiant:
+		case Race::StormGiant:
+		case Race::EarthGolem:
+		case Race::IronGolem:
+		case Race::StormGolem:
+		case Race::AirGolem:
+		case Race::WoodGolem:
+		case Race::FireGolem:
+		case Race::WaterGolem:
+		case Race::Giant2:
+		case Race::Giant3:
+		case Race::Giant4:
 			return "Giant";
-		case Races::Trakanon:
+		case Race::Trakanon:
 			return "Trakanon";
-		case Races::VenrilSathir:
+		case Race::VenrilSathir:
 			return "Venril Sathir";
-		case Races::EvilEye:
-		case Races::EvilEye2:
-		case Races::EvilEye3:
+		case Race::EvilEye:
+		case Race::EvilEye2:
+		case Race::EvilEye3:
 			return "Evil Eye";
-		case Races::Beetle:
-		case Races::Beetle2:
-		case Races::Beetle3:
+		case Race::Beetle:
+		case Race::Beetle2:
+		case Race::Beetle3:
 			return "Beetle";
-		case Races::Kerran:
-		case Races::Kerran2:
+		case Race::Kerran:
+		case Race::Kerran2:
 			return "Kerran";
-		case Races::Fish:
-		case Races::KunarkFish:
+		case Race::Fish:
+		case Race::KunarkFish:
 			return "Fish";
-		case Races::Fairy:
-		case Races::Fairy2:
+		case Race::Fairy:
+		case Race::Fairy2:
 			return "Fairy";
-		case Races::Froglok:
-		case Races::FroglokGhoul:
-		case Races::Froglok2:
+		case Race::Froglok:
+		case Race::FroglokGhoul:
+		case Race::Froglok2:
 			return "Froglok";
-		case Races::Fungusman:
+		case Race::Fungusman:
 			return "Fungusman";
-		case Races::Gargoyle:
-		case Races::Gargoyle2:
+		case Race::Gargoyle:
+		case Race::Gargoyle2:
 			return "Gargoyle";
-		case Races::Gasbag:
+		case Race::Gasbag:
 			return "Gasbag";
-		case Races::GelatinousCube:
-		case Races::GelatinousCube2:
+		case Race::GelatinousCube:
+		case Race::GelatinousCube2:
 			return "Gelatinous Cube";
-		case Races::Ghost:
-		case Races::DwarfGhost:
-		case Races::EruditeGhost:
-		case Races::PirateGhost:
+		case Race::Ghost:
+		case Race::DwarfGhost:
+		case Race::EruditeGhost:
+		case Race::PirateGhost:
 			return "Ghost";
-		case Races::Ghoul:
-		case Races::Ghoul2:
+		case Race::Ghoul:
+		case Race::Ghoul2:
 			return "Ghoul";
-		case Races::GiantBat:
-		case Races::Bat:
-		case Races::Bat2:
+		case Race::GiantBat:
+		case Race::Bat:
+		case Race::Bat2:
 			return "Bat";
-		case Races::GiantEel:
+		case Race::GiantEel:
 			return "Eel";
-		case Races::GiantRat:
-		case Races::Rat:
+		case Race::GiantRat:
+		case Race::Rat:
 			return "Rat";
-		case Races::GiantSnake:
-		case Races::Snake:
+		case Race::GiantSnake:
+		case Race::Snake:
 			return "Snake";
-		case Races::GiantSpider:
-		case Races::Spider:
+		case Race::GiantSpider:
+		case Race::Spider:
 			return "Spider";
-		case Races::Gnoll:
-		case Races::Gnoll2:
-		case Races::Gnoll3:
+		case Race::Gnoll:
+		case Race::Gnoll2:
+		case Race::Gnoll3:
 			return "Gnoll";
-		case Races::Goblin:
-		case Races::Bloodgill:
-		case Races::KunarkGoblin:
-		case Races::NewGoblin:
-		case Races::Goblin2:
+		case Race::Goblin:
+		case Race::Bloodgill:
+		case Race::KunarkGoblin:
+		case Race::NewGoblin:
+		case Race::Goblin2:
 			return "Goblin";
-		case Races::Gorilla:
-		case Races::Gorilla2:
+		case Race::Gorilla:
+		case Race::Gorilla2:
 			return "Gorilla";
-		case Races::Wolf:
-		case Races::WolfElemental:
-		case Races::Wolf2:
+		case Race::Wolf:
+		case Race::WolfElemental:
+		case Race::Wolf2:
 			return "Wolf";
-		case Races::Bear:
-		case Races::Bear2:
-		case Races::Bear3:
+		case Race::Bear:
+		case Race::Bear2:
+		case Race::Bear3:
 			return "Bear";
-		case Races::FreeportGuard:
-		case Races::Felguard:
-		case Races::Fayguard:
+		case Race::FreeportGuard:
+		case Race::Felguard:
+		case Race::Fayguard:
 			return "Guard";
-		case Races::DemiLich:
+		case Race::DemiLich:
 			return "Demi Lich";
-		case Races::Imp:
+		case Race::Imp:
 			return "Imp";
-		case Races::Griffin:
-		case Races::Griffin2:
+		case Race::Griffin:
+		case Race::Griffin2:
 			return "Griffin";
-		case Races::Kobold:
-		case Races::Kobold2:
+		case Race::Kobold:
+		case Race::Kobold2:
 			return "Kobold";
-		case Races::LavaDragon:
-		case Races::DragonSkeleton:
-		case Races::WaterDragon:
-		case Races::VeliousDragon:
-		case Races::ClockworkDragon:
-		case Races::BlackAndWhiteDragon:
-		case Races::GhostDragon:
-		case Races::PrismaticDragon:
-		case Races::Dragon:
-		case Races::Dragon2:
-		case Races::Dragon3:
-		case Races::Dragon4:
-		case Races::Dragon5:
-		case Races::Dragon6:
-		case Races::Dragon7:
+		case Race::LavaDragon:
+		case Race::DragonSkeleton:
+		case Race::WaterDragon:
+		case Race::VeliousDragon:
+		case Race::ClockworkDragon:
+		case Race::BlackAndWhiteDragon:
+		case Race::GhostDragon:
+		case Race::PrismaticDragon:
+		case Race::Dragon:
+		case Race::Dragon2:
+		case Race::Dragon3:
+		case Race::Dragon4:
+		case Race::Dragon5:
+		case Race::Dragon6:
+		case Race::Dragon7:
 			return "Dragon";
-		case Races::Lion:
+		case Race::Lion:
 			return "Lion";
-		case Races::LizardMan:
+		case Race::LizardMan:
 			return "Lizard Man";
-		case Races::Mimic:
+		case Race::Mimic:
 			return "Mimic";
-		case Races::Minotaur:
-		case Races::Minotaur2:
-		case Races::Minotaur3:
-		case Races::Minotaur4:
+		case Race::Minotaur:
+		case Race::Minotaur2:
+		case Race::Minotaur3:
+		case Race::Minotaur4:
 			return "Minotaur";
-		case Races::Orc:
-		case Races::Orc2:
+		case Race::Orc:
+		case Race::Orc2:
 			return "Orc";
-		case Races::HumanBeggar:
+		case Race::HumanBeggar:
 			return "Beggar";
-		case Races::Pixie:
+		case Race::Pixie:
 			return "Pixie";
-		case Races::Drachnid:
-		case Races::Drachnid2:
+		case Race::Drachnid:
+		case Race::Drachnid2:
 			return "Drachnid";
-		case Races::SolusekRo:
-		case Races::SolusekRo2:
+		case Race::SolusekRo:
+		case Race::SolusekRo2:
 			return "Solusek Ro";
-		case Races::Skeleton:
-		case Races::Skeleton2:
-		case Races::Skeleton3:
+		case Race::Skeleton:
+		case Race::Skeleton2:
+		case Race::Skeleton3:
 			return "Skeleton";
-		case Races::Shark:
+		case Race::Shark:
 			return "Shark";
-		case Races::Tunare:
+		case Race::Tunare:
 			return "Tunare";
-		case Races::Tiger:
+		case Race::Tiger:
 			return "Tiger";
-		case Races::Treant:
-		case Races::Treant2:
-		case Races::Treant3:
+		case Race::Treant:
+		case Race::Treant2:
+		case Race::Treant3:
 			return "Treant";
-		case Races::Vampire:
-		case Races::ElfVampire:
-		case Races::Vampire2:
-		case Races::VampireVolatalis:
-		case Races::UndeadVampire:
-		case Races::Vampire3:
-		case Races::MasterVampire:
-		case Races::Vampire4:
+		case Race::Vampire:
+		case Race::ElfVampire:
+		case Race::Vampire2:
+		case Race::VampireVolatalis:
+		case Race::UndeadVampire:
+		case Race::Vampire3:
+		case Race::MasterVampire:
+		case Race::Vampire4:
 			return "Vampire";
-		case Races::StatueOfRallosZek:
-		case Races::NewRallosZek:
+		case Race::StatueOfRallosZek:
+		case Race::NewRallosZek:
 			return "Rallos Zek";
-		case Races::TentacleTerror:
-		case Races::TentacleTerror2:
+		case Race::TentacleTerror:
+		case Race::TentacleTerror2:
 			return "Tentacle Terror";
-		case Races::Wisp:
+		case Race::Wisp:
 			return "Will-O-Wisp";
-		case Races::Zombie:
-		case Races::Zombie2:
+		case Race::Zombie:
+		case Race::Zombie2:
 			return "Zombie";
-		case Races::Ship:
+		case Race::Ship:
 			return "Ship";
-		case Races::Launch:
+		case Race::Launch:
 			return "Launch";
-		case Races::Piranha:
+		case Race::Piranha:
 			return "Piranha";
-		case Races::Elemental:
+		case Race::Elemental:
 			return "Elemental";
-		case Races::Puma:
-		case Races::Puma2:
-		case Races::Puma3:
+		case Race::Puma:
+		case Race::Puma2:
+		case Race::Puma3:
 			return "Puma";
-		case Races::Bixie:
-		case Races::Bixie2:
+		case Race::Bixie:
+		case Race::Bixie2:
 			return "Bixie";
-		case Races::ReanimatedHand:
+		case Race::ReanimatedHand:
 			return "Reanimated Hand";
-		case Races::Scarecrow:
-		case Races::Scarecrow2:
+		case Race::Scarecrow:
+		case Race::Scarecrow2:
 			return "Scarecrow";
-		case Races::Skunk:
+		case Race::Skunk:
 			return "Skunk";
-		case Races::SnakeElemental:
+		case Race::SnakeElemental:
 			return "Snake Elemental";
-		case Races::Spectre:
-		case Races::Spectre2:
+		case Race::Spectre:
+		case Race::Spectre2:
 			return "Spectre";
-		case Races::Sphinx:
-		case Races::Sphinx2:
+		case Race::Sphinx:
+		case Race::Sphinx2:
 			return "Sphinx";
-		case Races::Armadillo:
+		case Race::Armadillo:
 			return "Armadillo";
-		case Races::ClockworkGnome:
+		case Race::ClockworkGnome:
 			return "Clockwork Gnome";
-		case Races::Drake:
-		case Races::Drake2:
-		case Races::Drake3:
+		case Race::Drake:
+		case Race::Drake2:
+		case Race::Drake3:
 			return "Drake";
-		case Races::Alligator:
-		case Races::Alligator2:
+		case Race::Alligator:
+		case Race::Alligator2:
 			return "Alligator";
-		case Races::CazicThule:
-		case Races::CazicThule2:
+		case Race::CazicThule:
+		case Race::CazicThule2:
 			return "Cazic Thule";
-		case Races::Cockatrice:
+		case Race::Cockatrice:
 			return "Cockatrice";
-		case Races::DaisyMan:
+		case Race::DaisyMan:
 			return "Daisy Man";
-		case Races::Denizen:
-		case Races::Amygdalan:
+		case Race::Denizen:
+		case Race::Amygdalan:
 			return "Amygdalan";
-		case Races::Dervish:
-		case Races::Dervish2:
-		case Races::Dervish3:
-		case Races::Dervish4:
-		case Races::Dervish5:
-		case Races::Dervish6:
+		case Race::Dervish:
+		case Race::Dervish2:
+		case Race::Dervish3:
+		case Race::Dervish4:
+		case Race::Dervish5:
+		case Race::Dervish6:
 			return "Dervish";
-		case Races::Efreeti:
-		case Races::Efreeti2:
+		case Race::Efreeti:
+		case Race::Efreeti2:
 			return "Efreeti";
-		case Races::FroglokTadpole:
+		case Race::FroglokTadpole:
 			return "Tadpole";
-		case Races::PhinigelAutropos:
-		case Races::Kedge:
+		case Race::PhinigelAutropos:
+		case Race::Kedge:
 			return "Kedge";
-		case Races::Leech:
+		case Race::Leech:
 			return "Leech";
-		case Races::Swordfish:
+		case Race::Swordfish:
 			return "Swordfish";
-		case Races::Mammoth:
-		case Races::Mammoth2:
+		case Race::Mammoth:
+		case Race::Mammoth2:
 			return "Mammoth";
-		case Races::EyeOfZomm:
+		case Race::EyeOfZomm:
 			return "Eye";
-		case Races::Wasp:
+		case Race::Wasp:
 			return "Wasp";
-		case Races::Mermaid:
+		case Race::Mermaid:
 			return "Mermaid";
-		case Races::Harpy:
-		case Races::Harpy2:
+		case Race::Harpy:
+		case Race::Harpy2:
 			return "Harpy";
-		case Races::Drixie:
+		case Race::Drixie:
 			return "Drixie";
-		case Races::GhostShip:
-		case Races::GhostShip2:
+		case Race::GhostShip:
+		case Race::GhostShip2:
 			return "Ghost Ship";
-		case Races::Clam:
+		case Race::Clam:
 			return "Clam";
-		case Races::SeaHorse:
+		case Race::SeaHorse:
 			return "Seahorse";
-		case Races::Sabertooth:
+		case Race::Sabertooth:
 			return "Saber-toothed Cat";
-		case Races::Gorgon:
+		case Race::Gorgon:
 			return "Gorgon";
-		case Races::Innoruuk:
+		case Race::Innoruuk:
 			return "Innoruuk";
-		case Races::Unicorn:
-		case Races::Unicorn2:
-		case Races::Unicorn3:
+		case Race::Unicorn:
+		case Race::Unicorn2:
+		case Race::Unicorn3:
 			return "Unicorn";
-		case Races::Pegasus:
-		case Races::Pegasus2:
-		case Races::Pegasus3:
+		case Race::Pegasus:
+		case Race::Pegasus2:
+		case Race::Pegasus3:
 			return "Pegasus";
-		case Races::Djinn:
+		case Race::Djinn:
 			return "Djinn";
-		case Races::InvisibleMan:
-		case Races::InvisibleMan2:
-		case Races::InvisibleMan3:
+		case Race::InvisibleMan:
+		case Race::InvisibleMan2:
+		case Race::InvisibleMan3:
 			return "Invisible Man";
-		case Races::Iksar:
-		case Races::IksarCitizen:
+		case Race::Iksar:
+		case Race::IksarCitizen:
 			return "Iksar";
-		case Races::Scorpion:
-		case Races::IksarScorpion:
-		case Races::Scorpion2:
+		case Race::Scorpion:
+		case Race::IksarScorpion:
+		case Race::Scorpion2:
 			return "Scorpion";
-		case Races::VahShir:
-		case Races::VahShirKing:
-		case Races::VahShirGuard:
+		case Race::VahShir:
+		case Race::VahShirKing:
+		case Race::VahShirGuard:
 			return "Vah Shir";
-		case Races::Sarnak:
-		case Races::Sarnak2:
+		case Race::Sarnak:
+		case Race::Sarnak2:
 			return "Sarnak";
-		case Races::Draglock:
+		case Race::Draglock:
 			return "Draglok";
-		case Races::Drolvarg:
+		case Race::Drolvarg:
 			return "Drolvarg";
-		case Races::Mosquito:
+		case Race::Mosquito:
 			return "Mosquito";
-		case Races::Rhinoceros:
+		case Race::Rhinoceros:
 			return "Rhinoceros";
-		case Races::Xalgoz:
+		case Race::Xalgoz:
 			return "Xalgoz";
-		case Races::Yeti:
+		case Race::Yeti:
 			return "Yeti";
-		case Races::Boat:
-		case Races::Boat2:
+		case Race::Boat:
+		case Race::Boat2:
 			return "Boat";
-		case Races::MinorIllusion:
+		case Race::MinorIllusion:
 			return "Minor Illusion";
-		case Races::Tree:
+		case Race::Tree:
 			return "Tree";
-		case Races::Burynai:
-		case Races::Burynai2:
+		case Race::Burynai:
+		case Race::Burynai2:
 			return "Burynai";
-		case Races::Goo:
-		case Races::Goo2:
-		case Races::Goo3:
-		case Races::Goo4:
+		case Race::Goo:
+		case Race::Goo2:
+		case Race::Goo3:
+		case Race::Goo4:
 			return "Goo";
-		case Races::SarnakSpirit:
+		case Race::SarnakSpirit:
 			return "Sarnak Spirit";
-		case Races::IksarSpirit:
+		case Race::IksarSpirit:
 			return "Iksar Spirit";
-		case Races::Erollisi:
+		case Race::Erollisi:
 			return "Erollisi";
-		case Races::Tribunal:
-		case Races::TribunalNew:
+		case Race::Tribunal:
+		case Race::TribunalNew:
 			return "Tribunal";
-		case Races::Bertoxxulous:
-		case Races::BertoxxulousNew:
+		case Race::Bertoxxulous:
+		case Race::BertoxxulousNew:
 			return "Bertoxxulous";
-		case Races::Bristlebane:
+		case Race::Bristlebane:
 			return "Bristlebane";
-		case Races::FayDrake:
+		case Race::FayDrake:
 			return "Fay Drake";
-		case Races::UndeadSarnak:
+		case Race::UndeadSarnak:
 			return "Undead Sarnak";
-		case Races::Ratman:
-		case Races::Ratman2:
+		case Race::Ratman:
+		case Race::Ratman2:
 			return "Ratman";
-		case Races::Wyvern:
-		case Races::Wyvern2:
+		case Race::Wyvern:
+		case Race::Wyvern2:
 			return "Wyvern";
-		case Races::Wurm:
-		case Races::Wurm2:
+		case Race::Wurm:
+		case Race::Wurm2:
 			return "Wurm";
-		case Races::Devourer:
+		case Race::Devourer:
 			return "Devourer";
-		case Races::IksarGolem:
+		case Race::IksarGolem:
 			return "Iksar Golem";
-		case Races::UndeadIksar:
+		case Race::UndeadIksar:
 			return "Undead Iksar";
-		case Races::ManEatingPlant:
+		case Race::ManEatingPlant:
 			return "Man-Eating Plant";
-		case Races::Raptor:
-		case Races::Raptor2:
+		case Race::Raptor:
+		case Race::Raptor2:
 			return "Raptor";
-		case Races::SarnakGolem:
+		case Race::SarnakGolem:
 			return "Sarnak Golem";
-		case Races::AnimatedHand:
+		case Race::AnimatedHand:
 			return "Animated Hand";
-		case Races::Succulent:
+		case Race::Succulent:
 			return "Succulent";
-		case Races::Holgresh:
+		case Race::Holgresh:
 			return "Holgresh";
-		case Races::Brontotherium:
+		case Race::Brontotherium:
 			return "Brontotherium";
-		case Races::SnowDervish:
+		case Race::SnowDervish:
 			return "Snow Dervish";
-		case Races::DireWolf:
+		case Race::DireWolf:
 			return "Dire Wolf";
-		case Races::Manticore:
+		case Race::Manticore:
 			return "Manticore";
-		case Races::Totem:
-		case Races::Totem2:
+		case Race::Totem:
+		case Race::Totem2:
 			return "Totem";
-		case Races::IceSpectre:
+		case Race::IceSpectre:
 			return "Ice Spectre";
-		case Races::EnchantedArmor:
+		case Race::EnchantedArmor:
 			return "Enchanted Armor";
-		case Races::SnowRabbit:
+		case Race::SnowRabbit:
 			return "Snow Rabbit";
-		case Races::Walrus:
+		case Race::Walrus:
 			return "Walrus";
-		case Races::Geonid:
+		case Race::Geonid:
 			return "Geonid";
-		case Races::Yakkar:
+		case Race::Yakkar:
 			return "Yakkar";
-		case Races::Faun:
+		case Race::Faun:
 			return "Faun";
-		case Races::Coldain:
-		case Races::Coldain2:
-		case Races::Coldain3:
+		case Race::Coldain:
+		case Race::Coldain2:
+		case Race::Coldain3:
 			return "Coldain";
-		case Races::Hag:
+		case Race::Hag:
 			return "Hag";
-		case Races::Hippogriff:
+		case Race::Hippogriff:
 			return "Hippogriff";
-		case Races::Siren:
-		case Races::Siren2:
+		case Race::Siren:
+		case Race::Siren2:
 			return "Siren";
-		case Races::Othmir:
+		case Race::Othmir:
 			return "Othmir";
-		case Races::Ulthork:
+		case Race::Ulthork:
 			return "Ulthork";
-		case Races::Abhorrent:
+		case Race::Abhorrent:
 			return "Abhorrent";
-		case Races::SeaTurtle:
+		case Race::SeaTurtle:
 			return "Sea Turtle";
-		case Races::RonnieTest:
+		case Race::RonnieTest:
 			return "Ronnie Test";
-		case Races::Shiknar:
+		case Race::Shiknar:
 			return "Shik'Nar";
-		case Races::Rockhopper:
+		case Race::Rockhopper:
 			return "Rockhopper";
-		case Races::Underbulk:
+		case Race::Underbulk:
 			return "Underbulk";
-		case Races::Grimling:
+		case Race::Grimling:
 			return "Grimling";
-		case Races::Worm:
+		case Race::Worm:
 			return "Worm";
-		case Races::EvanTest:
+		case Race::EvanTest:
 			return "Evan Test";
-		case Races::KhatiSha:
+		case Race::KhatiSha:
 			return "Khati Sha";
-		case Races::Owlbear:
+		case Race::Owlbear:
 			return "Owlbear";
-		case Races::RhinoBeetle:
+		case Race::RhinoBeetle:
 			return "Rhino Beetle";
-		case Races::EarthElemental:
-		case Races::EarthElemental2:
+		case Race::EarthElemental:
+		case Race::EarthElemental2:
 			return "Earth Elemental";
-		case Races::AirElemental:
-		case Races::AirElemental2:
+		case Race::AirElemental:
+		case Race::AirElemental2:
 			return "Air Elemental";
-		case Races::WaterElemental:
-		case Races::WaterElemental2:
+		case Race::WaterElemental:
+		case Race::WaterElemental2:
 			return "Water Elemental";
-		case Races::FireElemental:
-		case Races::FireElemental2:
+		case Race::FireElemental:
+		case Race::FireElemental2:
 			return "Fire Elemental";
-		case Races::WetfangMinnow:
+		case Race::WetfangMinnow:
 			return "Wetfang Minnow";
-		case Races::ThoughtHorror:
+		case Race::ThoughtHorror:
 			return "Thought Horror";
-		case Races::Tegi:
+		case Race::Tegi:
 			return "Tegi";
-		case Races::HorseMount:
-		case Races::HorseMount2:
-		case Races::HorseMount3:
+		case Race::Horse:
+		case Race::Horse2:
+		case Race::Horse3:
 			return "Horse";
-		case Races::Shissar:
-		case Races::Shissar2:
+		case Race::Shissar:
+		case Race::Shissar2:
 			return "Shissar";
-		case Races::FungalFiend:
+		case Race::FungalFiend:
 			return "Fungal Fiend";
-		case Races::Stonegrabber:
+		case Race::Stonegrabber:
 			return "Stonegrabber";
-		case Races::ScarletCheetah:
+		case Race::ScarletCheetah:
 			return "Cheetah";
-		case Races::Zelniak:
+		case Race::Zelniak:
 			return "Zelniak";
-		case Races::Lightcrawler:
+		case Race::Lightcrawler:
 			return "Lightcrawler";
-		case Races::Shade:
-		case Races::Shade2:
-		case Races::Shade3:
+		case Race::Shade:
+		case Race::Shade2:
+		case Race::Shade3:
 			return "Shade";
-		case Races::Sunflower:
+		case Race::Sunflower:
 			return "Sunflower";
-		case Races::Shadel:
+		case Race::Shadel:
 			return "Shadel";
-		case Races::Shrieker:
+		case Race::Shrieker:
 			return "Shrieker";
-		case Races::Galorian:
+		case Race::Galorian:
 			return "Galorian";
-		case Races::Netherbian:
+		case Race::Netherbian:
 			return "Netherbian";
-		case Races::Akhevan:
+		case Race::Akhevan:
 			return "Akhevan";
-		case Races::GriegVeneficus:
+		case Race::GriegVeneficus:
 			return "Grieg Veneficus";
-		case Races::SonicWolf:
+		case Race::SonicWolf:
 			return "Sonic Wolf";
-		case Races::GroundShaker:
+		case Race::GroundShaker:
 			return "Ground Shaker";
-		case Races::VahShirSkeleton:
+		case Race::VahShirSkeleton:
 			return "Vah Shir Skeleton";
-		case Races::Wretch:
+		case Race::Wretch:
 			return "Wretch";
-		case Races::LordInquisitorSeru:
+		case Race::LordInquisitorSeru:
 			return "Lord Inquisitor Seru";
-		case Races::Recuso:
+		case Race::Recuso:
 			return "Recuso";
-		case Races::TeleportMan:
+		case Race::TeleportMan:
 			return "Teleport Man";
-		case Races::Nymph:
+		case Race::Nymph:
 			return "Nymph";
-		case Races::Dryad:
+		case Race::Dryad:
 			return "Dryad";
-		case Races::Fly:
+		case Race::Fly:
 			return "Fly";
-		case Races::TarewMarr:
+		case Race::TarewMarr:
 			return "Tarew Marr";
-		case Races::ClockworkGolem:
+		case Race::ClockworkGolem:
 			return "Clockwork Golem";
-		case Races::ClockworkBrain:
+		case Race::ClockworkBrain:
 			return "Clockwork Brain";
-		case Races::Banshee:
-		case Races::Banshee2:
-		case Races::Banshee3:
+		case Race::Banshee:
+		case Race::Banshee2:
+		case Race::Banshee3:
 			return "Banshee";
-		case Races::GuardOfJustice:
+		case Race::GuardOfJustice:
 			return "Guard of Justice";
-		case Races::MiniPom:
+		case Race::MiniPom:
 			return "Mini POM";
-		case Races::DiseasedFiend:
+		case Race::DiseasedFiend:
 			return "Diseased Fiend";
-		case Races::SolusekRoGuard:
+		case Race::SolusekRoGuard:
 			return "Solusek Ro Guard";
-		case Races::TerrisThule:
+		case Race::TerrisThule:
 			return "Terris-Thule";
-		case Races::Vegerog:
+		case Race::Vegerog:
 			return "Vegerog";
-		case Races::Crocodile:
+		case Race::Crocodile:
 			return "Crocodile";
-		case Races::Hraquis:
+		case Race::Hraquis:
 			return "Hraquis";
-		case Races::Tranquilion:
+		case Race::Tranquilion:
 			return "Tranquilion";
-		case Races::TinSoldier:
+		case Race::TinSoldier:
 			return "Tin Soldier";
-		case Races::NightmareWraith:
+		case Race::NightmareWraith:
 			return "Nightmare Wraith";
-		case Races::Malarian:
+		case Race::Malarian:
 			return "Malarian";
-		case Races::KnightOfPestilence:
+		case Race::KnightOfPestilence:
 			return "Knight of Pestilence";
-		case Races::Lepertoloth:
+		case Race::Lepertoloth:
 			return "Lepertoloth";
-		case Races::Bubonian:
+		case Race::Bubonian:
 			return "Bubonian";
-		case Races::BubonianUnderling:
+		case Race::BubonianUnderling:
 			return "Bubonian Underling";
-		case Races::Pusling:
+		case Race::Pusling:
 			return "Pusling";
-		case Races::WaterMephit:
+		case Race::WaterMephit:
 			return "Water Mephit";
-		case Races::Stormrider:
+		case Race::Stormrider:
 			return "Stormrider";
-		case Races::JunkBeast:
+		case Race::JunkBeast:
 			return "Junk Beast";
-		case Races::BrokenClockwork:
+		case Race::BrokenClockwork:
 			return "Broken Clockwork";
-		case Races::GiantClockwork:
+		case Race::GiantClockwork:
 			return "Giant Clockwork";
-		case Races::ClockworkBeetle:
+		case Race::ClockworkBeetle:
 			return "Clockwork Beetle";
-		case Races::NightmareGoblin:
+		case Race::NightmareGoblin:
 			return "Nightmare Goblin";
-		case Races::Karana:
+		case Race::Karana:
 			return "Karana";
-		case Races::BloodRaven:
+		case Race::BloodRaven:
 			return "Blood Raven";
-		case Races::NightmareGargoyle:
+		case Race::NightmareGargoyle:
 			return "Nightmare Gargoyle";
-		case Races::MouthOfInsanity:
+		case Race::MouthOfInsanity:
 			return "Mouth of Insanity";
-		case Races::SkeletalHorse:
+		case Race::SkeletalHorse:
 			return "Skeletal Horse";
-		case Races::Saryrn:
+		case Race::Saryrn:
 			return "Saryrn";
-		case Races::FenninRo:
+		case Race::FenninRo:
 			return "Fennin Ro";
-		case Races::Tormentor:
+		case Race::Tormentor:
 			return "Tormentor";
-		case Races::SoulDevourer:
+		case Race::SoulDevourer:
 			return "Soul Devourer";
-		case Races::Nightmare:
+		case Race::Nightmare:
 			return "Nightmare";
-		case Races::VallonZek:
+		case Race::VallonZek:
 			return "Vallon Zek";
-		case Races::TallonZek:
+		case Race::TallonZek:
 			return "Tallon Zek";
-		case Races::AirMephit:
+		case Race::AirMephit:
 			return "Air Mephit";
-		case Races::EarthMephit:
+		case Race::EarthMephit:
 			return "Earth Mephit";
-		case Races::FireMephit:
+		case Race::FireMephit:
 			return "Fire Mephit";
-		case Races::NightmareMephit:
+		case Race::NightmareMephit:
 			return "Nightmare Mephit";
-		case Races::Zebuxoruk:
+		case Race::Zebuxoruk:
 			return "Zebuxoruk";
-		case Races::MithanielMarr:
+		case Race::MithanielMarr:
 			return "Mithaniel Marr";
-		case Races::UndeadKnight:
+		case Race::UndeadKnight:
 			return "Undead Knight";
-		case Races::Rathe:
+		case Race::Rathe:
 			return "The Rathe";
-		case Races::Xegony:
+		case Race::Xegony:
 			return "Xegony";
-		case Races::Fiend:
+		case Race::Fiend:
 			return "Fiend";
-		case Races::TestObject:
+		case Race::TestObject:
 			return "Test Object";
-		case Races::Crab:
+		case Race::Crab:
 			return "Crab";
-		case Races::Phoenix:
+		case Race::Phoenix:
 			return "Phoenix";
-		case Races::Quarm:
+		case Race::Quarm:
 			return "Quarm";
-		case Races::WarWraith:
+		case Race::WarWraith:
 			return "War Wraith";
-		case Races::Wrulon:
-		case Races::Wrulon2:
+		case Race::Wrulon:
+		case Race::Wrulon2:
 			return "Wrulon";
-		case Races::Kraken:
+		case Race::Kraken:
 			return "Kraken";
-		case Races::PoisonFrog:
+		case Race::PoisonFrog:
 			return "Poison Frog";
-		case Races::Nilborien:
+		case Race::Nilborien:
 			return "Nilborien";
-		case Races::Valorian:
-		case Races::Valorian2:
+		case Race::Valorian:
+		case Race::Valorian2:
 			return "Valorian";
-		case Races::WarBoar:
-		case Races::WarBoar2:
+		case Race::WarBoar:
+		case Race::WarBoar2:
 			return "War Boar";
-		case Races::AnimatedArmor:
+		case Race::AnimatedArmor:
 			return "Animated Armor";
-		case Races::UndeadFootman:
+		case Race::UndeadFootman:
 			return "Undead Footman";
-		case Races::RallosOgre:
+		case Race::RallosOgre:
 			return "Rallos Zek Minion";
-		case Races::Arachnid:
+		case Race::Arachnid:
 			return "Arachnid";
-		case Races::CrystalSpider:
+		case Race::CrystalSpider:
 			return "Crystal Spider";
-		case Races::ZebuxoruksCage:
+		case Race::ZebuxoruksCage:
 			return "Zebuxoruk's Cage";
-		case Races::Portal:
+		case Race::Portal:
 			return "BoT Portal";
-		case Races::OneArmedPirate:
-		case Races::SpiritmasterNadox:
-		case Races::BrokenSkullTaskmaster:
-		case Races::GnomePirate:
-		case Races::DarkElfPirate:
-		case Races::OgrePirate:
-		case Races::HumanPirate:
-		case Races::EruditePirate:
+		case Race::OneArmedPirate:
+		case Race::SpiritmasterNadox:
+		case Race::BrokenSkullTaskmaster:
+		case Race::GnomePirate:
+		case Race::DarkElfPirate:
+		case Race::OgrePirate:
+		case Race::HumanPirate:
+		case Race::EruditePirate:
 			return "Pirate";
-		case Races::Frog:
-		case Races::Frog2:
+		case Race::Frog:
+		case Race::Frog2:
 			return "Frog";
-		case Races::TrollZombie:
+		case Race::TrollZombie:
 			return "Troll Zombie";
-		case Races::Luggald:
-		case Races::Luggald2:
-		case Races::Luggald3:
+		case Race::Luggald:
+		case Race::Luggald2:
+		case Race::Luggald3:
 			return "Luggald";
-		case Races::Drogmor:
+		case Race::Drogmor:
 			return "Drogmor";
-		case Races::FroglokSkeleton:
+		case Race::FroglokSkeleton:
 			return "Froglok Skeleton";
-		case Races::UndeadFroglok:
+		case Race::UndeadFroglok:
 			return "Undead Froglok";
-		case Races::KnightOfHate:
+		case Race::KnightOfHate:
 			return "Knight of Hate";
-		case Races::ArcanistOfHate:
+		case Race::ArcanistOfHate:
 			return "Arcanist of Hate";
-		case Races::Veksar:
-		case Races::Veksar2:
-		case Races::Veksar3:
+		case Race::Veksar:
+		case Race::Veksar2:
+		case Race::Veksar3:
 			return "Veksar";
-		case Races::Chokidai:
+		case Race::Chokidai:
 			return "Chokidai";
-		case Races::UndeadChokidai:
+		case Race::UndeadChokidai:
 			return "Undead Chokidai";
-		case Races::UndeadVeksar:
+		case Race::UndeadVeksar:
 			return "Undead Veksar";
-		case Races::RujarkianOrc:
-		case Races::MasterOrc:
+		case Race::RujarkianOrc:
+		case Race::MasterOrc:
 			return "Rujarkian Orc";
-		case Races::BoneGolem:
-		case Races::BoneGolem2:
+		case Race::BoneGolem:
+		case Race::BoneGolem2:
 			return "Bone Golem";
-		case Races::Synarcana:
+		case Race::Synarcana:
 			return "Synarcana";
-		case Races::SandElf:
+		case Race::SandElf:
 			return "Sand Elf";
-		case Races::Mummy:
+		case Race::Mummy:
 			return "Mummy";
-		case Races::Insect:
+		case Race::Insect:
 			return "Insect";
-		case Races::FroglokGhost:
+		case Race::FroglokGhost:
 			return "Froglok Ghost";
-		case Races::Box:
+		case Race::Box:
 			return "Box";
-		case Races::Barrel:
+		case Race::Barrel:
 			return "Barrel";
-		case Races::Chest:
-		case Races::Chest2:
-		case Races::Chest3:
+		case Race::Chest:
+		case Race::Chest2:
+		case Race::Chest3:
 			return "Chest";
-		case Races::Vase:
+		case Race::Vase:
 			return "Vase";
-		case Races::Table:
+		case Race::Table:
 			return "Table";
-		case Races::WeaponRack:
-		case Races::WeaponRack2:
+		case Race::WeaponRack:
+		case Race::WeaponRack2:
 			return "Weapon Rack";
-		case Races::Coffin:
-		case Races::Coffin2:
+		case Race::Coffin:
+		case Race::Coffin2:
 			return "Coffin";
-		case Races::Bones:
+		case Race::Bones:
 			return "Bones";
-		case Races::Jokester:
+		case Race::Jokester:
 			return "Jokester";
-		case Races::Nihil:
+		case Race::Nihil:
 			return "Nihil";
-		case Races::Trusik:
+		case Race::Trusik:
 			return "Trusik";
-		case Races::StoneWorker:
-		case Races::StoneWorker2:
+		case Race::StoneWorker:
+		case Race::StoneWorker2:
 			return "Stone Worker";
-		case Races::Hynid:
+		case Race::Hynid:
 			return "Hynid";
-		case Races::Turepta:
+		case Race::Turepta:
 			return "Turepta";
-		case Races::Cragbeast:
+		case Race::Cragbeast:
 			return "Cragbeast";
-		case Races::Stonemite:
+		case Race::Stonemite:
 			return "Stonemite";
-		case Races::Ukun:
+		case Race::Ukun:
 			return "Ukun";
-		case Races::Ixt:
+		case Race::Ixt:
 			return "Ixt";
-		case Races::Ikaav:
+		case Race::Ikaav:
 			return "Ikaav";
-		case Races::Aneuk:
+		case Race::Aneuk:
 			return "Aneuk";
-		case Races::Kyv:
+		case Race::Kyv:
 			return "Kyv";
-		case Races::Noc:
+		case Race::Noc:
 			return "Noc";
-		case Races::Ratuk:
+		case Race::Ratuk:
 			return "Ra`tuk";
-		case Races::Taneth:
+		case Race::Taneth:
 			return "Taneth";
-		case Races::Huvul:
+		case Race::Huvul:
 			return "Huvul";
-		case Races::Mutna:
+		case Race::Mutna:
 			return "Mutna";
-		case Races::Mastruq:
+		case Race::Mastruq:
 			return "Mastruq";
-		case Races::Taelosian:
+		case Race::Taelosian:
 			return "Taelosian";
-		case Races::DiscordShip:
+		case Race::DiscordShip:
 			return "Discord Ship";
-		case Races::MataMuram:
+		case Race::MataMuram:
 			return "Mata Muram";
-		case Races::LightingWarrior:
+		case Race::LightingWarrior:
 			return "Lightning Warrior";
-		case Races::Succubus:
+		case Race::Succubus:
 			return "Succubus";
-		case Races::Bazu:
+		case Race::Bazu:
 			return "Bazu";
-		case Races::Feran:
+		case Race::Feran:
 			return "Feran";
-		case Races::Pyrilen:
+		case Race::Pyrilen:
 			return "Pyrilen";
-		case Races::Chimera:
-		case Races::Chimera2:
+		case Race::Chimera:
+		case Race::Chimera2:
 			return "Chimera";
-		case Races::Dragorn:
+		case Race::Dragorn:
 			return "Dragorn";
-		case Races::Murkglider:
+		case Race::Murkglider:
 			return "Murkglider";
-		case Races::Gelidran:
+		case Race::Gelidran:
 			return "Gelidran";
-		case Races::Discordling:
+		case Race::Discordling:
 			return "Discordling";
-		case Races::Girplan:
+		case Race::Girplan:
 			return "Girplan";
-		case Races::DragornBox:
+		case Race::DragornBox:
 			return "Dragorn Box";
-		case Races::RunedOrb:
+		case Race::RunedOrb:
 			return "Runed Orb";
-		case Races::DragonBones:
+		case Race::DragonBones:
 			return "Dragon Bones";
-		case Races::MuramiteArmorPile:
+		case Race::MuramiteArmorPile:
 			return "Muramite Armor Pile";
-		case Races::CrystalShard:
+		case Race::CrystalShard:
 			return "Crystal Shard";
-		case Races::Portal2:
+		case Race::Portal2:
 			return "Portal";
-		case Races::CoinPurse:
+		case Race::CoinPurse:
 			return "Coin Purse";
-		case Races::RockPile:
+		case Race::RockPile:
 			return "Rock Pile";
-		case Races::MurkgliderEggSack:
+		case Race::MurkgliderEggSack:
 			return "Murglider Egg Sack";
-		case Races::Kirin:
-		case Races::Kirin2:
+		case Race::Kirin:
+		case Race::Kirin2:
 			return "Kirin";
-		case Races::Basilisk:
+		case Race::Basilisk:
 			return "Basilisk";
-		case Races::SpiderQueen:
+		case Race::SpiderQueen:
 			return "Spider Queen";
-		case Races::AnimatedStatue:
-		case Races::AnimatedStatue2:
+		case Race::AnimatedStatue:
+		case Race::AnimatedStatue2:
 			return "Animated Statue";
-		case Races::DragonEgg:
+		case Race::DragonEgg:
 			return "Dragon Egg";
-		case Races::DragonStatue:
+		case Race::DragonStatue:
 			return "Dragon Statue";
-		case Races::LavaRock:
+		case Race::LavaRock:
 			return "Lava Rock";
-		case Races::SpiderEggSack:
+		case Race::SpiderEggSack:
 			return "Spider Egg Sack";
-		case Races::LavaSpider:
+		case Race::LavaSpider:
 			return "Lava Spider";
-		case Races::LavaSpiderQueen:
+		case Race::LavaSpiderQueen:
 			return "Lava Spider Queen";
-		case Races::Sporali:
+		case Race::Sporali:
 			return "Sporali";
-		case Races::Gnomework:
+		case Race::Gnomework:
 			return "Gnomework";
-		case Races::Corathus:
+		case Race::Corathus:
 			return "Corathus";
-		case Races::Coral:
+		case Race::Coral:
 			return "Coral";
-		case Races::DrachnidCocoon:
+		case Race::DrachnidCocoon:
 			return "Drachnid Cocoon";
-		case Races::FungusPatch:
+		case Race::FungusPatch:
 			return "Fungus Patch";
-		case Races::Witheran:
-		case Races::Witheran2:
+		case Race::Witheran:
+		case Race::Witheran2:
 			return "Witheran";
-		case Races::DarkLord:
+		case Race::DarkLord:
 			return "Dark Lord";
-		case Races::Shiliskin:
+		case Race::Shiliskin:
 			return "Shiliskin";
-		case Races::ClockworkBoar:
+		case Race::ClockworkBoar:
 			return "Clockwork Boar";
-		case Races::ScaledWolf:
+		case Race::ScaledWolf:
 			return "Scaled Wolf";
-		case Races::SpiritWolf:
+		case Race::SpiritWolf:
 			return "Spirit Wolf";
-		case Races::Bolvirk:
+		case Race::Bolvirk:
 			return "Bolvirk";
-		case Races::Elddar:
+		case Race::Elddar:
 			return "Elddar";
-		case Races::ForestGiant2:
+		case Race::ForestGiant2:
 			return "Forest Giant";
-		case Races::ShamblingMound:
+		case Race::ShamblingMound:
 			return "Shambling Mound";
-		case Races::Scrykin:
+		case Race::Scrykin:
 			return "Scrykin";
-		case Races::AyonaeRo:
+		case Race::AyonaeRo:
 			return "Ayonae Ro";
-		case Races::SullonZek:
+		case Race::SullonZek:
 			return "Sullon Zek";
-		case Races::Banner:
-		case Races::Banner2:
-		case Races::Banner3:
-		case Races::Banner4:
-		case Races::Banner5:
-		case Races::Banner6:
-		case Races::Banner7:
+		case Race::Banner:
+		case Race::Banner2:
+		case Race::Banner3:
+		case Race::Banner4:
+		case Race::Banner5:
+		case Race::Banner6:
+		case Race::Banner7:
 			return "Banner";
-		case Races::Flag:
+		case Race::Flag:
 			return "Flag";
-		case Races::Rowboat:
+		case Race::Rowboat:
 			return "Rowboat";
-		case Races::BearTrap:
+		case Race::BearTrap:
 			return "Bear Trap";
-		case Races::ClockworkBomb:
+		case Race::ClockworkBomb:
 			return "Clockwork Bomb";
-		case Races::DynamiteKeg:
+		case Race::DynamiteKeg:
 			return "Dynamite Keg";
-		case Races::PressurePlate:
+		case Race::PressurePlate:
 			return "Pressure Plate";
-		case Races::PufferSpore:
+		case Race::PufferSpore:
 			return "Puffer Spore";
-		case Races::StoneRing:
+		case Race::StoneRing:
 			return "Stone Ring";
-		case Races::RootTentacle:
+		case Race::RootTentacle:
 			return "Root Tentacle";
-		case Races::RunicSymbol:
+		case Race::RunicSymbol:
 			return "Runic Symbol";
-		case Races::SaltpetterBomb:
+		case Race::SaltpetterBomb:
 			return "Saltpetter Bomb";
-		case Races::FloatingSkull:
+		case Race::FloatingSkull:
 			return "Floating Skull";
-		case Races::SpikeTrap:
+		case Race::SpikeTrap:
 			return "Spike Trap";
-		case Races::Web:
+		case Race::Web:
 			return "Web";
-		case Races::WickerBasket:
+		case Race::WickerBasket:
 			return "Wicker Basket";
-		case Races::Drakkin:
+		case Race::Drakkin:
 			return "Drakkin";
-		case Races::GiantShade:
+		case Race::GiantShade:
 			return "Giant Shade";
-		case Races::Satyr:
+		case Race::Satyr:
 			return "Satyr";
-		case Races::Dynleth:
+		case Race::Dynleth:
 			return "Dyn'Leth";
-		case Races::ArmorRack:
+		case Race::ArmorRack:
 			return "Armor Rack";
-		case Races::HoneyPot:
+		case Race::HoneyPot:
 			return "Honey Pot";
-		case Races::JumJumBucket:
+		case Race::JumJumBucket:
 			return "Jum Jum Bucket";
-		case Races::Plant:
-		case Races::Plant2:
+		case Race::Plant:
+		case Race::Plant2:
 			return "Plant";
-		case Races::StoneJug:
-		case Races::StoneJug2:
+		case Race::StoneJug:
+		case Race::StoneJug2:
 			return "Stone Jug";
-		case Races::Toolbox:
+		case Race::Toolbox:
 			return "Toolbox";
-		case Races::WineCask:
-		case Races::WineCask2:
+		case Race::WineCask:
+		case Race::WineCask2:
 			return "Wine Cask";
-		case Races::ElvenBoat:
+		case Race::ElvenBoat:
 			return "Elven Boat";
-		case Races::GnomishBoat:
+		case Race::GnomishBoat:
 			return "Gnomish Boat";
-		case Races::UndeadBoat:
+		case Race::UndeadBoat:
 			return "Undead Boat";
-		case Races::MerchantShip:
+		case Race::MerchantShip:
 			return "Merchant Ship";
-		case Races::PirateShip:
+		case Race::PirateShip:
 			return "Pirate Ship";
-		case Races::Campfire:
+		case Race::Campfire:
 			return "Campfire";
-		case Races::Exoskeleton:
+		case Race::Exoskeleton:
 			return "Exoskeleton";
-		case Races::ClockworkGuardian:
+		case Race::ClockworkGuardian:
 			return "Clockwork Guardian";
-		case Races::Rotocopter:
+		case Race::Rotocopter:
 			return "Rotocopter";
-		case Races::Wereorc:
+		case Race::Wereorc:
 			return "Wereorc";
-		case Races::Worg:
-		case Races::Worg2:
+		case Race::Worg:
+		case Race::Worg2:
 			return "Worg";
-		case Races::Boulder:
+		case Race::Boulder:
 			return "Boulder";
-		case Races::ElvenGhost:
+		case Race::ElvenGhost:
 			return "Elven Ghost";
-		case Races::HumanGhost:
+		case Race::HumanGhost:
 			return "Human Ghost";
-		case Races::Crystal:
+		case Race::Crystal:
 			return "Crystal";
-		case Races::GuardianCpu:
+		case Race::GuardianCpu:
 			return "Guardian CPU";
-		case Races::Mansion:
+		case Race::Mansion:
 			return "Mansion";
-		case Races::FloatingIsland:
+		case Race::FloatingIsland:
 			return "Floating Island";
-		case Races::Cragslither:
+		case Race::Cragslither:
 			return "Cragslither";
-		case Races::SpellParticle:
+		case Race::SpellParticle:
 			return "Spell Particle";
-		case Races::InvisibleManOfZomm:
+		case Race::InvisibleManOfZomm:
 			return "Invisible Man of Zomm";
-		case Races::RobocopterOfZomm:
+		case Race::RobocopterOfZomm:
 			return "Robocopter of Zomm";
-		case Races::Dracolich:
+		case Race::Dracolich:
 			return "Dracolich";
-		case Races::IksarGhost:
+		case Race::IksarGhost:
 			return "Iksar Ghost";
-		case Races::IksarSkeleton:
+		case Race::IksarSkeleton:
 			return "Iksar Skeleton";
-		case Races::Mephit:
+		case Race::Mephit:
 			return "Mephit";
-		case Races::Muddite:
+		case Race::Muddite:
 			return "Muddite";
-		case Races::Tsetsian:
+		case Race::Tsetsian:
 			return "Tsetsian";
-		case Races::Nekhon:
+		case Race::Nekhon:
 			return "Nekhon";
-		case Races::HydraCrystal:
+		case Race::HydraCrystal:
 			return "Hydra Crystal";
-		case Races::CrystalSphere:
+		case Race::CrystalSphere:
 			return "Crystal Sphere";
-		case Races::Sokokar:
+		case Race::Sokokar:
 			return "Sokokar";
-		case Races::StonePylon:
+		case Race::StonePylon:
 			return "Stone Pylon";
-		case Races::DemonVulture:
+		case Race::DemonVulture:
 			return "Demon Vulture";
-		case Races::Wagon:
+		case Race::Wagon:
 			return "Wagon";
-		case Races::GodOfDiscord:
+		case Race::GodOfDiscord:
 			return "God of Discord";
-		case Races::FeranMount:
+		case Race::FeranMount:
 			return "Feran Mount";
-		case Races::SokokarMount:
-		case Races::SokokarMount2:
+		case Race::SokokarMount:
+		case Race::SokokarMount2:
 			return "Sokokar Mount";
-		case Races::TenthAnniversaryBanner:
+		case Race::TenthAnniversaryBanner:
 			return "10th Anniversary Banner";
-		case Races::TenthAnniversaryCake:
+		case Race::TenthAnniversaryCake:
 			return "10th Anniversary Cake";
-		case Races::HydraMount:
+		case Race::HydraMount:
 			return "Hydra Mount";
-		case Races::Hydra:
+		case Race::Hydra:
 			return "Hydra";
-		case Races::WeddingFlowers:
+		case Race::WeddingFlowers:
 			return "Wedding Flowers";
-		case Races::WeddingArbor:
+		case Race::WeddingArbor:
 			return "Wedding Arbor";
-		case Races::WeddingAltar:
+		case Race::WeddingAltar:
 			return "Wedding Altar";
-		case Races::PowderKeg:
+		case Race::PowderKeg:
 			return "Powder Keg";
-		case Races::Apexus:
+		case Race::Apexus:
 			return "Apexus";
-		case Races::Bellikos:
+		case Race::Bellikos:
 			return "Bellikos";
-		case Races::BrellsFirstCreation:
+		case Race::BrellsFirstCreation:
 			return "Brell's First Creation";
-		case Races::Brell:
+		case Race::Brell:
 			return "Brell";
-		case Races::CrystalskinAmbuloid:
+		case Race::CrystalskinAmbuloid:
 			return "Crystalskin Ambuloud";
-		case Races::CliknarQueen:
+		case Race::CliknarQueen:
 			return "Cliknar Queen";
-		case Races::CliknarSoldier:
+		case Race::CliknarSoldier:
 			return "Cliknar Soldier";
-		case Races::CliknarWorker:
+		case Race::CliknarWorker:
 			return "Cliknar Worker";
-		case Races::CrystalskinSessiloid:
+		case Race::CrystalskinSessiloid:
 			return "Crystalskin Sessiloid";
-		case Races::Genari:
+		case Race::Genari:
 			return "Genari";
-		case Races::Gigyn:
+		case Race::Gigyn:
 			return "Gigyn";
-		case Races::GrekenYoungAdult:
+		case Race::GrekenYoungAdult:
 			return "Greken - Young Adult";
-		case Races::GrekenYoung:
+		case Race::GrekenYoung:
 			return "Greken - Young";
-		case Races::CliknarMount:
+		case Race::CliknarMount:
 			return "Cliknar Mount";
-		case Races::Telmira:
+		case Race::Telmira:
 			return "Telmira";
-		case Races::SpiderMount:
+		case Race::SpiderMount:
 			return "Spider Mount";
-		case Races::BearMount:
+		case Race::BearMount:
 			return "Bear Mount";
-		case Races::RatMount:
+		case Race::RatMount:
 			return "Rat Mount";
-		case Races::SessiloidMount:
+		case Race::SessiloidMount:
 			return "Sessiloid Mount";
-		case Races::MorellThule:
+		case Race::MorellThule:
 			return "Morell-Thule";
-		case Races::Marionette:
+		case Race::Marionette:
 			return "Marionette";
-		case Races::BookDervish:
+		case Race::BookDervish:
 			return "Book Dervish";
-		case Races::TopiaryLion:
+		case Race::TopiaryLion:
 			return "Topiary Lion";
-		case Races::RotDog:
+		case Race::RotDog:
 			return "Rot Dog";
-		case Races::Sandman:
+		case Race::Sandman:
 			return "Sandman";
-		case Races::GrandfatherClock:
+		case Race::GrandfatherClock:
 			return "Grandfather Clock";
-		case Races::GingerbreadMan:
+		case Race::GingerbreadMan:
 			return "Gingerbread Man";
-		case Races::RoyalGuard:
+		case Race::RoyalGuard:
 			return "Royal Guard";
-		case Races::Rabbit:
+		case Race::Rabbit:
 			return "Rabbit";
-		case Races::BlindDreamer:
+		case Race::BlindDreamer:
 			return "Blind Dreamer";
-		case Races::TopiaryLionMount:
+		case Race::TopiaryLionMount:
 			return "Topiary Lion Mount";
-		case Races::RotDogMount:
+		case Race::RotDogMount:
 			return "Rot Dog Mount";
-		case Races::GoralMount:
+		case Race::GoralMount:
 			return "Goral Mount";
-		case Races::SelyrahMount:
+		case Race::SelyrahMount:
 			return "Selyrah Mount";
-		case Races::ScleraMount:
+		case Race::ScleraMount:
 			return "Sclera Mount";
-		case Races::BraxiMount:
+		case Race::BraxiMount:
 			return "Braxi Mount";
-		case Races::KangonMount:
+		case Race::KangonMount:
 			return "Kangon Mount";
-		case Races::WurmMount:
+		case Race::WurmMount:
 			return "Wurm Mount";
-		case Races::RaptorMount:
+		case Race::RaptorMount:
 			return "Raptor Mount";
-		case Races::Whirligig:
+		case Race::Whirligig:
 			return "Whirligig";
-		case Races::GnomishBalloon:
+		case Race::GnomishBalloon:
 			return "Gnomish Balloon";
-		case Races::GnomishRocketPack:
+		case Race::GnomishRocketPack:
 			return "Gnomish Rocket Pack";
-		case Races::GnomishHoveringTransport:
+		case Race::GnomishHoveringTransport:
 			return "Gnomish Hovering Transport";
-		case Races::Selyrah:
+		case Race::Selyrah:
 			return "Selyrah";
-		case Races::Goral:
+		case Race::Goral:
 			return "Goral";
-		case Races::Braxi:
+		case Race::Braxi:
 			return "Braxi";
-		case Races::Kangon:
+		case Race::Kangon:
 			return "Kangon";
-		case Races::FloatingTower:
+		case Race::FloatingTower:
 			return "Floating Tower";
-		case Races::ExplosiveCart:
+		case Race::ExplosiveCart:
 			return "Explosive Cart";
-		case Races::BlimpShip:
+		case Race::BlimpShip:
 			return "Blimp Ship";
-		case Races::Tumbleweed:
+		case Race::Tumbleweed:
 			return "Tumbleweed";
-		case Races::Alaran:
+		case Race::Alaran:
 			return "Alaran";
-		case Races::Swinetor:
+		case Race::Swinetor:
 			return "Swinetor";
-		case Races::Triumvirate:
+		case Race::Triumvirate:
 			return "Triumvirate";
-		case Races::Hadal:
+		case Race::Hadal:
 			return "Hadal";
-		case Races::HoveringPlatform:
+		case Race::HoveringPlatform:
 			return "Hovering Platform";
-		case Races::ParasiticScavenger:
+		case Race::ParasiticScavenger:
 			return "Parasitic Scavenger";
-		case Races::Grendlaen:
+		case Race::Grendlaen:
 			return "Grendlaen";
-		case Races::ShipInABottle:
+		case Race::ShipInABottle:
 			return "Ship in a Bottle";
-		case Races::AlaranSentryStone:
+		case Race::AlaranSentryStone:
 			return "Alaran Sentry Stone";
-		case Races::RegenerationPool:
+		case Race::RegenerationPool:
 			return "Regeneration Pool";
-		case Races::TeleportationStand:
+		case Race::TeleportationStand:
 			return "Teleportation Stand";
-		case Races::RelicCase:
+		case Race::RelicCase:
 			return "Relic Case";
-		case Races::AlaranGhost:
+		case Race::AlaranGhost:
 			return "Alaran Ghost";
-		case Races::Skystrider:
+		case Race::Skystrider:
 			return "Skystrider";
-		case Races::WaterSpout:
+		case Race::WaterSpout:
 			return "Water Spout";
-		case Races::AviakPullAlong:
+		case Race::AviakPullAlong:
 			return "Aviak Pull Along";
-		case Races::Cat:
+		case Race::Cat:
 			return "Cat";
-		case Races::ElkHead:
+		case Race::ElkHead:
 			return "Elk Head";
-		case Races::Holgresh2:
+		case Race::Holgresh2:
 			return "Holgresh";
-		case Races::VineMaw:
+		case Race::VineMaw:
 			return "Vine Maw";
-		case Races::FallenKnight:
+		case Race::FallenKnight:
 			return "Fallen Knight";
-		case Races::FlyingCarpet:
+		case Race::FlyingCarpet:
 			return "Flying Carpet";
-		case Races::CarrierHand:
+		case Race::CarrierHand:
 			return "Carrier Hand";
-		case Races::Akheva:
+		case Race::Akheva:
 			return "Akheva";
-		case Races::ServantOfShadow:
+		case Race::ServantOfShadow:
 			return "Servant of Shadow";
-		case Races::Luclin:
-		case Races::Luclin2:
-		case Races::Luclin3:
-		case Races::Luclin4:
+		case Race::Luclin:
+		case Race::Luclin2:
+		case Race::Luclin3:
+		case Race::Luclin4:
 			return "Luclin";
-		case Races::Xaric:
+		case Race::Xaric:
 			return "Xaric";
-		case Races::Orb:
+		case Race::Orb:
 			return "Orb";
-		case Races::InteractiveObject:
+		case Race::InteractiveObject:
 			return "Interactive Object";
-		case Races::Node:
+		case Race::Node:
 			return "Node";
-		case Races::Unknown:
-		case Races::Unknown2:
-		case Races::Unknown3:
-		case Races::Unknown4:
-		case Races::Unknown5:
+		case Race::Unknown:
+		case Race::Unknown2:
+		case Race::Unknown3:
+		case Race::Unknown4:
+		case Race::Unknown5:
 		default:
 			return "Unknown Race";
 	}
@@ -1416,42 +1416,42 @@ float GetRaceGenderDefaultHeight(int race, int gender)
 		return 6.0f;
 	}
 
-	return gender == Genders::Male ? male_height[race] : female_height[race];
+	return gender == Gender::Male ? male_height[race] : female_height[race];
 }
 
 // PlayerAppearance prep
-#define HUMAN_MALE ((Races::Human << 8) | Genders::Male)
-#define HUMAN_FEMALE ((Races::Human << 8) | Genders::Female)
-#define BARBARIAN_MALE ((Races::Barbarian << 8) | Genders::Male)
-#define BARBARIAN_FEMALE ((Races::Barbarian << 8) | Genders::Female)
-#define ERUDITE_MALE ((Races::Erudite << 8) | Genders::Male)
-#define ERUDITE_FEMALE ((Races::Erudite << 8) | Genders::Female)
-#define WOOD_ELF_MALE ((Races::WoodElf << 8) | Genders::Male)
-#define WOOD_ELF_FEMALE ((Races::WoodElf << 8) | Genders::Female)
-#define HIGH_ELF_MALE ((Races::HighElf << 8) | Genders::Male)
-#define HIGH_ELF_FEMALE ((Races::HighElf << 8) | Genders::Female)
-#define DARK_ELF_MALE ((Races::DarkElf << 8) | Genders::Male)
-#define DARK_ELF_FEMALE ((Races::DarkElf << 8) | Genders::Female)
-#define HALF_ELF_MALE ((Races::HalfElf << 8) | Genders::Male)
-#define HALF_ELF_FEMALE ((Races::HalfElf << 8) | Genders::Female)
-#define DWARF_MALE ((Races::Dwarf << 8) | Genders::Male)
-#define DWARF_FEMALE ((Races::Dwarf << 8) | Genders::Female)
-#define TROLL_MALE ((Races::Troll << 8) | Genders::Male)
-#define TROLL_FEMALE ((Races::Troll << 8) | Genders::Female)
-#define OGRE_MALE ((Races::Ogre << 8) | Genders::Male)
-#define OGRE_FEMALE ((Races::Ogre << 8) | Genders::Female)
-#define HALFLING_MALE ((Races::Halfling << 8) | Genders::Male)
-#define HALFLING_FEMALE ((Races::Halfling << 8) | Genders::Female)
-#define GNOME_MALE ((Races::Gnome << 8) | Genders::Male)
-#define GNOME_FEMALE ((Races::Gnome << 8) | Genders::Female)
-#define IKSAR_MALE ((Races::Iksar << 8) | Genders::Male)
-#define IKSAR_FEMALE ((Races::Iksar << 8) | Genders::Female)
-#define VAH_SHIR_MALE ((Races::VahShir << 8) | Genders::Male)
-#define VAH_SHIR_FEMALE ((Races::VahShir << 8) | Genders::Female)
-#define FROGLOK_MALE ((Races::Froglok << 8) | Genders::Male)
-#define FROGLOK_FEMALE ((Races::Froglok << 8) | Genders::Female)
-#define DRAKKIN_MALE ((Races::Drakkin << 8) | Genders::Male)
-#define DRAKKIN_FEMALE ((Races::Drakkin << 8) | Genders::Female)
+#define HUMAN_MALE ((Race::Human << 8) | Gender::Male)
+#define HUMAN_FEMALE ((Race::Human << 8) | Gender::Female)
+#define BARBARIAN_MALE ((Race::Barbarian << 8) | Gender::Male)
+#define BARBARIAN_FEMALE ((Race::Barbarian << 8) | Gender::Female)
+#define ERUDITE_MALE ((Race::Erudite << 8) | Gender::Male)
+#define ERUDITE_FEMALE ((Race::Erudite << 8) | Gender::Female)
+#define WOOD_ELF_MALE ((Race::WoodElf << 8) | Gender::Male)
+#define WOOD_ELF_FEMALE ((Race::WoodElf << 8) | Gender::Female)
+#define HIGH_ELF_MALE ((Race::HighElf << 8) | Gender::Male)
+#define HIGH_ELF_FEMALE ((Race::HighElf << 8) | Gender::Female)
+#define DARK_ELF_MALE ((Race::DarkElf << 8) | Gender::Male)
+#define DARK_ELF_FEMALE ((Race::DarkElf << 8) | Gender::Female)
+#define HALF_ELF_MALE ((Race::HalfElf << 8) | Gender::Male)
+#define HALF_ELF_FEMALE ((Race::HalfElf << 8) | Gender::Female)
+#define DWARF_MALE ((Race::Dwarf << 8) | Gender::Male)
+#define DWARF_FEMALE ((Race::Dwarf << 8) | Gender::Female)
+#define TROLL_MALE ((Race::Troll << 8) | Gender::Male)
+#define TROLL_FEMALE ((Race::Troll << 8) | Gender::Female)
+#define OGRE_MALE ((Race::Ogre << 8) | Gender::Male)
+#define OGRE_FEMALE ((Race::Ogre << 8) | Gender::Female)
+#define HALFLING_MALE ((Race::Halfling << 8) | Gender::Male)
+#define HALFLING_FEMALE ((Race::Halfling << 8) | Gender::Female)
+#define GNOME_MALE ((Race::Gnome << 8) | Gender::Male)
+#define GNOME_FEMALE ((Race::Gnome << 8) | Gender::Female)
+#define IKSAR_MALE ((Race::Iksar << 8) | Gender::Male)
+#define IKSAR_FEMALE ((Race::Iksar << 8) | Gender::Female)
+#define VAH_SHIR_MALE ((Race::VahShir << 8) | Gender::Male)
+#define VAH_SHIR_FEMALE ((Race::VahShir << 8) | Gender::Female)
+#define FROGLOK_MALE ((Race::Froglok << 8) | Gender::Male)
+#define FROGLOK_FEMALE ((Race::Froglok << 8) | Gender::Female)
+#define DRAKKIN_MALE ((Race::Drakkin << 8) | Gender::Male)
+#define DRAKKIN_FEMALE ((Race::Drakkin << 8) | Gender::Female)
 
 #define BINDRG(r, g) (((int)r << 8) | g)
 
@@ -2160,7 +2160,7 @@ bool PlayerAppearance::IsValidWoad(uint16 race_id, uint8 gender_id, uint8 woad_v
 }
 
 const char* GetGenderName(uint8 gender_id) {
-	if (!EQ::ValueWithin(gender_id, Genders::Male, Genders::Neuter)) {
+	if (!EQ::ValueWithin(gender_id, Gender::Male, Gender::Neuter)) {
 		return "Unknown";
 	}
 
@@ -2174,37 +2174,37 @@ const std::string GetPlayerRaceAbbreviation(uint16 race_id)
 	}
 
 	switch (race_id) {
-		case Races::Human:
+		case Race::Human:
 			return "HUM";
-		case Races::Barbarian:
+		case Race::Barbarian:
 			return "BAR";
-		case Races::Erudite:
+		case Race::Erudite:
 			return "ERU";
-		case Races::WoodElf:
+		case Race::WoodElf:
 			return "ELF";
-		case Races::HighElf:
+		case Race::HighElf:
 			return "HIE";
-		case Races::DarkElf:
+		case Race::DarkElf:
 			return "DEF";
-		case Races::HalfElf:
+		case Race::HalfElf:
 			return "HEF";
-		case Races::Dwarf:
+		case Race::Dwarf:
 			return "DWF";
-		case Races::Troll:
+		case Race::Troll:
 			return "TRL";
-		case Races::Ogre:
+		case Race::Ogre:
 			return "OGR";
-		case Races::Halfling:
+		case Race::Halfling:
 			return "HFL";
-		case Races::Gnome:
+		case Race::Gnome:
 			return "GNM";
-		case Races::Iksar:
+		case Race::Iksar:
 			return "IKS";
-		case Races::VahShir:
+		case Race::VahShir:
 			return "VAH";
-		case Races::Froglok:
+		case Race::Froglok:
 			return "FRG";
-		case Races::Drakkin:
+		case Race::Drakkin:
 			return "DRK";
 	}
 
@@ -2213,10 +2213,10 @@ const std::string GetPlayerRaceAbbreviation(uint16 race_id)
 
 bool IsPlayerRace(uint16 race_id) {
 	return (
-		EQ::ValueWithin(race_id, Races::Human, Races::Gnome) ||
-		race_id == Races::Iksar ||
-		race_id == Races::VahShir ||
-		race_id == Races::Froglok ||
-		race_id == Races::Drakkin
+		EQ::ValueWithin(race_id, Race::Human, Race::Gnome) ||
+		race_id == Race::Iksar ||
+		race_id == Race::VahShir ||
+		race_id == Race::Froglok ||
+		race_id == Race::Drakkin
 	);
 }

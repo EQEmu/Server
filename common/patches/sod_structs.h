@@ -4383,7 +4383,7 @@ struct MercenaryStance_Struct {
 struct MercenaryListEntry_Struct {
 /*0000*/	uint32	MercID;				// ID unique to each type of mercenary (probably a DB id)
 /*0004*/	uint32	MercType;			// From dbstr_us.txt - Apprentice (330000100), Journeyman (330000200), Master (330000300)
-/*0008*/	uint32	MercSubType;		// From dbstr_us.txt - 330020105^23^Race: Guktan<br>Type: Healer<br>Confidence: High<br>Proficiency: Apprentice, Tier V...
+/*0008*/	uint32	MercSubType;		// From dbstr_us.txt - 330020105^23^Race:: Guktan<br>Type: Healer<br>Confidence: High<br>Proficiency: Apprentice, Tier V...
 /*0012*/	uint32	PurchaseCost;		// Purchase Cost (in gold)
 /*0016*/	uint32	UpkeepCost;			// Upkeep Cost (in gold)
 /*0020*/	uint32	AltCurrencyCost;	// Alternate Currency Purchase Cost? (all seen costs show N/A Bayle Mark) - Seen 0
@@ -4416,7 +4416,7 @@ struct MercenaryMerchantShopRequest_Struct {
 struct MercenaryData_Struct {
 /*0000*/	uint32	MercID;				// ID unique to each type of mercenary (probably a DB id)
 /*0004*/	uint32	MercType;			// From dbstr_us.txt - Apprentice (330000100), Journeyman (330000200), Master (330000300)
-/*0008*/	uint32	MercSubType;		// From dbstr_us.txt - 330020105^23^Race: Guktan<br>Type: Healer<br>Confidence: High<br>Proficiency: Apprentice, Tier V...
+/*0008*/	uint32	MercSubType;		// From dbstr_us.txt - 330020105^23^Race:: Guktan<br>Type: Healer<br>Confidence: High<br>Proficiency: Apprentice, Tier V...
 /*0012*/	uint32	PurchaseCost;		// Purchase Cost (in gold)
 /*0016*/	uint32	UpkeepCost;			// Upkeep Cost (in gold)
 /*0020*/	uint32	AltCurrencyCost;	// Alternate Currency Purchase Cost? (all seen costs show N/A Bayle Mark) - Seen 0

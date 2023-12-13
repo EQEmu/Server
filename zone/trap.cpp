@@ -510,7 +510,7 @@ void Trap::CreateHiddenTrigger()
 	make_npc->runspeed = 0.0f;
 	make_npc->bodytype = BT_Special;
 	make_npc->race = 127;
-	make_npc->gender = Genders::Male;
+	make_npc->gender = Gender::Male;
 	make_npc->loottable_id = 0;
 	make_npc->npc_spells_id = 0;
 	make_npc->d_melee_texture1 = 0;

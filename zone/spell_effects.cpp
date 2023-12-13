@@ -7430,42 +7430,42 @@ bool Mob::PassCastRestriction(int value)
 
 		case IS_BIXIE:
 		case IS_BIXIE2:
-			if ((GetRace() == Races::Bixie) ||(GetRace() == Races::Bixie2))
+			if ((GetRace() == Race::Bixie) ||(GetRace() == Race::Bixie2))
 				return true;
 			break;
 
 		case IS_HARPY:
-			if ((GetRace() == Races::Harpy) ||(GetRace() == Races::Harpy2))
+			if ((GetRace() == Race::Harpy) ||(GetRace() == Race::Harpy2))
 				return true;
 			break;
 
 		case IS_GNOLL:
-			if ((GetRace() == Races::Gnoll) || (GetRace() == Races::Gnoll2) || (GetRace() == Races::Gnoll3))
+			if ((GetRace() == Race::Gnoll) || (GetRace() == Race::Gnoll2) || (GetRace() == Race::Gnoll3))
 				return true;
 			break;
 
 		case IS_SPORALI:
-			if ((GetRace() == Races::Sporali) ||(GetRace() == Races::Fungusman))
+			if ((GetRace() == Race::Sporali) ||(GetRace() == Race::Fungusman))
 				return true;
 			break;
 
 		case IS_KOBOLD:
-			if ((GetRace() == Races::Kobold) ||(GetRace() == Races::Kobold2))
+			if ((GetRace() == Race::Kobold) ||(GetRace() == Race::Kobold2))
 				return true;
 			break;
 
 		case IS_FROSTCRYPT_SHADE:
-			if (GetRace() == Races::GiantShade)
+			if (GetRace() == Race::GiantShade)
 				return true;
 			break;
 
 		case IS_DRAKKIN:
-			if (GetRace() == Races::Drakkin)
+			if (GetRace() == Race::Drakkin)
 				return true;
 			break;
 
 		case IS_UNDEAD_OR_VALDEHOLM_GIANT:
-			if (GetBodyType() == BT_Undead || GetRace() == Races::Giant2 || GetRace() == Races::Giant3)
+			if (GetBodyType() == BT_Undead || GetRace() == Race::Giant2 || GetRace() == Race::Giant3)
 				return true;
 			break;
 
@@ -7496,7 +7496,7 @@ bool Mob::PassCastRestriction(int value)
 			break;
 
 		case IS_FAE_OR_PIXIE:
-			if ((GetRace() == Races::Pixie) || (GetRace() == Races::FayDrake))
+			if ((GetRace() == Race::Pixie) || (GetRace() == Race::FayDrake))
 				return  true;
 			break;
 
@@ -7511,12 +7511,12 @@ bool Mob::PassCastRestriction(int value)
 			break;
 
 		case IS_CLOCKWORK_AND_HP_LESS_THAN_45_PCT:
-			if ((GetRace() == Races::Gnomework || GetRace() == Races::ClockworkGnome) && (GetHPRatio() < 45))
+			if ((GetRace() == Race::Gnomework || GetRace() == Race::ClockworkGnome) && (GetHPRatio() < 45))
 				return true;
 			break;
 
 		case IS_WISP_AND_HP_LESS_THAN_10_PCT:
-			if ((GetRace() == Races::Wisp) && (GetHPRatio() < 10))
+			if ((GetRace() == Race::Wisp) && (GetHPRatio() < 10))
 				return true;
 			break;
 
@@ -7889,12 +7889,12 @@ bool Mob::PassCastRestriction(int value)
 			break;
 
 		case IS_TREANT:
-			if (GetRace() == Races::Treant || GetRace() == Races::Treant2 || GetRace() == Races::Treant3)
+			if (GetRace() == Race::Treant || GetRace() == Race::Treant2 || GetRace() == Race::Treant3)
 				return true;
 			break;
 
 		case IS_SCARECROW:
-			if (GetRace() == Races::Scarecrow || GetRace() == Races::Scarecrow2)
+			if (GetRace() == Race::Scarecrow || GetRace() == Race::Scarecrow2)
 				return true;
 			break;
 
@@ -8077,33 +8077,33 @@ bool Mob::PassCastRestriction(int value)
 		}
 
 		case IS_CLIENT_AND_MALE_PLATE_USER:
-			if (IsClient() && GetGender() == Genders::Male && IsPlateClass(GetClass()))
+			if (IsClient() && GetGender() == Gender::Male && IsPlateClass(GetClass()))
 				return true;
 			break;
 
 		case IS_CLEINT_AND_MALE_DRUID_ENCHANTER_MAGICIAN_NECROANCER_SHAMAN_OR_WIZARD:
-			if (IsClient() && GetGender() == Genders::Male && (IsCasterClass(GetClass()) && GetClass() != Class::Cleric))
+			if (IsClient() && GetGender() == Gender::Male && (IsCasterClass(GetClass()) && GetClass() != Class::Cleric))
 				return true;
 			break;
 
 		case IS_CLIENT_AND_MALE_BEASTLORD_BERSERKER_MONK_RANGER_OR_ROGUE:
-			if (IsClient() && GetGender() == Genders::Male &&
+			if (IsClient() && GetGender() == Gender::Male &&
 				(GetClass() == Class::Beastlord || GetClass() == Class::Berserker || GetClass() == Class::Monk || GetClass() == Class::Ranger || GetClass() == Class::Rogue))
 				return true;
 			break;
 
 		case IS_CLIENT_AND_FEMALE_PLATE_USER:
-			if (IsClient() && GetGender() == Genders::Female && IsPlateClass(GetClass()))
+			if (IsClient() && GetGender() == Gender::Female && IsPlateClass(GetClass()))
 				return true;
 			break;
 
 		case IS_CLIENT_AND_FEMALE_DRUID_ENCHANTER_MAGICIAN_NECROANCER_SHAMAN_OR_WIZARD:
-			if (IsClient() && GetGender() == Genders::Female && (IsCasterClass(GetClass()) && GetClass() != Class::Cleric))
+			if (IsClient() && GetGender() == Gender::Female && (IsCasterClass(GetClass()) && GetClass() != Class::Cleric))
 				return true;
 			break;
 
 		case IS_CLIENT_AND_FEMALE_BEASTLORD_BERSERKER_MONK_RANGER_OR_ROGUE:
-			if (IsClient() && GetGender() == Genders::Female &&
+			if (IsClient() && GetGender() == Gender::Female &&
 				(GetClass() == Class::Beastlord || GetClass() == Class::Berserker || GetClass() == Class::Monk || GetClass() == Class::Ranger || GetClass() == Class::Rogue))
 				return true;
 			break;
@@ -10219,7 +10219,7 @@ void Mob::ApplySpellEffectIllusion(int32 spell_id, Mob *caster, int buffslot, in
 	if (base == -1) {
 		// Specific Gender Illusions
 		if (spell_id == SPELL_ILLUSION_MALE || spell_id == SPELL_ILLUSION_FEMALE) {
-			uint8 specific_gender = spell_id == SPELL_ILLUSION_MALE ? Genders::Male : Genders::Female;
+			uint8 specific_gender = spell_id == SPELL_ILLUSION_MALE ? Gender::Male : Gender::Female;
 
 			if (caster && caster->GetTarget()) {
 				SendIllusionPacket(
@@ -10234,7 +10234,7 @@ void Mob::ApplySpellEffectIllusion(int32 spell_id, Mob *caster, int buffslot, in
 			// Change Gender Illusions
 		else {
 			if (caster && caster->GetTarget()) {
-				uint8 opposite_gender = caster->GetTarget()->GetGender() == Genders::Male ? Genders::Female : Genders::Male;
+				uint8 opposite_gender = caster->GetTarget()->GetGender() == Gender::Male ? Gender::Female : Gender::Male;
 
 				SendIllusionPacket(
 					AppearanceStruct{
@@ -10263,7 +10263,7 @@ void Mob::ApplySpellEffectIllusion(int32 spell_id, Mob *caster, int buffslot, in
 			gender_id
 		);
 
-		if (base != Races::Elemental && base != Races::Drakkin) {
+		if (base != Race::Elemental && base != Race::Drakkin) {
 			if (max > 0) {
 				if (limit == 0) {
 					SendIllusionPacket(
@@ -10303,7 +10303,7 @@ void Mob::ApplySpellEffectIllusion(int32 spell_id, Mob *caster, int buffslot, in
 					}
 				);
 			}
-		} else if (base == Races::Elemental){
+		} else if (base == Race::Elemental){
 			SendIllusionPacket(
 				AppearanceStruct{
 					.gender_id = static_cast<uint8>(gender_id),
@@ -10311,7 +10311,7 @@ void Mob::ApplySpellEffectIllusion(int32 spell_id, Mob *caster, int buffslot, in
 					.texture = static_cast<uint8>(limit),
 				}
 			);
-		} else if (base == Races::Drakkin) {
+		} else if (base == Race::Drakkin) {
 			FaceChange_Struct f{
 				.haircolor = GetHairColor(),
 				.beardcolor = GetBeardColor(),

@@ -308,9 +308,9 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 
 	if (ca_atk->m_skill == EQ::skills::SkillBash) { // SLAM - Bash without a shield equipped
 		switch (GetRace()) {
-			case Races::Ogre:
-			case Races::Troll:
-			case Races::Barbarian:
+			case Race::Ogre:
+			case Race::Troll:
+			case Race::Barbarian:
 				bypass_skill_check = true;
 			default:
 				break;

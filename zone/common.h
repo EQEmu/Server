@@ -823,7 +823,7 @@ struct MercType {
 struct MercData {
 	uint32	MercTemplateID;
 	uint32	MercType;				// From dbstr_us.txt - Apprentice (330000100), Journeyman (330000200), Master (330000300)
-	uint32	MercSubType;			// From dbstr_us.txt - 330020105^23^Race: Guktan<br>Type: Healer<br>Confidence: High<br>Proficiency: Apprentice, Tier V...
+	uint32	MercSubType;			// From dbstr_us.txt - 330020105^23^Race:: Guktan<br>Type: Healer<br>Confidence: High<br>Proficiency: Apprentice, Tier V...
 	uint32	CostFormula;			// To determine cost to client
 	uint32	ClientVersion;				// Only send valid mercs per expansion
 	uint32	NPCID;

@@ -8518,8 +8518,8 @@ void Client::InitInnates()
 	m_pp.InnateSkills[InnateInspect] = InnateEnabled;
 	m_pp.InnateSkills[InnateOpen] = InnateEnabled;
 
-	if (race >= Races::Froglok) {
-		if (race == Races::Skeleton2 || race == Races::Froglok) {
+	if (race >= Race::Froglok) {
+		if (race == Race::Skeleton2 || race == Race::Froglok) {
 			m_pp.InnateSkills[InnateUltraVision] = InnateEnabled;
 		} else {
 			m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
@@ -8527,74 +8527,74 @@ void Client::InitInnates()
 	}
 
 	switch (race) {
-		case Races::Human:
-		case Races::FreeportGuard:
-		case Races::HumanBeggar:
-		case Races::HighpassCitizen:
-		case Races::QeynosCitizen:
-		case Races::Froglok: // client does froglok weird, but this should work out fine
+		case Race::Human:
+		case Race::FreeportGuard:
+		case Race::HumanBeggar:
+		case Race::HighpassCitizen:
+		case Race::QeynosCitizen:
+		case Race::Froglok: // client does froglok weird, but this should work out fine
 			break;
-		case Races::Barbarian:
-		case Races::HalasCitizen:
+		case Race::Barbarian:
+		case Race::HalasCitizen:
 			m_pp.InnateSkills[InnateSlam] = InnateEnabled;
 			break;
-		case Races::Erudite:
-		case Races::EruditeCitizen:
+		case Race::Erudite:
+		case Race::EruditeCitizen:
 			m_pp.InnateSkills[InnateLore] = InnateEnabled;
 			break;
-		case Races::WoodElf:
-		case Races::Fayguard:
+		case Race::WoodElf:
+		case Race::Fayguard:
 			m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
 			break;
-		case Races::HighElf:
-		case Races::Gnome:
-		case Races::Felguard:
+		case Race::HighElf:
+		case Race::Gnome:
+		case Race::Felguard:
 			m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
 			m_pp.InnateSkills[InnateLore]        = InnateEnabled;
 			break;
-		case Races::DarkElf:
-		case Races::NeriakCitizen:
-		case Races::ElfVampire:
-		case Races::FroglokGhoul:
-		case Races::Ghost:
-		case Races::Ghoul:
-		case Races::Skeleton:
-		case Races::Vampire:
-		case Races::Wisp:
-		case Races::Zombie:
-		case Races::Spectre:
-		case Races::DwarfGhost:
-		case Races::EruditeGhost:
-		case Races::DragonSkeleton:
-		case Races::Innoruuk:
+		case Race::DarkElf:
+		case Race::NeriakCitizen:
+		case Race::ElfVampire:
+		case Race::FroglokGhoul:
+		case Race::Ghost:
+		case Race::Ghoul:
+		case Race::Skeleton:
+		case Race::Vampire:
+		case Race::Wisp:
+		case Race::Zombie:
+		case Race::Spectre:
+		case Race::DwarfGhost:
+		case Race::EruditeGhost:
+		case Race::DragonSkeleton:
+		case Race::Innoruuk:
 			m_pp.InnateSkills[InnateUltraVision] = InnateEnabled;
 			break;
-		case Races::Dwarf:
-		case Races::KaladimCitizen:
+		case Race::Dwarf:
+		case Race::KaladimCitizen:
 			m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
 			break;
-		case Races::Troll:
-		case Races::GrobbCitizen:
+		case Race::Troll:
+		case Race::GrobbCitizen:
 			m_pp.InnateSkills[InnateRegen]       = InnateEnabled;
 			m_pp.InnateSkills[InnateSlam]        = InnateEnabled;
 			m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
 			break;
-		case Races::Ogre:
-		case Races::OggokCitizen:
+		case Race::Ogre:
+		case Race::OggokCitizen:
 			m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
 			m_pp.InnateSkills[InnateSlam]        = InnateEnabled;
 			m_pp.InnateSkills[InnateNoBash]      = InnateEnabled;
 			m_pp.InnateSkills[InnateBashDoor]    = InnateEnabled;
 			break;
-		case Races::Halfling:
-		case Races::RivervaleCitizen:
+		case Race::Halfling:
+		case Race::RivervaleCitizen:
 			m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
 			break;
-		case Races::Iksar:
+		case Race::Iksar:
 			m_pp.InnateSkills[InnateRegen]       = InnateEnabled;
 			m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
 			break;
-		case Races::VahShir:
+		case Race::VahShir:
 			m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
 			break;
 		default:

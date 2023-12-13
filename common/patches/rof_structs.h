@@ -4991,7 +4991,7 @@ struct MercenaryStance_Struct {
 struct MercenaryListEntry_Struct {
 /*0000*/ uint32 MercID; // ID unique to each type of mercenary (probably a DB id)
 /*0004*/ uint32 MercType; // From dbstr_us.txt - Apprentice (330000100), Journeyman (330000200), Master (330000300)
-/*0008*/ uint32 MercSubType; // From dbstr_us.txt - 330020105^23^Race: Guktan<br>Type: Healer<br>Confidence: High<br>Proficiency: Apprentice, Tier V...
+/*0008*/ uint32 MercSubType; // From dbstr_us.txt - 330020105^23^Race:: Guktan<br>Type: Healer<br>Confidence: High<br>Proficiency: Apprentice, Tier V...
 /*0012*/ uint32 PurchaseCost; // Purchase Cost (in gold)
 /*0016*/ uint32 UpkeepCost; // Upkeep Cost (in gold)
 /*0020*/ uint32 Status; // Required Account Status (Free = 0, Silver = 1, Gold = 2) at merchants - Seen 0 (suspended) or 1 (unsuspended) on hired mercs ?
@@ -5028,7 +5028,7 @@ struct MercenaryMerchantShopRequest_Struct {
 struct MercenaryData_Struct {
 /*0000*/ uint32 MercID; // ID unique to each type of mercenary (probably a DB id) - (if 1, do not send MercenaryData_Struct - No merc hired)
 /*0004*/ uint32 MercType; // From dbstr_us.txt - Apprentice (330000100), Journeyman (330000200), Master (330000300)
-/*0008*/ uint32 MercSubType; // From dbstr_us.txt - 330020105^23^Race: Guktan<br>Type: Healer<br>Confidence: High<br>Proficiency: Apprentice, Tier V...
+/*0008*/ uint32 MercSubType; // From dbstr_us.txt - 330020105^23^Race:: Guktan<br>Type: Healer<br>Confidence: High<br>Proficiency: Apprentice, Tier V...
 /*0012*/ uint32 PurchaseCost; // Purchase Cost (in gold)
 /*0016*/ uint32 UpkeepCost; // Upkeep Cost (in gold)
 /*0020*/ uint32 Status; // Required Account Status (Free = 0, Silver = 1, Gold = 2) at merchants - Seen 0 (suspended) or 1 (unsuspended) on hired mercs ?

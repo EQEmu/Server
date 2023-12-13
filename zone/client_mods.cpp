@@ -1019,52 +1019,52 @@ int32	Client::CalcMR()
 {
 	//racial bases
 	switch (GetBaseRace()) {
-		case Races::Human:
+		case Race::Human:
 			MR = 25;
 			break;
-		case Races::Barbarian:
+		case Race::Barbarian:
 			MR = 25;
 			break;
-		case Races::Erudite:
+		case Race::Erudite:
 			MR = 30;
 			break;
-		case Races::WoodElf:
+		case Race::WoodElf:
 			MR = 25;
 			break;
-		case Races::HighElf:
+		case Race::HighElf:
 			MR = 25;
 			break;
-		case Races::DarkElf:
+		case Race::DarkElf:
 			MR = 25;
 			break;
-		case Races::HalfElf:
+		case Race::HalfElf:
 			MR = 25;
 			break;
-		case Races::Dwarf:
+		case Race::Dwarf:
 			MR = 30;
 			break;
-		case Races::Troll:
+		case Race::Troll:
 			MR = 25;
 			break;
-		case Races::Ogre:
+		case Race::Ogre:
 			MR = 25;
 			break;
-		case Races::Halfling:
+		case Race::Halfling:
 			MR = 25;
 			break;
-		case Races::Gnome:
+		case Race::Gnome:
 			MR = 25;
 			break;
-		case Races::Iksar:
+		case Race::Iksar:
 			MR = 25;
 			break;
-		case Races::VahShir:
+		case Race::VahShir:
 			MR = 25;
 			break;
-		case Races::Froglok:
+		case Race::Froglok:
 			MR = 30;
 			break;
-		case Races::Drakkin:
+		case Race::Drakkin:
 		{
 			MR = 25;
 			if (GetDrakkinHeritage() == 2)
@@ -1093,52 +1093,52 @@ int32	Client::CalcFR()
 {
 	//racial bases
 	switch (GetBaseRace()) {
-		case Races::Human:
+		case Race::Human:
 			FR = 25;
 			break;
-		case Races::Barbarian:
+		case Race::Barbarian:
 			FR = 25;
 			break;
-		case Races::Erudite:
+		case Race::Erudite:
 			FR = 25;
 			break;
-		case Races::WoodElf:
+		case Race::WoodElf:
 			FR = 25;
 			break;
-		case Races::HighElf:
+		case Race::HighElf:
 			FR = 25;
 			break;
-		case Races::DarkElf:
+		case Race::DarkElf:
 			FR = 25;
 			break;
-		case Races::HalfElf:
+		case Race::HalfElf:
 			FR = 25;
 			break;
-		case Races::Dwarf:
+		case Race::Dwarf:
 			FR = 25;
 			break;
-		case Races::Troll:
+		case Race::Troll:
 			FR = 5;
 			break;
-		case Races::Ogre:
+		case Race::Ogre:
 			FR = 25;
 			break;
-		case Races::Halfling:
+		case Race::Halfling:
 			FR = 25;
 			break;
-		case Races::Gnome:
+		case Race::Gnome:
 			FR = 25;
 			break;
-		case Races::Iksar:
+		case Race::Iksar:
 			FR = 30;
 			break;
-		case Races::VahShir:
+		case Race::VahShir:
 			FR = 25;
 			break;
-		case Races::Froglok:
+		case Race::Froglok:
 			FR = 25;
 			break;
-		case Races::Drakkin:
+		case Race::Drakkin:
 		{
 			FR = 25;
 			if (GetDrakkinHeritage() == 0)
@@ -1179,52 +1179,52 @@ int32	Client::CalcDR()
 {
 	//racial bases
 	switch (GetBaseRace()) {
-		case Races::Human:
+		case Race::Human:
 			DR = 15;
 			break;
-		case Races::Barbarian:
+		case Race::Barbarian:
 			DR = 15;
 			break;
-		case Races::Erudite:
+		case Race::Erudite:
 			DR = 10;
 			break;
-		case Races::WoodElf:
+		case Race::WoodElf:
 			DR = 15;
 			break;
-		case Races::HighElf:
+		case Race::HighElf:
 			DR = 15;
 			break;
-		case Races::DarkElf:
+		case Race::DarkElf:
 			DR = 15;
 			break;
-		case Races::HalfElf:
+		case Race::HalfElf:
 			DR = 15;
 			break;
-		case Races::Dwarf:
+		case Race::Dwarf:
 			DR = 15;
 			break;
-		case Races::Troll:
+		case Race::Troll:
 			DR = 15;
 			break;
-		case Races::Ogre:
+		case Race::Ogre:
 			DR = 15;
 			break;
-		case Races::Halfling:
+		case Race::Halfling:
 			DR = 20;
 			break;
-		case Races::Gnome:
+		case Race::Gnome:
 			DR = 15;
 			break;
-		case Races::Iksar:
+		case Race::Iksar:
 			DR = 15;
 			break;
-		case Races::VahShir:
+		case Race::VahShir:
 			DR = 15;
 			break;
-		case Races::Froglok:
+		case Race::Froglok:
 			DR = 15;
 			break;
-		case Races::Drakkin:
+		case Race::Drakkin:
 		{
 			DR = 15;
 			if (GetDrakkinHeritage() == 1)
@@ -1271,52 +1271,52 @@ int32	Client::CalcPR()
 {
 	//racial bases
 	switch (GetBaseRace()) {
-		case Races::Human:
+		case Race::Human:
 			PR = 15;
 			break;
-		case Races::Barbarian:
+		case Race::Barbarian:
 			PR = 15;
 			break;
-		case Races::Erudite:
+		case Race::Erudite:
 			PR = 15;
 			break;
-		case Races::WoodElf:
+		case Race::WoodElf:
 			PR = 15;
 			break;
-		case Races::HighElf:
+		case Race::HighElf:
 			PR = 15;
 			break;
-		case Races::DarkElf:
+		case Race::DarkElf:
 			PR = 15;
 			break;
-		case Races::HalfElf:
+		case Race::HalfElf:
 			PR = 15;
 			break;
-		case Races::Dwarf:
+		case Race::Dwarf:
 			PR = 20;
 			break;
-		case Races::Troll:
+		case Race::Troll:
 			PR = 15;
 			break;
-		case Races::Ogre:
+		case Race::Ogre:
 			PR = 15;
 			break;
-		case Races::Halfling:
+		case Race::Halfling:
 			PR = 20;
 			break;
-		case Races::Gnome:
+		case Race::Gnome:
 			PR = 15;
 			break;
-		case Races::Iksar:
+		case Race::Iksar:
 			PR = 15;
 			break;
-		case Races::VahShir:
+		case Race::VahShir:
 			PR = 15;
 			break;
-		case Races::Froglok:
+		case Race::Froglok:
 			PR = 30;
 			break;
-		case Races::Drakkin:
+		case Race::Drakkin:
 		{
 			PR = 15;
 			if (GetDrakkinHeritage() == 3)
@@ -1363,52 +1363,52 @@ int32	Client::CalcCR()
 {
 	//racial bases
 	switch (GetBaseRace()) {
-		case Races::Human:
+		case Race::Human:
 			CR = 25;
 			break;
-		case Races::Barbarian:
+		case Race::Barbarian:
 			CR = 35;
 			break;
-		case Races::Erudite:
+		case Race::Erudite:
 			CR = 25;
 			break;
-		case Races::WoodElf:
+		case Race::WoodElf:
 			CR = 25;
 			break;
-		case Races::HighElf:
+		case Race::HighElf:
 			CR = 25;
 			break;
-		case Races::DarkElf:
+		case Race::DarkElf:
 			CR = 25;
 			break;
-		case Races::HalfElf:
+		case Race::HalfElf:
 			CR = 25;
 			break;
-		case Races::Dwarf:
+		case Race::Dwarf:
 			CR = 25;
 			break;
-		case Races::Troll:
+		case Race::Troll:
 			CR = 25;
 			break;
-		case Races::Ogre:
+		case Race::Ogre:
 			CR = 25;
 			break;
-		case Races::Halfling:
+		case Race::Halfling:
 			CR = 25;
 			break;
-		case Races::Gnome:
+		case Race::Gnome:
 			CR = 25;
 			break;
-		case Races::Iksar:
+		case Race::Iksar:
 			CR = 15;
 			break;
-		case Races::VahShir:
+		case Race::VahShir:
 			CR = 25;
 			break;
-		case Races::Froglok:
+		case Race::Froglok:
 			CR = 25;
 			break;
-		case Races::Drakkin:
+		case Race::Drakkin:
 		{
 			CR = 25;
 			if (GetDrakkinHeritage() == 4)

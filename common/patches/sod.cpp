@@ -2507,8 +2507,8 @@ namespace SoD
 			}
 
 			float SpawnSize = emu->size;
-			if (!((emu->NPC == 0) || (emu->race <= Races::Gnome) || (emu->race == Races::Iksar) ||
-					(emu->race == Races::VahShir) || (emu->race == Races::Froglok) || (emu->race == Races::Drakkin))
+			if (!((emu->NPC == 0) || (emu->race <= Race::Gnome) || (emu->race == Race::Iksar) ||
+					(emu->race == Race::VahShir) || (emu->race == Race::Froglok) || (emu->race == Race::Drakkin))
 				)
 			{
 				PacketSize -= (sizeof(structs::Texture_Struct) * EQ::textures::materialCount);
@@ -2706,8 +2706,8 @@ namespace SoD
 
 			Buffer += sizeof(structs::Spawn_Struct_Position);
 
-			if ((emu->NPC == 0) || (emu->race <= Races::Gnome) || (emu->race == Races::Iksar) ||
-					(emu->race == Races::VahShir) || (emu->race == Races::Froglok) || (emu->race == Races::Drakkin)
+			if ((emu->NPC == 0) || (emu->race <= Race::Gnome) || (emu->race == Race::Iksar) ||
+					(emu->race == Race::VahShir) || (emu->race == Race::Froglok) || (emu->race == Race::Drakkin)
 				)
 			{
 				for (k = EQ::textures::textureBegin; k < EQ::textures::materialCount; ++k)
@@ -2733,8 +2733,8 @@ namespace SoD
 			}
 
 
-			if ((emu->NPC == 0) || (emu->race <= Races::Gnome) || (emu->race == Races::Iksar) ||
-					(emu->race == Races::VahShir) || (emu->race == Races::Froglok) || (emu->race == Races::Drakkin)
+			if ((emu->NPC == 0) || (emu->race <= Race::Gnome) || (emu->race == Race::Iksar) ||
+					(emu->race == Race::VahShir) || (emu->race == Race::Froglok) || (emu->race == Race::Drakkin)
 				)
 			{
 				structs::Texture_Struct *Equipment = (structs::Texture_Struct *)Buffer;

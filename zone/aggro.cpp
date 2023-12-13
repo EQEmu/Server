@@ -983,14 +983,14 @@ bool Mob::CombatRange(Mob* other, float fixed_size_mod, bool aeRampage, ExtraAtt
 	float size_mod = GetSize();
 	float other_size_mod = other->GetSize();
 
-	if (GetRace() == Races::LavaDragon || GetRace() == Races::Wurm || GetRace() == Races::GhostDragon) { //For races with a fixed size
+	if (GetRace() == Race::LavaDragon || GetRace() == Race::Wurm || GetRace() == Race::GhostDragon) { //For races with a fixed size
 		size_mod = 60.0f;
 	}
 	else if (size_mod < 6.0) {
 		size_mod = 8.0f;
 	}
 
-	if (other->GetRace() == Races::LavaDragon || other->GetRace() == Races::Wurm || other->GetRace() == Races::GhostDragon) { //For races with a fixed size
+	if (other->GetRace() == Race::LavaDragon || other->GetRace() == Race::Wurm || other->GetRace() == Race::GhostDragon) { //For races with a fixed size
 		other_size_mod = 60.0f;
 	}
 	else if (other_size_mod < 6.0) {
@@ -1011,11 +1011,11 @@ bool Mob::CombatRange(Mob* other, float fixed_size_mod, bool aeRampage, ExtraAtt
 		size_mod *= size_mod * 4;
 	}
 
-	if (other->GetRace() == Races::VeliousDragon)		// Lord Vyemm and other velious dragons
+	if (other->GetRace() == Race::VeliousDragon)		// Lord Vyemm and other velious dragons
 	{
 		size_mod *= 1.75;
 	}
-	if (other->GetRace() == Races::DragonSkeleton)		// Dracoliche in Fear.  Skeletal Dragon
+	if (other->GetRace() == Race::DragonSkeleton)		// Dracoliche in Fear.  Skeletal Dragon
 	{
 		size_mod *= 2.25;
 	}

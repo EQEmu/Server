@@ -95,13 +95,13 @@ bool IsOfEqualRace(int r1, int r2)
 	}
 	// TODO: add more values
 	switch (r1) {
-		case Races::DarkElf:
-			if (r2 == Races::NeriakCitizen) {
+		case Race::DarkElf:
+			if (r2 == Race::NeriakCitizen) {
 				return true;
 			}
 			break;
-		case Races::Barbarian:
-			if (r2 == Races::HalasCitizen) {
+		case Race::Barbarian:
+			if (r2 == Race::HalasCitizen) {
 				return true;
 			}
 	}
@@ -116,49 +116,49 @@ bool IsOfIndiffRace(int r1, int r2)
 	}
 	// TODO: add more values
 	switch (r1) {
-		case Races::DarkElf:
-		case Races::Ogre:
-		case Races::Troll:
-			if (r2 == Races::Ogre || r2 == Races::Troll || r2 == Races::DarkElf) {
+		case Race::DarkElf:
+		case Race::Ogre:
+		case Race::Troll:
+			if (r2 == Race::Ogre || r2 == Race::Troll || r2 == Race::DarkElf) {
 				return true;
 			}
 			break;
-		case Races::Human:
-		case Races::Barbarian:
-		case Races::HalfElf:
-		case Races::Gnome:
-		case Races::Halfling:
-		case Races::WoodElf:
-			if (r2 == Races::Human ||
-			    r2 == Races::Barbarian ||
-			    r2 == Races::Erudite ||
-			    r2 == Races::HalfElf ||
-			    r2 == Races::Gnome ||
-			    r2 == Races::Halfling ||
-			    r2 == Races::Dwarf ||
-			    r2 == Races::HighElf ||
-			    r2 == Races::WoodElf) {
+		case Race::Human:
+		case Race::Barbarian:
+		case Race::HalfElf:
+		case Race::Gnome:
+		case Race::Halfling:
+		case Race::WoodElf:
+			if (r2 == Race::Human ||
+			    r2 == Race::Barbarian ||
+			    r2 == Race::Erudite ||
+			    r2 == Race::HalfElf ||
+			    r2 == Race::Gnome ||
+			    r2 == Race::Halfling ||
+			    r2 == Race::Dwarf ||
+			    r2 == Race::HighElf ||
+			    r2 == Race::WoodElf) {
 				return true;
 			}
 			break;
-		case Races::Erudite:
-			if (r2 == Races::Human || r2 == Races::HalfElf) {
+		case Race::Erudite:
+			if (r2 == Race::Human || r2 == Race::HalfElf) {
 				return true;
 			}
 			break;
-		case Races::Dwarf:
-			if (r2 == Races::Halfling || r2 == Races::Gnome) {
+		case Race::Dwarf:
+			if (r2 == Race::Halfling || r2 == Race::Gnome) {
 				return true;
 			}
 			break;
-		case Races::HighElf:
-			if (r2 == Races::WoodElf) {
+		case Race::HighElf:
+			if (r2 == Race::WoodElf) {
 				return true;
 			}
 			break;
-		case Races::VahShir:
+		case Race::VahShir:
 			return true;
-		case Races::Iksar:
+		case Race::Iksar:
 			return false;
 	}
 	return false;

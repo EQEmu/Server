@@ -12,7 +12,7 @@ void ShowPetitionInfo(Client *c, const Seperator *sep)
 			c->Message(
 				Chat::White,
 				fmt::format(
-					"Petition {} | Name: {} Text: {} Account: {} Zone: {} Class: {} Race: {} Level: {}",
+					"Petition {} | Name: {} Text: {} Account: {} Zone: {} Class: {} Race:: {} Level: {}",
 					e.petid,
 					e.charname,
 					e.petitiontext,
@@ -65,7 +65,7 @@ void ShowPetitionInfo(Client *c, const Seperator *sep)
 	c->Message(
 		Chat::White,
 		fmt::format(
-			"Petition {} | Name: {} Text: {} Account: {} Zone: {} Class: {} Race: {} Level: {}",
+			"Petition {} | Name: {} Text: {} Account: {} Zone: {} Class: {} Race:: {} Level: {}",
 			l[0].petid,
 			l[0].charname,
 			l[0].petitiontext,

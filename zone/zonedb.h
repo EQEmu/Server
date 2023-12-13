@@ -225,7 +225,7 @@ struct MercStanceInfo {
 struct MercTemplate {
 	uint32	MercTemplateID;
 	uint32	MercType;				// From dbstr_us.txt - Apprentice (330000100), Journeyman (330000200), Master (330000300)
-	uint32	MercSubType;			// From dbstr_us.txt - 330020105^23^Race: Guktan<br>Type: Healer<br>Confidence: High<br>Proficiency: Apprentice, Tier V...
+	uint32	MercSubType;			// From dbstr_us.txt - 330020105^23^Race:: Guktan<br>Type: Healer<br>Confidence: High<br>Proficiency: Apprentice, Tier V...
 	uint16	RaceID;
 	uint8	ClassID;
 	uint32	MercNPCID;
@@ -335,10 +335,10 @@ struct CharacterCorpseEntry
 
 namespace BeastlordPetData {
 	struct PetStruct {
-		uint16 race_id       = Races::Wolf;
+		uint16 race_id       = Race::Wolf;
 		uint8  texture       = 0;
 		uint8  helm_texture  = 0;
-		uint8  gender        = Genders::Neuter;
+		uint8  gender        = Gender::Neuter;
 		float  size_modifier = 1.0f;
 		uint8  face          = 0;
 	};

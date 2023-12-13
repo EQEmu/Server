@@ -2014,10 +2014,10 @@ bool CheckCharCreateInfoTitanium(CharCreate_Struct *cc)
 	classtemp = cc->class_ - 1;
 	racetemp = cc->race - 1;
 	// these have non sequential race numbers so they need to be mapped
-	if (cc->race == Races::Froglok) racetemp = 14;
-	if (cc->race == Races::VahShir) racetemp = 13;
-	if (cc->race == Races::Iksar) racetemp = 12;
-	if (cc->race == Races::Drakkin) racetemp = 15;
+	if (cc->race == Race::Froglok) racetemp = 14;
+	if (cc->race == Race::VahShir) racetemp = 13;
+	if (cc->race == Race::Iksar) racetemp = 12;
+	if (cc->race == Race::Drakkin) racetemp = 15;
 
 	// if out of range looking it up in the table would crash stuff
 	// so we return from these
@@ -2124,53 +2124,53 @@ void Client::SetRaceStartingSkills( PlayerProfile_Struct *pp )
 {
 	switch( pp->race )
 	{
-	case Races::Barbarian:
-	case Races::Dwarf:
-	case Races::Erudite:
-	case Races::HalfElf:
-	case Races::HighElf:
-	case Races::Human:
-	case Races::Ogre:
-	case Races::Troll:
-	case Races::Drakkin:	//Drakkin are supposed to get a starting AA Skill
+	case Race::Barbarian:
+	case Race::Dwarf:
+	case Race::Erudite:
+	case Race::HalfElf:
+	case Race::HighElf:
+	case Race::Human:
+	case Race::Ogre:
+	case Race::Troll:
+	case Race::Drakkin:	//Drakkin are supposed to get a starting AA Skill
 		{
 			// No Race Specific Skills
 			break;
 		}
-	case Races::DarkElf:
+	case Race::DarkElf:
 		{
 			pp->skills[EQ::skills::SkillHide] = 50;
 			break;
 		}
-	case Races::Froglok:
+	case Race::Froglok:
 		{
 			pp->skills[EQ::skills::SkillSwimming] = 125;
 			break;
 		}
-	case Races::Gnome:
+	case Race::Gnome:
 		{
 			pp->skills[EQ::skills::SkillTinkering] = 50;
 			break;
 		}
-	case Races::Halfling:
+	case Race::Halfling:
 		{
 			pp->skills[EQ::skills::SkillHide] = 50;
 			pp->skills[EQ::skills::SkillSneak] = 50;
 			break;
 		}
-	case Races::Iksar:
+	case Race::Iksar:
 		{
 			pp->skills[EQ::skills::SkillForage] = 50;
 			pp->skills[EQ::skills::SkillSwimming] = 100;
 			break;
 		}
-	case Races::WoodElf:
+	case Race::WoodElf:
 		{
 			pp->skills[EQ::skills::SkillForage] = 50;
 			pp->skills[EQ::skills::SkillHide] = 50;
 			break;
 		}
-	case Races::VahShir:
+	case Race::VahShir:
 		{
 			pp->skills[EQ::skills::SkillSafeFall] = 50;
 			pp->skills[EQ::skills::SkillSneak] = 50;
@@ -2183,13 +2183,13 @@ void Client::SetRacialLanguages( PlayerProfile_Struct *pp )
 {
 	switch( pp->race )
 	{
-	case Races::Barbarian:
+	case Race::Barbarian:
 		{
 			pp->languages[LANG_COMMON_TONGUE] = 100;
 			pp->languages[LANG_BARBARIAN] = 100;
 			break;
 		}
-	case Races::DarkElf:
+	case Race::DarkElf:
 		{
 			pp->languages[LANG_COMMON_TONGUE] = 100;
 			pp->languages[LANG_DARK_ELVISH] = 100;
@@ -2198,46 +2198,46 @@ void Client::SetRacialLanguages( PlayerProfile_Struct *pp )
 			pp->languages[LANG_ELVISH] = 25;
 			break;
 		}
-	case Races::Dwarf:
+	case Race::Dwarf:
 		{
 			pp->languages[LANG_COMMON_TONGUE] = 100;
 			pp->languages[LANG_DWARVISH] = 100;
 			pp->languages[LANG_GNOMISH] = 25;
 			break;
 		}
-	case Races::Erudite:
+	case Race::Erudite:
 		{
 			pp->languages[LANG_COMMON_TONGUE] = 100;
 			pp->languages[LANG_ERUDIAN] = 100;
 			break;
 		}
-	case Races::Froglok:
+	case Race::Froglok:
 		{
 			pp->languages[LANG_COMMON_TONGUE] = 100;
 			pp->languages[LANG_FROGLOK] = 100;
 			pp->languages[LANG_TROLL] = 25;
 			break;
 		}
-	case Races::Gnome:
+	case Race::Gnome:
 		{
 			pp->languages[LANG_COMMON_TONGUE] = 100;
 			pp->languages[LANG_DWARVISH] = 25;
 			pp->languages[LANG_GNOMISH] = 100;
 			break;
 		}
-	case Races::HalfElf:
+	case Race::HalfElf:
 		{
 			pp->languages[LANG_COMMON_TONGUE] = 100;
 			pp->languages[LANG_ELVISH] = 100;
 			break;
 		}
-	case Races::Halfling:
+	case Race::Halfling:
 		{
 			pp->languages[LANG_COMMON_TONGUE] = 100;
 			pp->languages[LANG_HALFLING] = 100;
 			break;
 		}
-	case Races::HighElf:
+	case Race::HighElf:
 		{
 			pp->languages[LANG_COMMON_TONGUE] = 100;
 			pp->languages[LANG_DARK_ELVISH] = 25;
@@ -2245,39 +2245,39 @@ void Client::SetRacialLanguages( PlayerProfile_Struct *pp )
 			pp->languages[LANG_ELVISH] = 100;
 			break;
 		}
-	case Races::Human:
+	case Race::Human:
 		{
 			pp->languages[LANG_COMMON_TONGUE] = 100;
 			break;
 		}
-	case Races::Iksar:
+	case Race::Iksar:
 		{
 			pp->languages[LANG_COMMON_TONGUE] = RuleI(Character, IksarCommonTongue);
 			pp->languages[LANG_DARK_SPEECH] = 100;
 			pp->languages[LANG_LIZARDMAN] = 100;
 			break;
 		}
-	case Races::Ogre:
+	case Race::Ogre:
 		{
 			pp->languages[LANG_COMMON_TONGUE] = RuleI(Character, OgreCommonTongue);
 			pp->languages[LANG_DARK_SPEECH] = 100;
 			pp->languages[LANG_OGRE] = 100;
 			break;
 		}
-	case Races::Troll:
+	case Race::Troll:
 		{
 			pp->languages[LANG_COMMON_TONGUE] = RuleI(Character, TrollCommonTongue);
 			pp->languages[LANG_DARK_SPEECH] = 100;
 			pp->languages[LANG_TROLL] = 100;
 			break;
 		}
-	case Races::WoodElf:
+	case Race::WoodElf:
 		{
 			pp->languages[LANG_COMMON_TONGUE] = 100;
 			pp->languages[LANG_ELVISH] = 100;
 			break;
 		}
-	case Races::VahShir:
+	case Race::VahShir:
 		{
 			pp->languages[LANG_COMMON_TONGUE] = 100;
 			pp->languages[LANG_COMBINE_TONGUE] = 100;
@@ -2285,7 +2285,7 @@ void Client::SetRacialLanguages( PlayerProfile_Struct *pp )
 			pp->languages[LANG_VAH_SHIR] = 100;
 			break;
 		}
-	case Races::Drakkin:
+	case Race::Drakkin:
 		{
 			pp->languages[LANG_COMMON_TONGUE] = 100;
 			pp->languages[LANG_ELDER_DRAGON] = 100;
