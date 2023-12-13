@@ -19,99 +19,106 @@
 #define CLASSES_CH
 
 #include "../common/types.h"
+#include "../common/rulesys.h"
 #include <string>
+#include <map>
 
-#define NO_CLASS 0
-#define WARRIOR 1
-#define CLERIC 2
-#define PALADIN 3
-#define RANGER 4
-#define SHADOWKNIGHT 5
-#define DRUID 6
-#define MONK 7
-#define BARD 8
-#define ROGUE 9
-#define SHAMAN 10
-#define NECROMANCER 11
-#define WIZARD 12
-#define MAGICIAN 13
-#define ENCHANTER 14
-#define BEASTLORD 15
-#define BERSERKER 16
-#define WARRIORGM 20
-#define CLERICGM 21
-#define PALADINGM 22
-#define RANGERGM 23
-#define SHADOWKNIGHTGM 24
-#define DRUIDGM 25
-#define MONKGM 26
-#define BARDGM 27
-#define ROGUEGM 28
-#define SHAMANGM 29
-#define NECROMANCERGM 30
-#define WIZARDGM 31
-#define MAGICIANGM 32
-#define ENCHANTERGM 33
-#define BEASTLORDGM 34
-#define BERSERKERGM 35
-#define BANKER 40
-#define MERCHANT 41
-#define DISCORD_MERCHANT 59
-#define ADVENTURE_RECRUITER 60
-#define ADVENTURE_MERCHANT 61
-#define LDON_TREASURE 62	// objects you can use /open on first seen in LDONs, seen on Danvi's Corpse in Akheva
-#define TRIBUTE_MASTER 63
-#define GUILD_TRIBUTE_MASTER 64	// not sure
-#define GUILD_BANKER 66
-#define NORRATHS_KEEPERS_MERCHANT 67
-#define DARK_REIGN_MERCHANT 68
-#define FELLOWSHIP_MASTER 69
-#define ALT_CURRENCY_MERCHANT 70
-#define MERCENARY_MASTER 71
+namespace Class {
+	constexpr uint8 None                      = 0;
+	constexpr uint8 Warrior                   = 1;
+	constexpr uint8 Cleric                    = 2;
+	constexpr uint8 Paladin                   = 3;
+	constexpr uint8 Ranger                    = 4;
+	constexpr uint8 ShadowKnight              = 5;
+	constexpr uint8 Druid                     = 6;
+	constexpr uint8 Monk                      = 7;
+	constexpr uint8 Bard                      = 8;
+	constexpr uint8 Rogue                     = 9;
+	constexpr uint8 Shaman                    = 10;
+	constexpr uint8 Necromancer               = 11;
+	constexpr uint8 Wizard                    = 12;
+	constexpr uint8 Magician                  = 13;
+	constexpr uint8 Enchanter                 = 14;
+	constexpr uint8 Beastlord                 = 15;
+	constexpr uint8 Berserker                 = 16;
+	constexpr uint8 WarriorGM                 = 20;
+	constexpr uint8 ClericGM                  = 21;
+	constexpr uint8 PaladinGM                 = 22;
+	constexpr uint8 RangerGM                  = 23;
+	constexpr uint8 ShadowKnightGM            = 24;
+	constexpr uint8 DruidGM                   = 25;
+	constexpr uint8 MonkGM                    = 26;
+	constexpr uint8 BardGM                    = 27;
+	constexpr uint8 RogueGM                   = 28;
+	constexpr uint8 ShamanGM                  = 29;
+	constexpr uint8 NecromancerGM             = 30;
+	constexpr uint8 WizardGM                  = 31;
+	constexpr uint8 MagicianGM                = 32;
+	constexpr uint8 EnchanterGM               = 33;
+	constexpr uint8 BeastlordGM               = 34;
+	constexpr uint8 BerserkerGM               = 35;
+	constexpr uint8 Banker                    = 40;
+	constexpr uint8 Merchant                  = 41;
+	constexpr uint8 DiscordMerchant           = 59;
+	constexpr uint8 AdventureRecruiter        = 60;
+	constexpr uint8 AdventureMerchant         = 61;
+	constexpr uint8 LDoNTreasure              = 62;
+	constexpr uint8 TributeMaster             = 63;
+	constexpr uint8 GuildTributeMaster        = 64;
+	constexpr uint8 GuildBanker               = 66;
+	constexpr uint8 NorrathsKeepersMerchant   = 67;
+	constexpr uint8 DarkReignMerchant         = 68;
+	constexpr uint8 FellowshipMaster          = 69;
+	constexpr uint8 AlternateCurrencyMerchant = 70;
+	constexpr uint8 MercenaryLiaison          = 71;
 
+	constexpr uint8  PLAYER_CLASS_COUNT  = 16;
+	constexpr uint16 ALL_CLASSES_BITMASK = 65535;
+};
 
-// player class values
-#define PLAYER_CLASS_UNKNOWN 0
-#define PLAYER_CLASS_WARRIOR 1
-#define PLAYER_CLASS_CLERIC 2
-#define PLAYER_CLASS_PALADIN 3
-#define PLAYER_CLASS_RANGER 4
-#define PLAYER_CLASS_SHADOWKNIGHT 5
-#define PLAYER_CLASS_DRUID 6
-#define PLAYER_CLASS_MONK 7
-#define PLAYER_CLASS_BARD 8
-#define PLAYER_CLASS_ROGUE 9
-#define PLAYER_CLASS_SHAMAN 10
-#define PLAYER_CLASS_NECROMANCER 11
-#define PLAYER_CLASS_WIZARD 12
-#define PLAYER_CLASS_MAGICIAN 13
-#define PLAYER_CLASS_ENCHANTER 14
-#define PLAYER_CLASS_BEASTLORD 15
-#define PLAYER_CLASS_BERSERKER 16
+static std::map<uint8, uint16> player_class_bitmasks = {
+	{Class::Warrior,      1},
+	{Class::Cleric,       2},
+	{Class::Paladin,      4},
+	{Class::Ranger,       8},
+	{Class::ShadowKnight, 16},
+	{Class::Druid,        32},
+	{Class::Monk,         64},
+	{Class::Bard,         128},
+	{Class::Rogue,        256},
+	{Class::Shaman,       512},
+	{Class::Necromancer,  1024},
+	{Class::Wizard,       2048},
+	{Class::Magician,     4096},
+	{Class::Enchanter,    8192},
+	{Class::Beastlord,    16384},
+	{Class::Berserker,    32768},
+};
 
-#define PLAYER_CLASS_COUNT 16
+static std::string shadow_knight_class_name = (
+	RuleB(World, UseOldShadowKnightClassExport) ?
+	"Shadowknight" :
+	"Shadow Knight"
+);
 
-
-// player class bits
-#define PLAYER_CLASS_UNKNOWN_BIT 0
-#define PLAYER_CLASS_WARRIOR_BIT 1
-#define PLAYER_CLASS_CLERIC_BIT 2
-#define PLAYER_CLASS_PALADIN_BIT 4
-#define PLAYER_CLASS_RANGER_BIT 8
-#define PLAYER_CLASS_SHADOWKNIGHT_BIT 16
-#define PLAYER_CLASS_DRUID_BIT 32
-#define PLAYER_CLASS_MONK_BIT 64
-#define PLAYER_CLASS_BARD_BIT 128
-#define PLAYER_CLASS_ROGUE_BIT 256
-#define PLAYER_CLASS_SHAMAN_BIT 512
-#define PLAYER_CLASS_NECROMANCER_BIT 1024
-#define PLAYER_CLASS_WIZARD_BIT 2048
-#define PLAYER_CLASS_MAGICIAN_BIT 4096
-#define PLAYER_CLASS_ENCHANTER_BIT 8192
-#define PLAYER_CLASS_BEASTLORD_BIT 16384
-#define PLAYER_CLASS_BERSERKER_BIT 32768
-
-#define PLAYER_CLASS_ALL_MASK 65535	// was 65536
+static std::map<uint8, std::string> class_names = {
+	{Class::Warrior,      "Warrior"},
+	{Class::Cleric,       "Cleric"},
+	{Class::Paladin,      "Paladin"},
+	{Class::Ranger,       "Ranger"},
+	{Class::ShadowKnight, shadow_knight_class_name},
+	{Class::Druid,        "Druid"},
+	{Class::Monk,         "Monk"},
+	{Class::Bard,         "Bard"},
+	{Class::Rogue,        "Rogue"},
+	{Class::Shaman,       "Shaman"},
+	{Class::Necromancer,  "Necromancer"},
+	{Class::Wizard,       "Wizard"},
+	{Class::Magician,     "Magician"},
+	{Class::Enchanter,    "Enchanter"},
+	{Class::Beastlord,    "Beastlord"},
+	{Class::Berserker,    "Berserker"},
+};
 
 
 #define ARMOR_TYPE_UNKNOWN 0
@@ -130,8 +137,8 @@ const char* GetClassIDName(uint8 class_id, uint8 level = 0);
 bool IsPlayerClass(uint8 class_id);
 const std::string GetPlayerClassAbbreviation(uint8 class_id);
 
-uint32 GetPlayerClassValue(uint8 class_id);
-uint32 GetPlayerClassBit(uint8 class_id);
+uint8 GetPlayerClassValue(uint8 class_id);
+uint16 GetPlayerClassBit(uint8 class_id);
 
 bool IsFighterClass(uint8 class_id);
 bool IsSpellFighterClass(uint8 class_id);

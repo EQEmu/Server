@@ -132,7 +132,7 @@ namespace EQ
 
 		// Swap items in inventory
 		enum SwapItemFailState : int8 { swapInvalid = -1, swapPass = 0, swapNotAllowed, swapNullData, swapRaceClass, swapDeity, swapLevel };
-		bool SwapItem(int16 source_slot, int16 destination_slot, SwapItemFailState& fail_state, uint16 race_id = RACE_DOUG_0, uint8 class_id = NO_CLASS, uint16 deity_id = deity::DeityType::DeityUnknown, uint8 level = 0);
+		bool SwapItem(int16 source_slot, int16 destination_slot, SwapItemFailState& fail_state, uint16 race_id = RACE_DOUG_0, uint8 class_id = Class::None, uint16 deity_id = deity::DeityType::DeityUnknown, uint8 level = 0);
 
 		// Remove item from inventory
 		bool DeleteItem(int16 slot_id, int16 quantity = 0);

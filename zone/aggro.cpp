@@ -678,7 +678,7 @@ bool Mob::IsAttackAllowed(Mob *target, bool isSpellAttack)
 
 	if(!isSpellAttack)
 	{
-		if(GetClass() == LDON_TREASURE)
+		if(GetClass() == Class::LDoNTreasure)
 		{
 			return false;
 		}
@@ -1070,10 +1070,10 @@ bool Mob::CombatRange(Mob* other, float fixed_size_mod, bool aeRampage, ExtraAtt
 			SetPseudoRoot(false);
 		}
 	}
-	
+
 	if (aeRampage) {
 		float aeramp_size = RuleR(Combat, AERampageMaxDistance);
-		
+
 		LogCombatDetail("AERampage: Default - aeramp_size = [{}] ", aeramp_size);
 
 		if (opts) {
@@ -1093,7 +1093,7 @@ bool Mob::CombatRange(Mob* other, float fixed_size_mod, bool aeRampage, ExtraAtt
 
 		LogCombatDetail("AE Rampage: ramp_range = [{}] -- (size_mod [{}] * aeramp_size [{}])", ramp_range, size_mod, aeramp_size);
 		LogCombatDetail("AE Rampage: _DistNoRoot [{}] <= ramp_range [{}]", _DistNoRoot, ramp_range);
-		
+
 		if (_DistNoRoot <= ramp_range) {
 			LogCombatDetail("AE Rampage: Combat Distance returned [true]");
 			return true;

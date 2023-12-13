@@ -84,8 +84,8 @@ namespace
 
 	enum { EffectIDFirst = 1, EffectIDLast = 12 };
 
-#define VALIDATECLASSID(x) ((x >= WARRIOR && x <= BERSERKER) ? (x) : (0))
-#define CLASSIDTOINDEX(x) ((x >= WARRIOR && x <= BERSERKER) ? (x - 1) : (0))
+#define VALIDATECLASSID(x) ((x >= Class::Warrior && x <= Class::Berserker) ? (x) : (0))
+#define CLASSIDTOINDEX(x) ((x >= Class::Warrior && x <= Class::Berserker) ? (x - 1) : (0))
 #define EFFECTIDTOINDEX(x) ((x >= EffectIDFirst && x <= EffectIDLast) ? (x - 1) : (0))
 #define AILMENTIDTOINDEX(x) ((x >= BCEnum::AT_Blindness && x <= BCEnum::AT_Corruption) ? (x - 1) : (0))
 #define RESISTANCEIDTOINDEX(x) ((x >= BCEnum::RT_Fire && x <= BCEnum::RT_Corruption) ? (x - 1) : (0))
@@ -196,7 +196,7 @@ public:
 
 			uint8 class_levels[16] = {0};
 			bool player_spell = false;
-			for (int class_type = WARRIOR; class_type <= BERSERKER; ++class_type) {
+			for (int class_type = Class::Warrior; class_type <= Class::Berserker; ++class_type) {
 				int class_index = CLASSIDTOINDEX(class_type);
 				if (spells[spell_id].classes[class_index] == 0 ||
 					spells[spell_id].classes[class_index] > HARD_LEVEL_CAP) {
@@ -489,7 +489,7 @@ public:
 			entry_prototype->target_type = target_type;
 
 			bcst_levels& bot_levels = bot_levels_map[entry_prototype->BCST()];
-			for (int class_type = WARRIOR; class_type <= BERSERKER; ++class_type) {
+			for (int class_type = Class::Warrior; class_type <= Class::Berserker; ++class_type) {
 				int class_index = CLASSIDTOINDEX(class_type);
 				if (!class_levels[class_index])
 					continue;
@@ -1119,7 +1119,7 @@ private:
 	}
 
 	static void helper_bots_string(BCEnum::SpType type_index, bcst_levels& bot_levels) {
-		for (int i = WARRIOR; i <= BERSERKER; ++i)
+		for (int i = Class::Warrior; i <= Class::Berserker; ++i)
 			required_bots_map_by_class[type_index][i] = "Unavailable...";
 
 		if (bot_levels.empty()) {
@@ -2377,7 +2377,7 @@ namespace ActionableBots
 		else if (!ab_type_arg.compare("healrotationtargets")) {
 			ab_type = ABT_HealRotationTargets;
 		}
-		else if (!ab_type_arg.compare("byclass")) { 
+		else if (!ab_type_arg.compare("byclass")) {
 			ab_type = ABT_Class;
 		}
 		else if (!ab_type_arg.compare("byrace")) {
@@ -2730,9 +2730,9 @@ namespace ActionableBots
 
 	static void Filter_ByHighestPickLock(Client* bot_owner, std::list<Bot*>& sbl, float& pick_lock_value) {
 		sbl.remove_if([bot_owner](Bot* l) { return (!MyBots::IsMyBot(bot_owner, l)); });
-		sbl.remove_if([bot_owner](const Bot* l) { return (l->GetClass() != ROGUE && l->GetClass() != BARD); });
-		sbl.remove_if([bot_owner](const Bot* l) { return (l->GetClass() == ROGUE && l->GetLevel() < 5); });
-		sbl.remove_if([bot_owner](const Bot* l) { return (l->GetClass() == BARD && l->GetLevel() < 40); });
+		sbl.remove_if([bot_owner](const Bot* l) { return (l->GetClass() != Class::Rogue && l->GetClass() != Class::Bard); });
+		sbl.remove_if([bot_owner](const Bot* l) { return (l->GetClass() == Class::Rogue && l->GetLevel() < 5); });
+		sbl.remove_if([bot_owner](const Bot* l) { return (l->GetClass() == Class::Bard && l->GetLevel() < 40); });
 
 		ActionableBots::Filter_ByHighestSkill(bot_owner, sbl, EQ::skills::SkillPickLock, pick_lock_value);
 	}
@@ -2856,7 +2856,7 @@ void bot_command_apply_poison(Client *c, const Seperator *sep)
 		t &&
 		t->IsBot() &&
 		t->CastToBot()->GetBotOwnerCharacterID() == c->CharacterID() &&
-		t->GetClass() == ROGUE
+		t->GetClass() == Class::Rogue
 	) {
 		my_rogue_bot = t->CastToBot();
 	}
@@ -2964,7 +2964,7 @@ void bot_command_apply_potion(Client* c, const Seperator* sep)
 
 	if (potion_data->ItemType == EQ::item::ItemTypePotion && potion_data->Click.Effect > 0) {
 
-		if (RuleB(Bots, RestrictApplyPotionToRogue) && potion_data->Classes != PLAYER_CLASS_ROGUE_BIT) {
+		if (RuleB(Bots, RestrictApplyPotionToRogue) && potion_data->Classes != player_class_bitmasks[Class::Rogue]) {
 
 			c->Message(Chat::White, "This command is restricted to rogue poison potions only!");
 			return;
@@ -3353,8 +3353,8 @@ void bot_command_depart(Client *c, const Seperator *sep)
 
 	std::string destination = sep->arg[1];
 	if (!destination.compare("list")) {
-		Bot* my_druid_bot = ActionableBots::AsGroupMember_ByClass(c, c, DRUID);
-		Bot* my_wizard_bot = ActionableBots::AsGroupMember_ByClass(c, c, WIZARD);
+		Bot* my_druid_bot = ActionableBots::AsGroupMember_ByClass(c, c, Class::Druid);
+		Bot* my_wizard_bot = ActionableBots::AsGroupMember_ByClass(c, c, Class::Wizard);
 		helper_command_depart_list(c, my_druid_bot, my_wizard_bot, local_list, single);
 		return;
 	}
@@ -4647,17 +4647,17 @@ void bot_command_pull(Client *c, const Seperator *sep)
 		}
 
 		switch (bot_iter->GetClass()) {
-		case ROGUE:
-		case MONK:
-		case BARD:
-		case RANGER:
+		case Class::Rogue:
+		case Class::Monk:
+		case Class::Bard:
+		case Class::Ranger:
 			bot_puller = bot_iter;
 			break;
-		case WARRIOR:
-		case SHADOWKNIGHT:
-		case PALADIN:
-		case BERSERKER:
-		case BEASTLORD:
+		case Class::Warrior:
+		case Class::ShadowKnight:
+		case Class::Paladin:
+		case Class::Berserker:
+		case Class::Beastlord:
 			if (!bot_puller) {
 
 				bot_puller = bot_iter;
@@ -4665,22 +4665,22 @@ void bot_command_pull(Client *c, const Seperator *sep)
 			}
 
 			switch (bot_puller->GetClass()) {
-			case DRUID:
-			case SHAMAN:
-			case CLERIC:
-			case WIZARD:
-			case NECROMANCER:
-			case MAGICIAN:
-			case ENCHANTER:
+			case Class::Druid:
+			case Class::Shaman:
+			case Class::Cleric:
+			case Class::Wizard:
+			case Class::Necromancer:
+			case Class::Magician:
+			case Class::Enchanter:
 				bot_puller = bot_iter;
 			default:
 				continue;
 			}
 
 			continue;
-		case DRUID:
-		case SHAMAN:
-		case CLERIC:
+		case Class::Druid:
+		case Class::Shaman:
+		case Class::Cleric:
 			if (!bot_puller) {
 
 				bot_puller = bot_iter;
@@ -4688,20 +4688,20 @@ void bot_command_pull(Client *c, const Seperator *sep)
 			}
 
 			switch (bot_puller->GetClass()) {
-			case WIZARD:
-			case NECROMANCER:
-			case MAGICIAN:
-			case ENCHANTER:
+			case Class::Wizard:
+			case Class::Necromancer:
+			case Class::Magician:
+			case Class::Enchanter:
 				bot_puller = bot_iter;
 			default:
 				continue;
 			}
 
 			continue;
-		case WIZARD:
-		case NECROMANCER:
-		case MAGICIAN:
-		case ENCHANTER:
+		case Class::Wizard:
+		case Class::Necromancer:
+		case Class::Magician:
+		case Class::Enchanter:
 			if (!bot_puller) {
 				bot_puller = bot_iter;
 			}
@@ -5210,15 +5210,15 @@ void bot_command_track(Client *c, const Seperator *sep)
 	std::list<Bot*> sbl;
 	MyBots::PopulateSBL_BySpawnedBots(c, sbl);
 
-	uint16 class_mask = (PLAYER_CLASS_RANGER_BIT | PLAYER_CLASS_DRUID_BIT | PLAYER_CLASS_BARD_BIT);
+	uint16 class_mask = (player_class_bitmasks[Class::Ranger] | player_class_bitmasks[Class::Druid] | player_class_bitmasks[Class::Bard]);
 	ActionableBots::Filter_ByClasses(c, sbl, class_mask);
 
-	Bot* my_bot = ActionableBots::AsSpawned_ByMinLevelAndClass(c, sbl, 1, RANGER);
+	Bot* my_bot = ActionableBots::AsSpawned_ByMinLevelAndClass(c, sbl, 1, Class::Ranger);
 	if (tracking_scope.empty()) {
 		if (!my_bot)
-			my_bot = ActionableBots::AsSpawned_ByMinLevelAndClass(c, sbl, 20, DRUID);
+			my_bot = ActionableBots::AsSpawned_ByMinLevelAndClass(c, sbl, 20, Class::Druid);
 		if (!my_bot)
-			my_bot = ActionableBots::AsSpawned_ByMinLevelAndClass(c, sbl, 35, BARD);
+			my_bot = ActionableBots::AsSpawned_ByMinLevelAndClass(c, sbl, 35, Class::Bard);
 	}
 	if (!my_bot) {
 		c->Message(Chat::White, "No bots are capable of performing this action");
@@ -5229,7 +5229,7 @@ void bot_command_track(Client *c, const Seperator *sep)
 	bool track_named = false;
 	std::string tracking_msg;
 	switch (my_bot->GetClass()) {
-	case RANGER:
+	case Class::Ranger:
 		if (!tracking_scope.compare("local")) {
 			base_distance = 30;
 			tracking_msg = "Local tracking...";
@@ -5244,11 +5244,11 @@ void bot_command_track(Client *c, const Seperator *sep)
 			tracking_msg = "Advanced tracking...";
 		}
 		break;
-	case DRUID:
+	case Class::Druid:
 		base_distance = 30;
 		tracking_msg = "Local tracking...";
 		break;
-	case BARD:
+	case Class::Bard:
 		base_distance = 20;
 		tracking_msg = "Near tracking...";
 		break;
@@ -6612,7 +6612,7 @@ void bot_subcommand_bot_list(Client *c, const Seperator *sep)
 			).c_str()
 		);
 
-		for (uint8 class_id = WARRIOR; class_id <= BERSERKER; class_id++) {
+		for (uint8 class_id = Class::Warrior; class_id <= Class::Berserker; class_id++) {
 			auto class_creation_limit = c->GetBotCreationLimit(class_id);
 
 			if (class_creation_limit != overall_bot_creation_limit) {
@@ -6865,7 +6865,7 @@ void bot_subcommand_bot_spawn(Client *c, const Seperator *sep)
 	std::string bot_name = sep->arg[1];
 
 	uint32 bot_id = 0;
-	uint8 bot_class = NO_CLASS;
+	uint8 bot_class = Class::None;
 	if (!database.botdb.LoadBotID(c->CharacterID(), bot_name, bot_id, bot_class)) {
 		c->Message(
 			Chat::White,
@@ -6972,22 +6972,22 @@ void bot_subcommand_bot_spawn(Client *c, const Seperator *sep)
 
 	static std::string bot_spawn_message[17] = {
 		"I am ready to fight!", // DEFAULT
-		"A solid weapon is my ally!", // WARRIOR
-		"The pious shall never die!", // CLERIC
-		"I am the symbol of Light!", // PALADIN
-		"There are enemies near!", // RANGER
-		"Out of the shadows, I step!", // SHADOWKNIGHT
-		"Nature's fury shall be wrought!", // DRUID
-		"Your punishment will be my fist!", // MONK
+		"A solid weapon is my ally!", // Class::Warrior
+		"The pious shall never die!", // Class::Cleric
+		"I am the symbol of Light!", // Class::Paladin
+		"There are enemies near!", // Class::Ranger
+		"Out of the shadows, I step!", // Class::ShadowKnight
+		"Nature's fury shall be wrought!", // Class::Druid
+		"Your punishment will be my fist!", // Class::Monk
 		"Music is the overture of battle! ", // BARD
-		"Daggers into the backs of my enemies!", // ROGUE
-		"More bones to grind!", // SHAMAN
-		"Death is only the beginning!", // NECROMANCER
-		"I am the harbinger of demise!", // WIZARD
-		"The elements are at my command!", // MAGICIAN
-		"No being can resist my charm!", // ENCHANTER
-		"Battles are won by hand and paw!", // BEASTLORD
-		"My bloodthirst shall not be quenched!" // BERSERKER
+		"Daggers into the backs of my enemies!", // Class::Rogue
+		"More bones to grind!", // Class::Shaman
+		"Death is only the beginning!", // Class::Necromancer
+		"I am the harbinger of demise!", // Class::Wizard
+		"The elements are at my command!", // Class::Magician
+		"No being can resist my charm!", // Class::Enchanter
+		"Battles are won by hand and paw!", // Class::Beastlord
+		"My bloodthirst shall not be quenched!" // Class::Berserker
 	};
 
 	uint8 message_index = 0;
@@ -7257,7 +7257,7 @@ void bot_subcommand_bot_toggle_archer(Client *c, const Seperator *sep)
 		}
 		bot_iter->ChangeBotArcherWeapons(bot_iter->IsBotArcher());
 
-		if (bot_iter->GetClass() == RANGER && bot_iter->GetLevel() >= 61) {
+		if (bot_iter->GetClass() == Class::Ranger && bot_iter->GetLevel() >= 61) {
 			bot_iter->SetRangerAutoWeaponSelect(bot_iter->IsBotArcher());
 		}
 	}
@@ -7467,7 +7467,7 @@ void bot_subcommand_circle(Client *c, const Seperator *sep)
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
 		c->Message(Chat::White, "usage: %s [list | destination] ([option: single])", sep->arg[0]);
-		helper_send_usage_required_bots(c, BCEnum::SpT_Depart, DRUID);
+		helper_send_usage_required_bots(c, BCEnum::SpT_Depart, Class::Druid);
 		return;
 	}
 
@@ -7478,7 +7478,7 @@ void bot_subcommand_circle(Client *c, const Seperator *sep)
 
 	std::string destination = sep->arg[1];
 	if (!destination.compare("list")) {
-		auto my_druid_bot = ActionableBots::AsGroupMember_ByClass(c, c, DRUID);
+		auto my_druid_bot = ActionableBots::AsGroupMember_ByClass(c, c, Class::Druid);
 		helper_command_depart_list(c, my_druid_bot, nullptr, local_list, single);
 		return;
 	}
@@ -7497,7 +7497,7 @@ void bot_subcommand_circle(Client *c, const Seperator *sep)
 		auto local_entry = list_iter->SafeCastToDepart();
 		if (helper_spell_check_fail(local_entry))
 			continue;
-		if (local_entry->caster_class != DRUID)
+		if (local_entry->caster_class != Class::Druid)
 			continue;
 		if (local_entry->single != single)
 			continue;
@@ -8988,7 +8988,7 @@ void bot_subcommand_pet_remove(Client *c, const Seperator *sep)
 	if (ActionableBots::PopulateSBL(c, sep->arg[1], sbl, ab_mask, sep->arg[2]) == ActionableBots::ABT_None)
 		return;
 
-	uint16 class_mask = (PLAYER_CLASS_DRUID_BIT | PLAYER_CLASS_NECROMANCER_BIT | PLAYER_CLASS_ENCHANTER_BIT);
+	uint16 class_mask = (player_class_bitmasks[Class::Druid] | player_class_bitmasks[Class::Necromancer] | player_class_bitmasks[Class::Enchanter]);
 	ActionableBots::Filter_ByClasses(c, sbl, class_mask);
 	if (sbl.empty()) {
 		c->Message(Chat::White, "You have no spawned bots capable of charming");
@@ -9068,7 +9068,7 @@ void bot_subcommand_pet_set_type(Client *c, const Seperator *sep)
 	if (ActionableBots::PopulateSBL(c, sep->arg[2], sbl, ab_mask, sep->arg[3]) == ActionableBots::ABT_None)
 		return;
 
-	uint16 class_mask = PLAYER_CLASS_MAGICIAN_BIT;
+	uint16 class_mask = player_class_bitmasks[Class::Magician];
 	ActionableBots::Filter_ByClasses(c, sbl, class_mask);
 	if (sbl.empty()) {
 		c->Message(Chat::White, "You have no spawned Magician bots");
@@ -9103,7 +9103,7 @@ void bot_subcommand_portal(Client *c, const Seperator *sep)
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
 		c->Message(Chat::White, "usage: %s [list | destination] ([option: single])", sep->arg[0]);
-		helper_send_usage_required_bots(c, BCEnum::SpT_Depart, WIZARD);
+		helper_send_usage_required_bots(c, BCEnum::SpT_Depart, Class::Wizard);
 		return;
 	}
 
@@ -9114,7 +9114,7 @@ void bot_subcommand_portal(Client *c, const Seperator *sep)
 
 	std::string destination = sep->arg[1];
 	if (!destination.compare("list")) {
-		auto my_wizard_bot = ActionableBots::AsGroupMember_ByClass(c, c, WIZARD);
+		auto my_wizard_bot = ActionableBots::AsGroupMember_ByClass(c, c, Class::Wizard);
 		helper_command_depart_list(c, nullptr, my_wizard_bot, local_list, single);
 		return;
 	}
@@ -9133,7 +9133,7 @@ void bot_subcommand_portal(Client *c, const Seperator *sep)
 		auto local_entry = list_iter->SafeCastToDepart();
 		if (helper_spell_check_fail(local_entry))
 			continue;
-		if (local_entry->caster_class != WIZARD)
+		if (local_entry->caster_class != Class::Wizard)
 			continue;
 		if (local_entry->single != single)
 			continue;
@@ -9427,26 +9427,26 @@ void helper_bot_out_of_combat(Client *bot_owner, Bot *my_bot)
 		return;
 
 	switch (my_bot->GetClass()) {
-	case WARRIOR:
-	case CLERIC:
-	case PALADIN:
-	case RANGER:
-	case SHADOWKNIGHT:
-	case DRUID:
-	case MONK:
+	case Class::Warrior:
+	case Class::Cleric:
+	case Class::Paladin:
+	case Class::Ranger:
+	case Class::ShadowKnight:
+	case Class::Druid:
+	case Class::Monk:
 		bot_owner->Message(Chat::White, "%s has no out-of-combat behavior defined", my_bot->GetCleanName());
 		break;
-	case BARD:
+	case Class::Bard:
 		bot_owner->Message(Chat::White, "%s will %s use out-of-combat behavior for bard songs", my_bot->GetCleanName(), ((my_bot->GetAltOutOfCombatBehavior()) ? ("now") : ("no longer")));
 		break;
-	case ROGUE:
-	case SHAMAN:
-	case NECROMANCER:
-	case WIZARD:
-	case MAGICIAN:
-	case ENCHANTER:
-	case BEASTLORD:
-	case BERSERKER:
+	case Class::Rogue:
+	case Class::Shaman:
+	case Class::Necromancer:
+	case Class::Wizard:
+	case Class::Magician:
+	case Class::Enchanter:
+	case Class::Beastlord:
+	case Class::Berserker:
 		bot_owner->Message(Chat::White, "%s has no out-of-combat behavior defined", my_bot->GetCleanName());
 		break;
 	default:
@@ -10457,8 +10457,8 @@ void bot_command_pickpocket(Client *c, const Seperator *sep)
 	MyBots::PopulateSBL_BySpawnedBots(c, sbl);
 
 	// Check for capable rogue
-	ActionableBots::Filter_ByClasses(c, sbl, PLAYER_CLASS_ROGUE_BIT);
-	Bot *my_bot = ActionableBots::AsSpawned_ByMinLevelAndClass(c, sbl, 7, ROGUE);
+	ActionableBots::Filter_ByClasses(c, sbl, player_class_bitmasks[Class::Rogue]);
+	Bot *my_bot = ActionableBots::AsSpawned_ByMinLevelAndClass(c, sbl, 7, Class::Rogue);
 	if (!my_bot) {
 		c->Message(Chat::White, "No bots are capable of performing this action");
 		return;

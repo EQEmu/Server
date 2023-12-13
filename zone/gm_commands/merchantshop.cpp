@@ -7,12 +7,12 @@ void command_merchantshop(Client *c, const Seperator *sep)
 		!m ||
 		!m->IsNPC() ||
 		(
-			m->GetClass() != MERCHANT &&
-			m->GetClass() != DISCORD_MERCHANT &&
-			m->GetClass() != ADVENTURE_MERCHANT &&
-			m->GetClass() != NORRATHS_KEEPERS_MERCHANT &&
-			m->GetClass() != DARK_REIGN_MERCHANT &&
-			m->GetClass() != ALT_CURRENCY_MERCHANT
+			m->GetClass() != Class::Merchant &&
+			m->GetClass() != Class::DiscordMerchant &&
+			m->GetClass() != Class::AdventureMerchant &&
+			m->GetClass() != Class::NorrathsKeepersMerchant &&
+			m->GetClass() != Class::DarkReignMerchant &&
+			m->GetClass() != Class::AlternateCurrencyMerchant
 		)
 	) {
 		c->Message(Chat::White, "You must target a merchant.");

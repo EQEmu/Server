@@ -345,7 +345,7 @@ uint32 Mob::GetClassLevelFactor()
 	uint32 multiplier = 0;
 	uint8  mlevel     = GetLevel();
 	switch (GetClass()) {
-		case WARRIOR: {
+		case Class::Warrior: {
 			if (mlevel < 20) {
 				multiplier = 220;
 			}
@@ -372,9 +372,9 @@ uint32 Mob::GetClassLevelFactor()
 			}
 			break;
 		}
-		case DRUID:
-		case CLERIC:
-		case SHAMAN: {
+		case Class::Druid:
+		case Class::Cleric:
+		case Class::Shaman: {
 			if (mlevel < 70) {
 				multiplier = 150;
 			}
@@ -383,9 +383,9 @@ uint32 Mob::GetClassLevelFactor()
 			}
 			break;
 		}
-		case BERSERKER:
-		case PALADIN:
-		case SHADOWKNIGHT: {
+		case Class::Berserker:
+		case Class::Paladin:
+		case Class::ShadowKnight: {
 			if (mlevel < 35) {
 				multiplier = 210;
 			}
@@ -409,10 +409,10 @@ uint32 Mob::GetClassLevelFactor()
 			}
 			break;
 		}
-		case MONK:
-		case BARD:
-		case ROGUE:
-		case BEASTLORD: {
+		case Class::Monk:
+		case Class::Bard:
+		case Class::Rogue:
+		case Class::Beastlord: {
 			if (mlevel < 51) {
 				multiplier = 180;
 			}
@@ -427,7 +427,7 @@ uint32 Mob::GetClassLevelFactor()
 			}
 			break;
 		}
-		case RANGER: {
+		case Class::Ranger: {
 			if (mlevel < 58) {
 				multiplier = 200;
 			}
@@ -439,10 +439,10 @@ uint32 Mob::GetClassLevelFactor()
 			}
 			break;
 		}
-		case MAGICIAN:
-		case WIZARD:
-		case NECROMANCER:
-		case ENCHANTER: {
+		case Class::Magician:
+		case Class::Wizard:
+		case Class::Necromancer:
+		case Class::Enchanter: {
 			if (mlevel < 70) {
 				multiplier = 120;
 			}
@@ -677,7 +677,7 @@ int64 Client::CalcManaRegen(bool bCombat)
 		if (IsSitting() || CanMedOnHorse()) {
 			// kind of weird to do it here w/e
 			// client does some base medding regen for shrouds here
-			if (GetClass() != BARD) {
+			if (GetClass() != Class::Bard) {
 				auto skill = GetSkill(EQ::skills::SkillMeditate);
 				if (skill > 0) {
 					regen++;
@@ -1077,7 +1077,7 @@ int32	Client::CalcMR()
 			MR = 20;
 	}
 	MR += itembonuses.MR + spellbonuses.MR + aabonuses.MR;
-	if (GetClass() == WARRIOR || GetClass() == BERSERKER) {
+	if (GetClass() == Class::Warrior || GetClass() == Class::Berserker) {
 		MR += GetLevel() / 2;
 	}
 	if (MR < 1) {
@@ -1151,14 +1151,14 @@ int32	Client::CalcFR()
 			FR = 20;
 	}
 	int c = GetClass();
-	if (c == RANGER) {
+	if (c == Class::Ranger) {
 		FR += 4;
 		int l = GetLevel();
 		if (l > 49) {
 			FR += l - 49;
 		}
 	}
-	if (c == MONK) {
+	if (c == Class::Monk) {
 		FR += 8;
 		int l = GetLevel();
 		if (l > 49) {
@@ -1238,19 +1238,19 @@ int32	Client::CalcDR()
 	}
 	int c = GetClass();
 	// the monk one is part of base resist
-	if (c == MONK) {
+	if (c == Class::Monk) {
 		int l = GetLevel();
 		if (l > 50)
 			DR += l - 50;
 	}
-	if (c == PALADIN) {
+	if (c == Class::Paladin) {
 		DR += 8;
 		int l = GetLevel();
 		if (l > 49) {
 			DR += l - 49;
 		}
 	}
-	else if (c == SHADOWKNIGHT || c == BEASTLORD) {
+	else if (c == Class::ShadowKnight || c == Class::Beastlord) {
 		DR += 4;
 		int l = GetLevel();
 		if (l > 49) {
@@ -1330,19 +1330,19 @@ int32	Client::CalcPR()
 	}
 	int c = GetClass();
 	// this monk bonus is part of the base
-	if (c == MONK) {
+	if (c == Class::Monk) {
 		int l = GetLevel();
 		if (l > 50)
 			PR += l - 50;
 	}
-	if (c == ROGUE) {
+	if (c == Class::Rogue) {
 		PR += 8;
 		int l = GetLevel();
 		if (l > 49) {
 			PR += l - 49;
 		}
 	}
-	else if (c == SHADOWKNIGHT) {
+	else if (c == Class::ShadowKnight) {
 		PR += 4;
 		int l = GetLevel();
 		if (l > 49) {
@@ -1421,7 +1421,7 @@ int32	Client::CalcCR()
 			CR = 25;
 	}
 	int c = GetClass();
-	if (c == RANGER || c == BEASTLORD) {
+	if (c == Class::Ranger || c == Class::Beastlord) {
 		CR += 4;
 		int l = GetLevel();
 		if (l > 49) {
@@ -1455,7 +1455,7 @@ int32 Client::CalcATK()
 
 uint32 Mob::GetInstrumentMod(uint16 spell_id)
 {
-	if (GetClass() != BARD) {
+	if (GetClass() != Class::Bard) {
 		//Other classes can get a base effects mod using SPA 413
 		if (HasBaseEffectFocus()) {
 			return (10 + (GetFocusEffect(focusFcBaseEffects, spell_id) / 10));//TODO: change action->instrument mod to float to support < 10% focus values
@@ -1689,7 +1689,7 @@ int64 Client::CalcEnduranceRegen(bool bCombat)
 
 	int weight_limit = GetSTR();
 	auto level = GetLevel();
-	if (GetClass() == MONK) {
+	if (GetClass() == Class::Monk) {
 		if (level > 99)
 			weight_limit = 58;
 		else if (level > 94)

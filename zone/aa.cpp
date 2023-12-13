@@ -373,72 +373,72 @@ void Mob::WakeTheDead(uint16 spell_id, Corpse *corpse_to_use, Mob *tar, uint32 d
 	//some basic combat mods here too since it's convienent
 	switch (corpse_to_use->class_)
 	{
-	case CLERIC:
+	case Class::Cleric:
 		made_npc->npc_spells_id = 1;
 		break;
-	case WIZARD:
+	case Class::Wizard:
 		made_npc->npc_spells_id = 2;
 		break;
-	case NECROMANCER:
+	case Class::Necromancer:
 		made_npc->npc_spells_id = 3;
 		break;
-	case MAGICIAN:
+	case Class::Magician:
 		made_npc->npc_spells_id = 4;
 		break;
-	case ENCHANTER:
+	case Class::Enchanter:
 		made_npc->npc_spells_id = 5;
 		break;
-	case SHAMAN:
+	case Class::Shaman:
 		made_npc->npc_spells_id = 6;
 		break;
-	case DRUID:
+	case Class::Druid:
 		made_npc->npc_spells_id = 7;
 		break;
-	case PALADIN:
+	case Class::Paladin:
 		//SPECATK_TRIPLE
 		strcpy(made_npc->special_abilities, "6,1");
 		made_npc->current_hp = made_npc->current_hp * 150 / 100;
 		made_npc->max_hp = made_npc->max_hp * 150 / 100;
 		made_npc->npc_spells_id = 8;
 		break;
-	case SHADOWKNIGHT:
+	case Class::ShadowKnight:
 		strcpy(made_npc->special_abilities, "6,1");
 		made_npc->current_hp = made_npc->current_hp * 150 / 100;
 		made_npc->max_hp = made_npc->max_hp * 150 / 100;
 		made_npc->npc_spells_id = 9;
 		break;
-	case RANGER:
+	case Class::Ranger:
 		strcpy(made_npc->special_abilities, "7,1");
 		made_npc->current_hp = made_npc->current_hp * 135 / 100;
 		made_npc->max_hp = made_npc->max_hp * 135 / 100;
 		made_npc->npc_spells_id = 10;
 		break;
-	case BARD:
+	case Class::Bard:
 		strcpy(made_npc->special_abilities, "6,1");
 		made_npc->current_hp = made_npc->current_hp * 110 / 100;
 		made_npc->max_hp = made_npc->max_hp * 110 / 100;
 		made_npc->npc_spells_id = 11;
 		break;
-	case BEASTLORD:
+	case Class::Beastlord:
 		strcpy(made_npc->special_abilities, "7,1");
 		made_npc->current_hp = made_npc->current_hp * 110 / 100;
 		made_npc->max_hp = made_npc->max_hp * 110 / 100;
 		made_npc->npc_spells_id = 12;
 		break;
-	case ROGUE:
+	case Class::Rogue:
 		strcpy(made_npc->special_abilities, "7,1");
 		made_npc->max_dmg = made_npc->max_dmg * 150 / 100;
 		made_npc->current_hp = made_npc->current_hp * 110 / 100;
 		made_npc->max_hp = made_npc->max_hp * 110 / 100;
 		break;
-	case MONK:
+	case Class::Monk:
 		strcpy(made_npc->special_abilities, "7,1");
 		made_npc->max_dmg = made_npc->max_dmg * 150 / 100;
 		made_npc->current_hp = made_npc->current_hp * 135 / 100;
 		made_npc->max_hp = made_npc->max_hp * 135 / 100;
 		break;
-	case WARRIOR:
-	case BERSERKER:
+	case Class::Warrior:
+	case Class::Berserker:
 		strcpy(made_npc->special_abilities, "7,1");
 		made_npc->max_dmg = made_npc->max_dmg * 150 / 100;
 		made_npc->current_hp = made_npc->current_hp * 175 / 100;
@@ -1354,7 +1354,7 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 	}
 	else {
 		// Bards can cast instant cast AAs while they are casting or channeling item cast.
-		if (GetClass() == BARD && IsCasting() && spells[rank->spell].cast_time == 0) {
+		if (GetClass() == Class::Bard && IsCasting() && spells[rank->spell].cast_time == 0) {
 			if (!DoCastingChecksOnCaster(rank->spell, EQ::spells::CastingSlot::AltAbility)) {
 				return;
 			}

@@ -1808,7 +1808,7 @@ bool SharedDatabase::LoadSkillCaps(const std::string &prefix) {
 }
 
 void SharedDatabase::LoadSkillCaps(void *data) {
-	const uint32 class_count = PLAYER_CLASS_COUNT;
+	const uint32 class_count = Class::PLAYER_CLASS_COUNT;
 	const uint32 skill_count = EQ::skills::HIGHEST_SKILL + 1;
 	const uint32 level_count = HARD_LEVEL_CAP + 1;
 	uint16 *skill_caps_table = static_cast<uint16*>(data);
@@ -1848,7 +1848,7 @@ uint16 SharedDatabase::GetSkillCap(uint8 Class_, EQ::skills::SkillType Skill, ui
 		SkillMaxLevel = RuleI(Character, MaxLevel);
 	}
 
-	const uint32 class_count = PLAYER_CLASS_COUNT;
+	const uint32 class_count = Class::PLAYER_CLASS_COUNT;
 	const uint32 skill_count = EQ::skills::HIGHEST_SKILL + 1;
 	const uint32 level_count = HARD_LEVEL_CAP + 1;
 	if(Class_ > class_count || static_cast<uint32>(Skill) > skill_count || Level > level_count) {
@@ -1878,7 +1878,7 @@ uint8 SharedDatabase::GetTrainLevel(uint8 Class_, EQ::skills::SkillType Skill, u
 		SkillMaxLevel = RuleI(Character, MaxLevel);
 	}
 
-	const uint32 class_count = PLAYER_CLASS_COUNT;
+	const uint32 class_count = Class::PLAYER_CLASS_COUNT;
 	const uint32 skill_count = EQ::skills::HIGHEST_SKILL + 1;
 	const uint32 level_count = HARD_LEVEL_CAP + 1;
 	if(Class_ > class_count || static_cast<uint32>(Skill) > skill_count || Level > level_count) {
@@ -2061,7 +2061,7 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 		sp[tempid].environment_type=Strings::ToInt(row[102]);
 		sp[tempid].time_of_day=Strings::ToInt(row[103]);
 
-		for(y=0; y < PLAYER_CLASS_COUNT;y++)
+		for(y=0; y < Class::PLAYER_CLASS_COUNT;y++)
 			sp[tempid].classes[y]=Strings::ToInt(row[104+y]);
 
 		sp[tempid].casting_animation=Strings::ToInt(row[120]);

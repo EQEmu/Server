@@ -1369,7 +1369,7 @@ struct SPDat_Spell_Struct
 /* 101 */	int8 zone_type; // 01=Outdoors, 02=dungeons, ff=Any -- ZONETYPE
 /* 102 */	int8 environment_type; // -- ENVIRONMENTTYPE
 /* 103 */	int8 time_of_day; // -- TIMEOFDAY
-/* 104 */	uint8 classes[PLAYER_CLASS_COUNT]; // Classes, and their min levels -- WARRIORMIN ... BERSERKERMIN
+/* 104 */	uint8 classes[Class::PLAYER_CLASS_COUNT]; // Classes, and their min levels -- WARRIORMIN ... BERSERKERMIN
 /* 120 */	uint8 casting_animation; // -- CASTINGANIM
 /* 121 */	//uint8 TargetAnim; // -- TARGETANIM
 /* 122 */	//uint32 TravelType; // -- TRAVELTYPE

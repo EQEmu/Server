@@ -2045,14 +2045,14 @@ public:
 	bool GetBotPrecombat() { return m_bot_precombat; }
 	void SetBotPrecombat(bool flag = true) { m_bot_precombat = flag; }
 
-	int GetBotRequiredLevel(uint8 class_id = NO_CLASS);
-	uint32 GetBotCreationLimit(uint8 class_id = NO_CLASS);
-	int GetBotSpawnLimit(uint8 class_id = NO_CLASS);
-	void SetBotCreationLimit(uint32 new_creation_limit, uint8 class_id = NO_CLASS);
-	void SetBotRequiredLevel(int new_required_level, uint8 class_id = NO_CLASS);
-	void SetBotSpawnLimit(int new_spawn_limit, uint8 class_id = NO_CLASS);
+	int GetBotRequiredLevel(uint8 class_id = Class::None);
+	uint32 GetBotCreationLimit(uint8 class_id = Class::None);
+	int GetBotSpawnLimit(uint8 class_id = Class::None);
+	void SetBotCreationLimit(uint32 new_creation_limit, uint8 class_id = Class::None);
+	void SetBotRequiredLevel(int new_required_level, uint8 class_id = Class::None);
+	void SetBotSpawnLimit(int new_spawn_limit, uint8 class_id = Class::None);
 
-	void CampAllBots(uint8 class_id = NO_CLASS);
+	void CampAllBots(uint8 class_id = Class::None);
 	void SpawnRaidBotsOnConnect(Raid* raid);
 
 private:

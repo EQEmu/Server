@@ -60,7 +60,7 @@ Merc::Merc(const NPCType* d, float x, float y, float z, float heading)
 	SetStance(EQ::constants::stanceBalanced);
 	rest_timer.Disable();
 
-	if (GetClass() == ROGUE)
+	if (GetClass() == Class::Rogue)
 		evade_timer.Start();
 
 	int r;
@@ -1090,7 +1090,7 @@ void Merc::AI_Process() {
 
 		float meleeDistance = GetMaxMeleeRangeToTarget(GetTarget());
 
-		if(GetClass() == SHADOWKNIGHT || GetClass() == PALADIN || GetClass() == WARRIOR) {
+		if(GetClass() == Class::ShadowKnight || GetClass() == Class::Paladin || GetClass() == Class::Warrior) {
 			meleeDistance = meleeDistance * .30;
 		}
 		else {
@@ -1118,7 +1118,7 @@ void Merc::AI_Process() {
 
 			if(AI_movement_timer->Check()) {
 				if (!IsMoving()) {
-					if (GetClass() == ROGUE) {
+					if (GetClass() == Class::Rogue) {
 						if (HasTargetReflection() && !GetTarget()->IsFeared() && !GetTarget()->IsStunned()) {
 							// Hate redux actions
 							if (evade_timer.Check(false)) {
@@ -1161,7 +1161,7 @@ void Merc::AI_Process() {
 							}
 						}
 					}
-					else if (GetClass() != ROGUE && (DistanceSquaredNoZ(m_Position, GetTarget()->GetPosition()) < GetTarget()->GetSize())) {
+					else if (GetClass() != Class::Rogue && (DistanceSquaredNoZ(m_Position, GetTarget()->GetPosition()) < GetTarget()->GetSize())) {
 						// If we are not a rogue trying to backstab, let's try to adjust our melee range so we don't appear to be bunched up
 						float newX = 0;
 						float newY = 0;
@@ -1240,7 +1240,7 @@ void Merc::AI_Process() {
 				}
 
 				// TODO: Do mercs berserk? Find this out on live...
-				//if (GetClass() == WARRIOR || GetClass() == BERSERKER) {
+				//if (GetClass() == Class::Warrior || GetClass() == Class::Berserker) {
 				//      if(GetHP() > 0 && !berserk && GetHPRatio() < 30) {
 				//              entity_list.MessageCloseString(this, false, 200, 0, BERSERK_START, GetName());
 				//              berserk = true;
@@ -1685,8 +1685,8 @@ bool Merc::AICastSpell(int8 iChance, uint32 iSpellTypes) {
 											continue;
 										}
 
-										if(IsEngaged() && (g->members[i]->GetClass() == NECROMANCER && hpr >= 50)
-											|| (g->members[i]->GetClass() == SHAMAN && hpr >= 80)) {
+										if(IsEngaged() && (g->members[i]->GetClass() == Class::Necromancer && hpr >= 50)
+											|| (g->members[i]->GetClass() == Class::Shaman && hpr >= 80)) {
 												//allow necros to lifetap & shaman to canni without wasting mana
 												continue;
 										}
